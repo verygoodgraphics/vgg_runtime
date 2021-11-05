@@ -121,6 +121,20 @@ protected:
   {
     auto type = evt.type;
 
+    if (type == SDL_WINDOWEVENT)
+    {
+      if (evt.window.event == SDL_WINDOWEVENT_ENTER)
+      {
+        InputManager::setCursorVisibility(true);
+        return true;
+      }
+      else if (evt.window.event == SDL_WINDOWEVENT_LEAVE)
+      {
+        InputManager::setCursorVisibility(false);
+        return true;
+      }
+    }
+
     auto& panning = m_zoomer.panning;
     if (!panning && type == SDL_MOUSEBUTTONDOWN && (SDL_GetModState() & KMOD_CTRL))
     {
@@ -155,7 +169,7 @@ protected:
       }
       return false;
     }
-    if (type == SDL_KEYDOWN)
+    else if (type == SDL_KEYDOWN)
     {
       auto key = evt.key.keysym.sym;
       auto mod = evt.key.keysym.mod;

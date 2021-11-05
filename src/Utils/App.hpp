@@ -183,7 +183,11 @@ private: // private static methods
     int winWidth = w * DPI::ScaleFactor;
     int winHeight = h * DPI::ScaleFactor;
     SDL_Window* window =
+#ifndef EMSCRIPTEN
       SDL_CreateWindow(title.c_str(),
+#else
+      SDL_CreateWindow(nullptr,
+#endif
                        SDL_WINDOWPOS_CENTERED,
                        SDL_WINDOWPOS_CENTERED,
                        winWidth,

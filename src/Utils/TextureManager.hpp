@@ -32,9 +32,6 @@ namespace VGG
 
 struct TextureManager
 {
-#ifdef EMSCRIPTEN
-  inline static std::optional<std::function<void(const std::string&)>> onImageAdded;
-#endif
   std::unordered_map<std::string, sk_sp<SkImage>> images;
 
   inline bool contains(const std::string& name)
@@ -110,13 +107,6 @@ public: // public static methods
       if (auto image = SkImage::MakeFromEncoded(data))
       {
         auto key = tm->addImage(FileUtils::getFileName(name), image);
-#ifdef EMSCRIPTEN
-        if (onImageAdded)
-        {
-          onImageAdded.value()(key);
-          onImageAdded.reset();
-        }
-#endif
         return key;
       }
       WARN("Failed to decode image: %s", name.c_str());
@@ -125,12 +115,6 @@ public: // public static methods
     {
       WARN("Failed to load image from memory: (0x%p, %lu, %s)", buf, len, name.c_str());
     }
-#ifdef EMSCRIPTEN
-    if (onImageAdded)
-    {
-      onImageAdded.reset();
-    }
-#endif
     return std::nullopt;
   }
 

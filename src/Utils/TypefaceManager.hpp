@@ -34,9 +34,6 @@ namespace VGG
 
 struct TypefaceManager
 {
-#ifdef EMSCRIPTEN
-  inline static std::optional<std::function<void(const std::string&)>> onFontLoaded;
-#endif
   inline static std::unordered_map<std::string, sk_sp<SkTypeface>> typefaces;
   inline static std::unordered_map<std::string, sk_sp<SkTypeface>> typefacesPS;
 

@@ -183,18 +183,30 @@ protected:
 
     return false;
   }
+};
 
 #ifdef EMSCRIPTEN
-public:
-  static void emscripten_frame()
+extern "C"
+{
+  void emscripten_frame()
   {
-    Runtime* app = App::getInstance<Runtime>();
+    static Runtime* app = App::getInstance<Runtime>();
     ASSERT(app);
     app->frame();
   }
-#endif
-};
-
+  void emscripten_main(int width, int height)
+  {
+    Runtime* app = App::getInstance<Runtime>(width, height);
+    ASSERT(app);
+    if (auto fm = FileManager::getInstance(); fm && fm->fileCount() < 1)
+    {
+      FileManager::newFile();
+    }
+    app->setOnFrameOnce([app]() { app->startRunMode(); });
+    emscripten_set_main_loop(emscripten_frame, 0, 1);
+  }
+}
+#else
 int main(int argc, char** argv)
 {
   argparse::ArgumentParser program("vgg", Version::get());
@@ -261,13 +273,11 @@ int main(int argc, char** argv)
   // enter run mode
   app->setOnFrameOnce([app]() { app->startRunMode(); });
 
-#ifdef EMSCRIPTEN
-  emscripten_set_main_loop(Runtime::emscripten_frame, 0, 1);
-#else
+  // enter loop
   while (!app->shouldExit())
   {
     app->frame();
   }
-#endif
   return 0;
 }
+#endif

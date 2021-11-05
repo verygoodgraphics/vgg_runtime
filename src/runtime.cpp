@@ -174,13 +174,13 @@ protected:
       auto key = evt.key.keysym.sym;
       auto mod = evt.key.keysym.mod;
 
-      if (key == SDLK_PAGEUP)
+      if (key == SDLK_PAGEUP && (SDL_GetModState() & KMOD_CTRL))
       {
         FileManager::prevPage();
         return true;
       }
 
-      if (key == SDLK_PAGEDOWN)
+      if (key == SDLK_PAGEDOWN && (SDL_GetModState() & KMOD_CTRL))
       {
         FileManager::nextPage();
         return true;

@@ -48,10 +48,10 @@ Note that you should put fonts under the same directory for runtime to use.
 ### Built-in basic shortcuts
 
 - Ctrl+Q to exit
-
 - Ctrl+MouseDrag to pan
-
 - Ctrl+MouseWheel to zoom
+- Ctrl+PageDown to switch to next design page
+- Ctrl+PageUp to switch to previous design page
 
 ## How to embed into your own app
 

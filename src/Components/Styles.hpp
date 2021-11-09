@@ -711,7 +711,7 @@ struct TextStyle
   static constexpr double minSpacing = 0.0;
   static constexpr double minLineHeightRatio = 0.1;
   static constexpr double maxLineHeightRatio = 20.;
-  std::string typeface{ "WenQuanYi Micro Hei, Regular" };
+  std::string typeface{ "Fira Sans, Regular" };
   double size{ 14.0 };
   Color color{ Colors::Black };
   HorzAlignment horzAlignment{ HorzAlignment::HA_LEFT };

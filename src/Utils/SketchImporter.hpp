@@ -488,7 +488,7 @@ inline std::optional<TextStyle> fromSketchTextStyle(const json& ts)
   auto ps = getObj(ea, "paragraphStyle");
   auto fdAttr = getObj(fd, "attributes");
   return TextStyle{
-    .typeface = getStr(fdAttr, "name", "WenQuanYi Micro Hei, Regular"),
+    .typeface = getStr(fdAttr, "name", "Fira Sans, Regular"),
     .size = getScalar(fdAttr, "size", 14.),
     .color = fromSketchColor(getObjOrNull(ea, "MSAttributedStringColorAttribute")).value(),
     .horzAlignment = TextStyle::HorzAlignment(getInteger(ps, "alignment")),

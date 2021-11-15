@@ -69,7 +69,7 @@ public:
     double dt = 2 * M_PI / nEdges;
     for (size_t i = 1; i < nEdges; i++)
     {
-      double theta = dt * i;
+      double theta = -dt * i;
       Vec2 vv = Vec2{ std::cos(theta) * v.x + std::sin(theta) * v.y,
                       std::sin(-theta) * v.x + std::cos(theta) * v.y };
       Vec2 p = center + vv;

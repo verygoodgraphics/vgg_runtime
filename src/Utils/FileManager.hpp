@@ -17,6 +17,7 @@
 #ifndef __FILE_MANAGER_HPP__
 #define __FILE_MANAGER_HPP__
 
+#include <unordered_set>
 #include <nlohmann/json.hpp>
 #include <miniz-cpp/zip_file.hpp>
 
@@ -537,6 +538,19 @@ protected: // protected static methods
       }
     }
 
+    for (auto entry : file.namelist())
+    {
+      if (entry.rfind("typefaces/", 0) == 0)
+      {
+        std::string data = file.read(entry);
+        auto tf = TypefaceManager::loadTypefaceFromSerialized(data);
+        if (!tf)
+        {
+          WARN("Failed to load typeface from serialized data: %s", entry.c_str());
+        }
+      }
+    }
+
     if (auto fm = getInstance())
     {
       // TODO same-file check for vgg files
@@ -590,6 +604,25 @@ protected: // protected static methods
           {
             WARN("Failed to save image: %s", name.c_str());
           }
+        }
+      }
+    }
+
+    for (size_t i = 0; i < fi.pages.size(); i++)
+    {
+      auto& page = fi.pages[i];
+      std::unordered_set<std::string> typefacesInPage;
+      page.container.collectTypefaceNames(typefacesInPage);
+      for (auto& name : typefacesInPage)
+      {
+        const std::string fp = "typefaces/" + name;
+        if (file.has_file(fp))
+        {
+          continue;
+        }
+        if (auto data = TypefaceManager::serializeTypeface(name))
+        {
+          file.writestr(fp, std::string((char*)data->data(), data->size()));
         }
       }
     }

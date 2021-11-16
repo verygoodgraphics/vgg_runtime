@@ -219,6 +219,25 @@ void EntityContainer::collectFillImageNames(std::vector<std::string>& names)
   }
 }
 
+void EntityContainer::collectTypefaceNames(std::unordered_set<std::string>& names)
+{
+  for (auto entPtr : entities)
+  {
+    if (entPtr->components.hasRenderable<FramedText>())
+    {
+      auto ft = entPtr->components.getRenderable<FramedText>();
+      ASSERT(ft);
+      names.insert(ft->style.typeface);
+    }
+    else if (entPtr->components.hasRenderable<FramedRelation>())
+    {
+      auto fr = entPtr->components.getRenderable<FramedRelation>();
+      ASSERT(fr);
+      fr->children.collectTypefaceNames(names);
+    }
+  }
+}
+
 bool EntityContainer::deleteEntityUpward(EntityRaw ent, EntityRaw parentEnt)
 {
   if (!deleteEntity(ent))

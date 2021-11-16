@@ -20,6 +20,7 @@
 #include <nlohmann/json.hpp>
 #include <memory>
 #include <vector>
+#include <unordered_set>
 #include <initializer_list>
 
 #include "Entity/EntityDefs.hpp"
@@ -177,6 +178,8 @@ public:
   void updateRelations(EntityRaw parent = nullptr);
 
   void collectFillImageNames(std::vector<std::string>& names);
+
+  void collectTypefaceNames(std::unordered_set<std::string>& names);
 
   bool deleteEntity(EntityRaw ent)
   {

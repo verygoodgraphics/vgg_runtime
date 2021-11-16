@@ -18,6 +18,7 @@
 #define __TYPEFACE_MANAGER_HPP__
 
 #include <skia/include/core/SkData.h>
+#include <skia/include/core/SkStream.h>
 #include <skia/include/core/SkTypeface.h>
 #include <skia/include/core/SkFontStyle.h>
 
@@ -147,6 +148,30 @@ struct TypefaceManager
     return familyName + ", " + fontStyleDescription;
   }
 
+  inline static sk_sp<SkTypeface> loadTypefaceFromSerialized(const std::string& data)
+  {
+    auto stream = SkMemoryStream::Make(SkData::MakeWithCopy(data.data(), data.size()));
+    if (auto tf = SkTypeface::MakeDeserialize(stream.get()))
+    {
+      SkString psName;
+      if (tf->getPostScriptName(&psName) && !(psName.isEmpty()))
+      {
+        typefacesPS[std::string(psName.c_str())] = tf;
+      }
+
+      if (auto descOpt = getTypefaceDescriptor(tf))
+      {
+        auto desc = descOpt.value();
+        if (typefaces.find(desc) == typefaces.end())
+        {
+          typefaces[desc] = tf;
+        }
+        return typefaces[desc];
+      }
+    }
+    return nullptr;
+  }
+
   inline static sk_sp<SkTypeface> loadTypefaceFromMem(sk_sp<SkData> data, size_t fontIdx = 0)
   {
     ASSERT(data);
@@ -255,6 +280,16 @@ struct TypefaceManager
       return nullptr;
     }
     return typefacesPS[psName];
+  }
+
+  inline static sk_sp<SkData> serializeTypeface(const std::string& desc)
+  {
+    if (typefaces.find(desc) == typefaces.end())
+    {
+      return nullptr;
+    }
+    // TODO minimize ttc fonts by extracting only one typeface from SkTypeface
+    return typefaces[desc]->serialize(SkTypeface::SerializeBehavior::kDoIncludeData);
   }
 };
 

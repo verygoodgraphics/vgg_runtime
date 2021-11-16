@@ -27,7 +27,6 @@
 #include <algorithm>
 #include <optional>
 
-#include "Presets/Fonts/FiraSans.hpp"
 #include "Utils/Utils.hpp"
 
 namespace VGG
@@ -244,7 +243,7 @@ struct TypefaceManager
   {
     if (typefaces.find(desc) == typefaces.end())
     {
-      return loadTypefaceFromMem(FiraSans::getFontData());
+      return nullptr;
     }
     return typefaces[desc];
   }

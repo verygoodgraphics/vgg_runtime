@@ -31,6 +31,7 @@
 #include <skia/include/effects/SkDashPathEffect.h>
 
 #include "Components/Frame.hpp"
+#include "Presets/Fonts/FiraSans.hpp"
 #include "Utils/Math.hpp"
 #include "Utils/TypefaceManager.hpp"
 #include "Utils/Types.hpp"
@@ -711,7 +712,7 @@ struct TextStyle
   static constexpr double minSpacing = 0.0;
   static constexpr double minLineHeightRatio = 0.1;
   static constexpr double maxLineHeightRatio = 20.;
-  std::string typeface{ "Fira Sans, Regular" };
+  std::string typeface{ "WenQuanYi Micro Hei, Regular" };
   double size{ 14.0 };
   Color color{ Colors::Black };
   HorzAlignment horzAlignment{ HorzAlignment::HA_LEFT };
@@ -734,7 +735,14 @@ struct TextStyle
       SkFont font(tf, size);
       return font;
     }
-    return SkFont(nullptr, size);
+    auto sf = SkFont(nullptr, size);
+    auto tf = sf.getTypefaceOrDefault();
+    ASSERT(tf);
+    if (tf->countGlyphs() < 1)
+    {
+      sf.setTypeface(FiraSans::getSkTypeface());
+    }
+    return sf;
   }
 
   inline SkPaint getPaint() const

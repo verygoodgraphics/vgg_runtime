@@ -18,7 +18,10 @@
 #define __FIRA_SANS_HPP__
 
 #include <skia/include/core/SkData.h>
+#include <skia/include/core/SkTypeface.h>
 #include <miniz-cpp/zip_file.hpp>
+
+#include "Utils/Utils.hpp"
 
 namespace VGG
 {
@@ -689,13 +692,20 @@ struct FiraSans
   };
   constexpr static unsigned int ziplen = 10534;
 
-  static sk_sp<SkData> getFontData()
+  inline static sk_sp<SkData> getFontData()
   {
     miniz_cpp::zip_file file;
     std::vector<unsigned char> buf{ zipdata, zipdata + ziplen };
     file.load(buf);
     auto unzipped = file.read(zipname);
     return SkData::MakeWithCopy(unzipped.data(), unzipped.size());
+  }
+
+  inline static sk_sp<SkTypeface> getSkTypeface()
+  {
+    static sk_sp<SkTypeface> tf = SkTypeface::MakeFromData(getFontData());
+    ASSERT(tf);
+    return tf;
   }
 };
 

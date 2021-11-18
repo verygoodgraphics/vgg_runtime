@@ -48,7 +48,7 @@ public:
 private:
   MouseEntity mouse;
   KeyboardEntity keyboard;
-  bool cursorVisible{ true };
+  bool cursorVisible{ false };
 
   static InputManager* getInstance()
   {

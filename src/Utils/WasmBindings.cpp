@@ -16,6 +16,7 @@
  */
 #ifdef EMSCRIPTEN
 
+#include "Entity/EntityManager.hpp"
 #include "Utils/FileManager.hpp"
 #include "Utils/Version.hpp"
 
@@ -24,7 +25,12 @@ extern "C"
   bool load_file_from_mem(const char* name, unsigned char* data, int len)
   {
     std::vector<unsigned char> buf(data, data + len);
-    return VGG::FileManager::loadFileFromMem(buf, name);
+    auto res = VGG::FileManager::loadFileFromMem(buf, name);
+    if (auto container = VGG::EntityManager::getEntities())
+    {
+      container->setRunModeInteractions();
+    }
+    return res;
   }
 
   bool is_latest_version(const char* version)

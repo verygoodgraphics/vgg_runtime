@@ -136,7 +136,7 @@ protected:
     }
 
     auto& panning = m_zoomer.panning;
-    if (!panning && type == SDL_MOUSEBUTTONDOWN && (SDL_GetModState() & KMOD_CTRL))
+    if (!panning && type == SDL_MOUSEBUTTONDOWN && (SDL_GetKeyboardState(nullptr)[SDL_SCANCODE_SPACE]))
     {
       panning = true;
       InputManager::setMouseCursor(MouseEntity::CursorType::MOVE);

@@ -1,5 +1,6 @@
 .clangd/
 .cache/
 /build*
+/result
 **/.DS_Store
 compile_commands.json

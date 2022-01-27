@@ -1,3 +1,5 @@
+#!/usr/bin/env nix-build
+
 { nixpkgs ? (import <nixpkgs> {}) }: with nixpkgs;
 stdenv.mkDerivation rec {
   pname = "vgg";

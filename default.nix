@@ -6,5 +6,5 @@ stdenv.mkDerivation rec {
   version = "0.1";
   src = ./.;
   nativeBuildInputs = [ cmake ];
-  buildInputs = [ libGL SDL2 ];
+  buildInputs = [ freetype libGL SDL2 ];
 }

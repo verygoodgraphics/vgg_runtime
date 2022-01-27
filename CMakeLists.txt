@@ -3,6 +3,7 @@ project(vgg_runtime)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 # defaults to debug mode unless explicitly set to release
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Release")

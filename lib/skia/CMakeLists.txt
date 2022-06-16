@@ -1016,6 +1016,7 @@ if (NOT EMSCRIPTEN)
     "src/opts/SkOpts_avx.cpp"
     "src/opts/SkOpts_hsw.cpp"
     "src/opts/SkOpts_skx.cpp"
+    "src/opts/SkOpts_crc32.cpp"
   )
   add_library(skia SHARED ${SKIA_SRCS})
   target_compile_options(skia PRIVATE

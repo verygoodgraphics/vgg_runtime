@@ -10,6 +10,16 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL "Release")
   set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
+# customized platform checking flags
+set(VGG_CPU_ARCH "X86_64")
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "^arm" OR CMAKE_SYSTEM_PROCESSOR MATCHES "^aarch64")
+if(APPLE)
+    set(VGG_PLATFORM "MACOS")
+	set(VGG_CPU_ARCH "ARM")
+endif()
+endif()
+
+
 # find system libs
 if (NOT EMSCRIPTEN)
   # find OpenGL library

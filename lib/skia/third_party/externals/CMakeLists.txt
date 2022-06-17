@@ -33,12 +33,10 @@ if (NOT EMSCRIPTEN)
 endif()
 add_library(zlib SHARED ${ZLIB_SRCS})
 
-if (NOT EMSCRIPTEN)
-    if(VGG_CPU_ARCH MATCHES "X86_64")
-    set_target_properties(zlib PROPERTIES
-      COMPILE_FLAGS "-msse3 -msse4.2 -mpclmul -DX86_NOT_WINDOWS -DADLER32_SIMD_SSSE3 -DCRC32_SIMD_SSE42_PCLMUL -DDEFLATE_FILL_WINDOW_SSE2"
-    )
-  endif()
+if (NOT EMSCRIPTEN AND VGG_CPU_ARCH MATCHES "X86")
+  set_target_properties(zlib PROPERTIES
+    COMPILE_FLAGS "-msse3 -msse4.2 -mpclmul -DX86_NOT_WINDOWS -DADLER32_SIMD_SSSE3 -DCRC32_SIMD_SSE42_PCLMUL -DDEFLATE_FILL_WINDOW_SSE2"
+  )
 endif()
 target_include_directories(zlib PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/zlib
@@ -71,18 +69,17 @@ if (NOT EMSCRIPTEN)
   )
 endif()
 add_library(libpng SHARED ${LIBPNG_SRCS})
-if(VGG_CPU_ARCH STREQUAL "ARM" AND VGG_PLATFORM STREQUAL "MACOS")
-  # It seems that CMakeLists.txt in libpng directory is not used.
+if(APPLE AND VGG_CPU_ARCH STREQUAL "ARM")
   # On Apple silicon, the optimization for arm must be off or result in link error.
-  add_definitions(-DPNG_ARM_NEON_OPT=0)
+  target_compile_definitions(libpng PRIVATE
+    PNG_ARM_NEON_OPT=0
+  )
 endif()
 if (NOT EMSCRIPTEN)
-  # On arm64, it also could be compiled with PNG_INTEL_SSE.
-  if(VGG_CPU_ARCH STREQUAL "X86_64")
+  # It could be compiled with PNG_INTEL_SSE on both x86 and arm platforms.
   set_target_properties(libpng PROPERTIES
     COMPILE_FLAGS "-DPNG_INTEL_SSE"
   )
-  endif()
 endif()
 add_custom_target(libpng_config
   COMMAND "${CMAKE_COMMAND}" -E copy_if_different
@@ -220,12 +217,20 @@ target_include_directories(libjpeg-turbo PRIVATE
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/libjpeg-turbo
 )
-target_compile_definitions(libjpeg-turbo PRIVATE
-  TURBO_FOR_WINDOWS
-  C_ARITH_CODING_SUPPORTED=1
-  D_ARITH_CODING_SUPPORTED=1
-  USE_CLZ_INTRINSIC # for non-windows or clang
-)
+if(VGG_CPU_ARCH STREQUAL "X86")
+  target_compile_definitions(libjpeg-turbo PRIVATE
+    TURBO_FOR_WINDOWS
+    C_ARITH_CODING_SUPPORTED=1
+    D_ARITH_CODING_SUPPORTED=1
+    USE_CLZ_INTRINSIC # for non-windows or clang
+  )
+else() # ARM
+  target_compile_definitions(libjpeg-turbo PRIVATE
+    TURBO_FOR_WINDOWS
+    C_ARITH_CODING_SUPPORTED=1
+    D_ARITH_CODING_SUPPORTED=1
+  )
+endif()
 
 ######################################################################
 # setup libwebp
@@ -352,11 +357,17 @@ if (NOT EMSCRIPTEN)
 endif()
 add_library(libwebp SHARED ${LIBWEBP_SRCS})
 if (NOT EMSCRIPTEN)
-  set_target_properties(libpng PROPERTIES
-    COMPILE_FLAGS "-msse4.1 -DWEBP_SWAP_16BIT_CSP"
-  )
+  if(VGG_CPU_ARCH STREQUAL "X86")
+    set_target_properties(libwebp PROPERTIES
+      COMPILE_FLAGS "-msse4.1 -DWEBP_SWAP_16BIT_CSP"
+    )
+  else()
+    set_target_properties(libwebp PROPERTIES
+      COMPILE_FLAGS "-DWEBP_SWAP_16BIT_CSP"
+    )
+  endif()
 else()
-  set_target_properties(libpng PROPERTIES
+  set_target_properties(libwebp PROPERTIES
     COMPILE_FLAGS "-DWEBP_SWAP_16BIT_CSP"
   )
 endif()

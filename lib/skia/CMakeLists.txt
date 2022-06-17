@@ -1010,22 +1010,32 @@ if (NOT EMSCRIPTEN)
       "src/gpu/gl/glx/GrGLMakeGLXInterface.cpp"
     )
   endif()
-  set(SKIA_SRCS ${SKIA_SRCS}
-    "src/opts/SkOpts_ssse3.cpp"
-    "src/opts/SkOpts_sse42.cpp"
-    "src/opts/SkOpts_avx.cpp"
-    "src/opts/SkOpts_hsw.cpp"
-    "src/opts/SkOpts_skx.cpp"
-    "src/opts/SkOpts_crc32.cpp"
-  )
-  add_library(skia SHARED ${SKIA_SRCS})
-  target_compile_options(skia PRIVATE
-    $<$<CONFIG:Debug>:-DSK_DEBUG>
-    $<$<CONFIG:Release>:-DSK_RELEASE -fstrict-aliasing -fvisibility=hidden -fdata-sections -ffunction-sections -fvisibility-inlines-hidden -fno-exceptions -frtti>
-    -mssse3
-    -msse4.2
-    -mavx
-  )
+  if(VGG_CPU_ARCH STREQUAL "X86")
+    set(SKIA_SRCS ${SKIA_SRCS}
+      "src/opts/SkOpts_ssse3.cpp"
+      "src/opts/SkOpts_sse42.cpp"
+      "src/opts/SkOpts_avx.cpp"
+      "src/opts/SkOpts_hsw.cpp"
+      "src/opts/SkOpts_skx.cpp"
+    )
+    add_library(skia SHARED ${SKIA_SRCS})
+    target_compile_options(skia PRIVATE
+      $<$<CONFIG:Debug>:-DSK_DEBUG>
+      $<$<CONFIG:Release>:-DSK_RELEASE -fstrict-aliasing -fvisibility=hidden -fdata-sections -ffunction-sections -fvisibility-inlines-hidden -fno-exceptions -frtti>
+      -mssse3
+      -msse4.2
+      -mavx
+    )
+  else()
+    set(SKIA_SRCS ${SKIA_SRCS}
+      "src/opts/SkOpts_crc32.cpp"
+    )
+    add_library(skia SHARED ${SKIA_SRCS})
+    target_compile_options(skia PRIVATE
+      $<$<CONFIG:Debug>:-DSK_DEBUG>
+      $<$<CONFIG:Release>:-DSK_RELEASE -fstrict-aliasing -fvisibility=hidden -fdata-sections -ffunction-sections -fvisibility-inlines-hidden -fno-exceptions -frtti>
+    )
+  endif()
 else()
   set(SKIA_SRCS ${SKIA_SRCS}
     #"src/gpu/gl/egl/GrGLMakeNativeInterface_egl.cpp"

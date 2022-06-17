@@ -32,10 +32,13 @@ if (NOT EMSCRIPTEN)
   )
 endif()
 add_library(zlib SHARED ${ZLIB_SRCS})
+
 if (NOT EMSCRIPTEN)
-  set_target_properties(zlib PROPERTIES
-    COMPILE_FLAGS "-msse3 -msse4.2 -mpclmul -DX86_NOT_WINDOWS -DADLER32_SIMD_SSSE3 -DCRC32_SIMD_SSE42_PCLMUL -DDEFLATE_FILL_WINDOW_SSE2"
-  )
+    if(VGG_CPU_ARCH MATCHES "X86_64")
+    set_target_properties(zlib PROPERTIES
+      COMPILE_FLAGS "-msse3 -msse4.2 -mpclmul -DX86_NOT_WINDOWS -DADLER32_SIMD_SSSE3 -DCRC32_SIMD_SSE42_PCLMUL -DDEFLATE_FILL_WINDOW_SSE2"
+    )
+  endif()
 endif()
 target_include_directories(zlib PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/zlib
@@ -68,10 +71,18 @@ if (NOT EMSCRIPTEN)
   )
 endif()
 add_library(libpng SHARED ${LIBPNG_SRCS})
+if(VGG_CPU_ARCH STREQUAL "ARM" AND VGG_PLATFORM STREQUAL "MACOS")
+  # It seems that CMakeLists.txt in libpng directory is not used.
+  # On Apple silicon, the optimization for arm must be off or result in link error.
+  add_definitions(-DPNG_ARM_NEON_OPT=0)
+endif()
 if (NOT EMSCRIPTEN)
+  # On arm64, it also could be compiled with PNG_INTEL_SSE.
+  if(VGG_CPU_ARCH STREQUAL "X86_64")
   set_target_properties(libpng PROPERTIES
     COMPILE_FLAGS "-DPNG_INTEL_SSE"
   )
+  endif()
 endif()
 add_custom_target(libpng_config
   COMMAND "${CMAKE_COMMAND}" -E copy_if_different

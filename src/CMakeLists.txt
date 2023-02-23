@@ -12,14 +12,15 @@ add_executable(runtime
   Utils/EntityContainer.cpp
   Utils/WasmBindings.cpp
 )
-set_source_files_properties(
-  runtime.cpp
-  Utils/WasmBindings.cpp
-  PROPERTIES
-  COMPILE_FLAGS -DGIT_SHA1=${GIT_SHA1}
-)
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+  set_source_files_properties(
+    runtime.cpp
+    Utils/WasmBindings.cpp
+    PROPERTIES
+    COMPILE_FLAGS -DGIT_SHA1=${GIT_SHA1}
+  )
+endif()
 set_target_properties(runtime PROPERTIES
-  COMPILE_FLAGS "-DSK_GL"
   RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 if (EMSCRIPTEN)
@@ -49,6 +50,9 @@ elseif (APPLE)
   )
   target_link_libraries(runtime skia miniz quickjs ${OPENGL_LIBRARIES})
 else()
+  set_target_properties(main PROPERTIES
+    COMPILE_FLAGS "-DSK_GL"
+  )
   target_link_libraries(runtime skia miniz quickjs SDL2 ${OPENGL_LIBRARIES})
   install(TARGETS runtime skia zlib libpng libwebp libjpeg-turbo freetype)
 endif()

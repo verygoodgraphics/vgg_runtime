@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chaoya Li <harry75369@gmail.com>
+ * Copyright (C) 2021-2023 Chaoya Li <harry75369@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -387,7 +387,6 @@ protected: // protected methods
   {
   }
 
-  // TODO support shortcuts of combined keys
   virtual bool onGlobalEvent(const SDL_Event& evt)
   {
     return false;
@@ -416,7 +415,7 @@ public: // public methods
 
     // deal with events
     SDL_Event evt;
-    while (SDL_PollEvent(&evt)) // TODO change to WaitEvent to reduce CPU usage
+    while (SDL_PollEvent(&evt))
     {
       // process global events like shortcuts first
       if (on_global_event(evt))

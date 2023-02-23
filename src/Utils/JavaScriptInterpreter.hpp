@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chaoya Li <harry75369@gmail.com>
+ * Copyright (C) 2021-2023 Chaoya Li <harry75369@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -112,7 +112,7 @@ private: // private static methods
   static json unwrap_json(JSContext* ctx, JSValueConst val)
   {
     auto ptr = JS_ToCString(ctx, val);
-    auto j = json::parse(ptr);
+    auto j = json::parse(ptr); // TODO exception handling
     JS_FreeCString(ctx, ptr);
     return j;
   }

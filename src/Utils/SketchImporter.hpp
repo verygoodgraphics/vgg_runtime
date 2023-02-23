@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chaoya Li <harry75369@gmail.com>
+ * Copyright (C) 2021-2023 Chaoya Li <harry75369@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -606,7 +606,7 @@ inline std::optional<EntityContainer> fromSketchPage(const json& page)
   DEBUG2("fromSketchPage");
   if (getStr(page, "_class") != "page")
   {
-    FAIL("Not a sketch page.");
+    // FAIL("Not a sketch page.");
     return std::nullopt;
   }
 

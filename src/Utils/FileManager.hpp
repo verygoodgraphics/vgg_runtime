@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chaoya Li <harry75369@gmail.com>
+ * Copyright (C) 2021-2023 Chaoya Li <harry75369@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -472,7 +472,7 @@ protected: // protected static methods
     {
       if (entry.rfind("pages/", 0) == 0)
       {
-        auto json = json::parse(file.read(entry));
+        auto json = json::parse(file.read(entry)); // TODO exception handling
         if (auto containerOpt = SketchImporter::fromSketchPage(json))
         {
           auto container = containerOpt.value();
@@ -521,7 +521,7 @@ protected: // protected static methods
     {
       if (entry.rfind("pages/", 0) == 0)
       {
-        auto json = json::parse(file.read(entry));
+        auto json = json::parse(file.read(entry)); // TODO exception handling
         FilePage p;
         json.at("name").get_to(p.name);
         json.at("container").get_to(p.container);

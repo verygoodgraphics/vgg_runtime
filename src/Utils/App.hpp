@@ -36,7 +36,7 @@
 #include <skia/include/effects/SkDashPathEffect.h>
 #include <skia/src/gpu/gl/GrGLUtil.h>
 
-#include "Utils/Profiler.hpp"
+#include "Utils/CappingProfiler.hpp"
 #include "Utils/Types.hpp"
 #include "Utils/DPI.hpp"
 
@@ -87,7 +87,6 @@ protected: // protected members and static members
   int m_height;
   double m_pixelRatio;
   int m_nFrame;
-  bool m_enableProfiler;
   double m_timestamp;
   SDLState m_sdlState;
   SkiaState m_skiaState;
@@ -310,17 +309,6 @@ private: // private methods
                                                   &props);
   }
 
-  void cap_framerate(double fps = 60.)
-  {
-    double lasting = SkTime::GetMSecs() - m_timestamp;
-    double total = 1000. / fps;
-    if (lasting < total)
-    {
-      SDL_Delay(total - lasting);
-    }
-    m_timestamp = SkTime::GetMSecs();
-  }
-
   bool on_global_event(const SDL_Event& evt)
   {
     auto type = evt.type;
@@ -355,7 +343,6 @@ protected: // protected methods
     , m_height(0)
     , m_pixelRatio(1.0)
     , m_nFrame(0)
-    , m_enableProfiler(false)
   {
   }
 
@@ -427,6 +414,14 @@ public: // public methods
       onEvent(evt);
     }
 
+    // cap the frame rate
+    auto profiler = CappingProfiler::getInstance();
+    if (!(profiler->enoughFrameDuration(60)))
+    {
+      return;
+    }
+    profiler->markFrame();
+
     // get and setup canvas
     SkCanvas* canvas = getCanvas();
     ASSERT(canvas);
@@ -434,34 +429,15 @@ public: // public methods
     canvas->clear(SK_ColorWHITE);
     canvas->scale(m_pixelRatio, m_pixelRatio);
 
-    // setup profiler
-    Profiler* profiler = nullptr;
-    if (m_enableProfiler)
-    {
-      profiler = Profiler::getInstance();
-      ASSERT(profiler);
-      profiler->startTiming("paint");
-    }
-
     // update frame
     onFrame();
 
-    // and cap frame rate if necessary
-    cap_framerate();
-
     // finish this frame
-    if (profiler && m_enableProfiler)
-    {
-      profiler->stopTiming("paint");
-      profiler->startTiming("flush");
-    }
     canvas->flush();
-    if (profiler && m_enableProfiler)
-    {
-      profiler->stopTiming("flush");
-      profiler->nextMeasure();
-    }
     canvas->restore();
+
+    // display fps
+    SDL_SetWindowTitle(m_sdlState.window, profiler->fpsStr());
 
     // swap buffer at last
     SDL_GL_SwapWindow(m_sdlState.window);

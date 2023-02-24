@@ -4,6 +4,8 @@ option(ENABLE_MINIZ_CPP_TEST OFF)
 option(ENABLE_MINIZ_CPP_EXAMPLE OFF)
 add_subdirectory(miniz-cpp)
 
+add_subdirectory(vgg_contrib)
+
 set(VGG_LIB_INCLUDE_PATH
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/skia # for skia lib itself

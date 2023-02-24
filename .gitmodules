@@ -1,0 +1,3 @@
+[submodule "lib/vgg_contrib"]
+	path = lib/vgg_contrib
+	url = https://github.com/verygoodgraphics/vgg_contrib.git

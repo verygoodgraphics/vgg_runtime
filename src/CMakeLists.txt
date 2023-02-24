@@ -50,7 +50,7 @@ elseif (APPLE)
   )
   target_link_libraries(runtime skia miniz quickjs ${OPENGL_LIBRARIES})
 else()
-  set_target_properties(main PROPERTIES
+  set_target_properties(runtime PROPERTIES
     COMPILE_FLAGS "-DSK_GL"
   )
   target_link_libraries(runtime skia miniz quickjs SDL2 ${OPENGL_LIBRARIES})

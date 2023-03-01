@@ -39,3 +39,8 @@ include_directories(${VGG_LIB_INCLUDE_PATH})
 # add main targets
 add_subdirectory(src)
 include_directories(${VGG_SRC_INCLUDE_PATH})
+
+
+# add test targets
+include(CTest)
+add_subdirectory(test)

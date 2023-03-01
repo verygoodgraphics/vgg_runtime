@@ -12,6 +12,16 @@ add_executable(runtime
   Utils/EntityContainer.cpp
   Utils/WasmBindings.cpp
 )
+
+add_library(vgg_solution OBJECT
+  Model/JsonSchemaValidator.cpp)
+target_include_directories(vgg_solution PUBLIC 
+  ${CMAKE_CURRENT_SOURCE_DIR}/Model
+  ${VGG_CONTRIB_JSON_INCLUDE}
+  ${VGG_CONTRIB_JSON_SCHEMA_VALIDATOR_INCLUDE}
+)
+target_link_libraries(vgg_solution PUBLIC nlohmann_json_schema_validator)
+
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
   set_source_files_properties(
     runtime.cpp
@@ -42,17 +52,17 @@ if (EMSCRIPTEN)
     "
     SUFFIX ".js"
   )
-  target_link_libraries(runtime skia miniz quickjs)
+  target_link_libraries(runtime skia miniz quickjs vgg_solution)
 elseif (APPLE)
   set_target_properties(runtime PROPERTIES
     COMPILE_FLAGS "-DSK_GL -I${SDL2_INCLUDE_DIRS}/.."
     LINK_FLAGS ${SDL2_LIBRARIES}
   )
-  target_link_libraries(runtime skia miniz quickjs ${OPENGL_LIBRARIES})
+  target_link_libraries(runtime skia miniz quickjs vgg_solution ${OPENGL_LIBRARIES})
 else()
   set_target_properties(runtime PROPERTIES
     COMPILE_FLAGS "-DSK_GL"
   )
-  target_link_libraries(runtime skia miniz quickjs SDL2 ${OPENGL_LIBRARIES})
+  target_link_libraries(runtime skia miniz quickjs vgg_solution SDL2 ${OPENGL_LIBRARIES})
   install(TARGETS runtime skia zlib libpng libwebp libjpeg-turbo freetype)
 endif()

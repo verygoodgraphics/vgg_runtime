@@ -12,6 +12,7 @@ else()
 
   add_executable(unit_tests
     model/json_schema_validator_test.cpp
+    model/automerge_test.cpp
   )
   target_include_directories(unit_tests PRIVATE
     model 

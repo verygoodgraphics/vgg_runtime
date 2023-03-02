@@ -18,9 +18,8 @@ add_library(vgg_solution OBJECT
 target_include_directories(vgg_solution PUBLIC 
   ${CMAKE_CURRENT_SOURCE_DIR}/Model
   ${VGG_CONTRIB_JSON_INCLUDE}
-  ${VGG_CONTRIB_JSON_SCHEMA_VALIDATOR_INCLUDE}
+  ${VGG_CONTRIB_VALIJSON_INCLUDE}
 )
-target_link_libraries(vgg_solution PUBLIC nlohmann_json_schema_validator)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
   set_source_files_properties(

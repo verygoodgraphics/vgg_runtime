@@ -2,7 +2,7 @@
 #define VGG_JSON_SCHEMA_VALIDATOR_HPP
 
 #include "nlohmann/json.hpp"
-#include "nlohmann/json-schema.hpp"
+#include "valijson_nlohmann_bundled.hpp"
 
 class JsonSchemaValidator
 {
@@ -10,13 +10,12 @@ public:
   JsonSchemaValidator();
   ~JsonSchemaValidator();
 
-  void setRootSchema(const nlohmann::json& schema);
-  void setRootSchema(nlohmann::json&& schema);
-
-  bool validate(const nlohmann::json&) const;
+  void setRootSchema(const nlohmann::json& schemaJson);
+  bool validate(const nlohmann::json& targetJson);
 
 private:
-  nlohmann::json_schema::json_validator validator_;
+  valijson::Validator validator_;
+  valijson::Schema schema_;
 };
 
 #endif

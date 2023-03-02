@@ -2,6 +2,9 @@
 
 #include "Utils/Utils.hpp"
 
+using namespace valijson;
+using namespace valijson::adapters;
+
 JsonSchemaValidator::JsonSchemaValidator()
 {
 }
@@ -10,26 +13,45 @@ JsonSchemaValidator::~JsonSchemaValidator()
 {
 }
 
-void JsonSchemaValidator::setRootSchema(const nlohmann::json& schema)
+void JsonSchemaValidator::setRootSchema(const nlohmann::json& schemaJson)
 {
-  validator_.set_root_schema(schema);
-}
-
-void JsonSchemaValidator::setRootSchema(nlohmann::json&& schema)
-{
-  validator_.set_root_schema(schema);
-}
-
-bool JsonSchemaValidator::validate(const nlohmann::json& json_object) const
-{
+  SchemaParser parser;
+  NlohmannJsonAdapter schemaDocumentAdapter(schemaJson);
   try
   {
-    validator_.validate(json_object);
-    return true;
+    parser.populateSchema(schemaDocumentAdapter, schema_);
   }
-  catch (const std::exception& e)
+  catch (std::exception& e)
   {
-    WARN("#vgg json schema validate error: %s", e.what());
+    WARN("#vgg json schema set schema error: %s", e.what());
+    throw;
+  }
+}
+
+bool JsonSchemaValidator::validate(const nlohmann::json& targetDocument)
+{
+  ValidationResults results;
+  NlohmannJsonAdapter targetDocumentAdapter(targetDocument);
+  if (!validator_.validate(schema_, targetDocumentAdapter, &results))
+  {
+    ValidationResults::Error error;
+    unsigned int errorNum = 1;
+    while (results.popError(error))
+    {
+      std::string context;
+      std::vector<std::string>::iterator itr = error.context.begin();
+      for (; itr != error.context.end(); itr++)
+      {
+        context += *itr;
+      }
+
+      WARN("#vgg json schema validate error: %d, context: %s, desc: %s",
+           errorNum,
+           context.c_str(),
+           error.description.c_str());
+      ++errorNum;
+    }
     return false;
   }
+  return true;
 }

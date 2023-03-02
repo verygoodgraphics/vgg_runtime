@@ -17,6 +17,10 @@ else()
     model 
   )
 
+  add_custom_command(TARGET unit_tests POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/testDataDir $<TARGET_FILE_DIR:unit_tests>/testDataDir)
+
   target_link_libraries(unit_tests PRIVATE nlohmann_json_schema_validator vgg_solution gtest_main)
   include(GoogleTest)
   gtest_discover_tests(unit_tests)

@@ -5,6 +5,7 @@ option(ENABLE_MINIZ_CPP_EXAMPLE OFF)
 add_subdirectory(miniz-cpp)
 
 add_subdirectory(vgg_contrib)
+add_subdirectory(vgg_automerge/automerge)
 
 set(VGG_LIB_INCLUDE_PATH
   ${CMAKE_CURRENT_SOURCE_DIR}

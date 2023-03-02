@@ -1,0 +1,2436 @@
+{
+  "title": "Vgg Format",
+  "description": "vgg format is a JSON-based format for describing the content of various design pieces.",
+  "type": "object",
+  "$id": "https://git.vgg.cool/verygoodgraphics/vgg_format/src/branch/master/sketch-document-6.4.0/packages/file-format/src/vgg-format.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Artboard": {
+      "title": "Artboard",
+      "description": "Artboard is the top-level object organization container.",
+      "$id": "#Artboard",
+      "type": "object",
+      "required": [
+        "alphaMaskBy",
+        "class",
+        "contextSettings",
+        "frame",
+        "hasBackgroundColor",
+        "id",
+        "isFlippedHorizontal",
+        "isFlippedVertical",
+        "isLocked",
+        "isMask",
+        "layers",
+        "outlineMaskBy",
+        "rotation",
+        "style",
+        "visible"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique object identifier.\nID format:\n  Photoshop: numeric\n  Sketch: UUID string\n  Adobe XD: UUID string\n  Figma: string like 3:5:3\n  In Illustrator: numeric\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of object (utf-8)."
+        },
+        "isLocked": {
+          "type": "boolean",
+          "description": "Describes whether the object is locked."
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Describes the visibility of the object."
+        },
+        "contextSettings": {
+          "$ref": "#/definitions/GraphicsContextSettings",
+          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
+        },
+        "style": {
+          "$ref": "#/definitions/Style",
+          "description": "Object styles descriptor."
+        },
+        "frame": {
+          "$ref": "#/definitions/Rect",
+          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask."
+        },
+        "rotation": {
+          "type": "number",
+          "maximum": 180,
+          "minimum": -180,
+          "description": "Rotation of the object in degrees."
+        },
+        "isFlippedVertical": {
+          "type": "boolean",
+          "description": "Vertical flip transformation flag. Flip around the Y-axis centered on the object."
+        },
+        "isFlippedHorizontal": {
+          "type": "boolean",
+          "description": "Horizontal flip transformation flag. Flip around the X-axis centered on the object."
+        },
+        "alphaMaskBy": {
+          "type": "array",
+          "item": {
+            "$ref": "#/definitions/AlphaMask"
+          }
+        },
+        "outlineMaskBy": {
+          "type": "array",
+          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
+          "item": {
+            "type": "string",
+            "description": "The value is ID of a object that is a outline mask of this object."
+          }
+        },
+        "isMask": {
+          "type": "boolean",
+          "description": "Indicates whether the current object is a mask object."
+        },
+        "class": {
+          "const": "artboard"
+        },
+        "layers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Layer"
+          }
+        },
+        "hasBackgroundColor": {
+          "type": "boolean",
+          "description": "A flag indicating whether backgroundColor should be applied as a background color of the object."
+        },
+        "backgroundColor": {
+          "$ref": "#/definitions/Color"
+        }
+      },
+      "additionalProperties": false
+    },
+    "GraphicsContextSettings": {
+      "title": "Graphics Context Settings",
+      "description": "Defines the opacity and blend mode and isolate blending and transparency knockout group of a object.",
+      "type": "object",
+      "$id": "#GraphicsContextSettings",
+      "required": [
+        "class",
+        "blendMode",
+        "opacity",
+        "isolateBlending",
+        "transparencyKnockoutGroup"
+      ],
+      "properties": {
+        "class": {
+          "const": "graphicsContextSettings"
+        },
+        "blendMode": {
+          "$ref": "#/definitions/BlendMode"
+        },
+        "opacity": {
+          "$ref": "#/definitions/UnitInterval"
+        },
+        "isolateBlending": {
+          "type": "boolean",
+          "description": "You can isolate the blending mode to a targeted layer or group in order to leave objects beneath unaffected."
+        },
+        "transparencyKnockoutGroup": {
+          "type": "integer",
+          "description": "In a transparency knockout group, the elements of a group don't show through each other.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": ["OFF", "ON", "Neutral"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "BlendMode": {
+      "title": "Blend Mode",
+      "description": "Blend mode of the object.",
+      "type": "integer",
+      "enum": [
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+        20, 21, 22, 23, 24, 25, 26, 27, 28, 29
+      ],
+      "enumDescriptions": [
+        "Normal",
+        "Darken",
+        "Multiply",
+        "Color burn",
+        "Lighten",
+        "Screen",
+        "Color dodge",
+        "Overlay",
+        "Soft light",
+        "Hard light",
+        "Difference",
+        "Exclusion",
+        "Hue",
+        "Saturation",
+        "Color",
+        "Luminosity",
+        "Plus darker",
+        "Plus lighter",
+        "Blend divide",
+        "Blend subtraction",
+        "Darker color",
+        "Dissolve",
+        "Hard mix",
+        "Lighter color",
+        "Lighten burn",
+        "Lighten dodge",
+        "Lighten light",
+        "Pass through",
+        "Pin Light",
+        "Vivid light"
+      ],
+      "$id": "#BlendMode"
+    },
+    "UnitInterval": {
+      "title": "Unit Interval",
+      "description": "Encode normalised scalar values, for example RGB color components.",
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "$id": "#UnitInterval"
+    },
+    "Style": {
+      "title": "Style",
+      "description": "Defines a object style.",
+      "type": "object",
+      "$id": "#Style",
+      "required": ["class", "borders", "fills", "blurs", "shadows"],
+      "properties": {
+        "class": {
+          "const": "style"
+        },
+        "borders": {
+          "type": "array",
+          "description": "An array containing the border styles of the object.",
+          "items": {
+            "$ref": "#/definitions/Border"
+          }
+        },
+        "fills": {
+          "type": "array",
+          "description": "An array containing the fill effects of the object.",
+          "item": {
+            "$ref": "#/definitions/Fill"
+          }
+        },
+        "blurs": {
+          "type": "array",
+          "description": "An array containing the blur effects of the object.",
+          "item": {
+            "$ref": "#/definitions/Blur"
+          }
+        },
+        "shadows": {
+          "type": "array",
+          "description": "An array containing the shadow effects of the object.",
+          "items": {
+            "$ref": "#/definitions/Shadow"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "Border": {
+      "title": "Border",
+      "description": "Defines a border style",
+      "type": "object",
+      "$id": "#Border",
+      "required": [
+        "class",
+        "isEnabled",
+        "fillType",
+        "position",
+        "thickness",
+        "contextSettings",
+        "style",
+        "dashedPattern",
+        "dashedOffset",
+        "lineCapStyle",
+        "lineJoinStyle",
+        "miterLimit",
+        "flat"
+      ],
+      "properties": {
+        "class": {
+          "const": "border"
+        },
+        "isEnabled": {
+          "type": "boolean"
+        },
+        "color": {
+          "$ref": "#/definitions/Color"
+        },
+        "fillType": {
+          "$ref": "#/definitions/FillType"
+        },
+        "position": {
+          "$ref": "#/definitions/BorderPosition"
+        },
+        "thickness": {
+          "type": "number",
+          "description": "Thickness of the border. A line width of 0 is acceptable, this is interpreted as the thinnest line width that can be rendered at device resolution."
+        },
+        "contextSettings": {
+          "$ref": "#/definitions/GraphicsContextSettings"
+        },
+        "gradient": {
+          "$ref": "#/definitions/Gradient"
+        },
+        "pattern": {
+          "$ref": "#/definitions/Pattern"
+        },
+        "style": {
+          "type": "integer",
+          "description": "Type of the border style, the dashed style is further specified in dashedOffset and dashedPattern",
+          "enum": [0, 1, 2],
+          "enumDescriptions": ["solid", "dotted", "dashed"]
+        },
+        "dashedPattern": {
+          "type": "array",
+          "description": "A set of alternating dashes (filled regions) and gaps (empty regions). (applies to 'dashed' borders)",
+          "items": {
+            "type": "number"
+          }
+        },
+        "dashedOffset": {
+          "type": "number",
+          "descript": "Border dash initial offset. (applies to 'dashed' borders)"
+        },
+        "lineCapStyle": {
+          "$ref": "#/definitions/LineCapStyle"
+        },
+        "lineJoinStyle": {
+          "$ref": "#/definitions/LineJoinStyle"
+        },
+        "miterLimit": {
+          "type": "number",
+          "descript": "A value limiting the extension of a sharp tip created by adjacent border segments using 'miter' join."
+        },
+        "flat": {
+          "type": "number",
+          "descript": "equivalent to the PostScript language setflat operator, which sets the flatness parameter in the graphics state. The flatness parameter specifies the accuracy or smoothness with which curves are rendered as a sequence of flat line segments.",
+          "maximum": 100,
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "Color": {
+      "title": "Color",
+      "description": "Defines a RGBA color value.",
+      "type": "object",
+      "$id": "#Color",
+      "required": ["class", "alpha", "red", "green", "blue"],
+      "properties": {
+        "class": {
+          "const": "color"
+        },
+        "alpha": {
+          "$ref": "#/definitions/UnitInterval"
+        },
+        "red": {
+          "$ref": "#/definitions/UnitInterval"
+        },
+        "green": {
+          "$ref": "#/definitions/UnitInterval"
+        },
+        "blue": {
+          "$ref": "#/definitions/UnitInterval"
+        }
+      },
+      "additionalProperties": false
+    },
+    "FillType": {
+      "title": "Fill Type",
+      "description": "Enumeration of the fill types.",
+      "type": "integer",
+      "enum": [0, 1, 2],
+      "enumDescriptions": ["Color", "Gradient", "Pattern"],
+      "$id": "#FillType"
+    },
+    "BorderPosition": {
+      "title": "Border Position",
+      "description": "Enumeration of border positions.",
+      "type": "integer",
+      "enum": [0, 1, 2],
+      "enumDescriptions": ["Center", "Inside", "Outside"],
+      "$id": "#BorderPosition"
+    },
+    "Gradient": {
+      "title": "Gradient",
+      "description": "Defines a gradient.",
+      "type": "object",
+      "$id": "#Gradient",
+      "required": ["class", "instance"],
+      "properties": {
+        "class": {
+          "const": "gradient"
+        },
+        "instance": {
+          "description": "The current gradient instance.",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/GradientAngular"
+              },
+              {
+                "$ref": "#/definitions/GradientLinear"
+              },
+              {
+                "$ref": "#/definitions/GradientRadial"
+              },
+              {
+                "$ref": "#/definitions/GradientBasic"
+              }
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "GradientAngular": {
+      "title": "Gradient Angular",
+      "description": "Described parameters required by gradient angular.",
+      "type": "object",
+      "$id": "#GradientAngular",
+      "required": ["class", "from", "to", "stops", "invert", "rotation"],
+      "properties": {
+        "class": {
+          "const": "gradientAngular"
+        },
+        "from": {
+          "$ref": "#/definitions/Point"
+        },
+        "to": {
+          "$ref": "#/definitions/Point"
+        },
+        "stops": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/definitions/GradientStop"
+          }
+        },
+        "invert": {
+          "type": "boolean",
+          "description": "Flag describing if gradient has been inverted."
+        },
+        "rotation": {
+          "type": "number",
+          "description": "Describes the Angle of the starting position. Value of rotation in degrees."
+        }
+      },
+      "additionalProperties": false
+    },
+    "Point": {
+      "title": "Point",
+      "description": "An array holds two elements, The first term is x, the second term is y.",
+      "type": "array",
+      "maxItems": 2,
+      "minItems": 2,
+      "$id": "#Point",
+      "items": {
+        "type": "number"
+      }
+    },
+    "GradientStop": {
+      "title": "Gradient Stop",
+      "description": "Defines a position on a gradient that marks the end of a transition to a new color.",
+      "type": "object",
+      "$id": "#GradientStop",
+      "required": ["class", "color", "position", "midPoint"],
+      "properties": {
+        "class": {
+          "const": "gradientStop"
+        },
+        "color": {
+          "$ref": "#/definitions/Color"
+        },
+        "position": {
+          "$ref": "#/definitions/UnitInterval",
+          "description": "A number giving the position of a color stop on the gradient ramp."
+        },
+        "midPoint": {
+          "$ref": "#/definitions/UnitInterval",
+          "description": "Specifies the location between two ramp points where there is an equal mix of the two colors. midPoint is a percentage of the distance between two ramp points. The mid point for the last color stop is ignored."
+        }
+      },
+      "additionalProperties": false
+    },
+    "GradientLinear": {
+      "title": "Gradient Linear",
+      "description": "Described parameters required by gradient linear.",
+      "type": "object",
+      "$id": "#GradientLinear",
+      "required": ["class", "from", "to", "stops", "invert"],
+      "properties": {
+        "class": {
+          "const": "gradientLinear"
+        },
+        "from": {
+          "$ref": "#/definitions/Point"
+        },
+        "to": {
+          "$ref": "#/definitions/Point"
+        },
+        "stops": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/definitions/GradientStop"
+          }
+        },
+        "invert": {
+          "type": "boolean",
+          "description": "Flag describing if gradient has been inverted."
+        }
+      },
+      "additionalProperties": false
+    },
+    "GradientRadial": {
+      "title": "Gradient Radial",
+      "description": "Described parameters required by gradient radial.",
+      "type": "object",
+      "$id": "#GradientRadial",
+      "required": ["class", "from", "to", "stops", "invert", "elipseLength"],
+      "properties": {
+        "class": {
+          "const": "gradientRadial"
+        },
+        "from": {
+          "$ref": "#/definitions/Point"
+        },
+        "to": {
+          "$ref": "#/definitions/Point"
+        },
+        "stops": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/definitions/GradientStop"
+          }
+        },
+        "invert": {
+          "type": "boolean",
+          "description": "Flag describing if gradient has been inverted."
+        },
+        "elipseLength": {
+          "type": "number",
+          "description": "For elliptic gradients describes ratio of major to minor semi-axis of the ellipse."
+        }
+      },
+      "additionalProperties": false
+    },
+    "GradientBasic": {
+      "title": "Gradient Basic",
+      "description": "Describes the parameters of gradients in a more basic form.",
+      "type": "object",
+      "$id": "#GradientBasic",
+      "required": ["class", "gradientType", "stops", "invert", "geometry"],
+      "properties": {
+        "class": {
+          "const": "gradientBasic"
+        },
+        "gradientType": {
+          "type": "integer",
+          "enum": [0, 1],
+          "enumDescriptions": ["linear gradient", "radial gradient"]
+        },
+        "stops": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/definitions/GradientStop"
+          }
+        },
+        "invert": {
+          "type": "boolean",
+          "description": "Flag describing if gradient has been inverted."
+        },
+        "geometry": {
+          "$ref": "#/definitions/GradientBasicGeometry",
+          "description": "The meaning of the gradient vector is different for radial gradients than for linear gradients. The vector origin is the center of the circle containing the radial gradient; the vector length is the radius of the that circle. The vector angle is not used by radial blends, but is preserved and used if the user changes the gradient from radial to linear."
+        },
+        "hilight": {
+          "$ref": "#/definitions/GradientHilight",
+          "description": "Only exists in radial mode."
+        },
+        "overallMatrix": {
+          "$ref": "#/definitions/Matrix",
+          "description": "Its parameters are six floating point values, which describe the overall matrix applied to the gradient."
+        },
+        "perpendicularMatrix": {
+          "type": "array",
+          "item": {
+            "type": "object",
+            "properties": {
+              "flag": {
+                "type": "integer",
+                "enum": [0, 1],
+                "enumDescriptions": [
+                  "specifies a gradient fill between two colors.",
+                  "specifies solid colors at either end of a linear gradient fill, known as gradient caps.It doesn't exist in radial gradient."
+                ]
+              },
+              "matrix": {
+                "$ref": "#/definitions/Matrix"
+              }
+            },
+            "required": ["flag", "matrix"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "GradientBasicGeometry": {
+      "title": "Gradient basic geometry",
+      "description": "Gradient geometry defines much of the appearance of the gradient within the path.",
+      "type": "object",
+      "$id": "#GradientBasicGeometry",
+      "required": [
+        "class",
+        "flag",
+        "xOrigin",
+        "yOrigin",
+        "angle",
+        "length",
+        "matrix",
+        "widthRatio"
+      ],
+      "properties": {
+        "class": {
+          "const": "gradientBasicGeometry"
+        },
+        "flag": {
+          "type": "integer",
+          "description": "This argument defines how the gradient will be rendered.For simple filled paths, flag takes the value 1.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": [
+            "Do not issue a clip.",
+            "Issue a clip.",
+            "Disable rendering."
+          ]
+        },
+        "xOrigin": {
+          "type": "number",
+          "description": "xOrigin and yOrigin give the origin of the gradient in page coordinates. The origin can be located anywhere on the artwork, and corresponds to 0 on the gradient ramp."
+        },
+        "yOrigin": {
+          "type": "number",
+          "description": "Refer to xOriginal for details."
+        },
+        "angle": {
+          "type": "number",
+          "description": "This argument specifies the direction of the gradient vector, in degrees. The gradient ramp extends from the origin at the value of angle, which is measured counterclockwise from the x axis."
+        },
+        "length": {
+          "type": "number",
+          "description": "This argument specifies the distance over which the gradient ramp is applied. The ramp will be scaled so that its 100% value is the end of the length. This parameter may be greater than 1."
+        },
+        "matrix": {
+          "$ref": "#/definitions/Matrix",
+          "description": "The six values make up a transformation matrix. When a gradient is first applied to an object, these values are the identity matrix. If the user transforms the object, the user transformation matrix is concatenated to the gradient instance’s matrix."
+        },
+        "widthRatio": {
+          "type": "number",
+          "description": "0.5 Indicates that the width is half the length. 2 Indicates that the width is twice the length. and so on."
+        }
+      },
+      "additionalProperties": false
+    },
+    "Matrix": {
+      "title": "Matrix",
+      "description": "a b c d tx ty",
+      "type": "array",
+      "maxItems": 6,
+      "minItems": 6,
+      "$id": "#Matrix",
+      "items": {
+        "type": "number"
+      }
+    },
+    "GradientHilight": {
+      "title": "Gradient Hilight",
+      "description": "Radial gradients have an additional attribute called a hilight. The hilight serves at the starting point for the gradient ramp as it expands outward. It is still contained within the gradient vector circle.",
+      "type": "object",
+      "$id": "#GradientHilight",
+      "required": ["class", "xHilight", "yHilight", "angle", "length"],
+      "properties": {
+        "class": {
+          "const": "gradientHilight"
+        },
+        "xHilight": {
+          "type": "number",
+          "description": "xHilight and yHilight specify the hilight placement, in x and y offsets from the gradient vector origin."
+        },
+        "yHilight": {
+          "type": "number",
+          "description": "Refer to xHilight for details."
+        },
+        "angle": {
+          "type": "number",
+          "description": "This argument is the angle (in degrees) to the hilight point, measured counterclockwise from the x axis."
+        },
+        "length": {
+          "$ref": "#/definitions/UnitInterval",
+          "description": "This argument is the distance of the hilight from the origin, expressed as a fraction of the radius—a value between 0 and 1."
+        }
+      },
+      "additionalProperties": false
+    },
+    "Pattern": {
+      "title": "Pattern",
+      "description": "Pattern descriptor.",
+      "type": "object",
+      "$id": "#Pattern",
+      "required": ["class", "instance"],
+      "properties": {
+        "class": {
+          "const": "pattern"
+        },
+        "instance": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/PatternImage"
+            },
+            {
+              "$ref": "#/definitions/PatternLayerInstance"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "PatternImage": {
+      "title": "Pattern Image",
+      "description": "Use an image as the content of pattern.",
+      "type": "object",
+      "$id": "#PatternImage",
+      "required": [
+        "class",
+        "fillType",
+        "imageTileMirrored",
+        "imageTileScale",
+        "imageFileName"
+      ],
+      "properties": {
+        "class": {
+          "const": "pattern_iamge"
+        },
+        "fillType": {
+          "$ref": "#/definitions/PatternFillType"
+        },
+        "imageTileMirrored": {
+          "type": "boolean",
+          "description": "Whether to mirror the image."
+        },
+        "imageTileScale": {
+          "type": "number",
+          "description": "Image scale value in tile mode."
+        },
+        "imageFileName": {
+          "type": "string",
+          "description": "image filename."
+        }
+      },
+      "additionalProperties": false
+    },
+    "PatternFillType": {
+      "title": "Pattern Fill Type",
+      "description": "Enumeration of pattern fill types.",
+      "type": "integer",
+      "enum": [0, 1, 2, 3, 4, 5],
+      "enumDescriptions": [
+        "Tile",
+        "Fill",
+        "Stretch",
+        "Fit",
+        "Tile only horizontal",
+        "Tile only vertical"
+      ],
+      "$id": "#PatternFillType"
+    },
+    "PatternLayerInstance": {
+      "title": "Pattern layer",
+      "description": "Use an layer as the content of pattern.",
+      "type": "object",
+      "$id": "#PatternLayerInstance",
+      "required": [
+        "class",
+        "refLayerName",
+        "offset",
+        "scale",
+        "angle",
+        "reflection",
+        "r",
+        "shear",
+        "shearAxis",
+        "matrix"
+      ],
+      "properties": {
+        "class": {
+          "const": "pattern_layer"
+        },
+        "refLayerName": {
+          "type": "string",
+          "description": "The name(utf-8) of the referenced pattern layer. Note that this is the name of the pattern layer, not its id. The pattern layer name is unique."
+        },
+        "offset": {
+          "$ref": "#/definitions/Point",
+          "description": "Specify the offset from the ruler origin of the origin to be used for tiling the pattern. Each distance specified in points."
+        },
+        "scale": {
+          "$ref": "#/definitions/Point",
+          "description": "Specify the scale factors to be applied to the x and y dimensions, respectively, of the pattern."
+        },
+        "angle": {
+          "type": "number",
+          "description": "Specifies the angle in counterclockwise degrees to rotate the pattern."
+        },
+        "reflection": {
+          "type": "boolean",
+          "description": "Flag indicating whether to apply a reflection to the pattern."
+        },
+        "r": {
+          "type": "number",
+          "description": "Specifies the angle of the line from the origin about which the pattern is reflected. Used if the reflection operand is true."
+        },
+        "shear": {
+          "type": "number",
+          "description": "Specifies the shear angle."
+        },
+        "shearAxis": {
+          "type": "number",
+          "description": "Specifies the shear axis."
+        },
+        "matrix": {
+          "$ref": "#/definitions/Matrix",
+          "description": "Specifies the initial matrix to which all other pattern transformations are to be applied. This matrix describes transformations that are not otherwise expressible as the single combination of the other transformations."
+        }
+      },
+      "additionalProperties": false
+    },
+    "LineCapStyle": {
+      "title": "Line Cap Style",
+      "description": "Enumeration of the line cap styles.",
+      "type": "integer",
+      "enum": [0, 1, 2],
+      "enumDescriptions": ["Butt", "Round", "square"],
+      "$id": "#LineCapStyle"
+    },
+    "LineJoinStyle": {
+      "title": "Line Join Style",
+      "description": "Enumeration of the line join styles.",
+      "type": "integer",
+      "enum": [0, 1, 2],
+      "enumDescriptions": ["Miter", "Round", "Bevel"],
+      "$id": "#LineJoinStyle"
+    },
+    "Fill": {
+      "title": "Fill",
+      "description": "Defines a fill style.",
+      "type": "object",
+      "$id": "#Fill",
+      "required": ["class", "isEnabled", "fillType", "contextSettings"],
+      "properties": {
+        "class": {
+          "const": "fill"
+        },
+        "isEnabled": {
+          "type": "boolean"
+        },
+        "color": {
+          "$ref": "#/definitions/Color"
+        },
+        "fillType": {
+          "$ref": "#/definitions/FillType"
+        },
+        "contextSettings": {
+          "$ref": "#/definitions/GraphicsContextSettings"
+        },
+        "gradient": {
+          "$ref": "#/definitions/Gradient"
+        },
+        "pattern": {
+          "$ref": "#/definitions/Pattern"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Blur": {
+      "title": "Blur",
+      "description": "Defines a blur style.",
+      "type": "object",
+      "$id": "#Blur",
+      "required": ["class", "type", "isEnabled", "radius"],
+      "properties": {
+        "class": {
+          "const": "blur"
+        },
+        "type": {
+          "$ref": "#/definitions/BlurType"
+        },
+        "isEnabled": {
+          "type": "boolean"
+        },
+        "radius": {
+          "type": "number",
+          "description": "Blur radius."
+        },
+        "motionAngle": {
+          "type": "number",
+          "description": "Motion blur angle (in degrees)."
+        },
+        "center": {
+          "$ref": "#/definitions/Point",
+          "description": "The center of the zoom blur."
+        },
+        "saturation": {
+          "type": "number",
+          "description": "For background blur."
+        }
+      },
+      "additionalProperties": false
+    },
+    "BlurType": {
+      "title": "Blur Type",
+      "description": "Enumeration of the various blur types.",
+      "type": "integer",
+      "enum": [0, 1, 2, 3],
+      "enumDescriptions": ["Gaussian", "Motion", "Zoom", "Background"],
+      "$id": "#BlurType"
+    },
+    "Shadow": {
+      "title": "Shadow",
+      "description": "Defines a shadow style",
+      "type": "object",
+      "$id": "#Shadow",
+      "required": [
+        "class",
+        "isEnabled",
+        "color",
+        "offsetX",
+        "offsetY",
+        "blur",
+        "spread",
+        "contextSettings",
+        "inner"
+      ],
+      "properties": {
+        "class": {
+          "const": "shadow"
+        },
+        "isEnabled": {
+          "type": "boolean"
+        },
+        "color": {
+          "$ref": "#/definitions/Color",
+          "description": "The color of the shadow."
+        },
+        "offsetX": {
+          "type": "number",
+          "description": "Horizontal offset of the shadow."
+        },
+        "offsetY": {
+          "type": "number",
+          "description": "Vertical offset of the shadow."
+        },
+        "blur": {
+          "type": "number",
+          "description": "Blur value of the shadow."
+        },
+        "spread": {
+          "type": "number",
+          "description": "Spread amount of the shadow contour."
+        },
+        "contextSettings": {
+          "$ref": "#/definitions/GraphicsContextSettings"
+        },
+        "inner": {
+          "type": "boolean",
+          "description": "True means inner shadows. False means shadows."
+        }
+      },
+      "additionalProperties": false
+    },
+    "Rect": {
+      "title": "Rect",
+      "description": "Defines an abstract rectangle.",
+      "type": "object",
+      "$id": "#Rect",
+      "required": [
+        "class",
+        "constrainProportions",
+        "height",
+        "width",
+        "x",
+        "y"
+      ],
+      "properties": {
+        "class": {
+          "const": "rect"
+        },
+        "constrainProportions": {
+          "type": "boolean",
+          "description": "Whether to keep the height and width ratio constant while scaling."
+        },
+        "height": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number"
+        },
+        "x": {
+          "type": "number",
+          "description": "Top left X coordinate. The X value in the top left corner is 0. The X-axis increases to the right."
+        },
+        "y": {
+          "type": "number",
+          "description": "Top left Y coordinate. The Y value in the top left corner is 0. The Y-axis increases to the up."
+        }
+      },
+      "additionalProperties": false
+    },
+    "AlphaMask": {
+      "title": "Alpha Mask",
+      "type": "object",
+      "description": "Describes the properties of the alpha mask.",
+      "$id": "#AlphaMask",
+      "required": ["class", "id", "alphaType", "crop"],
+      "properties": {
+        "class": {
+          "const": "alphaMask"
+        },
+        "id": {
+          "type": "string",
+          "description": "The value is ID of a object that is a alpha mask of this object."
+        },
+        "alphaType": {
+          "type": "integer",
+          "enum": [0, 1, 2],
+          "enumDescriptions": ["alpha", "luminosity", "inverse-luminosity"]
+        },
+        "crop": {
+          "type": "boolean",
+          "description": "Crops the masked object to the boundaries of the masking object."
+        }
+      },
+      "additionalProperties": false
+    },
+    "Layer": {
+      "title": "Layer",
+      "description": "Layers provide a way to manage all the items that make up your artwork.",
+      "$id": "#Layer",
+      "type": "object",
+      "required": [
+        "alphaMaskBy",
+        "childObjects",
+        "class",
+        "contextSettings",
+        "frame",
+        "id",
+        "isFlippedHorizontal",
+        "isFlippedVertical",
+        "isLocked",
+        "isMask",
+        "outlineMaskBy",
+        "rotation",
+        "style",
+        "visible"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique object identifier.\nID format:\n  Photoshop: numeric\n  Sketch: UUID string\n  Adobe XD: UUID string\n  Figma: string like 3:5:3\n  In Illustrator: numeric\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of object (utf-8)."
+        },
+        "isLocked": {
+          "type": "boolean",
+          "description": "Describes whether the object is locked."
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Describes the visibility of the object."
+        },
+        "contextSettings": {
+          "$ref": "#/definitions/GraphicsContextSettings",
+          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
+        },
+        "style": {
+          "$ref": "#/definitions/Style",
+          "description": "Object styles descriptor."
+        },
+        "frame": {
+          "$ref": "#/definitions/Rect",
+          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask."
+        },
+        "rotation": {
+          "type": "number",
+          "maximum": 180,
+          "minimum": -180,
+          "description": "Rotation of the object in degrees."
+        },
+        "isFlippedVertical": {
+          "type": "boolean",
+          "description": "Vertical flip transformation flag. Flip around the Y-axis centered on the object."
+        },
+        "isFlippedHorizontal": {
+          "type": "boolean",
+          "description": "Horizontal flip transformation flag. Flip around the X-axis centered on the object."
+        },
+        "alphaMaskBy": {
+          "type": "array",
+          "item": {
+            "$ref": "#/definitions/AlphaMask"
+          }
+        },
+        "outlineMaskBy": {
+          "type": "array",
+          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
+          "item": {
+            "type": "string",
+            "description": "The value is ID of a object that is a outline mask of this object."
+          }
+        },
+        "isMask": {
+          "type": "boolean",
+          "description": "Indicates whether the current object is a mask object."
+        },
+        "childObjects": {
+          "type": "array",
+          "description": "Describes all child object information. The child item that appears later will be above the child item that appears first.",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/Path"
+              },
+              {
+                "$ref": "#/definitions/Image"
+              },
+              {
+                "$ref": "#/definitions/Text"
+              },
+              {
+                "$ref": "#/definitions/Group"
+              },
+              {
+                "$ref": "#/definitions/SymbolInstance"
+              }
+            ]
+          }
+        },
+        "class": {
+          "const": "layer"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Path": {
+      "title": "Path",
+      "description": "Path represents a vector geometry which is formed by individual subpaths combined together via boolean operations.",
+      "$id": "#Path",
+      "type": "object",
+      "required": [
+        "alphaMaskBy",
+        "class",
+        "contextSettings",
+        "frame",
+        "id",
+        "isFlippedHorizontal",
+        "isFlippedVertical",
+        "isLocked",
+        "isMask",
+        "outlineMaskBy",
+        "rotation",
+        "shape",
+        "style",
+        "visible"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique object identifier.\nID format:\n  Photoshop: numeric\n  Sketch: UUID string\n  Adobe XD: UUID string\n  Figma: string like 3:5:3\n  In Illustrator: numeric\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of object (utf-8)."
+        },
+        "isLocked": {
+          "type": "boolean",
+          "description": "Describes whether the object is locked."
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Describes the visibility of the object."
+        },
+        "contextSettings": {
+          "$ref": "#/definitions/GraphicsContextSettings",
+          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
+        },
+        "style": {
+          "$ref": "#/definitions/Style",
+          "description": "Object styles descriptor."
+        },
+        "frame": {
+          "$ref": "#/definitions/Rect",
+          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask."
+        },
+        "rotation": {
+          "type": "number",
+          "maximum": 180,
+          "minimum": -180,
+          "description": "Rotation of the object in degrees."
+        },
+        "isFlippedVertical": {
+          "type": "boolean",
+          "description": "Vertical flip transformation flag. Flip around the Y-axis centered on the object."
+        },
+        "isFlippedHorizontal": {
+          "type": "boolean",
+          "description": "Horizontal flip transformation flag. Flip around the X-axis centered on the object."
+        },
+        "alphaMaskBy": {
+          "type": "array",
+          "item": {
+            "$ref": "#/definitions/AlphaMask"
+          }
+        },
+        "outlineMaskBy": {
+          "type": "array",
+          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
+          "item": {
+            "type": "string",
+            "description": "The value is ID of a object that is a outline mask of this object."
+          }
+        },
+        "isMask": {
+          "type": "boolean",
+          "description": "Indicates whether the current object is a mask object."
+        },
+        "class": {
+          "const": "path"
+        },
+        "shape": {
+          "$ref": "#/definitions/Shape",
+          "description": "Specifies shape of the path."
+        }
+      },
+      "additionalProperties": false
+    },
+    "Shape": {
+      "title": "Shape",
+      "description": "Shape descriptor.",
+      "type": "object",
+      "$id": "#Shape",
+      "required": ["class", "subshapes", "windingRule"],
+      "properties": {
+        "class": {
+          "const": "shape"
+        },
+        "subshapes": {
+          "type": "array",
+          "description": "An array of subshape in the shape.",
+          "items": {
+            "$ref": "#/definitions/SubShape"
+          }
+        },
+        "windingRule": {
+          "type": "integer",
+          "description": "The value describes the shape's 'winding rule' (policy determining how overlapping contours fill an area).",
+          "enum": [0, 1],
+          "enumDescriptions": ["non-zero", "even-odd"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SubShape": {
+      "title": "Subshape",
+      "description": "A single subshape descriptor.",
+      "type": "object",
+      "$id": "#SubShape",
+      "required": [
+        "class",
+        "subGeometry",
+        "frame",
+        "booleanOperation",
+        "rotation",
+        "isFlippedVertical",
+        "isFlippedHorizontal"
+      ],
+      "properties": {
+        "class": {
+          "const": "subshape"
+        },
+        "subGeometry": {
+          "description": "The contour of the subpath is described.",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/Contour"
+            },
+            {
+              "$ref": "#/definitions/Text"
+            },
+            {
+              "$ref": "#/definitions/Image"
+            },
+            {
+              "$ref": "#/definitions/SymbolInstance"
+            }
+          ]
+        },
+        "frame": {
+          "$ref": "#/definitions/Rect"
+        },
+        "booleanOperation": {
+          "type": "integer",
+          "description": "Boolean operation combining this and next-in-the-array path.",
+          "enum": [0, 1, 2, 3, 4],
+          "enumDescriptions": [
+            "union",
+            "subtraction",
+            "intersecion",
+            "exclusion",
+            "none"
+          ]
+        },
+        "rotation": {
+          "type": "number",
+          "maximum": 180,
+          "minimum": -180,
+          "description": "Rotation of the object in degrees. Value of rotation in degrees."
+        },
+        "isFlippedVertical": {
+          "type": "boolean",
+          "description": "Vertical flip transformation flag. Flip around the Y-axis centered on the object."
+        },
+        "isFlippedHorizontal": {
+          "type": "boolean",
+          "description": "Horizontal flip transformation flag. Flip around the X-axis centered on the object."
+        }
+      },
+      "additionalProperties": false
+    },
+    "Contour": {
+      "title": "Contour",
+      "description": "Describes the contour of a shape.",
+      "type": "object",
+      "$id": "#Contour",
+      "required": ["class", "closed", "points"],
+      "properties": {
+        "class": {
+          "const": "contour"
+        },
+        "closed": {
+          "type": "boolean",
+          "description": "Describes if the path is opened or closed."
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PointAttr"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "PointAttr": {
+      "title": "Point Attr",
+      "description": "A single point descriptor.",
+      "type": "object",
+      "$id": "#PointAttr",
+      "required": ["class", "pointType", "points"],
+      "properties": {
+        "class": {
+          "const": "pointAttr"
+        },
+        "pointType": {
+          "type": "integer",
+          "description": "Describes a type of the point.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": ["simple point", "quad", "cubic"]
+        },
+        "radius": {
+          "type": "number",
+          "description": "Takes effect only in simple point mode, indicates that the effect of the current point is an arc, and specifies the radius of the arc."
+        },
+        "points": {
+          "type": "array",
+          "description": "If the point is of type cubic, the items are stored as c1, c2, p, where p is the point on the curve and c1 and c2 are its neighbouring control points. (In sketch, c1 eauql curveto, c2 equal curvefrom) For type quad the format is c, p. for type simple point it is p.",
+          "items": {
+            "$ref": "#/definitions/Point"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "Text": {
+      "title": "Text",
+      "description": "Contains the information needed to draw the text.",
+      "$id": "#Text",
+      "type": "object",
+      "required": [
+        "alphaMaskBy",
+        "attr",
+        "class",
+        "content",
+        "contextSettings",
+        "frame",
+        "frameMode",
+        "geometry",
+        "id",
+        "isFlippedHorizontal",
+        "isFlippedVertical",
+        "isLocked",
+        "isMask",
+        "outlineMaskBy",
+        "rotation",
+        "style",
+        "verticalAlignment",
+        "visible"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique object identifier.\nID format:\n  Photoshop: numeric\n  Sketch: UUID string\n  Adobe XD: UUID string\n  Figma: string like 3:5:3\n  In Illustrator: numeric\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of object (utf-8)."
+        },
+        "isLocked": {
+          "type": "boolean",
+          "description": "Describes whether the object is locked."
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Describes the visibility of the object."
+        },
+        "contextSettings": {
+          "$ref": "#/definitions/GraphicsContextSettings",
+          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
+        },
+        "style": {
+          "$ref": "#/definitions/Style",
+          "description": "Object styles descriptor."
+        },
+        "frame": {
+          "$ref": "#/definitions/Rect",
+          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask."
+        },
+        "rotation": {
+          "type": "number",
+          "maximum": 180,
+          "minimum": -180,
+          "description": "Rotation of the object in degrees."
+        },
+        "isFlippedVertical": {
+          "type": "boolean",
+          "description": "Vertical flip transformation flag. Flip around the Y-axis centered on the object."
+        },
+        "isFlippedHorizontal": {
+          "type": "boolean",
+          "description": "Horizontal flip transformation flag. Flip around the X-axis centered on the object."
+        },
+        "alphaMaskBy": {
+          "type": "array",
+          "item": {
+            "$ref": "#/definitions/AlphaMask"
+          }
+        },
+        "outlineMaskBy": {
+          "type": "array",
+          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
+          "item": {
+            "type": "string",
+            "description": "The value is ID of a object that is a outline mask of this object."
+          }
+        },
+        "isMask": {
+          "type": "boolean",
+          "description": "Indicates whether the current object is a mask object."
+        },
+        "class": {
+          "const": "text"
+        },
+        "content": {
+          "type": "string",
+          "description": "Text content of the text object. The encoding format is utf-8."
+        },
+        "geometry": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/TextOnPath"
+            },
+            {
+              "$ref": "#/definitions/TextTransformMatrix"
+            }
+          ]
+        },
+        "frameMode": {
+          "type": "integer",
+          "description": "Specifies the text frame semantics. fixed mode strictly sets the typeset area according to the frame. auto width and auto height mode expands associated bounds as needed.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": ["fixed", "auto width", "auto height"]
+        },
+        "verticalAlignment": {
+          "type": "integer",
+          "description": "Text vertical alignment.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": ["top", "center", "bottom"]
+        },
+        "attr": {
+          "type": "array",
+          "description": "An array containing font style ranges. Note: Arrays are ordered.",
+          "items": {
+            "$ref": "#/definitions/FontAttr"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "TextOnPath": {
+      "title": "Text On Path",
+      "description": "Describes information about text on a path.",
+      "type": "object",
+      "$id": "#TextOnPath",
+      "required": ["class", "pathId", "startOffset"],
+      "properties": {
+        "class": {
+          "const": "textOnPath"
+        },
+        "pathId": {
+          "type": "string",
+          "description": "Id of the associated path."
+        },
+        "startOffset": {
+          "type": "number",
+          "description": "The percentage of the text's starting position on the path.",
+          "maximum": 1,
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "TextTransformMatrix": {
+      "title": "Text Transform Matrix",
+      "type": "object",
+      "$id": "#TextTransformMatrix",
+      "required": ["class", "matrix"],
+      "properties": {
+        "class": {
+          "const": "textTransformMatrix"
+        },
+        "matrix": {
+          "$ref": "#/definitions/Matrix",
+          "description": "Text Matrix, as defined in PostScript Language Reference Manual, Second Edition. Original location information (given clockwise from top left): (0, 0), (width, 0), (width, -height), (0, -height)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "FontAttr": {
+      "title": "Text Attr",
+      "description": "Text Attr defined for particular fragments of the text (text ranges).",
+      "type": "object",
+      "$id": "#FontAttr",
+      "required": [
+        "class",
+        "length",
+        "contextSettings",
+        "horizontalAlignment",
+        "name",
+        "size",
+        "kerning",
+        "letterSpacing",
+        "lineSpace",
+        "underline",
+        "linethrough",
+        "lettertransform",
+        "baselineShift",
+        "baseline",
+        "horizontalScale",
+        "verticalScale",
+        "proportionalSpacing",
+        "rotate",
+        "textParagraph"
+      ],
+      "properties": {
+        "class": {
+          "const": "fontAttr"
+        },
+        "length": {
+          "type": "integer",
+          "description": "The number of characters(utf-8) that the current attribute acts on."
+        },
+        "fillColor": {
+          "$ref": "#/definitions/Color",
+          "description": "The fill color of the font.If it doesn't exist it means it doesn't need to be filled."
+        },
+        "borderColor": {
+          "$ref": "#/definitions/Color",
+          "description": "The border color of the font.If it doesn't exist it means it doesn't need to be stroked."
+        },
+        "borderSize": {
+          "type": "number",
+          "description": "Describes the stroke width.Exists only when stroke is required."
+        },
+        "contextSettings": {
+          "$ref": "#/definitions/GraphicsContextSettings"
+        },
+        "horizontalAlignment": {
+          "type": "integer",
+          "description": "Horizontal alignment of the text.",
+          "enum": [0, 1, 2, 3],
+          "enumDescriptions": ["left", "center", "right", "justify"]
+        },
+        "name": {
+          "type": "string",
+          "description": "Common name of font. The font name may contain subfamily, in which case the subFamilyName will not appear."
+        },
+        "subFamilyName": {
+          "type": "string",
+          "description": "Font type (called 'subfamily' in OpenType specification)."
+        },
+        "size": {
+          "type": "number",
+          "description": "Font's size."
+        },
+        "kerning": {
+          "type": "boolean",
+          "description": "Describes if kerning feature is enabled in the text."
+        },
+        "letterSpacing": {
+          "type": "number",
+          "description": "Text letter spacing (can be negative)."
+        },
+        "lineSpace": {
+          "type": "number",
+          "description": "Describes the line spacing values of the text."
+        },
+        "underline": {
+          "type": "integer",
+          "description": "Text underline type.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": ["none", "single line", "double line"]
+        },
+        "linethrough": {
+          "type": "boolean",
+          "description": "Describes if the text has line through."
+        },
+        "bold": {
+          "type": "boolean",
+          "description": "Describes if the text is bold. If missing the information is not known."
+        },
+        "italic": {
+          "type": "boolean",
+          "description": "Describes if the text is italic. If missing the information is not known."
+        },
+        "lettertransform": {
+          "type": "integer",
+          "enum": [0, 1, 2, 3],
+          "enumDescriptions": [
+            "do nothing.",
+            "open smallcaps.",
+            "open uppercase.",
+            "open lowercase."
+          ]
+        },
+        "baselineShift": {
+          "type": "number",
+          "description": "Describes baselineShift value."
+        },
+        "baseline": {
+          "type": "integer",
+          "description": "Describes baseline's position type.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": ["normal", "superScript", "subScript"]
+        },
+        "horizontalScale": {
+          "type": "number",
+          "description": "Describes the horizontal scaling value of text.\nValue example:\n  1:    not scale\n  1.75: 175%\n  2:    200%\n  0.5:  50%\n"
+        },
+        "verticalScale": {
+          "type": "number",
+          "description": "Describes the vertical scaling value of text. Value example reference horizontalScale."
+        },
+        "proportionalSpacing": {
+          "type": "number",
+          "description": "Describes the proportional spacing of text.\nValue example:\n  1:    100%\n  0.5:  50%\n  0:    0%\n",
+          "maximum": 1,
+          "minimum": 0
+        },
+        "rotate": {
+          "type": "number",
+          "description": "Describes the value of text rotation(in degree).",
+          "maximum": 180,
+          "minimum": -180
+        },
+        "textParagraph": {
+          "$ref": "#/definitions/TextParagraph"
+        }
+      },
+      "additionalProperties": false
+    },
+    "TextParagraph": {
+      "title": "Text Paragraph",
+      "description": "Describes the paragraph properties of the text.",
+      "type": "object",
+      "$id": "#TextParagraph",
+      "required": ["class", "paragraphSpacing"],
+      "properties": {
+        "class": {
+          "const": "textParagraph"
+        },
+        "paragraphSpacing": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Image": {
+      "title": "Image",
+      "description": "Contains the information needed to draw the image.",
+      "$id": "#Image",
+      "type": "object",
+      "required": [
+        "alphaMaskBy",
+        "class",
+        "contextSettings",
+        "frame",
+        "id",
+        "imageFileName",
+        "imageMatrix",
+        "isFlippedHorizontal",
+        "isFlippedVertical",
+        "isLocked",
+        "isMask",
+        "outlineMaskBy",
+        "rotation",
+        "style",
+        "visible"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique object identifier.\nID format:\n  Photoshop: numeric\n  Sketch: UUID string\n  Adobe XD: UUID string\n  Figma: string like 3:5:3\n  In Illustrator: numeric\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of object (utf-8)."
+        },
+        "isLocked": {
+          "type": "boolean",
+          "description": "Describes whether the object is locked."
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Describes the visibility of the object."
+        },
+        "contextSettings": {
+          "$ref": "#/definitions/GraphicsContextSettings",
+          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
+        },
+        "style": {
+          "$ref": "#/definitions/Style",
+          "description": "Object styles descriptor."
+        },
+        "frame": {
+          "$ref": "#/definitions/Rect",
+          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask."
+        },
+        "rotation": {
+          "type": "number",
+          "maximum": 180,
+          "minimum": -180,
+          "description": "Rotation of the object in degrees."
+        },
+        "isFlippedVertical": {
+          "type": "boolean",
+          "description": "Vertical flip transformation flag. Flip around the Y-axis centered on the object."
+        },
+        "isFlippedHorizontal": {
+          "type": "boolean",
+          "description": "Horizontal flip transformation flag. Flip around the X-axis centered on the object."
+        },
+        "alphaMaskBy": {
+          "type": "array",
+          "item": {
+            "$ref": "#/definitions/AlphaMask"
+          }
+        },
+        "outlineMaskBy": {
+          "type": "array",
+          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
+          "item": {
+            "type": "string",
+            "description": "The value is ID of a object that is a outline mask of this object."
+          }
+        },
+        "isMask": {
+          "type": "boolean",
+          "description": "Indicates whether the current object is a mask object."
+        },
+        "class": {
+          "const": "image"
+        },
+        "imageFileName": {
+          "type": "string",
+          "description": "The relative path to the image file (utf-8)."
+        },
+        "imageMatrix": {
+          "$ref": "#/definitions/Matrix",
+          "description": "Image Matrix, as defined in PostScript Language Reference Manual, Second Edition. Original location information (given clockwise from top left): (0, 0), (width, 0), (width, -height), (0, -height)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "SymbolInstance": {
+      "title": "Symbol Instance Layer",
+      "description": "Symbol instance object represent an instance of a symbol source.",
+      "type": "object",
+      "$id": "#SymbolInstance",
+      "required": [
+        "alphaMaskBy",
+        "class",
+        "contextSettings",
+        "frame",
+        "id",
+        "isFlippedHorizontal",
+        "isFlippedVertical",
+        "isLocked",
+        "isMask",
+        "outlineMaskBy",
+        "overrideValues",
+        "rotation",
+        "scale",
+        "style",
+        "symbolMasterId",
+        "visible"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique object identifier.\nID format:\n  Photoshop: numeric\n  Sketch: UUID string\n  Adobe XD: UUID string\n  Figma: string like 3:5:3\n  In Illustrator: numeric\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of object (utf-8)."
+        },
+        "isLocked": {
+          "type": "boolean",
+          "description": "Describes whether the object is locked."
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Describes the visibility of the object."
+        },
+        "contextSettings": {
+          "$ref": "#/definitions/GraphicsContextSettings",
+          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
+        },
+        "style": {
+          "$ref": "#/definitions/Style",
+          "description": "Object styles descriptor."
+        },
+        "frame": {
+          "$ref": "#/definitions/Rect",
+          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask."
+        },
+        "rotation": {
+          "type": "number",
+          "maximum": 180,
+          "minimum": -180,
+          "description": "Rotation of the object in degrees."
+        },
+        "isFlippedVertical": {
+          "type": "boolean",
+          "description": "Vertical flip transformation flag. Flip around the Y-axis centered on the object."
+        },
+        "isFlippedHorizontal": {
+          "type": "boolean",
+          "description": "Horizontal flip transformation flag. Flip around the X-axis centered on the object."
+        },
+        "alphaMaskBy": {
+          "type": "array",
+          "item": {
+            "$ref": "#/definitions/AlphaMask"
+          }
+        },
+        "outlineMaskBy": {
+          "type": "array",
+          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
+          "item": {
+            "type": "string",
+            "description": "The value is ID of a object that is a outline mask of this object."
+          }
+        },
+        "isMask": {
+          "type": "boolean",
+          "description": "Indicates whether the current object is a mask object."
+        },
+        "class": {
+          "const": "symbolInstance"
+        },
+        "overrideValues": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OverrideValue"
+          }
+        },
+        "symbolMasterId": {
+          "type": "string",
+          "description": "The id of the referenced symbol master."
+        },
+        "scale": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false
+    },
+    "OverrideValue": {
+      "title": "Override Value",
+      "description": "Defines an individual symbol override.",
+      "type": "object",
+      "$id": "#OverrideValue",
+      "required": ["class", "overrideName", "value"],
+      "properties": {
+        "class": {
+          "const": "overrideValue"
+        },
+        "do_objectID": {
+          "type": "string"
+        },
+        "overrideName": {
+          "$ref": "#/definitions/OverrideName"
+        },
+        "value": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/FileRef"
+            },
+            {
+              "$ref": "#/definitions/DataRef"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "OverrideName": {
+      "title": "Override Name",
+      "description": "Defines the valid string patterns for an override name.",
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "[0-9A-F]{8}\\-[0-9A-F]{4}\\-[0-9A-F]{4}\\-[0-9A-F]{4}\\-[0-9A-F]{12}((_stringValue$)|\\/)"
+        },
+        {
+          "type": "string",
+          "pattern": "[0-9A-F]{8}\\-[0-9A-F]{4}\\-[0-9A-F]{4}\\-[0-9A-F]{4}\\-[0-9A-F]{12}((_symbolID$)|\\/)"
+        },
+        {
+          "type": "string",
+          "pattern": "[0-9A-F]{8}\\-[0-9A-F]{4}\\-[0-9A-F]{4}\\-[0-9A-F]{4}\\-[0-9A-F]{12}((_image$)|\\/)"
+        },
+        {
+          "type": "string",
+          "pattern": "[0-9A-F]{8}\\-[0-9A-F]{4}\\-[0-9A-F]{4}\\-[0-9A-F]{4}\\-[0-9A-F]{12}((_layerStyle$)|\\/)"
+        }
+      ],
+      "$id": "#OverrideName"
+    },
+    "FileRef": {
+      "title": "File Reference",
+      "description": "Defines a reference to a file within the document bundle.",
+      "type": "object",
+      "$id": "#FileRef",
+      "required": ["class", "_ref_class", "_ref"],
+      "properties": {
+        "class": {
+          "const": "MSJSONFileReference"
+        },
+        "_ref_class": {
+          "type": "string",
+          "enum": ["MSImageData", "MSImmutablePage", "MSPatch"],
+          "enumDescriptions": ["MSImageData", "MSImmutablePage", "MSPatch"]
+        },
+        "_ref": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "DataRef": {
+      "title": "Data Reference",
+      "description": "Defines inline base64 data.",
+      "type": "object",
+      "$id": "#DataRef",
+      "required": ["class", "_ref_class", "_ref", "data", "sha1"],
+      "properties": {
+        "class": {
+          "const": "MSJSONOriginalDataReference"
+        },
+        "_ref_class": {
+          "type": "string",
+          "enum": ["MSImageData", "MSFontData"],
+          "enumDescriptions": ["MSImageData", "MSFontData"]
+        },
+        "_ref": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object",
+          "required": ["_data"],
+          "properties": {
+            "_data": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "sha1": {
+          "type": "object",
+          "required": ["_data"],
+          "properties": {
+            "_data": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "Group": {
+      "title": "Group",
+      "description": "A group is a combination of a series of objects.",
+      "$id": "#Group",
+      "type": "object",
+      "required": [
+        "alphaMaskBy",
+        "childObjects",
+        "class",
+        "contextSettings",
+        "frame",
+        "id",
+        "isFlippedHorizontal",
+        "isFlippedVertical",
+        "isLocked",
+        "isMask",
+        "outlineMaskBy",
+        "rotation",
+        "style",
+        "visible"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique object identifier.\nID format:\n  Photoshop: numeric\n  Sketch: UUID string\n  Adobe XD: UUID string\n  Figma: string like 3:5:3\n  In Illustrator: numeric\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of object (utf-8)."
+        },
+        "isLocked": {
+          "type": "boolean",
+          "description": "Describes whether the object is locked."
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Describes the visibility of the object."
+        },
+        "contextSettings": {
+          "$ref": "#/definitions/GraphicsContextSettings",
+          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
+        },
+        "style": {
+          "$ref": "#/definitions/Style",
+          "description": "Object styles descriptor."
+        },
+        "frame": {
+          "$ref": "#/definitions/Rect",
+          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask."
+        },
+        "rotation": {
+          "type": "number",
+          "maximum": 180,
+          "minimum": -180,
+          "description": "Rotation of the object in degrees."
+        },
+        "isFlippedVertical": {
+          "type": "boolean",
+          "description": "Vertical flip transformation flag. Flip around the Y-axis centered on the object."
+        },
+        "isFlippedHorizontal": {
+          "type": "boolean",
+          "description": "Horizontal flip transformation flag. Flip around the X-axis centered on the object."
+        },
+        "alphaMaskBy": {
+          "type": "array",
+          "item": {
+            "$ref": "#/definitions/AlphaMask"
+          }
+        },
+        "outlineMaskBy": {
+          "type": "array",
+          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
+          "item": {
+            "type": "string",
+            "description": "The value is ID of a object that is a outline mask of this object."
+          }
+        },
+        "isMask": {
+          "type": "boolean",
+          "description": "Indicates whether the current object is a mask object."
+        },
+        "childObjects": {
+          "type": "array",
+          "description": "Describes all child object information. The child item that appears later will be above the child item that appears first.",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/Path"
+              },
+              {
+                "$ref": "#/definitions/Image"
+              },
+              {
+                "$ref": "#/definitions/Text"
+              },
+              {
+                "$ref": "#/definitions/Group"
+              },
+              {
+                "$ref": "#/definitions/SymbolInstance"
+              }
+            ]
+          }
+        },
+        "class": {
+          "const": "group"
+        }
+      },
+      "additionalProperties": false
+    },
+    "PatternLayerDef": {
+      "title": "Pattern Layer Def",
+      "description": "Contains objects to define a global pattern.",
+      "$id": "#PatternLayerDef",
+      "type": "object",
+      "required": [
+        "alphaMaskBy",
+        "childObjects",
+        "class",
+        "contextSettings",
+        "frame",
+        "id",
+        "isFlippedHorizontal",
+        "isFlippedVertical",
+        "isLocked",
+        "isMask",
+        "outlineMaskBy",
+        "pattern_bounding_box",
+        "rotation",
+        "style",
+        "visible"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique object identifier.\nID format:\n  Photoshop: numeric\n  Sketch: UUID string\n  Adobe XD: UUID string\n  Figma: string like 3:5:3\n  In Illustrator: numeric\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of object (utf-8)."
+        },
+        "isLocked": {
+          "type": "boolean",
+          "description": "Describes whether the object is locked."
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Describes the visibility of the object."
+        },
+        "contextSettings": {
+          "$ref": "#/definitions/GraphicsContextSettings",
+          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
+        },
+        "style": {
+          "$ref": "#/definitions/Style",
+          "description": "Object styles descriptor."
+        },
+        "frame": {
+          "$ref": "#/definitions/Rect",
+          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask."
+        },
+        "rotation": {
+          "type": "number",
+          "maximum": 180,
+          "minimum": -180,
+          "description": "Rotation of the object in degrees."
+        },
+        "isFlippedVertical": {
+          "type": "boolean",
+          "description": "Vertical flip transformation flag. Flip around the Y-axis centered on the object."
+        },
+        "isFlippedHorizontal": {
+          "type": "boolean",
+          "description": "Horizontal flip transformation flag. Flip around the X-axis centered on the object."
+        },
+        "alphaMaskBy": {
+          "type": "array",
+          "item": {
+            "$ref": "#/definitions/AlphaMask"
+          }
+        },
+        "outlineMaskBy": {
+          "type": "array",
+          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
+          "item": {
+            "type": "string",
+            "description": "The value is ID of a object that is a outline mask of this object."
+          }
+        },
+        "isMask": {
+          "type": "boolean",
+          "description": "Indicates whether the current object is a mask object."
+        },
+        "childObjects": {
+          "type": "array",
+          "description": "Describes all child object information. The child item that appears later will be above the child item that appears first.",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/Path"
+              },
+              {
+                "$ref": "#/definitions/Image"
+              },
+              {
+                "$ref": "#/definitions/Text"
+              },
+              {
+                "$ref": "#/definitions/Group"
+              },
+              {
+                "$ref": "#/definitions/SymbolInstance"
+              }
+            ]
+          }
+        },
+        "class": {
+          "const": "pattern_layer_def"
+        },
+        "pattern_bounding_box": {
+          "type": "array",
+          "maxItems": 4,
+          "minItems": 4,
+          "items": {
+            "type": "number"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "SymbolMaster": {
+      "title": "Symbol Master",
+      "description": "A symbol source object represents a reusable group of objects.",
+      "$id": "#SymbolMaster",
+      "type": "object",
+      "required": [
+        "allowsOverrides",
+        "alphaMaskBy",
+        "childObjects",
+        "contextSettings",
+        "frame",
+        "hasBackgroundColor",
+        "id",
+        "includeBackgroundColorInInstance",
+        "isFlippedHorizontal",
+        "isFlippedVertical",
+        "isLocked",
+        "isMask",
+        "outlineMaskBy",
+        "overrideProperties",
+        "rotation",
+        "style",
+        "visible"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique object identifier.\nID format:\n  Photoshop: numeric\n  Sketch: UUID string\n  Adobe XD: UUID string\n  Figma: string like 3:5:3\n  In Illustrator: numeric\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of object (utf-8)."
+        },
+        "isLocked": {
+          "type": "boolean",
+          "description": "Describes whether the object is locked."
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Describes the visibility of the object."
+        },
+        "contextSettings": {
+          "$ref": "#/definitions/GraphicsContextSettings",
+          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
+        },
+        "style": {
+          "$ref": "#/definitions/Style",
+          "description": "Object styles descriptor."
+        },
+        "frame": {
+          "$ref": "#/definitions/Rect",
+          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask."
+        },
+        "rotation": {
+          "type": "number",
+          "maximum": 180,
+          "minimum": -180,
+          "description": "Rotation of the object in degrees."
+        },
+        "isFlippedVertical": {
+          "type": "boolean",
+          "description": "Vertical flip transformation flag. Flip around the Y-axis centered on the object."
+        },
+        "isFlippedHorizontal": {
+          "type": "boolean",
+          "description": "Horizontal flip transformation flag. Flip around the X-axis centered on the object."
+        },
+        "alphaMaskBy": {
+          "type": "array",
+          "item": {
+            "$ref": "#/definitions/AlphaMask"
+          }
+        },
+        "outlineMaskBy": {
+          "type": "array",
+          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
+          "item": {
+            "type": "string",
+            "description": "The value is ID of a object that is a outline mask of this object."
+          }
+        },
+        "isMask": {
+          "type": "boolean",
+          "description": "Indicates whether the current object is a mask object."
+        },
+        "childObjects": {
+          "type": "array",
+          "description": "Describes all child object information. The child item that appears later will be above the child item that appears first.",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/Path"
+              },
+              {
+                "$ref": "#/definitions/Image"
+              },
+              {
+                "$ref": "#/definitions/Text"
+              },
+              {
+                "$ref": "#/definitions/Group"
+              },
+              {
+                "$ref": "#/definitions/SymbolInstance"
+              }
+            ]
+          }
+        },
+        "hasBackgroundColor": {
+          "type": "boolean",
+          "description": "A flag indicating whether backgroundColor should be applied as a background color of the object."
+        },
+        "backgroundColor": {
+          "$ref": "#/definitions/Color"
+        },
+        "includeBackgroundColorInInstance": {
+          "type": "boolean"
+        },
+        "allowsOverrides": {
+          "type": "boolean"
+        },
+        "overrideProperties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OverrideProperty"
+          }
+        },
+        "presetDictionary": {
+          "type": "object",
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "OverrideProperty": {
+      "title": "Override Property",
+      "description": "Defines override properties on symbol sources.",
+      "type": "object",
+      "$id": "#OverrideProperty",
+      "required": ["class", "overrideName", "canOverride"],
+      "properties": {
+        "class": {
+          "const": "MSImmutableOverrideProperty"
+        },
+        "overrideName": {
+          "$ref": "#/definitions/OverrideName"
+        },
+        "canOverride": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["fileType", "fileName", "artboard"],
+  "properties": {
+    "fileType": {
+      "type": "integer",
+      "description": "Specifies the file type.",
+      "enum": [0, 1, 2, 3, 4],
+      "enumDescriptions": [
+        "photoshop",
+        "sketch",
+        "adobe xd",
+        "figma",
+        "adobe illustrator"
+      ]
+    },
+    "fileName": {
+      "type": "string",
+      "description": "Specifies the path to the input design file. The encoding format is utf-8."
+    },
+    "artboard": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Artboard"
+      }
+    },
+    "patternLayerDef": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PatternLayerDef"
+      }
+    },
+    "symbolMaster": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/SymbolMaster"
+      }
+    }
+  },
+  "additionalProperties": false
+}

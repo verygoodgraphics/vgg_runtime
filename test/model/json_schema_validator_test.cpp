@@ -3,11 +3,11 @@
 #include "JsonSchemaValidator.hpp"
 
 using json = nlohmann::json;
-using nlohmann::json_schema::json_validator;
 
-void validate(JsonSchemaValidator& sut,
-              const std::string& schema_file_name,
-              const std::string& json_file_name);
+void validate_by_filename(JsonSchemaValidator& sut,
+                          const std::string& schema_file_name,
+                          const std::string& json_file_name,
+                          const bool expect_result);
 
 class VggJsonSchemaValitatorTestSuite : public ::testing::Test
 {
@@ -23,53 +23,20 @@ protected:
   }
 };
 
-TEST_F(VggJsonSchemaValitatorTestSuite, smoke)
+TEST_F(VggJsonSchemaValitatorTestSuite, GoodCase)
 {
-  // Given
-  // Copy from https://github.com/pboettch/json-schema-validator/tree/2.2.0
-  json person_schema = R"(
-{
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "A person",
-    "properties": {
-        "name": {
-            "description": "Name",
-            "type": "string"
-        },
-        "age": {
-            "description": "Age of the person",
-            "type": "number",
-            "minimum": 2,
-            "maximum": 200
-        }
-    },
-    "required": [
-                 "name",
-                 "age"
-                 ],
-    "type": "object"
+  validate_by_filename(sut, "./testDataDir/vgg-format.json", "./testDataDir/2020.json", true);
 }
 
-)"_json;
-
-  json bad_person = { { "age", 42 } };
-  json good_person = { { "name", "Albert" }, { "age", 42 } };
-
-  sut.setRootSchema(person_schema);
-
-  // When && Then
-  EXPECT_EQ(false, sut.validate(bad_person));
-  EXPECT_EQ(true, sut.validate(good_person));
-}
-
-TEST_F(VggJsonSchemaValitatorTestSuite, withFileName)
+TEST_F(VggJsonSchemaValitatorTestSuite, BadTargetJson)
 {
-  validate(sut, "./testDataDir/vgg-format.json", "./testDataDir/2020.json");
+  validate_by_filename(sut, "./testDataDir/vgg-format.json", "./testDataDir/2020_bad.json", false);
 }
 
-void validate(JsonSchemaValidator& sut,
-              const std::string& schema_file_name,
-              const std::string& json_file_name)
+void validate_by_filename(JsonSchemaValidator& sut,
+                          const std::string& schema_file_name,
+                          const std::string& json_file_name,
+                          const bool expect_result)
 {
   // Given
   std::ifstream schema_fs(schema_file_name);
@@ -81,5 +48,5 @@ void validate(JsonSchemaValidator& sut,
   sut.setRootSchema(schema);
 
   // When && Then
-  EXPECT_EQ(true, sut.validate(json_data));
+  EXPECT_EQ(expect_result, sut.validate(json_data));
 }

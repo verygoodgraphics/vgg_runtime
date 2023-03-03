@@ -21,7 +21,7 @@ else()
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_CURRENT_SOURCE_DIR}/testDataDir $<TARGET_FILE_DIR:unit_tests>/testDataDir)
 
-  target_link_libraries(unit_tests PRIVATE vgg_solution gtest_main)
+  target_link_libraries(unit_tests PRIVATE vgg_internal gtest_main)
   include(GoogleTest)
   gtest_discover_tests(unit_tests)
 endif()

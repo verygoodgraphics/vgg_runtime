@@ -4,6 +4,8 @@
 
 using json = nlohmann::json;
 
+#define VGG_JSON_SCHEMA_FILE_NAME "./asset/vgg-format.json"
+
 void validate_by_filename(JsonSchemaValidator& sut,
                           const std::string& schema_file_name,
                           const std::string& json_file_name,
@@ -25,12 +27,12 @@ protected:
 
 TEST_F(VggJsonSchemaValitatorTestSuite, GoodCase)
 {
-  validate_by_filename(sut, "./testDataDir/vgg-format.json", "./testDataDir/2020.json", true);
+  validate_by_filename(sut, VGG_JSON_SCHEMA_FILE_NAME, "./testDataDir/2020.json", true);
 }
 
 TEST_F(VggJsonSchemaValitatorTestSuite, BadTargetJson)
 {
-  validate_by_filename(sut, "./testDataDir/vgg-format.json", "./testDataDir/2020_bad.json", false);
+  validate_by_filename(sut, VGG_JSON_SCHEMA_FILE_NAME, "./testDataDir/2020_bad.json", false);
 }
 
 void validate_by_filename(JsonSchemaValidator& sut,

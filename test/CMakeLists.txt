@@ -11,8 +11,9 @@ else()
   FetchContent_MakeAvailable(googletest)
 
   add_executable(unit_tests
-    model/json_schema_validator_test.cpp
     model/automerge_test.cpp
+    model/document_model_test.cpp
+    model/json_schema_validator_test.cpp
   )
   target_include_directories(unit_tests PRIVATE
     model 

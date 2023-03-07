@@ -20,12 +20,12 @@ private:
   valijson::Validator validator_;
   valijson::Schema schema_;
   std::map<std::string, std::string> classTitleMap_;
-  std::map<std::string, valijson::Subschema*> titleSubschemaMap_;
+  std::map<std::string, const valijson::Subschema*> classSubschemaMap_;
 
-  void processSchemaJsonAndSetupMap(nlohmann::json& schemaJson);
+  void preProcessSchemaAndSetupMap(nlohmann::json& schemaJson);
   void setRootSchemaInternal(const nlohmann::json& schemaJson);
   bool validate(const valijson::Subschema* subschema, const nlohmann::json& targetDocument);
-  valijson::Subschema* getSubschemaByClassName(const std::string& className);
+  const valijson::Subschema* getSubschemaByClassName(const std::string& className);
 };
 
 #endif

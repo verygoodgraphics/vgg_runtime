@@ -6,14 +6,8 @@ using json = nlohmann::json;
 
 #define VGG_JSON_SCHEMA_FILE_NAME "./asset/vgg-format.json"
 
-void validate_by_filename(JsonSchemaValidator& sut,
-                          const std::string& schema_file_name,
-                          const std::string& json_file_name,
-                          const bool expect_result);
-
 class VggJsonSchemaValitatorTestSuite : public ::testing::Test
 {
-
 protected:
   JsonSchemaValidator sut;
 
@@ -23,32 +17,53 @@ protected:
   void TearDown() override
   {
   }
+
+  void setRootSchemaByFileName(const std::string& schema_file_name)
+  {
+    json schema = load_json(schema_file_name);
+    sut.setRootSchema(schema);
+  }
+
+  json load_json(const std::string& json_file_name)
+  {
+    std::ifstream json_fs(json_file_name);
+    json json_data = json::parse(json_fs);
+
+    return json_data;
+  }
+
+  void validate_by_filename(const std::string& json_file_name, const bool expect_result)
+  {
+    // Given
+    json json_data = load_json(json_file_name);
+
+    // When && Then
+    EXPECT_EQ(expect_result, sut.validate(json_data));
+  }
 };
 
 TEST_F(VggJsonSchemaValitatorTestSuite, GoodCase)
 {
-  validate_by_filename(sut, VGG_JSON_SCHEMA_FILE_NAME, "./testDataDir/2020.json", true);
+  setRootSchemaByFileName(VGG_JSON_SCHEMA_FILE_NAME);
+  validate_by_filename("./testDataDir/2020.json", true);
 }
 
 TEST_F(VggJsonSchemaValitatorTestSuite, BadTargetJson)
 {
-  validate_by_filename(sut, VGG_JSON_SCHEMA_FILE_NAME, "./testDataDir/2020_bad.json", false);
+  setRootSchemaByFileName(VGG_JSON_SCHEMA_FILE_NAME);
+  validate_by_filename("./testDataDir/2020_bad.json", false);
 }
 
-void validate_by_filename(JsonSchemaValidator& sut,
-                          const std::string& schema_file_name,
-                          const std::string& json_file_name,
-                          const bool expect_result)
+TEST_F(VggJsonSchemaValitatorTestSuite, ValidateByClassName)
 {
   // Given
-  std::ifstream schema_fs(schema_file_name);
-  std::ifstream json_fs(json_file_name);
+  setRootSchemaByFileName(VGG_JSON_SCHEMA_FILE_NAME);
+  json json_data = load_json("./testDataDir/color.json");
+  std::string class_name = "color";
 
-  json schema = json::parse(schema_fs);
-  json json_data = json::parse(json_fs);
+  // When
+  auto result = sut.validate(class_name, json_data);
 
-  sut.setRootSchema(schema);
-
-  // When && Then
-  EXPECT_EQ(expect_result, sut.validate(json_data));
+  // Then
+  EXPECT_EQ(result, true);
 }

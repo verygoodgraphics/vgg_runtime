@@ -4,6 +4,8 @@
 #include "nlohmann/json.hpp"
 #include "valijson_nlohmann_bundled.hpp"
 
+#include <map>
+
 class JsonSchemaValidator
 {
 public:
@@ -11,11 +13,19 @@ public:
   ~JsonSchemaValidator();
 
   void setRootSchema(const nlohmann::json& schemaJson);
-  bool validate(const nlohmann::json& targetJson);
+  bool validate(const nlohmann::json& targetDocument);
+  bool validate(const std::string& className, const nlohmann::json& targetDocument);
 
 private:
   valijson::Validator validator_;
   valijson::Schema schema_;
+  std::map<std::string, std::string> classTitleMap_;
+  std::map<std::string, valijson::Subschema*> titleSubschemaMap_;
+
+  void processSchemaJsonAndSetupMap(nlohmann::json& schemaJson);
+  void setRootSchemaInternal(const nlohmann::json& schemaJson);
+  bool validate(const valijson::Subschema* subschema, const nlohmann::json& targetDocument);
+  valijson::Subschema* getSubschemaByClassName(const std::string& className);
 };
 
 #endif

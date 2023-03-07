@@ -20,7 +20,7 @@ private:
   Automerge doc_;
   JsonSchemaValidator validator_;
 
-  void validate();
+  bool validate(const json& document, const json::json_pointer& path);
   void save();
 };
 

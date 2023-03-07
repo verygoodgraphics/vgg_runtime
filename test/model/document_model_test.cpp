@@ -45,3 +45,23 @@ TEST_F(DocumentModelTestSuite, EditColor)
 
   EXPECT_EQ(new_value, value);
 }
+
+TEST_F(DocumentModelTestSuite, ChangeColorToInvalidValue)
+{
+  // Given
+  const auto path = "/artboard/0/layers/0/childObjects/0/style/borders/0/color/alpha"_json_pointer;
+
+  try
+  {
+    // When
+    sut->deleteAt(path);
+  }
+  catch (std::exception& e)
+  {
+    // Then
+    GTEST_SUCCEED();
+    return;
+  }
+
+  GTEST_FAIL();
+}

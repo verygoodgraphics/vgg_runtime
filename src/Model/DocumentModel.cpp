@@ -19,20 +19,44 @@ DocumentModel::~DocumentModel()
 
 void DocumentModel::addAt(const json::json_pointer& path, const json& value)
 {
-  validate();
-  doc_.json_add(path, value);
+  auto tmp_document = documentJson();
+  tmp_document[path] = value;
+  if (validate(tmp_document, path))
+  {
+    doc_.json_add(path, value);
+  }
+  else
+  {
+    throw std::logic_error("Invalid value");
+  }
 }
 
 void DocumentModel::replaceAt(const json::json_pointer& path, const json& value)
 {
-  validate();
-  doc_.json_replace(path, value);
+  auto tmp_document = documentJson();
+  tmp_document[path] = value;
+  if (validate(tmp_document, path))
+  {
+    doc_.json_replace(path, value);
+  }
+  else
+  {
+    throw std::logic_error("Invalid value");
+  }
 }
 
 void DocumentModel::deleteAt(const json::json_pointer& path)
 {
-  validate();
-  doc_.json_delete(path);
+  auto tmp_document = documentJson();
+  tmp_document.at(path.parent_pointer()).erase(path.back());
+  if (validate(tmp_document, path))
+  {
+    doc_.json_delete(path);
+  }
+  else
+  {
+    throw std::logic_error("Invalid value");
+  }
 }
 
 json DocumentModel::documentJson()
@@ -40,8 +64,10 @@ json DocumentModel::documentJson()
   return doc_;
 }
 
-void DocumentModel::validate()
+bool DocumentModel::validate(const json& document, const json::json_pointer& path)
 {
+  // todo: validate by class name
+  return validator_.validate(document);
 }
 
 void DocumentModel::save()

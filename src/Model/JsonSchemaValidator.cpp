@@ -23,7 +23,7 @@ void JsonSchemaValidator::setRootSchema(const nlohmann::json& schemaJson)
 
 bool JsonSchemaValidator::validate(const nlohmann::json& targetDocument)
 {
-  return validate(&schema_, targetDocument);
+  return validate(&m_schema, targetDocument);
 }
 
 bool JsonSchemaValidator::validate(const std::string& className,
@@ -42,7 +42,7 @@ bool JsonSchemaValidator::validate(const valijson::Subschema* subschema,
 
   ValidationResults results;
   NlohmannJsonAdapter targetDocumentAdapter(targetDocument);
-  if (!validator_.validate(*subschema, targetDocumentAdapter, &results))
+  if (!m_validator.validate(*subschema, targetDocumentAdapter, &results))
   {
     ValidationResults::Error error;
     unsigned int errorNum = 1;
@@ -71,18 +71,18 @@ const valijson::Subschema* JsonSchemaValidator::getSubschemaByClassName(
 {
   try
   {
-    auto result = classSubschemaMap_.at(className);
+    auto result = m_classSubschemaMap.at(className);
     return result;
   }
   catch (std::out_of_range)
   {
     try
     {
-      auto& title = classTitleMap_.at(className);
-      auto item = schema_.getSubschemaByTitle(title);
+      auto& title = m_classTitleMap.at(className);
+      auto item = m_schema.getSubschemaByTitle(title);
       if (item)
       {
-        classSubschemaMap_[className] = item;
+        m_classSubschemaMap[className] = item;
       }
       return item;
     }
@@ -97,7 +97,8 @@ void JsonSchemaValidator::preProcessSchemaAndSetupMap(nlohmann::json& schemaJson
 {
   auto& defination_object = schemaJson["definitions"];
 
-  classTitleMap_.clear();
+  m_classTitleMap.clear();
+  m_classSubschemaMap.clear();
   for (auto it = defination_object.begin(); it != defination_object.end(); ++it)
   {
     if (it.value().is_object())
@@ -111,7 +112,7 @@ void JsonSchemaValidator::preProcessSchemaAndSetupMap(nlohmann::json& schemaJson
 
         // save to class:title map
         auto class_name = class_name_json.get<std::string>();
-        classTitleMap_[class_name] = new_title;
+        m_classTitleMap[class_name] = new_title;
       }
     }
   }
@@ -123,7 +124,7 @@ void JsonSchemaValidator::setRootSchemaInternal(const nlohmann::json& schemaJson
   NlohmannJsonAdapter schemaDocumentAdapter(schemaJson);
   try
   {
-    parser.populateSchema(schemaDocumentAdapter, schema_);
+    parser.populateSchema(schemaDocumentAdapter, m_schema);
   }
   catch (std::exception& e)
   {

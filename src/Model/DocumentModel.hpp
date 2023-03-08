@@ -14,11 +14,11 @@ public:
   void replaceAt(const json::json_pointer& path, const json& value);
   void deleteAt(const json::json_pointer& path);
 
-  json documentJson();
+  json documentJson() const;
 
 private:
-  Automerge doc_;
-  JsonSchemaValidator validator_;
+  Automerge m_doc;
+  JsonSchemaValidator m_validator;
 
   bool validate(const json& document, const json::json_pointer& path);
   void save();

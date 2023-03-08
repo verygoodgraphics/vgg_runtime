@@ -4,7 +4,7 @@
 #include "nlohmann/json.hpp"
 #include "valijson_nlohmann_bundled.hpp"
 
-#include <map>
+#include <unordered_map>
 
 class JsonSchemaValidator
 {
@@ -17,10 +17,10 @@ public:
   bool validate(const std::string& className, const nlohmann::json& targetDocument);
 
 private:
-  valijson::Validator validator_;
-  valijson::Schema schema_;
-  std::map<std::string, std::string> classTitleMap_;
-  std::map<std::string, const valijson::Subschema*> classSubschemaMap_;
+  valijson::Validator m_validator;
+  valijson::Schema m_schema;
+  std::unordered_map<std::string, std::string> m_classTitleMap;
+  std::unordered_map<std::string, const valijson::Subschema*> m_classSubschemaMap;
 
   void preProcessSchemaAndSetupMap(nlohmann::json& schemaJson);
   void setRootSchemaInternal(const nlohmann::json& schemaJson);

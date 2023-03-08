@@ -4,10 +4,10 @@
 
 DocumentModel::DocumentModel(const nlohmann::json& schema, const nlohmann::json& document)
 {
-  validator_.setRootSchema(schema);
-  if (validator_.validate(document))
+  m_validator.setRootSchema(schema);
+  if (m_validator.validate(document))
   {
-    from_json(document, doc_);
+    from_json(document, m_doc);
   }
   else
   {
@@ -25,7 +25,7 @@ void DocumentModel::addAt(const json::json_pointer& path, const json& value)
   tmp_document[path] = value;
   if (validate(tmp_document, path.parent_pointer()))
   {
-    doc_.json_add(path, value);
+    m_doc.json_add(path, value);
   }
   else
   {
@@ -39,7 +39,7 @@ void DocumentModel::replaceAt(const json::json_pointer& path, const json& value)
   tmp_document[path] = value;
   if (validate(tmp_document, path.parent_pointer()))
   {
-    doc_.json_replace(path, value);
+    m_doc.json_replace(path, value);
   }
   else
   {
@@ -53,7 +53,7 @@ void DocumentModel::deleteAt(const json::json_pointer& path)
   tmp_document.at(path.parent_pointer()).erase(path.back());
   if (validate(tmp_document, path.parent_pointer()))
   {
-    doc_.json_delete(path);
+    m_doc.json_delete(path);
   }
   else
   {
@@ -61,9 +61,9 @@ void DocumentModel::deleteAt(const json::json_pointer& path)
   }
 }
 
-json DocumentModel::documentJson()
+json DocumentModel::documentJson() const
 {
-  return doc_;
+  return m_doc;
 }
 
 bool DocumentModel::validate(const json& document, const json::json_pointer& path)
@@ -82,7 +82,7 @@ bool DocumentModel::validate(const json& document, const json::json_pointer& pat
           if (class_json.is_string())
           {
             auto class_name = class_json.get<std::string>();
-            return validator_.validate(class_name, json_to_validate);
+            return m_validator.validate(class_name, json_to_validate);
           }
         }
         catch (json::type_error& e)
@@ -99,7 +99,7 @@ bool DocumentModel::validate(const json& document, const json::json_pointer& pat
   }
 
   WARN("#DocumentModel::validate: fallback, validate whole document");
-  return validator_.validate(document);
+  return m_validator.validate(document);
 }
 
 void DocumentModel::save()

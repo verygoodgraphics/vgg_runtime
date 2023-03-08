@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 #include <memory>
+#include <iostream>
 
 using namespace nlohmann;
 
@@ -34,7 +35,29 @@ TEST_F(DocumentModelTestSuite, Smoke)
   EXPECT_TRUE(sut);
 }
 
-TEST_F(DocumentModelTestSuite, EditColor)
+TEST_F(DocumentModelTestSuite, Add_ChangeColorToInvalidValue)
+{
+  // Given
+  const auto path =
+    "/artboard/0/layers/0/childObjects/0/style/borders/0/color/badfield"_json_pointer;
+
+  try
+  {
+    // When
+    sut->addAt(path, "aValue");
+  }
+  catch (std::exception& e)
+  {
+    std::cout << "Test Add_ChangeColorToInvalidValue, excetion: " << e.what() << std::endl;
+    // Then
+    GTEST_SUCCEED();
+    return;
+  }
+
+  GTEST_FAIL();
+}
+
+TEST_F(DocumentModelTestSuite, Replace_ValidValue)
 {
   const auto path = "/artboard/0/layers/0/childObjects/0/style/borders/0/color/alpha"_json_pointer;
   const auto value = 0.1;
@@ -46,7 +69,7 @@ TEST_F(DocumentModelTestSuite, EditColor)
   EXPECT_EQ(new_value, value);
 }
 
-TEST_F(DocumentModelTestSuite, ChangeColorToInvalidValue)
+TEST_F(DocumentModelTestSuite, Delete_ChangeColorToInvalidValue)
 {
   // Given
   const auto path = "/artboard/0/layers/0/childObjects/0/style/borders/0/color/alpha"_json_pointer;
@@ -58,6 +81,7 @@ TEST_F(DocumentModelTestSuite, ChangeColorToInvalidValue)
   }
   catch (std::exception& e)
   {
+    std::cout << "Test ChangeColorToInvalidValue, excetion: " << e.what() << std::endl;
     // Then
     GTEST_SUCCEED();
     return;

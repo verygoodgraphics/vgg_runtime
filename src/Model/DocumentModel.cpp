@@ -21,39 +21,59 @@ DocumentModel::~DocumentModel()
 
 void DocumentModel::addAt(const json::json_pointer& path, const json& value)
 {
-  auto tmp_document = documentJson();
-  tmp_document[path] = value;
-  if (validate(tmp_document, path.parent_pointer()))
-  {
-    m_doc.json_add(path, value);
-  }
-  else
-  {
-    throw std::logic_error("Invalid value");
-  }
+  editTemplate(
+    path,
+    value,
+    [](json& tmp_document, json::json_pointer& relative_path, const json& cb_value)
+    { tmp_document[relative_path] = cb_value; },
+    [](Automerge& cb_doc, const json::json_pointer& cb_path, const json& cb_value)
+    { cb_doc.json_add(cb_path, cb_value); });
 }
 
 void DocumentModel::replaceAt(const json::json_pointer& path, const json& value)
 {
-  auto tmp_document = documentJson();
-  tmp_document[path] = value;
-  if (validate(tmp_document, path.parent_pointer()))
-  {
-    m_doc.json_replace(path, value);
-  }
-  else
-  {
-    throw std::logic_error("Invalid value");
-  }
+  editTemplate(
+    path,
+    value,
+    [](json& tmp_document, json::json_pointer& relative_path, const json& cb_value)
+    { tmp_document[relative_path] = cb_value; },
+    [](Automerge& cb_doc, const json::json_pointer& cb_path, const json& cb_value)
+    { cb_doc.json_replace(cb_path, cb_value); });
 }
 
 void DocumentModel::deleteAt(const json::json_pointer& path)
 {
-  auto tmp_document = documentJson();
-  tmp_document.at(path.parent_pointer()).erase(path.back());
-  if (validate(tmp_document, path.parent_pointer()))
+  auto stub_value = documentJson();
+  editTemplate(
+    path,
+    stub_value,
+    [](json& tmp_document, json::json_pointer& relative_path, const json& cb_value)
+    { tmp_document.at(relative_path.parent_pointer()).erase(relative_path.back()); },
+    [](Automerge& cb_doc, const json::json_pointer& cb_path, const json& cb_value)
+    { cb_doc.json_delete(cb_path); });
+}
+
+const json& DocumentModel::documentJson() const
+{
+  return m_doc.json_const_ref();
+}
+
+void DocumentModel::editTemplate(
+  const json::json_pointer& path,
+  const json& value,
+  std::function<void(json&, json::json_pointer&, const json&)> tryEditFn,
+  std::function<void(Automerge&, const json::json_pointer&, const json&)> editFn)
+{
+  auto ancestor_path = getNearestHavingClassAncestorPath(path);
+  auto tmp_document = documentJson()[ancestor_path];
+
+  json::json_pointer relative_path;
+  calculateRelativePath(ancestor_path, path, relative_path);
+
+  tryEditFn(tmp_document, relative_path, value);
+  if (validateHavingClassDocument(tmp_document))
   {
-    m_doc.json_delete(path);
+    editFn(m_doc, path, value);
   }
   else
   {
@@ -61,37 +81,12 @@ void DocumentModel::deleteAt(const json::json_pointer& path)
   }
 }
 
-json DocumentModel::documentJson() const
-{
-  return m_doc;
-}
-
-bool DocumentModel::validate(const json& document, const json::json_pointer& path)
+bool DocumentModel::validateHavingClassDocument(const json& document)
 {
   try
   {
-    auto path_to_validate = path;
-    do
-    {
-      auto json_to_validate = document[path_to_validate];
-      if (json_to_validate.is_object())
-      {
-        try
-        {
-          auto class_json = json_to_validate["class"];
-          if (class_json.is_string())
-          {
-            auto class_name = class_json.get<std::string>();
-            return m_validator.validate(class_name, json_to_validate);
-          }
-        }
-        catch (json::type_error& e)
-        {
-          WARN("#DocumentModel::validate: no class field, error: %d, %s", e.id, e.what());
-        }
-      }
-      path_to_validate = path_to_validate.parent_pointer();
-    } while (true);
+    auto class_name = document["class"].get<std::string>();
+    return m_validator.validate(class_name, document);
   }
   catch (json::type_error& e)
   {
@@ -100,6 +95,46 @@ bool DocumentModel::validate(const json& document, const json::json_pointer& pat
 
   WARN("#DocumentModel::validate: fallback, validate whole document");
   return m_validator.validate(document);
+}
+
+const json::json_pointer DocumentModel::getNearestHavingClassAncestorPath(
+  const json::json_pointer& editPath) const
+{
+  const auto& document = documentJson();
+  try
+  {
+    auto ancestor_path = editPath.parent_pointer();
+    do
+    {
+      auto& ancestor_json = document[ancestor_path];
+      if (ancestor_json.is_object() && ancestor_json.contains("class") &&
+          ancestor_json["class"].is_string())
+      {
+        return ancestor_path;
+      }
+      ancestor_path = ancestor_path.parent_pointer();
+    } while (true);
+  }
+  catch (json::type_error& e)
+  {
+    WARN("#DocumentModel::getNearestAncestorHavingClass: error: %d, %s", e.id, e.what());
+  }
+
+  WARN("#DocumentModel::getNearestAncestorHavingClass: return root path");
+  return "/"_json_pointer;
+}
+
+void DocumentModel::calculateRelativePath(const json::json_pointer& ancestorPath,
+                                          const json::json_pointer& currentPath,
+                                          json::json_pointer& relativePath)
+{
+  if (currentPath == ancestorPath)
+  {
+    return;
+  }
+  auto& current = currentPath.back();
+  calculateRelativePath(ancestorPath, currentPath.parent_pointer(), relativePath);
+  relativePath.push_back(current);
 }
 
 void DocumentModel::save()

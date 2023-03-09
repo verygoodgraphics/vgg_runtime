@@ -24,7 +24,7 @@ private:
                     const json& value,
                     std::function<void(json&, json::json_pointer&, const json&)> tryEditFn,
                     std::function<void(Automerge&, const json::json_pointer&, const json&)> editFn);
-  bool validateHavingClassDocument(const json& document);
+  bool validateDocument(const json& document);
   const json::json_pointer getNearestHavingClassAncestorPath(
     const json::json_pointer& editPath) const;
   void calculateRelativePath(const json::json_pointer& ancestorPath,

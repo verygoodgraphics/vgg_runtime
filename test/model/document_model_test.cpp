@@ -79,7 +79,7 @@ TEST_F(DocumentModelTestSuite, Delete_ChangeColorToInvalidValue)
     // When
     sut->deleteAt(path);
   }
-  catch (std::exception& e)
+  catch (std::logic_error& e)
   {
     std::cout << "Test ChangeColorToInvalidValue, excetion: " << e.what() << std::endl;
     // Then

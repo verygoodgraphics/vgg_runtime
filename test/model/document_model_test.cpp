@@ -69,6 +69,18 @@ TEST_F(DocumentModelTestSuite, Replace_ValidValue)
   EXPECT_EQ(new_value, value);
 }
 
+TEST_F(DocumentModelTestSuite, Replace_Filetype)
+{
+  const auto path = "/fileType"_json_pointer;
+  const auto value = 1;
+  sut->replaceAt(path, value);
+
+  const auto document = sut->documentJson();
+  const auto new_value = document[path];
+
+  EXPECT_EQ(new_value, value);
+}
+
 TEST_F(DocumentModelTestSuite, Delete_ChangeColorToInvalidValue)
 {
   // Given

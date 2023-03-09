@@ -2,6 +2,8 @@
 
 #include "Utils/Utils.hpp"
 
+constexpr auto const_class_name = "class";
+
 DocumentModel::DocumentModel(const nlohmann::json& schema, const nlohmann::json& document)
 {
   m_validator.setRootSchema(schema);
@@ -71,7 +73,7 @@ void DocumentModel::editTemplate(
   calculateRelativePath(ancestor_path, path, relative_path);
 
   tryEditFn(tmp_document, relative_path, value);
-  if (validateHavingClassDocument(tmp_document))
+  if (validateDocument(tmp_document))
   {
     editFn(m_doc, path, value);
   }
@@ -81,20 +83,19 @@ void DocumentModel::editTemplate(
   }
 }
 
-bool DocumentModel::validateHavingClassDocument(const json& document)
+bool DocumentModel::validateDocument(const json& document)
 {
-  try
+  if (document.is_object() && document.contains(const_class_name) &&
+      document[const_class_name].is_string())
   {
-    auto class_name = document["class"].get<std::string>();
+    auto class_name = document[const_class_name].get<std::string>();
     return m_validator.validate(class_name, document);
   }
-  catch (json::type_error& e)
+  else
   {
-    WARN("#DocumentModel::validate: error: %d, %s", e.id, e.what());
+    WARN("#DocumentModel::validate: fallback, validate whole document");
+    return m_validator.validate(document);
   }
-
-  WARN("#DocumentModel::validate: fallback, validate whole document");
-  return m_validator.validate(document);
 }
 
 const json::json_pointer DocumentModel::getNearestHavingClassAncestorPath(
@@ -107,10 +108,14 @@ const json::json_pointer DocumentModel::getNearestHavingClassAncestorPath(
     do
     {
       auto& ancestor_json = document[ancestor_path];
-      if (ancestor_json.is_object() && ancestor_json.contains("class") &&
-          ancestor_json["class"].is_string())
+      if (ancestor_json.is_object() && ancestor_json.contains(const_class_name) &&
+          ancestor_json[const_class_name].is_string())
       {
         return ancestor_path;
+      }
+      if (ancestor_path.empty())
+      {
+        break;
       }
       ancestor_path = ancestor_path.parent_pointer();
     } while (true);
@@ -121,7 +126,7 @@ const json::json_pointer DocumentModel::getNearestHavingClassAncestorPath(
   }
 
   WARN("#DocumentModel::getNearestAncestorHavingClass: return root path");
-  return "/"_json_pointer;
+  return ""_json_pointer;
 }
 
 void DocumentModel::calculateRelativePath(const json::json_pointer& ancestorPath,

@@ -45,7 +45,7 @@ protected:
 TEST_F(VggJsonSchemaValitatorTestSuite, GoodCase)
 {
   setRootSchemaByFileName(VGG_JSON_SCHEMA_FILE_NAME);
-  validate_by_filename("./testDataDir/2020.json", true);
+  validate_by_filename("./testDataDir/1_out_json.json", true);
 }
 
 TEST_F(VggJsonSchemaValitatorTestSuite, BadTargetJson)

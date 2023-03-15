@@ -7,7 +7,7 @@
 using namespace nlohmann;
 
 #define JSON_SCHEMA_FILE_NAME "./asset/vgg-format.json"
-#define DOCUMENT_FILE_NAME "./testDataDir/2020.json"
+#define DOCUMENT_FILE_NAME "./testDataDir/1_out_json.json"
 
 class DocumentModelTestSuite : public ::testing::Test
 {

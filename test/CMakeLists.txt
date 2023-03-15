@@ -12,6 +12,7 @@ else()
 
   add_executable(unit_tests
     model/automerge_test.cpp
+    model/design_document_model_test.cpp
     model/document_model_test.cpp
     model/json_schema_validator_test.cpp
   )

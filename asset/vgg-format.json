@@ -12,18 +12,17 @@
       "type": "object",
       "required": [
         "alphaMaskBy",
+        "bounds",
         "class",
         "contextSettings",
         "frame",
         "hasBackgroundColor",
         "id",
-        "isFlippedHorizontal",
-        "isFlippedVertical",
         "isLocked",
         "isMask",
         "layers",
+        "matrix",
         "outlineMaskBy",
-        "rotation",
         "style",
         "visible"
       ],
@@ -52,23 +51,17 @@
           "$ref": "#/definitions/Style",
           "description": "Object styles descriptor."
         },
+        "bounds": {
+          "$ref": "#/definitions/Rect",
+          "description": " This property records the bounds information of the object before it is matrixed. For example, In adobe illustrator, the top left coordinate of an image is always 0, So the relationship of the bounds frame matrix is as follows: { (0, 0), (width, 0), (width, -height), (0, -height) } + matrix_transformation = frame. "
+        },
         "frame": {
           "$ref": "#/definitions/Rect",
-          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask."
+          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask. This property stores information about the object after the matrix transformation."
         },
-        "rotation": {
-          "type": "number",
-          "maximum": 180,
-          "minimum": -180,
-          "description": "Rotation of the object in degrees."
-        },
-        "isFlippedVertical": {
-          "type": "boolean",
-          "description": "Vertical flip transformation flag. Flip around the Y-axis centered on the object."
-        },
-        "isFlippedHorizontal": {
-          "type": "boolean",
-          "description": "Horizontal flip transformation flag. Flip around the X-axis centered on the object."
+        "matrix": {
+          "$ref": "#/definitions/Matrix",
+          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
         },
         "alphaMaskBy": {
           "type": "array",
@@ -135,53 +128,20 @@
         },
         "transparencyKnockoutGroup": {
           "type": "integer",
-          "description": "In a transparency knockout group, the elements of a group don't show through each other.",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["OFF", "ON", "Neutral"]
+          "description": " In a transparency knockout group, the elements of a group don't show through each other. 0: OFF 1: ON 2: Neutral "
         }
       },
       "additionalProperties": false
     },
     "BlendMode": {
       "title": "Blend Mode",
-      "description": "Blend mode of the object.",
       "type": "integer",
       "enum": [
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
         20, 21, 22, 23, 24, 25, 26, 27, 28, 29
       ],
-      "enumDescriptions": [
-        "Normal",
-        "Darken",
-        "Multiply",
-        "Color burn",
-        "Lighten",
-        "Screen",
-        "Color dodge",
-        "Overlay",
-        "Soft light",
-        "Hard light",
-        "Difference",
-        "Exclusion",
-        "Hue",
-        "Saturation",
-        "Color",
-        "Luminosity",
-        "Plus darker",
-        "Plus lighter",
-        "Blend divide",
-        "Blend subtraction",
-        "Darker color",
-        "Dissolve",
-        "Hard mix",
-        "Lighter color",
-        "Lighten burn",
-        "Lighten dodge",
-        "Lighten light",
-        "Pass through",
-        "Pin Light",
-        "Vivid light"
-      ],
+      "description": " Blend mode of the object. 0: Normal 1: Darken 2: Multiply 3: Color burn 4: Lighten 5: Screen 6: Color dodge 7: Overlay 8: Soft light 9: Hard light 10: Difference 11: Exclusion 12: Hue 13: Saturation 14: Color 15: Luminosity 16: Plus darker 17: Plus lighter 18: Blend divide 19: Blend subtraction 20: Darker color 21: Dissolve 22: Hard mix 23: Lighter color 24: Lighten burn 25: Lighten dodge 26: Lighten light 27: Pass through 28: Pin Light 29: Vivid light ",
       "$id": "#BlendMode"
     },
     "UnitInterval": {
@@ -284,9 +244,8 @@
         },
         "style": {
           "type": "integer",
-          "description": "Type of the border style, the dashed style is further specified in dashedOffset and dashedPattern",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["solid", "dotted", "dashed"]
+          "description": " Type of the border style, the dashed style is further specified in dashedOffset and dashedPattern. 0: solid 1: dotted 2: dashed "
         },
         "dashedPattern": {
           "type": "array",
@@ -345,18 +304,16 @@
     },
     "FillType": {
       "title": "Fill Type",
-      "description": "Enumeration of the fill types.",
       "type": "integer",
       "enum": [0, 1, 2],
-      "enumDescriptions": ["Color", "Gradient", "Pattern"],
+      "description": " Enumeration of the fill types. 0: Color 1: Gradient 2: Pattern ",
       "$id": "#FillType"
     },
     "BorderPosition": {
       "title": "Border Position",
-      "description": "Enumeration of border positions.",
       "type": "integer",
       "enum": [0, 1, 2],
-      "enumDescriptions": ["Center", "Inside", "Outside"],
+      "description": " Enumeration of border positions. 0: Center 1: Inside 2: Outside ",
       "$id": "#BorderPosition"
     },
     "Gradient": {
@@ -537,7 +494,7 @@
         "gradientType": {
           "type": "integer",
           "enum": [0, 1],
-          "enumDescriptions": ["linear gradient", "radial gradient"]
+          "description": " 0: linear gradient 1: radial gradient "
         },
         "stops": {
           "type": "array",
@@ -570,10 +527,7 @@
               "flag": {
                 "type": "integer",
                 "enum": [0, 1],
-                "enumDescriptions": [
-                  "specifies a gradient fill between two colors.",
-                  "specifies solid colors at either end of a linear gradient fill, known as gradient caps.It doesn't exist in radial gradient."
-                ]
+                "description": " 0: specifies a gradient fill between two colors. 1: specifies solid colors at either end of a linear gradient fill, known as gradient caps.It doesn't exist in radial gradient. "
               },
               "matrix": {
                 "$ref": "#/definitions/Matrix"
@@ -607,13 +561,8 @@
         },
         "flag": {
           "type": "integer",
-          "description": "This argument defines how the gradient will be rendered.For simple filled paths, flag takes the value 1.",
           "enum": [0, 1, 2],
-          "enumDescriptions": [
-            "Do not issue a clip.",
-            "Issue a clip.",
-            "Disable rendering."
-          ]
+          "description": " This argument defines how the gradient will be rendered.For simple filled paths, flag takes the value 1. 0: Do not issue a clip. 1: Issue a clip. 2: Disable rendering. "
         },
         "xOrigin": {
           "type": "number",
@@ -741,17 +690,9 @@
     },
     "PatternFillType": {
       "title": "Pattern Fill Type",
-      "description": "Enumeration of pattern fill types.",
       "type": "integer",
       "enum": [0, 1, 2, 3, 4, 5],
-      "enumDescriptions": [
-        "Tile",
-        "Fill",
-        "Stretch",
-        "Fit",
-        "Tile only horizontal",
-        "Tile only vertical"
-      ],
+      "description": " Enumeration of pattern fill types. 0: Tile 1: Fill 2: Stretch 3: Fit 4: Tile only horizontal 5: Tile only vertical ",
       "$id": "#PatternFillType"
     },
     "PatternLayerInstance": {
@@ -816,18 +757,16 @@
     },
     "LineCapStyle": {
       "title": "Line Cap Style",
-      "description": "Enumeration of the line cap styles.",
       "type": "integer",
       "enum": [0, 1, 2],
-      "enumDescriptions": ["Butt", "Round", "square"],
+      "description": " Enumeration of the line cap styles. 0: Butt 1: Round 2: square ",
       "$id": "#LineCapStyle"
     },
     "LineJoinStyle": {
       "title": "Line Join Style",
-      "description": "Enumeration of the line join styles.",
       "type": "integer",
       "enum": [0, 1, 2],
-      "enumDescriptions": ["Miter", "Round", "Bevel"],
+      "description": " Enumeration of the line join styles. 0: Miter 1: Round 2: Bevel ",
       "$id": "#LineJoinStyle"
     },
     "Fill": {
@@ -898,10 +837,9 @@
     },
     "BlurType": {
       "title": "Blur Type",
-      "description": "Enumeration of the various blur types.",
       "type": "integer",
       "enum": [0, 1, 2, 3],
-      "enumDescriptions": ["Gaussian", "Motion", "Zoom", "Background"],
+      "description": " Enumeration of the various blur types. 0: Gaussian 1: Motion 2: Zoom 3: Background ",
       "$id": "#BlurType"
     },
     "Shadow": {
@@ -1012,7 +950,7 @@
         "alphaType": {
           "type": "integer",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["alpha", "luminosity", "inverse-luminosity"]
+          "description": " 0: alpha         1: luminosity 2: inverse-luminosity "
         },
         "crop": {
           "type": "boolean",
@@ -1028,17 +966,16 @@
       "type": "object",
       "required": [
         "alphaMaskBy",
+        "bounds",
         "childObjects",
         "class",
         "contextSettings",
         "frame",
         "id",
-        "isFlippedHorizontal",
-        "isFlippedVertical",
         "isLocked",
         "isMask",
+        "matrix",
         "outlineMaskBy",
-        "rotation",
         "style",
         "visible"
       ],
@@ -1067,23 +1004,17 @@
           "$ref": "#/definitions/Style",
           "description": "Object styles descriptor."
         },
+        "bounds": {
+          "$ref": "#/definitions/Rect",
+          "description": " This property records the bounds information of the object before it is matrixed. For example, In adobe illustrator, the top left coordinate of an image is always 0, So the relationship of the bounds frame matrix is as follows: { (0, 0), (width, 0), (width, -height), (0, -height) } + matrix_transformation = frame. "
+        },
         "frame": {
           "$ref": "#/definitions/Rect",
-          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask."
+          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask. This property stores information about the object after the matrix transformation."
         },
-        "rotation": {
-          "type": "number",
-          "maximum": 180,
-          "minimum": -180,
-          "description": "Rotation of the object in degrees."
-        },
-        "isFlippedVertical": {
-          "type": "boolean",
-          "description": "Vertical flip transformation flag. Flip around the Y-axis centered on the object."
-        },
-        "isFlippedHorizontal": {
-          "type": "boolean",
-          "description": "Horizontal flip transformation flag. Flip around the X-axis centered on the object."
+        "matrix": {
+          "$ref": "#/definitions/Matrix",
+          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
         },
         "alphaMaskBy": {
           "type": "array",
@@ -1139,16 +1070,15 @@
       "type": "object",
       "required": [
         "alphaMaskBy",
+        "bounds",
         "class",
         "contextSettings",
         "frame",
         "id",
-        "isFlippedHorizontal",
-        "isFlippedVertical",
         "isLocked",
         "isMask",
+        "matrix",
         "outlineMaskBy",
-        "rotation",
         "shape",
         "style",
         "visible"
@@ -1178,23 +1108,17 @@
           "$ref": "#/definitions/Style",
           "description": "Object styles descriptor."
         },
+        "bounds": {
+          "$ref": "#/definitions/Rect",
+          "description": " This property records the bounds information of the object before it is matrixed. For example, In adobe illustrator, the top left coordinate of an image is always 0, So the relationship of the bounds frame matrix is as follows: { (0, 0), (width, 0), (width, -height), (0, -height) } + matrix_transformation = frame. "
+        },
         "frame": {
           "$ref": "#/definitions/Rect",
-          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask."
+          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask. This property stores information about the object after the matrix transformation."
         },
-        "rotation": {
-          "type": "number",
-          "maximum": 180,
-          "minimum": -180,
-          "description": "Rotation of the object in degrees."
-        },
-        "isFlippedVertical": {
-          "type": "boolean",
-          "description": "Vertical flip transformation flag. Flip around the Y-axis centered on the object."
-        },
-        "isFlippedHorizontal": {
-          "type": "boolean",
-          "description": "Horizontal flip transformation flag. Flip around the X-axis centered on the object."
+        "matrix": {
+          "$ref": "#/definitions/Matrix",
+          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
         },
         "alphaMaskBy": {
           "type": "array",
@@ -1243,9 +1167,8 @@
         },
         "windingRule": {
           "type": "integer",
-          "description": "The value describes the shape's 'winding rule' (policy determining how overlapping contours fill an area).",
           "enum": [0, 1],
-          "enumDescriptions": ["non-zero", "even-odd"]
+          "description": " The value describes the shape's 'winding rule' (policy determining how overlapping contours fill an area). 0: non-zero 1: even-odd "
         }
       },
       "additionalProperties": false
@@ -1258,11 +1181,10 @@
       "required": [
         "class",
         "subGeometry",
-        "frame",
         "booleanOperation",
-        "rotation",
-        "isFlippedVertical",
-        "isFlippedHorizontal"
+        "bounds",
+        "frame",
+        "matrix"
       ],
       "properties": {
         "class": {
@@ -1285,34 +1207,22 @@
             }
           ]
         },
-        "frame": {
-          "$ref": "#/definitions/Rect"
-        },
         "booleanOperation": {
           "type": "integer",
-          "description": "Boolean operation combining this and next-in-the-array path.",
           "enum": [0, 1, 2, 3, 4],
-          "enumDescriptions": [
-            "union",
-            "subtraction",
-            "intersecion",
-            "exclusion",
-            "none"
-          ]
+          "description": " Boolean operation combining this and next-in-the-array path. 0: union 1: subtraction 2: intersecion 3: exclusion 4: none "
         },
-        "rotation": {
-          "type": "number",
-          "maximum": 180,
-          "minimum": -180,
-          "description": "Rotation of the object in degrees. Value of rotation in degrees."
+        "bounds": {
+          "$ref": "#/definitions/Rect",
+          "description": " This property records the bounds information of the object before it is matrixed. For example, In adobe illustrator, the top left coordinate of an image is always 0, So the relationship of the bounds frame matrix is as follows: { (0, 0), (width, 0), (width, -height), (0, -height) } + matrix_transformation = frame. "
         },
-        "isFlippedVertical": {
-          "type": "boolean",
-          "description": "Vertical flip transformation flag. Flip around the Y-axis centered on the object."
+        "frame": {
+          "$ref": "#/definitions/Rect",
+          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask. This property stores information about the object after the matrix transformation."
         },
-        "isFlippedHorizontal": {
-          "type": "boolean",
-          "description": "Horizontal flip transformation flag. Flip around the X-axis centered on the object."
+        "matrix": {
+          "$ref": "#/definitions/Matrix",
+          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
         }
       },
       "additionalProperties": false
@@ -1352,9 +1262,8 @@
         },
         "pointType": {
           "type": "integer",
-          "description": "Describes a type of the point.",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["simple point", "quad", "cubic"]
+          "description": " Describes a type of the point. 0: simple point 1: quad 2: cubic "
         },
         "radius": {
           "type": "number",
@@ -1378,19 +1287,17 @@
       "required": [
         "alphaMaskBy",
         "attr",
+        "bounds",
         "class",
         "content",
         "contextSettings",
         "frame",
         "frameMode",
-        "geometry",
         "id",
-        "isFlippedHorizontal",
-        "isFlippedVertical",
         "isLocked",
         "isMask",
+        "matrix",
         "outlineMaskBy",
-        "rotation",
         "style",
         "verticalAlignment",
         "visible"
@@ -1420,23 +1327,17 @@
           "$ref": "#/definitions/Style",
           "description": "Object styles descriptor."
         },
+        "bounds": {
+          "$ref": "#/definitions/Rect",
+          "description": " This property records the bounds information of the object before it is matrixed. For example, In adobe illustrator, the top left coordinate of an image is always 0, So the relationship of the bounds frame matrix is as follows: { (0, 0), (width, 0), (width, -height), (0, -height) } + matrix_transformation = frame. "
+        },
         "frame": {
           "$ref": "#/definitions/Rect",
-          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask."
+          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask. This property stores information about the object after the matrix transformation."
         },
-        "rotation": {
-          "type": "number",
-          "maximum": 180,
-          "minimum": -180,
-          "description": "Rotation of the object in degrees."
-        },
-        "isFlippedVertical": {
-          "type": "boolean",
-          "description": "Vertical flip transformation flag. Flip around the Y-axis centered on the object."
-        },
-        "isFlippedHorizontal": {
-          "type": "boolean",
-          "description": "Horizontal flip transformation flag. Flip around the X-axis centered on the object."
+        "matrix": {
+          "$ref": "#/definitions/Matrix",
+          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
         },
         "alphaMaskBy": {
           "type": "array",
@@ -1463,27 +1364,19 @@
           "type": "string",
           "description": "Text content of the text object. The encoding format is utf-8."
         },
-        "geometry": {
-          "oneOf": [
-            {
-              "$ref": "#/definitions/TextOnPath"
-            },
-            {
-              "$ref": "#/definitions/TextTransformMatrix"
-            }
-          ]
+        "textOnPath": {
+          "$ref": "#/definitions/TextOnPath",
+          "description": "If this item exists, the text is on the path and the matrix information for the text should not be used."
         },
         "frameMode": {
           "type": "integer",
-          "description": "Specifies the text frame semantics. fixed mode strictly sets the typeset area according to the frame. auto width and auto height mode expands associated bounds as needed.",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["fixed", "auto width", "auto height"]
+          "description": " Specifies the text frame semantics. fixed mode strictly sets the typeset area according to the frame. auto width and auto height mode expands associated bounds as needed. 0: fixed 1: auto width 2: auto height "
         },
         "verticalAlignment": {
           "type": "integer",
-          "description": "Text vertical alignment.",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["top", "center", "bottom"]
+          "description": " Text vertical alignment. 0: top 1: center 2: bottom "
         },
         "attr": {
           "type": "array",
@@ -1514,22 +1407,6 @@
           "description": "The percentage of the text's starting position on the path.",
           "maximum": 1,
           "minimum": 0
-        }
-      },
-      "additionalProperties": false
-    },
-    "TextTransformMatrix": {
-      "title": "Text Transform Matrix",
-      "type": "object",
-      "$id": "#TextTransformMatrix",
-      "required": ["class", "matrix"],
-      "properties": {
-        "class": {
-          "const": "textTransformMatrix"
-        },
-        "matrix": {
-          "$ref": "#/definitions/Matrix",
-          "description": "Text Matrix, as defined in PostScript Language Reference Manual, Second Edition. Original location information (given clockwise from top left): (0, 0), (width, 0), (width, -height), (0, -height)."
         }
       },
       "additionalProperties": false
@@ -1585,9 +1462,8 @@
         },
         "horizontalAlignment": {
           "type": "integer",
-          "description": "Horizontal alignment of the text.",
           "enum": [0, 1, 2, 3],
-          "enumDescriptions": ["left", "center", "right", "justify"]
+          "description": " Horizontal alignment of the text. 0: left 1: center 2: right 3: justify "
         },
         "name": {
           "type": "string",
@@ -1615,9 +1491,8 @@
         },
         "underline": {
           "type": "integer",
-          "description": "Text underline type.",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["none", "single line", "double line"]
+          "description": " Text underline type. 0: none 1: single line 2: double line "
         },
         "linethrough": {
           "type": "boolean",
@@ -1634,12 +1509,7 @@
         "lettertransform": {
           "type": "integer",
           "enum": [0, 1, 2, 3],
-          "enumDescriptions": [
-            "do nothing.",
-            "open smallcaps.",
-            "open uppercase.",
-            "open lowercase."
-          ]
+          "description": " 0: do nothing 1: open smallcaps 2: open uppercase 3: open lowercase "
         },
         "baselineShift": {
           "type": "number",
@@ -1647,9 +1517,8 @@
         },
         "baseline": {
           "type": "integer",
-          "description": "Describes baseline's position type.",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["normal", "superScript", "subScript"]
+          "description": " Describes baseline's position type. 0: normal 1: superScript 2: subScript "
         },
         "horizontalScale": {
           "type": "number",
@@ -1700,18 +1569,16 @@
       "type": "object",
       "required": [
         "alphaMaskBy",
+        "bounds",
         "class",
         "contextSettings",
         "frame",
         "id",
         "imageFileName",
-        "imageMatrix",
-        "isFlippedHorizontal",
-        "isFlippedVertical",
         "isLocked",
         "isMask",
+        "matrix",
         "outlineMaskBy",
-        "rotation",
         "style",
         "visible"
       ],
@@ -1740,23 +1607,17 @@
           "$ref": "#/definitions/Style",
           "description": "Object styles descriptor."
         },
+        "bounds": {
+          "$ref": "#/definitions/Rect",
+          "description": " This property records the bounds information of the object before it is matrixed. For example, In adobe illustrator, the top left coordinate of an image is always 0, So the relationship of the bounds frame matrix is as follows: { (0, 0), (width, 0), (width, -height), (0, -height) } + matrix_transformation = frame. "
+        },
         "frame": {
           "$ref": "#/definitions/Rect",
-          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask."
+          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask. This property stores information about the object after the matrix transformation."
         },
-        "rotation": {
-          "type": "number",
-          "maximum": 180,
-          "minimum": -180,
-          "description": "Rotation of the object in degrees."
-        },
-        "isFlippedVertical": {
-          "type": "boolean",
-          "description": "Vertical flip transformation flag. Flip around the Y-axis centered on the object."
-        },
-        "isFlippedHorizontal": {
-          "type": "boolean",
-          "description": "Horizontal flip transformation flag. Flip around the X-axis centered on the object."
+        "matrix": {
+          "$ref": "#/definitions/Matrix",
+          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
         },
         "alphaMaskBy": {
           "type": "array",
@@ -1782,10 +1643,6 @@
         "imageFileName": {
           "type": "string",
           "description": "The relative path to the image file (utf-8)."
-        },
-        "imageMatrix": {
-          "$ref": "#/definitions/Matrix",
-          "description": "Image Matrix, as defined in PostScript Language Reference Manual, Second Edition. Original location information (given clockwise from top left): (0, 0), (width, 0), (width, -height), (0, -height)."
         }
       },
       "additionalProperties": false
@@ -1797,17 +1654,16 @@
       "$id": "#SymbolInstance",
       "required": [
         "alphaMaskBy",
+        "bounds",
         "class",
         "contextSettings",
         "frame",
         "id",
-        "isFlippedHorizontal",
-        "isFlippedVertical",
         "isLocked",
         "isMask",
+        "matrix",
         "outlineMaskBy",
         "overrideValues",
-        "rotation",
         "scale",
         "style",
         "symbolMasterId",
@@ -1838,23 +1694,17 @@
           "$ref": "#/definitions/Style",
           "description": "Object styles descriptor."
         },
+        "bounds": {
+          "$ref": "#/definitions/Rect",
+          "description": " This property records the bounds information of the object before it is matrixed. For example, In adobe illustrator, the top left coordinate of an image is always 0, So the relationship of the bounds frame matrix is as follows: { (0, 0), (width, 0), (width, -height), (0, -height) } + matrix_transformation = frame. "
+        },
         "frame": {
           "$ref": "#/definitions/Rect",
-          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask."
+          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask. This property stores information about the object after the matrix transformation."
         },
-        "rotation": {
-          "type": "number",
-          "maximum": 180,
-          "minimum": -180,
-          "description": "Rotation of the object in degrees."
-        },
-        "isFlippedVertical": {
-          "type": "boolean",
-          "description": "Vertical flip transformation flag. Flip around the Y-axis centered on the object."
-        },
-        "isFlippedHorizontal": {
-          "type": "boolean",
-          "description": "Horizontal flip transformation flag. Flip around the X-axis centered on the object."
+        "matrix": {
+          "$ref": "#/definitions/Matrix",
+          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
         },
         "alphaMaskBy": {
           "type": "array",
@@ -1960,8 +1810,7 @@
         },
         "_ref_class": {
           "type": "string",
-          "enum": ["MSImageData", "MSImmutablePage", "MSPatch"],
-          "enumDescriptions": ["MSImageData", "MSImmutablePage", "MSPatch"]
+          "enum": ["MSImageData", "MSImmutablePage", "MSPatch"]
         },
         "_ref": {
           "type": "string"
@@ -1981,8 +1830,7 @@
         },
         "_ref_class": {
           "type": "string",
-          "enum": ["MSImageData", "MSFontData"],
-          "enumDescriptions": ["MSImageData", "MSFontData"]
+          "enum": ["MSImageData", "MSFontData"]
         },
         "_ref": {
           "type": "string"
@@ -2017,17 +1865,16 @@
       "type": "object",
       "required": [
         "alphaMaskBy",
+        "bounds",
         "childObjects",
         "class",
         "contextSettings",
         "frame",
         "id",
-        "isFlippedHorizontal",
-        "isFlippedVertical",
         "isLocked",
         "isMask",
+        "matrix",
         "outlineMaskBy",
-        "rotation",
         "style",
         "visible"
       ],
@@ -2056,23 +1903,17 @@
           "$ref": "#/definitions/Style",
           "description": "Object styles descriptor."
         },
+        "bounds": {
+          "$ref": "#/definitions/Rect",
+          "description": " This property records the bounds information of the object before it is matrixed. For example, In adobe illustrator, the top left coordinate of an image is always 0, So the relationship of the bounds frame matrix is as follows: { (0, 0), (width, 0), (width, -height), (0, -height) } + matrix_transformation = frame. "
+        },
         "frame": {
           "$ref": "#/definitions/Rect",
-          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask."
+          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask. This property stores information about the object after the matrix transformation."
         },
-        "rotation": {
-          "type": "number",
-          "maximum": 180,
-          "minimum": -180,
-          "description": "Rotation of the object in degrees."
-        },
-        "isFlippedVertical": {
-          "type": "boolean",
-          "description": "Vertical flip transformation flag. Flip around the Y-axis centered on the object."
-        },
-        "isFlippedHorizontal": {
-          "type": "boolean",
-          "description": "Horizontal flip transformation flag. Flip around the X-axis centered on the object."
+        "matrix": {
+          "$ref": "#/definitions/Matrix",
+          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
         },
         "alphaMaskBy": {
           "type": "array",
@@ -2128,18 +1969,17 @@
       "type": "object",
       "required": [
         "alphaMaskBy",
+        "bounds",
         "childObjects",
         "class",
         "contextSettings",
         "frame",
         "id",
-        "isFlippedHorizontal",
-        "isFlippedVertical",
         "isLocked",
         "isMask",
+        "matrix",
         "outlineMaskBy",
         "pattern_bounding_box",
-        "rotation",
         "style",
         "visible"
       ],
@@ -2168,23 +2008,17 @@
           "$ref": "#/definitions/Style",
           "description": "Object styles descriptor."
         },
+        "bounds": {
+          "$ref": "#/definitions/Rect",
+          "description": " This property records the bounds information of the object before it is matrixed. For example, In adobe illustrator, the top left coordinate of an image is always 0, So the relationship of the bounds frame matrix is as follows: { (0, 0), (width, 0), (width, -height), (0, -height) } + matrix_transformation = frame. "
+        },
         "frame": {
           "$ref": "#/definitions/Rect",
-          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask."
+          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask. This property stores information about the object after the matrix transformation."
         },
-        "rotation": {
-          "type": "number",
-          "maximum": 180,
-          "minimum": -180,
-          "description": "Rotation of the object in degrees."
-        },
-        "isFlippedVertical": {
-          "type": "boolean",
-          "description": "Vertical flip transformation flag. Flip around the Y-axis centered on the object."
-        },
-        "isFlippedHorizontal": {
-          "type": "boolean",
-          "description": "Horizontal flip transformation flag. Flip around the X-axis centered on the object."
+        "matrix": {
+          "$ref": "#/definitions/Matrix",
+          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
         },
         "alphaMaskBy": {
           "type": "array",
@@ -2249,19 +2083,18 @@
       "required": [
         "allowsOverrides",
         "alphaMaskBy",
+        "bounds",
         "childObjects",
         "contextSettings",
         "frame",
         "hasBackgroundColor",
         "id",
         "includeBackgroundColorInInstance",
-        "isFlippedHorizontal",
-        "isFlippedVertical",
         "isLocked",
         "isMask",
+        "matrix",
         "outlineMaskBy",
         "overrideProperties",
-        "rotation",
         "style",
         "visible"
       ],
@@ -2290,23 +2123,17 @@
           "$ref": "#/definitions/Style",
           "description": "Object styles descriptor."
         },
+        "bounds": {
+          "$ref": "#/definitions/Rect",
+          "description": " This property records the bounds information of the object before it is matrixed. For example, In adobe illustrator, the top left coordinate of an image is always 0, So the relationship of the bounds frame matrix is as follows: { (0, 0), (width, 0), (width, -height), (0, -height) } + matrix_transformation = frame. "
+        },
         "frame": {
           "$ref": "#/definitions/Rect",
-          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask."
+          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask. This property stores information about the object after the matrix transformation."
         },
-        "rotation": {
-          "type": "number",
-          "maximum": 180,
-          "minimum": -180,
-          "description": "Rotation of the object in degrees."
-        },
-        "isFlippedVertical": {
-          "type": "boolean",
-          "description": "Vertical flip transformation flag. Flip around the Y-axis centered on the object."
-        },
-        "isFlippedHorizontal": {
-          "type": "boolean",
-          "description": "Horizontal flip transformation flag. Flip around the X-axis centered on the object."
+        "matrix": {
+          "$ref": "#/definitions/Matrix",
+          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
         },
         "alphaMaskBy": {
           "type": "array",
@@ -2399,15 +2226,8 @@
   "properties": {
     "fileType": {
       "type": "integer",
-      "description": "Specifies the file type.",
       "enum": [0, 1, 2, 3, 4],
-      "enumDescriptions": [
-        "photoshop",
-        "sketch",
-        "adobe xd",
-        "figma",
-        "adobe illustrator"
-      ]
+      "description": " Specifies the file type. 0: photoshop 1: sketch 2: adobe xd 3: figma 4: adobe illustrator "
     },
     "fileName": {
       "type": "string",

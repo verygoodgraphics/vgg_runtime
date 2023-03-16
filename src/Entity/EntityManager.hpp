@@ -84,7 +84,8 @@ public:
     return entities->push(Entity{});
   }
 
-  static inline void map(std::function<void(Entity&)> fn)
+  template<typename F>
+  static inline void map(F&& fn)
   {
     auto entities = EntityManager::getInstance()->entities;
     ASSERT(entities);
@@ -94,7 +95,8 @@ public:
     }
   }
 
-  static inline void mapR(std::function<void(Entity&)> fn)
+  template<typename F>
+  static inline void mapR(F&& fn)
   {
     auto entities = EntityManager::getInstance()->entities;
     ASSERT(entities);
@@ -104,7 +106,8 @@ public:
     }
   }
 
-  static inline bool scan(std::function<bool(Entity&)> fn)
+  template<typename F>
+  static inline bool scan(F&& fn)
   {
     auto entities = EntityManager::getInstance()->entities;
     ASSERT(entities);
@@ -118,7 +121,8 @@ public:
     return false;
   }
 
-  static inline bool scanR(std::function<bool(Entity&)> fn)
+  template<typename F>
+  static inline bool scanR(F&& fn)
   {
     auto entities = EntityManager::getInstance()->entities;
     ASSERT(entities);

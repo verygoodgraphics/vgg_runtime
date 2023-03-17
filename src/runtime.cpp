@@ -151,12 +151,11 @@ public:
 
     m_sdlState.glContext = glContext;
 
+    // switch to this context
     if (makeContextCurrent() == false)
     {
       return false;
     }
-
-    // switch to this context
     INFO("GL_VENDOR: %s", glGetString(GL_VENDOR));
     INFO("GL_RENDERER: %s", glGetString(GL_RENDERER));
     INFO("GL_VERSION: %s", glGetString(GL_VERSION));
@@ -171,12 +170,13 @@ public:
     m_properties["viewport_h"] = dh;
     m_properties["window_w"] = ww;
     m_properties["window_h"] = wh;
+    m_properties["app_w"] = w;
+    m_properties["app_h"] = h;
     return true;
   }
 
   bool makeContextCurrent()
   {
-    WARN("makeContextCurrent");
     if (SDL_GL_MakeCurrent(m_sdlState.window, m_sdlState.glContext) != 0)
     {
       handle_sdl_error();

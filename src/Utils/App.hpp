@@ -47,36 +47,50 @@ namespace VGG
 /** App
  *
  * A singleton app class which provides:
- * 1. A single SDL window with OpenGL/ES context for skia.
+ * 1. A single OpenGL/ES context for skia.
  * 2. Auto pixel ratio support.
  * 3. Basic events support.
  *
+ * CRTP: the following methods must be implemented in T to integrate custome window manager
+ * bool initContext(int, int, const std::string&)
+ *     It should guarantee the GL context properly created.
+ *
+ * bool makeContextCurrent()
+ *     It should switch the GL context in current thread after invoke.
+ *
+ * std::any getProperty(const std::string &):
+ *         It should return the properties about the T 
+ *         "window_w" "window_h", "app_w", "app_h" "viewport_w" "viewport_h"
+ *
+ * void swapBuffer():
+ *         swaps the buffer
+ *
+ * void onInit():
+ *         Invoked after all init processes complete.
+ *
+ * void pollEvent():
+ *         It will be invoked in every frame to poll event.
+ *         dispatchEvent() and dispatchGlobalEvent() must be processed properly in pollEvent()
+ *
+ * SDL event struct is adopted as our event handler framework, sdl runtime is not necessary for App
+ *
  * NOTE:
  * It must be derived to use this class, and the singleton app
- * instance can be obtained by App::getIntance<DerivedApp>().
+ * instance can be obtained by App<DerivedApp>::getIntance<DerivedApp>().
  */
 
 template<typename T>
 class App : public Uncopyable
 {
-// CRTP:
-// T must be implementes the following methods
-// initContext
-// makeContextCurrent
-// getProperty
-// swapBuffer
-// onInit
-// pollEvent
-// and dispatchEvent and dispatchGlobalEvent must be called properly to in pollEvent
 private:
-  inline void initContext(int w, int h, const std::string& title)
+  inline bool initContext(int w, int h, const std::string& title)
   {
-    static_cast<T*>(this)->initContext(w, h, title);
+    return static_cast<T*>(this)->initContext(w, h, title);
   }
 
-  inline void makeContextCurrent()
+  inline bool makeContextCurrent()
   {
-    static_cast<T*>(this)->makeContextCurrent();
+    return static_cast<T*>(this)->makeContextCurrent();
   }
 
   inline std::any getProperty(const std::string& name)

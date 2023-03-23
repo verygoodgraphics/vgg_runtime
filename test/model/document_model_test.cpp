@@ -22,7 +22,10 @@ protected:
     std::ifstream document_fs(DOCUMENT_FILE_NAME);
     json document = json::parse(document_fs);
 
-    sut.reset(new DocumentModel(schema, document));
+    auto schema_validator = std::make_shared<JsonSchemaValidator>();
+    schema_validator->setRootSchema(schema);
+
+    sut.reset(new DocumentModel(schema_validator, document));
   }
 
   void TearDown() override

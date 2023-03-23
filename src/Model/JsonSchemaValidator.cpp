@@ -2,8 +2,6 @@
 
 #include "Utils/Utils.hpp"
 
-using namespace valijson;
-using namespace valijson::adapters;
 using nlohmann::json;
 
 JsonSchemaValidator::JsonSchemaValidator()
@@ -14,11 +12,10 @@ JsonSchemaValidator::~JsonSchemaValidator()
 {
 }
 
-void JsonSchemaValidator::setRootSchema(const nlohmann::json& schemaJson)
+void JsonSchemaValidator::setRootSchema(nlohmann::json& schemaJson)
 {
-  auto tmp_json = schemaJson;
-  preProcessSchemaAndSetupMap(tmp_json);
-  setRootSchemaInternal(tmp_json);
+  preProcessSchemaAndSetupMap(schemaJson);
+  setRootSchemaInternal(schemaJson);
 }
 
 bool JsonSchemaValidator::validate(const nlohmann::json& targetDocument)
@@ -40,11 +37,11 @@ bool JsonSchemaValidator::validate(const valijson::Subschema* subschema,
     return false;
   }
 
-  ValidationResults results;
-  NlohmannJsonAdapter targetDocumentAdapter(targetDocument);
+  valijson::ValidationResults results;
+  valijson::adapters::NlohmannJsonAdapter targetDocumentAdapter(targetDocument);
   if (!m_validator.validate(*subschema, targetDocumentAdapter, &results))
   {
-    ValidationResults::Error error;
+    valijson::ValidationResults::Error error;
     unsigned int errorNum = 1;
     while (results.popError(error))
     {
@@ -95,11 +92,11 @@ const valijson::Subschema* JsonSchemaValidator::getSubschemaByClassName(
 
 void JsonSchemaValidator::preProcessSchemaAndSetupMap(nlohmann::json& schemaJson)
 {
-  auto& defination_object = schemaJson["definitions"];
+  auto& definition_object = schemaJson["definitions"];
 
   m_classTitleMap.clear();
   m_classSubschemaMap.clear();
-  for (auto it = defination_object.begin(); it != defination_object.end(); ++it)
+  for (auto it = definition_object.begin(); it != definition_object.end(); ++it)
   {
     if (it.value().is_object())
     {
@@ -120,8 +117,8 @@ void JsonSchemaValidator::preProcessSchemaAndSetupMap(nlohmann::json& schemaJson
 
 void JsonSchemaValidator::setRootSchemaInternal(const nlohmann::json& schemaJson)
 {
-  SchemaParser parser;
-  NlohmannJsonAdapter schemaDocumentAdapter(schemaJson);
+  valijson::SchemaParser parser;
+  valijson::adapters::NlohmannJsonAdapter schemaDocumentAdapter(schemaJson);
   try
   {
     parser.populateSchema(schemaDocumentAdapter, m_schema);

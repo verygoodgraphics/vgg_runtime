@@ -4,10 +4,13 @@
 #include "Automerge.h"
 #include "JsonSchemaValidator.hpp"
 
+#include <memory>
+
 class DocumentModel
 {
 public:
-  DocumentModel(const nlohmann::json& schema, const nlohmann::json& document);
+  DocumentModel(std::shared_ptr<JsonSchemaValidator> schemaValidator,
+                const nlohmann::json& document);
   ~DocumentModel();
 
   void addAt(const json::json_pointer& path, const json& value);
@@ -18,7 +21,7 @@ public:
 
 private:
   Automerge m_doc;
-  JsonSchemaValidator m_validator;
+  std::shared_ptr<JsonSchemaValidator> m_validator;
 
   void editTemplate(const json::json_pointer& path,
                     const json& value,

@@ -12,7 +12,7 @@ public:
   JsonSchemaValidator();
   ~JsonSchemaValidator();
 
-  void setRootSchema(const nlohmann::json& schemaJson);
+  void setRootSchema(nlohmann::json& schemaJson);
   bool validate(const nlohmann::json& targetDocument);
   bool validate(const std::string& className, const nlohmann::json& targetDocument);
 

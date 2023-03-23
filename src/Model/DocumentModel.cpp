@@ -4,17 +4,11 @@
 
 constexpr auto const_class_name = "class";
 
-DocumentModel::DocumentModel(const nlohmann::json& schema, const nlohmann::json& document)
+DocumentModel::DocumentModel(std::shared_ptr<JsonSchemaValidator> schemaValidator,
+                             const nlohmann::json& document)
+  : m_validator(schemaValidator)
 {
-  m_validator.setRootSchema(schema);
-  if (m_validator.validate(document))
-  {
-    from_json(document, m_doc);
-  }
-  else
-  {
-    throw std::runtime_error("Invalid document");
-  }
+  from_json(document, m_doc);
 }
 
 DocumentModel::~DocumentModel()
@@ -89,12 +83,12 @@ bool DocumentModel::validateDocument(const json& document)
       document[const_class_name].is_string())
   {
     auto class_name = document[const_class_name].get<std::string>();
-    return m_validator.validate(class_name, document);
+    return m_validator->validate(class_name, document);
   }
   else
   {
     WARN("#DocumentModel::validate: fallback, validate whole document");
-    return m_validator.validate(document);
+    return m_validator->validate(document);
   }
 }
 
@@ -144,4 +138,5 @@ void DocumentModel::calculateRelativePath(const json::json_pointer& ancestorPath
 
 void DocumentModel::save()
 {
+  // todo: save to vgg backend
 }

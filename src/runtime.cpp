@@ -318,7 +318,7 @@ int main(int argc, char** argv)
     }
   }
 
-  SDLRuntime* app = App<SDLRuntime>::getInstance<SDLRuntime>(1200, 800, "VGG");
+  SDLRuntime* app = App<SDLRuntime>::getInstance(1200, 800, "VGG");
   ASSERT(app);
   if (auto fm = FileManager::getInstance(); fm && fm->fileCount() < 1)
   {

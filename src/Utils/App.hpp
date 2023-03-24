@@ -495,12 +495,11 @@ public: // public methods
   }
 
 public: // public static methods
-  template<typename DerivedApp>
-  static DerivedApp* getInstance(int w = 800, int h = 600, const std::string& title = "App")
+  static T* getInstance(int w = 800, int h = 600, const std::string& title = "App")
   {
-    static_assert(std::is_base_of<App<DerivedApp>, DerivedApp>());
+    static_assert(std::is_base_of<App<T>, T>());
 
-    static DerivedApp app;
+    static T app;
 
     // if already initialized, these init params are ignored
     if (!init(&app, w, h, title))

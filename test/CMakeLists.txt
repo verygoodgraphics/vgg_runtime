@@ -11,20 +11,22 @@ else()
   FetchContent_MakeAvailable(googletest)
 
   add_executable(unit_tests
+    exec/vgg_exec_test.cpp
     model/automerge_test.cpp
     model/design_document_model_test.cpp
     model/document_model_test.cpp
     model/json_schema_validator_test.cpp
   )
   target_include_directories(unit_tests PRIVATE
-    model 
+    mocks
+    model
   )
 
   add_custom_command(TARGET unit_tests POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/testDataDir $<TARGET_FILE_DIR:unit_tests>/testDataDir
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/asset $<TARGET_FILE_DIR:unit_tests>/asset)
 
-  target_link_libraries(unit_tests PRIVATE vgg_internal gtest_main)
+  target_link_libraries(unit_tests PRIVATE vgg_internal gtest_main gmock)
   include(GoogleTest)
   gtest_discover_tests(unit_tests)
 endif()

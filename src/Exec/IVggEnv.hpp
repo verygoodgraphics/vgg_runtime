@@ -2,10 +2,10 @@
 
 #include <string>
 
-class VggEnv
+class IVggEnv
 {
 public:
-  virtual ~VggEnv() = default;
+  virtual ~IVggEnv() = default;
 
   virtual const std::string getEnv() = 0;
 };

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "VggEnv.hpp"
+#include "IVggEnv.hpp"
 
 #include "gmock/gmock.h"
 
-class VggEnvMock : public VggEnv
+class VggEnvMock : public IVggEnv
 {
 public:
   MOCK_METHOD(const std::string, getEnv, (), (override));

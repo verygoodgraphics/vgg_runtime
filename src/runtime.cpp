@@ -25,6 +25,9 @@
 #include "Utils/FileManager.hpp"
 #include "Utils/Version.hpp"
 #include "Utils/Scheduler.hpp"
+#include "VggEnv.hpp"
+#include "VggExec.hpp"
+#include "NativeExec.hpp"
 
 using namespace VGG;
 
@@ -136,7 +139,8 @@ protected:
     }
 
     auto& panning = m_zoomer.panning;
-    if (!panning && type == SDL_MOUSEBUTTONDOWN && (SDL_GetKeyboardState(nullptr)[SDL_SCANCODE_SPACE]))
+    if (!panning && type == SDL_MOUSEBUTTONDOWN &&
+        (SDL_GetKeyboardState(nullptr)[SDL_SCANCODE_SPACE]))
     {
       panning = true;
       InputManager::setMouseCursor(MouseEntity::CursorType::MOVE);
@@ -223,6 +227,10 @@ extern "C"
 #else
 int main(int argc, char** argv)
 {
+  // exec demo. todo: move to right place
+  VggExec exec(std::make_shared<NativeExec>(), std::make_shared<VggEnv>());
+  exec.eval("1+1");
+
   argparse::ArgumentParser program("vgg", Version::get());
   program.add_argument("-l", "--load").help("load from vgg or sketch file");
   program.add_argument("-c", "--convert")

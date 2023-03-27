@@ -25,7 +25,7 @@ TEST_F(VggExecTestSuite, Smoke)
   auto mock_env = new VggEnvMock();
   auto mock_js_engine = new VggJSEngineMock();
 
-  std::shared_ptr<VggEnv> env_ptr;
+  std::shared_ptr<IVggEnv> env_ptr;
   std::shared_ptr<VggJSEngine> js_ptr;
   env_ptr.reset(mock_env);
   js_ptr.reset(mock_js_engine);

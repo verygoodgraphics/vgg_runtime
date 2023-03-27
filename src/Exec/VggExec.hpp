@@ -2,7 +2,7 @@
 #define __VGG_EXEC_H__
 
 #include "VggJSEngine.hpp"
-#include "VggEnv.hpp"
+#include "IVggEnv.hpp"
 
 #include <memory>
 #include <string>
@@ -10,7 +10,7 @@
 class VggExec
 {
 public:
-  VggExec(std::shared_ptr<VggJSEngine> jsEngine, std::shared_ptr<VggEnv> env)
+  VggExec(std::shared_ptr<VggJSEngine> jsEngine, std::shared_ptr<IVggEnv> env)
     : m_jsEngine(jsEngine)
     , m_env(env)
   {
@@ -21,7 +21,7 @@ public:
 
 private:
   std::shared_ptr<VggJSEngine> m_jsEngine;
-  std::shared_ptr<VggEnv> m_env;
+  std::shared_ptr<IVggEnv> m_env;
 };
 
 #endif

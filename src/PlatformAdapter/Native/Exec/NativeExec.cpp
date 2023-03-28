@@ -152,10 +152,9 @@ int NativeExecImpl::setup(int argc,
   {
     envHook(env);
   }
-  if (getScriptHook)
-  {
-    loadEnv(getScriptHook());
-  }
+
+  const char* script = getScriptHook ? getScriptHook() : "";
+  return loadEnv(script);
 }
 
 void NativeExecImpl::teardown()

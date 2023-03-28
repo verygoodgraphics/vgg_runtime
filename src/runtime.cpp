@@ -27,7 +27,11 @@
 #include "Utils/Scheduler.hpp"
 #include "VggEnv.hpp"
 #include "VggExec.hpp"
+#ifdef EMSCRIPTEN
+#include "BrowserJSEngine.hpp"
+#else
 #include "NativeExec.hpp"
+#endif
 
 using namespace VGG;
 
@@ -214,6 +218,10 @@ extern "C"
   }
   void emscripten_main(int width, int height)
   {
+    // // exec demo. todo: move to right place
+    // VggExec exec(std::make_shared<BrowserJSEngine>(), std::make_shared<VggEnv>());
+    // exec.eval("console.log('#eval: sum = ', 1+1)");
+
     Runtime* app = App::getInstance<Runtime>(width, height);
     ASSERT(app);
     if (auto fm = FileManager::getInstance(); fm && fm->fileCount() < 1)
@@ -227,9 +235,9 @@ extern "C"
 #else
 int main(int argc, char** argv)
 {
-  // exec demo. todo: move to right place
-  VggExec exec(std::make_shared<NativeExec>(), std::make_shared<VggEnv>());
-  exec.eval("console.log('#eval: sum = ', 1+1)");
+  // // exec demo. todo: move to right place
+  // VggExec exec(std::make_shared<NativeExec>(), std::make_shared<VggEnv>());
+  // exec.eval("console.log('#eval: sum = ', 1+1)");
 
   argparse::ArgumentParser program("vgg", Version::get());
   program.add_argument("-l", "--load").help("load from vgg or sketch file");

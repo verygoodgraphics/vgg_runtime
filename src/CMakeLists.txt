@@ -25,7 +25,14 @@ target_include_directories(vgg_internal PUBLIC
   ${VGG_CONTRIB_VALIJSON_INCLUDE}
 )
 target_link_libraries(vgg_internal automerge)
-if (NOT EMSCRIPTEN)
+if (EMSCRIPTEN)
+  target_sources(vgg_internal PRIVATE
+    PlatformAdapter/Browser/Exec/BrowserJSEngine.cpp
+  )
+  target_include_directories(vgg_internal PUBLIC
+    PlatformAdapter/Browser/Exec
+  )
+else()
   target_link_libraries(vgg_internal vgg_libnode)
   target_sources(vgg_internal PRIVATE
     PlatformAdapter/Native/Exec/NativeExec.cpp

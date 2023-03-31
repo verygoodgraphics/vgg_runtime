@@ -3,13 +3,13 @@
 
 #include <string_view>
 
-
-class VggJSEngine {
+class VggJSEngine
+{
 public:
   virtual ~VggJSEngine() = default;
-   
-  virtual bool eval(std::string_view buffer, const char *filename = "<eval>",
-            int flags = 0) = 0;
+
+  virtual bool evalScript(const std::string& code) = 0;
+  virtual bool evalModule(const std::string& code) = 0;
 };
 
 #endif

@@ -218,9 +218,44 @@ extern "C"
   }
   void emscripten_main(int width, int height)
   {
+    auto script_code = R"(
+    // [SyntaxError: await is only valid in async functions and the top level bodies of modules]
+// const vggModule = await import("http://s3.vgg.cool/test/js/vgg-sdk.esm.js");
+// console.log('#vggModule is: ', vggModule);
+
+// SyntaxError: Cannot use import statement outside a module
+// import { getVgg, getVggSdk, setVgg } from "http://s3.vgg.cool/test/js/vgg-sdk.esm.js";
+// console.log('#1, vgg is: ', getVgg());
+
+const vggSdkUrl = "http://s3.vgg.cool/test/js/vgg-sdk.esm.js";
+import(vggSdkUrl).then((container) => {
+  console.log('#dynamic import, setVgg');
+  container.setVgg("fakeVgg");
+
+  setTimeout(function () {
+    container.getVgg().then((vgg) => {
+      console.log('#dynamic import, vgg is: ', vgg);
+    });
+  }, 1000);
+});
+
+  )";
+
+    auto module_code1 = R"(
+const vggModule = await import("http://s3.vgg.cool/test/js/vgg-sdk.esm.js");
+console.log('#await import: vggModule is: ', vggModule);
+  )";
+
+    auto module_code2 = R"(
+import { getVgg, getVggSdk, setVgg } from "http://s3.vgg.cool/test/js/vgg-sdk.esm.js";
+console.log('#import http url, vgg is: ', getVgg());
+  )";
     // // exec demo. todo: move to right place
-    // VggExec exec(std::make_shared<BrowserJSEngine>(), std::make_shared<VggEnv>());
+    VggExec exec(std::make_shared<BrowserJSEngine>(), std::make_shared<VggEnv>());
     // exec.eval("console.log('#eval: sum = ', 1+1)");
+    exec.evalScript(script_code);
+    exec.evalModule(module_code1);
+    exec.evalModule(module_code2);
 
     Runtime* app = App::getInstance<Runtime>(width, height);
     ASSERT(app);

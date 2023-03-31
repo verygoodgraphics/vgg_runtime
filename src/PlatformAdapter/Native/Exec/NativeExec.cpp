@@ -49,9 +49,14 @@ NativeExec::~NativeExec()
   delete pImpl;
 }
 
-bool NativeExec::eval(std::string_view buffer, const char* filename, int flags)
+bool NativeExec::evalScript(const std::string& code)
 {
-  return 0 == pImpl->eval(buffer);
+  return 0 == pImpl->eval(code);
+}
+
+bool NativeExec::evalModule(const std::string& code)
+{
+  return 0 == pImpl->eval(code);
 }
 
 int NativeExecImpl::loadEnv(const char* script)
@@ -69,7 +74,10 @@ int NativeExecImpl::loadEnv(const char* script)
     HandleScope handle_scope(isolate);
     Context::Scope context_scope(setup_->context());
 
-    MaybeLocal<Value> loadenv_ret = node::LoadEnvironment(env, script);
+    const char* setup_require_script =
+      "const publicRequire = require('module').createRequire(process.cwd() + '/');"
+      "globalThis.require = publicRequire;";
+    MaybeLocal<Value> loadenv_ret = node::LoadEnvironment(env, setup_require_script);
     if (loadenv_ret.IsEmpty()) // There has been a JS exception.
       return 1;
 

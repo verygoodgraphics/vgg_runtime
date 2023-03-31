@@ -33,15 +33,15 @@ TEST_F(VggExecTestSuite, Smoke)
   VggExec sut(js_ptr, env_ptr);
 
   EXPECT_CALL(*mock_env, getEnv()).WillRepeatedly(Return("1"));
-  EXPECT_CALL(*mock_js_engine, eval(_, _, _)).WillOnce(Return(true)).WillOnce(Return(false));
+  EXPECT_CALL(*mock_js_engine, evalScript(_)).WillOnce(Return(true)).WillOnce(Return(false));
 
   // When
-  auto result = sut.eval("1");
+  auto result = sut.evalScript("1");
   // Then
   EXPECT_EQ(result, true);
 
   // When
-  result = sut.eval("1");
+  result = sut.evalScript("1");
   // Then
   EXPECT_EQ(result, false);
 }

@@ -16,7 +16,8 @@ public:
   NativeExec();
   ~NativeExec();
 
-  bool eval(std::string_view buffer, const char* filename, int flags);
+  bool evalScript(const std::string& code);
+  bool evalModule(const std::string& code);
 
   std::function<void(node::Environment*)> m_envDidLoad;
   std::function<const char*()> m_getInitScriptForEnv;

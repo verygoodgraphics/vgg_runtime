@@ -3,9 +3,17 @@
 
 #include "VggJSEngine.hpp"
 
-class BrowserJSEngine : public VggJSEngine {
+#include <string>
+
+class BrowserJSEngine : public VggJSEngine
+{
 public:
-  bool eval(std::string_view buffer, const char *filename, int flags);
+  bool evalScript(const std::string& code);
+  bool evalModule(const std::string& code);
+
+private:
+  std::string m_moduleWrapper;
+  std::string url_encode(const std::string& value);
 };
 
 #endif

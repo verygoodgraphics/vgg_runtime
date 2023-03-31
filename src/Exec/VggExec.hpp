@@ -17,11 +17,14 @@ public:
   }
   ~VggExec() = default;
 
-  bool eval(const std::string& program);
+  bool evalScript(const std::string& srcipt);
+  bool evalModule(const std::string& module);
 
 private:
   std::shared_ptr<VggJSEngine> m_jsEngine;
   std::shared_ptr<IVggEnv> m_env;
+
+  void setEnv();
 };
 
 #endif

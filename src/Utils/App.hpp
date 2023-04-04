@@ -53,24 +53,24 @@ namespace VGG
  *
  * CRTP: the following methods must be implemented in T to integrate custome window manager
  * bool initContext(int, int, const std::string&)
- *     It should guarantee the GL context properly created.
+ *	   It should guarantee the GL context properly created.
  *
  * bool makeContextCurrent()
- *     It should switch the GL context in current thread after invoke.
+ *	   It should switch the GL context in current thread after invoke.
  *
  * std::any getProperty(const std::string &):
- *         It should return the properties about the T 
- *         "window_w" "window_h", "app_w", "app_h" "viewport_w" "viewport_h"
+ *		   It should return the properties about the T
+ *		   "window_w" "window_h", "app_w", "app_h" "viewport_w" "viewport_h"
  *
  * void swapBuffer():
- *         swaps the buffer
+ *		   swaps the buffer
  *
  * void onInit():
- *         Invoked after all init processes complete.
+ *		   Invoked after all init processes complete.
  *
  * void pollEvent():
- *         It will be invoked in every frame to poll event.
- *         dispatchEvent() and dispatchGlobalEvent() must be processed properly in pollEvent()
+ *		   It will be invoked in every frame to poll event.
+ *		   dispatchEvent() and dispatchGlobalEvent() must be processed properly in pollEvent()
  *
  * SDL event struct is adopted as our event handler framework, sdl runtime is not necessary for App
  *
@@ -234,23 +234,7 @@ protected: // protected members and static members
     app->m_skiaState.interface = interface;
     app->m_skiaState.grContext = grContext;
 
-    // get skia surface and canvas
-    sk_sp<SkSurface> surface = app->setup_skia_surface(w, h);
-    if (!surface)
-    {
-      FAIL("Failed to make skia surface.");
-      return false;
-    }
-    app->m_skiaState.surface = surface;
-    SkCanvas* canvas = surface->getCanvas();
-    if (!canvas)
-    {
-      FAIL("Failed to get skia canvas.");
-      return false;
-    }
-
     // get necessary property about window and DPI
-    //
     int dw = std::any_cast<int>(app->getProperty("viewport_w"));
     int dh = std::any_cast<int>(app->getProperty("viewport_h"));
     int ww = std::any_cast<int>(app->getProperty("window_w"));
@@ -265,6 +249,21 @@ protected: // protected members and static members
 #endif
     DEBUG("Scale factor: %.2lf", DPI::ScaleFactor);
     DEBUG("Pixel ratio: %.2lf", app->m_pixelRatio);
+
+    // get skia surface and canvas
+    sk_sp<SkSurface> surface = app->setup_skia_surface(w, h);
+    if (!surface)
+    {
+      FAIL("Failed to make skia surface.");
+      return false;
+    }
+    app->m_skiaState.surface = surface;
+    SkCanvas* canvas = surface->getCanvas();
+    if (!canvas)
+    {
+      FAIL("Failed to get skia canvas.");
+      return false;
+    }
 
     // extra initialization
     app->onInit();
@@ -332,6 +331,8 @@ protected: // protected methods
     {
       int w = window.data1 / DPI::ScaleFactor;
       int h = window.data2 / DPI::ScaleFactor;
+
+      DEBUG("Window resizing: (%d %d)", w, h);
       m_skiaState.surface = setup_skia_surface(w, h);
       m_width = w;
       m_height = h;
@@ -463,7 +464,7 @@ public: // public methods
       return;
     }
 #if 0
-    INFO("frame %d", m_nFrame++);
+	INFO("frame %d", m_nFrame++);
 #endif
 
     pollEvent();

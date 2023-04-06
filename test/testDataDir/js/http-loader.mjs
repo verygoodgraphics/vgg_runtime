@@ -19,7 +19,6 @@ export function resolve(specifier, context, nextResolve) {
 }
 
 export function load(url, context, nextLoad) {
-  console.log('#load');
   if (url.startsWith('http://')) {
     return new Promise((resolve, reject) => {
       get(url, (rsp) => {

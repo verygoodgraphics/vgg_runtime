@@ -85,11 +85,42 @@ TEST(NodeTest, Internal_evalModule_enable_network_import)
   // undefined is not supported: http can only be used to load local resources (use https instead).
 }
 
-TEST(NodeTest, Internal_evalModule_custom_http_loader)
+TEST(NodeTest, Internal_evalModule_enable_network_import_local_http_url)
+{
+  GTEST_SKIP() << "Skipping local http url test";
+
+  auto code = R"(
+    const { evalModule } = require('internal/process/execution');
+    const code = 'import("http://localhost:8000/mjs/vgg-di-container.esm.js").then((theModule)=>{ console.log("#theModule is: ", theModule); })';
+    evalModule(code);
+  )";
+  const char* argv[] = { "", "--expose-internals", "--experimental-network-imports", code };
+  auto ret = call_main(4, const_cast<char**>(argv));
+  EXPECT_TRUE(0 == ret);
+}
+
+TEST(NodeTest, Internal_evalModule_custom_http_loader1)
 {
   auto code = R"(
     const { evalModule } = require('internal/process/execution');
-    const code = 'import("http://s3.vgg.cool/test/js/vgg-sdk.esm.js").then((theModule)=>{ console.log("#theModule is: ", theModule); })';
+    const code2 = 'import("http://s3.vgg.cool/test/js/vgg-sdk.esm.js").then((theModule)=>{ console.log("#theModule is: ", theModule); })';
+    evalModule(code2);
+  )";
+  const char* argv[] = { "",
+                         "--expose-internals",
+                         "--experimental-loader",
+                         "./testDataDir/js/http-loader.mjs",
+                         code };
+  auto ret = call_main(5, const_cast<char**>(argv));
+  EXPECT_TRUE(0 == ret);
+}
+
+TEST(NodeTest, Internal_evalModule_custom_http_loader_await_import)
+{
+  auto code = R"(
+    const { evalModule } = require('internal/process/execution');
+    const code = `const { getVgg, getVggSdk, setVgg } = await import("http://s3.vgg.cool/test/js/vgg-sdk.esm.js");
+console.log('#vgg is: ', getVgg());`
     evalModule(code);
   )";
   const char* argv[] = { "",

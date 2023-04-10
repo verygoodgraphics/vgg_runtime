@@ -30,9 +30,9 @@ struct NativeExecImpl;
 
 struct NativeEvalTask
 {
-  std::string code;
-  uv_async_t async_task;
-  NativeExecImpl* exec_impl_ptr;
+  std::string m_code;
+  uv_async_t m_async_task;
+  NativeExecImpl* m_exec_impl_ptr;
 
   void run();
 };

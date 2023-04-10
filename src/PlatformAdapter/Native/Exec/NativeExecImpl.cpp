@@ -18,21 +18,21 @@ bool NativeExecImpl::schedule_eval(const std::string& code)
   }
 
   NativeEvalTask* task = new NativeEvalTask();
-  task->code = code;
-  task->exec_impl_ptr = this;
+  task->m_code = code;
+  task->m_exec_impl_ptr = this;
 
   const std::lock_guard<std::mutex> lock(m_tasks_mutex);
   m_tasks.insert(task);
 
   uv_async_init(m_loop,
-                &task->async_task,
+                &task->m_async_task,
                 [](uv_async_t* async)
                 {
                   uv_close(reinterpret_cast<uv_handle_t*>(async), nullptr);
-                  NativeEvalTask* task = node::ContainerOf(&NativeEvalTask::async_task, async);
+                  NativeEvalTask* task = node::ContainerOf(&NativeEvalTask::m_async_task, async);
                   task->run();
                 });
-  uv_async_send(&task->async_task);
+  uv_async_send(&task->m_async_task);
 
   return true;
 }
@@ -232,7 +232,7 @@ void NativeExecImpl::stop_node_thread_safe()
 void NativeExecImpl::run_task(NativeEvalTask* task)
 {
   DEBUG("#evalScript, before eval");
-  eval(task->code);
+  eval(task->m_code);
   DEBUG("#evalScript, after eval");
 
   erase_task(task);
@@ -243,5 +243,5 @@ void NativeExecImpl::run_task(NativeEvalTask* task)
  */
 void NativeEvalTask::run()
 {
-  exec_impl_ptr->run_task(this);
+  m_exec_impl_ptr->run_task(this);
 }

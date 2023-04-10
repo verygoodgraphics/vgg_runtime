@@ -231,9 +231,9 @@ void NativeExecImpl::stop_node_thread_safe()
 
 void NativeExecImpl::run_task(NativeEvalTask* task)
 {
-  DEBUG("#evalScript, async, before eval");
+  DEBUG("#evalScript, before eval");
   eval(task->code);
-  DEBUG("#evalScript, async, after eval");
+  DEBUG("#evalScript, after eval");
 
   erase_task(task);
 }
@@ -243,13 +243,5 @@ void NativeExecImpl::run_task(NativeEvalTask* task)
  */
 void NativeEvalTask::run()
 {
-  // todo
-  // auto code = R"(
-  //   console.log('#log in uv async callback');
-  //   const { evalModule } = require('internal/process/execution');
-  //   const code = 'import("http://localhost:8000/mjs/vgg-di-container.esm.js").then((theModule)=>{
-  //   console.log("#theModule is: ", theModule); })'; evalModule(code);
-  //               )";
-
   exec_impl_ptr->run_task(this);
 }

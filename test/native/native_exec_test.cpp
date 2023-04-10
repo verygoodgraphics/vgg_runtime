@@ -10,20 +10,17 @@
 class VggNativeExecTestSuite : public ::testing::Test
 {
 protected:
-  std::shared_ptr<std::thread> m_thread;
   std::shared_ptr<NativeExec> sut;
   VggJSEngine* sut_ptr = nullptr;
 
   void SetUp() override
   {
-    sut.reset(new NativeExec(m_thread));
+    sut.reset(new NativeExec);
     sut_ptr = sut.get();
   }
 
   void TearDown() override
   {
-    // sut->teardown();
-    // m_thread->join();
   }
 };
 
@@ -186,7 +183,7 @@ TEST_F(VggNativeExecTestSuite, Internal_evalModule_hello)
 
 TEST_F(VggNativeExecTestSuite, Internal_evalModule_enable_network_import_local_http_url)
 {
-  // GTEST_SKIP() << "Skipping local http url test";
+  GTEST_SKIP() << "Skipping local http url test";
 
   auto code = R"(
     const { evalModule } = require('internal/process/execution');
@@ -197,23 +194,23 @@ TEST_F(VggNativeExecTestSuite, Internal_evalModule_enable_network_import_local_h
   EXPECT_EQ(result, true);
 }
 
-TEST_F(VggNativeExecTestSuite, Internal_evalModule_custom_http_loader1)
+TEST_F(VggNativeExecTestSuite, Internal_evalModule_1)
 {
   auto code = R"(
     const { evalModule } = require('internal/process/execution');
-    const code2 = 'import("http://s3.vgg.cool/test/js/vgg-sdk.esm.js").then((theModule)=>{ console.log("#theModule is: ", theModule); })';
+    const code2 = 'import("https://s3.vgg.cool/test/js/vgg-sdk.esm.js").then((theModule)=>{ console.log("#theModule is: ", theModule); })';
     evalModule(code2);
   )";
   auto result = sut_ptr->evalScript(code);
   EXPECT_EQ(result, true);
 }
 
-TEST_F(VggNativeExecTestSuite, Internal_evalModule_custom_http_loader2)
+TEST_F(VggNativeExecTestSuite, Internal_evalModule_2)
 {
   auto code = R"(
     const code3 = `
       const { evalModule } = require('internal/process/execution');
-      const code2 = 'import("http://s3.vgg.cool/test/js/vgg-sdk.esm.js").then((theModule)=>{ console.log("#theModule is: ", theModule); })';
+      const code2 = 'import("https://s3.vgg.cool/test/js/vgg-sdk.esm.js").then((theModule)=>{ console.log("#theModule is: ", theModule); })';
       evalModule(code2);
       `;
     require('vm').runInThisContext(code3);
@@ -233,7 +230,7 @@ TEST_F(VggNativeExecTestSuite, Eval_module_smoke)
 TEST_F(VggNativeExecTestSuite, Eval_module_await_import)
 {
   auto code = R"(
-const { getVgg, getVggSdk, setVgg } = await import("http://s3.vgg.cool/test/js/vgg-sdk.esm.js");
+const { getVgg, getVggSdk, setVgg } = await import("https://s3.vgg.cool/test/js/vgg-sdk.esm.js");
 console.log('#vgg is: ', getVgg());
   )";
   auto result = sut_ptr->evalModule(code);

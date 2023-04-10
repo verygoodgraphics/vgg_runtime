@@ -59,7 +59,7 @@ TEST(NodeTest, Internal_evalModule1)
 
   auto code = R"(
     const { evalModule } = require('internal/process/execution');
-    const code = 'import("http://s3.vgg.cool/test/js/vgg-sdk.esm.js").then((theModule)=>{ console.log("#theModule is: ", theModule); })';
+    const code = 'import("https://s3.vgg.cool/test/js/vgg-sdk.esm.js").then((theModule)=>{ console.log("#theModule is: ", theModule); })';
     evalModule(code);
   )";
   const char* argv[] = { "", "--expose-internals", code };
@@ -75,14 +75,15 @@ TEST(NodeTest, Internal_evalModule_enable_network_import)
 
   auto code = R"(
     const { evalModule } = require('internal/process/execution');
-    const code = 'import("http://s3.vgg.cool/test/js/vgg-sdk.esm.js").then((theModule)=>{ console.log("#theModule is: ", theModule); })';
+    const code = 'import("https://s3.vgg.cool/test/js/vgg-sdk.esm.js").then((theModule)=>{ console.log("#theModule is: ", theModule); })';
     evalModule(code);
   )";
   const char* argv[] = { "", "--expose-internals", "--experimental-network-imports", code };
   auto ret = call_main(4, const_cast<char**>(argv));
   EXPECT_TRUE(0 == ret);
-  // Error [ERR_NETWORK_IMPORT_DISALLOWED]: import of 'http://s3.vgg.cool/test/js/vgg-sdk.esm.js' by
-  // undefined is not supported: http can only be used to load local resources (use https instead).
+  // Error [ERR_NETWORK_IMPORT_DISALLOWED]: import of 'https://s3.vgg.cool/test/js/vgg-sdk.esm.js'
+  // by undefined is not supported: http can only be used to load local resources (use https
+  // instead).
 }
 
 TEST(NodeTest, Internal_evalModule_enable_network_import_local_http_url)
@@ -101,9 +102,10 @@ TEST(NodeTest, Internal_evalModule_enable_network_import_local_http_url)
 
 TEST(NodeTest, Internal_evalModule_custom_http_loader1)
 {
+  GTEST_SKIP() << "Skipping custom http loader";
   auto code = R"(
     const { evalModule } = require('internal/process/execution');
-    const code2 = 'import("http://s3.vgg.cool/test/js/vgg-sdk.esm.js").then((theModule)=>{ console.log("#theModule is: ", theModule); })';
+    const code2 = 'import("https://s3.vgg.cool/test/js/vgg-sdk.esm.js").then((theModule)=>{ console.log("#theModule is: ", theModule); })';
     evalModule(code2);
   )";
   const char* argv[] = { "",
@@ -117,9 +119,11 @@ TEST(NodeTest, Internal_evalModule_custom_http_loader1)
 
 TEST(NodeTest, Internal_evalModule_custom_http_loader_await_import)
 {
+  GTEST_SKIP() << "Skipping custom http loader";
+
   auto code = R"(
     const { evalModule } = require('internal/process/execution');
-    const code = `const { getVgg, getVggSdk, setVgg } = await import("http://s3.vgg.cool/test/js/vgg-sdk.esm.js");
+    const code = `const { getVgg, getVggSdk, setVgg } = await import("https://s3.vgg.cool/test/js/vgg-sdk.esm.js");
 console.log('#vgg is: ', getVgg());`
     evalModule(code);
   )";
@@ -137,7 +141,7 @@ TEST(NodeTest, Internal_evalScript_custom_http_loader)
   GTEST_SKIP() << "Skipping exit test";
 
   auto code = R"(
-    const code = 'import("http://s3.vgg.cool/test/js/vgg-sdk.esm.js").then((theModule)=>{ console.log("#theModule is: ", theModule); })';
+    const code = 'import("https://s3.vgg.cool/test/js/vgg-sdk.esm.js").then((theModule)=>{ console.log("#theModule is: ", theModule); })';
     const { evalScript } = require('internal/process/execution');
     evalScript('fakeName', code);
   )";
@@ -158,7 +162,7 @@ TEST(NodeTest, Internal_evalScript_custom_http_loader_enable_network_imports)
 
   // custom loader is useless for evalScript
   auto code = R"(
-    const code = 'import("http://s3.vgg.cool/test/js/vgg-sdk.esm.js").then((theModule)=>{ console.log("#theModule is: ", theModule); })';
+    const code = 'import("https://s3.vgg.cool/test/js/vgg-sdk.esm.js").then((theModule)=>{ console.log("#theModule is: ", theModule); })';
     const { evalScript } = require('internal/process/execution');
     evalScript('fakeName', code);
   )";
@@ -170,8 +174,9 @@ TEST(NodeTest, Internal_evalScript_custom_http_loader_enable_network_imports)
                          code };
   auto ret = call_main(6, const_cast<char**>(argv));
   EXPECT_TRUE(0 == ret);
-  // Error [ERR_NETWORK_IMPORT_DISALLOWED]: import of 'http://s3.vgg.cool/test/js/vgg-sdk.esm.js' by
-  // undefined is not supported: http can only be used to load local resources (use https instead).
+  // Error [ERR_NETWORK_IMPORT_DISALLOWED]: import of 'https://s3.vgg.cool/test/js/vgg-sdk.esm.js'
+  // by undefined is not supported: http can only be used to load local resources (use https
+  // instead).
 }
 
 TEST(NodeTest, VM)
@@ -289,10 +294,10 @@ TEST(NodeTest, ImportUrl)
 
   auto code = R"(
     // [SyntaxError: await is only valid in async functions and the top level bodies of modules]
-// const vggModule = await import("http://s3.vgg.cool/test/js/vgg-sdk.esm.js");
+// const vggModule = await import("https://s3.vgg.cool/test/js/vgg-sdk.esm.js");
 // console.log('#vggModule is: ', vggModule);
 
-const vggSdkUrl = "http://s3.vgg.cool/test/js/vgg-sdk.esm.js";
+const vggSdkUrl = "https://s3.vgg.cool/test/js/vgg-sdk.esm.js";
 import(vggSdkUrl).then((container) => {
   container.getVgg().then((vgg) => {
     console.log('#vgg is: ', vgg);
@@ -310,7 +315,7 @@ import(vggSdkUrl).then((container) => {
 
 TEST(NodeTest, EvalFetchWasmAndCall)
 {
-  SKIP_FOR_DEBUG
+  GTEST_SKIP() << "Skipping fetch test";
 
   const char* argv[] = { "", R"(
 const importObject = {

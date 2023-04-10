@@ -15,8 +15,7 @@ struct NativeExecImpl;
 class NativeExec : public VggJSEngine
 {
 public:
-  // todo, remove thread
-  NativeExec(std::shared_ptr<std::thread>& thread);
+  NativeExec();
   ~NativeExec();
 
   bool evalScript(const std::string& code);

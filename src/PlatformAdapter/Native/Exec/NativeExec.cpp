@@ -37,8 +37,6 @@ bool NativeExec::evalModule(const std::string& code)
   wrapped_script.append("';\n");
   wrapped_script.append("evalModule(decodeURIComponent(encoded_code));");
 
-  DEBUG("#NativeExec, evalModule: %s", wrapped_script.c_str());
-
   return m_impl->schedule_eval(wrapped_script);
 }
 

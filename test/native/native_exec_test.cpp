@@ -5,18 +5,15 @@
 #include <gtest/gtest.h>
 
 #include <memory>
-#include <thread>
 
 class VggNativeExecTestSuite : public ::testing::Test
 {
 protected:
-  std::shared_ptr<NativeExec> sut;
-  VggJSEngine* sut_ptr = nullptr;
+  NativeExec sut;
+  VggJSEngine* sut_ptr = &sut;
 
   void SetUp() override
   {
-    sut.reset(new NativeExec);
-    sut_ptr = sut.get();
   }
 
   void TearDown() override

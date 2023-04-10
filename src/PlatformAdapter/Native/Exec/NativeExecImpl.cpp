@@ -2,6 +2,12 @@
 
 #include "Utils/Utils.hpp"
 
+#undef INFO
+#define INFO(msg, ...)
+
+#undef DEBUG
+#define DEBUG(msg, ...)
+
 /*
  * NativeExecImpl
  */

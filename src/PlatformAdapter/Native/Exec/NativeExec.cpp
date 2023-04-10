@@ -14,7 +14,7 @@ NativeExec::NativeExec()
     "--expose-internals",
     "--experimental-network-imports",
   };
-  m_impl->run_node(3, const_cast<char**>(argv), m_envDidLoad, m_getInitScriptForEnv, m_thread);
+  m_impl->run_node(3, argv, m_thread, m_envDidLoad, m_getInitScriptForEnv);
 }
 
 NativeExec::~NativeExec()

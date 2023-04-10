@@ -10,14 +10,14 @@
 class VggExec
 {
 public:
-  VggExec(std::shared_ptr<VggJSEngine> jsEngine, std::shared_ptr<IVggEnv> env)
+  VggExec(const std::shared_ptr<VggJSEngine>& jsEngine, const std::shared_ptr<IVggEnv>& env)
     : m_jsEngine(jsEngine)
     , m_env(env)
   {
   }
   ~VggExec() = default;
 
-  bool evalScript(const std::string& srcipt);
+  bool evalScript(const std::string& script);
   bool evalModule(const std::string& module);
 
 private:

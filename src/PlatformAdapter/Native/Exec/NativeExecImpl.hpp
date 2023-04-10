@@ -41,20 +41,20 @@ class NativeExecImpl
 {
 public:
   bool schedule_eval(const std::string& code);
-  int run_node(int argc,
-               char** argv,
-               std::function<void(node::Environment*)>& envHook,
-               std::function<const char*()>& getScriptHook,
-               std::shared_ptr<std::thread>& nodeThread);
+  int run_node(const int argc,
+               const char** argv,
+               std::shared_ptr<std::thread>& nodeThread,
+               const std::function<void(const node::Environment*)>& envHook,
+               const std::function<const char*()>& getScriptHook);
   void stop_node_thread_safe();
 
 private:
   friend NativeEvalTask;
-  int eval(std::string_view buffer);
+  int eval(const std::string_view buffer);
 
   int node_main(const std::vector<std::string>& args,
-                std::function<void(node::Environment*)>& envHook,
-                std::function<const char*()>& getScriptHook);
+                const std::function<void(node::Environment*)>& envHook,
+                const std::function<const char*()>& getScriptHook);
   int run_node_instance(MultiIsolatePlatform* platform,
                         const std::vector<std::string>& args,
                         const std::vector<std::string>& exec_args);

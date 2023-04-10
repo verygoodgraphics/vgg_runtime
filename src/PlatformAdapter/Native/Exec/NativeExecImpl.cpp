@@ -76,13 +76,13 @@ int NativeExecImpl::eval(std::string_view buffer)
   return 0;
 }
 
-int NativeExecImpl::run_node(int argc,
-                             char** argv,
-                             std::function<void(node::Environment*)>& envHook,
-                             std::function<const char*()>& getScriptHook,
-                             std::shared_ptr<std::thread>& nodeThread)
+int NativeExecImpl::run_node(const int argc,
+                             const char** argv,
+                             std::shared_ptr<std::thread>& nodeThread,
+                             const std::function<void(const node::Environment*)>& envHook,
+                             const std::function<const char*()>& getScriptHook)
 {
-  argv = uv_setup_args(argc, argv);
+  uv_setup_args(argc, const_cast<char**>(argv));
   std::vector<std::string> args(argv, argv + argc);
 
   nodeThread.reset(new std::thread([&, args]() { node_main(args, envHook, getScriptHook); }));
@@ -91,8 +91,8 @@ int NativeExecImpl::run_node(int argc,
 }
 
 int NativeExecImpl::node_main(const std::vector<std::string>& args,
-                              std::function<void(node::Environment*)>& envHook,
-                              std::function<const char*()>& getScriptHook)
+                              const std::function<void(node::Environment*)>& envHook,
+                              const std::function<const char*()>& getScriptHook)
 {
   std::unique_ptr<node::InitializationResult> result = node::InitializeOncePerProcess(
     args,

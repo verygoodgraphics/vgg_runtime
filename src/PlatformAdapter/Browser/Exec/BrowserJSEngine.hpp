@@ -13,7 +13,6 @@ public:
 
 private:
   std::string m_moduleWrapper;
-  std::string url_encode(const std::string& value);
 };
 
 #endif

@@ -1,177 +1,76 @@
 #include "NativeExec.hpp"
 
-#include <assert.h>
-#include <iostream>
-#include <string>
+#include "NativeExecImpl.hpp"
+#include "StringHelper.hpp"
+#include "Utils/Utils.hpp"
 
-#include "node.h"
-#include "uv.h"
+using namespace VGG;
 
-using node::CommonEnvironmentSetup;
-using node::Environment;
-using node::MultiIsolatePlatform;
-using v8::Context;
-using v8::HandleScope;
-using v8::Isolate;
-using v8::Locker;
-using v8::MaybeLocal;
-using v8::V8;
-using v8::Value;
-
-struct NativeExecImpl
+NativeExec::NativeExec(std::shared_ptr<std::thread>& thread)
+  : m_impl(new NativeExecImpl)
 {
-  std::unique_ptr<MultiIsolatePlatform> platform_ = nullptr;
-  std::unique_ptr<node::InitializationResult> result = nullptr;
-  std::unique_ptr<CommonEnvironmentSetup> setup_ = nullptr;
-  Environment* env = nullptr;
-  Isolate* isolate = nullptr;
+  // { // test http import
+  //   auto code = R"(
+  //   console.log('#argment script');
+  // )";
 
-  int loadEnv(const char* script);
-  int eval(std::string_view buffer);
+  //   const char* argv[] = { "", // first arg is program name, mock it
+  //                          "--expose-internals",
+  //                          "--experimental-network-imports",
+  //                          code };
+  //   m_impl->run_node(4, const_cast<char**>(argv), m_envDidLoad, m_getInitScriptForEnv, thread);
+  //   return; // debug
+  // }
 
-  int setup(int argc,
-            char** argv,
-            std::function<void(node::Environment*)>& envHook,
-            std::function<const char*()>& getScriptHook);
-  void teardown();
-};
+  // auto code = R"(
+  //   const { evalModule } = require('internal/process/execution');
+  //   const code = 'import("http://s3.vgg.cool/test/js/vgg-sdk.esm.js").then((theModule)=>{
+  //   console.log("#theModule is: ", theModule); })';
 
-NativeExec::NativeExec()
-  : pImpl(new NativeExecImpl)
-{
-  const char* argv[] = { "" }; // first arg is program name, mock it
-  pImpl->setup(1, const_cast<char**>(argv), m_envDidLoad, m_getInitScriptForEnv);
+  //   console.log('#before evalModule,  evalModule is: ', evalModule);
+  //   evalModule(code);
+  //   console.log('#after evalModule, evalModule is: ', evalModule);
+  // )";
+
+  // todo: import vgg https url and use default loader
+  const char* argv[] = { "", // first arg is program name, mock it
+                         "--expose-internals",
+                         "--experimental-loader",
+                         "./testDataDir/js/http-loader.mjs" };
+  m_impl->run_node(4, const_cast<char**>(argv), m_envDidLoad, m_getInitScriptForEnv, m_thread);
 }
 
 NativeExec::~NativeExec()
 {
-  pImpl->teardown();
-  delete pImpl;
+  teardown();
+  m_thread->join();
 }
 
 bool NativeExec::evalScript(const std::string& code)
 {
-  return 0 == pImpl->eval(code);
+  return m_impl->schedule_eval(code);
 }
 
 bool NativeExec::evalModule(const std::string& code)
 {
-  return 0 == pImpl->eval(code);
+  std::string wrapped_script(R"(
+    var { evalModule } = require('internal/process/execution');
+    var encoded_code = ')");
+  wrapped_script.append(StringHelper::url_encode(code));
+  wrapped_script.append("';\n");
+  wrapped_script.append("evalModule(decodeURIComponent(encoded_code));");
+
+  DEBUG("#NativeExec, evalModule: %s", wrapped_script.c_str());
+
+  return m_impl->schedule_eval(wrapped_script);
 }
 
-int NativeExecImpl::loadEnv(const char* script)
+void NativeExec::teardown()
 {
-  int exit_code = 0;
-
-  // todo: inject
-  // link_vgg_sdk_addon(env);
-  // const char* requrie_vgg_sdk_script =
-  //   "const vggSdkAddon = process._linkedBinding('vgg_sdk_addon');"
-  //   "globalThis.vggSdk = new vggSdkAddon.VggSdk()";
+  if (m_impl)
   {
-    Locker locker(isolate);
-    Isolate::Scope isolate_scope(isolate);
-    HandleScope handle_scope(isolate);
-    Context::Scope context_scope(setup_->context());
+    m_impl->stop_node_thread_safe();
 
-    const char* setup_require_script =
-      "const publicRequire = require('module').createRequire(process.cwd() + '/');"
-      "globalThis.require = publicRequire;";
-    MaybeLocal<Value> loadenv_ret = node::LoadEnvironment(env, setup_require_script);
-    if (loadenv_ret.IsEmpty()) // There has been a JS exception.
-      return 1;
-
-    exit_code = node::SpinEventLoop(env).FromMaybe(1);
+    // m_impl = nullptr; // todo
   }
-
-  return exit_code;
-}
-
-int NativeExecImpl::eval(std::string_view buffer)
-{
-  Locker locker(isolate);
-  Isolate::Scope isolate_scope(isolate);
-  HandleScope handle_scope(isolate);
-  auto context = setup_->context();
-  Context::Scope context_scope(context);
-
-  auto maybe_local_v8_string = v8::String::NewFromUtf8(isolate, buffer.data());
-  if (maybe_local_v8_string.IsEmpty())
-  {
-    return -1;
-  }
-
-  auto local_v8_string = maybe_local_v8_string.ToLocalChecked();
-  auto maybe_script = v8::Script::Compile(context, local_v8_string);
-  if (maybe_script.IsEmpty())
-  {
-    return -1;
-  }
-
-  auto script = maybe_script.ToLocalChecked();
-  auto script_result = script->Run(context);
-  if (script_result.IsEmpty())
-  {
-    return -1;
-  }
-
-  return node::SpinEventLoop(env).FromMaybe(1);
-}
-
-int NativeExecImpl::setup(int argc,
-                          char** argv,
-                          std::function<void(node::Environment*)>& envHook,
-                          std::function<const char*()>& getScriptHook)
-{
-  argv = uv_setup_args(argc, argv);
-  std::vector<std::string> args(argv, argv + argc);
-  result = node::InitializeOncePerProcess(
-    args,
-    { node::ProcessInitializationFlags::kNoInitializeV8,
-      node::ProcessInitializationFlags::kNoInitializeNodeV8Platform });
-
-  for (const std::string& error : result->errors())
-    fprintf(stderr, "%s: %s\n", args[0].c_str(), error.c_str());
-  if (result->early_return() != 0)
-  {
-    return result->exit_code();
-  }
-
-  platform_ = MultiIsolatePlatform::Create(4);
-  V8::InitializePlatform(platform_.get());
-  V8::Initialize();
-
-  MultiIsolatePlatform* platform = platform_.get();
-  const std::vector<std::string>& resultArgs = result->args();
-  const std::vector<std::string>& exec_args = result->exec_args();
-
-  std::vector<std::string> errors;
-  setup_ = CommonEnvironmentSetup::Create(platform, &errors, resultArgs, exec_args);
-  if (!setup_)
-  {
-    for (const std::string& err : errors)
-      fprintf(stderr, "%s: %s\n", resultArgs[0].c_str(), err.c_str());
-    return 1;
-  }
-
-  isolate = setup_->isolate();
-  env = setup_->env();
-  if (envHook)
-  {
-    envHook(env);
-  }
-
-  const char* script = getScriptHook ? getScriptHook() : "";
-  return loadEnv(script);
-}
-
-void NativeExecImpl::teardown()
-{
-  node::Stop(env);
-  setup_.reset();
-
-  V8::Dispose();
-  V8::DisposePlatform();
-
-  node::TearDownOncePerProcess();
 }

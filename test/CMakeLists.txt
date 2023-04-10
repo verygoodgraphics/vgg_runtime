@@ -17,6 +17,7 @@ else()
     model/document_model_test.cpp
     model/json_schema_validator_test.cpp
     native/native_exec_test.cpp
+    # native/native_sdk_test.cpp
     native/node_test.cpp
     native/node_test_helper.cpp
   )

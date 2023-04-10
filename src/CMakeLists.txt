@@ -16,13 +16,16 @@ add_executable(runtime
 add_library(vgg_internal OBJECT
   Exec/vggExec.cpp
   Model/DocumentModel.cpp
-  Model/JsonSchemaValidator.cpp)
+  Model/JsonSchemaValidator.cpp
+  PlatformAdapter/Helper/StringHelper.cpp
+  )
 target_include_directories(vgg_internal PUBLIC 
   ${CMAKE_CURRENT_SOURCE_DIR}/Api
   ${CMAKE_CURRENT_SOURCE_DIR}/Exec
   ${CMAKE_CURRENT_SOURCE_DIR}/Model
   ${VGG_CONTRIB_JSON_INCLUDE}
   ${VGG_CONTRIB_VALIJSON_INCLUDE}
+  PlatformAdapter/Helper
 )
 target_link_libraries(vgg_internal automerge)
 if (EMSCRIPTEN)
@@ -36,6 +39,7 @@ else()
   target_link_libraries(vgg_internal vgg_libnode)
   target_sources(vgg_internal PRIVATE
     PlatformAdapter/Native/Exec/NativeExec.cpp
+    PlatformAdapter/Native/Exec/NativeExecImpl.cpp
     # PlatformAdapter/Native/Sdk/VggSdkAddon.cpp
     # PlatformAdapter/Native/Sdk/VggSdkNodeAdapter.cpp
   )
@@ -43,6 +47,7 @@ else()
     PlatformAdapter/Native/Exec
     PlatformAdapter/Native/Sdk
   )
+  target_compile_definitions(vgg_internal PRIVATE NODE_WANT_INTERNALS=1)
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release")

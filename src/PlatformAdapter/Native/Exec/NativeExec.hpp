@@ -3,6 +3,8 @@
 
 #include "VggJSEngine.hpp"
 
+#include <memory>
+
 namespace node
 {
 class Environment;
@@ -13,7 +15,8 @@ struct NativeExecImpl;
 class NativeExec : public VggJSEngine
 {
 public:
-  NativeExec();
+  // todo, remove thread
+  NativeExec(std::shared_ptr<std::thread>& thread);
   ~NativeExec();
 
   bool evalScript(const std::string& code);
@@ -23,7 +26,10 @@ public:
   std::function<const char*()> m_getInitScriptForEnv;
 
 private:
-  NativeExecImpl* pImpl;
+  std::shared_ptr<std::thread> m_thread;
+  std::shared_ptr<NativeExecImpl> m_impl;
+
+  void teardown();
 };
 
 #endif

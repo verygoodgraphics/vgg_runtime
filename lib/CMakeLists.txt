@@ -15,11 +15,7 @@ set(VGG_LIB_INCLUDE_PATH
 
 
 if (NOT EMSCRIPTEN)
-  find_library(NODE_LIBRARY_PATH node
-    PATHS "${CMAKE_CURRENT_SOURCE_DIR}/node/out/Release"
-    NO_DEFAULT_PATH)
-
-  if(NOT NODE_LIBRARY_PATH)
+  if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/node")
     set(NODE_VERSION "v18.15.0")
     set(DOWNLOAD_URL "https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz")
     set(DOWNLOAD_AT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/node.tar.gz")
@@ -38,19 +34,17 @@ if (NOT EMSCRIPTEN)
       DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}")
     file(RENAME "${CMAKE_CURRENT_SOURCE_DIR}/node-${NODE_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/node")
     file(REMOVE ${DOWNLOAD_AT_PATH})
-
-    execute_process(
-      COMMAND ./configure --enable-static
-      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/node"
-      COMMAND_ERROR_IS_FATAL ANY)
-    execute_process(
-      COMMAND make -j8
-      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/node"
-      COMMAND_ERROR_IS_FATAL ANY)
   endif()
 
   add_library(vgg_libnode STATIC
     node/src/node_snapshot_stub.cc)
+  
+  add_custom_command(TARGET vgg_libnode
+    PRE_BUILD
+    COMMAND cmake -DNODE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/node
+      -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/BuildLibnode.cmake
+    COMMENT "Build libnode if needed"  
+  )
   target_include_directories(vgg_libnode PUBLIC
     node/src
     node/deps/uv/include

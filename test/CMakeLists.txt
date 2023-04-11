@@ -1,10 +1,17 @@
 if (EMSCRIPTEN)
 else()
+  option(ENABLE_UNIT_TEST "Enable unit test" OFF)
+  if(NOT ENABLE_UNIT_TEST)
+    message(STATUS "Unit test is disabled. Enable it with option if needed: cmake -DENABLE_UNIT_TEST=ON")
+    return()
+  endif()
+
   include(FetchContent)
+  message(STATUS "Downloading gtest...")
   FetchContent_Declare(
     googletest
-    GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG release-1.11.0
+    URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
   )
   # For Windows: Prevent overriding the parent project's compiler/linker settings
   set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)

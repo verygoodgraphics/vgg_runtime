@@ -9,8 +9,9 @@
 class DocumentModel
 {
 public:
-  DocumentModel(std::shared_ptr<JsonSchemaValidator> schemaValidator,
-                const nlohmann::json& document);
+  using ValidatorSharedPtr = std::shared_ptr<JsonSchemaValidator>;
+  DocumentModel(const nlohmann::json& document = nlohmann::json(json::value_t::string),
+                ValidatorSharedPtr schemaValidator = ValidatorSharedPtr());
   ~DocumentModel();
 
   void addAt(const json::json_pointer& path, const json& value);
@@ -21,7 +22,7 @@ public:
 
 private:
   Automerge m_doc;
-  std::shared_ptr<JsonSchemaValidator> m_validator;
+  ValidatorSharedPtr m_validator;
 
   void editTemplate(const json::json_pointer& path,
                     const json& value,

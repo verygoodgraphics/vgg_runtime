@@ -6,26 +6,23 @@
 <body>
     <script type="text/javascript" src="./sut/runtime.js"></script>
     <script type="text/javascript">
-        let vggWasmInstance;
-        let vggSdk;
-
         function setupAndRun() {
-            createModule().then(function (myInstance) {
-                vggWasmInstance = myInstance
-
+            createModule().then(async function (myInstance) {
                 try {
-                    vggWasmInstance._emscripten_main();
+                    myInstance._emscripten_main();
                 } catch (error) {
                     console.error(error);
                 }
 
                 // Given
-                vggSdk = new vggWasmInstance.VggSdk();
-                // When
-                const s = vggSdk.getDocumentJson();
-                // Then
-                console.log("document json string from sdk is: ", s);
+                const { getVggSdk, setVgg } = await import("https://s3.vgg.cool/test/js/vgg-sdk.esm.js");
+                setVgg(myInstance);
 
+                const vggSdk = await getVggSdk();
+                // When
+                const documentString = vggSdk.getDocumentJson();
+                // Then
+                console.log("document json string from sdk is: ", documentString);
             });
         }
 

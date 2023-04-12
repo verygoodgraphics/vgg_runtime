@@ -13,7 +13,18 @@
             createModule().then(function (myInstance) {
                 vggWasmInstance = myInstance
 
-                vggWasmInstance._emscripten_main();
+                try {
+                    vggWasmInstance._emscripten_main();
+                } catch (error) {
+                    console.error(error);
+                }
+
+                // Given
+                vggSdk = new vggWasmInstance.VggSdk();
+                // When
+                const s = vggSdk.getDocumentJson();
+                // Then
+                console.log("document json string from sdk is: ", s);
 
             });
         }

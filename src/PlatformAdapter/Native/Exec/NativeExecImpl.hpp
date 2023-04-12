@@ -41,25 +41,22 @@ class NativeExecImpl
 {
 public:
   bool schedule_eval(const std::string& code);
-  int run_node(const int argc,
-               const char** argv,
-               std::shared_ptr<std::thread>& nodeThread,
-               const std::function<void(const node::Environment*)>& envHook,
-               const std::function<const char*()>& getScriptHook);
+  int run_node(const int argc, const char** argv, std::shared_ptr<std::thread>& nodeThread);
   void stop_node_thread_safe();
+
+  node::Environment* getNodeEnv();
 
 private:
   friend NativeEvalTask;
   int eval(const std::string_view buffer);
 
-  int node_main(const std::vector<std::string>& args,
-                const std::function<void(node::Environment*)>& envHook,
-                const std::function<const char*()>& getScriptHook);
+  int node_main(const std::vector<std::string>& args);
   int run_node_instance(MultiIsolatePlatform* platform,
                         const std::vector<std::string>& args,
                         const std::vector<std::string>& exec_args);
   void run_task(NativeEvalTask* task);
   void erase_task(NativeEvalTask* task);
+  bool check_state();
 
   enum ExecState
   {

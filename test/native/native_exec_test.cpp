@@ -37,6 +37,21 @@ TEST_F(VggNativeExecTestSuite, Smoke)
   EXPECT_EQ(result, true);
 }
 
+TEST_F(VggNativeExecTestSuite, Not_abort)
+{
+  // When
+  auto code = R"(
+    var process = require('process');
+    if(false){
+      process.abort();
+    }
+  )";
+  auto result = sut_ptr->evalScript(code);
+
+  // Then
+  GTEST_SUCCEED();
+}
+
 TEST_F(VggNativeExecTestSuite, Eval_script_console_log)
 {
   // When

@@ -26,16 +26,12 @@ protected:
 TEST_F(VggSdkTestSuite, Smoke)
 {
   // Given
-  std::string original_string("{}");
-
-  auto mock_json_validator = std::make_shared<MockJsonSchemaValidator>();
-  json mock_doc_json(original_string);
-  m_mock_document_model = new MockDocumentModel(mock_json_validator, mock_doc_json);
+  m_mock_document_model = new MockDocumentModel();
   VggDepContainer<std::shared_ptr<DocumentModel>>::get().reset(m_mock_document_model);
 
   // When
   auto result = m_sut_ptr->documentJson();
 
   // Then
-  EXPECT_EQ(result, original_string);
+  EXPECT_EQ(result, R"("")");
 }

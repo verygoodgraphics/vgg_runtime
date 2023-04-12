@@ -1,7 +1,7 @@
 #ifndef _DOCUMENT_MODEL_HPP_
 #define _DOCUMENT_MODEL_HPP_
 
-#include "Automerge.h"
+#include "JsonDocumentStore.hpp"
 #include "JsonSchemaValidator.hpp"
 
 #include <memory>
@@ -9,9 +9,12 @@
 class DocumentModel
 {
 public:
-  using ValidatorSharedPtr = std::shared_ptr<JsonSchemaValidator>;
+  using ValidatorPtr = std::shared_ptr<JsonSchemaValidator>;
+  using DocumentStorePtr = std::shared_ptr<DocumentStore>;
+
   DocumentModel(const nlohmann::json& document = nlohmann::json(json::value_t::string),
-                ValidatorSharedPtr schemaValidator = ValidatorSharedPtr());
+                const DocumentStorePtr& store = DocumentStorePtr(new JsonDocumentStore),
+                const ValidatorPtr& schemaValidator = ValidatorPtr());
   ~DocumentModel();
 
   void addAt(const json::json_pointer& path, const json& value);
@@ -21,13 +24,14 @@ public:
   const json& documentJson() const;
 
 private:
-  Automerge m_doc;
-  ValidatorSharedPtr m_validator;
+  DocumentStorePtr m_doc;
+  ValidatorPtr m_validator;
 
-  void editTemplate(const json::json_pointer& path,
-                    const json& value,
-                    std::function<void(json&, json::json_pointer&, const json&)> tryEditFn,
-                    std::function<void(Automerge&, const json::json_pointer&, const json&)> editFn);
+  void editTemplate(
+    const json::json_pointer& path,
+    const json& value,
+    std::function<void(json&, json::json_pointer&, const json&)> tryEditFn,
+    std::function<void(DocumentStorePtr&, const json::json_pointer&, const json&)> editFn);
   bool validateDocument(const json& document);
   const json::json_pointer getNearestHavingClassAncestorPath(
     const json::json_pointer& editPath) const;

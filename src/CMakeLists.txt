@@ -17,12 +17,15 @@ add_library(vgg_internal OBJECT
   Exec/VggExec.cpp
   Model/DocumentModel.cpp
   Model/JsonSchemaValidator.cpp
+  # Sdk/VggSdk.cpp
   PlatformAdapter/Helper/StringHelper.cpp
 )
 target_include_directories(vgg_internal PUBLIC 
   ${CMAKE_CURRENT_SOURCE_DIR}/Api
   ${CMAKE_CURRENT_SOURCE_DIR}/Exec
+  ${CMAKE_CURRENT_SOURCE_DIR}/Infrastructure
   ${CMAKE_CURRENT_SOURCE_DIR}/Model
+  ${CMAKE_CURRENT_SOURCE_DIR}/Sdk
   ${VGG_CONTRIB_JSON_INCLUDE}
   ${VGG_CONTRIB_VALIJSON_INCLUDE}
   PlatformAdapter/Helper
@@ -43,8 +46,8 @@ else()
   target_sources(vgg_internal PRIVATE
     PlatformAdapter/Native/Exec/NativeExec.cpp
     PlatformAdapter/Native/Exec/NativeExecImpl.cpp
-    # PlatformAdapter/Native/Sdk/VggSdkAddon.cpp
-    # PlatformAdapter/Native/Sdk/VggSdkNodeAdapter.cpp
+    PlatformAdapter/Native/Sdk/VggSdkAddon.cpp
+    PlatformAdapter/Native/Sdk/VggSdkNodeAdapter.cpp
   )
   target_include_directories(vgg_internal PUBLIC
     PlatformAdapter/Native/Exec

@@ -14,7 +14,7 @@ NativeExec::NativeExec()
     "--expose-internals",
     "--experimental-network-imports",
   };
-  m_impl->run_node(3, argv, m_thread, m_envDidLoad, m_getInitScriptForEnv);
+  m_impl->run_node(3, argv, m_thread);
 }
 
 NativeExec::~NativeExec()
@@ -40,10 +40,18 @@ bool NativeExec::evalModule(const std::string& code)
   return m_impl->schedule_eval(wrapped_script);
 }
 
+bool NativeExec::inject(InjectFn fn)
+{
+  auto env = m_impl->getNodeEnv();
+  if (env)
+  {
+    fn(env);
+    return true;
+  }
+  return false;
+}
+
 void NativeExec::teardown()
 {
-  if (m_impl)
-  {
-    m_impl->stop_node_thread_safe();
-  }
+  m_impl->stop_node_thread_safe();
 }

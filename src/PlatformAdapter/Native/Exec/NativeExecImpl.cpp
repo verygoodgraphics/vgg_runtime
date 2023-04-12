@@ -15,15 +15,10 @@ constexpr int THREAD_POOL_SIZE = 4;
  */
 bool NativeExecImpl::schedule_eval(const std::string& code)
 {
-  if (m_state == DEAD)
+  if (!check_state())
   {
-    FAILED("#NativeExecImpl::schedule_eval, error, dead state");
+    FAILED("#NativeExecImpl::schedule_eval, error state");
     return false;
-  }
-
-  // Wait node thread ready. 'm_state' will be updated in run_node_instance
-  while (m_state != RUNNING)
-  {
   }
 
   NativeEvalTask* task = new NativeEvalTask();
@@ -91,9 +86,7 @@ int NativeExecImpl::eval(std::string_view buffer)
 
 int NativeExecImpl::run_node(const int argc,
                              const char** argv,
-                             std::shared_ptr<std::thread>& nodeThread,
-                             const std::function<void(const node::Environment*)>& envHook,
-                             const std::function<const char*()>& getScriptHook)
+                             std::shared_ptr<std::thread>& nodeThread)
 {
   uv_setup_args(argc, const_cast<char**>(argv));
   std::vector<std::string> args(argv, argv + argc);
@@ -101,16 +94,14 @@ int NativeExecImpl::run_node(const int argc,
   nodeThread.reset(new std::thread(
     [&, args]()
     {
-      int ret = node_main(args, envHook, getScriptHook);
+      int ret = node_main(args);
       INFO("#node thread exit, ret = %d", ret);
     }));
 
   return 0;
 }
 
-int NativeExecImpl::node_main(const std::vector<std::string>& args,
-                              const std::function<void(node::Environment*)>& envHook,
-                              const std::function<const char*()>& getScriptHook)
+int NativeExecImpl::node_main(const std::vector<std::string>& args)
 {
   std::unique_ptr<node::InitializationResult> result = node::InitializeOncePerProcess(
     args,
@@ -141,6 +132,27 @@ int NativeExecImpl::node_main(const std::vector<std::string>& args,
   return ret;
 }
 
+node::Environment* NativeExecImpl::getNodeEnv()
+{
+  return check_state() ? m_env : nullptr;
+}
+
+bool NativeExecImpl::check_state()
+{
+  if (m_state == DEAD)
+  {
+    FAILED("#NativeExecImpl::check_state, dead state");
+    return false;
+  }
+
+  // Wait node thread ready. 'm_state' will be updated in run_node_instance
+  while (m_state != RUNNING)
+  {
+  }
+
+  return true;
+}
+
 int NativeExecImpl::run_node_instance(MultiIsolatePlatform* platform,
                                       const std::vector<std::string>& args,
                                       const std::vector<std::string>& exec_args)
@@ -165,21 +177,6 @@ int NativeExecImpl::run_node_instance(MultiIsolatePlatform* platform,
   m_isolate = isolate;
   m_env = env;
   m_loop = setup->event_loop();
-
-  // todo, env hook
-  // if (envHook)
-  // {
-  //   envHook(m_setup->env());
-  // }
-
-  // todo, init script hook
-  // const char* script = getScriptHook ? getScriptHook() : "";
-
-  // todo: inject sdk
-  // link_vgg_sdk_addon(m_setup->env());
-  // const char* requrie_vgg_sdk_script =
-  //   "const vggSdkAddon = process._linkedBinding('vgg_sdk_addon');"
-  //   "globalThis.vggSdk = new vggSdkAddon.VggSdk()";
 
   {
     Locker locker(isolate);

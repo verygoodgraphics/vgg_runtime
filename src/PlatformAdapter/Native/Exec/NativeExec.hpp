@@ -23,12 +23,12 @@ public:
   bool evalScript(const std::string& code);
   bool evalModule(const std::string& code);
 
+  using InjectFn = std::function<void(node::Environment*)>;
+  bool inject(InjectFn fn);
+
 private:
   std::shared_ptr<std::thread> m_thread;
   std::shared_ptr<NativeExecImpl> m_impl;
-
-  std::function<void(const node::Environment*)> m_envDidLoad;
-  std::function<const char*()> m_getInitScriptForEnv;
 
   void teardown();
 };

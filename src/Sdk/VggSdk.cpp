@@ -14,7 +14,7 @@ void VggSdk::updateStyle()
 
 const std::string VggSdk::documentJson()
 {
-  return to_string(documentModel()->documentJson());
+  return documentModel()->documentJson().dump();
 }
 
 // const std::string VggSdk::getElementPath(const std::string& content)

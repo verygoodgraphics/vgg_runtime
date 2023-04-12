@@ -25,7 +25,7 @@ protected:
     auto schema_validator = std::make_shared<JsonSchemaValidator>();
     schema_validator->setRootSchema(schema);
 
-    sut.reset(new DocumentModel(document, schema_validator));
+    sut.reset(new DocumentModel(document, std::make_shared<JsonDocumentStore>(), schema_validator));
   }
 
   void TearDown() override
@@ -44,7 +44,7 @@ TEST_F(DocumentModelTestSuite, Default_document)
   auto tmp_sut = DocumentModel();
 
   // When
-  const auto result = tmp_sut.documentJson();
+  const auto result = tmp_sut.documentJson().get<std::string>();
 
   // Then
   EXPECT_TRUE(result.empty());

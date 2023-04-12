@@ -5,10 +5,12 @@
 constexpr auto const_class_name = "class";
 
 DocumentModel::DocumentModel(const nlohmann::json& document,
-                             std::shared_ptr<JsonSchemaValidator> schemaValidator)
-  : m_validator(schemaValidator)
+                             const DocumentStorePtr& store,
+                             const ValidatorPtr& schemaValidator)
+  : m_doc(store)
+  , m_validator(schemaValidator)
 {
-  from_json(document, m_doc);
+  m_doc->setDocument(document);
 }
 
 DocumentModel::~DocumentModel()
@@ -22,8 +24,8 @@ void DocumentModel::addAt(const json::json_pointer& path, const json& value)
     value,
     [](json& tmp_document, json::json_pointer& relative_path, const json& cb_value)
     { tmp_document[relative_path] = cb_value; },
-    [](Automerge& cb_doc, const json::json_pointer& cb_path, const json& cb_value)
-    { cb_doc.json_add(cb_path, cb_value); });
+    [](DocumentStorePtr& cb_doc, const json::json_pointer& cb_path, const json& cb_value)
+    { cb_doc->addAt(cb_path, cb_value); });
 }
 
 void DocumentModel::replaceAt(const json::json_pointer& path, const json& value)
@@ -33,8 +35,8 @@ void DocumentModel::replaceAt(const json::json_pointer& path, const json& value)
     value,
     [](json& tmp_document, json::json_pointer& relative_path, const json& cb_value)
     { tmp_document[relative_path] = cb_value; },
-    [](Automerge& cb_doc, const json::json_pointer& cb_path, const json& cb_value)
-    { cb_doc.json_replace(cb_path, cb_value); });
+    [](DocumentStorePtr& cb_doc, const json::json_pointer& cb_path, const json& cb_value)
+    { cb_doc->replaceAt(cb_path, cb_value); });
 }
 
 void DocumentModel::deleteAt(const json::json_pointer& path)
@@ -45,20 +47,20 @@ void DocumentModel::deleteAt(const json::json_pointer& path)
     stub_value,
     [](json& tmp_document, json::json_pointer& relative_path, const json& cb_value)
     { tmp_document.at(relative_path.parent_pointer()).erase(relative_path.back()); },
-    [](Automerge& cb_doc, const json::json_pointer& cb_path, const json& cb_value)
-    { cb_doc.json_delete(cb_path); });
+    [](DocumentStorePtr& cb_doc, const json::json_pointer& cb_path, const json& cb_value)
+    { cb_doc->deleteAt(cb_path); });
 }
 
 const json& DocumentModel::documentJson() const
 {
-  return m_doc.json_const_ref();
+  return m_doc->document();
 }
 
 void DocumentModel::editTemplate(
   const json::json_pointer& path,
   const json& value,
   std::function<void(json&, json::json_pointer&, const json&)> tryEditFn,
-  std::function<void(Automerge&, const json::json_pointer&, const json&)> editFn)
+  std::function<void(DocumentStorePtr&, const json::json_pointer&, const json&)> editFn)
 {
   auto ancestor_path = getNearestHavingClassAncestorPath(path);
   auto tmp_document = documentJson()[ancestor_path];

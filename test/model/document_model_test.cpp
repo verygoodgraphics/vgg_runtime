@@ -16,8 +16,6 @@ protected:
 
   void SetUp() override
   {
-    GTEST_SKIP() << "Too slow to test";
-
     std::ifstream schema_fs(JSON_SCHEMA_FILE_NAME);
     json schema = json::parse(schema_fs);
 
@@ -27,7 +25,7 @@ protected:
     auto schema_validator = std::make_shared<JsonSchemaValidator>();
     schema_validator->setRootSchema(schema);
 
-    sut.reset(new DocumentModel(schema_validator, document));
+    sut.reset(new DocumentModel(document, schema_validator));
   }
 
   void TearDown() override
@@ -38,6 +36,18 @@ protected:
 TEST_F(DocumentModelTestSuite, Smoke)
 {
   EXPECT_TRUE(sut);
+}
+
+TEST_F(DocumentModelTestSuite, Default_document)
+{
+  // Given
+  auto tmp_sut = DocumentModel();
+
+  // When
+  const auto result = tmp_sut.documentJson();
+
+  // Then
+  EXPECT_TRUE(result.empty());
 }
 
 TEST_F(DocumentModelTestSuite, Add_ChangeColorToInvalidValue)

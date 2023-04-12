@@ -4,8 +4,8 @@
 
 constexpr auto const_class_name = "class";
 
-DocumentModel::DocumentModel(std::shared_ptr<JsonSchemaValidator> schemaValidator,
-                             const nlohmann::json& document)
+DocumentModel::DocumentModel(const nlohmann::json& document,
+                             std::shared_ptr<JsonSchemaValidator> schemaValidator)
   : m_validator(schemaValidator)
 {
   from_json(document, m_doc);
@@ -79,6 +79,11 @@ void DocumentModel::editTemplate(
 
 bool DocumentModel::validateDocument(const json& document)
 {
+  if (!m_validator)
+  {
+    return true;
+  }
+
   if (document.is_object() && document.contains(const_class_name) &&
       document[const_class_name].is_string())
   {

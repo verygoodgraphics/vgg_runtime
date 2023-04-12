@@ -27,6 +27,7 @@ else()
     native/native_sdk_test.cpp
     native/node_test.cpp
     native/node_test_helper.cpp
+    sdk/vgg_sdk_test.cpp
   )
   target_include_directories(unit_tests PRIVATE
     mocks

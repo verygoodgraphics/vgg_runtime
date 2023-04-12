@@ -17,7 +17,7 @@ add_library(vgg_internal OBJECT
   Exec/VggExec.cpp
   Model/DocumentModel.cpp
   Model/JsonSchemaValidator.cpp
-  # Sdk/VggSdk.cpp
+  Sdk/VggSdk.cpp
   PlatformAdapter/Helper/StringHelper.cpp
 )
 target_include_directories(vgg_internal PUBLIC 

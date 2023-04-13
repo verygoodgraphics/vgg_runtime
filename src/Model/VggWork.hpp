@@ -32,6 +32,8 @@ public:
   void updateCode(const std::string& name, const std::string& code);
 
 private:
+  using LoadZipFn = std::function<void(miniz_cpp::zip_file&)>;
+  bool loadTemplate(LoadZipFn fn);
   bool load(miniz_cpp::zip_file& zipFile);
 
   const std::string& codeName(const json::json_pointer& path) const;

@@ -17,6 +17,7 @@ add_library(vgg_internal OBJECT
   Exec/VggExec.cpp
   Model/DocumentModel.cpp
   Model/JsonSchemaValidator.cpp
+  Model/VggWork.cpp
   Sdk/VggSdk.cpp
   PlatformAdapter/Helper/StringHelper.cpp
 )
@@ -32,6 +33,7 @@ target_include_directories(vgg_internal PUBLIC
 )
 target_link_libraries(vgg_internal
   automerge
+  miniz
   skia 
 )
 if (EMSCRIPTEN)

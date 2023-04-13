@@ -11,11 +11,21 @@ constexpr auto layout_file_name = "layout.json";
 
 bool VggWork::load(const std::string& filePath)
 {
+  return loadTemplate([&](miniz_cpp::zip_file& file) { file.load(filePath); });
+}
+
+bool VggWork::load(const std::vector<unsigned char>& buffer)
+{
+  return loadTemplate([&](miniz_cpp::zip_file& file) { file.load(buffer); });
+}
+
+bool VggWork::loadTemplate(LoadZipFn fn)
+{
   miniz_cpp::zip_file zip_file;
 
   try
   {
-    zip_file.load(filePath);
+    fn(zip_file);
     return load(zip_file);
   }
   catch (const std::runtime_error& err)

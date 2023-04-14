@@ -1,6 +1,5 @@
 #include "VggWork.hpp"
 
-#include "DocumentModel.hpp"
 #include "Utils/Utils.hpp"
 
 #include <miniz-cpp/zip_file.hpp>

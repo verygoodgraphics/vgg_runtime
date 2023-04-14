@@ -79,38 +79,50 @@ namespace VGG
  * instance can be obtained by App<DerivedApp>::getIntance<DerivedApp>().
  */
 
+#define HAS_MEMBER_FUNCTION_DEF(FUNC)                                                              \
+  template<typename T>                                                                             \
+  class has_member_##FUNC                                                                          \
+  {                                                                                                \
+    typedef char one;                                                                              \
+    struct two                                                                                     \
+    {                                                                                              \
+      char x[2];                                                                                   \
+    };                                                                                             \
+    template<typename C>                                                                           \
+    static one test(decltype(&C::FUNC));                                                           \
+    template<typename C>                                                                           \
+    static two test(...);                                                                          \
+                                                                                                   \
+  public:                                                                                          \
+    enum                                                                                           \
+    {                                                                                              \
+      value = sizeof(test<T>(0)) == sizeof(char)                                                   \
+    };                                                                                             \
+  };
+
+HAS_MEMBER_FUNCTION_DEF(initContext)
+HAS_MEMBER_FUNCTION_DEF(makeContextCurrent)
+HAS_MEMBER_FUNCTION_DEF(getProperty)
+HAS_MEMBER_FUNCTION_DEF(setProperty)
+HAS_MEMBER_FUNCTION_DEF(swapBuffer)
+HAS_MEMBER_FUNCTION_DEF(onInit)
+HAS_MEMBER_FUNCTION_DEF(pollEvent)
+
 template<typename T>
 class App : public Uncopyable
 {
 private:
-  inline bool initContext(int w, int h, const std::string& title)
+  inline T* CRTP()
   {
-    return static_cast<T*>(this)->initContext(w, h, title);
-  }
-
-  inline bool makeContextCurrent()
-  {
-    return static_cast<T*>(this)->makeContextCurrent();
-  }
-
-  inline std::any getProperty(const std::string& name)
-  {
-    return static_cast<T*>(this)->getProperty(name);
-  }
-
-  inline void swapBuffer()
-  {
-    static_cast<T*>(this)->swapBuffer();
-  }
-
-  inline void onInit()
-  {
-    static_cast<T*>(this)->onInit();
-  }
-
-  inline void pollEvent()
-  {
-    static_cast<T*>(this)->pollEvent();
+    static_assert(std::is_base_of<App, T>::value);
+    static_assert(has_member_initContext<T>::value);
+    static_assert(has_member_makeContextCurrent<T>::value);
+    static_assert(has_member_getProperty<T>::value);
+    static_assert(has_member_setProperty<T>::value);
+    static_assert(has_member_swapBuffer<T>::value);
+    static_assert(has_member_onInit<T>::value);
+    static_assert(has_member_pollEvent<T>::value);
+    return static_cast<T*>(this);
   }
 
 public: // public data and types
@@ -213,9 +225,9 @@ protected: // protected members and static members
       return true;
     }
 
-    app->initContext(w, h, title);
+    app->CRTP()->initContext(w, h, title);
 
-    app->makeContextCurrent();
+    app->CRTP()->makeContextCurrent();
     // Create Skia
     // get skia interface and make opengl context
     sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
@@ -235,8 +247,8 @@ protected: // protected members and static members
     app->m_skiaState.grContext = grContext;
 
     // get necessary property about window and DPI
-    auto drawSize = std::any_cast<std::pair<int, int>>(app->getProperty("viewport_size"));
-    auto winSize = std::any_cast<std::pair<int, int>>(app->getProperty("window_size"));
+    auto drawSize = std::any_cast<std::pair<int, int>>(app->CRTP()->getProperty("viewport_size"));
+    auto winSize = std::any_cast<std::pair<int, int>>(app->CRTP()->getProperty("window_size"));
 
     DEBUG("Drawable size: %d %d", drawSize.first, drawSize.second);
     DEBUG("Window size: %d %d", winSize.first, winSize.second);
@@ -264,7 +276,7 @@ protected: // protected members and static members
     }
 
     // extra initialization
-    app->onInit();
+    app->CRTP()->onInit();
 
     app->m_timestamp = SkTime::GetMSecs();
     app->m_inited = true;
@@ -465,7 +477,7 @@ public: // public methods
 	INFO("frame %d", m_nFrame++);
 #endif
 
-    pollEvent();
+    CRTP()->pollEvent();
     // deal with events
 
     // cap the frame rate
@@ -490,7 +502,7 @@ public: // public methods
     canvas->flush();
     canvas->restore();
 
-    swapBuffer();
+    CRTP()->swapBuffer();
   }
 
 public: // public static methods

@@ -23,6 +23,7 @@
 #include "Entity/InputManager.hpp"
 #include "Systems/RenderSystem.hpp"
 #include "Utils/App.hpp"
+#include "Utils/WindowTrait.hpp"
 #include "Utils/Utils.hpp"
 #include "Utils/Version.hpp"
 
@@ -38,35 +39,35 @@ class SDLRuntime : public App<SDLRuntime>
   SDLState m_sdlState;
   using Getter = std::function<std::any(void)>;
   using Setter = std::function<void(std::any)>;
-  std::unordered_map<std::string, std::pair<Getter, Setter>> m_prop;
+  std::unordered_map<std::string, std::pair<Getter, Setter>> m_properties;
 
   void initPropertyMap()
   {
-    m_prop["viewport_size"] = { [this]() -> std::any
-                                {
-                                  int dw, dh;
-                                  SDL_GL_GetDrawableSize(this->m_sdlState.window, &dw, &dh);
-                                  return std::any(std::pair<int, int>(dw, dh));
-                                },
-                                Setter() };
-    m_prop["window_size"] = { [this]()
-                              {
-                                int dw, dh;
-                                SDL_GetWindowSize(this->m_sdlState.window, &dw, &dh);
-                                return std::any(std::pair<int, int>(dw, dh));
-                              },
-                              [this](std::any size)
-                              {
-                                auto p = std::any_cast<std::pair<int, int>>(size);
-                                SDL_SetWindowSize(this->m_sdlState.window, p.first, p.second);
-                              } };
-    m_prop["app_size"] = { [this]() { return std::pair<int, int>(m_width, m_height); },
-                           [this](std::any size)
-                           {
-                             auto p = std::any_cast<std::pair<int, int>>(size);
-                             m_width = p.first;
-                             m_height = p.second;
-                           } };
+    m_properties["viewport_size"] = { [this]() -> std::any
+                                      {
+                                        int dw, dh;
+                                        SDL_GL_GetDrawableSize(this->m_sdlState.window, &dw, &dh);
+                                        return std::any(std::pair<int, int>(dw, dh));
+                                      },
+                                      Setter() };
+    m_properties["window_size"] = { [this]()
+                                    {
+                                      int dw, dh;
+                                      SDL_GetWindowSize(this->m_sdlState.window, &dw, &dh);
+                                      return std::any(std::pair<int, int>(dw, dh));
+                                    },
+                                    [this](std::any size)
+                                    {
+                                      auto p = std::any_cast<std::pair<int, int>>(size);
+                                      SDL_SetWindowSize(this->m_sdlState.window, p.first, p.second);
+                                    } };
+    m_properties["app_size"] = { [this]() { return std::pair<int, int>(m_width, m_height); },
+                                 [this](std::any size)
+                                 {
+                                   auto p = std::any_cast<std::pair<int, int>>(size);
+                                   m_width = p.first;
+                                   m_height = p.second;
+                                 } };
   }
 
 public:
@@ -211,8 +212,8 @@ public:
 
   std::any getProperty(const std::string& name)
   {
-    auto it = m_prop.find(name);
-    if (it != m_prop.end())
+    auto it = m_properties.find(name);
+    if (it != m_properties.end())
     {
       return (it->second.first)(); // getter
     }
@@ -221,8 +222,8 @@ public:
 
   void setProperty(const std::string& name, std::any value)
   {
-    auto it = m_prop.find(name);
-    if (it != m_prop.end())
+    auto it = m_properties.find(name);
+    if (it != m_properties.end())
     {
       (it->second.second)(value); // setter
     }

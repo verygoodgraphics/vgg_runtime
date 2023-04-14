@@ -9,6 +9,11 @@ constexpr auto artboard_file_name = "artboard.json";
 constexpr auto code_map_file_name = "code_map.json";
 constexpr auto layout_file_name = "layout.json";
 
+VggWork::VggWork(const MakeJsonDocFn& makeDesignDocFn)
+  : m_makeDesignDocFn(makeDesignDocFn)
+{
+}
+
 bool VggWork::load(const std::string& filePath)
 {
   return loadTemplate([&](miniz_cpp::zip_file& file) { file.load(filePath); });
@@ -44,7 +49,8 @@ bool VggWork::load(miniz_cpp::zip_file& zipFile)
       if (entry.rfind(artboard_file_name, 0) == 0)
       {
         auto json = json::parse(zipFile.read(entry));
-        m_artboard.reset(new DocumentModel(json));
+        m_designDoc = m_makeDesignDocFn(json);
+
         return true;
       }
     }
@@ -54,4 +60,9 @@ bool VggWork::load(miniz_cpp::zip_file& zipFile)
   {
     return false;
   }
+}
+
+const json& VggWork::designDoc() const
+{
+  return m_designDoc->content();
 }

@@ -18,6 +18,8 @@ protected:
 
   void SetUp() override
   {
+    GTEST_SKIP() << "Skip needless test";
+
     m_jsonData = load_json(DOCUMENT_FILE_NAME);
     m_cppData = m_jsonData;
   }

@@ -36,7 +36,38 @@ class SDLRuntime : public App<SDLRuntime>
     SDL_GLContext glContext{ nullptr };
   };
   SDLState m_sdlState;
-  std::unordered_map<std::string, std::any> m_properties;
+  using Getter = std::function<std::any(void)>;
+  using Setter = std::function<void(std::any)>;
+  std::unordered_map<std::string, std::pair<Getter, Setter>> m_prop;
+
+  void initPropertyMap()
+  {
+    m_prop["viewport_size"] = { [this]() -> std::any
+                                {
+                                  int dw, dh;
+                                  SDL_GL_GetDrawableSize(this->m_sdlState.window, &dw, &dh);
+                                  return std::any(std::pair<int, int>(dw, dh));
+                                },
+                                Setter() };
+    m_prop["window_size"] = { [this]()
+                              {
+                                int dw, dh;
+                                SDL_GetWindowSize(this->m_sdlState.window, &dw, &dh);
+                                return std::any(std::pair<int, int>(dw, dh));
+                              },
+                              [this](std::any size)
+                              {
+                                auto p = std::any_cast<std::pair<int, int>>(size);
+                                SDL_SetWindowSize(this->m_sdlState.window, p.first, p.second);
+                              } };
+    m_prop["app_size"] = { [this]() { return std::pair<int, int>(m_width, m_height); },
+                           [this](std::any size)
+                           {
+                             auto p = std::any_cast<std::pair<int, int>>(size);
+                             m_width = p.first;
+                             m_height = p.second;
+                           } };
+  }
 
 public:
   static inline void handle_sdl_error()
@@ -162,16 +193,9 @@ public:
     INFO("GL_SHADING_LANGUAGE_VERSION: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
     // get device pixel ratio
-    int dw = 0, dh = 0;
-    int ww = 0, wh = 0;
-    SDL_GL_GetDrawableSize(window, &dw, &dh);
-    SDL_GetWindowSize(window, &ww, &wh);
-    m_properties["viewport_w"] = dw;
-    m_properties["viewport_h"] = dh;
-    m_properties["window_w"] = ww;
-    m_properties["window_h"] = wh;
-    m_properties["app_w"] = w;
-    m_properties["app_h"] = h;
+    //
+
+    initPropertyMap();
     return true;
   }
 
@@ -187,7 +211,21 @@ public:
 
   std::any getProperty(const std::string& name)
   {
-    return m_properties[name];
+    auto it = m_prop.find(name);
+    if (it != m_prop.end())
+    {
+      return (it->second.first)(); // getter
+    }
+    return std::any();
+  }
+
+  void setProperty(const std::string& name, std::any value)
+  {
+    auto it = m_prop.find(name);
+    if (it != m_prop.end())
+    {
+      (it->second.second)(value); // setter
+    }
   }
 
   void onInit()

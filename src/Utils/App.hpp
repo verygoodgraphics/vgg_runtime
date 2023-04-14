@@ -235,17 +235,15 @@ protected: // protected members and static members
     app->m_skiaState.grContext = grContext;
 
     // get necessary property about window and DPI
-    int dw = std::any_cast<int>(app->getProperty("viewport_w"));
-    int dh = std::any_cast<int>(app->getProperty("viewport_h"));
-    int ww = std::any_cast<int>(app->getProperty("window_w"));
-    int wh = std::any_cast<int>(app->getProperty("window_h"));
+    auto drawSize = std::any_cast<std::pair<int, int>>(app->getProperty("viewport_size"));
+    auto winSize = std::any_cast<std::pair<int, int>>(app->getProperty("window_size"));
 
-    DEBUG("Drawable size: %d %d", dw, dh);
-    DEBUG("Window size: %d %d", ww, wh);
+    DEBUG("Drawable size: %d %d", drawSize.first, drawSize.second);
+    DEBUG("Window size: %d %d", winSize.first, winSize.second);
 #ifdef __linux__
     app->m_pixelRatio = DPI::ScaleFactor;
 #else
-    app->m_pixelRatio = (double)dw / ww;
+    app->m_pixelRatio = (double)drawSize.first / winSize.first;
 #endif
     DEBUG("Scale factor: %.2lf", DPI::ScaleFactor);
     DEBUG("Pixel ratio: %.2lf", app->m_pixelRatio);

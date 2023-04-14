@@ -1,5 +1,7 @@
 #include "VggWork.hpp"
 
+#include "RawJsonDocument.hpp"
+
 #include <gtest/gtest.h>
 
 #include <fstream>
@@ -8,14 +10,27 @@
 class VggWorkTestSuite : public ::testing::Test
 {
 protected:
-  VggWork m_sut;
+  std::shared_ptr<VggWork> m_sut;
 
   void SetUp() override
   {
+    make_normal_sut();
   }
 
   void TearDown() override
   {
+    m_sut.reset();
+  }
+
+  void make_normal_sut()
+  {
+    MakeJsonDocFn fn = [](const json& design_json)
+    {
+      auto raw_json_doc = new RawJsonDocument();
+      raw_json_doc->setContent(design_json);
+      return JsonDocumentPtr(raw_json_doc);
+    };
+    m_sut.reset(new VggWork(fn));
   }
 };
 
@@ -30,7 +45,7 @@ TEST_F(VggWorkTestSuite, Load_from_file)
   std::string file_path = "testDataDir/vgg-work.zip";
 
   // When
-  auto ret = m_sut.load(file_path);
+  auto ret = m_sut->load(file_path);
 
   // Then
   EXPECT_EQ(ret, true);
@@ -50,8 +65,22 @@ TEST_F(VggWorkTestSuite, Load_from_buffer)
   }
 
   // When
-  auto ret = m_sut.load(buffer);
+  auto ret = m_sut->load(buffer);
 
   // Then
   EXPECT_EQ(ret, true);
+}
+
+TEST_F(VggWorkTestSuite, Get_design_doc)
+{
+  // Given
+  std::string file_path = "testDataDir/vgg-work.zip";
+  auto ret = m_sut->load(file_path);
+  EXPECT_EQ(ret, true);
+
+  // When
+  auto& ret_json = m_sut->designDoc();
+
+  // Then
+  EXPECT_TRUE(ret_json.is_object());
 }

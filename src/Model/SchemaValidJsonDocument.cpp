@@ -6,9 +6,8 @@ using json = nlohmann::json;
 
 constexpr auto const_class_name = "class";
 
-SchemaValidJsonDocument::SchemaValidJsonDocument(
-  const JsonDocumentPtr& jsonDoc = JsonDocumentPtr(),
-  const ValidatorPtr& schemaValidator = ValidatorPtr())
+SchemaValidJsonDocument::SchemaValidJsonDocument(const JsonDocumentPtr& jsonDoc,
+                                                 const ValidatorPtr& schemaValidator)
   : JsonDocument(jsonDoc)
   , m_validator(schemaValidator)
 {

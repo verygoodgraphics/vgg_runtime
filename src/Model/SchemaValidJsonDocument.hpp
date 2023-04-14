@@ -9,7 +9,7 @@ class SchemaValidJsonDocument : public JsonDocument
 {
 public:
   using ValidatorPtr = std::shared_ptr<JsonSchemaValidator>;
-  SchemaValidJsonDocument(const JsonDocumentPtr& jsonDoc = JsonDocumentPtr(),
+  SchemaValidJsonDocument(const JsonDocumentPtr& jsonDoc,
                           const ValidatorPtr& schemaValidator = ValidatorPtr());
 
   const json& content() const override;

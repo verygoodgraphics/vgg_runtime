@@ -81,9 +81,9 @@ namespace VGG
  */
 
 /*
- * void initContext();
- * Init the opengl context
- * */
+ * bool initContext(int, int, const std::string&)
+ *	It should guarantee the GL context properly created.
+ *	*/
 HAS_MEMBER_FUNCTION_DEF(initContext)
 /*
  * bool makeContextCurrent()
@@ -116,10 +116,11 @@ HAS_MEMBER_FUNCTION_DEF(swapBuffer)
  *	Invoked after all init processes complete.
  * */
 HAS_MEMBER_FUNCTION_DEF(onInit)
+
 /*
- * bool initContext(int, int, const std::string&)
- *	It should guarantee the GL context properly created.
- *	*/
+ * void pollEvent()
+ * Polls the backends events
+ * */
 HAS_MEMBER_FUNCTION_DEF(pollEvent)
 
 template<typename T>

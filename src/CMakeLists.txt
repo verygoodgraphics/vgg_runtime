@@ -14,11 +14,11 @@ add_executable(runtime
 )
 
 add_library(vgg_internal OBJECT
-  Exec/vggExec.cpp
+  Exec/VggExec.cpp
   Model/DocumentModel.cpp
   Model/JsonSchemaValidator.cpp
   PlatformAdapter/Helper/StringHelper.cpp
-  )
+)
 target_include_directories(vgg_internal PUBLIC 
   ${CMAKE_CURRENT_SOURCE_DIR}/Api
   ${CMAKE_CURRENT_SOURCE_DIR}/Exec

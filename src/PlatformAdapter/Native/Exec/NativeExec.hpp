@@ -3,7 +3,9 @@
 
 #include "VggJSEngine.hpp"
 
+#include <functional>
 #include <memory>
+#include <thread>
 
 namespace node
 {

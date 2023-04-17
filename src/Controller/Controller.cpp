@@ -2,7 +2,13 @@
 
 #include "RawJsonDocument.hpp"
 #include "VggDepContainer.hpp"
+#include "VggExec.hpp"
 #include "VggWork.hpp"
+
+Controller::Controller(RunMode mode)
+  : m_mode(mode)
+{
+}
 
 bool Controller::start(const std::string& filePath)
 {
@@ -16,4 +22,15 @@ bool Controller::start(const std::string& filePath)
   VggDepContainer<std::shared_ptr<VggWork>>::get() = m_work;
 
   return m_work->load(filePath);
+}
+
+void Controller::onClick(const std::string& path)
+{
+  auto code = m_work->getCode(path);
+  vggExec()->evalModule(code);
+}
+
+const std::shared_ptr<VggExec>& Controller::vggExec()
+{
+  return VggDepContainer<std::shared_ptr<VggExec>>::get();
 }

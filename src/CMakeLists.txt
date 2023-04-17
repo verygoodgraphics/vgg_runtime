@@ -51,12 +51,14 @@ if (EMSCRIPTEN)
 else()
   target_link_libraries(vgg_internal vgg_libnode)
   target_sources(vgg_internal PRIVATE
+    PlatformAdapter/Native/Composer/MainComposer.cpp
     PlatformAdapter/Native/Exec/NativeExec.cpp
     PlatformAdapter/Native/Exec/NativeExecImpl.cpp
     PlatformAdapter/Native/Sdk/VggSdkAddon.cpp
     PlatformAdapter/Native/Sdk/VggSdkNodeAdapter.cpp
   )
   target_include_directories(vgg_internal PUBLIC
+    PlatformAdapter/Native/Composer
     PlatformAdapter/Native/Exec
     PlatformAdapter/Native/Sdk
   )

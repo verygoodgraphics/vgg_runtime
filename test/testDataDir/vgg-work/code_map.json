@@ -1,3 +1,4 @@
 {
-  "/artboard/layers/childObjects": "js/1_on_click.mjs"
+  "/artboard/layers/childObjects": "js/1_on_click.mjs",
+  "/artboard/layers": "js/2_on_click.mjs"
 }

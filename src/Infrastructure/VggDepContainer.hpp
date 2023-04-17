@@ -8,10 +8,6 @@ public:
   {
     return m_obj;
   }
-  static void set(const T& obj)
-  {
-    m_obj = obj;
-  }
 
 private:
   VggDepContainer() = default;

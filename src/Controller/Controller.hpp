@@ -14,11 +14,7 @@ public:
     EditMode
   };
 
-  Controller(RunMode mode = NormalMode)
-    : m_mode(mode)
-  {
-  }
-
+  Controller(RunMode mode = NormalMode);
   ~Controller() = default;
 
   bool start(const std::string& filePath);
@@ -29,5 +25,6 @@ public:
 private:
   RunMode m_mode;
   std::shared_ptr<VggWork> m_work;
-  std::shared_ptr<VggExec> m_exec;
+
+  const std::shared_ptr<VggExec>& vggExec();
 };

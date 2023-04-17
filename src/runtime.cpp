@@ -23,7 +23,6 @@
 #include "Entity/InputManager.hpp"
 #include "Systems/RenderSystem.hpp"
 #include "Utils/App.hpp"
-#include "Utils/WindowTrait.hpp"
 #include "Utils/Utils.hpp"
 #include "Utils/Version.hpp"
 

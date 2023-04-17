@@ -44,40 +44,6 @@
 
 namespace VGG
 {
-/** App
- *
- * A singleton app class which provides:
- * 1. A single OpenGL/ES context for skia.
- * 2. Auto pixel ratio support.
- * 3. Basic events support.
- *
- * CRTP: the following methods must be implemented in T to integrate custome window manager
- * bool initContext(int, int, const std::string&)
- *	   It should guarantee the GL context properly created.
- *
- * bool makeContextCurrent()
- *	   It should switch the GL context in current thread after invoke.
- *
- * std::any getProperty(const std::string &):
- *		   It should return the properties about the T
- *		   "window_w" "window_h", "app_w", "app_h" "viewport_w" "viewport_h"
- *
- * void swapBuffer():
- *		   swaps the buffer
- *
- * void onInit():
- *		   Invoked after all init processes complete.
- *
- * void pollEvent():
- *		   It will be invoked in every frame to poll event.
- *		   dispatchEvent() and dispatchGlobalEvent() must be processed properly in pollEvent()
- *
- * SDL event struct is adopted as our event handler framework, sdl runtime is not necessary for App
- *
- * NOTE:
- * It must be derived to use this class, and the singleton app
- * instance can be obtained by App<DerivedApp>::getIntance<DerivedApp>().
- */
 
 #define HAS_MEMBER_FUNCTION_DEF(FUNC)                                                              \
   template<typename T>                                                                             \
@@ -100,19 +66,67 @@ namespace VGG
     };                                                                                             \
   };
 
+/** App
+ *
+ * A singleton app class which provides:
+ * 1. A single OpenGL/ES context for skia.
+ * 2. Auto pixel ratio support.
+ * 3. Basic events support.
+ *
+ * CRTP: the following methods must be implemented in T to integrate custome window manager
+ * SDL event struct is adopted as our event handler framework, sdl runtime is not necessary for App
+ * NOTE:
+ * It must be derived to use this class, and the singleton app
+ * instance can be obtained by App::getIntance<DerivedApp>().
+ */
+
+/*
+ * void initContext();
+ * Init the opengl context
+ * */
 HAS_MEMBER_FUNCTION_DEF(initContext)
+/*
+ * bool makeContextCurrent()
+ *	It should switch the GL context in current thread after invoke.
+ */
 HAS_MEMBER_FUNCTION_DEF(makeContextCurrent)
+/*
+ * std::any setProperty(const std::string &, std::any value):
+ *	It should return the properties about the T
+ *	"window_size", "app_size", "viewport_size"
+ *
+ * */
 HAS_MEMBER_FUNCTION_DEF(getProperty)
+/*
+ *	"window_size": window size
+ *	"viewport_size": viewport size
+ *	"app_size": just caches the command line input (consistent with window_size in most cases,
+ *	depend on backends)
+ * */
 HAS_MEMBER_FUNCTION_DEF(setProperty)
+
+/*
+ * void swapBuffer():
+ *	swaps the buffer
+ * */
 HAS_MEMBER_FUNCTION_DEF(swapBuffer)
+
+/*
+ * void onInit():
+ *	Invoked after all init processes complete.
+ * */
 HAS_MEMBER_FUNCTION_DEF(onInit)
+/*
+ * bool initContext(int, int, const std::string&)
+ *	It should guarantee the GL context properly created.
+ *	*/
 HAS_MEMBER_FUNCTION_DEF(pollEvent)
 
 template<typename T>
 class App : public Uncopyable
 {
 private:
-  inline T* CRTP()
+  inline T* Self()
   {
     static_assert(std::is_base_of<App, T>::value);
     static_assert(has_member_initContext<T>::value);
@@ -225,9 +239,9 @@ protected: // protected members and static members
       return true;
     }
 
-    app->CRTP()->initContext(w, h, title);
+    app->Self()->initContext(w, h, title);
 
-    app->CRTP()->makeContextCurrent();
+    app->Self()->makeContextCurrent();
     // Create Skia
     // get skia interface and make opengl context
     sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
@@ -247,8 +261,8 @@ protected: // protected members and static members
     app->m_skiaState.grContext = grContext;
 
     // get necessary property about window and DPI
-    auto drawSize = std::any_cast<std::pair<int, int>>(app->CRTP()->getProperty("viewport_size"));
-    auto winSize = std::any_cast<std::pair<int, int>>(app->CRTP()->getProperty("window_size"));
+    auto drawSize = std::any_cast<std::pair<int, int>>(app->Self()->getProperty("viewport_size"));
+    auto winSize = std::any_cast<std::pair<int, int>>(app->Self()->getProperty("window_size"));
 
     DEBUG("Drawable size: %d %d", drawSize.first, drawSize.second);
     DEBUG("Window size: %d %d", winSize.first, winSize.second);
@@ -276,7 +290,7 @@ protected: // protected members and static members
     }
 
     // extra initialization
-    app->CRTP()->onInit();
+    app->Self()->onInit();
 
     app->m_timestamp = SkTime::GetMSecs();
     app->m_inited = true;
@@ -477,7 +491,7 @@ public: // public methods
 	INFO("frame %d", m_nFrame++);
 #endif
 
-    CRTP()->pollEvent();
+    Self()->pollEvent();
     // deal with events
 
     // cap the frame rate
@@ -502,7 +516,7 @@ public: // public methods
     canvas->flush();
     canvas->restore();
 
-    CRTP()->swapBuffer();
+    Self()->swapBuffer();
   }
 
 public: // public static methods

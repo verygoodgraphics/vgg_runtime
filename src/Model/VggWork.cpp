@@ -25,12 +25,12 @@ bool VggWork::load(const std::vector<unsigned char>& buffer)
 
 bool VggWork::loadTemplate(LoadZipFn fn)
 {
-  miniz_cpp::zip_file zip_file;
+  m_zipFile.reset(new miniz_cpp::zip_file);
 
   try
   {
-    fn(zip_file);
-    return load(zip_file);
+    fn(*m_zipFile);
+    return load(*m_zipFile);
   }
   catch (const std::runtime_error& err)
   {
@@ -39,26 +39,58 @@ bool VggWork::loadTemplate(LoadZipFn fn)
   }
 }
 
+const std::string VggWork::getCode(const std::string& path) const
+{
+  auto name = m_codeMap.at(path);
+  std::string code;
+  readZipFileEntry(*m_zipFile, name, code);
+  // todo, cache js file?
+  return code;
+}
+
 bool VggWork::load(miniz_cpp::zip_file& zipFile)
 {
   try
   {
-    for (auto entry : zipFile.namelist())
+    std::string file_content;
+    if (readZipFileEntry(zipFile, artboard_file_name, file_content))
     {
-      if (entry.rfind(artboard_file_name, 0) == 0)
-      {
-        auto json = json::parse(zipFile.read(entry));
-        m_designDoc = m_makeDesignDocFn(json);
-
-        return true;
-      }
+      auto tmp_json = json::parse(file_content);
+      m_designDoc = m_makeDesignDocFn(tmp_json);
     }
-    return false;
+    else
+    {
+      return false;
+    }
+
+    if (readZipFileEntry(zipFile, code_map_file_name, file_content))
+    {
+      auto tmp_json = json::parse(file_content);
+      tmp_json.get_to(m_codeMap);
+    }
+
+    return true;
   }
   catch (const std::exception& e)
   {
     return false;
   }
+}
+
+bool VggWork::readZipFileEntry(miniz_cpp::zip_file& zipFile,
+                               const std::string& entryName,
+                               std::string& content) const
+{
+  for (auto entry : zipFile.namelist())
+  {
+    if (entry.rfind(entryName, 0) == 0)
+    {
+      content = zipFile.read(entry);
+      return true;
+    }
+  }
+
+  return false;
 }
 
 const json& VggWork::designDoc() const

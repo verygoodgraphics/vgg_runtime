@@ -24,7 +24,7 @@ protected:
 
   void make_normal_sut()
   {
-    MakeJsonDocFn fn = [](const json& design_json)
+    auto fn = [](const json& design_json)
     {
       auto raw_json_doc = new RawJsonDocument();
       raw_json_doc->setContent(design_json);
@@ -83,4 +83,18 @@ TEST_F(VggWorkTestSuite, Get_design_doc)
 
   // Then
   EXPECT_TRUE(ret_json.is_object());
+}
+
+TEST_F(VggWorkTestSuite, Get_code)
+{
+  // Given
+  std::string file_path = "testDataDir/vgg-work.zip";
+  auto ret = m_sut->load(file_path);
+  EXPECT_EQ(ret, true);
+
+  // When
+  auto ret_code = m_sut->getCode("/artboard/layers/childObjects");
+
+  // Then
+  EXPECT_TRUE(!ret_code.empty());
 }

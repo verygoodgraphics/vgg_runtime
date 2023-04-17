@@ -28,7 +28,7 @@ public:
   const json& designDoc() const;
   const json& layoutDoc() const;
 
-  const std::string& getCode(const json::json_pointer& path) const;
+  const std::string getCode(const std::string& path) const;
 
   void createCode(const json::json_pointer& path, const std::string& name);
   void deleteCode(const json::json_pointer& path);
@@ -42,8 +42,17 @@ private:
   const std::string& codeName(const json::json_pointer& path) const;
   const std::string& jsCode(const std::string& name) const;
 
+  bool readZipFileEntry(miniz_cpp::zip_file& zipFile,
+                        const std::string& entryName,
+                        std::string& content) const;
+
+  std::shared_ptr<miniz_cpp::zip_file> m_zipFile;
+
   JsonDocumentPtr m_designDoc;
-  // JsonDocumentPtr m_layoutDoc;
   MakeJsonDocFn m_makeDesignDocFn;
+
+  std::unordered_map<std::string, std::string> m_codeMap;
+
+  // JsonDocumentPtr m_layoutDoc;
   // MakeJsonDocFn m_makeLayoutDocFn;
 };

@@ -40,9 +40,9 @@ private:
 
   static napi_ref constructor;
 
-  napi_env env_;
-  napi_ref wrapper_;
-  std::shared_ptr<VggSdk> vggSdk_;
+  napi_env m_env;
+  napi_ref m_wrapper;
+  std::shared_ptr<VggSdk> m_vggSdk;
 };
 
 #endif

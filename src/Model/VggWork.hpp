@@ -25,7 +25,7 @@ public:
   bool load(const std::vector<unsigned char>& buffer);
 
   const json& codeMapDoc() const;
-  const json& designDoc() const;
+  JsonDocumentPtr& designDoc();
   const json& layoutDoc() const;
 
   const std::string getCode(const std::string& path) const;

@@ -3,7 +3,7 @@
 
 #include <string>
 
-class DocumentModel;
+class JsonDocument;
 
 class VggSdk
 {
@@ -53,7 +53,7 @@ public:
   //   // char *getInputText(char *id);
 
 private:
-  std::shared_ptr<DocumentModel>& documentModel();
+  std::shared_ptr<JsonDocument>& designDocument();
   // std::string document_json_;
 };
 

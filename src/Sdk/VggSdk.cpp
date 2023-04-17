@@ -1,7 +1,7 @@
 #include "VggSdk.hpp"
 
-#include "DocumentModel.hpp"
 #include "VggDepContainer.hpp"
+#include "VggWork.hpp"
 
 void VggSdk::updateStyle()
 {
@@ -9,32 +9,32 @@ void VggSdk::updateStyle()
 
 // const std::string VggSdk::findElement(const std::string& content)
 // {
-//   return documentModel()->findElement(content);
+//   return designDocument()->findElement(content);
 // }
 
 const std::string VggSdk::documentJson()
 {
-  return documentModel()->documentJson().dump();
+  return designDocument()->content().dump();
 }
 
 // const std::string VggSdk::getElementPath(const std::string& content)
 // {
-//   return documentModel()->getElementPath(content);
+//   return designDocument()->getElementPath(content);
 // }
 
 // const std::string VggSdk::getElementContainerPath(const std::string& content)
 // {
-//   return documentModel()->getElementContainerPath(content);
+//   return designDocument()->getElementContainerPath(content);
 // }
 
 const std::string VggSdk::jsonAt(const std::string& json_pointer)
 {
-  return documentModel()->documentJson()[json_pointer];
+  return designDocument()->content()[json_pointer];
 }
 
 void VggSdk::replaceInDocument(const std::string& json_pointer, const std::string& value)
 {
-  documentModel()->replaceAt(json::json_pointer(json_pointer), value);
+  designDocument()->replaceAt(json::json_pointer(json_pointer), value);
 }
 
 void VggSdk::addToDocument(const std::string& json_pointer, const std::string& value)
@@ -45,7 +45,8 @@ void VggSdk::deleteFromDocument(const std::string& json_pointer)
 {
 }
 
-std::shared_ptr<DocumentModel>& VggSdk::documentModel()
+std::shared_ptr<JsonDocument>& VggSdk::designDocument()
 {
-  return VggDepContainer<std::shared_ptr<DocumentModel>>::get();
+  auto vggWork = VggDepContainer<std::shared_ptr<VggWork>>::get();
+  return vggWork->designDoc();
 }

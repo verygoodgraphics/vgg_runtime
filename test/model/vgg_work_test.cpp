@@ -79,10 +79,10 @@ TEST_F(VggWorkTestSuite, Get_design_doc)
   EXPECT_EQ(ret, true);
 
   // When
-  auto& ret_json = m_sut->designDoc();
+  auto& ret_doc = m_sut->designDoc();
 
   // Then
-  EXPECT_TRUE(ret_json.is_object());
+  EXPECT_TRUE(ret_doc->content().is_object());
 }
 
 TEST_F(VggWorkTestSuite, Get_code)

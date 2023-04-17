@@ -15,6 +15,8 @@ protected:
 
   void SetUp() override
   {
+    GTEST_SKIP() << "Skip deprecated test, use VggWork now";
+
     m_sut_ptr.reset(new VggSdk);
   }
 

@@ -78,15 +78,15 @@
 napi_ref VggSdkNodeAdapter::constructor;
 
 VggSdkNodeAdapter::VggSdkNodeAdapter()
-  : vggSdk_(VggDepContainer<std::shared_ptr<VggSdk>>::get())
-  , env_(nullptr)
-  , wrapper_(nullptr)
+  : m_vggSdk(VggDepContainer<std::shared_ptr<VggSdk>>::get())
+  , m_env(nullptr)
+  , m_wrapper(nullptr)
 {
 }
 
 VggSdkNodeAdapter::~VggSdkNodeAdapter()
 {
-  napi_delete_reference(env_, wrapper_);
+  napi_delete_reference(m_env, m_wrapper);
 }
 
 void VggSdkNodeAdapter::Destructor(napi_env env, void* nativeObject, void* /*finalize_hint*/)
@@ -143,7 +143,7 @@ napi_value VggSdkNodeAdapter::New(napi_env env, napi_callback_info info)
   {
     // Invoked as constructor: `new VggSdk()`
     VggSdkNodeAdapter* obj = new VggSdkNodeAdapter();
-    obj->env_ = env;
+    obj->m_env = env;
 
     NODE_API_CALL(env,
                   napi_wrap(env,
@@ -151,7 +151,7 @@ napi_value VggSdkNodeAdapter::New(napi_env env, napi_callback_info info)
                             obj,
                             VggSdkNodeAdapter::Destructor,
                             nullptr /* finalize_hint */,
-                            &obj->wrapper_));
+                            &obj->m_wrapper));
 
     return _this;
   }
@@ -174,7 +174,7 @@ napi_value VggSdkNodeAdapter::UpdateStyle(napi_env env, napi_callback_info info)
   VggSdkNodeAdapter* obj;
   NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
 
-  obj->vggSdk_->updateStyle();
+  obj->m_vggSdk->updateStyle();
 
   return nullptr;
 }
@@ -187,10 +187,10 @@ napi_value VggSdkNodeAdapter::GetDocumentJson(napi_env env, napi_callback_info i
   VggSdkNodeAdapter* obj;
   NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
 
-  // auto& json = obj->vggSdk_->documentJson();
+  auto& json = obj->m_vggSdk->documentJson();
 
   napi_value ret;
-  // NODE_API_CALL(env, napi_create_string_utf8(env, json.data(), json.size(), &ret));
+  NODE_API_CALL(env, napi_create_string_utf8(env, json.data(), json.size(), &ret));
 
   return ret;
 }
@@ -215,7 +215,7 @@ napi_value VggSdkNodeAdapter::GetJsonAt(napi_env env, napi_callback_info info)
   VggSdkNodeAdapter* obj;
   NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
 
-  // auto& json = obj->vggSdk_->jsonAt(json_pointer_string);
+  // auto& json = obj->m_vggSdk->jsonAt(json_pointer_string);
 
   napi_value ret;
   // NODE_API_CALL(env, napi_create_string_utf8(env, json.data(), json.size(), &ret));
@@ -243,7 +243,7 @@ napi_value VggSdkNodeAdapter::GetElementPath(napi_env env, napi_callback_info in
   VggSdkNodeAdapter* obj;
   NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
 
-  // auto& sdk_ret = obj->vggSdk_->getElementPath(arg1_string);
+  // auto& sdk_ret = obj->m_vggSdk->getElementPath(arg1_string);
   napi_value ret;
   // NODE_API_CALL(env, napi_create_string_utf8(env, sdk_ret.data(), sdk_ret.size(), &ret));
 
@@ -270,7 +270,7 @@ napi_value VggSdkNodeAdapter::GetElementContainerPath(napi_env env, napi_callbac
   VggSdkNodeAdapter* obj;
   NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
 
-  // auto& sdk_ret = obj->vggSdk_->getElementContainerPath(arg1_string);
+  // auto& sdk_ret = obj->m_vggSdk->getElementContainerPath(arg1_string);
   napi_value ret;
   // NODE_API_CALL(env, napi_create_string_utf8(env, sdk_ret.data(), sdk_ret.size(), &ret));
 
@@ -297,7 +297,7 @@ napi_value VggSdkNodeAdapter::FindElement(napi_env env, napi_callback_info info)
   VggSdkNodeAdapter* obj;
   NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
 
-  // auto& sdk_ret = obj->vggSdk_->findElement(arg1_string);
+  // auto& sdk_ret = obj->m_vggSdk->findElement(arg1_string);
   napi_value ret;
   // NODE_API_CALL(env, napi_create_string_utf8(env, sdk_ret.data(), sdk_ret.size(), &ret));
 
@@ -331,7 +331,7 @@ napi_value VggSdkNodeAdapter::ReplaceInDocument(napi_env env, napi_callback_info
 
   VggSdkNodeAdapter* obj;
   NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
-  // obj->vggSdk_->replaceInDocument(json_pointer_string, json_value_string);
+  // obj->m_vggSdk->replaceInDocument(json_pointer_string, json_value_string);
 
   return nullptr;
 }

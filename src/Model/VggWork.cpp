@@ -93,7 +93,7 @@ bool VggWork::readZipFileEntry(miniz_cpp::zip_file& zipFile,
   return false;
 }
 
-const json& VggWork::designDoc() const
+JsonDocumentPtr& VggWork::designDoc()
 {
-  return m_designDoc->content();
+  return m_designDoc;
 }

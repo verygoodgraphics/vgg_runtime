@@ -1,6 +1,7 @@
 #include "MainComposer.hpp"
 
 #include "VggSdkAddon.hpp"
+#include "VggSdk.hpp"
 
 void MainComposer::setup()
 {
@@ -12,11 +13,13 @@ void MainComposer::setup()
   setupVgg(exec);
 
   VggDepContainer<std::shared_ptr<VggExec>>::get() = exec;
+  VggDepContainer<std::shared_ptr<VggSdk>>::get().reset(new VggSdk);
 }
 
 void MainComposer::teardown()
 {
   VggDepContainer<std::shared_ptr<VggExec>>::get().reset();
+  VggDepContainer<std::shared_ptr<VggSdk>>::get().reset();
 }
 
 void MainComposer::setupVgg(std::shared_ptr<VggExec> vggExec)

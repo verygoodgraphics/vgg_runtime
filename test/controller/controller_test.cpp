@@ -44,8 +44,8 @@ TEST_F(ControllerTestSuite, OnClick)
   EXPECT_TRUE(ret);
 
   // When
-  // m_sut.onClick("/artboard/layers/childObjects");
-  m_sut.onClick("/artboard/layers");
+  m_sut.onClick("/artboard/layers/childObjects");
+  // m_sut.onClick("/artboard/layers");
 
   // Then
 }

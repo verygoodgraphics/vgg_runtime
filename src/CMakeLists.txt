@@ -19,7 +19,7 @@ add_library(vgg_internal OBJECT
   Model/JsonSchemaValidator.cpp
   PlatformAdapter/Helper/StringHelper.cpp
 )
-target_include_directories(vgg_internal PUBLIC 
+target_include_directories(vgg_internal PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/Api
   ${CMAKE_CURRENT_SOURCE_DIR}/Exec
   ${CMAKE_CURRENT_SOURCE_DIR}/Model
@@ -29,7 +29,7 @@ target_include_directories(vgg_internal PUBLIC
 )
 target_link_libraries(vgg_internal
   automerge
-  skia 
+  skia
 )
 if (EMSCRIPTEN)
   target_sources(vgg_internal PRIVATE
@@ -98,3 +98,5 @@ else()
 endif()
 
 target_link_libraries(runtime miniz quickjs vgg_internal)
+
+add_subdirectory(Entry)

@@ -321,6 +321,7 @@ private: // private methods
                                  N_MULTISAMPLE,
                                  N_STENCILBITS,
                                  info);
+
     SkSurfaceProps props;
     return SkSurface::MakeFromBackendRenderTarget(m_skiaState.grContext.get(),
                                                   target,
@@ -473,15 +474,19 @@ protected: // protected methods
     return false;
   }
 
+public: // public methods
+  inline bool shouldExit()
+  {
+    return m_shouldExit;
+  }
+
   inline SkCanvas* getCanvas()
   {
     return m_skiaState.getCanvas();
   }
 
-public: // public methods
-  inline bool shouldExit()
-  {
-    return m_shouldExit;
+  inline SkSurface* getSurface(){
+    return m_skiaState.surface.get();
   }
 
   void frame()

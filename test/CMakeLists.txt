@@ -18,6 +18,7 @@ else()
   FetchContent_MakeAvailable(googletest)
 
   add_executable(unit_tests
+    controller/controller_test.cpp
     exec/vgg_exec_test.cpp
     model/automerge_test.cpp
     model/design_document_model_test.cpp

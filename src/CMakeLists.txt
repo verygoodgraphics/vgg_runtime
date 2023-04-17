@@ -14,6 +14,7 @@ add_executable(runtime
 )
 
 add_library(vgg_internal OBJECT
+  Controller/Controller.cpp
   Exec/VggExec.cpp
   Model/DocumentModel.cpp
   Model/JsonSchemaValidator.cpp
@@ -24,6 +25,7 @@ add_library(vgg_internal OBJECT
 )
 target_include_directories(vgg_internal PUBLIC 
   ${CMAKE_CURRENT_SOURCE_DIR}/Api
+  ${CMAKE_CURRENT_SOURCE_DIR}/Controller
   ${CMAKE_CURRENT_SOURCE_DIR}/Exec
   ${CMAKE_CURRENT_SOURCE_DIR}/Infrastructure
   ${CMAKE_CURRENT_SOURCE_DIR}/Model

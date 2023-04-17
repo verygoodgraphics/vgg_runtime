@@ -1,0 +1,380 @@
+{
+    "artboard": [
+        {
+            "alphaMaskBy": [],
+            "bounds": {
+                "class": "rect",
+                "constrainProportions": false,
+                "height": 82.0,
+                "width": 852.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            "class": "artboard",
+            "contextSettings": {
+                "blendMode": 0,
+                "class": "graphicsContextSettings",
+                "isolateBlending": false,
+                "opacity": 1.0,
+                "transparencyKnockoutGroup": 0
+            },
+            "frame": {
+                "class": "rect",
+                "constrainProportions": false,
+                "height": 82.0,
+                "width": 852.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            "hasBackgroundColor": false,
+            "id": "1",
+            "isLocked": false,
+            "layers": [
+                {
+                    "alphaMaskBy": [],
+                    "bounds": {
+                        "class": "rect",
+                        "constrainProportions": false,
+                        "height": 82.0,
+                        "width": 852.0,
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "childObjects": [
+                        {
+                            "alphaMaskBy": [],
+                            "bounds": {
+                                "class": "rect",
+                                "constrainProportions": false,
+                                "height": 82.0,
+                                "width": 852.0,
+                                "x": 0.0,
+                                "y": 0.0
+                            },
+                            "class": "symbolInstance",
+                            "contextSettings": {
+                                "blendMode": 0,
+                                "class": "graphicsContextSettings",
+                                "isolateBlending": false,
+                                "opacity": 1.0,
+                                "transparencyKnockoutGroup": 0
+                            },
+                            "frame": {
+                                "class": "rect",
+                                "constrainProportions": false,
+                                "height": 82.0,
+                                "width": 852.0,
+                                "x": 0.0,
+                                "y": 0.0
+                            },
+                            "id": "A192FDBA-B4EC-4C84-A775-C4631AF66890",
+                            "isLocked": false,
+                            "maskType": 0,
+                            "matrix": [
+                                1.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                0.0,
+                                0.0
+                            ],
+                            "name": "Type something",
+                            "outlineMaskBy": [],
+                            "overrideValues": [
+                                {
+                                    "class": "overrideValue",
+                                    "overrideName": "BBB5C901-B00F-4818-AC74-4BAD056D4702_stringValue",
+                                    "value": "123"
+                                }
+                            ],
+                            "style": {
+                                "blurs": [
+                                    {
+                                        "center": [
+                                            0.5,
+                                            0.5
+                                        ],
+                                        "class": "blur",
+                                        "isEnabled": false,
+                                        "motionAngle": 0.0,
+                                        "radius": 10.0,
+                                        "saturation": 1.0,
+                                        "type": 0
+                                    }
+                                ],
+                                "borders": [],
+                                "class": "style",
+                                "colorControls": {
+                                    "brightness": 0.0,
+                                    "class": "colorControls",
+                                    "contrast": 1.0,
+                                    "hue": 0.0,
+                                    "isEnabled": false,
+                                    "saturation": 1.0
+                                },
+                                "fills": [],
+                                "shadows": []
+                            },
+                            "symbolID": "C5D94176-1101-44D7-AC5F-FCDDEBC38F0E",
+                            "visible": true
+                        }
+                    ],
+                    "class": "layer",
+                    "contextSettings": {
+                        "blendMode": 0,
+                        "class": "graphicsContextSettings",
+                        "isolateBlending": false,
+                        "opacity": 1.0,
+                        "transparencyKnockoutGroup": 0
+                    },
+                    "frame": {
+                        "class": "rect",
+                        "constrainProportions": false,
+                        "height": 82.0,
+                        "width": 852.0,
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "id": "1",
+                    "isLocked": false,
+                    "maskType": 0,
+                    "matrix": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    "name": "layer",
+                    "outlineMaskBy": [],
+                    "style": {
+                        "blurs": [],
+                        "borders": [],
+                        "class": "style",
+                        "fills": [],
+                        "shadows": []
+                    },
+                    "visible": true
+                }
+            ],
+            "maskType": 0,
+            "matrix": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+            ],
+            "name": "artboard",
+            "outlineMaskBy": [],
+            "style": {
+                "blurs": [],
+                "borders": [],
+                "class": "style",
+                "fills": [],
+                "shadows": []
+            },
+            "visible": true
+        }
+    ],
+    "fileName": "hello-sketch",
+    "fileType": 1,
+    "symbolMaster": [
+        {
+            "allowsOverrides": true,
+            "alphaMaskBy": [],
+            "backgroundColor": {
+                "alpha": 1.0,
+                "blue": 1.0,
+                "class": "color",
+                "green": 1.0,
+                "red": 1.0
+            },
+            "bounds": {
+                "class": "rect",
+                "constrainProportions": false,
+                "height": 82.0,
+                "width": 852.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            "childObjects": [
+                {
+                    "alphaMaskBy": [],
+                    "attr": [
+                        {
+                            "baseline": 0,
+                            "baselineShift": 0.0,
+                            "class": "fontAttr",
+                            "contextSettings": {
+                                "blendMode": 0,
+                                "class": "graphicsContextSettings",
+                                "isolateBlending": false,
+                                "opacity": 1.0,
+                                "transparencyKnockoutGroup": 0
+                            },
+                            "fillColor": {
+                                "alpha": 1.0,
+                                "blue": 0.02778366914103926,
+                                "class": "color",
+                                "green": 0.1824396176464043,
+                                "red": 0.9492753623188406
+                            },
+                            "horizontalAlignment": 2,
+                            "horizontalScale": 1.0,
+                            "kerning": false,
+                            "length": 14,
+                            "letterSpacing": 30.0,
+                            "lettertransform": 0,
+                            "lineSpace": 24.0,
+                            "linethrough": false,
+                            "name": "AvenirNext-Italic",
+                            "proportionalSpacing": 1.0,
+                            "rotate": 0.0,
+                            "size": 60.0,
+                            "textParagraph": {
+                                "class": "textParagraph",
+                                "paragraphSpacing": 10.0
+                            },
+                            "underline": 0,
+                            "verticalScale": 1.0
+                        }
+                    ],
+                    "bounds": {
+                        "class": "rect",
+                        "constrainProportions": false,
+                        "height": 82.0,
+                        "width": 852.0,
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "class": "text",
+                    "content": "Type something",
+                    "contextSettings": {
+                        "blendMode": 0,
+                        "class": "graphicsContextSettings",
+                        "isolateBlending": false,
+                        "opacity": 1.0,
+                        "transparencyKnockoutGroup": 0
+                    },
+                    "frame": {
+                        "class": "rect",
+                        "constrainProportions": false,
+                        "height": 82.0,
+                        "width": 852.0,
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "frameMode": 1,
+                    "id": "BBB5C901-B00F-4818-AC74-4BAD056D4702",
+                    "isLocked": false,
+                    "maskType": 0,
+                    "matrix": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    "name": "Type something",
+                    "outlineMaskBy": [],
+                    "style": {
+                        "blurs": [
+                            {
+                                "center": [
+                                    0.5,
+                                    0.5
+                                ],
+                                "class": "blur",
+                                "isEnabled": false,
+                                "motionAngle": 0.0,
+                                "radius": 10.0,
+                                "saturation": 1.0,
+                                "type": 0
+                            }
+                        ],
+                        "borders": [],
+                        "class": "style",
+                        "colorControls": {
+                            "brightness": 0.0,
+                            "class": "colorControls",
+                            "contrast": 1.0,
+                            "hue": 0.0,
+                            "isEnabled": false,
+                            "saturation": 1.0
+                        },
+                        "fills": [],
+                        "shadows": []
+                    },
+                    "verticalAlignment": 0,
+                    "visible": true
+                }
+            ],
+            "class": "symbolMaster",
+            "contextSettings": {
+                "blendMode": 0,
+                "class": "graphicsContextSettings",
+                "isolateBlending": false,
+                "opacity": 1.0,
+                "transparencyKnockoutGroup": 0
+            },
+            "frame": {
+                "class": "rect",
+                "constrainProportions": false,
+                "height": 82.0,
+                "width": 852.0,
+                "x": 100.0,
+                "y": 0.0
+            },
+            "hasBackgroundColor": false,
+            "id": "5EAA1AA2-6818-4134-BC32-C861F37E4FF7",
+            "includeBackgroundColorInInstance": false,
+            "isLocked": false,
+            "maskType": 0,
+            "matrix": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                100.0,
+                0.0
+            ],
+            "name": "Type something",
+            "outlineMaskBy": [],
+            "overrideProperties": [],
+            "style": {
+                "blurs": [
+                    {
+                        "center": [
+                            0.5,
+                            0.5
+                        ],
+                        "class": "blur",
+                        "isEnabled": false,
+                        "motionAngle": 0.0,
+                        "radius": 10.0,
+                        "saturation": 1.0,
+                        "type": 0
+                    }
+                ],
+                "borders": [],
+                "class": "style",
+                "colorControls": {
+                    "brightness": 0.0,
+                    "class": "colorControls",
+                    "contrast": 1.0,
+                    "hue": 0.0,
+                    "isEnabled": false,
+                    "saturation": 1.0
+                },
+                "fills": [],
+                "shadows": []
+            },
+            "symbolID": "C5D94176-1101-44D7-AC5F-FCDDEBC38F0E",
+            "visible": true
+        }
+    ]
+}

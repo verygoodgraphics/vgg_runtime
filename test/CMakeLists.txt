@@ -36,9 +36,18 @@ else()
     model
   )
 
+  set(TMP_VGG_WORK_ZIP_FILE ${CMAKE_CURRENT_SOURCE_DIR}/testDataDir/vgg-work.zip)
+  add_custom_command(TARGET unit_tests POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar cvf ${TMP_VGG_WORK_ZIP_FILE} --format=zip -- .
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/testDataDir/vgg-work
+  )
   add_custom_command(TARGET unit_tests POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/testDataDir $<TARGET_FILE_DIR:unit_tests>/testDataDir
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/asset $<TARGET_FILE_DIR:unit_tests>/asset)
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/asset $<TARGET_FILE_DIR:unit_tests>/asset
+  )
+  add_custom_command(TARGET unit_tests POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E rm ${TMP_VGG_WORK_ZIP_FILE}
+  )
 
   target_link_libraries(unit_tests PRIVATE vgg_internal gtest_main gmock)
   include(GoogleTest)

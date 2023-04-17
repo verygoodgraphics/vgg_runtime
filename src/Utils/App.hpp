@@ -123,6 +123,8 @@ HAS_MEMBER_FUNCTION_DEF(onInit)
  * */
 HAS_MEMBER_FUNCTION_DEF(pollEvent)
 
+#undef HAS_MEMBER_FUNCTION_DEF
+
 template<typename T>
 class App : public Uncopyable
 {

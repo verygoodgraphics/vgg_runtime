@@ -999,16 +999,34 @@ set(SKIA_SRCS ${SKIA_SRCS}
   "custom/SkDropInnerShadowImageFilter.cpp"
 )
 if (NOT EMSCRIPTEN)
-  if (APPLE)
+  if (VGG_VAR_OS_STR STREQUAL "macOS")
     set(SKIA_SRCS ${SKIA_SRCS}
       #"custom/GrGLMakeNativeInterface_angle.cpp"
       "src/gpu/gl/mac/GrGLMakeNativeInterface_mac.cpp"
     )
-  else()
-    set(SKIA_SRCS ${SKIA_SRCS}
-      "src/gpu/gl/glx/GrGLMakeNativeInterface_glx.cpp"
-      "src/gpu/gl/glx/GrGLMakeGLXInterface.cpp"
-    )
+  elseif(VGG_VAR_OS_STR STREQUAL "Linux")
+    if(VGG_VAR_GL_BACKEND STREQUAL "EGL")
+      set(SKIA_SRCS ${SKIA_SRCS}
+        "src/gpu/gl/egl/GrGLMakeNativeInterface_egl.cpp"
+        "src/gpu/gl/egl/GrGLMakeEGLInterface.cpp"
+      )
+    else()
+      set(SKIA_SRCS ${SKIA_SRCS}
+        "src/gpu/gl/glx/GrGLMakeNativeInterface_glx.cpp"
+        "src/gpu/gl/glx/GrGLMakeGLXInterface.cpp"
+      )
+    endif()
+  elseif(VGG_VAR_OS_STR STREQUAL "Windows")
+    if(VGG_VAR_GL_BACKEND STREQUAL "EGL")
+      set(SKIA_SRCS ${SKIA_SRCS}
+        "src/gpu/gl/egl/GrGLMakeNativeInterface_egl.cpp"
+        "src/gpu/gl/egl/GrGLMakeEGLInterface.cpp"
+      )
+    else()
+      set(SKIA_SRCS ${SKIA_SRCS}
+        "src/gpu/gl/win/GrGLMakeNativeInterface_win.cpp"
+      )
+    endif()
   endif()
   if(VGG_CPU_ARCH STREQUAL "X86")
     set(SKIA_SRCS ${SKIA_SRCS}

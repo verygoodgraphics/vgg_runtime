@@ -16,6 +16,16 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES "^arm" OR CMAKE_SYSTEM_PROCESSOR MATCHES "^aar
   set(VGG_CPU_ARCH "ARM")
 endif()
 
+#introduce customized cmake vars, see VggVars.cmake in cmake for details
+set(VGG_VAR_ARCH_TYPE ${VGG_CPU_ARCH} CACHE STRING "" FORCE)
+set(VGG_EGL_BACKEND OFF CACHE BOOL "Build runtime with egl backend for offscreen rendering" FORCE)
+if(VGG_EGL_BACKEND)
+  set(VGG_VAR_GL_BACKEND "EGL" CACHE STRING "" FORCE)
+else()
+  set(VGG_VAR_GL_BACKEND "SDL" CACHE STRING "" FORCE)
+endif()
+include(VggVars)
+
 
 # find system libs
 if (NOT EMSCRIPTEN)
@@ -44,3 +54,6 @@ include_directories(${VGG_SRC_INCLUDE_PATH})
 # add test targets
 include(CTest)
 add_subdirectory(test)
+
+get_directory_property(PreprocessorDefs COMPILE_DEFINITIONS)
+message("Preprocessor definitions: ${PreprocessorDefs}")

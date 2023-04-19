@@ -1,13 +1,13 @@
 # This file will output some cmake varibles for configure control and global macros for in C/C++ detection.
-# Each cmake variable could generate a corresponding C/C++ macro.
-
+# Each cmake 
 # 
-# --------- CMake Variables ---------
+# --------- CMake Variables Inputs ---------
 # VGG_VAR_PLATFORM_TARGET
 # VGG_VAR_ARCH_TYPE
 # VGG_VAR_GL_BACKEND
 
 
+# Above cmake variables could generate corresponding C/C++ macro.
 # --------- C/C++ Macros ---------
 # VGG_OS_MACOS
 #     VGG_TARGET_IOS_SIM
@@ -28,10 +28,7 @@ list(APPEND VGG_ANDROID_TARGET_LIST "Android_arm7" "Android_arm8" "Android_x86" 
 list(APPEND VGG_LINUX_TARGET_LIST "amd64")
 list(APPEND VGG_ARCH_TYPE_LIST "X86" "ARM")
 list(APPEND VGG_GL_BACKENDS_LIST "EGL" "SDL")
-
-set(VGG_VAR_PLATFORM_TARGET "macOS")
-set(VGG_VAR_ARCH_TYPE "X86")
-set(VGG_VAR_GL_BACKEND "SDL")
+set(VGG_VAR_PLATFORM_TARGET "macOS" CACHE STRING "" FORCE)
 
 # Variables checking
 if(NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_APPLE_TARGET_STR_LIST 
@@ -47,14 +44,14 @@ endif()
 
 
 if(APPLE)
-	set(_VGG_OS_STR "macOS")
+	set(VGG_VAR_OS_STR "macOS" CACHE STRING "" FORCE)
 	add_compile_definitions(VGG_OS_MACOS)
 elseif(WIN32)
-	set(_VGG_OS_STR "Windows")
+	set(VGG_VAR_OS_STR "Windows" CACHE STRING "" FORCE)
 	add_compile_definitions(VGG_OS_WIN NOMINMAX)
 elseif(UNIX)
-    # NOTE: When android.toolchain.cmake specified on windows, this branch also reached
-	set(_VGG_OS_STR "Linux")
+    # NOTE: When android.toolchain.cmake specified on windows, this branch also reached, A better way for platform detection is necessary.
+	set(VGG_VAR_OS_STR "Linux" CACHE STRING "" FORCE)
 	add_compile_definitions(VGG_OS_LINUX)
 endif()
 
@@ -64,17 +61,18 @@ elseif(VGG_VAR_ARCH_TYPE STREQUAL "ARM")
 	add_compile_definitions(VGG_ARCH_ARM)
 endif()
 
-if(VGG_VAR_GL_BACKEND STREQUAL "SDL")
-		add_compile_definitions(VGG_GL_BACKEND_SDL)
-elseif(VGG_VAR_GL_BACKEND STREQUAL "EGL")
+if(VGG_VAR_GL_BACKEND STREQUAL "EGL")
+	if(VGG_VAR_OS_STR STREQUAL "macOS" )	
+		message(FATAL_ERROR "macOS does not support EGL")	
+	elseif()
 		add_compile_definitions(VGG_GL_BACKEND_EGL)
+	endif()
 endif()
 
-endif()
 
-if(_VGG_OS_STR STREQUAL "macOS")
+if(VGG_VAR_OS_STR STREQUAL "macOS")
 		if(NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_APPLE_TARGET_STR_LIST)
-				message(FATAL_ERROR "VGG_VAR_PLATFORM_TARGET: ${VGG_VAR_PLATFORM_TARGET} is not compatible with ${_VGG_OS_STR}")
+				message(FATAL_ERROR "VGG_VAR_PLATFORM_TARGET: ${VGG_VAR_PLATFORM_TARGET} is not compatible with ${VGG_VAR_OS_STR}")
 	endif()
 	# PLATFORM 是ios.toolchain.cmake 的变量
 	if(VGG_VAR_PLATFORM_TARGET STREQUAL "iOS")
@@ -88,10 +86,10 @@ elseif(VGG_VAR_PLATFORM_TARGET STREQUAL "macOS")
 		add_compile_definitions(VGG_TARGET_MACOS)
 		set(PLATFORM "MACOS")
 	endif()
-elseif(_VGG_OS_STR STREQUAL "Windows")
+elseif(VGG_VAR_OS_STR STREQUAL "Windows")
 		if(${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_WIN_TARGET_LIST)
 		# Windows Target
-		# message(FATAL_ERROR "VGG_VAR_PLATFORM_TARGET: ${VGG_VAR_PLATFORM_TARGET} is not compatible with ${_VGG_OS_STR}")
+		# message(FATAL_ERROR "VGG_VAR_PLATFORM_TARGET: ${VGG_VAR_PLATFORM_TARGET} is not compatible with ${VGG_VAR_OS_STR}")
 		add_compile_definitions(VGG_TARGET_WIN)
 
 elseif(${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_ANDROID_TARGET_LIST)
@@ -110,12 +108,12 @@ elseif(${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_ANDROID_TARGET_LIST)
 			set(ANDROID_ABI "x86_64")
 		endif()
 	elseif()
-			message(FATAL_ERROR "VGG_VAR_PLATFORM_TARGET: ${VGG_VAR_PLATFORM_TARGET} is not compatible with ${_VGG_OS_STR}")
+			message(FATAL_ERROR "VGG_VAR_PLATFORM_TARGET: ${VGG_VAR_PLATFORM_TARGET} is not compatible with ${VGG_VAR_OS_STR}")
 	endif()
-elseif(_VGG_OS_STR STREQUAL "Linux")
+elseif(VGG_VAR_OS_STR STREQUAL "Linux")
 
 else()
-	message(FATAL_ERROR "Unsupported OS: ${_VGG_OS_STR}")
+		message(FATAL_ERROR "Unsupported OS: ${VGG_VAR_OS_STR}")
 endif()
 
 # VGG_OPTIMIAZED

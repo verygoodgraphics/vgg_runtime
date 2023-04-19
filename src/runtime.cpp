@@ -25,13 +25,6 @@
 #include "Utils/FileManager.hpp"
 #include "Utils/Version.hpp"
 #include "Utils/Scheduler.hpp"
-#include "VggEnv.hpp"
-#include "VggExec.hpp"
-#ifdef EMSCRIPTEN
-#include "BrowserJSEngine.hpp"
-#else
-#include "NativeExec.hpp"
-#endif
 
 using namespace VGG;
 
@@ -143,8 +136,7 @@ protected:
     }
 
     auto& panning = m_zoomer.panning;
-    if (!panning && type == SDL_MOUSEBUTTONDOWN &&
-        (SDL_GetKeyboardState(nullptr)[SDL_SCANCODE_SPACE]))
+    if (!panning && type == SDL_MOUSEBUTTONDOWN && (SDL_GetKeyboardState(nullptr)[SDL_SCANCODE_SPACE]))
     {
       panning = true;
       InputManager::setMouseCursor(MouseEntity::CursorType::MOVE);
@@ -218,9 +210,6 @@ extern "C"
   }
   void emscripten_main(int width, int height)
   {
-    // inject jsEngine & vggEnv
-    VggExec exec(std::make_shared<BrowserJSEngine>(), std::make_shared<VggEnv>());
-
     Runtime* app = App::getInstance<Runtime>(width, height);
     ASSERT(app);
     if (auto fm = FileManager::getInstance(); fm && fm->fileCount() < 1)
@@ -234,9 +223,6 @@ extern "C"
 #else
 int main(int argc, char** argv)
 {
-  // inject jsEngine & vggEnv
-  // VggExec exec(std::make_shared<NativeExec>(), std::make_shared<VggEnv>());
-
   argparse::ArgumentParser program("vgg", Version::get());
   program.add_argument("-l", "--load").help("load from vgg or sketch file");
   program.add_argument("-c", "--convert")

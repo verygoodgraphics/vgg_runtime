@@ -27,7 +27,10 @@ target_include_directories(vgg_internal PUBLIC
   ${VGG_CONTRIB_VALIJSON_INCLUDE}
   PlatformAdapter/Helper
 )
-target_link_libraries(vgg_internal automerge)
+target_link_libraries(vgg_internal
+  automerge
+  skia 
+)
 if (EMSCRIPTEN)
   target_sources(vgg_internal PRIVATE
     PlatformAdapter/Browser/Exec/BrowserJSEngine.cpp
@@ -80,17 +83,18 @@ if (EMSCRIPTEN)
     "
     SUFFIX ".js"
   )
-  target_link_libraries(runtime skia miniz quickjs vgg_internal)
 elseif (APPLE)
   set_target_properties(runtime PROPERTIES
     COMPILE_FLAGS "-DSK_GL -I${SDL2_INCLUDE_DIRS}/.."
     LINK_FLAGS ${SDL2_LIBRARIES}
   )
-  target_link_libraries(runtime skia miniz quickjs vgg_internal ${OPENGL_LIBRARIES})
+  target_link_libraries(vgg_internal ${OPENGL_LIBRARIES})
 else()
   set_target_properties(runtime PROPERTIES
     COMPILE_FLAGS "-DSK_GL"
   )
-  target_link_libraries(runtime skia miniz quickjs vgg_internal SDL2 ${OPENGL_LIBRARIES})
+  target_link_libraries(vgg_internal SDL2 ${OPENGL_LIBRARIES})
   install(TARGETS runtime skia zlib libpng libwebp libjpeg-turbo freetype)
 endif()
+
+target_link_libraries(runtime miniz quickjs vgg_internal)

@@ -36,8 +36,8 @@ if (NOT EMSCRIPTEN)
     file(REMOVE ${DOWNLOAD_AT_PATH})
   endif()
 
-  add_library(vgg_libnode STATIC
-    node/src/node_snapshot_stub.cc)
+  add_library(vgg_libnode STATIC empty.cpp)
+  add_library(vgg_libnode_stub STATIC node/src/node_snapshot_stub.cc)
   
   add_custom_command(TARGET vgg_libnode
     PRE_BUILD
@@ -49,39 +49,90 @@ if (NOT EMSCRIPTEN)
     node/src
     node/deps/uv/include
     node/deps/v8/include)
-  target_link_directories(vgg_libnode PUBLIC
-    node/out/Release)
-  target_link_libraries(vgg_libnode PRIVATE 
-    base64
-    base64_neon64
-    brotli
-    cares
-    histogram
-    icudata
-    icui18n
-    icutools
-    icuucx
-    llhttp
-    nghttp2
-    nghttp3
-    ngtcp2
-    node
-    openssl
-    simdutf
-    torque_base
-    uv
-    uvwasi
-    v8_base_without_compiler
-    v8_compiler
-    v8_init
-    v8_initializers
-    v8_libbase
-    v8_libplatform
-    v8_snapshot
-    v8_zlib
-    zlib
-    zlib_adler32_simd
-    zlib_arm_crc32
-    zlib_inflate_chunk_simd
-  )
+  target_include_directories(vgg_libnode_stub PUBLIC
+    node/src
+    node/deps/uv/include
+    node/deps/v8/include)
+  if(APPLE)
+    target_link_directories(vgg_libnode PUBLIC node/out/Release)
+    target_link_libraries(vgg_libnode PRIVATE 
+      base64
+      base64_neon64
+      brotli
+      cares
+      histogram
+      icudata
+      icui18n
+      icutools
+      icuucx
+      llhttp
+      nghttp2
+      nghttp3
+      ngtcp2
+      node
+      openssl
+      simdutf
+      torque_base
+      uv
+      uvwasi
+      v8_base_without_compiler
+      v8_compiler
+      v8_init
+      v8_initializers
+      v8_libbase
+      v8_libplatform
+      v8_snapshot
+      v8_zlib
+      vgg_libnode_stub
+    )
+  else()
+    target_link_directories(vgg_libnode PUBLIC 
+      node/out/Release/obj.target
+      node/out/Release/obj.target/deps/base64
+      node/out/Release/obj.target/deps/brotli 
+      node/out/Release/obj.target/deps/cares
+      node/out/Release/obj.target/deps/histogram
+      node/out/Release/obj.target/deps/llhttp
+      node/out/Release/obj.target/deps/nghttp2
+      node/out/Release/obj.target/deps/ngtcp2
+      node/out/Release/obj.target/deps/openssl
+      node/out/Release/obj.target/deps/simdutf
+      node/out/Release/obj.target/deps/uv
+      node/out/Release/obj.target/deps/uvwasi
+      node/out/Release/obj.target/tools/icu
+      node/out/Release/obj.target/tools/v8_gypfiles
+    )
+    target_link_libraries(vgg_libnode PRIVATE 
+      "-Wl,--whole-archive"
+      base64 
+      base64_avx
+      base64_avx2 
+      base64_sse41 
+      base64_sse42 
+      base64_ssse3 
+      brotli 
+      cares 
+      histogram 
+      icutools
+      llhttp 
+      nghttp2 
+      nghttp3 
+      ngtcp2 
+      node
+      openssl
+      simdutf 
+      torque_base
+      uv 
+      uvwasi 
+      v8_base_without_compiler 
+      v8_compiler 
+      v8_initializers 
+      v8_libbase 
+      v8_libplatform 
+      v8_snapshot
+      v8_zlib 
+      vgg_libnode_stub
+      "-Wl,--no-whole-archive"
+    )
+  endif()
 endif()

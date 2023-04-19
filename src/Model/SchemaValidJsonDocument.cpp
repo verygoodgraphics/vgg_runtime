@@ -47,16 +47,6 @@ void SchemaValidJsonDocument::deleteAt(const json::json_pointer& path)
     { cb_doc->deleteAt(cb_path); });
 }
 
-const json& SchemaValidJsonDocument::content() const
-{
-  return m_jsonDoc->content();
-}
-
-void SchemaValidJsonDocument::setContent(const json& content)
-{
-  return m_jsonDoc->setContent(content);
-}
-
 void SchemaValidJsonDocument::editTemplate(
   const json::json_pointer& path,
   const json& value,
@@ -142,9 +132,4 @@ void SchemaValidJsonDocument::calculateRelativePath(const json::json_pointer& an
   auto& current = currentPath.back();
   calculateRelativePath(ancestorPath, currentPath.parent_pointer(), relativePath);
   relativePath.push_back(current);
-}
-
-void SchemaValidJsonDocument::save()
-{
-  m_jsonDoc->save();
 }

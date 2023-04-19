@@ -17,8 +17,10 @@ add_library(vgg_internal OBJECT
   Controller/Controller.cpp
   Exec/VggExec.cpp
   Model/DocumentModel.cpp
+  Model/JsonDocument.cpp
   Model/JsonSchemaValidator.cpp
   Model/SchemaValidJsonDocument.cpp
+  Model/SubjectJsonDocument.cpp
   Model/VggWork.cpp
   Sdk/VggSdk.cpp
   PlatformAdapter/Helper/StringHelper.cpp

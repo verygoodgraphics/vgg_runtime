@@ -12,14 +12,9 @@ public:
   SchemaValidJsonDocument(const JsonDocumentPtr& jsonDoc,
                           const ValidatorPtr& schemaValidator = ValidatorPtr());
 
-  const json& content() const override;
-  void setContent(const json& document) override;
-
   void addAt(const json::json_pointer& path, const json& value) override;
   void replaceAt(const json::json_pointer& path, const json& value) override;
   void deleteAt(const json::json_pointer& path) override;
-
-  void save() override;
 
 private:
   ValidatorPtr m_validator;

@@ -24,7 +24,7 @@ if(VGG_EGL_BACKEND)
 else()
   set(VGG_VAR_GL_BACKEND "SDL" CACHE STRING "" FORCE)
 endif()
-include(VggVars)
+include(VGGVars)
 
 
 # find system libs

@@ -1114,4 +1114,8 @@ set_source_files_properties(
   PROPERTIES
   COMPILE_FLAGS -DSK_FONT_FILE_PREFIX=\\".\\"
 )
-target_link_libraries(skia zlib libpng freetype pthread libgifcodec libjpeg-turbo libwebp)
+if(VGG_VAR_GL_BACKEND STREQUAL "EGL")
+  target_link_libraries(skia zlib libpng freetype pthread libgifcodec libjpeg-turbo libwebp OpenGL::EGL)
+else()
+  target_link_libraries(skia zlib libpng freetype pthread libgifcodec libjpeg-turbo libwebp)
+endif()

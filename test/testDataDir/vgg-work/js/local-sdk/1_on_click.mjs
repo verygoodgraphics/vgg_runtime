@@ -9,7 +9,11 @@ const documentString = vggSdk.getDocumentJson();
 console.log("document json string from sdk is: ", documentString);
 
 // When
-const path = "/artboard";
-vggSdk.deleteFromDocument(path);
+try {
+  const path = "/artboard";
+  vggSdk.deleteFromDocument(path);
+} catch (error) {
+  console.error("delete throw exception, document not changed. Exception: ", error);
+}
 // Then
 console.log("document json string from sdk is: ", vggSdk.getDocumentJson());

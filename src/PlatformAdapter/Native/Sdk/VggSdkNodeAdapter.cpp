@@ -366,7 +366,14 @@ napi_value VggSdkNodeAdapter::DeleteFromDocument(napi_env env, napi_callback_inf
 
   VggSdkNodeAdapter* obj;
   NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
-  obj->m_vggSdk->deleteFromDocument(json_pointer_string);
+  try
+  {
+    obj->m_vggSdk->deleteFromDocument(json_pointer_string);
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
 
   return nullptr;
 }

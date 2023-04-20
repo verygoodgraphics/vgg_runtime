@@ -2,6 +2,7 @@
 #define VGG_SDK_HPP
 
 #include <string>
+#include <memory>
 
 class JsonDocument;
 

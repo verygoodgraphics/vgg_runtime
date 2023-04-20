@@ -13,6 +13,8 @@
 using ::testing::_;
 using ::testing::Return;
 
+constexpr auto design_doc_schema_file = "./asset/vgg-format.json";
+
 class ControllerTestSuite : public ::testing::Test
 {
 protected:
@@ -82,7 +84,25 @@ TEST_F(ControllerTestSuite, OnClick_observer)
   EXPECT_FALSE(design_doc_json == new_design_doc_json);
 }
 
-TEST_F(ControllerTestSuite, Validator)
+TEST_F(ControllerTestSuite, Validator_reject_deletion)
 {
-  // todo, validator
+  // Given
+  auto mock_observer = new MockJsonDocumentObserver();
+
+  m_sut.reset(new Controller(JsonDocumentObserverPtr(mock_observer)));
+  std::string file_path = "testDataDir/vgg-work.zip";
+  auto ret = m_sut->start(file_path, design_doc_schema_file);
+  EXPECT_TRUE(ret);
+
+  auto vgg_work = VggDepContainer<std::shared_ptr<VggWork>>::get();
+  auto design_doc_json = vgg_work->designDoc()->content();
+
+  // When
+  m_sut->onClick("/artboard/layers/0/childObjects");
+
+  // Then
+  EXPECT_CALL(*mock_observer, didDelete(_)).Times(0);
+
+  using ::testing::Mock;
+  Mock::VerifyAndClearExpectations(mock_observer);
 }

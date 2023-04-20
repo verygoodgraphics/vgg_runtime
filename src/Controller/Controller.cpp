@@ -47,6 +47,7 @@ void Controller::initVggWork(const char* designDocSchemaFilePath)
     {
       std::ifstream schema_fs(design_schema_file_path);
       json schema = json::parse(schema_fs);
+      design_doc_validator.reset(new JsonSchemaValidator);
       design_doc_validator->setRootSchema(schema);
     }
     auto schema_valid_doc =

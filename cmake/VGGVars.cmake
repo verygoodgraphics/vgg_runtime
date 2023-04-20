@@ -30,7 +30,6 @@
 #  "Linux" and macro VGG_BUILDING_OS_LINUX defined 
 #  "Windows" and macro VGG_BUILDING_OS_WIN defined
 
-# Macro VGG_OPTIMIZED will be defined when build type is Debug or RelWithDebInfo
 # Macro VGG_GL_BACKEND_EGL will be defined if VGG_VAR_GL_BACKEND is "EGL"
 
 

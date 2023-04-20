@@ -97,12 +97,13 @@ TEST_F(ControllerTestSuite, Validator_reject_deletion)
   auto vgg_work = VggDepContainer<std::shared_ptr<VggWork>>::get();
   auto design_doc_json = vgg_work->designDoc()->content();
 
+  // expect call
+  EXPECT_CALL(*mock_observer, didDelete(_)).Times(0);
+
   // When
   m_sut->onClick("/artboard/layers/0/childObjects");
 
   // Then
-  EXPECT_CALL(*mock_observer, didDelete(_)).Times(0);
-
   using ::testing::Mock;
   Mock::VerifyAndClearExpectations(mock_observer);
 }

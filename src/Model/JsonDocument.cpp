@@ -9,6 +9,19 @@ void JsonDocument::setContent(const json& document)
   m_jsonDoc->setContent(document);
 }
 
+void JsonDocument::addAt(const std::string& path, const std::string& value)
+{
+  addAt(json::json_pointer(path), json(value));
+}
+void JsonDocument::replaceAt(const std::string& path, const std::string& value)
+{
+  replaceAt(json::json_pointer(path), json(value));
+}
+void JsonDocument::deleteAt(const std::string& path)
+{
+  deleteAt(json::json_pointer(path));
+}
+
 void JsonDocument::addAt(const json::json_pointer& path, const json& value)
 {
   m_jsonDoc->addAt(path, value);

@@ -8,9 +8,9 @@
 class MainComposer
 {
 public:
-  void setup();
+  void setup(const std::string& sdkUrl);
   void teardown();
 
 private:
-  void setupVgg(std::shared_ptr<VggExec> vggExec);
+  void setupVgg(std::shared_ptr<VggExec> vggExec, const std::string& sdkUrl);
 };

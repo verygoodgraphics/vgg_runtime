@@ -32,15 +32,20 @@ bool Controller::start(const std::vector<unsigned char>& buffer,
 
 void Controller::initVggWork(const char* designDocSchemaFilePath)
 {
-  auto build_design_doc_fn = [&](const json& design_json)
+  std::string design_schema_file_path;
+  if (designDocSchemaFilePath)
+  {
+    design_schema_file_path.append(designDocSchemaFilePath);
+  }
+  auto build_design_doc_fn = [&, design_schema_file_path](const json& design_json)
   {
     auto json_doc = createJsonDoc();
     json_doc->setContent(design_json);
 
     SchemaValidJsonDocument::ValidatorPtr design_doc_validator;
-    if (designDocSchemaFilePath)
+    if (!design_schema_file_path.empty())
     {
-      std::ifstream schema_fs(designDocSchemaFilePath);
+      std::ifstream schema_fs(design_schema_file_path);
       json schema = json::parse(schema_fs);
       design_doc_validator->setRootSchema(schema);
     }
@@ -63,6 +68,7 @@ void Controller::initVggWork(const char* designDocSchemaFilePath)
 
 void Controller::onClick(const std::string& path)
 {
+  // todo: create event?
   auto code = m_work->getCode(path);
   vggExec()->evalModule(code);
 }

@@ -19,6 +19,7 @@ bool NativeExecImpl::schedule_eval(const std::string& code)
     return false;
   }
 
+  // Wait node thread ready. 'm_state' will be updated in run_node_instance
   while (m_state != RUNNING)
   {
   }
@@ -27,13 +28,17 @@ bool NativeExecImpl::schedule_eval(const std::string& code)
   task->m_code = code;
   task->m_exec_impl_ptr = this;
 
-  const std::lock_guard<std::mutex> lock(m_tasks_mutex);
-  m_tasks.insert(task);
+  {
+    const std::lock_guard<std::mutex> lock(m_tasks_mutex);
+    m_tasks.insert(task);
+  }
 
+  // Setup and send task to uv event loop
   uv_async_init(m_loop,
                 &task->m_async_task,
                 [](uv_async_t* async)
                 {
+                  // Run task in uv event loop.
                   uv_close(reinterpret_cast<uv_handle_t*>(async), nullptr);
                   NativeEvalTask* task = node::ContainerOf(&NativeEvalTask::m_async_task, async);
                   task->run();
@@ -91,7 +96,12 @@ int NativeExecImpl::run_node(const int argc,
   uv_setup_args(argc, const_cast<char**>(argv));
   std::vector<std::string> args(argv, argv + argc);
 
-  nodeThread.reset(new std::thread([&, args]() { node_main(args, envHook, getScriptHook); }));
+  nodeThread.reset(new std::thread(
+    [&, args]()
+    {
+      int ret = node_main(args, envHook, getScriptHook);
+      INFO("#node thread exit, ret = %d", ret);
+    }));
 
   return 0;
 }
@@ -112,6 +122,10 @@ int NativeExecImpl::node_main(const std::vector<std::string>& args,
     return result->exit_code();
   }
 
+  // Create a v8::Platform instance. `MultiIsolatePlatform::Create()` is a way
+  // to create a v8::Platform instance that Node.js can use when creating
+  // Worker threads. When no `MultiIsolatePlatform` instance is present,
+  // Worker threads are disabled.
   std::unique_ptr<MultiIsolatePlatform> platform = MultiIsolatePlatform::Create(4);
   V8::InitializePlatform(platform.get());
   V8::Initialize();
@@ -238,8 +252,8 @@ void NativeExecImpl::stop_node_thread_safe()
 void NativeExecImpl::run_task(NativeEvalTask* task)
 {
   DEBUG("#evalScript, before eval");
-  eval(task->m_code);
-  DEBUG("#evalScript, after eval");
+  int ret = eval(task->m_code);
+  DEBUG("#evalScript, after eval, ret = %d", ret);
 
   erase_task(task);
 }

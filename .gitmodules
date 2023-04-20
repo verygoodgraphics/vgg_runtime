@@ -3,4 +3,4 @@
 	url = https://github.com/verygoodgraphics/vgg_contrib.git
 [submodule "lib/vgg_automerge"]
 	path = lib/vgg_automerge
-	url = git@github.com:verygoodgraphics/vgg_automerge.git
+	url = https://github.com/verygoodgraphics/vgg_automerge.git

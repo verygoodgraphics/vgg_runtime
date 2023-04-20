@@ -289,7 +289,7 @@ extern "C"
   }
   void emscripten_main(int width, int height)
   {
-    SDLRuntime* app =App<SDLRuntime>::getInstance(width, height);
+    SDLRuntime* app = App<SDLRuntime>::getInstance(width, height);
     ASSERT(app);
     if (auto fm = FileManager::getInstance(); fm && fm->fileCount() < 1)
     {

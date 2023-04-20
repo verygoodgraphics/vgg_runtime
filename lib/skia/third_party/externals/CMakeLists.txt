@@ -33,7 +33,7 @@ if (NOT EMSCRIPTEN)
 endif()
 add_library(zlib SHARED ${ZLIB_SRCS})
 
-if (NOT EMSCRIPTEN AND VGG_CPU_ARCH MATCHES "X86")
+if (NOT EMSCRIPTEN AND VGG_VAR_ARCH MATCHES "X86")
   set_target_properties(zlib PROPERTIES
     COMPILE_FLAGS "-msse3 -msse4.2 -mpclmul -DX86_NOT_WINDOWS -DADLER32_SIMD_SSSE3 -DCRC32_SIMD_SSE42_PCLMUL -DDEFLATE_FILL_WINDOW_SSE2"
   )
@@ -69,7 +69,7 @@ if (NOT EMSCRIPTEN)
   )
 endif()
 add_library(libpng SHARED ${LIBPNG_SRCS})
-if(APPLE AND VGG_CPU_ARCH STREQUAL "ARM")
+if(APPLE AND VGG_VAR_ARCH STREQUAL "ARM")
   # On Apple silicon, the optimization for arm must be off or result in link error.
   target_compile_definitions(libpng PRIVATE
     PNG_ARM_NEON_OPT=0
@@ -217,7 +217,7 @@ target_include_directories(libjpeg-turbo PRIVATE
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/libjpeg-turbo
 )
-if(VGG_CPU_ARCH STREQUAL "X86")
+if(VGG_VAR_ARCH STREQUAL "X86")
   target_compile_definitions(libjpeg-turbo PRIVATE
     TURBO_FOR_WINDOWS
     C_ARITH_CODING_SUPPORTED=1
@@ -357,7 +357,7 @@ if (NOT EMSCRIPTEN)
 endif()
 add_library(libwebp SHARED ${LIBWEBP_SRCS})
 if (NOT EMSCRIPTEN)
-  if(VGG_CPU_ARCH STREQUAL "X86")
+  if(VGG_VAR_ARCH STREQUAL "X86")
     set_target_properties(libwebp PROPERTIES
       COMPILE_FLAGS "-msse4.1 -DWEBP_SWAP_16BIT_CSP"
     )

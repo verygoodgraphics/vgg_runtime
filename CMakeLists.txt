@@ -12,8 +12,8 @@ endif()
 
 # customized platform checking flags
 #introduce customized cmake vars, see VggVars.cmake in cmake for details
-set(VGG_EGL_BACKEND OFF CACHE BOOL "Build runtime with egl backend for offscreen rendering" FORCE)
-if(VGG_EGL_BACKEND)
+set(VGG_ENABLE_EGL OFF CACHE BOOL "Build runtime with egl backend for offscreen rendering" FORCE)
+if(VGG_ENABLE_EGL)
   set(VGG_VAR_GL_BACKEND "EGL" CACHE STRING "" FORCE)
 else()
   set(VGG_VAR_GL_BACKEND "SDL" CACHE STRING "" FORCE)

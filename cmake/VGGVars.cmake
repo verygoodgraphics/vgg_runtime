@@ -21,16 +21,16 @@
 # Macros VGG_TARGET_Android_arm64_v8a and VGG_HOST_Android could be used in C/C++ code and VGG_VAR_HOST equals "Android"
 
 # CMake variable VGG_VAR_ARCH will be on of the following values:
-# 	"ARM" and macro VGG_ARCH_ARM defined
-# 	"X86" and macro VGG_ARCH_X86 defined
-# 	"WASM" and macro VGG_ARCH_WASM defined
+#  "ARM" and macro VGG_ARCH_ARM defined
+#  "X86" and macro VGG_ARCH_X86 defined
+#  "WASM" and macro VGG_ARCH_WASM defined
 
 # CMake variable VGG_VAR_BUILDING_OS_STR will be one of the following value:
-# 	"macOS" and macro VGG_BUILDING_OS_MACOS defined
-# 	"Linux" and macro VGG_BUILDING_OS_LINUX defined 
-# 	"Windows" and macro VGG_BUILDING_OS_WIN defined
+#  "macOS" and macro VGG_BUILDING_OS_MACOS defined
+#  "Linux" and macro VGG_BUILDING_OS_LINUX defined 
+#  "Windows" and macro VGG_BUILDING_OS_WIN defined
 
-# Macro VGG_OPTIMIAZED will be defined when build type is Debug or RelWithDebInfo
+# Macro VGG_OPTIMIZED will be defined when build type is Debug or RelWithDebInfo
 # Macro VGG_GL_BACKEND_EGL will be defined if VGG_VAR_GL_BACKEND is "EGL"
 
 
@@ -60,42 +60,42 @@ list(APPEND VGG_GL_BACKENDS_LIST "EGL" "SDL")
 
 
 if(APPLE)
-	set(VGG_VAR_BUILDING_OS_STR "macOS" CACHE STRING "" FORCE)
-	add_compile_definitions(VGG_BUILDING_OS_MACOS)
+  set(VGG_VAR_BUILDING_OS_STR "macOS" CACHE STRING "" FORCE)
+  add_compile_definitions(VGG_BUILDING_OS_MACOS)
 elseif(WIN32)
-	set(VGG_VAR_BUILDING_OS_STR "Windows" CACHE STRING "" FORCE)
-	add_compile_definitions(VGG_BUILDING_OS_WIN NOMINMAX)
+  set(VGG_VAR_BUILDING_OS_STR "Windows" CACHE STRING "" FORCE)
+  add_compile_definitions(VGG_BUILDING_OS_WIN NOMINMAX)
 elseif(UNIX)
-    # NOTE: When android.toolchain.cmake specified on windows, this branch also reached, A better way for platform detection is necessary.
-	set(VGG_VAR_BUILDING_OS_STR "Linux" CACHE STRING "" FORCE)
-	add_compile_definitions(VGG_BUILDING_OS_LINUX)
+  # NOTE: When android.toolchain.cmake specified on windows, this branch also reached, A better way for platform detection is necessary.
+  set(VGG_VAR_BUILDING_OS_STR "Linux" CACHE STRING "" FORCE)
+  add_compile_definitions(VGG_BUILDING_OS_LINUX)
 endif()
 
 # Give default value dependent on current building platform
 if(NOT VGG_VAR_PLATFORM_TARGET)
-	if(VGG_VAR_BUILDING_OS_STR STREQUAL "macOS")
-		set(VGG_VAR_PLATFORM_TARGET "macOS-apple_silicon")
-	elseif(VGG_VAR_BUILDING_OS_STR STREQUAL "Windows")
-		set(VGG_VAR_PLATFORM_TARGET "Windows-x86_64")
-	elseif(VGG_VAR_BUILDING_OS_STR STREQUAL "Linux")
-		set(VGG_VAR_PLATFORM_TARGET "Linux-x86_64")
-	endif()
+  if(VGG_VAR_BUILDING_OS_STR STREQUAL "macOS")
+    set(VGG_VAR_PLATFORM_TARGET "macOS-apple_silicon")
+  elseif(VGG_VAR_BUILDING_OS_STR STREQUAL "Windows")
+    set(VGG_VAR_PLATFORM_TARGET "Windows-x86_64")
+  elseif(VGG_VAR_BUILDING_OS_STR STREQUAL "Linux")
+    set(VGG_VAR_PLATFORM_TARGET "Linux-x86_64")
+  endif()
 endif()
 # Variables checking
-if(NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_APPLE_TARGET_STR_LIST 
-				AND NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_WIN_TARGET_LIST 
-				AND NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_ANDROID_TARGET_LIST
-				AND NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_LINUX_TARGET_LIST
-				AND NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_OTHER_TARGET_LIST)
-		message(FATAL_ERROR "Please specifies a platform target by VGG_VAR_PLATFORM_TARGET. ${VGG_VAR_PLATFORM_TARGET}\n Candidate platforms: ${VGG_APPLE_TARGET_STR_LIST} ${VGG_WIN_TARGET_LIST} ${VGG_ANDROID_TARGET_LIST} ${VGG_LINUX_TARGET_LIST}")
+if(NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_APPLE_TARGET_STR_LIST AND
+   NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_WIN_TARGET_LIST AND
+   NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_ANDROID_TARGET_LIST AND
+   NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_LINUX_TARGET_LIST AND
+   NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_OTHER_TARGET_LIST)
+  message(FATAL_ERROR "Please specifies a platform target by VGG_VAR_PLATFORM_TARGET. ${VGG_VAR_PLATFORM_TARGET}\n Candidate platforms: ${VGG_APPLE_TARGET_STR_LIST} ${VGG_WIN_TARGET_LIST} ${VGG_ANDROID_TARGET_LIST} ${VGG_LINUX_TARGET_LIST}")
 endif()
 
 if(NOT ${VGG_VAR_GL_BACKEND} IN_LIST VGG_GL_BACKENDS_LIST)
-	message(FATAL_ERROR "Please specifies a gl target by VGG_VAR_GL_BACKEND. ${VGG_VAR_GL_BACKEND}\n Candidate backends: ${VGG_GL_BACKENDS_LIST}")
+  message(FATAL_ERROR "Please specifies a gl target by VGG_VAR_GL_BACKEND. ${VGG_VAR_GL_BACKEND}\n Candidate backends: ${VGG_GL_BACKENDS_LIST}")
 endif()
 
 if(${VGG_VAR_PLATFORM_TARGET} MATCHES "WASM" AND NOT EMSCRIPTEN)
-	message(FATAL_ERROR "emscripten tool chain not set, WASM target is invalid\n")
+  message(FATAL_ERROR "emscripten tool chain not set, WASM target is invalid\n")
 endif()
 
 
@@ -111,59 +111,50 @@ add_compile_definitions(VGG_HOST_${_HOST_PREFIX})
 set(VGG_VAR_HOST ${_HOST_PREFIX})
 
 if(${VGG_VAR_PLATFORM_TARGET} IN_LIST X86_ARCH_LIST)
-	add_compile_definitions(VGG_ARCH_X86)
-	set(VGG_VAR_ARCH "X86" CACHE STRING "" FORCE)
+  add_compile_definitions(VGG_ARCH_X86)
+  set(VGG_VAR_ARCH "X86" CACHE STRING "" FORCE)
 elseif(${VGG_VAR_PLATFORM_TARGET} STREQUAL "WASM")
-	add_compile_definitions(VGG_ARCH_WASM)
-	set(VGG_VAR_ARCH "WASM" CACHE STRING "" FORCE)
+  add_compile_definitions(VGG_ARCH_WASM)
+  set(VGG_VAR_ARCH "WASM" CACHE STRING "" FORCE)
 else()
-	add_compile_definitions(VGG_ARCH_ARM)
-	set(VGG_VAR_ARCH "ARM" CACHE STRING "" FORCE)
+  add_compile_definitions(VGG_ARCH_ARM)
+  set(VGG_VAR_ARCH "ARM" CACHE STRING "" FORCE)
 endif()
-
-
-if(CMAKE_BUILD_TYPE MATCHES "Debug" OR CMAKE_CONFIGURATION_TYPES MATCHES "Debug")
-	add_compile_definitions(VGG_OPTIMIAZED)
-elseif(CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo" OR CMAKE_CONFIGURATION_TYPES MATCHES "RelWithDebInfo")
-	add_compile_definitions(VGG_OPTIMIAZED)
-elseif(CMAKE_BUILD_TYPE MATCHES "Release" OR CMAKE_CONFIGURATION_TYPES MATCHES "Release")
-endif()
-
 
 
 if(VGG_VAR_GL_BACKEND STREQUAL "EGL")
-		if(VGG_VAR_BUILDING_OS_STR STREQUAL "macOS" )	
-		message(FATAL_ERROR "macOS does not support EGL")	
-	elseif()
-		add_compile_definitions(VGG_GL_BACKEND_EGL)
-	endif()
+  if(VGG_VAR_BUILDING_OS_STR STREQUAL "macOS" )  
+    message(FATAL_ERROR "macOS does not support EGL")  
+  elseif()
+    add_compile_definitions(VGG_GL_BACKEND_EGL)
+  endif()
 endif()
 
 
 # Setup android.toolchian.cmake variables
 if(${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_ANDROID_TARGET_LIST)
-		# See https://developer.android.com/ndk/guides/abis
-		if(${VGG_VAR_PLATFORM_TARGET} MATCHES "Android-armeabi_v7a")
-				set(ANDROID_ABI "armeabi-v7a with NEON")
-		elseif(${VGG_VAR_PLATFORM_TARGET} MATCHES "Android-arm64_v8a")
-				set(ANDROID_ABI "arm64-v8a")
-		elseif(${VGG_VAR_PLATFORM_TARGET} MATCHES "Android-x86")
-				set(ANDROID_ABI "x86")
-		elseif(${VGG_VAR_PLATFORM_TARGET} MATCHES "Android-x86_64")
-				set(ANDROID_ABI "x86_64")
-		endif()
+  # See https://developer.android.com/ndk/guides/abis
+  if(${VGG_VAR_PLATFORM_TARGET} MATCHES "Android-armeabi_v7a")
+    set(ANDROID_ABI "armeabi-v7a with NEON")
+  elseif(${VGG_VAR_PLATFORM_TARGET} MATCHES "Android-arm64_v8a")
+    set(ANDROID_ABI "arm64-v8a")
+  elseif(${VGG_VAR_PLATFORM_TARGET} MATCHES "Android-x86")
+    set(ANDROID_ABI "x86")
+  elseif(${VGG_VAR_PLATFORM_TARGET} MATCHES "Android-x86_64")
+    set(ANDROID_ABI "x86_64")
+  endif()
 endif()
 
 
 # Setup ios.toolchian.cmake variables
 if(${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_APPLE_TARGET_STR_LIST)
-	# PLATFORM 是ios.toolchain.cmake 的变量
-	if(VGG_VAR_PLATFORM_TARGET STREQUAL "iOS")
-		set(PLATFORM "OS64")
-		# TODO:: iphone device need a signature to build
-	elseif(VGG_VAR_PLATFORM_TARGET STREQUAL "iOS-simulator")
-		set(PLATFORM "SIMULATOR64")
-	elseif(VGG_VAR_PLATFORM_TARGET STREQUAL "macOS")
-		set(PLATFORM "MACOS")
-	endif()
+  # PLATFORM 是ios.toolchain.cmake 的变量
+  if(VGG_VAR_PLATFORM_TARGET STREQUAL "iOS")
+    set(PLATFORM "OS64")
+    # TODO:: iphone device need a signature to build
+  elseif(VGG_VAR_PLATFORM_TARGET STREQUAL "iOS-simulator")
+    set(PLATFORM "SIMULATOR64")
+  elseif(VGG_VAR_PLATFORM_TARGET STREQUAL "macOS")
+    set(PLATFORM "MACOS")
+  endif()
 endif()

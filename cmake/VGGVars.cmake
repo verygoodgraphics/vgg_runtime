@@ -1,68 +1,138 @@
 # This file will output some cmake varibles for configure control and global macros for in C/C++ detection.
-# Each cmake 
 # 
 # --------- CMake Variables Inputs ---------
-# VGG_VAR_PLATFORM_TARGET
-# VGG_VAR_ARCH_TYPE
+# VGG_VAR_PLATFORM_TARGET: possible values defined bellow
 # VGG_VAR_GL_BACKEND
-
-
-# Above cmake variables could generate corresponding C/C++ macro.
-# --------- C/C++ Macros ---------
-# VGG_OS_MACOS
-#     VGG_TARGET_IOS_SIM
-#     VGG_TARGET_IOS
-#     VGG_TARGET_MACOS
-# VGG_OS_WIN
-#     VGG_TARGET_WIN
-# VGG_OS_LINUX
 #
-# VGG_ARCH_ARM
-# VGG_ARCH_X86
-# VGG_OPTIMIAZED
+#
+#
+# ----------- OUTPUT Variables and Macros ---------
+# Above cmake variables could generate corresponding C/C++ macro.
+
+# When VGG_VAR_PLATFORM_TARGET is given the following macros could be defined:
+# VGG_TARGET_${VGG_VAR_PLATFORM_TARGET}: 
+# the '-' in VGG_VAR_PLATFORM_TARGET will be replaced by '_'
+
+# Macro VGG_HOST_${the prefix of ${VGG_VAR_PLATFORM_TARGET}} will be defined
+
+# CMake variable VGG_VAR_HOST variable will be set as a string type of ${the prefix of ${VGG_VAR_PLATFORM_TARGET}}
+
+# For example, if VGG_VAR_PLATFORM_TARGET is specified as "Android-arm64_v8a",
+# Macros VGG_TARGET_Android_arm64_v8a and VGG_HOST_Android could be used in C/C++ code and VGG_VAR_HOST equals "Android"
+
+# CMake variable VGG_VAR_ARCH will be on of the following values:
+# 	"ARM" and macro VGG_ARCH_ARM defined
+# 	"X86" and macro VGG_ARCH_X86 defined
+# 	"WASM" and macro VGG_ARCH_WASM defined
+
+# CMake variable VGG_VAR_BUILDING_OS_STR will be one of the following value:
+# 	"macOS" and macro VGG_BUILDING_OS_MACOS defined
+# 	"Linux" and macro VGG_BUILDING_OS_LINUX defined 
+# 	"Windows" and macro VGG_BUILDING_OS_WIN defined
+
+# Macro VGG_OPTIMIAZED will be defined when build type is Debug or RelWithDebInfo
+# Macro VGG_GL_BACKEND_EGL will be defined if VGG_VAR_GL_BACKEND is "EGL"
 
 
-list(APPEND VGG_APPLE_TARGET_STR_LIST "iOS" "macOS" "iOS-simulator")
-list(APPEND VGG_WIN_TARGET_LIST "Windows-x86_64")
-list(APPEND VGG_ANDROID_TARGET_LIST "Android_arm7" "Android_arm8" "Android_x86" "Android_x64")
-list(APPEND VGG_LINUX_TARGET_LIST "amd64")
-list(APPEND VGG_ARCH_TYPE_LIST "X86" "ARM")
+
+
+# apple targets:
+list(APPEND VGG_APPLE_TARGET_STR_LIST "iOS" "iOS-simulator" "macOS-apple_silicon" "macOS-x86" )
+
+# android targets:
+# Keep same with Andorid SDK https://developer.android.com/ndk/guides/abis
+list(APPEND VGG_ANDROID_TARGET_LIST "Android-armeabi_v7a" "Android-arm64_v8a" "Android-x86" "Android-x86_64")
+
+# Windows target 
+list(APPEND VGG_WIN_TARGET_LIST "Windows-x86_64" "Windows-x86")
+
+# linux target
+list(APPEND VGG_LINUX_TARGET_LIST "Linux-x86" "Linux-x86_64")
+
+# other target
+list(APPEND VGG_OTHER_TARGET_LIST "WASM")
+
+list(APPEND VGG_ALL_TARGETS ${VGG_APPLE_TARGET_STR_LIST} ${VGG_ANDROID_TARGET_LIST} ${VGG_WIN_TARGET_LIST} ${VGG_LINUX_TARGET_LIST} ${VGG_OTHER_TARGET_LIST})
+list(APPEND X86_ARCH_LIST "Windows-x86_64" "Windows-x86" "Linux-x86" "Linux-x86_64" "Android-x86" "Android-x86_64" "macOS-x86")
+
 list(APPEND VGG_GL_BACKENDS_LIST "EGL" "SDL")
-set(VGG_VAR_PLATFORM_TARGET "macOS" CACHE STRING "" FORCE)
 
+
+
+if(APPLE)
+	set(VGG_VAR_BUILDING_OS_STR "macOS" CACHE STRING "" FORCE)
+	add_compile_definitions(VGG_BUILDING_OS_MACOS)
+elseif(WIN32)
+	set(VGG_VAR_BUILDING_OS_STR "Windows" CACHE STRING "" FORCE)
+	add_compile_definitions(VGG_BUILDING_OS_WIN NOMINMAX)
+elseif(UNIX)
+    # NOTE: When android.toolchain.cmake specified on windows, this branch also reached, A better way for platform detection is necessary.
+	set(VGG_VAR_BUILDING_OS_STR "Linux" CACHE STRING "" FORCE)
+	add_compile_definitions(VGG_BUILDING_OS_LINUX)
+endif()
+
+# Give default value dependent on current building platform
+if(NOT VGG_VAR_PLATFORM_TARGET)
+	if(VGG_VAR_BUILDING_OS_STR STREQUAL "macOS")
+		set(VGG_VAR_PLATFORM_TARGET "macOS-apple_silicon")
+	elseif(VGG_VAR_BUILDING_OS_STR STREQUAL "Windows")
+		set(VGG_VAR_PLATFORM_TARGET "Windows-x86_64")
+	elseif(VGG_VAR_BUILDING_OS_STR STREQUAL "Linux")
+		set(VGG_VAR_PLATFORM_TARGET "Linux-x86_64")
+	endif()
+endif()
 # Variables checking
 if(NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_APPLE_TARGET_STR_LIST 
 				AND NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_WIN_TARGET_LIST 
 				AND NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_ANDROID_TARGET_LIST
-				AND NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_LINUX_TARGET_LIST)
+				AND NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_LINUX_TARGET_LIST
+				AND NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_OTHER_TARGET_LIST)
 		message(FATAL_ERROR "Please specifies a platform target by VGG_VAR_PLATFORM_TARGET. ${VGG_VAR_PLATFORM_TARGET}\n Candidate platforms: ${VGG_APPLE_TARGET_STR_LIST} ${VGG_WIN_TARGET_LIST} ${VGG_ANDROID_TARGET_LIST} ${VGG_LINUX_TARGET_LIST}")
 endif()
 
 if(NOT ${VGG_VAR_GL_BACKEND} IN_LIST VGG_GL_BACKENDS_LIST)
-		message(FATAL_ERROR "Please specifies a gl target by VGG_VAR_GL_BACKEND. ${VGG_VAR_GL_BACKEND}\n Candidate backends: ${VGG_GL_BACKENDS_LIST}")
+	message(FATAL_ERROR "Please specifies a gl target by VGG_VAR_GL_BACKEND. ${VGG_VAR_GL_BACKEND}\n Candidate backends: ${VGG_GL_BACKENDS_LIST}")
+endif()
+
+if(${VGG_VAR_PLATFORM_TARGET} MATCHES "WASM" AND NOT EMSCRIPTEN)
+	message(FATAL_ERROR "emscripten tool chain not set, WASM target is invalid\n")
 endif()
 
 
-if(APPLE)
-	set(VGG_VAR_OS_STR "macOS" CACHE STRING "" FORCE)
-	add_compile_definitions(VGG_OS_MACOS)
-elseif(WIN32)
-	set(VGG_VAR_OS_STR "Windows" CACHE STRING "" FORCE)
-	add_compile_definitions(VGG_OS_WIN NOMINMAX)
-elseif(UNIX)
-    # NOTE: When android.toolchain.cmake specified on windows, this branch also reached, A better way for platform detection is necessary.
-	set(VGG_VAR_OS_STR "Linux" CACHE STRING "" FORCE)
-	add_compile_definitions(VGG_OS_LINUX)
-endif()
 
-if(VGG_VAR_ARCH_TYPE STREQUAL "X86")
+# preprocessor definition
+string(REPLACE "-" "_" _TARGET_PLATROM_STR ${VGG_VAR_PLATFORM_TARGET})
+add_compile_definitions(VGG_TARGET_${_TARGET_PLATROM_STR})
+
+
+string(FIND ${VGG_VAR_PLATFORM_TARGET} "-" POS)
+string(SUBSTRING ${VGG_VAR_PLATFORM_TARGET} 0 ${POS} _HOST_PREFIX)
+add_compile_definitions(VGG_HOST_${_HOST_PREFIX})
+set(VGG_VAR_HOST ${_HOST_PREFIX})
+
+if(${VGG_VAR_PLATFORM_TARGET} IN_LIST X86_ARCH_LIST)
 	add_compile_definitions(VGG_ARCH_X86)
-elseif(VGG_VAR_ARCH_TYPE STREQUAL "ARM")
+	set(VGG_VAR_ARCH "X86" CACHE STRING "" FORCE)
+elseif(${VGG_VAR_PLATFORM_TARGET} STREQUAL "WASM")
+	add_compile_definitions(VGG_ARCH_WASM)
+	set(VGG_VAR_ARCH "WASM" CACHE STRING "" FORCE)
+else()
 	add_compile_definitions(VGG_ARCH_ARM)
+	set(VGG_VAR_ARCH "ARM" CACHE STRING "" FORCE)
 endif()
+
+
+if(CMAKE_BUILD_TYPE MATCHES "Debug" OR CMAKE_CONFIGURATION_TYPES MATCHES "Debug")
+	add_compile_definitions(VGG_OPTIMIAZED)
+elseif(CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo" OR CMAKE_CONFIGURATION_TYPES MATCHES "RelWithDebInfo")
+	add_compile_definitions(VGG_OPTIMIAZED)
+elseif(CMAKE_BUILD_TYPE MATCHES "Release" OR CMAKE_CONFIGURATION_TYPES MATCHES "Release")
+endif()
+
+
 
 if(VGG_VAR_GL_BACKEND STREQUAL "EGL")
-	if(VGG_VAR_OS_STR STREQUAL "macOS" )	
+		if(VGG_VAR_BUILDING_OS_STR STREQUAL "macOS" )	
 		message(FATAL_ERROR "macOS does not support EGL")	
 	elseif()
 		add_compile_definitions(VGG_GL_BACKEND_EGL)
@@ -70,56 +140,30 @@ if(VGG_VAR_GL_BACKEND STREQUAL "EGL")
 endif()
 
 
-if(VGG_VAR_OS_STR STREQUAL "macOS")
-		if(NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_APPLE_TARGET_STR_LIST)
-				message(FATAL_ERROR "VGG_VAR_PLATFORM_TARGET: ${VGG_VAR_PLATFORM_TARGET} is not compatible with ${VGG_VAR_OS_STR}")
-	endif()
-	# PLATFORM 是ios.toolchain.cmake 的变量
-	if(VGG_VAR_PLATFORM_TARGET STREQUAL "iOS")
-		add_compile_definitions(VGG_TARGET_IOS)
-		set(PLATFORM "OS64")
-		# TODO::检查签名是否存在
-elseif(VGG_VAR_PLATFORM_TARGET STREQUAL "iOS-simulator")
-		add_compile_definitions(VGG_TARGET_IOS_SIM)
-		set(PLATFORM "SIMULATOR64")
-elseif(VGG_VAR_PLATFORM_TARGET STREQUAL "macOS")
-		add_compile_definitions(VGG_TARGET_MACOS)
-		set(PLATFORM "MACOS")
-	endif()
-elseif(VGG_VAR_OS_STR STREQUAL "Windows")
-		if(${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_WIN_TARGET_LIST)
-		# Windows Target
-		# message(FATAL_ERROR "VGG_VAR_PLATFORM_TARGET: ${VGG_VAR_PLATFORM_TARGET} is not compatible with ${VGG_VAR_OS_STR}")
-		add_compile_definitions(VGG_TARGET_WIN)
-
-elseif(${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_ANDROID_TARGET_LIST)
-		# Android target
-		if(${VGG_VAR_PLATFORM_TARGET} MATCHES "Android_arm7")
-			add_compile_definitions(VGG_TARGET_ANDROID_ARM7)
-			set(ANDROID_ABI "armeabi-v7a with NEON")
-	elseif(${VGG_VAR_PLATFORM_TARGET} MATCHES "Android_arm8")
-			add_compile_definitions(VGG_TARGET_ANDROID_ARM8)
-			set(ANDROID_ABI "arm64-v8a")
-	elseif(${VGG_VAR_PLATFORM_TARGET} MATCHES "Android_x86")
-			add_compile_definitions(VGG_TARGET_ANDROID_X86)
-			set(ANDROID_ABI "x86")
-	elseif(${VGG_VAR_PLATFORM_TARGET} MATCHES "Android_x64")
-			add_compile_definitions(VGG_TARGET_ANDROID_X64)
-			set(ANDROID_ABI "x86_64")
+# Setup android.toolchian.cmake variables
+if(${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_ANDROID_TARGET_LIST)
+		# See https://developer.android.com/ndk/guides/abis
+		if(${VGG_VAR_PLATFORM_TARGET} MATCHES "Android-armeabi_v7a")
+				set(ANDROID_ABI "armeabi-v7a with NEON")
+		elseif(${VGG_VAR_PLATFORM_TARGET} MATCHES "Android-arm64_v8a")
+				set(ANDROID_ABI "arm64-v8a")
+		elseif(${VGG_VAR_PLATFORM_TARGET} MATCHES "Android-x86")
+				set(ANDROID_ABI "x86")
+		elseif(${VGG_VAR_PLATFORM_TARGET} MATCHES "Android-x86_64")
+				set(ANDROID_ABI "x86_64")
 		endif()
-	elseif()
-			message(FATAL_ERROR "VGG_VAR_PLATFORM_TARGET: ${VGG_VAR_PLATFORM_TARGET} is not compatible with ${VGG_VAR_OS_STR}")
-	endif()
-elseif(VGG_VAR_OS_STR STREQUAL "Linux")
-
-else()
-		message(FATAL_ERROR "Unsupported OS: ${VGG_VAR_OS_STR}")
 endif()
 
-# VGG_OPTIMIAZED
-if(CMAKE_BUILD_TYPE MATCHES "Debug" OR CMAKE_CONFIGURATION_TYPES MATCHES "Debug")
-	add_compile_definitions(VGG_OPTIMIAZED)
-elseif(CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo" OR CMAKE_CONFIGURATION_TYPES MATCHES "RelWithDebInfo")
-	add_compile_definitions(VGG_OPTIMIAZED)
-elseif(CMAKE_BUILD_TYPE MATCHES "Release" OR CMAKE_CONFIGURATION_TYPES MATCHES "Release")
+
+# Setup ios.toolchian.cmake variables
+if(${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_APPLE_TARGET_STR_LIST)
+	# PLATFORM 是ios.toolchain.cmake 的变量
+	if(VGG_VAR_PLATFORM_TARGET STREQUAL "iOS")
+		set(PLATFORM "OS64")
+		# TODO:: iphone device need a signature to build
+	elseif(VGG_VAR_PLATFORM_TARGET STREQUAL "iOS-simulator")
+		set(PLATFORM "SIMULATOR64")
+	elseif(VGG_VAR_PLATFORM_TARGET STREQUAL "macOS")
+		set(PLATFORM "MACOS")
+	endif()
 endif()

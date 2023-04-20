@@ -999,12 +999,12 @@ set(SKIA_SRCS ${SKIA_SRCS}
   "custom/SkDropInnerShadowImageFilter.cpp"
 )
 if (NOT EMSCRIPTEN)
-  if (VGG_VAR_OS_STR STREQUAL "macOS")
+  if (VGG_VAR_HOST STREQUAL "macOS")
     set(SKIA_SRCS ${SKIA_SRCS}
       #"custom/GrGLMakeNativeInterface_angle.cpp"
       "src/gpu/gl/mac/GrGLMakeNativeInterface_mac.cpp"
     )
-  elseif(VGG_VAR_OS_STR STREQUAL "Linux")
+  elseif(VGG_VAR_HOST STREQUAL "Linux")
     if(VGG_VAR_GL_BACKEND STREQUAL "EGL")
       set(SKIA_SRCS ${SKIA_SRCS}
         "src/gpu/gl/egl/GrGLMakeNativeInterface_egl.cpp"
@@ -1016,7 +1016,7 @@ if (NOT EMSCRIPTEN)
         "src/gpu/gl/glx/GrGLMakeGLXInterface.cpp"
       )
     endif()
-  elseif(VGG_VAR_OS_STR STREQUAL "Windows")
+  elseif(VGG_VAR_HOST STREQUAL "Windows")
     if(VGG_VAR_GL_BACKEND STREQUAL "EGL")
       set(SKIA_SRCS ${SKIA_SRCS}
         "src/gpu/gl/egl/GrGLMakeNativeInterface_egl.cpp"
@@ -1028,7 +1028,7 @@ if (NOT EMSCRIPTEN)
       )
     endif()
   endif()
-  if(VGG_CPU_ARCH STREQUAL "X86")
+  if(VGG_VAR_ARCH STREQUAL "X86")
     set(SKIA_SRCS ${SKIA_SRCS}
       "src/opts/SkOpts_ssse3.cpp"
       "src/opts/SkOpts_sse42.cpp"

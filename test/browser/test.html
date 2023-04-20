@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en-us">
+
+<head></head>
+
+<body>
+    <script type="text/javascript" src="./sut/runtime.js"></script>
+    <script type="text/javascript">
+        let vggWasmInstance;
+        let vggSdk;
+
+        function setupAndRun() {
+            createModule().then(function (myInstance) {
+                vggWasmInstance = myInstance
+
+                vggWasmInstance._emscripten_main();
+
+            });
+        }
+
+        setupAndRun();
+
+        function vggAssert(condition, message) {
+            if (!condition) {
+                throw new Error(message || "Assertion failed");
+            }
+        }
+    </script>
+</body>
+
+</html>

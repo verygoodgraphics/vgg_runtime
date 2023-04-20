@@ -14,14 +14,44 @@ add_executable(runtime
 )
 
 add_library(vgg_internal OBJECT
+  Exec/VggExec.cpp
   Model/DocumentModel.cpp
-  Model/JsonSchemaValidator.cpp)
+  Model/JsonSchemaValidator.cpp
+  PlatformAdapter/Helper/StringHelper.cpp
+)
 target_include_directories(vgg_internal PUBLIC 
+  ${CMAKE_CURRENT_SOURCE_DIR}/Api
+  ${CMAKE_CURRENT_SOURCE_DIR}/Exec
   ${CMAKE_CURRENT_SOURCE_DIR}/Model
   ${VGG_CONTRIB_JSON_INCLUDE}
   ${VGG_CONTRIB_VALIJSON_INCLUDE}
+  PlatformAdapter/Helper
 )
-target_link_libraries(vgg_internal automerge)
+target_link_libraries(vgg_internal
+  automerge
+  skia 
+)
+if (EMSCRIPTEN)
+  target_sources(vgg_internal PRIVATE
+    PlatformAdapter/Browser/Exec/BrowserJSEngine.cpp
+  )
+  target_include_directories(vgg_internal PUBLIC
+    PlatformAdapter/Browser/Exec
+  )
+else()
+  target_link_libraries(vgg_internal vgg_libnode)
+  target_sources(vgg_internal PRIVATE
+    PlatformAdapter/Native/Exec/NativeExec.cpp
+    PlatformAdapter/Native/Exec/NativeExecImpl.cpp
+    # PlatformAdapter/Native/Sdk/VggSdkAddon.cpp
+    # PlatformAdapter/Native/Sdk/VggSdkNodeAdapter.cpp
+  )
+  target_include_directories(vgg_internal PUBLIC
+    PlatformAdapter/Native/Exec
+    PlatformAdapter/Native/Sdk
+  )
+  target_compile_definitions(vgg_internal PRIVATE NODE_WANT_INTERNALS=1)
+endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
   set_source_files_properties(
@@ -53,17 +83,18 @@ if (EMSCRIPTEN)
     "
     SUFFIX ".js"
   )
-  target_link_libraries(runtime skia miniz quickjs vgg_internal)
 elseif (APPLE)
   set_target_properties(runtime PROPERTIES
     COMPILE_FLAGS "-DSK_GL -I${SDL2_INCLUDE_DIRS}/.."
     LINK_FLAGS ${SDL2_LIBRARIES}
   )
-  target_link_libraries(runtime skia miniz quickjs vgg_internal ${OPENGL_LIBRARIES})
+  target_link_libraries(vgg_internal ${OPENGL_LIBRARIES})
 else()
   set_target_properties(runtime PROPERTIES
     COMPILE_FLAGS "-DSK_GL"
   )
-  target_link_libraries(runtime skia miniz quickjs vgg_internal SDL2 ${OPENGL_LIBRARIES})
+  target_link_libraries(vgg_internal SDL2 ${OPENGL_LIBRARIES})
   install(TARGETS runtime skia zlib libpng libwebp libjpeg-turbo freetype)
 endif()
+
+target_link_libraries(runtime miniz quickjs vgg_internal)

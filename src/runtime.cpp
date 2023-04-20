@@ -283,13 +283,13 @@ extern "C"
 {
   void emscripten_frame()
   {
-    static Runtime* app = App::getInstance<Runtime>();
+    static SDLRuntime* app = App<SDLRuntime>::getInstance();
     ASSERT(app);
     app->frame();
   }
   void emscripten_main(int width, int height)
   {
-    Runtime* app = App::getInstance<Runtime>(width, height);
+    SDLRuntime* app =App<SDLRuntime>::getInstance(width, height);
     ASSERT(app);
     if (auto fm = FileManager::getInstance(); fm && fm->fileCount() < 1)
     {

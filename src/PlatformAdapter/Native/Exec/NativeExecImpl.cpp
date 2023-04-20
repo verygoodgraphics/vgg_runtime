@@ -8,6 +8,8 @@
 #undef DEBUG
 #define DEBUG(msg, ...)
 
+constexpr int THREAD_POOL_SIZE = 4;
+
 /*
  * NativeExecImpl
  */
@@ -126,7 +128,7 @@ int NativeExecImpl::node_main(const std::vector<std::string>& args,
   // to create a v8::Platform instance that Node.js can use when creating
   // Worker threads. When no `MultiIsolatePlatform` instance is present,
   // Worker threads are disabled.
-  std::unique_ptr<MultiIsolatePlatform> platform = MultiIsolatePlatform::Create(4);
+  std::unique_ptr<MultiIsolatePlatform> platform = MultiIsolatePlatform::Create(THREAD_POOL_SIZE);
   V8::InitializePlatform(platform.get());
   V8::Initialize();
 

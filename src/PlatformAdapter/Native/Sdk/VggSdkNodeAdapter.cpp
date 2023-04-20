@@ -349,11 +349,24 @@ napi_value VggSdkNodeAdapter::AddToDocument(napi_env env, napi_callback_info inf
 
 napi_value VggSdkNodeAdapter::DeleteFromDocument(napi_env env, napi_callback_info info)
 {
+  size_t argc = 1;
+  napi_value args[1];
   napi_value _this;
-  NODE_API_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &_this, nullptr));
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  NODE_API_ASSERT(env, argc >= 1, "Wrong number of arguments");
+
+  napi_valuetype valuetype0;
+  NODE_API_CALL(env, napi_typeof(env, args[0], &valuetype0));
+
+  NODE_API_ASSERT(env, valuetype0 == napi_string, "Wrong argument type. Strings expected.");
+
+  std::string json_pointer_string;
+  GetArgString_(env, json_pointer_string, args[0]);
 
   VggSdkNodeAdapter* obj;
   NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
+  obj->m_vggSdk->deleteFromDocument(json_pointer_string);
 
   return nullptr;
 }

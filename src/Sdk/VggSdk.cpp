@@ -34,15 +34,17 @@ const std::string VggSdk::jsonAt(const std::string& json_pointer)
 
 void VggSdk::replaceInDocument(const std::string& json_pointer, const std::string& value)
 {
-  designDocument()->replaceAt(json::json_pointer(json_pointer), value);
+  designDocument()->replaceAt(json_pointer, value);
 }
 
 void VggSdk::addToDocument(const std::string& json_pointer, const std::string& value)
 {
+  designDocument()->addAt(json_pointer, value);
 }
 
 void VggSdk::deleteFromDocument(const std::string& json_pointer)
 {
+  designDocument()->deleteAt(json_pointer);
 }
 
 std::shared_ptr<JsonDocument>& VggSdk::designDocument()

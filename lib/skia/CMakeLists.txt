@@ -996,38 +996,13 @@ set(SKIA_SRCS ${SKIA_SRCS}
 #"src/utils/mac/SkCTFont.cpp"
 )
 set(SKIA_SRCS ${SKIA_SRCS}
+# the following cpp files are of custom features
+#
   "custom/SkDropInnerShadowImageFilter.cpp"
 )
+
+# add platform-specific codes and compile options
 if (NOT EMSCRIPTEN)
-  if (VGG_VAR_HOST STREQUAL "macOS")
-    set(SKIA_SRCS ${SKIA_SRCS}
-      #"custom/GrGLMakeNativeInterface_angle.cpp"
-      "src/gpu/gl/mac/GrGLMakeNativeInterface_mac.cpp"
-    )
-  elseif(VGG_VAR_HOST STREQUAL "Linux")
-    if(VGG_VAR_GL_BACKEND STREQUAL "EGL")
-      set(SKIA_SRCS ${SKIA_SRCS}
-        "src/gpu/gl/egl/GrGLMakeNativeInterface_egl.cpp"
-        "src/gpu/gl/egl/GrGLMakeEGLInterface.cpp"
-      )
-    else()
-      set(SKIA_SRCS ${SKIA_SRCS}
-        "src/gpu/gl/glx/GrGLMakeNativeInterface_glx.cpp"
-        "src/gpu/gl/glx/GrGLMakeGLXInterface.cpp"
-      )
-    endif()
-  elseif(VGG_VAR_HOST STREQUAL "Windows")
-    if(VGG_VAR_GL_BACKEND STREQUAL "EGL")
-      set(SKIA_SRCS ${SKIA_SRCS}
-        "src/gpu/gl/egl/GrGLMakeNativeInterface_egl.cpp"
-        "src/gpu/gl/egl/GrGLMakeEGLInterface.cpp"
-      )
-    else()
-      set(SKIA_SRCS ${SKIA_SRCS}
-        "src/gpu/gl/win/GrGLMakeNativeInterface_win.cpp"
-      )
-    endif()
-  endif()
   if(VGG_VAR_ARCH STREQUAL "X86")
     set(SKIA_SRCS ${SKIA_SRCS}
       "src/opts/SkOpts_ssse3.cpp"
@@ -1036,32 +1011,27 @@ if (NOT EMSCRIPTEN)
       "src/opts/SkOpts_hsw.cpp"
       "src/opts/SkOpts_skx.cpp"
     )
-    add_library(skia SHARED ${SKIA_SRCS})
-    target_compile_options(skia PRIVATE
+    add_library(skia_base OBJECT ${SKIA_SRCS})
+    target_compile_options(skia_base PRIVATE
       $<$<CONFIG:Debug>:-DSK_DEBUG>
       $<$<CONFIG:Release>:-DSK_RELEASE -fstrict-aliasing -fvisibility=hidden -fdata-sections -ffunction-sections -fvisibility-inlines-hidden -fno-exceptions -frtti>
       -mssse3
       -msse4.2
       -mavx
     )
-  else()
+  else() # ARM
     set(SKIA_SRCS ${SKIA_SRCS}
       "src/opts/SkOpts_crc32.cpp"
     )
-    add_library(skia SHARED ${SKIA_SRCS})
-    target_compile_options(skia PRIVATE
+    add_library(skia_base OBJECT ${SKIA_SRCS})
+    target_compile_options(skia_base PRIVATE
       $<$<CONFIG:Debug>:-DSK_DEBUG>
       $<$<CONFIG:Release>:-DSK_RELEASE -fstrict-aliasing -fvisibility=hidden -fdata-sections -ffunction-sections -fvisibility-inlines-hidden -fno-exceptions -frtti>
     )
   endif()
 else()
-  set(SKIA_SRCS ${SKIA_SRCS}
-    #"src/gpu/gl/egl/GrGLMakeNativeInterface_egl.cpp"
-    #"src/gpu/gl/egl/GrGLMakeEGLInterface.cpp"
-    "src/gpu/gl/webgl/GrGLMakeNativeInterface_webgl.cpp"
-  )
-  add_library(skia SHARED ${SKIA_SRCS})
-  target_compile_options(skia PRIVATE
+  add_library(skia_base OBJECT ${SKIA_SRCS})
+  target_compile_options(skia_base PRIVATE
     -DSK_ASSUME_WEBGL=1
     -DSK_USE_WEBGL
     -DSK_FORCE_8_BYTE_ALIGNMENT
@@ -1069,7 +1039,8 @@ else()
     $<$<CONFIG:Release>:-DSK_RELEASE -fstrict-aliasing -fdata-sections -ffunction-sections -fno-exceptions -frtti>
   )
 endif()
-target_compile_definitions(skia PRIVATE
+set_target_properties(skia_base PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_compile_definitions(skia_base PRIVATE
   # deprecated in m92:
   #
   #SK_BUILD_NO_OPTS=1 # disable optimization like avx/sse/hsw etc in cpu rasterizer
@@ -1114,8 +1085,32 @@ set_source_files_properties(
   PROPERTIES
   COMPILE_FLAGS -DSK_FONT_FILE_PREFIX=\\".\\"
 )
-if(VGG_VAR_GL_BACKEND STREQUAL "EGL")
-  target_link_libraries(skia zlib libpng freetype pthread libgifcodec libjpeg-turbo libwebp OpenGL::EGL)
-else()
-  target_link_libraries(skia zlib libpng freetype pthread libgifcodec libjpeg-turbo libwebp)
+
+
+if (VGG_VAR_HOST STREQUAL "macOS")
+  set(SKIA_INTERFACE_SRCS
+    #"custom/GrGLMakeNativeInterface_angle.cpp"
+    "src/gpu/gl/mac/GrGLMakeNativeInterface_mac.cpp"
+  )
+elseif(VGG_VAR_HOST STREQUAL "Linux")
+  set(SKIA_INTERFACE_SRCS
+    "src/gpu/gl/glx/GrGLMakeNativeInterface_glx.cpp"
+    "src/gpu/gl/glx/GrGLMakeGLXInterface.cpp"
+  )
+elseif(VGG_VAR_HOST STREQUAL "Windows")
+  set(SKIA_INTERFACE_SRCS
+    "src/gpu/gl/win/GrGLMakeNativeInterface_win.cpp"
+  )
+endif()
+
+add_library(skia SHARED ${SKIA_INTERFACE_SRCS})
+target_link_libraries(skia $<TARGET_OBJECTS:skia_base> zlib libpng freetype pthread libgifcodec libjpeg-turbo libwebp)
+
+if(VGG_ENABLE_EGL)
+  set(SKIA_EGL_INTERFACE_SRCS
+    "src/gpu/gl/egl/GrGLMakeNativeInterface_egl.cpp"
+    "src/gpu/gl/egl/GrGLMakeEGLInterface.cpp"
+  )
+  add_library(skia_egl SHARED ${SKIA_EGL_INTERFACE_SRCS})
+  target_link_libraries(skia_egl $<TARGET_OBJECTS:skia_base> zlib libpng freetype pthread libgifcodec libjpeg-turbo libwebp OpenGL::EGL)
 endif()

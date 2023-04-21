@@ -111,4 +111,4 @@ else()
   install(TARGETS runtime skia zlib libpng libwebp libjpeg-turbo freetype)
 endif()
 
-target_link_libraries(runtime miniz quickjs vgg_internal)
+target_link_libraries(runtime quickjs vgg_internal)

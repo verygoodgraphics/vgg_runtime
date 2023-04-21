@@ -369,7 +369,7 @@ int main(int argc, char** argv)
   // enter loop
   while (!app->shouldExit())
   {
-    app->frame();
+    app->frame(60);
   }
   return 0;
 }

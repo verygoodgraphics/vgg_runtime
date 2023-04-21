@@ -245,23 +245,10 @@ protected: // protected members and static members
     app->Self()->initContext(w, h, title);
 
     app->Self()->makeContextCurrent();
-    // Create Skia
-    // get skia interface and make opengl context
-    sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
-    if (!interface)
-    {
-      FAIL("Failed to make skia opengl interface");
-      return false;
-    }
-    sk_sp<GrDirectContext> grContext = GrDirectContext::MakeGL(interface);
-    if (!grContext)
-    {
-      FAIL("Failed to make skia opengl context.");
-      return false;
-    }
 
-    app->m_skiaState.interface = interface;
-    app->m_skiaState.grContext = grContext;
+    auto res = app->updateSkiaEngine();
+    if (res == false)
+      return false;
 
     // get necessary property about window and DPI
     auto drawSize = std::any_cast<std::pair<int, int>>(app->Self()->getProperty("viewport_size"));
@@ -269,7 +256,7 @@ protected: // protected members and static members
 
     DEBUG("Drawable size: %d %d", drawSize.first, drawSize.second);
     DEBUG("Window size: %d %d", winSize.first, winSize.second);
-#ifdef __linux__
+#ifdef VGG_HOST_Linux
     app->m_pixelRatio = DPI::ScaleFactor;
 #else
     app->m_pixelRatio = (double)drawSize.first / winSize.first;
@@ -342,6 +329,34 @@ protected: // protected methods
   {
   }
 
+  void resizeSkiaSurface(int w, int h)
+  {
+    m_skiaState.surface = setup_skia_surface(w, h);
+    m_width = w;
+    m_height = h;
+  }
+
+  bool updateSkiaEngine()
+  {
+    // Create Skia
+    // get skia interface and make opengl context
+    sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
+    if (!interface)
+    {
+      FAIL("Failed to make skia opengl interface");
+      return false;
+    }
+    sk_sp<GrDirectContext> grContext = GrDirectContext::MakeGL(interface);
+    if (!grContext)
+    {
+      FAIL("Failed to make skia opengl context.");
+      return false;
+    }
+    m_skiaState.interface = interface;
+    m_skiaState.grContext = grContext;
+    return true;
+  }
+
   bool dispatchGlobalEvent(const SDL_Event& evt)
   {
     auto type = evt.type;
@@ -361,9 +376,7 @@ protected: // protected methods
       int h = window.data2 / DPI::ScaleFactor;
 
       DEBUG("Window resizing: (%d %d)", w, h);
-      m_skiaState.surface = setup_skia_surface(w, h);
-      m_width = w;
-      m_height = h;
+      resizeSkiaSurface(w, h);
       return true;
     }
 
@@ -485,11 +498,13 @@ public: // public methods
     return m_skiaState.getCanvas();
   }
 
-  inline SkSurface* getSurface(){
+  inline SkSurface* getSurface()
+  {
     return m_skiaState.surface.get();
   }
 
-  void frame()
+  // fps <= 0 indicates rendering as fast as possible
+  void frame(int fps)
   {
     if (!m_inited)
     {
@@ -504,9 +519,12 @@ public: // public methods
 
     // cap the frame rate
     auto profiler = CappingProfiler::getInstance();
-    if (!(profiler->enoughFrameDuration(60)))
+    if (fps > 0)
     {
-      return;
+      if (!(profiler->enoughFrameDuration(fps)))
+      {
+        return;
+      }
     }
     profiler->markFrame();
 

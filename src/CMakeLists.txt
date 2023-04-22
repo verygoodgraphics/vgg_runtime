@@ -94,9 +94,9 @@ else()
     COMPILE_FLAGS "-DSK_GL"
   )
   target_link_libraries(vgg_internal SDL2 ${OPENGL_LIBRARIES})
-  install(TARGETS runtime skia zlib libpng libwebp libjpeg-turbo freetype)
+  install(TARGETS runtime skia zlib libpng libwebp libjpeg-turbo freetype glm)
 endif()
 
-target_link_libraries(runtime miniz quickjs vgg_internal)
+target_link_libraries(runtime miniz quickjs vgg_internal glm)
 
 add_subdirectory(Entry)

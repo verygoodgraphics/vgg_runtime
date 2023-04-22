@@ -42,6 +42,8 @@
 #include "Utils/FileManager.hpp"
 #include "Utils/Scheduler.hpp"
 
+#include "Basic/Scene.hpp"
+
 namespace VGG
 {
 
@@ -233,6 +235,7 @@ protected: // protected members and static members
   double m_timestamp;
   SkiaState m_skiaState;
   Zoomer m_zoomer;
+  Scene m_scene;
 
   static bool init(App* app, int w, int h, const std::string& title)
   {
@@ -385,13 +388,13 @@ protected: // protected methods
 
   void onFrame()
   {
-
     Scheduler::callOnFrameOnce();
 
     if (SkCanvas* canvas = getCanvas())
     {
       m_zoomer.apply(canvas);
       EntityManager::map([&](Entity& entity) { RenderSystem::drawEntity(canvas, entity); });
+      m_scene.Render(canvas, m_width, m_height);
       InputManager::draw(canvas);
       m_zoomer.restore(canvas);
     }
@@ -501,6 +504,11 @@ public: // public methods
   inline SkSurface* getSurface()
   {
     return m_skiaState.surface.get();
+  }
+
+  Scene* getScene()
+  {
+    return &m_scene;
   }
 
   // fps <= 0 indicates rendering as fast as possible

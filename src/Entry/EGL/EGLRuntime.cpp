@@ -339,6 +339,17 @@ int loadSketchFile(const char* filename)
   return 0;
 }
 
+int loadContent(const char* content)
+{
+  if (!app)
+  {
+    FAIL("not init");
+    return -1;
+  }
+  app->getScene()->LoadFileContent(std::string(content));
+  return 0;
+}
+
 int renderAsImages(int width, int height, const ImageInfo* infos, int count, Image* out)
 {
   ASSERT(app);

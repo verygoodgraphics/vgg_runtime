@@ -37,6 +37,11 @@ extern "C"
    */
   int loadSketchFile(const char* filename);
 
+  int loadContent(const char* content);
+
+  int loadFile(const char* filename);
+
+
   /**
    * @brief Render the input file as images by the given infos array
    *

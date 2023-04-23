@@ -22,6 +22,7 @@ enum ObjectType
   VGG_PATH,
   VGG_IMAGE,
   VGG_TEXT,
+  VGG_ARTBOARD,
   VGG_GROUP,
   VGG_CONTOUR,
   VGG_MASTER,
@@ -156,6 +157,15 @@ class GroupNode final : public PaintNode
 public:
   GroupNode(const std::string& name)
     : PaintNode(name, ObjectType::VGG_GROUP)
+  {
+  }
+};
+
+class ArtboardNode final : public PaintNode
+{
+public:
+  ArtboardNode(const std::string& name)
+    : PaintNode(name, ObjectType::VGG_ARTBOARD)
   {
   }
 };

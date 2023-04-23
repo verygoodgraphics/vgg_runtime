@@ -16,6 +16,7 @@ add_executable(egl_entry
 EGLEntry.cpp)
 target_link_libraries(egl_entry egl_runtime)
 
+target_include_directories(egl_runtime PUBLIC ${VGG_CONTRIB_GLM_INCLUDE})
 target_link_libraries(egl_runtime skia_egl quickjs vgg_internal SDL2 OpenGL::EGL miniz)
 install(TARGETS egl_runtime skia_egl zlib libpng libwebp libjpeg-turbo freetype egl_entry)
 set_target_properties(egl_runtime PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

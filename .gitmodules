@@ -4,6 +4,3 @@
 [submodule "lib/vgg_automerge"]
 	path = lib/vgg_automerge
 	url = https://github.com/verygoodgraphics/vgg_automerge.git
-[submodule "lib/glm"]
-	path = lib/glm
-	url = https://github.com/g-truc/glm

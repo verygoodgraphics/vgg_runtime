@@ -19,8 +19,8 @@
         "hasBackgroundColor",
         "id",
         "isLocked",
-        "isMask",
         "layers",
+        "maskType",
         "matrix",
         "outlineMaskBy",
         "style",
@@ -53,7 +53,7 @@
         },
         "bounds": {
           "$ref": "#/definitions/Rect",
-          "description": " This property records the bounds information of the object before it is matrixed. For example, In adobe illustrator, the top left coordinate of an image is always 0, So the relationship of the bounds frame matrix is as follows: { (0, 0), (width, 0), (width, -height), (0, -height) } + matrix_transformation = frame. "
+          "description": "This property records the bounds information of the object before it is matrixed. self.bound * self.matrix = self.frame. self.frame * parent.matrix = self in parent coordinate system frame. and so on."
         },
         "frame": {
           "$ref": "#/definitions/Rect",
@@ -65,21 +65,23 @@
         },
         "alphaMaskBy": {
           "type": "array",
-          "item": {
+          "items": {
             "$ref": "#/definitions/AlphaMask"
           }
         },
         "outlineMaskBy": {
           "type": "array",
           "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
-          "item": {
+          "items": {
             "type": "string",
             "description": "The value is ID of a object that is a outline mask of this object."
           }
         },
-        "isMask": {
-          "type": "boolean",
-          "description": "Indicates whether the current object is a mask object."
+        "maskType": {
+          "type": "integer",
+          "description": "Describes the mask type of the object.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
         },
         "class": {
           "const": "artboard"
@@ -128,20 +130,53 @@
         },
         "transparencyKnockoutGroup": {
           "type": "integer",
+          "description": "In a transparency knockout group, the elements of a group don't show through each other.",
           "enum": [0, 1, 2],
-          "description": " In a transparency knockout group, the elements of a group don't show through each other. 0: OFF 1: ON 2: Neutral "
+          "enumDescriptions": ["OFF", "ON", "Neutral"]
         }
       },
       "additionalProperties": false
     },
     "BlendMode": {
       "title": "Blend Mode",
+      "description": "Blend mode of the object.",
       "type": "integer",
       "enum": [
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
         20, 21, 22, 23, 24, 25, 26, 27, 28, 29
       ],
-      "description": " Blend mode of the object. 0: Normal 1: Darken 2: Multiply 3: Color burn 4: Lighten 5: Screen 6: Color dodge 7: Overlay 8: Soft light 9: Hard light 10: Difference 11: Exclusion 12: Hue 13: Saturation 14: Color 15: Luminosity 16: Plus darker 17: Plus lighter 18: Blend divide 19: Blend subtraction 20: Darker color 21: Dissolve 22: Hard mix 23: Lighter color 24: Lighten burn 25: Lighten dodge 26: Lighten light 27: Pass through 28: Pin Light 29: Vivid light ",
+      "enumDescriptions": [
+        "Normal",
+        "Darken",
+        "Multiply",
+        "Color burn",
+        "Lighten",
+        "Screen",
+        "Color dodge",
+        "Overlay",
+        "Soft light",
+        "Hard light",
+        "Difference",
+        "Exclusion",
+        "Hue",
+        "Saturation",
+        "Color",
+        "Luminosity",
+        "Plus darker",
+        "Plus lighter",
+        "Blend divide",
+        "Blend subtraction",
+        "Darker color",
+        "Dissolve",
+        "Hard mix",
+        "Lighter color",
+        "Lighten burn",
+        "Lighten dodge",
+        "Lighten light",
+        "Pass through",
+        "Pin Light",
+        "Vivid light"
+      ],
       "$id": "#BlendMode"
     },
     "UnitInterval": {
@@ -172,14 +207,14 @@
         "fills": {
           "type": "array",
           "description": "An array containing the fill effects of the object.",
-          "item": {
+          "items": {
             "$ref": "#/definitions/Fill"
           }
         },
         "blurs": {
           "type": "array",
           "description": "An array containing the blur effects of the object.",
-          "item": {
+          "items": {
             "$ref": "#/definitions/Blur"
           }
         },
@@ -189,6 +224,9 @@
           "items": {
             "$ref": "#/definitions/Shadow"
           }
+        },
+        "colorControls": {
+          "$ref": "#/definitions/ColorControls"
         }
       },
       "additionalProperties": false
@@ -244,8 +282,9 @@
         },
         "style": {
           "type": "integer",
+          "description": "Type of the border style, the dashed style is further specified in dashedOffset and dashedPattern.",
           "enum": [0, 1, 2],
-          "description": " Type of the border style, the dashed style is further specified in dashedOffset and dashedPattern. 0: solid 1: dotted 2: dashed "
+          "enumDescriptions": ["solid", "dotted", "dashed"]
         },
         "dashedPattern": {
           "type": "array",
@@ -305,15 +344,17 @@
     "FillType": {
       "title": "Fill Type",
       "type": "integer",
+      "description": "Enumeration of the fill types.",
       "enum": [0, 1, 2],
-      "description": " Enumeration of the fill types. 0: Color 1: Gradient 2: Pattern ",
+      "enumDescriptions": ["Color", "Gradient", "Pattern"],
       "$id": "#FillType"
     },
     "BorderPosition": {
       "title": "Border Position",
       "type": "integer",
+      "description": "Enumeration of border positions.",
       "enum": [0, 1, 2],
-      "description": " Enumeration of border positions. 0: Center 1: Inside 2: Outside ",
+      "enumDescriptions": ["Center", "Inside", "Outside"],
       "$id": "#BorderPosition"
     },
     "Gradient": {
@@ -328,22 +369,20 @@
         },
         "instance": {
           "description": "The current gradient instance.",
-          "items": {
-            "oneOf": [
-              {
-                "$ref": "#/definitions/GradientAngular"
-              },
-              {
-                "$ref": "#/definitions/GradientLinear"
-              },
-              {
-                "$ref": "#/definitions/GradientRadial"
-              },
-              {
-                "$ref": "#/definitions/GradientBasic"
-              }
-            ]
-          }
+          "oneOf": [
+            {
+              "$ref": "#/definitions/GradientAngular"
+            },
+            {
+              "$ref": "#/definitions/GradientLinear"
+            },
+            {
+              "$ref": "#/definitions/GradientRadial"
+            },
+            {
+              "$ref": "#/definitions/GradientBasic"
+            }
+          ]
         }
       },
       "additionalProperties": false
@@ -366,7 +405,7 @@
         },
         "stops": {
           "type": "array",
-          "minItems": 2,
+          "minItems": 1,
           "items": {
             "$ref": "#/definitions/GradientStop"
           }
@@ -435,7 +474,7 @@
         },
         "stops": {
           "type": "array",
-          "minItems": 2,
+          "minItems": 1,
           "items": {
             "$ref": "#/definitions/GradientStop"
           }
@@ -465,7 +504,7 @@
         },
         "stops": {
           "type": "array",
-          "minItems": 2,
+          "minItems": 1,
           "items": {
             "$ref": "#/definitions/GradientStop"
           }
@@ -494,7 +533,7 @@
         "gradientType": {
           "type": "integer",
           "enum": [0, 1],
-          "description": " 0: linear gradient 1: radial gradient "
+          "enumDescriptions": ["linear gradient", "radial gradient"]
         },
         "stops": {
           "type": "array",
@@ -521,19 +560,22 @@
         },
         "perpendicularMatrix": {
           "type": "array",
-          "item": {
+          "items": {
             "type": "object",
+            "required": ["flag", "matrix"],
             "properties": {
               "flag": {
                 "type": "integer",
                 "enum": [0, 1],
-                "description": " 0: specifies a gradient fill between two colors. 1: specifies solid colors at either end of a linear gradient fill, known as gradient caps.It doesn't exist in radial gradient. "
+                "enumDescriptions": [
+                  "specifies a gradient fill between two colors.",
+                  "specifies solid colors at either end of a linear gradient fill, known as gradient caps.It doesn't exist in radial gradient."
+                ]
               },
               "matrix": {
                 "$ref": "#/definitions/Matrix"
               }
             },
-            "required": ["flag", "matrix"],
             "additionalProperties": false
           }
         }
@@ -561,8 +603,13 @@
         },
         "flag": {
           "type": "integer",
+          "description": "This argument defines how the gradient will be rendered.For simple filled paths, flag takes the value 1.",
           "enum": [0, 1, 2],
-          "description": " This argument defines how the gradient will be rendered.For simple filled paths, flag takes the value 1. 0: Do not issue a clip. 1: Issue a clip. 2: Disable rendering. "
+          "enumDescriptions": [
+            "Do not issue a clip.",
+            "Issue a clip.",
+            "Disable rendering."
+          ]
         },
         "xOrigin": {
           "type": "number",
@@ -668,7 +715,7 @@
       ],
       "properties": {
         "class": {
-          "const": "pattern_iamge"
+          "const": "pattern_image"
         },
         "fillType": {
           "$ref": "#/definitions/PatternFillType"
@@ -691,8 +738,16 @@
     "PatternFillType": {
       "title": "Pattern Fill Type",
       "type": "integer",
+      "description": "Enumeration of pattern fill types.",
       "enum": [0, 1, 2, 3, 4, 5],
-      "description": " Enumeration of pattern fill types. 0: Tile 1: Fill 2: Stretch 3: Fit 4: Tile only horizontal 5: Tile only vertical ",
+      "enumDescriptions": [
+        "Tile",
+        "Fill",
+        "Stretch",
+        "Fit",
+        "Tile only horizontal",
+        "Tile only vertical"
+      ],
       "$id": "#PatternFillType"
     },
     "PatternLayerInstance": {
@@ -758,15 +813,17 @@
     "LineCapStyle": {
       "title": "Line Cap Style",
       "type": "integer",
+      "description": "Enumeration of the line cap styles.",
       "enum": [0, 1, 2],
-      "description": " Enumeration of the line cap styles. 0: Butt 1: Round 2: square ",
+      "enumDescriptions": ["Butt", "Round", "Square"],
       "$id": "#LineCapStyle"
     },
     "LineJoinStyle": {
       "title": "Line Join Style",
       "type": "integer",
+      "description": "Enumeration of the line join styles.",
       "enum": [0, 1, 2],
-      "description": " Enumeration of the line join styles. 0: Miter 1: Round 2: Bevel ",
+      "enumDescriptions": ["Miter", "Round", "Bevel"],
       "$id": "#LineJoinStyle"
     },
     "Fill": {
@@ -805,7 +862,7 @@
       "description": "Defines a blur style.",
       "type": "object",
       "$id": "#Blur",
-      "required": ["class", "type", "isEnabled", "radius"],
+      "required": ["class", "type", "isEnabled", "center", "saturation"],
       "properties": {
         "class": {
           "const": "blur"
@@ -837,9 +894,10 @@
     },
     "BlurType": {
       "title": "Blur Type",
+      "description": "Enumeration of the various blur types.",
       "type": "integer",
       "enum": [0, 1, 2, 3],
-      "description": " Enumeration of the various blur types. 0: Gaussian 1: Motion 2: Zoom 3: Background ",
+      "enumDescriptions": ["Gaussian", "Motion", "Zoom", "Background"],
       "$id": "#BlurType"
     },
     "Shadow": {
@@ -891,6 +949,49 @@
         "inner": {
           "type": "boolean",
           "description": "True means inner shadows. False means shadows."
+        }
+      },
+      "additionalProperties": false
+    },
+    "ColorControls": {
+      "title": "Color Controls",
+      "description": "Defines color adjust styles on images",
+      "type": "object",
+      "$id": "#ColorControls",
+      "required": [
+        "class",
+        "isEnabled",
+        "brightness",
+        "contrast",
+        "hue",
+        "saturation"
+      ],
+      "properties": {
+        "class": {
+          "const": "colorControls"
+        },
+        "isEnabled": {
+          "type": "boolean"
+        },
+        "brightness": {
+          "type": "number",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "contrast": {
+          "type": "number",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "hue": {
+          "type": "number",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "saturation": {
+          "type": "number",
+          "minimum": -100,
+          "maximum": 100
         }
       },
       "additionalProperties": false
@@ -950,7 +1051,7 @@
         "alphaType": {
           "type": "integer",
           "enum": [0, 1, 2],
-          "description": " 0: alpha         1: luminosity 2: inverse-luminosity "
+          "enumDescriptions": ["alpha", "luminosity", "inverse-luminosity"]
         },
         "crop": {
           "type": "boolean",
@@ -973,7 +1074,7 @@
         "frame",
         "id",
         "isLocked",
-        "isMask",
+        "maskType",
         "matrix",
         "outlineMaskBy",
         "style",
@@ -1006,7 +1107,7 @@
         },
         "bounds": {
           "$ref": "#/definitions/Rect",
-          "description": " This property records the bounds information of the object before it is matrixed. For example, In adobe illustrator, the top left coordinate of an image is always 0, So the relationship of the bounds frame matrix is as follows: { (0, 0), (width, 0), (width, -height), (0, -height) } + matrix_transformation = frame. "
+          "description": "This property records the bounds information of the object before it is matrixed. self.bound * self.matrix = self.frame. self.frame * parent.matrix = self in parent coordinate system frame. and so on."
         },
         "frame": {
           "$ref": "#/definitions/Rect",
@@ -1018,21 +1119,23 @@
         },
         "alphaMaskBy": {
           "type": "array",
-          "item": {
+          "items": {
             "$ref": "#/definitions/AlphaMask"
           }
         },
         "outlineMaskBy": {
           "type": "array",
           "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
-          "item": {
+          "items": {
             "type": "string",
             "description": "The value is ID of a object that is a outline mask of this object."
           }
         },
-        "isMask": {
-          "type": "boolean",
-          "description": "Indicates whether the current object is a mask object."
+        "maskType": {
+          "type": "integer",
+          "description": "Describes the mask type of the object.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
         },
         "childObjects": {
           "type": "array",
@@ -1076,7 +1179,7 @@
         "frame",
         "id",
         "isLocked",
-        "isMask",
+        "maskType",
         "matrix",
         "outlineMaskBy",
         "shape",
@@ -1110,7 +1213,7 @@
         },
         "bounds": {
           "$ref": "#/definitions/Rect",
-          "description": " This property records the bounds information of the object before it is matrixed. For example, In adobe illustrator, the top left coordinate of an image is always 0, So the relationship of the bounds frame matrix is as follows: { (0, 0), (width, 0), (width, -height), (0, -height) } + matrix_transformation = frame. "
+          "description": "This property records the bounds information of the object before it is matrixed. self.bound * self.matrix = self.frame. self.frame * parent.matrix = self in parent coordinate system frame. and so on."
         },
         "frame": {
           "$ref": "#/definitions/Rect",
@@ -1122,21 +1225,23 @@
         },
         "alphaMaskBy": {
           "type": "array",
-          "item": {
+          "items": {
             "$ref": "#/definitions/AlphaMask"
           }
         },
         "outlineMaskBy": {
           "type": "array",
           "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
-          "item": {
+          "items": {
             "type": "string",
             "description": "The value is ID of a object that is a outline mask of this object."
           }
         },
-        "isMask": {
-          "type": "boolean",
-          "description": "Indicates whether the current object is a mask object."
+        "maskType": {
+          "type": "integer",
+          "description": "Describes the mask type of the object.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
         },
         "class": {
           "const": "path"
@@ -1167,8 +1272,9 @@
         },
         "windingRule": {
           "type": "integer",
+          "description": "The value describes the shape's 'winding rule' (policy determining how overlapping contours fill an area).",
           "enum": [0, 1],
-          "description": " The value describes the shape's 'winding rule' (policy determining how overlapping contours fill an area). 0: non-zero 1: even-odd "
+          "enumDescriptions": ["non-zero", "even-odd"]
         }
       },
       "additionalProperties": false
@@ -1178,14 +1284,7 @@
       "description": "A single subshape descriptor.",
       "type": "object",
       "$id": "#SubShape",
-      "required": [
-        "class",
-        "subGeometry",
-        "booleanOperation",
-        "bounds",
-        "frame",
-        "matrix"
-      ],
+      "required": ["class", "subGeometry", "booleanOperation"],
       "properties": {
         "class": {
           "const": "subshape"
@@ -1204,25 +1303,26 @@
             },
             {
               "$ref": "#/definitions/SymbolInstance"
+            },
+            {
+              "$ref": "#/definitions/Path"
+            },
+            {
+              "$ref": "#/definitions/Group"
             }
           ]
         },
         "booleanOperation": {
           "type": "integer",
+          "description": "Boolean operation combining this and next-in-the-array path.",
           "enum": [0, 1, 2, 3, 4],
-          "description": " Boolean operation combining this and next-in-the-array path. 0: union 1: subtraction 2: intersecion 3: exclusion 4: none "
-        },
-        "bounds": {
-          "$ref": "#/definitions/Rect",
-          "description": " This property records the bounds information of the object before it is matrixed. For example, In adobe illustrator, the top left coordinate of an image is always 0, So the relationship of the bounds frame matrix is as follows: { (0, 0), (width, 0), (width, -height), (0, -height) } + matrix_transformation = frame. "
-        },
-        "frame": {
-          "$ref": "#/definitions/Rect",
-          "description": "Frame information for the object. When the object is a group, its frame is the union of all objects in the group, whether or not the group contains a mask. This property stores information about the object after the matrix transformation."
-        },
-        "matrix": {
-          "$ref": "#/definitions/Matrix",
-          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
+          "enumDescriptions": [
+            "union",
+            "subtraction",
+            "intersecion",
+            "exclusion",
+            "none"
+          ]
         }
       },
       "additionalProperties": false
@@ -1255,26 +1355,37 @@
       "description": "A single point descriptor.",
       "type": "object",
       "$id": "#PointAttr",
-      "required": ["class", "pointType", "points"],
+      "required": ["class", "point"],
       "properties": {
         "class": {
           "const": "pointAttr"
         },
-        "pointType": {
-          "type": "integer",
-          "enum": [0, 1, 2],
-          "description": " Describes a type of the point. 0: simple point 1: quad 2: cubic "
-        },
         "radius": {
           "type": "number",
-          "description": "Takes effect only in simple point mode, indicates that the effect of the current point is an arc, and specifies the radius of the arc."
+          "description": "Corner radius at the point."
         },
-        "points": {
-          "type": "array",
-          "description": "If the point is of type cubic, the items are stored as c1, c2, p, where p is the point on the curve and c1 and c2 are its neighbouring control points. (In sketch, c1 eauql curveto, c2 equal curvefrom) For type quad the format is c, p. for type simple point it is p.",
-          "items": {
-            "$ref": "#/definitions/Point"
-          }
+        "cornerStyle": {
+          "type": "integer",
+          "description": "Enumeration of the corner styles that can be applied to vector points.",
+          "enum": [0, 1, 2, 3],
+          "enumDescriptions": [
+            "Rounded",
+            "RoundedInverted",
+            "Angled",
+            "Squared"
+          ]
+        },
+        "curveFrom": {
+          "$ref": "#/definitions/Point",
+          "description": "When the current point is the starting point of the Bezier curve, this attribute describes the control point at the starting point of the Bezier curve."
+        },
+        "curveTo": {
+          "$ref": "#/definitions/Point",
+          "description": "When the current point is the end point of the Bezier curve, this attribute describes the control point of the Bezier curve's end point."
+        },
+        "point": {
+          "$ref": "#/definitions/Point",
+          "description": "The actual point on the curve. The coordinates are before the matrix transformation."
         }
       },
       "additionalProperties": false
@@ -1295,7 +1406,7 @@
         "frameMode",
         "id",
         "isLocked",
-        "isMask",
+        "maskType",
         "matrix",
         "outlineMaskBy",
         "style",
@@ -1329,7 +1440,7 @@
         },
         "bounds": {
           "$ref": "#/definitions/Rect",
-          "description": " This property records the bounds information of the object before it is matrixed. For example, In adobe illustrator, the top left coordinate of an image is always 0, So the relationship of the bounds frame matrix is as follows: { (0, 0), (width, 0), (width, -height), (0, -height) } + matrix_transformation = frame. "
+          "description": "This property records the bounds information of the object before it is matrixed. self.bound * self.matrix = self.frame. self.frame * parent.matrix = self in parent coordinate system frame. and so on."
         },
         "frame": {
           "$ref": "#/definitions/Rect",
@@ -1341,21 +1452,23 @@
         },
         "alphaMaskBy": {
           "type": "array",
-          "item": {
+          "items": {
             "$ref": "#/definitions/AlphaMask"
           }
         },
         "outlineMaskBy": {
           "type": "array",
           "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
-          "item": {
+          "items": {
             "type": "string",
             "description": "The value is ID of a object that is a outline mask of this object."
           }
         },
-        "isMask": {
-          "type": "boolean",
-          "description": "Indicates whether the current object is a mask object."
+        "maskType": {
+          "type": "integer",
+          "description": "Describes the mask type of the object.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
         },
         "class": {
           "const": "text"
@@ -1366,17 +1479,19 @@
         },
         "textOnPath": {
           "$ref": "#/definitions/TextOnPath",
-          "description": "If this item exists, the text is on the path and the matrix information for the text should not be used."
+          "description": "If this item exists, the text is on the path."
         },
         "frameMode": {
           "type": "integer",
+          "description": "Specifies the text frame semantics. fixed mode strictly sets the typeset area according to the frame. auto width and auto height mode expands associated bounds as needed.",
           "enum": [0, 1, 2],
-          "description": " Specifies the text frame semantics. fixed mode strictly sets the typeset area according to the frame. auto width and auto height mode expands associated bounds as needed. 0: fixed 1: auto width 2: auto height "
+          "enumDescriptions": ["fixed", "auto width", "auto height"]
         },
         "verticalAlignment": {
           "type": "integer",
+          "description": "Text vertical alignment.",
           "enum": [0, 1, 2],
-          "description": " Text vertical alignment. 0: top 1: center 2: bottom "
+          "enumDescriptions": ["top", "center", "bottom"]
         },
         "attr": {
           "type": "array",
@@ -1393,20 +1508,10 @@
       "description": "Describes information about text on a path.",
       "type": "object",
       "$id": "#TextOnPath",
-      "required": ["class", "pathId", "startOffset"],
+      "required": ["class"],
       "properties": {
         "class": {
           "const": "textOnPath"
-        },
-        "pathId": {
-          "type": "string",
-          "description": "Id of the associated path."
-        },
-        "startOffset": {
-          "type": "number",
-          "description": "The percentage of the text's starting position on the path.",
-          "maximum": 1,
-          "minimum": 0
         }
       },
       "additionalProperties": false
@@ -1421,7 +1526,6 @@
         "length",
         "contextSettings",
         "horizontalAlignment",
-        "name",
         "size",
         "kerning",
         "letterSpacing",
@@ -1462,12 +1566,19 @@
         },
         "horizontalAlignment": {
           "type": "integer",
-          "enum": [0, 1, 2, 3],
-          "description": " Horizontal alignment of the text. 0: left 1: center 2: right 3: justify "
+          "description": "Horizontal alignment of the text.",
+          "enum": [0, 1, 2, 3, 4],
+          "enumDescriptions": [
+            "Left",
+            "Right",
+            "Centered",
+            "Justified",
+            "Natural"
+          ]
         },
         "name": {
           "type": "string",
-          "description": "Common name of font. The font name may contain subfamily, in which case the subFamilyName will not appear."
+          "description": "Common name of font. The font name may contain subfamily, in which case the subFamilyName will not appear. If this item does not exist, the font name cannot be obtained."
         },
         "subFamilyName": {
           "type": "string",
@@ -1491,8 +1602,9 @@
         },
         "underline": {
           "type": "integer",
+          "description": "Text underline type.",
           "enum": [0, 1, 2],
-          "description": " Text underline type. 0: none 1: single line 2: double line "
+          "enumDescriptions": ["none", "single line", "double line"]
         },
         "linethrough": {
           "type": "boolean",
@@ -1509,7 +1621,12 @@
         "lettertransform": {
           "type": "integer",
           "enum": [0, 1, 2, 3],
-          "description": " 0: do nothing 1: open smallcaps 2: open uppercase 3: open lowercase "
+          "enumDescriptions": [
+            "do nothing.",
+            "open smallcaps.",
+            "open uppercase.",
+            "open lowercase."
+          ]
         },
         "baselineShift": {
           "type": "number",
@@ -1517,8 +1634,9 @@
         },
         "baseline": {
           "type": "integer",
+          "description": "Describes baseline's position type.",
           "enum": [0, 1, 2],
-          "description": " Describes baseline's position type. 0: normal 1: superScript 2: subScript "
+          "enumDescriptions": ["normal", "superScript", "subScript"]
         },
         "horizontalScale": {
           "type": "number",
@@ -1576,7 +1694,7 @@
         "id",
         "imageFileName",
         "isLocked",
-        "isMask",
+        "maskType",
         "matrix",
         "outlineMaskBy",
         "style",
@@ -1609,7 +1727,7 @@
         },
         "bounds": {
           "$ref": "#/definitions/Rect",
-          "description": " This property records the bounds information of the object before it is matrixed. For example, In adobe illustrator, the top left coordinate of an image is always 0, So the relationship of the bounds frame matrix is as follows: { (0, 0), (width, 0), (width, -height), (0, -height) } + matrix_transformation = frame. "
+          "description": "This property records the bounds information of the object before it is matrixed. self.bound * self.matrix = self.frame. self.frame * parent.matrix = self in parent coordinate system frame. and so on."
         },
         "frame": {
           "$ref": "#/definitions/Rect",
@@ -1621,21 +1739,23 @@
         },
         "alphaMaskBy": {
           "type": "array",
-          "item": {
+          "items": {
             "$ref": "#/definitions/AlphaMask"
           }
         },
         "outlineMaskBy": {
           "type": "array",
           "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
-          "item": {
+          "items": {
             "type": "string",
             "description": "The value is ID of a object that is a outline mask of this object."
           }
         },
-        "isMask": {
-          "type": "boolean",
-          "description": "Indicates whether the current object is a mask object."
+        "maskType": {
+          "type": "integer",
+          "description": "Describes the mask type of the object.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
         },
         "class": {
           "const": "image"
@@ -1643,6 +1763,10 @@
         "imageFileName": {
           "type": "string",
           "description": "The relative path to the image file (utf-8)."
+        },
+        "fillReplacesImage": {
+          "type": "boolean",
+          "description": "If the value is true, only fill is used. Otherwise, the content of the image and the fill effect are used simultaneously. If missing, equivalent to false."
         }
       },
       "additionalProperties": false
@@ -1660,13 +1784,12 @@
         "frame",
         "id",
         "isLocked",
-        "isMask",
+        "maskType",
         "matrix",
         "outlineMaskBy",
         "overrideValues",
-        "scale",
         "style",
-        "symbolMasterId",
+        "symbolID",
         "visible"
       ],
       "properties": {
@@ -1696,7 +1819,7 @@
         },
         "bounds": {
           "$ref": "#/definitions/Rect",
-          "description": " This property records the bounds information of the object before it is matrixed. For example, In adobe illustrator, the top left coordinate of an image is always 0, So the relationship of the bounds frame matrix is as follows: { (0, 0), (width, 0), (width, -height), (0, -height) } + matrix_transformation = frame. "
+          "description": "This property records the bounds information of the object before it is matrixed. self.bound * self.matrix = self.frame. self.frame * parent.matrix = self in parent coordinate system frame. and so on."
         },
         "frame": {
           "$ref": "#/definitions/Rect",
@@ -1708,21 +1831,23 @@
         },
         "alphaMaskBy": {
           "type": "array",
-          "item": {
+          "items": {
             "$ref": "#/definitions/AlphaMask"
           }
         },
         "outlineMaskBy": {
           "type": "array",
           "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
-          "item": {
+          "items": {
             "type": "string",
             "description": "The value is ID of a object that is a outline mask of this object."
           }
         },
-        "isMask": {
-          "type": "boolean",
-          "description": "Indicates whether the current object is a mask object."
+        "maskType": {
+          "type": "integer",
+          "description": "Describes the mask type of the object.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
         },
         "class": {
           "const": "symbolInstance"
@@ -1733,12 +1858,9 @@
             "$ref": "#/definitions/OverrideValue"
           }
         },
-        "symbolMasterId": {
+        "symbolID": {
           "type": "string",
-          "description": "The id of the referenced symbol master."
-        },
-        "scale": {
-          "type": "number"
+          "description": "This field refers to the value symbolID in the symbol master."
         }
       },
       "additionalProperties": false
@@ -1752,9 +1874,6 @@
       "properties": {
         "class": {
           "const": "overrideValue"
-        },
-        "do_objectID": {
-          "type": "string"
         },
         "overrideName": {
           "$ref": "#/definitions/OverrideName"
@@ -1778,7 +1897,7 @@
     "OverrideName": {
       "title": "Override Name",
       "description": "Defines the valid string patterns for an override name.",
-      "oneOf": [
+      "anyOf": [
         {
           "type": "string",
           "pattern": "[0-9A-F]{8}\\-[0-9A-F]{4}\\-[0-9A-F]{4}\\-[0-9A-F]{4}\\-[0-9A-F]{12}((_stringValue$)|\\/)"
@@ -1794,6 +1913,10 @@
         {
           "type": "string",
           "pattern": "[0-9A-F]{8}\\-[0-9A-F]{4}\\-[0-9A-F]{4}\\-[0-9A-F]{4}\\-[0-9A-F]{12}((_layerStyle$)|\\/)"
+        },
+        {
+          "type": "string",
+          "description": " Compatibility with older versions. for example: 32253C46-642C-4D15-AE1D-DB42363B9D41_textStyle D36814C5-A07B-47A0-B07C-02E2AF4FCCE4/C7F665ED-97AF-430D-82CE-6D7088BDD967_symbolID 336F5BC3-22C3-4DFF-A0E5-1A394CBE40BC/50C69E36-F1B0-42FB-BABE-A882134C1650_stringValue "
         }
       ],
       "$id": "#OverrideName"
@@ -1810,7 +1933,8 @@
         },
         "_ref_class": {
           "type": "string",
-          "enum": ["MSImageData", "MSImmutablePage", "MSPatch"]
+          "enum": ["MSImageData", "MSImmutablePage", "MSPatch"],
+          "enumDescriptions": ["MSImageData", "MSImmutablePage", "MSPatch"]
         },
         "_ref": {
           "type": "string"
@@ -1830,7 +1954,8 @@
         },
         "_ref_class": {
           "type": "string",
-          "enum": ["MSImageData", "MSFontData"]
+          "enum": ["MSImageData", "MSFontData"],
+          "enumDescriptions": ["MSImageData", "MSFontData"]
         },
         "_ref": {
           "type": "string"
@@ -1872,7 +1997,7 @@
         "frame",
         "id",
         "isLocked",
-        "isMask",
+        "maskType",
         "matrix",
         "outlineMaskBy",
         "style",
@@ -1905,7 +2030,7 @@
         },
         "bounds": {
           "$ref": "#/definitions/Rect",
-          "description": " This property records the bounds information of the object before it is matrixed. For example, In adobe illustrator, the top left coordinate of an image is always 0, So the relationship of the bounds frame matrix is as follows: { (0, 0), (width, 0), (width, -height), (0, -height) } + matrix_transformation = frame. "
+          "description": "This property records the bounds information of the object before it is matrixed. self.bound * self.matrix = self.frame. self.frame * parent.matrix = self in parent coordinate system frame. and so on."
         },
         "frame": {
           "$ref": "#/definitions/Rect",
@@ -1917,21 +2042,23 @@
         },
         "alphaMaskBy": {
           "type": "array",
-          "item": {
+          "items": {
             "$ref": "#/definitions/AlphaMask"
           }
         },
         "outlineMaskBy": {
           "type": "array",
           "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
-          "item": {
+          "items": {
             "type": "string",
             "description": "The value is ID of a object that is a outline mask of this object."
           }
         },
-        "isMask": {
-          "type": "boolean",
-          "description": "Indicates whether the current object is a mask object."
+        "maskType": {
+          "type": "integer",
+          "description": "Describes the mask type of the object.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
         },
         "childObjects": {
           "type": "array",
@@ -1976,7 +2103,7 @@
         "frame",
         "id",
         "isLocked",
-        "isMask",
+        "maskType",
         "matrix",
         "outlineMaskBy",
         "pattern_bounding_box",
@@ -2010,7 +2137,7 @@
         },
         "bounds": {
           "$ref": "#/definitions/Rect",
-          "description": " This property records the bounds information of the object before it is matrixed. For example, In adobe illustrator, the top left coordinate of an image is always 0, So the relationship of the bounds frame matrix is as follows: { (0, 0), (width, 0), (width, -height), (0, -height) } + matrix_transformation = frame. "
+          "description": "This property records the bounds information of the object before it is matrixed. self.bound * self.matrix = self.frame. self.frame * parent.matrix = self in parent coordinate system frame. and so on."
         },
         "frame": {
           "$ref": "#/definitions/Rect",
@@ -2022,21 +2149,23 @@
         },
         "alphaMaskBy": {
           "type": "array",
-          "item": {
+          "items": {
             "$ref": "#/definitions/AlphaMask"
           }
         },
         "outlineMaskBy": {
           "type": "array",
           "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
-          "item": {
+          "items": {
             "type": "string",
             "description": "The value is ID of a object that is a outline mask of this object."
           }
         },
-        "isMask": {
-          "type": "boolean",
-          "description": "Indicates whether the current object is a mask object."
+        "maskType": {
+          "type": "integer",
+          "description": "Describes the mask type of the object.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
         },
         "childObjects": {
           "type": "array",
@@ -2083,19 +2212,22 @@
       "required": [
         "allowsOverrides",
         "alphaMaskBy",
+        "backgroundColor",
         "bounds",
         "childObjects",
+        "class",
         "contextSettings",
         "frame",
         "hasBackgroundColor",
         "id",
         "includeBackgroundColorInInstance",
         "isLocked",
-        "isMask",
+        "maskType",
         "matrix",
         "outlineMaskBy",
         "overrideProperties",
         "style",
+        "symbolID",
         "visible"
       ],
       "properties": {
@@ -2125,7 +2257,7 @@
         },
         "bounds": {
           "$ref": "#/definitions/Rect",
-          "description": " This property records the bounds information of the object before it is matrixed. For example, In adobe illustrator, the top left coordinate of an image is always 0, So the relationship of the bounds frame matrix is as follows: { (0, 0), (width, 0), (width, -height), (0, -height) } + matrix_transformation = frame. "
+          "description": "This property records the bounds information of the object before it is matrixed. self.bound * self.matrix = self.frame. self.frame * parent.matrix = self in parent coordinate system frame. and so on."
         },
         "frame": {
           "$ref": "#/definitions/Rect",
@@ -2137,21 +2269,23 @@
         },
         "alphaMaskBy": {
           "type": "array",
-          "item": {
+          "items": {
             "$ref": "#/definitions/AlphaMask"
           }
         },
         "outlineMaskBy": {
           "type": "array",
           "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
-          "item": {
+          "items": {
             "type": "string",
             "description": "The value is ID of a object that is a outline mask of this object."
           }
         },
-        "isMask": {
-          "type": "boolean",
-          "description": "Indicates whether the current object is a mask object."
+        "maskType": {
+          "type": "integer",
+          "description": "Describes the mask type of the object.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
         },
         "childObjects": {
           "type": "array",
@@ -2176,6 +2310,9 @@
             ]
           }
         },
+        "class": {
+          "const": "symbolMaster"
+        },
         "hasBackgroundColor": {
           "type": "boolean",
           "description": "A flag indicating whether backgroundColor should be applied as a background color of the object."
@@ -2195,9 +2332,9 @@
             "$ref": "#/definitions/OverrideProperty"
           }
         },
-        "presetDictionary": {
-          "type": "object",
-          "additionalProperties": false
+        "symbolID": {
+          "type": "string",
+          "description": "The symbolID field in the symbol instance refers to the value of this field."
         }
       },
       "additionalProperties": false
@@ -2226,8 +2363,15 @@
   "properties": {
     "fileType": {
       "type": "integer",
+      "description": "Specifies the file type.",
       "enum": [0, 1, 2, 3, 4],
-      "description": " Specifies the file type. 0: photoshop 1: sketch 2: adobe xd 3: figma 4: adobe illustrator "
+      "enumDescriptions": [
+        "photoshop",
+        "sketch",
+        "adobe xd",
+        "figma",
+        "adobe illustrator"
+      ]
     },
     "fileName": {
       "type": "string",

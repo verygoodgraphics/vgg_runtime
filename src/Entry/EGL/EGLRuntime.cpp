@@ -13,6 +13,8 @@
 #include "../../Utils/FileManager.hpp"
 
 #include "EGLRuntime.h"
+#include "include/core/SkData.h"
+#include "Basic/Scene.hpp"
 
 using namespace VGG;
 using namespace std;
@@ -244,6 +246,7 @@ public:
 
   void onInit()
   {
+    // do nothing
   }
 
   void pollEvent()
@@ -258,6 +261,7 @@ public:
       WARN("egl swap buffer failed\n");
     }
   }
+
   ~EGLRuntime()
   {
     eglDestroyContext(egl_display, egl_ctx);
@@ -265,135 +269,61 @@ public:
   }
 };
 
-static EGLRuntime* app = nullptr;
-
-SkEncodedImageFormat _toSkFormat(EncodeFormat format)
+std::tuple<std::string, std::map<int, sk_sp<SkData>>> render(
+  const nlohmann::json& j,
+  const std::map<std::string, std::vector<char>>& resources,
+  int imageQuality)
 {
-  switch (format)
-  {
-    case EncodeFormat::PNG:
-      return SkEncodedImageFormat::kPNG;
-    default:
-      WARN("Unkonwn format, fallback to PNG");
-  }
-  return SkEncodedImageFormat::kPNG;
-}
+  (void)resources;
+  std::string reason;
+  std::map<int, sk_sp<SkData>> res;
 
-int _renderCurrentPage(int quality, EncodeFormat format, Image* out)
-{
-  app->frame(0);
-  auto canvas = app->getCanvas();
-  auto surface = app->getSurface();
-  if (surface)
+  Scene scene;
+  scene.LoadFileContent(j);
+  auto count = scene.artboards.size();
+  for (int i = 0; i < count; i++)
   {
-    auto image = surface->makeImageSnapshot();
-    if (image)
+    auto b = scene.artboards[i]->bound;
+
+    int w = b.size().x;
+    int h = b.size().y;
+    auto app = App<EGLRuntime>::createInstance(w, h);
+    if (!app)
     {
-      auto data = image->encodeToData(_toSkFormat(format), quality);
-      if (data)
+      reason = "create instance failed\n";
+      return { reason, res };
+    }
+    scene.page = i;
+    auto canvas = app->getCanvas();
+    if (canvas)
+    {
+      canvas->clear(SK_ColorWHITE);
+      scene.Render(canvas);
+      if (auto surface = app->getSurface())
       {
-        out->size = data->size();
-        try
+        if (auto image = surface->makeImageSnapshot())
         {
-          out->data = new uint8_t[out->size];
+          if (auto data = image->encodeToData(SkEncodedImageFormat::kPNG, imageQuality))
+          {
+            reason = "";
+            res[i] = data;
+          }
+          else
+          {
+            reason = "encode to image failed\n";
+          }
         }
-        catch (...)
+        else
         {
-          FAIL("bad alloc");
-          return -1;
+          reason = "make image snapshot failed\n";
         }
-        memcpy(out->data, data->bytes(), out->size);
-        return 0;
       }
-      return -2;
+      else
+      {
+        reason = "null surface\n";
+      }
     }
-    return -2;
+    App<EGLRuntime>::destoryInstance(app);
   }
-  return -2;
-}
-
-int init(int width, int height)
-{
-  app = App<EGLRuntime>::getInstance(width, height, "VGG");
-  // app->setProperty("viewport_size", std::pair<int,int>{width, height});
-  if (!app)
-  {
-    return -1;
-    FAIL("Initialize failed\n");
-  }
-  return 0;
-}
-
-void shutdown()
-{
-  // do nothing
-}
-
-int loadSketchFile(const char* filename)
-{
-  if (!FileManager::loadFile(filename))
-  {
-    FAIL("Failed to load file: %s", filename);
-    return -1;
-  }
-  return 0;
-}
-
-int loadContent(const char* content)
-{
-  if (!app)
-  {
-    FAIL("not init");
-    return -1;
-  }
-  app->getScene()->LoadFileContent(std::string(content));
-  return 0;
-}
-
-int renderAsImages(int width, int height, const ImageInfo* infos, int count, Image* out)
-{
-  ASSERT(app);
-  if (!app)
-  {
-    FAIL("App is not initialized");
-    return -1;
-  }
-
-  auto fm = FileManager::getInstance();
-  if (!fm->currFile)
-  {
-    FAIL("No File loaded");
-    return -1;
-  }
-
-  // update image size
-  auto size = std::pair<int, int>{ width, height };
-  app->setProperty("viewport_size", size);
-
-  int res = 0;
-  for (int i = 0; i < count; i++)
-  {
-    auto currentFile = fm->currFile;
-    currentFile->currPageIdx = infos[i].artboardID;
-    currentFile->loadCurrPage();
-    out[i].data = nullptr;
-    if (_renderCurrentPage(infos[i].quality, infos[i].format, out + i) < 0)
-    {
-      res++;
-    }
-  }
-  return res == 0 ? 0 : -2;
-}
-
-void releaseImage(Image* image, int count)
-{
-  for (int i = 0; i < count; i++)
-  {
-    if (image[i].data)
-    {
-      delete image->data;
-      image->size = 0;
-      image->data = nullptr;
-    }
-  }
+  return { reason, res };
 }

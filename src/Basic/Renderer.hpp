@@ -31,12 +31,11 @@ inline void PrintCurrentTranslation(SkCanvas* canvas, int indent)
 class SkiaRenderer
 {
 public:
-  void Draw(SkCanvas* canvas, PaintNode* root, int vx, int vy)
+  void Draw(SkCanvas* canvas, PaintNode* root)
   {
     int deep = 0;
     glm::mat3 accumulationMatrix;
     TraversalData data;
-    root->bound = Bound2{ 0, 0, (float)vx, (float)vy };
     canvas->save();
     canvas->scale(1, -1); // convert the whole root to canvas coords
     root->Render(canvas);

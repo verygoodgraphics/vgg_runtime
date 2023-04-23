@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include "Basic/RenderTreeDef.hpp"
 #include "include/core/SkCanvas.h"
 // #include "vgg_sketch_parser/src/analyze_sketch_file/analyze_sketch_file.h"
 #include "Basic/Renderer.hpp"
@@ -12,7 +13,7 @@ namespace VGG
 struct Scene
 {
 public:
-  std::vector<std::vector<std::shared_ptr<PaintNode>>> artboards;
+  std::vector<std::shared_ptr<ArtboardNode>> artboards;
   std::vector<std::shared_ptr<SymbolMasterNode>> symbols;
   int page = 0;
   int symbolIndex = 0;
@@ -35,7 +36,6 @@ public:
     ifs.read(file_buf.data(), size);
     assert(ifs.gcount() == size);
     nlohmann::json json_out;
-    // analyze_sketch_file::analyze(file_buf.data(), size, "hello-sketch", json_out, resources);
     std::ofstream of("vgg_out.json");
     if (of.is_open())
     {
@@ -57,19 +57,21 @@ public:
     symbolIndex = 0;
   }
 
-  void Render(SkCanvas* canvas, int width, int height)
+  void Render(SkCanvas* canvas)
   {
     PaintNode* node = nullptr;
+    SkiaRenderer r;
     if (!renderSymbol)
     {
-      node = artboards[page][0].get();
+      auto board = artboards[page].get();
+      auto s = board->bound.size();
+      r.Draw(canvas, board);
     }
     else
     {
       node = symbols[symbolIndex].get();
+      r.Draw(canvas, node);
     }
-    SkiaRenderer r;
-    r.Draw(canvas, node, width, height);
   }
 
   void NextArtboard()

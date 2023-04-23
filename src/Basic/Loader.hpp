@@ -150,6 +150,7 @@ inline std::shared_ptr<PaintNode> fromLayer(const nlohmann::json& j)
 {
   auto p = std::make_shared<PaintNode>("Layer", VGG_LAYER);
   p->transform = glm::mat3(1);
+  fromObjectCommonProperty(j, p.get());
   for (const auto& e : j["childObjects"])
   {
     p->pushChildBack(fromObject(e));
@@ -167,14 +168,21 @@ inline std::vector<std::shared_ptr<PaintNode>> fromLayers(const nlohmann::json& 
   return layers;
 }
 
-inline std::vector<std::vector<std::shared_ptr<PaintNode>>> fromArtboard(const nlohmann::json& j)
+inline std::vector<std::shared_ptr<ArtboardNode>> fromArtboard(const nlohmann::json& j)
 {
-  std::vector<std::vector<std::shared_ptr<PaintNode>>> boards;
+  std::vector<std::shared_ptr<ArtboardNode>> artboards;
   for (const auto& e : j["artboard"])
   {
-    boards.emplace_back(fromLayers(e));
+    auto p = std::make_shared<ArtboardNode>(e["name"]);
+    fromObjectCommonProperty(e, p.get());
+    auto layers = fromLayers(e);
+    for (const auto& l : layers)
+    {
+      p->pushChildBack(l);
+    }
+    artboards.push_back(p);
   }
-  return boards;
+  return artboards;
 }
 
 inline std::shared_ptr<SymbolMasterNode> fromSymbolMaster(const nlohmann::json& j)

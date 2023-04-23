@@ -6,6 +6,16 @@
 
 using namespace VGG;
 
+std::string GetTextFromFile(const std::string& fileName)
+{
+  std::ifstream in(fileName, std::ios::in);
+  if (in.is_open() == false)
+  {
+    exit(-1);
+  }
+  return std::string{ std::istreambuf_iterator<char>{ in }, std::istreambuf_iterator<char>{} };
+}
+
 int main(int argc, char** argv)
 {
   argparse::ArgumentParser program("vgg", Version::get());
@@ -36,60 +46,30 @@ int main(int argc, char** argv)
   if (auto loadfile = program.present("-s"))
   {
     auto fp = loadfile.value();
-    if (!FileManager::loadFile(fp))
+
+    auto w = program.get<int>("-w");
+    auto h = program.get<int>("-h");
+    std::map<std::string, std::vector<char>> resources;
+    std::string json = GetTextFromFile(fp);
+    auto j = nlohmann::json::parse(json);
+    auto res = render(j, resources, 80);
+    auto reason = std::get<0>(res);
+    std::cout << "Reason: " << std::endl;
+    int count = 0;
+    for (const auto p : std::get<1>(res))
     {
-      WARN("Failed to load sketch file");
+      count++;
+      std::stringstream ss;
+      ss << "image" << count << ".png";
+      std::string name;
+      ss >> name;
+
+      std::ofstream ofs(name, std::ios::binary);
+      if (ofs.is_open())
+      {
+        ofs.write((const char*)p.second->bytes(), p.second->size());
+      }
     }
   }
-
-  auto w = program.get<int>("-w");
-  auto h = program.get<int>("-h");
-
-  if (init(w, h) != 0)
-  {
-    FAIL("Failed to create app");
-    return 0;
-  }
-
-  Image out;
-  out.data = nullptr;
-
-  ImageInfo info;
-  info.artboardID = 0;
-  info.format = PNG;
-  info.quality = 100;
-
-  int count = 1;
-  if (renderAsImages(600, 800, &info, count, &out) == 0)
-  {
-    std::ofstream ofs(program.get("-o"), std::ios::binary);
-    if (ofs.is_open())
-    {
-      ofs.write((const char*)out.data, out.size);
-      INFO("write to file ... %d byte(s)", out.size);
-    }
-  }
-  else
-  {
-    FAIL("filed to render image");
-  }
-  releaseImage(&out, count);
-
-  if (renderAsImages(1024, 1024, &info, count, &out) == 0)
-  {
-    std::ofstream ofs("image2.png", std::ios::binary);
-    if (ofs.is_open())
-    {
-      ofs.write((const char*)out.data, out.size);
-      INFO("write to file ... %d byte(s)", out.size);
-    }
-  }
-  else
-  {
-    FAIL("filed to render image");
-  }
-  releaseImage(&out, count);
-
-  shutdown();
   return 0;
 }

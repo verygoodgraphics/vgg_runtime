@@ -394,7 +394,7 @@ protected: // protected methods
     {
       m_zoomer.apply(canvas);
       EntityManager::map([&](Entity& entity) { RenderSystem::drawEntity(canvas, entity); });
-      m_scene.Render(canvas, m_width, m_height);
+      m_scene.Render(canvas);
       InputManager::draw(canvas);
       m_zoomer.restore(canvas);
     }
@@ -566,6 +566,26 @@ public: // public static methods
       return nullptr;
     }
     return &app;
+  }
+
+  static T* createInstance(int w, int h)
+  {
+    T* app = new T();
+    if (!app)
+    {
+      return nullptr;
+    }
+    if (!init(app, w, h, "instance"))
+    {
+      return nullptr;
+    }
+    return app;
+  }
+
+  static void destoryInstance(T* app)
+  {
+    if (app)
+      delete app;
   }
 
 }; // class App

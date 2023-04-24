@@ -64,7 +64,9 @@ inline Contour fromContour(const nlohmann::json& j)
 
 inline std::shared_ptr<ImageNode> fromImage(const nlohmann::json& j)
 {
-  return std::make_shared<ImageNode>("Image");
+  auto p = std::make_shared<ImageNode>(j["name"]);
+  fromObjectCommonProperty(j, p.get());
+  return p;
 }
 
 inline std::shared_ptr<SymbolInstanceNode> fromSymbolInstance(const nlohmann::json& j)

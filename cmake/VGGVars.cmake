@@ -36,6 +36,13 @@
 #
 # and CMake variable VGG_VAR_HOST equals "Android"
 
+#
+# VGG Variables && Macros Summary
+#
+# - VGG_VAR_PLATFORM_TARGET/VGG_TARGET_XXX => VGG_VAR_HOST/VGG_HOST_YYY => VGG_VAR_ARCH/VGG_ARCH_ZZZ
+# - VGG_VAR_BUILDING_OS_STR/VGG_BUILDING_OS_WWW
+#
+
 
 
 # apple targets:
@@ -139,7 +146,7 @@ endif()
 
 
 # Setup ios.toolchian.cmake variables
-if(${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_APPLE_TARGET_STR_LIST)
+if(${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_APPLE_TARGET_LIST)
   # PLATFORM 是ios.toolchain.cmake 的变量
   if(VGG_VAR_PLATFORM_TARGET STREQUAL "iOS")
     set(PLATFORM "OS64")

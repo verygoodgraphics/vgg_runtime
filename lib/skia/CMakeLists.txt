@@ -1101,6 +1101,14 @@ elseif(VGG_VAR_HOST STREQUAL "Windows")
   set(SKIA_INTERFACE_SRCS
     "src/gpu/gl/win/GrGLMakeNativeInterface_win.cpp"
   )
+elseif(VGG_VAR_HOST STREQUAL "iOS")
+  set(SKIA_INTERFACE_SRCS
+    "src/gpu/gl/iOS/GrGLMakeNativeInterface_iOS.cpp"
+  )
+elseif(VGG_VAR_HOST STREQUAL "Android")
+  set(SKIA_INTERFACE_SRCS
+    "src/gpu/gl/android/GrGLMakeNativeInterface_android.cpp"
+  )
 elseif(VGG_VAR_HOST STREQUAL "WASM")
   set(SKIA_INTERFACE_SRCS
     "src/gpu/gl/webgl/GrGLMakeNativeInterface_webgl.cpp"

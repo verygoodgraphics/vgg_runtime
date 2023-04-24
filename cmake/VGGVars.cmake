@@ -69,6 +69,12 @@ elseif(UNIX)
   add_compile_definitions(VGG_BUILDING_OS_LINUX)
 endif()
 
+#if emscripten is provided, wasm target is set forced.
+if(EMSCRIPTEN)
+  set(VGG_VAR_PLATFORM_TARGET "WASM" CACHE STRING "" FORCE)
+endif()
+
+
 # Give default value dependent on current building platform
 if(NOT VGG_VAR_PLATFORM_TARGET)
   if(VGG_VAR_BUILDING_OS_STR STREQUAL "macOS")

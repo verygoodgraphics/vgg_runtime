@@ -47,7 +47,17 @@ inline Contour fromContour(const nlohmann::json& j)
   for (const auto& e : j["points"])
   {
     auto p = e["point"];
-    contour.emplace_back(p[0], p[1], e["radius"], e["cornerStyle"]);
+    float r = 0;
+    if (e.contains("radius"))
+    {
+      r = e["radius"];
+    }
+    int cornerStyle = 0;
+    if (e.contains("cornerStyle"))
+    {
+      cornerStyle = e["cornerStyle"];
+    }
+    contour.emplace_back(p[0], p[1], r, cornerStyle);
   }
   return contour;
 }
@@ -200,9 +210,12 @@ inline std::shared_ptr<SymbolMasterNode> fromSymbolMaster(const nlohmann::json& 
 inline std::vector<std::shared_ptr<SymbolMasterNode>> fromSymbolMasters(const nlohmann::json& j)
 {
   std::vector<std::shared_ptr<SymbolMasterNode>> symbols;
-  for (const auto& e : j["symbolMaster"])
+  if (j.contains("symbolMaster"))
   {
-    symbols.emplace_back(fromSymbolMaster(e));
+    for (const auto& e : j["symbolMaster"])
+    {
+      symbols.emplace_back(fromSymbolMaster(e));
+    }
   }
   return symbols;
 }

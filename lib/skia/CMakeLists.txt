@@ -1101,6 +1101,10 @@ elseif(VGG_VAR_HOST STREQUAL "Windows")
   set(SKIA_INTERFACE_SRCS
     "src/gpu/gl/win/GrGLMakeNativeInterface_win.cpp"
   )
+elseif(VGG_VAR_HOST STREQUAL "WASM")
+  set(SKIA_INTERFACE_SRCS
+    "src/gpu/gl/webgl/GrGLMakeNativeInterface_webgl.cpp"
+  )
 endif()
 
 add_library(skia SHARED ${SKIA_INTERFACE_SRCS})

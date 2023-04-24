@@ -3,6 +3,7 @@
 #include "glm/ext/vector_float2.hpp"
 #include "glm/fwd.hpp"
 #include "include/core/SkCanvas.h"
+#include "include/core/SkColor.h"
 #include "include/core/SkPaint.h"
 #include "nlohmann/json.hpp"
 #include "Geometry.hpp"
@@ -102,7 +103,20 @@ protected:
     canvas->scale(1, -1);
     SkPaint strokePen;
     strokePen.setStyle(SkPaint::kStroke_Style);
-    strokePen.setColor(SK_ColorBLUE);
+    SkColor color;
+    if (this->type == VGG_LAYER)
+    {
+      color = SK_ColorBLUE;
+    }
+    else if (this->type == VGG_IMAGE)
+    {
+      color = SK_ColorRED;
+    }
+    else if (this->type == VGG_PATH)
+    {
+      color = SK_ColorGREEN;
+    }
+    strokePen.setColor(color);
     strokePen.setStrokeWidth(1);
     this->_drawRect(canvas, strokePen);
     this->Paint(canvas);
@@ -142,6 +156,7 @@ private:
   void _drawRect(SkCanvas* canvas, const SkPaint& paint)
   {
     auto skrect = toSkRect(this->bound);
+    skrect.setXYWH(skrect.x(), -skrect.y(), skrect.width(), skrect.height());
     canvas->drawRect(skrect, paint);
   }
 };

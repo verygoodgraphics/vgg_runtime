@@ -784,10 +784,10 @@ set(SKIA_SRCS
 #"src/ports/SkImageGeneratorWIC.cpp"
   "src/ports/SkMemory_malloc.cpp"
 #"src/ports/SkMemory_mozalloc.cpp"
-  "src/ports/SkOSFile_posix.cpp"
+#"src/ports/SkOSFile_posix.cpp"
   "src/ports/SkOSFile_stdio.cpp"
 #"src/ports/SkOSFile_win.cpp"
-  "src/ports/SkOSLibrary_posix.cpp"
+#"src/ports/SkOSLibrary_posix.cpp"
 #"src/ports/SkOSLibrary_win.cpp"
 #"src/ports/SkRemotableFontMgr_win_dw.cpp"
 #"src/ports/SkScalerContext_win_dw.cpp"
@@ -1091,27 +1091,39 @@ if (VGG_VAR_HOST STREQUAL "macOS")
   set(SKIA_INTERFACE_SRCS
     #"custom/GrGLMakeNativeInterface_angle.cpp"
     "src/gpu/gl/mac/GrGLMakeNativeInterface_mac.cpp"
+    "src/ports/SkOSFile_posix.cpp"
+    "src/ports/SkOSLibrary_posix.cpp"
   )
 elseif(VGG_VAR_HOST STREQUAL "Linux")
   set(SKIA_INTERFACE_SRCS
     "src/gpu/gl/glx/GrGLMakeNativeInterface_glx.cpp"
     "src/gpu/gl/glx/GrGLMakeGLXInterface.cpp"
+    "src/ports/SkOSFile_posix.cpp"
+    "src/ports/SkOSLibrary_posix.cpp"
   )
 elseif(VGG_VAR_HOST STREQUAL "Windows")
   set(SKIA_INTERFACE_SRCS
     "src/gpu/gl/win/GrGLMakeNativeInterface_win.cpp"
+    "src/ports/SkOSFile_win.cpp"
+    "src/ports/SkOSLibrary_win.cpp"
   )
 elseif(VGG_VAR_HOST STREQUAL "iOS")
   set(SKIA_INTERFACE_SRCS
     "src/gpu/gl/iOS/GrGLMakeNativeInterface_iOS.cpp"
+    "src/ports/SkOSFile_posix.cpp"
+    "src/ports/SkOSFile_win.cpp"
   )
 elseif(VGG_VAR_HOST STREQUAL "Android")
   set(SKIA_INTERFACE_SRCS
     "src/gpu/gl/android/GrGLMakeNativeInterface_android.cpp"
+    "src/ports/SkOSFile_posix.cpp"
+    "src/ports/SkOSFile_win.cpp"
   )
 elseif(VGG_VAR_HOST STREQUAL "WASM")
   set(SKIA_INTERFACE_SRCS
     "src/gpu/gl/webgl/GrGLMakeNativeInterface_webgl.cpp"
+    "src/ports/SkOSFile_posix.cpp"
+    "src/ports/SkOSFile_win.cpp"
   )
 endif()
 

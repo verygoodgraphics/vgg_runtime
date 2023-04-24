@@ -31,12 +31,18 @@ if (NOT EMSCRIPTEN)
     "zlib/fill_window_sse.c"
   )
 endif()
-add_library(zlib SHARED ${ZLIB_SRCS})
+add_library(zlib ${ZLIB_SRCS})
 
-if (NOT EMSCRIPTEN AND VGG_VAR_ARCH MATCHES "X86")
+if (VGG_VAR_ARCH MATCHES "X86")
+  if(VGG_VAR_HOST_Windows)
+  set_target_properties(zlib PROPERTIES
+    COMPILE_FLAGS "-msse3 -msse4.2 -mpclmul -DX86_WINDOWS -DADLER32_SIMD_SSSE3 -DCRC32_SIMD_SSE42_PCLMUL -DDEFLATE_FILL_WINDOW_SSE2"
+  )
+  else()
   set_target_properties(zlib PROPERTIES
     COMPILE_FLAGS "-msse3 -msse4.2 -mpclmul -DX86_NOT_WINDOWS -DADLER32_SIMD_SSSE3 -DCRC32_SIMD_SSE42_PCLMUL -DDEFLATE_FILL_WINDOW_SSE2"
   )
+  endif()
 endif()
 target_include_directories(zlib PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/zlib
@@ -222,7 +228,7 @@ if(VGG_VAR_ARCH STREQUAL "X86")
     TURBO_FOR_WINDOWS
     C_ARITH_CODING_SUPPORTED=1
     D_ARITH_CODING_SUPPORTED=1
-    USE_CLZ_INTRINSIC # for non-windows or clang
+    # USE_CLZ_INTRINSIC # for non-windows or clang
   )
 else() # ARM
   target_compile_definitions(libjpeg-turbo PRIVATE

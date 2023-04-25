@@ -3,7 +3,14 @@
 #include "Node.hpp"
 #include "nlohmann/json.hpp"
 #include "RenderTreeDef.hpp"
+#include "Basic/SymbolNode.h"
+#include "Basic/PaintNode.h"
+#include "Basic/PathNode.h"
+#include "Basic/TextNode.h"
+#include "Basic/ImageNode.h"
+#include "Basic/GroupNode.h"
 #include <memory>
+#include <optional>
 
 namespace VGG
 {
@@ -40,24 +47,38 @@ inline void fromObjectCommonProperty(const nlohmann::json& j, PaintNode* obj)
   std::tie(obj->bound, obj->transform) = fromTransform(j);
 }
 
+template<typename T>
+inline std::optional<T> get_opt(const nlohmann::json& obj, const std::string& key)
+{
+  if (auto p = obj.find(key); p != obj.end())
+    return p.value().get<T>();
+  return std::nullopt;
+}
+
+template<>
+inline std::optional<glm::vec2> get_opt(const nlohmann::json& obj, const std::string& key)
+{
+  if (auto it = obj.find(key); it != obj.end())
+  {
+    auto p0 = it.value()[0].get<float>();
+    auto p1 = it.value()[1].get<float>();
+    return glm::vec2(p0, p1);
+  }
+  return std::nullopt;
+}
+
 inline Contour fromContour(const nlohmann::json& j)
 {
   Contour contour;
   contour.closed = j["closed"];
   for (const auto& e : j["points"])
   {
-    auto p = e["point"];
-    float r = 0;
-    if (e.contains("radius"))
-    {
-      r = e["radius"];
-    }
-    int cornerStyle = 0;
-    if (e.contains("cornerStyle"))
-    {
-      cornerStyle = e["cornerStyle"];
-    }
-    contour.emplace_back(p[0], p[1], r, cornerStyle);
+    const auto p = e["point"];
+    contour.emplace_back(glm::vec2{ p[0], p[1] },
+                         get_opt<float>(e, "radius"),
+                         get_opt<glm::vec2>(e, "curveFrom"),
+                         get_opt<glm::vec2>(e, "curveTo"),
+                         get_opt<int>(e, "cornerStyle"));
   }
   return contour;
 }
@@ -66,6 +87,11 @@ inline std::shared_ptr<ImageNode> fromImage(const nlohmann::json& j)
 {
   auto p = std::make_shared<ImageNode>(j["name"]);
   fromObjectCommonProperty(j, p.get());
+  p->setImage(j["imageFileName"]);
+  if (auto it = j.find("fillReplacesImage"); it != j.end())
+  {
+    p->setReplacesImage(it.value());
+  }
   return p;
 }
 
@@ -86,13 +112,17 @@ inline std::shared_ptr<PathNode> fromPath(const nlohmann::json& j)
 {
   auto p = std::make_shared<PathNode>(j["name"]);
   fromObjectCommonProperty(j, p.get());
-  for (const auto& subshape : j["shape"]["subshapes"])
+  const auto shape = j["shape"];
+  p->shape.windingRule = shape["windingRule"];
+  for (const auto& subshape : shape["subshapes"])
   {
-    auto geo = subshape["subGeometry"];
-    auto klass = geo["class"];
+    const auto blop = subshape["booleanOperation"];
+    p->shape.subshape.blop = blop;
+    const auto geo = subshape["subGeometry"];
+    const auto klass = geo["class"];
     if (klass == "contour")
     {
-      p->contour = fromContour(geo);
+      p->shape.subshape.contour = fromContour(geo);
     }
     else if (klass == "path")
     {

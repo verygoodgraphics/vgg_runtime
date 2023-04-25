@@ -11,6 +11,7 @@ add_executable(runtime
   Systems/RenderSystem.cpp
   Utils/EntityContainer.cpp
   Utils/WasmBindings.cpp
+  Basic/Scene.cpp
 )
 
 add_library(vgg_internal OBJECT
@@ -96,6 +97,6 @@ else()
   install(TARGETS runtime skia zlib libpng libwebp libjpeg-turbo freetype)
 endif()
 
-target_link_libraries(runtime miniz quickjs vgg_internal glm)
+target_link_libraries(runtime quickjs vgg_internal glm vgg_sketch_parser)
 
 add_subdirectory(Entry)

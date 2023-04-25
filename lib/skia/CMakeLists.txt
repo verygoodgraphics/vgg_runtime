@@ -1117,6 +1117,10 @@ endif()
 
 add_library(skia SHARED ${SKIA_INTERFACE_SRCS})
 target_link_libraries(skia $<TARGET_OBJECTS:skia_base> zlib libpng freetype pthread libgifcodec libjpeg-turbo libwebp)
+target_compile_options(skia PRIVATE
+  $<$<CONFIG:Debug>:-DSK_DEBUG>
+  $<$<CONFIG:Release>:-DSK_RELEASE -fstrict-aliasing -fvisibility=hidden -fdata-sections -ffunction-sections -fvisibility-inlines-hidden -fno-exceptions -frtti>
+)
 
 if(VGG_ENABLE_EGL)
   set(SKIA_EGL_INTERFACE_SRCS
@@ -1125,4 +1129,8 @@ if(VGG_ENABLE_EGL)
   )
   add_library(skia_egl SHARED ${SKIA_EGL_INTERFACE_SRCS})
   target_link_libraries(skia_egl $<TARGET_OBJECTS:skia_base> zlib libpng freetype pthread libgifcodec libjpeg-turbo libwebp OpenGL::EGL)
+  target_compile_options(skia_egl PRIVATE
+    $<$<CONFIG:Debug>:-DSK_DEBUG>
+    $<$<CONFIG:Release>:-DSK_RELEASE -fstrict-aliasing -fvisibility=hidden -fdata-sections -ffunction-sections -fvisibility-inlines-hidden -fno-exceptions -frtti>
+  )
 endif()

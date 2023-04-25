@@ -1,4 +1,4 @@
-#include "VggSdkNodeAdapter.hpp"
+#include "PlatformAdapter/Native/Sdk/VggSdkNodeAdapter.hpp"
 
 #include "Sdk/VggSdk.hpp"
 #include "Utils/DIContainer.hpp"

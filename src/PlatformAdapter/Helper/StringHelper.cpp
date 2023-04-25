@@ -1,4 +1,4 @@
-#include "StringHelper.hpp"
+#include "PlatformAdapter/Helper/StringHelper.hpp"
 
 #include <cctype>
 #include <iomanip>

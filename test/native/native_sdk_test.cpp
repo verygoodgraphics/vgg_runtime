@@ -1,7 +1,7 @@
 #include "NativeExec.hpp"
 
-#include "VggDepContainer.hpp"
-#include "VggSdk.hpp"
+#include "Sdk/VggSdk.hpp"
+#include "Utils/DIContainer.hpp"
 #include "VggSdkAddon.hpp"
 #include "VggSdkMock.hpp"
 #include "test_config.hpp"
@@ -22,7 +22,7 @@ protected:
 
     m_sut_ptr.reset(new NativeExec);
     m_mock_sdk_ptr = new VggSdkMock();
-    VggDepContainer<std::shared_ptr<VggSdk>>::get().reset(m_mock_sdk_ptr);
+    VGG::DIContainer<std::shared_ptr<VggSdk>>::get().reset(m_mock_sdk_ptr);
 
     m_sut_ptr->inject([](node::Environment* env) { link_vgg_sdk_addon(env); });
     injectVgg();
@@ -32,7 +32,7 @@ protected:
   {
     m_sut_ptr.reset();
     m_mock_sdk_ptr = nullptr;
-    VggDepContainer<std::shared_ptr<VggSdk>>::get().reset();
+    VGG::DIContainer<std::shared_ptr<VggSdk>>::get().reset();
   }
 
 private:

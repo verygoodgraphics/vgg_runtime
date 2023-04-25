@@ -1,7 +1,10 @@
 #pragma once
 
+namespace VGG
+{
+
 template<typename T>
-class VggDepContainer
+class DIContainer
 {
 public:
   static T& get()
@@ -11,5 +14,7 @@ public:
   }
 
 private:
-  VggDepContainer() = default;
+  DIContainer() = default;
 };
+
+}

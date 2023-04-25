@@ -1,8 +1,9 @@
-#include "Controller.hpp"
-#include "MainComposer.hpp"
+#include "Controller/Controller.hpp"
+
 #include "MockJsonDocumentObserver.hpp"
 #include "Model/VggWork.hpp"
-#include "VggDepContainer.hpp"
+#include "PlatformAdapter/Native/Composer/MainComposer.hpp"
+#include "Utils/DIContainer.hpp"
 
 #include <gtest/gtest.h>
 
@@ -43,7 +44,7 @@ TEST_F(ControllerTestSuite, Smoke)
   // Then
   EXPECT_TRUE(ret);
   // Then
-  auto vgg_work = VggDepContainer<std::shared_ptr<VggWork>>::get();
+  auto vgg_work = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
   EXPECT_TRUE(vgg_work);
 }
 
@@ -66,7 +67,7 @@ TEST_F(ControllerTestSuite, OnClick_observer)
     cv.notify_one();
   };
 
-  auto vgg_work = VggDepContainer<std::shared_ptr<VggWork>>::get();
+  auto vgg_work = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
   auto design_doc_json = vgg_work->designDoc()->content();
 
   EXPECT_CALL(*mock_observer, didDelete(_)).WillOnce(callback);
@@ -94,7 +95,7 @@ TEST_F(ControllerTestSuite, Validator_reject_deletion)
   auto ret = m_sut->start(file_path, design_doc_schema_file);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = VggDepContainer<std::shared_ptr<VggWork>>::get();
+  auto vgg_work = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // expect call

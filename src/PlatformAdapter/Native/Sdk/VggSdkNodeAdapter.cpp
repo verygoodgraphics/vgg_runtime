@@ -1,7 +1,7 @@
 #include "VggSdkNodeAdapter.hpp"
 
-#include "VggSdk.hpp"
-#include "VggDepContainer.hpp"
+#include "Sdk/VggSdk.hpp"
+#include "Utils/DIContainer.hpp"
 
 #include <string>
 #include <cassert>
@@ -79,7 +79,7 @@
 napi_ref VggSdkNodeAdapter::constructor;
 
 VggSdkNodeAdapter::VggSdkNodeAdapter()
-  : m_vggSdk(VggDepContainer<std::shared_ptr<VggSdk>>::get())
+  : m_vggSdk(VGG::DIContainer<std::shared_ptr<VggSdk>>::get())
   , m_env(nullptr)
   , m_wrapper(nullptr)
 {

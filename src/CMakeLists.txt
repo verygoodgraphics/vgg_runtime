@@ -25,11 +25,7 @@ add_library(vgg_internal OBJECT
   PlatformAdapter/Helper/StringHelper.cpp
 )
 target_include_directories(vgg_internal PUBLIC 
-  ${CMAKE_CURRENT_SOURCE_DIR}/Api
-  ${CMAKE_CURRENT_SOURCE_DIR}/Controller
-  ${CMAKE_CURRENT_SOURCE_DIR}/Exec
-  ${CMAKE_CURRENT_SOURCE_DIR}/Infrastructure
-  ${CMAKE_CURRENT_SOURCE_DIR}/Sdk
+  ${CMAKE_CURRENT_SOURCE_DIR}
   ${VGG_CONTRIB_JSON_INCLUDE}
   ${VGG_CONTRIB_VALIJSON_INCLUDE}
   PlatformAdapter/Helper

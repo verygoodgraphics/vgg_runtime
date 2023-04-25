@@ -1,7 +1,8 @@
 #include "MainComposer.hpp"
 
+#include "Sdk/VggSdk.hpp"
 #include "VggSdkAddon.hpp"
-#include "VggSdk.hpp"
+#include "NativeExec.hpp"
 
 void MainComposer::setup(const std::string& sdkUrl)
 {
@@ -12,14 +13,14 @@ void MainComposer::setup(const std::string& sdkUrl)
   js_engine->inject([](node::Environment* env) { link_vgg_sdk_addon(env); });
   setupVgg(exec, sdkUrl);
 
-  VggDepContainer<std::shared_ptr<VggExec>>::get() = exec;
-  VggDepContainer<std::shared_ptr<VggSdk>>::get().reset(new VggSdk);
+  VGG::DIContainer<std::shared_ptr<VggExec>>::get() = exec;
+  VGG::DIContainer<std::shared_ptr<VggSdk>>::get().reset(new VggSdk);
 }
 
 void MainComposer::teardown()
 {
-  VggDepContainer<std::shared_ptr<VggExec>>::get().reset();
-  VggDepContainer<std::shared_ptr<VggSdk>>::get().reset();
+  VGG::DIContainer<std::shared_ptr<VggExec>>::get().reset();
+  VGG::DIContainer<std::shared_ptr<VggSdk>>::get().reset();
 }
 
 void MainComposer::setupVgg(std::shared_ptr<VggExec> vggExec, const std::string& sdkUrl)

@@ -1,7 +1,7 @@
 #include "VggSdk.hpp"
 
 #include "Model/VggWork.hpp"
-#include "VggDepContainer.hpp"
+#include "Utils/DIContainer.hpp"
 
 void VggSdk::updateStyle()
 {
@@ -49,6 +49,6 @@ void VggSdk::deleteFromDocument(const std::string& json_pointer)
 
 std::shared_ptr<JsonDocument>& VggSdk::designDocument()
 {
-  auto vggWork = VggDepContainer<std::shared_ptr<VggWork>>::get();
+  auto vggWork = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
   return vggWork->designDoc();
 }

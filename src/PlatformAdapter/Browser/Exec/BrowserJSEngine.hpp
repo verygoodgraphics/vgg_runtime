@@ -1,7 +1,6 @@
-#ifndef BROWSER_JS_ENGINE_HPP
-#define BROWSER_JS_ENGINE_HPP
+#pragma once
 
-#include "VggJSEngine.hpp"
+#include "Exec/VggJSEngine.hpp"
 
 #include <string>
 
@@ -14,5 +13,3 @@ public:
 private:
   std::string m_moduleWrapper;
 };
-
-#endif

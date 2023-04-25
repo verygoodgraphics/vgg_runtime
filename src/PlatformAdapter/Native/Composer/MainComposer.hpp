@@ -1,9 +1,8 @@
 #pragma once
 
-#include "NativeExec.hpp"
-#include "VggEnv.hpp"
-#include "VggDepContainer.hpp"
-#include "VggExec.hpp"
+#include "Api/VggEnv.hpp"
+#include "Exec/VggExec.hpp"
+#include "Utils/DIContainer.hpp"
 
 class MainComposer
 {

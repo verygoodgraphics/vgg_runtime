@@ -1,12 +1,12 @@
 #include "Controller.hpp"
 
+#include "Exec/VggExec.hpp"
 #include "Model/RawJsonDocument.hpp"
 #include "Model/SchemaValidJsonDocument.hpp"
 #include "Model/SubjectJsonDocument.hpp"
 #include "Model/UndoRedoJsonDocument.hpp"
 #include "Model/VggWork.hpp"
-#include "VggDepContainer.hpp"
-#include "VggExec.hpp"
+#include "Utils/DIContainer.hpp"
 
 Controller::Controller(JsonDocumentObserverPtr designDocObsever,
                        JsonDocumentObserverPtr layoutDocObsever,
@@ -64,7 +64,7 @@ void Controller::initVggWork(const char* designDocSchemaFilePath)
   // todo, build layout doc
   m_work.reset(new VggWork(build_design_doc_fn));
 
-  VggDepContainer<std::shared_ptr<VggWork>>::get() = m_work;
+  VGG::DIContainer<std::shared_ptr<VggWork>>::get() = m_work;
 }
 
 void Controller::onClick(const std::string& path)
@@ -76,7 +76,7 @@ void Controller::onClick(const std::string& path)
 
 const std::shared_ptr<VggExec>& Controller::vggExec()
 {
-  return VggDepContainer<std::shared_ptr<VggExec>>::get();
+  return VGG::DIContainer<std::shared_ptr<VggExec>>::get();
 }
 
 JsonDocument* Controller::createJsonDoc()

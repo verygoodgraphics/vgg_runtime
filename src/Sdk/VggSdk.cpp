@@ -1,7 +1,7 @@
 #include "VggSdk.hpp"
 
+#include "Model/VggWork.hpp"
 #include "VggDepContainer.hpp"
-#include "VggWork.hpp"
 
 void VggSdk::updateStyle()
 {

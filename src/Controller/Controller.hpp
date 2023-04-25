@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SubjectJsonDocument.hpp"
+#include "Model/SubjectJsonDocument.hpp"
 
 #include <memory>
 #include <string>

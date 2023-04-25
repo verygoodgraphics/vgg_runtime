@@ -1,12 +1,12 @@
 #include "Controller.hpp"
 
-#include "RawJsonDocument.hpp"
-#include "SchemaValidJsonDocument.hpp"
-#include "SubjectJsonDocument.hpp"
-#include "UndoRedoJsonDocument.hpp"
+#include "Model/RawJsonDocument.hpp"
+#include "Model/SchemaValidJsonDocument.hpp"
+#include "Model/SubjectJsonDocument.hpp"
+#include "Model/UndoRedoJsonDocument.hpp"
+#include "Model/VggWork.hpp"
 #include "VggDepContainer.hpp"
 #include "VggExec.hpp"
-#include "VggWork.hpp"
 
 Controller::Controller(JsonDocumentObserverPtr designDocObsever,
                        JsonDocumentObserverPtr layoutDocObsever,

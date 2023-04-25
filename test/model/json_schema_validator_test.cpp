@@ -1,6 +1,7 @@
+#include "Model/JsonSchemaValidator.hpp"
+
 #include <gtest/gtest.h>
 #include <fstream>
-#include "JsonSchemaValidator.hpp"
 
 using json = nlohmann::json;
 

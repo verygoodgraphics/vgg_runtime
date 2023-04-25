@@ -1,6 +1,7 @@
 #include "NativeExec.hpp"
 
 #include "Utils/Utils.hpp"
+#include "test_config.hpp"
 
 #include <gtest/gtest.h>
 
@@ -208,6 +209,8 @@ TEST_F(VggNativeExecTestSuite, Internal_evalModule_enable_network_import_local_h
 
 TEST_F(VggNativeExecTestSuite, Internal_evalModule_1)
 {
+  SKIP_S3_DEPENDENT_TEST
+
   auto code = R"(
     const { evalModule } = require('internal/process/execution');
     const code2 = 'import("https://s3.vgg.cool/test/js/vgg-sdk.esm.js").then((theModule)=>{ console.log("#theModule is: ", theModule); })';
@@ -219,6 +222,8 @@ TEST_F(VggNativeExecTestSuite, Internal_evalModule_1)
 
 TEST_F(VggNativeExecTestSuite, Internal_evalModule_2)
 {
+  SKIP_S3_DEPENDENT_TEST
+
   auto code = R"(
     const code3 = `
       const { evalModule } = require('internal/process/execution');
@@ -241,6 +246,8 @@ TEST_F(VggNativeExecTestSuite, Eval_module_smoke)
 
 TEST_F(VggNativeExecTestSuite, Eval_module_await_import)
 {
+  SKIP_S3_DEPENDENT_TEST
+
   auto code = R"(
 const { getVgg, getVggSdk, setVgg } = await import("https://s3.vgg.cool/test/js/vgg-sdk.esm.js");
 console.log('#vgg is: ', getVgg());

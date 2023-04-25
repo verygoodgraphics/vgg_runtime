@@ -16,7 +16,6 @@ add_executable(runtime
 add_library(vgg_internal OBJECT
   Controller/Controller.cpp
   Exec/VggExec.cpp
-  Model/DocumentModel.cpp
   Model/JsonDocument.cpp
   Model/JsonSchemaValidator.cpp
   Model/SchemaValidJsonDocument.cpp

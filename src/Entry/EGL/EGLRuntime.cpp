@@ -278,12 +278,12 @@ std::tuple<std::string, std::map<int, sk_sp<SkData>>> render(
   std::string reason;
   std::map<int, sk_sp<SkData>> res;
 
-  Scene scene;
-  scene.LoadFileContent(j);
-  auto count = scene.artboards.size();
+  auto scene = std::make_shared<Scene>();
+  scene->LoadFileContent(j);
+  auto count = scene->artboards.size();
   for (int i = 0; i < count; i++)
   {
-    auto b = scene.artboards[i]->bound;
+    auto b = scene->artboards[i]->bound;
 
     int w = b.size().x;
     int h = b.size().y;
@@ -293,12 +293,13 @@ std::tuple<std::string, std::map<int, sk_sp<SkData>>> render(
       reason = "create instance failed\n";
       return { reason, res };
     }
-    scene.page = i;
+    scene->page = i;
+    app->setUseOldRenderer(false);
+    app->setScene(scene);
     auto canvas = app->getCanvas();
     if (canvas)
     {
-      canvas->clear(SK_ColorWHITE);
-      scene.Render(canvas);
+      app->frame(0);
       if (auto surface = app->getSurface())
       {
         if (auto image = surface->makeImageSnapshot())

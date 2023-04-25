@@ -235,7 +235,8 @@ protected: // protected members and static members
   double m_timestamp;
   SkiaState m_skiaState;
   Zoomer m_zoomer;
-  Scene m_scene;
+  std::shared_ptr<Scene> m_scene;
+  bool m_useOldRenderer = true;
 
   static bool init(App* app, int w, int h, const std::string& title)
   {
@@ -393,8 +394,14 @@ protected: // protected methods
     if (SkCanvas* canvas = getCanvas())
     {
       m_zoomer.apply(canvas);
-      EntityManager::map([&](Entity& entity) { RenderSystem::drawEntity(canvas, entity); });
-      m_scene.Render(canvas);
+      if (m_useOldRenderer)
+      {
+        EntityManager::map([&](Entity& entity) { RenderSystem::drawEntity(canvas, entity); });
+      }
+      if (m_scene)
+      {
+        m_scene->Render(canvas);
+      }
       InputManager::draw(canvas);
       m_zoomer.restore(canvas);
     }
@@ -506,9 +513,24 @@ public: // public methods
     return m_skiaState.surface.get();
   }
 
+  void setScene(std::shared_ptr<Scene> scene)
+  {
+    m_scene = scene;
+  }
+
+  void setUseOldRenderer(bool use)
+  {
+    m_useOldRenderer = use;
+  }
+
+  bool useOldRenderer() const
+  {
+    return m_useOldRenderer;
+  }
+
   Scene* getScene()
   {
-    return &m_scene;
+    return m_scene.get();
   }
 
   // fps <= 0 indicates rendering as fast as possible

@@ -61,7 +61,7 @@ public:
     pointer m_ptr;
   };
 
-  const std::string& name() const
+  const std::string& getName() const
   {
     return m_name;
   }
@@ -278,6 +278,7 @@ public:
 
   virtual ~Node() = default;
 
+private:
   std::string m_name;
   FirstChildNode m_firstChild;
   std::list<std::shared_ptr<Node>>::iterator iter;

@@ -1,8 +1,8 @@
 #include "Controller.hpp"
 #include "MainComposer.hpp"
 #include "MockJsonDocumentObserver.hpp"
+#include "Model/VggWork.hpp"
 #include "VggDepContainer.hpp"
-#include "VggWork.hpp"
 
 #include <gtest/gtest.h>
 

@@ -1,6 +1,6 @@
-#include "VggWork.hpp"
+#include "Model/VggWork.hpp"
 
-#include "RawJsonDocument.hpp"
+#include "Model/RawJsonDocument.hpp"
 
 #include <gtest/gtest.h>
 

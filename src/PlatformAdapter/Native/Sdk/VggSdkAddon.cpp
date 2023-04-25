@@ -2,8 +2,8 @@
 #include "node_api.h"
 #include "util.h"
 
-#include "VggSdkAddon.hpp"
-#include "VggSdkNodeAdapter.hpp"
+#include "PlatformAdapter/Native/Sdk/VggSdkAddon.hpp"
+#include "PlatformAdapter/Native/Sdk/VggSdkNodeAdapter.hpp"
 
 napi_value InitializeLocalNapiBinding(napi_env env, napi_value exports)
 {

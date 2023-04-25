@@ -1,8 +1,8 @@
 #include "MainComposer.hpp"
 
 #include "Sdk/VggSdk.hpp"
-#include "VggSdkAddon.hpp"
-#include "NativeExec.hpp"
+#include "PlatformAdapter/Native/Sdk/VggSdkAddon.hpp"
+#include "PlatformAdapter/Native/Exec/NativeExec.hpp"
 
 void MainComposer::setup(const std::string& sdkUrl)
 {

@@ -24,24 +24,20 @@ add_library(vgg_internal OBJECT
   Sdk/VggSdk.cpp
   PlatformAdapter/Helper/StringHelper.cpp
 )
-target_include_directories(vgg_internal PUBLIC 
+target_include_directories(vgg_internal PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${VGG_CONTRIB_JSON_INCLUDE}
   ${VGG_CONTRIB_VALIJSON_INCLUDE}
-  PlatformAdapter/Helper
 )
 target_link_libraries(vgg_internal
   automerge
   miniz
-  skia 
+  skia
 )
 if (EMSCRIPTEN)
   target_sources(vgg_internal PRIVATE
     PlatformAdapter/Browser/Exec/BrowserJSEngine.cpp
     PlatformAdapter/Browser/Sdk/BrowserSdkAdapter.cpp
-  )
-  target_include_directories(vgg_internal PUBLIC
-    PlatformAdapter/Browser/Exec
   )
   target_link_options(vgg_internal PUBLIC -lembind)
 else()
@@ -52,11 +48,6 @@ else()
     PlatformAdapter/Native/Exec/NativeExecImpl.cpp
     PlatformAdapter/Native/Sdk/VggSdkAddon.cpp
     PlatformAdapter/Native/Sdk/VggSdkNodeAdapter.cpp
-  )
-  target_include_directories(vgg_internal PUBLIC
-    PlatformAdapter/Native/Composer
-    PlatformAdapter/Native/Exec
-    PlatformAdapter/Native/Sdk
   )
   target_compile_definitions(vgg_internal PRIVATE NODE_WANT_INTERNALS=1)
 endif()

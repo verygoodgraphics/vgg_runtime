@@ -1,6 +1,5 @@
-#include "BrowserJSEngine.hpp"
-
-#include "StringHelper.hpp"
+#include "PlatformAdapter/Browser/Exec/BrowserJSEngine.hpp"
+#include "PlatformAdapter/Helper/StringHelper.hpp"
 
 #include <emscripten/emscripten.h>
 

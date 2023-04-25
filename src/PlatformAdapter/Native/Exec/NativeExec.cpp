@@ -1,7 +1,7 @@
-#include "NativeExec.hpp"
+#include "PlatformAdapter/Native/Exec/NativeExec.hpp"
 
-#include "NativeExecImpl.hpp"
-#include "StringHelper.hpp"
+#include "PlatformAdapter/Native/Exec/NativeExecImpl.hpp"
+#include "PlatformAdapter/Helper/StringHelper.hpp"
 #include "Utils/Utils.hpp"
 
 using namespace VGG;

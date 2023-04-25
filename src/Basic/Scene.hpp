@@ -63,14 +63,20 @@ public:
     SkiaRenderer r;
     if (!renderSymbol)
     {
-      auto board = artboards[page].get();
-      auto s = board->bound.size();
-      r.Draw(canvas, board);
+      if (artboards.size() > 0)
+      {
+        auto board = artboards[page].get();
+        auto s = board->bound.size();
+        r.Draw(canvas, board);
+      }
     }
     else
     {
-      node = symbols[symbolIndex].get();
-      r.Draw(canvas, node);
+      if (symbols.size() > 0)
+      {
+        node = symbols[symbolIndex].get();
+        r.Draw(canvas, node);
+      }
     }
   }
 

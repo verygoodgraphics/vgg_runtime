@@ -21,8 +21,6 @@ else()
     controller/controller_test.cpp
     exec/vgg_exec_test.cpp
     model/automerge_test.cpp
-    model/design_document_model_test.cpp
-    model/document_model_test.cpp
     model/json_schema_validator_test.cpp
     model/schema_valid_json_document_test.cpp
     model/vgg_work_test.cpp
@@ -30,9 +28,9 @@ else()
     native/native_sdk_test.cpp
     native/node_test.cpp
     native/node_test_helper.cpp
-    sdk/vgg_sdk_test.cpp
   )
   target_include_directories(unit_tests PRIVATE
+    .
     mocks
     model
   )

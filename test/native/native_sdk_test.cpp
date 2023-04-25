@@ -4,6 +4,7 @@
 #include "VggSdk.hpp"
 #include "VggSdkAddon.hpp"
 #include "VggSdkMock.hpp"
+#include "test_config.hpp"
 
 #include <gtest/gtest.h>
 
@@ -17,6 +18,8 @@ protected:
 
   void SetUp() override
   {
+    SKIP_S3_DEPENDENT_TEST
+
     m_sut_ptr.reset(new NativeExec);
     m_mock_sdk_ptr = new VggSdkMock();
     VggDepContainer<std::shared_ptr<VggSdk>>::get().reset(m_mock_sdk_ptr);

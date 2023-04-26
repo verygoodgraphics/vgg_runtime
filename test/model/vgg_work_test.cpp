@@ -58,8 +58,8 @@ TEST_F(VggWorkTestSuite, Load_from_buffer)
   std::streamsize size = file.tellg();
   file.seekg(0, std::ios::beg);
 
-  std::vector<unsigned char> buffer(size);
-  if (!file.read(reinterpret_cast<char*>(buffer.data()), size))
+  std::vector<char> buffer(size);
+  if (!file.read(buffer.data(), size))
   {
     GTEST_FAIL();
   }

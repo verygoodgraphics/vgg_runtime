@@ -8,10 +8,7 @@
 #include <memory>
 #include <string>
 
-namespace miniz_cpp
-{
-class zip_file;
-}
+struct zip_t;
 
 using MakeJsonDocFn = std::function<JsonDocumentPtr(const json&)>;
 
@@ -19,10 +16,10 @@ class VggWork
 {
 public:
   VggWork(const MakeJsonDocFn& makeDesignDocFn);
-  ~VggWork() = default;
+  ~VggWork();
 
   bool load(const std::string& filePath);
-  bool load(const std::vector<unsigned char>& buffer);
+  bool load(const std::vector<char>& buffer);
 
   const json& codeMapDoc() const;
   JsonDocumentPtr& designDoc();
@@ -35,18 +32,14 @@ public:
   void updateCode(const std::string& name, const std::string& code);
 
 private:
-  using LoadZipFn = std::function<void(miniz_cpp::zip_file&)>;
-  bool loadTemplate(LoadZipFn fn);
-  bool load(miniz_cpp::zip_file& zipFile);
+  bool load(zip_t* zipFile);
 
   const std::string& codeName(const json::json_pointer& path) const;
   const std::string& jsCode(const std::string& name) const;
 
-  bool readZipFileEntry(miniz_cpp::zip_file& zipFile,
-                        const std::string& entryName,
-                        std::string& content) const;
+  bool readZipFileEntry(zip_t* zipFile, const std::string& entryName, std::string& content) const;
 
-  std::shared_ptr<miniz_cpp::zip_file> m_zipFile;
+  zip_t* m_zipFile{ nullptr };
 
   JsonDocumentPtr m_designDoc;
   MakeJsonDocFn m_makeDesignDocFn;

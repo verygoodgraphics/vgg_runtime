@@ -23,8 +23,7 @@ public:
   ~Controller() = default;
 
   bool start(const std::string& filePath, const char* designDocSchemaFilePath = nullptr);
-  bool start(const std::vector<unsigned char>& buffer,
-             const char* designDocSchemaFilePath = nullptr);
+  bool start(const std::vector<char>& buffer, const char* designDocSchemaFilePath = nullptr);
 
   void onClick(const std::string& path);
 

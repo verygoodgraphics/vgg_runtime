@@ -2,7 +2,7 @@
 
 #include "Utils/Utils.hpp"
 
-#include <miniz-cpp/zip_file.hpp>
+#include "zip.h"
 
 constexpr auto artboard_file_name = "artboard.json";
 constexpr auto code_map_file_name = "code_map.json";
@@ -13,42 +13,37 @@ VggWork::VggWork(const MakeJsonDocFn& makeDesignDocFn)
 {
 }
 
+VggWork::~VggWork()
+{
+  if (m_zipFile)
+  {
+    zip_close(m_zipFile);
+    m_zipFile = nullptr;
+  }
+}
+
 bool VggWork::load(const std::string& filePath)
 {
-  return loadTemplate([&](miniz_cpp::zip_file& file) { file.load(filePath); });
+  m_zipFile = zip_open(filePath.c_str(), 0, 'r');
+  return load(m_zipFile);
 }
 
-bool VggWork::load(const std::vector<unsigned char>& buffer)
+bool VggWork::load(const std::vector<char>& buffer)
 {
-  return loadTemplate([&](miniz_cpp::zip_file& file) { file.load(buffer); });
-}
-
-bool VggWork::loadTemplate(LoadZipFn fn)
-{
-  m_zipFile.reset(new miniz_cpp::zip_file);
-
-  try
-  {
-    fn(*m_zipFile);
-    return load(*m_zipFile);
-  }
-  catch (const std::runtime_error& err)
-  {
-    FAIL("Failed to load vgg file: %s", err.what());
-    return false;
-  }
+  m_zipFile = zip_stream_open(buffer.data(), buffer.size(), 0, 'r');
+  return load(m_zipFile);
 }
 
 const std::string VggWork::getCode(const std::string& path) const
 {
   auto name = m_codeMap.at(path);
   std::string code;
-  readZipFileEntry(*m_zipFile, name, code);
+  readZipFileEntry(m_zipFile, name, code);
   // todo, cache js file?
   return code;
 }
 
-bool VggWork::load(miniz_cpp::zip_file& zipFile)
+bool VggWork::load(zip_t* zipFile)
 {
   try
   {
@@ -77,17 +72,23 @@ bool VggWork::load(miniz_cpp::zip_file& zipFile)
   }
 }
 
-bool VggWork::readZipFileEntry(miniz_cpp::zip_file& zipFile,
+bool VggWork::readZipFileEntry(zip_t* zipFile,
                                const std::string& entryName,
                                std::string& content) const
 {
-  for (auto entry : zipFile.namelist())
+  content.clear();
+
+  if (0 == zip_entry_open(m_zipFile, entryName.c_str()))
   {
-    if (entry.rfind(entryName, 0) == 0)
-    {
-      content = zipFile.read(entry);
-      return true;
-    }
+    void* buf = NULL;
+    size_t bufsize;
+    zip_entry_read(m_zipFile, &buf, &bufsize);
+    zip_entry_close(m_zipFile);
+
+    content.append(static_cast<char*>(buf), bufsize);
+    free(buf);
+
+    return true;
   }
 
   return false;

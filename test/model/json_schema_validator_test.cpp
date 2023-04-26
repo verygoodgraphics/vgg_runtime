@@ -68,3 +68,21 @@ TEST_F(VggJsonSchemaValitatorTestSuite, ValidateByClassName)
   // Then
   EXPECT_EQ(result, true);
 }
+
+TEST_F(VggJsonSchemaValitatorTestSuite, NoSchema)
+{
+  validate_by_filename("./testDataDir/1_out_json.json", true);
+}
+
+TEST_F(VggJsonSchemaValitatorTestSuite, NoSchemaValidateByClassName)
+{
+  // Given
+  json json_data = load_json("./testDataDir/color.json");
+  std::string class_name = "color";
+
+  // When
+  auto result = sut.validate(class_name, json_data);
+
+  // Then
+  EXPECT_EQ(result, false);
+}

@@ -6,6 +6,7 @@ add_subdirectory(miniz-cpp)
 
 add_subdirectory(vgg_contrib)
 add_subdirectory(vgg_automerge/automerge)
+add_subdirectory(vgg_sketch_parser/src)
 
 set(VGG_LIB_INCLUDE_PATH
   ${CMAKE_CURRENT_SOURCE_DIR}

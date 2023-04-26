@@ -3,6 +3,7 @@
 #include "../../Utils/Version.hpp"
 #include "../../Utils/FileManager.hpp"
 #include "EGLRuntime.h"
+#include <vgg_sketch_parser/src/analyze_sketch_file/analyze_sketch_file.h>
 
 using namespace VGG;
 
@@ -19,19 +20,7 @@ std::string GetTextFromFile(const std::string& fileName)
 int main(int argc, char** argv)
 {
   argparse::ArgumentParser program("vgg", Version::get());
-  program.add_argument("-l", "--load").help("load from vgg or sketch file");
-  program.add_argument("-w", "--width")
-    .help("width of output image")
-    .scan<'i', int>()
-    .default_value(800);
-  program.add_argument("-h", "--height")
-    .help("height of output image")
-    .scan<'i', int>()
-    .default_value(1200);
   program.add_argument("-s", "--sketch").help("input sketch file");
-  program.add_argument("-o", "--output")
-    .help("output image file")
-    .default_value(std::string("image.png"));
   try
   {
     program.parse_args(argc, argv);
@@ -46,13 +35,19 @@ int main(int argc, char** argv)
   if (auto loadfile = program.present("-s"))
   {
     auto fp = loadfile.value();
-
-    auto w = program.get<int>("-w");
-    auto h = program.get<int>("-h");
+    auto size = std::filesystem::file_size(fp);
+    std::vector<char> file_buf(size);
+    std::ifstream ifs(fp, std::ios_base::binary);
+    if (ifs.is_open() == false)
+    {
+      exit(1);
+    }
+    ifs.read(file_buf.data(), size);
+    assert(ifs.gcount() == size);
+    nlohmann::json json_out;
     std::map<std::string, std::vector<char>> resources;
-    std::string json = GetTextFromFile(fp);
-    auto j = nlohmann::json::parse(json);
-    auto res = render(j, resources, 80);
+    analyze_sketch_file::analyze(file_buf.data(), size, "hello-sketch", json_out, resources);
+    auto res = render(json_out, resources, 80);
     auto reason = std::get<0>(res);
     std::cout << "Reason: " << std::endl;
     int count = 0;

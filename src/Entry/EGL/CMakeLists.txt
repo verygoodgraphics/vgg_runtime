@@ -14,7 +14,7 @@ set_target_properties(egl_runtime PROPERTIES
 
 add_executable(egl_entry
 EGLEntry.cpp)
-target_link_libraries(egl_entry egl_runtime)
+target_link_libraries(egl_entry egl_runtime vgg_sketch_parser)
 
 target_include_directories(egl_runtime PUBLIC ${VGG_CONTRIB_GLM_INCLUDE})
 target_link_libraries(egl_runtime skia_egl quickjs vgg_internal SDL2 OpenGL::EGL miniz)

@@ -31,8 +31,8 @@ target_include_directories(vgg_internal PUBLIC
 )
 target_link_libraries(vgg_internal
   automerge
-  miniz
   skia
+  zip
 )
 if (EMSCRIPTEN)
   target_sources(vgg_internal PRIVATE

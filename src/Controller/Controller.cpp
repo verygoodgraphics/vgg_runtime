@@ -39,21 +39,22 @@ void Controller::initVggWork(const char* designDocSchemaFilePath)
   }
   auto build_design_doc_fn = [&, design_schema_file_path](const json& design_json)
   {
-    auto json_doc = createJsonDoc();
-    json_doc->setContent(design_json);
+    auto json_doc_raw_ptr = createJsonDoc();
+    json_doc_raw_ptr->setContent(design_json);
 
-    SchemaValidJsonDocument::ValidatorPtr design_doc_validator;
     if (!design_schema_file_path.empty())
     {
+      SchemaValidJsonDocument::ValidatorPtr design_doc_validator;
       std::ifstream schema_fs(design_schema_file_path);
       json schema = json::parse(schema_fs);
       design_doc_validator.reset(new JsonSchemaValidator);
       design_doc_validator->setRootSchema(schema);
-    }
-    auto schema_valid_doc =
-      new SchemaValidJsonDocument(JsonDocumentPtr(json_doc), design_doc_validator);
 
-    auto subject_doc = new SubjectJsonDocument(JsonDocumentPtr(schema_valid_doc));
+      json_doc_raw_ptr =
+        new SchemaValidJsonDocument(JsonDocumentPtr(json_doc_raw_ptr), design_doc_validator);
+    }
+
+    auto subject_doc = new SubjectJsonDocument(JsonDocumentPtr(json_doc_raw_ptr));
     if (m_design_doc_observer)
     {
       subject_doc->addObserver(m_design_doc_observer);

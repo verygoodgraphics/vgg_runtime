@@ -74,7 +74,7 @@ bool SchemaValidJsonDocument::validateDocument(const json& document)
 {
   if (!m_validator)
   {
-    return true;
+    return false;
   }
 
   if (document.is_object() && document.contains(const_class_name) &&

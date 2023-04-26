@@ -9,15 +9,14 @@ class SchemaValidJsonDocument : public JsonDocument
 {
 public:
   using ValidatorPtr = std::shared_ptr<JsonSchemaValidator>;
-  SchemaValidJsonDocument(const JsonDocumentPtr& jsonDoc,
-                          const ValidatorPtr& schemaValidator = ValidatorPtr());
+  SchemaValidJsonDocument(const JsonDocumentPtr& jsonDoc, const ValidatorPtr& schemaValidator);
 
   void addAt(const json::json_pointer& path, const json& value) override;
   void replaceAt(const json::json_pointer& path, const json& value) override;
   void deleteAt(const json::json_pointer& path) override;
 
 private:
-  ValidatorPtr m_validator;
+  const ValidatorPtr m_validator;
 
   void editTemplate(
     const json::json_pointer& path,

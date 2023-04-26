@@ -12,6 +12,7 @@ add_executable(runtime
   Utils/EntityContainer.cpp
   Utils/WasmBindings.cpp
   Basic/Scene.cpp
+  Basic/PathNode.cpp
 )
 
 add_library(vgg_internal OBJECT

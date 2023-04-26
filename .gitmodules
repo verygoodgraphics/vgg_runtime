@@ -4,3 +4,7 @@
 [submodule "lib/vgg_automerge"]
 	path = lib/vgg_automerge
 	url = https://github.com/verygoodgraphics/vgg_automerge.git
+[submodule "lib/vgg_sketch_parser"]
+	path = lib/vgg_sketch_parser
+	url = https://github.com/verygoodgraphics/vgg_sketch_parser
+	branch = develop

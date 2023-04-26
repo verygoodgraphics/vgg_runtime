@@ -6,22 +6,31 @@
 namespace VGG
 {
 
+enum PointMode
+{
+  STRAIGHT = 1,
+  MIRRORED = 2,
+  ASYMMETRIC = 3,
+  DISCONNECTED = 4,
+};
 struct PointAttr
 {
   glm::vec2 point;
   std::optional<float> radius;
-  std::optional<glm::vec2> curveFrom;
-  std::optional<glm::vec2> curveTo;
+  std::optional<glm::vec2> from;
+  std::optional<glm::vec2> to;
   std::optional<int> cornerStyle;
+  PointMode mode;
+
   PointAttr(glm::vec2 point,
             std::optional<float> radius,
-            std::optional<glm::vec2> curveFrom,
-            std::optional<glm::vec2> curveTo,
+            std::optional<glm::vec2> from,
+            std::optional<glm::vec2> to,
             std::optional<int> cornerStyle)
     : point(point)
     , radius(radius)
-    , curveFrom(curveFrom)
-    , curveTo(curveTo)
+    , from(from)
+    , to(to)
     , cornerStyle(cornerStyle)
   {
   }
@@ -53,18 +62,8 @@ public:
     : PaintNode(name, ObjectType::VGG_PATH)
   {
   }
+  void Paint(SkCanvas* canvas) override{
 
-  void Paint(SkCanvas* canvas) override
-  {
-    if (shape.subshape.contour)
-    {
-      drawContour(shape.subshape.contour.value());
-    }
-  }
-
-protected:
-  void drawContour(const Contour& contour)
-  {
   }
 };
 } // namespace VGG

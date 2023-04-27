@@ -7,7 +7,7 @@
 
 namespace VGG
 {
-constexpr float FZERO = std::numeric_limits<float>::epsilon();
+constexpr float EPS = std::numeric_limits<float>::epsilon();
 double calcRadius(double r0,
                   const glm::vec2& p0,
                   const glm::vec2& p1,
@@ -19,13 +19,13 @@ double calcRadius(double r0,
   glm::vec2 b = p2 - p1;
   double alen = a.length();
   double blen = b.length();
-  if (std::fabs(alen) < FZERO || std::fabs(blen) < FZERO)
+  if (std::fabs(alen) < EPS || std::fabs(blen) < EPS)
   {
     return 0.;
   }
   ASSERT(alen > 0 && blen > 0);
   double cosTheta = glm::dot(a, b) / alen / blen;
-  if (cosTheta + 1 < FZERO) // cosTheta == -1
+  if (cosTheta + 1 < EPS) // cosTheta == -1
   {
     if (left)
     {
@@ -39,7 +39,7 @@ double calcRadius(double r0,
     }
     return r0;
   }
-  else if (1 - cosTheta < FZERO) // cosTheta == 1
+  else if (1 - cosTheta < EPS) // cosTheta == 1
   {
     return 0.;
   }

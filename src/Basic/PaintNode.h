@@ -28,6 +28,7 @@ public:
   bool visible = true;
   bool dirty = false;
   Style style;
+  ContextSetting contextSetting;
 
   PaintNode(const std::string& name, ObjectType type)
     : Node(name)

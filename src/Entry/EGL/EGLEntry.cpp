@@ -21,6 +21,7 @@ int main(int argc, char** argv)
 {
   argparse::ArgumentParser program("vgg", Version::get());
   program.add_argument("-s", "--sketch").help("input sketch file");
+  program.add_argument("-l").help("input vgg file");
   try
   {
     program.parse_args(argc, argv);
@@ -47,6 +48,32 @@ int main(int argc, char** argv)
     nlohmann::json json_out;
     std::map<std::string, std::vector<char>> resources;
     analyze_sketch_file::analyze(file_buf.data(), size, "hello-sketch", json_out, resources);
+    auto res = render(json_out, resources, 80);
+    auto reason = std::get<0>(res);
+    std::cout << "Reason: " << std::endl;
+    int count = 0;
+    for (const auto p : std::get<1>(res))
+    {
+      count++;
+      std::stringstream ss;
+      ss << "image" << count << ".png";
+      std::string name;
+      ss >> name;
+
+      std::ofstream ofs(name, std::ios::binary);
+      if (ofs.is_open())
+      {
+        ofs.write((const char*)p.second->bytes(), p.second->size());
+      }
+    }
+  }
+
+  if (auto loadfile = program.present("-l"))
+  {
+    auto fp = loadfile.value();
+    auto json = GetTextFromFile(fp);
+    nlohmann::json json_out = json::parse(json);
+    std::map<std::string, std::vector<char>> resources;
     auto res = render(json_out, resources, 80);
     auto reason = std::get<0>(res);
     std::cout << "Reason: " << std::endl;

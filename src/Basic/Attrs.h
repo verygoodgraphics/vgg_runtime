@@ -32,6 +32,11 @@ struct VGGColor
   float g;
   float b;
   float a;
+
+  operator SkColor() const
+  {
+    return SkColorSetARGB(255 * a, 255 * r, 255 * g, 255 * b);
+  }
 };
 
 struct VGGGradient
@@ -79,6 +84,10 @@ struct Blur
 
 struct Fill
 {
+  bool isEnabled;
+  VGGColor color;
+  EFillType fillType;
+  ContextSetting contextSettings;
 };
 
 struct Style
@@ -179,6 +188,10 @@ inline void from_json(const json& j, Blur& x)
 
 inline void from_json(const json& j, Fill& x)
 {
+  x.color = j.at("color").get<VGGColor>();
+  x.fillType = (EFillType)j.at("fillType").get<int>();
+  x.isEnabled = j.at("isEnabled").get<bool>();
+  x.contextSettings = j.at("contextSettings").get<ContextSetting>();
 }
 
 inline void from_json(const json& j, Style& x)

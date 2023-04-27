@@ -69,4 +69,11 @@ enum EBlendMode
   BM_Vivid_light,
 };
 
+enum EFillType
+{
+  FT_Color = 0,
+  FT_Gradient,
+  FT_Pattern
+};
+
 } // namespace VGG

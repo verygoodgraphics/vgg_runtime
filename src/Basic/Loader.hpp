@@ -47,6 +47,7 @@ inline void fromObjectCommonProperty(const nlohmann::json& j, PaintNode* obj)
   // all properties that render object cares about
   std::tie(obj->bound, obj->transform) = fromTransform(j);
   obj->style = j.at("style").get<Style>();
+  obj->contextSetting = j.at("contextSettings").get<ContextSetting>();
 }
 
 template<typename T>

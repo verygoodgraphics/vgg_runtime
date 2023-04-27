@@ -18,6 +18,7 @@
 #define __APP_HPP__
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_keycode.h>
 #ifdef EMSCRIPTEN
 #include <SDL2/SDL_opengles2.h>
 #include <emscripten/emscripten.h>
@@ -482,6 +483,12 @@ protected: // protected methods
       if (key == SDLK_PAGEDOWN && (SDL_GetModState() & KMOD_CTRL))
       {
         FileManager::nextPage();
+        return true;
+      }
+
+      if (key == SDLK_o)
+      {
+        m_useOldRenderer = !m_useOldRenderer;
         return true;
       }
 

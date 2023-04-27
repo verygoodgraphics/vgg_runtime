@@ -6,6 +6,7 @@ add_library(egl_runtime
   ${CMAKE_CURRENT_SOURCE_DIR}/../../Utils/EntityContainer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/../../Utils/WasmBindings.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/../../Basic/Scene.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../Basic/PathNode.cpp
 )
 
 set_target_properties(egl_runtime PROPERTIES

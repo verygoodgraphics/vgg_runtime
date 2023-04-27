@@ -1,7 +1,9 @@
 #pragma once
 #include "PaintNode.h"
 #include "VGGType.h"
+#include "include/core/SkCanvas.h"
 
+#include <charconv>
 #include <optional>
 namespace VGG
 {
@@ -16,14 +18,13 @@ enum PointMode
 struct PointAttr
 {
   glm::vec2 point;
-  std::optional<float> radius;
+  float radius = 0.0;
   std::optional<glm::vec2> from;
   std::optional<glm::vec2> to;
   std::optional<int> cornerStyle;
-  PointMode mode;
 
   PointAttr(glm::vec2 point,
-            std::optional<float> radius,
+            float radius,
             std::optional<glm::vec2> from,
             std::optional<glm::vec2> to,
             std::optional<int> cornerStyle)
@@ -33,6 +34,13 @@ struct PointAttr
     , to(to)
     , cornerStyle(cornerStyle)
   {
+  }
+
+  PointMode mode() const
+  {
+    if (from.has_value() || to.has_value())
+      return PointMode::DISCONNECTED;
+    return PointMode::STRAIGHT;
   }
 };
 
@@ -51,6 +59,7 @@ public:
     BoolOp blop;
     std::optional<Contour> contour;
   };
+
   struct Shape
   {
     WindingType windingRule;
@@ -58,12 +67,10 @@ public:
   } shape;
 
 public:
-  PathNode(const std::string& name)
-    : PaintNode(name, ObjectType::VGG_PATH)
-  {
-  }
-  void Paint(SkCanvas* canvas) override{
+  PathNode(const std::string& name);
+  void Paint(SkCanvas* canvas) override;
 
-  }
+protected:
+  void drawContour(SkCanvas * canvas);
 };
 } // namespace VGG

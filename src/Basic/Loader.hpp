@@ -75,7 +75,7 @@ inline Contour fromContour(const nlohmann::json& j)
   {
     const auto p = e["point"];
     contour.emplace_back(glm::vec2{ p[0], p[1] },
-                         get_opt<float>(e, "radius"),
+                         get_opt<float>(e, "radius").value_or(0.0),
                          get_opt<glm::vec2>(e, "curveFrom"),
                          get_opt<glm::vec2>(e, "curveTo"),
                          get_opt<int>(e, "cornerStyle"));

@@ -2,6 +2,7 @@
 #include "Basic/PathNode.h"
 #include "Basic/VGGType.h"
 #include "Utils/Utils.hpp"
+#include "include/core/SkBlendMode.h"
 #include "include/core/SkPath.h"
 #include <limits>
 
@@ -266,6 +267,55 @@ SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
   return skPath;
 }
 
+// void drawPathFill(SkCanvas* canvas,
+//                   const Frame& frame,
+//                   const SkPath& skPath,
+//                   const FillStyle* style,
+//                   double globalAlpha)
+// {
+//   ASSERT(canvas);
+//   SkPaint fillPen;
+//   fillPen.setStyle(SkPaint::kFill_Style);
+//
+//   if (!style)
+//   {
+//     canvas->drawPath(skPath, fillPen);
+//   }
+//   else if (FillTypeChooser<FillStyle>::isFlat(*style))
+//   {
+//     fillPen.setColor(style->color);
+//     fillPen.setAlphaf(fillPen.getAlphaf() * globalAlpha);
+//     canvas->drawPath(skPath, fillPen);
+//   }
+//   else if (FillTypeChooser<FillStyle>::isLinearGradient(*style))
+//   {
+//     fillPen.setShader(style->gradient.getLinearShader(frame));
+//     fillPen.setAlphaf(style->contextSettings.opacity * globalAlpha);
+//     canvas->drawPath(skPath, fillPen);
+//   }
+//   else if (FillTypeChooser<FillStyle>::isRadialGradient(*style))
+//   {
+//     fillPen.setShader(style->gradient.getRadialShader(frame));
+//     fillPen.setAlphaf(style->contextSettings.opacity * globalAlpha);
+//     canvas->drawPath(skPath, fillPen);
+//   }
+//   else if (FillTypeChooser<FillStyle>::isAngularGradient(*style))
+//   {
+//     fillPen.setShader(style->gradient.getAngularShader(frame));
+//     fillPen.setAlphaf(style->contextSettings.opacity * globalAlpha);
+//     canvas->drawPath(skPath, fillPen);
+//   }
+//   else if (style->fillType == FillStyle::FillType::IMAGE)
+//   {
+//     if (auto& name = style->imageName)
+//     {
+//       fillPen.setShader(style->getImageShader(frame));
+//       fillPen.setAlphaf(style->contextSettings.opacity * globalAlpha);
+//       canvas->drawPath(skPath, fillPen);
+//     }
+//   }
+// }
+
 PathNode::PathNode(const std::string& name)
   : PaintNode(name, ObjectType::VGG_PATH)
 {
@@ -275,17 +325,18 @@ void PathNode::Paint(SkCanvas* canvas)
 {
   if (shape.subshape.contour.has_value())
   {
-    auto skpath = getSkiaPath(shape.subshape.contour.value(), shape.subshape.contour->closed);
-    SkPaint p;
-    p.setAntiAlias(true);
-    p.setStyle(SkPaint::kStroke_Style);
-    p.setColor(SK_ColorBLUE);
-    p.setStrokeWidth(2);
-
-    canvas->save();
-    canvas->scale(1, -1);
-    canvas->drawPath(skpath, p);
-    canvas->restore();
+    drawContour(canvas);
+    // auto skpath = getSkiaPath(shape.subshape.contour.value(), shape.subshape.contour->closed);
+    // SkPaint p;
+    // p.setAntiAlias(true);
+    // p.setStyle(SkPaint::kStroke_Style);
+    // p.setColor(SK_ColorBLUE);
+    // p.setStrokeWidth(2);
+    //
+    // canvas->save();
+    // canvas->scale(1, -1);
+    // canvas->drawPath(skpath, p);
+    // canvas->restore();
   }
 }
 
@@ -297,8 +348,11 @@ void PathNode::drawContour(SkCanvas* canvas)
   p.setAntiAlias(true);
   p.setStyle(SkPaint::kStroke_Style);
   p.setColor(SK_ColorBLUE);
-  p.setStrokeWidth(2);
+  p.setStrokeWidth(1);
 
+  canvas->save();
+  canvas->scale(1, -1);
+  // canvas->drawPath(skPath, p);
 
   // winding rule
   if (shape.windingRule == WindingType::WR_EVENODD)
@@ -310,17 +364,19 @@ void PathNode::drawContour(SkCanvas* canvas)
     skPath.setFillType(SkPathFillType::kWinding);
   }
 
+  const auto globalAlpha = contextSetting.Opacity;
 
-  // blend mode
-  // TODO::
+  for (const auto& f : style.fills)
+  {
+    if (!f.isEnabled)
+      continue;
+    SkPaint fillPen;
+    fillPen.setColor(f.color);
+    fillPen.setStyle(SkPaint::kFill_Style);
+    fillPen.setAlphaf(fillPen.getAlphaf() * globalAlpha);
+    canvas->drawPath(skPath, fillPen);
+  }
 
-  // draw fill
-
-
-
-  canvas->save();
-  canvas->scale(1, -1);
-  canvas->drawPath(skPath, p);
   canvas->restore();
 }
 

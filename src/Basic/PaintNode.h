@@ -27,6 +27,7 @@ public:
   ObjectType type;
   bool visible = true;
   bool dirty = false;
+  Style style;
 
   PaintNode(const std::string& name, ObjectType type)
     : Node(name)

@@ -94,6 +94,7 @@ int main(int argc, char** argv)
       ofs.write(str.c_str(), str.size());
       ofs.close();
 
+      Scene::setResRepo(std::move(resources));
       scene->LoadFileContent(json_out);
     }
 

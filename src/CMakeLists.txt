@@ -13,6 +13,7 @@ add_executable(runtime
   Utils/WasmBindings.cpp
   Basic/Scene.cpp
   Basic/PathNode.cpp
+  Basic/ImageNode.cpp
 )
 
 add_library(vgg_internal OBJECT

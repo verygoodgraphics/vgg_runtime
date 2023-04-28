@@ -274,12 +274,12 @@ std::tuple<std::string, std::map<int, sk_sp<SkData>>> render(
   const std::map<std::string, std::vector<char>>& resources,
   int imageQuality)
 {
-  (void)resources;
   std::string reason;
   std::map<int, sk_sp<SkData>> res;
 
   auto scene = std::make_shared<Scene>();
   scene->LoadFileContent(j);
+  scene->setResRepo(resources);
   auto count = scene->artboards.size();
   for (int i = 0; i < count; i++)
   {

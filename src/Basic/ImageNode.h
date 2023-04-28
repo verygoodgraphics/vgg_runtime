@@ -1,6 +1,7 @@
 #pragma once
 #include "PaintNode.h"
-#include "VGGType.h"
+
+class SkImage;
 
 namespace VGG
 {
@@ -8,36 +9,18 @@ class ImageNode final : public PaintNode
 {
   std::string guid;
   bool fillReplacesImage = false;
-
+  sk_sp<SkImage> image;
+  sk_sp<SkShader> shader;
+  static std::unordered_map<std::string, sk_sp<SkImage>> SkiaImageRepo;
 public:
-  ImageNode(const std::string& name)
-    : PaintNode(name, VGG_IMAGE)
-  {
-  }
+  ImageNode(const std::string& name);
+  void Paint(SkCanvas* canvas) override;
+  void setImage(const std::string& guid);
+  const std::string& getImageGUID() const;
+  void setReplacesImage(bool fill);
+  bool fill() const;
 
-  void Paint(SkCanvas* canvas) override
-  {
-    // TODO:: draw image
-  }
-
-  void setImage(const std::string& guid)
-  {
-    this->guid = guid;
-  }
-
-  const std::string& getImageGUID() const
-  {
-    return this->guid;
-  }
-
-  void setReplacesImage(bool fill)
-  {
-    this->fillReplacesImage = fill;
-  }
-
-  bool fill() const
-  {
-    return this->fillReplacesImage;
-  }
+protected:
+  void reloadImage();
 };
 } // namespace VGG

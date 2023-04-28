@@ -30,8 +30,8 @@ inline glm::mat3 fromMatrix(const nlohmann::json& j)
 
 inline Bound2 fromBound(const nlohmann::json& j)
 {
-  auto x = j["x"];
-  auto y = j["y"];
+  auto x = -j["x"].get<float>(); // convert to skia coordinate system
+  auto y = -j["y"].get<float>();
   auto width = j["width"];
   auto height = j["height"];
   return Bound2{ x, y, width, height };

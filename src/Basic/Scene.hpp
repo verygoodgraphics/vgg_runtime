@@ -14,8 +14,9 @@ class ArtboardNode;
 using ResourceRepo = std::map<std::string, std::vector<char>>;
 struct Scene
 {
-public:
   static ResourceRepo ResRepo;
+
+public:
   std::vector<std::shared_ptr<ArtboardNode>> artboards;
   std::vector<std::shared_ptr<SymbolMasterNode>> symbols;
   int page = 0;
@@ -29,6 +30,16 @@ public:
   void PreArtboard();
   void NextSymbol();
   void PrevSymbol();
+
+  static ResourceRepo& getResRepo()
+  {
+    return ResRepo;
+  }
+
+  static void setResRepo(std::map<std::string, std::vector<char>> repo)
+  {
+    Scene::ResRepo = std::move(repo);
+  }
 };
 
 }; // namespace VGG

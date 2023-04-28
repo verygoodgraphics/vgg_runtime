@@ -20,19 +20,20 @@ class PaintNode : public Node
 {
   static SkCanvas* s_defaultCanvas;
   std::unordered_map<std::string, std::any> properties;
+  bool paintDirty = false;
 
 public:
   Bound2 bound;
   glm::mat3 transform;
   ObjectType type;
   bool visible = true;
-  bool dirty = false;
   Style style;
   ContextSetting contextSetting;
 
   PaintNode(const std::string& name, ObjectType type)
     : Node(name)
     , type(type)
+    , paintDirty(true)
   {
   }
   void setVisible(bool visible)
@@ -52,6 +53,16 @@ public:
 
 protected:
   void preVisit() override
+  {
+    if (isPaintDirty())
+    {
+      paint();
+      // std::cout << "paint\n";
+      // this->resetPaintDirty();
+    }
+  }
+
+  virtual void paint()
   {
     SkCanvas* canvas = getSkCanvas();
     canvas->save();
@@ -77,32 +88,41 @@ protected:
   {
   }
 
-  void propertyChanged()
+  void markPaintDirty()
   {
-    markDirty();
+    this->paintDirty = true;
   }
 
-  void markDirty()
+  void resetPaintDirty()
   {
-    this->dirty = true;
-  }
-
-  void resetDirty()
-  {
-    this->dirty = false;
+    this->paintDirty = false;
   }
 
 private:
   void _drawRect(SkCanvas* canvas)
   {
     auto skrect = toSkRect(this->bound);
-    skrect.setXYWH(skrect.x(), -skrect.y(), skrect.width(), skrect.height());
     SkPaint strokePen;
     strokePen.setStyle(SkPaint::kStroke_Style);
     SkColor color = nodeType2Color(this->type);
     strokePen.setColor(color);
     strokePen.setStrokeWidth(1);
     canvas->drawRect(skrect, strokePen);
+  }
+
+  void getLocalBound()
+  {
+  }
+
+  float rotateAngle()
+  {
+
+    return 0.0;
+  }
+
+  bool isPaintDirty()
+  {
+    return paintDirty;
   }
 };
 } // namespace VGG

@@ -376,7 +376,6 @@ void PathNode::drawContour(SkCanvas* canvas)
     fillPen.setAlphaf(fillPen.getAlphaf() * globalAlpha);
     canvas->drawPath(skPath, fillPen);
   }
-
   canvas->restore();
 }
 

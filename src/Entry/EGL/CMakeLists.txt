@@ -8,6 +8,7 @@ add_library(egl_runtime
   ${CMAKE_CURRENT_SOURCE_DIR}/../../Basic/Scene.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/../../Basic/PathNode.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/../../Basic/ImageNode.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../Basic/TextNode.cpp
 )
 
 set_target_properties(egl_runtime PROPERTIES

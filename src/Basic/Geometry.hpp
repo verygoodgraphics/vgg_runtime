@@ -25,6 +25,16 @@ struct Bound2
   {
   }
 
+  float width() const
+  {
+    return topRight.x - bottomLeft.x;
+  }
+
+  float height() const
+  {
+    return topRight.y - bottomLeft.y;
+  }
+
   bool valid() const
   {
     return size().x > 0 && size().y > 0;

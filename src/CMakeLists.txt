@@ -14,6 +14,7 @@ add_executable(runtime
   Basic/Scene.cpp
   Basic/PathNode.cpp
   Basic/ImageNode.cpp
+  Basic/TextNode.cpp
 )
 
 add_library(vgg_internal OBJECT

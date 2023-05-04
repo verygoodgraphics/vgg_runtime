@@ -76,4 +76,34 @@ enum EFillType
   FT_Pattern
 };
 
+enum ETextLayoutMode
+{
+  TL_Fixed,
+  TL_WidthAuto,
+  TL_HeightAuto
+};
+
+enum ETextVerticalAlignment
+{
+  VA_Top,
+  VA_Center,
+  VA_Bottom,
+};
+
+enum ETextHorizontalAlignment
+{
+  HA_Left,
+  HA_Right,
+  HA_Center,
+  HA_Justify,
+  HA_Natural
+};
+
+enum ETextUnderline
+{
+  UT_None,
+  UT_Single,
+  UT_Double
+};
+
 } // namespace VGG

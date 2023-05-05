@@ -101,16 +101,16 @@ void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
   napi_property_descriptor properties[] = {
     DECLARE_NODE_API_PROPERTY("updateStyle", UpdateStyle),
 
-    DECLARE_NODE_API_PROPERTY("getDocumentJson", GetDocumentJson),
+    DECLARE_NODE_API_PROPERTY("getDesignDocument", GetDocumentJson),
     DECLARE_NODE_API_PROPERTY("jsonAt", GetJsonAt),
 
     DECLARE_NODE_API_PROPERTY("getElementPath", GetElementPath),
     DECLARE_NODE_API_PROPERTY("getElementContainerPath", GetElementContainerPath),
     DECLARE_NODE_API_PROPERTY("findElement", FindElement),
 
-    DECLARE_NODE_API_PROPERTY("replaceInDocument", ReplaceInDocument),
-    DECLARE_NODE_API_PROPERTY("addToDocument", AddToDocument),
-    DECLARE_NODE_API_PROPERTY("deleteFromDocument", DeleteFromDocument),
+    DECLARE_NODE_API_PROPERTY("updateAt", ReplaceInDocument),
+    DECLARE_NODE_API_PROPERTY("addAt", AddToDocument),
+    DECLARE_NODE_API_PROPERTY("deleteAt", DeleteFromDocument),
   };
 
   napi_value cons;
@@ -332,18 +332,53 @@ napi_value VggSdkNodeAdapter::ReplaceInDocument(napi_env env, napi_callback_info
 
   VggSdkNodeAdapter* obj;
   NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
-  // obj->m_vggSdk->replaceInDocument(json_pointer_string, json_value_string);
+  try
+  {
+    obj->m_vggSdk->replaceInDocument(json_pointer_string, json_value_string);
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
 
   return nullptr;
 }
 
 napi_value VggSdkNodeAdapter::AddToDocument(napi_env env, napi_callback_info info)
 {
+  size_t argc = 2;
+  napi_value args[2];
   napi_value _this;
-  NODE_API_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &_this, nullptr));
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  NODE_API_ASSERT(env, argc >= 2, "Wrong number of arguments");
+
+  napi_valuetype valuetype0;
+  NODE_API_CALL(env, napi_typeof(env, args[0], &valuetype0));
+
+  napi_valuetype valuetype1;
+  NODE_API_CALL(env, napi_typeof(env, args[1], &valuetype1));
+
+  NODE_API_ASSERT(env,
+                  valuetype0 == napi_string && valuetype1 == napi_string,
+                  "Wrong argument type. Strings expected.");
+
+  std::string json_pointer_string;
+  GetArgString_(env, json_pointer_string, args[0]);
+
+  std::string json_value_string;
+  GetArgString_(env, json_value_string, args[1]);
 
   VggSdkNodeAdapter* obj;
   NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
+  try
+  {
+    obj->m_vggSdk->addToDocument(json_pointer_string, json_value_string);
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
 
   return nullptr;
 }

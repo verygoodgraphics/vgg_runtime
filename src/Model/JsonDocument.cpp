@@ -11,11 +11,11 @@ void JsonDocument::setContent(const json& document)
 
 void JsonDocument::addAt(const std::string& path, const std::string& value)
 {
-  addAt(json::json_pointer(path), json(value));
+  addAt(json::json_pointer(path), json::parse(value));
 }
 void JsonDocument::replaceAt(const std::string& path, const std::string& value)
 {
-  replaceAt(json::json_pointer(path), json(value));
+  replaceAt(json::json_pointer(path), json::parse(value));
 }
 void JsonDocument::deleteAt(const std::string& path)
 {

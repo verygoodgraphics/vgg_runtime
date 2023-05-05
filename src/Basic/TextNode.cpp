@@ -17,7 +17,7 @@ std::vector<std::string_view> makeLines(const std::string& text)
   {
     if (i == text.size() || text[i] == '\n')
     {
-      ls.push_back(text.substr(start, i - start));
+      ls.emplace_back(text.data() + start, i - start);
       start = i + 1;
     }
   }
@@ -31,6 +31,7 @@ void drawFramedText(SkCanvas* canvas,
 {
   ASSERT(canvas);
 
+  canvas->clipRect(toSkRect(frame));
   auto textLines = makeLines(text);
   SkFontMetrics metrics;
   SkFont font = textStyle.getFont();
@@ -72,7 +73,7 @@ void drawFramedText(SkCanvas* canvas,
     {
       xs.push_back(tw);
       // auto c = TextCodecs::conv.to_bytes(line[i]);
-      auto cw = font.measureText(line.data(), line.size(), SkTextEncoding::kUTF8);
+      auto cw = font.measureText(&line[i], 1, SkTextEncoding::kUTF8);
       tw += (cw + textStyle.letterSpacing);
     }
     tw -= textStyle.letterSpacing;

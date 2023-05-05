@@ -1,4 +1,5 @@
 #include <argparse/argparse.hpp>
+#include <filesystem>
 #include <fstream>
 #include "../../Utils/Version.hpp"
 #include "../../Utils/FileManager.hpp"
@@ -17,11 +18,23 @@ std::string GetTextFromFile(const std::string& fileName)
   return std::string{ std::istreambuf_iterator<char>{ in }, std::istreambuf_iterator<char>{} };
 }
 
+std::vector<char> GetBinFromFile(const std::string& filename)
+{
+  std::ifstream in(filename, std::ios::binary);
+  if (in.is_open() == false)
+  {
+    exit(-1);
+  }
+  return std::vector<char>{ std::istreambuf_iterator<char>{ in },
+                            std::istreambuf_iterator<char>{} };
+}
+
 int main(int argc, char** argv)
 {
   argparse::ArgumentParser program("vgg", Version::get());
   program.add_argument("-s", "--sketch").help("input sketch file");
   program.add_argument("-l").help("input vgg file");
+  program.add_argument("-d").help("input resources file");
   try
   {
     program.parse_args(argc, argv);
@@ -74,6 +87,15 @@ int main(int argc, char** argv)
     auto json = GetTextFromFile(fp);
     nlohmann::json json_out = json::parse(json);
     std::map<std::string, std::vector<char>> resources;
+    if (auto datafile = program.present("-d"))
+    {
+      for (const auto& entry : std::filesystem::recursive_directory_iterator(datafile.value()))
+      {
+        std::string key = string("./image/") + entry.path().filename().string();
+        std::cout << "read image: " << entry.path() << " which key is " << key << std::endl;
+        resources[key] = GetBinFromFile(entry.path());
+      }
+    }
     auto res = render(json_out, resources, 80);
     auto reason = std::get<0>(res);
     std::cout << "Reason: " << std::endl;

@@ -24,10 +24,10 @@ std::vector<std::string_view> makeLines(const std::string& text)
   return ls;
 }
 
-void drawFramedText(SkCanvas* canvas,
-                    const std::string& text,
-                    const Bound2& frame,
-                    const TextStyleStub& textStyle)
+void drawText(SkCanvas* canvas,
+              const std::string& text,
+              const Bound2& frame,
+              const TextStyleStub& textStyle)
 {
   ASSERT(canvas);
 
@@ -131,7 +131,7 @@ void TextNode::Paint(SkCanvas* canvas)
 {
   if (styles.empty() == false)
   {
-    drawFramedText(canvas, text, bound, styles[0]);
+    drawText(canvas, text, bound, styles[0]);
   }
 }
 

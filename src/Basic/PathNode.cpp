@@ -3,6 +3,8 @@
 #include "Basic/VGGType.h"
 #include "Utils/Utils.hpp"
 #include "include/core/SkBlendMode.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkColor.h"
 #include "include/core/SkPath.h"
 #include <limits>
 
@@ -345,14 +347,9 @@ void PathNode::drawContour(SkCanvas* canvas)
   ASSERT(shape.subshape.contour.has_value());
   auto skPath = getSkiaPath(shape.subshape.contour.value(), shape.subshape.contour->closed);
   SkPaint p;
-  p.setAntiAlias(true);
-  p.setStyle(SkPaint::kStroke_Style);
-  p.setColor(SK_ColorBLUE);
-  p.setStrokeWidth(1);
 
   canvas->save();
   canvas->scale(1, -1);
-  // canvas->drawPath(skPath, p);
 
   // winding rule
   if (shape.windingRule == WindingType::WR_EVENODD)
@@ -376,6 +373,22 @@ void PathNode::drawContour(SkCanvas* canvas)
     fillPen.setAlphaf(fillPen.getAlphaf() * globalAlpha);
     canvas->drawPath(skPath, fillPen);
   }
+
+  // draw boarders
+  //
+
+  SkPaint strokePen;
+  strokePen.setAntiAlias(true);
+  strokePen.setStyle(SkPaint::kStroke_Style);
+  for (const auto& b : style.borders)
+  {
+    if (!b.is_enabled)
+      continue;
+    strokePen.setStrokeWidth(b.thickness);
+    strokePen.setColor(b.color.value_or(VGGColor{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
+    canvas->drawPath(skPath, strokePen);
+  }
+
   canvas->restore();
 }
 

@@ -42,7 +42,7 @@ void SchemaValidJsonDocument::deleteAt(const json::json_pointer& path)
     path,
     stub_value,
     [](json& tmp_document, json::json_pointer& relative_path, const json& cb_value)
-    { tmp_document.at(relative_path.parent_pointer()).erase(relative_path.back()); },
+    { JsonDocument::erase(tmp_document, relative_path); },
     [](JsonDocumentPtr& cb_doc, const json::json_pointer& cb_path, const json& cb_value)
     { cb_doc->deleteAt(cb_path); });
 }

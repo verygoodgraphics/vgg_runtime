@@ -47,3 +47,17 @@ void JsonDocument::save()
 {
   m_jsonDoc->save();
 }
+
+void JsonDocument::erase(json& target, const json::json_pointer& path)
+{
+  auto j = target.at(path.parent_pointer());
+  if (j.is_object())
+  {
+    j.erase(path.back());
+  }
+  else // array
+  {
+    auto index = std::stoul(path.back());
+    j.erase(index);
+  }
+}

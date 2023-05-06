@@ -33,6 +33,8 @@ public:
   virtual void redo();
   virtual void save();
 
+  static void erase(json& target, const json::json_pointer& path);
+
 protected:
   JsonDocumentPtr m_jsonDoc;
 };

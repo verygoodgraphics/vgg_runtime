@@ -29,7 +29,7 @@ public:
 
   virtual void deleteAt(const json::json_pointer& path) override
   {
-    m_doc.at(path.parent_pointer()).erase(path.back());
+    erase(m_doc, path);
   }
 
 private:

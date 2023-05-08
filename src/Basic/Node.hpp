@@ -261,6 +261,7 @@ public:
     return nullptr;
   }
 
+  // used for rendering
   virtual void traverse()
   {
     preVisit();
@@ -278,7 +279,7 @@ public:
 
   virtual ~Node() = default;
 
-private:
+protected:
   std::string m_name;
   FirstChildNode m_firstChild;
   std::list<std::shared_ptr<Node>>::iterator iter;

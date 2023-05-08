@@ -106,4 +106,11 @@ enum ETextUnderline
   UT_Double
 };
 
+enum EMaskType
+{
+  MT_None,
+  MT_Outline,
+  MT_Alpha
+};
+
 } // namespace VGG

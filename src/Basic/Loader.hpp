@@ -90,6 +90,8 @@ public:
     std::tie(obj->bound, obj->transform) = fromTransform(j);
     obj->style = j.at("style").get<Style>();
     obj->contextSetting = j.at("contextSettings").get<ContextSetting>();
+    obj->maskedBy = j.at("outlineMaskBy").get<std::vector<std::string>>();
+    obj->maskType = (EMaskType)j.at("maskType").get<int>();
   }
 
   static inline Contour fromContour(const nlohmann::json& j)

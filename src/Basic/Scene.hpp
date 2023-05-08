@@ -1,5 +1,7 @@
 #pragma once
 #include <memory>
+#include "Basic/Node.hpp"
+#include "Basic/PaintNode.h"
 #include "include/core/SkCanvas.h"
 // #include "vgg_sketch_parser/src/analyze_sketch_file/analyze_sketch_file.h"
 #include "nlohmann/json.hpp"
@@ -19,9 +21,10 @@ struct Scene
 public:
   std::vector<std::shared_ptr<ArtboardNode>> artboards;
   std::vector<std::shared_ptr<SymbolMasterNode>> symbols;
-  int page = 0;
-  int symbolIndex = 0;
-  bool renderSymbol = false;
+  int page{ 0 };
+  int symbolIndex{ 0 };
+  bool renderSymbol{ false };
+  bool maskDirty{ true };
   Scene() = default;
   void LoadFileContent(const std::string& json);
   void LoadFileContent(const nlohmann::json& j);
@@ -40,6 +43,9 @@ public:
   {
     Scene::ResRepo = std::move(repo);
   }
+
+private:
+  void preprocessMask(PaintNode* node);
 };
 
 }; // namespace VGG

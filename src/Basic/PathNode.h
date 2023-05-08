@@ -57,7 +57,7 @@ public:
   struct Subshape
   {
     BoolOp blop;
-    std::optional<Contour> contour;
+    std::vector<Contour> contours;
   };
 
   struct Shape

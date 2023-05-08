@@ -154,7 +154,7 @@ public:
       const auto klass = geo["class"];
       if (klass == "contour")
       {
-        p->shape.subshape.contour = fromContour(geo);
+        p->shape.subshape.contours.push_back(fromContour(geo));
       }
       else if (klass == "path")
       {

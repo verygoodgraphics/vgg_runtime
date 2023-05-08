@@ -325,8 +325,16 @@ PathNode::PathNode(const std::string& name)
 
 void PathNode::Paint(SkCanvas* canvas)
 {
-  if (shape.subshape.contour.has_value())
+  if (!shape.subshape.contours.empty())
   {
+    if (m_name == "szn_hand")
+    {
+      std::cout << "szn_hand\n";
+    }
+    else if (m_name == "szn_de")
+    {
+      std::cout << "szn_de\n";
+    }
     drawContour(canvas);
     // auto skpath = getSkiaPath(shape.subshape.contour.value(), shape.subshape.contour->closed);
     // SkPaint p;
@@ -344,49 +352,51 @@ void PathNode::Paint(SkCanvas* canvas)
 
 void PathNode::drawContour(SkCanvas* canvas)
 {
-  ASSERT(shape.subshape.contour.has_value());
-  auto skPath = getSkiaPath(shape.subshape.contour.value(), shape.subshape.contour->closed);
-  SkPaint p;
-
-  canvas->save();
-  canvas->scale(1, -1);
-
-  // winding rule
-  if (shape.windingRule == WindingType::WR_EVENODD)
+  for (const auto& contour : shape.subshape.contours)
   {
-    skPath.setFillType(SkPathFillType::kEvenOdd);
-  }
-  else
-  {
-    skPath.setFillType(SkPathFillType::kWinding);
-  }
+    SkPath skPath = getSkiaPath(contour, contour.closed);
+    SkPaint p;
 
-  const auto globalAlpha = contextSetting.Opacity;
+    canvas->save();
+    canvas->scale(1, -1);
 
-  for (const auto& f : style.fills)
-  {
-    if (!f.isEnabled)
-      continue;
-    SkPaint fillPen;
-    fillPen.setColor(f.color);
-    fillPen.setStyle(SkPaint::kFill_Style);
-    fillPen.setAlphaf(fillPen.getAlphaf() * globalAlpha);
-    canvas->drawPath(skPath, fillPen);
-  }
+    // winding rule
+    if (shape.windingRule == WindingType::WR_EVENODD)
+    {
+      skPath.setFillType(SkPathFillType::kEvenOdd);
+    }
+    else
+    {
+      skPath.setFillType(SkPathFillType::kWinding);
+    }
 
-  // draw boarders
-  //
+    const auto globalAlpha = contextSetting.Opacity;
 
-  SkPaint strokePen;
-  strokePen.setAntiAlias(true);
-  strokePen.setStyle(SkPaint::kStroke_Style);
-  for (const auto& b : style.borders)
-  {
-    if (!b.is_enabled)
-      continue;
-    strokePen.setStrokeWidth(b.thickness);
-    strokePen.setColor(b.color.value_or(VGGColor{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
-    canvas->drawPath(skPath, strokePen);
+    for (const auto& f : style.fills)
+    {
+      if (!f.isEnabled)
+        continue;
+      SkPaint fillPen;
+      fillPen.setColor(f.color);
+      fillPen.setStyle(SkPaint::kFill_Style);
+      fillPen.setAlphaf(fillPen.getAlphaf() * globalAlpha);
+      canvas->drawPath(skPath, fillPen);
+    }
+
+    // draw boarders
+    //
+
+    SkPaint strokePen;
+    strokePen.setAntiAlias(true);
+    strokePen.setStyle(SkPaint::kStroke_Style);
+    for (const auto& b : style.borders)
+    {
+      if (!b.is_enabled)
+        continue;
+      strokePen.setStrokeWidth(b.thickness);
+      strokePen.setColor(b.color.value_or(VGGColor{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
+      canvas->drawPath(skPath, strokePen);
+    }
   }
 
   canvas->restore();

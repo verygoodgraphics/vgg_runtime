@@ -1,4 +1,5 @@
 #pragma once
+#include "Basic/RenderState.h"
 #include "nlohmann/json.hpp"
 #include "Scene.hpp"
 #include "PaintNode.h"
@@ -19,6 +20,8 @@ struct TraversalData
 };
 
 inline SkCanvas* PaintNode::s_defaultCanvas = nullptr;
+
+inline RenderState* PaintNode::s_renderState = nullptr;
 
 class ArtboardNode final : public PaintNode
 {

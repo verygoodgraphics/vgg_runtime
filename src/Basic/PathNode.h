@@ -71,6 +71,6 @@ public:
   void Paint(SkCanvas* canvas) override;
 
 protected:
-  void drawContour(SkCanvas * canvas);
+  void drawContour(SkCanvas* canvas);
 };
 } // namespace VGG

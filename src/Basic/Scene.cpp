@@ -45,6 +45,16 @@ void Scene::Render(SkCanvas* canvas)
   }
 }
 
+void Scene::preprocessMask(PaintNode* node)
+{
+  if (maskDirty)
+  {
+    node->PreprocessMask();
+    // generate each mask for masked node
+    maskDirty = false;
+  }
+}
+
 void Scene::NextArtboard()
 {
   page = (page + 1 >= artboards.size()) ? page : page + 1;

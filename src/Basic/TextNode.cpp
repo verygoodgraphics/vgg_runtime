@@ -24,6 +24,32 @@ std::vector<std::string_view> makeLines(const std::string& text)
   return ls;
 }
 
+const char* next_utf8_char(const unsigned char* p_begin)
+{
+  if (*p_begin >> 7 == 0)
+  {
+    ++p_begin;
+  }
+  else if (*p_begin >> 5 == 6 && p_begin[1] >> 6 == 2)
+  {
+    p_begin += 2;
+  }
+  else if (*p_begin >> 4 == 0x0E && p_begin[1] >> 6 == 2 && p_begin[2] >> 6 == 2)
+  {
+    p_begin += 3;
+  }
+  else if (*p_begin >> 3 == 0x1E && p_begin[1] >> 6 == 2 && p_begin[2] >> 6 == 2 &&
+           p_begin[3] >> 6 == 2)
+  {
+    p_begin += 4;
+  }
+  else
+  {
+    assert(false);
+  }
+  return (const char*)p_begin;
+}
+
 void drawText(SkCanvas* canvas,
               const std::string& text,
               const Bound2& frame,
@@ -69,15 +95,26 @@ void drawText(SkCanvas* canvas,
 
     double tw = 0;
     std::vector<SkScalar> xs;
-    for (size_t i = 0; i < line.size(); i++)
+    auto left_bytes = line.size();
+    const auto end = line.data() + left_bytes;
+    auto cur = line.data();
+    while (cur != end)
     {
+      auto next = next_utf8_char((const unsigned char*)cur);
       xs.push_back(tw);
-      // auto c = TextCodecs::conv.to_bytes(line[i]);
-      auto cw = font.measureText(&line[i], 1, SkTextEncoding::kUTF8);
+      auto cw = font.measureText(cur, next - cur, SkTextEncoding::kUTF8);
       tw += (cw + textStyle.letterSpacing);
+      cur = next;
     }
+    // for (size_t i = 0; i < line.size(); i++)
+    // {
+    //   xs.push_back(tw);
+    //   // auto c = TextCodecs::conv.to_bytes(line[i]);
+    //   auto cw = font.measureText(&line[i], 1, SkTextEncoding::kUTF8);
+    //   tw += (cw + textStyle.letterSpacing);
+    // }
+    //
     tw -= textStyle.letterSpacing;
-
     auto tb = SkTextBlob::MakeFromPosTextH(line.data(),
                                            line.size(),
                                            xs.data(),

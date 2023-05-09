@@ -46,7 +46,7 @@ protected:
 TEST_F(VggJsonSchemaValitatorTestSuite, GoodCase)
 {
   setRootSchemaByFileName(VGG_JSON_SCHEMA_FILE_NAME);
-  validate_by_filename("./testDataDir/1_out_json.json", true);
+  validate_by_filename("./testDataDir/vgg-work/artboard.json", true);
 }
 
 TEST_F(VggJsonSchemaValitatorTestSuite, BadTargetJson)
@@ -71,7 +71,7 @@ TEST_F(VggJsonSchemaValitatorTestSuite, ValidateByClassName)
 
 TEST_F(VggJsonSchemaValitatorTestSuite, NoSchema)
 {
-  validate_by_filename("./testDataDir/1_out_json.json", true);
+  validate_by_filename("./testDataDir/vgg-work/artboard.json", true);
 }
 
 TEST_F(VggJsonSchemaValitatorTestSuite, NoSchemaValidateByClassName)

@@ -30,7 +30,7 @@ void MainComposer::setupVgg(std::shared_ptr<VggExec> vggExec, const std::string&
   set_vgg_code.append(sdkUrl);
   set_vgg_code.append(R"(");
     var vggSdkAddon = process._linkedBinding('vgg_sdk_addon');
-    setVgg(vggSdkAddon);
+    await setVgg(vggSdkAddon);
   )");
 
   vggExec->evalModule(set_vgg_code);

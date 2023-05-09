@@ -24,17 +24,26 @@ protected:
 
   void SetUp() override
   {
-    composer.setup("./testDataDir/fake-sdk/vgg-sdk.esm.mjs");
   }
   void TearDown() override
   {
     composer.teardown();
+  }
+
+  void setup_sdk_with_local_dic()
+  {
+    composer.setup("./testDataDir/fake-sdk/vgg-sdk.esm.mjs");
+  }
+  void setup_sdk_with_remote_dic()
+  {
+    composer.setup("./asset/vgg-sdk.esm.mjs");
   }
 };
 
 TEST_F(ControllerTestSuite, Smoke)
 {
   // Given
+  setup_sdk_with_local_dic();
   std::string file_path = "testDataDir/vgg-work.zip";
   m_sut.reset(new Controller);
 
@@ -51,6 +60,7 @@ TEST_F(ControllerTestSuite, Smoke)
 TEST_F(ControllerTestSuite, OnClick_observer)
 {
   // Given
+  setup_sdk_with_local_dic();
   auto mock_observer = new MockJsonDocumentObserver();
   std::mutex m;
   std::condition_variable cv;
@@ -88,6 +98,7 @@ TEST_F(ControllerTestSuite, OnClick_observer)
 TEST_F(ControllerTestSuite, Validator_reject_deletion)
 {
   // Given
+  setup_sdk_with_local_dic();
   auto mock_observer = new MockJsonDocumentObserver();
 
   m_sut.reset(new Controller(JsonDocumentObserverPtr(mock_observer)));
@@ -112,6 +123,7 @@ TEST_F(ControllerTestSuite, Validator_reject_deletion)
 TEST_F(ControllerTestSuite, DidUpdate)
 {
   // Given
+  setup_sdk_with_local_dic();
   auto mock_observer = new MockJsonDocumentObserver();
   std::mutex m;
   std::condition_variable cv;
@@ -148,6 +160,7 @@ TEST_F(ControllerTestSuite, DidUpdate)
 TEST_F(ControllerTestSuite, DidDelete)
 {
   // Given
+  setup_sdk_with_local_dic();
   auto mock_observer = new MockJsonDocumentObserver();
   std::mutex m;
   std::condition_variable cv;
@@ -184,6 +197,7 @@ TEST_F(ControllerTestSuite, DidDelete)
 TEST_F(ControllerTestSuite, DidAdd_no_validator)
 {
   // Given
+  setup_sdk_with_local_dic();
   auto mock_observer = new MockJsonDocumentObserver();
   std::mutex m;
   std::condition_variable cv;
@@ -207,6 +221,43 @@ TEST_F(ControllerTestSuite, DidAdd_no_validator)
 
   // When
   m_sut->onClick("/fake/add");
+
+  // Then
+  {
+    std::unique_lock lk(m);
+    cv.wait(lk);
+  }
+  using ::testing::Mock;
+  Mock::VerifyAndClearExpectations(mock_observer);
+}
+
+TEST_F(ControllerTestSuite, DidAdd_color)
+{
+  // Given
+  setup_sdk_with_remote_dic();
+  auto mock_observer = new MockJsonDocumentObserver();
+  std::mutex m;
+  std::condition_variable cv;
+  auto callback = [&](const json::json_pointer& path, const json& value)
+  {
+    std::unique_lock lk(m);
+    lk.unlock();
+    cv.notify_one();
+  };
+
+  m_sut.reset(new Controller(JsonDocumentObserverPtr(mock_observer)));
+  std::string file_path = "testDataDir/vgg-work.zip";
+  auto ret = m_sut->start(file_path, design_doc_schema_file);
+  EXPECT_TRUE(ret);
+
+  auto vgg_work = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
+  auto design_doc_json = vgg_work->designDoc()->content();
+
+  // expect call
+  EXPECT_CALL(*mock_observer, didAdd(_, _)).WillOnce(callback);
+
+  // When
+  m_sut->onClick("/fake/add_color");
 
   // Then
   {

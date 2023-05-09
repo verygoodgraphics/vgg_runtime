@@ -4,16 +4,16 @@ const { getVggSdk } = await import("./testDataDir/fake-sdk/vgg-sdk.esm.mjs");
 const vggSdk = await getVggSdk();
 
 // When
-const documentString = vggSdk.getDocumentJson();
+const documentString = vggSdk.getDesignDocument();
 // Then
 console.log("document json string from sdk is: ", documentString);
 
 // When
 try {
   const path = "/artboard";
-  vggSdk.deleteFromDocument(path);
+  vggSdk.deleteAt(path);
 } catch (error) {
   console.error("delete throw exception, document not changed. Exception: ", error);
 }
 // Then
-console.log("document json string from sdk is: ", vggSdk.getDocumentJson());
+console.log("document json string from sdk is: ", vggSdk.getDesignDocument());

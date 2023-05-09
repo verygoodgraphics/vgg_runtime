@@ -8,7 +8,7 @@
 using namespace nlohmann;
 
 #define JSON_SCHEMA_FILE_NAME "./asset/vgg-format.json"
-#define DOCUMENT_FILE_NAME "./testDataDir/1_out_json.json"
+#define DOCUMENT_FILE_NAME "./testDataDir/vgg-work/artboard.json"
 
 class SchemaValidJsonDocumentTestSuite : public ::testing::Test
 {
@@ -45,8 +45,7 @@ TEST_F(SchemaValidJsonDocumentTestSuite, Smoke)
 TEST_F(SchemaValidJsonDocumentTestSuite, Add_ChangeColorToInvalidValue)
 {
   // Given
-  const auto path =
-    "/artboard/0/layers/0/childObjects/0/style/borders/0/color/badfield"_json_pointer;
+  const auto path = "/symbolMaster/0/backgroundColor/fakeProperty"_json_pointer;
 
   try
   {
@@ -66,7 +65,7 @@ TEST_F(SchemaValidJsonDocumentTestSuite, Add_ChangeColorToInvalidValue)
 
 TEST_F(SchemaValidJsonDocumentTestSuite, Replace_ValidValue)
 {
-  const auto path = "/artboard/0/layers/0/childObjects/0/style/borders/0/color/alpha"_json_pointer;
+  const auto path = "/symbolMaster/0/backgroundColor/alpha"_json_pointer;
   const auto value = 0.1;
   sut->replaceAt(path, value);
 
@@ -91,7 +90,7 @@ TEST_F(SchemaValidJsonDocumentTestSuite, Replace_Filetype)
 TEST_F(SchemaValidJsonDocumentTestSuite, Delete_ChangeColorToInvalidValue)
 {
   // Given
-  const auto path = "/artboard/0/layers/0/childObjects/0/style/borders/0/color/alpha"_json_pointer;
+  const auto path = "/symbolMaster/0/backgroundColor/alpha"_json_pointer;
 
   try
   {

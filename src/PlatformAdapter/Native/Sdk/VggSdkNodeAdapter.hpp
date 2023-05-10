@@ -20,18 +20,11 @@ private:
 
   static napi_value New(napi_env env, napi_callback_info info);
 
-  static napi_value UpdateStyle(napi_env env, napi_callback_info info);
+  static napi_value GetDesignDocument(napi_env env, napi_callback_info info);
 
-  static napi_value GetDocumentJson(napi_env env, napi_callback_info info);
-  static napi_value GetJsonAt(napi_env env, napi_callback_info info);
-
-  static napi_value GetElementPath(napi_env env, napi_callback_info info);
-  static napi_value GetElementContainerPath(napi_env env, napi_callback_info info);
-  static napi_value FindElement(napi_env env, napi_callback_info info);
-
-  static napi_value ReplaceInDocument(napi_env env, napi_callback_info info);
-  static napi_value AddToDocument(napi_env env, napi_callback_info info);
-  static napi_value DeleteFromDocument(napi_env env, napi_callback_info info);
+  static napi_value DesignDocumentReplaceAt(napi_env env, napi_callback_info info);
+  static napi_value DesignDocumentAddAt(napi_env env, napi_callback_info info);
+  static napi_value DesignDocumentDeleteAt(napi_env env, napi_callback_info info);
 
   static napi_value Undo(napi_env env, napi_callback_info info);
   static napi_value Redo(napi_env env, napi_callback_info info);

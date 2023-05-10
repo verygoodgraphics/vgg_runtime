@@ -99,18 +99,11 @@ void VggSdkNodeAdapter::Destructor(napi_env env, void* nativeObject, void* /*fin
 void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
 {
   napi_property_descriptor properties[] = {
-    DECLARE_NODE_API_PROPERTY("updateStyle", UpdateStyle),
+    DECLARE_NODE_API_PROPERTY("getDesignDocument", GetDesignDocument),
 
-    DECLARE_NODE_API_PROPERTY("getDesignDocument", GetDocumentJson),
-    DECLARE_NODE_API_PROPERTY("jsonAt", GetJsonAt),
-
-    DECLARE_NODE_API_PROPERTY("getElementPath", GetElementPath),
-    DECLARE_NODE_API_PROPERTY("getElementContainerPath", GetElementContainerPath),
-    DECLARE_NODE_API_PROPERTY("findElement", FindElement),
-
-    DECLARE_NODE_API_PROPERTY("updateAt", ReplaceInDocument),
-    DECLARE_NODE_API_PROPERTY("addAt", AddToDocument),
-    DECLARE_NODE_API_PROPERTY("deleteAt", DeleteFromDocument),
+    DECLARE_NODE_API_PROPERTY("updateAt", DesignDocumentReplaceAt),
+    DECLARE_NODE_API_PROPERTY("addAt", DesignDocumentAddAt),
+    DECLARE_NODE_API_PROPERTY("deleteAt", DesignDocumentDeleteAt),
   };
 
   napi_value cons;
@@ -167,7 +160,7 @@ napi_value VggSdkNodeAdapter::New(napi_env env, napi_callback_info info)
   return instance;
 }
 
-napi_value VggSdkNodeAdapter::UpdateStyle(napi_env env, napi_callback_info info)
+napi_value VggSdkNodeAdapter::GetDesignDocument(napi_env env, napi_callback_info info)
 {
   napi_value _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &_this, nullptr));
@@ -175,20 +168,7 @@ napi_value VggSdkNodeAdapter::UpdateStyle(napi_env env, napi_callback_info info)
   VggSdkNodeAdapter* obj;
   NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
 
-  obj->m_vggSdk->updateStyle();
-
-  return nullptr;
-}
-
-napi_value VggSdkNodeAdapter::GetDocumentJson(napi_env env, napi_callback_info info)
-{
-  napi_value _this;
-  NODE_API_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &_this, nullptr));
-
-  VggSdkNodeAdapter* obj;
-  NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
-
-  auto& json = obj->m_vggSdk->documentJson();
+  auto& json = obj->m_vggSdk->designDocument();
 
   napi_value ret;
   NODE_API_CALL(env, napi_create_string_utf8(env, json.data(), json.size(), &ret));
@@ -196,116 +176,7 @@ napi_value VggSdkNodeAdapter::GetDocumentJson(napi_env env, napi_callback_info i
   return ret;
 }
 
-napi_value VggSdkNodeAdapter::GetJsonAt(napi_env env, napi_callback_info info)
-{
-  size_t argc = 1;
-  napi_value args[1];
-  napi_value _this;
-  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
-
-  NODE_API_ASSERT(env, argc >= 1, "Wrong number of arguments");
-
-  napi_valuetype valuetype0;
-  NODE_API_CALL(env, napi_typeof(env, args[0], &valuetype0));
-
-  NODE_API_ASSERT(env, valuetype0 == napi_string, "Wrong argument type. Strings expected.");
-
-  std::string json_pointer_string;
-  GetArgString_(env, json_pointer_string, args[0]);
-
-  VggSdkNodeAdapter* obj;
-  NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
-
-  // auto& json = obj->m_vggSdk->jsonAt(json_pointer_string);
-
-  napi_value ret;
-  // NODE_API_CALL(env, napi_create_string_utf8(env, json.data(), json.size(), &ret));
-
-  return ret;
-}
-
-napi_value VggSdkNodeAdapter::GetElementPath(napi_env env, napi_callback_info info)
-{
-  size_t argc = 1;
-  napi_value args[1];
-  napi_value _this;
-  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
-
-  NODE_API_ASSERT(env, argc >= 1, "Wrong number of arguments");
-
-  napi_valuetype valuetype0;
-  NODE_API_CALL(env, napi_typeof(env, args[0], &valuetype0));
-
-  NODE_API_ASSERT(env, valuetype0 == napi_string, "Wrong argument type. Strings expected.");
-
-  std::string arg1_string;
-  GetArgString_(env, arg1_string, args[0]);
-
-  VggSdkNodeAdapter* obj;
-  NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
-
-  // auto& sdk_ret = obj->m_vggSdk->getElementPath(arg1_string);
-  napi_value ret;
-  // NODE_API_CALL(env, napi_create_string_utf8(env, sdk_ret.data(), sdk_ret.size(), &ret));
-
-  return ret;
-}
-
-napi_value VggSdkNodeAdapter::GetElementContainerPath(napi_env env, napi_callback_info info)
-{
-  size_t argc = 1;
-  napi_value args[1];
-  napi_value _this;
-  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
-
-  NODE_API_ASSERT(env, argc >= 1, "Wrong number of arguments");
-
-  napi_valuetype valuetype0;
-  NODE_API_CALL(env, napi_typeof(env, args[0], &valuetype0));
-
-  NODE_API_ASSERT(env, valuetype0 == napi_string, "Wrong argument type. Strings expected.");
-
-  std::string arg1_string;
-  GetArgString_(env, arg1_string, args[0]);
-
-  VggSdkNodeAdapter* obj;
-  NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
-
-  // auto& sdk_ret = obj->m_vggSdk->getElementContainerPath(arg1_string);
-  napi_value ret;
-  // NODE_API_CALL(env, napi_create_string_utf8(env, sdk_ret.data(), sdk_ret.size(), &ret));
-
-  return ret;
-}
-
-napi_value VggSdkNodeAdapter::FindElement(napi_env env, napi_callback_info info)
-{
-  size_t argc = 1;
-  napi_value args[1];
-  napi_value _this;
-  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
-
-  NODE_API_ASSERT(env, argc >= 1, "Wrong number of arguments");
-
-  napi_valuetype valuetype0;
-  NODE_API_CALL(env, napi_typeof(env, args[0], &valuetype0));
-
-  NODE_API_ASSERT(env, valuetype0 == napi_string, "Wrong argument type. Strings expected.");
-
-  std::string arg1_string;
-  GetArgString_(env, arg1_string, args[0]);
-
-  VggSdkNodeAdapter* obj;
-  NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
-
-  // auto& sdk_ret = obj->m_vggSdk->findElement(arg1_string);
-  napi_value ret;
-  // NODE_API_CALL(env, napi_create_string_utf8(env, sdk_ret.data(), sdk_ret.size(), &ret));
-
-  return ret;
-}
-
-napi_value VggSdkNodeAdapter::ReplaceInDocument(napi_env env, napi_callback_info info)
+napi_value VggSdkNodeAdapter::DesignDocumentReplaceAt(napi_env env, napi_callback_info info)
 {
   size_t argc = 2;
   napi_value args[2];
@@ -334,7 +205,7 @@ napi_value VggSdkNodeAdapter::ReplaceInDocument(napi_env env, napi_callback_info
   NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
   try
   {
-    obj->m_vggSdk->replaceInDocument(json_pointer_string, json_value_string);
+    obj->m_vggSdk->designDocumentReplaceAt(json_pointer_string, json_value_string);
   }
   catch (std::exception& e)
   {
@@ -344,7 +215,7 @@ napi_value VggSdkNodeAdapter::ReplaceInDocument(napi_env env, napi_callback_info
   return nullptr;
 }
 
-napi_value VggSdkNodeAdapter::AddToDocument(napi_env env, napi_callback_info info)
+napi_value VggSdkNodeAdapter::DesignDocumentAddAt(napi_env env, napi_callback_info info)
 {
   size_t argc = 2;
   napi_value args[2];
@@ -373,7 +244,7 @@ napi_value VggSdkNodeAdapter::AddToDocument(napi_env env, napi_callback_info inf
   NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
   try
   {
-    obj->m_vggSdk->addToDocument(json_pointer_string, json_value_string);
+    obj->m_vggSdk->designDocumentAddAt(json_pointer_string, json_value_string);
   }
   catch (std::exception& e)
   {
@@ -383,7 +254,7 @@ napi_value VggSdkNodeAdapter::AddToDocument(napi_env env, napi_callback_info inf
   return nullptr;
 }
 
-napi_value VggSdkNodeAdapter::DeleteFromDocument(napi_env env, napi_callback_info info)
+napi_value VggSdkNodeAdapter::DesignDocumentDeleteAt(napi_env env, napi_callback_info info)
 {
   size_t argc = 1;
   napi_value args[1];
@@ -404,7 +275,7 @@ napi_value VggSdkNodeAdapter::DeleteFromDocument(napi_env env, napi_callback_inf
   NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
   try
   {
-    obj->m_vggSdk->deleteFromDocument(json_pointer_string);
+    obj->m_vggSdk->designDocumentDeleteAt(json_pointer_string);
   }
   catch (std::exception& e)
   {

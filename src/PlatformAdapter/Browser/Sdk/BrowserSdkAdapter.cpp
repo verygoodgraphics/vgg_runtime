@@ -9,8 +9,8 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
 {
   class_<VggSdk>("VggSdk")
     .constructor<>()
-    .function("updateStyle", &VggSdk::updateStyle)
-    .function("getDesignDocument", &VggSdk::documentJson)
-    .function("jsonAt", &VggSdk::jsonAt)
-    .function("replaceInDocument", &VggSdk::replaceInDocument);
+    .function("getDesignDocument", &VggSdk::designDocument)
+    .function("addAt", &VggSdk::designDocumentAddAt)
+    .function("deleteAt", &VggSdk::designDocumentDeleteAt)
+    .function("udpateAt", &VggSdk::designDocumentReplaceAt);
 }

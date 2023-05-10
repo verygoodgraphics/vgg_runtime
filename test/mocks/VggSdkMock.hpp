@@ -9,8 +9,5 @@
 class VggSdkMock : public VggSdk
 {
 public:
-  // MOCK_METHOD(const std::string, documentJson, (), (const));
-  // MOCK_METHOD(const std::string, findElement, (const std::string&), (const));
-
-  MOCK_METHOD(void, updateStyle, (), (override));
+  MOCK_METHOD(void, updateStyle, (), ());
 };

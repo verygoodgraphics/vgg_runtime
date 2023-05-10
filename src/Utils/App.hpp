@@ -19,6 +19,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_keycode.h>
+#include <memory>
 #ifdef EMSCRIPTEN
 #include <SDL2/SDL_opengles2.h>
 #include <emscripten/emscripten.h>
@@ -30,6 +31,8 @@
 #include <skia/include/core/SkSurface.h>
 #include <skia/include/core/SkCanvas.h>
 #include <skia/include/core/SkData.h>
+#include <skia/include/core/SkPicture.h>
+#include <skia/include/core/SkPictureRecorder.h>
 #include <skia/include/core/SkImage.h>
 #include <skia/include/core/SkSwizzle.h>
 #include <skia/include/core/SkTextBlob.h>
@@ -238,6 +241,8 @@ protected: // protected members and static members
   Zoomer m_zoomer;
   std::shared_ptr<Scene> m_scene;
   bool m_useOldRenderer = true;
+  std::unique_ptr<SkPictureRecorder> m_recorder;
+  bool m_capture = false;
 
   static bool init(App* app, int w, int h, const std::string& title)
   {
@@ -283,6 +288,10 @@ protected: // protected members and static members
       FAIL("Failed to get skia canvas.");
       return false;
     }
+
+    // init capture
+
+    app->m_recorder = std::make_unique<SkPictureRecorder>();
 
     // extra initialization
     app->Self()->onInit();
@@ -392,7 +401,16 @@ protected: // protected methods
   {
     Scheduler::callOnFrameOnce();
 
-    if (SkCanvas* canvas = getCanvas())
+    SkCanvas* canvas = nullptr;
+    if (m_capture)
+    {
+      canvas = getCaptureCanvas();
+    }
+    else
+    {
+      canvas = getCanvas();
+    }
+    if (canvas)
     {
       m_zoomer.apply(canvas);
       if (m_useOldRenderer)
@@ -405,6 +423,12 @@ protected: // protected methods
       }
       InputManager::draw(canvas);
       m_zoomer.restore(canvas);
+    }
+
+    if (m_capture)
+    {
+      endCapture("picture.skp");
+      m_capture = false;
     }
 
     InputManager::onFrame();
@@ -492,6 +516,11 @@ protected: // protected methods
         return true;
       }
 
+      if (key == SDLK_c)
+      {
+        m_capture = true;
+      }
+
 #ifndef EMSCRIPTEN
       if ((mod & KMOD_CTRL) && key == SDLK_q)
       {
@@ -533,6 +562,19 @@ public: // public methods
   bool useOldRenderer() const
   {
     return m_useOldRenderer;
+  }
+
+  void endCapture(const std::string& fileName)
+  {
+    auto picture = m_recorder->finishRecordingAsPicture();
+    SkFILEWStream stream(fileName.c_str());
+    picture->serialize(&stream);
+  }
+
+  SkCanvas* getCaptureCanvas()
+  {
+    m_recorder->beginRecording(m_width, m_height);
+    return m_recorder->getRecordingCanvas();
   }
 
   Scene* getScene()

@@ -4,6 +4,7 @@
 #include "include/core/SkCanvas.h"
 #include "include/core/SkFont.h"
 #include "include/core/SkFontMetrics.h"
+#include "include/effects/SkRuntimeEffect.h"
 
 #include <string_view>
 
@@ -106,6 +107,7 @@ void drawText(SkCanvas* canvas,
       tw += (cw + textStyle.letterSpacing);
       cur = next;
     }
+
     // for (size_t i = 0; i < line.size(); i++)
     // {
     //   xs.push_back(tw);
@@ -132,6 +134,18 @@ void drawText(SkCanvas* canvas,
       x += (frame.width() - tw);
     }
     canvas->drawTextBlob(tb, x, y, pen);
+
+    // {
+    //   SkTextBlobBuilder textBlobBuilder;
+    //   SkFont font;
+    //   font.setSize(50);
+    //   const SkTextBlobBuilder::RunBuffer& run = textBlobBuilder.allocRun(font, 1, 0, 0);
+    //   run.glyphs[0] = 20;
+    //   sk_sp<const SkTextBlob> blob = textBlobBuilder.make();
+    //   SkPaint paint;
+    //   paint.setColor(SK_ColorBLUE);
+    //   canvas->drawTextBlob(blob.get(), 0, 0, paint);
+    // }
 
     if (textStyle.lineThrough)
     {

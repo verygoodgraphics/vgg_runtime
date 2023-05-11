@@ -5,9 +5,11 @@
 #include "VGGUtils.h"
 #include "Attrs.h"
 #include "RenderState.h"
+#include "Scene.hpp"
 
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
+#include "include/core/SkMatrix.h"
 #include "include/core/SkPaint.h"
 #include "glm/ext/vector_float2.hpp"
 #include "glm/fwd.hpp"
@@ -27,10 +29,12 @@ protected:
   static RenderState* s_renderState;
   std::string guid;
   std::unordered_map<std::string, std::any> properties;
+
   bool paintDirty{ false };
   EMaskType maskType{ MT_None };
   std::vector<std::string> maskedBy;
   SkPath outlineMask;
+
   friend class NlohmannBuilder;
 
 public:
@@ -81,44 +85,44 @@ public:
   }
 
   // TODO:: this routine should be removed to a stand alone render pass
-  void PreprocessMask()
+  VGG::ObjectTableType PreprocessMask()
   {
-    std::unordered_map<std::string, std::weak_ptr<PaintNode>> hash;
+    ObjectTableType hash;
     visitNode(this, hash);
-    visitFunc(this,
-              [&hash](VGG::PaintNode* node)
-              {
-                if (node->maskedBy.empty() == false)
-                {
-                  SkPath outlinePath;
-                  for (const auto& maskID : node->maskedBy)
-                  {
-                    if (auto it = hash.find(maskID); it != hash.end())
-                    {
-                      if (it->second.lock()->type == VGG_PATH) // only handle path mask so far
-                      {
-                        // TODO::
-                      }
-                    }
-                  }
-                  node->setOutlineMask(outlinePath);
-                }
-              });
+    return hash;
+  }
+
+  virtual SkPath makeOutlineMask(const glm::mat3* mat)
+  {
+    SkPath p;
+    p.addRect(toSkRect(bound));
+    if (mat)
+    {
+      p.makeTransform(toSkMatrix(*mat));
+    }
+    return p;
+  }
+
+  virtual void makeAlphaMask()
+  {
   }
 
 private:
-  void visitNode(VGG::Node* p, std::unordered_map<std::string, std::weak_ptr<PaintNode>>& table)
+  void visitNode(VGG::Node* p, ObjectTableType& table)
   {
     if (!p)
       return;
-    if (auto it = table.find(p->getName()); it == table.end())
+    auto sptr = std::static_pointer_cast<PaintNode>(p->shared_from_this());
+    if (sptr->maskType != MT_None)
     {
-      auto sptr = std::static_pointer_cast<PaintNode>(p->shared_from_this());
-      table[sptr->GUID()] = sptr; // type of all children of paintnode must be paintnode
+      if (auto it = table.find(sptr->GUID()); it == table.end())
+      {
+        table[sptr->GUID()] = sptr; // type of all children of paintnode must be paintnode
+      }
     }
-    for (const auto& c : m_firstChild)
+    for (auto it = p->begin(); it != p->end(); ++it)
     {
-      visitNode(c.get(), table);
+      visitNode(it->get(), table);
     }
   }
 

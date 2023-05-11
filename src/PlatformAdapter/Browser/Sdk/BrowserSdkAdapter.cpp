@@ -12,5 +12,5 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     .function("getDesignDocument", &VggSdk::designDocument)
     .function("addAt", &VggSdk::designDocumentAddAt)
     .function("deleteAt", &VggSdk::designDocumentDeleteAt)
-    .function("udpateAt", &VggSdk::designDocumentReplaceAt);
+    .function("updateAt", &VggSdk::designDocumentReplaceAt);
 }

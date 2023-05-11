@@ -12,6 +12,7 @@
 #include "Basic/TextNode.h"
 #include "Basic/ImageNode.h"
 #include "Basic/GroupNode.h"
+#include <glm/gtc/matrix_transform.hpp>
 #include <exception>
 #include <memory>
 #include <optional>
@@ -66,6 +67,7 @@ public:
   {
     auto v = j.at("matrix").get<std::vector<double>>();
     assert(v.size() == 6);
+    glm::mat3 scale;
     return glm::mat3{ glm::vec3{ v[0], v[2], v[4] },
                       glm::vec3{ v[1], v[3], v[5] },
                       glm::vec3{ 0, 0, 1 } };
@@ -92,6 +94,7 @@ public:
     obj->contextSetting = j.at("contextSettings").get<ContextSetting>();
     obj->maskedBy = j.at("outlineMaskBy").get<std::vector<std::string>>();
     obj->maskType = (EMaskType)j.at("maskType").get<int>();
+    obj->guid = j.at("id").get<std::string>();
   }
 
   static inline Contour fromContour(const nlohmann::json& j)

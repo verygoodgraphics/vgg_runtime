@@ -2,6 +2,9 @@
 #include "PaintNode.h"
 #include "VGGType.h"
 #include "include/core/SkCanvas.h"
+#include "include/core/SkPath.h"
+#include "include/core/SkShader.h"
+#include "include/effects/SkRuntimeEffect.h"
 
 #include <charconv>
 #include <optional>
@@ -70,7 +73,10 @@ public:
   PathNode(const std::string& name);
   void Paint(SkCanvas* canvas) override;
 
+  SkPath makeOutlineMask(const glm::mat3* mat) override;
+
 protected:
-  void drawContour(SkCanvas* canvas);
+  void drawContour(SkCanvas* canvas, sk_sp<SkShader> shader, const SkPath* outlineMask);
+  sk_sp<SkRuntimeEffect> maskEffect;
 };
 } // namespace VGG

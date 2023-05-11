@@ -71,6 +71,11 @@ public:
     return m_parent.lock();
   }
 
+  bool hasChild() const
+  {
+    return !m_firstChild.empty();
+  }
+
   NodePtr root() const
   {
     auto p = parent();
@@ -270,6 +275,16 @@ public:
       p->traverse();
     }
     postVisit();
+  }
+
+  auto begin()
+  {
+    return m_firstChild.begin();
+  }
+
+  auto end()
+  {
+    return m_firstChild.end();
   }
 
   static NodePtr createNode(const std::string& name)

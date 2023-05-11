@@ -116,5 +116,7 @@ inline void from_json(const json& j, TextStyleStub& x)
   x.italic = get_stack_optional<bool>(j, "italic").value_or(false);
   x.fontName = get_stack_optional<std::string>(j, "name").value_or("");
   x.fillColor = get_stack_optional<VGGColor>(j, "fillColor");
+  x.boarderColor = get_stack_optional<VGGColor>(j, "boarderColor");
+  x.lineThrough = j["linethrough"];
 }
 } // namespace VGG

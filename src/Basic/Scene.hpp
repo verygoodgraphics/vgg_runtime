@@ -1,22 +1,20 @@
 #pragma once
 #include <memory>
 #include "Basic/Node.hpp"
-#include "Basic/PaintNode.h"
 #include "include/core/SkCanvas.h"
-// #include "vgg_sketch_parser/src/analyze_sketch_file/analyze_sketch_file.h"
 #include "nlohmann/json.hpp"
-#include "Basic/RenderTreeDef.hpp"
 
 namespace VGG
 {
 class SymbolMasterNode;
-
 class ArtboardNode;
-
+class PaintNode;
 using ResourceRepo = std::map<std::string, std::vector<char>>;
+using ObjectTableType = std::unordered_map<std::string, std::weak_ptr<PaintNode>>;
 struct Scene
 {
   static ResourceRepo ResRepo;
+  static ObjectTableType ObjectTable;
 
 public:
   std::vector<std::shared_ptr<ArtboardNode>> artboards;
@@ -37,6 +35,11 @@ public:
   static ResourceRepo& getResRepo()
   {
     return ResRepo;
+  }
+
+  static ObjectTableType& getObjectTable()
+  {
+    return ObjectTable;
   }
 
   static void setResRepo(std::map<std::string, std::vector<char>> repo)

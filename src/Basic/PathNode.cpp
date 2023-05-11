@@ -1,11 +1,22 @@
 #include "Basic/PaintNode.h"
 #include "Basic/PathNode.h"
 #include "Basic/VGGType.h"
+#include "Basic/VGGUtils.h"
+#include "Components/Styles.hpp"
 #include "Utils/Utils.hpp"
 #include "include/core/SkBlendMode.h"
 #include "include/core/SkCanvas.h"
+#include "include/core/SkMatrix.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkShader.h"
+#include "include/core/SkSurface.h"
+#include "include/core/SkTileMode.h"
+#include "include/core/SkTypes.h"
+#include "include/effects/SkRuntimeEffect.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkPath.h"
+#include "include/gpu/GrTypes.h"
+#include "include/pathops/SkPathOps.h"
 #include <limits>
 
 namespace VGG
@@ -318,39 +329,150 @@ SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
 //   }
 // }
 
+// bool maskedByOthers = !maskedBy.empty();
+// auto cvs = canvas;
+// sk_sp<SkSurface> objectTarget;
+// if (maskedByOthers)
+// {
+//   objectTarget = SkSurface::MakeRenderTarget(canvas->recordingContext(),
+//                                              SkBudgeted::kYes,
+//                                              canvas->imageInfo(),
+//                                              0,
+//                                              GrSurfaceOrigin::kTopLeft_GrSurfaceOrigin,
+//                                              &canvas->getSurface()->props(),
+//                                              false);
+//   if (objectTarget)
+//   {
+//     cvs = objectTarget->getCanvas();
+//   }
+//   else
+//   {
+//     WARN("target cannot be created\n");
+//   }
+// }
+//
+// SkPaint p;
+// p.setShader(shader);
+// cvs->drawRect(toSkRect(this->bound), p);
+
+// if (maskedByOthers)
+// {
+//   auto target = SkSurface::MakeRenderTarget(canvas->recordingContext(),
+//                                             SkBudgeted::kYes,
+//                                             canvas->imageInfo(),
+//                                             0,
+//                                             GrSurfaceOrigin::kTopLeft_GrSurfaceOrigin,
+//                                             &canvas->getSurface()->props(),
+//                                             false);
+//
+//   SkPaint fill;
+//   fill.setColor4f({ 1, 0, 0, 1 });
+//   fill.setStyle(SkPaint::kFill_Style);
+//   auto c = target->getCanvas();
+//   c->concat(canvas->getTotalMatrix());
+//   c->drawRect(toSkRect(this->bound), fill);
+//
+//   // using shader
+//   if (objectTarget)
+//   {
+//     SkSamplingOptions opt;
+//     sk_sp<SkShader> objectShader =
+//       objectTarget->makeImageSnapshot()->makeShader(SkTileMode::kClamp,
+//                                                     SkTileMode::kClamp,
+//                                                     opt,
+//                                                     nullptr);
+//     auto maskShader = target->makeImageSnapshot()->makeShader(SkTileMode::kClamp,
+//                                                               SkTileMode::kClamp,
+//                                                               opt,
+//                                                               nullptr);
+//
+//     const char* sksl = "uniform shader input_1;"
+//                        "uniform shader input_2;"
+//                        "uniform vec4 rect;"
+//                        "half4 main(float2 coord) {"
+//                        "  return sample(input_2, coord);"
+//                        "}";
+//
+//     // Create SkShader from SkSL, then fill surface: // SK_FOLD_START
+//
+//     // Create an SkShader from our SkSL, with `children` bound to the inputs:
+//     auto [effect, err] = SkRuntimeEffect::MakeForShader(SkString(sksl));
+//     if (effect)
+//     {
+//       maskEffect = effect;
+//
+//       const auto info = canvas->imageInfo();
+//       SkRuntimeShaderBuilder builder(effect);
+//       builder.uniform("rect") = SkV4{ (float)info.width(), (float)info.height(), 0, 0 };
+//       builder.child("input_1") = objectShader;
+//       builder.child("input_2") = maskShader;
+//       SkPaint maskPaint;
+//       auto shader = builder.makeShader(nullptr, false);
+//       maskPaint.setShader(shader);
+//       // canvas->drawPaint(maskPaint);
+//     }
+//     else
+//     {
+//       WARN("%s", err.c_str());
+//     }
+//   }
+// }
 PathNode::PathNode(const std::string& name)
   : PaintNode(name, ObjectType::VGG_PATH)
 {
+}
+
+SkPath PathNode::makeOutlineMask(const glm::mat3* mat)
+{
+  SkPath p;
+  if (!shape.subshape.contours.empty())
+  {
+    for (const auto& c : shape.subshape.contours)
+    {
+      p.addPath(getSkiaPath(c, c.closed));
+    }
+  }
+  if (mat)
+  {
+    p.transform(toSkMatrix(*mat));
+  }
+  return p;
 }
 
 void PathNode::Paint(SkCanvas* canvas)
 {
   if (!shape.subshape.contours.empty())
   {
-    if (m_name == "szn_hand")
-    {
-      std::cout << "szn_hand\n";
-    }
-    else if (m_name == "szn_de")
-    {
-      std::cout << "szn_de\n";
-    }
-    drawContour(canvas);
-    // auto skpath = getSkiaPath(shape.subshape.contour.value(), shape.subshape.contour->closed);
-    // SkPaint p;
-    // p.setAntiAlias(true);
-    // p.setStyle(SkPaint::kStroke_Style);
-    // p.setColor(SK_ColorBLUE);
-    // p.setStrokeWidth(2);
-    //
-    // canvas->save();
-    // canvas->scale(1, -1);
-    // canvas->drawPath(skpath, p);
-    // canvas->restore();
-  }
-}
 
-void PathNode::drawContour(SkCanvas* canvas)
+    auto objects = Scene::getObjectTable();
+    SkPath result;
+    for (const auto id : maskedBy)
+    {
+      if (id != this->guid)
+      {
+        auto m = objects[id].lock()->makeOutlineMask(&this->transform);
+        if (result.isEmpty())
+        {
+          result = m;
+        }
+        else
+        {
+          Op(result, m, SkPathOp::kIntersect_SkPathOp, &result);
+        }
+      }
+    }
+    if (maskedBy.empty())
+    {
+      drawContour(canvas, nullptr, nullptr);
+    }
+    else
+    {
+      drawContour(canvas, nullptr, &result);
+    }
+  }
+} // namespace VGG
+
+void PathNode::drawContour(SkCanvas* canvas, sk_sp<SkShader> shader, const SkPath* outlineMask)
 {
   SkPath skPath;
   for (const auto& contour : shape.subshape.contours)
@@ -360,6 +482,14 @@ void PathNode::drawContour(SkCanvas* canvas)
 
   canvas->save();
   canvas->scale(1, -1);
+
+  // if (outlineMask)
+  // {
+  //   SkPaint maskPaint;
+  //   maskPaint.setStyle(SkPaint::kFill_Style);
+  //   maskPaint.setColor(Colors::Red);
+  //   canvas->drawPath(*outlineMask, maskPaint);
+  // }
 
   // winding rule
   if (shape.windingRule == WindingType::WR_EVENODD)
@@ -378,10 +508,23 @@ void PathNode::drawContour(SkCanvas* canvas)
     if (!f.isEnabled)
       continue;
     SkPaint fillPen;
+    if (shader)
+    {
+      fillPen.setShader(shader);
+    }
     fillPen.setColor(f.color);
     fillPen.setStyle(SkPaint::kFill_Style);
     fillPen.setAlphaf(fillPen.getAlphaf() * globalAlpha);
+    if (outlineMask)
+    {
+      canvas->save();
+      canvas->clipPath(*outlineMask);
+    }
     canvas->drawPath(skPath, fillPen);
+    if (outlineMask)
+    {
+      canvas->restore();
+    }
   }
 
   // draw boarders
@@ -394,9 +537,23 @@ void PathNode::drawContour(SkCanvas* canvas)
   {
     if (!b.is_enabled)
       continue;
+    if (shader)
+    {
+      strokePen.setShader(shader);
+    }
     strokePen.setStrokeWidth(b.thickness);
     strokePen.setColor(b.color.value_or(VGGColor{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
+
+    if (outlineMask)
+    {
+      canvas->save();
+      canvas->clipPath(*outlineMask);
+    }
     canvas->drawPath(skPath, strokePen);
+    if (outlineMask)
+    {
+      canvas->restore();
+    }
   }
 
   canvas->restore();

@@ -15,6 +15,7 @@
 #include "EGLRuntime.h"
 #include "include/core/SkData.h"
 #include "Basic/Scene.hpp"
+#include "Basic/RenderTreeDef.hpp"
 
 using namespace VGG;
 using namespace std;

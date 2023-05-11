@@ -1,5 +1,6 @@
 #include "Basic/Scene.hpp"
 #include "Basic/Loader.hpp"
+#include "Basic/PaintNode.h"
 #include "Basic/Renderer.hpp"
 
 #include "include/core/SkCanvas.h"
@@ -9,6 +10,7 @@ namespace VGG
 {
 
 ResourceRepo Scene::ResRepo = ResourceRepo();
+ObjectTableType Scene::ObjectTable = {};
 
 void Scene::LoadFileContent(const std::string& json)
 {
@@ -32,6 +34,7 @@ void Scene::Render(SkCanvas* canvas)
     if (!artboards.empty())
     {
       auto board = artboards[page].get();
+      preprocessMask(board);
       r.Draw(canvas, board);
     }
   }
@@ -49,7 +52,7 @@ void Scene::preprocessMask(PaintNode* node)
 {
   if (maskDirty)
   {
-    node->PreprocessMask();
+    Scene::ObjectTable = node->PreprocessMask();
     // generate each mask for masked node
     maskDirty = false;
   }

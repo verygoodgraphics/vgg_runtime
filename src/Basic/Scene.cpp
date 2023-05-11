@@ -29,14 +29,19 @@ void Scene::Render(SkCanvas* canvas)
   SkiaRenderer r;
   if (!renderSymbol)
   {
-    auto board = artboards[page].get();
-    auto s = board->bound.size();
-    r.Draw(canvas, board);
+    if (!artboards.empty())
+    {
+      auto board = artboards[page].get();
+      r.Draw(canvas, board);
+    }
   }
   else
   {
-    node = symbols[symbolIndex].get();
-    r.Draw(canvas, node);
+    if (!symbols.empty())
+    {
+      node = symbols[symbolIndex].get();
+      r.Draw(canvas, node);
+    }
   }
 }
 

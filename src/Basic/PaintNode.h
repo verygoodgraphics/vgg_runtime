@@ -7,6 +7,7 @@
 #include "RenderState.h"
 #include "Scene.hpp"
 
+#include "glm/matrix.hpp"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkMatrix.h"
@@ -56,9 +57,63 @@ public:
     this->visible = visible;
   }
 
+  const glm::mat3& localTransform() const
+  {
+    // TODO:: if the node is detached from the parent, this transform should be reset;
+    return transform;
+  }
+
   const std::string& GUID()
   {
     return guid;
+  }
+
+  /**
+   * Return a matrix that transform from this node to the given node
+   * */
+  glm::mat3 mapTransform(PaintNode* node)
+  {
+    auto find_path = [](Node* node) -> std::vector<Node*>
+    {
+      std::vector<Node*> path = { node };
+      while (node->parent())
+      {
+        node = node->parent().get();
+        path.push_back(node);
+      }
+      return path;
+    };
+    auto path1 = find_path(node);
+    auto path2 = find_path(this);
+    Node* lca = nullptr;
+    int lca_idx = -1;
+    for (int i = path1.size() - 1, j = path2.size() - 1; i >= 0 && j >= 0; i--, j--)
+    {
+      auto n1 = path1[i];
+      auto n2 = path2[j];
+      if (n1 == n2)
+      {
+        lca = n1;
+        lca_idx = j;
+      }
+      else
+      {
+        break;
+      }
+    }
+    glm::mat3 mat{ 1.0 };
+    if (!lca)
+      return mat;
+    for (int i = 0; i < path1.size() && path1[i] != lca; i++)
+    {
+      mat *= glm::inverse(static_cast<PaintNode*>(path1[i])->transform);
+    }
+
+    for (int i = lca_idx - 1; i >= 0; i--)
+    {
+      mat *= static_cast<PaintNode*>(path2[i])->transform;
+    }
+    return mat;
   }
 
   void Render(SkCanvas* canvas)

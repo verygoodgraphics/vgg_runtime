@@ -443,14 +443,15 @@ void PathNode::Paint(SkCanvas* canvas)
 {
   if (!shape.subshape.contours.empty())
   {
-
     auto objects = Scene::getObjectTable();
     SkPath result;
     for (const auto id : maskedBy)
     {
       if (id != this->guid)
       {
-        auto m = objects[id].lock()->makeOutlineMask(&this->transform);
+        auto obj = objects[id].lock().get();
+        const auto t = obj->mapTransform(this);
+        auto m = obj->makeOutlineMask(&t);
         if (result.isEmpty())
         {
           result = m;
@@ -483,16 +484,8 @@ void PathNode::drawContour(SkCanvas* canvas, sk_sp<SkShader> shader, const SkPat
   canvas->save();
   canvas->scale(1, -1);
 
-  // if (outlineMask)
-  // {
-  //   SkPaint maskPaint;
-  //   maskPaint.setStyle(SkPaint::kFill_Style);
-  //   maskPaint.setColor(Colors::Red);
-  //   canvas->drawPath(*outlineMask, maskPaint);
-  // }
-
   // winding rule
-  if (shape.windingRule == WindingType::WR_EVENODD)
+  if (shape.windingRule == WindingType::WR_EvenOdd)
   {
     skPath.setFillType(SkPathFillType::kEvenOdd);
   }

@@ -1,8 +1,5 @@
 add_subdirectory(skia)
 add_subdirectory(quickjs)
-option(ENABLE_MINIZ_CPP_TEST OFF)
-option(ENABLE_MINIZ_CPP_EXAMPLE OFF)
-# add_subdirectory(miniz-cpp)
 
 add_subdirectory(vgg_contrib)
 add_subdirectory(vgg_automerge/automerge)

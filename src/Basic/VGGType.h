@@ -17,17 +17,17 @@ enum ObjectType
 
 enum BoolOp
 {
-  BLOP_UNION, // union
-  BLOP_SUB,   // substraction
-  BLOP_ISECT, // intersection
-  BLOP_ECLD,  // exclusion
-  BLOP_NONE   // none
+  BO_Union,        // union
+  BO_substraction, // substraction
+  BO_intersection, // intersection
+  BO_exclusion,    // exclusion
+  BO_None          // none
 };
 
 enum WindingType
 {
-  WR_NONZERO,
-  WR_EVENODD
+  WR_NoneZero,
+  WR_EvenOdd
 };
 
 enum EBlendMode

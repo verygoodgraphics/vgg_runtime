@@ -28,7 +28,7 @@ public:
       for (const auto& c : m_firstChild)
       {
         auto paintNode = static_cast<PaintNode*>(c.get());
-        auto childPath = paintNode->makeOutlineMask(&this->transform);
+        auto childPath = paintNode->makeOutlineMask(&paintNode->localTransform());
         Op(p, childPath, SkPathOp::kUnion_SkPathOp, &p);
       }
     }

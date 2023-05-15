@@ -18,9 +18,9 @@ enum ObjectType
 enum BoolOp
 {
   BO_Union,        // union
-  BO_substraction, // substraction
-  BO_intersection, // intersection
-  BO_exclusion,    // exclusion
+  BO_Substraction, // substraction
+  BO_Intersection, // intersection
+  BO_Exclusion,    // exclusion
   BO_None          // none
 };
 

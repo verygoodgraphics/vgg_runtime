@@ -6,15 +6,16 @@
 #include "Attrs.h"
 #include "RenderState.h"
 #include "Scene.hpp"
+#include "Mask.h"
 
 #include "glm/matrix.hpp"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkMatrix.h"
 #include "include/core/SkPaint.h"
+#include "include/pathops/SkPathOps.h"
 #include "glm/ext/vector_float2.hpp"
 #include "glm/fwd.hpp"
-#include "include/core/SkPath.h"
 
 #include <any>
 #include <memory>
@@ -34,7 +35,7 @@ protected:
   bool paintDirty{ false };
   EMaskType maskType{ MT_None };
   std::vector<std::string> maskedBy;
-  SkPath outlineMask;
+  Mask outlineMask;
 
   friend class NlohmannBuilder;
 
@@ -63,9 +64,19 @@ public:
     return transform;
   }
 
-  const std::string& GUID()
+  const std::string& GUID() const
   {
     return guid;
+  }
+
+  bool isMasked() const
+  {
+    return !maskedBy.empty();
+  }
+
+  EMaskType getMaskType() const
+  {
+    return this->maskType;
   }
 
   /**
@@ -134,9 +145,9 @@ public:
     return s_renderState;
   }
 
-  void setOutlineMask(const SkPath& path)
+  void setOutlineMask(const Mask& mask)
   {
-    outlineMask = path;
+    outlineMask = mask;
   }
 
   // TODO:: this routine should be removed to a stand alone render pass
@@ -147,18 +158,20 @@ public:
     return hash;
   }
 
-  virtual SkPath makeOutlineMask(const glm::mat3* mat)
+  virtual Mask asOutlineMask(const glm::mat3* mat)
   {
     SkPath p;
+    Mask mask;
     p.addRect(toSkRect(bound));
     if (mat)
     {
       p.makeTransform(toSkMatrix(*mat));
     }
-    return p;
+    mask.outlineMask = p;
+    return mask;
   }
 
-  virtual void makeAlphaMask()
+  virtual void asAlphaMask()
   {
   }
 
@@ -241,6 +254,51 @@ protected:
   void resetPaintDirty()
   {
     this->paintDirty = false;
+  }
+
+  Mask makeMaskBy(EBoolOp maskOp)
+  {
+    Mask result;
+    if (maskedBy.empty())
+      return result;
+
+    SkPathOp op;
+    switch (maskOp)
+    {
+      case BO_Union:
+        op = SkPathOp::kUnion_SkPathOp;
+        break;
+      case BO_Substraction:
+        op = SkPathOp::kDifference_SkPathOp;
+        break;
+      case BO_Intersection:
+        op = SkPathOp::kIntersect_SkPathOp;
+        break;
+      case BO_Exclusion:
+        op = SkPathOp::kReverseDifference_SkPathOp;
+        break;
+      default:
+        return result;
+    }
+    auto objects = Scene::getObjectTable();
+    for (const auto id : maskedBy)
+    {
+      if (id != this->GUID())
+      {
+        auto obj = objects[id].lock().get();
+        const auto t = obj->mapTransform(this);
+        auto m = obj->asOutlineMask(&t);
+        if (result.outlineMask.isEmpty())
+        {
+          result.outlineMask = m.outlineMask;
+        }
+        else
+        {
+          Op(result.outlineMask, m.outlineMask, op, &result.outlineMask);
+        }
+      }
+    }
+    return result;
   }
 
 private:

@@ -68,7 +68,7 @@ public:
 
   NodePtr parent() const
   {
-    return m_parent.lock();
+    return !m_parent.expired() ? m_parent.lock() : nullptr;
   }
 
   bool hasChild() const
@@ -267,6 +267,7 @@ public:
   }
 
   // used for rendering
+  // TODO:: this interface should down to subclass
   virtual void traverse()
   {
     preVisit();

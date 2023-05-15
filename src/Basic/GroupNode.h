@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Basic/VGGType.h"
 #include "Basic/VGGUtils.h"
 #include "PaintNode.h"
 #include "include/core/SkMatrix.h"
@@ -16,27 +17,48 @@ public:
   {
   }
 
-  SkPath makeOutlineMask(const glm::mat3* mat) override
+  Mask asOutlineMask(const glm::mat3* mat) override
   {
-    SkPath p;
+    Mask mask;
     if (!hasChild())
     {
-      p.addRect(toSkRect(bound));
+      mask.outlineMask.addRect(toSkRect(bound));
     }
     else
     {
       for (const auto& c : m_firstChild)
       {
         auto paintNode = static_cast<PaintNode*>(c.get());
-        auto childPath = paintNode->makeOutlineMask(&paintNode->localTransform());
-        Op(p, childPath, SkPathOp::kUnion_SkPathOp, &p);
+        auto childMask = paintNode->asOutlineMask(&paintNode->localTransform());
+        Op(mask.outlineMask, childMask.outlineMask, SkPathOp::kUnion_SkPathOp, &mask.outlineMask);
       }
     }
     if (mat)
     {
-      p.transform(toSkMatrix(*mat));
+      mask.outlineMask.transform(toSkMatrix(*mat));
     }
-    return p;
+    return mask;
+  }
+  void traverse() override
+  {
+    preVisit();
+
+    // deal with mask rendering order
+    std::vector<PaintNode*> masked;
+    std::vector<PaintNode*> noneMasked;
+    for (const auto& p : this->m_firstChild)
+    {
+      auto c = static_cast<PaintNode*>(p.get());
+      if (c->getMaskType() == MT_Outline)
+        masked.push_back(c);
+      else
+        noneMasked.push_back(c);
+    }
+    for (const auto& p : masked)
+      p->traverse();
+    for (const auto& p : noneMasked)
+      p->traverse();
+    postVisit();
   }
 };
 } // namespace VGG

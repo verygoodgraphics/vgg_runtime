@@ -1,4 +1,5 @@
 #pragma once
+#include "Basic/Mask.h"
 #include "PaintNode.h"
 #include "VGGType.h"
 #include "include/core/SkCanvas.h"
@@ -59,21 +60,20 @@ class PathNode final : public PaintNode
 public:
   struct Subshape
   {
-    BoolOp blop;
+    EBoolOp blop;
     std::vector<Contour> contours;
   };
 
   struct Shape
   {
-    WindingType windingRule;
+    EWindingType windingRule;
     Subshape subshape;
   } shape;
 
 public:
   PathNode(const std::string& name);
   void Paint(SkCanvas* canvas) override;
-
-  SkPath makeOutlineMask(const glm::mat3* mat) override;
+  Mask asOutlineMask(const glm::mat3* mat) override;
 
 protected:
   void drawContour(SkCanvas* canvas, sk_sp<SkShader> shader, const SkPath* outlineMask);

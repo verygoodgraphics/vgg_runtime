@@ -2,6 +2,7 @@
 #include "Basic/VGGType.h"
 #include "Basic/VGGUtils.h"
 #include "Scene.hpp"
+#include "include/core/SkColor.h"
 #include "include/core/SkMatrix.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkTileMode.h"
@@ -27,11 +28,23 @@ void ImageNode::Paint(SkCanvas* canvas)
   }
   if (image)
   {
-    SkPaint imagePaint;
-    imagePaint.setStyle(SkPaint::Style::kFill_Style);
+
+    // draw mask
+    auto mask = makeMaskBy(BO_Intersection);
+    if (mask.outlineMask.isEmpty() == false)
+    {
+      SkPaint maskPaint;
+      maskPaint.setStyle(SkPaint::Style::kFill_Style);
+      maskPaint.setColor(SkColors::kBlue);
+      mask.outlineMask.transform(SkMatrix::Scale(1, -1));
+      canvas->drawPath(mask.outlineMask, maskPaint);
+      canvas->clipPath(mask.outlineMask);
+    }
+
     // apply scale
     SkSamplingOptions opt;
     canvas->drawImageRect(image, toSkRect(this->bound), opt);
+    // canvas->restore();
   }
 }
 

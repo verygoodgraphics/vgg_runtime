@@ -58,14 +58,25 @@ void Scene::preprocessMask(PaintNode* node)
   }
 }
 
+void Scene::SetPage(int num)
+{
+  if (num >= 0 && num < artboards.size())
+  {
+    page = num;
+    maskDirty = true;
+  }
+}
+
 void Scene::NextArtboard()
 {
   page = (page + 1 >= artboards.size()) ? page : page + 1;
+  maskDirty = true;
 }
 
 void Scene::PreArtboard()
 {
   page = (page - 1 > 0) ? page - 1 : 0;
+  maskDirty = true;
 }
 
 void Scene::NextSymbol()

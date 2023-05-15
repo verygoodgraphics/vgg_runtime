@@ -15,7 +15,7 @@ enum ObjectType
   VGG_INSTANCE
 };
 
-enum BoolOp
+enum EBoolOp
 {
   BO_Union,        // union
   BO_Substraction, // substraction
@@ -24,7 +24,7 @@ enum BoolOp
   BO_None          // none
 };
 
-enum WindingType
+enum EWindingType
 {
   WR_NoneZero,
   WR_EvenOdd

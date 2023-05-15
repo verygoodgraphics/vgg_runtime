@@ -422,9 +422,10 @@ PathNode::PathNode(const std::string& name)
 {
 }
 
-SkPath PathNode::makeOutlineMask(const glm::mat3* mat)
+Mask PathNode::asOutlineMask(const glm::mat3* mat)
 {
   SkPath p;
+  Mask mask;
   if (!shape.subshape.contours.empty())
   {
     for (const auto& c : shape.subshape.contours)
@@ -436,39 +437,22 @@ SkPath PathNode::makeOutlineMask(const glm::mat3* mat)
   {
     p.transform(toSkMatrix(*mat));
   }
-  return p;
+  mask.outlineMask = p;
+  return mask;
 }
 
 void PathNode::Paint(SkCanvas* canvas)
 {
   if (!shape.subshape.contours.empty())
   {
-    auto objects = Scene::getObjectTable();
-    SkPath result;
-    for (const auto id : maskedBy)
-    {
-      if (id != this->guid)
-      {
-        auto obj = objects[id].lock().get();
-        const auto t = obj->mapTransform(this);
-        auto m = obj->makeOutlineMask(&t);
-        if (result.isEmpty())
-        {
-          result = m;
-        }
-        else
-        {
-          Op(result, m, SkPathOp::kIntersect_SkPathOp, &result);
-        }
-      }
-    }
-    if (maskedBy.empty())
+    auto mask = makeMaskBy(BO_Intersection);
+    if (mask.outlineMask.isEmpty())
     {
       drawContour(canvas, nullptr, nullptr);
     }
     else
     {
-      drawContour(canvas, nullptr, &result);
+      drawContour(canvas, nullptr, &mask.outlineMask);
     }
   }
 } // namespace VGG
@@ -484,8 +468,16 @@ void PathNode::drawContour(SkCanvas* canvas, sk_sp<SkShader> shader, const SkPat
   canvas->save();
   canvas->scale(1, -1);
 
+  if (outlineMask)
+  {
+    SkPaint maskPaint;
+    maskPaint.setColor(SkColors::kRed);
+    maskPaint.setStyle(SkPaint::kFill_Style);
+    canvas->drawPath(*outlineMask, maskPaint);
+  }
+
   // winding rule
-  if (shape.windingRule == WindingType::WR_EvenOdd)
+  if (shape.windingRule == EWindingType::WR_EvenOdd)
   {
     skPath.setFillType(SkPathFillType::kEvenOdd);
   }
@@ -510,14 +502,9 @@ void PathNode::drawContour(SkCanvas* canvas, sk_sp<SkShader> shader, const SkPat
     fillPen.setAlphaf(fillPen.getAlphaf() * globalAlpha);
     if (outlineMask)
     {
-      canvas->save();
       canvas->clipPath(*outlineMask);
     }
     canvas->drawPath(skPath, fillPen);
-    if (outlineMask)
-    {
-      canvas->restore();
-    }
   }
 
   // draw boarders
@@ -539,14 +526,9 @@ void PathNode::drawContour(SkCanvas* canvas, sk_sp<SkShader> shader, const SkPat
 
     if (outlineMask)
     {
-      canvas->save();
       canvas->clipPath(*outlineMask);
     }
     canvas->drawPath(skPath, strokePen);
-    if (outlineMask)
-    {
-      canvas->restore();
-    }
   }
 
   canvas->restore();

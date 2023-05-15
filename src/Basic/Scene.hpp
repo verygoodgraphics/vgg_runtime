@@ -29,6 +29,7 @@ public:
   void Render(SkCanvas* canvas);
   void NextArtboard();
   void PreArtboard();
+  void SetPage(int num);
   void NextSymbol();
   void PrevSymbol();
 

@@ -74,7 +74,7 @@ public:
   }
   static inline Bound2 fromBound(const nlohmann::json& j)
   {
-    auto x = -j["x"].get<float>(); // convert to skia coordinate system
+    auto x = j["x"].get<float>(); // convert to skia coordinate system
     auto y = -j["y"].get<float>();
     auto width = j["width"];
     auto height = j["height"];

@@ -5,6 +5,8 @@
 #include "include/core/SkColor.h"
 #include "include/core/SkMatrix.h"
 #include "include/core/SkPaint.h"
+#include "include/core/SkPathTypes.h"
+#include "include/core/SkPoint.h"
 #include "include/core/SkTileMode.h"
 
 #include <include/core/SkCanvas.h>
@@ -29,7 +31,6 @@ void ImageNode::Paint(SkCanvas* canvas)
   if (image)
   {
 
-    // draw mask
     auto mask = makeMaskBy(BO_Intersection);
     if (mask.outlineMask.isEmpty() == false)
     {
@@ -37,14 +38,34 @@ void ImageNode::Paint(SkCanvas* canvas)
       maskPaint.setStyle(SkPaint::Style::kFill_Style);
       maskPaint.setColor(SkColors::kBlue);
       mask.outlineMask.transform(SkMatrix::Scale(1, -1));
-      canvas->drawPath(mask.outlineMask, maskPaint);
-      canvas->clipPath(mask.outlineMask);
+      // canvas->drawPath(mask.outlineMask, maskPaint);
+      // canvas->clipPath(mask.outlineMask);
     }
-
-    // apply scale
     SkSamplingOptions opt;
-    canvas->drawImageRect(image, toSkRect(this->bound), opt);
-    // canvas->restore();
+    SkPaint p;
+    p.setColor(SkColors::kRed);
+    p.setStyle(SkPaint::kFill_Style);
+
+    SkPath testPath;
+    std::vector<SkPoint> points;
+    points.resize(mask.outlineMask.countPoints());
+    mask.outlineMask.getPoints(points.data(), points.size());
+    for (auto& p : points)
+    {
+      p.fY = -p.fY;
+    }
+    // testPath.addPoly({ { 0, 0 }, { 100, 0 }, { 100, 100 }, { 0, 100 } }, true);
+    testPath.addPoly(points.data(), points.size(), true);
+    SkPaint testPaint;
+    testPaint.setStyle(SkPaint::Style::kFill_Style);
+    testPaint.setColor(SkColors::kRed);
+    canvas->drawPath(testPath, testPaint);
+    canvas->clipPath(testPath);
+    // canvas->clipPath(testPath);
+
+    SkPaint imagePaint;
+    imagePaint.setAlphaf(0.5);
+    canvas->drawImageRect(image, toSkRect(this->bound), opt, &imagePaint);
   }
 }
 

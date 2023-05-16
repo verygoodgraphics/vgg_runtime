@@ -425,6 +425,7 @@ PathNode::PathNode(const std::string& name)
 Mask PathNode::asOutlineMask(const glm::mat3* mat)
 {
   SkPath p;
+  p.getBounds();
   Mask mask;
   if (!shape.subshape.contours.empty())
   {

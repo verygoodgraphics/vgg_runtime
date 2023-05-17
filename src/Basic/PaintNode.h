@@ -311,7 +311,6 @@ protected:
       {
         auto obj = objects[id].lock().get();
         const auto t = obj->mapTransform(this);
-        std::cout << calcRotationAngle(t) << std::endl;
         auto m = obj->asOutlineMask(&t);
         if (result.outlineMask.isEmpty())
         {

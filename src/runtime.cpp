@@ -16,13 +16,15 @@
  */
 #include <argparse/argparse.hpp>
 #include <filesystem>
+#include "Basic/IReader.hpp"
+#include "Basic/ReaderFactory.h"
 #include "Entry/Common/SDLRuntime.hpp"
 #include "Utils/FileManager.hpp"
 #include "Basic/Scene.hpp"
 #include <memory>
-#ifndef EMSCRIPTEN
-#include <vgg_sketch_parser/src/analyze_sketch_file/analyze_sketch_file.h>
-#endif
+// #include <vgg_sketch_parser/src/analyze_sketch_file/analyze_sketch_file.h>
+#include <Basic/SketchFileReader.h>
+#include <Basic/RawFileReader.h>
 
 using namespace VGG;
 
@@ -53,10 +55,7 @@ int main(int argc, char** argv)
 {
   argparse::ArgumentParser program("vgg", Version::get());
   program.add_argument("-l", "--load").help("load from vgg or sketch file");
-  program.add_argument("-c", "--convert")
-    .help("convert sketch to vgg file")
-    .default_value(false)
-    .implicit_value(true);
+  program.add_argument("-d", "--data").help("resources dir");
 
   try
   {
@@ -75,56 +74,37 @@ int main(int argc, char** argv)
   {
     auto fp = loadfile.value();
     auto ext = FileManager::getLoweredFileExt(fp);
-    auto convert = program.get<bool>("--convert");
+    std::shared_ptr<IReader> reader;
 
-    auto size = std::filesystem::file_size(fp);
-    std::vector<char> file_buf(size);
-
-    std::ifstream ifs(fp, std::ios_base::binary);
-    if (ifs.is_open() == true)
+    if (ext == "sketch")
     {
-      ifs.read(file_buf.data(), size);
-      assert(ifs.gcount() == size);
-
-      nlohmann::json json_out;
-      analyze_sketch_file::analyze(file_buf.data(), size, "vgg_format", json_out, resources);
-
-      auto str = json_out.dump();
-      std::ofstream ofs("out.json");
-      ofs.write(str.c_str(), str.size());
-      ofs.close();
-
-      Scene::setResRepo(std::move(resources));
-      scene->LoadFileContent(json_out);
-    }
-
-    if (convert && ext != "sketch")
-    {
-      FAIL("Cannot convert non-sketch file: %s", fp.c_str());
-      exit(1);
-    }
-
-    if (!FileManager::loadFile(fp))
-    {
-      FAIL("Failed to load file: %s", fp.c_str());
-      exit(1);
-    }
-
-    if (convert && ext == "sketch")
-    {
-      auto dir = std::filesystem::current_path();
-      auto name = FileManager::getFileName(fp);
-      auto targetFp = dir / (name + ".vgg");
-      if (FileManager::saveFileAs(0, targetFp))
+      reader = GetSketchReader(fp);
+      // legacy renderer
+      if (!FileManager::loadFile(fp))
       {
-        INFO("Conversion succeeded: %s", targetFp.c_str());
-        exit(0);
+        FAIL("Failed to load file: %s", fp.c_str());
       }
-      else
+    }
+    else if (ext == "json")
+    {
+      std::string resFile = std::filesystem::path(fp).stem(); // same with filename as default
+      if (auto res = program.present("-d"))
       {
-        FAIL("Conversion failed for: %s", fp.c_str());
-        exit(1);
+        resFile = res.value();
       }
+      reader = GetRawReader(fp, resFile);
+    }
+
+    if (reader)
+    {
+      nlohmann::json json = reader->readFormat();
+      auto res = reader->readResource();
+      Scene::setResRepo(res);
+      scene->LoadFileContent(json);
+    }
+    else
+    {
+      INFO("Failed to initialize a reader\n");
     }
   }
 

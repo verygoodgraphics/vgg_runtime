@@ -50,10 +50,6 @@ void ImageNode::Paint(SkCanvas* canvas)
     std::vector<SkPoint> points;
     points.resize(mask.outlineMask.countPoints());
     mask.outlineMask.getPoints(points.data(), points.size());
-    for (auto& p : points)
-    {
-      p.fY = -p.fY;
-    }
     // testPath.addPoly({ { 0, 0 }, { 100, 0 }, { 100, 100 }, { 0, 100 } }, true);
     testPath.addPoly(points.data(), points.size(), true);
     SkPaint testPaint;
@@ -61,7 +57,6 @@ void ImageNode::Paint(SkCanvas* canvas)
     testPaint.setColor(SkColors::kRed);
     canvas->drawPath(testPath, testPaint);
     canvas->clipPath(testPath);
-    // canvas->clipPath(testPath);
 
     SkPaint imagePaint;
     imagePaint.setAlphaf(0.5);

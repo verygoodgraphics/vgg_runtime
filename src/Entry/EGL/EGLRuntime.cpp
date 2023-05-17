@@ -69,7 +69,7 @@ const char* get_egl_error_info(EGLint error)
     }                                                                                              \
   } while (0)
 
-constexpr int opengl_version[] = { 3, 3 };
+constexpr int opengl_version[] = { 4, 5 };
 constexpr int pixel_buffer_width = 800;
 constexpr int pixel_buffer_height = 600;
 

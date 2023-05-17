@@ -501,12 +501,14 @@ protected: // protected methods
       if (key == SDLK_PAGEUP && (SDL_GetModState() & KMOD_CTRL))
       {
         FileManager::prevPage();
+        m_scene->PreArtboard();
         return true;
       }
 
       if (key == SDLK_PAGEDOWN && (SDL_GetModState() & KMOD_CTRL))
       {
         FileManager::nextPage();
+        m_scene->NextArtboard();
         return true;
       }
 

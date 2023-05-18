@@ -11,8 +11,8 @@ namespace VGG
 
 class RawFileReader : public IReader
 {
-  std::string jsonFilename;
-  std::string resDir;
+  std::filesystem::path jsonFilename;
+  std::filesystem::path resDir;
 
 public:
   RawFileReader(const std::string& filename, const std::string& resDir)
@@ -22,13 +22,13 @@ public:
   }
   nlohmann::json readFormat() override
   {
-    return nlohmann::json::parse(GetTextFromFile(jsonFilename).value_or(""));
+    return nlohmann::json::parse(GetTextFromFile(prefix / jsonFilename).value_or(""));
   }
 
   std::map<std::string, std::vector<char>> readResource() override
   {
     std::map<std::string, std::vector<char>> resources;
-    for (const auto& entry : std::filesystem::recursive_directory_iterator(resDir))
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(prefix / resDir))
     {
       std::string key = std::string("./image/") + entry.path().filename().string();
       std::cout << "read image: " << entry.path() << " which key is " << key << std::endl;

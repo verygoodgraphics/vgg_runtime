@@ -1,5 +1,6 @@
 #pragma once
 #include "IReader.hpp"
+#include <filesystem>
 #include <vgg_sketch_parser/src/analyze_sketch_file/analyze_sketch_file.h>
 
 #include <fstream>
@@ -8,7 +9,7 @@ namespace VGG
 
 class SketchFileReader : public IReader
 {
-  std::string filename;
+  std::filesystem::path filename;
   std::map<std::string, std::vector<char>> resources;
 
 public:
@@ -19,9 +20,9 @@ public:
 
   nlohmann::json readFormat() override
   {
-    auto size = std::filesystem::file_size(filename);
+    auto size = std::filesystem::file_size(prefix / filename);
     std::vector<char> file_buf(size);
-    std::ifstream ifs(filename, std::ios_base::binary);
+    std::ifstream ifs(prefix/filename, std::ios_base::binary);
     if (ifs.is_open() == true)
     {
       ifs.read(file_buf.data(), size);

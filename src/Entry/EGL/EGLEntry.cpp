@@ -32,8 +32,7 @@ std::vector<char> GetBinFromFile(const std::string& filename)
 int main(int argc, char** argv)
 {
   argparse::ArgumentParser program("vgg", Version::get());
-  program.add_argument("-s", "--sketch").help("input sketch file");
-  program.add_argument("-l").help("input vgg file");
+  program.add_argument("-l").help("input file");
   program.add_argument("-d").help("input resources file");
   try
   {

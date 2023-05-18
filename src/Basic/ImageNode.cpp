@@ -30,7 +30,6 @@ void ImageNode::Paint(SkCanvas* canvas)
   }
   if (image)
   {
-
     auto mask = makeMaskBy(BO_Intersection);
     if (mask.outlineMask.isEmpty() == false)
     {
@@ -38,29 +37,11 @@ void ImageNode::Paint(SkCanvas* canvas)
       maskPaint.setStyle(SkPaint::Style::kFill_Style);
       maskPaint.setColor(SkColors::kBlue);
       mask.outlineMask.transform(SkMatrix::Scale(1, -1));
-      // canvas->drawPath(mask.outlineMask, maskPaint);
-      // canvas->clipPath(mask.outlineMask);
+      canvas->drawPath(mask.outlineMask, maskPaint);
+      canvas->clipPath(mask.outlineMask);
     }
     SkSamplingOptions opt;
-    SkPaint p;
-    p.setColor(SkColors::kRed);
-    p.setStyle(SkPaint::kFill_Style);
-
-    SkPath testPath;
-    std::vector<SkPoint> points;
-    points.resize(mask.outlineMask.countPoints());
-    mask.outlineMask.getPoints(points.data(), points.size());
-    // testPath.addPoly({ { 0, 0 }, { 100, 0 }, { 100, 100 }, { 0, 100 } }, true);
-    testPath.addPoly(points.data(), points.size(), true);
-    SkPaint testPaint;
-    testPaint.setStyle(SkPaint::Style::kFill_Style);
-    testPaint.setColor(SkColors::kRed);
-    canvas->drawPath(testPath, testPaint);
-    canvas->clipPath(testPath);
-
-    SkPaint imagePaint;
-    imagePaint.setAlphaf(0.5);
-    canvas->drawImageRect(image, toSkRect(this->bound), opt, &imagePaint);
+    canvas->drawImageRect(image, toSkRect(this->bound), opt);
   }
 }
 

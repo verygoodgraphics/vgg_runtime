@@ -56,6 +56,7 @@ int main(int argc, char** argv)
   argparse::ArgumentParser program("vgg", Version::get());
   program.add_argument("-l", "--load").help("load from vgg or sketch file");
   program.add_argument("-d", "--data").help("resources dir");
+  program.add_argument("-p", "--prefix").help("the prefix of filename or dir");
 
   try
   {
@@ -97,6 +98,11 @@ int main(int argc, char** argv)
 
     if (reader)
     {
+      if (auto p = program.present("-p"))
+      {
+        reader->setPrefix(p.value());
+        INFO("prefix %s", p.value().c_str());
+      }
       nlohmann::json json = reader->readFormat();
       auto res = reader->readResource();
       Scene::setResRepo(res);

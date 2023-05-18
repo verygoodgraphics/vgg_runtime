@@ -85,6 +85,7 @@ public:
 
   glm::mat3 mapTransform(PaintNode* node)
   {
+
     // auto find_path = [](Node* node) -> std::vector<Node*>
     // {
     //   std::vector<Node*> path = { node };
@@ -127,26 +128,35 @@ public:
     // }
     // return mat;
     //
-    //
-    std::function<void(PaintNode * node, glm::mat3 & mat)> recursive_find =
-      [&](PaintNode* node, glm::mat3& mat)
+
+    std::cout << "Map " << getName() << " to " << node->getName() << std::endl;
+    ;
+    std::function<void(PaintNode*, glm::mat3&)> recursive_find = [&](PaintNode* n, glm::mat3& mat)
     {
-      if (node)
+      if (n)
       {
-        auto p = static_cast<PaintNode*>(node->parent().get());
+        auto p = static_cast<PaintNode*>(n->parent().get());
         recursive_find(p, mat);
-        mat *= node->transform;
+        std::cout << n->getName() << std::endl;
+        std::cout << n->transform << std::endl;
+        mat *= n->transform;
       }
     };
 
     glm::mat3 m{ 1.0 };
     recursive_find(this, m);
 
+    std::cout << "Reversing: \n";
     while (node)
     {
       m *= glm::inverse(node->transform);
+      std::cout << node->getName() << std::endl;
+      std::cout << node->transform << std::endl;
       node = static_cast<PaintNode*>(node->parent().get());
     }
+
+    std::cout << "Total: -------------: \n" << m << std::endl;
+    std::cout << "End ------------------------------\n";
 
     return m;
   }

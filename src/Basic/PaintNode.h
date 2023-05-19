@@ -83,82 +83,100 @@ public:
    * Return a matrix that transform from this node to the given node
    * */
 
-  glm::mat3 mapTransform(PaintNode* node)
+  SkMatrix mapTransform(PaintNode* node)
   {
 
-    // auto find_path = [](Node* node) -> std::vector<Node*>
-    // {
-    //   std::vector<Node*> path = { node };
-    //   while (node->parent())
-    //   {
-    //     node = node->parent().get();
-    //     path.push_back(node);
-    //   }
-    //   return path;
-    // };
-    // auto path1 = find_path(node);
-    // auto path2 = find_path(this);
-    // Node* lca = nullptr;
-    // int lca_idx = -1;
-    // for (int i = path1.size() - 1, j = path2.size() - 1; i >= 0 && j >= 0; i--, j--)
-    // {
-    //   auto n1 = path1[i];
-    //   auto n2 = path2[j];
-    //   if (n1 == n2)
-    //   {
-    //     lca = n1;
-    //     lca_idx = j;
-    //   }
-    //   else
-    //   {
-    //     break;
-    //   }
-    // }
-    // glm::mat3 mat{ 1.0 };
-    // if (!lca)
-    //   return mat;
-    // for (int i = 0; i < path1.size() && path1[i] != lca; i++)
-    // {
-    //   mat *= glm::inverse(static_cast<PaintNode*>(path1[i])->transform);
-    // }
-    //
-    // for (int i = lca_idx - 1; i >= 0; i--)
-    // {
-    //   mat *= static_cast<PaintNode*>(path2[i])->transform;
-    // }
-    // return mat;
-    //
-
-    std::cout << "Map " << getName() << " to " << node->getName() << std::endl;
-    ;
-    std::function<void(PaintNode*, glm::mat3&)> recursive_find = [&](PaintNode* n, glm::mat3& mat)
+    auto find_path = [](Node* node) -> std::vector<Node*>
     {
-      if (n)
+      std::vector<Node*> path = { node };
+      while (node->parent())
       {
-        auto p = static_cast<PaintNode*>(n->parent().get());
-        recursive_find(p, mat);
-        std::cout << n->getName() << std::endl;
-        std::cout << n->transform << std::endl;
-        mat *= n->transform;
+        node = node->parent().get();
+        path.push_back(node);
       }
+      return path;
     };
-
-    glm::mat3 m{ 1.0 };
-    recursive_find(this, m);
-
-    std::cout << "Reversing: \n";
-    while (node)
+    auto path1 = find_path(node);
+    auto path2 = find_path(this);
+    Node* lca = nullptr;
+    int lca_idx = -1;
+    for (int i = path1.size() - 1, j = path2.size() - 1; i >= 0 && j >= 0; i--, j--)
     {
-      m *= glm::inverse(node->transform);
-      std::cout << node->getName() << std::endl;
-      std::cout << node->transform << std::endl;
-      node = static_cast<PaintNode*>(node->parent().get());
+      auto n1 = path1[i];
+      auto n2 = path2[j];
+      if (n1 == n2)
+      {
+        lca = n1;
+        lca_idx = j;
+      }
+      else
+      {
+        break;
+      }
+    }
+    // glm::mat3 mat{ 1.0 };
+    SkMatrix mat;
+    mat.setIdentity();
+    if (!lca)
+      return mat;
+    std::cout << "Begin: Map to :" << node->getName() << std::endl;
+    ;
+    for (int i = 0; i < path1.size() && path1[i] != lca; i++)
+    {
+      auto skm = toSkMatrix(static_cast<PaintNode*>(path1[i])->transform);
+      SkMatrix inv;
+      if (skm.invert(&inv) == false)
+      {
+        WARN("Cannot invert matrix");
+      }
+      std::cout << "Inverse of: " << path1[i]->getName() << std::endl;
+      std::cout << inv;
+      mat = mat * inv;
+      std::cout << "accu result: \n" << mat << std::endl;
     }
 
-    std::cout << "Total: -------------: \n" << m << std::endl;
-    std::cout << "End ------------------------------\n";
+    for (int i = lca_idx - 1; i >= 0; i--)
+    {
+      const auto m = toSkMatrix(static_cast<PaintNode*>(path2[i])->transform);
+      std::cout << "Matrix of: " << path2[i]->getName() << std::endl;
+      std::cout << m;
+      mat = mat * m;
+      std::cout << "accu result: \n" << mat << std::endl;
+    }
+    std::cout << "End ==============\n";
+    return mat;
 
-    return m;
+    // std::cout << "Map " << getName() << " to " << node->getName() << std::endl;
+    // ;
+    // std::function<void(PaintNode*, glm::mat3&)> recursive_find = [&](PaintNode* n, glm::mat3&
+    // mat)
+    // {
+    //   if (n)
+    //   {
+    //     auto p = static_cast<PaintNode*>(n->parent().get());
+    //     recursive_find(p, mat);
+    //     std::cout << n->getName() << std::endl;
+    //     std::cout << n->transform << std::endl;
+    //     mat *= n->transform;
+    //   }
+    // };
+    //
+    // glm::mat3 m{ 1.0 };
+    // recursive_find(this, m);
+    //
+    // std::cout << "Reversing: \n";
+    // while (node)
+    // {
+    //   m *= glm::inverse(node->transform);
+    //   std::cout << node->getName() << std::endl;
+    //   std::cout << node->transform << std::endl;
+    //   node = static_cast<PaintNode*>(node->parent().get());
+    // }
+    //
+    // std::cout << "Total: -------------: \n" << m << std::endl;
+    // std::cout << "End ------------------------------\n";
+    //
+    // return m;
   }
 
   void Render(SkCanvas* canvas)
@@ -192,14 +210,14 @@ public:
     return hash;
   }
 
-  virtual Mask asOutlineMask(const glm::mat3* mat)
+  virtual Mask asOutlineMask(const SkMatrix* mat)
   {
     SkPath p;
     Mask mask;
     p.addRect(toSkRect(bound));
     if (mat)
     {
-      p.transform(toSkMatrix(*mat));
+      p.transform(*mat);
     }
     mask.outlineMask = p;
     return mask;
@@ -259,11 +277,9 @@ protected:
     SkCanvas* canvas = getSkCanvas();
     canvas->save();
     canvas->concat(toSkMatrix(this->transform));
-    canvas->save();
-    canvas->scale(1, -1);
     this->drawDebugBoarder(canvas);
     this->Paint(canvas);
-    canvas->restore(); // restore the coord convertion
+    // canvas->restore(); // restore the coord convertion
   }
 
   void postVisit() override
@@ -324,7 +340,8 @@ protected:
         auto m = obj->asOutlineMask(&t);
         if (result.outlineMask.isEmpty())
         {
-          result.outlineMask = m.outlineMask;
+          // result.outlineMask = m.outlineMask;
+          result = m;
         }
         else
         {
@@ -343,8 +360,11 @@ private:
     strokePen.setStyle(SkPaint::kStroke_Style);
     SkColor color = nodeType2Color(this->type);
     strokePen.setColor(color);
-    strokePen.setStrokeWidth(1);
+    strokePen.setStrokeWidth(2);
+    canvas->save();
+    canvas->scale(1, -1);
     canvas->drawRect(skrect, strokePen);
+    canvas->restore();
   }
   bool isPaintDirty()
   {

@@ -1,6 +1,9 @@
 #pragma once
+#include "include/core/SkMatrix.h"
+#include "include/core/SkRect.h"
 #include <glm/glm.hpp>
 #include <iostream>
+#include <ostream>
 
 namespace VGG
 {
@@ -70,6 +73,22 @@ inline std::ostream& operator<<(std::ostream& os, const glm::mat3 m)
   os << "[" << m[0][0] << ", " << m[0][1] << ", " << m[0][2] << std::endl;
   os << m[1][0] << ", " << m[1][1] << ", " << m[1][2] << std::endl;
   os << m[2][0] << ", " << m[2][1] << ", " << m[2][2] << "]\n";
+  return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const SkMatrix& m)
+{
+  os << "[" << m[0] << ", " << m[1] << ", " << m[2] << std::endl;
+  os << m[3] << ", " << m[4] << ", " << m[5] << std::endl;
+  os << m[6] << ", " << m[7] << ", " << m[8] << "]\n";
+  return os;
+}
+inline std::ostream& operator<<(std::ostream& os, const SkRect& m)
+{
+  os << "center: " << m.centerX() << ", " << m.centerY() << std::endl;
+  os << "x, y" << m.x() << ", " << m.y() << std::endl;
+  os << "w, h: " << m.width() << ", " << m.height() << std::endl;
+  os << m.top() << " " << m.bottom() << " " << m.left() << " " << m.right() << std::endl;
   return os;
 }
 

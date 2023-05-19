@@ -3,6 +3,7 @@
 #include "PaintNode.h"
 #include "VGGType.h"
 #include "include/core/SkCanvas.h"
+#include "include/core/SkMatrix.h"
 #include "include/core/SkPath.h"
 #include "include/core/SkShader.h"
 #include "include/effects/SkRuntimeEffect.h"
@@ -73,7 +74,7 @@ public:
 public:
   PathNode(const std::string& name);
   void Paint(SkCanvas* canvas) override;
-  Mask asOutlineMask(const glm::mat3* mat) override;
+  Mask asOutlineMask(const SkMatrix* mat) override;
 
 protected:
   void drawContour(SkCanvas* canvas, sk_sp<SkShader> shader, const SkPath* outlineMask);

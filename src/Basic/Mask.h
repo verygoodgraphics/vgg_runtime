@@ -2,6 +2,7 @@
 
 #include "Basic/VGGType.h"
 #include "include/core/SkPath.h"
+#include "glm/glm.hpp"
 
 namespace VGG
 {
@@ -11,5 +12,6 @@ class Mask
 {
 public:
   SkPath outlineMask;
+  glm::mat3 trans;
 };
 }; // namespace VGG

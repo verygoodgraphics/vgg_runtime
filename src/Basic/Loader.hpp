@@ -101,6 +101,7 @@ public:
   {
     Contour contour;
     contour.closed = j["closed"];
+
     for (const auto& e : j["points"])
     {
       const auto p = e["point"];

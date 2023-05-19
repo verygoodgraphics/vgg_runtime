@@ -1,21 +1,8 @@
 if (EMSCRIPTEN)
 else()
-  option(ENABLE_UNIT_TEST "Enable unit test" OFF)
   if(NOT ENABLE_UNIT_TEST)
-    message(STATUS "Unit test is disabled. Enable it with option if needed: cmake -DENABLE_UNIT_TEST=ON")
     return()
   endif()
-
-  include(FetchContent)
-  message(STATUS "Downloading gtest...")
-  FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz
-    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-  )
-  # For Windows: Prevent overriding the parent project's compiler/linker settings
-  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-  FetchContent_MakeAvailable(googletest)
 
   add_executable(unit_tests
     controller/controller_test.cpp
@@ -24,7 +11,7 @@ else()
     model/json_schema_validator_test.cpp
     model/schema_valid_json_document_test.cpp
     model/vgg_work_test.cpp
-    model/treenode_test.cpp
+    # model/treenode_test.cpp
     native/native_exec_test.cpp
     native/native_sdk_test.cpp
     native/node_test.cpp

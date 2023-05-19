@@ -8,13 +8,21 @@
 #include "Model/VggWork.hpp"
 #include "Utils/DIContainer.hpp"
 
-Controller::Controller(JsonDocumentObserverPtr designDocObsever,
-                       JsonDocumentObserverPtr layoutDocObsever,
+#include <cassert>
+
+namespace VGG
+{
+
+Controller::Controller(std::shared_ptr<RunLoop> runLoop,
+                       rxcpp::observer<ModelEventPtr> designDocObsever,
+                       rxcpp::observer<ModelEventPtr> layoutDocObsever,
                        RunMode mode)
-  : m_design_doc_observer(designDocObsever)
+  : m_run_loop(runLoop)
+  , m_design_doc_observer(designDocObsever)
   , m_layout_doc_observer(layoutDocObsever)
   , m_mode(mode)
 {
+  assert(m_run_loop);
 }
 
 bool Controller::start(const std::string& filePath, const char* designDocSchemaFilePath)
@@ -54,10 +62,7 @@ void Controller::initVggWork(const char* designDocSchemaFilePath)
     }
 
     auto subject_doc = new SubjectJsonDocument(JsonDocumentPtr(json_doc_raw_ptr));
-    if (m_design_doc_observer)
-    {
-      subject_doc->addObserver(m_design_doc_observer);
-    }
+    subject_doc->getObservable().observe_on(m_run_loop->thread()).subscribe(m_design_doc_observer);
 
     return wrapJsonDoc(JsonDocumentPtr(subject_doc));
   };
@@ -103,3 +108,5 @@ JsonDocumentPtr Controller::wrapJsonDoc(std::shared_ptr<JsonDocument> jsonDoc)
     return jsonDoc;
   }
 }
+
+} // namespace VGG

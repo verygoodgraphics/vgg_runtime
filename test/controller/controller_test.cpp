@@ -1,9 +1,10 @@
 #include "Controller/Controller.hpp"
 
-#include "MockJsonDocumentObserver.hpp"
 #include "Model/VggWork.hpp"
 #include "PlatformAdapter/Native/Composer/MainComposer.hpp"
 #include "Utils/DIContainer.hpp"
+
+#include "rxcpp/rx.hpp"
 
 #include <gtest/gtest.h>
 
@@ -11,8 +12,7 @@
 #include <mutex>
 #include <condition_variable>
 
-using ::testing::_;
-using ::testing::Return;
+using namespace VGG;
 
 constexpr auto design_doc_schema_file = "./asset/vgg-format.json";
 
@@ -21,10 +21,13 @@ class ControllerTestSuite : public ::testing::Test
 protected:
   std::shared_ptr<Controller> m_sut;
   MainComposer composer;
+  std::shared_ptr<RunLoop> m_run_loop = std::make_shared<RunLoop>();
+  bool m_exit_loop = false;
 
   void SetUp() override
   {
   }
+
   void TearDown() override
   {
     composer.teardown();
@@ -38,6 +41,22 @@ protected:
   {
     composer.setup("./asset/vgg-sdk.esm.mjs");
   }
+
+  void loop_until_exit()
+  {
+    while (!m_exit_loop)
+    {
+      m_run_loop->dispatch();
+    }
+  }
+
+  void loop_times(int times)
+  {
+    while (times--)
+    {
+      m_run_loop->dispatch();
+    }
+  }
 };
 
 TEST_F(ControllerTestSuite, Smoke)
@@ -45,7 +64,7 @@ TEST_F(ControllerTestSuite, Smoke)
   // Given
   setup_sdk_with_local_dic();
   std::string file_path = "testDataDir/vgg-work.zip";
-  m_sut.reset(new Controller);
+  m_sut.reset(new Controller(m_run_loop));
 
   // When
   auto ret = m_sut->start(file_path);
@@ -61,36 +80,30 @@ TEST_F(ControllerTestSuite, OnClick_observer)
 {
   // Given
   setup_sdk_with_local_dic();
-  auto mock_observer = new MockJsonDocumentObserver();
-  std::mutex m;
-  std::condition_variable cv;
 
-  m_sut.reset(new Controller(JsonDocumentObserverPtr(mock_observer)));
+  auto type = ModelEventType::Invalid;
+  auto fake_design_doc_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+    [&](ModelEventPtr evt)
+    {
+      type = evt->type;
+      m_exit_loop = true;
+    });
+
+  m_sut.reset(new Controller(m_run_loop, fake_design_doc_observer));
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path);
   EXPECT_TRUE(ret);
 
-  auto callback = [&](const json::json_pointer&)
-  {
-    std::unique_lock lk(m);
-    lk.unlock();
-    cv.notify_one();
-  };
-
   auto vgg_work = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
   auto design_doc_json = vgg_work->designDoc()->content();
 
-  EXPECT_CALL(*mock_observer, didDelete(_)).WillOnce(callback);
-
   // When
   m_sut->onClick("/artboard/layers/0/childObjects");
+  loop_until_exit();
 
   // Then
-  // wait node thread change model // note: thread safe
-  {
-    std::unique_lock lk(m);
-    cv.wait(lk);
-  }
+  EXPECT_TRUE(type == ModelEventType::Delete);
+
   auto new_design_doc_json = vgg_work->designDoc()->content();
   EXPECT_FALSE(design_doc_json == new_design_doc_json);
 }
@@ -99,9 +112,15 @@ TEST_F(ControllerTestSuite, Validator_reject_deletion)
 {
   // Given
   setup_sdk_with_local_dic();
-  auto mock_observer = new MockJsonDocumentObserver();
 
-  m_sut.reset(new Controller(JsonDocumentObserverPtr(mock_observer)));
+  auto type = ModelEventType::Invalid;
+  auto fake_design_doc_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+    [&](ModelEventPtr evt)
+    {
+      type = evt->type;
+      m_exit_loop = true;
+    });
+  m_sut.reset(new Controller(m_run_loop, fake_design_doc_observer));
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path, design_doc_schema_file);
   EXPECT_TRUE(ret);
@@ -109,32 +128,27 @@ TEST_F(ControllerTestSuite, Validator_reject_deletion)
   auto vgg_work = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
   auto design_doc_json = vgg_work->designDoc()->content();
 
-  // expect call
-  EXPECT_CALL(*mock_observer, didDelete(_)).Times(0);
-
   // When
   m_sut->onClick("/artboard/layers/0/childObjects");
+  loop_times(100);
 
   // Then
-  using ::testing::Mock;
-  Mock::VerifyAndClearExpectations(mock_observer);
+  EXPECT_TRUE(type != ModelEventType::Delete);
 }
 
 TEST_F(ControllerTestSuite, DidUpdate)
 {
   // Given
   setup_sdk_with_local_dic();
-  auto mock_observer = new MockJsonDocumentObserver();
-  std::mutex m;
-  std::condition_variable cv;
-  auto callback = [&](const json::json_pointer& path, const json& value)
-  {
-    std::unique_lock lk(m);
-    lk.unlock();
-    cv.notify_one();
-  };
 
-  m_sut.reset(new Controller(JsonDocumentObserverPtr(mock_observer)));
+  auto type = ModelEventType::Invalid;
+  auto fake_design_doc_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+    [&](ModelEventPtr evt)
+    {
+      type = evt->type;
+      m_exit_loop = true;
+    });
+  m_sut.reset(new Controller(m_run_loop, fake_design_doc_observer));
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path, design_doc_schema_file);
   EXPECT_TRUE(ret);
@@ -142,36 +156,27 @@ TEST_F(ControllerTestSuite, DidUpdate)
   auto vgg_work = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
   auto design_doc_json = vgg_work->designDoc()->content();
 
-  // expect call
-  EXPECT_CALL(*mock_observer, didUpdate(_, _)).WillOnce(callback);
-
   // When
   m_sut->onClick("/artboard/layers");
+  loop_until_exit();
 
   // Then
-  {
-    std::unique_lock lk(m);
-    cv.wait(lk);
-  }
-  using ::testing::Mock;
-  Mock::VerifyAndClearExpectations(mock_observer);
+  EXPECT_TRUE(type == ModelEventType::Update);
 }
 
 TEST_F(ControllerTestSuite, DidDelete)
 {
   // Given
   setup_sdk_with_local_dic();
-  auto mock_observer = new MockJsonDocumentObserver();
-  std::mutex m;
-  std::condition_variable cv;
-  auto callback = [&](const json::json_pointer& path)
-  {
-    std::unique_lock lk(m);
-    lk.unlock();
-    cv.notify_one();
-  };
 
-  m_sut.reset(new Controller(JsonDocumentObserverPtr(mock_observer)));
+  auto type = ModelEventType::Invalid;
+  auto fake_design_doc_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+    [&](ModelEventPtr evt)
+    {
+      type = evt->type;
+      m_exit_loop = true;
+    });
+  m_sut.reset(new Controller(m_run_loop, fake_design_doc_observer));
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path, design_doc_schema_file);
   EXPECT_TRUE(ret);
@@ -179,36 +184,27 @@ TEST_F(ControllerTestSuite, DidDelete)
   auto vgg_work = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
   auto design_doc_json = vgg_work->designDoc()->content();
 
-  // expect call
-  EXPECT_CALL(*mock_observer, didDelete(_)).WillOnce(callback);
-
   // When
   m_sut->onClick("/artboard/layers/0");
+  loop_until_exit();
 
   // Then
-  {
-    std::unique_lock lk(m);
-    cv.wait(lk);
-  }
-  using ::testing::Mock;
-  Mock::VerifyAndClearExpectations(mock_observer);
+  EXPECT_TRUE(type == ModelEventType::Delete);
 }
 
 TEST_F(ControllerTestSuite, DidAdd_no_validator)
 {
   // Given
   setup_sdk_with_local_dic();
-  auto mock_observer = new MockJsonDocumentObserver();
-  std::mutex m;
-  std::condition_variable cv;
-  auto callback = [&](const json::json_pointer& path, const json& value)
-  {
-    std::unique_lock lk(m);
-    lk.unlock();
-    cv.notify_one();
-  };
 
-  m_sut.reset(new Controller(JsonDocumentObserverPtr(mock_observer)));
+  auto type = ModelEventType::Invalid;
+  auto fake_design_doc_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+    [&](ModelEventPtr evt)
+    {
+      type = evt->type;
+      m_exit_loop = true;
+    });
+  m_sut.reset(new Controller(m_run_loop, fake_design_doc_observer));
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path);
   EXPECT_TRUE(ret);
@@ -216,36 +212,29 @@ TEST_F(ControllerTestSuite, DidAdd_no_validator)
   auto vgg_work = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
   auto design_doc_json = vgg_work->designDoc()->content();
 
-  // expect call
-  EXPECT_CALL(*mock_observer, didAdd(_, _)).WillOnce(callback);
-
   // When
   m_sut->onClick("/fake/add");
+  loop_until_exit();
+
+  //
 
   // Then
-  {
-    std::unique_lock lk(m);
-    cv.wait(lk);
-  }
-  using ::testing::Mock;
-  Mock::VerifyAndClearExpectations(mock_observer);
+  EXPECT_TRUE(type == ModelEventType::Add);
 }
 
 TEST_F(ControllerTestSuite, DidAdd_color)
 {
   // Given
   setup_sdk_with_remote_dic();
-  auto mock_observer = new MockJsonDocumentObserver();
-  std::mutex m;
-  std::condition_variable cv;
-  auto callback = [&](const json::json_pointer& path, const json& value)
-  {
-    std::unique_lock lk(m);
-    lk.unlock();
-    cv.notify_one();
-  };
 
-  m_sut.reset(new Controller(JsonDocumentObserverPtr(mock_observer)));
+  auto type = ModelEventType::Invalid;
+  auto fake_design_doc_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+    [&](ModelEventPtr evt)
+    {
+      type = evt->type;
+      m_exit_loop = true;
+    });
+  m_sut.reset(new Controller(m_run_loop, fake_design_doc_observer));
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path, design_doc_schema_file);
   EXPECT_TRUE(ret);
@@ -253,17 +242,10 @@ TEST_F(ControllerTestSuite, DidAdd_color)
   auto vgg_work = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
   auto design_doc_json = vgg_work->designDoc()->content();
 
-  // expect call
-  EXPECT_CALL(*mock_observer, didAdd(_, _)).WillOnce(callback);
-
   // When
   m_sut->onClick("/fake/add_color");
+  loop_until_exit();
 
   // Then
-  {
-    std::unique_lock lk(m);
-    cv.wait(lk);
-  }
-  using ::testing::Mock;
-  Mock::VerifyAndClearExpectations(mock_observer);
+  EXPECT_TRUE(type == ModelEventType::Add);
 }

@@ -36,6 +36,25 @@ if (NOT EMSCRIPTEN)
   message(STATUS "SDL2_LIBRARIES: ${SDL2_LIBRARIES}")
 endif()
 
+
+# must fetch before add subdirectory vgg_contrib
+option(ENABLE_UNIT_TEST "Enable unit test" OFF)
+if(ENABLE_UNIT_TEST)
+  include(FetchContent)
+  message(STATUS "Downloading gtest...")
+  FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+  )
+  # For Windows: Prevent overriding the parent project's compiler/linker settings
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+  FetchContent_MakeAvailable(googletest)
+else()
+  message(STATUS "Unit test is disabled. Enable it with option if needed: cmake -DENABLE_UNIT_TEST=ON")
+endif()
+
+
 # add bundled libs
 add_subdirectory(lib)
 include_directories(${VGG_LIB_INCLUDE_PATH})

@@ -74,7 +74,7 @@ public:
 public:
   PathNode(const std::string& name);
   void Paint(SkCanvas* canvas) override;
-  Mask asOutlineMask(const SkMatrix* mat) override;
+  Mask asOutlineMask(const glm::mat3* mat) override;
 
 protected:
   void drawContour(SkCanvas* canvas, sk_sp<SkShader> shader, const SkPath* outlineMask);

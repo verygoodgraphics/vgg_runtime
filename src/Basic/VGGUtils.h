@@ -28,13 +28,13 @@ inline SkMatrix toSkMatrix(const glm::mat3& mat)
 {
   SkMatrix skMatrix;
   skMatrix.setAll(mat[0][0],
-                  mat[0][1],
-                  mat[0][2],
                   mat[1][0],
-                  mat[1][1],
-                  mat[1][2],
                   mat[2][0],
+                  mat[0][1],
+                  mat[1][1],
                   mat[2][1],
+                  mat[0][2],
+                  mat[1][2],
                   mat[2][2]);
   return skMatrix;
 }

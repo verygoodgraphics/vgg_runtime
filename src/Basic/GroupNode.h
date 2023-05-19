@@ -17,7 +17,7 @@ public:
   {
   }
 
-  Mask asOutlineMask(const SkMatrix* mat) override
+  Mask asOutlineMask(const glm::mat3* mat) override
   {
     Mask mask;
     if (!hasChild())
@@ -29,14 +29,13 @@ public:
       for (const auto& c : m_firstChild)
       {
         auto paintNode = static_cast<PaintNode*>(c.get());
-        const auto m = toSkMatrix(paintNode->localTransform());
-        auto childMask = paintNode->asOutlineMask(&m);
+        auto childMask = paintNode->asOutlineMask(&paintNode->localTransform());
         Op(mask.outlineMask, childMask.outlineMask, SkPathOp::kUnion_SkPathOp, &mask.outlineMask);
       }
     }
     if (mat)
     {
-      mask.outlineMask.transform(*mat);
+      mask.outlineMask.transform(toSkMatrix(*mat));
     }
     return mask;
   }

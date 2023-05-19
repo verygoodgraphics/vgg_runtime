@@ -4,6 +4,7 @@
 #include "Basic/AttrSerde.h"
 #include "Basic/VGGType.h"
 #include "Node.hpp"
+#include "glm/matrix.hpp"
 #include "nlohmann/json.hpp"
 #include "RenderTreeDef.hpp"
 #include "Basic/SymbolNode.h"
@@ -67,10 +68,10 @@ public:
   {
     auto v = j.at("matrix").get<std::vector<double>>();
     assert(v.size() == 6);
-    glm::mat3 scale;
-    return glm::mat3{ glm::vec3{ v[0], v[2], v[4] },
-                      glm::vec3{ v[1], v[3], v[5] },
-                      glm::vec3{ 0, 0, 1 } };
+    const auto m = glm::mat3{ glm::vec3{ v[0], v[1], 0 },
+                              glm::vec3{ v[2], v[3], 0 },
+                              glm::vec3{ v[4], v[5], 1 } };
+    return m;
   }
   static inline Bound2 fromBound(const nlohmann::json& j)
   {

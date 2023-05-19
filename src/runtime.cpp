@@ -76,12 +76,19 @@ int main(int argc, char** argv)
     auto fp = loadfile.value();
     auto ext = FileManager::getLoweredFileExt(fp);
     std::shared_ptr<IReader> reader;
+    std::filesystem::path prefix;
+
+    if (auto p = program.present("-p"))
+    {
+      prefix = p.value();
+      INFO("prefix %s", p.value().c_str());
+    }
 
     if (ext == "sketch")
     {
       reader = GetSketchReader(fp);
       // legacy renderer
-      if (!FileManager::loadFile(fp))
+      if (!FileManager::loadFile(prefix / fp))
       {
         FAIL("Failed to load file: %s", fp.c_str());
       }
@@ -98,11 +105,7 @@ int main(int argc, char** argv)
 
     if (reader)
     {
-      if (auto p = program.present("-p"))
-      {
-        reader->setPrefix(p.value());
-        INFO("prefix %s", p.value().c_str());
-      }
+      reader->setPrefix(prefix);
       nlohmann::json json = reader->readFormat();
       auto res = reader->readResource();
       Scene::setResRepo(res);

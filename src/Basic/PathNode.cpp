@@ -422,22 +422,23 @@ PathNode::PathNode(const std::string& name)
 {
 }
 
-Mask PathNode::asOutlineMask(const glm::mat3* mat)
+Mask PathNode::asOutlineMask(const SkMatrix* mat)
 {
   SkPath p;
-  p.getBounds();
   Mask mask;
   if (!shape.subshape.contours.empty())
   {
     for (const auto& c : shape.subshape.contours)
     {
-      p.addPath(getSkiaPath(c, c.closed));
+      auto comp = getSkiaPath(c, c.closed);
+      p.addPath(comp);
     }
   }
   if (mat)
   {
-    p.transform(toSkMatrix(*mat));
+    p.transform(*mat);
   }
+
   mask.outlineMask = p;
   return mask;
 }
@@ -466,8 +467,7 @@ void PathNode::drawContour(SkCanvas* canvas, sk_sp<SkShader> shader, const SkPat
     skPath.addPath(getSkiaPath(contour, contour.closed));
   }
 
-  canvas->save();
-  canvas->scale(1, -1);
+  // canvas->scale(1, -1);
 
   if (outlineMask)
   {
@@ -532,7 +532,8 @@ void PathNode::drawContour(SkCanvas* canvas, sk_sp<SkShader> shader, const SkPat
     canvas->drawPath(skPath, strokePen);
   }
 
-  canvas->restore();
+  std::cout << "Draw Path: " << std::endl;
+  std::cout << canvas->getTotalMatrix() << std::endl;
 }
 
 } // namespace VGG

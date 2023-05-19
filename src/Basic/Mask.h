@@ -12,6 +12,5 @@ class Mask
 {
 public:
   SkPath outlineMask;
-  glm::mat3 trans;
 };
 }; // namespace VGG

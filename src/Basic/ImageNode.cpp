@@ -32,41 +32,17 @@ void ImageNode::Paint(SkCanvas* canvas)
   if (image)
   {
     auto mask = makeMaskBy(BO_Intersection);
-    std::cout << "Draw Mask: " << std::endl;
-    std::cout << toSkMatrix(mask.trans) << std::endl;
-    std::cout << canvas->getTotalMatrix() << std::endl;
-    std::cout << canvas->getTotalMatrix() * toSkMatrix(mask.trans) << std::endl;
-
-    std::cout << "Test ====:\n";
-    const auto vp = glm::vec3{ 5, 25, 1 };
-    const auto glmres = glm::transpose(mask.trans) * vp;
-    std::cout << "glm mat: " << glm::transpose(mask.trans) << std::endl;
-    std::cout << "glm res: " << glmres.x << " " << glmres.y << " " << glmres.z << std::endl;
-    const auto sp = SkPoint{ 5, 25 };
-    const auto skmat = toSkMatrix(mask.trans);
-    const SkPoint3 src[] = { { 5, 25, 1 } };
-    SkPoint3 dst[1];
-    toSkMatrix(mask.trans).mapHomogeneousPoints(dst, src, 1);
-    std::cout << "sk mat: " << skmat << std::endl;
-    std::cout << "sk res: " << dst[0].x() << " " << dst[0].y() << std::endl;
-    std::cout << "Test End ====:\n";
-
     if (mask.outlineMask.isEmpty() == false)
     {
-      SkPaint maskPaint;
-      maskPaint.setStyle(SkPaint::Style::kFill_Style);
-      maskPaint.setColor(SkColors::kBlue);
-      canvas->drawPath(mask.outlineMask, maskPaint);
+      // SkPaint maskPaint;
+      // maskPaint.setStyle(SkPaint::Style::kFill_Style);
+      // maskPaint.setColor(SkColors::kBlue);
+      // canvas->drawPath(mask.outlineMask, maskPaint);
       canvas->clipPath(mask.outlineMask);
     }
     SkSamplingOptions opt;
     canvas->save();
     canvas->scale(1, -1);
-    const auto skRect = toSkRect(this->bound);
-    const auto skMat = canvas->getTotalMatrix();
-    SkRect res;
-    skMat.mapRect(&res, skRect);
-    std::cout << res << std::endl;
     canvas->drawImageRect(image, toSkRect(this->bound), opt);
     canvas->restore();
   }

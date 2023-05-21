@@ -2,7 +2,9 @@
 #include "Basic/PathNode.h"
 #include "Basic/VGGType.h"
 #include "Basic/VGGUtils.h"
-#include "Basic/SkiaConverter.h"
+#include "Basic/SkiaBackend/SkiaConverter.h"
+#include "Basic/SkiaBackend/SkiaUtils.h"
+
 #include "Components/Styles.hpp"
 #include "Utils/Utils.hpp"
 #include "include/core/SkBlendMode.h"
@@ -459,16 +461,16 @@ void PathNode::Paint(SkCanvas* canvas)
     auto mask = makeMaskBy(BO_Intersection);
     if (mask.outlineMask.isEmpty())
     {
-      drawContour(canvas, nullptr, nullptr);
+      drawContour(canvas, nullptr);
     }
     else
     {
-      drawContour(canvas, nullptr, &mask.outlineMask);
+      drawContour(canvas, &mask.outlineMask);
     }
   }
 } // namespace VGG
 
-void PathNode::drawContour(SkCanvas* canvas, sk_sp<SkShader> shader, const SkPath* outlineMask)
+void PathNode::drawContour(SkCanvas* canvas, const SkPath* outlineMask)
 {
   SkPath skPath;
   for (const auto& contour : shape.subshape.contours)
@@ -496,10 +498,6 @@ void PathNode::drawContour(SkCanvas* canvas, sk_sp<SkShader> shader, const SkPat
     if (!f.isEnabled)
       continue;
     SkPaint fillPen;
-    if (shader)
-    {
-      fillPen.setShader(shader);
-    }
     fillPen.setColor(f.color);
     fillPen.setStyle(SkPaint::kFill_Style);
     fillPen.setAlphaf(fillPen.getAlphaf() * globalAlpha);
@@ -518,19 +516,63 @@ void PathNode::drawContour(SkCanvas* canvas, sk_sp<SkShader> shader, const SkPat
   {
     if (!b.is_enabled)
       continue;
-    if (shader)
+    strokePen.setAntiAlias(true);
+    strokePen.setStrokeJoin(toSkPaintJoin(b.line_join_style));
+    strokePen.setStrokeCap(toSkPaintCap(b.line_cap_style));
+    if (b.position == PP_Inside)
     {
-      strokePen.setShader(shader);
+      // inside
+      strokePen.setStrokeWidth(2. * b.thickness);
+      canvas->save();
+      canvas->clipPath(skPath, SkClipOp::kIntersect);
     }
-    strokePen.setStrokeWidth(b.thickness);
-    strokePen.setColor(b.color.value_or(VGGColor{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
+    else if (b.position == PP_Outside)
+    {
+      // outside
+      strokePen.setStrokeWidth(2. * b.thickness);
+      canvas->save();
+      canvas->clipPath(skPath, SkClipOp::kDifference);
+    }
+    else
+    {
+      strokePen.setStrokeWidth(b.thickness);
+    }
+
+    // if border is gradient
+    if (b.gradient.has_value())
+    {
+      sk_sp<SkShader> shader;
+      const auto type = b.gradient->gradientType;
+      if (type == GT_Linear)
+      {
+        shader = b.gradient->getLinearShader(bound.size());
+      }
+      else if (type == GT_Radial)
+      {
+        shader = b.gradient->getRadialShader(bound.size());
+      }
+      else if (type == GT_Angular)
+      {
+        shader = b.gradient->getAngularShader(bound.size());
+      }
+      strokePen.setShader(shader);
+      strokePen.setAlphaf(b.context_settings.Opacity * globalAlpha);
+    }
+    else
+    {
+      strokePen.setColor(b.color.value_or(VGGColor{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
+      strokePen.setAlphaf(strokePen.getAlphaf() * globalAlpha);
+    }
 
     if (outlineMask)
     {
       canvas->clipPath(*outlineMask);
     }
-
     canvas->drawPath(skPath, strokePen);
+    if (b.position != PP_Middle)
+    {
+      canvas->restore();
+    }
   }
 }
 

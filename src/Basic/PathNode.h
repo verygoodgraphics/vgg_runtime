@@ -77,7 +77,7 @@ public:
   Mask asOutlineMask(const glm::mat3* mat) override;
 
 protected:
-  void drawContour(SkCanvas* canvas, sk_sp<SkShader> shader, const SkPath* outlineMask);
+  void drawContour(SkCanvas* canvas, const SkPath* outlineMask);
   sk_sp<SkRuntimeEffect> maskEffect;
 };
 } // namespace VGG

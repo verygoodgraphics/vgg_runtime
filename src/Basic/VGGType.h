@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 namespace VGG
 {
 
@@ -99,32 +100,46 @@ enum ETextHorizontalAlignment
   HA_Natural
 };
 
-enum ETextUnderline
+enum ETextUnderline : uint8_t
 {
   UT_None,
   UT_Single,
   UT_Double
 };
 
-enum EMaskType
+enum EMaskType : uint8_t
 {
   MT_None,
   MT_Outline,
   MT_Alpha
 };
 
-enum ELineJoin
+enum ELineJoin : uint8_t
 {
   LJ_Miter,
   LJ_Round,
   LJ_Bevel,
 };
 
-enum ELineCap
+enum ELineCap : uint8_t
 {
   LC_Butt,
   LC_Round,
   LC_Square,
+};
+
+enum EPathPosition : uint8_t
+{
+  PP_Middle,
+  PP_Outside,
+  PP_Inside,
+};
+
+enum EGradientType : uint8_t
+{
+  GT_Linear,
+  GT_Radial,
+  GT_Angular
 };
 
 } // namespace VGG

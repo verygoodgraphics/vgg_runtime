@@ -2,6 +2,7 @@
 #include <nlohmann/json.hpp>
 #include <optional>
 #include "Attrs.h"
+#include "Basic/VGGType.h"
 using nlohmann::json;
 
 namespace VGG
@@ -58,15 +59,15 @@ inline void from_json(const json& j, Border& x)
   x.context_settings = j.at("contextSettings").get<ContextSetting>();
   x.dashed_offset = j.at("dashedOffset").get<double>();
   x.dashed_pattern = j.at("dashedPattern").get<std::vector<float>>();
-  x.fill_type = j.at("fillType").get<int64_t>();
+  x.fill_type = j.at("fillType").get<EFillType>();
   x.flat = j.at("flat").get<double>();
   x.gradient = get_stack_optional<VGGGradient>(j, "gradient");
   x.is_enabled = j.at("isEnabled").get<bool>();
-  x.line_cap_style = j.at("lineCapStyle").get<int64_t>();
-  x.line_join_style = j.at("lineJoinStyle").get<int64_t>();
+  x.line_cap_style = j.at("lineCapStyle").get<ELineCap>();
+  x.line_join_style = j.at("lineJoinStyle").get<ELineJoin>();
   x.miter_limit = j.at("miterLimit").get<double>();
   // x.pattern = get_stack_optional<Pattern>(j, "pattern");
-  x.position = j.at("position").get<int64_t>();
+  x.position = j.at("position").get<EPathPosition>();
   x.style = j.at("style").get<int64_t>();
   x.thickness = j.at("thickness").get<double>();
 }

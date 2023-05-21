@@ -2,12 +2,15 @@
 #include "Basic/PathNode.h"
 #include "Basic/VGGType.h"
 #include "Basic/VGGUtils.h"
+#include "Basic/SkiaConverter.h"
 #include "Components/Styles.hpp"
 #include "Utils/Utils.hpp"
 #include "include/core/SkBlendMode.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkMatrix.h"
 #include "include/core/SkPaint.h"
+#include "include/core/SkPathEffect.h"
+#include "include/core/SkScalar.h"
 #include "include/core/SkShader.h"
 #include "include/core/SkSurface.h"
 #include "include/core/SkTileMode.h"
@@ -417,6 +420,12 @@ SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
 //     }
 //   }
 // }
+//
+
+void drawBorder_Skia(SkCanvas* canvas, const SkPath& path, const SkPaint& pen, int position)
+{
+}
+
 PathNode::PathNode(const std::string& name)
   : PaintNode(name, ObjectType::VGG_PATH)
 {
@@ -467,15 +476,8 @@ void PathNode::drawContour(SkCanvas* canvas, sk_sp<SkShader> shader, const SkPat
     skPath.addPath(getSkiaPath(contour, contour.closed));
   }
 
-  // canvas->scale(1, -1);
-
-  // if (outlineMask)
-  // {
-  //   SkPaint maskPaint;
-  //   maskPaint.setColor(SkColors::kRed);
-  //   maskPaint.setStyle(SkPaint::kFill_Style);
-  //   canvas->drawPath(*outlineMask, maskPaint);
-  // }
+  if (skPath.isEmpty())
+    return;
 
   // winding rule
   if (shape.windingRule == EWindingType::WR_EvenOdd)
@@ -509,8 +511,6 @@ void PathNode::drawContour(SkCanvas* canvas, sk_sp<SkShader> shader, const SkPat
   }
 
   // draw boarders
-  //
-
   SkPaint strokePen;
   strokePen.setAntiAlias(true);
   strokePen.setStyle(SkPaint::kStroke_Style);
@@ -529,6 +529,7 @@ void PathNode::drawContour(SkCanvas* canvas, sk_sp<SkShader> shader, const SkPat
     {
       canvas->clipPath(*outlineMask);
     }
+
     canvas->drawPath(skPath, strokePen);
   }
 }

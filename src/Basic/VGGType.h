@@ -113,4 +113,18 @@ enum EMaskType
   MT_Alpha
 };
 
+enum ELineJoin
+{
+  LJ_Miter,
+  LJ_Round,
+  LJ_Bevel,
+};
+
+enum ELineCap
+{
+  LC_Butt,
+  LC_Round,
+  LC_Square,
+};
+
 } // namespace VGG

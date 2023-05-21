@@ -48,7 +48,7 @@ struct Border
   std::optional<VGGColor> color;
   ContextSetting context_settings;
   double dashed_offset;
-  std::vector<double> dashed_pattern;
+  std::vector<float> dashed_pattern;
   int64_t fill_type;
   double flat;
   std::optional<VGGGradient> gradient;

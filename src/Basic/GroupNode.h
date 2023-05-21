@@ -39,9 +39,9 @@ public:
     }
     return mask;
   }
-  void traverse() override
+  void recursivelyRenderPass(SkCanvas* canvas) override
   {
-    preVisit();
+    renderPassBefore();
 
     // deal with mask rendering order
     std::vector<PaintNode*> masked;
@@ -55,10 +55,10 @@ public:
         noneMasked.push_back(c);
     }
     for (const auto& p : masked)
-      p->traverse();
+      p->recursivelyRenderPass(canvas);
     for (const auto& p : noneMasked)
-      p->traverse();
-    postVisit();
+      p->recursivelyRenderPass(canvas);
+    renderPassAfter();
   }
 };
 } // namespace VGG

@@ -35,7 +35,7 @@ void Scene::Render(SkCanvas* canvas)
     {
       auto board = artboards[page].get();
       preprocessMask(board);
-      r.Draw(canvas, board);
+      r.draw(canvas, board);
     }
   }
   else
@@ -43,7 +43,7 @@ void Scene::Render(SkCanvas* canvas)
     if (!symbols.empty())
     {
       node = symbols[symbolIndex].get();
-      r.Draw(canvas, node);
+      r.draw(canvas, node);
     }
   }
 }

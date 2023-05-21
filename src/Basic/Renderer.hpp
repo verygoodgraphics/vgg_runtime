@@ -1,7 +1,7 @@
 #pragma once
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
-#include "RenderTreeDef.hpp"
+#include "PaintNode.h"
 
 namespace VGG
 {
@@ -27,18 +27,14 @@ inline void PrintCurrentTranslation(SkCanvas* canvas, int indent)
   std::cout << v.x() << " " << v.y() << std::endl;
   std::cout << std::endl;
 }
-
 class SkiaRenderer
 {
 public:
-  void Draw(SkCanvas* canvas, PaintNode* root)
+  void draw(SkCanvas* canvas, PaintNode* root)
   {
-    int deep = 0;
-    glm::mat3 accumulationMatrix;
-    TraversalData data;
     canvas->save();
     canvas->scale(1, -1); // convert the whole root to canvas coords
-    root->Render(canvas);
+    root->renderPass(canvas);
     canvas->restore();
   }
 };

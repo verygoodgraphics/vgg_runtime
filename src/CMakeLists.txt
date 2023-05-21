@@ -15,6 +15,8 @@ add_executable(runtime
   Basic/PathNode.cpp
   Basic/ImageNode.cpp
   Basic/TextNode.cpp
+  Basic/PaintNode.cpp
+  Basic/Node.cpp
 )
 
 add_library(vgg_internal OBJECT

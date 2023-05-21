@@ -13,6 +13,7 @@ inline SkPaint::Join toSkPaintJoin(VGG::ELineJoin join)
     case VGG::LJ_Bevel:
       return SkPaint::kBevel_Join;
   }
+  return SkPaint::kMiter_Join;
 }
 
 inline SkPaint::Cap toSkPaintCap(VGG::ELineCap cap)
@@ -26,4 +27,5 @@ inline SkPaint::Cap toSkPaintCap(VGG::ELineCap cap)
     case VGG::LC_Square:
       return SkPaint::kSquare_Cap;
   }
+  return SkPaint::kButt_Cap;
 }

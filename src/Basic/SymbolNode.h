@@ -33,14 +33,15 @@ public:
     }
   }
 
-  void traverse() override
+protected:
+  void recursivelyRenderPass(SkCanvas* canvas) override
   {
-    preVisit();
+    renderPassBefore();
     if (master)
     {
-      master->traverse();
+      master->recursivelyRenderPass(canvas);
     }
-    postVisit();
+    renderPassAfter();
   }
 };
 

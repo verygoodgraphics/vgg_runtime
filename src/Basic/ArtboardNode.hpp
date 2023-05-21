@@ -1,5 +1,6 @@
 #pragma once
 #include "Basic/RenderState.h"
+#include "Basic/PaintNode.h"
 #include "nlohmann/json.hpp"
 #include "Scene.hpp"
 #include "PaintNode.h"
@@ -10,18 +11,6 @@
 
 namespace VGG
 {
-
-// Node that has transform and bound should be defined as tree node
-//
-struct TraversalData
-{
-  int depth = 0;
-  glm::mat3 transform;
-};
-
-inline SkCanvas* PaintNode::s_defaultCanvas = nullptr;
-
-inline RenderState* PaintNode::s_renderState = nullptr;
 
 class ArtboardNode final : public PaintNode
 {

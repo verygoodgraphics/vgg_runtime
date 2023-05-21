@@ -57,7 +57,7 @@ inline void from_json(const json& j, Border& x)
   x.color = get_stack_optional<VGGColor>(j, "color");
   x.context_settings = j.at("contextSettings").get<ContextSetting>();
   x.dashed_offset = j.at("dashedOffset").get<double>();
-  x.dashed_pattern = j.at("dashedPattern").get<std::vector<double>>();
+  x.dashed_pattern = j.at("dashedPattern").get<std::vector<float>>();
   x.fill_type = j.at("fillType").get<int64_t>();
   x.flat = j.at("flat").get<double>();
   x.gradient = get_stack_optional<VGGGradient>(j, "gradient");

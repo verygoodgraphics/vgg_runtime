@@ -6,13 +6,13 @@
 #include "Node.hpp"
 #include "glm/matrix.hpp"
 #include "nlohmann/json.hpp"
-#include "RenderTreeDef.hpp"
-#include "Basic/SymbolNode.h"
-#include "Basic/PaintNode.h"
-#include "Basic/PathNode.h"
-#include "Basic/TextNode.h"
-#include "Basic/ImageNode.h"
-#include "Basic/GroupNode.h"
+#include "ArtboardNode.hpp"
+#include "SymbolNode.h"
+#include "PaintNode.h"
+#include "PathNode.h"
+#include "TextNode.h"
+#include "ImageNode.h"
+#include "GroupNode.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <exception>
 #include <memory>
@@ -163,23 +163,23 @@ public:
       }
       else if (klass == "path")
       {
-        p->pushChildBack(fromPath(geo));
+        p->addChild(fromPath(geo));
       }
       else if (klass == "image")
       {
-        p->pushChildBack(fromImage(geo));
+        p->addChild(fromImage(geo));
       }
       else if (klass == "text")
       {
-        p->pushChildBack(fromText(geo));
+        p->addChild(fromText(geo));
       }
       else if (klass == "group")
       {
-        p->pushChildBack(fromGroup(j));
+        p->addChild(fromGroup(j));
       }
       else if (klass == "symbolInstance")
       {
-        p->pushChildBack(fromSymbolInstance(geo));
+        p->addChild(fromSymbolInstance(geo));
       }
     }
     return p;
@@ -220,7 +220,7 @@ public:
     fromObjectCommonProperty(j, p.get());
     for (const auto& c : j["childObjects"])
     {
-      p->pushChildBack(fromObject(c));
+      p->addChild(fromObject(c));
     }
     return p;
   }
@@ -232,7 +232,7 @@ public:
     fromObjectCommonProperty(j, p.get());
     for (const auto& e : j["childObjects"])
     {
-      p->pushChildBack(fromObject(e));
+      p->addChild(fromObject(e));
     }
     return p;
   }
@@ -257,7 +257,7 @@ public:
       auto layers = fromLayers(e);
       for (const auto& l : layers)
       {
-        p->pushChildBack(l);
+        p->addChild(l);
       }
       artboards.push_back(p);
     }
@@ -271,7 +271,7 @@ public:
     p->symbolID = j["symbolID"];
     for (const auto& e : j["childObjects"])
     {
-      p->pushChildBack(fromObject(e));
+      p->addChild(fromObject(e));
     }
     return p;
   }

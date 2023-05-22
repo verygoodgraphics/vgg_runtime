@@ -25,22 +25,46 @@ inline std::optional<T> get_stack_optional(const json& j, std::string property)
   return get_stack_optional<T>(j, property.data());
 }
 
-inline void from_json(const json& j, VGGGradient& x)
-{
-  // x.instance = get_stack_optional<std::variant<std::vector<InstanceElement>,
-  //                                              bool,
-  //                                              double,
-  //                                              int64_t,
-  //                                              std::map<std::string, nlohmann::json>,
-  //                                              std::string>>(j, "instance");
-}
-
 inline void from_json(const json& j, VGGColor& x)
 {
-  x.a = j.at("alpha").get<double>();
-  x.b = j.at("blue").get<double>();
-  x.g = j.at("green").get<double>();
-  x.r = j.at("red").get<double>();
+  x.a = j["alpha"];
+  x.b = j["blue"];
+  x.g = j["green"];
+  x.r = j["red"];
+}
+
+inline void from_json(const json& j, VGGGradient::GradientStop& x)
+{
+  x.color = j["color"];
+  x.position = j["position"];
+  x.midPoint = j["midPoint"];
+}
+
+inline void from_json(const json& j, VGGGradient& x)
+{
+  const auto g = j["instance"];
+  const auto klass = g["class"];
+  if (klass != "gradientBasic")
+  {
+    auto f = g["from"];
+    auto t = g["to"];
+    x.from = glm::vec2{ f[0], f[1] };
+    x.to = glm::vec2{ t[0], t[1] };
+    x.stops = g["stops"];
+    x.invert = g["invert"];
+    if (klass == "gradientRadial")
+    {
+      x.elipseLength = g["elipseLength"];
+    }
+    else if (klass == "gradientAngular")
+    {
+      x.rotation = g["rotation"];
+    }
+  }
+  else
+  {
+    // TODO::
+  }
 }
 
 inline void from_json(const json& j, ContextSetting& x)

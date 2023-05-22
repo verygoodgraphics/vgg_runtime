@@ -145,7 +145,7 @@ void PaintNode::paint()
   SkCanvas* canvas = getSkCanvas();
   canvas->save();
   canvas->concat(toSkMatrix(this->transform));
-  this->drawDebugBoarder(canvas);
+  // this->drawDebugBoarder(canvas);
   this->Paint(canvas);
 }
 

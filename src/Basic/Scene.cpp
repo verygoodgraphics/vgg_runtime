@@ -23,6 +23,7 @@ void Scene::LoadFileContent(const nlohmann::json& json)
   symbols = NlohmannBuilder::fromSymbolMasters(json);
   page = 0;
   symbolIndex = 0;
+  maskDirty = true;
 }
 
 void Scene::Render(SkCanvas* canvas)

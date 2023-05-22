@@ -27,6 +27,43 @@
 #include <Basic/RawFileReader.h>
 
 using namespace VGG;
+namespace fs = std::filesystem;
+
+bool load(Scene* scene, const fs::path& filepath, const fs::path& datapath, const fs::path& prefix)
+{
+
+  auto fp = filepath;
+  auto ext = FileManager::getLoweredFileExt(fp);
+  std::shared_ptr<IReader> reader;
+  if (ext == "sketch")
+  {
+    reader = GetSketchReader(fp);
+    // legacy renderer
+    if (!FileManager::loadFile(prefix / fp))
+    {
+      FAIL("Failed to load file: %s", fp.c_str());
+    }
+  }
+  else if (ext == "json")
+  {
+    std::string resFile = std::filesystem::path(fp).stem(); // same with filename as default
+    reader = GetRawReader(fp, datapath);
+  }
+
+  if (reader)
+  {
+    reader->setPrefix(prefix);
+    nlohmann::json json = reader->readFormat();
+    auto res = reader->readResource();
+    Scene::setResRepo(res);
+    scene->LoadFileContent(json);
+  }
+  else
+  {
+    INFO("Failed to initialize a reader\n");
+  }
+  return true;
+}
 
 #ifdef EMSCRIPTEN
 extern "C"
@@ -57,6 +94,7 @@ int main(int argc, char** argv)
   program.add_argument("-l", "--load").help("load from vgg or sketch file");
   program.add_argument("-d", "--data").help("resources dir");
   program.add_argument("-p", "--prefix").help("the prefix of filename or dir");
+  program.add_argument("-L", "--loaddir").help("iterates all the files in the given dir");
 
   try
   {
@@ -71,54 +109,56 @@ int main(int argc, char** argv)
 
   auto scene = std::make_shared<Scene>();
   std::map<std::string, std::vector<char>> resources;
+  std::filesystem::path prefix;
+  std::filesystem::path respath;
+
+  if (auto p = program.present("-p"))
+  {
+    prefix = p.value();
+  }
   if (auto loadfile = program.present("-l"))
   {
     auto fp = loadfile.value();
     auto ext = FileManager::getLoweredFileExt(fp);
-    std::shared_ptr<IReader> reader;
-    std::filesystem::path prefix;
-
-    if (auto p = program.present("-p"))
+    if (ext == "json")
     {
-      prefix = p.value();
-      INFO("prefix %s", p.value().c_str());
-    }
-
-    if (ext == "sketch")
-    {
-      reader = GetSketchReader(fp);
-      // legacy renderer
-      if (!FileManager::loadFile(prefix / fp))
-      {
-        FAIL("Failed to load file: %s", fp.c_str());
-      }
-    }
-    else if (ext == "json")
-    {
-      std::string resFile = std::filesystem::path(fp).stem(); // same with filename as default
+      respath = std::filesystem::path(fp).stem(); // same with filename as default
       if (auto res = program.present("-d"))
       {
-        resFile = res.value();
+        respath = res.value();
       }
-      reader = GetRawReader(fp, resFile);
     }
 
-    if (reader)
-    {
-      reader->setPrefix(prefix);
-      nlohmann::json json = reader->readFormat();
-      auto res = reader->readResource();
-      Scene::setResRepo(res);
-      scene->LoadFileContent(json);
-    }
-    else
-    {
-      INFO("Failed to initialize a reader\n");
-    }
+    load(scene.get(), fp, respath, prefix);
   }
 
   SDLRuntime* app = App<SDLRuntime>::getInstance(1200, 800, "VGG");
   app->setScene(scene);
+
+  std::vector<fs::path> entires;
+  std::vector<fs::path>::iterator fileIter;
+  if (auto L = program.present("-L"))
+  {
+    for (const auto& ent : fs::recursive_directory_iterator(prefix / L.value()))
+    {
+      entires.emplace_back(ent);
+    }
+    int fileIter = 0;
+    app->setReloadCallback(
+      [&](Scene* scene, int type)
+      {
+        if (type == 0 && fileIter < entires.size())
+          fileIter++;
+        else if (type == 1 && fileIter > 0)
+          fileIter--;
+
+        if (fileIter >= 0 && fileIter < entires.size())
+        {
+          load(scene, entires[fileIter], {}, {});
+          INFO("Open %s", entires[fileIter].string().c_str());
+        }
+      });
+  }
   ASSERT(app);
 
   if (auto fm = FileManager::getInstance(); fm && fm->fileCount() < 1)

@@ -455,6 +455,43 @@ sk_sp<SkShader> getGradientShader(const VGGGradient& g, const glm::vec2& size)
   return shader;
 }
 
+void drawShadow(SkCanvas* canvas,
+                const SkPath& skPath,
+                const Shadow& s,
+                const SkPath* outlineMask,
+                bool inner)
+{
+
+  SkPaint pen;
+  auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
+  pen.setImageFilter(
+    SkImageFilters::DropShadowOnly(s.offset_x, s.offset_y, sigma, sigma, s.color, nullptr));
+  canvas->saveLayer(nullptr, &pen);
+  canvas->translate(s.offset_x, s.offset_y);
+  if (inner)
+  {
+    canvas->scale(s.spread, s.spread);
+  }
+  else
+  {
+    if (s.spread > 0)
+    {
+      canvas->scale(1 / s.spread, 1 / s.spread);
+    }
+  }
+  canvas->translate(-s.offset_x, -s.offset_y);
+  SkPaint fillPen;
+  fillPen.setStyle(SkPaint::kFill_Style);
+
+  if (outlineMask)
+  {
+    canvas->clipPath(*outlineMask);
+  }
+
+  canvas->drawPath(skPath, fillPen);
+  canvas->restore();
+}
+
 PathNode::PathNode(const std::string& name)
   : PaintNode(name, ObjectType::VGG_PATH)
 {
@@ -520,31 +557,12 @@ void PathNode::drawContour(SkCanvas* canvas, const SkPath* outlineMask)
 
   const auto globalAlpha = contextSetting.Opacity;
 
-  // draw shadows
+  // draw outer shadows
   for (const auto& s : style.shadows)
   {
-    if (s.is_enabled == false)
+    if (!s.is_enabled || s.inner)
       continue;
-    SkPaint pen;
-    auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
-    pen.setImageFilter(
-      SkImageFilters::DropShadowOnly(s.offset_x, s.offset_y, sigma, sigma, s.color, nullptr));
-    canvas->saveLayer(nullptr, &pen);
-
-    const auto size = bound.size();
-    canvas->translate(size.x / 2 + s.offset_x, size.y / 2 + s.offset_y);
-    canvas->scale(s.spread, s.spread);
-    canvas->translate(-size.x / 2 - s.offset_x, -size.y / 2 - s.offset_y);
-    SkPaint fillPen;
-    fillPen.setStyle(SkPaint::kFill_Style);
-
-    if (outlineMask)
-    {
-      canvas->clipPath(*outlineMask);
-    }
-
-    canvas->drawPath(skPath, fillPen);
-    canvas->restore();
+    drawShadow(canvas, skPath, s, outlineMask, false);
   }
 
   // draw fills
@@ -561,6 +579,7 @@ void PathNode::drawContour(SkCanvas* canvas, const SkPath* outlineMask)
     else if (f.fillType == FT_Gradient)
     {
       // TODO: get gradient
+      fillPen.setShader(getGradientShader(f.gradient.value(), bound.size()));
       fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);
     }
     fillPen.setStyle(SkPaint::kFill_Style);
@@ -582,6 +601,7 @@ void PathNode::drawContour(SkCanvas* canvas, const SkPath* outlineMask)
     strokePen.setAntiAlias(true);
     strokePen.setStrokeJoin(toSkPaintJoin(b.line_join_style));
     strokePen.setStrokeCap(toSkPaintCap(b.line_cap_style));
+    strokePen.setColor(b.color.value_or(VGGColor{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
     if (b.position == PP_Inside)
     {
       // inside
@@ -601,8 +621,7 @@ void PathNode::drawContour(SkCanvas* canvas, const SkPath* outlineMask)
       strokePen.setStrokeWidth(b.thickness);
     }
 
-    // if border is gradient
-    if (b.gradient.has_value())
+    if (b.gradient.has_value() && b.fill_type == FT_Gradient)
     {
       strokePen.setShader(getGradientShader(b.gradient.value(), bound.size()));
       strokePen.setAlphaf(b.context_settings.Opacity * globalAlpha);
@@ -623,6 +642,14 @@ void PathNode::drawContour(SkCanvas* canvas, const SkPath* outlineMask)
     {
       canvas->restore(); // pop border position style
     }
+  }
+
+  // draw inner shadow
+  for (const auto& s : style.shadows)
+  {
+    if (!s.is_enabled || !s.inner)
+      continue;
+    drawShadow(canvas, skPath, s, outlineMask, true);
   }
 }
 

@@ -154,7 +154,6 @@ struct VGGGradient
   {
     // ASSERT(stops.size() > 1);
     auto indices = getSortedIndices();
-
     auto minPosition = stops[indices[0]].position;
     auto maxPosition = stops[indices[indices.size() - 1]].position;
     clampPairByLimits(minPosition, maxPosition, 0.0f, 1.0f, 0.0001f);
@@ -194,11 +193,9 @@ struct VGGGradient
   {
     // ASSERT(stops.size() > 1);
     auto indices = getSortedIndices();
-
     auto minPosition = stops[indices[0]].position;
     auto maxPosition = stops[indices[indices.size() - 1]].position;
     clampPairByLimits(minPosition, maxPosition, 0.f, 1.f, 0.0001f);
-
     auto f = size * from;
     auto t = size * to;
     auto center = (f + t) / 2.0f;
@@ -285,6 +282,8 @@ struct Fill
   VGGColor color;
   EFillType fillType;
   ContextSetting contextSettings;
+  std::optional<VGGGradient> gradient;
+  std::optional<Pattern> pattern;
 };
 
 struct Style

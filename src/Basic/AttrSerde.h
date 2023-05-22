@@ -124,6 +124,8 @@ inline void from_json(const json& j, Fill& x)
   x.fillType = (EFillType)j.at("fillType").get<int>();
   x.isEnabled = j.at("isEnabled").get<bool>();
   x.contextSettings = j.at("contextSettings").get<ContextSetting>();
+  x.gradient = get_stack_optional<VGGGradient>(j, "gradient");
+  // x.pattern = get_stack_optional<Pattern>(j, "pattern");
 }
 
 inline void from_json(const json& j, Style& x)

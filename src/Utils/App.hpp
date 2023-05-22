@@ -19,6 +19,8 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_keycode.h>
+#include <filesystem>
+#include <functional>
 #include <memory>
 #ifdef EMSCRIPTEN
 #include <SDL2/SDL_opengles2.h>
@@ -45,7 +47,6 @@
 #include "Utils/DPI.hpp"
 #include "Utils/FileManager.hpp"
 #include "Utils/Scheduler.hpp"
-
 #include "Basic/Scene.hpp"
 
 namespace VGG
@@ -243,6 +244,8 @@ protected: // protected members and static members
   bool m_useOldRenderer = true;
   std::unique_ptr<SkPictureRecorder> m_recorder;
   bool m_capture = false;
+
+  std::function<void(Scene* scene, int type)> m_reloadCallback;
 
   static bool init(App* app, int w, int h, const std::string& title)
   {
@@ -523,6 +526,18 @@ protected: // protected methods
         m_capture = true;
       }
 
+      if (key == SDLK_DOWN)
+      {
+        m_reloadCallback(m_scene.get(), 0);
+        return true;
+      }
+
+      if (key == SDLK_UP)
+      {
+        m_reloadCallback(m_scene.get(), 1);
+        return true;
+      }
+
 #ifndef EMSCRIPTEN
       if ((mod & KMOD_CTRL) && key == SDLK_q)
       {
@@ -554,6 +569,11 @@ public: // public methods
   void setScene(std::shared_ptr<Scene> scene)
   {
     m_scene = scene;
+  }
+
+  void setReloadCallback(std::function<void(Scene*, int)> callback)
+  {
+    m_reloadCallback = callback;
   }
 
   void setUseOldRenderer(bool use)

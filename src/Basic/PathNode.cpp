@@ -653,4 +653,16 @@ void PathNode::drawContour(SkCanvas* canvas, const SkPath* outlineMask)
   }
 }
 
+void PathNode::addSubShape(std::shared_ptr<PaintNode> node, EBoolOp op)
+{
+  addChild(node);
+  (void)op;
+}
+
+void PathNode::addSubShape(const Contour& ctr, EBoolOp op)
+{
+  shape.subshape.contours.push_back(ctr);
+  (void)op;
+}
+
 } // namespace VGG

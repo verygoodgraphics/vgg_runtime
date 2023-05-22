@@ -52,6 +52,7 @@ struct PointAttr
 struct Contour : public std::vector<PointAttr>
 {
   bool closed = true;
+  EBoolOp blop;
 };
 /*
  * the children of the path node as subshapes of shape
@@ -61,7 +62,6 @@ class PathNode final : public PaintNode
 public:
   struct Subshape
   {
-    EBoolOp blop;
     std::vector<Contour> contours;
   };
 
@@ -75,6 +75,8 @@ public:
   PathNode(const std::string& name);
   void Paint(SkCanvas* canvas) override;
   Mask asOutlineMask(const glm::mat3* mat) override;
+  void addSubShape(std::shared_ptr<PaintNode> node, EBoolOp op);
+  void addSubShape(const Contour& ctr, EBoolOp op);
 
 protected:
   void drawContour(SkCanvas* canvas, const SkPath* outlineMask);

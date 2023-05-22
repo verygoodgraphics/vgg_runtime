@@ -154,32 +154,33 @@ public:
     for (const auto& subshape : shape["subshapes"])
     {
       const auto blop = subshape["booleanOperation"];
-      p->shape.subshape.blop = blop;
       const auto geo = subshape["subGeometry"];
       const auto klass = geo["class"];
       if (klass == "contour")
       {
-        p->shape.subshape.contours.push_back(fromContour(geo));
+        auto ct = fromContour(geo);
+        ct.blop = blop;
+        p->addSubShape(ct, blop);
       }
       else if (klass == "path")
       {
-        p->addChild(fromPath(geo));
+        p->addSubShape(fromPath(geo), blop);
       }
       else if (klass == "image")
       {
-        p->addChild(fromImage(geo));
+        p->addSubShape(fromImage(geo), blop);
       }
       else if (klass == "text")
       {
-        p->addChild(fromText(geo));
+        p->addSubShape(fromText(geo), blop);
       }
       else if (klass == "group")
       {
-        p->addChild(fromGroup(j));
+        p->addSubShape(fromGroup(j), blop);
       }
       else if (klass == "symbolInstance")
       {
-        p->addChild(fromSymbolInstance(geo));
+        p->addSubShape(fromSymbolInstance(geo), blop);
       }
     }
     return p;

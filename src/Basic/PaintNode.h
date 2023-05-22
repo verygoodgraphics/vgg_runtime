@@ -36,6 +36,7 @@ protected:
   EMaskType maskType{ MT_None };
   std::vector<std::string> maskedBy;
   Mask outlineMask;
+  EBoolOp boolOperation;
   friend class NlohmannBuilder;
   friend class SkiaRenderer;
 

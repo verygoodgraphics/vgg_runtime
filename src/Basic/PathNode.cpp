@@ -619,7 +619,7 @@ void PathNode::drawContour(SkCanvas* canvas, const SkPath* outlineMask)
     }
     canvas->drawPath(skPath, strokePen);
 
-    if (b.position != PP_Middle)
+    if (b.position != PP_Center)
     {
       canvas->restore(); // pop border position style
     }

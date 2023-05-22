@@ -130,7 +130,7 @@ enum ELineCap : uint8_t
 
 enum EPathPosition : uint8_t
 {
-  PP_Middle,
+  PP_Center,
   PP_Inside,
   PP_Outside,
 };

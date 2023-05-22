@@ -78,6 +78,7 @@ struct VGGGradient
     static constexpr double maxPos = 1.0;
     VGGColor color{ 1., 1., 1., 1. };
     float position{ 1.0 }; // [0,1]
+    float midPoint;
   };
   static constexpr double minElipseLength = 0.01;
 
@@ -85,9 +86,9 @@ struct VGGGradient
 
   glm::vec2 from{ 0.5, 0 };
   glm::vec2 to{ 0.5, 1 };
-  float elipseLength{ 1.0 }; // (0, inf)
-  float rotation{ 0.0 };     // degree
-                             //
+  float elipseLength{ 1.0 }; // (0, inf) : radial
+  float rotation{ 0.0 };     // degree : angular
+  float invert{ false };     //
   std::vector<GradientStop> stops{
     { VGGColor::fromRGB(0xEE, 0xEE, 0xEE), 0.0 },
     { VGGColor::fromRGB(0xD8, 0xD8, 0xD8), 1.0 },

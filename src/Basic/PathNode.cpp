@@ -534,17 +534,50 @@ void PathNode::Paint(SkCanvas* canvas)
   }
 } // namespace VGG
 
-void PathNode::drawContour(SkCanvas* canvas, const SkPath* outlineMask)
+SkPath PathNode::makePath()
 {
-  SkPath skPath;
-  for (const auto& contour : shape.subshape.contours)
+  auto& ct = shape.subshape.contours;
+  assert(ct.size() >= 1);
+
+  if (ct.size() == 1)
   {
-    skPath.addPath(getSkiaPath(contour, contour.closed));
+    return getSkiaPath(ct[0], ct[0].closed);
   }
 
-  if (skPath.isEmpty())
-    return;
+  std::vector<SkPath> res;
+  SkPath skPath = getSkiaPath(ct[0], ct[0].closed);
+  auto op = ct[0].blop;
+  for (int i = 1; i < ct.size(); i++)
+  {
+    SkPath rhs;
+    if (op != BO_None)
+    {
+      auto skop = toSkPathOp(op);
+      rhs = getSkiaPath(ct[i], ct[i].closed);
+      Op(skPath, rhs, skop, &skPath);
+    }
+    else
+    {
+      res.push_back(skPath);
+      skPath = getSkiaPath(ct[i], ct[i].closed);
+    }
+    op = ct[i].blop; // next op
+  }
+  res.push_back(skPath);
 
+  SkPath paths;
+  for (const auto s : res)
+  {
+    paths.addPath(s);
+  }
+  return paths;
+}
+
+void PathNode::drawContour(SkCanvas* canvas, const SkPath* outlineMask)
+{
+  if (shape.subshape.contours.empty())
+    return;
+  SkPath skPath = makePath();
   // winding rule
   if (shape.windingRule == EWindingType::WR_EvenOdd)
   {
@@ -578,7 +611,6 @@ void PathNode::drawContour(SkCanvas* canvas, const SkPath* outlineMask)
     }
     else if (f.fillType == FT_Gradient)
     {
-      // TODO: get gradient
       fillPen.setShader(getGradientShader(f.gradient.value(), bound.size()));
       fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);
     }

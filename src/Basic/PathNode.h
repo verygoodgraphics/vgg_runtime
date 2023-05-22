@@ -80,6 +80,7 @@ public:
 
 protected:
   void drawContour(SkCanvas* canvas, const SkPath* outlineMask);
+  SkPath makePath();
   sk_sp<SkRuntimeEffect> maskEffect;
 };
 } // namespace VGG

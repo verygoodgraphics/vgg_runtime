@@ -3,6 +3,7 @@
 #include "Model/VggWork.hpp"
 #include "PlatformAdapter/Native/Composer/MainComposer.hpp"
 #include "Utils/DIContainer.hpp"
+#include "mocks/MockPresenter.hpp"
 
 #include "rxcpp/rx.hpp"
 
@@ -13,6 +14,7 @@
 #include <condition_variable>
 
 using namespace VGG;
+using ::testing::Return;
 
 constexpr auto design_doc_schema_file = "./asset/vgg-format.json";
 
@@ -22,6 +24,8 @@ protected:
   std::shared_ptr<Controller> m_sut;
   MainComposer composer;
   std::shared_ptr<RunLoop> m_run_loop = std::make_shared<RunLoop>();
+  MockPresenter m_mock_presenter;
+  rxcpp::subjects::subject<VGG::ViewEventPtr> m_fake_view_subject;
   bool m_exit_loop = false;
 
   void SetUp() override
@@ -42,6 +46,13 @@ protected:
     composer.setup("./asset/vgg-sdk.esm.mjs");
   }
 
+  void setup_sut()
+  {
+    EXPECT_CALL(m_mock_presenter, getObservable())
+      .WillOnce(Return(m_fake_view_subject.get_observable()));
+    m_sut.reset(new Controller(m_run_loop, m_mock_presenter));
+  }
+
   void loop_until_exit()
   {
     while (!m_exit_loop)
@@ -57,6 +68,12 @@ protected:
       m_run_loop->dispatch();
     }
   }
+
+  void mock_click(const std::string& path)
+  {
+    m_fake_view_subject.get_subscriber().on_next(
+      ViewEventPtr{ new ViewEvent{ ViewEventType::Click, ViewEventClick{ path } } });
+  }
 };
 
 TEST_F(ControllerTestSuite, Smoke)
@@ -64,7 +81,7 @@ TEST_F(ControllerTestSuite, Smoke)
   // Given
   setup_sdk_with_local_dic();
   std::string file_path = "testDataDir/vgg-work.zip";
-  m_sut.reset(new Controller(m_run_loop));
+  setup_sut();
 
   // When
   auto ret = m_sut->start(file_path);
@@ -89,7 +106,8 @@ TEST_F(ControllerTestSuite, OnClick_observer)
       m_exit_loop = true;
     });
 
-  m_sut.reset(new Controller(m_run_loop, fake_design_doc_observer));
+  EXPECT_CALL(m_mock_presenter, getDesignDocObserver()).WillOnce(Return(fake_design_doc_observer));
+  setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path);
   EXPECT_TRUE(ret);
@@ -98,7 +116,7 @@ TEST_F(ControllerTestSuite, OnClick_observer)
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // When
-  m_sut->onClick("/artboard/layers/0/childObjects");
+  mock_click("/artboard/layers/0/childObjects");
   loop_until_exit();
 
   // Then
@@ -120,7 +138,8 @@ TEST_F(ControllerTestSuite, Validator_reject_deletion)
       type = evt->type;
       m_exit_loop = true;
     });
-  m_sut.reset(new Controller(m_run_loop, fake_design_doc_observer));
+  EXPECT_CALL(m_mock_presenter, getDesignDocObserver()).WillOnce(Return(fake_design_doc_observer));
+  setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path, design_doc_schema_file);
   EXPECT_TRUE(ret);
@@ -129,7 +148,7 @@ TEST_F(ControllerTestSuite, Validator_reject_deletion)
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // When
-  m_sut->onClick("/artboard/layers/0/childObjects");
+  mock_click("/artboard/layers/0/childObjects");
   loop_times(100);
 
   // Then
@@ -148,7 +167,8 @@ TEST_F(ControllerTestSuite, DidUpdate)
       type = evt->type;
       m_exit_loop = true;
     });
-  m_sut.reset(new Controller(m_run_loop, fake_design_doc_observer));
+  EXPECT_CALL(m_mock_presenter, getDesignDocObserver()).WillOnce(Return(fake_design_doc_observer));
+  setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path, design_doc_schema_file);
   EXPECT_TRUE(ret);
@@ -157,7 +177,7 @@ TEST_F(ControllerTestSuite, DidUpdate)
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // When
-  m_sut->onClick("/artboard/layers");
+  mock_click("/artboard/layers");
   loop_until_exit();
 
   // Then
@@ -176,7 +196,8 @@ TEST_F(ControllerTestSuite, DidDelete)
       type = evt->type;
       m_exit_loop = true;
     });
-  m_sut.reset(new Controller(m_run_loop, fake_design_doc_observer));
+  EXPECT_CALL(m_mock_presenter, getDesignDocObserver()).WillOnce(Return(fake_design_doc_observer));
+  setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path, design_doc_schema_file);
   EXPECT_TRUE(ret);
@@ -185,7 +206,7 @@ TEST_F(ControllerTestSuite, DidDelete)
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // When
-  m_sut->onClick("/artboard/layers/0");
+  mock_click("/artboard/layers/0");
   loop_until_exit();
 
   // Then
@@ -204,7 +225,8 @@ TEST_F(ControllerTestSuite, DidAdd_no_validator)
       type = evt->type;
       m_exit_loop = true;
     });
-  m_sut.reset(new Controller(m_run_loop, fake_design_doc_observer));
+  EXPECT_CALL(m_mock_presenter, getDesignDocObserver()).WillOnce(Return(fake_design_doc_observer));
+  setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path);
   EXPECT_TRUE(ret);
@@ -213,7 +235,7 @@ TEST_F(ControllerTestSuite, DidAdd_no_validator)
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // When
-  m_sut->onClick("/fake/add");
+  mock_click("/fake/add");
   loop_until_exit();
 
   //
@@ -234,7 +256,8 @@ TEST_F(ControllerTestSuite, DidAdd_color)
       type = evt->type;
       m_exit_loop = true;
     });
-  m_sut.reset(new Controller(m_run_loop, fake_design_doc_observer));
+  EXPECT_CALL(m_mock_presenter, getDesignDocObserver()).WillOnce(Return(fake_design_doc_observer));
+  setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path, design_doc_schema_file);
   EXPECT_TRUE(ret);
@@ -243,7 +266,7 @@ TEST_F(ControllerTestSuite, DidAdd_color)
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // When
-  m_sut->onClick("/fake/add_color");
+  mock_click("/fake/add_color");
   loop_until_exit();
 
   // Then

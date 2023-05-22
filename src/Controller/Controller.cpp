@@ -6,6 +6,7 @@
 #include "Model/SubjectJsonDocument.hpp"
 #include "Model/UndoRedoJsonDocument.hpp"
 #include "Model/VggWork.hpp"
+#include "Presenter/Presenter.hpp"
 #include "Utils/DIContainer.hpp"
 
 #include <cassert>
@@ -13,16 +14,32 @@
 namespace VGG
 {
 
-Controller::Controller(std::shared_ptr<RunLoop> runLoop,
-                       rxcpp::observer<ModelEventPtr> designDocObsever,
-                       rxcpp::observer<ModelEventPtr> layoutDocObsever,
-                       RunMode mode)
+Controller::Controller(std::shared_ptr<RunLoop> runLoop, Presenter& presenter, RunMode mode)
   : m_run_loop(runLoop)
-  , m_design_doc_observer(designDocObsever)
-  , m_layout_doc_observer(layoutDocObsever)
+  , m_design_doc_observer(presenter.getDesignDocObserver())
+  , m_layout_doc_observer(presenter.getLayoutDocObserver())
   , m_mode(mode)
 {
   assert(m_run_loop);
+
+  m_view_event_observer = rxcpp::make_observer_dynamic<ViewEventPtr>(
+    [&](ViewEventPtr evt)
+    {
+      switch (evt->type)
+      {
+        case ViewEventType::Click:
+        {
+          const auto& evt_data = std::any_cast<ViewEventClick>(evt->data);
+          auto code = m_work->getCode(evt_data.path);
+          vggExec()->evalModule(code);
+        }
+        break;
+
+        default:
+          break;
+      }
+    });
+  presenter.getObservable().subscribe(m_view_event_observer);
 }
 
 bool Controller::start(const std::string& filePath, const char* designDocSchemaFilePath)
@@ -70,13 +87,6 @@ void Controller::initVggWork(const char* designDocSchemaFilePath)
   m_work.reset(new VggWork(build_design_doc_fn));
 
   VGG::DIContainer<std::shared_ptr<VggWork>>::get() = m_work;
-}
-
-void Controller::onClick(const std::string& path)
-{
-  // todo: create event?
-  auto code = m_work->getCode(path);
-  vggExec()->evalModule(code);
 }
 
 const std::shared_ptr<VggExec>& Controller::vggExec()

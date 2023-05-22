@@ -1,6 +1,7 @@
 #pragma once
 #include "include/core/SkPaint.h"
 #include "Basic/VGGType.h"
+#include "include/pathops/SkPathOps.h"
 
 inline SkPaint::Join toSkPaintJoin(VGG::ELineJoin join)
 {
@@ -28,4 +29,27 @@ inline SkPaint::Cap toSkPaintCap(VGG::ELineCap cap)
       return SkPaint::kSquare_Cap;
   }
   return SkPaint::kButt_Cap;
+}
+
+inline SkPathOp toSkPathOp(VGG::EBoolOp blop)
+{
+  SkPathOp op;
+  switch (blop)
+  {
+    case VGG::BO_Union:
+      op = SkPathOp::kUnion_SkPathOp;
+      break;
+    case VGG::BO_Substraction:
+      op = SkPathOp::kDifference_SkPathOp;
+      break;
+    case VGG::BO_Intersection:
+      op = SkPathOp::kIntersect_SkPathOp;
+      break;
+    case VGG::BO_Exclusion:
+      op = SkPathOp::kReverseDifference_SkPathOp;
+      break;
+    default:
+      return SkPathOp::kUnion_SkPathOp;
+  }
+  return op;
 }

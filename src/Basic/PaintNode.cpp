@@ -1,4 +1,5 @@
 #include "PaintNode.h"
+#include "Basic/SkiaBackend/SkiaConverter.h"
 #include "Basic/VGGType.h"
 
 namespace VGG
@@ -61,24 +62,7 @@ Mask PaintNode::makeMaskBy(EBoolOp maskOp)
   if (maskedBy.empty())
     return result;
 
-  SkPathOp op;
-  switch (maskOp)
-  {
-    case BO_Union:
-      op = SkPathOp::kUnion_SkPathOp;
-      break;
-    case BO_Substraction:
-      op = SkPathOp::kDifference_SkPathOp;
-      break;
-    case BO_Intersection:
-      op = SkPathOp::kIntersect_SkPathOp;
-      break;
-    case BO_Exclusion:
-      op = SkPathOp::kReverseDifference_SkPathOp;
-      break;
-    default:
-      return result;
-  }
+  auto op = toSkPathOp(maskOp);
   auto objects = Scene::getObjectTable();
   for (const auto id : maskedBy)
   {

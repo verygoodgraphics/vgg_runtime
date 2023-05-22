@@ -17,6 +17,47 @@ class Presenter
   rxcpp::observer<VGG::ModelEventPtr> m_layout_doc_observer;
 
 public:
+  Presenter()
+  {
+    m_design_doc_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+      [&](ModelEventPtr evt)
+      {
+        auto type = evt->type;
+        switch (type)
+        {
+          case ModelEventType::Add:
+          {
+            const auto& add_evt = std::any_cast<ModelEventAdd>(evt->data);
+          }
+          break;
+
+          case ModelEventType::Delete:
+          {
+            const auto& delete_evt = std::any_cast<ModelEventDelete>(evt->data);
+          }
+          break;
+
+          case ModelEventType::Update:
+          {
+            const auto& udpate_evt = std::any_cast<ModelEventUpdate>(evt->data);
+          }
+          break;
+
+          default:
+            break;
+        }
+      });
+
+    m_layout_doc_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+      [&](ModelEventPtr evt)
+      {
+        auto type = evt->type;
+        auto data = evt->data;
+      });
+  }
+
+  virtual ~Presenter() = default;
+
   virtual rxcpp::observer<VGG::ModelEventPtr> getDesignDocObserver()
   {
     return m_design_doc_observer;

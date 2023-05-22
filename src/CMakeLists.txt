@@ -43,7 +43,7 @@ if (EMSCRIPTEN)
   )
   target_link_options(vgg_internal PUBLIC -lembind)
 else()
-  target_link_libraries(vgg_internal vgg_libnode)
+  target_link_libraries(vgg_internal vgg_libnode vgg_sketch_parser)
   target_sources(vgg_internal PRIVATE
     PlatformAdapter/Native/Composer/MainComposer.cpp
     PlatformAdapter/Native/Exec/NativeExec.cpp
@@ -98,6 +98,6 @@ else()
   install(TARGETS runtime skia zlib libpng libwebp libjpeg-turbo freetype)
 endif()
 
-target_link_libraries(runtime quickjs vgg_internal glm vgg_sketch_parser)
+target_link_libraries(runtime quickjs vgg_internal glm)
 
 add_subdirectory(Entry)

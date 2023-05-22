@@ -20,7 +20,9 @@
 #include "Utils/FileManager.hpp"
 #include "Basic/Scene.hpp"
 #include <memory>
+#ifndef EMSCRIPTEN
 #include <vgg_sketch_parser/src/analyze_sketch_file/analyze_sketch_file.h>
+#endif
 
 using namespace VGG;
 
@@ -31,7 +33,8 @@ extern "C"
   {
     static SDLRuntime* app = App<SDLRuntime>::getInstance();
     ASSERT(app);
-    app->frame();
+    constexpr int fps = 60;
+    app->frame(fps);
   }
   void emscripten_main(int width, int height)
   {

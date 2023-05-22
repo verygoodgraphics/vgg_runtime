@@ -1,3 +1,4 @@
+#include "Basic/Attrs.h"
 #include "Basic/PaintNode.h"
 #include "Basic/PathNode.h"
 #include "Basic/VGGType.h"
@@ -12,6 +13,8 @@
 #include "include/core/SkMatrix.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPathEffect.h"
+
+#include "include/effects/SkImageFilters.h"
 #include "include/core/SkScalar.h"
 #include "include/core/SkShader.h"
 #include "include/core/SkSurface.h"
@@ -22,6 +25,7 @@
 #include "include/core/SkPath.h"
 #include "include/gpu/GrTypes.h"
 #include "include/pathops/SkPathOps.h"
+#include "src/core/SkBlurMask.h"
 #include <limits>
 
 namespace VGG
@@ -424,8 +428,31 @@ SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
 // }
 //
 
-void drawBorder_Skia(SkCanvas* canvas, const SkPath& path, const SkPaint& pen, int position)
+void drawPathFill(SkCanvas* canvas,
+                  const glm::vec2& size,
+                  const SkPath& path,
+                  const Style& fillStyle,
+                  float globalAlpha)
 {
+}
+
+sk_sp<SkShader> getGradientShader(const VGGGradient& g, const glm::vec2& size)
+{
+  sk_sp<SkShader> shader;
+  const auto type = g.gradientType;
+  if (type == GT_Linear)
+  {
+    shader = g.getLinearShader(size);
+  }
+  else if (type == GT_Radial)
+  {
+    shader = g.getRadialShader(size);
+  }
+  else if (type == GT_Angular)
+  {
+    shader = g.getAngularShader(size);
+  }
+  return shader;
 }
 
 PathNode::PathNode(const std::string& name)
@@ -493,14 +520,50 @@ void PathNode::drawContour(SkCanvas* canvas, const SkPath* outlineMask)
 
   const auto globalAlpha = contextSetting.Opacity;
 
+  // draw shadows
+  for (const auto& s : style.shadows)
+  {
+    if (s.is_enabled == false)
+      continue;
+    SkPaint pen;
+    auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
+    pen.setImageFilter(
+      SkImageFilters::DropShadowOnly(s.offset_x, s.offset_y, sigma, sigma, s.color, nullptr));
+    canvas->saveLayer(nullptr, &pen);
+
+    const auto size = bound.size();
+    canvas->translate(size.x / 2 + s.offset_x, size.y / 2 + s.offset_y);
+    canvas->scale(s.spread, s.spread);
+    canvas->translate(-size.x / 2 - s.offset_x, -size.y / 2 - s.offset_y);
+    SkPaint fillPen;
+    fillPen.setStyle(SkPaint::kFill_Style);
+
+    if (outlineMask)
+    {
+      canvas->clipPath(*outlineMask);
+    }
+
+    canvas->drawPath(skPath, fillPen);
+    canvas->restore();
+  }
+
+  // draw fills
   for (const auto& f : style.fills)
   {
     if (!f.isEnabled)
       continue;
     SkPaint fillPen;
-    fillPen.setColor(f.color);
+    if (f.fillType == FT_Color)
+    {
+      fillPen.setColor(f.color);
+      fillPen.setAlphaf(fillPen.getAlphaf() * globalAlpha);
+    }
+    else if (f.fillType == FT_Gradient)
+    {
+      // TODO: get gradient
+      fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);
+    }
     fillPen.setStyle(SkPaint::kFill_Style);
-    fillPen.setAlphaf(fillPen.getAlphaf() * globalAlpha);
     if (outlineMask)
     {
       canvas->clipPath(*outlineMask);
@@ -541,21 +604,7 @@ void PathNode::drawContour(SkCanvas* canvas, const SkPath* outlineMask)
     // if border is gradient
     if (b.gradient.has_value())
     {
-      sk_sp<SkShader> shader;
-      const auto type = b.gradient->gradientType;
-      if (type == GT_Linear)
-      {
-        shader = b.gradient->getLinearShader(bound.size());
-      }
-      else if (type == GT_Radial)
-      {
-        shader = b.gradient->getRadialShader(bound.size());
-      }
-      else if (type == GT_Angular)
-      {
-        shader = b.gradient->getAngularShader(bound.size());
-      }
-      strokePen.setShader(shader);
+      strokePen.setShader(getGradientShader(b.gradient.value(), bound.size()));
       strokePen.setAlphaf(b.context_settings.Opacity * globalAlpha);
     }
     else
@@ -569,9 +618,10 @@ void PathNode::drawContour(SkCanvas* canvas, const SkPath* outlineMask)
       canvas->clipPath(*outlineMask);
     }
     canvas->drawPath(skPath, strokePen);
+
     if (b.position != PP_Middle)
     {
-      canvas->restore();
+      canvas->restore(); // pop border position style
     }
   }
 }

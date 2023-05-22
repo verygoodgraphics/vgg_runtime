@@ -131,8 +131,8 @@ enum ELineCap : uint8_t
 enum EPathPosition : uint8_t
 {
   PP_Middle,
-  PP_Outside,
   PP_Inside,
+  PP_Outside,
 };
 
 enum EGradientType : uint8_t

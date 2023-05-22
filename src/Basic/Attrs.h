@@ -260,14 +260,14 @@ struct Border
 
 struct Shadow
 {
-  double blur;
+  float blur;
   VGGColor color;
   ContextSetting context_settings;
   bool inner;
   bool is_enabled;
-  double offset_x;
-  double offset_y;
-  double spread;
+  float offset_x;
+  float offset_y;
+  float spread;
 };
 
 struct Blur

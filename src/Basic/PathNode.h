@@ -73,7 +73,7 @@ public:
 
 public:
   PathNode(const std::string& name);
-  void Paint(SkCanvas* canvas) override;
+  void paintEvent(SkCanvas* canvas) override;
   Mask asOutlineMask(const glm::mat3* mat) override;
   void addSubShape(std::shared_ptr<PaintNode> node, EBoolOp op);
   void addSubShape(const Contour& ctr, EBoolOp op);

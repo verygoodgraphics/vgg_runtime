@@ -176,7 +176,7 @@ public:
       }
       else if (klass == "group")
       {
-        p->addSubShape(fromGroup(j), blop);
+        p->addSubShape(fromGroup(geo), blop);
       }
       else if (klass == "symbolInstance")
       {

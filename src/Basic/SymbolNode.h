@@ -25,7 +25,7 @@ public:
   {
   }
 
-  void Paint(SkCanvas* canvas) override
+  void paintEvent(SkCanvas* canvas) override
   {
     if (master == nullptr)
     {
@@ -34,14 +34,14 @@ public:
   }
 
 protected:
-  void recursivelyRenderPass(SkCanvas* canvas) override
+  void invokeRenderPass(SkCanvas* canvas) override
   {
-    renderPassBefore();
+    preRenderPass(canvas);
     if (master)
     {
-      master->recursivelyRenderPass(canvas);
+      master->invokeRenderPass(canvas);
     }
-    renderPassAfter();
+    postRenderPass(canvas);
   }
 };
 

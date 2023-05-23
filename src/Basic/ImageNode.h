@@ -14,7 +14,7 @@ class ImageNode final : public PaintNode
   static std::unordered_map<std::string, sk_sp<SkImage>> SkiaImageRepo;
 public:
   ImageNode(const std::string& name);
-  void Paint(SkCanvas* canvas) override;
+  void paintEvent(SkCanvas* canvas) override;
   void setImage(const std::string& guid);
   const std::string& getImageGUID() const;
   void setReplacesImage(bool fill);

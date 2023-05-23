@@ -14,7 +14,7 @@ class TextNode final : public PaintNode
   friend class NlohmannBuilder;
 public:
   TextNode(const std::string& name, const std::string& text);
-  void Paint(SkCanvas* canvas) override;
+  void paintEvent(SkCanvas* canvas) override;
 };
 
 } // namespace VGG

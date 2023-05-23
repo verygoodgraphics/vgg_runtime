@@ -34,14 +34,12 @@ public:
   }
 
 protected:
-  void invokeRenderPass(SkCanvas* canvas) override
+  void renderOrderPass(SkCanvas* canvas) override
   {
-    preRenderPass(canvas);
     if (master)
     {
       master->invokeRenderPass(canvas);
     }
-    postRenderPass(canvas);
   }
 };
 

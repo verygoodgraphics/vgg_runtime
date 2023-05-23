@@ -142,4 +142,12 @@ enum EGradientType : uint8_t
   GT_Angular
 };
 
+enum EPointMode
+{
+  PM_Straight = 1,
+  PM_Mirrored = 2,
+  PM_Asymmetric = 3,
+  PM_Disconnected = 4,
+};
+
 } // namespace VGG

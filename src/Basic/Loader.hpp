@@ -2,6 +2,7 @@
 
 #include "Basic/Attrs.h"
 #include "Basic/AttrSerde.h"
+#include "Basic/ContourNode.h"
 #include "Basic/VGGType.h"
 #include "Node.hpp"
 #include "glm/matrix.hpp"
@@ -98,11 +99,10 @@ public:
     obj->guid = j.at("id").get<std::string>();
   }
 
-  static inline Contour fromContour(const nlohmann::json& j)
+  static inline std::shared_ptr<ContourNode> fromContour(const nlohmann::json& j)
   {
     Contour contour;
     contour.closed = j["closed"];
-
     for (const auto& e : j["points"])
     {
       const auto p = e["point"];
@@ -112,7 +112,7 @@ public:
                            get_opt<glm::vec2>(e, "curveTo"),
                            get_opt<int>(e, "cornerStyle"));
     }
-    return contour;
+    return std::make_shared<ContourNode>("contour", std::make_shared<Contour>(contour));
   }
 
   static inline std::shared_ptr<ImageNode> fromImage(const nlohmann::json& j)
@@ -150,7 +150,7 @@ public:
     auto p = std::make_shared<PathNode>(j["name"]);
     fromObjectCommonProperty(j, p.get());
     const auto shape = j["shape"];
-    p->shape.windingRule = shape["windingRule"];
+    p->setWindingRule(shape["windingRule"]);
     for (const auto& subshape : shape["subshapes"])
     {
       const auto blop = subshape["booleanOperation"];
@@ -158,9 +158,7 @@ public:
       const auto klass = geo["class"];
       if (klass == "contour")
       {
-        auto ct = fromContour(geo);
-        ct.blop = blop;
-        p->addSubShape(ct, blop);
+        p->addSubShape(fromContour(geo), blop);
       }
       else if (klass == "path")
       {

@@ -518,7 +518,7 @@ Mask PathNode::asOutlineMask(const glm::mat3* mat)
   return mask;
 }
 
-void PathNode::Paint(SkCanvas* canvas)
+void PathNode::paintEvent(SkCanvas* canvas)
 {
   if (!shape.subshape.contours.empty())
   {
@@ -577,6 +577,11 @@ void PathNode::drawContour(SkCanvas* canvas, const SkPath* outlineMask)
 {
   if (shape.subshape.contours.empty())
     return;
+
+  if (m_name == "Difference")
+  {
+    std::cout << "Here\n";
+  }
   SkPath skPath = makePath();
   // winding rule
   if (shape.windingRule == EWindingType::WR_EvenOdd)

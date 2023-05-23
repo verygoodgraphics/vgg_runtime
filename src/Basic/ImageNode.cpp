@@ -23,7 +23,7 @@ ImageNode::ImageNode(const std::string& name)
 {
 }
 
-void ImageNode::Paint(SkCanvas* canvas)
+void ImageNode::paintEvent(SkCanvas* canvas)
 {
   if (!image)
   {

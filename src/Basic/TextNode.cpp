@@ -178,7 +178,7 @@ TextNode::TextNode(const std::string& name, const std::string& text)
 {
 }
 
-void TextNode::Paint(SkCanvas* canvas)
+void TextNode::paintEvent(SkCanvas* canvas)
 {
   if (styles.empty() == false)
   {

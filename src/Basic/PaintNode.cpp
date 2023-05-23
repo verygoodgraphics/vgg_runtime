@@ -89,7 +89,7 @@ void PaintNode::renderPass(SkCanvas* canvas)
   s_defaultCanvas = canvas;
   RenderState renderState;
   s_renderState = &renderState;
-  recursivelyRenderPass(canvas);
+  invokeRenderPass(canvas);
   s_renderState = nullptr;
 }
 
@@ -124,13 +124,13 @@ void PaintNode::visitNode(VGG::Node* p, ObjectTableType& table)
   }
 }
 
-void PaintNode::paint()
+void PaintNode::paintPass()
 {
   SkCanvas* canvas = getSkCanvas();
   canvas->save();
   canvas->concat(toSkMatrix(this->transform));
   // this->drawDebugBoarder(canvas);
-  this->Paint(canvas);
+  this->paintEvent(canvas);
 }
 
 SkCanvas* PaintNode::getSkCanvas()

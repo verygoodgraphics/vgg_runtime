@@ -113,7 +113,11 @@ public:
   virtual void asAlphaMask();
 
 protected:
-  void renderPass(SkCanvas* canvas);
+  void renderPass(SkCanvas* canvas); // TODO:: should be private access
+
+  virtual void paintEvent(SkCanvas* canvas)
+  {
+  }
 
 private:
   void visitNode(VGG::Node* p, ObjectTableType& table);
@@ -131,34 +135,34 @@ private:
   }
 
 public:
-  virtual void recursivelyRenderPass(SkCanvas* canvas)
+  virtual void invokeRenderPass(SkCanvas* canvas)
   {
-    renderPassBefore();
+    preRenderPass(canvas);
+    renderOrderPass(canvas);
+    postRenderPass(canvas);
+  }
+
+  virtual void renderOrderPass(SkCanvas* canvas)
+  {
     for (const auto& p : this->m_firstChild)
     {
       auto q = static_cast<PaintNode*>(p.get());
-      q->recursivelyRenderPass(canvas);
+      q->invokeRenderPass(canvas);
     }
-    renderPassAfter();
   }
-  virtual void renderPassBefore()
+  virtual void preRenderPass(SkCanvas* canvas)
   {
     if (isPaintDirty())
     {
-      paint();
+      paintPass();
     }
   }
 
-  virtual void paint();
+  virtual void paintPass();
 
-  virtual void renderPassAfter()
+  virtual void postRenderPass(SkCanvas* canvas)
   {
-    SkCanvas* canvas = getSkCanvas();
     canvas->restore();
-  }
-
-  virtual void Paint(SkCanvas* canvas)
-  {
   }
 
   virtual void Transform(SkCanvas* canvas)

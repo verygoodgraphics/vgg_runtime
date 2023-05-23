@@ -257,3 +257,10 @@ console.log('#vgg is: ', getVgg());
   auto result = sut_ptr->evalModule(code);
   EXPECT_EQ(result, true);
 }
+
+TEST_F(VggNativeExecTestSuite, setInterval)
+{
+  auto code = "let times = 0; setInterval(() => { console.log('test, ', ++times);}, 1000)";
+  auto result = sut_ptr->evalModule(code);
+  EXPECT_EQ(result, true);
+}

@@ -33,6 +33,9 @@
                 throw new Error(message || "Assertion failed");
             }
         }
+
+        let times = 0;
+        setInterval(() => { console.log('test, ', ++times); }, 1000);
     </script>
 </body>
 

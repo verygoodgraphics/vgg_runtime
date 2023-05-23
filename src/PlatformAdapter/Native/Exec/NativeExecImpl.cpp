@@ -17,7 +17,7 @@ bool NativeExecImpl::schedule_eval(const std::string& code)
 {
   if (!check_state())
   {
-    FAILED("#NativeExecImpl::schedule_eval, error state");
+    FAIL("#NativeExecImpl::schedule_eval, error state");
     return false;
   }
 
@@ -59,7 +59,7 @@ int NativeExecImpl::eval(std::string_view buffer)
   auto maybe_local_v8_string = v8::String::NewFromUtf8(m_isolate, buffer.data());
   if (maybe_local_v8_string.IsEmpty())
   {
-    FAILED("#NativeExecImpl::eval, error, script is empty");
+    FAIL("#NativeExecImpl::eval, error, script is empty");
     return -1;
   }
 
@@ -67,7 +67,7 @@ int NativeExecImpl::eval(std::string_view buffer)
   auto maybe_script = v8::Script::Compile(context, local_v8_string);
   if (maybe_script.IsEmpty())
   {
-    FAILED("#NativeExecImpl::eval, error, complie script error");
+    FAIL("#NativeExecImpl::eval, error, complie script error");
     return -1;
   }
 
@@ -76,7 +76,7 @@ int NativeExecImpl::eval(std::string_view buffer)
   auto script_result = script->Run(context);
   if (script_result.IsEmpty())
   {
-    FAILED("#NativeExecImpl::eval, error, run script error");
+    FAIL("#NativeExecImpl::eval, error, run script error");
     return -1;
   }
 
@@ -141,7 +141,7 @@ bool NativeExecImpl::check_state()
 {
   if (m_state == DEAD)
   {
-    FAILED("#NativeExecImpl::check_state, dead state");
+    FAIL("#NativeExecImpl::check_state, dead state");
     return false;
   }
 
@@ -208,7 +208,7 @@ int NativeExecImpl::run_node_instance(MultiIsolatePlatform* platform,
     INFO("#exec, node run");
     exit_code = node::SpinEventLoop(env).FromMaybe(1);
 
-    node::Stop(env);
+    stop_node();
   }
 
   m_state = DEAD;
@@ -221,6 +221,15 @@ void NativeExecImpl::erase_task(NativeEvalTask* task)
 {
   const std::lock_guard<std::mutex> lock(m_tasks_mutex);
   m_tasks.erase(task);
+}
+
+void NativeExecImpl::stop_node()
+{
+  if (m_env)
+  {
+    node::Stop(m_env);
+    m_env = nullptr;
+  }
 }
 
 void NativeExecImpl::stop_node_thread_safe()

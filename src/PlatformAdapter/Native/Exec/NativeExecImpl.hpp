@@ -31,10 +31,7 @@ struct NativeExecImpl;
 struct NativeEvalTask
 {
   std::string m_code;
-  uv_async_t m_async_task;
   NativeExecImpl* m_exec_impl_ptr;
-
-  void run();
 };
 
 class NativeExecImpl
@@ -48,16 +45,18 @@ public:
   node::Environment* getNodeEnv();
 
 private:
-  friend NativeEvalTask;
   int eval(const std::string_view buffer);
 
   int node_main(const std::vector<std::string>& args);
   int run_node_instance(MultiIsolatePlatform* platform,
                         const std::vector<std::string>& args,
                         const std::vector<std::string>& exec_args);
-  void run_task(NativeEvalTask* task);
+  void run_task();
   void erase_task(NativeEvalTask* task);
   bool check_state();
+
+  void init_uv_async_task();
+  void deinit_uv_async_task();
 
   enum ExecState
   {
@@ -78,4 +77,5 @@ private:
   std::mutex m_state_mutex;
   uv_timer_t m_keep_alive_timer;
   uv_async_t m_stop_timer_async;
+  uv_async_t m_async_task;
 };

@@ -29,18 +29,7 @@ bool NativeExecImpl::schedule_eval(const std::string& code)
     const std::lock_guard<std::mutex> lock(m_tasks_mutex);
     m_tasks.insert(task);
   }
-
-  // Setup and send task to uv event loop
-  uv_async_init(m_loop,
-                &task->m_async_task,
-                [](uv_async_t* async)
-                {
-                  // Run task in uv event loop.
-                  uv_close(reinterpret_cast<uv_handle_t*>(async), nullptr);
-                  NativeEvalTask* task = node::ContainerOf(&NativeEvalTask::m_async_task, async);
-                  task->run();
-                });
-  uv_async_send(&task->m_async_task);
+  uv_async_send(&m_async_task);
 
   return true;
 }
@@ -193,9 +182,6 @@ int NativeExecImpl::run_node_instance(MultiIsolatePlatform* platform,
 
     if (m_state != CANCELLED)
     {
-      const std::lock_guard<std::mutex> lock(m_state_mutex);
-      m_state = RUNNING;
-
       INFO("#exec, init keep alive timer");
       uv_timer_init(setup->event_loop(), &m_keep_alive_timer);
       uv_timer_start(
@@ -203,10 +189,17 @@ int NativeExecImpl::run_node_instance(MultiIsolatePlatform* platform,
         [](uv_timer_t* timer) {},
         std::numeric_limits<uint64_t>::max(),
         0);
-    }
 
-    INFO("#exec, node run");
-    exit_code = node::SpinEventLoop(env).FromMaybe(1);
+      init_uv_async_task();
+
+      const std::lock_guard<std::mutex> lock(m_state_mutex);
+      m_state = RUNNING;
+
+      INFO("#exec, node run");
+      exit_code = node::SpinEventLoop(env).FromMaybe(1);
+
+      deinit_uv_async_task();
+    }
 
     stop_node();
   }
@@ -243,6 +236,21 @@ void NativeExecImpl::stop_node_thread_safe()
     return;
   }
 
+  uv_async_send(&m_stop_timer_async);
+}
+
+void NativeExecImpl::init_uv_async_task()
+{
+  uv_async_init(m_loop,
+                &m_async_task,
+                [](uv_async_t* async)
+                {
+                  // Run task in uv event loop.
+                  auto self_ptr = static_cast<NativeExecImpl*>(async->data);
+                  self_ptr->run_task();
+                });
+  m_async_task.data = static_cast<void*>(this);
+
   uv_async_init(m_loop,
                 &m_stop_timer_async,
                 [](uv_async_t* async)
@@ -254,22 +262,24 @@ void NativeExecImpl::stop_node_thread_safe()
                   uv_close(reinterpret_cast<uv_handle_t*>(&self_ptr->m_stop_timer_async), nullptr);
                 });
   m_stop_timer_async.data = static_cast<void*>(this);
-  uv_async_send(&m_stop_timer_async);
 }
 
-void NativeExecImpl::run_task(NativeEvalTask* task)
+void NativeExecImpl::deinit_uv_async_task()
 {
+  uv_close(reinterpret_cast<uv_handle_t*>(&m_async_task), nullptr);
+}
+
+void NativeExecImpl::run_task()
+{
+  if (m_tasks.empty())
+  {
+    return;
+  }
+
+  auto task = *m_tasks.begin();
   DEBUG("#evalScript, before eval");
   int ret = eval(task->m_code);
   DEBUG("#evalScript, after eval, ret = %d", ret);
 
   erase_task(task);
-}
-
-/*
- * NativeEvalTask
- */
-void NativeEvalTask::run()
-{
-  m_exec_impl_ptr->run_task(this);
 }

@@ -11,10 +11,6 @@
 #include <stdint.h>
 #include <glm/glm.hpp>
 
-namespace nlohmann
-{
-} // namespace nlohmann
-
 namespace VGG
 {
 struct ContextSetting
@@ -339,6 +335,35 @@ struct TextStyleStub
     pen.setStyle(SkPaint::kFill_Style);
     pen.setColor(fillColor.value());
     return pen;
+  }
+};
+
+struct PointAttr
+{
+  glm::vec2 point;
+  float radius = 0.0;
+  std::optional<glm::vec2> from;
+  std::optional<glm::vec2> to;
+  std::optional<int> cornerStyle;
+
+  PointAttr(glm::vec2 point,
+            float radius,
+            std::optional<glm::vec2> from,
+            std::optional<glm::vec2> to,
+            std::optional<int> cornerStyle)
+    : point(point)
+    , radius(radius)
+    , from(from)
+    , to(to)
+    , cornerStyle(cornerStyle)
+  {
+  }
+
+  EPointMode mode() const
+  {
+    if (from.has_value() || to.has_value())
+      return EPointMode::PM_Disconnected;
+    return EPointMode::PM_Straight;
   }
 };
 

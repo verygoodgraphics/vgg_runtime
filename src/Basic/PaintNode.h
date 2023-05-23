@@ -15,8 +15,6 @@
 #include "include/core/SkMatrix.h"
 #include "include/core/SkPaint.h"
 #include "include/pathops/SkPathOps.h"
-#include "glm/ext/vector_float2.hpp"
-#include "glm/fwd.hpp"
 
 #include <any>
 #include <memory>
@@ -31,18 +29,18 @@ protected:
   static SkCanvas* s_defaultCanvas;
   static RenderState* s_renderState;
   std::string guid;
-  std::unordered_map<std::string, std::any> properties;
-  bool paintDirty{ false };
-  EMaskType maskType{ MT_None };
   std::vector<std::string> maskedBy;
   Mask outlineMask;
-  EBoolOp boolOperation;
+  EMaskType maskType{ MT_None };
+  bool paintDirty{ false };
+  EBoolOp m_clipOperator;
+
   friend class NlohmannBuilder;
   friend class SkiaRenderer;
 
 public:
   Bound2 bound;
-  glm::mat3 transform;
+  glm::mat3 transform{ 1.0 };
   ObjectType type;
   bool visible = true;
   Style style;
@@ -58,6 +56,16 @@ public:
   void addChild(const std::shared_ptr<PaintNode> node)
   {
     pushChildBack(std::move(node));
+  }
+
+  void setClipOperator(EBoolOp op)
+  {
+    m_clipOperator = op;
+  }
+
+  EBoolOp clipOperator() const
+  {
+    return m_clipOperator;
   }
 
   void setVisible(bool visible)
@@ -135,7 +143,7 @@ private:
   }
 
 public:
-  virtual void invokeRenderPass(SkCanvas* canvas)
+  void invokeRenderPass(SkCanvas* canvas)
   {
     preRenderPass(canvas);
     renderOrderPass(canvas);

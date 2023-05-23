@@ -1,4 +1,5 @@
 #include "Basic/Attrs.h"
+#include "Basic/ContourNode.h"
 #include "Basic/PaintNode.h"
 #include "Basic/PathNode.h"
 #include "Basic/VGGType.h"
@@ -30,264 +31,6 @@
 
 namespace VGG
 {
-constexpr float EPS = std::numeric_limits<float>::epsilon();
-double calcRadius(double r0,
-                  const glm::vec2& p0,
-                  const glm::vec2& p1,
-                  const glm::vec2& p2,
-                  glm::vec2* left,
-                  glm::vec2* right)
-{
-  glm::vec2 a = p0 - p1;
-  glm::vec2 b = p2 - p1;
-  double alen = a.length();
-  double blen = b.length();
-  if (std::fabs(alen) < EPS || std::fabs(blen) < EPS)
-  {
-    return 0.;
-  }
-  ASSERT(alen > 0 && blen > 0);
-  double cosTheta = glm::dot(a, b) / alen / blen;
-  if (cosTheta + 1 < EPS) // cosTheta == -1
-  {
-    if (left)
-    {
-      left->x = p1.x;
-      left->y = p1.y;
-    }
-    if (right)
-    {
-      right->x = p1.x;
-      right->y = p1.y;
-    }
-    return r0;
-  }
-  else if (1 - cosTheta < EPS) // cosTheta == 1
-  {
-    return 0.;
-  }
-  double tanHalfTheta = std::sqrt((1 - cosTheta) / (1 + cosTheta));
-  double radius = r0;
-  radius = std::min(radius, 0.5 * alen * tanHalfTheta);
-  radius = std::min(radius, 0.5 * blen * tanHalfTheta);
-  if (left)
-  {
-    ASSERT(tanHalfTheta > 0);
-    float len = radius / tanHalfTheta;
-    *left = p1 + float(len / alen) * a;
-  }
-  if (right)
-  {
-    ASSERT(tanHalfTheta > 0);
-    double len = radius / tanHalfTheta;
-    *right = p1 + (float(len / blen) * b);
-  }
-  return radius;
-}
-
-SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
-{
-  constexpr float w = 1.0;
-  constexpr float h = 1.0;
-  auto& pts = points;
-
-  ASSERT(w > 0);
-  ASSERT(h > 0);
-
-  SkPath skPath;
-
-  if (pts.size() < 2)
-  {
-    // WARN("Too few path points.");
-    return skPath;
-  }
-
-  using PM = PointMode;
-  auto* startP = &pts[0];
-  auto* endP = &pts[pts.size() - 1];
-  auto* prevP = endP;
-  auto* currP = startP;
-  auto* nextP = currP + 1;
-
-  const glm::vec2 s = { w, h };
-
-  if (currP->radius > 0 && currP->mode() == PM::STRAIGHT)
-  {
-    glm::vec2 start = currP->point * s;
-    calcRadius(currP->radius,
-               prevP->point * s,
-               currP->point * s,
-               nextP->point * s,
-               nullptr,
-               &start);
-    skPath.moveTo(start.x, start.y);
-  }
-  else
-  {
-    skPath.moveTo(w * currP->point.x, h * currP->point.y);
-  }
-
-  while (true)
-  {
-    if (currP->mode() == PM::STRAIGHT && nextP->mode() == PM::STRAIGHT)
-    {
-      if (nextP->radius > 0 && nextP->mode() == PM::STRAIGHT)
-      {
-        auto* next2P = (nextP == endP) ? startP : (nextP + 1);
-        auto next2Pp = next2P->to.has_value() ? next2P->to.value() : next2P->point;
-        double r = calcRadius(nextP->radius, currP->point * s, nextP->point * s, next2Pp * s, 0, 0);
-        skPath.arcTo(w * nextP->point.x, h * nextP->point.y, w * next2Pp.x, h * next2Pp.y, r);
-      }
-      else
-      {
-        skPath.lineTo(w * nextP->point.x, h * nextP->point.y);
-      }
-    }
-    else if (currP->mode() == PM::DISCONNECTED && nextP->mode() == PM::DISCONNECTED)
-    {
-      bool hasFrom = currP->from.has_value();
-      bool hasTo = nextP->to.has_value();
-      if (!hasFrom && !hasTo)
-      {
-        skPath.lineTo(w * nextP->point.x, h * nextP->point.y);
-      }
-      else if (hasFrom && !hasTo)
-      {
-        auto& from = currP->from.value();
-        skPath.quadTo(w * from.x, h * from.y, w * nextP->point.x, h * nextP->point.y);
-      }
-      else if (!hasFrom && hasTo)
-      {
-        auto& to = nextP->to.value();
-        skPath.quadTo(w * to.x, h * to.y, w * nextP->point.x, h * nextP->point.y);
-      }
-      else
-      {
-        auto& from = currP->from.value();
-        auto& to = nextP->to.value();
-        skPath.cubicTo(w * from.x,
-                       h * from.y,
-                       w * to.x,
-                       h * to.y,
-                       w * nextP->point.x,
-                       h * nextP->point.y);
-      }
-    }
-    else if (currP->mode() != PM::STRAIGHT && nextP->mode() != PM::STRAIGHT)
-    {
-      if ((currP->mode() == PM::DISCONNECTED && !currP->from.has_value()) ||
-          (nextP->mode() == PM::DISCONNECTED && !nextP->to.has_value()) ||
-          (currP->mode() != PM::DISCONNECTED &&
-           !(currP->from.has_value() && currP->to.has_value())) ||
-          (nextP->mode() != PM::DISCONNECTED &&
-           !(nextP->from.has_value() && nextP->to.has_value())))
-      {
-        WARN("Missing control points.");
-        return skPath;
-      }
-      auto& from = currP->from.value();
-      auto& to = nextP->to.value();
-      skPath.cubicTo(w * from.x,
-                     h * from.y,
-                     w * to.x,
-                     h * to.y,
-                     w * nextP->point.x,
-                     h * nextP->point.y);
-    }
-    else if (currP->mode() == PM::STRAIGHT && nextP->mode() != PM::STRAIGHT)
-    {
-      if (!nextP->to.has_value())
-      {
-        skPath.lineTo(w * nextP->point.x, h * nextP->point.y);
-      }
-      else
-      {
-        auto& to = nextP->to.value();
-        skPath.quadTo(w * to.x, h * to.y, w * nextP->point.x, h * nextP->point.y);
-      }
-    }
-    else if (currP->mode() != PM::STRAIGHT && nextP->mode() == PM::STRAIGHT)
-    {
-      if (nextP->radius > 0 && nextP->mode() == PM::STRAIGHT)
-      {
-        auto* next2P = (nextP == endP) ? startP : (nextP + 1);
-        if (!currP->from.has_value())
-        {
-          glm::vec2 start;
-          double r = calcRadius(nextP->radius,
-                                currP->point * s,
-                                nextP->point * s,
-                                next2P->point * s,
-                                &start,
-                                nullptr);
-          skPath.lineTo(start.x, start.y);
-          skPath.arcTo(w * nextP->point.x,
-                       h * nextP->point.y,
-                       w * next2P->point.x,
-                       h * next2P->point.y,
-                       r);
-        }
-        else
-        {
-          auto currPfrom = currP->from.value();
-          constexpr float radius_coeff = 1.0;
-          // glm::vec2 p =
-          // currP->point.add(currPfrom.sub(currP->point).scale(radius_coeff)).scale(w, h);
-          glm::vec2 p = (currP->point + radius_coeff * (currPfrom - currP->point)) * s;
-          glm::vec2 start;
-          double r =
-            calcRadius(nextP->radius, p, nextP->point * s, next2P->point * s, &start, nullptr);
-          skPath.quadTo(p.x, p.y, start.x, start.y);
-          skPath.arcTo(w * nextP->point.x,
-                       h * nextP->point.y,
-                       w * next2P->point.x,
-                       h * next2P->point.y,
-                       r);
-        }
-      }
-      else
-      {
-        if (!currP->from.has_value())
-        {
-          skPath.lineTo(w * nextP->point.x, h * nextP->point.y);
-        }
-        else
-        {
-          auto& from = currP->from.value();
-          skPath.quadTo(w * from.x, h * from.y, w * nextP->point.x, h * nextP->point.y);
-        }
-      }
-    }
-    else
-    {
-      WARN("Invalid point mode combination: %d %d", (int)currP->mode(), (int)nextP->mode());
-    }
-    currP = nextP;
-    nextP = (nextP == endP) ? startP : (nextP + 1);
-
-    if (isClosed)
-    {
-      if (currP == startP)
-      {
-        break;
-      }
-    }
-    else
-    {
-      if (nextP == startP)
-      {
-        break;
-      }
-    }
-  }
-
-  if (isClosed)
-  {
-    skPath.close();
-  }
-
-  return skPath;
-}
 
 // void drawPathFill(SkCanvas* canvas,
 //                   const Frame& frame,
@@ -499,69 +242,71 @@ PathNode::PathNode(const std::string& name)
 
 Mask PathNode::asOutlineMask(const glm::mat3* mat)
 {
-  SkPath p;
   Mask mask;
-  if (!shape.subshape.contours.empty())
+  for (const auto& c : m_firstChild)
   {
-    for (const auto& c : shape.subshape.contours)
-    {
-      auto comp = getSkiaPath(c, c.closed);
-      p.addPath(comp);
-    }
+    auto p = static_cast<PaintNode*>(c.get());
+    mask.addMask(p->asOutlineMask(&p->transform));
   }
   if (mat)
   {
-    p.transform(toSkMatrix(*mat));
+    mask.outlineMask.transform(toSkMatrix(*mat));
   }
-
-  mask.outlineMask = p;
   return mask;
 }
 
 void PathNode::paintEvent(SkCanvas* canvas)
 {
-  if (!shape.subshape.contours.empty())
+  if (m_firstChild.empty())
+    return;
+  auto mask = makeMaskBy(BO_Intersection);
+  if (mask.outlineMask.isEmpty())
   {
-    auto mask = makeMaskBy(BO_Intersection);
-    if (mask.outlineMask.isEmpty())
-    {
-      drawContour(canvas, nullptr);
-    }
-    else
-    {
-      drawContour(canvas, &mask.outlineMask);
-    }
+    drawContour(canvas, nullptr);
+  }
+  else
+  {
+    drawContour(canvas, &mask.outlineMask);
   }
 } // namespace VGG
 
 SkPath PathNode::makePath()
 {
-  auto& ct = shape.subshape.contours;
+  std::vector<std::pair<SkPath, EBoolOp>> ct;
+  // SkPath skpath;
+  for (const auto& c : m_firstChild)
+  {
+    auto p = static_cast<PaintNode*>(c.get());
+    auto outline = p->asOutlineMask(&p->transform);
+    ct.emplace_back(outline.outlineMask, p->clipOperator());
+    // skpath.addPath(outline.outlineMask);
+  }
+  // return skpath;
   assert(ct.size() >= 1);
 
   if (ct.size() == 1)
   {
-    return getSkiaPath(ct[0], ct[0].closed);
+    return ct[0].first;
   }
 
   std::vector<SkPath> res;
-  SkPath skPath = getSkiaPath(ct[0], ct[0].closed);
-  auto op = ct[0].blop;
+  SkPath skPath = ct[0].first;
+  auto op = ct[0].second;
   for (int i = 1; i < ct.size(); i++)
   {
     SkPath rhs;
     if (op != BO_None)
     {
       auto skop = toSkPathOp(op);
-      rhs = getSkiaPath(ct[i], ct[i].closed);
+      rhs = ct[i].first;
       Op(skPath, rhs, skop, &skPath);
     }
     else
     {
       res.push_back(skPath);
-      skPath = getSkiaPath(ct[i], ct[i].closed);
+      skPath = ct[i].first;
     }
-    op = ct[i].blop; // next op
+    op = ct[i].second;
   }
   res.push_back(skPath);
 
@@ -575,16 +320,10 @@ SkPath PathNode::makePath()
 
 void PathNode::drawContour(SkCanvas* canvas, const SkPath* outlineMask)
 {
-  if (shape.subshape.contours.empty())
-    return;
 
-  if (m_name == "Difference")
-  {
-    std::cout << "Here\n";
-  }
   SkPath skPath = makePath();
   // winding rule
-  if (shape.windingRule == EWindingType::WR_EvenOdd)
+  if (windingRule == EWindingType::WR_EvenOdd)
   {
     skPath.setFillType(SkPathFillType::kEvenOdd);
   }
@@ -692,14 +431,8 @@ void PathNode::drawContour(SkCanvas* canvas, const SkPath* outlineMask)
 
 void PathNode::addSubShape(std::shared_ptr<PaintNode> node, EBoolOp op)
 {
+  node->setClipOperator(op);
   addChild(node);
-  (void)op;
-}
-
-void PathNode::addSubShape(const Contour& ctr, EBoolOp op)
-{
-  shape.subshape.contours.push_back(ctr);
-  (void)op;
 }
 
 } // namespace VGG

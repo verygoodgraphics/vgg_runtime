@@ -12,5 +12,10 @@ class Mask
 {
 public:
   SkPath outlineMask;
+  Mask(){};
+  void addMask(const Mask& mask)
+  {
+    outlineMask.addPath(mask.outlineMask);
+  }
 };
 }; // namespace VGG

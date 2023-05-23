@@ -43,6 +43,7 @@ public:
   bool schedule_eval(const std::string& code);
   int run_node(const int argc, const char** argv, std::shared_ptr<std::thread>& nodeThread);
   void stop_node_thread_safe();
+  void stop_node();
 
   node::Environment* getNodeEnv();
 

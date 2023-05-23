@@ -53,5 +53,6 @@ bool NativeExec::inject(InjectFn fn)
 
 void NativeExec::teardown()
 {
+  m_impl->stop_node();
   m_impl->stop_node_thread_safe();
 }

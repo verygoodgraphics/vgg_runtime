@@ -106,13 +106,51 @@ TEST_F(VggWorkTestSuite, add_event_listener)
   auto ret = m_sut->load(file_path);
   EXPECT_EQ(ret, true);
 
+  m_sut->removeEventListener("/fake", "click", "console.log('hello');");
+  auto event_listeners_before = m_sut->getEventListeners("/fake", "click");
+
   // When
   m_sut->addEventListener("/fake", "click", "console.log('hello');");
 
+  // Then
+  auto event_listeners_after = m_sut->getEventListeners("/fake", "click");
+  EXPECT_EQ(event_listeners_before.size() + 1, event_listeners_after.size());
+}
+
+TEST_F(VggWorkTestSuite, remove_event_listener)
+{
+  // Given
+  std::string file_path = "testDataDir/vgg-work.zip";
+  auto ret = m_sut->load(file_path);
+  EXPECT_EQ(ret, true);
+
+  m_sut->removeEventListener("/fake", "click", "console.log('hello');");
+  m_sut->addEventListener("/fake", "click", "console.log('hello');");
+  auto event_listeners_before = m_sut->getEventListeners("/fake", "click");
+
+  // When
   m_sut->removeEventListener("/fake", "click", "console.log('hello');");
 
-  auto event_listeners = m_sut->getEventListeners("/fake", "click");
+  // Then
+  auto event_listeners_after = m_sut->getEventListeners("/fake", "click");
+  EXPECT_EQ(event_listeners_before.size() - 1, event_listeners_after.size());
+}
+
+TEST_F(VggWorkTestSuite, get_event_listeners)
+{
+  // Given
+  std::string file_path = "testDataDir/vgg-work.zip";
+  auto ret = m_sut->load(file_path);
+  EXPECT_EQ(ret, true);
+
+  m_sut->removeEventListener("/fake", "click", "console.log('hello');");
+
+  auto event_listeners_before = m_sut->getEventListeners("/fake", "click");
+  m_sut->addEventListener("/fake", "click", "console.log('hello');");
+
+  // When
+  auto event_listeners_after = m_sut->getEventListeners("/fake", "click");
 
   // Then
-  EXPECT_TRUE(event_listeners.empty());
+  EXPECT_EQ(event_listeners_before.size() + 1, event_listeners_after.size());
 }

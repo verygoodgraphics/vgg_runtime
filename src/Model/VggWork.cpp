@@ -15,6 +15,11 @@ constexpr auto code_map_file_name = "code_map.json";
 constexpr auto event_listeners_file_name = "event_listeners.json";
 constexpr auto layout_file_name = "layout.json";
 
+constexpr auto file_name_key = "fileName";
+constexpr auto created_at_key = "createdAt";
+
+constexpr auto js_file_suffix = ".mjs";
+
 VggWork::VggWork(const MakeJsonDocFn& makeDesignDocFn)
   : m_makeDesignDocFn(makeDesignDocFn)
 {
@@ -116,15 +121,17 @@ void VggWork::addEventListener(const std::string& json_pointer,
                                const std::string& code)
 {
   // generate file name
-  auto file_name = uuid_for(code) + ".mjs";
+  auto file_name = uuid_for(code) + js_file_suffix;
 
-  // fill empty object/array
-  if (m_event_listeners.find(json_pointer) == m_event_listeners.end())
+  // create element listenters object
+  if (!m_event_listeners.contains(json_pointer))
   {
     m_event_listeners[json_pointer] = json(json::value_t::object);
   }
+
+  // create element listenters array for `type`
   auto& element_event_listeners = m_event_listeners[json_pointer];
-  if (element_event_listeners.find(type) == element_event_listeners.end())
+  if (!element_event_listeners.contains(type))
   {
     element_event_listeners[type] = json(json::value_t::array);
   }
@@ -133,15 +140,12 @@ void VggWork::addEventListener(const std::string& json_pointer,
   auto& type_event_listeners = element_event_listeners[type];
   for (auto it = type_event_listeners.cbegin(); it != type_event_listeners.cend(); ++it)
   {
-    if (it->is_object())
+    if (it->is_object() && it->contains(file_name_key))
     {
-      auto file_name_it = it->find("fileName");
-      if (file_name_it != it->cend())
+      auto& item_file_name = (*it)[file_name_key];
+      if (itme_file_name.is_string() && item_file_name.get<std::string>() == file_name)
       {
-        if (file_name_it->is_string() && file_name_it->get<std::string>() == file_name)
-        {
-          return;
-        }
+        return;
       }
     }
   }
@@ -151,26 +155,87 @@ void VggWork::addEventListener(const std::string& json_pointer,
 
   // fill meta info
   auto item = json(json::value_t::object);
-  item["fileName"] = file_name;
+  item[file_name_key] = file_name;
   using namespace std::chrono;
-  item["createdAt"] = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+  item[created_at_key] =
+    duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 
   // save meta info
   type_event_listeners.push_back(item);
 
-  // todo, save code & meta to remote server
+  // todo, edit mode, save code & meta to remote server
 }
 
 void VggWork::removeEventListener(const std::string& json_pointer,
                                   const std::string& type,
                                   const std::string& code)
 {
+  if (!m_event_listeners.contains(json_pointer))
+  {
+    return;
+  }
+
+  auto& element_event_listeners = m_event_listeners[json_pointer];
+  if (!element_event_listeners.contains(type))
+  {
+    return;
+  }
+
+  auto file_name = uuid_for(code) + js_file_suffix;
+
+  auto& type_event_listeners = element_event_listeners[type];
+  for (auto it = type_event_listeners.cbegin(); it != type_event_listeners.cend(); ++it)
+  {
+    if (it->is_object() && it->contains(file_name_key))
+    {
+      auto& item_file_name = (*it)[file_name_key];
+      if (item_file_name.is_string() && item_file_name.get<std::string>() == file_name)
+      {
+        type_event_listeners.erase(it);
+        return;
+      }
+    }
+  }
 }
 
 const std::vector<std::string> VggWork::getEventListeners(const std::string& json_pointer,
                                                           const std::string& type)
 {
-  return {};
+  std::vector<std::string> result{};
+
+  if (!m_event_listeners.contains(json_pointer))
+  {
+    return result;
+  }
+
+  auto& element_event_listeners = m_event_listeners[json_pointer];
+  if (!element_event_listeners.contains(type))
+  {
+    return result;
+  }
+
+  auto& type_event_listeners = element_event_listeners[type];
+  for (auto it = type_event_listeners.cbegin(); it != type_event_listeners.cend(); ++it)
+  {
+    if (it->is_object() && it->contains(file_name_key))
+    {
+      result.push_back(get_code((*it)[file_name_key]));
+    }
+  }
+
+  return result;
+}
+
+std::string VggWork::get_code(const std::string& file_name)
+{
+  if (auto it = m_memory_code.find(file_name); it != m_memory_code.end())
+  {
+    return m_memory_code[file_name];
+  }
+
+  std::string code;
+  readZipFileEntry(m_zipFile, file_name, code);
+  return code;
 }
 
 std::string VggWork::uuid_for(const std::string& content)

@@ -129,7 +129,7 @@ void PaintNode::paintPass()
   SkCanvas* canvas = getSkCanvas();
   canvas->save();
   canvas->concat(toSkMatrix(this->transform));
-  // this->drawDebugBoarder(canvas);
+  this->drawDebugBoarder(canvas);
   this->paintEvent(canvas);
 }
 

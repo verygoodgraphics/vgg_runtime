@@ -33,6 +33,23 @@ inline void from_json(const json& j, VGGColor& x)
   x.r = j["red"];
 }
 
+inline void from_json(const json& j, Pattern& x)
+{
+  const auto instance = j["instance"];
+  const auto klass = instance["class"];
+  if (klass == "pattern_image")
+  {
+    x.imageFillType = instance["fillType"];
+    x.imageGUID = instance["imageFileName"];
+    x.tileMirrored = instance["imageTileMirrored"];
+    x.tileScale = instance["imageTileScale"];
+  }
+  else if (klass == "pattern_layer")
+  {
+    // TODO:: Feature for pattern_layer
+  }
+}
+
 inline void from_json(const json& j, VGGGradient::GradientStop& x)
 {
   x.color = j["color"];
@@ -86,14 +103,14 @@ inline void from_json(const json& j, Border& x)
   x.context_settings = j.at("contextSettings").get<ContextSetting>();
   x.dashed_offset = j.at("dashedOffset").get<double>();
   x.dashed_pattern = j.at("dashedPattern").get<std::vector<float>>();
-  x.fill_type = j.at("fillType").get<EFillType>();
+  x.fill_type = j.at("fillType").get<EPathFillType>();
   x.flat = j.at("flat").get<double>();
   x.gradient = get_stack_optional<VGGGradient>(j, "gradient");
   x.is_enabled = j.at("isEnabled").get<bool>();
   x.line_cap_style = j.at("lineCapStyle").get<ELineCap>();
   x.line_join_style = j.at("lineJoinStyle").get<ELineJoin>();
   x.miter_limit = j.at("miterLimit").get<double>();
-  // x.pattern = get_stack_optional<Pattern>(j, "pattern");
+  x.pattern = get_stack_optional<Pattern>(j, "pattern");
   x.position = j.at("position").get<EPathPosition>();
   x.style = j.at("style").get<int64_t>();
   x.thickness = j.at("thickness").get<double>();
@@ -124,11 +141,11 @@ inline void from_json(const json& j, Blur& x)
 inline void from_json(const json& j, Fill& x)
 {
   x.color = j.at("color").get<VGGColor>();
-  x.fillType = (EFillType)j.at("fillType").get<int>();
+  x.fillType = (EPathFillType)j.at("fillType").get<int>();
   x.isEnabled = j.at("isEnabled").get<bool>();
   x.contextSettings = j.at("contextSettings").get<ContextSetting>();
   x.gradient = get_stack_optional<VGGGradient>(j, "gradient");
-  // x.pattern = get_stack_optional<Pattern>(j, "pattern");
+  x.pattern = get_stack_optional<Pattern>(j, "pattern");
 }
 
 inline void from_json(const json& j, Style& x)

@@ -18,7 +18,7 @@ namespace VGG
 class PathNode final : public PaintNode
 {
   EWindingType windingRule;
-
+  sk_sp<SkShader> testShader;
 public:
   PathNode(const std::string& name);
   void paintEvent(SkCanvas* canvas) override;

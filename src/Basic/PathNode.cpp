@@ -4,8 +4,7 @@
 #include "Basic/PathNode.h"
 #include "Basic/VGGType.h"
 #include "Basic/VGGUtils.h"
-#include "Basic/SkiaBackend/SkiaConverter.h"
-#include "Basic/SkiaBackend/SkiaUtils.h"
+#include "Basic/SkiaBackend/SkiaImpl.h"
 
 #include "Components/Styles.hpp"
 #include "Utils/Utils.hpp"
@@ -31,55 +30,6 @@
 
 namespace VGG
 {
-
-// void drawPathFill(SkCanvas* canvas,
-//                   const Frame& frame,
-//                   const SkPath& skPath,
-//                   const FillStyle* style,
-//                   double globalAlpha)
-// {
-//   ASSERT(canvas);
-//   SkPaint fillPen;
-//   fillPen.setStyle(SkPaint::kFill_Style);
-//
-//   if (!style)
-//   {
-//     canvas->drawPath(skPath, fillPen);
-//   }
-//   else if (FillTypeChooser<FillStyle>::isFlat(*style))
-//   {
-//     fillPen.setColor(style->color);
-//     fillPen.setAlphaf(fillPen.getAlphaf() * globalAlpha);
-//     canvas->drawPath(skPath, fillPen);
-//   }
-//   else if (FillTypeChooser<FillStyle>::isLinearGradient(*style))
-//   {
-//     fillPen.setShader(style->gradient.getLinearShader(frame));
-//     fillPen.setAlphaf(style->contextSettings.opacity * globalAlpha);
-//     canvas->drawPath(skPath, fillPen);
-//   }
-//   else if (FillTypeChooser<FillStyle>::isRadialGradient(*style))
-//   {
-//     fillPen.setShader(style->gradient.getRadialShader(frame));
-//     fillPen.setAlphaf(style->contextSettings.opacity * globalAlpha);
-//     canvas->drawPath(skPath, fillPen);
-//   }
-//   else if (FillTypeChooser<FillStyle>::isAngularGradient(*style))
-//   {
-//     fillPen.setShader(style->gradient.getAngularShader(frame));
-//     fillPen.setAlphaf(style->contextSettings.opacity * globalAlpha);
-//     canvas->drawPath(skPath, fillPen);
-//   }
-//   else if (style->fillType == FillStyle::FillType::IMAGE)
-//   {
-//     if (auto& name = style->imageName)
-//     {
-//       fillPen.setShader(style->getImageShader(frame));
-//       fillPen.setAlphaf(style->contextSettings.opacity * globalAlpha);
-//       canvas->drawPath(skPath, fillPen);
-//     }
-//   }
-// }
 
 // bool maskedByOthers = !maskedBy.empty();
 // auto cvs = canvas;
@@ -347,6 +297,7 @@ void PathNode::drawContour(SkCanvas* canvas, const SkPath* outlineMask)
     if (!f.isEnabled)
       continue;
     SkPaint fillPen;
+    fillPen.setStyle(SkPaint::kFill_Style);
     if (f.fillType == FT_Color)
     {
       fillPen.setColor(f.color);
@@ -354,10 +305,26 @@ void PathNode::drawContour(SkCanvas* canvas, const SkPath* outlineMask)
     }
     else if (f.fillType == FT_Gradient)
     {
-      fillPen.setShader(getGradientShader(f.gradient.value(), bound.size()));
+      assert(f.gradient.has_value());
+      auto gradientShader = getGradientShader(f.gradient.value(), bound.size());
+      fillPen.setShader(gradientShader);
       fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);
     }
-    fillPen.setStyle(SkPaint::kFill_Style);
+    else if (f.fillType == FT_Pattern)
+    {
+      assert(f.pattern.has_value());
+      auto img = loadImage(f.pattern->imageGUID, Scene::getResRepo());
+      auto bs = bound.size();
+      auto shader = getImageShader(img,
+                                   bs.x,
+                                   bs.y,
+                                   f.pattern->imageFillType,
+                                   f.pattern->tileScale,
+                                   f.pattern->tileMirrored);
+
+      fillPen.setShader(shader);
+      fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);
+    }
     if (outlineMask)
     {
       canvas->clipPath(*outlineMask);
@@ -396,15 +363,20 @@ void PathNode::drawContour(SkCanvas* canvas, const SkPath* outlineMask)
       strokePen.setStrokeWidth(b.thickness);
     }
 
-    if (b.gradient.has_value() && b.fill_type == FT_Gradient)
+    // draw fill for border
+    if (b.fill_type == FT_Gradient)
     {
+      assert(b.gradient.has_value());
       strokePen.setShader(getGradientShader(b.gradient.value(), bound.size()));
       strokePen.setAlphaf(b.context_settings.Opacity * globalAlpha);
     }
-    else
+    else if (b.fill_type == FT_Color)
     {
       strokePen.setColor(b.color.value_or(VGGColor{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
       strokePen.setAlphaf(strokePen.getAlphaf() * globalAlpha);
+    }
+    else if (b.fill_type == FT_Pattern)
+    {
     }
 
     if (outlineMask)

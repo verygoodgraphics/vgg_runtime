@@ -1,12 +1,18 @@
 #pragma once
-#include "include/core/SkPaint.h"
 #include "Basic/VGGType.h"
 #include "Basic/Attrs.h"
+#include "Basic/Scene.hpp"
+
+#include "include/core/SkPaint.h"
+#include "include/core/SkImage.h"
 #include "include/pathops/SkPathOps.h"
 
 #include <vector>
-
+#include <unordered_map>
+#include <string>
 using namespace VGG;
+
+extern std::unordered_map<std::string, sk_sp<SkImage>> SkiaImageRepo;
 
 inline SkPaint::Join toSkPaintJoin(VGG::ELineJoin join)
 {
@@ -317,4 +323,117 @@ inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
   }
 
   return skPath;
+}
+
+inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
+                                      int width,
+                                      int height,
+                                      EImageFillType imageFillType,
+                                      float imageTileScale,
+                                      bool imageTileMirrored)
+{
+
+  SkTileMode modeX = SkTileMode::kDecal;
+  SkTileMode modeY = SkTileMode::kDecal;
+  SkMatrix mat = SkMatrix::I();
+  SkImageInfo mi = img->imageInfo();
+
+  float sx = (float)width / mi.width();
+  float sy = (float)height / mi.height();
+  if (imageFillType == IFT_Fill)
+  {
+    double s = std::max(sx, sy);
+    mat.postScale(s, s);
+    if (sx > sy)
+    {
+      // scaled image's width == frame's width
+      mat.postTranslate(0, (height - sx * mi.height()) / 2);
+    }
+    else
+    {
+      // scaled image's height == frame's height
+      mat.postTranslate((width - sy * mi.width()) / 2, 0);
+    }
+  }
+  else if (imageFillType == IFT_Fit)
+  {
+    double s = std::min(sx, sy);
+    mat.postScale(s, s);
+    if (sx < sy)
+    {
+      // scaled image's width == frame's width
+      mat.postTranslate(0, (height - sx * mi.height()) / 2);
+    }
+    else
+    {
+      // scaled image's height == frame's height
+      mat.postTranslate((width - sy * mi.width()) / 2, 0);
+    }
+  }
+  else if (imageFillType == VGG::IFT_Stretch)
+  {
+    mat.postScale(sx, sy);
+  }
+  else if (imageFillType == VGG::IFT_Tile)
+  {
+    mat.postScale(imageTileScale, imageTileScale);
+    modeX = imageTileMirrored ? SkTileMode::kMirror : SkTileMode::kRepeat;
+    modeY = imageTileMirrored ? SkTileMode::kMirror : SkTileMode::kRepeat;
+  }
+  else if (imageFillType == IFT_OnlyTileVertical)
+  {
+    mat.postScale(imageTileScale, imageTileScale);
+    modeY = imageTileMirrored ? SkTileMode::kMirror : SkTileMode::kRepeat;
+  }
+  else if (imageFillType == IFT_OnlyTileHorizontal)
+  {
+    mat.postScale(imageTileScale, imageTileScale);
+    modeX = imageTileMirrored ? SkTileMode::kMirror : SkTileMode::kRepeat;
+  }
+  SkSamplingOptions opt;
+  mat.postScale(1, -1); // convert to skia
+  return img->makeShader(modeX, modeY, opt, &mat);
+}
+
+inline sk_sp<SkImage> loadImage(const std::string& imageGUID, const ResourceRepo& repo)
+{
+  sk_sp<SkImage> image;
+  if (imageGUID.empty())
+    return image;
+  std::string guid = imageGUID;
+  if (auto pos = guid.find("./"); pos != std::string::npos && pos == 0)
+  {
+    // remove current dir notation
+    guid = guid.substr(2);
+  }
+  if (auto it = SkiaImageRepo.find(guid); it != SkiaImageRepo.end())
+  {
+    image = it->second;
+  }
+  else
+  {
+    auto repo = Scene::getResRepo();
+    if (auto it = repo.find(guid); it != repo.end())
+    {
+      auto data = SkData::MakeWithCopy(it->second.data(), it->second.size());
+      if (!data)
+      {
+        WARN("Make SkData failed");
+        return image;
+      }
+      sk_sp<SkImage> skImage = SkImage::MakeFromEncoded(data);
+      if (!skImage)
+      {
+        WARN("Make SkImage failed.");
+        return image;
+      }
+      SkiaImageRepo[guid] = skImage;
+      image = skImage;
+    }
+    else
+    {
+      WARN("Cannot find %s from resources repository", guid.c_str());
+    }
+  }
+  return image;
 }

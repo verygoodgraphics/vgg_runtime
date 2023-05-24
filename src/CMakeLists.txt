@@ -17,6 +17,7 @@ add_executable(runtime
   Basic/TextNode.cpp
   Basic/PaintNode.cpp
   Basic/Node.cpp
+  Basic/SkiaBackend/SkiaImpl.cpp
 )
 
 add_library(vgg_internal OBJECT

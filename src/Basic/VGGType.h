@@ -70,7 +70,7 @@ enum EBlendMode
   BM_Vivid_light,
 };
 
-enum EFillType
+enum EPathFillType
 {
   FT_Color = 0,
   FT_Gradient,
@@ -148,6 +148,16 @@ enum EPointMode
   PM_Mirrored = 2,
   PM_Asymmetric = 3,
   PM_Disconnected = 4,
+};
+
+enum EImageFillType
+{
+  IFT_Tile,
+  IFT_Fill,
+  IFT_Stretch,
+  IFT_Fit,
+  IFT_OnlyTileHorizontal,
+  IFT_OnlyTileVertical
 };
 
 } // namespace VGG

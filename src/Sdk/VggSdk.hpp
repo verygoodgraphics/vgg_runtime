@@ -17,11 +17,16 @@ public:
   void designDocumentReplaceAt(const std::string& json_pointer, const std::string& value);
   void designDocumentDeleteAt(const std::string& json_pointer);
 
-  //   // code
-  //   void addCode(const std::string& json_pointer, const std::string& value);
-  //   void updateCode(const std::string& json_pointer, const std::string& value);
-  //   void deleteCodeAt(const std::string& json_pointer);
-  //   const std::string codeAt(const std::string& json_pointer);
+  // code
+  // event types: https://developer.mozilla.org/en-US/docs/Web/API/Element#events
+  void addEventListener(const std::string& json_pointer,
+                        const std::string& type,
+                        const std::string& code);
+  void removeEventListener(const std::string& json_pointer,
+                           const std::string& type,
+                           const std::string& code);
+  const std::vector<std::string> getEventListeners(const std::string& json_pointer,
+                                                   const std::string& type);
 
   //   // ---
   //   void undo();

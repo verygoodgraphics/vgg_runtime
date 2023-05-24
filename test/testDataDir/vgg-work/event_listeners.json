@@ -1,0 +1,10 @@
+{
+  "/fake/add": {
+    "click": [
+      {
+        "fileName": "js/local-sdk/4.add.mjs",
+        "createdAt": 0
+      }
+    ]
+  }
+}

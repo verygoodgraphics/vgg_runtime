@@ -4,8 +4,15 @@
 
 #include "zip.h"
 
+#include <boost/uuid/name_generator_sha1.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
+#include <algorithm>
+#include <chrono>
+
 constexpr auto artboard_file_name = "artboard.json";
 constexpr auto code_map_file_name = "code_map.json";
+constexpr auto event_listeners_file_name = "event_listeners.json";
 constexpr auto layout_file_name = "layout.json";
 
 VggWork::VggWork(const MakeJsonDocFn& makeDesignDocFn)
@@ -64,6 +71,11 @@ bool VggWork::load(zip_t* zipFile)
       tmp_json.get_to(m_codeMap);
     }
 
+    if (readZipFileEntry(zipFile, event_listeners_file_name, file_content))
+    {
+      m_event_listeners = json::parse(file_content);
+    }
+
     return true;
   }
   catch (const std::exception& e)
@@ -97,4 +109,72 @@ bool VggWork::readZipFileEntry(zip_t* zipFile,
 JsonDocumentPtr& VggWork::designDoc()
 {
   return m_designDoc;
+}
+
+void VggWork::addEventListener(const std::string& json_pointer,
+                               const std::string& type,
+                               const std::string& code)
+{
+  // generate file name
+  auto file_name = uuid_for(code) + ".mjs";
+
+  // fill empty object/array
+  if (m_event_listeners.find(json_pointer) == m_event_listeners.end())
+  {
+    m_event_listeners[json_pointer] = json(json::value_t::object);
+  }
+  auto& element_event_listeners = m_event_listeners[json_pointer];
+  if (element_event_listeners.find(type) == element_event_listeners.end())
+  {
+    element_event_listeners[type] = json(json::value_t::array);
+  }
+
+  // return if exist
+  auto& type_event_listeners = element_event_listeners[type];
+  for (auto it = type_event_listeners.cbegin(); it != type_event_listeners.cend(); ++it)
+  {
+    if (it->is_object())
+    {
+      auto file_name_it = it->find("fileName");
+      if (file_name_it != it->cend())
+      {
+        if (file_name_it->is_string() && file_name_it->get<std::string>() == file_name)
+        {
+          return;
+        }
+      }
+    }
+  }
+
+  // save code content
+  m_memory_code[file_name] = code;
+
+  // fill meta info
+  auto item = json(json::value_t::object);
+  item["fileName"] = file_name;
+  using namespace std::chrono;
+  item["createdAt"] = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+
+  // save meta info
+  type_event_listeners.push_back(item);
+
+  // todo, save code & meta to remote server
+}
+
+void VggWork::removeEventListener(const std::string& json_pointer,
+                                  const std::string& type,
+                                  const std::string& code)
+{
+}
+
+const std::vector<std::string> VggWork::getEventListeners(const std::string& json_pointer,
+                                                          const std::string& type)
+{
+  return {};
+}
+
+std::string VggWork::uuid_for(const std::string& content)
+{
+  boost::uuids::name_generator_sha1 generator{ boost::uuids::ns::oid() };
+  return boost::uuids::to_string(generator(content));
 }

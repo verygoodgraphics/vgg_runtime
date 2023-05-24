@@ -14,6 +14,15 @@ using MakeJsonDocFn = std::function<JsonDocumentPtr(const json&)>;
 
 class VggWork
 {
+  zip_t* m_zipFile{ nullptr };
+  std::unordered_map<std::string, std::string> m_memory_code; // file_name: code_content
+  json m_event_listeners;
+
+  JsonDocumentPtr m_designDoc;
+  MakeJsonDocFn m_makeDesignDocFn;
+
+  std::unordered_map<std::string, std::string> m_codeMap;
+
 public:
   VggWork(const MakeJsonDocFn& makeDesignDocFn);
   ~VggWork();
@@ -27,9 +36,14 @@ public:
 
   const std::string getCode(const std::string& path) const;
 
-  void createCode(const json::json_pointer& path, const std::string& name);
-  void deleteCode(const json::json_pointer& path);
-  void updateCode(const std::string& name, const std::string& code);
+  void addEventListener(const std::string& json_pointer,
+                        const std::string& type,
+                        const std::string& code);
+  void removeEventListener(const std::string& json_pointer,
+                           const std::string& type,
+                           const std::string& code);
+  const std::vector<std::string> getEventListeners(const std::string& json_pointer,
+                                                   const std::string& type);
 
 private:
   bool load(zip_t* zipFile);
@@ -39,12 +53,7 @@ private:
 
   bool readZipFileEntry(zip_t* zipFile, const std::string& entryName, std::string& content) const;
 
-  zip_t* m_zipFile{ nullptr };
-
-  JsonDocumentPtr m_designDoc;
-  MakeJsonDocFn m_makeDesignDocFn;
-
-  std::unordered_map<std::string, std::string> m_codeMap;
+  std::string uuid_for(const std::string& content);
 
   // JsonDocumentPtr m_layoutDoc;
   // MakeJsonDocFn m_makeLayoutDocFn;

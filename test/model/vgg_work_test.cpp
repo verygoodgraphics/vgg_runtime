@@ -98,3 +98,21 @@ TEST_F(VggWorkTestSuite, Get_code)
   // Then
   EXPECT_TRUE(!ret_code.empty());
 }
+
+TEST_F(VggWorkTestSuite, add_event_listener)
+{
+  // Given
+  std::string file_path = "testDataDir/vgg-work.zip";
+  auto ret = m_sut->load(file_path);
+  EXPECT_EQ(ret, true);
+
+  // When
+  m_sut->addEventListener("/fake", "click", "console.log('hello');");
+
+  m_sut->removeEventListener("/fake", "click", "console.log('hello');");
+
+  auto event_listeners = m_sut->getEventListeners("/fake", "click");
+
+  // Then
+  EXPECT_TRUE(event_listeners.empty());
+}

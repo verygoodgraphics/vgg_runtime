@@ -51,7 +51,7 @@ inline SkPathOp toSkPathOp(VGG::EBoolOp blop)
       op = SkPathOp::kIntersect_SkPathOp;
       break;
     case VGG::BO_Exclusion:
-      op = SkPathOp::kReverseDifference_SkPathOp;
+      op = SkPathOp::kXOR_SkPathOp;
       break;
     default:
       return SkPathOp::kUnion_SkPathOp;

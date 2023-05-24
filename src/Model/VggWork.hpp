@@ -7,6 +7,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <vector>
 
 struct zip_t;
 
@@ -20,6 +21,8 @@ class VggWork
 
   JsonDocumentPtr m_designDoc;
   MakeJsonDocFn m_makeDesignDocFn;
+  // JsonDocumentPtr m_layoutDoc;
+  // MakeJsonDocFn m_makeLayoutDocFn;
 
   std::unordered_map<std::string, std::string> m_codeMap;
 
@@ -47,14 +50,9 @@ public:
 
 private:
   bool load(zip_t* zipFile);
-
-  const std::string& codeName(const json::json_pointer& path) const;
-  const std::string& jsCode(const std::string& name) const;
-
   bool readZipFileEntry(zip_t* zipFile, const std::string& entryName, std::string& content) const;
 
-  std::string uuid_for(const std::string& content);
+  std::string get_code(const std::string& file_name);
 
-  // JsonDocumentPtr m_layoutDoc;
-  // MakeJsonDocFn m_makeLayoutDocFn;
+  std::string uuid_for(const std::string& content);
 };

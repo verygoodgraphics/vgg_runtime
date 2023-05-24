@@ -1,6 +1,7 @@
 #pragma once
 #include "Components/Styles.hpp"
 #include "VGGType.h"
+#include <ostream>
 #include <skia/include/effects/SkGradientShader.h>
 #include <skia/include/effects/SkDashPathEffect.h>
 #include "src/core/SkRecordPattern.h"
@@ -139,11 +140,15 @@ struct VGGGradient
       auto p = stops[indices[i]].position;
       positions.push_back((p - minPosition) / (maxPosition - minPosition));
     }
+    SkMatrix mat;
+    mat.postScale(1, -1);
     return SkGradientShader::MakeLinear(pts,
                                         colors.data(),
                                         positions.data(),
                                         indices.size(),
-                                        SkTileMode::kClamp);
+                                        SkTileMode::kClamp,
+                                        0,
+                                        &mat);
   }
 
   inline sk_sp<SkShader> getRadialShader(const glm::vec2& size) const
@@ -174,7 +179,7 @@ struct VGGGradient
     mat.postScale(elipseLength, 1.0);
     mat.postRotate(-rad2deg(getTheta()));
     mat.postTranslate(start.x, start.y);
-
+    mat.postScale(1, -1);
     return SkGradientShader::MakeRadial(center,
                                         r,
                                         colors.data(),
@@ -223,6 +228,7 @@ struct VGGGradient
 
     SkMatrix rot;
     rot.setRotate(rotation, center.x, center.y);
+    rot.postScale(1, -1);
     return SkGradientShader::MakeSweep(center.x,
                                        center.y,
                                        colors.data(),

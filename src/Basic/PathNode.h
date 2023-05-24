@@ -17,17 +17,6 @@ namespace VGG
 // It likes a special container that provides bool operation for PaintNode object
 class PathNode final : public PaintNode
 {
-  // struct Subshape
-  // {
-  //   std::vector<Contour> contours;
-  // };
-  //
-  // struct Shape
-  // {
-  //   EWindingType windingRule;
-  //   Subshape subshape;
-  // } shape;
-
   EWindingType windingRule;
 
 public:

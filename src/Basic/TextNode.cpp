@@ -182,7 +182,11 @@ void TextNode::paintEvent(SkCanvas* canvas)
 {
   if (styles.empty() == false)
   {
+
+    canvas->save();
+    canvas->scale(1, -1);
     drawText(canvas, text, bound, styles[0]);
+    canvas->restore();
   }
 }
 

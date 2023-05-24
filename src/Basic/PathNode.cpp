@@ -279,7 +279,6 @@ SkPath PathNode::makePath()
     auto p = static_cast<PaintNode*>(c.get());
     auto outline = p->asOutlineMask(&p->transform);
     ct.emplace_back(outline.outlineMask, p->clipOperator());
-    // skpath.addPath(outline.outlineMask);
   }
   // return skpath;
   assert(ct.size() >= 1);
@@ -291,10 +290,10 @@ SkPath PathNode::makePath()
 
   std::vector<SkPath> res;
   SkPath skPath = ct[0].first;
-  auto op = ct[0].second;
   for (int i = 1; i < ct.size(); i++)
   {
     SkPath rhs;
+    auto op = ct[i].second;
     if (op != BO_None)
     {
       auto skop = toSkPathOp(op);

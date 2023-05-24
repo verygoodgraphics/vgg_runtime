@@ -46,19 +46,22 @@ inline void from_json(const json& j, VGGGradient& x)
   const auto klass = g["class"];
   if (klass != "gradientBasic")
   {
-    auto f = g["from"];
-    auto t = g["to"];
+    const auto f = g["from"];
+    const auto t = g["to"];
     x.from = glm::vec2{ f[0], f[1] };
     x.to = glm::vec2{ t[0], t[1] };
     x.stops = g["stops"];
     x.invert = g["invert"];
+    x.gradientType = EGradientType::GT_Linear;
     if (klass == "gradientRadial")
     {
       x.elipseLength = g["elipseLength"];
+      x.gradientType = EGradientType::GT_Radial;
     }
     else if (klass == "gradientAngular")
     {
       x.rotation = g["rotation"];
+      x.gradientType = EGradientType::GT_Angular;
     }
   }
   else

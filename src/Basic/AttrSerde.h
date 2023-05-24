@@ -140,7 +140,11 @@ inline void from_json(const json& j, Blur& x)
 
 inline void from_json(const json& j, Fill& x)
 {
-  x.color = j.at("color").get<VGGColor>();
+  x.color = VGGColor{ 0, 0, 0, 1 };
+  if (auto it = j.find("color"); it != j.end())
+  {
+    x.color = j.at("color").get<VGGColor>();
+  }
   x.fillType = (EPathFillType)j.at("fillType").get<int>();
   x.isEnabled = j.at("isEnabled").get<bool>();
   x.contextSettings = j.at("contextSettings").get<ContextSetting>();

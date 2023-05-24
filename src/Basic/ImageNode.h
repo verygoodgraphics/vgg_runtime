@@ -10,8 +10,7 @@ class ImageNode final : public PaintNode
   std::string guid;
   bool fillReplacesImage = false;
   sk_sp<SkImage> image;
-  sk_sp<SkShader> shader;
-  static std::unordered_map<std::string, sk_sp<SkImage>> SkiaImageRepo;
+
 public:
   ImageNode(const std::string& name);
   void paintEvent(SkCanvas* canvas) override;
@@ -19,8 +18,5 @@ public:
   const std::string& getImageGUID() const;
   void setReplacesImage(bool fill);
   bool fill() const;
-
-protected:
-  void reloadImage();
 };
 } // namespace VGG

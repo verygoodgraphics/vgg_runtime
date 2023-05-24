@@ -45,7 +45,6 @@ public:
   bool visible = true;
   Style style;
   ContextSetting contextSetting;
-
   PaintNode(const std::string& name, ObjectType type)
     : Node(name)
     , type(type)

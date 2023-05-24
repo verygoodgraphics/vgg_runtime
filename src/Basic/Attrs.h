@@ -24,6 +24,10 @@ struct ContextSetting
 
 struct Pattern
 {
+  EImageFillType imageFillType;
+  bool tileMirrored;
+  float tileScale;
+  std::string imageGUID;
 };
 
 // Type with 'VGG' prefix is temporary. It's used to distinguish
@@ -78,7 +82,6 @@ struct VGGGradient
     float midPoint;
   };
   static constexpr double minElipseLength = 0.01;
-
   EGradientType gradientType{ EGradientType::GT_Linear };
 
   glm::vec2 from{ 0.5, 0 };
@@ -245,7 +248,7 @@ struct Border
   ContextSetting context_settings;
   double dashed_offset;
   std::vector<float> dashed_pattern;
-  EFillType fill_type; // TODO:
+  EPathFillType fill_type; // TODO:
   double flat;
   std::optional<VGGGradient> gradient;
   bool is_enabled;
@@ -282,7 +285,7 @@ struct Fill
 {
   bool isEnabled;
   VGGColor color;
-  EFillType fillType;
+  EPathFillType fillType;
   ContextSetting contextSettings;
   std::optional<VGGGradient> gradient;
   std::optional<Pattern> pattern;

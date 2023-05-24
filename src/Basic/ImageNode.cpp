@@ -1,7 +1,8 @@
 #include "ImageNode.h"
 #include "Basic/VGGType.h"
 #include "Basic/VGGUtils.h"
-#include "Scene.hpp"
+#include "Basic/SkiaBackend/SkiaImpl.h"
+#include "Basic/Scene.hpp"
 #include "glm/matrix.hpp"
 #include "include/core/SkColor.h"
 #include "include/core/SkMatrix.h"
@@ -16,8 +17,6 @@
 namespace VGG
 {
 
-std::unordered_map<std::string, sk_sp<SkImage>> ImageNode::SkiaImageRepo = {};
-
 ImageNode::ImageNode(const std::string& name)
   : PaintNode(name, VGG_IMAGE)
 {
@@ -27,7 +26,12 @@ void ImageNode::paintEvent(SkCanvas* canvas)
 {
   if (!image)
   {
-    reloadImage();
+    image = loadImage(guid, Scene::getResRepo());
+    // SkSamplingOptions opt;
+    // const auto mi = image->imageInfo();
+    // auto skrect = toSkRect(this->bound);
+    // SkMatrix mat = toSkMatrix(this->transform);
+    // this->shader = image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, opt, mat);
   }
   if (image)
   {
@@ -66,56 +70,6 @@ void ImageNode::setReplacesImage(bool fill)
 bool ImageNode::fill() const
 {
   return this->fillReplacesImage;
-}
-
-void ImageNode::reloadImage()
-{
-  if (guid.empty())
-    return;
-  if (auto pos = guid.find("./"); pos != std::string::npos && pos == 0)
-  {
-    // remove current dir notation
-    guid = guid.substr(2);
-  }
-  if (!image)
-  {
-    if (auto it = SkiaImageRepo.find(guid); it != SkiaImageRepo.end())
-    {
-      image = it->second;
-    }
-    else
-    {
-      auto repo = Scene::getResRepo();
-      if (auto it = repo.find(guid); it != repo.end())
-      {
-        auto data = SkData::MakeWithCopy(it->second.data(), it->second.size());
-        if (!data)
-        {
-          WARN("Make SkData failed");
-          return;
-        }
-        sk_sp<SkImage> skImage = SkImage::MakeFromEncoded(data);
-        if (!skImage)
-        {
-          WARN("Make SkImage failed");
-          return;
-        }
-        SkiaImageRepo[guid] = skImage;
-        this->image = skImage;
-        SkSamplingOptions opt;
-
-        const auto mi = image->imageInfo();
-        auto skrect = toSkRect(this->bound);
-        SkMatrix mat = toSkMatrix(this->transform);
-        // mat.postScale(skrect.width() / mi.width(), skrect.height() / mi.height());
-        this->shader = skImage->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, opt, mat);
-      }
-      else
-      {
-        WARN("Cannot find %s from resources repository", this->guid.c_str());
-      }
-    }
-  }
 }
 
 } // namespace VGG

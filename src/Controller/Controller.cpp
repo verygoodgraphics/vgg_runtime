@@ -3,7 +3,6 @@
 #include "Exec/VggExec.hpp"
 #include "Model/RawJsonDocument.hpp"
 #include "Model/SchemaValidJsonDocument.hpp"
-#include "Model/SubjectJsonDocument.hpp"
 #include "Model/UndoRedoJsonDocument.hpp"
 #include "Model/VggWork.hpp"
 #include "Presenter/Presenter.hpp"
@@ -16,35 +15,38 @@ namespace VGG
 
 Controller::Controller(std::shared_ptr<RunLoop> runLoop, Presenter& presenter, RunMode mode)
   : m_run_loop(runLoop)
-  , m_design_doc_observer(presenter.getDesignDocObserver())
-  , m_layout_doc_observer(presenter.getLayoutDocObserver())
+  , m_model_observer(presenter.getModelObserver())
   , m_mode(mode)
 {
   assert(m_run_loop);
 
-  m_view_event_observer = rxcpp::make_observer_dynamic<UIEventPtr>(
+  m_view_observer = rxcpp::make_observer_dynamic<UIEventPtr>(
     [&](UIEventPtr evt)
     {
-      auto listenters = m_work->getEventListeners(evt->path, ViewEventTypeToString(evt->type));
-      for (auto& listenter : listenters)
+      auto listeners = m_work->getEventListeners(evt->path, ViewEventTypeToString(evt->type));
+      for (auto& listener : listeners)
       {
         // todo, pass evt data to listeners
-        vggExec()->evalModule(listenter);
+        vggExec()->evalModule(listener);
       }
     });
-  presenter.getObservable().subscribe(m_view_event_observer);
+  presenter.getObservable().subscribe(m_view_observer);
 }
 
 bool Controller::start(const std::string& filePath, const char* designDocSchemaFilePath)
 {
   initVggWork(designDocSchemaFilePath);
-  return m_work->load(filePath);
+  auto ret = m_work->load(filePath);
+  m_work->getObservable().observe_on(m_run_loop->thread()).subscribe(m_model_observer);
+  return ret;
 }
 
 bool Controller::start(const std::vector<char>& buffer, const char* designDocSchemaFilePath)
 {
   initVggWork(designDocSchemaFilePath);
-  return m_work->load(buffer);
+  auto ret = m_work->load(buffer);
+  m_work->getObservable().observe_on(m_run_loop->thread()).subscribe(m_model_observer);
+  return ret;
 }
 
 void Controller::initVggWork(const char* designDocSchemaFilePath)
@@ -54,10 +56,11 @@ void Controller::initVggWork(const char* designDocSchemaFilePath)
   {
     design_schema_file_path.append(designDocSchemaFilePath);
   }
+
   auto build_design_doc_fn = [&, design_schema_file_path](const json& design_json)
   {
-    auto json_doc_raw_ptr = createJsonDoc();
-    json_doc_raw_ptr->setContent(design_json);
+    auto json_doc_ptr = createJsonDoc();
+    json_doc_ptr->setContent(design_json);
 
     if (!design_schema_file_path.empty())
     {
@@ -67,14 +70,11 @@ void Controller::initVggWork(const char* designDocSchemaFilePath)
       design_doc_validator.reset(new JsonSchemaValidator);
       design_doc_validator->setRootSchema(schema);
 
-      json_doc_raw_ptr =
-        new SchemaValidJsonDocument(JsonDocumentPtr(json_doc_raw_ptr), design_doc_validator);
+      json_doc_ptr =
+        new SchemaValidJsonDocument(JsonDocumentPtr(json_doc_ptr), design_doc_validator);
     }
 
-    auto subject_doc = new SubjectJsonDocument(JsonDocumentPtr(json_doc_raw_ptr));
-    subject_doc->getObservable().observe_on(m_run_loop->thread()).subscribe(m_design_doc_observer);
-
-    return wrapJsonDoc(JsonDocumentPtr(subject_doc));
+    return wrapJsonDoc(JsonDocumentPtr(json_doc_ptr));
   };
   // todo, build layout doc
   m_work.reset(new VggWork(build_design_doc_fn));

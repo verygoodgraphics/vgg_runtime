@@ -1,5 +1,6 @@
 #include "VggWork.hpp"
 
+#include "Model/SubjectJsonDocument.hpp"
 #include "Utils/Utils.hpp"
 
 #include "zip.h"
@@ -9,6 +10,8 @@
 
 #include <algorithm>
 #include <chrono>
+
+using namespace VGG;
 
 constexpr auto artboard_file_name = "artboard.json";
 constexpr auto event_listeners_file_name = "event_listeners.json";
@@ -53,7 +56,8 @@ bool VggWork::load(zip_t* zipFile)
     if (readZipFileEntry(zipFile, artboard_file_name, file_content))
     {
       auto tmp_json = json::parse(file_content);
-      m_designDoc = m_makeDesignDocFn(tmp_json);
+      auto doc = m_makeDesignDocFn(tmp_json);
+      m_designDoc = JsonDocumentPtr(new SubjectJsonDocument(doc));
     }
     else
     {
@@ -104,6 +108,8 @@ void VggWork::addEventListener(const std::string& json_pointer,
                                const std::string& type,
                                const std::string& code)
 {
+  const std::lock_guard<std::mutex> lock(m_mutex);
+
   // generate file name
   auto file_name = uuid_for(code) + js_file_suffix;
 
@@ -147,6 +153,9 @@ void VggWork::addEventListener(const std::string& json_pointer,
   // save meta info
   type_event_listeners.push_back(item);
 
+  m_subject.get_subscriber().on_next(
+    ModelEventPtr{ new ModelEvent{ ModelEventType::ListenerDidAdd, ModelEventListenerDidAdd{} } });
+
   // todo, edit mode, save code & meta to remote server
 }
 
@@ -175,7 +184,12 @@ void VggWork::removeEventListener(const std::string& json_pointer,
       auto& item_file_name = (*it)[file_name_key];
       if (item_file_name.is_string() && item_file_name.get<std::string>() == file_name)
       {
+        const std::lock_guard<std::mutex> lock(m_mutex);
+
         type_event_listeners.erase(it);
+
+        m_subject.get_subscriber().on_next(ModelEventPtr{
+          new ModelEvent{ ModelEventType::ListenerDidRemove, ModelEventListenerDidRemove{} } });
         return;
       }
     }
@@ -185,6 +199,8 @@ void VggWork::removeEventListener(const std::string& json_pointer,
 const std::vector<std::string> VggWork::getEventListeners(const std::string& json_pointer,
                                                           const std::string& type)
 {
+  const std::lock_guard<std::mutex> lock(m_mutex);
+
   std::vector<std::string> result{};
 
   if (!m_event_listeners.contains(json_pointer))
@@ -205,6 +221,20 @@ const std::vector<std::string> VggWork::getEventListeners(const std::string& jso
     {
       result.push_back(get_code((*it)[file_name_key]));
     }
+  }
+
+  return result;
+}
+
+// observable
+rxcpp::observable<VGG::ModelEventPtr> VggWork::getObservable()
+{
+  auto result = m_subject.get_observable();
+
+  auto doc = m_designDoc.get();
+  if (auto sub_doc = dynamic_cast<SubjectJsonDocument*>(doc))
+  {
+    result = result.merge(sub_doc->getObservable());
   }
 
   return result;

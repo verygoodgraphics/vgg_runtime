@@ -105,9 +105,9 @@ void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
     DECLARE_NODE_API_PROPERTY("addAt", DesignDocumentAddAt),
     DECLARE_NODE_API_PROPERTY("deleteAt", DesignDocumentDeleteAt),
 
-    DECLARE_NODE_API_PROPERTY("AddEventListener", AddEventListener),
-    DECLARE_NODE_API_PROPERTY("RemoveEventListener", RemoveEventListener),
-    DECLARE_NODE_API_PROPERTY("GetEventListeners", GetEventListeners),
+    DECLARE_NODE_API_PROPERTY("addEventListener", AddEventListener),
+    DECLARE_NODE_API_PROPERTY("removeEventListener", RemoveEventListener),
+    DECLARE_NODE_API_PROPERTY("getEventListeners", GetEventListeners),
   };
 
   napi_value cons;

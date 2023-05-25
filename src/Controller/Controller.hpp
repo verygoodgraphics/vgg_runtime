@@ -32,12 +32,13 @@ public:
 
 private:
   std::shared_ptr<RunLoop> m_run_loop;
-  rxcpp::observer<ModelEventPtr>& m_design_doc_observer;
-  rxcpp::observer<ModelEventPtr>& m_layout_doc_observer;
-  rxcpp::observer<UIEventPtr> m_view_event_observer;
+  rxcpp::observer<ModelEventPtr>& m_model_observer;
+  rxcpp::observer<UIEventPtr> m_view_observer;
+
   RunMode m_mode;
   std::shared_ptr<VggWork> m_work;
 
+private:
   void initVggWork(const char* designDocSchemaFilePath);
   JsonDocument* createJsonDoc();
   JsonDocumentPtr wrapJsonDoc(std::shared_ptr<JsonDocument> jsonDoc);

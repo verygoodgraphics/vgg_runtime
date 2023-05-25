@@ -38,5 +38,13 @@
         "createdAt": 0
       }
     ]
+  },
+  "/fake/add_event_listener": {
+    "click": [
+      {
+        "fileName": "js/local-sdk/11_sdk_add_event_listener.mjs",
+        "createdAt": 0
+      }
+    ]
   }
 }

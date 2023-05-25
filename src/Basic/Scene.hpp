@@ -15,6 +15,7 @@ struct Scene
 {
   static ResourceRepo ResRepo;
   static ObjectTableType ObjectTable;
+  static bool s_enableDrawDebugBound;
 
 public:
   std::vector<std::shared_ptr<ArtboardNode>> artboards;
@@ -46,6 +47,16 @@ public:
   static void setResRepo(std::map<std::string, std::vector<char>> repo)
   {
     Scene::ResRepo = std::move(repo);
+  }
+
+  static void enableDrawDebugBound(bool enable)
+  {
+    s_enableDrawDebugBound = enable;
+  }
+
+  static bool isEnableDrawDebugBound()
+  {
+    return s_enableDrawDebugBound;
   }
 
 private:

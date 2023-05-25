@@ -93,7 +93,7 @@ void PaintNode::renderPass(SkCanvas* canvas)
   s_renderState = nullptr;
 }
 
-void PaintNode::drawDebugBoarder(SkCanvas* canvas)
+void PaintNode::drawDebugBound(SkCanvas* canvas)
 {
   auto skrect = toSkRect(this->m_bound);
   SkPaint strokePen;
@@ -129,7 +129,10 @@ void PaintNode::paintPass()
   SkCanvas* canvas = getSkCanvas();
   canvas->save();
   canvas->concat(toSkMatrix(this->m_transform));
-  this->drawDebugBoarder(canvas);
+  if (Scene::isEnableDrawDebugBound())
+  {
+    this->drawDebugBound(canvas);
+  }
   this->paintEvent(canvas);
 }
 

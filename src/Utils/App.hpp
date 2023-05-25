@@ -526,6 +526,12 @@ protected: // protected methods
         m_capture = true;
       }
 
+      if (key == SDLK_b)
+      {
+        Scene::enableDrawDebugBound(!Scene::isEnableDrawDebugBound());
+        return true;
+      }
+
       if (key == SDLK_DOWN)
       {
         m_reloadCallback(m_scene.get(), 0);

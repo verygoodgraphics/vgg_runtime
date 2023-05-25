@@ -9,8 +9,9 @@
 namespace VGG
 {
 
-ResourceRepo Scene::ResRepo = ResourceRepo();
-ObjectTableType Scene::ObjectTable = {};
+ResourceRepo Scene::ResRepo{};
+ObjectTableType Scene::ObjectTable{};
+bool Scene::s_enableDrawDebugBound{ false };
 
 void Scene::LoadFileContent(const std::string& json)
 {

@@ -3,6 +3,7 @@
 #include "Basic/Attrs.h"
 #include "Basic/Scene.hpp"
 
+#include "include/core/SkBlendMode.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkImage.h"
 #include "include/pathops/SkPathOps.h"
@@ -14,55 +15,84 @@ using namespace VGG;
 
 extern std::unordered_map<std::string, sk_sp<SkImage>> SkiaImageRepo;
 
+#define SWITCH_MAP_ITEM_BEGIN(var)                                                                 \
+  switch (var)                                                                                     \
+  {
+
+#define SWITCH_MAP_ITEM_DEF(from, to)                                                              \
+  case from:                                                                                       \
+    return to;
+
+#define SWITCH_MAP_ITEM_DEF_NULL(from) case from:;
+
+#define SWITCH_MAP_ITEM_END(fallback)                                                              \
+  default:                                                                                         \
+    return fallback;                                                                               \
+    }
+
 inline SkPaint::Join toSkPaintJoin(VGG::ELineJoin join)
 {
-  switch (join)
-  {
-    case VGG::LJ_Miter:
-      return SkPaint::kMiter_Join;
-    case VGG::LJ_Round:
-      return SkPaint::kRound_Join;
-    case VGG::LJ_Bevel:
-      return SkPaint::kBevel_Join;
-  }
-  return SkPaint::kMiter_Join;
+  SWITCH_MAP_ITEM_BEGIN(join)
+  SWITCH_MAP_ITEM_DEF(LJ_Miter, SkPaint::kMiter_Join)
+  SWITCH_MAP_ITEM_DEF(LJ_Round, SkPaint::kRound_Join)
+  SWITCH_MAP_ITEM_DEF(LJ_Bevel, SkPaint::kBevel_Join)
+  SWITCH_MAP_ITEM_END(SkPaint::kMiter_Join)
+}
+
+inline SkBlendMode toSkBlendMode(EBlendMode mode)
+{
+  SWITCH_MAP_ITEM_BEGIN(mode)
+  SWITCH_MAP_ITEM_DEF(BM_Normal, SkBlendMode::kSrcOver)
+  SWITCH_MAP_ITEM_DEF(BM_Darken, SkBlendMode::kDarken)
+  SWITCH_MAP_ITEM_DEF(BM_Multiply, SkBlendMode::kMultiply)
+  SWITCH_MAP_ITEM_DEF(BM_Color_burn, SkBlendMode::kColorBurn)
+  SWITCH_MAP_ITEM_DEF(BM_Lighten, SkBlendMode::kLighten)
+  SWITCH_MAP_ITEM_DEF(BM_Screen, SkBlendMode::kScreen)
+  SWITCH_MAP_ITEM_DEF(BM_Color_dodge, SkBlendMode::kColorDodge)
+  SWITCH_MAP_ITEM_DEF(BM_Overlay, SkBlendMode::kOverlay)
+  SWITCH_MAP_ITEM_DEF(BM_Soft_light, SkBlendMode::kSoftLight)
+  SWITCH_MAP_ITEM_DEF(BM_Hard_light, SkBlendMode::kHardLight)
+  SWITCH_MAP_ITEM_DEF(BM_Difference, SkBlendMode::kDifference)
+  SWITCH_MAP_ITEM_DEF(BM_Exclusion, SkBlendMode::kExclusion)
+  SWITCH_MAP_ITEM_DEF(BM_Hue, SkBlendMode::kHue)
+  SWITCH_MAP_ITEM_DEF(BM_Saturation, SkBlendMode::kSaturation)
+  SWITCH_MAP_ITEM_DEF(BM_Color, SkBlendMode::kColor)
+  SWITCH_MAP_ITEM_DEF(BM_Luminosity, SkBlendMode::kColor)
+  SWITCH_MAP_ITEM_DEF_NULL(BM_Plus_darker)
+  SWITCH_MAP_ITEM_DEF_NULL(BM_Plus_lighter)
+  SWITCH_MAP_ITEM_DEF_NULL(BM_Blend_divide)
+  SWITCH_MAP_ITEM_DEF_NULL(BM_Blend_subtraction)
+  SWITCH_MAP_ITEM_DEF_NULL(BM_Darker_color)
+  SWITCH_MAP_ITEM_DEF_NULL(BM_Dissolve)
+  SWITCH_MAP_ITEM_DEF_NULL(BM_Hard_mix)
+  SWITCH_MAP_ITEM_DEF_NULL(BM_Lighter_color)
+  SWITCH_MAP_ITEM_DEF_NULL(BM_Lighten_burn)
+  SWITCH_MAP_ITEM_DEF_NULL(BM_Lighten_dodge)
+  SWITCH_MAP_ITEM_DEF_NULL(BM_Lighten_light)
+  SWITCH_MAP_ITEM_DEF_NULL(BM_Pass_through)
+  SWITCH_MAP_ITEM_DEF_NULL(BM_Pin_Light)
+  SWITCH_MAP_ITEM_DEF_NULL(BM_Vivid_light)
+  SWITCH_MAP_ITEM_END(SkBlendMode::kSrcOver)
+  return SkBlendMode::kSrcOver;
 }
 
 inline SkPaint::Cap toSkPaintCap(VGG::ELineCap cap)
 {
-  switch (cap)
-  {
-    case VGG::LC_Butt:
-      return SkPaint::kButt_Cap;
-    case VGG::LC_Round:
-      return SkPaint::kRound_Cap;
-    case VGG::LC_Square:
-      return SkPaint::kSquare_Cap;
-  }
-  return SkPaint::kButt_Cap;
+  SWITCH_MAP_ITEM_BEGIN(cap)
+  SWITCH_MAP_ITEM_DEF(LC_Butt, SkPaint::kButt_Cap)
+  SWITCH_MAP_ITEM_DEF(LC_Round, SkPaint::kRound_Cap)
+  SWITCH_MAP_ITEM_DEF(LC_Square, SkPaint::kSquare_Cap)
+  SWITCH_MAP_ITEM_END(SkPaint::kButt_Cap)
 }
 
 inline SkPathOp toSkPathOp(VGG::EBoolOp blop)
 {
-  SkPathOp op;
-  switch (blop)
-  {
-    case VGG::BO_Union:
-      op = SkPathOp::kUnion_SkPathOp;
-      break;
-    case VGG::BO_Substraction:
-      op = SkPathOp::kDifference_SkPathOp;
-      break;
-    case VGG::BO_Intersection:
-      op = SkPathOp::kIntersect_SkPathOp;
-      break;
-    case VGG::BO_Exclusion:
-      op = SkPathOp::kXOR_SkPathOp;
-      break;
-    default:
-      return SkPathOp::kUnion_SkPathOp;
-  }
-  return op;
+  SWITCH_MAP_ITEM_BEGIN(blop)
+  SWITCH_MAP_ITEM_DEF(VGG::BO_Union, SkPathOp::kUnion_SkPathOp)
+  SWITCH_MAP_ITEM_DEF(BO_Substraction, SkPathOp::kDifference_SkPathOp)
+  SWITCH_MAP_ITEM_DEF(VGG::BO_Intersection, SkPathOp::kIntersect_SkPathOp)
+  SWITCH_MAP_ITEM_DEF(VGG::BO_Exclusion, SkPathOp::kXOR_SkPathOp)
+  SWITCH_MAP_ITEM_END(SkPathOp::kUnion_SkPathOp)
 }
 
 constexpr float EPS = std::numeric_limits<float>::epsilon();

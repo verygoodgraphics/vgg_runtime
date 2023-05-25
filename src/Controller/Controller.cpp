@@ -22,21 +22,14 @@ Controller::Controller(std::shared_ptr<RunLoop> runLoop, Presenter& presenter, R
 {
   assert(m_run_loop);
 
-  m_view_event_observer = rxcpp::make_observer_dynamic<ViewEventPtr>(
-    [&](ViewEventPtr evt)
+  m_view_event_observer = rxcpp::make_observer_dynamic<UIEventPtr>(
+    [&](UIEventPtr evt)
     {
-      switch (evt->type)
+      auto listenters = m_work->getEventListeners(evt->path, ViewEventTypeToString(evt->type));
+      for (auto& listenter : listenters)
       {
-        case ViewEventType::Click:
-        {
-          const auto& evt_data = std::any_cast<ViewEventClick>(evt->data);
-          auto code = m_work->getCode(evt_data.path);
-          vggExec()->evalModule(code);
-        }
-        break;
-
-        default:
-          break;
+        // todo, pass evt data to listeners
+        vggExec()->evalModule(listenter);
       }
     });
   presenter.getObservable().subscribe(m_view_event_observer);

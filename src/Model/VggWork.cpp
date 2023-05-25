@@ -11,7 +11,6 @@
 #include <chrono>
 
 constexpr auto artboard_file_name = "artboard.json";
-constexpr auto code_map_file_name = "code_map.json";
 constexpr auto event_listeners_file_name = "event_listeners.json";
 constexpr auto layout_file_name = "layout.json";
 
@@ -46,15 +45,6 @@ bool VggWork::load(const std::vector<char>& buffer)
   return load(m_zipFile);
 }
 
-const std::string VggWork::getCode(const std::string& path) const
-{
-  auto name = m_codeMap.at(path);
-  std::string code;
-  readZipFileEntry(m_zipFile, name, code);
-  // todo, cache js file?
-  return code;
-}
-
 bool VggWork::load(zip_t* zipFile)
 {
   try
@@ -68,12 +58,6 @@ bool VggWork::load(zip_t* zipFile)
     else
     {
       return false;
-    }
-
-    if (readZipFileEntry(zipFile, code_map_file_name, file_content))
-    {
-      auto tmp_json = json::parse(file_content);
-      tmp_json.get_to(m_codeMap);
     }
 
     if (readZipFileEntry(zipFile, event_listeners_file_name, file_content))
@@ -143,7 +127,7 @@ void VggWork::addEventListener(const std::string& json_pointer,
     if (it->is_object() && it->contains(file_name_key))
     {
       auto& item_file_name = (*it)[file_name_key];
-      if (itme_file_name.is_string() && item_file_name.get<std::string>() == file_name)
+      if (item_file_name.is_string() && item_file_name.get<std::string>() == file_name)
       {
         return;
       }

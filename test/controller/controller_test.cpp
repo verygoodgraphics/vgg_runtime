@@ -26,7 +26,7 @@ protected:
   MainComposer composer;
   std::shared_ptr<RunLoop> m_run_loop = std::make_shared<RunLoop>();
   MockPresenter m_mock_presenter;
-  rxcpp::subjects::subject<VGG::ViewEventPtr> m_fake_view_subject;
+  rxcpp::subjects::subject<VGG::UIEventPtr> m_fake_view_subject;
   bool m_exit_loop = false;
 
   void SetUp() override
@@ -73,7 +73,7 @@ protected:
   void mock_click(const std::string& path)
   {
     m_fake_view_subject.get_subscriber().on_next(
-      ViewEventPtr{ new ViewEvent{ ViewEventType::Click, ViewEventClick{ path } } });
+      UIEventPtr{ new UIEvent{ path, UIEventType::click, MouseEvent{} } });
   }
 };
 

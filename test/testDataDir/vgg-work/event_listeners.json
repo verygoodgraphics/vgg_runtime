@@ -1,8 +1,40 @@
 {
+  "/artboard/layers/0/childObjects": {
+    "click": [
+      {
+        "fileName": "js/local-sdk/1_on_click.mjs",
+        "createdAt": 0
+      }
+    ]
+  },
+  "/artboard/layers": {
+    "click": [
+      {
+        "fileName": "js/local-sdk/2_update.mjs",
+        "createdAt": 0
+      }
+    ]
+  },
+  "/artboard/layers/0": {
+    "click": [
+      {
+        "fileName": "js/local-sdk/3.delete.mjs",
+        "createdAt": 0
+      }
+    ]
+  },
   "/fake/add": {
     "click": [
       {
         "fileName": "js/local-sdk/4.add.mjs",
+        "createdAt": 0
+      }
+    ]
+  },
+  "/fake/add_color": {
+    "click": [
+      {
+        "fileName": "js/remote_dic/1_add_color.mjs",
         "createdAt": 0
       }
     ]

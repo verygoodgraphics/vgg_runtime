@@ -93,7 +93,7 @@ TEST_F(VggWorkTestSuite, Get_code)
   EXPECT_EQ(ret, true);
 
   // When
-  auto ret_code = m_sut->getCode("/artboard/layers/0/childObjects");
+  auto ret_code = m_sut->getEventListeners("/artboard/layers/0/childObjects", "click").front();
 
   // Then
   EXPECT_TRUE(!ret_code.empty());

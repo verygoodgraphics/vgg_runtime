@@ -24,8 +24,6 @@ class VggWork
   // JsonDocumentPtr m_layoutDoc;
   // MakeJsonDocFn m_makeLayoutDocFn;
 
-  std::unordered_map<std::string, std::string> m_codeMap;
-
 public:
   VggWork(const MakeJsonDocFn& makeDesignDocFn);
   ~VggWork();
@@ -36,8 +34,6 @@ public:
   const json& codeMapDoc() const;
   JsonDocumentPtr& designDoc();
   const json& layoutDoc() const;
-
-  const std::string getCode(const std::string& path) const;
 
   void addEventListener(const std::string& json_pointer,
                         const std::string& type,

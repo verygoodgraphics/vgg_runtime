@@ -188,7 +188,6 @@ void drawContour(SkCanvas* canvas,
     }
     else if (b.fill_type == FT_Pattern)
     {
-
       assert(b.pattern.has_value());
       auto img = loadImage(b.pattern->imageGUID, Scene::getResRepo());
       auto bs = bound.size();

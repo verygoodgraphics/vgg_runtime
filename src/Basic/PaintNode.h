@@ -29,27 +29,26 @@ protected:
   static SkCanvas* s_defaultCanvas;
   static RenderState* s_renderState;
 
+  Bound2 m_bound;
+  glm::mat3 m_transform{ 1.0 };
+
   std::string guid{};
   std::vector<std::string> maskedBy{};
   Mask outlineMask;
   EMaskType maskType{ MT_None };
-  bool paintDirty{ false };
   EBoolOp m_clipOperator{ BO_None };
+
+  Style style;
+  ContextSetting contextSetting;
+  ObjectType type;
 
   friend class NlohmannBuilder;
   friend class SkiaRenderer;
-
-  Bound2 m_bound;
-  glm::mat3 m_transform{ 1.0 };
-  ObjectType type;
-  Style style;
-  ContextSetting contextSetting;
 
 public:
   PaintNode(const std::string& name, ObjectType type)
     : Node(name)
     , type(type)
-    , paintDirty(true)
   {
   }
 
@@ -119,14 +118,7 @@ public:
   virtual Mask asOutlineMask(const glm::mat3* mat);
   virtual void asAlphaMask();
 
-protected:
-  void renderPass(SkCanvas* canvas); // TODO:: should be private access
-
-  virtual void paintEvent(SkCanvas* canvas)
-  {
-  }
-
-private:
+public:
   void visitNode(VGG::Node* p, ObjectTableType& table);
 
   template<typename F>
@@ -142,6 +134,7 @@ private:
   }
 
 public:
+  // TODO:: chagne the following functions accessbility
   void invokeRenderPass(SkCanvas* canvas)
   {
     preRenderPass(canvas);
@@ -159,40 +152,25 @@ public:
   }
   virtual void preRenderPass(SkCanvas* canvas)
   {
-    if (isPaintDirty())
-    {
-      paintPass();
-    }
+    paintPass();
   }
-
-  void paintPass();
 
   virtual void postRenderPass(SkCanvas* canvas)
   {
     canvas->restore();
   }
 
-  virtual void Transform(SkCanvas* canvas)
-  {
-  }
-
-  void markPaintDirty()
-  {
-    this->paintDirty = true;
-  }
-
-  void resetPaintDirty()
-  {
-    this->paintDirty = false;
-  }
-
   Mask makeMaskBy(EBoolOp maskOp);
+
+protected:
+  virtual void paintPass();
+  void renderPass(SkCanvas* canvas); // TODO:: should be private access
+
+  virtual void paintEvent(SkCanvas* canvas)
+  {
+  }
 
 private:
   void drawDebugBound(SkCanvas* canvas);
-  bool isPaintDirty()
-  {
-    return paintDirty;
-  }
 };
 } // namespace VGG

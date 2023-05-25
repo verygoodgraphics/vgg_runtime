@@ -28,19 +28,19 @@ class PaintNode : public Node
 protected:
   static SkCanvas* s_defaultCanvas;
   static RenderState* s_renderState;
-  std::string guid;
-  std::vector<std::string> maskedBy;
+
+  std::string guid{};
+  std::vector<std::string> maskedBy{};
   Mask outlineMask;
   EMaskType maskType{ MT_None };
   bool paintDirty{ false };
-  EBoolOp m_clipOperator;
-
+  EBoolOp m_clipOperator{ BO_None };
   friend class NlohmannBuilder;
   friend class SkiaRenderer;
 
 public:
   Bound2 bound;
-  glm::mat3 transform{ 1.0 };
+  glm::mat3 m_transform{ 1.0 };
   ObjectType type;
   bool visible = true;
   Style style;
@@ -74,10 +74,15 @@ public:
 
   glm::mat3 mapTransform(const PaintNode* node) const;
 
+  void setLocalTransform(const glm::mat3& transform)
+  {
+    this->m_transform = transform;
+  }
+
   const glm::mat3& localTransform() const
   {
     // TODO:: if the node is detached from the parent, this transform should be reset;
-    return transform;
+    return m_transform;
   }
 
   const Bound2& getBound() const
@@ -103,9 +108,9 @@ public:
   /**
    * Return a matrix that transform from this node to the given node
    * */
-
   virtual SkCanvas* getSkCanvas();
   RenderState* getRenderState();
+
   void setOutlineMask(const Mask& mask);
 
   // TODO:: this routine should be removed to a stand alone render pass
@@ -115,8 +120,8 @@ public:
     visitNode(this, hash);
     return hash;
   }
-  virtual Mask asOutlineMask(const glm::mat3* mat);
 
+  virtual Mask asOutlineMask(const glm::mat3* mat);
   virtual void asAlphaMask();
 
 protected:

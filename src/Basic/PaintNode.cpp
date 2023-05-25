@@ -43,14 +43,14 @@ glm::mat3 PaintNode::mapTransform(const PaintNode* node) const
     return mat;
   for (int i = 0; i < path1.size() && path1[i] != lca; i++)
   {
-    auto skm = static_cast<const PaintNode*>(path1[i])->transform;
+    auto skm = static_cast<const PaintNode*>(path1[i])->m_transform;
     auto inv = glm::inverse(skm);
     mat = mat * inv;
   }
 
   for (int i = lca_idx - 1; i >= 0; i--)
   {
-    const auto m = static_cast<const PaintNode*>(path2[i])->transform;
+    const auto m = static_cast<const PaintNode*>(path2[i])->m_transform;
     mat = mat * m;
   }
   return mat;
@@ -128,7 +128,7 @@ void PaintNode::paintPass()
 {
   SkCanvas* canvas = getSkCanvas();
   canvas->save();
-  canvas->concat(toSkMatrix(this->transform));
+  canvas->concat(toSkMatrix(this->m_transform));
   this->drawDebugBoarder(canvas);
   this->paintEvent(canvas);
 }

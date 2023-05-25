@@ -2,10 +2,14 @@
 
 #include "JsonDocument.hpp"
 
+#include "ModelEvent.hpp"
+
 #include "nlohmann/json.hpp"
+#include "rxcpp/rx.hpp"
 
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -24,6 +28,9 @@ class VggWork
   // JsonDocumentPtr m_layoutDoc;
   // MakeJsonDocFn m_makeLayoutDocFn;
 
+  rxcpp::subjects::subject<VGG::ModelEventPtr> m_subject;
+  std::mutex m_mutex;
+
 public:
   VggWork(const MakeJsonDocFn& makeDesignDocFn);
   ~VggWork();
@@ -35,6 +42,7 @@ public:
   JsonDocumentPtr& designDoc();
   const json& layoutDoc() const;
 
+  // event listener
   void addEventListener(const std::string& json_pointer,
                         const std::string& type,
                         const std::string& code);
@@ -43,6 +51,9 @@ public:
                            const std::string& code);
   const std::vector<std::string> getEventListeners(const std::string& json_pointer,
                                                    const std::string& type);
+
+  // observable
+  rxcpp::observable<VGG::ModelEventPtr> getObservable();
 
 private:
   bool load(zip_t* zipFile);

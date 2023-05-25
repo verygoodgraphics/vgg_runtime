@@ -11,9 +11,15 @@ namespace VGG
 enum class ModelEventType
 {
   Invalid,
+
+  // document
   Add,
   Delete,
-  Update
+  Update,
+
+  // event listener
+  ListenerDidAdd,
+  ListenerDidRemove
 };
 
 struct ModelEvent
@@ -86,6 +92,13 @@ struct ModelEventUpdate : ModelEvent
     , value{ std::move(value) }
   {
   }
+};
+
+struct ModelEventListenerDidAdd
+{
+};
+struct ModelEventListenerDidRemove
+{
 };
 
 } // namespace VGG

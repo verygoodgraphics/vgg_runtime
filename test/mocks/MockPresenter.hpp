@@ -7,6 +7,6 @@
 class MockPresenter : public VGG::Presenter
 {
 public:
-  MOCK_METHOD(rxcpp::observer<VGG::ModelEventPtr>&, getDesignDocObserver, (), (override));
+  MOCK_METHOD(rxcpp::observer<VGG::ModelEventPtr>&, getModelObserver, (), (override));
   MOCK_METHOD(rxcpp::observable<VGG::UIEventPtr>, getObservable, (), (override));
 };

@@ -104,15 +104,14 @@ TEST_F(ControllerTestSuite, OnClick_observer)
   setup_sdk_with_local_dic();
 
   auto type = ModelEventType::Invalid;
-  auto fake_design_doc_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       type = evt->type;
       m_exit_loop = true;
     });
 
-  EXPECT_CALL(m_mock_presenter, getDesignDocObserver())
-    .WillOnce(ReturnRef(fake_design_doc_observer));
+  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
   setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path);
@@ -138,14 +137,13 @@ TEST_F(ControllerTestSuite, Validator_reject_deletion)
   setup_sdk_with_local_dic();
 
   auto type = ModelEventType::Invalid;
-  auto fake_design_doc_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       type = evt->type;
       m_exit_loop = true;
     });
-  EXPECT_CALL(m_mock_presenter, getDesignDocObserver())
-    .WillOnce(ReturnRef(fake_design_doc_observer));
+  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
   setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path, design_doc_schema_file);
@@ -168,15 +166,14 @@ TEST_F(ControllerTestSuite, DidUpdate)
   setup_sdk_with_local_dic();
 
   auto type = ModelEventType::Invalid;
-  auto fake_design_doc_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       type = evt->type;
       auto udpate_event_ptr = static_cast<ModelEventUpdate*>(evt.get());
       m_exit_loop = true;
     });
-  EXPECT_CALL(m_mock_presenter, getDesignDocObserver())
-    .WillOnce(ReturnRef(fake_design_doc_observer));
+  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
   setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path, design_doc_schema_file);
@@ -199,15 +196,14 @@ TEST_F(ControllerTestSuite, DidDelete)
   setup_sdk_with_local_dic();
 
   auto type = ModelEventType::Invalid;
-  auto fake_design_doc_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       type = evt->type;
       auto delete_event_ptr = static_cast<ModelEventDelete*>(evt.get());
       m_exit_loop = true;
     });
-  EXPECT_CALL(m_mock_presenter, getDesignDocObserver())
-    .WillOnce(ReturnRef(fake_design_doc_observer));
+  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
   setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path, design_doc_schema_file);
@@ -230,15 +226,14 @@ TEST_F(ControllerTestSuite, DidAdd_no_validator)
   setup_sdk_with_local_dic();
 
   auto type = ModelEventType::Invalid;
-  auto fake_design_doc_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       type = evt->type;
       auto add_event_ptr = static_cast<ModelEventAdd*>(evt.get());
       m_exit_loop = true;
     });
-  EXPECT_CALL(m_mock_presenter, getDesignDocObserver())
-    .WillOnce(ReturnRef(fake_design_doc_observer));
+  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
   setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path);
@@ -263,14 +258,13 @@ TEST_F(ControllerTestSuite, DidAdd_color)
   setup_sdk_with_remote_dic();
 
   auto type = ModelEventType::Invalid;
-  auto fake_design_doc_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       type = evt->type;
       m_exit_loop = true;
     });
-  EXPECT_CALL(m_mock_presenter, getDesignDocObserver())
-    .WillOnce(ReturnRef(fake_design_doc_observer));
+  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
   setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path, design_doc_schema_file);
@@ -285,4 +279,32 @@ TEST_F(ControllerTestSuite, DidAdd_color)
 
   // Then
   EXPECT_TRUE(type == ModelEventType::Add);
+}
+
+TEST_F(ControllerTestSuite, add_event_listener)
+{
+  // Given
+  setup_sdk_with_local_dic();
+
+  auto type = ModelEventType::Invalid;
+  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+    [&](ModelEventPtr evt)
+    {
+      type = evt->type;
+      m_exit_loop = true;
+    });
+  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(Return(fake_model_observer));
+  setup_sut();
+  std::string file_path = "testDataDir/vgg-work.zip";
+  auto ret = m_sut->start(file_path);
+  EXPECT_TRUE(ret);
+
+  // When
+  mock_click("/fake/add_event_listener");
+
+  //
+  loop_until_exit();
+
+  // Then
+  EXPECT_TRUE(type == ModelEventType::ListenerDidAdd);
 }

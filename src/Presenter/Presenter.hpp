@@ -13,13 +13,12 @@ namespace VGG
 class Presenter
 {
   rxcpp::subjects::subject<VGG::UIEventPtr> m_subject;
-  rxcpp::observer<VGG::ModelEventPtr> m_design_doc_observer;
-  rxcpp::observer<VGG::ModelEventPtr> m_layout_doc_observer;
+  rxcpp::observer<VGG::ModelEventPtr> m_model_observer;
 
 public:
   Presenter()
   {
-    m_design_doc_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+    m_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
       [&](ModelEventPtr event)
       {
         switch (event->type)
@@ -46,21 +45,13 @@ public:
             break;
         }
       });
-
-    m_layout_doc_observer =
-      rxcpp::make_observer_dynamic<ModelEventPtr>([&](ModelEventPtr event) {});
   }
 
   virtual ~Presenter() = default;
 
-  virtual rxcpp::observer<VGG::ModelEventPtr>& getDesignDocObserver()
+  virtual rxcpp::observer<VGG::ModelEventPtr>& getModelObserver()
   {
-    return m_design_doc_observer;
-  }
-
-  virtual rxcpp::observer<VGG::ModelEventPtr>& getLayoutDocObserver()
-  {
-    return m_layout_doc_observer;
+    return m_model_observer;
   }
 
   virtual rxcpp::observable<VGG::UIEventPtr> getObservable()

@@ -29,7 +29,6 @@ public:
   }
   Mask asOutlineMask(const glm::mat3* mat) override;
   void addSubShape(std::shared_ptr<PaintNode> node, EBoolOp op);
-
   void renderOrderPass(SkCanvas* canvas) override
   {
     // do not render child object for path node

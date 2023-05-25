@@ -13,6 +13,7 @@ add_executable(runtime
   Utils/WasmBindings.cpp
   Basic/Scene.cpp
   Basic/PathNode.cpp
+  Basic/PathNodePrivate.cpp
   Basic/ImageNode.cpp
   Basic/TextNode.cpp
   Basic/PaintNode.cpp

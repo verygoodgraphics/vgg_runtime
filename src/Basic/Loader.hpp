@@ -91,7 +91,7 @@ public:
   static inline void fromObjectCommonProperty(const nlohmann::json& j, PaintNode* obj)
   {
     // all properties that render object cares about
-    std::tie(obj->bound, obj->transform) = fromTransform(j);
+    std::tie(obj->bound, obj->m_transform) = fromTransform(j);
     obj->style = j.at("style").get<Style>();
     obj->contextSetting = j.at("contextSettings").get<ContextSetting>();
     obj->maskedBy = j.at("outlineMaskBy").get<std::vector<std::string>>();
@@ -227,7 +227,7 @@ public:
   static inline std::shared_ptr<PaintNode> fromLayer(const nlohmann::json& j)
   {
     auto p = std::make_shared<PaintNode>("Layer", VGG_LAYER);
-    p->transform = glm::mat3(1);
+    p->m_transform = glm::mat3(1);
     fromObjectCommonProperty(j, p.get());
     for (const auto& e : j["childObjects"])
     {

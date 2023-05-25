@@ -19,6 +19,7 @@ class PathNode final : public PaintNode
 {
   EWindingType windingRule;
   sk_sp<SkShader> testShader;
+
 public:
   PathNode(const std::string& name);
   void paintEvent(SkCanvas* canvas) override;
@@ -35,7 +36,10 @@ public:
   }
 
 protected:
-  void drawContour(SkCanvas* canvas, const SkPath* outlineMask);
-  SkPath makePath();
+  // void drawContour(SkCanvas* canvas,
+  //                  const SkPath* outlineMask,
+  //                  const ContextSetting& settings,
+  //                  const Style& style);
+  // SkPath makePath(const std::vector<std::pair<SkPath, EBoolOp>>& ct);
 };
 } // namespace VGG

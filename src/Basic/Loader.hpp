@@ -91,7 +91,7 @@ public:
   static inline void fromObjectCommonProperty(const nlohmann::json& j, PaintNode* obj)
   {
     // all properties that render object cares about
-    std::tie(obj->bound, obj->m_transform) = fromTransform(j);
+    std::tie(obj->m_bound, obj->m_transform) = fromTransform(j);
     obj->style = j.at("style").get<Style>();
     obj->contextSetting = j.at("contextSettings").get<ContextSetting>();
     obj->maskedBy = j.at("outlineMaskBy").get<std::vector<std::string>>();

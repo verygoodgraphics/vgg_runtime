@@ -95,7 +95,7 @@ void PaintNode::renderPass(SkCanvas* canvas)
 
 void PaintNode::drawDebugBoarder(SkCanvas* canvas)
 {
-  auto skrect = toSkRect(this->bound);
+  auto skrect = toSkRect(this->m_bound);
   SkPaint strokePen;
   strokePen.setStyle(SkPaint::kStroke_Style);
   SkColor color = nodeType2Color(this->type);
@@ -147,7 +147,7 @@ Mask PaintNode::asOutlineMask(const glm::mat3* mat)
 {
   SkPath p;
   Mask mask;
-  p.addRect(toSkRect(bound));
+  p.addRect(toSkRect(m_bound));
   if (mat)
   {
     p.transform(toSkMatrix(*mat));

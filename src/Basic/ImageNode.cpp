@@ -47,7 +47,7 @@ void ImageNode::paintEvent(SkCanvas* canvas)
     SkSamplingOptions opt;
     canvas->save();
     canvas->scale(1, -1);
-    canvas->drawImageRect(image, toSkRect(this->bound), opt);
+    canvas->drawImageRect(image, toSkRect(this->m_bound), opt);
     canvas->restore();
   }
 }

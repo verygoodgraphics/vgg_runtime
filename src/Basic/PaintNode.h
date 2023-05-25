@@ -35,16 +35,17 @@ protected:
   EMaskType maskType{ MT_None };
   bool paintDirty{ false };
   EBoolOp m_clipOperator{ BO_None };
+
   friend class NlohmannBuilder;
   friend class SkiaRenderer;
 
-public:
-  Bound2 bound;
+  Bound2 m_bound;
   glm::mat3 m_transform{ 1.0 };
   ObjectType type;
-  bool visible = true;
   Style style;
   ContextSetting contextSetting;
+
+public:
   PaintNode(const std::string& name, ObjectType type)
     : Node(name)
     , type(type)
@@ -67,11 +68,6 @@ public:
     return m_clipOperator;
   }
 
-  void setVisible(bool visible)
-  {
-    this->visible = visible;
-  }
-
   glm::mat3 mapTransform(const PaintNode* node) const;
 
   void setLocalTransform(const glm::mat3& transform)
@@ -87,7 +83,7 @@ public:
 
   const Bound2& getBound() const
   {
-    return this->bound;
+    return this->m_bound;
   }
 
   const std::string& GUID() const
@@ -110,7 +106,6 @@ public:
    * */
   virtual SkCanvas* getSkCanvas();
   RenderState* getRenderState();
-
   void setOutlineMask(const Mask& mask);
 
   // TODO:: this routine should be removed to a stand alone render pass

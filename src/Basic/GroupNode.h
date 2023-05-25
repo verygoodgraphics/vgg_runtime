@@ -23,7 +23,7 @@ public:
     Mask mask;
     if (!hasChild())
     {
-      mask.outlineMask.addRect(toSkRect(bound));
+      mask.outlineMask.addRect(toSkRect(m_bound));
     }
     else
     {

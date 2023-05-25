@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Model/ModelEvent.hpp"
-#include "ViewEvent.hpp"
+#include "UIEvent.hpp"
 
 #include "rxcpp/rx.hpp"
 
@@ -12,7 +12,7 @@ namespace VGG
 
 class Presenter
 {
-  rxcpp::subjects::subject<VGG::ViewEventPtr> m_subject;
+  rxcpp::subjects::subject<VGG::UIEventPtr> m_subject;
   rxcpp::observer<VGG::ModelEventPtr> m_design_doc_observer;
   rxcpp::observer<VGG::ModelEventPtr> m_layout_doc_observer;
 
@@ -63,7 +63,7 @@ public:
     return m_layout_doc_observer;
   }
 
-  virtual rxcpp::observable<VGG::ViewEventPtr> getObservable()
+  virtual rxcpp::observable<VGG::UIEventPtr> getObservable()
   {
     return m_subject.get_observable();
   }

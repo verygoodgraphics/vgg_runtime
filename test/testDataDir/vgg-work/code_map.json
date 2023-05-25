@@ -1,7 +1,0 @@
-{
-  "/artboard/layers/0/childObjects": "js/local-sdk/1_on_click.mjs",
-  "/artboard/layers": "js/local-sdk/2_update.mjs",
-  "/artboard/layers/0": "js/local-sdk/3.delete.mjs",
-  "/fake/add": "js/local-sdk/4.add.mjs",
-  "/fake/add_color": "js/remote_dic/1_add_color.mjs"
-}

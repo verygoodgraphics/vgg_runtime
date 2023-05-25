@@ -46,5 +46,21 @@
         "createdAt": 0
       }
     ]
+  },
+  "/fake/remove_event_listener": {
+    "click": [
+      {
+        "fileName": "js/local-sdk/12_sdk_remove_event_listener.mjs",
+        "createdAt": 0
+      }
+    ]
+  },
+  "/fake/get_event_listeners": {
+    "click": [
+      {
+        "fileName": "js/local-sdk/13_sdk_get_event_listeners.mjs",
+        "createdAt": 0
+      }
+    ]
   }
 }

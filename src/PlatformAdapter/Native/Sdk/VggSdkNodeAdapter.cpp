@@ -92,8 +92,8 @@ VggSdkNodeAdapter::~VggSdkNodeAdapter()
 
 void VggSdkNodeAdapter::Destructor(napi_env env, void* nativeObject, void* /*finalize_hint*/)
 {
-  VggSdkNodeAdapter* obj = static_cast<VggSdkNodeAdapter*>(nativeObject);
-  delete obj;
+  VggSdkNodeAdapter* sdk_adapter = static_cast<VggSdkNodeAdapter*>(nativeObject);
+  delete sdk_adapter;
 }
 
 void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
@@ -104,6 +104,10 @@ void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
     DECLARE_NODE_API_PROPERTY("updateAt", DesignDocumentReplaceAt),
     DECLARE_NODE_API_PROPERTY("addAt", DesignDocumentAddAt),
     DECLARE_NODE_API_PROPERTY("deleteAt", DesignDocumentDeleteAt),
+
+    DECLARE_NODE_API_PROPERTY("AddEventListener", AddEventListener),
+    DECLARE_NODE_API_PROPERTY("RemoveEventListener", RemoveEventListener),
+    DECLARE_NODE_API_PROPERTY("GetEventListeners", GetEventListeners),
   };
 
   napi_value cons;
@@ -136,16 +140,16 @@ napi_value VggSdkNodeAdapter::New(napi_env env, napi_callback_info info)
   if (is_constructor)
   {
     // Invoked as constructor: `new VggSdk()`
-    VggSdkNodeAdapter* obj = new VggSdkNodeAdapter();
-    obj->m_env = env;
+    VggSdkNodeAdapter* sdk_adapter = new VggSdkNodeAdapter();
+    sdk_adapter->m_env = env;
 
     NODE_API_CALL(env,
                   napi_wrap(env,
                             _this,
-                            obj,
+                            sdk_adapter,
                             VggSdkNodeAdapter::Destructor,
                             nullptr /* finalize_hint */,
-                            &obj->m_wrapper));
+                            &sdk_adapter->m_wrapper));
 
     return _this;
   }
@@ -165,10 +169,10 @@ napi_value VggSdkNodeAdapter::GetDesignDocument(napi_env env, napi_callback_info
   napi_value _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &_this, nullptr));
 
-  VggSdkNodeAdapter* obj;
-  NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
+  VggSdkNodeAdapter* sdk_adapter;
+  NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
 
-  auto& json = obj->m_vggSdk->designDocument();
+  auto& json = sdk_adapter->m_vggSdk->designDocument();
 
   napi_value ret;
   NODE_API_CALL(env, napi_create_string_utf8(env, json.data(), json.size(), &ret));
@@ -183,29 +187,21 @@ napi_value VggSdkNodeAdapter::DesignDocumentReplaceAt(napi_env env, napi_callbac
   napi_value _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
 
-  NODE_API_ASSERT(env, argc >= 2, "Wrong number of arguments");
+  if (argc != 2)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
 
-  napi_valuetype valuetype0;
-  NODE_API_CALL(env, napi_typeof(env, args[0], &valuetype0));
-
-  napi_valuetype valuetype1;
-  NODE_API_CALL(env, napi_typeof(env, args[1], &valuetype1));
-
-  NODE_API_ASSERT(env,
-                  valuetype0 == napi_string && valuetype1 == napi_string,
-                  "Wrong argument type. Strings expected.");
-
-  std::string json_pointer_string;
-  GetArgString_(env, json_pointer_string, args[0]);
-
-  std::string json_value_string;
-  GetArgString_(env, json_value_string, args[1]);
-
-  VggSdkNodeAdapter* obj;
-  NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
   try
   {
-    obj->m_vggSdk->designDocumentReplaceAt(json_pointer_string, json_value_string);
+    auto json_pointer_string = GetArgString(env, args[0]);
+    auto json_value_string = GetArgString(env, args[1]);
+
+    VggSdkNodeAdapter* sdk_adapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
+
+    sdk_adapter->m_vggSdk->designDocumentReplaceAt(json_pointer_string, json_value_string);
   }
   catch (std::exception& e)
   {
@@ -222,29 +218,21 @@ napi_value VggSdkNodeAdapter::DesignDocumentAddAt(napi_env env, napi_callback_in
   napi_value _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
 
-  NODE_API_ASSERT(env, argc >= 2, "Wrong number of arguments");
+  if (argc != 2)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
 
-  napi_valuetype valuetype0;
-  NODE_API_CALL(env, napi_typeof(env, args[0], &valuetype0));
-
-  napi_valuetype valuetype1;
-  NODE_API_CALL(env, napi_typeof(env, args[1], &valuetype1));
-
-  NODE_API_ASSERT(env,
-                  valuetype0 == napi_string && valuetype1 == napi_string,
-                  "Wrong argument type. Strings expected.");
-
-  std::string json_pointer_string;
-  GetArgString_(env, json_pointer_string, args[0]);
-
-  std::string json_value_string;
-  GetArgString_(env, json_value_string, args[1]);
-
-  VggSdkNodeAdapter* obj;
-  NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
   try
   {
-    obj->m_vggSdk->designDocumentAddAt(json_pointer_string, json_value_string);
+    auto json_pointer_string = GetArgString(env, args[0]);
+    auto json_value_string = GetArgString(env, args[1]);
+
+    VggSdkNodeAdapter* sdk_adapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
+
+    sdk_adapter->m_vggSdk->designDocumentAddAt(json_pointer_string, json_value_string);
   }
   catch (std::exception& e)
   {
@@ -261,21 +249,20 @@ napi_value VggSdkNodeAdapter::DesignDocumentDeleteAt(napi_env env, napi_callback
   napi_value _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
 
-  NODE_API_ASSERT(env, argc >= 1, "Wrong number of arguments");
+  if (argc != 1)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
 
-  napi_valuetype valuetype0;
-  NODE_API_CALL(env, napi_typeof(env, args[0], &valuetype0));
-
-  NODE_API_ASSERT(env, valuetype0 == napi_string, "Wrong argument type. Strings expected.");
-
-  std::string json_pointer_string;
-  GetArgString_(env, json_pointer_string, args[0]);
-
-  VggSdkNodeAdapter* obj;
-  NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&obj)));
   try
   {
-    obj->m_vggSdk->designDocumentDeleteAt(json_pointer_string);
+    auto json_pointer_string = GetArgString(env, args[0]);
+
+    VggSdkNodeAdapter* sdk_adapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
+
+    sdk_adapter->m_vggSdk->designDocumentDeleteAt(json_pointer_string);
   }
   catch (std::exception& e)
   {
@@ -285,8 +272,126 @@ napi_value VggSdkNodeAdapter::DesignDocumentDeleteAt(napi_env env, napi_callback
   return nullptr;
 }
 
-void VggSdkNodeAdapter::GetArgString_(napi_env env, std::string& to_string, napi_value arg)
+// event listener
+napi_value VggSdkNodeAdapter::AddEventListener(napi_env env, napi_callback_info info)
 {
+  size_t argc = 3;
+  napi_value args[3];
+  napi_value _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc != 3)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    VggSdkNodeAdapter* sdk_adapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
+
+    auto element_path = GetArgString(env, args[0]);
+    auto event_type = GetArgString(env, args[1]);
+    auto listener_code = GetArgString(env, args[2]);
+
+    sdk_adapter->m_vggSdk->addEventListener(element_path, event_type, listener_code);
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+
+napi_value VggSdkNodeAdapter::RemoveEventListener(napi_env env, napi_callback_info info)
+{
+  size_t argc = 3;
+  napi_value args[3];
+  napi_value _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc != 3)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    VggSdkNodeAdapter* sdk_adapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
+
+    auto element_path = GetArgString(env, args[0]);
+    auto event_type = GetArgString(env, args[1]);
+    auto listener_code = GetArgString(env, args[2]);
+
+    sdk_adapter->m_vggSdk->removeEventListener(element_path, event_type, listener_code);
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+
+napi_value VggSdkNodeAdapter::GetEventListeners(napi_env env, napi_callback_info info)
+{
+  size_t argc = 2;
+  napi_value args[2];
+  napi_value _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc != 2)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    auto element_path = GetArgString(env, args[0]);
+    auto event_type = GetArgString(env, args[1]);
+
+    VggSdkNodeAdapter* sdk_adapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
+    auto listener_codes = sdk_adapter->m_vggSdk->getEventListeners(element_path, event_type);
+
+    napi_value js_listener_codes;
+    napi_create_array_with_length(env, listener_codes.size(), &js_listener_codes);
+    for (int i = 0; i < listener_codes.size(); ++i)
+    {
+      auto& listener_code = listener_codes[i];
+
+      napi_value js_listener_code;
+      NODE_API_CALL(env,
+                    napi_create_string_utf8(env,
+                                            listener_code.data(),
+                                            listener_code.size(),
+                                            &js_listener_code));
+      NODE_API_CALL(env, napi_set_element(env, js_listener_codes, i, js_listener_code));
+    }
+    return js_listener_codes;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+    return nullptr;
+  }
+}
+
+// helper
+std::string VggSdkNodeAdapter::GetArgString(napi_env env, napi_value arg)
+{
+  napi_valuetype value_type;
+  NODE_API_CALL(env, napi_typeof(env, arg, &value_type));
+  if (value_type != napi_string)
+  {
+    throw std::invalid_argument("Wrong argument type. Strings expected.");
+  }
+
   size_t len = 0;
   auto status = napi_get_value_string_utf8(env, arg, NULL, 0, &len);
   assert(status == napi_ok);
@@ -294,7 +399,11 @@ void VggSdkNodeAdapter::GetArgString_(napi_env env, std::string& to_string, napi
   char* buf = (char*)malloc(len + 1);
   status = napi_get_value_string_utf8(env, arg, buf, len + 1, &len);
   assert(status == napi_ok);
-  to_string.append(buf);
+
+  std::string result;
+  result.append(buf);
 
   free(buf);
+
+  return result;
 }

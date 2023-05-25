@@ -20,16 +20,24 @@ private:
 
   static napi_value New(napi_env env, napi_callback_info info);
 
+  // design document in vgg work
   static napi_value GetDesignDocument(napi_env env, napi_callback_info info);
 
   static napi_value DesignDocumentReplaceAt(napi_env env, napi_callback_info info);
   static napi_value DesignDocumentAddAt(napi_env env, napi_callback_info info);
   static napi_value DesignDocumentDeleteAt(napi_env env, napi_callback_info info);
 
+  // event listener
+  static napi_value AddEventListener(napi_env env, napi_callback_info info);
+  static napi_value RemoveEventListener(napi_env env, napi_callback_info info);
+  static napi_value GetEventListeners(napi_env env, napi_callback_info info);
+
+  // undo & redo
   static napi_value Undo(napi_env env, napi_callback_info info);
   static napi_value Redo(napi_env env, napi_callback_info info);
 
-  static void GetArgString_(napi_env env, std::string& to_string, napi_value arg);
+  // helper
+  static std::string GetArgString(napi_env env, napi_value arg);
 
   static napi_ref constructor;
 

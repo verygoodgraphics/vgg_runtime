@@ -3,6 +3,7 @@
 #include "Model/VggWork.hpp"
 #include "Utils/DIContainer.hpp"
 
+// design document in vgg work
 const std::string VggSdk::designDocument()
 {
   return getDesignDocument()->content().dump();
@@ -23,8 +24,34 @@ void VggSdk::designDocumentDeleteAt(const std::string& json_pointer)
   getDesignDocument()->deleteAt(json_pointer);
 }
 
-std::shared_ptr<JsonDocument>& VggSdk::getDesignDocument()
+// event listener
+void VggSdk::addEventListener(const std::string& element_path,
+                              const std::string& event_type,
+                              const std::string& listener_code)
 {
-  auto vggWork = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
-  return vggWork->designDoc();
+  getVggWork()->addEventListener(element_path, event_type, listener_code);
+}
+
+void VggSdk::removeEventListener(const std::string& element_path,
+                                 const std::string& event_type,
+                                 const std::string& listener_code)
+{
+  getVggWork()->removeEventListener(element_path, event_type, listener_code);
+}
+
+const std::vector<std::string> VggSdk::getEventListeners(const std::string& element_path,
+                                                         const std::string& event_type)
+{
+  return getVggWork()->getEventListeners(element_path, event_type);
+}
+
+// vgg work
+std::shared_ptr<JsonDocument> VggSdk::getDesignDocument()
+{
+  return getVggWork()->designDoc();
+}
+
+std::shared_ptr<VggWork> VggSdk::getVggWork()
+{
+  return VGG::DIContainer<std::shared_ptr<VggWork>>::get();
 }

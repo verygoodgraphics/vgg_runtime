@@ -5,6 +5,7 @@
 #include <memory>
 
 class JsonDocument;
+class VggWork;
 
 class VggSdk
 {
@@ -17,16 +18,16 @@ public:
   void designDocumentReplaceAt(const std::string& json_pointer, const std::string& value);
   void designDocumentDeleteAt(const std::string& json_pointer);
 
-  // code
+  // event listener
   // event types: https://developer.mozilla.org/en-US/docs/Web/API/Element#events
-  void addEventListener(const std::string& json_pointer,
-                        const std::string& type,
-                        const std::string& code);
-  void removeEventListener(const std::string& json_pointer,
-                           const std::string& type,
-                           const std::string& code);
-  const std::vector<std::string> getEventListeners(const std::string& json_pointer,
-                                                   const std::string& type);
+  void addEventListener(const std::string& element_path,
+                        const std::string& event_type,
+                        const std::string& listener_code);
+  void removeEventListener(const std::string& element_path,
+                           const std::string& event_type,
+                           const std::string& listener_code);
+  const std::vector<std::string> getEventListeners(const std::string& element_path,
+                                                   const std::string& event_type);
 
   //   // ---
   //   void undo();
@@ -44,7 +45,8 @@ public:
   //   // char *getInputText(char *id);
 
 private:
-  std::shared_ptr<JsonDocument>& getDesignDocument();
+  std::shared_ptr<JsonDocument> getDesignDocument();
+  std::shared_ptr<VggWork> getVggWork();
 };
 
 #endif

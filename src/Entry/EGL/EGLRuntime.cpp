@@ -284,7 +284,7 @@ std::tuple<std::string, std::map<int, sk_sp<SkData>>> render(
   auto count = scene->artboards.size();
   for (int i = 0; i < count; i++)
   {
-    auto b = scene->artboards[i]->bound;
+    auto b = scene->artboards[i]->getBound();
 
     int w = b.size().x;
     int h = b.size().y;

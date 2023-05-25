@@ -185,7 +185,7 @@ void TextNode::paintEvent(SkCanvas* canvas)
 
     canvas->save();
     canvas->scale(1, -1);
-    drawText(canvas, text, bound, styles[0]);
+    drawText(canvas, text, m_bound, styles[0]);
     canvas->restore();
   }
 }

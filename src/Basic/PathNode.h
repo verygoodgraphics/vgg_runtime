@@ -34,12 +34,5 @@ public:
   {
     // do not render child object for path node
   }
-
-protected:
-  // void drawContour(SkCanvas* canvas,
-  //                  const SkPath* outlineMask,
-  //                  const ContextSetting& settings,
-  //                  const Style& style);
-  // SkPath makePath(const std::vector<std::pair<SkPath, EBoolOp>>& ct);
 };
 } // namespace VGG

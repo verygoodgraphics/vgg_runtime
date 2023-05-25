@@ -133,7 +133,7 @@ Mask PathNode::asOutlineMask(const glm::mat3* mat)
   for (const auto& c : m_firstChild)
   {
     auto p = static_cast<PaintNode*>(c.get());
-    mask.addMask(p->asOutlineMask(&p->m_transform));
+    mask.addMask(p->asOutlineMask(&p->localTransform()));
   }
   if (mat)
   {
@@ -152,9 +152,10 @@ void PathNode::paintEvent(SkCanvas* canvas)
   for (const auto& c : m_firstChild)
   {
     auto p = static_cast<PaintNode*>(c.get());
-    auto outline = p->asOutlineMask(&p->m_transform);
+    auto outline = p->asOutlineMask(&p->localTransform());
     ct.emplace_back(outline.outlineMask, p->clipOperator());
   }
+
   if (mask.outlineMask.isEmpty())
   {
     drawContour(canvas, nullptr, contextSetting, style, windingRule, ct, getBound());
@@ -163,7 +164,7 @@ void PathNode::paintEvent(SkCanvas* canvas)
   {
     drawContour(canvas, &mask.outlineMask, contextSetting, style, windingRule, ct, getBound());
   }
-} // namespace VGG
+}
 
 void PathNode::addSubShape(std::shared_ptr<PaintNode> node, EBoolOp op)
 {

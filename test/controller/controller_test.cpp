@@ -303,8 +303,113 @@ TEST_F(ControllerTestSuite, add_event_listener)
   mock_click("/fake/add_event_listener");
 
   //
-  loop_until_exit();
+  loop_until_exit(); // add 1st listener
+  m_exit_loop = false;
+  EXPECT_TRUE(type == ModelEventType::ListenerDidAdd);
+
+  loop_until_exit(); // add 2nd listener
 
   // Then
   EXPECT_TRUE(type == ModelEventType::ListenerDidAdd);
+
+  // wait for evaluating
+  std::this_thread::sleep_for(std::chrono::milliseconds(1));
+}
+
+TEST_F(ControllerTestSuite, eval_added_event_listener)
+{
+  // Given
+  setup_sdk_with_local_dic();
+
+  auto type = ModelEventType::Invalid;
+  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+    [&](ModelEventPtr evt)
+    {
+      type = evt->type;
+      m_exit_loop = true;
+    });
+  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(Return(fake_model_observer));
+  setup_sut();
+  std::string file_path = "testDataDir/vgg-work.zip";
+  auto ret = m_sut->start(file_path);
+  EXPECT_TRUE(ret);
+
+  mock_click("/fake/add_event_listener");
+  loop_until_exit(); // loop until added
+  EXPECT_TRUE(type == ModelEventType::ListenerDidAdd);
+
+  // When
+  mock_click("/js/fake/run_added_listener");
+
+  // wait for evaluating
+  std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+  // Then
+  // added listener evaluated
+}
+
+TEST_F(ControllerTestSuite, remove_event_listener)
+{
+  // Given
+  setup_sdk_with_local_dic();
+
+  auto type = ModelEventType::Invalid;
+  auto recv_evt_count = 0;
+  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+    [&](ModelEventPtr evt)
+    {
+      type = evt->type;
+
+      recv_evt_count++;
+      if (recv_evt_count == 2)
+      {
+        m_exit_loop = true;
+      }
+    });
+  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(Return(fake_model_observer));
+  setup_sut();
+  std::string file_path = "testDataDir/vgg-work.zip";
+  auto ret = m_sut->start(file_path);
+  EXPECT_TRUE(ret);
+
+  // When
+  mock_click("/fake/remove_event_listener");
+
+  //
+  loop_until_exit();
+
+  // Then
+  EXPECT_TRUE(type == ModelEventType::ListenerDidRemove);
+}
+
+TEST_F(ControllerTestSuite, get_event_listeners)
+{
+  // Given
+  setup_sdk_with_local_dic();
+
+  auto type = ModelEventType::Invalid;
+  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+    [&](ModelEventPtr evt)
+    {
+      type = evt->type;
+
+      m_exit_loop = true;
+    });
+  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(Return(fake_model_observer));
+  setup_sut();
+  std::string file_path = "testDataDir/vgg-work.zip";
+  auto ret = m_sut->start(file_path);
+  EXPECT_TRUE(ret);
+
+  // When
+  mock_click("/fake/get_event_listeners");
+
+  loop_until_exit(); // loop until added
+  EXPECT_TRUE(type == ModelEventType::ListenerDidAdd);
+
+  // wait for evaluating
+  std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+  // Then
+  // js throw error if failed
 }

@@ -165,7 +165,7 @@ public:
     }
   }
 
-  virtual void paintPass();
+  void paintPass();
 
   virtual void postRenderPass(SkCanvas* canvas)
   {
@@ -189,7 +189,7 @@ public:
   Mask makeMaskBy(EBoolOp maskOp);
 
 private:
-  void drawDebugBoarder(SkCanvas* canvas);
+  void drawDebugBound(SkCanvas* canvas);
   bool isPaintDirty()
   {
     return paintDirty;

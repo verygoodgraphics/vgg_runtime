@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Basic/SkiaBackend/SkiaImpl.h"
 #include "Basic/VGGType.h"
 #include "Basic/VGGUtils.h"
 #include "PaintNode.h"
@@ -44,6 +45,7 @@ public:
   void renderOrderPass(SkCanvas* canvas) override
   {
     // deal with mask rendering order
+    //
     std::vector<PaintNode*> masked;
     std::vector<PaintNode*> noneMasked;
     for (const auto& p : this->m_firstChild)
@@ -55,14 +57,56 @@ public:
         noneMasked.push_back(c);
     }
     for (const auto& p : masked)
-      p->invokeRenderPass(canvas);
+    {
+      if (contextSetting.TransparencyKnockoutGroup)
+      {
+        SkPaint paint;
+        paint.setBlendMode(SkBlendMode::kSrc);
+        paint.setAlphaf(1.0);
+        // TODO:: bound
+        canvas->saveLayer(0, &paint);
+        p->invokeRenderPass(canvas);
+        canvas->restore();
+      }
+      else
+      {
+        p->invokeRenderPass(canvas);
+      }
+    }
     for (const auto& p : noneMasked)
-      p->invokeRenderPass(canvas);
+    {
+      if (contextSetting.TransparencyKnockoutGroup)
+      {
+        SkPaint paint;
+        paint.setBlendMode(SkBlendMode::kSrc);
+        paint.setAlphaf(1.0);
+        // TODO:: bound
+        canvas->saveLayer(0, &paint);
+        p->invokeRenderPass(canvas);
+        canvas->restore();
+      }
+      else
+      {
+        p->invokeRenderPass(canvas);
+      }
+    }
   }
 
   void paintEvent(SkCanvas* canvas) override
   {
-    PaintNode::paintEvent(canvas);
+    if (contextSetting.IsolateBlending)
+    {
+      SkPaint paint;
+      paint.setBlendMode(SkBlendMode::kSrc);
+      // TODO:: bound
+      canvas->saveLayer(toSkRect(getBound()), &paint);
+      PaintNode::paintEvent(canvas);
+      canvas->restore();
+    }
+    else
+    {
+      PaintNode::paintEvent(canvas);
+    }
   }
 };
 } // namespace VGG

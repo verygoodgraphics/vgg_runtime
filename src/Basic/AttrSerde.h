@@ -3,10 +3,18 @@
 #include <optional>
 #include "Attrs.h"
 #include "Basic/VGGType.h"
+#include "glm/fwd.hpp"
 using nlohmann::json;
 
 namespace VGG
 {
+
+inline void from_json(const json& j, glm::mat3& x)
+{
+  assert(j.size() == 6);
+  x =
+    glm::mat3{ glm::vec3{ j[0], j[1], 0 }, glm::vec3{ j[2], j[3], 0 }, glm::vec3{ j[4], j[5], 1 } };
+}
 
 template<typename T>
 inline std::optional<T> get_stack_optional(const json& j, const char* property)
@@ -20,10 +28,32 @@ inline std::optional<T> get_stack_optional(const json& j, const char* property)
 }
 
 template<typename T>
-inline std::optional<T> get_stack_optional(const json& j, std::string property)
+inline std::optional<T> get_stack_optional(const json& j, const std::string& property)
 {
   return get_stack_optional<T>(j, property.data());
 }
+
+// template<typename T>
+// inline T get_or_default(const json& j, const std::string& property, const T& dft)
+// {
+//   auto it = j.find(property);
+//   if (it != j.end() && !it->is_null())
+//   {
+//     return j.at(property).get<T>();
+//   }
+//   return dft;
+// }
+
+// template<typename T>
+// inline T get_or_default(const json& j, const char* property)
+// {
+//   auto it = j.find(property);
+//   if (it != j.end() && !it->is_null())
+//   {
+//     return j.at(property).get<T>();
+//   }
+//   return T{};
+// }
 
 inline void from_json(const json& j, VGGColor& x)
 {
@@ -42,7 +72,18 @@ inline void from_json(const json& j, Pattern& x)
     x.imageFillType = instance["fillType"];
     x.imageGUID = instance["imageFileName"];
     x.tileMirrored = instance["imageTileMirrored"];
-    x.tileScale = instance["imageTileScale"];
+    x.tileScale = 1.0;
+
+    const auto it = instance.find("matrix");
+    glm::mat3 m{ 1.0 };
+    if (it != instance.end())
+    {
+      auto v = instance.at("matrix").get<std::vector<double>>();
+      m = glm::mat3{ glm::vec3{ v[0], v[1], 0 },
+                     glm::vec3{ v[2], v[3], 0 },
+                     glm::vec3{ v[4], v[5], 1 } };
+    }
+    x.transform = m;
   }
   else if (klass == "pattern_layer")
   {
@@ -89,12 +130,10 @@ inline void from_json(const json& j, VGGGradient& x)
 
 inline void from_json(const json& j, ContextSetting& x)
 {
-  x.BlendMode = (EBlendMode)j.at("blendMode").get<int64_t>();
+  x.BlendMode = j.at("blendMode").get<EBlendMode>();
   x.IsolateBlending = j.at("isolateBlending").get<bool>();
   x.Opacity = j.at("opacity").get<double>();
-  // x.Opacity[0] = v[0];
-  // x.Opacity[1] = v[1];
-  x.TransparencyKnockoutGroup = j.at("transparencyKnockoutGroup").get<int64_t>();
+  x.TransparencyKnockoutGroup = j.at("transparencyKnockoutGroup").get<EKnockoutType>();
 }
 
 inline void from_json(const json& j, Border& x)

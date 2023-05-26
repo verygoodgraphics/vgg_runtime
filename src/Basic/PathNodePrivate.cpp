@@ -126,12 +126,14 @@ void drawContour(SkCanvas* canvas,
       assert(f.pattern.has_value());
       auto img = loadImage(f.pattern->imageGUID, Scene::getResRepo());
       auto bs = bound.size();
+      const auto m = toSkMatrix(f.pattern->transform);
       auto shader = getImageShader(img,
                                    bs.x,
                                    bs.y,
                                    f.pattern->imageFillType,
                                    f.pattern->tileScale,
-                                   f.pattern->tileMirrored);
+                                   f.pattern->tileMirrored,
+                                   &m);
 
       fillPen.setShader(shader);
       fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);
@@ -191,12 +193,15 @@ void drawContour(SkCanvas* canvas,
       assert(b.pattern.has_value());
       auto img = loadImage(b.pattern->imageGUID, Scene::getResRepo());
       auto bs = bound.size();
+
+      const auto m = toSkMatrix(b.pattern->transform);
       auto shader = getImageShader(img,
                                    bs.x,
                                    bs.y,
                                    b.pattern->imageFillType,
                                    b.pattern->tileScale,
-                                   b.pattern->tileMirrored);
+                                   b.pattern->tileMirrored,
+                                   &m);
 
       strokePen.setShader(shader);
       strokePen.setAlphaf(b.context_settings.Opacity * globalAlpha);

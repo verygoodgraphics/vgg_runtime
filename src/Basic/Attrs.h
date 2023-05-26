@@ -19,7 +19,7 @@ struct ContextSetting
   EBlendMode BlendMode;
   float Opacity;
   bool IsolateBlending;
-  int TransparencyKnockoutGroup;
+  EKnockoutType TransparencyKnockoutGroup;
 };
 
 struct Pattern
@@ -28,6 +28,7 @@ struct Pattern
   bool tileMirrored;
   float tileScale;
   std::string imageGUID;
+  glm::mat3 transform;
 };
 
 // Type with 'VGG' prefix is temporary. It's used to distinguish
@@ -230,15 +231,11 @@ struct VGGGradient
     }
 
     SkMatrix rot;
-    rot.setRotate(rotation, center.x, center.y);
+    const auto dir = to - from;
+    auto r = std::atan2(dir.y, dir.x);
+    rot.setRotate(r, f.x, f.y);
     rot.postScale(1, -1);
-    return SkGradientShader::MakeSweep(center.x,
-                                       center.y,
-                                       colors.data(),
-                                       positions.data(),
-                                       sz,
-                                       0,
-                                       &rot);
+    return SkGradientShader::MakeSweep(f.x, f.y, colors.data(), positions.data(), sz, 0, &rot);
   }
 };
 

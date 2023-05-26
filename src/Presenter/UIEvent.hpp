@@ -36,7 +36,7 @@ enum class UIEventType
   touchstart
 };
 
-constexpr const char* ViewEventTypeToString(UIEventType e) noexcept
+constexpr const char* UIEventTypeToString(UIEventType e) noexcept
 {
   switch (e)
   {

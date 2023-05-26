@@ -70,5 +70,13 @@
         "createdAt": 0
       }
     ]
+  },
+  "/fake/event_listener_example": {
+    "click": [
+      {
+        "fileName": "js/remote_dic/11_event_listener.mjs",
+        "createdAt": 0
+      }
+    ]
   }
 }

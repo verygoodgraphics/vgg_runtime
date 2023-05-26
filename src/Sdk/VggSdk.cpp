@@ -1,6 +1,5 @@
 #include "Sdk/VggSdk.hpp"
 
-#include "Model/VggWork.hpp"
 #include "Utils/DIContainer.hpp"
 
 // design document in vgg work
@@ -39,10 +38,9 @@ void VggSdk::removeEventListener(const std::string& element_path,
   getVggWork()->removeEventListener(element_path, event_type, listener_code);
 }
 
-const std::vector<std::string> VggSdk::getEventListeners(const std::string& element_path,
-                                                         const std::string& event_type)
+VggWork::ListenersType VggSdk::getEventListeners(const std::string& element_path)
 {
-  return getVggWork()->getEventListeners(element_path, event_type);
+  return getVggWork()->getEventListeners(element_path);
 }
 
 // vgg work

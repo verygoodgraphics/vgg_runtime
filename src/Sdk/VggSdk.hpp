@@ -1,11 +1,12 @@
 #ifndef VGG_SDK_HPP
 #define VGG_SDK_HPP
 
+#include "Model/VggWork.hpp"
+
 #include <string>
 #include <memory>
 
 class JsonDocument;
-class VggWork;
 
 class VggSdk
 {
@@ -26,8 +27,7 @@ public:
   void removeEventListener(const std::string& element_path,
                            const std::string& event_type,
                            const std::string& listener_code);
-  const std::vector<std::string> getEventListeners(const std::string& element_path,
-                                                   const std::string& event_type);
+  VggWork::ListenersType getEventListeners(const std::string& element_path);
 
   //   // ---
   //   void undo();

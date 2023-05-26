@@ -12,8 +12,11 @@ sdk.addEventListener('/js/fake/run_added_listener', 'click', listener_code2);
 sdk.addEventListener('/js/fake/run_added_listener', 'click', listener_code2);  // duplicated item will not be added
 
 // Then
-const listeners = sdk.getEventListeners('/js/fake/run_added_listener', 'click');
+const EventNameClick = 'click';
+const EventListenerKey = 'listener';
+
+const listeners = sdk.getEventListeners('/js/fake/run_added_listener')[EventNameClick];
 console.log('js got listeners: ', listeners);
-if (listeners.length != 2 || listeners[0] != listener_code || listeners[1] != listener_code2) {
+if (listeners.length != 2 || listeners[0][EventListenerKey] != listener_code || listeners[1][EventListenerKey] != listener_code2) {
   throw new Error("listeners.length != 2 || listeners[0] != listener_code || listeners[1] != listener_code2");
 }

@@ -6,6 +6,8 @@
 #include <string>
 #include <cassert>
 
+constexpr auto listener_code_key = "listener";
+
 // Empty value so that macros here are able to return NULL or void
 #define NODE_API_RETVAL_NOTHING // Intentionally blank #define
 
@@ -337,14 +339,53 @@ napi_value VggSdkNodeAdapter::RemoveEventListener(napi_env env, napi_callback_in
   return nullptr;
 }
 
+/*
+google chrome console, getEventListeners result:
+ {
+  "click": [
+    {
+      "useCapture": false,
+      "passive": false,
+      "once": false,
+      "type": "click",
+      "listener": f
+    },
+    {
+      "useCapture": true,
+      "passive": false,
+      "once": false,
+      "type": "click",
+      "listener": f
+    }
+  ],
+  "mousedown": [
+    {
+      "useCapture": true,
+      "passive": false,
+      "once": false,
+      "type": "mousedown",
+      "listener": f
+    }
+  ],
+  "mouseup": [
+    {
+      "useCapture": true,
+      "passive": false,
+      "once": false,
+      "type": "mouseup",
+      "listener": f
+    }
+  ]
+};
+*/
 napi_value VggSdkNodeAdapter::GetEventListeners(napi_env env, napi_callback_info info)
 {
-  size_t argc = 2;
-  napi_value args[2];
+  size_t argc = 1;
+  napi_value args[1];
   napi_value _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
 
-  if (argc != 2)
+  if (argc != 1)
   {
     napi_throw_error(env, nullptr, "Wrong number of arguments");
     return nullptr;
@@ -353,27 +394,52 @@ napi_value VggSdkNodeAdapter::GetEventListeners(napi_env env, napi_callback_info
   try
   {
     auto element_path = GetArgString(env, args[0]);
-    auto event_type = GetArgString(env, args[1]);
 
     VggSdkNodeAdapter* sdk_adapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
-    auto listener_codes = sdk_adapter->m_vggSdk->getEventListeners(element_path, event_type);
 
-    napi_value js_listener_codes;
-    napi_create_array_with_length(env, listener_codes.size(), &js_listener_codes);
-    for (int i = 0; i < listener_codes.size(); ++i)
+    napi_value result_listeners_map; // result object
+    napi_create_object(env, &result_listeners_map);
+
+    auto listeners_map = sdk_adapter->m_vggSdk->getEventListeners(element_path);
+    for (auto& map_item : listeners_map)
     {
-      auto& listener_code = listener_codes[i];
+      if (map_item.second.empty())
+      {
+        continue;
+      }
 
-      napi_value js_listener_code;
+      auto& event_type = map_item.first;
+
+      napi_value js_listener_code_array; // listener array of the event_type
+      napi_create_array_with_length(env, map_item.second.size(), &js_listener_code_array);
+      for (int i = 0; i < map_item.second.size(); ++i)
+      {
+        auto& listener_code = map_item.second[i];
+
+        napi_value js_listener_object; // array item, listener object
+        napi_create_object(env, &js_listener_object);
+
+        napi_value js_listener_code; // code string
+        NODE_API_CALL(env,
+                      napi_create_string_utf8(env,
+                                              listener_code.data(),
+                                              listener_code.size(),
+                                              &js_listener_code));
+        NODE_API_CALL(
+          env,
+          napi_set_named_property(env, js_listener_object, listener_code_key, js_listener_code));
+
+        NODE_API_CALL(env, napi_set_element(env, js_listener_code_array, i, js_listener_object));
+      }
+
       NODE_API_CALL(env,
-                    napi_create_string_utf8(env,
-                                            listener_code.data(),
-                                            listener_code.size(),
-                                            &js_listener_code));
-      NODE_API_CALL(env, napi_set_element(env, js_listener_codes, i, js_listener_code));
+                    napi_set_named_property(env,
+                                            result_listeners_map,
+                                            event_type.c_str(),
+                                            js_listener_code_array));
     }
-    return js_listener_codes;
+    return result_listeners_map;
   }
   catch (std::exception& e)
   {

@@ -9,7 +9,9 @@ sdk.addEventListener('/js/fake/run_added_listener', 'click', listener_code);
 sdk.removeEventListener('/js/fake/run_added_listener', 'click', listener_code);
 
 // Then
-const listeners = sdk.getEventListeners('/js/fake/run_added_listener', 'click');
+const EventNameClick = 'click';
+
+const listeners = sdk.getEventListeners('/js/fake/run_added_listener')[EventNameClick];
 if (listeners.length != 0) {
   throw new Error("listeners.length != 0");
 }

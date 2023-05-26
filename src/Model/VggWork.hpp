@@ -32,6 +32,8 @@ class VggWork
   std::mutex m_mutex;
 
 public:
+  using ListenersType = std::unordered_map<std::string, std::vector<std::string>>;
+
   VggWork(const MakeJsonDocFn& makeDesignDocFn);
   ~VggWork();
 
@@ -49,8 +51,7 @@ public:
   void removeEventListener(const std::string& json_pointer,
                            const std::string& type,
                            const std::string& code);
-  const std::vector<std::string> getEventListeners(const std::string& json_pointer,
-                                                   const std::string& type);
+  auto getEventListeners(const std::string& json_pointer) -> ListenersType;
 
   // observable
   rxcpp::observable<VGG::ModelEventPtr> getObservable();

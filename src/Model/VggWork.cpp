@@ -196,12 +196,11 @@ void VggWork::removeEventListener(const std::string& json_pointer,
   }
 }
 
-const std::vector<std::string> VggWork::getEventListeners(const std::string& json_pointer,
-                                                          const std::string& type)
+auto VggWork::getEventListeners(const std::string& json_pointer) -> ListenersType
 {
   const std::lock_guard<std::mutex> lock(m_mutex);
 
-  std::vector<std::string> result{};
+  ListenersType result{};
 
   if (!m_event_listeners.contains(json_pointer))
   {
@@ -209,18 +208,17 @@ const std::vector<std::string> VggWork::getEventListeners(const std::string& jso
   }
 
   auto& element_event_listeners = m_event_listeners[json_pointer];
-  if (!element_event_listeners.contains(type))
+  for (auto& [type, type_event_listeners] : element_event_listeners.items())
   {
-    return result;
-  }
-
-  auto& type_event_listeners = element_event_listeners[type];
-  for (auto it = type_event_listeners.cbegin(); it != type_event_listeners.cend(); ++it)
-  {
-    if (it->is_object() && it->contains(file_name_key))
+    std::vector<std::string> listeners{};
+    for (auto it = type_event_listeners.cbegin(); it != type_event_listeners.cend(); ++it)
     {
-      result.push_back(get_code((*it)[file_name_key]));
+      if (it->is_object() && it->contains(file_name_key))
+      {
+        listeners.push_back(get_code((*it)[file_name_key]));
+      }
     }
+    result[type] = listeners;
   }
 
   return result;

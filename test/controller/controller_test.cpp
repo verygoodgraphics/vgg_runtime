@@ -445,3 +445,34 @@ TEST_F(ControllerTestSuite, unhandled_js_error)
   // Then
   // js throw error if failed
 }
+
+TEST_F(ControllerTestSuite, event_listener_example)
+{
+  // Given
+  setup_sdk_with_remote_dic();
+
+  auto type = ModelEventType::Invalid;
+  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+    [&](ModelEventPtr evt)
+    {
+      type = evt->type;
+      m_exit_loop = true;
+    });
+  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(Return(fake_model_observer));
+  setup_sut();
+  std::string file_path = "testDataDir/vgg-work.zip";
+  auto ret = m_sut->start(file_path, design_doc_schema_file);
+  EXPECT_TRUE(ret);
+
+  auto vgg_work = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
+  auto design_doc_json = vgg_work->designDoc()->content();
+
+  // When
+  mock_click("/fake/event_listener_example");
+
+  // wait for evaluating
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+  // Then
+  // js throw error if failed
+}

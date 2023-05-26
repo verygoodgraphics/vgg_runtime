@@ -23,11 +23,15 @@ Controller::Controller(std::shared_ptr<RunLoop> runLoop, Presenter& presenter, R
   m_view_observer = rxcpp::make_observer_dynamic<UIEventPtr>(
     [&](UIEventPtr evt)
     {
-      auto listeners = m_work->getEventListeners(evt->path, ViewEventTypeToString(evt->type));
-      for (auto& listener : listeners)
+      auto listeners_map = m_work->getEventListeners(evt->path);
+      std::string type = UIEventTypeToString(evt->type);
+      if (auto it = listeners_map.find(type); it != listeners_map.end())
       {
-        // todo, pass evt data to listeners
-        vggExec()->evalModule(listener);
+        for (auto& listener : it->second)
+        {
+          // todo, pass evt data to listeners
+          vggExec()->evalModule(listener);
+        }
       }
     });
   presenter.getObservable().subscribe(m_view_observer);

@@ -62,5 +62,13 @@
         "createdAt": 0
       }
     ]
+  },
+  "/fake/throw_error": {
+    "click": [
+      {
+        "fileName": "js/without-sdk/91_throw_error.mjs",
+        "createdAt": 0
+      }
+    ]
   }
 }

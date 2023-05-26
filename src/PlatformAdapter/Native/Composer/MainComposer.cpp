@@ -32,6 +32,16 @@ void MainComposer::setupVgg(std::shared_ptr<VggExec> vggExec, const std::string&
     var vggSdkAddon = process._linkedBinding('vgg_sdk_addon');
     await setVgg(vggSdkAddon);
   )");
-
   vggExec->evalModule(set_vgg_code);
+
+  if (m_catchJsException)
+  {
+    std::string catch_exception{ R"(
+    const __vggErrorHandler = (err) => {
+      console.error(err)
+    }
+    process.on('uncaughtException', __vggErrorHandler)
+)" };
+    vggExec->evalScript(catch_exception);
+  }
 }

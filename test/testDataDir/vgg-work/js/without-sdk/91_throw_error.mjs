@@ -1,0 +1,1 @@
+throw new Error("unhandled error occurs, runtime should not exit");

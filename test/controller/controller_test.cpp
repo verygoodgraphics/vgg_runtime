@@ -23,7 +23,7 @@ class ControllerTestSuite : public ::testing::Test
 {
 protected:
   std::shared_ptr<Controller> m_sut;
-  MainComposer composer;
+  MainComposer m_main_composer{ false }; // false: enable js throw error to abort subprocess
   std::shared_ptr<RunLoop> m_run_loop = std::make_shared<RunLoop>();
   MockPresenter m_mock_presenter;
   rxcpp::subjects::subject<VGG::UIEventPtr> m_fake_view_subject;
@@ -35,16 +35,16 @@ protected:
 
   void TearDown() override
   {
-    composer.teardown();
+    m_main_composer.teardown();
   }
 
   void setup_sdk_with_local_dic()
   {
-    composer.setup("./testDataDir/fake-sdk/vgg-sdk.esm.mjs");
+    m_main_composer.setup("./testDataDir/fake-sdk/vgg-sdk.esm.mjs");
   }
   void setup_sdk_with_remote_dic()
   {
-    composer.setup("./asset/vgg-sdk.esm.mjs");
+    m_main_composer.setup("./asset/vgg-sdk.esm.mjs");
   }
 
   void setup_sut()
@@ -409,6 +409,38 @@ TEST_F(ControllerTestSuite, get_event_listeners)
 
   // wait for evaluating
   std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+  // Then
+  // js throw error if failed
+}
+
+TEST_F(ControllerTestSuite, unhandled_js_error)
+{
+  // Given
+  m_main_composer = MainComposer(true); // enable catch exception
+  setup_sdk_with_local_dic();
+
+  auto type = ModelEventType::Invalid;
+  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+    [&](ModelEventPtr evt)
+    {
+      type = evt->type;
+
+      m_exit_loop = true;
+    });
+  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(Return(fake_model_observer));
+  setup_sut();
+
+  std::string file_path = "testDataDir/vgg-work.zip";
+  auto ret = m_sut->start(file_path);
+  EXPECT_TRUE(ret);
+
+  // When
+  mock_click("/fake/throw_error");
+
+  // wait for evaluating
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  // std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 
   // Then
   // js throw error if failed

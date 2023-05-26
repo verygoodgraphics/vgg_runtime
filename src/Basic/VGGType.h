@@ -152,12 +152,19 @@ enum EPointMode
 
 enum EImageFillType
 {
-  IFT_Tile,
-  IFT_Fill,
-  IFT_Stretch,
-  IFT_Fit,
-  IFT_OnlyTileHorizontal,
-  IFT_OnlyTileVertical
+  IFT_Tile = 0,
+  IFT_Fill = 1,
+  IFT_Stretch = 2,
+  IFT_Fit = 3,
+  IFT_OnlyTileHorizontal = 4,
+  IFT_OnlyTileVertical = 5
+};
+
+enum EKnockoutType
+{
+  KT_Off = 0,
+  KT_On = 1,
+  KT_Neutrual = 2
 };
 
 } // namespace VGG

@@ -266,6 +266,10 @@ struct TypefaceManager
 
   inline static sk_sp<SkTypeface> getTypeface(const std::string& desc)
   {
+    if (typefaces.empty())
+    {
+      return loadTypefaceFromFile("wqy-microhei.ttc", 0);
+    }
     if (typefaces.find(desc) == typefaces.end())
     {
       return nullptr;

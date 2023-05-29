@@ -56,40 +56,30 @@ public:
       else
         noneMasked.push_back(c);
     }
-    for (const auto& p : masked)
+
+    auto paintCall = [&](std::vector<PaintNode*>& nodes)
     {
-      if (contextSetting.TransparencyKnockoutGroup)
+      for (const auto& p : nodes)
       {
-        SkPaint paint;
-        paint.setBlendMode(SkBlendMode::kSrc);
-        paint.setAlphaf(1.0);
-        // TODO:: bound
-        canvas->saveLayer(0, &paint);
-        p->invokeRenderPass(canvas);
-        canvas->restore();
+        if (contextSetting.TransparencyKnockoutGroup)
+        {
+          SkPaint paint;
+          paint.setBlendMode(SkBlendMode::kSrc);
+          paint.setAlphaf(1.0);
+          // TODO:: bound
+          canvas->saveLayer(0, &paint);
+          p->invokeRenderPass(canvas);
+          canvas->restore();
+        }
+        else
+        {
+          p->invokeRenderPass(canvas);
+        }
       }
-      else
-      {
-        p->invokeRenderPass(canvas);
-      }
-    }
-    for (const auto& p : noneMasked)
-    {
-      if (contextSetting.TransparencyKnockoutGroup)
-      {
-        SkPaint paint;
-        paint.setBlendMode(SkBlendMode::kSrc);
-        paint.setAlphaf(1.0);
-        // TODO:: bound
-        canvas->saveLayer(0, &paint);
-        p->invokeRenderPass(canvas);
-        canvas->restore();
-      }
-      else
-      {
-        p->invokeRenderPass(canvas);
-      }
-    }
+    };
+
+    paintCall(masked);
+    paintCall(noneMasked);
   }
 
   void paintEvent(SkCanvas* canvas) override

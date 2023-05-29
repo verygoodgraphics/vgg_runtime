@@ -174,6 +174,7 @@ inline void from_json(const json& j, Blur& x)
   const auto v = j.at("center").get<std::vector<double>>();
   x.center.x = v[0];
   x.center.y = v[1];
+  x.isEnabled = j["isEnabled"];
   x.saturation = j.at("saturation").get<double>();
 }
 

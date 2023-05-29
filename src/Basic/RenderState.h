@@ -51,4 +51,5 @@ public:
     currentPath = std::nullopt;
   }
 };
+
 }; // namespace VGG

@@ -1,5 +1,7 @@
 #include "Controller/Controller.hpp"
 
+#include "test_config.hpp"
+
 #include "Model/VggWork.hpp"
 #include "PlatformAdapter/Native/Composer/MainComposer.hpp"
 #include "Utils/DIContainer.hpp"
@@ -254,6 +256,8 @@ TEST_F(ControllerTestSuite, DidAdd_no_validator)
 
 TEST_F(ControllerTestSuite, DidAdd_color)
 {
+  SKIP_S3_DEPENDENT_TEST
+
   // Given
   setup_sdk_with_remote_dic();
 
@@ -448,6 +452,8 @@ TEST_F(ControllerTestSuite, unhandled_js_error)
 
 TEST_F(ControllerTestSuite, event_listener_example)
 {
+  SKIP_S3_DEPENDENT_TEST
+
   // Given
   setup_sdk_with_remote_dic();
 

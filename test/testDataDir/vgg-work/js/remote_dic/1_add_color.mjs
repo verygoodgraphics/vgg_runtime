@@ -387,10 +387,20 @@ function _createForOfIteratorHelperLoose(o, allowArrayLike) {
   }
   throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
 }
+var id = 0;
+function _classPrivateFieldLooseKey(name) {
+  return "__private_" + id++ + "_" + name;
+}
+function _classPrivateFieldLooseBase(receiver, privateKey) {
+  if (!Object.prototype.hasOwnProperty.call(receiver, privateKey)) {
+    throw new TypeError("attempted to use private field on non-instance");
+  }
+  return receiver;
+}
 
 var dicUrl = 'https://s3.vgg.cool/test/js/vgg-di-container.esm.js';
 var vggSdk;
-var vggContainer$1;
+var vggContainer;
 var vggWasmKey = 'vggWasmKey';
 function getVggSdk() {
   return _getVggSdk.apply(this, arguments);
@@ -409,7 +419,9 @@ function _getVggSdk() {
           return getVgg();
         case 3:
           wasm = _context.sent;
-          vggSdk = new wasm.VggSdk();
+          if (wasm) {
+            vggSdk = new wasm.VggSdk();
+          }
         case 5:
           return _context.abrupt("return", vggSdk);
         case 6:
@@ -438,29 +450,35 @@ function _getVgg() {
           return getContainer();
         case 2:
           container = _context4.sent;
+          if (container) {
+            _context4.next = 5;
+            break;
+          }
+          return _context4.abrupt("return", undefined);
+        case 5:
           i = 0;
-        case 4:
+        case 6:
           if (!(i < 1000)) {
-            _context4.next = 13;
+            _context4.next = 15;
             break;
           }
           // retry; wait for setVgg
           vgg = container.vggGetObject(vggWasmKey);
           if (!vgg) {
-            _context4.next = 8;
+            _context4.next = 10;
             break;
           }
-          return _context4.abrupt("break", 13);
-        case 8:
-          _context4.next = 10;
-          return sleep(1);
+          return _context4.abrupt("break", 15);
         case 10:
+          _context4.next = 12;
+          return sleep(1);
+        case 12:
           i++;
-          _context4.next = 4;
+          _context4.next = 6;
           break;
-        case 13:
+        case 15:
           return _context4.abrupt("return", vgg);
-        case 14:
+        case 16:
         case "end":
           return _context4.stop();
       }
@@ -476,16 +494,16 @@ function _getContainer() {
     return _regeneratorRuntime().wrap(function _callee5$(_context5) {
       while (1) switch (_context5.prev = _context5.next) {
         case 0:
-          if (vggContainer$1) {
+          if (vggContainer) {
             _context5.next = 4;
             break;
           }
           _context5.next = 3;
           return getRemoteContainer();
         case 3:
-          vggContainer$1 = _context5.sent;
+          vggContainer = _context5.sent;
         case 4:
-          return _context5.abrupt("return", Promise.resolve(vggContainer$1));
+          return _context5.abrupt("return", Promise.resolve(vggContainer));
         case 5:
         case "end":
           return _context5.stop();
@@ -518,6 +536,7 @@ function _getRemoteContainer() {
 var _isProxyKey = /*#__PURE__*/Symbol();
 var _proxyKey = /*#__PURE__*/Symbol();
 var _parentKey = /*#__PURE__*/Symbol();
+var _sdk;
 function getDesignDocument() {
   return _getDesignDocument.apply(this, arguments);
 }
@@ -531,12 +550,19 @@ function _getDesignDocument() {
           return getVggSdk();
         case 2:
           sdk = _context.sent;
+          if (sdk) {
+            _context.next = 5;
+            break;
+          }
+          return _context.abrupt("return", undefined);
+        case 5:
+          _sdk = sdk;
           docString = sdk.getDesignDocument();
           jsonDoc = JSON.parse(docString);
           designDoc = makeDeepProxy(jsonDoc, undefined);
           designDoc.sdk = sdk;
           return _context.abrupt("return", designDoc);
-        case 8:
+        case 11:
         case "end":
           return _context.stop();
       }
@@ -546,102 +572,77 @@ function _getDesignDocument() {
 }
 function isProxy(doc) {
   var _doc$_isProxyKey;
-  // @ts-ignore
   return (_doc$_isProxyKey = doc[_isProxyKey]) != null ? _doc$_isProxyKey : false;
 }
 // internal
+var _processAddOrUpdateProperty = /*#__PURE__*/_classPrivateFieldLooseKey("processAddOrUpdateProperty");
 var VggProxyHandler = /*#__PURE__*/function () {
-  function VggProxyHandler() {}
+  function VggProxyHandler() {
+    Object.defineProperty(this, _processAddOrUpdateProperty, {
+      value: _processAddOrUpdateProperty2
+    });
+    this.rootDesignDocProxy = void 0;
+  }
   var _proto = VggProxyHandler.prototype;
   _proto.set = function set(target, prop, value) {
-    // @ts-ignore
-    var path = getPathToNode(target[_proxyKey]);
-    var copiedValue = value;
-    var isSdk = path === '/' && prop === 'sdk';
-    if (!isSdk) {
-      copiedValue = JSON.parse(JSON.stringify(value));
-    }
-    try {
-      if (target[prop]) {
-        // skip, array.length
-        if (!Array.isArray(target) || prop !== 'length') {
-          var _this$rootDesignDocPr, _this$rootDesignDocPr2;
-          (_this$rootDesignDocPr = this.rootDesignDocProxy) == null ? void 0 : (_this$rootDesignDocPr2 = _this$rootDesignDocPr.sdk) == null ? void 0 : _this$rootDesignDocPr2.updateAt("" + path + prop, JSON.stringify(copiedValue));
-        }
-      } else {
-        var _this$rootDesignDocPr3, _this$rootDesignDocPr4;
-        (_this$rootDesignDocPr3 = this.rootDesignDocProxy) == null ? void 0 : (_this$rootDesignDocPr4 = _this$rootDesignDocPr3.sdk) == null ? void 0 : _this$rootDesignDocPr4.addAt("" + path + prop, JSON.stringify(copiedValue));
-      }
-    } catch (error) {
-      throw error;
-    }
-    if (typeof copiedValue == 'object' && !isSdk) {
-      var childProxy = makeDeepProxy(copiedValue, this.rootDesignDocProxy);
-      // @ts-ignore
-      defineParent(childProxy, target[_proxyKey]);
-      target[prop] = childProxy;
-    } else {
-      target[prop] = copiedValue;
-    }
+    var v = _classPrivateFieldLooseBase(this, _processAddOrUpdateProperty)[_processAddOrUpdateProperty](target, prop, value);
+    target[prop] = v;
     return true;
   };
   _proto.deleteProperty = function deleteProperty(target, prop) {
     if (prop in target) {
-      // @ts-ignore
-      var path = getPathToNode(target[_proxyKey]);
-      try {
-        var _this$rootDesignDocPr5, _this$rootDesignDocPr6;
-        (_this$rootDesignDocPr5 = this.rootDesignDocProxy) == null ? void 0 : (_this$rootDesignDocPr6 = _this$rootDesignDocPr5.sdk) == null ? void 0 : _this$rootDesignDocPr6.deleteAt("" + path + prop);
-      } catch (error) {
-        throw error;
-      }
+      var _this$rootDesignDocPr, _this$rootDesignDocPr2;
+      var path = getNodePath(target[_proxyKey]);
+      (_this$rootDesignDocPr = this.rootDesignDocProxy) == null ? void 0 : (_this$rootDesignDocPr2 = _this$rootDesignDocPr.sdk) == null ? void 0 : _this$rootDesignDocPr2.deleteAt("" + path + prop);
       return delete target[prop];
     }
     return false;
   };
   _proto.defineProperty = function defineProperty(target, prop, descriptor) {
     if (typeof prop == 'string') {
-      // @ts-ignore
-      var path = getPathToNode(target[_proxyKey]);
-      try {
-        if (descriptor.value) {
-          var value = descriptor.value;
-          if (typeof value == 'object') {
-            var proxyObj = makeDeepProxy(value, this.rootDesignDocProxy);
-            descriptor.value = proxyObj;
-            if (target[prop]) {
-              var _this$rootDesignDocPr7, _this$rootDesignDocPr8;
-              (_this$rootDesignDocPr7 = this.rootDesignDocProxy) == null ? void 0 : (_this$rootDesignDocPr8 = _this$rootDesignDocPr7.sdk) == null ? void 0 : _this$rootDesignDocPr8.updateAt("" + path + prop, value);
-            } else {
-              var _this$rootDesignDocPr9, _this$rootDesignDocPr10;
-              (_this$rootDesignDocPr9 = this.rootDesignDocProxy) == null ? void 0 : (_this$rootDesignDocPr10 = _this$rootDesignDocPr9.sdk) == null ? void 0 : _this$rootDesignDocPr10.addAt("" + path + prop, value);
-            }
-          }
-        }
-      } catch (error) {
-        throw error;
-      }
+      var v = _classPrivateFieldLooseBase(this, _processAddOrUpdateProperty)[_processAddOrUpdateProperty](target, prop, descriptor.value);
+      descriptor.value = v;
     }
     return Reflect.defineProperty(target, prop, descriptor);
   };
   return VggProxyHandler;
 }();
-function getPathToNode(childProxy, _nodeProxy) {
-  return calculatNodePath(childProxy);
-}
 /*
 parent.childName = child
 parent.children[0] = child
 */
-function calculatNodePath(nodeProxy) {
-  var path = "";
+function _processAddOrUpdateProperty2(target, prop, value) {
+  var path = getNodePath(target[_proxyKey]);
+  var copiedValue = value;
+  var isSdk = path === '/' && prop === 'sdk';
+  if (!isSdk) {
+    copiedValue = JSON.parse(JSON.stringify(value));
+  }
+  if (target[prop]) {
+    // skip, array.length
+    if (!Array.isArray(target) || prop !== 'length') {
+      var _this$rootDesignDocPr3, _this$rootDesignDocPr4;
+      (_this$rootDesignDocPr3 = this.rootDesignDocProxy) == null ? void 0 : (_this$rootDesignDocPr4 = _this$rootDesignDocPr3.sdk) == null ? void 0 : _this$rootDesignDocPr4.updateAt("" + path + prop, JSON.stringify(copiedValue));
+    }
+  } else {
+    var _this$rootDesignDocPr5, _this$rootDesignDocPr6;
+    (_this$rootDesignDocPr5 = this.rootDesignDocProxy) == null ? void 0 : (_this$rootDesignDocPr6 = _this$rootDesignDocPr5.sdk) == null ? void 0 : _this$rootDesignDocPr6.addAt("" + path + prop, JSON.stringify(copiedValue));
+  }
+  if (typeof copiedValue == 'object' && !isSdk) {
+    var childProxy = makeDeepProxy(copiedValue, this.rootDesignDocProxy);
+    defineParent(childProxy, target[_proxyKey]);
+    return childProxy;
+  } else {
+    return copiedValue;
+  }
+}
+function getNodePath(nodeProxy) {
+  var path = '';
   if (!nodeProxy) {
     return path;
   }
   var childProxy = nodeProxy;
-  // @ts-ignore
   while (childProxy[_parentKey]) {
-    // @ts-ignore
     var parentProxy = childProxy[_parentKey];
     for (var _i = 0, _Object$entries = Object.entries(parentProxy); _i < _Object$entries.length; _i++) {
       var _Object$entries$_i = _Object$entries[_i],
@@ -657,14 +658,17 @@ function calculatNodePath(nodeProxy) {
   path = "/" + path;
   return path;
 }
+function getNodePathForEventListener(nodeProxy) {
+  return getNodePath(nodeProxy).slice(0, -1);
+}
 function makeDeepProxy(object, rootObject) {
-  if (!object || typeof object != "object") {
+  if (!object || typeof object != 'object') {
     return object;
   }
-  // @ts-ignore
-  if (object[_isProxyKey] == true) {
+  if (isProxy(object)) {
     return object;
   }
+  setEventListenerMethods(object);
   var handler = new VggProxyHandler();
   var selfProxy = new Proxy(object, handler);
   handler.rootDesignDocProxy = rootObject || selfProxy;
@@ -677,12 +681,10 @@ function makeDeepProxy(object, rootObject) {
   var propNames = Reflect.ownKeys(object);
   for (var _iterator = _createForOfIteratorHelperLoose(propNames), _step; !(_step = _iterator()).done;) {
     var name = _step.value;
-    // @ts-ignore
     var value = object[name];
-    if (value && typeof value === "object") {
+    if (value && typeof value === 'object') {
       var childProxy = makeDeepProxy(value, handler.rootDesignDocProxy);
       defineParent(childProxy, selfProxy);
-      // @ts-ignore
       object[name] = childProxy;
     }
   }
@@ -702,6 +704,67 @@ function defineParent(childProxy, parentProxy) {
       configurable: false
     });
   }
+}
+function setEventListenerMethods(node) {
+  node.addEventListener = addEventListener;
+  node.removeEventListener = removeEventListener;
+  node.getEventListeners = getEventListeners;
+}
+function addEventListener(type, code) {
+  var _sdk2;
+  var path = getNodePathForEventListener(this);
+  (_sdk2 = _sdk) == null ? void 0 : _sdk2.addEventListener(path, type, code);
+}
+function removeEventListener(type, code) {
+  var _sdk3;
+  var path = getNodePathForEventListener(this);
+  (_sdk3 = _sdk) == null ? void 0 : _sdk3.removeEventListener(path, type, code);
+}
+function getEventListeners() {
+  if (!_sdk) {
+    return {};
+  }
+  var path = getNodePathForEventListener(this);
+  return _sdk.getEventListeners(path);
+  /*
+  chrome console getEventListeners result
+  {
+  "click": [
+    {
+      "useCapture": false,
+      "passive": false,
+      "once": false,
+      "type": "click",
+      "listener": f
+    },
+    {
+      "useCapture": true,
+      "passive": false,
+      "once": false,
+      "type": "click",
+      "listener": f
+    }
+  ],
+  "mousedown": [
+    {
+      "useCapture": true,
+      "passive": false,
+      "once": false,
+      "type": "mousedown",
+      "listener": f
+    }
+  ],
+  "mouseup": [
+    {
+      "useCapture": true,
+      "passive": false,
+      "once": false,
+      "type": "mouseup",
+      "listener": f
+    }
+  ]
+  };
+     */
 }
 
 var design_document = {

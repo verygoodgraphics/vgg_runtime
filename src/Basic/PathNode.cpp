@@ -169,11 +169,18 @@ void PathNode::paintEvent(SkCanvas* canvas)
 
   if (mask.outlineMask.isEmpty())
   {
-    drawContour(canvas, nullptr, contextSetting, style, windingRule, ct, getBound());
+    drawContour(canvas, nullptr, contextSetting, style, windingRule, ct, getBound(), hasFill());
   }
   else
   {
-    drawContour(canvas, &mask.outlineMask, contextSetting, style, windingRule, ct, getBound());
+    drawContour(canvas,
+                &mask.outlineMask,
+                contextSetting,
+                style,
+                windingRule,
+                ct,
+                getBound(),
+                hasFill());
   }
 
   if (hasBlur)
@@ -186,6 +193,16 @@ void PathNode::addSubShape(std::shared_ptr<PaintNode> node, EBoolOp op)
 {
   node->setClipOperator(op);
   addChild(node);
+}
+
+bool PathNode::hasFill() const
+{
+  for (const auto& f : style.fills)
+  {
+    if (f.isEnabled)
+      return true;
+  }
+  return false;
 }
 
 } // namespace VGG

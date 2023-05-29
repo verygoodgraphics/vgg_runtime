@@ -1,18 +1,23 @@
 #include "PathNodePrivate.h"
 
+#include "Basic/Geometry.hpp"
 #include "Basic/VGGType.h"
+#include "include/core/SkClipOp.h"
+#include "include/core/SkPathTypes.h"
 #include "include/effects/SkImageFilters.h"
 #include "include/core/SkScalar.h"
 #include "include/core/SkShader.h"
 #include "include/core/SkSurface.h"
 #include "include/core/SkTileMode.h"
 #include "include/core/SkTypes.h"
+#include "skia/custom/SkMyImageFilters.h"
 #include "include/effects/SkRuntimeEffect.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkPath.h"
 #include "include/gpu/GrTypes.h"
 #include "include/pathops/SkPathOps.h"
 #include "src/core/SkBlurMask.h"
+#include <algorithm>
 
 sk_sp<SkShader> getGradientShader(const VGGGradient& g, const glm::vec2& size)
 {
@@ -78,28 +83,46 @@ void drawContour(SkCanvas* canvas,
                  const Style& style,
                  EWindingType windingRule,
                  const std::vector<std::pair<SkPath, EBoolOp>>& ct,
-                 const Bound2& bound)
+                 const Bound2& bound,
+                 bool hasFill)
 {
 
   SkPath skPath = makePath(ct);
   // winding rule
-  if (windingRule == EWindingType::WR_EvenOdd)
-  {
-    skPath.setFillType(SkPathFillType::kEvenOdd);
-  }
-  else
-  {
-    skPath.setFillType(SkPathFillType::kWinding);
-  }
+  skPath.setFillType(EWindingType::WR_EvenOdd ? SkPathFillType::kEvenOdd
+                                              : SkPathFillType::kWinding);
 
   const auto globalAlpha = contextSetting.Opacity;
 
   // draw outer shadows
-  for (const auto& s : style.shadows)
+  // 1. check out fills
   {
-    if (!s.is_enabled || s.inner)
-      continue;
-    drawShadow(canvas, skPath, s, outlineMask, false);
+
+    if (hasFill)
+    {
+      // transparent fill clip out the shadow
+      canvas->save();
+      canvas->clipPath(skPath, SkClipOp::kDifference);
+    }
+    for (const auto& s : style.shadows) // simplified into one shadow
+    {
+      if (!s.is_enabled || s.inner)
+        continue;
+      if (hasFill)
+        drawShadow(canvas, skPath, s, outlineMask, SkPaint::kFill_Style, bound);
+
+      for (const auto& b : style.borders)
+      {
+        if (!b.is_enabled)
+          continue;
+        drawShadow(canvas, skPath, s, outlineMask, SkPaint::kStroke_Style, bound);
+        break;
+      }
+    }
+    if (hasFill)
+    {
+      canvas->restore();
+    }
   }
 
   // draw fills
@@ -112,7 +135,8 @@ void drawContour(SkCanvas* canvas,
     if (f.fillType == FT_Color)
     {
       fillPen.setColor(f.color);
-      fillPen.setAlphaf(fillPen.getAlphaf() * globalAlpha);
+      const auto currentAlpha = fillPen.getAlphaf();
+      fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha * currentAlpha);
     }
     else if (f.fillType == FT_Gradient)
     {
@@ -197,7 +221,6 @@ void drawContour(SkCanvas* canvas,
       if (!img)
         continue;
       auto bs = bound.size();
-
       const auto m = toSkMatrix(b.pattern->transform);
       auto shader = getImageShader(img,
                                    bs.x,
@@ -206,7 +229,6 @@ void drawContour(SkCanvas* canvas,
                                    b.pattern->tileScale,
                                    b.pattern->tileMirrored,
                                    &m);
-
       strokePen.setShader(shader);
       strokePen.setAlphaf(b.context_settings.Opacity * globalAlpha);
     }
@@ -224,47 +246,62 @@ void drawContour(SkCanvas* canvas,
   }
 
   // draw inner shadow
+  canvas->save();
+  canvas->clipPath(skPath, SkClipOp::kIntersect);
   for (const auto& s : style.shadows)
   {
     if (!s.is_enabled || !s.inner)
       continue;
-    drawShadow(canvas, skPath, s, outlineMask, true);
+    drawInnerShadow(canvas, skPath, s, outlineMask, SkPaint::kFill_Style, bound);
   }
+  canvas->restore();
 }
 
 void drawShadow(SkCanvas* canvas,
                 const SkPath& skPath,
                 const Shadow& s,
                 const SkPath* outlineMask,
-                bool inner)
+                SkPaint::Style style,
+                const Bound2& bound)
 {
 
   SkPaint pen;
   auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
   pen.setImageFilter(
-    SkImageFilters::DropShadowOnly(s.offset_x, s.offset_y, sigma, sigma, s.color, nullptr));
+    SkImageFilters::DropShadowOnly(s.offset_x, -s.offset_y, sigma, sigma, s.color, nullptr));
   canvas->saveLayer(nullptr, &pen);
-  canvas->translate(s.offset_x, s.offset_y);
-  if (inner)
-  {
-    canvas->scale(s.spread, s.spread);
-  }
-  else
-  {
-    if (s.spread > 0)
-    {
-      canvas->scale(1 / s.spread, 1 / s.spread);
-    }
-  }
-  canvas->translate(-s.offset_x, -s.offset_y);
+  if (s.spread > 0)
+    canvas->scale(1 + s.spread / 100.0, 1 + s.spread / 100.0);
   SkPaint fillPen;
-  fillPen.setStyle(SkPaint::kFill_Style);
-
+  fillPen.setStyle(style);
   if (outlineMask)
   {
     canvas->clipPath(*outlineMask);
   }
+  canvas->drawPath(skPath, fillPen);
+  canvas->restore();
+}
 
+void drawInnerShadow(SkCanvas* canvas,
+                     const SkPath& skPath,
+                     const Shadow& s,
+                     const SkPath* mask,
+                     SkPaint::Style style,
+                     const Bound2& bound)
+{
+  SkPaint pen;
+  auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
+  pen.setImageFilter(
+    SkMyImageFilters::DropInnerShadowOnly(s.offset_x, -s.offset_y, sigma, sigma, s.color, nullptr));
+  canvas->saveLayer(nullptr, &pen);
+  if (s.spread > 0)
+    canvas->scale(1.0 / s.spread, 1.0 / s.spread);
+  SkPaint fillPen;
+  fillPen.setStyle(style);
+  if (mask)
+  {
+    canvas->clipPath(*mask);
+  }
   canvas->drawPath(skPath, fillPen);
   canvas->restore();
 }

@@ -33,5 +33,7 @@ public:
   {
     // do not render child object for path node
   }
+
+  bool hasFill() const;
 };
 } // namespace VGG

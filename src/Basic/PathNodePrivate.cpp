@@ -125,6 +125,8 @@ void drawContour(SkCanvas* canvas,
     {
       assert(f.pattern.has_value());
       auto img = loadImage(f.pattern->imageGUID, Scene::getResRepo());
+      if (!img)
+        continue;
       auto bs = bound.size();
       const auto m = toSkMatrix(f.pattern->transform);
       auto shader = getImageShader(img,
@@ -192,6 +194,8 @@ void drawContour(SkCanvas* canvas,
     {
       assert(b.pattern.has_value());
       auto img = loadImage(b.pattern->imageGUID, Scene::getResRepo());
+      if (!img)
+        continue;
       auto bs = bound.size();
 
       const auto m = toSkMatrix(b.pattern->transform);

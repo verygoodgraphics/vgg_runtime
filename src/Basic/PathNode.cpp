@@ -156,6 +156,17 @@ void PathNode::paintEvent(SkCanvas* canvas)
     ct.emplace_back(outline.outlineMask, p->clipOperator());
   }
 
+  // draw blur
+  bool hasBlur = style.blurs.empty() ? false : style.blurs[0].isEnabled;
+  if (hasBlur)
+  {
+    SkPaint pen;
+    const auto blur = style.blurs[0];
+    auto sigma = SkBlurMask::ConvertRadiusToSigma(blur.radius);
+    pen.setImageFilter(SkImageFilters::Blur(sigma, sigma, nullptr));
+    canvas->saveLayer(nullptr, &pen);
+  }
+
   if (mask.outlineMask.isEmpty())
   {
     drawContour(canvas, nullptr, contextSetting, style, windingRule, ct, getBound());
@@ -163,6 +174,11 @@ void PathNode::paintEvent(SkCanvas* canvas)
   else
   {
     drawContour(canvas, &mask.outlineMask, contextSetting, style, windingRule, ct, getBound());
+  }
+
+  if (hasBlur)
+  {
+    canvas->restore();
   }
 }
 

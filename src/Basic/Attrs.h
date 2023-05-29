@@ -276,6 +276,7 @@ struct Blur
   float motionAngle;
   glm::vec2 center;
   float saturation;
+  bool isEnabled;
 };
 
 struct Fill

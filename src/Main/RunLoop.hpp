@@ -17,7 +17,7 @@ public:
 
   void dispatch()
   {
-    while (!m_run_loop.empty())
+    while (!m_run_loop.empty() && m_run_loop.peek().when < m_run_loop.now())
     {
       m_run_loop.dispatch();
     }

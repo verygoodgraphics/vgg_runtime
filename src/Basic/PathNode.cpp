@@ -124,6 +124,7 @@ namespace VGG
 
 PathNode::PathNode(const std::string& name)
   : PaintNode(name, ObjectType::VGG_PATH)
+  , d_ptr(new PathNode__pImpl(this))
 {
 }
 
@@ -144,9 +145,9 @@ Mask PathNode::asOutlineMask(const glm::mat3* mat)
 
 void PathNode::paintEvent(SkCanvas* canvas)
 {
-  if (m_firstChild.empty())
-    return;
-  auto mask = makeMaskBy(BO_Intersection);
+  VGG_IMPL(PathNode)
+  // if (m_firstChild.empty())
+  //   return;
 
   std::vector<std::pair<SkPath, EBoolOp>> ct;
   for (const auto& c : m_firstChild)
@@ -154,6 +155,10 @@ void PathNode::paintEvent(SkCanvas* canvas)
     auto p = static_cast<PaintNode*>(c.get());
     auto outline = p->asOutlineMask(&p->localTransform());
     ct.emplace_back(outline.outlineMask, p->clipOperator());
+  }
+  if (m_firstChild.empty())
+  {
+    ct.emplace_back(asOutlineMask(0).outlineMask, EBoolOp::BO_None);
   }
 
   // draw blur
@@ -167,15 +172,16 @@ void PathNode::paintEvent(SkCanvas* canvas)
     canvas->saveLayer(nullptr, &pen);
   }
 
+  auto mask = makeMaskBy(BO_Intersection);
   if (mask.outlineMask.isEmpty())
   {
-    drawContour(canvas, contextSetting, style, windingRule, ct, getBound(), hasFill());
+    _->drawContour(canvas, contextSetting, style, _->windingRule, ct, getBound(), hasFill());
   }
   else
   {
     canvas->save();
     canvas->clipPath(mask.outlineMask);
-    drawContour(canvas, contextSetting, style, windingRule, ct, getBound(), hasFill());
+    _->drawContour(canvas, contextSetting, style, _->windingRule, ct, getBound(), hasFill());
     canvas->restore();
   }
 
@@ -201,9 +207,58 @@ bool PathNode::hasFill() const
   return false;
 }
 
-void PathNode::paintFill(SkCanvas * canvas)
+void PathNode::paintFill(SkCanvas* canvas, float globalAlpha, const SkPath& skPath)
 {
+  VGG_IMPL(PathNode)
+  for (const auto& f : style.fills)
+  {
+    if (!f.isEnabled)
+      continue;
+    SkPaint fillPen;
+    fillPen.setStyle(SkPaint::kFill_Style);
+    if (f.fillType == FT_Color)
+    {
+      fillPen.setColor(f.color);
+      const auto currentAlpha = fillPen.getAlphaf();
+      fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha * currentAlpha);
+    }
+    else if (f.fillType == FT_Gradient)
+    {
+      assert(f.gradient.has_value());
+      auto gradientShader = _->getGradientShader(f.gradient.value(), getBound().size());
+      fillPen.setShader(gradientShader);
+      fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);
+    }
+    else if (f.fillType == FT_Pattern)
+    {
+      assert(f.pattern.has_value());
+      auto img = loadImage(f.pattern->imageGUID, Scene::getResRepo());
+      if (!img)
+        continue;
+      auto bs = getBound().size();
+      const auto m = toSkMatrix(f.pattern->transform);
+      auto shader = getImageShader(img,
+                                   bs.x,
+                                   bs.y,
+                                   f.pattern->imageFillType,
+                                   f.pattern->tileScale,
+                                   f.pattern->tileMirrored,
+                                   &m);
+
+      fillPen.setShader(shader);
+      fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);
+    }
+    canvas->drawPath(skPath, fillPen);
+  }
 }
 
+void PathNode::setWindingRule(EWindingType type)
+{
+  VGG_IMPL(PathNode)
+  _->windingRule = type;
+}
 
+PathNode::~PathNode()
+{
+}
 } // namespace VGG

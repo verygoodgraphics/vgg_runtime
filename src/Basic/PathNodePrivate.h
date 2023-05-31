@@ -1,28 +1,52 @@
 #pragma once
 
+#include "Basic/Node.hpp"
 #include "Basic/VGGType.h"
 #include "PathNode.h"
+#include "include/core/SkShader.h"
 
-SkPath makePath(const std::vector<std::pair<SkPath, EBoolOp>>& ct);
+namespace VGG
+{
+class PathNode__pImpl
+{
+  VGG_DECL_API(PathNode);
 
-void drawContour(SkCanvas* canvas,
-                 const ContextSetting& settings,
-                 const Style& style,
-                 EWindingType windingRule,
-                 const std::vector<std::pair<SkPath, EBoolOp>>& ct,
-                 const Bound2& bound,
-                 bool hasFill);
+public:
+  EWindingType windingRule;
+  sk_sp<SkShader> testShader;
+  PathNode__pImpl(PathNode* api)
+    : q_ptr(api)
+  {
+  }
 
-void drawShadow(SkCanvas* canvas,
-                const SkPath& skPath,
-                const Shadow& s,
-                SkPaint::Style style,
-                const Bound2& bound);
+  SkPath makePath(const std::vector<std::pair<SkPath, EBoolOp>>& ct);
 
-void drawInnerShadow(SkCanvas* canvas,
-                     const SkPath& skPath,
-                     const Shadow& s,
-                     SkPaint::Style style,
-                     const Bound2& bound);
+  void drawContour(SkCanvas* canvas,
+                   const ContextSetting& settings,
+                   const Style& style,
+                   EWindingType windingRule,
+                   const std::vector<std::pair<SkPath, EBoolOp>>& ct,
+                   const Bound2& bound,
+                   bool hasFill);
 
-sk_sp<SkShader> getGradientShader(const VGGGradient& g, const glm::vec2& size);
+  void drawShadow(SkCanvas* canvas,
+                  const SkPath& skPath,
+                  const Shadow& s,
+                  SkPaint::Style style,
+                  const Bound2& bound);
+
+  void drawInnerShadow(SkCanvas* canvas,
+                       const SkPath& skPath,
+                       const Shadow& s,
+                       SkPaint::Style style,
+                       const Bound2& bound);
+
+  sk_sp<SkShader> getGradientShader(const VGGGradient& g, const glm::vec2& size);
+
+  void drawPathBorder(SkCanvas* canvas,
+                      const SkPath& skPath,
+                      const Border& b,
+                      float globalAlpha,
+                      const Bound2& bound);
+};
+} // namespace VGG

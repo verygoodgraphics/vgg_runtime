@@ -61,7 +61,6 @@ bool ImageNode::fill() const
 
 void ImageNode::paintFill(SkCanvas* canvas, float globalAlpha, const SkPath& skPath)
 {
-  std::cout << "PaintFill in imageNode\n";
   if (!image)
   {
     image = loadImage(guid, Scene::getResRepo());

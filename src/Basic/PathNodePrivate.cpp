@@ -3,7 +3,9 @@
 #include "Basic/Geometry.hpp"
 #include "Basic/VGGType.h"
 #include "include/core/SkClipOp.h"
+#include "include/core/SkPaint.h"
 #include "include/core/SkPathTypes.h"
+#include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkImageFilters.h"
 #include "include/core/SkScalar.h"
 #include "include/core/SkShader.h"
@@ -77,8 +79,80 @@ SkPath makePath(const std::vector<std::pair<SkPath, EBoolOp>>& ct)
   return paths;
 }
 
+void drawPathBorder(SkCanvas* canvas,
+                    const SkPath& skPath,
+                    const Border& b,
+                    float globalAlpha,
+                    const Bound2& bound)
+{
+  SkPaint strokePen;
+  strokePen.setAntiAlias(true);
+  strokePen.setStyle(SkPaint::kStroke_Style);
+  strokePen.setPathEffect(
+    SkDashPathEffect::Make(b.dashed_pattern.data(), b.dashed_pattern.size(), 0));
+  strokePen.setStrokeJoin(toSkPaintJoin(b.lineJoinStyle));
+  strokePen.setStrokeCap(toSkPaintCap(b.lineCapStyle));
+  strokePen.setStrokeMiter(b.miterLimit);
+  strokePen.setColor(b.color.value_or(VGGColor{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
+  if (b.position == PP_Inside)
+  {
+    // inside
+    strokePen.setStrokeWidth(2. * b.thickness);
+    canvas->save();
+    canvas->clipPath(skPath, SkClipOp::kIntersect);
+  }
+  else if (b.position == PP_Outside)
+  {
+    // outside
+    strokePen.setStrokeWidth(2. * b.thickness);
+    canvas->save();
+    canvas->clipPath(skPath, SkClipOp::kDifference);
+  }
+  else
+  {
+    strokePen.setStrokeWidth(b.thickness);
+  }
+
+  // draw fill for border
+  if (b.fill_type == FT_Gradient)
+  {
+    assert(b.gradient.has_value());
+    strokePen.setShader(getGradientShader(b.gradient.value(), bound.size()));
+    strokePen.setAlphaf(b.context_settings.Opacity * globalAlpha);
+  }
+  else if (b.fill_type == FT_Color)
+  {
+    strokePen.setColor(b.color.value_or(VGGColor{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
+    strokePen.setAlphaf(strokePen.getAlphaf() * globalAlpha);
+  }
+  else if (b.fill_type == FT_Pattern)
+  {
+    assert(b.pattern.has_value());
+    auto img = loadImage(b.pattern->imageGUID, Scene::getResRepo());
+    if (!img)
+      return;
+    auto bs = bound.size();
+    const auto m = toSkMatrix(b.pattern->transform);
+    auto shader = getImageShader(img,
+                                 bs.x,
+                                 bs.y,
+                                 b.pattern->imageFillType,
+                                 b.pattern->tileScale,
+                                 b.pattern->tileMirrored,
+                                 &m);
+    strokePen.setShader(shader);
+    strokePen.setAlphaf(b.context_settings.Opacity * globalAlpha);
+  }
+
+  canvas->drawPath(skPath, strokePen);
+
+  if (b.position != PP_Center)
+  {
+    canvas->restore(); // pop border position style
+  }
+}
+
 void drawContour(SkCanvas* canvas,
-                 const SkPath* outlineMask,
                  const ContextSetting& contextSetting,
                  const Style& style,
                  EWindingType windingRule,
@@ -89,15 +163,14 @@ void drawContour(SkCanvas* canvas,
 
   SkPath skPath = makePath(ct);
   // winding rule
-  skPath.setFillType(EWindingType::WR_EvenOdd ? SkPathFillType::kEvenOdd
-                                              : SkPathFillType::kWinding);
+  skPath.setFillType(windingRule == EWindingType::WR_EvenOdd ? SkPathFillType::kEvenOdd
+                                                             : SkPathFillType::kWinding);
 
   const auto globalAlpha = contextSetting.Opacity;
 
   // draw outer shadows
   // 1. check out fills
   {
-
     if (hasFill)
     {
       // transparent fill clip out the shadow
@@ -109,13 +182,13 @@ void drawContour(SkCanvas* canvas,
       if (!s.is_enabled || s.inner)
         continue;
       if (hasFill)
-        drawShadow(canvas, skPath, s, outlineMask, SkPaint::kFill_Style, bound);
+        drawShadow(canvas, skPath, s, SkPaint::kFill_Style, bound);
 
       for (const auto& b : style.borders)
       {
-        if (!b.is_enabled)
+        if (!b.isEnabled)
           continue;
-        drawShadow(canvas, skPath, s, outlineMask, SkPaint::kStroke_Style, bound);
+        drawShadow(canvas, skPath, s, SkPaint::kStroke_Style, bound);
         break;
       }
     }
@@ -164,85 +237,22 @@ void drawContour(SkCanvas* canvas,
       fillPen.setShader(shader);
       fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);
     }
-    if (outlineMask)
-    {
-      canvas->clipPath(*outlineMask);
-    }
+    // if (outlineMask)
+    // {
+    //   canvas->clipPath(*outlineMask);
+    // }
     canvas->drawPath(skPath, fillPen);
   }
 
   // draw boarders
-  SkPaint strokePen;
-  strokePen.setAntiAlias(true);
-  strokePen.setStyle(SkPaint::kStroke_Style);
+  // SkPaint strokePen;
+  // strokePen.setAntiAlias(true);
+  // strokePen.setStyle(SkPaint::kStroke_Style);
   for (const auto& b : style.borders)
   {
-    if (!b.is_enabled)
+    if (!b.isEnabled)
       continue;
-    strokePen.setAntiAlias(true);
-    strokePen.setStrokeJoin(toSkPaintJoin(b.line_join_style));
-    strokePen.setStrokeCap(toSkPaintCap(b.line_cap_style));
-    strokePen.setColor(b.color.value_or(VGGColor{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
-    if (b.position == PP_Inside)
-    {
-      // inside
-      strokePen.setStrokeWidth(2. * b.thickness);
-      canvas->save();
-      canvas->clipPath(skPath, SkClipOp::kIntersect);
-    }
-    else if (b.position == PP_Outside)
-    {
-      // outside
-      strokePen.setStrokeWidth(2. * b.thickness);
-      canvas->save();
-      canvas->clipPath(skPath, SkClipOp::kDifference);
-    }
-    else
-    {
-      strokePen.setStrokeWidth(b.thickness);
-    }
-
-    // draw fill for border
-    if (b.fill_type == FT_Gradient)
-    {
-      assert(b.gradient.has_value());
-      strokePen.setShader(getGradientShader(b.gradient.value(), bound.size()));
-      strokePen.setAlphaf(b.context_settings.Opacity * globalAlpha);
-    }
-    else if (b.fill_type == FT_Color)
-    {
-      strokePen.setColor(b.color.value_or(VGGColor{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
-      strokePen.setAlphaf(strokePen.getAlphaf() * globalAlpha);
-    }
-    else if (b.fill_type == FT_Pattern)
-    {
-      assert(b.pattern.has_value());
-      auto img = loadImage(b.pattern->imageGUID, Scene::getResRepo());
-      if (!img)
-        continue;
-      auto bs = bound.size();
-      const auto m = toSkMatrix(b.pattern->transform);
-      auto shader = getImageShader(img,
-                                   bs.x,
-                                   bs.y,
-                                   b.pattern->imageFillType,
-                                   b.pattern->tileScale,
-                                   b.pattern->tileMirrored,
-                                   &m);
-      strokePen.setShader(shader);
-      strokePen.setAlphaf(b.context_settings.Opacity * globalAlpha);
-    }
-
-    if (outlineMask)
-    {
-      canvas->clipPath(*outlineMask);
-    }
-    canvas->drawPath(skPath, strokePen);
-
-    if (b.position != PP_Center)
-    {
-      canvas->restore(); // pop border position style
-    }
+    drawPathBorder(canvas, skPath, b, globalAlpha, bound);
   }
 
   // draw inner shadow
@@ -252,7 +262,7 @@ void drawContour(SkCanvas* canvas,
   {
     if (!s.is_enabled || !s.inner)
       continue;
-    drawInnerShadow(canvas, skPath, s, outlineMask, SkPaint::kFill_Style, bound);
+    drawInnerShadow(canvas, skPath, s, SkPaint::kFill_Style, bound);
   }
   canvas->restore();
 }
@@ -260,7 +270,6 @@ void drawContour(SkCanvas* canvas,
 void drawShadow(SkCanvas* canvas,
                 const SkPath& skPath,
                 const Shadow& s,
-                const SkPath* outlineMask,
                 SkPaint::Style style,
                 const Bound2& bound)
 {
@@ -274,10 +283,10 @@ void drawShadow(SkCanvas* canvas,
     canvas->scale(1 + s.spread / 100.0, 1 + s.spread / 100.0);
   SkPaint fillPen;
   fillPen.setStyle(style);
-  if (outlineMask)
-  {
-    canvas->clipPath(*outlineMask);
-  }
+  // if (outlineMask)
+  // {
+  //   canvas->clipPath(*outlineMask);
+  // }
   canvas->drawPath(skPath, fillPen);
   canvas->restore();
 }
@@ -285,7 +294,6 @@ void drawShadow(SkCanvas* canvas,
 void drawInnerShadow(SkCanvas* canvas,
                      const SkPath& skPath,
                      const Shadow& s,
-                     const SkPath* mask,
                      SkPaint::Style style,
                      const Bound2& bound)
 {
@@ -298,10 +306,10 @@ void drawInnerShadow(SkCanvas* canvas,
     canvas->scale(1.0 / s.spread, 1.0 / s.spread);
   SkPaint fillPen;
   fillPen.setStyle(style);
-  if (mask)
-  {
-    canvas->clipPath(*mask);
-  }
+  // if (mask)
+  // {
+  //   canvas->clipPath(*mask);
+  // }
   canvas->drawPath(skPath, fillPen);
   canvas->restore();
 }

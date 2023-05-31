@@ -85,6 +85,11 @@ public:
     return this->m_bound;
   }
 
+  void setBound(const Bound2& bound)
+  {
+    this->m_bound = bound;
+  }
+
   const std::string& GUID() const
   {
     return guid;

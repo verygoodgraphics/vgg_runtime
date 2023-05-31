@@ -114,6 +114,7 @@ inline void from_json(const json& j, VGGGradient& x)
     if (klass == "gradientRadial")
     {
       x.elipseLength = g["elipseLength"];
+      x.elipseLength = x.elipseLength == 0.0 ? 1.0 : x.elipseLength; // TODO::fixup
       x.gradientType = EGradientType::GT_Radial;
     }
     else if (klass == "gradientAngular")
@@ -145,10 +146,10 @@ inline void from_json(const json& j, Border& x)
   x.fill_type = j.at("fillType").get<EPathFillType>();
   x.flat = j.at("flat").get<double>();
   x.gradient = get_stack_optional<VGGGradient>(j, "gradient");
-  x.is_enabled = j.at("isEnabled").get<bool>();
-  x.line_cap_style = j.at("lineCapStyle").get<ELineCap>();
-  x.line_join_style = j.at("lineJoinStyle").get<ELineJoin>();
-  x.miter_limit = j.at("miterLimit").get<double>();
+  x.isEnabled = j.at("isEnabled").get<bool>();
+  x.lineCapStyle = j.at("lineCapStyle").get<ELineCap>();
+  x.lineJoinStyle = j.at("lineJoinStyle").get<ELineJoin>();
+  x.miterLimit = j.at("miterLimit").get<double>();
   x.pattern = get_stack_optional<Pattern>(j, "pattern");
   x.position = j.at("position").get<EPathPosition>();
   x.style = j.at("style").get<int64_t>();

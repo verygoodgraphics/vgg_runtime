@@ -107,8 +107,8 @@ inline double calcRadius(double r0,
 {
   glm::vec2 a = p0 - p1;
   glm::vec2 b = p2 - p1;
-  double alen = a.length();
-  double blen = b.length();
+  double alen = glm::distance(p0, p1);
+  double blen = glm::distance(p2, p1);
   if (std::fabs(alen) < EPS || std::fabs(blen) < EPS)
   {
     return 0.;

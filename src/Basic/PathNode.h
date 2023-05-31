@@ -1,5 +1,6 @@
 #pragma once
 #include "Basic/Mask.h"
+#include "Basic/Node.hpp"
 #include "PaintNode.h"
 #include "ContourNode.h"
 #include "VGGType.h"
@@ -13,20 +14,20 @@
 namespace VGG
 {
 
+class PathNode__pImpl;
+
 // TODO:: PathNode is not a good name.
 // It likes a special container that provides bool operation for PaintNode object
 class PathNode : public PaintNode
 {
-  EWindingType windingRule;
-  sk_sp<SkShader> testShader;
+  VGG_DECL_IMPL(PathNode)
+  // EWindingType windingRule;
+  // sk_sp<SkShader> testShader;
 
 public:
   PathNode(const std::string& name);
   void paintEvent(SkCanvas* canvas) override;
-  void setWindingRule(EWindingType type)
-  {
-    windingRule = type;
-  }
+  void setWindingRule(EWindingType type);
   Mask asOutlineMask(const glm::mat3* mat) override;
   void addSubShape(std::shared_ptr<PaintNode> node, EBoolOp op);
   void renderOrderPass(SkCanvas* canvas) override
@@ -36,7 +37,9 @@ public:
 
   bool hasFill() const;
 
+  virtual ~PathNode();
+
 protected:
-  virtual void paintFill(SkCanvas* canvas);
+  virtual void paintFill(SkCanvas* canvas, float globalAlpha, const SkPath & skPath);
 };
 } // namespace VGG

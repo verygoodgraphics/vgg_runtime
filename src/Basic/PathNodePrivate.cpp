@@ -2,6 +2,7 @@
 
 #include "Basic/Geometry.hpp"
 #include "Basic/VGGType.h"
+#include "Basic/PathNode.h"
 #include "include/core/SkClipOp.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPathTypes.h"
@@ -21,7 +22,10 @@
 #include "src/core/SkBlurMask.h"
 #include <algorithm>
 
-sk_sp<SkShader> getGradientShader(const VGGGradient& g, const glm::vec2& size)
+namespace VGG
+{
+
+sk_sp<SkShader> PathNode__pImpl::getGradientShader(const VGGGradient& g, const glm::vec2& size)
 {
   sk_sp<SkShader> shader;
   const auto type = g.gradientType;
@@ -40,7 +44,7 @@ sk_sp<SkShader> getGradientShader(const VGGGradient& g, const glm::vec2& size)
   return shader;
 }
 
-SkPath makePath(const std::vector<std::pair<SkPath, EBoolOp>>& ct)
+SkPath PathNode__pImpl::makePath(const std::vector<std::pair<SkPath, EBoolOp>>& ct)
 {
   // return skpath;
   assert(ct.size() >= 1);
@@ -79,11 +83,11 @@ SkPath makePath(const std::vector<std::pair<SkPath, EBoolOp>>& ct)
   return paths;
 }
 
-void drawPathBorder(SkCanvas* canvas,
-                    const SkPath& skPath,
-                    const Border& b,
-                    float globalAlpha,
-                    const Bound2& bound)
+void PathNode__pImpl::drawPathBorder(SkCanvas* canvas,
+                                     const SkPath& skPath,
+                                     const Border& b,
+                                     float globalAlpha,
+                                     const Bound2& bound)
 {
   SkPaint strokePen;
   strokePen.setAntiAlias(true);
@@ -152,13 +156,13 @@ void drawPathBorder(SkCanvas* canvas,
   }
 }
 
-void drawContour(SkCanvas* canvas,
-                 const ContextSetting& contextSetting,
-                 const Style& style,
-                 EWindingType windingRule,
-                 const std::vector<std::pair<SkPath, EBoolOp>>& ct,
-                 const Bound2& bound,
-                 bool hasFill)
+void PathNode__pImpl::drawContour(SkCanvas* canvas,
+                                  const ContextSetting& contextSetting,
+                                  const Style& style,
+                                  EWindingType windingRule,
+                                  const std::vector<std::pair<SkPath, EBoolOp>>& ct,
+                                  const Bound2& bound,
+                                  bool hasFill)
 {
 
   SkPath skPath = makePath(ct);
@@ -199,51 +203,8 @@ void drawContour(SkCanvas* canvas,
   }
 
   // draw fills
-  for (const auto& f : style.fills)
-  {
-    if (!f.isEnabled)
-      continue;
-    SkPaint fillPen;
-    fillPen.setStyle(SkPaint::kFill_Style);
-    if (f.fillType == FT_Color)
-    {
-      fillPen.setColor(f.color);
-      const auto currentAlpha = fillPen.getAlphaf();
-      fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha * currentAlpha);
-    }
-    else if (f.fillType == FT_Gradient)
-    {
-      assert(f.gradient.has_value());
-      auto gradientShader = getGradientShader(f.gradient.value(), bound.size());
-      fillPen.setShader(gradientShader);
-      fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);
-    }
-    else if (f.fillType == FT_Pattern)
-    {
-      assert(f.pattern.has_value());
-      auto img = loadImage(f.pattern->imageGUID, Scene::getResRepo());
-      if (!img)
-        continue;
-      auto bs = bound.size();
-      const auto m = toSkMatrix(f.pattern->transform);
-      auto shader = getImageShader(img,
-                                   bs.x,
-                                   bs.y,
-                                   f.pattern->imageFillType,
-                                   f.pattern->tileScale,
-                                   f.pattern->tileMirrored,
-                                   &m);
 
-      fillPen.setShader(shader);
-      fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);
-    }
-    // if (outlineMask)
-    // {
-    //   canvas->clipPath(*outlineMask);
-    // }
-    canvas->drawPath(skPath, fillPen);
-  }
-
+  q_ptr->paintFill(canvas, globalAlpha, skPath);
   // draw boarders
   // SkPaint strokePen;
   // strokePen.setAntiAlias(true);
@@ -267,11 +228,11 @@ void drawContour(SkCanvas* canvas,
   canvas->restore();
 }
 
-void drawShadow(SkCanvas* canvas,
-                const SkPath& skPath,
-                const Shadow& s,
-                SkPaint::Style style,
-                const Bound2& bound)
+void PathNode__pImpl::drawShadow(SkCanvas* canvas,
+                                 const SkPath& skPath,
+                                 const Shadow& s,
+                                 SkPaint::Style style,
+                                 const Bound2& bound)
 {
 
   SkPaint pen;
@@ -291,11 +252,11 @@ void drawShadow(SkCanvas* canvas,
   canvas->restore();
 }
 
-void drawInnerShadow(SkCanvas* canvas,
-                     const SkPath& skPath,
-                     const Shadow& s,
-                     SkPaint::Style style,
-                     const Bound2& bound)
+void PathNode__pImpl::drawInnerShadow(SkCanvas* canvas,
+                                      const SkPath& skPath,
+                                      const Shadow& s,
+                                      SkPaint::Style style,
+                                      const Bound2& bound)
 {
   SkPaint pen;
   auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
@@ -313,3 +274,5 @@ void drawInnerShadow(SkCanvas* canvas,
   canvas->drawPath(skPath, fillPen);
   canvas->restore();
 }
+
+} // namespace VGG

@@ -1,4 +1,5 @@
 #include "ImageNode.h"
+#include "Basic/PathNode.h"
 #include "Basic/VGGType.h"
 #include "Basic/VGGUtils.h"
 #include "Basic/SkiaBackend/SkiaImpl.h"
@@ -18,30 +19,25 @@ namespace VGG
 {
 
 ImageNode::ImageNode(const std::string& name)
-  : PaintNode(name, VGG_IMAGE)
+  : PathNode(name)
 {
 }
 
-void ImageNode::paintEvent(SkCanvas* canvas)
+Mask ImageNode::asOutlineMask(const glm::mat3* mat)
 {
-  if (!image)
+  Mask mask;
+  auto rect = toSkRect(getBound());
+  mask.outlineMask.addRect(rect);
+  if (mat)
   {
-    image = loadImage(guid, Scene::getResRepo());
+    mask.outlineMask.transform(toSkMatrix(*mat));
   }
-  if (image)
-  {
-    auto mask = makeMaskBy(BO_Intersection);
-    if (mask.outlineMask.isEmpty() == false)
-    {
-      canvas->clipPath(mask.outlineMask);
-    }
-    SkSamplingOptions opt;
-    canvas->save();
-    canvas->scale(1, -1);
-    canvas->drawImageRect(image, toSkRect(this->m_bound), opt);
-    canvas->restore();
-  }
+  return mask;
 }
+
+// void ImageNode::paintEvent(SkCanvas* canvas)
+// {
+// }
 
 void ImageNode::setImage(const std::string& guid)
 {
@@ -61,6 +57,28 @@ void ImageNode::setReplacesImage(bool fill)
 bool ImageNode::fill() const
 {
   return this->fillReplacesImage;
+}
+
+void ImageNode::paintFill(SkCanvas* canvas, float globalAlpha, const SkPath& skPath)
+{
+  std::cout << "PaintFill in imageNode\n";
+  if (!image)
+  {
+    image = loadImage(guid, Scene::getResRepo());
+  }
+  if (image)
+  {
+    auto mask = makeMaskBy(BO_Intersection);
+    if (mask.outlineMask.isEmpty() == false)
+    {
+      canvas->clipPath(mask.outlineMask);
+    }
+    SkSamplingOptions opt;
+    canvas->save();
+    canvas->scale(1, -1);
+    canvas->drawImageRect(image, toSkRect(this->m_bound), opt);
+    canvas->restore();
+  }
 }
 
 } // namespace VGG

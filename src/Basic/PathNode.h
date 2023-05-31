@@ -15,7 +15,7 @@ namespace VGG
 
 // TODO:: PathNode is not a good name.
 // It likes a special container that provides bool operation for PaintNode object
-class PathNode final : public PaintNode
+class PathNode : public PaintNode
 {
   EWindingType windingRule;
   sk_sp<SkShader> testShader;
@@ -35,5 +35,8 @@ public:
   }
 
   bool hasFill() const;
+
+protected:
+  virtual void paintFill(SkCanvas* canvas);
 };
 } // namespace VGG

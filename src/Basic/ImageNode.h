@@ -1,4 +1,5 @@
 #pragma once
+#include "Basic/PathNode.h"
 #include "PaintNode.h"
 
 class SkImage;

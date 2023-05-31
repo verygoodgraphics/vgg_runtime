@@ -169,18 +169,14 @@ void PathNode::paintEvent(SkCanvas* canvas)
 
   if (mask.outlineMask.isEmpty())
   {
-    drawContour(canvas, nullptr, contextSetting, style, windingRule, ct, getBound(), hasFill());
+    drawContour(canvas, contextSetting, style, windingRule, ct, getBound(), hasFill());
   }
   else
   {
-    drawContour(canvas,
-                &mask.outlineMask,
-                contextSetting,
-                style,
-                windingRule,
-                ct,
-                getBound(),
-                hasFill());
+    canvas->save();
+    canvas->clipPath(mask.outlineMask);
+    drawContour(canvas, contextSetting, style, windingRule, ct, getBound(), hasFill());
+    canvas->restore();
   }
 
   if (hasBlur)
@@ -204,5 +200,10 @@ bool PathNode::hasFill() const
   }
   return false;
 }
+
+void PathNode::paintFill(SkCanvas * canvas)
+{
+}
+
 
 } // namespace VGG

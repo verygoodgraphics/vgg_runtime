@@ -231,11 +231,22 @@ struct VGGGradient
     }
 
     SkMatrix rot;
-    const auto dir = to - from;
-    auto r = std::atan2(dir.y, dir.x);
-    rot.setRotate(r, f.x, f.y);
+    rot.setRotate(rotation, center.x, center.y);
     rot.postScale(1, -1);
-    return SkGradientShader::MakeSweep(f.x, f.y, colors.data(), positions.data(), sz, 0, &rot);
+    return SkGradientShader::MakeSweep(center.x,
+                                       center.y,
+                                       colors.data(),
+                                       positions.data(),
+                                       sz,
+                                       0,
+                                       &rot);
+
+    // SkMatrix rot;
+    // const auto dir = to - from;
+    // auto r = std::atan2(dir.y, dir.x);
+    // rot.setRotate(r, f.x, f.y);
+    // rot.postScale(1, -1);
+    // return SkGradientShader::MakeSweep(f.x, f.y, colors.data(), positions.data(), sz, 0, &rot);
   }
 };
 
@@ -248,10 +259,10 @@ struct Border
   EPathFillType fill_type; // TODO:
   double flat;
   std::optional<VGGGradient> gradient;
-  bool is_enabled;
-  ELineCap line_cap_style;
-  ELineJoin line_join_style;
-  double miter_limit;
+  bool isEnabled;
+  ELineCap lineCapStyle;
+  ELineJoin lineJoinStyle;
+  double miterLimit;
   std::optional<Pattern> pattern;
   EPathPosition position;
   int64_t style;

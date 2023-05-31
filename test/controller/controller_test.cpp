@@ -443,8 +443,7 @@ TEST_F(ControllerTestSuite, unhandled_js_error)
   mock_click("/fake/throw_error");
 
   // wait for evaluating
-  std::this_thread::sleep_for(std::chrono::milliseconds(10));
-  // std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   // Then
   // js throw error if failed

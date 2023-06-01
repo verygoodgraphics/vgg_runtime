@@ -1,9 +1,16 @@
 add_subdirectory(skia)
 add_subdirectory(quickjs)
 
+add_subdirectory(vgg_contrib/boost)
 add_subdirectory(vgg_contrib/glm)
+add_subdirectory(vgg_contrib/json)
+add_subdirectory(vgg_contrib/picosha2)
+add_subdirectory(vgg_contrib/rxcpp)
+add_subdirectory(vgg_contrib/sdefl)
+add_subdirectory(vgg_contrib/valijson)
 add_subdirectory(vgg_contrib/zip)
 add_subdirectory(vgg_contrib/zlib)
+
 add_subdirectory(vgg_automerge/automerge)
 add_subdirectory(vgg_sketch_parser/src)
 

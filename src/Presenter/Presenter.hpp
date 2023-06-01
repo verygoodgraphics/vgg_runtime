@@ -20,26 +20,25 @@ public:
   Presenter()
   {
     m_design_doc_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
-      [&](ModelEventPtr evt)
+      [&](ModelEventPtr event)
       {
-        auto type = evt->type;
-        switch (type)
+        switch (event->type)
         {
           case ModelEventType::Add:
           {
-            const auto& add_evt = std::any_cast<ModelEventAdd>(evt->data);
+            auto add_event_ptr = static_cast<ModelEventAdd*>(event.get());
           }
           break;
 
           case ModelEventType::Delete:
           {
-            const auto& delete_evt = std::any_cast<ModelEventDelete>(evt->data);
+            auto delete_event_ptr = static_cast<ModelEventDelete*>(event.get());
           }
           break;
 
           case ModelEventType::Update:
           {
-            const auto& udpate_evt = std::any_cast<ModelEventUpdate>(evt->data);
+            auto udpate_event_ptr = static_cast<ModelEventUpdate*>(event.get());
           }
           break;
 
@@ -48,12 +47,8 @@ public:
         }
       });
 
-    m_layout_doc_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
-      [&](ModelEventPtr evt)
-      {
-        auto type = evt->type;
-        auto data = evt->data;
-      });
+    m_layout_doc_observer =
+      rxcpp::make_observer_dynamic<ModelEventPtr>([&](ModelEventPtr event) {});
   }
 
   virtual ~Presenter() = default;

@@ -172,6 +172,7 @@ TEST_F(ControllerTestSuite, DidUpdate)
     [&](ModelEventPtr evt)
     {
       type = evt->type;
+      auto udpate_event_ptr = static_cast<ModelEventUpdate*>(evt.get());
       m_exit_loop = true;
     });
   EXPECT_CALL(m_mock_presenter, getDesignDocObserver())
@@ -202,6 +203,7 @@ TEST_F(ControllerTestSuite, DidDelete)
     [&](ModelEventPtr evt)
     {
       type = evt->type;
+      auto delete_event_ptr = static_cast<ModelEventDelete*>(evt.get());
       m_exit_loop = true;
     });
   EXPECT_CALL(m_mock_presenter, getDesignDocObserver())
@@ -232,6 +234,7 @@ TEST_F(ControllerTestSuite, DidAdd_no_validator)
     [&](ModelEventPtr evt)
     {
       type = evt->type;
+      auto add_event_ptr = static_cast<ModelEventAdd*>(evt.get());
       m_exit_loop = true;
     });
   EXPECT_CALL(m_mock_presenter, getDesignDocObserver())

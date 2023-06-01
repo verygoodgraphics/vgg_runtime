@@ -225,7 +225,7 @@ void NativeExecImpl::stop_node()
   }
 }
 
-void NativeExecImpl::stop_node_thread_safe()
+void NativeExecImpl::notify_node_thread_to_stop()
 {
   if (m_state != RUNNING)
   {
@@ -255,7 +255,7 @@ void NativeExecImpl::init_uv_async_task()
                 &m_stop_timer_async,
                 [](uv_async_t* async)
                 {
-                  DEBUG("#exec, stop_node_thread_safe, stop timer");
+                  DEBUG("#exec, stop keep alive timer");
                   auto self_ptr = static_cast<NativeExecImpl*>(async->data);
                   uv_timer_stop(&self_ptr->m_keep_alive_timer);
                   uv_close(reinterpret_cast<uv_handle_t*>(&self_ptr->m_keep_alive_timer), nullptr);

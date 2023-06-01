@@ -114,7 +114,7 @@ int main(int argc, char** argv)
       auto dir = std::filesystem::current_path();
       auto name = FileManager::getFileName(fp);
       auto targetFp = dir / (name + ".vgg");
-      if (FileManager::saveFileAs(0, targetFp))
+      if (FileManager::saveFileAs(0, targetFp.string()))
       {
         INFO("Conversion succeeded: %s", targetFp.c_str());
         exit(0);

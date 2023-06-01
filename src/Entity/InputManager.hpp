@@ -16,7 +16,7 @@
  */
 #ifndef __INPUT_MANAGER_HPP__
 #define __INPUT_MANAGER_HPP__
-
+#define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 
 #include "Entity/MouseEntity.hpp"
@@ -101,7 +101,7 @@ public:
       im->mouse.x = SINT2FLOAT(evt.motion.x);
       im->mouse.y = SINT2FLOAT(evt.motion.y);
       im->mouse.publish<MouseMove>(MouseMove{
-        .modKey = SDL_GetModState(),
+        .modKey = (size_t)SDL_GetModState(),
         .dx = SINT2FLOAT(evt.motion.xrel),
         .dy = SINT2FLOAT(evt.motion.yrel),
       });
@@ -110,7 +110,7 @@ public:
     {
       im->mouse.isDragging = true;
       im->mouse.publish<MouseClick>(MouseClick{
-        .modKey = SDL_GetModState(),
+        .modKey = (size_t)SDL_GetModState(),
         .nClicks = evt.button.clicks,
         .button = evt.button.button,
       });
@@ -125,14 +125,14 @@ public:
     else if (evt.type == SDL_KEYDOWN)
     {
       im->keyboard.publish<KeyboardPress>(KeyboardPress{
-        .modKey = SDL_GetModState(),
+        .modKey = (size_t)SDL_GetModState(),
         .key = evt.key.keysym.sym,
       });
     }
     else if (evt.type == SDL_KEYUP)
     {
       im->keyboard.publish<KeyboardRelease>(KeyboardRelease{
-        .modKey = SDL_GetModState(),
+        .modKey = (size_t)SDL_GetModState(),
         .key = evt.key.keysym.sym,
       });
     }

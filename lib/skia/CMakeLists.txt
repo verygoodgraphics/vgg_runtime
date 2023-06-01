@@ -23,8 +23,8 @@ set(SKIA_SRCS
 # cpp files in other directories are included with some
 # exceptions commented out as follows:
 #
-#"src/codec/SkAndroidCodecAdapter.cpp"
-#"src/codec/SkAndroidCodec.cpp"
+  "src/codec/SkAndroidCodecAdapter.cpp"
+  "src/codec/SkAndroidCodec.cpp"
   "src/codec/SkBmpBaseCodec.cpp"
   "src/codec/SkBmpCodec.cpp"
   "src/codec/SkBmpMaskCodec.cpp"
@@ -45,7 +45,7 @@ set(SKIA_SRCS
   #"src/codec/SkOrientationMarker.cpp" # deleted in m92
   "src/codec/SkPngCodec.cpp"
 #"src/codec/SkRawCodec.cpp"
-#"src/codec/SkSampledCodec.cpp"
+  "src/codec/SkSampledCodec.cpp"
   "src/codec/SkSampler.cpp"
   "src/codec/SkStreamBuffer.cpp"
   "src/codec/SkSwizzler.cpp"
@@ -1051,6 +1051,7 @@ target_compile_definitions(skia_base PRIVATE
   #
   #SK_DISABLE_READBUFFER=1 # disable serialization to/from SkPicture (i.e. skp files)
 
+  SKIA_IMPLEMENTATION=1   # activate __declspec(dllexport) for msvc on windows, do nothing for other platform
   SKIA_DLL=1         # turn on visibility of APIs flaged with SK_API
   SK_DISABLE_AAA=1   # disable anti-alias algorithm in cpu rasterizer
   SK_GL
@@ -1091,48 +1092,47 @@ if (VGG_VAR_HOST STREQUAL "macOS")
   set(SKIA_INTERFACE_SRCS
     #"custom/GrGLMakeNativeInterface_angle.cpp"
     "src/gpu/gl/mac/GrGLMakeNativeInterface_mac.cpp"
-    "src/ports/SkOSFile_posix.cpp"
-    "src/ports/SkOSLibrary_posix.cpp"
   )
 elseif(VGG_VAR_HOST STREQUAL "Linux")
   set(SKIA_INTERFACE_SRCS
     "src/gpu/gl/glx/GrGLMakeNativeInterface_glx.cpp"
     "src/gpu/gl/glx/GrGLMakeGLXInterface.cpp"
-    "src/ports/SkOSFile_posix.cpp"
-    "src/ports/SkOSLibrary_posix.cpp"
   )
 elseif(VGG_VAR_HOST STREQUAL "Windows")
   set(SKIA_INTERFACE_SRCS
     "src/gpu/gl/win/GrGLMakeNativeInterface_win.cpp"
     "src/ports/SkOSFile_win.cpp"
     "src/ports/SkOSLibrary_win.cpp"
+    "src/ports/SkDebug_win.cpp"
   )
 elseif(VGG_VAR_HOST STREQUAL "iOS")
   set(SKIA_INTERFACE_SRCS
     "src/gpu/gl/iOS/GrGLMakeNativeInterface_iOS.cpp"
-    "src/ports/SkOSFile_posix.cpp"
-    "src/ports/SkOSFile_win.cpp"
   )
 elseif(VGG_VAR_HOST STREQUAL "Android")
   set(SKIA_INTERFACE_SRCS
     "src/gpu/gl/android/GrGLMakeNativeInterface_android.cpp"
-    "src/ports/SkOSFile_posix.cpp"
-    "src/ports/SkOSFile_win.cpp"
   )
 elseif(VGG_VAR_HOST STREQUAL "WASM")
   set(SKIA_INTERFACE_SRCS
     "src/gpu/gl/webgl/GrGLMakeNativeInterface_webgl.cpp"
-    "src/ports/SkOSFile_posix.cpp"
-    "src/ports/SkOSFile_win.cpp"
   )
 endif()
 
+
+list(APPEND SKIA_DEPS_LIBS "zlib" "libpng" "freetype" "libgifcodec" "libjpeg-turbo" "libwebp")
+
+if(NOT VGG_VAR_HOST STREQUAL "Windows")
+  list(APPEND SKIA_DEPS_LIBS "pthread")
+endif()
+
 add_library(skia SHARED ${SKIA_INTERFACE_SRCS})
-target_link_libraries(skia $<TARGET_OBJECTS:skia_base> zlib libpng freetype pthread libgifcodec libjpeg-turbo libwebp)
+target_link_libraries(skia $<TARGET_OBJECTS:skia_base> ${SKIA_DEPS_LIBS})
 target_compile_options(skia PRIVATE
   $<$<CONFIG:Debug>:-DSK_DEBUG>
   $<$<CONFIG:Release>:-DSK_RELEASE -fstrict-aliasing -fvisibility=hidden -fdata-sections -ffunction-sections -fvisibility-inlines-hidden -fno-exceptions -frtti>
 )
+
 
 if(VGG_ENABLE_EGL)
   set(SKIA_EGL_INTERFACE_SRCS
@@ -1140,9 +1140,10 @@ if(VGG_ENABLE_EGL)
     "src/gpu/gl/egl/GrGLMakeEGLInterface.cpp"
   )
   add_library(skia_egl SHARED ${SKIA_EGL_INTERFACE_SRCS})
-  target_link_libraries(skia_egl $<TARGET_OBJECTS:skia_base> zlib libpng freetype pthread libgifcodec libjpeg-turbo libwebp OpenGL::EGL)
+  target_link_libraries(skia_egl $<TARGET_OBJECTS:skia_base> ${SKIA_DEPS_LIBS} OpenGL::EGL)
   target_compile_options(skia_egl PRIVATE
     $<$<CONFIG:Debug>:-DSK_DEBUG>
     $<$<CONFIG:Release>:-DSK_RELEASE -fstrict-aliasing -fvisibility=hidden -fdata-sections -ffunction-sections -fvisibility-inlines-hidden -fno-exceptions -frtti>
   )
 endif()
+

@@ -16,7 +16,7 @@
  */
 #ifndef __APP_HPP__
 #define __APP_HPP__
-
+#define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 #ifdef EMSCRIPTEN
 #include <SDL2/SDL_opengles2.h>

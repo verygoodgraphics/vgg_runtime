@@ -17,7 +17,7 @@
 #include <algorithm>
 
 #include "Entity/Entity.hpp"
-#include "Presets/Interactions/RunModeInteraction.hpp"
+//#include "Presets/Interactions/RunModeInteraction.hpp"
 #include "Utils/EntityContainer.hpp"
 
 namespace VGG
@@ -143,40 +143,40 @@ void EntityContainer::applyOffset(const Vec2& offset)
 
 void EntityContainer::setRunModeInteractions(bool init)
 {
-  for (auto entPtr : entities)
-  {
-    if (entPtr->components.hasRenderable<FramedPath>() ||
-        entPtr->components.hasRenderable<FramedText>() ||
-        entPtr->components.hasRenderable<FramedRelation>())
-    {
-      entPtr->interactable([](EntityRaw ent) { return RunModeInteraction::create(ent); });
-      if (auto rmi = entPtr->components.getInteractable().getState<RunModeInteraction>())
-      {
-        auto c = entPtr->components.code.content;
-        if (init && !(c.empty()))
-        {
-          ASSERT(rmi->jsi);
-          rmi->jsi->eval(c);
-        }
-      }
-      else
-      {
-        FAIL("Failed to set run mode interaction for entity: %p", entPtr.get());
-      }
-    }
-    else
-    {
-      WARN("Unknown renderable to set run mode interaction.");
-    }
-
-    // recursivly set run mode interactions
-    if (entPtr->components.hasRenderable<FramedRelation>())
-    {
-      auto fr = entPtr->components.getRenderable<FramedRelation>();
-      ASSERT(fr);
-      fr->children.setRunModeInteractions(init);
-    }
-  }
+  // for (auto entPtr : entities)
+  // {
+  //   if (entPtr->components.hasRenderable<FramedPath>() ||
+  //       entPtr->components.hasRenderable<FramedText>() ||
+  //       entPtr->components.hasRenderable<FramedRelation>())
+  //   {
+  //     entPtr->interactable([](EntityRaw ent) { return RunModeInteraction::create(ent); });
+  //     if (auto rmi = entPtr->components.getInteractable().getState<RunModeInteraction>())
+  //     {
+  //       auto c = entPtr->components.code.content;
+  //       if (init && !(c.empty()))
+  //       {
+  //         ASSERT(rmi->jsi);
+  //         rmi->jsi->eval(c);
+  //       }
+  //     }
+  //     else
+  //     {
+  //       FAIL("Failed to set run mode interaction for entity: %p", entPtr.get());
+  //     }
+  //   }
+  //   else
+  //   {
+  //     WARN("Unknown renderable to set run mode interaction.");
+  //   }
+  //
+  //   // recursivly set run mode interactions
+  //   if (entPtr->components.hasRenderable<FramedRelation>())
+  //   {
+  //     auto fr = entPtr->components.getRenderable<FramedRelation>();
+  //     ASSERT(fr);
+  //     fr->children.setRunModeInteractions(init);
+  //   }
+  // }
 }
 
 void EntityContainer::updateRelations(EntityRaw parent)

@@ -21,6 +21,11 @@
 #include <cmath>
 #include <vector>
 
+/* M_PI is not standard*/
+#ifndef M_PI
+#define M_PI 3.141592653589793
+#endif
+
 #include "Utils/Utils.hpp"
 
 #define FZERO 1e-10

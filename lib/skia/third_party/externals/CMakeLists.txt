@@ -31,20 +31,20 @@ if (NOT EMSCRIPTEN)
     "zlib/fill_window_sse.c"
   )
 endif()
-add_library(zlib ${ZLIB_SRCS})
+add_library(zlib_skia ${ZLIB_SRCS})
 
 if (VGG_VAR_ARCH MATCHES "X86")
-  if(VGG_VAR_HOST_Windows)
-  set_target_properties(zlib PROPERTIES
-    COMPILE_FLAGS "-msse3 -msse4.2 -mpclmul -DX86_WINDOWS -DADLER32_SIMD_SSSE3 -DCRC32_SIMD_SSE42_PCLMUL -DDEFLATE_FILL_WINDOW_SSE2"
-  )
-  else()
-  set_target_properties(zlib PROPERTIES
-    COMPILE_FLAGS "-msse3 -msse4.2 -mpclmul -DX86_NOT_WINDOWS -DADLER32_SIMD_SSSE3 -DCRC32_SIMD_SSE42_PCLMUL -DDEFLATE_FILL_WINDOW_SSE2"
-  )
-  endif()
+    if(VGG_VAR_HOST MATCHES "Windows")
+      set_target_properties(zlib_skia PROPERTIES
+        COMPILE_FLAGS "-msse3 -msse4.2 -mpclmul -DX86_WINDOWS -DADLER32_SIMD_SSSE3 -DCRC32_SIMD_SSE42_PCLMUL -DDEFLATE_FILL_WINDOW_SSE2"
+      )
+    else()
+      set_target_properties(zlib_skia PROPERTIES
+        COMPILE_FLAGS "-msse3 -msse4.2 -mpclmul -DX86_NOT_WINDOWS -DADLER32_SIMD_SSSE3 -DCRC32_SIMD_SSE42_PCLMUL -DDEFLATE_FILL_WINDOW_SSE2"
+      )
+    endif()
 endif()
-target_include_directories(zlib PRIVATE
+target_include_directories(zlib_skia PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/zlib
 )
 
@@ -97,7 +97,7 @@ target_include_directories(libpng PRIVATE
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/zlib
 )
-target_link_libraries(libpng zlib)
+target_link_libraries(libpng zlib_skia)
 
 ######################################################################
 # setup freetype
@@ -141,12 +141,14 @@ target_include_directories(freetype PRIVATE
 if (NOT EMSCRIPTEN)
   target_compile_definitions(freetype PRIVATE
     FT2_BUILD_LIBRARY
+    DLL_EXPORT  # only for shared library
     FT_CONFIG_MODULES_H=<include/freetype-android/ftmodule.h>
     FT_CONFIG_OPTIONS_H=<include/freetype-android/ftoption.h>
   )
 else()
   target_compile_definitions(freetype PRIVATE
     FT2_BUILD_LIBRARY
+    DLL_EXPORT  # only for shared library
     FT_CONFIG_MODULES_H=<include/freetype-no-type1/ftmodule.h>
     FT_CONFIG_OPTIONS_H=<include/freetype-no-type1/ftoption.h>
   )

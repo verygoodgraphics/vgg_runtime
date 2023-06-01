@@ -94,11 +94,29 @@ struct ModelEventUpdate : ModelEvent
   }
 };
 
-struct ModelEventListenerDidAdd
+struct ModelEventListenerDidAdd : ModelEvent
 {
+  ModelEventListenerDidAdd(const PathType& path)
+    : ModelEvent(ModelEventType::ListenerDidAdd, path)
+  {
+  }
+
+  ModelEventListenerDidAdd(PathType&& path)
+    : ModelEvent(ModelEventType::ListenerDidAdd, std::move(path))
+  {
+  }
 };
-struct ModelEventListenerDidRemove
+struct ModelEventListenerDidRemove : ModelEvent
 {
+  ModelEventListenerDidRemove(const PathType& path)
+    : ModelEvent(ModelEventType::ListenerDidRemove, path)
+  {
+  }
+
+  ModelEventListenerDidRemove(PathType&& path)
+    : ModelEvent(ModelEventType::ListenerDidRemove, std::move(path))
+  {
+  }
 };
 
 } // namespace VGG

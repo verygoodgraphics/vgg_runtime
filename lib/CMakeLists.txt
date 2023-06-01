@@ -1,8 +1,9 @@
 add_subdirectory(skia)
 add_subdirectory(quickjs)
 
-option(VGG_ADD_NANOBIND "add nanobind" OFF)
-add_subdirectory(vgg_contrib)
+add_subdirectory(vgg_contrib/glm)
+add_subdirectory(vgg_contrib/zip)
+add_subdirectory(vgg_contrib/zlib)
 add_subdirectory(vgg_automerge/automerge)
 add_subdirectory(vgg_sketch_parser/src)
 

@@ -154,7 +154,7 @@ void VggWork::addEventListener(const std::string& json_pointer,
   type_event_listeners.push_back(item);
 
   m_subject.get_subscriber().on_next(
-    ModelEventPtr{ new ModelEvent{ ModelEventType::ListenerDidAdd, ModelEventListenerDidAdd{} } });
+    ModelEventPtr{ new ModelEventListenerDidAdd{ json::json_pointer(json_pointer) } });
 
   // todo, edit mode, save code & meta to remote server
 }
@@ -188,8 +188,8 @@ void VggWork::removeEventListener(const std::string& json_pointer,
 
         type_event_listeners.erase(it);
 
-        m_subject.get_subscriber().on_next(ModelEventPtr{
-          new ModelEvent{ ModelEventType::ListenerDidRemove, ModelEventListenerDidRemove{} } });
+        m_subject.get_subscriber().on_next(
+          ModelEventPtr{ new ModelEventListenerDidRemove{ json::json_pointer(json_pointer) } });
         return;
       }
     }

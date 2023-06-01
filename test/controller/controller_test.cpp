@@ -84,10 +84,8 @@ TEST_F(ControllerTestSuite, Smoke)
   // Given
   setup_sdk_with_local_dic();
   std::string file_path = "testDataDir/vgg-work.zip";
-  auto fake_design_doc_observer =
-    rxcpp::make_observer_dynamic<ModelEventPtr>([&](ModelEventPtr evt) {});
-  EXPECT_CALL(m_mock_presenter, getDesignDocObserver())
-    .WillOnce(ReturnRef(fake_design_doc_observer));
+  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>([&](ModelEventPtr evt) {});
+  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
   setup_sut();
 
   // When
@@ -297,7 +295,7 @@ TEST_F(ControllerTestSuite, add_event_listener)
       type = evt->type;
       m_exit_loop = true;
     });
-  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(Return(fake_model_observer));
+  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
   setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path);
@@ -332,7 +330,7 @@ TEST_F(ControllerTestSuite, eval_added_event_listener)
       type = evt->type;
       m_exit_loop = true;
     });
-  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(Return(fake_model_observer));
+  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
   setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path);
@@ -370,7 +368,7 @@ TEST_F(ControllerTestSuite, remove_event_listener)
         m_exit_loop = true;
       }
     });
-  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(Return(fake_model_observer));
+  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
   setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path);
@@ -399,7 +397,7 @@ TEST_F(ControllerTestSuite, get_event_listeners)
 
       m_exit_loop = true;
     });
-  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(Return(fake_model_observer));
+  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
   setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path);
@@ -432,7 +430,7 @@ TEST_F(ControllerTestSuite, unhandled_js_error)
 
       m_exit_loop = true;
     });
-  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(Return(fake_model_observer));
+  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
   setup_sut();
 
   std::string file_path = "testDataDir/vgg-work.zip";
@@ -463,7 +461,7 @@ TEST_F(ControllerTestSuite, event_listener_example)
       type = evt->type;
       m_exit_loop = true;
     });
-  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(Return(fake_model_observer));
+  EXPECT_CALL(m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
   setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path, design_doc_schema_file);

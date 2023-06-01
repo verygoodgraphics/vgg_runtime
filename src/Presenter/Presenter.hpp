@@ -58,12 +58,12 @@ public:
 
   virtual ~Presenter() = default;
 
-  virtual rxcpp::observer<VGG::ModelEventPtr> getDesignDocObserver()
+  virtual rxcpp::observer<VGG::ModelEventPtr>& getDesignDocObserver()
   {
     return m_design_doc_observer;
   }
 
-  virtual rxcpp::observer<VGG::ModelEventPtr> getLayoutDocObserver()
+  virtual rxcpp::observer<VGG::ModelEventPtr>& getLayoutDocObserver()
   {
     return m_layout_doc_observer;
   }

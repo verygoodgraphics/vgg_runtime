@@ -15,6 +15,7 @@
 
 using namespace VGG;
 using ::testing::Return;
+using ::testing::ReturnRef;
 
 constexpr auto design_doc_schema_file = "./asset/vgg-format.json";
 
@@ -81,6 +82,10 @@ TEST_F(ControllerTestSuite, Smoke)
   // Given
   setup_sdk_with_local_dic();
   std::string file_path = "testDataDir/vgg-work.zip";
+  auto fake_design_doc_observer =
+    rxcpp::make_observer_dynamic<ModelEventPtr>([&](ModelEventPtr evt) {});
+  EXPECT_CALL(m_mock_presenter, getDesignDocObserver())
+    .WillOnce(ReturnRef(fake_design_doc_observer));
   setup_sut();
 
   // When
@@ -106,7 +111,8 @@ TEST_F(ControllerTestSuite, OnClick_observer)
       m_exit_loop = true;
     });
 
-  EXPECT_CALL(m_mock_presenter, getDesignDocObserver()).WillOnce(Return(fake_design_doc_observer));
+  EXPECT_CALL(m_mock_presenter, getDesignDocObserver())
+    .WillOnce(ReturnRef(fake_design_doc_observer));
   setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path);
@@ -138,7 +144,8 @@ TEST_F(ControllerTestSuite, Validator_reject_deletion)
       type = evt->type;
       m_exit_loop = true;
     });
-  EXPECT_CALL(m_mock_presenter, getDesignDocObserver()).WillOnce(Return(fake_design_doc_observer));
+  EXPECT_CALL(m_mock_presenter, getDesignDocObserver())
+    .WillOnce(ReturnRef(fake_design_doc_observer));
   setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path, design_doc_schema_file);
@@ -167,7 +174,8 @@ TEST_F(ControllerTestSuite, DidUpdate)
       type = evt->type;
       m_exit_loop = true;
     });
-  EXPECT_CALL(m_mock_presenter, getDesignDocObserver()).WillOnce(Return(fake_design_doc_observer));
+  EXPECT_CALL(m_mock_presenter, getDesignDocObserver())
+    .WillOnce(ReturnRef(fake_design_doc_observer));
   setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path, design_doc_schema_file);
@@ -196,7 +204,8 @@ TEST_F(ControllerTestSuite, DidDelete)
       type = evt->type;
       m_exit_loop = true;
     });
-  EXPECT_CALL(m_mock_presenter, getDesignDocObserver()).WillOnce(Return(fake_design_doc_observer));
+  EXPECT_CALL(m_mock_presenter, getDesignDocObserver())
+    .WillOnce(ReturnRef(fake_design_doc_observer));
   setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path, design_doc_schema_file);
@@ -225,7 +234,8 @@ TEST_F(ControllerTestSuite, DidAdd_no_validator)
       type = evt->type;
       m_exit_loop = true;
     });
-  EXPECT_CALL(m_mock_presenter, getDesignDocObserver()).WillOnce(Return(fake_design_doc_observer));
+  EXPECT_CALL(m_mock_presenter, getDesignDocObserver())
+    .WillOnce(ReturnRef(fake_design_doc_observer));
   setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path);
@@ -256,7 +266,8 @@ TEST_F(ControllerTestSuite, DidAdd_color)
       type = evt->type;
       m_exit_loop = true;
     });
-  EXPECT_CALL(m_mock_presenter, getDesignDocObserver()).WillOnce(Return(fake_design_doc_observer));
+  EXPECT_CALL(m_mock_presenter, getDesignDocObserver())
+    .WillOnce(ReturnRef(fake_design_doc_observer));
   setup_sut();
   std::string file_path = "testDataDir/vgg-work.zip";
   auto ret = m_sut->start(file_path, design_doc_schema_file);

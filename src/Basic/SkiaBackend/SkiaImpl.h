@@ -4,9 +4,11 @@
 #include "Basic/Scene.hpp"
 
 #include "include/core/SkBlendMode.h"
+#include "include/core/SkImageFilter.h"
 #include "include/core/SkMatrix.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkImage.h"
+#include "include/effects/SkImageFilters.h"
 #include "include/pathops/SkPathOps.h"
 
 #include <vector>
@@ -502,4 +504,15 @@ inline sk_sp<SkImage> loadImage(const std::string& imageGUID, const ResourceRepo
     }
   }
   return image;
+}
+
+inline sk_sp<SkImageFilter> makeBlendModeFilter(EBlendMode blendMode)
+{
+  switch (blendMode)
+  {
+    case VGG::BM_Blend_divide:
+      SkImageFilters::Arithmetic(0, 0, 0, 0, true, nullptr, nullptr);
+    default:
+      return nullptr;
+  }
 }

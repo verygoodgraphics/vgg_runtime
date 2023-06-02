@@ -182,13 +182,13 @@ void PathNode::paintEvent(SkCanvas* canvas)
   auto mask = makeMaskBy(BO_Intersection);
   if (mask.outlineMask.isEmpty())
   {
-    _->drawContour(canvas, contextSetting, style, _->windingRule, ct, getBound(), hasFill());
+    _->drawContour(canvas, m_contextSetting, style, _->windingRule, ct, getBound(), hasFill());
   }
   else
   {
     canvas->save();
     canvas->clipPath(mask.outlineMask);
-    _->drawContour(canvas, contextSetting, style, _->windingRule, ct, getBound(), hasFill());
+    _->drawContour(canvas, m_contextSetting, style, _->windingRule, ct, getBound(), hasFill());
     canvas->restore();
   }
 

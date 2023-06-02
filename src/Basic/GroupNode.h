@@ -61,9 +61,8 @@ public:
     {
       for (const auto& p : nodes)
       {
-        if (contextSetting.TransparencyKnockoutGroup)
+        if (m_contextSetting.TransparencyKnockoutGroup)
         {
-          std::cout << "TransparencyKnockoutGroup\n";
           SkPaint paint;
           paint.setBlendMode(SkBlendMode::kSrcOver);
           paint.setAlphaf(1.0);
@@ -87,12 +86,13 @@ public:
 
   void preRenderPass(SkCanvas* canvas) override
   {
-    if (contextSetting.Opacity < 1.0)
+    if (m_contextSetting.Opacity < 1.0)
     {
-      canvas->saveLayerAlpha(0, contextSetting.Opacity * 255);
+      // TODO:: more accurate bound is needed
+      canvas->saveLayerAlpha(0, m_contextSetting.Opacity * 255);
     }
 
-    if (contextSetting.IsolateBlending)
+    if (m_contextSetting.IsolateBlending)
     {
       SkPaint paint;
       paint.setBlendMode(SkBlendMode::kSrc);
@@ -108,13 +108,13 @@ public:
   {
     PaintNode::postRenderPass(canvas);
 
-    if (contextSetting.IsolateBlending)
+    if (m_contextSetting.IsolateBlending)
     {
       canvas->restore();
       canvas->restore();
     }
 
-    if (contextSetting.Opacity < 1.0)
+    if (m_contextSetting.Opacity < 1.0)
     {
       canvas->restore();
     }

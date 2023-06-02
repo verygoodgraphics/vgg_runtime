@@ -28,18 +28,17 @@ class PaintNode : public Node
 protected:
   static SkCanvas* s_defaultCanvas;
   static RenderState* s_renderState;
-
   Bound2 m_bound;
   glm::mat3 m_transform{ 1.0 };
-
   std::string guid{};
+
   std::vector<std::string> maskedBy{};
   Mask outlineMask;
   EMaskType maskType{ MT_None };
   EBoolOp m_clipOperator{ BO_None };
 
   Style style;
-  ContextSetting contextSetting;
+  ContextSetting m_contextSetting;
   ObjectType type;
 
   friend class NlohmannBuilder;
@@ -55,6 +54,16 @@ public:
   void addChild(const std::shared_ptr<PaintNode> node)
   {
     pushChildBack(std::move(node));
+  }
+
+  void setContectSettings(const ContextSetting& settings)
+  {
+    this->m_contextSetting = settings;
+  }
+
+  const ContextSetting& contextSetting() const
+  {
+    return this->m_contextSetting;
   }
 
   void setClipOperator(EBoolOp op)

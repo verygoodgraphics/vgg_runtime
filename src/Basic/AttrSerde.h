@@ -170,12 +170,13 @@ inline void from_json(const json& j, Shadow& x)
 
 inline void from_json(const json& j, Blur& x)
 {
-  x.radius = j.at("radius").get<double>();
-  x.motionAngle = j.at("motionAngle").get<double>();
+  x.radius = get_stack_optional<float>(j, "radius").value_or(0.f);
+  x.motionAngle = get_stack_optional<float>(j, "motionAngle").value_or(0.f);
   const auto v = j.at("center").get<std::vector<double>>();
   x.center.x = v[0];
   x.center.y = v[1];
   x.isEnabled = j["isEnabled"];
+  x.blurType = j.at("type").get<EBlurType>();
   x.saturation = j.at("saturation").get<double>();
 }
 

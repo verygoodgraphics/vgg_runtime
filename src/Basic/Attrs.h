@@ -283,6 +283,7 @@ struct Shadow
 
 struct Blur
 {
+  EBlurType blurType;
   float radius;
   float motionAngle;
   glm::vec2 center;

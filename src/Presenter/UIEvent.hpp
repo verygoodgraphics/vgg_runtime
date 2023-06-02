@@ -10,8 +10,6 @@ namespace VGG
 // https://developer.mozilla.org/en-US/docs/Web/API/Element#events
 enum class UIEventType
 {
-  invalid,
-
   // Keyboard events
   keydown,
   keyup,
@@ -40,9 +38,6 @@ constexpr const char* UIEventTypeToString(UIEventType e) noexcept
 {
   switch (e)
   {
-    case UIEventType::invalid:
-      return "invalid";
-
     // Keyboard events
     case UIEventType::keydown:
       return "keydown";
@@ -90,22 +85,71 @@ constexpr const char* UIEventTypeToString(UIEventType e) noexcept
 
 struct UIEvent
 {
-  const std::string path;
-  UIEventType type;
-  std::any data;
+  using PathType = std::string;
+
+  const PathType path;
+  const UIEventType type;
+
+  UIEvent(const PathType& path, const UIEventType type)
+    : path{ path }
+    , type{ type }
+  {
+  }
+
+  UIEvent(PathType&& path, UIEventType type)
+    : path{ std::move(path) }
+    , type{ type }
+  {
+  }
+
+  virtual ~UIEvent() = default;
 };
+
 using UIEventPtr = std::shared_ptr<UIEvent>;
 
-struct KeyboardEvent
+struct KeyboardEvent : UIEvent
 {
+  KeyboardEvent(const PathType& path, UIEventType type)
+    : UIEvent(path, type)
+  {
+    assert(type == UIEventType::keydown || type == UIEventType::keyup);
+  }
+
+  KeyboardEvent(PathType&& path, UIEventType type)
+    : UIEvent(std::move(path), type)
+  {
+    assert(type == UIEventType::keydown || type == UIEventType::keyup);
+  }
 };
 
-struct MouseEvent
+struct MouseEvent : UIEvent
 {
+  MouseEvent(const PathType& path, UIEventType type)
+    : UIEvent(path, type)
+  {
+    assert(type >= UIEventType::auxclick && type <= UIEventType::mouseup);
+  }
+
+  MouseEvent(PathType&& path, UIEventType type)
+    : UIEvent(std::move(path), type)
+  {
+    assert(type >= UIEventType::auxclick && type <= UIEventType::mouseup);
+  }
 };
 
-struct TouchEvent
+struct TouchEvent : UIEvent
 {
+  TouchEvent(const PathType& path, UIEventType type)
+    : UIEvent(path, type)
+  {
+    assert(type >= UIEventType::touchcancel && type <= UIEventType::touchstart);
+  }
+
+  TouchEvent(PathType&& path, UIEventType type)
+    : UIEvent(std::move(path), type)
+  {
+    assert(type >= UIEventType::touchcancel && type <= UIEventType::touchstart);
+  }
 };
 
 } // namespace VGG

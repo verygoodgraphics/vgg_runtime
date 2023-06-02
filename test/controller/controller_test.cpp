@@ -75,7 +75,7 @@ protected:
   void mock_click(const std::string& path)
   {
     m_fake_view_subject.get_subscriber().on_next(
-      UIEventPtr{ new UIEvent{ path, UIEventType::click, MouseEvent{} } });
+      UIEventPtr{ new MouseEvent{ path, UIEventType::click } });
   }
 };
 

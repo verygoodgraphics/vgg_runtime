@@ -214,7 +214,7 @@ public:
 
   static inline std::shared_ptr<GroupNode> fromGroup(const nlohmann::json& j)
   {
-    auto p = std::make_shared<GroupNode>("group");
+    auto p = std::make_shared<GroupNode>(j["name"]);
     // init group properties
     fromObjectCommonProperty(j, p.get());
     for (const auto& c : j["childObjects"])

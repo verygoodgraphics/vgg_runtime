@@ -85,12 +85,12 @@ public:
     paintCall(noneMasked);
   }
 
-  void paintEvent(SkCanvas* canvas) override
+  void preRenderPass(SkCanvas* canvas) override
   {
-    // bool needAlphaBlend = 1.0;
-    // if (contextSetting.Opacity < 1.0)
-    // {
-    // }
+    if (contextSetting.Opacity < 1.0)
+    {
+      canvas->saveLayerAlpha(0, contextSetting.Opacity * 255);
+    }
 
     if (contextSetting.IsolateBlending)
     {
@@ -100,13 +100,23 @@ public:
       canvas->save();
       canvas->scale(1, -1);
       canvas->saveLayer(toSkRect(getBound()), &paint);
-      PaintNode::paintEvent(canvas);
+    }
+    PaintNode::preRenderPass(canvas);
+  }
+
+  void postRenderPass(SkCanvas* canvas) override
+  {
+    PaintNode::postRenderPass(canvas);
+
+    if (contextSetting.IsolateBlending)
+    {
       canvas->restore();
       canvas->restore();
     }
-    else
+
+    if (contextSetting.Opacity < 1.0)
     {
-      PaintNode::paintEvent(canvas);
+      canvas->restore();
     }
   }
 };

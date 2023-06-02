@@ -168,7 +168,14 @@ void PathNode::paintEvent(SkCanvas* canvas)
     SkPaint pen;
     const auto blur = style.blurs[0];
     auto sigma = SkBlurMask::ConvertRadiusToSigma(blur.radius);
-    pen.setImageFilter(SkImageFilters::Blur(sigma, sigma, nullptr));
+    if (blur.blurType == BT_Gaussian)
+    {
+      pen.setImageFilter(SkImageFilters::Blur(sigma, sigma, nullptr));
+    }
+    else if (blur.blurType == BT_Motion)
+    {
+      pen.setImageFilter(SkImageFilters::Blur(sigma, 0, nullptr));
+    }
     canvas->saveLayer(nullptr, &pen);
   }
 

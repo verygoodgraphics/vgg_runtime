@@ -3,6 +3,7 @@
 namespace VGG
 {
 
+// TODO:: Could be removed in the future
 enum ObjectType
 {
   VGG_LAYER = 0,
@@ -142,7 +143,7 @@ enum EGradientType : uint8_t
   GT_Angular
 };
 
-enum EPointMode
+enum EPointMode : uint8_t
 {
   PM_Straight = 1,
   PM_Mirrored = 2,
@@ -150,7 +151,7 @@ enum EPointMode
   PM_Disconnected = 4,
 };
 
-enum EImageFillType
+enum EImageFillType : uint8_t
 {
   IFT_Tile = 0,
   IFT_Fill = 1,
@@ -160,11 +161,19 @@ enum EImageFillType
   IFT_OnlyTileVertical = 5
 };
 
-enum EKnockoutType
+enum EKnockoutType : uint8_t
 {
   KT_Off = 0,
   KT_On = 1,
   KT_Neutrual = 2
+};
+
+enum EBlurType : uint8_t
+{
+  BT_Gaussian = 0,
+  BT_Motion = 1,
+  BT_Zoom = 2,
+  BT_Background = 3
 };
 
 } // namespace VGG

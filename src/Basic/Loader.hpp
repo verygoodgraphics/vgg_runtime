@@ -93,7 +93,7 @@ public:
     // all properties that render object cares about
     std::tie(obj->m_bound, obj->m_transform) = fromTransform(j);
     obj->style = j.at("style").get<Style>();
-    obj->contextSetting = j.at("contextSettings").get<ContextSetting>();
+    obj->m_contextSetting = j.at("contextSettings").get<ContextSetting>();
     obj->maskedBy = j.at("outlineMaskBy").get<std::vector<std::string>>();
     obj->maskType = (EMaskType)j.at("maskType").get<int>();
     obj->guid = j.at("id").get<std::string>();

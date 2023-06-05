@@ -20,50 +20,11 @@
 #include "Utils/FileManager.hpp"
 #include <memory>
 
-#include <Reader/IReader.hpp>
-#include <Reader/ReaderFactory.h>
 #include <Scene/Scene.h>
-#include <Reader/SketchFileReader.h>
-#include <Reader/RawFileReader.h>
+#include <Reader/LoadUtil.hpp>
 
 using namespace VGG;
 namespace fs = std::filesystem;
-
-bool load(Scene* scene, const fs::path& filepath, const fs::path& datapath, const fs::path& prefix)
-{
-
-  auto fp = filepath;
-  auto ext = FileManager::getLoweredFileExt(fp);
-  std::shared_ptr<IReader> reader;
-  if (ext == "sketch")
-  {
-    reader = GetSketchReader(fp);
-    // legacy renderer
-    if (!FileManager::loadFile(prefix / fp))
-    {
-      FAIL("Failed to load file: %s", fp.c_str());
-    }
-  }
-  else if (ext == "json")
-  {
-    std::string resFile = std::filesystem::path(fp).stem(); // same with filename as default
-    reader = GetRawReader(fp, datapath);
-  }
-
-  if (reader)
-  {
-    reader->setPrefix(prefix);
-    nlohmann::json json = reader->readFormat();
-    auto res = reader->readResource();
-    Scene::setResRepo(res);
-    scene->LoadFileContent(json);
-  }
-  else
-  {
-    INFO("Failed to initialize a reader\n");
-  }
-  return true;
-}
 
 #ifdef EMSCRIPTEN
 extern "C"
@@ -129,7 +90,20 @@ int main(int argc, char** argv)
       }
     }
 
-    load(scene.get(), fp, respath, prefix);
+    load(fp,
+         respath,
+         prefix,
+         [&](const auto& json, auto res)
+         {
+           Scene::setResRepo(res);
+           scene->LoadFileContent(json);
+         });
+
+    // legacy renderer
+    if (!FileManager::loadFile(prefix / fp))
+    {
+      FAIL("Failed to load file: %s", fp.c_str());
+    }
   }
 
   SDLRuntime* app = App<SDLRuntime>::getInstance(1200, 800, "VGG");
@@ -154,7 +128,14 @@ int main(int argc, char** argv)
 
         if (fileIter >= 0 && fileIter < entires.size())
         {
-          load(scene, entires[fileIter], {}, {});
+          load(entires[fileIter],
+               {},
+               {},
+               [&](const auto& json, auto res)
+               {
+                 Scene::setResRepo(res);
+                 scene->LoadFileContent(json);
+               });
           INFO("Open %s", entires[fileIter].string().c_str());
         }
       });

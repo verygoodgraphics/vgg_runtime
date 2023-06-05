@@ -98,4 +98,6 @@ else()
 endif()
 
 add_subdirectory(Layer)
-target_link_libraries(runtime quickjs vgg_internal layer)
+target_link_libraries(runtime quickjs vgg_internal layer skia)
+
+add_subdirectory(Entry)

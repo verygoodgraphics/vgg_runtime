@@ -4,115 +4,80 @@
 #include "../../Utils/Version.hpp"
 #include "../../Utils/FileManager.hpp"
 #include "EGLRuntime.h"
-#include <vgg_sketch_parser/src/analyze_sketch_file/analyze_sketch_file.h>
-
+#include <Reader/LoadUtil.hpp>
 using namespace VGG;
 
-std::string GetTextFromFile(const std::string& fileName)
+void writeResult(const std::map<int, sk_sp<SkData>>& result)
 {
-  std::ifstream in(fileName, std::ios::in);
-  if (in.is_open() == false)
+  int count = 0;
+  for (const auto p : result)
   {
-    exit(-1);
-  }
-  return std::string{ std::istreambuf_iterator<char>{ in }, std::istreambuf_iterator<char>{} };
-}
+    count++;
+    std::stringstream ss;
+    ss << "image" << count << ".png";
+    std::string name;
+    ss >> name;
 
-std::vector<char> GetBinFromFile(const std::string& filename)
-{
-  std::ifstream in(filename, std::ios::binary);
-  if (in.is_open() == false)
-  {
-    exit(-1);
+    std::ofstream ofs(name, std::ios::binary);
+    if (ofs.is_open())
+    {
+      ofs.write((const char*)p.second->bytes(), p.second->size());
+    }
   }
-  return std::vector<char>{ std::istreambuf_iterator<char>{ in },
-                            std::istreambuf_iterator<char>{} };
 }
 
 int main(int argc, char** argv)
 {
   argparse::ArgumentParser program("vgg", Version::get());
-  program.add_argument("-l").help("input file");
-  program.add_argument("-d").help("input resources file");
+  program.add_argument("-l", "--load").help("load from vgg or sketch file");
+  program.add_argument("-d", "--data").help("resources dir");
+  program.add_argument("-p", "--prefix").help("the prefix of filename or dir");
+  program.add_argument("-L", "--loaddir").help("iterates all the files in the given dir");
+
   try
   {
     program.parse_args(argc, argv);
   }
-  catch (const std::exception& err)
+  catch (const std::runtime_error& err)
   {
     std::cout << err.what() << std::endl;
-    std::cout << program << std::endl;
+    std::cout << program;
     exit(0);
   }
 
-  if (auto loadfile = program.present("-s"))
+  auto scene = std::make_shared<Scene>();
+  std::map<std::string, std::vector<char>> resources;
+  std::filesystem::path prefix;
+  std::filesystem::path respath;
+
+  if (auto p = program.present("-p"))
   {
-    auto fp = loadfile.value();
-    auto size = std::filesystem::file_size(fp);
-    std::vector<char> file_buf(size);
-    std::ifstream ifs(fp, std::ios_base::binary);
-    if (ifs.is_open() == false)
-    {
-      exit(1);
-    }
-    ifs.read(file_buf.data(), size);
-    assert(ifs.gcount() == size);
-    nlohmann::json json_out;
-    std::map<std::string, std::vector<char>> resources;
-    analyze_sketch_file::analyze(file_buf.data(), size, "hello-sketch", json_out, resources);
-    auto res = render(json_out, resources, 80);
-    auto reason = std::get<0>(res);
-    std::cout << "Reason: " << std::endl;
-    int count = 0;
-    for (const auto p : std::get<1>(res))
-    {
-      count++;
-      std::stringstream ss;
-      ss << "image" << count << ".png";
-      std::string name;
-      ss >> name;
-
-      std::ofstream ofs(name, std::ios::binary);
-      if (ofs.is_open())
-      {
-        ofs.write((const char*)p.second->bytes(), p.second->size());
-      }
-    }
+    prefix = p.value();
   }
-
   if (auto loadfile = program.present("-l"))
   {
     auto fp = loadfile.value();
-    auto json = GetTextFromFile(fp);
-    nlohmann::json json_out = json::parse(json);
-    std::map<std::string, std::vector<char>> resources;
-    if (auto datafile = program.present("-d"))
+    auto ext = FileManager::getLoweredFileExt(fp);
+    if (ext == "json")
     {
-      for (const auto& entry : std::filesystem::recursive_directory_iterator(datafile.value()))
+      respath = std::filesystem::path(fp).stem(); // same with filename as default
+      if (auto res = program.present("-d"))
       {
-        std::string key = string("./image/") + entry.path().filename().string();
-        std::cout << "read image: " << entry.path() << " which key is " << key << std::endl;
-        resources[key] = GetBinFromFile(entry.path());
+        respath = res.value();
       }
     }
-    auto res = render(json_out, resources, 80);
-    auto reason = std::get<0>(res);
-    std::cout << "Reason: " << std::endl;
-    int count = 0;
-    for (const auto p : std::get<1>(res))
-    {
-      count++;
-      std::stringstream ss;
-      ss << "image" << count << ".png";
-      std::string name;
-      ss >> name;
 
-      std::ofstream ofs(name, std::ios::binary);
-      if (ofs.is_open())
-      {
-        ofs.write((const char*)p.second->bytes(), p.second->size());
-      }
-    }
+    load(fp,
+         respath,
+         prefix,
+         [&](const auto& json, auto res)
+         {
+           auto result = render(json, resources, 80);
+           auto reason = std::get<0>(result);
+           std::cout << "Reason: " << std::endl;
+           writeResult(std::get<1>(result));
+         });
   }
+
   return 0;
 }

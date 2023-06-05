@@ -97,5 +97,5 @@ else()
   install(TARGETS runtime zlib libpng libwebp libjpeg-turbo freetype)
 endif()
 
-add_subdirectory(Basic)
+add_subdirectory(Layer)
 target_link_libraries(runtime quickjs vgg_internal layer)

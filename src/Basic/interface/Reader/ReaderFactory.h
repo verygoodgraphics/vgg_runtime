@@ -1,8 +1,8 @@
 #pragma once
 
-#include "IReader.hpp"
-#include "RawFileReader.h"
-#include "SketchFileReader.h"
+#include "Reader/IReader.hpp"
+#include "Reader/RawFileReader.h"
+#include "Reader/SketchFileReader.h"
 
 namespace VGG
 {

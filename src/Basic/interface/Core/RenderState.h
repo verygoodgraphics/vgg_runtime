@@ -1,4 +1,5 @@
 #pragma once
+#include "Common/Config.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkPaint.h"
@@ -9,7 +10,7 @@
 
 namespace VGG
 {
-class RenderState
+class VGG_EXPORTS RenderState
 {
   float alpha{ 1.0 };
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Common/Config.h"
 #include "SkiaBackend/SkiaImpl.h"
 #include "Core/VGGType.h"
 #include "Core/VGGUtils.h"
@@ -12,7 +13,7 @@
 
 namespace VGG
 {
-class GroupNode final : public PaintNode
+class VGG_EXPORTS GroupNode final : public PaintNode
 {
 public:
   GroupNode(const std::string& name)

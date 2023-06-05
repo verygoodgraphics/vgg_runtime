@@ -1,4 +1,5 @@
 #pragma once
+#include "Common/Config.h"
 #include "IReader.hpp"
 #include "Utils/Utils.hpp"
 #include <exception>
@@ -9,7 +10,7 @@
 namespace VGG
 {
 
-class SketchFileReader : public IReader
+class VGG_EXPORTS SketchFileReader : public IReader
 {
   std::filesystem::path filename;
   std::map<std::string, std::vector<char>> resources;

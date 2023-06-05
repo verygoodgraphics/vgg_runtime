@@ -98,4 +98,4 @@ else()
 endif()
 
 add_subdirectory(Basic)
-target_link_libraries(runtime quickjs vgg_internal glm vgg_sketch_parser layer)
+target_link_libraries(runtime quickjs vgg_internal layer)

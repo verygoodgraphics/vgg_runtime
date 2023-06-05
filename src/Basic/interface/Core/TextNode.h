@@ -1,4 +1,5 @@
 #pragma once
+#include "Common/Config.h"
 #include "Core/Attrs.h"
 #include "Core/PaintNode.h"
 #include "Core/VGGType.h"
@@ -6,7 +7,7 @@
 namespace VGG
 {
 
-class TextNode final : public PaintNode
+class VGG_EXPORTS TextNode final : public PaintNode
 {
   std::string text;
   ETextLayoutMode mode;

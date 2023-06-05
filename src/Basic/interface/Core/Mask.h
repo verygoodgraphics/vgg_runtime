@@ -1,12 +1,13 @@
 #pragma once
 
+#include "Common/Config.h"
 #include "include/core/SkPath.h"
 
 namespace VGG
 {
 
 // TODO:: More features added later
-class Mask
+class VGG_EXPORTS Mask
 {
 public:
   SkPath outlineMask;

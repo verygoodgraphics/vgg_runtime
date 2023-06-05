@@ -1,11 +1,12 @@
 #pragma once
+#include "Common/Config.h"
 #include "VGGType.h"
 #include "PaintNode.h"
 
 namespace VGG
 {
 
-class SymbolMasterNode final : public PaintNode
+class VGG_EXPORTS SymbolMasterNode final : public PaintNode
 {
 public:
   std::string symbolID;

@@ -3,7 +3,6 @@
 #include "Core/VGGType.h"
 #include "Core/VGGUtils.h"
 #include "SkiaBackend/SkiaImpl.h"
-#include "Core/Scene.hpp"
 #include "glm/matrix.hpp"
 #include "include/core/SkColor.h"
 #include "include/core/SkMatrix.h"

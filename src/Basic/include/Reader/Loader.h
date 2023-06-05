@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Core/Attrs.h"
-#include "Core/AttrSerde.h"
 #include "Core/ContourNode.h"
 #include "Core/VGGType.h"
 #include "Core/Node.hpp"
@@ -14,6 +13,8 @@
 #include "Core/TextNode.h"
 #include "Core/ImageNode.h"
 #include "Core/GroupNode.h"
+
+#include "Reader/AttrSerde.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <exception>
 #include <memory>

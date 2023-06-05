@@ -11,4 +11,7 @@ endif ()
 target_sources(layer PRIVATE ${CoreSrcVar} ${SkiaImplSrcVar} ${SceneSrcVar})
 target_include_directories(${MODULE_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/interface)
 target_include_directories(${MODULE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(layer PUBLIC skia glm vgg_sketch_parser)
+
+list(APPEND COMMON_DEPS "glm" "vgg_sketch_parser")
+
+target_link_libraries(layer PUBLIC ${COMMON_DEPS})

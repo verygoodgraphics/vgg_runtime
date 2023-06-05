@@ -14,8 +14,8 @@
 
 #include "EGLRuntime.h"
 #include "include/core/SkData.h"
-#include "Basic/Scene.hpp"
-#include "Basic/ArtboardNode.hpp"
+#include "Scene/Scene.h"
+#include "Core/ArtboardNode.hpp"
 
 using namespace VGG;
 using namespace std;

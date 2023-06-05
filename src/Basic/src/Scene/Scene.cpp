@@ -1,7 +1,8 @@
-#include "Core/Scene.hpp"
-#include "Core/Loader.hpp"
+#include "Scene/Scene.h"
+
+#include "Reader/Loader.h"
 #include "Core/PaintNode.h"
-#include "Core/Renderer.hpp"
+#include "Scene/Renderer.h"
 
 #include "include/core/SkCanvas.h"
 #include <fstream>

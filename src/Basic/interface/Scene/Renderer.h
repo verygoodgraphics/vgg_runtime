@@ -1,7 +1,8 @@
 #pragma once
+#include "Common/Config.h"
+#include "Core/PaintNode.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
-#include "PaintNode.h"
 
 namespace VGG
 {
@@ -27,7 +28,7 @@ inline void PrintCurrentTranslation(SkCanvas* canvas, int indent)
   std::cout << v.x() << " " << v.y() << std::endl;
   std::cout << std::endl;
 }
-class SkiaRenderer
+class VGG_EXPORTS SkiaRenderer
 {
 public:
   void draw(SkCanvas* canvas, PaintNode* root)

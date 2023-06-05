@@ -1,4 +1,5 @@
 #pragma once
+#include "Common/Config.h"
 #include <algorithm>
 #include <string>
 #include <memory>
@@ -61,7 +62,7 @@ class Node;
 using NodePtr = std::shared_ptr<Node>;
 using NodeRef = std::weak_ptr<Node>;
 
-class Node : public std::enable_shared_from_this<Node>
+class VGG_EXPORTS Node : public std::enable_shared_from_this<Node>
 {
   using FirstChildNode = std::list<std::shared_ptr<Node>>;
 

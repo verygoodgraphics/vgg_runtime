@@ -1,4 +1,5 @@
 #pragma once
+#include "Common/Config.h"
 #include "Core/Mask.h"
 #include "Core/Node.hpp"
 #include "Core/PaintNode.h"
@@ -18,7 +19,7 @@ class PathNode__pImpl;
 
 // TODO:: PathNode is not a good name.
 // It likes a special container that provides bool operation for PaintNode object
-class PathNode : public PaintNode
+class VGG_EXPORTS PathNode : public PaintNode
 {
   VGG_DECL_IMPL(PathNode)
   // EWindingType windingRule;

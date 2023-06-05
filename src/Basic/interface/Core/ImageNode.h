@@ -1,4 +1,5 @@
 #pragma once
+#include "Common/Config.h"
 #include "Core/PathNode.h"
 #include "Core/PaintNode.h"
 #include "include/core/SkCanvas.h"
@@ -7,7 +8,7 @@ class SkImage;
 
 namespace VGG
 {
-class ImageNode final : public PathNode
+class VGG_EXPORTS ImageNode final : public PathNode
 {
   std::string guid;
   bool fillReplacesImage = false;

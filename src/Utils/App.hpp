@@ -47,7 +47,7 @@
 #include "Utils/DPI.hpp"
 #include "Utils/FileManager.hpp"
 #include "Utils/Scheduler.hpp"
-#include "Core/Scene.hpp"
+#include "Scene/Scene.h"
 
 namespace VGG
 {

@@ -1,13 +1,14 @@
 #pragma once
 // #include "Basic/Renderer.hpp"
+#include "Common/Config.h"
 #include "Core/Node.hpp"
 #include "Core/VGGType.h"
 #include "Core/Geometry.hpp"
 #include "Core/VGGUtils.h"
 #include "Core/Attrs.h"
 #include "Core/RenderState.h"
-#include "Core/Scene.hpp"
 #include "Core/Mask.h"
+#include "Scene/Scene.h"
 
 #include "glm/matrix.hpp"
 #include "include/core/SkCanvas.h"
@@ -23,7 +24,7 @@
 namespace VGG
 {
 
-class PaintNode : public Node
+class VGG_EXPORTS PaintNode : public Node
 {
 protected:
   static SkCanvas* s_defaultCanvas;

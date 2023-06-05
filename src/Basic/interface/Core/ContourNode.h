@@ -1,4 +1,5 @@
 #pragma once
+#include "Common/Config.h"
 #include "Core/VGGType.h"
 #include "Core/VGGUtils.h"
 #include "Core/PaintNode.h"
@@ -18,7 +19,7 @@ struct Contour : public std::vector<PointAttr>
 
 using ContourPtr = std::shared_ptr<Contour>;
 
-class ContourNode final : public PaintNode
+class VGG_EXPORTS ContourNode final : public PaintNode
 {
   ContourPtr data{ nullptr };
 

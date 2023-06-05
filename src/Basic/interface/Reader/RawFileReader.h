@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Common/Config.h"
 #include "IReader.hpp"
 
 #include <iostream>
@@ -9,7 +10,7 @@
 namespace VGG
 {
 
-class RawFileReader : public IReader
+class VGG_EXPORTS RawFileReader : public IReader
 {
   std::filesystem::path jsonFilename;
   std::filesystem::path resDir;

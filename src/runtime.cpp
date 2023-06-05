@@ -16,17 +16,15 @@
  */
 #include <argparse/argparse.hpp>
 #include <filesystem>
-// #include "Basic/IReader.hpp"
-#include <Core/IReader.hpp>
-#include <Core/ReaderFactory.h>
-// #include "Basic/ReaderFactory.h"
 #include "Entry/Common/SDLRuntime.hpp"
 #include "Utils/FileManager.hpp"
-#include "Core/Scene.hpp"
 #include <memory>
-// #include <vgg_sketch_parser/src/analyze_sketch_file/analyze_sketch_file.h>
-#include <Core/SketchFileReader.h>
-#include <Core/RawFileReader.h>
+
+#include <Reader/IReader.hpp>
+#include <Reader/ReaderFactory.h>
+#include <Scene/Scene.h>
+#include <Reader/SketchFileReader.h>
+#include <Reader/RawFileReader.h>
 
 using namespace VGG;
 namespace fs = std::filesystem;

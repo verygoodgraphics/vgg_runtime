@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include "Common/Config.h"
 #include "Core/Node.hpp"
 #include "include/core/SkCanvas.h"
 #include "nlohmann/json.hpp"
@@ -11,7 +12,7 @@ class ArtboardNode;
 class PaintNode;
 using ResourceRepo = std::map<std::string, std::vector<char>>;
 using ObjectTableType = std::unordered_map<std::string, std::weak_ptr<PaintNode>>;
-struct Scene
+struct VGG_EXPORTS Scene
 {
   static ResourceRepo ResRepo;
   static ObjectTableType ObjectTable;

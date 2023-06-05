@@ -1,7 +1,7 @@
 #pragma once
 #include <nlohmann/json.hpp>
 #include <optional>
-#include "Attrs.h"
+#include "Core/Attrs.h"
 #include "Core/VGGType.h"
 #include "glm/fwd.hpp"
 using nlohmann::json;

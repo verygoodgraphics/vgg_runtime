@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Basic/SkiaBackend/SkiaImpl.h"
-#include "Basic/VGGType.h"
-#include "Basic/VGGUtils.h"
-#include "PaintNode.h"
+#include "SkiaBackend/SkiaImpl.h"
+#include "Core/VGGType.h"
+#include "Core/VGGUtils.h"
+#include "Core/PaintNode.h"
+
 #include "include/core/SkCanvas.h"
 #include "include/core/SkMatrix.h"
 #include "include/core/SkPath.h"

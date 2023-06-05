@@ -1,7 +1,7 @@
 #pragma once
-#include "Basic/VGGType.h"
-#include "Basic/Attrs.h"
-#include "Basic/Scene.hpp"
+#include "Core/VGGType.h"
+#include "Core/Attrs.h"
+#include "Core/Scene.hpp"
 
 #include "include/core/SkBlendMode.h"
 #include "include/core/SkImageFilter.h"

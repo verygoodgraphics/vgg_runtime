@@ -1,9 +1,9 @@
 #pragma once
-#include "Basic/Mask.h"
-#include "Basic/Node.hpp"
-#include "PaintNode.h"
-#include "ContourNode.h"
-#include "VGGType.h"
+#include "Core/Mask.h"
+#include "Core/Node.hpp"
+#include "Core/PaintNode.h"
+#include "Core/ContourNode.h"
+#include "Core/VGGType.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkMatrix.h"
 #include "include/core/SkPath.h"
@@ -40,6 +40,6 @@ public:
   virtual ~PathNode();
 
 protected:
-  virtual void paintFill(SkCanvas* canvas, float globalAlpha, const SkPath & skPath);
+  virtual void paintFill(SkCanvas* canvas, float globalAlpha, const SkPath& skPath);
 };
 } // namespace VGG

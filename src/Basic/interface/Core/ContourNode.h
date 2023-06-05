@@ -1,7 +1,7 @@
 #pragma once
-#include "Basic/VGGType.h"
-#include "Basic/VGGUtils.h"
-#include "PaintNode.h"
+#include "Core/VGGType.h"
+#include "Core/VGGUtils.h"
+#include "Core/PaintNode.h"
 #include "Attrs.h"
 #include "SkiaBackend/SkiaImpl.h"
 

@@ -1,8 +1,6 @@
 #pragma once
 
-#include "Basic/VGGType.h"
 #include "include/core/SkPath.h"
-#include "glm/glm.hpp"
 
 namespace VGG
 {

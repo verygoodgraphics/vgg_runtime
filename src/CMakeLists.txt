@@ -11,14 +11,6 @@ add_executable(runtime
   Systems/RenderSystem.cpp
   Utils/EntityContainer.cpp
   Utils/WasmBindings.cpp
-  Basic/Scene.cpp
-  Basic/PathNode.cpp
-  Basic/PathNodePrivate.cpp
-  Basic/ImageNode.cpp
-  Basic/TextNode.cpp
-  Basic/PaintNode.cpp
-  Basic/Node.cpp
-  Basic/SkiaBackend/SkiaImpl.cpp
 )
 
 add_library(vgg_internal OBJECT
@@ -41,7 +33,6 @@ target_include_directories(vgg_internal PUBLIC
 )
 target_link_libraries(vgg_internal
   automerge
-  skia
   zip
 )
 if (EMSCRIPTEN)
@@ -103,9 +94,8 @@ else()
     COMPILE_FLAGS "-DSK_GL"
   )
   target_link_libraries(vgg_internal SDL2 ${OPENGL_LIBRARIES})
-  install(TARGETS runtime skia zlib libpng libwebp libjpeg-turbo freetype)
+  install(TARGETS runtime zlib libpng libwebp libjpeg-turbo freetype)
 endif()
 
-target_link_libraries(runtime quickjs vgg_internal glm)
-
-add_subdirectory(Entry)
+add_subdirectory(Basic)
+target_link_libraries(runtime quickjs vgg_internal glm vgg_sketch_parser layer)

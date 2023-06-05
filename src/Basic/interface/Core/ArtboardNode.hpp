@@ -1,11 +1,11 @@
 #pragma once
-#include "Basic/RenderState.h"
-#include "Basic/PaintNode.h"
+#include "Core/RenderState.h"
+#include "Core/PaintNode.h"
 #include "nlohmann/json.hpp"
-#include "Scene.hpp"
-#include "PaintNode.h"
-#include "VGGUtils.h"
-#include "VGGType.h"
+#include "Core/Scene.hpp"
+#include "Core/PaintNode.h"
+#include "Core/VGGUtils.h"
+#include "Core/VGGType.h"
 #include <tuple>
 #include <unordered_map>
 

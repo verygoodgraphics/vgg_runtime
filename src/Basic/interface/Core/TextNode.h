@@ -1,7 +1,7 @@
 #pragma once
-#include "Basic/Attrs.h"
-#include "PaintNode.h"
-#include "VGGType.h"
+#include "Core/Attrs.h"
+#include "Core/PaintNode.h"
+#include "Core/VGGType.h"
 
 namespace VGG
 {
@@ -12,6 +12,7 @@ class TextNode final : public PaintNode
   ETextLayoutMode mode;
   std::vector<TextStyleStub> styles;
   friend class NlohmannBuilder;
+
 public:
   TextNode(const std::string& name, const std::string& text);
   void paintEvent(SkCanvas* canvas) override;

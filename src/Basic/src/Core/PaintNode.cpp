@@ -1,6 +1,6 @@
-#include "PaintNode.h"
-#include "Basic/SkiaBackend/SkiaImpl.h"
-#include "Basic/VGGType.h"
+#include "Core/PaintNode.h"
+#include "Core/VGGType.h"
+#include "SkiaBackend/SkiaImpl.h"
 
 namespace VGG
 {

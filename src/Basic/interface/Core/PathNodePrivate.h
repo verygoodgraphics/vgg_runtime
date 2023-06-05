@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Basic/Node.hpp"
-#include "Basic/VGGType.h"
-#include "PathNode.h"
+#include "Core/Node.hpp"
+#include "Core/VGGType.h"
+#include "Core/PathNode.h"
 #include "include/core/SkShader.h"
 
 namespace VGG

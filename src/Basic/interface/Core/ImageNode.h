@@ -1,6 +1,6 @@
 #pragma once
-#include "Basic/PathNode.h"
-#include "PaintNode.h"
+#include "Core/PathNode.h"
+#include "Core/PaintNode.h"
 #include "include/core/SkCanvas.h"
 
 class SkImage;

@@ -1,9 +1,9 @@
-#include "ImageNode.h"
-#include "Basic/PathNode.h"
-#include "Basic/VGGType.h"
-#include "Basic/VGGUtils.h"
-#include "Basic/SkiaBackend/SkiaImpl.h"
-#include "Basic/Scene.hpp"
+#include <Core/ImageNode.h>
+#include <Core/PathNode.h>
+#include "Core/VGGType.h"
+#include "Core/VGGUtils.h"
+#include "SkiaBackend/SkiaImpl.h"
+#include "Core/Scene.hpp"
 #include "glm/matrix.hpp"
 #include "include/core/SkColor.h"
 #include "include/core/SkMatrix.h"

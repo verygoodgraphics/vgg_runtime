@@ -279,7 +279,7 @@ std::tuple<std::string, std::map<int, sk_sp<SkData>>> render(
   std::map<int, sk_sp<SkData>> res;
 
   auto scene = std::make_shared<Scene>();
-  scene->LoadFileContent(j);
+  scene->loadFileContent(j);
   scene->setResRepo(resources);
   auto count = scene->artboards.size();
   for (int i = 0; i < count; i++)

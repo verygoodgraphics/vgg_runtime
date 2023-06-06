@@ -8,7 +8,6 @@
 namespace VGG
 {
 class SymbolMasterNode;
-class ArtboardNode;
 class PaintNode;
 using ResourceRepo = std::map<std::string, std::vector<char>>;
 using ObjectTableType = std::unordered_map<std::string, std::weak_ptr<PaintNode>>;
@@ -19,7 +18,7 @@ struct VGG_EXPORTS Scene
   static bool s_enableDrawDebugBound;
 
 public:
-  std::vector<std::shared_ptr<ArtboardNode>> artboards;
+  std::vector<std::shared_ptr<PaintNode>> artboards;
   std::vector<std::shared_ptr<SymbolMasterNode>> symbols;
   int page{ 0 };
   int symbolIndex{ 0 };

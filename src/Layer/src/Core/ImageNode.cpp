@@ -74,7 +74,7 @@ void ImageNode::paintFill(SkCanvas* canvas, float globalAlpha, const SkPath& skP
     SkSamplingOptions opt;
     canvas->save();
     canvas->scale(1, -1);
-    canvas->drawImageRect(image, toSkRect(this->m_bound), opt);
+    canvas->drawImageRect(image, toSkRect(getBound()), opt);
     canvas->restore();
   }
 }

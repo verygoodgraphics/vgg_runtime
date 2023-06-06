@@ -24,15 +24,17 @@
 namespace VGG
 {
 
+class PaintNode__pImpl;
 class VGG_EXPORTS PaintNode : public Node
 {
+  VGG_DECL_IMPL(PaintNode)
+
 protected:
   static SkCanvas* s_defaultCanvas;
   static RenderState* s_renderState;
   Bound2 m_bound;
   glm::mat3 m_transform{ 1.0 };
   std::string guid{};
-
   std::vector<std::string> maskedBy{};
   Mask outlineMask;
   EMaskType maskType{ MT_None };
@@ -46,11 +48,7 @@ protected:
   friend class SkiaRenderer;
 
 public:
-  PaintNode(const std::string& name, ObjectType type)
-    : Node(name)
-    , type(type)
-  {
-  }
+  PaintNode(const std::string& name, ObjectType type);
 
   void addChild(const std::shared_ptr<PaintNode> node)
   {
@@ -132,6 +130,8 @@ public:
 
   virtual Mask asOutlineMask(const glm::mat3* mat);
   virtual void asAlphaMask();
+
+  ~PaintNode();
 
 public:
   void visitNode(VGG::Node* p, ObjectTableType& table);

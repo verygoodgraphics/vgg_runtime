@@ -1,4 +1,5 @@
 #include "Core/PaintNode.h"
+#include "Core/Node.hpp"
 #include "Core/VGGType.h"
 #include "SkiaBackend/SkiaImpl.h"
 
@@ -7,6 +8,24 @@ namespace VGG
 
 SkCanvas* PaintNode::s_defaultCanvas = nullptr;
 RenderState* PaintNode::s_renderState = nullptr;
+
+class PaintNode__pImpl
+{
+  VGG_DECL_API(PaintNode);
+
+public:
+  PaintNode__pImpl(PaintNode* api)
+    : q_ptr(api)
+  {
+  }
+};
+
+PaintNode::PaintNode(const std::string& name, ObjectType type)
+  : Node(name)
+  , type(type)
+  , d_ptr(new PaintNode__pImpl(this))
+{
+}
 
 glm::mat3 PaintNode::mapTransform(const PaintNode* node) const
 {
@@ -95,7 +114,7 @@ void PaintNode::renderPass(SkCanvas* canvas)
 
 void PaintNode::drawDebugBound(SkCanvas* canvas)
 {
-  auto skrect = toSkRect(this->m_bound);
+  auto skrect = toSkRect(getBound());
   SkPaint strokePen;
   strokePen.setStyle(SkPaint::kStroke_Style);
   SkColor color = nodeType2Color(this->type);
@@ -150,7 +169,7 @@ Mask PaintNode::asOutlineMask(const glm::mat3* mat)
 {
   SkPath p;
   Mask mask;
-  p.addRect(toSkRect(m_bound));
+  p.addRect(toSkRect(getBound()));
   if (mat)
   {
     p.transform(toSkMatrix(*mat));
@@ -167,5 +186,7 @@ void PaintNode::setOutlineMask(const Mask& mask)
 void PaintNode::asAlphaMask()
 {
 }
+
+PaintNode::~PaintNode() = default;
 
 } // namespace VGG

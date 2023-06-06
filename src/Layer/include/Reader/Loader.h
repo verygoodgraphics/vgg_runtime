@@ -6,7 +6,6 @@
 #include "Core/Node.hpp"
 #include "glm/matrix.hpp"
 #include "nlohmann/json.hpp"
-#include "Core/ArtboardNode.hpp"
 #include "Core/SymbolNode.h"
 #include "Core/PaintNode.h"
 #include "Core/PathNode.h"
@@ -247,12 +246,12 @@ public:
     return layers;
   }
 
-  static inline std::vector<std::shared_ptr<ArtboardNode>> fromArtboard(const nlohmann::json& j)
+  static inline std::vector<std::shared_ptr<PaintNode>> fromArtboard(const nlohmann::json& j)
   {
-    std::vector<std::shared_ptr<ArtboardNode>> artboards;
+    std::vector<std::shared_ptr<PaintNode>> artboards;
     for (const auto& e : j["artboard"])
     {
-      auto p = std::make_shared<ArtboardNode>(e["name"]);
+      auto p = std::make_shared<PaintNode>(e["name"], VGG_ARTBOARD);
       fromObjectCommonProperty(e, p.get());
       auto layers = fromLayers(e);
       for (const auto& l : layers)

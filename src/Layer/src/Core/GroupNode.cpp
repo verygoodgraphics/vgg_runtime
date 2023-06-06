@@ -51,21 +51,24 @@ void GroupNode::renderOrderPass(SkCanvas* canvas)
 
   auto paintCall = [&](std::vector<PaintNode*>& nodes)
   {
-    for (const auto& p : nodes)
+    if (m_contextSetting.TransparencyKnockoutGroup)
     {
-      if (m_contextSetting.TransparencyKnockoutGroup)
+      for (const auto& p : nodes)
       {
-        SkPaint paint;
-        paint.setBlendMode(SkBlendMode::kSrcOver);
-        paint.setAlphaf(1.0);
-        canvas->save();
-        canvas->scale(1, -1);
-        canvas->saveLayer(toSkRect(getBound()), &paint);
+        // TODO:: blend mode r = s!=0?s:d is needed.
+        // SkPaint paint;
+        // paint.setBlendMode(SkBlendMode::kSrc);
+        // canvas->save();
+        // canvas->scale(1, -1);
+        // canvas->saveLayer(toSkRect(getBound()), &paint);
         p->invokeRenderPass(canvas);
-        canvas->restore();
-        canvas->restore();
+        // canvas->restore();
+        // canvas->restore();
       }
-      else
+    }
+    else
+    {
+      for (const auto& p : nodes)
       {
         p->invokeRenderPass(canvas);
       }
@@ -86,12 +89,12 @@ void GroupNode::preRenderPass(SkCanvas* canvas)
 
   if (m_contextSetting.IsolateBlending)
   {
-    SkPaint paint;
-    paint.setBlendMode(SkBlendMode::kSrc);
-    paint.setAlphaf(1.0);
-    canvas->save();
-    canvas->scale(1, -1);
-    canvas->saveLayer(toSkRect(getBound()), &paint);
+    // TODO:: blend mode r = s!=0?s:d is needed.
+    // SkPaint paint;
+    // paint.setBlendMode(SkBlendMode::kSrc);
+    // canvas->save();
+    // canvas->scale(1, -1);
+    // canvas->saveLayer(toSkRect(getBound()), &paint);
   }
   PaintNode::preRenderPass(canvas);
 }
@@ -102,8 +105,8 @@ void GroupNode::postRenderPass(SkCanvas* canvas)
 
   if (m_contextSetting.IsolateBlending)
   {
-    canvas->restore();
-    canvas->restore();
+    // canvas->restore();
+    // canvas->restore();
   }
 
   if (m_contextSetting.Opacity < 1.0)

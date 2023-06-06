@@ -16,7 +16,7 @@ Mask GroupNode::asOutlineMask(const glm::mat3* mat)
   Mask mask;
   if (!hasChild())
   {
-    mask.outlineMask.addRect(toSkRect(m_bound));
+    mask.outlineMask.addRect(toSkRect(getBound()));
   }
   else
   {

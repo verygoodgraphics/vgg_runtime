@@ -14,7 +14,7 @@ ResourceRepo Scene::ResRepo{};
 ObjectTableType Scene::ObjectTable{};
 bool Scene::s_enableDrawDebugBound{ false };
 
-void Scene::LoadFileContent(const std::string& json)
+void Scene::loadFileContent(const std::string& json)
 {
   LoadFileContent(nlohmann::json::parse(json));
 }
@@ -28,7 +28,7 @@ void Scene::LoadFileContent(const nlohmann::json& json)
   maskDirty = true;
 }
 
-void Scene::Render(SkCanvas* canvas)
+void Scene::render(SkCanvas* canvas)
 {
   PaintNode* node = nullptr;
   SkiaRenderer r;
@@ -61,7 +61,7 @@ void Scene::preprocessMask(PaintNode* node)
   }
 }
 
-void Scene::SetPage(int num)
+void Scene::setPage(int num)
 {
   if (num >= 0 && num < artboards.size())
   {
@@ -70,24 +70,24 @@ void Scene::SetPage(int num)
   }
 }
 
-void Scene::NextArtboard()
+void Scene::nextArtboard()
 {
   page = (page + 1 >= artboards.size()) ? page : page + 1;
   maskDirty = true;
 }
 
-void Scene::PreArtboard()
+void Scene::preArtboard()
 {
   page = (page - 1 > 0) ? page - 1 : 0;
   maskDirty = true;
 }
 
-void Scene::NextSymbol()
+void Scene::nextSymbol()
 {
   symbolIndex = (symbolIndex + 1 >= symbols.size()) ? symbolIndex : symbolIndex + 1;
 }
 
-void Scene::PrevSymbol()
+void Scene::prevSymbol()
 {
   symbolIndex = (symbolIndex - 1 > 0) ? symbolIndex - 1 : 0;
 }

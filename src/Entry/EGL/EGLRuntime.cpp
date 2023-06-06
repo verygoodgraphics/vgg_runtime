@@ -294,7 +294,7 @@ std::tuple<std::string, std::map<int, sk_sp<SkData>>> render(
       reason = "create instance failed\n";
       return { reason, res };
     }
-    scene->SetPage(i);
+    scene->setPage(i);
     app->setUseOldRenderer(false);
     app->setScene(scene);
     auto canvas = app->getCanvas();

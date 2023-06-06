@@ -422,7 +422,7 @@ protected: // protected methods
       }
       if (m_scene)
       {
-        m_scene->Render(canvas);
+        m_scene->render(canvas);
       }
       InputManager::draw(canvas);
       m_zoomer.restore(canvas);
@@ -504,14 +504,14 @@ protected: // protected methods
       if (key == SDLK_PAGEUP && (SDL_GetModState() & KMOD_CTRL))
       {
         FileManager::prevPage();
-        m_scene->PreArtboard();
+        m_scene->preArtboard();
         return true;
       }
 
       if (key == SDLK_PAGEDOWN && (SDL_GetModState() & KMOD_CTRL))
       {
         FileManager::nextPage();
-        m_scene->NextArtboard();
+        m_scene->nextArtboard();
         return true;
       }
 

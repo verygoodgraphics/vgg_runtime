@@ -25,14 +25,14 @@ public:
   bool renderSymbol{ false };
   bool maskDirty{ true };
   Scene() = default;
-  void LoadFileContent(const std::string& json);
+  void loadFileContent(const std::string& json);
   void LoadFileContent(const nlohmann::json& j);
-  void Render(SkCanvas* canvas);
-  void NextArtboard();
-  void PreArtboard();
-  void SetPage(int num);
-  void NextSymbol();
-  void PrevSymbol();
+  void render(SkCanvas* canvas);
+  void nextArtboard();
+  void preArtboard();
+  void setPage(int num);
+  void nextSymbol();
+  void prevSymbol();
 
   static ResourceRepo& getResRepo()
   {

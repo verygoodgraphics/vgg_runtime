@@ -96,7 +96,7 @@ int main(int argc, char** argv)
          [&](const auto& json, auto res)
          {
            Scene::setResRepo(res);
-           scene->LoadFileContent(json);
+           scene->loadFileContent(json);
          });
 
     // legacy renderer
@@ -134,7 +134,7 @@ int main(int argc, char** argv)
                [&](const auto& json, auto res)
                {
                  Scene::setResRepo(res);
-                 scene->LoadFileContent(json);
+                 scene->loadFileContent(json);
                });
           INFO("Open %s", entires[fileIter].string().c_str());
         }

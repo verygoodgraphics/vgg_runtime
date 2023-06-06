@@ -26,7 +26,7 @@ public:
   bool maskDirty{ true };
   Scene() = default;
   void loadFileContent(const std::string& json);
-  void LoadFileContent(const nlohmann::json& j);
+  void loadFileContent(const nlohmann::json& j);
   void render(SkCanvas* canvas);
   void nextArtboard();
   void preArtboard();

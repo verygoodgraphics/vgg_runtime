@@ -16,10 +16,10 @@ bool Scene::s_enableDrawDebugBound{ false };
 
 void Scene::loadFileContent(const std::string& json)
 {
-  LoadFileContent(nlohmann::json::parse(json));
+  loadFileContent(nlohmann::json::parse(json));
 }
 
-void Scene::LoadFileContent(const nlohmann::json& json)
+void Scene::loadFileContent(const nlohmann::json& json)
 {
   artboards = NlohmannBuilder::fromArtboard(json);
   symbols = NlohmannBuilder::fromSymbolMasters(json);

@@ -3,13 +3,13 @@
 #include "Core/Attrs.h"
 #include "Scene/Scene.h"
 
-#include "include/core/SkBlendMode.h"
-#include "include/core/SkImageFilter.h"
-#include "include/core/SkMatrix.h"
-#include "include/core/SkPaint.h"
-#include "include/core/SkImage.h"
-#include "include/effects/SkImageFilters.h"
-#include "include/pathops/SkPathOps.h"
+#include "core/SkBlendMode.h"
+#include "core/SkImageFilter.h"
+#include "core/SkMatrix.h"
+#include "core/SkPaint.h"
+#include "core/SkImage.h"
+#include "effects/SkImageFilters.h"
+#include "pathops/SkPathOps.h"
 
 #include <vector>
 #include <unordered_map>

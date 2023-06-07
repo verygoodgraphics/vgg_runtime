@@ -3,7 +3,7 @@
 #include "Core/Node.hpp"
 #include "Core/VGGType.h"
 #include "Core/PathNode.h"
-#include "include/core/SkShader.h"
+#include "core/SkShader.h"
 
 namespace VGG
 {

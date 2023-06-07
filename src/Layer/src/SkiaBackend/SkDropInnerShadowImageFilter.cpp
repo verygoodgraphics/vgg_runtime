@@ -5,8 +5,8 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkCanvas.h"
-#include "include/effects/SkImageFilters.h"
+#include "core/SkCanvas.h"
+#include "effects/SkImageFilters.h"
 #include "src/core/SkImageFilter_Base.h"
 #include "src/core/SkReadBuffer.h"
 #include "src/core/SkSpecialImage.h"

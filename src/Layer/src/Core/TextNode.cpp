@@ -1,10 +1,11 @@
 #include "Core/TextNode.h"
 #include "Core/VGGType.h"
 #include "Core/VGGUtils.h"
-#include "include/core/SkCanvas.h"
-#include "include/core/SkFont.h"
-#include "include/core/SkFontMetrics.h"
-#include "include/effects/SkRuntimeEffect.h"
+#include "core/SkCanvas.h"
+#include "core/SkFont.h"
+#include "core/SkFontMetrics.h"
+#include "effects/SkRuntimeEffect.h"
+#include "core/SkTextBlob.h"
 
 #include <string_view>
 

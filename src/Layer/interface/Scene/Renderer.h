@@ -1,8 +1,8 @@
 #pragma once
 #include "Common/Config.h"
 #include "Core/PaintNode.h"
-#include "include/core/SkCanvas.h"
-#include "include/core/SkColor.h"
+#include "core/SkCanvas.h"
+#include "core/SkColor.h"
 
 namespace VGG
 {

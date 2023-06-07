@@ -2,9 +2,9 @@
 #include "Common/Config.h"
 #include "Core/PathNode.h"
 #include "Core/PaintNode.h"
-#include "include/core/SkCanvas.h"
 
 class SkImage;
+class SkCanvas;
 
 namespace VGG
 {

@@ -13,7 +13,7 @@
 #include "core/SkSurface.h"
 #include "core/SkTileMode.h"
 #include "core/SkTypes.h"
-#include "SkiaBackend/SkMyImageFilters.h"
+#include "skia/custom/SkMyImageFilters.h"
 #include "effects/SkRuntimeEffect.h"
 #include "core/SkColor.h"
 #include "core/SkPath.h"

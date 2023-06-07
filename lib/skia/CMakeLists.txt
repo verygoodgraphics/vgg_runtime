@@ -995,6 +995,11 @@ set(SKIA_SRCS ${SKIA_SRCS}
   "src/utils/SkOrderedFontMgr.cpp"
 #"src/utils/mac/SkCTFont.cpp"
 )
+set(SKIA_SRCS ${SKIA_SRCS}
+# the following cpp files are of custom features
+#
+  "custom/SkDropInnerShadowImageFilter.cpp"
+)
 
 # add platform-specific codes and compile options
 if (NOT EMSCRIPTEN)

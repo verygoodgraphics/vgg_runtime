@@ -18,6 +18,7 @@ add_library(vgg_internal OBJECT
   Model/VggWork.cpp
   Sdk/VggSdk.cpp
   PlatformAdapter/Helper/StringHelper.cpp
+  View/UIView.cpp
 )
 target_include_directories(vgg_internal PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
@@ -26,8 +27,12 @@ target_include_directories(vgg_internal PUBLIC
   ${VGG_CONTRIB_RXCPP_INCLUDE}
   ${VGG_CONTRIB_VALIJSON_INCLUDE}
 )
+
+add_subdirectory(Layer)
+
 target_link_libraries(vgg_internal
   automerge
+  layer
   zip
 )
 if (EMSCRIPTEN)
@@ -79,6 +84,9 @@ if (EMSCRIPTEN)
     SUFFIX ".js"
   )
 elseif (APPLE)
+  target_include_directories(vgg_internal PUBLIC
+    ${SDL2_INCLUDE_DIRS}
+  )
   set_target_properties(runtime PROPERTIES
     COMPILE_FLAGS "-DSK_GL -I${SDL2_INCLUDE_DIRS}/.."
     LINK_FLAGS ${SDL2_LIBRARIES}
@@ -92,7 +100,6 @@ else()
   install(TARGETS runtime zlib libpng libwebp libjpeg-turbo freetype)
 endif()
 
-add_subdirectory(Layer)
-target_link_libraries(runtime quickjs vgg_internal layer skia)
+target_link_libraries(runtime quickjs vgg_internal skia)
 
 add_subdirectory(Entry)

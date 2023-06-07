@@ -1115,7 +1115,7 @@ elseif(VGG_VAR_HOST STREQUAL "WASM")
   )
 endif()
 
-add_library(skia SHARED ${SKIA_INTERFACE_SRCS})
+add_library(skia STATIC ${SKIA_INTERFACE_SRCS})
 target_link_libraries(skia $<TARGET_OBJECTS:skia_base> zlib libpng freetype pthread libgifcodec libjpeg-turbo libwebp)
 target_compile_options(skia PRIVATE
   $<$<CONFIG:Debug>:-DSK_DEBUG>

@@ -17,7 +17,7 @@
 #include <algorithm>
 
 #include "Entity/Entity.hpp"
-#include "Presets/Interactions/RunModeInteraction.hpp"
+// #include "Presets/Interactions/RunModeInteraction.hpp"
 #include "Utils/EntityContainer.hpp"
 
 namespace VGG
@@ -149,20 +149,20 @@ void EntityContainer::setRunModeInteractions(bool init)
         entPtr->components.hasRenderable<FramedText>() ||
         entPtr->components.hasRenderable<FramedRelation>())
     {
-      entPtr->interactable([](EntityRaw ent) { return RunModeInteraction::create(ent); });
-      if (auto rmi = entPtr->components.getInteractable().getState<RunModeInteraction>())
-      {
-        auto c = entPtr->components.code.content;
-        if (init && !(c.empty()))
-        {
-          ASSERT(rmi->jsi);
-          rmi->jsi->eval(c);
-        }
-      }
-      else
-      {
-        FAIL("Failed to set run mode interaction for entity: %p", entPtr.get());
-      }
+      // entPtr->interactable([](EntityRaw ent) { return RunModeInteraction::create(ent); });
+      // if (auto rmi = entPtr->components.getInteractable().getState<RunModeInteraction>())
+      // {
+      //   auto c = entPtr->components.code.content;
+      //   if (init && !(c.empty()))
+      //   {
+      //     ASSERT(rmi->jsi);
+      //     rmi->jsi->eval(c);
+      //   }
+      // }
+      // else
+      // {
+      //   FAIL("Failed to set run mode interaction for entity: %p", entPtr.get());
+      // }
     }
     else
     {

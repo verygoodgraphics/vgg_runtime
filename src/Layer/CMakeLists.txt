@@ -8,7 +8,13 @@ if (LAYER_SHARED_LIBRARY)
 else ()
   add_library(layer STATIC)
 endif ()
-target_sources(layer PRIVATE ${CoreSrcVar} ${SkiaImplSrcVar} ${SceneSrcVar})
+
+set(LeagacySrcVar "${CMAKE_CURRENT_SOURCE_DIR}/interface/Entity/EntityManager.cpp"
+ "${CMAKE_CURRENT_SOURCE_DIR}/interface/Systems/GeometrySystem.cpp"
+ "${CMAKE_CURRENT_SOURCE_DIR}/interface/Systems/RenderSystem.cpp"
+ "${CMAKE_SOURCE_DIR}/src/Utils/EntityContainer.cpp"
+ "${CMAKE_SOURCE_DIR}/src/Utils/WasmBindings.cpp")
+target_sources(layer PRIVATE ${CoreSrcVar} ${SkiaImplSrcVar} ${SceneSrcVar} ${LeagacySrcVar})
 target_include_directories(${MODULE_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/interface)
 target_include_directories(${MODULE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 

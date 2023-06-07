@@ -1,10 +1,5 @@
 add_library(egl_runtime
   EGLRuntime.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../Entity/EntityManager.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../Systems/GeometrySystem.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../Systems/RenderSystem.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../Utils/EntityContainer.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../Utils/WasmBindings.cpp
 )
 
 set_target_properties(egl_runtime PROPERTIES

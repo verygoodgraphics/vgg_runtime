@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#include "Main/Main.hpp"
+
 #include <argparse/argparse.hpp>
 #include <filesystem>
 #include "Entry/SDL/SDLRuntime.hpp"
@@ -68,7 +71,9 @@ int main(int argc, char** argv)
     exit(0);
   }
 
-  auto scene = std::make_shared<Scene>();
+  Main main_component;
+  auto scene = main_component.view()->scene();
+
   std::map<std::string, std::vector<char>> resources;
   std::filesystem::path prefix;
   std::filesystem::path respath;
@@ -80,33 +85,13 @@ int main(int argc, char** argv)
   if (auto loadfile = program.present("-l"))
   {
     auto fp = loadfile.value();
-    auto ext = FileManager::getLoweredFileExt(fp);
-    if (ext == "json")
-    {
-      respath = std::filesystem::path(fp).stem(); // same with filename as default
-      if (auto res = program.present("-d"))
-      {
-        respath = res.value();
-      }
-    }
 
-    load(fp,
-         respath,
-         prefix,
-         [&](const auto& json, auto res)
-         {
-           Scene::setResRepo(res);
-           scene->loadFileContent(json);
-         });
-
-    // legacy renderer
-    if (!FileManager::loadFile(prefix / fp))
-    {
-      FAIL("Failed to load file: %s", fp.c_str());
-    }
+    // todo, add json schema
+    main_component.controller()->start(fp);
   }
 
   SDLRuntime* app = App<SDLRuntime>::getInstance(1200, 800, "VGG");
+  app->setView(main_component.view());
   app->setScene(scene);
 
   std::vector<fs::path> entires;
@@ -155,6 +140,7 @@ int main(int argc, char** argv)
   while (!app->shouldExit())
   {
     app->frame(fps);
+    main_component.runLoop()->dispatch();
   }
   return 0;
 }

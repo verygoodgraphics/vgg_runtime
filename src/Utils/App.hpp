@@ -48,6 +48,7 @@
 #include "Utils/FileManager.hpp"
 #include "Utils/Scheduler.hpp"
 #include "Scene/Scene.h"
+#include "View/UIView.hpp"
 
 namespace VGG
 {
@@ -240,6 +241,7 @@ protected: // protected members and static members
   double m_timestamp;
   SkiaState m_skiaState;
   Zoomer m_zoomer;
+  std::shared_ptr<UIView> m_view;
   std::shared_ptr<Scene> m_scene;
   bool m_useOldRenderer = true;
   std::unique_ptr<SkPictureRecorder> m_recorder;
@@ -441,6 +443,7 @@ protected: // protected methods
   {
     auto e = m_zoomer.mapEvent(evt, DPI::ScaleFactor);
     InputManager::onEvent(e);
+    m_view->onEvent(e);
   }
 
   bool onGlobalEvent(const SDL_Event& evt)
@@ -570,6 +573,11 @@ public: // public methods
   inline SkSurface* getSurface()
   {
     return m_skiaState.surface.get();
+  }
+
+  void setView(std::shared_ptr<UIView> view)
+  {
+    m_view = view;
   }
 
   void setScene(std::shared_ptr<Scene> scene)

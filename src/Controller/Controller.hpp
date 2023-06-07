@@ -15,7 +15,7 @@ class VggExec;
 namespace VGG
 {
 
-class Controller
+class Controller : public std::enable_shared_from_this<Controller>
 {
 public:
   enum RunMode
@@ -24,7 +24,9 @@ public:
     EditMode
   };
 
-  Controller(std::shared_ptr<RunLoop> runLoop, Presenter& presenter, RunMode mode = NormalMode);
+  Controller(std::shared_ptr<RunLoop> runLoop,
+             std::shared_ptr<Presenter> presenter,
+             RunMode mode = NormalMode);
   ~Controller() = default;
 
   bool start(const std::string& filePath, const char* designDocSchemaFilePath = nullptr);
@@ -32,8 +34,7 @@ public:
 
 private:
   std::shared_ptr<RunLoop> m_run_loop;
-  rxcpp::observer<ModelEventPtr>& m_model_observer;
-  rxcpp::observer<UIEventPtr> m_view_observer;
+  std::shared_ptr<Presenter> m_presenter;
 
   RunMode m_mode;
   std::shared_ptr<VggWork> m_work;
@@ -43,6 +44,10 @@ private:
   JsonDocument* createJsonDoc();
   JsonDocumentPtr wrapJsonDoc(std::shared_ptr<JsonDocument> jsonDoc);
   const std::shared_ptr<VggExec>& vggExec();
+
+  void start();
+  void observeModelState();
+  void observeUIEvent();
 };
 
 } // namespace VGG

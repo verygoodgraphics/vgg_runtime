@@ -11,7 +11,10 @@ add_subdirectory(vgg_contrib/zip)
 add_subdirectory(vgg_contrib/zlib)
 
 add_subdirectory(vgg_automerge/automerge)
-add_subdirectory(vgg_sketch_parser/src)
+
+if (NOT EMSCRIPTEN)
+  add_subdirectory(vgg_sketch_parser/src)
+endif()
 
 set(VGG_LIB_INCLUDE_PATH
   ${CMAKE_CURRENT_SOURCE_DIR}

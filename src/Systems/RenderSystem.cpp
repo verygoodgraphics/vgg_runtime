@@ -20,7 +20,7 @@
 #include <skia/include/effects/SkImageFilters.h>
 #include <skia/include/core/SkTextBlob.h>
 #include <skia/src/core/SkBlurMask.h>
-#include <skia/custom/SkMyImageFilters.h>
+// #include <skia/custom/SkMyImageFilters.h>
 
 #include <variant>
 
@@ -340,12 +340,16 @@ void drawFramedPath(SkCanvas* canvas, const FramedPath& fp, RenderCase rc)
       auto& s = is.style;
       SkPaint pen;
       auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blurRadius);
-      pen.setImageFilter(SkMyImageFilters::DropInnerShadowOnly(s.offset.x,
-                                                               s.offset.y,
-                                                               sigma,
-                                                               sigma,
-                                                               s.color,
-                                                               nullptr));
+      // Remove SkMyImageFilters from skia dir 2023.6.7
+      // pen.setImageFilter(SkMyImageFilters::DropInnerShadowOnly(s.offset.x,
+      //                                                          s.offset.y,
+      //                                                          sigma,
+      //                                                          sigma,
+      //                                                          s.color,
+      //                                                          nullptr));
+
+      WARN("Remove SkMyImageFilters from skia 2023.6.7, inner shadow is not supported in leagacy "
+           "renderer");
       canvas->saveLayer(nullptr, &pen);
 
       canvas->translate(frame.w / 2 + s.offset.x, frame.h / 2 + s.offset.y);

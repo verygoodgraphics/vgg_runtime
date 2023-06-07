@@ -4,7 +4,7 @@
 #include "Core/PaintNode.h"
 #include "Scene/Renderer.h"
 
-#include "include/core/SkCanvas.h"
+#include "core/SkCanvas.h"
 #include <fstream>
 #include <string>
 namespace VGG

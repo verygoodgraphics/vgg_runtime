@@ -1,7 +1,7 @@
 #include <Core/GroupNode.h>
 
 #include "Core/VGGType.h"
-#include "include/core/SkCanvas.h"
+#include "core/SkCanvas.h"
 
 namespace VGG
 {

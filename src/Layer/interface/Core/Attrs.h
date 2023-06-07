@@ -2,9 +2,8 @@
 #include "Components/Styles.hpp"
 #include "VGGType.h"
 #include <ostream>
-#include <skia/include/effects/SkGradientShader.h>
-#include <skia/include/effects/SkDashPathEffect.h>
-#include "src/core/SkRecordPattern.h"
+#include <effects/SkGradientShader.h>
+#include <effects/SkDashPathEffect.h>
 #include <algorithm>
 #include "Utils/Math.hpp"
 #include <optional>

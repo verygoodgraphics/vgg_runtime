@@ -5,11 +5,11 @@
 #include "Core/PaintNode.h"
 #include "Core/ContourNode.h"
 #include "Core/VGGType.h"
-#include "include/core/SkCanvas.h"
-#include "include/core/SkMatrix.h"
-#include "include/core/SkPath.h"
-#include "include/core/SkShader.h"
-#include "include/effects/SkRuntimeEffect.h"
+#include "core/SkCanvas.h"
+#include "core/SkMatrix.h"
+#include "core/SkPath.h"
+#include "core/SkShader.h"
+#include "effects/SkRuntimeEffect.h"
 
 #include <optional>
 namespace VGG

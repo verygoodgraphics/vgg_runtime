@@ -4,15 +4,14 @@
 #include "Core/VGGUtils.h"
 #include "SkiaBackend/SkiaImpl.h"
 #include "glm/matrix.hpp"
-#include "include/core/SkColor.h"
-#include "include/core/SkMatrix.h"
-#include "include/core/SkPaint.h"
-#include "include/core/SkPathTypes.h"
-#include "include/core/SkPoint.h"
-#include "include/core/SkTileMode.h"
-
-#include <include/core/SkCanvas.h>
-#include <include/core/SkImage.h>
+#include "core/SkColor.h"
+#include "core/SkMatrix.h"
+#include "core/SkPaint.h"
+#include "core/SkPathTypes.h"
+#include "core/SkPoint.h"
+#include "core/SkTileMode.h"
+#include "core/SkCanvas.h"
+#include "core/SkImage.h"
 
 namespace VGG
 {

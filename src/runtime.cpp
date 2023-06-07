@@ -24,7 +24,6 @@
 #include <memory>
 
 #include <Scene/Scene.h>
-#include <Reader/LoadUtil.hpp>
 
 using namespace VGG;
 namespace fs = std::filesystem;
@@ -72,16 +71,7 @@ int main(int argc, char** argv)
   }
 
   MainComposer main_composer;
-  auto scene = main_composer.view()->scene();
 
-  std::map<std::string, std::vector<char>> resources;
-  std::filesystem::path prefix;
-  std::filesystem::path respath;
-
-  if (auto p = program.present("-p"))
-  {
-    prefix = p.value();
-  }
   if (auto loadfile = program.present("-l"))
   {
     auto fp = loadfile.value();
@@ -91,46 +81,16 @@ int main(int argc, char** argv)
   }
 
   SDLRuntime* app = App<SDLRuntime>::getInstance(1200, 800, "VGG");
-  app->setView(main_composer.view());
-  app->setScene(scene);
-
-  std::vector<fs::path> entires;
-  std::vector<fs::path>::iterator fileIter;
-  if (auto L = program.present("-L"))
-  {
-    for (const auto& ent : fs::recursive_directory_iterator(prefix / L.value()))
-    {
-      entires.emplace_back(ent);
-    }
-    int fileIter = 0;
-    app->setReloadCallback(
-      [&](Scene* scene, int type)
-      {
-        if (type == 0 && fileIter < entires.size())
-          fileIter++;
-        else if (type == 1 && fileIter > 0)
-          fileIter--;
-
-        if (fileIter >= 0 && fileIter < entires.size())
-        {
-          load(entires[fileIter],
-               {},
-               {},
-               [&](const auto& json, auto res)
-               {
-                 Scene::setResRepo(res);
-                 scene->loadFileContent(json);
-               });
-          INFO("Open %s", entires[fileIter].string().c_str());
-        }
-      });
-  }
   ASSERT(app);
 
+  // todo: delete deprecated code
   if (auto fm = FileManager::getInstance(); fm && fm->fileCount() < 1)
   {
     FileManager::newFile();
   }
+
+  app->setView(main_composer.view());
+  app->setScene(main_composer.view()->scene());
 
   // enter run mode
   app->setOnFrameOnce([app]() { app->startRunMode(); });

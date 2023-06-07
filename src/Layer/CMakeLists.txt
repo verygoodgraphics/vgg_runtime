@@ -13,17 +13,20 @@ set(LeagacySrcVar
     "${CMAKE_CURRENT_SOURCE_DIR}/interface/Entity/EntityManager.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/interface/Systems/GeometrySystem.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/interface/Systems/RenderSystem.cpp"
-    "${CMAKE_SOURCE_DIR}/src/Utils/EntityContainer.cpp"
-    "${CMAKE_SOURCE_DIR}/src/Utils/WasmBindings.cpp")
+    "${CMAKE_SOURCE_DIR}/src/Utils/EntityContainer.cpp")
 target_sources(layer PRIVATE ${CoreSrcVar} ${SkiaImplSrcVar} ${SceneSrcVar}
                              ${LeagacySrcVar})
 target_include_directories(${MODULE_NAME}
                            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/interface)
 target_include_directories(
   ${MODULE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
-                         ${SDL2_INCLUDE_DIRS}/..)
+                         ${SDL2_INCLUDE_DIRS}/..
+                         ${VGG_CONTRIB_JSON_INCLUDE})
 
-list(APPEND COMMON_DEPS "glm" "vgg_sketch_parser")
+list(APPEND COMMON_DEPS "glm")
+if (NOT EMSCRIPTEN)
+  list(APPEND COMMON_DEPS "vgg_sketch_parser")
+endif()
 
 target_link_libraries(layer PUBLIC ${COMMON_DEPS})
 

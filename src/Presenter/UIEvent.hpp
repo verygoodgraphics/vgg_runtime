@@ -1,6 +1,7 @@
 #pragma once
 
 #include <any>
+#include <cassert>
 #include <memory>
 #include <string>
 

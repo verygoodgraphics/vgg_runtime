@@ -6,11 +6,6 @@ get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
 add_executable(runtime
   runtime.cpp
-  Entity/EntityManager.cpp
-  Systems/GeometrySystem.cpp
-  Systems/RenderSystem.cpp
-  Utils/EntityContainer.cpp
-  Utils/WasmBindings.cpp
 )
 
 add_library(vgg_internal OBJECT

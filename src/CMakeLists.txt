@@ -32,6 +32,7 @@ target_include_directories(vgg_internal PUBLIC
 add_subdirectory(Layer)
 
 target_link_libraries(vgg_internal
+  skia # must before layer
   automerge
   layer
   zip
@@ -100,6 +101,6 @@ else()
   install(TARGETS runtime zlib libpng libwebp libjpeg-turbo freetype)
 endif()
 
-target_link_libraries(runtime quickjs vgg_internal skia)
+target_link_libraries(runtime quickjs vgg_internal)
 
 add_subdirectory(Entry)

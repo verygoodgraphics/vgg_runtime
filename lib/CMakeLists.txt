@@ -1,5 +1,4 @@
 add_subdirectory(skia)
-add_subdirectory(quickjs)
 
 add_subdirectory(vgg_contrib/boost)
 add_subdirectory(vgg_contrib/glm)

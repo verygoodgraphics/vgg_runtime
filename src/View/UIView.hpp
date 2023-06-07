@@ -29,7 +29,7 @@ public:
 
   void show(const nlohmann::json& viewModel)
   {
-    m_scene->LoadFileContent(viewModel);
+    m_scene->loadFileContent(viewModel);
   }
 
   void setEventListener(EventListener listener)

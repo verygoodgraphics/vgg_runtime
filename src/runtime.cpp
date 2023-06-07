@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Main/Main.hpp"
+#include "Main/MainComposer.hpp"
 
 #include <argparse/argparse.hpp>
 #include <filesystem>
@@ -71,8 +71,8 @@ int main(int argc, char** argv)
     exit(0);
   }
 
-  Main main_component;
-  auto scene = main_component.view()->scene();
+  MainComposer main_composer;
+  auto scene = main_composer.view()->scene();
 
   std::map<std::string, std::vector<char>> resources;
   std::filesystem::path prefix;
@@ -87,11 +87,11 @@ int main(int argc, char** argv)
     auto fp = loadfile.value();
 
     // todo, add json schema
-    main_component.controller()->start(fp);
+    main_composer.controller()->start(fp);
   }
 
   SDLRuntime* app = App<SDLRuntime>::getInstance(1200, 800, "VGG");
-  app->setView(main_component.view());
+  app->setView(main_composer.view());
   app->setScene(scene);
 
   std::vector<fs::path> entires;
@@ -140,7 +140,7 @@ int main(int argc, char** argv)
   while (!app->shouldExit())
   {
     app->frame(fps);
-    main_component.runLoop()->dispatch();
+    main_composer.runLoop()->dispatch();
   }
   return 0;
 }

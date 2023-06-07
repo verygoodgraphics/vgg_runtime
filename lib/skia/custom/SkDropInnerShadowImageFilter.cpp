@@ -5,14 +5,14 @@
  * found in the LICENSE file.
  */
 
-#include "core/SkCanvas.h"
-#include "effects/SkImageFilters.h"
+#include "include/core/SkCanvas.h"
+#include "include/effects/SkImageFilters.h"
 #include "src/core/SkImageFilter_Base.h"
 #include "src/core/SkReadBuffer.h"
 #include "src/core/SkSpecialImage.h"
 #include "src/core/SkSpecialSurface.h"
 #include "src/core/SkWriteBuffer.h"
-#include "SkiaBackend/SkMyImageFilters.h"
+#include "./SkMyImageFilters.h"
 
 extern void SkRegisterDropInnerShadowImageFilterFlattenable();
 

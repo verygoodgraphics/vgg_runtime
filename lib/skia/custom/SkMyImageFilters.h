@@ -1,9 +1,9 @@
 #ifndef SkMyImageFilters_DEFINED
 #define SkMyImageFilters_DEFINED
 
-#include "core/SkColor.h"
-#include "core/SkImageFilter.h"
-#include "effects/SkImageFilters.h"
+#include "include/core/SkColor.h"
+#include "include/core/SkImageFilter.h"
+#include "include/effects/SkImageFilters.h"
 
 class SK_API SkMyImageFilters
 {

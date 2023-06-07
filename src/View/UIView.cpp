@@ -1,6 +1,6 @@
 #include "UIView.hpp"
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 using namespace VGG;
 

@@ -26,3 +26,9 @@ target_include_directories(
 list(APPEND COMMON_DEPS "glm" "vgg_sketch_parser")
 
 target_link_libraries(layer PUBLIC ${COMMON_DEPS})
+
+if (APPLE)
+  set_target_properties(layer PROPERTIES
+    COMPILE_FLAGS "-DSK_GL -I${SDL2_INCLUDE_DIRS}/.."
+  )
+endif()

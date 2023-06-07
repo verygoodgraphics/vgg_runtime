@@ -6,6 +6,7 @@ get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
 add_executable(runtime
   runtime.cpp
+  Utils/WasmBindings.cpp
 )
 
 add_library(vgg_internal OBJECT
@@ -84,7 +85,7 @@ if (EMSCRIPTEN)
   )
 elseif (APPLE)
   target_include_directories(vgg_internal PUBLIC
-    ${SDL2_INCLUDE_DIRS}
+    ${SDL2_INCLUDE_DIRS}/..
   )
   set_target_properties(runtime PROPERTIES
     COMPILE_FLAGS "-DSK_GL -I${SDL2_INCLUDE_DIRS}/.."

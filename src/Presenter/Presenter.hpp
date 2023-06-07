@@ -24,7 +24,7 @@ class Presenter : public std::enable_shared_from_this<Presenter>
 public:
   virtual ~Presenter() = default;
 
-  void setModel(std::shared_ptr<VggWork> model)
+  virtual void setModel(std::shared_ptr<VggWork> model)
   {
     m_model = model;
     show();

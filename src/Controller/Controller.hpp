@@ -30,7 +30,7 @@ public:
   ~Controller() = default;
 
   bool start(const std::string& filePath, const char* designDocSchemaFilePath = nullptr);
-  bool start(const std::vector<char>& buffer, const char* designDocSchemaFilePath = nullptr);
+  bool start(std::vector<char>& buffer, const char* designDocSchemaFilePath = nullptr);
 
 private:
   std::shared_ptr<RunLoop> m_run_loop;

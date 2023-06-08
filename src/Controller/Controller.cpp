@@ -34,7 +34,7 @@ bool Controller::start(const std::string& filePath, const char* designDocSchemaF
   return ret;
 }
 
-bool Controller::start(const std::vector<char>& buffer, const char* designDocSchemaFilePath)
+bool Controller::start(std::vector<char>& buffer, const char* designDocSchemaFilePath)
 {
   initVggWork(designDocSchemaFilePath);
   auto ret = m_work->load(buffer);

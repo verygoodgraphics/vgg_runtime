@@ -12,4 +12,5 @@ public:
 
 private:
   std::string m_moduleWrapper;
+  int m_evalTimes = 0;
 };

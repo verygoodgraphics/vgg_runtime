@@ -19,6 +19,7 @@
 
 #include <any>
 #include <memory>
+#include <optional>
 #include <string>
 #include <unordered_map>
 namespace VGG
@@ -34,6 +35,7 @@ protected:
   static RenderState* s_renderState;
   Bound2 m_bound;
   glm::mat3 m_transform{ 1.0 };
+
   std::string guid{};
   std::vector<std::string> maskedBy{};
   Mask outlineMask;
@@ -43,6 +45,9 @@ protected:
   Style style;
   ContextSetting m_contextSetting;
   ObjectType type;
+
+  bool visible{ true };
+  std::optional<VGGColor> bgColor;
 
   friend class NlohmannBuilder;
   friend class SkiaRenderer;
@@ -68,6 +73,21 @@ public:
   void setClipOperator(EBoolOp op)
   {
     m_clipOperator = op;
+  }
+
+  void setVisible(bool visible)
+  {
+    this->visible = visible;
+  }
+
+  void setBackgroundColor(const VGGColor& color)
+  {
+    this->bgColor = color;
+  }
+
+  bool isVisible() const
+  {
+    return this->visible;
   }
 
   EBoolOp clipOperator() const
@@ -152,6 +172,8 @@ public:
   // TODO:: chagne the following functions accessbility
   void invokeRenderPass(SkCanvas* canvas)
   {
+    if (!visible)
+      return;
     preRenderPass(canvas);
     renderOrderPass(canvas);
     postRenderPass(canvas);
@@ -181,9 +203,7 @@ protected:
   virtual void paintPass();
   void renderPass(SkCanvas* canvas); // TODO:: should be private access
 
-  virtual void paintEvent(SkCanvas* canvas)
-  {
-  }
+  virtual void paintEvent(SkCanvas* canvas);
 
 private:
   void drawDebugBound(SkCanvas* canvas);

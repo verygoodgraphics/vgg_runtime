@@ -148,7 +148,8 @@ void PathNode::paintEvent(SkCanvas* canvas)
   VGG_IMPL(PathNode)
   // if (m_firstChild.empty())
   //   return;
-
+  //
+  PaintNode::paintEvent(canvas);
   std::vector<std::pair<SkPath, EBoolOp>> ct;
   for (const auto& c : m_firstChild)
   {

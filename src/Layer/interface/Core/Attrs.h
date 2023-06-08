@@ -15,10 +15,10 @@ namespace VGG
 {
 struct ContextSetting
 {
-  EBlendMode BlendMode;
-  float Opacity;
-  bool IsolateBlending;
-  EKnockoutType TransparencyKnockoutGroup;
+  EBlendMode BlendMode{ BM_Normal };
+  float Opacity{ 1.0 };
+  bool IsolateBlending{ false };
+  EKnockoutType TransparencyKnockoutGroup{ KT_Off };
 };
 
 struct Pattern
@@ -292,12 +292,12 @@ struct Blur
 
 struct Fill
 {
-  bool isEnabled;
+  bool isEnabled{ true };
   VGGColor color;
-  EPathFillType fillType;
-  ContextSetting contextSettings;
-  std::optional<VGGGradient> gradient;
-  std::optional<Pattern> pattern;
+  EPathFillType fillType{};
+  ContextSetting contextSettings{};
+  std::optional<VGGGradient> gradient{ std::nullopt };
+  std::optional<Pattern> pattern{ std::nullopt };
 };
 
 struct Style

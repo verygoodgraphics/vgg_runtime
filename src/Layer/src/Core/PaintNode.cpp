@@ -1,7 +1,9 @@
 #include "Core/PaintNode.h"
 #include "Core/Node.hpp"
 #include "Core/VGGType.h"
+#include "Core/VGGUtils.h"
 #include "SkiaBackend/SkiaImpl.h"
+#include "core/SkCanvas.h"
 
 namespace VGG
 {
@@ -163,6 +165,20 @@ SkCanvas* PaintNode::getSkCanvas()
 RenderState* PaintNode::getRenderState()
 {
   return s_renderState;
+}
+
+void PaintNode::paintEvent(SkCanvas* canvas)
+{
+  if (this->bgColor.has_value())
+  {
+    SkPaint bgPaint;
+    bgPaint.setColor(this->bgColor.value());
+    bgPaint.setStyle(SkPaint::kFill_Style);
+    canvas->save();
+    canvas->scale(1, -1);
+    canvas->drawRect(toSkRect(getBound()), bgPaint);
+    canvas->restore();
+  }
 }
 
 Mask PaintNode::asOutlineMask(const glm::mat3* mat)

@@ -97,6 +97,7 @@ public:
     obj->maskedBy = j.at("outlineMaskBy").get<std::vector<std::string>>();
     obj->maskType = (EMaskType)j.at("maskType").get<int>();
     obj->guid = j.at("id").get<std::string>();
+    obj->setVisible(j.at("visible").get<bool>());
   }
 
   static inline std::shared_ptr<ContourNode> fromContour(const nlohmann::json& j)
@@ -252,6 +253,9 @@ public:
     for (const auto& e : j["artboard"])
     {
       auto p = std::make_shared<PaintNode>(e["name"], VGG_ARTBOARD);
+      const auto bg =
+        get_stack_optional<VGGColor>(e, "backgroundColor").value_or(VGGColor{ 1, 1, 1, 1 });
+      p->setBackgroundColor(bg);
       fromObjectCommonProperty(e, p.get());
       auto layers = fromLayers(e);
       for (const auto& l : layers)

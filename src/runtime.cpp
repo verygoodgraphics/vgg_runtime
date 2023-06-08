@@ -84,8 +84,7 @@ int main(int argc, char** argv)
   {
     auto fp = loadfile.value();
 
-    // todo, add json schema
-    main_composer.controller()->start(fp);
+    main_composer.controller()->start(fp, "../asset/vgg-format.json");
   }
 
   SDLRuntime* app = App<SDLRuntime>::getInstance(1200, 800, "VGG");

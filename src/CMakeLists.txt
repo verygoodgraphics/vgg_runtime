@@ -42,7 +42,12 @@ if (EMSCRIPTEN)
     PlatformAdapter/Browser/Exec/BrowserJSEngine.cpp
     PlatformAdapter/Browser/Sdk/BrowserSdkAdapter.cpp
   )
-  target_link_options(vgg_internal PUBLIC -lembind)
+  target_compile_options(vgg_internal PUBLIC 
+    -fexceptions
+  )
+  target_link_options(vgg_internal PUBLIC
+    -fexceptions
+    -lembind)
 else()
   target_link_libraries(vgg_internal vgg_libnode vgg_sketch_parser)
   target_sources(vgg_internal PRIVATE
@@ -81,6 +86,7 @@ if (EMSCRIPTEN)
       --no-heap-copy \
       -s EXPORTED_FUNCTIONS=\['_load_file_from_mem','_is_latest_version','_emscripten_main'] \
       -s EXPORTED_RUNTIME_METHODS=\['ccall','cwrap','writeArrayToMemory','stringToUTF8'\] \
+      --preload-file ../../asset \
     "
     SUFFIX ".js"
   )

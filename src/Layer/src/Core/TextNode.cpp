@@ -66,7 +66,8 @@ void drawText(SkCanvas* canvas,
   font.getMetrics(&metrics);
   double y = std::fabs(metrics.fAscent);
   double df = std::fabs(metrics.fAscent) + std::fabs(metrics.fDescent);
-  double dh = textStyle.lineSpace * df;
+  double dh = 1.0 * df;
+  // double dh = textStyle.lineSpace * df;
   double dl = textStyle.paraSpacing;
 
   if (textStyle.vertAlignment == VA_Center)

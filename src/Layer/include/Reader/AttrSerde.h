@@ -209,7 +209,13 @@ inline void from_json(const json& j, TextStyleStub& x)
   x.italic = get_stack_optional<bool>(j, "italic").value_or(false);
   x.fontName = get_stack_optional<std::string>(j, "name").value_or("");
   x.fillColor = get_stack_optional<VGGColor>(j, "fillColor");
-  x.boarderColor = get_stack_optional<VGGColor>(j, "boarderColor");
+  x.boarderColor = get_stack_optional<VGGColor>(j, "borderColor");
+  x.boarderSize = get_stack_optional<int>(j, "borderSize");
+  x.subFamilyName = get_stack_optional<std::string>(j, "subFamilyName").value_or("");
   x.lineThrough = j["linethrough"];
+  x.letterSpacing = j["letterSpacing"];
+  x.lineSpace = j["lineSpace"];
+  x.underline = j["underline"];
+  x.size = j["size"];
 }
 } // namespace VGG

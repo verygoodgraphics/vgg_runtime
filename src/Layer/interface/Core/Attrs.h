@@ -317,6 +317,7 @@ struct TextStyleStub
   float paraSpacing{ 0.0 };
   float letterSpacing{ 0.0 };
   std::string fontName;
+  std::string subFamilyName;
   std::optional<int> boarderSize;
   ETextVerticalAlignment vertAlignment{ VA_Top };
   ETextHorizontalAlignment horzAlignment{ HA_Left };

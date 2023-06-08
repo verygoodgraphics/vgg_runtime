@@ -42,9 +42,10 @@ bool VggWork::load(const std::string& filePath)
   return load(m_zipFile);
 }
 
-bool VggWork::load(const std::vector<char>& buffer)
+bool VggWork::load(std::vector<char>& buffer)
 {
-  m_zipFile = zip_stream_open(buffer.data(), buffer.size(), 0, 'r');
+  m_zip_buffer = std::move(buffer);
+  m_zipFile = zip_stream_open(m_zip_buffer.data(), m_zip_buffer.size(), 0, 'r');
   return load(m_zipFile);
 }
 

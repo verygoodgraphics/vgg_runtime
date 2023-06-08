@@ -37,6 +37,9 @@ extern "C"
     ASSERT(app);
     constexpr int fps = 60;
     app->frame(fps);
+
+    auto& main_composer = MainComposer::instance();
+    main_composer.runLoop()->dispatch();
   }
   void emscripten_main(int width, int height)
   {
@@ -46,6 +49,11 @@ extern "C"
     {
       FileManager::newFile();
     }
+
+    auto& main_composer = MainComposer::instance();
+    app->setView(main_composer.view());
+    app->setScene(main_composer.view()->scene());
+
     app->setOnFrameOnce([app]() { app->startRunMode(); });
     emscripten_set_main_loop(emscripten_frame, 0, 1);
   }

@@ -19,6 +19,7 @@ using MakeJsonDocFn = std::function<JsonDocumentPtr(const json&)>;
 
 class VggWork
 {
+  std::vector<char> m_zip_buffer;
   zip_t* m_zipFile{ nullptr };
   std::unordered_map<std::string, std::string> m_memory_code; // file_name: code_content
   json m_event_listeners;
@@ -38,7 +39,7 @@ public:
   ~VggWork();
 
   bool load(const std::string& filePath);
-  bool load(const std::vector<char>& buffer);
+  bool load(std::vector<char>& buffer);
 
   const json& codeMapDoc() const;
   JsonDocumentPtr& designDoc();

@@ -13,10 +13,12 @@ bool BrowserJSEngine::evalScript(const std::string& code)
 
 bool BrowserJSEngine::evalModule(const std::string& code)
 {
+  auto unique_code{ code + ";" + std::to_string(m_evalTimes++) + ";" };
+
   m_moduleWrapper.erase();
 
   m_moduleWrapper.append("const dataUri = ");
-  m_moduleWrapper.append(StringHelper::encode_script_to_data_uri(code));
+  m_moduleWrapper.append(StringHelper::encode_script_to_data_uri(unique_code));
   m_moduleWrapper.append("; import(dataUri);");
 
   emscripten_run_script(m_moduleWrapper.c_str());

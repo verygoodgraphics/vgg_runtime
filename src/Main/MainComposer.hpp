@@ -64,6 +64,14 @@ public:
   {
     return m_view;
   }
+
+#ifdef EMSCRIPTEN
+  static MainComposer& instance()
+  {
+    static MainComposer instance;
+    return instance;
+  }
+#endif
 };
 
 } // namespace VGG

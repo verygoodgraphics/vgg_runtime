@@ -16,21 +16,16 @@
  */
 #ifdef EMSCRIPTEN
 
-#include "Entity/EntityManager.hpp"
-#include "Utils/FileManager.hpp"
+#include "Main/MainComposer.hpp"
 #include "Utils/Version.hpp"
 
 extern "C"
 {
-  bool load_file_from_mem(const char* name, unsigned char* data, int len)
+  bool load_file_from_mem(const char* name, char* data, int len)
   {
-    std::vector<unsigned char> buf(data, data + len);
-    auto res = VGG::FileManager::loadFileFromMem(buf, name);
-    if (auto container = VGG::EntityManager::getEntities())
-    {
-      container->setRunModeInteractions();
-    }
-    return res;
+
+    std::vector<char> buf(data, data + len);
+    return VGG::MainComposer::instance().controller()->start(buf);
   }
 
   bool is_latest_version(const char* version)

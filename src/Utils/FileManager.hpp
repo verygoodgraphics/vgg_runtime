@@ -21,6 +21,8 @@
 #include <nlohmann/json.hpp>
 #include <miniz-cpp/zip_file.hpp>
 
+#include "include/codec/SkEncodedImageFormat.h"
+
 #include "Entity/EntityManager.hpp"
 #include "Utils/SketchImporter.hpp"
 #include "Utils/FileUtils.hpp"
@@ -594,7 +596,7 @@ protected: // protected static methods
         if (auto img = TextureManager::getSkiaImage(name))
         {
           // TODO provide saving option for lossless or lossy webp
-          if (auto data = img->encodeToData(SkEncodedImageFormat::kWEBP, 100)) // loseless webp
+          if (auto data = img->refEncodedData()) // loseless webp
           {
             auto pt = (char*)data->data();
             auto sz = data->size();

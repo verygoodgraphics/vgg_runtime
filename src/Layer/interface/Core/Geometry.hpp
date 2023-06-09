@@ -1,6 +1,6 @@
 #pragma once
-#include "core/SkMatrix.h"
-#include "core/SkRect.h"
+#include "include/core/SkMatrix.h"
+#include "include/core/SkRect.h"
 #include <glm/glm.hpp>
 #include <iostream>
 #include <ostream>

@@ -18,8 +18,8 @@
 #define __SKETCH_IMPORTER_HPP__
 
 #include <nlohmann/json.hpp>
-#include <skia/include/core/SkTypes.h>
-#include <skia/include/core/SkBlendMode.h>
+#include "core/SkTypes.h"
+#include "core/SkBlendMode.h"
 
 #include "Components/Frame.hpp"
 #include "Components/Path.hpp"
@@ -33,7 +33,7 @@
 #include "Utils/TextCodecs.hpp"
 #include "Utils/FileUtils.hpp"
 
-//#define DEBUG2(...) DEBUG(__VA_ARGS__)
+// #define DEBUG2(...) DEBUG(__VA_ARGS__)
 #define DEBUG2(...)
 
 namespace VGG
@@ -303,7 +303,7 @@ inline std::optional<GraphicsContextSettings> fromSketchGraphicsContextSettings(
     SkBlendMode::kPlus,       // plus lighter
   };
   int bmIdx = getInteger(cs, "blendMode");
-  ASSERT(bmIdx < SK_ARRAY_COUNT(modes));
+  ASSERT(bmIdx < std::size(modes));
   return GraphicsContextSettings{
     .opacity = getScalar(cs, "opacity", 1.),
     .blendMode = modes[bmIdx],

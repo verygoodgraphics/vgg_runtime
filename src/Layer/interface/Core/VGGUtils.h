@@ -5,12 +5,12 @@
 
 #include "glm/fwd.hpp"
 #include "glm/geometric.hpp"
-#include "core/SkCanvas.h"
-#include "core/SkColor.h"
-#include "core/SkMatrix.h"
-#include "core/SkPaint.h"
-#include "core/SkPoint.h"
-#include "core/SkPoint3.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkColor.h"
+#include "include/core/SkMatrix.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkPoint.h"
+#include "include/core/SkPoint3.h"
 
 namespace VGG
 {

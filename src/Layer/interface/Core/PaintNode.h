@@ -11,11 +11,11 @@
 #include "Scene/Scene.h"
 
 #include "glm/matrix.hpp"
-#include "core/SkCanvas.h"
-#include "core/SkColor.h"
-#include "core/SkMatrix.h"
-#include "core/SkPaint.h"
-#include "pathops/SkPathOps.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkColor.h"
+#include "include/core/SkMatrix.h"
+#include "include/core/SkPaint.h"
+#include "include/pathops/SkPathOps.h"
 
 #include <any>
 #include <memory>

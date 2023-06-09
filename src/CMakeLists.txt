@@ -62,6 +62,8 @@ else()
   target_compile_definitions(vgg_internal PRIVATE NODE_WANT_INTERNALS=1)
 endif()
 
+include(ImportSkia)
+
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
   set_source_files_properties(
     runtime.cpp
@@ -107,9 +109,13 @@ else()
     COMPILE_FLAGS "-DSK_GL"
   )
   target_link_libraries(vgg_internal SDL2 ${OPENGL_LIBRARIES})
-  install(TARGETS runtime zlib libpng libwebp libjpeg-turbo freetype)
+  install(TARGETS runtime)
 endif()
 
-target_link_libraries(runtime vgg_internal)
+add_subdirectory(Layer)
 
-add_subdirectory(Entry)
+target_link_libraries(runtime quickjs vgg_internal layer ${SK_LIBS} fontconfig freetype)
+message(STATUS "skia libs in runtime: " ${SK_LIBS})
+target_include_directories(runtime PRIVATE ${SKIA_INCLUDE_DIRS})
+
+# add_subdirectory(Entry)

@@ -2,7 +2,7 @@
 #include <memory>
 #include "Common/Config.h"
 #include "Core/Node.hpp"
-#include "core/SkCanvas.h"
+#include "include/core/SkCanvas.h"
 #include "nlohmann/json.hpp"
 
 namespace VGG

@@ -17,7 +17,7 @@
 #ifndef __RENDER_SYSTEM_HPP__
 #define __RENDER_SYSTEM_HPP__
 
-#include <skia/include/core/SkCanvas.h>
+#include <include/core/SkCanvas.h>
 
 #include "Entity/MouseEntity.hpp"
 #include "Components/Path.hpp"

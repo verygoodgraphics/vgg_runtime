@@ -13,7 +13,7 @@
 #include "include/core/SkSurface.h"
 #include "include/core/SkTileMode.h"
 #include "include/core/SkTypes.h"
-#include "SkiaBackend/SkMyImageFilters.h"
+// #include "SkiaBackend/SkMyImageFilters.h"
 #include "include/effects/SkRuntimeEffect.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkPath.h"
@@ -260,8 +260,8 @@ void PathNode__pImpl::drawInnerShadow(SkCanvas* canvas,
 {
   SkPaint pen;
   auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
-  pen.setImageFilter(
-    SkMyImageFilters::DropInnerShadowOnly(s.offset_x, -s.offset_y, sigma, sigma, s.color, nullptr));
+  // pen.setImageFilter(
+  //   SkMyImageFilters::DropInnerShadowOnly(s.offset_x, -s.offset_y, sigma, sigma, s.color, nullptr));
   canvas->saveLayer(nullptr, &pen);
   if (s.spread > 0)
     canvas->scale(1.0 / s.spread, 1.0 / s.spread);

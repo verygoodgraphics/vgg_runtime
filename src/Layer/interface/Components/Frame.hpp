@@ -18,7 +18,7 @@
 #define __FRAME_HPP__
 
 #include <nlohmann/json.hpp>
-#include <skia/include/core/SkRect.h>
+#include "include/core/SkRect.h"
 #include <tuple>
 
 #include "Utils/Math.hpp"

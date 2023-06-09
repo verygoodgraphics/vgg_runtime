@@ -3,13 +3,13 @@
 #include "Core/Attrs.h"
 #include "Scene/Scene.h"
 
-#include "core/SkBlendMode.h"
-#include "core/SkImageFilter.h"
-#include "core/SkMatrix.h"
-#include "core/SkPaint.h"
-#include "core/SkImage.h"
-#include "effects/SkImageFilters.h"
-#include "pathops/SkPathOps.h"
+#include "include/core/SkBlendMode.h"
+#include "include/core/SkImageFilter.h"
+#include "include/core/SkMatrix.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkImage.h"
+#include "include/effects/SkImageFilters.h"
+#include "include/pathops/SkPathOps.h"
 
 #include <vector>
 #include <unordered_map>
@@ -489,7 +489,7 @@ inline sk_sp<SkImage> loadImage(const std::string& imageGUID, const ResourceRepo
         WARN("Make SkData failed");
         return image;
       }
-      sk_sp<SkImage> skImage = SkImage::MakeFromEncoded(data);
+      sk_sp<SkImage> skImage = SkImages::DeferredFromEncodedData(data);
       if (!skImage)
       {
         WARN("Make SkImage failed.");

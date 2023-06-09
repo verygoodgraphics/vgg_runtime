@@ -1,6 +1,7 @@
 set(MODULE_NAME layer)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/Core CoreSrcVar)
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/SkiaBackend SkiaImplSrcVar)
+# aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/SkiaBackend SkiaImplSrcVar)
+set(SkiaImplSrcVar "${CMAKE_CURRENT_SOURCE_DIR}/src/SkiaBackend/SkiaImpl.cpp")
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/Scene SceneSrcVar)
 if(LAYER_SHARED_LIBRARY)
   add_library(layer SHARED)
@@ -16,12 +17,13 @@ set(LeagacySrcVar
     "${CMAKE_SOURCE_DIR}/src/Utils/EntityContainer.cpp")
 target_sources(layer PRIVATE ${CoreSrcVar} ${SkiaImplSrcVar} ${SceneSrcVar}
                              ${LeagacySrcVar})
-target_include_directories(${MODULE_NAME}
-                           PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/interface)
+target_include_directories(${MODULE_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/interface)
 target_include_directories(
-  ${MODULE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
-                         ${SDL2_INCLUDE_DIRS}/..
-                         ${VGG_CONTRIB_JSON_INCLUDE})
+  ${MODULE_NAME} PRIVATE 
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${SDL2_INCLUDE_DIRS}/.. ${SKIA_INCLUDE_DIRS})
+
+  message(STATUS "SKIA_INCLUDE_DIRS" ${SKIA_INCLUDE_DIRS})
 
 list(APPEND COMMON_DEPS "glm")
 if (NOT EMSCRIPTEN)

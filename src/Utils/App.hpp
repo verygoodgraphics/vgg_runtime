@@ -28,19 +28,25 @@
 #else
 #include <SDL2/SDL_opengl.h>
 #endif
-#include <skia/include/gpu/gl/GrGLInterface.h>
-#include <skia/include/gpu/GrDirectContext.h>
-#include <skia/include/core/SkSurface.h>
-#include <skia/include/core/SkCanvas.h>
-#include <skia/include/core/SkData.h>
-#include <skia/include/core/SkPicture.h>
-#include <skia/include/core/SkPictureRecorder.h>
-#include <skia/include/core/SkImage.h>
-#include <skia/include/core/SkSwizzle.h>
-#include <skia/include/core/SkTextBlob.h>
-#include <skia/include/core/SkTime.h>
-#include <skia/include/effects/SkDashPathEffect.h>
-#include <skia/src/gpu/gl/GrGLUtil.h>
+
+#define SK_GL
+#include <include/gpu/gl/GrGLInterface.h>
+#include <include/gpu/GrDirectContext.h>
+#include <include/core/SkSurface.h>
+#include <include/core/SkCanvas.h>
+#include <include/core/SkData.h>
+#include <include/core/SkPicture.h>
+#include <include/core/SkPictureRecorder.h>
+#include <include/core/SkImage.h>
+#include <include/core/SkSwizzle.h>
+#include <include/core/SkTextBlob.h>
+#include <include/core/SkTime.h>
+#include <include/effects/SkDashPathEffect.h>
+#include <src/gpu/ganesh/gl/GrGLDefines.h>
+#include <src/gpu/ganesh/gl/GrGLUtil.h>
+#include "include/gpu/gl/GrGLFunctions.h"
+#include "include/gpu/GrBackendSurface.h"
+#include "include/gpu/ganesh/SkSurfaceGanesh.h"
 
 #include "Utils/CappingProfiler.hpp"
 #include "Utils/Types.hpp"
@@ -309,32 +315,43 @@ protected: // protected members and static members
 private: // private methods
   sk_sp<SkSurface> setup_skia_surface(int w, int h)
   {
-    ASSERT(m_skiaState.interface);
-    ASSERT(m_skiaState.grContext);
-    GrGLFramebufferInfo info;
-    GR_GL_GetIntegerv(m_skiaState.interface.get(),
-                      GR_GL_FRAMEBUFFER_BINDING,
-                      (GrGLint*)&info.fFBOID);
-
-    // color type and info format must be the followings for
-    // both OpenGL and OpenGL ES, otherwise it will fail
-    SkColorType colorType;
-    colorType = kRGBA_8888_SkColorType;
-    info.fFormat = GR_GL_RGBA8;
-
-    GrBackendRenderTarget target(m_pixelRatio * w,
-                                 m_pixelRatio * h,
-                                 N_MULTISAMPLE,
-                                 N_STENCILBITS,
-                                 info);
-
-    SkSurfaceProps props;
-    return SkSurface::MakeFromBackendRenderTarget(m_skiaState.grContext.get(),
-                                                  target,
-                                                  kBottomLeft_GrSurfaceOrigin,
-                                                  colorType,
-                                                  nullptr,
-                                                  &props);
+    // ASSERT(m_skiaState.interface);
+    // ASSERT(m_skiaState.grContext);
+    // GrGLFramebufferInfo info;
+    // GR_GL_GetIntegerv(m_skiaState.interface.get(),
+    //                   GR_GL_FRAMEBUFFER_BINDING,
+    //                   (GrGLint*)&info.fFBOID);
+    //
+    // // color type and info format must be the followings for
+    // // both OpenGL and OpenGL ES, otherwise it will fail
+    // SkColorType colorType;
+    // colorType = kRGBA_8888_SkColorType;
+    // info.fFormat = GR_GL_RGBA8;
+    //
+    // GrBackendRenderTarget target(m_pixelRatio * w,
+    //                              m_pixelRatio * h,
+    //                              N_MULTISAMPLE,
+    //                              N_STENCILBITS,
+    //                              info);
+    //
+    // SkSurfaceProps props;
+    // return SkSurfaces::WrapBackendRenderTarget(m_skiaState.grContext.get(),
+    //                                            target,
+    //                                            kBottomLeft_GrSurfaceOrigin,
+    //                                            colorType,
+    //                                            nullptr,
+    //                                            &props);
+    sk_sp<const GrGLInterface> interface = nullptr;
+    sk_sp<GrDirectContext> context = GrDirectContext::MakeGL(interface);
+    SkImageInfo info = SkImageInfo::MakeN32Premul(m_pixelRatio * w, m_pixelRatio * h);
+    sk_sp<SkSurface> gpuSurface(
+      SkSurfaces::RenderTarget(context.get(), skgpu::Budgeted::kNo, info));
+    if (!gpuSurface)
+    {
+      SkDebugf("SkSurface::MakeRenderTarget returned null\n");
+      return nullptr;
+    }
+    return gpuSurface;
   }
 
 protected: // protected methods

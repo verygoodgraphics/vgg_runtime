@@ -17,8 +17,8 @@
 #ifndef __FIRA_SANS_HPP__
 #define __FIRA_SANS_HPP__
 
-#include <skia/include/core/SkData.h>
-#include <skia/include/core/SkTypeface.h>
+#include <include/core/SkData.h>
+#include <include/core/SkTypeface.h>
 #include <miniz-cpp/zip_file.hpp>
 
 #include "Utils/Utils.hpp"

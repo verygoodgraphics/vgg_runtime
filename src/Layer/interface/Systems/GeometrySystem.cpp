@@ -19,7 +19,9 @@
 #include "Utils/Math.hpp"
 #include "Utils/RadiusCoeff.hpp"
 
-//#define DEBUG2(...) DEBUG(__VA_ARGS__)
+#include "include/core/SkPathUtils.h"
+
+// #define DEBUG2(...) DEBUG(__VA_ARGS__)
 #define DEBUG2(...)
 
 namespace VGG
@@ -361,7 +363,8 @@ SkPath getSkiaStrokePath(const SkPath& sp)
   SkPaint pen;
   pen.setStyle(SkPaint::kStroke_Style);
   pen.setStrokeWidth(2 * CurvePoint::SIZE);
-  pen.getFillPath(sp, &strokePath);
+  // pen.getFillPath(sp, &strokePath);
+  skpathutils::FillPathWithPaint(sp, pen, &strokePath);
   return strokePath;
 }
 

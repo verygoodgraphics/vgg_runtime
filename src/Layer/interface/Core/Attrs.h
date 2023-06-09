@@ -2,8 +2,8 @@
 #include "Components/Styles.hpp"
 #include "VGGType.h"
 #include <ostream>
-#include <effects/SkGradientShader.h>
-#include <effects/SkDashPathEffect.h>
+#include "include/effects/SkGradientShader.h"
+#include "include/effects/SkDashPathEffect.h"
 #include <algorithm>
 #include "Utils/Math.hpp"
 #include <optional>

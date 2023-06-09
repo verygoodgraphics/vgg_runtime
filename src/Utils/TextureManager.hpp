@@ -19,10 +19,9 @@
 
 #include <optional>
 #include <unordered_map>
-#include <skia/include/core/SkImage.h>
-#include <skia/include/core/SkData.h>
-#include <skia/include/core/SkTileMode.h>
-#include <skia/src/gpu/gl/GrGLTexture.h>
+#include <include/core/SkImage.h>
+#include <include/core/SkData.h>
+#include <include/core/SkTileMode.h>
 
 #include "Utils/FileUtils.hpp"
 #include "Utils/Utils.hpp"
@@ -81,7 +80,7 @@ public: // public static methods
 
     if (auto data = SkData::MakeFromFileName(fp.c_str()))
     {
-      if (auto image = SkImage::MakeFromEncoded(data))
+      if (auto image = SkImages::DeferredFromEncodedData(data))
       {
         auto name = FileUtils::getFileName(fp);
         return tm->addImage(name, image);
@@ -104,7 +103,7 @@ public: // public static methods
 
     if (auto data = SkData::MakeFromMalloc(buf, len))
     {
-      if (auto image = SkImage::MakeFromEncoded(data))
+      if (auto image = SkImages::DeferredFromEncodedData(data))
       {
         auto key = tm->addImage(FileUtils::getFileName(name), image);
         return key;
@@ -126,7 +125,7 @@ public: // public static methods
 
     if (auto skData = SkData::MakeWithCopy(data.data(), data.size()))
     {
-      if (auto image = SkImage::MakeFromEncoded(skData))
+      if (auto image = SkImages::DeferredFromEncodedData(skData))
       {
         auto name = FileUtils::getFileName(fullName);
         return tm->addImage(name, image);

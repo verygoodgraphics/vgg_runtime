@@ -17,10 +17,10 @@
 #ifndef __TYPEFACE_MANAGER_HPP__
 #define __TYPEFACE_MANAGER_HPP__
 
-#include <skia/include/core/SkData.h>
-#include <skia/include/core/SkStream.h>
-#include <skia/include/core/SkTypeface.h>
-#include <skia/include/core/SkFontStyle.h>
+#include <include/core/SkData.h>
+#include <include/core/SkStream.h>
+#include <include/core/SkTypeface.h>
+#include <include/core/SkFontStyle.h>
 
 #include <string>
 #include <vector>

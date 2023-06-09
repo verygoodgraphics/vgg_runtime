@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <skia/include/core/SkFont.h>
-#include <skia/include/core/SkFontTypes.h>
-#include <skia/include/core/SkFontMetrics.h>
-#include <skia/include/effects/SkImageFilters.h>
-#include <skia/include/core/SkTextBlob.h>
-#include <skia/src/core/SkBlurMask.h>
+#include <include/core/SkFont.h>
+#include <include/core/SkFontTypes.h>
+#include <include/core/SkFontMetrics.h>
+#include <include/effects/SkImageFilters.h>
+#include <include/core/SkTextBlob.h>
+#include <src/core/SkBlurMask.h>
 // #include <skia/custom/SkMyImageFilters.h>
 
 #include <variant>

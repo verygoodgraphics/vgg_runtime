@@ -15,7 +15,6 @@ class MainComposer
 {
   std::shared_ptr<RunLoop> m_run_loop;
   std::shared_ptr<Controller> m_controller;
-  std::shared_ptr<VggWork> m_model;
   std::shared_ptr<UIView> m_view;
   std::shared_ptr<Presenter> m_presenter;
   std::shared_ptr<PlatformComposer> m_platform_composer;
@@ -34,7 +33,7 @@ public:
     m_platform_composer.reset(new BrowserComposer());
 #else
 #ifdef NDEBUG
-    // remote di container
+    // todo, use real js sdk file path, remote di container
     m_platform_composer.reset(new NativeComposer("./asset/vgg-sdk.esm.mjs"));
 #else
     // local di container

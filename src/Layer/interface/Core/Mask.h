@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Common/Config.h"
-#include "include/core/SkPath.h"
+#include "core/SkPath.h"
 
 namespace VGG
 {

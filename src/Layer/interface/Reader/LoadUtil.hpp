@@ -20,12 +20,12 @@ inline bool load(const fs::path& filepath,
   std::shared_ptr<IReader> reader;
   if (ext == ".sketch")
   {
-    reader = GetSketchReader(fp);
+    reader = GetSketchReader(fp.string());
   }
   else if (ext == ".json")
   {
-    std::string resFile = fp.stem(); // same with filename as default
-    reader = GetRawReader(fp, datapath);
+    std::string resFile = fp.stem().string(); // same with filename as default
+    reader = GetRawReader(fp.string(), datapath.string());
   }
 
   if (reader)

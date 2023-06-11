@@ -26,6 +26,10 @@
 #define FZERO 1e-10
 #define FTOLER 1e-2
 
+#ifndef M_PI
+#define M_PI 3.141592653589793
+#endif
+
 namespace VGG
 {
 

@@ -31,7 +31,7 @@ public:
     std::map<std::string, std::vector<char>> resources;
     for (const auto& entry : std::filesystem::recursive_directory_iterator(prefix / resDir))
     {
-      std::string key = resDir / entry.path().filename().string();
+      std::string key = (resDir / entry.path().filename()).string();
       std::cout << "read image: " << entry.path() << " which key is " << key << std::endl;
       resources[key] = GetBinFromFile(entry.path()).value_or(std::vector<char>{});
     }

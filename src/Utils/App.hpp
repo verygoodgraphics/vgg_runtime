@@ -30,6 +30,9 @@
 #endif
 
 #define SK_GL
+#define SK_GANESH
+#define GR_GL_LOG_CALLS 0
+#define GR_GL_CHECK_ERROR 0
 #include <include/gpu/gl/GrGLInterface.h>
 #include <include/gpu/GrDirectContext.h>
 #include <include/core/SkSurface.h>
@@ -55,6 +58,7 @@
 #include "Utils/Scheduler.hpp"
 #include "Scene/Scene.h"
 #include "View/UIView.hpp"
+
 
 namespace VGG
 {
@@ -315,43 +319,47 @@ protected: // protected members and static members
 private: // private methods
   sk_sp<SkSurface> setup_skia_surface(int w, int h)
   {
-    // ASSERT(m_skiaState.interface);
-    // ASSERT(m_skiaState.grContext);
-    // GrGLFramebufferInfo info;
-    // GR_GL_GetIntegerv(m_skiaState.interface.get(),
-    //                   GR_GL_FRAMEBUFFER_BINDING,
-    //                   (GrGLint*)&info.fFBOID);
-    //
-    // // color type and info format must be the followings for
-    // // both OpenGL and OpenGL ES, otherwise it will fail
-    // SkColorType colorType;
-    // colorType = kRGBA_8888_SkColorType;
-    // info.fFormat = GR_GL_RGBA8;
-    //
-    // GrBackendRenderTarget target(m_pixelRatio * w,
-    //                              m_pixelRatio * h,
-    //                              N_MULTISAMPLE,
-    //                              N_STENCILBITS,
-    //                              info);
-    //
-    // SkSurfaceProps props;
-    // return SkSurfaces::WrapBackendRenderTarget(m_skiaState.grContext.get(),
-    //                                            target,
-    //                                            kBottomLeft_GrSurfaceOrigin,
-    //                                            colorType,
-    //                                            nullptr,
-    //                                            &props);
-    sk_sp<const GrGLInterface> interface = nullptr;
-    sk_sp<GrDirectContext> context = GrDirectContext::MakeGL(interface);
-    SkImageInfo info = SkImageInfo::MakeN32Premul(m_pixelRatio * w, m_pixelRatio * h);
-    sk_sp<SkSurface> gpuSurface(
-      SkSurfaces::RenderTarget(context.get(), skgpu::Budgeted::kNo, info));
-    if (!gpuSurface)
-    {
-      SkDebugf("SkSurface::MakeRenderTarget returned null\n");
-      return nullptr;
-    }
-    return gpuSurface;
+     ASSERT(m_skiaState.interface);
+     ASSERT(m_skiaState.grContext);
+     GrGLFramebufferInfo info;
+     GR_GL_GetIntegerv(m_skiaState.interface.get(),
+                       GR_GL_FRAMEBUFFER_BINDING,
+                       (GrGLint*)&info.fFBOID);
+    
+     // color type and info format must be the followings for
+     // both OpenGL and OpenGL ES, otherwise it will fail
+     SkColorType colorType;
+     colorType = kRGBA_8888_SkColorType;
+     info.fFormat = GR_GL_RGBA8;
+    
+     GrBackendRenderTarget target(m_pixelRatio * w,
+                                  m_pixelRatio * h,
+                                  N_MULTISAMPLE,
+                                  N_STENCILBITS,
+                                  info);
+    
+     SkSurfaceProps props;
+     return SkSurfaces::WrapBackendRenderTarget(m_skiaState.grContext.get(),
+                                                target,
+                                                kBottomLeft_GrSurfaceOrigin,
+                                                colorType,
+                                                nullptr,
+                                                &props);
+   // sk_sp<const GrGLInterface> interface = nullptr;
+   // sk_sp<GrDirectContext> context = GrDirectContext::MakeGL(interface);
+   // SkImageInfo info = SkImageInfo::Make(m_pixelRatio * w,
+   //                                      m_pixelRatio * h,
+   //                                      SkColorType::kRGBA_8888_SkColorType,
+   //                                      SkAlphaType::kPremul_SkAlphaType);
+   //// SkImageInfo info2 = SkImageInfo::MakeN32Premul
+   // sk_sp<SkSurface> gpuSurface(
+   //   SkSurfaces::RenderTarget(context.get(), skgpu::Budgeted::kNo, info));
+   // if (!gpuSurface)
+   // {
+   //   SkDebugf("SkSurface::MakeRenderTarget returned null\n");
+   //   return nullptr;
+   // }
+   // return gpuSurface;
   }
 
 protected: // protected methods

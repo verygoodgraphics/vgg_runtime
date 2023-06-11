@@ -17,7 +17,7 @@
 #ifndef __GEOMETRY_SYSTEM_HPP__
 #define __GEOMETRY_SYSTEM_HPP__
 
-#include <include/core/SkPath.h>
+#include "core/SkPath.h"
 
 #include "Components/Path.hpp"
 #include "Utils/Math.hpp"

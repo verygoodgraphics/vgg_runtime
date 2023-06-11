@@ -22,16 +22,16 @@
 #include <vector>
 #include <algorithm>
 #include <regex>
-#include "include/core/SkBlendMode.h"
-#include "include/core/SkColor.h"
-#include "include/core/SkFont.h"
-#include "include/core/SkPaint.h"
-#include "include/core/SkSamplingOptions.h"
-#include "include/core/SkTileMode.h"
-#include "include/effects/SkGradientShader.h"
-#include "include/effects/SkDashPathEffect.h"
-#include "include/core/SkMatrix.h"
-#include "include/core/SkPathEffect.h"
+#include "core/SkBlendMode.h"
+#include "core/SkColor.h"
+#include "core/SkFont.h"
+#include "core/SkPaint.h"
+#include "core/SkSamplingOptions.h"
+#include "core/SkTileMode.h"
+#include "effects/SkGradientShader.h"
+#include "effects/SkDashPathEffect.h"
+#include "core/SkMatrix.h"
+#include "core/SkPathEffect.h"
 
 #include "Components/Frame.hpp"
 #include "Presets/Fonts/FiraSans.hpp"

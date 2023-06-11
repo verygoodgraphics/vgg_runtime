@@ -25,6 +25,8 @@
 
 #include <Scene/Scene.h>
 
+#define main main
+
 using namespace VGG;
 namespace fs = std::filesystem;
 
@@ -85,6 +87,20 @@ int main(int argc, char** argv)
     auto fp = loadfile.value();
 
     main_composer.controller()->start(fp, "../asset/vgg-format.json");
+    load(fp,
+         respath,
+         prefix,
+         [&](const auto& json, auto res)
+         {
+           Scene::setResRepo(res);
+           scene->loadFileContent(json);
+         });
+
+    // legacy renderer
+    if (!FileManager::loadFile(prefix / fp))
+    {
+      FAIL("Failed to load file: %s", fp.c_str());
+    }
   }
 
   SDLRuntime* app = App<SDLRuntime>::getInstance(1200, 800, "VGG");

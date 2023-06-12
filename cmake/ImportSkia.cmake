@@ -1,38 +1,59 @@
 # find_library(skia_DEB NAMES skia PATHS "/home/ysl/Code/skia/out/Static")
 set(SKIA_INCLUDE_DIRS "/home/ysl/Code/skia/" "/home/ysl/Code/skia/include/")
-# message(STATUS "skia library: ", ${skia_DEB})
-# add_library(skia::skia STATIC IMPORTED)
-# set_target_properties(skia::skia PROPERTIES
-#   IMPORTED_LOCATION "${skia_DEB}"
-#   IMPORTED_LOCATION_DEBUG "${skia_DEB}"
-#   IMPORTED_CONFIGURATIONS "RELEASE;DEBUG"
-# )
 set(SK_LIBS)
 
 set(SKIA_LIB_NAMES
 skia
-dng_sdk
-pathkit
-piex
-skcms
-skottie
-skparagraph
-skresources
-sksg
-skshaper
-sktext
-skunicode
-svg
-wuffs
-png
-webp
-jpeg
-compression_utils_portable
-icu
-icu_bidi
+# dng_sdk
+# pathkit
+# piex
+# skcms
+# skottie
+# skparagraph
+# skresources
+# sksg
+# skshaper
+# sktext
+# skunicode
+# sksg
+# svg
+# wuffs
+# png
+# webp
+# jpeg
+# compression_utils_portable
+# icu
+# icu_bidi
 )
 
-set(SKIA_LIB_DIR "/home/ysl/Code/skia/out/Static")
+set(SKIA_LIB_DIR "/home/ysl/Code/skia/out/Linux/Shared/Debug" CACHE STRING "" FORCE)
+
+set(SKIA_COMPILE_DEFS 
+SKSL_ENABLE_TRACING
+SK_ENABLE_SPIRV_VALIDATION
+SK_R32_SHIFT=16
+SK_ENABLE_SKSL
+SK_ENABLE_SKSL_IN_RASTER_PIPELINE
+SK_ENABLE_PRECOMPILE
+SK_GANESH
+SK_USE_PERFETTO
+SK_GAMMA_APPLY_TO_A8
+SK_ALLOW_STATIC_GLOBAL_INITIALIZERS=1
+GR_TEST_UTILS=1
+SK_TYPEFACE_FACTORY_FREETYPE
+SK_GL
+SK_ENABLE_DUMP_GPU
+SK_SUPPORT_PDF
+SK_CODEC_DECODES_JPEG
+SK_CODEC_DECODES_JPEG_GAINMAPS
+SK_XML
+SK_ENABLE_ANDROID_UTILS
+SK_HAS_HEIF_LIBRARY
+SK_CODEC_DECODES_PNG
+SK_CODEC_DECODES_RAW
+SK_CODEC_DECODES_WEBP
+SK_HAS_WUFFS_LIBRARY)
+
 
 foreach(LIB ${SKIA_LIB_NAMES})
 find_library(FOUND_LIB_${LIB} NAMES ${LIB} PATHS ${SKIA_LIB_DIR})

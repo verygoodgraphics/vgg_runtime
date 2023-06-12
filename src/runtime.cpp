@@ -22,6 +22,7 @@
 #include "Entry/SDL/SDLRuntime.hpp"
 #include "Utils/FileManager.hpp"
 #include <memory>
+#include "core/SkString.h"
 
 #include <Scene/Scene.h>
 

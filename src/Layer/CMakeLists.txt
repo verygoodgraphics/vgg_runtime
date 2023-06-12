@@ -32,12 +32,3 @@ endif()
 
 target_link_libraries(layer PUBLIC ${COMMON_DEPS})
 
-if (EMSCRIPTEN)
-  set_target_properties(layer PROPERTIES
-    COMPILE_FLAGS "-DSK_GL -s USE_SDL=2 -fexceptions"
-  )
-elseif (APPLE)
-  set_target_properties(layer PROPERTIES
-    COMPILE_FLAGS "-DSK_GL -I${SDL2_INCLUDE_DIRS}/.."
-  )
-endif()

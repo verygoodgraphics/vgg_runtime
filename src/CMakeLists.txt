@@ -114,8 +114,9 @@ endif()
 
 add_subdirectory(Layer)
 
-target_link_libraries(runtime quickjs vgg_internal layer ${SK_LIBS} fontconfig freetype)
-message(STATUS "skia libs in runtime: " ${SK_LIBS})
+target_link_libraries(runtime vgg_internal layer ${SK_LIBS})
+target_compile_definitions(runtime PRIVATE ${SKIA_COMPILE_DEFS})
+message(STATUS "skia libs in runtime: " ${SK_LIBS} ${SKIA_COMPILE_DEFS})
 target_include_directories(runtime PRIVATE ${SKIA_INCLUDE_DIRS})
 
 # add_subdirectory(Entry)

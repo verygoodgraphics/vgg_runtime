@@ -46,7 +46,6 @@ int main(int argc, char** argv)
   }
 
   auto scene = std::make_shared<Scene>();
-  std::map<std::string, std::vector<char>> resources;
   std::filesystem::path prefix;
   std::filesystem::path respath;
 
@@ -72,7 +71,7 @@ int main(int argc, char** argv)
          prefix,
          [&](const auto& json, auto res)
          {
-           auto result = render(json, resources, 80);
+           auto result = render(json, res, 80);
            auto reason = std::get<0>(result);
            std::cout << "Reason: " << std::endl;
            writeResult(std::get<1>(result));

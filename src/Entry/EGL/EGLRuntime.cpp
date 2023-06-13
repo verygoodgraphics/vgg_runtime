@@ -14,6 +14,7 @@
 
 #include "EGLRuntime.h"
 #include "include/core/SkData.h"
+#include "encode/SkPngEncoder.h"
 #include "Scene/Scene.h"
 #include "Core/PaintNode.h"
 
@@ -305,7 +306,9 @@ std::tuple<std::string, std::map<int, std::vector<char>>> render(
       {
         if (auto image = surface->makeImageSnapshot())
         {
-          if (auto data = image->encodeToData(SkEncodedImageFormat::kPNG, imageQuality))
+          SkPngEncoder::Options opt;
+          opt.fZLibLevel = imageQuality / 10;
+          if (auto data = SkPngEncoder::Encode(app->getDirectContext(), image.get(), opt))
           {
             reason = "";
             res[i] = std::vector<char>{ data->bytes(), data->bytes() + data->size() };

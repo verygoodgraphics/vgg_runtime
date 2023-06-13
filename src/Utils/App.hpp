@@ -603,6 +603,11 @@ public: // public methods
     m_view = view;
   }
 
+  inline GrDirectContext* getDirectContext()
+  {
+    return m_skiaState.grContext.get();
+  }
+
   void setScene(std::shared_ptr<Scene> scene)
   {
     m_scene = scene;

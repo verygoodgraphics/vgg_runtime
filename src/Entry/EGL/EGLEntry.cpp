@@ -7,7 +7,7 @@
 #include <Reader/LoadUtil.hpp>
 using namespace VGG;
 
-void writeResult(const std::map<int, sk_sp<SkData>>& result)
+void writeResult(const std::map<int, std::vector<char>>& result)
 {
   int count = 0;
   for (const auto p : result)
@@ -21,7 +21,7 @@ void writeResult(const std::map<int, sk_sp<SkData>>& result)
     std::ofstream ofs(name, std::ios::binary);
     if (ofs.is_open())
     {
-      ofs.write((const char*)p.second->bytes(), p.second->size());
+      ofs.write((const char*)p.second.data(), p.second.size());
     }
   }
 }

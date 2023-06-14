@@ -1,6 +1,7 @@
 #include "VggWork.hpp"
 
-#include "Model/SubjectJsonDocument.hpp"
+#include "Loader/DirLoader.hpp"
+#include "SubjectJsonDocument.hpp"
 #include "Utils/Utils.hpp"
 
 #include "zip.h"
@@ -10,8 +11,10 @@
 
 #include <algorithm>
 #include <chrono>
+#include <filesystem>
 
 using namespace VGG;
+namespace fs = std::filesystem;
 
 constexpr auto artboard_file_name = "artboard.json";
 constexpr auto event_listeners_file_name = "event_listeners.json";
@@ -36,10 +39,29 @@ VggWork::~VggWork()
   }
 }
 
-bool VggWork::load(const std::string& filePath)
+bool VggWork::load(const std::string& path)
 {
-  m_zipFile = zip_open(filePath.c_str(), 0, 'r');
-  return load(m_zipFile);
+  if (fs::is_regular_file(path))
+  {
+    m_zipFile = zip_open(path.c_str(), 0, 'r');
+    return load(m_zipFile);
+  }
+  else if (fs::is_directory(path))
+  {
+    m_loader.reset(new Model::DirLoader(path));
+    if (m_loader->load())
+    {
+      load();
+    }
+    else
+    {
+      return false;
+    }
+  }
+  else
+  {
+    return false;
+  }
 }
 
 bool VggWork::load(std::vector<char>& buffer)
@@ -47,6 +69,35 @@ bool VggWork::load(std::vector<char>& buffer)
   m_zip_buffer = std::move(buffer);
   m_zipFile = zip_stream_open(m_zip_buffer.data(), m_zip_buffer.size(), 0, 'r');
   return load(m_zipFile);
+}
+
+bool VggWork::load()
+{
+  try
+  {
+    std::string file_content;
+    if (m_loader->readFile(artboard_file_name, file_content))
+    {
+      auto tmp_json = json::parse(file_content);
+      auto doc = m_makeDesignDocFn(tmp_json);
+      m_designDoc = JsonDocumentPtr(new SubjectJsonDocument(doc));
+    }
+    else
+    {
+      return false;
+    }
+
+    if (m_loader->readFile(event_listeners_file_name, file_content))
+    {
+      m_event_listeners = json::parse(file_content);
+    }
+
+    return true;
+  }
+  catch (const std::exception& e)
+  {
+    return false;
+  }
 }
 
 bool VggWork::load(zip_t* zipFile)
@@ -247,7 +298,14 @@ std::string VggWork::get_code(const std::string& file_name)
   }
 
   std::string code;
-  readZipFileEntry(m_zipFile, file_name, code);
+  if (m_loader)
+  {
+    m_loader->readFile(file_name, code);
+  }
+  else
+  {
+    readZipFileEntry(m_zipFile, file_name, code);
+  }
   return code;
 }
 

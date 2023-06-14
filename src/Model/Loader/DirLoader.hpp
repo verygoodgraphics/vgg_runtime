@@ -21,11 +21,6 @@ public:
   {
   }
 
-  virtual bool load()
-  {
-    return true;
-  }
-
   virtual bool readFile(const std::string& name, std::string& content) const
   {
     content.clear();

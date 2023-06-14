@@ -14,16 +14,12 @@
 #include <string>
 #include <vector>
 
-struct zip_t;
-
 using MakeJsonDocFn = std::function<JsonDocumentPtr(const json&)>;
 
 class VggWork
 {
   std::shared_ptr<VGG::Model::Loader> m_loader;
 
-  std::vector<char> m_zip_buffer;
-  zip_t* m_zipFile{ nullptr };
   std::unordered_map<std::string, std::string> m_memory_code; // file_name: code_content
   json m_event_listeners;
 
@@ -39,10 +35,9 @@ public:
   using ListenersType = std::unordered_map<std::string, std::vector<std::string>>;
 
   VggWork(const MakeJsonDocFn& makeDesignDocFn);
-  ~VggWork();
 
-  bool load(const std::string& filePath);
-  bool load(std::vector<char>& buffer);
+  bool load(const std::string& path);   // zip file or dir
+  bool load(std::vector<char>& buffer); // zip buffer
 
   const json& codeMapDoc() const;
   JsonDocumentPtr& designDoc();
@@ -61,10 +56,7 @@ public:
   rxcpp::observable<VGG::ModelEventPtr> getObservable();
 
 private:
-  bool load();
-
-  bool load(zip_t* zipFile);
-  bool readZipFileEntry(zip_t* zipFile, const std::string& entryName, std::string& content) const;
+  bool load_files();
 
   std::string get_code(const std::string& file_name);
 

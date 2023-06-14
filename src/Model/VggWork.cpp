@@ -1,10 +1,9 @@
 #include "VggWork.hpp"
 
 #include "Loader/DirLoader.hpp"
+#include "Loader/ZipLoader.hpp"
 #include "SubjectJsonDocument.hpp"
 #include "Utils/Utils.hpp"
-
-#include "zip.h"
 
 #include <boost/uuid/name_generator_sha1.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -30,48 +29,31 @@ VggWork::VggWork(const MakeJsonDocFn& makeDesignDocFn)
 {
 }
 
-VggWork::~VggWork()
-{
-  if (m_zipFile)
-  {
-    zip_close(m_zipFile);
-    m_zipFile = nullptr;
-  }
-}
-
 bool VggWork::load(const std::string& path)
 {
   if (fs::is_regular_file(path))
   {
-    m_zipFile = zip_open(path.c_str(), 0, 'r');
-    return load(m_zipFile);
+    m_loader.reset(new Model::ZipLoader(path));
   }
   else if (fs::is_directory(path))
   {
     m_loader.reset(new Model::DirLoader(path));
-    if (m_loader->load())
-    {
-      load();
-    }
-    else
-    {
-      return false;
-    }
   }
   else
   {
     return false;
   }
+
+  return load_files();
 }
 
 bool VggWork::load(std::vector<char>& buffer)
 {
-  m_zip_buffer = std::move(buffer);
-  m_zipFile = zip_stream_open(m_zip_buffer.data(), m_zip_buffer.size(), 0, 'r');
-  return load(m_zipFile);
+  m_loader.reset(new Model::ZipLoader(buffer));
+  return load_files();
 }
 
-bool VggWork::load()
+bool VggWork::load_files()
 {
   try
   {
@@ -98,57 +80,6 @@ bool VggWork::load()
   {
     return false;
   }
-}
-
-bool VggWork::load(zip_t* zipFile)
-{
-  try
-  {
-    std::string file_content;
-    if (readZipFileEntry(zipFile, artboard_file_name, file_content))
-    {
-      auto tmp_json = json::parse(file_content);
-      auto doc = m_makeDesignDocFn(tmp_json);
-      m_designDoc = JsonDocumentPtr(new SubjectJsonDocument(doc));
-    }
-    else
-    {
-      return false;
-    }
-
-    if (readZipFileEntry(zipFile, event_listeners_file_name, file_content))
-    {
-      m_event_listeners = json::parse(file_content);
-    }
-
-    return true;
-  }
-  catch (const std::exception& e)
-  {
-    return false;
-  }
-}
-
-bool VggWork::readZipFileEntry(zip_t* zipFile,
-                               const std::string& entryName,
-                               std::string& content) const
-{
-  content.clear();
-
-  if (0 == zip_entry_open(m_zipFile, entryName.c_str()))
-  {
-    void* buf = NULL;
-    size_t bufsize;
-    zip_entry_read(m_zipFile, &buf, &bufsize);
-    zip_entry_close(m_zipFile);
-
-    content.append(static_cast<char*>(buf), bufsize);
-    free(buf);
-
-    return true;
-  }
-
-  return false;
 }
 
 JsonDocumentPtr& VggWork::designDoc()
@@ -298,14 +229,7 @@ std::string VggWork::get_code(const std::string& file_name)
   }
 
   std::string code;
-  if (m_loader)
-  {
-    m_loader->readFile(file_name, code);
-  }
-  else
-  {
-    readZipFileEntry(m_zipFile, file_name, code);
-  }
+  m_loader->readFile(file_name, code);
   return code;
 }
 

@@ -2,6 +2,10 @@
 
 #include "Utils/DIContainer.hpp"
 
+#ifdef EMSCRIPTEN
+constexpr auto listener_code_key = "listener";
+#endif
+
 // design document in vgg work
 const std::string VggSdk::designDocument()
 {
@@ -38,9 +42,39 @@ void VggSdk::removeEventListener(const std::string& element_path,
   getVggWork()->removeEventListener(element_path, event_type, listener_code);
 }
 
-VggWork::ListenersType VggSdk::getEventListeners(const std::string& element_path)
+VggSdk::ListenersType VggSdk::getEventListeners(const std::string& element_path)
 {
+#ifdef EMSCRIPTEN
+  using namespace emscripten;
+
+  auto result_listeners_map = val::object();
+  auto listeners_map = getVggWork()->getEventListeners(element_path);
+  for (auto& map_item : listeners_map)
+  {
+    if (map_item.second.empty())
+    {
+      continue;
+    }
+
+    auto& event_type = map_item.first;
+
+    auto js_listener_code_array = val::array();
+    for (int i = 0; i < map_item.second.size(); ++i)
+    {
+      auto& listener_code = map_item.second[i];
+      auto js_listener_object = val::object();
+
+      js_listener_object.set(listener_code_key, val(listener_code.c_str()));
+      js_listener_code_array.set(i, js_listener_object);
+    }
+
+    result_listeners_map.set(event_type.c_str(), js_listener_code_array);
+  }
+
+  return result_listeners_map;
+#else
   return getVggWork()->getEventListeners(element_path);
+#endif
 }
 
 // vgg work

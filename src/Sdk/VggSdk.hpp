@@ -3,6 +3,10 @@
 
 #include "Model/VggWork.hpp"
 
+#ifdef EMSCRIPTEN
+#include <emscripten/val.h>
+#endif
+
 #include <string>
 #include <memory>
 
@@ -11,6 +15,12 @@ class JsonDocument;
 class VggSdk
 {
 public:
+#ifdef EMSCRIPTEN
+  using ListenersType = emscripten::val;
+#else
+  using ListenersType = VggWork::ListenersType;
+#endif
+
   virtual ~VggSdk() = default;
 
   // design document
@@ -27,7 +37,7 @@ public:
   void removeEventListener(const std::string& element_path,
                            const std::string& event_type,
                            const std::string& listener_code);
-  VggWork::ListenersType getEventListeners(const std::string& element_path);
+  ListenersType getEventListeners(const std::string& element_path);
 
   //   // ---
   //   void undo();

@@ -270,13 +270,13 @@ public:
   }
 };
 
-std::tuple<std::string, std::map<int, sk_sp<SkData>>> render(
+std::tuple<std::string, std::map<int, std::vector<char>>> render(
   const nlohmann::json& j,
   const std::map<std::string, std::vector<char>>& resources,
   int imageQuality)
 {
   std::string reason;
-  std::map<int, sk_sp<SkData>> res;
+  std::map<int, std::vector<char>> res;
 
   auto scene = std::make_shared<Scene>();
   scene->loadFileContent(j);
@@ -308,7 +308,7 @@ std::tuple<std::string, std::map<int, sk_sp<SkData>>> render(
           if (auto data = image->encodeToData(SkEncodedImageFormat::kPNG, imageQuality))
           {
             reason = "";
-            res[i] = data;
+            res[i] = std::vector<char>{ data->bytes(), data->bytes() + data->size() };
           }
           else
           {

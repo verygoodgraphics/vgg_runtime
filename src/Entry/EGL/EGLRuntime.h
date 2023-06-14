@@ -6,7 +6,6 @@
 #include <tuple>
 #include <map>
 #include <nlohmann/json.hpp>
-#include "include/core/SkData.h"
 
 /**
  * @brief 
@@ -20,7 +19,7 @@
  * the second element is the render result, the key is the index of the artboard,
  * the value is the binary image data, which format is PNG.
  */
-std::tuple<std::string, std::map<int, sk_sp<SkData>>> render(
+std::tuple<std::string, std::map<int, std::vector<char>>> render(
   const nlohmann::json& j,
   const std::map<std::string, std::vector<char>>& resources,
   int imageQuality);

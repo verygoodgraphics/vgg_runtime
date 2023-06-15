@@ -53,6 +53,34 @@ bool VggWork::load(std::vector<char>& buffer)
   return load_files();
 }
 
+void VggWork::visit(VGG::Model::Visitor* visitor)
+{
+  // todo, lock for thread safe
+  const std::lock_guard<std::mutex> lock(m_mutex);
+
+  visitor->accept(artboard_file_name, m_designDoc->content().dump());
+  visitor->accept(event_listeners_file_name, m_event_listeners.dump());
+
+  // js
+  for (auto& [path, element_event_listeners] : m_event_listeners.items())
+  {
+    for (auto& [type, type_event_listeners] : element_event_listeners.items())
+    {
+      std::vector<std::string> listeners{};
+      for (auto it = type_event_listeners.cbegin(); it != type_event_listeners.cend(); ++it)
+      {
+        if (it->is_object() && it->contains(file_name_key))
+        {
+          auto& file_name = (*it)[file_name_key];
+          visitor->accept(file_name, get_code(file_name));
+        }
+      }
+    }
+  }
+
+  // todo, other files
+}
+
 bool VggWork::load_files()
 {
   try

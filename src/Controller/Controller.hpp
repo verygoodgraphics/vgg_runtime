@@ -18,7 +18,7 @@ namespace VGG
 class Controller : public std::enable_shared_from_this<Controller>
 {
 public:
-  enum RunMode
+  enum class RunMode
   {
     NormalMode,
     EditMode
@@ -26,7 +26,7 @@ public:
 
   Controller(std::shared_ptr<RunLoop> runLoop,
              std::shared_ptr<Presenter> presenter,
-             RunMode mode = NormalMode);
+             RunMode mode = RunMode::NormalMode);
   ~Controller() = default;
 
   bool start(const std::string& filePath, const char* designDocSchemaFilePath = nullptr);

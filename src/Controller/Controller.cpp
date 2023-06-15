@@ -127,7 +127,7 @@ const std::shared_ptr<VggExec>& Controller::vggExec()
 
 JsonDocument* Controller::createJsonDoc()
 {
-  if (m_mode == NormalMode)
+  if (m_mode == RunMode::NormalMode)
   {
     return new RawJsonDocument();
   }
@@ -139,7 +139,7 @@ JsonDocument* Controller::createJsonDoc()
 
 JsonDocumentPtr Controller::wrapJsonDoc(std::shared_ptr<JsonDocument> jsonDoc)
 {
-  if (m_mode == NormalMode)
+  if (m_mode == RunMode::NormalMode)
   {
     return jsonDoc;
   }

@@ -28,6 +28,7 @@ public:
   {
     m_model = model;
     show();
+    // todo, set resources
   }
 
   void setView(std::shared_ptr<UIView> view)

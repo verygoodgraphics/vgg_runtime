@@ -6,6 +6,7 @@ else()
 
   add_executable(unit_tests
     controller/controller_test.cpp
+    editor/save_test.cpp
     exec/vgg_exec_test.cpp
     model/automerge_test.cpp
     model/json_schema_validator_test.cpp

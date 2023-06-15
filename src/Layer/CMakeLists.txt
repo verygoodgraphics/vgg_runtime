@@ -31,6 +31,7 @@ endif()
 
 target_link_libraries(vgg_layer PUBLIC ${COMMON_DEPS} ${SKIA_LIBS})
 target_link_libraries(vgg_layer PRIVATE ${OPENGL_LIBRARIES})
+set_target_properties(vgg_layer PROPERTIES BUILD_RPATH ${SKIA_LIB_DIR})
 
 if(EMSCRIPTEN)
 # It's temporay because layer need the SDL event type declaration.

@@ -1,6 +1,3 @@
-# add_subdirectory(skia)
-add_subdirectory(quickjs)
-
 add_subdirectory(vgg_contrib/boost)
 add_subdirectory(vgg_contrib/glm)
 add_subdirectory(vgg_contrib/json)
@@ -19,8 +16,6 @@ endif()
 
 set(VGG_LIB_INCLUDE_PATH
   ${CMAKE_CURRENT_SOURCE_DIR}
-  # ${CMAKE_CURRENT_SOURCE_DIR}/skia # for skia lib itself
-  # ${CMAKE_CURRENT_SOURCE_DIR}/skia/include
   PARENT_SCOPE
 )
 

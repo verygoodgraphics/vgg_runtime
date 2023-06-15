@@ -167,6 +167,7 @@ void PathNode::paintEvent(SkCanvas* canvas)
   if (hasBlur)
   {
     SkPaint pen;
+    pen.setAntiAlias(true);
     const auto blur = style.blurs[0];
     auto sigma = SkBlurMask::ConvertRadiusToSigma(blur.radius);
     if (blur.blurType == BT_Gaussian)
@@ -224,6 +225,7 @@ void PathNode::paintFill(SkCanvas* canvas, float globalAlpha, const SkPath& skPa
       continue;
     SkPaint fillPen;
     fillPen.setStyle(SkPaint::kFill_Style);
+    fillPen.setAntiAlias(true);
     if (f.fillType == FT_Color)
     {
       fillPen.setColor(f.color);

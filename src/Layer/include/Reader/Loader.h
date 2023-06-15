@@ -4,7 +4,9 @@
 #include "Core/ContourNode.h"
 #include "Core/VGGType.h"
 #include "Core/Node.hpp"
+#include "glm/fwd.hpp"
 #include "glm/matrix.hpp"
+#include "glm/gtx/matrix_transform_2d.hpp"
 #include "nlohmann/json.hpp"
 #include "Core/SymbolNode.h"
 #include "Core/PaintNode.h"
@@ -257,6 +259,12 @@ public:
         get_stack_optional<VGGColor>(e, "backgroundColor").value_or(VGGColor{ 1, 1, 1, 1 });
       p->setBackgroundColor(bg);
       fromObjectCommonProperty(e, p.get());
+
+      auto t = p->localTransform();
+      const auto b = p->getBound();
+      const auto offset = glm::translate(t, -b.bottomLeft);
+      p->setLocalTransform(offset);
+
       auto layers = fromLayers(e);
       for (const auto& l : layers)
       {

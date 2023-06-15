@@ -236,6 +236,7 @@ void PathNode__pImpl::drawShadow(SkCanvas* canvas,
 {
 
   SkPaint pen;
+  pen.setAntiAlias(true);
   auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
   pen.setImageFilter(
     SkImageFilters::DropShadowOnly(s.offset_x, -s.offset_y, sigma, sigma, s.color, nullptr));
@@ -244,6 +245,7 @@ void PathNode__pImpl::drawShadow(SkCanvas* canvas,
     canvas->scale(1 + s.spread / 100.0, 1 + s.spread / 100.0);
   SkPaint fillPen;
   fillPen.setStyle(style);
+  fillPen.setAntiAlias(true);
   // if (outlineMask)
   // {
   //   canvas->clipPath(*outlineMask);
@@ -267,6 +269,7 @@ void PathNode__pImpl::drawInnerShadow(SkCanvas* canvas,
     canvas->scale(1.0 / s.spread, 1.0 / s.spread);
   SkPaint fillPen;
   fillPen.setStyle(style);
+  fillPen.setAntiAlias(true);
   // if (mask)
   // {
   //   canvas->clipPath(*mask);

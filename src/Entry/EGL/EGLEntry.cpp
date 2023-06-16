@@ -33,6 +33,8 @@ int main(int argc, char** argv)
   program.add_argument("-d", "--data").help("resources dir");
   program.add_argument("-p", "--prefix").help("the prefix of filename or dir");
   program.add_argument("-L", "--loaddir").help("iterates all the files in the given dir");
+  program.add_argument("-s", "--scale").help("canvas scale").scan<'g', float>().default_value(1.0);
+  program.add_argument("-q", "--quality").help("canvas scale").scan<'i', int>().default_value(80);
 
   try
   {
@@ -71,7 +73,8 @@ int main(int argc, char** argv)
          prefix,
          [&](const auto& json, auto res)
          {
-           auto result = render(json, res, 80);
+           auto result =
+             render(json, res, program.get<int>("-q"), program.get<float>("-s"));
            auto reason = std::get<0>(result);
            std::cout << "Reason: " << std::endl;
            writeResult(std::get<1>(result));

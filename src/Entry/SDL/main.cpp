@@ -17,6 +17,14 @@ int main(int argc, char** argv)
   program.add_argument("-d", "--data").help("resources dir");
   program.add_argument("-p", "--prefix").help("the prefix of filename or dir");
   program.add_argument("-L", "--loaddir").help("iterates all the files in the given dir");
+  program.add_argument("-w", "--width")
+    .help("width of viewport")
+    .scan<'i', int>()
+    .default_value(1200);
+  program.add_argument("-h", "--height")
+    .help("height of viewport")
+    .scan<'i', int>()
+    .default_value(800);
 
   try
   {
@@ -67,7 +75,8 @@ int main(int argc, char** argv)
     }
   }
 
-  SDLRuntime* app = App<SDLRuntime>::getInstance(1200, 800, "VGG");
+  SDLRuntime* app =
+    App<SDLRuntime>::getInstance(program.get<int>("-w"), program.get<int>("-h"), "VGG");
   app->setScene(scene);
 
   std::vector<fs::path> entires;

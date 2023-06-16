@@ -3,6 +3,7 @@
 #include <any>
 #include <nlohmann/json.hpp>
 #include <EGL/egl.h>
+#include <sstream>
 
 #include "Entity/EntityManager.hpp"
 #include "Entity/InputManager.hpp"
@@ -274,7 +275,8 @@ public:
 std::tuple<std::string, std::map<int, std::vector<char>>> render(
   const nlohmann::json& j,
   const std::map<std::string, std::vector<char>>& resources,
-  int imageQuality)
+  int imageQuality,
+  float scale)
 {
   std::string reason;
   std::map<int, std::vector<char>> res;
@@ -289,7 +291,7 @@ std::tuple<std::string, std::map<int, std::vector<char>>> render(
 
     int w = b.size().x;
     int h = b.size().y;
-    auto app = App<EGLRuntime>::createInstance(w, h);
+    auto app = App<EGLRuntime>::createInstance(w, h, scale);
     if (!app)
     {
       reason = "create instance failed\n";
@@ -307,7 +309,7 @@ std::tuple<std::string, std::map<int, std::vector<char>>> render(
         if (auto image = surface->makeImageSnapshot())
         {
           SkPngEncoder::Options opt;
-          opt.fZLibLevel = imageQuality / 10;
+          opt.fZLibLevel = std::max(std::min(9, (100 - imageQuality) / 10), 0);
           if (auto data = SkPngEncoder::Encode(app->getDirectContext(), image.get(), opt))
           {
             reason = "";

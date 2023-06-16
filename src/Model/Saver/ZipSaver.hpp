@@ -2,8 +2,6 @@
 
 #include "Saver.hpp"
 
-#include <string>
-
 struct zip_t;
 
 namespace VGG
@@ -20,7 +18,7 @@ public:
   ZipSaver(const std::string& filePath);
   ~ZipSaver();
 
-  virtual void accept(const std::string& path, const std::string& content) override;
+  virtual void accept(const std::string& path, const std::vector<char>& content) override;
 };
 
 } // namespace Model

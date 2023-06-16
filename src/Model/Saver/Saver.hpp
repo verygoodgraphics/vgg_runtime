@@ -12,7 +12,7 @@ class Saver : public Visitor
 public:
   virtual ~Saver() = default;
 
-  virtual void accept(const std::string& path, const std::string& content) override = 0;
+  virtual void accept(const std::string& path, const std::vector<char>& content) override = 0;
 };
 
 } // namespace Model

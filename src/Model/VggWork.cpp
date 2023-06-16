@@ -1,5 +1,6 @@
 #include "VggWork.hpp"
 
+#include "Config.hpp"
 #include "Loader/DirLoader.hpp"
 #include "Loader/ZipLoader.hpp"
 #include "SubjectJsonDocument.hpp"
@@ -76,6 +77,15 @@ void VggWork::visit(VGG::Model::Visitor* visitor)
         }
       }
     }
+  }
+
+  // resouces
+  auto resouces = m_loader->resources();
+  std::string resouces_dir{ Model::ResourcesDirWithSlash };
+
+  for (auto& [name, content] : resouces)
+  {
+    visitor->accept(resouces_dir + name, content);
   }
 
   // todo, other files

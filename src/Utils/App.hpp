@@ -49,6 +49,7 @@
 #include "include/gpu/gl/GrGLFunctions.h"
 #include "include/gpu/GrBackendSurface.h"
 #include "include/gpu/ganesh/SkSurfaceGanesh.h"
+#include "encode/SkPngEncoder.h"
 
 #include "Utils/CappingProfiler.hpp"
 #include "Utils/Types.hpp"
@@ -265,8 +266,7 @@ protected: // protected members and static members
       return true;
     }
 
-    app->Self()->initContext(w, h, title);
-
+    app->Self()->initContext(w * app->m_pixelRatio, h * app->m_pixelRatio, title);
     app->Self()->makeContextCurrent();
 
     auto res = app->updateSkiaEngine();
@@ -279,16 +279,12 @@ protected: // protected members and static members
 
     DEBUG("Drawable size: %d %d", drawSize.first, drawSize.second);
     DEBUG("Window size: %d %d", winSize.first, winSize.second);
-#ifdef VGG_HOST_Linux
-    app->m_pixelRatio = DPI::ScaleFactor;
-#else
-    app->m_pixelRatio = (double)drawSize.first / winSize.first;
-#endif
     DEBUG("Scale factor: %.2lf", DPI::ScaleFactor);
     DEBUG("Pixel ratio: %.2lf", app->m_pixelRatio);
 
     // get skia surface and canvas
-    sk_sp<SkSurface> surface = app->setup_skia_surface(w, h);
+    sk_sp<SkSurface> surface =
+      app->setup_skia_surface(w * app->m_pixelRatio, h * app->m_pixelRatio);
     if (!surface)
     {
       FAIL("Failed to make skia surface.");
@@ -305,10 +301,8 @@ protected: // protected members and static members
     // init capture
 
     app->m_recorder = std::make_unique<SkPictureRecorder>();
-
     // extra initialization
     app->Self()->onInit();
-
     app->m_timestamp = SkTime::GetMSecs();
     app->m_inited = true;
     return true;
@@ -319,8 +313,8 @@ private: // private methods
   {
     ASSERT(m_skiaState.interface);
     ASSERT(m_skiaState.grContext);
-    SkImageInfo info = SkImageInfo::Make(m_pixelRatio * w,
-                                         m_pixelRatio * h,
+    SkImageInfo info = SkImageInfo::Make(w,
+                                         h,
                                          SkColorType::kRGBA_8888_SkColorType,
                                          SkAlphaType::kPremul_SkAlphaType);
     auto gpuSurface =
@@ -345,11 +339,7 @@ private: // private methods
     // color type and info format must be the followings for
     // both OpenGL and OpenGL ES, otherwise it will fail
     info.fFormat = GR_GL_RGBA8;
-    GrBackendRenderTarget target(m_pixelRatio * w,
-                                 m_pixelRatio * h,
-                                 N_MULTISAMPLE,
-                                 N_STENCILBITS,
-                                 info);
+    GrBackendRenderTarget target(w, h, N_MULTISAMPLE, N_STENCILBITS, info);
 
     SkSurfaceProps props;
     return SkSurfaces::WrapBackendRenderTarget(m_skiaState.grContext.get(),
@@ -570,6 +560,23 @@ protected: // protected methods
         return true;
       }
 
+      if (key == SDLK_s)
+      {
+        auto image = makeImageSnapshot();
+
+        SkPngEncoder::Options opt;
+        opt.fZLibLevel = 0;
+        if (auto data = SkPngEncoder::Encode(getDirectContext(), image.get(), opt))
+        {
+          std::ofstream ofs("snapshot.png", std::ios::binary);
+          if (ofs.is_open())
+          {
+            ofs.write((const char*)data->bytes(), data->size());
+          }
+        }
+        return true;
+      }
+
 #ifndef EMSCRIPTEN
       if ((mod & KMOD_CTRL) && key == SDLK_q)
       {
@@ -616,6 +623,11 @@ public: // public methods
   void setReloadCallback(std::function<void(Scene*, int)> callback)
   {
     m_reloadCallback = callback;
+  }
+
+  sk_sp<SkImage> makeImageSnapshot()
+  {
+    return m_skiaState.surface->makeImageSnapshot();
   }
 
   void setUseOldRenderer(bool use)
@@ -703,13 +715,14 @@ public: // public static methods
     return &app;
   }
 
-  static T* createInstance(int w, int h)
+  static T* createInstance(int w, int h, float scale)
   {
     T* app = new T();
     if (!app)
     {
       return nullptr;
     }
+    app->m_pixelRatio = scale;
     if (!init(app, w, h, "instance"))
     {
       return nullptr;

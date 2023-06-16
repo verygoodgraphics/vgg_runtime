@@ -2,8 +2,6 @@
 
 #include "Saver.hpp"
 
-#include <string>
-
 namespace VGG
 {
 namespace Model
@@ -16,7 +14,7 @@ class DirSaver : public Saver
 public:
   DirSaver(const std::string& workDir);
 
-  virtual void accept(const std::string& path, const std::string& content) override;
+  virtual void accept(const std::string& path, const std::vector<char>& content) override;
   // todo, save to same dir, skip write file if not dirty
 };
 

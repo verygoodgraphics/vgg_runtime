@@ -19,24 +19,24 @@ DirSaver::DirSaver(const std::string& workDir)
   // todo, check if same as src dir
 }
 
-void DirSaver::accept(const std::string& path, const std::string& content)
+void DirSaver::accept(const std::string& path, const std::vector<char>& content)
 {
-  std::filesystem::path p{ m_work_dir };
-  p /= path;
+  std::filesystem::path file_path{ m_work_dir };
+  file_path /= path;
 
-  auto dirs{ p };
+  auto dirs{ file_path };
   dirs.remove_filename();
   fs::create_directories(dirs);
 
-  std::ofstream out{ p, std::ios::binary };
-  if (out.is_open())
+  std::ofstream ofs{ file_path, std::ios::binary };
+  if (ofs.is_open())
   {
-    out << content;
-    out.close();
+    ofs.write(content.data(), content.size());
+    ofs.close();
   }
   else
   {
-    FAIL("#DirSaver::accept, unable to open file: %s, %s", p.c_str(), std::strerror(errno));
+    FAIL("#DirSaver::accept, unable to open file: %s, %s", file_path.c_str(), std::strerror(errno));
   }
 }
 

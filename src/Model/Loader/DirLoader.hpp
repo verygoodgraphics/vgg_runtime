@@ -38,7 +38,7 @@ public:
   virtual ResourcesType resources() const override
   {
     std::filesystem::path dir{ m_path };
-    dir /= ResourcesDir;
+    dir /= ResourcesDirWithSlash;
 
     ResourcesType resources;
 

@@ -45,6 +45,10 @@ public:
   const json& codeMapDoc() const;
   JsonDocumentPtr& designDoc();
   const json& layoutDoc() const;
+  auto resources()
+  {
+    return m_loader->resources();
+  }
 
   // event listener
   void addEventListener(const std::string& json_pointer,

@@ -4,7 +4,10 @@
 
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <string>
+
+namespace fs = std::filesystem;
 
 namespace VGG
 {
@@ -21,14 +24,47 @@ public:
   {
   }
 
-  virtual bool readFile(const std::string& name, std::string& content) const
+  virtual bool readFile(const std::string& name, std::string& content) const override
   {
     content.clear();
 
     std::filesystem::path dir{ m_path };
-    std::ifstream t{ dir / name };
-    content.append(std::istreambuf_iterator<char>(t), std::istreambuf_iterator<char>());
+    std::ifstream ifs{ dir / name, std::ios::binary };
+    std::istreambuf_iterator<char> start{ ifs }, end;
+    content.append(start, end);
     return true;
+  }
+
+  virtual ResourcesType resources() const override
+  {
+    std::filesystem::path dir{ m_path };
+    dir /= ResourcesDir;
+
+    ResourcesType resources;
+
+    for (auto const& dir_entry : fs::recursive_directory_iterator(dir))
+    {
+      if (dir_entry.is_regular_file())
+      {
+        // auto relative_path = std::filesystem::relative(dir_entry.path(), dir);
+        auto relative_path = dir_entry.path().lexically_relative(dir);
+
+        auto it = relative_path.begin();
+        std::string key{ *it };
+        for (++it; it != relative_path.end(); ++it)
+        {
+          key.append("/"); // use "/" on windows & posix
+          key.append(*it);
+        }
+
+        std::ifstream ifs{ dir_entry, std::ios::binary };
+        std::istreambuf_iterator<char> start{ ifs }, end;
+        std::vector<char> content{ start, end };
+        resources[key] = std::move(content);
+      }
+    }
+
+    return resources;
   }
 };
 

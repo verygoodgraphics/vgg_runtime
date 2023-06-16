@@ -95,6 +95,7 @@ private:
   void show()
   {
     m_view->show(m_model->designDoc()->content());
+    m_view->setResouces(m_model->resources());
   }
 
   void update()

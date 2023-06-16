@@ -16,6 +16,7 @@ add_library(vgg_internal OBJECT
   Model/JsonDocument.cpp
   Model/JsonSchemaValidator.cpp
   Model/Saver/DirSaver.cpp
+  Model/Saver/ZipSaver.cpp
   Model/SchemaValidJsonDocument.cpp
   Model/SubjectJsonDocument.cpp
   Model/VggWork.cpp

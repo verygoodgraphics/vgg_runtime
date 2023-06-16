@@ -16,6 +16,7 @@ class UIView
 
 public:
   using EventListener = std::function<void(UIEventPtr)>;
+  using ResourcesType = std::map<std::string, std::vector<char>>;
 
   UIView()
   {
@@ -30,6 +31,11 @@ public:
   void show(const nlohmann::json& viewModel)
   {
     m_scene->loadFileContent(viewModel);
+  }
+
+  void setResouces(ResourcesType resources)
+  {
+    Scene::ResRepo = std::move(resources);
   }
 
   void setEventListener(EventListener listener)

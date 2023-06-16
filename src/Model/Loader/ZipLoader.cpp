@@ -47,5 +47,12 @@ bool ZipLoader::readFile(const std::string& name, std::string& content) const
   return false;
 }
 
+Loader::ResourcesType ZipLoader::resources() const
+{
+  ResourcesType resources;
+  // todo
+  return resources;
+}
+
 } // namespace Model
 } // namespace VGG

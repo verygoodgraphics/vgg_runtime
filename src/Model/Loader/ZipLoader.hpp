@@ -23,6 +23,7 @@ public:
   virtual ~ZipLoader();
 
   virtual bool readFile(const std::string& name, std::string& content) const override;
+  virtual ResourcesType resources() const override;
 
 private:
   bool load();

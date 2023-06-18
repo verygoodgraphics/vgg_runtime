@@ -51,6 +51,28 @@ skia_use_vulkan=false \
 skia_enable_pdf=false \
 ")
 
+function(list_from_json out_var json)
+    set(list)
+    string(JSON array ERROR_VARIABLE error GET "${json}" ${ARGN})
+    if(NOT error)
+        string(JSON len ERROR_VARIABLE error LENGTH "${array}")
+        if(NOT error AND NOT len STREQUAL "0")
+            math(EXPR last "${len} - 1")
+            foreach(i RANGE "${last}")
+                string(JSON item GET "${array}" "${i}")
+                list(APPEND list "${item}")
+            endforeach()
+        endif()
+    endif()
+    set("${out_var}" "${list}" PARENT_SCOPE)
+endfunction()
+
+function(get_definitions out_var desc_json target)
+    list_from_json(output "${desc_json}" "${target}" "defines")
+    list(FILTER output INCLUDE REGEX "^SK_")
+    set("${out_var}" "${output}" PARENT_SCOPE)
+endfunction()
+
 function(get_skia_gn_config out_options config platform link_type)
 
 # set target cpu for skia

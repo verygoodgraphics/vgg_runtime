@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en-us">
+
+<head></head>
+
+<body>
+    <canvas id="myCanvas"></canvas>
+
+    <script type="text/javascript" src="./sut/runtime.js"></script>
+    <script type="text/javascript">
+        async function setupAndRun() {
+            // 0. Given
+            const myCanvas = document.getElementById('myCanvas');
+            const myWorkUrl = '/my-work.zip';
+            const width = 800;
+            const height = 600;
+
+            // 1. create wasm instance
+            const myInstance = await createModule(
+                {
+                    noInitialRun: true,
+                    canvas: myCanvas,
+                    locateFile: function (path, prefix) {
+                        if (path.endsWith('.data')) {
+                            return './sut/' + path;
+                        }
+                        return prefix + path;
+                    },
+                }
+            );
+
+            // 2. call wasm main
+            try {
+                myInstance.ccall(
+                    'emscripten_main',
+                    'void',
+                    ['number', 'number'],
+                    [width, height]
+                );
+            } catch (error) {
+                console.error(error);
+            }
+
+            // 3. load vgg work
+            fetch(myWorkUrl)
+                .then(res => {
+                    if (res.ok) {
+                        return res.arrayBuffer();
+                    }
+                    throw new Error(res.statusText);
+                })
+                .then(buf => {
+                    const data = new Int8Array(buf);
+                    if (
+                        !myInstance.ccall(
+                            'load_file_from_mem',
+                            'boolean', // return type
+                            ['string', 'array', 'number'], // argument types
+                            [name, data, data.length]
+                        )
+                    ) {
+                        throw new Error('load failed!');
+                    }
+                }).then(
+                    (val) => {
+                        // 4. use vgg sdk
+                        useVggSdk(myInstance);
+                    }
+                )
+                .catch(err => {
+                    console.error(`Failed to load work: ${err.message}`);
+                });
+
+        }
+
+        async function useVggSdk(myInstance) {
+            // Given
+            const { getVggSdk, setVgg } = await import("https://s3.vgg.cool/test/js/vgg-sdk.esm.js");
+            setVgg(myInstance);
+            const vggSdk = await getVggSdk();
+            // When
+            const documentString = vggSdk.getDesignDocument();
+            // Then
+            console.log("got document json string from sdk, length:  ", documentString.length);
+        }
+
+        setupAndRun();
+    </script>
+</body>
+
+</html>

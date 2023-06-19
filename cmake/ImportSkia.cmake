@@ -1,13 +1,9 @@
 # find_library(skia_DEB NAMES skia PATHS "/home/ysl/Code/skia/out/Static")
 
 set(SKIA_LIB_LINK_TYPE "dynamic")
-set(SKIA_LIB_CONFIG_PREFIX "out/${VGG_VAR_PLATFORM_TARGET}/${SKIA_LIB_LINK_TYPE}/${CMAKE_BUILD_TYPE}")
+set(SKIA_LIB_BUILD_PREFIX "out/${VGG_VAR_PLATFORM_TARGET}/${SKIA_LIB_LINK_TYPE}/${CMAKE_BUILD_TYPE}")
 
-if(NOT EXISITS SKIA_EXTERNAL_PROJECT_DIR)
-message(FATAL "SKIA_EXTERNAL_PROJECT_DIR must be a valid full path to skia project")
-endif()
-
-set(SKIA_LIB_DIR "${SKIA_EXTERNAL_PROJECT_DIR}/${SKIA_LIB_CONFIG_PREFIX}")
+set(SKIA_LIB_DIR "${SKIA_EXTERNAL_PROJECT_DIR}/${SKIA_LIB_BUILD_PREFIX}")
 set(SKIA_INCLUDE_DIRS "${SKIA_EXTERNAL_PROJECT_DIR}" "${SKIA_EXTERNAL_PROJECT_DIR}/include/")
 set(SKIA_LIBS)
 
@@ -16,34 +12,19 @@ include(SkiaUtils)
 
 # setup features for skia compilation for different platform
 get_skia_gn_config(CONFIG_OPTIONS "debug" ${VGG_VAR_PLATFORM_TARGET} ${SKIA_LIB_LINK_TYPE})
-
-include(ExternalProject)
-
-ExternalProject_Add(skia
-SOURCE_DIR ${SKIA_EXTERNAL_PROJECT_DIR}
-GIT_REPOSITORY https://skia.googlesource.com/skia.git
-GIT_TAG master
-CONFIG_COMMAND ${GN} ${SKIA_LIB_DIR} ${CONFIG_OPTIONS}
-DEPENDS skia-fetch-deps
-BUILD_COMMAND ninja -C ${SKIA_LIB_DIR}
-)
-
-ExternalProject_Add_Step(skia fetch-deps
-  COMMAND python3 tools/git-sync-deps
-  WORKING_DIRECTORY ${SKIA_EXTERNAL_PROJECT_DIR}
-)
-
-
-
-# ===============================================
-# add skia as custome target
-# set(SKIA_BUILD_FEATURES)
-# set(SKIA_BUILD_DIR)
-
 string(REPLACE " " ";" PRINT_CONFIG_OPTIONS ${CONFIG_OPTIONS})
 foreach(OPT ${PRINT_CONFIG_OPTIONS})
   message(STATUS ${OPT})
 endforeach(OPT)
+
+# config skia
+execute_process(COMMAND ${GN} gen ${SKIA_LIB_BUILD_PREFIX} ${CONFIG_OPTIONS}
+WORKING_DIRECTORY ${SKIA_EXTERNAL_PROJECT_DIR})
+
+# build skia
+execute_process(COMMAND ninja -C ${SKIA_LIB_BUILD_PREFIX}
+WORKING_DIRECTORY ${SKIA_EXTERNAL_PROJECT_DIR}
+)
 
 
 # ===============================================

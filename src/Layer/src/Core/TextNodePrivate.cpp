@@ -1,0 +1,4 @@
+namespace VGG
+{
+
+} // namespace VGG

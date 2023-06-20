@@ -140,11 +140,9 @@ public:
 
   static inline std::shared_ptr<TextNode> fromText(const nlohmann::json& j)
   {
-    auto p = std::make_shared<TextNode>("Text", "");
-    auto frameMode = j["frameMode"].get<int>();
-    p->mode = (ETextLayoutMode)frameMode;
-    p->text = j["content"];
-    p->styles = j["attr"].get<std::vector<TextStyleStub>>();
+    auto p = std::make_shared<TextNode>("Text");
+    p->setFrameMode(j["frameMode"].get<ETextLayoutMode>());
+    p->setText(j["content"], j["attr"].get<std::vector<TextStyleStub>>());
     return p;
   }
 

@@ -1,4 +1,5 @@
 #include "Core/TextNode.h"
+#include "Core/Node.hpp"
 #include "Core/VGGType.h"
 #include "Core/VGGUtils.h"
 #include "include/core/SkCanvas.h"
@@ -7,10 +8,13 @@
 #include "include/effects/SkRuntimeEffect.h"
 #include "core/SkTextBlob.h"
 
+#include "Core/TextNodePrivate.h"
+
 #include <string_view>
 
 namespace VGG
 {
+
 std::vector<std::string_view> makeLines(const std::string& text)
 {
   std::vector<std::string_view> ls;
@@ -174,22 +178,37 @@ void drawText(SkCanvas* canvas,
   }
 }
 
-TextNode::TextNode(const std::string& name, const std::string& text)
+TextNode::TextNode(const std::string& name)
   : PaintNode(name, VGG_TEXT)
-  , text(text)
+  , d_ptr(new TextNode__pImpl(this))
 {
+}
+
+void TextNode::setText(const std::string& utf8, const std::vector<TextStyleStub>& styles)
+{
+  VGG_IMPL(TextNode)
+  _->text = utf8;
+  _->styles = styles;
+}
+
+void TextNode::setFrameMode(ETextLayoutMode mode)
+{
+  VGG_IMPL(TextNode)
+  _->mode = mode;
 }
 
 void TextNode::paintEvent(SkCanvas* canvas)
 {
-  if (styles.empty() == false)
+  VGG_IMPL(TextNode);
+  if (_->styles.empty() == false && _->text.empty() == false)
   {
-
     canvas->save();
     canvas->scale(1, -1);
-    drawText(canvas, text, getBound(), styles[0]);
+    drawText(canvas, _->text, getBound(), _->styles[0]);
     canvas->restore();
   }
 }
+
+TextNode::~TextNode() = default;
 
 } // namespace VGG

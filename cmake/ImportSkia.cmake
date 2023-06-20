@@ -28,7 +28,7 @@ WORKING_DIRECTORY ${SKIA_EXTERNAL_PROJECT_DIR}
 
 
 # ===============================================
-set(SKIA_LIB_NAMES skia)
+set(SKIA_LIB_NAMES skia skparagraph skshaper skunicode)
 execute_process(COMMAND ${GN} desc --format=json --all ${SKIA_LIB_DIR} //:skia
   WORKING_DIRECTORY ${SKIA_EXTERNAL_PROJECT_DIR}
   RESULT_VARIABLE CMD_RET

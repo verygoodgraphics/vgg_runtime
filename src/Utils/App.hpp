@@ -23,6 +23,7 @@
 #include <filesystem>
 #include <functional>
 #include <memory>
+#include <optional>
 #ifdef EMSCRIPTEN
 #include <SDL2/SDL_opengles2.h>
 #include <emscripten/emscripten.h>
@@ -142,6 +143,27 @@ HAS_MEMBER_FUNCTION_DEF(pollEvent)
 
 #undef HAS_MEMBER_FUNCTION_DEF
 
+struct AppError
+{
+  enum class Kind
+  {
+    TextureSizeOutOfRangeError,
+    EGLNoDisplayError,
+    EGLGetAttribError,
+    MakeCurrentContextError,
+    HasInitError,
+    UnknownError,
+    RenderEngineError,
+  };
+  Kind kind;
+  std::string text;
+  AppError(Kind k, const std::string& error)
+    : kind(k)
+    , text(error)
+  {
+  }
+};
+
 template<typename T>
 class App : public Uncopyable
 {
@@ -258,20 +280,25 @@ protected: // protected members and static members
 
   std::function<void(Scene* scene, int type)> m_reloadCallback;
 
-  static bool init(App* app, int w, int h, const std::string& title)
+  static std::optional<AppError> init(App* app, int w, int h, const std::string& title)
   {
     ASSERT(app);
     if (app->m_inited)
     {
-      return true;
+      return AppError(AppError::Kind::HasInitError, "app has init");
     }
 
-    app->Self()->initContext(w * app->m_pixelRatio, h * app->m_pixelRatio, title);
-    app->Self()->makeContextCurrent();
+    auto appResult = app->Self()->initContext(w * app->m_pixelRatio, h * app->m_pixelRatio, title);
+    if (appResult.has_value())
+      return appResult;
 
-    auto res = app->updateSkiaEngine();
-    if (res == false)
-      return false;
+    appResult = app->Self()->makeContextCurrent();
+    if (appResult.has_value())
+      return appResult;
+
+    appResult = app->updateSkiaEngine();
+    if (appResult.has_value())
+      return appResult;
 
     // get necessary property about window and DPI
     auto drawSize = std::any_cast<std::pair<int, int>>(app->Self()->getProperty("viewport_size"));
@@ -287,15 +314,13 @@ protected: // protected members and static members
       app->setup_skia_surface(w * app->m_pixelRatio, h * app->m_pixelRatio);
     if (!surface)
     {
-      FAIL("Failed to make skia surface.");
-      return false;
+      return AppError(AppError::Kind::RenderEngineError, "Failed to make skia surface");
     }
     app->m_skiaState.surface = surface;
     SkCanvas* canvas = surface->getCanvas();
     if (!canvas)
     {
-      FAIL("Failed to get skia canvas.");
-      return false;
+      return AppError(AppError::Kind::RenderEngineError, "Failed to make skia canvas");
     }
 
     // init capture
@@ -305,7 +330,7 @@ protected: // protected members and static members
     app->Self()->onInit();
     app->m_timestamp = SkTime::GetMSecs();
     app->m_inited = true;
-    return true;
+    return std::nullopt;
   }
 
 private: // private methods
@@ -368,25 +393,23 @@ protected: // protected methods
     m_height = h;
   }
 
-  bool updateSkiaEngine()
+  std::optional<AppError> updateSkiaEngine()
   {
     // Create Skia
     // get skia interface and make opengl context
     sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
     if (!interface)
     {
-      FAIL("Failed to make skia opengl interface");
-      return false;
+      return AppError(AppError::Kind::RenderEngineError, "Failed to make skia opengl interface");
     }
     sk_sp<GrDirectContext> grContext = GrDirectContext::MakeGL(interface);
     if (!grContext)
     {
-      FAIL("Failed to make skia opengl context.");
-      return false;
+      return AppError(AppError::Kind::RenderEngineError, "Failed to make skia opengl context.");
     }
     m_skiaState.interface = interface;
     m_skiaState.grContext = grContext;
-    return true;
+    return std::nullopt;
   }
 
   bool dispatchGlobalEvent(const SDL_Event& evt)
@@ -715,7 +738,7 @@ public: // public static methods
     return &app;
   }
 
-  static T* createInstance(int w, int h, float scale)
+  static std::variant<T*, AppError> createInstance(int w, int h, float scale)
   {
     T* app = new T();
     if (!app)
@@ -723,9 +746,10 @@ public: // public static methods
       return nullptr;
     }
     app->m_pixelRatio = scale;
-    if (!init(app, w, h, "instance"))
+    auto appResult = init(app, w, h, "instance");
+    if (appResult.has_value())
     {
-      return nullptr;
+      return appResult.value();
     }
     return app;
   }

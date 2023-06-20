@@ -90,7 +90,11 @@ endif()
 
 if(NOT ${platform} IN_LIST VGG_WIN_TARGET_LIST)
 # we assume non-window using gcc compatible compiler
-string(APPEND OPTIONS " extra_cflags_cc=[\"-fvisibility=default\"]")
+if(config STREQUAL "RelWithDebInfo")
+  string(APPEND OPTIONS " extra_cflags_cc=[\"-fvisibility=default\", \"-g\"]")
+else()
+  string(APPEND OPTIONS " extra_cflags_cc=[\"-fvisibility=default\"]")
+endif()
 elseif(platform STREQUAL "WASM")
 string(APPEND OPTIONS " extra_cflags_cc=[\"-frtti\",\"-s\", \"-fvisibility=default\"] extra_cflags=[\"-Wno-unknown-warning-option\",\"-s\",\"-s\"]")
 endif()
@@ -100,9 +104,11 @@ string(APPEND OPTIONS " cxx=\"${CMAKE_CXX_COMPILER}\"")
 string(APPEND OPTIONS " cc=\"${CMAKE_C_COMPILER}\"")
 
 # set config type for skia
-if(config STREQUAL "debug")
+if(config STREQUAL "Debug")
   string(APPEND OPTIONS " is_official_build=false is_debug=true")
-elseif(config STREQUAL "release")
+elseif(config STREQUAL "Release")
+  string(APPEND OPTIONS " is_official_build=true is_debug=false")
+elseif(config STREQUAL "RelWithDebInfo")
   string(APPEND OPTIONS " is_official_build=true is_debug=false")
 endif()
 

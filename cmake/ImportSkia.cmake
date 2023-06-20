@@ -11,7 +11,7 @@ set(GN "bin/gn")
 include(SkiaUtils)
 
 # setup features for skia compilation for different platform
-get_skia_gn_config(CONFIG_OPTIONS "debug" ${VGG_VAR_PLATFORM_TARGET} ${SKIA_LIB_LINK_TYPE})
+get_skia_gn_config(CONFIG_OPTIONS ${CMAKE_BUILD_TYPE} ${VGG_VAR_PLATFORM_TARGET} ${SKIA_LIB_LINK_TYPE})
 string(REPLACE " " ";" PRINT_CONFIG_OPTIONS ${CONFIG_OPTIONS})
 foreach(OPT ${PRINT_CONFIG_OPTIONS})
   message(STATUS ${OPT})

@@ -2,7 +2,7 @@
 # Only those needed are covered here.
 # https://skia.org/docs/user/build/
 set(SKIA_SUPPORTED_FEATURES "elg;zlib;freetype;skparagraph;icu;gpu;vulkan;")
-set(SKIA_PRESET_FEATURES_FOR_WASM
+set(SKIA_PRESET_FEATURES_FOR_NATIVE
 "skia_use_egl=true
 skia_use_freetype=true
 skia_use_zlib=true
@@ -27,7 +27,7 @@ skia_use_expat=false
 skia_use_vulkan=false 
 skia_enable_pdf=false")
 
-set(SKIA_PRESET_FEATURES_FOR_NATIVE
+set(SKIA_PRESET_FEATURES_FOR_WASM
 "skia_use_freetype=true 
 skia_enable_svg=true 
 skia_use_zlib=true 

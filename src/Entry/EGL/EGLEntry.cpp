@@ -73,10 +73,9 @@ int main(int argc, char** argv)
          prefix,
          [&](const auto& json, auto res)
          {
-           auto result =
-             render(json, res, program.get<int>("-q"), program.get<float>("-s"));
+           auto result = render(json, res, program.get<int>("-q"), program.get<float>("-s"));
            auto reason = std::get<0>(result);
-           std::cout << "Reason: " << std::endl;
+           std::cout << "Reason: " << reason << std::endl;
            writeResult(std::get<1>(result));
          });
   }

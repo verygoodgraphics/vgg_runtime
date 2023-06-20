@@ -3,7 +3,9 @@
 #include <any>
 #include <nlohmann/json.hpp>
 #include <EGL/egl.h>
+#include <optional>
 #include <sstream>
+#include <variant>
 
 #include "Entity/EntityManager.hpp"
 #include "Entity/InputManager.hpp"
@@ -157,7 +159,7 @@ public:
     return 1.0;
   }
 #endif
-  bool initContext(int w, int h, const std::string& title)
+  std::optional<AppError> initContext(int w, int h, const std::string& title)
   {
     // DPI::ScaleFactor = get_scale_factor();
     // int winWidth = w * DPI::ScaleFactor;
@@ -176,7 +178,7 @@ public:
       // try EXT_platform_device, see
       // https://www.khronos.org/registry/EGL/extensions/EXT/EGL_EXT_platform_device.txt
       // egl_display = create_display_from_device();
-      return false;
+      return AppError(AppError::Kind::EGLNoDisplayError, "No default display");
     }
 
     EGLint major = 0, minor = 0;
@@ -189,6 +191,23 @@ public:
     EGLint num_configs = 0;
     eglChooseConfig(egl_display, config_attribs, &egl_config, 1, &num_configs);
     EGL_CHECK();
+
+    int maxSurfaceSize[2];
+    if (eglGetConfigAttrib(egl_display, egl_config, EGL_MAX_PBUFFER_WIDTH, maxSurfaceSize) !=
+        EGL_TRUE)
+    {
+      return AppError(AppError::Kind::EGLGetAttribError, "get attribute error");
+    }
+    if (eglGetConfigAttrib(egl_display, egl_config, EGL_MAX_PBUFFER_HEIGHT, maxSurfaceSize + 1) !=
+        EGL_TRUE)
+    {
+      return AppError(AppError::Kind::EGLGetAttribError, "get attribute error");
+    }
+
+    if (winWidth + 100 > maxSurfaceSize[0] || winHeight + 100 > maxSurfaceSize[1])
+    {
+      return AppError(AppError::Kind::TextureSizeOutOfRangeError, "Texture size out of range");
+    }
 
     // 3. Create a surface
 
@@ -205,15 +224,16 @@ public:
     // 5. Create a context and make it current
     egl_ctx = eglCreateContext(egl_display, egl_config, EGL_NO_CONTEXT, context_attris);
     EGL_CHECK();
+
     return makeContextCurrent();
   }
-  bool makeContextCurrent()
+  std::optional<AppError> makeContextCurrent()
   {
     if (eglMakeCurrent(egl_display, egl_surface, egl_surface, egl_ctx) == EGL_TRUE)
     {
-      return true;
+      return nullopt;
     }
-    return false;
+    return AppError(AppError::Kind::MakeCurrentContextError, "make current failed");
   }
 
   std::any getProperty(const std::string& name)
@@ -278,24 +298,29 @@ std::tuple<std::string, std::map<int, std::vector<char>>> render(
   int imageQuality,
   float scale)
 {
-  std::string reason;
   std::map<int, std::vector<char>> res;
-
   auto scene = std::make_shared<Scene>();
   scene->loadFileContent(j);
   scene->setResRepo(resources);
   auto count = scene->artboards.size();
+  std::stringstream ss;
   for (int i = 0; i < count; i++)
   {
     auto b = scene->artboards[i]->getBound();
-
     int w = b.size().x;
     int h = b.size().y;
-    auto app = App<EGLRuntime>::createInstance(w, h, scale);
+    auto appResult = App<EGLRuntime>::createInstance(w, h, scale);
+    if (const auto error = std::get_if<AppError>(&appResult))
+    {
+      ss << "create instance failed for artboard: " << i + 1 << std::endl
+         << error->text << std::endl;
+      continue;
+    }
+    auto v = std::get_if<EGLRuntime*>(&appResult);
+    auto app = *v;
     if (!app)
     {
-      reason = "create instance failed\n";
-      return { reason, res };
+      return { "Failed to create instance", res };
     }
     scene->setPage(i);
     app->setUseOldRenderer(false);
@@ -312,25 +337,25 @@ std::tuple<std::string, std::map<int, std::vector<char>>> render(
           opt.fZLibLevel = std::max(std::min(9, (100 - imageQuality) / 10), 0);
           if (auto data = SkPngEncoder::Encode(app->getDirectContext(), image.get(), opt))
           {
-            reason = "";
             res[i] = std::vector<char>{ data->bytes(), data->bytes() + data->size() };
           }
           else
           {
-            reason = "encode to image failed\n";
+            ss << "failed to encode image for artboard: " << i + 1 << std::endl;
           }
         }
         else
         {
-          reason = "make image snapshot failed\n";
+          ss << "failed to render into image for artboard: " << i + 1 << std::endl;
         }
       }
       else
       {
-        reason = "null surface\n";
+        ss << "failed to create surface for artboard: " << i + 1 << std::endl;
       }
     }
     App<EGLRuntime>::destoryInstance(app);
   }
-  return { reason, res };
+  return { std::string{ std::istreambuf_iterator<char>{ ss }, std::istreambuf_iterator<char>{} },
+           res };
 }

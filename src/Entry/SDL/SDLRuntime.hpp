@@ -7,6 +7,7 @@
 #include "../../Utils/App.hpp"
 #include "../../Utils/Utils.hpp"
 #include "../../Utils/Version.hpp"
+#include <optional>
 
 using namespace VGG;
 
@@ -89,13 +90,13 @@ public:
     return 1.0;
   }
 #endif
-  bool initContext(int w, int h, const std::string& title)
+  std::optional<AppError> initContext(int w, int h, const std::string& title)
   {
     // init sdl
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
       handle_sdl_error();
-      return false;
+      return AppError(AppError::Kind::RenderEngineError, "sdl init failed");
     }
     SDL_version compileVersion, linkVersion;
     SDL_VERSION(&compileVersion);
@@ -149,7 +150,7 @@ public:
     if (!window)
     {
       handle_sdl_error();
-      return false;
+      return AppError(AppError::Kind::RenderEngineError, "Create Window Failed\n");
     }
     m_width = w;
     m_height = h;
@@ -159,15 +160,16 @@ public:
     if (!glContext)
     {
       handle_sdl_error();
-      return false;
+      return AppError(AppError::Kind::RenderEngineError, "Create Context Failed");
     }
 
     m_sdlState.glContext = glContext;
 
     // switch to this context
-    if (makeContextCurrent() == false)
+    auto appResult = makeContextCurrent();
+    if (appResult.has_value())
     {
-      return false;
+      return appResult;
     }
     INFO("GL_VENDOR: %s", glGetString(GL_VENDOR));
     INFO("GL_RENDERER: %s", glGetString(GL_RENDERER));
@@ -178,17 +180,17 @@ public:
     //
 
     initPropertyMap();
-    return true;
+    return std::nullopt;
   }
 
-  bool makeContextCurrent()
+  std::optional<AppError> makeContextCurrent()
   {
     if (SDL_GL_MakeCurrent(m_sdlState.window, m_sdlState.glContext) != 0)
     {
       handle_sdl_error();
-      return false;
+      return AppError(AppError::Kind::MakeCurrentContextError, "Make Current Context Error");
     }
-    return true;
+    return std::nullopt;
   }
 
   std::any getProperty(const std::string& name)

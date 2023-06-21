@@ -196,11 +196,13 @@ public:
     if (eglGetConfigAttrib(egl_display, egl_config, EGL_MAX_PBUFFER_WIDTH, maxSurfaceSize) !=
         EGL_TRUE)
     {
+      EGL_CHECK();
       return AppError(AppError::Kind::EGLGetAttribError, "get attribute error");
     }
     if (eglGetConfigAttrib(egl_display, egl_config, EGL_MAX_PBUFFER_HEIGHT, maxSurfaceSize + 1) !=
         EGL_TRUE)
     {
+      EGL_CHECK();
       return AppError(AppError::Kind::EGLGetAttribError, "get attribute error");
     }
 
@@ -233,6 +235,7 @@ public:
     {
       return nullopt;
     }
+    EGL_CHECK();
     return AppError(AppError::Kind::MakeCurrentContextError, "make current failed");
   }
 

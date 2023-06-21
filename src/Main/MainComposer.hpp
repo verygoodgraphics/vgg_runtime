@@ -33,12 +33,9 @@ public:
     m_platform_composer.reset(new BrowserComposer());
 #else
 #ifdef NDEBUG
-    // todo, use real js sdk file path, remote di container
-    m_platform_composer.reset(new NativeComposer("./asset/vgg-sdk.esm.mjs"));
+    m_platform_composer.reset(new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js"));
 #else
-    // local di container
-    m_platform_composer.reset(
-      new NativeComposer("../test/testDataDir/fake-sdk/vgg-sdk.esm.mjs", false));
+    m_platform_composer.reset(new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js", false));
 #endif
 #endif
     m_platform_composer->setup();

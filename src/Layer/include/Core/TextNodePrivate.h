@@ -13,5 +13,7 @@ public:
   std::string text;
   ETextLayoutMode mode;
   std::vector<TextStyleStub> styles;
+
+  void drawText(SkCanvas* canvas);
 };
 } // namespace VGG

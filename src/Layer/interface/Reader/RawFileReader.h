@@ -29,7 +29,10 @@ public:
   std::map<std::string, std::vector<char>> readResource() override
   {
     std::map<std::string, std::vector<char>> resources;
-    for (const auto& entry : std::filesystem::recursive_directory_iterator(prefix / resDir))
+    auto fullpath = prefix / resDir;
+    if (std::filesystem::exists(fullpath) == false)
+      return resources;
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(fullpath))
     {
       std::string key = (resDir / entry.path().filename()).string();
       std::cout << "read image: " << entry.path() << " which key is " << key << std::endl;

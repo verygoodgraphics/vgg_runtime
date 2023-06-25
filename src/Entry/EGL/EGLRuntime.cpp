@@ -295,46 +295,111 @@ public:
   }
 };
 
+float calcScaleFactor(float inputWidth,
+                      float inputHeight,
+                      float maxWidth,
+                      float maxHeight,
+                      float& outWidth,
+                      float& outHeight)
+{
+  auto widthScale = maxWidth / inputWidth;
+  auto heightScale = maxHeight / inputHeight;
+  float outputSize[2] = { 0.f, 0.f };
+  if (widthScale < heightScale)
+  {
+    outWidth = maxWidth;
+    outHeight = widthScale * inputHeight;
+  }
+  else
+  {
+    outWidth = heightScale * inputWidth;
+    outHeight = maxHeight;
+  }
+  return widthScale > heightScale ? heightScale : widthScale;
+}
+
+void getMaxSurfaceSize(int resolutionLevel, float* maxSurfaceSize)
+{
+  switch (resolutionLevel)
+  {
+    case 0:
+    {
+      maxSurfaceSize[0] = 2048;
+      maxSurfaceSize[1] = 2048;
+    }
+    case 1:
+
+    {
+      maxSurfaceSize[0] = 2048;
+      maxSurfaceSize[1] = 2048;
+    }
+    case 2:
+    {
+      maxSurfaceSize[0] = 4096;
+      maxSurfaceSize[1] = 4096;
+    }
+    case 3:
+    {
+      maxSurfaceSize[0] = 8192;
+      maxSurfaceSize[1] = 8192;
+    }
+    default:
+    {
+      maxSurfaceSize[0] = 2048;
+      maxSurfaceSize[1] = 2048;
+    }
+  }
+}
+
 std::tuple<std::string, std::map<int, std::vector<char>>> render(
   const nlohmann::json& j,
   const std::map<std::string, std::vector<char>>& resources,
   int imageQuality,
-  float scale)
+  int resolutionLevel)
 {
+  float maxSurfaceSize[2];
+  getMaxSurfaceSize(resolutionLevel, maxSurfaceSize);
+  std::stringstream ss;
+  auto appResult = App<EGLRuntime>::createInstance(maxSurfaceSize[0], maxSurfaceSize[1], 1.0);
+  if (const auto error = std::get_if<AppError>(&appResult))
+  {
+    ss << "create instance failed: " << error->text << std::endl;
+    std::string s;
+    ss >> s;
+    return { s, {} };
+  }
+  auto v = std::get_if<EGLRuntime*>(&appResult);
+  auto app = *v;
+  if (!app)
+  {
+    return { "Failed to create instance", {} };
+  }
+
   std::map<int, std::vector<char>> res;
   auto scene = std::make_shared<Scene>();
   scene->loadFileContent(j);
   scene->setResRepo(resources);
   auto count = scene->artboards.size();
-  std::stringstream ss;
   for (int i = 0; i < count; i++)
   {
     auto b = scene->artboards[i]->getBound();
     int w = b.size().x;
     int h = b.size().y;
-    auto appResult = App<EGLRuntime>::createInstance(w, h, scale);
-    if (const auto error = std::get_if<AppError>(&appResult))
-    {
-      ss << "create instance failed for artboard: " << i + 1 << std::endl
-         << error->text << std::endl;
-      continue;
-    }
-    auto v = std::get_if<EGLRuntime*>(&appResult);
-    auto app = *v;
-    if (!app)
-    {
-      return { "Failed to create instance", res };
-    }
     scene->setPage(i);
     app->setUseOldRenderer(false);
     app->setScene(scene);
     auto canvas = app->getCanvas();
     if (canvas)
     {
+      float actualSize[2];
+      auto scale =
+        calcScaleFactor(w, h, maxSurfaceSize[0], maxSurfaceSize[1], actualSize[0], actualSize[1]);
+      app->setScale(scale);
       app->frame(0);
       if (auto surface = app->getSurface())
       {
-        if (auto image = surface->makeImageSnapshot())
+        if (auto image = surface->makeImageSnapshot(
+              SkIRect::MakeXYWH(0, 0, (int)actualSize[0], (int)actualSize[1])))
         {
           SkPngEncoder::Options opt;
           opt.fZLibLevel = std::max(std::min(9, (100 - imageQuality) / 10), 0);
@@ -357,8 +422,9 @@ std::tuple<std::string, std::map<int, std::vector<char>>> render(
         ss << "failed to create surface for artboard: " << i + 1 << std::endl;
       }
     }
-    App<EGLRuntime>::destoryInstance(app);
   }
+
+  App<EGLRuntime>::destoryInstance(app);
   return { std::string{ std::istreambuf_iterator<char>{ ss }, std::istreambuf_iterator<char>{} },
            res };
 }

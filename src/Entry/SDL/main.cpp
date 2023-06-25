@@ -75,8 +75,11 @@ int main(int argc, char** argv)
     }
   }
 
-  SDLRuntime* app =
-    App<SDLRuntime>::getInstance(program.get<int>("-w"), program.get<int>("-h"), "VGG");
+  SDLRuntime* app = App<SDLRuntime>::getInstance(1920, 1080, "VGG");
+  if (!app)
+  {
+    return 0;
+  }
   app->setScene(scene);
 
   std::vector<fs::path> entires;

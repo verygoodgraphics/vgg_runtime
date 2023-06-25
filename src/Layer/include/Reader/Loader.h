@@ -260,9 +260,8 @@ public:
 
       auto t = p->localTransform();
       const auto b = p->getBound();
-      const auto offset = glm::translate(t, -b.bottomLeft);
+      const auto offset = glm::translate(t, glm::vec2{ -b.bottomLeft.x, b.bottomLeft.y });
       p->setLocalTransform(offset);
-
       auto layers = fromLayers(e);
       for (const auto& l : layers)
       {

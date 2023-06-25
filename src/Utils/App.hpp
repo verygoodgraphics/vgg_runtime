@@ -643,6 +643,11 @@ public: // public methods
     m_scene = scene;
   }
 
+  void setScale(float scale)
+  {
+    m_pixelRatio = scale;
+  }
+
   void setReloadCallback(std::function<void(Scene*, int)> callback)
   {
     m_reloadCallback = callback;

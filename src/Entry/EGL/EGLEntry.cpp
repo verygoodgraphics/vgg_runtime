@@ -73,7 +73,7 @@ int main(int argc, char** argv)
          prefix,
          [&](const auto& json, auto res)
          {
-           auto result = render(json, res, 100, 3);
+           auto result = render(json, res, 80, 2);
            auto reason = std::get<0>(result);
            std::cout << "Reason: " << reason << std::endl;
            writeResult(std::get<1>(result));

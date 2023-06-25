@@ -3,6 +3,7 @@
 #include <optional>
 #include "Core/Attrs.h"
 #include "Core/VGGType.h"
+#include "Reader/Loader.h"
 #include "glm/fwd.hpp"
 using nlohmann::json;
 
@@ -98,6 +99,26 @@ inline void from_json(const json& j, VGGGradient::GradientStop& x)
   x.midPoint = j["midPoint"];
 }
 
+inline void transformGredient(const json& j, VGGGradient& x)
+{
+  auto v = j.at("matrix").get<std::vector<double>>();
+  assert(v.size() == 6);
+  const auto matrix =
+    glm::mat3{ glm::vec3{ v[0], v[1], 0 }, glm::vec3{ v[2], v[3], 0 }, glm::vec3{ v[4], v[5], 1 } };
+  x.from.x = j["xOrigin"];
+  x.from.y = j["yOrigin"];
+  const float length = j["length"];
+  const float angle = j["angle"];
+  glm::vec2 dir = { std::cos(glm::radians(angle)), std::sin(glm::radians(angle)) };
+  x.to = x.from + length * dir;
+  const auto a = matrix * glm::vec3{ x.to, 1.0 };
+  const auto b = matrix * glm::vec3{ x.from, 1.0 };
+  x.to.x = a.x;
+  x.to.y = a.y;
+  x.from.x = b.x;
+  x.from.y = b.y;
+}
+
 inline void from_json(const json& j, VGGGradient& x)
 {
   const auto g = j["instance"];
@@ -125,7 +146,10 @@ inline void from_json(const json& j, VGGGradient& x)
   }
   else
   {
-    // TODO::
+    x.stops = g["stops"];
+    x.gradientType = g["gradientType"];
+    auto geo = g["geometry"];
+    transformGredient(geo, x);
   }
 }
 

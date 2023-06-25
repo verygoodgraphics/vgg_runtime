@@ -263,11 +263,11 @@ protected: // protected members and static members
   static constexpr int N_MULTISAMPLE = 0;
   static constexpr int N_STENCILBITS = 8;
 
-  bool m_inited;
+  bool m_inited{ false };
   bool m_shouldExit;
   int m_width;
   int m_height;
-  double m_pixelRatio;
+  double m_pixelRatio{ 1.0 };
   int m_nFrame;
   double m_timestamp;
   SkiaState m_skiaState;
@@ -734,10 +734,11 @@ public: // public static methods
     static_assert(std::is_base_of<App<T>, T>());
 
     static T app;
-
     // if already initialized, these init params are ignored
-    if (!init(&app, w, h, title))
+    auto appResult = init(&app, w, h, title);
+    if (appResult.has_value())
     {
+      INFO("%s", appResult.value().text.c_str());
       return nullptr;
     }
     return &app;

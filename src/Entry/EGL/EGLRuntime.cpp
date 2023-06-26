@@ -290,8 +290,11 @@ public:
 
   ~EGLRuntime()
   {
+    eglMakeCurrent(egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglDestroyContext(egl_display, egl_ctx);
     eglDestroySurface(egl_display, egl_surface);
+    eglTerminate(egl_display);
+    // eglReleaseThread();
   }
 };
 
@@ -327,22 +330,26 @@ void getMaxSurfaceSize(int resolutionLevel, float* maxSurfaceSize)
       maxSurfaceSize[0] = 2048;
       maxSurfaceSize[1] = 2048;
     }
+    break;
     case 1:
 
     {
       maxSurfaceSize[0] = 2048;
       maxSurfaceSize[1] = 2048;
     }
+    break;
     case 2:
     {
       maxSurfaceSize[0] = 4096;
       maxSurfaceSize[1] = 4096;
     }
+    break;
     case 3:
     {
       maxSurfaceSize[0] = 8192;
       maxSurfaceSize[1] = 8192;
     }
+    break;
     default:
     {
       maxSurfaceSize[0] = 2048;

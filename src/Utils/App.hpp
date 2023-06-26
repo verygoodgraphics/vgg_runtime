@@ -19,9 +19,15 @@
 
 #include "gpu/GrTypes.h"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_events.h>
 #include <SDL2/SDL_keycode.h>
+#include <core/SkColor.h>
+#include <core/SkFont.h>
+#include <core/SkFontTypes.h>
+#include <cstdio>
 #include <filesystem>
 #include <functional>
+#include <queue>
 #include <memory>
 #include <optional>
 #ifdef EMSCRIPTEN
@@ -241,6 +247,22 @@ public: // public data and types
       }
       return evt;
     }
+
+    void mapWindowPosToLogicalPosition(const float windowXY[2], float scaleFactor, float logicXY[2])
+    {
+      float x1 = windowXY[0];
+      float y1 = windowXY[1];
+      // float x0 = x1 - windowXYRel[0];
+      // float y0 = y1 - windowXYRel[1];
+      x1 = (x1 / scaleFactor - offset.x) / zoom;
+      y1 = (y1 / scaleFactor - offset.y) / zoom;
+      // x0 = (x0 / scaleFactor - offset.x) / zoom;
+      // y0 = (y0 / scaleFactor - offset.y) / zoom;
+      logicXY[0] = x1;
+      logicXY[1] = y1;
+      // logicXYRel[0] = x1 - x0;
+      // logicXYRel[1] = y1 - y0;
+    }
   };
 
 public:
@@ -273,6 +295,9 @@ protected: // protected members and static members
   SkiaState m_skiaState;
   Zoomer m_zoomer;
   std::shared_ptr<UIView> m_view;
+  float m_curMouseX{ 0.f }, m_curMouseY{ 0.f };
+  bool m_drawInfo{ false };
+  std::queue<SDL_Event> m_eventQueue;
   std::shared_ptr<Scene> m_scene;
   bool m_useOldRenderer = true;
   std::unique_ptr<SkPictureRecorder> m_recorder;
@@ -438,6 +463,40 @@ protected: // protected methods
     return onGlobalEvent(evt);
   }
 
+  void drawPositionInfo(SkCanvas* canvas)
+  {
+    SkPaint textPaint;
+    static const char* infoFmt1 = "WindowPos: [%d, %d]";
+    static const char* infoFmt2 = "ScenePos: [%d, %d]";
+
+    float windowPos[2] = { m_curMouseX, m_curMouseY };
+    float logixXY[2];
+    m_zoomer.mapWindowPosToLogicalPosition(windowPos, 1.0, logixXY);
+
+    char info[1024];
+    sprintf(info, infoFmt1, (int)m_curMouseX, (int)m_curMouseY);
+
+    textPaint.setColor(SK_ColorBLACK);
+    SkFont font(SkTypeface::MakeFromFile("/usr/share/fonts/TTF/Comfortaa-Bold.ttf"));
+    font.setSize(32);
+    canvas->drawSimpleText(info,
+                           strlen(info),
+                           SkTextEncoding::kUTF8,
+                           m_curMouseX,
+                           m_curMouseY,
+                           font,
+                           textPaint);
+
+    sprintf(info, infoFmt2, (int)logixXY[0], (int)logixXY[1]);
+    canvas->drawSimpleText(info,
+                           strlen(info),
+                           SkTextEncoding::kUTF8,
+                           m_curMouseX,
+                           m_curMouseY + 40,
+                           font,
+                           textPaint);
+  }
+
   void onFrame()
   {
     Scheduler::callOnFrameOnce();
@@ -462,8 +521,12 @@ protected: // protected methods
       {
         m_scene->render(canvas);
       }
-      InputManager::draw(canvas);
+      // InputManager::draw(canvas);
       m_zoomer.restore(canvas);
+
+      // draw position information
+      if (m_drawInfo)
+        drawPositionInfo(canvas);
     }
 
     if (m_capture)
@@ -472,14 +535,21 @@ protected: // protected methods
       m_capture = false;
     }
 
-    InputManager::onFrame();
+    // InputManager::onFrame();
   }
 
   void dispatchEvent(const SDL_Event& evt)
   {
+    if (evt.type == SDL_MOUSEMOTION)
+    {
+      m_curMouseX = evt.motion.x;
+      m_curMouseY = evt.motion.y;
+    }
     auto e = m_zoomer.mapEvent(evt, DPI::ScaleFactor);
     InputManager::onEvent(e);
     m_view->onEvent(e);
+    InputManager::onEvent(e);
+    // InputManager::onEvent(e);
   }
 
   bool onGlobalEvent(const SDL_Event& evt)
@@ -490,12 +560,12 @@ protected: // protected methods
     {
       if (evt.window.event == SDL_WINDOWEVENT_ENTER)
       {
-        InputManager::setCursorVisibility(true);
+        // InputManager::setCursorVisibility(true);
         return true;
       }
       else if (evt.window.event == SDL_WINDOWEVENT_LEAVE)
       {
-        InputManager::setCursorVisibility(false);
+        // InputManager::setCursorVisibility(false);
         return true;
       }
     }
@@ -505,13 +575,13 @@ protected: // protected methods
         (SDL_GetKeyboardState(nullptr)[SDL_SCANCODE_SPACE]))
     {
       panning = true;
-      InputManager::setMouseCursor(MouseEntity::CursorType::MOVE);
+      // InputManager::setMouseCursor(MouseEntity::CursorType::MOVE);
       return true;
     }
     else if (panning && type == SDL_MOUSEBUTTONUP)
     {
       panning = false;
-      InputManager::setMouseCursor(MouseEntity::CursorType::NORMAL);
+      // InputManager::setMouseCursor(MouseEntity::CursorType::NORMAL);
       return true;
     }
     else if (panning && type == SDL_MOUSEMOTION)
@@ -641,6 +711,11 @@ public: // public methods
   void setScene(std::shared_ptr<Scene> scene)
   {
     m_scene = scene;
+  }
+
+  void setDrawInfo(bool enable)
+  {
+    m_drawInfo = enable;
   }
 
   void setScale(float scale)

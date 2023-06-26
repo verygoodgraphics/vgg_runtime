@@ -81,6 +81,7 @@ int main(int argc, char** argv)
     return 0;
   }
   app->setScene(scene);
+  app->setDrawInfo(true);
 
   std::vector<fs::path> entires;
   std::vector<fs::path>::iterator fileIter;

@@ -215,7 +215,7 @@ public:
   void onInit()
   {
     SDL_GL_SetSwapInterval(0);
-    SDL_ShowCursor(SDL_DISABLE);
+    // SDL_ShowCursor(SDL_DISABLE);
   }
 
   void pollEvent()

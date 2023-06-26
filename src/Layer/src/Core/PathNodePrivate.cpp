@@ -25,21 +25,21 @@
 namespace VGG
 {
 
-sk_sp<SkShader> PathNode__pImpl::getGradientShader(const VGGGradient& g, const glm::vec2& size)
+sk_sp<SkShader> PathNode__pImpl::getGradientShader(const VGGGradient& g, const Bound2& bound)
 {
   sk_sp<SkShader> shader;
   const auto type = g.gradientType;
   if (type == GT_Linear)
   {
-    shader = g.getLinearShader(size);
+    shader = g.getLinearShader(bound);
   }
   else if (type == GT_Radial)
   {
-    shader = g.getRadialShader(size);
+    shader = g.getRadialShader(bound);
   }
   else if (type == GT_Angular)
   {
-    shader = g.getAngularShader(size);
+    shader = g.getAngularShader(bound);
   }
   return shader;
 }
@@ -121,7 +121,7 @@ void PathNode__pImpl::drawPathBorder(SkCanvas* canvas,
   if (b.fill_type == FT_Gradient)
   {
     assert(b.gradient.has_value());
-    strokePen.setShader(getGradientShader(b.gradient.value(), bound.size()));
+    strokePen.setShader(getGradientShader(b.gradient.value(), q_ptr->getBound()));
     strokePen.setAlphaf(b.context_settings.Opacity * globalAlpha);
   }
   else if (b.fill_type == FT_Color)
@@ -263,7 +263,8 @@ void PathNode__pImpl::drawInnerShadow(SkCanvas* canvas,
   SkPaint pen;
   auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
   // pen.setImageFilter(
-  //   SkMyImageFilters::DropInnerShadowOnly(s.offset_x, -s.offset_y, sigma, sigma, s.color, nullptr));
+  //   SkMyImageFilters::DropInnerShadowOnly(s.offset_x, -s.offset_y, sigma, sigma, s.color,
+  //   nullptr));
   canvas->saveLayer(nullptr, &pen);
   if (s.spread > 0)
     canvas->scale(1.0 / s.spread, 1.0 / s.spread);

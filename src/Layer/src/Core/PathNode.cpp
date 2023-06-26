@@ -235,9 +235,24 @@ void PathNode::paintFill(SkCanvas* canvas, float globalAlpha, const SkPath& skPa
     else if (f.fillType == FT_Gradient)
     {
       assert(f.gradient.has_value());
-      auto gradientShader = _->getGradientShader(f.gradient.value(), getBound().size());
+      auto gradientShader = _->getGradientShader(f.gradient.value(), getBound());
       fillPen.setShader(gradientShader);
       fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);
+
+      // SkPaint debugLine;
+      // debugLine.setColor(SK_ColorBLUE);
+      // debugLine.setStrokeWidth(2);
+      // const auto bound = getBound();
+      // const auto from = bound.map(bound.size() * f.gradient->from);
+      // const auto to = bound.map(bound.size() * f.gradient->to);
+      // canvas->save();
+      // canvas->scale(1, -1);
+      // canvas->drawLine(from.x, from.y, to.x, to.y, debugLine);
+      // SkPaint debugPoint;
+      // debugPoint.setColor(SK_ColorRED);
+      // debugPoint.setStrokeWidth(2);
+      // canvas->drawPoint(from.x, from.y, debugPoint);
+      // canvas->restore();
     }
     else if (f.fillType == FT_Pattern)
     {

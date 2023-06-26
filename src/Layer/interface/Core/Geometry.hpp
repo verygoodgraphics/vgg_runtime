@@ -28,6 +28,13 @@ struct Bound2
   {
   }
 
+  // map the given p into the bound coordinate
+  glm::vec2 map(const glm::vec2& p) const
+  {
+    // TODO:: bound already in skia coordinate system
+    return glm::vec2{ p.x - bottomLeft.x, p.y + bottomLeft.y };
+  }
+
   float width() const
   {
     return topRight.x - bottomLeft.x;

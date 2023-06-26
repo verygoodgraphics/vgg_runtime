@@ -6,6 +6,7 @@
 #include "include/effects/SkDashPathEffect.h"
 #include <algorithm>
 #include "Utils/Math.hpp"
+#include "Core/Geometry.hpp"
 #include <optional>
 #include <vector>
 #include <stdint.h>
@@ -118,7 +119,7 @@ struct VGGGradient
     return indices;
   }
 
-  inline sk_sp<SkShader> getLinearShader(const glm::vec2& size) const
+  inline sk_sp<SkShader> getLinearShader(const Bound2& bound) const
   {
     auto indices = getSortedIndices();
 
@@ -126,8 +127,8 @@ struct VGGGradient
     auto maxPosition = stops[indices[indices.size() - 1]].position;
     clampPairByLimits(minPosition, maxPosition, 0.f, 1.f, 0.0001f);
 
-    auto f = size * from;
-    auto t = size * to;
+    auto f = bound.map(bound.size() * from);
+    auto t = bound.map(bound.size() * to);
     auto start = glm::mix(f, t, minPosition);
     auto end = glm::mix(f, t, maxPosition);
 
@@ -154,7 +155,7 @@ struct VGGGradient
                                         &mat);
   }
 
-  inline sk_sp<SkShader> getRadialShader(const glm::vec2& size) const
+  inline sk_sp<SkShader> getRadialShader(const Bound2& bound) const
   {
     // ASSERT(stops.size() > 1);
     auto indices = getSortedIndices();
@@ -162,8 +163,8 @@ struct VGGGradient
     auto maxPosition = stops[indices[indices.size() - 1]].position;
     clampPairByLimits(minPosition, maxPosition, 0.0f, 1.0f, 0.0001f);
 
-    auto f = size * from;
-    auto t = size * to;
+    auto f = bound.map(bound.size() * from);
+    auto t = bound.map(bound.size() * to);
     auto start = glm::mix(f, t, minPosition);
     auto end = glm::mix(f, t, maxPosition);
 
@@ -193,15 +194,15 @@ struct VGGGradient
                                         &mat);
   }
 
-  inline sk_sp<SkShader> getAngularShader(const glm::vec2& size) const
+  inline sk_sp<SkShader> getAngularShader(const Bound2& bound) const
   {
     // ASSERT(stops.size() > 1);
     auto indices = getSortedIndices();
     auto minPosition = stops[indices[0]].position;
     auto maxPosition = stops[indices[indices.size() - 1]].position;
     clampPairByLimits(minPosition, maxPosition, 0.f, 1.f, 0.0001f);
-    auto f = size * from;
-    auto t = size * to;
+    auto f = bound.map(bound.size() * from);
+    auto t = bound.map(bound.size() * to);
     auto center = (f + t) / 2.0f;
 
     std::vector<SkColor> colors;

@@ -4,11 +4,13 @@
 
 #include <string>
 
-class BrowserJSEngine : public VggJSEngine
+class BrowserJSEngine final : public VggJSEngine
 {
 public:
   bool evalScript(const std::string& code);
   bool evalModule(const std::string& code);
+
+  bool evalModule(const std::string& code, VGG::EventPtr event);
 
 private:
   std::string m_moduleWrapper;

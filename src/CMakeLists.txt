@@ -38,6 +38,7 @@ if (EMSCRIPTEN)
   target_sources(vgg_internal PRIVATE
     PlatformAdapter/Browser/Exec/BrowserJSEngine.cpp
     PlatformAdapter/Browser/Sdk/BrowserSdkAdapter.cpp
+    PlatformAdapter/Browser/Sdk/MouseEventWrapper.cpp
   )
   target_compile_options(vgg_internal PUBLIC 
     -fexceptions

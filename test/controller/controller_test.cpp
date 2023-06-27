@@ -16,6 +16,7 @@
 #include <condition_variable>
 
 using namespace VGG;
+using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -54,6 +55,13 @@ protected:
   void setup_sdk_with_remote_dic(bool catchJsException = false)
   {
     m_native_composer.reset(new NativeComposer("./asset/vgg-sdk.esm.mjs", catchJsException));
+    m_native_composer->setup();
+  }
+
+  void setup_using_s5_sdk(bool catchJsException = false)
+  {
+    m_native_composer.reset(
+      new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js", catchJsException));
     m_native_composer->setup();
   }
 
@@ -485,4 +493,37 @@ TEST_F(ControllerTestSuite, event_listener_example)
 
   // Then
   // js throw error if failed
+}
+
+TEST_F(ControllerTestSuite, handle_event)
+{
+  // Given
+  // setup_sdk_with_local_dic();
+  setup_using_s5_sdk();
+
+  auto type = ModelEventType::Invalid;
+  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+    [&](ModelEventPtr evt)
+    {
+      type = evt->type;
+      m_exit_loop = true;
+    });
+
+  EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
+  EXPECT_CALL(*m_mock_presenter, setModel(_));
+  setup_sut();
+  std::string file_path = "testDataDir/vgg-work.zip";
+  auto ret = m_sut->start(file_path);
+  EXPECT_TRUE(ret);
+
+  // When
+  mock_click("/fake/handle_event");
+
+  // loop_times
+  //  10000: error
+  // 100000: success
+  // loop_times(100000);
+  loop_until_exit();
+
+  // Then
 }

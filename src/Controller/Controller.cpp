@@ -111,12 +111,16 @@ void Controller::observeUIEvent()
       {
         for (auto& listener : it->second)
         {
+          // todo, evt phase // kCapturingPhase = 1, // kAtTarget = 2, // kBubblingPhase = 3
+          // todo, evt PropagationStopped
           // todo, pass evt data to listeners
-          shared_this->vggExec()->evalModule(listener);
+          // shared_this->vggExec()->evalModule(listener);
+          shared_this->vggExec()->evalModule(listener, evt);
         }
       }
     });
 
+  // todo, subscribe on new thread to not block current thread while evaluating js code
   m_presenter->getObservable().subscribe(observer);
 }
 

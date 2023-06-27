@@ -52,6 +52,7 @@ else()
     PlatformAdapter/Native/Exec/NativeExecImpl.cpp
     PlatformAdapter/Native/Sdk/VggSdkAddon.cpp
     PlatformAdapter/Native/Sdk/VggSdkNodeAdapter.cpp
+    PlatformAdapter/Native/Sdk/Event/UIEvent.cpp
   )
   target_compile_definitions(vgg_internal PRIVATE NODE_WANT_INTERNALS=1)
 endif()

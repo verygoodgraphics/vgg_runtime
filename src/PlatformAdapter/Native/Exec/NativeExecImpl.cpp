@@ -57,6 +57,7 @@ int NativeExecImpl::eval(std::string_view buffer)
   if (maybe_script.IsEmpty())
   {
     FAIL("#NativeExecImpl::eval, error, complie script error");
+    std::cerr << "script is: " << buffer << std::endl;
     return -1;
   }
 
@@ -65,7 +66,7 @@ int NativeExecImpl::eval(std::string_view buffer)
   auto script_result = script->Run(context);
   if (script_result.IsEmpty())
   {
-    FAIL("#NativeExecImpl::eval, error, run script error");
+    WARN("#NativeExecImpl::eval, run script return empty result");
     return -1;
   }
 

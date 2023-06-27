@@ -1,6 +1,7 @@
 #include "PlatformAdapter/Native/Exec/NativeExec.hpp"
 
 #include "PlatformAdapter/Native/Exec/NativeExecImpl.hpp"
+#include "PlatformAdapter/Native/Sdk/Event/UIEvent.hpp"
 #include "PlatformAdapter/Helper/StringHelper.hpp"
 #include "Utils/Utils.hpp"
 
@@ -36,6 +37,30 @@ bool NativeExec::evalModule(const std::string& code)
   wrapped_script.append(StringHelper::url_encode(code));
   wrapped_script.append("';\n");
   wrapped_script.append("evalModule(decodeURIComponent(encoded_code));");
+
+  return m_impl->schedule_eval(wrapped_script);
+}
+
+bool NativeExec::evalModule(const std::string& code, VGG::EventPtr event)
+{
+  NodeAdapter::UIEvent::store(event); // todo fixme
+
+  std::string wrapped_script(R"(
+    var vggSdkAddon = process._linkedBinding('vgg_sdk_addon');
+    var theVggEvent = new vggSdkAddon.VggUIEvent();
+    theVggEvent.bindCppEvent(); // todo, bind the corresponding event
+
+    var { evalModule } = require('internal/process/execution');
+    var encoded_code = ')");
+
+  std::string call_imported_function;
+  call_imported_function.append("const dataUri = ");
+  call_imported_function.append(StringHelper::encode_script_to_data_uri(code));
+  call_imported_function.append(
+    "; const { default: handleEvent } = await import(dataUri); handleEvent(theVggEvent);");
+  wrapped_script.append(StringHelper::url_encode(call_imported_function));
+
+  wrapped_script.append("'; evalModule(decodeURIComponent(encoded_code));");
 
   return m_impl->schedule_eval(wrapped_script);
 }

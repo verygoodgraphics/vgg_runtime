@@ -350,6 +350,12 @@ void getMaxSurfaceSize(int resolutionLevel, float* maxSurfaceSize)
       maxSurfaceSize[1] = 8192;
     }
     break;
+    case 4:
+    {
+      maxSurfaceSize[0] = 16384;
+      maxSurfaceSize[1] = 16384;
+    }
+    break;
     default:
     {
       maxSurfaceSize[0] = 2048;

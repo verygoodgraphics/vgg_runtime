@@ -12,6 +12,12 @@ bool VggExec::evalModule(const std::string& program)
   return m_jsEngine->evalModule(program);
 }
 
+bool VggExec::evalModule(const std::string& code, VGG::EventPtr event)
+{
+  setEnv();
+  return m_jsEngine->evalModule(code, event);
+}
+
 void VggExec::setEnv()
 {
   auto env = m_env->getEnv();

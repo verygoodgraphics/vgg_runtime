@@ -78,5 +78,13 @@
         "createdAt": 0
       }
     ]
+  },
+  "/fake/handle_event": {
+    "click": [
+      {
+        "fileName": "js/s5-sdk/21_handle_event.mjs",
+        "createdAt": 0
+      }
+    ]
   }
 }

@@ -14,7 +14,7 @@ class Environment;
 
 struct NativeExecImpl;
 
-class NativeExec : public VggJSEngine
+class NativeExec final : public VggJSEngine
 {
 public:
   NativeExec();
@@ -22,6 +22,8 @@ public:
 
   bool evalScript(const std::string& code);
   bool evalModule(const std::string& code);
+
+  bool evalModule(const std::string& code, VGG::EventPtr event);
 
   using InjectFn = std::function<void(node::Environment*)>;
   bool inject(InjectFn fn);

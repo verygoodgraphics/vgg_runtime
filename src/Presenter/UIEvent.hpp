@@ -1,6 +1,7 @@
 #pragma once
 
-#include <any>
+#include "Event.hpp"
+
 #include <cassert>
 #include <memory>
 #include <string>
@@ -85,7 +86,7 @@ constexpr const char* UIEventTypeToString(UIEventType e) noexcept
   }
 }
 
-struct UIEvent
+struct UIEvent : Event
 {
   using PathType = std::string;
 

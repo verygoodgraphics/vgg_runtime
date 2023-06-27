@@ -4,10 +4,12 @@
 
 #include "PlatformAdapter/Native/Sdk/VggSdkAddon.hpp"
 #include "PlatformAdapter/Native/Sdk/VggSdkNodeAdapter.hpp"
+#include "PlatformAdapter/Native/Sdk/Event/UIEvent.hpp"
 
 napi_value InitializeLocalNapiBinding(napi_env env, napi_value exports)
 {
   VggSdkNodeAdapter::Init(env, exports);
+  VGG::NodeAdapter::UIEvent::Init(env, exports);
   return nullptr;
 }
 

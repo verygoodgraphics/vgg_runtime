@@ -19,6 +19,7 @@ public:
 
   bool evalScript(const std::string& script);
   bool evalModule(const std::string& module);
+  bool evalModule(const std::string& code, VGG::EventPtr event);
 
 private:
   std::shared_ptr<VggJSEngine> m_jsEngine;

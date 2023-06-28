@@ -4,20 +4,22 @@
 
 #include <mutex>
 #include <unordered_map>
+#include <vector>
 
 namespace VGG
 {
 namespace NodeAdapter
 {
 
-template<class T>
+template<class EventAdapterType, class EventType>
 class Event
 {
-  using this_type = Event<T>;
+  using child_type = EventAdapterType;
+  using event_type = EventType;
 
   using map_key_type = int;
   inline static std::mutex m_map_mutex;
-  inline static std::unordered_map<map_key_type, std::shared_ptr<T>> s_event_map;
+  inline static std::unordered_map<map_key_type, std::shared_ptr<event_type>> s_event_map;
   inline static map_key_type s_event_id{ 0 };
 
 protected:
@@ -25,10 +27,12 @@ protected:
 
   napi_env m_env;
   napi_ref m_wrapper;
-  std::shared_ptr<T> m_event_ptr;
+  std::shared_ptr<event_type> m_event_ptr;
 
 public:
-  static auto store(std::shared_ptr<T> event)
+  using properties_type = std::vector<napi_property_descriptor>;
+
+  static auto store(std::shared_ptr<event_type> event)
   {
     const std::lock_guard<std::mutex> lock(m_map_mutex);
 
@@ -56,12 +60,12 @@ protected:
     if (is_constructor)
     {
       // Invoked as constructor: `new VggXxEvent()`
-      auto instance = new this_type();
+      auto instance = new child_type();
       instance->m_env = env;
 
       NODE_API_CALL(
         env,
-        napi_wrap(env, _this, instance, this_type::Destructor, nullptr, &instance->m_wrapper));
+        napi_wrap(env, _this, instance, child_type::Destructor, nullptr, &instance->m_wrapper));
 
       return _this;
     }
@@ -102,7 +106,7 @@ protected:
     napi_value _this;
     NODE_API_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &_this, nullptr));
 
-    this_type* wrapper;
+    child_type* wrapper;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&wrapper)));
 
     wrapper->m_event_ptr->preventDefault();
@@ -130,7 +134,7 @@ protected:
     {
       auto event_id = getArgIntValue(env, args[0]);
 
-      this_type* wrapper;
+      child_type* wrapper;
       NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&wrapper)));
 
       wrapper->m_event_ptr = s_event_map[event_id];
@@ -144,6 +148,12 @@ protected:
     }
 
     return nullptr;
+  }
+
+  static properties_type properties()
+  {
+    return { DECLARE_NODE_API_PROPERTY("preventDefault", preventDefault),
+             DECLARE_NODE_API_PROPERTY("bindCppEvent", bindCppEvent) };
   }
 
 private:

@@ -25,17 +25,17 @@ public:
     return m_script;
   }
 
-  virtual void visit(KeyboardEvent* e)
+  virtual void visit(VGG::KeyboardEvent* e) override
   {
     makeScript("VggKeyboardEvent");
   }
 
-  virtual void visit(MouseEvent* e)
+  virtual void visit(VGG::MouseEvent* e) override
   {
     makeScript("VggMouseEvent");
   }
 
-  virtual void visit(TouchEvent* e)
+  virtual void visit(VGG::TouchEvent* e) override
   {
     makeScript("VggTouchEvent");
   }

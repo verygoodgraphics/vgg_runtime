@@ -5,7 +5,7 @@ function handleEvent(event) {
   console.log('handleEvent: ', event);
   //todo console.log('handleEvent, event.button is: ', event.button);
   event.preventDefault();
-  delete doc.artboard;
+  doc.artboard = [];
 }
 
 export default handleEvent;

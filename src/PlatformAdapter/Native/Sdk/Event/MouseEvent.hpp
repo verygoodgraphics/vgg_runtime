@@ -9,8 +9,10 @@ namespace VGG
 namespace NodeAdapter
 {
 
-class MouseEvent : public UIEvent<VGG::MouseEvent>
+class MouseEvent : public UIEvent<MouseEvent, VGG::MouseEvent>
 {
+  using base_type = UIEvent<MouseEvent, VGG::MouseEvent>;
+
 public:
   static void Init(napi_env env, napi_value exports);
 

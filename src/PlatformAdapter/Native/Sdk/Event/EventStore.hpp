@@ -2,7 +2,9 @@
 
 #include "Presenter/EventVisitor.hpp"
 #include "Presenter/UIEvent.hpp"
-#include "UIEvent.hpp"
+#include "MouseEvent.hpp"
+#include "KeyboardEvent.hpp"
+// #include "TouchEvent.hpp"
 
 namespace VGG
 {
@@ -25,19 +27,19 @@ public:
     return std::to_string(m_event_id);
   }
 
-  virtual void visit(KeyboardEvent*)
+  virtual void visit(VGG::KeyboardEvent*) override
   {
-    m_event_id = UIEvent<KeyboardEvent>::store(std::dynamic_pointer_cast<KeyboardEvent>(m_event));
+    m_event_id = KeyboardEvent::store(std::dynamic_pointer_cast<VGG::KeyboardEvent>(m_event));
   }
 
-  virtual void visit(MouseEvent*)
+  virtual void visit(VGG::MouseEvent*) override
   {
-    m_event_id = UIEvent<MouseEvent>::store(std::dynamic_pointer_cast<MouseEvent>(m_event));
+    m_event_id = MouseEvent::store(std::dynamic_pointer_cast<VGG::MouseEvent>(m_event));
   }
 
-  virtual void visit(TouchEvent*)
+  virtual void visit(VGG::TouchEvent*) override
   {
-    m_event_id = UIEvent<TouchEvent>::store(std::dynamic_pointer_cast<TouchEvent>(m_event));
+    // m_event_id = TouchEvent::store(std::dynamic_pointer_cast<VGG::TouchEvent>(m_event));
   }
 };
 

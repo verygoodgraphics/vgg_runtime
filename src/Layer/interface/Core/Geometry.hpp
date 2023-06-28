@@ -37,7 +37,7 @@ struct Bound2
   // map the given p into the bound coordinate
   glm::vec2 map(const glm::vec2& p) const
   {
-    return glm::vec2{ p.x - topLeft.x, p.y + topLeft.y };
+    return glm::vec2{ p.x - topLeft.x, p.y - topLeft.y };
   }
 
   float width() const
@@ -57,7 +57,7 @@ struct Bound2
 
   glm::vec2 size() const
   {
-    return bottomRight - topLeft;
+    return glm::vec2{ width(), height() };
   }
 };
 

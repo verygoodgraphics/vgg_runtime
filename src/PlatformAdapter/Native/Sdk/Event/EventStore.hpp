@@ -26,17 +26,17 @@ public:
 
   virtual void visit(KeyboardEvent*)
   {
-    BasicEvent<KeyboardEvent>::store(std::dynamic_pointer_cast<KeyboardEvent>(m_event));
+    UIEvent<KeyboardEvent>::store(std::dynamic_pointer_cast<KeyboardEvent>(m_event));
   }
 
   virtual void visit(MouseEvent*)
   {
-    BasicEvent<MouseEvent>::store(std::dynamic_pointer_cast<MouseEvent>(m_event));
+    UIEvent<MouseEvent>::store(std::dynamic_pointer_cast<MouseEvent>(m_event));
   }
 
   virtual void visit(TouchEvent*)
   {
-    BasicEvent<VGG::UIEvent>::store(std::dynamic_pointer_cast<VGG::UIEvent>(m_event));
+    UIEvent<VGG::UIEvent>::store(std::dynamic_pointer_cast<VGG::UIEvent>(m_event));
   }
 };
 

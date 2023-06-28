@@ -9,13 +9,10 @@ namespace VGG
 namespace NodeAdapter
 {
 
-class KeyboardEvent : public BasicEvent<VGG::KeyboardEvent>
+class KeyboardEvent : public UIEvent<VGG::KeyboardEvent>
 {
 public:
   static void Init(napi_env env, napi_value exports);
-  static void Destructor(napi_env env, void* nativeObject, void* finalize_hint);
-
-  ~KeyboardEvent();
 
 private:
   static napi_value getModifierState(napi_env env, napi_callback_info info);

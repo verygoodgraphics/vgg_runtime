@@ -501,7 +501,7 @@ TEST_F(ControllerTestSuite, event_listener_example)
   // js throw error if failed
 }
 
-TEST_F(ControllerTestSuite, handle_event)
+TEST_F(ControllerTestSuite, handle_event_mouse)
 {
   // Given
   // setup_sdk_with_local_dic();
@@ -523,7 +523,39 @@ TEST_F(ControllerTestSuite, handle_event)
   EXPECT_TRUE(ret);
 
   // When
-  // mock_click("/fake/handle_event");
+  mock_click("/fake/handle_event");
+
+  // loop_times
+  //  10000: error
+  // 100000: success
+  // loop_times(100000);
+  loop_until_exit();
+
+  // Then
+}
+
+TEST_F(ControllerTestSuite, handle_event_keyboard)
+{
+  // Given
+  // setup_sdk_with_local_dic();
+  setup_using_s5_sdk();
+
+  auto type = ModelEventType::Invalid;
+  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+    [&](ModelEventPtr evt)
+    {
+      type = evt->type;
+      m_exit_loop = true;
+    });
+
+  EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
+  EXPECT_CALL(*m_mock_presenter, setModel(_));
+  setup_sut();
+  std::string file_path = "testDataDir/vgg-work.zip";
+  auto ret = m_sut->start(file_path);
+  EXPECT_TRUE(ret);
+
+  // When
   mock_keydown("/fake/handle_event");
 
   // loop_times

@@ -1,6 +1,8 @@
 #include "PlatformAdapter/Native/Exec/NativeExec.hpp"
 
 #include "PlatformAdapter/Native/Exec/NativeExecImpl.hpp"
+#include "PlatformAdapter/Native/Sdk/Event/EventStore.hpp"
+#include "PlatformAdapter/Native/Sdk/Event/JsEventGenerator.hpp"
 #include "PlatformAdapter/Native/Sdk/Event/UIEvent.hpp"
 #include "PlatformAdapter/Helper/StringHelper.hpp"
 #include "Utils/Utils.hpp"
@@ -43,13 +45,12 @@ bool NativeExec::evalModule(const std::string& code)
 
 bool NativeExec::evalModule(const std::string& code, VGG::EventPtr event)
 {
-  NodeAdapter::UIEvent::store(event); // todo fixme
+  NodeAdapter::EventStore event_store{ event };
+  NodeAdapter::JsEventGenerator event_generator{ event_store.eventId() };
+  event->accept(&event_generator);
 
-  std::string wrapped_script(R"(
-    var vggSdkAddon = process._linkedBinding('vgg_sdk_addon');
-    var theVggEvent = new vggSdkAddon.VggUIEvent();
-    theVggEvent.bindCppEvent(); // todo, bind the corresponding event
-
+  std::string wrapped_script{ event_generator.getScirpt() };
+  wrapped_script.append(R"(
     var { evalModule } = require('internal/process/execution');
     var encoded_code = ')");
 

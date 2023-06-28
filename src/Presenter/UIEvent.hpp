@@ -123,6 +123,11 @@ struct KeyboardEvent : UIEvent
   {
     assert(type == UIEventType::keydown || type == UIEventType::keyup);
   }
+
+  void accept(EventVisitor* visitor) override
+  {
+    visitor->visit(this);
+  }
 };
 
 struct MouseEvent : UIEvent
@@ -138,6 +143,11 @@ struct MouseEvent : UIEvent
   {
     assert(type >= UIEventType::auxclick && type <= UIEventType::mouseup);
   }
+
+  void accept(EventVisitor* visitor) override
+  {
+    visitor->visit(this);
+  }
 };
 
 struct TouchEvent : UIEvent
@@ -152,6 +162,11 @@ struct TouchEvent : UIEvent
     : UIEvent(std::move(path), type)
   {
     assert(type >= UIEventType::touchcancel && type <= UIEventType::touchstart);
+  }
+
+  void accept(EventVisitor* visitor) override
+  {
+    visitor->visit(this);
   }
 };
 

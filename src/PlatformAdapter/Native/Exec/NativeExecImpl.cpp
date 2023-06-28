@@ -272,15 +272,13 @@ void NativeExecImpl::deinit_uv_async_task()
 
 void NativeExecImpl::run_task()
 {
-  if (m_tasks.empty())
+  while (!m_tasks.empty())
   {
-    return;
+    auto task = *m_tasks.begin();
+    DEBUG("#evalScript, before eval");
+    int ret = eval(task->m_code);
+    DEBUG("#evalScript, after eval, ret = %d", ret);
+
+    erase_task(task);
   }
-
-  auto task = *m_tasks.begin();
-  DEBUG("#evalScript, before eval");
-  int ret = eval(task->m_code);
-  DEBUG("#evalScript, after eval, ret = %d", ret);
-
-  erase_task(task);
 }

@@ -12,6 +12,7 @@ namespace NodeAdapter
 class EventStore : public EventVisitor
 {
   EventPtr m_event;
+  int m_event_id;
 
 public:
   EventStore(EventPtr event)
@@ -21,22 +22,22 @@ public:
   std::string eventId()
   {
     m_event->accept(this);
-    return {}; // todo
+    return std::to_string(m_event_id);
   }
 
   virtual void visit(KeyboardEvent*)
   {
-    UIEvent<KeyboardEvent>::store(std::dynamic_pointer_cast<KeyboardEvent>(m_event));
+    m_event_id = UIEvent<KeyboardEvent>::store(std::dynamic_pointer_cast<KeyboardEvent>(m_event));
   }
 
   virtual void visit(MouseEvent*)
   {
-    UIEvent<MouseEvent>::store(std::dynamic_pointer_cast<MouseEvent>(m_event));
+    m_event_id = UIEvent<MouseEvent>::store(std::dynamic_pointer_cast<MouseEvent>(m_event));
   }
 
   virtual void visit(TouchEvent*)
   {
-    UIEvent<VGG::UIEvent>::store(std::dynamic_pointer_cast<VGG::UIEvent>(m_event));
+    m_event_id = UIEvent<TouchEvent>::store(std::dynamic_pointer_cast<TouchEvent>(m_event));
   }
 };
 

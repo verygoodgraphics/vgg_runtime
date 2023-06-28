@@ -162,7 +162,7 @@ void PathNode::paintEvent(SkCanvas* canvas)
     ct.emplace_back(asOutlineMask(0).outlineMask, EBoolOp::BO_None);
   }
 
-  // draw blur
+  // draw blur, we assume that there is only one blur style
   bool hasBlur = style.blurs.empty() ? false : style.blurs[0].isEnabled;
   if (hasBlur)
   {
@@ -194,6 +194,7 @@ void PathNode::paintEvent(SkCanvas* canvas)
     canvas->restore();
   }
 
+  // restore blur
   if (hasBlur)
   {
     canvas->restore();
@@ -243,10 +244,14 @@ void PathNode::paintFill(SkCanvas* canvas, float globalAlpha, const SkPath& skPa
       // debugLine.setColor(SK_ColorBLUE);
       // debugLine.setStrokeWidth(2);
       // const auto bound = getBound();
-      // const auto from = bound.map(bound.size() * f.gradient->from);
-      // const auto to = bound.map(bound.size() * f.gradient->to);
+      // auto from = bound.map(bound.size() * f.gradient->from);
+      // auto to = bound.map(bound.size() * f.gradient->to);
+      // if (f.gradient->aiCoordinate)
+      // {
+      //   from = f.gradient->convert(bound.size() * f.gradient->from, bound);
+      //   to = f.gradient->convert(bound.size() * f.gradient->to, bound);
+      // }
       // canvas->save();
-      // canvas->scale(1, -1);
       // canvas->drawLine(from.x, from.y, to.x, to.y, debugLine);
       // SkPaint debugPoint;
       // debugPoint.setColor(SK_ColorRED);

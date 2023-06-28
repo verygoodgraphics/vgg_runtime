@@ -4,6 +4,7 @@
 #include "Core/VGGUtils.h"
 #include "SkiaBackend/SkiaImpl.h"
 #include "core/SkCanvas.h"
+#include <core/SkPath.h>
 
 namespace VGG
 {
@@ -116,16 +117,13 @@ void PaintNode::renderPass(SkCanvas* canvas)
 
 void PaintNode::drawDebugBound(SkCanvas* canvas)
 {
-  auto skrect = toSkRect(getBound());
+  const auto& b = getBound();
   SkPaint strokePen;
   strokePen.setStyle(SkPaint::kStroke_Style);
   SkColor color = nodeType2Color(this->type);
   strokePen.setColor(color);
   strokePen.setStrokeWidth(2);
-  canvas->save();
-  canvas->scale(1, -1);
-  canvas->drawRect(skrect, strokePen);
-  canvas->restore();
+  canvas->drawRect(toSkRect(getBound()), strokePen);
 }
 void PaintNode::visitNode(VGG::Node* p, ObjectTableType& table)
 {
@@ -175,7 +173,7 @@ void PaintNode::paintEvent(SkCanvas* canvas)
     bgPaint.setColor(this->bgColor.value());
     bgPaint.setStyle(SkPaint::kFill_Style);
     canvas->save();
-    canvas->scale(1, -1);
+    // canvas->scale(1, -1);
     canvas->drawRect(toSkRect(getBound()), bgPaint);
     canvas->restore();
   }

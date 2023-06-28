@@ -101,6 +101,7 @@ inline void from_json(const json& j, VGGGradient::GradientStop& x)
 
 inline void transformGredient(const json& j, VGGGradient& x)
 {
+  x.aiCoordinate = true;
   auto v = j.at("matrix").get<std::vector<double>>();
   assert(v.size() == 6);
   const auto matrix =
@@ -109,7 +110,7 @@ inline void transformGredient(const json& j, VGGGradient& x)
   x.from.y = j["yOrigin"];
   const float length = j["length"];
   const float angle = j["angle"];
-  glm::vec2 dir = { std::cos(glm::radians(angle)), std::sin(glm::radians(angle)) };
+  glm::vec2 dir = { std::cos(glm::radians(angle)), -std::sin(glm::radians(angle)) };
   x.to = x.from + length * dir;
   const auto a = matrix * glm::vec3{ x.to, 1.0 };
   const auto b = matrix * glm::vec3{ x.from, 1.0 };

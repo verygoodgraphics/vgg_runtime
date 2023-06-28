@@ -63,7 +63,6 @@ void drawText(SkCanvas* canvas,
 {
   ASSERT(canvas);
 
-  canvas->clipRect(toSkRect(frame));
   auto textLines = makeLines(text);
   SkFontMetrics metrics;
   SkFont font = textStyle.getFont();
@@ -203,7 +202,9 @@ void TextNode::paintEvent(SkCanvas* canvas)
   if (_->styles.empty() == false && _->text.empty() == false)
   {
     canvas->save();
+    canvas->clipRect(toSkRect(getBound()));
     canvas->scale(1, -1);
+    // we need to convert to skia coordinate to render text
     drawText(canvas, _->text, getBound(), _->styles[0]);
     canvas->restore();
   }

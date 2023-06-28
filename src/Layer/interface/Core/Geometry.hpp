@@ -9,40 +9,45 @@ namespace VGG
 {
 struct Bound2
 {
-  glm::vec2 bottomLeft;
-  glm::vec2 topRight;
+  enum class CoordOrigin
+  {
+    TopLeft,
+    BottomLeft,
+  };
+
+  glm::vec2 topLeft;
+  glm::vec2 bottomRight;
   Bound2()
-    : bottomLeft{ 0, 0 }
-    , topRight{ 0, 0 }
+    : topLeft{ 0, 0 }
+    , bottomRight{ 0, 0 }
   {
   }
   Bound2(float x, float y, float w, float h)
-    : bottomLeft{ x, y }
-    , topRight{ x + w, y + h }
+    : topLeft{ x, y }
+    , bottomRight{ x + w, y - h }
   {
   }
 
-  Bound2(const glm::vec2& p1, const glm::vec2& p2)
-    : bottomLeft{ std::min(p1.x, p2.x), std::min(p1.y, p2.y) }
-    , topRight{ std::max(p1.x, p2.x), std::max(p1.y, p2.y) }
-  {
-  }
+  // Bound2(const glm::vec2& p1, const glm::vec2& p2)
+  //   : topLeft{ std::min(p1.x, p2.x), std::min(p1.y, p2.y) }
+  //   , bottomRight{ std::max(p1.x, p2.x), std::max(p1.y, p2.y) }
+  // {
+  // }
 
   // map the given p into the bound coordinate
   glm::vec2 map(const glm::vec2& p) const
   {
-    // TODO:: bound already in skia coordinate system
-    return glm::vec2{ p.x - bottomLeft.x, p.y + bottomLeft.y };
+    return glm::vec2{ p.x - topLeft.x, p.y + topLeft.y };
   }
 
   float width() const
   {
-    return topRight.x - bottomLeft.x;
+    return bottomRight.x - topLeft.x;
   }
 
   float height() const
   {
-    return topRight.y - bottomLeft.y;
+    return topLeft.y - bottomRight.y;
   }
 
   bool valid() const
@@ -52,26 +57,26 @@ struct Bound2
 
   glm::vec2 size() const
   {
-    return topRight - bottomLeft;
+    return bottomRight - topLeft;
   }
 };
 
-inline Bound2 operator*(const glm::mat3& transform, const Bound2& other)
-{
-  return Bound2{ transform * glm::vec3{ other.bottomLeft, 1.0 },
-                 transform * glm::vec3{ other.topRight, 1.0 } };
-}
+// inline Bound2 operator*(const glm::mat3& transform, const Bound2& other)
+// {
+//   return Bound2{ transform * glm::vec3{ other.topLeft, 1.0 },
+//                  transform * glm::vec3{ other.bottomRight, 1.0 } };
+// }
 
-inline Bound2& operator*=(const glm::mat3& transform, Bound2& other)
-{
-  other = transform * other;
-  return other;
-}
+// inline Bound2& operator*=(const glm::mat3& transform, Bound2& other)
+// {
+//   other = transform * other;
+//   return other;
+// }
 
 inline std::ostream& operator<<(std::ostream& os, const Bound2& b)
 {
-  os << "[(" << b.bottomLeft.x << ", " << b.bottomLeft.y << "), (" << b.topRight.x << ","
-     << b.topRight.y << ")]" << std::endl;
+  os << "[(" << b.topLeft.x << ", " << b.topLeft.y << "), (" << b.bottomRight.x << ","
+     << b.bottomRight.y << ")]" << std::endl;
   return os;
 }
 

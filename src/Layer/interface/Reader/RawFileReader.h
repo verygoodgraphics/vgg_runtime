@@ -32,9 +32,10 @@ public:
     auto fullpath = prefix / resDir;
     if (std::filesystem::exists(fullpath) == false)
       return resources;
+    auto parentPath = resDir.filename();
     for (const auto& entry : std::filesystem::recursive_directory_iterator(fullpath))
     {
-      std::string key = (resDir / entry.path().filename()).string();
+      std::string key = (parentPath / entry.path().filename()).string();
       std::cout << "read image: " << entry.path() << " which key is " << key << std::endl;
       resources[key] = GetBinFromFile(entry.path()).value_or(std::vector<char>{});
     }

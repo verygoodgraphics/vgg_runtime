@@ -68,13 +68,21 @@ void ImageNode::paintFill(SkCanvas* canvas, float globalAlpha, const SkPath& skP
     auto mask = makeMaskBy(BO_Intersection);
     if (mask.outlineMask.isEmpty() == false)
     {
+      canvas->save();
       canvas->clipPath(mask.outlineMask);
     }
+    // SkPaint p;
+    // p.setColor(SK_ColorGREEN);
+    // p.setStrokeWidth(2);
+    // canvas->drawRect(toSkRect(getBound()), p);
+
     SkSamplingOptions opt;
-    canvas->save();
-    canvas->scale(1, -1);
     canvas->drawImageRect(image, toSkRect(getBound()), opt);
-    canvas->restore();
+
+    if (mask.outlineMask.isEmpty() == false)
+    {
+      canvas->restore();
+    }
   }
 }
 

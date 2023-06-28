@@ -1,7 +1,9 @@
 #pragma once
 
-#include <any>
+#include "EventVisitor.hpp"
+
 #include <cassert>
+#include <iostream>
 #include <memory>
 #include <string>
 
@@ -14,7 +16,10 @@ struct Event
 
   virtual void preventDefault()
   {
+    std::cout << "Event::preventDefault called" << std::endl;
   }
+
+  virtual void accept(EventVisitor* visitor) = 0;
 };
 
 using EventPtr = std::shared_ptr<Event>;

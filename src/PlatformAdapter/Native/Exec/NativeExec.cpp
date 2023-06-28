@@ -49,12 +49,11 @@ bool NativeExec::evalModule(const std::string& code, VGG::EventPtr event)
   NodeAdapter::JsEventGenerator event_generator{ event_store.eventId() };
   event->accept(&event_generator);
 
-  std::string wrapped_script{ event_generator.getScirpt() };
-  wrapped_script.append(R"(
+  std::string wrapped_script{ R"(
     var { evalModule } = require('internal/process/execution');
-    var encoded_code = ')");
+    var encoded_code = ')" };
 
-  std::string call_imported_function;
+  std::string call_imported_function{ event_generator.getScirpt() };
   call_imported_function.append("const dataUri = ");
   call_imported_function.append(StringHelper::encode_script_to_data_uri(code));
   call_imported_function.append(

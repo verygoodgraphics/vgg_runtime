@@ -13,9 +13,21 @@ namespace VGG
 namespace NodeAdapter
 {
 
-template<class T>
-class UIEvent : public Event<T>
+template<class EventAdapterType, class EventType>
+class UIEvent : public Event<EventAdapterType, EventType>
 {
+  using base_type = Event<EventAdapterType, EventType>;
+
+protected:
+  static auto properties()
+  {
+    auto base_properties{ base_type::properties() };
+
+    decltype(base_properties) v;
+    v.insert(v.end(), base_properties.begin(), base_properties.end());
+
+    return v;
+  }
 };
 
 } // namespace NodeAdapter

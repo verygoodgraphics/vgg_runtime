@@ -9,8 +9,10 @@ namespace VGG
 namespace NodeAdapter
 {
 
-class KeyboardEvent : public UIEvent<VGG::KeyboardEvent>
+class KeyboardEvent : public UIEvent<KeyboardEvent, VGG::KeyboardEvent>
 {
+  using base_type = UIEvent<KeyboardEvent, VGG::KeyboardEvent>;
+
 public:
   static void Init(napi_env env, napi_value exports);
 

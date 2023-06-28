@@ -7,15 +7,6 @@ namespace VGG
 namespace NodeAdapter
 {
 
-MouseEvent::~MouseEvent()
-{
-  napi_delete_reference(m_env, m_wrapper);
-}
-
-void MouseEvent::Destructor(napi_env env, void* nativeObject, void*)
-{
-}
-
 void MouseEvent::Init(napi_env env, napi_value exports)
 {
   napi_property_descriptor properties[] = {

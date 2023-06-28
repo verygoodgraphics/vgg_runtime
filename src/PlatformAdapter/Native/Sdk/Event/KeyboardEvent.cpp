@@ -7,15 +7,6 @@ namespace VGG
 namespace NodeAdapter
 {
 
-KeyboardEvent::~KeyboardEvent()
-{
-  napi_delete_reference(m_env, m_wrapper);
-}
-
-void KeyboardEvent::Destructor(napi_env env, void* nativeObject, void*)
-{
-}
-
 void KeyboardEvent::Init(napi_env env, napi_value exports)
 {
   napi_property_descriptor properties[] = {

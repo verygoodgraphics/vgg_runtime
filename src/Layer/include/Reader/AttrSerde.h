@@ -232,8 +232,8 @@ inline void from_json(const json& j, TextStyleStub& x)
   x.bold = get_stack_optional<bool>(j, "bold").value_or(false);
   x.italic = get_stack_optional<bool>(j, "italic").value_or(false);
   x.fontName = get_stack_optional<std::string>(j, "name").value_or("");
-  x.fillColor = get_stack_optional<VGGColor>(j, "fillColor");
-  x.boarderColor = get_stack_optional<VGGColor>(j, "borderColor");
+  x.fillColor = get_stack_optional<VGGColor>(j, "fillColor").value_or(VGGColor{ 0, 0, 0, 1 });
+  x.boarderColor = get_stack_optional<VGGColor>(j, "borderColor").value_or(VGGColor{ 0, 0, 0, 1 });
   x.boarderSize = get_stack_optional<int>(j, "borderSize");
   x.subFamilyName = get_stack_optional<std::string>(j, "subFamilyName").value_or("");
   x.lineThrough = j["linethrough"];

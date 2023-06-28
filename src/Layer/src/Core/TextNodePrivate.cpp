@@ -73,7 +73,7 @@ void TextNode__pImpl::drawText(SkCanvas* canvas)
   txtStyle.setColor(SK_ColorBLACK);
   txtStyle.setFontFamilies({ SkString(s.fontName), SkString("Noto Color Emoji") });
   txtStyle.setFontSize(s.size);
-  txtStyle.setColor(s.fillColor.value_or(VGGColor{ 0, 0, 0, 1 }));
+  txtStyle.setColor(s.fillColor);
   txtStyle.setDecoration(TextDecoration::kLineThrough);
   style.setTextStyle(txtStyle);
 

@@ -311,8 +311,8 @@ struct Style
 
 struct TextStyleStub
 {
-  std::optional<VGGColor> fillColor;
-  std::optional<VGGColor> boarderColor;
+  VGGColor fillColor;
+  VGGColor boarderColor;
   size_t length{ 0 };
   float lineSpace{ 1.0 };
   float paraSpacing{ 0.0 };
@@ -353,7 +353,7 @@ struct TextStyleStub
     SkPaint pen;
     pen.setAntiAlias(true);
     pen.setStyle(SkPaint::kFill_Style);
-    pen.setColor(fillColor.value());
+    pen.setColor(fillColor);
     return pen;
   }
 };

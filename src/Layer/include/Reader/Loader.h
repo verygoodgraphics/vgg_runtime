@@ -118,6 +118,12 @@ public:
     return std::make_shared<ContourNode>("contour", std::make_shared<Contour>(contour));
   }
 
+  static inline std::shared_ptr<PaintNode> fromFrame(const nlohmann::json& j)
+  {
+    auto p = std::make_shared<PaintNode>(j["name"], ObjectType::VGG_FRAME);
+    return p;
+  }
+
   static inline std::shared_ptr<ImageNode> fromImage(const nlohmann::json& j)
   {
     auto p = std::make_shared<ImageNode>(j["name"]);
@@ -181,6 +187,11 @@ public:
       {
         p->addSubShape(fromSymbolInstance(geo), blop);
       }
+      else if (klass == "frame")
+      {
+        // p->addSubShape(fromGroup(geo), blop);
+        p->addSubShape(fromFrame(geo), blop);
+      }
     }
     return p;
   }
@@ -208,6 +219,15 @@ public:
     else if (klass == "symbolInstance")
     {
       ro = fromSymbolInstance(j);
+    }
+    else if (klass == "frame")
+    {
+      ro = fromFrame(j);
+    }
+    else
+    {
+      // error
+      return nullptr;
     }
     fromObjectCommonProperty(j, ro.get());
     return ro;
@@ -260,8 +280,9 @@ public:
 
       auto t = p->localTransform();
       const auto b = p->getBound();
-      const auto offset = glm::translate(t, glm::vec2{ -b.bottomLeft.x, b.bottomLeft.y });
-      p->setLocalTransform(offset);
+      t = glm::translate(t, glm::vec2{ -b.bottomLeft.x, b.bottomLeft.y });
+      t = glm::translate(t, glm::vec2{ -t[2][0], -t[2][1] });
+      p->setLocalTransform(t);
       auto layers = fromLayers(e);
       for (const auto& l : layers)
       {

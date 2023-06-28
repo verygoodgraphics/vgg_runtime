@@ -507,12 +507,15 @@ TEST_F(ControllerTestSuite, handle_event_mouse)
   // setup_sdk_with_local_dic();
   setup_using_s5_sdk();
 
+  int times = 0;
   auto type = ModelEventType::Invalid;
   auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
+      times++;
+
       type = evt->type;
-      m_exit_loop = true;
+      m_exit_loop = times == 2;
     });
 
   EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
@@ -523,6 +526,7 @@ TEST_F(ControllerTestSuite, handle_event_mouse)
   EXPECT_TRUE(ret);
 
   // When
+  mock_click("/fake/handle_event");
   mock_click("/fake/handle_event");
 
   // loop_times

@@ -93,6 +93,12 @@ protected:
     m_fake_view_subject.get_subscriber().on_next(
       UIEventPtr{ new MouseEvent{ path, UIEventType::click } });
   }
+
+  void mock_keydown(const std::string& path)
+  {
+    m_fake_view_subject.get_subscriber().on_next(
+      UIEventPtr{ new KeyboardEvent{ path, UIEventType::keydown } });
+  }
 };
 
 TEST_F(ControllerTestSuite, Smoke)
@@ -517,7 +523,8 @@ TEST_F(ControllerTestSuite, handle_event)
   EXPECT_TRUE(ret);
 
   // When
-  mock_click("/fake/handle_event");
+  // mock_click("/fake/handle_event");
+  mock_keydown("/fake/handle_event");
 
   // loop_times
   //  10000: error

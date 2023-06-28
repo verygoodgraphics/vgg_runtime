@@ -87,9 +87,10 @@ struct VGGGradient
 
   glm::vec2 from{ 0.5, 0 };
   glm::vec2 to{ 0.5, 1 };
-  float elipseLength{ 1.0 }; // (0, inf) : radial
-  float rotation{ 0.0 };     // degree : angular
-  float invert{ false };     //
+  float elipseLength{ 1.0 };  // (0, inf) : radial
+  float rotation{ 0.0 };      // degree : angular
+  float invert{ false };      //
+  bool aiCoordinate{ false }; // This flag indicates if these positions are Ai exported.
   std::vector<GradientStop> stops{
     { VGGColor::fromRGB(0xEE, 0xEE, 0xEE), 0.0 },
     { VGGColor::fromRGB(0xD8, 0xD8, 0xD8), 1.0 },
@@ -104,6 +105,11 @@ struct VGGGradient
       return theta;
     }
     return 0;
+  }
+
+  inline glm::vec2 convert(const glm::vec2& p, const Bound2& b) const
+  {
+    return glm::vec2{ p.x + b.topLeft.x, p.y - b.height() + b.topLeft.y };
   }
 
   inline std::vector<size_t> getSortedIndices() const
@@ -127,8 +133,13 @@ struct VGGGradient
     auto maxPosition = stops[indices[indices.size() - 1]].position;
     clampPairByLimits(minPosition, maxPosition, 0.f, 1.f, 0.0001f);
 
-    auto f = bound.map(bound.size() * from);
-    auto t = bound.map(bound.size() * to);
+    auto f = bound.size() * from;
+    auto t = bound.size() * to;
+    // if (aiCoordinate)
+    // {
+    //   f = convert(bound.size() * from, bound);
+    //   t = convert(bound.size() * to, bound);
+    // }
     auto start = glm::mix(f, t, minPosition);
     auto end = glm::mix(f, t, maxPosition);
 
@@ -163,8 +174,13 @@ struct VGGGradient
     auto maxPosition = stops[indices[indices.size() - 1]].position;
     clampPairByLimits(minPosition, maxPosition, 0.0f, 1.0f, 0.0001f);
 
-    auto f = bound.map(bound.size() * from);
-    auto t = bound.map(bound.size() * to);
+    auto f = bound.size() * from;
+    auto t = bound.size() * to;
+    // if (aiCoordinate)
+    // {
+    //   f = convert(bound.size() * from, bound);
+    //   t = convert(bound.size() * to, bound);
+    // }
     auto start = glm::mix(f, t, minPosition);
     auto end = glm::mix(f, t, maxPosition);
 
@@ -201,8 +217,13 @@ struct VGGGradient
     auto minPosition = stops[indices[0]].position;
     auto maxPosition = stops[indices[indices.size() - 1]].position;
     clampPairByLimits(minPosition, maxPosition, 0.f, 1.f, 0.0001f);
-    auto f = bound.map(bound.size() * from);
-    auto t = bound.map(bound.size() * to);
+    auto f = bound.size() * from;
+    auto t = bound.size() * to;
+    // if (aiCoordinate)
+    // {
+    //   f = convert(bound.size() * from, bound);
+    //   t = convert(bound.size() * to, bound);
+    // }
     auto center = (f + t) / 2.0f;
 
     std::vector<SkColor> colors;

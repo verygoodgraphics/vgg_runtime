@@ -17,11 +17,8 @@ namespace VGG
 
 inline SkRect toSkRect(const VGG::Bound2& bound)
 {
-  auto rect = SkRect::MakeXYWH(bound.bottomLeft.x,
-                               bound.bottomLeft.y,
-                               bound.topRight.x - bound.bottomLeft.x,
-                               bound.topRight.y - bound.bottomLeft.y);
-  return rect;
+  const auto& b = bound;
+  return SkRect{ b.topLeft.x, b.topLeft.y, b.bottomRight.x, b.bottomRight.y };
 }
 
 inline SkMatrix toSkMatrix(const glm::mat3& mat)

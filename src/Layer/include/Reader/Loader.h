@@ -79,7 +79,7 @@ public:
   static inline Bound2 fromBound(const nlohmann::json& j)
   {
     auto x = j["x"].get<float>(); // convert to skia coordinate system
-    auto y = -j["y"].get<float>();
+    auto y = j["y"].get<float>();
     auto width = j["width"];
     auto height = j["height"];
     return Bound2{ x, y, width, height };
@@ -278,10 +278,10 @@ public:
       p->setBackgroundColor(bg);
       fromObjectCommonProperty(e, p.get());
 
-      auto t = p->localTransform();
+      const auto origin = p->localTransform();
       const auto b = p->getBound();
-      t = glm::translate(t, glm::vec2{ -b.bottomLeft.x, b.bottomLeft.y });
-      t = glm::translate(t, glm::vec2{ -t[2][0], -t[2][1] });
+      auto t = glm::translate(origin, glm::vec2{ -origin[2][0], -origin[2][1] });
+      t = glm::translate(t, glm::vec2{ -b.topLeft.x, -b.topLeft.y });
       p->setLocalTransform(t);
       auto layers = fromLayers(e);
       for (const auto& l : layers)

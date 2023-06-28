@@ -85,6 +85,12 @@
         "fileName": "js/s5-sdk/21_handle_event.mjs",
         "createdAt": 0
       }
+    ],
+    "keydown": [
+      {
+        "fileName": "js/s5-sdk/21_handle_event.mjs",
+        "createdAt": 0
+      }
     ]
   }
 }

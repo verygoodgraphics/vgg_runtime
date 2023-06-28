@@ -53,6 +53,7 @@ else()
     PlatformAdapter/Native/Exec/NativeExecImpl.cpp
     PlatformAdapter/Native/Sdk/VggSdkAddon.cpp
     PlatformAdapter/Native/Sdk/VggSdkNodeAdapter.cpp
+    PlatformAdapter/Native/Sdk/Event/KeyboardEvent.cpp
     PlatformAdapter/Native/Sdk/Event/MouseEvent.cpp
   )
   target_compile_definitions(vgg_internal PRIVATE NODE_WANT_INTERNALS=1)

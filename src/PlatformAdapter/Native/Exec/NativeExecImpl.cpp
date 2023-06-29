@@ -27,7 +27,7 @@ bool NativeExecImpl::schedule_eval(const std::string& code)
 
   {
     const std::lock_guard<std::mutex> lock(m_tasks_mutex);
-    m_tasks.insert(task);
+    m_tasks.push(task);
   }
   uv_async_send(&m_async_task);
 
@@ -211,12 +211,6 @@ int NativeExecImpl::run_node_instance(MultiIsolatePlatform* platform,
   return exit_code;
 }
 
-void NativeExecImpl::erase_task(NativeEvalTask* task)
-{
-  const std::lock_guard<std::mutex> lock(m_tasks_mutex);
-  m_tasks.erase(task);
-}
-
 void NativeExecImpl::stop_node()
 {
   if (m_env)
@@ -274,11 +268,14 @@ void NativeExecImpl::run_task()
 {
   while (!m_tasks.empty())
   {
-    auto task = *m_tasks.begin();
+    auto task = m_tasks.front();
+    {
+      const std::lock_guard<std::mutex> lock(m_tasks_mutex);
+      m_tasks.pop();
+    }
+
     DEBUG("#evalScript, before eval");
     int ret = eval(task->m_code);
     DEBUG("#evalScript, after eval, ret = %d", ret);
-
-    erase_task(task);
   }
 }

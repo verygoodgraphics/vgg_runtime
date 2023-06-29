@@ -10,10 +10,10 @@
 #include <limits>
 #include <memory>
 #include <mutex>
+#include <queue>
 #include <string>
 #include <thread>
 #include <unistd.h>
-#include <unordered_set>
 
 using node::CommonEnvironmentSetup;
 using node::Environment;
@@ -52,7 +52,6 @@ private:
                         const std::vector<std::string>& args,
                         const std::vector<std::string>& exec_args);
   void run_task();
-  void erase_task(NativeEvalTask* task);
   bool check_state();
 
   void init_uv_async_task();
@@ -71,7 +70,7 @@ private:
   Environment* m_env;
   uv_loop_t* m_loop;
 
-  std::unordered_set<NativeEvalTask*> m_tasks;
+  std::queue<NativeEvalTask*> m_tasks;
   std::mutex m_tasks_mutex;
 
   std::mutex m_state_mutex;

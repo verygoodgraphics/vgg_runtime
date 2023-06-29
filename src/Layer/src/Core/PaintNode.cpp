@@ -172,10 +172,10 @@ void PaintNode::paintEvent(SkCanvas* canvas)
     SkPaint bgPaint;
     bgPaint.setColor(this->bgColor.value());
     bgPaint.setStyle(SkPaint::kFill_Style);
-    canvas->save();
+    // canvas->save();
     // canvas->scale(1, -1);
     canvas->drawRect(toSkRect(getBound()), bgPaint);
-    canvas->restore();
+    // canvas->restore();
   }
 }
 

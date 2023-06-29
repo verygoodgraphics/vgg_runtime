@@ -13,6 +13,7 @@ class VGG_EXPORTS ImageNode final : public PathNode
   std::string guid;
   bool fillReplacesImage = false;
   sk_sp<SkImage> image;
+  sk_sp<SkShader> shader;
 
 public:
   ImageNode(const std::string& name);

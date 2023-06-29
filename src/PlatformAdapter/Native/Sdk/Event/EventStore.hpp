@@ -4,7 +4,7 @@
 #include "Presenter/UIEvent.hpp"
 #include "MouseEvent.hpp"
 #include "KeyboardEvent.hpp"
-// #include "TouchEvent.hpp"
+#include "TouchEvent.hpp"
 
 namespace VGG
 {
@@ -39,7 +39,7 @@ public:
 
   virtual void visit(VGG::TouchEvent*) override
   {
-    // m_event_id = TouchEvent::store(std::dynamic_pointer_cast<VGG::TouchEvent>(m_event));
+    m_event_id = TouchEvent::store(std::dynamic_pointer_cast<VGG::TouchEvent>(m_event));
   }
 };
 

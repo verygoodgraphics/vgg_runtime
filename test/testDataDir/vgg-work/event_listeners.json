@@ -91,6 +91,12 @@
         "fileName": "js/s5-sdk/21_handle_event.mjs",
         "createdAt": 0
       }
+    ],
+    "touchstart": [
+      {
+        "fileName": "js/s5-sdk/21_handle_event.mjs",
+        "createdAt": 0
+      }
     ]
   }
 }

@@ -88,16 +88,22 @@ protected:
     }
   }
 
-  void mock_click(const std::string& path)
+  void mock_click(const std::string& path, int button = 0)
   {
     m_fake_view_subject.get_subscriber().on_next(
-      UIEventPtr{ new MouseEvent{ path, UIEventType::click } });
+      UIEventPtr{ new MouseEvent{ path, UIEventType::click, button } });
   }
 
   void mock_keydown(const std::string& path)
   {
     m_fake_view_subject.get_subscriber().on_next(
       UIEventPtr{ new KeyboardEvent{ path, UIEventType::keydown } });
+  }
+
+  void mock_touch(const std::string& path)
+  {
+    m_fake_view_subject.get_subscriber().on_next(
+      UIEventPtr{ new TouchEvent{ path, UIEventType::touchstart } });
   }
 };
 
@@ -501,7 +507,7 @@ TEST_F(ControllerTestSuite, event_listener_example)
   // js throw error if failed
 }
 
-TEST_F(ControllerTestSuite, handle_event_mouse)
+TEST_F(ControllerTestSuite, handle_events)
 {
   // Given
   // setup_sdk_with_local_dic();
@@ -515,7 +521,7 @@ TEST_F(ControllerTestSuite, handle_event_mouse)
       times++;
 
       type = evt->type;
-      m_exit_loop = times == 2;
+      m_exit_loop = times == 4;
     });
 
   EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
@@ -527,7 +533,9 @@ TEST_F(ControllerTestSuite, handle_event_mouse)
 
   // When
   mock_click("/fake/handle_event");
-  mock_click("/fake/handle_event");
+  mock_click("/fake/handle_event", 2);
+  mock_keydown("/fake/handle_event");
+  mock_touch("/fake/handle_event");
 
   // loop_times
   //  10000: error

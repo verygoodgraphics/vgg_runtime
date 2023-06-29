@@ -17,6 +17,10 @@ public:
   static void Init(napi_env env, napi_value exports);
 
 private:
+  // Getter
+  static napi_value button(napi_env env, napi_callback_info info);
+
+  // Method
   static napi_value getModifierState(napi_env env, napi_callback_info info);
 };
 

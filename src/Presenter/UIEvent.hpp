@@ -110,6 +110,11 @@ public:
     return m_path;
   }
 
+  virtual std::string target()
+  {
+    return m_path;
+  }
+
   virtual std::string type()
   {
     return UIEventTypeToString(m_type);
@@ -144,14 +149,18 @@ struct KeyboardEvent : UIEvent
 
 struct MouseEvent : UIEvent
 {
-  MouseEvent(const PathType& path, UIEventType type)
+  const int button;
+
+  MouseEvent(const PathType& path, UIEventType type, int button = 0)
     : UIEvent(path, type)
+    , button{ button }
   {
     assert(type >= UIEventType::auxclick && type <= UIEventType::mouseup);
   }
 
-  MouseEvent(PathType&& path, UIEventType type)
+  MouseEvent(PathType&& path, UIEventType type, int button = 0)
     : UIEvent(std::move(path), type)
+    , button{ button }
   {
     assert(type >= UIEventType::auxclick && type <= UIEventType::mouseup);
   }

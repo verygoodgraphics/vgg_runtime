@@ -19,8 +19,8 @@ public:
   using ResourcesType = std::map<std::string, std::vector<char>>;
 
   UIView()
+    : m_scene{ std::make_shared<Scene>() }
   {
-    m_scene = std::make_shared<Scene>();
   }
 
   auto scene()

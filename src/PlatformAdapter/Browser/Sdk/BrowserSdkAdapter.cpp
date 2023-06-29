@@ -1,4 +1,4 @@
-#include "MouseEventWrapper.hpp"
+#include "MouseEvent.hpp"
 
 #include "Sdk/VggSdk.hpp"
 
@@ -7,6 +7,9 @@
 
 using namespace emscripten;
 using namespace VGG;
+using BEvent = BrowserAdapter::Event;
+using BUIEvent = BrowserAdapter::UIEvent;
+using BMouseEvent = BrowserAdapter::MouseEvent;
 
 EMSCRIPTEN_BINDINGS(vgg_sdk)
 {
@@ -23,9 +26,16 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
 
 EMSCRIPTEN_BINDINGS(vgg_event)
 {
-  class_<MouseEventWrapper>("VggMouseEvent")
+  class_<BEvent>("VggEvent")
     .constructor<>()
-    .property("button", &MouseEventWrapper::button)
-    .function("preventDefault", &MouseEventWrapper::preventDefault)
-    .function("bindCppEvent", &MouseEventWrapper::bindCppEvent);
+    .property("target", &BEvent::target)
+    .property("type", &BEvent::type)
+    .function("preventDefault", &BEvent::preventDefault)
+    .function("bindCppEvent", &BEvent::bindCppEvent);
+
+  class_<BUIEvent, base<BEvent>>("VggUIEvent").constructor<>();
+
+  class_<BMouseEvent, base<BUIEvent>>("VggMouseEvent")
+    .constructor<>()
+    .property("button", &BMouseEvent::button);
 }

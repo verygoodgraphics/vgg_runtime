@@ -244,12 +244,13 @@ void PathNode::paintFill(SkCanvas* canvas, float globalAlpha, const SkPath& skPa
       // debugLine.setColor(SK_ColorBLUE);
       // debugLine.setStrokeWidth(2);
       // const auto bound = getBound();
-      // auto from = bound.map(bound.size() * f.gradient->from);
-      // auto to = bound.map(bound.size() * f.gradient->to);
+      // auto from = (bound.size() * f.gradient->from);
+      // auto to = (bound.size() * f.gradient->to);
       // if (f.gradient->aiCoordinate)
       // {
-      //   from = f.gradient->convert(bound.size() * f.gradient->from, bound);
-      //   to = f.gradient->convert(bound.size() * f.gradient->to, bound);
+      //   auto r = f.gradient->aiConvert(f.gradient->from, f.gradient->to, bound);
+      //   from = r.first;
+      //   to = r.second;
       // }
       // canvas->save();
       // canvas->drawLine(from.x, from.y, to.x, to.y, debugLine);

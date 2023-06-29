@@ -59,6 +59,16 @@ struct Bound2
   {
     return glm::vec2{ width(), height() };
   }
+
+  float squaredDistance() const
+  {
+    return width() * width() + height() * height();
+  }
+
+  float distance() const
+  {
+    return std::sqrt(squaredDistance());
+  }
 };
 
 // inline Bound2 operator*(const glm::mat3& transform, const Bound2& other)

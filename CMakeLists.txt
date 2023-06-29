@@ -5,11 +5,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
-# defaults to debug mode unless explicitly set to release
-if (NOT CMAKE_BUILD_TYPE STREQUAL "Release")
-  set(CMAKE_BUILD_TYPE "Debug")
-endif()
-
 # customized platform checking flags
 #introduce customized cmake vars, see VggVars.cmake in cmake for details
 set(VGG_ENABLE_EGL OFF CACHE BOOL "Build runtime with egl backend for offscreen rendering")

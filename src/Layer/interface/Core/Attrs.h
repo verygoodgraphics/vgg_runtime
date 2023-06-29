@@ -112,6 +112,19 @@ struct VGGGradient
     return glm::vec2{ p.x + b.topLeft.x, p.y - b.height() + b.topLeft.y };
   }
 
+  inline std::pair<glm::vec2, glm::vec2> aiConvert(const glm::vec2& from,
+                                                   const glm::vec2& to,
+                                                   const Bound2& b) const
+  {
+    const auto angle = to.x;
+    const auto length = to.y;
+    glm::vec2 dir = { std::cos(glm::radians(angle)), std::sin(glm::radians(angle)) };
+    glm::vec2 f = from * b.size();
+    f = glm::vec2{ f.x + b.topLeft.x, f.y - b.height() / 2 + b.topLeft.y };
+    glm::vec2 t = f + length * dir * b.distance();
+    return { f, t };
+  }
+
   inline std::vector<size_t> getSortedIndices() const
   {
     std::vector<size_t> indices;
@@ -135,11 +148,12 @@ struct VGGGradient
 
     auto f = bound.size() * from;
     auto t = bound.size() * to;
-    // if (aiCoordinate)
-    // {
-    //   f = convert(bound.size() * from, bound);
-    //   t = convert(bound.size() * to, bound);
-    // }
+    if (aiCoordinate)
+    {
+      auto r = aiConvert(from, to, bound);
+      f = r.first;
+      t = r.second;
+    }
     auto start = glm::mix(f, t, minPosition);
     auto end = glm::mix(f, t, maxPosition);
 
@@ -156,7 +170,10 @@ struct VGGGradient
       positions.push_back((p - minPosition) / (maxPosition - minPosition));
     }
     SkMatrix mat;
-    mat.postScale(1, -1);
+    if (aiCoordinate)
+    {
+      mat.postScale(1, -1);
+    }
     return SkGradientShader::MakeLinear(pts,
                                         colors.data(),
                                         positions.data(),
@@ -176,11 +193,12 @@ struct VGGGradient
 
     auto f = bound.size() * from;
     auto t = bound.size() * to;
-    // if (aiCoordinate)
-    // {
-    //   f = convert(bound.size() * from, bound);
-    //   t = convert(bound.size() * to, bound);
-    // }
+    if (aiCoordinate)
+    {
+      auto r = aiConvert(from, to, bound);
+      f = r.first;
+      t = r.second;
+    }
     auto start = glm::mix(f, t, minPosition);
     auto end = glm::mix(f, t, maxPosition);
 
@@ -219,11 +237,11 @@ struct VGGGradient
     clampPairByLimits(minPosition, maxPosition, 0.f, 1.f, 0.0001f);
     auto f = bound.size() * from;
     auto t = bound.size() * to;
-    // if (aiCoordinate)
-    // {
-    //   f = convert(bound.size() * from, bound);
-    //   t = convert(bound.size() * to, bound);
-    // }
+    if (aiCoordinate)
+    {
+      f = convert(bound.size() * from, bound);
+      t = convert(bound.size() * to, bound);
+    }
     auto center = (f + t) / 2.0f;
 
     std::vector<SkColor> colors;

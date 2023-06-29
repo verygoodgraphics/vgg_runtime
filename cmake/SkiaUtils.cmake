@@ -11,6 +11,7 @@ skia_canvaskit_enable_paragraph=true
 skia_enable_skparagraph=true
 skia_use_libwebp_encode=true
 skia_use_icu=true
+skia_use_client_icu=true
 skia_enable_skunicode=true
 skia_enable_gpu=true
 skia_enable_fontmgr_custom_embedded=false
@@ -91,9 +92,9 @@ endif()
 if(NOT ${platform} IN_LIST VGG_WIN_TARGET_LIST)
 # we assume non-window using gcc compatible compiler
 if(config STREQUAL "RelWithDebInfo")
-  string(APPEND OPTIONS " extra_cflags_cc=[\"-fvisibility=default\", \"-g\"]")
+  string(APPEND OPTIONS " extra_cflags_cc=[\"-fvisibility=default\", \"-g\", \"-frtti\"]")
 else()
-  string(APPEND OPTIONS " extra_cflags_cc=[\"-fvisibility=default\"]")
+  string(APPEND OPTIONS " extra_cflags_cc=[\"-fvisibility=default\", \"-frtti\"]")
 endif()
 elseif(platform STREQUAL "WASM")
 string(APPEND OPTIONS " extra_cflags_cc=[\"-frtti\",\"-s\", \"-fvisibility=default\"] extra_cflags=[\"-Wno-unknown-warning-option\",\"-s\",\"-s\"]")

@@ -42,25 +42,28 @@ public:
 
     ResourcesType resources;
 
-    for (auto const& dir_entry : fs::recursive_directory_iterator(dir))
+    if (fs::exists(dir) && fs::is_directory(dir))
     {
-      if (dir_entry.is_regular_file())
+      for (auto const& dir_entry : fs::recursive_directory_iterator(dir))
       {
-        // auto relative_path = std::filesystem::relative(dir_entry.path(), dir);
-        auto relative_path = dir_entry.path().lexically_relative(dir);
-
-        auto it = relative_path.begin();
-        std::string key{ *it };
-        for (++it; it != relative_path.end(); ++it)
+        if (dir_entry.is_regular_file())
         {
-          key.append("/"); // use "/" on windows & posix
-          key.append(*it);
-        }
+          // auto relative_path = std::filesystem::relative(dir_entry.path(), dir);
+          auto relative_path = dir_entry.path().lexically_relative(dir);
 
-        std::ifstream ifs{ dir_entry, std::ios::binary };
-        std::istreambuf_iterator<char> start{ ifs }, end;
-        std::vector<char> content{ start, end };
-        resources[key] = std::move(content);
+          auto it = relative_path.begin();
+          std::string key{ *it };
+          for (++it; it != relative_path.end(); ++it)
+          {
+            key.append("/"); // use "/" on windows & posix
+            key.append(*it);
+          }
+
+          std::ifstream ifs{ dir_entry, std::ios::binary };
+          std::istreambuf_iterator<char> start{ ifs }, end;
+          std::vector<char> content{ start, end };
+          resources[key] = std::move(content);
+        }
       }
     }
 

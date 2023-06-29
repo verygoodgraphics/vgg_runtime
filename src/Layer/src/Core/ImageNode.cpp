@@ -1,5 +1,7 @@
 #include <Core/ImageNode.h>
 #include <Core/PathNode.h>
+#include <core/SkBlendMode.h>
+#include <core/SkRect.h>
 #include "Core/VGGType.h"
 #include "Core/VGGUtils.h"
 #include "SkiaBackend/SkiaImpl.h"
@@ -65,19 +67,30 @@ void ImageNode::paintFill(SkCanvas* canvas, float globalAlpha, const SkPath& skP
   }
   if (image)
   {
+    if (!shader)
+    {
+      const auto& b = getBound();
+      shader =
+        getImageShader(image, b.width(), b.height(), EImageFillType::IFT_Stretch, 1.0, false);
+    }
     auto mask = makeMaskBy(BO_Intersection);
     if (mask.outlineMask.isEmpty() == false)
     {
       canvas->save();
       canvas->clipPath(mask.outlineMask);
     }
-    // SkPaint p;
-    // p.setColor(SK_ColorGREEN);
-    // p.setStrokeWidth(2);
-    // canvas->drawRect(toSkRect(getBound()), p);
 
-    SkSamplingOptions opt;
-    canvas->drawImageRect(image, toSkRect(getBound()), opt);
+    SkPaint p;
+    p.setShader(shader);
+    canvas->drawPaint(p);
+    // Another weird drawing method
+    // SkSamplingOptions opt;
+    // const auto& b = getBound();
+    // SkRect imageRect = SkRect::MakeXYWH(b.topLeft.x, -b.topLeft.y, b.width(), b.height());
+    // canvas->save();
+    // canvas->scale(1, -1);
+    // canvas->drawImageRect(image, imageRect, opt);
+    // canvas->restore();
 
     if (mask.outlineMask.isEmpty() == false)
     {

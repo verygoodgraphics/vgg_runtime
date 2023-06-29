@@ -272,7 +272,7 @@ struct TypefaceManager
     }
     if (typefaces.find(desc) == typefaces.end())
     {
-      return nullptr;
+      return typefaces["WenQuanYi Micro Hei, Regular"];
     }
     return typefaces[desc];
   }

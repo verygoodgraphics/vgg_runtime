@@ -86,26 +86,38 @@ constexpr const char* UIEventTypeToString(UIEventType e) noexcept
   }
 }
 
-struct UIEvent : Event
+class UIEvent : public Event
 {
+public:
   using PathType = std::string;
 
-  const PathType path;
-  const UIEventType type;
-
   UIEvent(const PathType& path, const UIEventType type)
-    : path{ path }
-    , type{ type }
+    : m_path{ path }
+    , m_type{ type }
   {
   }
 
   UIEvent(PathType&& path, UIEventType type)
-    : path{ std::move(path) }
-    , type{ type }
+    : m_path{ std::move(path) }
+    , m_type{ type }
   {
   }
 
   virtual ~UIEvent() = default;
+
+  PathType path()
+  {
+    return m_path;
+  }
+
+  virtual std::string type()
+  {
+    return UIEventTypeToString(m_type);
+  }
+
+private:
+  const PathType m_path;
+  const UIEventType m_type;
 };
 
 using UIEventPtr = std::shared_ptr<UIEvent>;

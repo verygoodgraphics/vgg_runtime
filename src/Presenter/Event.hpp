@@ -19,6 +19,10 @@ struct Event
     std::cout << "Event::preventDefault called" << std::endl;
   }
 
+  // Getter
+  virtual std::string type() = 0;
+
+  // Method
   virtual void accept(EventVisitor* visitor) = 0;
 };
 

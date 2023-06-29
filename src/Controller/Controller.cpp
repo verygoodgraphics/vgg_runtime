@@ -105,8 +105,8 @@ void Controller::observeUIEvent()
         return;
       }
 
-      auto listeners_map = shared_this->m_work->getEventListeners(evt->path);
-      std::string type = UIEventTypeToString(evt->type);
+      auto listeners_map = shared_this->m_work->getEventListeners(evt->path());
+      std::string type = evt->type();
       if (auto it = listeners_map.find(type); it != listeners_map.end())
       {
         for (auto& listener : it->second)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "js_native_api.h"
+#include "node_api.h"
 
 #include <mutex>
 #include <unordered_map>
@@ -97,7 +97,18 @@ protected:
 
   static napi_value type(napi_env env, napi_callback_info info)
   {
-    return nullptr;
+    napi_value _this;
+    NODE_API_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &_this, nullptr));
+
+    child_type* wrapper;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&wrapper)));
+
+    auto result = wrapper->m_event_ptr->type();
+
+    napi_value ret;
+    NODE_API_CALL(env, napi_create_string_utf8(env, result.data(), result.size(), &ret));
+
+    return ret;
   }
 
   // method
@@ -152,7 +163,8 @@ protected:
 
   static properties_type properties()
   {
-    return { DECLARE_NODE_API_PROPERTY("preventDefault", preventDefault),
+    return { DECLARE_NODE_API_GETTER("type", type),
+             DECLARE_NODE_API_PROPERTY("preventDefault", preventDefault),
              DECLARE_NODE_API_PROPERTY("bindCppEvent", bindCppEvent) };
   }
 

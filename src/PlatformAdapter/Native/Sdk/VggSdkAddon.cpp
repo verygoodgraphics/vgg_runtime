@@ -6,6 +6,7 @@
 #include "PlatformAdapter/Native/Sdk/VggSdkNodeAdapter.hpp"
 #include "PlatformAdapter/Native/Sdk/Event/KeyboardEvent.hpp"
 #include "PlatformAdapter/Native/Sdk/Event/MouseEvent.hpp"
+#include "PlatformAdapter/Native/Sdk/Event/TouchEvent.hpp"
 #include "PlatformAdapter/Native/Sdk/Event/UIEvent.hpp"
 
 napi_value InitializeLocalNapiBinding(napi_env env, napi_value exports)
@@ -13,6 +14,7 @@ napi_value InitializeLocalNapiBinding(napi_env env, napi_value exports)
   VggSdkNodeAdapter::Init(env, exports);
   VGG::NodeAdapter::MouseEvent::Init(env, exports);
   VGG::NodeAdapter::KeyboardEvent::Init(env, exports);
+  VGG::NodeAdapter::TouchEvent::Init(env, exports);
   return nullptr;
 }
 

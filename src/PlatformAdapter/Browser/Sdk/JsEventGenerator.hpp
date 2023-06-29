@@ -6,7 +6,7 @@
 
 namespace VGG
 {
-namespace NodeAdapter
+namespace BrowserAdapter
 {
 
 class JsEventGenerator : public EventVisitor
@@ -44,8 +44,9 @@ private:
   void makeScript(std::string_view event)
   {
     m_script = R"(
-      var vggSdkAddon = process._linkedBinding('vgg_sdk_addon');
-      var theVggEvent = new vggSdkAddon.)";
+      const { getVgg } = await import('https://s5.vgg.cool/vgg-sdk.esm.js');
+      const vgg = await getVgg();
+      var theVggEvent = new vgg.)";
     m_script.append(event);
     m_script.append("(); theVggEvent.bindCppEvent(");
     m_script.append(m_event_id);
@@ -53,5 +54,5 @@ private:
   }
 };
 
-} // namespace NodeAdapter
+} // namespace BrowserAdapter
 } // namespace VGG

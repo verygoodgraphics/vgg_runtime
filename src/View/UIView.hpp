@@ -5,6 +5,8 @@
 
 #include "nlohmann/json.hpp"
 
+#include <tuple>
+
 union SDL_Event;
 
 namespace VGG
@@ -47,6 +49,8 @@ public:
 
 private:
   EventListener m_event_listener;
+
+  std::tuple<bool, bool, bool, bool> getKeyModifier(int keyMod);
 };
 
 } // namespace VGG

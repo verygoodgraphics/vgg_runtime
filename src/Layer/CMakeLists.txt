@@ -1,7 +1,6 @@
 include(ImportSkia)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/Core CoreSrcVar)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/SkiaBackend SkiaImplSrcVar)
-# set(SkiaImplSrcVar "${CMAKE_CURRENT_SOURCE_DIR}/src/SkiaBackend/SkiaImpl.cpp")
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/Scene SceneSrcVar)
 if(LAYER_SHARED_LIBRARY)
   add_library(vgg_layer SHARED)
@@ -19,10 +18,13 @@ set(LeagacySrcVar
 target_sources(vgg_layer PRIVATE ${CoreSrcVar} ${SkiaImplSrcVar} ${SceneSrcVar}
                              ${LeagacySrcVar})
 target_include_directories(vgg_layer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/interface)
+
+message(STATUS "JSON INCLUDE DIR: " ${VGG_CONTRIB_JSON_INCLUDE})
 target_include_directories(
   vgg_layer PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/include
-  ${SDL2_INCLUDE_DIRS}/..)
+  ${SDL2_INCLUDE_DIRS}/..
+  ${VGG_CONTRIB_JSON_INCLUDE})
 
 list(APPEND COMMON_DEPS "glm")
 if (NOT EMSCRIPTEN)

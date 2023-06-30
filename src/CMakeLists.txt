@@ -28,11 +28,9 @@ target_include_directories(vgg_internal PUBLIC
 )
 
 add_subdirectory(Layer)
-
 target_link_libraries(vgg_internal
-  skia # must before layer
   automerge
-  layer
+  vgg_layer
   zip
 )
 if (EMSCRIPTEN)
@@ -57,5 +55,4 @@ else()
   )
   target_compile_definitions(vgg_internal PRIVATE NODE_WANT_INTERNALS=1)
 endif()
-add_subdirectory(Layer)
 add_subdirectory(Entry)

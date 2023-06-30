@@ -59,7 +59,7 @@ public:
             key.append(*it);
           }
 
-          std::ifstream ifs{ dir_entry, std::ios::binary };
+          std::ifstream ifs{ dir_entry.path(), std::ios::binary };
           std::istreambuf_iterator<char> start{ ifs }, end;
           std::vector<char> content{ start, end };
           resources[key] = std::move(content);

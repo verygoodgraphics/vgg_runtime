@@ -1,4 +1,0 @@
-build
-config.mk
-include/dlg/
-src/dlg/dlg.c

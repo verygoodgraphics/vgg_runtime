@@ -33,6 +33,7 @@ target_link_libraries(vgg_internal
   vgg_layer
   zip
 )
+target_include_directories(vgg_internal PRIVATE ${SDL2_INCLUDE_DIRS}/..)
 if (EMSCRIPTEN)
   target_sources(vgg_internal PRIVATE
     PlatformAdapter/Browser/Exec/BrowserJSEngine.cpp
@@ -47,7 +48,6 @@ if (EMSCRIPTEN)
 else()
   target_link_libraries(vgg_internal vgg_libnode vgg_sketch_parser)
   target_sources(vgg_internal PRIVATE
-    PlatformAdapter/Native/Composer/MainComposer.cpp
     PlatformAdapter/Native/Exec/NativeExec.cpp
     PlatformAdapter/Native/Exec/NativeExecImpl.cpp
     PlatformAdapter/Native/Sdk/VggSdkAddon.cpp

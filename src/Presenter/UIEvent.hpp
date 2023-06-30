@@ -4,6 +4,7 @@
 #include <cassert>
 #include <memory>
 #include <string>
+#include <stdexcept>
 
 namespace VGG
 {

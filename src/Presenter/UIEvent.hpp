@@ -91,14 +91,8 @@ class UIEvent : public Event
 public:
   using PathType = std::string;
 
-  UIEvent(const PathType& path, const UIEventType type)
+  UIEvent(const PathType& path, UIEventType type)
     : m_path{ path }
-    , m_type{ type }
-  {
-  }
-
-  UIEvent(PathType&& path, UIEventType type)
-    : m_path{ std::move(path) }
     , m_type{ type }
   {
   }
@@ -129,14 +123,11 @@ using UIEventPtr = std::shared_ptr<UIEvent>;
 
 struct KeyboardEvent : UIEvent
 {
-  KeyboardEvent(const PathType& path, UIEventType type)
-    : UIEvent(path, type)
-  {
-    assert(type == UIEventType::keydown || type == UIEventType::keyup);
-  }
+  const int key;
 
-  KeyboardEvent(PathType&& path, UIEventType type)
-    : UIEvent(std::move(path), type)
+  KeyboardEvent(const PathType& path, UIEventType type, int key)
+    : UIEvent(path, type)
+    , key{ key }
   {
     assert(type == UIEventType::keydown || type == UIEventType::keyup);
   }
@@ -151,16 +142,38 @@ struct MouseEvent : UIEvent
 {
   const int button;
 
-  MouseEvent(const PathType& path, UIEventType type, int button = 0)
+  const int x;
+  const int y;
+
+  const int movementX;
+  const int movementY;
+
+  const bool altKey;
+  const bool ctrlKey;
+  const bool metaKey;
+  const bool shiftKey;
+
+  MouseEvent(const PathType& path,
+             UIEventType type,
+             int button = 0,
+             int x = 0,
+             int y = 0,
+             int movementX = 0,
+             int movementY = 0,
+             bool altKey = false,
+             bool ctrlKey = false,
+             bool metaKey = false,
+             bool shiftKey = false)
     : UIEvent(path, type)
     , button{ button }
-  {
-    assert(type >= UIEventType::auxclick && type <= UIEventType::mouseup);
-  }
-
-  MouseEvent(PathType&& path, UIEventType type, int button = 0)
-    : UIEvent(std::move(path), type)
-    , button{ button }
+    , x{ x }
+    , y{ y }
+    , movementX{ movementX }
+    , movementY{ movementY }
+    , altKey{ altKey }
+    , ctrlKey{ ctrlKey }
+    , metaKey{ metaKey }
+    , shiftKey{ shiftKey }
   {
     assert(type >= UIEventType::auxclick && type <= UIEventType::mouseup);
   }
@@ -175,12 +188,6 @@ struct TouchEvent : UIEvent
 {
   TouchEvent(const PathType& path, UIEventType type)
     : UIEvent(path, type)
-  {
-    assert(type >= UIEventType::touchcancel && type <= UIEventType::touchstart);
-  }
-
-  TouchEvent(PathType&& path, UIEventType type)
-    : UIEvent(std::move(path), type)
   {
     assert(type >= UIEventType::touchcancel && type <= UIEventType::touchstart);
   }

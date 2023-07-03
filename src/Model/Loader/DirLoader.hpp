@@ -52,11 +52,11 @@ public:
           auto relative_path = dir_entry.path().lexically_relative(dir);
 
           auto it = relative_path.begin();
-          std::string key{ *it };
+          std::string key{ it->string() };
           for (++it; it != relative_path.end(); ++it)
           {
             key.append("/"); // use "/" on windows & posix
-            key.append(*it);
+            key.append(it->string());
           }
 
           std::ifstream ifs{ dir_entry.path(), std::ios::binary };

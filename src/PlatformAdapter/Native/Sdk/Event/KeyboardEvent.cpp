@@ -11,6 +11,11 @@ void KeyboardEvent::Init(napi_env env, napi_value exports)
 {
   properties_type properties = {
     DECLARE_NODE_API_GETTER("key", stringMethod<&KeyboardEvent::key>),
+    DECLARE_NODE_API_GETTER("repeat", boolMethod<&KeyboardEvent::repeat>),
+    DECLARE_NODE_API_GETTER("altkey", boolMethod<&KeyboardEvent::altkey>),
+    DECLARE_NODE_API_GETTER("ctrlkey", boolMethod<&KeyboardEvent::ctrlkey>),
+    DECLARE_NODE_API_GETTER("metakey", boolMethod<&KeyboardEvent::metakey>),
+    DECLARE_NODE_API_GETTER("shiftkey", boolMethod<&KeyboardEvent::shiftkey>),
     DECLARE_NODE_API_PROPERTY("getModifierState", getModifierState),
   };
 

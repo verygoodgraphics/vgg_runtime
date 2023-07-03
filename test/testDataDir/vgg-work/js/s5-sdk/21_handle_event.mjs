@@ -33,8 +33,15 @@ function handleEvent(event) {
     }
       break;
 
-    case 'keyup': {
+
+    case 'keyup':
+    case 'keydown': {
       console.log('key:', event.key);
+      console.log('repeat:', event.repeat);
+      console.log('altkey:', event.altkey);
+      console.log('ctrlkey:', event.ctrlkey);
+      console.log('metakey:', event.metakey);
+      console.log('shifkey:', event.shiftkey)
     }
       break;
 

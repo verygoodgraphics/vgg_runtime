@@ -5,6 +5,34 @@ set(SKIA_SUPPORTED_FEATURES "elg;zlib;freetype;skparagraph;icu;gpu;vulkan;")
 set(SKIA_PRESET_FEATURES_FOR_NATIVE
 "skia_use_egl=true
 skia_use_freetype=true
+skia_use_system_freetype2=false
+skia_use_zlib=true
+skia_use_system_zlib=false
+skia_canvaskit_enable_paragraph=true
+skia_enable_skparagraph=true
+skia_use_libwebp_encode=true
+skia_use_icu=true
+skia_use_client_icu=true
+skia_enable_skunicode=true
+skia_enable_gpu=true
+skia_enable_fontmgr_custom_embedded=false
+skia_canvaskit_enable_canvas_bindings=false
+skia_canvaskit_enable_embedded_font=false
+skia_use_vulkan=false 
+skia_use_expat=false 
+skia_use_piex=false 
+skia_use_lua=false 
+skia_use_dng_sdk=false 
+skia_use_fontconfig=false 
+skia_use_libheif=false 
+skia_use_expat=false 
+skia_use_vulkan=false 
+skia_enable_pdf=false")
+
+set(SKIA_PRESET_FEATURES_FOR_WIN
+"skia_use_egl=false
+skia_use_freetype=true
+skia_use_system_freetype2=false
 skia_use_zlib=true
 skia_use_system_zlib=false
 skia_canvaskit_enable_paragraph=true
@@ -106,8 +134,12 @@ function(get_skia_gn_config out_options config platform link_type)
 string(APPEND OPTIONS --args=)
 
 # set target cpu for skia
-if(${platform} IN_LIST VGG_WIN_TARGET_LIST OR ${platform} IN_LIST VGG_LINUX_TARGET_LIST)
+if(${platform} IN_LIST VGG_LINUX_TARGET_LIST)
   foreach(OPT ${SKIA_PRESET_FEATURES_FOR_NATIVE})
+    string(APPEND OPTIONS " ${OPT}")
+  endforeach(OPT)
+elseif(${platform} IN_LIST VGG_WIN_TARGET_LIST)
+  foreach(OPT ${SKIA_PRESET_FEATURES_FOR_WIN})
     string(APPEND OPTIONS " ${OPT}")
   endforeach(OPT)
 elseif(platform STREQUAL "macOS-apple_silicon")

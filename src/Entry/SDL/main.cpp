@@ -9,7 +9,7 @@
 
 using namespace VGG;
 namespace fs = std::filesystem;
-
+#define main main
 int main(int argc, char** argv)
 {
   argparse::ArgumentParser program("vgg", Version::get());
@@ -69,7 +69,7 @@ int main(int argc, char** argv)
          });
 
     // legacy renderer
-    if (!FileManager::loadFile(prefix / fp))
+    if (!FileManager::loadFile((prefix / fp).string()))
     {
       FAIL("Failed to load file: %s", fp.c_str());
     }

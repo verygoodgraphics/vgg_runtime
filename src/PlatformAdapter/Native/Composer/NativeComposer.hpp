@@ -24,26 +24,26 @@ public:
   {
   }
 
-  virtual std::shared_ptr<VggJSEngine> createJsEngine()
+  virtual std::shared_ptr<VggJSEngine> createJsEngine() override
   {
     return m_native_exec;
   }
 
-  virtual void platformSetup(const std::shared_ptr<VggExec> exec)
+  virtual void platformSetup() override
   {
     m_native_exec->inject([](node::Environment* env) { link_vgg_sdk_addon(env); });
-    setupVgg(exec);
+    setupVgg();
 
     VGG::DIContainer<std::shared_ptr<VggSdk>>::get().reset(new VggSdk);
   }
 
-  virtual void platformTeardown()
+  virtual void platformTeardown() override
   {
     VGG::DIContainer<std::shared_ptr<VggSdk>>::get().reset();
   }
 
 private:
-  void setupVgg(std::shared_ptr<VggExec> vggExec)
+  void setupVgg()
   {
     std::string set_vgg_code(R"(
       const { getVgg, getVggSdk, setVgg } = await import(")");
@@ -52,7 +52,7 @@ private:
       var vggSdkAddon = process._linkedBinding('vgg_sdk_addon');
       await setVgg(vggSdkAddon);
     )");
-    vggExec->evalModule(set_vgg_code);
+    m_native_exec->evalModule(set_vgg_code);
 
     if (m_catchJsException)
     {
@@ -62,7 +62,7 @@ private:
         }
         process.on('uncaughtException', __vggErrorHandler)
       )" };
-      vggExec->evalScript(catch_exception);
+      m_native_exec->evalScript(catch_exception);
     }
   }
 };

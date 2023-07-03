@@ -9,7 +9,7 @@
 class BrowserComposer : public PlatformComposer
 {
 public:
-  virtual std::shared_ptr<VggJSEngine> createJsEngine()
+  virtual std::shared_ptr<VggJSEngine> createJsEngine() override
   {
     return std::make_shared<BrowserJSEngine>();
   }

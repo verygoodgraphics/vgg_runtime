@@ -7,10 +7,8 @@
 class BrowserJSEngine final : public VggJSEngine
 {
 public:
-  bool evalScript(const std::string& code);
-  bool evalModule(const std::string& code);
-
-  bool evalModule(const std::string& code, VGG::EventPtr event);
+  bool evalScript(const std::string& code) override;
+  bool evalModule(const std::string& code, VGG::EventPtr event) override;
 
 private:
   std::string m_moduleWrapper;

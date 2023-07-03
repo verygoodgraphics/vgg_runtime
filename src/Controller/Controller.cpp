@@ -113,8 +113,6 @@ void Controller::observeUIEvent()
         {
           // todo, evt phase // kCapturingPhase = 1, // kAtTarget = 2, // kBubblingPhase = 3
           // todo, evt PropagationStopped
-          // todo, pass evt data to listeners
-          // shared_this->vggExec()->evalModule(listener);
           shared_this->vggExec()->evalModule(listener, evt);
         }
       }

@@ -18,7 +18,6 @@ public:
   ~VggExec() = default;
 
   bool evalScript(const std::string& script);
-  bool evalModule(const std::string& module);
   bool evalModule(const std::string& code, VGG::EventPtr event);
 
 private:

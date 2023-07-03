@@ -80,7 +80,7 @@ struct VGGGradient
     static constexpr double maxPos = 1.0;
     VGGColor color{ 1., 1., 1., 1. };
     float position{ 1.0 }; // [0,1]
-    float midPoint;
+    float midPoint{ 0.5 };
   };
   static constexpr double minElipseLength = 0.01;
   EGradientType gradientType{ EGradientType::GT_Linear };
@@ -118,9 +118,20 @@ struct VGGGradient
   {
     const auto angle = to.x;
     const auto length = to.y;
-    glm::vec2 dir = { std::cos(glm::radians(angle)), std::sin(glm::radians(angle)) };
-    glm::vec2 f = from * b.size();
-    f = glm::vec2{ f.x + b.topLeft.x, f.y - b.height() / 2 + b.topLeft.y };
+    const auto radians = glm::radians(angle);
+    glm::vec2 dir = { std::cos(radians), std::sin(radians) };
+    const auto center = glm::vec2(b.topLeft.x + b.width() / 2, b.topLeft.y - b.height() / 2);
+    const auto x = from.x * b.width() + b.topLeft.x;
+    float k = 1;
+    if ((angle <= 45 && angle >= -45) || (angle >= 135 || angle <= -135))
+    {
+      const float k = dir.y / dir.x;
+    }
+    else
+    {
+      const float k = dir.x / dir.y;
+    }
+    glm::vec2 f = { x, k * (x - center.x) + center.y };
     glm::vec2 t = f + length * dir * b.distance();
     return { f, t };
   }
@@ -146,8 +157,8 @@ struct VGGGradient
     auto maxPosition = stops[indices[indices.size() - 1]].position;
     clampPairByLimits(minPosition, maxPosition, 0.f, 1.f, 0.0001f);
 
-    auto f = bound.size() * from;
-    auto t = bound.size() * to;
+    auto f = bound.map(bound.size() * from);
+    auto t = bound.map(bound.size() * to);
     if (aiCoordinate)
     {
       auto r = aiConvert(from, to, bound);
@@ -170,10 +181,6 @@ struct VGGGradient
       positions.push_back((p - minPosition) / (maxPosition - minPosition));
     }
     SkMatrix mat;
-    if (aiCoordinate)
-    {
-      mat.postScale(1, -1);
-    }
     return SkGradientShader::MakeLinear(pts,
                                         colors.data(),
                                         positions.data(),
@@ -191,8 +198,8 @@ struct VGGGradient
     auto maxPosition = stops[indices[indices.size() - 1]].position;
     clampPairByLimits(minPosition, maxPosition, 0.0f, 1.0f, 0.0001f);
 
-    auto f = bound.size() * from;
-    auto t = bound.size() * to;
+    auto f = bound.map(bound.size() * from);
+    auto t = bound.map(bound.size() * to);
     if (aiCoordinate)
     {
       auto r = aiConvert(from, to, bound);
@@ -217,7 +224,6 @@ struct VGGGradient
     mat.postScale(elipseLength, 1.0);
     mat.postRotate(-rad2deg(getTheta()));
     mat.postTranslate(start.x, start.y);
-    mat.postScale(1, -1);
     return SkGradientShader::MakeRadial(center,
                                         r,
                                         colors.data(),
@@ -235,12 +241,13 @@ struct VGGGradient
     auto minPosition = stops[indices[0]].position;
     auto maxPosition = stops[indices[indices.size() - 1]].position;
     clampPairByLimits(minPosition, maxPosition, 0.f, 1.f, 0.0001f);
-    auto f = bound.size() * from;
-    auto t = bound.size() * to;
+    auto f = bound.map(bound.size() * from);
+    auto t = bound.map(bound.size() * to);
     if (aiCoordinate)
     {
-      f = convert(bound.size() * from, bound);
-      t = convert(bound.size() * to, bound);
+      auto r = aiConvert(from, to, bound);
+      f = r.first;
+      t = r.second;
     }
     auto center = (f + t) / 2.0f;
 
@@ -271,7 +278,6 @@ struct VGGGradient
 
     SkMatrix rot;
     rot.setRotate(rotation, center.x, center.y);
-    rot.postScale(1, -1);
     return SkGradientShader::MakeSweep(center.x,
                                        center.y,
                                        colors.data(),

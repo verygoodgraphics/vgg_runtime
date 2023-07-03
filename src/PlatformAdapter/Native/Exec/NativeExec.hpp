@@ -20,10 +20,10 @@ public:
   NativeExec();
   ~NativeExec();
 
-  bool evalScript(const std::string& code);
-  bool evalModule(const std::string& code);
+  bool evalScript(const std::string& code) override;
+  bool evalModule(const std::string& code, VGG::EventPtr event) override;
 
-  bool evalModule(const std::string& code, VGG::EventPtr event);
+  bool evalModule(const std::string& code);
 
   using InjectFn = std::function<void(node::Environment*)>;
   bool inject(InjectFn fn);

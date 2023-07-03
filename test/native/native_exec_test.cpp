@@ -11,7 +11,7 @@ class VggNativeExecTestSuite : public ::testing::Test
 {
 protected:
   NativeExec sut;
-  VggJSEngine* sut_ptr = &sut;
+  NativeExec* sut_ptr = &sut;
 
   void SetUp() override
   {

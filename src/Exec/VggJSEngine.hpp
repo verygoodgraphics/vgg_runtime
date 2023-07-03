@@ -11,8 +11,6 @@ public:
   virtual ~VggJSEngine() = default;
 
   virtual bool evalScript(const std::string& code) = 0;
-  virtual bool evalModule(const std::string& code) = 0;
-
   virtual bool evalModule(const std::string& code, VGG::EventPtr event) = 0;
 };
 

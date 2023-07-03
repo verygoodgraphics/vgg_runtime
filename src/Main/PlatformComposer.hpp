@@ -15,7 +15,7 @@ public:
     auto exec = std::make_shared<VggExec>(createJsEngine(), std::make_shared<VggEnv>());
     VGG::DIContainer<std::shared_ptr<VggExec>>::get() = exec;
 
-    platformSetup(exec);
+    platformSetup();
   }
 
   void teardown()
@@ -26,7 +26,7 @@ public:
 
   virtual std::shared_ptr<VggJSEngine> createJsEngine() = 0;
 
-  virtual void platformSetup(const std::shared_ptr<VggExec> exec)
+  virtual void platformSetup()
   {
   }
   virtual void platformTeardown()

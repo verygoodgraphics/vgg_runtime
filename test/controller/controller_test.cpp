@@ -22,6 +22,9 @@ using ::testing::ReturnRef;
 
 constexpr auto design_doc_schema_file = "./asset/vgg-format.json";
 
+#define SKIP_LOCAL_TEST                                                                            \
+  GTEST_SKIP() << "Skipping local './xxx.sdk.mjd' test, unsupported when evaluating data uri ";
+
 class ControllerTestSuite : public ::testing::Test
 {
 protected:
@@ -111,6 +114,7 @@ TEST_F(ControllerTestSuite, Smoke)
 {
   // Given
   setup_sdk_with_local_dic();
+  SKIP_LOCAL_TEST
   std::string file_path = "testDataDir/vgg-work.zip";
   auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>([&](ModelEventPtr evt) {});
   EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
@@ -130,6 +134,7 @@ TEST_F(ControllerTestSuite, OnClick_observer)
 {
   // Given
   setup_sdk_with_local_dic();
+  SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
   auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
@@ -163,6 +168,7 @@ TEST_F(ControllerTestSuite, Validator_reject_deletion)
 {
   // Given
   setup_sdk_with_local_dic();
+  SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
   auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
@@ -192,6 +198,7 @@ TEST_F(ControllerTestSuite, DidUpdate)
 {
   // Given
   setup_sdk_with_local_dic();
+  SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
   auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
@@ -222,6 +229,7 @@ TEST_F(ControllerTestSuite, DidDelete)
 {
   // Given
   setup_sdk_with_local_dic();
+  SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
   auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
@@ -252,6 +260,7 @@ TEST_F(ControllerTestSuite, DidAdd_no_validator)
 {
   // Given
   setup_sdk_with_local_dic();
+  SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
   auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
@@ -315,6 +324,7 @@ TEST_F(ControllerTestSuite, add_event_listener)
 {
   // Given
   setup_sdk_with_local_dic();
+  SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
   auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
@@ -350,6 +360,7 @@ TEST_F(ControllerTestSuite, eval_added_event_listener)
 {
   // Given
   setup_sdk_with_local_dic();
+  SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
   auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
@@ -382,6 +393,7 @@ TEST_F(ControllerTestSuite, remove_event_listener)
 {
   // Given
   setup_sdk_with_local_dic();
+  SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
   auto recv_evt_count = 0;
@@ -416,6 +428,7 @@ TEST_F(ControllerTestSuite, get_event_listeners)
 {
   // Given
   setup_sdk_with_local_dic();
+  SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
   auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
@@ -448,6 +461,7 @@ TEST_F(ControllerTestSuite, unhandled_js_error)
 {
   // Given
   setup_sdk_with_local_dic(true); // enable catch exception
+  SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
   auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
@@ -510,7 +524,6 @@ TEST_F(ControllerTestSuite, event_listener_example)
 TEST_F(ControllerTestSuite, handle_events)
 {
   // Given
-  // setup_sdk_with_local_dic();
   setup_using_s5_sdk();
 
   int times = 0;
@@ -549,7 +562,6 @@ TEST_F(ControllerTestSuite, handle_events)
 TEST_F(ControllerTestSuite, handle_event_keyboard)
 {
   // Given
-  // setup_sdk_with_local_dic();
   setup_using_s5_sdk();
 
   auto type = ModelEventType::Invalid;

@@ -5,21 +5,44 @@ A design engine capable of loading design drafts as well as running design as an
 ## Features
 
 - Game-engine-like ECS architecture targeting high-performance interactive applications
-- First-class support for Sketch to load and render Sketch designs
 - Cross-platform support for running on Linux, macOS and in Browsers
 - WebAssembly support with emscripten compatibility
 - Built-in scripting ability for programming upon design drafts
 
 ## How to build
 
-This project can be built with CMake using common practice. All dependency is batteries-included (except for SDL) so no extra submodules are needed.
+This project can be built with CMake using common practice. All dependency is batteries-included (except for SDL and skia) so no extra submodules are needed.
+
+### Downloads skia
+
+First, You need to download skia refer to the [official website](https://skia.org/docs/user/download/)
+
+TLDR:
+
+If you don't have any common development tools, downloads them using:
+
+```bash
+git clone 'https://chromium.googlesource.com/chromium/tools/depot_tools.git'
+export PATH="${PWD}/depot_tools:${PATH}"
+```
+
+Or run the following commands directly:
+
+```bash
+git clone https://skia.googlesource.com/skia.git
+# or
+# fetch skia
+cd skia
+python3 tools/git-sync-deps
+bin/fetch-ninja
+```
 
 ### Linux-version building example
 
 ```bash
 mkdir build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake .. -DCMAKE_BUILD_TYPE=Release -DSKIA_EXTERNAL_PROJECT_DIR=/path/to/your/skia
 make -j8
 ```
 
@@ -31,17 +54,13 @@ make -j8
 mkdir build.wasm
 cd build.wasm
 source /path/to/emsdk/emsdk_env.sh
-emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
+emcmake cmake .. -DCMAKE_BUILD_TYPE=Release -DSKIA_EXTERNAL_PROJECT_DIR=/path/to/your/skia
 emmake make -j8
 ```
 
 ## How to use as standalone app
 
 The design draft could be created or imported from sketch by our [VGG editor](https://verygoodgraphics.com/). And runtime is capable of loading Sketch or VGG file, and running VGG file if scripts are programmed in.
-
-```bash
-./runtime -l /path/to/sketch_or_vgg_file
-```
 
 Note that you should put fonts under the same directory for runtime to use.
 

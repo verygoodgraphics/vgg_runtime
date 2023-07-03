@@ -26,7 +26,7 @@ if (NOT EMSCRIPTEN)
 
   # find SDL2 library
   set(SDL2_BUILDING_LIBRARY ON)
-  find_package(SDL2 CONFIG REQUIRED)
+  find_package(SDL2 REQUIRED)
   message(STATUS "SDL2_INCLUDE_DIRS: ${SDL2_INCLUDE_DIRS}")
   message(STATUS "SDL2_LIBRARIES: ${SDL2_LIBRARIES}")
 endif()

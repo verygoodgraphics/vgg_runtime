@@ -80,7 +80,43 @@
     ]
   },
   "/fake/handle_event": {
+    "mousedown": [
+      {
+        "fileName": "js/s5-sdk/21_handle_event.mjs",
+        "createdAt": 0
+      }
+    ],
+    "mousemove": [
+      {
+        "fileName": "js/s5-sdk/21_handle_event.mjs",
+        "createdAt": 0
+      }
+    ],
+    "mouseup": [
+      {
+        "fileName": "js/s5-sdk/21_handle_event.mjs",
+        "createdAt": 0
+      }
+    ],
     "click": [
+      {
+        "fileName": "js/s5-sdk/21_handle_event.mjs",
+        "createdAt": 0
+      }
+    ],
+    "auxclick": [
+      {
+        "fileName": "js/s5-sdk/21_handle_event.mjs",
+        "createdAt": 0
+      }
+    ],
+    "contextmenu": [
+      {
+        "fileName": "js/s5-sdk/21_handle_event.mjs",
+        "createdAt": 0
+      }
+    ],
+    "keyup": [
       {
         "fileName": "js/s5-sdk/21_handle_event.mjs",
         "createdAt": 0

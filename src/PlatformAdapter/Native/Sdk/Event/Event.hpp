@@ -45,6 +45,58 @@ public:
     napi_delete_reference(m_env, m_wrapper);
   }
 
+  // template
+  template<auto f>
+  static napi_value stringMethod(napi_env env, napi_callback_info info)
+  {
+    napi_value _this;
+    NODE_API_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &_this, nullptr));
+
+    child_type* wrapper;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&wrapper)));
+
+    auto result = std::invoke(f, wrapper);
+
+    napi_value ret;
+    NODE_API_CALL(env, napi_create_string_utf8(env, result.data(), result.size(), &ret));
+
+    return ret;
+  }
+
+  template<auto f>
+  static napi_value intMethod(napi_env env, napi_callback_info info)
+  {
+    napi_value _this;
+    NODE_API_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &_this, nullptr));
+
+    child_type* wrapper;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&wrapper)));
+
+    auto result = std::invoke(f, wrapper);
+
+    napi_value ret;
+    NODE_API_CALL(env, napi_create_int32(env, result, &ret));
+
+    return ret;
+  }
+
+  template<auto f>
+  static napi_value boolMethod(napi_env env, napi_callback_info info)
+  {
+    napi_value _this;
+    NODE_API_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &_this, nullptr));
+
+    child_type* wrapper;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&wrapper)));
+
+    auto result = std::invoke(f, wrapper);
+
+    napi_value ret;
+    NODE_API_CALL(env, napi_get_boolean(env, result, &ret));
+
+    return ret;
+  }
+
 protected:
   static napi_value New(napi_env env, napi_callback_info info)
   {

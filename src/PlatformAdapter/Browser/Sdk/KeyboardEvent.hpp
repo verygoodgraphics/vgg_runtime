@@ -21,6 +21,28 @@ public:
     return { key };
   }
 
+  bool repeat() const
+  {
+    return event()->repeat;
+  }
+
+  bool altkey() const
+  {
+    return event()->altKey;
+  }
+  bool ctrlkey() const
+  {
+    return event()->ctrlKey;
+  }
+  bool metakey() const
+  {
+    return event()->metaKey;
+  }
+  bool shiftkey() const
+  {
+    return event()->shiftKey;
+  }
+
   // methods
 
 private:

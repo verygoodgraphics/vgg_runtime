@@ -45,7 +45,12 @@ EMSCRIPTEN_BINDINGS(vgg_event)
   // child
   class_<BKeyboardEvent, base<BUIEvent>>("VggKeyboardEvent")
     .constructor<>()
-    .property("key", &BKeyboardEvent::key);
+    .property("key", &BKeyboardEvent::key)
+    .property("repeat", &BKeyboardEvent::repeat)
+    .property("altkey", &BKeyboardEvent::altkey)
+    .property("ctrlkey", &BKeyboardEvent::ctrlkey)
+    .property("metakey", &BKeyboardEvent::metakey)
+    .property("shiftkey", &BKeyboardEvent::shiftkey);
 
   class_<BMouseEvent, base<BUIEvent>>("VggMouseEvent")
     .constructor<>()

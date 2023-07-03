@@ -125,9 +125,28 @@ struct KeyboardEvent : UIEvent
 {
   const int key;
 
-  KeyboardEvent(const PathType& path, UIEventType type, int key)
+  const bool repeat;
+
+  const bool altKey;
+  const bool ctrlKey;
+  const bool metaKey;
+  const bool shiftKey;
+
+  KeyboardEvent(const PathType& path,
+                UIEventType type,
+                int key,
+                bool repeat = false,
+                bool altKey = false,
+                bool ctrlKey = false,
+                bool metaKey = false,
+                bool shiftKey = false)
     : UIEvent(path, type)
     , key{ key }
+    , repeat{ repeat }
+    , altKey{ altKey }
+    , ctrlKey{ ctrlKey }
+    , metaKey{ metaKey }
+    , shiftKey{ shiftKey }
   {
     assert(type == UIEventType::keydown || type == UIEventType::keyup);
   }

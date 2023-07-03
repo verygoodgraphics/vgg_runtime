@@ -117,15 +117,29 @@ void UIView::onEvent(const SDL_Event& evt)
 
     case SDL_KEYDOWN:
     {
-      m_event_listener(
-        UIEventPtr(new KeyboardEvent(target_path, UIEventType::keydown, evt.key.keysym.sym)));
+      auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
+      m_event_listener(UIEventPtr(new KeyboardEvent(target_path,
+                                                    UIEventType::keydown,
+                                                    evt.key.keysym.sym,
+                                                    evt.key.repeat,
+                                                    alt,
+                                                    ctrl,
+                                                    meta,
+                                                    shift)));
     }
     break;
 
     case SDL_KEYUP:
     {
-      m_event_listener(
-        UIEventPtr(new KeyboardEvent(target_path, UIEventType::keyup, evt.key.keysym.sym)));
+      auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
+      m_event_listener(UIEventPtr(new KeyboardEvent(target_path,
+                                                    UIEventType::keyup,
+                                                    evt.key.keysym.sym,
+                                                    evt.key.repeat,
+                                                    alt,
+                                                    ctrl,
+                                                    meta,
+                                                    shift)));
     }
     break;
 

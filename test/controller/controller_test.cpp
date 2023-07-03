@@ -97,7 +97,7 @@ protected:
   void mock_keydown(const std::string& path)
   {
     m_fake_view_subject.get_subscriber().on_next(
-      UIEventPtr{ new KeyboardEvent{ path, UIEventType::keydown } });
+      UIEventPtr{ new KeyboardEvent{ path, UIEventType::keydown, 'a' } });
   }
 
   void mock_touch(const std::string& path)

@@ -10,7 +10,17 @@ namespace NodeAdapter
 void MouseEvent::Init(napi_env env, napi_value exports)
 {
   properties_type properties = {
-    DECLARE_NODE_API_GETTER("button", button),
+    DECLARE_NODE_API_GETTER("altkey", &boolMethod<&MouseEvent::altkey>),
+    DECLARE_NODE_API_GETTER("button", &intMethod<&MouseEvent::button>),
+    DECLARE_NODE_API_GETTER("clientX", &intMethod<&MouseEvent::x>),
+    DECLARE_NODE_API_GETTER("clientY", &intMethod<&MouseEvent::y>),
+    DECLARE_NODE_API_GETTER("ctrlkey", &boolMethod<&MouseEvent::ctrlkey>),
+    DECLARE_NODE_API_GETTER("metakey", &boolMethod<&MouseEvent::metakey>),
+    DECLARE_NODE_API_GETTER("movementX", &intMethod<&MouseEvent::movementX>),
+    DECLARE_NODE_API_GETTER("movementY", &intMethod<&MouseEvent::movementY>),
+    DECLARE_NODE_API_GETTER("shiftkey", &boolMethod<&MouseEvent::shiftkey>),
+    DECLARE_NODE_API_GETTER("x", &intMethod<&MouseEvent::x>),
+    DECLARE_NODE_API_GETTER("y", &intMethod<&MouseEvent::y>),
     DECLARE_NODE_API_PROPERTY("getModifierState", getModifierState),
   };
 
@@ -34,21 +44,6 @@ void MouseEvent::Init(napi_env env, napi_value exports)
 }
 
 // Getter
-napi_value MouseEvent::button(napi_env env, napi_callback_info info)
-{
-  napi_value _this;
-  NODE_API_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &_this, nullptr));
-
-  MouseEvent* wrapper;
-  NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&wrapper)));
-
-  auto result = wrapper->m_event_ptr->button;
-
-  napi_value ret;
-  NODE_API_CALL(env, napi_create_int32(env, result, &ret));
-
-  return ret;
-}
 
 // Method
 napi_value MouseEvent::getModifierState(napi_env env, napi_callback_info info)

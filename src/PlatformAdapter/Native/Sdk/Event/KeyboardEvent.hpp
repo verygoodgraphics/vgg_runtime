@@ -18,6 +18,12 @@ public:
 
 private:
   static napi_value getModifierState(napi_env env, napi_callback_info info);
+
+  std::string key()
+  {
+    char key = m_event_ptr->key;
+    return { key };
+  };
 };
 
 } // namespace NodeAdapter

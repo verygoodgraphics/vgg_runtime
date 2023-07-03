@@ -18,10 +18,50 @@ public:
 
 private:
   // Getter
-  static napi_value button(napi_env env, napi_callback_info info);
 
   // Method
   static napi_value getModifierState(napi_env env, napi_callback_info info);
+
+  // getter
+  int button() const
+  {
+    return m_event_ptr->button;
+  }
+
+  int x() const
+  {
+    return m_event_ptr->x;
+  }
+  int y() const
+  {
+    return m_event_ptr->y;
+  }
+
+  int movementX() const
+  {
+    return m_event_ptr->movementX;
+  }
+  int movementY() const
+  {
+    return m_event_ptr->movementY;
+  }
+
+  bool altkey() const
+  {
+    return m_event_ptr->altKey;
+  }
+  bool ctrlkey() const
+  {
+    return m_event_ptr->ctrlKey;
+  }
+  bool metakey() const
+  {
+    return m_event_ptr->metaKey;
+  }
+  bool shiftkey() const
+  {
+    return m_event_ptr->shiftKey;
+  }
 };
 
 } // namespace NodeAdapter

@@ -10,6 +10,7 @@ namespace NodeAdapter
 void KeyboardEvent::Init(napi_env env, napi_value exports)
 {
   properties_type properties = {
+    DECLARE_NODE_API_GETTER("key", stringMethod<&KeyboardEvent::key>),
     DECLARE_NODE_API_PROPERTY("getModifierState", getModifierState),
   };
 

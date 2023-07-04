@@ -24,6 +24,11 @@ else()
     model
   )
 
+  get_target_property(VGG_LAYER_RPATH vgg_layer BUILD_RPATH)
+  set_target_properties(
+    unit_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+                          BUILD_RPATH ${VGG_LAYER_RPATH})
+
   set(TMP_VGG_WORK_ZIP_FILE ${CMAKE_CURRENT_SOURCE_DIR}/testDataDir/vgg-work.zip)
   add_custom_command(TARGET unit_tests POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E tar cvf ${TMP_VGG_WORK_ZIP_FILE} --format=zip -- .

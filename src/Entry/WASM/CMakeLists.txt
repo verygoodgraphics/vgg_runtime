@@ -14,6 +14,7 @@ add_executable(wasm_main "main.cpp" "${CMAKE_SOURCE_DIR}/src/Utils/WasmBindings.
       --no-heap-copy \
       -s EXPORTED_FUNCTIONS=\['_load_file_from_mem','_is_latest_version','_emscripten_main'\] \
       -s EXPORTED_RUNTIME_METHODS=\['ccall','cwrap','writeArrayToMemory','stringToUTF8'\] \
+      --preload-file ../../../../asset \
     "
     SUFFIX ".js"
   )

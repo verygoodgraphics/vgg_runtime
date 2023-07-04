@@ -63,7 +63,7 @@ public:
 
 protected:
   void flatten(SkWriteBuffer&) const override;
-  sk_sp<SkSpecialImage> onFilterImage(const Context&, SkIPoint* offset) const override;
+  sk_sp<SkSpecialImage> onFilterImage(const skif::Context&, SkIPoint* offset) const override;
   SkIRect onFilterNodeBounds(const SkIRect& src,
                              const SkMatrix& ctm,
                              MapDirection,
@@ -163,7 +163,7 @@ void SkDropInnerShadowImageFilter::flatten(SkWriteBuffer& buffer) const
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-sk_sp<SkSpecialImage> SkDropInnerShadowImageFilter::onFilterImage(const Context& ctx,
+sk_sp<SkSpecialImage> SkDropInnerShadowImageFilter::onFilterImage(const skif::Context& ctx,
                                                                   SkIPoint* offset) const
 {
   SkIPoint inputOffset = SkIPoint::Make(0, 0);

@@ -89,6 +89,7 @@ if (NOT EMSCRIPTEN)
       v8_libplatform
       v8_snapshot
       v8_zlib
+      zlib
       vgg_libnode_stub
     )
   else()
@@ -137,6 +138,7 @@ if (NOT EMSCRIPTEN)
       v8_libplatform 
       v8_snapshot
       v8_zlib 
+      zlib
       vgg_libnode_stub
       "-Wl,--no-whole-archive"
     )

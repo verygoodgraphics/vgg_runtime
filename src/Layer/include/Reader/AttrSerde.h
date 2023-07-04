@@ -137,6 +137,10 @@ inline void from_json(const json& j, VGGGradient& x)
     {
       x.rotation = g["rotation"];
       x.gradientType = EGradientType::GT_Angular;
+      for (auto& stop : x.stops)
+      {
+        stop.position = 1.0 - stop.position;
+      }
     }
   }
   else

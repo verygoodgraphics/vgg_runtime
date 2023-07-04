@@ -80,7 +80,7 @@ struct VGGGradient
     static constexpr double maxPos = 1.0;
     VGGColor color{ 1., 1., 1., 1. };
     float position{ 1.0 }; // [0,1]
-    float midPoint{ 0.5 };
+    float midPoint;
   };
   static constexpr double minElipseLength = 0.01;
   EGradientType gradientType{ EGradientType::GT_Linear };
@@ -200,12 +200,15 @@ struct VGGGradient
 
     auto f = bound.map(bound.size() * from);
     auto t = bound.map(bound.size() * to);
-    if (aiCoordinate)
-    {
-      auto r = aiConvert(from, to, bound);
-      f = r.first;
-      t = r.second;
-    }
+
+    // auto f = bound.size() * from;
+    // auto t = bound.size() * to;
+    // if (aiCoordinate)
+    // {
+    //   auto r = aiConvert(from, to, bound);
+    //   f = r.first;
+    //   t = r.second;
+    // }
     auto start = glm::mix(f, t, minPosition);
     auto end = glm::mix(f, t, maxPosition);
 
@@ -222,8 +225,9 @@ struct VGGGradient
     SkMatrix mat;
     mat.postTranslate(-start.x, -start.y);
     mat.postScale(elipseLength, 1.0);
-    mat.postRotate(-rad2deg(getTheta()));
+    mat.postRotate(rad2deg(getTheta()));
     mat.postTranslate(start.x, start.y);
+    // mat.postScale(1, -1);
     return SkGradientShader::MakeRadial(center,
                                         r,
                                         colors.data(),
@@ -243,13 +247,13 @@ struct VGGGradient
     clampPairByLimits(minPosition, maxPosition, 0.f, 1.f, 0.0001f);
     auto f = bound.map(bound.size() * from);
     auto t = bound.map(bound.size() * to);
-    if (aiCoordinate)
-    {
-      auto r = aiConvert(from, to, bound);
-      f = r.first;
-      t = r.second;
-    }
-    auto center = (f + t) / 2.0f;
+    // if (aiCoordinate)
+    // {
+    //   auto r = aiConvert(from, to, bound);
+    //   f = r.first;
+    //   t = r.second;
+    // }
+    auto center = f;
 
     std::vector<SkColor> colors;
     std::vector<SkScalar> positions;
@@ -263,7 +267,7 @@ struct VGGGradient
       positions.push_back(0);
       sz += 1;
     }
-    for (size_t i = 0; i < indices.size(); i++)
+    for (auto i = 0; i < indices.size(); i++)
     {
       colors.push_back(stops[indices[i]].color);
       positions.push_back(stops[indices[i]].position);
@@ -277,7 +281,9 @@ struct VGGGradient
     }
 
     SkMatrix rot;
-    rot.setRotate(rotation, center.x, center.y);
+    const auto dir = t - f;
+    const auto rotate = std::atan2(dir.y, dir.x);
+    rot.setRotate(glm::degrees(rotate), center.x, center.y);
     return SkGradientShader::MakeSweep(center.x,
                                        center.y,
                                        colors.data(),
@@ -285,13 +291,6 @@ struct VGGGradient
                                        sz,
                                        0,
                                        &rot);
-
-    // SkMatrix rot;
-    // const auto dir = to - from;
-    // auto r = std::atan2(dir.y, dir.x);
-    // rot.setRotate(r, f.x, f.y);
-    // rot.postScale(1, -1);
-    // return SkGradientShader::MakeSweep(f.x, f.y, colors.data(), positions.data(), sz, 0, &rot);
   }
 };
 

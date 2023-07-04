@@ -8,12 +8,16 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 # customized platform checking flags
 #introduce customized cmake vars, see VggVars.cmake in cmake for details
 set(VGG_ENABLE_EGL OFF CACHE BOOL "Build runtime with egl backend for offscreen rendering")
-if(VGG_ENABLE_EGL)
-  set(VGG_VAR_GL_BACKEND "EGL" CACHE STRING "" FORCE)
-else()
-  set(VGG_VAR_GL_BACKEND "SDL" CACHE STRING "" FORCE)
-endif()
 include(VGGVars)
+
+if(NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_LINUX_TARGET_LIST)
+  set(VGG_ENABLE_EGL OFF)
+endif()
+
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Debug")
+endif()
 
 
 # find system libs

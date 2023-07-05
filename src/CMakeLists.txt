@@ -34,6 +34,7 @@ target_link_libraries(vgg_internal
   zip
 )
 target_include_directories(vgg_internal PRIVATE ${SDL2_INCLUDE_DIRS}/..)
+set_target_properties(vgg_internal PROPERTIES POSITION_INDEPENDENT_CODE ON)
 if (EMSCRIPTEN)
   target_sources(vgg_internal PRIVATE
     PlatformAdapter/Browser/Exec/BrowserJSEngine.cpp

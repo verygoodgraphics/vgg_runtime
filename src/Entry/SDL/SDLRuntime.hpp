@@ -121,6 +121,7 @@ public:
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, N_MULTISAMPLE);
+    // SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
 #ifndef EMSCRIPTEN
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
@@ -136,6 +137,7 @@ public:
     DPI::ScaleFactor = get_scale_factor();
     int winWidth = w * DPI::ScaleFactor;
     int winHeight = h * DPI::ScaleFactor;
+    std::cout << winWidth << " :hw: " << winHeight << std::endl;
     SDL_Window* window =
 #ifndef EMSCRIPTEN
       SDL_CreateWindow(title.c_str(),
@@ -210,6 +212,20 @@ public:
     {
       (it->second.second)(value); // setter
     }
+  }
+
+  float getDPIScale()
+  {
+#ifdef VGG_HOST_macOS
+    int dw, dh;
+    int ww, wh;
+    SDL_GL_GetDrawableSize(this->m_sdlState.window, &dw, &dh);
+    SDL_GetWindowSize(this->m_sdlState.window, &ww, &wh);
+    std::cout << dw << " " << ww << " asfdsafdasf" << std::endl;
+    return float(dw) / (float)ww;
+#elif defined(VGG_HOST_Linux)
+    return get_scale_factor();
+#endif
   }
 
   void onInit()

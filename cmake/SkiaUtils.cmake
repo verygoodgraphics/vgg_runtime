@@ -2,10 +2,13 @@
 # Only those needed are covered here.
 # https://skia.org/docs/user/build/
 set(SKIA_SUPPORTED_FEATURES "elg;zlib;freetype;skparagraph;icu;gpu;vulkan;")
-set(SKIA_PRESET_FEATURES_FOR_NATIVE
+set(SKIA_PRESET_FEATURES_FOR_LINUX
 "skia_use_egl=true
 skia_use_freetype=true
+skia_use_jpeg_gainmaps=true
 skia_use_system_freetype2=false
+skia_use_libjpeg_turbo_decode=true
+skia_use_libjpeg_turbo_encode=true
 skia_use_zlib=true
 skia_use_system_zlib=false
 skia_canvaskit_enable_paragraph=true
@@ -33,6 +36,9 @@ set(SKIA_PRESET_FEATURES_FOR_WIN
 "skia_use_egl=false
 skia_use_freetype=true
 skia_use_system_freetype2=false
+skia_use_jpeg_gainmaps=true
+skia_use_libjpeg_turbo_decode=true
+skia_use_libjpeg_turbo_encode=true
 skia_use_zlib=true
 skia_use_system_zlib=false
 skia_canvaskit_enable_paragraph=true
@@ -61,6 +67,9 @@ set(SKIA_PRESET_FEATURES_FOR_MACOS
 skia_use_freetype=true
 skia_use_system_freetype2=false
 skia_use_system_libjpeg_turbo=false
+skia_use_jpeg_gainmaps=true
+skia_use_libjpeg_turbo_decode=true
+skia_use_libjpeg_turbo_encode=true
 skia_use_system_icu=false
 skia_use_system_libwebp=false
 skia_use_system_libpng=false
@@ -94,6 +103,9 @@ skia_enable_svg=true
 skia_use_zlib=true 
 skia_use_system_zlib=false 
 skia_canvaskit_enable_paragraph=true 
+skia_use_jpeg_gainmaps=true
+skia_use_libjpeg_turbo_decode=true
+skia_use_libjpeg_turbo_encode=true
 skia_enable_skparagraph=true 
 skia_use_libwebp_encode=true 
 skia_use_icu=true 
@@ -140,7 +152,7 @@ string(APPEND OPTIONS --args=)
 
 # set target cpu for skia
 if(${platform} IN_LIST VGG_LINUX_TARGET_LIST)
-  foreach(OPT ${SKIA_PRESET_FEATURES_FOR_NATIVE})
+  foreach(OPT ${SKIA_PRESET_FEATURES_FOR_LINUX})
     string(APPEND OPTIONS " ${OPT}")
   endforeach(OPT)
 elseif(${platform} IN_LIST VGG_WIN_TARGET_LIST)

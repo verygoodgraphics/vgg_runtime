@@ -3,7 +3,7 @@
 #include "Exec/VggExec.hpp"
 #include "Model/RawJsonDocument.hpp"
 #include "Model/SchemaValidJsonDocument.hpp"
-#include "Model/UndoRedoJsonDocument.hpp"
+// #include "Model/UndoRedoJsonDocument.hpp"
 #include "Model/VggWork.hpp"
 #include "Presenter/Presenter.hpp"
 #include "Utils/DIContainer.hpp"
@@ -133,7 +133,7 @@ JsonDocument* Controller::createJsonDoc()
   }
   else
   {
-    return new UndoRedoJsonDocument();
+    return nullptr; // new UndoRedoJsonDocument();
   }
 }
 

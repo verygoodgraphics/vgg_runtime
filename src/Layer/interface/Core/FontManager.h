@@ -38,9 +38,46 @@ public:
     this->disableFontFallback();
   }
 
+  void registerFontDir(const fs::path& dir)
+  {
+    auto typeface = this->getFallbackManager();
+  }
+
 private:
   sk_sp<TypefaceFontProvider> fFontProvider;
 };
 
 ResourceFontCollection* getDefaultFontCollection();
+
+class FontManager
+{
+  sk_sp<ResourceFontCollection> m_defaultFontCollection;
+  bool m_init{ false };
+
+public:
+  FontManager(const FontManager& s) = delete;
+  void operator=(const FontManager&) = delete;
+  void initFontManager(const std::vector<fs::path>& fontDirs);
+
+  bool hasInit()
+  {
+    return m_init;
+  }
+
+  void registerFontDirectory(const fs::path& dir);
+
+  void registerFontFile(const std::string& fontName);
+
+  sk_sp<ResourceFontCollection> defaultFontCollection();
+
+  static FontManager& instance()
+  {
+    static FontManager F;
+    return F;
+  }
+
+private:
+  FontManager();
+};
+
 } // namespace VGG

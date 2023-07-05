@@ -129,36 +129,10 @@ private:
   }
 
 public:
-#ifdef VGG_HOST_Linux
-  static double get_scale_factor()
-  {
-    static constexpr int NVARS = 4;
-    static const char* vars[NVARS] = {
-      "FORCE_SCALE",
-      "QT_SCALE_FACTOR",
-      "QT_SCREEN_SCALE_FACTOR",
-      "GDK_SCALE",
-    };
-    for (int i = 0; i < NVARS; i++)
-    {
-      const char* strVal = getenv(vars[i]);
-      if (strVal)
-      {
-        double val = atof(strVal);
-        if (val >= 1.0)
-        {
-          return val;
-        }
-      }
-    }
-    return 1.0;
-  }
-#else
-  static inline double get_scale_factor()
+  float getDPIScale()
   {
     return 1.0;
   }
-#endif
   std::optional<AppError> initContext(int w, int h, const std::string& title)
   {
     // DPI::ScaleFactor = get_scale_factor();
@@ -319,11 +293,6 @@ float calcScaleFactor(float inputWidth,
     outHeight = maxHeight;
   }
   return widthScale > heightScale ? heightScale : widthScale;
-}
-
-float getDPIScale()
-{
-  return 1.0;
 }
 
 void getMaxSurfaceSize(int resolutionLevel, float* maxSurfaceSize)

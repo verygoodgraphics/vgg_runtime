@@ -13,20 +13,22 @@ A design engine capable of loading design drafts as well as running design as an
 
 This project can be built with CMake using common practice. All dependency is batteries-included (except for SDL and skia) so no extra submodules are needed.
 
+
 ### Downloads skia
 
-First, You need to download skia refer to the [official website](https://skia.org/docs/user/download/)
+You need to download skia refer to the [official website](https://skia.org/docs/user/download/)
+
+We recommand [chrome/m116](https://github.com/google/skia/tree/chrome/m116) branch for our building. Skia's api is not stable between each released version.
+Other versions might be not compiled successfully.
 
 TLDR:
 
-If you don't have any common development tools, downloads them using:
+#### Requirements:
 
-```bash
-git clone 'https://chromium.googlesource.com/chromium/tools/depot_tools.git'
-export PATH="${PWD}/depot_tools:${PATH}"
-```
-
-Or run the following commands directly:
+- Develop environment supports C++20 or higher
+- CMake (Build tools for our project)
+- Python3 (Need by skia fetching dependecies)
+- Ninja (Need by skia to build itself)
 
 ```bash
 git clone https://skia.googlesource.com/skia.git
@@ -57,6 +59,10 @@ source /path/to/emsdk/emsdk_env.sh
 emcmake cmake .. -DCMAKE_BUILD_TYPE=Release -DSKIA_EXTERNAL_PROJECT_DIR=/path/to/your/skia
 emmake make -j8
 ```
+
+### For Windows
+
+Compiled on windows need some extra efforts. It will be released once being stable.
 
 ## How to use as standalone app
 

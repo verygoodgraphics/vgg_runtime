@@ -29,7 +29,6 @@ target_include_directories(vgg_internal PUBLIC
 
 add_subdirectory(Layer)
 target_link_libraries(vgg_internal
-  automerge
   vgg_layer
   zip
 )

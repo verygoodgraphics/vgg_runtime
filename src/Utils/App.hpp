@@ -110,6 +110,11 @@ namespace VGG
  *	*/
 HAS_MEMBER_FUNCTION_DEF(initContext)
 /*
+ * float getDPIScale()
+ *	return current dpi
+ *	*/
+HAS_MEMBER_FUNCTION_DEF(getDPIScale)
+/*
  * bool makeContextCurrent()
  *	It should switch the GL context in current thread after invoke.
  */
@@ -290,6 +295,7 @@ protected: // protected members and static members
   int m_width;
   int m_height;
   double m_pixelRatio{ 1.0 };
+  double m_dpiRatio{ 1.0 };
   int m_nFrame;
   double m_timestamp;
   SkiaState m_skiaState;
@@ -329,14 +335,15 @@ protected: // protected members and static members
     auto drawSize = std::any_cast<std::pair<int, int>>(app->Self()->getProperty("viewport_size"));
     auto winSize = std::any_cast<std::pair<int, int>>(app->Self()->getProperty("window_size"));
 
+    app->m_dpiRatio = app->Self()->getDPIScale();
     DEBUG("Drawable size: %d %d", drawSize.first, drawSize.second);
     DEBUG("Window size: %d %d", winSize.first, winSize.second);
-    DEBUG("Scale factor: %.2lf", DPI::ScaleFactor);
-    DEBUG("Pixel ratio: %.2lf", app->m_pixelRatio);
+    DEBUG("Pre scale scale: %.2lf", app->m_pixelRatio);
+    DEBUG("DPI ratio: %.2lf", app->m_dpiRatio);
 
     // get skia surface and canvas
-    sk_sp<SkSurface> surface =
-      app->setup_skia_surface(w * app->m_pixelRatio, h * app->m_pixelRatio);
+    sk_sp<SkSurface> surface = app->setup_skia_surface(w * app->m_pixelRatio * app->m_dpiRatio,
+                                                       h * app->m_pixelRatio * app->m_dpiRatio);
     if (!surface)
     {
       return AppError(AppError::Kind::RenderEngineError, "Failed to make skia surface");
@@ -456,7 +463,7 @@ protected: // protected methods
       int h = window.data2 / DPI::ScaleFactor;
 
       DEBUG("Window resizing: (%d %d)", w, h);
-      resizeSkiaSurface(w, h);
+      resizeSkiaSurface(w * m_pixelRatio * m_dpiRatio, h * m_pixelRatio * m_dpiRatio);
       return true;
     }
 
@@ -791,7 +798,7 @@ public: // public methods
     ASSERT(canvas);
     canvas->save();
     canvas->clear(SK_ColorWHITE);
-    canvas->scale(m_pixelRatio, m_pixelRatio);
+    canvas->scale(m_pixelRatio * m_dpiRatio, m_pixelRatio * m_dpiRatio);
 
     // update frame
     onFrame();

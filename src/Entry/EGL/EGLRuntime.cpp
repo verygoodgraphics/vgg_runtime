@@ -321,6 +321,11 @@ float calcScaleFactor(float inputWidth,
   return widthScale > heightScale ? heightScale : widthScale;
 }
 
+float getDPIScale()
+{
+  return 1.0;
+}
+
 void getMaxSurfaceSize(int resolutionLevel, float* maxSurfaceSize)
 {
   switch (resolutionLevel)

@@ -704,7 +704,10 @@ struct FiraSans
   inline static sk_sp<SkTypeface> getSkTypeface()
   {
     static sk_sp<SkTypeface> tf = SkTypeface::MakeFromData(getFontData());
-    ASSERT(tf);
+    if (!tf)
+    {
+      WARN("null SkTypeface");
+    }
     return tf;
   }
 };

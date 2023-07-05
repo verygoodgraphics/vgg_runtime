@@ -135,7 +135,6 @@ inline void from_json(const json& j, VGGGradient& x)
     }
     else if (klass == "gradientAngular")
     {
-      x.rotation = g["rotation"];
       x.gradientType = EGradientType::GT_Angular;
       for (auto& stop : x.stops)
       {

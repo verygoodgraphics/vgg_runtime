@@ -810,11 +810,14 @@ public: // public static methods
 
     static T app;
     // if already initialized, these init params are ignored
-    auto appResult = init(&app, w, h, title);
-    if (appResult.has_value())
+    if (!app.m_inited)
     {
-      INFO("%s", appResult.value().text.c_str());
-      return nullptr;
+      auto appResult = init(&app, w, h, title);
+      if (appResult.has_value())
+      {
+        INFO("%s", appResult.value().text.c_str());
+        return nullptr;
+      }
     }
     return &app;
   }

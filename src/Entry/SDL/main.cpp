@@ -1,3 +1,5 @@
+#include "Main/MainComposer.hpp"
+
 #include "SDLRuntime.hpp"
 #include "Utils/FileManager.hpp"
 #include <memory>
@@ -37,90 +39,24 @@ int main(int argc, char** argv)
     exit(0);
   }
 
-  auto scene = std::make_shared<Scene>();
-  std::map<std::string, std::vector<char>> resources;
-  std::filesystem::path prefix;
-  std::filesystem::path respath;
-
-  if (auto p = program.present("-p"))
-  {
-    prefix = p.value();
-  }
+  MainComposer main_composer;
   if (auto loadfile = program.present("-l"))
   {
     auto fp = loadfile.value();
-    auto ext = FileManager::getLoweredFileExt(fp);
-    if (ext == "json")
-    {
-      respath = std::filesystem::path(fp).stem(); // same with filename as default
-      if (auto res = program.present("-d"))
-      {
-        respath = res.value();
-      }
-    }
-
-    load(fp,
-         respath,
-         prefix,
-         [&](const auto& json, auto res)
-         {
-           Scene::setResRepo(res);
-           scene->loadFileContent(json);
-         });
-
-    // legacy renderer
-    if (!FileManager::loadFile((prefix / fp).string()))
-    {
-      FAIL("Failed to load file: %s", fp.c_str());
-    }
+    main_composer.controller()->start(fp, "../asset/vgg-format.json");
   }
 
   SDLRuntime* app = App<SDLRuntime>::getInstance(1920, 1080, "VGG");
-  if (!app)
-  {
-    return 0;
-  }
-  app->setScene(scene);
-  app->setDrawInfo(true);
-
-  std::vector<fs::path> entires;
-  std::vector<fs::path>::iterator fileIter;
-  if (auto L = program.present("-L"))
-  {
-    for (const auto& ent : fs::recursive_directory_iterator(prefix / L.value()))
-    {
-      entires.emplace_back(ent);
-    }
-    int fileIter = 0;
-    app->setReloadCallback(
-      [&](Scene* scene, int type)
-      {
-        if (type == 0 && fileIter < entires.size())
-          fileIter++;
-        else if (type == 1 && fileIter > 0)
-          fileIter--;
-
-        if (fileIter >= 0 && fileIter < entires.size())
-        {
-          load(entires[fileIter],
-               {},
-               {},
-               [&](const auto& json, auto res)
-               {
-                 Scene::setResRepo(res);
-                 scene->loadFileContent(json);
-               });
-          INFO("Open %s", entires[fileIter].string().c_str());
-        }
-      });
-  }
   ASSERT(app);
 
+  // todo: delete deprecated code
   if (auto fm = FileManager::getInstance(); fm && fm->fileCount() < 1)
   {
     FileManager::newFile();
   }
 
+  app->setView(main_composer.view());
+  app->setScene(main_composer.view()->scene());
   // enter run mode
   app->setOnFrameOnce([app]() { app->startRunMode(); });
 
@@ -129,6 +65,7 @@ int main(int argc, char** argv)
   while (!app->shouldExit())
   {
     app->frame(fps);
+    main_composer.runLoop()->dispatch();
   }
   return 0;
 }

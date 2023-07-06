@@ -5,6 +5,7 @@
 #include "Model/VggWork.hpp"
 #include "PlatformAdapter/Browser/Composer/BrowserComposer.hpp"
 #include "PlatformAdapter/Native/Composer/NativeComposer.hpp"
+#include "Utils/Async.hpp"
 #include "View/UIView.hpp"
 
 #include <memory>
@@ -40,6 +41,15 @@ public:
     m_presenter->setView(m_view);
 
     m_platform_composer->setup();
+
+#ifdef EMSCRIPTEN
+    AsyncWorkerFactory::setTaskWorkerFactory([run_loop = m_run_loop]()
+                                             { return run_loop->thread(); });
+#else
+    AsyncWorkerFactory::setTaskWorkerFactory([]() { return rxcpp::observe_on_new_thread(); });
+#endif
+    AsyncWorkerFactory::setResultWorkerFactory([run_loop = m_run_loop]()
+                                               { return run_loop->thread(); });
   }
 
   ~MainComposer()

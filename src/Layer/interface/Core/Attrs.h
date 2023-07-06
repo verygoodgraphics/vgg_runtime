@@ -7,6 +7,7 @@
 #include <algorithm>
 #include "Utils/Math.hpp"
 #include "Core/Geometry.hpp"
+#include "Common/Hash.h"
 #include <optional>
 #include <vector>
 #include <stdint.h>
@@ -351,6 +352,46 @@ struct Style
   std::vector<Border> borders;
   std::vector<Fill> fills;
   std::vector<Shadow> shadows;
+};
+
+struct TextLineAttr
+{
+  bool firstLine{ false };
+  int intendation{ 0 };
+  int lineType{ TLT_Plain };
+};
+
+struct TextAttr
+{
+  std::string fontName;
+  std::string subFamilyName;
+  VGGColor color{ 0, 0, 0, 1 };
+  float letterSpacing{ 0.0 };
+  size_t length{ 0 };
+  uint8_t size{ 14 };
+  bool bold{ false };
+  bool italic{ false };
+  bool lineThrough{ false };
+  bool kerning{ false };
+  ETextUnderline underline{ UT_None };
+  ETextHorizontalAlignment horzAlignment{ HA_Left };
+
+  bool operator==(const TextAttr& other) const
+  {
+    size_t h = 0;
+    hash_combine(h,
+                 fontName,
+                 subFamilyName,
+                 letterSpacing,
+                 length,
+                 size,
+                 bold,
+                 italic,
+                 lineThrough,
+                 underline,
+                 horzAlignment);
+    return h;
+  }
 };
 
 struct TextStyleStub

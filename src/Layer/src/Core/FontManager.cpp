@@ -4,8 +4,8 @@ namespace VGG
 
 ResourceFontCollection* getDefaultFontCollection()
 {
-  static sk_sp<ResourceFontCollection> fontCollection =
-    sk_make_sp<ResourceFontCollection>(std::vector{ fs::path("/usr/share/fonts/TTF") });
+  static sk_sp<ResourceFontCollection> fontCollection = sk_make_sp<ResourceFontCollection>(
+    std::vector{ fs::path("/usr/share/fonts/TTF"), fs::path("/home/ysl/Code/vgg_runtime/fonts") });
   return fontCollection.get();
 }
 

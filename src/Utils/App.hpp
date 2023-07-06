@@ -554,8 +554,8 @@ protected: // protected methods
     }
     auto e = m_zoomer.mapEvent(evt, DPI::ScaleFactor);
     InputManager::onEvent(e);
-    m_view->onEvent(e);
-    InputManager::onEvent(e);
+    if (m_view)
+      m_view->onEvent(e);
     // InputManager::onEvent(e);
   }
 

@@ -177,4 +177,11 @@ enum EBlurType : uint8_t
   BT_Background = 3
 };
 
+enum ETextLineType : uint8_t
+{
+  TLT_Plain = 0,
+  TLT_Ordered = 1,
+  TLT_Unordered = 2,
+};
+
 } // namespace VGG

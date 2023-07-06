@@ -18,7 +18,11 @@ public:
   TextNode(const std::string& name);
   void setText(const std::string& utf8, const std::vector<TextStyleStub>& styles);
   void setTextStyle(size_t position, const TextStyleStub& style);
+  void setParagraph(const std::string& utf8,
+                    const std::vector<TextAttr>& attrs,
+                    const std::vector<TextLineAttr>& lineAttr);
   void setFrameMode(ETextLayoutMode mode);
+  void setVerticalAlignment(ETextVerticalAlignment vertAlign);
   ~TextNode();
 
 protected:

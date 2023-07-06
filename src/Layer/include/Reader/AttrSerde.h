@@ -240,4 +240,30 @@ inline void from_json(const json& j, TextStyleStub& x)
   x.underline = j["underline"];
   x.size = j["size"];
 }
+
+inline void from_json(const json& j, TextLineAttr& x)
+{
+  x.intendation = j.at("indentation_level");
+  x.firstLine = j.at("is_first_line_of_list");
+  x.lineType = j.at("line_type");
+}
+
+inline void from_json(const json& j, TextAttr& x)
+{
+  x.length = get_stack_optional<size_t>(j, "length").value_or(false);
+  x.bold = get_stack_optional<bool>(j, "bold").value_or(false);
+  x.italic = get_stack_optional<bool>(j, "italic").value_or(false);
+  x.fontName = get_stack_optional<std::string>(j, "name").value_or("");
+  x.subFamilyName = get_stack_optional<std::string>(j, "subFamilyName").value_or("");
+  if (auto it = j.find("fills"); it != j.end())
+  {
+    // we don process other fill style now, only use color
+    x.color = get_stack_optional<VGGColor>(*it, "color").value_or(VGGColor{ 0, 0, 0, 1 });
+  }
+  x.lineThrough = j.at("linethrough");
+  x.letterSpacing = j.at("letterSpacing");
+  x.underline = j.at("underline");
+  x.kerning = j.at("kerning");
+  x.size = j.at("size");
+}
 } // namespace VGG

@@ -1,4 +1,5 @@
 #include "Core/TextNode.h"
+#include "Core/FontManager.h"
 #include "Core/Node.hpp"
 #include "Core/VGGType.h"
 #include "Core/VGGUtils.h"
@@ -10,6 +11,8 @@
 
 #include "Core/TextNodePrivate.h"
 
+#include <memory>
+#include <modules/skparagraph/include/FontCollection.h>
 #include <string_view>
 
 namespace VGG
@@ -190,6 +193,23 @@ void TextNode::setText(const std::string& utf8, const std::vector<TextStyleStub>
   _->styles = styles;
 }
 
+void TextNode::setTextStyle(size_t position, const TextStyleStub& style)
+{
+}
+
+void TextNode::setParagraph(const std::string& utf8,
+                            const std::vector<TextAttr>& attrs,
+                            const std::vector<TextLineAttr>& lineAttr)
+{
+  VGG_IMPL(TextNode);
+  std::vector<ParagraphSet::ParagraphAttr> paraAttrs;
+  for (const auto a : lineAttr)
+  {
+    paraAttrs.emplace_back(ParagraphStyle(), a);
+  }
+  _->m_paragraphSet = std::make_unique<ParagraphSet>(utf8, attrs, paraAttrs, nullptr);
+}
+
 void TextNode::setFrameMode(ETextLayoutMode mode)
 {
   VGG_IMPL(TextNode)
@@ -199,15 +219,31 @@ void TextNode::setFrameMode(ETextLayoutMode mode)
 void TextNode::paintEvent(SkCanvas* canvas)
 {
   VGG_IMPL(TextNode);
-  if (_->styles.empty() == false && _->text.empty() == false)
+  // if (_->styles.empty() == false && _->text.empty() == false)
+  // {
+  //   canvas->save();
+  //   canvas->clipRect(toSkRect(getBound()));
+  //   canvas->scale(1, -1);
+  //   // we need to convert to skia coordinate to render text
+  //   drawText(canvas, _->text, getBound(), _->styles[0]);
+  //   canvas->restore();
+  // }
+
+  if (_->m_paragraphSet)
   {
     canvas->save();
     canvas->clipRect(toSkRect(getBound()));
     canvas->scale(1, -1);
     // we need to convert to skia coordinate to render text
-    drawText(canvas, _->text, getBound(), _->styles[0]);
+    _->drawParagraph(canvas);
     canvas->restore();
   }
+}
+
+void TextNode::setVerticalAlignment(ETextVerticalAlignment vertAlign)
+{
+  VGG_IMPL(TextNode);
+  _->m_vertAlign = vertAlign;
 }
 
 TextNode::~TextNode() = default;

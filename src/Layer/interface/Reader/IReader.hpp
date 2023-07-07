@@ -81,7 +81,11 @@ protected:
   }
   int executeExternalCmd(const std::string& cmd)
   {
+    auto back = fs::current_path();
+    auto cwd = config.at("cwd");
+    fs::current_path(cwd);
     auto ret = std::system(cmd.c_str());
+    fs::current_path(back);
     return ret;
   }
 

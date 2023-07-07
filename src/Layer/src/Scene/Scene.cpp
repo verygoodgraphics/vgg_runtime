@@ -21,6 +21,8 @@ void Scene::loadFileContent(const std::string& json)
 
 void Scene::loadFileContent(const nlohmann::json& json)
 {
+  if (json.empty())
+    return;
   artboards = NlohmannBuilder::fromArtboard(json);
   symbols = NlohmannBuilder::fromSymbolMasters(json);
   page = 0;

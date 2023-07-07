@@ -1,11 +1,15 @@
 #include "SDLRuntime.hpp"
 #include "Utils/FileManager.hpp"
+#include <exception>
+#include <fstream>
+#include <nlohmann/json.hpp>
 #include <memory>
 #include <argparse/argparse.hpp>
 #include <filesystem>
 
 #include <Scene/Scene.h>
 #include <Reader/LoadUtil.hpp>
+#include <Reader/ConfigMananger.h>
 
 using namespace VGG;
 namespace fs = std::filesystem;
@@ -17,6 +21,7 @@ int main(int argc, char** argv)
   program.add_argument("-d", "--data").help("resources dir");
   program.add_argument("-p", "--prefix").help("the prefix of filename or dir");
   program.add_argument("-L", "--loaddir").help("iterates all the files in the given dir");
+  program.add_argument("-c", "--config").help("specify config file");
   program.add_argument("-w", "--width")
     .help("width of viewport")
     .scan<'i', int>()
@@ -35,6 +40,11 @@ int main(int argc, char** argv)
     std::cout << err.what() << std::endl;
     std::cout << program;
     exit(0);
+  }
+  if (auto configfile = program.present("-c"))
+  {
+    auto file = configfile.value();
+    Config::ReadGlobalConfig(file);
   }
 
   auto scene = std::make_shared<Scene>();
@@ -59,14 +69,20 @@ int main(int argc, char** argv)
       }
     }
 
-    load(fp,
-         respath,
-         prefix,
-         [&](const auto& json, auto res)
-         {
-           Scene::setResRepo(res);
-           scene->loadFileContent(json);
-         });
+    auto r = load("." + ext);
+    if (r)
+    {
+      auto data = r->read(prefix / fp);
+      Scene::setResRepo(data.Resource);
+      try
+      {
+        scene->loadFileContent(data.Format);
+      }
+      catch (std::exception& e)
+      {
+        FAIL("load json failed: %s", e.what());
+      }
+    }
 
     // legacy renderer
     if (!FileManager::loadFile((prefix / fp).string()))
@@ -102,15 +118,15 @@ int main(int argc, char** argv)
 
         if (fileIter >= 0 && fileIter < entires.size())
         {
-          load(entires[fileIter],
-               {},
-               {},
-               [&](const auto& json, auto res)
-               {
-                 Scene::setResRepo(res);
-                 scene->loadFileContent(json);
-               });
-          INFO("Open %s", entires[fileIter].string().c_str());
+          auto file = entires[fileIter];
+          auto r = load(file.extension().string());
+          if (r)
+          {
+            auto data = r->read(entires[fileIter]);
+            Scene::setResRepo(data.Resource);
+            scene->loadFileContent(data.Format);
+            INFO("Open %s", entires[fileIter].string().c_str());
+          }
         }
       });
   }

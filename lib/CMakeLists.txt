@@ -11,10 +11,6 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/vgg_contrib/zlib ${CMAKE_BINARY_DIR}/vgg_co
 
 add_subdirectory(vgg_automerge/automerge)
 
-if (NOT EMSCRIPTEN)
-  add_subdirectory(vgg_sketch_parser/src)
-endif()
-
 set(VGG_LIB_INCLUDE_PATH
   ${CMAKE_CURRENT_SOURCE_DIR}
   PARENT_SCOPE

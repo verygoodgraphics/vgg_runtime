@@ -4,10 +4,17 @@
 <head></head>
 
 <body>
-    <script type="text/javascript" src="./sut/runtime.js"></script>
+    <script type="text/javascript" src="./sut/wasm_main.js"></script>
     <script type="text/javascript">
         function setupAndRun() {
-            createModule().then(async function (myInstance) {
+            createModule({
+                locateFile: function (path, prefix) {
+                    if (path.endsWith('.data')) {
+                        return './sut/' + path;
+                    }
+                    return prefix + path;
+                },
+            }).then(async function (myInstance) {
                 try {
                     myInstance._emscripten_main();
                 } catch (error) {
@@ -15,7 +22,7 @@
                 }
 
                 // Given
-                const { getVggSdk, setVgg } = await import("https://s3.vgg.cool/test/js/vgg-sdk.esm.js");
+                const { getVggSdk, setVgg } = await import("https://s5.vgg.cool/vgg-sdk.esm.js");
                 setVgg(myInstance);
 
                 const vggSdk = await getVggSdk();
@@ -34,8 +41,6 @@
             }
         }
 
-        let times = 0;
-        setInterval(() => { console.log('test, ', ++times); }, 1000);
     </script>
 </body>
 

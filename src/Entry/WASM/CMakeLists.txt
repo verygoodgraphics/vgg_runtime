@@ -1,4 +1,4 @@
-add_executable(wasm_main "main.cpp" "${CMAKE_SOURCE_DIR}/src/Utils/WasmBindings.cpp")
+add_executable(wasm_main "main.cpp" "WasmBindings.cpp")
   set_target_properties(wasm_main PROPERTIES
     COMPILE_FLAGS "-s USE_SDL=2 -fexceptions"
     LINK_FLAGS "\

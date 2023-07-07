@@ -222,25 +222,25 @@ void TextNode::setFrameMode(ETextLayoutMode mode)
 void TextNode::paintEvent(SkCanvas* canvas)
 {
   VGG_IMPL(TextNode);
-  // if (_->styles.empty() == false && _->text.empty() == false)
-  // {
-  //   canvas->save();
-  //   canvas->clipRect(toSkRect(getBound()));
-  //   canvas->scale(1, -1);
-  //   // we need to convert to skia coordinate to render text
-  //   drawText(canvas, _->text, getBound(), _->styles[0]);
-  //   canvas->restore();
-  // }
-
-  if (_->m_paragraphSet)
+  if (_->styles.empty() == false && _->text.empty() == false)
   {
     canvas->save();
     canvas->clipRect(toSkRect(getBound()));
     canvas->scale(1, -1);
     // we need to convert to skia coordinate to render text
-    _->drawParagraph(canvas);
+    drawText(canvas, _->text, getBound(), _->styles[0]);
     canvas->restore();
   }
+
+  // if (_->m_paragraphSet)
+  // {
+  //   canvas->save();
+  //   canvas->clipRect(toSkRect(getBound()));
+  //   canvas->scale(1, -1);
+  //   // we need to convert to skia coordinate to render text
+  //   _->drawParagraph(canvas);
+  //   canvas->restore();
+  // }
 }
 
 void TextNode::setVerticalAlignment(ETextVerticalAlignment vertAlign)

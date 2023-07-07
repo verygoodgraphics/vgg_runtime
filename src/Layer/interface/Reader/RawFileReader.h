@@ -2,6 +2,7 @@
 
 #include "Common/Config.h"
 #include "IReader.hpp"
+#include "boost/numeric/ublas/fwd.hpp"
 
 #include <iostream>
 #include <string>
@@ -18,15 +19,10 @@ public:
   }
   Data read(const fs::path& fullpath) override
   {
-    const auto cmd = genCmd(fullpath);
-    auto ret = executeExternalCmd(cmd);
     Data data;
-    if (ret == 0)
-    {
-      auto readFile = getReadFile();
-      data.Format = readJson(getReadFile());
-      data.Resource = readRes(readFile.stem() / config.at("outputImageDir"));
-    }
+    data.Format = readJson(fullpath);
+    auto stem = fullpath.parent_path() / "image";
+    data.Resource = readRes(stem);
     return data;
   }
 };

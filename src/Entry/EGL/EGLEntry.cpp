@@ -34,6 +34,7 @@ int main(int argc, char** argv)
   program.add_argument("-p", "--prefix").help("the prefix of filename or dir");
   program.add_argument("-L", "--loaddir").help("iterates all the files in the given dir");
   program.add_argument("-s", "--scale").help("canvas scale").scan<'g', float>().default_value(1.0);
+  program.add_argument("-c", "--config").help("specify config file");
   program.add_argument("-q", "--quality").help("canvas scale").scan<'i', int>().default_value(80);
 
   try
@@ -50,6 +51,11 @@ int main(int argc, char** argv)
   auto scene = std::make_shared<Scene>();
   std::filesystem::path prefix;
   std::filesystem::path respath;
+  if (auto configfile = program.present("-c"))
+  {
+    auto file = configfile.value();
+    Config::ReadGlobalConfig(file);
+  }
 
   if (auto p = program.present("-p"))
   {
@@ -68,16 +74,15 @@ int main(int argc, char** argv)
       }
     }
 
-    load(fp,
-         respath,
-         prefix,
-         [&](const auto& json, auto res)
-         {
-           auto result = render(json, res, 80, 2);
-           auto reason = std::get<0>(result);
-           std::cout << "Reason: " << reason << std::endl;
-           writeResult(std::get<1>(result));
-         });
+    auto r = load("." + ext);
+    if (r)
+    {
+      auto data = r->read(prefix / fp);
+      auto result = render(data.Format, data.Resource, 80, 2);
+      auto reason = std::get<0>(result);
+      std::cout << "Reason: " << reason << std::endl;
+      writeResult(std::get<1>(result));
+    }
   }
 
   return 0;

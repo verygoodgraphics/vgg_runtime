@@ -12,34 +12,22 @@ namespace VGG
 
 class VGG_EXPORTS RawFileReader : public IReader
 {
-  std::filesystem::path jsonFilename;
-  std::filesystem::path resDir;
-
 public:
-  RawFileReader(const std::string& filename, const std::string& resDir)
-    : jsonFilename(filename)
-    , resDir(resDir)
+  RawFileReader()
   {
   }
-  nlohmann::json readFormat() override
+  Data read(const fs::path& fullpath) override
   {
-    return nlohmann::json::parse(GetTextFromFile(prefix / jsonFilename).value_or(""));
-  }
-
-  std::map<std::string, std::vector<char>> readResource() override
-  {
-    std::map<std::string, std::vector<char>> resources;
-    auto fullpath = prefix / resDir;
-    if (std::filesystem::exists(fullpath) == false)
-      return resources;
-    auto parentPath = resDir.filename();
-    for (const auto& entry : std::filesystem::recursive_directory_iterator(fullpath))
+    const auto cmd = genCmd(fullpath);
+    auto ret = executeExternalCmd(cmd);
+    Data data;
+    if (ret == 0)
     {
-      std::string key = (parentPath / entry.path().filename()).string();
-      std::cout << "read image: " << entry.path() << " which key is " << key << std::endl;
-      resources[key] = GetBinFromFile(entry.path()).value_or(std::vector<char>{});
+      auto readFile = getReadFile();
+      data.Format = readJson(getReadFile());
+      data.Resource = readRes(readFile.stem() / config.at("outputImageDir"));
     }
-    return resources;
+    return data;
   }
 };
 } // namespace VGG

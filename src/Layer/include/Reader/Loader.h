@@ -148,8 +148,10 @@ public:
   {
     auto p = std::make_shared<TextNode>("Text");
     const std::string text = j.at("content");
+    auto lineType = get_stack_optional<std::vector<TextLineAttr>>(j, "lineType")
+                      .value_or(std::vector<TextLineAttr>());
     p->setText(text, j.at("attr"));
-    p->setParagraph(text, j.at("attr"), j.at("line_type"));
+    p->setParagraph(text, j.at("attr"), lineType);
     p->setVerticalAlignment(j.at("verticalAlignment"));
     p->setFrameMode(j.at("frameMode"));
     return p;

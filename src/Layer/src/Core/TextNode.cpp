@@ -207,7 +207,10 @@ void TextNode::setParagraph(const std::string& utf8,
   {
     paraAttrs.emplace_back(ParagraphStyle(), a);
   }
-  _->m_paragraphSet = std::make_unique<ParagraphSet>(utf8, attrs, paraAttrs, nullptr);
+  if (!paraAttrs.empty())
+  {
+    _->m_paragraphSet = std::make_unique<ParagraphSet>(utf8, attrs, paraAttrs, nullptr);
+  }
 }
 
 void TextNode::setFrameMode(ETextLayoutMode mode)

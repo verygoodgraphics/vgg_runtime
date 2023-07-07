@@ -243,9 +243,9 @@ inline void from_json(const json& j, TextStyleStub& x)
 
 inline void from_json(const json& j, TextLineAttr& x)
 {
-  x.intendation = j.at("indentation_level");
-  x.firstLine = j.at("is_first_line_of_list");
-  x.lineType = j.at("line_type");
+  x.intendation = j.at("level");
+  x.firstLine = j.at("ifFirst");
+  x.lineType = j.at("styleType");
 }
 
 inline void from_json(const json& j, TextAttr& x)

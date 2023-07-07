@@ -6,7 +6,7 @@
 <body>
     <canvas id="myCanvas"></canvas>
 
-    <script type="text/javascript" src="./sut/runtime.js"></script>
+    <script type="text/javascript" src="./sut/wasm_main.js"></script>
     <script type="text/javascript">
         async function setupAndRun() {
             // 0. Given
@@ -75,7 +75,7 @@
 
         async function useVggSdk(myInstance) {
             // Given
-            const { getVggSdk, setVgg } = await import("https://s3.vgg.cool/test/js/vgg-sdk.esm.js");
+            const { getVggSdk, setVgg } = await import("https://s5.vgg.cool/vgg-sdk.esm.js");
             setVgg(myInstance);
             const vggSdk = await getVggSdk();
             // When

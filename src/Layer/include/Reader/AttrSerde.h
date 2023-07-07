@@ -68,7 +68,7 @@ inline void from_json(const json& j, Pattern& x)
 {
   const auto instance = j["instance"];
   const auto klass = instance["class"];
-  if (klass == "pattern_image")
+  if (klass == "patternImage")
   {
     x.imageFillType = instance["fillType"];
     x.imageGUID = instance["imageFileName"];
@@ -86,9 +86,9 @@ inline void from_json(const json& j, Pattern& x)
     }
     x.transform = m;
   }
-  else if (klass == "pattern_layer")
+  else if (klass == "patternLayer")
   {
-    // TODO:: Feature for pattern_layer
+    // TODO:: Feature for patternLayer
   }
 }
 

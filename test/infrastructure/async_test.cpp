@@ -63,3 +63,52 @@ TEST_F(VggAsyncTestSuite, Smoke)
 
   loop_until_exit();
 }
+
+TEST_F(VggAsyncTestSuite, Exception)
+{
+  // Given
+  auto current_thread_id = std::this_thread::get_id();
+  constexpr auto fake_result = 1;
+
+  Async<int, std::function<void(std::exception_ptr)>> sut{
+    [fake_result, &current_thread_id]()
+    {
+      auto task_thread_id = std::this_thread::get_id();
+      // Then
+      EXPECT_NE(task_thread_id, current_thread_id);
+
+      // run task
+      std::string().at(1); // this generates a std::out_of_range
+
+      return fake_result;
+    },
+    [fake_result, &exit = m_exit_loop, &current_thread_id](int result) { GTEST_FAIL(); },
+    [&exit = m_exit_loop, &current_thread_id](std::exception_ptr eptr)
+    {
+      // Then
+      auto result_thread_id = std::this_thread::get_id();
+      EXPECT_EQ(result_thread_id, current_thread_id);
+
+      try
+      {
+        if (eptr)
+          std::rethrow_exception(eptr);
+      }
+      catch (const std::exception& e)
+      {
+        std::cout << "Caught exception: '" << e.what() << "'\n";
+      }
+      catch (...)
+      {
+        std::cout << "Caught unknown exception. \n";
+      }
+
+      exit = true;
+    }
+  };
+
+  // When
+  sut();
+
+  loop_until_exit();
+}

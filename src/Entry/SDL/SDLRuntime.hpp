@@ -223,7 +223,7 @@ public:
     SDL_GetWindowSize(this->m_sdlState.window, &ww, &wh);
     std::cout << dw << " " << ww << " asfdsafdasf" << std::endl;
     return float(dw) / (float)ww;
-#elif defined(VGG_HOST_Linux)
+#else
     return get_scale_factor();
 #endif
   }

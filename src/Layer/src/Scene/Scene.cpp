@@ -1,10 +1,12 @@
 #include "Scene/Scene.h"
 
+#include "Core/FontManager.h"
 #include "Reader/Loader.h"
 #include "Core/PaintNode.h"
 #include "Scene/Renderer.h"
-
 #include "core/SkCanvas.h"
+#include <filesystem>
+#include "Reader/ConfigMananger.h"
 #include <fstream>
 #include <string>
 namespace VGG
@@ -14,6 +16,15 @@ ResourceRepo Scene::ResRepo{};
 ObjectTableType Scene::ObjectTable{};
 bool Scene::s_enableDrawDebugBound{ false };
 
+Scene::Scene()
+{
+  auto& fontMgr = FontManager::instance();
+  auto& cfg = Config::globalConfig();
+  if (auto it = cfg.find("fontDirs"); it != cfg.end())
+  {
+    fontMgr.createOrGetFontCollection("default", *it);
+  }
+}
 void Scene::loadFileContent(const std::string& json)
 {
   loadFileContent(nlohmann::json::parse(json));

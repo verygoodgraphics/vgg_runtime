@@ -255,10 +255,14 @@ inline void from_json(const json& j, TextAttr& x)
   x.italic = get_stack_optional<bool>(j, "italic").value_or(false);
   x.fontName = get_stack_optional<std::string>(j, "name").value_or("");
   x.subFamilyName = get_stack_optional<std::string>(j, "subFamilyName").value_or("");
+  x.baselineShift = j.at("baselineShift");
   if (auto it = j.find("fills"); it != j.end())
   {
     // we don process other fill style now, only use color
-    x.color = get_stack_optional<VGGColor>(*it, "color").value_or(VGGColor{ 0, 0, 0, 1 });
+    if ((*it).size() > 0)
+    {
+      x.color = get_stack_optional<VGGColor>((*it)[0], "color").value_or(VGGColor{ 0, 0, 0, 1 });
+    }
   }
   x.lineThrough = j.at("linethrough");
   x.letterSpacing = j.at("letterSpacing");

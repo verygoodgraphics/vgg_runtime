@@ -54,7 +54,7 @@ int main(int argc, char** argv)
   if (auto configfile = program.present("-c"))
   {
     auto file = configfile.value();
-    Config::ReadGlobalConfig(file);
+    Config::readGlobalConfig(file);
   }
 
   if (auto p = program.present("-p"))

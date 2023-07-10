@@ -6,7 +6,7 @@ namespace Config
 {
 
 namespace fs = std::filesystem;
-nlohmann::json& GetGlobalConfig();
+nlohmann::json& globalConfig();
 
-void ReadGlobalConfig(const fs::path& path);
+void readGlobalConfig(const fs::path& path);
 } // namespace Config

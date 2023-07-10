@@ -1,4 +1,5 @@
 #include <Core/FontManager.h>
+#include <core/SkRefCnt.h>
 namespace VGG
 {
 
@@ -8,28 +9,34 @@ ResourceFontCollection* getDefaultFontCollection()
     std::vector{ fs::path("/usr/share/fonts/TTF"), fs::path("/home/ysl/Code/vgg_runtime/fonts") });
   return fontCollection.get();
 }
-
-void FontManager::initFontManager(const std::vector<fs::path>& fontDirs)
-{
-  if (m_init)
-    return;
-  m_init = true;
-}
-
-void FontManager::registerFontDirectory(const fs::path& fontDir)
-{
-}
-
-void FontManager::registerFontFile(const std::string& fontName)
-{
-}
 FontManager::FontManager()
 {
 }
-
-sk_sp<ResourceFontCollection> FontManager::defaultFontCollection()
+sk_sp<ResourceFontCollection> FontManager::createOrGetFontCollection(
+  const std::string& key,
+  const std::vector<fs::path>& fontDirs)
 {
-  return m_defaultFontCollection;
+  sk_sp<ResourceFontCollection> fontCollection;
+  if (auto it = fontResourceCache.find(key); it != fontResourceCache.end())
+  {
+    return it->second;
+  }
+  else
+  {
+    fontCollection = sk_make_sp<ResourceFontCollection>(fontDirs);
+    fontResourceCache[key] = fontCollection;
+    return fontCollection;
+  }
+}
+
+sk_sp<ResourceFontCollection> FontManager::fontCollection(const std::string& key)
+{
+  sk_sp<ResourceFontCollection> fontCollection;
+  if (auto it = fontResourceCache.find(key); it != fontResourceCache.end())
+  {
+    fontCollection = it->second;
+  }
+  return fontCollection;
 }
 
 } // namespace VGG

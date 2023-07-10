@@ -203,13 +203,19 @@ void TextNode::setParagraph(const std::string& utf8,
 {
   VGG_IMPL(TextNode);
   std::vector<ParagraphSet::ParagraphAttr> paraAttrs;
+  ParagraphStyle style;
+  style.setEllipsis(u"...");
+  style.setTextAlign(TextAlign::kLeft);
+  style.setMaxLines(1000);
+  auto defaultFontCollection = FontManager::instance().fontCollection("default");
   for (const auto a : lineAttr)
   {
-    paraAttrs.emplace_back(ParagraphStyle(), a);
+    paraAttrs.emplace_back(style, a);
   }
   if (!paraAttrs.empty())
   {
-    _->m_paragraphSet = std::make_unique<ParagraphSet>(utf8, attrs, paraAttrs, nullptr);
+    _->m_paragraphSet =
+      std::make_unique<ParagraphSet>(utf8, attrs, paraAttrs, defaultFontCollection);
   }
 }
 
@@ -222,25 +228,25 @@ void TextNode::setFrameMode(ETextLayoutMode mode)
 void TextNode::paintEvent(SkCanvas* canvas)
 {
   VGG_IMPL(TextNode);
-  if (_->styles.empty() == false && _->text.empty() == false)
-  {
-    canvas->save();
-    canvas->clipRect(toSkRect(getBound()));
-    canvas->scale(1, -1);
-    // we need to convert to skia coordinate to render text
-    drawText(canvas, _->text, getBound(), _->styles[0]);
-    canvas->restore();
-  }
-
-  // if (_->m_paragraphSet)
+  // if (_->styles.empty() == false && _->text.empty() == false)
   // {
   //   canvas->save();
   //   canvas->clipRect(toSkRect(getBound()));
   //   canvas->scale(1, -1);
   //   // we need to convert to skia coordinate to render text
-  //   _->drawParagraph(canvas);
+  //   drawText(canvas, _->text, getBound(), _->styles[0]);
   //   canvas->restore();
   // }
+
+  if (_->m_paragraphSet)
+  {
+    canvas->save();
+    canvas->clipRect(toSkRect(getBound()));
+    canvas->scale(1, -1);
+    // we need to convert to skia coordinate to render text
+    _->drawParagraph(canvas);
+    canvas->restore();
+  }
 }
 
 void TextNode::setVerticalAlignment(ETextVerticalAlignment vertAlign)

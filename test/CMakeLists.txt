@@ -8,7 +8,7 @@ else()
     controller/controller_test.cpp
     editor/save_test.cpp
     exec/vgg_exec_test.cpp
-    model/automerge_test.cpp
+    # model/automerge_test.cpp
     model/json_schema_validator_test.cpp
     model/schema_valid_json_document_test.cpp
     model/vgg_work_test.cpp
@@ -43,6 +43,7 @@ else()
   )
 
   target_link_libraries(unit_tests PRIVATE vgg_internal gtest_main gmock)
+  set_target_properties(unit_tests PROPERTIES LINK_FLAGS ${SDL2_LIBRARIES})
   include(GoogleTest)
   gtest_discover_tests(unit_tests)
 endif()

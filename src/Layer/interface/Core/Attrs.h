@@ -367,6 +367,7 @@ struct TextAttr
   std::string subFamilyName;
   VGGColor color{ 0, 0, 0, 1 };
   float letterSpacing{ 0.0 };
+  float baselineShift{ 0.0 };
   size_t length{ 0 };
   uint8_t size{ 14 };
   bool bold{ false };

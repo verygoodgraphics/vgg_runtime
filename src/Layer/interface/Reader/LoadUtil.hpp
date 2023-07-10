@@ -16,7 +16,7 @@ using namespace VGG;
 inline std::shared_ptr<IReader> load(const std::string ext)
 {
   std::shared_ptr<IReader> reader;
-  auto& cfg = Config::GetGlobalConfig();
+  auto& cfg = Config::globalConfig();
   if (ext == ".sketch")
   {
     try

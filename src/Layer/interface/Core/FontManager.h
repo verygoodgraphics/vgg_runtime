@@ -2,6 +2,7 @@
 #include <modules/skparagraph/include/FontCollection.h>
 #include <modules/skparagraph/include/TypefaceFontProvider.h>
 #include <filesystem>
+#include <iostream>
 
 namespace VGG
 {
@@ -23,6 +24,10 @@ public:
         if (typeface)
         {
           fFontProvider->registerTypeface(typeface);
+          // SkString name, psname;
+          // typeface->getFamilyName(&name);
+          // typeface->getPostScriptName(&psname);
+          // std::cout << "familiy name: " << name.c_str() << " " << psname.c_str() << std::endl;
         }
       }
     }
@@ -53,22 +58,20 @@ class FontManager
 {
   sk_sp<ResourceFontCollection> m_defaultFontCollection;
   bool m_init{ false };
+  std::unordered_map<std::string, sk_sp<ResourceFontCollection>> fontResourceCache;
 
 public:
   FontManager(const FontManager& s) = delete;
   void operator=(const FontManager&) = delete;
-  void initFontManager(const std::vector<fs::path>& fontDirs);
-
   bool hasInit()
   {
     return m_init;
   }
 
-  void registerFontDirectory(const fs::path& dir);
+  sk_sp<ResourceFontCollection> createOrGetFontCollection(const std::string& key,
+                                                          const std::vector<fs::path>& fontDirs);
 
-  void registerFontFile(const std::string& fontName);
-
-  sk_sp<ResourceFontCollection> defaultFontCollection();
+  sk_sp<ResourceFontCollection> fontCollection(const std::string& key);
 
   static FontManager& instance()
   {

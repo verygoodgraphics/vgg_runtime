@@ -11,6 +11,8 @@
 #include "include/effects/SkImageFilters.h"
 #include "include/pathops/SkPathOps.h"
 
+#include <core/SkFontStyle.h>
+#include <modules/skparagraph/include/DartTypes.h>
 #include <vector>
 #include <unordered_map>
 #include <string>
@@ -86,6 +88,32 @@ inline SkPaint::Cap toSkPaintCap(VGG::ELineCap cap)
   SWITCH_MAP_ITEM_DEF(LC_Round, SkPaint::kRound_Cap)
   SWITCH_MAP_ITEM_DEF(LC_Square, SkPaint::kSquare_Cap)
   SWITCH_MAP_ITEM_END(SkPaint::kButt_Cap)
+}
+
+inline SkFontStyle toSkFontStyle(const std::string_view& subFamilyName)
+{
+  if (subFamilyName == "Bold")
+  {
+    return SkFontStyle::Bold();
+  }
+  else if (subFamilyName == "Regular")
+  {
+    return SkFontStyle::Normal();
+  }
+  else if (subFamilyName == "ExtraBold")
+  {
+    return SkFontStyle(SkFontStyle::kExtraBold_Weight,
+                       SkFontStyle::kNormal_Width,
+                       SkFontStyle::kUpright_Slant);
+  }
+  else if (subFamilyName == "Bold Italic")
+  {
+    return SkFontStyle::BoldItalic();
+  }
+  else
+  {
+    return SkFontStyle::Normal();
+  }
 }
 
 inline SkPathOp toSkPathOp(VGG::EBoolOp blop)

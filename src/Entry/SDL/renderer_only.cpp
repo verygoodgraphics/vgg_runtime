@@ -44,7 +44,7 @@ int main(int argc, char** argv)
   if (auto configfile = program.present("-c"))
   {
     auto file = configfile.value();
-    Config::ReadGlobalConfig(file);
+    Config::readGlobalConfig(file);
   }
 
   auto scene = std::make_shared<Scene>();

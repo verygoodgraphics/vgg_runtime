@@ -8,30 +8,45 @@
 namespace VGG
 {
 
-void TextNode__pImpl::drawText(SkCanvas* canvas)
+void drawParagraphDebugInfo(DebugCanvas& canvas, Paragraph* p, CursorState& state)
 {
-  int styleIndex = 0;
-  ParagraphStyle style;
-  skia::textlayout::TextStyle txtStyle;
-  const auto& b = q_ptr->getBound();
 
-  const auto& s = styles[0];
-  txtStyle.setColor(SK_ColorBLACK);
-  txtStyle.setFontFamilies({ SkString(s.fontName), SkString("Noto Color Emoji") });
-  txtStyle.setFontSize(s.size);
-  txtStyle.setColor(s.fillColor);
-  txtStyle.setDecoration(TextDecoration::kLineThrough);
-  style.setTextStyle(txtStyle);
-
-  style.setTextAlign(TextAlign::kCenter);
-  style.setEllipsis(u"...");
-
-  auto fontCollection = getDefaultFontCollection();
-  auto builder = ParagraphBuilder::make(style, sk_sp<FontCollection>(fontCollection));
-  builder->addText(text.c_str());
-  auto p = builder->Build();
-  p->layout(b.width());
-  p->paint(canvas, 0, 0);
+  canvas.get()->save();
+  canvas.get()->translate(state.cursorX, state.cursorY);
+  auto rects = p->getRectsForRange(0, 100, RectHeightStyle::kMax, RectWidthStyle::kMax);
+  auto h = p->getHeight();
+  auto mw = p->getMaxWidth();
+  auto iw = p->getMaxIntrinsicWidth();
+  SkPaint pen;
+  pen.setColor(SK_ColorGREEN);
+  canvas.get()->drawRect(SkRect{ 0, 0, mw, h }, pen);
+  // pen.setColor(SK_ColorBLUE);
+  // canvas.get()->drawRect(SkRect{0, 0, iw, h}, pen);
+  canvas.drawRects(SK_ColorRED, rects);
+  canvas.get()->restore();
+  p->paint(canvas.get(), state.cursorX, state.cursorY);
 }
 
+void TextNode__pImpl::drawParagraph(SkCanvas* canvas)
+
+{
+  assert(m_paragraphSet);
+  if (m_paragraphs.empty())
+  {
+    for (auto& pb : m_paragraphSet->Paragraphs)
+    {
+      m_paragraphs.push_back(std::move(pb.builder->Build()));
+    }
+  }
+  const auto& b = q_ptr->getBound();
+  const auto layoutWidht = b.width();
+  m_cursorState.reset(layoutWidht);
+  for (auto& p : m_paragraphs)
+  {
+    p->layout(m_cursorState.layoutWidth);
+    const auto height = p->getHeight();
+    p->paint(canvas, m_cursorState.cursorX, m_cursorState.cursorY);
+    m_cursorState.advanceY(height);
+  }
+}
 } // namespace VGG

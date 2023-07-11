@@ -138,6 +138,7 @@ bool NativeExecImpl::check_state()
   // Wait node thread ready. 'm_state' will be updated in run_node_instance
   while (m_state != RUNNING)
   {
+    // volatile m_state will prevent this loop from being optimized away in release build.
   }
 
   return true;

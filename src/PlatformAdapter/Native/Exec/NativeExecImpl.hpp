@@ -64,7 +64,7 @@ private:
     RUNNING,
     DEAD,
   };
-  ExecState m_state{ INIT };
+  volatile ExecState m_state{ INIT };
   CommonEnvironmentSetup* m_setup;
   Isolate* m_isolate;
   Environment* m_env;

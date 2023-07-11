@@ -203,14 +203,10 @@ void TextNode::setParagraph(const std::string& utf8,
 {
   VGG_IMPL(TextNode);
   std::vector<TextParagraphBuilder::ParagraphAttr> paraAttrs;
-  ParagraphStyle style;
-  style.setEllipsis(u"...");
-  style.setTextAlign(TextAlign::kLeft);
-  style.setMaxLines(1000);
   auto defaultFontCollection = FontManager::instance().fontCollection("default");
   for (const auto a : lineAttr)
   {
-    paraAttrs.emplace_back(style, a);
+    paraAttrs.emplace_back(a, ETextHorizontalAlignment::HA_Left, 1000, u"...");
   }
   if (!paraAttrs.empty())
   {

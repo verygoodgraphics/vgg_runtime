@@ -2,6 +2,7 @@
 
 #include "node_api.h"
 
+#include <functional>
 #include <mutex>
 #include <unordered_map>
 #include <vector>

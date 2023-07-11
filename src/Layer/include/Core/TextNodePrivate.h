@@ -75,191 +75,182 @@ Reason runOnUtf8(const char* utf8, size_t bytes, F&& f)
   return Reason::InvalidUTF8;
 }
 
-inline skia::textlayout::TextStyle createStyle(const TextAttr& attr)
+struct TextParagraph
 {
-  skia::textlayout::TextStyle style;
-  SkColor color = attr.color;
-  style.setColor(color);
-  style.setDecorationColor(color);
-  style.setFontFamilies({ SkString(attr.fontName) });
-  style.setFontSize(attr.size);
-  style.setLetterSpacing(attr.letterSpacing);
-  style.setBaselineShift(attr.baselineShift);
-  style.setFontStyle(toSkFontStyle(attr.subFamilyName));
-  if (attr.lineThrough)
+  std::string_view text;
+  std::unique_ptr<ParagraphBuilder> builder;
+  int level{ 0 };
+  TextParagraph(std::string_view view, std::unique_ptr<ParagraphBuilder> builder, int level)
+    : text(view)
+    , builder(std::move(builder))
+    , level(level)
   {
-    style.setDecoration(skia::textlayout::kLineThrough);
   }
-  if (attr.underline != UT_None)
-  {
-    style.setDecoration(skia::textlayout::kUnderline);
-    if (attr.underline == UT_Single)
-    {
-      style.setDecorationStyle(TextDecorationStyle::kSolid);
-    }
-    else if (attr.underline == UT_Double)
-    {
-      style.setDecorationStyle(TextDecorationStyle::kDouble);
-    }
-  }
-  // style.setFontStyle();
-  return style;
-}
+};
 
-struct ParagraphSet
+class TextParagraphBuilder
 {
+public:
   struct ParagraphAttr
   {
     ParagraphStyle defaultParagraphStyle;
     TextLineAttr type;
   };
 
-  struct Paragraph
+private:
+  int length{ 0 };
+  int styleIndex{ 0 };
+  int paragraphAttrIndex{ 0 };
+  const char* prevStyleBegin{ nullptr };
+  const char* prevParagraphBegin{ nullptr };
+  int offset{ 0 };
+  void reset(const std::string& text, int firstOffset)
   {
-    std::string_view text;
-    std::unique_ptr<ParagraphBuilder> builder;
-    int level{ 0 };
-    Paragraph(std::string_view view, std::unique_ptr<ParagraphBuilder> builder, int level)
-      : text(view)
-      , builder(std::move(builder))
-      , level(level)
+    styleIndex = 0;
+    paragraphAttrIndex = 0;
+    offset = firstOffset;
+    length = 0;
+    prevStyleBegin = text.c_str();
+    prevParagraphBegin = text.c_str();
+  }
+
+  static skia::textlayout::TextStyle createStyle(const TextAttr& attr)
+  {
+    skia::textlayout::TextStyle style;
+    SkColor color = attr.color;
+    style.setColor(color);
+    style.setDecorationColor(color);
+    style.setFontFamilies({ SkString(attr.fontName) });
+    style.setFontSize(attr.size);
+    style.setLetterSpacing(attr.letterSpacing);
+    style.setBaselineShift(attr.baselineShift);
+    style.setFontStyle(toSkFontStyle(attr.subFamilyName));
+    if (attr.lineThrough)
     {
+      style.setDecoration(skia::textlayout::kLineThrough);
     }
-  };
+    if (attr.underline != UT_None)
+    {
+      style.setDecoration(skia::textlayout::kUnderline);
+      if (attr.underline == UT_Single)
+      {
+        style.setDecorationStyle(TextDecorationStyle::kSolid);
+      }
+      else if (attr.underline == UT_Double)
+      {
+        style.setDecorationStyle(TextDecorationStyle::kDouble);
+      }
+    }
+    // style.setFontStyle();
+    return style;
+  }
 
-  std::string Text;
-  int Length{ 0 };
-  std::vector<Paragraph> Paragraphs;
-  bool IsUtf8{ true };
-
-  ParagraphSet(std::string text,
-               const std::vector<TextAttr>& textAttrs,
-               const std::vector<ParagraphAttr>& paragraphAttributes,
-               sk_sp<FontCollection> fontCollection)
-    : Text(std::move(text))
+public:
+  std::vector<TextParagraph> operator()(const std::string& text,
+                                        const std::vector<TextAttr>& textAttrs,
+                                        const std::vector<ParagraphAttr>& paragraphAttributes,
+                                        sk_sp<FontCollection> fontCollection)
   {
     assert(!textAttrs.empty());
     assert(!paragraphAttributes.empty());
-    assert(!Text.empty());
-    int styleIndex = 0;
-    int paragraphAttrIndex = 0;
-    const char* prevStyleBegin = Text.data();
-    const char* prevParagraphBegin = Text.data();
-
-    int offset = textAttrs[styleIndex].length;
+    assert(!text.empty());
+    reset(text, textAttrs[0].length);
+    std::vector<TextParagraph> paragraphs;
     auto builder = skia::textlayout::ParagraphBuilder::make(
       paragraphAttributes[paragraphAttrIndex].defaultParagraphStyle,
       fontCollection);
+    assert(builder);
 
-    auto appendStyle = [&prevStyleBegin, &textAttrs, &offset](ParagraphBuilder* builder,
-                                                              const char* next,
-                                                              int styleIndex)
-    {
-      const char* lastStyleEnd = next;
-      const auto bytes = lastStyleEnd - prevStyleBegin;
-      builder->pushStyle(createStyle(textAttrs[styleIndex]));
-      builder->addText(prevStyleBegin, bytes);
-      builder->pop();
-      if (styleIndex + 1 < textAttrs.size())
-      {
-        styleIndex++;
-        prevStyleBegin = lastStyleEnd;
-        offset += textAttrs[styleIndex].length;
-      }
-    };
+    auto reason = runOnUtf8(text.c_str(),
+                            text.size(),
+                            [&, this](const char* begin, const char* end, int charCount)
+                            {
+                              this->length += charCount;
+                              unsigned char newLine = *begin;
+                              bool skip = false;
+                              if (newLine >> 7 == 0 && newLine == '\n')
+                              {
+                                const char* lastStyleEnd = end;
+                                const auto bytes = lastStyleEnd - prevStyleBegin;
+                                builder->pushStyle(createStyle(textAttrs[styleIndex]));
+                                builder->addText(prevStyleBegin, bytes);
+                                builder->pop();
+                                prevStyleBegin = lastStyleEnd;
+                                if (this->length >= offset)
+                                {
+                                  skip = true;
+                                  styleIndex++;
+                                  if (styleIndex < textAttrs.size())
+                                  {
+                                    prevStyleBegin = lastStyleEnd;
+                                    offset += textAttrs[styleIndex].length;
+                                  }
+                                }
 
-    auto reason =
-      runOnUtf8(Text.c_str(),
-                Text.size(),
-                [&, this](const char* cur, const char* next, int count)
-                {
-                  this->Length += count;
-                  unsigned char newLine = *cur;
-                  bool skip = false;
-                  if (newLine >> 7 == 0 && newLine == '\n')
-                  {
-                    if (this->Length >= offset)
-                    {
-                      const char* lastStyleEnd = next;
-                      const auto bytes = lastStyleEnd - prevStyleBegin;
-                      builder->pushStyle(createStyle(textAttrs[styleIndex]));
-                      builder->addText(prevStyleBegin, bytes);
-                      builder->pop();
-                      prevStyleBegin = lastStyleEnd;
-                      skip = true;
-                    }
+                                paragraphs.push_back(TextParagraph{
+                                  std::string_view{ prevParagraphBegin, begin },
+                                  std::move(builder),
+                                  paragraphAttributes[paragraphAttrIndex].type.intendation });
+                                prevParagraphBegin = begin;
+                                if (paragraphAttrIndex + 1 < paragraphAttributes.size())
+                                {
+                                  paragraphAttrIndex++;
+                                  builder = skia::textlayout::ParagraphBuilder::make(
+                                    paragraphAttributes[paragraphAttrIndex].defaultParagraphStyle,
+                                    fontCollection);
+                                }
+                                else
+                                {
+                                  // default linetype
+                                  WARN("there is no matched line type for this paragrah");
+                                  builder = skia::textlayout::ParagraphBuilder::make(
+                                    paragraphAttributes[paragraphAttrIndex].defaultParagraphStyle,
+                                    fontCollection);
+                                  // print wanring
+                                }
+                              }
+                              if (this->length >= offset && !skip)
+                              {
+                                if (this->length > offset)
+                                {
+                                  WARN("style offset do not match utf8 character count");
+                                }
+                                assert(builder);
 
-                    this->Paragraphs.push_back(
-                      Paragraph{ std::string_view{ prevParagraphBegin, cur },
-                                 std::move(builder),
-                                 paragraphAttributes[paragraphAttrIndex].type.intendation });
+                                const char* lastStyleEnd = end;
+                                const auto bytes = lastStyleEnd - prevStyleBegin;
+                                builder->pushStyle(createStyle(textAttrs[styleIndex]));
+                                builder->addText(prevStyleBegin, bytes);
+                                builder->pop();
+                                if (styleIndex + 1 < textAttrs.size())
+                                {
+                                  styleIndex++;
+                                  prevStyleBegin = lastStyleEnd;
+                                  offset += textAttrs[styleIndex].length;
+                                }
+                                else
+                                {
+                                  WARN("No more style for text");
+                                  // builder->pushStyle(createStyle(textAttrs[styleIndex]));
+                                  // builder->addText(prevStyleBegin); // until \0
+                                  // builder->pop();
+                                  return false;
+                                }
+                              }
+                              return true;
+                            });
 
-                    std::cout << "Paragraph: " << std::string(prevParagraphBegin, cur) << std::endl;
-
-                    prevParagraphBegin = cur;
-                    if (paragraphAttrIndex + 1 < paragraphAttributes.size())
-                    {
-                      paragraphAttrIndex++;
-                      builder = skia::textlayout::ParagraphBuilder::make(
-                        paragraphAttributes[paragraphAttrIndex].defaultParagraphStyle,
-                        fontCollection);
-                    }
-                    else
-                    {
-                      // default linetype
-                      WARN("there is no matched line type for this paragrah");
-                      builder = skia::textlayout::ParagraphBuilder::make(
-                        paragraphAttributes[paragraphAttrIndex].defaultParagraphStyle,
-                        fontCollection);
-                      // print wanring
-                    }
-                  }
-                  if (this->Length >= offset && !skip)
-                  {
-                    if (this->Length > offset)
-                    {
-                      WARN("style offset do not match utf8 character count");
-                    }
-                    assert(builder);
-
-                    const char* lastStyleEnd = next;
-                    const auto bytes = lastStyleEnd - prevStyleBegin;
-                    builder->pushStyle(createStyle(textAttrs[styleIndex]));
-                    builder->addText(prevStyleBegin, bytes);
-                    builder->pop();
-                    std::cout << "Style: " << std::string(prevStyleBegin, bytes) << std::endl;
-                    if (styleIndex + 1 < textAttrs.size())
-                    {
-                      styleIndex++;
-                      prevStyleBegin = lastStyleEnd;
-                      offset += textAttrs[styleIndex].length;
-                    }
-                    else
-                    {
-                      WARN("No more style for text");
-                      // builder->pushStyle(createStyle(textAttrs[styleIndex]));
-                      // builder->addText(prevStyleBegin); // until \0
-                      // builder->pop();
-                      return false;
-                    }
-                  }
-                  return true;
-                });
-
-    IsUtf8 = (reason != Reason::InvalidUTF8);
-    if (!IsUtf8)
+    auto isUtf8 = (reason != Reason::InvalidUTF8);
+    if (!isUtf8)
     {
       WARN("Invalid utf8\n");
     }
     assert(builder);
-    this->Paragraphs.push_back(
-      ParagraphSet::Paragraph{ std::string_view{ prevParagraphBegin },
-                               std::move(builder),
-                               paragraphAttributes[paragraphAttrIndex].type.intendation });
+    paragraphs.push_back(TextParagraph{ std::string_view{ prevParagraphBegin },
+                                        std::move(builder),
+                                        paragraphAttributes[paragraphAttrIndex].type.intendation });
 
-    // std::string para(prevParagraphBegin);
-    // std::cout << "ParagraphBegin: " << para << std::endl;
-    // process last style
+    return paragraphs;
   }
 };
 
@@ -350,6 +341,68 @@ private:
   const char* name;
 };
 
+class TextParagraphCache
+{
+  std::vector<TextParagraph> paragraph;
+
+  std::vector<std::unique_ptr<skia::textlayout::Paragraph>> paragraphCache;
+  bool m_dirty{ true };
+  void clear()
+  {
+    m_dirty = false;
+  }
+
+public:
+  TextParagraphCache() = default;
+  TextParagraphCache(std::vector<TextParagraph> paragraph)
+    : paragraph(std::move(paragraph))
+  {
+  }
+
+  bool isDirty() const
+  {
+    return m_dirty;
+  }
+
+  void cache()
+  {
+    if (!isDirty())
+      return;
+    paragraphCache.clear();
+    paragraphCache.reserve(paragraph.size());
+    for (auto& d : paragraph)
+    {
+      paragraphCache.push_back(std::move(d.builder->Build()));
+    }
+    clear();
+  }
+
+  void drawParagraph(SkCanvas* canvas, const Bound2& bound)
+  {
+    if (paragraph.empty())
+      return;
+    cache();
+    CursorState cursor;
+    const auto layoutWidth = bound.width();
+    cursor.reset(layoutWidth);
+
+    int count = 0;
+    DebugCanvas debugCanvas(canvas);
+    for (auto& p : paragraphCache)
+    {
+      p->layout(cursor.layoutWidth);
+      p->paint(canvas, cursor.cursorX, cursor.cursorY);
+      const auto height = p->getHeight();
+      // if (Scene::isEnableDrawDebugBound())
+      // {
+      //   drawParagraphDebugInfo(debugCanvas, p.get(), cursor, count);
+      // }
+      cursor.advanceY(height);
+      count++;
+    }
+  }
+};
+
 class TextNode__pImpl
 {
   VGG_DECL_API(TextNode)
@@ -360,8 +413,7 @@ public:
   }
   std::string text;
   std::vector<TextStyleStub> styles;
-  std::unique_ptr<ParagraphSet> m_paragraphSet;
-  std::vector<std::unique_ptr<Paragraph>> m_paragraphs;
+  TextParagraphCache m_paragraphCache;
   CursorState m_cursorState;
   ETextLayoutMode mode;
   ETextVerticalAlignment m_vertAlign{ ETextVerticalAlignment::VA_Top };

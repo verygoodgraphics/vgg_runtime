@@ -202,7 +202,7 @@ void TextNode::setParagraph(const std::string& utf8,
                             const std::vector<TextLineAttr>& lineAttr)
 {
   VGG_IMPL(TextNode);
-  std::vector<TextParagraphBuilder::ParagraphAttr> paraAttrs;
+  std::vector<ParagraphAttr> paraAttrs;
   auto defaultFontCollection = FontManager::instance().fontCollection("default");
   for (const auto a : lineAttr)
   {
@@ -210,8 +210,8 @@ void TextNode::setParagraph(const std::string& utf8,
   }
   if (!paraAttrs.empty())
   {
-    TextParagraphBuilder builder;
-    auto paragraph = builder(utf8, attrs, paraAttrs, defaultFontCollection);
+    ParagraphParser parser;
+    auto paragraph = parser.parse(utf8, attrs, paraAttrs, defaultFontCollection);
     _->m_paragraphCache = TextParagraphCache(std::move(paragraph));
   }
 }

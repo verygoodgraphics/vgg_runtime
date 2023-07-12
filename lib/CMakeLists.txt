@@ -106,6 +106,7 @@ if (NOT EMSCRIPTEN)
       node/out/Release/obj.target/deps/simdutf
       node/out/Release/obj.target/deps/uv
       node/out/Release/obj.target/deps/uvwasi
+      node/out/Release/obj.target/deps/zlib
       node/out/Release/obj.target/tools/icu
       node/out/Release/obj.target/tools/v8_gypfiles
     )
@@ -120,7 +121,9 @@ if (NOT EMSCRIPTEN)
       brotli 
       cares 
       histogram 
-      icutools
+      icudata
+      icui18n
+      icuucx
       llhttp 
       nghttp2 
       nghttp3 

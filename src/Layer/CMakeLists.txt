@@ -3,6 +3,7 @@ aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/Core CoreSrcVar)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/SkiaBackend SkiaImplSrcVar)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/Scene SceneSrcVar)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/Reader ReaderSrcVar)
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/Common CommonSrcVar)
 if(LAYER_SHARED_LIBRARY)
   add_library(vgg_layer SHARED)
   target_compile_definitions(vgg_layer PUBLIC -DLAYER_SHARED_LIBRARY)
@@ -16,7 +17,7 @@ set(LeagacySrcVar
     "${CMAKE_CURRENT_SOURCE_DIR}/interface/Systems/RenderSystem.cpp"
     "${CMAKE_SOURCE_DIR}/src/Utils/EntityContainer.cpp"
 )
-target_sources(vgg_layer PRIVATE ${CoreSrcVar} ${SkiaImplSrcVar} ${SceneSrcVar} ${LeagacySrcVar} ${ReaderSrcVar})
+target_sources(vgg_layer PRIVATE ${CoreSrcVar} ${SkiaImplSrcVar} ${SceneSrcVar} ${LeagacySrcVar} ${ReaderSrcVar} ${CommonSrcVar})
 target_include_directories(vgg_layer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/interface)
 
 message(STATUS "JSON INCLUDE DIR: " ${VGG_CONTRIB_JSON_INCLUDE})

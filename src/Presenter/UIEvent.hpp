@@ -121,7 +121,9 @@ private:
 
 using UIEventPtr = std::shared_ptr<UIEvent>;
 
-struct KeyboardEvent : UIEvent
+struct KeyboardEvent
+  : UIEvent
+  , std::enable_shared_from_this<KeyboardEvent>
 {
   const int key;
 
@@ -157,7 +159,9 @@ struct KeyboardEvent : UIEvent
   }
 };
 
-struct MouseEvent : UIEvent
+struct MouseEvent
+  : UIEvent
+  , std::enable_shared_from_this<MouseEvent>
 {
   const int button;
 
@@ -203,7 +207,9 @@ struct MouseEvent : UIEvent
   }
 };
 
-struct TouchEvent : UIEvent
+struct TouchEvent
+  : UIEvent
+  , std::enable_shared_from_this<TouchEvent>
 {
   TouchEvent(const PathType& path, UIEventType type)
     : UIEvent(path, type)

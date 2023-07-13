@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Presenter/Event.hpp"
+#include "Utils/Utils.hpp"
 
 namespace VGG
 {
@@ -21,7 +22,10 @@ protected:
   template<class T>
   std::shared_ptr<T> getEvent() const
   {
-    return std::dynamic_pointer_cast<T>(m_event_ptr);
+    ASSERT(m_event_ptr);
+    auto result = std::dynamic_pointer_cast<T>(m_event_ptr);
+    ASSERT(result);
+    return result;
   }
 
 public:
@@ -30,6 +34,7 @@ public:
   // staitc
   static auto store(std::shared_ptr<event_type> event)
   {
+    ASSERT(event);
     s_event_map[s_event_id] = event;
     return std::to_string(s_event_id++);
   }
@@ -37,17 +42,20 @@ public:
   // getter
   std::string target() const
   {
+    ASSERT(m_event_ptr);
     return m_event_ptr->target();
   }
 
   std::string type() const
   {
+    ASSERT(m_event_ptr);
     return m_event_ptr->type();
   }
 
   // method
   void preventDefault()
   {
+    ASSERT(m_event_ptr);
     m_event_ptr->preventDefault();
   }
 
@@ -55,6 +63,7 @@ public:
   void bindCppEvent(int eventId)
   {
     m_event_ptr = s_event_map[eventId];
+    ASSERT(m_event_ptr);
 
     s_event_map.erase(eventId);
   }

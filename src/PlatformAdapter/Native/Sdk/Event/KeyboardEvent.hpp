@@ -2,6 +2,8 @@
 
 #include "UIEvent.hpp"
 
+#include "Utils/Utils.hpp"
+
 #include "node_api.h"
 
 namespace VGG
@@ -21,29 +23,35 @@ private:
 
   std::string key()
   {
+    ASSERT(m_event_ptr);
     char key = m_event_ptr->key;
     return { key };
   };
 
   bool repeat() const
   {
+    ASSERT(m_event_ptr);
     return m_event_ptr->repeat;
   }
 
   bool altkey() const
   {
+    ASSERT(m_event_ptr);
     return m_event_ptr->altKey;
   }
   bool ctrlkey() const
   {
+    ASSERT(m_event_ptr);
     return m_event_ptr->ctrlKey;
   }
   bool metakey() const
   {
+    ASSERT(m_event_ptr);
     return m_event_ptr->metaKey;
   }
   bool shiftkey() const
   {
+    ASSERT(m_event_ptr);
     return m_event_ptr->shiftKey;
   }
 };

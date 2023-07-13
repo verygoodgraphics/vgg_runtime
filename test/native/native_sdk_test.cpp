@@ -1,7 +1,7 @@
-#include "PlatformAdapter/Native/Exec/NativeExec.hpp"
+#include "Adapter/NativeExec.hpp"
 
-#include "PlatformAdapter/Native/Sdk/VggSdkAddon.hpp"
-#include "Sdk/VggSdk.hpp"
+#include "Adapter/VggSdkAddon.hpp"
+#include "Domain/VggSdk.hpp"
 #include "Utils/DIContainer.hpp"
 #include "VggSdkMock.hpp"
 #include "test_config.hpp"

@@ -1,7 +1,7 @@
-#include "Model/VggWork.hpp"
+#include "Domain/VggWork.hpp"
 
-#include "Presenter/UIEvent.hpp"
-#include "Model/RawJsonDocument.hpp"
+#include "Application/UIEvent.hpp"
+#include "Domain/RawJsonDocument.hpp"
 
 #include <gtest/gtest.h>
 

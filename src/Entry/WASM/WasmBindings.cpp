@@ -16,7 +16,7 @@
  */
 #ifdef EMSCRIPTEN
 
-#include "Main/MainComposer.hpp"
+#include "BrowserMainComposer.hpp"
 #include "Utils/Version.hpp"
 
 extern "C"
@@ -24,7 +24,8 @@ extern "C"
   bool load_file_from_mem(const char* name, char* data, int len)
   {
     std::vector<char> buf(data, data + len);
-    return VGG::MainComposer::instance().controller()->start(buf, "/asset/vgg-format.json");
+    auto& main_composer = VggBrowser::mainComposer();
+    return main_composer.controller()->start(buf, "/asset/vgg-format.json");
   }
 
   bool is_latest_version(const char* version)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Sdk/VggSdk.hpp"
+#include "Domain/VggSdk.hpp"
 
 #include "gmock/gmock.h"
 

@@ -1,5 +1,5 @@
-#include "Model/RawJsonDocument.hpp"
-#include "Model/SchemaValidJsonDocument.hpp"
+#include "Domain/RawJsonDocument.hpp"
+#include "Domain/SchemaValidJsonDocument.hpp"
 
 #include <gtest/gtest.h>
 #include <memory>

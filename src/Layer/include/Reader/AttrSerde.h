@@ -243,7 +243,7 @@ inline void from_json(const json& j, TextStyleStub& x)
 
 inline void from_json(const json& j, TextLineAttr& x)
 {
-  x.intendation = j.at("level");
+  x.level = j.at("level");
   x.firstLine = j.at("isFirst");
   x.lineType = j.at("styleType");
 }

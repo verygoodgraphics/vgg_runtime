@@ -357,7 +357,7 @@ struct Style
 struct TextLineAttr
 {
   bool firstLine{ false };
-  int intendation{ 0 };
+  int level{ 0 };
   int lineType{ TLT_Plain };
 };
 

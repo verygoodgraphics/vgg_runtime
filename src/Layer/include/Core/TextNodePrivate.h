@@ -58,8 +58,7 @@ inline void drawParagraphDebugInfo(DebugCanvas& canvas,
   };
   canvas.get()->save();
   canvas.get()->translate(state.cursorX, state.cursorY);
-  auto rects =
-    p->getRectsForRange(0, textParagraph.characters, RectHeightStyle::kMax, RectWidthStyle::kMax);
+  auto rects = p->getRectsForRange(0, 1000, RectHeightStyle::kMax, RectWidthStyle::kMax);
   auto h = p->getHeight();
   auto mw = p->getMaxWidth();
   auto iw = p->getMaxIntrinsicWidth();
@@ -73,10 +72,9 @@ inline void drawParagraphDebugInfo(DebugCanvas& canvas,
   canvas.get()->restore();
 }
 
-class TextParagraphCache
+class TextParagraphCache : public ParagraphListener
 {
   std::vector<TextParagraph> paragraph;
-
   std::vector<std::unique_ptr<skia::textlayout::Paragraph>> paragraphCache;
   bool m_dirty{ true };
   void clear()
@@ -84,12 +82,23 @@ class TextParagraphCache
     m_dirty = false;
   }
 
+  void markDirty()
+  {
+    m_dirty = true;
+  }
+
+protected:
+  void onBegin() override;
+  void onEnd() override;
+  void onParagraphBegin(int paraIndex, int order, const ParagraphAttr& paragraAttr) override;
+  void onParagraphEnd(int paraIndex, const TextView& textView) override;
+  void onTextStyle(int paraIndex,
+                   int styleIndex,
+                   const TextView& textView,
+                   const TextAttr& textAttr) override;
+
 public:
   TextParagraphCache() = default;
-  TextParagraphCache(std::vector<TextParagraph> paragraph)
-    : paragraph(std::move(paragraph))
-  {
-  }
 
   bool isDirty() const
   {
@@ -117,7 +126,6 @@ public:
     CursorState cursor;
     const auto layoutWidth = bound.width();
     cursor.reset(layoutWidth);
-
     DebugCanvas debugCanvas(canvas);
     for (int i = 0; i < paragraphCache.size(); i++)
     {

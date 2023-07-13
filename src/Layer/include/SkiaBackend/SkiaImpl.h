@@ -13,6 +13,7 @@
 
 #include <core/SkFontStyle.h>
 #include <modules/skparagraph/include/DartTypes.h>
+#include <modules/skparagraph/include/TextStyle.h>
 #include <vector>
 #include <unordered_map>
 #include <string>
@@ -88,6 +89,25 @@ inline SkPaint::Cap toSkPaintCap(VGG::ELineCap cap)
   SWITCH_MAP_ITEM_DEF(LC_Round, SkPaint::kRound_Cap)
   SWITCH_MAP_ITEM_DEF(LC_Square, SkPaint::kSquare_Cap)
   SWITCH_MAP_ITEM_END(SkPaint::kButt_Cap)
+}
+
+inline TextAlign toSkTextAlign(ETextVerticalAlignment align)
+{
+  SWITCH_MAP_ITEM_BEGIN(align)
+  SWITCH_MAP_ITEM_DEF(VGG::ETextVerticalAlignment::VA_Top, TextAlign::kStart);
+  SWITCH_MAP_ITEM_DEF(VGG::ETextVerticalAlignment::VA_Bottom, TextAlign::kEnd);
+  SWITCH_MAP_ITEM_DEF(VGG::ETextVerticalAlignment::VA_Center, TextAlign::kCenter);
+  SWITCH_MAP_ITEM_END(TextAlign::kStart)
+}
+
+inline TextAlign toSkTextAlign(ETextHorizontalAlignment align)
+{
+  SWITCH_MAP_ITEM_BEGIN(align)
+  SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_Left, TextAlign::kLeft);
+  SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_Right, TextAlign::kRight);
+  SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_Justify, TextAlign::kJustify);
+  SWITCH_MAP_ITEM_DEF_NULL(VGG::ETextHorizontalAlignment::HA_Natural)
+  SWITCH_MAP_ITEM_END(TextAlign::kLeft)
 }
 
 inline SkFontStyle toSkFontStyle(const std::string_view& subFamilyName)

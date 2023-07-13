@@ -17,23 +17,32 @@ namespace VGG
 {
 
 using namespace skia::textlayout;
-class TextParagraph : public Node
+
+struct TextView
+{
+  std::string_view Text;
+  size_t Count;
+  TextView() = default;
+  TextView(const std::string_view& text, size_t count)
+    : Text(text)
+    , Count(count)
+  {
+  }
+};
+class TextParagraph
 {
 public:
-  std::string_view text;
-  std::unique_ptr<ParagraphBuilder> builder;
-  int characters{ 0 };
+  std::unique_ptr<ParagraphBuilder> builder{ nullptr };
   int level{ 0 };
-
+  TextView Utf8TextView;
+  TextParagraph() = default;
   TextParagraph(std::string_view view,
                 std::unique_ptr<ParagraphBuilder> builder,
                 int level,
-                int charCount)
-    : Node("")
-    , text(view)
-    , builder(std::move(builder))
+                size_t charCount)
+    : builder(std::move(builder))
     , level(level)
-    , characters(charCount)
+    , Utf8TextView({ view, charCount })
   {
   }
 };
@@ -42,9 +51,25 @@ struct ParagraphAttr
 {
   TextLineAttr type;
   ETextHorizontalAlignment horiAlign;
-  int maxLines{ 1000 };
-  std::u16string ellipsis{ u"..." };
+  // int maxLines{ 1000 };
+  // std::u16string ellipsis{ u"..." };
 };
+
+class ParagraphListener
+{
+  friend class ParagraphParser;
+
+protected:
+  virtual void onBegin() = 0;
+  virtual void onEnd() = 0;
+  virtual void onParagraphBegin(int paraIndex, int order, const ParagraphAttr& paragraAttr) = 0;
+  virtual void onParagraphEnd(int paraIndex, const TextView& textView) = 0;
+  virtual void onTextStyle(int paraIndex,
+                           int styleIndex,
+                           const TextView& textView,
+                           const TextAttr& textAttr) = 0;
+};
+
 class ParagraphParser
 {
   int length{ 0 };
@@ -53,8 +78,30 @@ class ParagraphParser
   const char* prevStyleBegin{ nullptr };
   const char* prevParagraphBegin{ nullptr };
   int offset{ 0 };
-
   bool seperateLines{ false };
+  struct LevelOrderState
+  {
+    std::unordered_map<int, int> level2Order;
+    void reset()
+    {
+      level2Order.clear();
+    }
+    int order(int currentLevel, int isFirstLine)
+    {
+      int currentOrder = 0;
+      if (!isFirstLine)
+      {
+        currentOrder = level2Order[currentLevel] + 1;
+        level2Order[currentLevel] = currentOrder;
+      }
+      else
+      {
+        // reset to 0 for the first line
+        level2Order[currentLevel] = currentOrder;
+      }
+      return currentOrder;
+    }
+  } m_orderState;
   void reset(const std::string& text, int firstOffset)
   {
     styleIndex = 0;
@@ -63,36 +110,7 @@ class ParagraphParser
     length = 0;
     prevStyleBegin = text.c_str();
     prevParagraphBegin = text.c_str();
-  }
-
-  int calcWhitespace(int count,
-                     int fontSize,
-                     const std::vector<SkString>& fontFamilies,
-                     sk_sp<FontCollection> fontCollection);
-
-  std::stack<int> m_intendationStack;
-  int m_stackTop{ 0 };
-  void pushIntendation(int intend)
-  {
-    // m_stackTop += intend;
-    m_intendationStack.push(intend);
-  }
-
-  int topIntendation() const
-  {
-    return m_intendationStack.top();
-  }
-
-  int popIntendation()
-  {
-    if (!m_intendationStack.empty())
-    {
-      const auto r = m_intendationStack.top();
-      m_intendationStack.pop();
-      m_stackTop = r;
-      return m_stackTop;
-    }
-    return 0;
+    m_orderState.reset();
   }
 
 public:
@@ -100,14 +118,10 @@ public:
     : seperateLines(seperateLines)
   {
   }
-  std::vector<TextParagraph> parse(const std::string& text,
-                                   const std::vector<TextAttr>& textAttrs,
-                                   const std::vector<ParagraphAttr>& paragraphAttributes,
-                                   sk_sp<FontCollection> fontCollection);
 
-  std::shared_ptr<TextParagraph> parseTree(const std::string& text,
-                                           const std::vector<TextAttr>& textAttrs,
-                                           const std::vector<ParagraphAttr>& paragraphAttributes,
-                                           sk_sp<FontCollection> fontCollection);
+  void parse(ParagraphListener& listener,
+             const std::string& text,
+             const std::vector<TextAttr>& textAttrs,
+             const std::vector<ParagraphAttr>& paragraphAttributes);
 };
 } // namespace VGG

@@ -1,4 +1,4 @@
-#include "Model/JsonSchemaValidator.hpp"
+#include "Domain/JsonSchemaValidator.hpp"
 
 #include <gtest/gtest.h>
 #include <fstream>

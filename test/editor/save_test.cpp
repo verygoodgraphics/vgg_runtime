@@ -1,8 +1,8 @@
-#include "Editor/Editor.hpp"
+#include "Usecase/SaveModel.hpp"
 
-#include "Model/RawJsonDocument.hpp"
-#include "Model/Saver/DirSaver.hpp"
-#include "Model/Saver/ZipSaver.hpp"
+#include "Domain/RawJsonDocument.hpp"
+#include "Domain/Saver/DirSaver.hpp"
+#include "Domain/Saver/ZipSaver.hpp"
 
 #include <gtest/gtest.h>
 

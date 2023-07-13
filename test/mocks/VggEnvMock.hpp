@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Exec/IVggEnv.hpp"
+#include "Domain/IVggEnv.hpp"
 
 #include "gmock/gmock.h"
 

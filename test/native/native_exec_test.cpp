@@ -1,4 +1,4 @@
-#include "PlatformAdapter/Native/Exec/NativeExec.hpp"
+#include "Adapter/NativeExec.hpp"
 
 #include "Utils/Utils.hpp"
 #include "test_config.hpp"

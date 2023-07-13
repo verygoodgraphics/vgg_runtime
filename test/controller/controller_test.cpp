@@ -1,9 +1,9 @@
-#include "Controller/Controller.hpp"
+#include "Application/Controller.hpp"
 
 #include "test_config.hpp"
 
-#include "Model/VggWork.hpp"
-#include "PlatformAdapter/Native/Composer/NativeComposer.hpp"
+#include "Domain/VggWork.hpp"
+#include "Adapter/NativeComposer.hpp"
 #include "Utils/DIContainer.hpp"
 #include "mocks/MockPresenter.hpp"
 

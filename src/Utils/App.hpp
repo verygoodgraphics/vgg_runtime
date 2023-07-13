@@ -64,7 +64,7 @@
 #include "Utils/FileManager.hpp"
 #include "Utils/Scheduler.hpp"
 #include "Scene/Scene.h"
-#include "View/UIView.hpp"
+#include "Application/UIView.hpp"
 
 namespace VGG
 {

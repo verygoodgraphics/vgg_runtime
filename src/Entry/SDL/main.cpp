@@ -1,4 +1,5 @@
-#include "Main/MainComposer.hpp"
+#include "Application/MainComposer.hpp"
+#include "Adapter/NativeComposer.hpp"
 
 #include "SDLRuntime.hpp"
 #include "Utils/FileManager.hpp"
@@ -39,7 +40,12 @@ int main(int argc, char** argv)
     exit(0);
   }
 
-  MainComposer main_composer;
+#ifdef NDEBUG
+  MainComposer main_composer{ new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js") };
+#else
+  MainComposer main_composer{ new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js", false) };
+#endif
+
   if (auto loadfile = program.present("-l"))
   {
     auto fp = loadfile.value();

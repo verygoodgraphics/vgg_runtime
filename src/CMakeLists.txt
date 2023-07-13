@@ -10,14 +10,7 @@ add_subdirectory(Application)
 add_subdirectory(Adapter)
 
 add_library(vgg_internal INTERFACE)
-target_link_libraries(vgg_internal INTERFACE
-  vgg_adapter
-)
-if(NOT EMSCRIPTEN)
-  target_link_libraries(vgg_internal INTERFACE
-    vgg_sketch_parser
-  )
-endif()
-
+target_link_libraries(vgg_internal INTERFACE vgg_adapter)
 set_target_properties(vgg_internal PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 add_subdirectory(Entry)

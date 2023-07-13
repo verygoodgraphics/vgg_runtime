@@ -5,6 +5,7 @@
 #include "MouseEvent.hpp"
 #include "KeyboardEvent.hpp"
 #include "TouchEvent.hpp"
+#include "Utils/Utils.hpp"
 
 namespace VGG
 {
@@ -20,6 +21,7 @@ public:
   EventStore(EventPtr event)
     : m_event{ event }
   {
+    ASSERT(m_event);
   }
   std::string eventId()
   {
@@ -27,19 +29,19 @@ public:
     return std::to_string(m_event_id);
   }
 
-  virtual void visit(VGG::KeyboardEvent*) override
+  virtual void visit(VGG::KeyboardEvent* e) override
   {
-    m_event_id = KeyboardEvent::store(std::dynamic_pointer_cast<VGG::KeyboardEvent>(m_event));
+    m_event_id = KeyboardEvent::store(e->shared_from_this());
   }
 
-  virtual void visit(VGG::MouseEvent*) override
+  virtual void visit(VGG::MouseEvent* e) override
   {
-    m_event_id = MouseEvent::store(std::dynamic_pointer_cast<VGG::MouseEvent>(m_event));
+    m_event_id = MouseEvent::store(e->shared_from_this());
   }
 
-  virtual void visit(VGG::TouchEvent*) override
+  virtual void visit(VGG::TouchEvent* e) override
   {
-    m_event_id = TouchEvent::store(std::dynamic_pointer_cast<VGG::TouchEvent>(m_event));
+    m_event_id = TouchEvent::store(e->shared_from_this());
   }
 };
 

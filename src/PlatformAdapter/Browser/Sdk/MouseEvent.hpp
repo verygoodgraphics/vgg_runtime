@@ -2,6 +2,7 @@
 
 #include "UIEvent.hpp"
 #include "Presenter/UIEvent.hpp"
+#include "Utils/Utils.hpp"
 
 #include <memory>
 
@@ -59,7 +60,9 @@ public:
 private:
   std::shared_ptr<VGG::MouseEvent> event() const
   {
-    return getEvent<VGG::MouseEvent>();
+    auto result = getEvent<VGG::MouseEvent>();
+    ASSERT(result);
+    return result;
   }
 };
 

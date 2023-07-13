@@ -2,6 +2,8 @@
 
 #include "node_api.h"
 
+#include "Utils/Utils.hpp"
+
 #include <functional>
 #include <mutex>
 #include <unordered_map>
@@ -146,6 +148,7 @@ protected:
     child_type* wrapper;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&wrapper)));
 
+    ASSERT(wrapper->m_event_ptr);
     auto result = wrapper->m_event_ptr->target();
 
     napi_value ret;
@@ -167,6 +170,7 @@ protected:
     child_type* wrapper;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&wrapper)));
 
+    ASSERT(wrapper->m_event_ptr);
     auto result = wrapper->m_event_ptr->type();
 
     napi_value ret;
@@ -184,6 +188,7 @@ protected:
     child_type* wrapper;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&wrapper)));
 
+    ASSERT(wrapper->m_event_ptr);
     wrapper->m_event_ptr->preventDefault();
 
     return nullptr;
@@ -213,6 +218,7 @@ protected:
       NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&wrapper)));
 
       wrapper->m_event_ptr = s_event_map[event_id];
+      ASSERT(wrapper->m_event_ptr);
 
       const std::lock_guard<std::mutex> lock(m_map_mutex);
       s_event_map.erase(event_id);

@@ -2,6 +2,7 @@
 
 #include "UIEvent.hpp"
 #include "Presenter/UIEvent.hpp"
+#include "Utils/Utils.hpp"
 
 #include <memory>
 
@@ -48,7 +49,9 @@ public:
 private:
   std::shared_ptr<VGG::KeyboardEvent> event() const
   {
-    return getEvent<VGG::KeyboardEvent>();
+    auto result = getEvent<VGG::KeyboardEvent>();
+    ASSERT(result);
+    return result;
   }
 };
 

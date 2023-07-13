@@ -2,6 +2,8 @@
 
 #include "UIEvent.hpp"
 
+#include "Utils/Utils.hpp"
+
 #include "node_api.h"
 
 namespace VGG
@@ -25,41 +27,50 @@ private:
   // getter
   int button() const
   {
+    ASSERT(m_event_ptr);
     return m_event_ptr->button;
   }
 
   int x() const
   {
+    ASSERT(m_event_ptr);
     return m_event_ptr->x;
   }
   int y() const
   {
+    ASSERT(m_event_ptr);
     return m_event_ptr->y;
   }
 
   int movementX() const
   {
+    ASSERT(m_event_ptr);
     return m_event_ptr->movementX;
   }
   int movementY() const
   {
+    ASSERT(m_event_ptr);
     return m_event_ptr->movementY;
   }
 
   bool altkey() const
   {
+    ASSERT(m_event_ptr);
     return m_event_ptr->altKey;
   }
   bool ctrlkey() const
   {
+    ASSERT(m_event_ptr);
     return m_event_ptr->ctrlKey;
   }
   bool metakey() const
   {
+    ASSERT(m_event_ptr);
     return m_event_ptr->metaKey;
   }
   bool shiftkey() const
   {
+    ASSERT(m_event_ptr);
     return m_event_ptr->shiftKey;
   }
 };

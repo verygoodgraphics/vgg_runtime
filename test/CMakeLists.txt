@@ -29,10 +29,10 @@ else()
   set_target_properties(unit_tests PROPERTIES
     BUILD_RPATH ${VGG_LAYER_RPATH})
 
-  set(TMP_VGG_WORK_ZIP_FILE ${CMAKE_CURRENT_SOURCE_DIR}/testDataDir/vgg-work.zip)
+  set(TMP_VGG_WORK_ZIP_FILE ${CMAKE_CURRENT_SOURCE_DIR}/testDataDir/vgg-daruma.zip)
   add_custom_command(TARGET unit_tests POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E tar cvf ${TMP_VGG_WORK_ZIP_FILE} --format=zip -- .
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/testDataDir/vgg-work
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/testDataDir/vgg-daruma
   )
   add_custom_command(TARGET unit_tests POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/testDataDir $<TARGET_FILE_DIR:unit_tests>/testDataDir

@@ -120,13 +120,15 @@ inline SkFontStyle toSkFontStyle(const std::string_view& subFamilyName)
   {
     return SkFontStyle::Normal();
   }
-  else if (subFamilyName == "ExtraBold")
+  else if (subFamilyName == "ExtraBold" || subFamilyName == "Extra Bold" ||
+           subFamilyName == "Extra-Bold")
   {
     return SkFontStyle(SkFontStyle::kExtraBold_Weight,
                        SkFontStyle::kNormal_Width,
                        SkFontStyle::kUpright_Slant);
   }
-  else if (subFamilyName == "Bold Italic")
+  else if (subFamilyName == "Bold Italic" || subFamilyName == "BoldItalic" ||
+           subFamilyName == "Bold-Italic")
   {
     return SkFontStyle::BoldItalic();
   }

@@ -25,6 +25,5 @@ target_link_libraries(vgg_internal INTERFACE
   vgg_adapter
   $<TARGET_OBJECTS:vgg_adapter>
 )
-set_target_properties(vgg_internal PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 add_subdirectory(Entry)

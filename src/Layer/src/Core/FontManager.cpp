@@ -2,19 +2,13 @@
 #include <core/SkRefCnt.h>
 namespace VGG
 {
+using namespace std;
 
-ResourceFontCollection* getDefaultFontCollection()
-{
-  static sk_sp<ResourceFontCollection> fontCollection = sk_make_sp<ResourceFontCollection>(
-    std::vector{ fs::path("/usr/share/fonts/TTF"), fs::path("/home/ysl/Code/vgg_runtime/fonts") });
-  return fontCollection.get();
-}
 FontManager::FontManager()
 {
 }
-sk_sp<ResourceFontCollection> FontManager::createOrGetFontCollection(
-  const std::string& key,
-  const std::vector<fs::path>& fontDirs)
+sk_sp<ResourceFontCollection> FontManager::createOrGetFontCollection(const std::string& key,
+                                                                     const fs::path& fontDirs)
 {
   sk_sp<ResourceFontCollection> fontCollection;
   if (auto it = fontResourceCache.find(key); it != fontResourceCache.end())

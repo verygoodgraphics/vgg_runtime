@@ -6,7 +6,6 @@
 <body>
     <canvas id="myCanvas"></canvas>
 
-    <script type="text/javascript" src="./sut/wasm_main.js"></script>
     <script type="text/javascript">
         async function setupAndRun() {
             // 0. Given
@@ -16,7 +15,8 @@
             const height = 600;
 
             // 1. create wasm instance
-            const myInstance = await createModule(
+            const { default: createVggWasmInstance } = await import('./sut/vgg_runtime.mjs');
+            const myInstance = await createVggWasmInstance(
                 {
                     noInitialRun: true,
                     canvas: myCanvas,

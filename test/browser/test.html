@@ -4,10 +4,10 @@
 <head></head>
 
 <body>
-    <script type="text/javascript" src="./sut/wasm_main.js"></script>
     <script type="text/javascript">
-        function setupAndRun() {
-            createModule({
+        async function setupAndRun() {
+            const { default: createVggWasmInstance } = await import('./sut/vgg_runtime.mjs');
+            createVggWasmInstance({
                 locateFile: function (path, prefix) {
                     if (path.endsWith('.data')) {
                         return './sut/' + path;

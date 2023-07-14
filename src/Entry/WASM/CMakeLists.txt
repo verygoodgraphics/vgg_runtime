@@ -1,9 +1,8 @@
-add_executable(wasm_main "main.cpp" "WasmBindings.cpp")
-  set_target_properties(wasm_main PROPERTIES
+add_executable(vgg_runtime "main.cpp" "WasmBindings.cpp")
+  set_target_properties(vgg_runtime PROPERTIES
     COMPILE_FLAGS "-s USE_SDL=2 -fexceptions"
     LINK_FLAGS "\
       -s MODULARIZE=1 \
-      -s EXPORT_NAME=\"createModule\" \
       -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 \
       -s ENVIRONMENT=web \
       -s USE_WEBGL2=1 \
@@ -16,10 +15,13 @@ add_executable(wasm_main "main.cpp" "WasmBindings.cpp")
       -s EXPORTED_RUNTIME_METHODS=\['ccall','cwrap','writeArrayToMemory','stringToUTF8'\] \
       --preload-file ../../../../asset \
     "
-    SUFFIX ".js"
+    SUFFIX ".mjs"
   )
 
-target_link_libraries(wasm_main PRIVATE vgg_internal SDL2)
-set_target_properties(wasm_main PROPERTIES
+target_link_libraries(vgg_runtime PRIVATE
+  vgg_internal
+  SDL2
+)
+set_target_properties(vgg_runtime PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 )

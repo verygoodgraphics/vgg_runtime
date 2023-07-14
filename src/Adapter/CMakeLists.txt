@@ -1,4 +1,4 @@
-add_library(vgg_adapter STATIC
+add_library(vgg_adapter OBJECT
   PlatformAdapter/Helper/StringHelper.cpp
   View/UIView.cpp
 )

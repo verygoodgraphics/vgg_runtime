@@ -2,7 +2,7 @@
 
 #include "test_config.hpp"
 
-#include "Domain/VggWork.hpp"
+#include "Domain/Daruma.hpp"
 #include "Adapter/NativeComposer.hpp"
 #include "Utils/DIContainer.hpp"
 #include "mocks/MockPresenter.hpp"
@@ -126,7 +126,7 @@ TEST_F(ControllerTestSuite, Smoke)
   // Then
   EXPECT_TRUE(ret);
   // Then
-  auto vgg_work = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
+  auto vgg_work = VGG::DIContainer<std::shared_ptr<Daruma>>::get();
   EXPECT_TRUE(vgg_work);
 }
 
@@ -150,7 +150,7 @@ TEST_F(ControllerTestSuite, OnClick_observer)
   auto ret = m_sut->start(file_path);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
+  auto vgg_work = VGG::DIContainer<std::shared_ptr<Daruma>>::get();
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // When
@@ -183,7 +183,7 @@ TEST_F(ControllerTestSuite, Validator_reject_deletion)
   auto ret = m_sut->start(file_path, design_doc_schema_file);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
+  auto vgg_work = VGG::DIContainer<std::shared_ptr<Daruma>>::get();
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // When
@@ -214,7 +214,7 @@ TEST_F(ControllerTestSuite, DidUpdate)
   auto ret = m_sut->start(file_path, design_doc_schema_file);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
+  auto vgg_work = VGG::DIContainer<std::shared_ptr<Daruma>>::get();
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // When
@@ -245,7 +245,7 @@ TEST_F(ControllerTestSuite, DidDelete)
   auto ret = m_sut->start(file_path, design_doc_schema_file);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
+  auto vgg_work = VGG::DIContainer<std::shared_ptr<Daruma>>::get();
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // When
@@ -276,7 +276,7 @@ TEST_F(ControllerTestSuite, DidAdd_no_validator)
   auto ret = m_sut->start(file_path);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
+  auto vgg_work = VGG::DIContainer<std::shared_ptr<Daruma>>::get();
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // When
@@ -309,7 +309,7 @@ TEST_F(ControllerTestSuite, DidAdd_color)
   auto ret = m_sut->start(file_path, design_doc_schema_file);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
+  auto vgg_work = VGG::DIContainer<std::shared_ptr<Daruma>>::get();
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // When
@@ -508,7 +508,7 @@ TEST_F(ControllerTestSuite, event_listener_example)
   auto ret = m_sut->start(file_path, design_doc_schema_file);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = VGG::DIContainer<std::shared_ptr<VggWork>>::get();
+  auto vgg_work = VGG::DIContainer<std::shared_ptr<Daruma>>::get();
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // When

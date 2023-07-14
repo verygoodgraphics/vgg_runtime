@@ -7,13 +7,13 @@
 #include <memory>
 #include <string>
 
-class VggWork;
 class VggExec;
 class JsonDocument;
 
 namespace VGG
 {
 
+class Daruma;
 class Presenter;
 
 class Controller : public std::enable_shared_from_this<Controller>
@@ -38,10 +38,10 @@ private:
   std::shared_ptr<Presenter> m_presenter;
 
   RunMode m_mode;
-  std::shared_ptr<VggWork> m_work;
+  std::shared_ptr<Daruma> m_model;
 
 private:
-  void initVggWork(const char* designDocSchemaFilePath);
+  void initModel(const char* designDocSchemaFilePath);
   JsonDocument* createJsonDoc();
   std::shared_ptr<JsonDocument> wrapJsonDoc(std::shared_ptr<JsonDocument> jsonDoc);
   const std::shared_ptr<VggExec>& vggExec();

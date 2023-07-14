@@ -6,7 +6,9 @@
 constexpr auto listener_code_key = "listener";
 #endif
 
-// design document in vgg work
+using namespace VGG;
+
+// design document in vgg daruma file
 const std::string VggSdk::designDocument()
 {
   return getDesignDocument()->content().dump();
@@ -32,14 +34,14 @@ void VggSdk::addEventListener(const std::string& element_path,
                               const std::string& event_type,
                               const std::string& listener_code)
 {
-  getVggWork()->addEventListener(element_path, event_type, listener_code);
+  getModel()->addEventListener(element_path, event_type, listener_code);
 }
 
 void VggSdk::removeEventListener(const std::string& element_path,
                                  const std::string& event_type,
                                  const std::string& listener_code)
 {
-  getVggWork()->removeEventListener(element_path, event_type, listener_code);
+  getModel()->removeEventListener(element_path, event_type, listener_code);
 }
 
 VggSdk::ListenersType VggSdk::getEventListeners(const std::string& element_path)
@@ -48,7 +50,7 @@ VggSdk::ListenersType VggSdk::getEventListeners(const std::string& element_path)
   using namespace emscripten;
 
   auto result_listeners_map = val::object();
-  auto listeners_map = getVggWork()->getEventListeners(element_path);
+  auto listeners_map = getModel()->getEventListeners(element_path);
   for (auto& map_item : listeners_map)
   {
     if (map_item.second.empty())
@@ -73,17 +75,16 @@ VggSdk::ListenersType VggSdk::getEventListeners(const std::string& element_path)
 
   return result_listeners_map;
 #else
-  return getVggWork()->getEventListeners(element_path);
+  return getModel()->getEventListeners(element_path);
 #endif
 }
 
-// vgg work
+// vgg model
 std::shared_ptr<JsonDocument> VggSdk::getDesignDocument()
 {
-  return getVggWork()->designDoc();
+  return getModel()->designDoc();
 }
-
-std::shared_ptr<VggWork> VggSdk::getVggWork()
+std::shared_ptr<Daruma> VggSdk::getModel()
 {
-  return VGG::DIContainer<std::shared_ptr<VggWork>>::get();
+  return VGG::DIContainer<std::shared_ptr<Daruma>>::get();
 }

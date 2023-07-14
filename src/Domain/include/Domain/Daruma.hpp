@@ -15,9 +15,12 @@
 #include <string>
 #include <vector>
 
+namespace VGG
+{
+
 using MakeJsonDocFn = std::function<JsonDocumentPtr(const json&)>;
 
-class VggWork
+class Daruma
 {
   std::shared_ptr<VGG::Model::Loader> m_loader;
 
@@ -35,7 +38,7 @@ class VggWork
 public:
   using ListenersType = std::unordered_map<std::string, std::vector<std::string>>;
 
-  VggWork(const MakeJsonDocFn& makeDesignDocFn);
+  Daruma(const MakeJsonDocFn& makeDesignDocFn);
 
   bool load(const std::string& path);   // zip file or dir
   bool load(std::vector<char>& buffer); // zip buffer
@@ -71,3 +74,5 @@ private:
 
   std::string uuid_for(const std::string& content);
 };
+
+} // namespace VGG

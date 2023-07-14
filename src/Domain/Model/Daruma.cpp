@@ -1,4 +1,4 @@
-#include "VggWork.hpp"
+#include "Daruma.hpp"
 
 #include "Config.hpp"
 #include "Loader/DirLoader.hpp"
@@ -25,12 +25,12 @@ constexpr auto created_at_key = "createdAt";
 
 constexpr auto js_file_suffix = ".mjs";
 
-VggWork::VggWork(const MakeJsonDocFn& makeDesignDocFn)
+Daruma::Daruma(const MakeJsonDocFn& makeDesignDocFn)
   : m_makeDesignDocFn(makeDesignDocFn)
 {
 }
 
-bool VggWork::load(const std::string& path)
+bool Daruma::load(const std::string& path)
 {
   if (fs::is_regular_file(path))
   {
@@ -48,13 +48,13 @@ bool VggWork::load(const std::string& path)
   return load_files();
 }
 
-bool VggWork::load(std::vector<char>& buffer)
+bool Daruma::load(std::vector<char>& buffer)
 {
   m_loader.reset(new Model::ZipLoader(buffer));
   return load_files();
 }
 
-void VggWork::accept(VGG::Model::Visitor* visitor)
+void Daruma::accept(VGG::Model::Visitor* visitor)
 {
   // todo, lock for thread safe
   const std::lock_guard<std::mutex> lock(m_mutex);
@@ -91,7 +91,7 @@ void VggWork::accept(VGG::Model::Visitor* visitor)
   // todo, other files
 }
 
-bool VggWork::load_files()
+bool Daruma::load_files()
 {
   try
   {
@@ -120,14 +120,14 @@ bool VggWork::load_files()
   }
 }
 
-JsonDocumentPtr& VggWork::designDoc()
+JsonDocumentPtr& Daruma::designDoc()
 {
   return m_designDoc;
 }
 
-void VggWork::addEventListener(const std::string& json_pointer,
-                               const std::string& type,
-                               const std::string& code)
+void Daruma::addEventListener(const std::string& json_pointer,
+                              const std::string& type,
+                              const std::string& code)
 {
   const std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -180,9 +180,9 @@ void VggWork::addEventListener(const std::string& json_pointer,
   // todo, edit mode, save code & meta to remote server
 }
 
-void VggWork::removeEventListener(const std::string& json_pointer,
-                                  const std::string& type,
-                                  const std::string& code)
+void Daruma::removeEventListener(const std::string& json_pointer,
+                                 const std::string& type,
+                                 const std::string& code)
 {
   if (!m_event_listeners.contains(json_pointer))
   {
@@ -217,7 +217,7 @@ void VggWork::removeEventListener(const std::string& json_pointer,
   }
 }
 
-auto VggWork::getEventListeners(const std::string& json_pointer) -> ListenersType
+auto Daruma::getEventListeners(const std::string& json_pointer) -> ListenersType
 {
   const std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -246,7 +246,7 @@ auto VggWork::getEventListeners(const std::string& json_pointer) -> ListenersTyp
 }
 
 // observable
-rxcpp::observable<VGG::ModelEventPtr> VggWork::getObservable()
+rxcpp::observable<VGG::ModelEventPtr> Daruma::getObservable()
 {
   auto result = m_subject.get_observable();
 
@@ -259,7 +259,7 @@ rxcpp::observable<VGG::ModelEventPtr> VggWork::getObservable()
   return result;
 }
 
-std::string VggWork::get_code(const std::string& file_name)
+std::string Daruma::get_code(const std::string& file_name)
 {
   if (auto it = m_memory_code.find(file_name); it != m_memory_code.end())
   {
@@ -271,7 +271,7 @@ std::string VggWork::get_code(const std::string& file_name)
   return code;
 }
 
-std::string VggWork::uuid_for(const std::string& content)
+std::string Daruma::uuid_for(const std::string& content)
 {
   boost::uuids::name_generator_sha1 generator{ boost::uuids::ns::oid() };
   return boost::uuids::to_string(generator(content));

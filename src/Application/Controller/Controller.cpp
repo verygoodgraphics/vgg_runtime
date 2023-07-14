@@ -4,7 +4,7 @@
 #include "Domain/RawJsonDocument.hpp"
 #include "Domain/SchemaValidJsonDocument.hpp"
 // #include "Domain/UndoRedoJsonDocument.hpp"
-#include "Domain/VggWork.hpp"
+#include "Domain/Daruma.hpp"
 #include "Presenter.hpp"
 #include "Utils/DIContainer.hpp"
 
@@ -25,8 +25,8 @@ Controller::Controller(std::shared_ptr<RunLoop> runLoop,
 
 bool Controller::start(const std::string& filePath, const char* designDocSchemaFilePath)
 {
-  initVggWork(designDocSchemaFilePath);
-  auto ret = m_work->load(filePath);
+  initModel(designDocSchemaFilePath);
+  auto ret = m_model->load(filePath);
   if (ret)
   {
     start();
@@ -36,8 +36,8 @@ bool Controller::start(const std::string& filePath, const char* designDocSchemaF
 
 bool Controller::start(std::vector<char>& buffer, const char* designDocSchemaFilePath)
 {
-  initVggWork(designDocSchemaFilePath);
-  auto ret = m_work->load(buffer);
+  initModel(designDocSchemaFilePath);
+  auto ret = m_model->load(buffer);
   if (ret)
   {
     start();
@@ -45,7 +45,7 @@ bool Controller::start(std::vector<char>& buffer, const char* designDocSchemaFil
   return ret;
 }
 
-void Controller::initVggWork(const char* designDocSchemaFilePath)
+void Controller::initModel(const char* designDocSchemaFilePath)
 {
   std::string design_schema_file_path;
   if (designDocSchemaFilePath)
@@ -73,14 +73,14 @@ void Controller::initVggWork(const char* designDocSchemaFilePath)
     return wrapJsonDoc(JsonDocumentPtr(json_doc_ptr));
   };
   // todo, build layout doc
-  m_work.reset(new VggWork(build_design_doc_fn));
+  m_model.reset(new Daruma(build_design_doc_fn));
 
-  VGG::DIContainer<std::shared_ptr<VggWork>>::get() = m_work;
+  VGG::DIContainer<std::shared_ptr<Daruma>>::get() = m_model;
 }
 
 void Controller::start()
 {
-  m_presenter->setModel(m_work);
+  m_presenter->setModel(m_model);
 
   observeModelState();
   observeUIEvent();
@@ -88,7 +88,7 @@ void Controller::start()
 
 void Controller::observeModelState()
 {
-  m_work->getObservable()
+  m_model->getObservable()
     .observe_on(m_run_loop->thread())
     .subscribe(m_presenter->getModelObserver());
 }
@@ -105,7 +105,7 @@ void Controller::observeUIEvent()
         return;
       }
 
-      auto listeners_map = shared_this->m_work->getEventListeners(evt->path());
+      auto listeners_map = shared_this->m_model->getEventListeners(evt->path());
       std::string type = evt->type();
       if (auto it = listeners_map.find(type); it != listeners_map.end())
       {

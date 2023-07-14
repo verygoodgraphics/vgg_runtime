@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VggWork.hpp"
+#include "Daruma.hpp"
 
 #ifdef EMSCRIPTEN
 #include <emscripten/val.h>
@@ -17,7 +17,7 @@ public:
 #ifdef EMSCRIPTEN
   using ListenersType = emscripten::val;
 #else
-  using ListenersType = VggWork::ListenersType;
+  using ListenersType = VGG::Daruma::ListenersType;
 #endif
 
   virtual ~VggSdk() = default;
@@ -55,5 +55,5 @@ public:
 
 private:
   std::shared_ptr<JsonDocument> getDesignDocument();
-  std::shared_ptr<VggWork> getVggWork();
+  std::shared_ptr<VGG::Daruma> getModel();
 };

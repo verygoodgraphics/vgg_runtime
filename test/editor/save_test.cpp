@@ -21,7 +21,7 @@ constexpr auto model_src_zip_path = "testDataDir/vgg-work.zip";
 class EditorSaveTestSuite : public ::testing::Test
 {
 protected:
-  std::shared_ptr<VggWork> m_model;
+  std::shared_ptr<Daruma> m_model;
 
   void SetUp() override
   {
@@ -31,7 +31,7 @@ protected:
       raw_json_doc->setContent(design_json);
       return JsonDocumentPtr(raw_json_doc);
     };
-    m_model.reset(new VggWork(fn));
+    m_model.reset(new Daruma(fn));
   }
 
   void TearDown() override

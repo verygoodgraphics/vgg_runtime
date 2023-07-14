@@ -11,7 +11,7 @@
         async function setupAndRun() {
             // 0. Given
             const myCanvas = document.getElementById('myCanvas');
-            const myWorkUrl = '/my-work.zip';
+            const myDarumaUrl = '/my-daruma.zip';
             const width = 800;
             const height = 600;
 
@@ -42,7 +42,7 @@
             }
 
             // 3. load vgg work
-            fetch(myWorkUrl)
+            fetch(myDarumaUrl)
                 .then(res => {
                     if (res.ok) {
                         return res.arrayBuffer();

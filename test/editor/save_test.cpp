@@ -15,8 +15,8 @@ constexpr auto artboard_file_name = "artboard.json";
 constexpr auto event_listeners_file_name = "event_listeners.json";
 constexpr auto layout_file_name = "layout.json";
 
-constexpr auto model_src_dir_path = "testDataDir/vgg-work/";
-constexpr auto model_src_zip_path = "testDataDir/vgg-work.zip";
+constexpr auto model_src_dir_path = "testDataDir/vgg-daruma/";
+constexpr auto model_src_zip_path = "testDataDir/vgg-daruma.zip";
 
 class EditorSaveTestSuite : public ::testing::Test
 {

@@ -47,7 +47,7 @@ TEST_F(VggModelTestSuite, Smoke)
 TEST_F(VggModelTestSuite, Load_from_file)
 {
   // Given
-  std::string file_path = "testDataDir/vgg-work.zip";
+  std::string file_path = "testDataDir/vgg-daruma.zip";
 
   // When
   auto ret = m_sut->load(file_path);
@@ -59,7 +59,7 @@ TEST_F(VggModelTestSuite, Load_from_file)
 TEST_F(VggModelTestSuite, Load_from_buffer)
 {
   // Given
-  std::ifstream file("testDataDir/vgg-work.zip", std::ios::binary | std::ios::ate);
+  std::ifstream file("testDataDir/vgg-daruma.zip", std::ios::binary | std::ios::ate);
   std::streamsize size = file.tellg();
   file.seekg(0, std::ios::beg);
 
@@ -79,7 +79,7 @@ TEST_F(VggModelTestSuite, Load_from_buffer)
 TEST_F(VggModelTestSuite, Get_design_doc)
 {
   // Given
-  std::string file_path = "testDataDir/vgg-work.zip";
+  std::string file_path = "testDataDir/vgg-daruma.zip";
   auto ret = m_sut->load(file_path);
   EXPECT_EQ(ret, true);
 
@@ -93,7 +93,7 @@ TEST_F(VggModelTestSuite, Get_design_doc)
 TEST_F(VggModelTestSuite, Get_code)
 {
   // Given
-  std::string file_path = "testDataDir/vgg-work.zip";
+  std::string file_path = "testDataDir/vgg-daruma.zip";
   auto ret = m_sut->load(file_path);
   EXPECT_EQ(ret, true);
 
@@ -108,7 +108,7 @@ TEST_F(VggModelTestSuite, Get_code)
 TEST_F(VggModelTestSuite, add_event_listener)
 {
   // Given
-  std::string file_path = "testDataDir/vgg-work.zip";
+  std::string file_path = "testDataDir/vgg-daruma.zip";
   auto ret = m_sut->load(file_path);
   EXPECT_EQ(ret, true);
 
@@ -126,7 +126,7 @@ TEST_F(VggModelTestSuite, add_event_listener)
 TEST_F(VggModelTestSuite, remove_event_listener)
 {
   // Given
-  std::string file_path = "testDataDir/vgg-work.zip";
+  std::string file_path = "testDataDir/vgg-daruma.zip";
   auto ret = m_sut->load(file_path);
   EXPECT_EQ(ret, true);
 
@@ -145,7 +145,7 @@ TEST_F(VggModelTestSuite, remove_event_listener)
 TEST_F(VggModelTestSuite, get_event_listeners)
 {
   // Given
-  std::string file_path = "testDataDir/vgg-work.zip";
+  std::string file_path = "testDataDir/vgg-daruma.zip";
   auto ret = m_sut->load(file_path);
   EXPECT_EQ(ret, true);
 

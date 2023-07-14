@@ -8,7 +8,7 @@
 using namespace nlohmann;
 
 #define JSON_SCHEMA_FILE_NAME "./asset/vgg-format.json"
-#define DOCUMENT_FILE_NAME "./testDataDir/vgg-work/artboard.json"
+#define DOCUMENT_FILE_NAME "./testDataDir/vgg-daruma/artboard.json"
 
 class SchemaValidJsonDocumentTestSuite : public ::testing::Test
 {

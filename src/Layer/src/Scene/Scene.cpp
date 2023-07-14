@@ -22,7 +22,8 @@ Scene::Scene()
   auto& cfg = Config::globalConfig();
   if (auto it = cfg.find("fontDirs"); it != cfg.end())
   {
-    fontMgr.createOrGetFontCollection("default", *it);
+    if ((*it).size())
+      fontMgr.createOrGetFontCollection("default", (*it)[0]);
   }
 }
 void Scene::loadFileContent(const std::string& json)

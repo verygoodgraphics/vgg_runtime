@@ -25,7 +25,8 @@ target_include_directories(
   vgg_layer PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${SDL2_INCLUDE_DIRS}/..
-  ${VGG_CONTRIB_JSON_INCLUDE})
+  ${VGG_CONTRIB_JSON_INCLUDE}
+  ${VGG_CONTRIB_RAPIDFUZZCPP_INCLUDE})
 
 target_link_libraries(vgg_layer PUBLIC glm ${SKIA_LIBS})
 target_link_libraries(vgg_layer PRIVATE ${OPENGL_LIBRARIES})

@@ -12,6 +12,7 @@ target_include_directories(vgg_application PRIVATE
 )
 
 target_link_libraries(vgg_application PUBLIC
+  vgg_flags
   vgg_domain
   vgg_layer
 )

@@ -8,12 +8,6 @@ if (EMSCRIPTEN)
     PlatformAdapter/Browser/Exec/BrowserJSEngine.cpp
     PlatformAdapter/Browser/Sdk/BrowserSdkAdapter.cpp
   )
-  target_compile_options(vgg_adapter PUBLIC 
-    -fexceptions
-  )
-  target_link_options(vgg_adapter PUBLIC
-    -fexceptions
-    -lembind)
 else()
   target_link_libraries(vgg_adapter vgg_libnode )
   target_sources(vgg_adapter PRIVATE
@@ -39,5 +33,6 @@ target_include_directories(vgg_adapter PRIVATE
 )
 
 target_link_libraries(vgg_adapter
+  vgg_flags
   vgg_application
 )

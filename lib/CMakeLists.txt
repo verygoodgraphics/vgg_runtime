@@ -1,3 +1,4 @@
+add_subdirectory(${CMAKE_SOURCE_DIR}/vgg_contrib/argparse ${CMAKE_BINARY_DIR}/vgg_contrib/argparse)
 add_subdirectory(${CMAKE_SOURCE_DIR}/vgg_contrib/boost ${CMAKE_BINARY_DIR}/vgg_contrib/boost)
 add_subdirectory(${CMAKE_SOURCE_DIR}/vgg_contrib/glm ${CMAKE_BINARY_DIR}/vgg_contrib/glm)
 add_subdirectory(${CMAKE_SOURCE_DIR}/vgg_contrib/json ${CMAKE_BINARY_DIR}/vgg_contrib/json)

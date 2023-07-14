@@ -14,16 +14,8 @@
 #include <filesystem>
 
 using namespace VGG;
+using namespace VGG::Model;
 namespace fs = std::filesystem;
-
-constexpr auto artboard_file_name = "artboard.json";
-constexpr auto event_listeners_file_name = "event_listeners.json";
-constexpr auto layout_file_name = "layout.json";
-
-constexpr auto file_name_key = "fileName";
-constexpr auto created_at_key = "createdAt";
-
-constexpr auto js_file_suffix = ".mjs";
 
 Daruma::Daruma(const MakeJsonDocFn& makeDesignDocFn)
   : m_makeDesignDocFn(makeDesignDocFn)
@@ -59,7 +51,7 @@ void Daruma::accept(VGG::Model::Visitor* visitor)
   // todo, lock for thread safe
   const std::lock_guard<std::mutex> lock(m_mutex);
 
-  visitor->accept(artboard_file_name, m_designDoc->content().dump());
+  visitor->accept(design_file_name, m_designDoc->content().dump());
   visitor->accept(event_listeners_file_name, m_event_listeners.dump());
 
   // js
@@ -96,7 +88,7 @@ bool Daruma::load_files()
   try
   {
     std::string file_content;
-    if (m_loader->readFile(artboard_file_name, file_content))
+    if (m_loader->readFile(design_file_name, file_content))
     {
       auto tmp_json = json::parse(file_content);
       auto doc = m_makeDesignDocFn(tmp_json);

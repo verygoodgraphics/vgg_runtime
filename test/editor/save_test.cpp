@@ -9,11 +9,8 @@
 #include <filesystem>
 
 using namespace VGG;
+using namespace VGG::Model;
 namespace fs = std::filesystem;
-
-constexpr auto artboard_file_name = "artboard.json";
-constexpr auto event_listeners_file_name = "event_listeners.json";
-constexpr auto layout_file_name = "layout.json";
 
 constexpr auto model_src_dir_path = "testDataDir/vgg-daruma/";
 constexpr auto model_src_zip_path = "testDataDir/vgg-daruma.zip";
@@ -63,7 +60,7 @@ protected:
 
     // Then
     std::filesystem::path dir{ dst_dir };
-    auto ret = fs::is_regular_file(dir / artboard_file_name);
+    auto ret = fs::is_regular_file(dir / design_file_name);
     EXPECT_TRUE(ret);
 
     ret = fs::is_regular_file(dir / event_listeners_file_name);

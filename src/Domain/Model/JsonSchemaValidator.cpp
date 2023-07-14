@@ -83,10 +83,14 @@ const valijson::Subschema* JsonSchemaValidator::getSubschemaByClassName(
       }
       return item;
     }
-    catch (std::out_of_range)
+    catch (std::out_of_range&)
     {
       return nullptr;
     }
+  }
+  catch (...)
+  {
+    return nullptr;
   }
 }
 

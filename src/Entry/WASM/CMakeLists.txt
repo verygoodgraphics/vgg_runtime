@@ -19,6 +19,7 @@ add_executable(vgg_runtime "main.cpp" "WasmBindings.cpp")
   )
 
 target_link_libraries(vgg_runtime PRIVATE
+  vgg_flags
   vgg_internal
   SDL2
 )

@@ -23,6 +23,7 @@ target_include_directories(vgg_domain PRIVATE
   ${VGG_CONTRIB_BOOST_INCLUDE}
 )
 target_link_libraries(vgg_domain
+  vgg_flags
   zip
 )
 

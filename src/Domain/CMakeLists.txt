@@ -1,14 +1,14 @@
 add_library(vgg_domain STATIC
   Exec/VggExec.cpp
   Loader/ZipLoader.cpp
+  Model/Daruma.cpp
   Model/JsonDocument.cpp
   Model/JsonSchemaValidator.cpp
   Model/SchemaValidJsonDocument.cpp
   Model/SubjectJsonDocument.cpp
-  Model/VggWork.cpp
-  Sdk/VggSdk.cpp
   Saver/DirSaver.cpp
   Saver/ZipSaver.cpp
+  Sdk/VggSdk.cpp
 )
 
 target_include_directories(vgg_domain PUBLIC

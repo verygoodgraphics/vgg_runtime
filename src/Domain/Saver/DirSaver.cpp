@@ -14,15 +14,15 @@ namespace VGG
 namespace Model
 {
 
-DirSaver::DirSaver(const std::string& workDir)
-  : m_work_dir{ workDir }
+DirSaver::DirSaver(const std::string& modelDir)
+  : m_model_dir{ modelDir }
 {
   // todo, check if same as src dir
 }
 
 void DirSaver::accept(const std::string& path, const std::vector<char>& content)
 {
-  std::filesystem::path file_path{ m_work_dir };
+  std::filesystem::path file_path{ m_model_dir };
   file_path /= path;
 
   auto dirs{ file_path };

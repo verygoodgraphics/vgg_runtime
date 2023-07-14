@@ -20,7 +20,7 @@ private:
 
   static napi_value New(napi_env env, napi_callback_info info);
 
-  // design document in vgg work
+  // design document in vgg daruma file
   static napi_value GetDesignDocument(napi_env env, napi_callback_info info);
 
   static napi_value DesignDocumentReplaceAt(napi_env env, napi_callback_info info);

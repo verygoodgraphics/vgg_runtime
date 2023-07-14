@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Domain/ModelEvent.hpp"
-#include "Domain/VggWork.hpp"
+#include "Domain/Daruma.hpp"
 #include "UIEvent.hpp"
 #include "UIView.hpp"
 
@@ -16,7 +16,7 @@ namespace VGG
 class Presenter : public std::enable_shared_from_this<Presenter>
 {
   std::shared_ptr<UIView> m_view;
-  std::shared_ptr<VggWork> m_model;
+  std::shared_ptr<Daruma> m_model;
 
   rxcpp::subjects::subject<VGG::UIEventPtr> m_subject;
   rxcpp::observer<VGG::ModelEventPtr> m_model_observer;
@@ -24,7 +24,7 @@ class Presenter : public std::enable_shared_from_this<Presenter>
 public:
   virtual ~Presenter() = default;
 
-  virtual void setModel(std::shared_ptr<VggWork> model)
+  virtual void setModel(std::shared_ptr<Daruma> model)
   {
     m_model = model;
     show();

@@ -1,4 +1,4 @@
-#include "Domain/VggWork.hpp"
+#include "Domain/Daruma.hpp"
 
 #include "Application/UIEvent.hpp"
 #include "Domain/RawJsonDocument.hpp"
@@ -12,10 +12,10 @@ using namespace VGG;
 
 const auto event_name_click = UIEventTypeToString(UIEventType::click);
 
-class VggWorkTestSuite : public ::testing::Test
+class VggModelTestSuite : public ::testing::Test
 {
 protected:
-  std::shared_ptr<VggWork> m_sut;
+  std::shared_ptr<Daruma> m_sut;
 
   void SetUp() override
   {
@@ -35,16 +35,16 @@ protected:
       raw_json_doc->setContent(design_json);
       return JsonDocumentPtr(raw_json_doc);
     };
-    m_sut.reset(new VggWork(fn));
+    m_sut.reset(new Daruma(fn));
   }
 };
 
-TEST_F(VggWorkTestSuite, Smoke)
+TEST_F(VggModelTestSuite, Smoke)
 {
   GTEST_SUCCEED();
 }
 
-TEST_F(VggWorkTestSuite, Load_from_file)
+TEST_F(VggModelTestSuite, Load_from_file)
 {
   // Given
   std::string file_path = "testDataDir/vgg-work.zip";
@@ -56,7 +56,7 @@ TEST_F(VggWorkTestSuite, Load_from_file)
   EXPECT_EQ(ret, true);
 }
 
-TEST_F(VggWorkTestSuite, Load_from_buffer)
+TEST_F(VggModelTestSuite, Load_from_buffer)
 {
   // Given
   std::ifstream file("testDataDir/vgg-work.zip", std::ios::binary | std::ios::ate);
@@ -76,7 +76,7 @@ TEST_F(VggWorkTestSuite, Load_from_buffer)
   EXPECT_EQ(ret, true);
 }
 
-TEST_F(VggWorkTestSuite, Get_design_doc)
+TEST_F(VggModelTestSuite, Get_design_doc)
 {
   // Given
   std::string file_path = "testDataDir/vgg-work.zip";
@@ -90,7 +90,7 @@ TEST_F(VggWorkTestSuite, Get_design_doc)
   EXPECT_TRUE(ret_doc->content().is_object());
 }
 
-TEST_F(VggWorkTestSuite, Get_code)
+TEST_F(VggModelTestSuite, Get_code)
 {
   // Given
   std::string file_path = "testDataDir/vgg-work.zip";
@@ -105,7 +105,7 @@ TEST_F(VggWorkTestSuite, Get_code)
   EXPECT_TRUE(!ret_code.empty());
 }
 
-TEST_F(VggWorkTestSuite, add_event_listener)
+TEST_F(VggModelTestSuite, add_event_listener)
 {
   // Given
   std::string file_path = "testDataDir/vgg-work.zip";
@@ -123,7 +123,7 @@ TEST_F(VggWorkTestSuite, add_event_listener)
   EXPECT_EQ(event_listeners_before.size() + 1, event_listeners_after.size());
 }
 
-TEST_F(VggWorkTestSuite, remove_event_listener)
+TEST_F(VggModelTestSuite, remove_event_listener)
 {
   // Given
   std::string file_path = "testDataDir/vgg-work.zip";
@@ -142,7 +142,7 @@ TEST_F(VggWorkTestSuite, remove_event_listener)
   EXPECT_EQ(event_listeners_before.size() - 1, event_listeners_after.size());
 }
 
-TEST_F(VggWorkTestSuite, get_event_listeners)
+TEST_F(VggModelTestSuite, get_event_listeners)
 {
   // Given
   std::string file_path = "testDataDir/vgg-work.zip";

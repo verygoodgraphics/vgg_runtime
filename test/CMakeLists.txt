@@ -12,7 +12,7 @@ else()
     # model/automerge_test.cpp
     model/json_schema_validator_test.cpp
     model/schema_valid_json_document_test.cpp
-    model/vgg_work_test.cpp
+    model/vgg_model_test.cpp
     # model/treenode_test.cpp
     native/native_exec_test.cpp
     native/native_sdk_test.cpp

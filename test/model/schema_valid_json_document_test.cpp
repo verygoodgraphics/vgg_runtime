@@ -1,3 +1,4 @@
+#include "Domain/Config.hpp"
 #include "Domain/RawJsonDocument.hpp"
 #include "Domain/SchemaValidJsonDocument.hpp"
 
@@ -5,10 +6,10 @@
 #include <memory>
 #include <iostream>
 
+using namespace VGG::Model;
 using namespace nlohmann;
 
 #define JSON_SCHEMA_FILE_NAME "./asset/vgg-format.json"
-#define DOCUMENT_FILE_NAME "./testDataDir/vgg-daruma/artboard.json"
 
 class SchemaValidJsonDocumentTestSuite : public ::testing::Test
 {
@@ -20,7 +21,8 @@ protected:
     std::ifstream schema_fs(JSON_SCHEMA_FILE_NAME);
     json schema = json::parse(schema_fs);
 
-    std::ifstream document_fs(DOCUMENT_FILE_NAME);
+    auto file_path = std::string{ "./testDataDir/vgg-daruma/" } + design_file_name;
+    std::ifstream document_fs(file_path);
     json document = json::parse(document_fs);
 
     auto schema_validator = std::make_shared<JsonSchemaValidator>();

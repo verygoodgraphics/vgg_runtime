@@ -1,8 +1,10 @@
+#include "Domain/Config.hpp"
 #include "Domain/JsonSchemaValidator.hpp"
 
 #include <gtest/gtest.h>
 #include <fstream>
 
+using namespace VGG::Model;
 using json = nlohmann::json;
 
 #define VGG_JSON_SCHEMA_FILE_NAME "./asset/vgg-format.json"
@@ -46,7 +48,7 @@ protected:
 TEST_F(VggJsonSchemaValitatorTestSuite, GoodCase)
 {
   setRootSchemaByFileName(VGG_JSON_SCHEMA_FILE_NAME);
-  validate_by_filename("./testDataDir/vgg-daruma/artboard.json", true);
+  validate_by_filename(std::string{ "./testDataDir/vgg-daruma/" } + design_file_name, true);
 }
 
 TEST_F(VggJsonSchemaValitatorTestSuite, BadTargetJson)
@@ -71,7 +73,7 @@ TEST_F(VggJsonSchemaValitatorTestSuite, ValidateByClassName)
 
 TEST_F(VggJsonSchemaValitatorTestSuite, NoSchema)
 {
-  validate_by_filename("./testDataDir/vgg-daruma/artboard.json", true);
+  validate_by_filename(std::string{ "./testDataDir/vgg-daruma/" } + design_file_name, true);
 }
 
 TEST_F(VggJsonSchemaValitatorTestSuite, NoSchemaValidateByClassName)

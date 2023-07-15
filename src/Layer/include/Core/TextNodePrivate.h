@@ -133,10 +133,21 @@ public:
       auto lastLine = paragraph->lineNumber();
       if (lastLine < 1)
         continue;
-      LineMetrics lineMetric;
-      paragraph->getLineMetricsAt(lastLine - 1, &lineMetric);
-      const auto height = paragraph->getHeight();
-      curY += height;
+      assert(!d.Utf8TextView.Text.empty());
+      auto c = d.Utf8TextView.Text.back();
+      if (c == '\n' && i < paragraphCache.size() - 1)
+      {
+        // It not a neat design because list item must be rendered seperately.
+        // The line height of newline at each end of paragraph except for the last need to be dealt
+        // specially
+        LineMetrics lineMetric;
+        paragraph->getLineMetricsAt(lastLine - 1, &lineMetric);
+        curY += paragraph->getHeight() - lineMetric.fHeight;
+      }
+      else
+      {
+        curY += paragraph->getHeight();
+      }
     }
     m_height = curY;
     return newBound;

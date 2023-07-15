@@ -268,6 +268,7 @@ inline void from_json(const json& j, TextAttr& x)
   x.letterSpacing = j.at("letterSpacing");
   x.underline = j.at("underline");
   x.kerning = j.at("kerning");
+  x.horzAlignment = j.at("horizontalAlignment");
   x.size = j.at("size");
 }
 } // namespace VGG

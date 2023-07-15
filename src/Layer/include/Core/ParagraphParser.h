@@ -51,8 +51,6 @@ struct ParagraphAttr
 {
   TextLineAttr type;
   ETextHorizontalAlignment horiAlign;
-  // int maxLines{ 1000 };
-  // std::u16string ellipsis{ u"..." };
 };
 
 class ParagraphListener

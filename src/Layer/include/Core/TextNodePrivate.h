@@ -76,6 +76,8 @@ class TextParagraphCache : public ParagraphListener
 {
   std::vector<TextParagraph> paragraph;
   std::vector<std::unique_ptr<skia::textlayout::Paragraph>> paragraphCache;
+  bool newParagraph{ true };
+  ParagraphAttr paraAttr;
   bool m_dirty{ true };
   void clear()
   {
@@ -127,6 +129,7 @@ public:
     const auto layoutWidth = bound.width();
     cursor.reset(layoutWidth);
     DebugCanvas debugCanvas(canvas);
+    int width = 0, height = 0;
     for (int i = 0; i < paragraphCache.size(); i++)
     {
       auto& p = paragraphCache[i];
@@ -146,6 +149,8 @@ public:
       cursor.advanceY(height);
       // cursor.cursorX = width;
     }
+
+    // update bound
   }
 };
 

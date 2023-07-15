@@ -133,6 +133,12 @@ void TextParagraphCache::onParagraphEnd(int paraIndex, const TextView& textView)
   assert(!paragraph.empty());
   auto& p = paragraph.back();
   p.Utf8TextView = textView;
+  if (newParagraph)
+  {
+    if (textView.Text.empty())
+      paragraph.pop_back();
+    newParagraph = false;
+  }
   // std::cout << "onParagraphEnd: " << paraIndex << ", [" << textView.Text << "]\n";
 }
 

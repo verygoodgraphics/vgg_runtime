@@ -102,6 +102,7 @@ public:
     paragraphCache.reserve(paragraph.size());
     for (auto& d : paragraph)
     {
+      assert(d.builder);
       paragraphCache.push_back({ 0, std ::move(d.builder->Build()) });
     }
     set(D_LAYOUT);
@@ -144,59 +145,6 @@ public:
   int getHeight() const
   {
     return m_height;
-  }
-
-  void drawParagraph(SkCanvas* canvas,
-                     const Bound2& bound,
-                     ETextVerticalAlignment align,
-                     ETextLayoutMode mode)
-  {
-    if (paragraph.empty())
-    {
-      return;
-    }
-    if (test(D_REBUILD))
-    {
-      rebuild();
-      clear(D_REBUILD);
-    }
-    if (paragraphCache.empty())
-    {
-      return;
-    }
-    if (test(D_LAYOUT))
-    {
-      layout(bound, mode);
-      clear(D_LAYOUT);
-    }
-
-    int totalHeight = getHeight();
-    int curY = 0;
-    if (align == ETextVerticalAlignment::VA_Bottom)
-    {
-      curY = bound.height() - totalHeight;
-    }
-    else if (align == ETextVerticalAlignment::VA_Center)
-    {
-      curY = (bound.height() - totalHeight) / 2;
-    }
-    for (int i = 0; i < paragraphCache.size(); i++)
-    {
-      auto& p = paragraphCache[i].paragraph;
-      const auto curX = paragraphCache[i].offsetX;
-      p->paint(canvas, curX, curY);
-      auto lastLine = p->lineNumber();
-      if (lastLine < 1)
-        continue;
-      LineMetrics lineMetric;
-      p->getLineMetricsAt(lastLine - 1, &lineMetric);
-      if (Scene::isEnableDrawDebugBound())
-      {
-        DebugCanvas debugCanvas(canvas);
-        drawParagraphDebugInfo(debugCanvas, paragraph[i], p.get(), curX, curY, i);
-      }
-      curY += p->getHeight() - lineMetric.fHeight;
-    }
   }
 };
 

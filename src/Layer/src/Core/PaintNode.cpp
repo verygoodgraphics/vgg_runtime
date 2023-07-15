@@ -167,15 +167,16 @@ RenderState* PaintNode::getRenderState()
 
 void PaintNode::paintEvent(SkCanvas* canvas)
 {
+  if (overflow() == EOverflow::OF_Hidden)
+  {
+    canvas->clipRect(toSkRect(getBound()));
+  }
   if (this->bgColor.has_value())
   {
     SkPaint bgPaint;
     bgPaint.setColor(this->bgColor.value());
     bgPaint.setStyle(SkPaint::kFill_Style);
-    // canvas->save();
-    // canvas->scale(1, -1);
     canvas->drawRect(toSkRect(getBound()), bgPaint);
-    // canvas->restore();
   }
 }
 

@@ -1,6 +1,7 @@
 #include "Core/TextNode.h"
 #include "Core/FontManager.h"
 #include "Core/Node.hpp"
+#include "Core/PaintNode.h"
 #include "Core/VGGType.h"
 #include "Core/VGGUtils.h"
 #include "include/core/SkCanvas.h"
@@ -13,6 +14,7 @@
 
 #include <memory>
 #include <modules/skparagraph/include/FontCollection.h>
+#include <modules/skparagraph/include/ParagraphCache.h>
 #include <string_view>
 
 namespace VGG
@@ -24,23 +26,13 @@ TextNode::TextNode(const std::string& name)
 {
 }
 
-void TextNode::setText(const std::string& utf8, const std::vector<TextStyleStub>& styles)
-{
-  VGG_IMPL(TextNode)
-  _->text = utf8;
-  _->styles = styles;
-}
-
-void TextNode::setTextStyle(size_t position, const TextStyleStub& style)
-{
-}
-
-void TextNode::setParagraph(const std::string& utf8,
+void TextNode::setParagraph(std::string utf8,
                             const std::vector<TextAttr>& attrs,
                             const std::vector<TextLineAttr>& lineAttr)
 {
   VGG_IMPL(TextNode);
   std::vector<ParagraphAttr> paraAttrs;
+  _->text = std::move(utf8);
   for (const auto a : lineAttr)
   {
     paraAttrs.emplace_back(a, ETextHorizontalAlignment::HA_Left);
@@ -48,7 +40,7 @@ void TextNode::setParagraph(const std::string& utf8,
   if (!paraAttrs.empty())
   {
     ParagraphParser parser;
-    parser.parse(_->m_paragraphCache, utf8, attrs, paraAttrs);
+    parser.parse(_->m_paragraphCache, _->text, attrs, paraAttrs);
   }
 }
 
@@ -61,11 +53,58 @@ void TextNode::setFrameMode(ETextLayoutMode mode)
 void TextNode::paintEvent(SkCanvas* canvas)
 {
   VGG_IMPL(TextNode);
+  if (_->m_paragraphCache.empty())
+    return;
+  if (_->m_paragraphCache.test(TextParagraphCache::TextParagraphCacheFlagsBits::D_REBUILD))
+  {
+    _->m_paragraphCache.rebuild();
+    _->m_paragraphCache.clear(TextParagraphCache::TextParagraphCacheFlagsBits::D_REBUILD);
+  }
+  if (_->m_paragraphCache.test(TextParagraphCache::TextParagraphCacheFlagsBits::D_LAYOUT))
+  {
+    setBound(_->m_paragraphCache.layout(getBound(), _->mode)); // update bound
+    _->m_paragraphCache.clear(TextParagraphCache::TextParagraphCacheFlagsBits::D_LAYOUT);
+  }
+
+  PaintNode::paintEvent(canvas);
   canvas->save();
-  canvas->clipRect(toSkRect(getBound()));
-  canvas->scale(1, -1);
   // we need to convert to skia coordinate to render text
-  _->m_paragraphCache.drawParagraph(canvas, getBound());
+  canvas->scale(1, -1);
+  {
+    const auto bound = getBound();
+    int totalHeight = _->m_paragraphCache.getHeight();
+    int curY = 0;
+    if (_->m_vertAlign == ETextVerticalAlignment::VA_Bottom)
+    {
+      curY = bound.height() - totalHeight;
+    }
+    else if (_->m_vertAlign == ETextVerticalAlignment::VA_Center)
+    {
+      curY = (bound.height() - totalHeight) / 2;
+    }
+    for (int i = 0; i < _->m_paragraphCache.paragraphCache.size(); i++)
+    {
+      auto& p = _->m_paragraphCache.paragraphCache[i].paragraph;
+      const auto curX = _->m_paragraphCache.paragraphCache[i].offsetX;
+      p->paint(canvas, curX, curY);
+      auto lastLine = p->lineNumber();
+      if (lastLine < 1)
+        continue;
+      LineMetrics lineMetric;
+      p->getLineMetricsAt(lastLine - 1, &lineMetric);
+      if (Scene::isEnableDrawDebugBound())
+      {
+        DebugCanvas debugCanvas(canvas);
+        drawParagraphDebugInfo(debugCanvas,
+                               _->m_paragraphCache.paragraph[i],
+                               p.get(),
+                               curX,
+                               curY,
+                               i);
+      }
+      curY += p->getHeight() - lineMetric.fHeight;
+    }
+  }
   canvas->restore();
 }
 

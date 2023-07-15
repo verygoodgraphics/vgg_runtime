@@ -33,6 +33,13 @@ enum EWindingType
   WR_EvenOdd
 };
 
+enum EOverflow
+{
+  OF_Hidden = 1,
+  OF_Visible = 2,
+  OF_Scroll = 3
+};
+
 enum EBlendMode
 {
   // common in ai, sketch, octopus

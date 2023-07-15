@@ -18,6 +18,7 @@
 #include "include/pathops/SkPathOps.h"
 
 #include <any>
+#include <asm-generic/errno.h>
 #include <memory>
 #include <optional>
 #include <string>
@@ -41,6 +42,7 @@ protected:
   Mask outlineMask;
   EMaskType maskType{ MT_None };
   EBoolOp m_clipOperator{ BO_None };
+  EOverflow m_overflow{ OF_Hidden };
 
   Style style;
   ContextSetting m_contextSetting;
@@ -63,6 +65,16 @@ public:
   void setContectSettings(const ContextSetting& settings)
   {
     this->m_contextSetting = settings;
+  }
+
+  void setOverflow(EOverflow overflow)
+  {
+    m_overflow = overflow;
+  }
+
+  EOverflow overflow() const
+  {
+    return m_overflow;
   }
 
   const ContextSetting& contextSetting() const

@@ -106,6 +106,7 @@ inline TextAlign toSkTextAlign(ETextHorizontalAlignment align)
   SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_Left, TextAlign::kLeft);
   SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_Right, TextAlign::kRight);
   SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_Justify, TextAlign::kJustify);
+  SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_Center, TextAlign::kCenter);
   SWITCH_MAP_ITEM_DEF_NULL(VGG::ETextHorizontalAlignment::HA_Natural)
   SWITCH_MAP_ITEM_END(TextAlign::kLeft)
 }

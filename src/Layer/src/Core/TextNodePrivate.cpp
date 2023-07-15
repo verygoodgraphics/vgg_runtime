@@ -1,5 +1,6 @@
 #include "Core/TextNodePrivate.h"
 #include "Core/FontManager.h"
+#include "Core/ParagraphParser.h"
 #include "Core/TextNode.h"
 #include "Core/VGGType.h"
 #include "SkiaBackend/SkiaImpl.h"
@@ -91,9 +92,7 @@ void TextParagraphCache::onParagraphBegin(int paraIndex,
 {
   paragraph.emplace_back();
   auto& p = paragraph.back();
-  auto defaultFontCollection = FontManager::instance().fontCollection("default");
-  p.builder = skia::textlayout::ParagraphBuilder::make(createParagraphStyle(paragraAttr),
-                                                       defaultFontCollection);
+
   if (paragraAttr.type.lineType != TLT_Plain)
   {
     p.level = paragraAttr.type.level * 20;
@@ -102,6 +101,8 @@ void TextParagraphCache::onParagraphBegin(int paraIndex,
   {
     p.level = 0;
   }
+  newParagraph = true;
+  paraAttr = paragraAttr;
   // p.level = calcWhitespace(paragraAttr.type.level, 14, {}, defaultFontCollection);
   // std::cout << "onParagraphBegin: " << paraIndex << ", " << paragraAttr.type.level << "\n";
 }
@@ -121,6 +122,15 @@ void TextParagraphCache::onTextStyle(int paraIndex,
 {
   assert(!paragraph.empty());
   auto& p = paragraph.back();
+
+  if (newParagraph)
+  {
+    auto defaultFontCollection = FontManager::instance().fontCollection("default");
+    p.builder = skia::textlayout::ParagraphBuilder::make(
+      createParagraphStyle(ParagraphAttr{ paraAttr.type, textAttr.horzAlignment }),
+      defaultFontCollection);
+    newParagraph = false;
+  }
   p.builder->pushStyle(createTextStyle(textAttr));
   p.builder->addText(textView.Text.data(), textView.Text.size());
   p.builder->pop();

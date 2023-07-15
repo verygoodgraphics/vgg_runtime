@@ -11,6 +11,31 @@
 namespace VGG
 {
 
+void drawParagraphDebugInfo(DebugCanvas& canvas,
+                            const TextParagraph& textParagraph,
+                            Paragraph* p,
+                            int curX,
+                            int curY,
+                            int index)
+{
+  static SkColor colorTable[9] = {
+    SK_ColorBLUE,   SK_ColorGREEN,  SK_ColorRED,  SK_ColorCYAN,   SK_ColorMAGENTA,
+    SK_ColorYELLOW, SK_ColorDKGRAY, SK_ColorGRAY, SK_ColorLTGRAY,
+  };
+  canvas.get()->save();
+  canvas.get()->translate(curX, curY);
+  auto rects = p->getRectsForRange(0, 10000, RectHeightStyle::kMax, RectWidthStyle::kMax);
+  auto h = p->getHeight();
+  auto mw = p->getMaxWidth();
+  auto iw = p->getMaxIntrinsicWidth();
+  SkPaint pen;
+  SkColor color = colorTable[index % 9];
+  pen.setColor(SkColorSetA(color, 0x11));
+  canvas.get()->drawRect(SkRect{ 0, 0, mw, h }, pen);
+  canvas.drawRects(color, rects);
+  canvas.get()->restore();
+}
+
 int calcWhitespace(int count,
                    int fontSize,
                    const std::vector<SkString>& fontFamilies,
@@ -38,7 +63,7 @@ int calcWhitespace(int count,
     return 0;
   return rects[0].rect.width();
 }
-skia::textlayout::ParagraphStyle createParagraphStyle(const ParagraphAttr& attr)
+sktxt::ParagraphStyle createParagraphStyle(const ParagraphAttr& attr)
 {
   ParagraphStyle style;
   style.setEllipsis(u"...");
@@ -47,9 +72,9 @@ skia::textlayout::ParagraphStyle createParagraphStyle(const ParagraphAttr& attr)
   return style;
 }
 
-skia::textlayout::TextStyle createTextStyle(const TextAttr& attr)
+sktxt::TextStyle createTextStyle(const TextAttr& attr)
 {
-  skia::textlayout::TextStyle style;
+  sktxt::TextStyle style;
   SkColor color = attr.color;
   style.setColor(color);
   style.setDecorationColor(color);
@@ -74,7 +99,6 @@ skia::textlayout::TextStyle createTextStyle(const TextAttr& attr)
       style.setDecorationStyle(TextDecorationStyle::kDouble);
     }
   }
-  // style.setFontStyle();
   return style;
 }
 
@@ -84,7 +108,7 @@ void TextParagraphCache::onBegin()
 }
 void TextParagraphCache::onEnd()
 {
-  markDirty();
+  set(D_ALL);
 }
 void TextParagraphCache::onParagraphBegin(int paraIndex,
                                           int order,
@@ -92,10 +116,9 @@ void TextParagraphCache::onParagraphBegin(int paraIndex,
 {
   paragraph.emplace_back();
   auto& p = paragraph.back();
-
   if (paragraAttr.type.lineType != TLT_Plain)
   {
-    p.level = paragraAttr.type.level * 20;
+    p.level = paragraAttr.type.level;
   }
   else
   {
@@ -103,8 +126,6 @@ void TextParagraphCache::onParagraphBegin(int paraIndex,
   }
   newParagraph = true;
   paraAttr = paragraAttr;
-  // p.level = calcWhitespace(paragraAttr.type.level, 14, {}, defaultFontCollection);
-  // std::cout << "onParagraphBegin: " << paraIndex << ", " << paragraAttr.type.level << "\n";
 }
 
 void TextParagraphCache::onParagraphEnd(int paraIndex, const TextView& textView)
@@ -122,7 +143,6 @@ void TextParagraphCache::onTextStyle(int paraIndex,
 {
   assert(!paragraph.empty());
   auto& p = paragraph.back();
-
   if (newParagraph)
   {
     auto defaultFontCollection = FontManager::instance().fontCollection("default");

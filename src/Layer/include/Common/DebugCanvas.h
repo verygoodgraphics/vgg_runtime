@@ -17,7 +17,6 @@ public:
   DebugCanvas(SkCanvas* canvas)
     : canvas(canvas)
   {
-    canvas->clear(SK_ColorWHITE);
   }
 
   void drawRects(SkColor color, std::vector<sktxt::TextBox>& result, bool fill = false);

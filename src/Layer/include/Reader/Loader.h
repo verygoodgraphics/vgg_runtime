@@ -98,6 +98,7 @@ public:
     obj->m_contextSetting = j.at("contextSettings").get<ContextSetting>();
     obj->maskedBy = j.at("outlineMaskBy").get<std::vector<std::string>>();
     obj->maskType = (EMaskType)j.at("maskType").get<int>();
+    obj->m_overflow = (EOverflow)j.at("overflow").get<int>();
     obj->guid = j.at("id").get<std::string>();
     obj->setVisible(j.at("visible").get<bool>());
   }
@@ -147,11 +148,10 @@ public:
   static inline std::shared_ptr<TextNode> fromText(const nlohmann::json& j)
   {
     auto p = std::make_shared<TextNode>("Text");
-    const std::string text = j.at("content");
+    std::string text = j.at("content");
     auto lineType = get_stack_optional<std::vector<TextLineAttr>>(j, "lineType")
                       .value_or(std::vector<TextLineAttr>());
-    p->setText(text, j.at("attr"));
-    p->setParagraph(text, j.at("attr"), lineType);
+    p->setParagraph(std::move(text), j.at("attr"), lineType);
     p->setVerticalAlignment(j.at("verticalAlignment"));
     p->setFrameMode(j.at("frameMode"));
     return p;

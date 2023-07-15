@@ -6,8 +6,10 @@
 #include "Common/DebugCanvas.h"
 #include "Core/ParagraphParser.h"
 #include <core/SkColor.h>
+#include <core/SkFontMetrics.h>
 #include <core/SkFontStyle.h>
 #include <core/SkScalar.h>
+#include <limits>
 #include <modules/skparagraph/include/DartTypes.h>
 #include <modules/skparagraph/include/Metrics.h>
 #include <modules/skparagraph/include/Paragraph.h>
@@ -20,74 +22,37 @@
 namespace VGG
 {
 
-using namespace skia::textlayout;
-
-struct CursorState
-{
-  SkScalar cursorX = 0.f;
-  SkScalar cursorY = 0.f;
-  SkScalar layoutWidth = 500.f;
-
-  void advanceX(SkScalar a)
-  {
-    cursorX += a;
-    layoutWidth -= a;
-  }
-  void advanceY(SkScalar a)
-  {
-    cursorY += a;
-  }
-
-  void reset(SkScalar layout)
-  {
-    cursorY = 0;
-    cursorX = 0;
-    layoutWidth = layout;
-  }
-};
-
-inline void drawParagraphDebugInfo(DebugCanvas& canvas,
-                                   const TextParagraph& textParagraph,
-                                   Paragraph* p,
-                                   CursorState& state,
-                                   int index)
-{
-  static SkColor colorTable[9] = {
-    SK_ColorBLUE,   SK_ColorGREEN,  SK_ColorRED,  SK_ColorCYAN,   SK_ColorMAGENTA,
-    SK_ColorYELLOW, SK_ColorDKGRAY, SK_ColorGRAY, SK_ColorLTGRAY,
-  };
-  canvas.get()->save();
-  canvas.get()->translate(state.cursorX, state.cursorY);
-  auto rects = p->getRectsForRange(0, 1000, RectHeightStyle::kMax, RectWidthStyle::kMax);
-  auto h = p->getHeight();
-  auto mw = p->getMaxWidth();
-  auto iw = p->getMaxIntrinsicWidth();
-  SkPaint pen;
-  SkColor color = colorTable[index % 9];
-  pen.setColor(SkColorSetA(color, 0x88));
-  canvas.get()->drawRect(SkRect{ 0, 0, mw, h }, pen);
-  // pen.setColor(SK_ColorBLUE);
-  // canvas.get()->drawRect(SkRect{0, 0, iw, h}, pen);
-  canvas.drawRects(color, rects);
-  canvas.get()->restore();
-}
+void drawParagraphDebugInfo(DebugCanvas& canvas,
+                            const TextParagraph& textParagraph,
+                            Paragraph* p,
+                            int curX,
+                            int curY,
+                            int index);
 
 class TextParagraphCache : public ParagraphListener
 {
+public:
+  using TextParagraphCacheDirtyFlags = uint8_t;
+  enum TextParagraphCacheFlagsBits : TextParagraphCacheDirtyFlags
+  {
+    D_REBUILD = 1,
+    D_LAYOUT = 2,
+    D_ALL = D_REBUILD | D_LAYOUT,
+  };
+
   std::vector<TextParagraph> paragraph;
-  std::vector<std::unique_ptr<skia::textlayout::Paragraph>> paragraphCache;
+  struct ParagraphInfo
+  {
+    int offsetX{ 0 };
+    std::unique_ptr<sktxt::Paragraph> paragraph;
+  };
+  std::vector<ParagraphInfo> paragraphCache;
+
+private:
+  int m_height{ 0 };
   bool newParagraph{ true };
   ParagraphAttr paraAttr;
-  bool m_dirty{ true };
-  void clear()
-  {
-    m_dirty = false;
-  }
-
-  void markDirty()
-  {
-    m_dirty = true;
-  }
+  TextParagraphCacheDirtyFlags m_dirtyFlags{ D_ALL };
 
 protected:
   void onBegin() override;
@@ -101,56 +66,137 @@ protected:
 
 public:
   TextParagraphCache() = default;
+  bool empty() const
+  {
+    return paragraph.empty();
+  }
 
   bool isDirty() const
   {
-    return m_dirty;
+    return m_dirtyFlags != 0;
   }
 
-  void cache()
+  void clear(TextParagraphCacheFlagsBits bit)
   {
-    if (!isDirty())
-      return;
+    m_dirtyFlags &= ~bit;
+  }
+
+  void set(TextParagraphCacheDirtyFlags bit)
+  {
+    m_dirtyFlags |= bit;
+  }
+
+  bool test(TextParagraphCacheFlagsBits bit) const
+  {
+    return m_dirtyFlags & bit;
+  }
+
+  bool testAll(TextParagraphCacheFlagsBits bit) const
+  {
+    return (m_dirtyFlags & bit) == bit;
+  }
+
+  void rebuild()
+  {
     paragraphCache.clear();
     paragraphCache.reserve(paragraph.size());
     for (auto& d : paragraph)
     {
-      paragraphCache.push_back(std::move(d.builder->Build()));
+      paragraphCache.push_back({ 0, std ::move(d.builder->Build()) });
     }
-    clear();
+    set(D_LAYOUT);
   }
 
-  void drawParagraph(SkCanvas* canvas, const Bound2& bound)
+  Bound2 layout(const Bound2& bound, ETextLayoutMode mode)
   {
-    if (paragraph.empty())
-      return;
-    cache();
-    CursorState cursor;
+    Bound2 newBound = bound; // TODO:: update bound by mode
     const auto layoutWidth = bound.width();
-    cursor.reset(layoutWidth);
-    DebugCanvas debugCanvas(canvas);
-    int width = 0, height = 0;
+    int curY = 0;
     for (int i = 0; i < paragraphCache.size(); i++)
     {
-      auto& p = paragraphCache[i];
-      cursor.cursorX = paragraph[i].level;
-      p->layout(cursor.layoutWidth - cursor.cursorX);
-      p->paint(canvas, cursor.cursorX, cursor.cursorY);
+      // auto paragraph = d.builder->Build();
+      const auto& d = paragraph[i];
+      const auto& paragraph = paragraphCache[i].paragraph;
+      SkFontMetrics metrics;
+      d.builder->getParagraphStyle().getTextStyle().getFontMetrics(&metrics);
+      const auto curX = metrics.fAvgCharWidth * d.level;
+      paragraphCache[i].offsetX = curX;
+      if (mode == ETextLayoutMode::TL_WidthAuto)
+      {
+        paragraph->layout(std::numeric_limits<SkScalar>::infinity());
+      }
+      else
+      {
+        paragraph->layout(layoutWidth - curX);
+      }
+      auto lastLine = paragraph->lineNumber();
+      if (lastLine < 1)
+        continue;
+      LineMetrics lineMetric;
+      paragraph->getLineMetricsAt(lastLine - 1, &lineMetric);
+      const auto height = paragraph->getHeight();
+      curY += height;
+    }
+    m_height = curY;
+    return newBound;
+  }
+
+  int getHeight() const
+  {
+    return m_height;
+  }
+
+  void drawParagraph(SkCanvas* canvas,
+                     const Bound2& bound,
+                     ETextVerticalAlignment align,
+                     ETextLayoutMode mode)
+  {
+    if (paragraph.empty())
+    {
+      return;
+    }
+    if (test(D_REBUILD))
+    {
+      rebuild();
+      clear(D_REBUILD);
+    }
+    if (paragraphCache.empty())
+    {
+      return;
+    }
+    if (test(D_LAYOUT))
+    {
+      layout(bound, mode);
+      clear(D_LAYOUT);
+    }
+
+    int totalHeight = getHeight();
+    int curY = 0;
+    if (align == ETextVerticalAlignment::VA_Bottom)
+    {
+      curY = bound.height() - totalHeight;
+    }
+    else if (align == ETextVerticalAlignment::VA_Center)
+    {
+      curY = (bound.height() - totalHeight) / 2;
+    }
+    for (int i = 0; i < paragraphCache.size(); i++)
+    {
+      auto& p = paragraphCache[i].paragraph;
+      const auto curX = paragraphCache[i].offsetX;
+      p->paint(canvas, curX, curY);
       auto lastLine = p->lineNumber();
       if (lastLine < 1)
         continue;
       LineMetrics lineMetric;
       p->getLineMetricsAt(lastLine - 1, &lineMetric);
-      const auto height = p->getHeight() - lineMetric.fHeight;
       if (Scene::isEnableDrawDebugBound())
       {
-        drawParagraphDebugInfo(debugCanvas, paragraph[i], p.get(), cursor, i);
+        DebugCanvas debugCanvas(canvas);
+        drawParagraphDebugInfo(debugCanvas, paragraph[i], p.get(), curX, curY, i);
       }
-      cursor.advanceY(height);
-      // cursor.cursorX = width;
+      curY += p->getHeight() - lineMetric.fHeight;
     }
-
-    // update bound
   }
 };
 
@@ -163,9 +209,7 @@ public:
   {
   }
   std::string text;
-  std::vector<TextStyleStub> styles;
   TextParagraphCache m_paragraphCache;
-  CursorState m_cursorState;
   ETextLayoutMode mode;
   ETextVerticalAlignment m_vertAlign{ ETextVerticalAlignment::VA_Top };
 };

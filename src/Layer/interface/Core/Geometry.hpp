@@ -45,6 +45,16 @@ struct Bound2
     return bottomRight.x - topLeft.x;
   }
 
+  void setWidth(float w)
+  {
+    bottomRight.x = topLeft.x + w;
+  }
+
+  void setHeight(float h)
+  {
+    bottomRight.y = topLeft.y - h;
+  }
+
   float height() const
   {
     return topLeft.y - bottomRight.y;

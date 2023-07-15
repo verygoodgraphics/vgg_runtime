@@ -110,9 +110,11 @@ public:
 
   Bound2 layout(const Bound2& bound, ETextLayoutMode mode)
   {
-    Bound2 newBound = bound; // TODO:: update bound by mode
+    Bound2 newBound = bound;
     const auto layoutWidth = bound.width();
-    int curY = 0;
+    m_height = 0;
+    int newWidth = bound.width();
+    int newHeight = bound.height();
     for (int i = 0; i < paragraphCache.size(); i++)
     {
       // auto paragraph = d.builder->Build();
@@ -130,6 +132,7 @@ public:
       {
         paragraph->layout(layoutWidth - curX);
       }
+      newWidth = std::max((int)paragraph->getMaxWidth(), newWidth);
       auto lastLine = paragraph->lineNumber();
       if (lastLine < 1)
         continue;
@@ -142,14 +145,24 @@ public:
         // specially
         LineMetrics lineMetric;
         paragraph->getLineMetricsAt(lastLine - 1, &lineMetric);
-        curY += paragraph->getHeight() - lineMetric.fHeight;
+        m_height += paragraph->getHeight() - lineMetric.fHeight;
       }
       else
       {
-        curY += paragraph->getHeight();
+        m_height += paragraph->getHeight();
       }
     }
-    m_height = curY;
+    if (mode == ETextLayoutMode::TL_HeightAuto)
+    {
+      // update height only
+      newBound.setHeight(newHeight);
+    }
+    if (mode == ETextLayoutMode::TL_WidthAuto)
+    {
+      newBound.setHeight(newHeight);
+      newBound.setWidth(newWidth);
+      // update both
+    }
     return newBound;
   }
 

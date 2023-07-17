@@ -2,7 +2,7 @@
 
 #include "node_api.h"
 
-#include "Utils/Utils.hpp"
+#include "Log.h"
 
 #include <functional>
 #include <mutex>

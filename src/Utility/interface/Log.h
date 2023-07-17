@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef __UTILS_HPP__
-#define __UTILS_HPP__
+#ifndef __LOG__H_
+#define __LOG__H_
 
-//#define UTILS_NODEBUG
-//#define UTILS_NOASSERT
-//#define UTILS_NOPROFILE
-//#define UTILS_LOGFILE "log.txt
+// #define LOG_NODEBUG
+// #define LOG_NOASSERT
+// #define LOG_NOPROFILE
+// #define LOG_LOGFILE "log.txt
 
 #include <cassert>
 #include <cstdio>
@@ -50,13 +50,15 @@
 #define UNUSED(X) (void)(X)
 
 #define STRFMT(fmt, ...)                                                                           \
-  ([&]() {                                                                                         \
-    int sz = snprintf(nullptr, 0, fmt, __VA_ARGS__);                                               \
-    assert(sz >= 0);                                                                               \
-    std::unique_ptr<char> buf{ new char[sz + 1] };                                                 \
-    snprintf(buf.get(), sz + 1, fmt, __VA_ARGS__);                                                 \
-    return std::string(buf.get());                                                                 \
-  })()
+  (                                                                                                \
+    [&]()                                                                                          \
+    {                                                                                              \
+      int sz = snprintf(nullptr, 0, fmt, __VA_ARGS__);                                             \
+      assert(sz >= 0);                                                                             \
+      std::unique_ptr<char> buf{ new char[sz + 1] };                                               \
+      snprintf(buf.get(), sz + 1, fmt, __VA_ARGS__);                                               \
+      return std::string(buf.get());                                                               \
+    })()
 
 template<typename... Args>
 inline std::string strfmt(const char* fmt, Args... args)
@@ -165,12 +167,12 @@ inline std::string scalarfmt(double v, size_t maxFractionalDigitNums = 2)
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
 /// Log file
-namespace UTILS
+namespace LOG
 {
 static inline FILE* _log_file_()
 {
-#ifdef UTILS_LOGFILE
-  static FILE* fp = fopen(UTILS_LOGFILE, "a+");
+#ifdef LOG_LOGFILE
+  static FILE* fp = fopen(LOG_LOGFILE, "a+");
   if (fp)
   {
     return fp;
@@ -187,7 +189,7 @@ static inline FILE* _log_file_()
 #endif
 #endif
 }
-} // namespace UTILS
+} // namespace Log
 
 /// Private logging macros
 #define _MSG_(type, log, msg, ...)                                                                 \
@@ -201,25 +203,25 @@ static inline FILE* _log_file_()
 #define FAIL(msg, ...)                                                                             \
   do                                                                                               \
   {                                                                                                \
-    _MSG_("FAIL", UTILS::_log_file_(), FAIL_COLOR(msg), ##__VA_ARGS__);                            \
+    _MSG_("FAIL", LOG::_log_file_(), FAIL_COLOR(msg), ##__VA_ARGS__);                            \
   } while (0)
 #define FAILED(msg, ...)                                                                           \
   do                                                                                               \
   {                                                                                                \
-    _MSG_("FAIL", UTILS::_log_file_(), FAIL_COLOR("%s:%d "), __FILENAME__, __LINE__);              \
+    _MSG_("FAIL", LOG::_log_file_(), FAIL_COLOR("%s:%d "), __FILENAME__, __LINE__);              \
     FAIL(msg, ##__VA_ARGS__);                                                                      \
     exit(EXIT_FAILURE);                                                                            \
   } while (0)
 #define WARN(msg, ...)                                                                             \
   do                                                                                               \
   {                                                                                                \
-    _MSG_("WARN", UTILS::_log_file_(), WARN_COLOR(msg), ##__VA_ARGS__);                            \
+    _MSG_("WARN", LOG::_log_file_(), WARN_COLOR(msg), ##__VA_ARGS__);                            \
   } while (0)
 #define WARNL(msg, ...)                                                                            \
   do                                                                                               \
   {                                                                                                \
     _MSG_("WARN",                                                                                  \
-          UTILS::_log_file_(),                                                                     \
+          LOG::_log_file_(),                                                                     \
           WARN_COLOR("(%s:%d) " msg),                                                              \
           __FILENAME__,                                                                            \
           __LINE__,                                                                                \
@@ -228,13 +230,13 @@ static inline FILE* _log_file_()
 #define INFO(msg, ...)                                                                             \
   do                                                                                               \
   {                                                                                                \
-    _MSG_("INFO", UTILS::_log_file_(), INFO_COLOR(msg), ##__VA_ARGS__);                            \
+    _MSG_("INFO", LOG::_log_file_(), INFO_COLOR(msg), ##__VA_ARGS__);                            \
   } while (0)
-#ifndef UTILS_NODEBUG
+#ifndef LOG_NODEBUG
 #define DEBUG(msg, ...)                                                                            \
   do                                                                                               \
   {                                                                                                \
-    _MSG_("DEBUG", UTILS::_log_file_(), msg, ##__VA_ARGS__);                                       \
+    _MSG_("DEBUG", LOG::_log_file_(), msg, ##__VA_ARGS__);                                       \
   } while (0)
 #else
 #define DEBUG(msg, ...)
@@ -244,7 +246,7 @@ static inline FILE* _log_file_()
 /* Assertion                                                                                      */
 /**************************************************************************************************/
 /// Private assert macros
-#ifndef UTILS_NOASSERT
+#ifndef LOG_NOASSERT
 #define _ASSERT_(x, msg, ...)                                                                      \
   do                                                                                               \
   {                                                                                                \
@@ -301,10 +303,10 @@ static inline FILE* _log_file_()
 /**************************************************************************************************/
 /* Profile                                                                                        */
 /**************************************************************************************************/
-#ifndef UTILS_NOPROFILE
+#ifndef LOG_NOPROFILE
 #include <chrono>
 #include <unordered_map>
-namespace UTILS
+namespace LOG
 {
 using Clock = std::chrono::high_resolution_clock;
 using TimePoint = std::chrono::time_point<Clock>;
@@ -331,29 +333,29 @@ static inline double _timer_stop_(const std::string& id)
   const TimePoint now = Clock::now();
   return std::chrono::duration_cast<Precision>(now - it->second).count();
 }
-} // namespace UTILS
+} // namespace LOG
 #define PROFILE(id, ...)                                                                           \
   do                                                                                               \
   {                                                                                                \
     _MSG_("PROFILE >>>",                                                                           \
-          UTILS::_log_file_(),                                                                     \
+          LOG::_log_file_(),                                                                     \
           "%*s----- %s",                                                                           \
-          UTILS::_padding_counter_,                                                                \
+          LOG::_padding_counter_,                                                                \
           "{",                                                                                     \
           id,                                                                                      \
           ##__VA_ARGS__);                                                                          \
-    UTILS::_timer_start_(id);                                                                      \
+    LOG::_timer_start_(id);                                                                      \
   } while (0)
 #define PROFILE_END(id, ...)                                                                       \
   do                                                                                               \
   {                                                                                                \
-    const double c = UTILS::_timer_stop_(id);                                                      \
+    const double c = LOG::_timer_stop_(id);                                                      \
     if (c >= 0)                                                                                    \
     {                                                                                              \
       _MSG_("*TIME COST*",                                                                         \
-            UTILS::_log_file_(),                                                                   \
+            LOG::_log_file_(),                                                                   \
             "%*s%.3lfs",                                                                           \
-            UTILS::_padding_counter_ - 1,                                                          \
+            LOG::_padding_counter_ - 1,                                                          \
             "",                                                                                    \
             c / 1000);                                                                             \
     }                                                                                              \
@@ -362,9 +364,9 @@ static inline double _timer_stop_(const std::string& id)
       WARN("%s:%d NO PROFILE START FOUND", __FILENAME__, __LINE__);                                \
     }                                                                                              \
     _MSG_("PROFILE END",                                                                           \
-          UTILS::_log_file_(),                                                                     \
+          LOG::_log_file_(),                                                                     \
           "%*s----} %s",                                                                           \
-          UTILS::_padding_counter_,                                                                \
+          LOG::_padding_counter_,                                                                \
           "-",                                                                                     \
           id,                                                                                      \
           ##__VA_ARGS__);                                                                          \
@@ -374,4 +376,4 @@ static inline double _timer_stop_(const std::string& id)
 #define PROFILE_END(id, ...)
 #endif
 
-#endif //__UTILS_HPP__
+#endif //__LOG__H_

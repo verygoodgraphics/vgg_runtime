@@ -1,5 +1,4 @@
 #include "SDLRuntime.hpp"
-#include "Utils/FileManager.hpp"
 #include <exception>
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -16,7 +15,7 @@ namespace fs = std::filesystem;
 #define main main
 int main(int argc, char** argv)
 {
-  argparse::ArgumentParser program("vgg", Version::get());
+  argparse::ArgumentParser program("vgg", "0.1");
   program.add_argument("-l", "--load").help("load from vgg or sketch file");
   program.add_argument("-d", "--data").help("resources dir");
   program.add_argument("-p", "--prefix").help("the prefix of filename or dir");
@@ -59,8 +58,8 @@ int main(int argc, char** argv)
   if (auto loadfile = program.present("-l"))
   {
     auto fp = loadfile.value();
-    auto ext = FileManager::getLoweredFileExt(fp);
-    if (ext == "json")
+    auto ext = fs::path(fp).extension().string();
+    if (ext == ".json")
     {
       respath = std::filesystem::path(fp).stem(); // same with filename as default
       if (auto res = program.present("-d"))
@@ -69,7 +68,7 @@ int main(int argc, char** argv)
       }
     }
 
-    auto r = load("." + ext);
+    auto r = load(ext);
     if (r)
     {
       auto data = r->read(prefix / fp);
@@ -82,12 +81,6 @@ int main(int argc, char** argv)
       {
         FAIL("load json failed: %s", e.what());
       }
-    }
-
-    // legacy renderer
-    if (!FileManager::loadFile((prefix / fp).string()))
-    {
-      FAIL("Failed to load file: %s", fp.c_str());
     }
   }
 
@@ -131,14 +124,6 @@ int main(int argc, char** argv)
       });
   }
   ASSERT(app);
-
-  if (auto fm = FileManager::getInstance(); fm && fm->fileCount() < 1)
-  {
-    FileManager::newFile();
-  }
-
-  // enter run mode
-  app->setOnFrameOnce([app]() { app->startRunMode(); });
 
   // enter loop
   constexpr int fps = 60;

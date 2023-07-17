@@ -24,6 +24,7 @@ target_include_directories(vgg_domain PRIVATE
 )
 target_link_libraries(vgg_domain
   vgg_flags
+  vgg_utility
   zip
 )
 

@@ -23,7 +23,7 @@ inline std::optional<T> get_stack_optional(const json& j, const char* property)
   auto it = j.find(property);
   if (it != j.end() && !it->is_null())
   {
-    return j.at(property).get<std::optional<T>>();
+    return j.at(property).get<T>();
   }
   return std::optional<T>();
 }
@@ -56,7 +56,7 @@ inline std::optional<T> get_stack_optional(const json& j, const std::string& pro
 //   return T{};
 // }
 
-inline void from_json(const json& j, VGGColor& x)
+inline void from_json(const json& j, Color& x)
 {
   x.a = j["alpha"];
   x.b = j["blue"];
@@ -92,14 +92,14 @@ inline void from_json(const json& j, Pattern& x)
   }
 }
 
-inline void from_json(const json& j, VGGGradient::GradientStop& x)
+inline void from_json(const json& j, Gradient::GradientStop& x)
 {
   x.color = j["color"];
   x.position = j["position"];
   x.midPoint = j["midPoint"];
 }
 
-inline void transformGredient(const json& j, VGGGradient& x)
+inline void transformGredient(const json& j, Gradient& x)
 {
   x.aiCoordinate = true;
   auto v = j.at("matrix").get<std::vector<double>>();
@@ -114,7 +114,7 @@ inline void transformGredient(const json& j, VGGGradient& x)
   x.to.y = length;
 }
 
-inline void from_json(const json& j, VGGGradient& x)
+inline void from_json(const json& j, Gradient& x)
 {
   const auto g = j["instance"];
   const auto klass = g["class"];
@@ -161,13 +161,13 @@ inline void from_json(const json& j, ContextSetting& x)
 
 inline void from_json(const json& j, Border& x)
 {
-  x.color = get_stack_optional<VGGColor>(j, "color");
+  x.color = get_stack_optional<Color>(j, "color");
   x.context_settings = j.at("contextSettings").get<ContextSetting>();
   x.dashed_offset = j.at("dashedOffset").get<double>();
   x.dashed_pattern = j.at("dashedPattern").get<std::vector<float>>();
   x.fill_type = j.at("fillType").get<EPathFillType>();
   x.flat = j.at("flat").get<double>();
-  x.gradient = get_stack_optional<VGGGradient>(j, "gradient");
+  x.gradient = get_stack_optional<Gradient>(j, "gradient");
   x.isEnabled = j.at("isEnabled").get<bool>();
   x.lineCapStyle = j.at("lineCapStyle").get<ELineCap>();
   x.lineJoinStyle = j.at("lineJoinStyle").get<ELineJoin>();
@@ -181,7 +181,7 @@ inline void from_json(const json& j, Border& x)
 inline void from_json(const json& j, Shadow& x)
 {
   x.blur = j.at("blur").get<double>();
-  x.color = j.at("color").get<VGGColor>();
+  x.color = j.at("color").get<Color>();
   x.context_settings = j.at("contextSettings").get<ContextSetting>();
   x.inner = j.at("inner").get<bool>();
   x.is_enabled = j.at("isEnabled").get<bool>();
@@ -204,15 +204,15 @@ inline void from_json(const json& j, Blur& x)
 
 inline void from_json(const json& j, Fill& x)
 {
-  x.color = VGGColor{ 0, 0, 0, 1 };
+  x.color = Color{ 0, 0, 0, 1 };
   if (auto it = j.find("color"); it != j.end())
   {
-    x.color = j.at("color").get<VGGColor>();
+    x.color = j.at("color").get<Color>();
   }
   x.fillType = (EPathFillType)j.at("fillType").get<int>();
   x.isEnabled = j.at("isEnabled").get<bool>();
   x.contextSettings = j.at("contextSettings").get<ContextSetting>();
-  x.gradient = get_stack_optional<VGGGradient>(j, "gradient");
+  x.gradient = get_stack_optional<Gradient>(j, "gradient");
   x.pattern = get_stack_optional<Pattern>(j, "pattern");
 }
 
@@ -222,23 +222,6 @@ inline void from_json(const json& j, Style& x)
   x.borders = j.at("borders").get<std::vector<Border>>();
   x.fills = j.at("fills").get<std::vector<Fill>>();
   x.shadows = j.at("shadows").get<std::vector<Shadow>>();
-}
-
-inline void from_json(const json& j, TextStyleStub& x)
-{
-  x.length = get_stack_optional<size_t>(j, "length").value_or(false);
-  x.bold = get_stack_optional<bool>(j, "bold").value_or(false);
-  x.italic = get_stack_optional<bool>(j, "italic").value_or(false);
-  x.fontName = get_stack_optional<std::string>(j, "name").value_or("");
-  x.fillColor = get_stack_optional<VGGColor>(j, "fillColor").value_or(VGGColor{ 0, 0, 0, 1 });
-  x.boarderColor = get_stack_optional<VGGColor>(j, "borderColor").value_or(VGGColor{ 0, 0, 0, 1 });
-  x.boarderSize = get_stack_optional<int>(j, "borderSize");
-  x.subFamilyName = get_stack_optional<std::string>(j, "subFamilyName").value_or("");
-  x.lineThrough = j["linethrough"];
-  x.letterSpacing = j["letterSpacing"];
-  x.lineSpace = j["lineSpace"];
-  x.underline = j["underline"];
-  x.size = j["size"];
 }
 
 inline void from_json(const json& j, TextLineAttr& x)
@@ -261,7 +244,7 @@ inline void from_json(const json& j, TextAttr& x)
     // we don process other fill style now, only use color
     if ((*it).size() > 0)
     {
-      x.color = get_stack_optional<VGGColor>((*it)[0], "color").value_or(VGGColor{ 0, 0, 0, 1 });
+      x.color = get_stack_optional<Color>((*it)[0], "color").value_or(Color{ 0, 0, 0, 1 });
     }
   }
   x.lineThrough = j.at("linethrough");

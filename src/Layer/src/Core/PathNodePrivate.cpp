@@ -6,6 +6,7 @@
 #include "include/core/SkClipOp.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPathTypes.h"
+#include "include/core/SkPathEffect.h"
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkImageFilters.h"
 #include "include/core/SkScalar.h"
@@ -25,7 +26,7 @@
 namespace VGG
 {
 
-sk_sp<SkShader> PathNode__pImpl::getGradientShader(const VGGGradient& g, const Bound2& bound)
+sk_sp<SkShader> PathNode__pImpl::getGradientShader(const Gradient& g, const Bound2& bound)
 {
   sk_sp<SkShader> shader;
   const auto type = g.gradientType;
@@ -97,7 +98,7 @@ void PathNode__pImpl::drawPathBorder(SkCanvas* canvas,
   strokePen.setStrokeJoin(toSkPaintJoin(b.lineJoinStyle));
   strokePen.setStrokeCap(toSkPaintCap(b.lineCapStyle));
   strokePen.setStrokeMiter(b.miterLimit);
-  strokePen.setColor(b.color.value_or(VGGColor{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
+  strokePen.setColor(b.color.value_or(Color{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
   if (b.position == PP_Inside)
   {
     // inside
@@ -126,7 +127,7 @@ void PathNode__pImpl::drawPathBorder(SkCanvas* canvas,
   }
   else if (b.fill_type == FT_Color)
   {
-    strokePen.setColor(b.color.value_or(VGGColor{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
+    strokePen.setColor(b.color.value_or(Color{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
     strokePen.setAlphaf(strokePen.getAlphaf() * globalAlpha);
   }
   else if (b.fill_type == FT_Pattern)

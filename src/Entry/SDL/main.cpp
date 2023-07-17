@@ -2,7 +2,6 @@
 #include "Adapter/NativeComposer.hpp"
 
 #include "SDLRuntime.hpp"
-#include "Utils/FileManager.hpp"
 #include <memory>
 #include <argparse/argparse.hpp>
 #include <filesystem>
@@ -11,11 +10,10 @@
 #include <Reader/LoadUtil.hpp>
 
 using namespace VGG;
-namespace fs = std::filesystem;
 #define main main
 int main(int argc, char** argv)
 {
-  argparse::ArgumentParser program("vgg", Version::get());
+  argparse::ArgumentParser program("vgg", "0.1");
   program.add_argument("-l", "--load").help("load from vgg or sketch file");
   program.add_argument("-d", "--data").help("resources dir");
   program.add_argument("-p", "--prefix").help("the prefix of filename or dir");
@@ -55,16 +53,8 @@ int main(int argc, char** argv)
   SDLRuntime* app = App<SDLRuntime>::getInstance(1920, 1080, "VGG");
   ASSERT(app);
 
-  // todo: delete deprecated code
-  if (auto fm = FileManager::getInstance(); fm && fm->fileCount() < 1)
-  {
-    FileManager::newFile();
-  }
-
   app->setView(main_composer.view());
   app->setScene(main_composer.view()->scene());
-  // enter run mode
-  app->setOnFrameOnce([app]() { app->startRunMode(); });
 
   // enter loop
   constexpr int fps = 60;

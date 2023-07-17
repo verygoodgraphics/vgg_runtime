@@ -15,6 +15,7 @@ if (EMSCRIPTEN)
   )
 endif()
 
+add_subdirectory(Utility)
 add_subdirectory(Layer)
 add_subdirectory(Domain)
 add_subdirectory(Application)

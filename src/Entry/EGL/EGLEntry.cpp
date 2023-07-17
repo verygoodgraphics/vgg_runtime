@@ -1,8 +1,6 @@
 #include <argparse/argparse.hpp>
 #include <filesystem>
 #include <fstream>
-#include "../../Utils/Version.hpp"
-#include "../../Utils/FileManager.hpp"
 #include "EGLRuntime.h"
 #include <Reader/LoadUtil.hpp>
 using namespace VGG;
@@ -28,7 +26,7 @@ void writeResult(const std::map<int, std::vector<char>>& result)
 
 int main(int argc, char** argv)
 {
-  argparse::ArgumentParser program("vgg", Version::get());
+  argparse::ArgumentParser program("vgg", "0.1");
   program.add_argument("-l", "--load").help("load from vgg or sketch file");
   program.add_argument("-d", "--data").help("resources dir");
   program.add_argument("-p", "--prefix").help("the prefix of filename or dir");
@@ -64,8 +62,8 @@ int main(int argc, char** argv)
   if (auto loadfile = program.present("-l"))
   {
     auto fp = loadfile.value();
-    auto ext = FileManager::getLoweredFileExt(fp);
-    if (ext == "json")
+    auto ext = fs::path(fp).extension().string();
+    if (ext == ".json")
     {
       respath = std::filesystem::path(fp).stem(); // same with filename as default
       if (auto res = program.present("-d"))
@@ -74,7 +72,7 @@ int main(int argc, char** argv)
       }
     }
 
-    auto r = load("." + ext);
+    auto r = load(ext);
     if (r)
     {
       auto data = r->read(prefix / fp);

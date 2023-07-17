@@ -5,7 +5,7 @@
 #include "Presenter.hpp"
 #include "RunLoop.hpp"
 #include "UIView.hpp"
-#include "Utils/Async.hpp"
+#include "Async.hpp"
 #include "Domain/Daruma.hpp"
 
 #include <memory>

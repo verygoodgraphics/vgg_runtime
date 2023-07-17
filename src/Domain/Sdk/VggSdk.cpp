@@ -1,6 +1,6 @@
 #include "VggSdk.hpp"
 
-#include "Utils/DIContainer.hpp"
+#include "DIContainer.hpp"
 
 #ifdef EMSCRIPTEN
 constexpr auto listener_code_key = "listener";

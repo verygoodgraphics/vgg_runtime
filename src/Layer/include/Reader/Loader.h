@@ -279,7 +279,7 @@ public:
     {
       auto p = std::make_shared<PaintNode>(e["name"], VGG_ARTBOARD);
       const auto bg =
-        get_stack_optional<VGGColor>(e, "backgroundColor").value_or(VGGColor{ 1, 1, 1, 1 });
+        get_stack_optional<Color>(e, "backgroundColor").value_or(Color{ 1, 1, 1, 1 });
       p->setBackgroundColor(bg);
       fromObjectCommonProperty(e, p.get());
 

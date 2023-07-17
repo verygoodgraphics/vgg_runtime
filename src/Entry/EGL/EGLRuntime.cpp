@@ -7,13 +7,8 @@
 #include <sstream>
 #include <variant>
 
-#include "Entity/EntityManager.hpp"
-#include "Entity/InputManager.hpp"
-#include "Systems/RenderSystem.hpp"
-#include "Utils/Utils.hpp"
-#include "Utils/Version.hpp"
-#include "Utils/App.hpp"
-#include "Utils/FileManager.hpp"
+#include "Log.h"
+#include "App.hpp"
 
 #include "EGLRuntime.h"
 #include "include/core/SkData.h"

@@ -2,7 +2,7 @@
 
 #include "Adapter/VggSdkAddon.hpp"
 #include "Domain/VggSdk.hpp"
-#include "Utils/DIContainer.hpp"
+#include "DIContainer.hpp"
 #include "VggSdkMock.hpp"
 #include "test_config.hpp"
 

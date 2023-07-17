@@ -69,7 +69,6 @@ inline std::shared_ptr<IReader> load(const std::string ext)
   }
   else
   {
-    INFO("Failed to initialize a reader\n");
   }
   return nullptr;
 }

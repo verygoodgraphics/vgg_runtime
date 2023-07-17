@@ -49,7 +49,7 @@ protected:
   ObjectType type;
 
   bool visible{ true };
-  std::optional<VGGColor> bgColor;
+  std::optional<Color> bgColor;
 
   friend class NlohmannBuilder;
   friend class SkiaRenderer;
@@ -92,7 +92,7 @@ public:
     this->visible = visible;
   }
 
-  void setBackgroundColor(const VGGColor& color)
+  void setBackgroundColor(const Color& color)
   {
     this->bgColor = color;
   }

@@ -51,6 +51,12 @@ struct ParagraphAttr
 {
   TextLineAttr type;
   ETextHorizontalAlignment horiAlign;
+  ParagraphAttr() = default;
+  ParagraphAttr(TextLineAttr type, ETextHorizontalAlignment align)
+    : type(type)
+    , horiAlign(align)
+  {
+  }
 };
 
 class ParagraphListener

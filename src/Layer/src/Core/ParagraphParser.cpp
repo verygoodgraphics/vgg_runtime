@@ -115,7 +115,8 @@ void ParagraphParser::parse(ParagraphListener& listener,
 
           listener.onParagraphEnd(
             paragraphAttrIndex,
-            { std::string_view{ prevParagraphBegin, end }, paragraphCharCount });
+            { std::string_view{ prevParagraphBegin, size_t(end - prevParagraphBegin) },
+              paragraphCharCount });
           prevParagraphBegin = end;
           if (paragraphAttrIndex + 1 < paragraphAttributes.size())
           {

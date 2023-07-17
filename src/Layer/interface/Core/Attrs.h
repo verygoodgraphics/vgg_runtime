@@ -1,7 +1,7 @@
 #pragma once
 // #include "Components/Styles.hpp"
 #include "VGGType.h"
-#include <ostream>
+// #include <iostream>
 #include "include/effects/SkGradientShader.h"
 #include "include/effects/SkDashPathEffect.h"
 #include <algorithm>
@@ -50,9 +50,9 @@ struct Color
   }
 
   inline static Color fromARGB(unsigned char ua,
-                                  unsigned char ur,
-                                  unsigned char ug,
-                                  unsigned char ub)
+                               unsigned char ur,
+                               unsigned char ug,
+                               unsigned char ub)
   {
     return Color{ ur / 255.f, ug / 255.f, ub / 255.f, ua / 255.f };
   }

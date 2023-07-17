@@ -1,8 +1,9 @@
 #include <argparse/argparse.hpp>
 #include <filesystem>
 #include <fstream>
-#include "EGLRuntime.h"
-#include <Reader/LoadUtil.hpp>
+#include "Scene/Scene.h"
+#include "loader.h"
+#include "Entry/EGL/EGLRuntime.h"
 using namespace VGG;
 
 void writeResult(const std::map<int, std::vector<char>>& result)

@@ -7,7 +7,6 @@
 #include <filesystem>
 
 #include <Scene/Scene.h>
-#include <Reader/LoadUtil.hpp>
 
 using namespace VGG;
 #define main main

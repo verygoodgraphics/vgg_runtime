@@ -1,5 +1,6 @@
 if (EMSCRIPTEN)
 else()
+  add_subdirectory(render)
   if(NOT ENABLE_UNIT_TEST)
     return()
   endif()

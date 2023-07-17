@@ -1,4 +1,4 @@
-#include "SDLRuntime.hpp"
+#include "Entry/SDL/SDLRuntime.hpp"
 #include <exception>
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -7,8 +7,8 @@
 #include <filesystem>
 
 #include <Scene/Scene.h>
-#include <Reader/LoadUtil.hpp>
 #include <ConfigMananger.h>
+#include "loader.h"
 
 using namespace VGG;
 namespace fs = std::filesystem;

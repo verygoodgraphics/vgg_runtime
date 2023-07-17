@@ -18,7 +18,6 @@
 #include "include/pathops/SkPathOps.h"
 
 #include <any>
-#include <asm-generic/errno.h>
 #include <memory>
 #include <optional>
 #include <string>

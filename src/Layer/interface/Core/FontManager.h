@@ -3,6 +3,7 @@
 #include <modules/skparagraph/include/FontCollection.h>
 #include <modules/skparagraph/include/TypefaceFontProvider.h>
 #include "include/ports/SkFontMgr_directory.h"
+#include <unordered_map>
 
 #include <filesystem>
 #include <iostream>
@@ -38,7 +39,7 @@ class FontManager
   sk_sp<ResourceFontCollection> m_defaultFontCollection;
   bool m_init{ false };
   std::unordered_map<std::string, sk_sp<ResourceFontCollection>> fontResourceCache;
-  std::unordered_map<fs::path, std::vector<fs::path>> fontFilenameCache;
+  std::unordered_map<std::string, std::vector<fs::path>> fontFilenameCache;
 
 public:
   FontManager(const FontManager& s) = delete;

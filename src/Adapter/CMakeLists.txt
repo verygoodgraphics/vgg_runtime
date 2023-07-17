@@ -9,7 +9,8 @@ if (EMSCRIPTEN)
     PlatformAdapter/Browser/Sdk/BrowserSdkAdapter.cpp
   )
 else()
-  target_link_libraries(vgg_adapter vgg_libnode ${SDL2_LIBRARIES})
+  target_link_libraries(vgg_adapter vgg_libnode)
+  set_target_properties(vgg_adapter PROPERTIES LINK_FLAGS ${SDL2_LIBRARIES})
   target_sources(vgg_adapter PRIVATE
     PlatformAdapter/Native/Exec/NativeExec.cpp
     PlatformAdapter/Native/Exec/NativeExecImpl.cpp

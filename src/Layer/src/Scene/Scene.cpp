@@ -6,7 +6,7 @@
 #include "Scene/Renderer.h"
 #include "core/SkCanvas.h"
 #include <filesystem>
-#include "Reader/ConfigMananger.h"
+#include "ConfigMananger.h"
 #include <fstream>
 #include <string>
 namespace VGG

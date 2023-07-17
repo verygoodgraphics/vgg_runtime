@@ -1,4 +1,4 @@
-#include "Reader/ConfigMananger.h"
+#include "ConfigMananger.h"
 #include "Reader/FigmaFileReader.h"
 #include "Reader/RawFileReader.h"
 #include "Reader/SketchFileReader.h"

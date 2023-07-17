@@ -8,7 +8,7 @@
 
 #include <Scene/Scene.h>
 #include <Reader/LoadUtil.hpp>
-#include <Reader/ConfigMananger.h>
+#include <ConfigMananger.h>
 
 using namespace VGG;
 namespace fs = std::filesystem;

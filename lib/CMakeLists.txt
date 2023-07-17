@@ -8,8 +8,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/vgg_contrib/sdefl ${CMAKE_BINARY_DIR}/vgg_c
 add_subdirectory(${CMAKE_SOURCE_DIR}/vgg_contrib/valijson ${CMAKE_BINARY_DIR}/vgg_contrib/valijson)
 add_subdirectory(${CMAKE_SOURCE_DIR}/vgg_contrib/zip ${CMAKE_BINARY_DIR}/vgg_contrib/zip)
 add_subdirectory(${CMAKE_SOURCE_DIR}/vgg_contrib/zlib ${CMAKE_BINARY_DIR}/vgg_contrib/zlib)
-
-add_subdirectory(vgg_automerge/automerge)
+add_subdirectory(${CMAKE_SOURCE_DIR}/vgg_contrib/rapidfuzz-cpp ${CMAKE_BINARY_DIR}/vgg_contrib/rapidfuzz-cpp)
 
 set(VGG_LIB_INCLUDE_PATH
   ${CMAKE_CURRENT_SOURCE_DIR}

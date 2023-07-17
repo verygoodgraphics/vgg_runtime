@@ -1,6 +1,6 @@
 add_library(egl_runtime EGLRuntime.cpp)
 set_target_properties(egl_runtime PROPERTIES POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(egl_runtime vgg_layer vgg_internal)
+target_link_libraries(egl_runtime vgg_application)
 target_link_libraries(egl_runtime OpenGL::EGL)
 add_executable(egl_entry EGLEntry.cpp)
 target_link_libraries(egl_entry egl_runtime)

@@ -11,13 +11,7 @@ else()
   add_library(vgg_layer STATIC)
 endif()
 
-set(LeagacySrcVar
-    "${CMAKE_CURRENT_SOURCE_DIR}/interface/Entity/EntityManager.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/interface/Systems/GeometrySystem.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/interface/Systems/RenderSystem.cpp"
-    "${CMAKE_SOURCE_DIR}/src/Utils/EntityContainer.cpp"
-)
-target_sources(vgg_layer PRIVATE ${CoreSrcVar} ${SkiaImplSrcVar} ${SceneSrcVar} ${LeagacySrcVar} ${ReaderSrcVar} ${CommonSrcVar})
+target_sources(vgg_layer PRIVATE ${CoreSrcVar} ${SkiaImplSrcVar} ${SceneSrcVar} ${ReaderSrcVar} ${CommonSrcVar})
 target_include_directories(vgg_layer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/interface)
 
 message(STATUS "JSON INCLUDE DIR: " ${VGG_CONTRIB_JSON_INCLUDE})
@@ -29,7 +23,7 @@ target_include_directories(
   ${VGG_CONTRIB_RAPIDFUZZCPP_INCLUDE})
 
 target_link_libraries(vgg_layer PUBLIC glm ${SKIA_LIBS})
-target_link_libraries(vgg_layer PRIVATE ${OPENGL_LIBRARIES})
+target_link_libraries(vgg_layer PRIVATE ${OPENGL_LIBRARIES} vgg_utility)
 set_target_properties(vgg_layer PROPERTIES BUILD_RPATH ${SKIA_LIB_DIR})
 
 set_target_properties(vgg_layer PROPERTIES POSITION_INDEPENDENT_CODE ON)

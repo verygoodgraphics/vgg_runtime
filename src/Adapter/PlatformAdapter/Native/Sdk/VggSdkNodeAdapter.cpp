@@ -1,7 +1,7 @@
 #include "PlatformAdapter/Native/Sdk/VggSdkNodeAdapter.hpp"
 
 #include "Domain/VggSdk.hpp"
-#include "Utils/DIContainer.hpp"
+#include "DIContainer.hpp"
 
 #include <string>
 #include <cassert>

@@ -1,12 +1,7 @@
 #pragma once
 
-#include "Entity/EntityManager.hpp"
-#include "Entity/InputManager.hpp"
-#include "Systems/RenderSystem.hpp"
-
-#include "../../Utils/App.hpp"
-#include "../../Utils/Utils.hpp"
-#include "../../Utils/Version.hpp"
+#include "App.hpp"
+#include "Log.h"
 #include <optional>
 
 using namespace VGG;
@@ -253,9 +248,9 @@ public:
   void swapBuffer()
   {
 
-    auto profiler = CappingProfiler::getInstance();
+    // auto profiler = CappingProfiler::getInstance();
     // display fps
-    SDL_SetWindowTitle(m_sdlState.window, profiler->fpsStr());
+    // SDL_SetWindowTitle(m_sdlState.window, profiler->fpsStr());
 
     // swap buffer at last
     SDL_GL_SwapWindow(m_sdlState.window);

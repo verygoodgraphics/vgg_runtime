@@ -5,7 +5,7 @@
 #include "PlatformAdapter/Native/Sdk/Event/JsEventGenerator.hpp"
 #include "PlatformAdapter/Native/Sdk/Event/UIEvent.hpp"
 #include "PlatformAdapter/Helper/StringHelper.hpp"
-#include "Utils/Utils.hpp"
+#include "Log.h"
 
 using namespace VGG;
 

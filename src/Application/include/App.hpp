@@ -28,6 +28,7 @@
 #include <filesystem>
 #include <functional>
 #include <queue>
+#include <fstream>
 #include <memory>
 #include <optional>
 #ifdef EMSCRIPTEN
@@ -50,6 +51,7 @@
 #include <include/core/SkSwizzle.h>
 #include <include/core/SkTextBlob.h>
 #include <include/core/SkTime.h>
+#include <include/core/SkColorSpace.h>
 #include <include/effects/SkDashPathEffect.h>
 #include <src/gpu/ganesh/gl/GrGLDefines.h>
 #include <src/gpu/ganesh/gl/GrGLUtil.h>
@@ -58,13 +60,14 @@
 #include "include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "encode/SkPngEncoder.h"
 
-#include "Utils/CappingProfiler.hpp"
-#include "Utils/Types.hpp"
-#include "Utils/DPI.hpp"
-#include "Utils/FileManager.hpp"
-#include "Utils/Scheduler.hpp"
+// #include "Utils/CappingProfiler.hpp"
+// #include "Utils/Types.hpp"
+// #include "Utils/DPI.hpp"
+// #include "Utils/FileManager.hpp"
+// #include "Utils/Scheduler.hpp"
 #include "Scene/Scene.h"
 #include "Application/UIView.hpp"
+#include "Common/Math.hpp"
 
 namespace VGG
 {
@@ -175,8 +178,12 @@ struct AppError
   }
 };
 
+struct DPI
+{
+  inline static double ScaleFactor = 1.0;
+};
 template<typename T>
-class App : public Uncopyable
+class App
 {
 private:
   inline T* Self()
@@ -273,17 +280,17 @@ public: // public data and types
 public:
   inline void setOnFrameOnce(std::function<void()>&& cb)
   {
-    Scheduler::setOnFrameOnce(std::move(cb));
+    // Scheduler::setOnFrameOnce(std::move(cb));
   }
 
   inline void startRunMode()
   {
-    EntityManager::setInteractionMode(EntityManager::InteractionMode::RUN);
-    InputManager::setMouseCursor(MouseEntity::CursorType::NORMAL);
-    if (auto container = EntityManager::getEntities())
-    {
-      container->setRunModeInteractions();
-    }
+    // EntityManager::setInteractionMode(EntityManager::InteractionMode::RUN);
+    // // InputManager::setMouseCursor(MouseEntity::CursorType::NORMAL);
+    // if (auto container = EntityManager::getEntities())
+    // {
+    //   container->setRunModeInteractions();
+    // }
   }
 
 protected: // protected members and static members
@@ -506,7 +513,7 @@ protected: // protected methods
 
   void onFrame()
   {
-    Scheduler::callOnFrameOnce();
+    // Scheduler::callOnFrameOnce();
 
     SkCanvas* canvas = nullptr;
     if (m_capture)
@@ -520,10 +527,6 @@ protected: // protected methods
     if (canvas)
     {
       m_zoomer.apply(canvas);
-      if (m_useOldRenderer)
-      {
-        EntityManager::map([&](Entity& entity) { RenderSystem::drawEntity(canvas, entity); });
-      }
       if (m_scene)
       {
         m_scene->render(canvas);
@@ -553,7 +556,7 @@ protected: // protected methods
       m_curMouseY = evt.motion.y;
     }
     auto e = m_zoomer.mapEvent(evt, DPI::ScaleFactor);
-    InputManager::onEvent(e);
+    // InputManager::onEvent(e);
     if (m_view)
       m_view->onEvent(e);
     // InputManager::onEvent(e);
@@ -619,14 +622,14 @@ protected: // protected methods
 
       if (key == SDLK_PAGEUP && (SDL_GetModState() & KMOD_CTRL))
       {
-        FileManager::prevPage();
+        // FileManager::prevPage();
         m_scene->preArtboard();
         return true;
       }
 
       if (key == SDLK_PAGEDOWN && (SDL_GetModState() & KMOD_CTRL))
       {
-        FileManager::nextPage();
+        // FileManager::nextPage();
         m_scene->nextArtboard();
         return true;
       }
@@ -783,15 +786,15 @@ public: // public methods
     // deal with events
 
     // cap the frame rate
-    auto profiler = CappingProfiler::getInstance();
-    if (fps > 0)
-    {
-      if (!(profiler->enoughFrameDuration(fps)))
-      {
-        return;
-      }
-    }
-    profiler->markFrame();
+    // auto profiler = CappingProfiler::getInstance();
+    // if (fps > 0)
+    // {
+    //   if (!(profiler->enoughFrameDuration(fps)))
+    //   {
+    //     return;
+    //   }
+    // }
+    // profiler->markFrame();
 
     // get and setup canvas
     SkCanvas* canvas = getCanvas();

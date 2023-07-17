@@ -1,11 +1,11 @@
 #pragma once
-#include "Components/Styles.hpp"
+// #include "Components/Styles.hpp"
 #include "VGGType.h"
 #include <ostream>
 #include "include/effects/SkGradientShader.h"
 #include "include/effects/SkDashPathEffect.h"
 #include <algorithm>
-#include "Utils/Math.hpp"
+#include "Common/Math.hpp"
 #include "Core/Geometry.hpp"
 #include "Common/Hash.h"
 #include <optional>
@@ -32,11 +32,7 @@ struct Pattern
   glm::mat3 transform;
 };
 
-// Type with 'VGG' prefix is temporary. It's used to distinguish
-// the existsing version. Because new version doesn't need the definition
-// with NLOHMANN_DEFINE_TYPE_INTRUSIVE.
-// 'VGG' prefix will be removed once the old rendering code is replaced completely.
-struct VGGColor
+struct Color
 {
   float r{ 0. };
   float g{ 0. };
@@ -48,24 +44,24 @@ struct VGGColor
     return SkColorSetARGB(255 * a, 255 * r, 255 * g, 255 * b);
   }
 
-  inline static VGGColor fromRGB(unsigned char ur, unsigned char ug, unsigned char ub)
+  inline static Color fromRGB(unsigned char ur, unsigned char ug, unsigned char ub)
   {
-    return VGGColor{ ur / 255.f, ug / 255.f, ub / 255.f, 1. };
+    return Color{ ur / 255.f, ug / 255.f, ub / 255.f, 1. };
   }
 
-  inline static VGGColor fromARGB(unsigned char ua,
+  inline static Color fromARGB(unsigned char ua,
                                   unsigned char ur,
                                   unsigned char ug,
                                   unsigned char ub)
   {
-    return VGGColor{ ur / 255.f, ug / 255.f, ub / 255.f, ua / 255.f };
+    return Color{ ur / 255.f, ug / 255.f, ub / 255.f, ua / 255.f };
   }
 };
 
 template<>
-inline VGGColor lerp(const VGGColor& a, const VGGColor& b, double t)
+inline Color lerp(const Color& a, const Color& b, double t)
 {
-  return VGGColor{
+  return Color{
     lerp(a.r, b.r, t),
     lerp(a.g, b.g, t),
     lerp(a.b, b.b, t),
@@ -73,13 +69,13 @@ inline VGGColor lerp(const VGGColor& a, const VGGColor& b, double t)
   };
 }
 
-struct VGGGradient
+struct Gradient
 {
   struct GradientStop
   {
     static constexpr double minPos = 0.0;
     static constexpr double maxPos = 1.0;
-    VGGColor color{ 1., 1., 1., 1. };
+    Color color{ 1., 1., 1., 1. };
     float position{ 1.0 }; // [0,1]
     float midPoint;
   };
@@ -93,8 +89,8 @@ struct VGGGradient
   float invert{ false };      //
   bool aiCoordinate{ false }; // This flag indicates if these positions are Ai exported.
   std::vector<GradientStop> stops{
-    { VGGColor::fromRGB(0xEE, 0xEE, 0xEE), 0.0 },
-    { VGGColor::fromRGB(0xD8, 0xD8, 0xD8), 1.0 },
+    { Color::fromRGB(0xEE, 0xEE, 0xEE), 0.0 },
+    { Color::fromRGB(0xD8, 0xD8, 0xD8), 1.0 },
   };
 
   inline double getTheta() const
@@ -297,13 +293,13 @@ struct VGGGradient
 
 struct Border
 {
-  std::optional<VGGColor> color;
+  std::optional<Color> color;
   ContextSetting context_settings;
   double dashed_offset;
   std::vector<float> dashed_pattern;
   EPathFillType fill_type; // TODO:
   double flat;
-  std::optional<VGGGradient> gradient;
+  std::optional<Gradient> gradient;
   bool isEnabled;
   ELineCap lineCapStyle;
   ELineJoin lineJoinStyle;
@@ -317,7 +313,7 @@ struct Border
 struct Shadow
 {
   float blur;
-  VGGColor color;
+  Color color;
   ContextSetting context_settings;
   bool inner;
   bool is_enabled;
@@ -339,10 +335,10 @@ struct Blur
 struct Fill
 {
   bool isEnabled{ true };
-  VGGColor color;
+  Color color;
   EPathFillType fillType{};
   ContextSetting contextSettings{};
-  std::optional<VGGGradient> gradient{ std::nullopt };
+  std::optional<Gradient> gradient{ std::nullopt };
   std::optional<Pattern> pattern{ std::nullopt };
 };
 
@@ -365,7 +361,7 @@ struct TextAttr
 {
   std::string fontName;
   std::string subFamilyName;
-  VGGColor color{ 0, 0, 0, 1 };
+  Color color{ 0, 0, 0, 1 };
   float letterSpacing{ 0.0 };
   float baselineShift{ 0.0 };
   size_t length{ 0 };
@@ -392,55 +388,6 @@ struct TextAttr
                  underline,
                  horzAlignment);
     return h;
-  }
-};
-
-struct TextStyleStub
-{
-  VGGColor fillColor;
-  VGGColor boarderColor;
-  size_t length{ 0 };
-  float lineSpace{ 1.0 };
-  float paraSpacing{ 0.0 };
-  float letterSpacing{ 0.0 };
-  std::string fontName;
-  std::string subFamilyName;
-  std::optional<int> boarderSize;
-  ETextVerticalAlignment vertAlignment{ VA_Top };
-  ETextHorizontalAlignment horzAlignment{ HA_Left };
-  ETextUnderline underline{ UT_None };
-  uint8_t size{ 14 };
-  bool lineThrough{ false };
-  bool bold{ false };
-  bool italic{ false };
-  SkFont getFont() const
-  {
-    if (auto tf = TypefaceManager::getTypeface(fontName))
-    {
-      SkFont font(tf, size);
-      return font;
-    }
-    else if (auto tf = TypefaceManager::getTypefaceByPSName(fontName))
-    {
-      SkFont font(tf, size);
-      return font;
-    }
-    auto sf = SkFont(nullptr, size);
-    auto tf = sf.getTypefaceOrDefault();
-    ASSERT(tf);
-    if (tf->countGlyphs() < 1)
-    {
-      sf.setTypeface(FiraSans::getSkTypeface());
-    }
-    return sf;
-  }
-  SkPaint getPaint() const
-  {
-    SkPaint pen;
-    pen.setAntiAlias(true);
-    pen.setStyle(SkPaint::kFill_Style);
-    pen.setColor(fillColor);
-    return pen;
   }
 };
 

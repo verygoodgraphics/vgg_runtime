@@ -4,7 +4,7 @@
 
 #include "Domain/Daruma.hpp"
 #include "Adapter/NativeComposer.hpp"
-#include "Utils/DIContainer.hpp"
+#include "DIContainer.hpp"
 #include "mocks/MockPresenter.hpp"
 
 #include "rxcpp/rx.hpp"

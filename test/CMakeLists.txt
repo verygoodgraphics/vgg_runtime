@@ -42,7 +42,7 @@ else()
     COMMAND ${CMAKE_COMMAND} -E rm ${TMP_VGG_WORK_ZIP_FILE}
   )
 
-  target_link_libraries(unit_tests PRIVATE vgg_internal gtest_main gmock)
+  target_link_libraries(unit_tests PRIVATE vgg_internal gtest_main gmock vgg_utility)
   set_target_properties(unit_tests PROPERTIES LINK_FLAGS ${SDL2_LIBRARIES})
   include(GoogleTest)
   gtest_discover_tests(unit_tests)

@@ -7,8 +7,7 @@
 #include "Core/PathNodePrivate.h"
 #include "SkiaBackend/SkiaImpl.h"
 
-#include "Components/Styles.hpp"
-#include "Utils/Utils.hpp"
+#include "Log.h"
 #include "core/SkBlendMode.h"
 #include "core/SkCanvas.h"
 #include "core/SkMatrix.h"

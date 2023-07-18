@@ -6,17 +6,17 @@
 <body>
     <canvas id="myCanvas"></canvas>
 
+    <script type="text/javascript" src="./sut/vgg_runtime.js"></script>
     <script type="text/javascript">
         async function setupAndRun() {
             // 0. Given
             const myCanvas = document.getElementById('myCanvas');
-            const myDarumaUrl = '/my-daruma.zip';
+            const myDarumaUrl = '/example.daruma';
             const width = 800;
             const height = 600;
 
             // 1. create wasm instance
-            const { default: createVggWasmInstance } = await import('./sut/vgg_runtime.mjs');
-            const myInstance = await createVggWasmInstance(
+            const myInstance = await _vgg_createWasmInstance(
                 {
                     noInitialRun: true,
                     canvas: myCanvas,

@@ -6,6 +6,7 @@
 #include <argparse/argparse.hpp>
 #include <filesystem>
 
+#include <ConfigMananger.h>
 #include <Scene/Scene.h>
 
 using namespace VGG;
@@ -14,6 +15,7 @@ int main(int argc, char** argv)
 {
   argparse::ArgumentParser program("vgg", "0.1");
   program.add_argument("-l", "--load").help("load from vgg or sketch file");
+  program.add_argument("-c", "--config").help("specify config file");
   program.add_argument("-d", "--data").help("resources dir");
   program.add_argument("-p", "--prefix").help("the prefix of filename or dir");
   program.add_argument("-L", "--loaddir").help("iterates all the files in the given dir");
@@ -35,6 +37,12 @@ int main(int argc, char** argv)
     std::cout << err.what() << std::endl;
     std::cout << program;
     exit(0);
+  }
+
+  if (auto configfile = program.present("-c"))
+  {
+    auto file = configfile.value();
+    Config::readGlobalConfig(file);
   }
 
 #ifdef NDEBUG

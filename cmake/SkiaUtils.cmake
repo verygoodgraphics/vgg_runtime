@@ -111,6 +111,7 @@ skia_use_libwebp_encode=true
 skia_use_icu=true 
 skia_enable_skunicode=true 
 skia_enable_gpu=true 
+skia_enable_fontmgr_custom_directory=true
 skia_enable_fontmgr_custom_embedded=false
 skia_canvaskit_enable_canvas_bindings=false
 skia_canvaskit_enable_embedded_font=false

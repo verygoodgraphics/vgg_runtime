@@ -1,10 +1,13 @@
 #pragma once
 #include <core/SkFontMgr.h>
+#include <core/SkString.h>
 #include <modules/skparagraph/include/FontCollection.h>
 #include <modules/skparagraph/include/TypefaceFontProvider.h>
 #include "Layer/include/SkiaBackend/SkFontMgrVGG.h"
 #include "include/ports/SkFontMgr_directory.h"
+#include <string>
 #include <unordered_map>
+#include <ConfigMananger.h>
 
 #include <filesystem>
 #include <iostream>
@@ -18,14 +21,23 @@ class ResourceFontCollection : public FontCollection
 {
 public:
   ResourceFontCollection(const fs::path& fontDir, bool testOnly = false)
-    : fFontProvider(VGGFontDirectory(fontDir.string().c_str()))
   {
+    auto fFontProvider = VGGFontDirectory(fontDir.string().c_str());
+    fFontProvider->saveFontInfo("FontName.txt");
+    auto& cfg = Config::globalConfig();
+    std::vector<SkString> defFonts;
+    if (auto it = cfg.find("fallbackFonts"); it != cfg.end())
+    {
+      std::vector<std::string> fallbackFonts = *it;
+      for (const auto& f : fallbackFonts)
+      {
+        defFonts.push_back(SkString(f));
+      }
+    }
     this->setAssetFontManager(fFontProvider);
-    this->setDefaultFontManager(fFontProvider);
+    this->setDefaultFontManager(fFontProvider, defFonts);
+    this->enableFontFallback();
   }
-
-private:
-  sk_sp<SkFontMgr> fFontProvider;
 };
 
 class FontManager

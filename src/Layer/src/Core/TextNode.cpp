@@ -1,4 +1,5 @@
 #include "Core/TextNode.h"
+#include "Core/Attrs.h"
 #include "Core/FontManager.h"
 #include "Core/Node.hpp"
 #include "Core/PaintNode.h"
@@ -33,15 +34,22 @@ void TextNode::setParagraph(std::string utf8,
   VGG_IMPL(TextNode);
   std::vector<ParagraphAttr> paraAttrs;
   _->text = std::move(utf8);
+  if (_->text.empty())
+    return;
   for (const auto a : lineAttr)
   {
     paraAttrs.emplace_back(a, ETextHorizontalAlignment::HA_Left);
   }
-  if (!paraAttrs.empty())
+  if (paraAttrs.empty())
   {
-    ParagraphParser parser;
-    parser.parse(_->m_paragraphCache, _->text, attrs, paraAttrs);
+    TextLineAttr attr;
+    attr.level = 0;
+    attr.lineType = TLT_Plain;
+    attr.firstLine = false;
+    paraAttrs.emplace_back(attr, ETextHorizontalAlignment::HA_Left);
   }
+  ParagraphParser parser;
+  parser.parse(_->m_paragraphCache, _->text, attrs, paraAttrs);
 }
 
 void TextNode::setFrameMode(ETextLayoutMode mode)

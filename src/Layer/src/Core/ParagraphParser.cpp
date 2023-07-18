@@ -167,10 +167,12 @@ void ParagraphParser::parse(ParagraphListener& listener,
   if (prevStyleBegin - text.data() < text.size())
   {
     WARN("No more style for text");
-    listener.onTextStyle(paragraphAttrIndex,
-                         styleIndex,
-                         { std::string_view(prevStyleBegin), styleTextCharCount },
-                         textAttrs[styleIndex]);
+    listener.onTextStyle(
+      paragraphAttrIndex,
+      styleIndex,
+      { std::string_view(prevStyleBegin, text.size() - size_t(prevStyleBegin - text.data())),
+        styleTextCharCount },
+      textAttrs[styleIndex]);
   }
   styleTextCharCount = 0;
   assert(paragraphAttrIndex < paragraphAttributes.size());

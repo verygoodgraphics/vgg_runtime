@@ -53,6 +53,7 @@ private:
   bool newParagraph{ true };
   ParagraphAttr paraAttr;
   TextParagraphCacheDirtyFlags m_dirtyFlags{ D_ALL };
+  sk_sp<FontCollection> fontCollection;
 
 protected:
   void onBegin() override;

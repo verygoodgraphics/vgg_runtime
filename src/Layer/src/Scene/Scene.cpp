@@ -20,10 +20,16 @@ Scene::Scene()
 {
   auto& fontMgr = FontManager::instance();
   auto& cfg = Config::globalConfig();
-  if (auto it = cfg.find("fontDirs"); it != cfg.end())
+  if (auto it = cfg.find("fontCollections"); it != cfg.end())
   {
-    if ((*it).size())
-      fontMgr.createOrGetFontCollection("default", (*it)[0]);
+    if (it->is_object())
+    {
+      std::unordered_map<std::string, std::string> coll = *it;
+      for (const auto& p : coll)
+      {
+        FontManager::instance().createOrGetFontCollection(p.first, p.second);
+      }
+    }
   }
 }
 void Scene::loadFileContent(const std::string& json)

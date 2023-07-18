@@ -20,15 +20,8 @@ public:
   ResourceFontCollection(const fs::path& fontDir, bool testOnly = false)
     : fFontProvider(VGGFontDirectory(fontDir.string().c_str()))
   {
-    if (testOnly)
-    {
-      this->setTestFontManager(std::move(fFontProvider));
-    }
-    else
-    {
-      this->setAssetFontManager(std::move(fFontProvider));
-    }
-    this->disableFontFallback();
+    this->setAssetFontManager(fFontProvider);
+    this->setDefaultFontManager(fFontProvider);
   }
 
 private:

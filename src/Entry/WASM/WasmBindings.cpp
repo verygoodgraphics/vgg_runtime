@@ -17,7 +17,7 @@
 #ifdef EMSCRIPTEN
 
 #include "BrowserMainComposer.hpp"
-#include "Utils/Version.hpp"
+#include "Version.h"
 
 extern "C"
 {

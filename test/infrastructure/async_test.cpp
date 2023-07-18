@@ -1,5 +1,5 @@
 #include "Application/RunLoop.hpp"
-#include "Utils/Async.hpp"
+#include "Async.hpp"
 
 #include <gtest/gtest.h>
 

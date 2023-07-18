@@ -25,6 +25,7 @@ add_library(vgg_internal INTERFACE)
 target_link_libraries(vgg_internal INTERFACE
   vgg_adapter
   $<TARGET_OBJECTS:vgg_adapter>
+  vgg_utility
 )
 
 add_subdirectory(Entry)

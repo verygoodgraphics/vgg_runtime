@@ -2,6 +2,7 @@
 #include <core/SkFontMgr.h>
 #include <modules/skparagraph/include/FontCollection.h>
 #include <modules/skparagraph/include/TypefaceFontProvider.h>
+#include "Layer/include/SkiaBackend/SkFontMgrVGG.h"
 #include "include/ports/SkFontMgr_directory.h"
 #include <unordered_map>
 
@@ -17,7 +18,7 @@ class ResourceFontCollection : public FontCollection
 {
 public:
   ResourceFontCollection(const fs::path& fontDir, bool testOnly = false)
-    : fFontProvider(SkFontMgr_New_Custom_Directory(fontDir.string().c_str()))
+    : fFontProvider(VGGFontDirectory(fontDir.string().c_str()))
   {
     if (testOnly)
     {

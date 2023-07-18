@@ -1,5 +1,4 @@
 #include "Entry/SDL/SDLRuntime.hpp"
-#include "Utils/FileManager.hpp"
 #include "BrowserMainComposer.hpp"
 #include <memory>
 extern "C"
@@ -18,10 +17,6 @@ extern "C"
   {
     SDLRuntime* app = App<SDLRuntime>::getInstance(width, height);
     ASSERT(app);
-    if (auto fm = FileManager::getInstance(); fm && fm->fileCount() < 1)
-    {
-      FileManager::newFile();
-    }
 
     auto& main_composer = VggBrowser::mainComposer();
     app->setView(main_composer.view());

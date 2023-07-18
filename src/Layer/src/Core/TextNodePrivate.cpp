@@ -7,6 +7,7 @@
 
 #include <core/SkCanvas.h>
 #include <core/SkColor.h>
+#include <modules/skparagraph/include/FontCollection.h>
 
 namespace VGG
 {
@@ -72,13 +73,14 @@ sktxt::ParagraphStyle createParagraphStyle(const ParagraphAttr& attr)
   return style;
 }
 
-sktxt::TextStyle createTextStyle(const TextAttr& attr)
+sktxt::TextStyle createTextStyle(const TextAttr& attr, FontCollection* font)
 {
   sktxt::TextStyle style;
   SkColor color = attr.color;
   style.setColor(color);
   style.setDecorationColor(color);
-  style.setFontFamilies({ SkString(attr.fontName) });
+  // font->findTypefaces(attr.fontName);
+  style.setFontFamilies({ SkString(attr.fontName), SkString("PingFang SC"), SkString("Apple Color Emoji") });
   style.setFontSize(attr.size);
   style.setLetterSpacing(attr.letterSpacing);
   style.setBaselineShift(attr.baselineShift);
@@ -151,13 +153,13 @@ void TextParagraphCache::onTextStyle(int paraIndex,
   auto& p = paragraph.back();
   if (newParagraph)
   {
-    auto defaultFontCollection = FontManager::instance().fontCollection("default");
+    fontCollection = FontManager::instance().fontCollection("default");
     p.builder = skia::textlayout::ParagraphBuilder::make(
       createParagraphStyle(ParagraphAttr{ paraAttr.type, textAttr.horzAlignment }),
-      defaultFontCollection);
+      fontCollection);
     newParagraph = false;
   }
-  p.builder->pushStyle(createTextStyle(textAttr));
+  p.builder->pushStyle(createTextStyle(textAttr, fontCollection.get()));
   p.builder->addText(textView.Text.data(), textView.Text.size());
   p.builder->pop();
   // std::cout << "Style Text: " << styleIndex << ", [" << textView.Text << "]\n";

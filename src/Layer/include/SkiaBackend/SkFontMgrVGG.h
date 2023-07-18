@@ -7,10 +7,14 @@
 #include "include/core/SkTypes.h"
 #include "include/private/base/SkTArray.h"
 #include <unordered_map>
-#include <iostream>
+#include <map>
+#include <fstream>
+#include <filesystem>
 #include "src/ports/SkFontHost_FreeType_common.h"
 #include "src/core/SkOSFile.h"
 #include "src/utils/SkOSPath.h"
+
+namespace fs = std::filesystem;
 
 class SkData;
 class SkFontDescriptor;
@@ -161,6 +165,19 @@ public:
 
   void cacheFont(const char* familyName, int ttcIndex);
 
+  void saveFontInfo(const fs::path& path)
+  {
+    std::ofstream ofs(path);
+    if (ofs.is_open())
+    {
+      std::map<std::string, int> sort(fFamilies.lookUp.begin(), fFamilies.lookUp.end());
+      for (const auto& typeface : sort)
+      {
+        ofs << typeface.first << std::endl;
+      }
+    }
+  }
+
 protected:
   int onCountFamilies() const override;
   void onGetFamilyName(int index, SkString* familyName) const override;
@@ -212,8 +229,7 @@ public:
   }
 
 private:
-  static SkFontStyleSet_VGG* find_family(SkFontMgrVGG::Families& families,
-                                            const char familyName[])
+  static SkFontStyleSet_VGG* find_family(SkFontMgrVGG::Families& families, const char familyName[])
   {
     // for (int i = 0; i < families.size(); ++i)
     // {
@@ -297,7 +313,7 @@ private:
   SkString fBaseDirectory;
 };
 
-inline SK_API sk_sp<SkFontMgr> VGGFontDirectory(const char* dir)
+inline SK_API sk_sp<SkFontMgrVGG> VGGFontDirectory(const char* dir)
 {
   return sk_make_sp<SkFontMgrVGG>(VGGFontLoader(dir));
 }

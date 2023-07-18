@@ -153,7 +153,12 @@ public:
                       .value_or(std::vector<TextLineAttr>());
     p->setParagraph(std::move(text), j.at("attr"), lineType);
     p->setVerticalAlignment(j.at("verticalAlignment"));
+    const auto& b = p->getBound();
     p->setFrameMode(j.at("frameMode"));
+    if (b.width() == 0 || b.height())
+    {
+      p->setFrameMode(ETextLayoutMode::TL_WidthAuto);
+    }
     return p;
   }
 
@@ -278,8 +283,7 @@ public:
     for (const auto& e : j["artboard"])
     {
       auto p = std::make_shared<PaintNode>(e["name"], VGG_ARTBOARD);
-      const auto bg =
-        get_stack_optional<Color>(e, "backgroundColor").value_or(Color{ 1, 1, 1, 1 });
+      const auto bg = get_stack_optional<Color>(e, "backgroundColor").value_or(Color{ 1, 1, 1, 1 });
       p->setBackgroundColor(bg);
       fromObjectCommonProperty(e, p.get());
 

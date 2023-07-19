@@ -91,24 +91,26 @@ inline SkPaint::Cap toSkPaintCap(VGG::ELineCap cap)
   SWITCH_MAP_ITEM_END(SkPaint::kButt_Cap)
 }
 
-inline TextAlign toSkTextAlign(ETextVerticalAlignment align)
+inline skia::textlayout::TextAlign toSkTextAlign(ETextVerticalAlignment align)
 {
   SWITCH_MAP_ITEM_BEGIN(align)
-  SWITCH_MAP_ITEM_DEF(VGG::ETextVerticalAlignment::VA_Top, TextAlign::kStart);
-  SWITCH_MAP_ITEM_DEF(VGG::ETextVerticalAlignment::VA_Bottom, TextAlign::kEnd);
-  SWITCH_MAP_ITEM_DEF(VGG::ETextVerticalAlignment::VA_Center, TextAlign::kCenter);
-  SWITCH_MAP_ITEM_END(TextAlign::kStart)
+  SWITCH_MAP_ITEM_DEF(VGG::ETextVerticalAlignment::VA_Top, skia::textlayout::TextAlign::kStart);
+  SWITCH_MAP_ITEM_DEF(VGG::ETextVerticalAlignment::VA_Bottom, skia::textlayout::TextAlign::kEnd);
+  SWITCH_MAP_ITEM_DEF(VGG::ETextVerticalAlignment::VA_Center, skia::textlayout::TextAlign::kCenter);
+  SWITCH_MAP_ITEM_END(skia::textlayout::TextAlign::kStart)
 }
 
-inline TextAlign toSkTextAlign(ETextHorizontalAlignment align)
+inline skia::textlayout::TextAlign toSkTextAlign(ETextHorizontalAlignment align)
 {
   SWITCH_MAP_ITEM_BEGIN(align)
-  SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_Left, TextAlign::kLeft);
-  SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_Right, TextAlign::kRight);
-  SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_Justify, TextAlign::kJustify);
-  SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_Center, TextAlign::kCenter);
+  SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_Left, skia::textlayout::TextAlign::kLeft);
+  SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_Right, skia::textlayout::TextAlign::kRight);
+  SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_Justify,
+                      skia::textlayout::TextAlign::kJustify);
+  SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_Center,
+                      skia::textlayout::TextAlign::kCenter);
   SWITCH_MAP_ITEM_DEF_NULL(VGG::ETextHorizontalAlignment::HA_Natural)
-  SWITCH_MAP_ITEM_END(TextAlign::kLeft)
+  SWITCH_MAP_ITEM_END(skia::textlayout::TextAlign::kLeft)
 }
 
 inline SkFontStyle toSkFontStyle(const std::string_view& subFamilyName)

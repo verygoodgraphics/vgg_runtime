@@ -1,10 +1,37 @@
 #include <Core/FontManager.h>
-#include <core/SkRefCnt.h>
+
+#include "Core/Node.hpp"
+#include "SkiaBackend/SkFontMgrVGG.h"
 namespace VGG
 {
 using namespace std;
 
+struct FontMgrData
+{
+  sk_sp<SkFontMgrVGG> FontMgr;
+  std::vector<std::string> FallbackFonts;
+  FontMgrData(sk_sp<SkFontMgrVGG> fontMgr, std::vector<std::string> fallbackFonts)
+    : FontMgr(std::move(fontMgr))
+    , FallbackFonts(std::move(fallbackFonts))
+  {
+  }
+};
+class FontManager__pImpl
+{
+  VGG_DECL_API(FontManager);
+
+public:
+  FontManager__pImpl(FontManager* api)
+    : q_ptr(api)
+  {
+  }
+
+  std::unordered_map<std::string, FontMgrData> fontMgrs;
+  std::string defaultFontManagerKey;
+};
+
 FontManager::FontManager()
+  : d_ptr(new FontManager__pImpl(this))
 {
   auto& cfg = Config::globalConfig();
   if (auto font = cfg.find("fonts"); font != cfg.end())
@@ -22,51 +49,73 @@ FontManager::FontManager()
           {
             fallbackFonts = *fallbackIt;
           }
-          createOrGetFontCollection(p.first, *dirIt, fallbackFonts);
+          createFontManager(p.first, *dirIt, fallbackFonts);
         }
       }
     }
-    if (auto it = cfg.find("defaultFontCollection"); it != cfg.end() && it->is_string())
+    if (auto it = font->find("defaultFontCollection"); it != font->end() && it->is_string())
     {
-      defaultFontCollectionKey = *it;
-      m_defaultFontCollection = fontCollection(defaultFontCollectionKey);
+      d_ptr->defaultFontManagerKey = *it;
     }
     else
     {
-      if (auto it = fontResourceCache.begin(); it != fontResourceCache.end())
+      if (auto it = d_ptr->fontMgrs.begin(); it != d_ptr->fontMgrs.end())
       {
-        defaultFontCollectionKey = it->first;
-        m_defaultFontCollection = it->second;
+        d_ptr->defaultFontManagerKey = it->first;
       }
     }
   }
 }
-sk_sp<VGGFontCollection> FontManager::createOrGetFontCollection(
-  const std::string& key,
-  const fs::path& fontDirs,
-  const std::vector<std::string>& fallbackFonts)
+
+SkFontMgrVGG* FontManager::createFontManager(const std::string& key,
+                                             const fs::path& fontDir,
+                                             std::vector<std::string> fallbackFonts)
 {
-  sk_sp<VGGFontCollection> fontCollection;
-  if (auto it = fontResourceCache.find(key); it != fontResourceCache.end())
+  if (auto it = d_ptr->fontMgrs.find(key); it != d_ptr->fontMgrs.end())
   {
-    return it->second;
+    return it->second.FontMgr.get();
   }
   else
   {
-    fontCollection = sk_make_sp<VGGFontCollection>(fontDirs, fallbackFonts);
-    fontResourceCache[key] = fontCollection;
-    return fontCollection;
+    sk_sp<SkFontMgrVGG> vggFontMgr = VGGFontDirectory(fontDir.string().c_str());
+    vggFontMgr->saveFontInfo("FontName.txt");
+    d_ptr->fontMgrs.insert({ key, std::move(FontMgrData(vggFontMgr, std::move(fallbackFonts))) });
+    return vggFontMgr.get();
   }
 }
 
-sk_sp<VGGFontCollection> FontManager::fontCollection(const std::string& key)
+SkFontMgrVGG* FontManager::getFontManager(const std::string& key) const
 {
-  sk_sp<VGGFontCollection> fontCollection;
-  if (auto it = fontResourceCache.find(key); it != fontResourceCache.end())
+  if (auto it = d_ptr->fontMgrs.find(key); it != d_ptr->fontMgrs.end())
   {
-    fontCollection = it->second;
+    return it->second.FontMgr.get();
   }
-  return fontCollection;
+  return nullptr;
 }
+
+std::vector<std::string> FontManager::getFallbackFonts(const std::string& key) const
+{
+  if (auto it = d_ptr->fontMgrs.find(key); it != d_ptr->fontMgrs.end())
+  {
+    return it->second.FallbackFonts;
+  }
+  return {};
+}
+
+void FontManager::setDefaultFontManager(const std::string& key)
+{
+  d_ptr->defaultFontManagerKey = key;
+}
+
+SkFontMgrVGG* FontManager::getDefaultFontManager() const
+{
+  return getFontManager(d_ptr->defaultFontManagerKey);
+}
+std::vector<std::string> FontManager::getDefaultFallbackFonts() const
+{
+  return getFallbackFonts(d_ptr->defaultFontManagerKey);
+}
+
+FontManager::~FontManager() = default;
 
 } // namespace VGG

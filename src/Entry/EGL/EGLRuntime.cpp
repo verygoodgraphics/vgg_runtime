@@ -7,6 +7,7 @@
 #include <sstream>
 #include <variant>
 
+#include "Core/FontManager.h"
 #include "Log.h"
 #include "App.hpp"
 
@@ -337,7 +338,8 @@ std::tuple<std::string, std::map<int, std::vector<char>>> render(
   const nlohmann::json& j,
   const std::map<std::string, std::vector<char>>& resources,
   int imageQuality,
-  int resolutionLevel)
+  int resolutionLevel,
+  const std::string& fontCollectionName)
 {
   float maxSurfaceSize[2];
   getMaxSurfaceSize(resolutionLevel, maxSurfaceSize);
@@ -357,6 +359,7 @@ std::tuple<std::string, std::map<int, std::vector<char>>> render(
     return { "Failed to create instance", {} };
   }
 
+  FontManager::instance().setDefaultFontManager(fontCollectionName);
   std::map<int, std::vector<char>> res;
   auto scene = std::make_shared<Scene>();
   scene->loadFileContent(j);

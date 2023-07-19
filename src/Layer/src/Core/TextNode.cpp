@@ -5,6 +5,7 @@
 #include "Core/PaintNode.h"
 #include "Core/VGGType.h"
 #include "Core/VGGUtils.h"
+#include "SkiaBackend/SkFontMgrVGG.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkFont.h"
 #include "include/core/SkFontMetrics.h"
@@ -25,6 +26,12 @@ TextNode::TextNode(const std::string& name)
   : PaintNode(name, VGG_TEXT)
   , d_ptr(new TextNode__pImpl(this))
 {
+  auto mgr = sk_sp<SkFontMgrVGG>(FontManager::instance().getDefaultFontManager());
+  mgr->ref();
+  auto fontCollection =
+    sk_make_sp<VGGFontCollection>(std::move(mgr),
+                                  FontManager::instance().getDefaultFallbackFonts());
+  d_ptr->m_paragraphCache.setFontCollection(fontCollection);
 }
 
 void TextNode::setParagraph(std::string utf8,

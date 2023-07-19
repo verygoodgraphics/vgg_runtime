@@ -1,6 +1,4 @@
 #include "Scene/Scene.h"
-
-#include "Core/FontManager.h"
 #include "Reader/Loader.h"
 #include "Core/PaintNode.h"
 #include "Scene/Renderer.h"
@@ -18,7 +16,6 @@ bool Scene::s_enableDrawDebugBound{ false };
 
 Scene::Scene()
 {
-  auto& fontMgr = FontManager::instance();
 }
 void Scene::loadFileContent(const std::string& json)
 {

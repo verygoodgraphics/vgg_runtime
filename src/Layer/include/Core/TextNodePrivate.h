@@ -77,7 +77,10 @@ public:
   {
 
     auto mgr = sk_sp<SkFontMgrVGG>(FontManager::instance().getDefaultFontManager());
-    mgr->ref();
+    if (mgr)
+    {
+      mgr->ref();
+    }
     fontCollection =
       sk_make_sp<VGGFontCollection>(std::move(mgr),
                                     FontManager::instance().getDefaultFallbackFonts());

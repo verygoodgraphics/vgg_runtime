@@ -4,10 +4,10 @@
 
 namespace Config
 {
+static nlohmann::json config;
 
 nlohmann::json& globalConfig()
 {
-  static nlohmann::json config;
   return config;
 }
 

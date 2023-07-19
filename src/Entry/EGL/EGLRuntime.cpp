@@ -339,8 +339,11 @@ std::tuple<std::string, std::map<int, std::vector<char>>> render(
   const std::map<std::string, std::vector<char>>& resources,
   int imageQuality,
   int resolutionLevel,
+  const std::string& configFile,
   const std::string& fontCollectionName)
 {
+
+  Config::readGlobalConfig(configFile);
   float maxSurfaceSize[2];
   getMaxSurfaceSize(resolutionLevel, maxSurfaceSize);
   std::stringstream ss;

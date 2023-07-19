@@ -146,13 +146,15 @@ public:
       paragraphCache[i].offsetX = curX;
       if (mode == ETextLayoutMode::TL_WidthAuto)
       {
-        paragraph->layout(std::numeric_limits<SkScalar>::infinity());
+        paragraph->layout(100000);
+        const auto width = paragraph->getLongestLine();
+        paragraph->layout(width);
       }
       else
       {
         paragraph->layout(layoutWidth - curX);
       }
-      newWidth = std::max((int)paragraph->getMaxWidth(), newWidth);
+      newWidth = std::max((int)paragraph->getLongestLine(), newWidth);
       auto lastLine = paragraph->lineNumber();
       if (lastLine < 1)
         continue;

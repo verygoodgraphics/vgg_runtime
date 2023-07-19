@@ -27,7 +27,10 @@ TextNode::TextNode(const std::string& name)
   , d_ptr(new TextNode__pImpl(this))
 {
   auto mgr = sk_sp<SkFontMgrVGG>(FontManager::instance().getDefaultFontManager());
-  mgr->ref();
+  if (mgr)
+  {
+    mgr->ref();
+  }
   auto fontCollection =
     sk_make_sp<VGGFontCollection>(std::move(mgr),
                                   FontManager::instance().getDefaultFallbackFonts());

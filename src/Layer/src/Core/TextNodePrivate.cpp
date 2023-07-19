@@ -81,7 +81,7 @@ sktxt::TextStyle createTextStyle(const TextAttr& attr, VGGFontCollection* font)
   style.setColor(color);
   style.setDecorationColor(color);
   auto matched = font->fuzzyMatch(attr.fontName);
-  std::cout << "Font Name: " << attr.fontName << " matches " << matched.c_str() << std::endl;
+  // std::cout << "Font Name: " << attr.fontName << " matches " << matched.c_str() << std::endl;
   style.setFontFamilies({ matched });
   style.setFontSize(attr.size);
   style.setLetterSpacing(attr.letterSpacing);

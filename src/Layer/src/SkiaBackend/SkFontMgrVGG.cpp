@@ -10,6 +10,7 @@
 #include "include/private/base/SkTemplates.h"
 #include "src/core/SkFontDescriptor.h"
 #include "SkiaBackend/SkFontMgrVGG.h"
+#include "rapidfuzz/fuzz.hpp"
 
 #include <limits>
 #include <memory>
@@ -164,10 +165,11 @@ SkString SkFontStyleSet_VGG::getFamilyName()
   return fFamilyName;
 }
 
-SkFontMgrVGG::SkFontMgrVGG(const SystemFontLoader& loader)
+SkFontMgrVGG::SkFontMgrVGG(std::unique_ptr<SystemFontLoader> loader)
   : fDefaultFamily(nullptr)
+  , m_loader(std::move(loader))
 {
-  loader.loadSystemFonts(fScanner, &fFamilies);
+  m_loader->loadSystemFonts(fScanner, &fFamilies);
 
   // Try to pick a default font.
   static const char* defaultNames[] = { "Arial",      "Verdana",      "Times New Roman",
@@ -269,8 +271,25 @@ sk_sp<SkTypeface> SkFontMgrVGG::onMakeFromFile(const char path[], int ttcIndex) 
   return stream ? this->makeFromStream(std::move(stream), ttcIndex) : nullptr;
 }
 
-void SkFontMgrVGG::cacheFont(const char* familyName, int ttcIndex)
+SkString SkFontMgrVGG::fuzzyMatchFontFamilyName(const std::string& fontName) const
 {
+  bool match_found = false;
+  double best_score = 0.0;
+  SkString best_match;
+  rapidfuzz::fuzz::CachedRatio<char> scorer(fontName);
+  for (const auto& style : fFamilies.fFamilies)
+  {
+    auto choice = std::string(style->getFamilyName().c_str());
+    double score = scorer.similarity(choice, best_score);
+
+    if (score >= best_score)
+    {
+      match_found = true;
+      best_score = score;
+      best_match = style->getFamilyName();
+    }
+  }
+  return best_match;
 }
 
 sk_sp<SkTypeface> SkFontMgrVGG::onLegacyMakeTypeface(const char familyName[],

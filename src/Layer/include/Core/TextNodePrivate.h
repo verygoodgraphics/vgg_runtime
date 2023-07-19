@@ -3,11 +3,13 @@
 #include "Core/TextNode.h"
 #include "Core/VGGType.h"
 #include "SkiaBackend/SkiaImpl.h"
+#include "SkiaBackend/SkFontMgrVGG.h"
 #include "Common/DebugCanvas.h"
 #include "Core/ParagraphParser.h"
 #include <core/SkColor.h>
 #include <core/SkFontMetrics.h>
 #include <core/SkFontStyle.h>
+#include <core/SkRefCnt.h>
 #include <core/SkScalar.h>
 #include <limits>
 #include <modules/skparagraph/include/DartTypes.h>
@@ -48,12 +50,17 @@ public:
   };
   std::vector<ParagraphInfo> paragraphCache;
 
+  void setFontCollection(sk_sp<VGGFontCollection> fontCollection)
+  {
+    this->fontCollection = std::move(fontCollection);
+  }
+
 private:
   int m_height{ 0 };
   bool newParagraph{ true };
   ParagraphAttr paraAttr;
   TextParagraphCacheDirtyFlags m_dirtyFlags{ D_ALL };
-  sk_sp<FontCollection> fontCollection;
+  sk_sp<VGGFontCollection> fontCollection;
 
 protected:
   void onBegin() override;
@@ -66,7 +73,19 @@ protected:
                    const TextAttr& textAttr) override;
 
 public:
-  TextParagraphCache() = default;
+  TextParagraphCache()
+  {
+
+    auto mgr = sk_sp<SkFontMgrVGG>(FontManager::instance().getDefaultFontManager());
+    mgr->ref();
+    fontCollection =
+      sk_make_sp<VGGFontCollection>(std::move(mgr),
+                                    FontManager::instance().getDefaultFallbackFonts());
+  }
+  TextParagraphCache(sk_sp<VGGFontCollection> fontCollection)
+    : fontCollection(std::move(fontCollection))
+  {
+  }
   bool empty() const
   {
     return paragraph.empty();

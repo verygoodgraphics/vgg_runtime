@@ -77,7 +77,7 @@ int main(int argc, char** argv)
     if (r)
     {
       auto data = r->read(prefix / fp);
-      auto result = render(data.Format, data.Resource, 80, 2);
+      auto result = render(data.Format, data.Resource, 80, 2, "default");
       auto reason = std::get<0>(result);
       std::cout << "Reason: " << reason << std::endl;
       writeResult(std::get<1>(result));

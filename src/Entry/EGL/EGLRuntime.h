@@ -23,4 +23,5 @@ std::tuple<std::string, std::map<int, std::vector<char>>> render(
   const nlohmann::json& j,
   const std::map<std::string, std::vector<char>>& resources,
   int imageQuality,
-  int resolutionLevel);
+  int resolutionLevel,
+  const std::string& fontCollectionName);

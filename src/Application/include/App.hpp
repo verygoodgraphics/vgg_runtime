@@ -58,13 +58,9 @@
 #include "include/gpu/gl/GrGLFunctions.h"
 #include "include/gpu/GrBackendSurface.h"
 #include "include/gpu/ganesh/SkSurfaceGanesh.h"
+#include "include/core/SkStream.h"
 #include "encode/SkPngEncoder.h"
 
-// #include "Utils/CappingProfiler.hpp"
-// #include "Utils/Types.hpp"
-// #include "Utils/DPI.hpp"
-// #include "Utils/FileManager.hpp"
-// #include "Utils/Scheduler.hpp"
 #include "Scene/Scene.h"
 #include "Application/UIView.hpp"
 #include "Common/Math.hpp"
@@ -778,24 +774,8 @@ public: // public methods
     {
       return;
     }
-#if 0
-	INFO("frame %d", m_nFrame++);
-#endif
 
     Self()->pollEvent();
-    // deal with events
-
-    // cap the frame rate
-    // auto profiler = CappingProfiler::getInstance();
-    // if (fps > 0)
-    // {
-    //   if (!(profiler->enoughFrameDuration(fps)))
-    //   {
-    //     return;
-    //   }
-    // }
-    // profiler->markFrame();
-
     // get and setup canvas
     SkCanvas* canvas = getCanvas();
     ASSERT(canvas);

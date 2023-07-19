@@ -4,6 +4,7 @@
 #include "Core/TextNode.h"
 #include "Core/VGGType.h"
 #include "SkiaBackend/SkiaImpl.h"
+#include "glm/detail/qualifier.hpp"
 
 #include <core/SkCanvas.h>
 #include <core/SkColor.h>
@@ -73,15 +74,15 @@ sktxt::ParagraphStyle createParagraphStyle(const ParagraphAttr& attr)
   return style;
 }
 
-sktxt::TextStyle createTextStyle(const TextAttr& attr, FontCollection* font)
+sktxt::TextStyle createTextStyle(const TextAttr& attr, VGGFontCollection* font)
 {
   sktxt::TextStyle style;
   SkColor color = attr.color;
   style.setColor(color);
   style.setDecorationColor(color);
-  // font->findTypefaces(attr.fontName);
-  style.setFontFamilies(
-    { SkString(attr.fontName), SkString("PingFang SC"), SkString("Apple Color Emoji") });
+  auto matched = font->fuzzyMatch(attr.fontName);
+  std::cout << "Font Name: " << attr.fontName << " matches " << matched.c_str() << std::endl;
+  style.setFontFamilies({ matched });
   style.setFontSize(attr.size);
   style.setLetterSpacing(attr.letterSpacing);
   style.setBaselineShift(attr.baselineShift);
@@ -154,7 +155,6 @@ void TextParagraphCache::onTextStyle(int paraIndex,
   auto& p = paragraph.back();
   if (newParagraph)
   {
-    fontCollection = FontManager::instance().defaultFontCollection();
     p.builder = skia::textlayout::ParagraphBuilder::make(
       createParagraphStyle(ParagraphAttr{ paraAttr.type, textAttr.horzAlignment }),
       fontCollection);

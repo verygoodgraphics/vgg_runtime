@@ -14,6 +14,9 @@
 #include "src/core/SkOSFile.h"
 #include "src/utils/SkOSPath.h"
 
+#include <modules/skparagraph/include/FontCollection.h>
+#include <modules/skparagraph/include/TypefaceFontProvider.h>
+
 namespace fs = std::filesystem;
 
 class SkData;
@@ -159,11 +162,13 @@ public:
     virtual ~SystemFontLoader()
     {
     }
+
     virtual void loadSystemFonts(const SkTypeface_FreeType::Scanner&, Families*) const = 0;
   };
-  explicit SkFontMgrVGG(const SystemFontLoader& loader);
+  explicit SkFontMgrVGG(std::unique_ptr<SystemFontLoader> loader);
+  explicit SkFontMgrVGG() = default;
 
-  void cacheFont(const char* familyName, int ttcIndex);
+  SkString fuzzyMatchFontFamilyName(const std::string& fontName) const;
 
   void saveFontInfo(const fs::path& path)
   {
@@ -179,6 +184,7 @@ public:
   }
 
 protected:
+  std::unique_ptr<SystemFontLoader> m_loader;
   int onCountFamilies() const override;
   void onGetFamilyName(int index, SkString* familyName) const override;
   sk_sp<SkFontStyleSet> onCreateStyleSet(int index) const override;
@@ -287,7 +293,7 @@ private:
         {
           addTo = new SkFontStyleSet_VGG(realname);
           families->push_back().reset(addTo);
-          families->lookUp[std::string(realname.c_str())] = families->size() - 1;
+          families->lookUp[realname.c_str()] = families->size() - 1;
         }
         addTo->appendTypeface(sk_make_sp<SkTypeface_VGG_File>(style,
                                                               isFixedPitch,
@@ -315,5 +321,30 @@ private:
 
 inline SK_API sk_sp<SkFontMgrVGG> VGGFontDirectory(const char* dir)
 {
-  return sk_make_sp<SkFontMgrVGG>(VGGFontLoader(dir));
+  return sk_make_sp<SkFontMgrVGG>(std::make_unique<VGGFontLoader>(dir));
 }
+
+using namespace skia::textlayout;
+class VGGFontCollection : public FontCollection
+{
+  sk_sp<SkFontMgrVGG> m_fontMgr;
+
+public:
+  VGGFontCollection(sk_sp<SkFontMgrVGG> fontMgr, const std::vector<std::string>& fallbackFonts)
+    : m_fontMgr(std::move(fontMgr))
+  {
+    std::vector<SkString> defFonts;
+    for (const auto& f : fallbackFonts)
+    {
+      defFonts.push_back(SkString(f));
+    }
+    this->setAssetFontManager(m_fontMgr);
+    this->setDefaultFontManager(m_fontMgr, defFonts);
+    this->enableFontFallback();
+  }
+
+  SkString fuzzyMatch(const std::string& fontFamily)
+  {
+    return m_fontMgr->fuzzyMatchFontFamilyName(fontFamily);
+  }
+};

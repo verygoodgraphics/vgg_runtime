@@ -80,7 +80,8 @@ sktxt::TextStyle createTextStyle(const TextAttr& attr, FontCollection* font)
   style.setColor(color);
   style.setDecorationColor(color);
   // font->findTypefaces(attr.fontName);
-  style.setFontFamilies({ SkString(attr.fontName), SkString("PingFang SC"), SkString("Apple Color Emoji") });
+  style.setFontFamilies(
+    { SkString(attr.fontName), SkString("PingFang SC"), SkString("Apple Color Emoji") });
   style.setFontSize(attr.size);
   style.setLetterSpacing(attr.letterSpacing);
   style.setBaselineShift(attr.baselineShift);
@@ -153,7 +154,7 @@ void TextParagraphCache::onTextStyle(int paraIndex,
   auto& p = paragraph.back();
   if (newParagraph)
   {
-    fontCollection = FontManager::instance().fontCollection("default");
+    fontCollection = FontManager::instance().defaultFontCollection();
     p.builder = skia::textlayout::ParagraphBuilder::make(
       createParagraphStyle(ParagraphAttr{ paraAttr.type, textAttr.horzAlignment }),
       fontCollection);

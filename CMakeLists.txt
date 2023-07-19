@@ -58,15 +58,13 @@ endif()
 
 # add bundled libs
 add_subdirectory(lib)
-include_directories(${VGG_LIB_INCLUDE_PATH})
 
 # add main targets
 add_subdirectory(src)
-include_directories(${VGG_SRC_INCLUDE_PATH})
-
 
 # add test targets
 include(CTest)
+include_directories(src)
 add_subdirectory(test)
 
 get_directory_property(PreprocessorDefs COMPILE_DEFINITIONS)

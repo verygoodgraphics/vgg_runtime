@@ -1,6 +1,7 @@
 #include <argparse/argparse.hpp>
 #include <filesystem>
 #include <fstream>
+#include "ConfigMananger.h"
 #include "Scene/Scene.h"
 #include "loader.h"
 #include "Entry/EGL/EGLRuntime.h"
@@ -50,9 +51,12 @@ int main(int argc, char** argv)
   auto scene = std::make_shared<Scene>();
   std::filesystem::path prefix;
   std::filesystem::path respath;
+  std::string fontCollection = "google";
+  std::string configFile;
   if (auto configfile = program.present("-c"))
   {
     auto file = configfile.value();
+    configFile = file;
     Config::readGlobalConfig(file);
   }
 
@@ -77,7 +81,7 @@ int main(int argc, char** argv)
     if (r)
     {
       auto data = r->read(prefix / fp);
-      auto result = render(data.Format, data.Resource, 80, 2, "default");
+      auto result = render(data.Format, data.Resource, 80, 2, configFile, fontCollection);
       auto reason = std::get<0>(result);
       std::cout << "Reason: " << reason << std::endl;
       writeResult(std::get<1>(result));

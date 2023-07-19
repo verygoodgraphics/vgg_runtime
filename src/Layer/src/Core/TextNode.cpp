@@ -82,6 +82,7 @@ void TextNode::paintEvent(SkCanvas* canvas)
   }
 
   PaintNode::paintEvent(canvas);
+
   canvas->save();
   // we need to convert to skia coordinate to render text
   canvas->scale(1, -1);
@@ -102,11 +103,6 @@ void TextNode::paintEvent(SkCanvas* canvas)
       auto& p = _->m_paragraphCache.paragraphCache[i].paragraph;
       const auto curX = _->m_paragraphCache.paragraphCache[i].offsetX;
       p->paint(canvas, curX, curY);
-      auto lastLine = p->lineNumber();
-      if (lastLine < 1)
-        continue;
-      LineMetrics lineMetric;
-      p->getLineMetricsAt(lastLine - 1, &lineMetric);
       if (Scene::isEnableDrawDebugBound())
       {
         DebugCanvas debugCanvas(canvas);
@@ -117,6 +113,11 @@ void TextNode::paintEvent(SkCanvas* canvas)
                                curY,
                                i);
       }
+      auto lastLine = p->lineNumber();
+      LineMetrics lineMetric;
+      if (lastLine < 1)
+        continue;
+      p->getLineMetricsAt(lastLine - 1, &lineMetric);
       curY += p->getHeight() - lineMetric.fHeight;
     }
   }

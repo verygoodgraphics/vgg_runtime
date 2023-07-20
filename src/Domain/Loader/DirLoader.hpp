@@ -30,6 +30,10 @@ public:
 
     std::filesystem::path dir{ m_path };
     std::ifstream ifs{ dir / name, std::ios::binary };
+    if (!ifs)
+    {
+      return false;
+    }
     std::istreambuf_iterator<char> start{ ifs }, end;
     content.append(start, end);
     return true;

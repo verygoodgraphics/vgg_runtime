@@ -8,13 +8,8 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 set_property(GLOBAL PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # customized platform checking flags
-#introduce customized cmake vars, see VggVars.cmake in cmake for details
-set(VGG_ENABLE_EGL OFF CACHE BOOL "Build runtime with egl backend for offscreen rendering")
+# introduce customized cmake vars, see VggVars.cmake in cmake for details
 include(VGGVars)
-
-if(NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_LINUX_TARGET_LIST)
-  set(VGG_ENABLE_EGL OFF)
-endif()
 
 
 if(NOT CMAKE_BUILD_TYPE)

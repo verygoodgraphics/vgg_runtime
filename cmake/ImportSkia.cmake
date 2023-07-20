@@ -56,6 +56,7 @@ foreach(ITEM ${SKIA_LINK_LIBS})
 endforeach(ITEM)
 
 foreach(LIB_NAME ${SKIA_LIB_NAMES})
+  unset(FOUND_LIB_${LIB_NAME} CACHE)
   if(VGG_VAR_PLATFORM_TARGET STREQUAL "WASM")
     set(FOUND_LIB_${LIB_NAME} "${SKIA_LIB_DIR}/lib${LIB_NAME}.a")
   else()

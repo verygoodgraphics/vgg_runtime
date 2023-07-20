@@ -64,6 +64,7 @@
 #include "Scene/Scene.h"
 #include "Application/UIView.hpp"
 #include "Common/Math.hpp"
+#include "CappingProfiler.hpp"
 
 namespace VGG
 {
@@ -273,22 +274,6 @@ public: // public data and types
     }
   };
 
-public:
-  inline void setOnFrameOnce(std::function<void()>&& cb)
-  {
-    // Scheduler::setOnFrameOnce(std::move(cb));
-  }
-
-  inline void startRunMode()
-  {
-    // EntityManager::setInteractionMode(EntityManager::InteractionMode::RUN);
-    // // InputManager::setMouseCursor(MouseEntity::CursorType::NORMAL);
-    // if (auto container = EntityManager::getEntities())
-    // {
-    //   container->setRunModeInteractions();
-    // }
-  }
-
 protected: // protected members and static members
   static constexpr int N_MULTISAMPLE = 0;
   static constexpr int N_STENCILBITS = 8;
@@ -487,7 +472,7 @@ protected: // protected methods
     sprintf(info, infoFmt1, (int)m_curMouseX, (int)m_curMouseY);
 
     textPaint.setColor(SK_ColorBLACK);
-    SkFont font(SkTypeface::MakeFromFile("/usr/share/fonts/TTF/Comfortaa-Bold.ttf"));
+    SkFont font;
     font.setSize(32);
     canvas->drawSimpleText(info,
                            strlen(info),
@@ -509,8 +494,6 @@ protected: // protected methods
 
   void onFrame()
   {
-    // Scheduler::callOnFrameOnce();
-
     SkCanvas* canvas = nullptr;
     if (m_capture)
     {
@@ -527,7 +510,6 @@ protected: // protected methods
       {
         m_scene->render(canvas);
       }
-      // InputManager::draw(canvas);
       m_zoomer.restore(canvas);
 
       // draw position information
@@ -541,7 +523,6 @@ protected: // protected methods
       m_capture = false;
     }
 
-    // InputManager::onFrame();
   }
 
   void dispatchEvent(const SDL_Event& evt)
@@ -618,14 +599,12 @@ protected: // protected methods
 
       if (key == SDLK_PAGEUP && (SDL_GetModState() & KMOD_CTRL))
       {
-        // FileManager::prevPage();
         m_scene->preArtboard();
         return true;
       }
 
       if (key == SDLK_PAGEDOWN && (SDL_GetModState() & KMOD_CTRL))
       {
-        // FileManager::nextPage();
         m_scene->nextArtboard();
         return true;
       }
@@ -776,6 +755,18 @@ public: // public methods
     }
 
     Self()->pollEvent();
+
+    // cap the frame rate
+    auto profiler = CappingProfiler::getInstance();
+    if (fps > 0)
+    {
+      if (!(profiler->enoughFrameDuration(fps)))
+      {
+        return;
+      }
+    }
+    profiler->markFrame();
+
     // get and setup canvas
     SkCanvas* canvas = getCanvas();
     ASSERT(canvas);

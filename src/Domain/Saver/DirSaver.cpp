@@ -20,7 +20,7 @@ DirSaver::DirSaver(const std::string& modelDir)
   // todo, check if same as src dir
 }
 
-void DirSaver::accept(const std::string& path, const std::vector<char>& content)
+void DirSaver::visit(const std::string& path, const std::vector<char>& content)
 {
   std::filesystem::path file_path{ m_model_dir };
   file_path /= path;

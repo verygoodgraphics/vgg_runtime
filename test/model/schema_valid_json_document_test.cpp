@@ -1,3 +1,5 @@
+#include "test_config.hpp"
+
 #include "Domain/Config.hpp"
 #include "Domain/RawJsonDocument.hpp"
 #include "Domain/SchemaValidJsonDocument.hpp"
@@ -9,7 +11,7 @@
 using namespace VGG::Model;
 using namespace nlohmann;
 
-#define JSON_SCHEMA_FILE_NAME "./asset/vgg-format.json"
+#define JSON_SCHEMA_FILE_NAME design_doc_schema_file
 
 class SchemaValidJsonDocumentTestSuite : public ::testing::Test
 {

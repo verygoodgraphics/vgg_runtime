@@ -51,8 +51,8 @@ void Daruma::accept(VGG::Model::Visitor* visitor)
   // todo, lock for thread safe
   const std::lock_guard<std::mutex> lock(m_mutex);
 
-  visitor->accept(design_file_name, m_designDoc->content().dump());
-  visitor->accept(event_listeners_file_name, m_event_listeners.dump());
+  visitor->visit(design_file_name, m_designDoc->content().dump());
+  visitor->visit(event_listeners_file_name, m_event_listeners.dump());
 
   // js
   for (auto& [path, element_event_listeners] : m_event_listeners.items())
@@ -65,7 +65,7 @@ void Daruma::accept(VGG::Model::Visitor* visitor)
         if (it->is_object() && it->contains(file_name_key))
         {
           auto& file_name = (*it)[file_name_key];
-          visitor->accept(file_name, get_code(file_name));
+          visitor->visit(file_name, get_code(file_name));
         }
       }
     }
@@ -77,7 +77,7 @@ void Daruma::accept(VGG::Model::Visitor* visitor)
 
   for (auto& [name, content] : resouces)
   {
-    visitor->accept(resouces_dir + name, content);
+    visitor->visit(resouces_dir + name, content);
   }
 
   // todo, other files

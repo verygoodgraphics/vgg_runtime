@@ -14,7 +14,7 @@ class DirSaver : public Saver
 public:
   DirSaver(const std::string& modelDir);
 
-  virtual void accept(const std::string& path, const std::vector<char>& content) override;
+  virtual void visit(const std::string& path, const std::vector<char>& content) override;
   // todo, save to same dir, skip write file if not dirty
 };
 

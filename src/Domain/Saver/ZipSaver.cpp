@@ -30,7 +30,7 @@ ZipSaver::~ZipSaver()
   }
 }
 
-void ZipSaver::accept(const std::string& path, const std::vector<char>& content)
+void ZipSaver::visit(const std::string& path, const std::vector<char>& content)
 {
   zip_entry_open(m_zip_file, path.c_str());
   {

@@ -18,7 +18,7 @@ public:
   ZipSaver(const std::string& filePath);
   ~ZipSaver();
 
-  virtual void accept(const std::string& path, const std::vector<char>& content) override;
+  virtual void visit(const std::string& path, const std::vector<char>& content) override;
 };
 
 } // namespace Model

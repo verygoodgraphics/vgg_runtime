@@ -12,12 +12,12 @@ namespace Model
 class Visitor
 {
 public:
-  void accept(const std::string& path, const std::string& content)
+  void visit(const std::string& path, const std::string& content)
   {
-    accept(path, std::vector<char>(content.begin(), content.end()));
+    visit(path, std::vector<char>(content.begin(), content.end()));
   }
 
-  virtual void accept(const std::string& path, const std::vector<char>& content) = 0;
+  virtual void visit(const std::string& path, const std::vector<char>& content) = 0;
 };
 
 } // namespace Model

@@ -48,14 +48,12 @@ public:
       {
         if (dir_entry.is_regular_file())
         {
-          // auto relative_path = std::filesystem::relative(dir_entry.path(), dir);
           auto relative_path = dir_entry.path().lexically_relative(dir);
 
-          auto it = relative_path.begin();
-          std::string key{ it->string() };
-          for (++it; it != relative_path.end(); ++it)
+          std::string key{ ResourcesDir };
+          for (auto it = relative_path.begin(); it != relative_path.end(); ++it)
           {
-            key.append("/"); // use "/" on windows & posix
+            key.append("/"); // use "/" on both windows & posix
             key.append(it->string());
           }
 

@@ -103,6 +103,10 @@ bool Daruma::load_files()
     {
       m_event_listeners = json::parse(file_content);
     }
+    else
+    {
+      m_event_listeners = json::object();
+    }
 
     return true;
   }

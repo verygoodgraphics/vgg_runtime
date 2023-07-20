@@ -69,10 +69,9 @@ Loader::ResourcesType ZipLoader::resources() const
         zip_entry_read(m_zip_file, &buf, &bufsize);
         zip_entry_close(m_zip_file);
 
-        std::string key{ file_name.substr(strlen(ResourcesDirWithSlash)) };
         char* p_char = static_cast<char*>(buf);
         std::vector<char> content{ p_char, p_char + bufsize };
-        resources[key] = std::move(content);
+        resources[file_name] = std::move(content);
 
         free(buf);
       }

@@ -8,6 +8,8 @@ namespace Model
 constexpr auto design_file_name = "design.json";
 constexpr auto layout_file_name = "layout.json";
 constexpr auto event_listeners_file_name = "event_listeners.json";
+
+constexpr auto ResourcesDir = "resources";
 constexpr auto ResourcesDirWithSlash = "resources/";
 
 constexpr auto js_file_suffix = ".mjs";

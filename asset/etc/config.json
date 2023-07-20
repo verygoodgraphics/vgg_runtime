@@ -4,19 +4,19 @@
 			"google": {
 				"dir": "/asset/fonts",
 				"fallbackFonts": [
-					"ABeeZee-Regular"
+					"WenQuanYi Micro Hei"
 				]
 			},
 			"macOS": {
 				"dir": "/asset/fonts",
 				"fallbackFonts": [
-					"ABeeZee-Regular"
+					"WenQuanYi Micro Hei"
 				]
 			},
 			"windows": {
 				"dir": "/asset/fonts",
 				"fallbackFonts": [
-					"ABeeZee-Regular"
+					"WenQuanYi Micro Hei"
 				]
 			}
 		},

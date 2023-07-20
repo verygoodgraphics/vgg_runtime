@@ -1,5 +1,7 @@
 #include "Entry/SDL/SDLRuntime.hpp"
 #include "BrowserMainComposer.hpp"
+#include <ConfigMananger.h>
+
 #include <memory>
 extern "C"
 {
@@ -15,6 +17,8 @@ extern "C"
   }
   void emscripten_main(int width, int height)
   {
+    Config::readGlobalConfig("/asset/etc/config.json");
+
     SDLRuntime* app = App<SDLRuntime>::getInstance(width, height);
     ASSERT(app);
 

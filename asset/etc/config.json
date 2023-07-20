@@ -1,0 +1,25 @@
+{
+	"fonts": {
+		"fontCollections": {
+			"google": {
+				"dir": "/asset/fonts",
+				"fallbackFonts": [
+					"ABeeZee-Regular"
+				]
+			},
+			"macOS": {
+				"dir": "/asset/fonts",
+				"fallbackFonts": [
+					"ABeeZee-Regular"
+				]
+			},
+			"windows": {
+				"dir": "/asset/fonts",
+				"fallbackFonts": [
+					"ABeeZee-Regular"
+				]
+			}
+		},
+		"defaultFontCollection": "macOS"
+	}
+}

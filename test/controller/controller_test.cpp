@@ -20,8 +20,6 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-constexpr auto design_doc_schema_file = "./asset/vgg-format.json";
-
 #define SKIP_LOCAL_TEST                                                                            \
   GTEST_SKIP() << "Skipping local './xxx.sdk.mjd' test, unsupported when evaluating data uri ";
 

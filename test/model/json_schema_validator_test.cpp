@@ -1,3 +1,5 @@
+#include "test_config.hpp"
+
 #include "Domain/Config.hpp"
 #include "Domain/JsonSchemaValidator.hpp"
 
@@ -7,7 +9,7 @@
 using namespace VGG::Model;
 using json = nlohmann::json;
 
-#define VGG_JSON_SCHEMA_FILE_NAME "./asset/vgg-format.json"
+#define VGG_JSON_SCHEMA_FILE_NAME design_doc_schema_file
 
 class VggJsonSchemaValitatorTestSuite : public ::testing::Test
 {

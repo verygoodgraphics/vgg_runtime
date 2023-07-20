@@ -2,14 +2,16 @@ add_subdirectory(vgg_contrib/argparse)
 add_subdirectory(vgg_contrib/boost)
 add_subdirectory(vgg_contrib/glm)
 add_subdirectory(vgg_contrib/json)
-add_subdirectory(vgg_contrib/picosha2)
 add_subdirectory(vgg_contrib/rxcpp)
-add_subdirectory(vgg_contrib/sdefl)
 add_subdirectory(vgg_contrib/valijson)
 add_subdirectory(vgg_contrib/zip)
 add_subdirectory(vgg_contrib/zlib)
 add_subdirectory(vgg_contrib/rapidfuzz-cpp)
 
+# add automerge
+add_subdirectory(vgg_contrib/sdefl)
+add_subdirectory(vgg_contrib/picosha2)
+add_subdirectory(vgg_automerge/automerge)
 
 if (NOT EMSCRIPTEN)
   if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/node")

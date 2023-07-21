@@ -62,6 +62,7 @@
 #include "encode/SkPngEncoder.h"
 
 #include "Scene/Scene.h"
+#include "Scene/Zoomer.h"
 #include "Application/UIView.hpp"
 #include "Common/Math.hpp"
 #include "CappingProfiler.hpp"
@@ -212,65 +213,6 @@ public: // public data and types
         return surface->getCanvas();
       }
       return nullptr;
-    }
-  };
-
-  struct Zoomer
-  {
-    static constexpr double minZoom = 0.01;
-    static constexpr double maxZoom = 10.0;
-    Vec2 offset{ 0.0, 0.0 };
-    double zoom{ 1.0 };
-    bool panning{ false };
-
-    void apply(SkCanvas* canvas)
-    {
-      ASSERT(canvas);
-      canvas->translate(offset.x, offset.y);
-      canvas->scale(zoom, zoom);
-    }
-
-    void restore(SkCanvas* canvas)
-    {
-      ASSERT(canvas);
-      canvas->scale(1. / zoom, 1. / zoom);
-      canvas->translate(-offset.x, -offset.y);
-    }
-
-    SDL_Event mapEvent(SDL_Event evt, double scaleFactor)
-    {
-      if (evt.type == SDL_MOUSEMOTION)
-      {
-        double x1 = evt.motion.x;
-        double y1 = evt.motion.y;
-        double x0 = x1 - evt.motion.xrel;
-        double y0 = y1 - evt.motion.yrel;
-        x1 = (x1 / scaleFactor - offset.x) / zoom;
-        y1 = (y1 / scaleFactor - offset.y) / zoom;
-        x0 = (x0 / scaleFactor - offset.x) / zoom;
-        y0 = (y0 / scaleFactor - offset.y) / zoom;
-        evt.motion.x = FLOAT2SINT(x1);
-        evt.motion.y = FLOAT2SINT(y1);
-        evt.motion.xrel = FLOAT2SINT(x1 - x0);
-        evt.motion.yrel = FLOAT2SINT(y1 - y0);
-      }
-      return evt;
-    }
-
-    void mapWindowPosToLogicalPosition(const float windowXY[2], float scaleFactor, float logicXY[2])
-    {
-      float x1 = windowXY[0];
-      float y1 = windowXY[1];
-      // float x0 = x1 - windowXYRel[0];
-      // float y0 = y1 - windowXYRel[1];
-      x1 = (x1 / scaleFactor - offset.x) / zoom;
-      y1 = (y1 / scaleFactor - offset.y) / zoom;
-      // x0 = (x0 / scaleFactor - offset.x) / zoom;
-      // y0 = (y0 / scaleFactor - offset.y) / zoom;
-      logicXY[0] = x1;
-      logicXY[1] = y1;
-      // logicXYRel[0] = x1 - x0;
-      // logicXYRel[1] = y1 - y0;
     }
   };
 
@@ -522,7 +464,6 @@ protected: // protected methods
       endCapture("picture.skp");
       m_capture = false;
     }
-
   }
 
   void dispatchEvent(const SDL_Event& evt)

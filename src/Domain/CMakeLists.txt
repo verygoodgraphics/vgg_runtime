@@ -28,3 +28,4 @@ target_link_libraries(vgg_domain
   zip
 )
 
+install(TARGETS vgg_domain DESTINATION COMPONENT vgg_module_domain)

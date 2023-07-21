@@ -13,6 +13,9 @@
  * @param j vgg_format json object
  * @param resources blob resources map
  * @param imageQuality 0 - 100, 100 is the best quality of the generated image
+ * @param resolutionLevel 
+ * @param configFile specify the config file
+ * @param fontCollectionName specify the fontCollectionName given in configFile
  * @return std::tuple<std::string, std::map<int, sk_sp<SkData>>>
  *
  * first element is reason string, error ocurrs if string is not empty.

@@ -4,7 +4,7 @@
 #include "Core/Node.hpp"
 #include "Core/PaintNode.h"
 #include "Core/ContourNode.h"
-#include "Core/VGGType.h"
+#include "Core/VType.h"
 #include "core/SkCanvas.h"
 #include "core/SkMatrix.h"
 #include "core/SkPath.h"

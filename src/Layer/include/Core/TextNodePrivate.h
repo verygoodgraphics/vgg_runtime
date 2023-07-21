@@ -1,7 +1,7 @@
 #include "Core/Attrs.h"
 #include "Core/FontManager.h"
 #include "Core/TextNode.h"
-#include "Core/VGGType.h"
+#include "Core/VType.h"
 #include "SkiaBackend/SkiaImpl.h"
 #include "SkiaBackend/SkFontMgrVGG.h"
 #include "Common/DebugCanvas.h"

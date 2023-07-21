@@ -1,7 +1,6 @@
 #include "Core/PaintNode.h"
 #include "Core/Node.hpp"
-#include "Core/VGGType.h"
-#include "Core/VGGUtils.h"
+#include "Core/VType.h"
 #include "SkiaBackend/SkiaImpl.h"
 #include "core/SkCanvas.h"
 #include <core/SkPath.h>

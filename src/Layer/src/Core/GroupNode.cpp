@@ -1,7 +1,8 @@
 #include <Core/GroupNode.h>
 
-#include "Core/VGGType.h"
+#include "Core/VType.h"
 #include "core/SkCanvas.h"
+#include "SkiaBackend/SkiaImpl.h"
 
 namespace VGG
 {

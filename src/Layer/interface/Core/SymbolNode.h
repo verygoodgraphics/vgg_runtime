@@ -1,6 +1,6 @@
 #pragma once
 #include "Common/Config.h"
-#include "VGGType.h"
+#include "VType.h"
 #include "PaintNode.h"
 
 namespace VGG

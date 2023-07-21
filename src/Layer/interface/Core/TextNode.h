@@ -4,7 +4,7 @@
 #include "Core/FontManager.h"
 #include "Core/Node.hpp"
 #include "Core/PaintNode.h"
-#include "Core/VGGType.h"
+#include "Core/VType.h"
 
 namespace VGG
 {

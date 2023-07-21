@@ -2,8 +2,7 @@
 #include <Core/PathNode.h>
 #include <core/SkBlendMode.h>
 #include <core/SkRect.h>
-#include "Core/VGGType.h"
-#include "Core/VGGUtils.h"
+#include "Core/VType.h"
 #include "SkiaBackend/SkiaImpl.h"
 #include "glm/matrix.hpp"
 #include "core/SkColor.h"

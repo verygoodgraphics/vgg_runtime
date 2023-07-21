@@ -1,6 +1,6 @@
 #pragma once
 // #include "Components/Styles.hpp"
-#include "VGGType.h"
+#include "VType.h"
 // #include <iostream>
 #include "include/effects/SkGradientShader.h"
 #include "include/effects/SkDashPathEffect.h"

@@ -78,7 +78,7 @@ SkFontMgrVGG* FontManager::createFontManager(const std::string& key,
   else
   {
     sk_sp<SkFontMgrVGG> vggFontMgr = VGGFontDirectory(fontDir.string().c_str());
-    vggFontMgr->saveFontInfo("FontName.txt");
+    vggFontMgr->saveFontInfo(key + "_fontname.txt");
     d_ptr->fontMgrs.insert({ key, std::move(FontMgrData(vggFontMgr, std::move(fallbackFonts))) });
     return vggFontMgr.get();
   }

@@ -17,7 +17,6 @@
 #ifndef __MATH_HPP__
 #define __MATH_HPP__
 
-#include <nlohmann/json.hpp>
 #include <cmath>
 #include <vector>
 
@@ -35,7 +34,6 @@ namespace VGG
 
 struct Vec2
 {
-  NLOHMANN_DEFINE_TYPE_INTRUSIVE(Vec2, x, y);
   double x{ 0. };
   double y{ 0. };
 

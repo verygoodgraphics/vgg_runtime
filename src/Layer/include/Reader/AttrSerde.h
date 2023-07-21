@@ -2,7 +2,7 @@
 #include <nlohmann/json.hpp>
 #include <optional>
 #include "Core/Attrs.h"
-#include "Core/VGGType.h"
+#include "Core/VType.h"
 #include "Reader/Loader.h"
 #include "glm/fwd.hpp"
 using nlohmann::json;

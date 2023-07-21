@@ -1,5 +1,5 @@
 #include "Core/ParagraphParser.h"
-#include "Core/VGGType.h"
+#include "Core/VType.h"
 #include <iterator>
 #include <list>
 

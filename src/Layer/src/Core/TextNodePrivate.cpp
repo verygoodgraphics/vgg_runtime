@@ -2,7 +2,7 @@
 #include "Core/FontManager.h"
 #include "Core/ParagraphParser.h"
 #include "Core/TextNode.h"
-#include "Core/VGGType.h"
+#include "Core/VType.h"
 #include "SkiaBackend/SkiaImpl.h"
 #include "glm/detail/qualifier.hpp"
 

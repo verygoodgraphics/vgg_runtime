@@ -1,7 +1,7 @@
 #include "Core/PathNodePrivate.h"
 
 #include "Core/Geometry.hpp"
-#include "Core/VGGType.h"
+#include "Core/VType.h"
 #include "Core/PathNode.h"
 #include "include/core/SkClipOp.h"
 #include "include/core/SkPaint.h"

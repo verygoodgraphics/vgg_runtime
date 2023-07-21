@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Node.hpp"
-#include "Core/VGGType.h"
+#include "Core/VType.h"
 #include "Core/PathNode.h"
 #include "core/SkShader.h"
 

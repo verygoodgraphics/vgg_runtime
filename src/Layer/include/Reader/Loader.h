@@ -2,7 +2,7 @@
 
 #include "Core/Attrs.h"
 #include "Core/ContourNode.h"
-#include "Core/VGGType.h"
+#include "Core/VType.h"
 #include "Core/Node.hpp"
 #include "glm/fwd.hpp"
 #include "glm/matrix.hpp"

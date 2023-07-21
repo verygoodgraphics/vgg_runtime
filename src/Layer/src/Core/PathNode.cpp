@@ -2,8 +2,7 @@
 #include "Core/ContourNode.h"
 #include "Core/PaintNode.h"
 #include "Core/PathNode.h"
-#include "Core/VGGType.h"
-#include "Core/VGGUtils.h"
+#include "Core/VType.h"
 #include "Core/PathNodePrivate.h"
 #include "SkiaBackend/SkiaImpl.h"
 

@@ -1,6 +1,6 @@
 include(ImportSkia)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/Core CoreSrcVar)
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/SkiaBackend SkiaImplSrcVar)
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/SkiaImpl SkiaImplSrcVar)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/Scene SceneSrcVar)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/Reader ReaderSrcVar)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/Common CommonSrcVar)

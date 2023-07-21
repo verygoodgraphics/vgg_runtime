@@ -4,7 +4,7 @@
 #include "Core/PathNode.h"
 #include "Core/VType.h"
 #include "Core/PathNodePrivate.h"
-#include "SkiaBackend/SkiaImpl.h"
+#include "SkiaImpl/VSkia.h"
 
 #include "Log.h"
 #include "core/SkBlendMode.h"

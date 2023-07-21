@@ -12,7 +12,7 @@
 #include "src/core/SkSpecialImage.h"
 #include "src/core/SkSpecialSurface.h"
 #include "src/core/SkWriteBuffer.h"
-#include "SkiaBackend/SkMyImageFilters.h"
+#include "SkiaImpl/VSkImageFilters.h"
 
 extern void SkRegisterDropInnerShadowImageFilterFlattenable();
 

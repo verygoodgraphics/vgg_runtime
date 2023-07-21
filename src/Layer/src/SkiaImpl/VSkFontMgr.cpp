@@ -9,7 +9,7 @@
 #include "include/private/base/SkTArray.h"
 #include "include/private/base/SkTemplates.h"
 #include "src/core/SkFontDescriptor.h"
-#include "SkiaBackend/SkFontMgrVGG.h"
+#include "SkiaImpl/VSkFontMgr.h"
 #include "rapidfuzz/fuzz.hpp"
 
 #include <limits>

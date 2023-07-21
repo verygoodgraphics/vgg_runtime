@@ -1,7 +1,6 @@
 #pragma once
 #include "Core/Attrs.h"
 #include "Core/VType.h"
-#include "SkiaBackend/SkiaImpl.h"
 #include <modules/skparagraph/include/DartTypes.h>
 #include <modules/skparagraph/include/Metrics.h>
 #include <modules/skparagraph/include/Paragraph.h>

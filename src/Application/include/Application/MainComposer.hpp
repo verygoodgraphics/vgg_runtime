@@ -15,6 +15,7 @@ namespace VGG
 class MainComposer
 {
   std::shared_ptr<UIView> m_view;
+  std::shared_ptr<UIView> m_edit_view;
   std::shared_ptr<Presenter> m_presenter;
 
   std::shared_ptr<RunLoop> m_run_loop;
@@ -62,6 +63,15 @@ public:
   auto view()
   {
     return m_view;
+  }
+
+  void enableEdit()
+  {
+    m_edit_view.reset(new UIView);
+    m_presenter->setEditView(m_edit_view);
+
+    // todo: frame rect
+    m_view->addSubview(m_edit_view);
   }
 };
 

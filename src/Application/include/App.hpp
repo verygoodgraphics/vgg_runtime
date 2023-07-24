@@ -448,9 +448,9 @@ protected: // protected methods
     if (canvas)
     {
       m_zoomer.apply(canvas);
-      if (m_scene)
+      if (m_view)
       {
-        m_scene->render(canvas);
+        m_view->draw(canvas);
       }
       m_zoomer.restore(canvas);
 

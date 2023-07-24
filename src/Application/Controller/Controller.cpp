@@ -106,7 +106,7 @@ void Controller::start()
 
 void Controller::startEditing()
 {
-  m_presenter->setModelToEdit(m_edit_model);
+  m_presenter->setEditModel(m_edit_model);
   // todo, observe editing, then upate view
 }
 

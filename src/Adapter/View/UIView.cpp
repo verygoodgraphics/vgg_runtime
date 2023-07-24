@@ -12,6 +12,11 @@ void UIView::onEvent(const SDL_Event& evt)
   }
 
   // todo, hittest
+  for (auto& subview : m_subviews)
+  {
+    subview->onEvent(evt);
+  }
+
   // todo, capturing
   // todo, bubbling
   UIEvent::PathType target_path{ "/fake/update_background_color" };
@@ -181,4 +186,14 @@ std::tuple<bool, bool, bool, bool> UIView::getKeyModifier(int keyMod)
   bool r_shift = keyMod & KMOD_RSHIFT;
 
   return { l_alt || r_alt, l_ctrl || r_ctrl, l_meta || r_meta, l_shift || r_shift };
+}
+
+void UIView::draw(SkCanvas* canvas)
+{
+  m_scene->render(canvas);
+
+  for (auto& subview : m_subviews)
+  {
+    subview->draw(canvas);
+  }
 }

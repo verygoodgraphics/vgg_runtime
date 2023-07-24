@@ -48,6 +48,8 @@ int main(int argc, char** argv)
   }
   if (auto file_to_edit = program.present("-e"))
   {
+    main_composer.enableEdit();
+
     auto file_path = file_to_edit.value();
     main_composer.controller()->edit(file_path);
   }

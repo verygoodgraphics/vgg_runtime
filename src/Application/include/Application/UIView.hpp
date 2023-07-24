@@ -5,9 +5,12 @@
 
 #include "nlohmann/json.hpp"
 
+#include <memory>
 #include <tuple>
+#include <vector>
 
 union SDL_Event;
+class SkCanvas;
 
 namespace VGG
 {
@@ -15,6 +18,7 @@ namespace VGG
 class UIView
 {
   std::shared_ptr<Scene> m_scene;
+  std::vector<std::shared_ptr<UIView>> m_subviews;
 
 public:
   using EventListener = std::function<void(UIEventPtr)>;
@@ -46,6 +50,12 @@ public:
   }
 
   void onEvent(const SDL_Event& evt);
+
+  void addSubview(std::shared_ptr<UIView> view)
+  {
+    m_subviews.push_back(view);
+  }
+  void draw(SkCanvas* canvas);
 
 private:
   EventListener m_event_listener;

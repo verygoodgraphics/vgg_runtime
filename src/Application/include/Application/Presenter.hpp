@@ -34,7 +34,7 @@ public:
     show();
   }
 
-  void setModelToEdit(std::shared_ptr<Daruma> model)
+  void setEditModel(std::shared_ptr<Daruma> model)
   {
     m_edit_model = model;
     m_edit_view->setResouces(m_edit_model->resources());
@@ -54,6 +54,11 @@ public:
           p->m_subject.get_subscriber().on_next(evt_ptr);
         }
       });
+  }
+
+  void setEditView(std::shared_ptr<UIView> view)
+  {
+    m_edit_view = view;
   }
 
   virtual rxcpp::observer<VGG::ModelEventPtr>& getModelObserver()

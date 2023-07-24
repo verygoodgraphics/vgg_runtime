@@ -10,9 +10,7 @@
 #include "include/core/SkFontMetrics.h"
 #include "include/effects/SkRuntimeEffect.h"
 #include "core/SkTextBlob.h"
-
 #include "Core/TextNodePrivate.h"
-
 #include <memory>
 #include <modules/skparagraph/include/FontCollection.h>
 #include <modules/skparagraph/include/ParagraphCache.h>

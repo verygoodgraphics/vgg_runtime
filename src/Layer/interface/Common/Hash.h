@@ -1,5 +1,5 @@
 #pragma once
-
+// https://stackoverflow.com/questions/35985960/c-why-is-boosthash-combine-the-best-way-to-combine-hash-values
 template<typename T, typename... Rest>
 void hash_combine(std::size_t& seed, const T& v, const Rest&... rest)
 {

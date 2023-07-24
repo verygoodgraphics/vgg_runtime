@@ -81,7 +81,7 @@ sktxt::TextStyle createTextStyle(const TextAttr& attr, VGGFontCollection* font)
   style.setColor(color);
   style.setDecorationColor(color);
   // auto matched = font->fuzzyMatch(attr.fontName);
-  //  std::cout << "Font Name: " << attr.fontName << " matches " << matched.c_str() << std::endl;
+  // std::cout << "Font Name: " << attr.fontName << " matches " << matched.c_str() << std::endl;
   style.setFontFamilies({ SkString(attr.fontName) });
   style.setFontSize(attr.size);
   style.setLetterSpacing(attr.letterSpacing);
@@ -122,14 +122,14 @@ void TextParagraphCache::onParagraphBegin(int paraIndex,
   auto& p = paragraph.back();
   if (paragraAttr.type.lineType != TLT_Plain)
   {
-    p.level = paragraAttr.type.level;
+    p.Level = paragraAttr.type.level;
   }
   else
   {
-    p.level = 0;
+    p.Level = 0;
   }
-  newParagraph = true;
-  paraAttr = paragraAttr;
+  m_newParagraph = true;
+  m_paraAttr = paragraAttr;
 }
 
 void TextParagraphCache::onParagraphEnd(int paraIndex, const TextView& textView)
@@ -137,11 +137,11 @@ void TextParagraphCache::onParagraphEnd(int paraIndex, const TextView& textView)
   assert(!paragraph.empty());
   auto& p = paragraph.back();
   p.Utf8TextView = textView;
-  if (newParagraph)
+  if (m_newParagraph)
   {
     if (textView.Text.empty())
       paragraph.pop_back();
-    newParagraph = false;
+    m_newParagraph = false;
   }
   // std::cout << "onParagraphEnd: " << paraIndex << ", [" << textView.Text << "]\n";
 }
@@ -153,16 +153,16 @@ void TextParagraphCache::onTextStyle(int paraIndex,
 {
   assert(!paragraph.empty());
   auto& p = paragraph.back();
-  if (newParagraph)
+  if (m_newParagraph)
   {
-    p.builder = skia::textlayout::ParagraphBuilder::make(
-      createParagraphStyle(ParagraphAttr{ paraAttr.type, textAttr.horzAlignment }),
-      fontCollection);
-    newParagraph = false;
+    p.Builder = skia::textlayout::ParagraphBuilder::make(
+      createParagraphStyle(ParagraphAttr{ m_paraAttr.type, textAttr.horzAlignment }),
+      m_fontCollection);
+    m_newParagraph = false;
   }
-  p.builder->pushStyle(createTextStyle(textAttr, fontCollection.get()));
-  p.builder->addText(textView.Text.data(), textView.Text.size());
-  p.builder->pop();
+  p.Builder->pushStyle(createTextStyle(textAttr, m_fontCollection.get()));
+  p.Builder->addText(textView.Text.data(), textView.Text.size());
+  p.Builder->pop();
   // std::cout << "Style Text: " << styleIndex << ", [" << textView.Text << "]\n";
 }
 } // namespace VGG

@@ -39,7 +39,7 @@ inline std::optional<std::vector<char>> GetBinFromFile(const std::filesystem::pa
                             std::istreambuf_iterator<char>{} };
 }
 
-struct Data
+struct DataWrapper
 {
   nlohmann::json Format;
   std::map<std::string, std::vector<char>> Resource;
@@ -51,7 +51,7 @@ protected:
   nlohmann::json config;
 
 public:
-  virtual Data read(const fs::path& fullpath) = 0;
+  virtual DataWrapper read(const fs::path& fullpath) = 0;
   void setConfig(const nlohmann::json& j)
   {
     this->config = j;

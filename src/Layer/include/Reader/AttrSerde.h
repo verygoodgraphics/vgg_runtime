@@ -252,7 +252,6 @@ inline void from_json(const json& j, TextAttr& x)
   x.underline = j.at("underline");
   x.kerning = j.at("kerning");
   x.horzAlignment = j.at("horizontalAlignment");
-  x.letterTransform = j.at("letterTransform");
   x.size = j.at("size");
 }
 } // namespace VGG

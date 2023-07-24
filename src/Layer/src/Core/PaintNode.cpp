@@ -24,7 +24,7 @@ public:
 
 PaintNode::PaintNode(const std::string& name, ObjectType type)
   : Node(name)
-  , type(type)
+  , m_type(type)
   , d_ptr(new PaintNode__pImpl(this))
 {
 }
@@ -80,12 +80,12 @@ glm::mat3 PaintNode::mapTransform(const PaintNode* node) const
 Mask PaintNode::makeMaskBy(EBoolOp maskOp)
 {
   Mask result;
-  if (maskedBy.empty())
+  if (m_maskedBy.empty())
     return result;
 
   auto op = toSkPathOp(maskOp);
   auto objects = Scene::getObjectTable();
-  for (const auto id : maskedBy)
+  for (const auto id : m_maskedBy)
   {
     if (id != this->GUID())
     {
@@ -119,7 +119,7 @@ void PaintNode::drawDebugBound(SkCanvas* canvas)
   const auto& b = getBound();
   SkPaint strokePen;
   strokePen.setStyle(SkPaint::kStroke_Style);
-  SkColor color = nodeType2Color(this->type);
+  SkColor color = nodeType2Color(this->m_type);
   strokePen.setColor(color);
   strokePen.setStrokeWidth(2);
   canvas->drawRect(toSkRect(getBound()), strokePen);
@@ -129,7 +129,7 @@ void PaintNode::visitNode(VGG::Node* p, ObjectTableType& table)
   if (!p)
     return;
   auto sptr = std::static_pointer_cast<PaintNode>(p->shared_from_this());
-  if (sptr->maskType != MT_None)
+  if (sptr->m_maskType != MT_None)
   {
     if (auto it = table.find(sptr->GUID()); it == table.end())
     {
@@ -170,10 +170,10 @@ void PaintNode::paintEvent(SkCanvas* canvas)
   {
     canvas->clipRect(toSkRect(getBound()));
   }
-  if (this->bgColor.has_value())
+  if (this->m_bgColor.has_value())
   {
     SkPaint bgPaint;
-    bgPaint.setColor(this->bgColor.value());
+    bgPaint.setColor(this->m_bgColor.value());
     bgPaint.setStyle(SkPaint::kFill_Style);
     canvas->drawRect(toSkRect(getBound()), bgPaint);
   }
@@ -194,7 +194,7 @@ Mask PaintNode::asOutlineMask(const glm::mat3* mat)
 
 void PaintNode::setOutlineMask(const Mask& mask)
 {
-  outlineMask = mask;
+  m_outlineMask = mask;
 }
 
 void PaintNode::asAlphaMask()

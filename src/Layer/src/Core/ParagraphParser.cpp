@@ -92,7 +92,10 @@ void ParagraphParser::parse(ParagraphListener& listener,
       const auto pa = paragraphAttributes[paragraphAttrIndex];
       if (newLine >> 7 == 0 && newLine == '\n')
       {
-        const auto breakLine = seperateLines || pa.type.lineType != TLT_Plain;
+        const auto breakLine =
+          seperateLines || pa.type.lineType != TLT_Plain || styleIndex + 1 < textAttrs.size()
+            ? textAttrs[styleIndex + 1].horzAlignment != textAttrs[styleIndex].horzAlignment
+            : false;
         if (breakLine)
         {
           const char* lastStyleEnd = end;

@@ -372,6 +372,7 @@ struct TextAttr
   bool kerning{ false };
   ETextUnderline underline{ UT_None };
   ETextHorizontalAlignment horzAlignment{ HA_Left };
+  ELetterTransform letterTransform{ ELT_Nothing };
 
   bool operator==(const TextAttr& other) const
   {

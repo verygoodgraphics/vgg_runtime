@@ -16,5 +16,8 @@ target_link_libraries(vgg_application PUBLIC
   vgg_domain
   vgg_layer
 )
+target_link_libraries(vgg_application PRIVATE
+  automerge
+)
 
 install(TARGETS vgg_application DESTINATION lib COMPONENT vgg_module_application)

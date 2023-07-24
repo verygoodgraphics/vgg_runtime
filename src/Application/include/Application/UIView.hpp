@@ -9,8 +9,9 @@
 #include <tuple>
 #include <vector>
 
-union SDL_Event;
 class SkCanvas;
+struct Zoomer;
+union SDL_Event;
 
 namespace VGG
 {
@@ -19,6 +20,7 @@ class UIView
 {
   std::shared_ptr<Scene> m_scene;
   std::vector<std::shared_ptr<UIView>> m_subviews;
+  bool m_self_zoom_enabled = true;
 
 public:
   using EventListener = std::function<void(UIEventPtr)>;
@@ -55,7 +57,12 @@ public:
   {
     m_subviews.push_back(view);
   }
-  void draw(SkCanvas* canvas);
+
+  void draw(SkCanvas* canvas, Zoomer* zoomer);
+  void disableSelfZoom()
+  {
+    m_self_zoom_enabled = false;
+  }
 
 private:
   EventListener m_event_listener;

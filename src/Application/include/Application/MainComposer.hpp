@@ -70,7 +70,8 @@ public:
     m_edit_view.reset(new UIView);
     m_presenter->setEditView(m_edit_view);
 
-    // todo: frame rect
+    m_view->disableSelfZoom();
+    // todo: set subview's frame rect
     m_view->addSubview(m_edit_view);
   }
 };

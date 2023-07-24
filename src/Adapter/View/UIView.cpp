@@ -1,5 +1,7 @@
 #include "Application/UIView.hpp"
 
+#include "Scene/Zoomer.h"
+
 #include <SDL2/SDL.h>
 
 using namespace VGG;
@@ -10,6 +12,8 @@ void UIView::onEvent(const SDL_Event& evt)
   {
     return;
   }
+
+  // todo, handle zoom
 
   // todo, hittest
   for (auto& subview : m_subviews)
@@ -188,12 +192,23 @@ std::tuple<bool, bool, bool, bool> UIView::getKeyModifier(int keyMod)
   return { l_alt || r_alt, l_ctrl || r_ctrl, l_meta || r_meta, l_shift || r_shift };
 }
 
-void UIView::draw(SkCanvas* canvas)
+void UIView::draw(SkCanvas* canvas, Zoomer* zoomer)
 {
-  m_scene->render(canvas);
+  if (m_self_zoom_enabled) // zoom self & subviews
+  {
+    zoomer->apply(canvas);
+    m_scene->render(canvas);
+  }
+  else // zoom only subviews
+  {
+    m_scene->render(canvas);
+    zoomer->apply(canvas);
+  }
 
+  // todo: clip
   for (auto& subview : m_subviews)
   {
-    subview->draw(canvas);
+    subview->draw(canvas, zoomer);
   }
+  zoomer->restore(canvas);
 }

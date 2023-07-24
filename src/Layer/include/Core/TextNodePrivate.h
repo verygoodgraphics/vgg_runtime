@@ -52,15 +52,15 @@ public:
 
   void setFontCollection(sk_sp<VGGFontCollection> fontCollection)
   {
-    this->fontCollection = std::move(fontCollection);
+    this->m_fontCollection = std::move(fontCollection);
   }
 
 private:
   int m_height{ 0 };
-  bool newParagraph{ true };
-  ParagraphAttr paraAttr;
+  bool m_newParagraph{ true };
+  ParagraphAttr m_paraAttr;
   TextParagraphCacheDirtyFlags m_dirtyFlags{ D_ALL };
-  sk_sp<VGGFontCollection> fontCollection;
+  sk_sp<VGGFontCollection> m_fontCollection;
 
 protected:
   void onBegin() override;
@@ -81,12 +81,12 @@ public:
     {
       mgr->ref();
     }
-    fontCollection =
+    m_fontCollection =
       sk_make_sp<VGGFontCollection>(std::move(mgr),
                                     FontManager::instance().getDefaultFallbackFonts());
   }
   TextParagraphCache(sk_sp<VGGFontCollection> fontCollection)
-    : fontCollection(std::move(fontCollection))
+    : m_fontCollection(std::move(fontCollection))
   {
   }
   bool empty() const
@@ -125,8 +125,8 @@ public:
     paragraphCache.reserve(paragraph.size());
     for (auto& d : paragraph)
     {
-      assert(d.builder);
-      paragraphCache.push_back({ 0, std ::move(d.builder->Build()) });
+      assert(d.Builder);
+      paragraphCache.push_back({ 0, std ::move(d.Builder->Build()) });
     }
     set(D_LAYOUT);
   }
@@ -144,11 +144,13 @@ public:
       const auto& d = paragraph[i];
       const auto& paragraph = paragraphCache[i].paragraph;
       SkFontMetrics metrics;
-      d.builder->getParagraphStyle().getTextStyle().getFontMetrics(&metrics);
-      const auto curX = metrics.fAvgCharWidth * d.level;
+      d.Builder->getParagraphStyle().getTextStyle().getFontMetrics(&metrics);
+      const auto curX = metrics.fAvgCharWidth * d.Level;
       paragraphCache[i].offsetX = curX;
       if (mode == ETextLayoutMode::TL_WidthAuto)
       {
+        // TODO:: unexpected behavior occurs here.
+        // A fixed number provided as a workaround temporarily.
         paragraph->layout(100000);
         const auto width = paragraph->getLongestLine();
         paragraph->layout(width);

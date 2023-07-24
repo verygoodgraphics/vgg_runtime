@@ -31,16 +31,16 @@ struct TextView
 class TextParagraph
 {
 public:
-  std::unique_ptr<ParagraphBuilder> builder{ nullptr };
-  int level{ 0 };
+  std::unique_ptr<ParagraphBuilder> Builder{ nullptr };
+  int Level{ 0 };
   TextView Utf8TextView;
   TextParagraph() = default;
   TextParagraph(std::string_view view,
                 std::unique_ptr<ParagraphBuilder> builder,
                 int level,
                 size_t charCount)
-    : builder(std::move(builder))
-    , level(level)
+    : Builder(std::move(builder))
+    , Level(level)
     , Utf8TextView({ view, charCount })
   {
   }
@@ -75,13 +75,13 @@ protected:
 
 class ParagraphParser
 {
-  int length{ 0 };
-  int styleIndex{ 0 };
-  int paragraphAttrIndex{ 0 };
-  const char* prevStyleBegin{ nullptr };
-  const char* prevParagraphBegin{ nullptr };
-  int offset{ 0 };
-  bool seperateLines{ false };
+  int m_length{ 0 };
+  int m_styleIndex{ 0 };
+  int m_paragraphAttrIndex{ 0 };
+  const char* m_prevStyleBegin{ nullptr };
+  const char* m_prevParagraphBegin{ nullptr };
+  int m_offset{ 0 };
+  bool m_seperateLines{ false };
   struct LevelOrderState
   {
     std::unordered_map<int, int> level2Order;
@@ -107,18 +107,18 @@ class ParagraphParser
   } m_orderState;
   void reset(const std::string& text, int firstOffset)
   {
-    styleIndex = 0;
-    paragraphAttrIndex = 0;
-    offset = firstOffset;
-    length = 0;
-    prevStyleBegin = text.c_str();
-    prevParagraphBegin = text.c_str();
+    m_styleIndex = 0;
+    m_paragraphAttrIndex = 0;
+    m_offset = firstOffset;
+    m_length = 0;
+    m_prevStyleBegin = text.c_str();
+    m_prevParagraphBegin = text.c_str();
     m_orderState.reset();
   }
 
 public:
   ParagraphParser(bool seperateLines = false)
-    : seperateLines(seperateLines)
+    : m_seperateLines(seperateLines)
   {
   }
 

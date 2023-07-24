@@ -9,7 +9,7 @@ using namespace VGG;
 class ExternalToolReader : public VGG::IReader
 {
 public:
-  virtual Data read(const fs::path& fullpath)
+  virtual DataWrapper read(const fs::path& fullpath)
   {
     return readImpl(fullpath);
   }
@@ -19,11 +19,11 @@ public:
   }
 
 protected:
-  Data readImpl(const fs::path& file)
+  DataWrapper readImpl(const fs::path& file)
   {
     const auto cmd = genCmd(file);
     auto ret = executeExternalCmd(cmd);
-    Data data;
+    DataWrapper data;
     if (ret == 0)
     {
       data.Format = readJson(getReadFile());
@@ -104,9 +104,9 @@ public:
   RawFileReader()
   {
   }
-  Data read(const fs::path& fullpath) override
+  DataWrapper read(const fs::path& fullpath) override
   {
-    Data data;
+    DataWrapper data;
     data.Format = readJson(fullpath);
     auto stem = fullpath.parent_path() / "image";
     data.Resource = readRes(stem);

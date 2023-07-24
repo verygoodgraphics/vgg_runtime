@@ -76,86 +76,86 @@ void ParagraphParser::parse(ParagraphListener& listener,
   size_t paragraphCharCount = 0;
   size_t styleTextCharCount = 0;
   int currentOrder = 0;
-  listener.onParagraphBegin(paragraphAttrIndex,
+  listener.onParagraphBegin(m_paragraphAttrIndex,
                             currentOrder,
-                            paragraphAttributes[paragraphAttrIndex]);
+                            paragraphAttributes[m_paragraphAttrIndex]);
   auto reason = runOnUtf8(
     text.c_str(),
     text.size(),
     [&, this](const char* begin, const char* end, int charCount)
     {
-      this->length += charCount;
+      this->m_length += charCount;
       paragraphCharCount += charCount;
       styleTextCharCount += charCount;
       unsigned char newLine = *begin;
       bool skip = false;
-      const auto pa = paragraphAttributes[paragraphAttrIndex];
+      const auto pa = paragraphAttributes[m_paragraphAttrIndex];
       if (newLine >> 7 == 0 && newLine == '\n')
       {
         const auto breakLine =
-          seperateLines || pa.type.lineType != TLT_Plain || styleIndex + 1 < textAttrs.size()
-            ? textAttrs[styleIndex + 1].horzAlignment != textAttrs[styleIndex].horzAlignment
+          m_seperateLines || pa.type.lineType != TLT_Plain || m_styleIndex + 1 < textAttrs.size()
+            ? textAttrs[m_styleIndex + 1].horzAlignment != textAttrs[m_styleIndex].horzAlignment
             : false;
         if (breakLine)
         {
           const char* lastStyleEnd = end;
-          const auto bytes = lastStyleEnd - prevStyleBegin;
-          listener.onTextStyle(paragraphAttrIndex,
-                               styleIndex,
-                               { std::string_view(prevStyleBegin, bytes), styleTextCharCount },
-                               textAttrs[styleIndex]);
+          const auto bytes = lastStyleEnd - m_prevStyleBegin;
+          listener.onTextStyle(m_paragraphAttrIndex,
+                               m_styleIndex,
+                               { std::string_view(m_prevStyleBegin, bytes), styleTextCharCount },
+                               textAttrs[m_styleIndex]);
           styleTextCharCount = 0;
-          prevStyleBegin = end;
-          if (this->length >= offset)
+          m_prevStyleBegin = end;
+          if (this->m_length >= m_offset)
           {
             skip = true;
-            if (styleIndex + 1 < textAttrs.size())
+            if (m_styleIndex + 1 < textAttrs.size())
             {
-              styleIndex++;
-              offset += textAttrs[styleIndex].length;
+              m_styleIndex++;
+              m_offset += textAttrs[m_styleIndex].length;
             }
           }
 
           listener.onParagraphEnd(
-            paragraphAttrIndex,
-            { std::string_view{ prevParagraphBegin, size_t(end - prevParagraphBegin) },
+            m_paragraphAttrIndex,
+            { std::string_view{ m_prevParagraphBegin, size_t(end - m_prevParagraphBegin) },
               paragraphCharCount });
-          prevParagraphBegin = end;
-          if (paragraphAttrIndex + 1 < paragraphAttributes.size())
+          m_prevParagraphBegin = end;
+          if (m_paragraphAttrIndex + 1 < paragraphAttributes.size())
           {
-            paragraphAttrIndex++;
+            m_paragraphAttrIndex++;
           }
           currentOrder = 0;
           if (pa.type.lineType != TLT_Plain)
           {
             currentOrder = m_orderState.order(pa.type.level, pa.type.firstLine);
           }
-          listener.onParagraphBegin(paragraphAttrIndex,
+          listener.onParagraphBegin(m_paragraphAttrIndex,
                                     currentOrder,
-                                    paragraphAttributes[paragraphAttrIndex]);
+                                    paragraphAttributes[m_paragraphAttrIndex]);
           // print wanring
           paragraphCharCount = 0;
         }
         // update to new paragraph
       }
-      if (!skip && this->length >= offset)
+      if (!skip && this->m_length >= m_offset)
       {
-        if (this->length > offset)
+        if (this->m_length > m_offset)
         {
           WARN("style offset do not match utf8 character count");
         }
         const char* lastStyleEnd = end;
-        const auto bytes = lastStyleEnd - prevStyleBegin;
-        listener.onTextStyle(paragraphAttrIndex,
-                             styleIndex,
-                             { std::string_view(prevStyleBegin, bytes), styleTextCharCount },
-                             textAttrs[styleIndex]);
-        prevStyleBegin = lastStyleEnd;
+        const auto bytes = lastStyleEnd - m_prevStyleBegin;
+        listener.onTextStyle(m_paragraphAttrIndex,
+                             m_styleIndex,
+                             { std::string_view(m_prevStyleBegin, bytes), styleTextCharCount },
+                             textAttrs[m_styleIndex]);
+        m_prevStyleBegin = lastStyleEnd;
         styleTextCharCount = 0;
-        if (styleIndex + 1 < textAttrs.size())
+        if (m_styleIndex + 1 < textAttrs.size())
         {
-          styleIndex++;
-          offset += textAttrs[styleIndex].length; // advanced
+          m_styleIndex++;
+          m_offset += textAttrs[m_styleIndex].length; // advanced
         }
       }
       return true;
@@ -166,21 +166,21 @@ void ParagraphParser::parse(ParagraphListener& listener,
   {
     WARN("Invalid utf8\n");
   }
-  assert(styleIndex < textAttrs.size());
-  if (prevStyleBegin - text.data() < text.size())
+  assert(m_styleIndex < textAttrs.size());
+  if (m_prevStyleBegin - text.data() < text.size())
   {
     WARN("No more style for text");
     listener.onTextStyle(
-      paragraphAttrIndex,
-      styleIndex,
-      { std::string_view(prevStyleBegin, text.size() - size_t(prevStyleBegin - text.data())),
+      m_paragraphAttrIndex,
+      m_styleIndex,
+      { std::string_view(m_prevStyleBegin, text.size() - size_t(m_prevStyleBegin - text.data())),
         styleTextCharCount },
-      textAttrs[styleIndex]);
+      textAttrs[m_styleIndex]);
   }
   styleTextCharCount = 0;
-  assert(paragraphAttrIndex < paragraphAttributes.size());
-  listener.onParagraphEnd(paragraphAttrIndex,
-                          TextView{ std::string_view{ prevParagraphBegin }, paragraphCharCount });
+  assert(m_paragraphAttrIndex < paragraphAttributes.size());
+  listener.onParagraphEnd(m_paragraphAttrIndex,
+                          TextView{ std::string_view{ m_prevParagraphBegin }, paragraphCharCount });
   paragraphCharCount = 0;
   listener.onEnd();
 }

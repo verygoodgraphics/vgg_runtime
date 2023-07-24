@@ -161,12 +161,12 @@ void PathNode::paintEvent(SkCanvas* canvas)
   }
 
   // draw blur, we assume that there is only one blur style
-  bool hasBlur = style.blurs.empty() ? false : style.blurs[0].isEnabled;
+  bool hasBlur = m_style.blurs.empty() ? false : m_style.blurs[0].isEnabled;
   if (hasBlur)
   {
     SkPaint pen;
     pen.setAntiAlias(true);
-    const auto blur = style.blurs[0];
+    const auto blur = m_style.blurs[0];
     auto sigma = SkBlurMask::ConvertRadiusToSigma(blur.radius);
     if (blur.blurType == BT_Gaussian)
     {
@@ -182,13 +182,13 @@ void PathNode::paintEvent(SkCanvas* canvas)
   auto mask = makeMaskBy(BO_Intersection);
   if (mask.outlineMask.isEmpty())
   {
-    _->drawContour(canvas, m_contextSetting, style, _->windingRule, ct, getBound(), hasFill());
+    _->drawContour(canvas, m_contextSetting, m_style, _->windingRule, ct, getBound(), hasFill());
   }
   else
   {
     canvas->save();
     canvas->clipPath(mask.outlineMask);
-    _->drawContour(canvas, m_contextSetting, style, _->windingRule, ct, getBound(), hasFill());
+    _->drawContour(canvas, m_contextSetting, m_style, _->windingRule, ct, getBound(), hasFill());
     canvas->restore();
   }
 
@@ -207,7 +207,7 @@ void PathNode::addSubShape(std::shared_ptr<PaintNode> node, EBoolOp op)
 
 bool PathNode::hasFill() const
 {
-  for (const auto& f : style.fills)
+  for (const auto& f : m_style.fills)
   {
     if (f.isEnabled)
       return true;
@@ -218,7 +218,7 @@ bool PathNode::hasFill() const
 void PathNode::paintFill(SkCanvas* canvas, float globalAlpha, const SkPath& skPath)
 {
   VGG_IMPL(PathNode)
-  for (const auto& f : style.fills)
+  for (const auto& f : m_style.fills)
   {
     if (!f.isEnabled)
       continue;

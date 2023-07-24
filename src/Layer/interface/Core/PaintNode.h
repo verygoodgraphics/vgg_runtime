@@ -35,19 +35,19 @@ protected:
   Bound2 m_bound;
   glm::mat3 m_transform{ 1.0 };
 
-  std::string guid{};
-  std::vector<std::string> maskedBy{};
-  Mask outlineMask;
-  EMaskType maskType{ MT_None };
+  std::string m_guid{};
+  std::vector<std::string> m_maskedBy{};
+  Mask m_outlineMask;
+  EMaskType m_maskType{ MT_None };
   EBoolOp m_clipOperator{ BO_None };
   EOverflow m_overflow{ OF_Hidden };
 
-  Style style;
+  Style m_style;
   ContextSetting m_contextSetting;
-  ObjectType type;
+  ObjectType m_type;
 
-  bool visible{ true };
-  std::optional<Color> bgColor;
+  bool m_visible{ true };
+  std::optional<Color> m_bgColor;
 
   friend class NlohmannBuilder;
   friend class SkiaRenderer;
@@ -87,17 +87,17 @@ public:
 
   void setVisible(bool visible)
   {
-    this->visible = visible;
+    this->m_visible = visible;
   }
 
   void setBackgroundColor(const Color& color)
   {
-    this->bgColor = color;
+    this->m_bgColor = color;
   }
 
   bool isVisible() const
   {
-    return this->visible;
+    return this->m_visible;
   }
 
   EBoolOp clipOperator() const
@@ -130,17 +130,17 @@ public:
 
   const std::string& GUID() const
   {
-    return guid;
+    return m_guid;
   }
 
   bool isMasked() const
   {
-    return !maskedBy.empty();
+    return !m_maskedBy.empty();
   }
 
   EMaskType getMaskType() const
   {
-    return this->maskType;
+    return this->m_maskType;
   }
 
   /**
@@ -182,7 +182,7 @@ public:
   // TODO:: chagne the following functions accessbility
   void invokeRenderPass(SkCanvas* canvas)
   {
-    if (!visible)
+    if (!m_visible)
       return;
     preRenderPass(canvas);
     renderOrderPass(canvas);

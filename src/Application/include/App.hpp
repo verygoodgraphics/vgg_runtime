@@ -447,12 +447,10 @@ protected: // protected methods
     }
     if (canvas)
     {
-      m_zoomer.apply(canvas);
       if (m_view)
       {
-        m_view->draw(canvas);
+        m_view->draw(canvas, &m_zoomer);
       }
-      m_zoomer.restore(canvas);
 
       // draw position information
       if (m_drawInfo)

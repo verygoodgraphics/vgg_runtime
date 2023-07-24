@@ -191,4 +191,14 @@ enum ETextLineType : uint8_t
   TLT_Unordered = 2,
 };
 
+enum ELetterTransform : uint8_t
+{
+  ELT_Nothing = 0,
+  ELT_SmallCaps,
+  ELT_UpperCaps,
+  ELT_LowerCaps,
+  ELT_ForceSmallCaps,
+  ELT_Title
+};
+
 } // namespace VGG

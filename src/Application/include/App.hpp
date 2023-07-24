@@ -569,13 +569,15 @@ protected: // protected methods
 
       if (key == SDLK_DOWN)
       {
-        m_reloadCallback(m_scene.get(), 0);
+        if (m_reloadCallback)
+          m_reloadCallback(m_scene.get(), 0);
         return true;
       }
 
       if (key == SDLK_UP)
       {
-        m_reloadCallback(m_scene.get(), 1);
+        if (m_reloadCallback)
+          m_reloadCallback(m_scene.get(), 1);
         return true;
       }
 

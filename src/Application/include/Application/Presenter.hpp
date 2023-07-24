@@ -18,6 +18,9 @@ class Presenter : public std::enable_shared_from_this<Presenter>
   std::shared_ptr<UIView> m_view;
   std::shared_ptr<Daruma> m_model;
 
+  std::shared_ptr<UIView> m_edit_view;
+  std::shared_ptr<Daruma> m_edit_model;
+
   rxcpp::subjects::subject<VGG::UIEventPtr> m_subject;
   rxcpp::observer<VGG::ModelEventPtr> m_model_observer;
 
@@ -27,8 +30,15 @@ public:
   virtual void setModel(std::shared_ptr<Daruma> model)
   {
     m_model = model;
+    m_view->setResouces(m_model->resources());
     show();
-    // todo, set resources
+  }
+
+  void setModelToEdit(std::shared_ptr<Daruma> model)
+  {
+    m_edit_model = model;
+    m_edit_view->setResouces(m_edit_model->resources());
+    m_edit_view->show(m_edit_model->designDoc()->content());
   }
 
   void setView(std::shared_ptr<UIView> view)
@@ -95,7 +105,6 @@ private:
   void show()
   {
     m_view->show(m_model->designDoc()->content());
-    m_view->setResouces(m_model->resources());
   }
 
   void update()

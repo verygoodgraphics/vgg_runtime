@@ -1,5 +1,7 @@
 #include "Controller.hpp"
 
+#include "Usecase/EditModel.hpp"
+
 #include "Domain/VggExec.hpp"
 #include "Domain/RawJsonDocument.hpp"
 #include "Domain/SchemaValidJsonDocument.hpp"
@@ -45,15 +47,31 @@ bool Controller::start(std::vector<char>& buffer, const char* designDocSchemaFil
   return ret;
 }
 
+bool Controller::edit(const std::string& filePath)
+{
+  EditModel edit_model{ m_design_schema_file_path };
+  auto daruma_to_edit = edit_model.open(filePath);
+  if (daruma_to_edit)
+  {
+    m_edit_model = daruma_to_edit;
+    startEditing();
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
 void Controller::initModel(const char* designDocSchemaFilePath)
 {
-  std::string design_schema_file_path;
   if (designDocSchemaFilePath)
   {
-    design_schema_file_path.append(designDocSchemaFilePath);
+    m_design_schema_file_path.append(designDocSchemaFilePath);
   }
 
-  auto build_design_doc_fn = [&, design_schema_file_path](const json& design_json)
+  auto build_design_doc_fn =
+    [&, design_schema_file_path = m_design_schema_file_path](const json& design_json)
   {
     auto json_doc_ptr = createJsonDoc();
     json_doc_ptr->setContent(design_json);
@@ -84,6 +102,12 @@ void Controller::start()
 
   observeModelState();
   observeUIEvent();
+}
+
+void Controller::startEditing()
+{
+  m_presenter->setModelToEdit(m_edit_model);
+  // todo, observe editing, then upate view
 }
 
 void Controller::observeModelState()

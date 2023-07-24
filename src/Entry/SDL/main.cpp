@@ -16,6 +16,7 @@ int main(int argc, char** argv)
   argparse::ArgumentParser program("vgg", "0.1");
   program.add_argument("-l", "--load").help("load from daruma file or directory");
   program.add_argument("-c", "--config").help("specify config file");
+  program.add_argument("-e", "--edit").help("edit daruma file or directory");
 
   try
   {
@@ -44,6 +45,11 @@ int main(int argc, char** argv)
   {
     auto fp = loadfile.value();
     main_composer.controller()->start(fp, "../asset/vgg-format.json");
+  }
+  if (auto file_to_edit = program.present("-e"))
+  {
+    auto file_path = file_to_edit.value();
+    main_composer.controller()->edit(file_path);
   }
 
   SDLRuntime* app = App<SDLRuntime>::getInstance(1920, 1080, "VGG");

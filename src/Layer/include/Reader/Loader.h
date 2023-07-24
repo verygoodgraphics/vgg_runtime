@@ -148,6 +148,7 @@ public:
   static inline std::shared_ptr<TextNode> fromText(const nlohmann::json& j)
   {
     auto p = std::make_shared<TextNode>("Text");
+    fromObjectCommonProperty(j, p.get());
     std::string text = j.at("content");
     auto lineType = get_stack_optional<std::vector<TextLineAttr>>(j, "lineType")
                       .value_or(std::vector<TextLineAttr>());
@@ -155,9 +156,15 @@ public:
     p->setVerticalAlignment(j.at("verticalAlignment"));
     const auto& b = p->getBound();
     p->setFrameMode(j.at("frameMode"));
-    if (b.width() == 0 || b.height())
+    if (b.width() == 0 || b.height() == 0)
     {
+      // for Ai speicific
       p->setFrameMode(ETextLayoutMode::TL_WidthAuto);
+    }
+    else
+    {
+      // TODO:: force to Fixed now becase the bound computed by text layout is not accurate.
+      p->setFrameMode(ETextLayoutMode::TL_Fixed);
     }
     return p;
   }

@@ -26,7 +26,6 @@ extern "C"
     app->setView(main_composer.view());
     app->setScene(main_composer.view()->scene());
 
-    app->setOnFrameOnce([app]() { app->startRunMode(); });
     emscripten_set_main_loop(emscripten_frame, 0, 1);
   }
 }

@@ -1,0 +1,67 @@
+Checks: 'readability-identifier-naming'
+WarningsAsErrors: 'readability-identifier-naming'
+CheckOptions:
+  - key:             readability-identifier-naming.ClassCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.ClassMemberCase
+    value:           camelBack
+  - key:             readability-identifier-naming.ClassMemberPrefix
+    value:           's_'
+  - key:             readability-identifier-naming.MemberCase
+    value:           camelBack
+  - key:             readability-identifier-naming.PublicMemberCase
+    value:           camelBack
+  - key:             readability-identifier-naming.ProtectedMemberCase
+    value:           camelBack
+  - key:             readability-identifier-naming.ProtectedMemberPrefix
+    value:           'm_'
+  - key:             readability-identifier-naming.PrivateMemberCase
+    value:           camelBack
+  - key:             readability-identifier-naming.PrivateMemberPrefix
+    value:           'm_'
+  - key:             readability-identifier-naming.EnumCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.EnumPrefix
+    value:           E
+  - key:             readability-identifier-naming.EnumConstantCase
+    value:           Camel_Snake_Case
+  - key:             readability-identifier-naming.UnionCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.UnionPrefix
+    value:           U
+  - key:             readability-identifier-naming.FunctionCase
+    value:           camelBack
+  - key:             readability-identifier-naming.GlobalVariableCase
+    value:           camelBack
+  - key:             readability-identifier-naming.GlobalVariablePrefix
+    value:           'g_'
+  - key:             readability-identifier-naming.GlobalConstantCase
+    value:           camelBack
+  - key:             readability-identifier-naming.GlobalConstantPrefix
+    value:           'g_'
+  - key:             readability-identifier-naming.GlobalConstantSuffix
+    value:           ''
+  - key:             readability-identifier-naming.StaticConstantCase
+    value:           camelBack
+  - key:             readability-identifier-naming.StaticConstantPrefix
+    value:           's_'
+  - key:             readability-identifier-naming.StaticVariableCase
+    value:           camelBack
+  - key:             readability-identifier-naming.StaticVariablePrefix
+    value:           's_'
+  - key:             readability-identifier-naming.ConstexprVariableCase
+    value:           UPPER_CASE
+  - key:             readability-identifier-naming.MacroDefinitionCase
+    value:           UPPER_CASE
+  - key:             readability-identifier-naming.MacroDefinitionIgnoredRegexp
+    value:           '^[A-Z]+(_[A-Z]+)*_$'
+  - key:             readability-identifier-naming.ParameterCase
+    value:           camelBack
+  - key:             readability-identifier-naming.TypeAliasCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.TypedefCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.VariableCase
+    value:           camelBack
+  - key:             readability-identifier-naming.IgnoreMainLikeFunctions
+    value:           1

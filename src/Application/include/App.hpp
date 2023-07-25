@@ -249,6 +249,9 @@ protected: // protected members and static members
       return AppError(AppError::Kind::HasInitError, "app has init");
     }
 
+    app->m_width = w;
+    app->m_height = h;
+
     auto appResult = app->Self()->initContext(w * app->m_pixelRatio, h * app->m_pixelRatio, title);
     if (appResult.has_value())
       return appResult;
@@ -351,8 +354,6 @@ protected: // protected methods
   void resizeSkiaSurface(int w, int h)
   {
     m_skiaState.surface = setup_skia_surface(w, h);
-    m_width = w;
-    m_height = h;
   }
 
   std::optional<AppError> updateSkiaEngine()
@@ -394,6 +395,11 @@ protected: // protected methods
 
       DEBUG("Window resizing: (%d %d)", w, h);
       resizeSkiaSurface(w * m_pixelRatio * m_dpiRatio, h * m_pixelRatio * m_dpiRatio);
+
+      m_width = w;
+      m_height = h;
+      m_view->setSize(m_width, m_height);
+
       return true;
     }
 
@@ -627,6 +633,7 @@ public: // public methods
   void setView(std::shared_ptr<UIView> view)
   {
     m_view = view;
+    m_view->setSize(m_width, m_height);
   }
 
   inline GrDirectContext* getDirectContext()

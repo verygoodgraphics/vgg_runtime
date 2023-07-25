@@ -70,8 +70,7 @@ public:
     m_edit_view.reset(new UIView);
     m_presenter->setEditView(m_edit_view);
 
-    m_view->disableSelfZoom();
-    // todo: set subview's frame rect
+    m_view->becomeEditorWithSidebar(0, 200, 0, 200);
     m_view->addSubview(m_edit_view);
   }
 };

@@ -96,6 +96,7 @@ bool Daruma::load_files()
     }
     else
     {
+      FAIL("#Daruma::load_files(), read file failed");
       return false;
     }
 
@@ -112,6 +113,7 @@ bool Daruma::load_files()
   }
   catch (const std::exception& e)
   {
+    FAIL("#Daruma::load_files(), caught exception: %s", e.what());
     return false;
   }
 }

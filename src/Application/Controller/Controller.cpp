@@ -63,6 +63,22 @@ bool Controller::edit(const std::string& filePath)
   }
 }
 
+bool Controller::edit(std::vector<char>& buffer)
+{
+  EditModel edit_model{ m_design_schema_file_path };
+  auto daruma_to_edit = edit_model.open(buffer);
+  if (daruma_to_edit)
+  {
+    m_edit_model = daruma_to_edit;
+    startEditing();
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
 void Controller::initModel(const char* designDocSchemaFilePath)
 {
   if (designDocSchemaFilePath)

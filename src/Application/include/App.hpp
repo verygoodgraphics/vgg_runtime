@@ -268,10 +268,13 @@ protected: // protected members and static members
     auto drawSize = std::any_cast<std::pair<int, int>>(app->Self()->getProperty("viewport_size"));
     auto winSize = std::any_cast<std::pair<int, int>>(app->Self()->getProperty("window_size"));
 
+#ifdef EMSCRIPTEN
+    app->m_pixelRatio = (double)drawSize.first / winSize.first;
+#endif
     app->m_dpiRatio = app->Self()->getDPIScale();
     DEBUG("Drawable size: %d %d", drawSize.first, drawSize.second);
     DEBUG("Window size: %d %d", winSize.first, winSize.second);
-    DEBUG("Pre scale scale: %.2lf", app->m_pixelRatio);
+    DEBUG("Pixel ratio: %.2lf", app->m_pixelRatio);
     DEBUG("DPI ratio: %.2lf", app->m_dpiRatio);
 
     // get skia surface and canvas

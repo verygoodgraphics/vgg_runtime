@@ -18,9 +18,22 @@ namespace VGG
 
 class UIView
 {
+public:
+  using scalar_type = int;
+
+private:
   std::shared_ptr<Scene> m_scene;
   std::vector<std::shared_ptr<UIView>> m_subviews;
   bool m_self_zoom_enabled = true;
+
+  scalar_type m_width{ 0 };
+  scalar_type m_height{ 0 };
+
+  // sidebar
+  scalar_type m_top{ 0 };
+  scalar_type m_right{ 0 };
+  scalar_type m_bottom{ 0 };
+  scalar_type m_left{ 0 };
 
 public:
   using EventListener = std::function<void(UIEventPtr)>;
@@ -59,10 +72,16 @@ public:
   }
 
   void draw(SkCanvas* canvas, Zoomer* zoomer);
-  void disableSelfZoom()
+
+  void setSize(scalar_type w, scalar_type h)
   {
-    m_self_zoom_enabled = false;
+    m_width = w;
+    m_height = h;
   }
+  void becomeEditorWithSidebar(scalar_type top,
+                               scalar_type right,
+                               scalar_type bottom,
+                               scalar_type left);
 
 private:
   EventListener m_event_listener;

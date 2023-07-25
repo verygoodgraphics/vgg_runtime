@@ -202,13 +202,34 @@ void UIView::draw(SkCanvas* canvas, Zoomer* zoomer)
   else // zoom only subviews
   {
     m_scene->render(canvas);
+
+    SkRect edit_rect{ SkIntToScalar(m_left),
+                      SkIntToScalar(m_top),
+                      SkIntToScalar(m_width - m_right),
+                      SkIntToScalar(m_height - m_bottom) };
+    canvas->clipRect(edit_rect);
+
     zoomer->apply(canvas);
   }
 
-  // todo: clip
   for (auto& subview : m_subviews)
   {
     subview->draw(canvas, zoomer);
   }
   zoomer->restore(canvas);
+}
+
+void UIView::becomeEditorWithSidebar(scalar_type top,
+                                     scalar_type right,
+                                     scalar_type bottom,
+                                     scalar_type left)
+{
+  m_self_zoom_enabled = false;
+
+  m_top = top;
+  m_right = right;
+  m_bottom = bottom;
+  m_left = left;
+
+  // todo, editor layout
 }

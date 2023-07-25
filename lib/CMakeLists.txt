@@ -12,6 +12,8 @@ add_subdirectory(vgg_contrib/rapidfuzz-cpp)
 add_subdirectory(vgg_contrib/sdefl)
 add_subdirectory(vgg_contrib/picosha2)
 add_subdirectory(vgg_automerge/automerge)
+set(VGG_AUTOMERGE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/vgg_automerge/automerge CACHE PATH "" FORCE)
+mark_as_advanced(VGG_AUTOMERGE_INCLUDE)
 
 if (NOT EMSCRIPTEN)
   if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/node")

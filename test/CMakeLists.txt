@@ -10,7 +10,7 @@ else()
     editor/save_test.cpp
     exec/vgg_exec_test.cpp
     infrastructure/async_test.cpp
-    # model/automerge_test.cpp
+    model/automerge_test.cpp
     model/json_schema_validator_test.cpp
     model/schema_valid_json_document_test.cpp
     model/vgg_model_test.cpp
@@ -24,6 +24,7 @@ else()
     .
     mocks
     model
+    ${VGG_AUTOMERGE_INCLUDE}
   )
 
   get_target_property(VGG_LAYER_RPATH vgg_layer BUILD_RPATH)
@@ -43,7 +44,7 @@ else()
     COMMAND ${CMAKE_COMMAND} -E rm ${TMP_VGG_WORK_ZIP_FILE}
   )
 
-  target_link_libraries(unit_tests PRIVATE vgg_internal gtest_main gmock vgg_utility)
+  target_link_libraries(unit_tests PRIVATE vgg_internal gtest_main gmock vgg_utility automerge)
   set_target_properties(unit_tests PROPERTIES LINK_FLAGS ${SDL2_LIBRARIES})
   include(GoogleTest)
   gtest_discover_tests(unit_tests)

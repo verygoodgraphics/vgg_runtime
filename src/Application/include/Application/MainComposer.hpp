@@ -65,12 +65,12 @@ public:
     return m_view;
   }
 
-  void enableEdit()
+  void enableEdit(int top = 0, int right = 200, int bottom = 0, int left = 200)
   {
     m_edit_view.reset(new UIView);
     m_presenter->setEditView(m_edit_view);
 
-    m_view->becomeEditorWithSidebar(0, 200, 0, 200);
+    m_view->becomeEditorWithSidebar(top, right, bottom, left);
     m_view->addSubview(m_edit_view);
   }
 };

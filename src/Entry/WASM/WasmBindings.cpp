@@ -19,6 +19,8 @@
 #include "BrowserMainComposer.hpp"
 #include "Version.h"
 
+#include <emscripten.h>
+
 extern "C"
 {
   bool load_file_from_mem(const char* name, char* data, int len)
@@ -33,6 +35,18 @@ extern "C"
     std::string v1(version);
     std::string v2 = VGG::Version::get();
     return v1 == v2;
+  }
+
+  // Use current daruma file as an editor.
+  // data/len: is the daruma file to be edited.
+  // top/right/bottom/left: offsets within the editor
+  EMSCRIPTEN_KEEPALIVE bool edit(char* data, int len, int top, int right, int bottom, int left)
+  {
+    auto& main_composer = VggBrowser::mainComposer();
+    main_composer.enableEdit(top, right, bottom, left);
+
+    std::vector<char> buffer(data, data + len);
+    return main_composer.controller()->edit(buffer);
   }
 };
 

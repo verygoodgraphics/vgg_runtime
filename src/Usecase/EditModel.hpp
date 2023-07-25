@@ -34,7 +34,17 @@ public:
     }
   }
 
-  bool open(std::vector<char>& buffer);
+  std::shared_ptr<Daruma> open(std::vector<char>& buffer)
+  {
+    if (m_model->load(buffer))
+    {
+      return m_model;
+    }
+    else
+    {
+      return nullptr;
+    }
+  }
 
   std::shared_ptr<Daruma> model()
   {

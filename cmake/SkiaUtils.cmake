@@ -124,6 +124,7 @@ skia_use_expat=false
 skia_use_vulkan=false 
 skia_enable_pdf=false")
 
+cmake_minimum_required(VERSION 3.19) # for string(JSON ...)
 
 function(list_from_json out_var json)
     set(list)

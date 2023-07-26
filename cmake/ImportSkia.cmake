@@ -5,6 +5,7 @@ if(NOT IS_DIRECTORY ${SKIA_EXTERNAL_PROJECT_DIR})
     message(FATAL_ERROR "SKIA_EXTERNAL_PROJECT_DIR: ${SKIA_EXTERNAL_PROJECT_DIR} is not a directory")
 endif()
 
+unset(NINJA_COMMAND CACHE)
 find_program(NINJA_COMMAND ninja)
 if(NOT NINJA_COMMAND)
     message(FATAL_ERROR "ninja is not found. Check your ninja installation.")

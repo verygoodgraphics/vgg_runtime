@@ -8,6 +8,7 @@
 
 #include <core/SkCanvas.h>
 #include <core/SkColor.h>
+#include <core/SkString.h>
 #include <modules/skparagraph/include/FontCollection.h>
 
 namespace VGG
@@ -29,7 +30,6 @@ void drawParagraphDebugInfo(DebugCanvas& canvas,
   auto rects = p->getRectsForRange(0, 10000, RectHeightStyle::kMax, RectWidthStyle::kMax);
   auto h = p->getHeight();
   auto mw = p->getMaxWidth();
-  auto iw = p->getMaxIntrinsicWidth();
   SkPaint pen;
   SkColor color = colorTable[index % 9];
   pen.setColor(SkColorSetA(color, 0x11));
@@ -74,19 +74,98 @@ sktxt::ParagraphStyle createParagraphStyle(const ParagraphAttr& attr)
   return style;
 }
 
+std::vector<std::string> split(const std::string& s, char seperator)
+{
+  std::vector<std::string> output;
+  std::string::size_type prev_pos = 0, pos = 0;
+  while ((pos = s.find(seperator, pos)) != std::string::npos)
+  {
+    std::string substring(s.substr(prev_pos, pos - prev_pos));
+    output.push_back(substring);
+    prev_pos = ++pos;
+  }
+  output.push_back(s.substr(prev_pos, pos - prev_pos)); // Last word
+  return output;
+}
+
 sktxt::TextStyle createTextStyle(const TextAttr& attr, VGGFontCollection* font)
 {
   sktxt::TextStyle style;
   SkColor color = attr.color;
   style.setColor(color);
   style.setDecorationColor(color);
-  // auto matched = font->fuzzyMatch(attr.fontName);
-  // std::cout << "Font Name: " << attr.fontName << " matches " << matched.c_str() << std::endl;
-  style.setFontFamilies({ SkString(attr.fontName) });
+  std::string fontName;
+  std::string subFamilyName;
+
+  auto resolve = [&fontName, &subFamilyName](const std::vector<std::string>& candidates)
+  {
+    for (const auto& candidate : candidates)
+    {
+      if (const auto components = split(candidate, '-'); !components.empty())
+      {
+        fontName = components[0];
+        for (int i = 1; i < components.size(); i++)
+        {
+          subFamilyName += components[i];
+        }
+        break;
+      }
+    }
+  };
+
+  if (const auto components = split(attr.fontName, '-'); !components.empty())
+  {
+    fontName = components[0];
+    for (int i = 1; i < components.size(); i++)
+    {
+      subFamilyName += components[i];
+    }
+    auto matched = font->fuzzyMatch(fontName);
+    INFO("Font [%s] matches real name [%s][%f]",
+         fontName.c_str(),
+         matched.first.c_str(),
+         matched.second);
+    fontName = std::string(matched.first.c_str());
+
+    // When font name is provided, we match the real name first.
+    // If the score is lower than a threshold, we choose the
+    // fallback font rather pick it fuzzily.
+    constexpr float THRESHOLD = 70.f;
+    if (const auto& fallbackFonts = font->fallbackFonts();
+        !fallbackFonts.empty() && matched.second < THRESHOLD)
+    {
+      resolve(fallbackFonts);
+    }
+  }
+  else if (const auto& fallbackFonts = font->fallbackFonts(); !fallbackFonts.empty())
+  {
+    resolve(fallbackFonts);
+  }
+  if (subFamilyName.empty())
+  {
+    subFamilyName = "Regular";
+  }
+  if (fontName.empty())
+  {
+    // the worst case
+    fontName = "Inter";
+  }
+  INFO("Given [%s], [%s] is choosed finally", attr.fontName.c_str(), fontName.c_str());
+  std::vector<SkString> fontFamilies;
+  fontFamilies.push_back(SkString(fontName));
+  if (const auto& fallbackFonts = font->fallbackFonts(); !fallbackFonts.empty())
+  {
+    for (const auto& f : fallbackFonts)
+    {
+      fontFamilies.push_back(SkString(f));
+    }
+  }
+  style.setFontFamilies(fontFamilies);
+  style.setFontStyle(toSkFontStyle(subFamilyName));
+
   style.setFontSize(attr.size);
   style.setLetterSpacing(attr.letterSpacing);
   style.setBaselineShift(attr.baselineShift);
-  style.setFontStyle(toSkFontStyle(attr.subFamilyName));
   if (attr.lineThrough)
   {
     style.setDecoration(skia::textlayout::kLineThrough);

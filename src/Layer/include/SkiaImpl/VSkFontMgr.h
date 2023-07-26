@@ -168,7 +168,7 @@ public:
   explicit SkFontMgrVGG(std::unique_ptr<SystemFontLoader> loader);
   explicit SkFontMgrVGG() = default;
 
-  SkString fuzzyMatchFontFamilyName(const std::string& fontName) const;
+  std::pair<SkString, float> fuzzyMatchFontFamilyName(const std::string& fontName) const;
 
   void saveFontInfo(const fs::path& path)
   {
@@ -328,10 +328,12 @@ using namespace skia::textlayout;
 class VGGFontCollection : public FontCollection
 {
   sk_sp<SkFontMgrVGG> m_fontMgr;
+  std::vector<std::string> m_fallbackFonts;
 
 public:
   VGGFontCollection(sk_sp<SkFontMgrVGG> fontMgr, const std::vector<std::string>& fallbackFonts)
     : m_fontMgr(std::move(fontMgr))
+    , m_fallbackFonts(fallbackFonts)
   {
     std::vector<SkString> defFonts;
     for (const auto& f : fallbackFonts)
@@ -343,7 +345,12 @@ public:
     this->enableFontFallback();
   }
 
-  SkString fuzzyMatch(const std::string& fontFamily)
+  const std::vector<std::string>& fallbackFonts()
+  {
+    return m_fallbackFonts;
+  }
+
+  std::pair<SkString, float> fuzzyMatch(const std::string& fontFamily)
   {
     return m_fontMgr->fuzzyMatchFontFamilyName(fontFamily);
   }

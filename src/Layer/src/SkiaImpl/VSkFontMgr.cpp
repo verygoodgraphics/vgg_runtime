@@ -271,7 +271,7 @@ sk_sp<SkTypeface> SkFontMgrVGG::onMakeFromFile(const char path[], int ttcIndex) 
   return stream ? this->makeFromStream(std::move(stream), ttcIndex) : nullptr;
 }
 
-SkString SkFontMgrVGG::fuzzyMatchFontFamilyName(const std::string& fontName) const
+std::pair<SkString, float> SkFontMgrVGG::fuzzyMatchFontFamilyName(const std::string& fontName) const
 {
   bool match_found = false;
   double best_score = 0.0;
@@ -289,7 +289,7 @@ SkString SkFontMgrVGG::fuzzyMatchFontFamilyName(const std::string& fontName) con
       best_match = style->getFamilyName();
     }
   }
-  return best_match;
+  return { best_match, best_score };
 }
 
 sk_sp<SkTypeface> SkFontMgrVGG::onLegacyMakeTypeface(const char familyName[],

@@ -60,7 +60,7 @@ void Scene::preprocessMask(PaintNode* node)
 {
   if (maskDirty)
   {
-    Scene::ObjectTable = node->PreprocessMask();
+    Scene::ObjectTable = node->preprocessMask();
     // generate each mask for masked node
     maskDirty = false;
   }

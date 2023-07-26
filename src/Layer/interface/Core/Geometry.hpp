@@ -9,12 +9,6 @@ namespace VGG
 {
 struct Bound2
 {
-  enum class CoordOrigin
-  {
-    TopLeft,
-    BottomLeft,
-  };
-
   glm::vec2 topLeft;
   glm::vec2 bottomRight;
   Bound2()
@@ -78,6 +72,30 @@ struct Bound2
   float distance() const
   {
     return std::sqrt(squaredDistance());
+  }
+};
+
+struct RoundedBound2 : public Bound2
+{
+private:
+  float m_xRadius{ 0.0f }, m_yRadius{ 0.0f };
+
+public:
+  RoundedBound2(float x, float y, float w, float h, float xR, float yR)
+    : Bound2(x, y, w, h)
+    , m_xRadius(xR)
+    , m_yRadius(yR)
+  {
+  }
+  RoundedBound2() = default;
+  float xRadius() const
+  {
+    return m_xRadius;
+  }
+
+  float yRadius() const
+  {
+    return m_yRadius;
   }
 };
 

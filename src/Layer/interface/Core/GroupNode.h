@@ -6,7 +6,7 @@
 class SkCanvas;
 namespace VGG
 {
-class VGG_EXPORTS GroupNode final : public PaintNode
+class VGG_EXPORTS GroupNode : public PaintNode
 {
 public:
   GroupNode(const std::string& name);

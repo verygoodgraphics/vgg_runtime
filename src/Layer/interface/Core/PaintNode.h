@@ -39,6 +39,7 @@ protected:
   std::vector<std::string> m_maskedBy{};
   Mask m_outlineMask;
   EMaskType m_maskType{ MT_None };
+  EMaskCoutourType m_maskContourType{ MCT_Content };
   EBoolOp m_clipOperator{ BO_None };
   EOverflow m_overflow{ OF_Hidden };
 
@@ -80,6 +81,11 @@ public:
     return this->m_contextSetting;
   }
 
+  ContextSetting& contextSetting()
+  {
+    return this->m_contextSetting;
+  }
+
   void setClipOperator(EBoolOp op)
   {
     m_clipOperator = op;
@@ -98,6 +104,21 @@ public:
   bool isVisible() const
   {
     return this->m_visible;
+  }
+
+  void setStyle(const Style& style)
+  {
+    m_style = style;
+  }
+
+  Style& style()
+  {
+    return m_style;
+  }
+
+  const Style& style() const
+  {
+    return m_style;
   }
 
   EBoolOp clipOperator() const
@@ -138,9 +159,24 @@ public:
     return !m_maskedBy.empty();
   }
 
-  EMaskType getMaskType() const
+  EMaskType maskType() const
   {
     return this->m_maskType;
+  }
+
+  void setMaskType(EMaskType type)
+  {
+    this->m_maskType = type;
+  }
+
+  EMaskCoutourType maskContourType() const
+  {
+    return m_maskContourType;
+  }
+
+  void setMaskContourType(EMaskCoutourType type)
+  {
+    m_maskContourType = type;
   }
 
   /**
@@ -151,7 +187,7 @@ public:
   void setOutlineMask(const Mask& mask);
 
   // TODO:: this routine should be removed to a stand alone render pass
-  VGG::ObjectTableType PreprocessMask()
+  VGG::ObjectTableType preprocessMask()
   {
     ObjectTableType hash;
     visitNode(this, hash);

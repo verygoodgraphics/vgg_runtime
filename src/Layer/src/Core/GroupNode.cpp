@@ -44,7 +44,7 @@ void GroupNode::renderOrderPass(SkCanvas* canvas)
   for (const auto& p : this->m_firstChild)
   {
     auto c = static_cast<PaintNode*>(p.get());
-    if (c->getMaskType() == MT_Outline)
+    if (c->maskType() == MT_Outline)
       masked.push_back(c);
     else
       noneMasked.push_back(c);

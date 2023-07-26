@@ -123,6 +123,12 @@ enum EMaskType : uint8_t
   MT_Alpha
 };
 
+enum EMaskCoutourType : uint8_t
+{
+  MCT_Frame,
+  MCT_Content,
+};
+
 enum ELineJoin : uint8_t
 {
   LJ_Miter,

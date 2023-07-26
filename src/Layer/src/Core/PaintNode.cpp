@@ -4,6 +4,7 @@
 #include "SkiaImpl/VSkia.h"
 #include "core/SkCanvas.h"
 #include <core/SkPath.h>
+#include <core/SkRRect.h>
 
 namespace VGG
 {
@@ -166,16 +167,37 @@ RenderState* PaintNode::getRenderState()
 
 void PaintNode::paintEvent(SkCanvas* canvas)
 {
+  const auto& bound = toSkRect(getBound());
+  const auto radius = style().frameRadius;
+  SkRRect rrect;
+  if (radius > 0.0)
+  {
+    rrect = SkRRect::MakeRectXY(bound, radius, radius);
+  }
   if (overflow() == EOverflow::OF_Hidden)
   {
-    canvas->clipRect(toSkRect(getBound()));
+    if (radius > 0.0)
+    {
+      canvas->clipRRect(rrect, true);
+    }
+    else
+    {
+      canvas->clipRect(bound);
+    }
   }
   if (this->m_bgColor.has_value())
   {
     SkPaint bgPaint;
     bgPaint.setColor(this->m_bgColor.value());
     bgPaint.setStyle(SkPaint::kFill_Style);
-    canvas->drawRect(toSkRect(getBound()), bgPaint);
+    if (radius > 0.0)
+    {
+      canvas->drawRRect(rrect, bgPaint);
+    }
+    else
+    {
+      canvas->drawRect(bound, bgPaint);
+    }
   }
 }
 
@@ -183,7 +205,15 @@ Mask PaintNode::asOutlineMask(const glm::mat3* mat)
 {
   SkPath p;
   Mask mask;
-  p.addRect(toSkRect(getBound()));
+  const auto& skRect = toSkRect(getBound());
+  if (style().frameRadius > 0)
+  {
+    p.addRect(skRect);
+  }
+  else
+  {
+    p.addRect(skRect);
+  }
   if (mat)
   {
     p.transform(toSkMatrix(*mat));

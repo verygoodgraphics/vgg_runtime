@@ -1,11 +1,21 @@
-# find_library(skia_DEB NAMES skia PATHS "/home/ysl/Code/skia/out/Static")
+if(NOT DEFINED SKIA_EXTERNAL_PROJECT_DIR)
+    message(FATAL_ERROR "SKIA_EXTERNAL_PROJECT_DIR is not provided")
+endif()
+if(NOT IS_DIRECTORY ${SKIA_EXTERNAL_PROJECT_DIR})
+    message(FATAL_ERROR "SKIA_EXTERNAL_PROJECT_DIR: ${SKIA_EXTERNAL_PROJECT_DIR} is not a directory")
+endif()
+
+find_program(NINJA_COMMAND ninja)
+if(NOT NINJA_COMMAND)
+    message(FATAL_ERROR "ninja is not found. Check your ninja installation.")
+endif()
+message(STATUS "${NINJA_COMMAND} is found.")
 
 set(SKIA_LIB_LINK_TYPE "dynamic")
 if(VGG_VAR_PLATFORM_TARGET STREQUAL "WASM")
     set(SKIA_LIB_LINK_TYPE "static")
 endif()
 set(SKIA_LIB_BUILD_PREFIX "out/${VGG_VAR_PLATFORM_TARGET}/${SKIA_LIB_LINK_TYPE}/${CMAKE_BUILD_TYPE}")
-
 set(SKIA_LIB_DIR "${SKIA_EXTERNAL_PROJECT_DIR}/${SKIA_LIB_BUILD_PREFIX}")
 set(SKIA_INCLUDE_DIRS "${SKIA_EXTERNAL_PROJECT_DIR}" "${SKIA_EXTERNAL_PROJECT_DIR}/include/")
 set(SKIA_LIBS)
@@ -30,7 +40,7 @@ execute_process(COMMAND ${GN} gen ${SKIA_LIB_BUILD_PREFIX} ${CONFIG_OPTIONS}
 WORKING_DIRECTORY ${SKIA_EXTERNAL_PROJECT_DIR})
 
 # build skia
-execute_process(COMMAND ninja -C ${SKIA_LIB_BUILD_PREFIX}
+execute_process(COMMAND ${NINJA_COMMAND} -C ${SKIA_LIB_BUILD_PREFIX}
 WORKING_DIRECTORY ${SKIA_EXTERNAL_PROJECT_DIR}
 )
 

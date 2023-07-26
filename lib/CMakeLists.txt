@@ -40,12 +40,14 @@ if (NOT EMSCRIPTEN)
   add_library(vgg_libnode STATIC empty.cpp)
   add_library(vgg_libnode_stub STATIC node/src/node_snapshot_stub.cc)
 
+  cmake_minimum_required(VERSION 3.22) # this is requied for the following invoking
   add_custom_command(TARGET vgg_libnode
     PRE_BUILD
     COMMAND cmake -DNODE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/node
       -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/BuildLibnode.cmake
     COMMENT "Build libnode if needed"
   )
+
   target_include_directories(vgg_libnode PUBLIC
     node/src
     node/deps/uv/include

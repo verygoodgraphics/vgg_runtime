@@ -314,9 +314,12 @@ public:
   Mask makeMaskBy(EBoolOp maskOp);
 
 protected:
+  virtual SkPath getContour();
   SkPath makeBoundMask();
-
   SkPath makeOutlineMask(EMaskCoutourType type, const glm::mat3* mat);
+  void clipByBound(SkCanvas* canvas);
+  void paintBackgroundColor(SkCanvas* canvas);
+  void paintStyle(SkCanvas* canvas);
 
 protected:
   virtual void paintPass();

@@ -5,6 +5,7 @@
 #include "core/SkCanvas.h"
 #include <core/SkPath.h>
 #include <core/SkRRect.h>
+#include <limits>
 
 namespace VGG
 {
@@ -167,54 +168,92 @@ RenderState* PaintNode::getRenderState()
 
 void PaintNode::paintEvent(SkCanvas* canvas)
 {
-  const auto& bound = toSkRect(getBound());
-  const auto radius = style().frameRadius;
-  SkRRect rrect;
-  if (radius > 0.0)
-  {
-    rrect = SkRRect::MakeRectXY(bound, radius, radius);
-  }
-  if (overflow() == EOverflow::OF_Hidden)
-  {
-    if (radius > 0.0)
-    {
-      canvas->clipRRect(rrect, true);
-    }
-    else
-    {
-      canvas->clipRect(bound);
-    }
-  }
+  clipByBound(canvas);
+  paintBackgroundColor(canvas);
+  paintStyle(canvas);
+}
+
+void PaintNode::paintBackgroundColor(SkCanvas* canvas)
+{
   if (this->m_bgColor.has_value())
   {
     SkPaint bgPaint;
     bgPaint.setColor(this->m_bgColor.value());
     bgPaint.setStyle(SkPaint::kFill_Style);
-    if (radius > 0.0)
-    {
-      canvas->drawRRect(rrect, bgPaint);
-    }
-    else
-    {
-      canvas->drawRect(bound, bgPaint);
-    }
+    canvas->drawPath(getContour(), bgPaint);
   }
+}
+
+void PaintNode::clipByBound(SkCanvas* canvas)
+{
+  if (overflow() == OF_Hidden)
+    canvas->clipPath(getContour());
 }
 
 SkPath PaintNode::makeBoundMask()
 {
   SkPath p;
   const auto& skRect = toSkRect(getBound());
-  const auto r = style().frameRadius;
-  if (style().frameRadius > 0)
+  const auto radius = style().frameRadius;
+
+  bool rounded = false;
+  float maxR = 0.0, minR = std::numeric_limits<float>::max();
+  for (const auto r : radius)
   {
-    p.addRoundRect(skRect, r, r);
+    if (r > 0.f)
+    {
+      rounded = true;
+    }
+    maxR = std::max(maxR, r);
+    minR = std::min(minR, r);
+  }
+  if (rounded && (maxR - minR) < std::numeric_limits<float>::epsilon())
+  {
+    p.addRoundRect(skRect, minR, minR);
+  }
+  else if (rounded)
+  {
+    // TODO:: create general path
+    p.addRoundRect(skRect, minR, minR);
   }
   else
   {
     p.addRect(skRect);
   }
   return p;
+}
+
+SkPath PaintNode::getContour()
+{
+  return makeBoundMask();
+}
+
+void PaintNode::paintStyle(SkCanvas* canvas)
+{
+  auto path = getContour();
+  for (const auto& fill : m_style.fills)
+  {
+    if (fill.isEnabled)
+    {
+      SkPaint fp;
+      fp.setAntiAlias(true);
+      fp.setColor(fill.color);
+      fp.setStyle(SkPaint::kFill_Style);
+      canvas->drawPath(path, fp);
+    }
+  }
+  for (const auto& border : m_style.borders)
+  {
+    if (border.isEnabled)
+    {
+      SkPaint bp;
+      bp.setAntiAlias(true);
+      bp.setColor(border.color.value_or(Color{ 0, 0, 0, 1 }));
+      bp.setStrokeWidth(border.thickness);
+      bp.setStyle(SkPaint::kStroke_Style);
+      canvas->drawPath(path, bp);
+    }
+  }
 }
 
 SkPath PaintNode::makeOutlineMask(EMaskCoutourType type, const glm::mat3* mat)
@@ -239,9 +278,8 @@ SkPath PaintNode::makeOutlineMask(EMaskCoutourType type, const glm::mat3* mat)
       for (const auto& c : m_firstChild)
       {
         auto paintNode = static_cast<PaintNode*>(c.get());
-        auto childMask =
-          paintNode->makeOutlineMask(EMaskCoutourType::MCT_Union, &paintNode->localTransform());
-        Op(path, childMask, SkPathOp::kUnion_SkPathOp, &path);
+        auto childMask = paintNode->asOutlineMask(&paintNode->localTransform());
+        Op(path, childMask.outlineMask, SkPathOp::kUnion_SkPathOp, &path);
       }
     }
     break;
@@ -252,9 +290,8 @@ SkPath PaintNode::makeOutlineMask(EMaskCoutourType type, const glm::mat3* mat)
       for (const auto& c : m_firstChild)
       {
         auto paintNode = static_cast<PaintNode*>(c.get());
-        auto childMask =
-          paintNode->makeOutlineMask(EMaskCoutourType::MCT_Union, &paintNode->localTransform());
-        Op(path, childMask, SkPathOp::kIntersect_SkPathOp, &path);
+        auto childMask = paintNode->asOutlineMask(&paintNode->localTransform());
+        Op(path, childMask.outlineMask, SkPathOp::kIntersect_SkPathOp, &path);
       }
     }
     break;
@@ -263,9 +300,8 @@ SkPath PaintNode::makeOutlineMask(EMaskCoutourType type, const glm::mat3* mat)
       for (const auto& c : m_firstChild)
       {
         auto paintNode = static_cast<PaintNode*>(c.get());
-        auto childMask =
-          paintNode->makeOutlineMask(paintNode->maskContourType(), &paintNode->localTransform());
-        Op(path, childMask, SkPathOp::kUnion_SkPathOp, &path);
+        auto childMask = paintNode->asOutlineMask(&paintNode->localTransform());
+        Op(path, childMask.outlineMask, SkPathOp::kUnion_SkPathOp, &path);
       }
     }
     break;

@@ -168,7 +168,6 @@ RenderState* PaintNode::getRenderState()
 
 void PaintNode::paintEvent(SkCanvas* canvas)
 {
-  clipByBound(canvas);
   paintBackgroundColor(canvas);
   paintStyle(canvas);
 }
@@ -182,12 +181,6 @@ void PaintNode::paintBackgroundColor(SkCanvas* canvas)
     bgPaint.setStyle(SkPaint::kFill_Style);
     canvas->drawPath(getContour(), bgPaint);
   }
-}
-
-void PaintNode::clipByBound(SkCanvas* canvas)
-{
-  if (overflow() == OF_Hidden)
-    canvas->clipPath(getContour());
 }
 
 SkPath PaintNode::makeBoundMask()

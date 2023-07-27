@@ -81,7 +81,11 @@ void TextNode::paintEvent(SkCanvas* canvas)
     _->m_paragraphCache.clear(TextParagraphCache::TextParagraphCacheFlagsBits::D_LAYOUT);
   }
 
-  PaintNode::clipByBound(canvas);
+  if (overflow() == OF_Hidden)
+  {
+    canvas->save();
+    canvas->clipPath(makeBoundMask());
+  }
 
   canvas->save();
   // we need to convert to skia coordinate to render text
@@ -122,6 +126,11 @@ void TextNode::paintEvent(SkCanvas* canvas)
     }
   }
   canvas->restore();
+
+  if (overflow() == OF_Hidden)
+  {
+    canvas->restore();
+  }
 }
 
 void TextNode::setVerticalAlignment(ETextVerticalAlignment vertAlign)

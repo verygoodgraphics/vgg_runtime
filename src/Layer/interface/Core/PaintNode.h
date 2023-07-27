@@ -266,8 +266,17 @@ public:
       }
     };
 
+    if (overflow() == OF_Hidden)
+    {
+      canvas->save();
+      canvas->clipPath(getContour());
+    }
     paintCall(masked);
     paintCall(noneMasked);
+    if (overflow() == OF_Hidden)
+    {
+      canvas->restore();
+    }
     // for (const auto& p : this->m_firstChild)
     // {
     //   auto q = static_cast<PaintNode*>(p.get());
@@ -317,7 +326,6 @@ protected:
   virtual SkPath getContour();
   SkPath makeBoundMask();
   SkPath makeOutlineMask(EMaskCoutourType type, const glm::mat3* mat);
-  void clipByBound(SkCanvas* canvas);
   void paintBackgroundColor(SkCanvas* canvas);
   void paintStyle(SkCanvas* canvas);
 

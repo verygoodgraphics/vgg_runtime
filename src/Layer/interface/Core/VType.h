@@ -125,8 +125,13 @@ enum EMaskType : uint8_t
 
 enum EMaskCoutourType : uint8_t
 {
-  MCT_Frame,
-  MCT_Content,
+  MCT_FrameOnly, // not recursive
+  MCT_Union,
+  MCT_Intersect,
+  MCT_UnionWithFrame,
+  MCT_IntersectWithFrame,
+  MCT_UnionDependsOn,
+  MCT_IntersectDependsOn,
 };
 
 enum ELineJoin : uint8_t

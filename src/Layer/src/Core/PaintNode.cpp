@@ -201,24 +201,100 @@ void PaintNode::paintEvent(SkCanvas* canvas)
   }
 }
 
-Mask PaintNode::asOutlineMask(const glm::mat3* mat)
+SkPath PaintNode::makeBoundMask()
 {
   SkPath p;
-  Mask mask;
   const auto& skRect = toSkRect(getBound());
+  const auto r = style().frameRadius;
   if (style().frameRadius > 0)
   {
-    p.addRect(skRect);
+    p.addRoundRect(skRect, r, r);
   }
   else
   {
     p.addRect(skRect);
   }
+  return p;
+}
+
+SkPath PaintNode::makeOutlineMask(EMaskCoutourType type, const glm::mat3* mat)
+{
+  SkPath path;
+  if (!hasChild())
+  {
+    path = makeBoundMask();
+    if (mat)
+    {
+      path.transform(toSkMatrix(*mat));
+    }
+    return path;
+  }
+
+  switch (type)
+  {
+    case MCT_FrameOnly:
+      this->makeBoundMask();
+      break;
+    case MCT_UnionWithFrame:
+      path = this->makeBoundMask();
+    case MCT_Union:
+    {
+      for (const auto& c : m_firstChild)
+      {
+        auto paintNode = static_cast<PaintNode*>(c.get());
+        auto childMask =
+          paintNode->makeOutlineMask(EMaskCoutourType::MCT_Union, &paintNode->localTransform());
+        Op(path, childMask, SkPathOp::kUnion_SkPathOp, &path);
+      }
+    }
+    break;
+    case MCT_IntersectWithFrame:
+      path = this->makeBoundMask();
+    case MCT_Intersect:
+    {
+      for (const auto& c : m_firstChild)
+      {
+        auto paintNode = static_cast<PaintNode*>(c.get());
+        auto childMask =
+          paintNode->makeOutlineMask(EMaskCoutourType::MCT_Union, &paintNode->localTransform());
+        Op(path, childMask, SkPathOp::kIntersect_SkPathOp, &path);
+      }
+    }
+    break;
+    case MCT_UnionDependsOn:
+    {
+      for (const auto& c : m_firstChild)
+      {
+        auto paintNode = static_cast<PaintNode*>(c.get());
+        auto childMask =
+          paintNode->makeOutlineMask(paintNode->maskContourType(), &paintNode->localTransform());
+        Op(path, childMask, SkPathOp::kUnion_SkPathOp, &path);
+      }
+    }
+    break;
+    case MCT_IntersectDependsOn:
+    {
+      for (const auto& c : m_firstChild)
+      {
+        auto paintNode = static_cast<PaintNode*>(c.get());
+        auto childMask =
+          paintNode->makeOutlineMask(paintNode->maskContourType(), &paintNode->localTransform());
+        Op(path, childMask, SkPathOp::kUnion_SkPathOp, &path);
+      }
+    }
+    break;
+  }
   if (mat)
   {
-    p.transform(toSkMatrix(*mat));
+    path.transform(toSkMatrix(*mat));
   }
-  mask.outlineMask = p;
+  return path;
+}
+
+Mask PaintNode::asOutlineMask(const glm::mat3* mat)
+{
+  Mask mask;
+  mask.outlineMask = makeOutlineMask(maskContourType(), mat);
   return mask;
 }
 

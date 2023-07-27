@@ -158,7 +158,10 @@ sktxt::TextStyle createTextStyle(const TextAttr& attr, VGGFontCollection* font)
   {
     for (const auto& f : fallbackFonts)
     {
-      fontFamilies.push_back(SkString(f));
+      if (f.rfind(fontName, 0) != 0) // ignore the added fontName
+      {
+        fontFamilies.push_back(SkString(f));
+      }
     }
   }
   style.setFontFamilies(fontFamilies);

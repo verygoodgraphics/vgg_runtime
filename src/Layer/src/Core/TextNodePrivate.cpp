@@ -99,6 +99,7 @@ sktxt::TextStyle createTextStyle(const TextAttr& attr, VGGFontCollection* font)
 
   auto resolve = [&fontName, &subFamilyName](const std::vector<std::string>& candidates)
   {
+    subFamilyName = "Regular";
     for (const auto& candidate : candidates)
     {
       if (const auto components = split(candidate, '-'); !components.empty())

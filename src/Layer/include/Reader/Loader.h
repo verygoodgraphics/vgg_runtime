@@ -13,7 +13,6 @@
 #include "Core/PathNode.h"
 #include "Core/TextNode.h"
 #include "Core/ImageNode.h"
-#include "Core/GroupNode.h"
 
 #include "Reader/AttrSerde.h"
 #include <glm/gtc/matrix_transform.hpp>
@@ -250,11 +249,12 @@ public:
     return ro;
   }
 
-  static inline std::shared_ptr<GroupNode> fromGroup(const nlohmann::json& j)
+  static inline std::shared_ptr<PaintNode> fromGroup(const nlohmann::json& j)
   {
-    auto p = std::make_shared<GroupNode>(j["name"]);
+    auto p = std::make_shared<PaintNode>(j["name"], VGG_GROUP);
     // init group properties
     fromObjectCommonProperty(j, p.get());
+    p->setMaskContourType(EMaskCoutourType::MCT_Union);
     for (const auto& c : j["childObjects"])
     {
       p->addChild(fromObject(c));

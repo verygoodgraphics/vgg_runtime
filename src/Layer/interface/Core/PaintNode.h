@@ -39,9 +39,10 @@ protected:
   std::vector<std::string> m_maskedBy{};
   Mask m_outlineMask;
   EMaskType m_maskType{ MT_None };
-  EMaskCoutourType m_maskContourType{ MCT_Content };
   EBoolOp m_clipOperator{ BO_None };
   EOverflow m_overflow{ OF_Hidden };
+
+  EMaskCoutourType m_maskContourType{ MCT_FrameOnly };
 
   Style m_style;
   ContextSetting m_contextSetting;
@@ -227,23 +228,95 @@ public:
 
   virtual void renderOrderPass(SkCanvas* canvas)
   {
+
+    std::vector<PaintNode*> masked;
+    std::vector<PaintNode*> noneMasked;
     for (const auto& p : this->m_firstChild)
     {
-      auto q = static_cast<PaintNode*>(p.get());
-      q->invokeRenderPass(canvas);
+      auto c = static_cast<PaintNode*>(p.get());
+      if (c->maskType() == MT_Outline)
+        masked.push_back(c);
+      else
+        noneMasked.push_back(c);
     }
+
+    auto paintCall = [&](std::vector<PaintNode*>& nodes)
+    {
+      if (m_contextSetting.TransparencyKnockoutGroup)
+      {
+        for (const auto& p : nodes)
+        {
+          // TODO:: blend mode r = s!=0?s:d is needed.
+          // SkPaint paint;
+          // paint.setBlendMode(SkBlendMode::kSrc);
+          // canvas->save();
+          // canvas->scale(1, -1);
+          // canvas->saveLayer(toSkRect(getBound()), &paint);
+          p->invokeRenderPass(canvas);
+          // canvas->restore();
+          // canvas->restore();
+        }
+      }
+      else
+      {
+        for (const auto& p : nodes)
+        {
+          p->invokeRenderPass(canvas);
+        }
+      }
+    };
+
+    paintCall(masked);
+    paintCall(noneMasked);
+    // for (const auto& p : this->m_firstChild)
+    // {
+    //   auto q = static_cast<PaintNode*>(p.get());
+    //   q->invokeRenderPass(canvas);
+    // }
   }
   virtual void preRenderPass(SkCanvas* canvas)
   {
+
+    if (m_contextSetting.Opacity < 1.0)
+    {
+      // TODO:: more accurate bound is needed
+      canvas->saveLayerAlpha(0, m_contextSetting.Opacity * 255);
+    }
+
+    if (m_contextSetting.IsolateBlending)
+    {
+      // TODO:: blend mode r = s!=0?s:d is needed.
+      // SkPaint paint;
+      // paint.setBlendMode(SkBlendMode::kSrc);
+      // canvas->save();
+      // canvas->scale(1, -1);
+      // canvas->saveLayer(toSkRect(getBound()), &paint);
+    }
     paintPass();
   }
 
   virtual void postRenderPass(SkCanvas* canvas)
   {
-    canvas->restore();
+    canvas->restore(); // store the state in paintPass
+
+    if (m_contextSetting.IsolateBlending)
+    {
+      // canvas->restore();
+      // canvas->restore();
+    }
+
+    if (m_contextSetting.Opacity < 1.0)
+    {
+      canvas->restore();
+    }
   }
 
   Mask makeMaskBy(EBoolOp maskOp);
+
+protected:
+  SkPath makeBoundMask();
+
+  SkPath makeOutlineMask(EMaskCoutourType type, const glm::mat3* mat);
 
 protected:
   virtual void paintPass();

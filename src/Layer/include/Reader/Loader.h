@@ -121,6 +121,12 @@ public:
   static inline std::shared_ptr<PaintNode> fromFrame(const nlohmann::json& j)
   {
     auto p = std::make_shared<PaintNode>(j["name"], ObjectType::VGG_FRAME);
+    fromObjectCommonProperty(j, p.get());
+    p->setMaskContourType(EMaskCoutourType::MCT_Union);
+    for (const auto& c : j["childObjects"])
+    {
+      p->addChild(fromObject(c));
+    }
     return p;
   }
 
@@ -205,7 +211,6 @@ public:
       }
       else if (klass == "frame")
       {
-        // p->addSubShape(fromGroup(geo), blop);
         p->addSubShape(fromFrame(geo), blop);
       }
     }

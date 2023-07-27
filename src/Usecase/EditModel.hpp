@@ -1,8 +1,10 @@
 #pragma once
 
+#include "Domain/Daruma.hpp"
+#include "Domain/RawJsonDocument.hpp"
 #include "Domain/SchemaValidJsonDocument.hpp"
 #include "Domain/UndoRedoJsonDocument.hpp"
-#include "Domain/Daruma.hpp"
+#include "Log.h"
 
 #include <string>
 #include <vector>
@@ -81,6 +83,8 @@ private:
 
   JsonDocument* createJsonDoc()
   {
+    return new RawJsonDocument();
+    // todo, use automerge
     return new UndoRedoJsonDocument();
   }
 };

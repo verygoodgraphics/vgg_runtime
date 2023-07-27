@@ -1,6 +1,7 @@
 #include "VggSdk.hpp"
 
 #include "DIContainer.hpp"
+#include "Domain/DarumaContainer.hpp"
 
 #ifdef EMSCRIPTEN
 constexpr auto listener_code_key = "listener";
@@ -9,48 +10,54 @@ constexpr auto listener_code_key = "listener";
 using namespace VGG;
 
 // design document in vgg daruma file
-const std::string VggSdk::designDocument()
+const std::string VggSdk::designDocument(IndexType index)
 {
-  return getDesignDocument()->content().dump();
+  return getDesignDocument(index)->content().dump();
 }
 
-void VggSdk::designDocumentReplaceAt(const std::string& json_pointer, const std::string& value)
+void VggSdk::designDocumentReplaceAt(const std::string& json_pointer,
+                                     const std::string& value,
+                                     IndexType index)
 {
-  getDesignDocument()->replaceAt(json_pointer, value);
+  getDesignDocument(index)->replaceAt(json_pointer, value);
 }
 
-void VggSdk::designDocumentAddAt(const std::string& json_pointer, const std::string& value)
+void VggSdk::designDocumentAddAt(const std::string& json_pointer,
+                                 const std::string& value,
+                                 IndexType index)
 {
-  getDesignDocument()->addAt(json_pointer, value);
+  getDesignDocument(index)->addAt(json_pointer, value);
 }
 
-void VggSdk::designDocumentDeleteAt(const std::string& json_pointer)
+void VggSdk::designDocumentDeleteAt(const std::string& json_pointer, IndexType index)
 {
-  getDesignDocument()->deleteAt(json_pointer);
+  getDesignDocument(index)->deleteAt(json_pointer);
 }
 
 // event listener
 void VggSdk::addEventListener(const std::string& element_path,
                               const std::string& event_type,
-                              const std::string& listener_code)
+                              const std::string& listener_code,
+                              IndexType index)
 {
-  getModel()->addEventListener(element_path, event_type, listener_code);
+  getModel(index)->addEventListener(element_path, event_type, listener_code);
 }
 
 void VggSdk::removeEventListener(const std::string& element_path,
                                  const std::string& event_type,
-                                 const std::string& listener_code)
+                                 const std::string& listener_code,
+                                 IndexType index)
 {
-  getModel()->removeEventListener(element_path, event_type, listener_code);
+  getModel(index)->removeEventListener(element_path, event_type, listener_code);
 }
 
-VggSdk::ListenersType VggSdk::getEventListeners(const std::string& element_path)
+VggSdk::ListenersType VggSdk::getEventListeners(const std::string& element_path, IndexType index)
 {
 #ifdef EMSCRIPTEN
   using namespace emscripten;
 
   auto result_listeners_map = val::object();
-  auto listeners_map = getModel()->getEventListeners(element_path);
+  auto listeners_map = getModel(index)->getEventListeners(element_path);
   for (auto& map_item : listeners_map)
   {
     if (map_item.second.empty())
@@ -75,16 +82,18 @@ VggSdk::ListenersType VggSdk::getEventListeners(const std::string& element_path)
 
   return result_listeners_map;
 #else
-  return getModel()->getEventListeners(element_path);
+  return getModel(index)->getEventListeners(element_path);
 #endif
 }
 
 // vgg model
-std::shared_ptr<JsonDocument> VggSdk::getDesignDocument()
+std::shared_ptr<JsonDocument> VggSdk::getDesignDocument(IndexType index)
 {
-  return getModel()->designDoc();
+  return getModel(index)->designDoc();
 }
-std::shared_ptr<Daruma> VggSdk::getModel()
+std::shared_ptr<Daruma> VggSdk::getModel(IndexType index)
 {
-  return VGG::DIContainer<std::shared_ptr<Daruma>>::get();
+  auto key = index == main_or_editor_daruma_index ? DarumaContainer::KeyType::MainOrEditor
+                                                  : DarumaContainer::KeyType::Edited;
+  return DarumaContainer().get(key);
 }

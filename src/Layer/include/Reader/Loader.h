@@ -123,6 +123,9 @@ public:
     auto p = std::make_shared<PaintNode>(j["name"], ObjectType::VGG_FRAME);
     fromObjectCommonProperty(j, p.get());
     p->setMaskContourType(EMaskCoutourType::MCT_Union);
+    const auto radius = get_stack_optional<std::array<float, 4>>(j, "radius")
+                          .value_or(std::array<float, 4>{ 0.0f, 0.f, 0.f, 0.f });
+    p->style().frameRadius = radius;
     for (const auto& c : j["childObjects"])
     {
       p->addChild(fromObject(c));
@@ -250,7 +253,6 @@ public:
       // error
       return nullptr;
     }
-    fromObjectCommonProperty(j, ro.get());
     return ro;
   }
 

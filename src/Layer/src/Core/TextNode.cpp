@@ -81,7 +81,7 @@ void TextNode::paintEvent(SkCanvas* canvas)
     _->m_paragraphCache.clear(TextParagraphCache::TextParagraphCacheFlagsBits::D_LAYOUT);
   }
 
-  PaintNode::paintEvent(canvas);
+  PaintNode::clipByBound(canvas);
 
   canvas->save();
   // we need to convert to skia coordinate to render text

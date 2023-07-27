@@ -147,7 +147,7 @@ void PathNode::paintEvent(SkCanvas* canvas)
   // if (m_firstChild.empty())
   //   return;
   //
-  PaintNode::paintEvent(canvas);
+  // paintBackgroundColor(canvas); // Is it necessary?
   std::vector<std::pair<SkPath, EBoolOp>> ct;
   for (const auto& c : m_firstChild)
   {

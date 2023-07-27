@@ -23,7 +23,7 @@ inline std::optional<T> get_stack_optional(const json& j, const char* property)
   auto it = j.find(property);
   if (it != j.end() && !it->is_null())
   {
-    return j.at(property).get<T>();
+    return std::optional<T>(it.value());
   }
   return std::optional<T>();
 }

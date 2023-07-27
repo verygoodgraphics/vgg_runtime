@@ -7,6 +7,7 @@
 #include "Domain/SchemaValidJsonDocument.hpp"
 // #include "Domain/UndoRedoJsonDocument.hpp"
 #include "Domain/Daruma.hpp"
+#include "Domain/DarumaContainer.hpp"
 #include "Presenter.hpp"
 #include "DIContainer.hpp"
 
@@ -109,7 +110,7 @@ void Controller::initModel(const char* designDocSchemaFilePath)
   // todo, build layout doc
   m_model.reset(new Daruma(build_design_doc_fn));
 
-  VGG::DIContainer<std::shared_ptr<Daruma>>::get() = m_model;
+  DarumaContainer().get() = m_model;
 }
 
 void Controller::start()

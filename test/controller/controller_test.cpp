@@ -3,6 +3,7 @@
 #include "test_config.hpp"
 
 #include "Domain/Daruma.hpp"
+#include "Domain/DarumaContainer.hpp"
 #include "Adapter/NativeComposer.hpp"
 #include "DIContainer.hpp"
 #include "mocks/MockPresenter.hpp"
@@ -106,6 +107,11 @@ protected:
     m_fake_view_subject.get_subscriber().on_next(
       UIEventPtr{ new TouchEvent{ path, UIEventType::touchstart } });
   }
+
+  auto get_daruma()
+  {
+    return DarumaContainer().get();
+  }
 };
 
 TEST_F(ControllerTestSuite, Smoke)
@@ -124,7 +130,7 @@ TEST_F(ControllerTestSuite, Smoke)
   // Then
   EXPECT_TRUE(ret);
   // Then
-  auto vgg_work = VGG::DIContainer<std::shared_ptr<Daruma>>::get();
+  auto vgg_work = get_daruma();
   EXPECT_TRUE(vgg_work);
 }
 
@@ -148,7 +154,7 @@ TEST_F(ControllerTestSuite, OnClick_observer)
   auto ret = m_sut->start(file_path);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = VGG::DIContainer<std::shared_ptr<Daruma>>::get();
+  auto vgg_work = get_daruma();
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // When
@@ -181,7 +187,7 @@ TEST_F(ControllerTestSuite, Validator_reject_deletion)
   auto ret = m_sut->start(file_path, design_doc_schema_file);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = VGG::DIContainer<std::shared_ptr<Daruma>>::get();
+  auto vgg_work = get_daruma();
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // When
@@ -212,7 +218,7 @@ TEST_F(ControllerTestSuite, DidUpdate)
   auto ret = m_sut->start(file_path, design_doc_schema_file);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = VGG::DIContainer<std::shared_ptr<Daruma>>::get();
+  auto vgg_work = get_daruma();
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // When
@@ -243,7 +249,7 @@ TEST_F(ControllerTestSuite, DidDelete)
   auto ret = m_sut->start(file_path, design_doc_schema_file);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = VGG::DIContainer<std::shared_ptr<Daruma>>::get();
+  auto vgg_work = get_daruma();
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // When
@@ -274,7 +280,7 @@ TEST_F(ControllerTestSuite, DidAdd_no_validator)
   auto ret = m_sut->start(file_path);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = VGG::DIContainer<std::shared_ptr<Daruma>>::get();
+  auto vgg_work = get_daruma();
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // When
@@ -307,7 +313,7 @@ TEST_F(ControllerTestSuite, DidAdd_color)
   auto ret = m_sut->start(file_path, design_doc_schema_file);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = VGG::DIContainer<std::shared_ptr<Daruma>>::get();
+  auto vgg_work = get_daruma();
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // When
@@ -506,7 +512,7 @@ TEST_F(ControllerTestSuite, event_listener_example)
   auto ret = m_sut->start(file_path, design_doc_schema_file);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = VGG::DIContainer<std::shared_ptr<Daruma>>::get();
+  auto vgg_work = get_daruma();
   auto design_doc_json = vgg_work->designDoc()->content();
 
   // When

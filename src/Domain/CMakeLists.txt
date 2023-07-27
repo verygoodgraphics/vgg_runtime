@@ -2,6 +2,7 @@ add_library(vgg_domain STATIC
   Exec/VggExec.cpp
   Loader/ZipLoader.cpp
   Model/Daruma.cpp
+  Model/DarumaContainer.cpp
   Model/JsonDocument.cpp
   Model/JsonSchemaValidator.cpp
   Model/SchemaValidJsonDocument.cpp

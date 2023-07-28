@@ -27,6 +27,7 @@ public:
     : PaintNode(name, VGG_CONTOUR)
     , data(std::move(data))
   {
+    setOverflow(OF_Visible);
   }
   Contour* contour() const
   {

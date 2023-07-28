@@ -255,7 +255,10 @@ SkPath PaintNode::makeOutlineMask(EMaskCoutourType type, const glm::mat3* mat)
   if (!hasChild())
   {
     SkPath path;
-    path.transform(toSkMatrix(*mat));
+    if (mat)
+    {
+      path.transform(toSkMatrix(*mat));
+    }
     return path;
   }
 

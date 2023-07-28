@@ -231,6 +231,15 @@ inline void from_json(const json& j, TextLineAttr& x)
   x.lineType = j.at("styleType");
 }
 
+inline void from_json(const json& j, Bound2& b)
+{
+  auto x = j.value("x", 0.f);
+  auto y = j.value("y", 0.f);
+  auto width = j.value("width", 0.f);
+  auto height = j.value("height", 0.f);
+  b = Bound2{ x, y, width, height };
+}
+
 inline void from_json(const json& j, TextAttr& x)
 {
   x.length = get_stack_optional<size_t>(j, "length").value_or(false);

@@ -22,6 +22,11 @@
 // #define LOG_NOPROFILE
 // #define LOG_LOGFILE "log.txt
 
+#ifdef NDEBUG
+#define LOG_NODEBUG
+#define LOG_NOASSERT
+#endif
+
 #include <cassert>
 #include <cstdio>
 #include <cstring>
@@ -189,7 +194,7 @@ static inline FILE* _log_file_()
 #endif
 #endif
 }
-} // namespace Log
+} // namespace LOG
 
 /// Private logging macros
 #define _MSG_(type, log, msg, ...)                                                                 \
@@ -203,25 +208,25 @@ static inline FILE* _log_file_()
 #define FAIL(msg, ...)                                                                             \
   do                                                                                               \
   {                                                                                                \
-    _MSG_("FAIL", LOG::_log_file_(), FAIL_COLOR(msg), ##__VA_ARGS__);                            \
+    _MSG_("FAIL", LOG::_log_file_(), FAIL_COLOR(msg), ##__VA_ARGS__);                              \
   } while (0)
 #define FAILED(msg, ...)                                                                           \
   do                                                                                               \
   {                                                                                                \
-    _MSG_("FAIL", LOG::_log_file_(), FAIL_COLOR("%s:%d "), __FILENAME__, __LINE__);              \
+    _MSG_("FAIL", LOG::_log_file_(), FAIL_COLOR("%s:%d "), __FILENAME__, __LINE__);                \
     FAIL(msg, ##__VA_ARGS__);                                                                      \
     exit(EXIT_FAILURE);                                                                            \
   } while (0)
 #define WARN(msg, ...)                                                                             \
   do                                                                                               \
   {                                                                                                \
-    _MSG_("WARN", LOG::_log_file_(), WARN_COLOR(msg), ##__VA_ARGS__);                            \
+    _MSG_("WARN", LOG::_log_file_(), WARN_COLOR(msg), ##__VA_ARGS__);                              \
   } while (0)
 #define WARNL(msg, ...)                                                                            \
   do                                                                                               \
   {                                                                                                \
     _MSG_("WARN",                                                                                  \
-          LOG::_log_file_(),                                                                     \
+          LOG::_log_file_(),                                                                       \
           WARN_COLOR("(%s:%d) " msg),                                                              \
           __FILENAME__,                                                                            \
           __LINE__,                                                                                \
@@ -230,13 +235,13 @@ static inline FILE* _log_file_()
 #define INFO(msg, ...)                                                                             \
   do                                                                                               \
   {                                                                                                \
-    _MSG_("INFO", LOG::_log_file_(), INFO_COLOR(msg), ##__VA_ARGS__);                            \
+    _MSG_("INFO", LOG::_log_file_(), INFO_COLOR(msg), ##__VA_ARGS__);                              \
   } while (0)
 #ifndef LOG_NODEBUG
 #define DEBUG(msg, ...)                                                                            \
   do                                                                                               \
   {                                                                                                \
-    _MSG_("DEBUG", LOG::_log_file_(), msg, ##__VA_ARGS__);                                       \
+    _MSG_("DEBUG", LOG::_log_file_(), msg, ##__VA_ARGS__);                                         \
   } while (0)
 #else
 #define DEBUG(msg, ...)
@@ -338,24 +343,24 @@ static inline double _timer_stop_(const std::string& id)
   do                                                                                               \
   {                                                                                                \
     _MSG_("PROFILE >>>",                                                                           \
-          LOG::_log_file_(),                                                                     \
+          LOG::_log_file_(),                                                                       \
           "%*s----- %s",                                                                           \
-          LOG::_padding_counter_,                                                                \
+          LOG::_padding_counter_,                                                                  \
           "{",                                                                                     \
           id,                                                                                      \
           ##__VA_ARGS__);                                                                          \
-    LOG::_timer_start_(id);                                                                      \
+    LOG::_timer_start_(id);                                                                        \
   } while (0)
 #define PROFILE_END(id, ...)                                                                       \
   do                                                                                               \
   {                                                                                                \
-    const double c = LOG::_timer_stop_(id);                                                      \
+    const double c = LOG::_timer_stop_(id);                                                        \
     if (c >= 0)                                                                                    \
     {                                                                                              \
       _MSG_("*TIME COST*",                                                                         \
-            LOG::_log_file_(),                                                                   \
+            LOG::_log_file_(),                                                                     \
             "%*s%.3lfs",                                                                           \
-            LOG::_padding_counter_ - 1,                                                          \
+            LOG::_padding_counter_ - 1,                                                            \
             "",                                                                                    \
             c / 1000);                                                                             \
     }                                                                                              \
@@ -364,9 +369,9 @@ static inline double _timer_stop_(const std::string& id)
       WARN("%s:%d NO PROFILE START FOUND", __FILENAME__, __LINE__);                                \
     }                                                                                              \
     _MSG_("PROFILE END",                                                                           \
-          LOG::_log_file_(),                                                                     \
+          LOG::_log_file_(),                                                                       \
           "%*s----} %s",                                                                           \
-          LOG::_padding_counter_,                                                                \
+          LOG::_padding_counter_,                                                                  \
           "-",                                                                                     \
           id,                                                                                      \
           ##__VA_ARGS__);                                                                          \

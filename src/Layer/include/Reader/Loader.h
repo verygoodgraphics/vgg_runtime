@@ -261,6 +261,7 @@ public:
     auto p = std::make_shared<PaintNode>(j["name"], VGG_GROUP);
     // init group properties
     fromObjectCommonProperty(j, p.get());
+    p->setOverflow(OF_Visible); // Group do not clip inner content
     p->setMaskContourType(EMaskCoutourType::MCT_Union);
     for (const auto& c : j["childObjects"])
     {

@@ -277,11 +277,6 @@ public:
     {
       canvas->restore();
     }
-    // for (const auto& p : this->m_firstChild)
-    // {
-    //   auto q = static_cast<PaintNode*>(p.get());
-    //   q->invokeRenderPass(canvas);
-    // }
   }
   virtual void preRenderPass(SkCanvas* canvas)
   {

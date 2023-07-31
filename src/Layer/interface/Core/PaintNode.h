@@ -99,7 +99,7 @@ public:
 
   void setBound(const Bound2& bound);
 
-  const std::string& GUID() const;
+  const std::string& guid() const;
 
   bool isMasked() const;
 

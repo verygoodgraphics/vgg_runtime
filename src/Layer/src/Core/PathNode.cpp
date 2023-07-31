@@ -215,72 +215,13 @@ bool PathNode::hasFill() const
   return false;
 }
 
-void PathNode::paintFill(SkCanvas* canvas, float globalAlpha, const SkPath& skPath)
+void PathNode::paintFill(SkCanvas* canvas,
+                         float globalAlpha,
+                         const Style& style,
+                         const SkPath& skPath,
+                         const Bound2& bound)
 {
-  VGG_IMPL(PathNode)
-  for (const auto& f : style().fills)
-  {
-    if (!f.isEnabled)
-      continue;
-    SkPaint fillPen;
-    fillPen.setStyle(SkPaint::kFill_Style);
-    fillPen.setAntiAlias(true);
-    if (f.fillType == FT_Color)
-    {
-      fillPen.setColor(f.color);
-      const auto currentAlpha = fillPen.getAlphaf();
-      fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha * currentAlpha);
-    }
-    else if (f.fillType == FT_Gradient)
-    {
-      assert(f.gradient.has_value());
-      auto gradientShader = _->getGradientShader(f.gradient.value(), getBound());
-      fillPen.setShader(gradientShader);
-      fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);
-    }
-    else if (f.fillType == FT_Pattern)
-    {
-      assert(f.pattern.has_value());
-      auto img = loadImage(f.pattern->imageGUID, Scene::getResRepo());
-      if (!img)
-        continue;
-      auto bs = getBound().size();
-      const auto m = toSkMatrix(f.pattern->transform);
-      auto shader = getImageShader(img,
-                                   bs.x,
-                                   bs.y,
-                                   f.pattern->imageFillType,
-                                   f.pattern->tileScale,
-                                   f.pattern->tileMirrored,
-                                   &m);
-
-      fillPen.setShader(shader);
-      fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);
-    }
-    canvas->drawPath(skPath, fillPen);
-    // if (f.fillType == FT_Gradient && f.gradient)
-    // {
-    //   SkPaint debugLine;
-    //   debugLine.setColor(SK_ColorBLUE);
-    //   debugLine.setStrokeWidth(2);
-    //   const auto bound = getBound();
-    //   auto from = bound.map(bound.size() * f.gradient->from);
-    //   auto to = bound.map(bound.size() * f.gradient->to);
-    //   if (f.gradient->aiCoordinate)
-    //   {
-    //     auto r = f.gradient->aiConvert(f.gradient->from, f.gradient->to, bound);
-    //     from = r.first;
-    //     to = r.second;
-    //   }
-    //   canvas->save();
-    //   canvas->drawLine(from.x, from.y, to.x, to.y, debugLine);
-    //   SkPaint debugPoint;
-    //   debugPoint.setColor(SK_ColorRED);
-    //   debugPoint.setStrokeWidth(2);
-    //   canvas->drawPoint(from.x, from.y, debugPoint);
-    //   canvas->restore();
-    // }
-  }
+  d_ptr->drawFill(canvas, globalAlpha, style, skPath, bound);
 }
 
 void PathNode::setWindingRule(EWindingType type)

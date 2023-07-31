@@ -58,7 +58,11 @@ bool ImageNode::fill() const
   return this->fillReplacesImage;
 }
 
-void ImageNode::paintFill(SkCanvas* canvas, float globalAlpha, const SkPath& skPath)
+void ImageNode::paintFill(SkCanvas* canvas,
+                          float globalAlpha,
+                          const Style& style,
+                          const SkPath& skPath,
+                          const Bound2& bound)
 {
   if (!image)
   {
@@ -68,7 +72,7 @@ void ImageNode::paintFill(SkCanvas* canvas, float globalAlpha, const SkPath& skP
   {
     if (!shader)
     {
-      const auto& b = getBound();
+      const auto& b = bound;
       shader =
         getImageShader(image, b.width(), b.height(), EImageFillType::IFT_Stretch, 1.0, false);
     }

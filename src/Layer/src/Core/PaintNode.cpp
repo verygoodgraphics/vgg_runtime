@@ -111,7 +111,7 @@ Mask PaintNode::makeMaskBy(EBoolOp maskOp)
   auto objects = Scene::getObjectTable();
   for (const auto id : _->maskedBy)
   {
-    if (id != this->GUID())
+    if (id != this->guid())
     {
       auto obj = objects[id].lock().get();
       const auto t = obj->mapTransform(this);
@@ -156,9 +156,9 @@ void PaintNode::visitNode(VGG::Node* p, ObjectTableType& table)
   auto sptr = std::static_pointer_cast<PaintNode>(p->shared_from_this());
   if (sptr->d_ptr->maskType != MT_None)
   {
-    if (auto it = table.find(sptr->GUID()); it == table.end())
+    if (auto it = table.find(sptr->guid()); it == table.end())
     {
-      table[sptr->GUID()] = sptr; // type of all children of paintnode must be paintnode
+      table[sptr->guid()] = sptr; // type of all children of paintnode must be paintnode
     }
   }
   for (auto it = p->begin(); it != p->end(); ++it)
@@ -460,7 +460,7 @@ void PaintNode::setBound(const Bound2& bound)
   _->bound = bound;
 }
 
-const std::string& PaintNode::GUID() const
+const std::string& PaintNode::guid() const
 {
   return d_ptr->guid;
 }

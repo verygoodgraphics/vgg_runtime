@@ -122,7 +122,7 @@ void PathNode__pImpl::drawPathBorder(SkCanvas* canvas,
   if (b.fill_type == FT_Gradient)
   {
     assert(b.gradient.has_value());
-    strokePen.setShader(getGradientShader(b.gradient.value(), q_ptr->getBound()));
+    strokePen.setShader(getGradientShader(b.gradient.value(), bound));
     strokePen.setAlphaf(b.context_settings.Opacity * globalAlpha);
   }
   else if (b.fill_type == FT_Color)
@@ -205,7 +205,7 @@ void PathNode__pImpl::drawContour(SkCanvas* canvas,
 
   // draw fills
 
-  q_ptr->paintFill(canvas, globalAlpha, skPath);
+  q_ptr->paintFill(canvas, globalAlpha, style, skPath, bound);
   // draw boarders
   // SkPaint strokePen;
   // strokePen.setAntiAlias(true);
@@ -264,8 +264,7 @@ void PathNode__pImpl::drawInnerShadow(SkCanvas* canvas,
   SkPaint pen;
   auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
   pen.setImageFilter(
-    SkMyImageFilters::DropInnerShadowOnly(s.offset_x, -s.offset_y, sigma, sigma, s.color,
-    nullptr));
+    SkMyImageFilters::DropInnerShadowOnly(s.offset_x, -s.offset_y, sigma, sigma, s.color, nullptr));
   canvas->saveLayer(nullptr, &pen);
   if (s.spread > 0)
     canvas->scale(1.0 / s.spread, 1.0 / s.spread);
@@ -280,4 +279,74 @@ void PathNode__pImpl::drawInnerShadow(SkCanvas* canvas,
   canvas->restore();
 }
 
+void PathNode__pImpl::drawFill(SkCanvas* canvas,
+                               float globalAlpha,
+                               const Style& style,
+                               const SkPath& skPath,
+                               const Bound2& bound)
+{
+  for (const auto& f : style.fills)
+  {
+    if (!f.isEnabled)
+      continue;
+    SkPaint fillPen;
+    fillPen.setStyle(SkPaint::kFill_Style);
+    fillPen.setAntiAlias(true);
+    if (f.fillType == FT_Color)
+    {
+      fillPen.setColor(f.color);
+      const auto currentAlpha = fillPen.getAlphaf();
+      fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha * currentAlpha);
+    }
+    else if (f.fillType == FT_Gradient)
+    {
+      assert(f.gradient.has_value());
+      auto gradientShader = getGradientShader(f.gradient.value(), bound);
+      fillPen.setShader(gradientShader);
+      fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);
+    }
+    else if (f.fillType == FT_Pattern)
+    {
+      assert(f.pattern.has_value());
+      auto img = loadImage(f.pattern->imageGUID, Scene::getResRepo());
+      if (!img)
+        continue;
+      auto bs = bound.size();
+      const auto m = toSkMatrix(f.pattern->transform);
+      auto shader = getImageShader(img,
+                                   bs.x,
+                                   bs.y,
+                                   f.pattern->imageFillType,
+                                   f.pattern->tileScale,
+                                   f.pattern->tileMirrored,
+                                   &m);
+
+      fillPen.setShader(shader);
+      fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);
+    }
+    canvas->drawPath(skPath, fillPen);
+    // if (f.fillType == FT_Gradient && f.gradient)
+    // {
+    //   SkPaint debugLine;
+    //   debugLine.setColor(SK_ColorBLUE);
+    //   debugLine.setStrokeWidth(2);
+    //   const auto bound = getBound();
+    //   auto from = bound.map(bound.size() * f.gradient->from);
+    //   auto to = bound.map(bound.size() * f.gradient->to);
+    //   if (f.gradient->aiCoordinate)
+    //   {
+    //     auto r = f.gradient->aiConvert(f.gradient->from, f.gradient->to, bound);
+    //     from = r.first;
+    //     to = r.second;
+    //   }
+    //   canvas->save();
+    //   canvas->drawLine(from.x, from.y, to.x, to.y, debugLine);
+    //   SkPaint debugPoint;
+    //   debugPoint.setColor(SK_ColorRED);
+    //   debugPoint.setStrokeWidth(2);
+    //   canvas->drawPoint(from.x, from.y, debugPoint);
+    //   canvas->restore();
+    // }
+  }
+}
 } // namespace VGG

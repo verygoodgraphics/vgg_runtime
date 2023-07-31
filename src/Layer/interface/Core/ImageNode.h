@@ -25,6 +25,10 @@ public:
   Mask asOutlineMask(const glm::mat3* mat) override;
 
 protected:
-  void paintFill(SkCanvas* canvas, float globalAlpha, const SkPath& skPath) override;
+  void paintFill(SkCanvas* canvas,
+                 float globalAlpha,
+                 const Style& style,
+                 const SkPath& skPath,
+                 const Bound2& bound) override;
 };
 } // namespace VGG

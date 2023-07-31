@@ -110,7 +110,7 @@ void Controller::initModel(const char* designDocSchemaFilePath)
   // todo, build layout doc
   m_model.reset(new Daruma(build_design_doc_fn));
 
-  DarumaContainer().get() = m_model;
+  DarumaContainer().add(m_model);
 }
 
 void Controller::start()
@@ -125,6 +125,8 @@ void Controller::startEditing()
 {
   m_presenter->setEditModel(m_edit_model);
   // todo, observe editing, then upate view
+
+  DarumaContainer().add(m_edit_model, DarumaContainer::KeyType::Edited);
 }
 
 void Controller::observeModelState()

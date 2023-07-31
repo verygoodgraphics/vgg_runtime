@@ -18,7 +18,7 @@ public:
 
   void add(std::shared_ptr<Daruma> daruma, KeyType key = KeyType::MainOrEditor);
   void remove(KeyType key = KeyType::MainOrEditor);
-  std::shared_ptr<Daruma>& get(KeyType key = KeyType::MainOrEditor);
+  std::shared_ptr<Daruma> get(KeyType key = KeyType::MainOrEditor);
 
 private:
   auto& getRepo()

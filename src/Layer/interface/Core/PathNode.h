@@ -27,11 +27,9 @@ class VGG_EXPORTS PathNode : public PaintNode
 
 public:
   PathNode(const std::string& name, std::string guid);
-  // void paintEvent(SkCanvas* canvas) override;
   void setWindingRule(EWindingType type);
   Mask asOutlineMask(const glm::mat3* mat) override;
   void addSubShape(std::shared_ptr<PaintNode> node, EBoolOp op);
-  void addSubShape(ContourPtr data, EBoolOp);
   void paintChildrenPass(SkCanvas* canvas) override
   {
     // do not render child object for path node
@@ -41,11 +39,5 @@ public:
 
 protected:
   SkPath getContour() override;
-  std::vector<std::pair<SkPath, EBoolOp>> calcContour();
-  // virtual void paintFill(SkCanvas* canvas,
-  //                        float globalAlpha,
-  //                        const Style& style,
-  //                        const SkPath& skPath,
-  //                        const Bound2& bound);
 };
 } // namespace VGG

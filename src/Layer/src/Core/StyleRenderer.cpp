@@ -19,45 +19,6 @@ sk_sp<SkShader> StyleRenderer::getGradientShader(const Gradient& g, const Bound2
   return shader;
 }
 
-SkPath StyleRenderer::makePath(const std::vector<std::pair<SkPath, EBoolOp>>& ct)
-{
-  // return skpath;
-  assert(ct.size() >= 1);
-
-  if (ct.size() == 1)
-  {
-    return ct[0].first;
-  }
-
-  std::vector<SkPath> res;
-  SkPath skPath = ct[0].first;
-  for (int i = 1; i < ct.size(); i++)
-  {
-    SkPath rhs;
-    auto op = ct[i].second;
-    if (op != BO_None)
-    {
-      auto skop = toSkPathOp(op);
-      rhs = ct[i].first;
-      Op(skPath, rhs, skop, &skPath);
-    }
-    else
-    {
-      res.push_back(skPath);
-      skPath = ct[i].first;
-    }
-    op = ct[i].second;
-  }
-  res.push_back(skPath);
-
-  SkPath paths;
-  for (const auto s : res)
-  {
-    paths.addPath(s);
-  }
-  return paths;
-}
-
 void StyleRenderer::drawPathBorder(SkCanvas* canvas,
                                    const SkPath& skPath,
                                    const Border& b,

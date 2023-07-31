@@ -142,7 +142,6 @@ protected:
   SkPath makeBoundMask();
   SkPath makeOutlineMask(EMaskCoutourType type, const glm::mat3* mat);
   void paintBackgroundColor(SkCanvas* canvas, const SkPath& path);
-  void paintStyleSimple(SkCanvas* canvas, const SkPath& path);
   virtual void paintFill(SkCanvas* canvas,
                          const SkPath& path); // TODO:: only for ImageNode overriding
   void paintStyle(SkCanvas* canvas, const SkPath& path);

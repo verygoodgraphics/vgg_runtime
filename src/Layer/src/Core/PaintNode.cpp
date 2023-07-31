@@ -194,7 +194,7 @@ RenderState* PaintNode::getRenderState()
 void PaintNode::paintEvent(SkCanvas* canvas)
 {
   const auto path = getContour();
-  paintBackgroundColor(canvas, path);
+  paintBackgroundColor(canvas, path); // TODO::remove
   paintStyle(canvas, path);
 }
 

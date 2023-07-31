@@ -19,8 +19,8 @@
 namespace VGG
 {
 
-TextNode::TextNode(const std::string& name)
-  : PaintNode(name, VGG_TEXT)
+TextNode::TextNode(const std::string& name, std::string guid)
+  : PaintNode(name, VGG_TEXT, std::move(guid))
   , d_ptr(new TextNode__pImpl(this))
 {
   auto mgr = sk_sp<SkFontMgrVGG>(FontManager::instance().getDefaultFontManager());

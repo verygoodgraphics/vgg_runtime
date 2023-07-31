@@ -10,8 +10,8 @@ class VGG_EXPORTS SymbolMasterNode final : public PaintNode
 {
 public:
   std::string symbolID;
-  SymbolMasterNode(const std::string& name)
-    : PaintNode(name, VGG_MASTER)
+  SymbolMasterNode(const std::string& name, std::string guid)
+    : PaintNode(name, VGG_MASTER, std::move(guid))
   {
   }
 };
@@ -21,8 +21,8 @@ class SymbolInstanceNode final : public PaintNode
 public:
   std::string symbolID;
   std::shared_ptr<SymbolMasterNode> master;
-  SymbolInstanceNode(const std::string& name)
-    : PaintNode(name, VGG_INSTANCE)
+  SymbolInstanceNode(const std::string& name, std::string guid)
+    : PaintNode(name, VGG_INSTANCE, std::move(guid))
   {
   }
 

@@ -27,158 +27,91 @@ namespace VGG
 class PaintNode__pImpl;
 class VGG_EXPORTS PaintNode : public Node
 {
+protected:
   VGG_DECL_IMPL(PaintNode)
 
 protected:
   static SkCanvas* s_defaultCanvas;
   static RenderState* s_renderState;
-  Bound2 m_bound;
-  glm::mat3 m_transform{ 1.0 };
-
-  std::string m_guid{};
-  std::vector<std::string> m_maskedBy{};
-  Mask m_outlineMask;
-  EMaskType m_maskType{ MT_None };
-  EBoolOp m_clipOperator{ BO_None };
-  EOverflow m_overflow{ OF_Hidden };
-
-  EMaskCoutourType m_maskContourType{ MCT_FrameOnly };
-
-  Style m_style;
-  ContextSetting m_contextSetting;
-  ObjectType m_type;
-
-  bool m_visible{ true };
-  std::optional<Color> m_bgColor;
+  // Bound2 m_bound;
+  // glm::mat3 m_transform{ 1.0 };
+  //
+  // std::string m_guid{};
+  // std::vector<std::string> m_maskedBy{};
+  // Mask m_outlineMask;
+  // EMaskType m_maskType{ MT_None };
+  // EBoolOp m_clipOperator{ BO_None };
+  // EOverflow m_overflow{ OF_Hidden };
+  //
+  // EMaskCoutourType m_maskContourType{ MCT_FrameOnly };
+  //
+  // Style m_style;
+  // ContextSetting m_contextSetting;
+  // ObjectType m_type;
+  //
+  // bool m_visible{ true };
+  // std::optional<Color> m_bgColor;
 
   friend class NlohmannBuilder;
   friend class SkiaRenderer;
 
 public:
-  PaintNode(const std::string& name, ObjectType type);
+  PaintNode(const std::string& name, ObjectType type, const std::string& guid);
 
   void addChild(const std::shared_ptr<PaintNode> node)
   {
     pushChildBack(std::move(node));
   }
 
-  void setContectSettings(const ContextSetting& settings)
-  {
-    this->m_contextSetting = settings;
-  }
+  void setContectSettings(const ContextSetting& settings);
 
-  void setOverflow(EOverflow overflow)
-  {
-    m_overflow = overflow;
-  }
+  void setOverflow(EOverflow overflow);
 
-  EOverflow overflow() const
-  {
-    return m_overflow;
-  }
+  EOverflow overflow() const;
 
-  const ContextSetting& contextSetting() const
-  {
-    return this->m_contextSetting;
-  }
+  const ContextSetting& contextSetting() const;
 
-  ContextSetting& contextSetting()
-  {
-    return this->m_contextSetting;
-  }
+  ContextSetting& contextSetting();
 
-  void setClipOperator(EBoolOp op)
-  {
-    m_clipOperator = op;
-  }
+  void setClipOperator(EBoolOp op);
 
-  void setVisible(bool visible)
-  {
-    this->m_visible = visible;
-  }
+  void setVisible(bool visible);
 
-  void setBackgroundColor(const Color& color)
-  {
-    this->m_bgColor = color;
-  }
+  void setBackgroundColor(const Color& color);
 
-  bool isVisible() const
-  {
-    return this->m_visible;
-  }
+  bool isVisible() const;
 
-  void setStyle(const Style& style)
-  {
-    m_style = style;
-  }
+  void setStyle(const Style& style);
 
-  Style& style()
-  {
-    return m_style;
-  }
+  Style& style();
 
-  const Style& style() const
-  {
-    return m_style;
-  }
+  const Style& style() const;
 
-  EBoolOp clipOperator() const
-  {
-    return m_clipOperator;
-  }
+  EBoolOp clipOperator() const;
 
   glm::mat3 mapTransform(const PaintNode* node) const;
 
-  void setLocalTransform(const glm::mat3& transform)
-  {
-    this->m_transform = transform;
-  }
+  void setLocalTransform(const glm::mat3& transform);
 
-  const glm::mat3& localTransform() const
-  {
-    // TODO:: if the node is detached from the parent, this transform should be reset;
-    return m_transform;
-  }
+  const glm::mat3& localTransform() const;
 
-  const Bound2& getBound() const
-  {
-    return this->m_bound;
-  }
+  const Bound2& getBound() const;
 
-  void setBound(const Bound2& bound)
-  {
-    this->m_bound = bound;
-  }
+  void setBound(const Bound2& bound);
 
-  const std::string& GUID() const
-  {
-    return m_guid;
-  }
+  const std::string& GUID() const;
 
-  bool isMasked() const
-  {
-    return !m_maskedBy.empty();
-  }
+  bool isMasked() const;
 
-  EMaskType maskType() const
-  {
-    return this->m_maskType;
-  }
+  void setMaskBy(const std::vector<std::string> masks);
 
-  void setMaskType(EMaskType type)
-  {
-    this->m_maskType = type;
-  }
+  EMaskType maskType() const;
 
-  EMaskCoutourType maskContourType() const
-  {
-    return m_maskContourType;
-  }
+  void setMaskType(EMaskType type);
 
-  void setMaskContourType(EMaskCoutourType type)
-  {
-    m_maskContourType = type;
-  }
+  EMaskCoutourType maskContourType() const;
+
+  void setMaskContourType(EMaskCoutourType type);
 
   /**
    * Return a matrix that transform from this node to the given node
@@ -217,104 +150,10 @@ public:
 
 public:
   // TODO:: chagne the following functions accessbility
-  void invokeRenderPass(SkCanvas* canvas)
-  {
-    if (!m_visible)
-      return;
-    preRenderPass(canvas);
-    renderOrderPass(canvas);
-    postRenderPass(canvas);
-  }
-
-  virtual void renderOrderPass(SkCanvas* canvas)
-  {
-
-    std::vector<PaintNode*> masked;
-    std::vector<PaintNode*> noneMasked;
-    for (const auto& p : this->m_firstChild)
-    {
-      auto c = static_cast<PaintNode*>(p.get());
-      if (c->maskType() == MT_Outline)
-        masked.push_back(c);
-      else
-        noneMasked.push_back(c);
-    }
-
-    auto paintCall = [&](std::vector<PaintNode*>& nodes)
-    {
-      if (m_contextSetting.TransparencyKnockoutGroup)
-      {
-        for (const auto& p : nodes)
-        {
-          // TODO:: blend mode r = s!=0?s:d is needed.
-          // SkPaint paint;
-          // paint.setBlendMode(SkBlendMode::kSrc);
-          // canvas->save();
-          // canvas->scale(1, -1);
-          // canvas->saveLayer(toSkRect(getBound()), &paint);
-          p->invokeRenderPass(canvas);
-          // canvas->restore();
-          // canvas->restore();
-        }
-      }
-      else
-      {
-        for (const auto& p : nodes)
-        {
-          p->invokeRenderPass(canvas);
-        }
-      }
-    };
-
-    if (overflow() == OF_Hidden)
-    {
-      canvas->save();
-      canvas->clipPath(getContour());
-    }
-    paintCall(masked);
-    paintCall(noneMasked);
-    if (overflow() == OF_Hidden)
-    {
-      canvas->restore();
-    }
-  }
-  virtual void preRenderPass(SkCanvas* canvas)
-  {
-
-    if (m_contextSetting.Opacity < 1.0)
-    {
-      // TODO:: more accurate bound is needed
-      canvas->saveLayerAlpha(0, m_contextSetting.Opacity * 255);
-    }
-
-    if (m_contextSetting.IsolateBlending)
-    {
-      // TODO:: blend mode r = s!=0?s:d is needed.
-      // SkPaint paint;
-      // paint.setBlendMode(SkBlendMode::kSrc);
-      // canvas->save();
-      // canvas->scale(1, -1);
-      // canvas->saveLayer(toSkRect(getBound()), &paint);
-    }
-    paintPass();
-  }
-
-  virtual void postRenderPass(SkCanvas* canvas)
-  {
-    canvas->restore(); // store the state in paintPass
-
-    if (m_contextSetting.IsolateBlending)
-    {
-      // canvas->restore();
-      // canvas->restore();
-    }
-
-    if (m_contextSetting.Opacity < 1.0)
-    {
-      canvas->restore();
-    }
-  }
-
+  void invokeRenderPass(SkCanvas* canvas);
+  virtual void renderOrderPass(SkCanvas* canvas);
+  virtual void preRenderPass(SkCanvas* canvas);
+  virtual void postRenderPass(SkCanvas* canvas);
   Mask makeMaskBy(EBoolOp maskOp);
 
 protected:
@@ -327,7 +166,6 @@ protected:
 protected:
   virtual void paintPass();
   void renderPass(SkCanvas* canvas); // TODO:: should be private access
-
   virtual void paintEvent(SkCanvas* canvas);
 
 private:

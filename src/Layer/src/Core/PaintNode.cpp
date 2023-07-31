@@ -18,22 +18,43 @@ class PaintNode__pImpl
   VGG_DECL_API(PaintNode);
 
 public:
-  PaintNode__pImpl(PaintNode* api)
+  Bound2 bound;
+  glm::mat3 transform{ 1.0 };
+  std::string guid{};
+  std::vector<std::string> maskedBy{};
+  Mask outlineMask;
+  EMaskType maskType{ MT_None };
+  EBoolOp clipOperator{ BO_None };
+  EOverflow overflow{ OF_Hidden };
+  EMaskCoutourType maskContourType{ MCT_FrameOnly };
+  Style style;
+  ContextSetting contextSetting;
+  ObjectType type;
+  bool visible{ true };
+  std::optional<Color> bgColor;
+  PaintNode__pImpl(PaintNode* api, ObjectType type)
     : q_ptr(api)
+    , type(type)
   {
   }
 };
 
-PaintNode::PaintNode(const std::string& name, ObjectType type)
+PaintNode::PaintNode(const std::string& name, ObjectType type, const std::string& guid)
   : Node(name)
-  , m_type(type)
-  , d_ptr(new PaintNode__pImpl(this))
+  , d_ptr(new PaintNode__pImpl(this, type))
 {
+  d_ptr->guid = guid;
+}
+
+void PaintNode::setContectSettings(const ContextSetting& settings)
+{
+  VGG_IMPL(PaintNode);
+  _->contextSetting = settings;
 }
 
 glm::mat3 PaintNode::mapTransform(const PaintNode* node) const
 {
-  auto find_path = [](const Node* node) -> std::vector<const Node*>
+  auto findPath = [](const Node* node) -> std::vector<const Node*>
   {
     std::vector<const Node*> path = { node };
     while (node->parent())
@@ -43,10 +64,10 @@ glm::mat3 PaintNode::mapTransform(const PaintNode* node) const
     }
     return path;
   };
-  auto path1 = find_path(node);
-  auto path2 = find_path(this);
+  auto path1 = findPath(node);
+  auto path2 = findPath(this);
   const Node* lca = nullptr;
-  int lca_idx = -1;
+  int lcaIdx = -1;
   for (int i = path1.size() - 1, j = path2.size() - 1; i >= 0 && j >= 0; i--, j--)
   {
     auto n1 = path1[i];
@@ -54,7 +75,7 @@ glm::mat3 PaintNode::mapTransform(const PaintNode* node) const
     if (n1 == n2)
     {
       lca = n1;
-      lca_idx = j;
+      lcaIdx = j;
     }
     else
     {
@@ -66,14 +87,14 @@ glm::mat3 PaintNode::mapTransform(const PaintNode* node) const
     return mat;
   for (int i = 0; i < path1.size() && path1[i] != lca; i++)
   {
-    auto skm = static_cast<const PaintNode*>(path1[i])->m_transform;
+    auto skm = static_cast<const PaintNode*>(path1[i])->d_ptr->transform;
     auto inv = glm::inverse(skm);
     mat = mat * inv;
   }
 
-  for (int i = lca_idx - 1; i >= 0; i--)
+  for (int i = lcaIdx - 1; i >= 0; i--)
   {
-    const auto m = static_cast<const PaintNode*>(path2[i])->m_transform;
+    const auto m = static_cast<const PaintNode*>(path2[i])->d_ptr->transform;
     mat = mat * m;
   }
   return mat;
@@ -81,13 +102,14 @@ glm::mat3 PaintNode::mapTransform(const PaintNode* node) const
 
 Mask PaintNode::makeMaskBy(EBoolOp maskOp)
 {
+  VGG_IMPL(PaintNode);
   Mask result;
-  if (m_maskedBy.empty())
+  if (_->maskedBy.empty())
     return result;
 
   auto op = toSkPathOp(maskOp);
   auto objects = Scene::getObjectTable();
-  for (const auto id : m_maskedBy)
+  for (const auto id : _->maskedBy)
   {
     if (id != this->GUID())
     {
@@ -118,10 +140,11 @@ void PaintNode::renderPass(SkCanvas* canvas)
 
 void PaintNode::drawDebugBound(SkCanvas* canvas)
 {
+  VGG_IMPL(PaintNode);
   const auto& b = getBound();
   SkPaint strokePen;
   strokePen.setStyle(SkPaint::kStroke_Style);
-  SkColor color = nodeType2Color(this->m_type);
+  SkColor color = nodeType2Color(_->type);
   strokePen.setColor(color);
   strokePen.setStrokeWidth(2);
   canvas->drawRect(toSkRect(getBound()), strokePen);
@@ -131,7 +154,7 @@ void PaintNode::visitNode(VGG::Node* p, ObjectTableType& table)
   if (!p)
     return;
   auto sptr = std::static_pointer_cast<PaintNode>(p->shared_from_this());
-  if (sptr->m_maskType != MT_None)
+  if (sptr->d_ptr->maskType != MT_None)
   {
     if (auto it = table.find(sptr->GUID()); it == table.end())
     {
@@ -146,9 +169,10 @@ void PaintNode::visitNode(VGG::Node* p, ObjectTableType& table)
 
 void PaintNode::paintPass()
 {
+  VGG_IMPL(PaintNode);
   SkCanvas* canvas = getSkCanvas();
   canvas->save();
-  canvas->concat(toSkMatrix(this->m_transform));
+  canvas->concat(toSkMatrix(_->transform));
   if (Scene::isEnableDrawDebugBound())
   {
     this->drawDebugBound(canvas);
@@ -174,13 +198,21 @@ void PaintNode::paintEvent(SkCanvas* canvas)
 
 void PaintNode::paintBackgroundColor(SkCanvas* canvas)
 {
-  if (this->m_bgColor.has_value())
+
+  VGG_IMPL(PaintNode);
+  if (_->bgColor.has_value())
   {
     SkPaint bgPaint;
-    bgPaint.setColor(this->m_bgColor.value());
+    bgPaint.setColor(_->bgColor.value());
     bgPaint.setStyle(SkPaint::kFill_Style);
     canvas->drawPath(getContour(), bgPaint);
   }
+}
+
+void PaintNode::setMaskBy(std::vector<std::string> masks)
+{
+  VGG_IMPL(PaintNode);
+  _->maskedBy = std::move(masks);
 }
 
 SkPath PaintNode::makeBoundMask()
@@ -223,8 +255,9 @@ SkPath PaintNode::getContour()
 
 void PaintNode::paintStyle(SkCanvas* canvas)
 {
+  VGG_IMPL(PaintNode);
   auto path = getContour();
-  for (const auto& fill : m_style.fills)
+  for (const auto& fill : _->style.fills)
   {
     if (fill.isEnabled)
     {
@@ -235,7 +268,7 @@ void PaintNode::paintStyle(SkCanvas* canvas)
       canvas->drawPath(path, fp);
     }
   }
-  for (const auto& border : m_style.borders)
+  for (const auto& border : _->style.borders)
   {
     if (border.isEnabled)
     {
@@ -329,11 +362,234 @@ Mask PaintNode::asOutlineMask(const glm::mat3* mat)
 
 void PaintNode::setOutlineMask(const Mask& mask)
 {
-  m_outlineMask = mask;
+  VGG_IMPL(PaintNode);
+  _->outlineMask = mask;
 }
 
 void PaintNode::asAlphaMask()
 {
+}
+
+void PaintNode::setOverflow(EOverflow overflow)
+{
+
+  VGG_IMPL(PaintNode);
+  _->overflow = overflow;
+}
+
+EOverflow PaintNode::overflow() const
+{
+  return d_ptr->overflow;
+}
+
+const ContextSetting& PaintNode::contextSetting() const
+{
+  return d_ptr->contextSetting;
+}
+
+ContextSetting& PaintNode::contextSetting()
+{
+  VGG_IMPL(PaintNode);
+  return _->contextSetting;
+}
+
+void PaintNode::setClipOperator(EBoolOp op)
+{
+  VGG_IMPL(PaintNode);
+  _->clipOperator = op;
+}
+
+void PaintNode::setVisible(bool visible)
+{
+  VGG_IMPL(PaintNode);
+  _->visible = visible;
+}
+
+void PaintNode::setBackgroundColor(const Color& color)
+{
+  VGG_IMPL(PaintNode);
+  _->bgColor = color;
+}
+
+bool PaintNode::isVisible() const
+{
+  return d_ptr->visible;
+}
+
+void PaintNode::setStyle(const Style& style)
+{
+  VGG_IMPL(PaintNode);
+  _->style = style;
+}
+
+Style& PaintNode::style()
+{
+  VGG_IMPL(PaintNode);
+  return _->style;
+}
+
+const Style& PaintNode::style() const
+{
+  return d_ptr->style;
+}
+
+EBoolOp PaintNode::clipOperator() const
+{
+  return d_ptr->clipOperator;
+}
+void PaintNode::setLocalTransform(const glm::mat3& transform)
+{
+  VGG_IMPL(PaintNode);
+  _->transform = transform;
+}
+
+const glm::mat3& PaintNode::localTransform() const
+{
+  // TODO:: if the node is detached from the parent, this transform should be reset;
+  return d_ptr->transform;
+}
+
+const Bound2& PaintNode::getBound() const
+{
+  return d_ptr->bound;
+}
+
+void PaintNode::setBound(const Bound2& bound)
+{
+  VGG_IMPL(PaintNode);
+  _->bound = bound;
+}
+
+const std::string& PaintNode::GUID() const
+{
+  return d_ptr->guid;
+}
+
+bool PaintNode::isMasked() const
+{
+  return d_ptr->maskedBy.empty();
+}
+
+EMaskType PaintNode::maskType() const
+{
+  return d_ptr->maskType;
+}
+
+void PaintNode::setMaskType(EMaskType type)
+{
+  VGG_IMPL(PaintNode);
+  _->maskType = type;
+}
+
+EMaskCoutourType PaintNode::maskContourType() const
+{
+  return d_ptr->maskContourType;
+}
+
+void PaintNode::setMaskContourType(EMaskCoutourType type)
+{
+  VGG_IMPL(PaintNode);
+  d_ptr->maskContourType = type;
+}
+
+void PaintNode::invokeRenderPass(SkCanvas* canvas)
+{
+  VGG_IMPL(PaintNode);
+  if (!_->visible)
+    return;
+  preRenderPass(canvas);
+  renderOrderPass(canvas);
+  postRenderPass(canvas);
+}
+
+void PaintNode::renderOrderPass(SkCanvas* canvas)
+{
+  VGG_IMPL(PaintNode);
+  std::vector<PaintNode*> masked;
+  std::vector<PaintNode*> noneMasked;
+  for (const auto& p : this->m_firstChild)
+  {
+    auto c = static_cast<PaintNode*>(p.get());
+    if (c->maskType() == MT_Outline)
+      masked.push_back(c);
+    else
+      noneMasked.push_back(c);
+  }
+
+  auto paintCall = [&](std::vector<PaintNode*>& nodes)
+  {
+    if (_->contextSetting.TransparencyKnockoutGroup)
+    {
+      for (const auto& p : nodes)
+      {
+        // TODO:: blend mode r = s!=0?s:d is needed.
+        // SkPaint paint;
+        // paint.setBlendMode(SkBlendMode::kSrc);
+        // canvas->save();
+        // canvas->scale(1, -1);
+        // canvas->saveLayer(toSkRect(getBound()), &paint);
+        p->invokeRenderPass(canvas);
+        // canvas->restore();
+        // canvas->restore();
+      }
+    }
+    else
+    {
+      for (const auto& p : nodes)
+      {
+        p->invokeRenderPass(canvas);
+      }
+    }
+  };
+
+  if (overflow() == OF_Hidden)
+  {
+    canvas->save();
+    canvas->clipPath(getContour());
+  }
+  paintCall(masked);
+  paintCall(noneMasked);
+  if (overflow() == OF_Hidden)
+  {
+    canvas->restore();
+  }
+}
+void PaintNode::preRenderPass(SkCanvas* canvas)
+{
+  VGG_IMPL(PaintNode);
+  if (_->contextSetting.Opacity < 1.0)
+  {
+    // TODO:: more accurate bound is needed
+    canvas->saveLayerAlpha(0, _->contextSetting.Opacity * 255);
+  }
+
+  if (_->contextSetting.IsolateBlending)
+  {
+    // TODO:: blend mode r = s!=0?s:d is needed.
+    // SkPaint paint;
+    // paint.setBlendMode(SkBlendMode::kSrc);
+    // canvas->save();
+    // canvas->scale(1, -1);
+    // canvas->saveLayer(toSkRect(getBound()), &paint);
+  }
+  paintPass();
+}
+
+void PaintNode::postRenderPass(SkCanvas* canvas)
+{
+  VGG_IMPL(PaintNode);
+  canvas->restore(); // store the state in paintPass
+
+  if (_->contextSetting.IsolateBlending)
+  {
+    // canvas->restore();
+    // canvas->restore();
+  }
+
+  if (_->contextSetting.Opacity < 1.0)
+  {
+    canvas->restore();
+  }
 }
 
 PaintNode::~PaintNode() = default;

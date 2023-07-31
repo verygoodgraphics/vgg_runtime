@@ -23,7 +23,7 @@ struct VGG_EXPORTS Scene
   static bool s_enableDrawDebugBound;
 
   std::vector<std::shared_ptr<PaintNode>> artboards;
-  std::vector<std::shared_ptr<SymbolMasterNode>> symbols;
+  std::vector<std::shared_ptr<PaintNode>> symbols;
 
 public:
   int page{ 0 };

@@ -90,17 +90,23 @@ public:
     return { fromBound(j.value("bounds", nlohmann::json{})), fromMatrix(j) };
   }
 
-  static inline void fromObjectCommonProperty(const nlohmann::json& j, PaintNode* obj)
+  template<typename F1, typename F2>
+  static inline std::shared_ptr<PaintNode> makeObjectCommonProperty(const nlohmann::json& j,
+                                                                    F1&& creator,
+                                                                    F2&& overridor)
   {
-    // all properties that render object cares about
-    std::tie(obj->m_bound, obj->m_transform) = fromTransform(j);
+    auto obj = creator(std::move(j.value("name", "")), std::move(j.value("id", "")));
+    const auto [bound, transform] = fromTransform(j);
+    obj->setBound(bound);
+    obj->setLocalTransform(transform);
     obj->setStyle(j.value("style", Style()));
     obj->setContectSettings(j.value("contextSettings", ContextSetting()));
-    obj->m_maskedBy = j.value("outlineMaskBy", std::vector<std::string>{});
-    obj->m_maskType = j.value("maskType", EMaskType::MT_None);
-    obj->m_overflow = j.value("overflow", EOverflow::OF_Visible);
-    obj->m_guid = j.value("id", "");
+    obj->setMaskBy(std::move(j.value("outlineMaskBy", std::vector<std::string>{})));
+    obj->setMaskType(j.value("maskType", EMaskType::MT_None));
+    obj->setOverflow(j.value("overflow", EOverflow::OF_Visible));
     obj->setVisible(j.value("visible", true));
+    overridor(obj.get());
+    return obj;
   }
 
   static inline std::shared_ptr<ContourNode> fromContour(const nlohmann::json& j)
@@ -116,109 +122,129 @@ public:
                            get_opt<glm::vec2>(e, "curveTo"),
                            get_opt<int>(e, "cornerStyle"));
     }
-    return std::make_shared<ContourNode>("contour", std::make_shared<Contour>(contour));
+    return std::make_shared<ContourNode>("contour", std::make_shared<Contour>(contour), "");
   }
 
   static inline std::shared_ptr<PaintNode> fromFrame(const nlohmann::json& j)
   {
-    auto p = std::make_shared<PaintNode>(j.value("name", ""), ObjectType::VGG_FRAME);
-    fromObjectCommonProperty(j, p.get());
-    p->setMaskContourType(EMaskCoutourType::MCT_Union);
-    const auto radius = get_stack_optional<std::array<float, 4>>(j, "radius")
-                          .value_or(std::array<float, 4>{ 0.0f, 0.f, 0.f, 0.f });
-    p->style().frameRadius = radius;
-    for (const auto& c : j.value("childObjects", std::vector<nlohmann::json>{}))
-    {
-      p->addChild(fromObject(c));
-    }
+    auto p = makeObjectCommonProperty(
+      j,
+      [&j](std::string name, std::string guid)
+      {
+        auto p = std::make_shared<PaintNode>(std::move(name), VGG_FRAME, std::move(guid));
+        return p;
+      },
+      [&j](PaintNode* p)
+      {
+        p->setMaskContourType(EMaskCoutourType::MCT_Union);
+        const auto radius = get_stack_optional<std::array<float, 4>>(j, "radius")
+                              .value_or(std::array<float, 4>{ 0.0f, 0.f, 0.f, 0.f });
+        p->style().frameRadius = radius;
+        for (const auto& c : j.value("childObjects", std::vector<nlohmann::json>{}))
+        {
+          p->addChild(fromObject(c));
+        }
+      });
+
     return p;
   }
 
-  static inline std::shared_ptr<ImageNode> fromImage(const nlohmann::json& j)
+  static inline std::shared_ptr<PaintNode> fromImage(const nlohmann::json& j)
   {
-    auto p = std::make_shared<ImageNode>(j.value("name", ""));
-    fromObjectCommonProperty(j, p.get());
-    p->setImage(j.value("imageFileName", ""));
-    if (auto it = j.find("fillReplacesImage"); it != j.end())
-    {
-      p->setReplacesImage(it.value());
-    }
-    return p;
+    return makeObjectCommonProperty(
+      j,
+      [&j](std::string name, std::string guid)
+      {
+        auto p = std::make_shared<ImageNode>(j.value("name", ""), std::move(guid));
+        return p;
+      },
+      [&j](ImageNode* p)
+      {
+        p->setImage(j.value("imageFileName", ""));
+        p->setReplacesImage(j.value("fillReplacesImage", false));
+      });
   }
 
-  static inline std::shared_ptr<SymbolInstanceNode> fromSymbolInstance(const nlohmann::json& j)
+  static inline std::shared_ptr<PaintNode> fromText(const nlohmann::json& j)
   {
-    auto ins = std::make_shared<SymbolInstanceNode>(j.value("name", ""));
-    ins->symbolID = j.value("symbolID", "");
-    fromObjectCommonProperty(j, ins.get());
-    return ins;
+    return makeObjectCommonProperty(
+      j,
+      [&j](std::string name, std::string guid)
+      {
+        auto p = std::make_shared<TextNode>(std::move(name), std::move(guid));
+        return p;
+      },
+      [&j](TextNode* p)
+      {
+        std::string text = j.value("content", "");
+        auto lineType = get_stack_optional<std::vector<TextLineAttr>>(j, "lineType")
+                          .value_or(std::vector<TextLineAttr>());
+        p->setParagraph(std::move(text), j.value("attr", std::vector<TextAttr>{}), lineType);
+        p->setVerticalAlignment(j.value("verticalAlignment", ETextVerticalAlignment::VA_Top));
+        const auto& b = p->getBound();
+        p->setFrameMode(j.value("frameMode", ETextLayoutMode::TL_Fixed));
+        if (b.width() == 0 || b.height() == 0)
+        {
+          // for Ai speicific
+          p->setFrameMode(ETextLayoutMode::TL_WidthAuto);
+        }
+        else
+        {
+          // TODO:: force to Fixed now because the bound computed by text layout is not accurate.
+          p->setFrameMode(ETextLayoutMode::TL_Fixed);
+        }
+        return p;
+      });
   }
 
-  static inline std::shared_ptr<TextNode> fromText(const nlohmann::json& j)
+  static inline std::shared_ptr<PaintNode> fromPath(const nlohmann::json& j)
   {
-    auto p = std::make_shared<TextNode>("Text");
-    fromObjectCommonProperty(j, p.get());
-    std::string text = j.value("content", "");
-    auto lineType = get_stack_optional<std::vector<TextLineAttr>>(j, "lineType")
-                      .value_or(std::vector<TextLineAttr>());
-    p->setParagraph(std::move(text), j.value("attr", std::vector<TextAttr>{}), lineType);
-    p->setVerticalAlignment(j.value("verticalAlignment", ETextVerticalAlignment::VA_Top));
-    const auto& b = p->getBound();
-    p->setFrameMode(j.value("frameMode", ETextLayoutMode::TL_Fixed));
-    if (b.width() == 0 || b.height() == 0)
-    {
-      // for Ai speicific
-      p->setFrameMode(ETextLayoutMode::TL_WidthAuto);
-    }
-    else
-    {
-      // TODO:: force to Fixed now because the bound computed by text layout is not accurate.
-      p->setFrameMode(ETextLayoutMode::TL_Fixed);
-    }
-    return p;
-  }
-
-  static inline std::shared_ptr<PathNode> fromPath(const nlohmann::json& j)
-  {
-    auto p = std::make_shared<PathNode>(j.value("name", ""));
-    fromObjectCommonProperty(j, p.get());
-    const auto shape = j.value("shape", nlohmann::json{});
-    p->setWindingRule(shape.value("windingRule", EWindingType::WR_EvenOdd));
-    for (const auto& subshape : shape.value("subshapes", std::vector<nlohmann::json>{}))
-    {
-      const auto blop = subshape.value("booleanOperation", EBoolOp::BO_None);
-      const auto geo = subshape.value("subGeometry", nlohmann::json{});
-      const auto klass = geo.value("class", "");
-      if (klass == "contour")
+    return makeObjectCommonProperty(
+      j,
+      [&j](std::string name, std::string guid)
       {
-        p->addSubShape(fromContour(geo), blop);
-      }
-      else if (klass == "path")
+        auto p = std::make_shared<PathNode>(std::move(name), std::move(guid));
+        return p;
+      },
+      [&j](PathNode* p)
       {
-        p->addSubShape(fromPath(geo), blop);
-      }
-      else if (klass == "image")
-      {
-        p->addSubShape(fromImage(geo), blop);
-      }
-      else if (klass == "text")
-      {
-        p->addSubShape(fromText(geo), blop);
-      }
-      else if (klass == "group")
-      {
-        p->addSubShape(fromGroup(geo), blop);
-      }
-      else if (klass == "symbolInstance")
-      {
-        p->addSubShape(fromSymbolInstance(geo), blop);
-      }
-      else if (klass == "frame")
-      {
-        p->addSubShape(fromFrame(geo), blop);
-      }
-    }
-    return p;
+        const auto shape = j.value("shape", nlohmann::json{});
+        p->setWindingRule(shape.value("windingRule", EWindingType::WR_EvenOdd));
+        for (const auto& subshape : shape.value("subshapes", std::vector<nlohmann::json>{}))
+        {
+          const auto blop = subshape.value("booleanOperation", EBoolOp::BO_None);
+          const auto geo = subshape.value("subGeometry", nlohmann::json{});
+          const auto klass = geo.value("class", "");
+          if (klass == "contour")
+          {
+            p->addSubShape(fromContour(geo), blop);
+          }
+          else if (klass == "path")
+          {
+            p->addSubShape(fromPath(geo), blop);
+          }
+          else if (klass == "image")
+          {
+            p->addSubShape(fromImage(geo), blop);
+          }
+          else if (klass == "text")
+          {
+            p->addSubShape(fromText(geo), blop);
+          }
+          else if (klass == "group")
+          {
+            p->addSubShape(fromGroup(geo), blop);
+          }
+          else if (klass == "symbolInstance")
+          {
+            p->addSubShape(fromSymbolInstance(geo), blop);
+          }
+          else if (klass == "frame")
+          {
+            p->addSubShape(fromFrame(geo), blop);
+          }
+        }
+      });
   }
 
   static inline std::shared_ptr<PaintNode> fromObject(const nlohmann::json& j)
@@ -259,28 +285,43 @@ public:
 
   static inline std::shared_ptr<PaintNode> fromGroup(const nlohmann::json& j)
   {
-    auto p = std::make_shared<PaintNode>(j.value("name", ""), VGG_GROUP);
-    // init group properties
-    fromObjectCommonProperty(j, p.get());
-    p->setOverflow(OF_Visible); // Group do not clip inner content
-    p->setMaskContourType(EMaskCoutourType::MCT_Union);
-    for (const auto& c : j.value("childObjects", std::vector<nlohmann::json>{}))
-    {
-      p->addChild(fromObject(c));
-    }
-    return p;
+    // auto p = std::make_shared<PaintNode>(j.value("name", ""), VGG_GROUP);
+    //  init group properties
+    return makeObjectCommonProperty(
+      j,
+      [&j](std::string name, std::string guid)
+      {
+        auto p = std::make_shared<PaintNode>(std::move(name), VGG_GROUP, std::move(guid));
+        return p;
+      },
+      [&j](PaintNode* p)
+      {
+        p->setOverflow(OF_Visible); // Group do not clip inner content
+        p->setMaskContourType(EMaskCoutourType::MCT_Union);
+        for (const auto& c : j.value("childObjects", std::vector<nlohmann::json>{}))
+        {
+          p->addChild(fromObject(c));
+        }
+      });
   }
 
   static inline std::shared_ptr<PaintNode> fromLayer(const nlohmann::json& j)
   {
-    auto p = std::make_shared<PaintNode>("Layer", VGG_LAYER);
-    p->m_transform = glm::mat3(1);
-    fromObjectCommonProperty(j, p.get());
-    for (const auto& e : j.value("childObjects", std::vector<nlohmann::json>{}))
-    {
-      p->addChild(fromObject(e));
-    }
-    return p;
+    return makeObjectCommonProperty(
+      j,
+      [&j](std::string name, std::string guid)
+      {
+        auto p = std::make_shared<PaintNode>(std::move(name), VGG_LAYER, std::move(guid));
+        return p;
+      },
+      [&j](PaintNode* p)
+      {
+        p->setLocalTransform(glm::mat3(1));
+        for (const auto& e : j.value("childObjects", std::vector<nlohmann::json>{}))
+        {
+          p->addChild(fromObject(e));
+        }
+      });
   }
 
   static inline std::vector<std::shared_ptr<PaintNode>> fromLayers(const nlohmann::json& j)
@@ -298,42 +339,69 @@ public:
     std::vector<std::shared_ptr<PaintNode>> artboards;
     for (const auto& e : j.value("artboard", std::vector<nlohmann::json>{}))
     {
-      auto p = std::make_shared<PaintNode>(e.value("name", ""), VGG_ARTBOARD);
-      const auto bg = get_stack_optional<Color>(e, "backgroundColor").value_or(Color{ 1, 1, 1, 1 });
-      p->setBackgroundColor(bg);
-      fromObjectCommonProperty(e, p.get());
+      auto artboard = makeObjectCommonProperty(
+        e,
+        [&e](std::string name, std::string guid)
+        {
+          auto p = std::make_shared<PaintNode>(e.value("name", ""), VGG_ARTBOARD, std::move(guid));
+          return p;
+        },
+        [&e](PaintNode* p)
+        {
+          const auto bg =
+            get_stack_optional<Color>(e, "backgroundColor").value_or(Color{ 1, 1, 1, 1 });
+          p->setBackgroundColor(bg);
 
-      auto t = p->localTransform();
-      const auto b = p->getBound();
-      t = glm::translate(t, glm::vec2{ -t[2][0], -t[2][1] });
-      t = glm::translate(t, glm::vec2{ -b.topLeft.x, -b.topLeft.y });
-      p->setLocalTransform(t);
-      auto layers = fromLayers(e);
-      for (const auto& l : layers)
-      {
-        p->addChild(l);
-      }
-      artboards.push_back(p);
+          auto t = p->localTransform();
+          const auto b = p->getBound();
+          t = glm::translate(t, glm::vec2{ -t[2][0], -t[2][1] });
+          t = glm::translate(t, glm::vec2{ -b.topLeft.x, -b.topLeft.y });
+          p->setLocalTransform(t);
+          auto layers = fromLayers(e);
+          for (const auto& l : layers)
+          {
+            p->addChild(l);
+          }
+        });
+      artboards.push_back(artboard);
     }
     return artboards;
   }
 
-  static inline std::shared_ptr<SymbolMasterNode> fromSymbolMaster(const nlohmann::json& j)
+  static inline std::shared_ptr<PaintNode> fromSymbolInstance(const nlohmann::json& j)
   {
-    auto p = std::make_shared<SymbolMasterNode>(j.value("name", ""));
-    fromObjectCommonProperty(j, p.get());
-    p->symbolID = j.value("symbolID", "");
-    for (const auto& e : j.value("childObjects", std::vector<nlohmann::json>()))
-    {
-      p->addChild(fromObject(e));
-    }
-    return p;
+    return makeObjectCommonProperty(
+      j,
+      [&j](std::string name, std::string guid)
+      {
+        auto p = std::make_shared<PaintNode>(std::move(name), VGG_MASTER, std::move(guid));
+        return p;
+      },
+      [&j](PaintNode* p) {});
   }
 
-  static inline std::vector<std::shared_ptr<SymbolMasterNode>> fromSymbolMasters(
-    const nlohmann::json& j)
+  static inline std::shared_ptr<PaintNode> fromSymbolMaster(const nlohmann::json& j)
   {
-    std::vector<std::shared_ptr<SymbolMasterNode>> symbols;
+    return makeObjectCommonProperty(
+      j,
+      [&j](std::string name, std::string guid)
+      {
+        auto p = std::make_shared<SymbolMasterNode>(std::move(name), std::move(guid));
+        return p;
+      },
+      [&j](SymbolMasterNode* p)
+      {
+        p->symbolID = j.value("symbolID", "");
+        for (const auto& e : j.value("childObjects", std::vector<nlohmann::json>()))
+        {
+          p->addChild(fromObject(e));
+        }
+      });
+  }
+
+  static inline std::vector<std::shared_ptr<PaintNode>> fromSymbolMasters(const nlohmann::json& j)
+  {
+    std::vector<std::shared_ptr<PaintNode>> symbols;
     for (const auto& e : j.value("symbolMaster", std::vector<nlohmann::json>{}))
     {
       symbols.emplace_back(fromSymbolMaster(e));

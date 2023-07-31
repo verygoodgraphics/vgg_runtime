@@ -151,9 +151,9 @@ public:
 public:
   // TODO:: chagne the following functions accessbility
   void invokeRenderPass(SkCanvas* canvas);
-  virtual void renderOrderPass(SkCanvas* canvas);
-  virtual void preRenderPass(SkCanvas* canvas);
-  virtual void postRenderPass(SkCanvas* canvas);
+  virtual void paintChildrenPass(SkCanvas* canvas);
+  virtual void prePaintPass(SkCanvas* canvas);
+  virtual void postPaintPass(SkCanvas* canvas);
   Mask makeMaskBy(EBoolOp maskOp);
 
 protected:

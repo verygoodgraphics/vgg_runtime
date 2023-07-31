@@ -41,6 +41,12 @@ public:
                        SkPaint::Style style,
                        const Bound2& bound);
 
+  void drawFill(SkCanvas* canvas,
+                float globalAlpha,
+                const Style& style,
+                const SkPath& skPath,
+                const Bound2& bound);
+
   sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound2& bound);
 
   void drawPathBorder(SkCanvas* canvas,

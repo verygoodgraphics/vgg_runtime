@@ -41,6 +41,10 @@ public:
   virtual ~PathNode();
 
 protected:
-  virtual void paintFill(SkCanvas* canvas, float globalAlpha, const SkPath& skPath);
+  virtual void paintFill(SkCanvas* canvas,
+                         float globalAlpha,
+                         const Style& style,
+                         const SkPath& skPath,
+                         const Bound2& bound);
 };
 } // namespace VGG

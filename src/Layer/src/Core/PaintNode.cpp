@@ -497,12 +497,12 @@ void PaintNode::invokeRenderPass(SkCanvas* canvas)
   VGG_IMPL(PaintNode);
   if (!_->visible)
     return;
-  preRenderPass(canvas);
-  renderOrderPass(canvas);
-  postRenderPass(canvas);
+  prePaintPass(canvas);
+  paintChildrenPass(canvas);
+  postPaintPass(canvas);
 }
 
-void PaintNode::renderOrderPass(SkCanvas* canvas)
+void PaintNode::paintChildrenPass(SkCanvas* canvas)
 {
   VGG_IMPL(PaintNode);
   std::vector<PaintNode*> masked;
@@ -554,7 +554,7 @@ void PaintNode::renderOrderPass(SkCanvas* canvas)
     canvas->restore();
   }
 }
-void PaintNode::preRenderPass(SkCanvas* canvas)
+void PaintNode::prePaintPass(SkCanvas* canvas)
 {
   VGG_IMPL(PaintNode);
   if (_->contextSetting.Opacity < 1.0)
@@ -575,7 +575,7 @@ void PaintNode::preRenderPass(SkCanvas* canvas)
   paintPass();
 }
 
-void PaintNode::postRenderPass(SkCanvas* canvas)
+void PaintNode::postPaintPass(SkCanvas* canvas)
 {
   VGG_IMPL(PaintNode);
   canvas->restore(); // store the state in paintPass

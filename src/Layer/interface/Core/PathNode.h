@@ -26,7 +26,7 @@ class VGG_EXPORTS PathNode : public PaintNode
   // sk_sp<SkShader> testShader;
 
 public:
-  PathNode(const std::string& name);
+  PathNode(const std::string& name, std::string guid);
   void paintEvent(SkCanvas* canvas) override;
   void setWindingRule(EWindingType type);
   Mask asOutlineMask(const glm::mat3* mat) override;

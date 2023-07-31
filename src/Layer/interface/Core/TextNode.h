@@ -16,7 +16,7 @@ class VGG_EXPORTS TextNode final : public PaintNode
   friend class NlohmannBuilder;
 
 public:
-  TextNode(const std::string& name);
+  TextNode(const std::string& name, std::string guid);
   void setParagraph(std::string utf8,
                     const std::vector<TextAttr>& attrs,
                     const std::vector<TextLineAttr>& lineAttr);

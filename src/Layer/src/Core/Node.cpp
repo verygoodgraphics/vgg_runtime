@@ -193,4 +193,22 @@ NodePtr Node::_findChildRecursive(const NodePtr& ptr, const std::string& name) c
   return nullptr;
 }
 
+NodePtr Node::clone() const
+{
+  return createNode(m_name);
+}
+
+NodePtr Node::cloneRecursive() const
+{
+  auto newNode = clone();
+  if (newNode)
+  {
+    for (const auto& n : m_firstChild)
+    {
+      newNode->pushChildFront(n->cloneRecursive());
+    }
+  }
+  return newNode;
+}
+
 } // namespace VGG

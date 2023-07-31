@@ -17,8 +17,8 @@
 namespace VGG
 {
 
-ImageNode::ImageNode(const std::string& name)
-  : PathNode(name)
+ImageNode::ImageNode(const std::string& name, std::string guid)
+  : PathNode(name, std::move(guid))
 {
 }
 

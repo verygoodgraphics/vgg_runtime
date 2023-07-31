@@ -16,7 +16,7 @@ class VGG_EXPORTS ImageNode final : public PathNode
   sk_sp<SkShader> shader;
 
 public:
-  ImageNode(const std::string& name);
+  ImageNode(const std::string& name, std::string guid);
   // void paintEvent(SkCanvas* canvas) override;
   void setImage(const std::string& guid);
   const std::string& getImageGUID() const;

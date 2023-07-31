@@ -170,15 +170,9 @@ public:
     return NodePtr(new Node(name));
   }
 
-  virtual NodePtr clone() const
-  {
-    auto newNode = createNode(m_name);
-    for (const auto& n : m_firstChild)
-    {
-      newNode->pushChildFront(n->clone());
-    }
-    return newNode;
-  }
+  virtual NodePtr clone() const;
+
+  NodePtr cloneRecursive() const;
 
   virtual ~Node() = default;
 

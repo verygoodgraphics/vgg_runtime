@@ -23,8 +23,8 @@ class VGG_EXPORTS ContourNode final : public PaintNode
   ContourPtr data{ nullptr };
 
 public:
-  ContourNode(const std::string& name, ContourPtr data)
-    : PaintNode(name, VGG_CONTOUR)
+  ContourNode(const std::string& name, ContourPtr data, std::string guid)
+    : PaintNode(name, VGG_CONTOUR, std::move(guid))
     , data(std::move(data))
   {
     setOverflow(OF_Visible);

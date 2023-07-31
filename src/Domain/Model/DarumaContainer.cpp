@@ -1,5 +1,3 @@
-#pragma once
-
 #include "DarumaContainer.hpp"
 
 using namespace VGG;
@@ -14,7 +12,7 @@ void DarumaContainer::remove(KeyType key)
   getRepo().erase(key);
 }
 
-std::shared_ptr<Daruma>& DarumaContainer::get(KeyType key)
+std::shared_ptr<Daruma> DarumaContainer::get(KeyType key)
 {
   return getRepo()[key];
 }

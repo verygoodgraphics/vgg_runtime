@@ -65,7 +65,7 @@ public:
     return m_view;
   }
 
-  void enableEdit(int top = 0, int right = 200, int bottom = 0, int left = 200)
+  void enableEdit(int top = 0, int right = 300, int bottom = 0, int left = 300)
   {
     m_edit_view.reset(new UIView);
     m_presenter->setEditView(m_edit_view);

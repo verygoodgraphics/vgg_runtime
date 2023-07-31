@@ -194,20 +194,24 @@ std::tuple<bool, bool, bool, bool> UIView::getKeyModifier(int keyMod)
 
 void UIView::draw(SkCanvas* canvas, Zoomer* zoomer)
 {
-  if (m_self_zoom_enabled) // zoom self & subviews
+  auto is_editor = !m_self_zoom_enabled;
+
+  if (!is_editor) // zoom self & subviews
   {
     zoomer->apply(canvas);
     m_scene->render(canvas);
   }
   else // zoom only subviews
   {
-    m_scene->render(canvas);
+    m_scene->render(canvas); // render self(editor) without zoom
 
+    // setup clip & offset for edit view
     SkRect edit_rect{ SkIntToScalar(m_left),
                       SkIntToScalar(m_top),
                       SkIntToScalar(m_width - m_right),
                       SkIntToScalar(m_height - m_bottom) };
     canvas->clipRect(edit_rect);
+    canvas->translate(SkIntToScalar(m_left), SkIntToScalar(m_top));
 
     zoomer->apply(canvas);
   }
@@ -216,7 +220,14 @@ void UIView::draw(SkCanvas* canvas, Zoomer* zoomer)
   {
     subview->draw(canvas, zoomer);
   }
+
+  // restore zoom
   zoomer->restore(canvas);
+  // restore offset for edit view
+  if (is_editor)
+  {
+    canvas->translate(-SkIntToScalar(m_left), -SkIntToScalar(m_top));
+  }
 }
 
 void UIView::becomeEditorWithSidebar(scalar_type top,

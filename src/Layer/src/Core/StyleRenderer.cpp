@@ -1,33 +1,6 @@
-#include "Core/PathNodePrivate.h"
+#include "Core/StyleRenderer.h"
 
-#include "Core/Geometry.hpp"
-#include "Core/VType.h"
-#include "Core/PathNode.h"
-#include "include/core/SkClipOp.h"
-#include "include/core/SkPaint.h"
-#include "include/core/SkPathTypes.h"
-#include "include/core/SkPathEffect.h"
-#include "include/effects/SkDashPathEffect.h"
-#include "include/effects/SkImageFilters.h"
-#include "include/core/SkScalar.h"
-#include "include/core/SkShader.h"
-#include "include/core/SkSurface.h"
-#include "include/core/SkTileMode.h"
-#include "include/core/SkTypes.h"
-#include "SkiaImpl/VSkImageFilters.h"
-#include "include/effects/SkRuntimeEffect.h"
-#include "include/core/SkColor.h"
-#include "include/core/SkPath.h"
-#include "include/gpu/GrTypes.h"
-#include "include/pathops/SkPathOps.h"
-#include "src/core/SkBlurMask.h"
-#include <algorithm>
-#include <core/SkCanvas.h>
-
-namespace VGG
-{
-
-sk_sp<SkShader> PathNode__pImpl::getGradientShader(const Gradient& g, const Bound2& bound)
+sk_sp<SkShader> StyleRenderer::getGradientShader(const Gradient& g, const Bound2& bound)
 {
   sk_sp<SkShader> shader;
   const auto type = g.gradientType;
@@ -46,7 +19,7 @@ sk_sp<SkShader> PathNode__pImpl::getGradientShader(const Gradient& g, const Boun
   return shader;
 }
 
-SkPath PathNode__pImpl::makePath(const std::vector<std::pair<SkPath, EBoolOp>>& ct)
+SkPath StyleRenderer::makePath(const std::vector<std::pair<SkPath, EBoolOp>>& ct)
 {
   // return skpath;
   assert(ct.size() >= 1);
@@ -85,11 +58,11 @@ SkPath PathNode__pImpl::makePath(const std::vector<std::pair<SkPath, EBoolOp>>& 
   return paths;
 }
 
-void PathNode__pImpl::drawPathBorder(SkCanvas* canvas,
-                                     const SkPath& skPath,
-                                     const Border& b,
-                                     float globalAlpha,
-                                     const Bound2& bound)
+void StyleRenderer::drawPathBorder(SkCanvas* canvas,
+                                   const SkPath& skPath,
+                                   const Border& b,
+                                   float globalAlpha,
+                                   const Bound2& bound)
 {
   SkPaint strokePen;
   strokePen.setAntiAlias(true);
@@ -158,7 +131,7 @@ void PathNode__pImpl::drawPathBorder(SkCanvas* canvas,
   }
 }
 
-SkPaint PathNode__pImpl::makeBlurPen(const Blur& blur)
+SkPaint StyleRenderer::makeBlurPen(const Blur& blur)
 {
   SkPaint pen;
   pen.setAntiAlias(true);
@@ -174,112 +147,11 @@ SkPaint PathNode__pImpl::makeBlurPen(const Blur& blur)
   return pen;
 }
 
-void PathNode__pImpl::drawContour(SkCanvas* canvas,
-                                  const ContextSetting& contextSetting,
-                                  const Style& style,
-                                  const SkPath& skPath,
-                                  const Bound2& bound)
-{
-
-  // winding rule
-
-  const auto globalAlpha = contextSetting.Opacity;
-  const auto filled = hasFill(style);
-  // draw outer shadows
-  // 1. check out fills
-  {
-    if (filled)
-    {
-      // transparent fill clip out the shadow
-      canvas->save();
-      canvas->clipPath(skPath, SkClipOp::kDifference);
-    }
-    for (const auto& s : style.shadows) // simplified into one shadow
-    {
-      if (!s.is_enabled || s.inner)
-        continue;
-      if (filled)
-        drawShadow(canvas, skPath, s, SkPaint::kFill_Style, bound);
-
-      for (const auto& b : style.borders)
-      {
-        if (!b.isEnabled)
-          continue;
-        drawShadow(canvas, skPath, s, SkPaint::kStroke_Style, bound);
-        break;
-      }
-    }
-    if (filled)
-    {
-      canvas->restore();
-    }
-  }
-
-  // draw fills
-
-  q_ptr->paintFill(canvas, globalAlpha, style, skPath, bound);
-  // draw boarders
-  // SkPaint strokePen;
-  // strokePen.setAntiAlias(true);
-  // strokePen.setStyle(SkPaint::kStroke_Style);
-  for (const auto& b : style.borders)
-  {
-    if (!b.isEnabled)
-      continue;
-    drawPathBorder(canvas, skPath, b, globalAlpha, bound);
-  }
-
-  // draw inner shadow
-  canvas->save();
-  canvas->clipPath(skPath, SkClipOp::kIntersect);
-  for (const auto& s : style.shadows)
-  {
-    if (!s.is_enabled || !s.inner)
-      continue;
-    drawInnerShadow(canvas, skPath, s, SkPaint::kFill_Style, bound);
-  }
-  canvas->restore();
-}
-
-void PathNode__pImpl::drawBeforeFill(SkCanvas* canvas,
-                                     const Style& style,
-                                     const SkPath& skPath,
-                                     const Bound2& bound)
-{
-
-  const auto filled = hasFill(style);
-  if (filled)
-  {
-    // transparent fill clip out the shadow
-    canvas->save();
-    canvas->clipPath(skPath, SkClipOp::kDifference);
-  }
-  for (const auto& s : style.shadows) // simplified into one shadow
-  {
-    if (!s.is_enabled || s.inner)
-      continue;
-    if (filled)
-      drawShadow(canvas, skPath, s, SkPaint::kFill_Style, bound);
-
-    for (const auto& b : style.borders)
-    {
-      if (!b.isEnabled)
-        continue;
-      drawShadow(canvas, skPath, s, SkPaint::kStroke_Style, bound);
-      break;
-    }
-  }
-  if (filled)
-  {
-    canvas->restore();
-  }
-}
-
-void PathNode__pImpl::drawShadow(SkCanvas* canvas,
-                                 const SkPath& skPath,
-                                 const Shadow& s,
-                                 SkPaint::Style style,
-                                 const Bound2& bound)
+void StyleRenderer::drawShadow(SkCanvas* canvas,
+                               const SkPath& skPath,
+                               const Shadow& s,
+                               SkPaint::Style style,
+                               const Bound2& bound)
 {
 
   SkPaint pen;
@@ -301,11 +173,11 @@ void PathNode__pImpl::drawShadow(SkCanvas* canvas,
   canvas->restore();
 }
 
-void PathNode__pImpl::drawInnerShadow(SkCanvas* canvas,
-                                      const SkPath& skPath,
-                                      const Shadow& s,
-                                      SkPaint::Style style,
-                                      const Bound2& bound)
+void StyleRenderer::drawInnerShadow(SkCanvas* canvas,
+                                    const SkPath& skPath,
+                                    const Shadow& s,
+                                    SkPaint::Style style,
+                                    const Bound2& bound)
 {
   SkPaint pen;
   auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
@@ -325,11 +197,11 @@ void PathNode__pImpl::drawInnerShadow(SkCanvas* canvas,
   canvas->restore();
 }
 
-void PathNode__pImpl::drawFill(SkCanvas* canvas,
-                               float globalAlpha,
-                               const Style& style,
-                               const SkPath& skPath,
-                               const Bound2& bound)
+void StyleRenderer::drawFill(SkCanvas* canvas,
+                             float globalAlpha,
+                             const Style& style,
+                             const SkPath& skPath,
+                             const Bound2& bound)
 {
   for (const auto& f : style.fills)
   {
@@ -395,4 +267,3 @@ void PathNode__pImpl::drawFill(SkCanvas* canvas,
     // }
   }
 }
-} // namespace VGG

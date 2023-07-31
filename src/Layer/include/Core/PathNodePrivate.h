@@ -24,8 +24,7 @@ public:
   void drawContour(SkCanvas* canvas,
                    const ContextSetting& settings,
                    const Style& style,
-                   EWindingType windingRule,
-                   const std::vector<std::pair<SkPath, EBoolOp>>& ct,
+                   const SkPath& skPath,
                    const Bound2& bound);
 
   void drawShadow(SkCanvas* canvas,
@@ -57,6 +56,11 @@ public:
                 const Style& style,
                 const SkPath& skPath,
                 const Bound2& bound);
+
+  void drawBeforeFill(SkCanvas* canvas,
+                      const Style& style,
+                      const SkPath& skPath,
+                      const Bound2& bound);
 
   sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound2& bound);
 

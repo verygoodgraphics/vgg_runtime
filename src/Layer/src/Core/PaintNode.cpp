@@ -3,6 +3,7 @@
 #include "Core/VType.h"
 #include "SkiaImpl/VSkia.h"
 #include "core/SkCanvas.h"
+#include "Core/StyleRenderer.h"
 #include <core/SkPath.h>
 #include <core/SkRRect.h>
 #include <limits>
@@ -193,7 +194,7 @@ RenderState* PaintNode::getRenderState()
 void PaintNode::paintEvent(SkCanvas* canvas)
 {
   paintBackgroundColor(canvas);
-  paintStyle(canvas);
+  paintStyleSimple(canvas);
 }
 
 void PaintNode::paintBackgroundColor(SkCanvas* canvas)
@@ -253,7 +254,7 @@ SkPath PaintNode::getContour()
   return makeBoundMask();
 }
 
-void PaintNode::paintStyle(SkCanvas* canvas)
+void PaintNode::paintStyleSimple(SkCanvas* canvas)
 {
   VGG_IMPL(PaintNode);
   auto path = getContour();
@@ -590,6 +591,53 @@ void PaintNode::postPaintPass(SkCanvas* canvas)
   {
     canvas->restore();
   }
+}
+
+void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path)
+{
+  StyleRenderer styleRenderer;
+  // draw blur, we assume that there is only one blur style
+  bool hasBlur = style().blurs.empty() ? false : style().blurs[0].isEnabled;
+  if (hasBlur)
+  {
+    auto pen = styleRenderer.makeBlurPen(style().blurs[0]);
+    canvas->saveLayer(nullptr, &pen);
+  }
+
+  auto mask = makeMaskBy(BO_Intersection);
+  if (mask.outlineMask.isEmpty())
+  {
+    styleRenderer.drawContour(canvas,
+                              contextSetting(),
+                              style(),
+                              path,
+                              getBound(),
+                              [&]() { paintFill(canvas, path); });
+  }
+  else
+  {
+    canvas->save();
+    canvas->clipPath(mask.outlineMask);
+    styleRenderer.drawContour(canvas,
+                              contextSetting(),
+                              style(),
+                              path,
+                              getBound(),
+                              [&]() { paintFill(canvas, path); });
+    canvas->restore();
+  }
+
+  // restore blur
+  if (hasBlur)
+  {
+    canvas->restore();
+  }
+}
+
+void PaintNode::paintFill(SkCanvas* canvas, const SkPath& path)
+{
+  StyleRenderer render;
+  render.drawFill(canvas, contextSetting().Opacity, style(), path, getBound());
 }
 
 PaintNode::~PaintNode() = default;

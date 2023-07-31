@@ -141,8 +141,9 @@ Mask PathNode::asOutlineMask(const glm::mat3* mat)
   return mask;
 }
 
-std::vector<std::pair<SkPath, EBoolOp>> PathNode::makeContour()
+SkPath PathNode::getContour()
 {
+  VGG_IMPL(PathNode)
   std::vector<std::pair<SkPath, EBoolOp>> ct;
   for (const auto& c : m_firstChild)
   {
@@ -154,7 +155,8 @@ std::vector<std::pair<SkPath, EBoolOp>> PathNode::makeContour()
   {
     ct.emplace_back(asOutlineMask(0).outlineMask, EBoolOp::BO_None);
   }
-  return ct;
+  SkPath skPath = _->makePath(ct);
+  return skPath;
 }
 
 void PathNode::paintEvent(SkCanvas* canvas)
@@ -165,6 +167,9 @@ void PathNode::paintEvent(SkCanvas* canvas)
   //
   // paintBackgroundColor(canvas); // Is it necessary?
 
+  SkPath skPath = getContour();
+  skPath.setFillType(_->windingRule == EWindingType::WR_EvenOdd ? SkPathFillType::kEvenOdd
+                                                                : SkPathFillType::kWinding);
   // draw blur, we assume that there is only one blur style
   bool hasBlur = style().blurs.empty() ? false : style().blurs[0].isEnabled;
   if (hasBlur)
@@ -173,17 +178,16 @@ void PathNode::paintEvent(SkCanvas* canvas)
     canvas->saveLayer(nullptr, &pen);
   }
 
-  const auto ct = makeContour();
   auto mask = makeMaskBy(BO_Intersection);
   if (mask.outlineMask.isEmpty())
   {
-    _->drawContour(canvas, contextSetting(), style(), _->windingRule, ct, getBound());
+    _->drawContour(canvas, contextSetting(), style(), skPath, getBound());
   }
   else
   {
     canvas->save();
     canvas->clipPath(mask.outlineMask);
-    _->drawContour(canvas, contextSetting(), style(), _->windingRule, ct, getBound());
+    _->drawContour(canvas, contextSetting(), style(), skPath, getBound());
     canvas->restore();
   }
 

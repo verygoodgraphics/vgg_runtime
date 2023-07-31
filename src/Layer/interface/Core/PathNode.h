@@ -40,7 +40,8 @@ public:
   virtual ~PathNode();
 
 protected:
-  std::vector<std::pair<SkPath, EBoolOp>> makeContour();
+  SkPath getContour() override;
+  std::vector<std::pair<SkPath, EBoolOp>> calcContour();
   virtual void paintFill(SkCanvas* canvas,
                          float globalAlpha,
                          const Style& style,

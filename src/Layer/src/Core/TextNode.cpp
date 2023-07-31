@@ -1,7 +1,7 @@
 #include "Core/TextNode.h"
 #include "Core/Attrs.h"
 #include "Core/FontManager.h"
-#include "Core/Node.hpp"
+#include "Core/Node.h"
 #include "Core/PaintNode.h"
 #include "Core/VType.h"
 #include "SkiaImpl/VSkFontMgr.h"

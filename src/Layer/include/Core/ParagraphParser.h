@@ -10,7 +10,7 @@
 #include <modules/skparagraph/include/TextStyle.h>
 #include <modules/skparagraph/include/TypefaceFontProvider.h>
 
-#include "Core/Node.hpp"
+#include "Core/Node.h"
 
 namespace VGG
 {

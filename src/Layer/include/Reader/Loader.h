@@ -3,7 +3,7 @@
 #include "Core/Attrs.h"
 #include "Core/ContourNode.h"
 #include "Core/VType.h"
-#include "Core/Node.hpp"
+#include "Core/Node.h"
 #include "glm/fwd.hpp"
 #include "glm/matrix.hpp"
 #include "glm/gtx/matrix_transform_2d.hpp"

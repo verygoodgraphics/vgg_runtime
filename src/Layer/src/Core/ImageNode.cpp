@@ -58,50 +58,6 @@ bool ImageNode::fill() const
   return this->fillReplacesImage;
 }
 
-// void ImageNode::paintFill(SkCanvas* canvas,
-//                           float globalAlpha,
-//                           const Style& style,
-//                           const SkPath& skPath,
-//                           const Bound2& bound)
-// {
-//   if (!image)
-//   {
-//     image = loadImage(guid, Scene::getResRepo());
-//   }
-//   if (image)
-//   {
-//     if (!shader)
-//     {
-//       const auto& b = bound;
-//       shader =
-//         getImageShader(image, b.width(), b.height(), EImageFillType::IFT_Stretch, 1.0, false);
-//     }
-//     auto mask = makeMaskBy(BO_Intersection);
-//     if (mask.outlineMask.isEmpty() == false)
-//     {
-//       canvas->save();
-//       canvas->clipPath(mask.outlineMask);
-//     }
-//
-//     SkPaint p;
-//     p.setShader(shader);
-//     canvas->drawPaint(p);
-//     // Another weird drawing method
-//     // SkSamplingOptions opt;
-//     // const auto& b = getBound();
-//     // SkRect imageRect = SkRect::MakeXYWH(b.topLeft.x, -b.topLeft.y, b.width(), b.height());
-//     // canvas->save();
-//     // canvas->scale(1, -1);
-//     // canvas->drawImageRect(image, imageRect, opt);
-//     // canvas->restore();
-//
-//     if (mask.outlineMask.isEmpty() == false)
-//     {
-//       canvas->restore();
-//     }
-//   }
-// }
-
 void ImageNode::paintFill(SkCanvas* canvas, const SkPath& path)
 {
 

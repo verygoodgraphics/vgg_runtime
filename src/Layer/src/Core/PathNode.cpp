@@ -205,19 +205,6 @@ void PathNode::addSubShape(std::shared_ptr<PaintNode> node, EBoolOp op)
   addChild(node);
 }
 
-void PathNode::addSubShape(ContourPtr contour, EBoolOp op)
-{
-}
-
-// void PathNode::paintFill(SkCanvas* canvas,
-//                          float globalAlpha,
-//                          const Style& style,
-//                          const SkPath& skPath,
-//                          const Bound2& bound)
-// {
-//   d_ptr->drawFill(canvas, globalAlpha, style, skPath, bound);
-// }
-
 void PathNode::setWindingRule(EWindingType type)
 {
   VGG_IMPL(PathNode)

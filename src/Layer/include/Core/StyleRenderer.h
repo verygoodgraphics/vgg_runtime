@@ -25,8 +25,6 @@
 class StyleRenderer
 {
 public:
-  SkPath makePath(const std::vector<std::pair<SkPath, EBoolOp>>& ct);
-
   template<typename F>
   void drawContour(SkCanvas* canvas,
                    const ContextSetting& contextSetting,

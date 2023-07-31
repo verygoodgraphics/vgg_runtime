@@ -8,7 +8,6 @@
 #include "glm/matrix.hpp"
 #include "glm/gtx/matrix_transform_2d.hpp"
 #include "nlohmann/json.hpp"
-#include "Core/SymbolNode.h"
 #include "Core/PaintNode.h"
 #include "Core/PathNode.h"
 #include "Core/TextNode.h"
@@ -386,12 +385,12 @@ public:
       j,
       [&j](std::string name, std::string guid)
       {
-        auto p = std::make_shared<SymbolMasterNode>(std::move(name), std::move(guid));
+        auto symbolID = j.value("symbolID", "");
+        auto p = std::make_shared<PaintNode>(std::move(name), VGG_MASTER, std::move(symbolID));
         return p;
       },
-      [&j](SymbolMasterNode* p)
+      [&j](PaintNode* p)
       {
-        p->symbolID = j.value("symbolID", "");
         for (const auto& e : j.value("childObjects", std::vector<nlohmann::json>()))
         {
           p->addChild(fromObject(e));

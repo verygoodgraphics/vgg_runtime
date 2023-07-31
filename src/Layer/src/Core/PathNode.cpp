@@ -156,47 +156,48 @@ SkPath PathNode::getContour()
     ct.emplace_back(asOutlineMask(0).outlineMask, EBoolOp::BO_None);
   }
   SkPath skPath = _->makePath(ct);
+  skPath.setFillType(_->windingRule == EWindingType::WR_EvenOdd ? SkPathFillType::kEvenOdd
+                                                                : SkPathFillType::kWinding);
   return skPath;
 }
 
-void PathNode::paintEvent(SkCanvas* canvas)
-{
-  VGG_IMPL(PathNode)
-  // if (m_firstChild.empty())
-  //   return;
-  //
-  // paintBackgroundColor(canvas); // Is it necessary?
-
-  SkPath skPath = getContour();
-  skPath.setFillType(_->windingRule == EWindingType::WR_EvenOdd ? SkPathFillType::kEvenOdd
-                                                                : SkPathFillType::kWinding);
-  // draw blur, we assume that there is only one blur style
-  bool hasBlur = style().blurs.empty() ? false : style().blurs[0].isEnabled;
-  if (hasBlur)
-  {
-    auto pen = _->makeBlurPen(style().blurs[0]);
-    canvas->saveLayer(nullptr, &pen);
-  }
-
-  auto mask = makeMaskBy(BO_Intersection);
-  if (mask.outlineMask.isEmpty())
-  {
-    _->drawContour(canvas, contextSetting(), style(), skPath, getBound());
-  }
-  else
-  {
-    canvas->save();
-    canvas->clipPath(mask.outlineMask);
-    _->drawContour(canvas, contextSetting(), style(), skPath, getBound());
-    canvas->restore();
-  }
-
-  // restore blur
-  if (hasBlur)
-  {
-    canvas->restore();
-  }
-}
+// void PathNode::paintEvent(SkCanvas* canvas)
+// {
+//   VGG_IMPL(PathNode)
+//   // if (m_firstChild.empty())
+//   //   return;
+//   //
+//   // paintBackgroundColor(canvas); // Is it necessary?
+//
+//   SkPath skPath = getContour();
+//   paintStyle(canvas, skPath);
+//   // draw blur, we assume that there is only one blur style
+//   bool hasBlur = style().blurs.empty() ? false : style().blurs[0].isEnabled;
+//   if (hasBlur)
+//   {
+//     auto pen = _->makeBlurPen(style().blurs[0]);
+//     canvas->saveLayer(nullptr, &pen);
+//   }
+//
+//   auto mask = makeMaskBy(BO_Intersection);
+//   if (mask.outlineMask.isEmpty())
+//   {
+//     _->drawContour(canvas, contextSetting(), style(), skPath, getBound());
+//   }
+//   else
+//   {
+//     canvas->save();
+//     canvas->clipPath(mask.outlineMask);
+//     _->drawContour(canvas, contextSetting(), style(), skPath, getBound());
+//     canvas->restore();
+//   }
+//
+//   // restore blur
+//   if (hasBlur)
+//   {
+//     canvas->restore();
+//   }
+// }
 
 void PathNode::addSubShape(std::shared_ptr<PaintNode> node, EBoolOp op)
 {
@@ -208,14 +209,14 @@ void PathNode::addSubShape(ContourPtr contour, EBoolOp op)
 {
 }
 
-void PathNode::paintFill(SkCanvas* canvas,
-                         float globalAlpha,
-                         const Style& style,
-                         const SkPath& skPath,
-                         const Bound2& bound)
-{
-  d_ptr->drawFill(canvas, globalAlpha, style, skPath, bound);
-}
+// void PathNode::paintFill(SkCanvas* canvas,
+//                          float globalAlpha,
+//                          const Style& style,
+//                          const SkPath& skPath,
+//                          const Bound2& bound)
+// {
+//   d_ptr->drawFill(canvas, globalAlpha, style, skPath, bound);
+// }
 
 void PathNode::setWindingRule(EWindingType type)
 {

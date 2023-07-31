@@ -193,11 +193,12 @@ RenderState* PaintNode::getRenderState()
 
 void PaintNode::paintEvent(SkCanvas* canvas)
 {
-  paintBackgroundColor(canvas);
-  paintStyleSimple(canvas);
+  const auto path = getContour();
+  paintBackgroundColor(canvas, path);
+  paintStyle(canvas, path);
 }
 
-void PaintNode::paintBackgroundColor(SkCanvas* canvas)
+void PaintNode::paintBackgroundColor(SkCanvas* canvas, const SkPath& path)
 {
 
   VGG_IMPL(PaintNode);
@@ -206,7 +207,7 @@ void PaintNode::paintBackgroundColor(SkCanvas* canvas)
     SkPaint bgPaint;
     bgPaint.setColor(_->bgColor.value());
     bgPaint.setStyle(SkPaint::kFill_Style);
-    canvas->drawPath(getContour(), bgPaint);
+    canvas->drawPath(path, bgPaint);
   }
 }
 
@@ -252,35 +253,6 @@ SkPath PaintNode::makeBoundMask()
 SkPath PaintNode::getContour()
 {
   return makeBoundMask();
-}
-
-void PaintNode::paintStyleSimple(SkCanvas* canvas)
-{
-  VGG_IMPL(PaintNode);
-  auto path = getContour();
-  for (const auto& fill : _->style.fills)
-  {
-    if (fill.isEnabled)
-    {
-      SkPaint fp;
-      fp.setAntiAlias(true);
-      fp.setColor(fill.color);
-      fp.setStyle(SkPaint::kFill_Style);
-      canvas->drawPath(path, fp);
-    }
-  }
-  for (const auto& border : _->style.borders)
-  {
-    if (border.isEnabled)
-    {
-      SkPaint bp;
-      bp.setAntiAlias(true);
-      bp.setColor(border.color.value_or(Color{ 0, 0, 0, 1 }));
-      bp.setStrokeWidth(border.thickness);
-      bp.setStyle(SkPaint::kStroke_Style);
-      canvas->drawPath(path, bp);
-    }
-  }
 }
 
 SkPath PaintNode::makeOutlineMask(EMaskCoutourType type, const glm::mat3* mat)

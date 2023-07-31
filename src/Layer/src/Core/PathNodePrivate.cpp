@@ -217,7 +217,7 @@ void PathNode__pImpl::drawContour(SkCanvas* canvas,
 
   // draw fills
 
-  q_ptr->paintFill(canvas, globalAlpha, style, skPath, bound);
+  // q_ptr->paintFill(canvas, globalAlpha, style, skPath, bound);
   // draw boarders
   // SkPaint strokePen;
   // strokePen.setAntiAlias(true);

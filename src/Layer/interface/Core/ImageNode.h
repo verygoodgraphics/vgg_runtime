@@ -8,7 +8,7 @@ class SkCanvas;
 
 namespace VGG
 {
-class VGG_EXPORTS ImageNode final : public PathNode
+class VGG_EXPORTS ImageNode final : public PaintNode
 {
   std::string guid;
   bool fillReplacesImage = false;
@@ -25,10 +25,12 @@ public:
   Mask asOutlineMask(const glm::mat3* mat) override;
 
 protected:
-  void paintFill(SkCanvas* canvas,
-                 float globalAlpha,
-                 const Style& style,
-                 const SkPath& skPath,
-                 const Bound2& bound) override;
+  // void paintFill(SkCanvas* canvas,
+  //                float globalAlpha,
+  //                const Style& style,
+  //                const SkPath& skPath,
+  //                const Bound2& bound) override;
+
+  void paintFill(SkCanvas* canvas, const SkPath& path) override;
 };
 } // namespace VGG

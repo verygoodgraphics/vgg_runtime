@@ -24,7 +24,6 @@
 #include "core/SkPath.h"
 #include "gpu/GrTypes.h"
 #include "pathops/SkPathOps.h"
-#include "src/core/SkBlurMask.h" // TODO:: remove 'src' prefix after skia upgrade
 #include <limits>
 
 namespace VGG

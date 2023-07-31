@@ -20,26 +20,26 @@ using ContourPtr = std::shared_ptr<Contour>;
 
 class VGG_EXPORTS ContourNode final : public PaintNode
 {
-  ContourPtr data{ nullptr };
+  ContourPtr m_data{ nullptr };
 
 public:
   ContourNode(const std::string& name, ContourPtr data, std::string guid)
     : PaintNode(name, VGG_CONTOUR, std::move(guid))
-    , data(std::move(data))
+    , m_data(std::move(data))
   {
     setOverflow(OF_Visible);
   }
   Contour* contour() const
   {
-    return data.get();
+    return m_data.get();
   }
 
   Mask asOutlineMask(const glm::mat3* mat)
   {
     Mask mask;
-    if (data)
+    if (m_data)
     {
-      mask.outlineMask = getSkiaPath(*data, data->closed);
+      mask.outlineMask = getSkiaPath(*m_data, m_data->closed);
     }
     if (mat)
     {

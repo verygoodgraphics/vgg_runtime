@@ -31,16 +31,16 @@ public:
   void setWindingRule(EWindingType type);
   Mask asOutlineMask(const glm::mat3* mat) override;
   void addSubShape(std::shared_ptr<PaintNode> node, EBoolOp op);
+  void addSubShape(ContourPtr data, EBoolOp);
   void paintChildrenPass(SkCanvas* canvas) override
   {
     // do not render child object for path node
   }
 
-  bool hasFill() const;
-
   virtual ~PathNode();
 
 protected:
+  std::vector<std::pair<SkPath, EBoolOp>> makeContour();
   virtual void paintFill(SkCanvas* canvas,
                          float globalAlpha,
                          const Style& style,

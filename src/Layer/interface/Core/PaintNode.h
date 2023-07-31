@@ -33,25 +33,6 @@ protected:
 protected:
   static SkCanvas* s_defaultCanvas;
   static RenderState* s_renderState;
-  // Bound2 m_bound;
-  // glm::mat3 m_transform{ 1.0 };
-  //
-  // std::string m_guid{};
-  // std::vector<std::string> m_maskedBy{};
-  // Mask m_outlineMask;
-  // EMaskType m_maskType{ MT_None };
-  // EBoolOp m_clipOperator{ BO_None };
-  // EOverflow m_overflow{ OF_Hidden };
-  //
-  // EMaskCoutourType m_maskContourType{ MCT_FrameOnly };
-  //
-  // Style m_style;
-  // ContextSetting m_contextSetting;
-  // ObjectType m_type;
-  //
-  // bool m_visible{ true };
-  // std::optional<Color> m_bgColor;
-
   friend class NlohmannBuilder;
   friend class SkiaRenderer;
 
@@ -162,6 +143,7 @@ protected:
   SkPath makeOutlineMask(EMaskCoutourType type, const glm::mat3* mat);
   void paintBackgroundColor(SkCanvas* canvas);
   void paintStyle(SkCanvas* canvas);
+  void paintFill(SkCanvas* canvas);
 
 protected:
   virtual void paintPass();

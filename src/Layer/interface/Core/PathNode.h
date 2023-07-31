@@ -1,7 +1,7 @@
 #pragma once
 #include "Common/Config.h"
 #include "Core/Mask.h"
-#include "Core/Node.hpp"
+#include "Core/Node.h"
 #include "Core/PaintNode.h"
 #include "Core/ContourNode.h"
 #include "Core/VType.h"

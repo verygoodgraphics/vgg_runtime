@@ -1,4 +1,4 @@
-#include "Core/Node.hpp"
+#include "Core/Node.h"
 
 namespace VGG
 {
@@ -20,14 +20,14 @@ NodePtr Node::root() const
 void Node::pushChildBack(NodePtr node)
 {
   auto it = m_firstChild.insert(m_firstChild.end(), node);
-  node->iter = it;
+  node->m_iter = it;
   node->m_parent = shared_from_this();
 }
 
 void Node::pushChildFront(NodePtr node)
 {
   auto it = m_firstChild.insert(m_firstChild.begin(), node);
-  node->iter = it;
+  node->m_iter = it;
   node->m_parent = shared_from_this();
 }
 
@@ -38,7 +38,7 @@ void Node::pushChildAt(const std::string& name, NodePtr node)
                          [&name](const auto& a) { return a->m_name == name; });
   if (it != m_firstChild.end())
   {
-    node->iter = m_firstChild.insert(it, node);
+    node->m_iter = m_firstChild.insert(it, node);
     node->m_parent = shared_from_this();
   }
 }
@@ -63,7 +63,7 @@ void Node::pushSiblingAt(const std::string& name, NodePtr node)
                            [&name](const auto& a) { return a->m_name == name; });
     if (it != p->m_firstChild.end())
     {
-      node->iter = p->m_firstChild.insert(it, node);
+      node->m_iter = p->m_firstChild.insert(it, node);
       node->m_parent = p;
     }
   }
@@ -74,7 +74,7 @@ void Node::pushSiblingBack(NodePtr node)
   auto p = m_parent.lock();
   if (p)
   {
-    node->iter = p->m_firstChild.insert(p->m_firstChild.end(), node);
+    node->m_iter = p->m_firstChild.insert(p->m_firstChild.end(), node);
     node->m_parent = p;
   }
 }
@@ -88,7 +88,7 @@ NodePtr Node::removeChild(const std::string& name)
   }
   auto r = *it;
   r->m_parent.reset();
-  r->iter = m_firstChild.end();
+  r->m_iter = m_firstChild.end();
   m_firstChild.erase(it);
   return r;
 }
@@ -116,7 +116,7 @@ NodePtr Node::findNextSblingFromCurrent(const std::string& name) const
     return nullptr;
   }
   auto it =
-    std::find_if(iter, p->m_firstChild.end(), [&name](auto& a) { return a->m_name == name; });
+    std::find_if(m_iter, p->m_firstChild.end(), [&name](auto& a) { return a->m_name == name; });
   if (it != p->m_firstChild.end())
   {
     return *it;
@@ -132,7 +132,7 @@ NodePtr Node::findPrevSiblingFromCurrent(const std::string& name) const
     return nullptr;
   }
   auto it =
-    std::find_if(p->m_firstChild.begin(), iter, [&name](auto& a) { return a->m_name == name; });
+    std::find_if(p->m_firstChild.begin(), m_iter, [&name](auto& a) { return a->m_name == name; });
   if (it != p->m_firstChild.end())
   {
     return *it;

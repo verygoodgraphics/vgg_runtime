@@ -1,7 +1,7 @@
 #pragma once
 // #include "Basic/Renderer.hpp"
 #include "Common/Config.h"
-#include "Core/Node.hpp"
+#include "Core/Node.h"
 #include "Core/VType.h"
 #include "Core/Geometry.hpp"
 #include "Core/Attrs.h"

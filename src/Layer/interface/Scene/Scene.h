@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 #include "Common/Config.h"
-#include "Core/Node.hpp"
+#include "Core/Node.h"
 #include "core/SkCanvas.h"
 #include "nlohmann/json.hpp"
 

@@ -170,12 +170,22 @@ public:
     return NodePtr(new Node(name));
   }
 
+  virtual NodePtr clone() const
+  {
+    auto newNode = createNode(m_name);
+    for (const auto& n : m_firstChild)
+    {
+      newNode->pushChildFront(n->clone());
+    }
+    return newNode;
+  }
+
   virtual ~Node() = default;
 
 protected:
   std::string m_name;
   FirstChildNode m_firstChild;
-  std::list<std::shared_ptr<Node>>::iterator iter;
+  std::list<std::shared_ptr<Node>>::iterator m_iter;
   NodeRef m_parent;
   std::list<std::shared_ptr<Node>>::const_iterator _findChild(const std::string& name) const
   {
@@ -189,7 +199,7 @@ protected:
 protected:
   Node(const std::string& name)
     : m_name(name)
-    , iter(m_firstChild.end())
+    , m_iter(m_firstChild.end())
   {
   }
 };

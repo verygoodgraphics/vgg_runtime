@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Node.hpp"
+#include "Core/Node.h"
 #include "Core/VType.h"
 #include "Core/PathNode.h"
 #include "core/SkShader.h"

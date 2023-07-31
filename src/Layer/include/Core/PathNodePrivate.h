@@ -13,7 +13,6 @@ class PathNode__pImpl
 
 public:
   EWindingType windingRule;
-  sk_sp<SkShader> testShader;
   PathNode__pImpl(PathNode* api)
     : q_ptr(api)
   {

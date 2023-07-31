@@ -26,8 +26,7 @@ public:
                    const Style& style,
                    EWindingType windingRule,
                    const std::vector<std::pair<SkPath, EBoolOp>>& ct,
-                   const Bound2& bound,
-                   bool hasFill);
+                   const Bound2& bound);
 
   void drawShadow(SkCanvas* canvas,
                   const SkPath& skPath,
@@ -40,6 +39,18 @@ public:
                        const Shadow& s,
                        SkPaint::Style style,
                        const Bound2& bound);
+
+  SkPaint makeBlurPen(const Blur& blur);
+
+  bool hasFill(const Style& style) const
+  {
+    for (const auto& f : style.fills)
+    {
+      if (f.isEnabled)
+        return true;
+    }
+    return false;
+  }
 
   void drawFill(SkCanvas* canvas,
                 float globalAlpha,

@@ -22,6 +22,7 @@
 #include "include/pathops/SkPathOps.h"
 #include "src/core/SkBlurMask.h"
 #include <algorithm>
+#include <core/SkCanvas.h>
 
 namespace VGG
 {
@@ -157,13 +158,28 @@ void PathNode__pImpl::drawPathBorder(SkCanvas* canvas,
   }
 }
 
+SkPaint PathNode__pImpl::makeBlurPen(const Blur& blur)
+{
+  SkPaint pen;
+  pen.setAntiAlias(true);
+  auto sigma = SkBlurMask::ConvertRadiusToSigma(blur.radius);
+  if (blur.blurType == BT_Gaussian)
+  {
+    pen.setImageFilter(SkImageFilters::Blur(sigma, sigma, nullptr));
+  }
+  else if (blur.blurType == BT_Motion)
+  {
+    pen.setImageFilter(SkImageFilters::Blur(sigma, 0, nullptr));
+  }
+  return pen;
+}
+
 void PathNode__pImpl::drawContour(SkCanvas* canvas,
                                   const ContextSetting& contextSetting,
                                   const Style& style,
                                   EWindingType windingRule,
                                   const std::vector<std::pair<SkPath, EBoolOp>>& ct,
-                                  const Bound2& bound,
-                                  bool hasFill)
+                                  const Bound2& bound)
 {
 
   SkPath skPath = makePath(ct);
@@ -172,11 +188,11 @@ void PathNode__pImpl::drawContour(SkCanvas* canvas,
                                                              : SkPathFillType::kWinding);
 
   const auto globalAlpha = contextSetting.Opacity;
-
+  const auto filled = hasFill(style);
   // draw outer shadows
   // 1. check out fills
   {
-    if (hasFill)
+    if (filled)
     {
       // transparent fill clip out the shadow
       canvas->save();
@@ -186,7 +202,7 @@ void PathNode__pImpl::drawContour(SkCanvas* canvas,
     {
       if (!s.is_enabled || s.inner)
         continue;
-      if (hasFill)
+      if (filled)
         drawShadow(canvas, skPath, s, SkPaint::kFill_Style, bound);
 
       for (const auto& b : style.borders)
@@ -197,7 +213,7 @@ void PathNode__pImpl::drawContour(SkCanvas* canvas,
         break;
       }
     }
-    if (hasFill)
+    if (filled)
     {
       canvas->restore();
     }

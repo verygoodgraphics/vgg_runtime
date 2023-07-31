@@ -141,13 +141,8 @@ Mask PathNode::asOutlineMask(const glm::mat3* mat)
   return mask;
 }
 
-void PathNode::paintEvent(SkCanvas* canvas)
+std::vector<std::pair<SkPath, EBoolOp>> PathNode::makeContour()
 {
-  VGG_IMPL(PathNode)
-  // if (m_firstChild.empty())
-  //   return;
-  //
-  // paintBackgroundColor(canvas); // Is it necessary?
   std::vector<std::pair<SkPath, EBoolOp>> ct;
   for (const auto& c : m_firstChild)
   {
@@ -159,36 +154,36 @@ void PathNode::paintEvent(SkCanvas* canvas)
   {
     ct.emplace_back(asOutlineMask(0).outlineMask, EBoolOp::BO_None);
   }
+  return ct;
+}
+
+void PathNode::paintEvent(SkCanvas* canvas)
+{
+  VGG_IMPL(PathNode)
+  // if (m_firstChild.empty())
+  //   return;
+  //
+  // paintBackgroundColor(canvas); // Is it necessary?
 
   // draw blur, we assume that there is only one blur style
   bool hasBlur = style().blurs.empty() ? false : style().blurs[0].isEnabled;
   if (hasBlur)
   {
-    SkPaint pen;
-    pen.setAntiAlias(true);
-    const auto blur = style().blurs[0];
-    auto sigma = SkBlurMask::ConvertRadiusToSigma(blur.radius);
-    if (blur.blurType == BT_Gaussian)
-    {
-      pen.setImageFilter(SkImageFilters::Blur(sigma, sigma, nullptr));
-    }
-    else if (blur.blurType == BT_Motion)
-    {
-      pen.setImageFilter(SkImageFilters::Blur(sigma, 0, nullptr));
-    }
+    auto pen = _->makeBlurPen(style().blurs[0]);
     canvas->saveLayer(nullptr, &pen);
   }
 
+  const auto ct = makeContour();
   auto mask = makeMaskBy(BO_Intersection);
   if (mask.outlineMask.isEmpty())
   {
-    _->drawContour(canvas, contextSetting(), style(), _->windingRule, ct, getBound(), hasFill());
+    _->drawContour(canvas, contextSetting(), style(), _->windingRule, ct, getBound());
   }
   else
   {
     canvas->save();
     canvas->clipPath(mask.outlineMask);
-    _->drawContour(canvas, contextSetting(), style(), _->windingRule, ct, getBound(), hasFill());
+    _->drawContour(canvas, contextSetting(), style(), _->windingRule, ct, getBound());
     canvas->restore();
   }
 
@@ -205,14 +200,8 @@ void PathNode::addSubShape(std::shared_ptr<PaintNode> node, EBoolOp op)
   addChild(node);
 }
 
-bool PathNode::hasFill() const
+void PathNode::addSubShape(ContourPtr contour, EBoolOp op)
 {
-  for (const auto& f : style().fills)
-  {
-    if (f.isEnabled)
-      return true;
-  }
-  return false;
 }
 
 void PathNode::paintFill(SkCanvas* canvas,

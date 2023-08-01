@@ -132,24 +132,30 @@ public:
 public:
   // TODO:: chagne the following functions accessbility
   void invokeRenderPass(SkCanvas* canvas);
+
+protected:
+  // Render traverse
   virtual void paintChildrenPass(SkCanvas* canvas);
   virtual void prePaintPass(SkCanvas* canvas);
   virtual void postPaintPass(SkCanvas* canvas);
-  Mask makeMaskBy(EBoolOp maskOp);
-
-protected:
-  virtual SkPath getContour();
-  SkPath makeBoundMask();
-  SkPath makeOutlineMask(EMaskCoutourType type, const glm::mat3* mat);
-  void paintBackgroundColor(SkCanvas* canvas, const SkPath& path);
-  virtual void paintFill(SkCanvas* canvas,
-                         const SkPath& path); // TODO:: only for ImageNode overriding
-  void paintStyle(SkCanvas* canvas, const SkPath& path);
-
-protected:
   virtual void paintPass();
   void renderPass(SkCanvas* canvas); // TODO:: should be private access
   virtual void paintEvent(SkCanvas* canvas);
+
+protected:
+  // Mask
+  SkPath makeBoundMask();
+  SkPath makeOutlineMask(EMaskCoutourType type, const glm::mat3* mat);
+  Mask makeMaskBy(EBoolOp maskOp);
+
+protected:
+protected:
+  // Style
+  void paintBackgroundColor(SkCanvas* canvas, const SkPath& path);
+  virtual SkPath stylePath();
+  void paintStyle(SkCanvas* canvas, const SkPath& path);
+  virtual void paintFill(SkCanvas* canvas,
+                         const SkPath& path); // TODO:: only for ImageNode overriding
 
 private:
   void drawDebugBound(SkCanvas* canvas);

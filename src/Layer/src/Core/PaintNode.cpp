@@ -193,7 +193,7 @@ RenderState* PaintNode::getRenderState()
 
 void PaintNode::paintEvent(SkCanvas* canvas)
 {
-  const auto path = getContour();
+  const auto path = stylePath();
   paintBackgroundColor(canvas, path); // TODO::remove
   paintStyle(canvas, path);
 }
@@ -248,11 +248,6 @@ SkPath PaintNode::makeBoundMask()
     p.addRect(skRect);
   }
   return p;
-}
-
-SkPath PaintNode::getContour()
-{
-  return makeBoundMask();
 }
 
 SkPath PaintNode::makeOutlineMask(EMaskCoutourType type, const glm::mat3* mat)
@@ -518,7 +513,7 @@ void PaintNode::paintChildrenPass(SkCanvas* canvas)
   if (overflow() == OF_Hidden)
   {
     canvas->save();
-    canvas->clipPath(getContour());
+    canvas->clipPath(makeBoundMask());
   }
   paintCall(masked);
   paintCall(noneMasked);
@@ -563,6 +558,11 @@ void PaintNode::postPaintPass(SkCanvas* canvas)
   {
     canvas->restore();
   }
+}
+
+SkPath PaintNode::stylePath()
+{
+  return makeBoundMask();
 }
 
 void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path)

@@ -31,6 +31,7 @@
 #include <fstream>
 #include <memory>
 #include <optional>
+#include <variant>
 #ifdef EMSCRIPTEN
 #include <SDL2/SDL_opengles2.h>
 #include <emscripten/emscripten.h>

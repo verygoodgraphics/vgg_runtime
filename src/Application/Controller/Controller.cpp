@@ -124,7 +124,10 @@ void Controller::start()
 void Controller::startEditing()
 {
   m_presenter->setEditModel(m_edit_model);
-  // todo, observe editing, then upate view
+
+  m_edit_model->getObservable()
+    .observe_on(m_run_loop->thread())
+    .subscribe(m_presenter->getEditModelObserver());
 
   DarumaContainer().add(m_edit_model, DarumaContainer::KeyType::Edited);
 }

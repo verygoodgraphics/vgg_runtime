@@ -17,6 +17,7 @@ else()
     PlatformAdapter/Native/Sdk/Event/KeyboardEvent.cpp
     PlatformAdapter/Native/Sdk/Event/MouseEvent.cpp
     PlatformAdapter/Native/Sdk/Event/TouchEvent.cpp
+    PlatformAdapter/Native/Sdk/AdapterHelper.cpp
     PlatformAdapter/Native/Sdk/VggSdkAddon.cpp
     PlatformAdapter/Native/Sdk/VggSdkNodeAdapter.cpp
   )

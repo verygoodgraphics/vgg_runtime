@@ -1,5 +1,7 @@
 #pragma once
 
+#include "PlatformAdapter/Native/Sdk/AdapterHelper.hpp"
+
 #include "node_api.h"
 
 #include "Log.h"
@@ -212,7 +214,7 @@ protected:
 
     try
     {
-      auto event_id = getArgIntValue(env, args[0]);
+      auto event_id = adapter::GetArgIntValue(env, args[0]);
 
       child_type* wrapper;
       NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&wrapper)));
@@ -240,21 +242,6 @@ protected:
   }
 
 private:
-  static int getArgIntValue(napi_env env, napi_value arg)
-  {
-    napi_valuetype value_type;
-    NODE_API_CALL(env, napi_typeof(env, arg, &value_type));
-    if (value_type != napi_number)
-    {
-      throw std::invalid_argument("Wrong argument type. Number expected.");
-    }
-
-    int32_t result = 0;
-    auto status = napi_get_value_int32(env, arg, &result);
-    assert(status == napi_ok);
-
-    return result;
-  }
 };
 
 } // namespace NodeAdapter

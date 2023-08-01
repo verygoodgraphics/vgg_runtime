@@ -130,8 +130,7 @@ enum EMaskCoutourType : uint8_t
   MCT_Intersect,
   MCT_UnionWithFrame,
   MCT_IntersectWithFrame,
-  MCT_UnionDependsOn,
-  MCT_IntersectDependsOn,
+  MCT_ByObjectOps
 };
 
 enum ELineJoin : uint8_t

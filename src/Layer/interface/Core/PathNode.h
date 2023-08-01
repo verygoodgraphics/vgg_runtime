@@ -28,8 +28,7 @@ class VGG_EXPORTS PathNode : public PaintNode
 public:
   PathNode(const std::string& name, std::string guid);
   void setWindingRule(EWindingType type);
-  Mask asOutlineMask(const glm::mat3* mat) override;
-  void addSubShape(std::shared_ptr<PaintNode> node, EBoolOp op);
+  // Mask asOutlineMask(const glm::mat3* mat) override;
   void paintChildrenPass(SkCanvas* canvas) override
   {
     // do not render child object for path node

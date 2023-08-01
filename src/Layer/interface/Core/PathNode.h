@@ -38,6 +38,6 @@ public:
   virtual ~PathNode();
 
 protected:
-  SkPath getContour() override;
+  SkPath stylePath() override;
 };
 } // namespace VGG

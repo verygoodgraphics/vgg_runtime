@@ -29,7 +29,7 @@ public:
   {
     setOverflow(OF_Visible);
   }
-  Contour* contour() const
+  Contour* pointData() const
   {
     return m_data.get();
   }

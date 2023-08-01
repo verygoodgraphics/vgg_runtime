@@ -140,7 +140,7 @@ Mask PathNode::asOutlineMask(const glm::mat3* mat)
   return mask;
 }
 
-SkPath PathNode::getContour()
+SkPath PathNode::stylePath()
 {
   VGG_IMPL(PathNode)
   std::vector<std::pair<SkPath, EBoolOp>> ct;
@@ -168,7 +168,7 @@ SkPath PathNode::getContour()
 //   //
 //   // paintBackgroundColor(canvas); // Is it necessary?
 //
-//   SkPath skPath = getContour();
+//   SkPath skPath = stylePath();
 //   paintStyle(canvas, skPath);
 //   // draw blur, we assume that there is only one blur style
 //   bool hasBlur = style().blurs.empty() ? false : style().blurs[0].isEnabled;

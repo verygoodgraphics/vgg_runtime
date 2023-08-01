@@ -135,7 +135,7 @@ public:
       },
       [&j](PaintNode* p)
       {
-        p->setMaskContourType(EMaskCoutourType::MCT_Union);
+        p->setMaskOption(MaskOption(EMaskCoutourType::MCT_Union, false));
         const auto radius = get_stack_optional<std::array<float, 4>>(j, "radius")
                               .value_or(std::array<float, 4>{ 0.0f, 0.f, 0.f, 0.f });
         p->style().frameRadius = radius;
@@ -202,13 +202,14 @@ public:
       j,
       [&j](std::string name, std::string guid)
       {
-        auto p = std::make_shared<PathNode>(std::move(name), std::move(guid));
+        auto p = std::make_shared<PaintNode>(std::move(name), VGG_PATH, std::move(guid));
         return p;
       },
-      [&j](PathNode* p)
+      [&j](PaintNode* p)
       {
         const auto shape = j.value("shape", nlohmann::json{});
-        p->setWindingRule(shape.value("windingRule", EWindingType::WR_EvenOdd));
+        p->setChildWindingType(shape.value("windingRule", EWindingType::WR_EvenOdd));
+        p->setMaskOption(MaskOption(EMaskCoutourType::MCT_ByObjectOps, false));
         for (const auto& subshape : shape.value("subshapes", std::vector<nlohmann::json>{}))
         {
           const auto blop = subshape.value("booleanOperation", EBoolOp::BO_None);
@@ -296,7 +297,7 @@ public:
       [&j](PaintNode* p)
       {
         p->setOverflow(OF_Visible); // Group do not clip inner content
-        p->setMaskContourType(EMaskCoutourType::MCT_Union);
+        p->setMaskOption(MaskOption(EMaskCoutourType::MCT_Union, false));
         for (const auto& c : j.value("childObjects", std::vector<nlohmann::json>{}))
         {
           p->addChild(fromObject(c));

@@ -24,6 +24,11 @@
 namespace VGG
 {
 
+struct MaskOption
+{
+  EMaskCoutourType contourType{ EMaskCoutourType::MCT_FrameOnly };
+  bool visibilityAware{ true };
+};
 class PaintNode__pImpl;
 class VGG_EXPORTS PaintNode : public Node
 {
@@ -44,6 +49,12 @@ public:
     pushChildBack(std::move(node));
   }
 
+  void addSubShape(const std::shared_ptr<PaintNode> node, EBoolOp op)
+  {
+    node->setClipOperator(op);
+    addChild(node);
+  }
+
   void setContectSettings(const ContextSetting& settings);
 
   void setOverflow(EOverflow overflow);
@@ -57,6 +68,10 @@ public:
   void setClipOperator(EBoolOp op);
 
   void setVisible(bool visible);
+
+  void setChildWindingType(EWindingType rule);
+
+  EWindingType childWindingType() const;
 
   void setBackgroundColor(const Color& color);
 
@@ -90,9 +105,9 @@ public:
 
   void setMaskType(EMaskType type);
 
-  EMaskCoutourType maskContourType() const;
+  void setMaskOption(MaskOption option);
 
-  void setMaskContourType(EMaskCoutourType type);
+  const MaskOption& maskOption() const;
 
   /**
    * Return a matrix that transform from this node to the given node
@@ -145,7 +160,8 @@ protected:
 protected:
   // Mask
   SkPath makeBoundMask();
-  SkPath makeOutlineMask(EMaskCoutourType type, const glm::mat3* mat);
+  SkPath makeOutlineMask(MaskOption option, const glm::mat3* mat);
+  SkPath childPolyOperation(SkPath& path) const;
   Mask makeMaskBy(EBoolOp maskOp);
 
 protected:

@@ -125,20 +125,20 @@ PathNode::PathNode(const std::string& name, std::string guid)
 {
 }
 
-Mask PathNode::asOutlineMask(const glm::mat3* mat)
-{
-  Mask mask;
-  for (const auto& c : m_firstChild)
-  {
-    auto p = static_cast<PaintNode*>(c.get());
-    mask.addMask(p->asOutlineMask(&p->localTransform()));
-  }
-  if (mat)
-  {
-    mask.outlineMask.transform(toSkMatrix(*mat));
-  }
-  return mask;
-}
+// Mask PathNode::asOutlineMask(const glm::mat3* mat)
+// {
+//   Mask mask;
+//   for (const auto& c : m_firstChild)
+//   {
+//     auto p = static_cast<PaintNode*>(c.get());
+//     mask.addMask(p->asOutlineMask(&p->localTransform()));
+//   }
+//   if (mat)
+//   {
+//     mask.outlineMask.transform(toSkMatrix(*mat));
+//   }
+//   return mask;
+// }
 
 SkPath PathNode::stylePath()
 {
@@ -197,12 +197,6 @@ SkPath PathNode::stylePath()
 //     canvas->restore();
 //   }
 // }
-
-void PathNode::addSubShape(std::shared_ptr<PaintNode> node, EBoolOp op)
-{
-  node->setClipOperator(op);
-  addChild(node);
-}
 
 void PathNode::setWindingRule(EWindingType type)
 {

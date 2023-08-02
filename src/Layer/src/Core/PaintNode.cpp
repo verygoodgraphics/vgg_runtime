@@ -197,6 +197,10 @@ void PaintNode::paintEvent(SkCanvas* canvas)
 {
   // const auto path = stylePath();
   const auto path = asOutlineMask(0).outlineMask;
+  if (path.isEmpty())
+  {
+    return;
+  }
   paintStyle(canvas, path);
 }
 
@@ -239,7 +243,7 @@ SkPath PaintNode::makeBoundMask()
   return p;
 }
 
-SkPath PaintNode::childPolyOperation(SkPath& path) const
+SkPath PaintNode::childPolyOperation() const
 {
   std::vector<std::pair<SkPath, EBoolOp>> ct;
   for (auto it = m_firstChild.cbegin(); it != m_firstChild.cend(); ++it)
@@ -279,6 +283,7 @@ SkPath PaintNode::childPolyOperation(SkPath& path) const
   }
   res.push_back(skPath);
 
+  SkPath path;
   for (const auto s : res)
   {
     path.addPath(s);
@@ -289,16 +294,6 @@ SkPath PaintNode::childPolyOperation(SkPath& path) const
 SkPath PaintNode::makeContourImpl(MaskOption option, const glm::mat3* mat)
 {
   SkPath path;
-  if (!hasChild())
-  {
-    SkPath path;
-    if (mat)
-    {
-      path.transform(toSkMatrix(*mat));
-    }
-    return path;
-  }
-
   auto appendMask = [this](SkPath& path, const MaskOption& option, SkPathOp op)
   {
     for (auto it = begin(); it != end(); ++it)
@@ -312,7 +307,7 @@ SkPath PaintNode::makeContourImpl(MaskOption option, const glm::mat3* mat)
   switch (option.contourType)
   {
     case MCT_FrameOnly:
-      this->makeBoundMask();
+      path = this->makeBoundMask();
       break;
     case MCT_UnionWithFrame:
       path = this->makeBoundMask();
@@ -325,7 +320,7 @@ SkPath PaintNode::makeContourImpl(MaskOption option, const glm::mat3* mat)
       appendMask(path, option, SkPathOp::kIntersect_SkPathOp);
       break;
     case MCT_ByObjectOps:
-      childPolyOperation(path);
+      path = childPolyOperation();
       break;
   }
   if (mat)

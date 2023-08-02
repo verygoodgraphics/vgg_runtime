@@ -176,7 +176,7 @@ protected:
   // Mask
   SkPath makeBoundMask();
   virtual SkPath makeContourImpl(MaskOption option, const glm::mat3* mat);
-  SkPath childPolyOperation(SkPath& path) const;
+  SkPath childPolyOperation() const;
   Mask makeMaskBy(EBoolOp maskOp);
 
 protected:

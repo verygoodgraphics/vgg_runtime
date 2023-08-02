@@ -137,7 +137,7 @@ public:
       },
       [&j](PaintNode* p)
       {
-        p->setCoutourOption(MaskOption(EMaskCoutourType::MCT_Union, false));
+        p->setCoutourOption(MaskOption(EMaskCoutourType::MCT_FrameOnly, false));
         const auto radius = get_stack_optional<std::array<float, 4>>(j, "radius")
                               .value_or(std::array<float, 4>{ 0.0f, 0.f, 0.f, 0.f });
         p->style().frameRadius = radius;
@@ -354,7 +354,6 @@ public:
           const auto bg = get_stack_optional<Color>(e, "backgroundColor");
           if (bg.has_value())
           {
-            // p->setBackgroundColor(bg);
             Style style;
             Fill fill;
             fill.color = bg.value();

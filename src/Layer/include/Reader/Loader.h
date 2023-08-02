@@ -108,7 +108,7 @@ public:
     return obj;
   }
 
-  static inline std::shared_ptr<ContourNode> fromContour(const nlohmann::json& j)
+  static inline std::shared_ptr<PaintNode> fromContour(const nlohmann::json& j)
   {
     Contour contour;
     contour.closed = j.value("closed", false);
@@ -121,8 +121,11 @@ public:
                            get_opt<glm::vec2>(e, "curveTo"),
                            get_opt<int>(e, "cornerStyle"));
     }
-    auto p = std::make_shared<ContourNode>("contour", std::make_shared<Contour>(contour), "");
-    p->setCoutourOption(MaskOption{ EMaskCoutourType::MCT_Union, false });
+    // auto p = std::make_shared<ContourNode>("contour", std::make_shared<Contour>(contour), "");
+    auto p = std::make_shared<PaintNode>("contour", VGG_CONTOUR, "");
+    p->setOverflow(OF_Visible);
+    p->setContourOption(ContourOption{ ECoutourType::MCT_FrameOnly, false });
+    p->setContourData(std::make_shared<Contour>(contour));
     return p;
   }
 
@@ -137,7 +140,7 @@ public:
       },
       [&j](PaintNode* p)
       {
-        p->setCoutourOption(MaskOption(EMaskCoutourType::MCT_FrameOnly, false));
+        p->setContourOption(ContourOption(ECoutourType::MCT_FrameOnly, false));
         const auto radius = get_stack_optional<std::array<float, 4>>(j, "radius")
                               .value_or(std::array<float, 4>{ 0.0f, 0.f, 0.f, 0.f });
         p->style().frameRadius = radius;
@@ -211,7 +214,7 @@ public:
       {
         const auto shape = j.value("shape", nlohmann::json{});
         p->setChildWindingType(shape.value("windingRule", EWindingType::WR_EvenOdd));
-        p->setCoutourOption(MaskOption(EMaskCoutourType::MCT_ByObjectOps, false));
+        p->setContourOption(ContourOption(ECoutourType::MCT_ByObjectOps, false));
         p->setPaintOption(PaintOption(EPaintStrategy::PS_SelfOnly));
         for (const auto& subshape : shape.value("subshapes", std::vector<nlohmann::json>{}))
         {
@@ -300,7 +303,7 @@ public:
       [&j](PaintNode* p)
       {
         p->setOverflow(OF_Visible); // Group do not clip inner content
-        p->setCoutourOption(MaskOption(EMaskCoutourType::MCT_Union, false));
+        p->setContourOption(ContourOption(ECoutourType::MCT_Union, false));
         for (const auto& c : j.value("childObjects", std::vector<nlohmann::json>{}))
         {
           p->addChild(fromObject(c));

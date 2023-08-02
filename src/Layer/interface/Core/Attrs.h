@@ -15,6 +15,7 @@
 
 namespace VGG
 {
+
 struct ContextSetting
 {
   EBlendMode BlendMode{ BM_Normal };
@@ -421,5 +422,13 @@ struct PointAttr
     return EPointMode::PM_Straight;
   }
 };
+
+struct Contour : public std::vector<PointAttr>
+{
+  bool closed = true;
+  EBoolOp blop;
+};
+
+using ContourPtr = std::shared_ptr<Contour>;
 
 } // namespace VGG

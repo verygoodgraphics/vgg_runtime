@@ -10,14 +10,6 @@
 namespace VGG
 {
 
-struct Contour : public std::vector<PointAttr>
-{
-  bool closed = true;
-  EBoolOp blop;
-};
-
-using ContourPtr = std::shared_ptr<Contour>;
-
 class VGG_EXPORTS ContourNode final : public PaintNode
 {
   ContourPtr m_data{ nullptr };
@@ -34,7 +26,7 @@ public:
     return m_data.get();
   }
 
-  SkPath makeContourImpl(MaskOption option, const glm::mat3* mat)
+  SkPath makeContourImpl(ContourOption option, const glm::mat3* mat)
   {
     SkPath mask;
     if (m_data)
@@ -48,15 +40,15 @@ public:
     return mask;
   }
 
-  Mask asOutlineMask(const glm::mat3* mat)
-  {
-    Mask mask;
-    mask.outlineMask = makeContourImpl(maskOption(), mat);
-    if (mask.outlineMask.isEmpty())
-    {
-      WARN("Contour [%s] is empty", getName().c_str());
-    }
-    return mask;
-  }
+  // Mask asOutlineMask(const glm::mat3* mat)
+  // {
+  //   Mask mask;
+  //   mask.outlineMask = makeContourImpl(maskOption(), mat);
+  //   if (mask.outlineMask.isEmpty())
+  //   {
+  //     WARN("Contour [%s] is empty", getName().c_str());
+  //   }
+  //   return mask;
+  // }
 };
 }; // namespace VGG

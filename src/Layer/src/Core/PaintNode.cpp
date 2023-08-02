@@ -33,8 +33,9 @@ public:
   ObjectType type;
   bool visible{ true };
 
+  ContourPtr contour;
   PaintOption paintOption;
-  MaskOption maskOption;
+  ContourOption maskOption;
   PaintNode__pImpl(PaintNode* api, ObjectType type)
     : q_ptr(api)
     , type(type)
@@ -291,10 +292,11 @@ SkPath PaintNode::childPolyOperation() const
   return path;
 }
 
-SkPath PaintNode::makeContourImpl(MaskOption option, const glm::mat3* mat)
+SkPath PaintNode::makeContourImpl(ContourOption option, const glm::mat3* mat)
 {
+  VGG_IMPL(PaintNode);
   SkPath path;
-  auto appendMask = [this](SkPath& path, const MaskOption& option, SkPathOp op)
+  auto appendMask = [this](SkPath& path, const ContourOption& option, SkPathOp op)
   {
     for (auto it = begin(); it != end(); ++it)
     {
@@ -467,13 +469,19 @@ void PaintNode::setMaskType(EMaskType type)
   _->maskType = type;
 }
 
-void PaintNode::setCoutourOption(MaskOption option)
+void PaintNode::setContourOption(ContourOption option)
 {
   VGG_IMPL(PaintNode);
   _->maskOption = option;
 }
 
-const MaskOption& PaintNode::maskOption() const
+void PaintNode::setContourData(ContourPtr contour)
+{
+  VGG_IMPL(PaintNode);
+  _->contour = std::move(contour);
+}
+
+const ContourOption& PaintNode::maskOption() const
 {
   return d_ptr->maskOption;
 }

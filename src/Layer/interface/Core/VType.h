@@ -123,7 +123,7 @@ enum EMaskType : uint8_t
   MT_Alpha
 };
 
-enum EMaskCoutourType : uint8_t
+enum ECoutourType : uint8_t
 {
   MCT_FrameOnly, // not recursive
   MCT_Union,

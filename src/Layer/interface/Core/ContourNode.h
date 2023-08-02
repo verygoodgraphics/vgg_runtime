@@ -52,6 +52,10 @@ public:
   {
     Mask mask;
     mask.outlineMask = makeContourImpl(maskOption(), mat);
+    if (mask.outlineMask.isEmpty())
+    {
+      WARN("Contour [%s] is empty", getName().c_str());
+    }
     return mask;
   }
 };

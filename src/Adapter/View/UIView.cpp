@@ -5,7 +5,10 @@
 #include <SDL2/SDL.h>
 
 using namespace VGG;
+using namespace VGG::Layout;
 using namespace nlohmann;
+
+constexpr auto flip_y_factor = -1;
 
 void UIView::onEvent(const SDL_Event& evt)
 {
@@ -30,6 +33,9 @@ void UIView::onEvent(const SDL_Event& evt)
   {
     case SDL_MOUSEBUTTONDOWN:
     {
+      Layout::Point point{ LayoutIntToScalar(evt.button.x), LayoutIntToScalar(evt.button.y) };
+      auto target_view = m_root->hitTest(point);
+
       auto js_button_index{ evt.button.button - 1 };
       auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
       m_event_listener(UIEventPtr(new MouseEvent(target_path,
@@ -285,7 +291,7 @@ std::shared_ptr<LayoutView> UIView::createOneLayoutView(const nlohmann::json& j,
   {
     auto frame_json = j[frame_key];
     auto x = frame_json["x"];
-    auto y = frame_json["y"];
+    auto y = frame_json["y"].get<Layout::Scalar>() * flip_y_factor;
     auto width = frame_json["width"];
     auto height = frame_json["height"];
 

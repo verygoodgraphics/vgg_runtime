@@ -24,9 +24,9 @@
 namespace VGG
 {
 
-struct MaskOption
+struct ContourOption
 {
-  EMaskCoutourType contourType{ EMaskCoutourType::MCT_FrameOnly };
+  ECoutourType contourType{ ECoutourType::MCT_FrameOnly };
   bool visibilityAware{ true };
 };
 
@@ -115,9 +115,13 @@ public:
 
   void setMaskType(EMaskType type);
 
-  void setCoutourOption(MaskOption option);
+  void setContourOption(ContourOption option);
 
-  const MaskOption& maskOption() const;
+  void setContourData(ContourPtr contour);
+
+  Contour* contour();
+
+  const ContourOption& maskOption() const;
 
   void setPaintOption(PaintOption option);
 
@@ -175,7 +179,7 @@ protected:
 protected:
   // Mask
   SkPath makeBoundMask();
-  virtual SkPath makeContourImpl(MaskOption option, const glm::mat3* mat);
+  virtual SkPath makeContourImpl(ContourOption option, const glm::mat3* mat);
   SkPath childPolyOperation() const;
   Mask makeMaskBy(EBoolOp maskOp);
 

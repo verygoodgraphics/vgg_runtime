@@ -34,7 +34,7 @@ public:
     return m_data.get();
   }
 
-  SkPath makeOutlineMask(MaskOption option, const glm::mat3* mat)
+  SkPath makeContourImpl(MaskOption option, const glm::mat3* mat)
   {
     SkPath mask;
     if (m_data)
@@ -51,7 +51,7 @@ public:
   Mask asOutlineMask(const glm::mat3* mat)
   {
     Mask mask;
-    mask.outlineMask = makeOutlineMask(maskOption(), mat);
+    mask.outlineMask = makeContourImpl(maskOption(), mat);
     return mask;
   }
 };

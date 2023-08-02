@@ -32,7 +32,6 @@ public:
   ContextSetting contextSetting;
   ObjectType type;
   bool visible{ true };
-  std::optional<Color> bgColor;
 
   PaintOption paintOption;
   MaskOption maskOption;
@@ -196,22 +195,9 @@ RenderState* PaintNode::getRenderState()
 
 void PaintNode::paintEvent(SkCanvas* canvas)
 {
-  const auto path = stylePath();
-  paintBackgroundColor(canvas, path); // TODO::remove
+  // const auto path = stylePath();
+  const auto path = asOutlineMask(0).outlineMask;
   paintStyle(canvas, path);
-}
-
-void PaintNode::paintBackgroundColor(SkCanvas* canvas, const SkPath& path)
-{
-
-  VGG_IMPL(PaintNode);
-  if (_->bgColor.has_value())
-  {
-    SkPaint bgPaint;
-    bgPaint.setColor(_->bgColor.value());
-    bgPaint.setStyle(SkPaint::kFill_Style);
-    canvas->drawPath(path, bgPaint);
-  }
 }
 
 void PaintNode::setMaskBy(std::vector<std::string> masks)
@@ -300,7 +286,7 @@ SkPath PaintNode::childPolyOperation(SkPath& path) const
   return path;
 }
 
-SkPath PaintNode::makeOutlineMask(MaskOption option, const glm::mat3* mat)
+SkPath PaintNode::makeContourImpl(MaskOption option, const glm::mat3* mat)
 {
   SkPath path;
   if (!hasChild())
@@ -318,7 +304,7 @@ SkPath PaintNode::makeOutlineMask(MaskOption option, const glm::mat3* mat)
     for (auto it = begin(); it != end(); ++it)
     {
       auto paintNode = static_cast<PaintNode*>(it->get());
-      auto childMask = paintNode->makeOutlineMask(option, &paintNode->localTransform());
+      auto childMask = paintNode->makeContourImpl(option, &paintNode->localTransform());
       Op(path, childMask, op, &path);
     }
   };
@@ -353,7 +339,7 @@ Mask PaintNode::asOutlineMask(const glm::mat3* mat)
 {
   VGG_IMPL(PaintNode);
   Mask mask;
-  mask.outlineMask = makeOutlineMask(maskOption(), mat);
+  mask.outlineMask = makeContourImpl(maskOption(), mat);
   mask.outlineMask.setFillType(childWindingType() == EWindingType::WR_EvenOdd
                                  ? SkPathFillType::kEvenOdd
                                  : SkPathFillType::kWinding);
@@ -414,12 +400,6 @@ void PaintNode::setVisible(bool visible)
 {
   VGG_IMPL(PaintNode);
   _->visible = visible;
-}
-
-void PaintNode::setBackgroundColor(const Color& color)
-{
-  VGG_IMPL(PaintNode);
-  _->bgColor = color;
 }
 
 bool PaintNode::isVisible() const
@@ -492,7 +472,7 @@ void PaintNode::setMaskType(EMaskType type)
   _->maskType = type;
 }
 
-void PaintNode::setMaskOption(MaskOption option)
+void PaintNode::setCoutourOption(MaskOption option)
 {
   VGG_IMPL(PaintNode);
   _->maskOption = option;
@@ -631,7 +611,7 @@ void PaintNode::postPaintPass(SkCanvas* canvas)
 
 SkPath PaintNode::stylePath()
 {
-  // return asOutlineMask(0).outlineMask;
+  return asOutlineMask(0).outlineMask;
 
   std::vector<std::pair<SkPath, EBoolOp>> ct;
   for (const auto& c : m_firstChild)

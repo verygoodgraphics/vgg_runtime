@@ -26,14 +26,40 @@ public:
 
   std::shared_ptr<LayoutView> hitTest(Layout::Point point)
   {
-    return nullptr;
+    // test top z-index child first
+    for (auto it = m_children.rbegin(); it != m_children.rend(); ++it)
+    {
+      if ((*it)->pointInside(point))
+      {
+        return (*it)->hitTest(point);
+      }
+    }
+
+    if (pointInside(point))
+    {
+      return shared_from_this();
+    }
+    else
+    {
+      return nullptr;
+    }
   }
 
   bool pointInside(Layout::Point point)
   {
-    return false;
+    auto rect = convertRectToWindow(m_frame);
+    return rect.pointInRect(point);
   }
 
+  auto frame()
+  {
+    return m_frame;
+  }
+
+  std::shared_ptr<LayoutView> parent()
+  {
+    return m_parent;
+  }
   void setParent(std::shared_ptr<LayoutView> parent)
   {
     m_parent = parent;
@@ -48,6 +74,28 @@ public:
 
     child->setParent(shared_from_this());
     m_children.push_back(child);
+  }
+
+private:
+  Layout::Rect convertRectToWindow(Layout::Rect rect)
+  {
+    return { converPointToWindow(rect.origin), rect.size };
+  }
+
+  Layout::Point converPointToWindow(Layout::Point point)
+  {
+    auto x = point.x;
+    auto y = point.y;
+
+    auto parent = m_parent;
+    while (parent)
+    {
+      x += parent->frame().origin.x;
+      y += parent->frame().origin.y;
+      parent = parent->parent();
+    }
+
+    return { x, y };
   }
 };
 

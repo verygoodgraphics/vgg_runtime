@@ -122,7 +122,7 @@ public:
                            get_opt<int>(e, "cornerStyle"));
     }
     auto p = std::make_shared<ContourNode>("contour", std::make_shared<Contour>(contour), "");
-    p->setMaskOption(MaskOption{ EMaskCoutourType::MCT_Union, false });
+    p->setCoutourOption(MaskOption{ EMaskCoutourType::MCT_Union, false });
     return p;
   }
 
@@ -137,7 +137,7 @@ public:
       },
       [&j](PaintNode* p)
       {
-        p->setMaskOption(MaskOption(EMaskCoutourType::MCT_Union, false));
+        p->setCoutourOption(MaskOption(EMaskCoutourType::MCT_Union, false));
         const auto radius = get_stack_optional<std::array<float, 4>>(j, "radius")
                               .value_or(std::array<float, 4>{ 0.0f, 0.f, 0.f, 0.f });
         p->style().frameRadius = radius;
@@ -211,7 +211,7 @@ public:
       {
         const auto shape = j.value("shape", nlohmann::json{});
         p->setChildWindingType(shape.value("windingRule", EWindingType::WR_EvenOdd));
-        p->setMaskOption(MaskOption(EMaskCoutourType::MCT_ByObjectOps, false));
+        p->setCoutourOption(MaskOption(EMaskCoutourType::MCT_ByObjectOps, false));
         p->setPaintOption(PaintOption(EPaintStrategy::PS_SelfOnly));
         for (const auto& subshape : shape.value("subshapes", std::vector<nlohmann::json>{}))
         {
@@ -300,7 +300,7 @@ public:
       [&j](PaintNode* p)
       {
         p->setOverflow(OF_Visible); // Group do not clip inner content
-        p->setMaskOption(MaskOption(EMaskCoutourType::MCT_Union, false));
+        p->setCoutourOption(MaskOption(EMaskCoutourType::MCT_Union, false));
         for (const auto& c : j.value("childObjects", std::vector<nlohmann::json>{}))
         {
           p->addChild(fromObject(c));
@@ -351,9 +351,18 @@ public:
         },
         [&e](PaintNode* p)
         {
-          const auto bg =
-            get_stack_optional<Color>(e, "backgroundColor").value_or(Color{ 1, 1, 1, 1 });
-          p->setBackgroundColor(bg);
+          const auto bg = get_stack_optional<Color>(e, "backgroundColor");
+          if (bg.has_value())
+          {
+            // p->setBackgroundColor(bg);
+            Style style;
+            Fill fill;
+            fill.color = bg.value();
+            fill.isEnabled = true;
+            fill.fillType = EPathFillType::FT_Color;
+            style.fills.push_back(fill);
+            p->setStyle(style);
+          }
 
           auto t = p->localTransform();
           const auto b = p->getBound();

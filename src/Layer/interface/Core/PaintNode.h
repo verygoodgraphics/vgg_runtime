@@ -85,8 +85,6 @@ public:
 
   EWindingType childWindingType() const;
 
-  void setBackgroundColor(const Color& color);
-
   bool isVisible() const;
 
   void setStyle(const Style& style);
@@ -117,7 +115,7 @@ public:
 
   void setMaskType(EMaskType type);
 
-  void setMaskOption(MaskOption option);
+  void setCoutourOption(MaskOption option);
 
   const MaskOption& maskOption() const;
 
@@ -177,14 +175,13 @@ protected:
 protected:
   // Mask
   SkPath makeBoundMask();
-  virtual SkPath makeOutlineMask(MaskOption option, const glm::mat3* mat);
+  virtual SkPath makeContourImpl(MaskOption option, const glm::mat3* mat);
   SkPath childPolyOperation(SkPath& path) const;
   Mask makeMaskBy(EBoolOp maskOp);
 
 protected:
 protected:
   // Style
-  void paintBackgroundColor(SkCanvas* canvas, const SkPath& path);
   virtual SkPath stylePath();
   void paintStyle(SkCanvas* canvas, const SkPath& path);
   virtual void paintFill(SkCanvas* canvas,

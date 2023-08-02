@@ -28,13 +28,14 @@ public:
   EBoolOp clipOperator{ BO_None };
   EOverflow overflow{ OF_Hidden };
   EWindingType windingRule{ WR_EvenOdd };
-  // EMaskCoutourType maskContourType{ MCT_FrameOnly };
-  MaskOption maskOption;
   Style style;
   ContextSetting contextSetting;
   ObjectType type;
   bool visible{ true };
   std::optional<Color> bgColor;
+
+  PaintOption paintOption;
+  MaskOption maskOption;
   PaintNode__pImpl(PaintNode* api, ObjectType type)
     : q_ptr(api)
     , type(type)
@@ -258,9 +259,8 @@ SkPath PaintNode::childPolyOperation(SkPath& path) const
   for (auto it = m_firstChild.cbegin(); it != m_firstChild.cend(); ++it)
   {
     auto paintNode = static_cast<PaintNode*>(it->get());
-    auto childMask =
-      paintNode->makeOutlineMask(paintNode->maskOption(), &paintNode->localTransform());
-    ct.emplace_back(childMask, paintNode->clipOperator());
+    auto childMask = paintNode->asOutlineMask(&paintNode->localTransform());
+    ct.emplace_back(childMask.outlineMask, paintNode->clipOperator());
   }
 
   assert(ct.size() >= 1);
@@ -492,17 +492,6 @@ void PaintNode::setMaskType(EMaskType type)
   _->maskType = type;
 }
 
-// EMaskCoutourType PaintNode::maskContourType() const
-// {
-//   return d_ptr->maskContourType;
-// }
-//
-// void PaintNode::setMaskContourType(EMaskCoutourType type)
-// {
-//   VGG_IMPL(PaintNode);
-//   d_ptr->maskContourType = type;
-// }
-
 void PaintNode::setMaskOption(MaskOption option)
 {
   VGG_IMPL(PaintNode);
@@ -514,18 +503,38 @@ const MaskOption& PaintNode::maskOption() const
   return d_ptr->maskOption;
 }
 
+void PaintNode::setPaintOption(PaintOption option)
+{
+  VGG_IMPL(PaintNode);
+  _->paintOption = option;
+}
+
+const PaintOption& PaintNode::paintOption() const
+{
+  return d_ptr->paintOption;
+}
+
 void PaintNode::invokeRenderPass(SkCanvas* canvas)
 {
   VGG_IMPL(PaintNode);
   if (!_->visible)
     return;
-  prePaintPass(canvas);
-  paintChildrenPass(canvas);
-  postPaintPass(canvas);
+  if (_->paintOption.paintStrategy == EPaintStrategy::PS_SelfOnly)
+  {
+    prePaintPass(canvas);
+    postPaintPass(canvas);
+  }
+  else if (_->paintOption.paintStrategy == EPaintStrategy::PS_Recursively)
+  {
+    prePaintPass(canvas);
+    paintChildrenPass(canvas);
+    postPaintPass(canvas);
+  }
 }
 
-void PaintNode::paintChildrenPass(SkCanvas* canvas)
+void PaintNode::paintChildrenRecursively(SkCanvas* canvas)
 {
+
   VGG_IMPL(PaintNode);
   std::vector<PaintNode*> masked;
   std::vector<PaintNode*> noneMasked;
@@ -576,6 +585,12 @@ void PaintNode::paintChildrenPass(SkCanvas* canvas)
     canvas->restore();
   }
 }
+
+void PaintNode::paintChildrenPass(SkCanvas* canvas)
+{
+  VGG_IMPL(PaintNode);
+  paintChildrenRecursively(canvas);
+}
 void PaintNode::prePaintPass(SkCanvas* canvas)
 {
   VGG_IMPL(PaintNode);
@@ -616,7 +631,7 @@ void PaintNode::postPaintPass(SkCanvas* canvas)
 
 SkPath PaintNode::stylePath()
 {
-  return asOutlineMask(0).outlineMask;
+  // return asOutlineMask(0).outlineMask;
 
   std::vector<std::pair<SkPath, EBoolOp>> ct;
   for (const auto& c : m_firstChild)

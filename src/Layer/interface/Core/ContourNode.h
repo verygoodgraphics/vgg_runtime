@@ -34,17 +34,24 @@ public:
     return m_data.get();
   }
 
-  Mask asOutlineMask(const glm::mat3* mat)
+  SkPath makeOutlineMask(MaskOption option, const glm::mat3* mat)
   {
-    Mask mask;
+    SkPath mask;
     if (m_data)
     {
-      mask.outlineMask = getSkiaPath(*m_data, m_data->closed);
+      mask = getSkiaPath(*m_data, m_data->closed);
     }
     if (mat)
     {
-      mask.outlineMask.transform(toSkMatrix(*mat));
+      mask.transform(toSkMatrix(*mat));
     }
+    return mask;
+  }
+
+  Mask asOutlineMask(const glm::mat3* mat)
+  {
+    Mask mask;
+    mask.outlineMask = makeOutlineMask(maskOption(), mat);
     return mask;
   }
 };

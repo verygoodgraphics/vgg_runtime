@@ -29,6 +29,18 @@ struct MaskOption
   EMaskCoutourType contourType{ EMaskCoutourType::MCT_FrameOnly };
   bool visibilityAware{ true };
 };
+
+enum EPaintStrategy
+{
+  PS_Recursively,
+  PS_SelfOnly
+};
+
+struct PaintOption
+{
+  EPaintStrategy paintStrategy{ PS_Recursively };
+};
+
 class PaintNode__pImpl;
 class VGG_EXPORTS PaintNode : public Node
 {
@@ -109,6 +121,10 @@ public:
 
   const MaskOption& maskOption() const;
 
+  void setPaintOption(PaintOption option);
+
+  const PaintOption& paintOption() const;
+
   /**
    * Return a matrix that transform from this node to the given node
    * */
@@ -151,6 +167,7 @@ public:
 protected:
   // Render traverse
   virtual void paintChildrenPass(SkCanvas* canvas);
+  void paintChildrenRecursively(SkCanvas* canvas);
   virtual void prePaintPass(SkCanvas* canvas);
   virtual void postPaintPass(SkCanvas* canvas);
   virtual void paintPass();
@@ -160,7 +177,7 @@ protected:
 protected:
   // Mask
   SkPath makeBoundMask();
-  SkPath makeOutlineMask(MaskOption option, const glm::mat3* mat);
+  virtual SkPath makeOutlineMask(MaskOption option, const glm::mat3* mat);
   SkPath childPolyOperation(SkPath& path) const;
   Mask makeMaskBy(EBoolOp maskOp);
 

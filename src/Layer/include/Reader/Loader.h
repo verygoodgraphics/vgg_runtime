@@ -121,7 +121,9 @@ public:
                            get_opt<glm::vec2>(e, "curveTo"),
                            get_opt<int>(e, "cornerStyle"));
     }
-    return std::make_shared<ContourNode>("contour", std::make_shared<Contour>(contour), "");
+    auto p = std::make_shared<ContourNode>("contour", std::make_shared<Contour>(contour), "");
+    p->setMaskOption(MaskOption{ EMaskCoutourType::MCT_Union, false });
+    return p;
   }
 
   static inline std::shared_ptr<PaintNode> fromFrame(const nlohmann::json& j)
@@ -210,6 +212,7 @@ public:
         const auto shape = j.value("shape", nlohmann::json{});
         p->setChildWindingType(shape.value("windingRule", EWindingType::WR_EvenOdd));
         p->setMaskOption(MaskOption(EMaskCoutourType::MCT_ByObjectOps, false));
+        p->setPaintOption(PaintOption(EPaintStrategy::PS_SelfOnly));
         for (const auto& subshape : shape.value("subshapes", std::vector<nlohmann::json>{}))
         {
           const auto blop = subshape.value("booleanOperation", EBoolOp::BO_None);

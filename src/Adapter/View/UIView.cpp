@@ -29,66 +29,22 @@ void UIView::onEvent(const SDL_Event& evt)
   // todo, bubbling
   UIEvent::PathType target_path{ "/fake/update_background_color" };
 
+  auto& has_event_listener = m_has_event_listener;
   switch (evt.type)
   {
     case SDL_MOUSEBUTTONDOWN:
     {
       Layout::Point point{ LayoutIntToScalar(evt.button.x), LayoutIntToScalar(evt.button.y) };
-      auto target_view = m_root->hitTest(point);
-
-      auto js_button_index{ evt.button.button - 1 };
-      auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
-      m_event_listener(UIEventPtr(new MouseEvent(target_path,
-                                                 UIEventType::mousedown,
-                                                 js_button_index,
-                                                 evt.button.x,
-                                                 evt.button.y,
-                                                 0,
-                                                 0,
-                                                 alt,
-                                                 ctrl,
-                                                 meta,
-                                                 shift)));
-    }
-    break;
-
-    case SDL_MOUSEMOTION:
-    {
-      auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
-      m_event_listener(UIEventPtr(new MouseEvent(target_path,
-                                                 UIEventType::mousemove,
-                                                 0,
-                                                 evt.motion.x,
-                                                 evt.motion.y,
-                                                 evt.motion.xrel,
-                                                 evt.motion.yrel,
-                                                 alt,
-                                                 ctrl,
-                                                 meta,
-                                                 shift)));
-    }
-    break;
-
-    case SDL_MOUSEBUTTONUP:
-    {
-      auto js_button_index{ evt.button.button - 1 };
-      auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
-      m_event_listener(UIEventPtr(new MouseEvent(target_path,
-                                                 UIEventType::mouseup,
-                                                 js_button_index,
-                                                 evt.button.x,
-                                                 evt.button.y,
-                                                 0,
-                                                 0,
-                                                 alt,
-                                                 ctrl,
-                                                 meta,
-                                                 shift)));
-
-      if (js_button_index == 0)
+      auto target_view = m_root->hitTest(point,
+                                         [&has_event_listener](const std::string& path) {
+                                           return has_event_listener(path, UIEventType::mousedown);
+                                         });
+      if (target_view)
       {
-        m_event_listener(UIEventPtr(new MouseEvent(target_path,
-                                                   UIEventType::click,
+        auto js_button_index{ evt.button.button - 1 };
+        auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
+        m_event_listener(UIEventPtr(new MouseEvent(target_view->path(),
+                                                   UIEventType::mousedown,
                                                    js_button_index,
                                                    evt.button.x,
                                                    evt.button.y,
@@ -99,10 +55,48 @@ void UIView::onEvent(const SDL_Event& evt)
                                                    meta,
                                                    shift)));
       }
-      else
+    }
+    break;
+
+    case SDL_MOUSEMOTION:
+    {
+      Layout::Point point{ LayoutIntToScalar(evt.motion.x), LayoutIntToScalar(evt.motion.y) };
+      auto target_view = m_root->hitTest(point,
+                                         [&has_event_listener](const std::string& path) {
+                                           return has_event_listener(path, UIEventType::mousemove);
+                                         });
+      if (target_view)
       {
-        m_event_listener(UIEventPtr(new MouseEvent(target_path,
-                                                   UIEventType::auxclick,
+        auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
+        m_event_listener(UIEventPtr(new MouseEvent(target_view->path(),
+                                                   UIEventType::mousemove,
+                                                   0,
+                                                   evt.motion.x,
+                                                   evt.motion.y,
+                                                   evt.motion.xrel,
+                                                   evt.motion.yrel,
+                                                   alt,
+                                                   ctrl,
+                                                   meta,
+                                                   shift)));
+      }
+    }
+    break;
+
+    case SDL_MOUSEBUTTONUP:
+    {
+      Layout::Point point{ LayoutIntToScalar(evt.button.x), LayoutIntToScalar(evt.button.y) };
+      auto js_button_index{ evt.button.button - 1 };
+      auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
+
+      auto target_view = m_root->hitTest(point,
+                                         [&has_event_listener](const std::string& path) {
+                                           return has_event_listener(path, UIEventType::mouseup);
+                                         });
+      if (target_view)
+      {
+        m_event_listener(UIEventPtr(new MouseEvent(target_view->path(),
+                                                   UIEventType::mouseup,
                                                    js_button_index,
                                                    evt.button.x,
                                                    evt.button.y,
@@ -112,11 +106,18 @@ void UIView::onEvent(const SDL_Event& evt)
                                                    ctrl,
                                                    meta,
                                                    shift)));
+      }
 
-        if (js_button_index == 2)
+      if (js_button_index == 0)
+      {
+        auto target_view = m_root->hitTest(point,
+                                           [&has_event_listener](const std::string& path) {
+                                             return has_event_listener(path, UIEventType::click);
+                                           });
+        if (target_view)
         {
-          m_event_listener(UIEventPtr(new MouseEvent(target_path,
-                                                     UIEventType::contextmenu,
+          m_event_listener(UIEventPtr(new MouseEvent(target_view->path(),
+                                                     UIEventType::click,
                                                      js_button_index,
                                                      evt.button.x,
                                                      evt.button.y,
@@ -126,6 +127,49 @@ void UIView::onEvent(const SDL_Event& evt)
                                                      ctrl,
                                                      meta,
                                                      shift)));
+        }
+      }
+      else
+      {
+        auto target_view = m_root->hitTest(point,
+                                           [&has_event_listener](const std::string& path) {
+                                             return has_event_listener(path, UIEventType::auxclick);
+                                           });
+        if (target_view)
+        {
+          m_event_listener(UIEventPtr(new MouseEvent(target_view->path(),
+                                                     UIEventType::auxclick,
+                                                     js_button_index,
+                                                     evt.button.x,
+                                                     evt.button.y,
+                                                     0,
+                                                     0,
+                                                     alt,
+                                                     ctrl,
+                                                     meta,
+                                                     shift)));
+        }
+
+        if (js_button_index == 2)
+        {
+          auto target_view =
+            m_root->hitTest(point,
+                            [&has_event_listener](const std::string& path)
+                            { return has_event_listener(path, UIEventType::contextmenu); });
+          if (target_view)
+          {
+            m_event_listener(UIEventPtr(new MouseEvent(target_view->path(),
+                                                       UIEventType::contextmenu,
+                                                       js_button_index,
+                                                       evt.button.x,
+                                                       evt.button.y,
+                                                       0,
+                                                       0,
+                                                       alt,
+                                                       ctrl,
+                                                       meta,
+                                                       shift)));
+          }
         }
       }
     }

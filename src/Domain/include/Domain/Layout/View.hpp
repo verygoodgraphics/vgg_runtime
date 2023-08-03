@@ -18,51 +18,38 @@ class LayoutView : public std::enable_shared_from_this<LayoutView>
   Layout::Rect m_frame;
 
 public:
+  using HitTestHook = std::function<bool(const std::string&)>;
+
   LayoutView(const std::string& path, const Layout::Rect& frame)
     : m_path{ path }
     , m_frame{ frame }
   {
   }
 
-  std::shared_ptr<LayoutView> hitTest(Layout::Point point)
+  std::shared_ptr<LayoutView> hitTest(const Layout::Point& point,
+                                      const HitTestHook& hasEventListener)
   {
-    // test top z-index child first
+    // test front child first
     for (auto it = m_children.rbegin(); it != m_children.rend(); ++it)
     {
       if ((*it)->pointInside(point))
       {
-        return (*it)->hitTest(point);
+        if (auto target_view = (*it)->hitTest(point, hasEventListener))
+        {
+          return target_view;
+        }
       }
     }
 
     if (pointInside(point))
     {
-      return shared_from_this();
+      if (hasEventListener(m_path))
+      {
+        return shared_from_this();
+      }
     }
-    else
-    {
-      return nullptr;
-    }
-  }
 
-  bool pointInside(Layout::Point point)
-  {
-    auto rect = convertRectToWindow(m_frame);
-    return rect.pointInRect(point);
-  }
-
-  auto frame()
-  {
-    return m_frame;
-  }
-
-  std::shared_ptr<LayoutView> parent()
-  {
-    return m_parent;
-  }
-  void setParent(std::shared_ptr<LayoutView> parent)
-  {
-    m_parent = parent;
+    return nullptr;
   }
 
   void addChild(std::shared_ptr<LayoutView> child)
@@ -72,11 +59,22 @@ public:
       return;
     }
 
-    child->setParent(shared_from_this());
+    child->m_parent = shared_from_this();
     m_children.push_back(child);
   }
 
+  const std::string& path() const
+  {
+    return m_path;
+  }
+
 private:
+  bool pointInside(Layout::Point point)
+  {
+    auto rect = convertRectToWindow(m_frame);
+    return rect.pointInRect(point);
+  }
+
   Layout::Rect convertRectToWindow(Layout::Rect rect)
   {
     return { converPointToWindow(rect.origin), rect.size };
@@ -90,9 +88,9 @@ private:
     auto parent = m_parent;
     while (parent)
     {
-      x += parent->frame().origin.x;
-      y += parent->frame().origin.y;
-      parent = parent->parent();
+      x += parent->m_frame.origin.x;
+      y += parent->m_frame.origin.y;
+      parent = parent->m_parent;
     }
 
     return { x, y };

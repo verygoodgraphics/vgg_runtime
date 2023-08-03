@@ -34,6 +34,16 @@ public:
     m_model = model;
     m_view->setResouces(m_model->resources());
     m_view->show(m_model->designDoc()->content());
+
+    m_view->registerEventListener(
+      [model](std::string path, UIEventType eventType)
+      {
+        auto listeners_map = model->getEventListeners(path);
+        std::string type = UIEventTypeToString(eventType);
+
+        auto it = listeners_map.find(type);
+        return it != listeners_map.end();
+      });
   }
 
   void setEditModel(std::shared_ptr<Daruma> model)

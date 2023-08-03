@@ -10,31 +10,49 @@ using namespace nlohmann;
 
 constexpr auto flip_y_factor = -1;
 
-void UIView::onEvent(const SDL_Event& evt)
+void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
 {
   if (!m_event_listener)
   {
     return;
   }
 
-  // todo, handle zoom
+  if (!m_is_editor)
+  {
+    m_bounds.origin.x = zoomer->offset.x;
+    m_bounds.origin.y = zoomer->offset.y;
+
+    m_contentScaleFactor = zoomer->zoom;
+  }
 
   // todo, hittest
   for (auto& subview : m_subviews)
   {
-    subview->onEvent(evt);
+    subview->onEvent(evt, zoomer);
   }
 
   // todo, capturing
   // todo, bubbling
   UIEvent::PathType target_path{ "/fake/update_background_color" };
 
-  auto& has_event_listener = m_has_event_listener;
+  decltype(m_has_event_listener) has_event_listener =
+    [this](const std::string& path, UIEventType type)
+  {
+    if (this->m_superview && this->m_superview->m_is_editor)
+    {
+      return true;
+    }
+    else
+    {
+      return m_has_event_listener(path, type);
+    }
+  };
   switch (evt.type)
   {
     case SDL_MOUSEBUTTONDOWN:
     {
-      Layout::Point point{ LayoutIntToScalar(evt.button.x), LayoutIntToScalar(evt.button.y) };
+      Layout::Point point{ toVggLayoutScalar(evt.button.x), toVggLayoutScalar(evt.button.y) };
+      point = converPointFromWindow(point);
       auto target_view = m_root->hitTest(point,
                                          [&has_event_listener](const std::string& path) {
                                            return has_event_listener(path, UIEventType::mousedown);
@@ -60,7 +78,8 @@ void UIView::onEvent(const SDL_Event& evt)
 
     case SDL_MOUSEMOTION:
     {
-      Layout::Point point{ LayoutIntToScalar(evt.motion.x), LayoutIntToScalar(evt.motion.y) };
+      Layout::Point point{ toVggLayoutScalar(evt.motion.x), toVggLayoutScalar(evt.motion.y) };
+      point = converPointFromWindow(point);
       auto target_view = m_root->hitTest(point,
                                          [&has_event_listener](const std::string& path) {
                                            return has_event_listener(path, UIEventType::mousemove);
@@ -85,7 +104,8 @@ void UIView::onEvent(const SDL_Event& evt)
 
     case SDL_MOUSEBUTTONUP:
     {
-      Layout::Point point{ LayoutIntToScalar(evt.button.x), LayoutIntToScalar(evt.button.y) };
+      Layout::Point point{ toVggLayoutScalar(evt.button.x), toVggLayoutScalar(evt.button.y) };
+      point = converPointFromWindow(point);
       auto js_button_index{ evt.button.button - 1 };
       auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
 
@@ -245,39 +265,30 @@ std::tuple<bool, bool, bool, bool> UIView::getKeyModifier(int keyMod)
 
 void UIView::draw(SkCanvas* canvas, Zoomer* zoomer)
 {
-  auto is_editor = !m_self_zoom_enabled;
-
-  if (!is_editor) // zoom self & subviews
-  {
-    zoomer->apply(canvas);
-    m_scene->render(canvas);
-  }
-  else // zoom only subviews
+  if (m_is_editor) // editor; zoom only subviews
   {
     m_scene->render(canvas); // render self(editor) without zoom
 
+    // draw inner edit view
+    for (auto& subview : m_subviews)
+    {
+      subview->draw(canvas, zoomer);
+    }
+  }
+  else // edit view; edited document; zoom self
+  {
+    canvas->save();
+
     // setup clip & offset for edit view
-    SkRect edit_rect{ SkIntToScalar(m_left),
-                      SkIntToScalar(m_top),
-                      SkIntToScalar(m_width - m_right),
-                      SkIntToScalar(m_height - m_bottom) };
+    canvas->translate(m_frame.origin.x, m_frame.origin.y);
+    SkRect edit_rect{ 0, 0, m_frame.size.width, m_frame.size.height };
     canvas->clipRect(edit_rect);
-    canvas->translate(SkIntToScalar(m_left), SkIntToScalar(m_top));
 
     zoomer->apply(canvas);
-  }
 
-  for (auto& subview : m_subviews)
-  {
-    subview->draw(canvas, zoomer);
-  }
+    m_scene->render(canvas);
 
-  // restore zoom
-  zoomer->restore(canvas);
-  // restore offset for edit view
-  if (is_editor)
-  {
-    canvas->translate(-SkIntToScalar(m_left), -SkIntToScalar(m_top));
+    canvas->restore();
   }
 }
 
@@ -286,7 +297,7 @@ void UIView::becomeEditorWithSidebar(scalar_type top,
                                      scalar_type bottom,
                                      scalar_type left)
 {
-  m_self_zoom_enabled = false;
+  m_is_editor = true;
 
   m_top = top;
   m_right = right;
@@ -391,4 +402,39 @@ void UIView::createOneOrMoreLayoutViews(const nlohmann::json& j,
   {
     createLayoutViews(j, current_path, parent);
   }
+}
+
+void UIView::layoutSubviews()
+{
+  if (m_is_editor)
+  {
+    for (auto& subview : m_subviews)
+    {
+      subview->m_frame = { { toVggLayoutScalar(m_left), toVggLayoutScalar(m_top) },
+                           {
+                             m_frame.size.width - m_left - m_right,
+                             m_frame.size.height - m_top - m_bottom,
+                           } };
+    }
+  }
+}
+
+Layout::Point UIView::converPointFromWindow(Layout::Point point)
+{
+  auto x = point.x;
+  auto y = point.y;
+
+  auto parent = this;
+  while (parent)
+  {
+    x -= parent->m_frame.origin.x;
+    y -= parent->m_frame.origin.y;
+
+    x -= parent->m_bounds.origin.x;
+    y -= parent->m_bounds.origin.y;
+
+    parent = parent->m_superview;
+  }
+
+  return { x, y };
 }

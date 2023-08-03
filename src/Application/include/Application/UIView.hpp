@@ -31,14 +31,17 @@ private:
   HasEventListener m_has_event_listener;
 
   std::shared_ptr<Scene> m_scene;
+  UIView* m_superview;
   std::vector<std::shared_ptr<UIView>> m_subviews;
-  bool m_self_zoom_enabled = true;
 
   std::shared_ptr<LayoutView> m_root;
 
-  scalar_type m_width{ 0 };
-  scalar_type m_height{ 0 };
+  Layout::Rect m_frame;
+  Layout::Rect m_bounds;
+  float m_contentScaleFactor{ 1.0 };
 
+  // editor
+  bool m_is_editor = false;
   // sidebar
   scalar_type m_top{ 0 };
   scalar_type m_right{ 0 };
@@ -77,20 +80,24 @@ public:
     m_event_listener = listener;
   }
 
-  void onEvent(const SDL_Event& evt);
+  void onEvent(const SDL_Event& evt, Zoomer* zoomer);
 
   void addSubview(std::shared_ptr<UIView> view)
   {
     m_subviews.push_back(view);
+    view->m_superview = this;
+    layoutSubviews();
   }
 
   void draw(SkCanvas* canvas, Zoomer* zoomer);
 
   void setSize(scalar_type w, scalar_type h)
   {
-    m_width = w;
-    m_height = h;
+    m_frame.size.width = w;
+    m_frame.size.height = h;
+    layoutSubviews();
   }
+
   void becomeEditorWithSidebar(scalar_type top,
                                scalar_type right,
                                scalar_type bottom,
@@ -110,6 +117,8 @@ private:
   void createOneOrMoreLayoutViews(const nlohmann::json& j,
                                   nlohmann::json::json_pointer current_path,
                                   std::shared_ptr<LayoutView> parent);
+  void layoutSubviews();
+  Layout::Point converPointFromWindow(Layout::Point point);
 };
 
 } // namespace VGG

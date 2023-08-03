@@ -5,6 +5,8 @@
 #include "core/SkCanvas.h"
 #include <filesystem>
 #include "ConfigMananger.h"
+#include "glm/gtx/matrix_transform_2d.hpp"
+#include "glm/matrix.hpp"
 #include <fstream>
 #include <memory>
 #include <string>
@@ -36,9 +38,13 @@ void Scene::instantiateTemplates()
       {
         if (auto master = it->second.lock(); master)
         {
-          auto instance = std::static_pointer_cast<PaintNode>(master->cloneRecursive());
-          // TODO:: overide properties
-          // TODO:: clear transform
+          auto instance = std::static_pointer_cast<PaintNode>(master->cloneChildren());
+
+          auto transform = instance->localTransform();
+          // clear transform
+          transform = glm::translate(transform, glm::vec2{ -transform[2][0], -transform[2][1] });
+          instance->setLocalTransform(transform);
+          // TODO:: override properties
           node->addChild(instance);
         }
         else

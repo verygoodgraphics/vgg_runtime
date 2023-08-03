@@ -41,6 +41,33 @@ public:
     , type(type)
   {
   }
+  PaintNode__pImpl(const PaintNode__pImpl& other)
+  {
+    this->operator=(other);
+  }
+  PaintNode__pImpl& operator=(const PaintNode__pImpl& other)
+  {
+    bound = other.bound;
+    transform = other.transform;
+    guid = other.guid + "_Copy";
+    maskedBy = other.maskedBy;
+    outlineMask = other.outlineMask;
+    maskType = other.maskType;
+    clipOperator = other.clipOperator;
+    overflow = other.overflow;
+    windingRule = other.windingRule;
+    style = other.style;
+    contextSetting = other.contextSetting;
+    type = other.type;
+    visible = other.visible;
+    contour = other.contour;
+    paintOption = other.paintOption;
+    maskOption = other.maskOption;
+    return *this;
+  }
+
+  PaintNode__pImpl(PaintNode__pImpl&&) = delete;
+  PaintNode__pImpl& operator=(PaintNode__pImpl&&) = delete;
 };
 
 PaintNode::PaintNode(const std::string& name, ObjectType type, const std::string& guid)
@@ -211,7 +238,7 @@ void PaintNode::setMaskBy(std::vector<std::string> masks)
   _->maskedBy = std::move(masks);
 }
 
-SkPath PaintNode::makeBoundMask()
+SkPath PaintNode::makeBoundPath()
 {
   SkPath p;
   const auto& skRect = toSkRect(getBound());
@@ -296,7 +323,17 @@ SkPath PaintNode::makeContourImpl(ContourOption option, const glm::mat3* mat)
 {
   VGG_IMPL(PaintNode);
   SkPath path;
-  auto appendMask = [this](SkPath& path, const ContourOption& option, SkPathOp op)
+  if (_->contour)
+  {
+    path = getSkiaPath(*_->contour, _->contour->closed);
+    if (mat)
+    {
+      path.transform(toSkMatrix(*mat));
+    }
+    return path;
+  }
+
+  auto appendPath = [this](SkPath& path, const ContourOption& option, SkPathOp op)
   {
     for (auto it = begin(); it != end(); ++it)
     {
@@ -309,17 +346,17 @@ SkPath PaintNode::makeContourImpl(ContourOption option, const glm::mat3* mat)
   switch (option.contourType)
   {
     case MCT_FrameOnly:
-      path = this->makeBoundMask();
+      path = this->makeBoundPath();
       break;
     case MCT_UnionWithFrame:
-      path = this->makeBoundMask();
+      path = this->makeBoundPath();
     case MCT_Union:
-      appendMask(path, option, SkPathOp::kUnion_SkPathOp);
+      appendPath(path, option, SkPathOp::kUnion_SkPathOp);
       break;
     case MCT_IntersectWithFrame:
-      path = this->makeBoundMask();
+      path = this->makeBoundPath();
     case MCT_Intersect:
-      appendMask(path, option, SkPathOp::kIntersect_SkPathOp);
+      appendPath(path, option, SkPathOp::kIntersect_SkPathOp);
       break;
     case MCT_ByObjectOps:
       path = childPolyOperation();
@@ -559,7 +596,7 @@ void PaintNode::paintChildrenRecursively(SkCanvas* canvas)
   if (overflow() == OF_Hidden)
   {
     canvas->save();
-    canvas->clipPath(makeBoundMask());
+    canvas->clipPath(makeBoundPath());
   }
   paintCall(masked);
   paintCall(noneMasked);

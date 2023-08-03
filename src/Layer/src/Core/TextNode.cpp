@@ -84,7 +84,7 @@ void TextNode::paintEvent(SkCanvas* canvas)
   if (overflow() == OF_Hidden)
   {
     canvas->save();
-    canvas->clipPath(makeBoundMask());
+    canvas->clipPath(makeBoundPath());
   }
 
   canvas->save();

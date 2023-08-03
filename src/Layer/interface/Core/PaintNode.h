@@ -55,6 +55,10 @@ protected:
 
 public:
   PaintNode(const std::string& name, ObjectType type, const std::string& guid);
+  PaintNode(const PaintNode&) = delete;
+  PaintNode(PaintNode&&) = delete;
+  PaintNode& operator=(const PaintNode&) = delete;
+  PaintNode& operator=(PaintNode&&) = delete;
 
   void addChild(const std::shared_ptr<PaintNode> node)
   {
@@ -178,7 +182,7 @@ protected:
 
 protected:
   // Mask
-  SkPath makeBoundMask();
+  SkPath makeBoundPath();
   virtual SkPath makeContourImpl(ContourOption option, const glm::mat3* mat);
   SkPath childPolyOperation() const;
   Mask makeMaskBy(EBoolOp maskOp);

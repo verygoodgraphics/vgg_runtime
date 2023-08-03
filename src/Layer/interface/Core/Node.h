@@ -67,6 +67,10 @@ class VGG_EXPORTS Node : public std::enable_shared_from_this<Node>
   using FirstChildNode = std::list<std::shared_ptr<Node>>;
 
 public:
+  Node(const Node&) = delete;
+  Node(Node&&) = delete;
+  Node& operator=(const Node&) = delete;
+  Node& operator=(Node&&) = delete;
   struct Iterator
   {
     using iterator_category = std::forward_iterator_tag;

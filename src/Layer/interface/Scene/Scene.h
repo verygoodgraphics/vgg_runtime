@@ -11,15 +11,18 @@ class SymbolMasterNode;
 class PaintNode;
 using ResourceRepo = std::map<std::string, std::vector<char>>;
 using ObjectTableType = std::unordered_map<std::string, std::weak_ptr<PaintNode>>;
-
-struct SceneConfig
-{
-};
+using ObjectTableType = std::unordered_map<std::string, std::weak_ptr<PaintNode>>;
+using InstanceTable =
+  std::unordered_map<std::string,
+                     std::pair<std::weak_ptr<PaintNode>,
+                               std::string>>; // {instance_id: {instance_object: master_id}}
 
 struct VGG_EXPORTS Scene
 {
-  static ResourceRepo ResRepo;
-  static ObjectTableType ObjectTable;
+  static ResourceRepo s_resRepo;
+  static ObjectTableType s_objectTable;
+  static ObjectTableType s_templateObjectTable;
+  static InstanceTable s_instanceTable;
   static bool s_enableDrawDebugBound;
 
   std::vector<std::shared_ptr<PaintNode>> artboards;
@@ -42,17 +45,27 @@ public:
 
   static ResourceRepo& getResRepo()
   {
-    return ResRepo;
+    return s_resRepo;
   }
 
   static ObjectTableType& getObjectTable()
   {
-    return ObjectTable;
+    return s_objectTable;
+  }
+
+  static ObjectTableType& templateObjectTable()
+  {
+    return s_templateObjectTable;
+  }
+
+  static InstanceTable& instanceObjects()
+  {
+    return s_instanceTable;
   }
 
   static void setResRepo(std::map<std::string, std::vector<char>> repo)
   {
-    Scene::ResRepo = std::move(repo);
+    Scene::s_resRepo = std::move(repo);
   }
 
   static void enableDrawDebugBound(bool enable)
@@ -67,6 +80,7 @@ public:
 
 private:
   void preprocessMask(PaintNode* node);
+  void instantiateTemplates();
 };
 
 }; // namespace VGG

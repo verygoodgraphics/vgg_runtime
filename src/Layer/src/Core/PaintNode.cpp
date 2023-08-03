@@ -87,6 +87,7 @@ PaintNode::PaintNode(const PaintNode& other)
   : Node(other.name())
   , d_ptr(new PaintNode__pImpl(*other.d_ptr))
 {
+  DEBUG("PaintNode cloned");
 }
 
 NodePtr PaintNode::clone() const

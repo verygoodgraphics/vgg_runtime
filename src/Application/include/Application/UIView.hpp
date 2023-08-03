@@ -37,7 +37,7 @@ public:
 
   void setResouces(ResourcesType resources)
   {
-    Scene::ResRepo = std::move(resources);
+    Scene::s_resRepo = std::move(resources);
   }
 
   void setEventListener(EventListener listener)

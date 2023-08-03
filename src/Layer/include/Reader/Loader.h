@@ -94,6 +94,8 @@ public:
                                                                     F2&& overridor)
   {
     auto obj = creator(std::move(j.value("name", "")), std::move(j.value("id", "")));
+    if (!obj)
+      return nullptr;
     const auto [bound, transform] = fromTransform(j);
     obj->setBound(bound);
     obj->setLocalTransform(transform);
@@ -385,9 +387,27 @@ public:
   {
     return makeObjectCommonProperty(
       j,
-      [&j](std::string name, std::string guid)
+      [&j](std::string name, std::string guid) -> std::shared_ptr<PaintNode>
       {
-        auto p = std::make_shared<PaintNode>(std::move(name), VGG_MASTER, std::move(guid));
+        auto p = std::make_shared<PaintNode>(std::move(name), VGG_INSTANCE, std::move(guid));
+        auto& instances = Scene::instanceObjects();
+        if (auto it = instances.find(p->guid()); it == instances.end())
+        {
+          std::string masterID = j.value("symbolID", "");
+          if (!masterID.empty())
+          {
+            instances[p->guid()] =
+              std::move(std::pair<std::weak_ptr<PaintNode>, std::string>{ p, masterID });
+          }
+          else
+          {
+            WARN("master id is empty referenced by [%s].", p->guid().c_str());
+          }
+        }
+        else
+        {
+          WARN("Instance [%s] is duplicated.", p->guid().c_str());
+        }
         return p;
       },
       [&j](PaintNode* p) {});
@@ -399,8 +419,8 @@ public:
       j,
       [&j](std::string name, std::string guid)
       {
-        auto symbolID = j.value("symbolID", "");
-        auto p = std::make_shared<PaintNode>(std::move(name), VGG_MASTER, std::move(guid));
+        auto symbolID = j.value("symbolID", ""); // this field will be removed next version
+        auto p = std::make_shared<PaintNode>(std::move(name), VGG_MASTER, std::move(symbolID));
         return p;
       },
       [&j](PaintNode* p)

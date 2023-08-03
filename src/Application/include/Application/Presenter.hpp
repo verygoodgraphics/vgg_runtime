@@ -23,6 +23,7 @@ class Presenter : public std::enable_shared_from_this<Presenter>
   std::shared_ptr<Daruma> m_edit_model;
 
   rxcpp::subjects::subject<VGG::UIEventPtr> m_subject;
+  rxcpp::subjects::subject<VGG::UIEventPtr> m_edit_subject;
   rxcpp::observer<VGG::ModelEventPtr> m_model_observer;
   rxcpp::observer<VGG::ModelEventPtr> m_edit_model_observer;
 
@@ -53,6 +54,19 @@ public:
     {
       m_edit_view->setResouces(m_edit_model->resources());
       m_edit_view->show(m_edit_model->designDoc()->content());
+
+      m_edit_view->registerEventListener(
+        [model](std::string path, UIEventType eventType)
+        {
+          switch (eventType)
+          {
+            case UIEventType::click:
+              return true;
+
+            default:
+              return false;
+          }
+        });
     }
     else
     {
@@ -78,6 +92,16 @@ public:
   void setEditView(std::shared_ptr<UIView> view)
   {
     m_edit_view = view;
+
+    auto weak_this = weak_from_this();
+    m_edit_view->setEventListener(
+      [weak_this](UIEventPtr evt_ptr)
+      {
+        if (auto p = weak_this.lock())
+        {
+          p->m_edit_subject.get_subscriber().on_next(evt_ptr);
+        }
+      });
   }
 
   virtual rxcpp::observer<VGG::ModelEventPtr>& getModelObserver()
@@ -163,6 +187,11 @@ public:
   virtual rxcpp::observable<VGG::UIEventPtr> getObservable()
   {
     return m_subject.get_observable();
+  }
+
+  virtual rxcpp::observable<VGG::UIEventPtr> getEditObservable()
+  {
+    return m_edit_subject.get_observable();
   }
 
 private:

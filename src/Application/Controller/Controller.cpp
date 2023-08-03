@@ -13,6 +13,8 @@
 
 #include <cassert>
 
+constexpr auto pseudo_path_edit_view = "::editView";
+
 namespace VGG
 {
 
@@ -118,16 +120,15 @@ void Controller::start()
   m_presenter->setModel(m_model);
 
   observeModelState();
-  observeUIEvent();
+  observeViewEvent();
 }
 
 void Controller::startEditing()
 {
   m_presenter->setEditModel(m_edit_model);
 
-  m_edit_model->getObservable()
-    .observe_on(m_run_loop->thread())
-    .subscribe(m_presenter->getEditModelObserver());
+  observeEditModelState();
+  observeEditViewEvent();
 
   DarumaContainer().add(m_edit_model, DarumaContainer::KeyType::Edited);
 }
@@ -139,7 +140,14 @@ void Controller::observeModelState()
     .subscribe(m_presenter->getModelObserver());
 }
 
-void Controller::observeUIEvent()
+void Controller::observeEditModelState()
+{
+  m_edit_model->getObservable()
+    .observe_on(m_run_loop->thread())
+    .subscribe(m_presenter->getEditModelObserver());
+}
+
+void Controller::observeViewEvent()
 {
   auto weak_this = weak_from_this();
   auto observer = rxcpp::make_observer_dynamic<UIEventPtr>(
@@ -164,8 +172,33 @@ void Controller::observeUIEvent()
       }
     });
 
-  // todo, subscribe on new thread to not block current thread while evaluating js code
   m_presenter->getObservable().subscribe(observer);
+}
+
+void Controller::observeEditViewEvent()
+{
+  auto weak_this = weak_from_this();
+  auto observer = rxcpp::make_observer_dynamic<UIEventPtr>(
+    [weak_this](UIEventPtr evt)
+    {
+      auto shared_this = weak_this.lock();
+      if (!shared_this)
+      {
+        return;
+      }
+
+      auto listeners_map = shared_this->m_model->getEventListeners(pseudo_path_edit_view);
+      std::string type = evt->type();
+      if (auto it = listeners_map.find(type); it != listeners_map.end())
+      {
+        for (auto& listener : it->second)
+        {
+          shared_this->vggExec()->evalModule(listener, evt);
+        }
+      }
+    });
+
+  m_presenter->getEditObservable().subscribe(observer);
 }
 
 const std::shared_ptr<VggExec>& Controller::vggExec()

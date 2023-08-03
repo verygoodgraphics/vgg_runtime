@@ -54,9 +54,11 @@ private:
 
   void start();
   void observeModelState();
-  void observeUIEvent();
+  void observeViewEvent();
 
   void startEditing();
+  void observeEditModelState();
+  void observeEditViewEvent();
 };
 
 } // namespace VGG

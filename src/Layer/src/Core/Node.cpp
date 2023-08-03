@@ -205,7 +205,7 @@ NodePtr Node::cloneRecursive() const
   {
     for (const auto& n : m_firstChild)
     {
-      newNode->pushChildFront(n->cloneRecursive());
+      newNode->pushChildBack(n->cloneRecursive());
     }
   }
   return newNode;

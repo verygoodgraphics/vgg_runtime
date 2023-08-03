@@ -164,9 +164,19 @@ public:
     return m_firstChild.begin();
   }
 
+  auto cbegin() const
+  {
+    return m_firstChild.cbegin();
+  }
+
   auto end()
   {
     return m_firstChild.end();
+  }
+
+  auto cend() const
+  {
+    return m_firstChild.cend();
   }
 
   static NodePtr createNode(const std::string& name)

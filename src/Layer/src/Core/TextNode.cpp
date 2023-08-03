@@ -34,6 +34,11 @@ TextNode::TextNode(const std::string& name, std::string guid)
   d_ptr->m_paragraphCache.setFontCollection(fontCollection);
 }
 
+NodePtr TextNode::clone() const
+{
+  return 0;
+}
+
 void TextNode::setParagraph(std::string utf8,
                             const std::vector<TextAttr>& attrs,
                             const std::vector<TextLineAttr>& lineAttr)

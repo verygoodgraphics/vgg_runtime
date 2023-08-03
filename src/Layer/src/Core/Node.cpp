@@ -81,7 +81,7 @@ void Node::pushSiblingBack(NodePtr node)
 
 NodePtr Node::removeChild(const std::string& name)
 {
-  auto it = _findChild(name);
+  auto it = findChildImpl(name);
   if (it == m_firstChild.end())
   {
     return nullptr;
@@ -100,7 +100,7 @@ NodePtr Node::removeSibling(const std::string& name)
 
 NodePtr Node::findChild(const std::string& name) const
 {
-  auto it = _findChild(name);
+  auto it = findChildImpl(name);
   if (it != m_firstChild.end())
   {
     return *it;
@@ -167,7 +167,7 @@ NodePtr Node::findChildRecursive(const std::string& name) const
     }
     else
     {
-      auto r = _findChildRecursive(a, name);
+      auto r = findChildRecursiveImpl(a, name);
       if (r)
         return r;
     }
@@ -175,7 +175,7 @@ NodePtr Node::findChildRecursive(const std::string& name) const
   return nullptr;
 }
 
-NodePtr Node::_findChildRecursive(const NodePtr& ptr, const std::string& name) const
+NodePtr Node::findChildRecursiveImpl(const NodePtr& ptr, const std::string& name) const
 {
   for (const auto& a : ptr->m_firstChild)
   {
@@ -185,7 +185,7 @@ NodePtr Node::_findChildRecursive(const NodePtr& ptr, const std::string& name) c
     }
     else
     {
-      auto r = _findChildRecursive(a, name);
+      auto r = findChildRecursiveImpl(a, name);
       if (r)
         return r;
     }

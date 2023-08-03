@@ -5,9 +5,9 @@
 #include <memory>
 #include <list>
 #include <utility>
-
 #include <memory>
 
+// NOLINTBEGIN
 template<typename T>
 static inline T* GetImplPtrHelper(T* ptr)
 {
@@ -18,6 +18,7 @@ static inline typename Wrapper::pointer GetImplPtrHelper(const Wrapper& p)
 {
   return p.data();
 }
+// NOLINTEND
 
 #define VGG_DECL_IMPL(Class)                                                                       \
   inline Class##__pImpl* d_func()                                                                  \
@@ -67,17 +68,22 @@ class VGG_EXPORTS Node : public std::enable_shared_from_this<Node>
   using FirstChildNode = std::list<std::shared_ptr<Node>>;
 
 public:
-  Node(const Node&) = delete;
-  Node(Node&&) = delete;
-  Node& operator=(const Node&) = delete;
-  Node& operator=(Node&&) = delete;
+  Node(const Node& other)
+  {
+    m_name = other.m_name;
+  }
+  Node& operator=(const Node& other) = delete;
+  Node(Node&&) noexcept = default;
+  Node& operator=(Node&&) noexcept = default;
   struct Iterator
   {
+    // NOLINTBEGIN
     using iterator_category = std::forward_iterator_tag;
     using difference_type = std::ptrdiff_t;
     using value_type = NodePtr;
     using pointer = NodePtr*;
     using reference = NodePtr&;
+    // NOLINTEND
 
     Iterator(pointer ptr)
       : m_ptr(ptr)
@@ -116,9 +122,14 @@ public:
     pointer m_ptr;
   };
 
-  const std::string& getName() const
+  const std::string& name() const
   {
     return m_name;
+  }
+
+  void setName(const std::string& name)
+  {
+    m_name = name;
   }
 
   NodePtr parent() const
@@ -195,14 +206,14 @@ protected:
   FirstChildNode m_firstChild;
   std::list<std::shared_ptr<Node>>::iterator m_iter;
   NodeRef m_parent;
-  std::list<std::shared_ptr<Node>>::const_iterator _findChild(const std::string& name) const
+  std::list<std::shared_ptr<Node>>::const_iterator findChildImpl(const std::string& name) const
   {
     return std::find_if(m_firstChild.begin(),
                         m_firstChild.end(),
                         [&name](const auto& a) { return a->m_name == name; });
   }
 
-  NodePtr _findChildRecursive(const NodePtr& ptr, const std::string& name) const;
+  NodePtr findChildRecursiveImpl(const NodePtr& ptr, const std::string& name) const;
 
 protected:
   Node(const std::string& name)

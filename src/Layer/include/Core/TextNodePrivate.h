@@ -35,7 +35,7 @@ class TextParagraphCache : public ParagraphListener
 {
 public:
   using TextParagraphCacheDirtyFlags = uint8_t;
-  enum TextParagraphCacheFlagsBits : TextParagraphCacheDirtyFlags
+  enum ETextParagraphCacheFlagsBits : TextParagraphCacheDirtyFlags
   {
     D_REBUILD = 1,
     D_LAYOUT = 2,
@@ -85,6 +85,12 @@ public:
       sk_make_sp<VGGFontCollection>(std::move(mgr),
                                     FontManager::instance().getDefaultFallbackFonts());
   }
+  TextParagraphCache(const TextParagraphCache&) = default;
+  TextParagraphCache& operator=(const TextParagraphCache&) = default;
+
+  TextParagraphCache(TextParagraphCache&&) noexcept = default;
+  TextParagraphCache& operator=(TextParagraphCache&&) noexcept = default;
+
   TextParagraphCache(sk_sp<VGGFontCollection> fontCollection)
     : m_fontCollection(std::move(fontCollection))
   {
@@ -99,7 +105,7 @@ public:
     return m_dirtyFlags != 0;
   }
 
-  void clear(TextParagraphCacheFlagsBits bit)
+  void clear(ETextParagraphCacheFlagsBits bit)
   {
     m_dirtyFlags &= ~bit;
   }
@@ -109,12 +115,12 @@ public:
     m_dirtyFlags |= bit;
   }
 
-  bool test(TextParagraphCacheFlagsBits bit) const
+  bool test(ETextParagraphCacheFlagsBits bit) const
   {
     return m_dirtyFlags & bit;
   }
 
-  bool testAll(TextParagraphCacheFlagsBits bit) const
+  bool testAll(ETextParagraphCacheFlagsBits bit) const
   {
     return (m_dirtyFlags & bit) == bit;
   }
@@ -207,9 +213,27 @@ public:
     : q_ptr(api)
   {
   }
+
   std::string text;
-  TextParagraphCache m_paragraphCache;
+  TextParagraphCache paragraphCache;
   ETextLayoutMode mode;
-  ETextVerticalAlignment m_vertAlign{ ETextVerticalAlignment::VA_Top };
+  ETextVerticalAlignment vertAlign{ ETextVerticalAlignment::VA_Top };
+
+  TextNode__pImpl(const TextNode__pImpl& p)
+  {
+    this->operator=(p);
+  }
+
+  TextNode__pImpl& operator=(const TextNode__pImpl& p)
+  {
+    text = p.text;
+    mode = p.mode;
+    vertAlign = p.vertAlign;
+    // do not copy cache
+    return *this;
+  }
+
+  TextNode__pImpl(TextNode__pImpl&& p) noexcept = default;
+  TextNode__pImpl& operator=(TextNode__pImpl&& p) noexcept = default;
 };
 } // namespace VGG

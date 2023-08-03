@@ -22,11 +22,13 @@ class UIView
 public:
   using EventListener = std::function<void(UIEventPtr)>;
   using ResourcesType = std::map<std::string, std::vector<char>>;
+  using HasEventListener = std::function<bool(const std::string&, UIEventType)>;
 
   using scalar_type = int;
 
 private:
   EventListener m_event_listener;
+  HasEventListener m_has_event_listener;
 
   std::shared_ptr<Scene> m_scene;
   std::vector<std::shared_ptr<UIView>> m_subviews;
@@ -63,6 +65,11 @@ public:
   void setResouces(ResourcesType resources)
   {
     Scene::s_resRepo = std::move(resources);
+  }
+
+  void registerEventListener(HasEventListener hasEventListener)
+  {
+    m_has_event_listener = hasEventListener;
   }
 
   void setEventListener(EventListener listener)

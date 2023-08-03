@@ -79,6 +79,11 @@ public:
     m_has_event_listener = hasEventListener;
   }
 
+  void registerEventListener(HasEventListener hasEventListener)
+  {
+    m_has_event_listener = hasEventListener;
+  }
+
   void setEventListener(EventListener listener)
   {
     m_event_listener = listener;

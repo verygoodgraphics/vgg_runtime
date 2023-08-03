@@ -197,7 +197,7 @@ public:
 
   virtual NodePtr clone() const;
 
-  NodePtr cloneRecursive() const;
+  NodePtr cloneChildren() const;
 
   virtual ~Node() = default;
 

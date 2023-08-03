@@ -198,14 +198,14 @@ NodePtr Node::clone() const
   return createNode(m_name);
 }
 
-NodePtr Node::cloneRecursive() const
+NodePtr Node::cloneChildren() const
 {
   auto newNode = clone();
   if (newNode)
   {
     for (const auto& n : m_firstChild)
     {
-      newNode->pushChildBack(n->cloneRecursive());
+      newNode->pushChildBack(n->cloneChildren());
     }
   }
   return newNode;

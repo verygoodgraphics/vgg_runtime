@@ -480,11 +480,11 @@ protected: // protected methods
       m_curMouseX = evt.motion.x;
       m_curMouseY = evt.motion.y;
     }
-    auto e = m_zoomer.mapEvent(evt, DPI::ScaleFactor);
-    // InputManager::onEvent(e);
+
     if (m_view)
-      m_view->onEvent(e);
-    // InputManager::onEvent(e);
+    {
+      m_view->onEvent(evt, &m_zoomer);
+    }
   }
 
   bool onGlobalEvent(const SDL_Event& evt)

@@ -6,9 +6,9 @@ namespace VGG
 namespace Layout
 {
 
-using Scalar = double;
+using Scalar = float;
 
-#define LayoutIntToScalar(x) static_cast<Scalar>(x)
+#define toVggLayoutScalar(x) static_cast<Scalar>(x)
 
 struct Point
 {

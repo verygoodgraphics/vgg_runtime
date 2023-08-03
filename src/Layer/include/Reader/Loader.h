@@ -9,7 +9,6 @@
 #include "glm/gtx/matrix_transform_2d.hpp"
 #include "nlohmann/json.hpp"
 #include "Core/PaintNode.h"
-#include "Core/PathNode.h"
 #include "Core/TextNode.h"
 #include "Core/ImageNode.h"
 

@@ -77,6 +77,19 @@ PaintNode::PaintNode(const std::string& name, ObjectType type, const std::string
   d_ptr->guid = guid;
 }
 
+PaintNode::PaintNode(const std::string& name, std::unique_ptr<PaintNode__pImpl> impl)
+  : Node(name)
+  , d_ptr(std::move(impl))
+{
+}
+
+NodePtr PaintNode::clone() const
+{
+  auto newNode = std::shared_ptr<PaintNode>(
+    new PaintNode(getName(), std::move(std::make_unique<PaintNode__pImpl>(*d_ptr))));
+  return newNode;
+}
+
 void PaintNode::setContectSettings(const ContextSetting& settings)
 {
   VGG_IMPL(PaintNode);

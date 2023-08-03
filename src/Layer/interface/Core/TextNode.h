@@ -22,6 +22,7 @@ public:
                     const std::vector<TextLineAttr>& lineAttr);
   void setFrameMode(ETextLayoutMode mode);
   void setVerticalAlignment(ETextVerticalAlignment vertAlign);
+  NodePtr clone() const override;
   ~TextNode();
 
 protected:

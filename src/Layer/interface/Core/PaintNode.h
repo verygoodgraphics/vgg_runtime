@@ -53,12 +53,17 @@ protected:
   friend class NlohmannBuilder;
   friend class SkiaRenderer;
 
+private:
+  PaintNode(const std::string& name, std::unique_ptr<PaintNode__pImpl> impl);
+
 public:
   PaintNode(const std::string& name, ObjectType type, const std::string& guid);
   PaintNode(const PaintNode&) = delete;
   PaintNode(PaintNode&&) = delete;
   PaintNode& operator=(const PaintNode&) = delete;
   PaintNode& operator=(PaintNode&&) = delete;
+
+  virtual NodePtr clone() const override;
 
   void addChild(const std::shared_ptr<PaintNode> node)
   {

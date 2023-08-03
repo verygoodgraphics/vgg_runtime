@@ -67,11 +67,15 @@ public:
 
   void addChild(const std::shared_ptr<PaintNode> node)
   {
+    if (!node)
+      return;
     pushChildBack(std::move(node));
   }
 
   void addSubShape(const std::shared_ptr<PaintNode> node, EBoolOp op)
   {
+    if (!node)
+      return;
     node->setClipOperator(op);
     addChild(node);
   }

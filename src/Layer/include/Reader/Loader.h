@@ -400,7 +400,7 @@ public:
       [&j](std::string name, std::string guid)
       {
         auto symbolID = j.value("symbolID", "");
-        auto p = std::make_shared<PaintNode>(std::move(name), VGG_MASTER, std::move(symbolID));
+        auto p = std::make_shared<PaintNode>(std::move(name), VGG_MASTER, std::move(guid));
         return p;
       },
       [&j](PaintNode* p)

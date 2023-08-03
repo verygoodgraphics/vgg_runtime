@@ -66,8 +66,8 @@ public:
     return *this;
   }
 
-  PaintNode__pImpl(PaintNode__pImpl&&) = delete;
-  PaintNode__pImpl& operator=(PaintNode__pImpl&&) = delete;
+  PaintNode__pImpl(PaintNode__pImpl&&) noexcept = default;
+  PaintNode__pImpl& operator=(PaintNode__pImpl&&) noexcept = default;
 };
 
 PaintNode::PaintNode(const std::string& name, ObjectType type, const std::string& guid)
@@ -83,10 +83,15 @@ PaintNode::PaintNode(const std::string& name, std::unique_ptr<PaintNode__pImpl> 
 {
 }
 
+PaintNode::PaintNode(const PaintNode& other)
+  : Node(other.name())
+  , d_ptr(new PaintNode__pImpl(*other.d_ptr))
+{
+}
+
 NodePtr PaintNode::clone() const
 {
-  auto newNode = std::shared_ptr<PaintNode>(
-    new PaintNode(getName(), std::move(std::make_unique<PaintNode__pImpl>(*d_ptr))));
+  auto newNode = std::make_shared<PaintNode>(*this);
   return newNode;
 }
 

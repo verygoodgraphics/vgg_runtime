@@ -31,12 +31,19 @@ TextNode::TextNode(const std::string& name, std::string guid)
   auto fontCollection =
     sk_make_sp<VGGFontCollection>(std::move(mgr),
                                   FontManager::instance().getDefaultFallbackFonts());
-  d_ptr->m_paragraphCache.setFontCollection(fontCollection);
+  d_ptr->paragraphCache.setFontCollection(fontCollection);
+}
+
+TextNode::TextNode(const TextNode& other)
+  : PaintNode(other)
+  , d_ptr(new TextNode__pImpl(*other.d_ptr))
+{
 }
 
 NodePtr TextNode::clone() const
 {
-  return 0;
+  auto newNode = std::make_shared<TextNode>(*this);
+  return newNode;
 }
 
 void TextNode::setParagraph(std::string utf8,
@@ -61,7 +68,7 @@ void TextNode::setParagraph(std::string utf8,
     paraAttrs.emplace_back(attr, ETextHorizontalAlignment::HA_Left);
   }
   ParagraphParser parser;
-  parser.parse(_->m_paragraphCache, _->text, attrs, paraAttrs);
+  parser.parse(_->paragraphCache, _->text, attrs, paraAttrs);
 }
 
 void TextNode::setFrameMode(ETextLayoutMode mode)
@@ -73,17 +80,17 @@ void TextNode::setFrameMode(ETextLayoutMode mode)
 void TextNode::paintEvent(SkCanvas* canvas)
 {
   VGG_IMPL(TextNode);
-  if (_->m_paragraphCache.empty())
+  if (_->paragraphCache.empty())
     return;
-  if (_->m_paragraphCache.test(TextParagraphCache::TextParagraphCacheFlagsBits::D_REBUILD))
+  if (_->paragraphCache.test(TextParagraphCache::ETextParagraphCacheFlagsBits::D_REBUILD))
   {
-    _->m_paragraphCache.rebuild();
-    _->m_paragraphCache.clear(TextParagraphCache::TextParagraphCacheFlagsBits::D_REBUILD);
+    _->paragraphCache.rebuild();
+    _->paragraphCache.clear(TextParagraphCache::ETextParagraphCacheFlagsBits::D_REBUILD);
   }
-  if (_->m_paragraphCache.test(TextParagraphCache::TextParagraphCacheFlagsBits::D_LAYOUT))
+  if (_->paragraphCache.test(TextParagraphCache::ETextParagraphCacheFlagsBits::D_LAYOUT))
   {
-    setBound(_->m_paragraphCache.layout(getBound(), _->mode)); // update bound
-    _->m_paragraphCache.clear(TextParagraphCache::TextParagraphCacheFlagsBits::D_LAYOUT);
+    setBound(_->paragraphCache.layout(getBound(), _->mode)); // update bound
+    _->paragraphCache.clear(TextParagraphCache::ETextParagraphCacheFlagsBits::D_LAYOUT);
   }
 
   if (overflow() == OF_Hidden)
@@ -97,30 +104,25 @@ void TextNode::paintEvent(SkCanvas* canvas)
   canvas->scale(1, -1);
   {
     const auto bound = getBound();
-    int totalHeight = _->m_paragraphCache.getHeight();
+    int totalHeight = _->paragraphCache.getHeight();
     int curY = 0;
-    if (_->m_vertAlign == ETextVerticalAlignment::VA_Bottom)
+    if (_->vertAlign == ETextVerticalAlignment::VA_Bottom)
     {
       curY = bound.height() - totalHeight;
     }
-    else if (_->m_vertAlign == ETextVerticalAlignment::VA_Center)
+    else if (_->vertAlign == ETextVerticalAlignment::VA_Center)
     {
       curY = (bound.height() - totalHeight) / 2;
     }
-    for (int i = 0; i < _->m_paragraphCache.paragraphCache.size(); i++)
+    for (int i = 0; i < _->paragraphCache.paragraphCache.size(); i++)
     {
-      auto& p = _->m_paragraphCache.paragraphCache[i].paragraph;
-      const auto curX = _->m_paragraphCache.paragraphCache[i].offsetX;
+      auto& p = _->paragraphCache.paragraphCache[i].paragraph;
+      const auto curX = _->paragraphCache.paragraphCache[i].offsetX;
       p->paint(canvas, curX, curY);
       if (Scene::isEnableDrawDebugBound())
       {
         DebugCanvas debugCanvas(canvas);
-        drawParagraphDebugInfo(debugCanvas,
-                               _->m_paragraphCache.paragraph[i],
-                               p.get(),
-                               curX,
-                               curY,
-                               i);
+        drawParagraphDebugInfo(debugCanvas, _->paragraphCache.paragraph[i], p.get(), curX, curY, i);
       }
       auto lastLine = p->lineNumber();
       LineMetrics lineMetric;
@@ -141,7 +143,7 @@ void TextNode::paintEvent(SkCanvas* canvas)
 void TextNode::setVerticalAlignment(ETextVerticalAlignment vertAlign)
 {
   VGG_IMPL(TextNode);
-  _->m_vertAlign = vertAlign;
+  _->vertAlign = vertAlign;
 }
 
 TextNode::~TextNode() = default;

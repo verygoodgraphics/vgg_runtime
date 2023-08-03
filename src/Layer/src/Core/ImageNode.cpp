@@ -2,6 +2,7 @@
 #include <Core/PathNode.h>
 #include <core/SkBlendMode.h>
 #include <core/SkRect.h>
+#include "Core/Node.h"
 #include "Core/VType.h"
 #include "SkiaImpl/VSkia.h"
 #include "glm/matrix.hpp"
@@ -17,8 +18,47 @@
 namespace VGG
 {
 
+class ImageNode__pImpl
+{
+  VGG_DECL_API(ImageNode);
+
+public:
+  std::string imageGuid;
+  bool fillReplacesImage = false;
+  sk_sp<SkImage> image;
+  sk_sp<SkShader> shader;
+  ImageNode__pImpl(ImageNode* api)
+    : q_ptr(api)
+  {
+  }
+  ImageNode__pImpl(const ImageNode__pImpl& other)
+  {
+    imageGuid = other.imageGuid;
+    fillReplacesImage = other.fillReplacesImage;
+    image = other.image;
+    shader = other.shader;
+  }
+  ImageNode__pImpl& operator=(const ImageNode__pImpl& other) = delete;
+  ImageNode__pImpl(ImageNode__pImpl&& other) noexcept = default;
+  ImageNode__pImpl& operator=(ImageNode__pImpl&& other) noexcept
+  {
+    image = std::move(other.image);
+    shader = std::move(other.shader);
+    imageGuid = std::move(other.imageGuid);
+    fillReplacesImage = std::move(other.fillReplacesImage);
+    return *this;
+  }
+};
+
 ImageNode::ImageNode(const std::string& name, std::string guid)
   : PaintNode(name, VGG_IMAGE, std::move(guid))
+  , d_ptr(new ImageNode__pImpl(this))
+{
+}
+
+ImageNode::ImageNode(const ImageNode& other)
+  : PaintNode(other)
+  , d_ptr(new ImageNode__pImpl(*other.d_ptr))
 {
 }
 
@@ -40,38 +80,41 @@ Mask ImageNode::asOutlineMask(const glm::mat3* mat)
 
 void ImageNode::setImage(const std::string& guid)
 {
-  this->guid = guid;
+  VGG_IMPL(ImageNode)
+  _->imageGuid = guid;
 }
 
 const std::string& ImageNode::getImageGUID() const
 {
-  return guid;
+  return d_ptr->imageGuid;
 }
 
 void ImageNode::setReplacesImage(bool fill)
 {
-  this->fillReplacesImage = fill;
+  VGG_IMPL(ImageNode)
+  _->fillReplacesImage = fill;
 }
 
 bool ImageNode::fill() const
 {
-  return this->fillReplacesImage;
+  return d_ptr->fillReplacesImage;
 }
 
 void ImageNode::paintFill(SkCanvas* canvas, const SkPath& path)
 {
 
-  if (!image)
+  VGG_IMPL(ImageNode)
+  if (!_->image)
   {
-    image = loadImage(guid, Scene::getResRepo());
+    _->image = loadImage(_->imageGuid, Scene::getResRepo());
   }
-  if (image)
+  if (_->image)
   {
-    if (!shader)
+    if (!_->shader)
     {
       const auto& b = getBound();
-      shader =
-        getImageShader(image, b.width(), b.height(), EImageFillType::IFT_Stretch, 1.0, false);
+      _->shader =
+        getImageShader(_->image, b.width(), b.height(), EImageFillType::IFT_Stretch, 1.0, false);
     }
     auto mask = makeMaskBy(BO_Intersection);
     if (mask.outlineMask.isEmpty() == false)
@@ -81,7 +124,7 @@ void ImageNode::paintFill(SkCanvas* canvas, const SkPath& path)
     }
 
     SkPaint p;
-    p.setShader(shader);
+    p.setShader(_->shader);
     canvas->drawPaint(p);
     // Another weird drawing method
     // SkSamplingOptions opt;
@@ -98,5 +141,7 @@ void ImageNode::paintFill(SkCanvas* canvas, const SkPath& path)
     }
   }
 }
+
+ImageNode::~ImageNode() = default;
 
 } // namespace VGG

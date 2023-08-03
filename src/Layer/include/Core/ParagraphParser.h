@@ -56,11 +56,25 @@ struct ParagraphAttr
     , horiAlign(align)
   {
   }
+
+  ParagraphAttr(const ParagraphAttr&) = default;
+  ParagraphAttr& operator=(const ParagraphAttr&) = default;
+
+  ParagraphAttr(ParagraphAttr&&) = default;
+  ParagraphAttr& operator=(ParagraphAttr&&) = default;
 };
 
 class ParagraphListener
 {
   friend class ParagraphParser;
+
+public:
+  ParagraphListener() = default;
+  ParagraphListener(const ParagraphListener&) = default;
+  ParagraphListener& operator=(const ParagraphListener&) = default;
+
+  ParagraphListener(ParagraphListener&&) noexcept = default;
+  ParagraphListener& operator=(ParagraphListener&&) noexcept = default;
 
 protected:
   virtual void onBegin() = 0;

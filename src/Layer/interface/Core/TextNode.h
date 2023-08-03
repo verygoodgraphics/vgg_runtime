@@ -17,6 +17,10 @@ class VGG_EXPORTS TextNode final : public PaintNode
 
 public:
   TextNode(const std::string& name, std::string guid);
+  TextNode(const TextNode&);
+  TextNode& operator=(const TextNode&) = delete;
+  TextNode(TextNode&&) noexcept = default;
+  TextNode& operator=(TextNode&&) noexcept = default;
   void setParagraph(std::string utf8,
                     const std::vector<TextAttr>& attrs,
                     const std::vector<TextLineAttr>& lineAttr);

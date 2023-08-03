@@ -16,5 +16,10 @@ public:
   {
     outlineMask.addPath(mask.outlineMask);
   }
+
+  Mask& operator=(Mask&&) noexcept = default;
+  Mask(Mask&&) noexcept = default;
+  Mask& operator=(const Mask&) = default;
+  Mask(const Mask&) = default;
 };
 }; // namespace VGG

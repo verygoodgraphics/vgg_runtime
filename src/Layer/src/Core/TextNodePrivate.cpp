@@ -21,7 +21,7 @@ void drawParagraphDebugInfo(DebugCanvas& canvas,
                             int curY,
                             int index)
 {
-  static SkColor colorTable[9] = {
+  static SkColor s_colorTable[9] = {
     SK_ColorBLUE,   SK_ColorGREEN,  SK_ColorRED,  SK_ColorCYAN,   SK_ColorMAGENTA,
     SK_ColorYELLOW, SK_ColorDKGRAY, SK_ColorGRAY, SK_ColorLTGRAY,
   };
@@ -31,7 +31,7 @@ void drawParagraphDebugInfo(DebugCanvas& canvas,
   auto h = p->getHeight();
   auto mw = p->getMaxWidth();
   SkPaint pen;
-  SkColor color = colorTable[index % 9];
+  SkColor color = s_colorTable[index % 9];
   pen.setColor(SkColorSetA(color, 0x11));
   canvas.get()->drawRect(SkRect{ 0, 0, mw, h }, pen);
   canvas.drawRects(color, rects);
@@ -77,14 +77,14 @@ sktxt::ParagraphStyle createParagraphStyle(const ParagraphAttr& attr)
 std::vector<std::string> split(const std::string& s, char seperator)
 {
   std::vector<std::string> output;
-  std::string::size_type prev_pos = 0, pos = 0;
+  std::string::size_type prevPos = 0, pos = 0;
   while ((pos = s.find(seperator, pos)) != std::string::npos)
   {
-    std::string substring(s.substr(prev_pos, pos - prev_pos));
+    std::string substring(s.substr(prevPos, pos - prevPos));
     output.push_back(substring);
-    prev_pos = ++pos;
+    prevPos = ++pos;
   }
-  output.push_back(s.substr(prev_pos, pos - prev_pos)); // Last word
+  output.push_back(s.substr(prevPos, pos - prevPos)); // Last word
   return output;
 }
 

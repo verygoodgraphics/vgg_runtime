@@ -58,10 +58,10 @@ private:
 
 public:
   PaintNode(const std::string& name, ObjectType type, const std::string& guid);
-  PaintNode(const PaintNode&) = delete;
-  PaintNode(PaintNode&&) = delete;
+  PaintNode(const PaintNode&);
   PaintNode& operator=(const PaintNode&) = delete;
-  PaintNode& operator=(PaintNode&&) = delete;
+  PaintNode(PaintNode&&) = default;
+  PaintNode& operator=(PaintNode&&) = default;
 
   virtual NodePtr clone() const override;
 

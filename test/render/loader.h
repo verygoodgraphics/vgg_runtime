@@ -139,6 +139,7 @@ inline std::shared_ptr<IReader> load(const std::string ext)
   else if (ext == ".json")
   {
     auto r = std::make_shared<RawFileReader>();
+    r->setConfig(cfg.at("rawParser"));
     reader = r;
   }
   else if (ext == ".ai")

@@ -114,6 +114,8 @@ void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
     DECLARE_NODE_API_PROPERTY("addEventListener", AddEventListener),
     DECLARE_NODE_API_PROPERTY("removeEventListener", RemoveEventListener),
     DECLARE_NODE_API_PROPERTY("getEventListeners", GetEventListeners),
+
+    DECLARE_NODE_API_PROPERTY("save", Save),
   };
 
   napi_value cons;
@@ -452,6 +454,34 @@ napi_value VggSdkNodeAdapter::GetEventListeners(napi_env env, napi_callback_info
                                             js_listener_code_array));
     }
     return result_listeners_map;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+    return nullptr;
+  }
+}
+
+napi_value VggSdkNodeAdapter::Save(napi_env env, napi_callback_info info)
+{
+  size_t argc = 0;
+  napi_value _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, nullptr, &_this, nullptr));
+
+  if (argc != 0)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    VggSdkNodeAdapter* sdk_adapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
+
+    sdk_adapter->m_vggSdk->save();
+
+    return nullptr;
   }
   catch (std::exception& e)
   {

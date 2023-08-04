@@ -68,6 +68,7 @@ class VGG_EXPORTS Node : public std::enable_shared_from_this<Node>
   using FirstChildNode = std::list<std::shared_ptr<Node>>;
 
 public:
+  using NodeIter = std::list<std::shared_ptr<Node>>::iterator;
   Node(const Node& other)
   {
     m_name = other.m_name;
@@ -143,6 +144,11 @@ public:
   }
 
   NodePtr root() const;
+
+  NodeIter iter()
+  {
+    return m_iter;
+  }
 
   void pushChildBack(NodePtr node);
 

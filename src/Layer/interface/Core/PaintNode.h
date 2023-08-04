@@ -28,6 +28,12 @@ struct ContourOption
 {
   ECoutourType contourType{ ECoutourType::MCT_FrameOnly };
   bool visibilityAware{ true };
+  ContourOption(ECoutourType contourType = ECoutourType::MCT_FrameOnly,
+                bool visibilityAware = false)
+    : contourType(contourType)
+    , visibilityAware(visibilityAware)
+  {
+  }
 };
 
 enum EPaintStrategy
@@ -39,6 +45,10 @@ enum EPaintStrategy
 struct PaintOption
 {
   EPaintStrategy paintStrategy{ PS_Recursively };
+  PaintOption(EPaintStrategy paintStrategy = PS_Recursively)
+    : paintStrategy(paintStrategy)
+  {
+  }
 };
 
 class PaintNode__pImpl;

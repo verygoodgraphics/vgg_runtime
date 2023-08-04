@@ -272,6 +272,8 @@ protected: // protected members and static members
     app->m_pixelRatio = (double)drawSize.first / winSize.first;
 #endif
     app->m_dpiRatio = app->Self()->getDPIScale();
+    app->m_zoomer.dpiRatio = DPI::ScaleFactor;
+
     DEBUG("Drawable size: %d %d", drawSize.first, drawSize.second);
     DEBUG("Window size: %d %d", winSize.first, winSize.second);
     DEBUG("Pixel ratio: %.2lf", app->m_pixelRatio);
@@ -524,21 +526,6 @@ protected: // protected methods
       m_zoomer.offset.x += evt.motion.xrel / DPI::ScaleFactor;
       m_zoomer.offset.y += evt.motion.yrel / DPI::ScaleFactor;
       return true;
-    }
-    else if (type == SDL_MOUSEWHEEL && (SDL_GetModState() & KMOD_CTRL))
-    {
-      int mx, my;
-      SDL_GetMouseState(&mx, &my);
-      double dz = (evt.wheel.y > 0 ? 1.0 : -1.0) * 0.03;
-      double z2 = m_zoomer.zoom * (1 + dz);
-      if (z2 > 0.01 && z2 < 100)
-      {
-        m_zoomer.offset.x -= (mx / DPI::ScaleFactor - m_zoomer.offset.x) * dz;
-        m_zoomer.offset.y -= (my / DPI::ScaleFactor - m_zoomer.offset.y) * dz;
-        m_zoomer.zoom += m_zoomer.zoom * dz;
-        return true;
-      }
-      return false;
     }
     else if (type == SDL_KEYDOWN)
     {

@@ -1,5 +1,4 @@
 #include <Core/ImageNode.h>
-#include <Core/PathNode.h>
 #include <core/SkBlendMode.h>
 #include <core/SkRect.h>
 #include "Core/Node.h"

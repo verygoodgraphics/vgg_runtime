@@ -1,4 +1,7 @@
 #include "Core/StyleRenderer.h"
+#include "SkiaImpl/VSkia.h"
+
+using namespace VGG;
 
 sk_sp<SkShader> StyleRenderer::getGradientShader(const Gradient& g, const Bound2& bound)
 {

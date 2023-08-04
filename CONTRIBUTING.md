@@ -21,16 +21,16 @@ If you can fix any bug or make any improvement, welcome to send a pull request. 
 
 When opening a pull request, you will be asked to sign a Contributor License Agreement (CLA).
 
-### Basic PR Requirements
+### basic guildlines
 - Keep each commit atomic, and commit with clear messages.
 - Follow the PR template, and write clear descriptions.
-- For C++ code, we enforce the coding style via clang-format and clang-tidy.
+
+### extra guildines for code
+- How to build the code, refer to [Build Instructions](README.md#build-instructions).
 - Make sure you put useful comments in your code.
+- For C++ code, we enforce the coding style via clang-format and clang-tidy.
 
-Please refer to [Build Instructions](README.md#build-instructions) for how to build VGG runtime.
-
-## Need More Help?
-Please contact us through
-- Twitter: https://twitter.com/VGG_Design
+## Contact Us
+- twitter: https://twitter.com/VGG_Design
 - Discord: https://discord.gg/g3HJuKP54D
-- E-mail: bd@verygoodgraphics.com
+- e-mail: bd@verygoodgraphics.com

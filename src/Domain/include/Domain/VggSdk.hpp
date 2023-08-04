@@ -13,6 +13,7 @@
 class JsonDocument;
 
 constexpr int main_or_editor_daruma_index = 0;
+constexpr int edited_daruma_index = 1;
 
 class VggSdk
 {
@@ -50,9 +51,10 @@ public:
   ListenersType getEventListeners(const std::string& element_path,
                                   IndexType index = main_or_editor_daruma_index);
 
-  //   // ---
+  // editor
   //   void undo();
   //   void redo();
+  void save();
 
   //   // Production api
 

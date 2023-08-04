@@ -2,6 +2,9 @@
 
 #include "DIContainer.hpp"
 #include "Domain/DarumaContainer.hpp"
+#include "Domain/Saver/DirSaver.hpp"
+#include "Log.h"
+#include "Usecase/SaveModel.hpp"
 
 #ifdef EMSCRIPTEN
 constexpr auto listener_code_key = "listener";
@@ -96,4 +99,22 @@ std::shared_ptr<Daruma> VggSdk::getModel(IndexType index)
   auto key = index == main_or_editor_daruma_index ? DarumaContainer::KeyType::MainOrEditor
                                                   : DarumaContainer::KeyType::Edited;
   return DarumaContainer().get(key);
+}
+
+void VggSdk::save()
+{
+  auto editModel = getModel(edited_daruma_index);
+  if (editModel)
+  {
+    // todo, choose location to save, or save to remote server
+    std::string dst_dir{ "tmp/" };
+    auto saver{ std::make_shared<Model::DirSaver>(dst_dir) };
+    Editor editor{ editModel, saver };
+
+    editor.save();
+  }
+  else
+  {
+    WARN("VggSdk: no daruma file to save");
+  }
 }

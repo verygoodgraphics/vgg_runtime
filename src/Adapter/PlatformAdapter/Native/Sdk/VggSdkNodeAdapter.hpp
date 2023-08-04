@@ -35,6 +35,7 @@ private:
   // undo & redo
   static napi_value Undo(napi_env env, napi_callback_info info);
   static napi_value Redo(napi_env env, napi_callback_info info);
+  static napi_value Save(napi_env env, napi_callback_info info);
 
   static napi_ref constructor;
 

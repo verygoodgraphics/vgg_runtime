@@ -26,7 +26,8 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     .function("updateAt", &VggSdk::designDocumentReplaceAt)
     .function("addEventListener", &VggSdk::addEventListener)
     .function("removeEventListener", &VggSdk::removeEventListener)
-    .function("getEventListeners", &VggSdk::getEventListeners);
+    .function("getEventListeners", &VggSdk::getEventListeners)
+    .function("save", &VggSdk::save);
 }
 
 EMSCRIPTEN_BINDINGS(vgg_event)

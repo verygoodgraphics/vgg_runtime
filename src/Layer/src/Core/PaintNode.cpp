@@ -163,6 +163,8 @@ Mask PaintNode::makeMaskBy(EBoolOp maskOp)
     if (id != this->guid())
     {
       auto obj = objects[id].lock().get();
+      if (!obj)
+        continue;
       const auto t = obj->mapTransform(this);
       auto m = obj->asOutlineMask(&t);
       if (result.outlineMask.isEmpty())

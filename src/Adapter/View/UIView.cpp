@@ -52,7 +52,7 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
     case SDL_MOUSEBUTTONDOWN:
     {
       Layout::Point point{ toVggLayoutScalar(evt.button.x), toVggLayoutScalar(evt.button.y) };
-      point = converPointFromWindow(point);
+      point = converPointFromWindowAndScale(point);
       auto target_view = m_root->hitTest(point,
                                          [&has_event_listener](const std::string& path) {
                                            return has_event_listener(path, UIEventType::mousedown);
@@ -79,7 +79,7 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
     case SDL_MOUSEMOTION:
     {
       Layout::Point point{ toVggLayoutScalar(evt.motion.x), toVggLayoutScalar(evt.motion.y) };
-      point = converPointFromWindow(point);
+      point = converPointFromWindowAndScale(point);
       auto target_view = m_root->hitTest(point,
                                          [&has_event_listener](const std::string& path) {
                                            return has_event_listener(path, UIEventType::mousemove);
@@ -105,7 +105,7 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
     case SDL_MOUSEBUTTONUP:
     {
       Layout::Point point{ toVggLayoutScalar(evt.button.x), toVggLayoutScalar(evt.button.y) };
-      point = converPointFromWindow(point);
+      point = converPointFromWindowAndScale(point);
       auto js_button_index{ evt.button.button - 1 };
       auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
 
@@ -192,6 +192,12 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
           }
         }
       }
+    }
+    break;
+
+    case SDL_MOUSEWHEEL:
+    {
+      handleMouseWheel(evt, zoomer);
     }
     break;
 
@@ -437,4 +443,36 @@ Layout::Point UIView::converPointFromWindow(Layout::Point point)
   }
 
   return { x, y };
+}
+
+Layout::Point UIView::converPointFromWindowAndScale(Layout::Point point)
+{
+  point = converPointFromWindow(point);
+
+  auto x = point.x / m_contentScaleFactor;
+  auto y = point.y / m_contentScaleFactor;
+
+  return { x, y };
+}
+
+void UIView::handleMouseWheel(const SDL_Event& evt, Zoomer* zoomer)
+{
+  if (!m_is_editor && SDL_GetModState() & KMOD_CTRL)
+  {
+    int mx, my;
+    SDL_GetMouseState(&mx, &my);
+    Layout::Point point{ toVggLayoutScalar(mx), toVggLayoutScalar(my) };
+    point = converPointFromWindow(point);
+    mx = point.x;
+    my = point.y;
+
+    double dz = (evt.wheel.y > 0 ? 1.0 : -1.0) * 0.03;
+    double z2 = zoomer->zoom * (1 + dz);
+    if (z2 > 0.01 && z2 < 100)
+    {
+      zoomer->offset.x -= (mx / zoomer->dpiRatio) * dz;
+      zoomer->offset.y -= (my / zoomer->dpiRatio) * dz;
+      zoomer->zoom += zoomer->zoom * dz;
+    }
+  }
 }

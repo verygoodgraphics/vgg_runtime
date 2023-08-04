@@ -119,6 +119,8 @@ private:
                                   std::shared_ptr<LayoutView> parent);
   void layoutSubviews();
   Layout::Point converPointFromWindow(Layout::Point point);
+  Layout::Point converPointFromWindowAndScale(Layout::Point point);
+  void handleMouseWheel(const SDL_Event& evt, Zoomer* zoomer);
 };
 
 } // namespace VGG

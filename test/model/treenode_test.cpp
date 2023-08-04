@@ -1,4 +1,4 @@
-#include "Basic/Node.h"
+#include "Core/Node.h"
 #include "nlohmann/json.hpp"
 #include <deque>
 #include <gtest/gtest.h>
@@ -14,9 +14,8 @@ void PreorderVisit(const NodePtr& root, F&& f)
   if (root)
   {
     f(root);
-    for (const auto& p : root->m_firstChild)
+    for (const auto& p : *root)
     {
-
       PreorderVisit(p, std::forward<F>(f));
     }
   }
@@ -27,7 +26,7 @@ void PostorderVisit(const NodePtr& root, F&& f)
 {
   if (root)
   {
-    for (const auto& p : root->m_firstChild)
+    for (const auto& p : *root)
     {
       PostorderVisit(p, std::forward<F>(f));
     }
@@ -45,26 +44,26 @@ protected:
   {
   }
 
-  static VGG::NodePtr root;
+  static VGG::NodePtr s_root;
 
   static void check()
   {
     std::deque<std::string> cases = { "1", "2",  "6",  "7",  "12", "8",  "3", "4",
                                       "9", "10", "13", "14", "11", "15", "5" };
-    preOrder(root, cases);
+    preOrder(s_root, cases);
     cases = { "6", "12", "7", "8", "2", "3", "9", "13", "14", "10", "15", "11", "4", "5", "1" };
-    postOrder(root, cases);
+    postOrder(s_root, cases);
   }
 
   static void print()
   {
-    PreorderVisit(root, [](const auto& p) { std::cout << p->m_name << " "; });
+    PreorderVisit(s_root, [](const auto& p) { std::cout << p->name() << " "; });
     std::cout << "\n";
   }
 
   static void SetUpTestCase()
   {
-    root = VGG::Node::createNode("1");
+    s_root = VGG::Node::createNode("1");
   }
   static void TearDownTestCase()
   {
@@ -119,7 +118,7 @@ protected:
                    [&cases](const auto& p)
                    {
                      EXPECT_FALSE(cases.empty());
-                     EXPECT_EQ(p->m_name, cases.front());
+                     EXPECT_EQ(p->name(), cases.front());
                      cases.pop_front();
                    });
   }
@@ -130,17 +129,17 @@ protected:
                   [&cases](const auto& p)
                   {
                     EXPECT_FALSE(cases.empty());
-                    EXPECT_EQ(p->m_name, cases.front());
+                    EXPECT_EQ(p->name(), cases.front());
                     cases.pop_front();
                   });
   }
 };
 
-VGG::NodePtr TreeNodeTestSuit::root = nullptr;
+VGG::NodePtr TreeNodeTestSuit::s_root = nullptr;
 
 TEST_F(TreeNodeTestSuit, Create)
 {
-  root = Node::createNode("1");
+  s_root = Node::createNode("1");
 }
 
 TEST_F(TreeNodeTestSuit, InitTreeFromJson)
@@ -201,49 +200,49 @@ TEST_F(TreeNodeTestSuit, TraverseCheck)
 
 TEST_F(TreeNodeTestSuit, RemoveChildAndReattach)
 {
-  auto removed = root->removeChild("4");
+  auto removed = s_root->removeChild("4");
 
   std::deque<std::string> cases = { "4", "9", "10", "13", "14", "11", "15" };
   preOrder(removed, cases);
 
   cases = { "1", "2", "6", "7", "12", "8", "3", "5" };
-  preOrder(root, cases);
-  root->pushChildAt("5", removed);
+  preOrder(s_root, cases);
+  s_root->pushChildAt("5", removed);
 
   cases = { "1", "2", "6", "7", "12", "8", "3", "4", "9", "10", "13", "14", "11", "15", "5" };
-  preOrder(root, cases);
+  preOrder(s_root, cases);
 }
 
 TEST_F(TreeNodeTestSuit, RemoveSiblingAndReattach)
 {
-  auto removed = root->removeChild("4");
+  auto removed = s_root->removeChild("4");
 
   std::deque<std::string> cases = { "4", "9", "10", "13", "14", "11", "15" };
   preOrder(removed, cases);
 
   cases = { "1", "2", "6", "7", "12", "8", "3", "5" };
-  preOrder(root, cases);
-  root->findChild("3")->pushSiblingAt("5", removed);
+  preOrder(s_root, cases);
+  s_root->findChild("3")->pushSiblingAt("5", removed);
 
   cases = { "1", "2", "6", "7", "12", "8", "3", "4", "9", "10", "13", "14", "11", "15", "5" };
-  preOrder(root, cases);
+  preOrder(s_root, cases);
 }
 
 TEST_F(TreeNodeTestSuit, FindChildNode)
 {
-  auto c = root->findChild("1");
+  auto c = s_root->findChild("1");
   EXPECT_FALSE(c);
 
-  c = root->findChild("14");
+  c = s_root->findChild("14");
   EXPECT_FALSE(c);
-  c = root->findChildRecursive("14");
+  c = s_root->findChildRecursive("14");
   EXPECT_TRUE(c != nullptr);
-  EXPECT_EQ("14", c->m_name);
+  EXPECT_EQ("14", c->name());
 }
 
 TEST_F(TreeNodeTestSuit, FindSiblingNode)
 {
-  auto c = root->findChild("10");
+  auto c = s_root->findChild("10");
   EXPECT_TRUE(c);
   EXPECT_FALSE(c->findNextSblingFromCurrent("9"));
   EXPECT_TRUE(c->findNextSblingFromCurrent("10"));
@@ -256,30 +255,30 @@ TEST_F(TreeNodeTestSuit, FindSiblingNode)
 
 TEST_F(TreeNodeTestSuit, SeekRoot)
 {
-  auto c = root->findChildRecursive("10");
+  auto c = s_root->findChildRecursive("10");
   EXPECT_TRUE(c != nullptr);
-  EXPECT_EQ("10", c->m_name);
+  EXPECT_EQ("10", c->name());
   auto r = c->root();
   EXPECT_TRUE(r != nullptr);
-  EXPECT_EQ("1", r->m_name);
+  EXPECT_EQ("1", r->name());
   // removed
-  auto removed = root->removeChild("4");
+  auto removed = s_root->removeChild("4");
   r = c->root();
   EXPECT_TRUE(r != nullptr);
-  EXPECT_EQ("4", r->m_name);
+  EXPECT_EQ("4", r->name());
 
-  root->pushChildAt("5", removed);
+  s_root->pushChildAt("5", removed);
   check();
   r = c->root();
   EXPECT_TRUE(r != nullptr);
-  EXPECT_EQ("1", r->m_name);
+  EXPECT_EQ("1", r->name());
 }
 
 TEST_F(TreeNodeTestSuit, AccessByIterator)
 {
-  auto c = root->findChildRecursive("10");
+  auto c = s_root->findChildRecursive("10");
   EXPECT_TRUE(c);
-  EXPECT_EQ(c->m_name, "10");
-  auto it = *(c->iter);
-  EXPECT_EQ(it->m_name, "10");
+  EXPECT_EQ(c->name(), "10");
+  auto it = *(c->iter());
+  EXPECT_EQ(it->name(), "10");
 }

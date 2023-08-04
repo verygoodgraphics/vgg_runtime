@@ -69,11 +69,11 @@ protected:
     std::map<std::string, std::vector<char>> resources;
     if (std::filesystem::exists(fullpath) == false)
       return resources;
-    auto parentPath = fullpath.filename();
+    const fs::path prefix = this->config.value("outputImageDir", "resources");
     for (const auto& entry : std::filesystem::recursive_directory_iterator(fullpath))
     {
-      std::string key = (parentPath / entry.path().filename()).string();
-      std::cout << "read image: " << entry.path() << " which key is " << key << std::endl;
+      std::string key = (prefix / entry.path().filename()).string();
+      std::cout << "read image: " << entry.path() << " which key is: " << key << std::endl;
       resources[key] = GetBinFromFile(entry.path()).value_or(std::vector<char>{});
     }
     return resources;
@@ -108,7 +108,8 @@ public:
   {
     DataWrapper data;
     data.Format = readJson(fullpath);
-    auto stem = fullpath.parent_path() / "image";
+    const fs::path prefix = this->config.value("outputImageDir", "resources");
+    auto stem = fullpath.parent_path() / prefix;
     data.Resource = readRes(stem);
     return data;
   }

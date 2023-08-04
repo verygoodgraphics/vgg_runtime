@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Core/Attrs.h"
-#include "Core/ContourNode.h"
 #include "Core/VType.h"
 #include "Core/Node.h"
 #include "glm/fwd.hpp"

@@ -1,27 +1,20 @@
 #pragma once
 #include "Core/Geometry.hpp"
 #include "Core/VType.h"
-#include "Core/PathNode.h"
+#include "Core/Attrs.h"
 #include "include/core/SkClipOp.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPathTypes.h"
 #include "include/core/SkPathEffect.h"
-#include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkImageFilters.h"
-#include "include/core/SkScalar.h"
 #include "include/core/SkShader.h"
-#include "include/core/SkSurface.h"
-#include "include/core/SkTileMode.h"
 #include "include/core/SkTypes.h"
 #include "SkiaImpl/VSkImageFilters.h"
 #include "include/effects/SkRuntimeEffect.h"
-#include "include/core/SkColor.h"
-#include "include/core/SkPath.h"
-#include "include/gpu/GrTypes.h"
-#include "include/pathops/SkPathOps.h"
 #include "src/core/SkBlurMask.h"
 #include <algorithm>
 #include <core/SkCanvas.h>
+using namespace VGG;
 class StyleRenderer
 {
 public:

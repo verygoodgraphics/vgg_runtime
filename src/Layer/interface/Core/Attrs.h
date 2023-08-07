@@ -349,7 +349,7 @@ struct Style
   std::vector<Border> borders;
   std::vector<Fill> fills;
   std::vector<Shadow> shadows;
-  std::array<float, 4> frameRadius;
+  std::optional<std::array<float, 4>> frameRadius;
 };
 
 struct TextLineAttr

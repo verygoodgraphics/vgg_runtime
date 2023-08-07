@@ -19,7 +19,7 @@
 #include <string>
 using namespace VGG;
 
-extern std::unordered_map<std::string, sk_sp<SkImage>> SkiaImageRepo;
+extern std::unordered_map<std::string, sk_sp<SkImage>> g_skiaImageRepo;
 
 #define SWITCH_MAP_ITEM_BEGIN(var)                                                                 \
   switch (var)                                                                                     \
@@ -217,12 +217,12 @@ inline SkMatrix upperMatrix22(const SkMatrix& matrix)
 
 inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
 {
-  constexpr float w = 1.0;
-  constexpr float h = 1.0;
+  constexpr float W = 1.0;
+  constexpr float H = 1.0;
   auto& pts = points;
 
-  ASSERT(w > 0);
-  ASSERT(h > 0);
+  ASSERT(W > 0);
+  ASSERT(H > 0);
 
   SkPath skPath;
 
@@ -239,7 +239,7 @@ inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
   auto* currP = startP;
   auto* nextP = currP + 1;
 
-  const glm::vec2 s = { w, h };
+  const glm::vec2 s = { W, H };
 
   if (currP->radius > 0 && currP->mode() == PM::PM_Straight)
   {
@@ -254,7 +254,7 @@ inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
   }
   else
   {
-    skPath.moveTo(w * currP->point.x, h * currP->point.y);
+    skPath.moveTo(W * currP->point.x, H * currP->point.y);
   }
 
   while (true)
@@ -266,11 +266,11 @@ inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
         auto* next2P = (nextP == endP) ? startP : (nextP + 1);
         auto next2Pp = next2P->to.has_value() ? next2P->to.value() : next2P->point;
         double r = calcRadius(nextP->radius, currP->point * s, nextP->point * s, next2Pp * s, 0, 0);
-        skPath.arcTo(w * nextP->point.x, h * nextP->point.y, w * next2Pp.x, h * next2Pp.y, r);
+        skPath.arcTo(W * nextP->point.x, H * nextP->point.y, W * next2Pp.x, H * next2Pp.y, r);
       }
       else
       {
-        skPath.lineTo(w * nextP->point.x, h * nextP->point.y);
+        skPath.lineTo(W * nextP->point.x, H * nextP->point.y);
       }
     }
     else if (currP->mode() == PM::PM_Disconnected && nextP->mode() == PM::PM_Disconnected)
@@ -279,28 +279,28 @@ inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
       bool hasTo = nextP->to.has_value();
       if (!hasFrom && !hasTo)
       {
-        skPath.lineTo(w * nextP->point.x, h * nextP->point.y);
+        skPath.lineTo(W * nextP->point.x, H * nextP->point.y);
       }
       else if (hasFrom && !hasTo)
       {
         auto& from = currP->from.value();
-        skPath.quadTo(w * from.x, h * from.y, w * nextP->point.x, h * nextP->point.y);
+        skPath.quadTo(W * from.x, H * from.y, W * nextP->point.x, H * nextP->point.y);
       }
       else if (!hasFrom && hasTo)
       {
         auto& to = nextP->to.value();
-        skPath.quadTo(w * to.x, h * to.y, w * nextP->point.x, h * nextP->point.y);
+        skPath.quadTo(W * to.x, H * to.y, W * nextP->point.x, H * nextP->point.y);
       }
       else
       {
         auto& from = currP->from.value();
         auto& to = nextP->to.value();
-        skPath.cubicTo(w * from.x,
-                       h * from.y,
-                       w * to.x,
-                       h * to.y,
-                       w * nextP->point.x,
-                       h * nextP->point.y);
+        skPath.cubicTo(W * from.x,
+                       H * from.y,
+                       W * to.x,
+                       H * to.y,
+                       W * nextP->point.x,
+                       H * nextP->point.y);
       }
     }
     else if (currP->mode() != PM::PM_Straight && nextP->mode() != PM::PM_Straight)
@@ -317,23 +317,23 @@ inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
       }
       auto& from = currP->from.value();
       auto& to = nextP->to.value();
-      skPath.cubicTo(w * from.x,
-                     h * from.y,
-                     w * to.x,
-                     h * to.y,
-                     w * nextP->point.x,
-                     h * nextP->point.y);
+      skPath.cubicTo(W * from.x,
+                     H * from.y,
+                     W * to.x,
+                     H * to.y,
+                     W * nextP->point.x,
+                     H * nextP->point.y);
     }
     else if (currP->mode() == PM::PM_Straight && nextP->mode() != PM::PM_Straight)
     {
       if (!nextP->to.has_value())
       {
-        skPath.lineTo(w * nextP->point.x, h * nextP->point.y);
+        skPath.lineTo(W * nextP->point.x, H * nextP->point.y);
       }
       else
       {
         auto& to = nextP->to.value();
-        skPath.quadTo(w * to.x, h * to.y, w * nextP->point.x, h * nextP->point.y);
+        skPath.quadTo(W * to.x, H * to.y, W * nextP->point.x, H * nextP->point.y);
       }
     }
     else if (currP->mode() != PM::PM_Straight && nextP->mode() == PM::PM_Straight)
@@ -351,27 +351,26 @@ inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
                                 &start,
                                 nullptr);
           skPath.lineTo(start.x, start.y);
-          skPath.arcTo(w * nextP->point.x,
-                       h * nextP->point.y,
-                       w * next2P->point.x,
-                       h * next2P->point.y,
+          skPath.arcTo(W * nextP->point.x,
+                       H * nextP->point.y,
+                       W * next2P->point.x,
+                       H * next2P->point.y,
                        r);
         }
         else
         {
           auto currPfrom = currP->from.value();
-          constexpr float radius_coeff = 1.0;
+          constexpr float RADIUS_COEFF = 1.0;
           // glm::vec2 p =
-          // currP->point.add(currPfrom.sub(currP->point).scale(radius_coeff)).scale(w, h);
-          glm::vec2 p = (currP->point + radius_coeff * (currPfrom - currP->point)) * s;
+          glm::vec2 p = (currP->point + RADIUS_COEFF * (currPfrom - currP->point)) * s;
           glm::vec2 start;
           double r =
             calcRadius(nextP->radius, p, nextP->point * s, next2P->point * s, &start, nullptr);
           skPath.quadTo(p.x, p.y, start.x, start.y);
-          skPath.arcTo(w * nextP->point.x,
-                       h * nextP->point.y,
-                       w * next2P->point.x,
-                       h * next2P->point.y,
+          skPath.arcTo(W * nextP->point.x,
+                       H * nextP->point.y,
+                       W * next2P->point.x,
+                       H * next2P->point.y,
                        r);
         }
       }
@@ -379,12 +378,12 @@ inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
       {
         if (!currP->from.has_value())
         {
-          skPath.lineTo(w * nextP->point.x, h * nextP->point.y);
+          skPath.lineTo(W * nextP->point.x, H * nextP->point.y);
         }
         else
         {
           auto& from = currP->from.value();
-          skPath.quadTo(w * from.x, h * from.y, w * nextP->point.x, h * nextP->point.y);
+          skPath.quadTo(W * from.x, H * from.y, W * nextP->point.x, H * nextP->point.y);
         }
       }
     }
@@ -527,7 +526,7 @@ inline sk_sp<SkImage> loadImage(const std::string& imageGUID, const ResourceRepo
     // remove current dir notation
     guid = guid.substr(2);
   }
-  if (auto it = SkiaImageRepo.find(guid); it != SkiaImageRepo.end())
+  if (auto it = g_skiaImageRepo.find(guid); it != g_skiaImageRepo.end())
   {
     image = it->second;
   }
@@ -548,7 +547,7 @@ inline sk_sp<SkImage> loadImage(const std::string& imageGUID, const ResourceRepo
         WARN("Make SkImage failed.");
         return image;
       }
-      SkiaImageRepo[guid] = skImage;
+      g_skiaImageRepo[guid] = skImage;
       image = skImage;
     }
     else

@@ -1,12 +1,15 @@
 #pragma once
+
+#include <memory>
+
 namespace VGG
 {
-class Drauma;
+class Daruma;
 
 class ModelChanged
 {
 public:
-  void onChange(Drauma& model);
+  void onChange(std::shared_ptr<Daruma> model);
 };
 
 } // namespace VGG

@@ -57,6 +57,7 @@ int main(int argc, char** argv)
   SDLRuntime* app = App<SDLRuntime>::getInstance(1920, 1080, "VGG");
   ASSERT(app);
 
+  app->setController(main_composer.controller());
   app->setView(main_composer.view());
 
   // enter loop

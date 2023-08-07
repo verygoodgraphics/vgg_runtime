@@ -63,6 +63,7 @@
 
 #include "Scene/Scene.h"
 #include "Scene/Zoomer.h"
+#include "Application/Controller.hpp"
 #include "Application/UIView.hpp"
 #include "Common/Math.hpp"
 #include "CappingProfiler.hpp"
@@ -186,6 +187,11 @@ template<typename T>
 class App
 {
 private:
+  std::shared_ptr<Controller> m_controller;
+  std::shared_ptr<UIView> m_view;
+  std::shared_ptr<Scene> m_scene;
+
+private:
   inline T* Self()
   {
     static_assert(std::is_base_of<App, T>::value);
@@ -232,11 +238,9 @@ protected: // protected members and static members
   double m_timestamp;
   SkiaState m_skiaState;
   Zoomer m_zoomer;
-  std::shared_ptr<UIView> m_view;
   float m_curMouseX{ 0.f }, m_curMouseY{ 0.f };
   bool m_drawInfo{ false };
   std::queue<SDL_Event> m_eventQueue;
-  std::shared_ptr<Scene> m_scene;
   bool m_useOldRenderer = true;
   std::unique_ptr<SkPictureRecorder> m_recorder;
   bool m_capture = false;
@@ -410,8 +414,7 @@ protected: // protected methods
         m_view->setSize(m_width, m_height);
       }
 
-      ResizeWindow resizeWindow;
-      resizeWindow.onResize(m_width, m_height);
+      m_controller->onResize();
 
       return true;
     }
@@ -651,6 +654,11 @@ public: // public methods
   inline SkSurface* getSurface()
   {
     return m_skiaState.surface.get();
+  }
+
+  void setController(std::shared_ptr<Controller> controller)
+  {
+    m_controller = controller;
   }
 
   void setView(std::shared_ptr<UIView> view)

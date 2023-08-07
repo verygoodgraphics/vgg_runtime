@@ -1,6 +1,7 @@
 add_library(vgg_domain STATIC
   Exec/VggExec.cpp
   Loader/ZipLoader.cpp
+  Layout/Layout.cpp
   Model/Daruma.cpp
   Model/DarumaContainer.cpp
   Model/JsonDocument.cpp
@@ -20,6 +21,7 @@ target_include_directories(vgg_domain PUBLIC
 target_include_directories(vgg_domain PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Domain
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Domain/Layout
   ${VGG_CONTRIB_BOOST_INCLUDE}
 )
 target_link_libraries(vgg_domain

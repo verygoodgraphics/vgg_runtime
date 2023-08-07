@@ -5,6 +5,7 @@
 #include "Log.h"
 #include "UIEvent.hpp"
 #include "UIView.hpp"
+#include "ViewModel.hpp"
 
 #include "nlohmann/json.hpp"
 #include "rxcpp/rx.hpp"
@@ -17,10 +18,10 @@ namespace VGG
 class Presenter : public std::enable_shared_from_this<Presenter>
 {
   std::shared_ptr<UIView> m_view;
-  std::shared_ptr<Daruma> m_model;
+  std::shared_ptr<ViewModel> m_model;
 
   std::shared_ptr<UIView> m_edit_view;
-  std::shared_ptr<Daruma> m_edit_model;
+  std::shared_ptr<ViewModel> m_edit_model;
 
   rxcpp::subjects::subject<VGG::UIEventPtr> m_subject;
   rxcpp::subjects::subject<VGG::UIEventPtr> m_edit_subject;
@@ -30,7 +31,7 @@ class Presenter : public std::enable_shared_from_this<Presenter>
 public:
   virtual ~Presenter() = default;
 
-  virtual void setModel(std::shared_ptr<Daruma> model)
+  virtual void setModel(std::shared_ptr<ViewModel> model)
   {
     m_model = model;
 
@@ -40,13 +41,12 @@ public:
       return;
     }
 
-    m_view->setResouces(m_model->resources());
-    m_view->show(m_model->designDoc()->content());
+    m_view->show(*m_model);
 
     m_view->registerEventListener(
       [model](std::string path, UIEventType eventType)
       {
-        auto listeners_map = model->getEventListeners(path);
+        auto listeners_map = model->model->getEventListeners(path);
         std::string type = UIEventTypeToString(eventType);
 
         auto it = listeners_map.find(type);
@@ -54,13 +54,12 @@ public:
       });
   }
 
-  void setEditModel(std::shared_ptr<Daruma> model)
+  void setEditModel(std::shared_ptr<ViewModel> model)
   {
     m_edit_model = model;
     if (m_edit_view)
     {
-      m_edit_view->setResouces(m_edit_model->resources());
-      m_edit_view->show(m_edit_model->designDoc()->content());
+      m_edit_view->show(*m_edit_model);
 
       m_edit_view->registerEventListener(
         [model](std::string path, UIEventType eventType)
@@ -102,6 +101,18 @@ public:
       });
   }
 
+  Layout::Size viewSize()
+  {
+    if (m_view)
+    {
+      return m_view->size();
+    }
+    else
+    {
+      return {};
+    }
+  }
+
   void setEditView(std::shared_ptr<UIView> view)
   {
     m_edit_view = view;
@@ -115,6 +126,18 @@ public:
           p->m_edit_subject.get_subscriber().on_next(evt_ptr);
         }
       });
+  }
+
+  Layout::Size editViewSize()
+  {
+    if (m_edit_view)
+    {
+      return m_edit_view->size();
+    }
+    else
+    {
+      return {};
+    }
   }
 
   virtual rxcpp::observer<VGG::ModelEventPtr>& getModelObserver()
@@ -212,7 +235,7 @@ private:
   {
     if (m_view && m_model)
     {
-      m_view->show(m_model->designDoc()->content());
+      m_view->show(*m_model);
     }
   }
 
@@ -220,7 +243,7 @@ private:
   {
     if (m_edit_view && m_edit_model)
     {
-      m_edit_view->show(m_edit_model->designDoc()->content());
+      m_edit_view->show(*m_edit_model);
     }
   }
 };

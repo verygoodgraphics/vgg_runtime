@@ -2,7 +2,7 @@
 #include "MouseEvent.hpp"
 #include "TouchEvent.hpp"
 
-#include "Domain/VggSdk.hpp"
+#include "Application/VggSdk.hpp"
 
 #include <emscripten.h>
 #include <emscripten/bind.h>

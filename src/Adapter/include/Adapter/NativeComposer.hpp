@@ -2,7 +2,7 @@
 
 #include "Application/PlatformComposer.hpp"
 
-#include "Domain/VggSdk.hpp"
+#include "Application/VggSdk.hpp"
 #include "NativeExec.hpp"
 #include "VggSdkAddon.hpp"
 

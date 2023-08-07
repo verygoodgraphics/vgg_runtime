@@ -1,5 +1,6 @@
 add_library(vgg_application STATIC
   Controller/Controller.cpp
+  Sdk/VggSdk.cpp
 )
 
 target_include_directories(vgg_application PUBLIC
@@ -13,7 +14,7 @@ target_include_directories(vgg_application PRIVATE
 
 target_link_libraries(vgg_application PUBLIC
   vgg_flags
-  vgg_domain
+  vgg_usecase
   vgg_layer
 )
 target_link_libraries(vgg_application PRIVATE

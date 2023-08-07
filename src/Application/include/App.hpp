@@ -67,6 +67,7 @@
 #include "Common/Math.hpp"
 #include "CappingProfiler.hpp"
 #include "Log.h"
+#include "Usecase/ResizeWindow.hpp"
 
 namespace VGG
 {
@@ -408,6 +409,9 @@ protected: // protected methods
       {
         m_view->setSize(m_width, m_height);
       }
+
+      ResizeWindow resizeWindow;
+      resizeWindow.onResize(m_width, m_height);
 
       return true;
     }

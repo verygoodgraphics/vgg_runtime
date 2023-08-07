@@ -9,7 +9,6 @@ add_library(vgg_domain STATIC
   Model/SubjectJsonDocument.cpp
   Saver/DirSaver.cpp
   Saver/ZipSaver.cpp
-  Sdk/VggSdk.cpp
 )
 
 target_include_directories(vgg_domain PUBLIC

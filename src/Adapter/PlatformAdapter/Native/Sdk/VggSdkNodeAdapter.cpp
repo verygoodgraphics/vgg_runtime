@@ -2,7 +2,7 @@
 
 #include "PlatformAdapter/Native/Sdk/AdapterHelper.hpp"
 
-#include "Domain/VggSdk.hpp"
+#include "Application/VggSdk.hpp"
 #include "DIContainer.hpp"
 
 #include <string>

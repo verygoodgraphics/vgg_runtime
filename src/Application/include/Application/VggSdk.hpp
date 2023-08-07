@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Daruma.hpp"
+#include "Domain/Daruma.hpp"
 
 #ifdef EMSCRIPTEN
 #include <emscripten/val.h>

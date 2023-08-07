@@ -1,7 +1,7 @@
 #include "Adapter/NativeExec.hpp"
 
 #include "Adapter/VggSdkAddon.hpp"
-#include "Domain/VggSdk.hpp"
+#include "Application/VggSdk.hpp"
 #include "DIContainer.hpp"
 #include "VggSdkMock.hpp"
 #include "test_config.hpp"

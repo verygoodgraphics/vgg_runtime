@@ -23,6 +23,7 @@ extern "C"
     ASSERT(app);
 
     auto& main_composer = VggBrowser::mainComposer();
+    app->setController(main_composer.controller());
     app->setView(main_composer.view());
     app->setScene(main_composer.view()->scene());
 

@@ -10,6 +10,9 @@
 #include "Domain/DarumaContainer.hpp"
 #include "Presenter.hpp"
 #include "DIContainer.hpp"
+#include "Usecase/ModelChanged.hpp"
+#include "Usecase/ResizeWindow.hpp"
+#include "Usecase/StartRunning.hpp"
 
 #include <cassert>
 
@@ -82,6 +85,15 @@ bool Controller::edit(std::vector<char>& buffer)
   }
 }
 
+void Controller::onResize()
+{
+  ResizeWindow().onResize(m_model, m_presenter->viewSize());
+  if (m_edit_model)
+  {
+    ResizeWindow().onResize(m_edit_model, m_presenter->editViewSize());
+  }
+}
+
 void Controller::initModel(const char* designDocSchemaFilePath)
 {
   if (designDocSchemaFilePath)
@@ -117,7 +129,7 @@ void Controller::initModel(const char* designDocSchemaFilePath)
 
 void Controller::start()
 {
-  m_presenter->setModel(m_model);
+  m_presenter->setModel(generateViewModel(m_model, m_presenter->viewSize()));
 
   observeModelState();
   observeViewEvent();
@@ -125,7 +137,7 @@ void Controller::start()
 
 void Controller::startEditing()
 {
-  m_presenter->setEditModel(m_edit_model);
+  m_presenter->setEditModel(generateViewModel(m_edit_model, m_presenter->editViewSize()));
 
   observeEditModelState();
   observeEditViewEvent();
@@ -135,15 +147,48 @@ void Controller::startEditing()
 
 void Controller::observeModelState()
 {
+  auto weak_this = weak_from_this();
   m_model->getObservable()
     .observe_on(m_run_loop->thread())
+    .map(
+      [weak_this](VGG::ModelEventPtr event)
+      {
+        auto shared_this = weak_this.lock();
+        if (!shared_this)
+        {
+          return VGG::ModelEventPtr{};
+        }
+        // todo, layout
+        // todo, layout thread?
+        ModelChanged().onChange(shared_this->m_model);
+        shared_this->resetViewModel();
+
+        return event;
+      })
     .subscribe(m_presenter->getModelObserver());
 }
 
 void Controller::observeEditModelState()
 {
+  auto weak_this = weak_from_this();
   m_edit_model->getObservable()
     .observe_on(m_run_loop->thread())
+    .map(
+      [weak_this](VGG::ModelEventPtr event)
+      {
+        auto shared_this = weak_this.lock();
+        if (!shared_this)
+        {
+          return VGG::ModelEventPtr{};
+        }
+        // todo, layout
+        // todo, layout thread?
+
+        ModelChanged().onChange(shared_this->m_edit_model);
+        shared_this->resetEditViewModel();
+
+        return event;
+      })
     .subscribe(m_presenter->getEditModelObserver());
 }
 
@@ -229,6 +274,32 @@ JsonDocumentPtr Controller::wrapJsonDoc(std::shared_ptr<JsonDocument> jsonDoc)
     // todo, wrap with remote doc which can save to server
     return jsonDoc;
   }
+}
+
+void Controller::resetViewModel()
+{
+  // TODO, OPTIMIZE, partial update instead of resetting the whole document
+  m_presenter->setModel(generateViewModel(m_model, m_presenter->viewSize()));
+}
+
+void Controller::resetEditViewModel()
+{
+  // TODO, OPTIMIZE, partial update instead of resetting the whole document
+  m_presenter->setEditModel(generateViewModel(m_edit_model, m_presenter->editViewSize()));
+}
+
+std::shared_ptr<ViewModel> Controller::generateViewModel(std::shared_ptr<Daruma> model,
+                                                         Layout::Size size)
+{
+  StartRunning start_running{ model };
+  start_running.layout(size);
+
+  auto view_model = std::make_shared<ViewModel>();
+  view_model->model = m_model;
+  view_model->designDoc = start_running.designDoc();
+  view_model->layoutTree = start_running.layoutTree();
+
+  return view_model;
 }
 
 } // namespace VGG

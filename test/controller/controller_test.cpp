@@ -532,17 +532,18 @@ TEST_F(ControllerTestSuite, handle_events)
 
   int times = 0;
   auto type = ModelEventType::Invalid;
+  constexpr auto expect_times = 4;
   auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       times++;
 
       type = evt->type;
-      m_exit_loop = times == 4;
+      m_exit_loop = times == expect_times;
     });
 
   EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
-  EXPECT_CALL(*m_mock_presenter, setModel(_));
+  EXPECT_CALL(*m_mock_presenter, setModel(_)).Times(expect_times + 1);
   setup_sut();
   std::string file_path = "testDataDir/vgg-daruma.zip";
   auto ret = m_sut->start(file_path);
@@ -568,6 +569,7 @@ TEST_F(ControllerTestSuite, handle_event_keyboard)
   // Given
   setup_using_s5_sdk();
 
+  constexpr auto expect_times = 1;
   auto type = ModelEventType::Invalid;
   auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
@@ -577,7 +579,7 @@ TEST_F(ControllerTestSuite, handle_event_keyboard)
     });
 
   EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
-  EXPECT_CALL(*m_mock_presenter, setModel(_));
+  EXPECT_CALL(*m_mock_presenter, setModel(_)).Times(expect_times + 1);
   setup_sut();
   std::string file_path = "testDataDir/vgg-daruma.zip";
   auto ret = m_sut->start(file_path);

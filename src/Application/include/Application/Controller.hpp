@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Domain/Layout/Rect.hpp"
+
 #include "RunLoop.hpp"
 
 #include "rxcpp/rx.hpp"
@@ -15,6 +17,7 @@ namespace VGG
 
 class Daruma;
 class Presenter;
+class ViewModel;
 
 class Controller : public std::enable_shared_from_this<Controller>
 {
@@ -38,6 +41,8 @@ public:
   bool edit(const std::string& filePath);
   bool edit(std::vector<char>& buffer);
 
+  void onResize();
+
 private:
   std::shared_ptr<RunLoop> m_run_loop;
   std::shared_ptr<Presenter> m_presenter;
@@ -59,6 +64,10 @@ private:
   void startEditing();
   void observeEditModelState();
   void observeEditViewEvent();
+
+  void resetViewModel();
+  void resetEditViewModel();
+  std::shared_ptr<ViewModel> generateViewModel(std::shared_ptr<Daruma> model, Layout::Size size);
 };
 
 } // namespace VGG

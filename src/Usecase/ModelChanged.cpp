@@ -4,7 +4,7 @@
 
 using namespace VGG;
 
-void ModelChanged::onChange(Drauma& model)
+void ModelChanged::onChange(std::shared_ptr<Daruma> model)
 {
   // todo, layout
 }

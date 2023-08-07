@@ -3,6 +3,7 @@
 #include "Domain/Layout/View.hpp"
 #include "UIEvent.hpp"
 #include "Scene/Scene.h"
+#include "ViewModel.hpp"
 
 #include "nlohmann/json.hpp"
 
@@ -61,22 +62,14 @@ public:
     return m_scene;
   }
 
-  void show(const nlohmann::json& viewModel)
+  void show(const ViewModel& viewModel)
   {
-    m_scene->loadFileContent(viewModel);
-    setupTree(viewModel);
+    m_scene->loadFileContent(viewModel.designDoc);
+    m_root = viewModel.layoutTree;
+    // todo, merge edited doc resouces ?
+    Scene::s_resRepo = std::move(viewModel.resources());
 
     m_is_dirty = true;
-  }
-
-  void setResouces(ResourcesType resources)
-  {
-    Scene::s_resRepo = std::move(resources);
-  }
-
-  void registerEventListener(HasEventListener hasEventListener)
-  {
-    m_has_event_listener = hasEventListener;
   }
 
   void registerEventListener(HasEventListener hasEventListener)
@@ -100,6 +93,10 @@ public:
 
   void draw(SkCanvas* canvas, Zoomer* zoomer);
 
+  Layout::Size size()
+  {
+    return m_frame.size;
+  }
   void setSize(scalar_type w, scalar_type h)
   {
     m_frame.size.width = w;
@@ -127,17 +124,6 @@ public:
 private:
   std::tuple<bool, bool, bool, bool> getKeyModifier(int keyMod);
 
-  void setupTree(const nlohmann::json& j);
-  std::shared_ptr<LayoutView> createOneLayoutView(const nlohmann::json& j,
-                                                  nlohmann::json::json_pointer current_path,
-                                                  std::shared_ptr<LayoutView> parent);
-  void createLayoutViews(const nlohmann::json& j,
-                         nlohmann::json::json_pointer current_path,
-                         std::shared_ptr<LayoutView> parent);
-
-  void createOneOrMoreLayoutViews(const nlohmann::json& j,
-                                  nlohmann::json::json_pointer current_path,
-                                  std::shared_ptr<LayoutView> parent);
   void layoutSubviews();
   Layout::Point converPointFromWindow(Layout::Point point);
   Layout::Point converPointFromWindowAndScale(Layout::Point point);

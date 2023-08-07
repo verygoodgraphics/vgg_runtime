@@ -141,8 +141,7 @@ public:
       [&j](PaintNode* p)
       {
         p->setContourOption(ContourOption(ECoutourType::MCT_FrameOnly, false));
-        const auto radius = get_stack_optional<std::array<float, 4>>(j, "radius")
-                              .value_or(std::array<float, 4>{ 0.0f, 0.f, 0.f, 0.f });
+        const auto radius = get_stack_optional<std::array<float, 4>>(j, "radius");
         p->style().frameRadius = radius;
         for (const auto& c : j.value("childObjects", std::vector<nlohmann::json>{}))
         {

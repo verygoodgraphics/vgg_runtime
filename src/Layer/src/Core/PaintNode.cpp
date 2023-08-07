@@ -262,11 +262,18 @@ SkPath PaintNode::makeBoundPath()
 {
   SkPath p;
   const auto& skRect = toSkRect(getBound());
-  const auto radius = style().frameRadius;
+  const auto& radius = style().frameRadius;
 
   bool rounded = false;
   float maxR = 0.0, minR = std::numeric_limits<float>::max();
-  for (const auto r : radius)
+
+  if (!radius.has_value())
+  {
+    p.addRect(skRect);
+    return p;
+  }
+
+  for (const auto r : *radius)
   {
     if (r > 0.f)
     {
@@ -275,14 +282,17 @@ SkPath PaintNode::makeBoundPath()
     maxR = std::max(maxR, r);
     minR = std::min(minR, r);
   }
-  if (rounded && (maxR - minR) < std::numeric_limits<float>::epsilon())
+  if (rounded)
   {
-    p.addRoundRect(skRect, minR, minR);
-  }
-  else if (rounded)
-  {
-    // TODO:: create general path
-    p.addRoundRect(skRect, minR, minR);
+    if ((maxR - minR) < std::numeric_limits<float>::epsilon())
+    {
+      p.addRoundRect(skRect, minR, minR);
+    }
+    else
+    {
+      // TODO:: create general path
+      p.addRoundRect(skRect, minR, minR);
+    }
   }
   else
   {

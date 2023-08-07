@@ -90,7 +90,7 @@ public:
   template<typename F1, typename F2>
   static inline std::shared_ptr<PaintNode> makeObjectCommonProperty(const nlohmann::json& j,
                                                                     F1&& creator,
-                                                                    F2&& overridor)
+                                                                    F2&& override)
   {
     auto obj = creator(std::move(j.value("name", "")), std::move(j.value("id", "")));
     if (!obj)
@@ -104,7 +104,7 @@ public:
     obj->setMaskType(j.value("maskType", EMaskType::MT_None));
     obj->setOverflow(j.value("overflow", EOverflow::OF_Visible));
     obj->setVisible(j.value("visible", true));
-    overridor(obj.get());
+    override(obj.get());
     return obj;
   }
 

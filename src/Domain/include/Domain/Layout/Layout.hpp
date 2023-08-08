@@ -37,6 +37,8 @@ private:
   void createOneOrMoreLayoutViews(const nlohmann::json& j,
                                   nlohmann::json::json_pointer current_path,
                                   std::shared_ptr<LayoutView> parent);
+
+  void normalizePoint(nlohmann::json& json);
 };
 
 } // namespace Layout

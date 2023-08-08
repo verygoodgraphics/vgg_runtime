@@ -34,6 +34,7 @@ bool Daruma::load(const std::string& path)
   }
   else
   {
+    WARN("Daruma::load, invaid file path, %s, return", path.c_str());
     return false;
   }
 

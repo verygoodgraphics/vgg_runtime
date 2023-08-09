@@ -31,7 +31,7 @@ private:
   HasEventListener m_has_event_listener;
 
   std::shared_ptr<Scene> m_scene;
-  UIView* m_superview;
+  UIView* m_superview{ nullptr };
   std::vector<std::shared_ptr<UIView>> m_subviews;
 
   std::shared_ptr<LayoutView> m_root;

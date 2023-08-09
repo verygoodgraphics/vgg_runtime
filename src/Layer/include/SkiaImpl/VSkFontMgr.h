@@ -256,12 +256,15 @@ private:
                                    const char* suffix,
                                    SkFontMgrVGG::Families* families)
   {
-    SkOSFile::Iter iter(directory.c_str(), suffix);
-    SkString name;
+    const std::filesystem::path dir{ directory.c_str() };
 
-    while (iter.next(&name, false))
+    for (auto const& entry : fs::recursive_directory_iterator(dir))
     {
-      SkString filename(SkOSPath::Join(directory.c_str(), name.c_str()));
+      if (!entry.is_regular_file())
+      {
+        continue;
+      }
+      auto filename = entry.path().string();
       std::unique_ptr<SkStreamAsset> stream = SkStream::MakeFromFile(filename.c_str());
       if (!stream)
       {
@@ -304,15 +307,15 @@ private:
       }
     }
 
-    SkOSFile::Iter dirIter(directory.c_str());
-    while (dirIter.next(&name, true))
+    for (auto const& entry : fs::recursive_directory_iterator(dir))
     {
-      if (name.startsWith("."))
+      if (!entry.is_directory())
       {
         continue;
       }
-      SkString dirname(SkOSPath::Join(directory.c_str(), name.c_str()));
-      load_directory_fonts(scanner, dirname, suffix, families);
+
+      auto dir_name = entry.path().string();
+      load_directory_fonts(scanner, SkString{ dir_name }, suffix, families);
     }
   }
 

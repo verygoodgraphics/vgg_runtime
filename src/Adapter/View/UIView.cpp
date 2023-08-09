@@ -51,6 +51,11 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
   {
     case SDL_MOUSEBUTTONDOWN:
     {
+      if (!m_root)
+      {
+        break;
+      }
+
       Layout::Point point{ toVggLayoutScalar(evt.button.x), toVggLayoutScalar(evt.button.y) };
       point = converPointFromWindowAndScale(point);
       auto target_view = m_root->hitTest(point,
@@ -78,6 +83,11 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
 
     case SDL_MOUSEMOTION:
     {
+      if (!m_root)
+      {
+        break;
+      }
+
       Layout::Point point{ toVggLayoutScalar(evt.motion.x), toVggLayoutScalar(evt.motion.y) };
       point = converPointFromWindowAndScale(point);
       auto target_view = m_root->hitTest(point,
@@ -104,6 +114,11 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
 
     case SDL_MOUSEBUTTONUP:
     {
+      if (!m_root)
+      {
+        break;
+      }
+
       Layout::Point point{ toVggLayoutScalar(evt.button.x), toVggLayoutScalar(evt.button.y) };
       point = converPointFromWindowAndScale(point);
       auto js_button_index{ evt.button.button - 1 };

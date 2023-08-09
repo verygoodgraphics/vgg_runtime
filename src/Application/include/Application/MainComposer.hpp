@@ -70,8 +70,11 @@ public:
     m_edit_view.reset(new UIView);
     m_presenter->setEditView(m_edit_view);
 
-    m_view->becomeEditorWithSidebar(top, right, bottom, left);
-    m_view->addSubview(m_edit_view);
+    if (m_view)
+    {
+      m_view->becomeEditorWithSidebar(top, right, bottom, left);
+      m_view->addSubview(m_edit_view);
+    }
   }
 };
 

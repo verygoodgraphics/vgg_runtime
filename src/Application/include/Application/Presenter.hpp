@@ -33,6 +33,13 @@ public:
   virtual void setModel(std::shared_ptr<Daruma> model)
   {
     m_model = model;
+
+    if (!m_view)
+    {
+      WARN("#Presenter::setModel, null m_view, return");
+      return;
+    }
+
     m_view->setResouces(m_model->resources());
     m_view->show(m_model->designDoc()->content());
 
@@ -77,6 +84,12 @@ public:
   void setView(std::shared_ptr<UIView> view)
   {
     m_view = view;
+
+    if (!m_view)
+    {
+      WARN("#Presenter::setView, null m_view, return");
+      return;
+    }
 
     auto weak_this = weak_from_this();
     m_view->setEventListener(
@@ -197,7 +210,10 @@ public:
 private:
   void update()
   {
-    m_view->show(m_model->designDoc()->content());
+    if (m_view && m_model)
+    {
+      m_view->show(m_model->designDoc()->content());
+    }
   }
 
   void update_edit_view()

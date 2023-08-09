@@ -652,7 +652,10 @@ public: // public methods
   void setView(std::shared_ptr<UIView> view)
   {
     m_view = view;
-    m_view->setSize(m_width, m_height);
+    if (m_view)
+    {
+      m_view->setSize(m_width, m_height);
+    }
   }
 
   inline GrDirectContext* getDirectContext()

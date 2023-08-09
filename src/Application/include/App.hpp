@@ -66,6 +66,7 @@
 #include "Application/UIView.hpp"
 #include "Common/Math.hpp"
 #include "CappingProfiler.hpp"
+#include "Log.h"
 
 namespace VGG
 {
@@ -403,7 +404,10 @@ protected: // protected methods
 
       m_width = w;
       m_height = h;
-      m_view->setSize(m_width, m_height);
+      if (m_view)
+      {
+        m_view->setSize(m_width, m_height);
+      }
 
       return true;
     }
@@ -531,6 +535,10 @@ protected: // protected methods
     {
       m_zoomer.offset.x += evt.motion.xrel / DPI::ScaleFactor;
       m_zoomer.offset.y += evt.motion.yrel / DPI::ScaleFactor;
+      if (m_view)
+      {
+        m_view->setDirty(true);
+      }
       return true;
     }
     else if (m_scene && type == SDL_MOUSEWHEEL && (SDL_GetModState() & KMOD_CTRL))
@@ -726,6 +734,11 @@ public: // public methods
     }
     profiler->markFrame();
 
+    if (m_view && !m_view->isDirty())
+    {
+      return;
+    }
+
     // get and setup canvas
     SkCanvas* canvas = getCanvas();
     ASSERT(canvas);
@@ -741,6 +754,11 @@ public: // public methods
     canvas->restore();
 
     Self()->swapBuffer();
+
+    if (m_view)
+    {
+      m_view->setDirty(false);
+    }
   }
 
 public: // public static methods

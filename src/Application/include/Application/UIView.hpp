@@ -48,6 +48,8 @@ private:
   scalar_type m_bottom{ 0 };
   scalar_type m_left{ 0 };
 
+  bool m_is_dirty = false;
+
 public:
   UIView()
     : m_scene{ std::make_shared<Scene>() }
@@ -63,6 +65,8 @@ public:
   {
     m_scene->loadFileContent(viewModel);
     setupTree(viewModel);
+
+    m_is_dirty = true;
   }
 
   void setResouces(ResourcesType resources)
@@ -102,6 +106,15 @@ public:
                                scalar_type right,
                                scalar_type bottom,
                                scalar_type left);
+
+  bool isDirty()
+  {
+    return m_is_dirty;
+  }
+  void setDirty(bool dirty)
+  {
+    m_is_dirty = dirty;
+  }
 
 private:
   std::tuple<bool, bool, bool, bool> getKeyModifier(int keyMod);

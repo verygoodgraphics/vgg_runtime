@@ -474,5 +474,7 @@ void UIView::handleMouseWheel(const SDL_Event& evt, Zoomer* zoomer)
       zoomer->offset.y -= (my / zoomer->dpiRatio) * dz;
       zoomer->zoom += zoomer->zoom * dz;
     }
+
+    m_is_dirty = true;
   }
 }

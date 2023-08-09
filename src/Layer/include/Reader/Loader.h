@@ -340,7 +340,7 @@ class NlohmannBuilder
         auto& instances = Scene::instanceObjects();
         if (auto it = instances.find(p->guid()); it == instances.end())
         {
-          std::string masterID = j.value("symbolID", "");
+          std::string masterID = j.value("masterId", "");
           if (!masterID.empty())
           {
             instances[p->guid()] =
@@ -366,8 +366,7 @@ class NlohmannBuilder
       j,
       [this, &j](std::string name, std::string guid)
       {
-        auto symbolID = j.value("symbolID", ""); // this field will be removed next version
-        auto p = std::make_shared<PaintNode>(std::move(name), VGG_MASTER, std::move(symbolID));
+        auto p = std::make_shared<PaintNode>(std::move(name), VGG_MASTER, std::move(guid));
         appendSymbolMaster(p);
         return p;
       },

@@ -58,7 +58,6 @@ int main(int argc, char** argv)
   ASSERT(app);
 
   app->setView(main_composer.view());
-  app->setScene(main_composer.view()->scene());
 
   // enter loop
   constexpr int fps = 60;

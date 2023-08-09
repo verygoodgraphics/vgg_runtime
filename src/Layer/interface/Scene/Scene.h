@@ -16,6 +16,20 @@ using InstanceTable =
   std::unordered_map<std::string,
                      std::pair<std::weak_ptr<PaintNode>,
                                std::string>>; // {instance_id: {instance_object: master_id}}
+                                              //
+struct FormatRepresentation
+{
+public:
+  std::vector<std::shared_ptr<PaintNode>> artboards;
+  std::vector<std::shared_ptr<PaintNode>> symbols;
+  FormatRepresentation() = default;
+  FormatRepresentation(std::vector<std::shared_ptr<PaintNode>> artboards,
+                       std::vector<std::shared_ptr<PaintNode>> symbols)
+    : artboards(std::move(artboards))
+    , symbols(std::move(symbols))
+  {
+  }
+};
 
 struct VGG_EXPORTS Scene
 {
@@ -25,8 +39,7 @@ struct VGG_EXPORTS Scene
   static InstanceTable s_instanceTable;
   static bool s_enableDrawDebugBound;
 
-  std::vector<std::shared_ptr<PaintNode>> artboards;
-  std::vector<std::shared_ptr<PaintNode>> symbols;
+  FormatRepresentation repr;
 
 public:
   int page{ 0 };

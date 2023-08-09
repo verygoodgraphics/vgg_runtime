@@ -62,10 +62,9 @@ inline std::optional<glm::vec2> get_opt(const nlohmann::json& obj, const char* k
   return std::nullopt;
 }
 
-
 class NlohmannBuilder
 {
-  std::vector<std::shared_ptr<PaintNode>> m_artboards;
+  std::vector<std::shared_ptr<PaintNode>> m_frames;
   std::vector<std::shared_ptr<PaintNode>> m_symbols;
 
   inline glm::mat3 fromMatrix(const nlohmann::json& j)
@@ -321,75 +320,14 @@ class NlohmannBuilder
       });
   }
 
-  inline std::shared_ptr<PaintNode> fromLayer(const nlohmann::json& j)
+  inline std::vector<std::shared_ptr<PaintNode>> fromFrames(const nlohmann::json& j)
   {
-    return makeObjectCommonProperty(
-      j,
-      [this, &j](std::string name, std::string guid)
-      {
-        auto p = std::make_shared<PaintNode>(std::move(name), VGG_LAYER, std::move(guid));
-        return p;
-      },
-      [this, &j](PaintNode* p)
-      {
-        p->setLocalTransform(glm::mat3(1));
-        for (const auto& e : j.value("childObjects", std::vector<nlohmann::json>{}))
-        {
-          p->addChild(fromObject(e));
-        }
-      });
-  }
-
-  inline std::vector<std::shared_ptr<PaintNode>> fromLayers(const nlohmann::json& j)
-  {
-    std::vector<std::shared_ptr<PaintNode>> layers;
-    for (const auto& e : j.value("layers", std::vector<nlohmann::json>{}))
+    std::vector<std::shared_ptr<PaintNode>> frames;
+    for (const auto& e : j.value("frames", std::vector<nlohmann::json>{}))
     {
-      layers.emplace_back(fromLayer(e));
+      frames.push_back(fromFrame(e));
     }
-    return layers;
-  }
-
-  inline std::vector<std::shared_ptr<PaintNode>> fromArtboard(const nlohmann::json& j)
-  {
-    std::vector<std::shared_ptr<PaintNode>> artboards;
-    for (const auto& e : j.value("artboard", std::vector<nlohmann::json>{}))
-    {
-      auto artboard = makeObjectCommonProperty(
-        e,
-        [this, &e](std::string name, std::string guid)
-        {
-          auto p = std::make_shared<PaintNode>(e.value("name", ""), VGG_ARTBOARD, std::move(guid));
-          return p;
-        },
-        [this, &e](PaintNode* p)
-        {
-          const auto bg = get_stack_optional<Color>(e, "backgroundColor");
-          if (bg.has_value())
-          {
-            Style style;
-            Fill fill;
-            fill.color = bg.value();
-            fill.isEnabled = true;
-            fill.fillType = EPathFillType::FT_Color;
-            style.fills.push_back(fill);
-            p->setStyle(style);
-          }
-
-          auto t = p->localTransform();
-          const auto b = p->getBound();
-          t = glm::translate(t, glm::vec2{ -t[2][0], -t[2][1] });
-          t = glm::translate(t, glm::vec2{ -b.topLeft.x, -b.topLeft.y });
-          p->setLocalTransform(t);
-          auto layers = fromLayers(e);
-          for (const auto& l : layers)
-          {
-            p->addChild(l);
-          }
-        });
-      artboards.push_back(artboard);
-    }
-    return artboards;
+    return frames;
   }
 
   inline std::shared_ptr<PaintNode> fromSymbolInstance(const nlohmann::json& j)
@@ -457,10 +395,29 @@ class NlohmannBuilder
     m_symbols.push_back(std::move(master));
   }
 
+  inline std::vector<std::shared_ptr<PaintNode>> fromTopLevelFrames(
+    const std::vector<nlohmann::json>& j)
+  {
+    std::vector<std::shared_ptr<PaintNode>> frames;
+    for (const auto& e : j)
+    {
+      frames.push_back(fromFrame(e));
+    }
+    for (const auto& p : frames)
+    {
+      auto t = p->localTransform();
+      const auto b = p->getBound();
+      t = glm::translate(t, glm::vec2{ -t[2][0], -t[2][1] });
+      t = glm::translate(t, glm::vec2{ -b.topLeft.x, -b.topLeft.y });
+      p->setLocalTransform(t);
+    }
+    return frames;
+  }
+
   NlohmannBuilder() = default;
   void buildImpl(const nlohmann::json& j)
   {
-    m_artboards = fromArtboard(j);
+    m_frames = fromTopLevelFrames(j.value("frames", std::vector<nlohmann::json>{}));
   }
 
 public:
@@ -468,7 +425,7 @@ public:
   {
     NlohmannBuilder builder;
     builder.buildImpl(j);
-    return FormatRepresentation{ std::move(builder.m_artboards), std::move(builder.m_symbols) };
+    return FormatRepresentation{ std::move(builder.m_frames), std::move(builder.m_symbols) };
   }
 };
 

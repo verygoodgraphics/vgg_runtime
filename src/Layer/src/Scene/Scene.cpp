@@ -86,9 +86,9 @@ void Scene::render(SkCanvas* canvas)
   SkiaRenderer r;
   if (!renderSymbol)
   {
-    if (!repr.artboards.empty())
+    if (!repr.frames.empty())
     {
-      auto board = repr.artboards[page].get();
+      auto board = repr.frames[page].get();
       preprocessMask(board);
       r.draw(canvas, board);
     }
@@ -115,7 +115,7 @@ void Scene::preprocessMask(PaintNode* node)
 
 void Scene::setPage(int num)
 {
-  if (num >= 0 && num < repr.artboards.size())
+  if (num >= 0 && num < repr.frames.size())
   {
     page = num;
     maskDirty = true;
@@ -124,7 +124,7 @@ void Scene::setPage(int num)
 
 void Scene::nextArtboard()
 {
-  page = (page + 1 >= repr.artboards.size()) ? page : page + 1;
+  page = (page + 1 >= repr.frames.size()) ? page : page + 1;
   maskDirty = true;
 }
 

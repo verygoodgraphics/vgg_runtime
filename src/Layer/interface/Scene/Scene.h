@@ -20,12 +20,12 @@ using InstanceTable =
 struct FormatRepresentation
 {
 public:
-  std::vector<std::shared_ptr<PaintNode>> artboards;
+  std::vector<std::shared_ptr<PaintNode>> frames;
   std::vector<std::shared_ptr<PaintNode>> symbols;
   FormatRepresentation() = default;
-  FormatRepresentation(std::vector<std::shared_ptr<PaintNode>> artboards,
+  FormatRepresentation(std::vector<std::shared_ptr<PaintNode>> frames,
                        std::vector<std::shared_ptr<PaintNode>> symbols)
-    : artboards(std::move(artboards))
+    : frames(std::move(frames))
     , symbols(std::move(symbols))
   {
   }

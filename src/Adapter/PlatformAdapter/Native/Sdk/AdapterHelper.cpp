@@ -1,5 +1,7 @@
 #include "AdapterHelper.hpp"
 #include "defines.hpp"
+#include <cassert>
+#include <stdexcept>
 
 namespace VGG
 {

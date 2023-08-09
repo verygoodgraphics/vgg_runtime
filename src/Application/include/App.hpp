@@ -458,7 +458,11 @@ protected: // protected methods
     }
     if (canvas)
     {
-      if (m_view)
+      if (m_scene)
+      {
+        m_scene->render(canvas);
+      }
+      else if (m_view)
       {
         m_view->draw(canvas, &m_zoomer);
       }

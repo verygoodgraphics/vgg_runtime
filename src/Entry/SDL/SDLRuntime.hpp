@@ -248,13 +248,13 @@ public:
   void swapBuffer()
   {
 
-    auto profiler = CappingProfiler::getInstance();
+    // auto profiler = CappingProfiler::getInstance();
 
-    // display fps
-    if (profiler)
-    {
-      SDL_SetWindowTitle(m_sdlState.window, profiler->fpsStr());
-    }
+    // // display fps
+    // if (profiler)
+    // {
+    //   SDL_SetWindowTitle(m_sdlState.window, profiler->fpsStr());
+    // }
 
     // swap buffer at last
     SDL_GL_SwapWindow(m_sdlState.window);

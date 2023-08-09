@@ -3,6 +3,8 @@ add_library(vgg_adapter OBJECT
   View/UIView.cpp
 )
 
+set_target_properties(vgg_adapter PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 if (EMSCRIPTEN)
   target_sources(vgg_adapter PRIVATE
     PlatformAdapter/Browser/Exec/BrowserJSEngine.cpp

@@ -303,6 +303,7 @@ public:
       {
         p->setOverflow(OF_Visible); // Group do not clip inner content
         p->setContourOption(ContourOption(ECoutourType::MCT_Union, false));
+        p->setPaintOption(EPaintStrategy(EPaintStrategy::PS_ChildOnly));
         for (const auto& c : j.value("childObjects", std::vector<nlohmann::json>{}))
         {
           p->addChild(fromObject(c));

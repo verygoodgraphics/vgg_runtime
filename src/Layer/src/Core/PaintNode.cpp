@@ -580,6 +580,10 @@ void PaintNode::invokeRenderPass(SkCanvas* canvas)
     paintChildrenPass(canvas);
     postPaintPass(canvas);
   }
+  else if (_->paintOption.paintStrategy == EPaintStrategy::PS_ChildOnly)
+  {
+    paintChildrenPass(canvas);
+  }
 }
 
 void PaintNode::paintChildrenRecursively(SkCanvas* canvas)

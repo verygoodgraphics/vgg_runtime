@@ -8,13 +8,7 @@ constexpr auto flip_y_factor = -1;
 
 void Layout::Layout::layout(Size size)
 {
-}
-
-nlohmann::json Layout::Layout::normalizePoint()
-{
-  auto normalized_design_json = m_model->designDoc()->content();
-  normalized_design_json(normalized_design_json);
-  return normalized_design_json;
+  // todo
 }
 
 std::shared_ptr<LayoutView> Layout::Layout::createLayoutTree()
@@ -113,23 +107,5 @@ void Layout::Layout::createOneOrMoreLayoutViews(const nlohmann::json& j,
   else if (j.is_array())
   {
     createLayoutViews(j, current_path, parent);
-  }
-}
-
-void Layout::Layout::normalizePoint(nlohmann::json& json)
-{
-  if (json.is_object())
-  {
-    for (auto& [key, val] : json.items())
-    {
-      normalizePoint(json);
-    }
-  }
-  else if (json.is_array())
-  {
-    for (auto i = 0; i < json.size(); ++i)
-    {
-      normalizePoint(json[i]);
-    }
   }
 }

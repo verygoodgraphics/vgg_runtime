@@ -22,7 +22,7 @@ public:
 
   nlohmann::json designDoc()
   {
-    return m_layout->normalizePoint();
+    return m_layout->designDoc();
   }
 
   std::shared_ptr<LayoutView> layoutTree()

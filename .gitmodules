@@ -4,3 +4,6 @@
 [submodule "lib/vgg_automerge"]
 	path = lib/vgg_automerge
 	url = https://github.com/verygoodgraphics/vgg_automerge.git
+[submodule "lib/vgg_layout"]
+	path = lib/vgg_layout
+	url = git@github.com:verygoodgraphics/vgg_layout.git

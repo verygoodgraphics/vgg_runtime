@@ -72,8 +72,8 @@ void Scene::loadFileContent(const nlohmann::json& json)
   symbolIndex = 0;
   maskDirty = true;
 
-  repr = NlohmannBuilder::build(json);
-  for (const auto& s : repr.symbols)
+  container = NlohmannBuilder::build(json);
+  for (const auto& s : container.symbols)
   {
     s_templateObjectTable[s->guid()] = s;
   }
@@ -86,18 +86,18 @@ void Scene::render(SkCanvas* canvas)
   SkiaRenderer r;
   if (!renderSymbol)
   {
-    if (!repr.frames.empty())
+    if (!container.frames.empty())
     {
-      auto board = repr.frames[page].get();
+      auto board = container.frames[page].get();
       preprocessMask(board);
       r.draw(canvas, board);
     }
   }
   else
   {
-    if (!repr.symbols.empty())
+    if (!container.symbols.empty())
     {
-      node = repr.symbols[symbolIndex].get();
+      node = container.symbols[symbolIndex].get();
       r.draw(canvas, node);
     }
   }
@@ -115,7 +115,7 @@ void Scene::preprocessMask(PaintNode* node)
 
 void Scene::setPage(int num)
 {
-  if (num >= 0 && num < repr.frames.size())
+  if (num >= 0 && num < container.frames.size())
   {
     page = num;
     maskDirty = true;
@@ -124,7 +124,7 @@ void Scene::setPage(int num)
 
 void Scene::nextArtboard()
 {
-  page = (page + 1 >= repr.frames.size()) ? page : page + 1;
+  page = (page + 1 >= container.frames.size()) ? page : page + 1;
   maskDirty = true;
 }
 
@@ -136,7 +136,7 @@ void Scene::preArtboard()
 
 void Scene::nextSymbol()
 {
-  symbolIndex = (symbolIndex + 1 >= repr.symbols.size()) ? symbolIndex : symbolIndex + 1;
+  symbolIndex = (symbolIndex + 1 >= container.symbols.size()) ? symbolIndex : symbolIndex + 1;
 }
 
 void Scene::prevSymbol()

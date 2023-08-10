@@ -221,13 +221,7 @@ void PaintNode::visitNode(VGG::Node* p, ObjectTableType& table)
 void PaintNode::paintPass()
 {
   VGG_IMPL(PaintNode);
-  SkCanvas* canvas = getSkCanvas();
-  canvas->save();
-  canvas->concat(toSkMatrix(_->transform));
-  if (Scene::isEnableDrawDebugBound())
-  {
-    this->drawDebugBound(canvas);
-  }
+  auto canvas = getSkCanvas();
   this->paintEvent(canvas);
 }
 
@@ -572,9 +566,17 @@ void PaintNode::invokeRenderPass(SkCanvas* canvas)
   if (_->paintOption.paintStrategy == EPaintStrategy::PS_SelfOnly)
   {
     prePaintPass(canvas);
+    paintPass();
     postPaintPass(canvas);
   }
   else if (_->paintOption.paintStrategy == EPaintStrategy::PS_Recursively)
+  {
+    prePaintPass(canvas);
+    paintPass();
+    paintChildrenPass(canvas);
+    postPaintPass(canvas);
+  }
+  else if (_->paintOption.paintStrategy == EPaintStrategy::PS_ChildOnly)
   {
     prePaintPass(canvas);
     paintChildrenPass(canvas);
@@ -659,7 +661,13 @@ void PaintNode::prePaintPass(SkCanvas* canvas)
     // canvas->scale(1, -1);
     // canvas->saveLayer(toSkRect(getBound()), &paint);
   }
-  paintPass();
+
+  canvas->save();
+  canvas->concat(toSkMatrix(_->transform));
+  if (Scene::isEnableDrawDebugBound())
+  {
+    this->drawDebugBound(canvas);
+  }
 }
 
 void PaintNode::postPaintPass(SkCanvas* canvas)

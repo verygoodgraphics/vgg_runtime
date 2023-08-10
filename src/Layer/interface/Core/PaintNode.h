@@ -39,7 +39,8 @@ struct ContourOption
 enum EPaintStrategy
 {
   PS_Recursively,
-  PS_SelfOnly
+  PS_SelfOnly,
+  PS_ChildOnly,
 };
 
 struct PaintOption

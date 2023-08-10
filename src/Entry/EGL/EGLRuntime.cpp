@@ -367,10 +367,10 @@ std::tuple<std::string, std::map<int, std::vector<char>>> render(
   auto scene = std::make_shared<Scene>();
   scene->loadFileContent(j);
   scene->setResRepo(resources);
-  auto count = scene->repr.frames.size();
+  auto count = scene->container.frames.size();
   for (int i = 0; i < count; i++)
   {
-    auto b = scene->repr.frames[i]->getBound();
+    auto b = scene->container.frames[i]->getBound();
     int w = b.size().x;
     int h = b.size().y;
     scene->setPage(i);

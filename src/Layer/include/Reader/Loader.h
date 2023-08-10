@@ -420,11 +420,11 @@ class NlohmannBuilder
   }
 
 public:
-  static FormatRepresentation build(const nlohmann::json& j)
+  static NodeContainer build(const nlohmann::json& j)
   {
     NlohmannBuilder builder;
     builder.buildImpl(j);
-    return FormatRepresentation{ std::move(builder.m_frames), std::move(builder.m_symbols) };
+    return NodeContainer{ std::move(builder.m_frames), std::move(builder.m_symbols) };
   }
 };
 

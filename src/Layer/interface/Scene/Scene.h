@@ -17,14 +17,14 @@ using InstanceTable =
                      std::pair<std::weak_ptr<PaintNode>,
                                std::string>>; // {instance_id: {instance_object: master_id}}
                                               //
-struct FormatRepresentation
+struct NodeContainer
 {
 public:
   std::vector<std::shared_ptr<PaintNode>> frames;
   std::vector<std::shared_ptr<PaintNode>> symbols;
-  FormatRepresentation() = default;
-  FormatRepresentation(std::vector<std::shared_ptr<PaintNode>> frames,
-                       std::vector<std::shared_ptr<PaintNode>> symbols)
+  NodeContainer() = default;
+  NodeContainer(std::vector<std::shared_ptr<PaintNode>> frames,
+                std::vector<std::shared_ptr<PaintNode>> symbols)
     : frames(std::move(frames))
     , symbols(std::move(symbols))
   {
@@ -39,7 +39,7 @@ struct VGG_EXPORTS Scene
   static InstanceTable s_instanceTable;
   static bool s_enableDrawDebugBound;
 
-  FormatRepresentation repr;
+  NodeContainer container;
 
 public:
   int page{ 0 };

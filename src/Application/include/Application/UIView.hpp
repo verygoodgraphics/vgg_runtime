@@ -99,6 +99,9 @@ public:
   {
     m_frame.size.width = w;
     m_frame.size.height = h;
+
+    m_is_dirty = true;
+
     layoutSubviews();
   }
 

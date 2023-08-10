@@ -7,7 +7,9 @@ else()
 
   add_executable(unit_tests
     controller/controller_test.cpp
-    domain/layout_tests.cpp
+    domain/layout/expand_symbol_tests.cpp
+    domain/layout/layout_tests.cpp
+    domain/model/daruma_helper.cpp
     editor/save_test.cpp
     exec/vgg_exec_test.cpp
     infrastructure/async_test.cpp

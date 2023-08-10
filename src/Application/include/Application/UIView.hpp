@@ -67,7 +67,7 @@ public:
     m_scene->loadFileContent(viewModel.designDoc);
     m_root = viewModel.layoutTree;
     // todo, merge edited doc resouces ?
-    Scene::s_resRepo = std::move(viewModel.resources());
+    Scene::getResRepo() = std::move(viewModel.resources());
 
     m_is_dirty = true;
   }

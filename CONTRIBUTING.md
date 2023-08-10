@@ -17,9 +17,9 @@ We will reply ASAP.
 If you want to solve an unassigned issue in [#help-wanted](https://github.com/verygoodgraphics/vgg_runtime/labels/help%20wanted), you can reply under the comment thread, waiting for an assignment. You can create a [pull request](#pull-request) when the issue is sovled.
 
 ## Pull Request
-If you can fix any bug or make any improvement, welcome to send a pull request. Both core team members and external contributors send pull requests which go through the same review process. Checkout [GitHub's pull request tutorial](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests) in case of any issue.
+If you can fix any bug or make any improvement, welcome to send a pull request (PR). Both core team members and external contributors send pull requests which go through the same review process. Checkout [GitHub's pull request tutorial](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests) in case of any issue.
 
-When opening a pull request, you will be asked to sign a Contributor License Agreement (CLA).
+When opening a pull request, you will be asked to sign a [Contributor License Agreement (CLA)](.github/CLA.md), by posting a comment under instructions.
 
 ### Basic PR Requirements
 - Keep each commit atomic, and commit with clear messages.

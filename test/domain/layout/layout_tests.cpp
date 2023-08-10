@@ -1,6 +1,6 @@
 #include "Domain/Layout/Layout.hpp"
 
-#include "model/daruma_helper.hpp"
+#include "domain/model/daruma_helper.hpp"
 
 #include <gtest/gtest.h>
 

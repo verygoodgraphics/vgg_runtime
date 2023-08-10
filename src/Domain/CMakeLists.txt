@@ -1,7 +1,8 @@
 add_library(vgg_domain STATIC
   Exec/VggExec.cpp
-  Loader/ZipLoader.cpp
+  Layout/ExpandSymbol.cpp
   Layout/Layout.cpp
+  Loader/ZipLoader.cpp
   Model/Daruma.cpp
   Model/DarumaContainer.cpp
   Model/JsonDocument.cpp

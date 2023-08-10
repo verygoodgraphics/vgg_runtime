@@ -74,7 +74,22 @@ protected:
     {
       std::string key = (prefix / entry.path().filename()).string();
       std::cout << "read image: " << entry.path() << " which key is: " << key << std::endl;
-      resources[key] = GetBinFromFile(entry.path()).value_or(std::vector<char>{});
+      auto data = GetBinFromFile(entry.path());
+      if (data.has_value())
+      {
+        if (data.value().empty())
+        {
+          std::cout << "Image is empty: " << key << std::endl;
+        }
+        else
+        {
+          resources[key] = data.value();
+        }
+      }
+      else
+      {
+        std::cout << "Failed to read image: " << key << std::endl;
+      }
     }
     return resources;
   }

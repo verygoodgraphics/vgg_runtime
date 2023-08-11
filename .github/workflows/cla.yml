@@ -29,7 +29,7 @@ jobs:
           path-to-signatures: '.github/signatures/v1/cla.json'
           path-to-document: 'https://github.com/verygoodgraphics/vgg_runtime/blob/main/.github/CLA.md' # e.g. a CLA or a DCO document
           # branch should not be protected
-          branch: 'main'
+          branch: 'cla'
           allowlist: harry75369,gaimanjing,yslib,szn409,elff1,MaybeMonad,bot*
 
          # the followings are the optional inputs - If the optional inputs are not given, then default values will be taken

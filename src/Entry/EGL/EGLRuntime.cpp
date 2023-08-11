@@ -334,7 +334,7 @@ void getMaxSurfaceSize(int resolutionLevel, float* maxSurfaceSize)
   }
 }
 
-std::tuple<std::string, std::map<int, std::vector<char>>> render(
+std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> render(
   const nlohmann::json& j,
   const std::map<std::string, std::vector<char>>& resources,
   int imageQuality,
@@ -363,7 +363,7 @@ std::tuple<std::string, std::map<int, std::vector<char>>> render(
   }
 
   FontManager::instance().setDefaultFontManager(fontCollectionName);
-  std::map<int, std::vector<char>> res;
+  std::vector<std::pair<std::string, std::vector<char>>> res;
   auto scene = std::make_shared<Scene>();
   scene->loadFileContent(j);
   scene->setResRepo(resources);
@@ -393,7 +393,8 @@ std::tuple<std::string, std::map<int, std::vector<char>>> render(
           opt.fZLibLevel = std::max(std::min(9, (100 - imageQuality) / 10), 0);
           if (auto data = SkPngEncoder::Encode(app->getDirectContext(), image.get(), opt))
           {
-            res[i] = std::vector<char>{ data->bytes(), data->bytes() + data->size() };
+            res.emplace_back(scene->container.frames[i]->guid(),
+                             std::vector<char>{ data->bytes(), data->bytes() + data->size() });
           }
           else
           {

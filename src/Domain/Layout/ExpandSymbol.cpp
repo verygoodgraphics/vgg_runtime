@@ -65,6 +65,8 @@ void ExpandSymbol::expand_instance(nlohmann::json& json)
         auto& master_json = m_masters[master_id];
         json[k_child_objects] = master_json[k_child_objects];
         expand_instance(json[k_child_objects]);
+        scale_from_master(json, master_json);
+        handle_override(json, master_json);
       }
     }
   }
@@ -73,4 +75,34 @@ void ExpandSymbol::expand_instance(nlohmann::json& json)
   {
     expand_instance(el.value());
   }
+}
+
+void ExpandSymbol::scale_from_master(nlohmann::json& instance, nlohmann::json& master)
+{
+  auto size_is_equal = true;
+  if (size_is_equal)
+  {
+    return;
+  }
+
+  normalize_children_geometry_within_master(instance, master);
+  recalculate_intance_children_geometry(instance, master);
+}
+
+void ExpandSymbol::normalize_children_geometry_within_master(nlohmann::json& instance,
+                                                             nlohmann::json& master)
+{
+}
+
+void ExpandSymbol::recalculate_intance_children_geometry(nlohmann::json& instance,
+                                                         nlohmann::json& master)
+{
+}
+
+void ExpandSymbol::handle_override(nlohmann::json& instance, nlohmann::json& master)
+{
+}
+
+void ExpandSymbol::handle_override_master_id(nlohmann::json& instance, nlohmann::json& master)
+{
 }

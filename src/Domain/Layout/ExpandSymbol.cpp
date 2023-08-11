@@ -6,14 +6,6 @@ namespace nl = nlohmann;
 using jref = nl::detail::json_ref<nl::json>;
 using namespace VGG::Layout;
 
-constexpr auto k_child_objects = "childObjects";
-constexpr auto k_class = "class";
-constexpr auto k_empty_string = "";
-constexpr auto k_id = "id";
-constexpr auto k_master_id = "masterId";
-constexpr auto k_symbol_instance = "symbolInstance";
-constexpr auto k_symbol_master = "symbolMaster";
-
 nlohmann::json ExpandSymbol::operator()()
 {
   collect_master(m_design_json);
@@ -64,9 +56,12 @@ void ExpandSymbol::expand_instance(nlohmann::json& json)
       {
         auto& master_json = m_masters[master_id];
         json[k_child_objects] = master_json[k_child_objects];
+
         expand_instance(json[k_child_objects]);
+
+        apply_overrides(json, master_json);
+
         scale_from_master(json, master_json);
-        handle_override(json, master_json);
       }
     }
   }
@@ -99,10 +94,64 @@ void ExpandSymbol::recalculate_intance_children_geometry(nlohmann::json& instanc
 {
 }
 
-void ExpandSymbol::handle_override(nlohmann::json& instance, nlohmann::json& master)
+void ExpandSymbol::apply_overrides(nlohmann::json& instance, nlohmann::json& master)
 {
+  override_master(instance);
+
+  // other override
 }
 
-void ExpandSymbol::handle_override_master_id(nlohmann::json& instance, nlohmann::json& master)
+void ExpandSymbol::override_master(nlohmann::json& instance)
 {
+  auto& override_values = instance[k_override_values];
+  if (!override_values.is_array())
+  {
+    return;
+  }
+
+  for (auto& el : override_values.items())
+  {
+    auto& override_item = el.value();
+    if (override_item.is_object() && (override_item[k_class] == k_override_class) &&
+        (override_item[k_override_name] == k_master_id))
+    {
+      nl::json* child_instance =
+        find_child_instance(instance[k_child_objects], override_item[k_object_id]);
+      if (child_instance && child_instance->is_object())
+      {
+        (*child_instance)[k_master_id] = override_item[k_override_value];
+        (*child_instance)[k_override_values] = nl::json(nl::detail::value_t::array);
+        expand_instance(*child_instance);
+      }
+    }
+  }
+}
+
+nlohmann::json* ExpandSymbol::find_child_instance(nlohmann::json& json,
+                                                  const nlohmann::json& object_id)
+{
+  if (!json.is_object() && !json.is_array())
+  {
+    return nullptr;
+  }
+
+  if (json.is_object())
+  {
+    auto class_name = json.value(k_class, k_empty_string);
+    if ((class_name == k_symbol_instance) && (json[k_id] == object_id))
+    {
+      return &json;
+    }
+  }
+
+  for (auto& el : json.items())
+  {
+    auto ret = find_child_instance(el.value(), object_id);
+    if (ret)
+    {
+      return ret;
+    }
+  }
+
+  return nullptr;
 }

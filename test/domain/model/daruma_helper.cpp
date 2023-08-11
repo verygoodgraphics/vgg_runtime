@@ -9,3 +9,9 @@ nlohmann::json Helper::load_json(const std::string& json_file_name)
 
   return json_data;
 }
+
+void Helper::write_json(const nlohmann::json& json, const std::string& json_file_name)
+{
+  std::ofstream json_fs(json_file_name);
+  json_fs << json;
+}

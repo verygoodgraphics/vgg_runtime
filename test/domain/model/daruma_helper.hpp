@@ -11,5 +11,6 @@ auto RawJsonDocumentBuilder = [](const json& design_json)
 };
 
 nlohmann::json load_json(const std::string& json_file_name);
+void write_json(const nlohmann::json& json, const std::string& json_file_name);
 
 } // namespace Helper

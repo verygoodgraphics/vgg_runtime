@@ -1,24 +1,20 @@
 #include <argparse/argparse.hpp>
 #include <filesystem>
 #include <fstream>
+#include <optional>
 #include "ConfigMananger.h"
 #include "Scene/Scene.h"
 #include "loader.h"
 #include "Entry/EGL/EGLRuntime.h"
 using namespace VGG;
 
-void writeResult(const std::map<int, std::vector<char>>& result)
+template<typename F>
+void writeResult(const std::vector<std::pair<std::string, std::vector<char>>>& result, F&& f)
 {
   int count = 0;
   for (const auto p : result)
   {
-    count++;
-    std::stringstream ss;
-    ss << "image" << count << ".png";
-    std::string name;
-    ss >> name;
-
-    std::ofstream ofs(name, std::ios::binary);
+    std::ofstream ofs(f(p.first) + ".png", std::ios::binary);
     if (ofs.is_open())
     {
       ofs.write((const char*)p.second.data(), p.second.size());
@@ -26,9 +22,42 @@ void writeResult(const std::map<int, std::vector<char>>& result)
   }
 }
 
+struct InputDesc
+{
+  fs::path filepath;
+  std::string fontCollection;
+  int imageQuality{ 80 };
+  int resolutionLevel{ 2 };
+  std::optional<fs::path> configFilePath;
+  std::optional<fs::path> prefix;
+};
+
+std::vector<std::pair<std::string, std::vector<char>>> renderAndOutput(InputDesc input)
+{
+  auto ext = fs::path(input.filepath).extension().string();
+  auto r = load(ext);
+  if (r)
+  {
+    auto data = r->read(input.prefix.value_or(fs::path(".")) / input.filepath);
+    auto result = render(data.Format,
+                         data.Resource,
+                         input.imageQuality,
+                         input.resolutionLevel,
+                         input.configFilePath.value_or("config.json"),
+                         input.fontCollection);
+    const auto reason = std::get<0>(result);
+    if (!reason.empty())
+    {
+      std::cout << reason << std::endl;
+    }
+    return std::get<1>(result);
+  }
+  return {};
+}
+
 int main(int argc, char** argv)
 {
-  argparse::ArgumentParser program("vgg", "0.1");
+  argparse::ArgumentParser program("exporter", "0.1");
   program.add_argument("-l", "--load").help("load from vgg or sketch file");
   program.add_argument("-d", "--data").help("resources dir");
   program.add_argument("-p", "--prefix").help("the prefix of filename or dir");
@@ -36,6 +65,10 @@ int main(int argc, char** argv)
   program.add_argument("-s", "--scale").help("canvas scale").scan<'g', float>().default_value(1.0);
   program.add_argument("-c", "--config").help("specify config file");
   program.add_argument("-q", "--quality").help("canvas scale").scan<'i', int>().default_value(80);
+  program.add_argument("-o", "--output").help("output directory");
+  program.add_argument("-t").help("postfix for output filename");
+  program.add_argument("-f", "--font-collection")
+    .help("Specifiy font collection listed in config file");
 
   try
   {
@@ -48,45 +81,61 @@ int main(int argc, char** argv)
     exit(0);
   }
 
-  auto scene = std::make_shared<Scene>();
-  std::filesystem::path prefix;
-  std::filesystem::path respath;
-  std::string fontCollection = "google";
-  std::string configFile;
-  if (auto configfile = program.present("-c"))
+  const auto outputDir = program.present("-o").value_or(".");
+  if (!fs::exists(outputDir))
   {
-    auto file = configfile.value();
-    configFile = file;
-    Config::readGlobalConfig(file);
+    std::cout << "specified output directory not exists\n";
   }
 
-  if (auto p = program.present("-p"))
-  {
-    prefix = p.value();
-  }
+  const fs::path configFilePath = program.present("-c").value_or("config.json");
+  std::string outputFilePostfix = program.present("-t").value_or("");
+  InputDesc desc;
+  desc.prefix = program.present("-p").value_or("");
+  desc.fontCollection = program.present("-f").value_or("google");
+  desc.resolutionLevel = 2;
+  desc.imageQuality = 80;
+  desc.configFilePath = configFilePath;
+
+  Config::readGlobalConfig(configFilePath);
+
   if (auto loadfile = program.present("-l"))
   {
     auto fp = loadfile.value();
+    desc.filepath = fp;
     auto ext = fs::path(fp).extension().string();
-    if (ext == ".json")
-    {
-      respath = std::filesystem::path(fp).stem(); // same with filename as default
-      if (auto res = program.present("-d"))
-      {
-        respath = res.value();
-      }
-    }
-
     auto r = load(ext);
     if (r)
     {
-      auto data = r->read(prefix / fp);
-      auto result = render(data.Format, data.Resource, 80, 2, configFile, fontCollection);
-      auto reason = std::get<0>(result);
-      std::cout << "Reason: " << reason << std::endl;
-      writeResult(std::get<1>(result));
+      auto res = renderAndOutput(desc);
+      const auto folder = fs::path(fp).filename().stem();
+      const auto prefix = outputDir / folder;
+      fs::create_directory(prefix);
+      writeResult(res, [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); });
     }
   }
-
+  else if (auto d = program.present("-L"))
+  {
+    const auto dir = desc.prefix.value_or(".") / d.value();
+    if (fs::exists(dir))
+    {
+      for (const auto& ent : fs::recursive_directory_iterator(dir))
+      {
+        if (fs::is_regular_file(ent))
+        {
+          desc.filepath = ent;
+          auto res = renderAndOutput(desc);
+          const auto folder = ent.path().filename().stem();
+          const auto prefix = outputDir / folder;
+          fs::create_directory(prefix);
+          writeResult(res,
+                      [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); });
+        }
+      }
+    }
+    else
+    {
+      std::cout << "Directory " << dir << "not exists\n";
+    }
+  }
   return 0;
 }

@@ -32,7 +32,23 @@ TEST_F(VggExpandSymbolTestSuite, Smoke)
   EXPECT_TRUE(result_json.is_object());
 }
 
-// no overide
+TEST_F(VggExpandSymbolTestSuite, fill_childObjects)
+{
+  // Given
+  std::string file_path = "testDataDir/symbol_instance/design.json";
+  auto design_json = Helper::load_json(file_path);
+  ExpandSymbol sut{ design_json };
+
+  // When
+  auto result_json = sut();
+
+  // Then
+  nlohmann::json::json_pointer path{ "/frames/0/childObjects/0/childObjects" };
+  auto instance_child = result_json[path];
+  EXPECT_TRUE(instance_child.is_array());
+}
+
+// no override
 // overide width & height
 
 // instance of one master containing instance have no overide

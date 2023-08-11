@@ -76,10 +76,7 @@ public:
     return s_instanceTable;
   }
 
-  static void setResRepo(std::map<std::string, std::vector<char>> repo)
-  {
-    Scene::s_resRepo = std::move(repo);
-  }
+  static void setResRepo(std::map<std::string, std::vector<char>> repo);
 
   static void enableDrawDebugBound(bool enable)
   {

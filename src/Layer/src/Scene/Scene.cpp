@@ -3,6 +3,7 @@
 #include "Core/PaintNode.h"
 #include "Scene/Renderer.h"
 #include "core/SkCanvas.h"
+#include "core/SkImage.h"
 #include <filesystem>
 #include "ConfigMananger.h"
 #include "glm/gtx/matrix_transform_2d.hpp"
@@ -10,6 +11,8 @@
 #include <fstream>
 #include <memory>
 #include <string>
+
+extern std::unordered_map<std::string, sk_sp<SkImage>> g_skiaImageRepo;
 namespace VGG
 {
 
@@ -142,6 +145,12 @@ void Scene::nextSymbol()
 void Scene::prevSymbol()
 {
   symbolIndex = (symbolIndex - 1 > 0) ? symbolIndex - 1 : 0;
+}
+
+void Scene::setResRepo(std::map<std::string, std::vector<char>> repo)
+{
+  Scene::s_resRepo = std::move(repo);
+  g_skiaImageRepo.clear();
 }
 
 } // namespace VGG

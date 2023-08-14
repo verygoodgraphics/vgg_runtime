@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Rect.hpp"
+
 #include "nlohmann/json.hpp"
 
 #include <string>
@@ -9,18 +11,6 @@ namespace VGG
 {
 namespace Layout
 {
-constexpr auto k_child_objects = "childObjects";
-constexpr auto k_class = "class";
-constexpr auto k_empty_string = "";
-constexpr auto k_id = "id";
-constexpr auto k_master_id = "masterId";
-constexpr auto k_object_id = "objectId";
-constexpr auto k_override_class = "overrideValue";
-constexpr auto k_override_name = "overrideName";
-constexpr auto k_override_value = "overrideValue";
-constexpr auto k_override_values = "overrideValues";
-constexpr auto k_symbol_instance = "symbolInstance";
-constexpr auto k_symbol_master = "symbolMaster";
 
 class ExpandSymbol
 {
@@ -39,11 +29,15 @@ private:
   void collect_master(const nlohmann::json& json);
   void expand_instance(nlohmann::json& json);
   void scale_from_master(nlohmann::json& instance, nlohmann::json& master);
-  void normalize_children_geometry_within_master(nlohmann::json& instance, nlohmann::json& master);
-  void recalculate_intance_children_geometry(nlohmann::json& instance, nlohmann::json& master);
+
+  void normalize_children_geometry(nlohmann::json& json, const Size container_size);
+  void recalculate_intance_children_geometry(nlohmann::json& json, Size container_size);
+
   void apply_overrides(nlohmann::json& instance, nlohmann::json& master);
   void override_master(nlohmann::json& instance);
   nlohmann::json* find_child_instance(nlohmann::json& json, const nlohmann::json& object_id);
+
+  Rect get_node_bounds(nlohmann::json& node_json);
 };
 } // namespace Layout
 

@@ -14,12 +14,16 @@ struct Point
 {
   Scalar x{ 0 };
   Scalar y{ 0 };
+
+  bool operator==(const Point& rhs) const noexcept;
 };
 
 struct Size
 {
   Scalar width{ 0 };
   Scalar height{ 0 };
+
+  bool operator==(const Size& rhs) const noexcept;
 };
 
 struct Rect
@@ -31,6 +35,10 @@ struct Rect
   {
     return (point.x >= origin.x && point.x <= (origin.x + size.width)) &&
            (point.y >= origin.y && point.y <= (origin.y + size.height));
+  }
+  bool operator==(const Rect& rhs) const noexcept
+  {
+    return origin == rhs.origin && size == rhs.size;
   }
 };
 

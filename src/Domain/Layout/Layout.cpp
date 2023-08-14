@@ -1,5 +1,7 @@
 #include "Layout.hpp"
 
+#include "Helper.hpp"
+#include "JsonKeys.hpp"
 #include "Log.h"
 
 using namespace VGG;
@@ -15,15 +17,15 @@ std::shared_ptr<LayoutView> Layout::Layout::createLayoutTree()
 {
   auto doc = m_model->designDoc()->content();
 
-  // todo, select artboard
-  auto& artboard = doc["artboard"][0];
-  if (!artboard.is_object())
+  // todo, select frame
+  auto& frame = doc[k_frame][0];
+  if (!frame.is_object())
   {
-    WARN("no artboard in design file");
+    WARN("no frame in design file");
     return {};
   }
 
-  return createOneLayoutView(artboard, json::json_pointer("/artboard/0"), nullptr);
+  return createOneLayoutView(frame, json::json_pointer("/frames/0"), nullptr);
 }
 
 std::shared_ptr<LayoutView> Layout::Layout::createOneLayoutView(const nlohmann::json& j,
@@ -36,28 +38,13 @@ std::shared_ptr<LayoutView> Layout::Layout::createOneLayoutView(const nlohmann::
     return nullptr;
   }
 
-  // check top level class
-  auto class_name = j.value("class", "");
-  if (class_name != "artboard" && class_name != "frame" && class_name != "group" &&
-      class_name != "image" && class_name != "layer" && class_name != "path" &&
-      class_name != "symbolInstance" && class_name != "symbolMaster" && class_name != "text")
+  if (!is_layout_node(j))
   {
     return nullptr;
   }
 
-  Rect frame;
-  constexpr auto frame_key = "frame";
-  const auto it = j.find(frame_key);
-  if (it != j.end())
-  {
-    auto frame_json = j[frame_key];
-    auto x = frame_json["x"];
-    auto y = frame_json["y"].get<Scalar>() * flip_y_factor;
-    auto width = frame_json["width"];
-    auto height = frame_json["height"];
-
-    frame = { { x, y }, { width, height } };
-  }
+  auto frame = j[k_frame].get<Rect>();
+  frame.origin.y *= flip_y_factor;
 
   auto layout_view = std::make_shared<LayoutView>(current_path.to_string(), frame);
   if (parent)

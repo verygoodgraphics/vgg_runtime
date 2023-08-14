@@ -1,5 +1,9 @@
 #include "ExpandSymbol.hpp"
 
+#include "Helper.hpp"
+#include "JsonKeys.hpp"
+#include "Log.h"
+
 #include <iostream>
 
 namespace nl = nlohmann;
@@ -74,31 +78,101 @@ void ExpandSymbol::expand_instance(nlohmann::json& json)
 
 void ExpandSymbol::scale_from_master(nlohmann::json& instance, nlohmann::json& master)
 {
-  auto size_is_equal = true;
-  if (size_is_equal)
+  auto master_size = master[k_bounds].get<Rect>().size;
+  auto instance_size = instance[k_bounds].get<Rect>().size;
+
+  auto size_is_equal = false;
+  if (master_size == instance_size)
   {
     return;
   }
 
-  normalize_children_geometry_within_master(instance, master);
-  recalculate_intance_children_geometry(instance, master);
+  normalize_children_geometry(instance[k_child_objects], master_size);
+  recalculate_intance_children_geometry(instance[k_child_objects], instance_size);
 }
 
-void ExpandSymbol::normalize_children_geometry_within_master(nlohmann::json& instance,
-                                                             nlohmann::json& master)
+void ExpandSymbol::normalize_children_geometry(nlohmann::json& json, const Size container_size)
 {
+  if (!json.is_object() && !json.is_array())
+  {
+    return;
+  }
+  auto my_container_size = container_size;
+  auto child_container_size = container_size;
+
+  auto has_bounds = is_layout_node(json);
+  Rect bounds, frame;
+  if (has_bounds)
+  {
+    bounds = json[k_bounds].get<Rect>();
+    frame = json[k_frame].get<Rect>();
+
+    child_container_size = bounds.size;
+  }
+
+  // bottom up; leaf first
+  for (auto& el : json.items())
+  {
+    normalize_children_geometry(el.value(), child_container_size);
+  }
+
+  // root last, normalize self
+  if (has_bounds)
+  {
+    Rect normalized_bounds = {
+      { bounds.origin.x / my_container_size.width, bounds.origin.y / my_container_size.height },
+      { bounds.size.width / my_container_size.width, bounds.size.height / my_container_size.height }
+    };
+    Rect normalized_frame = {
+      { frame.origin.x / my_container_size.width, frame.origin.y / my_container_size.height },
+      { frame.size.width / my_container_size.width, frame.size.height / my_container_size.height }
+    };
+    to_json(json[k_bounds], normalized_bounds);
+    to_json(json[k_frame], normalized_frame);
+  }
 }
 
-void ExpandSymbol::recalculate_intance_children_geometry(nlohmann::json& instance,
-                                                         nlohmann::json& master)
+void ExpandSymbol::recalculate_intance_children_geometry(nlohmann::json& json, Size container_size)
 {
+  if (!json.is_object() && !json.is_array())
+  {
+    return;
+  }
+
+  // top down, root fist
+  auto has_bounds = is_layout_node(json);
+  Rect normalized_bounds, normalized_frame;
+  if (has_bounds)
+  {
+    normalized_bounds = json[k_bounds].get<Rect>();
+    normalized_frame = json[k_frame].get<Rect>();
+
+    Rect bounds = { { normalized_bounds.origin.x * container_size.width,
+                      normalized_bounds.origin.y * container_size.height },
+                    { normalized_bounds.size.width * container_size.width,
+                      normalized_bounds.size.height * container_size.height } };
+    Rect frame = { { normalized_frame.origin.x * container_size.width,
+                     normalized_frame.origin.y * container_size.height },
+                   { normalized_frame.size.width * container_size.width,
+                     normalized_frame.size.height * container_size.height } };
+    to_json(json[k_bounds], bounds);
+    to_json(json[k_frame], frame);
+
+    container_size = bounds.size;
+  }
+
+  // leaf last
+  for (auto& el : json.items())
+  {
+    recalculate_intance_children_geometry(el.value(), container_size);
+  }
 }
 
 void ExpandSymbol::apply_overrides(nlohmann::json& instance, nlohmann::json& master)
 {
   override_master(instance);
 
-  // other override
+  // todo: other override
 }
 
 void ExpandSymbol::override_master(nlohmann::json& instance)

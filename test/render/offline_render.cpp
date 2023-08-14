@@ -108,7 +108,7 @@ int main(int argc, char** argv)
     {
       auto res = renderAndOutput(desc);
       const auto folder = fs::path(fp).filename().stem();
-      const auto prefix = outputDir / folder;
+      const fs::path prefix = outputDir;
       fs::create_directory(prefix);
       writeResult(res, [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); });
     }
@@ -125,7 +125,7 @@ int main(int argc, char** argv)
           desc.filepath = ent;
           auto res = renderAndOutput(desc);
           const auto folder = ent.path().filename().stem();
-          const auto prefix = outputDir / folder;
+          const fs::path prefix = outputDir;
           fs::create_directory(prefix);
           writeResult(res,
                       [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); });

@@ -22,7 +22,7 @@ protected:
   {
   }
 
-  void write_result_json(const nlohmann::json& json)
+  void debug_write_result_json(const nlohmann::json& json)
   {
     std::string out_file_path = "tmp/design.json";
     Helper::write_json(json, out_file_path);
@@ -67,7 +67,6 @@ TEST_F(VggExpandSymbolTestSuite, scale)
 
   // When
   auto result_json = sut();
-  write_result_json(result_json);
 
   // Then
   nlohmann::json::json_pointer path{ "/frames/1/childObjects/0/childObjects/1" };
@@ -103,12 +102,31 @@ TEST_F(VggExpandSymbolTestSuite, expand_masterId_overridden_instance)
   // When
   auto result_json = sut();
 
+  debug_write_result_json(result_json);
+
   // Then
-  nlohmann::json::json_pointer path{ "/frames/0/childObjects/5/childObjects/1" };
+  nlohmann::json::json_pointer path{ "/frames/0/childObjects/4/childObjects/1" };
   auto instance_child = result_json[path];
   EXPECT_TRUE(instance_child[k_master_id].is_null());
   EXPECT_TRUE(instance_child[k_override_values].is_null());
 }
-// instance of one master containing instance overide width & height
 
+TEST_F(VggExpandSymbolTestSuite, override)
+{ // Given
+  std::string file_path = "testDataDir/symbol/scale/design.json";
+  auto design_json = Helper::load_json(file_path);
+  ExpandSymbol sut{ design_json };
+
+  // When
+  auto result_json = sut();
+  debug_write_result_json(result_json);
+
+  // Then
+  nlohmann::json::json_pointer path{
+    "/frames/1/childObjects/0/childObjects/2/childObjects/0/style/fills/0/color/blue"
+  };
+  double blue = result_json[path];
+
+  EXPECT_DOUBLE_EQ(blue, 0.7517530913433672);
+}
 // todo, validate expanded json

@@ -6,6 +6,9 @@
 
 #include <iostream>
 
+#undef DEBUG
+#define DEBUG(msg, ...)
+
 namespace nl = nlohmann;
 using jref = nl::detail::json_ref<nl::json>;
 using namespace VGG::Layout;
@@ -58,6 +61,10 @@ void ExpandSymbol::expand_instance(nlohmann::json& json)
       auto master_id = json[k_master_id].get<std::string>();
       if (m_masters.find(master_id) != m_masters.end())
       {
+        DEBUG("#ExpandSymbol: expand instance[id=%s, ptr=%p] with masterId=%s",
+              json[k_id].get<std::string>().c_str(),
+              &json,
+              master_id.c_str());
         auto& master_json = m_masters[master_id];
         json[k_child_objects] = master_json[k_child_objects];
 
@@ -68,6 +75,9 @@ void ExpandSymbol::expand_instance(nlohmann::json& json)
         scale_from_master(json, master_json);
 
         // make instance node to "symbalMaster" or render will not draw this node
+        DEBUG("#ExpandSymbol: make instance[id=%s, ptr=%p] as master, erase masterId",
+              json[k_id].get<std::string>().c_str(),
+              &json);
         json[k_class] = k_symbol_master;
         json.erase(k_master_id);
         json.erase(k_override_values);
@@ -203,13 +213,6 @@ void ExpandSymbol::recalculate_intance_children_geometry(nlohmann::json& json, S
 
 void ExpandSymbol::apply_overrides(nlohmann::json& instance, nlohmann::json& master)
 {
-  override_master(instance);
-
-  // todo: other override
-}
-
-void ExpandSymbol::override_master(nlohmann::json& instance)
-{
   auto& override_values = instance[k_override_values];
   if (!override_values.is_array())
   {
@@ -219,23 +222,69 @@ void ExpandSymbol::override_master(nlohmann::json& instance)
   for (auto& el : override_values.items())
   {
     auto& override_item = el.value();
-    if (override_item.is_object() && (override_item[k_class] == k_override_class) &&
-        (override_item[k_override_name] == k_master_id))
+    if (!override_item.is_object() || (override_item[k_class] != k_override_class))
     {
-      nl::json* child_instance =
-        find_child_instance(instance[k_child_objects], override_item[k_object_id]);
-      if (child_instance && child_instance->is_object())
+      continue;
+    }
+
+    nl::json* child_object =
+      find_child_object(instance[k_child_objects], override_item[k_object_id]);
+    if (!child_object || !child_object->is_object())
+    {
+      continue;
+    }
+    std::string name = override_item[k_override_name];
+    auto value = override_item[k_override_value];
+    if (name == k_master_id) // override masterId
+    {
+      DEBUG(
+        "#ExpandSymbol: overide instance[id=%s, ptr=%p], old masterId=%s, new masterId=%s, restore "
+        "class to symbolInstance to expand",
+        (*child_object)[k_id].dump().c_str(),
+        child_object,
+        (*child_object)[k_master_id].dump().c_str(),
+        value.get<std::string>().c_str());
+      (*child_object)[k_master_id] = value;
+      (*child_object).erase(k_override_values);
+
+      // restore to symbolInstance to expand again
+      (*child_object)[k_class] = k_symbol_instance;
+      expand_instance(*child_object);
+    }
+    else // other overrides
+    {
+      // make name to json pointer string
+      while (true)
       {
-        (*child_instance)[k_master_id] = override_item[k_override_value];
-        (*child_instance).erase(k_override_values);
-        expand_instance(*child_instance);
+        auto index = name.find(".");
+        if (index == std::string::npos)
+        {
+          break;
+        }
+        name[index] = '/';
+      }
+
+      if (name.find("*") == std::string::npos) // no * in path
+      {
+        nl::json::json_pointer path{ "/" + name };
+        DEBUG("#ExpandSymbol: override object[id=%s, ptr=%p], path=%s, value=%s",
+              (*child_object)[k_id].get<std::string>().c_str(),
+              child_object,
+              path.to_string().c_str(),
+              value.dump().c_str());
+        (*child_object)[path] = value;
+      }
+      else // path has *
+      {
+        // todo
+        std::vector<nl::json::pointer> paths;
       }
     }
   }
 }
 
-nlohmann::json* ExpandSymbol::find_child_instance(nlohmann::json& json,
-                                                  const nlohmann::json& object_id)
+nlohmann::json* ExpandSymbol::find_child_object(nlohmann::json& json,
+                                                const nlohmann::json& object_id)
 {
   if (!json.is_object() && !json.is_array())
   {
@@ -244,8 +293,7 @@ nlohmann::json* ExpandSymbol::find_child_instance(nlohmann::json& json,
 
   if (json.is_object())
   {
-    auto class_name = json.value(k_class, k_empty_string);
-    if ((class_name == k_symbol_instance) && (json[k_id] == object_id))
+    if (json[k_id] == object_id)
     {
       return &json;
     }
@@ -253,7 +301,7 @@ nlohmann::json* ExpandSymbol::find_child_instance(nlohmann::json& json,
 
   for (auto& el : json.items())
   {
-    auto ret = find_child_instance(el.value(), object_id);
+    auto ret = find_child_object(el.value(), object_id);
     if (ret)
     {
       return ret;

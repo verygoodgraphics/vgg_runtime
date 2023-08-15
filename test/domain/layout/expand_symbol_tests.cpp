@@ -32,7 +32,7 @@ protected:
 TEST_F(VggExpandSymbolTestSuite, Smoke)
 {
   // Given
-  std::string file_path = "testDataDir/symbol_instance/design.json";
+  std::string file_path = "testDataDir/symbol/symbol_instance/design.json";
   auto design_json = Helper::load_json(file_path);
   ExpandSymbol sut{ design_json };
 
@@ -46,7 +46,7 @@ TEST_F(VggExpandSymbolTestSuite, Smoke)
 TEST_F(VggExpandSymbolTestSuite, fill_childObjects)
 {
   // Given
-  std::string file_path = "testDataDir/symbol_instance/design.json";
+  std::string file_path = "testDataDir/symbol/symbol_instance/design.json";
   auto design_json = Helper::load_json(file_path);
   ExpandSymbol sut{ design_json };
 
@@ -96,7 +96,7 @@ TEST_F(VggExpandSymbolTestSuite, scale)
 TEST_F(VggExpandSymbolTestSuite, expand_masterId_overridden_instance)
 {
   // Given
-  std::string file_path = "testDataDir/symbol_instance/design.json";
+  std::string file_path = "testDataDir/symbol/symbol_instance/design.json";
   auto design_json = Helper::load_json(file_path);
   ExpandSymbol sut{ design_json };
 

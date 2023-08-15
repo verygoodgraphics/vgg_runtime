@@ -34,8 +34,7 @@ private:
   void recalculate_intance_children_geometry(nlohmann::json& json, Size container_size);
 
   void apply_overrides(nlohmann::json& instance, nlohmann::json& master);
-  void override_master(nlohmann::json& instance);
-  nlohmann::json* find_child_instance(nlohmann::json& json, const nlohmann::json& object_id);
+  nlohmann::json* find_child_object(nlohmann::json& json, const nlohmann::json& object_id);
 
   Rect get_node_bounds(nlohmann::json& node_json);
 };

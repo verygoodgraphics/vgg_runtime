@@ -847,7 +847,20 @@
           "name": "Rectangle",
           "outlineMaskBy": [],
           "overflow": 2,
-          "overrideValues": [],
+          "overrideValues": [
+            {
+              "class": "overrideValue",
+              "objectId": "8B33AFCB-BD70-44A8-B425-72E146ADE8DF",
+              "overrideName": "style.fills.0.color",
+              "overrideValue": {
+                "alpha": 1.0,
+                "blue": 0.7517530913433672,
+                "class": "color",
+                "green": 0.653965869848279,
+                "red": 0.8309556159420289
+              }
+            }
+          ],
           "style": {
             "blurs": [
               {

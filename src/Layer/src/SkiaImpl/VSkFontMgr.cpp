@@ -102,10 +102,10 @@ sk_sp<SkTypeface> SkTypeface_VGG_File::onMakeClone(const SkFontArguments& args) 
   SkString familyName;
   this->getFamilyName(&familyName);
 
-  return sk_make_sp<SkTypeface_FreeTypeStream>(std::move(data),
-                                               familyName,
-                                               this->fontStyle(),
-                                               this->isFixedPitch());
+  return sk_ref_sp(new SkTypeface_FreeTypeStream(std::move(data),
+                                                 familyName,
+                                                 this->fontStyle(),
+                                                 this->isFixedPitch()));
 }
 
 std::unique_ptr<SkFontData> SkTypeface_VGG_File::onMakeFontData() const

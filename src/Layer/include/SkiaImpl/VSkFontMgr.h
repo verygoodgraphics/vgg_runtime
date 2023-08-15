@@ -230,7 +230,7 @@ public:
     {
       SkFontStyleSet_VGG* family = new SkFontStyleSet_VGG(SkString());
       families->push_back().reset(family);
-      family->appendTypeface(sk_make_sp<SkTypeface_VGG_Empty>());
+      family->appendTypeface(sk_ref_sp(new SkTypeface_VGG_Empty()));
     }
   }
 
@@ -298,12 +298,12 @@ private:
           families->push_back().reset(addTo);
           families->lookUp[realname.c_str()] = families->size() - 1;
         }
-        addTo->appendTypeface(sk_make_sp<SkTypeface_VGG_File>(style,
-                                                              isFixedPitch,
-                                                              true,
-                                                              realname,
-                                                              filename.c_str(),
-                                                              faceIndex));
+        addTo->appendTypeface(sk_ref_sp(new SkTypeface_VGG_File(style,
+                                                                isFixedPitch,
+                                                                true,
+                                                                realname,
+                                                                filename.c_str(),
+                                                                faceIndex)));
       }
     }
 
@@ -324,7 +324,7 @@ private:
 
 inline SK_API sk_sp<SkFontMgrVGG> VGGFontDirectory(const char* dir)
 {
-  return sk_make_sp<SkFontMgrVGG>(std::make_unique<VGGFontLoader>(dir));
+  return sk_ref_sp(new SkFontMgrVGG(std::make_unique<VGGFontLoader>(dir)));
 }
 
 using namespace skia::textlayout;

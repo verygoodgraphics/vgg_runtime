@@ -20,6 +20,8 @@ constexpr auto k_override_name = "overrideName";
 constexpr auto k_override_value = "overrideValue";
 constexpr auto k_override_values = "overrideValues";
 constexpr auto k_path = "path";
+constexpr auto k_point_attr = "pointAttr";
+constexpr auto k_point = "point";
 constexpr auto k_symbol_instance = "symbolInstance";
 constexpr auto k_symbol_master = "symbolMaster";
 constexpr auto k_text = "text";
@@ -27,4 +29,4 @@ constexpr auto k_width = "width";
 constexpr auto k_x = "x";
 constexpr auto k_y = "y";
 
-}
+} // namespace VGG

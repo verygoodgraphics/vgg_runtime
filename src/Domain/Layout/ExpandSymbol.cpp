@@ -66,6 +66,11 @@ void ExpandSymbol::expand_instance(nlohmann::json& json)
         apply_overrides(json, master_json);
 
         scale_from_master(json, master_json);
+
+        // make instance node to "symbalMaster" or render will not draw this node
+        json[k_class] = k_symbol_master;
+        json.erase(k_master_id);
+        json.erase(k_override_values);
       }
     }
   }
@@ -102,10 +107,12 @@ void ExpandSymbol::normalize_children_geometry(nlohmann::json& json, const Size 
 
   auto has_bounds = is_layout_node(json);
   Rect bounds, frame;
+  Matrix matrix;
   if (has_bounds)
   {
     bounds = json[k_bounds].get<Rect>();
     frame = json[k_frame].get<Rect>();
+    matrix = json[k_matrix].get<Matrix>();
 
     child_container_size = bounds.size;
   }
@@ -127,8 +134,13 @@ void ExpandSymbol::normalize_children_geometry(nlohmann::json& json, const Size 
       { frame.origin.x / my_container_size.width, frame.origin.y / my_container_size.height },
       { frame.size.width / my_container_size.width, frame.size.height / my_container_size.height }
     };
+    Matrix normalized_matrix = matrix;
+    normalized_matrix.tx = matrix.tx / my_container_size.width;
+    normalized_matrix.ty = matrix.ty / my_container_size.height;
+
     to_json(json[k_bounds], normalized_bounds);
     to_json(json[k_frame], normalized_frame);
+    to_json(json[k_matrix], normalized_matrix);
   }
 }
 
@@ -142,10 +154,12 @@ void ExpandSymbol::recalculate_intance_children_geometry(nlohmann::json& json, S
   // top down, root fist
   auto has_bounds = is_layout_node(json);
   Rect normalized_bounds, normalized_frame;
+  Matrix normalized_matrix;
   if (has_bounds)
   {
     normalized_bounds = json[k_bounds].get<Rect>();
     normalized_frame = json[k_frame].get<Rect>();
+    normalized_matrix = json[k_matrix].get<Matrix>();
 
     Rect bounds = { { normalized_bounds.origin.x * container_size.width,
                       normalized_bounds.origin.y * container_size.height },
@@ -155,8 +169,13 @@ void ExpandSymbol::recalculate_intance_children_geometry(nlohmann::json& json, S
                      normalized_frame.origin.y * container_size.height },
                    { normalized_frame.size.width * container_size.width,
                      normalized_frame.size.height * container_size.height } };
+    auto matrix = normalized_matrix;
+    matrix.tx = normalized_matrix.tx * container_size.width;
+    matrix.ty = normalized_matrix.ty * container_size.height;
+
     to_json(json[k_bounds], bounds);
     to_json(json[k_frame], frame);
+    to_json(json[k_matrix], matrix);
 
     container_size = bounds.size;
   }
@@ -194,7 +213,7 @@ void ExpandSymbol::override_master(nlohmann::json& instance)
       if (child_instance && child_instance->is_object())
       {
         (*child_instance)[k_master_id] = override_item[k_override_value];
-        (*child_instance)[k_override_values] = nl::json(nl::detail::value_t::array);
+        (*child_instance).erase(k_override_values);
         expand_instance(*child_instance);
       }
     }

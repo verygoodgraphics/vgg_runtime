@@ -24,7 +24,7 @@ protected:
 
   void write_result_json(const nlohmann::json& json)
   {
-    std::string out_file_path = "tmp/expanded_design.json";
+    std::string out_file_path = "tmp/design.json";
     Helper::write_json(json, out_file_path);
   }
 };
@@ -74,12 +74,15 @@ TEST_F(VggExpandSymbolTestSuite, scale)
   auto child = result_json[path];
   auto child_bounds = child[k_bounds].get<Rect>();
   auto child_frame = child[k_frame].get<Rect>();
+  auto child_matrix = child[k_matrix].get<Matrix>();
 
-  Rect expect_bounds{ 0, 0, 260.800018, 133.333344 };
-  Rect expect_frame{ 57.5999985, -200, 260.800018, 133.333344 };
+  Rect expect_bounds{ 0, 0, 637.656005, 129.333344 };
+  Rect expect_frame{ 140.832001, -194, 637.656005, 129.333344 };
+  Matrix expect_matrix{ 1, 0, 0, 1, 140.832001, -194 };
 
   EXPECT_EQ(child_bounds, expect_bounds);
   EXPECT_EQ(child_frame, expect_frame);
+  EXPECT_EQ(child_matrix, expect_matrix);
 }
 
 TEST_F(VggExpandSymbolTestSuite, expand_masterId_overridden_instance)
@@ -95,8 +98,9 @@ TEST_F(VggExpandSymbolTestSuite, expand_masterId_overridden_instance)
   // Then
   nlohmann::json::json_pointer path{ "/frames/0/childObjects/5/childObjects/1" };
   auto instance_child = result_json[path];
-  EXPECT_EQ(instance_child[k_master_id], "87621494-BE66-4837-9F83-EE3D6390C1D6");
-  EXPECT_TRUE(instance_child[k_override_values].is_array());
-  EXPECT_TRUE(instance_child[k_override_values].empty());
+  EXPECT_TRUE(instance_child[k_master_id].is_null());
+  EXPECT_TRUE(instance_child[k_override_values].is_null());
 }
 // instance of one master containing instance overide width & height
+
+// todo, validate expanded json

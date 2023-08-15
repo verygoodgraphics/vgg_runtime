@@ -800,8 +800,8 @@
       "bounds": {
         "class": "rect",
         "constrainProportions": false,
-        "height": 400.0,
-        "width": 800.0,
+        "height": 388.0,
+        "width": 1956.0,
         "x": 259.0,
         "y": -170.0
       },
@@ -811,8 +811,8 @@
           "bounds": {
             "class": "rect",
             "constrainProportions": false,
-            "height": 400.0,
-            "width": 800.0,
+            "height": 388.0,
+            "width": 1956.0,
             "x": 0.0,
             "y": 0.0
           },
@@ -827,8 +827,8 @@
           "frame": {
             "class": "rect",
             "constrainProportions": false,
-            "height": 400.0,
-            "width": 800.0,
+            "height": 388.0,
+            "width": 1956.0,
             "x": 259.0,
             "y": -170.0
           },
@@ -883,8 +883,8 @@
       "frame": {
         "class": "rect",
         "constrainProportions": false,
-        "height": 400.0,
-        "width": 800.0,
+        "height": 388.0,
+        "width": 1956.0,
         "x": 259.0,
         "y": -170.0
       },

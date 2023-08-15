@@ -42,6 +42,18 @@ struct Rect
   }
 };
 
+struct Matrix
+{
+  Scalar a;
+  Scalar b;
+  Scalar c;
+  Scalar d;
+  Scalar tx;
+  Scalar ty;
+
+  bool operator==(const Matrix& rhs) const noexcept;
+};
+
 } // namespace Layout
 
 } // namespace VGG

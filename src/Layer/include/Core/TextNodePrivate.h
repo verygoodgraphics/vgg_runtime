@@ -81,9 +81,8 @@ public:
     {
       mgr->ref();
     }
-    m_fontCollection =
-      sk_make_sp<VGGFontCollection>(std::move(mgr),
-                                    FontManager::instance().getDefaultFallbackFonts());
+    m_fontCollection = sk_ref_sp(
+      new VGGFontCollection(std::move(mgr), FontManager::instance().getDefaultFallbackFonts()));
   }
   TextParagraphCache(const TextParagraphCache&) = default;
   TextParagraphCache& operator=(const TextParagraphCache&) = default;

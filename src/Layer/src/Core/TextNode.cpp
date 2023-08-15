@@ -28,9 +28,8 @@ TextNode::TextNode(const std::string& name, std::string guid)
   {
     mgr->ref();
   }
-  auto fontCollection =
-    sk_make_sp<VGGFontCollection>(std::move(mgr),
-                                  FontManager::instance().getDefaultFallbackFonts());
+  auto fontCollection = sk_ref_sp(
+    new VGGFontCollection(std::move(mgr), FontManager::instance().getDefaultFallbackFonts()));
   d_ptr->paragraphCache.setFontCollection(fontCollection);
 }
 

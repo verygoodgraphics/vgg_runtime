@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Domain/Daruma.hpp"
-#include "Domain/Layout/View.hpp"
+#include "ExpandSymbol.hpp"
+#include "View.hpp"
 #include "Log.h"
 
 #include "nlohmann/json.hpp"
@@ -29,7 +30,8 @@ public:
 
   nlohmann::json designDoc()
   {
-    return m_design_json;
+    ExpandSymbol expande_symbol{ m_design_json };
+    return expande_symbol();
   }
 
   void layout(Size size);

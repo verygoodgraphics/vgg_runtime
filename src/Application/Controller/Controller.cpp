@@ -10,6 +10,7 @@
 #include "Domain/DarumaContainer.hpp"
 #include "Presenter.hpp"
 #include "DIContainer.hpp"
+#include "Log.h"
 #include "Usecase/ModelChanged.hpp"
 #include "Usecase/ResizeWindow.hpp"
 #include "Usecase/StartRunning.hpp"
@@ -39,6 +40,10 @@ bool Controller::start(const std::string& filePath, const char* designDocSchemaF
   {
     start();
   }
+  else
+  {
+    FAIL("#controller, load file failed, %s", filePath.c_str());
+  }
   return ret;
 }
 
@@ -49,6 +54,10 @@ bool Controller::start(std::vector<char>& buffer, const char* designDocSchemaFil
   if (ret)
   {
     start();
+  }
+  else
+  {
+    FAIL("#controller, load buffer failed");
   }
   return ret;
 }

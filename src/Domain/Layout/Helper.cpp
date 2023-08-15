@@ -26,6 +26,30 @@ void from_json(const nlohmann::json& j, Rect& rect)
   rect.size.height = j.value(k_height, 0.f);
 }
 
+void to_json(nlohmann::json& j, const Matrix& matrix)
+{
+  j[0] = matrix.a;
+  j[1] = matrix.b;
+  j[2] = matrix.c;
+  j[3] = matrix.d;
+  j[4] = matrix.tx;
+  j[5] = matrix.ty;
+}
+
+void from_json(const nlohmann::json& json, Matrix& matrix)
+{
+  if (!json.is_array() && json.size() != 6)
+  {
+    return;
+  }
+  matrix.a = json[0];
+  matrix.b = json[1];
+  matrix.c = json[2];
+  matrix.d = json[3];
+  matrix.tx = json[4];
+  matrix.ty = json[5];
+}
+
 bool is_layout_node(const nlohmann::json& json)
 {
   if (!json.is_object())

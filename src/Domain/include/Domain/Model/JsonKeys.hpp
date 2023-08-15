@@ -13,6 +13,7 @@ constexpr auto k_height = "height";
 constexpr auto k_id = "id";
 constexpr auto k_image = "image";
 constexpr auto k_master_id = "masterId";
+constexpr auto k_matrix = "matrix";
 constexpr auto k_object_id = "objectId";
 constexpr auto k_override_class = "overrideValue";
 constexpr auto k_override_name = "overrideName";

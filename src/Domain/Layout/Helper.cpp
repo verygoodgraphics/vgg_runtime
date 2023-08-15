@@ -10,6 +10,15 @@ namespace VGG
 namespace Layout
 {
 
+void to_json(nlohmann::json& j, const Point& point)
+{
+  j = { point.x, point.y };
+}
+void from_json(const nlohmann::json& j, Point& point)
+{
+  point = { j[0], j[1] };
+}
+
 void to_json(nlohmann::json& j, const Rect& rect)
 {
   j[k_x] = rect.origin.x;
@@ -61,6 +70,22 @@ bool is_layout_node(const nlohmann::json& json)
   if (class_name == k_frame || class_name == k_group || class_name == k_image ||
       class_name == k_path || class_name == k_symbol_instance || class_name == k_symbol_master ||
       class_name == k_text)
+  {
+    return true;
+  }
+
+  return false;
+}
+
+bool is_point_attr_node(const nlohmann::json& json)
+{
+  if (!json.is_object())
+  {
+    return false;
+  }
+
+  auto class_name = json.value(k_class, "");
+  if (class_name == k_point_attr)
   {
     return true;
   }

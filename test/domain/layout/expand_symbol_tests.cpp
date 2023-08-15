@@ -83,6 +83,14 @@ TEST_F(VggExpandSymbolTestSuite, scale)
   EXPECT_EQ(child_bounds, expect_bounds);
   EXPECT_EQ(child_frame, expect_frame);
   EXPECT_EQ(child_matrix, expect_matrix);
+
+  // Then
+  nlohmann::json::json_pointer path2{
+    "/frames/1/childObjects/0/childObjects/2/childObjects/0/shape/subshapes/0/subGeometry/points/2"
+  };
+  auto point = result_json[path2][k_point].get<Point>();
+  Point expect_point{ 704.1600341796875, -129.33334350585938 };
+  EXPECT_EQ(point, expect_point);
 }
 
 TEST_F(VggExpandSymbolTestSuite, expand_masterId_overridden_instance)

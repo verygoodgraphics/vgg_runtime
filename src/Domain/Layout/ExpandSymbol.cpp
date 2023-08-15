@@ -142,6 +142,13 @@ void ExpandSymbol::normalize_children_geometry(nlohmann::json& json, const Size 
     to_json(json[k_frame], normalized_frame);
     to_json(json[k_matrix], normalized_matrix);
   }
+  if (is_point_attr_node(json))
+  {
+    auto point = json[k_point].get<Point>();
+    point.x /= my_container_size.width;
+    point.y /= my_container_size.height;
+    json[k_point] = point;
+  }
 }
 
 void ExpandSymbol::recalculate_intance_children_geometry(nlohmann::json& json, Size container_size)
@@ -178,6 +185,13 @@ void ExpandSymbol::recalculate_intance_children_geometry(nlohmann::json& json, S
     to_json(json[k_matrix], matrix);
 
     container_size = bounds.size;
+  }
+  if (is_point_attr_node(json))
+  {
+    auto point = json[k_point].get<Point>();
+    point.x *= container_size.width;
+    point.y *= container_size.height;
+    json[k_point] = point;
   }
 
   // leaf last

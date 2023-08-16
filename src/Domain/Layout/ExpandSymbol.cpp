@@ -96,8 +96,6 @@ void ExpandSymbol::scale_from_master(nlohmann::json& instance, nlohmann::json& m
 {
   auto master_size = master[k_bounds].get<Rect>().size;
   auto instance_size = instance[k_bounds].get<Rect>().size;
-
-  auto size_is_equal = false;
   if (master_size == instance_size)
   {
     return;
@@ -337,7 +335,7 @@ nlohmann::json* ExpandSymbol::find_child_object(nlohmann::json& json,
 
   if (json.is_object())
   {
-    if (json[k_id] == object_id)
+    if (json.contains(k_id) && json[k_id] == object_id)
     {
       return &json;
     }

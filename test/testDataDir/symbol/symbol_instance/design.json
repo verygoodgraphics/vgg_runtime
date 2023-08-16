@@ -142,7 +142,7 @@
             {
               "class": "overrideValue",
               "objectId": "FB099C6B-9E82-43D9-84EE-909F6D602498",
-              "overrideName": "style.fills.2.pattern.imageFileName",
+              "overrideName": "style.fills.2.pattern.instance.imageFileName",
               "overrideValue": "resources/4e3a88994fb339824d20deaa85ebf1bad7d7b46f.png"
             }
           ],
@@ -448,7 +448,7 @@
             {
               "class": "overrideValue",
               "objectId": "FB099C6B-9E82-43D9-84EE-909F6D602498",
-              "overrideName": "style.fills.2.pattern.imageFileName",
+              "overrideName": "style.fills.2.pattern.instance.imageFileName",
               "overrideValue": "resources/4e3a88994fb339824d20deaa85ebf1bad7d7b46f.png"
             },
             {
@@ -2087,7 +2087,7 @@
                 "x": 70.0,
                 "y": -98.0
               },
-              "frameMode": 1,
+              "frameMode": 0,
               "id": "F052DA2D-69E8-4F54-AB92-F19335E9486F",
               "isLocked": false,
               "maskType": 0,

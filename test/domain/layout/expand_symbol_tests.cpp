@@ -102,7 +102,7 @@ TEST_F(VggExpandSymbolTestSuite, expand_masterId_overridden_instance)
   // When
   auto result_json = sut();
 
-  debug_write_result_json(result_json);
+  // debug_write_result_json(result_json);
 
   // Then
   nlohmann::json::json_pointer path{ "/frames/0/childObjects/4/childObjects/1" };
@@ -119,7 +119,7 @@ TEST_F(VggExpandSymbolTestSuite, override)
 
   // When
   auto result_json = sut();
-  debug_write_result_json(result_json);
+  // debug_write_result_json(result_json);
 
   // Then
   nlohmann::json::json_pointer path{
@@ -129,4 +129,26 @@ TEST_F(VggExpandSymbolTestSuite, override)
 
   EXPECT_DOUBLE_EQ(blue, 0.7517530913433672);
 }
+
+TEST_F(VggExpandSymbolTestSuite, override_with_star_wildcard)
+{
+  // Given
+  std::string file_path = "testDataDir/symbol/symbol_instance/design.json";
+  auto design_json = Helper::load_json(file_path);
+  ExpandSymbol sut{ design_json };
+
+  // When
+  auto result_json = sut();
+
+  // debug_write_result_json(result_json);
+
+  // Then
+  nlohmann::json::json_pointer path{
+    "/frames/0/childObjects/2/childObjects/0/attr/0/fills/0/color/blue"
+  };
+  double blue = result_json[path];
+
+  EXPECT_DOUBLE_EQ(blue, 0.01908801696712621);
+}
+
 // todo, validate expanded json

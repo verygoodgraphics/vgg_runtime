@@ -5,6 +5,7 @@
 #include "Log.h"
 
 #include <iostream>
+#include <stack>
 
 #undef DEBUG
 #define DEBUG(msg, ...)
@@ -70,7 +71,7 @@ void ExpandSymbol::expand_instance(nlohmann::json& json)
 
         expand_instance(json[k_child_objects]);
 
-        apply_overrides(json, master_json);
+        apply_overrides(json);
 
         scale_from_master(json, master_json);
 
@@ -211,7 +212,7 @@ void ExpandSymbol::recalculate_intance_children_geometry(nlohmann::json& json, S
   }
 }
 
-void ExpandSymbol::apply_overrides(nlohmann::json& instance, nlohmann::json& master)
+void ExpandSymbol::apply_overrides(nlohmann::json& instance)
 {
   auto& override_values = instance[k_override_values];
   if (!override_values.is_array())
@@ -251,7 +252,7 @@ void ExpandSymbol::apply_overrides(nlohmann::json& instance, nlohmann::json& mas
       (*child_object)[k_class] = k_symbol_instance;
       expand_instance(*child_object);
     }
-    else // other overrides
+    else if (!name.empty()) // other overrides
     {
       // make name to json pointer string
       while (true)
@@ -264,20 +265,63 @@ void ExpandSymbol::apply_overrides(nlohmann::json& instance, nlohmann::json& mas
         name[index] = '/';
       }
 
+      nl::json::json_pointer path{ "/" + name };
+      DEBUG("#ExpandSymbol: override object[id=%s, ptr=%p], path=%s, value=%s",
+            (*child_object)[k_id].get<std::string>().c_str(),
+            child_object,
+            path.to_string().c_str(),
+            value.dump().c_str());
       if (name.find("*") == std::string::npos) // no * in path
       {
-        nl::json::json_pointer path{ "/" + name };
-        DEBUG("#ExpandSymbol: override object[id=%s, ptr=%p], path=%s, value=%s",
-              (*child_object)[k_id].get<std::string>().c_str(),
-              child_object,
-              path.to_string().c_str(),
-              value.dump().c_str());
         (*child_object)[path] = value;
       }
       else // path has *
       {
-        // todo
-        std::vector<nl::json::pointer> paths;
+        std::stack<std::string> path_stack;
+        while (!path.empty())
+        {
+          path_stack.push(path.back());
+          path.pop_back();
+        }
+
+        apply_overrides((*child_object), path_stack, value);
+      }
+    }
+  }
+}
+
+void ExpandSymbol::apply_overrides(nlohmann::json& json,
+                                   std::stack<std::string> reversed_path,
+                                   const nlohmann::json& value)
+{
+  ASSERT(!reversed_path.empty());
+
+  auto key = reversed_path.top();
+  reversed_path.pop();
+  auto is_last_key = reversed_path.empty();
+
+  if (key != "*")
+  {
+    if (is_last_key)
+    {
+      json[key] = value;
+    }
+    else
+    {
+      apply_overrides(json[key], reversed_path, value);
+    }
+  }
+  else
+  {
+    for (auto& el : json.items())
+    {
+      if (is_last_key)
+      {
+        el.value() = value;
+      }
+      else
+      {
+        apply_overrides(el.value(), reversed_path, value);
       }
     }
   }

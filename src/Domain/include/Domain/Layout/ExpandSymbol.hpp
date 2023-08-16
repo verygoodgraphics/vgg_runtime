@@ -33,10 +33,11 @@ private:
   void normalize_children_geometry(nlohmann::json& json, const Size container_size);
   void recalculate_intance_children_geometry(nlohmann::json& json, Size container_size);
 
-  void apply_overrides(nlohmann::json& instance, nlohmann::json& master);
+  void apply_overrides(nlohmann::json& instance);
+  void apply_overrides(nlohmann::json& json,
+                       std::stack<std::string> reversed_path,
+                       const nlohmann::json& value);
   nlohmann::json* find_child_object(nlohmann::json& json, const nlohmann::json& object_id);
-
-  Rect get_node_bounds(nlohmann::json& node_json);
 };
 } // namespace Layout
 

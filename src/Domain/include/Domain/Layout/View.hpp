@@ -12,7 +12,7 @@ namespace VGG
 
 class LayoutView : public std::enable_shared_from_this<LayoutView>
 {
-  std::shared_ptr<LayoutView> m_parent;
+  std::weak_ptr<LayoutView> m_parent;
   std::vector<std::shared_ptr<LayoutView>> m_children;
 
   const std::string m_path;
@@ -60,7 +60,7 @@ public:
       return;
     }
 
-    child->m_parent = shared_from_this();
+    child->m_parent = weak_from_this();
     m_children.push_back(child);
   }
 
@@ -86,12 +86,12 @@ private:
     auto x = point.x;
     auto y = point.y;
 
-    auto parent = m_parent;
+    auto parent = m_parent.lock();
     while (parent)
     {
       x += parent->m_frame.origin.x;
       y += parent->m_frame.origin.y;
-      parent = parent->m_parent;
+      parent = parent->m_parent.lock();
     }
 
     return { x, y };

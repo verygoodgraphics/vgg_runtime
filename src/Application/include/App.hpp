@@ -570,13 +570,29 @@ protected: // protected methods
 
       if (key == SDLK_PAGEUP && (SDL_GetModState() & KMOD_CTRL))
       {
-        m_scene->preArtboard();
+        if (m_scene)
+        {
+          m_scene->preArtboard();
+        }
+        if (m_view)
+        {
+          m_view->scene()->preArtboard();
+          m_view->setDirty(true);
+        }
         return true;
       }
 
       if (key == SDLK_PAGEDOWN && (SDL_GetModState() & KMOD_CTRL))
       {
-        m_scene->nextArtboard();
+        if (m_scene)
+        {
+          m_scene->nextArtboard();
+        }
+        if (m_view)
+        {
+          m_view->scene()->nextArtboard();
+          m_view->setDirty(true);
+        }
         return true;
       }
 
@@ -594,6 +610,10 @@ protected: // protected methods
       if (key == SDLK_b)
       {
         Scene::enableDrawDebugBound(!Scene::isEnableDrawDebugBound());
+        if (m_view)
+        {
+          m_view->setDirty(true);
+        }
         return true;
       }
 

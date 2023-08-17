@@ -151,4 +151,23 @@ TEST_F(VggExpandSymbolTestSuite, override_with_star_wildcard)
   EXPECT_DOUBLE_EQ(blue, 0.01908801696712621);
 }
 
+TEST_F(VggExpandSymbolTestSuite, override_master_own_style)
+{
+  // Given
+  std::string file_path = "testDataDir/symbol/instance_override_master‘s_own_style/design.json";
+  auto design_json = Helper::load_json(file_path);
+  ExpandSymbol sut{ design_json };
+
+  // When
+  auto result_json = sut();
+
+  // debug_write_result_json(result_json);
+
+  // Then
+  nlohmann::json::json_pointer path{ "/frames/0/childObjects/0/style/fills" };
+  auto fills = result_json[path].dump();
+
+  EXPECT_EQ(fills, "[]");
+}
+
 // todo, validate expanded json

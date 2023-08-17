@@ -284,9 +284,13 @@ std::tuple<bool, bool, bool, bool> UIView::getKeyModifier(int keyMod)
 
 void UIView::draw(SkCanvas* canvas, Zoomer* zoomer)
 {
+
+  UEvent e;
+  e.type = VGG_PAINT;
+  e.paint.data = canvas;
   if (m_is_editor) // editor; zoom only subviews
   {
-    m_scene->render(canvas); // render self(editor) without zoom
+    m_scene->dispatchEvent(e); // render self(editor) without zoom
 
     // draw inner edit view
     for (auto& subview : m_subviews)
@@ -305,7 +309,7 @@ void UIView::draw(SkCanvas* canvas, Zoomer* zoomer)
 
     zoomer->apply(canvas);
 
-    m_scene->render(canvas);
+    m_scene->dispatchEvent(e);
 
     canvas->restore();
   }

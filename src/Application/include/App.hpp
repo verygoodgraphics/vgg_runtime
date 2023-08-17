@@ -17,6 +17,7 @@
 #ifndef __APP_HPP__
 #define __APP_HPP__
 
+#include "Event/Event.h"
 #include "gpu/GrTypes.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
@@ -472,7 +473,10 @@ protected: // protected methods
       if (m_scene)
       {
         m_zoomer.apply(canvas);
-        m_scene->render(canvas);
+        UEvent e;
+        e.type = VGG_PAINT;
+        e.paint.data = canvas;
+        m_scene->dispatchEvent(e);
         m_zoomer.restore(canvas);
       }
       else if (m_view)

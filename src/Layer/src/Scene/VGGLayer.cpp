@@ -212,4 +212,3 @@ void VLayer::shutdown()
 }
 } // namespace VGG
   //
-std::shared_ptr<GraphicsEventListener> makeDefaultEventListner();

@@ -1,4 +1,6 @@
 #include "Scene/Scene.h"
+#include "Application/include/Event/Event.h"
+#include "Core/Node.h"
 #include "Reader/Loader.h"
 #include "Core/PaintNode.h"
 #include "Scene/Renderer.h"
@@ -22,13 +24,64 @@ ObjectTableType Scene::s_templateObjectTable{};
 InstanceTable Scene::s_instanceTable{};
 bool Scene::s_enableDrawDebugBound{ false };
 
+class Scene__pImpl
+{
+  VGG_DECL_API(Scene);
+
+public:
+  Scene__pImpl(Scene* api)
+    : q_ptr(api)
+  {
+  }
+  NodeContainer container;
+  int page{ 0 };
+  int symbolIndex{ 0 };
+  bool renderSymbol{ false };
+  bool maskDirty{ true };
+
+  void render(SkCanvas* canvas)
+  {
+    PaintNode* node = nullptr;
+    SkiaRenderer r;
+    if (!renderSymbol)
+    {
+      if (!container.frames.empty())
+      {
+        auto board = container.frames[page].get();
+        preprocessMask(board);
+        r.draw(canvas, board);
+      }
+    }
+    else
+    {
+      if (!container.symbols.empty())
+      {
+        node = container.symbols[symbolIndex].get();
+        r.draw(canvas, node);
+      }
+    }
+  }
+
+  void preprocessMask(PaintNode* node)
+  {
+    if (maskDirty)
+    {
+      Scene::s_objectTable = node->preprocessMask();
+      // generate each mask for masked node
+      maskDirty = false;
+    }
+  }
+};
+
 Scene::Scene()
+  : d_ptr(new Scene__pImpl(this))
 {
 }
 void Scene::loadFileContent(const std::string& json)
 {
   loadFileContent(nlohmann::json::parse(json));
 }
+Scene::~Scene() = default;
 
 void Scene::instantiateTemplates()
 {
@@ -67,84 +120,83 @@ void Scene::instantiateTemplates()
 
 void Scene::loadFileContent(const nlohmann::json& json)
 {
+  VGG_IMPL(Scene)
   if (json.empty())
     return;
   s_templateObjectTable.clear();
   s_instanceTable.clear();
-  page = 0;
-  symbolIndex = 0;
-  maskDirty = true;
+  _->page = 0;
+  _->symbolIndex = 0;
+  _->maskDirty = true;
 
-  container = NlohmannBuilder::build(json);
-  for (const auto& s : container.symbols)
+  _->container = NlohmannBuilder::build(json);
+  for (const auto& s : _->container.symbols)
   {
     s_templateObjectTable[s->guid()] = s;
   }
   instantiateTemplates();
 }
 
-void Scene::render(SkCanvas* canvas)
+void Scene::dispatchEvent(UEvent e)
 {
-  PaintNode* node = nullptr;
-  SkiaRenderer r;
-  if (!renderSymbol)
+  VGG_IMPL(Scene)
+  if (e.type == VGG_PAINT)
   {
-    if (!container.frames.empty())
-    {
-      auto board = container.frames[page].get();
-      preprocessMask(board);
-      r.draw(canvas, board);
-    }
-  }
-  else
-  {
-    if (!container.symbols.empty())
-    {
-      node = container.symbols[symbolIndex].get();
-      r.draw(canvas, node);
-    }
+    auto canvas = (SkCanvas*)e.paint.data;
+    _->render(canvas);
   }
 }
 
-void Scene::preprocessMask(PaintNode* node)
+int Scene::frameCount() const
 {
-  if (maskDirty)
+  return d_ptr->container.frames.size();
+}
+
+PaintNode* Scene::frame(int index)
+{
+  VGG_IMPL(Scene);
+  if (index >= 0 && index < _->container.frames.size())
   {
-    Scene::s_objectTable = node->preprocessMask();
-    // generate each mask for masked node
-    maskDirty = false;
+    return _->container.frames[index].get();
   }
+  return nullptr;
 }
 
 void Scene::setPage(int num)
 {
-  if (num >= 0 && num < container.frames.size())
+  VGG_IMPL(Scene)
+  if (num >= 0 && num < _->container.frames.size())
   {
-    page = num;
-    maskDirty = true;
+    _->page = num;
+    _->maskDirty = true;
   }
 }
 
 void Scene::nextArtboard()
 {
-  page = (page + 1 >= container.frames.size()) ? page : page + 1;
-  maskDirty = true;
+  VGG_IMPL(Scene)
+  _->page = (_->page + 1 >= _->container.frames.size()) ? _->page : _->page + 1;
+  _->maskDirty = true;
 }
 
 void Scene::preArtboard()
 {
-  page = (page - 1 > 0) ? page - 1 : 0;
-  maskDirty = true;
+  VGG_IMPL(Scene)
+  _->page = (_->page - 1 > 0) ? _->page - 1 : 0;
+  _->maskDirty = true;
 }
 
 void Scene::nextSymbol()
 {
-  symbolIndex = (symbolIndex + 1 >= container.symbols.size()) ? symbolIndex : symbolIndex + 1;
+  VGG_IMPL(Scene)
+  _->symbolIndex =
+    (_->symbolIndex + 1 >= _->container.symbols.size()) ? _->symbolIndex : _->symbolIndex + 1;
 }
 
 void Scene::prevSymbol()
 {
-  symbolIndex = (symbolIndex - 1 > 0) ? symbolIndex - 1 : 0;
+  VGG_IMPL(Scene)
+  _->symbolIndex = (_->symbolIndex - 1 > 0) ? _->symbolIndex - 1 : 0;
 }
 
 void Scene::setResRepo(std::map<std::string, std::vector<char>> repo)

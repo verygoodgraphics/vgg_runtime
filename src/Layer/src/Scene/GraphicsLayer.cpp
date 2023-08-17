@@ -1,43 +1,58 @@
 #include "Scene/GraphicsLayer.h"
 #include "Application/include/Event/Event.h"
+#include "Scene/EventListener.h"
 #include "Scene/Zoomer.h"
 #include <core/SkCanvas.h>
+
+#include <queue>
 
 namespace VGG
 {
 
-class GraphicsEventListener__pImpl
+class Graphics__pImpl
 {
-  VGG_DECL_API(GraphicsEventListener)
+  VGG_DECL_API(Graphics)
 public:
-  Zoomer zoomer;
-  GraphicsEventListener__pImpl(GraphicsEventListener* api)
+  std::vector<std::shared_ptr<EventListener>> listeners;
+  std::queue<UEvent> msgQueue;
+  Graphics__pImpl(Graphics* api)
     : q_ptr(api)
-  {
-  }
-  void onZoomIn(float ratio, SkCanvas* canvas)
-  {
-  }
-  void onZoomOut(float ratio, SkCanvas* canvas)
-  {
-  }
-  void onTranslate(float x, float y, SkCanvas* canvas)
   {
   }
 };
 
-GraphicsEventListener::GraphicsEventListener()
-  : d_ptr(new GraphicsEventListener__pImpl(this))
+Graphics::Graphics()
+  : d_ptr(new Graphics__pImpl(this))
 {
 }
 
-void GraphicsEventListener::dispatchEvent(UEvent e, void* userData)
+void Graphics::pushEvent(UEvent e)
 {
-  auto canvas = reinterpret_cast<SkCanvas*>(userData);
+  VGG_IMPL(Graphics)
+  _->msgQueue.push(e);
 }
 
-std::shared_ptr<GraphicsEventListener> makeDefaultEventListner()
+void Graphics::addEventListener(std::shared_ptr<EventListener> listener)
 {
-  return std::make_shared<GraphicsEventListener>();
+  VGG_IMPL(Graphics)
+  _->listeners.push_back(std::move(listener));
 }
+void Graphics::dispatchEvent()
+{
+  VGG_IMPL(Graphics)
+  while (_->msgQueue.empty() == false)
+  {
+    const auto& e = _->msgQueue.front();
+    for (const auto& l : _->listeners)
+    {
+      l->dispatchEvent(e);
+    }
+    _->msgQueue.pop();
+  }
+}
+
+Graphics::~Graphics()
+{
+}
+
 }; // namespace VGG

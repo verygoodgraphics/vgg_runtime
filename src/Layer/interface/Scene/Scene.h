@@ -1,9 +1,11 @@
 #pragma once
 #include <memory>
+#include "Application/include/Event/Event.h"
 #include "Common/Config.h"
 #include "Core/Node.h"
 #include "core/SkCanvas.h"
 #include "nlohmann/json.hpp"
+#include "Scene/EventListener.h"
 
 namespace VGG
 {
@@ -30,32 +32,28 @@ public:
   {
   }
 };
-
-struct VGG_EXPORTS Scene
+class Scene__pImpl;
+struct VGG_EXPORTS Scene : public EventListener
 {
   static ResourceRepo s_resRepo;
   static ObjectTableType s_objectTable;
   static ObjectTableType s_templateObjectTable;
   static InstanceTable s_instanceTable;
   static bool s_enableDrawDebugBound;
-
-  NodeContainer container;
-
+  VGG_DECL_IMPL(Scene)
 public:
-  int page{ 0 };
-  int symbolIndex{ 0 };
-  bool renderSymbol{ false };
-  bool maskDirty{ true };
   Scene();
+  ~Scene();
   void loadFileContent(const std::string& json);
   void loadFileContent(const nlohmann::json& j);
-  void render(SkCanvas* canvas);
   void nextArtboard();
   void preArtboard();
+  int frameCount() const;
+  PaintNode* frame(int index);
   void setPage(int num);
   void nextSymbol();
   void prevSymbol();
-
+  void dispatchEvent(UEvent e) override;
   static ResourceRepo& getResRepo()
   {
     return s_resRepo;

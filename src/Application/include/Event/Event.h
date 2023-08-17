@@ -82,6 +82,8 @@ enum EEventType
   VGG_DROPBEGIN,         /**< A new set of drops is beginning (NULL filename) */
   VGG_DROPCOMPLETE,      /**< Current set of drops is now complete (NULL filename) */
 
+  VGG_PAINT = 0x1100,
+
   VGG_USEREVENT = 0x8000,
 
   /**
@@ -244,6 +246,13 @@ struct VUserEvent
   void* data2;        /**< User defined data pointer */
 };
 
+struct VPaintEvent
+{
+  uint32_t type;
+  uint32_t timestamp;
+  void* data;
+};
+
 /**
  *  \brief General event structure
  */
@@ -260,6 +269,7 @@ union UEvent
   VQuitEvent quit;              /**< Quit request event data */
   VUserEvent user;              /**< Custom event data */
   VDropEvent drop;              /**< Drag and drop event data */
+  VPaintEvent paint;
 
   /* This is necessary for ABI compatibility between Visual C++ and GCC.
      Visual C++ will respect the push pack pragma and use 52 bytes (size of

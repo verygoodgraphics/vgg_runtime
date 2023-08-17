@@ -367,10 +367,10 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
   auto scene = std::make_shared<Scene>();
   scene->loadFileContent(j);
   scene->setResRepo(resources);
-  auto count = scene->container.frames.size();
+  auto count = scene->frameCount();
   for (int i = 0; i < count; i++)
   {
-    auto b = scene->container.frames[i]->getBound();
+    auto b = scene->frame(i)->getBound();
     int w = b.size().x;
     int h = b.size().y;
     scene->setPage(i);
@@ -393,7 +393,7 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
           opt.fZLibLevel = std::max(std::min(9, (100 - imageQuality) / 10), 0);
           if (auto data = SkPngEncoder::Encode(app->getDirectContext(), image.get(), opt))
           {
-            res.emplace_back(scene->container.frames[i]->guid(),
+            res.emplace_back(scene->frame(i)->guid(),
                              std::vector<char>{ data->bytes(), data->bytes() + data->size() });
           }
           else

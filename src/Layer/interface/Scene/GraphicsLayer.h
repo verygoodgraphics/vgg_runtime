@@ -1,8 +1,8 @@
 #pragma once
 #include <memory>
 #include <optional>
-
 #include "Core/Node.h"
+#include "Scene/EventListener.h"
 
 #include "../../../Application/include/Event/Event.h"
 
@@ -13,8 +13,6 @@ enum class EGraphicAPI
 {
   GA_OPENGL
 };
-
-class Scene;
 
 struct LayerConfig
 {
@@ -36,23 +34,15 @@ enum class ELayerError
   RenderEngineError,
   UnknownError,
 };
-class GraphicsEventListener__pImpl;
-class GraphicsEventListener : std::enable_shared_from_this<GraphicsEventListener>
-{
-  VGG_DECL_IMPL(GraphicsEventListener);
 
-public:
-  GraphicsEventListener();
-  virtual void dispatchEvent(UEvent e, void* userData);
-};
-
+class Graphics__pImpl;
 class Graphics : public std::enable_shared_from_this<Graphics>
 {
+  VGG_DECL_IMPL(Graphics)
 public:
   virtual std::optional<ELayerError> init(const LayerConfig& cfg) = 0;
   void pushEvent(UEvent e);
-  void setEventListener(std::shared_ptr<GraphicsEventListener> listener);
-  void setScene(std::shared_ptr<Scene> scene);
+  void addEventListener(std::shared_ptr<EventListener> listener);
   virtual void beginFrame() = 0;
   virtual void render() = 0;
   virtual void endFrame() = 0;
@@ -60,8 +50,8 @@ public:
   virtual ~Graphics() = 0;
 
 protected:
-  void dispatchEvent();
+  Graphics();
+  virtual void dispatchEvent();
 };
 
-std::shared_ptr<GraphicsEventListener> makeDefaultEventListner();
 } // namespace VGG

@@ -33,7 +33,6 @@ public:
   virtual void endFrame() override;
   virtual void shutdown() override;
   SkSurface* skiaSurface();
-  Scene* scene();
   std::optional<std::vector<char>> makeImageSnapshot(const ImageOptions& opts);
 };
 

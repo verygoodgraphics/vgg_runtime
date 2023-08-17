@@ -221,6 +221,7 @@ void ExpandSymbol::apply_overrides(nlohmann::json& instance)
     return;
   }
 
+  auto master_id = instance[k_master_id];
   for (auto& el : override_values.items())
   {
     auto& override_item = el.value();
@@ -229,12 +230,20 @@ void ExpandSymbol::apply_overrides(nlohmann::json& instance)
       continue;
     }
 
-    nl::json* child_object =
-      find_child_object(instance[k_child_objects], override_item[k_object_id]);
-    if (!child_object || !child_object->is_object())
+    nl::json* child_object{ nullptr };
+    if (override_item[k_object_id] == master_id)
     {
-      continue;
+      child_object = &instance;
     }
+    else
+    {
+      child_object = find_child_object(instance[k_child_objects], override_item[k_object_id]);
+      if (!child_object || !child_object->is_object())
+      {
+        continue;
+      }
+    }
+
     std::string name = override_item[k_override_name];
     auto value = override_item[k_override_value];
     if (name == k_master_id) // override masterId

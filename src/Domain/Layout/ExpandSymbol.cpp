@@ -4,6 +4,7 @@
 #include "JsonKeys.hpp"
 #include "Log.h"
 
+#include <fstream>
 #include <iostream>
 #include <stack>
 
@@ -68,6 +69,7 @@ void ExpandSymbol::expand_instance(nlohmann::json& json)
               master_id.c_str());
         auto& master_json = m_masters[master_id];
         json[k_child_objects] = master_json[k_child_objects];
+        json[k_style] = master_json[k_style]; // todo, merge style
 
         expand_instance(json[k_child_objects]);
 
@@ -80,6 +82,7 @@ void ExpandSymbol::expand_instance(nlohmann::json& json)
               json[k_id].get<std::string>().c_str(),
               &json);
         json[k_class] = k_symbol_master;
+        json[k_name] = json[k_name].get<std::string>() + "; expanded_instance";
         json.erase(k_master_id);
         json.erase(k_override_values);
       }

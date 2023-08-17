@@ -5,21 +5,20 @@
   "$id": "https://git.vgg.cool/verygoodgraphics/vgg_format/src/branch/master/sketch-document-6.4.0/packages/file-format/src/vgg-format.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
-    "Artboard": {
-      "title": "Artboard",
-      "description": "Artboard is the top-level object organization container.",
-      "$id": "#Artboard",
+    "Frame": {
+      "title": "Frame",
+      "description": " The frame itself is a object that can be rendered and a container that can contain other objects. In contrast to a group, a group is simply a collection of objects. For example:  The group's fill acts on all of its children. The frame's fill acts on itself. ",
+      "$id": "#Frame",
       "type": "object",
       "required": [
         "alphaMaskBy",
         "bounds",
+        "childObjects",
         "class",
         "contextSettings",
         "frame",
-        "hasBackgroundColor",
         "id",
         "isLocked",
-        "layers",
         "maskType",
         "matrix",
         "outlineMaskBy",
@@ -118,21 +117,37 @@
             "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
           ]
         },
-        "class": {
-          "const": "artboard"
-        },
-        "layers": {
+        "childObjects": {
           "type": "array",
+          "description": "Describes all child object information. The child item that appears later will be above the child item that appears first.",
           "items": {
-            "$ref": "#/definitions/Layer"
+            "oneOf": [
+              {
+                "$ref": "#/definitions/Path"
+              },
+              {
+                "$ref": "#/definitions/Image"
+              },
+              {
+                "$ref": "#/definitions/Text"
+              },
+              {
+                "$ref": "#/definitions/Group"
+              },
+              {
+                "$ref": "#/definitions/Frame"
+              },
+              {
+                "$ref": "#/definitions/SymbolInstance"
+              },
+              {
+                "$ref": "#/definitions/SymbolMaster"
+              }
+            ]
           }
         },
-        "hasBackgroundColor": {
-          "type": "boolean",
-          "description": "A flag indicating whether backgroundColor should be applied as a background color of the object."
-        },
-        "backgroundColor": {
-          "$ref": "#/definitions/Color"
+        "class": {
+          "const": "frame"
         },
         "radius": {
           "type": "array",
@@ -1260,150 +1275,6 @@
       },
       "additionalProperties": false
     },
-    "Layer": {
-      "title": "Layer",
-      "description": "Layers provide a way to manage all the items that make up your artwork.",
-      "$id": "#Layer",
-      "type": "object",
-      "required": [
-        "alphaMaskBy",
-        "bounds",
-        "childObjects",
-        "class",
-        "contextSettings",
-        "frame",
-        "id",
-        "isLocked",
-        "maskType",
-        "matrix",
-        "outlineMaskBy",
-        "overflow",
-        "style",
-        "styleEffectMaskArea",
-        "visible"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Object identifier, unique."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of object (utf-8)."
-        },
-        "isLocked": {
-          "type": "boolean",
-          "description": "Describes whether the object is locked."
-        },
-        "visible": {
-          "type": "boolean",
-          "description": "Describes the visibility of the object."
-        },
-        "contextSettings": {
-          "$ref": "#/definitions/GraphicsContextSettings",
-          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
-        },
-        "style": {
-          "$ref": "#/definitions/Style",
-          "description": "Object styles descriptor."
-        },
-        "bounds": {
-          "$ref": "#/definitions/Rect",
-          "description": "This property records the bounds information of the object before it is matrixed."
-        },
-        "frame": {
-          "$ref": "#/definitions/Rect",
-          "description": "An enclosing rectangle for the object. This property stores information about the object after the matrix transformation."
-        },
-        "matrix": {
-          "$ref": "#/definitions/Matrix",
-          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
-        },
-        "alphaMaskBy": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/AlphaMask"
-          }
-        },
-        "outlineMaskBy": {
-          "type": "array",
-          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
-          "items": {
-            "type": "string",
-            "description": "The value is ID of a object that is a outline mask of this object."
-          }
-        },
-        "maskType": {
-          "type": "integer",
-          "description": "Describes the mask type of the object.",
-          "enum": [0, 1, 2],
-          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
-        },
-        "styleEffectMaskArea": {
-          "type": "integer",
-          "enum": [0, 1, 2],
-          "enumDescriptions": [
-            "The style and visible of the object not affects the area of the mask. The area of mask depends on bound.",
-            "The style of the object not affects the area of the mask. The visible of the object affects the area of the mask.",
-            "The style and visible of the object affects the area of the mask."
-          ]
-        },
-        "maskShowType": {
-          "type": "integer",
-          "description": "Decide how the mask object should be displayed.",
-          "enum": [0, 1, 2],
-          "enumDescriptions": [
-            "depends on the style. (default value for outline mask)",
-            "only show bounds. (default value for alpha mask when it alphaType equal 0)",
-            "not show. (default for other condition)"
-          ]
-        },
-        "maskBoundsBorder": {
-          "$ref": "#/definitions/Border",
-          "description": " Used to draw the bounds of the mask. Only applies if the mask show type is 1. if omit, use r = g = b = 1 position = outside thickness = 1 opacity = 1 blend-mode = normal style = solid "
-        },
-        "overflow": {
-          "description": "Sets what happens when a child element of a parent overflows its space.",
-          "type": "integer",
-          "enum": [1, 2, 3],
-          "enumDescriptions": [
-            "hidden: Anything outside the scope of the container will be cropped and invisible.",
-            "visible: Contents outside the scope of the container will not be cropped and will be visible.",
-            "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
-          ]
-        },
-        "childObjects": {
-          "type": "array",
-          "description": "Describes all child object information. The child item that appears later will be above the child item that appears first.",
-          "items": {
-            "oneOf": [
-              {
-                "$ref": "#/definitions/Path"
-              },
-              {
-                "$ref": "#/definitions/Image"
-              },
-              {
-                "$ref": "#/definitions/Text"
-              },
-              {
-                "$ref": "#/definitions/Group"
-              },
-              {
-                "$ref": "#/definitions/Frame"
-              },
-              {
-                "$ref": "#/definitions/SymbolInstance"
-              }
-            ]
-          }
-        },
-        "class": {
-          "const": "layer"
-        }
-      },
-      "additionalProperties": false
-    },
     "Path": {
       "title": "Path",
       "description": "Path represents a vector geometry which is formed by individual subpaths combined together via boolean operations.",
@@ -1577,7 +1448,7 @@
           "const": "subshape"
         },
         "subGeometry": {
-          "description": "The contour of the subpath is described.",
+          "description": "The contour of the subpath is described. When the frame and symbol-instance and symbol-master are in subGeometry, only the childObjects will be used, and the bounding box will not be used. Any mask nested within this object will be invalidated.",
           "oneOf": [
             {
               "$ref": "#/definitions/Contour"
@@ -1593,6 +1464,9 @@
             },
             {
               "$ref": "#/definitions/Group"
+            },
+            {
+              "$ref": "#/definitions/SymbolMaster"
             },
             {
               "$ref": "#/definitions/SymbolInstance"
@@ -1889,17 +1763,25 @@
         },
         "borders": {
           "type": "array",
-          "description": "An array containing the border styles of the character. Takes precedence over the corresponding property of the object. If the entry is empty, the corresponding property of the object itself is used.",
+          "description": "An array containing the border styles of the character. Take precedence over the corresponding property of the object. If the entry is not exists, the corresponding property of the object itself is used.",
           "items": {
             "$ref": "#/definitions/Border"
           }
         },
         "fills": {
           "type": "array",
-          "description": "An array containing the fill effects of the character. Takes precedence over the corresponding property of the object. If the entry is empty, the corresponding property of the object itself is used.",
+          "description": "An array containing the fill effects of the character.",
           "items": {
             "$ref": "#/definitions/Fill"
           }
+        },
+        "fillUseType": {
+          "type": "integer",
+          "enum": [0, 1],
+          "enumDescriptions": [
+            "fills take precedence over the corresponding property of the object, unless fills not exists.(default value)",
+            "The corresponding property of the object take precedence over fills. When style.fills only has one valid solid color object and fills only has one valid solid color object, the opacity of the two solid color objects is added to the solid color object of style.fills."
+          ]
         },
         "horizontalAlignment": {
           "type": "integer",
@@ -2308,6 +2190,9 @@
               },
               {
                 "$ref": "#/definitions/SymbolInstance"
+              },
+              {
+                "$ref": "#/definitions/SymbolMaster"
               }
             ]
           }
@@ -2322,10 +2207,163 @@
       },
       "additionalProperties": false
     },
-    "Frame": {
-      "title": "Frame",
-      "description": " The frame itself is a top-level object and a container that can contain other objects. In contrast to a group, a group is simply a collection of objects. For example:  The group's fill acts on all of its children. The frame's fill acts on itself. ",
-      "$id": "#Frame",
+    "SymbolInstance": {
+      "title": "Symbol Instance Layer",
+      "description": "Symbol instance object represent an instance of a symbol source.",
+      "type": "object",
+      "$id": "#SymbolInstance",
+      "required": [
+        "alphaMaskBy",
+        "bounds",
+        "class",
+        "contextSettings",
+        "frame",
+        "id",
+        "isLocked",
+        "maskType",
+        "masterId",
+        "matrix",
+        "outlineMaskBy",
+        "overflow",
+        "overrideValues",
+        "style",
+        "styleEffectMaskArea",
+        "visible"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Object identifier, unique."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of object (utf-8)."
+        },
+        "isLocked": {
+          "type": "boolean",
+          "description": "Describes whether the object is locked."
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Describes the visibility of the object."
+        },
+        "contextSettings": {
+          "$ref": "#/definitions/GraphicsContextSettings",
+          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
+        },
+        "style": {
+          "$ref": "#/definitions/Style",
+          "description": "Object styles descriptor."
+        },
+        "bounds": {
+          "$ref": "#/definitions/Rect",
+          "description": "This property records the bounds information of the object before it is matrixed."
+        },
+        "frame": {
+          "$ref": "#/definitions/Rect",
+          "description": "An enclosing rectangle for the object. This property stores information about the object after the matrix transformation."
+        },
+        "matrix": {
+          "$ref": "#/definitions/Matrix",
+          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
+        },
+        "alphaMaskBy": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AlphaMask"
+          }
+        },
+        "outlineMaskBy": {
+          "type": "array",
+          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
+          "items": {
+            "type": "string",
+            "description": "The value is ID of a object that is a outline mask of this object."
+          }
+        },
+        "maskType": {
+          "type": "integer",
+          "description": "Describes the mask type of the object.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
+        },
+        "styleEffectMaskArea": {
+          "type": "integer",
+          "enum": [0, 1, 2],
+          "enumDescriptions": [
+            "The style and visible of the object not affects the area of the mask. The area of mask depends on bound.",
+            "The style of the object not affects the area of the mask. The visible of the object affects the area of the mask.",
+            "The style and visible of the object affects the area of the mask."
+          ]
+        },
+        "maskShowType": {
+          "type": "integer",
+          "description": "Decide how the mask object should be displayed.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": [
+            "depends on the style. (default value for outline mask)",
+            "only show bounds. (default value for alpha mask when it alphaType equal 0)",
+            "not show. (default for other condition)"
+          ]
+        },
+        "maskBoundsBorder": {
+          "$ref": "#/definitions/Border",
+          "description": " Used to draw the bounds of the mask. Only applies if the mask show type is 1. if omit, use r = g = b = 1 position = outside thickness = 1 opacity = 1 blend-mode = normal style = solid "
+        },
+        "overflow": {
+          "description": "Sets what happens when a child element of a parent overflows its space.",
+          "type": "integer",
+          "enum": [1, 2, 3],
+          "enumDescriptions": [
+            "hidden: Anything outside the scope of the container will be cropped and invisible.",
+            "visible: Contents outside the scope of the container will not be cropped and will be visible.",
+            "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
+          ]
+        },
+        "class": {
+          "const": "symbolInstance"
+        },
+        "overrideValues": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OverrideValue"
+          }
+        },
+        "masterId": {
+          "type": "string",
+          "description": "This field refers to the symbol master id."
+        }
+      },
+      "additionalProperties": false
+    },
+    "OverrideValue": {
+      "title": "Override Value",
+      "description": "Defines an individual symbol override.",
+      "type": "object",
+      "$id": "#OverrideValue",
+      "required": ["class", "objectId", "overrideName", "overrideValue"],
+      "properties": {
+        "class": {
+          "const": "overrideValue"
+        },
+        "objectId": {
+          "type": "string",
+          "description": "Indicates which object's property is overridden."
+        },
+        "overrideName": {
+          "type": "string",
+          "description": " Starting with the top-level property of the object, use . as a separator. If the property is an array, it contains the index of the array, starting at 0, and * is valid for all items.\nFor example: style: override whole style style.fills: override the style.fills style.fills.0: override the first item of style.fills style.fills.0.color: override the color of the first style.fills style.fills.*.color: Override the color of all items in style.fills "
+        },
+        "overrideValue": {
+          "description": "The value of the overridden attribute. The type depends on the concrete property."
+        }
+      },
+      "additionalProperties": false
+    },
+    "SymbolMaster": {
+      "title": "Symbol Master",
+      "description": "A symbol source object represents a reusable group of objects.",
+      "$id": "#SymbolMaster",
       "type": "object",
       "required": [
         "alphaMaskBy",
@@ -2456,263 +2494,15 @@
               },
               {
                 "$ref": "#/definitions/SymbolInstance"
+              },
+              {
+                "$ref": "#/definitions/SymbolMaster"
               }
             ]
           }
         },
         "class": {
-          "const": "frame"
-        },
-        "radius": {
-          "type": "array",
-          "description": " The radius of the four corners. [left-top, right-top, right-bottom, left-bottom] default value: [0, 0, 0, 0] "
-        }
-      },
-      "additionalProperties": false
-    },
-    "SymbolInstance": {
-      "title": "Symbol Instance Layer",
-      "description": "Symbol instance object represent an instance of a symbol source.",
-      "type": "object",
-      "$id": "#SymbolInstance",
-      "required": [
-        "alphaMaskBy",
-        "bounds",
-        "class",
-        "contextSettings",
-        "frame",
-        "id",
-        "isLocked",
-        "maskType",
-        "matrix",
-        "outlineMaskBy",
-        "overflow",
-        "overrideValues",
-        "style",
-        "styleEffectMaskArea",
-        "symbolID",
-        "visible"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Object identifier, unique."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of object (utf-8)."
-        },
-        "isLocked": {
-          "type": "boolean",
-          "description": "Describes whether the object is locked."
-        },
-        "visible": {
-          "type": "boolean",
-          "description": "Describes the visibility of the object."
-        },
-        "contextSettings": {
-          "$ref": "#/definitions/GraphicsContextSettings",
-          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
-        },
-        "style": {
-          "$ref": "#/definitions/Style",
-          "description": "Object styles descriptor."
-        },
-        "bounds": {
-          "$ref": "#/definitions/Rect",
-          "description": "This property records the bounds information of the object before it is matrixed."
-        },
-        "frame": {
-          "$ref": "#/definitions/Rect",
-          "description": "An enclosing rectangle for the object. This property stores information about the object after the matrix transformation."
-        },
-        "matrix": {
-          "$ref": "#/definitions/Matrix",
-          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
-        },
-        "alphaMaskBy": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/AlphaMask"
-          }
-        },
-        "outlineMaskBy": {
-          "type": "array",
-          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
-          "items": {
-            "type": "string",
-            "description": "The value is ID of a object that is a outline mask of this object."
-          }
-        },
-        "maskType": {
-          "type": "integer",
-          "description": "Describes the mask type of the object.",
-          "enum": [0, 1, 2],
-          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
-        },
-        "styleEffectMaskArea": {
-          "type": "integer",
-          "enum": [0, 1, 2],
-          "enumDescriptions": [
-            "The style and visible of the object not affects the area of the mask. The area of mask depends on bound.",
-            "The style of the object not affects the area of the mask. The visible of the object affects the area of the mask.",
-            "The style and visible of the object affects the area of the mask."
-          ]
-        },
-        "maskShowType": {
-          "type": "integer",
-          "description": "Decide how the mask object should be displayed.",
-          "enum": [0, 1, 2],
-          "enumDescriptions": [
-            "depends on the style. (default value for outline mask)",
-            "only show bounds. (default value for alpha mask when it alphaType equal 0)",
-            "not show. (default for other condition)"
-          ]
-        },
-        "maskBoundsBorder": {
-          "$ref": "#/definitions/Border",
-          "description": " Used to draw the bounds of the mask. Only applies if the mask show type is 1. if omit, use r = g = b = 1 position = outside thickness = 1 opacity = 1 blend-mode = normal style = solid "
-        },
-        "overflow": {
-          "description": "Sets what happens when a child element of a parent overflows its space.",
-          "type": "integer",
-          "enum": [1, 2, 3],
-          "enumDescriptions": [
-            "hidden: Anything outside the scope of the container will be cropped and invisible.",
-            "visible: Contents outside the scope of the container will not be cropped and will be visible.",
-            "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
-          ]
-        },
-        "class": {
-          "const": "symbolInstance"
-        },
-        "overrideValues": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/OverrideValue"
-          }
-        },
-        "symbolID": {
-          "type": "string",
-          "description": "This field refers to the value symbolID in the symbol master."
-        }
-      },
-      "additionalProperties": false
-    },
-    "OverrideValue": {
-      "title": "Override Value",
-      "description": "Defines an individual symbol override.",
-      "type": "object",
-      "$id": "#OverrideValue",
-      "required": ["class", "overrideName", "value"],
-      "properties": {
-        "class": {
-          "const": "overrideValue"
-        },
-        "overrideName": {
-          "$ref": "#/definitions/OverrideName"
-        },
-        "value": {
-          "oneOf": [
-            {
-              "type": "string"
-            },
-            {
-              "$ref": "#/definitions/FileRef"
-            },
-            {
-              "$ref": "#/definitions/DataRef"
-            }
-          ]
-        }
-      },
-      "additionalProperties": false
-    },
-    "OverrideName": {
-      "title": "Override Name",
-      "description": "Defines the valid string patterns for an override name.",
-      "anyOf": [
-        {
-          "type": "string",
-          "pattern": "[0-9A-F]{8}\\-[0-9A-F]{4}\\-[0-9A-F]{4}\\-[0-9A-F]{4}\\-[0-9A-F]{12}((_stringValue$)|\\/)"
-        },
-        {
-          "type": "string",
-          "pattern": "[0-9A-F]{8}\\-[0-9A-F]{4}\\-[0-9A-F]{4}\\-[0-9A-F]{4}\\-[0-9A-F]{12}((_symbolID$)|\\/)"
-        },
-        {
-          "type": "string",
-          "pattern": "[0-9A-F]{8}\\-[0-9A-F]{4}\\-[0-9A-F]{4}\\-[0-9A-F]{4}\\-[0-9A-F]{12}((_image$)|\\/)"
-        },
-        {
-          "type": "string",
-          "pattern": "[0-9A-F]{8}\\-[0-9A-F]{4}\\-[0-9A-F]{4}\\-[0-9A-F]{4}\\-[0-9A-F]{12}((_layerStyle$)|\\/)"
-        },
-        {
-          "type": "string",
-          "description": " Compatibility with older versions. for example: 32253C46-642C-4D15-AE1D-DB42363B9D41_textStyle D36814C5-A07B-47A0-B07C-02E2AF4FCCE4/C7F665ED-97AF-430D-82CE-6D7088BDD967_symbolID 336F5BC3-22C3-4DFF-A0E5-1A394CBE40BC/50C69E36-F1B0-42FB-BABE-A882134C1650_stringValue "
-        }
-      ],
-      "$id": "#OverrideName"
-    },
-    "FileRef": {
-      "title": "File Reference",
-      "description": "Defines a reference to a file within the document bundle.",
-      "type": "object",
-      "$id": "#FileRef",
-      "required": ["class", "_ref_class", "_ref"],
-      "properties": {
-        "class": {
-          "const": "MSJSONFileReference"
-        },
-        "_ref_class": {
-          "type": "string",
-          "enum": ["MSImageData", "MSImmutablePage", "MSPatch"],
-          "enumDescriptions": ["MSImageData", "MSImmutablePage", "MSPatch"]
-        },
-        "_ref": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false
-    },
-    "DataRef": {
-      "title": "Data Reference",
-      "description": "Defines inline base64 data.",
-      "type": "object",
-      "$id": "#DataRef",
-      "required": ["class", "_ref_class", "_ref", "data", "sha1"],
-      "properties": {
-        "class": {
-          "const": "MSJSONOriginalDataReference"
-        },
-        "_ref_class": {
-          "type": "string",
-          "enum": ["MSImageData", "MSFontData"],
-          "enumDescriptions": ["MSImageData", "MSFontData"]
-        },
-        "_ref": {
-          "type": "string"
-        },
-        "data": {
-          "type": "object",
-          "required": ["_data"],
-          "properties": {
-            "_data": {
-              "type": "string"
-            }
-          },
-          "additionalProperties": false
-        },
-        "sha1": {
-          "type": "object",
-          "required": ["_data"],
-          "properties": {
-            "_data": {
-              "type": "string"
-            }
-          },
-          "additionalProperties": false
+          "const": "symbolMaster"
         }
       },
       "additionalProperties": false
@@ -2852,6 +2642,9 @@
               },
               {
                 "$ref": "#/definitions/SymbolInstance"
+              },
+              {
+                "$ref": "#/definitions/SymbolMaster"
               }
             ]
           }
@@ -2869,234 +2662,30 @@
         }
       },
       "additionalProperties": false
-    },
-    "SymbolMaster": {
-      "title": "Symbol Master",
-      "description": "A symbol source object represents a reusable group of objects.",
-      "$id": "#SymbolMaster",
-      "type": "object",
-      "required": [
-        "allowsOverrides",
-        "alphaMaskBy",
-        "backgroundColor",
-        "bounds",
-        "childObjects",
-        "class",
-        "contextSettings",
-        "frame",
-        "hasBackgroundColor",
-        "id",
-        "includeBackgroundColorInInstance",
-        "isLocked",
-        "maskType",
-        "matrix",
-        "outlineMaskBy",
-        "overflow",
-        "overrideProperties",
-        "style",
-        "styleEffectMaskArea",
-        "symbolID",
-        "visible"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Object identifier, unique."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of object (utf-8)."
-        },
-        "isLocked": {
-          "type": "boolean",
-          "description": "Describes whether the object is locked."
-        },
-        "visible": {
-          "type": "boolean",
-          "description": "Describes the visibility of the object."
-        },
-        "contextSettings": {
-          "$ref": "#/definitions/GraphicsContextSettings",
-          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
-        },
-        "style": {
-          "$ref": "#/definitions/Style",
-          "description": "Object styles descriptor."
-        },
-        "bounds": {
-          "$ref": "#/definitions/Rect",
-          "description": "This property records the bounds information of the object before it is matrixed."
-        },
-        "frame": {
-          "$ref": "#/definitions/Rect",
-          "description": "An enclosing rectangle for the object. This property stores information about the object after the matrix transformation."
-        },
-        "matrix": {
-          "$ref": "#/definitions/Matrix",
-          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
-        },
-        "alphaMaskBy": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/AlphaMask"
-          }
-        },
-        "outlineMaskBy": {
-          "type": "array",
-          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
-          "items": {
-            "type": "string",
-            "description": "The value is ID of a object that is a outline mask of this object."
-          }
-        },
-        "maskType": {
-          "type": "integer",
-          "description": "Describes the mask type of the object.",
-          "enum": [0, 1, 2],
-          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
-        },
-        "styleEffectMaskArea": {
-          "type": "integer",
-          "enum": [0, 1, 2],
-          "enumDescriptions": [
-            "The style and visible of the object not affects the area of the mask. The area of mask depends on bound.",
-            "The style of the object not affects the area of the mask. The visible of the object affects the area of the mask.",
-            "The style and visible of the object affects the area of the mask."
-          ]
-        },
-        "maskShowType": {
-          "type": "integer",
-          "description": "Decide how the mask object should be displayed.",
-          "enum": [0, 1, 2],
-          "enumDescriptions": [
-            "depends on the style. (default value for outline mask)",
-            "only show bounds. (default value for alpha mask when it alphaType equal 0)",
-            "not show. (default for other condition)"
-          ]
-        },
-        "maskBoundsBorder": {
-          "$ref": "#/definitions/Border",
-          "description": " Used to draw the bounds of the mask. Only applies if the mask show type is 1. if omit, use r = g = b = 1 position = outside thickness = 1 opacity = 1 blend-mode = normal style = solid "
-        },
-        "overflow": {
-          "description": "Sets what happens when a child element of a parent overflows its space.",
-          "type": "integer",
-          "enum": [1, 2, 3],
-          "enumDescriptions": [
-            "hidden: Anything outside the scope of the container will be cropped and invisible.",
-            "visible: Contents outside the scope of the container will not be cropped and will be visible.",
-            "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
-          ]
-        },
-        "childObjects": {
-          "type": "array",
-          "description": "Describes all child object information. The child item that appears later will be above the child item that appears first.",
-          "items": {
-            "oneOf": [
-              {
-                "$ref": "#/definitions/Path"
-              },
-              {
-                "$ref": "#/definitions/Image"
-              },
-              {
-                "$ref": "#/definitions/Text"
-              },
-              {
-                "$ref": "#/definitions/Group"
-              },
-              {
-                "$ref": "#/definitions/Frame"
-              },
-              {
-                "$ref": "#/definitions/SymbolInstance"
-              }
-            ]
-          }
-        },
-        "class": {
-          "const": "symbolMaster"
-        },
-        "hasBackgroundColor": {
-          "type": "boolean",
-          "description": "A flag indicating whether backgroundColor should be applied as a background color of the object."
-        },
-        "backgroundColor": {
-          "$ref": "#/definitions/Color"
-        },
-        "includeBackgroundColorInInstance": {
-          "type": "boolean"
-        },
-        "allowsOverrides": {
-          "type": "boolean"
-        },
-        "overrideProperties": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/OverrideProperty"
-          }
-        },
-        "symbolID": {
-          "type": "string",
-          "description": "The symbolID field in the symbol instance refers to the value of this field."
-        }
-      },
-      "additionalProperties": false
-    },
-    "OverrideProperty": {
-      "title": "Override Property",
-      "description": "Defines override properties on symbol sources.",
-      "type": "object",
-      "$id": "#OverrideProperty",
-      "required": ["class", "overrideName", "canOverride"],
-      "properties": {
-        "class": {
-          "const": "MSImmutableOverrideProperty"
-        },
-        "overrideName": {
-          "$ref": "#/definitions/OverrideName"
-        },
-        "canOverride": {
-          "type": "boolean"
-        }
-      },
-      "additionalProperties": false
     }
   },
-  "required": ["fileType", "fileName", "artboard"],
+  "required": ["fileType", "frames"],
   "properties": {
     "fileType": {
       "type": "integer",
       "description": "Specifies the file type.",
-      "enum": [0, 1, 2, 3, 4],
-      "enumDescriptions": [
-        "photoshop",
-        "sketch",
-        "adobe xd",
-        "figma",
-        "adobe illustrator"
-      ]
+      "enum": [1, 3, 4],
+      "enumDescriptions": ["sketch", "figma", "adobe illustrator"]
     },
     "fileName": {
       "type": "string",
-      "description": "Specifies the path to the input design file. The encoding format is utf-8."
+      "description": "Specifies the name to the input design file. The encoding format is utf-8."
     },
-    "artboard": {
+    "frames": {
       "type": "array",
       "items": {
-        "$ref": "#/definitions/Artboard"
+        "$ref": "#/definitions/Frame"
       }
     },
     "patternLayerDef": {
       "type": "array",
       "items": {
         "$ref": "#/definitions/PatternLayerDef"
-      }
-    },
-    "symbolMaster": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/SymbolMaster"
       }
     }
   },

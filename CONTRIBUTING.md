@@ -1,11 +1,12 @@
-# Contributing Guidelines
+# VGG Contribution Guidelines
 
-First, thank you for using VGG! We welcome for issues, pull requests, or asking/answering questions on [Discard channel](#contact-us). Before that, please read [Code of Conduct](CODE_OF_CONDUCT.md).
+We sincerely appreciate your interest in and use of VGG. We welcome for issues, pull requests, or engaging in discussions on our [Discord channel](#contact-us). Before that, please read [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Create an Issue
-If you find any bug or have any idea, no matter a typo, a document error, or a runtime bug, feel free to create an issue.
 
-If it's a simple bug easy to fix, you can create a [pull request](#pull-request) directly, bypassing this step.
+If you find any bug including a typo or a runtime bug, feel free to create an issue.
+
+If it's a minor bug that is easy to fix, you can create a [pull request](#pull-request) directly, bypassing this step.
 
 1. Check [issue list](https://github.com/verygoodgraphics/vgg_runtime/issues) to avoid duplicated issues.
 2. If it's security related, please report to [VGG](mailto:bd@verygoodgraphics.com) directly.
@@ -14,16 +15,19 @@ If it's a simple bug easy to fix, you can create a [pull request](#pull-request)
 We will reply ASAP.
 
 ## Solve an Issue
-If you want to solve an unassigned issue in [#help-wanted](https://github.com/verygoodgraphics/vgg_runtime/labels/help%20wanted), you can reply under the comment thread, waiting for an assignment. You can create a [pull request](#pull-request) when the issue is sovled.
+
+If you are capable to solve an unassigned issue in [#help-wanted](https://github.com/verygoodgraphics/vgg_runtime/labels/help%20wanted), you can reply under the comment thread, waiting for an assignment. You can create a [pull request](#pull-request) once the issue is resovled.
 
 ## Pull Request
-If you fix a bug, improve a document or create a new feature, welcome to send a pull request (PR). We will appreciate it.
 
-Both core team members and external contributors send pull requests which go through the same review process. Checkout [GitHub's pull request tutorial](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests) in case of any issue.
+We welcome and appreciate your contributions in terms of bug fixes, enhancements to documents, or creation of new features. Feel free to send a pull request (PR).
 
-When opening a pull request, you will be asked to sign a [Contributor License Agreement (CLA)](.github/CLA.md), by posting a comment under instructions.
+Both core team members and external contributors send pull requests that undergo the same review process. Refer to [GitHub's pull request tutorial](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests) if you encounter any issues.
+
+Upon opening a pull request, you will be prompted to sign a [Contributor License Agreement (CLA)](.github/CLA.md) by leaving a comment as instructed.
 
 ### Basic PR Requirements
+
 - Keep each commit atomic, and commit with clear messages.
 - Follow the PR template, and write clear descriptions.
 - For C++ code, we enforce the coding style via clang-format and clang-tidy.
@@ -31,6 +35,7 @@ When opening a pull request, you will be asked to sign a [Contributor License Ag
 - Make sure your code compiles and passes all uint tests. Please refer to [Build Instructions](README.md#build-instructions) for details.
 
 ## Need More Help?
+
 Please contact us through
 - Twitter: https://twitter.com/VGG_Design
 - Discord: https://discord.gg/g3HJuKP54D

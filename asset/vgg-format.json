@@ -2347,8 +2347,11 @@
           "const": "overrideValue"
         },
         "objectId": {
-          "type": "string",
-          "description": "Indicates which object's property is overridden."
+          "type": "array",
+          "description": " Indicates which object's property is overridden.Each item is the id of the object.\nFor example: Suppose the value is [D456, 6516, FB09]. Now, we have a symbol-instance object that points to symbol-master(id: C1CF),  symbol-master(C1CF) has a child symbol-instance(id:D456),  this symbol-instance(id:D456) points to symbol-master(id:0739),  symbol-master(id:0739) has a child symbol-instance(id:6516), this symbol-instance(id:6516) points to symbol-master(59B5),  and eventually this symbol-master(59B5) has a child with id FB09. ",
+          "items": {
+            "type": "string"
+          }
         },
         "overrideName": {
           "type": "string",

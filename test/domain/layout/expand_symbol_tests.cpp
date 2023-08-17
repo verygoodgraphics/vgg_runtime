@@ -102,8 +102,6 @@ TEST_F(VggExpandSymbolTestSuite, expand_masterId_overridden_instance)
   // When
   auto result_json = sut();
 
-  // debug_write_result_json(result_json);
-
   // Then
   nlohmann::json::json_pointer path{ "/frames/0/childObjects/4/childObjects/1" };
   auto instance_child = result_json[path];
@@ -111,7 +109,7 @@ TEST_F(VggExpandSymbolTestSuite, expand_masterId_overridden_instance)
   EXPECT_TRUE(instance_child[k_override_values].is_null());
 }
 
-TEST_F(VggExpandSymbolTestSuite, override)
+TEST_F(VggExpandSymbolTestSuite, color_override)
 { // Given
   std::string file_path = "testDataDir/symbol/scale/design.json";
   auto design_json = Helper::load_json(file_path);
@@ -119,7 +117,6 @@ TEST_F(VggExpandSymbolTestSuite, override)
 
   // When
   auto result_json = sut();
-  // debug_write_result_json(result_json);
 
   // Then
   nlohmann::json::json_pointer path{
@@ -140,8 +137,6 @@ TEST_F(VggExpandSymbolTestSuite, override_with_star_wildcard)
   // When
   auto result_json = sut();
 
-  // debug_write_result_json(result_json);
-
   // Then
   nlohmann::json::json_pointer path{
     "/frames/0/childObjects/2/childObjects/0/attr/0/fills/0/color/blue"
@@ -161,13 +156,30 @@ TEST_F(VggExpandSymbolTestSuite, override_master_own_style)
   // When
   auto result_json = sut();
 
-  // debug_write_result_json(result_json);
-
   // Then
   nlohmann::json::json_pointer path{ "/frames/0/childObjects/0/style/fills" };
   auto fills = result_json[path].dump();
 
   EXPECT_EQ(fills, "[]");
+}
+
+TEST_F(VggExpandSymbolTestSuite, override_duplicated_object_id)
+{
+  // Given
+  std::string file_path = "testDataDir/symbol/symbol_instance/design.json";
+  auto design_json = Helper::load_json(file_path);
+  ExpandSymbol sut{ design_json };
+
+  // When
+  auto result_json = sut();
+
+  // Then
+  nlohmann::json::json_pointer path{
+    "/frames/0/childObjects/4/childObjects/1/childObjects/0/content"
+  };
+  auto content = result_json[path].get<std::string>();
+
+  EXPECT_EQ(content, "symbol-change");
 }
 
 // todo, validate expanded json

@@ -57,7 +57,9 @@
           "overrideValues": [
             {
               "class": "overrideValue",
-              "objectId": "3E7F1BA4-4DDF-4ADD-8CED-959DACEE9274",
+              "objectId": [
+                "3E7F1BA4-4DDF-4ADD-8CED-959DACEE9274"
+              ],
               "overrideName": "style.fills",
               "overrideValue": []
             }

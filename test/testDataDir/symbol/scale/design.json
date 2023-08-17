@@ -850,7 +850,9 @@
           "overrideValues": [
             {
               "class": "overrideValue",
-              "objectId": "8B33AFCB-BD70-44A8-B425-72E146ADE8DF",
+              "objectId": [
+                "8B33AFCB-BD70-44A8-B425-72E146ADE8DF"
+              ],
               "overrideName": "style.fills.0.color",
               "overrideValue": {
                 "alpha": 1.0,

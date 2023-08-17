@@ -231,13 +231,18 @@ void ExpandSymbol::apply_overrides(nlohmann::json& instance)
     }
 
     nl::json* child_object{ nullptr };
-    if (override_item[k_object_id] == master_id)
+    auto& object_id_paths = override_item[k_object_id];
+    if (!object_id_paths.is_array() || object_id_paths.empty())
+    {
+      continue;
+    }
+    else if (object_id_paths.size() == 1 && object_id_paths[0] == master_id)
     {
       child_object = &instance;
     }
     else
     {
-      child_object = find_child_object(instance[k_child_objects], override_item[k_object_id]);
+      child_object = find_child_object(instance[k_child_objects], object_id_paths);
       if (!child_object || !child_object->is_object())
       {
         continue;
@@ -338,24 +343,33 @@ void ExpandSymbol::apply_overrides(nlohmann::json& json,
 }
 
 nlohmann::json* ExpandSymbol::find_child_object(nlohmann::json& json,
-                                                const nlohmann::json& object_id)
+                                                const nlohmann::json& object_id_paths)
 {
   if (!json.is_object() && !json.is_array())
   {
     return nullptr;
   }
 
+  auto& object_id = object_id_paths[0];
   if (json.is_object())
   {
     if (json.contains(k_id) && json[k_id] == object_id)
     {
-      return &json;
+      if (object_id_paths.size() == 1)
+      {
+        return &json;
+      }
+      else
+      {
+        return find_child_object(json,
+                                 nl::json{ object_id_paths.cbegin() + 1, object_id_paths.cend() });
+      }
     }
   }
 
   for (auto& el : json.items())
   {
-    auto ret = find_child_object(el.value(), object_id);
+    auto ret = find_child_object(el.value(), object_id_paths);
     if (ret)
     {
       return ret;

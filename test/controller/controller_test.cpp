@@ -545,7 +545,7 @@ TEST_F(ControllerTestSuite, handle_events)
   EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
   EXPECT_CALL(*m_mock_presenter, setModel(_)).Times(expect_times + 1);
   setup_sut();
-  std::string file_path = "testDataDir/vgg-daruma.zip";
+  std::string file_path = "testDataDir/vgg-daruma-2";
   auto ret = m_sut->start(file_path);
   EXPECT_TRUE(ret);
 
@@ -581,7 +581,7 @@ TEST_F(ControllerTestSuite, handle_event_keyboard)
   EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
   EXPECT_CALL(*m_mock_presenter, setModel(_)).Times(expect_times + 1);
   setup_sut();
-  std::string file_path = "testDataDir/vgg-daruma.zip";
+  std::string file_path = "testDataDir/vgg-daruma-2";
   auto ret = m_sut->start(file_path);
   EXPECT_TRUE(ret);
 

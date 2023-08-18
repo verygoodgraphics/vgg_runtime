@@ -5,6 +5,7 @@
 #include "Log.h"
 
 #include <fstream>
+#include <numeric>
 #include <iostream>
 #include <stack>
 
@@ -20,7 +21,8 @@ nlohmann::json ExpandSymbol::operator()()
   collect_master(m_design_json);
 
   auto result = m_design_json;
-  expand_instance(result);
+  std::vector<std::string> instance_id_stack{};
+  expand_instance(result, instance_id_stack);
 
   return result;
 }
@@ -48,7 +50,9 @@ void ExpandSymbol::collect_master(const nlohmann::json& json)
   }
 }
 
-void ExpandSymbol::expand_instance(nlohmann::json& json)
+void ExpandSymbol::expand_instance(nlohmann::json& json,
+                                   std::vector<std::string>& instance_id_stack,
+                                   bool again)
 {
   if (!json.is_object() && !json.is_array())
   {
@@ -63,35 +67,66 @@ void ExpandSymbol::expand_instance(nlohmann::json& json)
       auto master_id = json[k_master_id].get<std::string>();
       if (m_masters.find(master_id) != m_masters.end())
       {
+        auto instance_id = json[k_id].get<std::string>();
         DEBUG("#ExpandSymbol: expand instance[id=%s, ptr=%p] with masterId=%s",
-              json[k_id].get<std::string>().c_str(),
+              instance_id.c_str(),
               &json,
               master_id.c_str());
         auto& master_json = m_masters[master_id];
         json[k_child_objects] = master_json[k_child_objects];
-        json[k_style] = master_json[k_style]; // todo, merge style
+        json[k_style] = master_json[k_style];
 
-        expand_instance(json[k_child_objects]);
+        if (!again)
+        {
+          instance_id_stack.push_back(instance_id);
+        }
 
-        apply_overrides(json);
+        // 1. expand
+        expand_instance(json[k_child_objects], instance_id_stack);
 
+        // 2. make instance tree nodes id unique
+        if (!again)
+        {
+          auto new_instance_id = join(instance_id_stack);
+          DEBUG("ExpandSymbol: instance id: %s -> %s",
+                instance_id.c_str(),
+                new_instance_id.c_str());
+          json[k_id] = new_instance_id;                                         // self
+          make_id_unique(json[k_child_objects], new_instance_id + k_separator); // children
+        }
+        else
+        {
+          make_id_unique(json[k_child_objects], instance_id + k_separator); // children
+        }
+
+        // 3. overrides
+        apply_overrides(json, instance_id_stack);
+
+        if (!again)
+        {
+          instance_id_stack.pop_back();
+        }
+
+        // 4. scale
         scale_from_master(json, master_json);
 
-        // make instance node to "symbalMaster" or render will not draw this node
+        // 5. make instance node to "symbalMaster" or render will not draw this node
         DEBUG("#ExpandSymbol: make instance[id=%s, ptr=%p] as master, erase masterId",
-              json[k_id].get<std::string>().c_str(),
+              instance_id.c_str(),
               &json);
         json[k_class] = k_symbol_master;
         json[k_name] = json[k_name].get<std::string>() + "; expanded_instance";
         json.erase(k_master_id);
         json.erase(k_override_values);
       }
+
+      return;
     }
   }
 
   for (auto& el : json.items())
   {
-    expand_instance(el.value());
+    expand_instance(el.value(), instance_id_stack);
   }
 }
 
@@ -213,7 +248,8 @@ void ExpandSymbol::recalculate_intance_children_geometry(nlohmann::json& json, S
   }
 }
 
-void ExpandSymbol::apply_overrides(nlohmann::json& instance)
+void ExpandSymbol::apply_overrides(nlohmann::json& instance,
+                                   const std::vector<std::string>& instance_id_stack)
 {
   auto& override_values = instance[k_override_values];
   if (!override_values.is_array())
@@ -221,7 +257,8 @@ void ExpandSymbol::apply_overrides(nlohmann::json& instance)
     return;
   }
 
-  auto master_id = instance[k_master_id];
+  auto instance_id = instance[k_id];
+  auto instance_master_id = instance[k_master_id];
   for (auto& el : override_values.items())
   {
     auto& override_item = el.value();
@@ -230,19 +267,27 @@ void ExpandSymbol::apply_overrides(nlohmann::json& instance)
       continue;
     }
 
+    auto expand_context_instance_id_stack = instance_id_stack;
+
     nl::json* child_object{ nullptr };
     auto& object_id_paths = override_item[k_object_id];
     if (!object_id_paths.is_array() || object_id_paths.empty())
     {
       continue;
     }
-    else if (object_id_paths.size() == 1 && object_id_paths[0] == master_id)
+    else if (object_id_paths.size() == 1 && object_id_paths[0] == instance_master_id)
     {
       child_object = &instance;
     }
     else
     {
-      child_object = find_child_object(instance[k_child_objects], object_id_paths);
+      auto new_instance_id_stack = instance_id_stack;
+      for (auto& id_json : object_id_paths)
+      {
+        new_instance_id_stack.push_back(id_json);
+      }
+      expand_context_instance_id_stack = new_instance_id_stack;
+      child_object = find_child_object(instance[k_child_objects], join(new_instance_id_stack));
       if (!child_object || !child_object->is_object())
       {
         continue;
@@ -265,7 +310,7 @@ void ExpandSymbol::apply_overrides(nlohmann::json& instance)
 
       // restore to symbolInstance to expand again
       (*child_object)[k_class] = k_symbol_instance;
-      expand_instance(*child_object);
+      expand_instance(*child_object, expand_context_instance_id_stack, true);
     }
     else if (!name.empty()) // other overrides
     {
@@ -342,34 +387,24 @@ void ExpandSymbol::apply_overrides(nlohmann::json& json,
   }
 }
 
-nlohmann::json* ExpandSymbol::find_child_object(nlohmann::json& json,
-                                                const nlohmann::json& object_id_paths)
+nlohmann::json* ExpandSymbol::find_child_object(nlohmann::json& json, const std::string& object_id)
 {
   if (!json.is_object() && !json.is_array())
   {
     return nullptr;
   }
 
-  auto& object_id = object_id_paths[0];
   if (json.is_object())
   {
     if (json.contains(k_id) && json[k_id] == object_id)
     {
-      if (object_id_paths.size() == 1)
-      {
-        return &json;
-      }
-      else
-      {
-        return find_child_object(json,
-                                 nl::json{ object_id_paths.cbegin() + 1, object_id_paths.cend() });
-      }
+      return &json;
     }
   }
 
   for (auto& el : json.items())
   {
-    auto ret = find_child_object(el.value(), object_id_paths);
+    auto ret = find_child_object(el.value(), object_id);
     if (ret)
     {
       return ret;
@@ -378,3 +413,45 @@ nlohmann::json* ExpandSymbol::find_child_object(nlohmann::json& json,
 
   return nullptr;
 }
+
+void ExpandSymbol::make_id_unique(nlohmann::json& json, const std::string& id_prefix)
+{
+  if (!json.is_object() && !json.is_array())
+  {
+    return;
+  }
+
+  if (json.is_object())
+  {
+    // skip expanded instance
+    auto class_name = json.value(k_class, k_empty_string);
+    if (class_name == k_symbol_master)
+    {
+      return;
+    }
+
+    if (json.contains(k_id))
+    {
+      auto object_id = json[k_id].get<std::string>();
+      auto new_object_id = id_prefix + object_id;
+      DEBUG("ExpandSymbol: object id: %s -> %s", object_id.c_str(), new_object_id.c_str());
+      json[k_id] = new_object_id;
+    }
+  }
+
+  for (auto& el : json.items())
+  {
+    make_id_unique(el.value(), id_prefix);
+  }
+}
+std::string ExpandSymbol::join(const std::vector<std::string>& instance_id_stack,
+                               const std::string& separator)
+{
+  return std::accumulate(std::next(instance_id_stack.begin()),
+                         instance_id_stack.end(),
+                         instance_id_stack[0], // start with first element
+                         [&](const std::string& a, const std::string& b)
+                         { return a + separator + b; });
+}
+
+// todo, mask id

@@ -249,6 +249,23 @@ protected: // protected members and static members
   }
 
 protected:
+  bool onGlobalEvent(const UEvent& evt)
+  {
+    // handles App-wide events
+    if (evt.type == VGG_QUIT)
+    {
+      m_shouldExit = true;
+      return true;
+    }
+    return false;
+  }
+
+public: // public methods
+  inline bool shouldExit()
+  {
+    return m_shouldExit;
+  }
+
   bool sendEvent(const UEvent& e)
   {
     bool handled = false;
@@ -256,44 +273,7 @@ protected:
     {
       handled = m_eventListener->dispatchEvent(e, this);
     }
-    // auto type = evt.type;
-    // auto key = evt.key.keysym.sym;
-    // auto mod = evt.key.keysym.mod;
-    //
-    // if (type == SDL_QUIT)
-    // {
-    //   m_shouldExit = true;
-    //   return true;
-    // }
-    //
-    // if (auto& window = evt.window;
-    //     type == SDL_WINDOWEVENT && window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
-    // {
-    //   int w = window.data1 / DPI::ScaleFactor;
-    //   int h = window.data2 / DPI::ScaleFactor;
-    //
-    //   DEBUG("Window resizing: (%d %d)", w, h);
-    //   // resizeSkiaSurface(w * m_pixelRatio * m_dpiRatio, h * m_pixelRatio * m_dpiRatio);
-    //
-    //   m_width = w;
-    //   m_height = h;
-    //
-    //   return true;
-    // }
-
     return !handled ? onGlobalEvent(e) : true;
-  }
-
-  bool onGlobalEvent(const UEvent& evt)
-  {
-    // handles App-wide events
-    return true;
-  }
-
-public: // public methods
-  inline bool shouldExit()
-  {
-    return m_shouldExit;
   }
 
   inline VLayer* layer()
@@ -314,9 +294,12 @@ public: // public methods
       return;
     }
     Self()->pollEvent();
-    m_layer->beginFrame();
-    m_layer->render();
-    m_layer->endFrame();
+    if (m_layer)
+    {
+      m_layer->beginFrame();
+      m_layer->render();
+      m_layer->endFrame();
+    }
     Self()->swapBuffer();
   }
 
@@ -339,13 +322,6 @@ public: // public static methods
         return nullptr;
       }
     }
-    VAppInitEvent e;
-    e.type = VGG_APP_INIT;
-    e.argv = argv;
-    e.argc = argc;
-    UEvent evt;
-    evt.init = e;
-    s_app.sendEvent(evt);
     return &s_app;
   }
 }; // class App

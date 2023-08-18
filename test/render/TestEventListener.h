@@ -23,8 +23,8 @@ class MyEventListener : public EventListener
 protected:
   void onAppInit(AppImpl* app, char** argv, int argc)
   {
+    INFO("onAppInit");
     m_layer = app->layer();
-
     argparse::ArgumentParser program("vgg", "0.1");
     program.add_argument("-l", "--load").help("load from vgg or sketch file");
     program.add_argument("-d", "--data").help("resources dir");

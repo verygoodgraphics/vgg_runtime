@@ -85,7 +85,7 @@ public:
 
   inline SkCanvas* getCanvas()
   {
-    return nullptr;
+    return surface->getCanvas();
   }
 };
 
@@ -94,9 +94,7 @@ class VLayer__pImpl
   VGG_DECL_API(VLayer);
 
 public:
-  static constexpr int N_MULTISAMPLE = 0;
-  static constexpr int N_STENCILBITS = 8;
-
+  LayerConfig config;
   Zoomer zoomer;
   SkiaState skiaState;
   int surfaceWidth;
@@ -145,7 +143,7 @@ public:
     // color type and info format must be the followings for
     // both OpenGL and OpenGL ES, otherwise it will fail
     info.fFormat = GR_GL_RGBA8;
-    GrBackendRenderTarget target(w, h, N_MULTISAMPLE, N_STENCILBITS, info);
+    GrBackendRenderTarget target(w, h, config.stencilBit, config.multiSample, info);
 
     SkSurfaceProps props;
     return SkSurfaces::WrapBackendRenderTarget(skiaState.grContext.get(),
@@ -191,10 +189,10 @@ public:
 
 std::optional<ELayerError> VLayer::init(const LayerConfig& cfg)
 {
-
   VGG_IMPL(VLayer)
+  _->config = cfg;
   _->updateSkiaEngineGL();
-  _->resizeSkiaSurfaceGL(1000, 1000);
+  onResizeEvent(cfg.drawableSize[0], cfg.drawableSize[1]);
   return std::nullopt;
 }
 void VLayer::beginFrame()
@@ -205,21 +203,27 @@ void VLayer::beginFrame()
 void VLayer::render()
 {
   VGG_IMPL(VLayer)
-  VPaintEvent e;
   auto canvas = _->skiaState.getCanvas();
-  e.data = canvas;
-  canvas->save();
-  canvas->clear(SK_ColorWHITE);
-  float sx = 1.f, sy = 1.f;
-  canvas->scale(sx, sy); // dpi
-  sendRenderEvent(e);
-  _->skiaState.getCanvas()->restore();
+  if (canvas)
+  {
+    VPaintEvent e;
+    e.data = canvas;
+    canvas->save();
+    canvas->clear(SK_ColorWHITE);
+    float sx = 1.f, sy = 1.f;
+    canvas->scale(sx, sy); // dpi
+    sendRenderEvent(e);
+    _->skiaState.getCanvas()->restore();
+  }
 }
 
 void VLayer::onResizeEvent(int w, int h)
 {
   VGG_IMPL(VLayer);
-  _->resizeSkiaSurfaceGL(w, h);
+  int finalW = w * scale() * dpi();
+  int finalH = h * scale() * dpi();
+  INFO("onResizeEvent: [%d, %d]  (%d, %d)", w, h, finalW, finalH);
+  _->resizeSkiaSurfaceGL(finalW, finalH);
 }
 void VLayer::endFrame()
 {
@@ -227,25 +231,29 @@ void VLayer::endFrame()
   _->skiaState.getCanvas()->flush();
 }
 
-void VLayer::onEvent(UEvent e)
+bool VLayer::onEvent(UEvent e)
 {
-  // handle zooming event
-
   VGG_IMPL(VLayer);
-  auto& panning = _->zoomer.panning;
-  if (panning && e.type == VGG_MOUSEMOTION)
+  // handle resize event
+  auto type = e.type;
+  if (auto& window = e.window;
+      type == VGG_WINDOWEVENT && window.event == VGG_WINDOWEVENT_SIZE_CHANGED)
   {
-    _->zoomer.doTranslate(e.motion.xrel, e.motion.yrel);
+    int w = window.data1;
+    int h = window.data2;
+    onResizeEvent(w, h);
+    return true;
   }
-  else if (e.type == VGG_MOUSEWHEEL && (SDL_GetModState() & KMOD_CTRL))
-  {
-    int mx, my;
-    SDL_GetMouseState(&mx, &my);
-    _->zoomer.doZoom((e.wheel.y > 0 ? 1.0 : -1.0) * 0.03, mx, my);
-  }
+  return false;
 }
 void VLayer::shutdown()
 {
 }
+
+VLayer::VLayer()
+  : d_ptr(new VLayer__pImpl(this))
+{
+}
+VLayer::~VLayer() = default;
 } // namespace VGG
   //

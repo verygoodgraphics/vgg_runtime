@@ -91,8 +91,8 @@ enum EEventType
 
 struct VKeysym
 {
-  EVGGScancode scancode; /**< SDL physical key code - see ::SDL_Scancode for details */
-  EVGGKeyCode sym;       /**< SDL virtual key code - see ::SDL_Keycode for details */
+  EVGGScancode scancode; /**< VGG physical key code - see ::SDL_Scancode for details */
+  EVGGKeyCode sym;       /**< VGG virtual key code - see ::SDL_Keycode for details */
   uint16_t mod;          /**< current key modifiers */
   uint32_t unused;
 };
@@ -104,7 +104,7 @@ struct VKeyboardEvent
 {
   uint32_t type;      /**< ::VGG_KEYDOWN or ::VGG_KEYUP */
   uint32_t timestamp; /**< In milliseconds, populated using VGG_GetTicks() */
-  EButtonState state; /**< ::VGG_Pressed or ::SDL_Release */
+  EButtonState state; /**< ::VGG_Pressed or ::VGG_Release */
   uint8_t repeat;     /**< Non-zero if this is a key repeat */
   uint8_t padding2;
   uint8_t padding3;
@@ -156,7 +156,7 @@ struct VMouseMotionEvent
   uint32_t type;      /**< ::VGG_MOUSEMOTION */
   uint32_t timestamp; /**< In milliseconds, populated using VGG_GetTicks() */
   uint32_t which;     /**< The mouse instance id, or VGG_TOUCH_MOUSEID */
-  EButtonState state; /**< ::VGG_PRESSED or ::SDL_RELEASED */
+  EButtonState state; /**< ::VGG_PRESSED or ::VGG_RELEASED */
   int32_t x;          /**< X coordinate, relative to window */
   int32_t y;          /**< Y coordinate, relative to window */
   int32_t xrel;       /**< The relative motion in the X direction */
@@ -168,11 +168,11 @@ struct VMouseMotionEvent
  */
 struct VMouseButtonEvent
 {
-  uint32_t type;      /**< ::VGG_MOUSEBUTTONDOWN or ::SDL_MOUSEBUTTONUP */
+  uint32_t type;      /**< ::VGG_MOUSEBUTTONDOWN or ::VGG_MOUSEBUTTONUP */
   uint32_t timestamp; /**< In milliseconds, populated using VGG_GetTicks() */
   uint32_t which;     /**< The mouse instance id, or VGG_TOUCH_MOUSEID */
   uint8_t button;     /**< The mouse button index */
-  EButtonState state; /**< ::VGG_PRESSED or ::SDL_RELEASED */
+  EButtonState state; /**< ::VGG_PRESSED or ::VGG_RELEASED */
   uint8_t clicks;     /**< 1 for single-click, 2 for double-click, etc. */
   uint8_t padding1;
   int32_t x; /**< X coordinate, relative to window */
@@ -201,6 +201,45 @@ struct VMouseWheelEvent
   int32_t mouseY; /**< Y coordinate, relative to window (added in 2.26.0) */
 };
 
+enum EWindowEventID
+{
+  VGG_WINDOWEVENT_NONE,         /**< Never used */
+  VGG_WINDOWEVENT_SHOWN,        /**< Window has been shown */
+  VGG_WINDOWEVENT_HIDDEN,       /**< Window has been hidden */
+  VGG_WINDOWEVENT_EXPOSED,      /**< Window has been exposed and should be
+                                     redrawn */
+  VGG_WINDOWEVENT_MOVED,        /**< Window has been moved to data1, data2
+                                 */
+  VGG_WINDOWEVENT_RESIZED,      /**< Window has been resized to data1xdata2 */
+  VGG_WINDOWEVENT_SIZE_CHANGED, /**< The window size has changed, either as
+                                     a result of an API call or through the
+                                     system or user changing the window size. */
+  VGG_WINDOWEVENT_MINIMIZED,    /**< Window has been minimized */
+  VGG_WINDOWEVENT_MAXIMIZED,    /**< Window has been maximized */
+  VGG_WINDOWEVENT_RESTORED,     /**< Window has been restored to normal size
+                                     and position */
+  VGG_WINDOWEVENT_ENTER,        /**< Window has gained mouse focus */
+  VGG_WINDOWEVENT_LEAVE,        /**< Window has lost mouse focus */
+  VGG_WINDOWEVENT_FOCUS_GAINED, /**< Window has gained keyboard focus */
+  VGG_WINDOWEVENT_FOCUS_LOST,   /**< Window has lost keyboard focus */
+  VGG_WINDOWEVENT_CLOSE,        /**< The window manager requests that the window be closed */
+  VGG_WINDOWEVENT_TAKE_FOCUS, /**< Window is being offered a focus (should SetWindowInputFocus() on
+                                 itself or a subwindow, or ignore) */
+  VGG_WINDOWEVENT_HIT_TEST,   /**< Window had a hit test that wasn't SDL_HITTEST_NORMAL. */
+  VGG_WINDOWEVENT_ICCPROF_CHANGED, /**< The ICC profile of the window's display has changed. */
+  VGG_WINDOWEVENT_DISPLAY_CHANGED  /**< Window has been moved to display data1. */
+};
+
+struct VWindowEvent
+{
+  uint32_t type;        /**< ::VGG_WINDOWEVENT */
+  uint32_t timestamp;   /**< In milliseconds, populated using VGG_GetTicks() */
+  uint32_t windowID;    /**< The associated window */
+  EWindowEventID event; /**< ::VGG_WindowEventID */
+  int32_t data1;        /**< event dependent data */
+  int32_t data2;        /**< event dependent data */
+};
+
 /**
  *  \brief An event used to request a file open by the system (event.drop.*)
  *         This event is enabled by default, you can disable it with VGG_EventState().
@@ -208,7 +247,7 @@ struct VMouseWheelEvent
  */
 struct VDropEvent
 {
-  uint32_t type; /**< ::VGG_DROPBEGIN or ::SDL_DROPFILE or ::SDL_DROPTEXT or ::SDL_DROPCOMPLETE */
+  uint32_t type; /**< ::VGG_DROPBEGIN or ::VGG_DROPFILE or ::SDL_DROPTEXT or ::SDL_DROPCOMPLETE */
   uint32_t timestamp; /**< In milliseconds, populated using VGG_GetTicks() */
   char*
     file; /**< The file name, which should be freed with VGG_free(), is NULL on begin/complete */
@@ -232,7 +271,7 @@ struct VQuitEvent
  */
 struct VUserEvent
 {
-  uint32_t type;      /**< ::VGG_USEREVENT through ::SDL_LASTEVENT-1 */
+  uint32_t type;      /**< ::VGG_USEREVENT through ::VGG_LASTEVENT-1 */
   uint32_t timestamp; /**< In milliseconds, populated using VGG_GetTicks() */
   int32_t code;       /**< User defined event code */
   void* data1;        /**< User defined data pointer */
@@ -262,16 +301,17 @@ union UEvent
 {
   uint32_t type; /**< Event type, shared with all events */
   VAppInitEvent init;
-  VKeyboardEvent key;           /**< Keyboard event data */
-  VTextEditingEvent edit;       /**< Text editing event data */
-  VTextEditingExtEvent editExt; /**< Extended text editing event data */
-  VTextInputEvent text;         /**< Text input event data */
-  VMouseMotionEvent motion;     /**< Mouse motion event data */
-  VMouseButtonEvent button;     /**< Mouse button event data */
-  VMouseWheelEvent wheel;       /**< Mouse wheel event data */
-  VQuitEvent quit;              /**< Quit request event data */
-  VUserEvent user;              /**< Custom event data */
-  VDropEvent drop;              /**< Drag and drop event data */
+  VKeyboardEvent key;
+  VWindowEvent window;
+  VTextEditingEvent edit;
+  VTextEditingExtEvent editExt;
+  VTextInputEvent text;
+  VMouseMotionEvent motion;
+  VMouseButtonEvent button;
+  VMouseWheelEvent wheel;
+  VQuitEvent quit;
+  VUserEvent user;
+  VDropEvent drop;
   VPaintEvent paint;
 };
 

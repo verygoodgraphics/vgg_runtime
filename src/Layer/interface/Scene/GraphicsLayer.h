@@ -44,11 +44,10 @@ enum class EGraphicAPI
 struct LayerConfig
 {
   EGraphicAPI graphicsAPI{ EGraphicAPI::GA_OPENGL };
-  float dpiScale[2];
-};
-
-struct LayerEvent
-{
+  float drawableSize[2];
+  float dpi{ 1.0 };
+  int stencilBit{ 8 };
+  int multiSample{ 0 };
 };
 
 enum class ELayerError
@@ -83,7 +82,7 @@ public:
 
 protected:
   Graphics();
-  virtual void onEvent(UEvent e) = 0;
+  virtual bool onEvent(UEvent e) = 0;
   void sendRenderEvent(VPaintEvent e);
 };
 

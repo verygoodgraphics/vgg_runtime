@@ -5,6 +5,7 @@
 #include "EventConvert.h"
 #include <SDL/SDL_opengl.h>
 #include <optional>
+#include <any>
 
 using namespace VGG;
 using namespace VGGNew;
@@ -62,7 +63,7 @@ public:
   static double getScaleFactor()
   {
     static constexpr int NVARS = 4;
-    static const char* vars[NVARS] = {
+    static const char* s_vars[NVARS] = {
       "FORCE_SCALE",
       "QT_SCALE_FACTOR",
       "QT_SCREEN_SCALE_FACTOR",
@@ -70,7 +71,7 @@ public:
     };
     for (int i = 0; i < NVARS; i++)
     {
-      const char* strVal = getenv(vars[i]);
+      const char* strVal = getenv(s_vars[i]);
       if (strVal)
       {
         double val = atof(strVal);
@@ -88,7 +89,7 @@ public:
     return 1.0;
   }
 #endif
-  std::optional<AppError> initContext(int w, int h, const std::string& title)
+  std::optional<AppError> initContext(int w, int h)
   {
     // init sdl
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
@@ -115,10 +116,10 @@ public:
     SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 1);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, N_STENCILBITS);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, appConfig().videoConfig.stencilBit);
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, N_MULTISAMPLE);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, appConfig().videoConfig.multiSample);
     // SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
 #ifndef EMSCRIPTEN
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -132,13 +133,12 @@ public:
 #endif
 
     // create window
-    DPI::ScaleFactor = getScaleFactor();
-    int winWidth = w * DPI::ScaleFactor;
-    int winHeight = h * DPI::ScaleFactor;
-    std::cout << winWidth << " :hw: " << winHeight << std::endl;
+    float f = getScaleFactor();
+    int winWidth = w * f;
+    int winHeight = h * f;
     SDL_Window* window =
 #ifndef EMSCRIPTEN
-      SDL_CreateWindow(title.c_str(),
+      SDL_CreateWindow(appName().c_str(),
 #else
       SDL_CreateWindow(nullptr,
 #endif
@@ -237,10 +237,6 @@ public:
     SDL_Event evt;
     while (SDL_PollEvent(&evt))
     {
-      if (evt.type == SDL_QUIT)
-      {
-        std::cout << "Quit\n";
-      }
       sendEvent(toUEvent(evt));
     }
   }

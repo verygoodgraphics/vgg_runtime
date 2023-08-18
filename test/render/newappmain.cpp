@@ -1,11 +1,18 @@
 #include "Event/Event.h"
+#include "NewApp.hpp"
 #include "TestEventListener.h"
 using namespace VGG;
 namespace fs = std::filesystem;
 #define main main
 int main(int argc, char** argv)
 {
-  auto app = AppImpl::getInstance(1920, 1080, "VGG");
+  AppConfig cfg;
+  cfg.appName = "Renderer";
+  cfg.windowSize[0] = 1920;
+  cfg.windowSize[1] = 1080;
+  cfg.videoConfig.multiSample = 0;
+  cfg.videoConfig.stencilBit = 8;
+  auto app = AppImpl::getInstance(cfg);
   if (!app)
   {
     return 1;
@@ -16,9 +23,13 @@ int main(int argc, char** argv)
   evt.init.argc = argc;
   evt.init.argv = argv;
   app->sendEvent(evt);
-  while (!app->shouldExit())
-  {
-    app->exec();
-  }
-  return 0;
+
+  app->exec();
+  // or:
+  // while (!app->shouldExit())
+  // {
+  //   app->poll();
+  //   app->process();
+  // }
+  return app->exec();
 }

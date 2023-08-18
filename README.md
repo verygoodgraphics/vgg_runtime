@@ -24,6 +24,7 @@ You could download Skia from the [official website](https://skia.org/docs/user/d
 ```bash
 # fetch skia
 git clone --depth 1 --branch chrome/m116 https://github.com/google/skia.git
+
 # then fetch skia's own dependencies
 cd skia
 python3 tools/git-sync-deps
@@ -37,24 +38,24 @@ python3 tools/git-sync-deps
 mkdir build
 cd build
 cmake .. -DSKIA_EXTERNAL_PROJECT_DIR=/path/to/your/skia
-cmake --build .
+cmake --build . --parallel 
 ```
 
-> Note: For release build, please add `-DCMAKE_BUILD_TYPE=Release` to the first `cmake` command. Currently on linux environment, Arch can be built while Ubuntu has some issues.
+> Note: For release build, please add `-DCMAKE_BUILD_TYPE=Release` to the first `cmake` command. Currently in linux environment, VGG runtime can be built on Arch but not on Ubuntu.
 
 #### WebAssembly building example
 
-[Emscripten SDK](https://github.com/emscripten-core/emscripten) is required to build WebAssembly version. You should [install and activate emsdk](https://emscripten.org/docs/getting_started/downloads.html#installation-instructions-using-the-emsdk-recommended) with version `3.1.17` at most, by using `./emsdk install 3.1.17` and `./emsdk activate 3.1.17`.
+[Emscripten SDK](https://github.com/emscripten-core/emscripten) is required to build WebAssembly version. You should [install and activate](https://emscripten.org/docs/getting_started/downloads.html#installation-instructions-using-the-emsdk-recommended) at least one version of emsdk before proceeding.
 
 ```bash
 mkdir build.wasm
 cd build.wasm
 source /path/to/emsdk/emsdk_env.sh
 emcmake cmake .. -DCMAKE_BUILD_TYPE=Release -DSKIA_EXTERNAL_PROJECT_DIR=/path/to/your/skia
-cmake --build .
+cmake --build . --parallel 
 ```
 
-> Note: WebAssembly is hard to debug, we build release for defalut. Currnetly, WebAssembly can only be built on macOS.
+> Note: We build release version by defalut as it's hard to debug in WebAssembly environment. Currently, the WebAssembly version can only be built on macOS.
 
 #### Windows building example
 
@@ -66,7 +67,7 @@ Compiled on windows need some extra efforts. It will be released once being stab
 ```bash
 cd build
 cmake .. -DENABLE_UNIT_TEST=ON -DSKIA_EXTERNAL_PROJECT_DIR=/path/to/your/skia
-cmake --build . -t unit_tests
+cmake --build . --parallel -t unit_tests
 ctest
 ```
 

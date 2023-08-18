@@ -20,7 +20,7 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
     m_bounds.origin.x = zoomer->offset.x;
     m_bounds.origin.y = zoomer->offset.y;
 
-    m_contentScaleFactor = zoomer->zoom;
+    m_contentScaleFactor = zoomer->m_zoom;
   }
 
   // todo, hittest
@@ -288,9 +288,12 @@ void UIView::draw(SkCanvas* canvas, Zoomer* zoomer)
   UEvent e;
   e.type = VGG_PAINT;
   e.paint.data = canvas;
+  // DEPRECATED: VPaintEvent will be removed from UEvent,
+  // the only way to paint a scene is added in
+  // a layer
   if (m_is_editor) // editor; zoom only subviews
   {
-    m_scene->dispatchEvent(e); // render self(editor) without zoom
+    m_scene->dispatchEvent(e, 0); // render self(editor) without zoom
 
     // draw inner edit view
     for (auto& subview : m_subviews)
@@ -309,7 +312,7 @@ void UIView::draw(SkCanvas* canvas, Zoomer* zoomer)
 
     zoomer->apply(canvas);
 
-    m_scene->dispatchEvent(e);
+    m_scene->dispatchEvent(e, 0);
 
     canvas->restore();
   }
@@ -387,12 +390,12 @@ void UIView::handleMouseWheel(const SDL_Event& evt, Zoomer* zoomer)
     my = point.y;
 
     double dz = (evt.wheel.y > 0 ? 1.0 : -1.0) * 0.03;
-    double z2 = zoomer->zoom * (1 + dz);
+    double z2 = zoomer->m_zoom * (1 + dz);
     if (z2 > 0.01 && z2 < 100)
     {
       zoomer->offset.x -= (mx / zoomer->dpiRatio) * dz;
       zoomer->offset.y -= (my / zoomer->dpiRatio) * dz;
-      zoomer->zoom += zoomer->zoom * dz;
+      zoomer->m_zoom += zoomer->m_zoom * dz;
     }
 
     m_is_dirty = true;

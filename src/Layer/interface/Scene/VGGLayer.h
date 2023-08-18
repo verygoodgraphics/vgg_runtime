@@ -1,13 +1,12 @@
+#pragma once
 #include "Core/Node.h"
 #include "Scene/GraphicsLayer.h"
 #include <vector>
-class SkSurface;
 
 namespace VGG
 {
 
 class VLayer__pImpl;
-class Scene;
 
 enum class EImageEncode
 {
@@ -32,8 +31,15 @@ public:
   virtual void render() override;
   virtual void endFrame() override;
   virtual void shutdown() override;
-  SkSurface* skiaSurface();
   std::optional<std::vector<char>> makeImageSnapshot(const ImageOptions& opts);
+  static std::shared_ptr<VLayer> makeVLayer(float dpi)
+  {
+    return nullptr;
+  }
+
+protected:
+  void onResizeEvent(int w, int h);
+  void onEvent(UEvent e) override;
 };
 
 } // namespace VGG

@@ -2,12 +2,39 @@
 #include <memory>
 #include <optional>
 #include "Core/Node.h"
-#include "Scene/EventListener.h"
-
-#include "../../../Application/include/Event/Event.h"
+#include "../../../Application/include/Event/EventListener.h"
+#include "Zoomer.h"
 
 namespace VGG
 {
+
+class ZoomerListener
+  : public Zoomer
+  , public EventListener
+{
+public:
+  bool dispatchEvent(UEvent e, void* userData) override
+  {
+    if (panning && e.type == VGG_MOUSEMOTION)
+    {
+      doTranslate(e.motion.xrel, e.motion.yrel);
+    }
+    else if (e.type == VGG_MOUSEWHEEL && (SDL_GetModState() & KMOD_CTRL))
+    {
+      int mx, my;
+      SDL_GetMouseState(&mx, &my);
+      doZoom((e.wheel.y > 0 ? 1.0 : -1.0) * 0.03, mx, my);
+    }
+    return true;
+  }
+};
+
+// This listner has renderable capability
+class RenderEventListener : public EventListener
+{
+public:
+  virtual bool onPaintEvent(VPaintEvent e) = 0;
+};
 
 enum class EGraphicAPI
 {
@@ -41,9 +68,14 @@ class Graphics : public std::enable_shared_from_this<Graphics>
   VGG_DECL_IMPL(Graphics)
 public:
   virtual std::optional<ELayerError> init(const LayerConfig& cfg) = 0;
-  void pushEvent(UEvent e);
+  // event will not be handled until beginFrame
+  void postEvent(UEvent e);
+  // event will be handled immediately
+  void sendEvent(UEvent e);
   void addEventListener(std::shared_ptr<EventListener> listener);
-  virtual void beginFrame() = 0;
+  void addRenderListener(std::shared_ptr<RenderEventListener> listener);
+  virtual void beginFrame();
+  // render is just a send special event
   virtual void render() = 0;
   virtual void endFrame() = 0;
   virtual void shutdown() = 0;
@@ -51,7 +83,8 @@ public:
 
 protected:
   Graphics();
-  virtual void dispatchEvent();
+  virtual void onEvent(UEvent e) = 0;
+  void sendRenderEvent(VPaintEvent e);
 };
 
 } // namespace VGG

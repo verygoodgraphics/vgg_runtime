@@ -1,4 +1,5 @@
 #include "Scene/VGGLayer.h"
+#include "Application/include/Event/Event.h"
 #include "Core/Node.h"
 #include "Scene/GraphicsLayer.h"
 #include "Scene/Zoomer.h"
@@ -84,10 +85,6 @@ public:
 
   inline SkCanvas* getCanvas()
   {
-    if (surface)
-    {
-      return surface->getCanvas();
-    }
     return nullptr;
   }
 };
@@ -102,7 +99,6 @@ public:
 
   Zoomer zoomer;
   SkiaState skiaState;
-  Scene scene;
   int surfaceWidth;
   int surfaceHeight;
   SkCanvas* canvas{ nullptr };
@@ -195,17 +191,58 @@ public:
 
 std::optional<ELayerError> VLayer::init(const LayerConfig& cfg)
 {
+
+  VGG_IMPL(VLayer)
+  _->updateSkiaEngineGL();
+  _->resizeSkiaSurfaceGL(1000, 1000);
   return std::nullopt;
 }
 void VLayer::beginFrame()
 {
+  Graphics::beginFrame();
 }
+
 void VLayer::render()
 {
   VGG_IMPL(VLayer)
+  VPaintEvent e;
+  auto canvas = _->skiaState.getCanvas();
+  e.data = canvas;
+  canvas->save();
+  canvas->clear(SK_ColorWHITE);
+  float sx = 1.f, sy = 1.f;
+  canvas->scale(sx, sy); // dpi
+  sendRenderEvent(e);
+  _->skiaState.getCanvas()->restore();
+}
+
+void VLayer::onResizeEvent(int w, int h)
+{
+  VGG_IMPL(VLayer);
+  _->resizeSkiaSurfaceGL(w, h);
 }
 void VLayer::endFrame()
 {
+  VGG_IMPL(VLayer)
+  _->skiaState.getCanvas()->flush();
+}
+
+void VLayer::onEvent(UEvent e)
+{
+  // handle zooming event
+
+  VGG_IMPL(VLayer);
+  auto& panning = _->zoomer.panning;
+  if (panning && e.type == VGG_MOUSEMOTION)
+  {
+    _->zoomer.doTranslate(e.motion.xrel, e.motion.yrel);
+  }
+  else if (e.type == VGG_MOUSEWHEEL && (SDL_GetModState() & KMOD_CTRL))
+  {
+    int mx, my;
+    SDL_GetMouseState(&mx, &my);
+    _->zoomer.doZoom((e.wheel.y > 0 ? 1.0 : -1.0) * 0.03, mx, my);
+  }
 }
 void VLayer::shutdown()
 {

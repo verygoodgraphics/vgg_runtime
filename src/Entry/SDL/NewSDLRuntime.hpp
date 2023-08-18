@@ -1,12 +1,15 @@
 #pragma once
 
-#include "App.hpp"
+#include "NewApp.hpp"
 #include "Log.h"
+#include "EventConvert.h"
+#include <SDL/SDL_opengl.h>
 #include <optional>
 
 using namespace VGG;
+using namespace VGGNew;
 
-class SDLRuntime : public VGG::App<SDLRuntime>
+class NewSDLRuntime : public VGGNew::App<NewSDLRuntime>
 {
   struct SDLState
   {
@@ -234,14 +237,7 @@ public:
     SDL_Event evt;
     while (SDL_PollEvent(&evt))
     {
-      // process global events like shortcuts first
-      if (dispatchGlobalEvent(evt))
-      {
-        continue;
-      }
-
-      // process app events at last
-      dispatchEvent(evt);
+      sendEvent(toUEvent(evt));
     }
   }
 
@@ -260,7 +256,7 @@ public:
     SDL_GL_SwapWindow(m_sdlState.window);
   }
 
-  ~SDLRuntime()
+  ~NewSDLRuntime()
   {
     if (m_inited && m_sdlState.glContext)
     {

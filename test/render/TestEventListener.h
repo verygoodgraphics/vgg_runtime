@@ -10,6 +10,7 @@
 #include <ConfigMananger.h>
 #include "Event/Event.h"
 #include "Event/EventListener.h"
+#include "Scene/GraphicsLayer.h"
 #include "Scene/VGGLayer.h"
 #include "loader.h"
 #include <filesystem>
@@ -60,6 +61,7 @@ protected:
     }
 
     m_scene = std::make_shared<Scene>();
+    m_scene->setZoomer(std::make_shared<ZoomerListener>());
     std::map<std::string, std::vector<char>> resources;
     std::filesystem::path prefix;
     std::filesystem::path respath;

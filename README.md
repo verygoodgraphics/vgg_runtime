@@ -23,24 +23,24 @@ You could download Skia from the [official website](https://skia.org/docs/user/d
 
 ```bash
 # fetch skia
-git clone https://skia.googlesource.com/skia.git
+git clone --depth 1 --branch chrome/m116 https://github.com/google/skia.git
 # then fetch skia's own dependencies
 cd skia
 python3 tools/git-sync-deps
 ```
 
-## Build Examples
+### 3. Build Examples
 
-### Linux/macOS building example
+#### Linux/macOS building example
 
 ```bash
 mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release -DSKIA_EXTERNAL_PROJECT_DIR=/path/to/your/skia
-make -j8
+cmake --build .
 ```
 
-### WebAssembly building example
+#### WebAssembly building example
 
 [Emscripten SDK](https://github.com/emscripten-core/emscripten) is required to build WebAssembly version. You should at least [install and activate](https://emscripten.org/docs/getting_started/downloads.html#installation-instructions-using-the-emsdk-recommended) one version of emsdk before proceeding.
 
@@ -49,12 +49,22 @@ mkdir build.wasm
 cd build.wasm
 source /path/to/emsdk/emsdk_env.sh
 emcmake cmake .. -DCMAKE_BUILD_TYPE=Release -DSKIA_EXTERNAL_PROJECT_DIR=/path/to/your/skia
-emmake make -j8
+emcmake cmake --build .
 ```
 
-### Windows building example
+#### Windows building example
 
 Compiled on windows need some extra efforts. It will be released once being stable.
+
+### 4. Unit test
+
+#### Linux/macOS unit test
+```bash
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Debug -DENABLE_UNIT_TEST=ON -DSKIA_EXTERNAL_PROJECT_DIR=/path/to/your/skia
+cmake --build . -t unit_tests
+ctest
+```
 
 ## LICENSE
 

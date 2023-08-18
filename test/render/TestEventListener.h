@@ -11,9 +11,12 @@
 #include "Event/Event.h"
 #include "Event/EventListener.h"
 #include "Scene/VGGLayer.h"
+#include "loader.h"
+#include <filesystem>
 #include "Entry/SDL/NewSDLRuntime.hpp"
 
 using AppImpl = App<NewSDLRuntime>;
+namespace fs = std::filesystem;
 class MyEventListener : public EventListener
 {
   VLayer* m_layer{ nullptr };
@@ -54,6 +57,45 @@ protected:
     {
       auto file = configfile.value();
       Config::readGlobalConfig(file);
+    }
+
+    m_scene = std::make_shared<Scene>();
+    std::map<std::string, std::vector<char>> resources;
+    std::filesystem::path prefix;
+    std::filesystem::path respath;
+
+    if (auto p = program.present("-p"))
+    {
+      prefix = p.value();
+    }
+    if (auto loadfile = program.present("-l"))
+    {
+      auto fp = loadfile.value();
+      auto ext = fs::path(fp).extension().string();
+      if (ext == ".json")
+      {
+        respath = std::filesystem::path(fp).stem(); // same with filename as default
+        if (auto res = program.present("-d"))
+        {
+          respath = res.value();
+        }
+      }
+
+      auto r = load(ext);
+      if (r)
+      {
+        auto data = r->read(prefix / fp);
+        Scene::setResRepo(data.Resource);
+        try
+        {
+          m_scene->loadFileContent(data.Format);
+          m_layer->addRenderListener(m_scene);
+        }
+        catch (std::exception& e)
+        {
+          FAIL("load json failed: %s", e.what());
+        }
+      }
     }
   }
 

@@ -23,7 +23,6 @@ public:
 
   void dispatchEvent(UEvent e, void* userData)
   {
-    q_ptr->onEvent(e);
     for (const auto& l : listeners)
     {
       l->dispatchEvent(e, userData);
@@ -32,6 +31,7 @@ public:
     {
       l->dispatchEvent(e, userData);
     }
+    q_ptr->onEvent(e);
   }
 };
 

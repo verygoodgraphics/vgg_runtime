@@ -17,10 +17,6 @@
 #ifndef __APP_HPP__
 #define __APP_HPP__
 
-#include "Event/Event.h"
-#include <core/SkColor.h>
-#include <core/SkFont.h>
-#include <core/SkFontTypes.h>
 #include <cstdio>
 #include <filesystem>
 #include <functional>
@@ -28,19 +24,11 @@
 #include <fstream>
 #include <memory>
 #include <optional>
+#include <regex>
+#include <any>
 #include "Scene/VGGLayer.h"
-#ifdef EMSCRIPTEN
-#include <SDL2/SDL_opengles2.h>
-#include <emscripten/emscripten.h>
-#else
-#endif
-
+#include "Event/Event.h"
 #include "Application/include/Event/EventListener.h"
-#include "Scene/Scene.h"
-#include "Scene/Zoomer.h"
-#include "Application/UIView.hpp"
-#include "Common/Math.hpp"
-#include "CappingProfiler.hpp"
 #include "Log.h"
 
 using namespace VGG;
@@ -82,7 +70,7 @@ namespace VGGNew
  */
 
 /*
- * bool initContext(int, int, const std::string&)
+ * bool initContext(int, int)
  *	It should guarantee the GL context properly created.
  *	*/
 HAS_MEMBER_FUNCTION_DEF(initContext)
@@ -152,10 +140,19 @@ struct AppError
   }
 };
 
-struct DPI
+struct VideoConfig
 {
-  inline static double ScaleFactor = 1.0;
+  int stencilBit{ 8 };
+  int multiSample{ 0 };
 };
+
+struct AppConfig
+{
+  VideoConfig videoConfig;
+  std::string appName;
+  int windowSize[2] = { 1920, 1080 };
+};
+
 template<typename T>
 class App
 {
@@ -173,35 +170,28 @@ class App
     return static_cast<T*>(this);
   }
   // NOLINTEND
-
 protected: // protected members and static members
-  static constexpr int N_MULTISAMPLE = 0;
-  static constexpr int N_STENCILBITS = 8;
-  std::shared_ptr<VLayer> m_layer;
+  std::unique_ptr<VLayer> m_layer;
   std::unique_ptr<EventListener> m_eventListener;
-
+  std::string m_appName;
+  AppConfig m_appConfig;
   bool m_inited{ false };
   bool m_shouldExit;
   int m_width;
   int m_height;
   double m_pixelRatio{ 1.0 };
-  double m_dpiRatio{ 1.0 };
-  float m_curMouseX{ 0.f }, m_curMouseY{ 0.f };
-  bool m_drawInfo{ false };
-  bool m_capture = false;
 
-  static std::optional<AppError> init(App* app, int w, int h, const std::string& title)
+  static std::optional<AppError> init(App* app, const AppConfig& cfg)
   {
     ASSERT(app);
     if (app->m_inited)
     {
       return AppError(AppError::Kind::HasInitError, "app has init");
     }
-
-    app->m_width = w;
-    app->m_height = h;
-
-    auto appResult = app->Self()->initContext(w * app->m_pixelRatio, h * app->m_pixelRatio, title);
+    app->m_appConfig = cfg;
+    int w = app->m_appConfig.windowSize[0];
+    int h = app->m_appConfig.windowSize[1];
+    auto appResult = app->Self()->initContext(w * app->m_pixelRatio, h * app->m_pixelRatio);
     if (appResult.has_value())
       return appResult;
 
@@ -216,23 +206,25 @@ protected: // protected members and static members
 #ifdef EMSCRIPTEN
     app->m_pixelRatio = (double)drawSize.first / winSize.first;
 #endif
-    app->m_dpiRatio = app->Self()->getDPIScale();
-    // app->m_zoomer.dpiRatio = DPI::ScaleFactor;
 
     DEBUG("Drawable size: %d %d", drawSize.first, drawSize.second);
     DEBUG("Window size: %d %d", winSize.first, winSize.second);
     DEBUG("Pixel ratio: %.2lf", app->m_pixelRatio);
-    DEBUG("DPI ratio: %.2lf", app->m_dpiRatio);
-
-    // get skia surface and canvas
-    // sk_sp<SkSurface> surface = app->setup_skia_surface(w * app->m_pixelRatio * app->m_dpiRatio,
-    //                                                    h * app->m_pixelRatio *
-    //                                                    app->m_dpiRatio);
-
-    // init capture
-
     // init m_layer
-    app->m_layer = VLayer::makeVLayer(2.0);
+    app->m_layer = std::make_unique<VLayer>();
+    if (app->m_layer)
+    {
+      LayerConfig cfg;
+      cfg.drawableSize[0] = app->m_appConfig.windowSize[0];
+      cfg.drawableSize[1] = app->m_appConfig.windowSize[1];
+      cfg.dpi = app->Self()->getDPIScale();
+      cfg.stencilBit = app->appConfig().videoConfig.stencilBit;
+      cfg.multiSample = app->appConfig().videoConfig.multiSample;
+      if (auto err = app->m_layer->init(cfg))
+      {
+        return AppError(AppError::Kind::RenderEngineError, "RenderEngineError");
+      }
+    }
     // extra initialization
     app->Self()->onInit();
     app->m_inited = true;
@@ -268,12 +260,15 @@ public: // public methods
 
   bool sendEvent(const UEvent& e)
   {
-    bool handled = false;
     if (m_eventListener)
     {
-      handled = m_eventListener->dispatchEvent(e, this);
+      m_eventListener->dispatchEvent(e, this);
     }
-    return !handled ? onGlobalEvent(e) : true;
+    if (m_layer)
+    {
+      m_layer->sendEvent(e);
+    }
+    return onGlobalEvent(e);
   }
 
   inline VLayer* layer()
@@ -286,14 +281,25 @@ public: // public methods
     m_eventListener = std::move(listener);
   }
 
-  // fps <= 0 indicates rendering as fast as possible
-  void exec()
+  const AppConfig& appConfig() const
   {
-    if (!m_inited)
-    {
-      return;
-    }
+    return m_appConfig;
+  }
+
+  const std::string& appName() const
+  {
+    return m_appConfig.appName;
+  }
+
+  void poll()
+  {
+    ASSERT(m_inited);
     Self()->pollEvent();
+  }
+
+  void process()
+  {
+    ASSERT(m_inited);
     if (m_layer)
     {
       m_layer->beginFrame();
@@ -303,19 +309,26 @@ public: // public methods
     Self()->swapBuffer();
   }
 
+  int exec()
+  {
+    ASSERT(m_inited);
+    while (!shouldExit())
+    {
+      poll();
+      process();
+    }
+    return 0;
+  }
+
 public: // public static methods
-  static T* getInstance(int w = 800,
-                        int h = 600,
-                        const std::string& title = "App",
-                        char** argv = 0,
-                        int argc = 0)
+  static T* getInstance(const AppConfig& cfg)
   {
     static_assert(std::is_base_of<App<T>, T>());
     static T s_app;
     // if already initialized, these init params are ignored
     if (!s_app.m_inited)
     {
-      auto appResult = init(&s_app, w, h, title);
+      auto appResult = init(&s_app, cfg);
       if (appResult.has_value())
       {
         INFO("%s", appResult.value().text.c_str());

@@ -201,4 +201,31 @@ TEST_F(VggExpandSymbolTestSuite, unique_object_id_in_instance_tree)
             "5EC9-4A61-97B1-0FFBE0C30E83");
 }
 
+TEST_F(VggExpandSymbolTestSuite, unique_id_in_mask_by)
+{
+  // Given
+  std::string file_path = "testDataDir/symbol/mask/design.json";
+  auto design_json = Helper::load_json(file_path);
+  ExpandSymbol sut{ design_json };
+
+  // When
+  auto result_json = sut();
+
+  // Then
+  {
+    nlohmann::json::json_pointer path{ "/frames/0/childObjects/0/childObjects/0/alphaMaskBy/0/id" };
+    auto id = result_json[path].get<std::string>();
+    EXPECT_EQ(id, "010894C5-A614-4918-A147-8ECF371856F3__82B564BA-4F87-47FE-9986-26B57D43B3EB");
+  }
+  {
+    nlohmann::json::json_pointer path{
+      "/frames/0/childObjects/0/childObjects/1/childObjects/0/childObjects/0/outlineMaskBy/0"
+    };
+    auto id = result_json[path].get<std::string>();
+    EXPECT_EQ(id,
+              "010894C5-A614-4918-A147-8ECF371856F3__CE1AF72C-CEA2-4E11-B1F3-53881A6CA6B5__"
+              "D0A3D25C-21D1-465C-AD31-5A1B56F69FB7");
+  }
+}
+
 // todo, validate expanded json

@@ -84,20 +84,14 @@ void ExpandSymbol::expand_instance(nlohmann::json& json,
         // 1. expand
         expand_instance(json[k_child_objects], instance_id_stack);
 
-        // 2. make instance tree nodes id unique
-        if (!again)
-        {
-          auto new_instance_id = join(instance_id_stack);
-          DEBUG("ExpandSymbol: instance id: %s -> %s",
-                instance_id.c_str(),
-                new_instance_id.c_str());
-          json[k_id] = new_instance_id;                                         // self
-          make_id_unique(json[k_child_objects], new_instance_id + k_separator); // children
-        }
-        else
-        {
-          make_id_unique(json[k_child_objects], instance_id + k_separator); // children
-        }
+        // 2.1. make instance tree nodes id unique
+        auto new_instance_id = join(instance_id_stack);
+        auto id_prefix = new_instance_id + k_separator;
+        DEBUG("ExpandSymbol: instance id: %s -> %s", instance_id.c_str(), new_instance_id.c_str());
+        json[k_id] = new_instance_id;                     // self
+        make_id_unique(json[k_child_objects], id_prefix); // children
+        // 2.2. update mask by: id -> unique id
+        make_mask_id_unique(json[k_child_objects], json, id_prefix);
 
         // 3. overrides
         apply_overrides(json, instance_id_stack);
@@ -421,7 +415,7 @@ void ExpandSymbol::make_id_unique(nlohmann::json& json, const std::string& id_pr
     return;
   }
 
-  if (json.is_object())
+  if (is_layout_node(json))
   {
     // skip expanded instance
     auto class_name = json.value(k_class, k_empty_string);
@@ -434,7 +428,9 @@ void ExpandSymbol::make_id_unique(nlohmann::json& json, const std::string& id_pr
     {
       auto object_id = json[k_id].get<std::string>();
       auto new_object_id = id_prefix + object_id;
-      DEBUG("ExpandSymbol: object id: %s -> %s", object_id.c_str(), new_object_id.c_str());
+      DEBUG("ExpandSymbol::make_id_unique: object id: %s -> %s",
+            object_id.c_str(),
+            new_object_id.c_str());
       json[k_id] = new_object_id;
     }
   }
@@ -454,4 +450,78 @@ std::string ExpandSymbol::join(const std::vector<std::string>& instance_id_stack
                          { return a + separator + b; });
 }
 
-// todo, mask id
+void ExpandSymbol::make_mask_id_unique(nlohmann::json& json,
+                                       nlohmann::json& instance_json,
+                                       const std::string& id_prefix)
+{
+  if (json.is_object())
+  {
+    if (!is_layout_node(json))
+    {
+      return;
+    }
+    DEBUG("ExpandSymbol::make_mask_id_unique: visit node[id=%s, %p], with instance[id=%s, %p], "
+          "id_prefix: %s",
+          json[k_id].dump().c_str(),
+          &json,
+          instance_json[k_id].dump().c_str(),
+          &instance_json,
+          id_prefix.c_str());
+
+    if (json.contains(k_alpha_mask_by))
+    {
+      auto& mask_by = json[k_alpha_mask_by];
+      if (mask_by.is_array())
+      {
+        for (auto& item : mask_by)
+        {
+          if (item.contains(k_id))
+          {
+            auto id = item[k_id].get<std::string>();
+            auto unique_id = id_prefix + id;
+            if (find_child_object(instance_json, unique_id))
+            {
+              DEBUG(
+                "ExpandSymbol::make_mask_id_unique: json node[id=%s]: alphaMaskBy, id: %s -> %s",
+                json[k_id].dump().c_str(),
+                id.c_str(),
+                unique_id.c_str());
+              item[k_id] = unique_id;
+            }
+          }
+        }
+      }
+    }
+
+    if (json.contains(k_outline_mask_by))
+    {
+      auto& mask_by = json[k_outline_mask_by];
+      if (mask_by.is_array())
+      {
+        for (auto& item : mask_by)
+        {
+          auto id = item.get<std::string>();
+          auto unique_id = id_prefix + id;
+          if (find_child_object(instance_json, unique_id))
+          {
+            DEBUG(
+              "ExpandSymbol::make_mask_id_unique: json node[id=%s]: outlineMaskBy, id: %s -> %s",
+              json[k_id].dump().c_str(),
+              id.c_str(),
+              unique_id.c_str());
+            item = unique_id;
+          }
+        }
+      }
+    }
+
+    make_mask_id_unique(json[k_child_objects], instance_json, id_prefix);
+  }
+  else if (json.is_array())
+  {
+    for (auto& el : json.items())
+    {
+      make_mask_id_unique(el.value(), instance_json, id_prefix);
+    }
+  }
+}

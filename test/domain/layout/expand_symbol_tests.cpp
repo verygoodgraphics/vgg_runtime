@@ -182,4 +182,23 @@ TEST_F(VggExpandSymbolTestSuite, override_duplicated_object_id)
   EXPECT_EQ(content, "symbol-change");
 }
 
+TEST_F(VggExpandSymbolTestSuite, unique_object_id_in_instance_tree)
+{
+  // Given
+  std::string file_path = "testDataDir/symbol/symbol_instance/design.json";
+  auto design_json = Helper::load_json(file_path);
+  ExpandSymbol sut{ design_json };
+
+  // When
+  auto result_json = sut();
+
+  // Then
+  nlohmann::json::json_pointer path{ "/frames/0/childObjects/4/childObjects/1/childObjects/0/id" };
+  auto id = result_json[path].get<std::string>();
+
+  EXPECT_EQ(id,
+            "98C9A450-A48C-4072-B310-E9E80A20F309__651675C7-452D-48D3-A84A-A6CF6796E3B3__95C02DB7-"
+            "5EC9-4A61-97B1-0FFBE0C30E83");
+}
+
 // todo, validate expanded json

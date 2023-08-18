@@ -42,8 +42,10 @@ private:
                        std::stack<std::string> reversed_path,
                        const nlohmann::json& value);
   nlohmann::json* find_child_object(nlohmann::json& json, const std::string& object_id);
-  void make_mask_id_unique(nlohmann::json& json, std::vector<std::string> instance_id_stack);
   void make_id_unique(nlohmann::json& json, const std::string& id_prefix);
+  void make_mask_id_unique(nlohmann::json& json,
+                           nlohmann::json& instance_json,
+                           const std::string& id_prefix);
   std::string join(const std::vector<std::string>& instance_id_stack,
                    const std::string& seperator = k_separator);
 };

@@ -41,6 +41,26 @@ public:
   bool maskDirty{ true };
   std::shared_ptr<ZoomerListener> zoomer;
 
+  void applyZoom(SkCanvas* canvas)
+  {
+    ASSERT(canvas);
+    ASSERT(zoomer);
+    auto offset = zoomer->translate();
+    auto zoom = zoomer->zoom();
+    canvas->translate(offset.x, offset.y);
+    canvas->scale(zoom, zoom);
+  }
+
+  void restoreZoom(SkCanvas* canvas)
+  {
+    ASSERT(canvas);
+    ASSERT(zoomer);
+    auto offset = zoomer->translate();
+    auto zoom = zoomer->zoom();
+    canvas->scale(1. / zoom, 1. / zoom);
+    canvas->translate(-offset.x, -offset.y);
+  }
+
   void render(SkCanvas* canvas)
   {
     PaintNode* node = nullptr;
@@ -156,9 +176,17 @@ bool Scene::onPaintEvent(VPaintEvent e)
 {
   VGG_IMPL(Scene)
   auto canvas = (SkCanvas*)e.data;
-  // handle zooming
-  _->render(canvas);
-  // handle zooming
+  if (_->zoomer)
+  {
+    // handle zooming
+    _->applyZoom(canvas);
+    _->render(canvas);
+    _->restoreZoom(canvas);
+  }
+  else
+  {
+    _->render(canvas);
+  }
   return true;
 }
 

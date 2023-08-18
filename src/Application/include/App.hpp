@@ -476,7 +476,7 @@ protected: // protected methods
         UEvent e;
         e.type = VGG_PAINT;
         e.paint.data = canvas;
-        m_scene->dispatchEvent(e);
+        m_scene->dispatchEvent(e, 0);
         m_zoomer.restore(canvas);
       }
       else if (m_view)
@@ -557,12 +557,12 @@ protected: // protected methods
       int mx, my;
       SDL_GetMouseState(&mx, &my);
       double dz = (evt.wheel.y > 0 ? 1.0 : -1.0) * 0.03;
-      double z2 = m_zoomer.zoom * (1 + dz);
+      double z2 = m_zoomer.m_zoom * (1 + dz);
       if (z2 > 0.01 && z2 < 100)
       {
         m_zoomer.offset.x -= (mx / DPI::ScaleFactor - m_zoomer.offset.x) * dz;
         m_zoomer.offset.y -= (my / DPI::ScaleFactor - m_zoomer.offset.y) * dz;
-        m_zoomer.zoom += m_zoomer.zoom * dz;
+        m_zoomer.m_zoom += m_zoomer.m_zoom * dz;
         return true;
       }
       return false;

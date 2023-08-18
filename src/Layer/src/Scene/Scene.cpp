@@ -4,6 +4,7 @@
 #include "Reader/Loader.h"
 #include "Core/PaintNode.h"
 #include "Scene/Renderer.h"
+#include "Scene/Zoomer.h"
 #include "core/SkCanvas.h"
 #include "core/SkImage.h"
 #include <filesystem>
@@ -38,6 +39,7 @@ public:
   int symbolIndex{ 0 };
   bool renderSymbol{ false };
   bool maskDirty{ true };
+  std::shared_ptr<ZoomerListener> zoomer;
 
   void render(SkCanvas* canvas)
   {
@@ -128,7 +130,6 @@ void Scene::loadFileContent(const nlohmann::json& json)
   _->page = 0;
   _->symbolIndex = 0;
   _->maskDirty = true;
-
   _->container = NlohmannBuilder::build(json);
   for (const auto& s : _->container.symbols)
   {
@@ -137,14 +138,28 @@ void Scene::loadFileContent(const nlohmann::json& json)
   instantiateTemplates();
 }
 
-void Scene::dispatchEvent(UEvent e)
+bool Scene::dispatchEvent(UEvent e, void* userData)
 {
   VGG_IMPL(Scene)
+  if (_->zoomer)
+  {
+    _->zoomer->dispatchEvent(e, this);
+  }
   if (e.type == VGG_PAINT)
   {
-    auto canvas = (SkCanvas*)e.paint.data;
-    _->render(canvas);
+    onPaintEvent(e.paint);
   }
+  return true;
+}
+
+bool Scene::onPaintEvent(VPaintEvent e)
+{
+  VGG_IMPL(Scene)
+  auto canvas = (SkCanvas*)e.data;
+  // handle zooming
+  _->render(canvas);
+  // handle zooming
+  return true;
 }
 
 int Scene::frameCount() const
@@ -160,6 +175,12 @@ PaintNode* Scene::frame(int index)
     return _->container.frames[index].get();
   }
   return nullptr;
+}
+
+void Scene::setZoomer(std::shared_ptr<ZoomerListener> zoomer)
+{
+  VGG_IMPL(Scene);
+  _->zoomer = std::move(zoomer);
 }
 
 void Scene::setPage(int num)

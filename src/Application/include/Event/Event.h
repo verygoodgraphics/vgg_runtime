@@ -16,24 +16,17 @@ enum EEventType
 
   /* Application events */
   VGG_QUIT = 0x100, /**< User-requested quit */
+  VGG_APP_INIT,
 
-  /* These application events have special meaning on iOS, see README-ios.md for details */
-  VGG_APP_TERMINATING,         /**< The application is being terminated by the OS
-                                    Called on iOS in applicationWillTerminate()
-                                    Called on Android in onDestroy()
-                               */
-  VGG_APP_LOWMEMORY,           /**< The application is low on memory, free memory if possible.
-                                    Called on iOS in applicationDidReceiveMemoryWarning()
-                                    Called on Android in onLowMemory()
-                               */
+  VGG_APP_TERMINATING,
+
+  VGG_APP_LOWMEMORY,
   VGG_APP_WILLENTERBACKGROUND, /**< The application is about to enter the background
                                    Called on iOS in applicationWillResignActive()
                                    Called on Android in onPause()
                               */
   VGG_APP_DIDENTERBACKGROUND,  /**< The application did enter the background and may not get CPU
-                                  for some time  Called on iOS in applicationDidEnterBackground()
-                                    Called on Android in onPause()
-                               */
+                                */
   VGG_APP_WILLENTERFOREGROUND, /**< The application is about to enter the foreground
                                    Called on iOS in applicationWillEnterForeground()
                                    Called on Android in onResume()
@@ -109,7 +102,7 @@ struct VKeysym
  */
 struct VKeyboardEvent
 {
-  uint32_t type;      /**< ::VGG_KEYDOWN or ::SDL_KEYUP */
+  uint32_t type;      /**< ::VGG_KEYDOWN or ::VGG_KEYUP */
   uint32_t timestamp; /**< In milliseconds, populated using VGG_GetTicks() */
   EButtonState state; /**< ::VGG_Pressed or ::SDL_Release */
   uint8_t repeat;     /**< Non-zero if this is a key repeat */
@@ -163,7 +156,7 @@ struct VMouseMotionEvent
   uint32_t type;      /**< ::VGG_MOUSEMOTION */
   uint32_t timestamp; /**< In milliseconds, populated using VGG_GetTicks() */
   uint32_t which;     /**< The mouse instance id, or VGG_TOUCH_MOUSEID */
-  uint32_t state;     /**< The current button state */
+  EButtonState state; /**< ::VGG_PRESSED or ::SDL_RELEASED */
   int32_t x;          /**< X coordinate, relative to window */
   int32_t y;          /**< Y coordinate, relative to window */
   int32_t xrel;       /**< The relative motion in the X direction */
@@ -251,6 +244,15 @@ struct VPaintEvent
   uint32_t type;
   uint32_t timestamp;
   void* data;
+  float dpi;
+};
+
+struct VAppInitEvent
+{
+  uint32_t type;
+  uint32_t timestamp;
+  int argc;
+  char** argv;
 };
 
 /**
@@ -258,7 +260,8 @@ struct VPaintEvent
  */
 union UEvent
 {
-  uint32_t type;                /**< Event type, shared with all events */
+  uint32_t type; /**< Event type, shared with all events */
+  VAppInitEvent init;
   VKeyboardEvent key;           /**< Keyboard event data */
   VTextEditingEvent edit;       /**< Text editing event data */
   VTextEditingExtEvent editExt; /**< Extended text editing event data */
@@ -270,21 +273,6 @@ union UEvent
   VUserEvent user;              /**< Custom event data */
   VDropEvent drop;              /**< Drag and drop event data */
   VPaintEvent paint;
-
-  /* This is necessary for ABI compatibility between Visual C++ and GCC.
-     Visual C++ will respect the push pack pragma and use 52 bytes (size of
-     VGG_TextEditingEvent, the largest structure for 32-bit and 64-bit
-     architectures) for this union, and GCC will use the alignment of the
-     largest datatype within the union, which is 8 bytes on 64-bit
-     architectures.
-
-     So... we'll add padding to force the size to be 56 bytes for both.
-
-     On architectures where pointers are 16 bytes, this needs rounding up to
-     the next multiple of 16, 64, and on architectures where pointers are
-     even larger the size of VGG_UserEvent will dominate as being 3 pointers.
-  */
-  uint8_t padding[sizeof(void*) <= 8 ? 56 : sizeof(void*) == 16 ? 64 : 3 * sizeof(void*)];
 };
 
 /* vi: set ts=4 sw=4 expandtab: */

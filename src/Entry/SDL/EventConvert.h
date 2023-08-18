@@ -51,7 +51,6 @@ inline EButtonState toEButtonState(int t)
 inline VKeyboardEvent toVKeyboardEvent(const SDL_KeyboardEvent& e)
 {
   VKeyboardEvent ve;
-  ve.type = toEEventType((SDL_EventType)e.type);
   ve.timestamp = e.timestamp;
   ve.state = toEButtonState(e.state);
   ve.repeat = e.repeat;
@@ -153,7 +152,7 @@ inline VMouseButtonEvent toVMouseButtonEvent(const SDL_MouseButtonEvent& e)
 inline UEvent toUEvent(const SDL_Event& e)
 {
   UEvent u;
-  u.type = toEEventType((SDL_EventType)e.type);
+  auto t = toEEventType((SDL_EventType)e.type);
   switch (e.type)
   {
     case SDL_MOUSEBUTTONUP:
@@ -192,6 +191,7 @@ inline UEvent toUEvent(const SDL_Event& e)
       u.user = toVUserEvent(e.user);
       break;
   }
+  u.type = t;
   return u;
 }
 

@@ -237,6 +237,10 @@ public:
     SDL_Event evt;
     while (SDL_PollEvent(&evt))
     {
+      if (evt.type == SDL_QUIT)
+      {
+        std::cout << "Quit\n";
+      }
       sendEvent(toUEvent(evt));
     }
   }

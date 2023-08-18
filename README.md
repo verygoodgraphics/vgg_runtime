@@ -36,21 +36,25 @@ python3 tools/git-sync-deps
 ```bash
 mkdir build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release -DSKIA_EXTERNAL_PROJECT_DIR=/path/to/your/skia
+cmake .. -DSKIA_EXTERNAL_PROJECT_DIR=/path/to/your/skia
 cmake --build .
 ```
 
+> Note: For release build, please add `-DCMAKE_BUILD_TYPE=Release` to the first `cmake` command. Currently on linux environment, Arch can be built while Ubuntu has some issues.
+
 #### WebAssembly building example
 
-[Emscripten SDK](https://github.com/emscripten-core/emscripten) is required to build WebAssembly version. You should at least [install and activate](https://emscripten.org/docs/getting_started/downloads.html#installation-instructions-using-the-emsdk-recommended) one version of emsdk before proceeding.
+[Emscripten SDK](https://github.com/emscripten-core/emscripten) is required to build WebAssembly version. You should [install and activate emsdk](https://emscripten.org/docs/getting_started/downloads.html#installation-instructions-using-the-emsdk-recommended) with version `3.1.17` at most, by using `./emsdk install 3.1.17` and `./emsdk activate 3.1.17`.
 
 ```bash
 mkdir build.wasm
 cd build.wasm
 source /path/to/emsdk/emsdk_env.sh
 emcmake cmake .. -DCMAKE_BUILD_TYPE=Release -DSKIA_EXTERNAL_PROJECT_DIR=/path/to/your/skia
-emcmake cmake --build .
+cmake --build .
 ```
+
+> Note: WebAssembly is hard to debug, we build release for defalut. Currnetly, WebAssembly can only be built on macOS.
 
 #### Windows building example
 
@@ -61,7 +65,7 @@ Compiled on windows need some extra efforts. It will be released once being stab
 #### Linux/macOS unit test
 ```bash
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=Debug -DENABLE_UNIT_TEST=ON -DSKIA_EXTERNAL_PROJECT_DIR=/path/to/your/skia
+cmake .. -DENABLE_UNIT_TEST=ON -DSKIA_EXTERNAL_PROJECT_DIR=/path/to/your/skia
 cmake --build . -t unit_tests
 ctest
 ```

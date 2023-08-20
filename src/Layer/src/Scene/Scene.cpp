@@ -174,38 +174,6 @@ void Scene::onRender(SkCanvas* canvas)
   }
 }
 
-// bool Scene::dispatchEvent(UEvent e, void* userData)
-// {
-//   VGG_IMPL(Scene)
-//   if (_->zoomer)
-//   {
-//     _->zoomer->dispatchEvent(e, this);
-//   }
-//   if (e.type == VGG_PAINT)
-//   {
-//     onPaintEvent(e.paint);
-//   }
-//   return true;
-// }
-//
-// bool Scene::onPaintEvent(VPaintEvent e)
-// {
-//   VGG_IMPL(Scene)
-//   auto canvas = (SkCanvas*)e.data;
-//   if (_->zoomer)
-//   {
-//     // handle zooming
-//     _->applyZoom(canvas);
-//     _->render(canvas);
-//     _->restoreZoom(canvas);
-//   }
-//   else
-//   {
-//     _->render(canvas);
-//   }
-//   return true;
-// }
-
 int Scene::frameCount() const
 {
   return d_ptr->container.frames.size();

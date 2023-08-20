@@ -59,10 +59,6 @@ public:
   void nextSymbol();
   void prevSymbol();
   void onRender(SkCanvas* canvas) override;
-
-  // bool onPaintEvent(VPaintEvent e) override;
-  // bool dispatchEvent(UEvent e, void* userData) override;
-
   // To remove zoomer, just set nullptr
   void setZoomer(std::shared_ptr<Zoomer> zoomer);
   Zoomer* zoomer();

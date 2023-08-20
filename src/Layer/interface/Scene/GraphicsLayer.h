@@ -8,19 +8,6 @@
 namespace VGG
 {
 
-
-// This listner has renderable capability
-class RenderEventListener : public EventListener
-{
-public:
-  virtual bool onPaintEvent(VPaintEvent e) = 0;
-};
-
-class RenderContext
-{
-public:
-};
-
 enum class EGraphicAPI
 {
   GA_OPENGL
@@ -45,30 +32,14 @@ enum class ELayerError
   RenderEngineError,
   UnknownError,
 };
-
-class Graphics__pImpl;
 class Graphics : public std::enable_shared_from_this<Graphics>
 {
-  VGG_DECL_IMPL(Graphics)
 public:
   virtual std::optional<ELayerError> init(const LayerConfig& cfg) = 0;
-  // event will not be handled until beginFrame
-  void postEvent(UEvent e);
-  // event will be handled immediately
-  void sendEvent(UEvent e);
-  void addEventListener(std::shared_ptr<EventListener> listener);
-  void addRenderListener(std::shared_ptr<RenderEventListener> listener);
-  virtual void beginFrame();
-  // render is just a send special event
+  virtual void beginFrame() = 0;
   virtual void render() = 0;
   virtual void endFrame() = 0;
   virtual void shutdown() = 0;
-  virtual ~Graphics() = 0;
-
-protected:
-  Graphics();
-  virtual bool onEvent(UEvent e) = 0;
-  void sendRenderEvent(VPaintEvent e);
 };
 
 } // namespace VGG

@@ -15,7 +15,6 @@ public:
   std::vector<std::shared_ptr<EventListener>> listeners;
   std::vector<std::shared_ptr<RenderEventListener>> renderable;
   std::queue<UEvent> msgQueue;
-  Zoomer globalZoomer;
   Graphics__pImpl(Graphics* api)
     : q_ptr(api)
   {

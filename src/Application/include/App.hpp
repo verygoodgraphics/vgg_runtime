@@ -473,10 +473,7 @@ protected: // protected methods
       if (m_scene)
       {
         m_zoomer.apply(canvas);
-        UEvent e;
-        e.type = VGG_PAINT;
-        e.paint.data = canvas;
-        m_scene->dispatchEvent(e, 0);
+        m_scene->onRender(canvas);
         m_zoomer.restore(canvas);
       }
       else if (m_view)

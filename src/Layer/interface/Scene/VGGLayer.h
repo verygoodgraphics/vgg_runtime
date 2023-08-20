@@ -18,6 +18,12 @@ struct ImageOptions
   EImageEncode encode;
 };
 
+class Renderable : public std::enable_shared_from_this<Renderable>
+{
+public:
+  virtual void onRender(SkCanvas* canvas) = 0;
+};
+
 class VLayer : public Graphics
 {
   VGG_DECL_IMPL(VLayer);
@@ -32,6 +38,7 @@ public:
   virtual void render() override;
   virtual void endFrame() override;
   virtual void shutdown() override;
+  void addRenderItem(std::shared_ptr<Renderable> item);
 
   void setScale(float scale)
   {

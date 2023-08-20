@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include "Scene/GraphicsLayer.h"
+#include "Scene/VGGLayer.h"
 #include "Common/Config.h"
 #include "Core/Node.h"
 #include "core/SkCanvas.h"
@@ -33,7 +34,7 @@ public:
   }
 };
 class Scene__pImpl;
-struct VGG_EXPORTS Scene : public RenderEventListener
+struct VGG_EXPORTS Scene : public Renderable
 {
   static ResourceRepo s_resRepo;
   static ObjectTableType s_objectTable;
@@ -57,11 +58,14 @@ public:
   void setPage(int num);
   void nextSymbol();
   void prevSymbol();
-  bool onPaintEvent(VPaintEvent e) override;
-  bool dispatchEvent(UEvent e, void* userData) override;
+  void onRender(SkCanvas* canvas) override;
+
+  // bool onPaintEvent(VPaintEvent e) override;
+  // bool dispatchEvent(UEvent e, void* userData) override;
 
   // To remove zoomer, just set nullptr
-  void setZoomer(std::shared_ptr<ZoomerListener> zoomer);
+  void setZoomer(std::shared_ptr<Zoomer> zoomer);
+  Zoomer* zoomer();
   static ResourceRepo& getResRepo()
   {
     return s_resRepo;

@@ -8,7 +8,6 @@ class EventListener : public std::enable_shared_from_this<EventListener>
 {
 public:
   virtual bool dispatchEvent(UEvent e, void* userData) = 0;
-  virtual ~EventListener() = default;
 };
 } // namespace VGG
 

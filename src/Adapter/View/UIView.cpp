@@ -293,7 +293,7 @@ void UIView::draw(SkCanvas* canvas, Zoomer* zoomer)
   // a layer
   if (m_is_editor) // editor; zoom only subviews
   {
-    m_scene->dispatchEvent(e, 0); // render self(editor) without zoom
+    m_scene->onRender(canvas); // NOTE:: onRender will be privated soon
 
     // draw inner edit view
     for (auto& subview : m_subviews)
@@ -312,7 +312,7 @@ void UIView::draw(SkCanvas* canvas, Zoomer* zoomer)
 
     zoomer->apply(canvas);
 
-    m_scene->dispatchEvent(e, 0);
+    m_scene->onRender(canvas); // NOTE:: onRender will be privated soon
 
     canvas->restore();
   }

@@ -8,6 +8,8 @@
 #include "nlohmann/json.hpp"
 #include "Zoomer.h"
 
+class SkCanvas;
+
 namespace VGG
 {
 class SymbolMasterNode;

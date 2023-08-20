@@ -5,14 +5,14 @@
 namespace VGG
 {
 
-class LayerEventAdapter__pImpl
+class EventDispatcherLayer__pImpl
 {
 public:
-  VGG_DECL_API(LayerEventAdapter)
+  VGG_DECL_API(EventDispatcherLayer)
   std::vector<std::shared_ptr<EventListener>> listeners;
   std::queue<UEvent> msgQueue;
   std::shared_ptr<VLayer> layer;
-  LayerEventAdapter__pImpl(LayerEventAdapter* api, std::shared_ptr<VLayer> layer)
+  EventDispatcherLayer__pImpl(EventDispatcherLayer* api, std::shared_ptr<VLayer> layer)
     : q_ptr(api)
     , layer(std::move(layer))
   {
@@ -22,36 +22,36 @@ public:
   {
     for (const auto& l : listeners)
     {
-      l->dispatchEvent(e, userData);
+      l->onEvent(e, userData);
     }
     q_ptr->onEvent(e);
   }
 };
 
-LayerEventAdapter::LayerEventAdapter(std::shared_ptr<VLayer> layer)
-  : d_ptr(new LayerEventAdapter__pImpl(this, std::move(layer)))
+EventDispatcherLayer::EventDispatcherLayer(std::shared_ptr<VLayer> layer)
+  : d_ptr(new EventDispatcherLayer__pImpl(this, std::move(layer)))
 {
 }
-void LayerEventAdapter::postEvent(UEvent e)
+void EventDispatcherLayer::postEvent(UEvent e)
 {
-  VGG_IMPL(LayerEventAdapter)
+  VGG_IMPL(EventDispatcherLayer)
   _->msgQueue.push(e);
 }
-void LayerEventAdapter::sendEvent(UEvent e)
+void EventDispatcherLayer::sendEvent(UEvent e)
 {
-  VGG_IMPL(LayerEventAdapter)
+  VGG_IMPL(EventDispatcherLayer)
   _->dispatchEvent(e, this);
 }
-void LayerEventAdapter::addSceneListener(std::shared_ptr<SceneEventListener> listener)
+void EventDispatcherLayer::addSceneListener(std::shared_ptr<EventListenerScene> listener)
 {
-  VGG_IMPL(LayerEventAdapter)
+  VGG_IMPL(EventDispatcherLayer)
   _->listeners.push_back(listener);
   _->layer->addRenderItem(std::move(listener));
 }
 
-void LayerEventAdapter::beginFrame()
+void EventDispatcherLayer::beginFrame()
 {
-  VGG_IMPL(LayerEventAdapter);
+  VGG_IMPL(EventDispatcherLayer);
   d_ptr->layer->beginFrame();
   while (_->msgQueue.empty() == false)
   {
@@ -60,18 +60,18 @@ void LayerEventAdapter::beginFrame()
     _->msgQueue.pop();
   }
 }
-void LayerEventAdapter::render()
+void EventDispatcherLayer::render()
 {
   d_ptr->layer->render();
 }
-void LayerEventAdapter::endFrame()
+void EventDispatcherLayer::endFrame()
 {
   d_ptr->layer->endFrame();
 }
 
-bool LayerEventAdapter::onEvent(UEvent e)
+bool EventDispatcherLayer::onEvent(UEvent e)
 {
-  VGG_IMPL(LayerEventAdapter);
+  VGG_IMPL(EventDispatcherLayer);
   auto type = e.type;
   if (auto& window = e.window;
       type == VGG_WINDOWEVENT && window.event == VGG_WINDOWEVENT_SIZE_CHANGED)
@@ -84,7 +84,7 @@ bool LayerEventAdapter::onEvent(UEvent e)
   return false;
 }
 
-LayerEventAdapter::~LayerEventAdapter()
+EventDispatcherLayer::~EventDispatcherLayer()
 {
 }
 

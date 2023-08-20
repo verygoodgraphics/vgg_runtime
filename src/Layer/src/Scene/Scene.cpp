@@ -39,7 +39,7 @@ public:
   int symbolIndex{ 0 };
   bool renderSymbol{ false };
   bool maskDirty{ true };
-  std::shared_ptr<ZoomerListener> zoomer;
+  std::shared_ptr<Zoomer> zoomer;
 
   void applyZoom(SkCanvas* canvas)
   {
@@ -158,24 +158,9 @@ void Scene::loadFileContent(const nlohmann::json& json)
   instantiateTemplates();
 }
 
-bool Scene::dispatchEvent(UEvent e, void* userData)
+void Scene::onRender(SkCanvas* canvas)
 {
   VGG_IMPL(Scene)
-  if (_->zoomer)
-  {
-    _->zoomer->dispatchEvent(e, this);
-  }
-  if (e.type == VGG_PAINT)
-  {
-    onPaintEvent(e.paint);
-  }
-  return true;
-}
-
-bool Scene::onPaintEvent(VPaintEvent e)
-{
-  VGG_IMPL(Scene)
-  auto canvas = (SkCanvas*)e.data;
   if (_->zoomer)
   {
     // handle zooming
@@ -187,8 +172,39 @@ bool Scene::onPaintEvent(VPaintEvent e)
   {
     _->render(canvas);
   }
-  return true;
 }
+
+// bool Scene::dispatchEvent(UEvent e, void* userData)
+// {
+//   VGG_IMPL(Scene)
+//   if (_->zoomer)
+//   {
+//     _->zoomer->dispatchEvent(e, this);
+//   }
+//   if (e.type == VGG_PAINT)
+//   {
+//     onPaintEvent(e.paint);
+//   }
+//   return true;
+// }
+//
+// bool Scene::onPaintEvent(VPaintEvent e)
+// {
+//   VGG_IMPL(Scene)
+//   auto canvas = (SkCanvas*)e.data;
+//   if (_->zoomer)
+//   {
+//     // handle zooming
+//     _->applyZoom(canvas);
+//     _->render(canvas);
+//     _->restoreZoom(canvas);
+//   }
+//   else
+//   {
+//     _->render(canvas);
+//   }
+//   return true;
+// }
 
 int Scene::frameCount() const
 {
@@ -204,8 +220,13 @@ PaintNode* Scene::frame(int index)
   }
   return nullptr;
 }
+Zoomer* Scene::zoomer()
+{
+  VGG_IMPL(Scene)
+  return _->zoomer.get();
+}
 
-void Scene::setZoomer(std::shared_ptr<ZoomerListener> zoomer)
+void Scene::setZoomer(std::shared_ptr<Zoomer> zoomer)
 {
   VGG_IMPL(Scene);
   _->zoomer = std::move(zoomer);

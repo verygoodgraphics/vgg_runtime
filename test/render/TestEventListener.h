@@ -91,7 +91,7 @@ protected:
         try
         {
           m_scene->loadFileContent(data.Format);
-          m_layer->addRenderListener(m_scene);
+          m_layer->addRenderItem(m_scene);
         }
         catch (std::exception& e)
         {

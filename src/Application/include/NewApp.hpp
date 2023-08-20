@@ -27,6 +27,7 @@
 #include <regex>
 #include <any>
 #include "Scene/VGGLayer.h"
+#include "Application/interface/Renderer/RenderAdapter.h"
 #include "Event/Event.h"
 #include "Application/include/Event/EventListener.h"
 #include "Log.h"
@@ -171,7 +172,7 @@ class App
   }
   // NOLINTEND
 protected: // protected members and static members
-  std::unique_ptr<VLayer> m_layer;
+  std::unique_ptr<LayerEventAdapter> m_layerAdapter;
   std::unique_ptr<EventListener> m_eventListener;
   std::string m_appName;
   AppConfig m_appConfig;
@@ -211,8 +212,8 @@ protected: // protected members and static members
     DEBUG("Window size: %d %d", winSize.first, winSize.second);
     DEBUG("Pixel ratio: %.2lf", app->m_pixelRatio);
     // init m_layer
-    app->m_layer = std::make_unique<VLayer>();
-    if (app->m_layer)
+    auto layer = std::make_shared<VLayer>();
+    if (layer)
     {
       LayerConfig cfg;
       cfg.drawableSize[0] = app->m_appConfig.windowSize[0];
@@ -220,10 +221,11 @@ protected: // protected members and static members
       cfg.dpi = app->Self()->getDPIScale();
       cfg.stencilBit = app->appConfig().videoConfig.stencilBit;
       cfg.multiSample = app->appConfig().videoConfig.multiSample;
-      if (auto err = app->m_layer->init(cfg))
+      if (auto err = layer->init(cfg))
       {
         return AppError(AppError::Kind::RenderEngineError, "RenderEngineError");
       }
+      app->m_layerAdapter = std::make_unique<LayerEventAdapter>(std::move(layer));
     }
     // extra initialization
     app->Self()->onInit();
@@ -264,16 +266,16 @@ public: // public methods
     {
       m_eventListener->dispatchEvent(e, this);
     }
-    if (m_layer)
+    if (m_layerAdapter)
     {
-      m_layer->sendEvent(e);
+      m_layerAdapter->sendEvent(e);
     }
     return onGlobalEvent(e);
   }
 
   inline VLayer* layer()
   {
-    return m_layer.get();
+    return nullptr;
   }
 
   void setEventListener(std::unique_ptr<EventListener> listener)
@@ -300,11 +302,11 @@ public: // public methods
   void process()
   {
     ASSERT(m_inited);
-    if (m_layer)
+    if (m_layerAdapter)
     {
-      m_layer->beginFrame();
-      m_layer->render();
-      m_layer->endFrame();
+      m_layerAdapter->beginFrame();
+      m_layerAdapter->render();
+      m_layerAdapter->endFrame();
     }
     Self()->swapBuffer();
   }

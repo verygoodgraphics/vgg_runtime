@@ -100,6 +100,7 @@ public:
   int surfaceWidth;
   int surfaceHeight;
   SkCanvas* canvas{ nullptr };
+  std::shared_ptr<Renderable> item;
   VLayer__pImpl(VLayer* api)
     : q_ptr(api)
   {
@@ -213,8 +214,15 @@ void VLayer::render()
     float sx = 1.f, sy = 1.f;
     canvas->scale(sx, sy); // dpi
     sendRenderEvent(e);
+
+    _->item->onRender(canvas);
     _->skiaState.getCanvas()->restore();
   }
+}
+
+void VLayer::addRenderItem(std::shared_ptr<Renderable> item)
+{
+  d_ptr->item = std::move(item);
 }
 
 void VLayer::onResizeEvent(int w, int h)

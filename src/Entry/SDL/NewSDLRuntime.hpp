@@ -3,7 +3,8 @@
 #include "NewApp.hpp"
 #include "Log.h"
 #include "EventConvert.h"
-#include <SDL/SDL_opengl.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
 #include <optional>
 #include <any>
 
@@ -84,7 +85,7 @@ public:
     return 1.0;
   }
 #else
-  static inline double get_scale_factor()
+  static inline double getScaleFactor()
   {
     return 1.0;
   }

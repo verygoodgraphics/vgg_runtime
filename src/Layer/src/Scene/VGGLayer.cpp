@@ -1,5 +1,4 @@
 #include "Scene/VGGLayer.h"
-#include "Application/include/Event/Event.h"
 #include "Core/Node.h"
 #include "Scene/GraphicsLayer.h"
 #include "Scene/Zoomer.h"
@@ -193,12 +192,11 @@ std::optional<ELayerError> VLayer::init(const LayerConfig& cfg)
   VGG_IMPL(VLayer)
   _->config = cfg;
   _->updateSkiaEngineGL();
-  onResizeEvent(cfg.drawableSize[0], cfg.drawableSize[1]);
+  resize(cfg.drawableSize[0], cfg.drawableSize[1]);
   return std::nullopt;
 }
 void VLayer::beginFrame()
 {
-  Graphics::beginFrame();
 }
 
 void VLayer::render()
@@ -207,15 +205,17 @@ void VLayer::render()
   auto canvas = _->skiaState.getCanvas();
   if (canvas)
   {
-    VPaintEvent e;
-    e.data = canvas;
     canvas->save();
     canvas->clear(SK_ColorWHITE);
     float sx = 1.f, sy = 1.f;
     canvas->scale(sx, sy); // dpi
-    sendRenderEvent(e);
-
+                           //
     _->item->onRender(canvas);
+    // if (m_debugInfo)
+    // {
+    //   _->drawPositionInfo(canvas, m_debugInfo->curX, m_debugInfo->curY);
+    //   m_debugInfo = std::nullopt;
+    // }
     _->skiaState.getCanvas()->restore();
   }
 }
@@ -225,12 +225,12 @@ void VLayer::addRenderItem(std::shared_ptr<Renderable> item)
   d_ptr->item = std::move(item);
 }
 
-void VLayer::onResizeEvent(int w, int h)
+void VLayer::resize(int w, int h)
 {
   VGG_IMPL(VLayer);
   int finalW = w * scale() * dpi();
   int finalH = h * scale() * dpi();
-  INFO("onResizeEvent: [%d, %d]  (%d, %d)", w, h, finalW, finalH);
+  INFO("resize: [%d, %d]  (%d, %d)", w, h, finalW, finalH);
   _->resizeSkiaSurfaceGL(finalW, finalH);
 }
 void VLayer::endFrame()
@@ -239,21 +239,6 @@ void VLayer::endFrame()
   _->skiaState.getCanvas()->flush();
 }
 
-bool VLayer::onEvent(UEvent e)
-{
-  VGG_IMPL(VLayer);
-  // handle resize event
-  auto type = e.type;
-  if (auto& window = e.window;
-      type == VGG_WINDOWEVENT && window.event == VGG_WINDOWEVENT_SIZE_CHANGED)
-  {
-    int w = window.data1;
-    int h = window.data2;
-    onResizeEvent(w, h);
-    return true;
-  }
-  return false;
-}
 void VLayer::shutdown()
 {
 }

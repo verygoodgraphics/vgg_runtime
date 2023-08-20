@@ -71,7 +71,16 @@ void LayerEventAdapter::endFrame()
 
 bool LayerEventAdapter::onEvent(UEvent e)
 {
-  // handle render layer event if any
+  VGG_IMPL(LayerEventAdapter);
+  auto type = e.type;
+  if (auto& window = e.window;
+      type == VGG_WINDOWEVENT && window.event == VGG_WINDOWEVENT_SIZE_CHANGED)
+  {
+    int w = window.data1;
+    int h = window.data2;
+    _->layer->resize(w, h);
+    return true;
+  }
   return false;
 }
 

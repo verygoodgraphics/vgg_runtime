@@ -61,7 +61,7 @@ protected:
     }
 
     m_scene = std::make_shared<Scene>();
-    m_scene->setZoomer(std::make_shared<ZoomerListener>());
+    m_scene->setZoomer(std::make_shared<Zoomer>());
     std::map<std::string, std::vector<char>> resources;
     std::filesystem::path prefix;
     std::filesystem::path respath;

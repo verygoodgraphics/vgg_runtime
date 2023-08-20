@@ -80,7 +80,7 @@ public:
     return 1.0;
   }
 #else
-  static inline double get_scale_factor()
+  static inline double getScaleFactor()
   {
     return 1.0;
   }

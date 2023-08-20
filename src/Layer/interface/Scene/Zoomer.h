@@ -1,6 +1,5 @@
 #pragma once
 #include "Common/Math.hpp"
-#include <SDL2/SDL.h>
 
 using namespace VGG;
 
@@ -32,6 +31,6 @@ struct Zoomer
     return offset;
   }
 
-  SDL_Event mapEvent(SDL_Event evt, double scaleFactor);
+  //SDL_Event mapEvent(SDL_Event evt, double scaleFactor);
   void mapWindowPosToLogicalPosition(const float windowXY[2], float scaleFactor, float logicXY[2]);
 };

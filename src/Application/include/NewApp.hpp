@@ -172,7 +172,7 @@ class App
   }
   // NOLINTEND
 protected: // protected members and static members
-  std::unique_ptr<LayerEventAdapter> m_layerAdapter;
+  std::unique_ptr<EventDispatcherLayer> m_layerAdapter;
   std::unique_ptr<EventListener> m_eventListener;
   std::string m_appName;
   AppConfig m_appConfig;
@@ -225,7 +225,7 @@ protected: // protected members and static members
       {
         return AppError(AppError::Kind::RenderEngineError, "RenderEngineError");
       }
-      app->m_layerAdapter = std::make_unique<LayerEventAdapter>(std::move(layer));
+      app->m_layerAdapter = std::make_unique<EventDispatcherLayer>(std::move(layer));
     }
     // extra initialization
     app->Self()->onInit();
@@ -264,7 +264,7 @@ public: // public methods
   {
     if (m_eventListener)
     {
-      m_eventListener->dispatchEvent(e, this);
+      m_eventListener->onEvent(e, this);
     }
     if (m_layerAdapter)
     {

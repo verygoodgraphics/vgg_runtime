@@ -8,14 +8,14 @@
 namespace VGG
 {
 
-class SceneEventListener
+class EventListenerScene
   : public Scene
   , public EventListener
 {
   bool m_panning{ false };
 
 public:
-  bool dispatchEvent(UEvent e, void* userData) override
+  bool onEvent(UEvent e, void* userData) override
   {
     if (zoomer())
     {
@@ -49,22 +49,22 @@ public:
   }
 };
 
-class LayerEventAdapter__pImpl;
-class LayerEventAdapter
+class EventDispatcherLayer__pImpl;
+class EventDispatcherLayer
 {
-  VGG_DECL_IMPL(LayerEventAdapter)
+  VGG_DECL_IMPL(EventDispatcherLayer)
 public:
-  LayerEventAdapter() = default;
-  LayerEventAdapter(std::shared_ptr<VLayer> layer);
+  EventDispatcherLayer() = default;
+  EventDispatcherLayer(std::shared_ptr<VLayer> layer);
   void postEvent(UEvent e);
   void sendEvent(UEvent e);
-  void addSceneListener(std::shared_ptr<SceneEventListener> listener);
+  void addSceneListener(std::shared_ptr<EventListenerScene> listener);
 
   void beginFrame();
   void render();
   void endFrame();
 
-  ~LayerEventAdapter();
+  ~EventDispatcherLayer();
 
 protected:
   bool onEvent(UEvent e);

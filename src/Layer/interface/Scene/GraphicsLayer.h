@@ -1,9 +1,6 @@
 #pragma once
 #include <memory>
 #include <optional>
-#include "Core/Node.h"
-#include "../../../Application/include/Event/EventListener.h"
-#include "Zoomer.h"
 
 namespace VGG
 {
@@ -32,7 +29,8 @@ enum class ELayerError
   RenderEngineError,
   UnknownError,
 };
-class Graphics : public std::enable_shared_from_this<Graphics>
+
+class GraphicsLayer : public std::enable_shared_from_this<GraphicsLayer>
 {
 public:
   virtual std::optional<ELayerError> init(const LayerConfig& cfg) = 0;

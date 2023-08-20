@@ -107,7 +107,7 @@ protected:
   }
 
 public:
-  bool dispatchEvent(UEvent evt, void* userData) override
+  bool onEvent(UEvent evt, void* userData) override
   {
     if (evt.type == VGG_APP_INIT)
     {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Entry/SDL/EventAPISDLImpl.h"
+#include "Event/EventAPI.h"
 #include "NewApp.hpp"
 #include "Log.h"
 #include "EventConvert.h"
@@ -230,6 +232,10 @@ public:
   void onInit()
   {
     SDL_GL_SetSwapInterval(0);
+
+    // Reigster SDL event impl
+    auto eventAPIImpl = std::make_unique<EventAPISDLImpl>();
+    EventManager::registerEventAPI(std::move(eventAPIImpl));
     // SDL_ShowCursor(SDL_DISABLE);
   }
 

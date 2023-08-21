@@ -24,7 +24,6 @@ int main(int argc, char** argv)
   evt.init.argv = argv;
   app->sendEvent(evt);
 
-  app->exec();
   // or:
   // while (!app->shouldExit())
   // {

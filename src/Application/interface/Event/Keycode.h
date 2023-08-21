@@ -2,6 +2,8 @@
 #include "Scancode.h"
 #define VGGK_SCANCODE_MASK (1 << 30)
 #define VGG_SCANCODE_TO_KEYCODE(X) (X | VGGK_SCANCODE_MASK)
+
+// We keep the definition of EVGGKeycode same with SDL2's
 typedef enum
 {
   VGGK_UNKNOWN = 0,

@@ -8,7 +8,7 @@
 
 #include <Scene/Scene.h>
 #include <ConfigMananger.h>
-#include "Application/RenderAdapter.h"
+#include "Application/AppRender.h"
 #include "Event/Event.h"
 #include "Event/EventListener.h"
 #include "Event/Keycode.h"
@@ -22,8 +22,8 @@ using AppImpl = App<VGGNew::SDLRuntime>;
 namespace fs = std::filesystem;
 class MyEventListener : public EventListener
 {
-  EventDispatcherLayer* m_layer{ nullptr };
-  std::shared_ptr<EventListenerScene> m_scene;
+  AppRender* m_layer{ nullptr };
+  std::shared_ptr<AppScene> m_scene;
 
 protected:
   void onAppInit(AppImpl* app, char** argv, int argc)
@@ -61,8 +61,8 @@ protected:
       Config::readGlobalConfig(file);
     }
 
-    m_scene = std::make_shared<EventListenerScene>();
-    m_scene->setZoomer(std::make_shared<Zoomer>());
+    m_scene = std::make_shared<AppScene>();
+    m_scene->setZoomerListener(std::make_shared<AppZoomer>());
     std::map<std::string, std::vector<char>> resources;
     std::filesystem::path prefix;
     std::filesystem::path respath;
@@ -92,7 +92,7 @@ protected:
         try
         {
           m_scene->loadFileContent(data.Format);
-          m_layer->addSceneListener(m_scene);
+          m_layer->addAppScene(m_scene);
         }
         catch (std::exception& e)
         {

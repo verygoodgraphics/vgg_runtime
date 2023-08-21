@@ -10,10 +10,11 @@
 #include <optional>
 #include <any>
 
-using namespace VGG;
 using namespace VGGNew;
 
-class NewSDLRuntime : public VGGNew::App<NewSDLRuntime>
+namespace VGGNew
+{
+class SDLRuntime : public VGGNew::App<SDLRuntime>
 {
   struct SDLState
   {
@@ -263,7 +264,7 @@ public:
     SDL_GL_SwapWindow(m_sdlState.window);
   }
 
-  ~NewSDLRuntime()
+  ~SDLRuntime()
   {
     if (m_inited && m_sdlState.glContext)
     {
@@ -279,3 +280,4 @@ public:
     SDL_Quit();
   }
 };
+} // namespace VGGNew

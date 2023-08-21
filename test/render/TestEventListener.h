@@ -11,18 +11,18 @@
 #include "Application/RenderAdapter.h"
 #include "Event/Event.h"
 #include "Event/EventListener.h"
+#include "Event/Keycode.h"
 #include "Scene/GraphicsLayer.h"
 #include "Scene/VGGLayer.h"
 #include "loader.h"
 #include <filesystem>
 #include "Entry/SDL/NewSDLRuntime.hpp"
 
-using AppImpl = App<NewSDLRuntime>;
+using AppImpl = App<VGGNew::SDLRuntime>;
 namespace fs = std::filesystem;
 class MyEventListener : public EventListener
 {
   EventDispatcherLayer* m_layer{ nullptr };
-
   std::shared_ptr<EventListenerScene> m_scene;
 
 protected:
@@ -124,7 +124,7 @@ public:
     auto key = evt.key.keysym.sym;
     auto mod = evt.key.keysym.mod;
 
-    if (key == VGGK_PAGEUP && (mod & KMOD_CTRL))
+    if (key == VGGK_PAGEUP && (mod & VGG_KMOD_CTRL))
     {
       INFO("Previous page");
       if (m_scene)
@@ -134,7 +134,7 @@ public:
       return true;
     }
 
-    if (key == VGGK_PAGEDOWN && (mod & KMOD_CTRL))
+    if (key == VGGK_PAGEDOWN && (mod & VGG_KMOD_CTRL))
     {
       INFO("Next page");
       if (m_scene)

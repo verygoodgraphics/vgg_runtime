@@ -93,7 +93,7 @@ struct VKeysym
 {
   EVGGScancode scancode; /**< VGG physical key code - see ::SDL_Scancode for details */
   EVGGKeyCode sym;       /**< VGG virtual key code - see ::SDL_Keycode for details */
-  uint16_t mod;          /**< current key modifiers */
+  EVGGKeymod mod;        /**< current key modifiers */
   uint32_t unused;
 };
 

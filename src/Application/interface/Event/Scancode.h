@@ -1,4 +1,6 @@
 #pragma once
+
+// We keep the definition of EVGGKeycode same with SDL2's
 enum EVGGScancode
 {
   VGG_SCANCODE_UNKNOWN = 0,

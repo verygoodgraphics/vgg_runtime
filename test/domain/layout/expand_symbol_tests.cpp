@@ -1,10 +1,12 @@
 #include "Domain/Layout/ExpandSymbol.hpp"
 
+#include "Domain/JsonSchemaValidator.hpp"
 #include "Domain/Layout/Helper.hpp"
 #include "Domain/Model/JsonKeys.hpp"
 #include "VggFloat.hpp"
 
 #include "domain/model/daruma_helper.hpp"
+#include "test_config.hpp"
 
 #include <gtest/gtest.h>
 
@@ -228,4 +230,21 @@ TEST_F(VggExpandSymbolTestSuite, unique_id_in_mask_by)
   }
 }
 
-// todo, validate expanded json
+TEST_F(VggExpandSymbolTestSuite, validate_expanded_design_json)
+{
+  SKIP_SLOW_TEST;
+
+  // Given
+  std::string file_path = "testDataDir/symbol/symbol_instance/design.json";
+  auto design_json = Helper::load_json(file_path);
+  ExpandSymbol sut{ design_json };
+
+  // When
+  auto result_json = sut();
+
+  // Then
+  JsonSchemaValidator validator;
+  json schema = Helper::load_json("../../asset/vgg-format.json");
+  validator.setRootSchema(schema);
+  EXPECT_TRUE(validator.validate(result_json));
+}

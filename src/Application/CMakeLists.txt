@@ -2,10 +2,13 @@ add_library(vgg_application STATIC
   Controller/Controller.cpp
   Sdk/VggSdk.cpp
   src/Renderer/RenderAdapter.cpp
+  src/RenderAdapter.cpp
+  src/EventImpl.cpp
 )
 
 target_include_directories(vgg_application PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/interface
 )
 
 target_include_directories(vgg_application PRIVATE

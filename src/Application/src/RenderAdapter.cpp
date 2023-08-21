@@ -1,4 +1,5 @@
-#include "interface/Renderer/RenderAdapter.h"
+
+#include "Application/RenderAdapter.h"
 #include "Scene/VGGLayer.h"
 #include "Scene/Scene.h"
 

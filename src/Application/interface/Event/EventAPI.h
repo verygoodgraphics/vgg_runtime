@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 
 class EventAPI
 {
@@ -16,6 +17,6 @@ public:
 class EventManager
 {
 public:
-  static void registerEventAPI(EventAPI* impl);
+  static void registerEventAPI(std::unique_ptr<EventAPI> impl);
   static void getModState();
 };

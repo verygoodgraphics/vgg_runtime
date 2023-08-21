@@ -1,5 +1,5 @@
 #pragma once
-#include "Event/EventListener.h"
+#include "Application/interface/Event/EventListener.h"
 #include "Scene/GraphicsLayer.h"
 #include "Scene/VGGLayer.h"
 #include "Scene/Scene.h"
@@ -7,6 +7,7 @@
 
 namespace VGG
 {
+class VLayer;
 
 class EventListenerScene
   : public Scene

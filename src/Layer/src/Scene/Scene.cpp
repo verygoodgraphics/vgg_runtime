@@ -1,5 +1,4 @@
 #include "Scene/Scene.h"
-#include "Application/include/Event/Event.h"
 #include "Core/Node.h"
 #include "Reader/Loader.h"
 #include "Core/PaintNode.h"

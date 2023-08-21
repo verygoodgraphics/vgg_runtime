@@ -27,9 +27,8 @@
 #include <regex>
 #include <any>
 #include "Scene/VGGLayer.h"
-#include "Application/interface/Renderer/RenderAdapter.h"
-#include "Event/Event.h"
-#include "Application/include/Event/EventListener.h"
+#include "Application/RenderAdapter.h"
+#include "Application/interface/Event/EventListener.h"
 #include "Log.h"
 
 using namespace VGG;

@@ -11,7 +11,7 @@ class EventDispatcherLayer__pImpl
 public:
   VGG_DECL_API(EventDispatcherLayer)
   std::vector<std::shared_ptr<EventListener>> listeners;
-  std::queue<UEvent> msgQueue;
+  std::queue<std::pair<UEvent, void*>> msgQueue;
   std::shared_ptr<VLayer> layer;
   EventDispatcherLayer__pImpl(EventDispatcherLayer* api, std::shared_ptr<VLayer> layer)
     : q_ptr(api)
@@ -33,15 +33,15 @@ EventDispatcherLayer::EventDispatcherLayer(std::shared_ptr<VLayer> layer)
   : d_ptr(new EventDispatcherLayer__pImpl(this, std::move(layer)))
 {
 }
-void EventDispatcherLayer::postEvent(UEvent e)
+void EventDispatcherLayer::postEvent(UEvent e, void* userData)
 {
   VGG_IMPL(EventDispatcherLayer)
-  _->msgQueue.push(e);
+  _->msgQueue.emplace(e, userData);
 }
-void EventDispatcherLayer::sendEvent(UEvent e)
+void EventDispatcherLayer::sendEvent(UEvent e, void* userData)
 {
   VGG_IMPL(EventDispatcherLayer)
-  _->dispatchEvent(e, this);
+  _->dispatchEvent(e, userData);
 }
 void EventDispatcherLayer::addSceneListener(std::shared_ptr<EventListenerScene> listener)
 {
@@ -56,8 +56,8 @@ void EventDispatcherLayer::beginFrame()
   d_ptr->layer->beginFrame();
   while (_->msgQueue.empty() == false)
   {
-    const auto& e = _->msgQueue.front();
-    _->dispatchEvent(e, this);
+    auto& [e, u] = _->msgQueue.front();
+    _->dispatchEvent(e, u);
     _->msgQueue.pop();
   }
 }

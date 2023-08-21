@@ -267,14 +267,15 @@ public: // public methods
     }
     if (m_layerAdapter)
     {
-      m_layerAdapter->sendEvent(e);
+      m_layerAdapter->sendEvent(e, this);
     }
     return onGlobalEvent(e);
   }
 
-  inline VLayer* layer()
+  inline EventDispatcherLayer* layer()
   {
-    return nullptr;
+    ASSERT(m_layerAdapter.get());
+    return m_layerAdapter.get();
   }
 
   void setEventListener(std::unique_ptr<EventListener> listener)

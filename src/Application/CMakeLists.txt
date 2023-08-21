@@ -3,7 +3,7 @@ add_library(vgg_application STATIC
   Sdk/VggSdk.cpp
   src/Renderer/RenderAdapter.cpp
   src/RenderAdapter.cpp
-  src/EventImpl.cpp
+  src/EventAPI.cpp
 )
 
 target_include_directories(vgg_application PUBLIC

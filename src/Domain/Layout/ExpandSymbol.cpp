@@ -7,7 +7,6 @@
 #include <fstream>
 #include <numeric>
 #include <iostream>
-#include <stack>
 
 #undef DEBUG
 #define DEBUG(msg, ...)

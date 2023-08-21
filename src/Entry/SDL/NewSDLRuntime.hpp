@@ -46,13 +46,6 @@ class SDLRuntime : public VGGNew::App<SDLRuntime>
                                       auto p = std::any_cast<std::pair<int, int>>(size);
                                       SDL_SetWindowSize(this->m_sdlState.window, p.first, p.second);
                                     } };
-    m_properties["app_size"] = { [this]() { return std::pair<int, int>(m_width, m_height); },
-                                 [this](std::any size)
-                                 {
-                                   auto p = std::any_cast<std::pair<int, int>>(size);
-                                   m_width = p.first;
-                                   m_height = p.second;
-                                 } };
   }
 
 public:
@@ -156,8 +149,8 @@ public:
       handleSDLError();
       return AppError(AppError::Kind::RenderEngineError, "Create Window Failed\n");
     }
-    m_width = w;
-    m_height = h;
+    // m_width = w;
+    // m_height = h;
     m_sdlState.window = window;
     // create context
     SDL_GLContext glContext = SDL_GL_CreateContext(window);

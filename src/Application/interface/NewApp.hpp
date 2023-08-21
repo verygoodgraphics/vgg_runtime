@@ -27,7 +27,7 @@
 #include <regex>
 #include <any>
 #include "Scene/VGGLayer.h"
-#include "Application/RenderAdapter.h"
+#include "Application/AppRender.h"
 #include "Application/interface/Event/EventListener.h"
 #include "Log.h"
 
@@ -170,15 +170,12 @@ class App
     return static_cast<T*>(this);
   }
   // NOLINTEND
-protected: // protected members and static members
-  std::unique_ptr<EventDispatcherLayer> m_layerAdapter;
+protected:
+  std::unique_ptr<AppRender> m_appRender;
   std::unique_ptr<EventListener> m_eventListener;
-  std::string m_appName;
   AppConfig m_appConfig;
   bool m_inited{ false };
   bool m_shouldExit;
-  int m_width;
-  int m_height;
   double m_pixelRatio{ 1.0 };
 
   static std::optional<AppError> init(App* app, const AppConfig& cfg)
@@ -211,8 +208,8 @@ protected: // protected members and static members
     DEBUG("Window size: %d %d", winSize.first, winSize.second);
     DEBUG("Pixel ratio: %.2lf", app->m_pixelRatio);
     // init m_layer
-    auto layer = std::make_shared<VLayer>();
-    if (layer)
+    app->m_appRender = std::make_unique<AppRender>();
+    if (app->m_appRender)
     {
       LayerConfig cfg;
       cfg.drawableSize[0] = app->m_appConfig.windowSize[0];
@@ -220,11 +217,10 @@ protected: // protected members and static members
       cfg.dpi = app->Self()->getDPIScale();
       cfg.stencilBit = app->appConfig().videoConfig.stencilBit;
       cfg.multiSample = app->appConfig().videoConfig.multiSample;
-      if (auto err = layer->init(cfg))
+      if (auto err = app->m_appRender->init(cfg))
       {
         return AppError(AppError::Kind::RenderEngineError, "RenderEngineError");
       }
-      app->m_layerAdapter = std::make_unique<EventDispatcherLayer>(std::move(layer));
     }
     // extra initialization
     app->Self()->onInit();
@@ -235,8 +231,6 @@ protected: // protected members and static members
   App()
     : m_inited(false)
     , m_shouldExit(false)
-    , m_width(0)
-    , m_height(0)
     , m_pixelRatio(1.0)
   {
   }
@@ -265,17 +259,17 @@ public: // public methods
     {
       m_eventListener->onEvent(e, this);
     }
-    if (m_layerAdapter)
+    if (m_appRender)
     {
-      m_layerAdapter->sendEvent(e, this);
+      m_appRender->sendEvent(e, this);
     }
     return onGlobalEvent(e);
   }
 
-  inline EventDispatcherLayer* layer()
+  inline AppRender* layer()
   {
-    ASSERT(m_layerAdapter.get());
-    return m_layerAdapter.get();
+    ASSERT(m_appRender.get());
+    return m_appRender.get();
   }
 
   void setEventListener(std::unique_ptr<EventListener> listener)
@@ -302,11 +296,11 @@ public: // public methods
   void process()
   {
     ASSERT(m_inited);
-    if (m_layerAdapter)
+    if (m_appRender)
     {
-      m_layerAdapter->beginFrame();
-      m_layerAdapter->render();
-      m_layerAdapter->endFrame();
+      m_appRender->beginFrame();
+      m_appRender->render();
+      m_appRender->endFrame();
     }
     Self()->swapBuffer();
   }

@@ -31,6 +31,8 @@ struct Zoomer
     return offset;
   }
 
-  //SDL_Event mapEvent(SDL_Event evt, double scaleFactor);
-  void mapWindowPosToLogicalPosition(const float windowXY[2], float scaleFactor, float logicXY[2]);
+  // SDL_Event mapEvent(SDL_Event evt, double scaleFactor);
+  void mapWindowPosToLogicalPosition(const float windowXY[2],
+                                     float scaleFactor,
+                                     float logicXY[2]) const;
 };

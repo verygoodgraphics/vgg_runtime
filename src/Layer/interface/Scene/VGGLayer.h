@@ -1,6 +1,7 @@
 #pragma once
 #include "Core/Node.h"
 #include "Scene/GraphicsLayer.h"
+#include "Scene/Scene.h"
 #include <vector>
 class SkCanvas;
 
@@ -17,12 +18,6 @@ struct ImageOptions
   EImageEncode encode;
 };
 
-class Renderable : public std::enable_shared_from_this<Renderable>
-{
-public:
-  virtual void onRender(SkCanvas* canvas) = 0;
-};
-
 struct DebugInfo
 {
   int curX{ 0 }, curY{ 0 };
@@ -34,6 +29,7 @@ class VLayer : public GraphicsLayer
   VGG_DECL_IMPL(VLayer);
   float m_scale{ 1.0 };
   float m_dpi{ 1.0 };
+  bool m_drawPos{ false };
   std::optional<DebugInfo> m_debugInfo;
 
 public:
@@ -46,6 +42,17 @@ public:
   virtual void shutdown() override;
   void resize(int w, int h);
   void addRenderItem(std::shared_ptr<Renderable> item);
+  void addScene(std::shared_ptr<Scene> scene);
+
+  void setDrawPositionEnabled(bool enable)
+  {
+    m_drawPos = enable;
+  }
+
+  bool enableDrawPosition() const
+  {
+    return m_drawPos;
+  }
 
   void drawDebugInfo(const DebugInfo& info)
   {

@@ -93,6 +93,7 @@ protected:
         {
           m_scene->loadFileContent(data.Format);
           m_layer->addAppScene(m_scene);
+          m_layer->setDrawPositionEnabled(true);
         }
         catch (std::exception& e)
         {
@@ -154,6 +155,13 @@ public:
     {
       INFO("Toggle object bounding box");
       Scene::enableDrawDebugBound(!Scene::isEnableDrawDebugBound());
+      return true;
+    }
+
+    if (key == VGGK_1)
+    {
+      INFO("Toggle cursor position");
+      m_layer->setDrawPositionEnabled(!m_layer->enableDrawPosition());
       return true;
     }
 

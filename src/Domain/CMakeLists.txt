@@ -4,6 +4,7 @@ add_library(vgg_domain STATIC
   Layout/Helper.cpp
   Layout/Layout.cpp
   Layout/Rect.cpp
+  Layout/View.cpp
   Loader/ZipLoader.cpp
   Model/Daruma.cpp
   Model/DarumaContainer.cpp
@@ -29,6 +30,8 @@ target_include_directories(vgg_domain PRIVATE
   ${VGG_CONTRIB_BOOST_INCLUDE}
 )
 target_link_libraries(vgg_domain
+  flexbox
+  grid_layout
   vgg_flags
   vgg_utility
   zip

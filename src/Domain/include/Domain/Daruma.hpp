@@ -29,8 +29,8 @@ class Daruma
 
   JsonDocumentPtr m_designDoc;
   MakeJsonDocFn m_makeDesignDocFn;
-  // JsonDocumentPtr m_layoutDoc;
-  // MakeJsonDocFn m_makeLayoutDocFn;
+  JsonDocumentPtr m_layout_doc;
+  MakeJsonDocFn m_make_layout_doc_fn;
 
   rxcpp::subjects::subject<VGG::ModelEventPtr> m_subject;
   std::mutex m_mutex;
@@ -38,16 +38,15 @@ class Daruma
 public:
   using ListenersType = std::unordered_map<std::string, std::vector<std::string>>;
 
-  Daruma(const MakeJsonDocFn& makeDesignDocFn);
+  Daruma(const MakeJsonDocFn& makeDesignDocFn, const MakeJsonDocFn& makeLayoutDocFn = {});
 
   bool load(const std::string& path);   // zip file or dir
   bool load(std::vector<char>& buffer); // zip buffer
 
   void accept(VGG::Model::Visitor* visitor);
 
-  const json& codeMapDoc() const;
   JsonDocumentPtr& designDoc();
-  const json& layoutDoc() const;
+  JsonDocumentPtr& layoutDoc();
   auto resources()
   {
     return m_loader->resources();

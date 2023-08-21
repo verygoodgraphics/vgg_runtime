@@ -7,8 +7,19 @@
 #include <vector>
 #include <functional>
 
+class flexbox_node;
+class grid_layout;
+
 namespace VGG
 {
+namespace Layout
+{
+namespace Internal
+{
+using ConfigureFlexLayoutFn = std::function<void(std::shared_ptr<flexbox_node>)>;
+using ConfigureGridLayoutFn = std::function<void(std::shared_ptr<grid_layout>)>;
+} // namespace Internal
+} // namespace Layout
 
 class LayoutView : public std::enable_shared_from_this<LayoutView>
 {
@@ -17,6 +28,9 @@ class LayoutView : public std::enable_shared_from_this<LayoutView>
 
   const std::string m_path;
   Layout::Rect m_frame;
+
+  std::shared_ptr<flexbox_node> m_flex_node;
+  std::shared_ptr<grid_layout> m_grid_node;
 
 public:
   using HitTestHook = std::function<bool(const std::string&)>;
@@ -69,6 +83,10 @@ public:
     return m_path;
   }
 
+  void configureFlexLayout(const Layout::Internal::ConfigureFlexLayoutFn& configureFn);
+  void configureGridLayout(const Layout::Internal::ConfigureGridLayoutFn& configureFn);
+  void applyLayout();
+
 private:
   bool pointInside(Layout::Point point)
   {
@@ -96,6 +114,10 @@ private:
 
     return { x, y };
   }
+
+  void calculateLayoutWithSize();
+  void applyLayoutToViewHierarchy();
+  void attachNodesFromViewHierachy();
 };
 
 } // namespace VGG

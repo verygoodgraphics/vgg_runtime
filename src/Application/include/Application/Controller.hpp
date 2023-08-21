@@ -21,8 +21,6 @@ class ViewModel;
 
 class Controller : public std::enable_shared_from_this<Controller>
 {
-  std::string m_design_schema_file_path;
-
 public:
   enum class RunMode
   {
@@ -30,6 +28,17 @@ public:
     EditMode
   };
 
+private:
+  std::string m_design_schema_file_path;
+  std::shared_ptr<RunLoop> m_run_loop;
+  std::shared_ptr<Presenter> m_presenter;
+
+  RunMode m_mode;
+  std::shared_ptr<Daruma> m_model;
+  std::shared_ptr<Daruma> m_edit_model;
+  std::shared_ptr<ViewModel> m_view_model;
+
+public:
   Controller(std::shared_ptr<RunLoop> runLoop,
              std::shared_ptr<Presenter> presenter,
              RunMode mode = RunMode::NormalMode);
@@ -42,14 +51,6 @@ public:
   bool edit(std::vector<char>& buffer);
 
   void onResize();
-
-private:
-  std::shared_ptr<RunLoop> m_run_loop;
-  std::shared_ptr<Presenter> m_presenter;
-
-  RunMode m_mode;
-  std::shared_ptr<Daruma> m_model;
-  std::shared_ptr<Daruma> m_edit_model;
 
 private:
   void initModel(const char* designDocSchemaFilePath);

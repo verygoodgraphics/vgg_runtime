@@ -70,7 +70,6 @@
 #include "Common/Math.hpp"
 #include "CappingProfiler.hpp"
 #include "Log.h"
-#include "Usecase/ResizeWindow.hpp"
 
 namespace VGG
 {

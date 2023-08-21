@@ -15,6 +15,10 @@ add_subdirectory(vgg_automerge/automerge)
 set(VGG_AUTOMERGE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/vgg_automerge/automerge CACHE PATH "" FORCE)
 mark_as_advanced(VGG_AUTOMERGE_INCLUDE)
 
+# layout
+add_subdirectory(vgg_contrib/yoga)
+add_subdirectory(vgg_layout)
+
 if (NOT EMSCRIPTEN)
   if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/node")
     set(NODE_VERSION "v18.15.0")

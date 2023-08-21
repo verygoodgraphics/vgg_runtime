@@ -515,7 +515,10 @@ void ExpandSymbol::make_mask_id_unique(nlohmann::json& json,
       }
     }
 
-    make_mask_id_unique(json[k_child_objects], instance_json, id_prefix);
+    if (json.contains(k_child_objects))
+    {
+      make_mask_id_unique(json[k_child_objects], instance_json, id_prefix);
+    }
   }
   else if (json.is_array())
   {

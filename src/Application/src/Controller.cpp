@@ -124,6 +124,8 @@ void Controller::initModel(const char* designDocSchemaFilePath)
       design_doc_validator.reset(new JsonSchemaValidator);
       design_doc_validator->setRootSchema(schema);
 
+      // todo, validate design doc
+
       json_doc_ptr =
         new SchemaValidJsonDocument(JsonDocumentPtr(json_doc_ptr), design_doc_validator);
     }
@@ -131,6 +133,7 @@ void Controller::initModel(const char* designDocSchemaFilePath)
     return wrapJsonDoc(JsonDocumentPtr(json_doc_ptr));
   };
   // todo, build layout doc
+  // todo, validate layout doc
   m_model.reset(new Daruma(build_design_doc_fn));
 
   DarumaContainer().add(m_model);

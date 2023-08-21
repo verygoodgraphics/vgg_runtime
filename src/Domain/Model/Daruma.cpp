@@ -17,8 +17,9 @@ using namespace VGG;
 using namespace VGG::Model;
 namespace fs = std::filesystem;
 
-Daruma::Daruma(const MakeJsonDocFn& makeDesignDocFn)
-  : m_makeDesignDocFn(makeDesignDocFn)
+Daruma::Daruma(const MakeJsonDocFn& makeDesignDocFn, const MakeJsonDocFn& makeLayoutDocFn)
+  : m_makeDesignDocFn{ makeDesignDocFn }
+  , m_make_layout_doc_fn{ makeLayoutDocFn }
 {
 }
 
@@ -54,6 +55,10 @@ void Daruma::accept(VGG::Model::Visitor* visitor)
 
   visitor->visit(design_file_name, m_designDoc->content().dump());
   visitor->visit(event_listeners_file_name, m_event_listeners.dump());
+  if (m_layout_doc && m_layout_doc->content().is_object())
+  {
+    visitor->visit(layout_file_name, m_layout_doc->content().dump());
+  }
 
   // js
   for (auto& [path, element_event_listeners] : m_event_listeners.items())
@@ -80,8 +85,6 @@ void Daruma::accept(VGG::Model::Visitor* visitor)
   {
     visitor->visit(resouces_dir + name, content);
   }
-
-  // todo, other files
 }
 
 bool Daruma::load_files()
@@ -99,6 +102,17 @@ bool Daruma::load_files()
     {
       FAIL("#Daruma::load_files(), read file failed");
       return false;
+    }
+
+    if (m_loader->readFile(layout_file_name, file_content) && m_make_layout_doc_fn)
+    {
+      auto tmp_json = json::parse(file_content);
+      auto doc = m_make_layout_doc_fn(tmp_json);
+      m_layout_doc = JsonDocumentPtr(new SubjectJsonDocument(doc));
+    }
+    else
+    {
+      WARN("#Daruma::load_files(), read layout file failed");
     }
 
     if (m_loader->readFile(event_listeners_file_name, file_content))
@@ -122,6 +136,11 @@ bool Daruma::load_files()
 JsonDocumentPtr& Daruma::designDoc()
 {
   return m_designDoc;
+}
+
+JsonDocumentPtr& Daruma::layoutDoc()
+{
+  return m_layout_doc;
 }
 
 void Daruma::addEventListener(const std::string& json_pointer,

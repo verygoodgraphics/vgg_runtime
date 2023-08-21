@@ -3,6 +3,8 @@
 #include "Application/UIEvent.hpp"
 #include "Domain/RawJsonDocument.hpp"
 
+#include "domain/model/daruma_helper.hpp"
+
 #include <gtest/gtest.h>
 
 #include <fstream>
@@ -29,13 +31,7 @@ protected:
 
   void make_normal_sut()
   {
-    auto fn = [](const json& design_json)
-    {
-      auto raw_json_doc = new RawJsonDocument();
-      raw_json_doc->setContent(design_json);
-      return JsonDocumentPtr(raw_json_doc);
-    };
-    m_sut.reset(new Daruma(fn));
+    m_sut.reset(new Daruma(Helper::RawJsonDocumentBuilder, Helper::RawJsonDocumentBuilder));
   }
 };
 
@@ -159,4 +155,18 @@ TEST_F(VggModelTestSuite, get_event_listeners)
 
   // Then
   EXPECT_EQ(event_listeners_before.size() + 1, event_listeners_after.size());
+}
+
+TEST_F(VggModelTestSuite, load_layout_doc)
+{
+  // Given
+  std::string file_path = "testDataDir/layout/0_space_between/";
+  auto ret = m_sut->load(file_path);
+  EXPECT_EQ(ret, true);
+
+  // When
+  auto layout_doc = m_sut->layoutDoc();
+
+  // Then
+  EXPECT_TRUE(layout_doc);
 }

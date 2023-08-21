@@ -1,11 +1,11 @@
 #pragma once
 #include <memory>
 #include "Scene/GraphicsLayer.h"
-#include "Scene/VGGLayer.h"
 #include "Common/Config.h"
 #include "Core/Node.h"
 #include "core/SkCanvas.h"
 #include "nlohmann/json.hpp"
+#include "Scene/Renderable.h"
 #include "Zoomer.h"
 
 class SkCanvas;
@@ -46,13 +46,21 @@ struct VGG_EXPORTS Scene : public Renderable
 
 private:
   VGG_DECL_IMPL(Scene)
+  std::string m_name{ "Default Scene" };
 
 public:
   Scene();
   ~Scene();
   void loadFileContent(const std::string& json);
   void loadFileContent(const nlohmann::json& j);
-
+  void setName(std::string name)
+  {
+    m_name = std::move(name);
+  }
+  const std::string name() const
+  {
+    return m_name;
+  }
   void nextArtboard();
   void preArtboard();
   int frameCount() const;

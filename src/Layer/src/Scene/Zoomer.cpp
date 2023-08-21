@@ -56,18 +56,12 @@ float Zoomer::doZoom(float speed, float x, float y)
 
 void Zoomer::mapWindowPosToLogicalPosition(const float windowXY[2],
                                            float scaleFactor,
-                                           float logicXY[2])
+                                           float logicXY[2]) const
 {
   float x1 = windowXY[0];
   float y1 = windowXY[1];
-  // float x0 = x1 - windowXYRel[0];
-  // float y0 = y1 - windowXYRel[1];
   x1 = (x1 / scaleFactor - offset.x) / m_zoom;
   y1 = (y1 / scaleFactor - offset.y) / m_zoom;
-  // x0 = (x0 / scaleFactor - offset.x) / zoom;
-  // y0 = (y0 / scaleFactor - offset.y) / zoom;
   logicXY[0] = x1;
   logicXY[1] = y1;
-  // logicXYRel[0] = x1 - x0;
-  // logicXYRel[1] = y1 - y0;
 }

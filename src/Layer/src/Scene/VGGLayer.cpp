@@ -1,8 +1,10 @@
 #include "Scene/VGGLayer.h"
 #include "Core/Node.h"
 #include "Scene/GraphicsLayer.h"
+#include "Scene/Renderer.h"
 #include "Scene/Zoomer.h"
 #include <optional>
+#include <sstream>
 
 #define GR_GL_LOG_CALLS 0
 #define GR_GL_CHECK_ERROR 0
@@ -36,6 +38,7 @@
 
 namespace VGG
 {
+
 struct SkiaState
 {
 private:
@@ -99,7 +102,8 @@ public:
   int surfaceWidth;
   int surfaceHeight;
   SkCanvas* canvas{ nullptr };
-  std::shared_ptr<Renderable> item;
+  std::vector<std::shared_ptr<Renderable>> items;
+  std::vector<std::shared_ptr<Scene>> scenes;
   VLayer__pImpl(VLayer* api)
     : q_ptr(api)
   {
@@ -152,6 +156,45 @@ public:
                                                SkColorType::kRGBA_8888_SkColorType,
                                                nullptr,
                                                &props);
+  }
+
+  std::string mapMousePositionToScene(const Zoomer* zoomer,
+                                      const char* name,
+                                      float scaleFactor,
+                                      int curMouseX,
+                                      int curMouseY)
+  {
+    std::stringstream ss;
+    float windowPos[2] = { (float)curMouseX, (float)curMouseY };
+    float logixXY[2];
+    zoomer->mapWindowPosToLogicalPosition(windowPos, scaleFactor, logixXY);
+    ss << name << ": (" << (int)logixXY[0] << ", " << (int)logixXY[1] << ")";
+    std::string res{ std::istreambuf_iterator<char>{ ss }, {} };
+    return res;
+  }
+
+  void drawTextAt(SkCanvas* canvas,
+                  const std::vector<std::string>& strings,
+                  int curMouseX,
+                  int curMouseY)
+  {
+    SkPaint textPaint;
+    textPaint.setColor(SK_ColorBLACK);
+    SkFont font;
+    constexpr int FONTSIZE = 20;
+    font.setSize(FONTSIZE);
+    int dy = 0;
+    for (const auto& text : strings)
+    {
+      canvas->drawSimpleText(text.c_str(),
+                             text.size(),
+                             SkTextEncoding::kUTF8,
+                             curMouseX,
+                             curMouseY + dy,
+                             font,
+                             textPaint);
+      dy += FONTSIZE;
+    }
   }
 
   void drawPositionInfo(SkCanvas* canvas, int curMouseX, int curMouseY)
@@ -208,21 +251,45 @@ void VLayer::render()
     canvas->save();
     canvas->clear(SK_ColorWHITE);
     float sx = 1.f, sy = 1.f;
-    canvas->scale(sx, sy); // dpi
-                           //
-    _->item->onRender(canvas);
-    // if (m_debugInfo)
-    // {
-    //   _->drawPositionInfo(canvas, m_debugInfo->curX, m_debugInfo->curY);
-    //   m_debugInfo = std::nullopt;
-    // }
+    canvas->scale(sx, sy);
+    for (auto& scene : _->scenes)
+    {
+      scene->onRender(canvas);
+    }
+    for (auto& item : _->items)
+    {
+      item->onRender(canvas);
+    }
+    std::vector<std::string> info;
+    if (enableDrawPosition())
+    {
+      for (auto& scene : _->scenes)
+      {
+        auto z = scene->zoomer();
+        if (z)
+        {
+          info.push_back(_->mapMousePositionToScene(z,
+                                                    scene->name().c_str(),
+                                                    1.0,
+                                                    m_debugInfo->curX,
+                                                    m_debugInfo->curY));
+        }
+      }
+
+      _->drawTextAt(canvas, info, m_debugInfo->curX, m_debugInfo->curY);
+    }
     _->skiaState.getCanvas()->restore();
   }
 }
 
 void VLayer::addRenderItem(std::shared_ptr<Renderable> item)
 {
-  d_ptr->item = std::move(item);
+  d_ptr->items.push_back(std::move(item));
+}
+
+void VLayer::addScene(std::shared_ptr<Scene> scene)
+{
+  d_ptr->scenes.push_back(std::move(scene));
 }
 
 void VLayer::resize(int w, int h)

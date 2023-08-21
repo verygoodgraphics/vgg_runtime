@@ -11,14 +11,17 @@ class AppRender__pImpl;
 class AppRender : public VLayer
 {
   VGG_DECL_IMPL(AppRender)
+
 public:
   AppRender();
   void postEvent(UEvent e, void* userData);
   void sendEvent(UEvent e, void* userData);
   void addAppScene(std::shared_ptr<AppScene> listener);
+  std::shared_ptr<AppScene> popAppScene();
   void beginFrame();
   void render();
   void endFrame();
+
   ~AppRender();
 
 protected:

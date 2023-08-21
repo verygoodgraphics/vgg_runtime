@@ -1,5 +1,6 @@
 
 #include "Application/AppRender.h"
+#include "AppScene.h"
 #include "Scene/VGGLayer.h"
 #include "Application/interface/Event/EventListener.h"
 
@@ -10,8 +11,9 @@ class AppRender__pImpl
 {
 public:
   VGG_DECL_API(AppRender)
-  std::vector<std::shared_ptr<EventListener>> listeners;
+  std::vector<std::shared_ptr<AppScene>> listeners;
   std::queue<std::pair<UEvent, void*>> msgQueue;
+  float mouseX, mouseY;
   AppRender__pImpl(AppRender* api)
     : q_ptr(api)
   {
@@ -19,11 +21,11 @@ public:
 
   void dispatchEvent(UEvent e, void* userData)
   {
+    q_ptr->onEvent(e);
     for (const auto& l : listeners)
     {
       l->onEvent(e, userData);
     }
-    q_ptr->onEvent(e);
   }
 
   ~AppRender__pImpl()
@@ -50,7 +52,7 @@ void AppRender::addAppScene(std::shared_ptr<AppScene> listener)
 {
   VGG_IMPL(AppRender)
   _->listeners.push_back(listener);
-  addRenderItem(std::move(listener));
+  addScene(std::move(listener));
 }
 
 void AppRender::beginFrame()
@@ -84,6 +86,16 @@ bool AppRender::onEvent(UEvent e)
     int h = window.data2;
     resize(w, h);
     return true;
+  }
+  if (type == VGG_MOUSEMOTION)
+  {
+    if (enableDrawPosition())
+    {
+      DebugInfo debugInfo;
+      debugInfo.curX = e.motion.x;
+      debugInfo.curY = e.motion.y;
+      drawDebugInfo(debugInfo);
+    }
   }
   return false;
 }

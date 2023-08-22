@@ -86,12 +86,6 @@ HAS_MEMBER_FUNCTION_DEF(getDPIScale)
  * */
 
 /*
- * void onInit():
- *	Invoked after all init processes complete.
- * */
-HAS_MEMBER_FUNCTION_DEF(onInit)
-
-/*
  * void pollEvent()
  * Polls the backends events
  * */
@@ -141,7 +135,6 @@ class App : public layer::GraphicsContext
   inline T* Self()
   {
     static_assert(std::is_base_of<App, T>::value);
-    static_assert(has_member_onInit<T>::value);
     static_assert(has_member_pollEvent<T>::value);
     return static_cast<T*>(this);
   }
@@ -161,26 +154,6 @@ private:
     m_appConfig = cfg;
     int w = m_appConfig.windowSize[0];
     int h = m_appConfig.windowSize[1];
-    // auto appResult = Self()->initContext(w * m_pixelRatio, h * m_pixelRatio);
-    // if (appResult.has_value())
-    //   return appResult;
-    //
-    // appResult = Self()->makeContextCurrent();
-    // if (appResult.has_value())
-    //   return appResult;
-
-    // get necessary property about window and DPI
-    // auto drawSize = std::any_cast<std::pair<int, int>>(Self()->getProperty("viewport_size"));
-    // auto winSize = std::any_cast<std::pair<int, int>>(Self()->getProperty("window_size"));
-
-#ifdef EMSCRIPTEN
-    app->m_pixelRatio = (double)drawSize.first / winSize.first;
-#endif
-
-    // DEBUG("Drawable size: %d %d", drawSize.first, drawSize.second);
-    // DEBUG("Window size: %d %d", winSize.first, winSize.second);
-    // DEBUG("Pixel ratio: %.2lf", m_pixelRatio);
-    // init m_layer
     m_appRender = std::make_unique<AppRender>();
     if (m_appRender)
     {
@@ -191,17 +164,11 @@ private:
       cfg.stencilBit = appConfig().videoConfig.stencilBit;
       cfg.multiSample = appConfig().videoConfig.multiSample;
       initGraphicsContext(cfg);
-      // cfg.drawableSize[0] = m_appConfig.windowSize[0];
-      // cfg.drawableSize[1] = m_appConfig.windowSize[1];
-      // cfg.dpi = Self()->getDPIScale();
-      // cfg.context = this;
       if (auto err = m_appRender->init(this))
       {
         return AppError(AppError::Kind::RenderEngineError, "RenderEngineError");
       }
     }
-    // extra initialization
-    Self()->onInit();
     return std::nullopt;
   }
 

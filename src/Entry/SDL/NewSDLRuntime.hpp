@@ -180,6 +180,7 @@ public:
     return std::nullopt;
   }
 
+public:
   bool makeCurrent() override
   {
     if (makeContextCurrent())

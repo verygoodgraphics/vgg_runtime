@@ -18,24 +18,24 @@ class Layout
 {
   std::shared_ptr<Daruma> m_model;
   nlohmann::json m_designJson;
+  Size m_size;
+  std::shared_ptr<LayoutView> m_layout_tree;
 
 public:
   Layout(std::shared_ptr<Daruma> model)
     : m_model{ model }
   {
     ASSERT(m_model);
-
-    m_designJson = m_model->designDoc()->content();
+    m_designJson = ExpandSymbol{ m_model->designDoc()->content() }();
   }
 
-  nlohmann::json designDoc()
+  const nlohmann::json& designDoc()
   {
-    ExpandSymbol expandeSymbol{ m_designJson };
-    return expandeSymbol();
+    return m_designJson;
   }
 
   void layout(Size size);
-  std::shared_ptr<LayoutView> createLayoutTree();
+  std::shared_ptr<LayoutView> layoutTree();
 
 private:
   std::shared_ptr<LayoutView> createOneLayoutView(const nlohmann::json& j,

@@ -24,13 +24,40 @@ protected:
 TEST_F(VggLayoutTestSuite, Smoke)
 {
   // Given
-  std::shared_ptr<Daruma> daruma{ new Daruma(Helper::RawJsonDocumentBuilder) };
-  std::string file_path = "testDataDir/vgg-daruma";
+  std::shared_ptr<Daruma> daruma{ new Daruma(Helper::RawJsonDocumentBuilder,
+                                             Helper::RawJsonDocumentBuilder) };
+  std::string file_path = "testDataDir/layout/0_space_between/";
   daruma->load(file_path);
 
   // When
-  m_sut.reset(new Layout::Layout(daruma));
+  Layout::Layout sut{ daruma };
 
   // Then
-  EXPECT_TRUE(m_sut);
+}
+
+TEST_F(VggLayoutTestSuite, Layout)
+{
+  // Given
+  std::shared_ptr<Daruma> daruma{ new Daruma(Helper::RawJsonDocumentBuilder,
+                                             Helper::RawJsonDocumentBuilder) };
+  std::string file_path = "testDataDir/layout/0_space_between/";
+  daruma->load(file_path);
+
+  Layout::Layout sut{ daruma };
+  Layout::Size window_size{ 1400, 900 };
+
+  // When
+  sut.layout(window_size);
+
+  // Then
+  auto tree = sut.layoutTree();
+  auto current_page = tree->children()[0];
+
+  auto left_child_frame = current_page->children()[0]->frame();
+  Layout::Rect expect_left_child_frame{ { 100, 40 }, { 200, 150 } };
+  EXPECT_TRUE(left_child_frame == expect_left_child_frame);
+
+  auto right_child_frame = current_page->children()[1]->frame();
+  Layout::Rect expect_right_child_frame{ { 1100, 40 }, { 200, 300 } };
+  EXPECT_TRUE(right_child_frame == expect_right_child_frame);
 }

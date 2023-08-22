@@ -8,7 +8,7 @@
         "class": "width",
         "value": {
           "class": "length",
-          "value": 1054.0,
+          "value": 1600.0,
           "types": 1
         }
       },
@@ -16,7 +16,7 @@
         "class": "height",
         "value": {
           "class": "length",
-          "value": 354.0,
+          "value": 900.0,
           "types": 1
         }
       },
@@ -30,10 +30,10 @@
         "row_gap": 0,
         "column_gap": 205.0,
         "padding": [
-          81.0,
-          73.0,
-          81.0,
-          73.0
+          40.0,
+          100.0,
+          40.0,
+          100.0
         ]
       }
     },
@@ -44,7 +44,7 @@
         "class": "width",
         "value": {
           "class": "length",
-          "value": 187.0,
+          "value": 200.0,
           "types": 1
         }
       },
@@ -52,7 +52,7 @@
         "class": "height",
         "value": {
           "class": "length",
-          "value": 151.0,
+          "value": 150.0,
           "types": 1
         }
       },
@@ -72,7 +72,7 @@
         "class": "width",
         "value": {
           "class": "length",
-          "value": 230.0,
+          "value": 200.0,
           "types": 1
         }
       },
@@ -80,7 +80,7 @@
         "class": "height",
         "value": {
           "class": "length",
-          "value": 151.0,
+          "value": 250.0,
           "types": 1
         }
       },

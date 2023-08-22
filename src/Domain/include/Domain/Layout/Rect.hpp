@@ -24,6 +24,10 @@ struct Size
   Scalar height{ 0 };
 
   bool operator==(const Size& rhs) const noexcept;
+  bool operator!=(const Size& rhs) const noexcept
+  {
+    return !(*this == rhs);
+  }
 };
 
 struct Rect

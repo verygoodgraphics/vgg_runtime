@@ -96,10 +96,11 @@ bool Controller::edit(std::vector<char>& buffer)
 
 void Controller::onResize()
 {
-  ResizeWindow().onResize(m_model, m_presenter->viewSize());
+  ResizeWindow{ m_layout }.onResize(m_presenter->viewSize());
   if (m_edit_model)
   {
-    ResizeWindow().onResize(m_edit_model, m_presenter->editViewSize());
+    // todo, edited model
+    // ResizeWindow{m_edit_layout}.onResize(m_presenter->editViewSize());
   }
 }
 
@@ -304,6 +305,8 @@ std::shared_ptr<ViewModel> Controller::generateViewModel(std::shared_ptr<Daruma>
                                                          Layout::Size size)
 {
   StartRunning start_running{ model };
+  m_layout = start_running.layout();
+
   start_running.layout(size);
 
   auto view_model = std::make_shared<ViewModel>();

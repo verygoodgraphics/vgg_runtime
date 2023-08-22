@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Domain/Layout/Layout.hpp"
 #include "Domain/Layout/Rect.hpp"
 
 #include "RunLoop.hpp"
@@ -36,7 +37,7 @@ private:
   RunMode m_mode;
   std::shared_ptr<Daruma> m_model;
   std::shared_ptr<Daruma> m_edit_model;
-  std::shared_ptr<ViewModel> m_view_model;
+  std::shared_ptr<Layout::Layout> m_layout;
 
 public:
   Controller(std::shared_ptr<RunLoop> runLoop,

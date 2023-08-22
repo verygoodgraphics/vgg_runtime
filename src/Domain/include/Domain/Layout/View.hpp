@@ -78,9 +78,19 @@ public:
     m_children.push_back(child);
   }
 
+  const std::vector<std::shared_ptr<LayoutView>>& children() const
+  {
+    return m_children;
+  }
+
   const std::string& path() const
   {
     return m_path;
+  }
+
+  const auto& frame() const
+  {
+    return m_frame;
   }
 
   void configureFlexLayout(const Layout::Internal::ConfigureFlexLayoutFn& configureFn);

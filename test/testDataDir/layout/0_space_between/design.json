@@ -25,16 +25,16 @@
       "bounds": {
         "class": "rect",
         "constrainProportions": false,
-        "width": 1054.0,
-        "height": 354.0,
+        "width": 1600.0,
+        "height": 900.0,
         "x": 0,
         "y": 0
       },
       "frame": {
         "class": "rect",
         "constrainProportions": false,
-        "width": 1054.0,
-        "height": 354.0,
+        "width": 1600.0,
+        "height": 900.0,
         "x": -1285.0,
         "y": 623.0
       },
@@ -90,24 +90,24 @@
             0.0,
             0.0,
             1.0,
-            73.0,
-            -81.0
+            100.0,
+            -40.0
           ],
           "bounds": {
             "class": "rect",
             "constrainProportions": false,
-            "width": 187.0,
-            "height": 151.0,
+            "width": 200.0,
+            "height": 150.0,
             "x": 0,
             "y": 0
           },
           "frame": {
             "class": "rect",
             "constrainProportions": false,
-            "width": 187.0,
-            "height": 151.0,
-            "x": 73.0,
-            "y": -81.0
+            "width": 200.0,
+            "height": 150.0,
+            "x": 100.0,
+            "y": -40.0
           },
           "style": {
             "class": "style",
@@ -165,22 +165,22 @@
                       "radius": 0.0,
                       "point": [
                         0.0,
-                        -151.0
+                        -150.0
                       ]
                     },
                     {
                       "class": "pointAttr",
                       "radius": 0.0,
                       "point": [
-                        187.0,
-                        -151.0
+                        200.0,
+                        -150.0
                       ]
                     },
                     {
                       "class": "pointAttr",
                       "radius": 0.0,
                       "point": [
-                        187.0,
+                        200.0,
                         0.0
                       ]
                     }
@@ -210,24 +210,24 @@
             0.0,
             0.0,
             1.0,
-            751.0,
-            -81.0
+            1300.0,
+            -40.0
           ],
           "bounds": {
             "class": "rect",
             "constrainProportions": false,
-            "width": 230.0,
-            "height": 151.0,
+            "width": 200.0,
+            "height": 250.0,
             "x": 0,
             "y": 0
           },
           "frame": {
             "class": "rect",
             "constrainProportions": false,
-            "width": 230.0,
-            "height": 151.0,
-            "x": 751.0,
-            "y": -81.0
+            "width": 200.0,
+            "height": 250.0,
+            "x": 1300.0,
+            "y": -40.0
           },
           "style": {
             "class": "style",
@@ -285,22 +285,22 @@
                       "radius": 0.0,
                       "point": [
                         0.0,
-                        -151.0
+                        -250.0
                       ]
                     },
                     {
                       "class": "pointAttr",
                       "radius": 0.0,
                       "point": [
-                        230.0,
-                        -151.0
+                        200.0,
+                        -250.0
                       ]
                     },
                     {
                       "class": "pointAttr",
                       "radius": 0.0,
                       "point": [
-                        230.0,
+                        200.0,
                         0.0
                       ]
                     }

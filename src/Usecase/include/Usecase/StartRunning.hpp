@@ -20,14 +20,19 @@ public:
     m_layout->layout(size);
   }
 
-  nlohmann::json designDoc()
+  std::shared_ptr<Layout::Layout> layout()
+  {
+    return m_layout;
+  }
+
+  const nlohmann::json& designDoc()
   {
     return m_layout->designDoc();
   }
 
   std::shared_ptr<LayoutView> layoutTree()
   {
-    return m_layout->createLayoutTree();
+    return m_layout->layoutTree();
   }
 };
 

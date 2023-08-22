@@ -10,22 +10,31 @@ constexpr auto FLIP_Y_FACTOR = -1;
 
 void Layout::Layout::layout(Size size)
 {
-  // todo
+  if (size != m_size)
+  {
+    // todo
+    m_size = size;
+  }
 }
 
-std::shared_ptr<LayoutView> Layout::Layout::createLayoutTree()
+std::shared_ptr<LayoutView> Layout::Layout::layoutTree()
 {
-  auto doc = m_model->designDoc()->content();
-
-  // todo, select frame
-  auto& frame = doc[K_FRAME][0];
-  if (!frame.is_object())
+  if (!m_designJson.is_object())
   {
-    WARN("no frame in design file");
+    WARN("invalid design file");
     return {};
   }
 
-  return createOneLayoutView(frame, json::json_pointer("/frames/0"), nullptr);
+  m_layout_tree.reset(new LayoutView{ "/", {} });
+
+  json::json_pointer frames_path{ "/frames" };
+  for (auto i = 0; i < m_design_json[K_FRAMES].size(); ++i)
+  {
+    auto path = frames_path / i;
+    createOneLayoutView(m_design_json[path], path, m_layout_tree);
+  }
+
+  return m_layout_tree;
 }
 
 std::shared_ptr<LayoutView> Layout::Layout::createOneLayoutView(const nlohmann::json& j,

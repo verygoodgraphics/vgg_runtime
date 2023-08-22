@@ -27,6 +27,7 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
   }
 
   // todo, hittest
+  // todo, select page
   for (auto& subview : m_subviews)
   {
     subview->onEvent(evt, zoomer);

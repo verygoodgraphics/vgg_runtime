@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Domain/Layout/Layout.hpp"
 #include "Domain/Layout/View.hpp"
 #include "Domain/Daruma.hpp"
 
@@ -8,10 +9,15 @@ namespace VGG
 
 class ResizeWindow
 {
+  std::shared_ptr<Layout::Layout> m_layout;
+
 public:
-  void onResize(std::shared_ptr<Daruma> model,
-                std::shared_ptr<LayoutView> layoutTree,
-                Layout::Size newSize);
+  ResizeWindow(std::shared_ptr<Layout::Layout> layout)
+    : m_layout{ layout }
+  {
+  }
+
+  void onResize(Layout::Size newSize);
 };
 
 } // namespace VGG

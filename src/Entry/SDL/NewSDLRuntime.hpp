@@ -9,11 +9,14 @@
 #include <SDL2/SDL_opengl.h>
 #include <optional>
 #include <any>
+#include <Scene/GraphicsContext.h>
+#include "Application/include/Application/AppEventContext.h"
 
 using namespace VGGNew;
 
 namespace VGGNew
 {
+
 class SDLRuntime : public VGGNew::App<SDLRuntime>
 {
   struct SDLState
@@ -25,28 +28,6 @@ class SDLRuntime : public VGGNew::App<SDLRuntime>
   using Getter = std::function<std::any(void)>;
   using Setter = std::function<void(std::any)>;
   std::unordered_map<std::string, std::pair<Getter, Setter>> m_properties;
-
-  void initPropertyMap()
-  {
-    m_properties["viewport_size"] = { [this]() -> std::any
-                                      {
-                                        int dw, dh;
-                                        SDL_GL_GetDrawableSize(this->m_sdlState.window, &dw, &dh);
-                                        return std::any(std::pair<int, int>(dw, dh));
-                                      },
-                                      Setter() };
-    m_properties["window_size"] = { [this]()
-                                    {
-                                      int dw, dh;
-                                      SDL_GetWindowSize(this->m_sdlState.window, &dw, &dh);
-                                      return std::any(std::pair<int, int>(dw, dh));
-                                    },
-                                    [this](std::any size)
-                                    {
-                                      auto p = std::any_cast<std::pair<int, int>>(size);
-                                      SDL_SetWindowSize(this->m_sdlState.window, p.first, p.second);
-                                    } };
-  }
 
 public:
   static inline void handleSDLError()
@@ -86,6 +67,25 @@ public:
     return 1.0;
   }
 #endif
+
+  bool onInit() override
+  {
+    const auto& cfg = config();
+    if (initContext(cfg.drawableSize[0], cfg.drawableSize[1]))
+      return false;
+
+    SDL_GL_SetSwapInterval(0);
+
+    // Reigster SDL event impl
+    auto eventAPIImpl = std::make_unique<EventAPISDLImpl>();
+    EventManager::registerEventAPI(std::move(eventAPIImpl));
+    return true;
+  }
+
+  void shutdown() override
+  {
+  }
+
   std::optional<AppError> initContext(int w, int h)
   {
     // init sdl
@@ -176,8 +176,29 @@ public:
     // get device pixel ratio
     //
 
-    initPropertyMap();
+    // initPropertyMap();
     return std::nullopt;
+  }
+
+  bool makeCurrent() override
+  {
+    if (makeContextCurrent())
+    {
+      return false;
+    }
+    return true;
+  }
+
+  bool swap() override
+  {
+    swapBuffer();
+    return true;
+  }
+
+  bool resize(int w, int h) override
+  {
+    INFO("SDLContext Resize: [%d, %d]", w, h);
+    return true;
   }
 
   std::optional<AppError> makeContextCurrent()
@@ -188,25 +209,6 @@ public:
       return AppError(AppError::Kind::MakeCurrentContextError, "Make Current Context Error");
     }
     return std::nullopt;
-  }
-
-  std::any getProperty(const std::string& name)
-  {
-    auto it = m_properties.find(name);
-    if (it != m_properties.end())
-    {
-      return (it->second.first)(); // getter
-    }
-    return std::any();
-  }
-
-  void setProperty(const std::string& name, std::any value)
-  {
-    auto it = m_properties.find(name);
-    if (it != m_properties.end())
-    {
-      (it->second.second)(value); // setter
-    }
   }
 
   float getDPIScale()
@@ -221,16 +223,6 @@ public:
 #else
     return getScaleFactor();
 #endif
-  }
-
-  void onInit()
-  {
-    SDL_GL_SetSwapInterval(0);
-
-    // Reigster SDL event impl
-    auto eventAPIImpl = std::make_unique<EventAPISDLImpl>();
-    EventManager::registerEventAPI(std::move(eventAPIImpl));
-    // SDL_ShowCursor(SDL_DISABLE);
   }
 
   void pollEvent()
@@ -259,14 +251,14 @@ public:
 
   ~SDLRuntime()
   {
-    if (m_inited && m_sdlState.glContext)
+    if (m_sdlState.glContext)
     {
       // NOTE The failure to delete GL context may be related to multi-thread and is hard
       // to make it right. For simplicity, we can just safely ignore the deletion.
       //
       // SDL_GL_DeleteContext(m_sdlState.glContext);
     }
-    if (m_inited && m_sdlState.window)
+    if (m_sdlState.window)
     {
       SDL_DestroyWindow(m_sdlState.window);
     }

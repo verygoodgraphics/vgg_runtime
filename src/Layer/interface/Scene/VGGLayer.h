@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/Node.h"
+#include "Scene/GraphicsContext.h"
 #include "Scene/GraphicsLayer.h"
 #include "Scene/Scene.h"
 #include <vector>
@@ -16,6 +17,9 @@ enum class EImageEncode
 struct ImageOptions
 {
   EImageEncode encode;
+  int position[2];
+  int extend[2];
+  int quality{ 100 };
 };
 
 struct DebugInfo
@@ -35,7 +39,7 @@ class VLayer : public GraphicsLayer
 public:
   VLayer();
   ~VLayer();
-  virtual std::optional<ELayerError> init(const LayerConfig& cfg) override;
+  virtual std::optional<ELayerError> init(layer::GraphicsContext* ctx) override;
   virtual void beginFrame() override;
   virtual void render() override;
   virtual void endFrame() override;
@@ -75,6 +79,7 @@ public:
   {
     return m_dpi;
   }
+
   std::optional<std::vector<char>> makeImageSnapshot(const ImageOptions& opts);
 };
 

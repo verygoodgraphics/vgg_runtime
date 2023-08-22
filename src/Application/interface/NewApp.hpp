@@ -17,6 +17,7 @@
 #ifndef __APP_HPP__
 #define __APP_HPP__
 
+#include <SDL2/SDL_pixels.h>
 #include <cstdio>
 #include <filesystem>
 #include <functional>
@@ -26,6 +27,9 @@
 #include <optional>
 #include <regex>
 #include <any>
+#include <stdexcept>
+#include <exception>
+#include "Scene/GraphicsContext.h"
 #include "Scene/VGGLayer.h"
 #include "Application/AppRender.h"
 #include "Application/interface/Event/EventListener.h"
@@ -70,40 +74,16 @@ namespace VGGNew
  */
 
 /*
- * bool initContext(int, int)
- *	It should guarantee the GL context properly created.
- *	*/
-HAS_MEMBER_FUNCTION_DEF(initContext)
-/*
  * float getDPIScale()
  *	return current dpi
  *	*/
 HAS_MEMBER_FUNCTION_DEF(getDPIScale)
-/*
- * bool makeContextCurrent()
- *	It should switch the GL context in current thread after invoke.
- */
-HAS_MEMBER_FUNCTION_DEF(makeContextCurrent)
 /*
  * std::any setProperty(const std::string &, std::any value):
  *	It should return the properties about the T
  *	"window_size", "app_size", "viewport_size"
  *
  * */
-HAS_MEMBER_FUNCTION_DEF(getProperty)
-/*
- *	"window_size": window size
- *	"viewport_size": viewport size
- *	"app_size": just caches the command line input (consistent with window_size in most cases,
- *	depend on backends)
- * */
-HAS_MEMBER_FUNCTION_DEF(setProperty)
-
-/*
- * void swapBuffer():
- *	swaps the buffer
- * */
-HAS_MEMBER_FUNCTION_DEF(swapBuffer)
 
 /*
  * void onInit():
@@ -151,100 +131,111 @@ struct AppConfig
   VideoConfig videoConfig;
   std::string appName;
   int windowSize[2] = { 1920, 1080 };
+  AppConfig() = default;
 };
 
 template<typename T>
-class App
+class App : public layer::GraphicsContext
 {
   // NOLINTBEGIN
   inline T* Self()
   {
     static_assert(std::is_base_of<App, T>::value);
-    static_assert(has_member_initContext<T>::value);
-    static_assert(has_member_makeContextCurrent<T>::value);
-    static_assert(has_member_getProperty<T>::value);
-    static_assert(has_member_setProperty<T>::value);
-    static_assert(has_member_swapBuffer<T>::value);
     static_assert(has_member_onInit<T>::value);
     static_assert(has_member_pollEvent<T>::value);
     return static_cast<T*>(this);
   }
   // NOLINTEND
+
 protected:
   std::unique_ptr<AppRender> m_appRender;
   std::unique_ptr<EventListener> m_eventListener;
   AppConfig m_appConfig;
-  bool m_inited{ false };
   bool m_shouldExit;
   double m_pixelRatio{ 1.0 };
+  bool m_init{ false };
 
-  static std::optional<AppError> init(App* app, const AppConfig& cfg)
+private:
+  std::optional<AppError> initInternal(const AppConfig& cfg)
   {
-    ASSERT(app);
-    if (app->m_inited)
-    {
-      return AppError(AppError::Kind::HasInitError, "app has init");
-    }
-    app->m_appConfig = cfg;
-    int w = app->m_appConfig.windowSize[0];
-    int h = app->m_appConfig.windowSize[1];
-    auto appResult = app->Self()->initContext(w * app->m_pixelRatio, h * app->m_pixelRatio);
-    if (appResult.has_value())
-      return appResult;
-
-    appResult = app->Self()->makeContextCurrent();
-    if (appResult.has_value())
-      return appResult;
+    m_appConfig = cfg;
+    int w = m_appConfig.windowSize[0];
+    int h = m_appConfig.windowSize[1];
+    // auto appResult = Self()->initContext(w * m_pixelRatio, h * m_pixelRatio);
+    // if (appResult.has_value())
+    //   return appResult;
+    //
+    // appResult = Self()->makeContextCurrent();
+    // if (appResult.has_value())
+    //   return appResult;
 
     // get necessary property about window and DPI
-    auto drawSize = std::any_cast<std::pair<int, int>>(app->Self()->getProperty("viewport_size"));
-    auto winSize = std::any_cast<std::pair<int, int>>(app->Self()->getProperty("window_size"));
+    // auto drawSize = std::any_cast<std::pair<int, int>>(Self()->getProperty("viewport_size"));
+    // auto winSize = std::any_cast<std::pair<int, int>>(Self()->getProperty("window_size"));
 
 #ifdef EMSCRIPTEN
     app->m_pixelRatio = (double)drawSize.first / winSize.first;
 #endif
 
-    DEBUG("Drawable size: %d %d", drawSize.first, drawSize.second);
-    DEBUG("Window size: %d %d", winSize.first, winSize.second);
-    DEBUG("Pixel ratio: %.2lf", app->m_pixelRatio);
+    // DEBUG("Drawable size: %d %d", drawSize.first, drawSize.second);
+    // DEBUG("Window size: %d %d", winSize.first, winSize.second);
+    // DEBUG("Pixel ratio: %.2lf", m_pixelRatio);
     // init m_layer
-    app->m_appRender = std::make_unique<AppRender>();
-    if (app->m_appRender)
+    m_appRender = std::make_unique<AppRender>();
+    if (m_appRender)
     {
-      LayerConfig cfg;
-      cfg.drawableSize[0] = app->m_appConfig.windowSize[0];
-      cfg.drawableSize[1] = app->m_appConfig.windowSize[1];
-      cfg.dpi = app->Self()->getDPIScale();
-      cfg.stencilBit = app->appConfig().videoConfig.stencilBit;
-      cfg.multiSample = app->appConfig().videoConfig.multiSample;
-      if (auto err = app->m_appRender->init(cfg))
+      layer::ContextConfig cfg;
+      cfg.drawableSize[0] = m_appConfig.windowSize[0];
+      cfg.drawableSize[1] = m_appConfig.windowSize[1];
+      cfg.dpi = Self()->getDPIScale();
+      cfg.stencilBit = appConfig().videoConfig.stencilBit;
+      cfg.multiSample = appConfig().videoConfig.multiSample;
+      initGraphicsContext(cfg);
+      // cfg.drawableSize[0] = m_appConfig.windowSize[0];
+      // cfg.drawableSize[1] = m_appConfig.windowSize[1];
+      // cfg.dpi = Self()->getDPIScale();
+      // cfg.context = this;
+      if (auto err = m_appRender->init(this))
       {
         return AppError(AppError::Kind::RenderEngineError, "RenderEngineError");
       }
     }
     // extra initialization
-    app->Self()->onInit();
-    app->m_inited = true;
+    Self()->onInit();
     return std::nullopt;
-  }
-
-  App()
-    : m_inited(false)
-    , m_shouldExit(false)
-    , m_pixelRatio(1.0)
-  {
   }
 
 protected:
   bool onGlobalEvent(const UEvent& evt)
   {
     // handles App-wide events
+
     if (evt.type == VGG_QUIT)
     {
       m_shouldExit = true;
       return true;
     }
+    if (auto& window = evt.window;
+        evt.type == VGG_WINDOWEVENT && window.event == VGG_WINDOWEVENT_SIZE_CHANGED)
+    {
+      int w = window.data1;
+      int h = window.data2;
+      resize(w, h);
+      return true;
+    }
     return false;
+  }
+
+  App()
+    : m_shouldExit(false)
+    , m_pixelRatio(1.0)
+    , m_init(false)
+  {
+  }
+
+  bool hasInit() const
+  {
+    return m_init;
   }
 
 public: // public methods
@@ -255,6 +246,7 @@ public: // public methods
 
   bool sendEvent(const UEvent& e)
   {
+    onGlobalEvent(e);
     if (m_eventListener)
     {
       m_eventListener->onEvent(e, this);
@@ -263,7 +255,7 @@ public: // public methods
     {
       m_appRender->sendEvent(e, this);
     }
-    return onGlobalEvent(e);
+    return true;
   }
 
   inline AppRender* layer()
@@ -289,25 +281,21 @@ public: // public methods
 
   void poll()
   {
-    ASSERT(m_inited);
     Self()->pollEvent();
   }
 
   void process()
   {
-    ASSERT(m_inited);
     if (m_appRender)
     {
       m_appRender->beginFrame();
       m_appRender->render();
       m_appRender->endFrame();
     }
-    Self()->swapBuffer();
   }
 
   int exec()
   {
-    ASSERT(m_inited);
     while (!shouldExit())
     {
       poll();
@@ -317,24 +305,19 @@ public: // public methods
   }
 
 public: // public static methods
-  static T* getInstance(const AppConfig& cfg)
+  static T& createInstance(const AppConfig& cfg = AppConfig())
   {
     static_assert(std::is_base_of<App<T>, T>());
     static T s_app;
-    // if already initialized, these init params are ignored
-    if (!s_app.m_inited)
+    if (!s_app.hasInit())
     {
-      auto appResult = init(&s_app, cfg);
-      if (appResult.has_value())
-      {
-        INFO("%s", appResult.value().text.c_str());
-        return nullptr;
-      }
+      s_app.initInternal(cfg);
     }
-    return &s_app;
+    return s_app;
   }
-}; // class App
 
+}; // class App
+   //
 }; // namespace VGGNew
 
 #endif // __APP_HPP__

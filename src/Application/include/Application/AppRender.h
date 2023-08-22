@@ -8,7 +8,7 @@ namespace VGG
 {
 
 class AppRender__pImpl;
-class AppRender : public VLayer
+class AppRender : public layer::VLayer
 {
   VGG_DECL_IMPL(AppRender)
 

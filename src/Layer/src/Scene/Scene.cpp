@@ -157,7 +157,7 @@ void Scene::loadFileContent(const nlohmann::json& json)
   instantiateTemplates();
 }
 
-void Scene::onRender(SkCanvas* canvas)
+void Scene::onRenderImpl(SkCanvas* canvas)
 {
   VGG_IMPL(Scene)
   if (_->zoomer)

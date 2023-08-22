@@ -105,3 +105,21 @@ void Layout::Layout::createOneOrMoreLayoutViews(const nlohmann::json& j,
     createLayoutViews(j, currentPath, parent);
   }
 }
+
+void Layout::Layout::collectRules(const nlohmann::json& json)
+{
+  if (!json.is_object())
+  {
+    return;
+  }
+
+  auto& obj = json["obj"];
+  if (obj.is_array())
+  {
+    for (auto& item : obj)
+    {
+      auto& id = item[k_id];
+      m_rules[id] = item;
+    }
+  }
+}

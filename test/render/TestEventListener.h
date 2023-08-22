@@ -18,7 +18,7 @@
 #include <filesystem>
 #include "Entry/SDL/NewSDLRuntime.hpp"
 
-using AppImpl = App<VGGNew::SDLRuntime>;
+using AppBase = App<VGGNew::SDLRuntime>;
 namespace fs = std::filesystem;
 class MyEventListener : public EventListener
 {
@@ -26,7 +26,7 @@ class MyEventListener : public EventListener
   std::shared_ptr<AppScene> m_scene;
 
 protected:
-  void onAppInit(AppImpl* app, char** argv, int argc)
+  void onAppInit(AppBase* app, char** argv, int argc)
   {
     INFO("onAppInit");
     m_layer = app->layer();
@@ -113,7 +113,7 @@ public:
   {
     if (evt.type == VGG_APP_INIT)
     {
-      auto app = reinterpret_cast<AppImpl*>(userData);
+      auto app = reinterpret_cast<AppBase*>(userData);
       onAppInit(app, evt.init.argv, evt.init.argc);
       return true;
     }

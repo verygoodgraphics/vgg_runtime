@@ -1,6 +1,7 @@
 #include "Event/Event.h"
 #include "NewApp.hpp"
 #include "TestEventListener.h"
+#include <exception>
 using namespace VGG;
 namespace fs = std::filesystem;
 #define main main
@@ -12,10 +13,14 @@ int main(int argc, char** argv)
   cfg.windowSize[1] = 1080;
   cfg.videoConfig.multiSample = 0;
   cfg.videoConfig.stencilBit = 8;
-  auto app = AppImpl::getInstance(cfg);
-  if (!app)
+  SDLRuntime* app = nullptr;
+  try
   {
-    return 1;
+    app = &AppBase::createInstance(cfg);
+  }
+  catch (const std::exception& e)
+  {
+    std::cout << e.what() << std::endl;
   }
   app->setEventListener(std::make_unique<MyEventListener>());
   UEvent evt;

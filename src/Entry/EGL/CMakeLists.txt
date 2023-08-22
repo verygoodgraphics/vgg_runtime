@@ -1,4 +1,4 @@
-add_library(egl_runtime EGLRuntime.cpp)
+add_library(egl_runtime EGLRuntime.cpp NewEGLRuntime.cpp)
 set_target_properties(egl_runtime PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(egl_runtime vgg_application vgg_adapter SDL2)
 set_target_properties(egl_runtime PROPERTIES LINK_FLAGS ${SDL2_LIBRARIES})

@@ -1,5 +1,6 @@
 #include "Scene/VGGLayer.h"
 #include "Core/Node.h"
+#include "Scene/GraphicsContext.h"
 #include "Scene/GraphicsLayer.h"
 #include "Scene/Renderer.h"
 #include "Scene/Zoomer.h"
@@ -96,7 +97,7 @@ class VLayer__pImpl
   VGG_DECL_API(VLayer);
 
 public:
-  LayerConfig config;
+  layer::GraphicsContext* ctx;
   Zoomer zoomer;
   SkiaState skiaState;
   int surfaceWidth;
@@ -147,7 +148,8 @@ public:
     // color type and info format must be the followings for
     // both OpenGL and OpenGL ES, otherwise it will fail
     info.fFormat = GR_GL_RGBA8;
-    GrBackendRenderTarget target(w, h, config.stencilBit, config.multiSample, info);
+    const auto& cfg = ctx->config();
+    GrBackendRenderTarget target(w, h, cfg.stencilBit, cfg.multiSample, info);
 
     SkSurfaceProps props;
     return SkSurfaces::WrapBackendRenderTarget(skiaState.grContext.get(),
@@ -230,11 +232,14 @@ public:
   }
 };
 
-std::optional<ELayerError> VLayer::init(const LayerConfig& cfg)
+std::optional<ELayerError> VLayer::init(layer::GraphicsContext* ctx)
 {
   VGG_IMPL(VLayer)
-  _->config = cfg;
+  _->ctx = ctx;
+  ASSERT_MSG(_->ctx, "null graphics context");
+  _->ctx->makeCurrent();
   _->updateSkiaEngineGL();
+  const auto& cfg = _->ctx->config();
   resize(cfg.drawableSize[0], cfg.drawableSize[1]);
   return std::nullopt;
 }
@@ -304,6 +309,29 @@ void VLayer::endFrame()
 {
   VGG_IMPL(VLayer)
   _->skiaState.getCanvas()->flush();
+  _->ctx->swap();
+}
+
+std::optional<std::vector<char>> VLayer::makeImageSnapshot(const ImageOptions& opts)
+{
+  VGG_IMPL(VLayer);
+  auto surface = _->skiaState.surface;
+  auto context = _->skiaState.grContext.get();
+  if (auto image = surface->makeImageSnapshot(
+        SkIRect::MakeXYWH(opts.position[0], opts.position[1], opts.extend[0], opts.extend[1])))
+  {
+    SkPngEncoder::Options opt;
+    opt.fZLibLevel = std::max(std::min(9, (100 - opts.quality) / 10), 0);
+    if (auto data = SkPngEncoder::Encode(context, image.get(), opt))
+    {
+      return std::vector<char>{ data->bytes(), data->bytes() + data->size() };
+    }
+    else
+    {
+      DEBUG("Failed to encode image data");
+    }
+  }
+  return std::nullopt;
 }
 
 void VLayer::shutdown()

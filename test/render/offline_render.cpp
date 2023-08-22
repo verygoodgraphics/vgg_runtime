@@ -39,12 +39,12 @@ std::vector<std::pair<std::string, std::vector<char>>> renderAndOutput(InputDesc
   if (r)
   {
     auto data = r->read(input.prefix.value_or(fs::path(".")) / input.filepath);
-    auto result = render(data.Format,
-                         data.Resource,
-                         input.imageQuality,
-                         input.resolutionLevel,
-                         input.configFilePath.value_or("config.json"),
-                         input.fontCollection);
+    auto result = VGGNew::render(data.Format,
+                                 data.Resource,
+                                 input.imageQuality,
+                                 input.resolutionLevel,
+                                 input.configFilePath.value_or("config.json"),
+                                 input.fontCollection);
     const auto reason = std::get<0>(result);
     if (!reason.empty())
     {

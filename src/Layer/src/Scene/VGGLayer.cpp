@@ -37,7 +37,7 @@
 
 #include <queue>
 
-namespace VGG
+namespace VGG::layer
 {
 
 struct SkiaState
@@ -343,5 +343,5 @@ VLayer::VLayer()
 {
 }
 VLayer::~VLayer() = default;
-} // namespace VGG
+} // namespace VGG::layer
   //

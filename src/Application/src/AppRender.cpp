@@ -91,7 +91,7 @@ bool AppRender::onEvent(UEvent e)
   {
     if (enableDrawPosition())
     {
-      DebugInfo debugInfo;
+      VGG::layer::DebugInfo debugInfo;
       debugInfo.curX = e.motion.x;
       debugInfo.curY = e.motion.y;
       drawDebugInfo(debugInfo);

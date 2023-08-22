@@ -36,7 +36,7 @@ public:
   }
 };
 class Scene__pImpl;
-struct VGG_EXPORTS Scene : public Renderable
+struct VGG_EXPORTS Scene : public layer::Renderable
 {
   static ResourceRepo s_resRepo;
   static ObjectTableType s_objectTable;
@@ -47,6 +47,9 @@ struct VGG_EXPORTS Scene : public Renderable
 private:
   VGG_DECL_IMPL(Scene)
   std::string m_name{ "Default Scene" };
+
+protected:
+  void onRenderImpl(SkCanvas* canvas) override;
 
 public:
   Scene();
@@ -68,7 +71,6 @@ public:
   void setPage(int num);
   void nextSymbol();
   void prevSymbol();
-  void onRender(SkCanvas* canvas) override;
   // To remove zoomer, just set nullptr
   void setZoomer(std::shared_ptr<Zoomer> zoomer);
   Zoomer* zoomer();

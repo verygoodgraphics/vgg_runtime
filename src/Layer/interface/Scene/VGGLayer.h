@@ -6,7 +6,7 @@
 #include <vector>
 class SkCanvas;
 
-namespace VGG
+namespace VGG::layer
 {
 
 enum class EImageEncode
@@ -83,4 +83,4 @@ public:
   std::optional<std::vector<char>> makeImageSnapshot(const ImageOptions& opts);
 };
 
-} // namespace VGG
+} // namespace VGG::layer

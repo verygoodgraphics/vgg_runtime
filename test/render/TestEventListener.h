@@ -63,6 +63,7 @@ protected:
 
     m_scene = std::make_shared<AppScene>();
     m_scene->setZoomerListener(std::make_shared<AppZoomer>());
+
     std::map<std::string, std::vector<char>> resources;
     std::filesystem::path prefix;
     std::filesystem::path respath;

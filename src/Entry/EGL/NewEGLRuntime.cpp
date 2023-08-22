@@ -352,7 +352,7 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
   std::stringstream ss;
 
   auto egl = std::make_shared<EGLCtx>();
-  auto layer = std::make_shared<VLayer>();
+  auto layer = std::make_shared<layer::VLayer>();
   layer::ContextConfig cfg;
   cfg.drawableSize[0] = maxSurfaceSize[0];
   cfg.drawableSize[1] = maxSurfaceSize[1];
@@ -365,7 +365,6 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
   FontManager::instance().setDefaultFontManager(fontCollectionName);
   std::vector<std::pair<std::string, std::vector<char>>> res;
   auto scene = std::make_shared<Scene>();
-
   scene->loadFileContent(j);
   scene->setResRepo(resources);
   layer->addScene(scene);
@@ -382,12 +381,15 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
       calcScaleFactor(w, h, maxSurfaceSize[0], maxSurfaceSize[1], actualSize[0], actualSize[1]);
     layer->resize(actualSize[0], actualSize[1]);
     layer->setScale(scale);
+
+    // begin render one frame
     layer->beginFrame();
     layer->render();
     layer->endFrame();
+    // end render one frame
 
-    ImageOptions opts;
-    opts.encode = EImageEncode::IE_PNG;
+    layer::ImageOptions opts;
+    opts.encode = layer::EImageEncode::IE_PNG;
     opts.position[0] = 0;
     opts.position[1] = 0;
     opts.extend[0] = actualSize[0];
@@ -398,7 +400,7 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
     }
     else
     {
-      ss << "failed to encode image for artboard: " << i + 1 << std::endl;
+      ss << "Failed to encode image for artboard: " << i + 1 << std::endl;
     }
   }
   return { std::string{ std::istreambuf_iterator<char>{ ss }, std::istreambuf_iterator<char>{} },

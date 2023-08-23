@@ -17,22 +17,13 @@
 #ifndef __APP_HPP__
 #define __APP_HPP__
 
-#include <SDL2/SDL_pixels.h>
-#include <cstdio>
-#include <filesystem>
-#include <functional>
-#include <queue>
-#include <fstream>
 #include <memory>
 #include <optional>
-#include <regex>
-#include <any>
-#include <stdexcept>
 #include <exception>
-#include "Scene/GraphicsContext.h"
-#include "Scene/VGGLayer.h"
-#include "Application/include/Application/AppRender.h"
-#include "Application/interface/Event/EventListener.h"
+#include <Scene/GraphicsContext.h>
+#include <Scene/VGGLayer.h>
+#include <Application/include/Application/AppRender.h>
+#include <Application/interface/Event/EventListener.h>
 #include <Utility/interface/Log.h>
 
 using namespace VGG;
@@ -88,7 +79,7 @@ HAS_MEMBER_FUNCTION_DEF(pollEvent)
 
 struct AppError
 {
-  enum class Kind
+  enum class EKind
   {
     TextureSizeOutOfRangeError,
     EGLNoDisplayError,
@@ -98,9 +89,9 @@ struct AppError
     UnknownError,
     RenderEngineError,
   };
-  Kind kind;
+  EKind kind;
   std::string text;
-  AppError(Kind k, const std::string& error)
+  AppError(EKind k, const std::string& error)
     : kind(k)
     , text(error)
   {
@@ -148,7 +139,7 @@ private:
       init(m_appConfig.graphicsContextConfig);
       if (auto err = m_appRender->init(this))
       {
-        return AppError(AppError::Kind::RenderEngineError, "RenderEngineError");
+        return AppError(AppError::EKind::RenderEngineError, "RenderEngineError");
       }
     }
     return std::nullopt;

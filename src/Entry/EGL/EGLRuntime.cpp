@@ -139,7 +139,7 @@ public:
       // try EXT_platform_device, see
       // https://www.khronos.org/registry/EGL/extensions/EXT/EGL_EXT_platform_device.txt
       // egl_display = create_display_from_device();
-      return AppError(AppError::Kind::EGLNoDisplayError, "No default display");
+      return AppError(AppError::EKind::EGLNoDisplayError, "No default display");
     }
 
     EGLint major = 0, minor = 0;
@@ -158,18 +158,18 @@ public:
         EGL_TRUE)
     {
       EGL_CHECK();
-      return AppError(AppError::Kind::EGLGetAttribError, "get attribute error");
+      return AppError(AppError::EKind::EGLGetAttribError, "get attribute error");
     }
     if (eglGetConfigAttrib(m_eglDisplay, m_eglConfig, EGL_MAX_PBUFFER_HEIGHT, maxSurfaceSize + 1) !=
         EGL_TRUE)
     {
       EGL_CHECK();
-      return AppError(AppError::Kind::EGLGetAttribError, "get attribute error");
+      return AppError(AppError::EKind::EGLGetAttribError, "get attribute error");
     }
 
     if (winWidth + 100 > maxSurfaceSize[0] || winHeight + 100 > maxSurfaceSize[1])
     {
-      return AppError(AppError::Kind::TextureSizeOutOfRangeError, "Texture size out of range");
+      return AppError(AppError::EKind::TextureSizeOutOfRangeError, "Texture size out of range");
     }
 
     // 3. Create a surface
@@ -197,7 +197,7 @@ public:
       return nullopt;
     }
     EGL_CHECK();
-    return AppError(AppError::Kind::MakeCurrentContextError, "make current failed");
+    return AppError(AppError::EKind::MakeCurrentContextError, "make current failed");
   }
 
   std::any getProperty(const std::string& name)

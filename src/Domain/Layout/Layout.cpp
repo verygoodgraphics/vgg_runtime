@@ -3,6 +3,7 @@
 #include "Helper.hpp"
 #include "JsonKeys.hpp"
 #include "Log.h"
+#include "Rule.hpp"
 
 using namespace VGG;
 
@@ -119,7 +120,10 @@ void Layout::Layout::collectRules(const nlohmann::json& json)
     for (auto& item : obj)
     {
       auto& id = item[K_ID];
-      m_rules[id] = item;
+      auto rule = std::make_shared<Internal::Rule::Rule>();
+      *rule = item;
+      
+      m_rules[id] = rule;
     }
   }
 }

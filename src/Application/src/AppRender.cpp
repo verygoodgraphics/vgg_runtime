@@ -13,7 +13,6 @@ public:
   VGG_DECL_API(AppRender)
   std::vector<std::shared_ptr<AppScene>> listeners;
   std::queue<std::pair<UEvent, void*>> msgQueue;
-  float mouseX, mouseY;
   AppRender__pImpl(AppRender* api)
     : q_ptr(api)
   {
@@ -79,22 +78,11 @@ bool AppRender::onEvent(UEvent e)
 {
   VGG_IMPL(AppRender);
   auto type = e.type;
-  if (auto& window = e.window;
-      type == VGG_WINDOWEVENT && window.event == VGG_WINDOWEVENT_SIZE_CHANGED)
-  {
-    int w = window.data1;
-    int h = window.data2;
-    resize(w, h);
-    return true;
-  }
   if (type == VGG_MOUSEMOTION)
   {
     if (enableDrawPosition())
     {
-      VGG::layer::DebugInfo debugInfo;
-      debugInfo.curX = e.motion.x;
-      debugInfo.curY = e.motion.y;
-      drawDebugInfo(debugInfo);
+      drawMousePosition(e.motion.x, e.motion.y);
     }
   }
   return false;

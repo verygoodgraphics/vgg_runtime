@@ -3,6 +3,7 @@
 #include "Scene/GraphicsContext.h"
 #include "Scene/GraphicsLayer.h"
 #include "Scene/Scene.h"
+#include <_xlocale.h>
 #include <vector>
 class SkCanvas;
 
@@ -22,18 +23,13 @@ struct ImageOptions
   int quality{ 100 };
 };
 
-struct DebugInfo
-{
-  int curX{ 0 }, curY{ 0 };
-};
-
 class VLayer__pImpl;
 class VLayer : public GraphicsLayer
 {
   VGG_DECL_IMPL(VLayer);
   float m_scale{ 1.0 };
   bool m_drawPos{ false };
-  std::optional<DebugInfo> m_debugInfo;
+  int m_mousePosition[2] = { 0, 0 };
 
 protected:
   virtual std::optional<ELayerError> onInit() override;
@@ -58,9 +54,10 @@ public:
     return m_drawPos;
   }
 
-  void drawDebugInfo(const DebugInfo& info)
+  void drawMousePosition(int x, int y)
   {
-    m_debugInfo = info;
+    m_mousePosition[0] = x;
+    m_mousePosition[1] = y;
   }
 
   void setScaleFactor(float scale)

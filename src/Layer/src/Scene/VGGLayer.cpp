@@ -159,16 +159,15 @@ public:
                                                &props);
   }
 
-  std::string mapMousePositionToScene(const Zoomer* zoomer,
-                                      const char* name,
-                                      float scaleFactor,
-                                      int curMouseX,
-                                      int curMouseY)
+  std::string mapCanvasPositionToScene(const Zoomer* zoomer,
+                                       const char* name,
+                                       int curMouseX,
+                                       int curMouseY)
   {
     std::stringstream ss;
     float windowPos[2] = { (float)curMouseX, (float)curMouseY };
     float logixXY[2];
-    zoomer->mapWindowPosToLogicalPosition(windowPos, scaleFactor, logixXY);
+    zoomer->mapCanvasPosToLogicalPosition(windowPos, logixXY);
     ss << name << ": (" << (int)logixXY[0] << ", " << (int)logixXY[1] << ")";
     std::string res{ std::istreambuf_iterator<char>{ ss }, {} };
     return res;
@@ -205,7 +204,7 @@ std::optional<ELayerError> VLayer::onInit()
   context()->makeCurrent();
   _->updateSkiaEngineGL();
   const auto& cfg = context()->config();
-  resize(cfg.drawableSize[0], cfg.drawableSize[1]);
+  resize(cfg.windowSize[0], cfg.windowSize[1]);
   return std::nullopt;
 }
 void VLayer::beginFrame()
@@ -232,20 +231,20 @@ void VLayer::render()
     std::vector<std::string> info;
     if (enableDrawPosition())
     {
+      const float resolutionScale = context()->property().resolutionScale;
+      const float canvasPosX = m_mousePosition[0] * resolutionScale;
+      const float canvasPosY = m_mousePosition[1] * resolutionScale;
       for (auto& scene : _->scenes)
       {
         auto z = scene->zoomer();
         if (z)
         {
-          info.push_back(_->mapMousePositionToScene(z,
-                                                    scene->name().c_str(),
-                                                    1.0,
-                                                    m_debugInfo->curX,
-                                                    m_debugInfo->curY));
+          info.push_back(
+            _->mapCanvasPositionToScene(z, scene->name().c_str(), canvasPosX, canvasPosY));
         }
       }
 
-      _->drawTextAt(canvas, info, m_debugInfo->curX, m_debugInfo->curY);
+      _->drawTextAt(canvas, info, canvasPosX, canvasPosY);
     }
     canvas->restore();
   }

@@ -3,7 +3,7 @@
 #include <memory>
 #include <optional>
 
-namespace VGG
+namespace VGG::layer
 {
 
 enum class EGraphicAPI
@@ -34,12 +34,32 @@ enum class ELayerError
 
 class GraphicsLayer : public std::enable_shared_from_this<GraphicsLayer>
 {
+  layer::GraphicsContext* m_ctx{ nullptr };
+
 public:
-  virtual std::optional<ELayerError> init(layer::GraphicsContext* ctx) = 0;
+  std::optional<ELayerError> init(layer::GraphicsContext* ctx)
+  {
+    m_ctx = ctx;
+    m_ctx->addManagedLayer(shared_from_this());
+    return onInit();
+  }
+  layer::GraphicsContext* context()
+  {
+    return m_ctx;
+  }
   virtual void beginFrame() = 0;
   virtual void render() = 0;
   virtual void endFrame() = 0;
   virtual void shutdown() = 0;
+  virtual void resize(int w, int h) = 0;
+  virtual ~GraphicsLayer()
+  {
+    // remove from mananged layer from context
+    // m_ctx->removeFromManagedLayer(shared_from_this());
+  }
+
+protected:
+  virtual std::optional<ELayerError> onInit() = 0;
 };
 
-} // namespace VGG
+} // namespace VGG::layer

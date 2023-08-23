@@ -97,7 +97,6 @@ class VLayer__pImpl
   VGG_DECL_API(VLayer);
 
 public:
-  layer::GraphicsContext* ctx;
   Zoomer zoomer;
   SkiaState skiaState;
   int surfaceWidth;
@@ -148,7 +147,7 @@ public:
     // color type and info format must be the followings for
     // both OpenGL and OpenGL ES, otherwise it will fail
     info.fFormat = GR_GL_RGBA8;
-    const auto& cfg = ctx->config();
+    const auto& cfg = q_ptr->context()->config();
     GrBackendRenderTarget target(w, h, cfg.stencilBit, cfg.multiSample, info);
 
     SkSurfaceProps props;
@@ -232,14 +231,12 @@ public:
   }
 };
 
-std::optional<ELayerError> VLayer::init(layer::GraphicsContext* ctx)
+std::optional<ELayerError> VLayer::onInit()
 {
   VGG_IMPL(VLayer)
-  _->ctx = ctx;
-  ASSERT_MSG(_->ctx, "null graphics context");
-  _->ctx->makeCurrent();
+  context()->makeCurrent();
   _->updateSkiaEngineGL();
-  const auto& cfg = _->ctx->config();
+  const auto& cfg = context()->config();
   resize(cfg.drawableSize[0], cfg.drawableSize[1]);
   return std::nullopt;
 }
@@ -300,29 +297,32 @@ void VLayer::addScene(std::shared_ptr<Scene> scene)
 void VLayer::resize(int w, int h)
 {
   VGG_IMPL(VLayer);
-  int finalW = w * scale() * dpi();
-  int finalH = h * scale() * dpi();
-  INFO("resize: [%d, %d]  (%d, %d)", w, h, finalW, finalH);
+  const auto dpi = context()->config().resolutionScale;
+  const auto scaleFactor = context()->config().scaleFactor;
+  const auto f = scaleFactor * dpi;
+  const int finalW = w * f;
+  const int finalH = h * f;
+  INFO("resize: [%d, %d], actually (%d, %d)", w, h, finalW, finalH);
   _->resizeSkiaSurfaceGL(finalW, finalH);
 }
 void VLayer::endFrame()
 {
   VGG_IMPL(VLayer)
   _->skiaState.getCanvas()->flush();
-  _->ctx->swap();
+  context()->swap();
 }
 
 std::optional<std::vector<char>> VLayer::makeImageSnapshot(const ImageOptions& opts)
 {
   VGG_IMPL(VLayer);
   auto surface = _->skiaState.surface;
-  auto context = _->skiaState.grContext.get();
+  auto ctx = _->skiaState.grContext.get();
   if (auto image = surface->makeImageSnapshot(
         SkIRect::MakeXYWH(opts.position[0], opts.position[1], opts.extend[0], opts.extend[1])))
   {
     SkPngEncoder::Options opt;
     opt.fZLibLevel = std::max(std::min(9, (100 - opts.quality) / 10), 0);
-    if (auto data = SkPngEncoder::Encode(context, image.get(), opt))
+    if (auto data = SkPngEncoder::Encode(ctx, image.get(), opt))
     {
       return std::vector<char>{ data->bytes(), data->bytes() + data->size() };
     }

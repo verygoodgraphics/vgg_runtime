@@ -113,10 +113,10 @@ public:
     SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 1);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, appConfig().videoConfig.stencilBit);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, appConfig().graphicsContextConfig.stencilBit);
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, appConfig().videoConfig.multiSample);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, appConfig().graphicsContextConfig.multiSample);
     // SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
 #ifndef EMSCRIPTEN
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -173,10 +173,6 @@ public:
     INFO("GL_VERSION: %s", glGetString(GL_VERSION));
     INFO("GL_SHADING_LANGUAGE_VERSION: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-    // get device pixel ratio
-    //
-
-    // initPropertyMap();
     return std::nullopt;
   }
 
@@ -196,9 +192,8 @@ public:
     return true;
   }
 
-  bool resize(int w, int h) override
+  bool onResize(int w, int h) override
   {
-    INFO("SDLContext Resize: [%d, %d]", w, h);
     return true;
   }
 
@@ -212,7 +207,7 @@ public:
     return std::nullopt;
   }
 
-  float getDPIScale()
+  float resolutionScale()
   {
 #ifdef VGG_HOST_macOS
     int dw, dh;

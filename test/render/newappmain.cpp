@@ -9,31 +9,30 @@ int main(int argc, char** argv)
 {
   AppConfig cfg;
   cfg.appName = "Renderer";
-  cfg.windowSize[0] = 1920;
-  cfg.windowSize[1] = 1080;
-  cfg.videoConfig.multiSample = 0;
-  cfg.videoConfig.stencilBit = 8;
-  SDLRuntime* app = nullptr;
+  cfg.graphicsContextConfig.drawableSize[0] = 1920;
+  cfg.graphicsContextConfig.drawableSize[1] = 1080;
+  cfg.graphicsContextConfig.multiSample = 0;
+  cfg.graphicsContextConfig.stencilBit = 8;
+  cfg.graphicsContextConfig.scaleFactor = 1.0f;
+  cfg.graphicsContextConfig.resolutionScale = 1.0f;
+  cfg.argc = argc;
+  cfg.argv = argv;
+  cfg.eventListener = std::make_unique<MyEventListener>();
   try
   {
-    app = &AppBase::createInstance(cfg);
+    AppBase::createInstance(std::move(cfg));
   }
   catch (const std::exception& e)
   {
     std::cout << e.what() << std::endl;
   }
-  app->setEventListener(std::make_unique<MyEventListener>());
-  UEvent evt;
-  evt.type = VGG_APP_INIT;
-  evt.init.argc = argc;
-  evt.init.argv = argv;
-  app->sendEvent(evt);
 
   // or:
+  // SDLRuntime* app = AppBase::app();
   // while (!app->shouldExit())
   // {
   //   app->poll();
   //   app->process();
   // }
-  return app->exec();
+  return AppBase::app()->exec();
 }

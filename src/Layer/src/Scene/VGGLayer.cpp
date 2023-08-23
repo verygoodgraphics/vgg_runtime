@@ -259,11 +259,11 @@ void VLayer::render()
     canvas->scale(sx, sy);
     for (auto& scene : _->scenes)
     {
-      scene->onRender(canvas);
+      scene->render(canvas);
     }
     for (auto& item : _->items)
     {
-      item->onRender(canvas);
+      item->render(canvas);
     }
     std::vector<std::string> info;
     if (enableDrawPosition())

@@ -49,7 +49,7 @@ private:
   std::string m_name{ "Default Scene" };
 
 protected:
-  void onRenderImpl(SkCanvas* canvas) override;
+  void onRender(SkCanvas* canvas) override;
 
 public:
   Scene();

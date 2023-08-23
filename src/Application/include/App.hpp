@@ -473,7 +473,7 @@ protected: // protected methods
       if (m_scene)
       {
         m_zoomer.apply(canvas);
-        m_scene->onRender(canvas);
+        m_scene->render(canvas);
         m_zoomer.restore(canvas);
       }
       else if (m_view)

@@ -17,15 +17,26 @@ struct Viewport
 class VGG_EXPORTS Renderable : public std::enable_shared_from_this<Renderable>
 {
   std::optional<Viewport> m_viewport;
+  bool m_visible{ true };
 
 protected:
-  virtual void onRenderImpl(SkCanvas* canvas) = 0;
+  virtual void onRender(SkCanvas* canvas) = 0;
 
 public:
-  void onRender(SkCanvas* canvas);
+  void render(SkCanvas* canvas);
   void setViewport(const Viewport& vp)
   {
     m_viewport = vp;
+  }
+
+  void setVisible(bool enable)
+  {
+    m_visible = enable;
+  }
+
+  bool visible() const
+  {
+    return m_visible;
   }
 };
 } // namespace VGG::layer

@@ -2,7 +2,7 @@
 #include <filesystem>
 #include <fstream>
 #include <optional>
-#include "ConfigMananger.h"
+#include <Utility/interface/ConfigMananger.h>
 #include "Scene/Scene.h"
 #include "loader.h"
 #include "Entry/EGL/EGLRuntime.h"
@@ -39,12 +39,14 @@ std::vector<std::pair<std::string, std::vector<char>>> renderAndOutput(InputDesc
   if (r)
   {
     auto data = r->read(input.prefix.value_or(fs::path(".")) / input.filepath);
-    auto result = VGGNew::render(data.Format,
-                                 data.Resource,
-                                 input.imageQuality,
-                                 input.resolutionLevel,
-                                 input.configFilePath.value_or("config.json"),
-                                 input.fontCollection);
+    DEBUG("Image Quality: %d", input.imageQuality);
+    DEBUG("Resolution Level: %d", input.resolutionLevel);
+    auto result = VGG::entry::render(data.Format,
+                                     data.Resource,
+                                     input.imageQuality,
+                                     input.resolutionLevel,
+                                     input.configFilePath.value_or("config.json"),
+                                     input.fontCollection);
     const auto reason = std::get<0>(result);
     if (!reason.empty())
     {

@@ -1,23 +1,23 @@
 #pragma once
 
-#include "Entry/SDL/EventAPISDLImpl.h"
+#include <Entry/SDL/SDLImpl/EventAPISDLImpl.h>
 #include "Event/EventAPI.h"
-#include "NewApp.hpp"
-#include "Log.h"
+#include <Application/interface/AppBase.hpp>
+#include <Utility/interface/Log.h>
 #include "EventConvert.h"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
 #include <optional>
 #include <any>
 #include <Scene/GraphicsContext.h>
-#include "Application/include/Application/AppEventContext.h"
 
-using namespace VGGNew;
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
 
-namespace VGGNew
+namespace VGG::entry
 {
 
-class SDLRuntime : public VGGNew::App<SDLRuntime>
+using namespace VGG::app;
+
+class AppSDLImpl : public AppBase<AppSDLImpl>
 {
   struct SDLState
   {
@@ -245,7 +245,7 @@ public:
     SDL_GL_SwapWindow(m_sdlState.window);
   }
 
-  ~SDLRuntime()
+  ~AppSDLImpl()
   {
     if (m_sdlState.glContext)
     {
@@ -261,4 +261,4 @@ public:
     SDL_Quit();
   }
 };
-} // namespace VGGNew
+} // namespace VGG::entry

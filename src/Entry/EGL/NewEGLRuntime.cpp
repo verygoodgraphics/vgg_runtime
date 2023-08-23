@@ -1,9 +1,8 @@
-#include <Application/interface/NewApp.hpp>
+#include <Application/interface/AppBase.hpp>
 #include <EGL/egl.h>
-#include <ConfigMananger.h>
 #include "Core/FontManager.h"
 #include "Core/PaintNode.h"
-#include "Event/EventListener.h"
+#include "Application/interface/Event/EventListener.h"
 #include "Scene/GraphicsContext.h"
 #include "Scene/GraphicsLayer.h"
 #include "Scene/VGGLayer.h"
@@ -12,7 +11,8 @@
 #include <memory>
 #include <optional>
 using namespace std;
-namespace VGGNew
+using namespace VGG::app;
+namespace VGG::entry
 {
 
 constexpr int OPENGL_VERSION[] = { 4, 5 };
@@ -357,6 +357,8 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
   cfg.drawableSize[0] = maxSurfaceSize[0];
   cfg.drawableSize[1] = maxSurfaceSize[1];
   cfg.resolutionScale = 1.0;
+  cfg.scaleFactor = 1.0;
+  cfg.resolutionScale = 1.0;
   cfg.stencilBit = 8;
   cfg.multiSample = 0;
   egl->init(cfg);
@@ -379,8 +381,15 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
     float actualSize[2];
     auto scale =
       calcScaleFactor(w, h, maxSurfaceSize[0], maxSurfaceSize[1], actualSize[0], actualSize[1]);
-    layer->resize(actualSize[0], actualSize[1]);
-    layer->setPreScale(scale);
+    layer->setScaleFactor(scale);
+
+    DEBUG("Render Canvas Size: [%d, %d]", (int)maxSurfaceSize[0], (int)maxSurfaceSize[1]);
+    DEBUG("Original [%d, %d] x Scale[%f] = Final[%d, %d]",
+          w,
+          h,
+          scale,
+          (int)actualSize[0],
+          (int)actualSize[1]);
 
     // begin render one frame
     layer->beginFrame();
@@ -407,4 +416,4 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
            res };
 }
 
-} // namespace VGGNew
+} // namespace VGG::entry

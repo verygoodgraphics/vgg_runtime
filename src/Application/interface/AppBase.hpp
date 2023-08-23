@@ -31,12 +31,12 @@
 #include <exception>
 #include "Scene/GraphicsContext.h"
 #include "Scene/VGGLayer.h"
-#include "Application/AppRender.h"
+#include "Application/include/Application/AppRender.h"
 #include "Application/interface/Event/EventListener.h"
-#include "Log.h"
+#include <Utility/interface/Log.h>
 
 using namespace VGG;
-namespace VGGNew
+namespace VGG::app
 {
 
 #define HAS_MEMBER_FUNCTION_DEF(FUNC)                                                              \
@@ -117,12 +117,12 @@ struct AppConfig
 };
 
 template<typename T>
-class App : public layer::GraphicsContext
+class AppBase : public layer::GraphicsContext
 {
   // NOLINTBEGIN
   inline T* Self()
   {
-    static_assert(std::is_base_of<App, T>::value);
+    static_assert(std::is_base_of<AppBase, T>::value);
     static_assert(has_member_pollEvent<T>::value);
     static_assert(has_member_resolutionScale<T>::value);
     return static_cast<T*>(this);
@@ -175,7 +175,7 @@ protected:
     return false;
   }
 
-  App()
+  AppBase()
     : m_shouldExit(false)
     , m_init(false)
   {
@@ -259,7 +259,7 @@ public: // public methods
 
   static T& createInstance(AppConfig cfg)
   {
-    static_assert(std::is_base_of<App<T>, T>());
+    static_assert(std::is_base_of<AppBase<T>, T>());
     static T s_app;
     if (!s_app.hasInit())
     {
@@ -281,6 +281,6 @@ public: // public methods
 
 }; // class App
    //
-}; // namespace VGGNew
+}; // namespace VGG::app
 
 #endif // __APP_HPP__

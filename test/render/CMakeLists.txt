@@ -21,18 +21,3 @@ if(${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_LINUX_TARGET_LIST)
   get_target_property(VGG_LAYER_RPATH vgg_layer BUILD_RPATH)
   set_target_properties(egl_entry PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} BUILD_RPATH ${VGG_LAYER_RPATH})
 endif()
-
-add_executable(new_sdl_renderer)
-target_sources(new_sdl_renderer PRIVATE newappmain.cpp)
-target_link_libraries(new_sdl_renderer PRIVATE vgg_application vgg_adapter vgg_utility)
-
-set_target_properties(new_sdl_renderer PROPERTIES LINK_FLAGS ${SDL2_LIBRARIES})
-target_include_directories(new_sdl_renderer PRIVATE
-  ${SDL2_INCLUDE_DIRS}/..
-  ${VGG_CONTRIB_ARGPARSE_INCLUDE}
-)
-
-get_target_property(VGG_LAYER_RPATH vgg_layer BUILD_RPATH)
-set_target_properties(
-  new_sdl_renderer PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
-                         BUILD_RPATH ${VGG_LAYER_RPATH})

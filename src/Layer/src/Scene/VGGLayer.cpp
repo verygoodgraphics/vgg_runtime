@@ -252,8 +252,7 @@ void VLayer::render()
   {
     canvas->save();
     canvas->clear(SK_ColorWHITE);
-    float sx = 1.f, sy = 1.f;
-    canvas->scale(sx, sy);
+    canvas->scale(m_scale, m_scale);
     for (auto& scene : _->scenes)
     {
       scene->render(canvas);
@@ -297,9 +296,7 @@ void VLayer::addScene(std::shared_ptr<Scene> scene)
 void VLayer::resize(int w, int h)
 {
   VGG_IMPL(VLayer);
-  const auto dpi = context()->config().resolutionScale;
-  const auto scaleFactor = context()->config().scaleFactor;
-  const auto f = scaleFactor * dpi;
+  const auto f = 1.0;
   const int finalW = w * f;
   const int finalH = h * f;
   INFO("resize: [%d, %d], actually (%d, %d)", w, h, finalW, finalH);
@@ -308,6 +305,7 @@ void VLayer::resize(int w, int h)
 void VLayer::endFrame()
 {
   VGG_IMPL(VLayer)
+  ASSERT(context());
   _->skiaState.getCanvas()->flush();
   context()->swap();
 }

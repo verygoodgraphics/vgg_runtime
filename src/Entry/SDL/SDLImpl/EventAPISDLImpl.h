@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Entry/SDL/EventConvert.h"
+#include <Entry/SDL/SDLImpl/EventConvert.h>
 #include "Event/EventAPI.h"
 #include "Event/Keycode.h"
 #include <SDL2/SDL_keyboard.h>

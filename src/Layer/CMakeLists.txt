@@ -21,19 +21,12 @@ target_include_directories(
   ${VGG_CONTRIB_JSON_INCLUDE}
   ${VGG_CONTRIB_RAPIDFUZZCPP_INCLUDE})
 
+target_include_directories(vgg_layer PUBLIC ${VGG_CONTRIB_JSON_INCLUDE})
 target_link_libraries(vgg_layer PUBLIC glm ${SKIA_LIBS})
 target_link_libraries(vgg_layer PRIVATE ${OPENGL_LIBRARIES} vgg_utility)
 set_target_properties(vgg_layer PROPERTIES BUILD_RPATH ${SKIA_LIB_DIR})
 
 set_target_properties(vgg_layer PROPERTIES POSITION_INDEPENDENT_CODE ON)
-
-if(EMSCRIPTEN)
-# It's temporay because layer need the SDL event type declaration.
-# This will be removed after a self-contained event framework introduced
-set_target_properties(vgg_layer PROPERTIES
-    COMPILE_FLAGS "-s USE_SDL=2 -fexceptions"
-    LINK_FLAGS "-s USE_SDL=2")
-endif()
 
 # TODO: install(IMPORTED_RUNTIME_ARTIFACTS ...) maybe a better choice
 set(SKIA_ARTIFACTS_LOCATION)

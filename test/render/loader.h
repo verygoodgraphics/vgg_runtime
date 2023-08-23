@@ -1,7 +1,7 @@
 #pragma once
 #include <Reader/IReader.hpp>
 #include <filesystem>
-#include <ConfigMananger.h>
+#include <Utility/interface/ConfigMananger.h>
 
 namespace fs = std::filesystem;
 using namespace VGG;

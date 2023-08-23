@@ -30,7 +30,7 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
   const std::string& configFile,
   const std::string& fontCollectionName);
 
-namespace VGGNew
+namespace VGG::entry
 {
 std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> render(
   const nlohmann::json& j,

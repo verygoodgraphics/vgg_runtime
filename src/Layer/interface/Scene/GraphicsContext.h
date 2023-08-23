@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Log.h"
+#include <Utility/interface/Log.h>
 #include <memory>
 #include <vector>
 namespace VGG::layer

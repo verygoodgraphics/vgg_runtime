@@ -8,6 +8,7 @@
 #include "Scene/Renderable.h"
 #include "Zoomer.h"
 
+#include <map>
 class SkCanvas;
 
 namespace VGG

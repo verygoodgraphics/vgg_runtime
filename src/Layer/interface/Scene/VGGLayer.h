@@ -48,7 +48,6 @@ public:
   void resize(int w, int h) override;
   void addRenderItem(std::shared_ptr<Renderable> item);
   void addScene(std::shared_ptr<Scene> scene);
-
   void setDrawPositionEnabled(bool enable)
   {
     m_drawPos = enable;
@@ -64,12 +63,12 @@ public:
     m_debugInfo = info;
   }
 
-  void setPreScale(float scale)
+  void setScaleFactor(float scale)
   {
     m_scale = scale;
   }
 
-  float preScale() const
+  float scaleFactor() const
   {
     return m_scale;
   }

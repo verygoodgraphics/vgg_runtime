@@ -98,6 +98,7 @@ struct AppConfig
   layer::ContextConfig graphicsContextConfig;
   std::string appName;
   std::unique_ptr<EventListener> eventListener;
+  int renderFPSLimit{ 60 };
   int argc;
   char** argv;
 };
@@ -224,9 +225,9 @@ public: // public methods
 
   void process()
   {
-    if (m_appRender)
+    ASSERT(m_appRender);
+    if (m_appRender->beginFrame(appConfig().renderFPSLimit))
     {
-      m_appRender->beginFrame();
       m_appRender->render();
       m_appRender->endFrame();
     }

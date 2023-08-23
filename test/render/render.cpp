@@ -14,7 +14,6 @@ int main(int argc, char** argv)
   cfg.graphicsContextConfig.windowSize[1] = 1080;
   cfg.graphicsContextConfig.multiSample = 0;
   cfg.graphicsContextConfig.stencilBit = 8;
-  cfg.graphicsContextConfig.scaleFactor = 1.0f;
   cfg.argc = argc;
   cfg.argv = argv;
   cfg.eventListener = std::make_unique<MyEventListener>();

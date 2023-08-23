@@ -3,6 +3,7 @@
 #include "AppScene.h"
 #include "Scene/VGGLayer.h"
 #include "Application/interface/Event/EventListener.h"
+#include "Utility/interface/CappingProfiler.hpp"
 
 namespace VGG
 {
@@ -54,7 +55,7 @@ void AppRender::addAppScene(std::shared_ptr<AppScene> listener)
   addScene(std::move(listener));
 }
 
-void AppRender::beginFrame()
+bool AppRender::beginFrame(int fps)
 {
   VGG_IMPL(AppRender);
   while (_->msgQueue.empty() == false)
@@ -63,7 +64,18 @@ void AppRender::beginFrame()
     _->dispatchEvent(e, u);
     _->msgQueue.pop();
   }
+
+  auto profiler = CappingProfiler::getInstance();
+  if (fps > 0)
+  {
+    if (!(profiler->enoughFrameDuration(fps)))
+    {
+      return false;
+    }
+  }
+  profiler->markFrame();
   VLayer::beginFrame();
+  return true;
 }
 void AppRender::render()
 {

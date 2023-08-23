@@ -3,7 +3,6 @@
 #include "Scene/GraphicsContext.h"
 #include "Scene/GraphicsLayer.h"
 #include "Scene/Scene.h"
-#include <_xlocale.h>
 #include <vector>
 class SkCanvas;
 

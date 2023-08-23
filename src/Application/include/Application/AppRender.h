@@ -18,7 +18,7 @@ public:
   void sendEvent(UEvent e, void* userData);
   void addAppScene(std::shared_ptr<AppScene> listener);
   std::shared_ptr<AppScene> popAppScene();
-  void beginFrame();
+  bool beginFrame(int fps);
   void render();
   void endFrame();
 

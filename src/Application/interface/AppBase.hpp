@@ -65,11 +65,6 @@ namespace VGG::app
  */
 
 /*
- * float resolutionScale()
- *	return current dpi
- *	*/
-HAS_MEMBER_FUNCTION_DEF(resolutionScale)
-/*
  * void pollEvent()
  * Polls the backends events
  * */
@@ -115,7 +110,6 @@ class AppBase : public layer::GraphicsContext
   {
     static_assert(std::is_base_of<AppBase, T>::value);
     static_assert(has_member_pollEvent<T>::value);
-    static_assert(has_member_resolutionScale<T>::value);
     return static_cast<T*>(this);
   }
   // NOLINTEND
@@ -135,7 +129,6 @@ private:
     m_eventListener = std::move(m_appConfig.eventListener);
     if (m_appRender)
     {
-      m_appConfig.graphicsContextConfig.resolutionScale = Self()->resolutionScale();
       init(m_appConfig.graphicsContextConfig);
       if (auto err = m_appRender->init(this))
       {
@@ -158,9 +151,10 @@ protected:
     if (auto& window = evt.window;
         evt.type == VGG_WINDOWEVENT && window.event == VGG_WINDOWEVENT_SIZE_CHANGED)
     {
-      int w = window.data1;
-      int h = window.data2;
-      resize(w, h);
+      float rs = property().resolutionScale;
+      int textureWidth = window.data1 * rs;
+      int textureHeight = window.data2 * rs;
+      resize(textureWidth, textureHeight);
       return true;
     }
     return false;

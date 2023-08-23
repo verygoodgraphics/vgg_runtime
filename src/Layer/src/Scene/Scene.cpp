@@ -45,7 +45,7 @@ public:
     ASSERT(canvas);
     ASSERT(zoomer);
     auto offset = zoomer->translate();
-    auto zoom = zoomer->zoom();
+    auto zoom = zoomer->scale();
     canvas->translate(offset.x, offset.y);
     canvas->scale(zoom, zoom);
   }
@@ -55,7 +55,7 @@ public:
     ASSERT(canvas);
     ASSERT(zoomer);
     auto offset = zoomer->translate();
-    auto zoom = zoomer->zoom();
+    auto zoom = zoomer->scale();
     canvas->scale(1. / zoom, 1. / zoom);
     canvas->translate(-offset.x, -offset.y);
   }

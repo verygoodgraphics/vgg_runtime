@@ -431,7 +431,7 @@ protected: // protected methods
 
     float windowPos[2] = { m_curMouseX, m_curMouseY };
     float logixXY[2];
-    m_zoomer.mapWindowPosToLogicalPosition(windowPos, 1.0, logixXY);
+    m_zoomer.mapCanvasPosToLogicalPosition(windowPos, logixXY);
 
     char info[1024];
     sprintf(info, infoFmt1, (int)m_curMouseX, (int)m_curMouseY);
@@ -554,12 +554,12 @@ protected: // protected methods
       int mx, my;
       SDL_GetMouseState(&mx, &my);
       double dz = (evt.wheel.y > 0 ? 1.0 : -1.0) * 0.03;
-      double z2 = m_zoomer.m_zoom * (1 + dz);
+      double z2 = m_zoomer.zoom * (1 + dz);
       if (z2 > 0.01 && z2 < 100)
       {
         m_zoomer.offset.x -= (mx / DPI::ScaleFactor - m_zoomer.offset.x) * dz;
         m_zoomer.offset.y -= (my / DPI::ScaleFactor - m_zoomer.offset.y) * dz;
-        m_zoomer.m_zoom += m_zoomer.m_zoom * dz;
+        m_zoomer.zoom += m_zoomer.zoom * dz;
         return true;
       }
       return false;

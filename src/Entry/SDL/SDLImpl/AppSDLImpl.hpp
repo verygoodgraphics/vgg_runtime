@@ -68,10 +68,15 @@ public:
   }
 #endif
 
+  void onInitProperties(layer::ContextProperty& property) override
+  {
+    property.resolutionScale = resolutionScale();
+  }
+
   bool onInit() override
   {
     const auto& cfg = config();
-    if (initContext(cfg.drawableSize[0], cfg.drawableSize[1]))
+    if (initContext(cfg.windowSize[0], cfg.windowSize[1]))
       return false;
 
     SDL_GL_SetSwapInterval(0);
@@ -84,6 +89,18 @@ public:
 
   void shutdown() override
   {
+    if (m_sdlState.glContext)
+    {
+      // NOTE The failure to delete GL context may be related to multi-thread and is hard
+      // to make it right. For simplicity, we can just safely ignore the deletion.
+      //
+      // SDL_GL_DeleteContext(m_sdlState.glContext);
+    }
+    if (m_sdlState.window)
+    {
+      SDL_DestroyWindow(m_sdlState.window);
+    }
+    SDL_Quit();
   }
 
   std::optional<AppError> initContext(int w, int h)
@@ -194,6 +211,7 @@ public:
 
   bool onResize(int w, int h) override
   {
+    // In SDL, we do not need to resize its surface mannually
     return true;
   }
 
@@ -214,8 +232,9 @@ public:
     int ww, wh;
     SDL_GL_GetDrawableSize(this->m_sdlState.window, &dw, &dh);
     SDL_GetWindowSize(this->m_sdlState.window, &ww, &wh);
-    std::cout << dw << " " << ww << " asfdsafdasf" << std::endl;
-    return float(dw) / (float)ww;
+    const float s = float(dw) / (float)ww;
+    DEBUG("Scale Factor on macOS: %f", s);
+    return s;
 #else
     return getScaleFactor();
 #endif
@@ -247,18 +266,7 @@ public:
 
   ~AppSDLImpl()
   {
-    if (m_sdlState.glContext)
-    {
-      // NOTE The failure to delete GL context may be related to multi-thread and is hard
-      // to make it right. For simplicity, we can just safely ignore the deletion.
-      //
-      // SDL_GL_DeleteContext(m_sdlState.glContext);
-    }
-    if (m_sdlState.window)
-    {
-      SDL_DestroyWindow(m_sdlState.window);
-    }
-    SDL_Quit();
+    shutdown();
   }
 };
 } // namespace VGG::entry

@@ -21,7 +21,7 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
     m_bounds.origin.x = zoomer->offset.x;
     m_bounds.origin.y = zoomer->offset.y;
 
-    m_contentScaleFactor = zoomer->m_zoom;
+    m_contentScaleFactor = zoomer->zoom;
   }
 
   // todo, hittest
@@ -391,12 +391,12 @@ void UIView::handleMouseWheel(const SDL_Event& evt, Zoomer* zoomer)
     my = point.y;
 
     double dz = (evt.wheel.y > 0 ? 1.0 : -1.0) * 0.03;
-    double z2 = zoomer->m_zoom * (1 + dz);
+    double z2 = zoomer->zoom * (1 + dz);
     if (z2 > 0.01 && z2 < 100)
     {
       zoomer->offset.x -= (mx / zoomer->dpiRatio) * dz;
       zoomer->offset.y -= (my / zoomer->dpiRatio) * dz;
-      zoomer->m_zoom += zoomer->m_zoom * dz;
+      zoomer->zoom += zoomer->zoom * dz;
     }
 
     m_is_dirty = true;

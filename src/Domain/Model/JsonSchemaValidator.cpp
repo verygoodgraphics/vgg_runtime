@@ -112,8 +112,8 @@ void JsonSchemaValidator::preProcessSchemaAndSetupMap(nlohmann::json& schemaJson
         it.value()["title"] = new_title;
 
         // save to class:title map
-        auto class_name = class_name_json.get<std::string>();
-        m_classTitleMap[class_name] = new_title;
+        auto className = class_name_json.get<std::string>();
+        m_classTitleMap[className] = new_title;
       }
     }
   }

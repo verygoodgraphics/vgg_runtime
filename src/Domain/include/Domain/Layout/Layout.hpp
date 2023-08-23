@@ -17,7 +17,7 @@ namespace Layout
 class Layout
 {
   std::shared_ptr<Daruma> m_model;
-  nlohmann::json m_design_json;
+  nlohmann::json m_designJson;
 
 public:
   Layout(std::shared_ptr<Daruma> model)
@@ -25,13 +25,13 @@ public:
   {
     ASSERT(m_model);
 
-    m_design_json = m_model->designDoc()->content();
+    m_designJson = m_model->designDoc()->content();
   }
 
   nlohmann::json designDoc()
   {
-    ExpandSymbol expande_symbol{ m_design_json };
-    return expande_symbol();
+    ExpandSymbol expandeSymbol{ m_designJson };
+    return expandeSymbol();
   }
 
   void layout(Size size);
@@ -39,14 +39,14 @@ public:
 
 private:
   std::shared_ptr<LayoutView> createOneLayoutView(const nlohmann::json& j,
-                                                  nlohmann::json::json_pointer current_path,
+                                                  nlohmann::json::json_pointer currentPath,
                                                   std::shared_ptr<LayoutView> parent);
   void createLayoutViews(const nlohmann::json& j,
-                         nlohmann::json::json_pointer current_path,
+                         nlohmann::json::json_pointer currentPath,
                          std::shared_ptr<LayoutView> parent);
 
   void createOneOrMoreLayoutViews(const nlohmann::json& j,
-                                  nlohmann::json::json_pointer current_path,
+                                  nlohmann::json::json_pointer currentPath,
                                   std::shared_ptr<LayoutView> parent);
 };
 

@@ -80,8 +80,8 @@ bool SchemaValidJsonDocument::validateDocument(const json& document)
   if (document.is_object() && document.contains(const_class_name) &&
       document[const_class_name].is_string())
   {
-    auto class_name = document[const_class_name].get<std::string>();
-    return m_validator->validate(class_name, document);
+    auto className = document[const_class_name].get<std::string>();
+    return m_validator->validate(className, document);
   }
   else
   {

@@ -6,7 +6,7 @@
 
 using namespace VGG;
 
-constexpr auto flip_y_factor = -1;
+constexpr auto FLIP_Y_FACTOR = -1;
 
 void Layout::Layout::layout(Size size)
 {
@@ -18,7 +18,7 @@ std::shared_ptr<LayoutView> Layout::Layout::createLayoutTree()
   auto doc = m_model->designDoc()->content();
 
   // todo, select frame
-  auto& frame = doc[k_frame][0];
+  auto& frame = doc[K_FRAME][0];
   if (!frame.is_object())
   {
     WARN("no frame in design file");
@@ -29,7 +29,7 @@ std::shared_ptr<LayoutView> Layout::Layout::createLayoutTree()
 }
 
 std::shared_ptr<LayoutView> Layout::Layout::createOneLayoutView(const nlohmann::json& j,
-                                                                json::json_pointer current_path,
+                                                                json::json_pointer currentPath,
                                                                 std::shared_ptr<LayoutView> parent)
 {
   if (!j.is_object())
@@ -38,33 +38,33 @@ std::shared_ptr<LayoutView> Layout::Layout::createOneLayoutView(const nlohmann::
     return nullptr;
   }
 
-  if (!is_layout_node(j))
+  if (!isLayoutNode(j))
   {
     return nullptr;
   }
 
-  auto frame = j[k_frame].get<Rect>();
-  frame.origin.y *= flip_y_factor;
+  auto frame = j[K_FRAME].get<Rect>();
+  frame.origin.y *= FLIP_Y_FACTOR;
 
-  auto layout_view = std::make_shared<LayoutView>(current_path.to_string(), frame);
+  auto layoutView = std::make_shared<LayoutView>(currentPath.to_string(), frame);
   if (parent)
   {
-    parent->addChild(layout_view);
+    parent->addChild(layoutView);
   }
 
   for (auto& [key, val] : j.items())
   {
-    auto path = current_path;
+    auto path = currentPath;
     path /= key;
 
-    createOneOrMoreLayoutViews(val, path, layout_view);
+    createOneOrMoreLayoutViews(val, path, layoutView);
   }
 
-  return layout_view;
+  return layoutView;
 }
 
 void Layout::Layout::createLayoutViews(const nlohmann::json& j,
-                                       json::json_pointer current_path,
+                                       json::json_pointer currentPath,
                                        std::shared_ptr<LayoutView> parent)
 {
   if (!j.is_array())
@@ -76,7 +76,7 @@ void Layout::Layout::createLayoutViews(const nlohmann::json& j,
   auto size = j.size();
   for (auto i = 0; i < size; ++i)
   {
-    auto path = current_path;
+    auto path = currentPath;
     path /= i;
 
     createOneOrMoreLayoutViews(j[i], path, parent);
@@ -84,15 +84,15 @@ void Layout::Layout::createLayoutViews(const nlohmann::json& j,
 }
 
 void Layout::Layout::createOneOrMoreLayoutViews(const nlohmann::json& j,
-                                                json::json_pointer current_path,
+                                                json::json_pointer currentPath,
                                                 std::shared_ptr<LayoutView> parent)
 {
   if (j.is_object())
   {
-    createOneLayoutView(j, current_path, parent);
+    createOneLayoutView(j, currentPath, parent);
   }
   else if (j.is_array())
   {
-    createLayoutViews(j, current_path, parent);
+    createLayoutViews(j, currentPath, parent);
   }
 }

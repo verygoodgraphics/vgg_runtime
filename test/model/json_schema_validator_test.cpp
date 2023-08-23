@@ -64,10 +64,10 @@ TEST_F(VggJsonSchemaValitatorTestSuite, ValidateByClassName)
   // Given
   setRootSchemaByFileName(VGG_JSON_SCHEMA_FILE_NAME);
   json json_data = load_json("./testDataDir/color.json");
-  std::string class_name = "color";
+  std::string className = "color";
 
   // When
-  auto result = sut.validate(class_name, json_data);
+  auto result = sut.validate(className, json_data);
 
   // Then
   EXPECT_EQ(result, true);
@@ -82,10 +82,10 @@ TEST_F(VggJsonSchemaValitatorTestSuite, NoSchemaValidateByClassName)
 {
   // Given
   json json_data = load_json("./testDataDir/color.json");
-  std::string class_name = "color";
+  std::string className = "color";
 
   // When
-  auto result = sut.validate(class_name, json_data);
+  auto result = sut.validate(className, json_data);
 
   // Then
   EXPECT_EQ(result, false);

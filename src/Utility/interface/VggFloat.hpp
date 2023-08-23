@@ -4,8 +4,8 @@
 
 namespace VGG
 {
-bool nearly_equal(double x, double y);
+bool nearlyEqual(double x, double y);
 
-bool double_nearly_zero(double a);
-bool doubles_nearly_equal(double a, double b);
+bool doubleNearlyZero(double a);
+bool doublesNearlyEqual(double a, double b);
 } // namespace VGG

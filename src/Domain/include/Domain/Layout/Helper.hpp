@@ -8,7 +8,7 @@ namespace VGG
 {
 namespace Layout
 {
-
+// NOLINTBEGIN
 void to_json(nlohmann::json& j, const Point& point);
 void from_json(const nlohmann::json& j, Point& point);
 
@@ -17,9 +17,10 @@ void from_json(const nlohmann::json& j, Rect& rect);
 
 void to_json(nlohmann::json& j, const Matrix& matrix);
 void from_json(const nlohmann::json& j, Matrix& matrix);
+// NOLINTEND
 
-bool is_layout_node(const nlohmann::json& json);
-bool is_point_attr_node(const nlohmann::json& json);
+bool isLayoutNode(const nlohmann::json& json);
+bool isPointAttrNode(const nlohmann::json& json);
 
 } // namespace Layout
 } // namespace VGG

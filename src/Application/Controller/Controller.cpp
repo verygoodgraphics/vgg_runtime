@@ -111,10 +111,10 @@ void Controller::initModel(const char* designDocSchemaFilePath)
   }
 
   auto build_design_doc_fn =
-    [&, design_schema_file_path = m_design_schema_file_path](const json& design_json)
+    [&, design_schema_file_path = m_design_schema_file_path](const json& designJson)
   {
     auto json_doc_ptr = createJsonDoc();
-    json_doc_ptr->setContent(design_json);
+    json_doc_ptr->setContent(designJson);
 
     if (!design_schema_file_path.empty())
     {

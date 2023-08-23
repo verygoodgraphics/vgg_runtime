@@ -200,17 +200,6 @@ public:
     return AppError(AppError::EKind::MakeCurrentContextError, "make current failed");
   }
 
-  std::any getProperty(const std::string& name)
-  {
-    // the properties result doesnt matter in EGL backend
-    auto it = m_properties.find(name);
-    if (it != m_properties.end())
-    {
-      return it->second;
-    }
-    return std::any();
-  }
-
   bool swap() override
   {
     swapBuffer();
@@ -232,14 +221,15 @@ public:
     destoryEGLContext();
   }
 
-  void setProperty(const std::string& name, std::any value)
+  void onInitProperties(layer::ContextProperty& property) override
   {
+    // No property need to be init in EGL
   }
 
   bool onInit() override
   {
     const auto& cfg = config();
-    if (initContext(cfg.drawableSize[0], cfg.drawableSize[1]))
+    if (initContext(cfg.windowSize[0], cfg.windowSize[1]))
       return false;
     return true;
   }
@@ -354,11 +344,8 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
   auto egl = std::make_shared<EGLCtx>();
   auto layer = std::make_shared<layer::VLayer>();
   layer::ContextConfig cfg;
-  cfg.drawableSize[0] = maxSurfaceSize[0];
-  cfg.drawableSize[1] = maxSurfaceSize[1];
-  cfg.resolutionScale = 1.0;
-  cfg.scaleFactor = 1.0;
-  cfg.resolutionScale = 1.0;
+  cfg.windowSize[0] = maxSurfaceSize[0];
+  cfg.windowSize[1] = maxSurfaceSize[1];
   cfg.stencilBit = 8;
   cfg.multiSample = 0;
   egl->init(cfg);

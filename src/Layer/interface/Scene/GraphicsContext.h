@@ -10,7 +10,6 @@ class GraphicsLayer;
 struct ContextConfig
 {
   int windowSize[2] = { 0, 0 };
-  float scaleFactor{ 1.0f };
   int stencilBit{ 8 };
   int multiSample{ 0 };
 };

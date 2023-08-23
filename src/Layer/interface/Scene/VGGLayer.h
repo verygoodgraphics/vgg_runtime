@@ -32,19 +32,20 @@ class VLayer : public GraphicsLayer
 {
   VGG_DECL_IMPL(VLayer);
   float m_scale{ 1.0 };
-  float m_dpi{ 1.0 };
   bool m_drawPos{ false };
   std::optional<DebugInfo> m_debugInfo;
+
+protected:
+  virtual std::optional<ELayerError> onInit() override;
 
 public:
   VLayer();
   ~VLayer();
-  virtual std::optional<ELayerError> init(layer::GraphicsContext* ctx) override;
   virtual void beginFrame() override;
   virtual void render() override;
   virtual void endFrame() override;
   virtual void shutdown() override;
-  void resize(int w, int h);
+  void resize(int w, int h) override;
   void addRenderItem(std::shared_ptr<Renderable> item);
   void addScene(std::shared_ptr<Scene> scene);
 
@@ -62,22 +63,15 @@ public:
   {
     m_debugInfo = info;
   }
-  void setScale(float scale)
+
+  void setPreScale(float scale)
   {
     m_scale = scale;
   }
 
-  float scale() const
+  float preScale() const
   {
     return m_scale;
-  }
-  void setDPI(float dpi)
-  {
-    m_dpi = dpi;
-  }
-  float dpi() const
-  {
-    return m_dpi;
   }
 
   std::optional<std::vector<char>> makeImageSnapshot(const ImageOptions& opts);

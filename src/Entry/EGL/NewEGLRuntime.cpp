@@ -222,7 +222,7 @@ public:
     return true;
   }
 
-  bool resize(int w, int h) override
+  bool onResize(int w, int h) override
   {
     return true;
   }
@@ -356,10 +356,10 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
   layer::ContextConfig cfg;
   cfg.drawableSize[0] = maxSurfaceSize[0];
   cfg.drawableSize[1] = maxSurfaceSize[1];
-  cfg.dpi = 1.0;
+  cfg.resolutionScale = 1.0;
   cfg.stencilBit = 8;
   cfg.multiSample = 0;
-  egl->initGraphicsContext(cfg);
+  egl->init(cfg);
   layer->init(egl.get());
 
   FontManager::instance().setDefaultFontManager(fontCollectionName);
@@ -380,7 +380,7 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
     auto scale =
       calcScaleFactor(w, h, maxSurfaceSize[0], maxSurfaceSize[1], actualSize[0], actualSize[1]);
     layer->resize(actualSize[0], actualSize[1]);
-    layer->setScale(scale);
+    layer->setPreScale(scale);
 
     // begin render one frame
     layer->beginFrame();

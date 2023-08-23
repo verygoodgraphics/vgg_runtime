@@ -74,17 +74,10 @@ namespace VGGNew
  */
 
 /*
- * float getDPIScale()
+ * float resolutionScale()
  *	return current dpi
  *	*/
-HAS_MEMBER_FUNCTION_DEF(getDPIScale)
-/*
- * std::any setProperty(const std::string &, std::any value):
- *	It should return the properties about the T
- *	"window_size", "app_size", "viewport_size"
- *
- * */
-
+HAS_MEMBER_FUNCTION_DEF(resolutionScale)
 /*
  * void pollEvent()
  * Polls the backends events
@@ -114,18 +107,13 @@ struct AppError
   }
 };
 
-struct VideoConfig
-{
-  int stencilBit{ 8 };
-  int multiSample{ 0 };
-};
-
 struct AppConfig
 {
-  VideoConfig videoConfig;
+  layer::ContextConfig graphicsContextConfig;
   std::string appName;
-  int windowSize[2] = { 1920, 1080 };
-  AppConfig() = default;
+  std::unique_ptr<EventListener> eventListener;
+  int argc;
+  char** argv;
 };
 
 template<typename T>
@@ -136,34 +124,28 @@ class App : public layer::GraphicsContext
   {
     static_assert(std::is_base_of<App, T>::value);
     static_assert(has_member_pollEvent<T>::value);
+    static_assert(has_member_resolutionScale<T>::value);
     return static_cast<T*>(this);
   }
   // NOLINTEND
 
 protected:
-  std::unique_ptr<AppRender> m_appRender;
+  std::shared_ptr<AppRender> m_appRender;
   std::unique_ptr<EventListener> m_eventListener;
   AppConfig m_appConfig;
   bool m_shouldExit;
-  double m_pixelRatio{ 1.0 };
   bool m_init{ false };
 
 private:
-  std::optional<AppError> initInternal(const AppConfig& cfg)
+  std::optional<AppError> initInternal(AppConfig cfg)
   {
-    m_appConfig = cfg;
-    int w = m_appConfig.windowSize[0];
-    int h = m_appConfig.windowSize[1];
-    m_appRender = std::make_unique<AppRender>();
+    m_appConfig = std::move(cfg);
+    m_appRender = std::make_shared<AppRender>();
+    m_eventListener = std::move(m_appConfig.eventListener);
     if (m_appRender)
     {
-      layer::ContextConfig cfg;
-      cfg.drawableSize[0] = m_appConfig.windowSize[0];
-      cfg.drawableSize[1] = m_appConfig.windowSize[1];
-      cfg.dpi = Self()->getDPIScale();
-      cfg.stencilBit = appConfig().videoConfig.stencilBit;
-      cfg.multiSample = appConfig().videoConfig.multiSample;
-      initGraphicsContext(cfg);
+      m_appConfig.graphicsContextConfig.resolutionScale = Self()->resolutionScale();
+      init(m_appConfig.graphicsContextConfig);
       if (auto err = m_appRender->init(this))
       {
         return AppError(AppError::Kind::RenderEngineError, "RenderEngineError");
@@ -195,7 +177,6 @@ protected:
 
   App()
     : m_shouldExit(false)
-    , m_pixelRatio(1.0)
     , m_init(false)
   {
   }
@@ -205,6 +186,8 @@ protected:
     return m_init;
   }
 
+  inline static T* s_instance{ nullptr };
+
 public: // public methods
   inline bool shouldExit()
   {
@@ -213,14 +196,17 @@ public: // public methods
 
   bool sendEvent(const UEvent& e)
   {
-    onGlobalEvent(e);
-    if (m_eventListener)
+    auto handled = onGlobalEvent(e);
+    if (!handled)
     {
-      m_eventListener->onEvent(e, this);
-    }
-    if (m_appRender)
-    {
-      m_appRender->sendEvent(e, this);
+      if (m_eventListener)
+      {
+        m_eventListener->onEvent(e, this);
+      }
+      if (m_appRender)
+      {
+        m_appRender->sendEvent(e, this);
+      }
     }
     return true;
   }
@@ -271,16 +257,26 @@ public: // public methods
     return 0;
   }
 
-public: // public static methods
-  static T& createInstance(const AppConfig& cfg = AppConfig())
+  static T& createInstance(AppConfig cfg)
   {
     static_assert(std::is_base_of<App<T>, T>());
     static T s_app;
     if (!s_app.hasInit())
     {
-      s_app.initInternal(cfg);
+      s_app.initInternal(std::move(cfg));
+      s_instance = &s_app;
+      UEvent evt;
+      evt.type = VGG_APP_INIT;
+      evt.init.argc = cfg.argc;
+      evt.init.argv = cfg.argv;
+      s_app.sendEvent(evt);
     }
     return s_app;
+  }
+
+  static T* app()
+  {
+    return s_instance;
   }
 
 }; // class App

@@ -2,8 +2,8 @@
 
 #include "Domain/Daruma.hpp"
 #include "ExpandSymbol.hpp"
-#include "View.hpp"
 #include "Log.h"
+#include "View.hpp"
 
 #include "nlohmann/json.hpp"
 
@@ -15,6 +15,13 @@ namespace VGG
 {
 namespace Layout
 {
+namespace Internal
+{
+namespace Rule
+{
+struct Rule;
+}
+} // namespace Internal
 
 class Layout
 {
@@ -22,7 +29,7 @@ class Layout
   nlohmann::json m_designJson;
   Size m_size;
   std::shared_ptr<LayoutView> m_layout_tree;
-  std::unordered_map<std::string, nlohmann::json> m_rules;
+  std::unordered_map<std::string, std::shared_ptr<Internal::Rule::Rule>> m_rules;
 
 public:
   Layout(std::shared_ptr<Daruma> model)

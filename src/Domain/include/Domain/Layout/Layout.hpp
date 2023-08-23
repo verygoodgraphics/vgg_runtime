@@ -64,6 +64,7 @@ private:
                                   nlohmann::json::json_pointer currentPath,
                                   std::shared_ptr<LayoutView> parent);
   void collectRules(const nlohmann::json& json);
+  void configureView(std::shared_ptr<LayoutView> view);
 };
 
 } // namespace Layout

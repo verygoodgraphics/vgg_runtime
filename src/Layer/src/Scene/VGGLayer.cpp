@@ -148,7 +148,7 @@ public:
     // both OpenGL and OpenGL ES, otherwise it will fail
     info.fFormat = GR_GL_RGBA8;
     const auto& cfg = q_ptr->context()->config();
-    GrBackendRenderTarget target(w, h, cfg.stencilBit, cfg.multiSample, info);
+    GrBackendRenderTarget target(w, h, cfg.multiSample, cfg.stencilBit, info);
 
     SkSurfaceProps props;
     return SkSurfaces::WrapBackendRenderTarget(skiaState.grContext.get(),
@@ -196,38 +196,6 @@ public:
                              textPaint);
       dy += FONTSIZE;
     }
-  }
-
-  void drawPositionInfo(SkCanvas* canvas, int curMouseX, int curMouseY)
-  {
-    SkPaint textPaint;
-    static const char* s_infoFmt1 = "WindowPos: [%d, %d]";
-    static const char* s_infoFmt2 = "ScenePos: [%d, %d]";
-
-    float windowPos[2] = { (float)curMouseX, (float)curMouseY };
-    float logixXY[2];
-    zoomer.mapWindowPosToLogicalPosition(windowPos, 1.0, logixXY);
-    char info[1024];
-    sprintf(info, s_infoFmt1, (int)curMouseX, (int)curMouseY);
-    textPaint.setColor(SK_ColorBLACK);
-    SkFont font;
-    font.setSize(32);
-    canvas->drawSimpleText(info,
-                           strlen(info),
-                           SkTextEncoding::kUTF8,
-                           curMouseX,
-                           curMouseY,
-                           font,
-                           textPaint);
-
-    sprintf(info, s_infoFmt2, (int)logixXY[0], (int)logixXY[1]);
-    canvas->drawSimpleText(info,
-                           strlen(info),
-                           SkTextEncoding::kUTF8,
-                           curMouseX,
-                           curMouseY + 40,
-                           font,
-                           textPaint);
   }
 };
 
@@ -279,7 +247,7 @@ void VLayer::render()
 
       _->drawTextAt(canvas, info, m_debugInfo->curX, m_debugInfo->curY);
     }
-    _->skiaState.getCanvas()->restore();
+    canvas->restore();
   }
 }
 

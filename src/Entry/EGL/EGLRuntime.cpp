@@ -1,26 +1,46 @@
-#include <algorithm>
-#include <filesystem>
-#include <any>
-#include <nlohmann/json.hpp>
+#include <Application/interface/AppBase.hpp>
 #include <EGL/egl.h>
+#include <Core/FontManager.h>
+#include <Core/PaintNode.h>
+#include <Application/interface/Event/EventListener.h>
+#include <Scene/GraphicsContext.h>
+#include <Scene/GraphicsLayer.h>
+#include <Scene/VGGLayer.h>
+#include <algorithm>
+#include <exception>
+#include <memory>
 #include <optional>
-#include <sstream>
-#include <variant>
-
-#include "Core/FontManager.h"
-#include "Log.h"
-#include "App.hpp"
-
-#include "EGLRuntime.h"
-#include "include/core/SkData.h"
-#include "encode/SkPngEncoder.h"
-#include "Scene/Scene.h"
-#include "Core/PaintNode.h"
-
-using namespace VGG;
 using namespace std;
+using namespace VGG::app;
+namespace VGG::entry
+{
 
-const char* get_egl_error_info(EGLint error)
+constexpr int OPENGL_VERSION[] = { 4, 5 };
+constexpr int PIXEL_BUFFER_WIDTH = 800;
+constexpr int PIXEL_BUFFER_HEIGHT = 600;
+constexpr EGLint CONFIG_ATTRIBS[] = { EGL_SURFACE_TYPE,
+                                      EGL_PBUFFER_BIT,
+                                      EGL_BLUE_SIZE,
+                                      8,
+                                      EGL_GREEN_SIZE,
+                                      8,
+                                      EGL_RED_SIZE,
+                                      8,
+                                      EGL_DEPTH_SIZE,
+                                      8,
+                                      EGL_RENDERABLE_TYPE,
+                                      EGL_OPENGL_BIT,
+                                      EGL_NONE };
+
+constexpr EGLint CONTEXT_ATTRIBS[] = { EGL_CONTEXT_MAJOR_VERSION,
+                                       OPENGL_VERSION[0],
+                                       EGL_CONTEXT_MINOR_VERSION,
+                                       OPENGL_VERSION[1],
+                                       EGL_CONTEXT_OPENGL_PROFILE_MASK,
+                                       EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT,
+                                       EGL_NONE };
+
+const char* getEglErrorInfo(EGLint error)
 {
   switch (error)
   {
@@ -65,42 +85,16 @@ const char* get_egl_error_info(EGLint error)
     auto error = eglGetError();                                                                    \
     if (error != EGL_SUCCESS)                                                                      \
     {                                                                                              \
-      WARN("EGL Error: %s", get_egl_error_info(error));                                            \
+      WARN("EGL Error: %s", getEglErrorInfo(error));                                               \
     }                                                                                              \
   } while (0)
 
-constexpr int opengl_version[] = { 4, 5 };
-constexpr int pixel_buffer_width = 800;
-constexpr int pixel_buffer_height = 600;
-
-constexpr EGLint config_attribs[] = { EGL_SURFACE_TYPE,
-                                      EGL_PBUFFER_BIT,
-                                      EGL_BLUE_SIZE,
-                                      8,
-                                      EGL_GREEN_SIZE,
-                                      8,
-                                      EGL_RED_SIZE,
-                                      8,
-                                      EGL_DEPTH_SIZE,
-                                      8,
-                                      EGL_RENDERABLE_TYPE,
-                                      EGL_OPENGL_BIT,
-                                      EGL_NONE };
-
-constexpr EGLint context_attris[] = { EGL_CONTEXT_MAJOR_VERSION,
-                                      opengl_version[0],
-                                      EGL_CONTEXT_MINOR_VERSION,
-                                      opengl_version[1],
-                                      EGL_CONTEXT_OPENGL_PROFILE_MASK,
-                                      EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT,
-                                      EGL_NONE };
-
-class EGLRuntime : public App<EGLRuntime>
+class EGLCtx : public layer::GraphicsContext
 {
-  EGLContext egl_ctx;
-  EGLSurface egl_surface;
-  EGLDisplay egl_display;
-  EGLConfig egl_config = nullptr;
+  EGLContext m_eglCtx;
+  EGLSurface m_eglSurface;
+  EGLDisplay m_eglDisplay;
+  EGLConfig m_eglConfig = nullptr;
   std::unordered_map<std::string, std::any> m_properties;
 
 private:
@@ -110,12 +104,12 @@ private:
     EGLint width = w;
     EGLint height = h;
 
-    eglDestroySurface(egl_display, egl_surface);
+    eglDestroySurface(m_eglDisplay, m_eglSurface);
     EGL_CHECK();
-    EGLint pixel_buffer_attribs[] = {
+    EGLint pixelBufferAttribs[] = {
       EGL_WIDTH, w, EGL_HEIGHT, h, EGL_NONE,
     };
-    egl_surface = eglCreatePbufferSurface(egl_display, egl_config, pixel_buffer_attribs);
+    m_eglSurface = eglCreatePbufferSurface(m_eglDisplay, m_eglConfig, pixelBufferAttribs);
     EGL_CHECK();
 
     eglBindAPI(EGL_OPENGL_API);
@@ -129,11 +123,8 @@ public:
   {
     return 1.0;
   }
-  std::optional<AppError> initContext(int w, int h, const std::string& title)
+  std::optional<AppError> initContext(int w, int h)
   {
-    // DPI::ScaleFactor = get_scale_factor();
-    // int winWidth = w * DPI::ScaleFactor;
-    // int winHeight = h * DPI::ScaleFactor;
     int winWidth = w;
     int winHeight = h;
 
@@ -141,8 +132,8 @@ public:
     m_properties["viewport_size"] = std::pair{ winWidth, winHeight };
     m_properties["app_size"] = std::pair{ winWidth, winHeight };
 
-    egl_display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    if (egl_display == EGL_NO_DISPLAY)
+    m_eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    if (m_eglDisplay == EGL_NO_DISPLAY)
     {
       WARN("No default display");
       // try EXT_platform_device, see
@@ -152,24 +143,24 @@ public:
     }
 
     EGLint major = 0, minor = 0;
-    eglInitialize(egl_display, &major, &minor);
+    eglInitialize(m_eglDisplay, &major, &minor);
     INFO("EGL version: %d, %d", major, minor);
-    INFO("EGL vendor string: %s", eglQueryString(egl_display, EGL_VENDOR));
+    INFO("EGL vendor string: %s", eglQueryString(m_eglDisplay, EGL_VENDOR));
     EGL_CHECK();
 
     // 2. Select an appropriate configuration
-    EGLint num_configs = 0;
-    eglChooseConfig(egl_display, config_attribs, &egl_config, 1, &num_configs);
+    EGLint numConfigs = 0;
+    eglChooseConfig(m_eglDisplay, CONFIG_ATTRIBS, &m_eglConfig, 1, &numConfigs);
     EGL_CHECK();
 
     int maxSurfaceSize[2];
-    if (eglGetConfigAttrib(egl_display, egl_config, EGL_MAX_PBUFFER_WIDTH, maxSurfaceSize) !=
+    if (eglGetConfigAttrib(m_eglDisplay, m_eglConfig, EGL_MAX_PBUFFER_WIDTH, maxSurfaceSize) !=
         EGL_TRUE)
     {
       EGL_CHECK();
       return AppError(AppError::Kind::EGLGetAttribError, "get attribute error");
     }
-    if (eglGetConfigAttrib(egl_display, egl_config, EGL_MAX_PBUFFER_HEIGHT, maxSurfaceSize + 1) !=
+    if (eglGetConfigAttrib(m_eglDisplay, m_eglConfig, EGL_MAX_PBUFFER_HEIGHT, maxSurfaceSize + 1) !=
         EGL_TRUE)
     {
       EGL_CHECK();
@@ -183,10 +174,10 @@ public:
 
     // 3. Create a surface
 
-    EGLint pixel_buffer_attribs[] = {
+    EGLint pixelBufferAttribs[] = {
       EGL_WIDTH, w, EGL_HEIGHT, h, EGL_NONE,
     };
-    egl_surface = eglCreatePbufferSurface(egl_display, egl_config, pixel_buffer_attribs);
+    m_eglSurface = eglCreatePbufferSurface(m_eglDisplay, m_eglConfig, pixelBufferAttribs);
     EGL_CHECK();
 
     // 4. Bind the API
@@ -194,14 +185,14 @@ public:
     EGL_CHECK();
 
     // 5. Create a context and make it current
-    egl_ctx = eglCreateContext(egl_display, egl_config, EGL_NO_CONTEXT, context_attris);
+    m_eglCtx = eglCreateContext(m_eglDisplay, m_eglConfig, EGL_NO_CONTEXT, CONTEXT_ATTRIBS);
     EGL_CHECK();
 
     return makeContextCurrent();
   }
   std::optional<AppError> makeContextCurrent()
   {
-    if (eglMakeCurrent(egl_display, egl_surface, egl_surface, egl_ctx) == EGL_TRUE)
+    if (eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface, m_eglCtx) == EGL_TRUE)
     {
       return nullopt;
     }
@@ -220,29 +211,37 @@ public:
     return std::any();
   }
 
-  void setProperty(const std::string& name, std::any value)
+  bool swap() override
   {
-    auto it = m_properties.find(name);
-    if (it != m_properties.end())
-    {
-      if (name == "viewport_size")
-      {
-        auto size = std::any_cast<std::pair<int, int>>(value);
-        auto prop = std::any_cast<std::pair<int, int>>(it->second);
-        if (size.first != prop.first || size.second != prop.second)
-        {
-          resizeEGLSurface(prop.first, prop.second);
-          updateSkiaEngine();
-          resizeSkiaSurface(prop.first, prop.second);
-          it->second = value;
-        }
-      }
-    }
+    swapBuffer();
+    return true;
   }
 
-  void onInit()
+  bool makeCurrent() override
   {
-    // do nothing
+    return true;
+  }
+
+  bool onResize(int w, int h) override
+  {
+    return true;
+  }
+
+  virtual void shutdown() override
+  {
+    destoryEGLContext();
+  }
+
+  void setProperty(const std::string& name, std::any value)
+  {
+  }
+
+  bool onInit() override
+  {
+    const auto& cfg = config();
+    if (initContext(cfg.drawableSize[0], cfg.drawableSize[1]))
+      return false;
+    return true;
   }
 
   void pollEvent()
@@ -252,44 +251,26 @@ public:
 
   void swapBuffer()
   {
-    if (eglSwapBuffers(egl_display, egl_surface) == EGL_FALSE)
+    if (eglSwapBuffers(m_eglDisplay, m_eglSurface) == EGL_FALSE)
     {
       WARN("egl swap buffer failed\n");
     }
   }
 
-  ~EGLRuntime()
+  void destoryEGLContext()
   {
-    eglMakeCurrent(egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-    eglDestroyContext(egl_display, egl_ctx);
-    eglDestroySurface(egl_display, egl_surface);
-    eglTerminate(egl_display);
+    eglMakeCurrent(m_eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    eglDestroyContext(m_eglDisplay, m_eglCtx);
+    eglDestroySurface(m_eglDisplay, m_eglSurface);
+    eglTerminate(m_eglDisplay);
     // eglReleaseThread();
   }
-};
 
-float calcScaleFactor(float inputWidth,
-                      float inputHeight,
-                      float maxWidth,
-                      float maxHeight,
-                      float& outWidth,
-                      float& outHeight)
-{
-  auto widthScale = maxWidth / inputWidth;
-  auto heightScale = maxHeight / inputHeight;
-  float outputSize[2] = { 0.f, 0.f };
-  if (widthScale < heightScale)
+  ~EGLCtx()
   {
-    outWidth = maxWidth;
-    outHeight = widthScale * inputHeight;
+    destoryEGLContext();
   }
-  else
-  {
-    outWidth = heightScale * inputWidth;
-    outHeight = maxHeight;
-  }
-  return widthScale > heightScale ? heightScale : widthScale;
-}
+};
 
 void getMaxSurfaceSize(int resolutionLevel, float* maxSurfaceSize)
 {
@@ -334,6 +315,28 @@ void getMaxSurfaceSize(int resolutionLevel, float* maxSurfaceSize)
   }
 }
 
+float calcScaleFactor(float inputWidth,
+                      float inputHeight,
+                      float maxWidth,
+                      float maxHeight,
+                      float& outWidth,
+                      float& outHeight)
+{
+  auto widthScale = maxWidth / inputWidth;
+  auto heightScale = maxHeight / inputHeight;
+  float outputSize[2] = { 0.f, 0.f };
+  if (widthScale < heightScale)
+  {
+    outWidth = maxWidth;
+    outHeight = widthScale * inputHeight;
+  }
+  else
+  {
+    outWidth = heightScale * inputWidth;
+    outHeight = maxHeight;
+  }
+  return widthScale > heightScale ? heightScale : widthScale;
+}
 std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> render(
   const nlohmann::json& j,
   const std::map<std::string, std::vector<char>>& resources,
@@ -347,26 +350,26 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
   float maxSurfaceSize[2];
   getMaxSurfaceSize(resolutionLevel, maxSurfaceSize);
   std::stringstream ss;
-  auto appResult = App<EGLRuntime>::createInstance(maxSurfaceSize[0], maxSurfaceSize[1], 1.0);
-  if (const auto error = std::get_if<AppError>(&appResult))
-  {
-    ss << "create instance failed: " << error->text << std::endl;
-    std::string s;
-    ss >> s;
-    return { s, {} };
-  }
-  auto v = std::get_if<EGLRuntime*>(&appResult);
-  auto app = *v;
-  if (!app)
-  {
-    return { "Failed to create instance", {} };
-  }
+
+  auto egl = std::make_shared<EGLCtx>();
+  auto layer = std::make_shared<layer::VLayer>();
+  layer::ContextConfig cfg;
+  cfg.drawableSize[0] = maxSurfaceSize[0];
+  cfg.drawableSize[1] = maxSurfaceSize[1];
+  cfg.resolutionScale = 1.0;
+  cfg.scaleFactor = 1.0;
+  cfg.resolutionScale = 1.0;
+  cfg.stencilBit = 8;
+  cfg.multiSample = 0;
+  egl->init(cfg);
+  layer->init(egl.get());
 
   FontManager::instance().setDefaultFontManager(fontCollectionName);
   std::vector<std::pair<std::string, std::vector<char>>> res;
   auto scene = std::make_shared<Scene>();
   scene->loadFileContent(j);
   scene->setResRepo(resources);
+  layer->addScene(scene);
   auto count = scene->frameCount();
   for (int i = 0; i < count; i++)
   {
@@ -374,46 +377,43 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
     int w = b.size().x;
     int h = b.size().y;
     scene->setPage(i);
-    app->setUseOldRenderer(false);
-    app->setScene(scene);
-    auto canvas = app->getCanvas();
-    if (canvas)
+
+    float actualSize[2];
+    auto scale =
+      calcScaleFactor(w, h, maxSurfaceSize[0], maxSurfaceSize[1], actualSize[0], actualSize[1]);
+    layer->setScaleFactor(scale);
+
+    DEBUG("Render Canvas Size: [%d, %d]", (int)maxSurfaceSize[0], (int)maxSurfaceSize[1]);
+    DEBUG("Original [%d, %d] x Scale[%f] = Final[%d, %d]",
+          w,
+          h,
+          scale,
+          (int)actualSize[0],
+          (int)actualSize[1]);
+
+    // begin render one frame
+    layer->beginFrame();
+    layer->render();
+    layer->endFrame();
+    // end render one frame
+
+    layer::ImageOptions opts;
+    opts.encode = layer::EImageEncode::IE_PNG;
+    opts.position[0] = 0;
+    opts.position[1] = 0;
+    opts.extend[0] = actualSize[0];
+    opts.extend[1] = actualSize[1];
+    if (auto img = layer->makeImageSnapshot(opts); img)
     {
-      float actualSize[2];
-      auto scale =
-        calcScaleFactor(w, h, maxSurfaceSize[0], maxSurfaceSize[1], actualSize[0], actualSize[1]);
-      app->setScale(scale);
-      app->frame(0);
-      if (auto surface = app->getSurface())
-      {
-        if (auto image = surface->makeImageSnapshot(
-              SkIRect::MakeXYWH(0, 0, (int)actualSize[0], (int)actualSize[1])))
-        {
-          SkPngEncoder::Options opt;
-          opt.fZLibLevel = std::max(std::min(9, (100 - imageQuality) / 10), 0);
-          if (auto data = SkPngEncoder::Encode(app->getDirectContext(), image.get(), opt))
-          {
-            res.emplace_back(scene->frame(i)->guid(),
-                             std::vector<char>{ data->bytes(), data->bytes() + data->size() });
-          }
-          else
-          {
-            ss << "failed to encode image for artboard: " << i + 1 << std::endl;
-          }
-        }
-        else
-        {
-          ss << "failed to render into image for artboard: " << i + 1 << std::endl;
-        }
-      }
-      else
-      {
-        ss << "failed to create surface for artboard: " << i + 1 << std::endl;
-      }
+      res.emplace_back(scene->frame(i)->guid(), std::move(img.value()));
+    }
+    else
+    {
+      ss << "Failed to encode image for artboard: " << i + 1 << std::endl;
     }
   }
-
-  App<EGLRuntime>::destoryInstance(app);
   return { std::string{ std::istreambuf_iterator<char>{ ss }, std::istreambuf_iterator<char>{} },
            res };
 }
+
+} // namespace VGG::entry

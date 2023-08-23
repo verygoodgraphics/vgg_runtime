@@ -234,13 +234,14 @@ struct Rule
 };
 
 // NOLINTBEGIN
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Length, types, value);
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Bottom, value);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ColumnWidth, strategy, width_value);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ExpandStrategy, strategy, min_row, column_count);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(GridItemPos, strategy, column_id, row_id);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Height, value);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Left, value);
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Length, types, value);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(MaxHeight, value);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(MaxWidth, value);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(MinHeight, value);
@@ -250,6 +251,13 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Right, value);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(RowHeight, strategy, fixed_value);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Top, value);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Width, value);
+
+void from_json(const nlohmann::json& json, FlexboxItem& obj);
+void from_json(const nlohmann::json& json, GridItem& obj);
+void from_json(const nlohmann::json& json, Padding& obj);
+void to_json(nlohmann::json& json, const FlexboxItem& obj);
+void to_json(nlohmann::json& json, const GridItem& obj);
+void to_json(nlohmann::json& json, const Padding& obj);
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FlexboxLayout,
                                                 direction,
@@ -271,13 +279,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(GridLayout,
                                                 padding,
                                                 cell_align);
 
-void from_json(const nlohmann::json& json, FlexboxItem& obj);
-void from_json(const nlohmann::json& json, GridItem& obj);
-void from_json(const nlohmann::json& json, Padding& obj);
 void from_json(const nlohmann::json& json, Rule& obj);
-void to_json(nlohmann::json& json, const FlexboxItem& obj);
-void to_json(nlohmann::json& json, const GridItem& obj);
-void to_json(nlohmann::json& json, const Padding& obj);
 void to_json(nlohmann::json& json, const Rule& obj);
 
 // NOLINTEND

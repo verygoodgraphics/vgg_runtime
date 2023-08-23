@@ -60,4 +60,6 @@ TEST_F(VggLayoutTestSuite, Layout)
   auto right_child_frame = current_page->children()[1]->frame();
   Layout::Rect expect_right_child_frame{ { 1100, 40 }, { 200, 300 } };
   EXPECT_TRUE(right_child_frame == expect_right_child_frame);
+
+  // todo, check json model
 }

@@ -8,7 +8,7 @@ namespace Layout
 
 using Scalar = float;
 
-#define toVggLayoutScalar(x) static_cast<Scalar>(x)
+#define TO_VGG_LAYOUT_SCALAR(x) static_cast<Scalar>(x)
 
 struct Point
 {

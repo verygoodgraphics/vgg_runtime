@@ -21,18 +21,18 @@ void from_json(const nlohmann::json& j, Point& point)
 
 void to_json(nlohmann::json& j, const Rect& rect)
 {
-  j[k_x] = rect.origin.x;
-  j[k_y] = rect.origin.y;
-  j[k_width] = rect.size.width;
-  j[k_height] = rect.size.height;
+  j[K_X] = rect.origin.x;
+  j[K_Y] = rect.origin.y;
+  j[K_WIDTH] = rect.size.width;
+  j[K_HEIGHT] = rect.size.height;
 }
 
 void from_json(const nlohmann::json& j, Rect& rect)
 {
-  rect.origin.x = j.value(k_x, 0.f);
-  rect.origin.y = j.value(k_y, 0.f);
-  rect.size.width = j.value(k_width, 0.f);
-  rect.size.height = j.value(k_height, 0.f);
+  rect.origin.x = j.value(K_X, 0.f);
+  rect.origin.y = j.value(K_Y, 0.f);
+  rect.size.width = j.value(K_WIDTH, 0.f);
+  rect.size.height = j.value(K_HEIGHT, 0.f);
 }
 
 void to_json(nlohmann::json& j, const Matrix& matrix)
@@ -59,17 +59,16 @@ void from_json(const nlohmann::json& json, Matrix& matrix)
   matrix.ty = json[5];
 }
 
-bool is_layout_node(const nlohmann::json& json)
+bool isLayoutNode(const nlohmann::json& json)
 {
   if (!json.is_object())
   {
     return false;
   }
 
-  auto class_name = json.value(k_class, "");
-  if (class_name == k_frame || class_name == k_group || class_name == k_image ||
-      class_name == k_path || class_name == k_symbol_instance || class_name == k_symbol_master ||
-      class_name == k_text)
+  auto className = json.value(K_CLASS, "");
+  if (className == K_FRAME || className == K_GROUP || className == K_IMAGE || className == K_PATH ||
+      className == K_SYMBOL_INSTANCE || className == K_SYMBOL_MASTER || className == K_TEXT)
   {
     return true;
   }
@@ -77,15 +76,15 @@ bool is_layout_node(const nlohmann::json& json)
   return false;
 }
 
-bool is_point_attr_node(const nlohmann::json& json)
+bool isPointAttrNode(const nlohmann::json& json)
 {
   if (!json.is_object())
   {
     return false;
   }
 
-  auto class_name = json.value(k_class, "");
-  if (class_name == k_point_attr)
+  auto className = json.value(K_CLASS, "");
+  if (className == K_POINT_ATTR)
   {
     return true;
   }

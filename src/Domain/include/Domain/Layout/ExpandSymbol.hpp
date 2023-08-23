@@ -13,42 +13,42 @@ namespace VGG
 {
 namespace Layout
 {
-constexpr auto k_separator = "__";
+constexpr auto K_SEPARATOR = "__";
 
 class ExpandSymbol
 {
-  const nlohmann::json m_design_json;
+  const nlohmann::json m_designJson;
   std::unordered_map<std::string, nlohmann::json> m_masters;
 
 public:
-  ExpandSymbol(const nlohmann::json& design_json)
-    : m_design_json{ design_json }
+  ExpandSymbol(const nlohmann::json& designJson)
+    : m_designJson{ designJson }
   {
   }
 
   nlohmann::json operator()();
 
 private:
-  void collect_master(const nlohmann::json& json);
-  void expand_instance(nlohmann::json& json,
-                       std::vector<std::string>& instance_id_stack,
-                       bool again = false);
-  void scale_from_master(nlohmann::json& instance, nlohmann::json& master);
+  void collectMaster(const nlohmann::json& json);
+  void expandInstance(nlohmann::json& json,
+                      std::vector<std::string>& instanceIdStack,
+                      bool again = false);
+  void scaleFromMaster(nlohmann::json& instance, nlohmann::json& master);
 
-  void normalize_children_geometry(nlohmann::json& json, const Size container_size);
-  void recalculate_intance_children_geometry(nlohmann::json& json, Size container_size);
+  void normalizeChildrenGeometry(nlohmann::json& json, const Size containerSize);
+  void recalculateIntanceChildrenGeometry(nlohmann::json& json, Size containerSize);
 
-  void apply_overrides(nlohmann::json& instance, const std::vector<std::string>& instance_id_stack);
-  void apply_overrides(nlohmann::json& json,
-                       std::stack<std::string> reversed_path,
-                       const nlohmann::json& value);
-  nlohmann::json* find_child_object(nlohmann::json& json, const std::string& object_id);
-  void make_id_unique(nlohmann::json& json, const std::string& id_prefix);
-  void make_mask_id_unique(nlohmann::json& json,
-                           nlohmann::json& instance_json,
-                           const std::string& id_prefix);
-  std::string join(const std::vector<std::string>& instance_id_stack,
-                   const std::string& seperator = k_separator);
+  void applyOverrides(nlohmann::json& instance, const std::vector<std::string>& instanceIdStack);
+  void applyOverrides(nlohmann::json& json,
+                      std::stack<std::string> reversedPath,
+                      const nlohmann::json& value);
+  nlohmann::json* findChildObject(nlohmann::json& json, const std::string& objectId);
+  void makeIdUnique(nlohmann::json& json, const std::string& idPrefix);
+  void makeMaskIdUnique(nlohmann::json& json,
+                        nlohmann::json& instanceJson,
+                        const std::string& idPrefix);
+  std::string join(const std::vector<std::string>& instanceIdStack,
+                   const std::string& seperator = K_SEPARATOR);
 };
 } // namespace Layout
 

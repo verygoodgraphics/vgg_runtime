@@ -55,7 +55,7 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
         return;
       }
 
-      Layout::Point point{ toVggLayoutScalar(evt.button.x), toVggLayoutScalar(evt.button.y) };
+      Layout::Point point{ TO_VGG_LAYOUT_SCALAR(evt.button.x), TO_VGG_LAYOUT_SCALAR(evt.button.y) };
       point = converPointFromWindowAndScale(point);
       auto target_view = m_root->hitTest(point,
                                          [&has_event_listener](const std::string& path) {
@@ -88,7 +88,7 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
         return;
       }
 
-      Layout::Point point{ toVggLayoutScalar(evt.motion.x), toVggLayoutScalar(evt.motion.y) };
+      Layout::Point point{ TO_VGG_LAYOUT_SCALAR(evt.motion.x), TO_VGG_LAYOUT_SCALAR(evt.motion.y) };
       point = converPointFromWindowAndScale(point);
       auto target_view = m_root->hitTest(point,
                                          [&has_event_listener](const std::string& path) {
@@ -120,7 +120,7 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
         return;
       }
 
-      Layout::Point point{ toVggLayoutScalar(evt.button.x), toVggLayoutScalar(evt.button.y) };
+      Layout::Point point{ TO_VGG_LAYOUT_SCALAR(evt.button.x), TO_VGG_LAYOUT_SCALAR(evt.button.y) };
       point = converPointFromWindowAndScale(point);
       auto js_button_index{ evt.button.button - 1 };
       auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
@@ -335,7 +335,7 @@ void UIView::layoutSubviews()
   {
     for (auto& subview : m_subviews)
     {
-      subview->m_frame = { { toVggLayoutScalar(m_left), toVggLayoutScalar(m_top) },
+      subview->m_frame = { { TO_VGG_LAYOUT_SCALAR(m_left), TO_VGG_LAYOUT_SCALAR(m_top) },
                            {
                              m_frame.size.width - m_left - m_right,
                              m_frame.size.height - m_top - m_bottom,
@@ -380,7 +380,7 @@ void UIView::handleMouseWheel(const SDL_Event& evt, Zoomer* zoomer)
   {
     int mx, my;
     SDL_GetMouseState(&mx, &my);
-    Layout::Point point{ toVggLayoutScalar(mx), toVggLayoutScalar(my) };
+    Layout::Point point{ TO_VGG_LAYOUT_SCALAR(mx), TO_VGG_LAYOUT_SCALAR(my) };
     point = converPointFromWindow(point);
     mx = point.x;
     my = point.y;

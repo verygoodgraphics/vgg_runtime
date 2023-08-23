@@ -12,21 +12,20 @@
 #define DEBUG(msg, ...)
 
 namespace nl = nlohmann;
-using jref = nl::detail::json_ref<nl::json>;
 using namespace VGG::Layout;
 
 nlohmann::json ExpandSymbol::operator()()
 {
-  collect_master(m_design_json);
+  collectMaster(m_designJson);
 
-  auto result = m_design_json;
-  std::vector<std::string> instance_id_stack{};
-  expand_instance(result, instance_id_stack);
+  auto result = m_designJson;
+  std::vector<std::string> instanceIdStack{};
+  expandInstance(result, instanceIdStack);
 
   return result;
 }
 
-void ExpandSymbol::collect_master(const nlohmann::json& json)
+void ExpandSymbol::collectMaster(const nlohmann::json& json)
 {
   if (!json.is_object() && !json.is_array())
   {
@@ -35,23 +34,23 @@ void ExpandSymbol::collect_master(const nlohmann::json& json)
 
   if (json.is_object())
   {
-    auto class_name = json.value(k_class, k_empty_string);
-    if (class_name == k_symbol_master)
+    auto className = json.value(K_CLASS, K_EMPTY_STRING);
+    if (className == K_SYMBOL_MASTER)
     {
-      auto id = json[k_id];
+      auto id = json[K_ID];
       m_masters[id] = json;
     }
   }
 
   for (auto& el : json.items())
   {
-    collect_master(el.value());
+    collectMaster(el.value());
   }
 }
 
-void ExpandSymbol::expand_instance(nlohmann::json& json,
-                                   std::vector<std::string>& instance_id_stack,
-                                   bool again)
+void ExpandSymbol::expandInstance(nlohmann::json& json,
+                                  std::vector<std::string>& instanceIdStack,
+                                  bool again)
 {
   if (!json.is_object() && !json.is_array())
   {
@@ -60,57 +59,57 @@ void ExpandSymbol::expand_instance(nlohmann::json& json,
 
   if (json.is_object())
   {
-    auto class_name = json.value(k_class, k_empty_string);
-    if (class_name == k_symbol_instance)
+    auto className = json.value(K_CLASS, K_EMPTY_STRING);
+    if (className == K_SYMBOL_INSTANCE)
     {
-      auto master_id = json[k_master_id].get<std::string>();
-      if (m_masters.find(master_id) != m_masters.end())
+      auto masterId = json[K_MASTER_ID].get<std::string>();
+      if (m_masters.find(masterId) != m_masters.end())
       {
-        auto instance_id = json[k_id].get<std::string>();
+        auto instanceId = json[K_ID].get<std::string>();
         DEBUG("#ExpandSymbol: expand instance[id=%s, ptr=%p] with masterId=%s",
-              instance_id.c_str(),
+              instanceId.c_str(),
               &json,
-              master_id.c_str());
-        auto& master_json = m_masters[master_id];
-        json[k_child_objects] = master_json[k_child_objects];
-        json[k_style] = master_json[k_style];
+              masterId.c_str());
+        auto& masterJson = m_masters[masterId];
+        json[K_CHILD_OBJECTS] = masterJson[K_CHILD_OBJECTS];
+        json[K_STYLE] = masterJson[K_STYLE];
 
         if (!again)
         {
-          instance_id_stack.push_back(instance_id);
+          instanceIdStack.push_back(instanceId);
         }
 
         // 1. expand
-        expand_instance(json[k_child_objects], instance_id_stack);
+        expandInstance(json[K_CHILD_OBJECTS], instanceIdStack);
 
         // 2.1. make instance tree nodes id unique
-        auto new_instance_id = join(instance_id_stack);
-        auto id_prefix = new_instance_id + k_separator;
-        DEBUG("ExpandSymbol: instance id: %s -> %s", instance_id.c_str(), new_instance_id.c_str());
-        json[k_id] = new_instance_id;                     // self
-        make_id_unique(json[k_child_objects], id_prefix); // children
+        auto newInstanceId = join(instanceIdStack);
+        auto idPrefix = newInstanceId + K_SEPARATOR;
+        DEBUG("ExpandSymbol: instance id: %s -> %s", instanceId.c_str(), newInstanceId.c_str());
+        json[K_ID] = newInstanceId;                    // self
+        makeIdUnique(json[K_CHILD_OBJECTS], idPrefix); // children
         // 2.2. update mask by: id -> unique id
-        make_mask_id_unique(json[k_child_objects], json, id_prefix);
+        makeMaskIdUnique(json[K_CHILD_OBJECTS], json, idPrefix);
 
         // 3. overrides
-        apply_overrides(json, instance_id_stack);
+        applyOverrides(json, instanceIdStack);
 
         if (!again)
         {
-          instance_id_stack.pop_back();
+          instanceIdStack.pop_back();
         }
 
         // 4. scale
-        scale_from_master(json, master_json);
+        scaleFromMaster(json, masterJson);
 
         // 5. make instance node to "symbalMaster" or render will not draw this node
         DEBUG("#ExpandSymbol: make instance[id=%s, ptr=%p] as master, erase masterId",
-              instance_id.c_str(),
+              instanceId.c_str(),
               &json);
-        json[k_class] = k_symbol_master;
-        json[k_name] = json[k_name].get<std::string>() + "; expanded_instance";
-        json.erase(k_master_id);
-        json.erase(k_override_values);
+        json[K_CLASS] = K_SYMBOL_MASTER;
+        json[K_NAME] = json[K_NAME].get<std::string>() + "; expanded_instance";
+        json.erase(K_MASTER_ID);
+        json.erase(K_OVERRIDE_VALUES);
       }
 
       return;
@@ -119,79 +118,79 @@ void ExpandSymbol::expand_instance(nlohmann::json& json,
 
   for (auto& el : json.items())
   {
-    expand_instance(el.value(), instance_id_stack);
+    expandInstance(el.value(), instanceIdStack);
   }
 }
 
-void ExpandSymbol::scale_from_master(nlohmann::json& instance, nlohmann::json& master)
+void ExpandSymbol::scaleFromMaster(nlohmann::json& instance, nlohmann::json& master)
 {
-  auto master_size = master[k_bounds].get<Rect>().size;
-  auto instance_size = instance[k_bounds].get<Rect>().size;
-  if (master_size == instance_size)
+  auto masterSize = master[K_BOUNDS].get<Rect>().size;
+  auto instanceSize = instance[K_BOUNDS].get<Rect>().size;
+  if (masterSize == instanceSize)
   {
     return;
   }
 
-  normalize_children_geometry(instance[k_child_objects], master_size);
-  recalculate_intance_children_geometry(instance[k_child_objects], instance_size);
+  normalizeChildrenGeometry(instance[K_CHILD_OBJECTS], masterSize);
+  recalculateIntanceChildrenGeometry(instance[K_CHILD_OBJECTS], instanceSize);
 }
 
-void ExpandSymbol::normalize_children_geometry(nlohmann::json& json, const Size container_size)
+void ExpandSymbol::normalizeChildrenGeometry(nlohmann::json& json, const Size containerSize)
 {
   if (!json.is_object() && !json.is_array())
   {
     return;
   }
-  auto my_container_size = container_size;
-  auto child_container_size = container_size;
+  auto myContainerSize = containerSize;
+  auto childContainerSize = containerSize;
 
-  auto has_bounds = is_layout_node(json);
+  auto hasBounds = isLayoutNode(json);
   Rect bounds, frame;
   Matrix matrix;
-  if (has_bounds)
+  if (hasBounds)
   {
-    bounds = json[k_bounds].get<Rect>();
-    frame = json[k_frame].get<Rect>();
-    matrix = json[k_matrix].get<Matrix>();
+    bounds = json[K_BOUNDS].get<Rect>();
+    frame = json[K_FRAME].get<Rect>();
+    matrix = json[K_MATRIX].get<Matrix>();
 
-    child_container_size = bounds.size;
+    childContainerSize = bounds.size;
   }
 
   // bottom up; leaf first
   for (auto& el : json.items())
   {
-    normalize_children_geometry(el.value(), child_container_size);
+    normalizeChildrenGeometry(el.value(), childContainerSize);
   }
 
   // root last, normalize self
-  if (has_bounds)
+  if (hasBounds)
   {
-    Rect normalized_bounds = {
-      { bounds.origin.x / my_container_size.width, bounds.origin.y / my_container_size.height },
-      { bounds.size.width / my_container_size.width, bounds.size.height / my_container_size.height }
+    Rect normalizedBounds = {
+      { bounds.origin.x / myContainerSize.width, bounds.origin.y / myContainerSize.height },
+      { bounds.size.width / myContainerSize.width, bounds.size.height / myContainerSize.height }
     };
-    Rect normalized_frame = {
-      { frame.origin.x / my_container_size.width, frame.origin.y / my_container_size.height },
-      { frame.size.width / my_container_size.width, frame.size.height / my_container_size.height }
+    Rect normalizedFrame = {
+      { frame.origin.x / myContainerSize.width, frame.origin.y / myContainerSize.height },
+      { frame.size.width / myContainerSize.width, frame.size.height / myContainerSize.height }
     };
-    Matrix normalized_matrix = matrix;
-    normalized_matrix.tx = matrix.tx / my_container_size.width;
-    normalized_matrix.ty = matrix.ty / my_container_size.height;
+    Matrix normalizedMatrix = matrix;
+    normalizedMatrix.tx = matrix.tx / myContainerSize.width;
+    normalizedMatrix.ty = matrix.ty / myContainerSize.height;
 
-    to_json(json[k_bounds], normalized_bounds);
-    to_json(json[k_frame], normalized_frame);
-    to_json(json[k_matrix], normalized_matrix);
+    to_json(json[K_BOUNDS], normalizedBounds);
+    to_json(json[K_FRAME], normalizedFrame);
+    to_json(json[K_MATRIX], normalizedMatrix);
   }
-  if (is_point_attr_node(json))
+  if (isPointAttrNode(json))
   {
-    auto point = json[k_point].get<Point>();
-    point.x /= my_container_size.width;
-    point.y /= my_container_size.height;
-    json[k_point] = point;
+    auto point = json[K_POINT].get<Point>();
+    point.x /= myContainerSize.width;
+    point.y /= myContainerSize.height;
+    json[K_POINT] = point;
   }
 }
 
-void ExpandSymbol::recalculate_intance_children_geometry(nlohmann::json& json, Size container_size)
+void ExpandSymbol::recalculateIntanceChildrenGeometry(nlohmann::json& json, Size containerSize)
 {
   if (!json.is_object() && !json.is_array())
   {
@@ -199,111 +198,111 @@ void ExpandSymbol::recalculate_intance_children_geometry(nlohmann::json& json, S
   }
 
   // top down, root fist
-  auto has_bounds = is_layout_node(json);
-  Rect normalized_bounds, normalized_frame;
-  Matrix normalized_matrix;
-  if (has_bounds)
+  auto hasBounds = isLayoutNode(json);
+  Rect normalizedBounds, normalizedFrame;
+  Matrix normalizedMatrix;
+  if (hasBounds)
   {
-    normalized_bounds = json[k_bounds].get<Rect>();
-    normalized_frame = json[k_frame].get<Rect>();
-    normalized_matrix = json[k_matrix].get<Matrix>();
+    normalizedBounds = json[K_BOUNDS].get<Rect>();
+    normalizedFrame = json[K_FRAME].get<Rect>();
+    normalizedMatrix = json[K_MATRIX].get<Matrix>();
 
-    Rect bounds = { { normalized_bounds.origin.x * container_size.width,
-                      normalized_bounds.origin.y * container_size.height },
-                    { normalized_bounds.size.width * container_size.width,
-                      normalized_bounds.size.height * container_size.height } };
-    Rect frame = { { normalized_frame.origin.x * container_size.width,
-                     normalized_frame.origin.y * container_size.height },
-                   { normalized_frame.size.width * container_size.width,
-                     normalized_frame.size.height * container_size.height } };
-    auto matrix = normalized_matrix;
-    matrix.tx = normalized_matrix.tx * container_size.width;
-    matrix.ty = normalized_matrix.ty * container_size.height;
+    Rect bounds = { { normalizedBounds.origin.x * containerSize.width,
+                      normalizedBounds.origin.y * containerSize.height },
+                    { normalizedBounds.size.width * containerSize.width,
+                      normalizedBounds.size.height * containerSize.height } };
+    Rect frame = { { normalizedFrame.origin.x * containerSize.width,
+                     normalizedFrame.origin.y * containerSize.height },
+                   { normalizedFrame.size.width * containerSize.width,
+                     normalizedFrame.size.height * containerSize.height } };
+    auto matrix = normalizedMatrix;
+    matrix.tx = normalizedMatrix.tx * containerSize.width;
+    matrix.ty = normalizedMatrix.ty * containerSize.height;
 
-    to_json(json[k_bounds], bounds);
-    to_json(json[k_frame], frame);
-    to_json(json[k_matrix], matrix);
+    to_json(json[K_BOUNDS], bounds);
+    to_json(json[K_FRAME], frame);
+    to_json(json[K_MATRIX], matrix);
 
-    container_size = bounds.size;
+    containerSize = bounds.size;
   }
-  if (is_point_attr_node(json))
+  if (isPointAttrNode(json))
   {
-    auto point = json[k_point].get<Point>();
-    point.x *= container_size.width;
-    point.y *= container_size.height;
-    json[k_point] = point;
+    auto point = json[K_POINT].get<Point>();
+    point.x *= containerSize.width;
+    point.y *= containerSize.height;
+    json[K_POINT] = point;
   }
 
   // leaf last
   for (auto& el : json.items())
   {
-    recalculate_intance_children_geometry(el.value(), container_size);
+    recalculateIntanceChildrenGeometry(el.value(), containerSize);
   }
 }
 
-void ExpandSymbol::apply_overrides(nlohmann::json& instance,
-                                   const std::vector<std::string>& instance_id_stack)
+void ExpandSymbol::applyOverrides(nlohmann::json& instance,
+                                  const std::vector<std::string>& instanceIdStack)
 {
-  auto& override_values = instance[k_override_values];
-  if (!override_values.is_array())
+  auto& overrideValues = instance[K_OVERRIDE_VALUES];
+  if (!overrideValues.is_array())
   {
     return;
   }
 
-  auto instance_id = instance[k_id];
-  auto instance_master_id = instance[k_master_id];
-  for (auto& el : override_values.items())
+  auto instanceId = instance[K_ID];
+  auto instanceMasterId = instance[K_MASTER_ID];
+  for (auto& el : overrideValues.items())
   {
-    auto& override_item = el.value();
-    if (!override_item.is_object() || (override_item[k_class] != k_override_class))
+    auto& overrideItem = el.value();
+    if (!overrideItem.is_object() || (overrideItem[K_CLASS] != K_OVERRIDE_CLASS))
     {
       continue;
     }
 
-    auto expand_context_instance_id_stack = instance_id_stack;
+    auto expandContextInstanceIdStack = instanceIdStack;
 
-    nl::json* child_object{ nullptr };
-    auto& object_id_paths = override_item[k_object_id];
-    if (!object_id_paths.is_array() || object_id_paths.empty())
+    nl::json* childObject{ nullptr };
+    auto& objectIdPaths = overrideItem[K_OBJECT_ID];
+    if (!objectIdPaths.is_array() || objectIdPaths.empty())
     {
       continue;
     }
-    else if (object_id_paths.size() == 1 && object_id_paths[0] == instance_master_id)
+    else if (objectIdPaths.size() == 1 && objectIdPaths[0] == instanceMasterId)
     {
-      child_object = &instance;
+      childObject = &instance;
     }
     else
     {
-      auto new_instance_id_stack = instance_id_stack;
-      for (auto& id_json : object_id_paths)
+      auto newInstanceIdStack = instanceIdStack;
+      for (auto& idJson : objectIdPaths)
       {
-        new_instance_id_stack.push_back(id_json);
+        newInstanceIdStack.push_back(idJson);
       }
-      expand_context_instance_id_stack = new_instance_id_stack;
-      child_object = find_child_object(instance[k_child_objects], join(new_instance_id_stack));
-      if (!child_object || !child_object->is_object())
+      expandContextInstanceIdStack = newInstanceIdStack;
+      childObject = findChildObject(instance[K_CHILD_OBJECTS], join(newInstanceIdStack));
+      if (!childObject || !childObject->is_object())
       {
         continue;
       }
     }
 
-    std::string name = override_item[k_override_name];
-    auto value = override_item[k_override_value];
-    if (name == k_master_id) // override masterId
+    std::string name = overrideItem[K_OVERRIDE_NAME];
+    auto value = overrideItem[K_OVERRIDE_VALUE];
+    if (name == K_MASTER_ID) // override masterId
     {
       DEBUG(
         "#ExpandSymbol: overide instance[id=%s, ptr=%p], old masterId=%s, new masterId=%s, restore "
         "class to symbolInstance to expand",
-        (*child_object)[k_id].dump().c_str(),
-        child_object,
-        (*child_object)[k_master_id].dump().c_str(),
+        (*childObject)[K_ID].dump().c_str(),
+        childObject,
+        (*childObject)[K_MASTER_ID].dump().c_str(),
         value.get<std::string>().c_str());
-      (*child_object)[k_master_id] = value;
-      (*child_object).erase(k_override_values);
+      (*childObject)[K_MASTER_ID] = value;
+      (*childObject).erase(K_OVERRIDE_VALUES);
 
       // restore to symbolInstance to expand again
-      (*child_object)[k_class] = k_symbol_instance;
-      expand_instance(*child_object, expand_context_instance_id_stack, true);
+      (*childObject)[K_CLASS] = K_SYMBOL_INSTANCE;
+      expandInstance(*childObject, expandContextInstanceIdStack, true);
     }
     else if (!name.empty()) // other overrides
     {
@@ -320,67 +319,67 @@ void ExpandSymbol::apply_overrides(nlohmann::json& instance,
 
       nl::json::json_pointer path{ "/" + name };
       DEBUG("#ExpandSymbol: override object[id=%s, ptr=%p], path=%s, value=%s",
-            (*child_object)[k_id].get<std::string>().c_str(),
-            child_object,
+            (*childObject)[K_ID].get<std::string>().c_str(),
+            childObject,
             path.to_string().c_str(),
             value.dump().c_str());
       if (name.find("*") == std::string::npos) // no * in path
       {
-        (*child_object)[path] = value;
+        (*childObject)[path] = value;
       }
       else // path has *
       {
-        std::stack<std::string> path_stack;
+        std::stack<std::string> pathStack;
         while (!path.empty())
         {
-          path_stack.push(path.back());
+          pathStack.push(path.back());
           path.pop_back();
         }
 
-        apply_overrides((*child_object), path_stack, value);
+        applyOverrides((*childObject), pathStack, value);
       }
     }
   }
 }
 
-void ExpandSymbol::apply_overrides(nlohmann::json& json,
-                                   std::stack<std::string> reversed_path,
-                                   const nlohmann::json& value)
+void ExpandSymbol::applyOverrides(nlohmann::json& json,
+                                  std::stack<std::string> reversedPath,
+                                  const nlohmann::json& value)
 {
-  ASSERT(!reversed_path.empty());
+  ASSERT(!reversedPath.empty());
 
-  auto key = reversed_path.top();
-  reversed_path.pop();
-  auto is_last_key = reversed_path.empty();
+  auto key = reversedPath.top();
+  reversedPath.pop();
+  auto isLastKey = reversedPath.empty();
 
   if (key != "*")
   {
-    if (is_last_key)
+    if (isLastKey)
     {
       json[key] = value;
     }
     else
     {
-      apply_overrides(json[key], reversed_path, value);
+      applyOverrides(json[key], reversedPath, value);
     }
   }
   else
   {
     for (auto& el : json.items())
     {
-      if (is_last_key)
+      if (isLastKey)
       {
         el.value() = value;
       }
       else
       {
-        apply_overrides(el.value(), reversed_path, value);
+        applyOverrides(el.value(), reversedPath, value);
       }
     }
   }
 }
 
-nlohmann::json* ExpandSymbol::find_child_object(nlohmann::json& json, const std::string& object_id)
+nlohmann::json* ExpandSymbol::findChildObject(nlohmann::json& json, const std::string& objectId)
 {
   if (!json.is_object() && !json.is_array())
   {
@@ -389,7 +388,7 @@ nlohmann::json* ExpandSymbol::find_child_object(nlohmann::json& json, const std:
 
   if (json.is_object())
   {
-    if (json.contains(k_id) && json[k_id] == object_id)
+    if (json.contains(K_ID) && json[K_ID] == objectId)
     {
       return &json;
     }
@@ -397,7 +396,7 @@ nlohmann::json* ExpandSymbol::find_child_object(nlohmann::json& json, const std:
 
   for (auto& el : json.items())
   {
-    auto ret = find_child_object(el.value(), object_id);
+    auto ret = findChildObject(el.value(), objectId);
     if (ret)
     {
       return ret;
@@ -407,123 +406,121 @@ nlohmann::json* ExpandSymbol::find_child_object(nlohmann::json& json, const std:
   return nullptr;
 }
 
-void ExpandSymbol::make_id_unique(nlohmann::json& json, const std::string& id_prefix)
+void ExpandSymbol::makeIdUnique(nlohmann::json& json, const std::string& idPrefix)
 {
   if (!json.is_object() && !json.is_array())
   {
     return;
   }
 
-  if (is_layout_node(json))
+  if (isLayoutNode(json))
   {
     // skip expanded instance
-    auto class_name = json.value(k_class, k_empty_string);
-    if (class_name == k_symbol_master)
+    auto className = json.value(K_CLASS, K_EMPTY_STRING);
+    if (className == K_SYMBOL_MASTER)
     {
       return;
     }
 
-    if (json.contains(k_id))
+    if (json.contains(K_ID))
     {
-      auto object_id = json[k_id].get<std::string>();
-      auto new_object_id = id_prefix + object_id;
-      DEBUG("ExpandSymbol::make_id_unique: object id: %s -> %s",
-            object_id.c_str(),
-            new_object_id.c_str());
-      json[k_id] = new_object_id;
+      auto objectId = json[K_ID].get<std::string>();
+      auto newObjectId = idPrefix + objectId;
+      DEBUG("ExpandSymbol::makeIdUnique: object id: %s -> %s",
+            objectId.c_str(),
+            newObjectId.c_str());
+      json[K_ID] = newObjectId;
     }
   }
 
   for (auto& el : json.items())
   {
-    make_id_unique(el.value(), id_prefix);
+    makeIdUnique(el.value(), idPrefix);
   }
 }
-std::string ExpandSymbol::join(const std::vector<std::string>& instance_id_stack,
+std::string ExpandSymbol::join(const std::vector<std::string>& instanceIdStack,
                                const std::string& separator)
 {
-  return std::accumulate(std::next(instance_id_stack.begin()),
-                         instance_id_stack.end(),
-                         instance_id_stack[0], // start with first element
+  return std::accumulate(std::next(instanceIdStack.begin()),
+                         instanceIdStack.end(),
+                         instanceIdStack[0], // start with first element
                          [&](const std::string& a, const std::string& b)
                          { return a + separator + b; });
 }
 
-void ExpandSymbol::make_mask_id_unique(nlohmann::json& json,
-                                       nlohmann::json& instance_json,
-                                       const std::string& id_prefix)
+void ExpandSymbol::makeMaskIdUnique(nlohmann::json& json,
+                                    nlohmann::json& instanceJson,
+                                    const std::string& idPrefix)
 {
   if (json.is_object())
   {
-    if (!is_layout_node(json))
+    if (!isLayoutNode(json))
     {
       return;
     }
-    DEBUG("ExpandSymbol::make_mask_id_unique: visit node[id=%s, %p], with instance[id=%s, %p], "
-          "id_prefix: %s",
-          json[k_id].dump().c_str(),
+    DEBUG("ExpandSymbol::makeMaskIdUnique: visit node[id=%s, %p], with instance[id=%s, %p], "
+          "idPrefix: %s",
+          json[K_ID].dump().c_str(),
           &json,
-          instance_json[k_id].dump().c_str(),
-          &instance_json,
-          id_prefix.c_str());
+          instanceJson[K_ID].dump().c_str(),
+          &instanceJson,
+          idPrefix.c_str());
 
-    if (json.contains(k_alpha_mask_by))
+    if (json.contains(K_ALPHA_MASK_BY))
     {
-      auto& mask_by = json[k_alpha_mask_by];
-      if (mask_by.is_array())
+      auto& maskBy = json[K_ALPHA_MASK_BY];
+      if (maskBy.is_array())
       {
-        for (auto& item : mask_by)
+        for (auto& item : maskBy)
         {
-          if (item.contains(k_id))
+          if (item.contains(K_ID))
           {
-            auto id = item[k_id].get<std::string>();
-            auto unique_id = id_prefix + id;
-            if (find_child_object(instance_json, unique_id))
+            auto id = item[K_ID].get<std::string>();
+            auto uniqueId = idPrefix + id;
+            if (findChildObject(instanceJson, uniqueId))
             {
-              DEBUG(
-                "ExpandSymbol::make_mask_id_unique: json node[id=%s]: alphaMaskBy, id: %s -> %s",
-                json[k_id].dump().c_str(),
-                id.c_str(),
-                unique_id.c_str());
-              item[k_id] = unique_id;
+              DEBUG("ExpandSymbol::makeMaskIdUnique: json node[id=%s]: alphaMaskBy, id: %s -> %s",
+                    json[K_ID].dump().c_str(),
+                    id.c_str(),
+                    uniqueId.c_str());
+              item[K_ID] = uniqueId;
             }
           }
         }
       }
     }
 
-    if (json.contains(k_outline_mask_by))
+    if (json.contains(K_OUTLINE_MASK_BY))
     {
-      auto& mask_by = json[k_outline_mask_by];
-      if (mask_by.is_array())
+      auto& maskBy = json[K_OUTLINE_MASK_BY];
+      if (maskBy.is_array())
       {
-        for (auto& item : mask_by)
+        for (auto& item : maskBy)
         {
           auto id = item.get<std::string>();
-          auto unique_id = id_prefix + id;
-          if (find_child_object(instance_json, unique_id))
+          auto uniqueId = idPrefix + id;
+          if (findChildObject(instanceJson, uniqueId))
           {
-            DEBUG(
-              "ExpandSymbol::make_mask_id_unique: json node[id=%s]: outlineMaskBy, id: %s -> %s",
-              json[k_id].dump().c_str(),
-              id.c_str(),
-              unique_id.c_str());
-            item = unique_id;
+            DEBUG("ExpandSymbol::makeMaskIdUnique: json node[id=%s]: outlineMaskBy, id: %s -> %s",
+                  json[K_ID].dump().c_str(),
+                  id.c_str(),
+                  uniqueId.c_str());
+            item = uniqueId;
           }
         }
       }
     }
 
-    if (json.contains(k_child_objects))
+    if (json.contains(K_CHILD_OBJECTS))
     {
-      make_mask_id_unique(json[k_child_objects], instance_json, id_prefix);
+      makeMaskIdUnique(json[K_CHILD_OBJECTS], instanceJson, idPrefix);
     }
   }
   else if (json.is_array())
   {
     for (auto& el : json.items())
     {
-      make_mask_id_unique(el.value(), instance_json, id_prefix);
+      makeMaskIdUnique(el.value(), instanceJson, idPrefix);
     }
   }
 }

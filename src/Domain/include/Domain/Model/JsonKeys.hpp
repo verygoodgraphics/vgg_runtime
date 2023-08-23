@@ -3,34 +3,34 @@
 namespace VGG
 {
 
-constexpr auto k_alpha_mask_by = "alphaMaskBy";
-constexpr auto k_bounds = "bounds";
-constexpr auto k_child_objects = "childObjects";
-constexpr auto k_class = "class";
-constexpr auto k_empty_string = "";
-constexpr auto k_frame = "frame";
-constexpr auto k_group = "group";
-constexpr auto k_height = "height";
-constexpr auto k_id = "id";
-constexpr auto k_image = "image";
-constexpr auto k_master_id = "masterId";
-constexpr auto k_matrix = "matrix";
-constexpr auto k_name = "name";
-constexpr auto k_object_id = "objectId";
-constexpr auto k_outline_mask_by = "outlineMaskBy";
-constexpr auto k_override_class = "overrideValue";
-constexpr auto k_override_name = "overrideName";
-constexpr auto k_override_value = "overrideValue";
-constexpr auto k_override_values = "overrideValues";
-constexpr auto k_path = "path";
-constexpr auto k_point = "point";
-constexpr auto k_point_attr = "pointAttr";
-constexpr auto k_style = "style";
-constexpr auto k_symbol_instance = "symbolInstance";
-constexpr auto k_symbol_master = "symbolMaster";
-constexpr auto k_text = "text";
-constexpr auto k_width = "width";
-constexpr auto k_x = "x";
-constexpr auto k_y = "y";
+constexpr auto K_ALPHA_MASK_BY = "alphaMaskBy";
+constexpr auto K_BOUNDS = "bounds";
+constexpr auto K_CHILD_OBJECTS = "childObjects";
+constexpr auto K_CLASS = "class";
+constexpr auto K_EMPTY_STRING = "";
+constexpr auto K_FRAME = "frame";
+constexpr auto K_GROUP = "group";
+constexpr auto K_HEIGHT = "height";
+constexpr auto K_ID = "id";
+constexpr auto K_IMAGE = "image";
+constexpr auto K_MASTER_ID = "masterId";
+constexpr auto K_MATRIX = "matrix";
+constexpr auto K_NAME = "name";
+constexpr auto K_OBJECT_ID = "objectId";
+constexpr auto K_OUTLINE_MASK_BY = "outlineMaskBy";
+constexpr auto K_OVERRIDE_CLASS = "overrideValue";
+constexpr auto K_OVERRIDE_NAME = "overrideName";
+constexpr auto K_OVERRIDE_VALUE = "overrideValue";
+constexpr auto K_OVERRIDE_VALUES = "overrideValues";
+constexpr auto K_PATH = "path";
+constexpr auto K_POINT = "point";
+constexpr auto K_POINT_ATTR = "pointAttr";
+constexpr auto K_STYLE = "style";
+constexpr auto K_SYMBOL_INSTANCE = "symbolInstance";
+constexpr auto K_SYMBOL_MASTER = "symbolMaster";
+constexpr auto K_TEXT = "text";
+constexpr auto K_WIDTH = "width";
+constexpr auto K_X = "x";
+constexpr auto K_Y = "y";
 
 } // namespace VGG

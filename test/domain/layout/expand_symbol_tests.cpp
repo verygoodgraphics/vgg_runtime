@@ -73,9 +73,9 @@ TEST_F(VggExpandSymbolTestSuite, scale)
   // Then
   nlohmann::json::json_pointer path{ "/frames/1/childObjects/0/childObjects/1" };
   auto child = result_json[path];
-  auto child_bounds = child[k_bounds].get<Rect>();
-  auto child_frame = child[k_frame].get<Rect>();
-  auto child_matrix = child[k_matrix].get<Matrix>();
+  auto child_bounds = child[K_BOUNDS].get<Rect>();
+  auto child_frame = child[K_FRAME].get<Rect>();
+  auto child_matrix = child[K_MATRIX].get<Matrix>();
 
   Rect expect_bounds{ 0, 0, 637.656005, 129.333344 };
   Rect expect_frame{ 140.832001, -194, 637.656005, 129.333344 };
@@ -89,7 +89,7 @@ TEST_F(VggExpandSymbolTestSuite, scale)
   nlohmann::json::json_pointer path2{
     "/frames/1/childObjects/0/childObjects/2/childObjects/0/shape/subshapes/0/subGeometry/points/2"
   };
-  auto point = result_json[path2][k_point].get<Point>();
+  auto point = result_json[path2][K_POINT].get<Point>();
   Point expect_point{ 704.1600341796875, -129.33334350585938 };
   EXPECT_EQ(point, expect_point);
 }
@@ -107,8 +107,8 @@ TEST_F(VggExpandSymbolTestSuite, expand_masterId_overridden_instance)
   // Then
   nlohmann::json::json_pointer path{ "/frames/0/childObjects/4/childObjects/1" };
   auto instance_child = result_json[path];
-  EXPECT_TRUE(instance_child[k_master_id].is_null());
-  EXPECT_TRUE(instance_child[k_override_values].is_null());
+  EXPECT_TRUE(instance_child[K_MASTER_ID].is_null());
+  EXPECT_TRUE(instance_child[K_OVERRIDE_VALUES].is_null());
 }
 
 TEST_F(VggExpandSymbolTestSuite, color_override)

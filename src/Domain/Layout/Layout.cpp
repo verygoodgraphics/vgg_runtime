@@ -28,10 +28,10 @@ std::shared_ptr<LayoutView> Layout::Layout::layoutTree()
   m_layout_tree.reset(new LayoutView{ "/", {} });
 
   json::json_pointer frames_path{ "/frames" };
-  for (auto i = 0; i < m_design_json[K_FRAMES].size(); ++i)
+  for (auto i = 0; i < m_designJson[K_FRAMES].size(); ++i)
   {
     auto path = frames_path / i;
-    createOneLayoutView(m_design_json[path], path, m_layout_tree);
+    createOneLayoutView(m_designJson[path], path, m_layout_tree);
   }
 
   return m_layout_tree;
@@ -118,7 +118,7 @@ void Layout::Layout::collectRules(const nlohmann::json& json)
   {
     for (auto& item : obj)
     {
-      auto& id = item[k_id];
+      auto& id = item[K_ID];
       m_rules[id] = item;
     }
   }

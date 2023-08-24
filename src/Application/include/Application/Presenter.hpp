@@ -18,22 +18,22 @@ namespace VGG
 class Presenter : public std::enable_shared_from_this<Presenter>
 {
   std::shared_ptr<UIView> m_view;
-  std::shared_ptr<ViewModel> m_model;
+  std::shared_ptr<ViewModel> m_viewModel;
 
-  std::shared_ptr<UIView> m_edit_view;
-  std::shared_ptr<ViewModel> m_edit_model;
+  std::shared_ptr<UIView> m_editView;
+  std::shared_ptr<ViewModel> m_editViewModel;
 
   rxcpp::subjects::subject<VGG::UIEventPtr> m_subject;
-  rxcpp::subjects::subject<VGG::UIEventPtr> m_edit_subject;
-  rxcpp::observer<VGG::ModelEventPtr> m_model_observer;
-  rxcpp::observer<VGG::ModelEventPtr> m_edit_model_observer;
+  rxcpp::subjects::subject<VGG::UIEventPtr> m_editSubject;
+  rxcpp::observer<VGG::ModelEventPtr> m_modelObserver;
+  rxcpp::observer<VGG::ModelEventPtr> m_editModelObserver;
 
 public:
   virtual ~Presenter() = default;
 
-  virtual void setModel(std::shared_ptr<ViewModel> model)
+  virtual void setModel(std::shared_ptr<ViewModel> viewModel)
   {
-    m_model = model;
+    m_viewModel = viewModel;
 
     if (!m_view)
     {
@@ -41,28 +41,28 @@ public:
       return;
     }
 
-    m_view->show(*m_model);
+    m_view->show(*m_viewModel);
 
     m_view->registerEventListener(
-      [model](std::string path, UIEventType eventType)
+      [viewModel](std::string path, UIEventType eventType)
       {
-        auto listeners_map = model->model->getEventListeners(path);
+        auto listenersMap = viewModel->model->getEventListeners(path);
         std::string type = UIEventTypeToString(eventType);
 
-        auto it = listeners_map.find(type);
-        return it != listeners_map.end();
+        auto it = listenersMap.find(type);
+        return it != listenersMap.end();
       });
   }
 
-  void setEditModel(std::shared_ptr<ViewModel> model)
+  void setEditModel(std::shared_ptr<ViewModel> viewModel)
   {
-    m_edit_model = model;
-    if (m_edit_view)
+    m_editViewModel = viewModel;
+    if (m_editView)
     {
-      m_edit_view->show(*m_edit_model);
+      m_editView->show(*m_editViewModel);
 
-      m_edit_view->registerEventListener(
-        [model](std::string path, UIEventType eventType)
+      m_editView->registerEventListener(
+        [viewModel](std::string path, UIEventType eventType)
         {
           switch (eventType)
           {
@@ -76,7 +76,7 @@ public:
     }
     else
     {
-      WARN("Presenter::setEditModel: empty m_edit_view");
+      WARN("Presenter::setEditModel: empty m_editView");
     }
   }
 
@@ -90,13 +90,13 @@ public:
       return;
     }
 
-    auto weak_this = weak_from_this();
+    auto weakThis = weak_from_this();
     m_view->setEventListener(
-      [weak_this](UIEventPtr evt_ptr)
+      [weakThis](UIEventPtr evtPtr)
       {
-        if (auto p = weak_this.lock())
+        if (auto p = weakThis.lock())
         {
-          p->m_subject.get_subscriber().on_next(evt_ptr);
+          p->m_subject.get_subscriber().on_next(evtPtr);
         }
       });
   }
@@ -115,24 +115,24 @@ public:
 
   void setEditView(std::shared_ptr<UIView> view)
   {
-    m_edit_view = view;
+    m_editView = view;
 
-    auto weak_this = weak_from_this();
-    m_edit_view->setEventListener(
-      [weak_this](UIEventPtr evt_ptr)
+    auto weakThis = weak_from_this();
+    m_editView->setEventListener(
+      [weakThis](UIEventPtr evtPtr)
       {
-        if (auto p = weak_this.lock())
+        if (auto p = weakThis.lock())
         {
-          p->m_edit_subject.get_subscriber().on_next(evt_ptr);
+          p->m_editSubject.get_subscriber().on_next(evtPtr);
         }
       });
   }
 
   Layout::Size editViewSize()
   {
-    if (m_edit_view)
+    if (m_editView)
     {
-      return m_edit_view->size();
+      return m_editView->size();
     }
     else
     {
@@ -142,27 +142,27 @@ public:
 
   virtual rxcpp::observer<VGG::ModelEventPtr>& getModelObserver()
   {
-    auto weak_this = weak_from_this();
-    m_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
-      [weak_this](ModelEventPtr event)
+    auto weakThis = weak_from_this();
+    m_modelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>(
+      [weakThis](ModelEventPtr event)
       {
         switch (event->type)
         {
           case ModelEventType::Add:
           {
-            auto add_event_ptr = static_cast<ModelEventAdd*>(event.get());
+            auto addEventPtr = static_cast<ModelEventAdd*>(event.get());
           }
           break;
 
           case ModelEventType::Delete:
           {
-            auto delete_event_ptr = static_cast<ModelEventDelete*>(event.get());
+            auto deleteEventPtr = static_cast<ModelEventDelete*>(event.get());
           }
           break;
 
           case ModelEventType::Update:
           {
-            auto udpate_event_ptr = static_cast<ModelEventUpdate*>(event.get());
+            auto udpateEventPtr = static_cast<ModelEventUpdate*>(event.get());
           }
           break;
 
@@ -170,39 +170,39 @@ public:
             break;
         }
 
-        if (auto p = weak_this.lock())
+        if (auto p = weakThis.lock())
         {
           // todo, diff & update
           p->update();
         }
       });
 
-    return m_model_observer;
+    return m_modelObserver;
   }
 
   virtual rxcpp::observer<VGG::ModelEventPtr>& getEditModelObserver()
   {
-    auto weak_this = weak_from_this();
-    m_edit_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
-      [weak_this](ModelEventPtr event)
+    auto weakThis = weak_from_this();
+    m_editModelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>(
+      [weakThis](ModelEventPtr event)
       {
         switch (event->type)
         {
           case ModelEventType::Add:
           {
-            auto add_event_ptr = static_cast<ModelEventAdd*>(event.get());
+            auto addEventPtr = static_cast<ModelEventAdd*>(event.get());
           }
           break;
 
           case ModelEventType::Delete:
           {
-            auto delete_event_ptr = static_cast<ModelEventDelete*>(event.get());
+            auto deleteEventPtr = static_cast<ModelEventDelete*>(event.get());
           }
           break;
 
           case ModelEventType::Update:
           {
-            auto udpate_event_ptr = static_cast<ModelEventUpdate*>(event.get());
+            auto udpateEventPtr = static_cast<ModelEventUpdate*>(event.get());
           }
           break;
 
@@ -210,14 +210,14 @@ public:
             break;
         }
 
-        if (auto p = weak_this.lock())
+        if (auto p = weakThis.lock())
         {
           // todo, diff & update
-          p->update_edit_view();
+          p->updateEditView();
         }
       });
 
-    return m_edit_model_observer;
+    return m_editModelObserver;
   }
 
   virtual rxcpp::observable<VGG::UIEventPtr> getObservable()
@@ -227,23 +227,23 @@ public:
 
   virtual rxcpp::observable<VGG::UIEventPtr> getEditObservable()
   {
-    return m_edit_subject.get_observable();
+    return m_editSubject.get_observable();
   }
 
 private:
   void update()
   {
-    if (m_view && m_model)
+    if (m_view && m_viewModel)
     {
-      m_view->show(*m_model);
+      m_view->show(*m_viewModel);
     }
   }
 
-  void update_edit_view()
+  void updateEditView()
   {
-    if (m_edit_view && m_edit_model)
+    if (m_editView && m_editViewModel)
     {
-      m_edit_view->show(*m_edit_model);
+      m_editView->show(*m_editViewModel);
     }
   }
 };

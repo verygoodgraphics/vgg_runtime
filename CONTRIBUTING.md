@@ -31,6 +31,7 @@ Upon opening a pull request, you will be prompted to sign a [Contributor License
 - Keep each commit atomic, and commit with clear messages.
 - Follow the PR template, and write clear descriptions.
 - For C++ code, we enforce the coding style via clang-format and clang-tidy.
+- Make sure the file extensions are *.hpp or *.cpp. Strictly use CamelCase in filenames.
 - Make sure you put useful comments in your code.
 - Make sure your code compiles and passes all uint tests. Please refer to [Build Instructions](README.md#build-instructions) for details.
 

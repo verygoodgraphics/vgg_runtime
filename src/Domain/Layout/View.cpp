@@ -18,6 +18,10 @@ void LayoutView::configureLayout(const Layout::Internal::ConfigureLayoutFn& conf
 
 void LayoutView::applyLayout()
 {
+  if (m_bridge)
+  {
+    m_bridge->applyLayout(false);
+  }
 }
 
 } // namespace VGG

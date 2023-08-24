@@ -91,6 +91,17 @@ public:
     return m_frame;
   }
 
+  void setFrame(const Layout::Rect& frame)
+  {
+    m_frame = frame;
+    // todo, update json model
+  }
+
+  auto layoutBridge() const
+  {
+    return m_bridge;
+  }
+
   void configureLayout(const Layout::Internal::ConfigureLayoutFn& configureFn);
   void applyLayout();
 
@@ -122,7 +133,7 @@ private:
     return { x, y };
   }
 
-  void calculateLayoutWithSize();
+  void calculateLayout();
   void applyLayoutToViewHierarchy();
   void attachNodesFromViewHierachy();
 };

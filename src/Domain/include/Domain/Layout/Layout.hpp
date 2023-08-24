@@ -28,7 +28,7 @@ class Layout
   std::shared_ptr<Daruma> m_model;
   nlohmann::json m_designJson;
   Size m_size;
-  std::shared_ptr<LayoutView> m_layout_tree;
+  std::shared_ptr<LayoutView> m_layoutTree;
   std::unordered_map<std::string, std::shared_ptr<Internal::Rule::Rule>> m_rules;
 
 public:

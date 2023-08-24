@@ -7,6 +7,9 @@
 #include <vector>
 #include <functional>
 
+class flexbox_node;
+class grid_layout;
+
 namespace VGG
 {
 namespace Layout
@@ -14,8 +17,6 @@ namespace Layout
 namespace Internal
 {
 struct Bridge;
-
-using ConfigureLayoutFn = std::function<void(std::shared_ptr<Bridge>)>;
 
 } // namespace Internal
 } // namespace Layout
@@ -93,17 +94,27 @@ public:
 
   void setFrame(const Layout::Rect& frame)
   {
+    bool needLayout = m_frame.size != frame.size;
     m_frame = frame;
-    // todo, update json model
+
+    if (needLayout)
+    {
+      // todo, scale subview
+      // todo, update json model
+      applyLayout();
+    }
   }
 
-  auto layoutBridge() const
+public:
+  std::shared_ptr<Layout::Internal::Bridge> configureLayout();
+  std::shared_ptr<flexbox_node> createFlexboxNode();
+  std::shared_ptr<grid_layout> createGridNode();
+  void applyLayout();
+
+  std::shared_ptr<Layout::Internal::Bridge> layoutBridge() const
   {
     return m_bridge;
   }
-
-  void configureLayout(const Layout::Internal::ConfigureLayoutFn& configureFn);
-  void applyLayout();
 
 private:
   bool pointInside(Layout::Point point)
@@ -132,10 +143,6 @@ private:
 
     return { x, y };
   }
-
-  void calculateLayout();
-  void applyLayoutToViewHierarchy();
-  void attachNodesFromViewHierachy();
 };
 
 } // namespace VGG

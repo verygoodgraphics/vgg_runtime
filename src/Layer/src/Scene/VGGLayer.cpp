@@ -4,8 +4,13 @@
 #include "Scene/GraphicsLayer.h"
 #include "Scene/Renderer.h"
 #include "Scene/Zoomer.h"
+#include "GPU/vk/VulkanObject.hpp"
+#include <gpu/GpuTypes.h>
+#include <gpu/GrTypes.h>
+#include <gpu/vk/GrVkTypes.h>
 #include <optional>
 #include <sstream>
+#include <vulkan/vulkan_core.h>
 
 #define GR_GL_LOG_CALLS 0
 #define GR_GL_CHECK_ERROR 0
@@ -35,7 +40,11 @@
 #include "CappingProfiler.hpp"
 #include "include/docs/SkPDFDocument.h"
 
+#include "gpu/vk/GrVkBackendContext.h"
+
 #include <queue>
+
+#define USE_VULKAN
 
 namespace VGG::layer
 {
@@ -52,6 +61,8 @@ public:
   };
   sk_sp<GrDirectContext> grContext{ nullptr };
   sk_sp<SkSurface> surface{ nullptr };
+
+  GrVkBackendContext vkContext;
 
   inline SkCanvas* getPDFCanvas(const char* fileName, int width, int height)
   {
@@ -104,6 +115,12 @@ public:
   SkCanvas* canvas{ nullptr };
   std::vector<std::shared_ptr<Renderable>> items;
   std::vector<std::shared_ptr<Scene>> scenes;
+
+#ifdef USE_VULKAN
+  std::shared_ptr<vk::VkInstanceObject> vkInstance;
+  std::shared_ptr<vk::VkPhysicalDeviceObject> vkPhysicalDevice;
+  std::shared_ptr<vk::VkDeviceObject> vkDevice;
+#endif
   VLayer__pImpl(VLayer* api)
     : q_ptr(api)
   {
@@ -111,6 +128,9 @@ public:
 
   void updateSkiaEngineGL()
   {
+#ifdef USE_VULKAN
+    updateSkiaEngineVK();
+#else
     // Create Skia
     // get skia interface and make opengl context
     sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
@@ -125,17 +145,27 @@ public:
     }
     skiaState.interface = interface;
     skiaState.grContext = grContext;
+#endif
   }
 
   void resizeSkiaSurfaceGL(int w, int h)
   {
+
+#ifdef USE_VULKAN
+    resizeSkiaSurfaceVk(w, h);
+#else
     skiaState.surface = createSkiaSurfaceGL(w, h);
     surfaceWidth = w;
     surfaceHeight = h;
+#endif
   }
 
   sk_sp<SkSurface> createSkiaSurfaceGL(int w, int h)
   {
+
+#ifdef USE_VULKAN
+    return createSkiaSurfaceVK(w, h);
+#else
     ASSERT(skiaState.interface);
     ASSERT(skiaState.grContext);
     GrGLFramebufferInfo info;
@@ -157,7 +187,83 @@ public:
                                                SkColorType::kRGBA_8888_SkColorType,
                                                nullptr,
                                                &props);
+#endif
   }
+
+#ifdef USE_VULKAN
+
+  void initVulkanObject()
+  {
+    vkInstance = std::make_shared<vk::VkInstanceObject>();
+    skiaState.vkContext.fInstance = VkInstance(*vkInstance);
+    vkPhysicalDevice = std::make_shared<vk::VkPhysicalDeviceObject>(vkInstance);
+    skiaState.vkContext.fPhysicalDevice = VkPhysicalDevice(*vkPhysicalDevice);
+    vkDevice = std::make_shared<vk::VkDeviceObject>(vkPhysicalDevice);
+    skiaState.vkContext.fDevice = VkDevice(*vkDevice);
+    skiaState.vkContext.fQueue = vkDevice->graphicsQueue;
+    skiaState.vkContext.fGetProc = std::function(
+      [](const char* name, VkInstance instance, VkDevice dev) -> PFN_vkVoidFunction
+      {
+        if (dev == VK_NULL_HANDLE && instance == VK_NULL_HANDLE)
+        {
+          return vkGetInstanceProcAddr(VK_NULL_HANDLE, name);
+        }
+        if (dev != VK_NULL_HANDLE)
+        {
+          return vkGetDeviceProcAddr(dev, name);
+        }
+        else if (instance != VK_NULL_HANDLE)
+        {
+          return vkGetInstanceProcAddr(instance, name);
+        }
+        ASSERT(" invalid option");
+        return nullptr;
+      });
+
+    ASSERT(vkInstance);
+    ASSERT(vkPhysicalDevice);
+    ASSERT(vkDevice);
+  }
+  void updateSkiaEngineVK()
+  {
+    // init vkContext;
+    skiaState.grContext = GrDirectContext::MakeVulkan(skiaState.vkContext);
+  }
+
+  void resizeSkiaSurfaceVk(int w, int h)
+  {
+    skiaState.surface = createSkiaSurfaceVK(w, h);
+    surfaceWidth = w;
+    surfaceHeight = h;
+  }
+  sk_sp<SkSurface> createSkiaSurfaceVK(int w, int h)
+  {
+    GrVkImageInfo vkImageInfo;
+    vkImageInfo.fFormat = VK_FORMAT_R8G8B8A8_UNORM;
+    const auto& cfg = q_ptr->context()->config();
+    GrBackendRenderTarget target(w, h, vkImageInfo);
+
+    // GrBackendFormat f = GrBackendFormat::MakeVk(VK_FORMAT_R8G8B8A8_UNORM);
+    // auto a =
+    //   skiaState.grContext->createBackendTexture(w, h, f, GrMipmapped::kNo, GrRenderable::kYes);
+    //
+    // SkSurfaceProps props;
+    // auto r = SkSurfaces::WrapBackendRenderTarget(skiaState.grContext.get(),
+    //                                              target,
+    //                                              kBottomLeft_GrSurfaceOrigin,
+    //                                              SkColorType::kRGBA_8888_SkColorType,
+    //                                              nullptr,
+    //                                              &props);
+
+    SkImageInfo info = SkImageInfo::Make(w,
+                                         h,
+                                         SkColorType::kRGBA_8888_SkColorType,
+                                         SkAlphaType::kPremul_SkAlphaType);
+    auto a = SkSurfaces::RenderTarget(skiaState.grContext.get(), skgpu::Budgeted::kNo, info);
+    return a;
+  }
+
+#endif
 
   std::string mapCanvasPositionToScene(const Zoomer* zoomer,
                                        const char* name,
@@ -202,6 +308,9 @@ std::optional<ELayerError> VLayer::onInit()
 {
   VGG_IMPL(VLayer)
   context()->makeCurrent();
+#ifdef USE_VULKAN
+  _->initVulkanObject();
+#endif
   _->updateSkiaEngineGL();
   const auto& cfg = context()->config();
   resize(cfg.windowSize[0], cfg.windowSize[1]);

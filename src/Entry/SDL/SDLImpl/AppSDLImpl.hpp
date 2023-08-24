@@ -266,7 +266,6 @@ public:
 
   ~AppSDLImpl()
   {
-    shutdown();
   }
 };
 } // namespace VGG::entry

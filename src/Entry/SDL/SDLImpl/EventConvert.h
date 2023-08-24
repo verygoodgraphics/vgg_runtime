@@ -111,7 +111,7 @@ inline VTextEditingEvent toVTextEditingEvent(const SDL_TextEditingEvent& e)
   v.timestamp = e.timestamp;
   v.start = e.start;
   v.length = e.length;
-  std::strcpy(v.text, e.text);
+  std::strncpy(v.text, e.text, sizeof(v.text));
   return v;
 }
 inline VTextEditingExtEvent toVTextEditingExtEvent(const SDL_TextEditingExtEvent& e)
@@ -120,14 +120,14 @@ inline VTextEditingExtEvent toVTextEditingExtEvent(const SDL_TextEditingExtEvent
   v.timestamp = e.timestamp;
   v.start = e.start;
   v.length = e.length;
-  std::strcpy(v.text, e.text);
+  v.text = e.text;
   return v;
 }
 inline VTextInputEvent toVTextInputEvent(const SDL_TextInputEvent& e)
 {
   VTextInputEvent v;
   v.timestamp = e.timestamp;
-  std::strcpy(v.text, e.text);
+  std::strncpy(v.text, e.text, sizeof(v.text));
   return v;
 }
 

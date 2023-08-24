@@ -4,6 +4,7 @@
 #include "JsonKeys.hpp"
 #include "Log.h"
 
+#include <algorithm>
 #include <fstream>
 #include <numeric>
 #include <iostream>
@@ -248,6 +249,26 @@ void ExpandSymbol::applyOverrides(nlohmann::json& instance,
   {
     return;
   }
+
+  // Sorting: 1. masterId first; 2. Top-down, root first;
+  std::sort(overrideValues.begin(),
+            overrideValues.end(),
+            [](const nlohmann::json& a, const nlohmann::json& b)
+            {
+              std::string aName = a[K_OVERRIDE_NAME];
+              std::string bName = b[K_OVERRIDE_NAME];
+              if (aName == K_MASTER_ID && bName != K_MASTER_ID)
+              {
+                return true;
+              }
+              if (aName != K_MASTER_ID && bName == K_MASTER_ID)
+              {
+                return false;
+              }
+              auto& aObjectIdPaths = a[K_OBJECT_ID];
+              auto& bObjectIdPaths = b[K_OBJECT_ID];
+              return aObjectIdPaths.size() < bObjectIdPaths.size();
+            });
 
   auto instanceId = instance[K_ID];
   auto instanceMasterId = instance[K_MASTER_ID];

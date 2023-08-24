@@ -3,6 +3,7 @@
 #include <Entry/SDL/SDLImpl/EventAPISDLImpl.h>
 #include "Event/EventAPI.h"
 #include <Application/interface/AppBase.hpp>
+#include <SDL2/SDL_video.h>
 #include <Utility/interface/Log.h>
 #include "EventConvert.h"
 #include <optional>
@@ -160,7 +161,7 @@ public:
                        SDL_WINDOWPOS_CENTERED,
                        winWidth,
                        winHeight,
-                       SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+                       SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     if (!window)
     {
       handleSDLError();

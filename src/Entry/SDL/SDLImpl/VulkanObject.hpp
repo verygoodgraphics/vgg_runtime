@@ -1,14 +1,11 @@
 #pragma once
 #include <Utility/interface/Log.h>
 #include <cstdint>
-#include <private/base/SkTDArray.h>
+#include <glm/glm.hpp>
 #include <vector>
 #include <iostream>
 #include <functional>
 #include <memory>
-
-#include <GLFW/glfw3.h>
-
 #include <vulkan/vulkan_core.h>
 
 #ifndef __APPLE__
@@ -37,7 +34,8 @@ namespace vk
 {
 struct VkInstanceObject : public std::enable_shared_from_this<VkInstanceObject>
 {
-  VkInstanceObject()
+  template<typename F>
+  VkInstanceObject(F&& extensionQueryFunc)
   {
     uint32_t extPropCount = 0;
     vkEnumerateInstanceExtensionProperties(nullptr, &extPropCount, nullptr);
@@ -47,18 +45,7 @@ struct VkInstanceObject : public std::enable_shared_from_this<VkInstanceObject>
     {
       std::cout << props[i].extensionName << std::endl;
     }
-    if (glfwInit() != GLFW_TRUE)
-    {
-      std::cout << "glfw init failed\n";
-      exit(-1);
-    };
-    uint32_t extCount = 0;
-    auto ext = glfwGetRequiredInstanceExtensions(&extCount);
-    std::vector<const char*> extNames(ext, ext + extCount);
-    for (const auto& c : extNames)
-    {
-      std::cout << "Extension: " << c << std::endl;
-    }
+    std::vector<const char*> extNames = extensionQueryFunc();
 
     if (ENABLE_VALIDATION_LAYER)
     {
@@ -439,9 +426,7 @@ private:
 
 struct VkSurfaceObject
 {
-
   VkSurfaceCapabilitiesKHR cap;
-  template<typename F>
   VkSurfaceObject(std::shared_ptr<VkInstanceObject> instance,
                   std::shared_ptr<VkDeviceObject> device,
                   VkSurfaceKHR surface)
@@ -562,19 +547,10 @@ struct VkSwapchainObject
     : device(std::move(device))
     , surface(std::move(surface))
   {
-    // // Get properties of surface, necessary for creation of swap-chain
-    // VkSurfaceCapabilitiesKHR surfaceProperties;
-    // if (!getSurfaceProperties(physicalDevice, surface, surfaceProperties))
-    //   return false;
-    //
-    // // Get the image presentation mode (synced, immediate etc.)
-    // VkPresentModeKHR presentation_mode = gPresentationMode;
-    // if (!getPresentationMode(surface, physicalDevice, presentation_mode))
-    //   return false;
 
     // Get other swap chain related features
-    const auto capabilities = surface->cap;
-    unsigned int swapImageCount = surface->cap.maxImageCount + 1;
+    const auto capabilities = this->surface->cap;
+    unsigned int swapImageCount = this->surface->cap.maxImageCount + 1;
 
     // Size of the images
     // Default size = window size
@@ -582,14 +558,14 @@ struct VkSwapchainObject
     VkExtent2D swapImageExtent = { (unsigned int)gWindowWidth, (unsigned int)gWindowHeight };
 
     // This happens when the window scales based on the size of an image
-    if (surface->cap.currentExtent.width == 0xFFFFFFF)
+    if (this->surface->cap.currentExtent.width == 0xFFFFFFF)
     {
-      swapImageCount.width = glm::clamp<unsigned int>(size.width,
-                                                      capabilities.minImageExtent.width,
-                                                      capabilities.maxImageExtent.width);
-      swapImageCount.height = glm::clamp<unsigned int>(size.height,
-                                                       capabilities.minImageExtent.height,
-                                                       capabilities.maxImageExtent.height);
+      swapImageExtent.width = glm::clamp<uint32_t>(swapImageExtent.width,
+                                                   capabilities.minImageExtent.width,
+                                                   capabilities.maxImageExtent.width);
+      swapImageExtent.height = glm::clamp<unsigned int>(swapImageExtent.height,
+                                                        capabilities.minImageExtent.height,
+                                                        capabilities.maxImageExtent.height);
     }
     else
     {
@@ -605,9 +581,7 @@ struct VkSwapchainObject
     // VkSurfaceTransformFlagBitsKHR transform = getTransform(capabilities);
 
     // Get swapchain image format
-    // VkSurfaceFormatKHR imageFormat;
-    // if (!getFormat(physicalDevice, surface, imageFormat))
-    //   return false;
+    VkSurfaceFormatKHR imageFormat = this->surface->m_supportedFormat[0];
 
     // Old swap chain
 
@@ -621,13 +595,13 @@ struct VkSwapchainObject
     swapInfo.imageColorSpace = imageFormat.colorSpace;
     swapInfo.imageExtent = swapImageExtent;
     swapInfo.imageArrayLayers = 1;
-    swapInfo.imageUsage = usageFlags;
+    swapInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
     swapInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
     swapInfo.queueFamilyIndexCount = 0;
     swapInfo.pQueueFamilyIndices = nullptr;
-    swapInfo.preTransform = transform;
+    swapInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
     swapInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    swapInfo.presentMode = presentation_mode;
+    swapInfo.presentMode = this->surface->m_supportedPresentMode[0];
     swapInfo.clipped = true;
     swapInfo.oldSwapchain = NULL;
     swapInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -635,22 +609,34 @@ struct VkSwapchainObject
     // Destroy old swap chain
     if (oldSwapchain != VK_NULL_HANDLE)
     {
-      vkDestroySwapchainKHR(this->device, oldSwapchain, nullptr);
+      vkDestroySwapchainKHR(*(this->device), oldSwapchain, nullptr);
       oldSwapchain = VK_NULL_HANDLE;
     }
 
-    if (vkCreateSwapchainKHR(this->device, &swapInfo, nullptr, &oldSwapchain) != VK_SUCCESS)
+    if (vkCreateSwapchainKHR(*(this->device), &swapInfo, nullptr, &oldSwapchain) != VK_SUCCESS)
     {
       std::cout << "unable to create swap chain\n";
-      return false;
+      exit(-1);
     }
 
     // Store handle
-    outSwapChain = oldSwapchain;
-  }
-  void update()
-  {
-    *this = VkSwapchainObject(device, surface);
+    swapChainKHR = oldSwapchain;
+
+    unsigned int imageCount(0);
+    VkResult res = vkGetSwapchainImagesKHR(*this->device, swapChainKHR, &imageCount, nullptr);
+    if (res != VK_SUCCESS)
+    {
+      std::cout << "unable to get number of images in swap chain\n";
+      exit(-1);
+    }
+
+    swapchainImages.clear();
+    swapchainImages.resize(imageCount);
+    if (vkGetSwapchainImagesKHR(*this->device, swapChainKHR, &imageCount, swapchainImages.data()) !=
+        VK_SUCCESS)
+    {
+      exit(-1);
+    }
   }
 };
 

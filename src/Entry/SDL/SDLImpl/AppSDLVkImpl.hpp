@@ -3,7 +3,6 @@
 #include <Entry/SDL/SDLImpl/EventAPISDLImpl.h>
 #include "Event/EventAPI.h"
 #include <Application/interface/AppBase.hpp>
-#include <SDL2/SDL_stdinc.h>
 #include <SDL2/SDL_video.h>
 #include <Utility/interface/Log.h>
 #include "EventConvert.h"
@@ -16,6 +15,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include "VulkanObject.hpp"
 
@@ -24,7 +24,7 @@ namespace VGG::entry
 
 using namespace VGG::app;
 using namespace VGG::layer;
-class AppSDLImpl : public AppBase<AppSDLImpl>
+class AppSDLVkImpl : public AppBase<AppSDLVkImpl>
 {
   struct SDLState
   {
@@ -33,7 +33,85 @@ class AppSDLImpl : public AppBase<AppSDLImpl>
     std::shared_ptr<vk::VkPhysicalDeviceObject> vkPhysicalDevice;
     std::shared_ptr<vk::VkDeviceObject> vkDevice;
     std::shared_ptr<vk::VkSurfaceObject> vkSurface;
+    std::shared_ptr<vk::VkSwapchainObject> vkSwapchain;
+
+    VkQueue presentQueue{ VK_NULL_HANDLE };
+    uint32_t swapChainImageIndex = 0;
+    VkSemaphore imageAvailableSemaphore;
+    VkSemaphore renderFinishedSemaphore;
+    VkFence fence;
+
     ContextInfoVulkan context;
+
+    void resetFence()
+    {
+      vkResetFences(context.device, 1, &fence);
+    }
+
+    void cleanup()
+    {
+      vkDestroySemaphore(context.device, imageAvailableSemaphore, nullptr);
+      vkDestroySemaphore(context.device, renderFinishedSemaphore, nullptr);
+      vkDestroyFence(context.device, fence, nullptr);
+    }
+
+    void acquireImageIndex()
+    {
+      vkAcquireNextImageKHR(context.device,
+                            vkSwapchain->swapChainKHR,
+                            UINT64_MAX,
+                            imageAvailableSemaphore,
+                            VK_NULL_HANDLE,
+                            &swapChainImageIndex);
+    }
+
+    void createSemaphore()
+    {
+      VkFenceCreateInfo fenceInfo{};
+      fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+      VkSemaphoreCreateInfo semaphoreInfo{};
+      semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+      if (vkCreateSemaphore(context.device, &semaphoreInfo, nullptr, &imageAvailableSemaphore) !=
+            VK_SUCCESS ||
+          vkCreateSemaphore(context.device, &semaphoreInfo, nullptr, &renderFinishedSemaphore) !=
+            VK_SUCCESS ||
+          vkCreateFence(context.device, &fenceInfo, nullptr, &fence) != VK_SUCCESS)
+      {
+        throw std::runtime_error("failed to create semaphores!");
+      }
+    }
+
+    bool submit()
+    {
+      VkSubmitInfo submitInfo{};
+      submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+      VkSemaphore waitSemaphores[] = { imageAvailableSemaphore };
+      VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+      submitInfo.waitSemaphoreCount = 1;
+      submitInfo.pWaitSemaphores = waitSemaphores;
+      submitInfo.pWaitDstStageMask = waitStages;
+
+      submitInfo.commandBufferCount = 1;
+      // submitInfo.pCommandBuffers = &commandBuffer;
+      //
+      if (vkQueueSubmit(context.queue, 1, &submitInfo, fence) != VK_SUCCESS)
+      {
+        std::cout << "submit failed\n";
+        return false;
+      }
+      return true;
+    }
+
+    void present()
+    {
+      VkPresentInfoKHR presentInfo;
+      VkSwapchainKHR swapChains[] = { vkSwapchain->swapChainKHR };
+      presentInfo.pSwapchains = swapChains;
+      presentInfo.swapchainCount = 1;
+      presentInfo.pResults = 0;
+      vkQueuePresentKHR(presentQueue, &presentInfo);
+    }
   };
   SDLState m_sdlState;
   using Getter = std::function<std::any(void)>;
@@ -143,8 +221,20 @@ public:
       return AppError(AppError::EKind::RenderEngineError, "Create Window Failed\n");
     }
     m_sdlState.window = window;
-
-    m_sdlState.vkInstance = std::make_shared<vk::VkInstanceObject>();
+    return std::nullopt;
+    m_sdlState.vkInstance = std::make_shared<vk::VkInstanceObject>(
+      [this]()
+      {
+        unsigned int count = 0;
+        SDL_Vulkan_GetInstanceExtensions(m_sdlState.window, &count, nullptr);
+        std::vector<const char*> extNames;
+        if (count > 0)
+        {
+          extNames.resize(count);
+          SDL_Vulkan_GetInstanceExtensions(m_sdlState.window, &count, extNames.data());
+        }
+        return extNames;
+      });
     m_sdlState.vkPhysicalDevice =
       std::make_shared<vk::VkPhysicalDeviceObject>(m_sdlState.vkInstance);
     m_sdlState.vkDevice = std::make_shared<vk::VkDeviceObject>(m_sdlState.vkPhysicalDevice);
@@ -163,6 +253,14 @@ public:
     m_sdlState.vkSurface = std::make_shared<vk::VkSurfaceObject>(m_sdlState.vkInstance,
                                                                  m_sdlState.vkDevice,
                                                                  m_sdlState.context.surface);
+    m_sdlState.vkSwapchain = std::make_shared<vk::VkSwapchainObject>(m_sdlState.vkDevice,
+                                                                     m_sdlState.vkSurface,
+                                                                     VK_NULL_HANDLE);
+
+    vkGetDeviceQueue(*m_sdlState.vkDevice,
+                     m_sdlState.vkDevice->graphicsQueueIndex,
+                     0,
+                     &m_sdlState.presentQueue);
 
     return std::nullopt;
   }
@@ -218,8 +316,8 @@ public:
     return;
   }
 
-  ~AppSDLImpl()
+  ~AppSDLVkImpl()
   {
   }
-};
+}; // namespace VGG::entry
 } // namespace VGG::entry

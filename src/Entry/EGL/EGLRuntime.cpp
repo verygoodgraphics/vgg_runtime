@@ -2,6 +2,7 @@
 #include <EGL/egl.h>
 #include <Core/FontManager.h>
 #include <Core/PaintNode.h>
+#include <fstream>
 #include <Application/interface/Event/EventListener.h>
 #include <Scene/GraphicsContext.h>
 #include <Scene/GraphicsLayer.h>
@@ -401,6 +402,12 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
     opts.quality = imageQuality;
     if (auto img = layer->makeImageSnapshot(opts); img)
     {
+      static int s_count = 0;
+      std::ofstream ofs(scene->frame(i)->guid() + ".png", std::ios::binary);
+      if (ofs.is_open())
+      {
+        ofs.write((const char*)img->data(), img->size());
+      }
       res.emplace_back(scene->frame(i)->guid(), std::move(img.value()));
     }
     else

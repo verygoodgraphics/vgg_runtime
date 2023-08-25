@@ -43,6 +43,7 @@
 #include "gpu/vk/GrVkBackendContext.h"
 
 #include <queue>
+#include "Entry/SDL/SDLImpl/VulkanObject.hpp"
 
 #define USE_VULKAN
 
@@ -61,6 +62,10 @@ public:
   };
   sk_sp<GrDirectContext> grContext{ nullptr };
   sk_sp<SkSurface> surface{ nullptr };
+
+  std::shared_ptr<vk::VkInstanceObject> vkInstance;
+  std::shared_ptr<vk::VkPhysicalDeviceObject> vkPhysicalDevice;
+  std::shared_ptr<vk::VkDeviceObject> vkDevice;
 
   GrVkBackendContext vkContext;
 
@@ -190,10 +195,19 @@ public:
   void initVulkanObject()
   {
     auto vk = (ContextInfoVulkan*)q_ptr->context()->contextInfo();
-    skiaState.vkContext.fInstance = vk->instance;
-    skiaState.vkContext.fPhysicalDevice = vk->physicalDevice;
-    skiaState.vkContext.fDevice = vk->device;
-    skiaState.vkContext.fQueue = vk->queue;
+
+    skiaState.vkInstance = std::make_shared<vk::VkInstanceObject>(
+      [this]()
+      {
+        std::vector<const char*> extNames;
+        return extNames;
+      });
+    skiaState.vkPhysicalDevice = std::make_shared<vk::VkPhysicalDeviceObject>(skiaState.vkInstance);
+    skiaState.vkDevice = std::make_shared<vk::VkDeviceObject>(skiaState.vkPhysicalDevice);
+    skiaState.vkContext.fInstance = *skiaState.vkInstance;
+    skiaState.vkContext.fPhysicalDevice = *skiaState.vkPhysicalDevice;
+    skiaState.vkContext.fDevice = *skiaState.vkDevice;
+    skiaState.vkContext.fQueue = skiaState.vkDevice->graphicsQueue;
     skiaState.vkContext.fGetProc = std::function(
       [](const char* name, VkInstance instance, VkDevice dev) -> PFN_vkVoidFunction
       {
@@ -373,6 +387,8 @@ void VLayer::endFrame()
   VGG_IMPL(VLayer)
   ASSERT(context());
   _->skiaState.getCanvas()->flush();
+  _->skiaState.grContext->flush();
+  _->skiaState.grContext->submit();
   context()->swap();
 }
 

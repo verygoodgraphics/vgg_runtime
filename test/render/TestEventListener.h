@@ -16,17 +16,15 @@
 #include "Scene/VGGLayer.h"
 #include "loader.h"
 #include <filesystem>
-#include "Entry/SDL/SDLImpl/AppSDLImpl.hpp"
-
-using AppImpl = VGG::entry::AppSDLImpl;
 namespace fs = std::filesystem;
+template<typename App>
 class MyEventListener : public EventListener
 {
   AppRender* m_layer{ nullptr };
   std::shared_ptr<AppScene> m_scene;
 
 protected:
-  void onAppInit(AppImpl* app, char** argv, int argc)
+  void onAppInit(App* app, char** argv, int argc)
   {
     INFO("onAppInit");
     m_layer = app->layer();
@@ -114,7 +112,7 @@ public:
   {
     if (evt.type == VGG_APP_INIT)
     {
-      auto app = reinterpret_cast<AppImpl*>(userData);
+      auto app = reinterpret_cast<App*>(userData);
       onAppInit(app, evt.init.argv, evt.init.argc);
       return true;
     }

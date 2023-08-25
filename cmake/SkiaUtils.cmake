@@ -26,7 +26,8 @@ skia_enable_gpu=true
 skia_enable_fontmgr_custom_embedded=false
 skia_canvaskit_enable_canvas_bindings=false
 skia_canvaskit_enable_embedded_font=false
-skia_use_vulkan=false
+skia_enable_ganesh=true
+skia_use_vulkan=true
 skia_use_piex=false
 skia_use_lua=false
 skia_use_dng_sdk=false
@@ -34,7 +35,6 @@ skia_use_fontconfig=false
 skia_use_libheif=false
 skia_use_system_expat=false
 skia_use_expat=false
-skia_use_vulkan=false
 skia_enable_pdf=false")
 
 set(SKIA_PRESET_FEATURES_FOR_WIN

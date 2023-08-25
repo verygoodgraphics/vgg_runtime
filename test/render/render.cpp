@@ -1,10 +1,17 @@
 #include "Event/Event.h"
 #include "AppBase.hpp"
 #include "TestEventListener.h"
+#include "Entry/SDL/SDLImpl/AppSDLImpl.hpp"
+#include "Entry/SDL/SDLImpl/AppSDLVkImpl.hpp"
 #include <exception>
 using namespace VGG;
 using namespace VGG::app;
 namespace fs = std::filesystem;
+
+using AppSDLImpl = VGG::entry::AppSDLImpl;
+using AppVkImpl = VGG::entry::AppSDLVkImpl;
+using App = AppVkImpl;
+
 #define main main
 int main(int argc, char** argv)
 {
@@ -16,10 +23,10 @@ int main(int argc, char** argv)
   cfg.graphicsContextConfig.stencilBit = 8;
   cfg.argc = argc;
   cfg.argv = argv;
-  cfg.eventListener = std::make_unique<MyEventListener>();
+  cfg.eventListener = std::make_unique<MyEventListener<App>>();
   try
   {
-    AppImpl::createInstance(std::move(cfg));
+    App::createInstance(std::move(cfg));
   }
   catch (const std::exception& e)
   {
@@ -33,5 +40,5 @@ int main(int argc, char** argv)
   //   app->poll();
   //   app->process();
   // }
-  return AppImpl::app()->exec();
+  return App::app()->exec();
 }

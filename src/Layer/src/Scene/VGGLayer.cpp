@@ -1,10 +1,10 @@
 #include "Scene/VGGLayer.h"
 #include "Core/Node.h"
+#include "Scene/ContextInfoVulkan.hpp"
 #include "Scene/GraphicsContext.h"
 #include "Scene/GraphicsLayer.h"
 #include "Scene/Renderer.h"
 #include "Scene/Zoomer.h"
-#include "GPU/vk/VulkanObject.hpp"
 #include <gpu/GpuTypes.h>
 #include <gpu/GrTypes.h>
 #include <gpu/vk/GrVkTypes.h>
@@ -116,11 +116,6 @@ public:
   std::vector<std::shared_ptr<Renderable>> items;
   std::vector<std::shared_ptr<Scene>> scenes;
 
-#ifdef USE_VULKAN
-  std::shared_ptr<vk::VkInstanceObject> vkInstance;
-  std::shared_ptr<vk::VkPhysicalDeviceObject> vkPhysicalDevice;
-  std::shared_ptr<vk::VkDeviceObject> vkDevice;
-#endif
   VLayer__pImpl(VLayer* api)
     : q_ptr(api)
   {
@@ -194,13 +189,11 @@ public:
 
   void initVulkanObject()
   {
-    vkInstance = std::make_shared<vk::VkInstanceObject>();
-    skiaState.vkContext.fInstance = VkInstance(*vkInstance);
-    vkPhysicalDevice = std::make_shared<vk::VkPhysicalDeviceObject>(vkInstance);
-    skiaState.vkContext.fPhysicalDevice = VkPhysicalDevice(*vkPhysicalDevice);
-    vkDevice = std::make_shared<vk::VkDeviceObject>(vkPhysicalDevice);
-    skiaState.vkContext.fDevice = VkDevice(*vkDevice);
-    skiaState.vkContext.fQueue = vkDevice->graphicsQueue;
+    auto vk = (ContextInfoVulkan*)q_ptr->context()->contextInfo();
+    skiaState.vkContext.fInstance = vk->instance;
+    skiaState.vkContext.fPhysicalDevice = vk->physicalDevice;
+    skiaState.vkContext.fDevice = vk->device;
+    skiaState.vkContext.fQueue = vk->queue;
     skiaState.vkContext.fGetProc = std::function(
       [](const char* name, VkInstance instance, VkDevice dev) -> PFN_vkVoidFunction
       {
@@ -219,10 +212,6 @@ public:
         ASSERT(" invalid option");
         return nullptr;
       });
-
-    ASSERT(vkInstance);
-    ASSERT(vkPhysicalDevice);
-    ASSERT(vkDevice);
   }
   void updateSkiaEngineVK()
   {
@@ -356,6 +345,7 @@ void VLayer::render()
       _->drawTextAt(canvas, info, canvasPosX, canvasPosY);
     }
     canvas->restore();
+    canvas->flush();
   }
 }
 

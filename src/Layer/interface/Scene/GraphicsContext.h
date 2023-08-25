@@ -3,6 +3,7 @@
 #include <Utility/interface/Log.h>
 #include <memory>
 #include <vector>
+
 namespace VGG::layer
 {
 
@@ -61,6 +62,7 @@ public:
   virtual bool swap() = 0;
   virtual bool makeCurrent() = 0;
   virtual void shutdown() = 0;
+  virtual void* contextInfo() = 0;
   bool resize(int w, int h);
 
 protected:

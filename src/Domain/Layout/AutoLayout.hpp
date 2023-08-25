@@ -20,18 +20,25 @@ namespace Internal
 
 struct AutoLayout
 {
+public:
   std::weak_ptr<LayoutView> view;
   std::shared_ptr<Rule::Rule> rule;
 
+  VGG::Layout::Rect frame;
   std::shared_ptr<flexbox_node> flexNode;
   std::shared_ptr<grid_layout> gridNode;
 
-  bool isEnabled{ false };
   bool isIncludedInLayout{ true };
 
+public:
   void applyLayout(bool preservingOrigin);
+  void frameChanged();
 
   bool isLeaf();
+  bool isEnabled()
+  {
+    return rule != nullptr;
+  }
 
 private:
   Size calculateLayout(Size size);

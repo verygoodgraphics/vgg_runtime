@@ -64,11 +64,7 @@ private:
                                   nlohmann::json::json_pointer currentPath,
                                   std::shared_ptr<LayoutView> parent);
   void collectRules(const nlohmann::json& json);
-  void configureView(std::shared_ptr<LayoutView> view);
-  void configureView(std::shared_ptr<LayoutView> view,
-                     std::shared_ptr<VGG::Layout::Internal::Rule::Rule> rule);
-  void configureNode(std::shared_ptr<flexbox_node> node,
-                     std::shared_ptr<VGG::Layout::Internal::Rule::Rule> rule);
+  void configureAutoLayout(std::shared_ptr<LayoutView> view);
 };
 
 } // namespace Layout

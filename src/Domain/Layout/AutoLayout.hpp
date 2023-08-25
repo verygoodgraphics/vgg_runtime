@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Rect.hpp"
+#include "Rule.hpp"
 
 #include "flexbox_node.h"
 #include "grid_layout.h"
@@ -17,9 +18,11 @@ namespace Layout
 namespace Internal
 {
 
-struct Bridge
+struct AutoLayout
 {
   std::weak_ptr<LayoutView> view;
+  std::shared_ptr<Rule::Rule> rule;
+
   std::shared_ptr<flexbox_node> flexNode;
   std::shared_ptr<grid_layout> gridNode;
 

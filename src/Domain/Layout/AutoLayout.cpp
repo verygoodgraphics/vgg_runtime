@@ -1,4 +1,4 @@
-#include "Bridge.hpp"
+#include "AutoLayout.hpp"
 
 #include "Log.h"
 #include "View.hpp"
@@ -37,7 +37,7 @@ bool layoutNodeHasExactSameChildren(std::shared_ptr<flexbox_node> node, Views su
 
   for (auto i = 0; i < subviews.size(); ++i)
   {
-    if (node->get_child(i) != subviews[i]->layoutBridge()->flexNode)
+    if (node->get_child(i) != subviews[i]->autoLayout()->flexNode)
     {
       return false;
     }
@@ -49,11 +49,11 @@ bool layoutNodeHasExactSameChildren(std::shared_ptr<flexbox_node> node, Views su
 void attachNodesFromViewHierachy(std::shared_ptr<LayoutView> view)
 {
   // todo
-  const auto bridge = view->layoutBridge();
-  if (bridge->flexNode)
+  const auto autoLayout = view->autoLayout();
+  if (autoLayout->flexNode)
   {
-    const auto node = bridge->flexNode;
-    if (bridge->isLeaf())
+    const auto node = autoLayout->flexNode;
+    if (autoLayout->isLeaf())
     {
       removeAllChildren(node);
     }
@@ -62,7 +62,7 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutView> view)
       std::vector<std::shared_ptr<LayoutView>> subviewsToInclude;
       for (auto subview : view->children())
       {
-        if (subview->layoutBridge()->isEnabled && subview->layoutBridge()->isIncludedInLayout)
+        if (subview->autoLayout()->isEnabled && subview->autoLayout()->isIncludedInLayout)
         {
           subviewsToInclude.push_back(subview);
         }
@@ -74,7 +74,7 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutView> view)
         for (auto i = 0; i < subviewsToInclude.size(); ++i)
         {
           DEBUG("attachNodesFromViewHierachy, flex node add child");
-          node->add_child(subviewsToInclude[i]->layoutBridge()->flexNode, i);
+          node->add_child(subviewsToInclude[i]->autoLayout()->flexNode, i);
         }
       }
 
@@ -88,13 +88,13 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutView> view)
 
 void applyLayoutToViewHierarchy(std::shared_ptr<LayoutView> view, bool preserveOrigin)
 {
-  auto layoutBridge = view->layoutBridge();
-  if (!layoutBridge->isIncludedInLayout)
+  auto autoLayout = view->autoLayout();
+  if (!autoLayout->isIncludedInLayout)
   {
     return;
   }
 
-  if (auto node = layoutBridge->flexNode)
+  if (auto node = autoLayout->flexNode)
   {
     Point origin;
     if (preserveOrigin)
@@ -116,7 +116,7 @@ void applyLayoutToViewHierarchy(std::shared_ptr<LayoutView> view, bool preserveO
     view->setFrame(frame);
   }
 
-  if (!layoutBridge->isLeaf())
+  if (!autoLayout->isLeaf())
   {
     for (auto subview : view->children())
     {
@@ -129,7 +129,7 @@ void applyLayoutToViewHierarchy(std::shared_ptr<LayoutView> view, bool preserveO
 
 } // namespace
 
-void Bridge::applyLayout(bool preservingOrigin)
+void AutoLayout::applyLayout(bool preservingOrigin)
 {
   if (isLeaf())
   {
@@ -143,11 +143,13 @@ void Bridge::applyLayout(bool preservingOrigin)
   }
 }
 
-Size Bridge::calculateLayout(Size size)
+Size AutoLayout::calculateLayout(Size size)
 {
   if (auto sharedView = view.lock())
   {
-    DEBUG("Bridge::calculateLayout, view[%p, %s]", sharedView.get(), sharedView->path().c_str());
+    DEBUG("AutoLayout::calculateLayout, view[%p, %s]",
+          sharedView.get(),
+          sharedView->path().c_str());
     attachNodesFromViewHierachy(sharedView);
   }
 
@@ -158,19 +160,19 @@ Size Bridge::calculateLayout(Size size)
   }
   else if (gridNode)
   {
-    DEBUG("Bridge::calculateLayout, grid node calculate");
+    DEBUG("AutoLayout::calculateLayout, grid node calculate");
     gridNode->calc_layout();
     return { TO_VGG_LAYOUT_SCALAR(gridNode->get_layout_width()),
              TO_VGG_LAYOUT_SCALAR(gridNode->get_layout_height()) };
   }
   else
   {
-    WARN("Bridge::calculateLayout, no layout node, return parameter size");
+    WARN("AutoLayout::calculateLayout, no layout node, return parameter size");
     return size;
   }
 }
 
-bool Bridge::isLeaf()
+bool AutoLayout::isLeaf()
 {
   if (isEnabled)
   {
@@ -178,8 +180,8 @@ bool Bridge::isLeaf()
     {
       for (auto& child : sharedView->children())
       {
-        auto bridge = child->layoutBridge();
-        if (bridge->isEnabled && bridge->isIncludedInLayout)
+        auto autoLayout = child->autoLayout();
+        if (autoLayout->isEnabled && autoLayout->isIncludedInLayout)
         {
           return false;
         }

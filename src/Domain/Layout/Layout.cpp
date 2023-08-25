@@ -1,6 +1,6 @@
 #include "Layout.hpp"
 
-#include "Bridge.hpp"
+#include "AutoLayout.hpp"
 #include "Helper.hpp"
 #include "JsonKeys.hpp"
 #include "Log.h"
@@ -261,12 +261,15 @@ void Layout::Layout::configureView(std::shared_ptr<LayoutView> view)
     }
   }
 
-  auto bridge = view->configureLayout();
+  auto autoLayout = view->resetAutoLayout();
   if (rule)
   {
-    bridge->isEnabled = true;
-    bridge->flexNode = nullptr;
-    bridge->gridNode = nullptr;
+    autoLayout->isEnabled = true;
+    autoLayout->rule = rule;
+
+    autoLayout->flexNode = nullptr;
+    autoLayout->gridNode = nullptr;
+
     configureView(view, rule);
   }
 
@@ -304,14 +307,14 @@ void Layout::Layout::configureView(std::shared_ptr<LayoutView> view,
 
     // todo
     // auto node = new grid_layout;
-    // bridge->gridNode.reset(node);
+    // autoLayout->gridNode.reset(node);
   }
 
   if (const auto detail = std::get_if<FlexboxItem>(&rule->item_in_layout))
   {
     DEBUG("Layout::configureView, flex item , view[%p, %s]", view.get(), view->path().c_str());
 
-    auto node = view->layoutBridge()->flexNode;
+    auto node = view->autoLayout()->flexNode;
     if (!node)
     {
       node = view->createFlexboxNode();

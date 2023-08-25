@@ -135,10 +135,7 @@ private:
     return { x, y };
   }
 
-  std::shared_ptr<flexbox_node> createFlexboxNode();
-  std::shared_ptr<grid_layout> createGridNode();
-  void configureNode(std::shared_ptr<flexbox_node> node,
-                     std::shared_ptr<VGG::Layout::Internal::Rule::Rule> rule);
+  void configureNode(flexbox_node* node, std::shared_ptr<VGG::Layout::Internal::Rule::Rule> rule);
   void udpateAutoLayout();
 };
 

@@ -20,13 +20,18 @@ namespace Internal
 
 struct AutoLayout
 {
+private:
+  std::unique_ptr<flexbox_node> m_flexNode;
+  std::unique_ptr<grid_layout> m_gridNode;
+
+  flexbox_node* m_flexNodePtr;
+  grid_layout* m_gridNodePtr;
+
 public:
   std::weak_ptr<LayoutView> view;
-  std::shared_ptr<Rule::Rule> rule;
+  std::weak_ptr<Rule::Rule> rule;
 
   VGG::Layout::Rect frame;
-  std::shared_ptr<flexbox_node> flexNode;
-  std::shared_ptr<grid_layout> gridNode;
 
   bool isIncludedInLayout{ true };
 
@@ -37,8 +42,17 @@ public:
   bool isLeaf();
   bool isEnabled()
   {
-    return rule != nullptr;
+    return !rule.expired();
   }
+
+  std::unique_ptr<flexbox_node>& takeFlexNode();
+  std::unique_ptr<grid_layout>& takeGridNode();
+
+  flexbox_node* createFlexNode();
+  grid_layout* createGridNode();
+
+  flexbox_node* getFlexNode();
+  grid_layout* getGridNode();
 
 private:
   Size calculateLayout(Size size);

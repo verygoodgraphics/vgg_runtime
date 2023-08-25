@@ -20,7 +20,7 @@ namespace
 {
 using Views = std::vector<std::shared_ptr<LayoutView>>;
 
-void removeAllChildren(std::shared_ptr<flexbox_node> node)
+void removeAllChildren(flexbox_node* node)
 {
   while (node->child_count() > 0)
   {
@@ -28,7 +28,7 @@ void removeAllChildren(std::shared_ptr<flexbox_node> node)
   }
 }
 
-bool layoutNodeHasExactSameChildren(std::shared_ptr<flexbox_node> node, Views subviews)
+bool layoutNodeHasExactSameChildren(flexbox_node* node, Views subviews)
 {
   if (node->child_count() != subviews.size())
   {
@@ -37,7 +37,7 @@ bool layoutNodeHasExactSameChildren(std::shared_ptr<flexbox_node> node, Views su
 
   for (auto i = 0; i < subviews.size(); ++i)
   {
-    if (node->get_child(i) != subviews[i]->autoLayout()->flexNode)
+    if (node->get_child(i) != subviews[i]->autoLayout()->getFlexNode())
     {
       return false;
     }
@@ -50,9 +50,8 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutView> view)
 {
   // todo
   const auto autoLayout = view->autoLayout();
-  if (autoLayout->flexNode)
+  if (const auto node = autoLayout->getFlexNode())
   {
-    const auto node = autoLayout->flexNode;
     if (autoLayout->isLeaf())
     {
       removeAllChildren(node);
@@ -74,7 +73,7 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutView> view)
         for (auto i = 0; i < subviewsToInclude.size(); ++i)
         {
           DEBUG("attachNodesFromViewHierachy, flex node add child");
-          node->add_child(subviewsToInclude[i]->autoLayout()->flexNode, i);
+          node->add_child(subviewsToInclude[i]->autoLayout()->takeFlexNode(), i);
         }
       }
 
@@ -94,7 +93,7 @@ void applyLayoutToViewHierarchy(std::shared_ptr<LayoutView> view, bool preserveO
     return;
   }
 
-  if (auto node = autoLayout->flexNode)
+  if (auto node = autoLayout->getFlexNode())
   {
     Point origin;
     if (preserveOrigin)
@@ -155,12 +154,12 @@ Size AutoLayout::calculateLayout(Size size)
     attachNodesFromViewHierachy(sharedView);
   }
 
-  if (flexNode)
+  if (auto flexNode = getFlexNode())
   {
     flexNode->calc_layout();
     return { flexNode->get_layout_width(), flexNode->get_layout_height() };
   }
-  else if (gridNode)
+  else if (auto gridNode = getGridNode())
   {
     DEBUG("AutoLayout::calculateLayout, grid node calculate");
     gridNode->calc_layout();
@@ -197,23 +196,24 @@ bool AutoLayout::isLeaf()
 void AutoLayout::frameChanged()
 {
   auto sharedView = view.lock();
-  if (isEnabled() && sharedView)
+  auto sharedRule = rule.lock();
+  if (isEnabled() && sharedView && sharedRule)
   {
     auto newSize = sharedView->frame().size;
     if (newSize != frame.size)
     {
       // todo, old type is percent
-      rule->width.value.types = Rule::Length::Types::px;
-      rule->width.value.value = newSize.width;
+      sharedRule->width.value.types = Rule::Length::Types::px;
+      sharedRule->width.value.value = newSize.width;
 
-      rule->height.value.types = Rule::Length::Types::px;
-      rule->height.value.value = newSize.height;
+      sharedRule->height.value.types = Rule::Length::Types::px;
+      sharedRule->height.value.value = newSize.height;
 
-      if (rule->isFlexConatiner() || rule->isFlexConatiner())
+      if (sharedRule->isFlexConatiner() || sharedRule->isFlexConatiner())
       {
         sharedView->setNeedLayout();
       }
-      else if (rule->isFlexItem() || rule->isGridItem())
+      else if (sharedRule->isFlexItem() || sharedRule->isGridItem())
       {
         if (auto container = sharedView->autoLayoutContainer())
         {
@@ -224,6 +224,39 @@ void AutoLayout::frameChanged()
       }
     }
   }
+}
+
+std::unique_ptr<flexbox_node>& AutoLayout::takeFlexNode()
+{
+  return m_flexNode;
+}
+
+std::unique_ptr<grid_layout>& AutoLayout::takeGridNode()
+{
+  return m_gridNode;
+}
+
+flexbox_node* AutoLayout::createFlexNode()
+{
+  m_flexNodePtr = new flexbox_node;
+  m_flexNode.reset(m_flexNodePtr);
+  return m_flexNode.get();
+}
+
+grid_layout* AutoLayout::createGridNode()
+{
+  // todo
+  return nullptr;
+}
+
+flexbox_node* AutoLayout::getFlexNode()
+{
+  return m_flexNodePtr;
+}
+
+grid_layout* AutoLayout::getGridNode()
+{
+  return m_gridNodePtr;
 }
 
 } // namespace Internal

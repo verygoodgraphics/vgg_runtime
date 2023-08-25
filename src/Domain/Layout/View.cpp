@@ -129,20 +129,6 @@ std::shared_ptr<LayoutView> LayoutView::autoLayoutContainer()
   return m_parent.lock();
 }
 
-std::shared_ptr<flexbox_node> LayoutView::createFlexboxNode()
-{
-  flexbox_node::p_node node{ new flexbox_node };
-  m_autoLayout->flexNode = node;
-
-  return m_autoLayout->flexNode;
-}
-
-std::shared_ptr<grid_layout> LayoutView::createGridNode()
-{
-  // todo
-  return m_autoLayout->gridNode;
-}
-
 void LayoutView::applyLayout()
 {
   for (auto subview : m_children)
@@ -197,7 +183,7 @@ void LayoutView::configureAutoLayout()
   {
     return;
   }
-  auto rule = m_autoLayout->rule;
+  auto rule = m_autoLayout->rule.lock();
   if (!rule)
   {
     return;
@@ -207,7 +193,7 @@ void LayoutView::configureAutoLayout()
   {
     DEBUG("LayoutView::configureAutoLayout, flex layout, view[%p, %s]", this, path().c_str());
 
-    auto node = createFlexboxNode();
+    auto node = m_autoLayout->createFlexNode();
     configureNode(node, rule);
 
     node->set_direction(toLibDirecion(detail->direction));
@@ -235,10 +221,10 @@ void LayoutView::configureAutoLayout()
   {
     DEBUG("LayoutView::configureAutoLayout, flex item , view[%p, %s]", this, path().c_str());
 
-    auto node = autoLayout()->flexNode;
+    auto node = autoLayout()->getFlexNode();
     if (!node)
     {
-      node = createFlexboxNode();
+      node = autoLayout()->createFlexNode();
     }
     configureNode(node, rule);
 
@@ -269,7 +255,7 @@ void LayoutView::configureAutoLayout()
   }
 }
 
-void LayoutView::configureNode(std::shared_ptr<flexbox_node> node,
+void LayoutView::configureNode(flexbox_node* node,
                                std::shared_ptr<VGG::Layout::Internal::Rule::Rule> rule)
 {
   node->set_width(toLibUnit(rule->width.value.types), rule->width.value.value);

@@ -1,8 +1,10 @@
 #pragma once
 #include <Utility/interface/Log.h>
 #include <cstdint>
+#include <private/base/SkTDArray.h>
 #include <vector>
 #include <iostream>
+#include <functional>
 #include <memory>
 
 #include <GLFW/glfw3.h>
@@ -31,7 +33,7 @@ inline const std::vector<const char*> g_deviceExtensions = { VK_KHR_SWAPCHAIN_EX
 
 constexpr bool ENABLE_VALIDATION_LAYER = true;
 
-namespace VGG::layer::vk
+namespace vk
 {
 struct VkInstanceObject : public std::enable_shared_from_this<VkInstanceObject>
 {
@@ -435,4 +437,221 @@ private:
   VkDevice m_device;
 };
 
-}; // namespace VGG::layer::vk
+struct VkSurfaceObject
+{
+
+  VkSurfaceCapabilitiesKHR cap;
+  template<typename F>
+  VkSurfaceObject(std::shared_ptr<VkInstanceObject> instance,
+                  std::shared_ptr<VkDeviceObject> device,
+                  VkSurfaceKHR surface)
+    : m_instance(std::move(instance))
+    , m_device(std::move(device))
+    , m_surface(std::move(surface))
+  {
+    ASSERT(m_surface != VK_NULL_HANDLE);
+    VkBool32 support = VK_FALSE;
+    vkGetPhysicalDeviceSurfaceSupportKHR(*(m_device->physicalDevice),
+                                         m_device->graphicsQueueIndex,
+                                         m_surface,
+                                         &support);
+    if (support == VK_FALSE)
+    {
+      std::cout << "This device does not support present feature\n";
+      exit(-1);
+    }
+
+    vkGetDeviceQueue(*m_device, m_device->graphicsQueueIndex, 0, &m_presentQueue);
+
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(*(m_device->physicalDevice), m_surface, &cap);
+
+    uint32_t count;
+    vkGetPhysicalDeviceSurfaceFormatsKHR(*(m_device->physicalDevice), m_surface, &count, nullptr);
+    m_supportedFormat.resize(count);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(*(m_device->physicalDevice),
+                                         m_surface,
+                                         &count,
+                                         m_supportedFormat.data());
+
+    std::cout << "Supported Format: " << count << "\n";
+    for (int i = 0; i < count; i++)
+    {
+      if (m_supportedFormat[i].format == VK_FORMAT_B8G8R8A8_UNORM &&
+          m_supportedFormat[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+      {
+        std::cout << "Format Support";
+      }
+      std::cout << m_supportedFormat[i].format << " " << m_supportedFormat[i].colorSpace
+                << std::endl;
+    }
+
+    vkGetPhysicalDeviceSurfacePresentModesKHR(*(m_device->physicalDevice),
+                                              m_surface,
+                                              &count,
+                                              nullptr);
+    m_supportedPresentMode.resize(count);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(*(m_device->physicalDevice),
+                                              m_surface,
+                                              &count,
+                                              m_supportedPresentMode.data());
+  }
+  ~VkSurfaceObject()
+  {
+    release();
+  }
+  VkSurfaceObject(const VkSurfaceObject&) = delete;
+  VkSurfaceObject& operator=(const VkSurfaceObject&) = delete;
+  VkSurfaceObject(VkSurfaceObject&& rhs) noexcept
+    : m_instance(std::move(rhs.m_instance))
+    , m_surface(rhs.m_surface)
+    , m_device(std::move(rhs.m_device))
+  {
+    rhs.m_surface = VK_NULL_HANDLE;
+  }
+  VkSurfaceObject& operator=(VkSurfaceObject&& rhs) noexcept
+  {
+    release();
+    m_instance = std::move(rhs.m_instance);
+    m_device = std::move(rhs.m_device);
+    return *this;
+  }
+
+  operator VkSurfaceKHR()
+  {
+    return m_surface;
+  }
+  operator VkSurfaceKHR() const
+  {
+    return m_surface;
+  }
+
+private:
+  friend class VkSwapchainObject;
+  void release()
+  {
+    vkDestroySurfaceKHR(*m_instance, m_surface, m_instance->allocationCallback);
+    m_device = nullptr;
+    m_instance = nullptr;
+  }
+
+  VkSurfaceKHR m_surface;
+  VkQueue m_presentQueue = VK_NULL_HANDLE;
+  std::shared_ptr<VkInstanceObject> m_instance;
+  std::shared_ptr<VkDeviceObject> m_device;
+  std::vector<VkSurfaceFormatKHR> m_supportedFormat;
+  std::vector<VkPresentModeKHR> m_supportedPresentMode;
+
+public:
+};
+struct VkSwapchainObject
+{
+  std::vector<VkImage> swapchainImages;
+  // std::vector<VkImageViewObject> swapchainImageViews;
+  std::shared_ptr<VkSurfaceObject> surface;
+  VkSurfaceCapabilitiesKHR cap;
+  VkSurfaceFormatKHR surfaceFormat;
+  VkExtent2D extent;
+  std::shared_ptr<VkDeviceObject> device;
+
+  VkSwapchainKHR swapChainKHR;
+  // static FramebufferResizeEventCallback Callback;
+
+  VkSwapchainObject(std::shared_ptr<VkDeviceObject> device,
+                    std::shared_ptr<VkSurfaceObject> surface,
+                    VkSwapchainKHR oldSwapchain)
+    : device(std::move(device))
+    , surface(std::move(surface))
+  {
+    // // Get properties of surface, necessary for creation of swap-chain
+    // VkSurfaceCapabilitiesKHR surfaceProperties;
+    // if (!getSurfaceProperties(physicalDevice, surface, surfaceProperties))
+    //   return false;
+    //
+    // // Get the image presentation mode (synced, immediate etc.)
+    // VkPresentModeKHR presentation_mode = gPresentationMode;
+    // if (!getPresentationMode(surface, physicalDevice, presentation_mode))
+    //   return false;
+
+    // Get other swap chain related features
+    const auto capabilities = surface->cap;
+    unsigned int swapImageCount = surface->cap.maxImageCount + 1;
+
+    // Size of the images
+    // Default size = window size
+    int gWindowWidth, gWindowHeight;
+    VkExtent2D swapImageExtent = { (unsigned int)gWindowWidth, (unsigned int)gWindowHeight };
+
+    // This happens when the window scales based on the size of an image
+    if (surface->cap.currentExtent.width == 0xFFFFFFF)
+    {
+      swapImageCount.width = glm::clamp<unsigned int>(size.width,
+                                                      capabilities.minImageExtent.width,
+                                                      capabilities.maxImageExtent.width);
+      swapImageCount.height = glm::clamp<unsigned int>(size.height,
+                                                       capabilities.minImageExtent.height,
+                                                       capabilities.maxImageExtent.height);
+    }
+    else
+    {
+      swapImageExtent = capabilities.currentExtent;
+    }
+
+    // Get image usage (color etc.)
+    // VkImageUsageFlags usageFlags;
+    // if (!getImageUsage(capabilities, usageFlags))
+    //   return false;
+
+    // Get the transform, falls back on current transform when transform is not supported
+    // VkSurfaceTransformFlagBitsKHR transform = getTransform(capabilities);
+
+    // Get swapchain image format
+    // VkSurfaceFormatKHR imageFormat;
+    // if (!getFormat(physicalDevice, surface, imageFormat))
+    //   return false;
+
+    // Old swap chain
+
+    // Populate swapchain creation info
+    VkSwapchainCreateInfoKHR swapInfo;
+    swapInfo.pNext = nullptr;
+    swapInfo.flags = 0;
+    swapInfo.surface = this->surface->m_surface;
+    swapInfo.minImageCount = swapImageCount;
+    swapInfo.imageFormat = imageFormat.format;
+    swapInfo.imageColorSpace = imageFormat.colorSpace;
+    swapInfo.imageExtent = swapImageExtent;
+    swapInfo.imageArrayLayers = 1;
+    swapInfo.imageUsage = usageFlags;
+    swapInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    swapInfo.queueFamilyIndexCount = 0;
+    swapInfo.pQueueFamilyIndices = nullptr;
+    swapInfo.preTransform = transform;
+    swapInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    swapInfo.presentMode = presentation_mode;
+    swapInfo.clipped = true;
+    swapInfo.oldSwapchain = NULL;
+    swapInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+
+    // Destroy old swap chain
+    if (oldSwapchain != VK_NULL_HANDLE)
+    {
+      vkDestroySwapchainKHR(this->device, oldSwapchain, nullptr);
+      oldSwapchain = VK_NULL_HANDLE;
+    }
+
+    if (vkCreateSwapchainKHR(this->device, &swapInfo, nullptr, &oldSwapchain) != VK_SUCCESS)
+    {
+      std::cout << "unable to create swap chain\n";
+      return false;
+    }
+
+    // Store handle
+    outSwapChain = oldSwapchain;
+  }
+  void update()
+  {
+    *this = VkSwapchainObject(device, surface);
+  }
+};
+
+}; // namespace vk

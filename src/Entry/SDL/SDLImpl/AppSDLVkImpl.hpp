@@ -3,27 +3,37 @@
 #include <Entry/SDL/SDLImpl/EventAPISDLImpl.h>
 #include "Event/EventAPI.h"
 #include <Application/interface/AppBase.hpp>
+#include <SDL2/SDL_stdinc.h>
 #include <SDL2/SDL_video.h>
 #include <Utility/interface/Log.h>
 #include "EventConvert.h"
+#include "nlohmann/json.hpp"
+#include <memory>
 #include <optional>
 #include <any>
 #include <Scene/GraphicsContext.h>
+#include <Scene/ContextInfoVulkan.hpp>
 
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
+#include <SDL2/SDL_vulkan.h>
+
+#include "VulkanObject.hpp"
 
 namespace VGG::entry
 {
 
 using namespace VGG::app;
-
+using namespace VGG::layer;
 class AppSDLImpl : public AppBase<AppSDLImpl>
 {
   struct SDLState
   {
     SDL_Window* window{ nullptr };
-    SDL_GLContext glContext{ nullptr };
+    std::shared_ptr<vk::VkInstanceObject> vkInstance;
+    std::shared_ptr<vk::VkPhysicalDeviceObject> vkPhysicalDevice;
+    std::shared_ptr<vk::VkDeviceObject> vkDevice;
+    std::shared_ptr<vk::VkSurfaceObject> vkSurface;
+    ContextInfoVulkan context;
   };
   SDLState m_sdlState;
   using Getter = std::function<std::any(void)>;
@@ -33,9 +43,6 @@ class AppSDLImpl : public AppBase<AppSDLImpl>
 public:
   static inline void handleVkError()
   {
-    const char* err = SDL_GetError();
-    FAIL("SDL Error: %s", err);
-    SDL_ClearError();
   }
 
 #ifdef __linux__
@@ -80,8 +87,6 @@ public:
     if (initContext(cfg.windowSize[0], cfg.windowSize[1]))
       return false;
 
-    SDL_GL_SetSwapInterval(0);
-
     // Reigster SDL event impl
     auto eventAPIImpl = std::make_unique<EventAPISDLImpl>();
     EventManager::registerEventAPI(std::move(eventAPIImpl));
@@ -90,18 +95,16 @@ public:
 
   void shutdown() override
   {
-    if (m_sdlState.glContext)
-    {
-      // NOTE The failure to delete GL context may be related to multi-thread and is hard
-      // to make it right. For simplicity, we can just safely ignore the deletion.
-      //
-      // SDL_GL_DeleteContext(m_sdlState.glContext);
-    }
     if (m_sdlState.window)
     {
       SDL_DestroyWindow(m_sdlState.window);
     }
     SDL_Quit();
+  }
+
+  void* contextInfo() override
+  {
+    return &m_sdlState.context;
   }
 
   std::optional<AppError> initContext(int w, int h)
@@ -122,41 +125,13 @@ public:
          linkVersion.major,
          linkVersion.minor,
          linkVersion.patch);
-
-    // setup opengl properties
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 1);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, appConfig().graphicsContextConfig.stencilBit);
-    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, appConfig().graphicsContextConfig.multiSample);
-    // SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
-#ifndef EMSCRIPTEN
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-#else
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-    SDL_SetHint(SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT, "#canvas");
-#endif
-
+    //
     // create window
     float f = getScaleFactor();
     int winWidth = w * f;
     int winHeight = h * f;
     SDL_Window* window =
-#ifndef EMSCRIPTEN
       SDL_CreateWindow(appName().c_str(),
-#else
-      SDL_CreateWindow(nullptr,
-#endif
                        SDL_WINDOWPOS_CENTERED,
                        SDL_WINDOWPOS_CENTERED,
                        winWidth,
@@ -167,29 +142,27 @@ public:
       handleVkError();
       return AppError(AppError::EKind::RenderEngineError, "Create Window Failed\n");
     }
-    // m_width = w;
-    // m_height = h;
     m_sdlState.window = window;
-    // create context
-    SDL_GLContext glContext = SDL_GL_CreateContext(window);
-    if (!glContext)
+
+    m_sdlState.vkInstance = std::make_shared<vk::VkInstanceObject>();
+    m_sdlState.vkPhysicalDevice =
+      std::make_shared<vk::VkPhysicalDeviceObject>(m_sdlState.vkInstance);
+    m_sdlState.vkDevice = std::make_shared<vk::VkDeviceObject>(m_sdlState.vkPhysicalDevice);
+    m_sdlState.context.instance = *(m_sdlState.vkInstance);
+    m_sdlState.context.physicalDevice = *(m_sdlState.vkPhysicalDevice);
+    m_sdlState.context.device = *(m_sdlState.vkDevice);
+    m_sdlState.context.graphicsQueueIndex = m_sdlState.vkDevice->graphicsQueueIndex;
+
+    if (SDL_Vulkan_CreateSurface(m_sdlState.window,
+                                 m_sdlState.context.instance,
+                                 &m_sdlState.context.surface) == SDL_FALSE)
     {
-      handleVkError();
-      return AppError(AppError::EKind::RenderEngineError, "Create Context Failed");
+      DEBUG("Create Vulkan surface failed\n");
     }
 
-    m_sdlState.glContext = glContext;
-
-    // switch to this context
-    auto appResult = makeContextCurrent();
-    if (appResult.has_value())
-    {
-      return appResult;
-    }
-    INFO("GL_VENDOR: %s", glGetString(GL_VENDOR));
-    INFO("GL_RENDERER: %s", glGetString(GL_RENDERER));
-    INFO("GL_VERSION: %s", glGetString(GL_VERSION));
-    INFO("GL_SHADING_LANGUAGE_VERSION: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+    m_sdlState.vkSurface = std::make_shared<vk::VkSurfaceObject>(m_sdlState.vkInstance,
+                                                                 m_sdlState.vkDevice,
+                                                                 m_sdlState.context.surface);
 
     return std::nullopt;
   }
@@ -197,16 +170,11 @@ public:
 public:
   bool makeCurrent() override
   {
-    if (makeContextCurrent())
-    {
-      return false;
-    }
     return true;
   }
 
   bool swap() override
   {
-    swapBuffer();
     return true;
   }
 
@@ -218,11 +186,6 @@ public:
 
   std::optional<AppError> makeContextCurrent()
   {
-    if (SDL_GL_MakeCurrent(m_sdlState.window, m_sdlState.glContext) != 0)
-    {
-      handleVkError();
-      return AppError(AppError::EKind::MakeCurrentContextError, "Make Current Context Error");
-    }
     return std::nullopt;
   }
 
@@ -231,7 +194,7 @@ public:
 #ifdef VGG_HOST_macOS
     int dw, dh;
     int ww, wh;
-    SDL_GL_GetDrawableSize(this->m_sdlState.window, &dw, &dh);
+    SDL_Vulkan_GetDrawableSize(this->m_sdlState.window, &dw, &dh);
     SDL_GetWindowSize(this->m_sdlState.window, &ww, &wh);
     const float s = float(dw) / (float)ww;
     DEBUG("Scale Factor on macOS: %f", s);
@@ -252,22 +215,7 @@ public:
 
   void swapBuffer()
   {
-
-    // auto profiler = CappingProfiler::getInstance();
-
-    // // display fps
-    // if (profiler)
-    // {
-    //   SDL_SetWindowTitle(m_sdlState.window, profiler->fpsStr());
-    // }
-
-    // swap buffer at last
-    SDL_GL_SwapWindow(m_sdlState.window);
-  }
-
-  void* contextInfo() override
-  {
-    return m_sdlState.glContext;
+    return;
   }
 
   ~AppSDLImpl()

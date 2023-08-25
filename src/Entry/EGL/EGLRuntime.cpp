@@ -212,6 +212,11 @@ public:
     return true;
   }
 
+  void* contextInfo() override
+  {
+    return m_eglCtx;
+  }
+
   bool onResize(int w, int h) override
   {
     return true;

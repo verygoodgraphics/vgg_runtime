@@ -16,7 +16,7 @@ namespace Layout
 {
 namespace Internal
 {
-struct Bridge;
+struct AutoLayout;
 
 } // namespace Internal
 } // namespace Layout
@@ -29,7 +29,7 @@ class LayoutView : public std::enable_shared_from_this<LayoutView>
   const std::string m_path;
   Layout::Rect m_frame;
 
-  std::shared_ptr<Layout::Internal::Bridge> m_bridge;
+  std::shared_ptr<Layout::Internal::AutoLayout> m_autoLayout;
 
 public:
   using HitTestHook = std::function<bool(const std::string&)>;
@@ -101,19 +101,20 @@ public:
     {
       // todo, scale subview
       // todo, update json model
+      // todo, mark dirty
       applyLayout();
     }
   }
 
 public:
-  std::shared_ptr<Layout::Internal::Bridge> configureLayout();
+  std::shared_ptr<Layout::Internal::AutoLayout> resetAutoLayout();
   std::shared_ptr<flexbox_node> createFlexboxNode();
   std::shared_ptr<grid_layout> createGridNode();
   void applyLayout();
 
-  std::shared_ptr<Layout::Internal::Bridge> layoutBridge() const
+  std::shared_ptr<Layout::Internal::AutoLayout> autoLayout() const
   {
-    return m_bridge;
+    return m_autoLayout;
   }
 
 private:

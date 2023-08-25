@@ -1,6 +1,6 @@
 add_library(vgg_domain STATIC
   Exec/VggExec.cpp
-  Layout/Bridge.cpp
+  Layout/AutoLayout.cpp
   Layout/ExpandSymbol.cpp
   Layout/Helper.cpp
   Layout/Layout.cpp

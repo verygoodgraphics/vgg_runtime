@@ -62,7 +62,7 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutView> view)
       std::vector<std::shared_ptr<LayoutView>> subviewsToInclude;
       for (auto subview : view->children())
       {
-        if (subview->autoLayout()->isEnabled && subview->autoLayout()->isIncludedInLayout)
+        if (subview->autoLayout()->isEnabled() && subview->autoLayout()->isIncludedInLayout)
         {
           subviewsToInclude.push_back(subview);
         }
@@ -113,6 +113,8 @@ void applyLayoutToViewHierarchy(std::shared_ptr<LayoutView> view, bool preserveO
           static_cast<int>(frame.origin.y),
           static_cast<int>(frame.size.width),
           static_cast<int>(frame.size.height));
+
+    autoLayout->frame = frame;
     view->setFrame(frame);
   }
 
@@ -174,14 +176,14 @@ Size AutoLayout::calculateLayout(Size size)
 
 bool AutoLayout::isLeaf()
 {
-  if (isEnabled)
+  if (isEnabled())
   {
     if (auto sharedView = view.lock())
     {
       for (auto& child : sharedView->children())
       {
         auto autoLayout = child->autoLayout();
-        if (autoLayout->isEnabled && autoLayout->isIncludedInLayout)
+        if (autoLayout->isEnabled() && autoLayout->isIncludedInLayout)
         {
           return false;
         }
@@ -190,6 +192,38 @@ bool AutoLayout::isLeaf()
   }
 
   return true;
+}
+
+void AutoLayout::frameChanged()
+{
+  auto sharedView = view.lock();
+  if (isEnabled() && sharedView)
+  {
+    auto newSize = sharedView->frame().size;
+    if (newSize != frame.size)
+    {
+      // todo, old type is percent
+      rule->width.value.types = Rule::Length::Types::px;
+      rule->width.value.value = newSize.width;
+
+      rule->height.value.types = Rule::Length::Types::px;
+      rule->height.value.value = newSize.height;
+
+      if (rule->isFlexConatiner() || rule->isFlexConatiner())
+      {
+        sharedView->setNeedLayout();
+      }
+      else if (rule->isFlexItem() || rule->isGridItem())
+      {
+        if (auto container = sharedView->autoLayoutContainer())
+        {
+          container->setNeedLayout();
+        }
+
+        // todo, scale descendant node
+      }
+    }
+  }
 }
 
 } // namespace Internal

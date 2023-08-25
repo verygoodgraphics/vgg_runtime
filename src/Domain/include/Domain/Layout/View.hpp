@@ -18,6 +18,11 @@ namespace Internal
 {
 struct AutoLayout;
 
+namespace Rule
+{
+struct Rule;
+}
+
 } // namespace Internal
 } // namespace Layout
 
@@ -30,6 +35,7 @@ class LayoutView : public std::enable_shared_from_this<LayoutView>
   Layout::Rect m_frame;
 
   std::shared_ptr<Layout::Internal::AutoLayout> m_autoLayout;
+  bool m_needsLayout{ false };
 
 public:
   using HitTestHook = std::function<bool(const std::string&)>;
@@ -87,35 +93,19 @@ public:
     return m_path;
   }
 
-  const auto& frame() const
-  {
-    return m_frame;
-  }
-
-  void setFrame(const Layout::Rect& frame)
-  {
-    bool needLayout = m_frame.size != frame.size;
-    m_frame = frame;
-
-    if (needLayout)
-    {
-      // todo, scale subview
-      // todo, update json model
-      // todo, mark dirty
-      applyLayout();
-    }
-  }
+  const Layout::Rect& frame() const;
+  void setFrame(const Layout::Rect& frame);
 
 public:
-  std::shared_ptr<Layout::Internal::AutoLayout> resetAutoLayout();
-  std::shared_ptr<flexbox_node> createFlexboxNode();
-  std::shared_ptr<grid_layout> createGridNode();
-  void applyLayout();
+  std::shared_ptr<Layout::Internal::AutoLayout> autoLayout() const;
+  std::shared_ptr<Layout::Internal::AutoLayout> createAutoLayout();
+  void configureAutoLayout();
 
-  std::shared_ptr<Layout::Internal::AutoLayout> autoLayout() const
-  {
-    return m_autoLayout;
-  }
+  std::shared_ptr<LayoutView> autoLayoutContainer();
+
+  void applyLayout();
+  void setNeedLayout();
+  void layoutIfNeeded();
 
 private:
   bool pointInside(Layout::Point point)
@@ -144,6 +134,12 @@ private:
 
     return { x, y };
   }
+
+  std::shared_ptr<flexbox_node> createFlexboxNode();
+  std::shared_ptr<grid_layout> createGridNode();
+  void configureNode(std::shared_ptr<flexbox_node> node,
+                     std::shared_ptr<VGG::Layout::Internal::Rule::Rule> rule);
+  void udpateAutoLayout();
 };
 
 } // namespace VGG

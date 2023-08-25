@@ -231,6 +231,40 @@ struct Rule
   std::optional<MinHeight> min_height;
 
   std::optional<double> aspect_ratio;
+
+  auto getFlexConatinerRule()
+  {
+    return std::get_if<FlexboxLayout>(&layout);
+  }
+  auto getGridConatinerRule()
+  {
+    return std::get_if<GridLayout>(&layout);
+  }
+  auto getFlexItemRule()
+  {
+    return std::get_if<FlexboxItem>(&item_in_layout);
+  }
+  auto getGridItemRule()
+  {
+    return std::get_if<GridItem>(&item_in_layout);
+  }
+
+  bool isFlexConatiner()
+  {
+    return getFlexConatinerRule();
+  }
+  bool isGridConatiner()
+  {
+    return getGridConatinerRule();
+  }
+  bool isFlexItem()
+  {
+    return getFlexItemRule();
+  }
+  bool isGridItem()
+  {
+    return getGridItemRule();
+  }
 };
 
 // NOLINTBEGIN

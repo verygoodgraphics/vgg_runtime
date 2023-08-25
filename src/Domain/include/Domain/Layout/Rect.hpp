@@ -44,6 +44,10 @@ struct Rect
   {
     return origin == rhs.origin && size == rhs.size;
   }
+  bool operator!=(const Rect& rhs) const noexcept
+  {
+    return !(*this == rhs);
+  }
 };
 
 struct Matrix

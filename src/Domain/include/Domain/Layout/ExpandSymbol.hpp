@@ -39,10 +39,20 @@ private:
   void recalculateIntanceChildrenGeometry(nlohmann::json& json, Size containerSize);
 
   void applyOverrides(nlohmann::json& instance, const std::vector<std::string>& instanceIdStack);
-  void applyOverrides(nlohmann::json& json,
-                      std::stack<std::string> reversedPath,
-                      const nlohmann::json& value);
-  nlohmann::json* findChildObject(nlohmann::json& json, const std::string& objectId);
+  void processMasterIdOverrides(nlohmann::json& instance,
+                                const std::vector<std::string>& instanceIdStack);
+  void processOtherOverrides(nlohmann::json& instance,
+                             const std::vector<std::string>& instanceIdStack);
+  void applyOverridesDetail(nlohmann::json& json,
+                            std::stack<std::string> reversedPath,
+                            const nlohmann::json& value);
+
+  nlohmann::json* findChildObject(nlohmann::json& instance,
+                                  const std::vector<std::string>& instanceIdStack,
+                                  std::vector<std::string>& expandContextInstanceIdStack,
+                                  nlohmann::json& overrideItem);
+  nlohmann::json* findChildObjectInTree(nlohmann::json& json, const std::string& objectId);
+
   void makeIdUnique(nlohmann::json& json, const std::string& idPrefix);
   void makeMaskIdUnique(nlohmann::json& json,
                         nlohmann::json& instanceJson,

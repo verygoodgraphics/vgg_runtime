@@ -10,6 +10,7 @@
 #include <exception>
 #include <memory>
 #include <optional>
+#include <Domain/Layout/ExpandSymbol.hpp>
 using namespace std;
 using namespace VGG::app;
 namespace VGG::entry
@@ -354,7 +355,9 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
   FontManager::instance().setDefaultFontManager(fontCollectionName);
   std::vector<std::pair<std::string, std::vector<char>>> res;
   auto scene = std::make_shared<Scene>();
-  scene->loadFileContent(j);
+  // expand symbol
+  Layout::ExpandSymbol e(j);
+  scene->loadFileContent(e());
   scene->setResRepo(resources);
   layer->addScene(scene);
   auto count = scene->frameCount();

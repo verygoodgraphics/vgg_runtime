@@ -22,7 +22,7 @@ class ExpandSymbol
 
 public:
   ExpandSymbol(const nlohmann::json& designJson)
-    : m_designJson{ designJson }
+    : m_designJson(designJson)
   {
   }
 

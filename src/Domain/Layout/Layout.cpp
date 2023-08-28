@@ -15,10 +15,8 @@ void Layout::Layout::layout(Size size)
 
 std::shared_ptr<LayoutView> Layout::Layout::createLayoutTree()
 {
-  auto doc = m_model->designDoc()->content();
-
   // todo, select frame
-  auto& frame = doc[K_FRAME][0];
+  auto& frame = m_designJson["frames"][0];
   if (!frame.is_object())
   {
     WARN("no frame in design file");

@@ -31,7 +31,9 @@ public:
   nlohmann::json designDoc()
   {
     ExpandSymbol expandeSymbol{ m_designJson };
-    return expandeSymbol();
+    m_designJson = expandeSymbol();
+
+    return m_designJson;
   }
 
   void layout(Size size);

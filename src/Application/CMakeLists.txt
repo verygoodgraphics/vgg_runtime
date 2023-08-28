@@ -1,6 +1,6 @@
 add_library(vgg_application STATIC
-  Controller/Controller.cpp
-  Sdk/VggSdk.cpp
+  src/Controller.cpp
+  src/VggSdk.cpp
   src/AppRender.cpp
   src/EventAPI.cpp
 )

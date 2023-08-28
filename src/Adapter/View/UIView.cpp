@@ -51,7 +51,6 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
     {
       if (!m_root)
       {
-        WARN("no layout view");
         return;
       }
 
@@ -84,7 +83,6 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
     {
       if (!m_root)
       {
-        WARN("no layout view");
         return;
       }
 
@@ -116,7 +114,6 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
     {
       if (!m_root)
       {
-        WARN("no layout view");
         return;
       }
 

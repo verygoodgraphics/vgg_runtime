@@ -190,10 +190,22 @@ void ExpandSymbol::normalizeChildrenGeometry(nlohmann::json& json, const Size co
   }
   if (isPointAttrNode(json))
   {
-    auto point = json[K_POINT].get<Point>();
-    point.x /= myContainerSize.width;
-    point.y /= myContainerSize.height;
-    json[K_POINT] = point;
+    normalizePoint(json, K_POINT, myContainerSize);
+    normalizePoint(json, K_CURVE_FROM, myContainerSize);
+    normalizePoint(json, K_CURVE_TO, myContainerSize);
+  }
+}
+
+void ExpandSymbol::normalizePoint(nlohmann::json& json, const char* key, const Size& containerSize)
+{
+  if (json.contains(key))
+  {
+    auto point = json[key].get<Point>();
+
+    point.x /= containerSize.width;
+    point.y /= containerSize.height;
+
+    json[key] = point;
   }
 }
 
@@ -234,16 +246,30 @@ void ExpandSymbol::recalculateIntanceChildrenGeometry(nlohmann::json& json, Size
   }
   if (isPointAttrNode(json))
   {
-    auto point = json[K_POINT].get<Point>();
-    point.x *= containerSize.width;
-    point.y *= containerSize.height;
-    json[K_POINT] = point;
+    recalculatePoint(json, K_POINT, containerSize);
+    recalculatePoint(json, K_CURVE_FROM, containerSize);
+    recalculatePoint(json, K_CURVE_TO, containerSize);
   }
 
   // leaf last
   for (auto& el : json.items())
   {
     recalculateIntanceChildrenGeometry(el.value(), containerSize);
+  }
+}
+
+void ExpandSymbol::recalculatePoint(nlohmann::json& json,
+                                    const char* key,
+                                    const Size& containerSize)
+{
+  if (json.contains(key))
+  {
+    auto point = json[key].get<Point>();
+
+    point.x *= containerSize.width;
+    point.y *= containerSize.height;
+
+    json[key] = point;
   }
 }
 

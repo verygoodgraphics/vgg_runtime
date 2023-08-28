@@ -36,7 +36,9 @@ private:
   void scaleFromMaster(nlohmann::json& instance, nlohmann::json& master);
 
   void normalizeChildrenGeometry(nlohmann::json& json, const Size containerSize);
+  void normalizePoint(nlohmann::json& json, const char* key, const Size& containerSize);
   void recalculateIntanceChildrenGeometry(nlohmann::json& json, Size containerSize);
+  void recalculatePoint(nlohmann::json& json, const char* key, const Size& containerSize);
 
   void applyOverrides(nlohmann::json& instance, const std::vector<std::string>& instanceIdStack);
   void processMasterIdOverrides(nlohmann::json& instance,

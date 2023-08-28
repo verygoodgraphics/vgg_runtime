@@ -63,6 +63,12 @@ void ExpandSymbol::expandInstance(nlohmann::json& json,
     auto className = json.value(K_CLASS, K_EMPTY_STRING);
     if (className == K_SYMBOL_INSTANCE)
     {
+      if (!json.contains(K_MASTER_ID))
+      {
+        WARN("ExpandSymbol::expandInstance: no master id, return");
+        return;
+      }
+
       auto masterId = json[K_MASTER_ID].get<std::string>();
       if (m_masters.find(masterId) != m_masters.end())
       {

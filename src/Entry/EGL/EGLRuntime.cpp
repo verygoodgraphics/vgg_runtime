@@ -390,6 +390,7 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
     opts.position[1] = 0;
     opts.extend[0] = actualSize[0];
     opts.extend[1] = actualSize[1];
+    opts.quality = imageQuality;
     if (auto img = layer->makeImageSnapshot(opts); img)
     {
       res.emplace_back(scene->frame(i)->guid(), std::move(img.value()));

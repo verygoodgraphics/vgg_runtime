@@ -33,7 +33,7 @@ find_package(Vulkan REQUIRED)
 
 target_include_directories(vgg_layer PUBLIC ${VGG_CONTRIB_JSON_INCLUDE})
 target_link_libraries(vgg_layer PUBLIC glm ${SKIA_LIBS})
-target_link_libraries(vgg_layer PRIVATE ${OPENGL_LIBRARIES} vgg_utility Vulkan::Vulkan glfw)
+target_link_libraries(vgg_layer PRIVATE ${OPENGL_LIBRARIES} vgg_utility Vulkan::Vulkan)
 set_target_properties(vgg_layer PROPERTIES BUILD_RPATH ${SKIA_LIB_DIR})
 set_target_properties(vgg_layer PROPERTIES POSITION_INDEPENDENT_CODE ON)
 

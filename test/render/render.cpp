@@ -10,7 +10,7 @@ namespace fs = std::filesystem;
 
 using AppSDLImpl = VGG::entry::AppSDLImpl;
 using AppVkImpl = VGG::entry::AppSDLVkImpl;
-using App = AppVkImpl;
+using App = AppSDLImpl;
 
 #define main main
 int main(int argc, char** argv)

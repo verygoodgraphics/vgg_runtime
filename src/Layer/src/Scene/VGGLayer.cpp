@@ -1,6 +1,7 @@
 #include "Scene/VGGLayer.h"
 #include "Core/Node.h"
 #include "Scene/ContextInfoVulkan.hpp"
+#include "Scene/ContextInfoGL.hpp"
 #include "Scene/GraphicsContext.h"
 #include "Scene/GraphicsLayer.h"
 #include "Scene/Renderer.h"
@@ -43,12 +44,197 @@
 #include "gpu/vk/GrVkBackendContext.h"
 
 #include <queue>
-#include "Entry/SDL/SDLImpl/VulkanObject.hpp"
-
-#define USE_VULKAN
+#include "Entry/Common/GPU/Vulkan/VulkanObject.hpp"
 
 namespace VGG::layer
 {
+
+template<class... Ts>
+struct Overloaded : Ts...
+{
+  using Ts::operator()...;
+};
+// explicit deduction guide (not needed as of C++20)
+template<class... Ts>
+Overloaded(Ts...) -> Overloaded<Ts...>;
+
+class SkiaContext
+{
+public:
+  enum class ESkiaGraphicsAPIBackend
+  {
+    API_OPENGL,
+    API_VULKAN
+  };
+
+  SkiaContext(const SkiaContext&) = delete;
+  SkiaContext& operator=(const SkiaContext&) = delete;
+  SkiaContext(SkiaContext&& other) noexcept
+    : m_stream(std::move(other.m_stream))
+    , m_document(std::move(other.m_document))
+    , m_grContext(std::move(other.m_grContext))
+    , m_surface(std::move(other.m_surface))
+    , m_ctx(std::move(other.m_ctx))
+    , m_ctxConfig(std::move(other.m_ctxConfig))
+  {
+  }
+  SkiaContext& operator=(SkiaContext&& other) noexcept
+  {
+    release();
+    *this = SkiaContext(std::move(other));
+    return *this;
+  }
+
+  void release()
+  {
+    // ensure release order
+    m_stream = nullptr;
+    m_document = nullptr;
+    m_surface = nullptr;
+    m_grContext = nullptr;
+  }
+
+private:
+  std::unique_ptr<SkFILEWStream> m_stream;
+  sk_sp<SkDocument> m_document;
+  sk_sp<GrDirectContext> m_grContext{ nullptr };
+  sk_sp<SkSurface> m_surface{ nullptr };
+  std::variant<ContextInfoVulkan, ContextInfoGL> m_ctx;
+  ContextConfig m_ctxConfig;
+
+  void initContextVK(const ContextInfoVulkan& ctx)
+  {
+    GrVkBackendContext vkContext;
+    vkContext.fInstance = ctx.instance;
+    vkContext.fPhysicalDevice = ctx.physicalDevice;
+    vkContext.fDevice = ctx.device;
+    vkContext.fQueue = ctx.queue;
+    vkContext.fGetProc = std::function(
+      [](const char* name, VkInstance instance, VkDevice dev) -> PFN_vkVoidFunction
+      {
+        if (dev == VK_NULL_HANDLE && instance == VK_NULL_HANDLE)
+        {
+          return vkGetInstanceProcAddr(VK_NULL_HANDLE, name);
+        }
+        if (dev != VK_NULL_HANDLE)
+        {
+          return vkGetDeviceProcAddr(dev, name);
+        }
+        else if (instance != VK_NULL_HANDLE)
+        {
+          return vkGetInstanceProcAddr(instance, name);
+        }
+        ASSERT(" invalid option");
+        return nullptr;
+      });
+    m_grContext = GrDirectContext::MakeVulkan(vkContext);
+  }
+
+  void initContextGL(const ContextInfoGL& ctx)
+  {
+    sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
+    ASSERT(interface);
+    if (!interface)
+    {
+      // return AppError(AppError::Kind::RenderEngineError, "Failed to make skia opengl interface");
+    }
+    sk_sp<GrDirectContext> grContext = GrDirectContext::MakeGL(interface);
+    ASSERT(grContext);
+    if (!grContext)
+    {
+      // return AppError(AppError::Kind::RenderEngineError, "Failed to make skia opengl context.");
+    }
+    m_grContext = grContext;
+  }
+
+  sk_sp<SkSurface> createSurfaceVK(const ContextInfoVulkan& ctx,
+                                   const ContextConfig& cfg,
+                                   int w,
+                                   int h)
+  {
+    ASSERT(m_grContext);
+    GrVkImageInfo vkImageInfo;
+    vkImageInfo.fFormat = VK_FORMAT_R8G8B8A8_UNORM;
+    GrBackendRenderTarget target(w, h, vkImageInfo);
+    SkImageInfo info = SkImageInfo::Make(w,
+                                         h,
+                                         SkColorType::kRGBA_8888_SkColorType,
+                                         SkAlphaType::kPremul_SkAlphaType);
+    auto a = SkSurfaces::RenderTarget(m_grContext.get(), skgpu::Budgeted::kYes, info);
+    return a;
+  };
+
+  sk_sp<SkSurface> createSurfaceGL(const ContextInfoGL& ctx, const ContextConfig& cfg, int w, int h)
+  {
+    ASSERT(m_grContext);
+    GrGLFramebufferInfo info;
+    info.fFBOID = 0;
+    info.fFormat = GR_GL_RGBA8;
+    GrBackendRenderTarget target(w, h, cfg.multiSample, cfg.stencilBit, info);
+    SkSurfaceProps props;
+    return SkSurfaces::WrapBackendRenderTarget(m_grContext.get(),
+                                               target,
+                                               kBottomLeft_GrSurfaceOrigin,
+                                               SkColorType::kRGBA_8888_SkColorType,
+                                               nullptr,
+                                               &props);
+  };
+
+public:
+  SkiaContext(std::variant<ContextInfoVulkan, ContextInfoGL> context, const ContextConfig& cfg)
+    : m_ctx(std::move(context))
+    , m_ctxConfig(std::move(cfg))
+  {
+    std::visit(
+      Overloaded{
+        [this](const ContextInfoVulkan& ctx)
+        {
+          initContextVK(ctx);
+          m_surface =
+            createSurfaceVK(ctx, m_ctxConfig, m_ctxConfig.windowSize[0], m_ctxConfig.windowSize[1]);
+        },
+        [this](const ContextInfoGL& ctx)
+        {
+          initContextGL(ctx);
+          m_surface =
+            createSurfaceGL(ctx, m_ctxConfig, m_ctxConfig.windowSize[0], m_ctxConfig.windowSize[1]);
+        } },
+      m_ctx);
+  }
+
+  void resizeSurface(int w, int h)
+  {
+    std::visit(Overloaded{ [this, w, h](const ContextInfoVulkan& ctx)
+                           { m_surface = createSurfaceVK(ctx, m_ctxConfig, w, h); },
+                           [this, w, h](const ContextInfoGL& ctx)
+                           { m_surface = createSurfaceGL(ctx, m_ctxConfig, w, h); } },
+               m_ctx);
+  }
+
+  bool flushAndSubmit()
+  {
+    auto ok = m_grContext->submit();
+    m_grContext->flush();
+    return ok;
+  }
+
+  SkSurface* surface()
+  {
+    ASSERT(m_surface);
+    return m_surface.get();
+  }
+
+  SkCanvas* canvas()
+  {
+    ASSERT(m_surface);
+    return m_surface->getCanvas();
+  }
+
+  GrDirectContext* context()
+  {
+    return m_grContext.get();
+  }
+};
 
 struct SkiaState
 {
@@ -114,7 +300,8 @@ class VLayer__pImpl
 
 public:
   Zoomer zoomer;
-  SkiaState skiaState;
+  // SkiaState skiaState;
+  std::unique_ptr<SkiaContext> skiaContext;
   int surfaceWidth;
   int surfaceHeight;
   SkCanvas* canvas{ nullptr };
@@ -126,147 +313,121 @@ public:
   {
   }
 
-  void updateSkiaEngineGL()
-  {
-#ifdef USE_VULKAN
-    updateSkiaEngineVK();
-#else
-    // Create Skia
-    // get skia interface and make opengl context
-    sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
-    if (!interface)
-    {
-      // return AppError(AppError::Kind::RenderEngineError, "Failed to make skia opengl interface");
-    }
-    sk_sp<GrDirectContext> grContext = GrDirectContext::MakeGL(interface);
-    if (!grContext)
-    {
-      // return AppError(AppError::Kind::RenderEngineError, "Failed to make skia opengl context.");
-    }
-    skiaState.interface = interface;
-    skiaState.grContext = grContext;
-#endif
-  }
-
-  void resizeSkiaSurfaceGL(int w, int h)
-  {
-
-#ifdef USE_VULKAN
-    resizeSkiaSurfaceVk(w, h);
-#else
-    skiaState.surface = createSkiaSurfaceGL(w, h);
-    surfaceWidth = w;
-    surfaceHeight = h;
-#endif
-  }
-
-  sk_sp<SkSurface> createSkiaSurfaceGL(int w, int h)
-  {
-
-#ifdef USE_VULKAN
-    return createSkiaSurfaceVK(w, h);
-#else
-    ASSERT(skiaState.interface);
-    ASSERT(skiaState.grContext);
-    GrGLFramebufferInfo info;
-    info.fFBOID = 0;
-    // GR_GL_GetIntegerv(m_skiaState.interface.get(),
-    //                   GR_GL_FRAMEBUFFER_BINDING,
-    //                   (GrGLint*)&info.fFBOID);
-
-    // color type and info format must be the followings for
-    // both OpenGL and OpenGL ES, otherwise it will fail
-    info.fFormat = GR_GL_RGBA8;
-    const auto& cfg = q_ptr->context()->config();
-    GrBackendRenderTarget target(w, h, cfg.multiSample, cfg.stencilBit, info);
-
-    SkSurfaceProps props;
-    return SkSurfaces::WrapBackendRenderTarget(skiaState.grContext.get(),
-                                               target,
-                                               kBottomLeft_GrSurfaceOrigin,
-                                               SkColorType::kRGBA_8888_SkColorType,
-                                               nullptr,
-                                               &props);
-#endif
-  }
-
-#ifdef USE_VULKAN
-
-  void initVulkanObject()
-  {
-    auto vk = (ContextInfoVulkan*)q_ptr->context()->contextInfo();
-
-    skiaState.vkInstance = std::make_shared<vk::VkInstanceObject>(
-      [this]()
-      {
-        std::vector<const char*> extNames;
-        return extNames;
-      });
-    skiaState.vkPhysicalDevice = std::make_shared<vk::VkPhysicalDeviceObject>(skiaState.vkInstance);
-    skiaState.vkDevice = std::make_shared<vk::VkDeviceObject>(skiaState.vkPhysicalDevice);
-    skiaState.vkContext.fInstance = *skiaState.vkInstance;
-    skiaState.vkContext.fPhysicalDevice = *skiaState.vkPhysicalDevice;
-    skiaState.vkContext.fDevice = *skiaState.vkDevice;
-    skiaState.vkContext.fQueue = skiaState.vkDevice->graphicsQueue;
-    skiaState.vkContext.fGetProc = std::function(
-      [](const char* name, VkInstance instance, VkDevice dev) -> PFN_vkVoidFunction
-      {
-        if (dev == VK_NULL_HANDLE && instance == VK_NULL_HANDLE)
-        {
-          return vkGetInstanceProcAddr(VK_NULL_HANDLE, name);
-        }
-        if (dev != VK_NULL_HANDLE)
-        {
-          return vkGetDeviceProcAddr(dev, name);
-        }
-        else if (instance != VK_NULL_HANDLE)
-        {
-          return vkGetInstanceProcAddr(instance, name);
-        }
-        ASSERT(" invalid option");
-        return nullptr;
-      });
-  }
-  void updateSkiaEngineVK()
-  {
-    // init vkContext;
-    skiaState.grContext = GrDirectContext::MakeVulkan(skiaState.vkContext);
-  }
-
-  void resizeSkiaSurfaceVk(int w, int h)
-  {
-    skiaState.surface = createSkiaSurfaceVK(w, h);
-    surfaceWidth = w;
-    surfaceHeight = h;
-  }
-  sk_sp<SkSurface> createSkiaSurfaceVK(int w, int h)
-  {
-    GrVkImageInfo vkImageInfo;
-    vkImageInfo.fFormat = VK_FORMAT_R8G8B8A8_UNORM;
-    const auto& cfg = q_ptr->context()->config();
-    GrBackendRenderTarget target(w, h, vkImageInfo);
-
-    // GrBackendFormat f = GrBackendFormat::MakeVk(VK_FORMAT_R8G8B8A8_UNORM);
-    // auto a =
-    //   skiaState.grContext->createBackendTexture(w, h, f, GrMipmapped::kNo, GrRenderable::kYes);
-    //
-    // SkSurfaceProps props;
-    // auto r = SkSurfaces::WrapBackendRenderTarget(skiaState.grContext.get(),
-    //                                              target,
-    //                                              kBottomLeft_GrSurfaceOrigin,
-    //                                              SkColorType::kRGBA_8888_SkColorType,
-    //                                              nullptr,
-    //                                              &props);
-
-    SkImageInfo info = SkImageInfo::Make(w,
-                                         h,
-                                         SkColorType::kRGBA_8888_SkColorType,
-                                         SkAlphaType::kPremul_SkAlphaType);
-    auto a = SkSurfaces::RenderTarget(skiaState.grContext.get(), skgpu::Budgeted::kNo, info);
-    return a;
-  }
-
-#endif
+  // void updateSkiaEngineGL()
+  // {
+  //   // Create Skia
+  //   // get skia interface and make opengl context
+  //   sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
+  //   if (!interface)
+  //   {
+  //     // return AppError(AppError::Kind::RenderEngineError, "Failed to make skia opengl
+  //     interface");
+  //   }
+  //   sk_sp<GrDirectContext> grContext = GrDirectContext::MakeGL(interface);
+  //   if (!grContext)
+  //   {
+  //     // return AppError(AppError::Kind::RenderEngineError, "Failed to make skia opengl
+  //     context.");
+  //   }
+  //   skiaState.interface = interface;
+  //   skiaState.grContext = grContext;
+  // }
+  //
+  // void resizeSkiaSurfaceGL(int w, int h)
+  // {
+  //   skiaState.surface = createSkiaSurfaceGL(w, h);
+  //   surfaceWidth = w;
+  //   surfaceHeight = h;
+  // }
+  //
+  // sk_sp<SkSurface> createSkiaSurfaceGL(int w, int h)
+  // {
+  //
+  //   ASSERT(skiaState.interface);
+  //   ASSERT(skiaState.grContext);
+  //   GrGLFramebufferInfo info;
+  //   info.fFBOID = 0;
+  //   // GR_GL_GetIntegerv(m_skiaState.interface.get(),
+  //   //                   GR_GL_FRAMEBUFFER_BINDING,
+  //   //                   (GrGLint*)&info.fFBOID);
+  //
+  //   // color type and info format must be the followings for
+  //   // both OpenGL and OpenGL ES, otherwise it will fail
+  //   info.fFormat = GR_GL_RGBA8;
+  //   const auto& cfg = q_ptr->context()->config();
+  //   GrBackendRenderTarget target(w, h, cfg.multiSample, cfg.stencilBit, info);
+  //
+  //   SkSurfaceProps props;
+  //   return SkSurfaces::WrapBackendRenderTarget(skiaState.grContext.get(),
+  //                                              target,
+  //                                              kBottomLeft_GrSurfaceOrigin,
+  //                                              SkColorType::kRGBA_8888_SkColorType,
+  //                                              nullptr,
+  //                                              &props);
+  // }
+  //
+  // void initVulkanObject()
+  // {
+  //   auto vk = (ContextInfoVulkan*)q_ptr->context()->contextInfo();
+  //
+  //   skiaState.vkInstance = std::make_shared<vk::VkInstanceObject>(
+  //     [this]()
+  //     {
+  //       std::vector<const char*> extNames;
+  //       return extNames;
+  //     });
+  //   skiaState.vkPhysicalDevice =
+  //   std::make_shared<vk::VkPhysicalDeviceObject>(skiaState.vkInstance); skiaState.vkDevice =
+  //   std::make_shared<vk::VkDeviceObject>(skiaState.vkPhysicalDevice);
+  //   skiaState.vkContext.fInstance = *skiaState.vkInstance;
+  //   skiaState.vkContext.fPhysicalDevice = *skiaState.vkPhysicalDevice;
+  //   skiaState.vkContext.fDevice = *skiaState.vkDevice;
+  //   skiaState.vkContext.fQueue = skiaState.vkDevice->graphicsQueue;
+  //   skiaState.vkContext.fGetProc = std::function(
+  //     [](const char* name, VkInstance instance, VkDevice dev) -> PFN_vkVoidFunction
+  //     {
+  //       if (dev == VK_NULL_HANDLE && instance == VK_NULL_HANDLE)
+  //       {
+  //         return vkGetInstanceProcAddr(VK_NULL_HANDLE, name);
+  //       }
+  //       if (dev != VK_NULL_HANDLE)
+  //       {
+  //         return vkGetDeviceProcAddr(dev, name);
+  //       }
+  //       else if (instance != VK_NULL_HANDLE)
+  //       {
+  //         return vkGetInstanceProcAddr(instance, name);
+  //       }
+  //       ASSERT(" invalid option");
+  //       return nullptr;
+  //     });
+  // }
+  // void updateSkiaEngineVK()
+  // {
+  //   // init vkContext;
+  //   skiaState.grContext = GrDirectContext::MakeVulkan(skiaState.vkContext);
+  // }
+  //
+  // void resizeSkiaSurfaceVk(int w, int h)
+  // {
+  //   skiaState.surface = createSkiaSurfaceVK(w, h);
+  //   surfaceWidth = w;
+  //   surfaceHeight = h;
+  // }
+  // sk_sp<SkSurface> createSkiaSurfaceVK(int w, int h)
+  // {
+  //   GrVkImageInfo vkImageInfo;
+  //   vkImageInfo.fFormat = VK_FORMAT_R8G8B8A8_UNORM;
+  //   const auto& cfg = q_ptr->context()->config();
+  //   GrBackendRenderTarget target(w, h, vkImageInfo);
+  //
+  //   SkImageInfo info = SkImageInfo::Make(w,
+  //                                        h,
+  //                                        SkColorType::kRGBA_8888_SkColorType,
+  //                                        SkAlphaType::kPremul_SkAlphaType);
+  //   auto a = SkSurfaces::RenderTarget(skiaState.grContext.get(), skgpu::Budgeted::kNo, info);
+  //   return a;
+  // }
 
   std::string mapCanvasPositionToScene(const Zoomer* zoomer,
                                        const char* name,
@@ -311,12 +472,25 @@ std::optional<ELayerError> VLayer::onInit()
 {
   VGG_IMPL(VLayer)
   context()->makeCurrent();
-#ifdef USE_VULKAN
-  _->initVulkanObject();
-#endif
-  _->updateSkiaEngineGL();
+
   const auto& cfg = context()->config();
-  resize(cfg.windowSize[0], cfg.windowSize[1]);
+  const auto api = context()->property().api;
+  if (api == EGraphicsAPIBackend::API_OPENGL)
+  {
+    const auto* ctx = reinterpret_cast<ContextInfoGL*>(context()->contextInfo());
+    _->skiaContext = std::make_unique<SkiaContext>(*ctx, cfg);
+  }
+  else if (api == EGraphicsAPIBackend::API_VULKAN)
+  {
+    const auto* ctx = reinterpret_cast<ContextInfoVulkan*>(context()->contextInfo());
+    _->skiaContext = std::make_unique<SkiaContext>(*ctx, cfg);
+  }
+  else
+  {
+    ASSERT(false);
+  }
+  ASSERT(_->skiaContext);
+  // resize(cfg.windowSize[0], cfg.windowSize[1]);
   return std::nullopt;
 }
 void VLayer::beginFrame()
@@ -326,7 +500,8 @@ void VLayer::beginFrame()
 void VLayer::render()
 {
   VGG_IMPL(VLayer)
-  auto canvas = _->skiaState.getCanvas();
+  // auto canvas = _->skiaState.getCanvas();
+  auto canvas = _->skiaContext->canvas();
   if (canvas)
   {
     canvas->save();
@@ -376,27 +551,28 @@ void VLayer::addScene(std::shared_ptr<Scene> scene)
 void VLayer::resize(int w, int h)
 {
   VGG_IMPL(VLayer);
-  const auto f = 1.0;
-  const int finalW = w * f;
-  const int finalH = h * f;
+  const int finalW = w;
+  const int finalH = h;
   INFO("resize: [%d, %d], actually (%d, %d)", w, h, finalW, finalH);
-  _->resizeSkiaSurfaceGL(finalW, finalH);
+  _->skiaContext->resizeSurface(finalW, finalH);
+  //_->resizeSkiaSurfaceGL(finalW, finalH);
 }
 void VLayer::endFrame()
 {
   VGG_IMPL(VLayer)
   ASSERT(context());
-  _->skiaState.getCanvas()->flush();
-  _->skiaState.grContext->flush();
-  _->skiaState.grContext->submit();
+  _->skiaContext->flushAndSubmit();
+  // _->skiaState.getCanvas()->flush();
+  // _->skiaState.grContext->flush();
+  // _->skiaState.grContext->submit();
   context()->swap();
 }
 
 std::optional<std::vector<char>> VLayer::makeImageSnapshot(const ImageOptions& opts)
 {
   VGG_IMPL(VLayer);
-  auto surface = _->skiaState.surface;
-  auto ctx = _->skiaState.grContext.get();
+  auto surface = _->skiaContext->surface();
+  auto ctx = _->skiaContext->context();
   if (auto image = surface->makeImageSnapshot(
         SkIRect::MakeXYWH(opts.position[0], opts.position[1], opts.extend[0], opts.extend[1])))
   {
@@ -416,6 +592,8 @@ std::optional<std::vector<char>> VLayer::makeImageSnapshot(const ImageOptions& o
 
 void VLayer::shutdown()
 {
+  VGG_IMPL(VLayer);
+  _->skiaContext = nullptr;
 }
 
 VLayer::VLayer()

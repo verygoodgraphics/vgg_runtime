@@ -9,20 +9,18 @@
 using namespace VGG;
 using namespace VGG::Layout::Internal::Rule;
 
-constexpr auto FLIP_Y_FACTOR = -1;
-
 Layout::Layout::Layout(std::shared_ptr<Daruma> model)
   : m_model{ model }
 {
   ASSERT(m_model);
 
-  m_designJson = ExpandSymbol{ m_model->designDoc()->content() }();
+  auto designJson = ExpandSymbol{ m_model->designDoc()->content() }();
   if (m_model->layoutDoc())
   {
     collectRules(m_model->layoutDoc()->content());
   }
 
-  m_model->setRuntimeDesignDoc(m_designJson);
+  m_model->setRuntimeDesignDoc(designJson);
 }
 
 void Layout::Layout::layout(Size size)
@@ -59,7 +57,8 @@ std::shared_ptr<LayoutView> Layout::Layout::layoutTree()
     return m_layoutTree;
   }
 
-  if (!m_designJson.is_object())
+  auto& designJson = m_model->runtimeDesignDoc()->content();
+  if (!designJson.is_object())
   {
     WARN("invalid design file");
     return {};
@@ -68,10 +67,10 @@ std::shared_ptr<LayoutView> Layout::Layout::layoutTree()
   m_layoutTree.reset(new LayoutView{ "/", {} });
 
   json::json_pointer framesPath{ "/frames" };
-  for (auto i = 0; i < m_designJson[K_FRAMES].size(); ++i)
+  for (auto i = 0; i < designJson[K_FRAMES].size(); ++i)
   {
     auto path = framesPath / i;
-    createOneLayoutView(m_designJson[path], path, m_layoutTree);
+    createOneLayoutView(designJson[path], path, m_layoutTree);
   }
 
   m_size = m_layoutTree->frame().size;
@@ -98,6 +97,7 @@ std::shared_ptr<LayoutView> Layout::Layout::createOneLayoutView(const nlohmann::
   frame.origin.y *= FLIP_Y_FACTOR;
 
   auto layoutView = std::make_shared<LayoutView>(currentPath.to_string(), frame);
+  layoutView->setViewModel(m_model->runtimeDesignDoc());
   if (parent)
   {
     parent->addChild(layoutView);
@@ -173,13 +173,17 @@ void Layout::Layout::configureAutoLayout(std::shared_ptr<LayoutView> view)
 {
   std::shared_ptr<VGG::Layout::Internal::Rule::Rule> rule;
 
-  auto json = m_designJson[nlohmann::json::json_pointer{ view->path() }];
-  if (json.contains(K_ID))
+  auto& designJson = m_model->runtimeDesignDoc()->content();
+  if (view->path() != "/")
   {
-    auto nodeId = json.at(K_ID).get<std::string>();
-    if (m_rules.find(nodeId) != m_rules.end())
+    auto& json = designJson[nlohmann::json::json_pointer{ view->path() }];
+    if (json.contains(K_ID))
     {
-      rule = m_rules[nodeId];
+      auto nodeId = json.at(K_ID).get<std::string>();
+      if (m_rules.find(nodeId) != m_rules.end())
+      {
+        rule = m_rules[nodeId];
+      }
     }
   }
 

@@ -26,18 +26,12 @@ struct Rule;
 class Layout
 {
   std::shared_ptr<Daruma> m_model;
-  nlohmann::json m_designJson;
   Size m_size;
   std::shared_ptr<LayoutView> m_layoutTree;
   std::unordered_map<std::string, std::shared_ptr<Internal::Rule::Rule>> m_rules;
 
 public:
   Layout(std::shared_ptr<Daruma> model);
-
-  const nlohmann::json& designDoc()
-  {
-    return m_designJson;
-  }
 
   void layout(Size size);
   std::shared_ptr<LayoutView> layoutTree();

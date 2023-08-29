@@ -32,9 +32,11 @@ Controller::Controller(std::shared_ptr<RunLoop> runLoop,
   assert(m_run_loop);
 }
 
-bool Controller::start(const std::string& filePath, const char* designDocSchemaFilePath)
+bool Controller::start(const std::string& filePath,
+                       const char* designDocSchemaFilePath,
+                       const char* layoutDocSchemaFilePath)
 {
-  initModel(designDocSchemaFilePath);
+  initModel(designDocSchemaFilePath, layoutDocSchemaFilePath);
   auto ret = m_model->load(filePath);
   if (ret)
   {
@@ -47,9 +49,11 @@ bool Controller::start(const std::string& filePath, const char* designDocSchemaF
   return ret;
 }
 
-bool Controller::start(std::vector<char>& buffer, const char* designDocSchemaFilePath)
+bool Controller::start(std::vector<char>& buffer,
+                       const char* designDocSchemaFilePath,
+                       const char* layoutDocSchemaFilePath)
 {
-  initModel(designDocSchemaFilePath);
+  initModel(designDocSchemaFilePath, layoutDocSchemaFilePath);
   auto ret = m_model->load(buffer);
   if (ret)
   {
@@ -104,38 +108,15 @@ void Controller::onResize()
   }
 }
 
-void Controller::initModel(const char* designDocSchemaFilePath)
+void Controller::initModel(const char* designDocSchemaFilePath, const char* layoutDocSchemaFilePath)
 {
   if (designDocSchemaFilePath)
   {
     m_design_schema_file_path.append(designDocSchemaFilePath);
   }
 
-  auto build_design_doc_fn =
-    [&, design_schema_file_path = m_design_schema_file_path](const json& designJson)
-  {
-    auto json_doc_ptr = createJsonDoc();
-    json_doc_ptr->setContent(designJson);
-
-    if (!design_schema_file_path.empty())
-    {
-      SchemaValidJsonDocument::ValidatorPtr design_doc_validator;
-      std::ifstream schema_fs(design_schema_file_path);
-      json schema = json::parse(schema_fs);
-      design_doc_validator.reset(new JsonSchemaValidator);
-      design_doc_validator->setRootSchema(schema);
-
-      // todo, validate design doc
-
-      json_doc_ptr =
-        new SchemaValidJsonDocument(JsonDocumentPtr(json_doc_ptr), design_doc_validator);
-    }
-
-    return wrapJsonDoc(JsonDocumentPtr(json_doc_ptr));
-  };
-  // todo, build layout doc
-  // todo, validate layout doc
-  m_model.reset(new Daruma(build_design_doc_fn));
+  m_model.reset(new Daruma(createMakeJsonDocFn(designDocSchemaFilePath),
+                           createMakeJsonDocFn(layoutDocSchemaFilePath)));
 
   DarumaContainer().add(m_model);
 }
@@ -301,6 +282,38 @@ std::shared_ptr<ViewModel> Controller::generateViewModel(std::shared_ptr<Daruma>
   view_model->layoutTree = start_running.layoutTree();
 
   return view_model;
+}
+
+MakeJsonDocFn Controller::createMakeJsonDocFn(const char* pJsonSchemaFilePath)
+{
+  std::string jsonSchemaFilePath;
+  if (pJsonSchemaFilePath)
+  {
+    jsonSchemaFilePath.append(pJsonSchemaFilePath);
+  }
+
+  auto lambda = [&, jsonSchemaFilePath](const json& designJson)
+  {
+    auto jsonDocPtr = createJsonDoc();
+    jsonDocPtr->setContent(designJson);
+
+    if (!jsonSchemaFilePath.empty())
+    {
+      SchemaValidJsonDocument::ValidatorPtr validator;
+      std::ifstream schema_fs(jsonSchemaFilePath);
+      json schema = json::parse(schema_fs);
+      validator.reset(new JsonSchemaValidator);
+      validator->setRootSchema(schema);
+
+      // todo, validate doc
+
+      jsonDocPtr = new SchemaValidJsonDocument(JsonDocumentPtr(jsonDocPtr), validator);
+    }
+
+    return wrapJsonDoc(JsonDocumentPtr(jsonDocPtr));
+  };
+
+  return lambda;
 }
 
 } // namespace VGG

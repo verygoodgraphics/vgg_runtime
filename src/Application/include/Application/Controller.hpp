@@ -45,8 +45,12 @@ public:
              RunMode mode = RunMode::NormalMode);
   ~Controller() = default;
 
-  bool start(const std::string& filePath, const char* designDocSchemaFilePath = nullptr);
-  bool start(std::vector<char>& buffer, const char* designDocSchemaFilePath = nullptr);
+  bool start(const std::string& filePath,
+             const char* designDocSchemaFilePath = nullptr,
+             const char* layoutDocSchemaFilePath = nullptr);
+  bool start(std::vector<char>& buffer,
+             const char* designDocSchemaFilePath = nullptr,
+             const char* layoutDocSchemaFilePath = nullptr);
 
   bool edit(const std::string& filePath);
   bool edit(std::vector<char>& buffer);
@@ -54,7 +58,7 @@ public:
   void onResize();
 
 private:
-  void initModel(const char* designDocSchemaFilePath);
+  void initModel(const char* designDocSchemaFilePath, const char* layoutDocSchemaFilePath);
   JsonDocument* createJsonDoc();
   std::shared_ptr<JsonDocument> wrapJsonDoc(std::shared_ptr<JsonDocument> jsonDoc);
   const std::shared_ptr<VggExec>& vggExec();
@@ -68,6 +72,7 @@ private:
   void observeEditViewEvent();
 
   std::shared_ptr<ViewModel> generateViewModel(std::shared_ptr<Daruma> model, Layout::Size size);
+  MakeJsonDocFn createMakeJsonDocFn(const char* pJsonSchemaFilePath);
 };
 
 } // namespace VGG

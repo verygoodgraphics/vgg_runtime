@@ -1,6 +1,8 @@
 #include "View.hpp"
 
 #include "AutoLayout.hpp"
+#include "Helper.hpp"
+#include "JsonKeys.hpp"
 #include "Log.h"
 #include "Rule.hpp"
 
@@ -169,12 +171,41 @@ const Layout::Rect& LayoutView::frame() const
 }
 void LayoutView::setFrame(const Layout::Rect& frame)
 {
-  m_frame = frame;
+  if (m_frame != frame)
+  {
+    m_frame = frame;
 
-  // todo, scale subview if no layout
-  // todo, update json model
-  // todo, mark dirty
-  m_autoLayout->frameChanged();
+    // updateAt
+    if (auto viewModel = m_viewModel.lock())
+    {
+      nlohmann::json::json_pointer path{ m_path };
+      nlohmann::json objectJson{ viewModel->content()[path] };
+      auto& frameJson = objectJson[K_FRAME];
+      auto& boundsJson = objectJson[K_BOUNDS];
+      auto& matrixJson = objectJson[K_MATRIX];
+
+      to_json(frameJson, frame);
+
+      boundsJson[K_WIDTH] = frame.size.width;
+      boundsJson[K_HEIGHT] = frame.size.height;
+
+      matrixJson[4] = frame.origin.x;
+      matrixJson[5] = frame.origin.y * VGG::Layout::FLIP_Y_FACTOR;
+
+      viewModel->replaceAt(path / K_FRAME, frameJson);
+      viewModel->replaceAt(path / K_BOUNDS, boundsJson);
+      viewModel->replaceAt(path / K_MATRIX, matrixJson);
+    }
+
+    // todo, scale subview if no layout
+
+    m_autoLayout->frameChanged();
+  }
+}
+
+void LayoutView::setViewModel(JsonDocumentPtr viewModel)
+{
+  m_viewModel = viewModel;
 }
 
 void LayoutView::configureAutoLayout()

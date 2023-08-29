@@ -1,0 +1,641 @@
+{
+  "title": "Vgg Layout",
+  "description": "Vgg Layout describes the layout information of an element. Vgg layout does not contain hierarchical relationships between objects, which are described in vgg-format.",
+  "type": "object",
+  "$id": "https://git.vgg.cool/verygoodgraphics/vgg_format/src/branch/master/sketch-document-6.4.0/packages/layout-format/src/vgg-layout.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Object": {
+      "title": "Object",
+      "description": "Describes properties related to the layout of an object.",
+      "type": "object",
+      "$id": "#Object",
+      "required": ["class", "id", "width", "height"],
+      "properties": {
+        "class": {
+          "const": "object"
+        },
+        "id": {
+          "type": "string",
+          "description": "object identifier. Use this value to associate objects in vgg-format."
+        },
+        "layout": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/FlexboxLayout"
+            },
+            {
+              "$ref": "#/definitions/GridLayout"
+            }
+          ],
+          "description": "Describes the layout information used by the current object."
+        },
+        "item_in_layout": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/FlexboxItem"
+            },
+            {
+              "$ref": "#/definitions/GridItem"
+            }
+          ],
+          "description": "Describes information about the current object when it is in the layout."
+        },
+        "width": {
+          "$ref": "#/definitions/Width"
+        },
+        "max_width": {
+          "$ref": "#/definitions/MaxWidth"
+        },
+        "min_width": {
+          "$ref": "#/definitions/MinWidth"
+        },
+        "height": {
+          "$ref": "#/definitions/Height"
+        },
+        "max_height": {
+          "$ref": "#/definitions/MaxHeight"
+        },
+        "min_height": {
+          "$ref": "#/definitions/MinHeight"
+        },
+        "aspect_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Defined as the ratio between the width and the height of a node. if a node has an aspect ratio of 2 then its width is twice the size of its height. If this item does not exist, there is no limit to the aspect ratio."
+        }
+      },
+      "additionalProperties": false
+    },
+    "FlexboxLayout": {
+      "title": "Flexbox Layout",
+      "description": "The Flexible Box Module, usually referred to as flexbox, was designed as a one-dimensional layout model, and as a method that could offer space distribution between items in an interface and powerful alignment capabilities.",
+      "type": "object",
+      "$id": "#FlexboxLayout",
+      "required": [
+        "class",
+        "direction",
+        "justify_content",
+        "align_items",
+        "align_content",
+        "wrap",
+        "row_gap",
+        "column_gap",
+        "padding"
+      ],
+      "properties": {
+        "class": {
+          "const": "flexbox_layout"
+        },
+        "direction": {
+          "type": "integer",
+          "enum": [1, 2],
+          "enumDescriptions": ["horizontal", "vertical"]
+        },
+        "justify_content": {
+          "description": " The justify-content property defines how the render engine distributes space between and around content items  along the main-axis of a flex container, and the inline axis of a grid container.\nFor more information:  https://developer.mozilla.org/en-US/docs/Web/CSS/justify-content ",
+          "type": "integer",
+          "enum": [1, 2, 3, 4, 5, 6],
+          "enumDescriptions": [
+            "start",
+            "center",
+            "end",
+            "space between",
+            "space around",
+            "space evenly"
+          ]
+        },
+        "align_items": {
+          "description": "The align-items property sets the align-self value on all direct children as a group. In Flexbox, it controls the alignment of items on the Cross Axis.",
+          "$ref": "#/definitions/AlignStyle"
+        },
+        "align_content": {
+          "description": "The align-content property sets the distribution of space between and around content items along a flexbox's cross-axis or a grid's block axis.",
+          "$ref": "#/definitions/AlignStyle"
+        },
+        "wrap": {
+          "type": "integer",
+          "enum": [1, 2],
+          "enumDescriptions": [
+            "no wrap: Indicates that the parent container is a single-line container. All child items in the parent container are arranged in order of layout,  even if the child items overflow the parent container.",
+            "wrap: The parent container under the wrap definition is a multi-line container. When the parent container does not have enough space left to hold the minimum size of the child,  the child items are wrapped in rows or columns along the layout direction"
+          ]
+        },
+        "row_gap": {
+          "type": "number",
+          "description": " The row-gap property sets the size of the gap (gutter) between an element's rows. Unit: px "
+        },
+        "column_gap": {
+          "type": "number",
+          "description": " The column-gap property sets the size of the gap (gutter) between an element's columns. Unit: px "
+        },
+        "padding": {
+          "type": "array",
+          "maxItems": 4,
+          "minItems": 4,
+          "description": " The padding property sets the padding area on all four sides of an element at once. [top right bottom left]\nUnit: px ",
+          "items": {
+            "type": "number"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "AlignStyle": {
+      "title": "Ailgn Style",
+      "description": "The alignment is described.",
+      "type": "integer",
+      "enum": [1, 2, 3],
+      "enumDescriptions": ["start", "center", "end"],
+      "$id": "#AlignStyle"
+    },
+    "GridLayout": {
+      "title": "Grid Layout",
+      "description": "Grid Layout introduces a two-dimensional grid system.",
+      "type": "object",
+      "$id": "#GridLayout",
+      "required": [
+        "class",
+        "expand_strategy",
+        "column_width",
+        "row_height",
+        "base_height",
+        "column_gap",
+        "row_gap",
+        "grid_auto_flow",
+        "padding",
+        "cell_align"
+      ],
+      "properties": {
+        "class": {
+          "const": "grid_layout"
+        },
+        "expand_strategy": {
+          "$ref": "#/definitions/ExpandStrategy"
+        },
+        "column_width": {
+          "$ref": "#/definitions/ColumnWidth"
+        },
+        "row_height": {
+          "$ref": "#/definitions/RowHeight"
+        },
+        "base_height": {
+          "type": "number",
+          "description": "This value is used as the fiducial value when there are empty rows or high row circular dependencies."
+        },
+        "column_gap": {
+          "type": "number",
+          "description": "The column-gap property sets the size of the gap (gutter) between an element's columns. Unit is px."
+        },
+        "row_gap": {
+          "type": "number",
+          "description": "The row-gap property sets the size of the gap (gutter) between an element's rows. Unit is px."
+        },
+        "grid_auto_flow": {
+          "type": "integer",
+          "description": "The grid-auto-flow property controls how the auto-placement algorithm works, specifying exactly how auto-placed items get flowed into the grid.",
+          "enum": [1, 2],
+          "enumDescriptions": ["row", "row dense"]
+        },
+        "padding": {
+          "type": "array",
+          "maxItems": 4,
+          "minItems": 4,
+          "description": " The padding property sets the padding area on all four sides of an element at once. [top right bottom left]\nUnit: px ",
+          "items": {
+            "type": "number"
+          }
+        },
+        "cell_align": {
+          "type": "integer",
+          "description": "Describes the alignment of the row direction. Valid when the sum of column widths is less than the width of the container. The column orientation is fixed to start and does not need to be set.",
+          "$ref": "#/definitions/AlignStyle"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ExpandStrategy": {
+      "title": "Expand Strategy",
+      "type": "object",
+      "description": "The growth strategy of row and column of grid-layout is described.",
+      "$id": "#ExpandStrategy",
+      "required": ["class", "strategy", "min_row", "column_count"],
+      "properties": {
+        "class": {
+          "const": "expand_strategy"
+        },
+        "strategy": {
+          "type": "integer",
+          "enum": [1, 2],
+          "enumDescriptions": [
+            "auto (The number of columns and rows is calculated automatically by the algorithm and is not controlled by the user.)",
+            "fix-column (A fixed number of columns is specified by the user. The number of rows is automatically adjusted as needed and is always greater than or equal to the minimum number of rows.)"
+          ]
+        },
+        "min_row": {
+          "type": "integer",
+          "description": "Takes effect only in fix-column mode and indicates the minimum number of rows."
+        },
+        "column_count": {
+          "type": "integer",
+          "description": "Takes effect only in fix-column mode, indicating a fixed number of columns."
+        }
+      },
+      "additionalProperties": false
+    },
+    "ColumnWidth": {
+      "title": "Column Width",
+      "description": "Describes the attribute of column width in grid-layout.",
+      "type": "object",
+      "$id": "#ColumnWidth",
+      "required": ["class", "strategy", "width_value"],
+      "properties": {
+        "class": {
+          "const": "column_width"
+        },
+        "strategy": {
+          "type": "integer",
+          "enum": [1, 2],
+          "enumDescriptions": [
+            "min (Specifies the minimum width of the column.)",
+            "fix (Specifies the fixed width of the column.)"
+          ]
+        },
+        "width_value": {
+          "type": "number",
+          "description": "Describes the width of the column. The practical implications depend on the strategy. Unit is px."
+        }
+      },
+      "additionalProperties": false
+    },
+    "RowHeight": {
+      "title": "Row Height",
+      "description": "Describes the height attributes of rows in grid-layout.",
+      "type": "object",
+      "$id": "#RowHeight",
+      "required": ["class", "strategy", "fixed_value"],
+      "properties": {
+        "class": {
+          "const": "row_height"
+        },
+        "strategy": {
+          "type": "integer",
+          "enum": [1, 2, 3],
+          "enumDescriptions": [
+            "fill container (Fills the row height of the parent.)",
+            "fit content (Adapts the height of the subitem.)",
+            "fixed (decided by row height)"
+          ]
+        },
+        "fixed_value": {
+          "type": "number",
+          "description": "Only applies when strategy is fixed, indicating a fixed row height value."
+        }
+      },
+      "additionalProperties": false
+    },
+    "FlexboxItem": {
+      "title": "Flexbox Item",
+      "description": "Describes the properties of an element located in the flexbox layout.",
+      "type": "object",
+      "$id": "#FlexboxItem",
+      "required": ["class", "position", "flex_grow"],
+      "properties": {
+        "class": {
+          "const": "flexbox_item"
+        },
+        "position": {
+          "$ref": "#/definitions/Position"
+        },
+        "top": {
+          "$ref": "#/definitions/Top"
+        },
+        "right": {
+          "$ref": "#/definitions/Right"
+        },
+        "bottom": {
+          "$ref": "#/definitions/Bottom"
+        },
+        "left": {
+          "$ref": "#/definitions/Left"
+        },
+        "flex_grow": {
+          "type": "number",
+          "description": "The flex-grow property sets the flex grow factor, which specifies how much of the flex container's remaining space should be assigned to the flex item's main size."
+        }
+      },
+      "additionalProperties": false
+    },
+    "Position": {
+      "title": "Position",
+      "description": "The position property sets how an element is positioned in a document. The top, right, bottom, and left properties determine the final location of positioned elements.",
+      "type": "object",
+      "$id": "#Position",
+      "required": ["class", "value"],
+      "properties": {
+        "class": {
+          "const": "position"
+        },
+        "value": {
+          "type": "integer",
+          "enum": [1, 2, 3, 4],
+          "enumDescriptions": ["relative", "absolute", "fixed", "sticky"],
+          "description": " relative:  The element is positioned according to the normal flow of the document,  and then offset relative to itself based on the values of top, right, bottom, and left.  The offset does not affect the position of any other elements;  thus, the space given for the element in the page layout is the same as if position were static.\nabsolute: The element is removed from the normal document flow,  and no space is created for the element in the page layout.  It is positioned relative to its closest positioned ancestor, if any;  otherwise, it is placed relative to the initial containing block.  Its final position is determined by the values of top, right, bottom, and left.\nfixed: The element is removed from the normal document flow,  and no space is created for the element in the page layout.  It is positioned relative to the initial containing block established by the viewport,  except when one of its ancestors has a transform, perspective,  or filter property set to something other than none (see the CSS Transforms Spec),  or the will-change property is set to transform, in which case that ancestor behaves as the containing block.  (Note that there are browser inconsistencies with perspective and filter contributing to containing block formation.)  Its final position is determined by the values of top, right, bottom, and left.\nsticky: The element is positioned according to the normal flow of the document,  and then offset relative to its nearest scrolling ancestor and containing block (nearest block-level ancestor),  including table-related elements, based on the values of top, right, bottom, and left.  The offset does not affect the position of any other elements.\nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/position "
+        }
+      },
+      "additionalProperties": false
+    },
+    "Top": {
+      "title": "Top",
+      "type": "object",
+      "$id": "#Top",
+      "required": ["class", "value"],
+      "properties": {
+        "class": {
+          "const": "top"
+        },
+        "value": {
+          "type": "number",
+          "description": " Unit: px\nThe top property participates in specifying the vertical position of a positioned element.  It has no effect on non-positioned elements.\nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/top "
+        }
+      },
+      "additionalProperties": false
+    },
+    "Right": {
+      "title": "Right",
+      "type": "object",
+      "$id": "#Right",
+      "required": ["class", "value"],
+      "properties": {
+        "class": {
+          "const": "right"
+        },
+        "value": {
+          "type": "number",
+          "description": " Unit: px\nThe right CSS property participates in specifying the horizontal position of a positioned element.  It has no effect on non-positioned elements.\nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/right "
+        }
+      },
+      "additionalProperties": false
+    },
+    "Bottom": {
+      "title": "Bottom",
+      "type": "object",
+      "$id": "#Bottom",
+      "required": ["class", "value"],
+      "properties": {
+        "class": {
+          "const": "bottom"
+        },
+        "value": {
+          "type": "number",
+          "description": " Unit: px\nThe bottom property participates in setting the vertical position of a positioned element.  It has no effect on non-positioned elements.\nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/bottom "
+        }
+      },
+      "additionalProperties": false
+    },
+    "Left": {
+      "title": "Left",
+      "type": "object",
+      "$id": "#Left",
+      "required": ["class", "value"],
+      "properties": {
+        "class": {
+          "const": "left"
+        },
+        "value": {
+          "type": "number",
+          "description": " Unit: px\nThe left property participates in specifying the horizontal position of a positioned element.  It has no effect on non-positioned elements.\nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/left "
+        }
+      },
+      "additionalProperties": false
+    },
+    "GridItem": {
+      "title": "Grid Item",
+      "description": "Describes the properties of an element located in the grid layout.",
+      "type": "object",
+      "$id": "#GridItem",
+      "required": [
+        "class",
+        "item_pos",
+        "row_span",
+        "column_span",
+        "position",
+        "row_align",
+        "column_align"
+      ],
+      "properties": {
+        "class": {
+          "const": "grid_item"
+        },
+        "item_pos": {
+          "$ref": "#/definitions/GridItemPos"
+        },
+        "row_span": {
+          "type": "integer",
+          "description": "The number of rows occupied by the element.",
+          "minimum": 1
+        },
+        "column_span": {
+          "type": "integer",
+          "description": "The number of columns occupied by the element.",
+          "minimum": 1
+        },
+        "position": {
+          "$ref": "#/definitions/Position"
+        },
+        "top": {
+          "$ref": "#/definitions/Top"
+        },
+        "right": {
+          "$ref": "#/definitions/Right"
+        },
+        "bottom": {
+          "$ref": "#/definitions/Bottom"
+        },
+        "left": {
+          "$ref": "#/definitions/Left"
+        },
+        "row_align": {
+          "type": "integer",
+          "description": "Valid when the position type is relative or sticky, specifies how the element's row direction is aligned to it.",
+          "$ref": "#/definitions/AlignStyle"
+        },
+        "column_align": {
+          "type": "integer",
+          "description": "Valid when the position type is relative or sticky, specifies how the element's column direction is aligned to it.",
+          "$ref": "#/definitions/AlignStyle"
+        }
+      },
+      "additionalProperties": false
+    },
+    "GridItemPos": {
+      "title": "Grid Item Pos",
+      "description": "Describes the position information of rows and columns of an element in a grid-layout.",
+      "type": "object",
+      "$id": "#GridItemPos",
+      "required": ["class", "strategy", "row_id", "column_id"],
+      "properties": {
+        "class": {
+          "const": "grid_item_pos"
+        },
+        "strategy": {
+          "type": "integer",
+          "enum": [1, 2],
+          "enumDescriptions": [
+            "auto (Automatically assign row and column coordinates.)",
+            "fix (Coordinates are specified by the user.)"
+          ]
+        },
+        "row_id": {
+          "type": "integer",
+          "description": "Takes effect only in fix mode, specifies the element start row coordinates. Value start with 0.",
+          "minimum": 0
+        },
+        "column_id": {
+          "type": "integer",
+          "description": "Takes effect only in fix mode, specifies the element start column coordinates. Value start with 0.",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "Width": {
+      "title": "Width",
+      "type": "object",
+      "description": " The width property sets an element's width. \nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/width ",
+      "$id": "#Width",
+      "required": ["class", "value"],
+      "properties": {
+        "class": {
+          "const": "width"
+        },
+        "value": {
+          "$ref": "#/definitions/Length"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Length": {
+      "title": "Length",
+      "type": "object",
+      "$id": "#Length",
+      "required": ["class", "value", "types"],
+      "properties": {
+        "class": {
+          "const": "length"
+        },
+        "value": {
+          "type": "number",
+          "description": "The units and meaning of value depend on the types."
+        },
+        "types": {
+          "type": "integer",
+          "enum": [1, 2, 4],
+          "enumDescriptions": [
+            "fixed (px): Width or height is a fixed value.",
+            "relative (percent): The width or height of the child is the percentage relative to the width or height of the parent. Only children whose parents apply layout are available.",
+            "fit content (auto): The size of the parent is calculated from the sum of the size of the child nodes. In this case, the value of value is meaningless. Only the parent is available."
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "MaxWidth": {
+      "title": "Max Width",
+      "type": "object",
+      "description": " The max-width property sets the maximum width of an element.  It prevents the used value of the width property from becoming larger than the value specified by max-width.\nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/max-width ",
+      "$id": "#MaxWidth",
+      "required": ["class", "value"],
+      "properties": {
+        "class": {
+          "const": "max_width"
+        },
+        "value": {
+          "$ref": "#/definitions/Length",
+          "description": "Available types include only fixed and relative."
+        }
+      },
+      "additionalProperties": false
+    },
+    "MinWidth": {
+      "title": "Min Width",
+      "type": "object",
+      "description": " The min-width property sets the minimum width of an element.  It prevents the used value of the width property from becoming smaller than the value specified for min-width.\nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/min-width ",
+      "$id": "#MinWidth",
+      "required": ["class", "value"],
+      "properties": {
+        "class": {
+          "const": "min_width"
+        },
+        "value": {
+          "$ref": "#/definitions/Length",
+          "description": "Available types include only fixed and relative."
+        }
+      },
+      "additionalProperties": false
+    },
+    "Height": {
+      "title": "Height",
+      "type": "object",
+      "description": " The height property specifies the height of an element.\nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/height ",
+      "$id": "#Height",
+      "required": ["class", "value"],
+      "properties": {
+        "class": {
+          "const": "height"
+        },
+        "value": {
+          "$ref": "#/definitions/Length"
+        }
+      },
+      "additionalProperties": false
+    },
+    "MaxHeight": {
+      "title": "Max Height",
+      "type": "object",
+      "description": " The max-height property sets the maximum height of an element.  It prevents the used value of the height property from becoming larger than the value specified for max-height.\nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/max-height ",
+      "$id": "#MaxHeight",
+      "required": ["class", "value"],
+      "properties": {
+        "class": {
+          "const": "max_height"
+        },
+        "value": {
+          "$ref": "#/definitions/Length",
+          "description": "Available types include only fixed and relative."
+        }
+      },
+      "additionalProperties": false
+    },
+    "MinHeight": {
+      "title": "Min Height",
+      "type": "object",
+      "description": " The min-height property sets the minimum height of an element.  It prevents the used value of the height property from becoming smaller than the value specified for min-height.\nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/min-height ",
+      "$id": "#MinHeight",
+      "required": ["class", "value"],
+      "properties": {
+        "class": {
+          "const": "min_height"
+        },
+        "value": {
+          "$ref": "#/definitions/Length",
+          "description": "Available types include only fixed and relative."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["class", "obj"],
+  "properties": {
+    "class": {
+      "const": "Vgg_Layout"
+    },
+    "obj": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Object"
+      }
+    }
+  },
+  "additionalProperties": false
+}

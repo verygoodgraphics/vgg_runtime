@@ -42,8 +42,16 @@ int main(int argc, char** argv)
   MainComposer main_composer{ new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js", false) };
 #endif
 
+  SDLRuntime* app = App<SDLRuntime>::getInstance(1920, 1080, "VGG");
+  ASSERT(app);
+
+  app->setController(main_composer.controller());
+  app->setView(main_composer.view());
+
   auto darumaFileOrDir = program.get<std::string>(DARUMA_FILE_OR_DIRECTORY);
-  main_composer.controller()->start(darumaFileOrDir, "../asset/vgg-format.json");
+  main_composer.controller()->start(darumaFileOrDir,
+                                    "../asset/vgg-format.json",
+                                    "../asset/vgg_layout.json");
 
   // if (auto file_to_edit = program.present("-e"))
   // {
@@ -52,12 +60,6 @@ int main(int argc, char** argv)
   //   auto file_path = file_to_edit.value();
   //   main_composer.controller()->edit(file_path);
   // }
-
-  SDLRuntime* app = App<SDLRuntime>::getInstance(1920, 1080, "VGG");
-  ASSERT(app);
-
-  app->setController(main_composer.controller());
-  app->setView(main_composer.view());
 
   // enter loop
   constexpr int fps = 60;

@@ -97,6 +97,7 @@ bool Daruma::load_files()
       auto tmp_json = json::parse(file_content);
       auto doc = m_makeDesignDocFn(tmp_json);
       m_designDoc = JsonDocumentPtr(new SubjectJsonDocument(doc));
+      m_runtimeDesignDoc = m_designDoc;
     }
     else
     {
@@ -109,6 +110,7 @@ bool Daruma::load_files()
       auto tmp_json = json::parse(file_content);
       auto doc = m_make_layout_doc_fn(tmp_json);
       m_layout_doc = JsonDocumentPtr(new SubjectJsonDocument(doc));
+      m_runtimeLayoutDoc = m_layout_doc;
     }
     else
     {
@@ -131,6 +133,22 @@ bool Daruma::load_files()
     FAIL("#Daruma::load_files(), caught exception: %s", e.what());
     return false;
   }
+}
+
+JsonDocumentPtr Daruma::runtimeDesignDoc()
+{
+  return m_runtimeDesignDoc;
+}
+
+JsonDocumentPtr Daruma::runtimeLayoutDoc()
+{
+  return m_runtimeLayoutDoc;
+}
+
+void Daruma::setRuntimeDesignDoc(const nlohmann::json& designJson)
+{
+  auto doc = m_makeDesignDocFn(designJson);
+  m_runtimeDesignDoc = JsonDocumentPtr(new SubjectJsonDocument(doc));
 }
 
 JsonDocumentPtr& Daruma::designDoc()
@@ -268,7 +286,7 @@ rxcpp::observable<VGG::ModelEventPtr> Daruma::getObservable()
 {
   auto result = m_subject.get_observable();
 
-  auto doc = m_designDoc.get();
+  auto doc = m_runtimeDesignDoc.get();
   if (auto sub_doc = dynamic_cast<SubjectJsonDocument*>(doc))
   {
     result = result.merge(sub_doc->getObservable());

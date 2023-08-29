@@ -67,8 +67,6 @@ private:
   void observeEditModelState();
   void observeEditViewEvent();
 
-  void resetViewModel();
-  void resetEditViewModel();
   std::shared_ptr<ViewModel> generateViewModel(std::shared_ptr<Daruma> model, Layout::Size size);
 };
 

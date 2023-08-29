@@ -92,7 +92,7 @@ VggSdk::ListenersType VggSdk::getEventListeners(const std::string& element_path,
 // vgg model
 std::shared_ptr<JsonDocument> VggSdk::getDesignDocument(IndexType index)
 {
-  return getModel(index)->designDoc();
+  return getModel(index)->runtimeDesignDoc();
 }
 std::shared_ptr<Daruma> VggSdk::getModel(IndexType index)
 {

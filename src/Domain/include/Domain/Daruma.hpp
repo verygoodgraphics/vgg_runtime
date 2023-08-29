@@ -27,10 +27,15 @@ class Daruma
   std::unordered_map<std::string, std::string> m_memory_code; // file_name: code_content
   json m_event_listeners;
 
+  // original model
   JsonDocumentPtr m_designDoc;
   MakeJsonDocFn m_makeDesignDocFn;
   JsonDocumentPtr m_layout_doc;
   MakeJsonDocFn m_make_layout_doc_fn;
+
+  // runtime view model, symbol instance expanded
+  JsonDocumentPtr m_runtimeDesignDoc;
+  JsonDocumentPtr m_runtimeLayoutDoc;
 
   rxcpp::subjects::subject<VGG::ModelEventPtr> m_subject;
   std::mutex m_mutex;
@@ -44,6 +49,10 @@ public:
   bool load(std::vector<char>& buffer); // zip buffer
 
   void accept(VGG::Model::Visitor* visitor);
+
+  JsonDocumentPtr runtimeDesignDoc();
+  JsonDocumentPtr runtimeLayoutDoc();
+  void setRuntimeDesignDoc(const nlohmann::json& desingJson);
 
   JsonDocumentPtr& designDoc();
   JsonDocumentPtr& layoutDoc();

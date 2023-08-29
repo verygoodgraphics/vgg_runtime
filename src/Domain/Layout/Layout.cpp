@@ -11,6 +11,20 @@ using namespace VGG::Layout::Internal::Rule;
 
 constexpr auto FLIP_Y_FACTOR = -1;
 
+Layout::Layout::Layout(std::shared_ptr<Daruma> model)
+  : m_model{ model }
+{
+  ASSERT(m_model);
+
+  m_designJson = ExpandSymbol{ m_model->designDoc()->content() }();
+  if (m_model->layoutDoc())
+  {
+    collectRules(m_model->layoutDoc()->content());
+  }
+
+  m_model->setRuntimeDesignDoc(m_designJson);
+}
+
 void Layout::Layout::layout(Size size)
 {
   auto root = layoutTree();

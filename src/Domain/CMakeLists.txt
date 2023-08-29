@@ -33,5 +33,6 @@ target_link_libraries(vgg_domain
   vgg_utility
   zip
 )
+set_target_properties(vgg_domain PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-install(TARGETS vgg_domain DESTINATION COMPONENT vgg_module_domain)
+install(TARGETS vgg_domain DESTINATION lib COMPONENT vgg_module_domain)

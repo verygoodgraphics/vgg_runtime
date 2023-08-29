@@ -174,7 +174,6 @@ void Controller::observeModelState()
         // todo, layout
         // todo, layout thread?
         ModelChanged().onChange(shared_this->m_model);
-        shared_this->resetViewModel();
 
         return event;
       })
@@ -198,7 +197,6 @@ void Controller::observeEditModelState()
         // todo, layout thread?
 
         ModelChanged().onChange(shared_this->m_edit_model);
-        shared_this->resetEditViewModel();
 
         return event;
       })
@@ -289,18 +287,6 @@ JsonDocumentPtr Controller::wrapJsonDoc(std::shared_ptr<JsonDocument> jsonDoc)
   }
 }
 
-void Controller::resetViewModel()
-{
-  // TODO, OPTIMIZE, partial update instead of resetting the whole document
-  m_presenter->setModel(generateViewModel(m_model, m_presenter->viewSize()));
-}
-
-void Controller::resetEditViewModel()
-{
-  // TODO, OPTIMIZE, partial update instead of resetting the whole document
-  m_presenter->setEditModel(generateViewModel(m_edit_model, m_presenter->editViewSize()));
-}
-
 std::shared_ptr<ViewModel> Controller::generateViewModel(std::shared_ptr<Daruma> model,
                                                          Layout::Size size)
 {
@@ -311,7 +297,7 @@ std::shared_ptr<ViewModel> Controller::generateViewModel(std::shared_ptr<Daruma>
 
   auto view_model = std::make_shared<ViewModel>();
   view_model->model = m_model;
-  view_model->designDoc = start_running.designDoc();
+  view_model->designDoc = m_model->runtimeDesignDoc()->content();
   view_model->layoutTree = start_running.layoutTree();
 
   return view_model;

@@ -1,7 +1,5 @@
 #include "Application/Controller.hpp"
 
-#include "test_config.hpp"
-
 #include "Domain/Daruma.hpp"
 #include "Domain/DarumaContainer.hpp"
 #include "Adapter/NativeComposer.hpp"
@@ -9,6 +7,8 @@
 #include "mocks/MockPresenter.hpp"
 
 #include "rxcpp/rx.hpp"
+
+#include "test_config.hpp"
 
 #include <gtest/gtest.h>
 
@@ -543,7 +543,7 @@ TEST_F(ControllerTestSuite, handle_events)
     });
 
   EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
-  EXPECT_CALL(*m_mock_presenter, setModel(_)).Times(expect_times + 1);
+  EXPECT_CALL(*m_mock_presenter, setModel(_));
   setup_sut();
   std::string file_path = "testDataDir/vgg-daruma-2";
   auto ret = m_sut->start(file_path);
@@ -579,7 +579,7 @@ TEST_F(ControllerTestSuite, handle_event_keyboard)
     });
 
   EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
-  EXPECT_CALL(*m_mock_presenter, setModel(_)).Times(expect_times + 1);
+  EXPECT_CALL(*m_mock_presenter, setModel(_));
   setup_sut();
   std::string file_path = "testDataDir/vgg-daruma-2";
   auto ret = m_sut->start(file_path);

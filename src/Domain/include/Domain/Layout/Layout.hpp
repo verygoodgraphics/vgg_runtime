@@ -32,17 +32,7 @@ class Layout
   std::unordered_map<std::string, std::shared_ptr<Internal::Rule::Rule>> m_rules;
 
 public:
-  Layout(std::shared_ptr<Daruma> model)
-    : m_model{ model }
-  {
-    ASSERT(m_model);
-
-    m_designJson = ExpandSymbol{ m_model->designDoc()->content() }();
-    if (m_model->layoutDoc())
-    {
-      collectRules(m_model->layoutDoc()->content());
-    }
-  }
+  Layout(std::shared_ptr<Daruma> model);
 
   const nlohmann::json& designDoc()
   {

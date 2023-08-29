@@ -27,7 +27,9 @@ extern "C"
   {
     std::vector<char> buf(data, data + len);
     auto& main_composer = VggBrowser::mainComposer();
-    return main_composer.controller()->start(buf, "/asset/vgg-format.json");
+    return main_composer.controller()->start(buf,
+                                             "/asset/vgg-format.json",
+                                             "/asset/vgg_layout.json");
   }
 
   bool is_latest_version(const char* version)

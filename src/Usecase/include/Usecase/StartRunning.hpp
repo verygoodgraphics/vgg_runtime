@@ -25,11 +25,6 @@ public:
     return m_layout;
   }
 
-  const nlohmann::json& designDoc()
-  {
-    return m_layout->designDoc();
-  }
-
   std::shared_ptr<LayoutView> layoutTree()
   {
     return m_layout->layoutTree();

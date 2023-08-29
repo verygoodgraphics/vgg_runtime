@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Domain/JsonDocument.hpp"
 #include "Rect.hpp"
 
 #include <memory>
@@ -31,6 +32,7 @@ class LayoutView : public std::enable_shared_from_this<LayoutView>
   std::weak_ptr<LayoutView> m_parent;
   std::vector<std::shared_ptr<LayoutView>> m_children;
 
+  std::weak_ptr<JsonDocument> m_viewModel;
   const std::string m_path;
   Layout::Rect m_frame;
 
@@ -95,6 +97,7 @@ public:
 
   const Layout::Rect& frame() const;
   void setFrame(const Layout::Rect& frame);
+  void setViewModel(JsonDocumentPtr viewModel);
 
 public:
   std::shared_ptr<Layout::Internal::AutoLayout> autoLayout() const;

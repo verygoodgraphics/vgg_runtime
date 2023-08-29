@@ -9,6 +9,7 @@
 #include <optional>
 #include <any>
 #include <Scene/GraphicsContext.h>
+#include <Scene/ContextInfoGL.hpp>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
@@ -26,12 +27,13 @@ class AppSDLImpl : public AppBase<AppSDLImpl>
     SDL_GLContext glContext{ nullptr };
   };
   SDLState m_sdlState;
+  ContextInfoGL m_glContext;
   using Getter = std::function<std::any(void)>;
   using Setter = std::function<void(std::any)>;
   std::unordered_map<std::string, std::pair<Getter, Setter>> m_properties;
 
 public:
-  static inline void handleVkError()
+  static inline void handleGLError()
   {
     const char* err = SDL_GetError();
     FAIL("SDL Error: %s", err);
@@ -72,6 +74,7 @@ public:
   void onInitProperties(layer::ContextProperty& property) override
   {
     property.resolutionScale = resolutionScale();
+    property.api = layer::EGraphicsAPIBackend::API_OPENGL;
   }
 
   bool onInit() override
@@ -109,7 +112,7 @@ public:
     // init sdl
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
-      handleVkError();
+      handleGLError();
       return AppError(AppError::EKind::RenderEngineError, "sdl init failed");
     }
     SDL_version compileVersion, linkVersion;
@@ -161,10 +164,10 @@ public:
                        SDL_WINDOWPOS_CENTERED,
                        winWidth,
                        winHeight,
-                       SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+                       SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     if (!window)
     {
-      handleVkError();
+      handleGLError();
       return AppError(AppError::EKind::RenderEngineError, "Create Window Failed\n");
     }
     // m_width = w;
@@ -172,9 +175,10 @@ public:
     m_sdlState.window = window;
     // create context
     SDL_GLContext glContext = SDL_GL_CreateContext(window);
+    m_glContext.context = glContext;
     if (!glContext)
     {
-      handleVkError();
+      handleGLError();
       return AppError(AppError::EKind::RenderEngineError, "Create Context Failed");
     }
 
@@ -220,7 +224,7 @@ public:
   {
     if (SDL_GL_MakeCurrent(m_sdlState.window, m_sdlState.glContext) != 0)
     {
-      handleVkError();
+      handleGLError();
       return AppError(AppError::EKind::MakeCurrentContextError, "Make Current Context Error");
     }
     return std::nullopt;
@@ -267,7 +271,7 @@ public:
 
   void* contextInfo() override
   {
-    return m_sdlState.glContext;
+    return &m_glContext;
   }
 
   ~AppSDLImpl()

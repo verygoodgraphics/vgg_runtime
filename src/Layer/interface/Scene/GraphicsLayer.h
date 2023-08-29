@@ -6,14 +6,8 @@
 namespace VGG::layer
 {
 
-enum class EGraphicAPI
-{
-  GA_OPENGL
-};
-
 struct LayerConfig
 {
-  EGraphicAPI graphicsAPI{ EGraphicAPI::GA_OPENGL };
   layer::GraphicsContext* context{ nullptr };
   float drawableSize[2];
   float dpi{ 1.0 };

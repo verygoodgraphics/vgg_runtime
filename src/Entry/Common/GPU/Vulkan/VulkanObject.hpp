@@ -639,5 +639,4 @@ struct VkSwapchainObject
     }
   }
 };
-
-}; // namespace vk
+} // namespace vk

@@ -16,7 +16,7 @@ set_target_properties(
 
 if(${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_LINUX_TARGET_LIST)
   add_executable(egl_entry offline_render.cpp)
-  target_link_libraries(egl_entry egl_runtime)
+  target_link_libraries(egl_entry vgg_exporter)
   target_include_directories(egl_entry PRIVATE ${VGG_CONTRIB_ARGPARSE_INCLUDE})
   get_target_property(VGG_LAYER_RPATH vgg_layer BUILD_RPATH)
   set_target_properties(egl_entry PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} BUILD_RPATH ${VGG_LAYER_RPATH})

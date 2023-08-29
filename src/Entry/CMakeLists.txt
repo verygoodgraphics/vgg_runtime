@@ -1,5 +1,6 @@
 if(NOT EMSCRIPTEN)
   add_subdirectory(SDL)
+  add_subdirectory(Exporter)
   if(${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_LINUX_TARGET_LIST)
     add_subdirectory(EGL)
   endif()

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Scene/ContextInfoGL.hpp"
+#include "Scene/ContextInfoVulkan.hpp"
 #include <Utility/interface/Log.h>
 #include <memory>
 #include <vector>
@@ -8,6 +10,13 @@ namespace VGG::layer
 {
 
 class GraphicsLayer;
+
+enum class EGraphicsAPIBackend
+{
+  API_OPENGL,
+  API_VULKAN
+};
+
 struct ContextConfig
 {
   int windowSize[2] = { 0, 0 };
@@ -18,10 +27,12 @@ struct ContextConfig
 struct ContextProperty
 {
   float resolutionScale{ 1.0 };
+  std::optional<EGraphicsAPIBackend> api;
 };
 
 class GraphicsContext : public std::enable_shared_from_this<GraphicsContext>
 {
+private:
   ContextConfig m_config;
   ContextProperty m_property;
   std::vector<std::shared_ptr<GraphicsLayer>> m_managedLayer;
@@ -69,5 +80,8 @@ protected:
   virtual bool onResize(int w, int h) = 0;
   virtual bool onInit() = 0;
   virtual void onInitProperties(ContextProperty& property) = 0;
+  virtual void onInitContext()
+  {
+  }
 };
 } // namespace VGG::layer

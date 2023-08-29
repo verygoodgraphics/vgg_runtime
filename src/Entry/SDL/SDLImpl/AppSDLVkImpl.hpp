@@ -17,7 +17,7 @@
 #include <SDL2/SDL_vulkan.h>
 #include <vulkan/vulkan_core.h>
 
-#include "VulkanObject.hpp"
+#include "Entry/Common/GPU/Vulkan/VulkanObject.hpp"
 
 namespace VGG::entry
 {
@@ -157,6 +157,7 @@ public:
   void onInitProperties(layer::ContextProperty& property) override
   {
     property.resolutionScale = resolutionScale();
+    property.api = layer::EGraphicsAPIBackend::API_VULKAN;
   }
 
   bool onInit() override
@@ -309,11 +310,6 @@ public:
     {
       sendEvent(toUEvent(evt));
     }
-  }
-
-  void swapBuffer()
-  {
-    return;
   }
 
   ~AppSDLVkImpl()

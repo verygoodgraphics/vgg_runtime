@@ -5,7 +5,8 @@
 #include <Utility/interface/ConfigMananger.h>
 #include "Scene/Scene.h"
 #include "loader.h"
-#include "Entry/EGL/EGLRuntime.h"
+// #include "Entry/EGL/EGLRuntime.h"
+#include "Entry/Exporter/interface/ImageExporter.hpp"
 using namespace VGG;
 
 template<typename F>
@@ -41,12 +42,12 @@ std::vector<std::pair<std::string, std::vector<char>>> renderAndOutput(InputDesc
     auto data = r->read(input.prefix.value_or(fs::path(".")) / input.filepath);
     DEBUG("Image Quality: %d", input.imageQuality);
     DEBUG("Resolution Level: %d", input.resolutionLevel);
-    auto result = VGG::entry::render(data.Format,
-                                     data.Resource,
-                                     input.imageQuality,
-                                     input.resolutionLevel,
-                                     input.configFilePath.value_or("config.json"),
-                                     input.fontCollection);
+    auto result = VGG::exporter::render(data.Format,
+                                        data.Resource,
+                                        input.imageQuality,
+                                        input.resolutionLevel,
+                                        input.configFilePath.value_or("config.json"),
+                                        input.fontCollection);
     const auto reason = std::get<0>(result);
     if (!reason.empty())
     {

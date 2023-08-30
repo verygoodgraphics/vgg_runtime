@@ -15,6 +15,12 @@
 #include <limits>
 #include <memory>
 
+#define VGG_USE_EMBBED_FONT 1
+
+#ifdef VGG_USE_EMBBED_FONT
+#include "Resources/EmbbedFont.hpp"
+#endif
+
 using namespace skia_private;
 
 class SkData;
@@ -308,4 +314,71 @@ sk_sp<SkTypeface> SkFontMgrVGG::onLegacyMakeTypeface(const char familyName[],
   }
 
   return tf;
+}
+void VGGFontLoader::load_font_from_data(const SkTypeface_FreeType::Scanner& scanner,
+                                        std::unique_ptr<SkMemoryStream> stream,
+                                        int index,
+                                        SkFontMgrVGG::Families* families)
+{
+  int numFaces;
+  if (!scanner.recognizedFont(stream.get(), &numFaces))
+  {
+    // SkDebugf("---- failed to open <%d> as a font\n", index);
+    return;
+  }
+
+  for (int faceIndex = 0; faceIndex < numFaces; ++faceIndex)
+  {
+    bool isFixedPitch;
+    SkString realname;
+    SkFontStyle style = SkFontStyle(); // avoid uninitialized warning
+    if (!scanner.scanFont(stream.get(), faceIndex, &realname, &style, &isFixedPitch, nullptr))
+    {
+      // SkDebugf("---- failed to open <%d> <%d> as a font\n", index, faceIndex);
+      return;
+    }
+    if (realname.isEmpty())
+    {
+      realname = "NotoMono Regular";
+    }
+    SkFontStyleSet_VGG* addTo = find_family(*families, realname.c_str());
+    if (nullptr == addTo)
+    {
+      addTo = new SkFontStyleSet_VGG(realname);
+      families->push_back().reset(addTo);
+    }
+    auto data =
+      std::make_unique<SkFontData>(stream->duplicate(), faceIndex, 0, nullptr, 0, nullptr, 0);
+    addTo->appendTypeface(
+      sk_make_sp<SkTypeface_FreeTypeStream>(std::move(data), realname, style, isFixedPitch));
+  }
+}
+
+void VGGFontLoader::loadSystemFonts(const SkTypeface_FreeType::Scanner& scanner,
+                                    SkFontMgrVGG::Families* families) const
+{
+  if (fBaseDirectory.isEmpty() == false)
+  {
+    load_directory_fonts(scanner, fBaseDirectory, ".ttf", families);
+    load_directory_fonts(scanner, fBaseDirectory, ".ttc", families);
+    load_directory_fonts(scanner, fBaseDirectory, ".otf", families);
+    load_directory_fonts(scanner, fBaseDirectory, ".pfb", families);
+  }
+  else
+  {
+
+#ifdef VGG_USE_EMBBED_FONT
+    auto stream = std::make_unique<SkMemoryStream>(VGG::layer::resources::g_notoMonoRegularTTF,
+                                                   VGG::layer::resources::g_dataLength,
+                                                   false);
+    load_font_from_data(scanner, std::move(stream), 0, families);
+#endif
+  }
+
+  if (families->empty())
+  {
+    SkFontStyleSet_VGG* family = new SkFontStyleSet_VGG(SkString());
+    families->push_back().reset(family);
+    family->appendTypeface(sk_ref_sp(new SkTypeface_VGG_Empty()));
+  }
 }

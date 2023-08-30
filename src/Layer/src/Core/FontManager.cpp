@@ -65,6 +65,14 @@ FontManager::FontManager()
       }
     }
   }
+  else
+  {
+    const string key = "default";
+    sk_sp<SkFontMgrVGG> vggFontMgr = VGGFontDirectory(nullptr);
+    vggFontMgr->saveFontInfo(key + "_fontname.txt");
+    d_ptr->fontMgrs.insert({ key, std::move(FontMgrData(vggFontMgr, { "NotoMono Regular" })) });
+    d_ptr->defaultFontManagerKey = key;
+  }
 }
 
 SkFontMgrVGG* FontManager::createFontManager(const std::string& key,

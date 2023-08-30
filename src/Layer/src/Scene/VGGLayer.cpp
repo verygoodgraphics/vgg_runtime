@@ -234,6 +234,11 @@ public:
   {
     return m_grContext.get();
   }
+
+  ~SkiaContext()
+  {
+    release();
+  }
 };
 
 struct SkiaState
@@ -311,6 +316,11 @@ public:
   VLayer__pImpl(VLayer* api)
     : q_ptr(api)
   {
+  }
+
+  void cleanup()
+  {
+    skiaContext = nullptr;
   }
 
   // void updateSkiaEngineGL()
@@ -593,13 +603,15 @@ std::optional<std::vector<char>> VLayer::makeImageSnapshot(const ImageOptions& o
 void VLayer::shutdown()
 {
   VGG_IMPL(VLayer);
-  _->skiaContext = nullptr;
+  _->cleanup();
 }
 
 VLayer::VLayer()
   : d_ptr(new VLayer__pImpl(this))
 {
 }
-VLayer::~VLayer() = default;
+VLayer::~VLayer()
+{
+}
 } // namespace VGG::layer
   //

@@ -14,7 +14,6 @@ class VkGraphicsContext : public layer::GraphicsContext
   ContextInfoVulkan m_vulkanContextInfo;
   bool initVulkanContextInfo()
   {
-
     m_context = std::make_unique<VulkanContext>(VulkanContext::EContextConfig::WINDOWLESS_CONTEXT);
     ASSERT(m_context);
     if (!m_context)
@@ -25,6 +24,12 @@ class VkGraphicsContext : public layer::GraphicsContext
     m_vulkanContextInfo.queue = m_context->queue();
     m_vulkanContextInfo.graphicsQueueIndex = m_context->queueIndex();
     return true;
+  }
+
+private:
+  void cleanup()
+  {
+    m_context = nullptr;
   }
 
 public:
@@ -44,8 +49,7 @@ public:
 
   void shutdown() override
   {
-    m_context->cleanup();
-    m_context = nullptr;
+    cleanup();
   }
 
   void* contextInfo() override
@@ -72,6 +76,7 @@ public:
 
   ~VkGraphicsContext()
   {
+    cleanup();
   }
 }; // namespace VGG::entry
 } // namespace VGG::exporter

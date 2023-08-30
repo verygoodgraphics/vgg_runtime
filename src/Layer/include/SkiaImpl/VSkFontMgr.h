@@ -219,20 +219,7 @@ public:
   }
 
   void loadSystemFonts(const SkTypeface_FreeType::Scanner& scanner,
-                       SkFontMgrVGG::Families* families) const override
-  {
-    load_directory_fonts(scanner, fBaseDirectory, ".ttf", families);
-    load_directory_fonts(scanner, fBaseDirectory, ".ttc", families);
-    load_directory_fonts(scanner, fBaseDirectory, ".otf", families);
-    load_directory_fonts(scanner, fBaseDirectory, ".pfb", families);
-
-    if (families->empty())
-    {
-      SkFontStyleSet_VGG* family = new SkFontStyleSet_VGG(SkString());
-      families->push_back().reset(family);
-      family->appendTypeface(sk_ref_sp(new SkTypeface_VGG_Empty()));
-    }
-  }
+                       SkFontMgrVGG::Families* families) const override;
 
 private:
   static SkFontStyleSet_VGG* find_family(SkFontMgrVGG::Families& families, const char familyName[])
@@ -250,6 +237,11 @@ private:
     }
     return nullptr;
   }
+
+  static void load_font_from_data(const SkTypeface_FreeType::Scanner& scanner,
+                                  std::unique_ptr<SkMemoryStream> stream,
+                                  int index,
+                                  SkFontMgrVGG::Families* families);
 
   static void load_directory_fonts(const SkTypeface_FreeType::Scanner& scanner,
                                    const SkString& directory,

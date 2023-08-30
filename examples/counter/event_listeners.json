@@ -5,6 +5,18 @@
         "createdAt": 1691118721013,
         "fileName": "js/button_onclick.mjs"
       }
+    ],
+    "mousedown": [
+      {
+        "createdAt": 1691118721013,
+        "fileName": "js/button_onclick.mjs"
+      }
+    ],
+    "mouseup": [
+      {
+        "createdAt": 1691118721013,
+        "fileName": "js/button_onclick.mjs"
+      }
     ]
   }
 }

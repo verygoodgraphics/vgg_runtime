@@ -448,7 +448,7 @@
               {
                 "class": "fill",
                 "color": {
-                  "alpha": 1.0,
+                  "alpha": 0.5,
                   "blue": 0.847,
                   "class": "color",
                   "green": 0.847,

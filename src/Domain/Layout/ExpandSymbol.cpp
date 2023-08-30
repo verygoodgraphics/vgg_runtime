@@ -662,6 +662,10 @@ bool ExpandSymbol::applyReferenceOverride(nlohmann::json& objectJson,
               return true;
             }
           }
+
+          WARN("ExpandSymbol::applyReferenceOverride, reference not found, return true to NOT "
+               "REPLACE with bad value");
+          return true;
         }
       }
     }

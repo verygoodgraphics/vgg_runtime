@@ -320,16 +320,27 @@
         },
         "thickness": {
           "type": "number",
-          "description": "Thickness of the border. A line width of 0 is acceptable, this is interpreted as the thinnest line width that can be rendered at device resolution."
+          "description": "Thickness of the border. A line width of 0 is acceptable, this is interpreted as the thinnest line width that can be rendered at device resolution. This item only work if strokeWeightsIndependent is false."
         },
-        "customTickness": {
-          "type": "array",
-          "description": "Specifies the tickness of the four sides of the rectangle. [left, top, right, bottom]. Higher priority than \"thickness\".",
-          "maxItems": 4,
-          "minItems": 4,
-          "items": {
-            "type": "number"
-          }
+        "strokeWeightsIndependent": {
+          "type": "boolean",
+          "description": "For rectangle, enable or disable the four side stroke weight independently. Default is false."
+        },
+        "topWeight": {
+          "type": "number",
+          "description": "Used only when strokeWeightsIndependent is true to specify the stroke weight at the top of the rectangle. Default is 0."
+        },
+        "leftWeight": {
+          "type": "number",
+          "description": "Used only when strokeWeightsIndependent is true to specify the stroke weight at the left of the rectangle. Default is 0."
+        },
+        "bottomWeight": {
+          "type": "number",
+          "description": "Used only when strokeWeightsIndependent is true to specify the stroke weight at the bottom of the rectangle. Default is 0."
+        },
+        "rightWeight": {
+          "type": "number",
+          "description": "Used only when strokeWeightsIndependent is true to specify the stroke weight at the right of the rectangle. Default is 0."
         },
         "contextSettings": {
           "$ref": "#/definitions/GraphicsContextSettings"
@@ -461,7 +472,7 @@
       "description": "Described parameters required by gradient angular.",
       "type": "object",
       "$id": "#GradientAngular",
-      "required": ["class", "from", "to", "stops", "invert", "elipseLength"],
+      "required": ["class", "from", "stops", "invert", "elipseLength"],
       "properties": {
         "class": {
           "const": "gradientAngular"
@@ -470,6 +481,7 @@
           "$ref": "#/definitions/Point"
         },
         "to": {
+          "description": " default value: first value: bounds.width >= bounds.height ? 1.0 : (bounds.height / bounds.width) second value: 0.5 ",
           "$ref": "#/definitions/Point"
         },
         "stops": {
@@ -2355,10 +2367,10 @@
         },
         "overrideName": {
           "type": "string",
-          "description": " Starting with the top-level property of the object, use . as a separator. If the property is an array, it contains the index of the array, starting at 0, and * is valid for all items.\nFor example: style: override whole style style.fills: override the style.fills style.fills.0: override the first item of style.fills style.fills.0.color: override the color of the first style.fills style.fills.*.color: Override the color of all items in style.fills "
+          "description": " Starting with the top-level property of the object, use . as a separator. If the property is an array, it contains the index of the array, starting at 0, and * is valid for all items.\nFor example: style: override whole style style.fills: override the style.fills style.fills.0: override the first item of style.fills style.fills.0.color: override the color of the first style.fills style.fills.*.color: override the color of all items in style.fills "
         },
         "overrideValue": {
-          "description": "The value of the overridden attribute. The type depends on the concrete property."
+          "description": " The value of the overridden attribute. The type depends on the concrete property. A special case: when overrideName end with 'style' and overrideValue conform to 'referenced_style_<id>', then use corresponding value in references(top level attr). "
         }
       },
       "additionalProperties": false
@@ -2506,6 +2518,28 @@
         },
         "class": {
           "const": "symbolMaster"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ReferencedStyle": {
+      "title": "Referenced style",
+      "type": "object",
+      "$id": "#ReferencedStyle",
+      "required": ["class", "id", "style"],
+      "properties": {
+        "class": {
+          "const": "referencedStyle"
+        },
+        "id": {
+          "type": "string",
+          "description": "identifier, unique."
+        },
+        "style": {
+          "$ref": "#/definitions/Style"
+        },
+        "contextSettings": {
+          "$ref": "#/definitions/GraphicsContextSettings"
         }
       },
       "additionalProperties": false
@@ -2683,6 +2717,20 @@
       "type": "array",
       "items": {
         "$ref": "#/definitions/Frame"
+      }
+    },
+    "references": {
+      "type": "array",
+      "description": "Describes the referenced resources.",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/ReferencedStyle"
+          },
+          {
+            "$ref": "#/definitions/SymbolMaster"
+          }
+        ]
       }
     },
     "patternLayerDef": {

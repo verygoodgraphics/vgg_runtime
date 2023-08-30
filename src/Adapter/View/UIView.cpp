@@ -286,10 +286,7 @@ std::tuple<bool, bool, bool, bool> UIView::getKeyModifier(int keyMod)
 void UIView::draw(SkCanvas* canvas, Zoomer* zoomer)
 {
 
-  UEvent e;
-  e.type = VGG_PAINT;
-  e.paint.data = canvas;
-  // DEPRECATED: VPaintEvent will be removed from UEvent,
+  // DEPRECATED:
   // the only way to paint a scene is added in
   // a layer
   if (m_is_editor) // editor; zoom only subviews

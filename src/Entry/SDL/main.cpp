@@ -34,10 +34,6 @@ int main(int argc, char** argv)
     auto file = configfile.value();
     Config::readGlobalConfig(file);
   }
-  else
-  {
-    Config::globalConfig() = Config::genDefaultConfig();
-  }
 
 #ifdef NDEBUG
   MainComposer main_composer{ new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js") };

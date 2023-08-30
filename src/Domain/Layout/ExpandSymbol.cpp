@@ -378,7 +378,7 @@ void ExpandSymbol::processOtherOverrides(nlohmann::json& instance,
       auto& value = overrideItem[K_OVERRIDE_VALUE];
       if (applyReferenceOverride(*childObject, name, value))
       {
-        return;
+        continue;
       }
 
       // make name to json pointer string

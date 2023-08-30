@@ -48,6 +48,9 @@ private:
   void applyOverridesDetail(nlohmann::json& json,
                             std::stack<std::string> reversedPath,
                             const nlohmann::json& value);
+  bool applyReferenceOverride(nlohmann::json& objectJson,
+                              const std::string& name,
+                              const nlohmann::json& value);
 
   nlohmann::json* findChildObject(nlohmann::json& instance,
                                   const std::vector<std::string>& instanceIdStack,

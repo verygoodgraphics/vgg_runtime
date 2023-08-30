@@ -12,6 +12,8 @@
 #undef DEBUG
 #define DEBUG(msg, ...)
 
+constexpr auto K_PREFIX = "referenced_style_";
+
 namespace nl = nlohmann;
 using namespace VGG::Layout;
 
@@ -19,11 +21,13 @@ nlohmann::json ExpandSymbol::operator()()
 {
   collectMaster(m_designJson);
 
-  auto result = m_designJson;
-  std::vector<std::string> instanceIdStack{};
-  expandInstance(result, instanceIdStack);
+  auto resultJson = m_designJson;
 
-  return result;
+  std::vector<std::string> instanceIdStack{};
+  expandInstance(resultJson, instanceIdStack);
+
+
+  return resultJson;
 }
 
 void ExpandSymbol::collectMaster(const nlohmann::json& json)
@@ -369,9 +373,14 @@ void ExpandSymbol::processOtherOverrides(nlohmann::json& instance,
     }
 
     std::string name = overrideItem[K_OVERRIDE_NAME];
-    auto value = overrideItem[K_OVERRIDE_VALUE];
     if (name != K_MASTER_ID && !name.empty()) // other overrides
     {
+      auto& value = overrideItem[K_OVERRIDE_VALUE];
+      if (applyReferenceOverride(*childObject, name, value))
+      {
+        return;
+      }
+
       // make name to json pointer string
       while (true)
       {
@@ -619,4 +628,44 @@ nlohmann::json* ExpandSymbol::findChildObject(
     expandContextInstanceIdStack = newInstanceIdStack;
     return findChildObjectInTree(instance[K_CHILD_OBJECTS], join(newInstanceIdStack));
   }
+}
+
+bool ExpandSymbol::applyReferenceOverride(nlohmann::json& objectJson,
+                                          const std::string& name,
+                                          const nlohmann::json& value)
+{
+  if (name == K_STYLE && value.is_string())
+  {
+    std::string s = value;
+    if (s.rfind(K_PREFIX, 0) == 0)
+    {
+      auto id = s.substr(std::strlen(K_PREFIX));
+
+      if (m_designJson.contains(K_REFERENCES))
+      {
+        auto& items = m_designJson[K_REFERENCES];
+        if (items.is_array())
+        {
+          for (auto& item : items)
+          {
+            if (item[K_ID] == id)
+            {
+              if (item.contains(K_STYLE))
+              {
+                objectJson[K_STYLE] = item[K_STYLE];
+              }
+              if (item.contains(K_CONTEXT_SETTINGS))
+              {
+                objectJson[K_CONTEXT_SETTINGS] = item[K_CONTEXT_SETTINGS];
+              }
+
+              return true;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return false;
 }

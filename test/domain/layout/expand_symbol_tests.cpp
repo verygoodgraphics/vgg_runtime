@@ -184,6 +184,35 @@ TEST_F(VggExpandSymbolTestSuite, override_duplicated_object_id)
   EXPECT_EQ(content, "symbol-change");
 }
 
+TEST_F(VggExpandSymbolTestSuite, ReferenceStyleOverride)
+{
+  // Given
+  std::string filePath = "testDataDir/symbol/reference_override/design.json";
+  auto designJson = Helper::load_json(filePath);
+  ExpandSymbol sut{ designJson };
+
+  // When
+  auto resultJson = sut();
+
+  // Then
+  {
+    nlohmann::json::json_pointer path{
+      "/frames/1/childObjects/0/childObjects/2/childObjects/0/style/blurs/0/center/0"
+    };
+    double centerX = resultJson[path];
+
+    EXPECT_DOUBLE_EQ(centerX, 0.5);
+  }
+  {
+    nlohmann::json::json_pointer path{
+      "/frames/1/childObjects/0/childObjects/2/childObjects/0/contextSettings/opacity"
+    };
+    double opacity = resultJson[path];
+
+    EXPECT_DOUBLE_EQ(opacity, 1.0);
+  }
+}
+
 TEST_F(VggExpandSymbolTestSuite, unique_object_id_in_instance_tree)
 {
   // Given

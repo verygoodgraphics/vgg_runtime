@@ -155,6 +155,8 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
       ss << "Failed to encode image for artboard: " << i + 1 << std::endl;
     }
   }
+  // layer->shutdown();
+  // ctx->shutdown();
   return { std::string{ std::istreambuf_iterator<char>{ ss }, std::istreambuf_iterator<char>{} },
            res };
 }

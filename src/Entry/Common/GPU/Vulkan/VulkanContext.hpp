@@ -102,6 +102,7 @@ public:
 
   ~VulkanContext()
   {
+    cleanup();
   }
 
   void resetFence()

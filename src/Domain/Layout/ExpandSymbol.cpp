@@ -398,21 +398,14 @@ void ExpandSymbol::processOtherOverrides(nlohmann::json& instance,
             childObject,
             path.to_string().c_str(),
             value.dump().c_str());
-      if (name.find("*") == std::string::npos) // no * in path
+      std::stack<std::string> pathStack;
+      while (!path.empty())
       {
-        (*childObject)[path] = value;
+        pathStack.push(path.back());
+        path.pop_back();
       }
-      else // path has *
-      {
-        std::stack<std::string> pathStack;
-        while (!path.empty())
-        {
-          pathStack.push(path.back());
-          path.pop_back();
-        }
 
-        applyOverridesDetail((*childObject), pathStack, value);
-      }
+      applyOverridesDetail((*childObject), pathStack, value);
     }
   }
 }
@@ -429,13 +422,35 @@ void ExpandSymbol::applyOverridesDetail(nlohmann::json& json,
 
   if (key != "*")
   {
-    if (isLastKey)
+    if (json.is_array())
     {
-      json[key] = value;
+      auto path = nlohmann::json::json_pointer{ "/" + key };
+      if (json.contains(path))
+      {
+        if (isLastKey)
+        {
+          json[path] = value;
+        }
+        else
+        {
+          applyOverridesDetail(json[path], reversedPath, value);
+        }
+      }
+      else
+      {
+        DEBUG("invalide array index, %s", key.c_str());
+      }
     }
     else
     {
-      applyOverridesDetail(json[key], reversedPath, value);
+      if (isLastKey)
+      {
+        json[key] = value;
+      }
+      else
+      {
+        applyOverridesDetail(json[key], reversedPath, value);
+      }
     }
   }
   else

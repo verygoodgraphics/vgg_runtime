@@ -6,6 +6,7 @@
 #include "include/core/SkString.h"
 #include "include/core/SkTypes.h"
 #include "include/private/base/SkTArray.h"
+#include <optional>
 #include <unordered_map>
 #include <map>
 #include <fstream>
@@ -16,7 +17,7 @@
 
 #include <modules/skparagraph/include/FontCollection.h>
 #include <modules/skparagraph/include/TypefaceFontProvider.h>
-
+// NOLINTBEGIN
 namespace fs = std::filesystem;
 
 class SkData;
@@ -168,7 +169,14 @@ public:
   explicit SkFontMgrVGG(std::unique_ptr<SystemFontLoader> loader);
   explicit SkFontMgrVGG() = default;
 
-  std::pair<SkString, float> fuzzyMatchFontFamilyName(const std::string& fontName) const;
+  std::optional<std::pair<SkString, float>> fuzzyMatchFontFamilyName(
+    const std::string& fontName) const;
+
+  bool addFont(const fs::path& path);
+  bool addFont(const uint8_t* data,
+               size_t length,
+               const char* defaultRealName,
+               bool copyData = true);
 
   void saveFontInfo(const fs::path& path)
   {
@@ -213,24 +221,33 @@ private:
 class VGGFontLoader : public SkFontMgrVGG::SystemFontLoader
 {
 public:
-  VGGFontLoader(const char* dir)
-    : fBaseDirectory(dir)
+  VGGFontLoader(const char* d)
+    : dir(SkString(d))
+  {
+  }
+
+  VGGFontLoader(const std::vector<fs::path>& paths)
+    : dir(paths)
   {
   }
 
   void loadSystemFonts(const SkTypeface_FreeType::Scanner& scanner,
                        SkFontMgrVGG::Families* families) const override;
 
+  static bool loadFontFromData(const SkTypeface_FreeType::Scanner& scanner,
+                               std::unique_ptr<SkMemoryStream> stream,
+                               int index,
+                               SkFontMgrVGG::Families* families,
+                               const char* defaultRealName);
+
+  static void loadDirectoryFonts(const SkTypeface_FreeType::Scanner& scanner,
+                                 const SkString& directory,
+                                 const char* suffix,
+                                 SkFontMgrVGG::Families* families);
+
 private:
   static SkFontStyleSet_VGG* find_family(SkFontMgrVGG::Families& families, const char familyName[])
   {
-    // for (int i = 0; i < families.size(); ++i)
-    // {
-    //   if (families[i]->getFamilyName().equals(familyName))
-    //   {
-    //     return families[i].get();
-    //   }
-    // }
     if (auto it = families.lookUp.find(familyName); it != families.lookUp.end())
     {
       return families.fFamilies[it->second].get();
@@ -238,83 +255,15 @@ private:
     return nullptr;
   }
 
-  static void load_font_from_data(const SkTypeface_FreeType::Scanner& scanner,
-                                  std::unique_ptr<SkMemoryStream> stream,
-                                  int index,
-                                  SkFontMgrVGG::Families* families);
-
-  static void load_directory_fonts(const SkTypeface_FreeType::Scanner& scanner,
-                                   const SkString& directory,
-                                   const char* suffix,
-                                   SkFontMgrVGG::Families* families)
-  {
-    const std::filesystem::path dir{ directory.c_str() };
-
-    for (auto const& entry : fs::recursive_directory_iterator(dir))
-    {
-      if (!entry.is_regular_file())
-      {
-        continue;
-      }
-      auto filename = entry.path().string();
-      std::unique_ptr<SkStreamAsset> stream = SkStream::MakeFromFile(filename.c_str());
-      if (!stream)
-      {
-        // SkDebugf("---- failed to open <%s>\n", filename.c_str());
-        continue;
-      }
-
-      int numFaces;
-      if (!scanner.recognizedFont(stream.get(), &numFaces))
-      {
-        // SkDebugf("---- failed to open <%s> as a font\n", filename.c_str());
-        continue;
-      }
-
-      for (int faceIndex = 0; faceIndex < numFaces; ++faceIndex)
-      {
-        bool isFixedPitch;
-        SkString realname;
-        SkFontStyle style = SkFontStyle(); // avoid uninitialized warning
-        if (!scanner.scanFont(stream.get(), faceIndex, &realname, &style, &isFixedPitch, nullptr))
-        {
-          // SkDebugf("---- failed to open <%s> <%d> as a font\n",
-          //          filename.c_str(), faceIndex);
-          continue;
-        }
-
-        SkFontStyleSet_VGG* addTo = find_family(*families, realname.c_str());
-        if (nullptr == addTo)
-        {
-          addTo = new SkFontStyleSet_VGG(realname);
-          families->push_back().reset(addTo);
-          families->lookUp[realname.c_str()] = families->size() - 1;
-        }
-        addTo->appendTypeface(sk_ref_sp(new SkTypeface_VGG_File(style,
-                                                                isFixedPitch,
-                                                                true,
-                                                                realname,
-                                                                filename.c_str(),
-                                                                faceIndex)));
-      }
-    }
-
-    for (auto const& entry : fs::recursive_directory_iterator(dir))
-    {
-      if (!entry.is_directory())
-      {
-        continue;
-      }
-
-      auto dir_name = entry.path().string();
-      load_directory_fonts(scanner, SkString{ dir_name }, suffix, families);
-    }
-  }
-
-  SkString fBaseDirectory;
+  std::variant<SkString, std::vector<fs::path>> dir;
 };
 
 inline SK_API sk_sp<SkFontMgrVGG> VGGFontDirectory(const char* dir)
+{
+  return sk_ref_sp(new SkFontMgrVGG(std::make_unique<VGGFontLoader>(dir)));
+}
+
+inline SK_API sk_sp<SkFontMgrVGG> VGGFontDirectory(const std::vector<fs::path>& dir)
 {
   return sk_ref_sp(new SkFontMgrVGG(std::make_unique<VGGFontLoader>(dir)));
 }
@@ -345,8 +294,13 @@ public:
     return m_fallbackFonts;
   }
 
-  std::pair<SkString, float> fuzzyMatch(const std::string& fontFamily)
+  std::optional<std::pair<SkString, float>> fuzzyMatch(const std::string& fontFamily)
   {
-    return m_fontMgr->fuzzyMatchFontFamilyName(fontFamily);
+    if (m_fontMgr)
+    {
+      return m_fontMgr->fuzzyMatchFontFamilyName(fontFamily);
+    }
+    return std::nullopt;
   }
 };
+// NOLINTEND

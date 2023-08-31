@@ -1,4 +1,5 @@
 #pragma once
+#include "nlohmann/json.hpp"
 #include <Reader/IReader.hpp>
 #include <filesystem>
 #include <Utility/interface/ConfigMananger.h>
@@ -33,14 +34,14 @@ protected:
   }
   std::string genCmd(const fs::path& filepath)
   {
-    std::string cmd = config.at("cmd");
-    std::string outputImageDir = config.at("outputDir");
+    std::string cmd = config.value("cmd", "");
+    std::string outputImageDir = config.value("outputDir", "");
     return cmd + " " + filepath.string() + " " + outputImageDir;
   }
   int executeExternalCmd(const std::string& cmd)
   {
     auto back = fs::current_path();
-    const std::string cwd = config.at("cwd");
+    const std::string cwd = config.value("cwd", "");
     if (!cwd.empty())
     {
       fs::current_path(cwd);
@@ -52,15 +53,15 @@ protected:
 
   fs::path getReadFile()
   {
-    const auto outputDir = fs::path(config.at("outputDir"));
-    const auto fileName = fs::path(config.at("outputFileName"));
+    const auto outputDir = fs::path(config.value("outputDir", ""));
+    const auto fileName = fs::path(config.value("outputFileName", ""));
     return outputDir / fileName;
   }
 
   fs::path getResource()
   {
-    const auto outputDir = fs::path(config.at("outputDir"));
-    const auto image = fs::path(config.at("outputImageDir"));
+    const auto outputDir = fs::path(config.value("outputDir", ""));
+    const auto image = fs::path(config.value("outputImageDir", ""));
     return outputDir / image;
   }
 
@@ -143,7 +144,7 @@ inline std::shared_ptr<IReader> load(const std::string ext)
     try
     {
       auto r = std::make_shared<SketchFileReader>();
-      r->setConfig(cfg.at("sketchParser"));
+      r->setConfig(cfg.value("sketchParser", nlohmann::json::object()));
       reader = r;
     }
     catch (const std::exception& e)
@@ -154,7 +155,7 @@ inline std::shared_ptr<IReader> load(const std::string ext)
   else if (ext == ".json")
   {
     auto r = std::make_shared<RawFileReader>();
-    r->setConfig(cfg.at("rawParser"));
+    r->setConfig(cfg.value("rawParser", nlohmann::json::object()));
     reader = r;
   }
   else if (ext == ".ai")
@@ -162,7 +163,7 @@ inline std::shared_ptr<IReader> load(const std::string ext)
     try
     {
       auto r = std::make_shared<AiFileReader>();
-      r->setConfig(cfg.at("aiParser"));
+      r->setConfig(cfg.value("aiParser", nlohmann::json::object()));
       reader = r;
     }
     catch (const std::exception& e)
@@ -174,9 +175,8 @@ inline std::shared_ptr<IReader> load(const std::string ext)
   {
     try
     {
-      const auto aiconfig = cfg.at("figmaParser");
       auto r = std::make_shared<FigmaFileReader>();
-      r->setConfig(cfg.at("figmaParser"));
+      r->setConfig(cfg.value("figmaParser", nlohmann::json::object()));
       reader = r;
     }
     catch (const std::exception& e)

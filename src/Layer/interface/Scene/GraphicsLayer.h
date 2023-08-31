@@ -17,13 +17,10 @@ struct LayerConfig
 
 enum class ELayerError
 {
-  TextureSizeOutOfRangeError,
-  EGLNoDisplayError,
-  EGLGetAttribError,
-  MakeCurrentContextError,
-  HasInitError,
-  RenderEngineError,
-  UnknownError,
+  TEXTURE_SIZE_OUT_OF_RANGE,
+  MAKE_CURRENT_CONTEXT_ERROR,
+  RENDER_ENGINE_ERROR,
+  UNKNOWN_ERROR,
 };
 
 class GraphicsLayer : public std::enable_shared_from_this<GraphicsLayer>

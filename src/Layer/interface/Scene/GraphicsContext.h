@@ -35,7 +35,7 @@ class GraphicsContext : public std::enable_shared_from_this<GraphicsContext>
 private:
   ContextConfig m_config;
   ContextProperty m_property;
-  std::vector<std::shared_ptr<GraphicsLayer>> m_managedLayer;
+  std::vector<std::weak_ptr<GraphicsLayer>> m_managedLayer;
   friend class GraphicsLayer;
 
 protected:
@@ -75,6 +75,7 @@ public:
   virtual void shutdown() = 0;
   virtual void* contextInfo() = 0;
   bool resize(int w, int h);
+  virtual ~GraphicsContext() = default;
 
 protected:
   virtual bool onResize(int w, int h) = 0;

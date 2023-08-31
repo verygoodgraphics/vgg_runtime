@@ -12,7 +12,10 @@ bool GraphicsContext::resize(int w, int h)
   // send resize msg to mananaged layers
   for (const auto& l : m_managedLayer)
   {
-    l->resize(w, h);
+    if (auto p = l.lock(); p)
+    {
+      p->resize(w, h);
+    }
   }
   return ok;
 }

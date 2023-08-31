@@ -138,7 +138,6 @@ private:
     return { x, y };
   }
 
-  void configureNode(flexbox_node* node, std::shared_ptr<VGG::Layout::Internal::Rule::Rule> rule);
   void udpateAutoLayout();
 };
 

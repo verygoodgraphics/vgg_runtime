@@ -1,0 +1,203 @@
+{
+  "class": "Vgg_Layout",
+  "obj": [
+    {
+      "class": "object",
+      "id": "208:2",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 1600.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 900.0,
+          "types": 1
+        }
+      },
+      "layout": {
+        "class": "grid_layout",
+        "expand_strategy": {
+          "class": "expand_strategy",
+          "strategy": 1,
+          "min_row": 1,
+          "column_count": 1
+        },
+        "column_width": {
+          "class": "column_width",
+          "strategy": 2,
+          "width_value": 300
+        },
+        "row_height": {
+          "class": "row_height",
+          "strategy": 2,
+          "fixed_value": -1
+        },
+        "base_height": 100,
+        "column_gap": 20,
+        "row_gap": 30,
+        "grid_auto_flow": 1,
+        "padding": [
+          40.0,
+          100.0,
+          40.0,
+          100.0
+        ],
+        "cell_align": 1
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:4",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 200.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 250.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "grid_item",
+        "item_pos": {
+          "class": "grid_item_pos",
+          "strategy": 1,
+          "row_id": -1,
+          "column_id": -1
+        },
+        "row_span": 1,
+        "column_span": 1,
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "row_align": 1,
+        "column_align": 1
+      }
+    },
+    {
+      "class": "object",
+      "id": "401:2",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 200.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 100.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "grid_item",
+        "item_pos": {
+          "class": "grid_item_pos",
+          "strategy": 1,
+          "row_id": -1,
+          "column_id": -1
+        },
+        "row_span": 1,
+        "column_span": 1,
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "row_align": 1,
+        "column_align": 1
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:3",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 200.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 150.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "grid_item",
+        "item_pos": {
+          "class": "grid_item_pos",
+          "strategy": 1,
+          "row_id": -1,
+          "column_id": -1
+        },
+        "row_span": 1,
+        "column_span": 1,
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "row_align": 1,
+        "column_align": 1
+      }
+    },
+    {
+      "class": "object",
+      "id": "401:3",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 200.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 200.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "grid_item",
+        "item_pos": {
+          "class": "grid_item_pos",
+          "strategy": 1,
+          "row_id": -1,
+          "column_id": -1
+        },
+        "row_span": 1,
+        "column_span": 1,
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "row_align": 1,
+        "column_align": 1
+      }
+    }
+  ]
+}

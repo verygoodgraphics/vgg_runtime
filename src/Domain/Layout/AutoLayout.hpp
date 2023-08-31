@@ -18,14 +18,22 @@ namespace Layout
 namespace Internal
 {
 
+namespace Rule
+{
+struct GridLayout;
+}
+
 struct AutoLayout
 {
 private:
   std::unique_ptr<flexbox_node> m_flexNode;
-  std::unique_ptr<grid_layout> m_gridNode;
-
   flexbox_node* m_flexNodePtr;
-  grid_layout* m_gridNodePtr;
+
+  std::unique_ptr<grid_layout> m_gridContainer;
+  grid_layout* m_gridContainerPtr;
+
+  std::shared_ptr<grid_item> m_gridItem;
+  decltype(m_gridContainerPtr->calc_layout(-1, -1)) m_gridItemFrames;
 
 public:
   std::weak_ptr<LayoutView> view;
@@ -46,18 +54,44 @@ public:
     return !rule.expired();
   }
 
-  std::unique_ptr<flexbox_node>& takeFlexNode();
-  std::unique_ptr<grid_layout>& takeGridNode();
+  std::unique_ptr<flexbox_node>& takeFlexNode()
+  {
+    return m_flexNode;
+  }
+  flexbox_node* getFlexNode()
+  {
+    return m_flexNodePtr;
+  }
 
-  flexbox_node* createFlexNode();
-  grid_layout* createGridNode();
-
-  flexbox_node* getFlexNode();
-  grid_layout* getGridNode();
+  std::unique_ptr<grid_layout>& takeGridContainer()
+  {
+    return m_gridContainer;
+  }
+  grid_layout* getGridContainer()
+  {
+    return m_gridContainerPtr;
+  }
+  std::shared_ptr<grid_item>& getGridItem()
+  {
+    return m_gridItem;
+  }
+  auto& gridItemFrames()
+  {
+    return m_gridItemFrames;
+  }
 
 private:
   Size calculateLayout(Size size);
-  void configureNode(flexbox_node* node, std::shared_ptr<VGG::Layout::Internal::Rule::Rule> rule);
+  void configureFlexNodeSize();
+  void configureGridItemSize();
+
+  flexbox_node* createFlexNode();
+
+  void configureFlexContainer(Rule::FlexboxLayout* layout);
+  void configureFlexItem(Rule::FlexboxItem* layout);
+
+  void configureGridContainer(Rule::GridLayout* layout);
+  void configureGridItem(Rule::GridItem* layout);
 };
 
 } // namespace Internal

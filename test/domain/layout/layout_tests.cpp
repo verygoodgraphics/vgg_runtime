@@ -60,6 +60,33 @@ TEST_F(VggLayoutTestSuite, Layout)
   auto right_child_frame = current_page->children()[1]->frame();
   Layout::Rect expect_right_child_frame{ { 1100, 40 }, { 200, 250 } };
   EXPECT_TRUE(right_child_frame == expect_right_child_frame);
+}
 
-  // todo, check json model
+TEST_F(VggLayoutTestSuite, GridWrap)
+{
+  // Given
+  std::shared_ptr<Daruma> daruma{ new Daruma(Helper::RawJsonDocumentBuilder,
+                                             Helper::RawJsonDocumentBuilder) };
+  std::string filePath = "testDataDir/layout/1_grid_wrap/";
+  daruma->load(filePath);
+
+  Layout::Layout sut{ daruma };
+  Layout::Size windowSize{ 1400, 900 };
+
+  // When
+  sut.layout(windowSize);
+
+  // Then
+  auto tree = sut.layoutTree();
+  auto currentPage = tree->children()[0];
+
+  auto gridContainer = currentPage;
+
+  auto child0Frame = gridContainer->children()[0]->frame();
+  Layout::Rect expectChild0Frame{ { 100, 40 }, { 200, 250 } };
+  EXPECT_TRUE(child0Frame == expectChild0Frame);
+
+  auto child3Frame = gridContainer->children()[3]->frame();
+  Layout::Rect expectChild3Frame{ { 1060, 40 }, { 200, 200 } };
+  EXPECT_TRUE(child3Frame == expectChild3Frame);
 }

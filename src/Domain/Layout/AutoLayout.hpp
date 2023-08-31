@@ -36,6 +36,7 @@ public:
   bool isIncludedInLayout{ true };
 
 public:
+  void configure();
   void applyLayout(bool preservingOrigin);
   void frameChanged();
 
@@ -56,6 +57,7 @@ public:
 
 private:
   Size calculateLayout(Size size);
+  void configureNode(flexbox_node* node, std::shared_ptr<VGG::Layout::Internal::Rule::Rule> rule);
 };
 
 } // namespace Internal

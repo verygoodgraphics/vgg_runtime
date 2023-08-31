@@ -87,6 +87,7 @@ public:
 
   void release()
   {
+    DEBUG("SkiaContext Releasing ... ");
     // ensure release order
     m_stream = nullptr;
     m_document = nullptr;
@@ -101,7 +102,6 @@ private:
   sk_sp<SkSurface> m_surface{ nullptr };
   std::variant<ContextInfoVulkan, ContextInfoGL> m_ctx;
   ContextConfig m_ctxConfig;
-
   void initContextVK(const ContextInfoVulkan& ctx)
   {
     GrVkBackendContext vkContext;
@@ -241,64 +241,6 @@ public:
   }
 };
 
-struct SkiaState
-{
-private:
-  std::unique_ptr<SkFILEWStream> m_stream;
-  sk_sp<SkDocument> m_document;
-
-public:
-  sk_sp<const GrGLInterface> interface {
-    nullptr
-  };
-  sk_sp<GrDirectContext> grContext{ nullptr };
-  sk_sp<SkSurface> surface{ nullptr };
-
-  std::shared_ptr<vk::VkInstanceObject> vkInstance;
-  std::shared_ptr<vk::VkPhysicalDeviceObject> vkPhysicalDevice;
-  std::shared_ptr<vk::VkDeviceObject> vkDevice;
-
-  GrVkBackendContext vkContext;
-
-  inline SkCanvas* getPDFCanvas(const char* fileName, int width, int height)
-  {
-    m_stream = std::make_unique<SkFILEWStream>(fileName);
-    if (!m_stream)
-    {
-      DEBUG("failed to create file stream: %s", fileName);
-      return nullptr;
-    }
-    SkPDF::Metadata metadata;
-    metadata.fTitle = "VGG";
-    metadata.fCreator = "Example WritePDF() Function";
-    metadata.fCreation = { 0, 2019, 1, 4, 31, 12, 34, 56 };
-    metadata.fModified = { 0, 2019, 1, 4, 31, 12, 34, 56 };
-    m_document = SkPDF::MakeDocument(m_stream.get(), metadata);
-
-    if (!m_document)
-    {
-      DEBUG("failed to create document");
-      return nullptr;
-    }
-    auto canvas = m_document->beginPage(width, height);
-    return canvas;
-  }
-
-  inline void endPDFCanvas()
-  {
-    if (m_document)
-    {
-      m_document->close();
-      m_document = nullptr;
-    }
-  }
-
-  inline SkCanvas* getCanvas()
-  {
-    return surface->getCanvas();
-  }
-};
-
 class VLayer__pImpl
 {
   VGG_DECL_API(VLayer);
@@ -322,122 +264,6 @@ public:
   {
     skiaContext = nullptr;
   }
-
-  // void updateSkiaEngineGL()
-  // {
-  //   // Create Skia
-  //   // get skia interface and make opengl context
-  //   sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
-  //   if (!interface)
-  //   {
-  //     // return AppError(AppError::Kind::RenderEngineError, "Failed to make skia opengl
-  //     interface");
-  //   }
-  //   sk_sp<GrDirectContext> grContext = GrDirectContext::MakeGL(interface);
-  //   if (!grContext)
-  //   {
-  //     // return AppError(AppError::Kind::RenderEngineError, "Failed to make skia opengl
-  //     context.");
-  //   }
-  //   skiaState.interface = interface;
-  //   skiaState.grContext = grContext;
-  // }
-  //
-  // void resizeSkiaSurfaceGL(int w, int h)
-  // {
-  //   skiaState.surface = createSkiaSurfaceGL(w, h);
-  //   surfaceWidth = w;
-  //   surfaceHeight = h;
-  // }
-  //
-  // sk_sp<SkSurface> createSkiaSurfaceGL(int w, int h)
-  // {
-  //
-  //   ASSERT(skiaState.interface);
-  //   ASSERT(skiaState.grContext);
-  //   GrGLFramebufferInfo info;
-  //   info.fFBOID = 0;
-  //   // GR_GL_GetIntegerv(m_skiaState.interface.get(),
-  //   //                   GR_GL_FRAMEBUFFER_BINDING,
-  //   //                   (GrGLint*)&info.fFBOID);
-  //
-  //   // color type and info format must be the followings for
-  //   // both OpenGL and OpenGL ES, otherwise it will fail
-  //   info.fFormat = GR_GL_RGBA8;
-  //   const auto& cfg = q_ptr->context()->config();
-  //   GrBackendRenderTarget target(w, h, cfg.multiSample, cfg.stencilBit, info);
-  //
-  //   SkSurfaceProps props;
-  //   return SkSurfaces::WrapBackendRenderTarget(skiaState.grContext.get(),
-  //                                              target,
-  //                                              kBottomLeft_GrSurfaceOrigin,
-  //                                              SkColorType::kRGBA_8888_SkColorType,
-  //                                              nullptr,
-  //                                              &props);
-  // }
-  //
-  // void initVulkanObject()
-  // {
-  //   auto vk = (ContextInfoVulkan*)q_ptr->context()->contextInfo();
-  //
-  //   skiaState.vkInstance = std::make_shared<vk::VkInstanceObject>(
-  //     [this]()
-  //     {
-  //       std::vector<const char*> extNames;
-  //       return extNames;
-  //     });
-  //   skiaState.vkPhysicalDevice =
-  //   std::make_shared<vk::VkPhysicalDeviceObject>(skiaState.vkInstance); skiaState.vkDevice =
-  //   std::make_shared<vk::VkDeviceObject>(skiaState.vkPhysicalDevice);
-  //   skiaState.vkContext.fInstance = *skiaState.vkInstance;
-  //   skiaState.vkContext.fPhysicalDevice = *skiaState.vkPhysicalDevice;
-  //   skiaState.vkContext.fDevice = *skiaState.vkDevice;
-  //   skiaState.vkContext.fQueue = skiaState.vkDevice->graphicsQueue;
-  //   skiaState.vkContext.fGetProc = std::function(
-  //     [](const char* name, VkInstance instance, VkDevice dev) -> PFN_vkVoidFunction
-  //     {
-  //       if (dev == VK_NULL_HANDLE && instance == VK_NULL_HANDLE)
-  //       {
-  //         return vkGetInstanceProcAddr(VK_NULL_HANDLE, name);
-  //       }
-  //       if (dev != VK_NULL_HANDLE)
-  //       {
-  //         return vkGetDeviceProcAddr(dev, name);
-  //       }
-  //       else if (instance != VK_NULL_HANDLE)
-  //       {
-  //         return vkGetInstanceProcAddr(instance, name);
-  //       }
-  //       ASSERT(" invalid option");
-  //       return nullptr;
-  //     });
-  // }
-  // void updateSkiaEngineVK()
-  // {
-  //   // init vkContext;
-  //   skiaState.grContext = GrDirectContext::MakeVulkan(skiaState.vkContext);
-  // }
-  //
-  // void resizeSkiaSurfaceVk(int w, int h)
-  // {
-  //   skiaState.surface = createSkiaSurfaceVK(w, h);
-  //   surfaceWidth = w;
-  //   surfaceHeight = h;
-  // }
-  // sk_sp<SkSurface> createSkiaSurfaceVK(int w, int h)
-  // {
-  //   GrVkImageInfo vkImageInfo;
-  //   vkImageInfo.fFormat = VK_FORMAT_R8G8B8A8_UNORM;
-  //   const auto& cfg = q_ptr->context()->config();
-  //   GrBackendRenderTarget target(w, h, vkImageInfo);
-  //
-  //   SkImageInfo info = SkImageInfo::Make(w,
-  //                                        h,
-  //                                        SkColorType::kRGBA_8888_SkColorType,
-  //                                        SkAlphaType::kPremul_SkAlphaType);
-  //   auto a = SkSurfaces::RenderTarget(skiaState.grContext.get(), skgpu::Budgeted::kNo, info);
-  //   return a;
-  // }
 
   std::string mapCanvasPositionToScene(const Zoomer* zoomer,
                                        const char* name,
@@ -500,7 +326,6 @@ std::optional<ELayerError> VLayer::onInit()
     ASSERT(false);
   }
   ASSERT(_->skiaContext);
-  // resize(cfg.windowSize[0], cfg.windowSize[1]);
   return std::nullopt;
 }
 void VLayer::beginFrame()
@@ -510,7 +335,6 @@ void VLayer::beginFrame()
 void VLayer::render()
 {
   VGG_IMPL(VLayer)
-  // auto canvas = _->skiaState.getCanvas();
   auto canvas = _->skiaContext->canvas();
   if (canvas)
   {
@@ -565,16 +389,12 @@ void VLayer::resize(int w, int h)
   const int finalH = h;
   INFO("resize: [%d, %d], actually (%d, %d)", w, h, finalW, finalH);
   _->skiaContext->resizeSurface(finalW, finalH);
-  //_->resizeSkiaSurfaceGL(finalW, finalH);
 }
 void VLayer::endFrame()
 {
   VGG_IMPL(VLayer)
   ASSERT(context());
   _->skiaContext->flushAndSubmit();
-  // _->skiaState.getCanvas()->flush();
-  // _->skiaState.grContext->flush();
-  // _->skiaState.grContext->submit();
   context()->swap();
 }
 
@@ -612,6 +432,7 @@ VLayer::VLayer()
 }
 VLayer::~VLayer()
 {
+  DEBUG("VGG Layer releasing...");
 }
 } // namespace VGG::layer
   //

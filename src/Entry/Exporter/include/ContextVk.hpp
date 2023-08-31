@@ -29,6 +29,7 @@ class VkGraphicsContext : public layer::GraphicsContext
 private:
   void cleanup()
   {
+    DEBUG("Vulkan Context releasing...");
     m_context = nullptr;
   }
 

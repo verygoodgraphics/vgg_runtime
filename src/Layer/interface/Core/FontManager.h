@@ -15,16 +15,21 @@ namespace fs = std::filesystem;
 
 class FontManager__pImpl;
 
-class FontManager
+class FontManager final
 {
   VGG_DECL_IMPL(FontManager);
 
+  void createFallbackFontMananger();
+
 public:
   FontManager(const FontManager& s) = delete;
-  void operator=(const FontManager&) = delete;
+  FontManager& operator=(const FontManager&) = delete;
+  FontManager(FontManager&& s) noexcept = delete;
+  FontManager& operator=(FontManager&&) noexcept = delete;
   SkFontMgrVGG* createFontManager(const std::string& key,
                                   const fs::path& fontDir,
                                   std::vector<std::string> fallbackFonts);
+
   SkFontMgrVGG* getFontManager(const std::string& key) const;
   std::vector<std::string> getFallbackFonts(const std::string& key) const;
   void setDefaultFontManager(const std::string& key);
@@ -33,8 +38,8 @@ public:
   ~FontManager();
   static FontManager& instance()
   {
-    static FontManager F;
-    return F;
+    static FontManager s_fontManagerInstance;
+    return s_fontManagerInstance;
   }
 
 private:

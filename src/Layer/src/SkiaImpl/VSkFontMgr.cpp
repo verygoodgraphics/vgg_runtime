@@ -14,12 +14,8 @@
 
 #include <limits>
 #include <memory>
-
-#define VGG_USE_EMBBED_FONT 1
-
-#ifdef VGG_USE_EMBBED_FONT
-#include "Resources/EmbbedFont.hpp"
-#endif
+#include <optional>
+#include <iostream>
 
 using namespace skia_private;
 
@@ -277,25 +273,48 @@ sk_sp<SkTypeface> SkFontMgrVGG::onMakeFromFile(const char path[], int ttcIndex) 
   return stream ? this->makeFromStream(std::move(stream), ttcIndex) : nullptr;
 }
 
-std::pair<SkString, float> SkFontMgrVGG::fuzzyMatchFontFamilyName(const std::string& fontName) const
+bool SkFontMgrVGG::addFont(const fs::path& path)
 {
-  bool match_found = false;
-  double best_score = 0.0;
-  SkString best_match;
+  return false;
+}
+
+bool SkFontMgrVGG::addFont(const uint8_t* data,
+                           size_t length,
+                           const char* defaultRealName,
+                           bool copyData)
+{
+  auto stream = std::make_unique<SkMemoryStream>(data, length, copyData);
+  return VGGFontLoader::loadFontFromData(fScanner,
+                                         std::move(stream),
+                                         0,
+                                         &fFamilies,
+                                         defaultRealName);
+}
+
+std::optional<std::pair<SkString, float>> SkFontMgrVGG::fuzzyMatchFontFamilyName(
+  const std::string& fontName) const
+{
+  if (fFamilies.fFamilies.empty())
+  {
+    return std::nullopt;
+  }
+  bool matchFound = false;
+  double bestScore = 0.0;
+  SkString bestMatch;
   rapidfuzz::fuzz::CachedRatio<char> scorer(fontName);
   for (const auto& style : fFamilies.fFamilies)
   {
     auto choice = std::string(style->getFamilyName().c_str());
-    double score = scorer.similarity(choice, best_score);
+    double score = scorer.similarity(choice, bestScore);
 
-    if (score >= best_score)
+    if (score >= bestScore)
     {
-      match_found = true;
-      best_score = score;
-      best_match = style->getFamilyName();
+      matchFound = true;
+      bestScore = score;
+      bestMatch = style->getFamilyName();
     }
   }
-  return { best_match, best_score };
+  return std::pair{ bestMatch, bestScore };
 }
 
 sk_sp<SkTypeface> SkFontMgrVGG::onLegacyMakeTypeface(const char familyName[],
@@ -315,16 +334,18 @@ sk_sp<SkTypeface> SkFontMgrVGG::onLegacyMakeTypeface(const char familyName[],
 
   return tf;
 }
-void VGGFontLoader::load_font_from_data(const SkTypeface_FreeType::Scanner& scanner,
-                                        std::unique_ptr<SkMemoryStream> stream,
-                                        int index,
-                                        SkFontMgrVGG::Families* families)
+
+bool VGGFontLoader::loadFontFromData(const SkTypeface_FreeType::Scanner& scanner,
+                                     std::unique_ptr<SkMemoryStream> stream,
+                                     int index,
+                                     SkFontMgrVGG::Families* families,
+                                     const char* defaultRealName)
 {
   int numFaces;
   if (!scanner.recognizedFont(stream.get(), &numFaces))
   {
     // SkDebugf("---- failed to open <%d> as a font\n", index);
-    return;
+    return false;
   }
 
   for (int faceIndex = 0; faceIndex < numFaces; ++faceIndex)
@@ -335,46 +356,129 @@ void VGGFontLoader::load_font_from_data(const SkTypeface_FreeType::Scanner& scan
     if (!scanner.scanFont(stream.get(), faceIndex, &realname, &style, &isFixedPitch, nullptr))
     {
       // SkDebugf("---- failed to open <%d> <%d> as a font\n", index, faceIndex);
-      return;
+      return false;
     }
     if (realname.isEmpty())
     {
-      realname = "NotoMono Regular";
+      realname = defaultRealName;
     }
     SkFontStyleSet_VGG* addTo = find_family(*families, realname.c_str());
     if (nullptr == addTo)
     {
       addTo = new SkFontStyleSet_VGG(realname);
       families->push_back().reset(addTo);
+      families->lookUp[realname.c_str()] = families->size() - 1;
     }
     auto data =
       std::make_unique<SkFontData>(stream->duplicate(), faceIndex, 0, nullptr, 0, nullptr, 0);
     addTo->appendTypeface(
       sk_make_sp<SkTypeface_FreeTypeStream>(std::move(data), realname, style, isFixedPitch));
   }
+  return true;
 }
+
+void VGGFontLoader::loadDirectoryFonts(const SkTypeface_FreeType::Scanner& scanner,
+                                       const SkString& directory,
+                                       const char* suffix,
+                                       SkFontMgrVGG::Families* families)
+{
+  const std::filesystem::path dir{ directory.c_str() };
+
+  for (auto const& entry : fs::recursive_directory_iterator(dir))
+  {
+    if (!entry.is_regular_file())
+    {
+      continue;
+    }
+    auto filename = entry.path().string();
+    std::unique_ptr<SkStreamAsset> stream = SkStream::MakeFromFile(filename.c_str());
+    if (!stream)
+    {
+      // SkDebugf("---- failed to open <%s>\n", filename.c_str());
+      continue;
+    }
+
+    int numFaces;
+    if (!scanner.recognizedFont(stream.get(), &numFaces))
+    {
+      // SkDebugf("---- failed to open <%s> as a font\n", filename.c_str());
+      continue;
+    }
+
+    for (int faceIndex = 0; faceIndex < numFaces; ++faceIndex)
+    {
+      bool isFixedPitch;
+      SkString realname;
+      SkFontStyle style = SkFontStyle(); // avoid uninitialized warning
+      if (!scanner.scanFont(stream.get(), faceIndex, &realname, &style, &isFixedPitch, nullptr))
+      {
+        // SkDebugf("---- failed to open <%s> <%d> as a font\n",
+        //          filename.c_str(), faceIndex);
+        continue;
+      }
+
+      SkFontStyleSet_VGG* addTo = find_family(*families, realname.c_str());
+      if (nullptr == addTo)
+      {
+        addTo = new SkFontStyleSet_VGG(realname);
+        families->push_back().reset(addTo);
+        families->lookUp[realname.c_str()] = families->size() - 1;
+      }
+      addTo->appendTypeface(sk_ref_sp(
+        new SkTypeface_VGG_File(style, isFixedPitch, true, realname, filename.c_str(), faceIndex)));
+    }
+  }
+
+  for (auto const& entry : fs::recursive_directory_iterator(dir))
+  {
+    if (!entry.is_directory())
+    {
+      continue;
+    }
+
+    auto dirName = entry.path().string();
+    loadDirectoryFonts(scanner, SkString{ dirName }, suffix, families);
+  }
+}
+
+template<class... Ts>
+struct Overloaded : Ts...
+{
+  using Ts::operator()...;
+};
+// explicit deduction guide (not needed as of C++20)
+template<class... Ts>
+Overloaded(Ts...) -> Overloaded<Ts...>;
 
 void VGGFontLoader::loadSystemFonts(const SkTypeface_FreeType::Scanner& scanner,
                                     SkFontMgrVGG::Families* families) const
 {
-  if (fBaseDirectory.isEmpty() == false)
-  {
-    load_directory_fonts(scanner, fBaseDirectory, ".ttf", families);
-    load_directory_fonts(scanner, fBaseDirectory, ".ttc", families);
-    load_directory_fonts(scanner, fBaseDirectory, ".otf", families);
-    load_directory_fonts(scanner, fBaseDirectory, ".pfb", families);
-  }
-  else
-  {
-
-#ifdef VGG_USE_EMBBED_FONT
-    auto stream = std::make_unique<SkMemoryStream>(VGG::layer::resources::g_notoMonoRegularTTF,
-                                                   VGG::layer::resources::g_dataLength,
-                                                   false);
-    load_font_from_data(scanner, std::move(stream), 0, families);
-#endif
-  }
-
+  // helper type for the visitor #4
+  std::visit(Overloaded{ [&, this](const SkString& arg)
+                         {
+                           if (arg.isEmpty() == false)
+                           {
+                             loadDirectoryFonts(scanner, arg, ".ttf", families);
+                             loadDirectoryFonts(scanner, arg, ".ttc", families);
+                             loadDirectoryFonts(scanner, arg, ".otf", families);
+                             loadDirectoryFonts(scanner, arg, ".pfb", families);
+                           }
+                         },
+                         [&, this](const std::vector<fs::path>& arg)
+                         {
+                           for (const auto& p : arg)
+                           {
+                             SkString path(p.string());
+                             if (path.isEmpty() == false)
+                             {
+                               loadDirectoryFonts(scanner, path, ".ttf", families);
+                               loadDirectoryFonts(scanner, path, ".ttc", families);
+                               loadDirectoryFonts(scanner, path, ".otf", families);
+                               loadDirectoryFonts(scanner, path, ".pfb", families);
+                             }
+                           }
+                         } },
+             this->dir);
   if (families->empty())
   {
     SkFontStyleSet_VGG* family = new SkFontStyleSet_VGG(SkString());

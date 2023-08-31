@@ -122,26 +122,34 @@ sktxt::TextStyle createTextStyle(const TextAttr& attr, VGGFontCollection* font)
       subFamilyName += components[i];
     }
     auto matched = font->fuzzyMatch(fontName);
-    INFO("Font [%s] matches real name [%s][%f]",
-         fontName.c_str(),
-         matched.first.c_str(),
-         matched.second);
-    fontName = std::string(matched.first.c_str());
-
-    // When font name is provided, we match the real name first.
-    // If the score is lower than a threshold, we choose the
-    // fallback font rather pick it fuzzily.
-    constexpr float THRESHOLD = 70.f;
-    if (const auto& fallbackFonts = font->fallbackFonts();
-        !fallbackFonts.empty() && matched.second < THRESHOLD)
+    if (matched)
     {
-      resolve(fallbackFonts);
+      INFO("Font [%s] matches real name [%s][%f]",
+           fontName.c_str(),
+           matched->first.c_str(),
+           matched->second);
+      fontName = std::string(matched->first.c_str());
+
+      // When font name is provided, we match the real name first.
+      // If the score is lower than a threshold, we choose the
+      // fallback font rather pick it fuzzily.
+      constexpr float THRESHOLD = 70.f;
+      if (const auto& fallbackFonts = font->fallbackFonts();
+          !fallbackFonts.empty() && matched->second < THRESHOLD)
+      {
+        resolve(fallbackFonts);
+      }
+    }
+    else
+    {
+      DEBUG("No font in font manager");
     }
   }
   else if (const auto& fallbackFonts = font->fallbackFonts(); !fallbackFonts.empty())
   {
     resolve(fallbackFonts);
   }
+
   if (subFamilyName.empty())
   {
     subFamilyName = "Regular";
@@ -149,7 +157,7 @@ sktxt::TextStyle createTextStyle(const TextAttr& attr, VGGFontCollection* font)
   if (fontName.empty())
   {
     // the worst case
-    fontName = "Inter";
+    fontName = "FiraSans";
   }
   INFO("Given [%s], [%s] is choosed finally", attr.fontName.c_str(), fontName.c_str());
   std::vector<SkString> fontFamilies;

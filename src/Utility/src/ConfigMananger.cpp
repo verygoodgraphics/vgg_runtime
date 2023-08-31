@@ -4,11 +4,11 @@
 
 namespace Config
 {
-static nlohmann::json config;
 
 nlohmann::json& globalConfig()
 {
-  return config;
+  static nlohmann::json s_config = nlohmann::json::object();
+  return s_config;
 }
 
 void readGlobalConfig(const fs::path& path)

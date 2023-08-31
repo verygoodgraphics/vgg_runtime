@@ -9,14 +9,15 @@
 #include <ConfigMananger.h>
 #include <Scene/Scene.h>
 
+constexpr auto DARUMA_FILE_OR_DIRECTORY = "daruma";
+
 using namespace VGG;
 #define main main
 int main(int argc, char** argv)
 {
   argparse::ArgumentParser program("vgg", "0.1");
-  program.add_argument("-l", "--load").help("load from daruma file or directory");
+  program.add_argument(DARUMA_FILE_OR_DIRECTORY).help("daruma file or directory");
   program.add_argument("-c", "--config").help("specify config file");
-  program.add_argument("-e", "--edit").help("edit daruma file or directory");
 
   try
   {
@@ -41,18 +42,16 @@ int main(int argc, char** argv)
   MainComposer main_composer{ new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js", false) };
 #endif
 
-  if (auto loadfile = program.present("-l"))
-  {
-    auto fp = loadfile.value();
-    main_composer.controller()->start(fp, "../asset/vgg-format.json");
-  }
-  if (auto file_to_edit = program.present("-e"))
-  {
-    main_composer.enableEdit();
+  auto darumaFileOrDir = program.get<std::string>(DARUMA_FILE_OR_DIRECTORY);
+  main_composer.controller()->start(darumaFileOrDir, "../asset/vgg-format.json");
 
-    auto file_path = file_to_edit.value();
-    main_composer.controller()->edit(file_path);
-  }
+  // if (auto file_to_edit = program.present("-e"))
+  // {
+  //   main_composer.enableEdit();
+
+  //   auto file_path = file_to_edit.value();
+  //   main_composer.controller()->edit(file_path);
+  // }
 
   SDLRuntime* app = App<SDLRuntime>::getInstance(1920, 1080, "VGG");
   ASSERT(app);

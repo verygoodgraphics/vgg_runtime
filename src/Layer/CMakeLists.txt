@@ -11,6 +11,14 @@ else()
   add_library(vgg_layer STATIC)
 endif()
 
+option(ENABLE_EMBBED_FONT "Enable embbed FiraSans font" ON)
+mark_as_advanced(ENABLE_EMBBED_FONT)
+
+if(ENABLE_EMBBED_FONT)
+  target_compile_definitions(vgg_layer PRIVATE VGG_USE_EMBBED_FONT)
+  target_link_libraries(vgg_layer PRIVATE zip)
+endif()
+
 target_sources(vgg_layer PRIVATE ${CoreSrcVar} ${SkiaImplSrcVar} ${SceneSrcVar} ${ReaderSrcVar} ${CommonSrcVar})
 target_include_directories(vgg_layer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/interface)
 
@@ -25,7 +33,6 @@ target_include_directories(vgg_layer PUBLIC ${VGG_CONTRIB_JSON_INCLUDE})
 target_link_libraries(vgg_layer PUBLIC glm ${SKIA_LIBS})
 target_link_libraries(vgg_layer PRIVATE ${OPENGL_LIBRARIES} vgg_utility)
 set_target_properties(vgg_layer PROPERTIES BUILD_RPATH ${SKIA_LIB_DIR})
-
 set_target_properties(vgg_layer PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # TODO: install(IMPORTED_RUNTIME_ARTIFACTS ...) maybe a better choice

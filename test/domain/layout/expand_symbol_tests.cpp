@@ -213,6 +213,24 @@ TEST_F(VggExpandSymbolTestSuite, ReferenceStyleOverride)
   }
 }
 
+TEST_F(VggExpandSymbolTestSuite, IgnoreInvalideArrayIndexOverride)
+{
+  // Given
+  std::string filePath = "testDataDir/symbol/invalid_override/design.json";
+  auto designJson = Helper::load_json(filePath);
+  ExpandSymbol sut{ designJson };
+
+  // When
+  auto resultJson = sut();
+
+  // Then
+  nlohmann::json::json_pointer path{ "/frames/1/childObjects/1/childObjects/0/style/fills" };
+  auto& fills = resultJson[path];
+
+  EXPECT_TRUE(fills.is_array());
+  EXPECT_EQ(fills.size(), 1);
+}
+
 TEST_F(VggExpandSymbolTestSuite, unique_object_id_in_instance_tree)
 {
   // Given

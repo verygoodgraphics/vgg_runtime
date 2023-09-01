@@ -4,6 +4,7 @@ namespace VGG
 {
 
 constexpr auto K_ALPHA_MASK_BY = "alphaMaskBy";
+constexpr auto K_ATTR = "attr";
 constexpr auto K_BOUNDS = "bounds";
 constexpr auto K_CHILD_OBJECTS = "childObjects";
 constexpr auto K_CLASS = "class";
@@ -11,6 +12,7 @@ constexpr auto K_CONTEXT_SETTINGS = "contextSettings";
 constexpr auto K_CURVE_FROM = "curveFrom";
 constexpr auto K_CURVE_TO = "curveTo";
 constexpr auto K_EMPTY_STRING = "";
+constexpr auto K_FONT_ATTR = "fontAttr";
 constexpr auto K_FRAME = "frame";
 constexpr auto K_GROUP = "group";
 constexpr auto K_HEIGHT = "height";

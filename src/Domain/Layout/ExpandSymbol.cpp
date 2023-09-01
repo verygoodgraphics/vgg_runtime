@@ -645,7 +645,7 @@ nlohmann::json* ExpandSymbol::findChildObject(
   }
 }
 
-bool ExpandSymbol::applyReferenceOverride(nlohmann::json& objectJson,
+bool ExpandSymbol::applyReferenceOverride(nlohmann::json& destObjectJson,
                                           const std::string& name,
                                           const nlohmann::json& value)
 {
@@ -661,17 +661,21 @@ bool ExpandSymbol::applyReferenceOverride(nlohmann::json& objectJson,
         auto& items = m_designJson[K_REFERENCES];
         if (items.is_array())
         {
-          for (auto& item : items)
+          for (auto& srcReferenence : items)
           {
-            if (item[K_ID] == id)
+            if (srcReferenence[K_ID] == id)
             {
-              if (item.contains(K_STYLE))
+              if (srcReferenence.contains(K_STYLE))
               {
-                objectJson[K_STYLE] = item[K_STYLE];
+                destObjectJson[K_STYLE] = srcReferenence[K_STYLE];
               }
-              if (item.contains(K_CONTEXT_SETTINGS))
+              if (srcReferenence.contains(K_CONTEXT_SETTINGS))
               {
-                objectJson[K_CONTEXT_SETTINGS] = item[K_CONTEXT_SETTINGS];
+                destObjectJson[K_CONTEXT_SETTINGS] = srcReferenence[K_CONTEXT_SETTINGS];
+              }
+              if (srcReferenence.contains(K_FONT_ATTR))
+              {
+                destObjectJson[K_ATTR] = nlohmann::json::array({ srcReferenence[K_FONT_ATTR] });
               }
 
               return true;

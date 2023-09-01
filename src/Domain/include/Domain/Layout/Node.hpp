@@ -27,10 +27,10 @@ struct Rule;
 } // namespace Internal
 } // namespace Layout
 
-class LayoutView : public std::enable_shared_from_this<LayoutView>
+class LayoutNode : public std::enable_shared_from_this<LayoutNode>
 {
-  std::weak_ptr<LayoutView> m_parent;
-  std::vector<std::shared_ptr<LayoutView>> m_children;
+  std::weak_ptr<LayoutNode> m_parent;
+  std::vector<std::shared_ptr<LayoutNode>> m_children;
 
   std::weak_ptr<JsonDocument> m_viewModel;
   const std::string m_path;
@@ -42,13 +42,13 @@ class LayoutView : public std::enable_shared_from_this<LayoutView>
 public:
   using HitTestHook = std::function<bool(const std::string&)>;
 
-  LayoutView(const std::string& path, const Layout::Rect& frame)
+  LayoutNode(const std::string& path, const Layout::Rect& frame)
     : m_path{ path }
     , m_frame{ frame }
   {
   }
 
-  std::shared_ptr<LayoutView> hitTest(const Layout::Point& point,
+  std::shared_ptr<LayoutNode> hitTest(const Layout::Point& point,
                                       const HitTestHook& hasEventListener)
   {
     // test front child first
@@ -74,7 +74,7 @@ public:
     return nullptr;
   }
 
-  void addChild(std::shared_ptr<LayoutView> child)
+  void addChild(std::shared_ptr<LayoutNode> child)
   {
     if (!child)
     {
@@ -85,7 +85,7 @@ public:
     m_children.push_back(child);
   }
 
-  const std::vector<std::shared_ptr<LayoutView>>& children() const
+  const std::vector<std::shared_ptr<LayoutNode>>& children() const
   {
     return m_children;
   }
@@ -104,7 +104,7 @@ public:
   std::shared_ptr<Layout::Internal::AutoLayout> createAutoLayout();
   void configureAutoLayout();
 
-  std::shared_ptr<LayoutView> autoLayoutContainer();
+  std::shared_ptr<LayoutNode> autoLayoutContainer();
 
   void applyLayout();
   void setNeedLayout();
@@ -138,7 +138,7 @@ private:
     return { x, y };
   }
 
-  void udpateAutoLayout();
+  void scaleSubviews();
 };
 
 } // namespace VGG

@@ -10,7 +10,7 @@
 
 namespace VGG
 {
-class LayoutView;
+class LayoutNode;
 
 namespace Layout
 {
@@ -36,7 +36,7 @@ private:
   decltype(m_gridContainerPtr->calc_layout(-1, -1)) m_gridItemFrames;
 
 public:
-  std::weak_ptr<LayoutView> view;
+  std::weak_ptr<LayoutNode> view;
   std::weak_ptr<Rule::Rule> rule;
 
   VGG::Layout::Rect frame;

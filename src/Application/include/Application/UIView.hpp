@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Domain/Layout/View.hpp"
+#include "Domain/Layout/Node.hpp"
 #include "UIEvent.hpp"
 #include "Scene/Scene.h"
 #include "ViewModel.hpp"
@@ -35,7 +35,7 @@ private:
   UIView* m_superview{ nullptr };
   std::vector<std::shared_ptr<UIView>> m_subviews;
 
-  std::shared_ptr<LayoutView> m_root;
+  std::shared_ptr<LayoutNode> m_root;
 
   Layout::Rect m_frame;
   Layout::Rect m_bounds;

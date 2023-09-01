@@ -25,7 +25,7 @@ public:
     return m_layout;
   }
 
-  std::shared_ptr<LayoutView> layoutTree()
+  std::shared_ptr<LayoutNode> layoutTree()
   {
     return m_layout->layoutTree();
   }

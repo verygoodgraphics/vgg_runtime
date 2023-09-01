@@ -8,14 +8,20 @@
 #include <memory>
 #include <vulkan/vulkan_core.h>
 
-#ifndef __APPLE__
 inline const std::vector<const char*> g_validationLayers = {
-  "VK_LAYER_LUNARG_standard_validation"
+  //"VK_LAYER_LUNARG_standard_validation"
+  "VK_LAYER_KHRONOS_validation"
 };
-#else
-const std::vector<const char*> g_validationLayers = {};
+// const std::vector<const char*> g_validationLayers = {};
+inline const std::vector<const char*> g_deviceExtensions = {
+  VK_KHR_SWAPCHAIN_EXTENSION_NAME
+#ifdef VGG_HOST_macOS
+  ,
+  "VK_KHR_portability_subset",
+  "VK_KHR_get_memory_requirements2",
+  "VK_KHR_bind_memory2"
 #endif
-inline const std::vector<const char*> g_deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+};
 
 #define VK_CHECK(expr)                                                                             \
   do                                                                                               \
@@ -58,12 +64,17 @@ struct VkInstanceObject : public std::enable_shared_from_this<VkInstanceObject>
     ci.enabledLayerCount = 0;
     ci.ppEnabledLayerNames = nullptr;
 
+#ifdef VGG_HOST_macOS
+    extNames.push_back("VK_KHR_portability_enumeration");
+    ci.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
+
     ci.enabledExtensionCount = extNames.size();
     ci.ppEnabledExtensionNames = extNames.data();
 
     ci.pApplicationInfo = nullptr;
     ////Check validationLayers
-    if (false)
+    if (true)
     { // warning: If layer is enabled, the VK_LAYER_PATH must be set
       ci.enabledLayerCount = g_validationLayers.size();
       ci.ppEnabledLayerNames = g_validationLayers.data();

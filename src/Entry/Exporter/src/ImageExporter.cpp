@@ -11,7 +11,9 @@
 #include <exception>
 #include <memory>
 #include <optional>
+#include <fstream>
 #include <string>
+#include <sstream>
 
 namespace VGG::exporter
 {
@@ -149,6 +151,11 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
     {
       static int s_count = 0;
       res.emplace_back(scene->frame(i)->guid(), std::move(img.value()));
+      std::ofstream f(scene->frame(i)->guid() + ".png");
+      if (f.is_open())
+      {
+        f.write(img->data(), img->size());
+      }
     }
     else
     {

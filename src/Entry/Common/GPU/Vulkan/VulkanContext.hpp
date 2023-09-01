@@ -57,6 +57,8 @@ public:
       [this]()
       {
         std::vector<const char*> extNames;
+        extNames.push_back("VK_KHR_get_physical_device_properties2");
+        extNames.push_back("VK_KHR_surface");
         return extNames;
       });
     vkPhysicalDevice = std::make_shared<vk::VkPhysicalDeviceObject>(vkInstance);

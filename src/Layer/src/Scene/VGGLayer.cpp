@@ -11,7 +11,10 @@
 #include <gpu/vk/GrVkTypes.h>
 #include <optional>
 #include <sstream>
+#include <third_party/vulkan/vulkan/vulkan_core.h>
 #include <vulkan/vulkan_core.h>
+
+#include <dlfcn.h>
 
 #define GR_GL_LOG_CALLS 0
 #define GR_GL_CHECK_ERROR 0
@@ -45,6 +48,21 @@
 
 #include <queue>
 #include "Entry/Common/GPU/Vulkan/VulkanObject.hpp"
+
+#define VK_PROC_BEGIN(vkName)                                                                      \
+  if (strcmp(name, #vkName) == 0)                                                                  \
+  {                                                                                                \
+    ptr = reinterpret_cast<PFN_vkVoidFunction>(vkName);                                            \
+  }
+#define VK_PROC(vkName)                                                                            \
+  else if (strcmp(name, #vkName) == 0)                                                             \
+  {                                                                                                \
+    ptr = reinterpret_cast<PFN_vkVoidFunction>(vkName);                                            \
+  }
+
+#define VK_PROC_END                                                                                \
+  if (ptr)                                                                                         \
+    return ptr;
 
 namespace VGG::layer
 {
@@ -104,28 +122,52 @@ private:
   ContextConfig m_ctxConfig;
   void initContextVK(const ContextInfoVulkan& ctx)
   {
+    // void* module = dlopen("libvulkan.dylib", RTLD_NOW | RTLD_LOCAL);
+    // if (!module)
+    //   module = dlopen("libvulkan.1.dylib", RTLD_NOW | RTLD_LOCAL);
+    // // if (!module)
+    auto module = dlopen("libvulkan.1.dylib", RTLD_NOW | RTLD_LOCAL);
+    ASSERT(module);
+    auto __vkGetInstanceProcAddr =
+      (PFN_vkGetInstanceProcAddr)dlsym(module, "vkGetInstanceProcAddr");
+
+    auto __vkGetDeviceProcAddr = (PFN_vkGetDeviceProcAddr)dlsym(module, "vkGetDeviceProcAddr");
     GrVkBackendContext vkContext;
     vkContext.fInstance = ctx.instance;
     vkContext.fPhysicalDevice = ctx.physicalDevice;
     vkContext.fDevice = ctx.device;
     vkContext.fQueue = ctx.queue;
     vkContext.fGetProc = std::function(
-      [](const char* name, VkInstance instance, VkDevice dev) -> PFN_vkVoidFunction
+      [=](const char* name, VkInstance instance, VkDevice dev) -> PFN_vkVoidFunction
       {
-        if (dev == VK_NULL_HANDLE && instance == VK_NULL_HANDLE)
+        PFN_vkVoidFunction ptr = nullptr;
+        if (instance == VK_NULL_HANDLE && dev == VK_NULL_HANDLE)
         {
-          return vkGetInstanceProcAddr(VK_NULL_HANDLE, name);
+          ptr = __vkGetInstanceProcAddr(VK_NULL_HANDLE, name);
         }
-        if (dev != VK_NULL_HANDLE)
+        else if (instance == VK_NULL_HANDLE && dev != VK_NULL_HANDLE)
         {
-          return vkGetDeviceProcAddr(dev, name);
+          ptr = __vkGetDeviceProcAddr(dev, name);
         }
-        else if (instance != VK_NULL_HANDLE)
+        else if (instance != VK_NULL_HANDLE && dev == VK_NULL_HANDLE)
         {
-          return vkGetInstanceProcAddr(instance, name);
+          ptr = __vkGetInstanceProcAddr(instance, name);
         }
-        ASSERT(" invalid option");
-        return nullptr;
+        else
+        {
+          ptr = __vkGetDeviceProcAddr(dev, name);
+        }
+        // if (std::string(name) == "vkGetPhysicalDeviceProperties" && instance != VK_NULL_HANDLE)
+        // {
+        //   ptr = vkGetInstanceProcAddr(instance, name);
+        //   std::cout << "???" << name << std::endl;
+        // }
+        if (!ptr)
+          DEBUG("[%d %d], extension [%s] required by skia is not satisfied",
+                (size_t)instance,
+                (size_t)dev,
+                name);
+        return ptr;
       });
     m_grContext = GrDirectContext::MakeVulkan(vkContext);
   }

@@ -2,7 +2,7 @@
 
 #include "Log.h"
 #include "Rule.hpp"
-#include "View.hpp"
+#include "Node.hpp"
 
 #include <memory>
 #include <vector>
@@ -14,7 +14,7 @@ using namespace VGG::Layout::Internal::Rule;
 
 namespace VGG
 {
-class LayoutView;
+class LayoutNode;
 
 namespace Layout
 {
@@ -189,7 +189,7 @@ length_unit toLibLengthUnit(Length::Types type)
 
 namespace
 {
-using Views = std::vector<std::shared_ptr<LayoutView>>;
+using Views = std::vector<std::shared_ptr<LayoutNode>>;
 
 void removeAllChildren(flexbox_node* node)
 {
@@ -235,7 +235,7 @@ bool layoutNodeHasExactSameChildren(grid_layout* node, Views subviews)
   return true;
 }
 
-void attachNodesFromViewHierachy(std::shared_ptr<LayoutView> view)
+void attachNodesFromViewHierachy(std::shared_ptr<LayoutNode> view)
 {
   const auto autoLayout = view->autoLayout();
   if (const auto node = autoLayout->getFlexNode())
@@ -246,7 +246,7 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutView> view)
     }
     else
     {
-      std::vector<std::shared_ptr<LayoutView>> subviewsToInclude;
+      std::vector<std::shared_ptr<LayoutNode>> subviewsToInclude;
       for (auto subview : view->children())
       {
         if (subview->autoLayout()->isEnabled() && subview->autoLayout()->isIncludedInLayout)
@@ -279,7 +279,7 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutView> view)
     }
     else
     {
-      std::vector<std::shared_ptr<LayoutView>> subviewsToInclude;
+      std::vector<std::shared_ptr<LayoutNode>> subviewsToInclude;
       for (auto subview : view->children())
       {
         if (subview->autoLayout()->isEnabled() && subview->autoLayout()->isIncludedInLayout)
@@ -306,7 +306,7 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutView> view)
   }
 }
 
-void applyLayoutToViewHierarchy(std::shared_ptr<LayoutView> view, bool preserveOrigin)
+void applyLayoutToViewHierarchy(std::shared_ptr<LayoutNode> view, bool preserveOrigin)
 {
   auto autoLayout = view->autoLayout();
   if (!autoLayout->isIncludedInLayout)
@@ -485,8 +485,6 @@ void AutoLayout::frameChanged()
         {
           container->setNeedLayout();
         }
-
-        // todo, scale descendant node
       }
     }
   }

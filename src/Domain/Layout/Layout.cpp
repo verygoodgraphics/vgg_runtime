@@ -50,7 +50,7 @@ void Layout::Layout::layout(Size size)
   }
 }
 
-std::shared_ptr<LayoutView> Layout::Layout::layoutTree()
+std::shared_ptr<LayoutNode> Layout::Layout::layoutTree()
 {
   if (m_layoutTree)
   {
@@ -64,7 +64,7 @@ std::shared_ptr<LayoutView> Layout::Layout::layoutTree()
     return {};
   }
 
-  m_layoutTree.reset(new LayoutView{ "/", {} });
+  m_layoutTree.reset(new LayoutNode{ "/", {} });
 
   json::json_pointer framesPath{ "/frames" };
   for (auto i = 0; i < designJson[K_FRAMES].size(); ++i)
@@ -78,9 +78,9 @@ std::shared_ptr<LayoutView> Layout::Layout::layoutTree()
   return m_layoutTree;
 }
 
-std::shared_ptr<LayoutView> Layout::Layout::createOneLayoutView(const nlohmann::json& j,
+std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutView(const nlohmann::json& j,
                                                                 json::json_pointer currentPath,
-                                                                std::shared_ptr<LayoutView> parent)
+                                                                std::shared_ptr<LayoutNode> parent)
 {
   if (!j.is_object())
   {
@@ -96,7 +96,7 @@ std::shared_ptr<LayoutView> Layout::Layout::createOneLayoutView(const nlohmann::
   auto frame = j[K_FRAME].get<Rect>();
   frame.origin.y *= FLIP_Y_FACTOR;
 
-  auto layoutView = std::make_shared<LayoutView>(currentPath.to_string(), frame);
+  auto layoutView = std::make_shared<LayoutNode>(currentPath.to_string(), frame);
   layoutView->setViewModel(m_model->runtimeDesignDoc());
   if (parent)
   {
@@ -116,7 +116,7 @@ std::shared_ptr<LayoutView> Layout::Layout::createOneLayoutView(const nlohmann::
 
 void Layout::Layout::createLayoutViews(const nlohmann::json& j,
                                        json::json_pointer currentPath,
-                                       std::shared_ptr<LayoutView> parent)
+                                       std::shared_ptr<LayoutNode> parent)
 {
   if (!j.is_array())
   {
@@ -136,7 +136,7 @@ void Layout::Layout::createLayoutViews(const nlohmann::json& j,
 
 void Layout::Layout::createOneOrMoreLayoutViews(const nlohmann::json& j,
                                                 json::json_pointer currentPath,
-                                                std::shared_ptr<LayoutView> parent)
+                                                std::shared_ptr<LayoutNode> parent)
 {
   if (j.is_object())
   {
@@ -169,7 +169,7 @@ void Layout::Layout::collectRules(const nlohmann::json& json)
   }
 }
 
-void Layout::Layout::configureAutoLayout(std::shared_ptr<LayoutView> view)
+void Layout::Layout::configureAutoLayout(std::shared_ptr<LayoutNode> view)
 {
   std::shared_ptr<VGG::Layout::Internal::Rule::Rule> rule;
 

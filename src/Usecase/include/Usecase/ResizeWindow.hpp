@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Domain/Layout/Layout.hpp"
-#include "Domain/Layout/View.hpp"
+#include "Domain/Layout/Node.hpp"
 #include "Domain/Daruma.hpp"
 
 namespace VGG

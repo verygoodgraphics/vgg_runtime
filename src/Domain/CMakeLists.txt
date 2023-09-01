@@ -4,9 +4,9 @@ add_library(vgg_domain STATIC
   Layout/ExpandSymbol.cpp
   Layout/Helper.cpp
   Layout/Layout.cpp
+  Layout/Node.cpp
   Layout/Rect.cpp
   Layout/Rule.cpp
-  Layout/View.cpp
   Loader/ZipLoader.cpp
   Model/Daruma.cpp
   Model/DarumaContainer.cpp

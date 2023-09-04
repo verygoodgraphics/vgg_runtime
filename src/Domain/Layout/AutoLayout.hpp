@@ -23,7 +23,7 @@ namespace Rule
 struct GridLayout;
 }
 
-struct AutoLayout
+class AutoLayout
 {
 private:
   std::unique_ptr<flexbox_node> m_flexNode;
@@ -34,6 +34,8 @@ private:
 
   std::shared_ptr<grid_item> m_gridItem;
   decltype(m_gridContainerPtr->calc_layout(-1, -1)) m_gridItemFrames;
+
+  bool m_isContainer{ false };
 
 public:
   std::weak_ptr<LayoutNode> view;
@@ -52,6 +54,10 @@ public:
   bool isEnabled()
   {
     return !rule.expired();
+  }
+  bool isContainer()
+  {
+    return m_isContainer;
   }
 
   std::unique_ptr<flexbox_node>& takeFlexNode()

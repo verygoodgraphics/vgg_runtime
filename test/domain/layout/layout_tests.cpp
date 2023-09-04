@@ -90,3 +90,32 @@ TEST_F(VggLayoutTestSuite, GridWrap)
   Layout::Rect expectChild3Frame{ { 1060, 40 }, { 200, 200 } };
   EXPECT_TRUE(child3Frame == expectChild3Frame);
 }
+
+TEST_F(VggLayoutTestSuite, ScaleSubtree)
+{
+  // Given
+  std::shared_ptr<Daruma> daruma{ new Daruma(Helper::RawJsonDocumentBuilder,
+                                             Helper::RawJsonDocumentBuilder) };
+  std::string filePath = "testDataDir/layout/3_flex_with_symbol_instance/";
+  daruma->load(filePath);
+
+  Layout::Layout sut{ daruma };
+  Layout::Size windowSize{ 1400, 900 };
+
+  // When
+  sut.layout(windowSize);
+
+  // Then
+  auto tree = sut.layoutTree();
+  auto currentPage = tree->children()[1];
+
+  auto container = currentPage->children()[0];
+
+  auto child0Frame = container->children()[0]->frame();
+  Layout::Rect expectChild0Frame{ { 0, 0 }, { 947, 839.999938 } };
+  EXPECT_TRUE(child0Frame == expectChild0Frame);
+
+  auto child1Frame = container->children()[1]->frame();
+  Layout::Rect expectChild1Frame{ { 104.170006, 188.999985 }, { 130.685989, 361.199982 } };
+  EXPECT_TRUE(child1Frame == expectChild1Frame);
+}

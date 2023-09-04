@@ -517,6 +517,7 @@ void AutoLayout::configure()
           sharedView.get(),
           sharedView->path().c_str());
 
+    m_isContainer = true;
     configureFlexContainer(detail);
     configureFlexNodeSize();
   }
@@ -526,6 +527,7 @@ void AutoLayout::configure()
           sharedView.get(),
           sharedView->path().c_str());
 
+    m_isContainer = true;
     configureGridContainer(detail);
   }
 

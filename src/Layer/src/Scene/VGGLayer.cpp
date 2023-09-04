@@ -1,271 +1,27 @@
 #include "Scene/VGGLayer.h"
 #include "Core/Node.h"
-#include "Scene/ContextInfoVulkan.hpp"
-#include "Scene/ContextInfoGL.hpp"
 #include "Scene/GraphicsContext.h"
 #include "Scene/GraphicsLayer.h"
 #include "Scene/Renderer.h"
 #include "Scene/Zoomer.h"
-#include <gpu/GpuTypes.h>
-#include <gpu/GrTypes.h>
-#include <gpu/vk/GrVkTypes.h>
-#include <optional>
-#include <sstream>
-#include <third_party/vulkan/vulkan/vulkan_core.h>
-
-#include <dlfcn.h>
-
-#define GR_GL_LOG_CALLS 0
-#define GR_GL_CHECK_ERROR 0
-#include <include/gpu/gl/GrGLInterface.h>
-#include <include/gpu/GrDirectContext.h>
-#include <include/core/SkSurface.h>
-#include <include/core/SkCanvas.h>
-#include <include/core/SkData.h>
-#include <include/core/SkPicture.h>
-#include <include/core/SkPictureRecorder.h>
-#include <include/core/SkImage.h>
-#include <include/core/SkSwizzle.h>
-#include <include/core/SkTextBlob.h>
-#include <include/core/SkTime.h>
-#include <include/core/SkColorSpace.h>
-#include <include/effects/SkDashPathEffect.h>
-#include <src/gpu/ganesh/gl/GrGLDefines.h>
-#include <src/gpu/ganesh/gl/GrGLUtil.h>
-#include "include/gpu/gl/GrGLFunctions.h"
-#include "include/gpu/GrBackendSurface.h"
-#include "include/gpu/ganesh/SkSurfaceGanesh.h"
-#include "include/core/SkStream.h"
-#include "encode/SkPngEncoder.h"
-
 #include "Scene/Scene.h"
 #include "Common/Math.hpp"
 #include "CappingProfiler.hpp"
-#include "include/docs/SkPDFDocument.h"
 
-#include "gpu/vk/GrVkBackendContext.h"
+#include "SkiaImpl/VSkiaContext.hpp"
+#include "SkiaImpl/VSkiaGL.hpp"
 
-#include <queue>
-#include "Entry/Common/GPU/Vulkan/VulkanObject.hpp"
+#ifdef VGG_USE_VULKAN
+#include "SkiaImpl/VSkiaVK.hpp"
+#endif
 
-#define VK_PROC_BEGIN(vkName)                                                                      \
-  if (strcmp(name, #vkName) == 0)                                                                  \
-  {                                                                                                \
-    ptr = reinterpret_cast<PFN_vkVoidFunction>(vkName);                                            \
-  }
-#define VK_PROC(vkName)                                                                            \
-  else if (strcmp(name, #vkName) == 0)                                                             \
-  {                                                                                                \
-    ptr = reinterpret_cast<PFN_vkVoidFunction>(vkName);                                            \
-  }
-
-#define VK_PROC_END                                                                                \
-  if (ptr)                                                                                         \
-    return ptr;
+#include <optional>
+#include <sstream>
 
 namespace VGG::layer
 {
 
-template<class... Ts>
-struct Overloaded : Ts...
-{
-  using Ts::operator()...;
-};
-// explicit deduction guide (not needed as of C++20)
-template<class... Ts>
-Overloaded(Ts...) -> Overloaded<Ts...>;
-
-class SkiaContext
-{
-public:
-  enum class ESkiaGraphicsAPIBackend
-  {
-    API_OPENGL,
-    API_VULKAN
-  };
-
-  SkiaContext(const SkiaContext&) = delete;
-  SkiaContext& operator=(const SkiaContext&) = delete;
-  SkiaContext(SkiaContext&& other) noexcept
-    : m_stream(std::move(other.m_stream))
-    , m_document(std::move(other.m_document))
-    , m_grContext(std::move(other.m_grContext))
-    , m_surface(std::move(other.m_surface))
-    , m_ctx(std::move(other.m_ctx))
-    , m_ctxConfig(std::move(other.m_ctxConfig))
-  {
-  }
-  SkiaContext& operator=(SkiaContext&& other) noexcept
-  {
-    release();
-    *this = SkiaContext(std::move(other));
-    return *this;
-  }
-
-  void release()
-  {
-    DEBUG("SkiaContext Releasing ... ");
-    // ensure release order
-    m_stream = nullptr;
-    m_document = nullptr;
-    m_surface = nullptr;
-    m_grContext = nullptr;
-  }
-
-private:
-  std::unique_ptr<SkFILEWStream> m_stream;
-  sk_sp<SkDocument> m_document;
-  sk_sp<GrDirectContext> m_grContext{ nullptr };
-  sk_sp<SkSurface> m_surface{ nullptr };
-  std::variant<ContextInfoVulkan, ContextInfoGL> m_ctx;
-  ContextConfig m_ctxConfig;
-
-#ifdef VGG_USE_VULKAN
-  void initContextVK(const ContextInfoVulkan& ctx)
-  {
-    GrVkBackendContext vkContext;
-    vkContext.fInstance = ctx.instance;
-    vkContext.fPhysicalDevice = ctx.physicalDevice;
-    vkContext.fDevice = ctx.device;
-    vkContext.fQueue = ctx.queue;
-    vkContext.fGetProc = std::function(
-      [=](const char* name, VkInstance instance, VkDevice dev) -> PFN_vkVoidFunction
-      {
-        PFN_vkVoidFunction ptr = nullptr;
-        if (instance == VK_NULL_HANDLE && dev == VK_NULL_HANDLE)
-        {
-          ptr = vkGetInstanceProcAddr(VK_NULL_HANDLE, name);
-        }
-        else if (instance == VK_NULL_HANDLE && dev != VK_NULL_HANDLE)
-        {
-          ptr = vkGetDeviceProcAddr(dev, name);
-        }
-        else if (instance != VK_NULL_HANDLE && dev == VK_NULL_HANDLE)
-        {
-          ptr = vkGetInstanceProcAddr(instance, name);
-        }
-        else
-        {
-          ptr = vkGetDeviceProcAddr(dev, name);
-        }
-        if (!ptr)
-          DEBUG("xtension [%s] required by skia is not satisfied", name);
-        return ptr;
-      });
-    m_grContext = GrDirectContext::MakeVulkan(vkContext);
-  }
-
-  sk_sp<SkSurface> createSurfaceVK(const ContextInfoVulkan& ctx,
-                                   const ContextConfig& cfg,
-                                   int w,
-                                   int h)
-  {
-    ASSERT(m_grContext);
-    GrVkImageInfo vkImageInfo;
-    vkImageInfo.fFormat = VK_FORMAT_R8G8B8A8_UNORM;
-    GrBackendRenderTarget target(w, h, vkImageInfo);
-    SkImageInfo info = SkImageInfo::Make(w,
-                                         h,
-                                         SkColorType::kRGBA_8888_SkColorType,
-                                         SkAlphaType::kPremul_SkAlphaType);
-    auto a = SkSurfaces::RenderTarget(m_grContext.get(), skgpu::Budgeted::kYes, info);
-    return a;
-  };
-#endif
-
-  void initContextGL(const ContextInfoGL& ctx)
-  {
-    sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
-    ASSERT(interface);
-    if (!interface)
-    {
-      // return AppError(AppError::Kind::RenderEngineError, "Failed to make skia opengl interface");
-    }
-    sk_sp<GrDirectContext> grContext = GrDirectContext::MakeGL(interface);
-    ASSERT(grContext);
-    if (!grContext)
-    {
-      // return AppError(AppError::Kind::RenderEngineError, "Failed to make skia opengl context.");
-    }
-    m_grContext = grContext;
-  }
-
-  sk_sp<SkSurface> createSurfaceGL(const ContextInfoGL& ctx, const ContextConfig& cfg, int w, int h)
-  {
-    ASSERT(m_grContext);
-    GrGLFramebufferInfo info;
-    info.fFBOID = 0;
-    info.fFormat = GR_GL_RGBA8;
-    GrBackendRenderTarget target(w, h, cfg.multiSample, cfg.stencilBit, info);
-    SkSurfaceProps props;
-    return SkSurfaces::WrapBackendRenderTarget(m_grContext.get(),
-                                               target,
-                                               kBottomLeft_GrSurfaceOrigin,
-                                               SkColorType::kRGBA_8888_SkColorType,
-                                               nullptr,
-                                               &props);
-  };
-
-public:
-  SkiaContext(std::variant<ContextInfoVulkan, ContextInfoGL> context, const ContextConfig& cfg)
-    : m_ctx(std::move(context))
-    , m_ctxConfig(std::move(cfg))
-  {
-    std::visit(
-      Overloaded{
-        [this](const ContextInfoVulkan& ctx)
-        {
-          initContextVK(ctx);
-          m_surface =
-            createSurfaceVK(ctx, m_ctxConfig, m_ctxConfig.windowSize[0], m_ctxConfig.windowSize[1]);
-        },
-        [this](const ContextInfoGL& ctx)
-        {
-          initContextGL(ctx);
-          m_surface =
-            createSurfaceGL(ctx, m_ctxConfig, m_ctxConfig.windowSize[0], m_ctxConfig.windowSize[1]);
-        } },
-      m_ctx);
-  }
-
-  void resizeSurface(int w, int h)
-  {
-    std::visit(Overloaded{ [this, w, h](const ContextInfoVulkan& ctx)
-                           { m_surface = createSurfaceVK(ctx, m_ctxConfig, w, h); },
-                           [this, w, h](const ContextInfoGL& ctx)
-                           { m_surface = createSurfaceGL(ctx, m_ctxConfig, w, h); } },
-               m_ctx);
-  }
-
-  bool flushAndSubmit()
-  {
-    auto ok = m_grContext->submit();
-    m_grContext->flush();
-    return ok;
-  }
-
-  SkSurface* surface()
-  {
-    ASSERT(m_surface);
-    return m_surface.get();
-  }
-
-  SkCanvas* canvas()
-  {
-    ASSERT(m_surface);
-    return m_surface->getCanvas();
-  }
-
-  GrDirectContext* context()
-  {
-    return m_grContext.get();
-  }
-
-  ~SkiaContext()
-  {
-    release();
-  }
-};
+using namespace VGG::layer::skia_impl;
 
 class VLayer__pImpl
 {
@@ -337,19 +93,29 @@ std::optional<ELayerError> VLayer::onInit()
 
   const auto& cfg = context()->config();
   const auto api = context()->property().api;
+
   if (api == EGraphicsAPIBackend::API_OPENGL)
   {
-    const auto* ctx = reinterpret_cast<ContextInfoGL*>(context()->contextInfo());
-    _->skiaContext = std::make_unique<SkiaContext>(*ctx, cfg);
+    auto* ctx = reinterpret_cast<ContextInfoGL*>(context()->contextInfo());
+    _->skiaContext =
+      std::make_unique<SkiaContext>(gl::glContextCreateProc(ctx), gl::glSurfaceCreateProc(), cfg);
   }
   else if (api == EGraphicsAPIBackend::API_VULKAN)
   {
-    const auto* ctx = reinterpret_cast<ContextInfoVulkan*>(context()->contextInfo());
-    _->skiaContext = std::make_unique<SkiaContext>(*ctx, cfg);
+#ifdef VGG_USE_VULKAN
+    auto* ctx = reinterpret_cast<ContextInfoVulkan*>(context()->contextInfo());
+    _->skiaContext =
+      std::make_unique<SkiaContext>(vk::vkContextCreateProc(ctx), vk::vkSurfaceCreateProc(), cfg);
+#else
+    DEGBUG("Vulkan is not support on the platform, fallback to OpenGL")
+    auto* ctx = reinterpret_cast<ContextInfoGL*>(context()->contextInfo());
+    _->skiaContext =
+      std::make_unique<SkiaContext>(gl::glContextCreateProc(ctx), gl::glSurfaceCreateProc(), cfg);
+#endif
   }
   else
   {
-    ASSERT(false);
+    ASSERT(false && "Invalid Graphics API backend");
   }
   ASSERT(_->skiaContext);
   return std::nullopt;

@@ -19,7 +19,7 @@ namespace fs = std::filesystem;
 
 Daruma::Daruma(const MakeJsonDocFn& makeDesignDocFn, const MakeJsonDocFn& makeLayoutDocFn)
   : m_makeDesignDocFn{ makeDesignDocFn }
-  , m_make_layout_doc_fn{ makeLayoutDocFn }
+  , m_makeLayoutDocFn{ makeLayoutDocFn }
 {
 }
 
@@ -39,13 +39,13 @@ bool Daruma::load(const std::string& path)
     return false;
   }
 
-  return load_files();
+  return loadFiles();
 }
 
 bool Daruma::load(std::vector<char>& buffer)
 {
   m_loader.reset(new Model::ZipLoader(buffer));
-  return load_files();
+  return loadFiles();
 }
 
 void Daruma::accept(VGG::Model::Visitor* visitor)
@@ -54,24 +54,24 @@ void Daruma::accept(VGG::Model::Visitor* visitor)
   const std::lock_guard<std::mutex> lock(m_mutex);
 
   visitor->visit(design_file_name, m_designDoc->content().dump());
-  visitor->visit(event_listeners_file_name, m_event_listeners.dump());
-  if (m_layout_doc && m_layout_doc->content().is_object())
+  visitor->visit(event_listeners_file_name, m_eventListeners.dump());
+  if (m_layoutDoc && m_layoutDoc->content().is_object())
   {
-    visitor->visit(layout_file_name, m_layout_doc->content().dump());
+    visitor->visit(layout_file_name, m_layoutDoc->content().dump());
   }
 
   // js
-  for (auto& [path, element_event_listeners] : m_event_listeners.items())
+  for (auto& [path, elementEventListeners] : m_eventListeners.items())
   {
-    for (auto& [type, type_event_listeners] : element_event_listeners.items())
+    for (auto& [type, typeEventListeners] : elementEventListeners.items())
     {
       std::vector<std::string> listeners{};
-      for (auto it = type_event_listeners.cbegin(); it != type_event_listeners.cend(); ++it)
+      for (auto it = typeEventListeners.cbegin(); it != typeEventListeners.cend(); ++it)
       {
         if (it->is_object() && it->contains(file_name_key))
         {
-          auto& file_name = (*it)[file_name_key];
-          visitor->visit(file_name, get_code(file_name));
+          auto& fileName = (*it)[file_name_key];
+          visitor->visit(fileName, getCode(fileName));
         }
       }
     }
@@ -79,58 +79,58 @@ void Daruma::accept(VGG::Model::Visitor* visitor)
 
   // resouces
   auto resouces = m_loader->resources();
-  std::string resouces_dir{ Model::ResourcesDirWithSlash };
+  std::string resoucesDir{ Model::ResourcesDirWithSlash };
 
   for (auto& [name, content] : resouces)
   {
-    visitor->visit(resouces_dir + name, content);
+    visitor->visit(resoucesDir + name, content);
   }
 }
 
-bool Daruma::load_files()
+bool Daruma::loadFiles()
 {
   try
   {
-    std::string file_content;
-    if (m_loader->readFile(design_file_name, file_content))
+    std::string fileContent;
+    if (m_loader->readFile(design_file_name, fileContent))
     {
-      auto tmp_json = json::parse(file_content);
-      auto doc = m_makeDesignDocFn(tmp_json);
+      auto tmpJson = json::parse(fileContent);
+      auto doc = m_makeDesignDocFn(tmpJson);
       m_designDoc = JsonDocumentPtr(new SubjectJsonDocument(doc));
       m_runtimeDesignDoc = m_designDoc;
     }
     else
     {
-      FAIL("#Daruma::load_files(), read file failed");
+      FAIL("#Daruma::loadFiles(), read file failed");
       return false;
     }
 
-    if (m_loader->readFile(layout_file_name, file_content) && m_make_layout_doc_fn)
+    if (m_loader->readFile(layout_file_name, fileContent) && m_makeLayoutDocFn)
     {
-      auto tmp_json = json::parse(file_content);
-      auto doc = m_make_layout_doc_fn(tmp_json);
-      m_layout_doc = JsonDocumentPtr(new SubjectJsonDocument(doc));
-      m_runtimeLayoutDoc = m_layout_doc;
+      auto tmpJson = json::parse(fileContent);
+      auto doc = m_makeLayoutDocFn(tmpJson);
+      m_layoutDoc = JsonDocumentPtr(new SubjectJsonDocument(doc));
+      m_runtimeLayoutDoc = m_layoutDoc;
     }
     else
     {
-      WARN("#Daruma::load_files(), read layout file failed");
+      WARN("#Daruma::loadFiles(), read layout file failed");
     }
 
-    if (m_loader->readFile(event_listeners_file_name, file_content))
+    if (m_loader->readFile(event_listeners_file_name, fileContent))
     {
-      m_event_listeners = json::parse(file_content);
+      m_eventListeners = json::parse(fileContent);
     }
     else
     {
-      m_event_listeners = json::object();
+      m_eventListeners = json::object();
     }
 
     return true;
   }
   catch (const std::exception& e)
   {
-    FAIL("#Daruma::load_files(), caught exception: %s", e.what());
+    FAIL("#Daruma::loadFiles(), caught exception: %s", e.what());
     return false;
   }
 }
@@ -158,39 +158,39 @@ JsonDocumentPtr& Daruma::designDoc()
 
 JsonDocumentPtr& Daruma::layoutDoc()
 {
-  return m_layout_doc;
+  return m_layoutDoc;
 }
 
-void Daruma::addEventListener(const std::string& json_pointer,
+void Daruma::addEventListener(const std::string& jsonPointer,
                               const std::string& type,
                               const std::string& code)
 {
   const std::lock_guard<std::mutex> lock(m_mutex);
 
   // generate file name
-  auto file_name = uuid_for(code) + js_file_suffix;
+  auto fileName = uuidFor(code) + js_file_suffix;
 
   // create element listenters object
-  if (!m_event_listeners.contains(json_pointer))
+  if (!m_eventListeners.contains(jsonPointer))
   {
-    m_event_listeners[json_pointer] = json(json::value_t::object);
+    m_eventListeners[jsonPointer] = json(json::value_t::object);
   }
 
   // create element listenters array for `type`
-  auto& element_event_listeners = m_event_listeners[json_pointer];
-  if (!element_event_listeners.contains(type))
+  auto& elementEventListeners = m_eventListeners[jsonPointer];
+  if (!elementEventListeners.contains(type))
   {
-    element_event_listeners[type] = json(json::value_t::array);
+    elementEventListeners[type] = json(json::value_t::array);
   }
 
   // return if exist
-  auto& type_event_listeners = element_event_listeners[type];
-  for (auto it = type_event_listeners.cbegin(); it != type_event_listeners.cend(); ++it)
+  auto& typeEventListeners = elementEventListeners[type];
+  for (auto it = typeEventListeners.cbegin(); it != typeEventListeners.cend(); ++it)
   {
     if (it->is_object() && it->contains(file_name_key))
     {
-      auto& item_file_name = (*it)[file_name_key];
-      if (item_file_name.is_string() && item_file_name.get<std::string>() == file_name)
+      auto& itemFileName = (*it)[file_name_key];
+      if (itemFileName.is_string() && itemFileName.get<std::string>() == fileName)
       {
         return;
       }
@@ -198,81 +198,81 @@ void Daruma::addEventListener(const std::string& json_pointer,
   }
 
   // save code content
-  m_memory_code[file_name] = code;
+  m_memoryCode[fileName] = code;
 
   // fill meta info
   auto item = json(json::value_t::object);
-  item[file_name_key] = file_name;
+  item[file_name_key] = fileName;
   using namespace std::chrono;
   item[created_at_key] =
     duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 
   // save meta info
-  type_event_listeners.push_back(item);
+  typeEventListeners.push_back(item);
 
   m_subject.get_subscriber().on_next(
-    ModelEventPtr{ new ModelEventListenerDidAdd{ json::json_pointer(json_pointer) } });
+    ModelEventPtr{ new ModelEventListenerDidAdd{ json::json_pointer(jsonPointer) } });
 
   // todo, edit mode, save code & meta to remote server
 }
 
-void Daruma::removeEventListener(const std::string& json_pointer,
+void Daruma::removeEventListener(const std::string& jsonPointer,
                                  const std::string& type,
                                  const std::string& code)
 {
-  if (!m_event_listeners.contains(json_pointer))
+  if (!m_eventListeners.contains(jsonPointer))
   {
     return;
   }
 
-  auto& element_event_listeners = m_event_listeners[json_pointer];
-  if (!element_event_listeners.contains(type))
+  auto& elementEventListeners = m_eventListeners[jsonPointer];
+  if (!elementEventListeners.contains(type))
   {
     return;
   }
 
-  auto file_name = uuid_for(code) + js_file_suffix;
+  auto fileName = uuidFor(code) + js_file_suffix;
 
-  auto& type_event_listeners = element_event_listeners[type];
-  for (auto it = type_event_listeners.cbegin(); it != type_event_listeners.cend(); ++it)
+  auto& typeEventListeners = elementEventListeners[type];
+  for (auto it = typeEventListeners.cbegin(); it != typeEventListeners.cend(); ++it)
   {
     if (it->is_object() && it->contains(file_name_key))
     {
-      auto& item_file_name = (*it)[file_name_key];
-      if (item_file_name.is_string() && item_file_name.get<std::string>() == file_name)
+      auto& itemFileName = (*it)[file_name_key];
+      if (itemFileName.is_string() && itemFileName.get<std::string>() == fileName)
       {
         const std::lock_guard<std::mutex> lock(m_mutex);
 
-        type_event_listeners.erase(it);
+        typeEventListeners.erase(it);
 
         m_subject.get_subscriber().on_next(
-          ModelEventPtr{ new ModelEventListenerDidRemove{ json::json_pointer(json_pointer) } });
+          ModelEventPtr{ new ModelEventListenerDidRemove{ json::json_pointer(jsonPointer) } });
         return;
       }
     }
   }
 }
 
-auto Daruma::getEventListeners(const std::string& json_pointer) -> ListenersType
+auto Daruma::getEventListeners(const std::string& jsonPointer) -> ListenersType
 {
   const std::lock_guard<std::mutex> lock(m_mutex);
 
   ListenersType result{};
 
-  if (!m_event_listeners.contains(json_pointer))
+  if (!m_eventListeners.contains(jsonPointer))
   {
     return result;
   }
 
-  auto& element_event_listeners = m_event_listeners[json_pointer];
-  for (auto& [type, type_event_listeners] : element_event_listeners.items())
+  auto& elementEventListeners = m_eventListeners[jsonPointer];
+  for (auto& [type, typeEventListeners] : elementEventListeners.items())
   {
     std::vector<std::string> listeners{};
-    for (auto it = type_event_listeners.cbegin(); it != type_event_listeners.cend(); ++it)
+    for (auto it = typeEventListeners.cbegin(); it != typeEventListeners.cend(); ++it)
     {
       if (it->is_object() && it->contains(file_name_key))
       {
-        listeners.push_back(get_code((*it)[file_name_key]));
+        listeners.push_back(getCode((*it)[file_name_key]));
       }
     }
     result[type] = listeners;
@@ -287,27 +287,27 @@ rxcpp::observable<VGG::ModelEventPtr> Daruma::getObservable()
   auto result = m_subject.get_observable();
 
   auto doc = m_runtimeDesignDoc.get();
-  if (auto sub_doc = dynamic_cast<SubjectJsonDocument*>(doc))
+  if (auto subjectDoc = dynamic_cast<SubjectJsonDocument*>(doc))
   {
-    result = result.merge(sub_doc->getObservable());
+    result = result.merge(subjectDoc->getObservable());
   }
 
   return result;
 }
 
-std::string Daruma::get_code(const std::string& file_name)
+std::string Daruma::getCode(const std::string& fileName)
 {
-  if (auto it = m_memory_code.find(file_name); it != m_memory_code.end())
+  if (auto it = m_memoryCode.find(fileName); it != m_memoryCode.end())
   {
-    return m_memory_code[file_name];
+    return m_memoryCode[fileName];
   }
 
   std::string code;
-  m_loader->readFile(file_name, code);
+  m_loader->readFile(fileName, code);
   return code;
 }
 
-std::string Daruma::uuid_for(const std::string& content)
+std::string Daruma::uuidFor(const std::string& content)
 {
   boost::uuids::name_generator_sha1 generator{ boost::uuids::ns::oid() };
   return boost::uuids::to_string(generator(content));

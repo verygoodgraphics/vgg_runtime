@@ -18,74 +18,74 @@ const std::string VggSdk::designDocument(IndexType index)
   return getDesignDocument(index)->content().dump();
 }
 
-void VggSdk::designDocumentReplaceAt(const std::string& json_pointer,
+void VggSdk::designDocumentReplaceAt(const std::string& jsonPointer,
                                      const std::string& value,
                                      IndexType index)
 {
-  getDesignDocument(index)->replaceAt(json_pointer, value);
+  getDesignDocument(index)->replaceAt(jsonPointer, value);
 }
 
-void VggSdk::designDocumentAddAt(const std::string& json_pointer,
+void VggSdk::designDocumentAddAt(const std::string& jsonPointer,
                                  const std::string& value,
                                  IndexType index)
 {
-  getDesignDocument(index)->addAt(json_pointer, value);
+  getDesignDocument(index)->addAt(jsonPointer, value);
 }
 
-void VggSdk::designDocumentDeleteAt(const std::string& json_pointer, IndexType index)
+void VggSdk::designDocumentDeleteAt(const std::string& jsonPointer, IndexType index)
 {
-  getDesignDocument(index)->deleteAt(json_pointer);
+  getDesignDocument(index)->deleteAt(jsonPointer);
 }
 
 // event listener
-void VggSdk::addEventListener(const std::string& element_path,
-                              const std::string& event_type,
-                              const std::string& listener_code,
+void VggSdk::addEventListener(const std::string& elementPath,
+                              const std::string& eventType,
+                              const std::string& listenerCode,
                               IndexType index)
 {
-  getModel(index)->addEventListener(element_path, event_type, listener_code);
+  getModel(index)->addEventListener(elementPath, eventType, listenerCode);
 }
 
-void VggSdk::removeEventListener(const std::string& element_path,
-                                 const std::string& event_type,
-                                 const std::string& listener_code,
+void VggSdk::removeEventListener(const std::string& elementPath,
+                                 const std::string& eventType,
+                                 const std::string& listenerCode,
                                  IndexType index)
 {
-  getModel(index)->removeEventListener(element_path, event_type, listener_code);
+  getModel(index)->removeEventListener(elementPath, eventType, listenerCode);
 }
 
-VggSdk::ListenersType VggSdk::getEventListeners(const std::string& element_path, IndexType index)
+VggSdk::ListenersType VggSdk::getEventListeners(const std::string& elementPath, IndexType index)
 {
 #ifdef EMSCRIPTEN
   using namespace emscripten;
 
   auto result_listeners_map = val::object();
-  auto listeners_map = getModel(index)->getEventListeners(element_path);
-  for (auto& map_item : listeners_map)
+  auto listenersMap = getModel(index)->getEventListeners(elementPath);
+  for (auto& map_item : listenersMap)
   {
     if (map_item.second.empty())
     {
       continue;
     }
 
-    auto& event_type = map_item.first;
+    auto& eventType = map_item.first;
 
     auto js_listener_code_array = val::array();
     for (int i = 0; i < map_item.second.size(); ++i)
     {
-      auto& listener_code = map_item.second[i];
+      auto& listenerCode = map_item.second[i];
       auto js_listener_object = val::object();
 
-      js_listener_object.set(listener_code_key, val(listener_code.c_str()));
+      js_listener_object.set(listener_code_key, val(listenerCode.c_str()));
       js_listener_code_array.set(i, js_listener_object);
     }
 
-    result_listeners_map.set(event_type.c_str(), js_listener_code_array);
+    result_listeners_map.set(eventType.c_str(), js_listener_code_array);
   }
 
   return result_listeners_map;
 #else
-  return getModel(index)->getEventListeners(element_path);
+  return getModel(index)->getEventListeners(elementPath);
 #endif
 }
 
@@ -107,8 +107,8 @@ void VggSdk::save()
   if (editModel)
   {
     // todo, choose location to save, or save to remote server
-    std::string dst_dir{ "tmp/" };
-    auto saver{ std::make_shared<Model::DirSaver>(dst_dir) };
+    std::string dstDir{ "tmp/" };
+    auto saver{ std::make_shared<Model::DirSaver>(dstDir) };
     Editor editor{ editModel, saver };
 
     editor.save();

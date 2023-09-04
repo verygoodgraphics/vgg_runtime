@@ -18,14 +18,14 @@ namespace Rule
 
 struct Length
 {
-  enum class Types
+  enum class ETypes
   {
-    px = 1,
-    percent = 2,
-    fit_content = 4
+    PX = 1,
+    PERCENT = 2,
+    FIT_CONTENT = 4
   };
 
-  Types types;
+  ETypes types;
   double value;
 };
 struct Width
@@ -72,76 +72,76 @@ struct Bottom
 
 struct GridItemPos
 {
-  enum class Strategy
+  enum class EStrategy
   {
-    Auto = 1,
-    Fix = 2
+    AUTO = 1,
+    FIX = 2
   };
 
-  Strategy strategy;
-  int64_t column_id;
-  int64_t row_id;
+  EStrategy strategy;
+  int64_t column_id; // NOLINT
+  int64_t row_id;    // NOLINT
 };
 
 struct Position
 {
-  enum class Types
+  enum class ETypes
   {
-    Relative = 1,
-    Absolute = 2,
-    Fixed = 3,
-    Sticky = 4
+    RELATIVE = 1,
+    ABSOLUTE = 2,
+    FIXED = 3,
+    STICKY = 4
   };
 
-  Types value;
+  ETypes value;
 };
 
 struct ColumnWidth
 {
-  enum class Strategy
+  enum class EStrategy
   {
-    Min = 1,
-    Fix = 2
+    MIN = 1,
+    FIX = 2
   };
-  Strategy strategy;
-  double width_value;
+  EStrategy strategy;
+  double width_value; // NOLINT
 };
 
 struct ExpandStrategy
 {
-  enum class Strategy
+  enum class EStrategy
   {
-    Auto = 1,
-    Fix_column = 2
+    AUTO = 1,
+    FIX_COLUMN = 2
   };
-  Strategy strategy;
-  int64_t min_row;
-  int64_t column_count;
+  EStrategy strategy;
+  int64_t min_row;      // NOLINT
+  int64_t column_count; // NOLINT
 };
 
 struct RowHeight
 {
-  enum class Strategy
+  enum class EStrategy
   {
-    FillContainer = 1,
-    FillContent = 2,
-    Fixed = 3
+    FILL_CONTAINER = 1,
+    FILL_CONTENT = 2,
+    FIXED = 3
   };
-  Strategy strategy;
-  double fixed_value;
+  EStrategy strategy;
+  double fixed_value; // NOLINT
 };
 
-enum class AlignStyle
+enum class EAlignStyle
 {
-  Start = 1,
-  Center = 2,
-  End = 3
+  START = 1,
+  CENTER = 2,
+  END = 3
 };
 
 struct FlexboxItem
 {
   Position position;
-  double flex_grow;
+  double flex_grow; // NOLINT
 
   std::optional<Top> top;
   std::optional<Right> right;
@@ -150,17 +150,19 @@ struct FlexboxItem
 };
 struct GridItem
 {
+  // NOLINTBEGIN
   GridItemPos item_pos;
   int64_t row_span;
   int64_t column_span;
   Position position;
-  AlignStyle row_align;
-  AlignStyle column_align;
+  EAlignStyle row_align;
+  EAlignStyle column_align;
 
   std::optional<Top> top;
   std::optional<Right> right;
   std::optional<Bottom> bottom;
   std::optional<Left> left;
+  // NOLINTEND
 };
 
 struct Padding
@@ -173,37 +175,40 @@ struct Padding
 
 struct FlexboxLayout
 {
-  enum class Direction
+  enum class EDirection
   {
-    Horizontal = 1,
-    Vertical = 2
+    HORIZONTAL = 1,
+    VERTICAL = 2
   };
-  enum class JustifyContent
+  enum class EJustifyContent
   {
-    Start = 1,
-    Center = 2,
-    End = 3,
-    SpaceBetween = 4,
-    SpaceAround = 5,
-    SpaceEvenly = 6
+    START = 1,
+    CENTER = 2,
+    END = 3,
+    SPACE_BETWEEN = 4,
+    SPACE_AROUND = 5,
+    SPACE_EVENLY = 6
   };
-  enum class Wrap
+  enum class EWrap
   {
-    NoWrap = 1,
-    Wrap = 2
+    NO_WRAP = 1,
+    WRAP = 2
   };
-  Direction direction;
-  JustifyContent justify_content;
-  AlignStyle align_items;
-  AlignStyle align_content;
-  Wrap wrap;
+  // NOLINTBEGIN
+  EDirection direction;
+  EJustifyContent justify_content;
+  EAlignStyle align_items;
+  EAlignStyle align_content;
+  EWrap wrap;
   double row_gap;
   double column_gap;
   Padding padding;
+  // NOLINTEND
 };
 
 struct GridLayout
 {
+  // NOLINTBEGIN
   ExpandStrategy expand_strategy;
   ColumnWidth column_width;
   RowHeight row_height;
@@ -212,11 +217,13 @@ struct GridLayout
   int row_gap;
   int grid_auto_flow;
   Padding padding;
-  AlignStyle cell_align;
+  EAlignStyle cell_align;
+  // NOLINTEND
 };
 
 struct Rule
 {
+  // NOLINTBEGIN
   std::string id;
 
   std::variant<std::monostate, FlexboxLayout, GridLayout> layout;
@@ -231,6 +238,7 @@ struct Rule
   std::optional<MinHeight> min_height;
 
   std::optional<double> aspect_ratio;
+  // NOLINTEND
 
   auto getFlexConatinerRule()
   {

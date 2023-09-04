@@ -51,15 +51,15 @@ protected:
 
   void save_to_dir()
   {
-    std::string dst_dir{ "tmp/" };
-    auto saver{ std::make_shared<Model::DirSaver>(dst_dir) };
+    std::string dstDir{ "tmp/" };
+    auto saver{ std::make_shared<Model::DirSaver>(dstDir) };
     Editor sut{ m_model, saver };
 
     // When
     sut.save();
 
     // Then
-    std::filesystem::path dir{ dst_dir };
+    std::filesystem::path dir{ dstDir };
     auto ret = fs::is_regular_file(dir / design_file_name);
     EXPECT_TRUE(ret);
 

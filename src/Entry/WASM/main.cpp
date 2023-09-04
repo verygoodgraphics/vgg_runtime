@@ -9,11 +9,11 @@ extern "C"
   {
     static SDLRuntime* app = App<SDLRuntime>::getInstance();
     ASSERT(app);
-    constexpr int fps = 60;
-    app->frame(fps);
+    constexpr int FPS = 60;
+    app->frame(FPS);
 
-    auto& main_composer = VggBrowser::mainComposer();
-    main_composer.runLoop()->dispatch();
+    auto& mainComposer = VggBrowser::mainComposer();
+    mainComposer.runLoop()->dispatch();
   }
   void emscripten_main(int width, int height)
   {
@@ -22,10 +22,10 @@ extern "C"
     SDLRuntime* app = App<SDLRuntime>::getInstance(width, height);
     ASSERT(app);
 
-    auto& main_composer = VggBrowser::mainComposer();
-    app->setController(main_composer.controller());
-    app->setView(main_composer.view());
-    app->setScene(main_composer.view()->scene());
+    auto& mainComposer = VggBrowser::mainComposer();
+    app->setController(mainComposer.controller());
+    app->setView(mainComposer.view());
+    app->setScene(mainComposer.view()->scene());
 
     emscripten_set_main_loop(emscripten_frame, 0, 1);
   }

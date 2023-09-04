@@ -17,19 +17,19 @@
 
 #include <cassert>
 
-constexpr auto pseudo_path_edit_view = "::editView";
+constexpr auto PSEUDO_PATH_EDIT_VIEW = "::editView";
 
 namespace VGG
 {
 
 Controller::Controller(std::shared_ptr<RunLoop> runLoop,
                        std::shared_ptr<Presenter> presenter,
-                       RunMode mode)
-  : m_run_loop(runLoop)
+                       ERunMode mode)
+  : m_runLoop(runLoop)
   , m_presenter(presenter)
   , m_mode(mode)
 {
-  assert(m_run_loop);
+  assert(m_runLoop);
 }
 
 bool Controller::start(const std::string& filePath,
@@ -68,11 +68,11 @@ bool Controller::start(std::vector<char>& buffer,
 
 bool Controller::edit(const std::string& filePath)
 {
-  EditModel edit_model{ m_design_schema_file_path };
-  auto daruma_to_edit = edit_model.open(filePath);
-  if (daruma_to_edit)
+  EditModel editModel{ m_designSchemaFilePath };
+  auto darumaToEdit = editModel.open(filePath);
+  if (darumaToEdit)
   {
-    m_edit_model = daruma_to_edit;
+    m_editModel = darumaToEdit;
     startEditing();
     return true;
   }
@@ -84,11 +84,11 @@ bool Controller::edit(const std::string& filePath)
 
 bool Controller::edit(std::vector<char>& buffer)
 {
-  EditModel edit_model{ m_design_schema_file_path };
-  auto daruma_to_edit = edit_model.open(buffer);
-  if (daruma_to_edit)
+  EditModel editModel{ m_designSchemaFilePath };
+  auto darumaToEdit = editModel.open(buffer);
+  if (darumaToEdit)
   {
-    m_edit_model = daruma_to_edit;
+    m_editModel = darumaToEdit;
     startEditing();
     return true;
   }
@@ -101,7 +101,7 @@ bool Controller::edit(std::vector<char>& buffer)
 void Controller::onResize()
 {
   ResizeWindow{ m_layout }.onResize(m_presenter->viewSize());
-  if (m_edit_model)
+  if (m_editModel)
   {
     // todo, edited model
     // ResizeWindow{m_edit_layout}.onResize(m_presenter->editViewSize());
@@ -112,7 +112,7 @@ void Controller::initModel(const char* designDocSchemaFilePath, const char* layo
 {
   if (designDocSchemaFilePath)
   {
-    m_design_schema_file_path.append(designDocSchemaFilePath);
+    m_designSchemaFilePath.append(designDocSchemaFilePath);
   }
 
   m_model.reset(new Daruma(createMakeJsonDocFn(designDocSchemaFilePath),
@@ -131,30 +131,30 @@ void Controller::start()
 
 void Controller::startEditing()
 {
-  m_presenter->setEditModel(generateViewModel(m_edit_model, m_presenter->editViewSize()));
+  m_presenter->setEditModel(generateViewModel(m_editModel, m_presenter->editViewSize()));
 
   observeEditModelState();
   observeEditViewEvent();
 
-  DarumaContainer().add(m_edit_model, DarumaContainer::KeyType::Edited);
+  DarumaContainer().add(m_editModel, DarumaContainer::KeyType::Edited);
 }
 
 void Controller::observeModelState()
 {
-  auto weak_this = weak_from_this();
+  auto weakThis = weak_from_this();
   m_model->getObservable()
-    .observe_on(m_run_loop->thread())
+    .observe_on(m_runLoop->thread())
     .map(
-      [weak_this](VGG::ModelEventPtr event)
+      [weakThis](VGG::ModelEventPtr event)
       {
-        auto shared_this = weak_this.lock();
-        if (!shared_this)
+        auto sharedThis = weakThis.lock();
+        if (!sharedThis)
         {
           return VGG::ModelEventPtr{};
         }
         // todo, layout
         // todo, layout thread?
-        ModelChanged().onChange(shared_this->m_model);
+        ModelChanged().onChange(sharedThis->m_model);
 
         return event;
       })
@@ -163,21 +163,21 @@ void Controller::observeModelState()
 
 void Controller::observeEditModelState()
 {
-  auto weak_this = weak_from_this();
-  m_edit_model->getObservable()
-    .observe_on(m_run_loop->thread())
+  auto weakThis = weak_from_this();
+  m_editModel->getObservable()
+    .observe_on(m_runLoop->thread())
     .map(
-      [weak_this](VGG::ModelEventPtr event)
+      [weakThis](VGG::ModelEventPtr event)
       {
-        auto shared_this = weak_this.lock();
-        if (!shared_this)
+        auto sharedThis = weakThis.lock();
+        if (!sharedThis)
         {
           return VGG::ModelEventPtr{};
         }
         // todo, layout
         // todo, layout thread?
 
-        ModelChanged().onChange(shared_this->m_edit_model);
+        ModelChanged().onChange(sharedThis->m_editModel);
 
         return event;
       })
@@ -186,25 +186,25 @@ void Controller::observeEditModelState()
 
 void Controller::observeViewEvent()
 {
-  auto weak_this = weak_from_this();
+  auto weakThis = weak_from_this();
   auto observer = rxcpp::make_observer_dynamic<UIEventPtr>(
-    [weak_this](UIEventPtr evt)
+    [weakThis](UIEventPtr evt)
     {
-      auto shared_this = weak_this.lock();
-      if (!shared_this)
+      auto sharedThis = weakThis.lock();
+      if (!sharedThis)
       {
         return;
       }
 
-      auto listeners_map = shared_this->m_model->getEventListeners(evt->path());
+      auto listenersMap = sharedThis->m_model->getEventListeners(evt->path());
       std::string type = evt->type();
-      if (auto it = listeners_map.find(type); it != listeners_map.end())
+      if (auto it = listenersMap.find(type); it != listenersMap.end())
       {
         for (auto& listener : it->second)
         {
           // todo, evt phase // kCapturingPhase = 1, // kAtTarget = 2, // kBubblingPhase = 3
           // todo, evt PropagationStopped
-          shared_this->vggExec()->evalModule(listener, evt);
+          sharedThis->vggExec()->evalModule(listener, evt);
         }
       }
     });
@@ -214,23 +214,23 @@ void Controller::observeViewEvent()
 
 void Controller::observeEditViewEvent()
 {
-  auto weak_this = weak_from_this();
+  auto weakThis = weak_from_this();
   auto observer = rxcpp::make_observer_dynamic<UIEventPtr>(
-    [weak_this](UIEventPtr evt)
+    [weakThis](UIEventPtr evt)
     {
-      auto shared_this = weak_this.lock();
-      if (!shared_this)
+      auto sharedThis = weakThis.lock();
+      if (!sharedThis)
       {
         return;
       }
 
-      auto listeners_map = shared_this->m_model->getEventListeners(pseudo_path_edit_view);
+      auto listenersMap = sharedThis->m_model->getEventListeners(PSEUDO_PATH_EDIT_VIEW);
       std::string type = evt->type();
-      if (auto it = listeners_map.find(type); it != listeners_map.end())
+      if (auto it = listenersMap.find(type); it != listenersMap.end())
       {
         for (auto& listener : it->second)
         {
-          shared_this->vggExec()->evalModule(listener, evt);
+          sharedThis->vggExec()->evalModule(listener, evt);
         }
       }
     });
@@ -245,7 +245,7 @@ const std::shared_ptr<VggExec>& Controller::vggExec()
 
 JsonDocument* Controller::createJsonDoc()
 {
-  if (m_mode == RunMode::NormalMode)
+  if (m_mode == ERunMode::NORMAL_MODE)
   {
     return new RawJsonDocument();
   }
@@ -257,7 +257,7 @@ JsonDocument* Controller::createJsonDoc()
 
 JsonDocumentPtr Controller::wrapJsonDoc(std::shared_ptr<JsonDocument> jsonDoc)
 {
-  if (m_mode == RunMode::NormalMode)
+  if (m_mode == ERunMode::NORMAL_MODE)
   {
     return jsonDoc;
   }
@@ -271,17 +271,17 @@ JsonDocumentPtr Controller::wrapJsonDoc(std::shared_ptr<JsonDocument> jsonDoc)
 std::shared_ptr<ViewModel> Controller::generateViewModel(std::shared_ptr<Daruma> model,
                                                          Layout::Size size)
 {
-  StartRunning start_running{ model };
-  m_layout = start_running.layout();
+  StartRunning startRunning{ model };
+  m_layout = startRunning.layout();
 
-  start_running.layout(size);
+  startRunning.layout(size);
 
-  auto view_model = std::make_shared<ViewModel>();
-  view_model->model = m_model;
-  view_model->designDoc = m_model->runtimeDesignDoc()->content();
-  view_model->layoutTree = start_running.layoutTree();
+  auto viewModel = std::make_shared<ViewModel>();
+  viewModel->model = m_model;
+  viewModel->designDoc = m_model->runtimeDesignDoc()->content();
+  viewModel->layoutTree = startRunning.layoutTree();
 
-  return view_model;
+  return viewModel;
 }
 
 MakeJsonDocFn Controller::createMakeJsonDocFn(const char* pJsonSchemaFilePath)
@@ -300,8 +300,8 @@ MakeJsonDocFn Controller::createMakeJsonDocFn(const char* pJsonSchemaFilePath)
     if (!jsonSchemaFilePath.empty())
     {
       SchemaValidJsonDocument::ValidatorPtr validator;
-      std::ifstream schema_fs(jsonSchemaFilePath);
-      json schema = json::parse(schema_fs);
+      std::ifstream schemaIfs(jsonSchemaFilePath);
+      json schema = json::parse(schemaIfs);
       validator.reset(new JsonSchemaValidator);
       validator->setRootSchema(schema);
 

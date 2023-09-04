@@ -12,7 +12,7 @@
 
 using namespace VGG;
 
-const auto event_name_click = UIEventTypeToString(UIEventType::click);
+const auto g_eventNameClick = UIEventTypeToString(UIEventType::click);
 
 class VggModelTestSuite : public ::testing::Test
 {
@@ -21,7 +21,7 @@ protected:
 
   void SetUp() override
   {
-    make_normal_sut();
+    makeNormalSut();
   }
 
   void TearDown() override
@@ -29,7 +29,7 @@ protected:
     m_sut.reset();
   }
 
-  void make_normal_sut()
+  void makeNormalSut()
   {
     m_sut.reset(new Daruma(Helper::RawJsonDocumentBuilder, Helper::RawJsonDocumentBuilder));
   }
@@ -43,10 +43,10 @@ TEST_F(VggModelTestSuite, Smoke)
 TEST_F(VggModelTestSuite, Load_from_file)
 {
   // Given
-  std::string file_path = "testDataDir/vgg-daruma.zip";
+  std::string filePath = "testDataDir/vgg-daruma.zip";
 
   // When
-  auto ret = m_sut->load(file_path);
+  auto ret = m_sut->load(filePath);
 
   // Then
   EXPECT_EQ(ret, true);
@@ -75,98 +75,98 @@ TEST_F(VggModelTestSuite, Load_from_buffer)
 TEST_F(VggModelTestSuite, Get_design_doc)
 {
   // Given
-  std::string file_path = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->load(file_path);
+  std::string filePath = "testDataDir/vgg-daruma.zip";
+  auto ret = m_sut->load(filePath);
   EXPECT_EQ(ret, true);
 
   // When
-  auto& ret_doc = m_sut->designDoc();
+  auto& retDoc = m_sut->designDoc();
 
   // Then
-  EXPECT_TRUE(ret_doc->content().is_object());
+  EXPECT_TRUE(retDoc->content().is_object());
 }
 
 TEST_F(VggModelTestSuite, Get_code)
 {
   // Given
-  std::string file_path = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->load(file_path);
+  std::string filePath = "testDataDir/vgg-daruma.zip";
+  auto ret = m_sut->load(filePath);
   EXPECT_EQ(ret, true);
 
   // When
-  auto ret_code =
-    m_sut->getEventListeners("/artboard/layers/0/childObjects")[event_name_click].front();
+  auto retCode =
+    m_sut->getEventListeners("/artboard/layers/0/childObjects")[g_eventNameClick].front();
 
   // Then
-  EXPECT_TRUE(!ret_code.empty());
+  EXPECT_TRUE(!retCode.empty());
 }
 
 TEST_F(VggModelTestSuite, add_event_listener)
 {
   // Given
-  std::string file_path = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->load(file_path);
+  std::string filePath = "testDataDir/vgg-daruma.zip";
+  auto ret = m_sut->load(filePath);
   EXPECT_EQ(ret, true);
 
-  m_sut->removeEventListener("/fake", event_name_click, "console.log('hello');");
-  auto event_listeners_before = m_sut->getEventListeners("/fake");
+  m_sut->removeEventListener("/fake", g_eventNameClick, "console.log('hello');");
+  auto eventListenersBefore = m_sut->getEventListeners("/fake");
 
   // When
-  m_sut->addEventListener("/fake", event_name_click, "console.log('hello');");
+  m_sut->addEventListener("/fake", g_eventNameClick, "console.log('hello');");
 
   // Then
-  auto event_listeners_after = m_sut->getEventListeners("/fake");
-  EXPECT_EQ(event_listeners_before.size() + 1, event_listeners_after.size());
+  auto eventListenersAfter = m_sut->getEventListeners("/fake");
+  EXPECT_EQ(eventListenersBefore.size() + 1, eventListenersAfter.size());
 }
 
 TEST_F(VggModelTestSuite, remove_event_listener)
 {
   // Given
-  std::string file_path = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->load(file_path);
+  std::string filePath = "testDataDir/vgg-daruma.zip";
+  auto ret = m_sut->load(filePath);
   EXPECT_EQ(ret, true);
 
-  m_sut->removeEventListener("/fake", event_name_click, "console.log('hello');");
-  m_sut->addEventListener("/fake", event_name_click, "console.log('hello');");
-  auto event_listeners_before = m_sut->getEventListeners("/fake")[event_name_click];
+  m_sut->removeEventListener("/fake", g_eventNameClick, "console.log('hello');");
+  m_sut->addEventListener("/fake", g_eventNameClick, "console.log('hello');");
+  auto eventListenersBefore = m_sut->getEventListeners("/fake")[g_eventNameClick];
 
   // When
-  m_sut->removeEventListener("/fake", event_name_click, "console.log('hello');");
+  m_sut->removeEventListener("/fake", g_eventNameClick, "console.log('hello');");
 
   // Then
-  auto event_listeners_after = m_sut->getEventListeners("/fake")[event_name_click];
-  EXPECT_EQ(event_listeners_before.size() - 1, event_listeners_after.size());
+  auto eventListenersAfter = m_sut->getEventListeners("/fake")[g_eventNameClick];
+  EXPECT_EQ(eventListenersBefore.size() - 1, eventListenersAfter.size());
 }
 
 TEST_F(VggModelTestSuite, get_event_listeners)
 {
   // Given
-  std::string file_path = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->load(file_path);
+  std::string filePath = "testDataDir/vgg-daruma.zip";
+  auto ret = m_sut->load(filePath);
   EXPECT_EQ(ret, true);
 
-  m_sut->removeEventListener("/fake", event_name_click, "console.log('hello');");
+  m_sut->removeEventListener("/fake", g_eventNameClick, "console.log('hello');");
 
-  auto event_listeners_before = m_sut->getEventListeners("/fake");
-  m_sut->addEventListener("/fake", event_name_click, "console.log('hello');");
+  auto eventListenersBefore = m_sut->getEventListeners("/fake");
+  m_sut->addEventListener("/fake", g_eventNameClick, "console.log('hello');");
 
   // When
-  auto event_listeners_after = m_sut->getEventListeners("/fake");
+  auto eventListenersAfter = m_sut->getEventListeners("/fake");
 
   // Then
-  EXPECT_EQ(event_listeners_before.size() + 1, event_listeners_after.size());
+  EXPECT_EQ(eventListenersBefore.size() + 1, eventListenersAfter.size());
 }
 
 TEST_F(VggModelTestSuite, load_layout_doc)
 {
   // Given
-  std::string file_path = "testDataDir/layout/0_space_between/";
-  auto ret = m_sut->load(file_path);
+  std::string filePath = "testDataDir/layout/0_space_between/";
+  auto ret = m_sut->load(filePath);
   EXPECT_EQ(ret, true);
 
   // When
-  auto layout_doc = m_sut->layoutDoc();
+  auto layoutDoc = m_sut->layoutDoc();
 
   // Then
-  EXPECT_TRUE(layout_doc);
+  EXPECT_TRUE(layoutDoc);
 }

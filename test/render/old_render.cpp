@@ -126,10 +126,10 @@ int main(int argc, char** argv)
   ASSERT(app);
 
   // enter loop
-  constexpr int fps = 60;
+  constexpr int FPS = 60;
   while (!app->shouldExit())
   {
-    app->frame(fps);
+    app->frame(FPS);
   }
   return 0;
 }

@@ -26,8 +26,8 @@ extern "C"
   bool load_file_from_mem(const char* name, char* data, int len)
   {
     std::vector<char> buf(data, data + len);
-    auto& main_composer = VggBrowser::mainComposer();
-    return main_composer.controller()->start(buf,
+    auto& mainComposer = VggBrowser::mainComposer();
+    return mainComposer.controller()->start(buf,
                                              "/asset/vgg-format.json",
                                              "/asset/vgg_layout.json");
   }
@@ -44,11 +44,11 @@ extern "C"
   // top/right/bottom/left: offsets within the editor
   EMSCRIPTEN_KEEPALIVE bool edit(char* data, int len, int top, int right, int bottom, int left)
   {
-    auto& main_composer = VggBrowser::mainComposer();
-    main_composer.enableEdit(top, right, bottom, left);
+    auto& mainComposer = VggBrowser::mainComposer();
+    mainComposer.enableEdit(top, right, bottom, left);
 
     std::vector<char> buffer(data, data + len);
-    return main_composer.controller()->edit(buffer);
+    return mainComposer.controller()->edit(buffer);
   }
 };
 

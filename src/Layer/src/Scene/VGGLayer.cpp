@@ -12,7 +12,6 @@
 #include <optional>
 #include <sstream>
 #include <third_party/vulkan/vulkan/vulkan_core.h>
-#include <vulkan/vulkan_core.h>
 
 #include <dlfcn.h>
 
@@ -120,6 +119,8 @@ private:
   sk_sp<SkSurface> m_surface{ nullptr };
   std::variant<ContextInfoVulkan, ContextInfoGL> m_ctx;
   ContextConfig m_ctxConfig;
+
+#ifdef VGG_USE_VULKAN
   void initContextVK(const ContextInfoVulkan& ctx)
   {
     GrVkBackendContext vkContext;
@@ -148,28 +149,10 @@ private:
           ptr = vkGetDeviceProcAddr(dev, name);
         }
         if (!ptr)
-          DEBUG("xtension [%s] required by skia is not satisfied",
-                name);
+          DEBUG("xtension [%s] required by skia is not satisfied", name);
         return ptr;
       });
     m_grContext = GrDirectContext::MakeVulkan(vkContext);
-  }
-
-  void initContextGL(const ContextInfoGL& ctx)
-  {
-    sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
-    ASSERT(interface);
-    if (!interface)
-    {
-      // return AppError(AppError::Kind::RenderEngineError, "Failed to make skia opengl interface");
-    }
-    sk_sp<GrDirectContext> grContext = GrDirectContext::MakeGL(interface);
-    ASSERT(grContext);
-    if (!grContext)
-    {
-      // return AppError(AppError::Kind::RenderEngineError, "Failed to make skia opengl context.");
-    }
-    m_grContext = grContext;
   }
 
   sk_sp<SkSurface> createSurfaceVK(const ContextInfoVulkan& ctx,
@@ -188,6 +171,24 @@ private:
     auto a = SkSurfaces::RenderTarget(m_grContext.get(), skgpu::Budgeted::kYes, info);
     return a;
   };
+#endif
+
+  void initContextGL(const ContextInfoGL& ctx)
+  {
+    sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
+    ASSERT(interface);
+    if (!interface)
+    {
+      // return AppError(AppError::Kind::RenderEngineError, "Failed to make skia opengl interface");
+    }
+    sk_sp<GrDirectContext> grContext = GrDirectContext::MakeGL(interface);
+    ASSERT(grContext);
+    if (!grContext)
+    {
+      // return AppError(AppError::Kind::RenderEngineError, "Failed to make skia opengl context.");
+    }
+    m_grContext = grContext;
+  }
 
   sk_sp<SkSurface> createSurfaceGL(const ContextInfoGL& ctx, const ContextConfig& cfg, int w, int h)
   {

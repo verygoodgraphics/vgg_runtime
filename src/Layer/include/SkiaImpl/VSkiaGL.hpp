@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Scene/ContextInfoGL.hpp"
-#include "Scene/ContextInfoVulkan.hpp"
 #include "SkiaImpl/VSkiaContext.hpp"
 
 #include <include/gpu/ganesh/SkSurfaceGanesh.h>

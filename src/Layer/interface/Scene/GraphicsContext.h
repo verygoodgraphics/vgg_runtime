@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Scene/ContextInfoGL.hpp"
-#include "Scene/ContextInfoVulkan.hpp"
 #include <Utility/interface/Log.h>
 #include <memory>
 #include <vector>

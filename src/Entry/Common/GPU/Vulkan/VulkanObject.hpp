@@ -1,11 +1,11 @@
 #pragma once
 #include <Utility/interface/Log.h>
 #include <cstdint>
-#include <glm/glm.hpp>
 #include <vector>
 #include <iostream>
 #include <functional>
 #include <memory>
+#include <glm/glm.hpp>
 #include <vulkan/vulkan_core.h>
 
 inline const std::vector<const char*> g_validationLayers = {

@@ -107,10 +107,8 @@ std::optional<ELayerError> VLayer::onInit()
     _->skiaContext =
       std::make_unique<SkiaContext>(vk::vkContextCreateProc(ctx), vk::vkSurfaceCreateProc(), cfg);
 #else
-    DEGBUG("Vulkan is not support on the platform, fallback to OpenGL")
-    auto* ctx = reinterpret_cast<ContextInfoGL*>(context()->contextInfo());
-    _->skiaContext =
-      std::make_unique<SkiaContext>(gl::glContextCreateProc(ctx), gl::glSurfaceCreateProc(), cfg);
+    ASSERT(false && "Vulkan is not support on the platform")
+    _->skiaContext = nullptr;
 #endif
   }
   else

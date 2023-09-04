@@ -50,6 +50,8 @@ public:
     , m_grContext(std::move(other.m_grContext))
     , m_surface(std::move(other.m_surface))
     , m_ctxConfig(std::move(other.m_ctxConfig))
+    , m_skiaSurfaceCreateProc(std::move(other.m_skiaSurfaceCreateProc))
+    , m_skiaContextCreateProc(std::move(other.m_skiaContextCreateProc))
   {
   }
   SkiaContext& operator=(SkiaContext&& other) noexcept
@@ -84,6 +86,7 @@ public:
               const ContextConfig& cfg)
     : m_skiaContextCreateProc(std::move(contextProc))
     , m_skiaSurfaceCreateProc(std::move(surfaceProc))
+    , m_ctxConfig(cfg)
   {
     m_grContext = m_skiaContextCreateProc();
     ASSERT(m_grContext);
@@ -91,6 +94,10 @@ public:
                                         m_ctxConfig.windowSize[0],
                                         m_ctxConfig.windowSize[1],
                                         m_ctxConfig);
+    if (m_surface == nullptr)
+    {
+      DEBUG("null m_surface");
+    }
     ASSERT(m_surface);
   }
 

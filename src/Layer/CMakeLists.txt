@@ -35,10 +35,10 @@ find_package(OpenGL REQUIRED)
 
 target_include_directories(vgg_layer PUBLIC ${VGG_CONTRIB_JSON_INCLUDE})
 # REFACTOR:: make skia hidden from public
-target_link_libraries(vgg_layer PUBLIC ${SKIA_LIBS})
-target_link_libraries(vgg_layer PRIVATE ${OPENGL_LIBRARIES} vgg_utility glm)
+target_link_libraries(vgg_layer PUBLIC ${SKIA_LIBS} glm)
+target_link_libraries(vgg_layer PRIVATE ${OPENGL_LIBRARIES} vgg_utility)
 find_package(Vulkan)
-if(Vulkan_FOUND)
+if(Vulkan_FOUND AND ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_LINUX_TARGET_LIST)
   message("Vulkan found: enabling vulkan ...")
   target_compile_definitions(vgg_layer PRIVATE VGG_USE_VULKAN)
   target_link_libraries(vgg_layer PRIVATE Vulkan::Vulkan)

@@ -2,11 +2,11 @@
 const { getVggSdk } = await import("./testDataDir/fake-sdk/vgg-sdk.esm.mjs");
 const sdk = await getVggSdk();
 
-const listener_code = "console.log('hello');"
-sdk.addEventListener('/js/fake/run_added_listener', 'click', listener_code);
+const listenerCode = "console.log('hello');"
+sdk.addEventListener('/js/fake/run_added_listener', 'click', listenerCode);
 
 // When
-sdk.removeEventListener('/js/fake/run_added_listener', 'click', listener_code);
+sdk.removeEventListener('/js/fake/run_added_listener', 'click', listenerCode);
 
 // Then
 const EventNameClick = 'click';

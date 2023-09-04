@@ -14,12 +14,12 @@ namespace VGG
 
 class EditModel
 {
-  const std::string& m_design_schema_file_path;
+  const std::string& m_designSchemaFilePath;
   std::shared_ptr<Daruma> m_model;
 
 public:
   EditModel(const std::string& design_schema_file_path)
-    : m_design_schema_file_path{ design_schema_file_path }
+    : m_designSchemaFilePath{ design_schema_file_path }
   {
     initModel();
   }
@@ -57,7 +57,7 @@ private:
   void initModel()
   {
     auto build_design_doc_fn =
-      [&, design_schema_file_path = m_design_schema_file_path](const json& designJson)
+      [&, design_schema_file_path = m_designSchemaFilePath](const json& designJson)
     {
       auto json_doc_ptr = createJsonDoc();
       json_doc_ptr->setContent(designJson);
@@ -65,8 +65,8 @@ private:
       if (!design_schema_file_path.empty())
       {
         SchemaValidJsonDocument::ValidatorPtr design_doc_validator;
-        std::ifstream schema_fs(design_schema_file_path);
-        json schema = json::parse(schema_fs);
+        std::ifstream schemaIfs(design_schema_file_path);
+        json schema = json::parse(schemaIfs);
         design_doc_validator.reset(new JsonSchemaValidator);
         design_doc_validator->setRootSchema(schema);
 

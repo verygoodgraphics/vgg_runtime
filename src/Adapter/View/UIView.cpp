@@ -13,12 +13,12 @@ using namespace nlohmann;
 
 void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
 {
-  if (!m_event_listener)
+  if (!m_eventListener)
   {
     return;
   }
 
-  if (!m_is_editor)
+  if (!m_isEditor)
   {
     m_bounds.origin.x = zoomer->offset.x;
     m_bounds.origin.y = zoomer->offset.y;
@@ -35,18 +35,17 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
 
   // todo, capturing
   // todo, bubbling
-  UIEvent::PathType target_path{ "/fake/update_background_color" };
+  UIEvent::PathType targetPath{ "/fake/update_background_color" };
 
-  decltype(m_has_event_listener) has_event_listener =
-    [this](const std::string& path, UIEventType type)
+  decltype(m_hasEventListener) hasEventListener = [this](const std::string& path, UIEventType type)
   {
-    if (this->m_superview && this->m_superview->m_is_editor)
+    if (this->m_superview && this->m_superview->m_isEditor)
     {
       return true;
     }
     else
     {
-      return m_has_event_listener(path, type);
+      return m_hasEventListener(path, type);
     }
   };
   switch (evt.type)
@@ -60,25 +59,24 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
 
       Layout::Point point{ TO_VGG_LAYOUT_SCALAR(evt.button.x), TO_VGG_LAYOUT_SCALAR(evt.button.y) };
       point = converPointFromWindowAndScale(point);
-      auto target_view = m_root->hitTest(point,
-                                         [&has_event_listener](const std::string& path) {
-                                           return has_event_listener(path, UIEventType::mousedown);
-                                         });
-      if (target_view)
+      auto targetNode = m_root->hitTest(point,
+                                        [&hasEventListener](const std::string& path)
+                                        { return hasEventListener(path, UIEventType::mousedown); });
+      if (targetNode)
       {
-        auto js_button_index{ evt.button.button - 1 };
+        auto jsButtonIndex{ evt.button.button - 1 };
         auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
-        m_event_listener(UIEventPtr(new MouseEvent(target_view->path(),
-                                                   UIEventType::mousedown,
-                                                   js_button_index,
-                                                   evt.button.x,
-                                                   evt.button.y,
-                                                   0,
-                                                   0,
-                                                   alt,
-                                                   ctrl,
-                                                   meta,
-                                                   shift)));
+        m_eventListener(UIEventPtr(new MouseEvent(targetNode->path(),
+                                                  UIEventType::mousedown,
+                                                  jsButtonIndex,
+                                                  evt.button.x,
+                                                  evt.button.y,
+                                                  0,
+                                                  0,
+                                                  alt,
+                                                  ctrl,
+                                                  meta,
+                                                  shift)));
       }
     }
     break;
@@ -92,24 +90,23 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
 
       Layout::Point point{ TO_VGG_LAYOUT_SCALAR(evt.motion.x), TO_VGG_LAYOUT_SCALAR(evt.motion.y) };
       point = converPointFromWindowAndScale(point);
-      auto target_view = m_root->hitTest(point,
-                                         [&has_event_listener](const std::string& path) {
-                                           return has_event_listener(path, UIEventType::mousemove);
-                                         });
-      if (target_view)
+      auto targetNode = m_root->hitTest(point,
+                                        [&hasEventListener](const std::string& path)
+                                        { return hasEventListener(path, UIEventType::mousemove); });
+      if (targetNode)
       {
         auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
-        m_event_listener(UIEventPtr(new MouseEvent(target_view->path(),
-                                                   UIEventType::mousemove,
-                                                   0,
-                                                   evt.motion.x,
-                                                   evt.motion.y,
-                                                   evt.motion.xrel,
-                                                   evt.motion.yrel,
-                                                   alt,
-                                                   ctrl,
-                                                   meta,
-                                                   shift)));
+        m_eventListener(UIEventPtr(new MouseEvent(targetNode->path(),
+                                                  UIEventType::mousemove,
+                                                  0,
+                                                  evt.motion.x,
+                                                  evt.motion.y,
+                                                  evt.motion.xrel,
+                                                  evt.motion.yrel,
+                                                  alt,
+                                                  ctrl,
+                                                  meta,
+                                                  shift)));
       }
     }
     break;
@@ -123,89 +120,87 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
 
       Layout::Point point{ TO_VGG_LAYOUT_SCALAR(evt.button.x), TO_VGG_LAYOUT_SCALAR(evt.button.y) };
       point = converPointFromWindowAndScale(point);
-      auto js_button_index{ evt.button.button - 1 };
+      auto jsButtonIndex{ evt.button.button - 1 };
       auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
 
-      auto target_view = m_root->hitTest(point,
-                                         [&has_event_listener](const std::string& path) {
-                                           return has_event_listener(path, UIEventType::mouseup);
-                                         });
-      if (target_view)
+      auto targetNode = m_root->hitTest(point,
+                                        [&hasEventListener](const std::string& path)
+                                        { return hasEventListener(path, UIEventType::mouseup); });
+      if (targetNode)
       {
-        m_event_listener(UIEventPtr(new MouseEvent(target_view->path(),
-                                                   UIEventType::mouseup,
-                                                   js_button_index,
-                                                   evt.button.x,
-                                                   evt.button.y,
-                                                   0,
-                                                   0,
-                                                   alt,
-                                                   ctrl,
-                                                   meta,
-                                                   shift)));
+        m_eventListener(UIEventPtr(new MouseEvent(targetNode->path(),
+                                                  UIEventType::mouseup,
+                                                  jsButtonIndex,
+                                                  evt.button.x,
+                                                  evt.button.y,
+                                                  0,
+                                                  0,
+                                                  alt,
+                                                  ctrl,
+                                                  meta,
+                                                  shift)));
       }
 
-      if (js_button_index == 0)
+      if (jsButtonIndex == 0)
       {
-        auto target_view = m_root->hitTest(point,
-                                           [&has_event_listener](const std::string& path) {
-                                             return has_event_listener(path, UIEventType::click);
-                                           });
-        if (target_view)
+        auto targetNode = m_root->hitTest(point,
+                                          [&hasEventListener](const std::string& path)
+                                          { return hasEventListener(path, UIEventType::click); });
+        if (targetNode)
         {
-          m_event_listener(UIEventPtr(new MouseEvent(target_view->path(),
-                                                     UIEventType::click,
-                                                     js_button_index,
-                                                     evt.button.x,
-                                                     evt.button.y,
-                                                     0,
-                                                     0,
-                                                     alt,
-                                                     ctrl,
-                                                     meta,
-                                                     shift)));
+          m_eventListener(UIEventPtr(new MouseEvent(targetNode->path(),
+                                                    UIEventType::click,
+                                                    jsButtonIndex,
+                                                    evt.button.x,
+                                                    evt.button.y,
+                                                    0,
+                                                    0,
+                                                    alt,
+                                                    ctrl,
+                                                    meta,
+                                                    shift)));
         }
       }
       else
       {
-        auto target_view = m_root->hitTest(point,
-                                           [&has_event_listener](const std::string& path) {
-                                             return has_event_listener(path, UIEventType::auxclick);
-                                           });
-        if (target_view)
+        auto targetNode = m_root->hitTest(point,
+                                          [&hasEventListener](const std::string& path) {
+                                            return hasEventListener(path, UIEventType::auxclick);
+                                          });
+        if (targetNode)
         {
-          m_event_listener(UIEventPtr(new MouseEvent(target_view->path(),
-                                                     UIEventType::auxclick,
-                                                     js_button_index,
-                                                     evt.button.x,
-                                                     evt.button.y,
-                                                     0,
-                                                     0,
-                                                     alt,
-                                                     ctrl,
-                                                     meta,
-                                                     shift)));
+          m_eventListener(UIEventPtr(new MouseEvent(targetNode->path(),
+                                                    UIEventType::auxclick,
+                                                    jsButtonIndex,
+                                                    evt.button.x,
+                                                    evt.button.y,
+                                                    0,
+                                                    0,
+                                                    alt,
+                                                    ctrl,
+                                                    meta,
+                                                    shift)));
         }
 
-        if (js_button_index == 2)
+        if (jsButtonIndex == 2)
         {
-          auto target_view =
+          auto targetNode =
             m_root->hitTest(point,
-                            [&has_event_listener](const std::string& path)
-                            { return has_event_listener(path, UIEventType::contextmenu); });
-          if (target_view)
+                            [&hasEventListener](const std::string& path)
+                            { return hasEventListener(path, UIEventType::contextmenu); });
+          if (targetNode)
           {
-            m_event_listener(UIEventPtr(new MouseEvent(target_view->path(),
-                                                       UIEventType::contextmenu,
-                                                       js_button_index,
-                                                       evt.button.x,
-                                                       evt.button.y,
-                                                       0,
-                                                       0,
-                                                       alt,
-                                                       ctrl,
-                                                       meta,
-                                                       shift)));
+            m_eventListener(UIEventPtr(new MouseEvent(targetNode->path(),
+                                                      UIEventType::contextmenu,
+                                                      jsButtonIndex,
+                                                      evt.button.x,
+                                                      evt.button.y,
+                                                      0,
+                                                      0,
+                                                      alt,
+                                                      ctrl,
+                                                      meta,
+                                                      shift)));
           }
         }
       }
@@ -221,46 +216,46 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
     case SDL_KEYDOWN:
     {
       auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
-      m_event_listener(UIEventPtr(new KeyboardEvent(target_path,
-                                                    UIEventType::keydown,
-                                                    evt.key.keysym.sym,
-                                                    evt.key.repeat,
-                                                    alt,
-                                                    ctrl,
-                                                    meta,
-                                                    shift)));
+      m_eventListener(UIEventPtr(new KeyboardEvent(targetPath,
+                                                   UIEventType::keydown,
+                                                   evt.key.keysym.sym,
+                                                   evt.key.repeat,
+                                                   alt,
+                                                   ctrl,
+                                                   meta,
+                                                   shift)));
     }
     break;
 
     case SDL_KEYUP:
     {
       auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
-      m_event_listener(UIEventPtr(new KeyboardEvent(target_path,
-                                                    UIEventType::keyup,
-                                                    evt.key.keysym.sym,
-                                                    evt.key.repeat,
-                                                    alt,
-                                                    ctrl,
-                                                    meta,
-                                                    shift)));
+      m_eventListener(UIEventPtr(new KeyboardEvent(targetPath,
+                                                   UIEventType::keyup,
+                                                   evt.key.keysym.sym,
+                                                   evt.key.repeat,
+                                                   alt,
+                                                   ctrl,
+                                                   meta,
+                                                   shift)));
     }
     break;
 
     case SDL_FINGERDOWN:
     {
-      m_event_listener(UIEventPtr(new TouchEvent(target_path, UIEventType::touchstart)));
+      m_eventListener(UIEventPtr(new TouchEvent(targetPath, UIEventType::touchstart)));
     }
     break;
 
     case SDL_FINGERMOTION:
     {
-      m_event_listener(UIEventPtr(new TouchEvent(target_path, UIEventType::touchmove)));
+      m_eventListener(UIEventPtr(new TouchEvent(targetPath, UIEventType::touchmove)));
     }
     break;
 
     case SDL_FINGERUP:
     {
-      m_event_listener(UIEventPtr(new TouchEvent(target_path, UIEventType::touchend)));
+      m_eventListener(UIEventPtr(new TouchEvent(targetPath, UIEventType::touchend)));
     }
     break;
 
@@ -273,17 +268,17 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
 
 std::tuple<bool, bool, bool, bool> UIView::getKeyModifier(int keyMod)
 {
-  bool l_alt = keyMod & KMOD_LALT;
-  bool l_ctrl = keyMod & KMOD_LCTRL;
-  bool l_meta = keyMod & KMOD_LGUI;
-  bool l_shift = keyMod & KMOD_LSHIFT;
+  bool lAlt = keyMod & KMOD_LALT;
+  bool lCtrl = keyMod & KMOD_LCTRL;
+  bool lMeta = keyMod & KMOD_LGUI;
+  bool lShift = keyMod & KMOD_LSHIFT;
 
-  bool r_alt = keyMod & KMOD_RALT;
-  bool r_ctrl = keyMod & KMOD_RCTRL;
-  bool r_meta = keyMod & KMOD_RGUI;
-  bool r_shift = keyMod & KMOD_RSHIFT;
+  bool rAlt = keyMod & KMOD_RALT;
+  bool rCtrl = keyMod & KMOD_RCTRL;
+  bool rMeta = keyMod & KMOD_RGUI;
+  bool rShift = keyMod & KMOD_RSHIFT;
 
-  return { l_alt || r_alt, l_ctrl || r_ctrl, l_meta || r_meta, l_shift || r_shift };
+  return { lAlt || rAlt, lCtrl || rCtrl, lMeta || rMeta, lShift || rShift };
 }
 
 void UIView::draw(SkCanvas* canvas, Zoomer* zoomer)
@@ -292,7 +287,7 @@ void UIView::draw(SkCanvas* canvas, Zoomer* zoomer)
   // DEPRECATED:
   // the only way to paint a scene is added in
   // a layer
-  if (m_is_editor) // editor; zoom only subviews
+  if (m_isEditor) // editor; zoom only subviews
   {
     m_scene->render(canvas);
 
@@ -308,8 +303,8 @@ void UIView::draw(SkCanvas* canvas, Zoomer* zoomer)
 
     // setup clip & offset for edit view
     canvas->translate(m_frame.origin.x, m_frame.origin.y);
-    SkRect edit_rect{ 0, 0, m_frame.size.width, m_frame.size.height };
-    canvas->clipRect(edit_rect);
+    SkRect editRect{ 0, 0, m_frame.size.width, m_frame.size.height };
+    canvas->clipRect(editRect);
 
     zoomer->apply(canvas);
 
@@ -319,12 +314,12 @@ void UIView::draw(SkCanvas* canvas, Zoomer* zoomer)
   }
 }
 
-void UIView::becomeEditorWithSidebar(scalar_type top,
-                                     scalar_type right,
-                                     scalar_type bottom,
-                                     scalar_type left)
+void UIView::becomeEditorWithSidebar(ScalarType top,
+                                     ScalarType right,
+                                     ScalarType bottom,
+                                     ScalarType left)
 {
-  m_is_editor = true;
+  m_isEditor = true;
 
   m_top = top;
   m_right = right;
@@ -336,7 +331,7 @@ void UIView::becomeEditorWithSidebar(scalar_type top,
 
 void UIView::layoutSubviews()
 {
-  if (m_is_editor)
+  if (m_isEditor)
   {
     for (auto& subview : m_subviews)
     {
@@ -381,7 +376,7 @@ Layout::Point UIView::converPointFromWindowAndScale(Layout::Point point)
 
 void UIView::handleMouseWheel(const SDL_Event& evt, Zoomer* zoomer)
 {
-  if (!m_is_editor && SDL_GetModState() & KMOD_CTRL)
+  if (!m_isEditor && SDL_GetModState() & KMOD_CTRL)
   {
     int mx, my;
     SDL_GetMouseState(&mx, &my);
@@ -399,6 +394,6 @@ void UIView::handleMouseWheel(const SDL_Event& evt, Zoomer* zoomer)
       zoomer->zoom += zoomer->zoom * dz;
     }
 
-    m_is_dirty = true;
+    m_isDirty = true;
   }
 }

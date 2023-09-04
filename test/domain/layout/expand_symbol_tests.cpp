@@ -34,8 +34,8 @@ protected:
 TEST_F(VggExpandSymbolTestSuite, Smoke)
 {
   // Given
-  std::string file_path = "testDataDir/symbol/symbol_instance/design.json";
-  auto design_json = Helper::load_json(file_path);
+  std::string filePath = "testDataDir/symbol/symbol_instance/design.json";
+  auto design_json = Helper::load_json(filePath);
   ExpandSymbol sut{ design_json };
 
   // When
@@ -48,8 +48,8 @@ TEST_F(VggExpandSymbolTestSuite, Smoke)
 TEST_F(VggExpandSymbolTestSuite, fill_childObjects)
 {
   // Given
-  std::string file_path = "testDataDir/symbol/symbol_instance/design.json";
-  auto design_json = Helper::load_json(file_path);
+  std::string filePath = "testDataDir/symbol/symbol_instance/design.json";
+  auto design_json = Helper::load_json(filePath);
   ExpandSymbol sut{ design_json };
 
   // When
@@ -63,8 +63,8 @@ TEST_F(VggExpandSymbolTestSuite, fill_childObjects)
 
 TEST_F(VggExpandSymbolTestSuite, scale)
 { // Given
-  std::string file_path = "testDataDir/symbol/scale/design.json";
-  auto design_json = Helper::load_json(file_path);
+  std::string filePath = "testDataDir/symbol/scale/design.json";
+  auto design_json = Helper::load_json(filePath);
   ExpandSymbol sut{ design_json };
 
   // When
@@ -97,8 +97,8 @@ TEST_F(VggExpandSymbolTestSuite, scale)
 TEST_F(VggExpandSymbolTestSuite, expand_masterId_overridden_instance)
 {
   // Given
-  std::string file_path = "testDataDir/symbol/symbol_instance/design.json";
-  auto design_json = Helper::load_json(file_path);
+  std::string filePath = "testDataDir/symbol/symbol_instance/design.json";
+  auto design_json = Helper::load_json(filePath);
   ExpandSymbol sut{ design_json };
 
   // When
@@ -113,8 +113,8 @@ TEST_F(VggExpandSymbolTestSuite, expand_masterId_overridden_instance)
 
 TEST_F(VggExpandSymbolTestSuite, color_override)
 { // Given
-  std::string file_path = "testDataDir/symbol/scale/design.json";
-  auto design_json = Helper::load_json(file_path);
+  std::string filePath = "testDataDir/symbol/scale/design.json";
+  auto design_json = Helper::load_json(filePath);
   ExpandSymbol sut{ design_json };
 
   // When
@@ -132,8 +132,8 @@ TEST_F(VggExpandSymbolTestSuite, color_override)
 TEST_F(VggExpandSymbolTestSuite, override_with_star_wildcard)
 {
   // Given
-  std::string file_path = "testDataDir/symbol/symbol_instance/design.json";
-  auto design_json = Helper::load_json(file_path);
+  std::string filePath = "testDataDir/symbol/symbol_instance/design.json";
+  auto design_json = Helper::load_json(filePath);
   ExpandSymbol sut{ design_json };
 
   // When
@@ -151,8 +151,8 @@ TEST_F(VggExpandSymbolTestSuite, override_with_star_wildcard)
 TEST_F(VggExpandSymbolTestSuite, override_master_own_style)
 {
   // Given
-  std::string file_path = "testDataDir/symbol/instance_override_master‘s_own_style/design.json";
-  auto design_json = Helper::load_json(file_path);
+  std::string filePath = "testDataDir/symbol/instance_override_master‘s_own_style/design.json";
+  auto design_json = Helper::load_json(filePath);
   ExpandSymbol sut{ design_json };
 
   // When
@@ -168,8 +168,8 @@ TEST_F(VggExpandSymbolTestSuite, override_master_own_style)
 TEST_F(VggExpandSymbolTestSuite, override_duplicated_object_id)
 {
   // Given
-  std::string file_path = "testDataDir/symbol/symbol_instance/design.json";
-  auto design_json = Helper::load_json(file_path);
+  std::string filePath = "testDataDir/symbol/symbol_instance/design.json";
+  auto design_json = Helper::load_json(filePath);
   ExpandSymbol sut{ design_json };
 
   // When
@@ -267,8 +267,8 @@ TEST_F(VggExpandSymbolTestSuite, BoundsOverride)
 TEST_F(VggExpandSymbolTestSuite, unique_object_id_in_instance_tree)
 {
   // Given
-  std::string file_path = "testDataDir/symbol/symbol_instance/design.json";
-  auto design_json = Helper::load_json(file_path);
+  std::string filePath = "testDataDir/symbol/symbol_instance/design.json";
+  auto design_json = Helper::load_json(filePath);
   ExpandSymbol sut{ design_json };
 
   // When
@@ -286,8 +286,8 @@ TEST_F(VggExpandSymbolTestSuite, unique_object_id_in_instance_tree)
 TEST_F(VggExpandSymbolTestSuite, unique_id_in_mask_by)
 {
   // Given
-  std::string file_path = "testDataDir/symbol/mask/design.json";
-  auto design_json = Helper::load_json(file_path);
+  std::string filePath = "testDataDir/symbol/mask/design.json";
+  auto design_json = Helper::load_json(filePath);
   ExpandSymbol sut{ design_json };
 
   // When
@@ -315,8 +315,8 @@ TEST_F(VggExpandSymbolTestSuite, validate_expanded_design_json)
   SKIP_SLOW_TEST;
 
   // Given
-  std::string file_path = "testDataDir/symbol/symbol_instance/design.json";
-  auto design_json = Helper::load_json(file_path);
+  std::string filePath = "testDataDir/symbol/symbol_instance/design.json";
+  auto design_json = Helper::load_json(filePath);
   ExpandSymbol sut{ design_json };
 
   // When

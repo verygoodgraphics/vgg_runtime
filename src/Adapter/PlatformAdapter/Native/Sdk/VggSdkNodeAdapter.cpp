@@ -205,14 +205,14 @@ napi_value VggSdkNodeAdapter::DesignDocumentReplaceAt(napi_env env, napi_callbac
   {
     auto json_pointer_string = GetArgString(env, args[0]);
     auto json_value_string = GetArgString(env, args[1]);
-    auto doc_index = argc == 3 ? GetArgIntValue(env, args[2]) : 0;
+    auto docIndex = argc == 3 ? GetArgIntValue(env, args[2]) : 0;
 
     VggSdkNodeAdapter* sdk_adapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
 
     sdk_adapter->m_vggSdk->designDocumentReplaceAt(json_pointer_string,
                                                    json_value_string,
-                                                   doc_index);
+                                                   docIndex);
   }
   catch (std::exception& e)
   {
@@ -239,12 +239,12 @@ napi_value VggSdkNodeAdapter::DesignDocumentAddAt(napi_env env, napi_callback_in
   {
     auto json_pointer_string = GetArgString(env, args[0]);
     auto json_value_string = GetArgString(env, args[1]);
-    auto doc_index = argc == 3 ? GetArgIntValue(env, args[2]) : 0;
+    auto docIndex = argc == 3 ? GetArgIntValue(env, args[2]) : 0;
 
     VggSdkNodeAdapter* sdk_adapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
 
-    sdk_adapter->m_vggSdk->designDocumentAddAt(json_pointer_string, json_value_string, doc_index);
+    sdk_adapter->m_vggSdk->designDocumentAddAt(json_pointer_string, json_value_string, docIndex);
   }
   catch (std::exception& e)
   {
@@ -270,12 +270,12 @@ napi_value VggSdkNodeAdapter::DesignDocumentDeleteAt(napi_env env, napi_callback
   try
   {
     auto json_pointer_string = GetArgString(env, args[0]);
-    auto doc_index = argc == 2 ? GetArgIntValue(env, args[1]) : 0;
+    auto docIndex = argc == 2 ? GetArgIntValue(env, args[1]) : 0;
 
     VggSdkNodeAdapter* sdk_adapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
 
-    sdk_adapter->m_vggSdk->designDocumentDeleteAt(json_pointer_string, doc_index);
+    sdk_adapter->m_vggSdk->designDocumentDeleteAt(json_pointer_string, docIndex);
   }
   catch (std::exception& e)
   {
@@ -304,12 +304,12 @@ napi_value VggSdkNodeAdapter::AddEventListener(napi_env env, napi_callback_info 
     VggSdkNodeAdapter* sdk_adapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
 
-    auto element_path = GetArgString(env, args[0]);
-    auto event_type = GetArgString(env, args[1]);
-    auto listener_code = GetArgString(env, args[2]);
-    auto doc_index = argc == 4 ? GetArgIntValue(env, args[3]) : 0;
+    auto elementPath = GetArgString(env, args[0]);
+    auto eventType = GetArgString(env, args[1]);
+    auto listenerCode = GetArgString(env, args[2]);
+    auto docIndex = argc == 4 ? GetArgIntValue(env, args[3]) : 0;
 
-    sdk_adapter->m_vggSdk->addEventListener(element_path, event_type, listener_code, doc_index);
+    sdk_adapter->m_vggSdk->addEventListener(elementPath, eventType, listenerCode, docIndex);
   }
   catch (std::exception& e)
   {
@@ -337,12 +337,12 @@ napi_value VggSdkNodeAdapter::RemoveEventListener(napi_env env, napi_callback_in
     VggSdkNodeAdapter* sdk_adapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
 
-    auto element_path = GetArgString(env, args[0]);
-    auto event_type = GetArgString(env, args[1]);
-    auto listener_code = GetArgString(env, args[2]);
-    auto doc_index = argc == 4 ? GetArgIntValue(env, args[3]) : 0;
+    auto elementPath = GetArgString(env, args[0]);
+    auto eventType = GetArgString(env, args[1]);
+    auto listenerCode = GetArgString(env, args[2]);
+    auto docIndex = argc == 4 ? GetArgIntValue(env, args[3]) : 0;
 
-    sdk_adapter->m_vggSdk->removeEventListener(element_path, event_type, listener_code, doc_index);
+    sdk_adapter->m_vggSdk->removeEventListener(elementPath, eventType, listenerCode, docIndex);
   }
   catch (std::exception& e)
   {
@@ -406,8 +406,8 @@ napi_value VggSdkNodeAdapter::GetEventListeners(napi_env env, napi_callback_info
 
   try
   {
-    auto element_path = GetArgString(env, args[0]);
-    auto doc_index = argc == 2 ? GetArgIntValue(env, args[1]) : 0;
+    auto elementPath = GetArgString(env, args[0]);
+    auto docIndex = argc == 2 ? GetArgIntValue(env, args[1]) : 0;
 
     VggSdkNodeAdapter* sdk_adapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
@@ -415,21 +415,21 @@ napi_value VggSdkNodeAdapter::GetEventListeners(napi_env env, napi_callback_info
     napi_value result_listeners_map; // result object
     napi_create_object(env, &result_listeners_map);
 
-    auto listeners_map = sdk_adapter->m_vggSdk->getEventListeners(element_path, doc_index);
-    for (auto& map_item : listeners_map)
+    auto listenersMap = sdk_adapter->m_vggSdk->getEventListeners(elementPath, docIndex);
+    for (auto& map_item : listenersMap)
     {
       if (map_item.second.empty())
       {
         continue;
       }
 
-      auto& event_type = map_item.first;
+      auto& eventType = map_item.first;
 
-      napi_value js_listener_code_array; // listener array of the event_type
+      napi_value js_listener_code_array; // listener array of the eventType
       napi_create_array_with_length(env, map_item.second.size(), &js_listener_code_array);
       for (int i = 0; i < map_item.second.size(); ++i)
       {
-        auto& listener_code = map_item.second[i];
+        auto& listenerCode = map_item.second[i];
 
         napi_value js_listener_object; // array item, listener object
         napi_create_object(env, &js_listener_object);
@@ -437,8 +437,8 @@ napi_value VggSdkNodeAdapter::GetEventListeners(napi_env env, napi_callback_info
         napi_value js_listener_code; // code string
         NODE_API_CALL(env,
                       napi_create_string_utf8(env,
-                                              listener_code.data(),
-                                              listener_code.size(),
+                                              listenerCode.data(),
+                                              listenerCode.size(),
                                               &js_listener_code));
         NODE_API_CALL(
           env,
@@ -450,7 +450,7 @@ napi_value VggSdkNodeAdapter::GetEventListeners(napi_env env, napi_callback_info
       NODE_API_CALL(env,
                     napi_set_named_property(env,
                                             result_listeners_map,
-                                            event_type.c_str(),
+                                            eventType.c_str(),
                                             js_listener_code_array));
     }
     return result_listeners_map;

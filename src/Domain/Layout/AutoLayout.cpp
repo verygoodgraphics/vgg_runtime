@@ -24,29 +24,29 @@ namespace Internal
 
 namespace
 {
-using LengthTypes = VGG::Layout::Internal::Rule::Length::Types;
+using LengthTypes = VGG::Layout::Internal::Rule::Length::ETypes;
 unit toLibUnit(LengthTypes type)
 {
   switch (type)
   {
-    case LengthTypes::px:
+    case LengthTypes::PX:
       return unit_point;
-    case LengthTypes::percent:
+    case LengthTypes::PERCENT:
       return unit_percent;
-    case LengthTypes::fit_content:
+    case LengthTypes::FIT_CONTENT:
       return unit_auto;
     default:
       return unit_undefine;
   }
 }
 
-position toLibPosition(Position::Types type)
+position toLibPosition(Position::ETypes type)
 {
   switch (type)
   {
-    case Position::Types::Relative:
+    case Position::ETypes::RELATIVE:
       return position_relative;
-    case Position::Types::Absolute:
+    case Position::ETypes::ABSOLUTE:
       return position_absolute;
 
     default: // todo
@@ -54,11 +54,11 @@ position toLibPosition(Position::Types type)
   }
 }
 
-direction toLibDirecion(FlexboxLayout::Direction type)
+direction toLibDirecion(FlexboxLayout::EDirection type)
 {
   switch (type)
   {
-    case FlexboxLayout::Direction::Horizontal:
+    case FlexboxLayout::EDirection::HORIZONTAL:
       return direction_row;
 
     default:
@@ -66,119 +66,119 @@ direction toLibDirecion(FlexboxLayout::Direction type)
   }
 }
 
-justify_content toLibJustifyContent(FlexboxLayout::JustifyContent type)
+justify_content toLibJustifyContent(FlexboxLayout::EJustifyContent type)
 {
   switch (type)
   {
-    case FlexboxLayout::JustifyContent::Start:
+    case FlexboxLayout::EJustifyContent::START:
       return justify_content_flex_start;
-    case FlexboxLayout::JustifyContent::Center:
+    case FlexboxLayout::EJustifyContent::CENTER:
       return justify_content_center;
-    case FlexboxLayout::JustifyContent::End:
+    case FlexboxLayout::EJustifyContent::END:
       return justify_content_flex_end;
-    case FlexboxLayout::JustifyContent::SpaceBetween:
+    case FlexboxLayout::EJustifyContent::SPACE_BETWEEN:
       return justify_content_space_between;
-    case FlexboxLayout::JustifyContent::SpaceAround:
+    case FlexboxLayout::EJustifyContent::SPACE_AROUND:
       return justify_content_space_around;
-    case FlexboxLayout::JustifyContent::SpaceEvenly:
+    case FlexboxLayout::EJustifyContent::SPACE_EVENLY:
       return justify_content_space_evenly;
   }
 }
 
-align_content toLibAlignContent(AlignStyle type)
+align_content toLibAlignContent(EAlignStyle type)
 {
   switch (type)
   {
-    case AlignStyle::Start:
+    case EAlignStyle::START:
       return align_content_flex_start;
-    case AlignStyle::Center:
+    case EAlignStyle::CENTER:
       return align_content_center;
-    case AlignStyle::End:
+    case EAlignStyle::END:
       return align_content_flex_end;
   }
 }
 
-align_items toLibAlignItem(AlignStyle type)
+align_items toLibAlignItem(EAlignStyle type)
 {
   switch (type)
   {
-    case AlignStyle::Start:
+    case EAlignStyle::START:
       return align_items_flex_start;
-    case AlignStyle::Center:
+    case EAlignStyle::CENTER:
       return align_items_center;
-    case AlignStyle::End:
+    case EAlignStyle::END:
       return align_items_flex_end;
   }
 }
 
-wrap toLibWrap(FlexboxLayout::Wrap type)
+wrap toLibWrap(FlexboxLayout::EWrap type)
 {
   switch (type)
   {
-    case FlexboxLayout::Wrap::NoWrap:
+    case FlexboxLayout::EWrap::NO_WRAP:
       return wrap_no_wrap;
-    case FlexboxLayout::Wrap::Wrap:
+    case FlexboxLayout::EWrap::WRAP:
       return wrap_wrap;
   }
 }
 
-column_width_strategy toLibColumnWidthStrategy(ColumnWidth::Strategy type)
+column_width_strategy toLibColumnWidthStrategy(ColumnWidth::EStrategy type)
 {
   switch (type)
   {
-    case ColumnWidth::Strategy::Min:
+    case ColumnWidth::EStrategy::MIN:
       return column_width_strategy_min;
-    case ColumnWidth::Strategy::Fix:
+    case ColumnWidth::EStrategy::FIX:
       return column_width_strategy_fix;
   }
 }
 
-row_height_strategy toLibRowHeightStrategy(RowHeight::Strategy type)
+row_height_strategy toLibRowHeightStrategy(RowHeight::EStrategy type)
 {
   switch (type)
   {
-    case RowHeight::Strategy::FillContainer:
+    case RowHeight::EStrategy::FILL_CONTAINER:
       return row_height_strategy_fill;
-    case RowHeight::Strategy::FillContent:
+    case RowHeight::EStrategy::FILL_CONTENT:
       return row_height_strategy_fit;
-    case RowHeight::Strategy::Fixed:
+    case RowHeight::EStrategy::FIXED:
       return row_height_strategy_fix;
   }
 }
 
-align toLibAlign(AlignStyle type)
+align toLibAlign(EAlignStyle type)
 {
   switch (type)
   {
-    case AlignStyle::Start:
+    case EAlignStyle::START:
       return align_start;
-    case AlignStyle::Center:
+    case EAlignStyle::CENTER:
       return align_center;
-    case AlignStyle::End:
+    case EAlignStyle::END:
       return align_end;
   }
 }
 
-item_pos_strategy toLibItemPosStrategy(GridItemPos::Strategy type)
+item_pos_strategy toLibItemPosStrategy(GridItemPos::EStrategy type)
 {
   switch (type)
   {
-    case GridItemPos::Strategy::Auto:
+    case GridItemPos::EStrategy::AUTO:
       return item_pos_strategy_auto;
-    case GridItemPos::Strategy::Fix:
+    case GridItemPos::EStrategy::FIX:
       return item_pos_strategy_fix;
   }
 }
 
-length_unit toLibLengthUnit(Length::Types type)
+length_unit toLibLengthUnit(Length::ETypes type)
 {
   switch (type)
   {
-    case Length::Types::px:
+    case Length::ETypes::PX:
       return length_unit_point;
-    case Length::Types::percent:
+    case Length::ETypes::PERCENT:
       return length_unit_percent;
-    case Length::Types::fit_content:
+    case Length::ETypes::FIT_CONTENT:
       // todo
       ASSERT(false);
       return length_unit_percent;
@@ -468,11 +468,11 @@ void AutoLayout::frameChanged()
     auto newSize = sharedView->frame().size;
     if (newSize != frame.size)
     {
-      // todo, old type is percent
-      sharedRule->width.value.types = Rule::Length::Types::px;
+      // todo, old type is PERCENT
+      sharedRule->width.value.types = Rule::Length::ETypes::PX;
       sharedRule->width.value.value = newSize.width;
 
-      sharedRule->height.value.types = Rule::Length::Types::px;
+      sharedRule->height.value.types = Rule::Length::ETypes::PX;
       sharedRule->height.value.value = newSize.height;
 
       if (sharedRule->isFlexConatiner() || sharedRule->isGridConatiner())
@@ -686,7 +686,7 @@ void AutoLayout::configureGridContainer(GridLayout* layout)
 {
   std::optional<uint32_t> minRow;
   auto columnCount = layout->expand_strategy.column_count;
-  if (layout->expand_strategy.strategy == ExpandStrategy::Strategy::Fix_column)
+  if (layout->expand_strategy.strategy == ExpandStrategy::EStrategy::FIX_COLUMN)
   {
     minRow = layout->expand_strategy.min_row;
   }

@@ -24,14 +24,14 @@ class Daruma
 {
   std::shared_ptr<VGG::Model::Loader> m_loader;
 
-  std::unordered_map<std::string, std::string> m_memory_code; // file_name: code_content
-  json m_event_listeners;
+  std::unordered_map<std::string, std::string> m_memoryCode; // fileName: code_content
+  json m_eventListeners;
 
   // original model
   JsonDocumentPtr m_designDoc;
   MakeJsonDocFn m_makeDesignDocFn;
-  JsonDocumentPtr m_layout_doc;
-  MakeJsonDocFn m_make_layout_doc_fn;
+  JsonDocumentPtr m_layoutDoc;
+  MakeJsonDocFn m_makeLayoutDocFn;
 
   // runtime view model, symbol instance expanded
   JsonDocumentPtr m_runtimeDesignDoc;
@@ -62,13 +62,13 @@ public:
   }
 
   // event listener
-  void addEventListener(const std::string& json_pointer,
+  void addEventListener(const std::string& jsonPointer,
                         const std::string& type,
                         const std::string& code);
-  void removeEventListener(const std::string& json_pointer,
+  void removeEventListener(const std::string& jsonPointer,
                            const std::string& type,
                            const std::string& code);
-  auto getEventListeners(const std::string& json_pointer) -> ListenersType;
+  auto getEventListeners(const std::string& jsonPointer) -> ListenersType;
 
   // todo, make sure the wasm files (*.mjs *.wasm) are in the correct directory or url
 
@@ -76,11 +76,11 @@ public:
   rxcpp::observable<VGG::ModelEventPtr> getObservable();
 
 private:
-  bool load_files();
+  bool loadFiles();
 
-  std::string get_code(const std::string& file_name);
+  std::string getCode(const std::string& fileName);
 
-  std::string uuid_for(const std::string& content);
+  std::string uuidFor(const std::string& content);
 };
 
 } // namespace VGG

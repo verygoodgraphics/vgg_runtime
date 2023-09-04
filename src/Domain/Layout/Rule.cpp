@@ -39,9 +39,9 @@ constexpr auto K_VALUE = "value";
 constexpr auto K_WIDTH = "width";
 
 template<class T>
-void get_position_from_json(const nlohmann::json& json, T& obj)
+void getPositionFromJson(const nlohmann::json& json, T& obj)
 {
-  obj.position.value = static_cast<Position::Types>(json.at(K_POSITION).at(K_VALUE).get<int>());
+  obj.position.value = static_cast<Position::ETypes>(json.at(K_POSITION).at(K_VALUE).get<int>());
   if (json.contains(K_TOP))
   {
     obj.top = json[K_TOP].get<Top>();
@@ -68,7 +68,7 @@ void from_json(const nlohmann::json& json, FlexboxItem& obj)
 {
   obj.flex_grow = json.at(K_FLEX_GROW);
 
-  get_position_from_json(json, obj);
+  getPositionFromJson(json, obj);
 }
 
 void to_json(nlohmann::json& json, const GridItem& obj)
@@ -84,7 +84,7 @@ void from_json(const nlohmann::json& json, GridItem& obj)
   obj.row_align = json.at(K_ROW_ALIGN);
   obj.column_align = json.at(K_COLUMN_ALIGN);
 
-  get_position_from_json(json, obj);
+  getPositionFromJson(json, obj);
 }
 
 void to_json(nlohmann::json& json, const Padding& obj)

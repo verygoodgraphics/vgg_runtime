@@ -28,12 +28,12 @@ class ControllerTestSuite : public ::testing::Test
 {
 protected:
   std::shared_ptr<Controller> m_sut;
-  std::shared_ptr<NativeComposer> m_native_composer;
-  std::shared_ptr<RunLoop> m_run_loop = std::make_shared<RunLoop>();
-  std::shared_ptr<MockPresenter> m_mock_presenter = std::make_shared<MockPresenter>();
+  std::shared_ptr<NativeComposer> m_nativeComposer;
+  std::shared_ptr<RunLoop> m_runLoop = std::make_shared<RunLoop>();
+  std::shared_ptr<MockPresenter> m_mockPresenter = std::make_shared<MockPresenter>();
 
-  rxcpp::subjects::subject<VGG::UIEventPtr> m_fake_view_subject;
-  bool m_exit_loop = false;
+  rxcpp::subjects::subject<VGG::UIEventPtr> m_fakeViewSubject;
+  bool m_exitLoop = false;
 
   void SetUp() override
   {
@@ -41,74 +41,74 @@ protected:
 
   void TearDown() override
   {
-    if (m_native_composer)
+    if (m_nativeComposer)
     {
-      m_native_composer->teardown();
+      m_nativeComposer->teardown();
     }
   }
 
-  void setup_sdk_with_local_dic(bool catchJsException = false)
+  void setupSdkWithLocalDic(bool catchJsException = false)
   {
-    m_native_composer.reset(
+    m_nativeComposer.reset(
       new NativeComposer("./testDataDir/fake-sdk/vgg-sdk.esm.mjs", catchJsException));
-    m_native_composer->setup();
+    m_nativeComposer->setup();
   }
 
-  void setup_sdk_with_remote_dic(bool catchJsException = false)
+  void setupSdkWithRemoteDic(bool catchJsException = false)
   {
-    m_native_composer.reset(new NativeComposer("./asset/vgg-sdk.esm.mjs", catchJsException));
-    m_native_composer->setup();
+    m_nativeComposer.reset(new NativeComposer("./asset/vgg-sdk.esm.mjs", catchJsException));
+    m_nativeComposer->setup();
   }
 
-  void setup_using_s5_sdk(bool catchJsException = false)
+  void setupUsingS5Sdk(bool catchJsException = false)
   {
-    m_native_composer.reset(
+    m_nativeComposer.reset(
       new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js", catchJsException));
-    m_native_composer->setup();
+    m_nativeComposer->setup();
   }
 
-  void setup_sut()
+  void setupSut()
   {
-    EXPECT_CALL(*m_mock_presenter, getObservable())
-      .WillOnce(Return(m_fake_view_subject.get_observable()));
-    m_sut.reset(new Controller(m_run_loop, m_mock_presenter));
+    EXPECT_CALL(*m_mockPresenter, getObservable())
+      .WillOnce(Return(m_fakeViewSubject.get_observable()));
+    m_sut.reset(new Controller(m_runLoop, m_mockPresenter));
   }
 
-  void loop_until_exit()
+  void loopUntilExit()
   {
-    while (!m_exit_loop)
+    while (!m_exitLoop)
     {
-      m_run_loop->dispatch();
+      m_runLoop->dispatch();
     }
   }
 
-  void loop_times(int times)
+  void loopTimes(int times)
   {
     while (times--)
     {
-      m_run_loop->dispatch();
+      m_runLoop->dispatch();
     }
   }
 
-  void mock_click(const std::string& path, int button = 0)
+  void mockClick(const std::string& path, int button = 0)
   {
-    m_fake_view_subject.get_subscriber().on_next(
+    m_fakeViewSubject.get_subscriber().on_next(
       UIEventPtr{ new MouseEvent{ path, UIEventType::click, button } });
   }
 
-  void mock_keydown(const std::string& path)
+  void mockKeydown(const std::string& path)
   {
-    m_fake_view_subject.get_subscriber().on_next(
+    m_fakeViewSubject.get_subscriber().on_next(
       UIEventPtr{ new KeyboardEvent{ path, UIEventType::keydown, 'a' } });
   }
 
-  void mock_touch(const std::string& path)
+  void mockTouch(const std::string& path)
   {
-    m_fake_view_subject.get_subscriber().on_next(
+    m_fakeViewSubject.get_subscriber().on_next(
       UIEventPtr{ new TouchEvent{ path, UIEventType::touchstart } });
   }
 
-  auto get_daruma()
+  auto getDaruma()
   {
     return DarumaContainer().get();
   }
@@ -117,82 +117,82 @@ protected:
 TEST_F(ControllerTestSuite, Smoke)
 {
   // Given
-  setup_sdk_with_local_dic();
+  setupSdkWithLocalDic();
   SKIP_LOCAL_TEST
-  std::string file_path = "testDataDir/vgg-daruma.zip";
-  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>([&](ModelEventPtr evt) {});
-  EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
-  setup_sut();
+  std::string filePath = "testDataDir/vgg-daruma.zip";
+  auto fakeModelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>([&](ModelEventPtr evt) {});
+  EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
+  setupSut();
 
   // When
-  auto ret = m_sut->start(file_path);
+  auto ret = m_sut->start(filePath);
 
   // Then
   EXPECT_TRUE(ret);
   // Then
-  auto vgg_work = get_daruma();
-  EXPECT_TRUE(vgg_work);
+  auto vggWork = getDaruma();
+  EXPECT_TRUE(vggWork);
 }
 
 TEST_F(ControllerTestSuite, OnClick_observer)
 {
   // Given
-  setup_sdk_with_local_dic();
+  setupSdkWithLocalDic();
   SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
-  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+  auto fakeModelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       type = evt->type;
-      m_exit_loop = true;
+      m_exitLoop = true;
     });
 
-  EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
-  setup_sut();
-  std::string file_path = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->start(file_path);
+  EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
+  setupSut();
+  std::string filePath = "testDataDir/vgg-daruma.zip";
+  auto ret = m_sut->start(filePath);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = get_daruma();
-  auto design_doc_json = vgg_work->designDoc()->content();
+  auto vggWork = getDaruma();
+  auto designDocJson = vggWork->designDoc()->content();
 
   // When
-  mock_click("/artboard/layers/0/childObjects");
-  loop_until_exit();
+  mockClick("/artboard/layers/0/childObjects");
+  loopUntilExit();
 
   // Then
   EXPECT_TRUE(type == ModelEventType::Delete);
 
-  auto new_design_doc_json = vgg_work->designDoc()->content();
-  EXPECT_FALSE(design_doc_json == new_design_doc_json);
+  auto newDesignDocJson = vggWork->designDoc()->content();
+  EXPECT_FALSE(designDocJson == newDesignDocJson);
 }
 
 TEST_F(ControllerTestSuite, Validator_reject_deletion)
 {
   // Given
-  setup_sdk_with_local_dic();
+  setupSdkWithLocalDic();
   SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
-  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+  auto fakeModelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       type = evt->type;
-      m_exit_loop = true;
+      m_exitLoop = true;
     });
-  EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
-  setup_sut();
-  std::string file_path = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->start(file_path, design_doc_schema_file);
+  EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
+  setupSut();
+  std::string filePath = "testDataDir/vgg-daruma.zip";
+  auto ret = m_sut->start(filePath, design_doc_schema_file);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = get_daruma();
-  auto design_doc_json = vgg_work->designDoc()->content();
+  auto vggWork = getDaruma();
+  auto designDocJson = vggWork->designDoc()->content();
 
   // When
-  mock_click("/artboard/layers/0/childObjects");
-  loop_times(100);
+  mockClick("/artboard/layers/0/childObjects");
+  loopTimes(100);
 
   // Then
   EXPECT_TRUE(type != ModelEventType::Delete);
@@ -201,29 +201,29 @@ TEST_F(ControllerTestSuite, Validator_reject_deletion)
 TEST_F(ControllerTestSuite, DidUpdate)
 {
   // Given
-  setup_sdk_with_local_dic();
+  setupSdkWithLocalDic();
   SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
-  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+  auto fakeModelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       type = evt->type;
-      auto udpate_event_ptr = static_cast<ModelEventUpdate*>(evt.get());
-      m_exit_loop = true;
+      auto udpateEventPtr = static_cast<ModelEventUpdate*>(evt.get());
+      m_exitLoop = true;
     });
-  EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
-  setup_sut();
-  std::string file_path = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->start(file_path, design_doc_schema_file);
+  EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
+  setupSut();
+  std::string filePath = "testDataDir/vgg-daruma.zip";
+  auto ret = m_sut->start(filePath, design_doc_schema_file);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = get_daruma();
-  auto design_doc_json = vgg_work->designDoc()->content();
+  auto vggWork = getDaruma();
+  auto designDocJson = vggWork->designDoc()->content();
 
   // When
-  mock_click("/artboard/layers");
-  loop_until_exit();
+  mockClick("/artboard/layers");
+  loopUntilExit();
 
   // Then
   EXPECT_TRUE(type == ModelEventType::Update);
@@ -232,29 +232,29 @@ TEST_F(ControllerTestSuite, DidUpdate)
 TEST_F(ControllerTestSuite, DidDelete)
 {
   // Given
-  setup_sdk_with_local_dic();
+  setupSdkWithLocalDic();
   SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
-  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+  auto fakeModelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       type = evt->type;
-      auto delete_event_ptr = static_cast<ModelEventDelete*>(evt.get());
-      m_exit_loop = true;
+      auto deleteEventPtr = static_cast<ModelEventDelete*>(evt.get());
+      m_exitLoop = true;
     });
-  EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
-  setup_sut();
-  std::string file_path = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->start(file_path, design_doc_schema_file);
+  EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
+  setupSut();
+  std::string filePath = "testDataDir/vgg-daruma.zip";
+  auto ret = m_sut->start(filePath, design_doc_schema_file);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = get_daruma();
-  auto design_doc_json = vgg_work->designDoc()->content();
+  auto vggWork = getDaruma();
+  auto designDocJson = vggWork->designDoc()->content();
 
   // When
-  mock_click("/artboard/layers/0");
-  loop_until_exit();
+  mockClick("/artboard/layers/0");
+  loopUntilExit();
 
   // Then
   EXPECT_TRUE(type == ModelEventType::Delete);
@@ -263,29 +263,29 @@ TEST_F(ControllerTestSuite, DidDelete)
 TEST_F(ControllerTestSuite, DidAdd_no_validator)
 {
   // Given
-  setup_sdk_with_local_dic();
+  setupSdkWithLocalDic();
   SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
-  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+  auto fakeModelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       type = evt->type;
-      auto add_event_ptr = static_cast<ModelEventAdd*>(evt.get());
-      m_exit_loop = true;
+      auto addEventPtr = static_cast<ModelEventAdd*>(evt.get());
+      m_exitLoop = true;
     });
-  EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
-  setup_sut();
-  std::string file_path = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->start(file_path);
+  EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
+  setupSut();
+  std::string filePath = "testDataDir/vgg-daruma.zip";
+  auto ret = m_sut->start(filePath);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = get_daruma();
-  auto design_doc_json = vgg_work->designDoc()->content();
+  auto vggWork = getDaruma();
+  auto designDocJson = vggWork->designDoc()->content();
 
   // When
-  mock_click("/fake/add");
-  loop_until_exit();
+  mockClick("/fake/add");
+  loopUntilExit();
 
   //
 
@@ -298,27 +298,27 @@ TEST_F(ControllerTestSuite, DidAdd_color)
   SKIP_S3_DEPENDENT_TEST
 
   // Given
-  setup_sdk_with_remote_dic();
+  setupSdkWithRemoteDic();
 
   auto type = ModelEventType::Invalid;
-  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+  auto fakeModelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       type = evt->type;
-      m_exit_loop = true;
+      m_exitLoop = true;
     });
-  EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
-  setup_sut();
-  std::string file_path = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->start(file_path, design_doc_schema_file);
+  EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
+  setupSut();
+  std::string filePath = "testDataDir/vgg-daruma.zip";
+  auto ret = m_sut->start(filePath, design_doc_schema_file);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = get_daruma();
-  auto design_doc_json = vgg_work->designDoc()->content();
+  auto vggWork = getDaruma();
+  auto designDocJson = vggWork->designDoc()->content();
 
   // When
-  mock_click("/fake/add_color");
-  loop_until_exit();
+  mockClick("/fake/add_color");
+  loopUntilExit();
 
   // Then
   EXPECT_TRUE(type == ModelEventType::Add);
@@ -327,31 +327,31 @@ TEST_F(ControllerTestSuite, DidAdd_color)
 TEST_F(ControllerTestSuite, add_event_listener)
 {
   // Given
-  setup_sdk_with_local_dic();
+  setupSdkWithLocalDic();
   SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
-  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+  auto fakeModelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       type = evt->type;
-      m_exit_loop = true;
+      m_exitLoop = true;
     });
-  EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
-  setup_sut();
-  std::string file_path = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->start(file_path);
+  EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
+  setupSut();
+  std::string filePath = "testDataDir/vgg-daruma.zip";
+  auto ret = m_sut->start(filePath);
   EXPECT_TRUE(ret);
 
   // When
-  mock_click("/fake/add_event_listener");
+  mockClick("/fake/add_event_listener");
 
   //
-  loop_until_exit(); // add 1st listener
-  m_exit_loop = false;
+  loopUntilExit(); // add 1st listener
+  m_exitLoop = false;
   EXPECT_TRUE(type == ModelEventType::ListenerDidAdd);
 
-  loop_until_exit(); // add 2nd listener
+  loopUntilExit(); // add 2nd listener
 
   // Then
   EXPECT_TRUE(type == ModelEventType::ListenerDidAdd);
@@ -363,28 +363,28 @@ TEST_F(ControllerTestSuite, add_event_listener)
 TEST_F(ControllerTestSuite, eval_added_event_listener)
 {
   // Given
-  setup_sdk_with_local_dic();
+  setupSdkWithLocalDic();
   SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
-  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+  auto fakeModelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       type = evt->type;
-      m_exit_loop = true;
+      m_exitLoop = true;
     });
-  EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
-  setup_sut();
-  std::string file_path = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->start(file_path);
+  EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
+  setupSut();
+  std::string filePath = "testDataDir/vgg-daruma.zip";
+  auto ret = m_sut->start(filePath);
   EXPECT_TRUE(ret);
 
-  mock_click("/fake/add_event_listener");
-  loop_until_exit(); // loop until added
+  mockClick("/fake/add_event_listener");
+  loopUntilExit(); // loop until added
   EXPECT_TRUE(type == ModelEventType::ListenerDidAdd);
 
   // When
-  mock_click("/js/fake/run_added_listener");
+  mockClick("/js/fake/run_added_listener");
 
   // wait for evaluating
   std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -396,33 +396,33 @@ TEST_F(ControllerTestSuite, eval_added_event_listener)
 TEST_F(ControllerTestSuite, remove_event_listener)
 {
   // Given
-  setup_sdk_with_local_dic();
+  setupSdkWithLocalDic();
   SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
-  auto recv_evt_count = 0;
-  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+  auto recvEvtCount = 0;
+  auto fakeModelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       type = evt->type;
 
-      recv_evt_count++;
-      if (recv_evt_count == 2)
+      recvEvtCount++;
+      if (recvEvtCount == 2)
       {
-        m_exit_loop = true;
+        m_exitLoop = true;
       }
     });
-  EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
-  setup_sut();
-  std::string file_path = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->start(file_path);
+  EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
+  setupSut();
+  std::string filePath = "testDataDir/vgg-daruma.zip";
+  auto ret = m_sut->start(filePath);
   EXPECT_TRUE(ret);
 
   // When
-  mock_click("/fake/remove_event_listener");
+  mockClick("/fake/remove_event_listener");
 
   //
-  loop_until_exit();
+  loopUntilExit();
 
   // Then
   EXPECT_TRUE(type == ModelEventType::ListenerDidRemove);
@@ -431,27 +431,27 @@ TEST_F(ControllerTestSuite, remove_event_listener)
 TEST_F(ControllerTestSuite, get_event_listeners)
 {
   // Given
-  setup_sdk_with_local_dic();
+  setupSdkWithLocalDic();
   SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
-  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+  auto fakeModelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       type = evt->type;
 
-      m_exit_loop = true;
+      m_exitLoop = true;
     });
-  EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
-  setup_sut();
-  std::string file_path = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->start(file_path);
+  EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
+  setupSut();
+  std::string filePath = "testDataDir/vgg-daruma.zip";
+  auto ret = m_sut->start(filePath);
   EXPECT_TRUE(ret);
 
   // When
-  mock_click("/fake/get_event_listeners");
+  mockClick("/fake/get_event_listeners");
 
-  loop_until_exit(); // loop until added
+  loopUntilExit(); // loop until added
   EXPECT_TRUE(type == ModelEventType::ListenerDidAdd);
 
   // wait for evaluating
@@ -464,26 +464,26 @@ TEST_F(ControllerTestSuite, get_event_listeners)
 TEST_F(ControllerTestSuite, unhandled_js_error)
 {
   // Given
-  setup_sdk_with_local_dic(true); // enable catch exception
+  setupSdkWithLocalDic(true); // enable catch exception
   SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
-  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+  auto fakeModelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       type = evt->type;
 
-      m_exit_loop = true;
+      m_exitLoop = true;
     });
-  EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
-  setup_sut();
+  EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
+  setupSut();
 
-  std::string file_path = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->start(file_path);
+  std::string filePath = "testDataDir/vgg-daruma.zip";
+  auto ret = m_sut->start(filePath);
   EXPECT_TRUE(ret);
 
   // When
-  mock_click("/fake/throw_error");
+  mockClick("/fake/throw_error");
 
   // wait for evaluating
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -497,26 +497,26 @@ TEST_F(ControllerTestSuite, event_listener_example)
   SKIP_S3_DEPENDENT_TEST
 
   // Given
-  setup_sdk_with_remote_dic();
+  setupSdkWithRemoteDic();
 
   auto type = ModelEventType::Invalid;
-  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+  auto fakeModelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       type = evt->type;
-      m_exit_loop = true;
+      m_exitLoop = true;
     });
-  EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
-  setup_sut();
-  std::string file_path = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->start(file_path, design_doc_schema_file);
+  EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
+  setupSut();
+  std::string filePath = "testDataDir/vgg-daruma.zip";
+  auto ret = m_sut->start(filePath, design_doc_schema_file);
   EXPECT_TRUE(ret);
 
-  auto vgg_work = get_daruma();
-  auto design_doc_json = vgg_work->designDoc()->content();
+  auto vggWork = getDaruma();
+  auto designDocJson = vggWork->designDoc()->content();
 
   // When
-  mock_click("/fake/event_listener_example");
+  mockClick("/fake/event_listener_example");
 
   // wait for evaluating
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -528,38 +528,38 @@ TEST_F(ControllerTestSuite, event_listener_example)
 TEST_F(ControllerTestSuite, handle_events)
 {
   // Given
-  setup_using_s5_sdk();
+  setupUsingS5Sdk();
 
   int times = 0;
   auto type = ModelEventType::Invalid;
-  constexpr auto expect_times = 4;
-  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+  constexpr auto EXPECT_TIMES = 4;
+  auto fakeModelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       times++;
 
       type = evt->type;
-      m_exit_loop = times == expect_times;
+      m_exitLoop = times == EXPECT_TIMES;
     });
 
-  EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
-  EXPECT_CALL(*m_mock_presenter, setModel(_));
-  setup_sut();
-  std::string file_path = "testDataDir/vgg-daruma-2";
-  auto ret = m_sut->start(file_path);
+  EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
+  EXPECT_CALL(*m_mockPresenter, setModel(_));
+  setupSut();
+  std::string filePath = "testDataDir/vgg-daruma-2";
+  auto ret = m_sut->start(filePath);
   EXPECT_TRUE(ret);
 
   // When
-  mock_click("/fake/handle_event");
-  mock_click("/fake/handle_event", 2);
-  mock_keydown("/fake/handle_event");
-  mock_touch("/fake/handle_event");
+  mockClick("/fake/handle_event");
+  mockClick("/fake/handle_event", 2);
+  mockKeydown("/fake/handle_event");
+  mockTouch("/fake/handle_event");
 
-  // loop_times
+  // loopTimes
   //  10000: error
   // 100000: success
-  // loop_times(100000);
-  loop_until_exit();
+  // loopTimes(100000);
+  loopUntilExit();
 
   // Then
 }
@@ -567,32 +567,32 @@ TEST_F(ControllerTestSuite, handle_events)
 TEST_F(ControllerTestSuite, handle_event_keyboard)
 {
   // Given
-  setup_using_s5_sdk();
+  setupUsingS5Sdk();
 
-  constexpr auto expect_times = 1;
+  constexpr auto EXPECT_TIMES = 1;
   auto type = ModelEventType::Invalid;
-  auto fake_model_observer = rxcpp::make_observer_dynamic<ModelEventPtr>(
+  auto fakeModelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>(
     [&](ModelEventPtr evt)
     {
       type = evt->type;
-      m_exit_loop = true;
+      m_exitLoop = true;
     });
 
-  EXPECT_CALL(*m_mock_presenter, getModelObserver()).WillOnce(ReturnRef(fake_model_observer));
-  EXPECT_CALL(*m_mock_presenter, setModel(_));
-  setup_sut();
-  std::string file_path = "testDataDir/vgg-daruma-2";
-  auto ret = m_sut->start(file_path);
+  EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
+  EXPECT_CALL(*m_mockPresenter, setModel(_));
+  setupSut();
+  std::string filePath = "testDataDir/vgg-daruma-2";
+  auto ret = m_sut->start(filePath);
   EXPECT_TRUE(ret);
 
   // When
-  mock_keydown("/fake/handle_event");
+  mockKeydown("/fake/handle_event");
 
-  // loop_times
+  // loopTimes
   //  10000: error
   // 100000: success
-  // loop_times(100000);
-  loop_until_exit();
+  // loopTimes(100000);
+  loopUntilExit();
 
   // Then
 }

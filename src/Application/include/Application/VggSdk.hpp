@@ -29,26 +29,26 @@ public:
 
   // design document
   const std::string designDocument(IndexType index = main_or_editor_daruma_index);
-  void designDocumentAddAt(const std::string& json_pointer,
+  void designDocumentAddAt(const std::string& jsonPointer,
                            const std::string& value,
                            IndexType index = main_or_editor_daruma_index);
-  void designDocumentReplaceAt(const std::string& json_pointer,
+  void designDocumentReplaceAt(const std::string& jsonPointer,
                                const std::string& value,
                                IndexType index = main_or_editor_daruma_index);
-  void designDocumentDeleteAt(const std::string& json_pointer,
+  void designDocumentDeleteAt(const std::string& jsonPointer,
                               IndexType index = main_or_editor_daruma_index);
 
   // event listener
   // event types: https://developer.mozilla.org/en-US/docs/Web/API/Element#events
-  void addEventListener(const std::string& element_path,
-                        const std::string& event_type,
-                        const std::string& listener_code,
+  void addEventListener(const std::string& elementPath,
+                        const std::string& eventType,
+                        const std::string& listenerCode,
                         IndexType index = main_or_editor_daruma_index);
-  void removeEventListener(const std::string& element_path,
-                           const std::string& event_type,
-                           const std::string& listener_code,
+  void removeEventListener(const std::string& elementPath,
+                           const std::string& eventType,
+                           const std::string& listenerCode,
                            IndexType index = main_or_editor_daruma_index);
-  ListenersType getEventListeners(const std::string& element_path,
+  ListenersType getEventListeners(const std::string& elementPath,
                                   IndexType index = main_or_editor_daruma_index);
 
   // editor

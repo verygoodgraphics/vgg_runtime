@@ -23,26 +23,26 @@ class ViewModel;
 class Controller : public std::enable_shared_from_this<Controller>
 {
 public:
-  enum class RunMode
+  enum class ERunMode
   {
-    NormalMode,
-    EditMode
+    NORMAL_MODE,
+    EDIT_MODE
   };
 
 private:
-  std::string m_design_schema_file_path;
-  std::shared_ptr<RunLoop> m_run_loop;
+  std::string m_designSchemaFilePath;
+  std::shared_ptr<RunLoop> m_runLoop;
   std::shared_ptr<Presenter> m_presenter;
 
-  RunMode m_mode;
+  ERunMode m_mode;
   std::shared_ptr<Daruma> m_model;
-  std::shared_ptr<Daruma> m_edit_model;
+  std::shared_ptr<Daruma> m_editModel;
   std::shared_ptr<Layout::Layout> m_layout;
 
 public:
   Controller(std::shared_ptr<RunLoop> runLoop,
              std::shared_ptr<Presenter> presenter,
-             RunMode mode = RunMode::NormalMode);
+             ERunMode mode = ERunMode::NORMAL_MODE);
   ~Controller() = default;
 
   bool start(const std::string& filePath,

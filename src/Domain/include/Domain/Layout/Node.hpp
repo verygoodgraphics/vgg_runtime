@@ -56,9 +56,9 @@ public:
     {
       if ((*it)->pointInside(point))
       {
-        if (auto target_view = (*it)->hitTest(point, hasEventListener))
+        if (auto targetNode = (*it)->hitTest(point, hasEventListener))
         {
-          return target_view;
+          return targetNode;
         }
       }
     }

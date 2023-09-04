@@ -25,8 +25,8 @@ TEST_F(StartRunningTestSuite, Smoke)
   // Given
   std::shared_ptr<Daruma> daruma{ new Daruma(Helper::RawJsonDocumentBuilder,
                                              Helper::RawJsonDocumentBuilder) };
-  std::string file_path = "testDataDir/layout/0_space_between/";
-  daruma->load(file_path);
+  std::string filePath = "testDataDir/layout/0_space_between/";
+  daruma->load(filePath);
 
   // When
   StartRunning sut{ daruma };

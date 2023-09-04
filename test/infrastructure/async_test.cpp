@@ -8,26 +8,26 @@ using namespace VGG;
 class VggAsyncTestSuite : public ::testing::Test
 {
 protected:
-  std::shared_ptr<RunLoop> m_run_loop;
-  bool m_exit_loop = false;
+  std::shared_ptr<RunLoop> m_runLoop;
+  bool m_exitLoop = false;
 
   void SetUp() override
   {
-    m_run_loop = std::make_shared<RunLoop>();
+    m_runLoop = std::make_shared<RunLoop>();
 
     AsyncWorkerFactory::setTaskWorkerFactory([]() { return rxcpp::observe_on_new_thread(); });
-    AsyncWorkerFactory::setResultWorkerFactory([run_loop = m_run_loop]()
+    AsyncWorkerFactory::setResultWorkerFactory([run_loop = m_runLoop]()
                                                { return run_loop->thread(); });
   }
   void TearDown() override
   {
   }
 
-  void loop_until_exit()
+  void loopUntilExit()
   {
-    while (!m_exit_loop)
+    while (!m_exitLoop)
     {
-      m_run_loop->dispatch();
+      m_runLoop->dispatch();
     }
   }
 };
@@ -48,7 +48,7 @@ TEST_F(VggAsyncTestSuite, Smoke)
                     auto result = fake_result;
                     return result;
                   },
-                  [fake_result, &exit = m_exit_loop, &current_thread_id](int result)
+                  [fake_result, &exit = m_exitLoop, &current_thread_id](int result)
                   {
                     auto result_thread_id = std::this_thread::get_id();
                     // Then
@@ -61,7 +61,7 @@ TEST_F(VggAsyncTestSuite, Smoke)
   // When
   sut();
 
-  loop_until_exit();
+  loopUntilExit();
 }
 
 TEST_F(VggAsyncTestSuite, Exception)
@@ -82,8 +82,8 @@ TEST_F(VggAsyncTestSuite, Exception)
 
       return fake_result;
     },
-    [fake_result, &exit = m_exit_loop, &current_thread_id](int result) { GTEST_FAIL(); },
-    [&exit = m_exit_loop, &current_thread_id](std::exception_ptr eptr)
+    [fake_result, &exit = m_exitLoop, &current_thread_id](int result) { GTEST_FAIL(); },
+    [&exit = m_exitLoop, &current_thread_id](std::exception_ptr eptr)
     {
       // Then
       auto result_thread_id = std::this_thread::get_id();
@@ -110,5 +110,5 @@ TEST_F(VggAsyncTestSuite, Exception)
   // When
   sut();
 
-  loop_until_exit();
+  loopUntilExit();
 }

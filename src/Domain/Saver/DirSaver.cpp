@@ -22,14 +22,14 @@ DirSaver::DirSaver(const std::string& modelDir)
 
 void DirSaver::visit(const std::string& path, const std::vector<char>& content)
 {
-  std::filesystem::path file_path{ m_model_dir };
-  file_path /= path;
+  std::filesystem::path filePath{ m_model_dir };
+  filePath /= path;
 
-  auto dirs{ file_path };
+  auto dirs{ filePath };
   dirs.remove_filename();
   fs::create_directories(dirs);
 
-  std::ofstream ofs{ file_path, std::ios::binary };
+  std::ofstream ofs{ filePath, std::ios::binary };
   if (ofs.is_open())
   {
     ofs.write(content.data(), content.size());
@@ -37,7 +37,7 @@ void DirSaver::visit(const std::string& path, const std::vector<char>& content)
   }
   else
   {
-    FAIL("#DirSaver::accept, unable to open file: %s, %s", file_path.c_str(), std::strerror(errno));
+    FAIL("#DirSaver::accept, unable to open file: %s, %s", filePath.c_str(), std::strerror(errno));
   }
 }
 

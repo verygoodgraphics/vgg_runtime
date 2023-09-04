@@ -12,7 +12,7 @@
 constexpr auto DARUMA_FILE_OR_DIRECTORY = "daruma";
 
 using namespace VGG;
-#define main main
+#define main main // NOLINT
 int main(int argc, char** argv)
 {
   argparse::ArgumentParser program("vgg", "0.1");
@@ -37,21 +37,21 @@ int main(int argc, char** argv)
   }
 
 #ifdef NDEBUG
-  MainComposer main_composer{ new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js") };
+  MainComposer mainComposer{ new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js") };
 #else
-  MainComposer main_composer{ new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js", false) };
+  MainComposer mainComposer{ new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js", false) };
 #endif
 
   SDLRuntime* app = App<SDLRuntime>::getInstance(1920, 1080, "VGG");
   ASSERT(app);
 
-  app->setController(main_composer.controller());
-  app->setView(main_composer.view());
+  app->setController(mainComposer.controller());
+  app->setView(mainComposer.view());
 
   auto darumaFileOrDir = program.get<std::string>(DARUMA_FILE_OR_DIRECTORY);
-  main_composer.controller()->start(darumaFileOrDir,
-                                    "../asset/vgg-format.json",
-                                    "../asset/vgg_layout.json");
+  mainComposer.controller()->start(darumaFileOrDir,
+                                   "../asset/vgg-format.json",
+                                   "../asset/vgg_layout.json");
 
   // if (auto file_to_edit = program.present("-e"))
   // {
@@ -62,11 +62,11 @@ int main(int argc, char** argv)
   // }
 
   // enter loop
-  constexpr int fps = 60;
+  constexpr int FPS = 60;
   while (!app->shouldExit())
   {
-    app->frame(fps);
-    main_composer.runLoop()->dispatch();
+    app->frame(FPS);
+    mainComposer.runLoop()->dispatch();
   }
   return 0;
 }

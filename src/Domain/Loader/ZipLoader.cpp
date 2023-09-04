@@ -64,8 +64,8 @@ Loader::ResourcesType ZipLoader::resources() const
         continue;
       }
 
-      std::string file_name{ zip_entry_name(m_zip_file) };
-      if (file_name.rfind(ResourcesDirWithSlash, 0) == 0)
+      std::string fileName{ zip_entry_name(m_zip_file) };
+      if (fileName.rfind(ResourcesDirWithSlash, 0) == 0)
       {
         void* buf = NULL;
         size_t bufsize;
@@ -74,7 +74,7 @@ Loader::ResourcesType ZipLoader::resources() const
 
         char* p_char = static_cast<char*>(buf);
         std::vector<char> content{ p_char, p_char + bufsize };
-        resources[file_name] = std::move(content);
+        resources[fileName] = std::move(content);
 
         free(buf);
       }

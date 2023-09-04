@@ -26,7 +26,6 @@ nlohmann::json ExpandSymbol::operator()()
   std::vector<std::string> instanceIdStack{};
   expandInstance(resultJson, instanceIdStack);
 
-
   return resultJson;
 }
 

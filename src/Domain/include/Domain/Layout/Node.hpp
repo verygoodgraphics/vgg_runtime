@@ -138,7 +138,9 @@ private:
     return { x, y };
   }
 
-  void scaleSubviews();
+  void scaleChildNodes(const Layout::Size& oldSize, const Layout::Size& newSize);
+  void scaleContour(float xScaleFactor, float yScaleFactor);
+  void scalePoint(nlohmann::json& json, const char* key, float xScaleFactor, float yScaleFactor);
 };
 
 } // namespace VGG

@@ -9,6 +9,7 @@
 #include <Scene/Scene.h>
 #include <ConfigMananger.h>
 #include "Application/AppRender.h"
+#include "Domain/Layout/ExpandSymbol.hpp"
 #include "Event/Event.h"
 #include "Event/EventListener.h"
 #include "Event/Keycode.h"
@@ -90,7 +91,8 @@ protected:
         Scene::setResRepo(data.Resource);
         try
         {
-          m_scene->loadFileContent(data.Format);
+          Layout::ExpandSymbol e(data.Format);
+          m_scene->loadFileContent(e());
           m_layer->addAppScene(m_scene);
           m_layer->setDrawPositionEnabled(true);
         }

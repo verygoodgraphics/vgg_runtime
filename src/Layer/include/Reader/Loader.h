@@ -368,7 +368,7 @@ class NlohmannBuilder
       [this, &j](std::string name, std::string guid)
       {
         auto p = std::make_shared<PaintNode>(std::move(name), VGG_MASTER, std::move(guid));
-        appendSymbolMaster(p);
+        // appendSymbolMaster(p);
         return p;
       },
       [this, &j](PaintNode* p)

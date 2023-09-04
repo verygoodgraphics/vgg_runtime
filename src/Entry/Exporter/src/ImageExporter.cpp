@@ -1,4 +1,5 @@
 #include <iostream>
+#include "Domain/include/Domain/Layout/ExpandSymbol.hpp"
 #include "ImageExporter.hpp"
 #include "ContextVk.hpp"
 // #include "ContextEGL.hpp"
@@ -111,7 +112,8 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
   FontManager::instance().setDefaultFontManager(fontCollectionName);
   std::vector<std::pair<std::string, std::vector<char>>> res;
   auto scene = std::make_shared<Scene>();
-  scene->loadFileContent(j);
+  Layout::ExpandSymbol e(j);
+  scene->loadFileContent(e());
   scene->setResRepo(resources);
   layer->addScene(scene);
   auto count = scene->frameCount();

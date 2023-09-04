@@ -37,18 +37,18 @@ public:
   std::shared_ptr<LayoutNode> layoutTree();
 
 private:
-  std::shared_ptr<LayoutNode> createOneLayoutView(const nlohmann::json& j,
+  std::shared_ptr<LayoutNode> createOneLayoutNode(const nlohmann::json& j,
                                                   nlohmann::json::json_pointer currentPath,
                                                   std::shared_ptr<LayoutNode> parent);
-  void createLayoutViews(const nlohmann::json& j,
+  void createLayoutNodes(const nlohmann::json& j,
                          nlohmann::json::json_pointer currentPath,
                          std::shared_ptr<LayoutNode> parent);
 
-  void createOneOrMoreLayoutViews(const nlohmann::json& j,
+  void createOneOrMoreLayoutNodes(const nlohmann::json& j,
                                   nlohmann::json::json_pointer currentPath,
                                   std::shared_ptr<LayoutNode> parent);
   void collectRules(const nlohmann::json& json);
-  void configureAutoLayout(std::shared_ptr<LayoutNode> view);
+  void configureAutoLayout(std::shared_ptr<LayoutNode> node);
 };
 
 } // namespace Layout

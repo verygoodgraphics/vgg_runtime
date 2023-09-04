@@ -38,11 +38,11 @@ void Layout::Layout::layout(Size size)
     auto frame = root->frame();
     frame.size = m_size;
     root->setFrame(frame);
-    for (auto& subview : root->children())
+    for (auto& node : root->children())
     {
-      auto frame = subview->frame();
+      auto frame = node->frame();
       frame.size = m_size;
-      subview->setFrame(frame);
+      node->setFrame(frame);
     }
 
     //
@@ -70,7 +70,7 @@ std::shared_ptr<LayoutNode> Layout::Layout::layoutTree()
   for (auto i = 0; i < designJson[K_FRAMES].size(); ++i)
   {
     auto path = framesPath / i;
-    createOneLayoutView(designJson[path], path, m_layoutTree);
+    createOneLayoutNode(designJson[path], path, m_layoutTree);
   }
 
   m_size = m_layoutTree->frame().size;
@@ -78,13 +78,13 @@ std::shared_ptr<LayoutNode> Layout::Layout::layoutTree()
   return m_layoutTree;
 }
 
-std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutView(const nlohmann::json& j,
+std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(const nlohmann::json& j,
                                                                 json::json_pointer currentPath,
                                                                 std::shared_ptr<LayoutNode> parent)
 {
   if (!j.is_object())
   {
-    WARN("create one layout view from json object, json is not object, return");
+    WARN("create one layout node from json object, json is not object, return");
     return nullptr;
   }
 
@@ -96,11 +96,11 @@ std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutView(const nlohmann::
   auto frame = j[K_FRAME].get<Rect>();
   frame.origin.y *= FLIP_Y_FACTOR;
 
-  auto layoutView = std::make_shared<LayoutNode>(currentPath.to_string(), frame);
-  layoutView->setViewModel(m_model->runtimeDesignDoc());
+  auto node = std::make_shared<LayoutNode>(currentPath.to_string(), frame);
+  node->setViewModel(m_model->runtimeDesignDoc());
   if (parent)
   {
-    parent->addChild(layoutView);
+    parent->addChild(node);
   }
 
   for (auto& [key, val] : j.items())
@@ -108,19 +108,19 @@ std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutView(const nlohmann::
     auto path = currentPath;
     path /= key;
 
-    createOneOrMoreLayoutViews(val, path, layoutView);
+    createOneOrMoreLayoutNodes(val, path, node);
   }
 
-  return layoutView;
+  return node;
 }
 
-void Layout::Layout::createLayoutViews(const nlohmann::json& j,
+void Layout::Layout::createLayoutNodes(const nlohmann::json& j,
                                        json::json_pointer currentPath,
                                        std::shared_ptr<LayoutNode> parent)
 {
   if (!j.is_array())
   {
-    WARN("create layout views from json array, json is not array, return");
+    WARN("create layout nodes from json array, json is not array, return");
     return;
   }
 
@@ -130,21 +130,21 @@ void Layout::Layout::createLayoutViews(const nlohmann::json& j,
     auto path = currentPath;
     path /= i;
 
-    createOneOrMoreLayoutViews(j[i], path, parent);
+    createOneOrMoreLayoutNodes(j[i], path, parent);
   }
 }
 
-void Layout::Layout::createOneOrMoreLayoutViews(const nlohmann::json& j,
+void Layout::Layout::createOneOrMoreLayoutNodes(const nlohmann::json& j,
                                                 json::json_pointer currentPath,
                                                 std::shared_ptr<LayoutNode> parent)
 {
   if (j.is_object())
   {
-    createOneLayoutView(j, currentPath, parent);
+    createOneLayoutNode(j, currentPath, parent);
   }
   else if (j.is_array())
   {
-    createLayoutViews(j, currentPath, parent);
+    createLayoutNodes(j, currentPath, parent);
   }
 }
 
@@ -169,14 +169,14 @@ void Layout::Layout::collectRules(const nlohmann::json& json)
   }
 }
 
-void Layout::Layout::configureAutoLayout(std::shared_ptr<LayoutNode> view)
+void Layout::Layout::configureAutoLayout(std::shared_ptr<LayoutNode> node)
 {
   std::shared_ptr<VGG::Layout::Internal::Rule::Rule> rule;
 
   auto& designJson = m_model->runtimeDesignDoc()->content();
-  if (view->path() != "/")
+  if (node->path() != "/")
   {
-    auto& json = designJson[nlohmann::json::json_pointer{ view->path() }];
+    auto& json = designJson[nlohmann::json::json_pointer{ node->path() }];
     if (json.contains(K_ID))
     {
       auto nodeId = json.at(K_ID).get<std::string>();
@@ -187,14 +187,14 @@ void Layout::Layout::configureAutoLayout(std::shared_ptr<LayoutNode> view)
     }
   }
 
-  auto autoLayout = view->createAutoLayout();
+  auto autoLayout = node->createAutoLayout();
   if (rule)
   {
     autoLayout->rule = rule;
-    view->configureAutoLayout();
+    node->configureAutoLayout();
   }
 
-  for (auto& child : view->children())
+  for (auto& child : node->children())
   {
     configureAutoLayout(child);
   }

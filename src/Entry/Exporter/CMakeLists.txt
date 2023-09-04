@@ -4,7 +4,7 @@ if(Vulkan_FOUND)
   set_target_properties(vgg_exporter PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
   find_package(Vulkan REQUIRED)
-  target_link_libraries(vgg_exporter PUBLIC vgg_layer Vulkan::Vulkan)
+  target_link_libraries(vgg_exporter PUBLIC vgg_layer Vulkan::Vulkan vgg_domain)
 
 
   target_include_directories(vgg_exporter PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

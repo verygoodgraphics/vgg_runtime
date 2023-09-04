@@ -150,11 +150,11 @@ void Scene::loadFileContent(const nlohmann::json& json)
   _->symbolIndex = 0;
   _->maskDirty = true;
   _->container = NlohmannBuilder::build(json);
-  for (const auto& s : _->container.symbols)
-  {
-    s_templateObjectTable[s->guid()] = s;
-  }
-  instantiateTemplates();
+  // for (const auto& s : _->container.symbols)
+  // {
+  //   s_templateObjectTable[s->guid()] = s;
+  // }
+  // instantiateTemplates();
 }
 
 void Scene::onRender(SkCanvas* canvas)

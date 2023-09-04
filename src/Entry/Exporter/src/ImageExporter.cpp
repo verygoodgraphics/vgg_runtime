@@ -2,7 +2,6 @@
 #include "Domain/include/Domain/Layout/ExpandSymbol.hpp"
 #include "ImageExporter.hpp"
 #include "ContextVk.hpp"
-// #include "ContextEGL.hpp"
 #include <Scene/VGGLayer.h>
 #include <Scene/Scene.h>
 #include <Core/FontManager.h>

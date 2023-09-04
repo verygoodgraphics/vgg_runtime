@@ -2,14 +2,18 @@
 #include "AppBase.hpp"
 #include "TestEventListener.h"
 #include "Entry/SDL/SDLImpl/AppSDLImpl.hpp"
+#ifdef VGG_USE_VULKAN
 #include "Entry/SDL/SDLImpl/AppSDLVkImpl.hpp"
+#endif
 #include <exception>
 using namespace VGG;
 using namespace VGG::app;
 namespace fs = std::filesystem;
 
 using AppSDLImpl = VGG::entry::AppSDLImpl;
+#ifdef VGG_USE_VULKAN
 using AppVkImpl = VGG::entry::AppSDLVkImpl;
+#endif
 using App = AppSDLImpl;
 
 #define main main

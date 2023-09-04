@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Scene/GraphicsContext.h>
+#include <Scene/ContextInfoVulkan.hpp>
 #include <Entry/Common/GPU/Vulkan/VulkanContext.hpp>
 
 namespace VGG::exporter

@@ -29,16 +29,15 @@ SkiaContext::SurfaceCreateProc vkSurfaceCreateProc()
 {
   return [](GrDirectContext* context, int w, int h, const ContextConfig& cfg)
   {
+    ASSERT(context);
     GrVkImageInfo vkImageInfo;
     vkImageInfo.fFormat = VK_FORMAT_R8G8B8A8_UNORM;
     GrBackendRenderTarget target(w, h, vkImageInfo);
-    return nullptr;
     SkImageInfo info = SkImageInfo::Make(w,
                                          h,
                                          SkColorType::kRGBA_8888_SkColorType,
                                          SkAlphaType::kPremul_SkAlphaType);
-    auto a = SkSurfaces::RenderTarget(context, skgpu::Budgeted::kYes, info);
-    // return a;
+    return SkSurfaces::RenderTarget(context, skgpu::Budgeted::kYes, info);
   };
 }
 
@@ -46,6 +45,10 @@ SkiaContext::ContextCreateProc vkContextCreateProc(ContextInfoVulkan* context)
 {
   return [context]()
   {
+    ASSERT(context->instance);
+    ASSERT(context->physicalDevice);
+    ASSERT(context->device);
+    ASSERT(context->queue);
     GrVkBackendContext vkContext;
     vkContext.fInstance = context->instance;
     vkContext.fPhysicalDevice = context->physicalDevice;

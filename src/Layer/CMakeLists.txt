@@ -30,10 +30,15 @@ target_include_directories(
   ${VGG_CONTRIB_RAPIDFUZZCPP_INCLUDE})
 
 find_package(Vulkan REQUIRED)
+  # find OpenGL library
+cmake_policy(SET CMP0072 NEW)
+find_package(OpenGL REQUIRED)
 
 target_include_directories(vgg_layer PUBLIC ${VGG_CONTRIB_JSON_INCLUDE})
-target_link_libraries(vgg_layer PUBLIC glm ${SKIA_LIBS} Vulkan::Vulkan)
-target_link_libraries(vgg_layer PRIVATE ${OPENGL_LIBRARIES} vgg_utility)
+# TODO:: make skia hidden from public
+target_link_libraries(vgg_layer PUBLIC ${SKIA_LIBS})
+
+target_link_libraries(vgg_layer PRIVATE ${OPENGL_LIBRARIES} vgg_utility Vulkan::Vulkan glm)
 set_target_properties(vgg_layer PROPERTIES BUILD_RPATH ${SKIA_LIB_DIR})
 set_target_properties(vgg_layer PROPERTIES POSITION_INDEPENDENT_CODE ON)
 

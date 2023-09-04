@@ -3,6 +3,8 @@
 
 #include "Scene/Zoomer.h"
 
+#include "core/SkCanvas.h"
+
 #include <SDL2/SDL.h>
 
 using namespace VGG;

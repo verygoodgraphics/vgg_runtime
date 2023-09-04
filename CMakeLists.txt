@@ -19,13 +19,8 @@ endif()
 
 # find system libs
 if (NOT EMSCRIPTEN)
-  # find OpenGL library
-  cmake_policy(SET CMP0072 NEW)
-  find_package(OpenGL REQUIRED)
-  message(STATUS "OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
-  message(STATUS "OPENGL_LIBRARIES: ${OPENGL_LIBRARIES}")
-
   # find SDL2 library
+  # REFACTOR:: SDL2 dependency is only need by SDL module.
   set(SDL2_BUILDING_LIBRARY ON)
   find_package(SDL2 REQUIRED)
   message(STATUS "SDL2_INCLUDE_DIRS: ${SDL2_INCLUDE_DIRS}")

@@ -122,16 +122,6 @@ private:
   ContextConfig m_ctxConfig;
   void initContextVK(const ContextInfoVulkan& ctx)
   {
-    // void* module = dlopen("libvulkan.dylib", RTLD_NOW | RTLD_LOCAL);
-    // if (!module)
-    //   module = dlopen("libvulkan.1.dylib", RTLD_NOW | RTLD_LOCAL);
-    // // if (!module)
-    auto module = dlopen("libvulkan.1.dylib", RTLD_NOW | RTLD_LOCAL);
-    ASSERT(module);
-    auto __vkGetInstanceProcAddr =
-      (PFN_vkGetInstanceProcAddr)dlsym(module, "vkGetInstanceProcAddr");
-
-    auto __vkGetDeviceProcAddr = (PFN_vkGetDeviceProcAddr)dlsym(module, "vkGetDeviceProcAddr");
     GrVkBackendContext vkContext;
     vkContext.fInstance = ctx.instance;
     vkContext.fPhysicalDevice = ctx.physicalDevice;
@@ -143,29 +133,22 @@ private:
         PFN_vkVoidFunction ptr = nullptr;
         if (instance == VK_NULL_HANDLE && dev == VK_NULL_HANDLE)
         {
-          ptr = __vkGetInstanceProcAddr(VK_NULL_HANDLE, name);
+          ptr = vkGetInstanceProcAddr(VK_NULL_HANDLE, name);
         }
         else if (instance == VK_NULL_HANDLE && dev != VK_NULL_HANDLE)
         {
-          ptr = __vkGetDeviceProcAddr(dev, name);
+          ptr = vkGetDeviceProcAddr(dev, name);
         }
         else if (instance != VK_NULL_HANDLE && dev == VK_NULL_HANDLE)
         {
-          ptr = __vkGetInstanceProcAddr(instance, name);
+          ptr = vkGetInstanceProcAddr(instance, name);
         }
         else
         {
-          ptr = __vkGetDeviceProcAddr(dev, name);
+          ptr = vkGetDeviceProcAddr(dev, name);
         }
-        // if (std::string(name) == "vkGetPhysicalDeviceProperties" && instance != VK_NULL_HANDLE)
-        // {
-        //   ptr = vkGetInstanceProcAddr(instance, name);
-        //   std::cout << "???" << name << std::endl;
-        // }
         if (!ptr)
-          DEBUG("[%d %d], extension [%s] required by skia is not satisfied",
-                (size_t)instance,
-                (size_t)dev,
+          DEBUG("xtension [%s] required by skia is not satisfied",
                 name);
         return ptr;
       });

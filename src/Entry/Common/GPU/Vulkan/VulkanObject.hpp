@@ -9,17 +9,16 @@
 #include <vulkan/vulkan_core.h>
 
 inline const std::vector<const char*> g_validationLayers = {
-  //"VK_LAYER_LUNARG_standard_validation"
+  //"VK_LAYER_LUNARG_standard_validation",
   "VK_LAYER_KHRONOS_validation"
 };
 // const std::vector<const char*> g_validationLayers = {};
-inline const std::vector<const char*> g_deviceExtensions = {
-  VK_KHR_SWAPCHAIN_EXTENSION_NAME
+inline const std::vector<const char*> g_deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME
 #ifdef VGG_HOST_macOS
-  ,
-  "VK_KHR_portability_subset",
-  "VK_KHR_get_memory_requirements2",
-  "VK_KHR_bind_memory2"
+                                                             ,
+                                                             "VK_KHR_portability_subset",
+                                                             "VK_KHR_get_memory_requirements2",
+                                                             "VK_KHR_bind_memory2"
 #endif
 };
 
@@ -74,7 +73,7 @@ struct VkInstanceObject : public std::enable_shared_from_this<VkInstanceObject>
 
     ci.pApplicationInfo = nullptr;
     ////Check validationLayers
-    if (true)
+    if (false)
     { // warning: If layer is enabled, the VK_LAYER_PATH must be set
       ci.enabledLayerCount = g_validationLayers.size();
       ci.ppEnabledLayerNames = g_validationLayers.data();

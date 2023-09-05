@@ -9,6 +9,7 @@
 #include <Scene/Scene.h>
 #include <ConfigMananger.h>
 #include "Application/AppRender.h"
+#include "Application/include/Application/AppRenderable.h"
 #include "Domain/Layout/ExpandSymbol.hpp"
 #include "Event/Event.h"
 #include "Event/EventListener.h"
@@ -18,8 +19,32 @@
 #include "loader.h"
 #include <filesystem>
 namespace fs = std::filesystem;
+
+using namespace VGG::app;
+
+class SkCanvas;
+class Editor : public VGG::app::AppRenderable
+{
+public:
+  Editor()
+  {
+  }
+
+  bool onEvent(UEvent e, void* userData) override
+  {
+    // Handle editor code herer
+    return true;
+  }
+
+protected:
+  void onRender(SkCanvas* canvas) override
+  {
+    // drawing here
+  }
+};
+
 template<typename App>
-class MyEventListener : public EventListener
+class MyEventListener : public VGG::app::EventListener
 {
   AppRender* m_layer{ nullptr };
   std::shared_ptr<AppScene> m_scene;
@@ -93,6 +118,8 @@ protected:
         {
           Layout::ExpandSymbol e(data.Format);
           m_scene->loadFileContent(e());
+          auto editor = std::make_shared<Editor>();
+          m_layer->addAppRenderable(editor);
           m_layer->addAppScene(m_scene);
           m_layer->setDrawPositionEnabled(true);
         }

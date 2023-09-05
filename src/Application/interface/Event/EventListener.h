@@ -2,7 +2,7 @@
 
 #include "Event.h"
 #include <memory>
-namespace VGG
+namespace VGG::app
 {
 class EventListener : public std::enable_shared_from_this<EventListener>
 {
@@ -10,6 +10,6 @@ public:
   virtual bool onEvent(UEvent e, void* userData) = 0;
   virtual ~EventListener() = default;
 };
-} // namespace VGG
+} // namespace VGG::app
 
 // general EventListener

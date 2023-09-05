@@ -3,6 +3,7 @@
 #include <Utility/interface/Log.h>
 #include <memory>
 #include <vector>
+#include <optional>
 
 namespace VGG::layer
 {

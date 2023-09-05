@@ -25,11 +25,10 @@ target_include_directories(vgg_layer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/interfac
 target_include_directories(
   vgg_layer PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/include
-  ${SDL2_INCLUDE_DIRS}/..
   ${VGG_CONTRIB_JSON_INCLUDE}
   ${VGG_CONTRIB_RAPIDFUZZCPP_INCLUDE})
 
-  # find OpenGL library
+# find OpenGL library
 cmake_policy(SET CMP0072 NEW)
 find_package(OpenGL REQUIRED)
 

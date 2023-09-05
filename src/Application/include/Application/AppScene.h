@@ -4,6 +4,9 @@
 #include "AppZoomer.h"
 #include "Scene/Scene.h"
 
+namespace VGG::app
+{
+
 class AppScene
   : public Scene
   , public EventListener
@@ -25,3 +28,4 @@ public:
     return false;
   }
 };
+} // namespace VGG::app

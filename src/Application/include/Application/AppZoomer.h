@@ -3,6 +3,10 @@
 #include "Application/interface/Event/EventListener.h"
 #include "Scene/Zoomer.h"
 #include "Application/interface/Event/EventAPI.h"
+
+namespace VGG::app
+{
+
 class AppZoomer
   : public Zoomer
   , public EventListener
@@ -38,3 +42,4 @@ public:
     return false;
   }
 };
+} // namespace VGG::app

@@ -1,11 +1,12 @@
 
 #include "Application/AppRender.h"
+#include "AppRenderable.h"
 #include "AppScene.h"
 #include "Scene/VGGLayer.h"
 #include "Application/interface/Event/EventListener.h"
 #include "Utility/interface/CappingProfiler.hpp"
 
-namespace VGG
+namespace VGG::app
 {
 
 class AppRender__pImpl
@@ -13,6 +14,7 @@ class AppRender__pImpl
 public:
   VGG_DECL_API(AppRender)
   std::vector<std::shared_ptr<AppScene>> listeners;
+  std::vector<std::shared_ptr<AppRenderable>> renderables;
   std::queue<std::pair<UEvent, void*>> msgQueue;
   AppRender__pImpl(AppRender* api)
     : q_ptr(api)
@@ -23,6 +25,10 @@ public:
   {
     q_ptr->onEvent(e);
     for (const auto& l : listeners)
+    {
+      l->onEvent(e, userData);
+    }
+    for (const auto& l : renderables)
     {
       l->onEvent(e, userData);
     }
@@ -53,6 +59,13 @@ void AppRender::addAppScene(std::shared_ptr<AppScene> listener)
   VGG_IMPL(AppRender)
   _->listeners.push_back(listener);
   addScene(std::move(listener));
+}
+
+void AppRender::addAppRenderable(std::shared_ptr<AppRenderable> listener)
+{
+  VGG_IMPL(AppRender)
+  _->renderables.push_back(listener);
+  addRenderItem(std::move(listener));
 }
 
 bool AppRender::beginFrame(int fps)
@@ -105,4 +118,4 @@ AppRender::~AppRender()
   shutdown();
 }
 
-} // namespace VGG
+} // namespace VGG::app

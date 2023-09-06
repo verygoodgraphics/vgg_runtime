@@ -102,16 +102,19 @@ void ExpandSymbol::expandInstance(nlohmann::json& json,
         // 2.2. update mask by: id -> unique id
         makeMaskIdUnique(json[K_CHILD_OBJECTS], json, idPrefix);
 
-        // 3. overrides
-        applyOverrides(json, instanceIdStack);
+        // 3.1 overrides
+        processMasterIdOverrides(json, instanceIdStack);
 
+        // 4. scale
+        scaleFromMaster(json, masterJson);
+
+        // 3.2 bounds overrides must be processed after scaling
+        processBoundsOverrides(json, instanceIdStack);
+        processOtherOverrides(json, instanceIdStack);
         if (!again)
         {
           instanceIdStack.pop_back();
         }
-
-        // 4. scale
-        scaleFromMaster(json, masterJson);
 
         // 5. make instance node to "symbalMaster" or render will not draw this node
         DEBUG("#ExpandSymbol: make instance[id=%s, ptr=%p] as master, erase masterId",
@@ -283,14 +286,6 @@ void ExpandSymbol::recalculatePoint(nlohmann::json& json,
           point.y);
     json[key] = point;
   }
-}
-
-void ExpandSymbol::applyOverrides(nlohmann::json& instance,
-                                  const std::vector<std::string>& instanceIdStack)
-{
-  processMasterIdOverrides(instance, instanceIdStack);
-  processBoundsOverrides(instance, instanceIdStack);
-  processOtherOverrides(instance, instanceIdStack);
 }
 
 void ExpandSymbol::processMasterIdOverrides(nlohmann::json& instance,

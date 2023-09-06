@@ -209,6 +209,10 @@ void ExpandSymbol::normalizePoint(nlohmann::json& json, const char* key, const S
     point.x /= containerSize.width;
     point.y /= containerSize.height;
 
+    DEBUG("ExpandSymbol::normalizePoint: %s -> [%f,%f]",
+          json[key].dump().c_str(),
+          point.x,
+          point.y);
     json[key] = point;
   }
 }
@@ -273,6 +277,10 @@ void ExpandSymbol::recalculatePoint(nlohmann::json& json,
     point.x *= containerSize.width;
     point.y *= containerSize.height;
 
+    DEBUG("ExpandSymbol::recalculatePoint: %s -> [%f,%f]",
+          json[key].dump().c_str(),
+          point.x,
+          point.y);
     json[key] = point;
   }
 }
@@ -281,6 +289,7 @@ void ExpandSymbol::applyOverrides(nlohmann::json& instance,
                                   const std::vector<std::string>& instanceIdStack)
 {
   processMasterIdOverrides(instance, instanceIdStack);
+  processBoundsOverrides(instance, instanceIdStack);
   processOtherOverrides(instance, instanceIdStack);
 }
 
@@ -345,6 +354,53 @@ void ExpandSymbol::processMasterIdOverrides(nlohmann::json& instance,
   }
 }
 
+void ExpandSymbol::processBoundsOverrides(nlohmann::json& instance,
+                                          const std::vector<std::string>& instanceIdStack)
+{
+  const auto& overrideValues = instance[K_OVERRIDE_VALUES];
+  if (!overrideValues.is_array())
+  {
+    return;
+  }
+
+  auto boundsOverrideValues = nlohmann::json::array();
+  std::copy_if(overrideValues.begin(),
+               overrideValues.end(),
+               std::back_inserter(boundsOverrideValues),
+               [](const nlohmann::json& item) { return item[K_OVERRIDE_NAME] == K_BOUNDS; });
+
+  // Sorting: Top-down, root first;
+  std::stable_sort(boundsOverrideValues.begin(),
+                   boundsOverrideValues.end(),
+                   [](const nlohmann::json& a, const nlohmann::json& b)
+                   {
+                     auto& aObjectIdPaths = a[K_OBJECT_ID];
+                     auto& bObjectIdPaths = b[K_OBJECT_ID];
+                     return aObjectIdPaths.size() < bObjectIdPaths.size();
+                   });
+
+  auto instanceId = instance[K_ID];
+  for (auto& el : boundsOverrideValues.items())
+  {
+    auto& overrideItem = el.value();
+    if (!overrideItem.is_object() || (overrideItem[K_CLASS] != K_OVERRIDE_CLASS))
+    {
+      continue;
+    }
+
+    auto expandContextInstanceIdStack = instanceIdStack;
+    nl::json* childObject =
+      findChildObject(instance, instanceIdStack, expandContextInstanceIdStack, overrideItem);
+    if (!childObject || !childObject->is_object())
+    {
+      continue;
+    }
+
+    auto value = overrideItem[K_OVERRIDE_VALUE];
+    scaleTree(*childObject, value);
+  }
+}
+
 void ExpandSymbol::processOtherOverrides(nlohmann::json& instance,
                                          const std::vector<std::string>& instanceIdStack)
 {
@@ -373,40 +429,42 @@ void ExpandSymbol::processOtherOverrides(nlohmann::json& instance,
     }
 
     std::string name = overrideItem[K_OVERRIDE_NAME];
-    if (name != K_MASTER_ID && !name.empty()) // other overrides
+    if (name == K_MASTER_ID || name == K_BOUNDS || name.empty())
     {
-      auto& value = overrideItem[K_OVERRIDE_VALUE];
-      if (applyReferenceOverride(*childObject, name, value))
-      {
-        continue;
-      }
-
-      // make name to json pointer string
-      while (true)
-      {
-        auto index = name.find(".");
-        if (index == std::string::npos)
-        {
-          break;
-        }
-        name[index] = '/';
-      }
-
-      nl::json::json_pointer path{ "/" + name };
-      DEBUG("#ExpandSymbol: override object[id=%s, ptr=%p], path=%s, value=%s",
-            (*childObject)[K_ID].get<std::string>().c_str(),
-            childObject,
-            path.to_string().c_str(),
-            value.dump().c_str());
-      std::stack<std::string> pathStack;
-      while (!path.empty())
-      {
-        pathStack.push(path.back());
-        path.pop_back();
-      }
-
-      applyOverridesDetail((*childObject), pathStack, value);
+      continue;
     }
+
+    auto& value = overrideItem[K_OVERRIDE_VALUE];
+    if (applyReferenceOverride(*childObject, name, value))
+    {
+      continue;
+    }
+
+    // make name to json pointer string
+    while (true)
+    {
+      auto index = name.find(".");
+      if (index == std::string::npos)
+      {
+        break;
+      }
+      name[index] = '/';
+    }
+
+    nl::json::json_pointer path{ "/" + name };
+    DEBUG("#ExpandSymbol: override object[id=%s, ptr=%p], path=%s, value=%s",
+          (*childObject)[K_ID].get<std::string>().c_str(),
+          childObject,
+          path.to_string().c_str(),
+          value.dump().c_str());
+    std::stack<std::string> pathStack;
+    while (!path.empty())
+    {
+      pathStack.push(path.back());
+      path.pop_back();
+    }
+
+    applyOverridesDetail((*childObject), pathStack, value);
   }
 }
 
@@ -438,7 +496,7 @@ void ExpandSymbol::applyOverridesDetail(nlohmann::json& json,
       }
       else
       {
-        DEBUG("invalide array index, %s", key.c_str());
+        DEBUG("invalid array index, %s", key.c_str());
       }
     }
     else
@@ -691,4 +749,147 @@ bool ExpandSymbol::applyReferenceOverride(nlohmann::json& destObjectJson,
   }
 
   return false;
+}
+
+void ExpandSymbol::scaleTree(nlohmann::json& rootJson, const nlohmann::json& newBoundsJson)
+{
+  Rect newBounds = newBoundsJson;
+
+  auto hasBounds = isLayoutNode(rootJson);
+  Rect oldBounds, frame;
+  Matrix matrix;
+  if (!hasBounds)
+  {
+    return;
+  }
+
+  oldBounds = rootJson[K_BOUNDS].get<Rect>();
+  if (newBounds == oldBounds)
+  {
+    return;
+  }
+
+  auto newSize = newBounds.size;
+  auto oldSize = oldBounds.size;
+  auto xScaleFactor = newSize.width / oldSize.width;
+  auto yScaleFactor = newSize.height / oldSize.height;
+
+  DEBUG("ExpandSymbol::scaleTree, id=%s, bounds: %s -> %s",
+        rootJson[K_ID].dump().c_str(),
+        rootJson[K_BOUNDS].dump().c_str(),
+        newBoundsJson.dump().c_str());
+  rootJson[K_BOUNDS] = newBoundsJson;
+  scaleContour(rootJson, xScaleFactor, yScaleFactor);
+
+  for (auto& el : rootJson.items())
+  {
+    scaleTree(el.value(), xScaleFactor, yScaleFactor);
+  }
+}
+
+void ExpandSymbol::scaleTree(nlohmann::json& rootJson, float xScaleFactor, float yScaleFactor)
+{
+  if (!rootJson.is_object() && !rootJson.is_array())
+  {
+    return;
+  }
+
+  auto hasBounds = isLayoutNode(rootJson);
+  Rect bounds, frame;
+  Matrix matrix;
+  if (hasBounds)
+  {
+    bounds = rootJson[K_BOUNDS].get<Rect>();
+    frame = rootJson[K_FRAME].get<Rect>();
+    matrix = rootJson[K_MATRIX].get<Matrix>();
+
+    bounds.origin.x *= xScaleFactor;
+    bounds.origin.y *= yScaleFactor;
+    bounds.size.width *= xScaleFactor;
+    bounds.size.height *= yScaleFactor;
+
+    frame.origin.x *= xScaleFactor;
+    frame.origin.y *= yScaleFactor;
+    frame.size.width *= xScaleFactor;
+    frame.size.height *= yScaleFactor;
+
+    matrix.tx *= xScaleFactor;
+    matrix.ty *= yScaleFactor;
+
+    DEBUG("ExpandSymbol::scaleTree, id=%s", rootJson[K_ID].dump().c_str());
+    DEBUG("ExpandSymbol::scaleTree, bounds, %s -> %f, %f, %f, %f",
+          rootJson[K_BOUNDS].dump().c_str(),
+          bounds.origin.x,
+          bounds.origin.y,
+          bounds.size.width,
+          bounds.size.height);
+    DEBUG("ExpandSymbol::scaleTree, frames, %s -> %f, %f, %f, %f",
+          rootJson[K_FRAME].dump().c_str(),
+          frame.origin.x,
+          frame.origin.y,
+          frame.size.width,
+          frame.size.height);
+    DEBUG("ExpandSymbol::scaleTree, matrix, %s -> %f, %f",
+          rootJson[K_MATRIX].dump().c_str(),
+          matrix.tx,
+          matrix.ty);
+    to_json(rootJson[K_BOUNDS], bounds);
+    to_json(rootJson[K_FRAME], frame);
+    to_json(rootJson[K_MATRIX], matrix);
+
+    scaleContour(rootJson, xScaleFactor, yScaleFactor);
+  }
+
+  for (auto& el : rootJson.items())
+  {
+    scaleTree(el.value(), xScaleFactor, yScaleFactor);
+  }
+}
+
+void ExpandSymbol::scaleContour(nlohmann::json& nodeJson, float xScaleFactor, float yScaleFactor)
+{
+  if (nodeJson[K_CLASS] != K_PATH)
+  {
+    return;
+  }
+
+  DEBUG("ExpandSymbol::scaleContour, id=%s", nodeJson[K_ID].dump().c_str());
+
+  // ./shape/subshapes/XXX/subGeometry/points/XXX
+  auto& subshapes = nodeJson[K_SHAPE][K_SUBSHAPES];
+  for (auto i = 0; i < subshapes.size(); ++i)
+  {
+    auto& subshape = subshapes[i];
+    auto& subGeometry = subshape[K_SUBGEOMETRY];
+    if (subGeometry[K_CLASS] != K_CONTOUR)
+    {
+      continue;
+    }
+
+    auto& points = subGeometry[K_POINTS];
+    for (auto j = 0; j < points.size(); ++j)
+    {
+      auto& point = points[j];
+      scalePoint(point, K_POINT, xScaleFactor, yScaleFactor);
+      scalePoint(point, K_CURVE_FROM, xScaleFactor, yScaleFactor);
+      scalePoint(point, K_CURVE_TO, xScaleFactor, yScaleFactor);
+    }
+  }
+}
+
+void ExpandSymbol::scalePoint(nlohmann::json& json,
+                              const char* key,
+                              float xScaleFactor,
+                              float yScaleFactor)
+{
+  if (json.contains(key))
+  {
+    auto point = json[key].get<Point>();
+
+    point.x *= xScaleFactor;
+    point.y *= yScaleFactor;
+
+    DEBUG("ExpandSymbol::scalePoint, %s -> %f, %f", json[key].dump().c_str(), point.x, point.y);
+    json[key] = point;
+  }
 }

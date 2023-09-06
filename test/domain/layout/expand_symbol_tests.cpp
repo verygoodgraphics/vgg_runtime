@@ -231,6 +231,39 @@ TEST_F(VggExpandSymbolTestSuite, IgnoreInvalideArrayIndexOverride)
   EXPECT_EQ(fills.size(), 1);
 }
 
+TEST_F(VggExpandSymbolTestSuite, BoundsOverride)
+{
+  // Given
+  std::string filePath = "testDataDir/symbol/BoundsOverrides/design.json";
+  auto designJson = Helper::load_json(filePath);
+  ExpandSymbol sut{ designJson };
+
+  // When
+  auto resultJson = sut();
+
+  // Then
+  {
+    nlohmann::json::json_pointer path{
+      "/frames/0/childObjects/6/childObjects/0/childObjects/0/childObjects/0/bounds"
+    };
+    auto& bounds = resultJson[path];
+    double width = bounds[K_WIDTH];
+    double height = bounds[K_HEIGHT];
+    EXPECT_DOUBLE_EQ(width, 102.578125);
+    EXPECT_DOUBLE_EQ(height, 123.4413833618164);
+  }
+  {
+    nlohmann::json::json_pointer path{
+      "/frames/0/childObjects/3/childObjects/0/childObjects/0/bounds"
+    };
+    auto& bounds = resultJson[path];
+    double width = bounds[K_WIDTH];
+    double height = bounds[K_HEIGHT];
+    EXPECT_DOUBLE_EQ(width, 193.6458282470703);
+    EXPECT_DOUBLE_EQ(height, 83.01298522949219);
+  }
+}
+
 TEST_F(VggExpandSymbolTestSuite, unique_object_id_in_instance_tree)
 {
   // Given

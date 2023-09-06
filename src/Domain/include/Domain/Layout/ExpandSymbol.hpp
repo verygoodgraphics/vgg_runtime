@@ -44,7 +44,6 @@ private:
   void scaleContour(nlohmann::json& nodeJson, float xScaleFactor, float yScaleFactor);
   void scalePoint(nlohmann::json& json, const char* key, float xScaleFactor, float yScaleFactor);
 
-  void applyOverrides(nlohmann::json& instance, const std::vector<std::string>& instanceIdStack);
   void processMasterIdOverrides(nlohmann::json& instance,
                                 const std::vector<std::string>& instanceIdStack);
   void processBoundsOverrides(nlohmann::json& instance,

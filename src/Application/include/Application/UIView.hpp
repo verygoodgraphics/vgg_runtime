@@ -36,7 +36,6 @@ private:
 
   Layout::Rect m_frame;
   Layout::Rect m_bounds;
-  float m_contentScaleFactor{ 1.0 };
 
   // editor
   bool m_isEditor = false;
@@ -117,7 +116,6 @@ private:
   void layoutSubviews();
   Layout::Point converPointFromWindow(Layout::Point point);
   Layout::Point converPointFromWindowAndScale(Layout::Point point);
-  void handleMouseWheel();
 };
 
 } // namespace VGG

@@ -19,7 +19,7 @@ This project can be built with CMake using common practice, however, third-party
 - We need user-provided Skia source code or precompiled binaries.
 - Nodejs would be automatically downloaded and compiled.
 
-You could download Skia from the [official website](https://skia.org/docs/user/download/). We recommend [chrome/m116](https://github.com/google/skia/tree/chrome/m116) branch for building. Since Skia's API is not stable between releases, we don't assure other versions could be successfully compiled using our CMake script.
+You could download Skia from the [official website](https://skia.org/docs/user/download/). We use our skia fork[vgg/m116](https://github.com/verygoodgraphics/skia/tree/vgg/m116) branch for building, which has some modifications and fixes for our scenario. We don't assure other versions could be successfully compiled using our CMake script.
 
 ```bash
 # fetch skia

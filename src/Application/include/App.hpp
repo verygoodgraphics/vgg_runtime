@@ -476,10 +476,6 @@ protected: // protected methods
         m_scene->render(canvas);
         m_zoomer.restore(canvas);
       }
-      else if (m_view)
-      {
-        m_view->draw(canvas, &m_zoomer);
-      }
 
       // draw position information
       if (m_drawInfo)
@@ -499,11 +495,6 @@ protected: // protected methods
     {
       m_curMouseX = evt.motion.x;
       m_curMouseY = evt.motion.y;
-    }
-
-    if (m_view)
-    {
-      m_view->onEvent(evt, &m_zoomer);
     }
   }
 
@@ -577,7 +568,7 @@ protected: // protected methods
         }
         if (m_view)
         {
-          m_view->scene()->preArtboard();
+          m_view->preArtboard();
           m_view->setDirty(true);
         }
         return true;
@@ -591,7 +582,7 @@ protected: // protected methods
         }
         if (m_view)
         {
-          m_view->scene()->nextArtboard();
+          m_view->nextArtboard();
           m_view->setDirty(true);
         }
         return true;

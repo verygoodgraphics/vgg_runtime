@@ -1,24 +1,22 @@
 #pragma once
 
-#include "Domain/Layout/Node.hpp"
+#include "AppScene.h"
 #include "UIEvent.hpp"
-#include "Scene/Scene.h"
 #include "ViewModel.hpp"
 
-#include "nlohmann/json.hpp"
+#include <Domain/Layout/Node.hpp>
+#include <Scene/Scene.h>
+
+#include <nlohmann/json.hpp>
 
 #include <memory>
 #include <tuple>
 #include <vector>
 
-class SkCanvas;
-struct Zoomer;
-union SDL_Event;
-
 namespace VGG
 {
 
-class UIView
+class UIView : public AppScene
 {
 public:
   using EventListener = std::function<void(UIEventPtr)>;
@@ -31,7 +29,6 @@ private:
   EventListener m_eventListener;
   HasEventListener m_hasEventListener;
 
-  std::shared_ptr<Scene> m_scene;
   UIView* m_superview{ nullptr };
   std::vector<std::shared_ptr<UIView>> m_subviews;
 
@@ -53,21 +50,16 @@ private:
 
 public:
   UIView()
-    : m_scene{ std::make_shared<Scene>() }
   {
-  }
-
-  auto scene()
-  {
-    return m_scene;
+    setZoomerListener(std::make_shared<AppZoomer>());
   }
 
   void show(const ViewModel& viewModel)
   {
-    m_scene->loadFileContent(viewModel.designDoc);
+    loadFileContent(viewModel.designDoc);
     m_root = viewModel.layoutTree;
     // todo, merge edited doc resouces ?
-    Scene::getResRepo() = std::move(viewModel.resources());
+    Scene::setResRepo(viewModel.resources());
 
     m_isDirty = true;
   }
@@ -82,7 +74,7 @@ public:
     m_eventListener = listener;
   }
 
-  void onEvent(const SDL_Event& evt, Zoomer* zoomer);
+  bool onEvent(UEvent e, void* userData) override;
 
   void addSubview(std::shared_ptr<UIView> view)
   {
@@ -90,8 +82,6 @@ public:
     view->m_superview = this;
     layoutSubviews();
   }
-
-  void draw(SkCanvas* canvas, Zoomer* zoomer);
 
   Layout::Size size()
   {
@@ -127,7 +117,7 @@ private:
   void layoutSubviews();
   Layout::Point converPointFromWindow(Layout::Point point);
   Layout::Point converPointFromWindowAndScale(Layout::Point point);
-  void handleMouseWheel(const SDL_Event& evt, Zoomer* zoomer);
+  void handleMouseWheel();
 };
 
 } // namespace VGG

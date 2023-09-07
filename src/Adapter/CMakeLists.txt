@@ -1,6 +1,5 @@
 add_library(vgg_adapter OBJECT
   PlatformAdapter/Helper/StringHelper.cpp
-  View/UIView.cpp
 )
 
 set_target_properties(vgg_adapter PROPERTIES POSITION_INDEPENDENT_CODE ON)

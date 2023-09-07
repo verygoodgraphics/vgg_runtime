@@ -23,6 +23,8 @@ class Presenter : public std::enable_shared_from_this<Presenter>
   std::shared_ptr<UIView> m_editView;
   std::shared_ptr<ViewModel> m_editViewModel;
 
+  bool m_editMode{ false };
+
   rxcpp::subjects::subject<VGG::UIEventPtr> m_subject;
   rxcpp::subjects::subject<VGG::UIEventPtr> m_editSubject;
   rxcpp::observer<VGG::ModelEventPtr> m_modelObserver;
@@ -43,15 +45,32 @@ public:
 
     m_view->show(*m_viewModel);
 
+    auto weakThis = weak_from_this();
     m_view->registerEventListener(
-      [viewModel](std::string path, UIEventType eventType)
+      [weakThis, viewModel](std::string path, UIEventType eventType)
       {
+        auto sharedThis = weakThis.lock();
+        if (!sharedThis)
+        {
+          return false;
+        }
+
+        if (sharedThis->m_editMode)
+        {
+          return true;
+        }
+
         auto listenersMap = viewModel->model->getEventListeners(path);
         std::string type = UIEventTypeToString(eventType);
 
         auto it = listenersMap.find(type);
         return it != listenersMap.end();
       });
+  }
+
+  void setEditMode(bool editMode)
+  {
+    m_editMode = editMode;
   }
 
   void setEditModel(std::shared_ptr<ViewModel> viewModel)

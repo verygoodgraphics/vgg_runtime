@@ -73,7 +73,7 @@ int main(int argc, char** argv)
   auto sdlApp = AppImpl::app();
 
   // inject dependencies
-  app->setLayer(sdlApp->layer());
+  app->setLayer(sdlApp->layer()); // 1. must be first
   app->setScene(mainComposer.view());
   app->setController(mainComposer.controller());
 

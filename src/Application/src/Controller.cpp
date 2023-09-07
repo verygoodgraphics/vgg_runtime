@@ -1,5 +1,7 @@
 #include "Controller.hpp"
 
+#include "Editor.hpp"
+
 #include "Usecase/EditModel.hpp"
 
 #include "Domain/VggExec.hpp"
@@ -28,6 +30,7 @@ Controller::Controller(std::shared_ptr<RunLoop> runLoop,
   : m_runLoop(runLoop)
   , m_presenter(presenter)
   , m_mode(mode)
+  , m_editor{ new Editor }
 {
   assert(m_runLoop);
 }
@@ -106,6 +109,35 @@ void Controller::onResize()
     // todo, edited model
     // ResizeWindow{m_edit_layout}.onResize(m_presenter->editViewSize());
   }
+}
+
+void Controller::setEditMode(bool editMode)
+{
+  if (editMode)
+  {
+    if (m_mode == ERunMode::EDIT_MODE)
+    {
+      return;
+    }
+
+    m_mode = ERunMode::EDIT_MODE;
+  }
+  else
+  {
+    if (m_mode == ERunMode::NORMAL_MODE)
+    {
+      return;
+    }
+
+    m_mode = ERunMode::NORMAL_MODE;
+  }
+
+  m_presenter->setEditMode(editMode);
+}
+
+std::shared_ptr<AppScene> Controller::editor()
+{
+  return m_editor;
 }
 
 void Controller::initModel(const char* designDocSchemaFilePath, const char* layoutDocSchemaFilePath)
@@ -193,6 +225,15 @@ void Controller::observeViewEvent()
       auto sharedThis = weakThis.lock();
       if (!sharedThis)
       {
+        return;
+      }
+
+      if (sharedThis->m_mode == ERunMode::EDIT_MODE)
+      {
+        if (sharedThis->m_editor)
+        {
+          sharedThis->m_editor->handleUIEvent(evt);
+        }
         return;
       }
 

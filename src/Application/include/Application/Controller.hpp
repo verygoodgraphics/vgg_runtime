@@ -1,11 +1,12 @@
 #pragma once
 
-#include "Domain/Layout/Layout.hpp"
-#include "Domain/Layout/Rect.hpp"
+#include <Application/AppScene.h>
+#include <Application/RunLoop.hpp>
 
-#include "RunLoop.hpp"
+#include <Domain/Layout/Layout.hpp>
+#include <Domain/Layout/Rect.hpp>
 
-#include "rxcpp/rx.hpp"
+#include <rxcpp/rx.hpp>
 
 #include <memory>
 #include <string>
@@ -17,6 +18,7 @@ namespace VGG
 {
 
 class Daruma;
+class Editor;
 class Presenter;
 class ViewModel;
 
@@ -33,6 +35,7 @@ private:
   std::string m_designSchemaFilePath;
   std::shared_ptr<RunLoop> m_runLoop;
   std::shared_ptr<Presenter> m_presenter;
+  std::shared_ptr<Editor> m_editor;
 
   ERunMode m_mode;
   std::shared_ptr<Daruma> m_model;
@@ -56,6 +59,13 @@ public:
   bool edit(std::vector<char>& buffer);
 
   void onResize();
+
+  std::shared_ptr<AppScene> editor();
+  void setEditMode(bool editMode);
+  bool isEditMode()
+  {
+    return m_mode == ERunMode::EDIT_MODE;
+  }
 
 private:
   void initModel(const char* designDocSchemaFilePath, const char* layoutDocSchemaFilePath);

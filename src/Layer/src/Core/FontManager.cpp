@@ -12,7 +12,7 @@
 
 namespace VGG
 {
-inline std::vector<char> readFromZip(const char* zip, size_t length, const char* entry)
+static std::vector<char> readFromZip(const char* zip, size_t length, const char* entry)
 {
   std::vector<char> data;
   auto zipStream = zip_stream_open(zip, length, 0, 'r');
@@ -32,9 +32,9 @@ inline std::vector<char> readFromZip(const char* zip, size_t length, const char*
 }; // namespace VGG
 
 #endif
+
 namespace VGG
 {
-using namespace std;
 
 struct FontMgrData
 {
@@ -111,7 +111,7 @@ FontManager::FontManager()
 
 void FontManager::createFallbackFontMananger()
 {
-  const string key = "default";
+  const std::string key = "default";
   sk_sp<SkFontMgrVGG> vggFontMgr = VGGFontDirectory(nullptr);
   std::vector<std::string> fallbackFonts;
 #ifdef VGG_USE_EMBBED_FONT
@@ -153,8 +153,13 @@ SkFontMgrVGG* FontManager::createFontManager(const std::string& key,
       fallbackFonts.push_back(layer::resources::FiraSans::FONT_NAME);
 #endif
       vggFontMgr->saveFontInfo(key + "_fontname.txt");
-      d_ptr->fontMgrs.insert({ key, std::move(FontMgrData(vggFontMgr, std::move(fallbackFonts))) });
-      return vggFontMgr.get();
+      auto result = d_ptr->fontMgrs.insert(
+        { key, std::move(FontMgrData(vggFontMgr, std::move(fallbackFonts))) });
+      if (result.second)
+      {
+        return result.first->second.FontMgr.get();
+      }
+      return nullptr;
     }
     return nullptr;
   }

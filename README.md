@@ -23,7 +23,7 @@ You could download Skia from the [official website](https://skia.org/docs/user/d
 
 ```bash
 # fetch skia
-git clone --depth 1 --branch chrome/m116 https://github.com/google/skia.git
+git clone --depth 1 --branch vgg/m116 https://github.com/verygoodgraphics/skia.git
 
 # then fetch skia's own dependencies
 cd skia
@@ -38,7 +38,7 @@ python3 tools/git-sync-deps
 mkdir build
 cd build
 cmake .. -DSKIA_EXTERNAL_PROJECT_DIR=/path/to/your/skia
-cmake --build . --parallel 
+cmake --build . --parallel
 ```
 
 > Note: For release build, please add `-DCMAKE_BUILD_TYPE=Release` to the first `cmake` command. Currently in linux environment, VGG runtime can be built on Arch but not on Ubuntu.
@@ -52,7 +52,7 @@ mkdir build.wasm
 cd build.wasm
 source /path/to/emsdk/emsdk_env.sh
 emcmake cmake .. -DCMAKE_BUILD_TYPE=Release -DSKIA_EXTERNAL_PROJECT_DIR=/path/to/your/skia
-cmake --build . --parallel 
+cmake --build . --parallel
 ```
 
 > Note: We build release version by defalut as it's hard to debug in WebAssembly environment. Currently, the WebAssembly version can only be built on macOS.

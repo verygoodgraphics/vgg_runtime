@@ -20,14 +20,6 @@ bool UIView::onEvent(UEvent evt, void* userData)
     return false;
   }
 
-  if (!m_isEditor)
-  {
-    // m_bounds.origin.x = zoomer->offset.x;
-    // m_bounds.origin.y = zoomer->offset.y;
-
-    // m_contentScaleFactor = zoomer->zoom;
-  }
-
   // todo, hittest
   // todo, select page
   for (auto& subview : m_subviews)
@@ -211,7 +203,6 @@ bool UIView::onEvent(UEvent evt, void* userData)
 
     case VGG_MOUSEWHEEL:
     {
-      // handleMouseWheel(evt, zoomer);
     }
     break;
 
@@ -332,20 +323,25 @@ Layout::Point UIView::converPointFromWindow(Layout::Point point)
     parent = parent->m_superview;
   }
 
+  if (m_zoomerListener)
+  {
+    auto offset = m_zoomerListener->translate();
+    x -= offset.x;
+    y -= offset.y;
+  }
+
   return { x, y };
 }
 
 Layout::Point UIView::converPointFromWindowAndScale(Layout::Point point)
 {
   point = converPointFromWindow(point);
+  if (m_zoomerListener)
+  {
+    auto scaleFactor = m_zoomerListener->scale();
+    point.x /= scaleFactor;
+    point.y /= scaleFactor;
+  }
 
-  auto x = point.x / m_contentScaleFactor;
-  auto y = point.y / m_contentScaleFactor;
-
-  return { x, y };
-}
-
-void UIView::handleMouseWheel()
-{
-  // todo
+  return point;
 }

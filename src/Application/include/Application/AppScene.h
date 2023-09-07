@@ -11,6 +11,7 @@ class AppScene
   : public Scene
   , public EventListener
 {
+protected:
   std::shared_ptr<AppZoomer> m_zoomerListener;
 
 public:

@@ -1,36 +1,38 @@
-#include "Application/UIView.hpp"
-#include "Application/interface/Event/Event.h"
+#include "UIView.hpp"
 
-#include "Scene/Zoomer.h"
-
-#include "core/SkCanvas.h"
-
-#include <SDL2/SDL.h>
+#include "Event/Event.h"
+#include "Event/EventAPI.h"
+#include "Event/Keycode.h"
 
 using namespace VGG;
 using namespace VGG::Layout;
 using namespace nlohmann;
 
-void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
+bool UIView::onEvent(UEvent evt, void* userData)
 {
+  if (AppScene::onEvent(evt, userData))
+  {
+    return true;
+  }
+
   if (!m_eventListener)
   {
-    return;
+    return false;
   }
 
   if (!m_isEditor)
   {
-    m_bounds.origin.x = zoomer->offset.x;
-    m_bounds.origin.y = zoomer->offset.y;
+    // m_bounds.origin.x = zoomer->offset.x;
+    // m_bounds.origin.y = zoomer->offset.y;
 
-    m_contentScaleFactor = zoomer->zoom;
+    // m_contentScaleFactor = zoomer->zoom;
   }
 
   // todo, hittest
   // todo, select page
   for (auto& subview : m_subviews)
   {
-    subview->onEvent(evt, zoomer);
+    subview->onEvent(evt, userData);
   }
 
   // todo, capturing
@@ -50,11 +52,11 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
   };
   switch (evt.type)
   {
-    case SDL_MOUSEBUTTONDOWN:
+    case VGG_MOUSEBUTTONDOWN:
     {
       if (!m_root)
       {
-        return;
+        return false;
       }
 
       Layout::Point point{ TO_VGG_LAYOUT_SCALAR(evt.button.x), TO_VGG_LAYOUT_SCALAR(evt.button.y) };
@@ -65,7 +67,7 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
       if (targetNode)
       {
         auto jsButtonIndex{ evt.button.button - 1 };
-        auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
+        auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
         m_eventListener(UIEventPtr(new MouseEvent(targetNode->path(),
                                                   UIEventType::mousedown,
                                                   jsButtonIndex,
@@ -81,11 +83,11 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
     }
     break;
 
-    case SDL_MOUSEMOTION:
+    case VGG_MOUSEMOTION:
     {
       if (!m_root)
       {
-        return;
+        return false;
       }
 
       Layout::Point point{ TO_VGG_LAYOUT_SCALAR(evt.motion.x), TO_VGG_LAYOUT_SCALAR(evt.motion.y) };
@@ -95,7 +97,7 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
                                         { return hasEventListener(path, UIEventType::mousemove); });
       if (targetNode)
       {
-        auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
+        auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
         m_eventListener(UIEventPtr(new MouseEvent(targetNode->path(),
                                                   UIEventType::mousemove,
                                                   0,
@@ -111,17 +113,17 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
     }
     break;
 
-    case SDL_MOUSEBUTTONUP:
+    case VGG_MOUSEBUTTONUP:
     {
       if (!m_root)
       {
-        return;
+        return false;
       }
 
       Layout::Point point{ TO_VGG_LAYOUT_SCALAR(evt.button.x), TO_VGG_LAYOUT_SCALAR(evt.button.y) };
       point = converPointFromWindowAndScale(point);
       auto jsButtonIndex{ evt.button.button - 1 };
-      auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
+      auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
 
       auto targetNode = m_root->hitTest(point,
                                         [&hasEventListener](const std::string& path)
@@ -207,15 +209,15 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
     }
     break;
 
-    case SDL_MOUSEWHEEL:
+    case VGG_MOUSEWHEEL:
     {
-      handleMouseWheel(evt, zoomer);
+      // handleMouseWheel(evt, zoomer);
     }
     break;
 
-    case SDL_KEYDOWN:
+    case VGG_KEYDOWN:
     {
-      auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
+      auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
       m_eventListener(UIEventPtr(new KeyboardEvent(targetPath,
                                                    UIEventType::keydown,
                                                    evt.key.keysym.sym,
@@ -227,9 +229,9 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
     }
     break;
 
-    case SDL_KEYUP:
+    case VGG_KEYUP:
     {
-      auto [alt, ctrl, meta, shift] = getKeyModifier(SDL_GetModState());
+      auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
       m_eventListener(UIEventPtr(new KeyboardEvent(targetPath,
                                                    UIEventType::keyup,
                                                    evt.key.keysym.sym,
@@ -241,19 +243,19 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
     }
     break;
 
-    case SDL_FINGERDOWN:
+    case VGG_FINGERDOWN:
     {
       m_eventListener(UIEventPtr(new TouchEvent(targetPath, UIEventType::touchstart)));
     }
     break;
 
-    case SDL_FINGERMOTION:
+    case VGG_FINGERMOTION:
     {
       m_eventListener(UIEventPtr(new TouchEvent(targetPath, UIEventType::touchmove)));
     }
     break;
 
-    case SDL_FINGERUP:
+    case VGG_FINGERUP:
     {
       m_eventListener(UIEventPtr(new TouchEvent(targetPath, UIEventType::touchend)));
     }
@@ -264,54 +266,23 @@ void UIView::onEvent(const SDL_Event& evt, Zoomer* zoomer)
     default:
       break;
   }
+
+  return true;
 }
 
 std::tuple<bool, bool, bool, bool> UIView::getKeyModifier(int keyMod)
 {
-  bool lAlt = keyMod & KMOD_LALT;
-  bool lCtrl = keyMod & KMOD_LCTRL;
-  bool lMeta = keyMod & KMOD_LGUI;
-  bool lShift = keyMod & KMOD_LSHIFT;
+  bool lAlt = keyMod & VGG_KMOD_LALT;
+  bool lCtrl = keyMod & VGG_KMOD_LCTRL;
+  bool lMeta = keyMod & VGG_KMOD_LGUI;
+  bool lShift = keyMod & VGG_KMOD_LSHIFT;
 
-  bool rAlt = keyMod & KMOD_RALT;
-  bool rCtrl = keyMod & KMOD_RCTRL;
-  bool rMeta = keyMod & KMOD_RGUI;
-  bool rShift = keyMod & KMOD_RSHIFT;
+  bool rAlt = keyMod & VGG_KMOD_RALT;
+  bool rCtrl = keyMod & VGG_KMOD_RCTRL;
+  bool rMeta = keyMod & VGG_KMOD_RGUI;
+  bool rShift = keyMod & VGG_KMOD_RSHIFT;
 
   return { lAlt || rAlt, lCtrl || rCtrl, lMeta || rMeta, lShift || rShift };
-}
-
-void UIView::draw(SkCanvas* canvas, Zoomer* zoomer)
-{
-
-  // DEPRECATED:
-  // the only way to paint a scene is added in
-  // a layer
-  if (m_isEditor) // editor; zoom only subviews
-  {
-    m_scene->render(canvas);
-
-    // draw inner edit view
-    for (auto& subview : m_subviews)
-    {
-      subview->draw(canvas, zoomer);
-    }
-  }
-  else // edit view; edited document; zoom self
-  {
-    canvas->save();
-
-    // setup clip & offset for edit view
-    canvas->translate(m_frame.origin.x, m_frame.origin.y);
-    SkRect editRect{ 0, 0, m_frame.size.width, m_frame.size.height };
-    canvas->clipRect(editRect);
-
-    zoomer->apply(canvas);
-
-    m_scene->render(canvas);
-
-    canvas->restore();
-  }
 }
 
 void UIView::becomeEditorWithSidebar(ScalarType top,
@@ -374,26 +345,7 @@ Layout::Point UIView::converPointFromWindowAndScale(Layout::Point point)
   return { x, y };
 }
 
-void UIView::handleMouseWheel(const SDL_Event& evt, Zoomer* zoomer)
+void UIView::handleMouseWheel()
 {
-  if (!m_isEditor && SDL_GetModState() & KMOD_CTRL)
-  {
-    int mx, my;
-    SDL_GetMouseState(&mx, &my);
-    Layout::Point point{ TO_VGG_LAYOUT_SCALAR(mx), TO_VGG_LAYOUT_SCALAR(my) };
-    point = converPointFromWindow(point);
-    mx = point.x;
-    my = point.y;
-
-    double dz = (evt.wheel.y > 0 ? 1.0 : -1.0) * 0.03;
-    double z2 = zoomer->zoom * (1 + dz);
-    if (z2 > 0.01 && z2 < 100)
-    {
-      zoomer->offset.x -= (mx / zoomer->dpiRatio) * dz;
-      zoomer->offset.y -= (my / zoomer->dpiRatio) * dz;
-      zoomer->zoom += zoomer->zoom * dz;
-    }
-
-    m_isDirty = true;
-  }
+  // todo
 }

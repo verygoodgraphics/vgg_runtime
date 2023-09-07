@@ -1,20 +1,26 @@
-#include "Application/MainComposer.hpp"
-#include "Adapter/NativeComposer.hpp"
+#include "SDLImpl/AppSDLImpl.hpp"
 
-#include "SDLRuntime.hpp"
-#include <memory>
-#include <argparse/argparse.hpp>
-#include <filesystem>
-
+#include <Adapter/NativeComposer.hpp>
+#include <AppBase.hpp>
+#include <Application/MainComposer.hpp>
+#include <Application/UIApplication.hpp>
 #include <ConfigMananger.h>
 #include <Scene/Scene.h>
+
+#include <argparse/argparse.hpp>
+
+#include <memory>
+#include <filesystem>
 
 constexpr auto DARUMA_FILE_OR_DIRECTORY = "daruma";
 
 using namespace VGG;
-#define main main // NOLINT
+using namespace VGG::app;
+
 int main(int argc, char** argv)
 {
+  INFO("main");
+
   argparse::ArgumentParser program("vgg", "0.1");
   program.add_argument(DARUMA_FILE_OR_DIRECTORY).help("daruma file or directory");
   program.add_argument("-c", "--config").help("specify config file");
@@ -36,37 +42,52 @@ int main(int argc, char** argv)
     Config::readGlobalConfig(file);
   }
 
+  AppConfig cfg;
+  cfg.appName = "SdlRuntime";
+  cfg.graphicsContextConfig.windowSize[0] = 1920;
+  cfg.graphicsContextConfig.windowSize[1] = 1080;
+  cfg.graphicsContextConfig.multiSample = 0;
+  cfg.graphicsContextConfig.stencilBit = 8;
+  cfg.argc = argc;
+  cfg.argv = argv;
+
+  auto app = new UIApplication;
+  cfg.eventListener.reset(app);
+
+  try
+  {
+    AppImpl::createInstance(std::move(cfg));
+  }
+  catch (const std::exception& e)
+  {
+    std::cout << e.what() << std::endl;
+  }
+
+  bool catchJsException = false;
 #ifdef NDEBUG
-  MainComposer mainComposer{ new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js") };
-#else
-  MainComposer mainComposer{ new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js", false) };
+  catchJsException = true;
 #endif
+  MainComposer mainComposer{ new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js",
+                                                catchJsException) };
 
-  SDLRuntime* app = App<SDLRuntime>::getInstance(1920, 1080, "VGG");
-  ASSERT(app);
+  auto sdlApp = AppImpl::app();
 
+  // inject dependencies
+  app->setLayer(sdlApp->layer());
+  app->setScene(mainComposer.view());
   app->setController(mainComposer.controller());
-  app->setView(mainComposer.view());
 
   auto darumaFileOrDir = program.get<std::string>(DARUMA_FILE_OR_DIRECTORY);
   mainComposer.controller()->start(darumaFileOrDir,
                                    "../asset/vgg-format.json",
                                    "../asset/vgg_layout.json");
 
-  // if (auto file_to_edit = program.present("-e"))
-  // {
-  //   main_composer.enableEdit();
-
-  //   auto file_path = file_to_edit.value();
-  //   main_composer.controller()->edit(file_path);
-  // }
-
-  // enter loop
-  constexpr int FPS = 60;
-  while (!app->shouldExit())
+  while (!sdlApp->shouldExit())
   {
-    app->frame(FPS);
+    sdlApp->poll();
+    sdlApp->process();
     mainComposer.runLoop()->dispatch();
   }
+
   return 0;
 }

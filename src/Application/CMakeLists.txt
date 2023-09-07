@@ -1,11 +1,13 @@
 add_library(vgg_application STATIC
-  src/Controller.cpp
-  src/VggSdk.cpp
   src/AppRender.cpp
+  src/Controller.cpp
   src/EventAPI.cpp
+  src/UIView.cpp
+  src/VggSdk.cpp
 )
 
 target_include_directories(vgg_application PUBLIC
+  ${CMAKE_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/interface
 )

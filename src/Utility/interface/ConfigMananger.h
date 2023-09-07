@@ -18,6 +18,7 @@ inline nlohmann::json genDefaultConfig()
   path = "/System/Library/Fonts/";
   fallbacks = { "Helvetica" };
 #endif
+  // TODO:: for other platform config
   font["dir"] = path;
   font["fallbackFonts"] = fallbacks;
   cfg["useEmbbedFont"] = true;

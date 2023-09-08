@@ -21,7 +21,7 @@ public:
   std::shared_ptr<vk::VkSwapchainObject> vkSwapchain;
   VkQueue presentQueue{ VK_NULL_HANDLE };
   uint32_t swapChainImageIndex = -1;
-  VkFence fence;
+  VkFence fence{ VK_NULL_HANDLE };
   VkSemaphore imageAvailableSemaphore{ VK_NULL_HANDLE };
   VkSemaphore renderFinishedSemaphore{ VK_NULL_HANDLE };
 

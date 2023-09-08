@@ -43,6 +43,7 @@ protected:
   }
 };
 
+constexpr char POS_ARG_INPUT_FILE[] = "fig/ai/sketch/json";
 template<typename App>
 class MyEventListener : public VGG::app::EventListener
 {
@@ -55,7 +56,7 @@ protected:
     INFO("onAppInit");
     m_layer = app->layer();
     argparse::ArgumentParser program("vgg", "0.1");
-    program.add_argument("-l", "--load").help("load from vgg or sketch file");
+    program.add_argument(POS_ARG_INPUT_FILE).help("input fig/ai/sketch/json file");
     program.add_argument("-d", "--data").help("resources dir");
     program.add_argument("-p", "--prefix").help("the prefix of filename or dir");
     program.add_argument("-L", "--loaddir").help("iterates all the files in the given dir");
@@ -96,7 +97,7 @@ protected:
     {
       prefix = p.value();
     }
-    if (auto loadfile = program.present("-l"))
+    if (auto loadfile = program.present(POS_ARG_INPUT_FILE))
     {
       auto fp = loadfile.value();
       auto ext = fs::path(fp).extension().string();

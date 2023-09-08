@@ -130,7 +130,8 @@ void VLayer::render()
   {
     canvas->save();
     canvas->clear(SK_ColorWHITE);
-    canvas->scale(m_scale, m_scale);
+    const auto scale = context()->property().dpiScaling * scaleFactor();
+    canvas->scale(scale, scale);
     for (auto& scene : _->scenes)
     {
       scene->render(canvas);

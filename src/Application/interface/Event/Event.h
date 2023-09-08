@@ -6,8 +6,8 @@
 
 enum EButtonState : uint8_t
 {
-  VGG_Release,
-  VGG_Pressed
+  VGG_RELEASE,
+  VGG_PRESSED
 };
 
 enum EEventType
@@ -157,10 +157,16 @@ struct VMouseMotionEvent
   uint32_t timestamp; /**< In milliseconds, populated using VGG_GetTicks() */
   uint32_t which;     /**< The mouse instance id, or VGG_TOUCH_MOUSEID */
   EButtonState state; /**< ::VGG_PRESSED or ::VGG_RELEASED */
-  int32_t x;          /**< X coordinate, relative to window */
-  int32_t y;          /**< Y coordinate, relative to window */
+  int32_t windowX;    /**< X coordinate, relative to window */
+  int32_t windowY;    /**< Y coordinate, relative to window */
   int32_t xrel;       /**< The relative motion in the X direction */
   int32_t yrel;       /**< The relative motion in the Y direction */
+  int32_t canvasXRel; /**< The relative motion in the X direction in canvas space*/
+  int32_t canvasYRel; /**< The relative motion in the Y direction in canvas space*/
+  int32_t canvasX;    /*mouse position on canvas means that the mapped position on the drawable
+                                texture beacuse of high dpi screen, its value should be given correctly
+                                by the app, same with mouse position by default*/
+  int32_t canvasY;
 };
 
 /**
@@ -175,8 +181,10 @@ struct VMouseButtonEvent
   EButtonState state; /**< ::VGG_PRESSED or ::VGG_RELEASED */
   uint8_t clicks;     /**< 1 for single-click, 2 for double-click, etc. */
   uint8_t padding1;
-  int32_t x; /**< X coordinate, relative to window */
-  int32_t y; /**< Y coordinate, relative to window */
+  int32_t windowX; /**< X coordinate, relative to window */
+  int32_t windowY; /**< Y coordinate, relative to window */
+  int32_t canvasX;
+  int32_t canvasY;
 };
 
 /**
@@ -193,12 +201,14 @@ struct VMouseWheelEvent
                the user */
   uint32_t direction; /**< Set to one of the VGG_MOUSEWHEEL_* defines. When FLIPPED the values in
                          X and Y will be opposite. Multiply by -1 to change them back */
-  float preciseX; /**< The amount scrolled horizontally, positive to the right and negative to the
-                     left, with float precision (added in 2.0.18) */
-  float preciseY; /**< The amount scrolled vertically, positive away from the user and negative
-                     toward the user, with float precision (added in 2.0.18) */
-  int32_t mouseX; /**< X coordinate, relative to window (added in 2.26.0) */
-  int32_t mouseY; /**< Y coordinate, relative to window (added in 2.26.0) */
+  float preciseX;  /**< The amount scrolled horizontally, positive to the right and negative to the
+                      left, with float precision (added in 2.0.18) */
+  float preciseY;  /**< The amount scrolled vertically, positive away from the user and negative
+                      toward the user, with float precision (added in 2.0.18) */
+  int32_t mouseX;  /**< X coordinate, relative to window (added in 2.26.0) */
+  int32_t mouseY;  /**< Y coordinate, relative to window (added in 2.26.0) */
+  int32_t canvasX; /**<X coordiante, relative to canvas  */
+  int32_t canvasY; /**<Y coordiante, relative to canvas  */
 };
 
 enum EWindowEventID
@@ -232,12 +242,14 @@ enum EWindowEventID
 
 struct VWindowEvent
 {
-  uint32_t type;        /**< ::VGG_WINDOWEVENT */
-  uint32_t timestamp;   /**< In milliseconds, populated using VGG_GetTicks() */
-  uint32_t windowID;    /**< The associated window */
-  EWindowEventID event; /**< ::VGG_WindowEventID */
-  int32_t data1;        /**< event dependent data */
-  int32_t data2;        /**< event dependent data */
+  uint32_t type;         /**< ::VGG_WINDOWEVENT */
+  uint32_t timestamp;    /**< In milliseconds, populated using VGG_GetTicks() */
+  uint32_t windowID;     /**< The associated window */
+  EWindowEventID event;  /**< ::VGG_WindowEventID */
+  int32_t data1;         /**< event dependent data */
+  int32_t data2;         /**< event dependent data */
+  int32_t drawableWidth; /*window drawable size width: */
+  int32_t drawableHeight;
 };
 
 /**
@@ -314,5 +326,3 @@ union UEvent
   VDropEvent drop;
   VPaintEvent paint;
 };
-
-/* vi: set ts=4 sw=4 expandtab: */

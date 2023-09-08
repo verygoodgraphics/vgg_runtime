@@ -73,7 +73,7 @@ public:
 
   void onInitProperties(layer::ContextProperty& property) override
   {
-    property.resolutionScale = resolutionScale();
+    property.dpiScaling = resolutionScale();
     property.api = layer::EGraphicsAPIBackend::API_OPENGL;
   }
 
@@ -151,9 +151,8 @@ public:
 #endif
 
     // create window
-    float f = getScaleFactor();
-    int winWidth = w * f;
-    int winHeight = h * f;
+    int winWidth = w;
+    int winHeight = h;
     SDL_Window* window =
 #ifndef EMSCRIPTEN
       SDL_CreateWindow(appName().c_str(),
@@ -170,8 +169,6 @@ public:
       handleGLError();
       return AppError(AppError::EKind::RenderEngineError, "Create Window Failed\n");
     }
-    // m_width = w;
-    // m_height = h;
     m_sdlState.window = window;
     // create context
     SDL_GLContext glContext = SDL_GL_CreateContext(window);
@@ -238,7 +235,6 @@ public:
     SDL_GL_GetDrawableSize(this->m_sdlState.window, &dw, &dh);
     SDL_GetWindowSize(this->m_sdlState.window, &ww, &wh);
     const float s = float(dw) / (float)ww;
-    DEBUG("Scale Factor on macOS: %f", s);
     return s;
 #else
     return getScaleFactor();
@@ -250,13 +246,13 @@ public:
     SDL_Event evt;
     while (SDL_PollEvent(&evt))
     {
-      sendEvent(toUEvent(evt));
+      auto event = toUEvent(evt, resolutionScale());
+      sendEvent(event);
     }
   }
 
   void swapBuffer()
   {
-
     // auto profiler = CappingProfiler::getInstance();
 
     // // display fps

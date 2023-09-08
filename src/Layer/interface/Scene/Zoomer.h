@@ -7,9 +7,7 @@ class SkCanvas;
 
 struct Zoomer
 {
-  static constexpr double minZoom = 0.01;
-  static constexpr double maxZoom = 10.0;
-
+public:
   double zoom{ 1.0 };
   Vec2 offset{ 0.0, 0.0 };
 
@@ -32,6 +30,5 @@ struct Zoomer
     return offset;
   }
 
-  // SDL_Event mapEvent(SDL_Event evt, double scaleFactor);
   void mapCanvasPosToLogicalPosition(const float canvasXY[2], float logicXY[2]) const;
 };

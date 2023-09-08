@@ -25,7 +25,7 @@ struct ContextConfig
 
 struct ContextProperty
 {
-  float resolutionScale{ 1.0 };
+  float dpiScaling{ 1.0 };
   std::optional<EGraphicsAPIBackend> api;
 };
 

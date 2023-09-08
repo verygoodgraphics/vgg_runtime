@@ -29,13 +29,13 @@ public:
     }
     else if (m_panning && e.type == VGG_MOUSEMOTION)
     {
-      doTranslate(e.motion.xrel * 2.0, e.motion.yrel * 2.0);
+      doTranslate(e.motion.canvasXRel, e.motion.canvasYRel);
       return true;
     }
     else if (e.type == VGG_MOUSEWHEEL && (EventManager::getModState() & VGG_KMOD_CTRL))
     {
-      int mx = e.wheel.mouseX * 2.0;
-      int my = e.wheel.mouseY * 2.0;
+      int mx = e.wheel.canvasX;
+      int my = e.wheel.canvasY;
       doZoom((e.wheel.y > 0 ? 1.0 : -1.0) * 0.03, mx, my);
       return true;
     }

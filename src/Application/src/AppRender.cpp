@@ -2,6 +2,7 @@
 #include "Application/AppRender.h"
 #include "AppRenderable.h"
 #include "AppScene.h"
+#include "Event/Event.h"
 #include "Scene/VGGLayer.h"
 #include "Application/interface/Event/EventListener.h"
 #include "Utility/interface/CappingProfiler.hpp"
@@ -107,7 +108,7 @@ bool AppRender::onEvent(UEvent e)
   {
     if (enableDrawPosition())
     {
-      drawMousePosition(e.motion.x, e.motion.y);
+      drawPosition(e.motion.canvasX, e.motion.canvasY);
     }
   }
   return false;

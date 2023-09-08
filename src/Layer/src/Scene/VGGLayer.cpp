@@ -107,7 +107,7 @@ std::optional<ELayerError> VLayer::onInit()
     _->skiaContext =
       std::make_unique<SkiaContext>(vk::vkContextCreateProc(ctx), vk::vkSurfaceCreateProc(), cfg);
 #else
-    ASSERT(false && "Vulkan is not support on the platform")
+    ASSERT(false && "Vulkan is not support on the platform");
     _->skiaContext = nullptr;
 #endif
   }
@@ -139,23 +139,20 @@ void VLayer::render()
     {
       item->render(canvas);
     }
-    std::vector<std::string> info;
     if (enableDrawPosition())
     {
-      const float resolutionScale = context()->property().resolutionScale;
-      const float canvasPosX = m_mousePosition[0] * resolutionScale;
-      const float canvasPosY = m_mousePosition[1] * resolutionScale;
+      std::vector<std::string> info;
       for (auto& scene : _->scenes)
       {
         auto z = scene->zoomer();
         if (z)
         {
           info.push_back(
-            _->mapCanvasPositionToScene(z, scene->name().c_str(), canvasPosX, canvasPosY));
+            _->mapCanvasPositionToScene(z, scene->name().c_str(), m_position[0], m_position[1]));
         }
       }
 
-      _->drawTextAt(canvas, info, canvasPosX, canvasPosY);
+      _->drawTextAt(canvas, info, m_position[0], m_position[1]);
     }
     canvas->restore();
     canvas->flush();

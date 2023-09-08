@@ -71,19 +71,26 @@ inline EWindowEventID toEWindowEventID(SDL_WindowEventID id)
 inline EButtonState toEButtonState(int t)
 {
   SWITCH_MAP_ITEM_BEGIN(t)
-  SWITCH_MAP_ITEM_DEF(SDL_PRESSED, EButtonState::VGG_Pressed)
-  SWITCH_MAP_ITEM_DEF(SDL_RELEASED, EButtonState::VGG_Release)
-  SWITCH_MAP_ITEM_END(EButtonState::VGG_Release)
+  SWITCH_MAP_ITEM_DEF(SDL_PRESSED, EButtonState::VGG_PRESSED)
+  SWITCH_MAP_ITEM_DEF(SDL_RELEASED, EButtonState::VGG_RELEASE)
+  SWITCH_MAP_ITEM_END(EButtonState::VGG_RELEASE)
 }
 
-inline VWindowEvent toVWindowEvent(const SDL_WindowEvent& e)
+inline VWindowEvent toVWindowEvent(const SDL_WindowEvent& e, float dpiScale)
 {
   VWindowEvent v;
   v.timestamp = e.timestamp;
   v.windowID = e.windowID;
   v.event = toEWindowEventID((SDL_WindowEventID)e.event);
-  v.data2 = e.data2;
   v.data1 = e.data1;
+  v.data2 = e.data2;
+  v.drawableWidth = v.data1;
+  v.drawableHeight = v.data2;
+  if (v.event == VGG_WINDOWEVENT_RESIZED || v.event == VGG_WINDOWEVENT_SIZE_CHANGED)
+  {
+    v.drawableWidth = v.data1 * dpiScale;
+    v.drawableHeight = v.data2 * dpiScale;
+  }
   return v;
 }
 
@@ -157,20 +164,24 @@ inline VUserEvent toVUserEvent(const SDL_UserEvent& e)
   return v;
 }
 
-inline VMouseMotionEvent toVMouseMotionEvent(const SDL_MouseMotionEvent& e)
+inline VMouseMotionEvent toVMouseMotionEvent(const SDL_MouseMotionEvent& e, float dpiScale)
 {
   VMouseMotionEvent v;
   v.timestamp = e.timestamp;
-  v.y = e.y;
-  v.x = e.x;
+  v.windowY = e.y;
+  v.windowX = e.x;
+  v.canvasX = e.x * dpiScale;
+  v.canvasY = e.y * dpiScale;
   v.yrel = e.yrel;
   v.xrel = e.xrel;
+  v.canvasXRel = e.xrel * dpiScale;
+  v.canvasYRel = e.yrel * dpiScale;
   v.state = toEButtonState(e.state);
   v.which = e.which;
   return v;
 }
 
-inline VMouseWheelEvent toVMouseWheelEvent(const SDL_MouseWheelEvent& e)
+inline VMouseWheelEvent toVMouseWheelEvent(const SDL_MouseWheelEvent& e, float dpiScale)
 {
   VMouseWheelEvent v;
   v.timestamp = e.timestamp;
@@ -178,18 +189,22 @@ inline VMouseWheelEvent toVMouseWheelEvent(const SDL_MouseWheelEvent& e)
   v.x = e.x;
   v.mouseX = e.mouseX;
   v.mouseY = e.mouseY;
+  v.canvasX = e.mouseX * dpiScale;
+  v.canvasY = e.mouseY * dpiScale;
   v.preciseX = e.preciseX;
   v.preciseY = e.preciseY;
   v.direction = e.direction;
   return v;
 }
 
-inline VMouseButtonEvent toVMouseButtonEvent(const SDL_MouseButtonEvent& e)
+inline VMouseButtonEvent toVMouseButtonEvent(const SDL_MouseButtonEvent& e, float dpiScale)
 {
   VMouseButtonEvent v;
   v.timestamp = e.timestamp;
-  v.y = e.y;
-  v.x = e.x;
+  v.windowY = e.y;
+  v.windowX = e.x;
+  v.canvasX = e.x * dpiScale;
+  v.canvasY = e.y * dpiScale;
   v.state = toEButtonState(e.state);
   v.which = e.which;
   v.clicks = e.clicks;
@@ -197,7 +212,7 @@ inline VMouseButtonEvent toVMouseButtonEvent(const SDL_MouseButtonEvent& e)
   return v;
 }
 
-inline UEvent toUEvent(const SDL_Event& e)
+inline UEvent toUEvent(const SDL_Event& e, float dpiScale = 1.0)
 {
   UEvent u;
   auto t = toEEventType((SDL_EventType)e.type);
@@ -205,13 +220,13 @@ inline UEvent toUEvent(const SDL_Event& e)
   {
     case SDL_MOUSEBUTTONUP:
     case SDL_MOUSEBUTTONDOWN:
-      u.button = toVMouseButtonEvent(e.button);
+      u.button = toVMouseButtonEvent(e.button, dpiScale);
       break;
     case SDL_MOUSEMOTION:
-      u.motion = toVMouseMotionEvent(e.motion);
+      u.motion = toVMouseMotionEvent(e.motion, dpiScale);
       break;
     case SDL_MOUSEWHEEL:
-      u.wheel = toVMouseWheelEvent(e.wheel);
+      u.wheel = toVMouseWheelEvent(e.wheel, dpiScale);
       break;
     case SDL_KEYUP:
     case SDL_KEYDOWN:
@@ -239,7 +254,7 @@ inline UEvent toUEvent(const SDL_Event& e)
       u.user = toVUserEvent(e.user);
       break;
     case SDL_WINDOWEVENT:
-      u.window = toVWindowEvent(e.window);
+      u.window = toVWindowEvent(e.window, dpiScale);
       break;
   }
   u.type = t;

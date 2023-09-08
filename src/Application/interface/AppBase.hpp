@@ -143,7 +143,6 @@ protected:
   bool onGlobalEvent(const UEvent& evt)
   {
     // handles App-wide events
-
     if (evt.type == VGG_QUIT)
     {
       m_shouldExit = true;
@@ -152,10 +151,9 @@ protected:
     if (auto& window = evt.window;
         evt.type == VGG_WINDOWEVENT && window.event == VGG_WINDOWEVENT_SIZE_CHANGED)
     {
-      float rs = property().resolutionScale;
-      int textureWidth = window.data1 * rs;
-      int textureHeight = window.data2 * rs;
-      resize(textureWidth, textureHeight);
+      int drawableWidth = window.drawableWidth;
+      int drawableHeight = window.drawableHeight;
+      resize(drawableWidth, drawableHeight);
       return true;
     }
     return false;

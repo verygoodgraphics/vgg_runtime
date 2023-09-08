@@ -28,7 +28,7 @@ class VLayer : public GraphicsLayer
   VGG_DECL_IMPL(VLayer);
   float m_scale{ 1.0 };
   bool m_drawPos{ false };
-  int m_mousePosition[2] = { 0, 0 };
+  int m_position[2] = { 0, 0 };
 
 protected:
   virtual std::optional<ELayerError> onInit() override;
@@ -53,10 +53,10 @@ public:
     return m_drawPos;
   }
 
-  void drawMousePosition(int x, int y)
+  void drawPosition(int x, int y)
   {
-    m_mousePosition[0] = x;
-    m_mousePosition[1] = y;
+    m_position[0] = x;
+    m_position[1] = y;
   }
 
   void setScaleFactor(float scale)

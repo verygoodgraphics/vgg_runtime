@@ -21,6 +21,11 @@ public:
 class EventManager
 {
 public:
+  EventManager() = delete;
+  EventManager(const EventAPI&) = delete;
+  EventManager(EventManager&&) = delete;
+  EventManager& operator=(const EventManager&) = delete;
+  EventManager& operator=(EventManager&&) = delete;
   static void registerEventAPI(std::unique_ptr<EventAPI> impl);
   static EVGGKeymod getModState();
   static uint8_t* getKeyboardState(int* nums);

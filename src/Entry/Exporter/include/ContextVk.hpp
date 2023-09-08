@@ -40,7 +40,7 @@ public:
   }
   void onInitProperties(layer::ContextProperty& property) override
   {
-    property.resolutionScale = 1.0;
+    property.dpiScaling = 1.0;
     property.api = layer::EGraphicsAPIBackend::API_VULKAN;
   }
 

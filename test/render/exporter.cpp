@@ -5,7 +5,6 @@
 #include <Utility/interface/ConfigMananger.h>
 #include "Scene/Scene.h"
 #include "loader.h"
-// #include "Entry/EGL/EGLRuntime.h"
 #include "Entry/Exporter/interface/ImageExporter.hpp"
 using namespace VGG;
 
@@ -58,10 +57,12 @@ std::vector<std::pair<std::string, std::vector<char>>> renderAndOutput(InputDesc
   return {};
 }
 
+constexpr char POS_ARG_INPUT_FILE[] = "fig/ai/sketch/json";
+
 int main(int argc, char** argv)
 {
   argparse::ArgumentParser program("exporter", "0.1");
-  program.add_argument("-l", "--load").help("load from vgg or sketch file");
+  program.add_argument(POS_ARG_INPUT_FILE).help("input fig/ai/sketch/json file");
   program.add_argument("-d", "--data").help("resources dir");
   program.add_argument("-p", "--prefix").help("the prefix of filename or dir");
   program.add_argument("-L", "--loaddir").help("iterates all the files in the given dir");
@@ -101,7 +102,7 @@ int main(int argc, char** argv)
 
   Config::readGlobalConfig(configFilePath);
 
-  if (auto loadfile = program.present("-l"))
+  if (auto loadfile = program.present(POS_ARG_INPUT_FILE))
   {
     auto fp = loadfile.value();
     desc.filepath = fp;

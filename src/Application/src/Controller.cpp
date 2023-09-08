@@ -133,6 +133,7 @@ void Controller::setEditMode(bool editMode)
   }
 
   m_presenter->setEditMode(editMode);
+  m_editor->enable(editMode);
 }
 
 std::shared_ptr<AppScene> Controller::editor()

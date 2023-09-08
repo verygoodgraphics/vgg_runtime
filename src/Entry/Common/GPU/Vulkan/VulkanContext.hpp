@@ -16,14 +16,14 @@ public:
   std::shared_ptr<vk::VkPhysicalDeviceObject> vkPhysicalDevice;
   std::shared_ptr<vk::VkDeviceObject> vkDevice;
 
-  // windowlesss-specific
+  // windowed-specific
   std::shared_ptr<vk::VkSurfaceObject> vkSurface;
   std::shared_ptr<vk::VkSwapchainObject> vkSwapchain;
   VkQueue presentQueue{ VK_NULL_HANDLE };
   uint32_t swapChainImageIndex = -1;
   VkFence fence;
-  VkSemaphore imageAvailableSemaphore;
-  VkSemaphore renderFinishedSemaphore;
+  VkSemaphore imageAvailableSemaphore{ VK_NULL_HANDLE };
+  VkSemaphore renderFinishedSemaphore{ VK_NULL_HANDLE };
 
   EContextConfig config;
   VulkanContext(const VulkanContext&) = delete;
@@ -48,6 +48,7 @@ public:
   void createWindowedContext()
   {
     cleanup();
+    // TODO::
   }
 
   void createWindowlessContext()
@@ -115,7 +116,24 @@ public:
 
   void cleanup()
   {
-
+    if (vkDevice)
+    {
+      if (imageAvailableSemaphore != VK_NULL_HANDLE)
+      {
+        vkDestroySemaphore(*vkDevice, imageAvailableSemaphore, nullptr);
+        imageAvailableSemaphore = VK_NULL_HANDLE;
+      }
+      if (renderFinishedSemaphore != VK_NULL_HANDLE)
+      {
+        vkDestroySemaphore(*vkDevice, renderFinishedSemaphore, nullptr);
+        renderFinishedSemaphore = VK_NULL_HANDLE;
+      }
+      if (fence != VK_NULL_HANDLE)
+      {
+        vkDestroyFence(*vkDevice, fence, nullptr);
+        fence = VK_NULL_HANDLE;
+      }
+    }
     if (vkSurface)
     {
       vkSurface = nullptr;
@@ -135,18 +153,6 @@ public:
     if (vkInstance)
     {
       vkInstance = nullptr;
-    }
-    if (vkDevice != VK_NULL_HANDLE && imageAvailableSemaphore != VK_NULL_HANDLE)
-    {
-      vkDestroySemaphore(*vkDevice, imageAvailableSemaphore, nullptr);
-    }
-    if (vkDevice != VK_NULL_HANDLE && renderFinishedSemaphore != VK_NULL_HANDLE)
-    {
-      vkDestroySemaphore(*vkDevice, renderFinishedSemaphore, nullptr);
-    }
-    if (vkDevice != VK_NULL_HANDLE && fence != VK_NULL_HANDLE)
-    {
-      vkDestroyFence(*vkDevice, fence, nullptr);
     }
   }
 

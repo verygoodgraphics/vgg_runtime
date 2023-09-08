@@ -51,7 +51,8 @@ bool UIView::onEvent(UEvent evt, void* userData)
         return false;
       }
 
-      Layout::Point point{ TO_VGG_LAYOUT_SCALAR(evt.button.x), TO_VGG_LAYOUT_SCALAR(evt.button.y) };
+      Layout::Point point{ TO_VGG_LAYOUT_SCALAR(evt.button.windowX),
+                           TO_VGG_LAYOUT_SCALAR(evt.button.windowY) };
       point = converPointFromWindowAndScale(point);
       auto targetNode = m_root->hitTest(point,
                                         [&hasEventListener](const std::string& path)
@@ -63,8 +64,8 @@ bool UIView::onEvent(UEvent evt, void* userData)
         m_eventListener(UIEventPtr(new MouseEvent(targetNode->path(),
                                                   UIEventType::mousedown,
                                                   jsButtonIndex,
-                                                  evt.button.x,
-                                                  evt.button.y,
+                                                  evt.button.windowX,
+                                                  evt.button.windowY,
                                                   0,
                                                   0,
                                                   alt,
@@ -82,7 +83,8 @@ bool UIView::onEvent(UEvent evt, void* userData)
         return false;
       }
 
-      Layout::Point point{ TO_VGG_LAYOUT_SCALAR(evt.motion.x), TO_VGG_LAYOUT_SCALAR(evt.motion.y) };
+      Layout::Point point{ TO_VGG_LAYOUT_SCALAR(evt.motion.windowX),
+                           TO_VGG_LAYOUT_SCALAR(evt.motion.windowY) };
       point = converPointFromWindowAndScale(point);
       auto targetNode = m_root->hitTest(point,
                                         [&hasEventListener](const std::string& path)
@@ -93,8 +95,8 @@ bool UIView::onEvent(UEvent evt, void* userData)
         m_eventListener(UIEventPtr(new MouseEvent(targetNode->path(),
                                                   UIEventType::mousemove,
                                                   0,
-                                                  evt.motion.x,
-                                                  evt.motion.y,
+                                                  evt.motion.windowX,
+                                                  evt.motion.windowY,
                                                   evt.motion.xrel,
                                                   evt.motion.yrel,
                                                   alt,
@@ -112,7 +114,8 @@ bool UIView::onEvent(UEvent evt, void* userData)
         return false;
       }
 
-      Layout::Point point{ TO_VGG_LAYOUT_SCALAR(evt.button.x), TO_VGG_LAYOUT_SCALAR(evt.button.y) };
+      Layout::Point point{ TO_VGG_LAYOUT_SCALAR(evt.button.windowX),
+                           TO_VGG_LAYOUT_SCALAR(evt.button.windowY) };
       point = converPointFromWindowAndScale(point);
       auto jsButtonIndex{ evt.button.button - 1 };
       auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
@@ -125,8 +128,8 @@ bool UIView::onEvent(UEvent evt, void* userData)
         m_eventListener(UIEventPtr(new MouseEvent(targetNode->path(),
                                                   UIEventType::mouseup,
                                                   jsButtonIndex,
-                                                  evt.button.x,
-                                                  evt.button.y,
+                                                  evt.button.windowX,
+                                                  evt.button.windowY,
                                                   0,
                                                   0,
                                                   alt,
@@ -145,8 +148,8 @@ bool UIView::onEvent(UEvent evt, void* userData)
           m_eventListener(UIEventPtr(new MouseEvent(targetNode->path(),
                                                     UIEventType::click,
                                                     jsButtonIndex,
-                                                    evt.button.x,
-                                                    evt.button.y,
+                                                    evt.button.windowX,
+                                                    evt.button.windowY,
                                                     0,
                                                     0,
                                                     alt,
@@ -166,8 +169,8 @@ bool UIView::onEvent(UEvent evt, void* userData)
           m_eventListener(UIEventPtr(new MouseEvent(targetNode->path(),
                                                     UIEventType::auxclick,
                                                     jsButtonIndex,
-                                                    evt.button.x,
-                                                    evt.button.y,
+                                                    evt.button.windowX,
+                                                    evt.button.windowY,
                                                     0,
                                                     0,
                                                     alt,
@@ -187,8 +190,8 @@ bool UIView::onEvent(UEvent evt, void* userData)
             m_eventListener(UIEventPtr(new MouseEvent(targetNode->path(),
                                                       UIEventType::contextmenu,
                                                       jsButtonIndex,
-                                                      evt.button.x,
-                                                      evt.button.y,
+                                                      evt.button.windowX,
+                                                      evt.button.windowY,
                                                       0,
                                                       0,
                                                       alt,

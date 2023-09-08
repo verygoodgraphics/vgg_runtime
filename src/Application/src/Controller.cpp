@@ -136,7 +136,7 @@ void Controller::setEditMode(bool editMode)
   m_editor->enable(editMode);
 }
 
-std::shared_ptr<AppScene> Controller::editor()
+std::shared_ptr<app::AppScene> Controller::editor()
 {
   return m_editor;
 }

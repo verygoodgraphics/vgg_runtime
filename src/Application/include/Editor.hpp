@@ -13,7 +13,7 @@ class SkCanvas;
 namespace VGG
 {
 
-class Editor : public AppScene
+class Editor : public app::AppScene
 {
   bool m_enabled{ false };
   std::vector<std::weak_ptr<LayoutNode>> m_selectedNodes;

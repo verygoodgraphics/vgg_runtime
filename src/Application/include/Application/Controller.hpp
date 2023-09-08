@@ -60,7 +60,7 @@ public:
 
   void onResize();
 
-  std::shared_ptr<AppScene> editor();
+  std::shared_ptr<app::AppScene> editor();
   void setEditMode(bool editMode);
   bool isEditMode()
   {

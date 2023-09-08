@@ -16,7 +16,7 @@
 namespace VGG
 {
 
-class UIView : public AppScene
+class UIView : public app::AppScene
 {
 public:
   using EventListener = std::function<void(UIEventPtr)>;
@@ -50,7 +50,7 @@ private:
 public:
   UIView()
   {
-    setZoomerListener(std::make_shared<AppZoomer>());
+    setZoomerListener(std::make_shared<app::AppZoomer>());
   }
 
   void show(const ViewModel& viewModel)

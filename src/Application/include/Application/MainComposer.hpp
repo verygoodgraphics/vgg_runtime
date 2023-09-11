@@ -12,11 +12,15 @@
 
 namespace VGG
 {
+
+class Editor;
+
 class MainComposer
 {
   std::shared_ptr<UIView> m_view;
   std::shared_ptr<UIView> m_edit_view;
   std::shared_ptr<Presenter> m_presenter;
+  std::shared_ptr<Editor> m_editor;
 
   std::shared_ptr<RunLoop> m_runLoop;
   std::shared_ptr<Controller> m_controller;
@@ -24,26 +28,7 @@ class MainComposer
   std::shared_ptr<PlatformComposer> m_platform_composer;
 
 public:
-  MainComposer(PlatformComposer* platformComposer)
-    : m_view{ std::make_shared<UIView>() }
-    , m_presenter{ std::make_shared<Presenter>() }
-    , m_runLoop{ std::make_shared<RunLoop>() }
-    , m_controller{ std::make_shared<Controller>(m_runLoop, m_presenter) }
-    , m_platform_composer{ platformComposer }
-  {
-    m_presenter->setView(m_view);
-
-    m_platform_composer->setup();
-
-#ifdef EMSCRIPTEN
-    AsyncWorkerFactory::setTaskWorkerFactory([run_loop = m_runLoop]()
-                                             { return run_loop->thread(); });
-#else
-    AsyncWorkerFactory::setTaskWorkerFactory([]() { return rxcpp::observe_on_new_thread(); });
-#endif
-    AsyncWorkerFactory::setResultWorkerFactory([run_loop = m_runLoop]()
-                                               { return run_loop->thread(); });
-  }
+  MainComposer(PlatformComposer* platformComposer);
 
   ~MainComposer()
   {

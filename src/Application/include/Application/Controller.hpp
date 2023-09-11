@@ -46,6 +46,7 @@ private:
 public:
   Controller(std::shared_ptr<RunLoop> runLoop,
              std::shared_ptr<Presenter> presenter,
+             std::shared_ptr<Editor> editor,
              ERunMode mode = ERunMode::NORMAL_MODE);
   ~Controller() = default;
 

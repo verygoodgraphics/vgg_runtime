@@ -110,25 +110,32 @@ public:
   void setNeedLayout();
   void layoutIfNeeded();
 
+  Layout::Rect frameToAncestor(std::shared_ptr<LayoutNode> ancestorNode = nullptr)
+  {
+    return convertRectToAncestor(m_frame, ancestorNode);
+  }
+
 private:
   bool pointInside(Layout::Point point)
   {
-    auto rect = convertRectToWindow(m_frame);
+    auto rect = convertRectToAncestor(m_frame);
     return rect.pointInRect(point);
   }
 
-  Layout::Rect convertRectToWindow(Layout::Rect rect)
+  Layout::Rect convertRectToAncestor(Layout::Rect rect,
+                                     std::shared_ptr<LayoutNode> ancestorNode = nullptr)
   {
-    return { converPointToWindow(rect.origin), rect.size };
+    return { converPointToAncestor(rect.origin, ancestorNode), rect.size };
   }
 
-  Layout::Point converPointToWindow(Layout::Point point)
+  Layout::Point converPointToAncestor(Layout::Point point,
+                                      std::shared_ptr<LayoutNode> ancestorNode = nullptr)
   {
     auto x = point.x;
     auto y = point.y;
 
     auto parent = m_parent.lock();
-    while (parent)
+    while (parent != ancestorNode)
     {
       x += parent->m_frame.origin.x;
       y += parent->m_frame.origin.y;

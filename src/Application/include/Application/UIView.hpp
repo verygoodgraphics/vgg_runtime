@@ -26,6 +26,8 @@ public:
   using ScalarType = int;
 
 private:
+  friend class Editor;
+
   EventListener m_eventListener;
   HasEventListener m_hasEventListener;
 

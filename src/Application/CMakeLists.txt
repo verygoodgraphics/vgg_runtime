@@ -3,6 +3,7 @@ add_library(vgg_application STATIC
   src/Controller.cpp
   src/Editor.cpp
   src/EventAPI.cpp
+  src/MainComposer.cpp
   src/UIView.cpp
   src/VggSdk.cpp
 )

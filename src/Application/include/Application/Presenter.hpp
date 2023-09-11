@@ -24,6 +24,7 @@ class Presenter : public std::enable_shared_from_this<Presenter>
   std::shared_ptr<ViewModel> m_editViewModel;
 
   bool m_editMode{ false };
+  UIView::EventListener m_editorEventListener;
 
   rxcpp::subjects::subject<VGG::UIEventPtr> m_subject;
   rxcpp::subjects::subject<VGG::UIEventPtr> m_editSubject;
@@ -111,13 +112,25 @@ public:
 
     auto weakThis = weak_from_this();
     m_view->setEventListener(
-      [weakThis](UIEventPtr evtPtr)
+      [weakThis](UIEventPtr evtPtr, std::weak_ptr<LayoutNode> targetNode)
       {
-        if (auto p = weakThis.lock())
+        if (auto sharedThis = weakThis.lock())
         {
-          p->m_subject.get_subscriber().on_next(evtPtr);
+          if (sharedThis->m_editMode)
+          {
+            sharedThis->m_editorEventListener(evtPtr, targetNode);
+          }
+          else if (!targetNode.expired())
+          {
+            sharedThis->m_subject.get_subscriber().on_next(evtPtr);
+          }
         }
       });
+  }
+
+  void setEditorEventListener(UIView::EventListener listener)
+  {
+    m_editorEventListener = listener;
   }
 
   Layout::Size viewSize()
@@ -138,7 +151,7 @@ public:
 
     auto weakThis = weak_from_this();
     m_editView->setEventListener(
-      [weakThis](UIEventPtr evtPtr)
+      [weakThis](UIEventPtr evtPtr, std::weak_ptr<LayoutNode> targetNode)
       {
         if (auto p = weakThis.lock())
         {

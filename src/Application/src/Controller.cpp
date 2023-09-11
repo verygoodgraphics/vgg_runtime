@@ -136,7 +136,7 @@ void Controller::setEditMode(bool editMode)
   m_editor->enable(editMode);
 }
 
-std::shared_ptr<app::AppScene> Controller::editor()
+std::shared_ptr<app::AppRenderable> Controller::editor()
 {
   return m_editor;
 }
@@ -231,10 +231,6 @@ void Controller::observeViewEvent()
 
       if (sharedThis->m_mode == ERunMode::EDIT_MODE)
       {
-        if (sharedThis->m_editor)
-        {
-          sharedThis->m_editor->handleUIEvent(evt);
-        }
         return;
       }
 
@@ -252,6 +248,17 @@ void Controller::observeViewEvent()
     });
 
   m_presenter->getObservable().subscribe(observer);
+  m_presenter->setEditorEventListener(
+    [weakThis](UIEventPtr event, std::weak_ptr<LayoutNode> targetNode)
+    {
+      auto sharedThis = weakThis.lock();
+      if (!sharedThis)
+      {
+        return;
+      }
+
+      sharedThis->m_editor->handleUIEvent(event, targetNode);
+    });
 }
 
 void Controller::observeEditViewEvent()

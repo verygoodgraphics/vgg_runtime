@@ -48,18 +48,31 @@ void drawFrame(SkCanvas* canvas, const SkRect& rect)
   SkPaint strokePen;
   strokePen.setAntiAlias(true);
   strokePen.setStyle(SkPaint::kStroke_Style);
-  strokePen.setColor(SK_ColorLTGRAY);
+  strokePen.setColor(SK_ColorBLUE);
   canvas->drawRect(rect, strokePen);
 
   canvas->restore();
 }
 } // namespace
 
-void Editor::handleUIEvent(UIEventPtr event)
+void Editor::handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNode)
 {
   DEBUG("Editor::handleUIEvent: type = %s, target = %s",
         event->type().c_str(),
         event->path().c_str());
+
+  switch (event->enumType())
+  {
+    case UIEventType::click:
+    {
+      m_selectedNode = targetNode;
+      // todo, multiple selection, deselect
+      break;
+    }
+
+    default:
+      return;
+  }
 }
 
 void Editor::onRender(SkCanvas* canvas)
@@ -71,8 +84,12 @@ void Editor::onRender(SkCanvas* canvas)
 
   DEBUG("Editor::onRender");
 
-  SkRect rect{ 0, 0, 200, 100 };
-  drawFrame(canvas, rect);
+  if (auto node = m_selectedNode.lock())
+  {
+    SkRect rect = toSkRect(node->frame());
+    drawFrame(canvas, rect);
+    // todo, translate, scale
+  }
 }
 
 void Editor::drawBorder(SkCanvas* canvas, const LayoutNode* node)

@@ -115,6 +115,11 @@ public:
     return UIEventTypeToString(m_type);
   }
 
+  auto enumType()
+  {
+    return m_type;
+  }
+
 private:
   const PathType m_path;
   const UIEventType m_type;

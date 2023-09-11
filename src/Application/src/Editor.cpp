@@ -11,6 +11,8 @@
 
 using namespace VGG;
 
+constexpr auto K_MOUSE_CONTAINER_WIDTH = 30.0f;
+
 namespace
 {
 SkRect toSkRect(const Layout::Rect rect)
@@ -65,10 +67,41 @@ void Editor::handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNod
 
   switch (event->enumType())
   {
-    case UIEventType::click:
+    case UIEventType::mousedown:
     {
+      m_isMouseDown = true;
+
+      checkMouseDownPostion(static_cast<MouseEvent*>(event.get()));
+      if (m_mouseDownPostion != EFramePosition::NONE)
+      {
+        return;
+      }
+
+      if (auto contentView = m_contentView.lock())
+      {
+        if (targetNode.lock() == contentView->currentPage())
+        {
+          m_selectedNode.reset();
+          return;
+        }
+      }
+
       m_selectedNode = targetNode;
+      checkMouseDownPostion(static_cast<MouseEvent*>(event.get()));
+
       // todo, multiple selection, deselect
+      break;
+    }
+
+    case UIEventType::mousemove:
+    {
+      resizeNode(static_cast<MouseEvent*>(event.get()));
+      break;
+    }
+
+    case UIEventType::mouseup:
+    {
+      m_isMouseDown = false;
       break;
     }
 
@@ -89,8 +122,6 @@ void Editor::onRender(SkCanvas* canvas)
   {
     return;
   }
-
-  DEBUG("Editor::onRender");
 
   canvas->save();
 
@@ -173,4 +204,214 @@ void Editor::drawCornerPoint(SkCanvas* canvas, const LayoutNode* node)
   //     canvas->drawRect(ctrPt, strokePen);
   //   }
   // canvas->restore();
+}
+
+void Editor::checkMouseDownPostion(MouseEvent* mouseDown)
+{
+  m_mouseDownPostion = EFramePosition::NONE;
+
+  auto selectedNode = m_selectedNode.lock();
+  if (!selectedNode)
+  {
+    return;
+  }
+
+  auto contentView = m_contentView.lock();
+  if (!contentView)
+  {
+    return;
+  }
+
+  Layout::Point mouse{ TO_VGG_LAYOUT_SCALAR(mouseDown->x), TO_VGG_LAYOUT_SCALAR(mouseDown->y) };
+  auto f = selectedNode->frameToAncestor(contentView->currentPage());
+
+  DEBUG("Editor::checkMouseDownPostion: selected node frame is: (%f, %f, %f, %f), mouse at: %f, %f",
+        f.origin.x,
+        f.origin.y,
+        f.size.width,
+        f.size.height,
+        mouse.x,
+        mouse.y);
+
+  // top corner
+  Layout::Rect topLeftCorner{ { f.origin.x - K_MOUSE_CONTAINER_WIDTH / 2,
+                                f.origin.y - K_MOUSE_CONTAINER_WIDTH / 2 },
+                              { K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
+  if (topLeftCorner.contains(mouse))
+  {
+    DEBUG("Editor::checkMouseDownPostion: click top left corner");
+    m_mouseDownPostion = EFramePosition::TOP_LEFT;
+    return;
+  }
+
+  Layout::Rect topRightCorner{ { f.origin.x + f.size.width - K_MOUSE_CONTAINER_WIDTH / 2,
+                                 f.origin.y - K_MOUSE_CONTAINER_WIDTH / 2 },
+                               { K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
+  if (topRightCorner.contains(mouse))
+  {
+    DEBUG("Editor::checkMouseDownPostion: click top right corner");
+    m_mouseDownPostion = EFramePosition::TOP_RIGHT;
+    return;
+  }
+
+  // bottom corner
+  Layout::Rect bottomLeftCorner{ { f.origin.x - K_MOUSE_CONTAINER_WIDTH / 2,
+                                   f.origin.y + f.size.height - K_MOUSE_CONTAINER_WIDTH / 2 },
+                                 { K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
+  if (bottomLeftCorner.contains(mouse))
+  {
+    DEBUG("Editor::checkMouseDownPostion: click bottom left corner");
+    m_mouseDownPostion = EFramePosition::BOTTOM_LEFT;
+    return;
+  }
+
+  Layout::Rect bottomRightCorner{ { f.origin.x + f.size.width - K_MOUSE_CONTAINER_WIDTH / 2,
+                                    f.origin.y + f.size.height - K_MOUSE_CONTAINER_WIDTH / 2 },
+                                  { K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
+  if (bottomRightCorner.contains(mouse))
+  {
+    DEBUG("Editor::checkMouseDownPostion: click bottom right corner");
+    m_mouseDownPostion = EFramePosition::BOTTOM_RIGHT;
+    return;
+  }
+
+  // top/bottom border
+  Layout::Rect topBorder{ { f.origin.x + K_MOUSE_CONTAINER_WIDTH / 2,
+                            f.origin.y - K_MOUSE_CONTAINER_WIDTH / 2 },
+                          { f.size.width - K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
+  if (topBorder.contains(mouse))
+  {
+    DEBUG("Editor::checkMouseDownPostion: click top border");
+    m_mouseDownPostion = EFramePosition::TOP;
+    return;
+  }
+
+  Layout::Rect bottomBorder{ { f.origin.x + K_MOUSE_CONTAINER_WIDTH / 2,
+                               f.origin.y + f.size.height - K_MOUSE_CONTAINER_WIDTH / 2 },
+                             { f.size.width - K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
+  if (bottomBorder.contains(mouse))
+  {
+    DEBUG("Editor::checkMouseDownPostion: click bottom border");
+    m_mouseDownPostion = EFramePosition::BOTTOM;
+    return;
+  }
+
+  // left/right border
+  Layout::Rect leftBorder{ { f.origin.x - K_MOUSE_CONTAINER_WIDTH / 2,
+                             f.origin.y + K_MOUSE_CONTAINER_WIDTH / 2 },
+                           { K_MOUSE_CONTAINER_WIDTH, f.size.height - K_MOUSE_CONTAINER_WIDTH } };
+  if (leftBorder.contains(mouse))
+  {
+    DEBUG("Editor::checkMouseDownPostion: click left border");
+    m_mouseDownPostion = EFramePosition::LEFT;
+    return;
+  }
+
+  Layout::Rect rightBorder{ { f.origin.x + f.size.width - K_MOUSE_CONTAINER_WIDTH / 2,
+                              f.origin.y + K_MOUSE_CONTAINER_WIDTH / 2 },
+                            { K_MOUSE_CONTAINER_WIDTH, f.size.height - K_MOUSE_CONTAINER_WIDTH } };
+  if (rightBorder.contains(mouse))
+  {
+    DEBUG("Editor::checkMouseDownPostion: click right border");
+    m_mouseDownPostion = EFramePosition::RIGHT;
+    return;
+  }
+}
+
+void Editor::resizeNode(MouseEvent* mouseMove)
+{
+  if (!m_isMouseDown)
+  {
+    return;
+  }
+
+  auto selectedNode = m_selectedNode.lock();
+  if (!selectedNode)
+  {
+    return;
+  }
+
+  if (m_mouseDownPostion == EFramePosition::NONE)
+  {
+    return;
+  }
+
+  auto frame = selectedNode->frame();
+  auto tx = mouseMove->movementX;
+  auto ty = mouseMove->movementY;
+
+  DEBUG("Editor::resizeNode: selected node frame is: (%f, %f, %f, %f), mouse move is: %d, %d",
+        frame.origin.x,
+        frame.origin.y,
+        frame.size.width,
+        frame.size.height,
+        tx,
+        ty);
+
+  switch (m_mouseDownPostion)
+  {
+    case EFramePosition::TOP_LEFT:
+    {
+      frame.origin.x += tx;
+      frame.origin.y += ty;
+
+      frame.size.width -= tx;
+      frame.size.height -= ty;
+      break;
+    }
+    case EFramePosition::TOP_RIGHT:
+    {
+      frame.origin.y += ty;
+
+      frame.size.width += tx;
+      frame.size.height -= ty;
+      break;
+    }
+
+    case EFramePosition::BOTTOM_LEFT:
+    {
+      frame.origin.x += tx;
+
+      frame.size.width -= tx;
+      frame.size.height += ty;
+      break;
+    }
+    case EFramePosition::BOTTOM_RIGHT:
+    {
+      frame.size.width += tx;
+      frame.size.height += ty;
+      break;
+    }
+
+    case EFramePosition::LEFT:
+    {
+      frame.origin.x += tx;
+
+      frame.size.width -= tx;
+      break;
+    }
+    case EFramePosition::RIGHT:
+    {
+      frame.size.width += tx;
+      break;
+    }
+
+    case EFramePosition::TOP:
+    {
+      frame.origin.y += ty;
+
+      frame.size.height -= ty;
+      break;
+    }
+    case EFramePosition::BOTTOM:
+    {
+      frame.size.height += ty;
+      break;
+    }
+
+    default:
+      return;
+  }
+
+  selectedNode->setFrame(frame);
 }

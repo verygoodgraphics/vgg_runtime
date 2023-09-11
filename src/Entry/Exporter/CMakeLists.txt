@@ -1,5 +1,5 @@
 find_package(Vulkan)
-if(Vulkan_FOUND AND ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_LINUX_TARGET_LIST)
+if(Vulkan_FOUND)
   add_library(vgg_exporter src/ImageExporter.cpp)
   set_target_properties(vgg_exporter PROPERTIES POSITION_INDEPENDENT_CODE ON)
 

@@ -15,8 +15,9 @@ set_target_properties(
 
 
 find_package(Vulkan)
-if(Vulkan_FOUND AND ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_LINUX_TARGET_LIST)
+if(Vulkan_FOUND)
   add_executable(exporter exporter.cpp)
+  target_compile_definitions(exporter PRIVATE VGG_USE_VULKAN)
   target_link_libraries(exporter vgg_exporter vgg_layer)
   target_include_directories(exporter PRIVATE ${VGG_CONTRIB_ARGPARSE_INCLUDE} ${VGG_CONTRIB_JSON_INCLUDE})
   get_target_property(VGG_LAYER_RPATH vgg_layer BUILD_RPATH)

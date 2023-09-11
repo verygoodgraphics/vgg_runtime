@@ -1,6 +1,8 @@
 #include "Editor.hpp"
 
+#include <Application/UIView.hpp>
 #include <Log.h>
+#include <Scene/Zoomer.h>
 
 #include <include/core/SkCanvas.h>
 
@@ -25,8 +27,8 @@ void drawFrame(SkCanvas* canvas, const SkRect& rect)
   ASSERT(rect.right() > rect.left());
   ASSERT(rect.bottom() > rect.top());
 
-  canvas->save();
-  canvas->translate(rect.left(), rect.top());
+  // canvas->save();
+  // canvas->translate(rect.left(), rect.top());
   // todo, flip
   // todo, rotate
 
@@ -51,7 +53,7 @@ void drawFrame(SkCanvas* canvas, const SkRect& rect)
   strokePen.setColor(SK_ColorBLUE);
   canvas->drawRect(rect, strokePen);
 
-  canvas->restore();
+  // canvas->restore();
 }
 } // namespace
 
@@ -82,14 +84,29 @@ void Editor::onRender(SkCanvas* canvas)
     return;
   }
 
+  auto contentView = m_contentView.lock();
+  if (!contentView)
+  {
+    return;
+  }
+
   DEBUG("Editor::onRender");
+
+  canvas->save();
+
+  auto offset = contentView->zoomer()->translate();
+  auto zoom = contentView->zoomer()->scale();
+  canvas->translate(offset.x, offset.y);
+  canvas->scale(zoom, zoom);
 
   if (auto node = m_selectedNode.lock())
   {
-    SkRect rect = toSkRect(node->frame());
+    SkRect rect = toSkRect(node->frameToAncestor(contentView->currentPage()));
     drawFrame(canvas, rect);
     // todo, translate, scale
   }
+
+  canvas->restore();
 }
 
 void Editor::drawBorder(SkCanvas* canvas, const LayoutNode* node)

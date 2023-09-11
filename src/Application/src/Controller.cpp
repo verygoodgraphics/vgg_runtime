@@ -26,11 +26,12 @@ namespace VGG
 
 Controller::Controller(std::shared_ptr<RunLoop> runLoop,
                        std::shared_ptr<Presenter> presenter,
+                       std::shared_ptr<Editor> editor,
                        ERunMode mode)
   : m_runLoop(runLoop)
   , m_presenter(presenter)
   , m_mode(mode)
-  , m_editor{ new Editor }
+  , m_editor{ editor }
 {
   assert(m_runLoop);
 }

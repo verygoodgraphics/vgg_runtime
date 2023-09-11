@@ -10,7 +10,11 @@ set_property(GLOBAL PROPERTY POSITION_INDEPENDENT_CODE ON)
 # customized platform checking flags
 # introduce customized cmake vars, see VggVars.cmake in cmake for details
 include(VGGVars)
-
+set(ENV_SHELL_PREFIX $ENV{name} CACHE STRING "" FORCE)
+if(NOT ENV_SHELL_PREFIX)
+  set(ENV_SHELL_PREFIX "default-shell" CACHE STRING "" FORCE)
+endif()
+message(STATUS "SHELL: " ${ENV_SHELL_PREFIX})
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug")

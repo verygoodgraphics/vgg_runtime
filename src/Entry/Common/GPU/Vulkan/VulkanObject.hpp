@@ -42,6 +42,35 @@ struct VkInstanceObject : public std::enable_shared_from_this<VkInstanceObject>
   template<typename F>
   VkInstanceObject(F&& extensionQueryFunc)
   {
+    // Check if vulkan 1.1 is supported at least
+    // https: // registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkApplicationInfo.html
+    auto f = (PFN_vkEnumerateInstanceVersion)vkGetInstanceProcAddr(VK_NULL_HANDLE,
+                                                                   "vkEnumerateInstanceVersion");
+    ASSERT_MSG(f,
+               "Minimum required version for vulkan is 1.1 (only 1.0 supported now, check your "
+               "driver installation");
+
+    uint32_t apiVersion;
+    if (f(&apiVersion) != VK_SUCCESS)
+    {
+      DEBUG("Get api version failed\n");
+      std::abort();
+    }
+    uint32_t major = VK_VERSION_MAJOR(apiVersion);
+    uint32_t minor = VK_VERSION_MINOR(apiVersion);
+
+    if (!(major >= 1 && minor >= 1))
+    {
+      ASSERT_MSG(f,
+                 "Minimum required version for vulkan is 1.1,only %d.%d is currently supported "
+                 "now, check your "
+                 "driver installation",
+                 major,
+                 minor);
+    }
+
+    DEBUG("Vulkan version: %d.%d", major, minor);
+
     uint32_t extPropCount = 0;
     vkEnumerateInstanceExtensionProperties(nullptr, &extPropCount, nullptr);
     std::vector<VkExtensionProperties> props(extPropCount);
@@ -71,7 +100,16 @@ struct VkInstanceObject : public std::enable_shared_from_this<VkInstanceObject>
     ci.enabledExtensionCount = extNames.size();
     ci.ppEnabledExtensionNames = extNames.data();
 
-    ci.pApplicationInfo = nullptr;
+    VkApplicationInfo appInfo;
+    appInfo.apiVersion = apiVersion;
+    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    appInfo.pNext = nullptr;
+    appInfo.pEngineName = "Vulkan for skia";
+    appInfo.applicationVersion = VK_MAKE_API_VERSION(1, 0, 0, 0);
+    appInfo.engineVersion = VK_MAKE_API_VERSION(1, 0, 0, 0);
+
+    ci.pApplicationInfo = &appInfo;
+
     ////Check validationLayers
     if (false)
     { // warning: If layer is enabled, the VK_LAYER_PATH must be set

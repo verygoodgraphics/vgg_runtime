@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Application/AppRenderable.h>
 #include <Application/AppScene.h>
 #include <Application/RunLoop.hpp>
 
@@ -60,7 +61,7 @@ public:
 
   void onResize();
 
-  std::shared_ptr<app::AppScene> editor();
+  std::shared_ptr<app::AppRenderable> editor();
   void setEditMode(bool editMode);
   bool isEditMode()
   {

@@ -8,6 +8,8 @@ using namespace VGG;
 using namespace VGG::Layout;
 using namespace nlohmann;
 
+constexpr auto K_EMPTY_STRING = "";
+
 bool UIView::onEvent(UEvent evt, void* userData)
 {
   if (AppScene::onEvent(evt, userData))
@@ -42,11 +44,14 @@ bool UIView::onEvent(UEvent evt, void* userData)
       return m_hasEventListener(path, type);
     }
   };
+
+  std::shared_ptr<LayoutNode> targetNode;
   switch (evt.type)
   {
     case VGG_MOUSEBUTTONDOWN:
     {
-      if (!m_root)
+      auto page = currentPage();
+      if (!page)
       {
         return false;
       }
@@ -54,31 +59,30 @@ bool UIView::onEvent(UEvent evt, void* userData)
       Layout::Point point{ TO_VGG_LAYOUT_SCALAR(evt.button.windowX),
                            TO_VGG_LAYOUT_SCALAR(evt.button.windowY) };
       point = converPointFromWindowAndScale(point);
-      auto targetNode = m_root->hitTest(point,
-                                        [&hasEventListener](const std::string& path)
-                                        { return hasEventListener(path, UIEventType::mousedown); });
-      if (targetNode)
-      {
-        auto jsButtonIndex{ evt.button.button - 1 };
-        auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
-        m_eventListener(UIEventPtr(new MouseEvent(targetNode->path(),
-                                                  UIEventType::mousedown,
-                                                  jsButtonIndex,
-                                                  evt.button.windowX,
-                                                  evt.button.windowY,
-                                                  0,
-                                                  0,
-                                                  alt,
-                                                  ctrl,
-                                                  meta,
-                                                  shift)));
-      }
+      targetNode = page->hitTest(point,
+                                 [&hasEventListener](const std::string& path)
+                                 { return hasEventListener(path, UIEventType::mousedown); });
+      auto jsButtonIndex{ evt.button.button - 1 };
+      auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
+      m_eventListener(UIEventPtr(new MouseEvent(targetNode ? targetNode->path() : K_EMPTY_STRING,
+                                                UIEventType::mousedown,
+                                                jsButtonIndex,
+                                                evt.button.windowX,
+                                                evt.button.windowY,
+                                                0,
+                                                0,
+                                                alt,
+                                                ctrl,
+                                                meta,
+                                                shift)),
+                      targetNode);
     }
     break;
 
     case VGG_MOUSEMOTION:
     {
-      if (!m_root)
+      auto page = currentPage();
+      if (!page)
       {
         return false;
       }
@@ -86,30 +90,29 @@ bool UIView::onEvent(UEvent evt, void* userData)
       Layout::Point point{ TO_VGG_LAYOUT_SCALAR(evt.motion.windowX),
                            TO_VGG_LAYOUT_SCALAR(evt.motion.windowY) };
       point = converPointFromWindowAndScale(point);
-      auto targetNode = m_root->hitTest(point,
-                                        [&hasEventListener](const std::string& path)
-                                        { return hasEventListener(path, UIEventType::mousemove); });
-      if (targetNode)
-      {
-        auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
-        m_eventListener(UIEventPtr(new MouseEvent(targetNode->path(),
-                                                  UIEventType::mousemove,
-                                                  0,
-                                                  evt.motion.windowX,
-                                                  evt.motion.windowY,
-                                                  evt.motion.xrel,
-                                                  evt.motion.yrel,
-                                                  alt,
-                                                  ctrl,
-                                                  meta,
-                                                  shift)));
-      }
+      targetNode = page->hitTest(point,
+                                 [&hasEventListener](const std::string& path)
+                                 { return hasEventListener(path, UIEventType::mousemove); });
+      auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
+      m_eventListener(UIEventPtr(new MouseEvent(targetNode ? targetNode->path() : K_EMPTY_STRING,
+                                                UIEventType::mousemove,
+                                                0,
+                                                evt.motion.windowX,
+                                                evt.motion.windowY,
+                                                evt.motion.xrel,
+                                                evt.motion.yrel,
+                                                alt,
+                                                ctrl,
+                                                meta,
+                                                shift)),
+                      targetNode);
     }
     break;
 
     case VGG_MOUSEBUTTONUP:
     {
-      if (!m_root)
+      auto page = currentPage();
+      if (!page)
       {
         return false;
       }
@@ -120,13 +123,29 @@ bool UIView::onEvent(UEvent evt, void* userData)
       auto jsButtonIndex{ evt.button.button - 1 };
       auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
 
-      auto targetNode = m_root->hitTest(point,
-                                        [&hasEventListener](const std::string& path)
-                                        { return hasEventListener(path, UIEventType::mouseup); });
-      if (targetNode)
+      targetNode = page->hitTest(point,
+                                 [&hasEventListener](const std::string& path)
+                                 { return hasEventListener(path, UIEventType::mouseup); });
+      m_eventListener(UIEventPtr(new MouseEvent(targetNode ? targetNode->path() : K_EMPTY_STRING,
+                                                UIEventType::mouseup,
+                                                jsButtonIndex,
+                                                evt.button.windowX,
+                                                evt.button.windowY,
+                                                0,
+                                                0,
+                                                alt,
+                                                ctrl,
+                                                meta,
+                                                shift)),
+                      targetNode);
+
+      if (jsButtonIndex == 0)
       {
-        m_eventListener(UIEventPtr(new MouseEvent(targetNode->path(),
-                                                  UIEventType::mouseup,
+        targetNode = page->hitTest(point,
+                                   [&hasEventListener](const std::string& path)
+                                   { return hasEventListener(path, UIEventType::click); });
+        m_eventListener(UIEventPtr(new MouseEvent(targetNode ? targetNode->path() : K_EMPTY_STRING,
+                                                  UIEventType::click,
                                                   jsButtonIndex,
                                                   evt.button.windowX,
                                                   evt.button.windowY,
@@ -135,70 +154,45 @@ bool UIView::onEvent(UEvent evt, void* userData)
                                                   alt,
                                                   ctrl,
                                                   meta,
-                                                  shift)));
-      }
-
-      if (jsButtonIndex == 0)
-      {
-        auto targetNode = m_root->hitTest(point,
-                                          [&hasEventListener](const std::string& path)
-                                          { return hasEventListener(path, UIEventType::click); });
-        if (targetNode)
-        {
-          m_eventListener(UIEventPtr(new MouseEvent(targetNode->path(),
-                                                    UIEventType::click,
-                                                    jsButtonIndex,
-                                                    evt.button.windowX,
-                                                    evt.button.windowY,
-                                                    0,
-                                                    0,
-                                                    alt,
-                                                    ctrl,
-                                                    meta,
-                                                    shift)));
-        }
+                                                  shift)),
+                        targetNode);
       }
       else
       {
-        auto targetNode = m_root->hitTest(point,
-                                          [&hasEventListener](const std::string& path) {
-                                            return hasEventListener(path, UIEventType::auxclick);
-                                          });
-        if (targetNode)
-        {
-          m_eventListener(UIEventPtr(new MouseEvent(targetNode->path(),
-                                                    UIEventType::auxclick,
-                                                    jsButtonIndex,
-                                                    evt.button.windowX,
-                                                    evt.button.windowY,
-                                                    0,
-                                                    0,
-                                                    alt,
-                                                    ctrl,
-                                                    meta,
-                                                    shift)));
-        }
+        targetNode = page->hitTest(point,
+                                   [&hasEventListener](const std::string& path)
+                                   { return hasEventListener(path, UIEventType::auxclick); });
+        m_eventListener(UIEventPtr(new MouseEvent(targetNode ? targetNode->path() : K_EMPTY_STRING,
+                                                  UIEventType::auxclick,
+                                                  jsButtonIndex,
+                                                  evt.button.windowX,
+                                                  evt.button.windowY,
+                                                  0,
+                                                  0,
+                                                  alt,
+                                                  ctrl,
+                                                  meta,
+                                                  shift)),
+                        targetNode);
 
         if (jsButtonIndex == 2)
         {
-          auto targetNode =
-            m_root->hitTest(point,
-                            [&hasEventListener](const std::string& path)
-                            { return hasEventListener(path, UIEventType::contextmenu); });
-          if (targetNode)
-          {
-            m_eventListener(UIEventPtr(new MouseEvent(targetNode->path(),
-                                                      UIEventType::contextmenu,
-                                                      jsButtonIndex,
-                                                      evt.button.windowX,
-                                                      evt.button.windowY,
-                                                      0,
-                                                      0,
-                                                      alt,
-                                                      ctrl,
-                                                      meta,
-                                                      shift)));
-          }
+          targetNode = page->hitTest(point,
+                                     [&hasEventListener](const std::string& path)
+                                     { return hasEventListener(path, UIEventType::contextmenu); });
+          m_eventListener(
+            UIEventPtr(new MouseEvent(targetNode ? targetNode->path() : K_EMPTY_STRING,
+                                      UIEventType::contextmenu,
+                                      jsButtonIndex,
+                                      evt.button.windowX,
+                                      evt.button.windowY,
+                                      0,
+                                      0,
+                                      alt,
+                                      ctrl,
+                                      meta,
+                                      shift)),
+            targetNode);
         }
       }
     }
@@ -219,7 +213,8 @@ bool UIView::onEvent(UEvent evt, void* userData)
                                                    alt,
                                                    ctrl,
                                                    meta,
-                                                   shift)));
+                                                   shift)),
+                      targetNode);
     }
     break;
 
@@ -233,25 +228,26 @@ bool UIView::onEvent(UEvent evt, void* userData)
                                                    alt,
                                                    ctrl,
                                                    meta,
-                                                   shift)));
+                                                   shift)),
+                      targetNode);
     }
     break;
 
     case VGG_FINGERDOWN:
     {
-      m_eventListener(UIEventPtr(new TouchEvent(targetPath, UIEventType::touchstart)));
+      m_eventListener(UIEventPtr(new TouchEvent(targetPath, UIEventType::touchstart)), targetNode);
     }
     break;
 
     case VGG_FINGERMOTION:
     {
-      m_eventListener(UIEventPtr(new TouchEvent(targetPath, UIEventType::touchmove)));
+      m_eventListener(UIEventPtr(new TouchEvent(targetPath, UIEventType::touchmove)), targetNode);
     }
     break;
 
     case VGG_FINGERUP:
     {
-      m_eventListener(UIEventPtr(new TouchEvent(targetPath, UIEventType::touchend)));
+      m_eventListener(UIEventPtr(new TouchEvent(targetPath, UIEventType::touchend)), targetNode);
     }
     break;
 
@@ -333,6 +329,13 @@ Layout::Point UIView::converPointFromWindow(Layout::Point point)
     y -= offset.y;
   }
 
+  auto page = currentPage();
+  if (page)
+  {
+    x += page->frame().origin.x;
+    y += page->frame().origin.y;
+  }
+
   return { x, y };
 }
 
@@ -347,4 +350,45 @@ Layout::Point UIView::converPointFromWindowAndScale(Layout::Point point)
   }
 
   return point;
+}
+
+void UIView::nextArtboard()
+{
+  auto document = m_document.lock();
+  if (document)
+  {
+    if (m_page >= document->children().size() - 1)
+    {
+      return;
+    }
+
+    ++m_page;
+    Scene::nextArtboard();
+  }
+}
+
+void UIView::preArtboard()
+{
+  auto document = m_document.lock();
+  if (document)
+  {
+    if (m_page <= 0)
+    {
+      return;
+    }
+
+    --m_page;
+    Scene::preArtboard();
+  }
+}
+
+std::shared_ptr<LayoutNode> UIView::currentPage()
+{
+  auto document = m_document.lock();
+  if (document)
+  {
+    return document->children()[m_page];
+  }
+
+  return nullptr;
 }

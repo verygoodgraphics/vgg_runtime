@@ -19,7 +19,7 @@ namespace VGG
 class UIView : public app::AppScene
 {
 public:
-  using EventListener = std::function<void(UIEventPtr)>;
+  using EventListener = std::function<void(UIEventPtr, std::weak_ptr<LayoutNode>)>;
   using ResourcesType = std::map<std::string, std::vector<char>>;
   using HasEventListener = std::function<bool(const std::string&, UIEventType)>;
 
@@ -32,7 +32,8 @@ private:
   UIView* m_superview{ nullptr };
   std::vector<std::shared_ptr<UIView>> m_subviews;
 
-  std::shared_ptr<LayoutNode> m_root;
+  std::weak_ptr<LayoutNode> m_document;
+  int m_page{ 0 };
 
   Layout::Rect m_frame;
   Layout::Rect m_bounds;
@@ -56,7 +57,7 @@ public:
   void show(const ViewModel& viewModel)
   {
     loadFileContent(viewModel.designDoc);
-    m_root = viewModel.layoutTree;
+    m_document = viewModel.layoutTree;
     // todo, merge edited doc resouces ?
     Scene::setResRepo(viewModel.resources());
 
@@ -110,12 +111,16 @@ public:
     m_isDirty = dirty;
   }
 
+  void nextArtboard();
+  void preArtboard();
+
 private:
   std::tuple<bool, bool, bool, bool> getKeyModifier(int keyMod);
 
   void layoutSubviews();
   Layout::Point converPointFromWindow(Layout::Point point);
   Layout::Point converPointFromWindowAndScale(Layout::Point point);
+  std::shared_ptr<LayoutNode> currentPage();
 };
 
 } // namespace VGG

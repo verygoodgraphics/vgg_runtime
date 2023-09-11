@@ -74,7 +74,7 @@ int main(int argc, char** argv)
 
   // inject dependencies
   app->setLayer(sdlApp->layer()); // 1. must be first
-  app->setScene(mainComposer.view());
+  app->setView(mainComposer.view());
   app->setController(mainComposer.controller());
 
   auto darumaFileOrDir = program.get<std::string>(DARUMA_FILE_OR_DIRECTORY);

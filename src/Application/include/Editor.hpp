@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AppScene.h"
+#include "AppRenderable.h"
 #include "UIEvent.hpp"
 
 #include <Domain/Layout/Node.hpp>
@@ -13,10 +13,10 @@ class SkCanvas;
 namespace VGG
 {
 
-class Editor : public app::AppScene
+class Editor : public app::AppRenderable
 {
   bool m_enabled{ false };
-  std::vector<std::weak_ptr<LayoutNode>> m_selectedNodes;
+  std::weak_ptr<LayoutNode> m_selectedNode;
 
 public:
   void enable(bool enabled)
@@ -24,9 +24,13 @@ public:
     m_enabled = enabled;
   }
 
-  void handleUIEvent(UIEventPtr event);
+  void handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNode);
 
   void onRender(SkCanvas* canvas) override;
+  bool onEvent(UEvent e, void* userData) override
+  {
+    return false;
+  }
 
 private:
   void drawBorder(SkCanvas* canvas, const LayoutNode* node);

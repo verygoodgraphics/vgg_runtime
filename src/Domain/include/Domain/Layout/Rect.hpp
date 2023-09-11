@@ -8,7 +8,7 @@ namespace Layout
 
 using Scalar = float;
 
-#define TO_VGG_LAYOUT_SCALAR(x) static_cast<Scalar>(x)
+#define TO_VGG_LAYOUT_SCALAR(x) static_cast<Layout::Scalar>(x)
 
 struct Point
 {
@@ -35,7 +35,7 @@ struct Rect
   Point origin;
   Size size;
 
-  bool pointInRect(Point point)
+  bool contains(Point point)
   {
     return (point.x >= origin.x && point.x <= (origin.x + size.width)) &&
            (point.y >= origin.y && point.y <= (origin.y + size.height));

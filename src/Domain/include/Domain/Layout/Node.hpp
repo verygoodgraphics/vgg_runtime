@@ -119,7 +119,7 @@ private:
   bool pointInside(Layout::Point point)
   {
     auto rect = convertRectToAncestor(m_frame);
-    return rect.pointInRect(point);
+    return rect.contains(point);
   }
 
   Layout::Rect convertRectToAncestor(Layout::Rect rect,
@@ -131,6 +131,11 @@ private:
   Layout::Point converPointToAncestor(Layout::Point point,
                                       std::shared_ptr<LayoutNode> ancestorNode = nullptr)
   {
+    if (ancestorNode.get() == this)
+    {
+      return point;
+    }
+
     auto x = point.x;
     auto y = point.y;
 

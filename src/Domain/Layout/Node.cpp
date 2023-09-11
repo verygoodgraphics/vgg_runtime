@@ -117,7 +117,7 @@ void LayoutNode::setFrame(const Layout::Rect& frame)
       return;
     }
 
-    if (m_autoLayout->isEnabled() && m_autoLayout->isContainer())
+    if (m_autoLayout && m_autoLayout->isEnabled() && m_autoLayout->isContainer())
     {
       m_autoLayout->frameChanged();
     }

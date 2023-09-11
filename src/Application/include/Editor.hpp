@@ -18,9 +18,27 @@ class UIView;
 
 class Editor : public app::AppRenderable
 {
+  enum class EFramePosition
+  {
+    NONE,
+
+    TOP_LEFT,
+    TOP_RIGHT,
+    BOTTOM_LEFT,
+    BOTTOM_RIGHT,
+
+    TOP,
+    BOTTOM,
+    LEFT,
+    RIGHT
+  };
+
   bool m_enabled{ false };
   std::weak_ptr<LayoutNode> m_selectedNode;
   std::weak_ptr<UIView> m_contentView;
+
+  bool m_isMouseDown{ false };
+  EFramePosition m_mouseDownPostion;
 
 public:
   Editor(std::weak_ptr<UIView> contentView)
@@ -45,6 +63,9 @@ public:
 private:
   void drawBorder(SkCanvas* canvas, const LayoutNode* node);
   void drawCornerPoint(SkCanvas* canvas, const LayoutNode* node);
+
+  void checkMouseDownPostion(MouseEvent* mouseDown);
+  void resizeNode(MouseEvent* mouseMove);
 };
 
 } // namespace VGG

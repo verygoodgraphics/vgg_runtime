@@ -21,33 +21,37 @@ Layout::Layout::Layout(std::shared_ptr<Daruma> model)
   }
 
   m_model->setRuntimeDesignDoc(designJson);
+
+  // initial config
+  auto document = layoutTree();
+  configureNodeAutoLayout(document);
 }
 
 void Layout::Layout::layout(Size size)
 {
-  auto root = layoutTree();
-
-  if (size != m_size)
+  if (size == m_size)
   {
-    m_size = size;
-
-    // initial config
-    configureAutoLayout(root);
-
-    // udpate Frames's frame
-    auto frame = root->frame();
-    frame.size = m_size;
-    root->setFrame(frame);
-    for (auto& node : root->children())
-    {
-      auto frame = node->frame();
-      frame.size = m_size;
-      node->setFrame(frame);
-    }
-
-    //
-    root->layoutIfNeeded();
+    return;
   }
+
+  m_size = size;
+
+  // update document frame
+  auto document = layoutTree();
+  auto frame = document->frame();
+  frame.size = m_size;
+  document->setFrame(frame);
+
+  // udpate page frame
+  for (auto& page : document->children())
+  {
+    auto frame = page->frame();
+    frame.size = m_size;
+    page->setFrame(frame);
+  }
+
+  // layout
+  document->layoutIfNeeded();
 }
 
 std::shared_ptr<LayoutNode> Layout::Layout::layoutTree()
@@ -169,7 +173,7 @@ void Layout::Layout::collectRules(const nlohmann::json& json)
   }
 }
 
-void Layout::Layout::configureAutoLayout(std::shared_ptr<LayoutNode> node)
+void Layout::Layout::configureNodeAutoLayout(std::shared_ptr<LayoutNode> node)
 {
   std::shared_ptr<VGG::Layout::Internal::Rule::Rule> rule;
 
@@ -196,6 +200,6 @@ void Layout::Layout::configureAutoLayout(std::shared_ptr<LayoutNode> node)
 
   for (auto& child : node->children())
   {
-    configureAutoLayout(child);
+    configureNodeAutoLayout(child);
   }
 }

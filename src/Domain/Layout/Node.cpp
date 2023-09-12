@@ -51,16 +51,22 @@ void LayoutNode::setNeedLayout()
 
 void LayoutNode::layoutIfNeeded()
 {
-  for (auto subview : m_children)
+  for (auto child : m_children)
   {
-    subview->layoutIfNeeded();
+    child->layoutIfNeeded();
   }
 
   if (m_needsLayout)
   {
     m_needsLayout = false;
 
-    configureAutoLayout();
+    // configure container and child items
+    configureAutoLayout(true);
+    for (auto child : m_children)
+    {
+      child->configureAutoLayout(true);
+    }
+
     applyLayout();
   }
 }
@@ -117,9 +123,14 @@ void LayoutNode::setFrame(const Layout::Rect& frame)
       return;
     }
 
-    if (m_autoLayout && m_autoLayout->isEnabled() && m_autoLayout->isContainer())
+    if (m_autoLayout && m_autoLayout->isEnabled())
     {
       m_autoLayout->frameChanged();
+
+      if (!m_autoLayout->isContainer())
+      {
+        scaleChildNodes(oldSize, newSize);
+      }
     }
     else
     {
@@ -133,11 +144,11 @@ void LayoutNode::setViewModel(JsonDocumentPtr viewModel)
   m_viewModel = viewModel;
 }
 
-void LayoutNode::configureAutoLayout()
+void LayoutNode::configureAutoLayout(bool reset)
 {
   if (m_autoLayout)
   {
-    m_autoLayout->configure();
+    m_autoLayout->configure(reset);
   }
 }
 

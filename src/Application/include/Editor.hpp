@@ -34,6 +34,7 @@ class Editor : public app::AppRenderable
   };
 
   bool m_enabled{ false };
+  std::weak_ptr<LayoutNode> m_hoverNode;
   std::weak_ptr<LayoutNode> m_selectedNode;
   std::weak_ptr<UIView> m_contentView;
 

@@ -86,6 +86,7 @@ void Editor::handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNod
 
     case UIEventType::mousemove:
     {
+      m_hoverNode = targetNode;
       resizeNode(static_cast<MouseEvent*>(event.get()));
       break;
     }
@@ -121,7 +122,25 @@ void Editor::onRender(SkCanvas* canvas)
   canvas->translate(offset.x, offset.y);
   canvas->scale(zoom, zoom);
 
-  if (auto node = m_selectedNode.lock())
+  auto selectedNode = m_selectedNode.lock();
+  if (selectedNode)
+  {
+    SkRect rect;
+    if (selectedNode == contentView->currentPage())
+    {
+      rect.fRight = selectedNode->frame().size.width;
+      rect.fBottom = selectedNode->frame().size.height;
+    }
+    else
+    {
+      rect = toSkRect(selectedNode->frameToAncestor(contentView->currentPage()));
+    }
+
+    drawFrame(canvas, rect);
+    // todo, translate, scale
+  }
+
+  if (auto node = m_hoverNode.lock(); node && node != selectedNode)
   {
     SkRect rect;
     if (node == contentView->currentPage())

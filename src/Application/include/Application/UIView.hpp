@@ -120,9 +120,15 @@ private:
   std::tuple<bool, bool, bool, bool> getKeyModifier(int keyMod);
 
   void layoutSubviews();
-  Layout::Point converPointFromWindow(Layout::Point point);
   Layout::Point converPointFromWindowAndScale(Layout::Point point);
   std::shared_ptr<LayoutNode> currentPage();
+
+  bool handleMouseEvent(int jsButtonIndex,
+                        int x,
+                        int y,
+                        int motionX,
+                        int motionY,
+                        UIEventType type);
 };
 
 } // namespace VGG

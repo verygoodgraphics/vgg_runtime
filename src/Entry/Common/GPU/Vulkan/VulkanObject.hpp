@@ -107,7 +107,7 @@ struct VkInstanceObject : public std::enable_shared_from_this<VkInstanceObject>
     appInfo.pEngineName = "Vulkan for skia";
     appInfo.applicationVersion = VK_MAKE_API_VERSION(1, 0, 0, 0);
     appInfo.engineVersion = VK_MAKE_API_VERSION(1, 0, 0, 0);
-
+    appInfo.pApplicationName = "VGG";
     ci.pApplicationInfo = &appInfo;
 
     ////Check validationLayers

@@ -46,7 +46,7 @@ public:
   bool isIncludedInLayout{ true };
 
 public:
-  void configure();
+  void configure(bool reset);
   void applyLayout(bool preservingOrigin);
   void frameChanged();
 

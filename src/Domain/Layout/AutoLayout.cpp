@@ -497,7 +497,7 @@ flexbox_node* AutoLayout::createFlexNode()
   return m_flexNode.get();
 }
 
-void AutoLayout::configure()
+void AutoLayout::configure(bool reset)
 {
   auto sharedRule = rule.lock();
   if (!sharedRule)
@@ -509,6 +509,17 @@ void AutoLayout::configure()
   if (!sharedView)
   {
     return;
+  }
+
+  if (reset)
+  {
+    m_flexNode.reset();
+    m_flexNodePtr = nullptr;
+
+    m_gridContainer.reset();
+    m_gridContainerPtr = nullptr;
+
+    m_gridItem.reset();
   }
 
   if (const auto detail = std::get_if<FlexboxLayout>(&sharedRule->layout))

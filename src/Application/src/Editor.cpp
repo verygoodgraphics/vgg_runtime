@@ -77,15 +77,6 @@ void Editor::handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNod
         return;
       }
 
-      if (auto contentView = m_contentView.lock())
-      {
-        if (targetNode.lock() == contentView->currentPage())
-        {
-          m_selectedNode.reset();
-          return;
-        }
-      }
-
       m_selectedNode = targetNode;
       checkMouseDownPostion(static_cast<MouseEvent*>(event.get()));
 
@@ -132,7 +123,17 @@ void Editor::onRender(SkCanvas* canvas)
 
   if (auto node = m_selectedNode.lock())
   {
-    SkRect rect = toSkRect(node->frameToAncestor(contentView->currentPage()));
+    SkRect rect;
+    if (node == contentView->currentPage())
+    {
+      rect.fRight = node->frame().size.width;
+      rect.fBottom = node->frame().size.height;
+    }
+    else
+    {
+      rect = toSkRect(node->frameToAncestor(contentView->currentPage()));
+    }
+
     drawFrame(canvas, rect);
     // todo, translate, scale
   }
@@ -223,7 +224,15 @@ void Editor::checkMouseDownPostion(MouseEvent* mouseDown)
   }
 
   Layout::Point mouse{ TO_VGG_LAYOUT_SCALAR(mouseDown->x), TO_VGG_LAYOUT_SCALAR(mouseDown->y) };
-  auto f = selectedNode->frameToAncestor(contentView->currentPage());
+  Layout::Rect f;
+  if (selectedNode == contentView->currentPage())
+  {
+    f.size = selectedNode->frame().size;
+  }
+  else
+  {
+    f = selectedNode->frameToAncestor(contentView->currentPage());
+  }
 
   DEBUG("Editor::checkMouseDownPostion: selected node frame is: (%f, %f, %f, %f), mouse at: %f, %f",
         f.origin.x,

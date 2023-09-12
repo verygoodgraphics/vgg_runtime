@@ -63,10 +63,11 @@ public:
 
 private:
   void drawBorder(SkCanvas* canvas, const LayoutNode* node);
-  void drawCornerPoint(SkCanvas* canvas, const LayoutNode* node);
 
   void checkMouseDownPostion(MouseEvent* mouseDown);
   void resizeNode(MouseEvent* mouseMove);
+
+  Layout::Rect getSelectNodeRect(EFramePosition position);
 };
 
 } // namespace VGG

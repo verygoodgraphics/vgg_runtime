@@ -11,7 +11,7 @@
 
 using namespace VGG;
 
-constexpr auto K_MOUSE_CONTAINER_WIDTH = 30.0f;
+constexpr auto K_MOUSE_CONTAINER_WIDTH = 10.0f;
 
 namespace
 {
@@ -23,40 +23,40 @@ SkRect toSkRect(const Layout::Rect rect)
            rect.origin.y + rect.size.height };
 }
 
-void drawFrame(SkCanvas* canvas, const SkRect& rect)
+void drawFrame(SkCanvas* canvas, const SkRect& rect, const SkScalar strokeWidth = 1)
 {
   ASSERT(canvas);
   ASSERT(rect.right() > rect.left());
   ASSERT(rect.bottom() > rect.top());
 
-  // canvas->save();
-  // canvas->translate(rect.left(), rect.top());
-  // todo, flip
-  // todo, rotate
+  SkPaint strokePen;
+  strokePen.setAntiAlias(true);
+  strokePen.setStyle(SkPaint::kStroke_Style);
+  strokePen.setColor(SK_ColorBLUE);
+  strokePen.setStrokeWidth(strokeWidth);
+  canvas->drawRect(rect, strokePen);
+}
 
-  // todo, hover border
-  // if (rc == RenderCase::RC_HOVER)
-  // {
-  //   SkPaint strokePen;
-  //   strokePen.setAntiAlias(true);
-  //   strokePen.setStyle(SkPaint::kStroke_Style);
-  //   strokePen.setColor(SK_ColorBLUE);
-  //   strokePen.setStrokeWidth(2);
-  //   canvas->drawRect(f.toLocalSkRect(), strokePen);
-
-  //   canvas->restore();
-  //   return;
-  // }
-  // else if (rc == RenderCase::RC_EDIT)
+void drawRectCorner(SkCanvas* canvas, const SkRect& rect)
+{
+  ASSERT(canvas);
+  ASSERT(rect.right() > rect.left());
+  ASSERT(rect.bottom() > rect.top());
 
   SkPaint strokePen;
   strokePen.setAntiAlias(true);
   strokePen.setStyle(SkPaint::kStroke_Style);
   strokePen.setColor(SK_ColorBLUE);
-  canvas->drawRect(rect, strokePen);
 
-  // canvas->restore();
+  SkPaint fillPen;
+  fillPen.setAntiAlias(true);
+  fillPen.setStyle(SkPaint::kFill_Style);
+  fillPen.setColor(SK_ColorWHITE);
+
+  canvas->drawRect(rect, strokePen);
+  canvas->drawRect(rect, fillPen);
 }
+
 } // namespace
 
 void Editor::handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNode)
@@ -136,8 +136,12 @@ void Editor::onRender(SkCanvas* canvas)
       rect = toSkRect(selectedNode->frameToAncestor(contentView->currentPage()));
     }
 
-    drawFrame(canvas, rect);
     // todo, translate, scale
+    drawFrame(canvas, rect);
+    drawRectCorner(canvas, toSkRect(getSelectNodeRect(EFramePosition::TOP_LEFT)));
+    drawRectCorner(canvas, toSkRect(getSelectNodeRect(EFramePosition::TOP_RIGHT)));
+    drawRectCorner(canvas, toSkRect(getSelectNodeRect(EFramePosition::BOTTOM_LEFT)));
+    drawRectCorner(canvas, toSkRect(getSelectNodeRect(EFramePosition::BOTTOM_RIGHT)));
   }
 
   if (auto node = m_hoverNode.lock(); node && node != selectedNode)
@@ -153,8 +157,8 @@ void Editor::onRender(SkCanvas* canvas)
       rect = toSkRect(node->frameToAncestor(contentView->currentPage()));
     }
 
-    drawFrame(canvas, rect);
     // todo, translate, scale
+    drawFrame(canvas, rect, 2.0f);
   }
 
   canvas->restore();
@@ -166,64 +170,6 @@ void Editor::drawBorder(SkCanvas* canvas, const LayoutNode* node)
   auto frame = node->frame();
   ASSERT(frame.size.width > 0);
   ASSERT(frame.size.height > 0);
-}
-
-void Editor::drawCornerPoint(SkCanvas* canvas, const LayoutNode* node)
-{
-  // ASSERT(canvas);
-  // ASSERT(f.w > 0);
-  // ASSERT(f.h > 0);
-
-  // // todo, align line
-  // if (fe.draggingFrame && !fe.currEditAnchor.has_value())
-  // {
-  //   return;
-  // }
-
-  // canvas->save();
-  // canvas->translate(f.x, f.y);
-  // canvas->translate(f.w / 2, f.h / 2);
-  // canvas->scale(f.flipX ? -1 : 1, f.flipY ? -1 : 1);
-  // canvas->rotate(f.rotation);
-  // canvas->translate(-f.w / 2, -f.h / 2);
-
-  // SkPaint strokePen;
-  // strokePen.setStyle(SkPaint::kStroke_Style);
-  // strokePen.setColor(SK_ColorBLACK);
-
-  // SkPaint fillPen;
-  // fillPen.setStyle(SkPaint::kFill_Style);
-  // fillPen.setColor(SK_ColorWHITE);
-
-  // SkPaint fillPen2;
-  // fillPen2.setStyle(SkPaint::kFill_Style);
-  // fillPen2.setColor(SK_ColorBLUE);
-
-  // double dw = f.w / 2;
-  // double dh = f.h / 2;
-  // double cx = dw;
-  // double cy = dh;
-  // for (int i = -1; i <= 1; i++)
-  //   for (int j = -1; j <= 1; j++)
-  //   {
-  //     int idx = i * 3 + j;
-  //     if (idx == 0)
-  //     {
-  //       continue;
-  //     }
-  //     if (fe.draggingFrame && fe.currEditAnchor.has_value() && fe.currEditAnchor != idx)
-  //     {
-  //       continue;
-  //     }
-  //     SkRect ctrPt;
-  //     ctrPt.setXYWH(cx + i * dw - CurvePoint::SIZE,
-  //                   cy + j * dh - CurvePoint::SIZE,
-  //                   CurvePoint::SIZE * 2,
-  //                   CurvePoint::SIZE * 2);
-  //     canvas->drawRect(ctrPt, idx == fe.currEditAnchor ? fillPen2 : fillPen);
-  //     canvas->drawRect(ctrPt, strokePen);
-  //   }
-  // canvas->restore();
 }
 
 void Editor::checkMouseDownPostion(MouseEvent* mouseDown)
@@ -262,9 +208,7 @@ void Editor::checkMouseDownPostion(MouseEvent* mouseDown)
         mouse.y);
 
   // top corner
-  Layout::Rect topLeftCorner{ { f.origin.x - K_MOUSE_CONTAINER_WIDTH / 2,
-                                f.origin.y - K_MOUSE_CONTAINER_WIDTH / 2 },
-                              { K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
+  Layout::Rect topLeftCorner{ getSelectNodeRect(EFramePosition::TOP_LEFT) };
   if (topLeftCorner.contains(mouse))
   {
     DEBUG("Editor::checkMouseDownPostion: click top left corner");
@@ -272,9 +216,7 @@ void Editor::checkMouseDownPostion(MouseEvent* mouseDown)
     return;
   }
 
-  Layout::Rect topRightCorner{ { f.origin.x + f.size.width - K_MOUSE_CONTAINER_WIDTH / 2,
-                                 f.origin.y - K_MOUSE_CONTAINER_WIDTH / 2 },
-                               { K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
+  Layout::Rect topRightCorner{ getSelectNodeRect(EFramePosition::TOP_RIGHT) };
   if (topRightCorner.contains(mouse))
   {
     DEBUG("Editor::checkMouseDownPostion: click top right corner");
@@ -283,9 +225,7 @@ void Editor::checkMouseDownPostion(MouseEvent* mouseDown)
   }
 
   // bottom corner
-  Layout::Rect bottomLeftCorner{ { f.origin.x - K_MOUSE_CONTAINER_WIDTH / 2,
-                                   f.origin.y + f.size.height - K_MOUSE_CONTAINER_WIDTH / 2 },
-                                 { K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
+  Layout::Rect bottomLeftCorner{ getSelectNodeRect(EFramePosition::BOTTOM_LEFT) };
   if (bottomLeftCorner.contains(mouse))
   {
     DEBUG("Editor::checkMouseDownPostion: click bottom left corner");
@@ -293,9 +233,7 @@ void Editor::checkMouseDownPostion(MouseEvent* mouseDown)
     return;
   }
 
-  Layout::Rect bottomRightCorner{ { f.origin.x + f.size.width - K_MOUSE_CONTAINER_WIDTH / 2,
-                                    f.origin.y + f.size.height - K_MOUSE_CONTAINER_WIDTH / 2 },
-                                  { K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
+  Layout::Rect bottomRightCorner{ getSelectNodeRect(EFramePosition::BOTTOM_RIGHT) };
   if (bottomRightCorner.contains(mouse))
   {
     DEBUG("Editor::checkMouseDownPostion: click bottom right corner");
@@ -304,9 +242,7 @@ void Editor::checkMouseDownPostion(MouseEvent* mouseDown)
   }
 
   // top/bottom border
-  Layout::Rect topBorder{ { f.origin.x + K_MOUSE_CONTAINER_WIDTH / 2,
-                            f.origin.y - K_MOUSE_CONTAINER_WIDTH / 2 },
-                          { f.size.width - K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
+  Layout::Rect topBorder{ getSelectNodeRect(EFramePosition::TOP) };
   if (topBorder.contains(mouse))
   {
     DEBUG("Editor::checkMouseDownPostion: click top border");
@@ -314,9 +250,7 @@ void Editor::checkMouseDownPostion(MouseEvent* mouseDown)
     return;
   }
 
-  Layout::Rect bottomBorder{ { f.origin.x + K_MOUSE_CONTAINER_WIDTH / 2,
-                               f.origin.y + f.size.height - K_MOUSE_CONTAINER_WIDTH / 2 },
-                             { f.size.width - K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
+  Layout::Rect bottomBorder{ getSelectNodeRect(EFramePosition::BOTTOM) };
   if (bottomBorder.contains(mouse))
   {
     DEBUG("Editor::checkMouseDownPostion: click bottom border");
@@ -325,9 +259,7 @@ void Editor::checkMouseDownPostion(MouseEvent* mouseDown)
   }
 
   // left/right border
-  Layout::Rect leftBorder{ { f.origin.x - K_MOUSE_CONTAINER_WIDTH / 2,
-                             f.origin.y + K_MOUSE_CONTAINER_WIDTH / 2 },
-                           { K_MOUSE_CONTAINER_WIDTH, f.size.height - K_MOUSE_CONTAINER_WIDTH } };
+  Layout::Rect leftBorder{ getSelectNodeRect(EFramePosition::LEFT) };
   if (leftBorder.contains(mouse))
   {
     DEBUG("Editor::checkMouseDownPostion: click left border");
@@ -335,9 +267,7 @@ void Editor::checkMouseDownPostion(MouseEvent* mouseDown)
     return;
   }
 
-  Layout::Rect rightBorder{ { f.origin.x + f.size.width - K_MOUSE_CONTAINER_WIDTH / 2,
-                              f.origin.y + K_MOUSE_CONTAINER_WIDTH / 2 },
-                            { K_MOUSE_CONTAINER_WIDTH, f.size.height - K_MOUSE_CONTAINER_WIDTH } };
+  Layout::Rect rightBorder{ getSelectNodeRect(EFramePosition::RIGHT) };
   if (rightBorder.contains(mouse))
   {
     DEBUG("Editor::checkMouseDownPostion: click right border");
@@ -442,4 +372,100 @@ void Editor::resizeNode(MouseEvent* mouseMove)
   }
 
   selectedNode->setFrame(frame);
+}
+
+Layout::Rect Editor::getSelectNodeRect(EFramePosition position)
+{
+  Layout::Rect rect;
+
+  auto selectedNode = m_selectedNode.lock();
+  if (!selectedNode)
+  {
+    return rect;
+  }
+
+  auto contentView = m_contentView.lock();
+  if (!contentView)
+  {
+    return rect;
+  }
+
+  Layout::Rect f;
+  if (selectedNode == contentView->currentPage())
+  {
+    f.size = selectedNode->frame().size;
+  }
+  else
+  {
+    f = selectedNode->frameToAncestor(contentView->currentPage());
+  }
+
+  switch (position)
+  {
+    case EFramePosition::TOP_LEFT:
+    {
+      rect = { { f.origin.x - K_MOUSE_CONTAINER_WIDTH / 2,
+                 f.origin.y - K_MOUSE_CONTAINER_WIDTH / 2 },
+               { K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
+      break;
+    }
+    case EFramePosition::TOP_RIGHT:
+    {
+      rect = { { f.origin.x + f.size.width - K_MOUSE_CONTAINER_WIDTH / 2,
+                 f.origin.y - K_MOUSE_CONTAINER_WIDTH / 2 },
+               { K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
+      break;
+    }
+
+    case EFramePosition::BOTTOM_LEFT:
+    {
+      rect = { { f.origin.x - K_MOUSE_CONTAINER_WIDTH / 2,
+                 f.origin.y + f.size.height - K_MOUSE_CONTAINER_WIDTH / 2 },
+               { K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
+      break;
+    }
+    case EFramePosition::BOTTOM_RIGHT:
+    {
+      rect = { { f.origin.x + f.size.width - K_MOUSE_CONTAINER_WIDTH / 2,
+                 f.origin.y + f.size.height - K_MOUSE_CONTAINER_WIDTH / 2 },
+               { K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
+      break;
+    }
+
+    case EFramePosition::LEFT:
+    {
+      rect = { { f.origin.x - K_MOUSE_CONTAINER_WIDTH / 2,
+                 f.origin.y + K_MOUSE_CONTAINER_WIDTH / 2 },
+               { K_MOUSE_CONTAINER_WIDTH, f.size.height - K_MOUSE_CONTAINER_WIDTH } };
+
+      break;
+    }
+    case EFramePosition::RIGHT:
+    {
+      rect = { { f.origin.x + f.size.width - K_MOUSE_CONTAINER_WIDTH / 2,
+                 f.origin.y + K_MOUSE_CONTAINER_WIDTH / 2 },
+               { K_MOUSE_CONTAINER_WIDTH, f.size.height - K_MOUSE_CONTAINER_WIDTH } };
+      break;
+    }
+
+    case EFramePosition::TOP:
+    {
+      rect = { { f.origin.x + K_MOUSE_CONTAINER_WIDTH / 2,
+                 f.origin.y - K_MOUSE_CONTAINER_WIDTH / 2 },
+               { f.size.width - K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
+      break;
+    }
+    case EFramePosition::BOTTOM:
+    {
+      rect = { { f.origin.x + K_MOUSE_CONTAINER_WIDTH / 2,
+                 f.origin.y + f.size.height - K_MOUSE_CONTAINER_WIDTH / 2 },
+               { f.size.width - K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
+      break;
+    }
+
+    default:
+      break;
+  }
+
+  return rect;
 }

@@ -294,11 +294,18 @@ void Editor::resizeNode(MouseEvent* mouseMove)
     return;
   }
 
-  auto frame = selectedNode->frame();
-  auto tx = mouseMove->movementX;
-  auto ty = mouseMove->movementY;
+  auto contentView = m_contentView.lock();
+  if (!contentView)
+  {
+    return;
+  }
 
-  DEBUG("Editor::resizeNode: selected node frame is: (%f, %f, %f, %f), mouse move is: %d, %d",
+  auto frame = selectedNode->frame();
+  auto scale = contentView->zoomer()->scale();
+  auto tx = mouseMove->movementX / scale;
+  auto ty = mouseMove->movementY / scale;
+
+  DEBUG("Editor::resizeNode: selected node frame is: (%f, %f, %f, %f), mouse move is: %f, %f",
         frame.origin.x,
         frame.origin.y,
         frame.size.width,

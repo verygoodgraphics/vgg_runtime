@@ -297,6 +297,11 @@ SkPath PaintNode::makeBoundPath()
 
 SkPath PaintNode::childPolyOperation() const
 {
+  if (m_firstChild.empty())
+  {
+    WARN("no child in path %s", name().c_str());
+    return SkPath();
+  }
   std::vector<std::pair<SkPath, EBoolOp>> ct;
   for (auto it = m_firstChild.cbegin(); it != m_firstChild.cend(); ++it)
   {
@@ -304,8 +309,6 @@ SkPath PaintNode::childPolyOperation() const
     auto childMask = paintNode->asOutlineMask(&paintNode->localTransform());
     ct.emplace_back(childMask.outlineMask, paintNode->clipOperator());
   }
-
-  assert(ct.size() >= 1);
 
   if (ct.size() == 1)
   {

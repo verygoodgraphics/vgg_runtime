@@ -71,7 +71,7 @@ protected:
   {
     EXPECT_CALL(*m_mockPresenter, getObservable())
       .WillOnce(Return(m_fakeViewSubject.get_observable()));
-    m_sut.reset(new Controller(m_runLoop, m_mockPresenter));
+    m_sut.reset(new Controller(m_runLoop, m_mockPresenter, {}));
   }
 
   void loopUntilExit()

@@ -187,10 +187,19 @@ inline VMouseWheelEvent toVMouseWheelEvent(const SDL_MouseWheelEvent& e, float d
   v.timestamp = e.timestamp;
   v.y = e.y;
   v.x = e.x;
-  v.mouseX = e.mouseX;
-  v.mouseY = e.mouseY;
-  v.canvasX = e.mouseX * dpiScale;
-  v.canvasY = e.mouseY * dpiScale;
+
+  int mouseX, mouseY;
+#ifdef EMSCRIPTEN
+  SDL_GetMouseState(&mouseX, &mouseY);
+#else
+  mouseX = e.mouseX;
+  mouseY = e.mouseY;
+#endif
+
+  v.mouseX = mouseX;
+  v.mouseY = mouseY;
+  v.canvasX = mouseX * dpiScale;
+  v.canvasY = mouseY * dpiScale;
   v.preciseX = e.preciseX;
   v.preciseY = e.preciseY;
   v.direction = e.direction;

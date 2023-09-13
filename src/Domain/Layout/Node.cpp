@@ -94,10 +94,10 @@ void LayoutNode::setFrame(const Layout::Rect& frame)
     if (auto viewModel = m_viewModel.lock())
     {
       nlohmann::json::json_pointer path{ m_path };
-      nlohmann::json objectJson{ viewModel->content()[path] };
-      auto& frameJson = objectJson[K_FRAME];
-      auto& boundsJson = objectJson[K_BOUNDS];
-      auto& matrixJson = objectJson[K_MATRIX];
+      const auto& objectJson = viewModel->content()[path];
+      auto frameJson = objectJson[K_FRAME];
+      auto boundsJson = objectJson[K_BOUNDS];
+      auto matrixJson = objectJson[K_MATRIX];
 
       to_json(frameJson, frame);
 
@@ -176,7 +176,7 @@ void LayoutNode::scaleContour(float xScaleFactor, float yScaleFactor)
   }
 
   nlohmann::json::json_pointer path{ m_path };
-  nlohmann::json objectJson{ viewModel->content()[path] };
+  const auto& objectJson = viewModel->content()[path];
   if (objectJson[K_CLASS] != K_PATH)
   {
     return;

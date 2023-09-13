@@ -286,13 +286,14 @@ std::shared_ptr<ViewModel> Controller::generateViewModel(std::shared_ptr<Daruma>
 
 MakeJsonDocFn Controller::createMakeJsonDocFn(const char* pJsonSchemaFilePath)
 {
-  std::string jsonSchemaFilePath;
+  std::string tmpJsonSchemaFilePath;
   if (pJsonSchemaFilePath)
   {
-    jsonSchemaFilePath.append(pJsonSchemaFilePath);
+    tmpJsonSchemaFilePath.append(pJsonSchemaFilePath);
   }
 
-  auto lambda = [&, jsonSchemaFilePath](const json& designJson)
+  // `jsonSchemaFilePath` is used in the returned lambda, so copy it.
+  auto lambda = [&, jsonSchemaFilePath = tmpJsonSchemaFilePath](const json& designJson)
   {
     auto jsonDocPtr = createJsonDoc();
     jsonDocPtr->setContent(designJson);

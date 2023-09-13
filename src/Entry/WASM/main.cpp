@@ -1,8 +1,17 @@
 #include "Entry/SDL/SDLImpl/AppSDLImpl.hpp"
 #include "BrowserMainComposer.hpp"
+
+#include <Application/UIApplication.hpp>
 #include <ConfigMananger.h>
 
+#ifdef EMSCRIPTEN
+#include <emscripten/emscripten.h>
+#endif
+
 #include <memory>
+
+using AppImpl = VGG::entry::AppSDLImpl;
+
 extern "C"
 {
   void emscripten_frame()
@@ -21,7 +30,7 @@ extern "C"
   {
     Config::readGlobalConfig("/asset/etc/config.json");
 
-    AppConfig cfg;
+    VGG::app::AppConfig cfg;
     cfg.appName = "SdlRuntime";
     cfg.graphicsContextConfig.windowSize[0] = width;
     cfg.graphicsContextConfig.windowSize[1] = height;
@@ -46,7 +55,7 @@ extern "C"
 
     // inject dependencies
     app->setLayer(sdlApp->layer());
-    app->setScene(mainComposer.view());
+    app->setView(mainComposer.view());
     app->setController(mainComposer.controller());
 
     emscripten_set_main_loop(emscripten_frame, 0, 1);

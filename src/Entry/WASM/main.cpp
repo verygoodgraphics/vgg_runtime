@@ -12,6 +12,12 @@
 
 using AppImpl = VGG::entry::AppSDLImpl;
 
+UIApplication* application()
+{
+  static auto app = new UIApplication;
+  return app;
+}
+
 extern "C"
 {
   void emscripten_frame()
@@ -20,7 +26,8 @@ extern "C"
     ASSERT(sdlApp);
 
     sdlApp->poll();
-    sdlApp->process();
+
+    application()->run(sdlApp->appConfig().renderFPSLimit);
 
     auto& mainComposer = VggBrowser::mainComposer();
     mainComposer.runLoop()->dispatch();
@@ -37,7 +44,7 @@ extern "C"
     cfg.graphicsContextConfig.multiSample = 0;
     cfg.graphicsContextConfig.stencilBit = 8;
 
-    auto app = new UIApplication;
+    auto app = application();
     cfg.eventListener.reset(app);
 
     try

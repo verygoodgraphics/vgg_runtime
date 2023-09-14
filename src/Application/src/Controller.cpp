@@ -367,4 +367,14 @@ MakeJsonDocFn Controller::createMakeJsonDocFn(const char* pJsonSchemaFilePath)
   return lambda;
 }
 
+bool Controller::hasDirtyEditor()
+{
+  return isEditMode() && m_editor->isDirty();
+}
+
+void Controller::resetEditorDirty()
+{
+  m_editor->setDirty(false);
+}
+
 } // namespace VGG

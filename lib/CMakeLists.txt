@@ -20,7 +20,8 @@ add_subdirectory(vgg_contrib/yoga EXCLUDE_FROM_ALL)
 add_subdirectory(vgg_layout EXCLUDE_FROM_ALL)
 
 if (NOT EMSCRIPTEN)
-  if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/node")
+  set(NODE_FOLDER "node$ENV{name}" CACHE STRING "node folder name" FORCE)
+  if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${NODE_FOLDER}")
     set(NODE_VERSION "v18.15.0")
     set(DOWNLOAD_URL "https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz")
     set(DOWNLOAD_AT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/node.tar.gz")
@@ -37,7 +38,7 @@ if (NOT EMSCRIPTEN)
 
     file(ARCHIVE_EXTRACT INPUT ${DOWNLOAD_AT_PATH}
       DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}")
-    file(RENAME "${CMAKE_CURRENT_SOURCE_DIR}/node-${NODE_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/node")
+    file(RENAME "${CMAKE_CURRENT_SOURCE_DIR}/node-${NODE_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/${NODE_FOLDER}")
     file(REMOVE ${DOWNLOAD_AT_PATH})
   endif()
 
@@ -47,21 +48,21 @@ if (NOT EMSCRIPTEN)
   cmake_minimum_required(VERSION 3.22) # this is requied for the following invoking
   add_custom_command(TARGET vgg_libnode
     PRE_BUILD
-    COMMAND cmake -DNODE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/node
+    COMMAND cmake -DNODE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/${NODE_FOLDER}
       -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/BuildLibnode.cmake
     COMMENT "Build libnode if needed"
   )
 
   target_include_directories(vgg_libnode PUBLIC
-    node/src
-    node/deps/uv/include
-    node/deps/v8/include)
+    ${NODE_FOLDER}/src
+    ${NODE_FOLDER}/deps/uv/include
+    ${NODE_FOLDER}/deps/v8/include)
   target_include_directories(vgg_libnode_stub PUBLIC
-    node/src
-    node/deps/uv/include
-    node/deps/v8/include)
+    ${NODE_FOLDER}/src
+    ${NODE_FOLDER}/deps/uv/include
+    ${NODE_FOLDER}/deps/v8/include)
   if(APPLE)
-    target_link_directories(vgg_libnode PUBLIC node/out/Release)
+    target_link_directories(vgg_libnode PUBLIC ${NODE_FOLDER}/out/Release)
     target_link_libraries(vgg_libnode PRIVATE
       base64
       base64_neon64
@@ -95,21 +96,21 @@ if (NOT EMSCRIPTEN)
     )
   else()
     target_link_directories(vgg_libnode PUBLIC
-      node/out/Release/obj.target
-      node/out/Release/obj.target/deps/base64
-      node/out/Release/obj.target/deps/brotli
-      node/out/Release/obj.target/deps/cares
-      node/out/Release/obj.target/deps/histogram
-      node/out/Release/obj.target/deps/llhttp
-      node/out/Release/obj.target/deps/nghttp2
-      node/out/Release/obj.target/deps/ngtcp2
-      node/out/Release/obj.target/deps/openssl
-      node/out/Release/obj.target/deps/simdutf
-      node/out/Release/obj.target/deps/uv
-      node/out/Release/obj.target/deps/uvwasi
-      node/out/Release/obj.target/deps/zlib
-      node/out/Release/obj.target/tools/icu
-      node/out/Release/obj.target/tools/v8_gypfiles
+      ${NODE_FOLDER}/out/Release/obj.target
+      ${NODE_FOLDER}/out/Release/obj.target/deps/base64
+      ${NODE_FOLDER}/out/Release/obj.target/deps/brotli
+      ${NODE_FOLDER}/out/Release/obj.target/deps/cares
+      ${NODE_FOLDER}/out/Release/obj.target/deps/histogram
+      ${NODE_FOLDER}/out/Release/obj.target/deps/llhttp
+      ${NODE_FOLDER}/out/Release/obj.target/deps/nghttp2
+      ${NODE_FOLDER}/out/Release/obj.target/deps/ngtcp2
+      ${NODE_FOLDER}/out/Release/obj.target/deps/openssl
+      ${NODE_FOLDER}/out/Release/obj.target/deps/simdutf
+      ${NODE_FOLDER}/out/Release/obj.target/deps/uv
+      ${NODE_FOLDER}/out/Release/obj.target/deps/uvwasi
+      ${NODE_FOLDER}/out/Release/obj.target/deps/zlib
+      ${NODE_FOLDER}/out/Release/obj.target/tools/icu
+      ${NODE_FOLDER}/out/Release/obj.target/tools/v8_gypfiles
     )
     target_link_libraries(vgg_libnode PRIVATE
       "-Wl,--whole-archive"

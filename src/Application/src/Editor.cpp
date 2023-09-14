@@ -71,14 +71,16 @@ void Editor::handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNod
     {
       m_isMouseDown = true;
 
-      checkMouseDownPostion(static_cast<MouseEvent*>(event.get()));
-      if (m_mouseDownPostion != EFramePosition::NONE)
+      auto mouseEvent = static_cast<MouseEvent*>(event.get());
+
+      m_mouseDownPosition = checkMousePostion(mouseEvent->x, mouseEvent->y);
+      if (m_mouseDownPosition != EResizePosition::NONE)
       {
         return;
       }
 
       m_selectedNode = targetNode;
-      checkMouseDownPostion(static_cast<MouseEvent*>(event.get()));
+      m_mouseDownPosition = checkMousePostion(mouseEvent->x, mouseEvent->y);
 
       // todo, multiple selection, deselect
       break;
@@ -86,14 +88,42 @@ void Editor::handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNod
 
     case UIEventType::mousemove:
     {
-      m_hoverNode = targetNode;
-      resizeNode(static_cast<MouseEvent*>(event.get()));
+      auto mouseEvent = static_cast<MouseEvent*>(event.get());
+      resizeNode(mouseEvent);
+
+      auto position = checkMousePostion(mouseEvent->x, mouseEvent->y);
+      if (position == EResizePosition::NONE)
+      {
+        m_hoverNode = targetNode;
+      }
+      updateCursor(position);
+
       break;
     }
 
     case UIEventType::mouseup:
     {
       m_isMouseDown = false;
+      break;
+    }
+
+    case UIEventType::keydown:
+    {
+      auto keyEvent = static_cast<KeyboardEvent*>(event.get());
+      if (keyEvent->key == ' ')
+      {
+        m_mouse->setCursor(Mouse::ECursor::HAND);
+      }
+      break;
+    }
+
+    case UIEventType::keyup:
+    {
+      auto keyEvent = static_cast<KeyboardEvent*>(event.get());
+      if (keyEvent->key == ' ')
+      {
+        m_mouse->resetCursor();
+      }
       break;
     }
 
@@ -138,10 +168,10 @@ void Editor::onRender(SkCanvas* canvas)
 
     // todo, translate, scale
     drawFrame(canvas, rect);
-    drawRectCorner(canvas, toSkRect(getSelectNodeRect(EFramePosition::TOP_LEFT)));
-    drawRectCorner(canvas, toSkRect(getSelectNodeRect(EFramePosition::TOP_RIGHT)));
-    drawRectCorner(canvas, toSkRect(getSelectNodeRect(EFramePosition::BOTTOM_LEFT)));
-    drawRectCorner(canvas, toSkRect(getSelectNodeRect(EFramePosition::BOTTOM_RIGHT)));
+    drawRectCorner(canvas, toSkRect(getSelectNodeRect(EResizePosition::TOP_LEFT)));
+    drawRectCorner(canvas, toSkRect(getSelectNodeRect(EResizePosition::TOP_RIGHT)));
+    drawRectCorner(canvas, toSkRect(getSelectNodeRect(EResizePosition::BOTTOM_LEFT)));
+    drawRectCorner(canvas, toSkRect(getSelectNodeRect(EResizePosition::BOTTOM_RIGHT)));
   }
 
   if (auto node = m_hoverNode.lock(); node && node != selectedNode)
@@ -172,23 +202,23 @@ void Editor::drawBorder(SkCanvas* canvas, const LayoutNode* node)
   ASSERT(frame.size.height > 0);
 }
 
-void Editor::checkMouseDownPostion(MouseEvent* mouseDown)
+Editor::EResizePosition Editor::checkMousePostion(int x, int y)
 {
-  m_mouseDownPostion = EFramePosition::NONE;
+  auto position = EResizePosition::NONE;
 
   auto selectedNode = m_selectedNode.lock();
   if (!selectedNode)
   {
-    return;
+    return position;
   }
 
   auto contentView = m_contentView.lock();
   if (!contentView)
   {
-    return;
+    return position;
   }
 
-  Layout::Point mouse{ TO_VGG_LAYOUT_SCALAR(mouseDown->x), TO_VGG_LAYOUT_SCALAR(mouseDown->y) };
+  Layout::Point mouse{ TO_VGG_LAYOUT_SCALAR(x), TO_VGG_LAYOUT_SCALAR(y) };
   Layout::Rect f;
   if (selectedNode == contentView->currentPage())
   {
@@ -199,7 +229,7 @@ void Editor::checkMouseDownPostion(MouseEvent* mouseDown)
     f = selectedNode->frameToAncestor(contentView->currentPage());
   }
 
-  DEBUG("Editor::checkMouseDownPostion: selected node frame is: (%f, %f, %f, %f), mouse at: %f, %f",
+  DEBUG("Editor::checkMousePostion: selected node frame is: (%f, %f, %f, %f), mouse at: %f, %f",
         f.origin.x,
         f.origin.y,
         f.size.width,
@@ -208,72 +238,75 @@ void Editor::checkMouseDownPostion(MouseEvent* mouseDown)
         mouse.y);
 
   // top corner
-  Layout::Rect topLeftCorner{ getSelectNodeRect(EFramePosition::TOP_LEFT) };
+  Layout::Rect topLeftCorner{ getSelectNodeRect(EResizePosition::TOP_LEFT) };
   if (topLeftCorner.contains(mouse))
   {
-    DEBUG("Editor::checkMouseDownPostion: click top left corner");
-    m_mouseDownPostion = EFramePosition::TOP_LEFT;
-    return;
+    DEBUG("Editor::checkMousePostion: at top left corner");
+    position = EResizePosition::TOP_LEFT;
+    return position;
   }
 
-  Layout::Rect topRightCorner{ getSelectNodeRect(EFramePosition::TOP_RIGHT) };
+  Layout::Rect topRightCorner{ getSelectNodeRect(EResizePosition::TOP_RIGHT) };
   if (topRightCorner.contains(mouse))
   {
-    DEBUG("Editor::checkMouseDownPostion: click top right corner");
-    m_mouseDownPostion = EFramePosition::TOP_RIGHT;
-    return;
+    DEBUG("Editor::checkMousePostion: at top right corner");
+    position = EResizePosition::TOP_RIGHT;
+    return position;
   }
 
   // bottom corner
-  Layout::Rect bottomLeftCorner{ getSelectNodeRect(EFramePosition::BOTTOM_LEFT) };
+  Layout::Rect bottomLeftCorner{ getSelectNodeRect(EResizePosition::BOTTOM_LEFT) };
   if (bottomLeftCorner.contains(mouse))
   {
-    DEBUG("Editor::checkMouseDownPostion: click bottom left corner");
-    m_mouseDownPostion = EFramePosition::BOTTOM_LEFT;
-    return;
+    DEBUG("Editor::checkMousePostion: at bottom left corner");
+    position = EResizePosition::BOTTOM_LEFT;
+    return position;
   }
 
-  Layout::Rect bottomRightCorner{ getSelectNodeRect(EFramePosition::BOTTOM_RIGHT) };
+  Layout::Rect bottomRightCorner{ getSelectNodeRect(EResizePosition::BOTTOM_RIGHT) };
   if (bottomRightCorner.contains(mouse))
   {
-    DEBUG("Editor::checkMouseDownPostion: click bottom right corner");
-    m_mouseDownPostion = EFramePosition::BOTTOM_RIGHT;
-    return;
+    DEBUG("Editor::checkMousePostion: at bottom right corner");
+    position = EResizePosition::BOTTOM_RIGHT;
+    return position;
   }
 
   // top/bottom border
-  Layout::Rect topBorder{ getSelectNodeRect(EFramePosition::TOP) };
+  Layout::Rect topBorder{ getSelectNodeRect(EResizePosition::TOP) };
   if (topBorder.contains(mouse))
   {
-    DEBUG("Editor::checkMouseDownPostion: click top border");
-    m_mouseDownPostion = EFramePosition::TOP;
-    return;
+    DEBUG("Editor::checkMousePostion: at top border");
+
+    position = EResizePosition::TOP;
+    return position;
   }
 
-  Layout::Rect bottomBorder{ getSelectNodeRect(EFramePosition::BOTTOM) };
+  Layout::Rect bottomBorder{ getSelectNodeRect(EResizePosition::BOTTOM) };
   if (bottomBorder.contains(mouse))
   {
-    DEBUG("Editor::checkMouseDownPostion: click bottom border");
-    m_mouseDownPostion = EFramePosition::BOTTOM;
-    return;
+    DEBUG("Editor::checkMousePostion: at bottom border");
+    position = EResizePosition::BOTTOM;
+    return position;
   }
 
   // left/right border
-  Layout::Rect leftBorder{ getSelectNodeRect(EFramePosition::LEFT) };
+  Layout::Rect leftBorder{ getSelectNodeRect(EResizePosition::LEFT) };
   if (leftBorder.contains(mouse))
   {
-    DEBUG("Editor::checkMouseDownPostion: click left border");
-    m_mouseDownPostion = EFramePosition::LEFT;
-    return;
+    DEBUG("Editor::checkMousePostion: at left border");
+    position = EResizePosition::LEFT;
+    return position;
   }
 
-  Layout::Rect rightBorder{ getSelectNodeRect(EFramePosition::RIGHT) };
+  Layout::Rect rightBorder{ getSelectNodeRect(EResizePosition::RIGHT) };
   if (rightBorder.contains(mouse))
   {
-    DEBUG("Editor::checkMouseDownPostion: click right border");
-    m_mouseDownPostion = EFramePosition::RIGHT;
-    return;
+    DEBUG("Editor::checkMousePostion: at right border");
+    position = EResizePosition::RIGHT;
+    return position;
   }
+
+  return position;
 }
 
 void Editor::resizeNode(MouseEvent* mouseMove)
@@ -289,7 +322,7 @@ void Editor::resizeNode(MouseEvent* mouseMove)
     return;
   }
 
-  if (m_mouseDownPostion == EFramePosition::NONE)
+  if (m_mouseDownPosition == EResizePosition::NONE)
   {
     return;
   }
@@ -313,9 +346,9 @@ void Editor::resizeNode(MouseEvent* mouseMove)
         tx,
         ty);
 
-  switch (m_mouseDownPostion)
+  switch (m_mouseDownPosition)
   {
-    case EFramePosition::TOP_LEFT:
+    case EResizePosition::TOP_LEFT:
     {
       frame.origin.x += tx;
       frame.origin.y += ty;
@@ -324,7 +357,7 @@ void Editor::resizeNode(MouseEvent* mouseMove)
       frame.size.height -= ty;
       break;
     }
-    case EFramePosition::TOP_RIGHT:
+    case EResizePosition::TOP_RIGHT:
     {
       frame.origin.y += ty;
 
@@ -333,7 +366,7 @@ void Editor::resizeNode(MouseEvent* mouseMove)
       break;
     }
 
-    case EFramePosition::BOTTOM_LEFT:
+    case EResizePosition::BOTTOM_LEFT:
     {
       frame.origin.x += tx;
 
@@ -341,34 +374,34 @@ void Editor::resizeNode(MouseEvent* mouseMove)
       frame.size.height += ty;
       break;
     }
-    case EFramePosition::BOTTOM_RIGHT:
+    case EResizePosition::BOTTOM_RIGHT:
     {
       frame.size.width += tx;
       frame.size.height += ty;
       break;
     }
 
-    case EFramePosition::LEFT:
+    case EResizePosition::LEFT:
     {
       frame.origin.x += tx;
 
       frame.size.width -= tx;
       break;
     }
-    case EFramePosition::RIGHT:
+    case EResizePosition::RIGHT:
     {
       frame.size.width += tx;
       break;
     }
 
-    case EFramePosition::TOP:
+    case EResizePosition::TOP:
     {
       frame.origin.y += ty;
 
       frame.size.height -= ty;
       break;
     }
-    case EFramePosition::BOTTOM:
+    case EResizePosition::BOTTOM:
     {
       frame.size.height += ty;
       break;
@@ -381,7 +414,7 @@ void Editor::resizeNode(MouseEvent* mouseMove)
   selectedNode->setFrame(frame);
 }
 
-Layout::Rect Editor::getSelectNodeRect(EFramePosition position)
+Layout::Rect Editor::getSelectNodeRect(EResizePosition position)
 {
   Layout::Rect rect;
 
@@ -409,14 +442,14 @@ Layout::Rect Editor::getSelectNodeRect(EFramePosition position)
 
   switch (position)
   {
-    case EFramePosition::TOP_LEFT:
+    case EResizePosition::TOP_LEFT:
     {
       rect = { { f.origin.x - K_MOUSE_CONTAINER_WIDTH / 2,
                  f.origin.y - K_MOUSE_CONTAINER_WIDTH / 2 },
                { K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
       break;
     }
-    case EFramePosition::TOP_RIGHT:
+    case EResizePosition::TOP_RIGHT:
     {
       rect = { { f.origin.x + f.size.width - K_MOUSE_CONTAINER_WIDTH / 2,
                  f.origin.y - K_MOUSE_CONTAINER_WIDTH / 2 },
@@ -424,14 +457,14 @@ Layout::Rect Editor::getSelectNodeRect(EFramePosition position)
       break;
     }
 
-    case EFramePosition::BOTTOM_LEFT:
+    case EResizePosition::BOTTOM_LEFT:
     {
       rect = { { f.origin.x - K_MOUSE_CONTAINER_WIDTH / 2,
                  f.origin.y + f.size.height - K_MOUSE_CONTAINER_WIDTH / 2 },
                { K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
       break;
     }
-    case EFramePosition::BOTTOM_RIGHT:
+    case EResizePosition::BOTTOM_RIGHT:
     {
       rect = { { f.origin.x + f.size.width - K_MOUSE_CONTAINER_WIDTH / 2,
                  f.origin.y + f.size.height - K_MOUSE_CONTAINER_WIDTH / 2 },
@@ -439,7 +472,7 @@ Layout::Rect Editor::getSelectNodeRect(EFramePosition position)
       break;
     }
 
-    case EFramePosition::LEFT:
+    case EResizePosition::LEFT:
     {
       rect = { { f.origin.x - K_MOUSE_CONTAINER_WIDTH / 2,
                  f.origin.y + K_MOUSE_CONTAINER_WIDTH / 2 },
@@ -447,7 +480,7 @@ Layout::Rect Editor::getSelectNodeRect(EFramePosition position)
 
       break;
     }
-    case EFramePosition::RIGHT:
+    case EResizePosition::RIGHT:
     {
       rect = { { f.origin.x + f.size.width - K_MOUSE_CONTAINER_WIDTH / 2,
                  f.origin.y + K_MOUSE_CONTAINER_WIDTH / 2 },
@@ -455,14 +488,14 @@ Layout::Rect Editor::getSelectNodeRect(EFramePosition position)
       break;
     }
 
-    case EFramePosition::TOP:
+    case EResizePosition::TOP:
     {
       rect = { { f.origin.x + K_MOUSE_CONTAINER_WIDTH / 2,
                  f.origin.y - K_MOUSE_CONTAINER_WIDTH / 2 },
                { f.size.width - K_MOUSE_CONTAINER_WIDTH, K_MOUSE_CONTAINER_WIDTH } };
       break;
     }
-    case EFramePosition::BOTTOM:
+    case EResizePosition::BOTTOM:
     {
       rect = { { f.origin.x + K_MOUSE_CONTAINER_WIDTH / 2,
                  f.origin.y + f.size.height - K_MOUSE_CONTAINER_WIDTH / 2 },
@@ -475,4 +508,40 @@ Layout::Rect Editor::getSelectNodeRect(EFramePosition position)
   }
 
   return rect;
+}
+
+void Editor::enable(bool enabled)
+{
+  m_enabled = enabled;
+  m_mouse->resetCursor();
+}
+
+void Editor::updateCursor(EResizePosition mousePosition)
+{
+  switch (mousePosition)
+  {
+    case EResizePosition::TOP:
+    case EResizePosition::BOTTOM:
+      m_mouse->setCursor(Mouse::ECursor::SIZENS);
+      break;
+
+    case EResizePosition::LEFT:
+    case EResizePosition::RIGHT:
+      m_mouse->setCursor(Mouse::ECursor::SIZEWE);
+      break;
+
+    case EResizePosition::TOP_LEFT:
+    case EResizePosition::BOTTOM_RIGHT:
+      m_mouse->setCursor(Mouse::ECursor::SIZENWSE);
+      break;
+
+    case EResizePosition::TOP_RIGHT:
+    case EResizePosition::BOTTOM_LEFT:
+      m_mouse->setCursor(Mouse::ECursor::SIZENESW);
+      break;
+
+    default:
+      m_mouse->resetCursor();
+      break;
+  }
 }

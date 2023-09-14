@@ -3,6 +3,7 @@
 #include <Adapter/NativeComposer.hpp>
 #include <AppBase.hpp>
 #include <Application/MainComposer.hpp>
+#include <Application/Mouse.hpp>
 #include <Application/UIApplication.hpp>
 #include <ConfigMananger.h>
 #include <Scene/Scene.h>
@@ -68,7 +69,8 @@ int main(int argc, char** argv)
   catchJsException = true;
 #endif
   MainComposer mainComposer{ new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js",
-                                                catchJsException) };
+                                                catchJsException),
+                             std::make_shared<Mouse>() };
 
   auto sdlApp = AppImpl::app();
 

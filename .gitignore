@@ -5,3 +5,5 @@
 **/.DS_Store
 compile_commands.json
 lib/node*
+lib/skia
+archive

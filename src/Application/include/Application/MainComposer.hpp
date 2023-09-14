@@ -8,6 +8,8 @@
 #include "Async.hpp"
 #include "Domain/Daruma.hpp"
 
+#include <Application/Mouse.hpp>
+
 #include <memory>
 
 namespace VGG
@@ -28,7 +30,7 @@ class MainComposer
   std::shared_ptr<PlatformComposer> m_platform_composer;
 
 public:
-  MainComposer(PlatformComposer* platformComposer);
+  MainComposer(PlatformComposer* platformComposer, std::shared_ptr<Mouse> mouse);
 
   ~MainComposer()
   {

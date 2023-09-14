@@ -4,10 +4,10 @@
 
 using namespace VGG;
 
-MainComposer::MainComposer(PlatformComposer* platformComposer)
+MainComposer::MainComposer(PlatformComposer* platformComposer, std::shared_ptr<Mouse> mouse)
   : m_view{ new UIView }
   , m_presenter{ new Presenter }
-  , m_editor{ new Editor{ m_view } }
+  , m_editor{ new Editor{ m_view, mouse } }
   , m_runLoop{ new RunLoop }
   , m_controller{ new Controller{ m_runLoop, m_presenter, m_editor } }
   , m_platform_composer{ platformComposer }

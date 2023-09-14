@@ -3,6 +3,8 @@
 #include "Application/MainComposer.hpp"
 #include "Adapter/BrowserComposer.hpp"
 
+#include <Application/Mouse.hpp>
+
 class VggBrowser
 {
 public:
@@ -10,7 +12,7 @@ public:
 
   static VGG::MainComposer& mainComposer()
   {
-    static VGG::MainComposer instance{ new BrowserComposer() };
+    static VGG::MainComposer instance{ new BrowserComposer(), std::make_shared<Mouse>() };
     return instance;
   }
 };

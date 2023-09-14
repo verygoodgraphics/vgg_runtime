@@ -3,6 +3,7 @@
 #include "AppRenderable.h"
 #include "UIEvent.hpp"
 
+#include <Application/Mouse.hpp>
 #include <Domain/Layout/Node.hpp>
 #include <Log.h>
 
@@ -18,7 +19,7 @@ class UIView;
 
 class Editor : public app::AppRenderable
 {
-  enum class EFramePosition
+  enum class EResizePosition
   {
     NONE,
 
@@ -39,19 +40,20 @@ class Editor : public app::AppRenderable
   std::weak_ptr<UIView> m_contentView;
 
   bool m_isMouseDown{ false };
-  EFramePosition m_mouseDownPostion;
+  EResizePosition m_mouseDownPosition;
+
+  std::shared_ptr<Mouse> m_mouse;
 
 public:
-  Editor(std::weak_ptr<UIView> contentView)
+  Editor(std::weak_ptr<UIView> contentView, std::shared_ptr<Mouse> mouse)
     : m_contentView{ contentView }
+    , m_mouse{ mouse }
   {
     ASSERT(!contentView.expired());
+    ASSERT(mouse);
   }
 
-  void enable(bool enabled)
-  {
-    m_enabled = enabled;
-  }
+  void enable(bool enabled);
 
   void handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNode);
 
@@ -64,10 +66,12 @@ public:
 private:
   void drawBorder(SkCanvas* canvas, const LayoutNode* node);
 
-  void checkMouseDownPostion(MouseEvent* mouseDown);
+  EResizePosition checkMousePostion(int x, int y);
   void resizeNode(MouseEvent* mouseMove);
 
-  Layout::Rect getSelectNodeRect(EFramePosition position);
+  Layout::Rect getSelectNodeRect(EResizePosition position);
+
+  void updateCursor(EResizePosition mousePosition);
 };
 
 } // namespace VGG

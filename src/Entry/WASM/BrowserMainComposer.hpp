@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Application/MainComposer.hpp"
-#include "Adapter/BrowserComposer.hpp"
+#include "../SDL/SDLImpl/SdlMouse.hpp"
 
-#include <Application/Mouse.hpp>
+#include <Adapter/BrowserComposer.hpp>
+#include <Application/MainComposer.hpp>
 
 class VggBrowser
 {
@@ -12,7 +12,7 @@ public:
 
   static VGG::MainComposer& mainComposer()
   {
-    static VGG::MainComposer instance{ new BrowserComposer(), std::make_shared<Mouse>() };
+    static VGG::MainComposer instance{ new BrowserComposer(), std::make_shared<SdlMouse>() };
     return instance;
   }
 };

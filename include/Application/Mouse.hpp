@@ -24,18 +24,11 @@ public:
     HAND       /**< Hand */
   };
 
-private:
-  ECursor m_type{ ECursor::ARROW };
-  SDL_Cursor* m_cursor{ nullptr };
-
 public:
-  ~Mouse();
+  virtual ~Mouse() = default;
 
-  void setCursor(ECursor type);
-  void resetCursor();
-
-private:
-  void freeCursor();
+  virtual void setCursor(ECursor type) = 0;
+  virtual void resetCursor() = 0;
 };
 
 } // namespace VGG

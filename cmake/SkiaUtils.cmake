@@ -1,7 +1,12 @@
 # Please refer to the skia build document for all supported featuers.
 # Only those needed are covered here.
 # https://skia.org/docs/user/build/
-set(SKIA_SUPPORTED_FEATURES "elg;zlib;freetype;skparagraph;icu;gpu;vulkan;")
+find_package(Vulkan)
+if(Vulkan_FOUND)
+set(VULKAN_AVAILABLE "true")
+else()
+set(VULKAN_AVAILABLE "false")
+endif()
 set(SKIA_PRESET_FEATURES_FOR_LINUX
 "skia_use_egl=true
 skia_use_freetype=true
@@ -27,7 +32,7 @@ skia_enable_fontmgr_custom_embedded=false
 skia_canvaskit_enable_canvas_bindings=false
 skia_canvaskit_enable_embedded_font=false
 skia_enable_ganesh=true
-skia_use_vulkan=true
+skia_use_vulkan=${VULKAN_AVAILABLE}
 skia_use_piex=false
 skia_use_lua=false
 skia_use_dng_sdk=false
@@ -56,7 +61,7 @@ skia_enable_gpu=true
 skia_enable_fontmgr_custom_embedded=false
 skia_canvaskit_enable_canvas_bindings=false
 skia_canvaskit_enable_embedded_font=false
-skia_use_vulkan=false
+skia_use_vulkan=${VULKAN_AVAILABLE}
 skia_use_piex=false
 skia_use_lua=false
 skia_use_dng_sdk=false
@@ -90,7 +95,7 @@ skia_enable_fontmgr_custom_embedded=false
 skia_canvaskit_enable_canvas_bindings=false
 skia_canvaskit_enable_embedded_font=false
 skia_enable_ganesh=true 
-skia_use_vulkan=true
+skia_use_vulkan=${VULKAN_AVAILABLE}
 skia_use_piex=false
 skia_use_lua=false
 skia_use_dng_sdk=false

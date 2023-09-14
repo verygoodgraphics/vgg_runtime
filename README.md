@@ -16,19 +16,8 @@ This project can be built with CMake using common practice, however, third-party
 
 - Fetch `vgg_contrib` submodule by running `git submodule update --init`
 - We use system/user-provided SDL installation
-- We need user-provided Skia source code or precompiled binaries.
-- Nodejs would be automatically downloaded and compiled.
+- ```Nodejs``` and ```Skia``` would be automatically downloaded and compiled.
 
-You could download Skia from the [official website](https://skia.org/docs/user/download/). We use our skia fork[vgg/m116](https://github.com/verygoodgraphics/skia/tree/vgg/m116) branch for building, which has some modifications and fixes for our scenario. We don't assure other versions could be successfully compiled using our CMake script.
-
-```bash
-# fetch skia
-git clone --depth 1 --branch vgg/m116 https://github.com/verygoodgraphics/skia.git
-
-# then fetch skia's own dependencies
-cd skia
-python3 tools/git-sync-deps
-```
 
 ### 3. Build Examples
 
@@ -37,7 +26,7 @@ python3 tools/git-sync-deps
 ```bash
 mkdir build
 cd build
-cmake .. -DSKIA_EXTERNAL_PROJECT_DIR=/path/to/your/skia
+cmake ..
 cmake --build . --parallel
 ```
 
@@ -51,7 +40,7 @@ cmake --build . --parallel
 mkdir build.wasm
 cd build.wasm
 source /path/to/emsdk/emsdk_env.sh
-emcmake cmake .. -DCMAKE_BUILD_TYPE=Release -DSKIA_EXTERNAL_PROJECT_DIR=/path/to/your/skia
+emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --parallel
 ```
 
@@ -61,12 +50,27 @@ cmake --build . --parallel
 
 Compiled on windows need some extra efforts. It will be released once being stable.
 
+#### Specify skia manually
+
+You can also override skia by specifying SKIA_DIR:
+
+```bash
+...
+
+cmake .. -DSKIA_DIR=/path/to/your/skia
+
+...
+
+```
+
+You could download Skia from the [official website](https://skia.org/docs/user/download/). We use our skia fork[vgg/m116](https://github.com/verygoodgraphics/skia/tree/vgg/m116) branch for building, which has some modifications and fixes for our scenario. We don't assure other versions could be successfully compiled using our CMake script.
+
 ### 4. Unit test
 
 #### Linux/macOS unit test
 ```bash
 cd build
-cmake .. -DENABLE_UNIT_TEST=ON -DSKIA_EXTERNAL_PROJECT_DIR=/path/to/your/skia
+cmake .. -DENABLE_UNIT_TEST=ON
 cmake --build . --parallel -t unit_tests
 ctest
 ```

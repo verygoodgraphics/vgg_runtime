@@ -16,6 +16,7 @@ set(VGG_AUTOMERGE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/vgg_automerge/automerge CA
 mark_as_advanced(VGG_AUTOMERGE_INCLUDE)
 
 # layout
+option(open_vgg_layout_test "Disable vgg_layout test" OFF)
 add_subdirectory(vgg_contrib/yoga EXCLUDE_FROM_ALL)
 add_subdirectory(vgg_layout EXCLUDE_FROM_ALL)
 
@@ -44,7 +45,8 @@ if (NOT EMSCRIPTEN)
   endif()
 
   add_library(vgg_libnode STATIC empty.cpp)
-  add_library(vgg_libnode_stub STATIC node/src/node_snapshot_stub.cc)
+  add_library(vgg_libnode_stub STATIC
+    ${NODE_FOLDER}/src/node_snapshot_stub.cc)
 
   cmake_minimum_required(VERSION 3.22) # this is requied for the following invoking
   add_custom_command(TARGET vgg_libnode

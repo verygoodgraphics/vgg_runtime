@@ -25,7 +25,7 @@ if (NOT EMSCRIPTEN)
   if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${NODE_FOLDER}")
     set(NODE_VERSION "v18.15.0")
     set(DOWNLOAD_URL "https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz")
-    set(DOWNLOAD_AT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/node.tar.gz")
+    set(DOWNLOAD_AT_PATH "${CMAKE_SOURCE_DIR}/downloads/node-${NODE_VERSION}.tar.gz")
 
     message(STATUS "Downloading ${DOWNLOAD_URL} to ${DOWNLOAD_AT_PATH}")
     file(DOWNLOAD
@@ -41,7 +41,7 @@ if (NOT EMSCRIPTEN)
     file(ARCHIVE_EXTRACT INPUT ${DOWNLOAD_AT_PATH}
       DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}")
     file(RENAME "${CMAKE_CURRENT_SOURCE_DIR}/node-${NODE_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/${NODE_FOLDER}")
-    file(REMOVE ${DOWNLOAD_AT_PATH})
+    #file(REMOVE ${DOWNLOAD_AT_PATH})
   endif()
 
   add_library(vgg_libnode STATIC empty.cpp)
@@ -99,21 +99,21 @@ if (NOT EMSCRIPTEN)
     )
   else()
     target_link_directories(vgg_libnode PUBLIC
-      ${NODE_FOLDER}/out/Release/obj.target
-      ${NODE_FOLDER}/out/Release/obj.target/deps/base64
-      ${NODE_FOLDER}/out/Release/obj.target/deps/brotli
-      ${NODE_FOLDER}/out/Release/obj.target/deps/cares
-      ${NODE_FOLDER}/out/Release/obj.target/deps/histogram
-      ${NODE_FOLDER}/out/Release/obj.target/deps/llhttp
-      ${NODE_FOLDER}/out/Release/obj.target/deps/nghttp2
-      ${NODE_FOLDER}/out/Release/obj.target/deps/ngtcp2
-      ${NODE_FOLDER}/out/Release/obj.target/deps/openssl
-      ${NODE_FOLDER}/out/Release/obj.target/deps/simdutf
-      ${NODE_FOLDER}/out/Release/obj.target/deps/uv
-      ${NODE_FOLDER}/out/Release/obj.target/deps/uvwasi
-      ${NODE_FOLDER}/out/Release/obj.target/deps/zlib
-      ${NODE_FOLDER}/out/Release/obj.target/tools/icu
-      ${NODE_FOLDER}/out/Release/obj.target/tools/v8_gypfiles
+      ${NODE_FOLDER}/out/Release/obj
+      ${NODE_FOLDER}/out/Release/obj/deps/base64
+      ${NODE_FOLDER}/out/Release/obj/deps/brotli
+      ${NODE_FOLDER}/out/Release/obj/deps/cares
+      ${NODE_FOLDER}/out/Release/obj/deps/histogram
+      ${NODE_FOLDER}/out/Release/obj/deps/llhttp
+      ${NODE_FOLDER}/out/Release/obj/deps/nghttp2
+      ${NODE_FOLDER}/out/Release/obj/deps/ngtcp2
+      ${NODE_FOLDER}/out/Release/obj/deps/openssl
+      ${NODE_FOLDER}/out/Release/obj/deps/simdutf
+      ${NODE_FOLDER}/out/Release/obj/deps/uv
+      ${NODE_FOLDER}/out/Release/obj/deps/uvwasi
+      ${NODE_FOLDER}/out/Release/obj/deps/zlib
+      ${NODE_FOLDER}/out/Release/obj/tools/icu
+      ${NODE_FOLDER}/out/Release/obj/tools/v8_gypfiles
     )
     target_link_libraries(vgg_libnode PRIVATE
       "-Wl,--whole-archive"

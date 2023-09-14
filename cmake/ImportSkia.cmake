@@ -8,7 +8,7 @@ elseif(NOT IS_DIRECTORY ${SKIA_SOURCE_DIR})
   set(SKIA_ARCHIVE_TAG "20220914")
   set(SKIA_ARCHIVE_CHECKSUM "ed2005ca6e29a75309c922462127623e")
   set(SKIA_URL "https://github.com/verygoodgraphics/skia/releases/download/${SKIA_ARCHIVE_TAG}/skia-with-deps.tar.gz")
-  set(SKIA_ARCHIVE_LOCATION "${CMAKE_SOURCE_DIR}/archive/skia-with-deps.tar.gz")
+  set(SKIA_ARCHIVE_LOCATION "${CMAKE_SOURCE_DIR}/downloads/skia-with-deps-${SKIA_ARCHIVE_TAG}.tar.gz")
   file(DOWNLOAD ${SKIA_URL} ${SKIA_ARCHIVE_LOCATION}
     STATUS DOWNLOAD_STATUS
     SHOW_PROGRESS

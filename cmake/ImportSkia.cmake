@@ -20,19 +20,20 @@ elseif(NOT IS_DIRECTORY ${SKIA_SOURCE_DIR})
   if(NOT IS_DIRECTORY ${SKIA_SOURCE_DIR})
     file(ARCHIVE_EXTRACT INPUT ${SKIA_ARCHIVE_LOCATION} DESTINATION ${SKIA_SOURCE_DIR})
   endif()
-  # test gn if is for the current platform
-  execute_process(COMMAND ${GN} WORKING_DIRECTORY ${SKIA_SOURCE_DIR} ERROR_VARIABLE GN_RUNNABLE_TEST)
-  if(GN_RUNNABLE_TEST)
-     message(STATUS ${GN_RUNNABLE_TEST})
-     message(STATUS "Try to sync gn")
-     execute_process(COMMAND bin/fetch-gn WORKING_DIRECTORY ${SKIA_SOURCE_DIR} COMMAND_ERROR_IS_FATAL ANY)
-  endif()
   set(SKIA_EXTERNAL_PROJECT_DIR ${SKIA_SOURCE_DIR} CACHE STRING "" FORCE)
 else()
   set(SKIA_EXTERNAL_PROJECT_DIR ${SKIA_SOURCE_DIR} CACHE STRING "" FORCE)
 endif()
 
 message(STATUS "Use skia ${SKIA_EXTERNAL_PROJECT_DIR}")
+
+# test gn if is for the current platform
+execute_process(COMMAND ./bin/gn --version WORKING_DIRECTORY ${SKIA_SOURCE_DIR} ERROR_VARIABLE GN_RUNNABLE_TEST)
+if(GN_RUNNABLE_TEST)
+   message(STATUS ${GN_RUNNABLE_TEST})
+   message(STATUS "Try to sync gn")
+   execute_process(COMMAND bin/fetch-gn WORKING_DIRECTORY ${SKIA_SOURCE_DIR} COMMAND_ERROR_IS_FATAL ANY)
+endif()
 
 unset(NINJA_COMMAND CACHE)
 find_program(NINJA_COMMAND ninja)

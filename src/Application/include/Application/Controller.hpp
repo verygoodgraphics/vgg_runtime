@@ -69,6 +69,9 @@ public:
     return m_mode == ERunMode::EDIT_MODE;
   }
 
+  bool hasDirtyEditor();
+  void resetEditorDirty();
+
 private:
   void initModel(const char* designDocSchemaFilePath, const char* layoutDocSchemaFilePath);
   JsonDocument* createJsonDoc();

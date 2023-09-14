@@ -80,6 +80,7 @@ void Editor::handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNod
       }
 
       m_selectedNode = targetNode;
+      setDirty(true);
       m_mouseDownPosition = checkMousePostion(mouseEvent->x, mouseEvent->y);
 
       // todo, multiple selection, deselect
@@ -95,6 +96,7 @@ void Editor::handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNod
       if (position == EResizePosition::NONE)
       {
         m_hoverNode = targetNode;
+        setDirty(true);
       }
       updateCursor(position);
 
@@ -120,7 +122,7 @@ void Editor::handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNod
     case UIEventType::keyup:
     {
       auto keyEvent = static_cast<KeyboardEvent*>(event.get());
-      if (keyEvent->key == ' ')
+      if (keyEvent->key == VGGK_SPACE)
       {
         m_mouse->resetCursor();
       }
@@ -134,7 +136,7 @@ void Editor::handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNod
 
 void Editor::onRender(SkCanvas* canvas)
 {
-  if (!m_enabled)
+  if (!m_isEnabled)
   {
     return;
   }
@@ -512,7 +514,7 @@ Layout::Rect Editor::getSelectNodeRect(EResizePosition position)
 
 void Editor::enable(bool enabled)
 {
-  m_enabled = enabled;
+  m_isEnabled = enabled;
   m_mouse->resetCursor();
 }
 

@@ -34,7 +34,7 @@ class Editor : public app::AppRenderable
     RIGHT
   };
 
-  bool m_enabled{ false };
+  bool m_isEnabled{ false };
   std::weak_ptr<LayoutNode> m_hoverNode;
   std::weak_ptr<LayoutNode> m_selectedNode;
   std::weak_ptr<UIView> m_contentView;
@@ -43,6 +43,8 @@ class Editor : public app::AppRenderable
   EResizePosition m_mouseDownPosition;
 
   std::shared_ptr<Mouse> m_mouse;
+
+  bool m_isDirty{ false };
 
 public:
   Editor(std::weak_ptr<UIView> contentView, std::shared_ptr<Mouse> mouse)
@@ -61,6 +63,15 @@ public:
   bool onEvent(UEvent e, void* userData) override
   {
     return false;
+  }
+
+  bool isDirty()
+  {
+    return m_isEnabled && m_isDirty;
+  }
+  void setDirty(bool dirty)
+  {
+    m_isDirty = dirty;
   }
 
 private:

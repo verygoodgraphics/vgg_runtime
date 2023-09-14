@@ -14,6 +14,8 @@ bool UIView::onEvent(UEvent evt, void* userData)
 {
   if (AppScene::onEvent(evt, userData))
   {
+    // zoom or pan event
+    setDirty(true);
     return true;
   }
 
@@ -229,6 +231,7 @@ void UIView::nextArtboard()
 
     ++m_page;
     Scene::nextArtboard();
+    setDirty(true);
   }
 }
 
@@ -244,6 +247,7 @@ void UIView::preArtboard()
 
     --m_page;
     Scene::preArtboard();
+    setDirty(true);
   }
 }
 

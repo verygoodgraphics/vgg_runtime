@@ -63,7 +63,7 @@ public:
     // todo, merge edited doc resouces ?
     Scene::setResRepo(viewModel.resources());
 
-    m_isDirty = true;
+    setDirty(true);
   }
 
   void registerEventListener(HasEventListener hasEventListener)
@@ -94,7 +94,7 @@ public:
     m_frame.size.width = w;
     m_frame.size.height = h;
 
-    m_isDirty = true;
+    setDirty(true);
 
     layoutSubviews();
   }

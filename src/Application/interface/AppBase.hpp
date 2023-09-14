@@ -147,13 +147,15 @@ protected:
       m_shouldExit = true;
       return true;
     }
+
     if (auto& window = evt.window;
-        evt.type == VGG_WINDOWEVENT && window.event == VGG_WINDOWEVENT_SIZE_CHANGED)
+        evt.type == VGG_WINDOWEVENT &&
+        (window.event == VGG_WINDOWEVENT_RESIZED || window.event == VGG_WINDOWEVENT_SIZE_CHANGED))
     {
       int drawableWidth = window.drawableWidth;
       int drawableHeight = window.drawableHeight;
       resize(drawableWidth, drawableHeight);
-      return true;
+      return false;
     }
     return false;
   }

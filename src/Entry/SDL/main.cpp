@@ -1,4 +1,5 @@
 #include "SDLImpl/AppSDLImpl.hpp"
+#include "SDLImpl/SdlMouse.hpp"
 
 #include <Adapter/NativeComposer.hpp>
 #include <AppBase.hpp>
@@ -70,7 +71,7 @@ int main(int argc, char** argv)
 #endif
   MainComposer mainComposer{ new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js",
                                                 catchJsException),
-                             std::make_shared<Mouse>() };
+                             std::make_shared<SdlMouse>() };
 
   auto sdlApp = AppImpl::app();
 

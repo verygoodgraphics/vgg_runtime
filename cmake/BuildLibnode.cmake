@@ -6,12 +6,12 @@
     if(NOT NODE_LIBRARY_PATH)
       message("build libnode...")
       execute_process(
-        COMMAND ./configure --enable-static
+        COMMAND ./configure --enable-static --ninja
         WORKING_DIRECTORY ${WORK_DIR}
         COMMAND_ERROR_IS_FATAL ANY)
       execute_process(
-        COMMAND make -j16
-        WORKING_DIRECTORY ${WORK_DIR}
+        COMMAND ninja
+        WORKING_DIRECTORY "${WORK_DIR}/out/Release"
         COMMAND_ERROR_IS_FATAL ANY)
     endif()
 

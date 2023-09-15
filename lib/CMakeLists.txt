@@ -21,9 +21,10 @@ add_subdirectory(vgg_contrib/yoga EXCLUDE_FROM_ALL)
 add_subdirectory(vgg_layout EXCLUDE_FROM_ALL)
 
 if (NOT EMSCRIPTEN)
-  set(NODE_FOLDER "node$ENV{name}" CACHE STRING "node folder name" FORCE)
+  set(NODE_FOLDER "node$ENV{name}${CMAKE_CXX_COMPILER_ID}${CMAKE_CXX_COMPILER_VERSION}" CACHE STRING "node folder name" FORCE)
   if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${NODE_FOLDER}")
     set(NODE_VERSION "v18.15.0")
+    set(NODE_MD5_CHECKSUM "a517c1c055ba65757ccb2d446d165335")
     set(DOWNLOAD_URL "https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz")
     set(DOWNLOAD_AT_PATH "${CMAKE_SOURCE_DIR}/downloads/node-${NODE_VERSION}.tar.gz")
 
@@ -31,7 +32,7 @@ if (NOT EMSCRIPTEN)
     file(DOWNLOAD
       ${DOWNLOAD_URL}
       ${DOWNLOAD_AT_PATH}
-      EXPECTED_MD5 a517c1c055ba65757ccb2d446d165335
+      EXPECTED_MD5 ${NODE_MD5_CHECKSUM}
       STATUS DOWNLOAD_STATUS
       SHOW_PROGRESS)
     if(NOT DOWNLOAD_STATUS MATCHES "^0;")

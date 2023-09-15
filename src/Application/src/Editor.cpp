@@ -81,8 +81,7 @@ void Editor::handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNod
 
       if (m_selectedNode.lock() != targetNode.lock())
       {
-        m_selectedNode = targetNode;
-        setDirty(true);
+        didSelectNode(targetNode);
         m_mouseDownPosition = checkMousePostion(mouseEvent->x, mouseEvent->y);
       }
 
@@ -548,5 +547,16 @@ void Editor::updateCursor(EResizePosition mousePosition)
     default:
       m_mouse->resetCursor();
       break;
+  }
+}
+
+void Editor::didSelectNode(std::weak_ptr<LayoutNode> node)
+{
+  m_selectedNode = node;
+  setDirty(true);
+
+  if (auto listener = m_listener.lock())
+  {
+    listener->onSelectNode(node);
   }
 }

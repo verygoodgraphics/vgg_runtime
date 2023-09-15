@@ -1,6 +1,7 @@
 #pragma once
 
 #include <nlohmann/json.hpp>
+#include <cstdlib>
 
 namespace Config
 {
@@ -14,7 +15,7 @@ inline nlohmann::json genDefaultFontConfig()
   dirs = { "/usr/share/fonts/TTF" };
   fallbacks = { "DejaVuSans" };
 #elif defined(VGG_HOST_macOS)
-  dirs = { "/System/Library/Fonts/", "~/Library/Fonts/" };
+  dirs = { "/System/Library/Fonts/", std::filesystem::path(std::getenv("HOME"))/"Library"/"Fonts" };
   fallbacks = { "Helvetica" };
 #elif defined(VGG_Host_Windows)
   // TODO:: for other platform config

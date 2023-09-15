@@ -103,6 +103,7 @@ public:
     {
       INFO("Switch edit mode");
       m_controller->setEditMode(!m_controller->isEditMode());
+      m_view->setDirty(true);
       return true;
     }
 

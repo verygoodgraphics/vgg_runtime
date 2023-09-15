@@ -79,9 +79,12 @@ void Editor::handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNod
         return;
       }
 
-      m_selectedNode = targetNode;
-      setDirty(true);
-      m_mouseDownPosition = checkMousePostion(mouseEvent->x, mouseEvent->y);
+      if (m_selectedNode.lock() != targetNode.lock())
+      {
+        m_selectedNode = targetNode;
+        setDirty(true);
+        m_mouseDownPosition = checkMousePostion(mouseEvent->x, mouseEvent->y);
+      }
 
       // todo, multiple selection, deselect
       break;
@@ -93,7 +96,7 @@ void Editor::handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNod
       resizeNode(mouseEvent);
 
       auto position = checkMousePostion(mouseEvent->x, mouseEvent->y);
-      if (position == EResizePosition::NONE)
+      if (position == EResizePosition::NONE && m_hoverNode.lock() != targetNode.lock())
       {
         m_hoverNode = targetNode;
         setDirty(true);

@@ -19,6 +19,8 @@ constexpr auto DARUMA_FILE_OR_DIRECTORY = "daruma";
 using namespace VGG;
 using namespace VGG::app;
 
+using AppImpl = VGG::entry::AppSDLImpl;
+
 int main(int argc, char** argv)
 {
   INFO("main");

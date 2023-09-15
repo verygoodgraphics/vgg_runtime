@@ -69,8 +69,13 @@ public:
   {
     return m_isEnabled && m_isDirty;
   }
-  void setDirty(bool dirty)
+  void setDirty(const bool dirty)
   {
+    if (dirty == m_isDirty)
+    {
+      return;
+    }
+
     m_isDirty = dirty;
   }
 

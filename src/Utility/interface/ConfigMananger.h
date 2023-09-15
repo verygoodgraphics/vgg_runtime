@@ -5,26 +5,23 @@
 namespace Config
 {
 
-inline nlohmann::json genDefaultConfig()
+inline nlohmann::json genDefaultFontConfig()
 {
-  nlohmann::json cfg{};
   nlohmann::json font = {};
-  std::string path;
+  std::vector<std::string> dirs;
   std::vector<std::string> fallbacks;
 #if defined(VGG_HOST_Linux)
-  path = "/usr/share/fonts/TTF";
+  dirs = { "/usr/share/fonts/TTF" };
   fallbacks = { "DejaVuSans" };
 #elif defined(VGG_HOST_macOS)
-  path = "/System/Library/Fonts/";
+  dirs = { "/System/Library/Fonts/", "~/Library/Fonts/" };
   fallbacks = { "Helvetica" };
-#endif
+#elif defined(VGG_Host_Windows)
   // TODO:: for other platform config
-  font["dir"] = path;
-  font["fallbackFonts"] = fallbacks;
-  cfg["useEmbbedFont"] = true;
-  cfg["fonts"]["fontCollections"]["vgg_font"] = font;
-  cfg["fonts"]["defaultFontCollection"] = "vgg_font";
-  return cfg;
+#endif
+  font["directory"] = dirs;
+  font["fallbackFont"] = fallbacks;
+  return font;
 }
 
 namespace fs = std::filesystem;

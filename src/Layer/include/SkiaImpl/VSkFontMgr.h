@@ -178,6 +178,16 @@ public:
                const char* defaultRealName,
                bool copyData = true);
 
+  void setFallbackFonts(std::vector<std::string> fallbacks)
+  {
+    m_fallbackFonts = std::move(fallbacks);
+  }
+
+  const std::vector<std::string>& fallbackFonts() const
+  {
+    return m_fallbackFonts;
+  }
+
   void saveFontInfo(const fs::path& path)
   {
     std::ofstream ofs(path);
@@ -215,6 +225,7 @@ protected:
 private:
   Families fFamilies;
   sk_sp<SkFontStyleSet> fDefaultFamily;
+  std::vector<std::string> m_fallbackFonts;
   SkTypeface_FreeType::Scanner fScanner;
 };
 
@@ -272,26 +283,28 @@ using namespace skia::textlayout;
 class VGGFontCollection : public FontCollection
 {
   sk_sp<SkFontMgrVGG> m_fontMgr;
-  std::vector<std::string> m_fallbackFonts;
 
 public:
-  VGGFontCollection(sk_sp<SkFontMgrVGG> fontMgr, const std::vector<std::string>& fallbackFonts)
+  VGGFontCollection(sk_sp<SkFontMgrVGG> fontMgr)
     : m_fontMgr(std::move(fontMgr))
-    , m_fallbackFonts(fallbackFonts)
   {
     std::vector<SkString> defFonts;
-    for (const auto& f : fallbackFonts)
+    if (m_fontMgr)
     {
-      defFonts.push_back(SkString(f));
+      for (const auto& f : m_fontMgr->fallbackFonts())
+      {
+        defFonts.push_back(SkString(f));
+      }
     }
     this->setAssetFontManager(m_fontMgr);
     this->setDefaultFontManager(m_fontMgr, defFonts);
     this->enableFontFallback();
+    this->defaultFallback();
   }
 
   const std::vector<std::string>& fallbackFonts()
   {
-    return m_fallbackFonts;
+    return m_fontMgr->fallbackFonts();
   }
 
   std::optional<std::pair<SkString, float>> fuzzyMatch(const std::string& fontFamily)

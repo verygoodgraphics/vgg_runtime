@@ -45,7 +45,7 @@ std::vector<std::pair<std::string, std::vector<char>>> renderAndOutput(InputDesc
                                         data.Resource,
                                         input.imageQuality,
                                         input.resolutionLevel,
-                                        input.configFilePath.value_or("config.json"),
+                                        input.configFilePath.value_or(""),
                                         input.fontCollection);
     const auto reason = std::get<0>(result);
     if (!reason.empty())
@@ -91,16 +91,18 @@ int main(int argc, char** argv)
     std::cout << "specified output directory not exists\n";
   }
 
-  const fs::path configFilePath = program.present("-c").value_or("config.json");
   std::string outputFilePostfix = program.present("-t").value_or("");
   InputDesc desc;
   desc.prefix = program.present("-p").value_or("");
   desc.fontCollection = program.present("-f").value_or("google");
   desc.resolutionLevel = 2;
   desc.imageQuality = 80;
-  desc.configFilePath = configFilePath;
 
-  Config::readGlobalConfig(configFilePath);
+  if (auto cfg = program.present("-c"))
+  {
+    desc.configFilePath = cfg.value();
+    Config::readGlobalConfig(cfg.value());
+  }
 
   if (auto loadfile = program.present(POS_ARG_INPUT_FILE))
   {

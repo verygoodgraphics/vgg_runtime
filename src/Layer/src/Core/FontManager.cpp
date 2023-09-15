@@ -1,8 +1,13 @@
 #include <Core/FontManager.h>
+#include <algorithm>
 #include <core/SkFont.h>
+#include <filesystem>
 
+#include "ConfigMananger.h"
 #include "Core/Node.h"
 #include "SkiaImpl/VSkFontMgr.h"
+#include "nlohmann/json.hpp"
+#include "Utility/interface/Log.h"
 
 #define VGG_USE_EMBBED_FONT 1
 
@@ -10,9 +15,9 @@
 #include "Resources/FiraSans.hpp"
 #include "zip.h"
 
-namespace VGG
+namespace
 {
-static std::vector<char> readFromZip(const char* zip, size_t length, const char* entry)
+std::vector<char> readFromZip(const char* zip, size_t length, const char* entry)
 {
   std::vector<char> data;
   auto zipStream = zip_stream_open(zip, length, 0, 'r');
@@ -29,23 +34,25 @@ static std::vector<char> readFromZip(const char* zip, size_t length, const char*
   zip_close(zipStream);
   return data;
 }
-}; // namespace VGG
+
+bool addEmbbedFont(SkFontMgrVGG* mgr)
+{
+  auto data = readFromZip((const char*)VGG::layer::resources::FiraSans::FIRA_SANS_ZIP,
+                          VGG::layer::resources::FiraSans::FiraSans::DATA_LENGTH,
+                          "FiraSans.ttf");
+  return mgr->addFont((uint8_t*)data.data(),
+                      data.size(),
+                      VGG::layer::resources::FiraSans::FONT_NAME,
+                      true);
+}
+
+}; // namespace
 
 #endif
 
 namespace VGG
 {
 
-struct FontMgrData
-{
-  sk_sp<SkFontMgrVGG> FontMgr;
-  std::vector<std::string> FallbackFonts;
-  FontMgrData(sk_sp<SkFontMgrVGG> fontMgr, std::vector<std::string> fallbackFonts)
-    : FontMgr(std::move(fontMgr))
-    , FallbackFonts(std::move(fallbackFonts))
-  {
-  }
-};
 class FontManager__pImpl
 {
   VGG_DECL_API(FontManager);
@@ -56,112 +63,88 @@ public:
   {
   }
 
-  std::unordered_map<std::string, FontMgrData> fontMgrs;
-  std::string defaultFontManagerKey;
+  std::unordered_map<std::string, sk_sp<SkFontMgrVGG>> fontMgrs;
+  SkFontMgrVGG* defaultFontMgr{ nullptr };
+  SkFontMgrVGG* registerFont(const std::string& key,
+                             const fs::path& fontDir,
+                             std::vector<std::string> fallbackFonts)
+  {
+    return registerFont(key, std::vector<fs::path>{ fontDir }, std::move(fallbackFonts));
+  }
+
+  SkFontMgrVGG* registerFont(const std::string& key,
+                             std::vector<fs::path> dirs,
+                             std::vector<std::string> fallbacks)
+  {
+    DEBUG("Font directory: -----------");
+    for (const auto p : dirs)
+    {
+      DEBUG("%s", p.string().c_str());
+    }
+    sk_sp<SkFontMgrVGG> vggFontMgr = VGGFontDirectory(std::move(dirs));
+    if (vggFontMgr)
+    {
+#ifdef VGG_USE_EMBBED_FONT
+      if (addEmbbedFont(vggFontMgr.get()))
+      {
+        fallbacks.push_back(layer::resources::FiraSans::FONT_NAME);
+      }
+#endif
+      DEBUG("----  Fallback font:  -----------");
+      for (const auto f : fallbacks)
+      {
+        DEBUG("%s", f.c_str());
+      }
+      vggFontMgr->setFallbackFonts(std::move(fallbacks));
+      auto result = fontMgrs.insert({ key, std::move(vggFontMgr) });
+      if (result.second)
+      {
+        return result.first->second.get();
+      }
+    }
+    return nullptr;
+  }
 };
 
 FontManager::FontManager()
   : d_ptr(new FontManager__pImpl(this))
 {
-  auto& cfg = Config::globalConfig();
-  if (auto font = cfg.find("fonts"); font != cfg.end())
+  auto font = Config::globalConfig().value("fonts", nlohmann::json{});
+  std::vector<fs::path> fontDir;
+  std::vector<std::string> fallback;
+  if (font.is_object())
   {
-    if (auto it = font->find("fontCollections"); it != font->end() && it->is_object())
-    {
-      std::unordered_map<std::string, nlohmann::json> coll = *it;
-      bool atLeastOne = false;
-      for (const auto& p : coll)
-      {
-        if (auto dirIt = p.second.find("dir"); dirIt != p.second.end() && dirIt->is_string())
-        {
-          std::vector<std::string> fallbackFonts;
-          if (auto fallbackIt = p.second.find("fallbackFonts");
-              fallbackIt != p.second.end() && fallbackIt->is_array())
-          {
-            fallbackFonts = *fallbackIt;
-          }
-          if (createFontManager(p.first, *dirIt, fallbackFonts))
-          {
-            atLeastOne = true;
-          }
-        }
-      }
-      if (auto it = font->find("defaultFontCollection");
-          atLeastOne && it != font->end() && it->is_string())
-      {
-        if (auto dft = coll.find(*it); dft != coll.end())
-        {
-          d_ptr->defaultFontManagerKey = *it;
-        }
-        else
-        {
-          if (auto it = d_ptr->fontMgrs.begin(); it != d_ptr->fontMgrs.end())
-          {
-            d_ptr->defaultFontManagerKey = it->first;
-          }
-        }
-      }
-    }
+    fontDir = font.value("directory", std::vector<fs::path>());
+    fallback = font.value("fallbackFont", std::vector<std::string>());
   }
-  if (d_ptr->defaultFontManagerKey.empty())
+  std::set<fs::path> fontDirSet{ fontDir.begin(), fontDir.end() }; // remove duplicate elements
+  std::set<std::string> fallbackSet{ fallback.begin(), fallback.end() };
+  const auto systemFontCfg = Config::genDefaultFontConfig();
+  if (systemFontCfg.is_object())
   {
-    createFallbackFontMananger();
-  }
-}
+    auto systemFontDir = systemFontCfg.value("directory", std::vector<fs::path>{});
+    fontDirSet.insert(systemFontDir.begin(), systemFontDir.end());
 
-void FontManager::createFallbackFontMananger()
-{
-  const std::string key = "default";
-  sk_sp<SkFontMgrVGG> vggFontMgr = VGGFontDirectory(nullptr);
-  std::vector<std::string> fallbackFonts;
-#ifdef VGG_USE_EMBBED_FONT
-  auto data = readFromZip((const char*)VGG::layer::resources::FiraSans::FIRA_SANS_ZIP,
-                          VGG::layer::resources::FiraSans::FiraSans::DATA_LENGTH,
-                          "FiraSans.ttf");
-  vggFontMgr->addFont((uint8_t*)data.data(),
-                      data.size(),
-                      layer::resources::FiraSans::FONT_NAME,
-                      true);
-  vggFontMgr->saveFontInfo(key + "_fontname.txt");
-  fallbackFonts.push_back(layer::resources::FiraSans::FONT_NAME);
-#endif
-  d_ptr->fontMgrs.insert({ key, std::move(FontMgrData(vggFontMgr, fallbackFonts)) });
-  d_ptr->defaultFontManagerKey = key;
-}
-
-SkFontMgrVGG* FontManager::createFontManager(const std::string& key,
-                                             const fs::path& fontDir,
-                                             std::vector<std::string> fallbackFonts)
-{
-  if (auto it = d_ptr->fontMgrs.find(key); it != d_ptr->fontMgrs.end())
-  {
-    return it->second.FontMgr.get();
+    auto systemFallback = systemFontCfg.value("fallbackFont", std::vector<std::string>{});
+    fallbackSet.insert(systemFallback.begin(), systemFallback.end());
   }
-  else
+
+  std::vector<fs::path> dirs{ fontDirSet.begin(), fontDirSet.end() };
+  auto fallbacks = std::vector<std::string>{ fallbackSet.begin(), fallbackSet.end() };
+
+  bool atLeastOne = false;
+  if (!dirs.empty())
   {
-    sk_sp<SkFontMgrVGG> vggFontMgr = VGGFontDirectory(fontDir.string().c_str());
-    if (vggFontMgr)
+    auto mgr = d_ptr->registerFont("default", dirs, fallbacks);
+    d_ptr->defaultFontMgr = mgr;
+    atLeastOne = true;
+  }
+  if (!atLeastOne)
+  {
+    if (auto mgr = d_ptr->registerFont("default", fs::path(), {}))
     {
-#ifdef VGG_USE_EMBBED_FONT
-      auto data = readFromZip((const char*)VGG::layer::resources::FiraSans::FIRA_SANS_ZIP,
-                              VGG::layer::resources::FiraSans::FiraSans::DATA_LENGTH,
-                              "FiraSans.ttf");
-      vggFontMgr->addFont((uint8_t*)data.data(),
-                          data.size(),
-                          layer::resources::FiraSans::FONT_NAME,
-                          true);
-      fallbackFonts.push_back(layer::resources::FiraSans::FONT_NAME);
-#endif
-      vggFontMgr->saveFontInfo(key + "_fontname.txt");
-      auto result = d_ptr->fontMgrs.insert(
-        { key, std::move(FontMgrData(vggFontMgr, std::move(fallbackFonts))) });
-      if (result.second)
-      {
-        return result.first->second.FontMgr.get();
-      }
-      return nullptr;
+      d_ptr->defaultFontMgr = mgr;
     }
-    return nullptr;
   }
 }
 
@@ -169,32 +152,14 @@ SkFontMgrVGG* FontManager::fontManager(const std::string& key) const
 {
   if (auto it = d_ptr->fontMgrs.find(key); it != d_ptr->fontMgrs.end())
   {
-    return it->second.FontMgr.get();
+    return it->second.get();
   }
   return nullptr;
 }
 
-std::vector<std::string> FontManager::fallbackFonts(const std::string& key) const
+SkFontMgrVGG* FontManager::defaultFontManager() const
 {
-  if (auto it = d_ptr->fontMgrs.find(key); it != d_ptr->fontMgrs.end())
-  {
-    return it->second.FallbackFonts;
-  }
-  return {};
-}
-
-void FontManager::setCurrentFontManager(const std::string& key)
-{
-  d_ptr->defaultFontManagerKey = key;
-}
-
-SkFontMgrVGG* FontManager::currentFontManager() const
-{
-  return fontManager(d_ptr->defaultFontManagerKey);
-}
-std::vector<std::string> FontManager::currentFallbackFonts() const
-{
-  return fallbackFonts(d_ptr->defaultFontManagerKey);
+  return d_ptr->defaultFontMgr;
 }
 
 FontManager::~FontManager() = default;

@@ -108,7 +108,6 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
   ctx->init(cfg);
   layer->init(ctx.get());
 
-  FontManager::instance().setCurrentFontManager(fontCollectionName);
   std::vector<std::pair<std::string, std::vector<char>>> res;
   auto scene = std::make_shared<Scene>();
   Layout::ExpandSymbol e(j);

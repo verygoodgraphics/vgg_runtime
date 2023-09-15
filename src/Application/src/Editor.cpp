@@ -67,7 +67,7 @@ void Editor::handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNod
 
   switch (event->enumType())
   {
-    case UIEventType::mousedown:
+    case EUIEventType::MOUSEDOWN:
     {
       m_isMouseDown = true;
 
@@ -87,7 +87,7 @@ void Editor::handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNod
       break;
     }
 
-    case UIEventType::mousemove:
+    case EUIEventType::MOUSEMOVE:
     {
       auto mouseEvent = static_cast<MouseEvent*>(event.get());
       resizeNode(mouseEvent);
@@ -103,13 +103,13 @@ void Editor::handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNod
       break;
     }
 
-    case UIEventType::mouseup:
+    case EUIEventType::MOUSEUP:
     {
       m_isMouseDown = false;
       break;
     }
 
-    case UIEventType::keydown:
+    case EUIEventType::KEYDOWN:
     {
       auto keyEvent = static_cast<KeyboardEvent*>(event.get());
       if (keyEvent->key == ' ')
@@ -119,7 +119,7 @@ void Editor::handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNod
       break;
     }
 
-    case UIEventType::keyup:
+    case EUIEventType::KEYUP:
     {
       auto keyEvent = static_cast<KeyboardEvent*>(event.get());
       if (keyEvent->key == VGGK_SPACE)

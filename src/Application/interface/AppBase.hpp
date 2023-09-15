@@ -75,13 +75,13 @@ struct AppError
 {
   enum class EKind
   {
-    TextureSizeOutOfRangeError,
-    EGLNoDisplayError,
-    EGLGetAttribError,
-    MakeCurrentContextError,
-    HasInitError,
-    UnknownError,
-    RenderEngineError,
+    TEXTURE_SIZE_OUT_OF_RANGE_ERROR,
+    EGL_NO_DISPLAY_ERROR,
+    EGL_GET_ATTRIB_ERROR,
+    MAKE_CURRENT_CONTEXT_ERROR,
+    HAS_INIT_ERROR,
+    UNKNOWN_ERROR,
+    RENDER_ENGINE_ERROR,
   };
   EKind kind;
   std::string text;
@@ -132,7 +132,7 @@ private:
       init(m_appConfig.graphicsContextConfig);
       if (auto err = m_appRender->init(this))
       {
-        return AppError(AppError::EKind::RenderEngineError, "RenderEngineError");
+        return AppError(AppError::EKind::RENDER_ENGINE_ERROR, "RENDER_ENGINE_ERROR");
       }
     }
     return std::nullopt;

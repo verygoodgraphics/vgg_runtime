@@ -10,17 +10,16 @@ MainComposer::MainComposer(PlatformComposer* platformComposer, std::shared_ptr<M
   , m_editor{ new Editor{ m_view, mouse } }
   , m_runLoop{ new RunLoop }
   , m_controller{ new Controller{ m_runLoop, m_presenter, m_editor } }
-  , m_platform_composer{ platformComposer }
+  , m_platformComposer{ platformComposer }
 {
   m_presenter->setView(m_view);
 
-  m_platform_composer->setup();
+  m_platformComposer->setup();
 
 #ifdef EMSCRIPTEN
-  AsyncWorkerFactory::setTaskWorkerFactory([run_loop = m_runLoop]() { return run_loop->thread(); });
+  AsyncWorkerFactory::setTaskWorkerFactory([runLoop = m_runLoop]() { return runLoop->thread(); });
 #else
   AsyncWorkerFactory::setTaskWorkerFactory([]() { return rxcpp::observe_on_new_thread(); });
 #endif
-  AsyncWorkerFactory::setResultWorkerFactory([run_loop = m_runLoop]()
-                                             { return run_loop->thread(); });
+  AsyncWorkerFactory::setResultWorkerFactory([runLoop = m_runLoop]() { return runLoop->thread(); });
 }

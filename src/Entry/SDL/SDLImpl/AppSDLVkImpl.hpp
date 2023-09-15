@@ -192,7 +192,7 @@ public:
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
       handleVkError();
-      return AppError(AppError::EKind::RenderEngineError, "sdl init failed");
+      return AppError(AppError::EKind::RENDER_ENGINE_ERROR, "sdl init failed");
     }
     SDL_version compileVersion, linkVersion;
     SDL_VERSION(&compileVersion);
@@ -219,7 +219,7 @@ public:
     if (!window)
     {
       handleVkError();
-      return AppError(AppError::EKind::RenderEngineError, "Create Window Failed\n");
+      return AppError(AppError::EKind::RENDER_ENGINE_ERROR, "Create Window Failed\n");
     }
     m_sdlState.window = window;
     return std::nullopt;

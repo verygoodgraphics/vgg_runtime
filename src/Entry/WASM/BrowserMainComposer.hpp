@@ -12,7 +12,7 @@ public:
 
   static VGG::MainComposer& mainComposer()
   {
-    static VGG::MainComposer instance{ new BrowserComposer(), std::make_shared<SdlMouse>() };
-    return instance;
+    static VGG::MainComposer s_instance{ new BrowserComposer(), std::make_shared<SdlMouse>() };
+    return s_instance;
   }
 };

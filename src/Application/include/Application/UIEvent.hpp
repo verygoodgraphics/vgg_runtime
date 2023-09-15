@@ -12,74 +12,74 @@ namespace VGG
 {
 
 // https://developer.mozilla.org/en-US/docs/Web/API/Element#events
-enum class UIEventType
+enum class EUIEventType
 {
   // Keyboard events
-  keydown,
-  keyup,
+  KEYDOWN,
+  KEYUP,
 
   // Mouse events
-  auxclick,
-  click,
-  contextmenu,
-  dblclick,
-  mousedown,
-  mouseenter,
-  mouseleave,
-  mousemove,
-  mouseout,
-  mouseover,
-  mouseup,
+  AUXCLICK,
+  CLICK,
+  CONTEXTMENU,
+  DBLCLICK,
+  MOUSEDOWN,
+  MOUSEENTER,
+  MOUSELEAVE,
+  MOUSEMOVE,
+  MOUSEOUT,
+  MOUSEOVER,
+  MOUSEUP,
 
   // Touch events
-  touchcancel,
-  touchend,
-  touchmove,
-  touchstart
+  TOUCHCANCEL,
+  TOUCHEND,
+  TOUCHMOVE,
+  TOUCHSTART
 };
 
-constexpr const char* UIEventTypeToString(UIEventType e) noexcept
+constexpr const char* uiEventTypeToString(EUIEventType e) noexcept
 {
   switch (e)
   {
     // Keyboard events
-    case UIEventType::keydown:
+    case EUIEventType::KEYDOWN:
       return "keydown";
-    case UIEventType::keyup:
+    case EUIEventType::KEYUP:
       return "keyup";
 
     // Mouse events
-    case UIEventType::auxclick:
+    case EUIEventType::AUXCLICK:
       return "auxclick";
-    case UIEventType::click:
+    case EUIEventType::CLICK:
       return "click";
-    case UIEventType::contextmenu:
+    case EUIEventType::CONTEXTMENU:
       return "contextmenu";
-    case UIEventType::dblclick:
+    case EUIEventType::DBLCLICK:
       return "dblclick";
-    case UIEventType::mousedown:
+    case EUIEventType::MOUSEDOWN:
       return "mousedown";
-    case UIEventType::mouseenter:
+    case EUIEventType::MOUSEENTER:
       return "mouseenter";
-    case UIEventType::mouseleave:
+    case EUIEventType::MOUSELEAVE:
       return "mouseleave";
-    case UIEventType::mousemove:
+    case EUIEventType::MOUSEMOVE:
       return "mousemove";
-    case UIEventType::mouseout:
+    case EUIEventType::MOUSEOUT:
       return "mouseout";
-    case UIEventType::mouseover:
+    case EUIEventType::MOUSEOVER:
       return "mouseover";
-    case UIEventType::mouseup:
+    case EUIEventType::MOUSEUP:
       return "mouseup";
 
     // Touch events
-    case UIEventType::touchcancel:
+    case EUIEventType::TOUCHCANCEL:
       return "touchcancel";
-    case UIEventType::touchend:
+    case EUIEventType::TOUCHEND:
       return "touchend";
-    case UIEventType::touchmove:
+    case EUIEventType::TOUCHMOVE:
       return "touchmove";
-    case UIEventType::touchstart:
+    case EUIEventType::TOUCHSTART:
       return "touchstart";
 
     default:
@@ -92,7 +92,7 @@ class UIEvent : public Event
 public:
   using PathType = std::string;
 
-  UIEvent(const PathType& path, UIEventType type)
+  UIEvent(const PathType& path, EUIEventType type)
     : m_path{ path }
     , m_type{ type }
   {
@@ -112,7 +112,7 @@ public:
 
   virtual std::string type()
   {
-    return UIEventTypeToString(m_type);
+    return uiEventTypeToString(m_type);
   }
 
   auto enumType()
@@ -122,7 +122,7 @@ public:
 
 private:
   const PathType m_path;
-  const UIEventType m_type;
+  const EUIEventType m_type;
 };
 
 using UIEventPtr = std::shared_ptr<UIEvent>;
@@ -141,7 +141,7 @@ struct KeyboardEvent
   const bool shiftKey;
 
   KeyboardEvent(const PathType& path,
-                UIEventType type,
+                EUIEventType type,
                 int key,
                 bool repeat = false,
                 bool altKey = false,
@@ -156,7 +156,7 @@ struct KeyboardEvent
     , metaKey{ metaKey }
     , shiftKey{ shiftKey }
   {
-    assert(type == UIEventType::keydown || type == UIEventType::keyup);
+    assert(type == EUIEventType::KEYDOWN || type == EUIEventType::KEYUP);
   }
 
   void accept(EventVisitor* visitor) override
@@ -183,7 +183,7 @@ struct MouseEvent
   const bool shiftKey;
 
   MouseEvent(const PathType& path,
-             UIEventType type,
+             EUIEventType type,
              int button = 0,
              int x = 0,
              int y = 0,
@@ -204,7 +204,7 @@ struct MouseEvent
     , metaKey{ metaKey }
     , shiftKey{ shiftKey }
   {
-    assert(type >= UIEventType::auxclick && type <= UIEventType::mouseup);
+    assert(type >= EUIEventType::AUXCLICK && type <= EUIEventType::MOUSEUP);
   }
 
   void accept(EventVisitor* visitor) override
@@ -217,10 +217,10 @@ struct TouchEvent
   : UIEvent
   , std::enable_shared_from_this<TouchEvent>
 {
-  TouchEvent(const PathType& path, UIEventType type)
+  TouchEvent(const PathType& path, EUIEventType type)
     : UIEvent(path, type)
   {
-    assert(type >= UIEventType::touchcancel && type <= UIEventType::touchstart);
+    assert(type >= EUIEventType::TOUCHCANCEL && type <= EUIEventType::TOUCHSTART);
   }
 
   void accept(EventVisitor* visitor) override

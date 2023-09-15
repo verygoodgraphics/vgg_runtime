@@ -163,13 +163,13 @@ struct AppError
 {
   enum class Kind
   {
-    TextureSizeOutOfRangeError,
-    EGLNoDisplayError,
-    EGLGetAttribError,
-    MakeCurrentContextError,
-    HasInitError,
-    UnknownError,
-    RenderEngineError,
+    TEXTURE_SIZE_OUT_OF_RANGE_ERROR,
+    EGL_NO_DISPLAY_ERROR,
+    EGL_GET_ATTRIB_ERROR,
+    MAKE_CURRENT_CONTEXT_ERROR,
+    HAS_INIT_ERROR,
+    UNKNOWN_ERROR,
+    RENDER_ENGINE_ERROR,
   };
   Kind kind;
   std::string text;
@@ -253,7 +253,7 @@ protected: // protected members and static members
     ASSERT(app);
     if (app->m_inited)
     {
-      return AppError(AppError::Kind::HasInitError, "app has init");
+      return AppError(AppError::Kind::HAS_INIT_ERROR, "app has init");
     }
 
     app->m_width = w;
@@ -291,13 +291,13 @@ protected: // protected members and static members
                                                        h * app->m_pixelRatio * app->m_dpiRatio);
     if (!surface)
     {
-      return AppError(AppError::Kind::RenderEngineError, "Failed to make skia surface");
+      return AppError(AppError::Kind::RENDER_ENGINE_ERROR, "Failed to make skia surface");
     }
     app->m_skiaState.surface = surface;
     SkCanvas* canvas = surface->getCanvas();
     if (!canvas)
     {
-      return AppError(AppError::Kind::RenderEngineError, "Failed to make skia canvas");
+      return AppError(AppError::Kind::RENDER_ENGINE_ERROR, "Failed to make skia canvas");
     }
 
     // init capture
@@ -375,12 +375,12 @@ protected: // protected methods
     sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
     if (!interface)
     {
-      return AppError(AppError::Kind::RenderEngineError, "Failed to make skia opengl interface");
+      return AppError(AppError::Kind::RENDER_ENGINE_ERROR, "Failed to make skia opengl interface");
     }
     sk_sp<GrDirectContext> grContext = GrDirectContext::MakeGL(interface);
     if (!grContext)
     {
-      return AppError(AppError::Kind::RenderEngineError, "Failed to make skia opengl context.");
+      return AppError(AppError::Kind::RENDER_ENGINE_ERROR, "Failed to make skia opengl context.");
     }
     m_skiaState.interface = interface;
     m_skiaState.grContext = grContext;

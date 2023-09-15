@@ -113,7 +113,7 @@ public:
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
       handleGLError();
-      return AppError(AppError::EKind::RenderEngineError, "sdl init failed");
+      return AppError(AppError::EKind::RENDER_ENGINE_ERROR, "sdl init failed");
     }
     SDL_version compileVersion, linkVersion;
     SDL_VERSION(&compileVersion);
@@ -167,7 +167,7 @@ public:
     if (!window)
     {
       handleGLError();
-      return AppError(AppError::EKind::RenderEngineError, "Create Window Failed\n");
+      return AppError(AppError::EKind::RENDER_ENGINE_ERROR, "Create Window Failed\n");
     }
     m_sdlState.window = window;
     // create context
@@ -176,7 +176,7 @@ public:
     if (!glContext)
     {
       handleGLError();
-      return AppError(AppError::EKind::RenderEngineError, "Create Context Failed");
+      return AppError(AppError::EKind::RENDER_ENGINE_ERROR, "Create Context Failed");
     }
 
     m_sdlState.glContext = glContext;
@@ -222,7 +222,7 @@ public:
     if (SDL_GL_MakeCurrent(m_sdlState.window, m_sdlState.glContext) != 0)
     {
       handleGLError();
-      return AppError(AppError::EKind::MakeCurrentContextError, "Make Current Context Error");
+      return AppError(AppError::EKind::MAKE_CURRENT_CONTEXT_ERROR, "Make Current Context Error");
     }
     return std::nullopt;
   }

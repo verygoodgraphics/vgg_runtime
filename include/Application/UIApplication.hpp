@@ -21,7 +21,6 @@
 
 namespace fs = std::filesystem;
 using namespace VGG;
-using AppImpl = VGG::entry::AppSDLImpl;
 
 class UIApplication : public app::EventListener
 {
@@ -83,7 +82,6 @@ public:
         return false;
     }
 
-    auto type = evt.type;
     auto key = evt.key.keysym.sym;
     auto mod = evt.key.keysym.mod;
 

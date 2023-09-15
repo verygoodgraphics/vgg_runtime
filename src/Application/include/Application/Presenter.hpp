@@ -48,7 +48,7 @@ public:
 
     auto weakThis = weak_from_this();
     m_view->registerEventListener(
-      [weakThis, viewModel](std::string path, UIEventType eventType)
+      [weakThis, viewModel](std::string path, EUIEventType eventType)
       {
         auto sharedThis = weakThis.lock();
         if (!sharedThis)
@@ -62,7 +62,7 @@ public:
         }
 
         auto listenersMap = viewModel->model->getEventListeners(path);
-        std::string type = UIEventTypeToString(eventType);
+        std::string type = uiEventTypeToString(eventType);
 
         auto it = listenersMap.find(type);
         return it != listenersMap.end();
@@ -82,11 +82,11 @@ public:
       m_editView->show(*m_editViewModel);
 
       m_editView->registerEventListener(
-        [viewModel](std::string path, UIEventType eventType)
+        [viewModel](std::string path, EUIEventType eventType)
         {
           switch (eventType)
           {
-            case UIEventType::click:
+            case EUIEventType::CLICK:
               return true;
 
             default:

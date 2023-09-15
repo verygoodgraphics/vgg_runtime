@@ -14,26 +14,26 @@ using AppImpl = VGG::entry::AppSDLImpl;
 
 UIApplication* application()
 {
-  static auto app = new UIApplication;
-  return app;
+  static auto s_app = new UIApplication;
+  return s_app;
 }
 
 extern "C"
 {
-  void emscripten_frame()
+  void emscripten_frame() // NOLINT
   {
-    static auto sdlApp = AppImpl::app();
-    ASSERT(sdlApp);
+    static auto s_sdlApp = AppImpl::app();
+    ASSERT(s_sdlApp);
 
-    sdlApp->poll();
+    s_sdlApp->poll();
 
-    application()->run(sdlApp->appConfig().renderFPSLimit);
+    application()->run(s_sdlApp->appConfig().renderFPSLimit);
 
     auto& mainComposer = VggBrowser::mainComposer();
     mainComposer.runLoop()->dispatch();
   }
 
-  void emscripten_main(int width, int height)
+  void emscripten_main(int width, int height) // NOLINT
   {
     Config::readGlobalConfig("/asset/etc/config.json");
 

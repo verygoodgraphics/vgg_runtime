@@ -21,7 +21,7 @@ class UIView : public app::AppScene
 public:
   using EventListener = std::function<void(UIEventPtr, std::weak_ptr<LayoutNode>)>;
   using ResourcesType = std::map<std::string, std::vector<char>>;
-  using HasEventListener = std::function<bool(const std::string&, UIEventType)>;
+  using HasEventListener = std::function<bool(const std::string&, EUIEventType)>;
 
   using ScalarType = int;
 
@@ -128,7 +128,7 @@ private:
                         int y,
                         int motionX,
                         int motionY,
-                        UIEventType type);
+                        EUIEventType type);
 };
 
 } // namespace VGG

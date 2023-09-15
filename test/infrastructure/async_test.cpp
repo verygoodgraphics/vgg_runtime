@@ -16,8 +16,8 @@ protected:
     m_runLoop = std::make_shared<RunLoop>();
 
     AsyncWorkerFactory::setTaskWorkerFactory([]() { return rxcpp::observe_on_new_thread(); });
-    AsyncWorkerFactory::setResultWorkerFactory([run_loop = m_runLoop]()
-                                               { return run_loop->thread(); });
+    AsyncWorkerFactory::setResultWorkerFactory([runLoop = m_runLoop]()
+                                               { return runLoop->thread(); });
   }
   void TearDown() override
   {

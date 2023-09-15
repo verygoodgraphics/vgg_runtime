@@ -12,7 +12,7 @@
 
 using namespace VGG;
 
-const auto g_eventNameClick = UIEventTypeToString(UIEventType::click);
+const auto g_eventNameClick = uiEventTypeToString(EUIEventType::CLICK);
 
 class VggModelTestSuite : public ::testing::Test
 {

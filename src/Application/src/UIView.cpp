@@ -39,7 +39,7 @@ bool UIView::onEvent(UEvent evt, void* userData)
                               evt.button.windowY,
                               0,
                               0,
-                              UIEventType::mousedown);
+                              EUIEventType::MOUSEDOWN);
     }
     break;
 
@@ -50,7 +50,7 @@ bool UIView::onEvent(UEvent evt, void* userData)
                               evt.motion.windowY,
                               evt.motion.xrel,
                               evt.motion.yrel,
-                              UIEventType::mousemove);
+                              EUIEventType::MOUSEMOVE);
     }
     break;
 
@@ -63,7 +63,7 @@ bool UIView::onEvent(UEvent evt, void* userData)
                        evt.button.windowY,
                        0,
                        0,
-                       UIEventType::mouseup);
+                       EUIEventType::MOUSEUP);
 
       if (jsButtonIndex == 0)
       {
@@ -72,7 +72,7 @@ bool UIView::onEvent(UEvent evt, void* userData)
                          evt.button.windowY,
                          0,
                          0,
-                         UIEventType::click);
+                         EUIEventType::CLICK);
       }
       else
       {
@@ -81,7 +81,7 @@ bool UIView::onEvent(UEvent evt, void* userData)
                          evt.button.windowY,
                          0,
                          0,
-                         UIEventType::auxclick);
+                         EUIEventType::AUXCLICK);
 
         if (jsButtonIndex == 2)
         {
@@ -90,7 +90,7 @@ bool UIView::onEvent(UEvent evt, void* userData)
                            evt.button.windowY,
                            0,
                            0,
-                           UIEventType::contextmenu);
+                           EUIEventType::CONTEXTMENU);
         }
       }
     }
@@ -105,7 +105,7 @@ bool UIView::onEvent(UEvent evt, void* userData)
     {
       auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
       m_eventListener(UIEventPtr(new KeyboardEvent(targetPath,
-                                                   UIEventType::keydown,
+                                                   EUIEventType::KEYDOWN,
                                                    evt.key.keysym.sym,
                                                    evt.key.repeat,
                                                    alt,
@@ -120,7 +120,7 @@ bool UIView::onEvent(UEvent evt, void* userData)
     {
       auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
       m_eventListener(UIEventPtr(new KeyboardEvent(targetPath,
-                                                   UIEventType::keyup,
+                                                   EUIEventType::KEYUP,
                                                    evt.key.keysym.sym,
                                                    evt.key.repeat,
                                                    alt,
@@ -133,19 +133,19 @@ bool UIView::onEvent(UEvent evt, void* userData)
 
     case VGG_FINGERDOWN:
     {
-      m_eventListener(UIEventPtr(new TouchEvent(targetPath, UIEventType::touchstart)), targetNode);
+      m_eventListener(UIEventPtr(new TouchEvent(targetPath, EUIEventType::TOUCHSTART)), targetNode);
     }
     break;
 
     case VGG_FINGERMOTION:
     {
-      m_eventListener(UIEventPtr(new TouchEvent(targetPath, UIEventType::touchmove)), targetNode);
+      m_eventListener(UIEventPtr(new TouchEvent(targetPath, EUIEventType::TOUCHMOVE)), targetNode);
     }
     break;
 
     case VGG_FINGERUP:
     {
-      m_eventListener(UIEventPtr(new TouchEvent(targetPath, UIEventType::touchend)), targetNode);
+      m_eventListener(UIEventPtr(new TouchEvent(targetPath, EUIEventType::TOUCHEND)), targetNode);
     }
     break;
 
@@ -267,7 +267,7 @@ bool UIView::handleMouseEvent(int jsButtonIndex,
                               int y,
                               int motionX,
                               int motionY,
-                              UIEventType type)
+                              EUIEventType type)
 {
   auto page = currentPage();
   if (!page)

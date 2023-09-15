@@ -165,7 +165,7 @@ SkFontMgrVGG* FontManager::createFontManager(const std::string& key,
   }
 }
 
-SkFontMgrVGG* FontManager::getFontManager(const std::string& key) const
+SkFontMgrVGG* FontManager::fontManager(const std::string& key) const
 {
   if (auto it = d_ptr->fontMgrs.find(key); it != d_ptr->fontMgrs.end())
   {
@@ -174,7 +174,7 @@ SkFontMgrVGG* FontManager::getFontManager(const std::string& key) const
   return nullptr;
 }
 
-std::vector<std::string> FontManager::getFallbackFonts(const std::string& key) const
+std::vector<std::string> FontManager::fallbackFonts(const std::string& key) const
 {
   if (auto it = d_ptr->fontMgrs.find(key); it != d_ptr->fontMgrs.end())
   {
@@ -183,18 +183,18 @@ std::vector<std::string> FontManager::getFallbackFonts(const std::string& key) c
   return {};
 }
 
-void FontManager::setDefaultFontManager(const std::string& key)
+void FontManager::setCurrentFontManager(const std::string& key)
 {
   d_ptr->defaultFontManagerKey = key;
 }
 
-SkFontMgrVGG* FontManager::getDefaultFontManager() const
+SkFontMgrVGG* FontManager::currentFontManager() const
 {
-  return getFontManager(d_ptr->defaultFontManagerKey);
+  return fontManager(d_ptr->defaultFontManagerKey);
 }
-std::vector<std::string> FontManager::getDefaultFallbackFonts() const
+std::vector<std::string> FontManager::currentFallbackFonts() const
 {
-  return getFallbackFonts(d_ptr->defaultFontManagerKey);
+  return fallbackFonts(d_ptr->defaultFontManagerKey);
 }
 
 FontManager::~FontManager() = default;

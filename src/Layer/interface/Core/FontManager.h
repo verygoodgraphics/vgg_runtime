@@ -30,11 +30,11 @@ public:
                                   const fs::path& fontDir,
                                   std::vector<std::string> fallbackFonts);
 
-  SkFontMgrVGG* getFontManager(const std::string& key) const;
-  std::vector<std::string> getFallbackFonts(const std::string& key) const;
-  void setDefaultFontManager(const std::string& key);
-  SkFontMgrVGG* getDefaultFontManager() const;
-  std::vector<std::string> getDefaultFallbackFonts() const;
+  SkFontMgrVGG* fontManager(const std::string& key) const;
+  std::vector<std::string> fallbackFonts(const std::string& key) const;
+  void setCurrentFontManager(const std::string& key);
+  SkFontMgrVGG* currentFontManager() const;
+  std::vector<std::string> currentFallbackFonts() const;
   ~FontManager();
   static FontManager& instance()
   {

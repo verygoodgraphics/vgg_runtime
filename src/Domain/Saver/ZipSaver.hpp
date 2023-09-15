@@ -11,8 +11,8 @@ namespace Model
 
 class ZipSaver : public Saver
 {
-  std::string m_file_path;
-  zip_t* m_zip_file{ nullptr };
+  std::string m_filePath;
+  zip_t* m_zipFile{ nullptr };
 
 public:
   ZipSaver(const std::string& filePath);

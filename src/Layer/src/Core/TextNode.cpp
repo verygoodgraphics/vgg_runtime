@@ -23,13 +23,13 @@ TextNode::TextNode(const std::string& name, std::string guid)
   : PaintNode(name, VGG_TEXT, std::move(guid))
   , d_ptr(new TextNode__pImpl(this))
 {
-  auto mgr = sk_sp<SkFontMgrVGG>(FontManager::instance().getDefaultFontManager());
+  auto mgr = sk_sp<SkFontMgrVGG>(FontManager::instance().currentFontManager());
   if (mgr)
   {
     mgr->ref();
   }
   auto fontCollection = sk_ref_sp(
-    new VGGFontCollection(std::move(mgr), FontManager::instance().getDefaultFallbackFonts()));
+    new VGGFontCollection(std::move(mgr), FontManager::instance().currentFallbackFonts()));
   d_ptr->paragraphCache.setFontCollection(fontCollection);
 }
 

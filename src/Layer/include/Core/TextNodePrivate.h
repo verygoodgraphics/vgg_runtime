@@ -76,13 +76,13 @@ public:
   TextParagraphCache()
   {
 
-    auto mgr = sk_sp<SkFontMgrVGG>(FontManager::instance().getDefaultFontManager());
+    auto mgr = sk_sp<SkFontMgrVGG>(FontManager::instance().currentFontManager());
     if (mgr)
     {
       mgr->ref();
     }
     m_fontCollection = sk_ref_sp(
-      new VGGFontCollection(std::move(mgr), FontManager::instance().getDefaultFallbackFonts()));
+      new VGGFontCollection(std::move(mgr), FontManager::instance().currentFallbackFonts()));
   }
   TextParagraphCache(const TextParagraphCache&) = default;
   TextParagraphCache& operator=(const TextParagraphCache&) = default;

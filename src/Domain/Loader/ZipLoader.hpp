@@ -14,8 +14,8 @@ namespace Model
 
 class ZipLoader : public Loader
 {
-  std::vector<char> m_zip_buffer;
-  zip_t* m_zip_file{ nullptr };
+  std::vector<char> m_zipBuffer;
+  zip_t* m_zipFile{ nullptr };
 
 public:
   ZipLoader(const std::string& filePath);

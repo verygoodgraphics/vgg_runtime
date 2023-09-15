@@ -35,13 +35,13 @@ bool ZipLoader::readFile(const std::string& name, std::string& content) const
 
   if (0 == zip_entry_open(m_zip_file, name.c_str()))
   {
-    void* buf = NULL;
-    size_t bufsize;
-    zip_entry_read(m_zip_file, &buf, &bufsize);
+    auto size = zip_entry_size(m_zip_file);
+    if (size > 0)
+    {
+      content.resize(size);
+      zip_entry_noallocread(m_zip_file, static_cast<void*>(content.data()), size);
+    }
     zip_entry_close(m_zip_file);
-
-    content.append(static_cast<char*>(buf), bufsize);
-    free(buf);
 
     return true;
   }
@@ -67,16 +67,15 @@ Loader::ResourcesType ZipLoader::resources() const
       std::string fileName{ zip_entry_name(m_zip_file) };
       if (fileName.rfind(ResourcesDirWithSlash, 0) == 0)
       {
-        void* buf = NULL;
-        size_t bufsize;
-        zip_entry_read(m_zip_file, &buf, &bufsize);
+        auto size = zip_entry_size(m_zip_file);
+        if (size > 0)
+        {
+          std::vector<char> content;
+          content.resize(size);
+          zip_entry_noallocread(m_zip_file, static_cast<void*>(content.data()), size);
+          resources[fileName] = std::move(content);
+        }
         zip_entry_close(m_zip_file);
-
-        char* p_char = static_cast<char*>(buf);
-        std::vector<char> content{ p_char, p_char + bufsize };
-        resources[fileName] = std::move(content);
-
-        free(buf);
       }
     }
     zip_entry_close(m_zip_file);

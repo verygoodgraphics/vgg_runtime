@@ -19,6 +19,16 @@ class UIView;
 
 class Editor : public app::AppRenderable
 {
+public:
+  class Listener
+  {
+  public:
+    virtual ~Listener() = default;
+
+    virtual void onSelectNode(std::weak_ptr<LayoutNode> node) = 0;
+  };
+
+private:
   enum class EResizePosition
   {
     NONE,
@@ -45,6 +55,8 @@ class Editor : public app::AppRenderable
   std::shared_ptr<Mouse> m_mouse;
 
   bool m_isDirty{ false };
+
+  std::weak_ptr<Listener> m_listener;
 
 public:
   Editor(std::weak_ptr<UIView> contentView, std::shared_ptr<Mouse> mouse)
@@ -79,6 +91,11 @@ public:
     m_isDirty = dirty;
   }
 
+  void setListener(std::weak_ptr<Listener> listener)
+  {
+    m_listener = listener;
+  }
+
 private:
   void drawBorder(SkCanvas* canvas, const LayoutNode* node);
 
@@ -88,6 +105,7 @@ private:
   Layout::Rect getSelectNodeRect(EResizePosition position);
 
   void updateCursor(EResizePosition mousePosition);
+  void didSelectNode(std::weak_ptr<LayoutNode> node);
 };
 
 } // namespace VGG

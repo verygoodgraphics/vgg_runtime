@@ -1,21 +1,21 @@
 #include "Controller.hpp"
 
 #include "Editor.hpp"
-
-#include "Usecase/EditModel.hpp"
-
-#include "Domain/VggExec.hpp"
-#include "Domain/RawJsonDocument.hpp"
-#include "Domain/SchemaValidJsonDocument.hpp"
-// #include "Domain/UndoRedoJsonDocument.hpp"
-#include "Domain/Daruma.hpp"
-#include "Domain/DarumaContainer.hpp"
 #include "Presenter.hpp"
-#include "DIContainer.hpp"
-#include "Log.h"
-#include "Usecase/ModelChanged.hpp"
-#include "Usecase/ResizeWindow.hpp"
-#include "Usecase/StartRunning.hpp"
+#include "Reporter.hpp"
+
+#include <DIContainer.hpp>
+#include <Domain/Daruma.hpp>
+#include <Domain/DarumaContainer.hpp>
+#include <Domain/RawJsonDocument.hpp>
+#include <Domain/SchemaValidJsonDocument.hpp>
+#include <Domain/UndoRedoJsonDocument.hpp>
+#include <Domain/VggExec.hpp>
+#include <Log.h>
+#include <UseCase/EditModel.hpp>
+#include <UseCase/ModelChanged.hpp>
+#include <UseCase/ResizeWindow.hpp>
+#include <UseCase/StartRunning.hpp>
 
 #include <cassert>
 
@@ -32,8 +32,11 @@ Controller::Controller(std::shared_ptr<RunLoop> runLoop,
   , m_presenter(presenter)
   , m_mode(mode)
   , m_editor{ editor }
+  , m_reporter{ new Reporter{ vggExec() } }
 {
   assert(m_runLoop);
+
+  m_editor->setListener(m_reporter);
 }
 
 bool Controller::start(const std::string& filePath,

@@ -21,6 +21,7 @@ namespace VGG
 class Daruma;
 class Editor;
 class Presenter;
+class Reporter;
 class ViewModel;
 
 class Controller : public std::enable_shared_from_this<Controller>
@@ -37,6 +38,7 @@ private:
   std::shared_ptr<RunLoop> m_runLoop;
   std::shared_ptr<Presenter> m_presenter;
   std::shared_ptr<Editor> m_editor;
+  std::shared_ptr<Reporter> m_reporter;
 
   ERunMode m_mode;
   std::shared_ptr<Daruma> m_model;

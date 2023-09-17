@@ -49,6 +49,10 @@ if (NOT EMSCRIPTEN)
   add_library(vgg_libnode_stub STATIC
     ${NODE_FOLDER}/src/node_snapshot_stub.cc)
 
+  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "$ENV{name}" STREQUAL "nix-shell")
+    target_link_libraries(vgg_libnode_stub atomic)
+  endif()
+
   cmake_minimum_required(VERSION 3.22) # this is requied for the following invoking
   add_custom_command(TARGET vgg_libnode
     PRE_BUILD

@@ -117,7 +117,10 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
   auto count = scene->frameCount();
   for (int i = 0; i < count; i++)
   {
-    auto b = scene->frame(i)->getBound();
+    auto f = scene->frame(i);
+    if (!f->isVisible())
+      continue;
+    auto b = f->getBound();
     int w = b.size().x;
     int h = b.size().y;
     scene->setPage(i);

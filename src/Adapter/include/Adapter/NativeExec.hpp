@@ -21,9 +21,8 @@ public:
   ~NativeExec();
 
   bool evalScript(const std::string& code) override;
+  bool evalModule(const std::string& code) override;
   bool evalModule(const std::string& code, VGG::EventPtr event) override;
-
-  bool evalModule(const std::string& code);
 
   using InjectFn = std::function<void(node::Environment*)>;
   bool inject(InjectFn fn);

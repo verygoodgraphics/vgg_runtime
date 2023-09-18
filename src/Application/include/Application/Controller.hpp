@@ -36,6 +36,7 @@ public:
 private:
   std::string m_designSchemaFilePath;
   std::shared_ptr<RunLoop> m_runLoop;
+  std::shared_ptr<VggExec> m_jsEngine;
   std::shared_ptr<Presenter> m_presenter;
   std::shared_ptr<Editor> m_editor;
   std::shared_ptr<Reporter> m_reporter;
@@ -47,6 +48,7 @@ private:
 
 public:
   Controller(std::shared_ptr<RunLoop> runLoop,
+             std::shared_ptr<VggExec> jsEngine,
              std::shared_ptr<Presenter> presenter,
              std::shared_ptr<Editor> editor,
              ERunMode mode = ERunMode::NORMAL_MODE);

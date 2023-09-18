@@ -4,7 +4,6 @@
 #include "Presenter.hpp"
 #include "Reporter.hpp"
 
-#include <DIContainer.hpp>
 #include <Domain/Daruma.hpp>
 #include <Domain/DarumaContainer.hpp>
 #include <Domain/RawJsonDocument.hpp>
@@ -25,14 +24,16 @@ namespace VGG
 {
 
 Controller::Controller(std::shared_ptr<RunLoop> runLoop,
+                       std::shared_ptr<VggExec> jsEngine,
                        std::shared_ptr<Presenter> presenter,
                        std::shared_ptr<Editor> editor,
                        ERunMode mode)
   : m_runLoop(runLoop)
+  , m_jsEngine{ jsEngine }
   , m_presenter(presenter)
-  , m_mode(mode)
   , m_editor{ editor }
-  , m_reporter{ new Reporter{ vggExec() } }
+  , m_mode(mode)
+  , m_reporter{ new Reporter{ jsEngine } }
 {
   assert(m_runLoop);
 
@@ -293,7 +294,7 @@ void Controller::observeEditViewEvent()
 
 const std::shared_ptr<VggExec>& Controller::vggExec()
 {
-  return VGG::DIContainer<std::shared_ptr<VggExec>>::get();
+  return m_jsEngine;
 }
 
 JsonDocument* Controller::createJsonDoc()

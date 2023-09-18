@@ -6,6 +6,12 @@ bool VggExec::evalScript(const std::string& program)
   return m_jsEngine->evalScript(program);
 }
 
+bool VggExec::evalModule(const std::string& program)
+{
+  setEnv();
+  return m_jsEngine->evalModule(program);
+}
+
 bool VggExec::evalModule(const std::string& code, VGG::EventPtr event)
 {
   setEnv();

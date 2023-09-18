@@ -9,12 +9,12 @@ MainComposer::MainComposer(PlatformComposer* platformComposer, std::shared_ptr<M
   , m_presenter{ new Presenter }
   , m_editor{ new Editor{ m_view, mouse } }
   , m_runLoop{ new RunLoop }
-  , m_controller{ new Controller{ m_runLoop, m_presenter, m_editor } }
   , m_platformComposer{ platformComposer }
 {
   m_presenter->setView(m_view);
 
-  m_platformComposer->setup();
+  auto jsEngine = m_platformComposer->setup();
+  m_controller.reset(new Controller{ m_runLoop, jsEngine, m_presenter, m_editor });
 
 #ifdef EMSCRIPTEN
   AsyncWorkerFactory::setTaskWorkerFactory([runLoop = m_runLoop]() { return runLoop->thread(); });

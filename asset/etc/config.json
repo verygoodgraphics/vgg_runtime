@@ -1,25 +1,10 @@
 {
 	"fonts": {
-		"fontCollections": {
-			"google": {
-				"dir": "/asset/fonts",
-				"fallbackFonts": [
-					"WenQuanYi Micro Hei"
-				]
-			},
-			"macOS": {
-				"dir": "/asset/fonts",
-				"fallbackFonts": [
-					"WenQuanYi Micro Hei"
-				]
-			},
-			"windows": {
-				"dir": "/asset/fonts",
-				"fallbackFonts": [
-					"WenQuanYi Micro Hei"
-				]
-			}
-		},
-		"defaultFontCollection": "macOS"
+		"directory": [
+			"/asset/fonts"
+		],
+		"fallbackFont": [
+			"WenQuanYi Micro Hei"
+		]
 	}
 }

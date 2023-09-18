@@ -12,7 +12,7 @@ inline nlohmann::json genDefaultFontConfig()
   std::vector<std::string> dirs;
   std::vector<std::string> fallbacks;
 #if defined(VGG_HOST_Linux)
-  dirs = { "/usr/share/fonts/TTF" };
+  dirs = { "/usr/share/fonts" };
   fallbacks = { "DejaVuSans" };
 #elif defined(VGG_HOST_macOS)
   dirs = { "/System/Library/Fonts/", std::filesystem::path(std::getenv("HOME"))/"Library"/"Fonts" };

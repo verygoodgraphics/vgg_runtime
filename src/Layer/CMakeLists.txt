@@ -17,6 +17,7 @@ mark_as_advanced(ENABLE_EMBBED_FONT)
 if(ENABLE_EMBBED_FONT)
   target_compile_definitions(vgg_layer PRIVATE VGG_USE_EMBBED_FONT)
   target_link_libraries(vgg_layer PRIVATE zip)
+  install(TARGETS zip DESTINATION lib COMPONENT vgg_module_zip)
 endif()
 
 target_sources(vgg_layer PRIVATE ${CoreSrcVar} ${SkiaImplSrcVar} ${SceneSrcVar} ${ReaderSrcVar} ${CommonSrcVar})

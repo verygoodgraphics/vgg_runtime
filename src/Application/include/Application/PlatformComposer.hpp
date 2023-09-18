@@ -10,12 +10,14 @@ class PlatformComposer
 public:
   virtual ~PlatformComposer() = default;
 
-  void setup()
+  auto setup()
   {
-    auto exec = std::make_shared<VggExec>(createJsEngine(), std::make_shared<VggEnv>());
-    VGG::DIContainer<std::shared_ptr<VggExec>>::get() = exec;
+    auto jsEngine = std::make_shared<VggExec>(createJsEngine(), std::make_shared<VggEnv>());
+    VGG::DIContainer<std::shared_ptr<VggExec>>::get() = jsEngine;
 
     platformSetup();
+
+    return jsEngine;
   }
 
   void teardown()

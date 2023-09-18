@@ -13,6 +13,11 @@ bool BrowserJSEngine::evalScript(const std::string& code)
   return true;
 }
 
+bool BrowserJSEngine::evalModule(const std::string& code)
+{
+  return evalScript(code);
+}
+
 bool BrowserJSEngine::evalModule(const std::string& code, VGG::EventPtr event)
 {
   auto event_id{ BrowserAdapter::Event::store(event) };

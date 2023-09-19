@@ -92,7 +92,8 @@ void ExpandSymbol::expandInstance(nlohmann::json& json,
         // 1. expand
         expandInstance(json[K_CHILD_OBJECTS], instanceIdStack);
 
-        // 2.1. make instance tree nodes id unique
+        // 2 make instance tree nodes id unique
+        // 2.1
         auto newInstanceId = join(instanceIdStack);
         auto idPrefix = newInstanceId + K_SEPARATOR;
         DEBUG("ExpandSymbol: instance id: %s -> %s", instanceId.c_str(), newInstanceId.c_str());
@@ -101,19 +102,22 @@ void ExpandSymbol::expandInstance(nlohmann::json& json,
         // 2.2. update mask by: id -> unique id
         makeMaskIdUnique(json[K_CHILD_OBJECTS], json, idPrefix);
 
-        // 3.1 overrides
+        // 3 overrides and scale
+        // 3.1 master id overrides
         processMasterIdOverrides(json, instanceIdStack);
-
-        // 4. scale
+        // 3.2: scale before bounds overrides
         scaleFromMaster(json, masterJson);
-
-        // 3.2 bounds overrides must be processed after scaling
+        // 3.3 bounds overrides must be processed after scaling
         processBoundsOverrides(json, instanceIdStack);
+        // 3.4 other overrides
         processOtherOverrides(json, instanceIdStack);
         if (!again)
         {
           instanceIdStack.pop_back();
         }
+
+        // 4. again, makeMaskIdUnique after override: id -> unique id
+        makeMaskIdUnique(json[K_CHILD_OBJECTS], json, idPrefix);
 
         // 5. make instance node to "symbalMaster" or render will not draw this node
         DEBUG("#ExpandSymbol: make instance[id=%s, ptr=%p] as master, erase masterId",

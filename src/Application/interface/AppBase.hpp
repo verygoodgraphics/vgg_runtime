@@ -155,9 +155,9 @@ protected:
       int drawableWidth = window.drawableWidth;
       int drawableHeight = window.drawableHeight;
       resize(drawableWidth, drawableHeight);
-      return false;
     }
-    return false;
+
+    return false; // continue to dispatch event
   }
 
   AppBase()

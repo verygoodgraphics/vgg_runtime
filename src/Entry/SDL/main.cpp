@@ -1,13 +1,13 @@
 #include "SDLImpl/AppSDLImpl.hpp"
 #include "SDLImpl/SdlMouse.hpp"
 
-#include <Adapter/NativeComposer.hpp>
-#include <AppBase.hpp>
-#include <Application/MainComposer.hpp>
-#include <Application/Mouse.hpp>
-#include <Application/UIApplication.hpp>
-#include <ConfigMananger.h>
-#include <Scene/Scene.h>
+#include "Adapter/NativeComposer.hpp"
+#include "AppBase.hpp"
+#include "Application/MainComposer.hpp"
+#include "Application/Mouse.hpp"
+#include "Application/UIApplication.hpp"
+#include "ConfigMananger.h"
+#include "Scene/Scene.h"
 
 #include <argparse/argparse.hpp>
 

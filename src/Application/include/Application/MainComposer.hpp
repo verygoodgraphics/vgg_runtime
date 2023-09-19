@@ -8,7 +8,7 @@
 #include "Async.hpp"
 #include "Domain/Daruma.hpp"
 
-#include <Application/Mouse.hpp>
+#include "Application/Mouse.hpp"
 
 #include <memory>
 

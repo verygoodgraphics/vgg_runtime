@@ -1,16 +1,16 @@
 #pragma once
 
-#include <Application/AppRender.h>
-#include <Application/Controller.hpp>
-#include <Application/UIView.hpp>
+#include "Application/AppRender.h"
+#include "Application/Controller.hpp"
+#include "Application/UIView.hpp"
 
-#include <ConfigMananger.h>
-#include <Event/Event.h>
-#include <Event/EventListener.h>
-#include <Event/Keycode.h>
-#include <Scene/GraphicsLayer.h>
-#include <Scene/Scene.h>
-#include <Scene/VGGLayer.h>
+#include "ConfigMananger.h"
+#include "Event/Event.h"
+#include "Event/EventListener.h"
+#include "Event/Keycode.h"
+#include "Scene/GraphicsLayer.h"
+#include "Scene/Scene.h"
+#include "Scene/VGGLayer.h"
 
 #include <nlohmann/json.hpp>
 

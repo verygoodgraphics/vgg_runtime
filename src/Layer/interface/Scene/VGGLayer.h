@@ -43,6 +43,7 @@ public:
   void resize(int w, int h) override;
   void addRenderItem(std::shared_ptr<Renderable> item);
   void addScene(std::shared_ptr<Scene> scene);
+  void setScene(std::shared_ptr<Scene> scene);
   void setDrawPositionEnabled(bool enable)
   {
     m_drawPos = enable;

@@ -83,6 +83,169 @@ float calcScaleFactor(float inputWidth,
   }
   return widthScale > heightScale ? heightScale : widthScale;
 }
+
+class Exporter__pImpl
+{
+  Exporter* q_api; // NOLINT
+public:
+  std::shared_ptr<layer::GraphicsContext> ctx;
+  std::shared_ptr<layer::VLayer> layer;
+  std::shared_ptr<Scene> scene;
+  OutputCallback outputCallback;
+  Exporter__pImpl(Exporter* api)
+    : q_api(api)
+  {
+  }
+
+  void resize(int w, int h)
+  {
+    layer->resize(w, h);
+  }
+
+  std::pair<std::string, std::vector<char>> render(std::shared_ptr<Scene> scene,
+                                                   float scale,
+                                                   const layer::ImageOptions& opts)
+  {
+    layer->setScene(std::move(scene));
+    layer->setScaleFactor(scale);
+
+    // begin render one frame
+    layer->beginFrame();
+    layer->render();
+    layer->endFrame();
+    // end render one frame
+
+    if (auto img = layer->makeImageSnapshot(opts); img)
+    {
+      return { scene->frame(scene->currentPage())->guid(), std::move(img.value()) };
+    }
+    else
+    {
+      return {};
+    }
+  }
+};
+
+void setGlobalConfig(const std::string& fileName)
+{
+  Config::readGlobalConfig(fileName);
+}
+
+Exporter::Exporter()
+  : d_impl(new Exporter__pImpl(this))
+{
+  layer::ContextConfig cfg;
+  d_impl->ctx = std::shared_ptr<VkGraphicsContext>();
+  d_impl->layer = std::shared_ptr<layer::VLayer>();
+  cfg.windowSize[0] = 0;
+  cfg.windowSize[1] = 0;
+  cfg.stencilBit = 8;
+  cfg.multiSample = 0;
+  d_impl->ctx->init(cfg);
+  d_impl->layer->init(d_impl->ctx.get());
+}
+
+void Exporter::info(ExporterInfo* info)
+{
+  if (info)
+  {
+  }
+}
+
+Exporter::~Exporter() = default;
+
+void Exporter::setOutputCallback(OutputCallback callback)
+{
+  d_impl->outputCallback = std::move(callback);
+}
+
+class Exporter::Iterator__pImpl
+{
+  Exporter::Iterator* q_api{ nullptr }; // NOLINT
+public:
+  Exporter& exporter;
+  float maxSurfaceSize[2];
+  std::shared_ptr<Scene> scene;
+  Iterator__pImpl(Exporter::Iterator* api,
+                  Exporter& exporter,
+                  nlohmann::json json,
+                  Resource resource,
+                  const ImageOption& opt)
+    : q_api(api)
+    , exporter(exporter)
+  {
+    getMaxSurfaceSize(opt.resolutionLevel, maxSurfaceSize);
+    exporter.d_impl->resize(maxSurfaceSize[0], maxSurfaceSize[1]);
+  }
+
+  bool next(std::string& key, std::vector<char>& image)
+  {
+    int index = scene->currentPage();
+    if (index >= scene->frameCount())
+    {
+      return false;
+    }
+    auto f = scene->frame(index);
+    while (f && !f->isVisible() && index < scene->frameCount())
+    {
+      index++;
+      f = scene->frame(index);
+    }
+    if (index >= scene->frameCount())
+    {
+      return false;
+    }
+    if (!f)
+      return false;
+
+    scene->setPage(index); // render this page
+    auto b = f->getBound();
+    int w = b.size().x;
+    int h = b.size().y;
+    // f is visible
+    auto state = exporter.d_impl.get();
+    float actualSize[2];
+    auto scale =
+      calcScaleFactor(w, h, maxSurfaceSize[0], maxSurfaceSize[1], actualSize[0], actualSize[1]);
+    layer::ImageOptions opts;
+    opts.encode = layer::EImageEncode::IE_PNG;
+    opts.position[0] = 0;
+    opts.position[1] = 0;
+    opts.extend[0] = actualSize[0];
+    opts.extend[1] = actualSize[1];
+    auto res = state->render(scene, 1.0, opts);
+    key = std::move(res.first);
+    image = std::move(res.second);
+    return true;
+  }
+};
+
+bool Exporter::Iterator::next(std::string& key, std::vector<char>& image)
+{
+  return d_impl->next(key, image);
+}
+
+Exporter::Iterator::Iterator(Exporter::Iterator&& other) noexcept
+{
+  *this = std::move(other);
+}
+Exporter::Iterator& Exporter::Iterator::Iterator::operator=(Exporter::Iterator&& other) noexcept
+{
+  d_impl = std::move(other.d_impl);
+  return *this;
+}
+
+Exporter::Iterator::~Iterator() = default;
+
+Exporter::Iterator::Iterator(Exporter& exporter,
+                             nlohmann::json json,
+                             Resource resources,
+                             const ImageOption& opt)
+  : d_impl(
+      new Exporter::Iterator__pImpl(this, exporter, std::move(json), std::move(resources), opt))
+{
+}
+
 std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> render(
   const nlohmann::json& j,
   const std::map<std::string, std::vector<char>>& resources,
@@ -91,7 +254,6 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
   const std::string& configFile,
   const std::string& fontCollectionName)
 {
-
   Config::readGlobalConfig(configFile);
   float maxSurfaceSize[2];
   getMaxSurfaceSize(resolutionLevel, maxSurfaceSize);

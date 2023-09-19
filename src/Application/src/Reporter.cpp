@@ -16,7 +16,6 @@ using namespace VGG;
 void Reporter::onSelectNode(std::weak_ptr<LayoutNode> node)
 {
   auto target = node.lock();
-  ASSERT(target);
   if (!target)
   {
     return;

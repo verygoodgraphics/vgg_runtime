@@ -2,8 +2,8 @@
 
 #include "../SDL/SDLImpl/SdlMouse.hpp"
 
-#include <Adapter/BrowserComposer.hpp>
-#include <Application/MainComposer.hpp>
+#include "Adapter/BrowserComposer.hpp"
+#include "Application/MainComposer.hpp"
 
 class VggBrowser
 {

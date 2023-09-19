@@ -1,8 +1,8 @@
 #include "Entry/SDL/SDLImpl/AppSDLImpl.hpp"
 #include "BrowserMainComposer.hpp"
 
-#include <Application/UIApplication.hpp>
-#include <ConfigMananger.h>
+#include "Application/UIApplication.hpp"
+#include "ConfigMananger.h"
 
 #ifdef EMSCRIPTEN
 #include <emscripten/emscripten.h>

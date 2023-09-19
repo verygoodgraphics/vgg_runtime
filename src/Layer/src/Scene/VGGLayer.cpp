@@ -181,8 +181,11 @@ void VLayer::resize(int w, int h)
   VGG_IMPL(VLayer);
   const int finalW = w;
   const int finalH = h;
-  INFO("resize: [%d, %d], actually (%d, %d)", w, h, finalW, finalH);
-  _->skiaContext->resizeSurface(finalW, finalH);
+  if (finalH > 0 || finalW > 0)
+  {
+    INFO("resize: [%d, %d], actually (%d, %d)", w, h, finalW, finalH);
+    _->skiaContext->resizeSurface(finalW, finalH);
+  }
 }
 void VLayer::endFrame()
 {

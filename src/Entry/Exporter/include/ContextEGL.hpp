@@ -173,7 +173,8 @@ public:
 
     if (winWidth + 100 > maxSurfaceSize[0] || winHeight + 100 > maxSurfaceSize[1])
     {
-      return AppError(AppError::EKind::TEXTURE_SIZE_OUT_OF_RANGE_ERROR, "Texture size out of range");
+      return AppError(AppError::EKind::TEXTURE_SIZE_OUT_OF_RANGE_ERROR,
+                      "Texture size out of range");
     }
 
     // 3. Create a surface
@@ -218,11 +219,6 @@ public:
   void* contextInfo() override
   {
     return m_eglCtx;
-  }
-
-  bool onResize(int w, int h) override
-  {
-    return true;
   }
 
   virtual void shutdown() override

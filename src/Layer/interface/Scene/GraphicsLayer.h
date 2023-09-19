@@ -42,6 +42,8 @@ public:
   virtual void render() = 0;
   virtual void endFrame() = 0;
   virtual void shutdown() = 0;
+
+  // After init, you must call resize with proper value so that render() could be called
   virtual void resize(int w, int h) = 0;
   virtual ~GraphicsLayer()
   {

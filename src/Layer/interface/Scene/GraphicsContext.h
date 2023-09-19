@@ -18,7 +18,7 @@ enum class EGraphicsAPIBackend
 
 struct ContextConfig
 {
-  int windowSize[2] = { 0, 0 };
+  // int windowSize[2] = { 0, 0 };
   int stencilBit{ 8 };
   int multiSample{ 0 };
 };
@@ -73,11 +73,10 @@ public:
   virtual bool makeCurrent() = 0;
   virtual void shutdown() = 0;
   virtual void* contextInfo() = 0;
-  bool resize(int w, int h);
+  // bool resize(int w, int h);
   virtual ~GraphicsContext() = default;
 
 protected:
-  virtual bool onResize(int w, int h) = 0;
   virtual bool onInit() = 0;
   virtual void onInitProperties(ContextProperty& property) = 0;
   virtual void onInitContext()

@@ -97,6 +97,7 @@ struct AppConfig
   layer::ContextConfig graphicsContextConfig;
   std::string appName;
   std::unique_ptr<EventListener> eventListener;
+  int windowSize[2];
   int renderFPSLimit{ 60 };
   int argc;
   char** argv;
@@ -154,7 +155,10 @@ protected:
     {
       int drawableWidth = window.drawableWidth;
       int drawableHeight = window.drawableHeight;
-      resize(drawableWidth, drawableHeight);
+      if (m_appRender)
+      {
+        m_appRender->resize(drawableWidth, drawableHeight);
+      }
     }
 
     return false; // continue to dispatch event
@@ -254,6 +258,11 @@ public: // public methods
       evt.type = VGG_APP_INIT;
       evt.init.argc = cfg.argc;
       evt.init.argv = cfg.argv;
+      evt.init.windowWidth = cfg.windowSize[0];
+      evt.init.windowHeight = cfg.windowSize[1];
+      const auto p = s_app.property();
+      evt.init.drawableWidth = cfg.windowSize[0] * p.dpiScaling;
+      evt.init.drawableHeight = cfg.windowSize[1] * p.dpiScaling;
       s_app.sendEvent(evt);
     }
     return s_app;

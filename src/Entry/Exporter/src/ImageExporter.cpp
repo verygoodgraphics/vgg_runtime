@@ -102,10 +102,11 @@ public:
     layer->resize(w, h);
   }
 
-  std::pair<std::string, std::vector<char>> render(std::shared_ptr<Scene> scene,
-                                                   float scale,
-                                                   const layer::ImageOptions& opts)
+  std::optional<std::vector<char>> render(std::shared_ptr<Scene> scene,
+                                          float scale,
+                                          const layer::ImageOptions& opts)
   {
+    auto id = scene->frame(scene->currentPage())->guid();
     layer->setScene(std::move(scene));
     layer->setScaleFactor(scale);
 
@@ -115,14 +116,7 @@ public:
     layer->endFrame();
     // end render one frame
 
-    if (auto img = layer->makeImageSnapshot(opts); img)
-    {
-      return { scene->frame(scene->currentPage())->guid(), std::move(img.value()) };
-    }
-    else
-    {
-      return {};
-    }
+    return layer->makeImageSnapshot(opts);
   }
 };
 
@@ -135,10 +129,8 @@ Exporter::Exporter()
   : d_impl(new Exporter__pImpl(this))
 {
   layer::ContextConfig cfg;
-  d_impl->ctx = std::shared_ptr<VkGraphicsContext>();
-  d_impl->layer = std::shared_ptr<layer::VLayer>();
-  cfg.windowSize[0] = 0;
-  cfg.windowSize[1] = 0;
+  d_impl->ctx = std::make_shared<VkGraphicsContext>();
+  d_impl->layer = std::make_shared<layer::VLayer>();
   cfg.stencilBit = 8;
   cfg.multiSample = 0;
   d_impl->ctx->init(cfg);
@@ -165,6 +157,8 @@ class Exporter::Iterator__pImpl
 public:
   Exporter& exporter;
   float maxSurfaceSize[2];
+  int totalFrames{ 0 };
+  int index{ 0 };
   std::shared_ptr<Scene> scene;
   Iterator__pImpl(Exporter::Iterator* api,
                   Exporter& exporter,
@@ -175,12 +169,17 @@ public:
     , exporter(exporter)
   {
     getMaxSurfaceSize(opt.resolutionLevel, maxSurfaceSize);
+    scene = std::make_shared<Scene>();
+    Layout::ExpandSymbol e(json);
+    scene->loadFileContent(e());
+    scene->setResRepo(resource);
+    totalFrames = scene->frameCount();
+    index = 0;
     exporter.d_impl->resize(maxSurfaceSize[0], maxSurfaceSize[1]);
   }
 
   bool next(std::string& key, std::vector<char>& image)
   {
-    int index = scene->currentPage();
     if (index >= scene->frameCount())
     {
       return false;
@@ -188,6 +187,7 @@ public:
     auto f = scene->frame(index);
     while (f && !f->isVisible() && index < scene->frameCount())
     {
+      // skip invisble frame
       index++;
       f = scene->frame(index);
     }
@@ -198,10 +198,11 @@ public:
     if (!f)
       return false;
 
-    scene->setPage(index); // render this page
-    auto b = f->getBound();
+    const auto b = f->getBound();
+    const auto id = f->guid();
     int w = b.size().x;
     int h = b.size().y;
+
     // f is visible
     auto state = exporter.d_impl.get();
     float actualSize[2];
@@ -213,9 +214,16 @@ public:
     opts.position[1] = 0;
     opts.extend[0] = actualSize[0];
     opts.extend[1] = actualSize[1];
-    auto res = state->render(scene, 1.0, opts);
-    key = std::move(res.first);
-    image = std::move(res.second);
+    auto res = state->render(scene, scale, opts);
+    if (!res.has_value())
+    {
+      return false;
+    }
+    key = std::move(id);
+    image = std::move(res.value());
+
+    index++;
+    scene->setPage(index); // advanced page
     return true;
   }
 };
@@ -263,8 +271,6 @@ std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> 
   ctx = std::make_shared<VkGraphicsContext>();
   auto layer = std::make_shared<layer::VLayer>();
   layer::ContextConfig cfg;
-  cfg.windowSize[0] = maxSurfaceSize[0];
-  cfg.windowSize[1] = maxSurfaceSize[1];
   cfg.stencilBit = 8;
   cfg.multiSample = 0;
   ctx->init(cfg);

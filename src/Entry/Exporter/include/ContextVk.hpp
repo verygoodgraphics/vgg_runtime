@@ -71,11 +71,6 @@ public:
     return true;
   }
 
-  bool onResize(int w, int h) override
-  {
-    return true;
-  }
-
   ~VkGraphicsContext()
   {
     cleanup();

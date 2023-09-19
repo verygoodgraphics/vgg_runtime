@@ -79,8 +79,9 @@ public:
 
   bool onInit() override
   {
-    const auto& cfg = config();
-    if (initContext(cfg.windowSize[0], cfg.windowSize[1]))
+    const auto& cfg = appConfig();
+    if (initContext(cfg.windowSize[0],
+                    cfg.windowSize[1])) // TODO:: remove hard-coded initial window size
       return false;
 
     SDL_GL_SetSwapInterval(0);
@@ -208,12 +209,6 @@ public:
   bool swap() override
   {
     swapBuffer();
-    return true;
-  }
-
-  bool onResize(int w, int h) override
-  {
-    // In SDL, we do not need to resize its surface mannually
     return true;
   }
 

@@ -302,6 +302,10 @@ struct VAppInitEvent
 {
   uint32_t type;
   uint32_t timestamp;
+  uint32_t windowWidth;
+  uint32_t windowHeight;
+  uint32_t drawableWidth;
+  uint32_t drawableHeight;
   int argc;
   char** argv;
 };

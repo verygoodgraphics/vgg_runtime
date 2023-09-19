@@ -21,8 +21,8 @@ int main(int argc, char** argv)
 {
   AppConfig cfg;
   cfg.appName = "Renderer";
-  cfg.graphicsContextConfig.windowSize[0] = 1920;
-  cfg.graphicsContextConfig.windowSize[1] = 1080;
+  cfg.windowSize[0] = 1920;
+  cfg.windowSize[1] = 1080;
   cfg.graphicsContextConfig.multiSample = 0;
   cfg.graphicsContextConfig.stencilBit = 8;
   cfg.argc = argc;

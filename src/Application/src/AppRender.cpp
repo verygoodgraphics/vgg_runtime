@@ -111,6 +111,12 @@ bool AppRender::onEvent(UEvent e)
       drawPosition(e.motion.canvasX, e.motion.canvasY);
     }
   }
+  if (type == EEventType::VGG_APP_INIT)
+  {
+    // for GUI front-end, an init event is necessary to trigger resize to create surface.
+    DEBUG("Layer Initiailization: [%d, %d]", e.init.drawableWidth, e.init.drawableHeight);
+    resize(e.init.drawableWidth, e.init.drawableHeight);
+  }
   return false;
 }
 

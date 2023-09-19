@@ -170,6 +170,12 @@ void VLayer::addScene(std::shared_ptr<Scene> scene)
   d_ptr->scenes.push_back(std::move(scene));
 }
 
+void VLayer::setScene(std::shared_ptr<Scene> scene)
+{
+  d_ptr->scenes.clear();
+  d_ptr->scenes.push_back(std::move(scene));
+}
+
 void VLayer::resize(int w, int h)
 {
   VGG_IMPL(VLayer);

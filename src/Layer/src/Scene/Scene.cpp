@@ -157,6 +157,11 @@ void Scene::loadFileContent(const nlohmann::json& json)
   // instantiateTemplates();
 }
 
+int Scene::currentPage() const
+{
+  return d_ptr->page;
+}
+
 void Scene::onRender(SkCanvas* canvas)
 {
   VGG_IMPL(Scene)

@@ -8,16 +8,31 @@
 #include "Entry/Exporter/interface/ImageExporter.hpp"
 using namespace VGG;
 
+// template<typename F>
+// void writeResult(const std::vector<std::pair<std::string, std::vector<char>>>& result, F&& f)
+// {
+//   int count = 0;
+//   for (const auto p : result)
+//   {
+//     std::ofstream ofs(f(p.first) + ".png", std::ios::binary);
+//     if (ofs.is_open())
+//     {
+//       ofs.write((const char*)p.second.data(), p.second.size());
+//     }
+//   }
+// }
+
 template<typename F>
-void writeResult(const std::vector<std::pair<std::string, std::vector<char>>>& result, F&& f)
+void write(exporter::Exporter::Iterator iter, F&& f)
 {
-  int count = 0;
-  for (const auto p : result)
+  std::string key;
+  std::vector<char> image;
+  while (iter.next(key, image))
   {
-    std::ofstream ofs(f(p.first) + ".png", std::ios::binary);
+    std::ofstream ofs(f(key) + ".png", std::ios::binary);
     if (ofs.is_open())
     {
-      ofs.write((const char*)p.second.data(), p.second.size());
+      ofs.write((const char*)image.data(), image.size());
     }
   }
 }
@@ -32,30 +47,30 @@ struct InputDesc
   std::optional<fs::path> prefix;
 };
 
-std::vector<std::pair<std::string, std::vector<char>>> renderAndOutput(InputDesc input)
-{
-  auto ext = fs::path(input.filepath).extension().string();
-  auto r = load(ext);
-  if (r)
-  {
-    auto data = r->read(input.prefix.value_or(fs::path(".")) / input.filepath);
-    DEBUG("Image Quality: %d", input.imageQuality);
-    DEBUG("Resolution Level: %d", input.resolutionLevel);
-    auto result = VGG::exporter::render(data.Format,
-                                        data.Resource,
-                                        input.imageQuality,
-                                        input.resolutionLevel,
-                                        input.configFilePath.value_or(""),
-                                        input.fontCollection);
-    const auto reason = std::get<0>(result);
-    if (!reason.empty())
-    {
-      std::cout << reason << std::endl;
-    }
-    return std::get<1>(result);
-  }
-  return {};
-}
+// std::vector<std::pair<std::string, std::vector<char>>> renderAndOutput(InputDesc input)
+// {
+//   auto ext = fs::path(input.filepath).extension().string();
+//   auto r = load(ext);
+//   if (r)
+//   {
+//     auto data = r->read(input.prefix.value_or(fs::path(".")) / input.filepath);
+//     DEBUG("Image Quality: %d", input.imageQuality);
+//     DEBUG("Resolution Level: %d", input.resolutionLevel);
+//     auto result = VGG::exporter::render(data.Format,
+//                                         data.Resource,
+//                                         input.imageQuality,
+//                                         input.resolutionLevel,
+//                                         input.configFilePath.value_or(""),
+//                                         input.fontCollection);
+//     const auto reason = std::get<0>(result);
+//     if (!reason.empty())
+//     {
+//       std::cout << reason << std::endl;
+//     }
+//     return std::get<1>(result);
+//   }
+//   return {};
+// }
 
 constexpr char POS_ARG_INPUT_FILE[] = "fig/ai/sketch/json";
 
@@ -94,15 +109,20 @@ int main(int argc, char** argv)
   std::string outputFilePostfix = program.present("-t").value_or("");
   InputDesc desc;
   desc.prefix = program.present("-p").value_or("");
-  desc.fontCollection = program.present("-f").value_or("google");
-  desc.resolutionLevel = 2;
-  desc.imageQuality = 80;
+
+  exporter::ImageOption opts;
+  opts.resolutionLevel = 2;
+  opts.imageQuality = 80;
+  // desc.fontCollection = program.present("-f").value_or("google");
+  //  desc.resolutionLevel = 2;
+  //  desc.imageQuality = 80;
 
   if (auto cfg = program.present("-c"))
   {
-    desc.configFilePath = cfg.value();
-    Config::readGlobalConfig(cfg.value());
+    // desc.configFilePath = cfg.value();
+    exporter::setGlobalConfig(desc.configFilePath->string());
   }
+  exporter::Exporter exporter;
 
   if (auto loadfile = program.present(POS_ARG_INPUT_FILE))
   {
@@ -112,11 +132,13 @@ int main(int argc, char** argv)
     auto r = load(ext);
     if (r)
     {
-      auto res = renderAndOutput(desc);
+      auto data = r->read(desc.prefix.value_or(fs::path(".")) / desc.filepath);
+      auto iter = exporter.render(data.Format, data.Resource, opts);
       const auto folder = fs::path(fp).filename().stem();
       const fs::path prefix = outputDir;
       fs::create_directory(prefix);
-      writeResult(res, [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); });
+      write(std::move(iter),
+            [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); });
     }
   }
   else if (auto d = program.present("-L"))
@@ -129,12 +151,16 @@ int main(int argc, char** argv)
         if (fs::is_regular_file(ent))
         {
           desc.filepath = ent;
-          auto res = renderAndOutput(desc);
-          const auto folder = ent.path().filename().stem();
-          const fs::path prefix = outputDir;
-          fs::create_directory(prefix);
-          writeResult(res,
-                      [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); });
+          auto r = load(desc.filepath.extension().string());
+          if (r)
+          {
+            auto data = r->read(desc.prefix.value_or(fs::path(".")) / desc.filepath);
+            auto iter = exporter.render(data.Format, data.Resource, opts);
+            const fs::path prefix = outputDir;
+            fs::create_directory(prefix);
+            write(std::move(iter),
+                  [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); });
+          }
         }
       }
     }

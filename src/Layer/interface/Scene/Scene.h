@@ -71,6 +71,7 @@ public:
   void setPage(int num);
   void nextSymbol();
   void prevSymbol();
+  int currentPage() const;
   // To remove zoomer, just set nullptr
   void setZoomer(std::shared_ptr<Zoomer> zoomer);
   Zoomer* zoomer();

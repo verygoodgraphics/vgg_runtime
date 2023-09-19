@@ -15,8 +15,8 @@ if(DEFINED SKIA_DIR)
 # case 2: no skia source code is prepared, so we download and uncompress it
 #
 elseif(NOT IS_DIRECTORY ${SKIA_SOURCE_DIR})
-  set(SKIA_ARCHIVE_TAG "20220914")
-  set(SKIA_ARCHIVE_MD5_CHECKSUM "ed2005ca6e29a75309c922462127623e")
+  set(SKIA_ARCHIVE_TAG "20230919")
+  set(SKIA_ARCHIVE_MD5_CHECKSUM "e8cc0ba3dd1c86545c369570340e8f04")
   set(SKIA_URL "https://github.com/verygoodgraphics/skia/releases/download/${SKIA_ARCHIVE_TAG}/skia-with-deps.tar.gz")
   set(SKIA_ARCHIVE_LOCATION "${CMAKE_SOURCE_DIR}/downloads/skia-with-deps-${SKIA_ARCHIVE_TAG}.tar.gz")
 
@@ -77,11 +77,6 @@ foreach(OPT ${PRINT_CONFIG_OPTIONS})
   message(STATUS ${OPT})
 endforeach(OPT)
 
-if(VGG_VAR_PLATFORM_TARGET STREQUAL "macOS-apple_silicon")
-  string(APPEND OPTIONS " target_cpu='arm64'")
-elseif(VGG_VAR_PLATFORM_TARGET STREQUAL "WASM")
-  string(APPEND OPTIONS " target_cpu='wasm'")
-endif()
 # config skia
 execute_process(COMMAND ${GN} gen ${SKIA_LIB_BUILD_PREFIX} ${CONFIG_OPTIONS}
 WORKING_DIRECTORY ${SKIA_EXTERNAL_PROJECT_DIR} COMMAND_ERROR_IS_FATAL ANY)

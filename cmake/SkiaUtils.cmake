@@ -105,8 +105,11 @@ skia_use_system_expat=false
 skia_use_expat=false
 skia_enable_pdf=false")
 
+if (EMSCRIPTEN)
+message(STATUS "EMSDK=$ENV{EMSDK}")
 set(SKIA_PRESET_FEATURES_FOR_WASM
-"skia_use_freetype=true
+"skia_emsdk_dir=\"$ENV{EMSDK}\"
+skia_use_freetype=true
 skia_enable_svg=true
 skia_use_zlib=true
 skia_use_system_zlib=false
@@ -131,6 +134,7 @@ skia_use_libheif=false
 skia_use_expat=false
 skia_use_vulkan=false
 skia_enable_pdf=false")
+endif()
 
 cmake_minimum_required(VERSION 3.19) # for string(JSON ...)
 
@@ -174,7 +178,7 @@ elseif(platform STREQUAL "macOS-apple_silicon")
   foreach(OPT ${SKIA_PRESET_FEATURES_FOR_MACOS})
     string(APPEND OPTIONS " ${OPT}")
   endforeach(OPT)
-elseif(platform STREQUAL "WASM")
+elseif(platform STREQUAL "WASM" AND DEFINED EMSCRIPTEN)
   string(APPEND OPTIONS " target_cpu=\"wasm\"")
   foreach(OPT ${SKIA_PRESET_FEATURES_FOR_WASM})
     string(APPEND OPTIONS " ${OPT}")
@@ -190,7 +194,7 @@ if(config STREQUAL "RelWithDebInfo")
 else()
   string(APPEND OPTIONS " extra_cflags_cc=[\"-fvisibility=default\", \"-frtti\"]")
 endif()
-elseif(platform STREQUAL "WASM")
+elseif(platform STREQUAL "WASM" AND DEFINED EMSCRIPTEN)
 string(APPEND OPTIONS " extra_cflags_cc=[\"-frtti\",\"-s\", \"-fvisibility=default\"] extra_cflags=[\"-Wno-unknown-warning-option\",\"-s\",\"-s\"]")
 endif()
 

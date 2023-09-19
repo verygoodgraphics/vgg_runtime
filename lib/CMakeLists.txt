@@ -45,30 +45,35 @@ if (NOT EMSCRIPTEN)
     #file(REMOVE ${DOWNLOAD_AT_PATH})
   endif()
 
-  add_library(vgg_libnode STATIC empty.cpp)
-  add_library(vgg_libnode_stub STATIC
-    ${NODE_FOLDER}/src/node_snapshot_stub.cc)
-
-  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "$ENV{name}" STREQUAL "nix-shell")
-    target_link_libraries(vgg_libnode_stub atomic)
-  endif()
-
+  # this is a custom target to build node with its own building system
+  # NOTE this target will always be invoked
   cmake_minimum_required(VERSION 3.22) # this is requied for the following invoking
-  add_custom_command(TARGET vgg_libnode
-    PRE_BUILD
+  add_custom_target(vgg_libnode_building
+    COMMENT "Build node if neccessary..."
     COMMAND cmake -DNODE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/${NODE_FOLDER}
       -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/BuildLibnode.cmake
-    COMMENT "Build libnode if needed"
   )
 
+  # this is an empty library for linking purpose only
+  add_library(vgg_libnode STATIC empty.cpp)
+  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "$ENV{name}" STREQUAL "nix-shell")
+    target_link_libraries(vgg_libnode INTERFACE atomic)
+  endif()
   target_include_directories(vgg_libnode PUBLIC
     ${NODE_FOLDER}/src
     ${NODE_FOLDER}/deps/uv/include
     ${NODE_FOLDER}/deps/v8/include)
+  add_dependencies(vgg_libnode vgg_libnode_building)
+
+  # this is a stub library for providing missing interface that must be linked to libnode
+  add_library(vgg_libnode_stub STATIC
+    ${NODE_FOLDER}/src/node_snapshot_stub.cc
+  )
   target_include_directories(vgg_libnode_stub PUBLIC
     ${NODE_FOLDER}/src
     ${NODE_FOLDER}/deps/uv/include
     ${NODE_FOLDER}/deps/v8/include)
+
   if(APPLE)
     target_link_directories(vgg_libnode PUBLIC ${NODE_FOLDER}/out/Release)
     target_link_libraries(vgg_libnode PRIVATE

@@ -80,6 +80,7 @@ private:
                    const std::string& seperator = K_SEPARATOR);
 
   void copyLayoutRule(const std::string& srcId, const std::string& dstId);
+  void removeInvalidLayoutRule(const nlohmann::json& instanceChildren);
 };
 } // namespace Layout
 

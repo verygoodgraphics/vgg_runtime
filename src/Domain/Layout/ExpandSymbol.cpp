@@ -373,6 +373,7 @@ void ExpandSymbol::processMasterIdOverrides(nlohmann::json& instance,
 
     (*childObject)[K_MASTER_ID] = value;
     (*childObject).erase(K_OVERRIDE_VALUES);
+    removeInvalidLayoutRule((*childObject));
 
     // restore to symbolInstance to expand again
     (*childObject)[K_CLASS] = K_SYMBOL_INSTANCE;
@@ -936,4 +937,32 @@ void ExpandSymbol::copyLayoutRule(const std::string& srcId, const std::string& d
   auto rule = m_layoutRules[srcId];
   rule[K_ID] = dstId;
   m_outLayoutJson[K_OBJ].push_back(std::move(rule));
+}
+
+void ExpandSymbol::removeInvalidLayoutRule(const nlohmann::json& json)
+{
+  if (!json.is_object() && !json.is_array())
+  {
+    return;
+  }
+
+  if (json.is_object() && json.contains(K_ID))
+  {
+    auto id = json[K_ID];
+
+    auto& rules = m_outLayoutJson[K_OBJ];
+    for (auto i = 0; i < rules[K_OBJ].size(); ++i)
+    {
+      if (rules[i][K_ID] == id)
+      {
+        rules.erase(i);
+        break;
+      }
+    }
+  }
+
+  for (auto& el : json.items())
+  {
+    removeInvalidLayoutRule(el.value());
+  }
 }

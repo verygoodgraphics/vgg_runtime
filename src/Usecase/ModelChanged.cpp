@@ -1,4 +1,4 @@
-#include "ModelChanged.hpp"
+#include "UseCase/ModelChanged.hpp"
 
 #include "Domain/Daruma.hpp"
 

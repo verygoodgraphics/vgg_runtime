@@ -1,18 +1,20 @@
 #pragma once
 
-#include <Entry/SDL/SDLImpl/EventAPISDLImpl.h>
+#include "Entry/SDL/SDLImpl/EventAPISDLImpl.h"
+
+#include "Application/AppBase.hpp"
 #include "Application/Event/EventAPI.h"
-#include <Application/AppBase.hpp>
-#include <SDL2/SDL_video.h>
-#include <Utility/Log.h>
 #include "EventConvert.h"
-#include <optional>
-#include <any>
-#include <Scene/GraphicsContext.h>
-#include <Scene/ContextInfoGL.hpp>
+#include "Scene/ContextInfoGL.hpp"
+#include "Scene/GraphicsContext.h"
+#include "Utility/Log.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
+#include <SDL2/SDL_video.h>
+
+#include <any>
+#include <optional>
 
 namespace VGG::entry
 {

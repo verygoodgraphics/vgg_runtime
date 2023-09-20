@@ -1,9 +1,11 @@
 #pragma once
 
-#include <Entry/SDL/SDLImpl/EventConvert.h>
+#include "Entry/SDL/SDLImpl/EventConvert.h"
 #include "Application/Event/EventAPI.h"
 #include "Application/Event/Keycode.h"
+
 #include <SDL2/SDL_keyboard.h>
+
 #include <cstdint>
 
 class EventAPISDLImpl : public EventAPI

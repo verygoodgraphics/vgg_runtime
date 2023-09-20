@@ -19,11 +19,12 @@
 #include <memory>
 #include <optional>
 #include <exception>
-#include <Scene/GraphicsContext.h>
-#include <Scene/VGGLayer.h>
-#include <Application/AppRender.h>
-#include <Application/Event/EventListener.h>
-#include <Utility/Log.h>
+
+#include "Scene/GraphicsContext.h"
+#include "Scene/VGGLayer.h"
+#include "Application/AppRender.h"
+#include "Application/Event/EventListener.h"
+#include "Utility/Log.h"
 
 using namespace VGG;
 namespace VGG::app

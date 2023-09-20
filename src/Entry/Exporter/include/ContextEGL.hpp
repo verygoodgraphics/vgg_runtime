@@ -1,14 +1,14 @@
 #pragma once
 
-#include <Application/AppBase.hpp>
+#include "Application/AppBase.hpp"
 #include <EGL/egl.h>
-#include <Core/FontManager.h>
-#include <Core/PaintNode.h>
+#include "Core/FontManager.h"
+#include "Core/PaintNode.h"
 #include <fstream>
-#include <Application/Event/EventListener.h>
-#include <Scene/GraphicsContext.h>
-#include <Scene/GraphicsLayer.h>
-#include <Scene/VGGLayer.h>
+#include "Application/Event/EventListener.h"
+#include "Scene/GraphicsContext.h"
+#include "Scene/GraphicsLayer.h"
+#include "Scene/VGGLayer.h"
 #include <algorithm>
 #include <exception>
 #include <memory>

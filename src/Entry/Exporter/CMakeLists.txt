@@ -1,6 +1,10 @@
 find_package(Vulkan)
+include(GetGitRevisionDescription)
 if(Vulkan_FOUND)
+  get_git_head_revision(REF_VAR HASH_VAR)
+  message(STATUS "${REF_VAR} ${HASH_VAR}")
   add_library(vgg_exporter src/ImageExporter.cpp)
+  target_compile_definitions(vgg_exporter PRIVATE GIT_COMMIT="${HASH_VAR}")
   set_target_properties(vgg_exporter PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
   find_package(Vulkan REQUIRED)

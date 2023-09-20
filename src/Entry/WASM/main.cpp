@@ -39,8 +39,8 @@ extern "C"
 
     VGG::app::AppConfig cfg;
     cfg.appName = "SdlRuntime";
-    cfg.graphicsContextConfig.windowSize[0] = width;
-    cfg.graphicsContextConfig.windowSize[1] = height;
+    cfg.windowSize[0] = width;
+    cfg.windowSize[1] = height;
     cfg.graphicsContextConfig.multiSample = 0;
     cfg.graphicsContextConfig.stencilBit = 8;
 

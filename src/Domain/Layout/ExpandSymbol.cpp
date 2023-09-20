@@ -19,14 +19,20 @@ using namespace VGG::Layout;
 
 nlohmann::json ExpandSymbol::operator()()
 {
+  return std::get<0>(run());
+}
+
+std::pair<nlohmann::json, nlohmann::json> ExpandSymbol::run()
+{
   collectMaster(m_designJson);
 
-  auto resultJson = m_designJson;
+  auto designJson = m_designJson;
+  auto layoutJson = m_layoutJson;
 
   std::vector<std::string> instanceIdStack{};
-  expandInstance(resultJson, instanceIdStack);
+  expandInstance(designJson, instanceIdStack);
 
-  return resultJson;
+  return { designJson, layoutJson };
 }
 
 void ExpandSymbol::collectMaster(const nlohmann::json& json)

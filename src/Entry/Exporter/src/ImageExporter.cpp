@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Domain/include/Domain/Layout/ExpandSymbol.hpp"
+#include "Domain/Layout/ExpandSymbol.hpp"
 #include "ImageExporter.hpp"
 #include "ContextVk.hpp"
 #include <Scene/VGGLayer.h>

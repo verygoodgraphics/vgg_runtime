@@ -1,5 +1,5 @@
-#include "Event/Event.h"
-#include "AppBase.hpp"
+#include "Application/Event/Event.h"
+#include "Application/AppBase.hpp"
 #include "TestEventListener.h"
 #include "Entry/SDL/SDLImpl/AppSDLImpl.hpp"
 #ifdef VGG_USE_VULKAN

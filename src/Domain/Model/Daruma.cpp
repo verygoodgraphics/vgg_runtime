@@ -151,6 +151,12 @@ void Daruma::setRuntimeDesignDoc(const nlohmann::json& designJson)
   m_runtimeDesignDoc = JsonDocumentPtr(new SubjectJsonDocument(doc));
 }
 
+void Daruma::setRuntimeLayoutDoc(const nlohmann::json& layoutJson)
+{
+  auto doc = m_makeLayoutDocFn(layoutJson);
+  m_runtimeLayoutDoc = JsonDocumentPtr(new SubjectJsonDocument(doc));
+}
+
 JsonDocumentPtr& Daruma::designDoc()
 {
   return m_designDoc;

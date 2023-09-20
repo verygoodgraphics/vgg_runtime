@@ -3,7 +3,6 @@
 #include "Domain/Daruma.hpp"
 #include "Domain/DarumaContainer.hpp"
 #include "Adapter/NativeComposer.hpp"
-#include "Utility/DIContainer.hpp"
 #include "mocks/MockPresenter.hpp"
 
 #include "rxcpp/rx.hpp"
@@ -47,31 +46,31 @@ protected:
     }
   }
 
-  void setupSdkWithLocalDic(bool catchJsException = false)
+  auto setupSdkWithLocalDic(bool catchJsException = false)
   {
     m_nativeComposer.reset(
       new NativeComposer("./testDataDir/fake-sdk/vgg-sdk.esm.mjs", catchJsException));
-    m_nativeComposer->setup();
+    return m_nativeComposer->setup();
   }
 
-  void setupSdkWithRemoteDic(bool catchJsException = false)
+  auto setupSdkWithRemoteDic(bool catchJsException = false)
   {
     m_nativeComposer.reset(new NativeComposer("./asset/vgg-sdk.esm.mjs", catchJsException));
-    m_nativeComposer->setup();
+    return m_nativeComposer->setup();
   }
 
-  void setupUsingS5Sdk(bool catchJsException = false)
+  auto setupUsingS5Sdk(bool catchJsException = false)
   {
     m_nativeComposer.reset(
       new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js", catchJsException));
-    m_nativeComposer->setup();
+    return m_nativeComposer->setup();
   }
 
-  void setupSut()
+  void setupSut(std::shared_ptr<VggExec> jsEngine)
   {
     EXPECT_CALL(*m_mockPresenter, getObservable())
       .WillOnce(Return(m_fakeViewSubject.get_observable()));
-    m_sut.reset(new Controller(m_runLoop, {}, m_mockPresenter, {}));
+    m_sut.reset(new Controller(m_runLoop, jsEngine, m_mockPresenter, {}));
   }
 
   void loopUntilExit()
@@ -117,12 +116,12 @@ protected:
 TEST_F(ControllerTestSuite, Smoke)
 {
   // Given
-  setupSdkWithLocalDic();
+  auto jsEngine = setupSdkWithLocalDic();
   SKIP_LOCAL_TEST
   std::string filePath = "testDataDir/vgg-daruma.zip";
   auto fakeModelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>([&](ModelEventPtr evt) {});
   EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
-  setupSut();
+  setupSut(jsEngine);
 
   // When
   auto ret = m_sut->start(filePath);
@@ -137,7 +136,7 @@ TEST_F(ControllerTestSuite, Smoke)
 TEST_F(ControllerTestSuite, OnClick_observer)
 {
   // Given
-  setupSdkWithLocalDic();
+  auto jsEngine = setupSdkWithLocalDic();
   SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
@@ -149,7 +148,7 @@ TEST_F(ControllerTestSuite, OnClick_observer)
     });
 
   EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
-  setupSut();
+  setupSut(jsEngine);
   std::string filePath = "testDataDir/vgg-daruma.zip";
   auto ret = m_sut->start(filePath);
   EXPECT_TRUE(ret);
@@ -171,7 +170,7 @@ TEST_F(ControllerTestSuite, OnClick_observer)
 TEST_F(ControllerTestSuite, Validator_reject_deletion)
 {
   // Given
-  setupSdkWithLocalDic();
+  auto jsEngine = setupSdkWithLocalDic();
   SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
@@ -182,7 +181,7 @@ TEST_F(ControllerTestSuite, Validator_reject_deletion)
       m_exitLoop = true;
     });
   EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
-  setupSut();
+  setupSut(jsEngine);
   std::string filePath = "testDataDir/vgg-daruma.zip";
   auto ret = m_sut->start(filePath, design_doc_schema_file);
   EXPECT_TRUE(ret);
@@ -201,7 +200,7 @@ TEST_F(ControllerTestSuite, Validator_reject_deletion)
 TEST_F(ControllerTestSuite, DidUpdate)
 {
   // Given
-  setupSdkWithLocalDic();
+  auto jsEngine = setupSdkWithLocalDic();
   SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
@@ -213,7 +212,7 @@ TEST_F(ControllerTestSuite, DidUpdate)
       m_exitLoop = true;
     });
   EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
-  setupSut();
+  setupSut(jsEngine);
   std::string filePath = "testDataDir/vgg-daruma.zip";
   auto ret = m_sut->start(filePath, design_doc_schema_file);
   EXPECT_TRUE(ret);
@@ -232,7 +231,7 @@ TEST_F(ControllerTestSuite, DidUpdate)
 TEST_F(ControllerTestSuite, DidDelete)
 {
   // Given
-  setupSdkWithLocalDic();
+  auto jsEngine = setupSdkWithLocalDic();
   SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
@@ -244,7 +243,7 @@ TEST_F(ControllerTestSuite, DidDelete)
       m_exitLoop = true;
     });
   EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
-  setupSut();
+  setupSut(jsEngine);
   std::string filePath = "testDataDir/vgg-daruma.zip";
   auto ret = m_sut->start(filePath, design_doc_schema_file);
   EXPECT_TRUE(ret);
@@ -263,7 +262,7 @@ TEST_F(ControllerTestSuite, DidDelete)
 TEST_F(ControllerTestSuite, DidAdd_no_validator)
 {
   // Given
-  setupSdkWithLocalDic();
+  auto jsEngine = setupSdkWithLocalDic();
   SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
@@ -275,7 +274,7 @@ TEST_F(ControllerTestSuite, DidAdd_no_validator)
       m_exitLoop = true;
     });
   EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
-  setupSut();
+  setupSut(jsEngine);
   std::string filePath = "testDataDir/vgg-daruma.zip";
   auto ret = m_sut->start(filePath);
   EXPECT_TRUE(ret);
@@ -298,7 +297,7 @@ TEST_F(ControllerTestSuite, DidAdd_color)
   SKIP_S3_DEPENDENT_TEST
 
   // Given
-  setupSdkWithRemoteDic();
+  auto jsEngine = setupSdkWithRemoteDic();
 
   auto type = ModelEventType::Invalid;
   auto fakeModelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>(
@@ -308,7 +307,7 @@ TEST_F(ControllerTestSuite, DidAdd_color)
       m_exitLoop = true;
     });
   EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
-  setupSut();
+  setupSut(jsEngine);
   std::string filePath = "testDataDir/vgg-daruma.zip";
   auto ret = m_sut->start(filePath, design_doc_schema_file);
   EXPECT_TRUE(ret);
@@ -327,7 +326,7 @@ TEST_F(ControllerTestSuite, DidAdd_color)
 TEST_F(ControllerTestSuite, add_event_listener)
 {
   // Given
-  setupSdkWithLocalDic();
+  auto jsEngine = setupSdkWithLocalDic();
   SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
@@ -338,7 +337,7 @@ TEST_F(ControllerTestSuite, add_event_listener)
       m_exitLoop = true;
     });
   EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
-  setupSut();
+  setupSut(jsEngine);
   std::string filePath = "testDataDir/vgg-daruma.zip";
   auto ret = m_sut->start(filePath);
   EXPECT_TRUE(ret);
@@ -363,7 +362,7 @@ TEST_F(ControllerTestSuite, add_event_listener)
 TEST_F(ControllerTestSuite, eval_added_event_listener)
 {
   // Given
-  setupSdkWithLocalDic();
+  auto jsEngine = setupSdkWithLocalDic();
   SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
@@ -374,7 +373,7 @@ TEST_F(ControllerTestSuite, eval_added_event_listener)
       m_exitLoop = true;
     });
   EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
-  setupSut();
+  setupSut(jsEngine);
   std::string filePath = "testDataDir/vgg-daruma.zip";
   auto ret = m_sut->start(filePath);
   EXPECT_TRUE(ret);
@@ -396,7 +395,7 @@ TEST_F(ControllerTestSuite, eval_added_event_listener)
 TEST_F(ControllerTestSuite, remove_event_listener)
 {
   // Given
-  setupSdkWithLocalDic();
+  auto jsEngine = setupSdkWithLocalDic();
   SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
@@ -413,7 +412,7 @@ TEST_F(ControllerTestSuite, remove_event_listener)
       }
     });
   EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
-  setupSut();
+  setupSut(jsEngine);
   std::string filePath = "testDataDir/vgg-daruma.zip";
   auto ret = m_sut->start(filePath);
   EXPECT_TRUE(ret);
@@ -431,7 +430,7 @@ TEST_F(ControllerTestSuite, remove_event_listener)
 TEST_F(ControllerTestSuite, get_event_listeners)
 {
   // Given
-  setupSdkWithLocalDic();
+  auto jsEngine = setupSdkWithLocalDic();
   SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
@@ -443,7 +442,7 @@ TEST_F(ControllerTestSuite, get_event_listeners)
       m_exitLoop = true;
     });
   EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
-  setupSut();
+  setupSut(jsEngine);
   std::string filePath = "testDataDir/vgg-daruma.zip";
   auto ret = m_sut->start(filePath);
   EXPECT_TRUE(ret);
@@ -464,7 +463,7 @@ TEST_F(ControllerTestSuite, get_event_listeners)
 TEST_F(ControllerTestSuite, unhandled_js_error)
 {
   // Given
-  setupSdkWithLocalDic(true); // enable catch exception
+  auto jsEngine = setupSdkWithLocalDic(true); // enable catch exception
   SKIP_LOCAL_TEST
 
   auto type = ModelEventType::Invalid;
@@ -476,7 +475,7 @@ TEST_F(ControllerTestSuite, unhandled_js_error)
       m_exitLoop = true;
     });
   EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
-  setupSut();
+  setupSut(jsEngine);
 
   std::string filePath = "testDataDir/vgg-daruma.zip";
   auto ret = m_sut->start(filePath);
@@ -497,7 +496,7 @@ TEST_F(ControllerTestSuite, event_listener_example)
   SKIP_S3_DEPENDENT_TEST
 
   // Given
-  setupSdkWithRemoteDic();
+  auto jsEngine = setupSdkWithRemoteDic();
 
   auto type = ModelEventType::Invalid;
   auto fakeModelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>(
@@ -507,7 +506,7 @@ TEST_F(ControllerTestSuite, event_listener_example)
       m_exitLoop = true;
     });
   EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
-  setupSut();
+  setupSut(jsEngine);
   std::string filePath = "testDataDir/vgg-daruma.zip";
   auto ret = m_sut->start(filePath, design_doc_schema_file);
   EXPECT_TRUE(ret);
@@ -528,7 +527,7 @@ TEST_F(ControllerTestSuite, event_listener_example)
 TEST_F(ControllerTestSuite, handle_events)
 {
   // Given
-  setupUsingS5Sdk();
+  auto jsEngine = setupUsingS5Sdk();
 
   int times = 0;
   auto type = ModelEventType::Invalid;
@@ -544,7 +543,7 @@ TEST_F(ControllerTestSuite, handle_events)
 
   EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
   EXPECT_CALL(*m_mockPresenter, setModel(_));
-  setupSut();
+  setupSut(jsEngine);
   std::string filePath = "testDataDir/vgg-daruma-2";
   auto ret = m_sut->start(filePath);
   EXPECT_TRUE(ret);
@@ -567,7 +566,7 @@ TEST_F(ControllerTestSuite, handle_events)
 TEST_F(ControllerTestSuite, handle_event_keyboard)
 {
   // Given
-  setupUsingS5Sdk();
+  auto jsEngine = setupUsingS5Sdk();
 
   constexpr auto EXPECT_TIMES = 1;
   auto type = ModelEventType::Invalid;
@@ -580,7 +579,7 @@ TEST_F(ControllerTestSuite, handle_event_keyboard)
 
   EXPECT_CALL(*m_mockPresenter, getModelObserver()).WillOnce(ReturnRef(fakeModelObserver));
   EXPECT_CALL(*m_mockPresenter, setModel(_));
-  setupSut();
+  setupSut(jsEngine);
   std::string filePath = "testDataDir/vgg-daruma-2";
   auto ret = m_sut->start(filePath);
   EXPECT_TRUE(ret);

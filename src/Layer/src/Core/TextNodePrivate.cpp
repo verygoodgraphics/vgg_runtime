@@ -159,7 +159,7 @@ sktxt::TextStyle createTextStyle(const TextAttr& attr, VGGFontCollection* font)
     // the worst case
     fontName = "FiraSans";
   }
-  INFO("Given [%s], [%s] is choosed finally", attr.fontName.c_str(), fontName.c_str());
+  DEBUG("Given [%s], [%s] is choosed finally", attr.fontName.c_str(), fontName.c_str());
   std::vector<SkString> fontFamilies;
   fontFamilies.push_back(SkString(fontName));
   if (const auto& fallbackFonts = font->fallbackFonts(); !fallbackFonts.empty())

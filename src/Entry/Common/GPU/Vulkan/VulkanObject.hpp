@@ -77,7 +77,7 @@ struct VkInstanceObject : public std::enable_shared_from_this<VkInstanceObject>
     vkEnumerateInstanceExtensionProperties(nullptr, &extPropCount, props.data());
     for (int i = 0; i < props.size(); i++)
     {
-      std::cout << props[i].extensionName << std::endl;
+      DEBUG("%s", props[i].extensionName);
     }
     std::vector<const char*> extNames = extensionQueryFunc();
 
@@ -136,7 +136,7 @@ struct VkInstanceObject : public std::enable_shared_from_this<VkInstanceObject>
       m_debugUtilsMessenger = createDebugUtilsMessenger(ci);
       if (m_debugUtilsMessenger == VK_NULL_HANDLE)
       {
-        std::cout << "Create Debug Utils messenger failed\n";
+        DEBUG("Create Debug Utils messenger failed\n");
         exit(-1);
       }
     }
@@ -163,7 +163,7 @@ private:
     (void)messageSeverity;
     (void)messageType;
     (void)pUserData;
-    std::cerr << "Validation layer: " << pCallbackData->pMessage << std::endl;
+    DEBUG("Validation Layer: %s", pCallbackData->pMessage);
     return VK_FALSE;
   }
   VkDebugUtilsMessengerEXT createDebugUtilsMessenger(const VkDebugUtilsMessengerCreateInfoEXT& ci)
@@ -178,7 +178,7 @@ private:
     }
     else
     {
-      std::cout << "Failed to load vkCreateDebugUtilsMessengerEXT\n";
+      DEBUG("Failed to load vkCreateDebugUtilsMessengerEXT\n");
       exit(-1);
     }
     return vkHandle;
@@ -194,7 +194,7 @@ private:
     }
     else
     {
-      std::cout << "Failed to load vkDestoryDebugUtilsMessengerEXT\n";
+      DEBUG("Failed to load vkDestoryDebugUtilsMessengerEXT\n");
     }
   }
 
@@ -218,7 +218,7 @@ struct VkPhysicalDeviceObject : public std::enable_shared_from_this<VkPhysicalDe
     using namespace std;
     vector<VkPhysicalDevice> dev(count);
     VK_CHECK(vkEnumeratePhysicalDevices(*(this->instance), &count, dev.data()));
-    std::cout << "There are " << count << " physical device(s)\n";
+    DEBUG("%d physical device found", count);
 
     for (int i = 0; i < count; i++)
     {
@@ -291,7 +291,7 @@ struct VkPhysicalDeviceObject : public std::enable_shared_from_this<VkPhysicalDe
         return format;
       }
     }
-    std::cout << "Unsupported format\n";
+    DEBUG("Unsupported format");
     exit(-1);
   }
   VkSampleCountFlagBits getMaxUsableSampleCount()
@@ -345,7 +345,7 @@ struct VkPhysicalDeviceObject : public std::enable_shared_from_this<VkPhysicalDe
         return i;
       }
     }
-    std::cout << "specified queue is not found\n";
+    DEBUG("specified queue is not found");
     return -1;
   }
 
@@ -490,7 +490,7 @@ struct VkSurfaceObject
                                          &support);
     if (support == VK_FALSE)
     {
-      std::cout << "This device does not support present feature\n";
+      DEBUG("This device does not support present feature\n");
       exit(-1);
     }
 
@@ -506,16 +506,17 @@ struct VkSurfaceObject
                                          &count,
                                          m_supportedFormat.data());
 
-    std::cout << "Supported Format: " << count << "\n";
+    DEBUG("Supported Format: %d.\n", count);
     for (int i = 0; i < count; i++)
     {
       if (m_supportedFormat[i].format == VK_FORMAT_B8G8R8A8_UNORM &&
           m_supportedFormat[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
       {
-        std::cout << "Format Support";
+        DEBUG("RGBA8888 VK_COLOR_SPACE_SRGB_NONLINEAR_KHR is supported");
       }
-      std::cout << m_supportedFormat[i].format << " " << m_supportedFormat[i].colorSpace
-                << std::endl;
+      DEBUG("Supported Format: %d, %d",
+            m_supportedFormat[i].format,
+            m_supportedFormat[i].colorSpace);
     }
 
     vkGetPhysicalDeviceSurfacePresentModesKHR(*(m_device->physicalDevice),
@@ -663,7 +664,7 @@ struct VkSwapchainObject
 
     if (vkCreateSwapchainKHR(*(this->device), &swapInfo, nullptr, &oldSwapchain) != VK_SUCCESS)
     {
-      std::cout << "unable to create swap chain\n";
+      DEBUG("Unable to create swap chain\n");
       exit(-1);
     }
 
@@ -674,7 +675,7 @@ struct VkSwapchainObject
     VkResult res = vkGetSwapchainImagesKHR(*this->device, swapChainKHR, &imageCount, nullptr);
     if (res != VK_SUCCESS)
     {
-      std::cout << "unable to get number of images in swap chain\n";
+      DEBUG("Unable to get number of images in swap chain");
       exit(-1);
     }
 

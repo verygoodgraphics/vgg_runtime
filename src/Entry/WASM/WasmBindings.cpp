@@ -17,7 +17,7 @@
 #ifdef EMSCRIPTEN
 
 #include "BrowserMainComposer.hpp"
-#include "Version.h"
+#include "Utility/Version.h"
 
 #include <emscripten.h>
 
@@ -28,8 +28,8 @@ extern "C"
     std::vector<char> buf(data, data + len);
     auto& mainComposer = VggBrowser::mainComposer();
     return mainComposer.controller()->start(buf,
-                                             "/asset/vgg-format.json",
-                                             "/asset/vgg_layout.json");
+                                            "/asset/vgg-format.json",
+                                            "/asset/vgg_layout.json");
   }
 
   bool is_latest_version(const char* version)

@@ -44,7 +44,7 @@ struct BackendInfo
 struct ExporterInfo
 {
   std::string buildCommit;
-  EBackend backend;
+  BackendInfo backend;
 };
 
 using OutputCallback = std::function<bool(const std::string&, const std::vector<char>&)>;

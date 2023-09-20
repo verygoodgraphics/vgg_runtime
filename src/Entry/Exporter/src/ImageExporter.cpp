@@ -141,6 +141,14 @@ void Exporter::info(ExporterInfo* info)
 {
   if (info)
   {
+    info->backend.type = EBackend::VULKAN;
+    info->backend.majorVersion = 1;
+    info->backend.minorVersion = 3;
+#ifdef GIT_COMMIT
+    info->buildCommit = GIT_COMMIT;
+#else
+    info->buildCommit = "";
+#endif
   }
 }
 

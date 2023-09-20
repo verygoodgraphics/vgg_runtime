@@ -1,4 +1,5 @@
 #include "Application/MainComposer.hpp"
+#include "Async.hpp"
 
 #include "Editor.hpp"
 

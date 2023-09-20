@@ -26,12 +26,12 @@ else()
 endif()
 
 target_include_directories(vgg_adapter PUBLIC
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_SOURCE_DIR}/include
 )
 
 target_include_directories(vgg_adapter PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Adapter
+  ${CMAKE_SOURCE_DIR}/include/Adapter
   ${SDL2_INCLUDE_DIRS}/..
 )
 

@@ -4,7 +4,7 @@
 #include "AppScene.h"
 #include "Event/Event.h"
 #include "Scene/VGGLayer.h"
-#include "Application/interface/Event/EventListener.h"
+#include "Event/EventListener.h"
 #include "Utility/interface/CappingProfiler.hpp"
 
 namespace VGG::app

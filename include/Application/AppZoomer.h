@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Application/interface/Event/EventListener.h"
+#include "Event/EventListener.h"
 #include "Scene/Zoomer.h"
-#include "Application/interface/Event/EventAPI.h"
+#include "Event/EventAPI.h"
 
 namespace VGG::app
 {

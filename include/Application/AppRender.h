@@ -1,5 +1,5 @@
 #pragma once
-#include "Application/interface/Event/Event.h"
+#include "Event/Event.h"
 #include "Scene/VGGLayer.h"
 #include "AppScene.h"
 #include "AppRenderable.h"

@@ -6,14 +6,14 @@
 #include <argparse/argparse.hpp>
 #include <filesystem>
 
-#include <Scene/Scene.h>
-#include <ConfigMananger.h>
+#include "Scene/Scene.h"
+#include "Utility/ConfigMananger.h"
 #include "Application/AppRender.h"
-#include "Application/include/Application/AppRenderable.h"
+#include "Application/AppRenderable.h"
 #include "Domain/Layout/ExpandSymbol.hpp"
-#include "Event/Event.h"
-#include "Event/EventListener.h"
-#include "Event/Keycode.h"
+#include "Application/Event/Event.h"
+#include "Application/Event/EventListener.h"
+#include "Application/Event/Keycode.h"
 #include "Scene/GraphicsLayer.h"
 #include "Scene/VGGLayer.h"
 #include "loader.h"

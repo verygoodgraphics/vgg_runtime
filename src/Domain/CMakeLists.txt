@@ -19,16 +19,16 @@ add_library(vgg_domain STATIC
 )
 
 target_include_directories(vgg_domain PUBLIC
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_SOURCE_DIR}/include
   ${VGG_CONTRIB_JSON_INCLUDE}
   ${VGG_CONTRIB_RXCPP_INCLUDE}
   ${VGG_CONTRIB_VALIJSON_INCLUDE}
 )
 target_include_directories(vgg_domain PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Domain
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Domain/Layout
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Domain/Model
+  ${CMAKE_SOURCE_DIR}/include/Domain
+  ${CMAKE_SOURCE_DIR}/include/Domain/Layout
+  ${CMAKE_SOURCE_DIR}/include/Domain/Model
   ${VGG_CONTRIB_BOOST_INCLUDE}
 )
 target_link_libraries(vgg_domain

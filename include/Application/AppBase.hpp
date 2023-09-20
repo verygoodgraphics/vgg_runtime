@@ -21,8 +21,8 @@
 #include <exception>
 #include <Scene/GraphicsContext.h>
 #include <Scene/VGGLayer.h>
-#include <Application/include/Application/AppRender.h>
-#include <Application/interface/Event/EventListener.h>
+#include <Application/AppRender.h>
+#include <Application/Event/EventListener.h>
 #include <Utility/interface/Log.h>
 
 using namespace VGG;

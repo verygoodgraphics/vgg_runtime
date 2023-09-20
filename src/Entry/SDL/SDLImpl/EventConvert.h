@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Event/Event.h"
-#include "Event/Keycode.h"
+#include "Application/Event/Event.h"
+#include "Application/Event/Keycode.h"
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_keyboard.h>
 #include <SDL2/SDL_keycode.h>

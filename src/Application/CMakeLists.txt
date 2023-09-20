@@ -11,12 +11,11 @@ add_library(vgg_application STATIC
 
 target_include_directories(vgg_application PUBLIC
   ${CMAKE_SOURCE_DIR}/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/interface
 )
 
 target_include_directories(vgg_application PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Application
+  ${CMAKE_SOURCE_DIR}/include/Application
+  ${CMAKE_CURRENT_SOURCE_DIR}/Include
   ${CMAKE_CURRENT_SOURCE_DIR}
 )
 

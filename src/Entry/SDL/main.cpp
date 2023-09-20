@@ -2,7 +2,7 @@
 #include "SDLImpl/SdlMouse.hpp"
 
 #include "Adapter/NativeComposer.hpp"
-#include "AppBase.hpp"
+#include "Application/AppBase.hpp"
 #include "Application/MainComposer.hpp"
 #include "Application/Mouse.hpp"
 #include "Application/UIApplication.hpp"

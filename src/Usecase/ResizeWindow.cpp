@@ -1,4 +1,4 @@
-#include "ResizeWindow.hpp"
+#include "UseCase/ResizeWindow.hpp"
 
 namespace VGG
 {

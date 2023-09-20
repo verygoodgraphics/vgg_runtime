@@ -4,7 +4,7 @@
 #include "Domain/RawJsonDocument.hpp"
 #include "Domain/SchemaValidJsonDocument.hpp"
 #include "Domain/UndoRedoJsonDocument.hpp"
-#include "Log.h"
+#include "Utility/Log.h"
 
 #include <string>
 #include <vector>

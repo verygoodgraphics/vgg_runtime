@@ -2,7 +2,7 @@
 #include <filesystem>
 #include <fstream>
 #include <optional>
-#include <Utility/interface/ConfigMananger.h>
+#include <Utility/ConfigMananger.h>
 #include "Scene/Scene.h"
 #include "loader.h"
 #include "Entry/Exporter/interface/ImageExporter.hpp"

@@ -1,6 +1,6 @@
 #pragma once
 #include "Core/Node.h"
-#include <Utility/interface/ConfigMananger.h>
+#include <Utility/ConfigMananger.h>
 #include <core/SkString.h>
 #include <string>
 #include <unordered_map>

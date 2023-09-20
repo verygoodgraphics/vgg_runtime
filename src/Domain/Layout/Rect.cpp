@@ -1,6 +1,6 @@
 #include "Rect.hpp"
 
-#include "VggFloat.hpp"
+#include "Utility/VggFloat.hpp"
 
 using namespace VGG;
 using namespace VGG::Layout;

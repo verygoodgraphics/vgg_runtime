@@ -1,7 +1,7 @@
 #pragma once
 
 #include "App.hpp"
-#include "Log.h"
+#include "Utility/Log.h"
 #include <optional>
 
 using namespace VGG;

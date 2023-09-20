@@ -17,7 +17,7 @@
 #ifndef __VERSION_HPP__
 #define __VERSION_HPP__
 
-#include "Log.h"
+#include "Utility/Log.h"
 
 namespace VGG
 {

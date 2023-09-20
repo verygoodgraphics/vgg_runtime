@@ -6,7 +6,7 @@
 #include <Scene/Scene.h>
 #include <Core/FontManager.h>
 #include <Core/PaintNode.h>
-#include <Utility/interface/ConfigMananger.h>
+#include <Utility/ConfigMananger.h>
 #include <algorithm>
 #include <exception>
 #include <memory>

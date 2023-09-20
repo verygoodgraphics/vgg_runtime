@@ -3,7 +3,7 @@
 #include "Domain/Daruma.hpp"
 #include "Domain/DarumaContainer.hpp"
 #include "Adapter/NativeComposer.hpp"
-#include "DIContainer.hpp"
+#include "Utility/DIContainer.hpp"
 #include "mocks/MockPresenter.hpp"
 
 #include "rxcpp/rx.hpp"
@@ -71,7 +71,7 @@ protected:
   {
     EXPECT_CALL(*m_mockPresenter, getObservable())
       .WillOnce(Return(m_fakeViewSubject.get_observable()));
-    m_sut.reset(new Controller(m_runLoop, m_mockPresenter, {}));
+    m_sut.reset(new Controller(m_runLoop, {}, m_mockPresenter, {}));
   }
 
   void loopUntilExit()

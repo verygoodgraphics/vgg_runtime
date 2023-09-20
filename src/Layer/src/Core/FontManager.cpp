@@ -3,11 +3,11 @@
 #include <core/SkFont.h>
 #include <filesystem>
 
-#include "ConfigMananger.h"
+#include "Utility/ConfigMananger.h"
 #include "Core/Node.h"
 #include "SkiaImpl/VSkFontMgr.h"
 #include "nlohmann/json.hpp"
-#include "Utility/interface/Log.h"
+#include "Utility/Log.h"
 
 #define VGG_USE_EMBBED_FONT 1
 

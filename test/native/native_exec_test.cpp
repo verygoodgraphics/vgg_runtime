@@ -1,6 +1,6 @@
 #include "Adapter/NativeExec.hpp"
 
-#include "Log.h"
+#include "Utility/Log.h"
 #include "test_config.hpp"
 
 #include <gtest/gtest.h>

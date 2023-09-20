@@ -1,6 +1,6 @@
 #include "Rule.hpp"
 
-#include "Log.h"
+#include "Utility/Log.h"
 
 namespace VGG
 {

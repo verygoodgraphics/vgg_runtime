@@ -3,7 +3,7 @@
 #include "VggEnv.hpp"
 #include "Domain/VggExec.hpp"
 #include "Domain/VggJSEngine.hpp"
-#include "DIContainer.hpp"
+#include "Utility/DIContainer.hpp"
 
 class PlatformComposer
 {

@@ -3,7 +3,7 @@
 #include "Domain/JsonSchemaValidator.hpp"
 #include "Domain/Layout/Helper.hpp"
 #include "Domain/Model/JsonKeys.hpp"
-#include "VggFloat.hpp"
+#include "Utility/VggFloat.hpp"
 
 #include "domain/model/daruma_helper.hpp"
 #include "test_config.hpp"

@@ -2,7 +2,7 @@
 
 #include "Domain/Daruma.hpp"
 #include "ExpandSymbol.hpp"
-#include "Log.h"
+#include "Utility/Log.h"
 #include "Node.hpp"
 
 #include "nlohmann/json.hpp"

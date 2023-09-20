@@ -1,4 +1,4 @@
-#include "Usecase/StartRunning.hpp"
+#include "UseCase/StartRunning.hpp"
 
 #include "domain/model/daruma_helper.hpp"
 #include "test_config.hpp"

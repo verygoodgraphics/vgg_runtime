@@ -4,7 +4,7 @@
 #include "Application/Controller.hpp"
 #include "Application/UIView.hpp"
 
-#include "ConfigMananger.h"
+#include "Utility/ConfigMananger.h"
 #include "Event/Event.h"
 #include "Event/EventListener.h"
 #include "Event/Keycode.h"

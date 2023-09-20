@@ -14,13 +14,21 @@ Layout::Layout::Layout(std::shared_ptr<Daruma> model)
 {
   ASSERT(m_model);
 
-  auto designJson = ExpandSymbol{ m_model->designDoc()->content() }();
   if (m_model->layoutDoc())
   {
-    collectRules(m_model->layoutDoc()->content());
-  }
+    auto result =
+      ExpandSymbol{ m_model->designDoc()->content(), m_model->layoutDoc()->content() }.run();
 
-  m_model->setRuntimeDesignDoc(designJson);
+    m_model->setRuntimeDesignDoc(std::get<0>(result));
+    m_model->setRuntimeLayoutDoc(std::get<1>(result));
+
+    collectRules(m_model->runtimeLayoutDoc()->content());
+  }
+  else
+  {
+    auto designJson = ExpandSymbol{ m_model->designDoc()->content() }();
+    m_model->setRuntimeDesignDoc(designJson);
+  }
 
   // initial config
   auto document = layoutTree();

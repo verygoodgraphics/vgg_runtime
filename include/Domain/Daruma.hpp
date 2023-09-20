@@ -52,7 +52,8 @@ public:
 
   JsonDocumentPtr runtimeDesignDoc();
   JsonDocumentPtr runtimeLayoutDoc();
-  void setRuntimeDesignDoc(const nlohmann::json& desingJson);
+  void setRuntimeDesignDoc(const nlohmann::json& designJson);
+  void setRuntimeLayoutDoc(const nlohmann::json& layoutJson);
 
   JsonDocumentPtr& designDoc();
   JsonDocumentPtr& layoutDoc();

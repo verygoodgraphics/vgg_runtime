@@ -40,7 +40,7 @@ void LayoutNode::applyLayout()
 
   if (m_autoLayout)
   {
-    m_autoLayout->applyLayout(false);
+    m_autoLayout->applyLayout(true);
   }
 }
 

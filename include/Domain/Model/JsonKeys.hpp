@@ -24,6 +24,7 @@ constexpr auto K_MASTER_ID = "masterId";
 constexpr auto K_MATRIX = "matrix";
 constexpr auto K_NAME = "name";
 constexpr auto K_OBJECT_ID = "objectId";
+constexpr auto K_OBJ = "obj";
 constexpr auto K_OUTLINE_MASK_BY = "outlineMaskBy";
 constexpr auto K_OVERRIDE_CLASS = "overrideValue";
 constexpr auto K_OVERRIDE_NAME = "overrideName";

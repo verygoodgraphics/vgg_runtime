@@ -37,7 +37,7 @@ protected:
       return false;
     }
 
-    auto& obj = layoutJson["obj"];
+    auto& obj = layoutJson[K_OBJ];
     if (!obj.is_array())
     {
       return false;
@@ -367,14 +367,14 @@ TEST_F(VggExpandSymbolTestSuite, ExpandLayout)
   auto result = sut.run();
 
   // Then
-  auto expandedDesignJson = std::get<0>(result);
-  Helper::write_json(expandedDesignJson,
-                     "/Users/houguanhua/code/vgg/vgg_runtime_B/test/testDataDir/instance_layout/"
-                     "1_instance_layout/_design.json");
+  // auto expandedDesignJson = std::get<0>(result);
+  // Helper::write_json(expandedDesignJson,
+  //                    "/Users/houguanhua/code/vgg/vgg_runtime_B/test/testDataDir/instance_layout/"
+  //                    "1_instance_layout/_design.json");
   auto expandedLayoutJson = std::get<1>(result);
-  Helper::write_json(expandedDesignJson,
-                     "/Users/houguanhua/code/vgg/vgg_runtime_B/test/testDataDir/instance_layout/"
-                     "1_instance_layout/_layout.json");
+  // Helper::write_json(expandedLayoutJson,
+  //                    "/Users/houguanhua/code/vgg/vgg_runtime_B/test/testDataDir/instance_layout/"
+  //                    "1_instance_layout/_layout.json");
 
   EXPECT_TRUE(hasLayoutRule(expandedLayoutJson, "401:2"));
   EXPECT_TRUE(hasLayoutRule(expandedLayoutJson, "401:2__1:3"));

@@ -159,7 +159,7 @@ void Layout::Layout::collectRules(const nlohmann::json& json)
     return;
   }
 
-  auto& obj = json["obj"];
+  auto& obj = json[K_OBJ];
   if (obj.is_array())
   {
     for (auto& item : obj)

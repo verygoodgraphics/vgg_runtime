@@ -20,6 +20,7 @@ class ExpandSymbol
 {
   const nlohmann::json m_designJson;
   const nlohmann::json m_layoutJson;
+  nlohmann::json m_outLayoutJson;
   std::unordered_map<std::string, nlohmann::json> m_masters;
   std::unordered_map<std::string, nlohmann::json> m_layoutRules;
 
@@ -77,6 +78,8 @@ private:
                         const std::string& idPrefix);
   std::string join(const std::vector<std::string>& instanceIdStack,
                    const std::string& seperator = K_SEPARATOR);
+
+  void copyLayoutRule(const std::string& srcId, const std::string& dstId);
 };
 } // namespace Layout
 

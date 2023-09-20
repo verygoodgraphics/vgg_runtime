@@ -25,14 +25,15 @@ nlohmann::json ExpandSymbol::operator()()
 std::pair<nlohmann::json, nlohmann::json> ExpandSymbol::run()
 {
   collectMaster(m_designJson);
+  collectLayoutRules(m_layoutJson);
 
   auto designJson = m_designJson;
-  auto layoutJson = m_layoutJson;
+  m_outLayoutJson = m_layoutJson;
 
   std::vector<std::string> instanceIdStack{};
   expandInstance(designJson, instanceIdStack);
 
-  return { designJson, layoutJson };
+  return { designJson, m_outLayoutJson };
 }
 
 void ExpandSymbol::collectMaster(const nlohmann::json& json)
@@ -55,6 +56,26 @@ void ExpandSymbol::collectMaster(const nlohmann::json& json)
   for (auto& el : json.items())
   {
     collectMaster(el.value());
+  }
+}
+
+void ExpandSymbol::collectLayoutRules(const nlohmann::json& layoutJson)
+{
+  if (!layoutJson.is_object())
+  {
+    return;
+  }
+
+  auto& obj = layoutJson[K_OBJ];
+  if (!obj.is_array())
+  {
+    return;
+  }
+
+  for (auto& item : obj)
+  {
+    auto& id = item[K_ID];
+    m_layoutRules[id] = item;
   }
 }
 
@@ -103,7 +124,8 @@ void ExpandSymbol::expandInstance(nlohmann::json& json,
         auto newInstanceId = join(instanceIdStack);
         auto idPrefix = newInstanceId + K_SEPARATOR;
         DEBUG("ExpandSymbol: instance id: %s -> %s", instanceId.c_str(), newInstanceId.c_str());
-        json[K_ID] = newInstanceId;                    // self
+        json[K_ID] = newInstanceId; // self
+        copyLayoutRule(masterId, newInstanceId);
         makeIdUnique(json[K_CHILD_OBJECTS], idPrefix); // children
         // 2.2. update mask by: id -> unique id
         makeMaskIdUnique(json[K_CHILD_OBJECTS], json, idPrefix);
@@ -583,6 +605,7 @@ void ExpandSymbol::makeIdUnique(nlohmann::json& json, const std::string& idPrefi
             objectId.c_str(),
             newObjectId.c_str());
       json[K_ID] = newObjectId;
+      copyLayoutRule(objectId, newObjectId);
     }
   }
 
@@ -896,4 +919,21 @@ void ExpandSymbol::scalePoint(nlohmann::json& json,
     DEBUG("ExpandSymbol::scalePoint, %s -> %f, %f", json[key].dump().c_str(), point.x, point.y);
     json[key] = point;
   }
+}
+
+void ExpandSymbol::copyLayoutRule(const std::string& srcId, const std::string& dstId)
+{
+  if (srcId == dstId)
+  {
+    return;
+  }
+
+  if (m_layoutRules.find(srcId) == m_layoutRules.end())
+  {
+    return;
+  }
+
+  auto rule = m_layoutRules[srcId];
+  rule[K_ID] = dstId;
+  m_outLayoutJson[K_OBJ].push_back(std::move(rule));
 }

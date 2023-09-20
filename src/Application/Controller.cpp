@@ -37,7 +37,10 @@ Controller::Controller(std::shared_ptr<RunLoop> runLoop,
 {
   assert(m_runLoop);
 
-  m_editor->setListener(m_reporter);
+  if (m_editor)
+  {
+    m_editor->setListener(m_reporter);
+  }
 }
 
 bool Controller::start(const std::string& filePath,

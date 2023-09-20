@@ -1,9 +1,9 @@
 #include "VggSdk.hpp"
 
-#include "DIContainer.hpp"
+#include "Utility/DIContainer.hpp"
 #include "Domain/DarumaContainer.hpp"
 #include "Domain/Saver/DirSaver.hpp"
-#include "Log.h"
+#include "Utility/Log.h"
 #include "UseCase/SaveModel.hpp"
 
 #ifdef EMSCRIPTEN

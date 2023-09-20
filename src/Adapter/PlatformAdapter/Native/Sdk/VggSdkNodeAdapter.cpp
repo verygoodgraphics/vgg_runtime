@@ -3,7 +3,7 @@
 #include "PlatformAdapter/Native/Sdk/AdapterHelper.hpp"
 
 #include "Application/VggSdk.hpp"
-#include "DIContainer.hpp"
+#include "Utility/DIContainer.hpp"
 
 #include <string>
 #include <cassert>

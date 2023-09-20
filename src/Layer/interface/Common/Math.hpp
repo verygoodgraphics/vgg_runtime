@@ -20,7 +20,7 @@
 #include <cmath>
 #include <vector>
 
-#include <Utility/interface/Log.h>
+#include <Utility/Log.h>
 
 #define FZERO 1e-10
 #define FTOLER 1e-2

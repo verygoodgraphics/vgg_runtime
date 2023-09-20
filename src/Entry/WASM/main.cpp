@@ -2,7 +2,7 @@
 #include "BrowserMainComposer.hpp"
 
 #include "Application/UIApplication.hpp"
-#include "ConfigMananger.h"
+#include "Utility/ConfigMananger.h"
 
 #ifdef EMSCRIPTEN
 #include <emscripten/emscripten.h>

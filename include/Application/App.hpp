@@ -68,8 +68,8 @@
 #include "Application/Controller.hpp"
 #include "Application/UIView.hpp"
 #include "Common/Math.hpp"
-#include "CappingProfiler.hpp"
-#include "Log.h"
+#include "Utility/CappingProfiler.hpp"
+#include "Utility/Log.h"
 
 namespace VGG
 {

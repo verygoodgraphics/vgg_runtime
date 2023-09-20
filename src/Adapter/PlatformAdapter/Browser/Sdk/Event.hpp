@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Domain/Event.hpp"
-#include "Log.h"
+#include "Utility/Log.h"
 
 namespace VGG
 {

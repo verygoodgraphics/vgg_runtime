@@ -2,7 +2,7 @@
 
 #include "Domain/ModelEvent.hpp"
 #include "Domain/Daruma.hpp"
-#include "Log.h"
+#include "Utility/Log.h"
 #include "UIEvent.hpp"
 #include "UIView.hpp"
 #include "ViewModel.hpp"

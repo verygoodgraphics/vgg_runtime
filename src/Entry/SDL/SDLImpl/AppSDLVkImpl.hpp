@@ -4,7 +4,7 @@
 #include "Event/EventAPI.h"
 #include <Application/AppBase.hpp>
 #include <SDL2/SDL_video.h>
-#include <Utility/interface/Log.h>
+#include <Utility/Log.h>
 #include "EventConvert.h"
 #include "nlohmann/json.hpp"
 #include <memory>

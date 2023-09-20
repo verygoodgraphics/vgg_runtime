@@ -1,6 +1,6 @@
 #include "SchemaValidJsonDocument.hpp"
 
-#include "Log.h"
+#include "Utility/Log.h"
 
 using json = nlohmann::json;
 

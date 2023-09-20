@@ -23,7 +23,7 @@
 #include <Scene/VGGLayer.h>
 #include <Application/AppRender.h>
 #include <Application/Event/EventListener.h>
-#include <Utility/interface/Log.h>
+#include <Utility/Log.h>
 
 using namespace VGG;
 namespace VGG::app

@@ -2,7 +2,7 @@
 #include "nlohmann/json.hpp"
 #include <Reader/IReader.hpp>
 #include <filesystem>
-#include <Utility/interface/ConfigMananger.h>
+#include <Utility/ConfigMananger.h>
 
 namespace fs = std::filesystem;
 using namespace VGG;

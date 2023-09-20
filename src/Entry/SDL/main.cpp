@@ -6,7 +6,7 @@
 #include "Application/MainComposer.hpp"
 #include "Application/Mouse.hpp"
 #include "Application/UIApplication.hpp"
-#include "ConfigMananger.h"
+#include "Utility/ConfigMananger.h"
 #include "Scene/Scene.h"
 
 #include <argparse/argparse.hpp>

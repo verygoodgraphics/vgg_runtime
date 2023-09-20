@@ -1,6 +1,6 @@
 #include "JsonSchemaValidator.hpp"
 
-#include "Log.h"
+#include "Utility/Log.h"
 
 using nlohmann::json;
 

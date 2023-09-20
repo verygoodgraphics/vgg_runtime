@@ -7,7 +7,7 @@
 #include "core/SkCanvas.h"
 #include "core/SkImage.h"
 #include <filesystem>
-#include "ConfigMananger.h"
+#include "Utility/ConfigMananger.h"
 #include "glm/gtx/matrix_transform_2d.hpp"
 #include "glm/matrix.hpp"
 #include <fstream>

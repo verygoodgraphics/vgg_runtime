@@ -8,5 +8,6 @@ class VggJSEngineMock : public VggJSEngine
 {
 public:
   MOCK_METHOD(bool, evalScript, (const std::string& code), (override));
+  MOCK_METHOD(bool, evalModule, (const std::string& code), (override));
   MOCK_METHOD(bool, evalModule, (const std::string& code, VGG::EventPtr event), (override));
 };

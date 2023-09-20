@@ -6,7 +6,7 @@
 #include "Scene/Zoomer.h"
 #include "Scene/Scene.h"
 #include "Common/Math.hpp"
-#include "CappingProfiler.hpp"
+#include "Utility/CappingProfiler.hpp"
 
 #include "SkiaImpl/VSkiaContext.hpp"
 #include "SkiaImpl/VSkiaGL.hpp"

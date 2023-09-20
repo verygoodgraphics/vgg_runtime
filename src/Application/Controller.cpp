@@ -10,7 +10,7 @@
 #include "Domain/SchemaValidJsonDocument.hpp"
 #include "Domain/UndoRedoJsonDocument.hpp"
 #include "Domain/VggExec.hpp"
-#include "Log.h"
+#include "Utility/Log.h"
 #include "UseCase/EditModel.hpp"
 #include "UseCase/ModelChanged.hpp"
 #include "UseCase/ResizeWindow.hpp"

@@ -7,6 +7,7 @@
 #include <stack>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace VGG
@@ -18,18 +19,25 @@ constexpr auto K_SEPARATOR = "__";
 class ExpandSymbol
 {
   const nlohmann::json m_designJson;
+  const nlohmann::json m_layoutJson;
   std::unordered_map<std::string, nlohmann::json> m_masters;
+  std::unordered_map<std::string, nlohmann::json> m_layoutRules;
 
 public:
-  ExpandSymbol(const nlohmann::json& designJson)
+  ExpandSymbol(const nlohmann::json& designJson,
+               const nlohmann::json& layoutJson = nlohmann::json())
     : m_designJson(designJson)
+    , m_layoutJson(layoutJson)
   {
   }
 
   nlohmann::json operator()();
+  std::pair<nlohmann::json, nlohmann::json> run(); // 0: design.json; 1: layout.json
 
 private:
   void collectMaster(const nlohmann::json& json);
+  void collectLayoutRules(const nlohmann::json& json);
+
   void expandInstance(nlohmann::json& json,
                       std::vector<std::string>& instanceIdStack,
                       bool again = false);

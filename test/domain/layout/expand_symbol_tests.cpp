@@ -29,6 +29,31 @@ protected:
     std::string out_file_path = "tmp/design.json";
     Helper::write_json(json, out_file_path);
   }
+
+  bool hasLayoutRule(const nlohmann::json& layoutJson, const std::string& id)
+  {
+    if (!layoutJson.is_object())
+    {
+      return false;
+    }
+
+    auto& obj = layoutJson["obj"];
+    if (!obj.is_array())
+    {
+      return false;
+    }
+
+    for (auto& item : obj)
+    {
+      auto& jsonId = item[K_ID];
+      if (jsonId == id)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
 };
 
 TEST_F(VggExpandSymbolTestSuite, Smoke)
@@ -327,4 +352,31 @@ TEST_F(VggExpandSymbolTestSuite, validate_expanded_design_json)
   json schema = Helper::load_json("../../asset/vgg-format.json");
   validator.setRootSchema(schema);
   EXPECT_TRUE(validator.validate(result_json));
+}
+
+TEST_F(VggExpandSymbolTestSuite, ExpandLayout)
+{
+  // Given
+  std::string designFilePath = "testDataDir/instance_layout/1_instance_layout/design.json";
+  std::string layoutFilePath = "testDataDir/instance_layout/1_instance_layout/layout.json";
+  auto designJson = Helper::load_json(designFilePath);
+  auto layoutJson = Helper::load_json(layoutFilePath);
+  ExpandSymbol sut{ designJson, layoutJson };
+
+  // When
+  auto result = sut.run();
+
+  // Then
+  auto expandedDesignJson = std::get<0>(result);
+  Helper::write_json(expandedDesignJson,
+                     "/Users/houguanhua/code/vgg/vgg_runtime_B/test/testDataDir/instance_layout/"
+                     "1_instance_layout/_design.json");
+  auto expandedLayoutJson = std::get<1>(result);
+  Helper::write_json(expandedDesignJson,
+                     "/Users/houguanhua/code/vgg/vgg_runtime_B/test/testDataDir/instance_layout/"
+                     "1_instance_layout/_layout.json");
+
+  EXPECT_TRUE(hasLayoutRule(expandedLayoutJson, "401:2"));
+  EXPECT_TRUE(hasLayoutRule(expandedLayoutJson, "401:2__1:3"));
+  EXPECT_TRUE(hasLayoutRule(expandedLayoutJson, "401:2__1:4"));
 }

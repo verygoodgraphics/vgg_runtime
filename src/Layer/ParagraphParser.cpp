@@ -1,6 +1,6 @@
-#include "ParagraphParser.h"
-#include "Utility/Log.h"
-#include "VGG/Layer/Core/VType.h"
+#include "ParagraphParser.hpp"
+#include "Utility/Log.hpp"
+#include "VGG/Layer/Core/VType.hpp"
 
 #include <iterator>
 #include <list>

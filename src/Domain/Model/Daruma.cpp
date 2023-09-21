@@ -4,7 +4,7 @@
 #include "Loader/DirLoader.hpp"
 #include "Loader/ZipLoader.hpp"
 #include "SubjectJsonDocument.hpp"
-#include "Utility/Log.h"
+#include "Utility/Log.hpp"
 
 #include <boost/uuid/name_generator_sha1.hpp>
 #include <boost/uuid/uuid_io.hpp>

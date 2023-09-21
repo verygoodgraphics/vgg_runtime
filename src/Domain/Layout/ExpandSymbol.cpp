@@ -2,7 +2,7 @@
 
 #include "Helper.hpp"
 #include "JsonKeys.hpp"
-#include "Utility/Log.h"
+#include "Utility/Log.hpp"
 
 #include <algorithm>
 #include <fstream>

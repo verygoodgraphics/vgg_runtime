@@ -10,7 +10,7 @@ if(Vulkan_FOUND)
   find_package(Vulkan REQUIRED)
   target_link_libraries(vgg_exporter PUBLIC vgg_layer Vulkan::Vulkan vgg_domain)
 
-  target_include_directories(vgg_exporter PUBLIC ${CMAKE_SOURCE_DIR}/include/VGG)
+  target_include_directories(vgg_exporter PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
   install(TARGETS vgg_exporter DESTINATION lib COMPONENT vgg_module_exporter)
   install(FILES ${CMAKE_SOURCE_DIR}/include/VGG/Exporter/ImageExporter.hpp DESTINATION include COMPONENT vgg_module_exporter)

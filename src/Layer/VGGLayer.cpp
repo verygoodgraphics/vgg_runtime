@@ -1,10 +1,10 @@
-#include "VGG/Layer/VGGLayer.h"
-#include "VGG/Layer/Renderer.h"
-#include "VGG/Layer/Zoomer.h"
-#include "VGG/Layer/Scene.h"
-#include "VGG/Layer/Graphics/GraphicsLayer.h"
-#include "VGG/Layer/Graphics/GraphicsContext.h"
-#include "VGG/Layer/Core/Node.h"
+#include "VGG/Layer/VGGLayer.hpp"
+#include "VGG/Layer/Renderer.hpp"
+#include "VGG/Layer/Zoomer.hpp"
+#include "VGG/Layer/Scene.hpp"
+#include "VGG/Layer/Graphics/GraphicsLayer.hpp"
+#include "VGG/Layer/Graphics/GraphicsContext.hpp"
+#include "VGG/Layer/Core/Node.hpp"
 
 #include "Utility/CappingProfiler.hpp"
 

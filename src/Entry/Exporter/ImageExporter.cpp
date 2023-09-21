@@ -1,9 +1,9 @@
 #include "ContextVk.hpp"
 #include "Domain/Layout/ExpandSymbol.hpp"
-#include "Utility/ConfigMananger.h"
-#include "VGG/Layer/Core/PaintNode.h"
-#include "VGG/Layer/VGGLayer.h"
-#include "VGG/Layer/Scene.h"
+#include "Utility/ConfigManager.hpp"
+#include "VGG/Layer/Core/PaintNode.hpp"
+#include "VGG/Layer/VGGLayer.hpp"
+#include "VGG/Layer/Scene.hpp"
 #include "VGG/Exporter/ImageExporter.hpp"
 
 #include <iostream>

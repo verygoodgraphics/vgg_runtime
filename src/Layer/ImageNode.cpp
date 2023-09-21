@@ -1,7 +1,7 @@
-#include "VSkia.h"
-#include "VGG/Layer/Core/ImageNode.h"
-#include "VGG/Layer/Core/Node.h"
-#include "VGG/Layer/Core/VType.h"
+#include "VSkia.hpp"
+#include "VGG/Layer/Core/ImageNode.hpp"
+#include "VGG/Layer/Core/Node.hpp"
+#include "VGG/Layer/Core/PaintNode.hpp"
 
 #include <glm/matrix.hpp>
 #include <include/core/SkBlendMode.h>

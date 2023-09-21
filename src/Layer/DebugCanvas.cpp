@@ -1,4 +1,4 @@
-#include "DebugCanvas.h"
+#include "DebugCanvas.hpp"
 
 void DebugCanvas::drawRects(SkColor color, std::vector<sktxt::TextBox>& result, bool fill)
 {

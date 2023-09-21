@@ -1,6 +1,6 @@
 #include "PlatformAdapter/Native/Exec/NativeExecImpl.hpp"
 
-#include "Utility/Log.h"
+#include "Utility/Log.hpp"
 
 #undef INFO
 #define INFO(msg, ...)

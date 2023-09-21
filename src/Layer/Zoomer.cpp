@@ -1,5 +1,5 @@
-#include "Utility/Log.h"
-#include "VGG/Layer/Zoomer.h"
+#include "Utility/Log.hpp"
+#include "VGG/Layer/Zoomer.hpp"
 
 #include <core/SkCanvas.h>
 

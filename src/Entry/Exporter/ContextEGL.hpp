@@ -2,13 +2,13 @@
 
 #include "Application/AppBase.hpp"
 #include <EGL/egl.h>
-#include "Core/FontManager.h"
-#include "Core/PaintNode.h"
+#include "Core/FongManager.hpp"
+#include "Core/PaintNode.hpp"
 #include <fstream>
-#include "Application/Event/EventListener.h"
-#include "Scene/GraphicsContext.h"
-#include "Scene/GraphicsLayer.h"
-#include "Scene/VGGLayer.h"
+#include "Application/Event/EventListener.hpp"
+#include "Scene/GraphicsContext.hpp"
+#include "Scene/GraphicsLayer.hpp"
+#include "Scene/VGGLayer.hpp"
 #include <algorithm>
 #include <exception>
 #include <memory>

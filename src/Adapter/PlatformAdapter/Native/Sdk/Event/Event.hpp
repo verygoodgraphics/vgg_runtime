@@ -4,7 +4,7 @@
 
 #include "node_api.h"
 
-#include "Utility/Log.h"
+#include "Utility/Log.hpp"
 
 #include <functional>
 #include <mutex>

@@ -1,11 +1,11 @@
-#include "Loader.h"
-#include "Utility/ConfigMananger.h"
-#include "Utility/Log.h"
-#include "VGG/Layer/Scene.h"
-#include "VGG/Layer/Renderer.h"
-#include "VGG/Layer/Zoomer.h"
-#include "VGG/Layer/Core/PaintNode.h"
-#include "VGG/Layer/Core/Node.h"
+#include "Loader.hpp"
+#include "Utility/ConfigManager.hpp"
+#include "Utility/Log.hpp"
+#include "VGG/Layer/Scene.hpp"
+#include "VGG/Layer/Renderer.hpp"
+#include "VGG/Layer/Zoomer.hpp"
+#include "VGG/Layer/Core/PaintNode.hpp"
+#include "VGG/Layer/Core/Node.hpp"
 
 #include <glm/gtx/matrix_transform_2d.hpp>
 #include <glm/matrix.hpp>

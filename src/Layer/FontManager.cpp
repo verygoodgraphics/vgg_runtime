@@ -1,8 +1,8 @@
-#include "VSkFontMgr.h"
-#include "Utility/ConfigMananger.h"
-#include "Utility/Log.h"
-#include "VGG/Layer/Core/Node.h"
-#include "VGG/Layer/FontManager.h"
+#include "VSkFontMgr.hpp"
+#include "Utility/ConfigManager.hpp"
+#include "Utility/Log.hpp"
+#include "VGG/Layer/Core/Node.hpp"
+#include "VGG/Layer/FontManager.hpp"
 
 #include <core/SkFont.h>
 #include <nlohmann/json.hpp>

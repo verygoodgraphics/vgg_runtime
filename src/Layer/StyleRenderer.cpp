@@ -1,5 +1,5 @@
-#include "StyleRenderer.h"
-#include "VSkia.h"
+#include "StyleRenderer.hpp"
+#include "VSkia.hpp"
 
 using namespace VGG;
 

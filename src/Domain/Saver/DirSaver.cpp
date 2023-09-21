@@ -1,6 +1,6 @@
 #include "DirSaver.hpp"
 
-#include "Utility/Log.h"
+#include "Utility/Log.hpp"
 
 #include <cstring>
 #include <fstream>

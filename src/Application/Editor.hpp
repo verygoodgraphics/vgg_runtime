@@ -1,11 +1,11 @@
 #pragma once
 
-#include "AppRenderable.h"
+#include "AppRenderable.hpp"
 #include "UIEvent.hpp"
 
 #include "Application/Mouse.hpp"
 #include "Domain/Layout/Node.hpp"
-#include "Utility/Log.h"
+#include "Utility/Log.hpp"
 
 #include <memory>
 #include <vector>

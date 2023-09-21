@@ -1,15 +1,15 @@
 #pragma once
 
-#include "Application/AppRender.h"
+#include "Application/AppRender.hpp"
 #include "Application/Controller.hpp"
 #include "Application/UIView.hpp"
-#include "Utility/ConfigMananger.h"
-#include "Event/Event.h"
-#include "Event/EventListener.h"
-#include "Event/Keycode.h"
+#include "Utility/ConfigManager.hpp"
+#include "Event/Event.hpp"
+#include "Event/EventListener.hpp"
+#include "Event/Keycode.hpp"
 
-#include "VGG/Layer/Scene.h"
-#include "VGG/Layer/VGGLayer.h"
+#include "VGG/Layer/Scene.hpp"
+#include "VGG/Layer/VGGLayer.hpp"
 
 #include <nlohmann/json.hpp>
 

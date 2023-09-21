@@ -6,8 +6,8 @@
 #include "Application/MainComposer.hpp"
 #include "Application/Mouse.hpp"
 #include "Application/UIApplication.hpp"
-#include "Utility/ConfigMananger.h"
-#include "VGG/Layer/Scene.h"
+#include "Utility/ConfigManager.hpp"
+#include "VGG/Layer/Scene.hpp"
 
 #include <argparse/argparse.hpp>
 

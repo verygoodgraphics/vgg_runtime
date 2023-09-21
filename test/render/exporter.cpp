@@ -1,8 +1,8 @@
-#include "loader.h"
-#include "Utility/ConfigMananger.h"
+#include "loader.hpp"
+#include "Utility/ConfigManager.hpp"
 
 #include "VGG/Exporter/ImageExporter.hpp"
-#include "VGG/Layer/Scene.h"
+#include "VGG/Layer/Scene.hpp"
 
 #include <argparse/argparse.hpp>
 #include <filesystem>

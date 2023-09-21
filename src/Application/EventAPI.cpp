@@ -1,7 +1,7 @@
 
-#include "Event/Keycode.h"
-#include "Utility/Log.h"
-#include "Event/EventAPI.h"
+#include "Event/Keycode.hpp"
+#include "Utility/Log.hpp"
+#include "Event/EventAPI.hpp"
 
 static std::unique_ptr<EventAPI> g_vggEventAPIImpl = nullptr;
 

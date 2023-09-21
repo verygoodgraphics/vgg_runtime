@@ -1,11 +1,11 @@
 #pragma once
 
-#include "AppScene.h"
+#include "AppScene.hpp"
 #include "UIEvent.hpp"
 #include "ViewModel.hpp"
 
 #include "Domain/Layout/Node.hpp"
-#include "VGG/Layer/Scene.h"
+#include "VGG/Layer/Scene.hpp"
 
 #include <nlohmann/json.hpp>
 

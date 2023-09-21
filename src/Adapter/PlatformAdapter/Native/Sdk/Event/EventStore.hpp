@@ -5,7 +5,7 @@
 #include "MouseEvent.hpp"
 #include "KeyboardEvent.hpp"
 #include "TouchEvent.hpp"
-#include "Utility/Log.h"
+#include "Utility/Log.hpp"
 
 namespace VGG
 {

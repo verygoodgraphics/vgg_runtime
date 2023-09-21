@@ -2,10 +2,6 @@ add_executable(sdl_runtime)
 target_sources(sdl_runtime PRIVATE "main.cpp")
 target_link_libraries(sdl_runtime PRIVATE vgg_application vgg_adapter)
 
-
-# workaroud for App.hpp
-# App.hpp should no longer be used, use AppBase.hpp instead
-# see the VGG_USE_VULKAN usage in App.hpp 
 find_package(Vulkan)
 if(Vulkan_FOUND)
   target_compile_definitions(sdl_runtime PRIVATE VGG_USE_VULKAN)

@@ -4,7 +4,7 @@
 #include "Domain/DarumaContainer.hpp"
 #include "Domain/Model/JsonKeys.hpp"
 #include "Domain/VggExec.hpp"
-#include "Utility/Log.h"
+#include "Utility/Log.hpp"
 
 #include <sstream>
 

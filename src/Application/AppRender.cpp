@@ -3,9 +3,10 @@
 #include "AppRenderable.h"
 #include "AppScene.h"
 #include "Event/Event.h"
-#include "Scene/VGGLayer.h"
 #include "Event/EventListener.h"
 #include "Utility/CappingProfiler.hpp"
+
+#include "VGG/Layer/VGGLayer.h"
 
 namespace VGG::app
 {

@@ -1,12 +1,6 @@
 #pragma once
-#include <exception>
-#include <fstream>
-#include <nlohmann/json.hpp>
-#include <memory>
-#include <argparse/argparse.hpp>
-#include <filesystem>
 
-#include "Scene/Scene.h"
+#include "loader.h"
 #include "Utility/ConfigMananger.h"
 #include "Application/AppRender.h"
 #include "Application/AppRenderable.h"
@@ -14,9 +8,16 @@
 #include "Application/Event/Event.h"
 #include "Application/Event/EventListener.h"
 #include "Application/Event/Keycode.h"
-#include "Scene/GraphicsLayer.h"
-#include "Scene/VGGLayer.h"
-#include "loader.h"
+
+#include "VGG/Layer/Scene.h"
+#include "VGG/Layer/VGGLayer.h"
+
+#include <exception>
+#include <fstream>
+#include <nlohmann/json.hpp>
+#include <memory>
+#include <argparse/argparse.hpp>
+#include <filesystem>
 #include <filesystem>
 namespace fs = std::filesystem;
 

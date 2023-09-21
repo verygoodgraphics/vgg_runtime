@@ -13,7 +13,7 @@ if(Vulkan_FOUND)
   target_include_directories(vgg_exporter PUBLIC ${CMAKE_SOURCE_DIR}/include/VGG)
 
   install(TARGETS vgg_exporter DESTINATION lib COMPONENT vgg_module_exporter)
-  install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/interface/ImageExporter.hpp DESTINATION include COMPONENT vgg_module_exporter)
+  install(FILES ${CMAKE_SOURCE_DIR}/include/VGG/Exporter/ImageExporter.hpp DESTINATION include COMPONENT vgg_module_exporter)
 else()
   message("Exporter requires vulkan backend, please check your vulkan installation")
 endif()

@@ -5,7 +5,7 @@
 #include "ViewModel.hpp"
 
 #include "Domain/Layout/Node.hpp"
-#include "Scene/Scene.h"
+#include "VGG/Layer/Scene.h"
 
 #include <nlohmann/json.hpp>
 

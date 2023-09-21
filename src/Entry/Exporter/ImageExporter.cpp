@@ -1,12 +1,12 @@
-#include <iostream>
-#include "Domain/Layout/ExpandSymbol.hpp"
-#include "Exporter/ImageExporter.hpp"
 #include "ContextVk.hpp"
-#include <Scene/VGGLayer.h>
-#include <Scene/Scene.h>
-#include <Core/FontManager.h>
-#include <Core/PaintNode.h>
-#include <Utility/ConfigMananger.h>
+#include "Domain/Layout/ExpandSymbol.hpp"
+#include "Utility/ConfigMananger.h"
+#include "VGG/Layer/Core/PaintNode.h"
+#include "VGG/Layer/VGGLayer.h"
+#include "VGG/Layer/Scene.h"
+#include "VGG/Exporter/ImageExporter.hpp"
+
+#include <iostream>
 #include <algorithm>
 #include <exception>
 #include <memory>

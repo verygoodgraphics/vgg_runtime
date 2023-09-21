@@ -1,8 +1,10 @@
 #pragma once
 #include "Event/Event.h"
-#include "Scene/VGGLayer.h"
 #include "AppScene.h"
 #include "AppRenderable.h"
+
+#include "VGG/Layer/VGGLayer.h"
+
 #include <queue>
 
 namespace VGG::app

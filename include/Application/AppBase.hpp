@@ -15,16 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
+#include "Application/AppRender.h"
+#include "Application/Event/EventListener.h"
+#include "Utility/Log.h"
+
+#include "VGG/Layer/Graphics/GraphicsContext.h"
+#include "VGG/Layer/VGGLayer.h"
 
 #include <memory>
 #include <optional>
 #include <exception>
-
-#include "Scene/GraphicsContext.h"
-#include "Scene/VGGLayer.h"
-#include "Application/AppRender.h"
-#include "Application/Event/EventListener.h"
-#include "Utility/Log.h"
 
 using namespace VGG;
 namespace VGG::app

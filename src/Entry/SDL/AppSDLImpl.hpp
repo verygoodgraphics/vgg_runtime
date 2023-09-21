@@ -5,9 +5,10 @@
 #include "Application/AppBase.hpp"
 #include "Application/Event/EventAPI.h"
 #include "EventConvert.h"
-#include "Scene/ContextInfoGL.hpp"
-#include "Scene/GraphicsContext.h"
 #include "Utility/Log.h"
+
+#include "VGG/Layer/Graphics/GraphicsContext.h"
+#include "VGG/Layer/Graphics/ContextInfoGL.hpp"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>

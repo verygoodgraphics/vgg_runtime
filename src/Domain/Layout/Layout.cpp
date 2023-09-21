@@ -22,23 +22,21 @@ Layout::Layout::Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc, boo
   }
 
   // initial config
-  auto root = layoutTree();
-  configureNodeAutoLayout(root);
+  buildLayoutTree();
+  configureNodeAutoLayout(m_layoutTree);
 }
 
 void Layout::Layout::layout(Size size)
 {
-  if (size == m_size)
+  // update root frame
+  auto root = layoutTree();
+  auto frame = root->frame();
+  if (frame.size == size)
   {
     return;
   }
 
-  m_size = size;
-
-  // update root frame
-  auto root = layoutTree();
-  auto frame = root->frame();
-  frame.size = m_size;
+  frame.size = size;
   root->setFrame(frame);
 
   if (m_isRootTree)
@@ -47,7 +45,7 @@ void Layout::Layout::layout(Size size)
     for (auto& page : root->children())
     {
       auto frame = page->frame();
-      frame.size = m_size;
+      frame.size = size;
       page->setFrame(frame);
     }
   }
@@ -56,18 +54,13 @@ void Layout::Layout::layout(Size size)
   root->layoutIfNeeded();
 }
 
-std::shared_ptr<LayoutNode> Layout::Layout::layoutTree()
+void Layout::Layout::buildLayoutTree()
 {
-  if (m_layoutTree)
-  {
-    return m_layoutTree;
-  }
-
   auto& designJson = m_designDoc->content();
   if (!designJson.is_object())
   {
     WARN("invalid design file");
-    return {};
+    return;
   }
 
   if (m_isRootTree)
@@ -85,10 +78,6 @@ std::shared_ptr<LayoutNode> Layout::Layout::layoutTree()
     json::json_pointer path;
     m_layoutTree = createOneLayoutNode(designJson, path, nullptr);
   }
-
-  m_size = m_layoutTree->frame().size;
-
-  return m_layoutTree;
 }
 
 std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(const nlohmann::json& j,

@@ -1,5 +1,5 @@
-#include "SDLImpl/AppSDLImpl.hpp"
-#include "SDLImpl/SdlMouse.hpp"
+#include "AppSDLImpl.hpp"
+#include "SdlMouse.hpp"
 
 #include "Adapter/NativeComposer.hpp"
 #include "Application/AppBase.hpp"

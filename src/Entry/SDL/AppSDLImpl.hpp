@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Entry/SDL/SDLImpl/EventAPISDLImpl.h"
+#include "EventAPISDLImpl.h"
 
 #include "Application/AppBase.hpp"
 #include "Application/Event/EventAPI.h"

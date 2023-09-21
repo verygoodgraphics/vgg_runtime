@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Entry/SDL/SDLImpl/EventAPISDLImpl.h"
-#include "Entry/Common/GPU/Vulkan/VulkanObject.hpp"
+#include "EventAPISDLImpl.h"
+#include "../Common/GPU/Vulkan/VulkanObject.hpp"
 #include "EventConvert.h"
 
 #include "Application/AppBase.hpp"

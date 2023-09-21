@@ -133,8 +133,8 @@ void ExpandSymbol::expandInstance(nlohmann::json& json,
         // 3 overrides and scale
         // 3.1 master id overrides
         processMasterIdOverrides(json, instanceIdStack);
-        // 3.2: scale before bounds overrides
-        scaleFromMaster(json, masterJson);
+        // 3.2: scale or layout before bounds overrides
+        resizeInstance(json, masterJson);
         // 3.3 bounds overrides must be processed after scaling
         processBoundsOverrides(json, instanceIdStack);
         // 3.4 other overrides
@@ -167,7 +167,7 @@ void ExpandSymbol::expandInstance(nlohmann::json& json,
   }
 }
 
-void ExpandSymbol::scaleFromMaster(nlohmann::json& instance, nlohmann::json& master)
+void ExpandSymbol::resizeInstance(nlohmann::json& instance, nlohmann::json& master)
 {
   auto masterSize = master[K_BOUNDS].get<Rect>().size;
   auto instanceSize = instance[K_BOUNDS].get<Rect>().size;
@@ -176,6 +176,20 @@ void ExpandSymbol::scaleFromMaster(nlohmann::json& instance, nlohmann::json& mas
     return;
   }
 
+  if (hasLayoutRule(master[K_ID]))
+  {
+    layoutInstance(instance, masterSize, instanceSize);
+  }
+  else
+  {
+    scaleInstance(instance, masterSize, instanceSize);
+  }
+}
+
+void ExpandSymbol::scaleInstance(nlohmann::json& instance,
+                                 const Size& masterSize,
+                                 const Size& instanceSize)
+{
   normalizeChildrenGeometry(instance[K_CHILD_OBJECTS], masterSize);
   recalculateIntanceChildrenGeometry(instance[K_CHILD_OBJECTS], instanceSize);
 }
@@ -779,6 +793,20 @@ bool ExpandSymbol::applyReferenceOverride(nlohmann::json& destObjectJson,
   return false;
 }
 
+void ExpandSymbol::resizeTree(nlohmann::json& rootJson, const nlohmann::json& newBoundsJson)
+{
+  bool hasLayoutRule = false; // todo
+  if (hasLayoutRule)
+  {
+    bool isLayoutContainer = false;
+    layoutTree(rootJson, newBoundsJson);
+  }
+  else
+  {
+    scaleTree(rootJson, newBoundsJson);
+  }
+}
+
 void ExpandSymbol::scaleTree(nlohmann::json& rootJson, const nlohmann::json& newBoundsJson)
 {
   Rect newBounds = newBoundsJson;
@@ -929,7 +957,7 @@ void ExpandSymbol::copyLayoutRule(const std::string& srcId, const std::string& d
     return;
   }
 
-  if (m_layoutRules.find(srcId) == m_layoutRules.end())
+  if (!hasLayoutRule(srcId))
   {
     return;
   }
@@ -965,4 +993,16 @@ void ExpandSymbol::removeInvalidLayoutRule(const nlohmann::json& json)
   {
     removeInvalidLayoutRule(el.value());
   }
+}
+
+void ExpandSymbol::layoutInstance(nlohmann::json& instance,
+                                  const Size& masterSize,
+                                  const Size& instanceSize)
+{
+  // todo
+}
+
+void ExpandSymbol::layoutTree(nlohmann::json& rootJson, const nlohmann::json& newBoundsJson)
+{
+  // todo
 }

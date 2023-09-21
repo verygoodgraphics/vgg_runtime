@@ -69,12 +69,4 @@ public:
 
 void setGlobalConfig(const std::string& fileName);
 
-std::tuple<std::string, std::vector<std::pair<std::string, std::vector<char>>>> render(
-  const nlohmann::json& j,
-  const std::map<std::string, std::vector<char>>& resources,
-  int imageQuality,
-  int resolutionLevel,
-  const std::string& configFile,
-  const std::string& fontCollectionName);
-
 }; // namespace VGG::exporter

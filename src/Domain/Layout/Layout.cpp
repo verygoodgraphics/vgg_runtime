@@ -9,25 +9,15 @@
 using namespace VGG;
 using namespace VGG::Layout::Internal::Rule;
 
-Layout::Layout::Layout(std::shared_ptr<Daruma> model)
-  : m_model{ model }
+Layout::Layout::Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc)
+  : m_designDoc{ designDoc }
+  , m_layoutDoc{ layoutDoc }
 {
-  ASSERT(m_model);
+  ASSERT(m_designDoc);
 
-  if (m_model->layoutDoc())
+  if (m_layoutDoc)
   {
-    auto result =
-      ExpandSymbol{ m_model->designDoc()->content(), m_model->layoutDoc()->content() }.run();
-
-    m_model->setRuntimeDesignDoc(std::get<0>(result));
-    m_model->setRuntimeLayoutDoc(std::get<1>(result));
-
-    collectRules(m_model->runtimeLayoutDoc()->content());
-  }
-  else
-  {
-    auto designJson = ExpandSymbol{ m_model->designDoc()->content() }();
-    m_model->setRuntimeDesignDoc(designJson);
+    collectRules(m_layoutDoc->content());
   }
 
   // initial config
@@ -69,7 +59,7 @@ std::shared_ptr<LayoutNode> Layout::Layout::layoutTree()
     return m_layoutTree;
   }
 
-  auto& designJson = m_model->runtimeDesignDoc()->content();
+  auto& designJson = m_designDoc->content();
   if (!designJson.is_object())
   {
     WARN("invalid design file");
@@ -109,7 +99,7 @@ std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(const nlohmann::
   frame.origin.y *= FLIP_Y_FACTOR;
 
   auto node = std::make_shared<LayoutNode>(currentPath.to_string(), frame);
-  node->setViewModel(m_model->runtimeDesignDoc());
+  node->setViewModel(m_designDoc);
   if (parent)
   {
     parent->addChild(node);
@@ -185,7 +175,7 @@ void Layout::Layout::configureNodeAutoLayout(std::shared_ptr<LayoutNode> node)
 {
   std::shared_ptr<VGG::Layout::Internal::Rule::Rule> rule;
 
-  auto& designJson = m_model->runtimeDesignDoc()->content();
+  auto& designJson = m_designDoc->content();
   if (node->path() != "/")
   {
     auto& json = designJson[nlohmann::json::json_pointer{ node->path() }];

@@ -10,10 +10,7 @@ class StartRunning
   std::shared_ptr<Layout::Layout> m_layout;
 
 public:
-  StartRunning(std::shared_ptr<Daruma> model)
-    : m_layout{ new Layout::Layout{ model } }
-  {
-  }
+  StartRunning(std::shared_ptr<Daruma> model);
 
   void layout(Layout::Size size)
   {

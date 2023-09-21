@@ -3,7 +3,7 @@
 #include "Utility/DIContainer.hpp"
 #include "Domain/DarumaContainer.hpp"
 #include "Domain/Saver/DirSaver.hpp"
-#include "Utility/Log.h"
+#include "Utility/Log.hpp"
 #include "UseCase/SaveModel.hpp"
 
 #ifdef EMSCRIPTEN

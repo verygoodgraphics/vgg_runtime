@@ -1,14 +1,14 @@
 #pragma once
 
-#include "EventAPISDLImpl.h"
+#include "EventAPISDLImpl.hpp"
 #include "../Common/GPU/Vulkan/VulkanObject.hpp"
-#include "EventConvert.h"
+#include "EventConvert.hpp"
 
 #include "Application/AppBase.hpp"
-#include "Application/Event/EventAPI.h"
-#include "Scene/ContextInfoVulkan.hpp"
-#include "Scene/GraphicsContext.h"
-#include "Utility/Log.h"
+#include "Application/Event/EventAPI.hpp"
+#include "VGG/Layer/Graphics/ContextInfoVulkan.hpp"
+#include "VGG/Layer/Graphics/GraphicsContext.hpp"
+#include "Utility/Log.hpp"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>

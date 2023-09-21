@@ -1,4 +1,4 @@
-#include "VGG/Layer/Renderable.h"
+#include "VGG/Layer/Renderable.hpp"
 
 #include <core/SkCanvas.h>
 

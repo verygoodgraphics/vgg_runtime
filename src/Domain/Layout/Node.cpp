@@ -5,7 +5,7 @@
 #include "JsonKeys.hpp"
 #include "Rect.hpp"
 
-#include "Utility/Log.h"
+#include "Utility/Log.hpp"
 
 #undef DEBUG
 #define DEBUG(msg, ...)

@@ -1,8 +1,8 @@
 #include "Editor.hpp"
 #include "Application/UIView.hpp"
-#include "Utility/Log.h"
+#include "Utility/Log.hpp"
 
-#include "VGG/Layer/Zoomer.h"
+#include "VGG/Layer/Zoomer.hpp"
 
 #include <include/core/SkCanvas.h>
 

@@ -1,12 +1,11 @@
 
-#include "Application/AppRender.h"
-#include "AppRenderable.h"
-#include "AppScene.h"
-#include "Event/Event.h"
-#include "Event/EventListener.h"
+#include "Application/AppRender.hpp"
+#include "AppRenderable.hpp"
+#include "AppScene.hpp"
+#include "Event/EventListener.hpp"
 #include "Utility/CappingProfiler.hpp"
 
-#include "VGG/Layer/VGGLayer.h"
+#include "VGG/Layer/VGGLayer.hpp"
 
 namespace VGG::app
 {

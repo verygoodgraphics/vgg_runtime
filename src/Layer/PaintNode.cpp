@@ -1,10 +1,10 @@
-#include "VGG/Layer/Core/PaintNode.h"
-#include "VGG/Layer/Core/Node.h"
-#include "VGG/Layer/Core/VType.h"
+#include "VGG/Layer/Core/VType.hpp"
+#include "VGG/Layer/Core/PaintNode.hpp"
+#include "VGG/Layer/Core/Node.hpp"
 
-#include "VSkia.h"
-#include "StyleRenderer.h"
-#include "RenderState.h"
+#include "VSkia.hpp"
+#include "StyleRenderer.hpp"
+#include "RenderState.hpp"
 
 #include <core/SkPath.h>
 #include <core/SkCanvas.h>

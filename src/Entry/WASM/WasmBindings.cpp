@@ -17,7 +17,7 @@
 #ifdef EMSCRIPTEN
 
 #include "BrowserMainComposer.hpp"
-#include "Utility/Version.h"
+#include "Utility/Version.hpp"
 
 #include <emscripten.h>
 

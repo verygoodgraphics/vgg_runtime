@@ -1,10 +1,10 @@
-#include "TextNodePrivate.h"
-#include "ParagraphParser.h"
-#include "VSkia.h"
+#include "TextNodePrivate.hpp"
+#include "ParagraphParser.hpp"
+#include "VSkia.hpp"
 
-#include "VGG/Layer/Core/TextNode.h"
-#include "VGG/Layer/Core/VType.h"
-#include "VGG/Layer/FontManager.h"
+#include "VGG/Layer/Core/TextNode.hpp"
+#include "VGG/Layer/Core/VType.hpp"
+#include "VGG/Layer/FontManager.hpp"
 
 #include <core/SkCanvas.h>
 #include <core/SkColor.h>

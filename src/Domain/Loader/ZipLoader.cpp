@@ -2,7 +2,7 @@
 
 #include "zip.h"
 
-#include "Utility/Log.h"
+#include "Utility/Log.hpp"
 
 namespace VGG
 {

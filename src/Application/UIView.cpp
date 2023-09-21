@@ -1,8 +1,8 @@
 #include "UIView.hpp"
 
-#include "Event/Event.h"
-#include "Event/EventAPI.h"
-#include "Event/Keycode.h"
+#include "Event/Event.hpp"
+#include "Event/EventAPI.hpp"
+#include "Event/Keycode.hpp"
 
 using namespace VGG;
 using namespace VGG::Layout;

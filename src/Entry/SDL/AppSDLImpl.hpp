@@ -1,13 +1,13 @@
 #pragma once
 
-#include "EventAPISDLImpl.h"
+#include "EventAPISDLImpl.hpp"
 
 #include "Application/AppBase.hpp"
-#include "Application/Event/EventAPI.h"
-#include "EventConvert.h"
-#include "Utility/Log.h"
+#include "Application/Event/EventAPI.hpp"
+#include "EventConvert.hpp"
+#include "Utility/Log.hpp"
 
-#include "VGG/Layer/Graphics/GraphicsContext.h"
+#include "VGG/Layer/Graphics/GraphicsContext.hpp"
 #include "VGG/Layer/Graphics/ContextInfoGL.hpp"
 
 #include <SDL2/SDL.h>

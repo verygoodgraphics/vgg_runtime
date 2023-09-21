@@ -1,6 +1,6 @@
 #include "AutoLayout.hpp"
 
-#include "Utility/Log.h"
+#include "Utility/Log.hpp"
 #include "Rule.hpp"
 #include "Node.hpp"
 

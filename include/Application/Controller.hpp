@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Application/AppRenderable.h"
-#include "Application/AppScene.h"
+#include "Application/AppRenderable.hpp"
+#include "Application/AppScene.hpp"
 #include "Application/RunLoop.hpp"
 
 #include "Domain/Layout/Layout.hpp"

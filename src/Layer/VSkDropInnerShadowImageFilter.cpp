@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-#include "VSkImageFilters.h"
+#include "VSkImageFilters.hpp"
 
 #include <include/core/SkCanvas.h>
 #include <include/effects/SkImageFilters.h>

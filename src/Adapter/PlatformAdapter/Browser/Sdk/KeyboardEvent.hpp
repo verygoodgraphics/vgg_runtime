@@ -1,7 +1,7 @@
 #pragma once
 
 #include "UIEvent.hpp"
-#include "Utility/Log.h"
+#include "Utility/Log.hpp"
 
 #include <memory>
 

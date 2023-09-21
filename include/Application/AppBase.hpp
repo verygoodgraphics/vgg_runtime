@@ -15,12 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "Application/AppRender.h"
-#include "Application/Event/EventListener.h"
-#include "Utility/Log.h"
+#include "Application/AppRender.hpp"
+#include "Application/Event/EventListener.hpp"
+#include "Utility/Log.hpp"
 
-#include "VGG/Layer/Graphics/GraphicsContext.h"
-#include "VGG/Layer/VGGLayer.h"
+#include "VGG/Layer/Graphics/GraphicsContext.hpp"
+#include "VGG/Layer/VGGLayer.hpp"
 
 #include <memory>
 #include <optional>

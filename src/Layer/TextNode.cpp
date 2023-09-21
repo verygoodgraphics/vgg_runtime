@@ -1,12 +1,12 @@
-#include "VSkFontMgr.h"
-#include "TextNodePrivate.h"
+#include "VSkFontMgr.hpp"
+#include "TextNodePrivate.hpp"
 
-#include "VGG/Layer/Core/TextNode.h"
-#include "VGG/Layer/Core/Attrs.h"
-#include "VGG/Layer/Core/Node.h"
-#include "VGG/Layer/Core/PaintNode.h"
-#include "VGG/Layer/Core/VType.h"
-#include "VGG/Layer/FontManager.h"
+#include "VGG/Layer/Core/TextNode.hpp"
+#include "VGG/Layer/Core/Attrs.hpp"
+#include "VGG/Layer/Core/Node.hpp"
+#include "VGG/Layer/Core/PaintNode.hpp"
+#include "VGG/Layer/Core/VType.hpp"
+#include "VGG/Layer/FontManager.hpp"
 
 #include <include/core/SkCanvas.h>
 #include <include/core/SkFont.h>

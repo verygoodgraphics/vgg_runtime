@@ -3,14 +3,13 @@
 #include "Application/AppRender.h"
 #include "Application/Controller.hpp"
 #include "Application/UIView.hpp"
-
 #include "Utility/ConfigMananger.h"
 #include "Event/Event.h"
 #include "Event/EventListener.h"
 #include "Event/Keycode.h"
-#include "Scene/GraphicsLayer.h"
-#include "Scene/Scene.h"
-#include "Scene/VGGLayer.h"
+
+#include "VGG/Layer/Scene.h"
+#include "VGG/Layer/VGGLayer.h"
 
 #include <nlohmann/json.hpp>
 

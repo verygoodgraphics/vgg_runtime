@@ -1,9 +1,5 @@
 include(ImportSkia)
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/Core CoreSrcVar)
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/SkiaImpl SkiaImplSrcVar)
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/Scene SceneSrcVar)
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/Reader ReaderSrcVar)
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src/Common CommonSrcVar)
+file(GLOB SrcVar *.cpp)
 if(LAYER_SHARED_LIBRARY)
   add_library(vgg_layer SHARED)
   target_compile_definitions(vgg_layer PUBLIC -DLAYER_SHARED_LIBRARY)
@@ -20,12 +16,11 @@ if(ENABLE_EMBBED_FONT)
   install(TARGETS zip DESTINATION lib COMPONENT vgg_module_zip)
 endif()
 
-target_sources(vgg_layer PRIVATE ${CoreSrcVar} ${SkiaImplSrcVar} ${SceneSrcVar} ${ReaderSrcVar} ${CommonSrcVar})
-target_include_directories(vgg_layer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/interface)
+target_sources(vgg_layer PRIVATE ${SrcVar})
+target_include_directories(vgg_layer PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
 target_include_directories(
   vgg_layer PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${VGG_CONTRIB_JSON_INCLUDE}
   ${VGG_CONTRIB_RAPIDFUZZCPP_INCLUDE})
 

@@ -7,7 +7,7 @@
 #include "Application/Mouse.hpp"
 #include "Application/UIApplication.hpp"
 #include "Utility/ConfigMananger.h"
-#include "Scene/Scene.h"
+#include "VGG/Layer/Scene.h"
 
 #include <argparse/argparse.hpp>
 

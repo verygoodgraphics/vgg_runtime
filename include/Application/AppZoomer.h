@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Event/EventListener.h"
-#include "Scene/Zoomer.h"
 #include "Event/EventAPI.h"
+
+#include "VGG/Layer/Zoomer.h"
 
 namespace VGG::app
 {

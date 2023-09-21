@@ -1,8 +1,8 @@
 #pragma once
+#include "../Common/GPU/Vulkan/VulkanContext.hpp"
 
-#include <Scene/GraphicsContext.h>
-#include <Scene/ContextInfoVulkan.hpp>
-#include <Entry/Common/GPU/Vulkan/VulkanContext.hpp>
+#include "VGG/Layer/Graphics/GraphicsContext.h"
+#include "VGG/Layer/Graphics/ContextInfoVulkan.hpp"
 
 namespace VGG::exporter
 {

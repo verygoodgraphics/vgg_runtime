@@ -1,8 +1,10 @@
 #pragma once
-#include "nlohmann/json.hpp"
-#include <Reader/IReader.hpp>
-#include <filesystem>
 #include "Utility/ConfigMananger.h"
+#include "VGG/Layer/IReader.hpp"
+
+#include <nlohmann/json.hpp>
+
+#include <filesystem>
 
 namespace fs = std::filesystem;
 using namespace VGG;

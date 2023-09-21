@@ -25,18 +25,17 @@ enum class ELayerError
 
 class GraphicsLayer : public std::enable_shared_from_this<GraphicsLayer>
 {
-  layer::GraphicsContext* m_ctx{ nullptr };
+  std::shared_ptr<layer::GraphicsContext> m_ctx{ nullptr };
 
 public:
-  std::optional<ELayerError> init(layer::GraphicsContext* ctx)
+  std::optional<ELayerError> init(std::shared_ptr<layer::GraphicsContext> ctx)
   {
     m_ctx = ctx;
-    m_ctx->addManagedLayer(shared_from_this());
     return onInit();
   }
   layer::GraphicsContext* context()
   {
-    return m_ctx;
+    return m_ctx.get();
   }
   virtual void beginFrame() = 0;
   virtual void render() = 0;
@@ -45,11 +44,7 @@ public:
 
   // After init, you must call resize with proper value so that render() could be called
   virtual void resize(int w, int h) = 0;
-  virtual ~GraphicsLayer()
-  {
-    // remove from mananged layer from context
-    // m_ctx->removeFromManagedLayer(shared_from_this());
-  }
+  virtual ~GraphicsLayer() = default;
 
 protected:
   virtual std::optional<ELayerError> onInit() = 0;

@@ -135,7 +135,7 @@ Exporter::Exporter()
   cfg.stencilBit = 8;
   cfg.multiSample = 0;
   d_impl->ctx->init(cfg);
-  d_impl->layer->init(d_impl->ctx.get());
+  d_impl->layer->init(d_impl->ctx);
 }
 
 void Exporter::info(ExporterInfo* info)
@@ -288,7 +288,7 @@ void render(const nlohmann::json& j,
     std::stringstream ss;
     std::vector<std::pair<std::string, std::vector<char>>> res;
     auto layer = std::make_shared<layer::VLayer>();
-    layer->init(ctx.get());
+    layer->init(ctx);
     layer->resize(maxSurfaceSize[0], maxSurfaceSize[1]);
 
     auto scene = std::make_shared<Scene>();

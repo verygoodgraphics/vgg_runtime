@@ -27,7 +27,6 @@ class Layout
 {
   JsonDocumentPtr m_designDoc;
   JsonDocumentPtr m_layoutDoc;
-  Size m_size;
   std::shared_ptr<LayoutNode> m_layoutTree;
   std::unordered_map<std::string, std::shared_ptr<Internal::Rule::Rule>> m_rules;
   bool m_isRootTree{ true }; // root document or fragment
@@ -36,9 +35,13 @@ public:
   Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc, bool isRootTree = true);
 
   void layout(Size size);
-  std::shared_ptr<LayoutNode> layoutTree();
+  std::shared_ptr<LayoutNode> layoutTree()
+  {
+    return m_layoutTree;
+  }
 
 private:
+  void buildLayoutTree();
   std::shared_ptr<LayoutNode> createOneLayoutNode(const nlohmann::json& j,
                                                   nlohmann::json::json_pointer currentPath,
                                                   std::shared_ptr<LayoutNode> parent);

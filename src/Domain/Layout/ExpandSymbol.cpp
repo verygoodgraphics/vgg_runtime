@@ -1005,10 +1005,14 @@ void ExpandSymbol::layoutInstance(nlohmann::json& instance,
   Layout layout{ JsonDocumentPtr{ new ReferenceJsonDocument{ instance } },
                  JsonDocumentPtr{ new ReferenceJsonDocument{ m_outLayoutJson } },
                  false };
-  // layout.layout(instanceSize); // not work, instance size is same as it is
+
+  // layout first, update instance size with rule size
   auto root = layout.layoutTree();
   root->setNeedLayout();
   root->layoutIfNeeded();
+
+  // layout with new size
+  layout.layout(instanceSize);
 }
 
 void ExpandSymbol::layoutTree(nlohmann::json& rootJson, const nlohmann::json& newBoundsJson)

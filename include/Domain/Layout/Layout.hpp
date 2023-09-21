@@ -25,13 +25,14 @@ struct Rule;
 
 class Layout
 {
-  std::shared_ptr<Daruma> m_model;
+  JsonDocumentPtr m_designDoc;
+  JsonDocumentPtr m_layoutDoc;
   Size m_size;
   std::shared_ptr<LayoutNode> m_layoutTree;
   std::unordered_map<std::string, std::shared_ptr<Internal::Rule::Rule>> m_rules;
 
 public:
-  Layout(std::shared_ptr<Daruma> model);
+  Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc);
 
   void layout(Size size);
   std::shared_ptr<LayoutNode> layoutTree();

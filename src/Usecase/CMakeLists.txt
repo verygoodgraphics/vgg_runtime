@@ -1,6 +1,7 @@
 add_library(vgg_usecase STATIC
   ModelChanged.cpp
   ResizeWindow.cpp
+  StartRunning.cpp
 )
 
 target_include_directories(vgg_usecase PUBLIC

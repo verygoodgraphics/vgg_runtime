@@ -1,4 +1,5 @@
 #include "Domain/Layout/Layout.hpp"
+#include "UseCase/StartRunning.hpp"
 
 #include "domain/model/daruma_helper.hpp"
 
@@ -30,7 +31,7 @@ TEST_F(VggLayoutTestSuite, Smoke)
   daruma->load(filePath);
 
   // When
-  Layout::Layout sut{ daruma };
+  Layout::Layout sut{ daruma->designDoc(), daruma->layoutDoc() };
 
   // Then
 }
@@ -43,7 +44,7 @@ TEST_F(VggLayoutTestSuite, Layout)
   std::string filePath = "testDataDir/layout/0_space_between/";
   daruma->load(filePath);
 
-  Layout::Layout sut{ daruma };
+  Layout::Layout sut{ daruma->designDoc(), daruma->layoutDoc() };
   Layout::Size windowSize{ 1400, 900 };
 
   // When
@@ -70,7 +71,7 @@ TEST_F(VggLayoutTestSuite, GridWrap)
   std::string filePath = "testDataDir/layout/1_grid_wrap/";
   daruma->load(filePath);
 
-  Layout::Layout sut{ daruma };
+  Layout::Layout sut{ daruma->designDoc(), daruma->layoutDoc() };
   Layout::Size windowSize{ 1400, 900 };
 
   // When
@@ -99,14 +100,15 @@ TEST_F(VggLayoutTestSuite, ScaleSubtree)
   std::string filePath = "testDataDir/layout/3_flex_with_symbol_instance/";
   daruma->load(filePath);
 
-  Layout::Layout sut{ daruma };
+  StartRunning startRunning{ daruma };
+  auto sut = startRunning.layout();
   Layout::Size windowSize{ 1400, 900 };
 
   // When
-  sut.layout(windowSize);
+  sut->layout(windowSize);
 
   // Then
-  auto tree = sut.layoutTree();
+  auto tree = sut->layoutTree();
   auto currentPage = tree->children()[1];
 
   auto container = currentPage->children()[0];

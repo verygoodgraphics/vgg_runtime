@@ -105,13 +105,16 @@ void LayoutNode::setFrame(const Layout::Rect& frame)
       auto boundsJson = objectJson[K_BOUNDS];
       auto matrixJson = objectJson[K_MATRIX];
 
-      to_json(frameJson, frame);
+      const Layout::Rect vggFrame{ { frame.origin.x, frame.origin.y * VGG::Layout::FLIP_Y_FACTOR },
+                                   frame.size };
 
-      boundsJson[K_WIDTH] = frame.size.width;
-      boundsJson[K_HEIGHT] = frame.size.height;
+      to_json(frameJson, vggFrame);
 
-      matrixJson[4] = frame.origin.x;
-      matrixJson[5] = frame.origin.y * VGG::Layout::FLIP_Y_FACTOR;
+      boundsJson[K_WIDTH] = vggFrame.size.width;
+      boundsJson[K_HEIGHT] = vggFrame.size.height;
+
+      matrixJson[4] = vggFrame.origin.x;
+      matrixJson[5] = vggFrame.origin.y;
 
       viewModel->replaceAt(path / K_FRAME, frameJson);
       viewModel->replaceAt(path / K_BOUNDS, boundsJson);

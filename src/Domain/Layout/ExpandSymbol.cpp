@@ -1,5 +1,8 @@
 #include "ExpandSymbol.hpp"
 
+#include "Layout.hpp"
+#include "ReferenceJsonDocument.hpp"
+
 #include "Helper.hpp"
 #include "JsonKeys.hpp"
 #include "Utility/Log.hpp"
@@ -438,7 +441,7 @@ void ExpandSymbol::processBoundsOverrides(nlohmann::json& instance,
     }
 
     auto value = overrideItem[K_OVERRIDE_VALUE];
-    scaleTree(*childObject, value);
+    resizeTree(*childObject, value);
   }
 }
 
@@ -795,10 +798,8 @@ bool ExpandSymbol::applyReferenceOverride(nlohmann::json& destObjectJson,
 
 void ExpandSymbol::resizeTree(nlohmann::json& rootJson, const nlohmann::json& newBoundsJson)
 {
-  bool hasLayoutRule = false; // todo
-  if (hasLayoutRule)
+  if (isLayoutNode(rootJson) && hasLayoutRule(rootJson[K_ID]))
   {
-    bool isLayoutContainer = false;
     layoutTree(rootJson, newBoundsJson);
   }
   else
@@ -964,6 +965,7 @@ void ExpandSymbol::copyLayoutRule(const std::string& srcId, const std::string& d
 
   auto rule = m_layoutRules[srcId];
   rule[K_ID] = dstId;
+  m_layoutRules[dstId] = rule;
   m_outLayoutJson[K_OBJ].push_back(std::move(rule));
 }
 
@@ -977,6 +979,7 @@ void ExpandSymbol::removeInvalidLayoutRule(const nlohmann::json& json)
   if (json.is_object() && json.contains(K_ID))
   {
     auto id = json[K_ID];
+    m_layoutRules.erase(id);
 
     auto& rules = m_outLayoutJson[K_OBJ];
     for (auto i = 0; i < rules[K_OBJ].size(); ++i)
@@ -999,10 +1002,20 @@ void ExpandSymbol::layoutInstance(nlohmann::json& instance,
                                   const Size& masterSize,
                                   const Size& instanceSize)
 {
-  // todo
+  Layout layout{ JsonDocumentPtr{ new ReferenceJsonDocument{ instance } },
+                 JsonDocumentPtr{ new ReferenceJsonDocument{ m_outLayoutJson } },
+                 false };
+  // layout.layout(instanceSize); // not work, instance size is same as it is
+  auto root = layout.layoutTree();
+  root->setNeedLayout();
+  root->layoutIfNeeded();
 }
 
 void ExpandSymbol::layoutTree(nlohmann::json& rootJson, const nlohmann::json& newBoundsJson)
 {
-  // todo
+  Rect newBounds = newBoundsJson;
+  Layout layout{ JsonDocumentPtr{ new ReferenceJsonDocument{ rootJson } },
+                 JsonDocumentPtr{ new ReferenceJsonDocument{ m_outLayoutJson } },
+                 false };
+  layout.layout(newBounds.size);
 }

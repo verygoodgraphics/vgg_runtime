@@ -34,7 +34,6 @@ class GraphicsContext : public std::enable_shared_from_this<GraphicsContext>
 private:
   ContextConfig m_config;
   ContextProperty m_property;
-  std::vector<std::weak_ptr<GraphicsLayer>> m_managedLayer;
   friend class GraphicsLayer;
 
 protected:
@@ -42,16 +41,6 @@ protected:
   float m_resolutionScale{ 1.0 };
 
 protected:
-  void addManagedLayer(std::shared_ptr<GraphicsLayer> layer)
-  {
-    m_managedLayer.push_back(std::move(layer));
-  }
-
-  void removeFromManagedLayer(std::shared_ptr<GraphicsLayer> layer)
-  {
-    WARN("Not implemeted");
-  }
-
 public:
   bool init(const ContextConfig& cfg)
   {
@@ -73,7 +62,6 @@ public:
   virtual bool makeCurrent() = 0;
   virtual void shutdown() = 0;
   virtual void* contextInfo() = 0;
-  // bool resize(int w, int h);
   virtual ~GraphicsContext() = default;
 
 protected:

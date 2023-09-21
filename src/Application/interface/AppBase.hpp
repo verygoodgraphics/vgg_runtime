@@ -131,7 +131,7 @@ private:
     if (m_appRender)
     {
       init(m_appConfig.graphicsContextConfig);
-      if (auto err = m_appRender->init(shared_from_this()))
+      if (auto err = m_appRender->init(this))
       {
         return AppError(AppError::EKind::RENDER_ENGINE_ERROR, "RENDER_ENGINE_ERROR");
       }

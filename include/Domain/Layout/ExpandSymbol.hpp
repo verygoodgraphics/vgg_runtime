@@ -42,16 +42,24 @@ private:
   void expandInstance(nlohmann::json& json,
                       std::vector<std::string>& instanceIdStack,
                       bool again = false);
-  void scaleFromMaster(nlohmann::json& instance, nlohmann::json& master);
+  void resizeInstance(nlohmann::json& instance, nlohmann::json& master);
 
+  void scaleInstance(nlohmann::json& instance, const Size& masterSize, const Size& instanceSize);
   void normalizeChildrenGeometry(nlohmann::json& json, const Size containerSize);
   void normalizePoint(nlohmann::json& json, const char* key, const Size& containerSize);
   void recalculateIntanceChildrenGeometry(nlohmann::json& json, Size containerSize);
   void recalculatePoint(nlohmann::json& json, const char* key, const Size& containerSize);
+
+  void layoutInstance(nlohmann::json& instance, const Size& masterSize, const Size& instanceSize);
+
+  void resizeTree(nlohmann::json& rootJson, const nlohmann::json& newBoundsJson);
+
   void scaleTree(nlohmann::json& rootJson, const nlohmann::json& newBoundsJson);
   void scaleTree(nlohmann::json& rootJson, float xScaleFactor, float yScaleFactor);
   void scaleContour(nlohmann::json& nodeJson, float xScaleFactor, float yScaleFactor);
   void scalePoint(nlohmann::json& json, const char* key, float xScaleFactor, float yScaleFactor);
+
+  void layoutTree(nlohmann::json& rootJson, const nlohmann::json& newBoundsJson);
 
   void processMasterIdOverrides(nlohmann::json& instance,
                                 const std::vector<std::string>& instanceIdStack);
@@ -81,6 +89,10 @@ private:
 
   void copyLayoutRule(const std::string& srcId, const std::string& dstId);
   void removeInvalidLayoutRule(const nlohmann::json& instanceChildren);
+  bool hasLayoutRule(const std::string& id)
+  {
+    return m_layoutRules.find(id) != m_layoutRules.end();
+  }
 };
 } // namespace Layout
 

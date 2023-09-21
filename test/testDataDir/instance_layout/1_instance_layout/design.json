@@ -389,7 +389,7 @@
           "bounds": {
             "class": "rect",
             "constrainProportions": false,
-            "width": 1400.0,
+            "width": 900.0,
             "height": 400.0,
             "x": 0,
             "y": 0
@@ -397,7 +397,7 @@
           "frame": {
             "class": "rect",
             "constrainProportions": false,
-            "width": 1400.0,
+            "width": 900.0,
             "height": 400.0,
             "x": 0.0,
             "y": -410.0
@@ -445,6 +445,21 @@
               ],
               "overrideName": "name",
               "overrideValue": "instance"
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "208:2"
+              ],
+              "overrideName": "bounds",
+              "overrideValue": {
+                "class": "rect",
+                "constrainProportions": false,
+                "width": 900.0,
+                "height": 400.0,
+                "x": 0,
+                "y": 0
+              }
             }
           ]
         }

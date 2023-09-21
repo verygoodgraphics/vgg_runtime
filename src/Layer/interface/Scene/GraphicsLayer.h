@@ -25,17 +25,17 @@ enum class ELayerError
 
 class GraphicsLayer : public std::enable_shared_from_this<GraphicsLayer>
 {
-  std::shared_ptr<layer::GraphicsContext> m_ctx{ nullptr };
+  layer::GraphicsContext* m_ctx{ nullptr };
 
 public:
-  std::optional<ELayerError> init(std::shared_ptr<layer::GraphicsContext> ctx)
+  std::optional<ELayerError> init(layer::GraphicsContext* ctx)
   {
     m_ctx = ctx;
     return onInit();
   }
   layer::GraphicsContext* context()
   {
-    return m_ctx.get();
+    return m_ctx;
   }
   virtual void beginFrame() = 0;
   virtual void render() = 0;

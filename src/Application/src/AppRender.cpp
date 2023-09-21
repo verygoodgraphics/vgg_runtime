@@ -108,7 +108,7 @@ bool AppRender::onEvent(UEvent e)
   {
     if (enableDrawPosition())
     {
-      drawPosition(e.motion.canvasX, e.motion.canvasY);
+      drawPosition(e.motion.windowX, e.motion.windowY);
     }
   }
   if (type == EEventType::VGG_APP_INIT)

@@ -78,6 +78,7 @@ int main(int argc, char** argv)
   {
     exporter::setGlobalConfig(cfg.value());
   }
+
   exporter::Exporter exporter;
 
   if (auto loadfile = program.present(POS_ARG_INPUT_FILE))

@@ -9,9 +9,10 @@
 using namespace VGG;
 using namespace VGG::Layout::Internal::Rule;
 
-Layout::Layout::Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc)
+Layout::Layout::Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc, bool isRootTree)
   : m_designDoc{ designDoc }
   , m_layoutDoc{ layoutDoc }
+  , m_isRootTree{ isRootTree }
 {
   ASSERT(m_designDoc);
 
@@ -21,8 +22,8 @@ Layout::Layout::Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc)
   }
 
   // initial config
-  auto document = layoutTree();
-  configureNodeAutoLayout(document);
+  auto root = layoutTree();
+  configureNodeAutoLayout(root);
 }
 
 void Layout::Layout::layout(Size size)
@@ -34,22 +35,25 @@ void Layout::Layout::layout(Size size)
 
   m_size = size;
 
-  // update document frame
-  auto document = layoutTree();
-  auto frame = document->frame();
+  // update root frame
+  auto root = layoutTree();
+  auto frame = root->frame();
   frame.size = m_size;
-  document->setFrame(frame);
+  root->setFrame(frame);
 
-  // udpate page frame
-  for (auto& page : document->children())
+  if (m_isRootTree)
   {
-    auto frame = page->frame();
-    frame.size = m_size;
-    page->setFrame(frame);
+    // udpate page frame
+    for (auto& page : root->children())
+    {
+      auto frame = page->frame();
+      frame.size = m_size;
+      page->setFrame(frame);
+    }
   }
 
   // layout
-  document->layoutIfNeeded();
+  root->layoutIfNeeded();
 }
 
 std::shared_ptr<LayoutNode> Layout::Layout::layoutTree()
@@ -66,13 +70,20 @@ std::shared_ptr<LayoutNode> Layout::Layout::layoutTree()
     return {};
   }
 
-  m_layoutTree.reset(new LayoutNode{ "/", {} });
-
-  json::json_pointer framesPath{ "/frames" };
-  for (auto i = 0; i < designJson[K_FRAMES].size(); ++i)
+  if (m_isRootTree)
   {
-    auto path = framesPath / i;
-    createOneLayoutNode(designJson[path], path, m_layoutTree);
+    m_layoutTree.reset(new LayoutNode{ "/", {} });
+    json::json_pointer framesPath{ "/frames" };
+    for (auto i = 0; i < designJson[K_FRAMES].size(); ++i)
+    {
+      auto path = framesPath / i;
+      createOneLayoutNode(designJson[path], path, m_layoutTree);
+    }
+  }
+  else
+  {
+    json::json_pointer path;
+    m_layoutTree = createOneLayoutNode(designJson, path, nullptr);
   }
 
   m_size = m_layoutTree->frame().size;

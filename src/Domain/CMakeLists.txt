@@ -26,6 +26,8 @@ target_include_directories(vgg_domain PUBLIC
 )
 target_include_directories(vgg_domain PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/Layout
+  ${CMAKE_CURRENT_SOURCE_DIR}/Model
   ${CMAKE_SOURCE_DIR}/include/Domain
   ${CMAKE_SOURCE_DIR}/include/Domain/Layout
   ${CMAKE_SOURCE_DIR}/include/Domain/Model

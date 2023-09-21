@@ -30,9 +30,10 @@ class Layout
   Size m_size;
   std::shared_ptr<LayoutNode> m_layoutTree;
   std::unordered_map<std::string, std::shared_ptr<Internal::Rule::Rule>> m_rules;
+  bool m_isRootTree{ true }; // root document or fragment
 
 public:
-  Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc);
+  Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc, bool isRootTree = true);
 
   void layout(Size size);
   std::shared_ptr<LayoutNode> layoutTree();

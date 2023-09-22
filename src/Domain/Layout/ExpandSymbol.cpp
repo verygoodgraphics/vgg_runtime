@@ -129,7 +129,8 @@ void ExpandSymbol::expandInstance(nlohmann::json& json,
         auto idPrefix = newInstanceId + K_SEPARATOR;
         DEBUG("ExpandSymbol: instance id: %s -> %s", instanceId.c_str(), newInstanceId.c_str());
         json[K_ID] = newInstanceId; // self
-        copyLayoutRule(masterId, newInstanceId);
+        mergeLayoutRule(instanceId, newInstanceId);
+        mergeLayoutRule(masterId, newInstanceId);
         makeIdUnique(json[K_CHILD_OBJECTS], idPrefix); // children
         // 2.2. update mask by: id -> unique id
         makeMaskIdUnique(json[K_CHILD_OBJECTS], json, idPrefix);
@@ -673,7 +674,7 @@ void ExpandSymbol::makeIdUnique(nlohmann::json& json, const std::string& idPrefi
             objectId.c_str(),
             newObjectId.c_str());
       json[K_ID] = newObjectId;
-      copyLayoutRule(objectId, newObjectId);
+      mergeLayoutRule(objectId, newObjectId);
     }
   }
 
@@ -1001,7 +1002,7 @@ void ExpandSymbol::scalePoint(nlohmann::json& json,
   }
 }
 
-void ExpandSymbol::copyLayoutRule(const std::string& srcId, const std::string& dstId)
+void ExpandSymbol::mergeLayoutRule(const std::string& srcId, const std::string& dstId)
 {
   if (srcId == dstId)
   {
@@ -1010,13 +1011,37 @@ void ExpandSymbol::copyLayoutRule(const std::string& srcId, const std::string& d
 
   if (!hasLayoutRule(srcId))
   {
+    DEBUG("ExpandSymbol, no src layout rule, %s -x-> %s", srcId.c_str(), dstId.c_str());
     return;
   }
 
-  auto rule = m_layoutRules[srcId];
-  rule[K_ID] = dstId;
-  m_layoutRules[dstId] = rule;
-  m_outLayoutJson[K_OBJ].push_back(std::move(rule));
+  if (hasLayoutRule(dstId)) // merge
+  {
+    DEBUG("ExpandSymbol, merge layout rule, %s -> %s", srcId.c_str(), dstId.c_str());
+    auto srcRule = m_layoutRules[srcId];
+    if (srcRule.contains(K_LAYOUT)) // copy container layout
+    {
+      auto& rules = m_outLayoutJson[K_OBJ];
+      for (auto& dstRule : rules)
+      {
+        if (dstRule[K_ID] == dstId)
+        {
+          dstRule[K_LAYOUT] = srcRule[K_LAYOUT];
+          m_layoutRules[dstId] = dstRule;
+          break;
+        }
+      }
+    }
+  }
+  else // copy
+  {
+    DEBUG("ExpandSymbol, copy layout rule, %s -> %s", srcId.c_str(), dstId.c_str());
+    auto dstRule = m_layoutRules[srcId];
+    dstRule[K_ID] = dstId;
+
+    m_outLayoutJson[K_OBJ].push_back(std::move(dstRule));
+    m_layoutRules[dstId] = dstRule;
+  }
 }
 
 void ExpandSymbol::removeInvalidLayoutRule(const nlohmann::json& json)
@@ -1070,15 +1095,15 @@ void ExpandSymbol::layoutInstance(nlohmann::json& instance,
 void ExpandSymbol::overrideLayoutRuleSize(const std::string& instanceId, const Size& instanceSize)
 {
   auto& rules = m_outLayoutJson[K_OBJ];
-  for (auto i = 0; i < rules.size(); ++i)
+  for (auto& dstRule : rules)
   {
-    if (rules[i][K_ID] == instanceId)
+    if (dstRule[K_ID] == instanceId)
     {
-      rules[i][K_WIDTH][K_VALUE][K_TYPES] = Internal::Rule::Length::ETypes::PX;
-      rules[i][K_WIDTH][K_VALUE][K_VALUE] = instanceSize.width;
+      dstRule[K_WIDTH][K_VALUE][K_TYPES] = Internal::Rule::Length::ETypes::PX;
+      dstRule[K_WIDTH][K_VALUE][K_VALUE] = instanceSize.width;
 
-      rules[i][K_HEIGHT][K_VALUE][K_TYPES] = Internal::Rule::Length::ETypes::PX;
-      rules[i][K_HEIGHT][K_VALUE][K_VALUE] = instanceSize.height;
+      dstRule[K_HEIGHT][K_VALUE][K_TYPES] = Internal::Rule::Length::ETypes::PX;
+      dstRule[K_HEIGHT][K_VALUE][K_VALUE] = instanceSize.height;
       break;
     }
   }
@@ -1122,11 +1147,11 @@ nlohmann::json* ExpandSymbol::findLayoutObject(nlohmann::json& instance,
 nlohmann::json* ExpandSymbol::findLayoutObjectById(const std::string id)
 {
   auto& rules = m_outLayoutJson[K_OBJ];
-  for (auto i = 0; i < rules.size(); ++i)
+  for (auto& targetRule : rules)
   {
-    if (rules[i][K_ID] == id)
+    if (targetRule[K_ID] == id)
     {
-      return &rules[i];
+      return &targetRule;
     }
   }
 

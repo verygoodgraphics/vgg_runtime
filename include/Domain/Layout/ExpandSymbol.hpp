@@ -91,7 +91,7 @@ private:
   std::string join(const std::vector<std::string>& instanceIdStack,
                    const std::string& seperator = K_SEPARATOR);
 
-  void copyLayoutRule(const std::string& srcId, const std::string& dstId);
+  void mergeLayoutRule(const std::string& srcId, const std::string& dstId);
   void removeInvalidLayoutRule(const nlohmann::json& instanceChildren);
   bool hasLayoutRule(const std::string& id)
   {

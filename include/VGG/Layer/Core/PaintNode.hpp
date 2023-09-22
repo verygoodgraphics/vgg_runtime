@@ -9,21 +9,22 @@
 #include "VGG/Layer/Scene.hpp"
 
 #include <glm/matrix.hpp>
-#include <include/core/SkCanvas.h>
-#include <include/core/SkColor.h>
-#include <include/core/SkMatrix.h>
-#include <include/core/SkPaint.h>
-#include <include/pathops/SkPathOps.h>
+// #include <include/core/SkColor.h>
+// #include <include/core/SkMatrix.h>
+// #include <include/core/SkPaint.h>
+// #include <include/pathops/SkPathOps.h>
 
 #include <any>
 #include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
+class SkCanvas;
 namespace VGG
 {
 
 class RenderState;
+class SkiaRenderer;
 
 struct ContourOption
 {
@@ -37,12 +38,14 @@ struct ContourOption
   }
 };
 
+// NOLINTBEGIN
 enum EPaintStrategy
 {
   PS_Recursively,
   PS_SelfOnly,
   PS_ChildOnly,
 };
+// NOLINTEND
 
 struct PaintOption
 {
@@ -189,17 +192,17 @@ public:
 
 public:
   // TODO:: chagne the following functions accessbility
-  void invokeRenderPass(SkCanvas* canvas);
+  void invokeRenderPass(SkiaRenderer* renderer);
 
 protected:
   // Render traverse
-  virtual void paintChildrenPass(SkCanvas* canvas);
-  void paintChildrenRecursively(SkCanvas* canvas);
-  virtual void prePaintPass(SkCanvas* canvas);
-  virtual void postPaintPass(SkCanvas* canvas);
-  virtual void paintPass();
-  void renderPass(SkCanvas* canvas); // TODO:: should be private access
-  virtual void paintEvent(SkCanvas* canvas);
+  virtual void paintChildrenPass(SkiaRenderer* renderer);
+  void paintChildrenRecursively(SkiaRenderer* renderer);
+  virtual void prePaintPass(SkiaRenderer* renderer);
+  virtual void postPaintPass(SkiaRenderer* renderer);
+  virtual void paintPass(SkiaRenderer* renderer);
+  void renderPass(SkiaRenderer* renderer); // TODO:: should be private access
+  virtual void paintEvent(SkiaRenderer* renderer);
 
 protected:
   // Mask

@@ -1,5 +1,6 @@
 #include "VSkFontMgr.hpp"
 #include "TextNodePrivate.hpp"
+#include "Renderer.hpp"
 
 #include "VGG/Layer/Core/TextNode.hpp"
 #include "VGG/Layer/Core/Attrs.hpp"
@@ -78,8 +79,9 @@ void TextNode::setFrameMode(ETextLayoutMode mode)
   _->mode = mode;
 }
 
-void TextNode::paintEvent(SkCanvas* canvas)
+void TextNode::paintEvent(SkiaRenderer* renderer)
 {
+  auto canvas = renderer->canvas();
   VGG_IMPL(TextNode);
   if (_->paragraphCache.empty())
     return;

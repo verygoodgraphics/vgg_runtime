@@ -335,32 +335,7 @@ class NlohmannBuilder
 
   inline std::shared_ptr<PaintNode> fromSymbolInstance(const nlohmann::json& j)
   {
-    return makeObjectCommonProperty(
-      j,
-      [this, &j](std::string name, std::string guid) -> std::shared_ptr<PaintNode>
-      {
-        auto p = std::make_shared<PaintNode>(std::move(name), VGG_INSTANCE, std::move(guid));
-        auto& instances = Scene::instanceObjects();
-        if (auto it = instances.find(p->guid()); it == instances.end())
-        {
-          std::string masterID = j.value("masterId", "");
-          if (!masterID.empty())
-          {
-            instances[p->guid()] =
-              std::move(std::pair<std::weak_ptr<PaintNode>, std::string>{ p, masterID });
-          }
-          else
-          {
-            WARN("master id is empty referenced by [%s].", p->guid().c_str());
-          }
-        }
-        else
-        {
-          WARN("Instance [%s] is duplicated.", p->guid().c_str());
-        }
-        return p;
-      },
-      [this, &j](PaintNode* p) {});
+    return nullptr;
   }
 
   std::shared_ptr<PaintNode> fromSymbolMaster(const nlohmann::json& j)

@@ -40,8 +40,6 @@ struct VGG_EXPORTS Scene : public layer::Renderable
 {
   static ResourceRepo s_resRepo;
   static ObjectTableType s_objectTable;
-  static ObjectTableType s_templateObjectTable;
-  static InstanceTable s_instanceTable;
   static bool s_enableDrawDebugBound;
 
 private:
@@ -85,16 +83,6 @@ public:
     return s_objectTable;
   }
 
-  static ObjectTableType& templateObjectTable()
-  {
-    return s_templateObjectTable;
-  }
-
-  static InstanceTable& instanceObjects()
-  {
-    return s_instanceTable;
-  }
-
   static void setResRepo(std::map<std::string, std::vector<char>> repo);
 
   static void enableDrawDebugBound(bool enable)
@@ -109,7 +97,6 @@ public:
 
 private:
   void preprocessMask(PaintNode* node);
-  void instantiateTemplates();
 };
 
 }; // namespace VGG

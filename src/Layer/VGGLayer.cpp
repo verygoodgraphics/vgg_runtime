@@ -1,19 +1,17 @@
+#ifdef VGG_USE_VULKAN
+#include "VSkiaVK.hpp"
+#endif
+#include "Renderer.hpp"
+#include "VSkiaContext.hpp"
+#include "VSkiaGL.hpp"
+
 #include "VGG/Layer/VGGLayer.hpp"
-#include "VGG/Layer/Renderer.hpp"
 #include "VGG/Layer/Zoomer.hpp"
 #include "VGG/Layer/Scene.hpp"
 #include "VGG/Layer/Graphics/GraphicsLayer.hpp"
 #include "VGG/Layer/Graphics/GraphicsContext.hpp"
 #include "VGG/Layer/Core/Node.hpp"
-
 #include "Utility/CappingProfiler.hpp"
-
-#include "VSkiaContext.hpp"
-#include "VSkiaGL.hpp"
-
-#ifdef VGG_USE_VULKAN
-#include "VSkiaVK.hpp"
-#endif
 
 #include <optional>
 #include <sstream>

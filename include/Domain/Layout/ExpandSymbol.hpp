@@ -70,6 +70,7 @@ private:
                               const std::vector<std::string>& instanceIdStack);
   void processOtherOverrides(nlohmann::json& instance,
                              const std::vector<std::string>& instanceIdStack);
+  void applyOverrides(nlohmann::json& json, std::string& path, const nlohmann::json& value);
   void applyOverridesDetail(nlohmann::json& json,
                             std::stack<std::string> reversedPath,
                             const nlohmann::json& value);
@@ -96,6 +97,10 @@ private:
   {
     return m_layoutRules.find(id) != m_layoutRules.end();
   }
+  nlohmann::json* findLayoutObject(nlohmann::json& instance,
+                                   const std::vector<std::string>& instanceIdStack,
+                                   nlohmann::json& overrideItem);
+  nlohmann::json* findLayoutObjectById(const std::string id);
 };
 } // namespace Layout
 

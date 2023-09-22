@@ -4,6 +4,7 @@
 #include "VGG/Layer/Config.hpp"
 #include "RenderState.hpp"
 
+#include <core/SkMatrix.h>
 #include <include/core/SkCanvas.h>
 
 namespace VGG
@@ -34,18 +35,23 @@ namespace VGG
 struct DisplayItem
 {
   SkMatrix matrix;
-  PaintNode* item;
-  PaintNode* mask;
+  PaintNode* item{ nullptr };
+
+  DisplayItem(SkMatrix m, PaintNode* item)
+    : matrix(std::move(m))
+    , item(item)
+  {
+  }
 };
 
 // NOLINTEND
 class SkiaRenderer
 {
   RenderState m_state;
-  std::vector<DisplayItem> m_displayList;
   SkCanvas* m_canvas{ nullptr };
 
 public:
+  std::vector<DisplayItem> displayList;
   void draw(SkCanvas* canvas, PaintNode* root)
   {
     m_canvas = canvas;
@@ -60,11 +66,11 @@ public:
     return m_canvas;
   }
 
-  void draw(SkCanvas* canvas)
+  void commit(SkCanvas* canvas)
   {
     m_canvas = canvas;
     SkMatrix savedMatrix = canvas->getTotalMatrix();
-    for (const auto& item : m_displayList)
+    for (const auto& item : displayList)
     {
       canvas->setMatrix(item.matrix);
       item.item->paintEvent(this);

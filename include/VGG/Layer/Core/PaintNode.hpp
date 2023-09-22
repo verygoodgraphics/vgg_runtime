@@ -215,7 +215,7 @@ protected:
 protected:
   // Style
   virtual SkPath stylePath();
-  void paintStyle(SkCanvas* canvas, const SkPath& path);
+  void paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& mask);
   virtual void paintFill(SkCanvas* canvas,
                          const SkPath& path); // TODO:: only for ImageNode overriding
 

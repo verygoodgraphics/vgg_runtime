@@ -1,6 +1,6 @@
 {
-  "title": "Vgg Layout",
-  "description": "Vgg Layout describes the layout information of an element. Vgg layout does not contain hierarchical relationships between objects, which are described in vgg-format.",
+  "title": "Daruma Layout",
+  "description": "Daruma Layout describes the layout information of an element. Daruma layout does not contain hierarchical relationships between objects, which are described in Daruma-Format.",
   "type": "object",
   "$id": "https://git.vgg.cool/verygoodgraphics/vgg_format/src/branch/master/sketch-document-6.4.0/packages/layout-format/src/vgg-layout.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
@@ -17,7 +17,7 @@
         },
         "id": {
           "type": "string",
-          "description": "object identifier. Use this value to associate objects in vgg-format."
+          "description": "object identifier. Use this value to associate objects in daruma-format."
         },
         "layout": {
           "oneOf": [
@@ -137,6 +137,10 @@
           "items": {
             "type": "number"
           }
+        },
+        "z_order": {
+          "type": "boolean",
+          "description": "Default value is false. If this value is true, the child object order of the corresponding object defined in the daruma design format should be reversed."
         }
       },
       "additionalProperties": false
@@ -628,7 +632,7 @@
   "required": ["class", "obj"],
   "properties": {
     "class": {
-      "const": "Vgg_Layout"
+      "const": "Daruma_Layout"
     },
     "obj": {
       "type": "array",

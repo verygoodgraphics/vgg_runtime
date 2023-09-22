@@ -404,7 +404,37 @@ void ExpandSymbol::processMasterIdOverrides(nlohmann::json& instance,
 void ExpandSymbol::processLayoutOverrides(nlohmann::json& instance,
                                           const std::vector<std::string>& instanceIdStack)
 {
-  // todo
+  const auto& overrideValues = instance[K_OVERRIDE_VALUES];
+  if (!overrideValues.is_array())
+  {
+    return;
+  }
+
+  auto layoutOverrideValues = nlohmann::json::array();
+  std::copy_if(overrideValues.begin(),
+               overrideValues.end(),
+               std::back_inserter(layoutOverrideValues),
+               [](const nlohmann::json& item) { return item.value(K_EFFECT_ON_LAYOUT, false); });
+
+  auto instanceId = instance[K_ID];
+  for (auto& el : layoutOverrideValues.items())
+  {
+    auto& overrideItem = el.value();
+    if (!overrideItem.is_object() || (overrideItem[K_CLASS] != K_OVERRIDE_CLASS))
+    {
+      continue;
+    }
+
+    nl::json* childObject = findLayoutObject(instance, instanceIdStack, overrideItem);
+    if (!childObject || !childObject->is_object())
+    {
+      continue;
+    }
+
+    std::string path = overrideItem[K_OVERRIDE_NAME];
+    auto value = overrideItem[K_OVERRIDE_VALUE];
+    applyOverrides((*childObject), path, value);
+  }
 }
 
 void ExpandSymbol::processBoundsOverrides(nlohmann::json& instance,
@@ -497,32 +527,39 @@ void ExpandSymbol::processOtherOverrides(nlohmann::json& instance,
       continue;
     }
 
-    // make name to json pointer string
-    while (true)
-    {
-      auto index = name.find(".");
-      if (index == std::string::npos)
-      {
-        break;
-      }
-      name[index] = '/';
-    }
-
-    nl::json::json_pointer path{ "/" + name };
-    DEBUG("#ExpandSymbol: override object[id=%s, ptr=%p], path=%s, value=%s",
-          (*childObject)[K_ID].get<std::string>().c_str(),
-          childObject,
-          path.to_string().c_str(),
-          value.dump().c_str());
-    std::stack<std::string> pathStack;
-    while (!path.empty())
-    {
-      pathStack.push(path.back());
-      path.pop_back();
-    }
-
-    applyOverridesDetail((*childObject), pathStack, value);
+    applyOverrides((*childObject), name, value);
   }
+}
+
+void ExpandSymbol::applyOverrides(nlohmann::json& json,
+                                  std::string& name,
+                                  const nlohmann::json& value)
+{
+  // make name to json pointer string: x.y -> /x/y
+  while (true)
+  {
+    auto index = name.find(".");
+    if (index == std::string::npos)
+    {
+      break;
+    }
+    name[index] = '/';
+  }
+
+  nl::json::json_pointer path{ "/" + name };
+  DEBUG("#ExpandSymbol: override object[id=%s, ptr=%p], path=%s, value=%s",
+        json[K_ID].get<std::string>().c_str(),
+        &json,
+        path.to_string().c_str(),
+        value.dump().c_str());
+  std::stack<std::string> reversedPath;
+  while (!path.empty())
+  {
+    reversedPath.push(path.back());
+    path.pop_back();
+  }
+
+  applyOverridesDetail(json, reversedPath, value);
 }
 
 void ExpandSymbol::applyOverridesDetail(nlohmann::json& json,
@@ -1054,4 +1091,44 @@ void ExpandSymbol::layoutTree(nlohmann::json& rootJson, const nlohmann::json& ne
                  JsonDocumentPtr{ new ReferenceJsonDocument{ m_outLayoutJson } },
                  false };
   layout.layout(newBounds.size);
+}
+
+nlohmann::json* ExpandSymbol::findLayoutObject(nlohmann::json& instance,
+                                               const std::vector<std::string>& instanceIdStack,
+                                               nlohmann::json& overrideItem)
+{
+  auto instanceMasterId = instance[K_MASTER_ID];
+
+  auto& objectIdPaths = overrideItem[K_OBJECT_ID];
+  if (!objectIdPaths.is_array() || objectIdPaths.empty())
+  {
+    return nullptr;
+  }
+  else if (objectIdPaths.size() == 1 && objectIdPaths[0] == instanceMasterId)
+  {
+    return findLayoutObjectById(instance[K_ID]);
+  }
+  else
+  {
+    auto idChain = instanceIdStack;
+    for (auto& idJson : objectIdPaths)
+    {
+      idChain.push_back(idJson);
+    }
+    return findLayoutObjectById(join(idChain));
+  }
+}
+
+nlohmann::json* ExpandSymbol::findLayoutObjectById(const std::string id)
+{
+  auto& rules = m_outLayoutJson[K_OBJ];
+  for (auto i = 0; i < rules.size(); ++i)
+  {
+    if (rules[i][K_ID] == id)
+    {
+      return &rules[i];
+    }
+  }
+
+  return nullptr;
 }

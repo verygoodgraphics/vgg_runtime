@@ -1,13 +1,13 @@
-#include "VGG/Layer/Core/VType.hpp"
-#include "VGG/Layer/Core/PaintNode.hpp"
-#include "VGG/Layer/Core/Node.hpp"
-
 #include "VSkia.hpp"
 #include "StyleRenderer.hpp"
+#include "Renderer.hpp"
 #include "RenderState.hpp"
+#include "VGG/Layer/Core/PaintNode.hpp"
+#include "VGG/Layer/Core/VType.hpp"
+#include "VGG/Layer/Core/Node.hpp"
 
+#include <include/core/SkCanvas.h>
 #include <core/SkPath.h>
-#include <core/SkCanvas.h>
 #include <core/SkRRect.h>
 #include <limits>
 
@@ -183,13 +183,9 @@ Mask PaintNode::makeMaskBy(EBoolOp maskOp)
   return result;
 }
 
-void PaintNode::renderPass(SkCanvas* canvas)
+void PaintNode::renderPass(SkiaRenderer* renderer)
 {
-  s_defaultCanvas = canvas;
-  RenderState renderState;
-  s_renderState = &renderState;
-  invokeRenderPass(canvas);
-  s_renderState = nullptr;
+  invokeRenderPass(renderer);
 }
 
 void PaintNode::drawDebugBound(SkCanvas* canvas)
@@ -221,11 +217,10 @@ void PaintNode::visitNode(VGG::Node* p, ObjectTableType& table)
   }
 }
 
-void PaintNode::paintPass()
+void PaintNode::paintPass(SkiaRenderer* renderer)
 {
   VGG_IMPL(PaintNode);
-  auto canvas = getSkCanvas();
-  this->paintEvent(canvas);
+  this->paintEvent(renderer);
 }
 
 SkCanvas* PaintNode::getSkCanvas()
@@ -233,7 +228,7 @@ SkCanvas* PaintNode::getSkCanvas()
   return s_defaultCanvas;
 }
 
-void PaintNode::paintEvent(SkCanvas* canvas)
+void PaintNode::paintEvent(SkiaRenderer* renderer)
 {
   // const auto path = stylePath();
   const auto path = asOutlineMask(0).outlineMask;
@@ -241,7 +236,7 @@ void PaintNode::paintEvent(SkCanvas* canvas)
   {
     return;
   }
-  paintStyle(canvas, path);
+  paintStyle(renderer->canvas(), path);
 }
 
 void PaintNode::setMaskBy(std::vector<std::string> masks)
@@ -559,38 +554,39 @@ const PaintOption& PaintNode::paintOption() const
   return d_ptr->paintOption;
 }
 
-void PaintNode::invokeRenderPass(SkCanvas* canvas)
+void PaintNode::invokeRenderPass(SkiaRenderer* renderer)
 {
   VGG_IMPL(PaintNode);
   if (!_->visible)
     return;
   if (_->paintOption.paintStrategy == EPaintStrategy::PS_SelfOnly)
   {
-    prePaintPass(canvas);
-    paintPass();
-    postPaintPass(canvas);
+    prePaintPass(renderer);
+    paintPass(renderer);
+    postPaintPass(renderer);
   }
   else if (_->paintOption.paintStrategy == EPaintStrategy::PS_Recursively)
   {
-    prePaintPass(canvas);
-    paintPass();
-    paintChildrenPass(canvas);
-    postPaintPass(canvas);
+    prePaintPass(renderer);
+    paintPass(renderer);
+    paintChildrenPass(renderer);
+    postPaintPass(renderer);
   }
   else if (_->paintOption.paintStrategy == EPaintStrategy::PS_ChildOnly)
   {
-    prePaintPass(canvas);
-    paintChildrenPass(canvas);
-    postPaintPass(canvas);
+    prePaintPass(renderer);
+    paintChildrenPass(renderer);
+    postPaintPass(renderer);
   }
 }
 
-void PaintNode::paintChildrenRecursively(SkCanvas* canvas)
+void PaintNode::paintChildrenRecursively(SkiaRenderer* renderer)
 {
 
   VGG_IMPL(PaintNode);
   std::vector<PaintNode*> masked;
   std::vector<PaintNode*> noneMasked;
+  auto canvas = renderer->canvas();
   for (const auto& p : this->m_firstChild)
   {
     auto c = static_cast<PaintNode*>(p.get());
@@ -612,7 +608,7 @@ void PaintNode::paintChildrenRecursively(SkCanvas* canvas)
         // canvas->save();
         // canvas->scale(1, -1);
         // canvas->saveLayer(toSkRect(getBound()), &paint);
-        p->invokeRenderPass(canvas);
+        p->invokeRenderPass(renderer);
         // canvas->restore();
         // canvas->restore();
       }
@@ -621,7 +617,7 @@ void PaintNode::paintChildrenRecursively(SkCanvas* canvas)
     {
       for (const auto& p : nodes)
       {
-        p->invokeRenderPass(canvas);
+        p->invokeRenderPass(renderer);
       }
     }
   };
@@ -639,14 +635,15 @@ void PaintNode::paintChildrenRecursively(SkCanvas* canvas)
   }
 }
 
-void PaintNode::paintChildrenPass(SkCanvas* canvas)
+void PaintNode::paintChildrenPass(SkiaRenderer* renderer)
 {
   VGG_IMPL(PaintNode);
-  paintChildrenRecursively(canvas);
+  paintChildrenRecursively(renderer);
 }
-void PaintNode::prePaintPass(SkCanvas* canvas)
+void PaintNode::prePaintPass(SkiaRenderer* renderer)
 {
   VGG_IMPL(PaintNode);
+  auto canvas = renderer->canvas();
   if (_->contextSetting.Opacity < 1.0)
   {
     // TODO:: more accurate bound is needed
@@ -671,9 +668,10 @@ void PaintNode::prePaintPass(SkCanvas* canvas)
   }
 }
 
-void PaintNode::postPaintPass(SkCanvas* canvas)
+void PaintNode::postPaintPass(SkiaRenderer* renderer)
 {
   VGG_IMPL(PaintNode);
+  auto canvas = renderer->canvas();
   canvas->restore(); // store the state in paintPass
 
   if (_->contextSetting.IsolateBlending)

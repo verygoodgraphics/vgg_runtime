@@ -31,7 +31,7 @@ public:
   ~TextNode();
 
 protected:
-  void paintEvent(SkCanvas* canvas) override;
+  void paintEvent(SkiaRenderer* renderer) override;
 };
 
 } // namespace VGG

@@ -1,8 +1,10 @@
 #include "Loader.hpp"
+#include "Renderer.hpp"
+
 #include "Utility/ConfigManager.hpp"
 #include "Utility/Log.hpp"
 #include "VGG/Layer/Scene.hpp"
-#include "VGG/Layer/Renderer.hpp"
+#include "Renderer.hpp"
 #include "VGG/Layer/Zoomer.hpp"
 #include "VGG/Layer/Core/PaintNode.hpp"
 #include "VGG/Layer/Core/Node.hpp"
@@ -23,8 +25,6 @@ namespace VGG
 
 ResourceRepo Scene::s_resRepo{};
 ObjectTableType Scene::s_objectTable{};
-ObjectTableType Scene::s_templateObjectTable{};
-InstanceTable Scene::s_instanceTable{};
 bool Scene::s_enableDrawDebugBound{ false };
 
 class Scene__pImpl
@@ -39,7 +39,6 @@ public:
   NodeContainer container;
   int page{ 0 };
   int symbolIndex{ 0 };
-  bool renderSymbol{ false };
   bool maskDirty{ true };
   std::shared_ptr<Zoomer> zoomer;
 
@@ -67,22 +66,11 @@ public:
   {
     PaintNode* node = nullptr;
     SkiaRenderer r;
-    if (!renderSymbol)
+    if (!container.frames.empty())
     {
-      if (!container.frames.empty())
-      {
-        auto board = container.frames[page].get();
-        preprocessMask(board);
-        r.draw(canvas, board);
-      }
-    }
-    else
-    {
-      if (!container.symbols.empty())
-      {
-        node = container.symbols[symbolIndex].get();
-        r.draw(canvas, node);
-      }
+      auto board = container.frames[page].get();
+      preprocessMask(board);
+      r.draw(canvas, board);
     }
   }
 
@@ -107,57 +95,15 @@ void Scene::loadFileContent(const std::string& json)
 }
 Scene::~Scene() = default;
 
-void Scene::instantiateTemplates()
-{
-  for (auto& p : Scene::instanceObjects())
-  {
-    if (auto node = p.second.first.lock(); node)
-    {
-      auto& templates = Scene::templateObjectTable();
-      if (auto it = templates.find(p.second.second); it != templates.end())
-      {
-        if (auto master = it->second.lock(); master)
-        {
-          auto instance = std::static_pointer_cast<PaintNode>(master->cloneChildren());
-
-          auto transform = instance->localTransform();
-          // clear transform
-          transform = glm::translate(transform, glm::vec2{ -transform[2][0], -transform[2][1] });
-          instance->setLocalTransform(transform);
-          // TODO:: override properties
-          node->addChild(instance);
-        }
-        else
-        {
-          ASSERT_MSG(false, "master node is expired");
-        }
-      }
-      else
-      {
-        DEBUG("symbol master [%s] doesn't exist referenced by [%s]",
-              p.second.second.c_str(),
-              p.first.c_str());
-      }
-    }
-  }
-}
-
 void Scene::loadFileContent(const nlohmann::json& json)
 {
   VGG_IMPL(Scene)
   if (json.empty())
     return;
-  s_templateObjectTable.clear();
-  s_instanceTable.clear();
   _->page = 0;
   _->symbolIndex = 0;
   _->maskDirty = true;
   _->container = NlohmannBuilder::build(json);
-  // for (const auto& s : _->container.symbols)
-  // {
-  //   s_templateObjectTable[s->guid()] = s;
-  // }
-  // instantiateTemplates();
 }
 
 int Scene::currentPage() const

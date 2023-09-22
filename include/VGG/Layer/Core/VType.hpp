@@ -2,7 +2,7 @@
 #include <cstdint>
 namespace VGG
 {
-
+// NOLINTBEGIN
 // TODO:: Could be removed in the future
 enum ObjectType
 {
@@ -212,3 +212,4 @@ enum ELetterTransform : uint8_t
 };
 
 } // namespace VGG
+  // NOLINTEND

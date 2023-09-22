@@ -260,7 +260,7 @@
         },
         "fills": {
           "type": "array",
-          "description": "An array containing the fill effects of the object.",
+          "description": "An array containing the fill effects of the object. When a fill is applied to a group, the fill acts as a tint.",
           "items": {
             "$ref": "#/definitions/Fill"
           }
@@ -1444,6 +1444,10 @@
           "description": "The value describes the shape's 'winding rule' (policy determining how overlapping contours fill an area).",
           "enum": [0, 1],
           "enumDescriptions": ["non-zero", "even-odd"]
+        },
+        "radius": {
+          "type": "number",
+          "description": "Indicates the radius of the Boolean object. If this item doesn't exist or has the value 0, recurse upward to get its value. If a point of an inner object has no radius specified or its value is 0, use this value for the point's radius. This value also has an impact on the corners of the overlapping region."
         }
       },
       "additionalProperties": false
@@ -2358,7 +2362,7 @@
         },
         "objectId": {
           "type": "array",
-          "description": " Indicates which object's property is overridden.Each item is the id of the object.\nFor example: Suppose the value is [D456, 6516, FB09]. Now, we have a symbol-instance object that points to symbol-master(id: C1CF),  symbol-master(C1CF) has a child symbol-instance(id:D456),  this symbol-instance(id:D456) points to symbol-master(id:0739),  symbol-master(id:0739) has a child symbol-instance(id:6516), this symbol-instance(id:6516) points to symbol-master(59B5),  and eventually this symbol-master(59B5) has a child with id FB09. ",
+          "description": " This array describes the overridden chain, where the last one is the object whose value shall be overridden.\nFor example: Suppose this array is [D456, 6516, FB09]. Suppose the current instance (of id XXXX) points to a symbol-master (of id C1CF), which contains a symbol-instance (of id D456). And this instance (of id D456) points to another symbol-master (of id 0739), which contains another symbol-instance (of id 6516). Recursively, this instance (of id 6516) points to yet another symbol-master (of id 59B5), which contains the final object (of id FB09).\nSo the current instance (of id XXXX) will override the value of the final object (of id FB09) according to `overrideName` and `overrideValue`. ",
           "items": {
             "type": "string"
           }
@@ -2369,6 +2373,10 @@
         },
         "overrideValue": {
           "description": " The value of the overridden attribute. The type depends on the concrete property. A special case: when overrideName end with 'style' and overrideValue conform to 'referenced_style_<id>', then use corresponding value in references(top level attr). "
+        },
+        "effectOnLayout": {
+          "type": "boolean",
+          "description": " Default value is false. If the value of this item is true, the current override applies to the layout. Note: layout information is defined in layout.json, not design.json "
         }
       },
       "additionalProperties": false

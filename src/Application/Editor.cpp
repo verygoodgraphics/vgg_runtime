@@ -6,12 +6,15 @@
 
 #include <include/core/SkCanvas.h>
 
+#include <algorithm>
+
 #undef DEBUG
 #define DEBUG(msg, ...)
 
 using namespace VGG;
 
 constexpr auto K_MOUSE_CONTAINER_WIDTH = 10.0f;
+constexpr auto K_RESIZE_MIN_LENGTH = 1.0f;
 
 namespace
 {
@@ -26,8 +29,8 @@ SkRect toSkRect(const Layout::Rect rect)
 void drawFrame(SkCanvas* canvas, const SkRect& rect, const SkScalar strokeWidth = 1)
 {
   ASSERT(canvas);
-  ASSERT(rect.right() > rect.left());
-  ASSERT(rect.bottom() > rect.top());
+  ASSERT(rect.right() >= rect.left());
+  ASSERT(rect.bottom() >= rect.top());
 
   SkPaint strokePen;
   strokePen.setAntiAlias(true);
@@ -414,6 +417,9 @@ void Editor::resizeNode(MouseEvent* mouseMove)
     default:
       return;
   }
+
+  frame.size.width = std::max(frame.size.width, K_RESIZE_MIN_LENGTH);
+  frame.size.height = std::max(frame.size.height, K_RESIZE_MIN_LENGTH);
 
   selectedNode->setFrame(frame);
 }

@@ -20,18 +20,6 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
-
-# find system libs
-if (NOT EMSCRIPTEN)
-  # find SDL2 library
-  # REFACTOR:: SDL2 dependency is only need by SDL module.
-  set(SDL2_BUILDING_LIBRARY ON)
-  find_package(SDL2 REQUIRED)
-  message(STATUS "SDL2_INCLUDE_DIRS: ${SDL2_INCLUDE_DIRS}")
-  message(STATUS "SDL2_LIBRARIES: ${SDL2_LIBRARIES}")
-endif()
-
-
 # must fetch before add subdirectory vgg_contrib
 option(ENABLE_UNIT_TEST "Enable unit test" OFF)
 if(ENABLE_UNIT_TEST)

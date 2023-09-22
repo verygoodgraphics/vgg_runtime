@@ -11,7 +11,6 @@ if (EMSCRIPTEN)
   )
 else()
   target_link_libraries(vgg_adapter vgg_libnode)
-  set_target_properties(vgg_adapter PROPERTIES LINK_FLAGS ${SDL2_LIBRARIES})
   target_sources(vgg_adapter PRIVATE
     PlatformAdapter/Native/Exec/NativeExec.cpp
     PlatformAdapter/Native/Exec/NativeExecImpl.cpp
@@ -32,7 +31,6 @@ target_include_directories(vgg_adapter PUBLIC
 target_include_directories(vgg_adapter PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_SOURCE_DIR}/include/Adapter
-  ${SDL2_INCLUDE_DIRS}/..
 )
 
 target_link_libraries(vgg_adapter

@@ -1,5 +1,5 @@
 {
-  "class": "Vgg_Layout",
+  "class": "Daruma_Layout",
   "obj": [
     {
       "class": "object",
@@ -8,7 +8,7 @@
         "class": "width",
         "value": {
           "class": "length",
-          "value": 1600.0,
+          "value": 1400.0,
           "types": 1
         }
       },
@@ -16,7 +16,7 @@
         "class": "height",
         "value": {
           "class": "length",
-          "value": 900.0,
+          "value": 400.0,
           "types": 1
         }
       },
@@ -34,7 +34,8 @@
           100.0,
           40.0,
           100.0
-        ]
+        ],
+        "z_order": false
       }
     },
     {

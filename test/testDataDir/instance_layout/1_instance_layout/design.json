@@ -444,7 +444,8 @@
                 "208:2"
               ],
               "overrideName": "name",
-              "overrideValue": "instance"
+              "overrideValue": "instance",
+              "effectOnLayout": false
             },
             {
               "class": "overrideValue",
@@ -459,7 +460,8 @@
                 "height": 400.0,
                 "x": 0,
                 "y": 0
-              }
+              },
+              "effectOnLayout": false
             }
           ]
         }

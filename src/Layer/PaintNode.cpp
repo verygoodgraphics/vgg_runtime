@@ -39,6 +39,10 @@ public:
   ContourPtr contour;
   PaintOption paintOption;
   ContourOption maskOption;
+
+  std::optional<SkPath> path;
+  std::optional<SkPath> mask;
+
   PaintNode__pImpl(PaintNode* api, ObjectType type)
     : q_ptr(api)
     , type(type)
@@ -220,7 +224,20 @@ void PaintNode::visitNode(VGG::Node* p, ObjectTableType& table)
 void PaintNode::paintPass(SkiaRenderer* renderer)
 {
   VGG_IMPL(PaintNode);
-  this->paintEvent(renderer);
+  if (!_->path)
+  {
+    _->path = asOutlineMask(0).outlineMask;
+  }
+  if (_->path->isEmpty())
+  {
+    return;
+  }
+  if (!_->mask)
+  {
+    _->mask = makeMaskBy(BO_Intersection).outlineMask;
+  }
+  renderer->displayList.emplace_back(renderer->canvas()->getTotalMatrix(), this);
+  // this->paintEvent(renderer);
 }
 
 SkCanvas* PaintNode::getSkCanvas()
@@ -230,13 +247,9 @@ SkCanvas* PaintNode::getSkCanvas()
 
 void PaintNode::paintEvent(SkiaRenderer* renderer)
 {
+  VGG_IMPL(PaintNode);
   // const auto path = stylePath();
-  const auto path = asOutlineMask(0).outlineMask;
-  if (path.isEmpty())
-  {
-    return;
-  }
-  paintStyle(renderer->canvas(), path);
+  paintStyle(renderer->canvas(), *_->path, *_->mask);
 }
 
 void PaintNode::setMaskBy(std::vector<std::string> masks)
@@ -739,7 +752,7 @@ SkPath PaintNode::stylePath()
   return skPath;
 }
 
-void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path)
+void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& outlineMask)
 {
   StyleRenderer styleRenderer;
   // draw blur, we assume that there is only one blur style
@@ -750,8 +763,7 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path)
     canvas->saveLayer(nullptr, &pen);
   }
 
-  auto mask = makeMaskBy(BO_Intersection);
-  if (mask.outlineMask.isEmpty())
+  if (outlineMask.isEmpty())
   {
     styleRenderer.drawContour(canvas,
                               contextSetting(),
@@ -763,7 +775,7 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path)
   else
   {
     canvas->save();
-    canvas->clipPath(mask.outlineMask);
+    canvas->clipPath(outlineMask);
     styleRenderer.drawContour(canvas,
                               contextSetting(),
                               style(),

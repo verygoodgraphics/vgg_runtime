@@ -40,6 +40,7 @@ public:
   int page{ 0 };
   int symbolIndex{ 0 };
   bool maskDirty{ true };
+  SkiaRenderer renderer;
   std::shared_ptr<Zoomer> zoomer;
 
   void applyZoom(SkCanvas* canvas)
@@ -65,23 +66,23 @@ public:
   void render(SkCanvas* canvas)
   {
     PaintNode* node = nullptr;
-    SkiaRenderer r;
-    if (!container.frames.empty())
+    if (!container.frames.empty() && maskDirty)
     {
       auto board = container.frames[page].get();
       preprocessMask(board);
-      r.draw(canvas, board);
+      renderer.draw(canvas, board);
+      maskDirty = false;
+    }
+    if (!maskDirty)
+    {
+      renderer.commit(canvas);
     }
   }
 
   void preprocessMask(PaintNode* node)
   {
-    if (maskDirty)
-    {
-      Scene::s_objectTable = node->preprocessMask();
-      // generate each mask for masked node
-      maskDirty = false;
-    }
+    Scene::s_objectTable = node->preprocessMask();
+    // generate each mask for masked node
   }
 };
 

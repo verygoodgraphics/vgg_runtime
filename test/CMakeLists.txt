@@ -49,7 +49,6 @@ else()
   )
 
   target_link_libraries(unit_tests PRIVATE vgg_internal gtest_main gmock vgg_utility automerge)
-  set_target_properties(unit_tests PROPERTIES LINK_FLAGS ${SDL2_LIBRARIES})
   include(GoogleTest)
   gtest_discover_tests(unit_tests)
 endif()

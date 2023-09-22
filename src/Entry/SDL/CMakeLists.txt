@@ -1,3 +1,10 @@
+if (NOT EMSCRIPTEN)
+  # REFACTOR:: SDL2 dependency is only need by SDL module.
+  set(SDL2_BUILDING_LIBRARY ON)
+  find_package(SDL2 REQUIRED)
+  message(STATUS "SDL2_INCLUDE_DIRS: ${SDL2_INCLUDE_DIRS}")
+  message(STATUS "SDL2_LIBRARIES: ${SDL2_LIBRARIES}")
+endif()
 add_executable(sdl_runtime)
 target_sources(sdl_runtime PRIVATE "main.cpp")
 target_link_libraries(sdl_runtime PRIVATE vgg_application vgg_adapter)

@@ -21,6 +21,7 @@ constexpr auto K_GROUP = "group";
 constexpr auto K_HEIGHT = "height";
 constexpr auto K_ID = "id";
 constexpr auto K_IMAGE = "image";
+constexpr auto K_LAYOUT = "layout";
 constexpr auto K_MASTER_ID = "masterId";
 constexpr auto K_MATRIX = "matrix";
 constexpr auto K_NAME = "name";

@@ -2,6 +2,7 @@
 
 #include "Layout.hpp"
 #include "ReferenceJsonDocument.hpp"
+#include "Rule.hpp"
 
 #include "Helper.hpp"
 #include "JsonKeys.hpp"
@@ -136,11 +137,13 @@ void ExpandSymbol::expandInstance(nlohmann::json& json,
         // 3 overrides and scale
         // 3.1 master id overrides
         processMasterIdOverrides(json, instanceIdStack);
-        // 3.2: scale or layout before bounds overrides
+        // 3.2: layout overrides
+        processLayoutOverrides(json, instanceIdStack);
+        // 3.3: scale or layout before bounds overrides
         resizeInstance(json, masterJson);
-        // 3.3 bounds overrides must be processed after scaling
+        // 3.4 bounds overrides must be processed after scaling
         processBoundsOverrides(json, instanceIdStack);
-        // 3.4 other overrides
+        // 3.5 other overrides
         processOtherOverrides(json, instanceIdStack);
         if (!again)
         {
@@ -398,6 +401,12 @@ void ExpandSymbol::processMasterIdOverrides(nlohmann::json& instance,
   }
 }
 
+void ExpandSymbol::processLayoutOverrides(nlohmann::json& instance,
+                                          const std::vector<std::string>& instanceIdStack)
+{
+  // todo
+}
+
 void ExpandSymbol::processBoundsOverrides(nlohmann::json& instance,
                                           const std::vector<std::string>& instanceIdStack)
 {
@@ -460,6 +469,10 @@ void ExpandSymbol::processOtherOverrides(nlohmann::json& instance,
   {
     auto& overrideItem = el.value();
     if (!overrideItem.is_object() || (overrideItem[K_CLASS] != K_OVERRIDE_CLASS))
+    {
+      continue;
+    }
+    if (auto isLayoutOverride = overrideItem.value(K_EFFECT_ON_LAYOUT, false))
     {
       continue;
     }
@@ -1013,6 +1026,25 @@ void ExpandSymbol::layoutInstance(nlohmann::json& instance,
 
   // layout with new size
   layout.layout(instanceSize);
+
+  overrideLayoutRuleSize(instance[K_ID], instanceSize);
+}
+
+void ExpandSymbol::overrideLayoutRuleSize(const std::string& instanceId, const Size& instanceSize)
+{
+  auto& rules = m_outLayoutJson[K_OBJ];
+  for (auto i = 0; i < rules.size(); ++i)
+  {
+    if (rules[i][K_ID] == instanceId)
+    {
+      rules[i][K_WIDTH][K_VALUE][K_TYPES] = Internal::Rule::Length::ETypes::PX;
+      rules[i][K_WIDTH][K_VALUE][K_VALUE] = instanceSize.width;
+
+      rules[i][K_HEIGHT][K_VALUE][K_TYPES] = Internal::Rule::Length::ETypes::PX;
+      rules[i][K_HEIGHT][K_VALUE][K_VALUE] = instanceSize.height;
+      break;
+    }
+  }
 }
 
 void ExpandSymbol::layoutTree(nlohmann::json& rootJson, const nlohmann::json& newBoundsJson)

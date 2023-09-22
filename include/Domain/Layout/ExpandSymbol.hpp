@@ -51,6 +51,7 @@ private:
   void recalculatePoint(nlohmann::json& json, const char* key, const Size& containerSize);
 
   void layoutInstance(nlohmann::json& instance, const Size& masterSize, const Size& instanceSize);
+  void overrideLayoutRuleSize(const std::string& instanceId, const Size& instanceSize);
 
   void resizeTree(nlohmann::json& rootJson, const nlohmann::json& newBoundsJson);
 
@@ -63,6 +64,8 @@ private:
 
   void processMasterIdOverrides(nlohmann::json& instance,
                                 const std::vector<std::string>& instanceIdStack);
+  void processLayoutOverrides(nlohmann::json& instance,
+                              const std::vector<std::string>& instanceIdStack);
   void processBoundsOverrides(nlohmann::json& instance,
                               const std::vector<std::string>& instanceIdStack);
   void processOtherOverrides(nlohmann::json& instance,

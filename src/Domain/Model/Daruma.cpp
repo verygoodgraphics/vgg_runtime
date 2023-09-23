@@ -126,6 +126,8 @@ bool Daruma::loadFiles()
       m_eventListeners = json::object();
     }
 
+    m_resources = m_loader->resources();
+
     return true;
   }
   catch (const std::exception& e)

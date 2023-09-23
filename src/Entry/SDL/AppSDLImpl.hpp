@@ -242,7 +242,7 @@ public:
   void pollEvent()
   {
     SDL_Event evt;
-    while (SDL_PollEvent(&evt))
+    while (SDL_WaitEventTimeout(&evt, 1))
     {
       auto event = toUEvent(evt, resolutionScale());
       sendEvent(event);

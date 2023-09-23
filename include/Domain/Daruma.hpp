@@ -32,6 +32,7 @@ class Daruma
   MakeJsonDocFn m_makeDesignDocFn;
   JsonDocumentPtr m_layoutDoc;
   MakeJsonDocFn m_makeLayoutDocFn;
+  Model::Loader::ResourcesType m_resources;
 
   // runtime view model, symbol instance expanded
   JsonDocumentPtr m_runtimeDesignDoc;
@@ -59,7 +60,7 @@ public:
   JsonDocumentPtr& layoutDoc();
   auto resources()
   {
-    return m_loader->resources();
+    return m_resources;
   }
 
   // event listener

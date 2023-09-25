@@ -207,6 +207,7 @@ public:
     if (!f)
       return false;
 
+    scene->setPage(index);
     const auto b = f->getBound();
     const auto id = f->guid();
     int w = b.size().x;
@@ -232,7 +233,6 @@ public:
     image = std::move(res.value());
 
     index++;
-    scene->setPage(index); // advanced page
     return true;
   }
 };

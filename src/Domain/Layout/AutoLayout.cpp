@@ -491,7 +491,8 @@ void AutoLayout::frameChanged()
       {
         sharedView->setNeedLayout();
       }
-      else if (sharedRule->isFlexItem() || sharedRule->isGridItem())
+
+      if (sharedRule->isFlexItem() || sharedRule->isGridItem())
       {
         if (auto container = sharedView->autoLayoutContainer())
         {

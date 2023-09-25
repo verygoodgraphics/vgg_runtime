@@ -21,6 +21,7 @@
 
 namespace VGG
 {
+// NOLINTBEGIN
 using namespace nlohmann;
 template<typename T>
 inline std::optional<T> get_opt(const nlohmann::json& obj, const std::string& key)
@@ -36,6 +37,16 @@ inline std::optional<T> get_opt(const nlohmann::json& obj, const char* key)
   if (auto p = obj.find(key); p != obj.end())
     return p.value().get<T>();
   return std::nullopt;
+}
+
+template<typename R, typename K>
+inline R get_or_create(const nlohmann::json& j, K&& key)
+{
+  if (auto it = j.find(key); it != j.end())
+  {
+    return it.value();
+  }
+  return R();
 }
 
 template<>
@@ -64,6 +75,8 @@ inline std::optional<glm::vec2> get_opt(const nlohmann::json& obj, const char* k
   return std::nullopt;
 }
 
+// NOLINTEND
+
 class NlohmannBuilder
 {
   std::vector<std::shared_ptr<PaintNode>> m_frames;
@@ -88,7 +101,7 @@ class NlohmannBuilder
 
   inline std::tuple<Bound2, glm::mat3> fromTransform(const nlohmann::json& j)
   {
-    return { fromBound(j.value("bounds", nlohmann::json{})), fromMatrix(j) };
+    return { fromBound(get_or_create<nlohmann::json>(j, "bounds")), fromMatrix(j) };
   }
 
   template<typename F1, typename F2>
@@ -116,7 +129,8 @@ class NlohmannBuilder
   {
     Contour contour;
     contour.closed = j.value("closed", false);
-    for (const auto& e : j.value("points", nlohmann::json{}))
+    const auto points = j.value("points", nlohmann::json{});
+    for (const auto& e : points)
     {
       const auto p = e.value("point", std::array<float, 2>{ 0, 0 });
       contour.emplace_back(glm::vec2{ p[0], p[1] },
@@ -147,7 +161,8 @@ class NlohmannBuilder
         p->setContourOption(ContourOption(ECoutourType::MCT_FrameOnly, false));
         const auto radius = get_stack_optional<std::array<float, 4>>(j, "radius");
         p->style().frameRadius = radius;
-        for (const auto& c : j.value("childObjects", std::vector<nlohmann::json>{}))
+        const auto childObjects = get_or_create<nlohmann::json>(j, "childObjects");
+        for (const auto& c : childObjects)
         {
           p->addChild(fromObject(c));
         }
@@ -219,7 +234,8 @@ class NlohmannBuilder
         p->setChildWindingType(shape.value("windingRule", EWindingType::WR_EvenOdd));
         p->setContourOption(ContourOption(ECoutourType::MCT_ByObjectOps, false));
         p->setPaintOption(PaintOption(EPaintStrategy::PS_SelfOnly));
-        for (const auto& subshape : shape.value("subshapes", std::vector<nlohmann::json>{}))
+        const auto shapes = get_or_create<nlohmann::json>(shape, "subshapes");
+        for (const auto& subshape : shapes)
         {
           const auto blop = subshape.value("booleanOperation", EBoolOp::BO_None);
           const auto geo = subshape.value("subGeometry", nlohmann::json{});
@@ -316,7 +332,8 @@ class NlohmannBuilder
         p->setOverflow(OF_Visible); // Group do not clip inner content
         p->setContourOption(ContourOption(ECoutourType::MCT_Union, false));
         p->setPaintOption(EPaintStrategy(EPaintStrategy::PS_ChildOnly));
-        for (const auto& c : j.value("childObjects", std::vector<nlohmann::json>{}))
+        const auto childObjects = get_or_create<nlohmann::json>(j, "childObjects");
+        for (const auto& c : childObjects)
         {
           p->addChild(fromObject(c));
         }
@@ -326,7 +343,8 @@ class NlohmannBuilder
   inline std::vector<std::shared_ptr<PaintNode>> fromFrames(const nlohmann::json& j)
   {
     std::vector<std::shared_ptr<PaintNode>> frames;
-    for (const auto& e : j.value("frames", std::vector<nlohmann::json>{}))
+    const auto fs = get_or_create<nlohmann::json>(j, "frames");
+    for (const auto& e : fs)
     {
       frames.push_back(fromFrame(e));
     }
@@ -350,7 +368,8 @@ class NlohmannBuilder
       },
       [this, &j](PaintNode* p)
       {
-        for (const auto& e : j.value("childObjects", std::vector<nlohmann::json>()))
+        const auto chidlObject = get_or_create<nlohmann::json>(j, "childObjects");
+        for (const auto& e : chidlObject)
         {
           p->addChild(fromObject(e));
         }
@@ -360,7 +379,8 @@ class NlohmannBuilder
   inline std::vector<std::shared_ptr<PaintNode>> fromSymbolMasters(const nlohmann::json& j)
   {
     std::vector<std::shared_ptr<PaintNode>> symbols;
-    for (const auto& e : j.value("symbolMaster", std::vector<nlohmann::json>{}))
+    const auto symbolMasters = get_or_create<nlohmann::json>(j, "symbolMaster");
+    for (const auto& e : symbolMasters)
     {
       symbols.emplace_back(fromSymbolMaster(e));
     }
@@ -394,7 +414,7 @@ class NlohmannBuilder
   NlohmannBuilder() = default;
   void buildImpl(const nlohmann::json& j)
   {
-    m_frames = fromTopLevelFrames(j.value("frames", std::vector<nlohmann::json>{}));
+    m_frames = fromTopLevelFrames(get_or_create<nlohmann::json>(j, "frames"));
   }
 
 public:

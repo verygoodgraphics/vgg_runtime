@@ -60,11 +60,15 @@ void LayoutNode::layoutIfNeeded()
   {
     m_needsLayout = false;
 
-    // configure container and child items
-    configureAutoLayout(true);
+    // configure container
+    m_autoLayout->resetContainer();
+    configureAutoLayout();
+
+    // configure child items
     for (auto child : m_children)
     {
-      child->configureAutoLayout(true);
+      child->autoLayout()->resetItem();
+      child->configureAutoLayout();
     }
 
     applyLayout();
@@ -147,11 +151,11 @@ void LayoutNode::setViewModel(JsonDocumentPtr viewModel)
   m_viewModel = viewModel;
 }
 
-void LayoutNode::configureAutoLayout(bool reset)
+void LayoutNode::configureAutoLayout()
 {
   if (m_autoLayout)
   {
-    m_autoLayout->configure(reset);
+    m_autoLayout->configure();
   }
 }
 

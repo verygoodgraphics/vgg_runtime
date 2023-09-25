@@ -102,7 +102,7 @@ public:
 public:
   std::shared_ptr<Layout::Internal::AutoLayout> autoLayout() const;
   std::shared_ptr<Layout::Internal::AutoLayout> createAutoLayout();
-  void configureAutoLayout(bool reset = false);
+  void configureAutoLayout();
 
   std::shared_ptr<LayoutNode> autoLayoutContainer();
 

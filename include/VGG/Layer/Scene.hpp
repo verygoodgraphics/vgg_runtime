@@ -73,6 +73,10 @@ public:
   // To remove zoomer, just set nullptr
   void setZoomer(std::shared_ptr<Zoomer> zoomer);
   Zoomer* zoomer();
+  void enableDrawDebugBound(bool enabled);
+  bool isEnableDrawDebugBound();
+
+  void repaint();
   static ResourceRepo& getResRepo()
   {
     return s_resRepo;
@@ -84,16 +88,6 @@ public:
   }
 
   static void setResRepo(std::map<std::string, std::vector<char>> repo);
-
-  static void enableDrawDebugBound(bool enable)
-  {
-    s_enableDrawDebugBound = enable;
-  }
-
-  static bool isEnableDrawDebugBound()
-  {
-    return s_enableDrawDebugBound;
-  }
 
 private:
   void preprocessMask(PaintNode* node);

@@ -162,22 +162,12 @@ public:
   RenderState* getRenderState();
   void setOutlineMask(const Mask& mask);
 
-  // TODO:: this routine should be removed to a stand alone render pass
-  VGG::ObjectTableType preprocessMask()
-  {
-    ObjectTableType hash;
-    visitNode(this, hash);
-    return hash;
-  }
-
   virtual Mask asOutlineMask(const glm::mat3* mat);
   virtual void asAlphaMask();
 
   ~PaintNode();
 
 public:
-  void visitNode(VGG::Node* p, ObjectTableType& table);
-
   template<typename F>
   void visitFunc(VGG::Node* p, F&& f)
   {
@@ -209,7 +199,7 @@ protected:
   SkPath makeBoundPath();
   virtual SkPath makeContourImpl(ContourOption option, const glm::mat3* mat);
   SkPath childPolyOperation() const;
-  Mask makeMaskBy(EBoolOp maskOp);
+  Mask makeMaskBy(EBoolOp maskOp, SkiaRenderer* renderer);
 
 protected:
 protected:
@@ -218,8 +208,5 @@ protected:
   void paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& mask);
   virtual void paintFill(SkCanvas* canvas,
                          const SkPath& path); // TODO:: only for ImageNode overriding
-
-private:
-  void drawDebugBound(SkCanvas* canvas);
 };
 } // namespace VGG

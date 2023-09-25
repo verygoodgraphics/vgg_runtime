@@ -1,4 +1,5 @@
 #include "VSkia.hpp"
+#include "PaintNodePrivate.hpp"
 #include "VGG/Layer/Core/ImageNode.hpp"
 #include "VGG/Layer/Core/Node.hpp"
 #include "VGG/Layer/Core/PaintNode.hpp"
@@ -74,10 +75,6 @@ Mask ImageNode::asOutlineMask(const glm::mat3* mat)
   return mask;
 }
 
-// void ImageNode::paintEvent(SkCanvas* canvas)
-// {
-// }
-
 void ImageNode::setImage(const std::string& guid)
 {
   VGG_IMPL(ImageNode)
@@ -116,11 +113,17 @@ void ImageNode::paintFill(SkCanvas* canvas, const SkPath& path)
       _->shader =
         getImageShader(_->image, b.width(), b.height(), EImageFillType::IFT_Stretch, 1.0, false);
     }
-    auto mask = makeMaskBy(BO_Intersection);
-    if (mask.outlineMask.isEmpty() == false)
+
+    bool hasMask = false;
+    if (PaintNode::d_ptr.get()->mask)
     {
-      canvas->save();
-      canvas->clipPath(mask.outlineMask);
+      auto mask = PaintNode::d_ptr.get()->mask.value();
+      if (mask.isEmpty() == false)
+      {
+        canvas->save();
+        canvas->clipPath(mask);
+        hasMask = true;
+      }
     }
 
     SkPaint p;
@@ -135,7 +138,7 @@ void ImageNode::paintFill(SkCanvas* canvas, const SkPath& path)
     // canvas->drawImageRect(image, imageRect, opt);
     // canvas->restore();
 
-    if (mask.outlineMask.isEmpty() == false)
+    if (hasMask)
     {
       canvas->restore();
     }

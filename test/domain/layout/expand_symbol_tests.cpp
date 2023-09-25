@@ -462,3 +462,64 @@ TEST_F(VggExpandSymbolTestSuite, OverrideLayout)
     EXPECT_EQ(instanceMatrix, matrix);
   }
 }
+
+TEST_F(VggExpandSymbolTestSuite, NestedLayout)
+{
+  // Given
+  std::string designFilePath = "testDataDir/instance_layout/10_nested_instance/design.json";
+  std::string layoutFilePath = "testDataDir/instance_layout/10_nested_instance/layout.json";
+  auto designJson = Helper::load_json(designFilePath);
+  auto layoutJson = Helper::load_json(layoutFilePath);
+  ExpandSymbol sut{ designJson, layoutJson };
+
+  // When
+  auto result = sut.run();
+
+  // Then
+  auto expandedDesignJson = std::get<0>(result);
+  auto expandedLayoutJson = std::get<1>(result);
+
+  // rule
+  {
+    EXPECT_TRUE(hasLayoutRule(expandedLayoutJson, "401:2__601:8"));
+  }
+
+  // layout
+  {
+    nlohmann::json::json_pointer boundsPath{ "/frames/0/childObjects/1/bounds" };
+    Layout::Rect instanceBounds = expandedDesignJson[boundsPath];
+    Layout::Rect rect{ { 0, 0 }, { 1000, 400 } };
+    EXPECT_EQ(instanceBounds, rect);
+
+    nlohmann::json::json_pointer matrixPath{ "/frames/0/childObjects/1/matrix" };
+    Matrix instanceMatrix = expandedDesignJson[matrixPath];
+    Matrix matrix{ 1, 0, 0, 1, 0, -410 };
+    EXPECT_EQ(instanceMatrix, matrix);
+  }
+  {
+    nlohmann::json::json_pointer boundsPath{ "/frames/0/childObjects/1/childObjects/1/bounds" };
+    Layout::Rect instanceBounds = expandedDesignJson[boundsPath];
+    Layout::Rect rect{ { 0, 0 }, { 400, 300 } };
+    EXPECT_EQ(instanceBounds, rect);
+
+    nlohmann::json::json_pointer matrixPath{ "/frames/0/childObjects/1/childObjects/1/matrix" };
+    Matrix instanceMatrix = expandedDesignJson[matrixPath];
+    Matrix matrix{ 1, 0, 0, 1, 410, -40 };
+    EXPECT_EQ(instanceMatrix, matrix);
+  }
+  {
+    nlohmann::json::json_pointer boundsPath{
+      "/frames/0/childObjects/1/childObjects/1/childObjects/0/bounds"
+    };
+    Layout::Rect instanceBounds = expandedDesignJson[boundsPath];
+    Layout::Rect rect{ Point{ 0, 0 }, { 57, 110 } };
+    EXPECT_EQ(instanceBounds, rect);
+
+    nlohmann::json::json_pointer matrixPath{
+      "/frames/0/childObjects/1/childObjects/1/childObjects/0/matrix"
+    };
+    Matrix instanceMatrix = expandedDesignJson[matrixPath];
+    Matrix matrix{ 1, 0, 0, 1, 40, -30 };
+    EXPECT_EQ(instanceMatrix, matrix);
+  }
+}

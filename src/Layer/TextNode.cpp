@@ -122,7 +122,7 @@ void TextNode::paintEvent(SkiaRenderer* renderer)
       auto& p = _->paragraphCache.paragraphCache[i].paragraph;
       const auto curX = _->paragraphCache.paragraphCache[i].offsetX;
       p->paint(canvas, curX, curY);
-      if (Scene::isEnableDrawDebugBound())
+      if (renderer->isEnableDrawDebugBound())
       {
         DebugCanvas debugCanvas(canvas);
         drawParagraphDebugInfo(debugCanvas, _->paragraphCache.paragraph[i], p.get(), curX, curY, i);

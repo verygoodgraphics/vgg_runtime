@@ -1,4 +1,5 @@
 #include "VSkia.hpp"
+#include "PaintNodePrivate.hpp"
 #include "StyleRenderer.hpp"
 #include "Renderer.hpp"
 #include "RenderState.hpp"
@@ -16,66 +17,6 @@ namespace VGG
 
 SkCanvas* PaintNode::s_defaultCanvas = nullptr;
 RenderState* PaintNode::s_renderState = nullptr;
-
-class PaintNode__pImpl
-{
-  VGG_DECL_API(PaintNode);
-
-public:
-  Bound2 bound;
-  glm::mat3 transform{ 1.0 };
-  std::string guid{};
-  std::vector<std::string> maskedBy{};
-  Mask outlineMask;
-  EMaskType maskType{ MT_None };
-  EBoolOp clipOperator{ BO_None };
-  EOverflow overflow{ OF_Hidden };
-  EWindingType windingRule{ WR_EvenOdd };
-  Style style;
-  ContextSetting contextSetting;
-  ObjectType type;
-  bool visible{ true };
-
-  ContourPtr contour;
-  PaintOption paintOption;
-  ContourOption maskOption;
-
-  std::optional<SkPath> path;
-  std::optional<SkPath> mask;
-
-  PaintNode__pImpl(PaintNode* api, ObjectType type)
-    : q_ptr(api)
-    , type(type)
-  {
-  }
-  PaintNode__pImpl(const PaintNode__pImpl& other)
-  {
-    this->operator=(other);
-  }
-  PaintNode__pImpl& operator=(const PaintNode__pImpl& other)
-  {
-    bound = other.bound;
-    transform = other.transform;
-    guid = other.guid + "_Copy";
-    maskedBy = other.maskedBy;
-    outlineMask = other.outlineMask;
-    maskType = other.maskType;
-    clipOperator = other.clipOperator;
-    overflow = other.overflow;
-    windingRule = other.windingRule;
-    style = other.style;
-    contextSetting = other.contextSetting;
-    type = other.type;
-    visible = other.visible;
-    contour = other.contour;
-    paintOption = other.paintOption;
-    maskOption = other.maskOption;
-    return *this;
-  }
-
-  PaintNode__pImpl(PaintNode__pImpl&&) noexcept = default;
-  PaintNode__pImpl& operator=(PaintNode__pImpl&&) noexcept = default;
-};
 
 PaintNode::PaintNode(const std::string& name, ObjectType type, const std::string& guid)
   : Node(name)
@@ -156,7 +97,7 @@ glm::mat3 PaintNode::mapTransform(const PaintNode* node) const
   return mat;
 }
 
-Mask PaintNode::makeMaskBy(EBoolOp maskOp)
+Mask PaintNode::makeMaskBy(EBoolOp maskOp, SkiaRenderer* renderer)
 {
   VGG_IMPL(PaintNode);
   Mask result;
@@ -164,23 +105,27 @@ Mask PaintNode::makeMaskBy(EBoolOp maskOp)
     return result;
 
   auto op = toSkPathOp(maskOp);
-  auto objects = Scene::getObjectTable();
+  auto objects = renderer->maskObjects();
   for (const auto id : _->maskedBy)
   {
     if (id != this->guid())
     {
-      auto obj = objects[id].lock().get();
-      if (!obj)
-        continue;
-      const auto t = obj->mapTransform(this);
-      auto m = obj->asOutlineMask(&t);
-      if (result.outlineMask.isEmpty())
+      if (auto obj = objects.find(id); obj != objects.end())
       {
-        result = m;
+        const auto t = obj->second->mapTransform(this);
+        auto m = obj->second->asOutlineMask(&t);
+        if (result.outlineMask.isEmpty())
+        {
+          result = m;
+        }
+        else
+        {
+          Op(result.outlineMask, m.outlineMask, op, &result.outlineMask);
+        }
       }
       else
       {
-        Op(result.outlineMask, m.outlineMask, op, &result.outlineMask);
+        DEBUG("No such mask: %s", id.c_str());
       }
     }
   }
@@ -192,35 +137,24 @@ void PaintNode::renderPass(SkiaRenderer* renderer)
   invokeRenderPass(renderer);
 }
 
-void PaintNode::drawDebugBound(SkCanvas* canvas)
-{
-  VGG_IMPL(PaintNode);
-  const auto& b = getBound();
-  SkPaint strokePen;
-  strokePen.setStyle(SkPaint::kStroke_Style);
-  SkColor color = nodeType2Color(_->type);
-  strokePen.setColor(color);
-  strokePen.setStrokeWidth(2);
-  canvas->drawRect(toSkRect(getBound()), strokePen);
-}
-void PaintNode::visitNode(VGG::Node* p, ObjectTableType& table)
-{
-  if (!p)
-    return;
-  auto sptr = std::static_pointer_cast<PaintNode>(p->shared_from_this());
-  if (sptr->d_ptr->maskType != MT_None)
-  {
-    if (auto it = table.find(sptr->guid()); it == table.end())
-    {
-      table[sptr->guid()] = sptr; // type of all children of paintnode must be paintnode
-    }
-  }
-  for (auto it = p->begin(); it != p->end(); ++it)
-  {
-    visitNode(it->get(), table);
-  }
-}
-
+// void PaintNode::visitNode(VGG::Node* p, ObjectTableType& table)
+// {
+//   if (!p)
+//     return;
+//   auto sptr = std::static_pointer_cast<PaintNode>(p->shared_from_this());
+//   if (sptr->d_ptr->maskType != MT_None)
+//   {
+//     if (auto it = table.find(sptr->guid()); it == table.end())
+//     {
+//       table[sptr->guid()] = sptr; // type of all children of paintnode must be paintnode
+//     }
+//   }
+//   for (auto it = p->begin(); it != p->end(); ++it)
+//   {
+//     visitNode(it->get(), table);
+//   }
+// }
+//
 void PaintNode::paintPass(SkiaRenderer* renderer)
 {
   VGG_IMPL(PaintNode);
@@ -234,9 +168,10 @@ void PaintNode::paintPass(SkiaRenderer* renderer)
   }
   if (!_->mask)
   {
-    _->mask = makeMaskBy(BO_Intersection).outlineMask;
+    _->mask = makeMaskBy(BO_Intersection, renderer).outlineMask;
   }
-  renderer->displayList.emplace_back(renderer->canvas()->getTotalMatrix(), this);
+  // renderer->displayList.emplace_back(renderer->canvas()->getTotalMatrix(), this);
+  renderer->pushItem(this);
   // this->paintEvent(renderer);
 }
 
@@ -673,19 +608,17 @@ void PaintNode::prePaintPass(SkiaRenderer* renderer)
     // canvas->saveLayer(toSkRect(getBound()), &paint);
   }
 
-  canvas->save();
-  canvas->concat(toSkMatrix(_->transform));
-  if (Scene::isEnableDrawDebugBound())
-  {
-    this->drawDebugBound(canvas);
-  }
+  // canvas->save();
+  // canvas->concat(toSkMatrix(_->transform));
+  renderer->pushMatrix(this->localTransform());
 }
 
 void PaintNode::postPaintPass(SkiaRenderer* renderer)
 {
   VGG_IMPL(PaintNode);
   auto canvas = renderer->canvas();
-  canvas->restore(); // store the state in paintPass
+  renderer->popMatrix();
+  // canvas->restore(); // store the state in paintPass
 
   if (_->contextSetting.IsolateBlending)
   {

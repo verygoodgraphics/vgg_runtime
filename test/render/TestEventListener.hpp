@@ -184,7 +184,7 @@ public:
     if (key == VGGK_b)
     {
       INFO("Toggle object bounding box");
-      Scene::enableDrawDebugBound(!Scene::isEnableDrawDebugBound());
+      m_scene->enableDrawDebugBound(!m_scene->isEnableDrawDebugBound());
       return true;
     }
 

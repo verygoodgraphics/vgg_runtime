@@ -24,8 +24,6 @@ namespace VGG
 {
 
 ResourceRepo Scene::s_resRepo{};
-ObjectTableType Scene::s_objectTable{};
-bool Scene::s_enableDrawDebugBound{ false };
 
 class Scene__pImpl
 {
@@ -68,21 +66,13 @@ public:
     PaintNode* node = nullptr;
     if (!container.frames.empty() && maskDirty)
     {
-      auto board = container.frames[page].get();
-      preprocessMask(board);
-      renderer.draw(canvas, board);
+      auto frame = container.frames[page].get();
+      renderer.clearCache();
+      renderer.updateMaskObject(frame);
+      renderer.draw(canvas, frame);
       maskDirty = false;
     }
-    if (!maskDirty)
-    {
-      renderer.commit(canvas);
-    }
-  }
-
-  void preprocessMask(PaintNode* node)
-  {
-    Scene::s_objectTable = node->preprocessMask();
-    // generate each mask for masked node
+    renderer.commit(canvas);
   }
 };
 
@@ -103,7 +93,7 @@ void Scene::loadFileContent(const nlohmann::json& json)
     return;
   _->page = 0;
   _->symbolIndex = 0;
-  _->maskDirty = true;
+  repaint();
   _->container = NlohmannBuilder::build(json);
 }
 
@@ -151,7 +141,12 @@ Zoomer* Scene::zoomer()
 void Scene::setZoomer(std::shared_ptr<Zoomer> zoomer)
 {
   VGG_IMPL(Scene);
+  if (_->zoomer)
+  {
+    _->zoomer->setOwnerScene(nullptr);
+  }
   _->zoomer = std::move(zoomer);
+  _->zoomer->setOwnerScene(this);
 }
 
 void Scene::setPage(int num)
@@ -160,22 +155,28 @@ void Scene::setPage(int num)
   if (num >= 0 && num < _->container.frames.size())
   {
     _->page = num;
-    _->maskDirty = true;
+    repaint();
   }
+}
+
+void Scene::repaint()
+{
+  VGG_IMPL(Scene);
+  _->maskDirty = true;
 }
 
 void Scene::nextArtboard()
 {
   VGG_IMPL(Scene)
   _->page = (_->page + 1 >= _->container.frames.size()) ? _->page : _->page + 1;
-  _->maskDirty = true;
+  repaint();
 }
 
 void Scene::preArtboard()
 {
   VGG_IMPL(Scene)
   _->page = (_->page - 1 > 0) ? _->page - 1 : 0;
-  _->maskDirty = true;
+  repaint();
 }
 
 void Scene::nextSymbol()
@@ -195,6 +196,17 @@ void Scene::setResRepo(std::map<std::string, std::vector<char>> repo)
 {
   Scene::s_resRepo = std::move(repo);
   g_skiaImageRepo.clear();
+}
+
+void Scene::enableDrawDebugBound(bool enabled)
+{
+  VGG_IMPL(Scene)
+  _->renderer.enableDrawDebugBound(enabled);
+}
+bool Scene::isEnableDrawDebugBound()
+{
+  VGG_IMPL(Scene)
+  return _->renderer.isEnableDrawDebugBound();
 }
 
 } // namespace VGG

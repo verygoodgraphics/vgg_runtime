@@ -18,8 +18,8 @@ constexpr auto K_SEPARATOR = "__";
 
 class ExpandSymbol
 {
-  const nlohmann::json m_designJson;
-  const nlohmann::json m_layoutJson;
+  const nlohmann::json& m_designJson;
+  const nlohmann::json& m_layoutJson;
   nlohmann::json m_outLayoutJson;
   std::unordered_map<std::string, nlohmann::json> m_masters;
   std::unordered_map<std::string, nlohmann::json> m_layoutRules;

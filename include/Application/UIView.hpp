@@ -2,7 +2,6 @@
 
 #include "AppScene.hpp"
 #include "UIEvent.hpp"
-#include "ViewModel.hpp"
 
 #include "Domain/Layout/Node.hpp"
 #include "Layer/Scene.hpp"
@@ -15,6 +14,8 @@
 
 namespace VGG
 {
+
+struct ViewModel;
 
 class UIView : public app::AppScene
 {
@@ -56,15 +57,7 @@ public:
     setZoomerListener(std::make_shared<app::AppZoomer>());
   }
 
-  void show(const ViewModel& viewModel)
-  {
-    loadFileContent(viewModel.designDoc);
-    m_document = viewModel.layoutTree;
-    // todo, merge edited doc resouces ?
-    Scene::setResRepo(viewModel.resources());
-
-    setDirty(true);
-  }
+  void show(const ViewModel& viewModel);
 
   void registerEventListener(HasEventListener hasEventListener)
   {

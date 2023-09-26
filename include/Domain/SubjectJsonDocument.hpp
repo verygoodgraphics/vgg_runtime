@@ -4,7 +4,7 @@
 
 #include "ModelEvent.hpp"
 
-#include "rxcpp/rx.hpp"
+#include <rxcpp/rx.hpp>
 
 #include <memory>
 #include <vector>

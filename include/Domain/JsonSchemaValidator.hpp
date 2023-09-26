@@ -1,8 +1,8 @@
 #ifndef VGG_JSON_SCHEMA_VALIDATOR_HPP
 #define VGG_JSON_SCHEMA_VALIDATOR_HPP
 
-#include "nlohmann/json.hpp"
-#include "valijson_nlohmann_bundled.hpp"
+#include <nlohmann/json.hpp>
+#include <valijson_nlohmann_bundled.hpp>
 
 #include <unordered_map>
 

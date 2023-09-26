@@ -3,7 +3,7 @@
 #include "JsonKeys.hpp"
 #include "Rect.hpp"
 
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace VGG
 {

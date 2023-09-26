@@ -4,7 +4,7 @@
 
 #include "Utility/Log.hpp"
 
-#include "node_api.h"
+#include <node_api.h>
 
 namespace VGG
 {

@@ -1,6 +1,6 @@
-#include "node.h"
-#include "node_api.h"
-#include "util.h"
+#include <node.h>
+#include <node_api.h>
+#include <util.h>
 
 #include "VggSdkAddon.hpp"
 #include "PlatformAdapter/Native/Sdk/VggSdkNodeAdapter.hpp"

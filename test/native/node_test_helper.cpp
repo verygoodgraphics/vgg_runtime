@@ -1,5 +1,5 @@
-#include "node.h"
-#include "uv.h"
+#include <node.h>
+#include <uv.h>
 #include <assert.h>
 
 using node::CommonEnvironmentSetup;

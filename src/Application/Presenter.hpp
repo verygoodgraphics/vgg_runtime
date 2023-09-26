@@ -34,6 +34,11 @@ class Presenter : public std::enable_shared_from_this<Presenter>
 public:
   virtual ~Presenter() = default;
 
+  int currentPageIndex()
+  {
+    return m_view->currentPageIndex();
+  }
+
   virtual void setModel(std::shared_ptr<ViewModel> viewModel)
   {
     m_viewModel = viewModel;

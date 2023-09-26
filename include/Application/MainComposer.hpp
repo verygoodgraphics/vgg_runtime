@@ -2,9 +2,6 @@
 
 #include "Controller.hpp"
 #include "PlatformComposer.hpp"
-#include "Presenter.hpp"
-#include "RunLoop.hpp"
-#include "UIView.hpp"
 #include "Domain/Daruma.hpp"
 
 #include "Application/Mouse.hpp"
@@ -15,6 +12,9 @@ namespace VGG
 {
 
 class Editor;
+class Presenter;
+class RunLoop;
+class UIView;
 
 class MainComposer
 {
@@ -51,17 +51,7 @@ public:
     return m_view;
   }
 
-  void enableEdit(int top = 0, int right = 300, int bottom = 0, int left = 300)
-  {
-    m_editView.reset(new UIView);
-    m_presenter->setEditView(m_editView);
-
-    if (m_view)
-    {
-      m_view->becomeEditorWithSidebar(top, right, bottom, left);
-      m_view->addSubview(m_editView);
-    }
-  }
+  void enableEdit(int top = 0, int right = 300, int bottom = 0, int left = 300);
 };
 
 } // namespace VGG

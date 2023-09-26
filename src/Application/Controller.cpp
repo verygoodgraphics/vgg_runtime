@@ -3,6 +3,7 @@
 #include "Editor.hpp"
 #include "Presenter.hpp"
 #include "Reporter.hpp"
+#include "RunLoop.hpp"
 
 #include "Domain/Daruma.hpp"
 #include "Domain/DarumaContainer.hpp"
@@ -111,7 +112,11 @@ bool Controller::edit(std::vector<char>& buffer)
 
 void Controller::onResize()
 {
-  // ResizeWindow{ m_layout }.onResize(m_presenter->viewSize());
+  if (isNormalMode())
+  {
+    ResizeWindow{ m_layout }.onResize(m_presenter->viewSize());
+  }
+
   if (m_editModel)
   {
     // todo, edited model
@@ -121,27 +126,24 @@ void Controller::onResize()
 
 void Controller::setEditMode(bool editMode)
 {
-  if (editMode)
+  auto newMode = editMode ? ERunMode::EDIT_MODE : ERunMode::NORMAL_MODE;
+  if (newMode == m_mode)
   {
-    if (m_mode == ERunMode::EDIT_MODE)
-    {
-      return;
-    }
+    return;
+  }
 
-    m_mode = ERunMode::EDIT_MODE;
+  m_mode = newMode;
+  m_presenter->setEditMode(editMode);
+  m_editor->enable(editMode);
+
+  if (isNormalMode())
+  {
+    m_layout->layout(m_presenter->viewSize()); // windows size
   }
   else
   {
-    if (m_mode == ERunMode::NORMAL_MODE)
-    {
-      return;
-    }
-
-    m_mode = ERunMode::NORMAL_MODE;
+    m_layout->layout(m_layout->pageSize(m_presenter->currentPageIndex())); // original page size
   }
-
-  m_presenter->setEditMode(editMode);
-  m_editor->enable(editMode);
 }
 
 std::shared_ptr<app::AppRenderable> Controller::editor()
@@ -331,7 +333,10 @@ std::shared_ptr<ViewModel> Controller::generateViewModel(std::shared_ptr<Daruma>
   StartRunning startRunning{ model };
   m_layout = startRunning.layout();
 
-  // startRunning.layout(size);
+  if (isNormalMode())
+  {
+    startRunning.layout(size);
+  }
 
   auto viewModel = std::make_shared<ViewModel>();
   viewModel->model = m_model;

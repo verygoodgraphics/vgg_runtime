@@ -120,6 +120,10 @@ public:
 
   void nextArtboard();
   void preArtboard();
+  int currentPageIndex()
+  {
+    return m_page;
+  }
 
 private:
   std::tuple<bool, bool, bool, bool> getKeyModifier(int keyMod);

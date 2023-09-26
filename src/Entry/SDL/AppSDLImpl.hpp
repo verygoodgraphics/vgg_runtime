@@ -7,8 +7,8 @@
 #include "EventConvert.hpp"
 #include "Utility/Log.hpp"
 
-#include "VGG/Layer/Graphics/GraphicsContext.hpp"
-#include "VGG/Layer/Graphics/ContextInfoGL.hpp"
+#include "Layer/Graphics/GraphicsContext.hpp"
+#include "Layer/Graphics/ContextInfoGL.hpp"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>

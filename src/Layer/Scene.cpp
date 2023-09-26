@@ -3,11 +3,11 @@
 
 #include "Utility/ConfigManager.hpp"
 #include "Utility/Log.hpp"
-#include "VGG/Layer/Scene.hpp"
+#include "Layer/Scene.hpp"
 #include "Renderer.hpp"
-#include "VGG/Layer/Zoomer.hpp"
-#include "VGG/Layer/Core/PaintNode.hpp"
-#include "VGG/Layer/Core/Node.hpp"
+#include "Layer/Zoomer.hpp"
+#include "Layer/Core/PaintNode.hpp"
+#include "Layer/Core/Node.hpp"
 
 #include <glm/gtx/matrix_transform_2d.hpp>
 #include <glm/matrix.hpp>

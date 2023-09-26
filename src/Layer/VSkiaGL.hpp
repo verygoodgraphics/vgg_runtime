@@ -2,7 +2,7 @@
 
 #include "VSkiaContext.hpp"
 
-#include "VGG/Layer/Graphics/ContextInfoGL.hpp"
+#include "Layer/Graphics/ContextInfoGL.hpp"
 
 #include <include/gpu/ganesh/SkSurfaceGanesh.h>
 #include <include/gpu/GrBackendSurface.h>

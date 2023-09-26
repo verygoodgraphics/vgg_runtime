@@ -3,9 +3,9 @@
 #include "StyleRenderer.hpp"
 #include "Renderer.hpp"
 #include "RenderState.hpp"
-#include "VGG/Layer/Core/PaintNode.hpp"
-#include "VGG/Layer/Core/VType.hpp"
-#include "VGG/Layer/Core/Node.hpp"
+#include "Layer/Core/PaintNode.hpp"
+#include "Layer/Core/VType.hpp"
+#include "Layer/Core/Node.hpp"
 
 #include <include/core/SkCanvas.h>
 #include <core/SkPath.h>

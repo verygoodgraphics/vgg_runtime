@@ -3,7 +3,7 @@
 #include "AppScene.hpp"
 #include "AppRenderable.hpp"
 
-#include "VGG/Layer/VGGLayer.hpp"
+#include "Layer/VGGLayer.hpp"
 
 #include <queue>
 

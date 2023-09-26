@@ -2,7 +2,7 @@
 #include "Application/UIView.hpp"
 #include "Utility/Log.hpp"
 
-#include "VGG/Layer/Zoomer.hpp"
+#include "Layer/Zoomer.hpp"
 
 #include <include/core/SkCanvas.h>
 

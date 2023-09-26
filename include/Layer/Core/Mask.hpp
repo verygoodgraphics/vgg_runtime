@@ -1,5 +1,5 @@
 #pragma once
-#include "VGG/Layer/Config.hpp"
+#include "Layer/Config.hpp"
 
 #include <include/core/SkPath.h>
 

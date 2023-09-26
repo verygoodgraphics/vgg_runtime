@@ -1,14 +1,14 @@
 #pragma once
 #include "Utility/Log.hpp"
-
-#include "VGG/Layer/Core/Attrs.hpp"
-#include "VGG/Layer/Core/PaintNode.hpp"
-#include "VGG/Layer/Core/Node.hpp"
-#include "VGG/Layer/Core/PaintNode.hpp"
-#include "VGG/Layer/Core/TextNode.hpp"
-#include "VGG/Layer/Core/ImageNode.hpp"
-
 #include "AttrSerde.hpp"
+
+#include "Layer/Core/Attrs.hpp"
+#include "Layer/Core/PaintNode.hpp"
+#include "Layer/Core/Node.hpp"
+#include "Layer/Core/PaintNode.hpp"
+#include "Layer/Core/TextNode.hpp"
+#include "Layer/Core/ImageNode.hpp"
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/fwd.hpp>
 #include <glm/matrix.hpp>

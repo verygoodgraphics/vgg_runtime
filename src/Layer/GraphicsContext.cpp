@@ -1,4 +1,4 @@
-#include "VGG/Layer/Graphics/GraphicsContext.hpp"
+#include "Layer/Graphics/GraphicsContext.hpp"
 
 namespace VGG::layer
 {

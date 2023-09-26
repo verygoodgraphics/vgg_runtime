@@ -5,12 +5,12 @@
 #include "VSkiaContext.hpp"
 #include "VSkiaGL.hpp"
 
-#include "VGG/Layer/VGGLayer.hpp"
-#include "VGG/Layer/Zoomer.hpp"
-#include "VGG/Layer/Scene.hpp"
-#include "VGG/Layer/Graphics/GraphicsLayer.hpp"
-#include "VGG/Layer/Graphics/GraphicsContext.hpp"
-#include "VGG/Layer/Core/Node.hpp"
+#include "Layer/VGGLayer.hpp"
+#include "Layer/Zoomer.hpp"
+#include "Layer/Scene.hpp"
+#include "Layer/Graphics/GraphicsLayer.hpp"
+#include "Layer/Graphics/GraphicsContext.hpp"
+#include "Layer/Core/Node.hpp"
 #include "Utility/CappingProfiler.hpp"
 
 #include <optional>

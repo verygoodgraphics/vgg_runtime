@@ -1,5 +1,5 @@
 #pragma once
-#include "VGG/Math/Math.hpp"
+#include "Math/Math.hpp"
 
 using namespace VGG;
 

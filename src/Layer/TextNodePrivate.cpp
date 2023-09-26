@@ -2,9 +2,9 @@
 #include "ParagraphParser.hpp"
 #include "VSkia.hpp"
 
-#include "VGG/Layer/Core/TextNode.hpp"
-#include "VGG/Layer/Core/VType.hpp"
-#include "VGG/Layer/FontManager.hpp"
+#include "Layer/Core/TextNode.hpp"
+#include "Layer/Core/VType.hpp"
+#include "Layer/FontManager.hpp"
 
 #include <core/SkCanvas.h>
 #include <core/SkColor.h>

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "VGG/Math/Hash.hpp"
-#include "VGG/Math/Math.hpp"
-#include "VGG/Math/Geometry.hpp"
-#include "VGG/Layer/Core/VType.hpp"
+#include "Math/Hash.hpp"
+#include "Math/Math.hpp"
+#include "Math/Geometry.hpp"
+#include "Layer/Core/VType.hpp"
 
 #include <include/effects/SkGradientShader.h>
 #include <include/effects/SkDashPathEffect.h>

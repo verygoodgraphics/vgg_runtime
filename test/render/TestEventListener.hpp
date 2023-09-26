@@ -9,8 +9,8 @@
 #include "Application/Event/EventListener.hpp"
 #include "Application/Event/Keycode.hpp"
 
-#include "VGG/Layer/Scene.hpp"
-#include "VGG/Layer/VGGLayer.hpp"
+#include "Layer/Scene.hpp"
+#include "Layer/VGGLayer.hpp"
 
 #include <exception>
 #include <fstream>

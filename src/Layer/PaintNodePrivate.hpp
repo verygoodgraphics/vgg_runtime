@@ -1,6 +1,6 @@
 #pragma once
-#include "VGG/VGG.hpp"
-#include "VGG/Layer/Core/PaintNode.hpp"
+#include "VGG.hpp"
+#include "Layer/Core/PaintNode.hpp"
 namespace VGG
 {
 

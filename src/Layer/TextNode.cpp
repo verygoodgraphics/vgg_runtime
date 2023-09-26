@@ -2,12 +2,12 @@
 #include "TextNodePrivate.hpp"
 #include "Renderer.hpp"
 
-#include "VGG/Layer/Core/TextNode.hpp"
-#include "VGG/Layer/Core/Attrs.hpp"
-#include "VGG/Layer/Core/Node.hpp"
-#include "VGG/Layer/Core/PaintNode.hpp"
-#include "VGG/Layer/Core/VType.hpp"
-#include "VGG/Layer/FontManager.hpp"
+#include "Layer/Core/TextNode.hpp"
+#include "Layer/Core/Attrs.hpp"
+#include "Layer/Core/Node.hpp"
+#include "Layer/Core/PaintNode.hpp"
+#include "Layer/Core/VType.hpp"
+#include "Layer/FontManager.hpp"
 
 #include <include/core/SkCanvas.h>
 #include <include/core/SkFont.h>

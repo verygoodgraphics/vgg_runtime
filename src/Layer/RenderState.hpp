@@ -2,7 +2,7 @@
 #include <optional>
 #include <stack>
 
-#include "VGG/Layer/Core/PaintNode.hpp"
+#include "Layer/Core/PaintNode.hpp"
 
 namespace VGG
 {

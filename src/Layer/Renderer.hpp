@@ -2,8 +2,8 @@
 #include "VSkia.hpp"
 #include "PaintNodePrivate.hpp"
 
-#include "VGG/Layer/Core/PaintNode.hpp"
-#include "VGG/Layer/Config.hpp"
+#include "Layer/Core/PaintNode.hpp"
+#include "Layer/Config.hpp"
 #include "RenderState.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/matrix.hpp"

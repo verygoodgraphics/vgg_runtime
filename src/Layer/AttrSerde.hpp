@@ -1,7 +1,6 @@
 #pragma once
-#include "Loader.hpp"
-#include "VGG/Layer/Core/VType.hpp"
-#include "VGG/Layer/Core/Attrs.hpp"
+#include "Layer/Core/VType.hpp"
+#include "Layer/Core/Attrs.hpp"
 
 #include <nlohmann/json.hpp>
 

@@ -1,7 +1,7 @@
 #pragma once
-#include "VGG/Layer/Core/VType.hpp"
-#include "VGG/Layer/Core/Attrs.hpp"
-#include "VGG/Layer/Scene.hpp"
+#include "Layer/Core/VType.hpp"
+#include "Layer/Core/Attrs.hpp"
+#include "Layer/Scene.hpp"
 #include "Utility/Log.hpp"
 
 #include <include/core/SkBlendMode.h>

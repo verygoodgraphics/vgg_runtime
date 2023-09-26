@@ -1,12 +1,12 @@
 #pragma once
 
-#include "VGG/Math/Geometry.hpp"
-#include "VGG/Layer/Core/Node.hpp"
-#include "VGG/Layer/Core/VType.hpp"
-#include "VGG/Layer/Core/Attrs.hpp"
-#include "VGG/Layer/Core/Mask.hpp"
-#include "VGG/Layer/Config.hpp"
-#include "VGG/Layer/Scene.hpp"
+#include "Math/Geometry.hpp"
+#include "Layer/Core/Node.hpp"
+#include "Layer/Core/VType.hpp"
+#include "Layer/Core/Attrs.hpp"
+#include "Layer/Core/Mask.hpp"
+#include "Layer/Config.hpp"
+#include "Layer/Scene.hpp"
 
 #include <glm/matrix.hpp>
 // #include <include/core/SkColor.h>

@@ -1,6 +1,6 @@
 #pragma once
-#include "VGG/VGG.hpp"
-#include "VGG/Layer/Config.hpp"
+#include "VGG.hpp"
+#include "Layer/Config.hpp"
 #include <algorithm>
 #include <string>
 #include <memory>

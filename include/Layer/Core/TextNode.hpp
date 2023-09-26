@@ -1,11 +1,11 @@
 #pragma once
 
-#include "VGG/Layer/Config.hpp"
+#include "Layer/Config.hpp"
 
-#include "VGG/Layer/FontManager.hpp"
-#include "VGG/Layer/Core/Node.hpp"
-#include "VGG/Layer/Core/PaintNode.hpp"
-#include "VGG/Layer/Core/VType.hpp"
+#include "Layer/FontManager.hpp"
+#include "Layer/Core/Node.hpp"
+#include "Layer/Core/PaintNode.hpp"
+#include "Layer/Core/VType.hpp"
 
 namespace VGG
 {

@@ -19,8 +19,8 @@
 #include "Application/Event/EventListener.hpp"
 #include "Utility/Log.hpp"
 
-#include "VGG/Layer/Graphics/GraphicsContext.hpp"
-#include "VGG/Layer/VGGLayer.hpp"
+#include "Layer/Graphics/GraphicsContext.hpp"
+#include "Layer/VGGLayer.hpp"
 
 #include <memory>
 #include <optional>

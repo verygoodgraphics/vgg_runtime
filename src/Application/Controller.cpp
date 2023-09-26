@@ -136,13 +136,18 @@ void Controller::setEditMode(bool editMode)
   m_presenter->setEditMode(editMode);
   m_editor->enable(editMode);
 
+  if (!m_layout)
+  {
+    return;
+  }
+
   if (isNormalMode())
   {
     m_layout->layout(m_presenter->viewSize()); // windows size
   }
   else
   {
-    m_layout->layout(m_layout->pageSize(m_presenter->currentPageIndex())); // original page size
+    m_layout->layoutByPageSize(m_presenter->currentPageIndex());
   }
 }
 
@@ -310,7 +315,8 @@ JsonDocument* Controller::createJsonDoc()
   }
   else
   {
-    return nullptr; // new UndoRedoJsonDocument();
+    // todo: use UndoRedoJsonDocument
+    return new RawJsonDocument();
   }
 }
 

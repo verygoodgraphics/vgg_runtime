@@ -1,6 +1,6 @@
 add_executable(viewer)
 target_sources(viewer PRIVATE render.cpp)
-target_link_libraries(viewer PRIVATE vgg_application vgg_adapter vgg_utility)
+target_link_libraries(viewer PRIVATE vgg_utility vgg_layer vgg_application)
 if (NOT EMSCRIPTEN)
   # REFACTOR:: SDL2 dependency is only need by SDL module.
   set(SDL2_BUILDING_LIBRARY ON)

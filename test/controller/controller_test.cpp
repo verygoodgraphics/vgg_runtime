@@ -5,7 +5,7 @@
 #include "Adapter/NativeComposer.hpp"
 #include "mocks/MockPresenter.hpp"
 
-#include "rxcpp/rx.hpp"
+#include <rxcpp/rx.hpp>
 
 #include "test_config.hpp"
 

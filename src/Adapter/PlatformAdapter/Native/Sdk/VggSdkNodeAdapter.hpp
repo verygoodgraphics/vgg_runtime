@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include "node_api.h"
+#include <node_api.h>
 
 class VggSdk;
 

@@ -2,7 +2,7 @@
 
 #include "Rect.hpp"
 
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 #include <stack>
 #include <string>

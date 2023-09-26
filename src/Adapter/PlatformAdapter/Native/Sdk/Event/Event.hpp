@@ -2,9 +2,9 @@
 
 #include "PlatformAdapter/Native/Sdk/AdapterHelper.hpp"
 
-#include "node_api.h"
-
 #include "Utility/Log.hpp"
+
+#include <node_api.h>
 
 #include <functional>
 #include <mutex>

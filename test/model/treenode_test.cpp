@@ -1,5 +1,5 @@
 #include "VGG/Layer/Core/Node.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include <deque>
 #include <gtest/gtest.h>
 #include <queue>

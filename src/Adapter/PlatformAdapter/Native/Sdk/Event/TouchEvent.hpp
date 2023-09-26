@@ -2,7 +2,7 @@
 
 #include "UIEvent.hpp"
 
-#include "node_api.h"
+#include <node_api.h>
 
 namespace VGG
 {

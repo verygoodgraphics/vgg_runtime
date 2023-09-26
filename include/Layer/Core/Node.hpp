@@ -1,5 +1,5 @@
 #pragma once
-#include "VGG.hpp"
+#include "Utility/HelperMacro.hpp"
 #include "Layer/Config.hpp"
 #include <algorithm>
 #include <string>

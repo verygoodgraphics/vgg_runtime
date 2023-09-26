@@ -37,7 +37,8 @@ std::pair<nlohmann::json, nlohmann::json> ExpandSymbol::run()
   std::vector<std::string> instanceIdStack{};
   expandInstance(designJson, instanceIdStack);
 
-  return { designJson, m_outLayoutJson };
+  // It's OK to move m_outLayoutJson, it's like a temporary variable
+  return { std::move(designJson), std::move(m_outLayoutJson) };
 }
 
 void ExpandSymbol::collectMaster(const nlohmann::json& json)
@@ -365,7 +366,6 @@ void ExpandSymbol::processMasterIdOverrides(nlohmann::json& instance,
                      return aObjectIdPaths.size() < bObjectIdPaths.size();
                    });
 
-  auto instanceId = instance[K_ID];
   for (auto& el : masterIdOverrideValues.items())
   {
     auto& overrideItem = el.value();
@@ -417,7 +417,6 @@ void ExpandSymbol::processLayoutOverrides(nlohmann::json& instance,
                std::back_inserter(layoutOverrideValues),
                [](const nlohmann::json& item) { return item.value(K_EFFECT_ON_LAYOUT, false); });
 
-  auto instanceId = instance[K_ID];
   for (auto& el : layoutOverrideValues.items())
   {
     auto& overrideItem = el.value();
@@ -463,7 +462,6 @@ void ExpandSymbol::processBoundsOverrides(nlohmann::json& instance,
                      return aObjectIdPaths.size() < bObjectIdPaths.size();
                    });
 
-  auto instanceId = instance[K_ID];
   for (auto& el : boundsOverrideValues.items())
   {
     auto& overrideItem = el.value();
@@ -494,7 +492,6 @@ void ExpandSymbol::processOtherOverrides(nlohmann::json& instance,
     return;
   }
 
-  auto instanceId = instance[K_ID];
   auto instanceMasterId = instance[K_MASTER_ID];
   for (auto& el : overrideValues.items())
   {

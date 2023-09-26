@@ -26,10 +26,8 @@ extern "C"
   bool load_file_from_mem(const char* name, char* data, int len)
   {
     std::vector<char> buf(data, data + len);
-    auto& mainComposer = VggBrowser::mainComposer();
-    return mainComposer.controller()->start(buf,
-                                            "/asset/vgg-format.json",
-                                            "/asset/vgg_layout.json");
+    auto controller = VggBrowser::mainComposer().controller();
+    return controller->start(buf, "/asset/vgg-format.json", "/asset/vgg_layout.json");
   }
 
   bool is_latest_version(const char* version)

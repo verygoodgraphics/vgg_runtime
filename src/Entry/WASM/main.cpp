@@ -1,7 +1,9 @@
 #include "Entry/SDL/AppSDLImpl.hpp"
 #include "BrowserMainComposer.hpp"
 
+#include "Application/RunLoop.hpp"
 #include "Application/UIApplication.hpp"
+#include "Application/UIView.hpp"
 #include "Utility/ConfigManager.hpp"
 
 #ifdef EMSCRIPTEN
@@ -33,7 +35,7 @@ extern "C"
     mainComposer.runLoop()->dispatch();
   }
 
-  void emscripten_main(int width, int height) // NOLINT
+  void emscripten_main(int width, int height, bool editMode) // NOLINT
   {
     Config::readGlobalConfig("/asset/etc/config.json");
 
@@ -62,8 +64,14 @@ extern "C"
 
     // inject dependencies
     app->setLayer(sdlApp->layer());
-    app->setView(mainComposer.view());
-    app->setController(mainComposer.controller());
+
+    auto view = mainComposer.view();
+    view->setSize(cfg.windowSize[0], cfg.windowSize[1]);
+    app->setView(view);
+
+    auto controller = mainComposer.controller();
+    controller->setEditMode(editMode);
+    app->setController(controller);
 
     emscripten_set_main_loop(emscripten_frame, 0, 1);
   }

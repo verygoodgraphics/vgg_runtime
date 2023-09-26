@@ -84,13 +84,12 @@ int main(int argc, char** argv)
   auto view = mainComposer.view();
   view->setSize(cfg.windowSize[0], cfg.windowSize[1]);
   app->setView(view);
-  app->setController(mainComposer.controller());
 
-  // mainComposer.controller()->setEditMode(true);
+  auto controller = mainComposer.controller();
+  // controller->setEditMode(true);
   auto darumaFileOrDir = program.get<std::string>(DARUMA_FILE_OR_DIRECTORY);
-  mainComposer.controller()->start(darumaFileOrDir,
-                                   "../asset/vgg-format.json",
-                                   "../asset/vgg_layout.json");
+  controller->start(darumaFileOrDir, "../asset/vgg-format.json", "../asset/vgg_layout.json");
+  app->setController(controller);
 
   while (!sdlApp->shouldExit())
   {

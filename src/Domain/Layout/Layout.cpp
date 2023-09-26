@@ -28,6 +28,8 @@ Layout::Layout::Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc, boo
 
 void Layout::Layout::layout(Size size)
 {
+  // todo, layout current page only
+
   // update root frame
   auto root = layoutTree();
   auto frame = root->frame();

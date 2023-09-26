@@ -102,7 +102,7 @@ Mask PaintNode::makeMaskBy(EBoolOp maskOp, SkiaRenderer* renderer)
     return result;
 
   auto op = toSkPathOp(maskOp);
-  auto objects = renderer->maskObjects();
+  const auto& objects = renderer->maskObjects();
   for (const auto id : _->maskedBy)
   {
     if (id != this->guid())

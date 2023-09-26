@@ -39,8 +39,6 @@ class Scene__pImpl;
 struct VGG_EXPORTS Scene : public layer::Renderable
 {
   static ResourceRepo s_resRepo;
-  static ObjectTableType s_objectTable;
-  static bool s_enableDrawDebugBound;
 
 private:
   VGG_DECL_IMPL(Scene)
@@ -80,11 +78,6 @@ public:
   static ResourceRepo& getResRepo()
   {
     return s_resRepo;
-  }
-
-  static ObjectTableType& getObjectTable()
-  {
-    return s_objectTable;
   }
 
   static void setResRepo(std::map<std::string, std::vector<char>> repo);

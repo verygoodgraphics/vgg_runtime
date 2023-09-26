@@ -1,14 +1,14 @@
 #pragma once
 #include "VSkia.hpp"
+#include "RenderState.hpp"
 #include "PaintNodePrivate.hpp"
 
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Config.hpp"
-#include "RenderState.hpp"
-#include "glm/ext/matrix_transform.hpp"
-#include "glm/matrix.hpp"
 
-#include <core/SkMatrix.h>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/matrix.hpp>
+#include <include/core/SkMatrix.h>
 #include <include/core/SkCanvas.h>
 
 namespace VGG
@@ -22,19 +22,6 @@ inline void PrintSkMatrix(const SkMatrix& m)
   }
   std::cout << std::endl;
 }
-//
-// inline void PrintCurrentTranslation(SkCanvas* canvas, int indent)
-// {
-//   auto m = canvas->getTotalMatrix();
-//   SkVector v;
-//   m.mapVector(0, 0, &v);
-//   for (int i = 0; i < indent; i++)
-//   {
-//     std::cout << "\t";
-//   }
-//   std::cout << v.x() << " " << v.y() << std::endl;
-//   std::cout << std::endl;
-// }
 
 struct DisplayItem
 {
@@ -121,6 +108,7 @@ public:
 
   void pushItem(PaintNode* item)
   {
+    // OPTIMIZATION
     auto m = glm::identity<glm::mat3>();
     for (const auto& ma : m_transforms)
     {

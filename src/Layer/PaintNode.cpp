@@ -15,9 +15,6 @@
 namespace VGG
 {
 
-SkCanvas* PaintNode::s_defaultCanvas = nullptr;
-RenderState* PaintNode::s_renderState = nullptr;
-
 PaintNode::PaintNode(const std::string& name, ObjectType type, const std::string& guid)
   : Node(name)
   , d_ptr(new PaintNode__pImpl(this, type))
@@ -173,11 +170,6 @@ void PaintNode::paintPass(SkiaRenderer* renderer)
   // renderer->displayList.emplace_back(renderer->canvas()->getTotalMatrix(), this);
   renderer->pushItem(this);
   // this->paintEvent(renderer);
-}
-
-SkCanvas* PaintNode::getSkCanvas()
-{
-  return s_defaultCanvas;
 }
 
 void PaintNode::paintEvent(SkiaRenderer* renderer)
@@ -352,10 +344,6 @@ void PaintNode::setOutlineMask(const Mask& mask)
 {
   VGG_IMPL(PaintNode);
   _->outlineMask = mask;
-}
-
-void PaintNode::asAlphaMask()
-{
 }
 
 void PaintNode::setOverflow(EOverflow overflow)

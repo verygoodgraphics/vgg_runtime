@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Math/Geometry.hpp"
 #include "Layer/Core/Node.hpp"
 #include "Layer/Core/VType.hpp"
@@ -9,10 +8,6 @@
 #include "Layer/Scene.hpp"
 
 #include <glm/matrix.hpp>
-// #include <include/core/SkColor.h>
-// #include <include/core/SkMatrix.h>
-// #include <include/core/SkPaint.h>
-// #include <include/pathops/SkPathOps.h>
 
 #include <any>
 #include <memory>
@@ -63,8 +58,6 @@ protected:
   VGG_DECL_IMPL(PaintNode)
 
 protected:
-  static SkCanvas* s_defaultCanvas;
-  static RenderState* s_renderState;
   friend class NlohmannBuilder;
   friend class SkiaRenderer;
 
@@ -75,8 +68,8 @@ public:
   PaintNode(const std::string& name, ObjectType type, const std::string& guid);
   PaintNode(const PaintNode&);
   PaintNode& operator=(const PaintNode&) = delete;
-  PaintNode(PaintNode&&) = default;
-  PaintNode& operator=(PaintNode&&) = default;
+  PaintNode(PaintNode&&) = delete;
+  PaintNode& operator=(PaintNode&&) = delete;
 
   virtual NodePtr clone() const override;
 
@@ -155,15 +148,9 @@ public:
 
   const PaintOption& paintOption() const;
 
-  /**
-   * Return a matrix that transform from this node to the given node
-   * */
-  virtual SkCanvas* getSkCanvas();
-  RenderState* getRenderState();
   void setOutlineMask(const Mask& mask);
 
   virtual Mask asOutlineMask(const glm::mat3* mat);
-  virtual void asAlphaMask();
 
   ~PaintNode();
 
@@ -201,7 +188,6 @@ protected:
   SkPath childPolyOperation() const;
   Mask makeMaskBy(EBoolOp maskOp, SkiaRenderer* renderer);
 
-protected:
 protected:
   // Style
   virtual SkPath stylePath();

@@ -3,6 +3,7 @@
 #include "Event/Event.hpp"
 #include "Event/EventAPI.hpp"
 #include "Event/Keycode.hpp"
+#include "ViewModel.hpp"
 
 using namespace VGG;
 using namespace VGG::Layout;
@@ -300,4 +301,14 @@ bool UIView::handleMouseEvent(int jsButtonIndex,
                   targetNode);
 
   return true;
+}
+
+void UIView::show(const ViewModel& viewModel)
+{
+  loadFileContent(viewModel.designDoc);
+  m_document = viewModel.layoutTree;
+  // todo, merge edited doc resouces ?
+  Scene::setResRepo(viewModel.resources());
+
+  setDirty(true);
 }

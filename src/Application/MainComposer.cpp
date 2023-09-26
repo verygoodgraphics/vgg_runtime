@@ -2,6 +2,9 @@
 #include "Async.hpp"
 
 #include "Editor.hpp"
+#include "Presenter.hpp"
+#include "RunLoop.hpp"
+#include "UIView.hpp"
 
 using namespace VGG;
 
@@ -23,4 +26,16 @@ MainComposer::MainComposer(PlatformComposer* platformComposer, std::shared_ptr<M
   AsyncWorkerFactory::setTaskWorkerFactory([]() { return rxcpp::observe_on_new_thread(); });
 #endif
   AsyncWorkerFactory::setResultWorkerFactory([runLoop = m_runLoop]() { return runLoop->thread(); });
+}
+
+void MainComposer::enableEdit(int top, int right, int bottom, int left)
+{
+  m_editView.reset(new UIView);
+  m_presenter->setEditView(m_editView);
+
+  if (m_view)
+  {
+    m_view->becomeEditorWithSidebar(top, right, bottom, left);
+    m_view->addSubview(m_editView);
+  }
 }

@@ -30,6 +30,7 @@ class Layout
   std::shared_ptr<LayoutNode> m_layoutTree;
   std::unordered_map<std::string, std::shared_ptr<Internal::Rule::Rule>> m_rules;
   bool m_isRootTree{ true }; // root document or fragment
+  std::vector<Size> m_pageSize;
 
 public:
   Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc, bool isRootTree = true);
@@ -38,6 +39,11 @@ public:
   std::shared_ptr<LayoutNode> layoutTree()
   {
     return m_layoutTree;
+  }
+
+  auto pageSize(int index)
+  {
+    return m_pageSize[index];
   }
 
 private:

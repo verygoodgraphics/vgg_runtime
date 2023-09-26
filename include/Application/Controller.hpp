@@ -2,7 +2,6 @@
 
 #include "Application/AppRenderable.hpp"
 #include "Application/AppScene.hpp"
-#include "Application/RunLoop.hpp"
 
 #include "Domain/Layout/Layout.hpp"
 #include "Domain/Layout/Rect.hpp"
@@ -22,6 +21,7 @@ class Daruma;
 class Editor;
 class Presenter;
 class Reporter;
+class RunLoop;
 class ViewModel;
 
 class Controller : public std::enable_shared_from_this<Controller>
@@ -71,6 +71,10 @@ public:
   bool isEditMode()
   {
     return m_mode == ERunMode::EDIT_MODE;
+  }
+  bool isNormalMode()
+  {
+    return m_mode == ERunMode::NORMAL_MODE;
   }
 
   bool hasDirtyEditor();

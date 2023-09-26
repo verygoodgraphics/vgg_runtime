@@ -70,7 +70,8 @@ void Layout::Layout::buildLayoutTree()
     for (auto i = 0; i < designJson[K_FRAMES].size(); ++i)
     {
       auto path = framesPath / i;
-      createOneLayoutNode(designJson[path], path, m_layoutTree);
+      auto page = createOneLayoutNode(designJson[path], path, m_layoutTree);
+      m_pageSize.push_back(page->frame().size);
     }
   }
   else

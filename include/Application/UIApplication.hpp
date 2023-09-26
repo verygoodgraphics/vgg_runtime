@@ -2,7 +2,6 @@
 
 #include "Application/AppRender.hpp"
 #include "Application/Controller.hpp"
-#include "Application/UIView.hpp"
 #include "Utility/ConfigManager.hpp"
 #include "Event/Event.hpp"
 #include "Event/EventListener.hpp"
@@ -21,6 +20,11 @@
 namespace fs = std::filesystem;
 using namespace VGG;
 
+namespace VGG
+{
+class UIView;
+}
+
 class UIApplication : public app::EventListener
 {
   app::AppRender* m_layer{ nullptr };
@@ -34,14 +38,7 @@ public:
     m_layer = layer;
   }
 
-  void setView(std::shared_ptr<UIView> view)
-  {
-    ASSERT(view);
-    m_view = view;
-
-    ASSERT(m_layer);
-    m_layer->addAppScene(m_view);
-  }
+  void setView(std::shared_ptr<UIView> view);
 
   void setController(std::shared_ptr<Controller> controller)
   {
@@ -52,90 +49,7 @@ public:
     m_layer->addAppRenderable(m_controller->editor());
   }
 
-  bool onEvent(UEvent evt, void* userData) override
-  {
-    if (evt.type == VGG_APP_INIT)
-    {
-      return true;
-    }
+  bool onEvent(UEvent evt, void* userData) override;
 
-    switch (evt.type)
-    {
-      case VGG_KEYDOWN:
-        break; // break to continue processing
-
-      case VGG_WINDOWEVENT:
-      {
-        switch (evt.window.event)
-        {
-          case VGG_WINDOWEVENT_RESIZED:
-          case VGG_WINDOWEVENT_SIZE_CHANGED:
-            m_view->setDirty(true);
-            break;
-
-          default:
-            break;
-        }
-      }
-      default:
-        return false;
-    }
-
-    auto key = evt.key.keysym.sym;
-    auto mod = evt.key.keysym.mod;
-
-    if (key == VGGK_PAGEUP && (mod & VGG_KMOD_CTRL))
-    {
-      INFO("Previous page");
-      m_view->preArtboard();
-      return true;
-    }
-
-    if (key == VGGK_PAGEDOWN && (mod & VGG_KMOD_CTRL))
-    {
-      INFO("Next page");
-      m_view->nextArtboard();
-      return true;
-    }
-
-    if (key == VGGK_e && (mod & VGG_KMOD_CTRL))
-    {
-      INFO("Switch edit mode");
-      m_controller->setEditMode(!m_controller->isEditMode());
-      m_view->setDirty(true);
-      return true;
-    }
-
-    if (key == VGGK_b)
-    {
-      INFO("Toggle object bounding box");
-      m_view->enableDrawDebugBound(!m_view->isEnableDrawDebugBound());
-      m_view->setDirty(true);
-      return true;
-    }
-
-    if (key == VGGK_1)
-    {
-      INFO("Toggle cursor position");
-      m_layer->setDrawPositionEnabled(!m_layer->enableDrawPosition());
-      return true;
-    }
-
-    return false;
-  }
-
-  void run(int fps)
-  {
-    if (m_layer->beginFrame(fps))
-    {
-      if (m_view->isDirty() || m_controller->hasDirtyEditor())
-      {
-        m_view->setDirty(false);
-        m_controller->resetEditorDirty();
-
-        m_layer->render();
-        m_layer->endFrame();
-      }
-    }
-  }
+  void run(int fps);
 };

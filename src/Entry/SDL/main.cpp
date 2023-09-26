@@ -5,7 +5,9 @@
 #include "Application/AppBase.hpp"
 #include "Application/MainComposer.hpp"
 #include "Application/Mouse.hpp"
+#include "Application/RunLoop.hpp"
 #include "Application/UIApplication.hpp"
+#include "Application/UIView.hpp"
 #include "Utility/ConfigManager.hpp"
 #include "Layer/Scene.hpp"
 
@@ -79,9 +81,12 @@ int main(int argc, char** argv)
 
   // inject dependencies
   app->setLayer(sdlApp->layer()); // 1. must be first
-  app->setView(mainComposer.view());
+  auto view = mainComposer.view();
+  view->setSize(cfg.windowSize[0], cfg.windowSize[1]);
+  app->setView(view);
   app->setController(mainComposer.controller());
 
+  // mainComposer.controller()->setEditMode(true);
   auto darumaFileOrDir = program.get<std::string>(DARUMA_FILE_OR_DIRECTORY);
   mainComposer.controller()->start(darumaFileOrDir,
                                    "../asset/vgg-format.json",

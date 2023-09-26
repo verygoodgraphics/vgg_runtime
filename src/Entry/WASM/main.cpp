@@ -1,4 +1,4 @@
-#include "Entry/SDL/SDLImpl/AppSDLImpl.hpp"
+#include "Entry/SDL/AppSDLImpl.hpp"
 #include "BrowserMainComposer.hpp"
 
 #include "Application/UIApplication.hpp"

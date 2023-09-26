@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../SDL/SDLImpl/SdlMouse.hpp"
+#include "Entry/SDL/SdlMouse.hpp"
 
 #include "Adapter/BrowserComposer.hpp"
 #include "Application/MainComposer.hpp"

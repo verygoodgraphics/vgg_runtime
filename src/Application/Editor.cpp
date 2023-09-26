@@ -8,6 +8,9 @@
 
 #include <algorithm>
 
+#undef INFO
+#define INFO(msg, ...)
+
 #undef DEBUG
 #define DEBUG(msg, ...)
 
@@ -558,6 +561,11 @@ void Editor::updateCursor(EResizePosition mousePosition)
 
 void Editor::didSelectNode(std::weak_ptr<LayoutNode> node)
 {
+  if (auto selectedNode = node.lock())
+  {
+    INFO("Editor::didSelectNode: path = %s", selectedNode->path().c_str());
+  }
+
   m_selectedNode = node;
   setDirty(true);
 

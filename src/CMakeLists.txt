@@ -17,7 +17,7 @@ endif()
 add_subdirectory(Utility)
 add_subdirectory(Layer)
 add_subdirectory(Domain)
-add_subdirectory(Usecase)
+add_subdirectory(UseCase)
 add_subdirectory(Application)
 add_subdirectory(Adapter)
 

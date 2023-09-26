@@ -10,7 +10,7 @@ target_include_directories(vgg_usecase PUBLIC
 
 target_include_directories(vgg_usecase PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/include/Usecase
+  ${CMAKE_SOURCE_DIR}/include/UseCase
 )
 
 target_link_libraries(vgg_usecase PUBLIC

@@ -1,8 +1,8 @@
 #pragma once
 #include "VSkImageFilters.hpp"
-#include "VGG/Math/Geometry.hpp"
-#include "VGG/Layer/Core/VType.hpp"
-#include "VGG/Layer/Core/Attrs.hpp"
+#include "Math/Geometry.hpp"
+#include "Layer/Core/VType.hpp"
+#include "Layer/Core/Attrs.hpp"
 
 #include <include/core/SkClipOp.h>
 #include <include/core/SkPaint.h>

@@ -1,8 +1,8 @@
 #pragma once
-#include "VGG/Layer/Renderable.hpp"
-#include "VGG/Layer/Zoomer.hpp"
-#include "VGG/Layer/Core/Node.hpp"
-#include "VGG/Layer/Config.hpp"
+#include "Layer/Renderable.hpp"
+#include "Layer/Zoomer.hpp"
+#include "Layer/Core/Node.hpp"
+#include "Layer/Config.hpp"
 
 #include <nlohmann/json.hpp>
 

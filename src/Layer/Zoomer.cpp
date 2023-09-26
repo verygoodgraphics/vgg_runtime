@@ -1,6 +1,6 @@
 #include "Utility/Log.hpp"
-#include "VGG/Layer/Zoomer.hpp"
-#include "VGG/Layer/Scene.hpp"
+#include "Layer/Zoomer.hpp"
+#include "Layer/Scene.hpp"
 
 #include <core/SkCanvas.h>
 

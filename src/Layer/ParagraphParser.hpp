@@ -1,6 +1,6 @@
 #pragma once
-#include "VGG/Layer/Core/VType.hpp"
-#include "VGG/Layer/Core/Attrs.hpp"
+#include "Layer/Core/VType.hpp"
+#include "Layer/Core/Attrs.hpp"
 #include <modules/skparagraph/include/DartTypes.h>
 #include <modules/skparagraph/include/Metrics.h>
 #include <modules/skparagraph/include/Paragraph.h>
@@ -10,7 +10,7 @@
 #include <modules/skparagraph/include/TextStyle.h>
 #include <modules/skparagraph/include/TypefaceFontProvider.h>
 
-#include "VGG/Layer/Core/Node.hpp"
+#include "Layer/Core/Node.hpp"
 
 namespace VGG
 {

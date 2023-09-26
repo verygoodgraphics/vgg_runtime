@@ -1,7 +1,7 @@
 #pragma once
 #include "VSkiaContext.hpp"
 
-#include "VGG/Layer/Graphics/ContextInfoVulkan.hpp"
+#include "Layer/Graphics/ContextInfoVulkan.hpp"
 
 #include <include/gpu/vk/GrVkBackendContext.h>
 #include <include/gpu/GrDirectContext.h>

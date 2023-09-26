@@ -1,4 +1,4 @@
-#include "VGG/Layer/Core/Node.hpp"
+#include "Layer/Core/Node.hpp"
 
 namespace VGG
 {

@@ -1,6 +1,6 @@
 #pragma once
-#include "VGG/Layer/Graphics/GraphicsLayer.hpp"
-#include "VGG/Layer/Scene.hpp"
+#include "Layer/Graphics/GraphicsLayer.hpp"
+#include "Layer/Scene.hpp"
 
 #include <vector>
 class SkCanvas;

@@ -3,7 +3,7 @@
 #include "AppZoomer.hpp"
 #include "Event/EventListener.hpp"
 
-#include "VGG/Layer/Scene.hpp"
+#include "Layer/Scene.hpp"
 
 namespace VGG::app
 {

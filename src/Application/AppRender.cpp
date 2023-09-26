@@ -5,7 +5,7 @@
 #include "Event/EventListener.hpp"
 #include "Utility/CappingProfiler.hpp"
 
-#include "VGG/Layer/VGGLayer.hpp"
+#include "Layer/VGGLayer.hpp"
 
 namespace VGG::app
 {

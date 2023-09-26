@@ -1,6 +1,6 @@
 #pragma once
 #include "Utility/ConfigManager.hpp"
-#include "VGG/Layer/IReader.hpp"
+#include "Layer/IReader.hpp"
 
 #include <nlohmann/json.hpp>
 

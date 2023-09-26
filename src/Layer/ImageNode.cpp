@@ -1,8 +1,8 @@
 #include "VSkia.hpp"
 #include "PaintNodePrivate.hpp"
-#include "VGG/Layer/Core/ImageNode.hpp"
-#include "VGG/Layer/Core/Node.hpp"
-#include "VGG/Layer/Core/PaintNode.hpp"
+#include "Layer/Core/ImageNode.hpp"
+#include "Layer/Core/Node.hpp"
+#include "Layer/Core/PaintNode.hpp"
 
 #include <glm/matrix.hpp>
 #include <include/core/SkBlendMode.h>

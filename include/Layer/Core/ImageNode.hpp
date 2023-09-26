@@ -1,7 +1,7 @@
 #pragma once
-#include "VGG/Layer/Core/Node.hpp"
-#include "VGG/Layer/Core/PaintNode.hpp"
-#include "VGG/Layer/Config.hpp"
+#include "Layer/Core/Node.hpp"
+#include "Layer/Core/PaintNode.hpp"
+#include "Layer/Config.hpp"
 
 class SkImage;
 class SkCanvas;

@@ -8,8 +8,8 @@
 #include "Event/EventListener.hpp"
 #include "Event/Keycode.hpp"
 
-#include "VGG/Layer/Scene.hpp"
-#include "VGG/Layer/VGGLayer.hpp"
+#include "Layer/Scene.hpp"
+#include "Layer/VGGLayer.hpp"
 
 #include <nlohmann/json.hpp>
 

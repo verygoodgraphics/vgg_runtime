@@ -1,7 +1,7 @@
 #pragma once
 #include "Event/EventListener.hpp"
 
-#include "VGG/Layer/Renderable.hpp"
+#include "Layer/Renderable.hpp"
 
 namespace VGG::app
 {

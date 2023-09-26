@@ -1,6 +1,6 @@
 #pragma once
 #include "Layer/Config.hpp"
-#include "VGG.hpp"
+#include "Utility/HelperMacro.hpp"
 #include "Utility/ConfigManager.hpp"
 
 #include <string>

@@ -1,5 +1,5 @@
 #pragma once
-#include "VGG.hpp"
+#include "Utility/HelperMacro.hpp"
 #include "Layer/Core/PaintNode.hpp"
 namespace VGG
 {

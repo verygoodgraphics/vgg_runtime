@@ -86,6 +86,8 @@ bool UIApplication::onEvent(UEvent evt, void* userData)
 
 void UIApplication::run(int fps)
 {
+  m_view->updateOnce();
+
   if (m_layer->beginFrame(fps))
   {
     if (m_view->isDirty() || m_controller->hasDirtyEditor())

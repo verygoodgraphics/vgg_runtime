@@ -50,6 +50,7 @@ private:
   ScalarType m_left{ 0 };
 
   bool m_isDirty = false;
+  bool m_updateOnce{ true };
 
 public:
   UIView()
@@ -109,6 +110,11 @@ public:
     }
 
     m_isDirty = dirty;
+  }
+
+  void updateOnce()
+  {
+    m_updateOnce = true;
   }
 
   void nextArtboard();

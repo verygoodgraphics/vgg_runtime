@@ -86,7 +86,7 @@ bool UIApplication::onEvent(UEvent evt, void* userData)
 
 void UIApplication::run(int fps)
 {
-  m_view->updateOnce();
+  m_view->updateOncePerLoop();
 
   if (m_layer->beginFrame(fps))
   {

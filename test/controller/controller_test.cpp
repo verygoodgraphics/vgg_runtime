@@ -1,5 +1,6 @@
 #include "Application/Controller.hpp"
 
+#include "Application/RunLoop.hpp"
 #include "Domain/Daruma.hpp"
 #include "Domain/DarumaContainer.hpp"
 #include "Adapter/NativeComposer.hpp"

@@ -20,7 +20,7 @@ This project can be built with CMake using common practice.
   - Vulkan SDK (with SPIR-V tools)
   - SDL >= 2.26
 
-#### Specify Skia manually
+#### Optinal: Specify Skia manually
 
 You can also use your own skia by specifying `SKIA_DIR`:
 
@@ -28,7 +28,7 @@ You can also use your own skia by specifying `SKIA_DIR`:
 cmake .. -DSKIA_DIR=/path/to/your/skia
 ```
 
-You could download Skia from the [official website](https://skia.org/docs/user/download/). We use our Skia fork [vgg/m116](https://github.com/verygoodgraphics/skia/tree/vgg/m116) branch for building, which has some modifications and fixes for our scenario. We don't assure other versions could be successfully compiled using our CMake script.
+Skia can be download from the [official website](https://skia.org/docs/user/download/). We use our Skia fork [vgg/m116](https://github.com/verygoodgraphics/skia/tree/vgg/m116) branch for building, which has some modifications and fixes for our scenario. We don't assure other versions could be successfully compiled using our CMake script.
 
 ### 3. Build Examples
 

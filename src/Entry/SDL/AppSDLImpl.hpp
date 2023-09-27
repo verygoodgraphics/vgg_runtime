@@ -242,7 +242,11 @@ public:
   void pollEvent()
   {
     SDL_Event evt;
+#ifdef EMSCRIPTEN
+    while (SDL_PollEvent(&evt))
+#else
     while (SDL_WaitEventTimeout(&evt, 1))
+#endif
     {
       auto event = toUEvent(evt, resolutionScale());
       sendEvent(event);

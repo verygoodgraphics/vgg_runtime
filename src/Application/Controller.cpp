@@ -346,7 +346,6 @@ std::shared_ptr<ViewModel> Controller::generateViewModel(std::shared_ptr<Daruma>
 
   auto viewModel = std::make_shared<ViewModel>();
   viewModel->model = m_model;
-  viewModel->designDoc = m_model->runtimeDesignDoc()->content();
   viewModel->layoutTree = startRunning.layoutTree();
 
   return viewModel;
@@ -366,18 +365,18 @@ MakeJsonDocFn Controller::createMakeJsonDocFn(const char* pJsonSchemaFilePath)
     auto jsonDocPtr = createJsonDoc();
     jsonDocPtr->setContent(designJson);
 
-    if (!jsonSchemaFilePath.empty())
-    {
-      SchemaValidJsonDocument::ValidatorPtr validator;
-      std::ifstream schemaIfs(jsonSchemaFilePath);
-      json schema = json::parse(schemaIfs);
-      validator.reset(new JsonSchemaValidator);
-      validator->setRootSchema(schema);
+    // if (!jsonSchemaFilePath.empty())
+    // {
+    //   SchemaValidJsonDocument::ValidatorPtr validator;
+    //   std::ifstream schemaIfs(jsonSchemaFilePath);
+    //   json schema = json::parse(schemaIfs);
+    //   validator.reset(new JsonSchemaValidator);
+    //   validator->setRootSchema(schema);
 
-      // todo, validate doc
+    //   // todo, validate doc
 
-      jsonDocPtr = new SchemaValidJsonDocument(JsonDocumentPtr(jsonDocPtr), validator);
-    }
+    //   jsonDocPtr = new SchemaValidJsonDocument(JsonDocumentPtr(jsonDocPtr), validator);
+    // }
 
     return wrapJsonDoc(JsonDocumentPtr(jsonDocPtr));
   };

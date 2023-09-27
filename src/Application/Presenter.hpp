@@ -273,7 +273,6 @@ private:
     if (m_view && m_viewModel)
     {
       m_viewModel->layoutTree->layoutIfNeeded();
-      m_viewModel->designDoc = m_viewModel->model->runtimeDesignDoc()->content();
       m_view->show(*m_viewModel);
     }
   }

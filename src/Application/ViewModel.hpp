@@ -10,9 +10,12 @@ struct ViewModel
 {
   std::shared_ptr<Daruma> model;
 
-  nlohmann::json designDoc;
   std::shared_ptr<LayoutNode> layoutTree;
 
+  const nlohmann::json& designDoc() const
+  {
+    return model->runtimeDesignDoc()->content();
+  }
   auto resources() const
   {
     return model->resources();

@@ -50,7 +50,7 @@ private:
   ScalarType m_left{ 0 };
 
   bool m_isDirty = false;
-  bool m_updateOnce{ true };
+  bool m_skipUntilNextLoop{ false };
 
 public:
   UIView()
@@ -112,9 +112,9 @@ public:
     m_isDirty = dirty;
   }
 
-  void updateOnce()
+  void updateOncePerLoop()
   {
-    m_updateOnce = true;
+    m_skipUntilNextLoop = false;
   }
 
   void nextArtboard();

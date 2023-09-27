@@ -305,11 +305,11 @@ bool UIView::handleMouseEvent(int jsButtonIndex,
 
 void UIView::show(const ViewModel& viewModel)
 {
-  if (!m_updateOnce)
+  if (m_skipUntilNextLoop)
   {
     return;
   }
-  m_updateOnce = false;
+  m_skipUntilNextLoop = true;
 
   loadFileContent(viewModel.designDoc());
   m_document = viewModel.layoutTree;

@@ -4,7 +4,7 @@ VGG Runtime is a design-as-code engine for rendering and running [VGG Daruma](ht
 
 ## Build Instructions
 
-This project can be built with CMake using common practice, however, third-party libraries should be prepared first in order to compile it.
+This project can be built with CMake using common practice.
 
 ### 1. Build Requirements
 
@@ -12,12 +12,23 @@ This project can be built with CMake using common practice, however, third-party
 - Make, CMake and Ninja
 - Python3
 
-### 2. Third-party Libraries
+### 2. Dependent Libraries
 
-- Fetch `vgg_contrib` submodule by running `git submodule update --init`
-- We use system/user-provided SDL installation
-- ```Nodejs``` and ```Skia``` would be automatically downloaded and compiled.
+- Use `git submodule update --init` to fetch VGG submodules.
+- `Nodejs` and `Skia` would be automatically prepared during building.
+- System/user-provided installation of the following libraries
+  - Vulkan SDK (with SPIR-V tools)
+  - SDL >= 2.26
 
+#### Specify Skia manually
+
+You can also use your own skia by specifying `SKIA_DIR`:
+
+```bash
+cmake .. -DSKIA_DIR=/path/to/your/skia
+```
+
+You could download Skia from the [official website](https://skia.org/docs/user/download/). We use our Skia fork [vgg/m116](https://github.com/verygoodgraphics/skia/tree/vgg/m116) branch for building, which has some modifications and fixes for our scenario. We don't assure other versions could be successfully compiled using our CMake script.
 
 ### 3. Build Examples
 
@@ -30,7 +41,7 @@ cmake ..
 cmake --build . --parallel
 ```
 
-> Note: For release build, please add `-DCMAKE_BUILD_TYPE=Release` to the first `cmake` command. Currently in linux environment, VGG runtime can be built on Arch but not on Ubuntu.
+> Note: For release build, please add `-DCMAKE_BUILD_TYPE=Release` to the first `cmake` command.
 
 #### WebAssembly building example
 
@@ -44,26 +55,9 @@ emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --parallel
 ```
 
-> Note: We build release version by defalut as it's hard to debug in WebAssembly environment. Currently, the WebAssembly version can only be built on macOS.
-
 #### Windows building example
 
-Compiled on windows need some extra efforts. It will be released once being stable.
-
-#### Specify skia manually
-
-You can also override skia by specifying SKIA_DIR:
-
-```bash
-...
-
-cmake .. -DSKIA_DIR=/path/to/your/skia
-
-...
-
-```
-
-You could download Skia from the [official website](https://skia.org/docs/user/download/). We use our skia fork[vgg/m116](https://github.com/verygoodgraphics/skia/tree/vgg/m116) branch for building, which has some modifications and fixes for our scenario. We don't assure other versions could be successfully compiled using our CMake script.
+Compiling on Windows need extra efforts. It will be released once being stable.
 
 ### 4. Unit test
 
@@ -77,4 +71,4 @@ ctest
 
 ## LICENSE
 
-VGG Runtime is licensed under [AGPL](./LICENSE). Those who need a commercial version can visit the official [VGG website](https://verygoodgraphics.com/).
+VGG Runtime is licensed under [AGPL](./LICENSE).

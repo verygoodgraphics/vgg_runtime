@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Domain/ModelEvent.hpp"
+#include "Application/UIEvent.hpp"
+#include "Application/UIView.hpp"
 #include "Domain/Daruma.hpp"
+#include "Domain/ModelEvent.hpp"
 #include "Utility/Log.hpp"
-#include "UIEvent.hpp"
-#include "UIView.hpp"
 #include "ViewModel.hpp"
 
 #include <nlohmann/json.hpp>

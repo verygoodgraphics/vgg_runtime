@@ -114,7 +114,12 @@ void Controller::onResize()
 {
   if (isNormalMode())
   {
+    m_presenter->resetForRunning();
     ResizeWindow{ m_layout }.onResize(m_presenter->viewSize());
+  }
+  else
+  {
+    fitPageForEditing();
   }
 
   if (m_editModel)
@@ -143,11 +148,12 @@ void Controller::setEditMode(bool editMode)
 
   if (isNormalMode())
   {
+    m_presenter->resetForRunning();
     m_layout->layout(m_presenter->viewSize()); // windows size
   }
   else
   {
-    m_layout->layoutByPageSize(m_presenter->currentPageIndex());
+    fitPageForEditing();
   }
 }
 
@@ -341,7 +347,12 @@ std::shared_ptr<ViewModel> Controller::generateViewModel(std::shared_ptr<Daruma>
 
   if (isNormalMode())
   {
+    m_presenter->resetForRunning();
     startRunning.layout(size);
+  }
+  else
+  {
+    fitPageForEditing();
   }
 
   auto viewModel = std::make_shared<ViewModel>();
@@ -392,6 +403,13 @@ bool Controller::hasDirtyEditor()
 void Controller::resetEditorDirty()
 {
   m_editor->setDirty(false);
+}
+
+void Controller::fitPageForEditing()
+{
+  auto pageSize = m_layout->pageSize(m_presenter->currentPageIndex());
+  m_layout->layout(pageSize);
+  m_presenter->fitForEditing(pageSize);
 }
 
 } // namespace VGG

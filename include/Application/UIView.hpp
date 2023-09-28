@@ -59,6 +59,7 @@ public:
   }
 
   void show(const ViewModel& viewModel);
+  void fitContent(float xOffset, float yOffset, float scale);
 
   void registerEventListener(HasEventListener hasEventListener)
   {

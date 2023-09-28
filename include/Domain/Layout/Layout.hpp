@@ -36,14 +36,15 @@ public:
   Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc, bool isRootTree = true);
 
   void layout(Size size);
-  void layoutByPageSize(int index)
-  {
-    layout(m_pageSize[index]);
-  }
 
   std::shared_ptr<LayoutNode> layoutTree()
   {
     return m_layoutTree;
+  }
+
+  auto pageSize(int index)
+  {
+    return m_pageSize[index];
   }
 
 private:

@@ -33,5 +33,14 @@ public:
     return m_offset;
   }
 
+  void setZoom(double zoom)
+  {
+    m_zoom = zoom;
+  }
+  void setOffset(Vec2 offset)
+  {
+    m_offset = offset;
+  }
+
   void mapCanvasPosToLogicalPosition(const float canvasXY[2], float logicXY[2]) const;
 };

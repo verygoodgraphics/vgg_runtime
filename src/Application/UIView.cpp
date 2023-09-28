@@ -5,6 +5,8 @@
 #include "Event/Keycode.hpp"
 #include "ViewModel.hpp"
 
+#include "Utility/Log.hpp"
+
 using namespace VGG;
 using namespace VGG::Layout;
 using namespace nlohmann;
@@ -317,4 +319,12 @@ void UIView::show(const ViewModel& viewModel)
   Scene::setResRepo(viewModel.resources());
 
   setDirty(true);
+}
+
+void UIView::fitContent(float xOffset, float yOffset, float scale)
+{
+  ASSERT(m_zoomerListener);
+
+  m_zoomerListener->setOffset({ xOffset, yOffset });
+  m_zoomerListener->setZoom(scale);
 }

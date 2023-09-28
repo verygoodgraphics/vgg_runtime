@@ -22,10 +22,11 @@ private:
     const json::json_pointer& path,
     const json& value,
     std::function<void(json&, json::json_pointer&, const json&)> tryEditFn,
-    std::function<void(JsonDocumentPtr&, const json::json_pointer&, const json&)> editFn);
+    std::function<void(JsonDocumentPtr&, const json::json_pointer&, const json&)> editFn,
+    bool update = false);
   bool validateDocument(const json& document);
-  const json::json_pointer getNearestHavingClassAncestorPath(
-    const json::json_pointer& editPath) const;
+  const json::json_pointer getNearestHavingClassAncestorPath(const json::json_pointer& editPath,
+                                                             bool includeSelf = false) const;
   void calculateRelativePath(const json::json_pointer& ancestorPath,
                              const json::json_pointer& currentPath,
                              json::json_pointer& relativePath);

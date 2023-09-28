@@ -32,7 +32,8 @@ void SchemaValidJsonDocument::replaceAt(const json::json_pointer& path, const js
     [](json& tmp_document, json::json_pointer& relative_path, const json& cb_value)
     { tmp_document[relative_path] = cb_value; },
     [](JsonDocumentPtr& cb_doc, const json::json_pointer& cb_path, const json& cb_value)
-    { cb_doc->replaceAt(cb_path, cb_value); });
+    { cb_doc->replaceAt(cb_path, cb_value); },
+    true);
 }
 
 void SchemaValidJsonDocument::deleteAt(const json::json_pointer& path)
@@ -51,9 +52,10 @@ void SchemaValidJsonDocument::editTemplate(
   const json::json_pointer& path,
   const json& value,
   std::function<void(json&, json::json_pointer&, const json&)> tryEditFn,
-  std::function<void(JsonDocumentPtr&, const json::json_pointer&, const json&)> editFn)
+  std::function<void(JsonDocumentPtr&, const json::json_pointer&, const json&)> editFn,
+  bool udpate)
 {
-  auto ancestor_path = getNearestHavingClassAncestorPath(path);
+  auto ancestor_path = getNearestHavingClassAncestorPath(path, udpate);
   auto tmp_document = content()[ancestor_path];
 
   json::json_pointer relative_path;
@@ -91,12 +93,13 @@ bool SchemaValidJsonDocument::validateDocument(const json& document)
 }
 
 const json::json_pointer SchemaValidJsonDocument::getNearestHavingClassAncestorPath(
-  const json::json_pointer& editPath) const
+  const json::json_pointer& editPath,
+  bool includeSelf) const
 {
   const auto& document = content();
   try
   {
-    auto ancestor_path = editPath.parent_pointer();
+    auto ancestor_path = includeSelf ? editPath : editPath.parent_pointer();
     do
     {
       auto& ancestor_json = document[ancestor_path];

@@ -376,18 +376,18 @@ MakeJsonDocFn Controller::createMakeJsonDocFn(const char* pJsonSchemaFilePath)
     auto jsonDocPtr = createJsonDoc();
     jsonDocPtr->setContent(designJson);
 
-    // if (!jsonSchemaFilePath.empty())
-    // {
-    //   SchemaValidJsonDocument::ValidatorPtr validator;
-    //   std::ifstream schemaIfs(jsonSchemaFilePath);
-    //   json schema = json::parse(schemaIfs);
-    //   validator.reset(new JsonSchemaValidator);
-    //   validator->setRootSchema(schema);
+    if (!jsonSchemaFilePath.empty())
+    {
+      SchemaValidJsonDocument::ValidatorPtr validator;
+      std::ifstream schemaIfs(jsonSchemaFilePath);
+      json schema = json::parse(schemaIfs);
+      validator.reset(new JsonSchemaValidator);
+      validator->setRootSchema(schema);
 
-    //   // todo, validate doc
+      // todo, validate doc
 
-    //   jsonDocPtr = new SchemaValidJsonDocument(JsonDocumentPtr(jsonDocPtr), validator);
-    // }
+      jsonDocPtr = new SchemaValidJsonDocument(JsonDocumentPtr(jsonDocPtr), validator);
+    }
 
     return wrapJsonDoc(JsonDocumentPtr(jsonDocPtr));
   };

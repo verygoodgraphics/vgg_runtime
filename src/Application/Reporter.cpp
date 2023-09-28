@@ -13,7 +13,12 @@
 
 using namespace VGG;
 
+// event key
 constexpr auto K_TYPE = "type";
+
+// event type
+constexpr auto K_SELECT = "select";
+constexpr auto K_FIRST_RENDER = "firstRender";
 
 void Reporter::onSelectNode(std::weak_ptr<LayoutNode> node)
 {
@@ -41,9 +46,9 @@ void Reporter::onSelectNode(std::weak_ptr<LayoutNode> node)
   const auto& jsonNode = designDoc->content()[path];
 
   nlohmann::json event;
-  event[K_TYPE] = "select";
-  event["id"] = jsonNode[K_ID];
-  event["path"] = target->path();
+  event[K_TYPE] = K_SELECT;
+  event[K_ID] = jsonNode[K_ID];
+  event[K_PATH] = target->path();
 
   sendEventToJs(event);
 }
@@ -51,7 +56,7 @@ void Reporter::onSelectNode(std::weak_ptr<LayoutNode> node)
 void Reporter::onFirstRender()
 {
   nlohmann::json event;
-  event[K_TYPE] = "firstRender";
+  event[K_TYPE] = K_FIRST_RENDER;
 
   sendEventToJs(event);
 }

@@ -250,7 +250,7 @@ void Controller::observeViewEvent()
         return;
       }
 
-      if (sharedThis->m_mode == ERunMode::EDIT_MODE)
+      if (sharedThis->isEditMode())
       {
         return;
       }
@@ -315,7 +315,7 @@ const std::shared_ptr<VggExec>& Controller::vggExec()
 
 JsonDocument* Controller::createJsonDoc()
 {
-  if (m_mode == ERunMode::NORMAL_MODE)
+  if (isNormalMode())
   {
     return new RawJsonDocument();
   }
@@ -328,7 +328,7 @@ JsonDocument* Controller::createJsonDoc()
 
 JsonDocumentPtr Controller::wrapJsonDoc(std::shared_ptr<JsonDocument> jsonDoc)
 {
-  if (m_mode == ERunMode::NORMAL_MODE)
+  if (isNormalMode())
   {
     return jsonDoc;
   }

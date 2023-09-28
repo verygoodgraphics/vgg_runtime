@@ -10,7 +10,7 @@ using namespace VGG;
 
 MainComposer::MainComposer(PlatformComposer* platformComposer, std::shared_ptr<Mouse> mouse)
   : m_view{ new UIView }
-  , m_presenter{ new Presenter }
+  , m_presenter{ new Presenter{ mouse } }
   , m_editor{ new Editor{ m_view, mouse } }
   , m_runLoop{ new RunLoop }
   , m_platformComposer{ platformComposer }

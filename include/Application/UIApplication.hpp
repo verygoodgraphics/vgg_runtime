@@ -31,6 +31,8 @@ class UIApplication : public app::EventListener
   std::shared_ptr<UIView> m_view;
   std::shared_ptr<Controller> m_controller;
 
+  bool m_firstRender{ true };
+
 public:
   void setLayer(app::AppRender* layer)
   {

@@ -13,6 +13,8 @@
 
 using namespace VGG;
 
+constexpr auto K_TYPE = "type";
+
 void Reporter::onSelectNode(std::weak_ptr<LayoutNode> node)
 {
   auto target = node.lock();
@@ -39,9 +41,17 @@ void Reporter::onSelectNode(std::weak_ptr<LayoutNode> node)
   const auto& jsonNode = designDoc->content()[path];
 
   nlohmann::json event;
-  event["type"] = "select";
+  event[K_TYPE] = "select";
   event["id"] = jsonNode[K_ID];
   event["path"] = target->path();
+
+  sendEventToJs(event);
+}
+
+void Reporter::onFirstRender()
+{
+  nlohmann::json event;
+  event[K_TYPE] = "firstRender";
 
   sendEventToJs(event);
 }

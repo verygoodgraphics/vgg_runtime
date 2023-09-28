@@ -116,6 +116,18 @@ std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(const nlohmann::
     createOneOrMoreLayoutNodes(val, path, node);
   }
 
+  if (j[K_CLASS] == K_PATH)
+  {
+    // ./shape/subshapes/i/subGeometry
+    auto& subShapes = j[K_SHAPE][K_SUBSHAPES];
+    auto subShapesPath = currentPath / K_SHAPE / K_SUBSHAPES;
+    auto size = subShapes.size();
+    for (auto i = 0; i < size; ++i)
+    {
+      createOneLayoutNode(subShapes[i][K_SUBGEOMETRY], subShapesPath / i / K_SUBGEOMETRY, node);
+    }
+  }
+
   return node;
 }
 

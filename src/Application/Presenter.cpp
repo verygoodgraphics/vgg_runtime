@@ -36,14 +36,20 @@ void Presenter::fitForEditing(Layout::Size pageSize)
   auto xOffset = (maxSize.width - contentSize.width) / 2 + K_EDITOR_PADDING;
   auto yOffset = (maxSize.height - contentSize.height) / 2 + K_EDITOR_PADDING;
 
-  ASSERT(m_view);
+  if (!m_view)
+  {
+    return;
+  }
   m_view->fitContent(xOffset, yOffset, scale);
   m_view->enableZoomer(true);
 }
 
 void Presenter::resetForRunning()
 {
-  ASSERT(m_view);
+  if (!m_view)
+  {
+    return;
+  }
   m_view->fitContent(0, 0, 1);
   m_view->enableZoomer(false);
 }

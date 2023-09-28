@@ -97,6 +97,12 @@ void UIApplication::run(int fps)
 
       m_layer->render();
       m_layer->endFrame();
+
+      if (m_firstRender)
+      {
+        m_firstRender = false;
+        m_controller->onFirstRender();
+      }
     }
   }
 }

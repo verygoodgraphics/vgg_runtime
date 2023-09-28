@@ -22,6 +22,7 @@ public:
   }
 
   void onSelectNode(std::weak_ptr<LayoutNode> node) override;
+  void onFirstRender();
 
 private:
   void sendEventToJs(const nlohmann::json& event);

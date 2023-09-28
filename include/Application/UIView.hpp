@@ -49,7 +49,7 @@ private:
   ScalarType m_bottom{ 0 };
   ScalarType m_left{ 0 };
 
-  bool m_isDirty = false;
+  bool m_isDirty{ false };
   bool m_skipUntilNextLoop{ false };
   bool m_isZoomerEnabled{ true };
 

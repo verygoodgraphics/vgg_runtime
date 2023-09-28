@@ -79,6 +79,7 @@ public:
 
   bool hasDirtyEditor();
   void resetEditorDirty();
+  void onFirstRender();
 
 private:
   void initModel(const char* designDocSchemaFilePath, const char* layoutDocSchemaFilePath);

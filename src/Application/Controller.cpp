@@ -412,4 +412,10 @@ void Controller::fitPageForEditing()
   m_presenter->fitForEditing(pageSize);
 }
 
+void Controller::onFirstRender()
+{
+  ASSERT(m_reporter);
+  m_reporter->onFirstRender();
+}
+
 } // namespace VGG

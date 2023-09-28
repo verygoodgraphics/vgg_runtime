@@ -51,6 +51,7 @@ private:
 
   bool m_isDirty = false;
   bool m_skipUntilNextLoop{ false };
+  bool m_isZoomerEnabled{ true };
 
 public:
   UIView()
@@ -124,6 +125,8 @@ public:
   {
     return m_page;
   }
+
+  void enableZoomer(bool enabled);
 
 private:
   std::tuple<bool, bool, bool, bool> getKeyModifier(int keyMod);

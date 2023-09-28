@@ -38,12 +38,14 @@ void Presenter::fitForEditing(Layout::Size pageSize)
 
   ASSERT(m_view);
   m_view->fitContent(xOffset, yOffset, scale);
+  m_view->enableZoomer(true);
 }
 
 void Presenter::resetForRunning()
 {
   ASSERT(m_view);
   m_view->fitContent(0, 0, 1);
+  m_view->enableZoomer(false);
 }
 
 void Presenter::listenViewEvent()

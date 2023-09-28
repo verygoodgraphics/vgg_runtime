@@ -14,6 +14,7 @@
 
 namespace VGG
 {
+class Mouse;
 
 class Presenter : public std::enable_shared_from_this<Presenter>
 {
@@ -22,6 +23,8 @@ class Presenter : public std::enable_shared_from_this<Presenter>
 
   std::shared_ptr<UIView> m_editView;
   std::shared_ptr<ViewModel> m_editViewModel;
+
+  std::shared_ptr<Mouse> m_mouse;
 
   bool m_editMode{ false };
   UIView::EventListener m_editorEventListener;
@@ -32,6 +35,11 @@ class Presenter : public std::enable_shared_from_this<Presenter>
   rxcpp::observer<VGG::ModelEventPtr> m_editModelObserver;
 
 public:
+  Presenter(std::shared_ptr<Mouse> mouse = nullptr)
+    : m_mouse{ mouse }
+  {
+  }
+
   virtual ~Presenter() = default;
 
   void fitForEditing(Layout::Size pageSize);
@@ -54,27 +62,7 @@ public:
 
     m_view->show(*m_viewModel);
 
-    auto weakThis = weak_from_this();
-    m_view->registerEventListener(
-      [weakThis, viewModel](std::string path, EUIEventType eventType)
-      {
-        auto sharedThis = weakThis.lock();
-        if (!sharedThis)
-        {
-          return false;
-        }
-
-        if (sharedThis->m_editMode)
-        {
-          return true;
-        }
-
-        auto listenersMap = viewModel->model->getEventListeners(path);
-        std::string type = uiEventTypeToString(eventType);
-
-        auto it = listenersMap.find(type);
-        return it != listenersMap.end();
-      });
+    listenViewEvent();
   }
 
   void setEditMode(bool editMode)
@@ -271,6 +259,8 @@ public:
   }
 
 private:
+  void listenViewEvent();
+
   void update()
   {
     if (m_view && m_viewModel)

@@ -1,5 +1,9 @@
 #include "Presenter.hpp"
 
+#include "Mouse.hpp"
+
+#include "Utility/Log.hpp"
+
 #include <algorithm>
 
 using namespace VGG;
@@ -40,4 +44,51 @@ void Presenter::resetForRunning()
 {
   ASSERT(m_view);
   m_view->fitContent(0, 0, 1);
+}
+
+void Presenter::listenViewEvent()
+{
+  auto weakThis = weak_from_this();
+  m_view->registerEventListener(
+    [weakThis](std::string path, EUIEventType eventType)
+    {
+      auto sharedThis = weakThis.lock();
+      if (!sharedThis)
+      {
+        return false;
+      }
+
+      if (sharedThis->m_editMode)
+      {
+        return true;
+      }
+
+      auto listenersMap = sharedThis->m_viewModel->model->getEventListeners(path);
+      std::string type = uiEventTypeToString(eventType);
+
+      auto hasUserListener = listenersMap.find(type) != listenersMap.end();
+      if (hasUserListener)
+      {
+        return true;
+      }
+
+      if (eventType == EUIEventType::MOUSEMOVE)
+      {
+        // process hover
+        auto shouldHandleHover =
+          listenersMap.find(uiEventTypeToString(EUIEventType::CLICK)) != listenersMap.end() ||
+          listenersMap.find(uiEventTypeToString(EUIEventType::MOUSEDOWN)) != listenersMap.end() ||
+          listenersMap.find(uiEventTypeToString(EUIEventType::MOUSEUP)) != listenersMap.end();
+        if (auto mouse = sharedThis->m_mouse)
+        {
+          mouse->setCursor(shouldHandleHover ? Mouse::ECursor::HAND : Mouse::ECursor::ARROW);
+        }
+        if (shouldHandleHover)
+        {
+          return true; // stop hit test
+        }
+      }
+
+      return false;
+    });
 }

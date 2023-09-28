@@ -33,11 +33,8 @@ void Layout::Layout::layout(Size size)
   // update root frame
   auto root = layoutTree();
   auto frame = root->frame();
-  if (frame.size == size)
-  {
-    return;
-  }
 
+  // Always update the root size because resizing the page does not update the root size
   frame.size = size;
   root->setFrame(frame);
 

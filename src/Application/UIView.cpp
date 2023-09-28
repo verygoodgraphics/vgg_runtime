@@ -15,7 +15,7 @@ constexpr auto K_EMPTY_STRING = "";
 
 bool UIView::onEvent(UEvent evt, void* userData)
 {
-  if (AppScene::onEvent(evt, userData))
+  if (m_isZoomerEnabled && AppScene::onEvent(evt, userData))
   {
     // zoom or pan event
     setDirty(true);
@@ -327,4 +327,9 @@ void UIView::fitContent(float xOffset, float yOffset, float scale)
 
   m_zoomerListener->setOffset({ xOffset, yOffset });
   m_zoomerListener->setZoom(scale);
+}
+
+void UIView::enableZoomer(bool enabled)
+{
+  m_isZoomerEnabled = enabled;
 }

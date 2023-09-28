@@ -4,6 +4,7 @@ add_library(vgg_application STATIC
   Editor.cpp
   EventAPI.cpp
   MainComposer.cpp
+  Presenter.cpp
   Reporter.cpp
   UIApplication.cpp
   UIView.cpp

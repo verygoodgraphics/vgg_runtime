@@ -34,6 +34,9 @@ class Presenter : public std::enable_shared_from_this<Presenter>
 public:
   virtual ~Presenter() = default;
 
+  void fitForEditing(Layout::Size pageSize);
+  void resetForRunning();
+
   int currentPageIndex()
   {
     return m_view->currentPageIndex();

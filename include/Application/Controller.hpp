@@ -93,6 +93,7 @@ private:
   void startEditing();
   void observeEditModelState();
   void observeEditViewEvent();
+  void fitPageForEditing();
 
   std::shared_ptr<ViewModel> generateViewModel(std::shared_ptr<Daruma> model, Layout::Size size);
   MakeJsonDocFn createMakeJsonDocFn(const char* pJsonSchemaFilePath);

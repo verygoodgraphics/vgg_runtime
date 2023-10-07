@@ -4,7 +4,7 @@
 #include "Application/Event/EventAPI.hpp"
 #include "Application/Event/Keycode.hpp"
 
-#include <SDL2/SDL_keyboard.h>
+#include <SDL_keyboard.h>
 
 #include <cstdint>
 

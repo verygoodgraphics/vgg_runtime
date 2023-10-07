@@ -10,9 +10,9 @@
 #include "VGG/Layer/Graphics/GraphicsContext.hpp"
 #include "Utility/Log.hpp"
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_vulkan.h>
-#include <SDL2/SDL_video.h>
+#include <SDL.h>
+#include <SDL_vulkan.h>
+#include <SDL_video.h>
 
 #include <vulkan/vulkan_core.h>
 

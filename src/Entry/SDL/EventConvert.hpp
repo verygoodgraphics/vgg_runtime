@@ -2,10 +2,10 @@
 
 #include "Application/Event/Event.hpp"
 #include "Application/Event/Keycode.hpp"
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_keyboard.h>
-#include <SDL2/SDL_keycode.h>
-#include <SDL2/SDL_video.h>
+#include <SDL_events.h>
+#include <SDL_keyboard.h>
+#include <SDL_keycode.h>
+#include <SDL_video.h>
 #include <cstring>
 
 #define SWITCH_MAP_ITEM_BEGIN(var)                                                                 \

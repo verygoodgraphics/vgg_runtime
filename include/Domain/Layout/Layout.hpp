@@ -25,10 +25,12 @@ struct Rule;
 
 class Layout
 {
+  using RuleMap = std::unordered_map<std::string, std::shared_ptr<Internal::Rule::Rule>>;
+
   JsonDocumentPtr m_designDoc;
   JsonDocumentPtr m_layoutDoc;
   std::shared_ptr<LayoutNode> m_layoutTree;
-  std::unordered_map<std::string, std::shared_ptr<Internal::Rule::Rule>> m_rules;
+  RuleMap m_rules;
   bool m_isRootTree{ true }; // root document or fragment
   std::vector<Size> m_pageSize;
 
@@ -47,6 +49,8 @@ public:
     return m_pageSize[index];
   }
 
+  JsonDocumentPtr displayDesignDoc();
+
 private:
   void buildLayoutTree();
   std::shared_ptr<LayoutNode> createOneLayoutNode(const nlohmann::json& j,
@@ -61,6 +65,9 @@ private:
                                   std::shared_ptr<LayoutNode> parent);
   void collectRules(const nlohmann::json& json);
   void configureNodeAutoLayout(std::shared_ptr<LayoutNode> node);
+
+  bool hasFirstOnTopNode();
+  void reverseChildren(nlohmann::json& nodeJson);
 };
 
 } // namespace Layout

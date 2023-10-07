@@ -203,6 +203,7 @@ struct FlexboxLayout
   double row_gap;
   double column_gap;
   Padding padding;
+  bool z_order;
   // NOLINTEND
 };
 
@@ -240,11 +241,11 @@ struct Rule
   std::optional<double> aspect_ratio;
   // NOLINTEND
 
-  auto getFlexConatinerRule()
+  auto getFlexContainerRule()
   {
     return std::get_if<FlexboxLayout>(&layout);
   }
-  auto getGridConatinerRule()
+  auto getGridContainerRule()
   {
     return std::get_if<GridLayout>(&layout);
   }
@@ -257,13 +258,13 @@ struct Rule
     return std::get_if<GridItem>(&item_in_layout);
   }
 
-  bool isFlexConatiner()
+  bool isFlexContainer()
   {
-    return getFlexConatinerRule();
+    return getFlexContainerRule();
   }
-  bool isGridConatiner()
+  bool isGridContainer()
   {
-    return getGridConatinerRule();
+    return getGridContainerRule();
   }
   bool isFlexItem()
   {
@@ -309,7 +310,8 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FlexboxLayout,
                                                 wrap,
                                                 row_gap,
                                                 column_gap,
-                                                padding);
+                                                padding,
+                                                z_order);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(GridLayout,
                                                 expand_strategy,
                                                 column_width,

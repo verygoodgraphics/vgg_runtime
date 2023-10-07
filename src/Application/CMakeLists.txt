@@ -9,6 +9,7 @@ add_library(vgg_application STATIC
   UIApplication.cpp
   UIView.cpp
   VggSdk.cpp
+  ViewModel.cpp
 )
 
 target_include_directories(vgg_application PUBLIC

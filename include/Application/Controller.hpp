@@ -22,7 +22,7 @@ class Editor;
 class Presenter;
 class Reporter;
 class RunLoop;
-class ViewModel;
+struct ViewModel;
 
 class Controller : public std::enable_shared_from_this<Controller>
 {

@@ -74,6 +74,10 @@ private:
   void applyOverridesDetail(nlohmann::json& json,
                             std::stack<std::string> reversedPath,
                             const nlohmann::json& value);
+  void applyLeafOverrides(nlohmann::json& json,
+                          const std::string& key,
+                          const nlohmann::json& value);
+  void deleteLeafElement(nlohmann::json& json, const std::string& key);
   bool applyReferenceOverride(nlohmann::json& objectJson,
                               const std::string& name,
                               const nlohmann::json& value);

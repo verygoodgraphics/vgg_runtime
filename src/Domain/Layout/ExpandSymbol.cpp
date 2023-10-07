@@ -567,55 +567,37 @@ void ExpandSymbol::applyOverridesDetail(nlohmann::json& json,
   ASSERT(!reversedPath.empty());
 
   auto key = reversedPath.top();
+
   reversedPath.pop();
   auto isLastKey = reversedPath.empty();
-
-  if (key != "*")
+  if (isLastKey)
   {
-    if (json.is_array())
+    applyLeafOverrides(json, key, value);
+    return;
+  }
+
+  if (key == "*")
+  {
+    for (auto& el : json.items())
     {
-      auto path = nlohmann::json::json_pointer{ "/" + key };
-      if (json.contains(path))
-      {
-        if (isLastKey)
-        {
-          json[path] = value;
-        }
-        else
-        {
-          applyOverridesDetail(json[path], reversedPath, value);
-        }
-      }
-      else
-      {
-        DEBUG("invalid array index, %s", key.c_str());
-      }
+      applyOverridesDetail(el.value(), reversedPath, value);
+    }
+  }
+  else if (json.is_array())
+  {
+    auto path = nlohmann::json::json_pointer{ "/" + key };
+    if (json.contains(path))
+    {
+      applyOverridesDetail(json[path], reversedPath, value);
     }
     else
     {
-      if (isLastKey)
-      {
-        json[key] = value;
-      }
-      else
-      {
-        applyOverridesDetail(json[key], reversedPath, value);
-      }
+      DEBUG("invalid array index, %s", key.c_str());
     }
   }
   else
   {
-    for (auto& el : json.items())
-    {
-      if (isLastKey)
-      {
-        el.value() = value;
-      }
-      else
-      {
-        applyOverridesDetail(el.value(), reversedPath, value);
-      }
-    }
+    applyOverridesDetail(json[key], reversedPath, value);
   }
 }
 
@@ -1153,4 +1135,73 @@ nlohmann::json* ExpandSymbol::findLayoutObjectById(const std::string id)
   }
 
   return nullptr;
+}
+
+void ExpandSymbol::applyLeafOverrides(nlohmann::json& json,
+                                      const std::string& key,
+                                      const nlohmann::json& value)
+{
+  if (value.is_null()) // A null value indicates deletion of the element
+  {
+    deleteLeafElement(json, key);
+    return;
+  }
+
+  if (key == "*")
+  {
+    for (auto& el : json.items())
+    {
+      el.value() = value;
+    }
+  }
+  else if (json.is_array())
+  {
+    auto path = nlohmann::json::json_pointer{ "/" + key };
+    if (json.contains(path))
+    {
+      json[path] = value;
+    }
+    else
+    {
+      DEBUG("invalid array index, %s", key.c_str());
+    }
+  }
+  else
+  {
+    json[key] = value;
+  }
+}
+
+void ExpandSymbol::deleteLeafElement(nlohmann::json& json, const std::string& key)
+{
+  if (key == "*")
+  {
+    while (true)
+    {
+      auto it = json.begin();
+      if (it == json.end())
+      {
+        break;
+      }
+
+      json.erase(it.key());
+    }
+  }
+  else if (json.is_array())
+  {
+    auto path = nlohmann::json::json_pointer{ "/" + key };
+    if (json.contains(path))
+    {
+      auto index = std::stoul(key);
+      json.erase(index);
+    }
+    else
+    {
+      DEBUG("invalid array index, %s", key.c_str());
+    }
+  }
+  else
+  {
+    json.erase(key);
+  }
 }

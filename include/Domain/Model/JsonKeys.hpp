@@ -29,6 +29,7 @@ constexpr auto K_OBJ = "obj";
 constexpr auto K_OBJECT_ID = "objectId";
 constexpr auto K_OUTLINE_MASK_BY = "outlineMaskBy";
 constexpr auto K_OVERRIDE_CLASS = "overrideValue";
+constexpr auto K_OVERRIDE_KEY = "overrideKey";
 constexpr auto K_OVERRIDE_NAME = "overrideName";
 constexpr auto K_OVERRIDE_VALUE = "overrideValue";
 constexpr auto K_OVERRIDE_VALUES = "overrideValues";

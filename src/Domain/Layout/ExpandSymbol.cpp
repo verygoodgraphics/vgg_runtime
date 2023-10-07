@@ -611,6 +611,13 @@ nlohmann::json* ExpandSymbol::findChildObjectInTree(nlohmann::json& json,
 
   if (json.is_object())
   {
+    // 1. find by overrideKey first
+    if (json.contains(K_OVERRIDE_KEY) && json[K_OVERRIDE_KEY] == objectId)
+    {
+      return &json;
+    }
+
+    // 2. find by id
     if (json.contains(K_ID) && json[K_ID] == objectId)
     {
       return &json;
@@ -654,6 +661,16 @@ void ExpandSymbol::makeIdUnique(nlohmann::json& json, const std::string& idPrefi
             newObjectId.c_str());
       json[K_ID] = newObjectId;
       mergeLayoutRule(objectId, newObjectId);
+    }
+
+    if (json.contains(K_OVERRIDE_KEY))
+    {
+      auto objectKey = json[K_OVERRIDE_KEY].get<std::string>();
+      auto newObjectKey = idPrefix + objectKey;
+      DEBUG("ExpandSymbol::makeIdUnique: object key: %s -> %s",
+            objectKey.c_str(),
+            newObjectKey.c_str());
+      json[K_OVERRIDE_KEY] = newObjectKey;
     }
   }
 

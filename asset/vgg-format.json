@@ -117,6 +117,14 @@
             "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
           ]
         },
+        "cornerSmoothing": {
+          "type": "number",
+          "description": " Used to control corner smooth. Range: [0, 1] "
+        },
+        "overrideKey": {
+          "type": "string",
+          "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+        },
         "childObjects": {
           "type": "array",
           "description": "Describes all child object information. The child item that appears later will be above the child item that appears first.",
@@ -1398,6 +1406,14 @@
             "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
           ]
         },
+        "cornerSmoothing": {
+          "type": "number",
+          "description": " Used to control corner smooth. Range: [0, 1] "
+        },
+        "overrideKey": {
+          "type": "string",
+          "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+        },
         "class": {
           "const": "path"
         },
@@ -1684,6 +1700,14 @@
             "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
           ]
         },
+        "cornerSmoothing": {
+          "type": "number",
+          "description": " Used to control corner smooth. Range: [0, 1] "
+        },
+        "overrideKey": {
+          "type": "string",
+          "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+        },
         "class": {
           "const": "text"
         },
@@ -1811,7 +1835,7 @@
         },
         "name": {
           "type": "string",
-          "description": "Common name of font. The font name may contain subfamily, in which case the subFamilyName will not appear. If this item does not exist, the font name cannot be obtained."
+          "description": "Common name of font. The font name may contain subfamily, in which case the subFamilyName will not appear. If this item does not exist, the font name cannot be obtained(maybe some error occur), application can fall back to using the default font name."
         },
         "subFamilyName": {
           "type": "string",
@@ -2053,6 +2077,14 @@
             "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
           ]
         },
+        "cornerSmoothing": {
+          "type": "number",
+          "description": " Used to control corner smooth. Range: [0, 1] "
+        },
+        "overrideKey": {
+          "type": "string",
+          "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+        },
         "class": {
           "const": "image"
         },
@@ -2181,6 +2213,14 @@
             "visible: Contents outside the scope of the container will not be cropped and will be visible.",
             "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
           ]
+        },
+        "cornerSmoothing": {
+          "type": "number",
+          "description": " Used to control corner smooth. Range: [0, 1] "
+        },
+        "overrideKey": {
+          "type": "string",
+          "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
         },
         "childObjects": {
           "type": "array",
@@ -2334,6 +2374,14 @@
             "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
           ]
         },
+        "cornerSmoothing": {
+          "type": "number",
+          "description": " Used to control corner smooth. Range: [0, 1] "
+        },
+        "overrideKey": {
+          "type": "string",
+          "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+        },
         "class": {
           "const": "symbolInstance"
         },
@@ -2362,7 +2410,7 @@
         },
         "objectId": {
           "type": "array",
-          "description": " This array describes the overridden chain, where the last one is the object whose value shall be overridden.\nFor example: Suppose this array is [D456, 6516, FB09]. Suppose the current instance (of id XXXX) points to a symbol-master (of id C1CF), which contains a symbol-instance (of id D456). And this instance (of id D456) points to another symbol-master (of id 0739), which contains another symbol-instance (of id 6516). Recursively, this instance (of id 6516) points to yet another symbol-master (of id 59B5), which contains the final object (of id FB09).\nSo the current instance (of id XXXX) will override the value of the final object (of id FB09) according to `overrideName` and `overrideValue`. ",
+          "description": " This array describes the overridden chain, where the last one is the object whose value shall be overridden.\nFor example: Suppose this array is [D456, 6516, FB09]. Suppose the current instance (of id XXXX) points to a symbol-master (of id C1CF), which contains a symbol-instance (of id D456). And this instance (of id D456) points to another symbol-master (of id 0739), which contains another symbol-instance (of id 6516). Recursively, this instance (of id 6516) points to yet another symbol-master (of id 59B5), which contains the final object (of id FB09).\nSo the current instance (of id XXXX) will override the value of the final object (of id FB09) according to `overrideName` and `overrideValue`.\nNote: each item in the array is associated with the object's overrideKey first. If overrideKey does not exist, the object's id is associated. ",
           "items": {
             "type": "string"
           }
@@ -2372,7 +2420,7 @@
           "description": " Starting with the top-level property of the object, use . as a separator. If the property is an array, it contains the index of the array, starting at 0, and * is valid for all items.\nFor example: style: override whole style style.fills: override the style.fills style.fills.0: override the first item of style.fills style.fills.0.color: override the color of the first style.fills style.fills.*.color: override the color of all items in style.fills "
         },
         "overrideValue": {
-          "description": " The value of the overridden attribute. The type depends on the concrete property. A special case: when overrideName end with 'style' and overrideValue conform to 'referenced_style_<id>', then use corresponding value in references(top level attr). "
+          "description": " The value of the overridden attribute. The type depends on the concrete property. A special case: when overrideName end with 'style' and overrideValue conform to 'referenced_style_<id>', then use corresponding value in references(top level attr). Another special case: When the value is null, it indicates deletion. "
         },
         "effectOnLayout": {
           "type": "boolean",
@@ -2492,6 +2540,14 @@
             "visible: Contents outside the scope of the container will not be cropped and will be visible.",
             "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
           ]
+        },
+        "cornerSmoothing": {
+          "type": "number",
+          "description": " Used to control corner smooth. Range: [0, 1] "
+        },
+        "overrideKey": {
+          "type": "string",
+          "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
         },
         "childObjects": {
           "type": "array",
@@ -2668,6 +2724,14 @@
             "visible: Contents outside the scope of the container will not be cropped and will be visible.",
             "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
           ]
+        },
+        "cornerSmoothing": {
+          "type": "number",
+          "description": " Used to control corner smooth. Range: [0, 1] "
+        },
+        "overrideKey": {
+          "type": "string",
+          "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
         },
         "childObjects": {
           "type": "array",

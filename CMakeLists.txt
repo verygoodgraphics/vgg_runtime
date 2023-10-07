@@ -16,6 +16,11 @@ if(NOT ENV_SHELL_PREFIX)
 endif()
 message(STATUS "SHELL: " ${ENV_SHELL_PREFIX})
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  # for rpath of skia shared libraries issues on some platforms
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--disable-new-dtags")
+endif()
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug")
 endif()

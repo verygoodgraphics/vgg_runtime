@@ -5,20 +5,29 @@
 
 namespace VGG
 {
+namespace Layout
+{
+class Layout;
+}
 
 struct ViewModel
 {
-  std::shared_ptr<Daruma> model;
+  std::weak_ptr<Daruma> model;
+  std::weak_ptr<Layout::Layout> layout;
 
-  std::shared_ptr<LayoutNode> layoutTree;
+  std::shared_ptr<LayoutNode> layoutTree() const;
+  JsonDocumentPtr designDoc() const;
 
-  const nlohmann::json& designDoc() const
+  VGG::Model::Loader::ResourcesType resources() const
   {
-    return model->runtimeDesignDoc()->content();
-  }
-  auto resources() const
-  {
-    return model->resources();
+    if (auto sharedModel = model.lock())
+    {
+      return sharedModel->resources();
+    }
+    else
+    {
+      return {};
+    }
   }
 };
 

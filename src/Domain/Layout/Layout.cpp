@@ -3,8 +3,11 @@
 #include "AutoLayout.hpp"
 #include "Helper.hpp"
 #include "JsonKeys.hpp"
-#include "Utility/Log.hpp"
+#include "RawJsonDocument.hpp"
 #include "Rule.hpp"
+#include "Utility/Log.hpp"
+
+#include <algorithm>
 
 using namespace VGG;
 using namespace VGG::Layout::Internal::Rule;
@@ -211,5 +214,65 @@ void Layout::Layout::configureNodeAutoLayout(std::shared_ptr<LayoutNode> node)
   for (auto& child : node->children())
   {
     configureNodeAutoLayout(child);
+  }
+}
+
+bool Layout::Layout::hasFirstOnTopNode()
+{
+  for (const auto& [id, rule] : m_rules)
+  {
+    if (auto flexContainerRule = rule->getFlexContainerRule();
+        flexContainerRule && flexContainerRule->z_order)
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+JsonDocumentPtr Layout::Layout::displayDesignDoc()
+{
+  if (hasFirstOnTopNode())
+  {
+    auto designJson = m_designDoc->content();
+    reverseChildren(designJson);
+
+    JsonDocumentPtr result{ new RawJsonDocument() };
+    result->setContent(designJson);
+    return result;
+  }
+
+  return m_designDoc;
+}
+
+void Layout::Layout::reverseChildren(nlohmann::json& json)
+{
+  if (!json.is_object() && !json.is_array())
+  {
+    return;
+  }
+
+  if (json.contains(K_ID) && json.contains(K_CHILD_OBJECTS))
+  {
+    auto nodeId = json[K_ID].get<std::string>();
+    if (m_rules.find(nodeId) != m_rules.end())
+    {
+      auto rule = m_rules[nodeId];
+      if (auto flexContainerRule = rule->getFlexContainerRule();
+          flexContainerRule && flexContainerRule->z_order)
+      {
+        auto& children = json[K_CHILD_OBJECTS];
+        if (children.is_array())
+        {
+          std::reverse(children.begin(), children.end());
+        }
+      }
+    }
+  }
+
+  for (auto& el : json.items())
+  {
+    reverseChildren(el.value());
   }
 }

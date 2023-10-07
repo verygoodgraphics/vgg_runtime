@@ -206,7 +206,7 @@ void UIView::layoutSubviews()
   }
 }
 
-Layout::Point UIView::converPointFromWindowAndScale(Layout::Point point)
+VGG::Layout::Point UIView::converPointFromWindowAndScale(Layout::Point point)
 {
   if (m_zoomerListener)
   {
@@ -313,8 +313,8 @@ void UIView::show(const ViewModel& viewModel)
   }
   m_skipUntilNextLoop = true;
 
-  loadFileContent(viewModel.designDoc());
-  m_document = viewModel.layoutTree;
+  loadFileContent(viewModel.designDoc()->content());
+  m_document = viewModel.layoutTree();
   // todo, merge edited doc resouces ?
   Scene::setResRepo(viewModel.resources());
 

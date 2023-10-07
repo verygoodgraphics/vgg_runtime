@@ -487,7 +487,7 @@ void AutoLayout::frameChanged()
       sharedRule->height.value.types = Rule::Length::ETypes::PX;
       sharedRule->height.value.value = newSize.height;
 
-      if (sharedRule->isFlexConatiner() || sharedRule->isGridConatiner())
+      if (sharedRule->isFlexContainer() || sharedRule->isGridContainer())
       {
         sharedView->setNeedLayout();
       }

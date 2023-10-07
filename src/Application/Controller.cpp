@@ -357,7 +357,7 @@ std::shared_ptr<ViewModel> Controller::generateViewModel(std::shared_ptr<Daruma>
 
   auto viewModel = std::make_shared<ViewModel>();
   viewModel->model = m_model;
-  viewModel->layoutTree = startRunning.layoutTree();
+  viewModel->layout = m_layout;
 
   return viewModel;
 }

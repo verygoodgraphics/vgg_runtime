@@ -71,7 +71,13 @@ void Presenter::listenViewEvent()
         return true;
       }
 
-      auto listenersMap = sharedThis->m_viewModel->model->getEventListeners(path);
+      auto sharedModel = sharedThis->m_viewModel->model.lock();
+      if (!sharedModel)
+      {
+        return false;
+      }
+
+      auto listenersMap = sharedModel->getEventListeners(path);
       std::string type = uiEventTypeToString(eventType);
 
       auto hasUserListener = listenersMap.find(type) != listenersMap.end();

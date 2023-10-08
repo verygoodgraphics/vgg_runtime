@@ -26,11 +26,8 @@ struct GridLayout;
 class AutoLayout
 {
 private:
-  std::unique_ptr<flexbox_node> m_flexContainer;
-  flexbox_node* m_flexContainerPtr{ nullptr };
-
-  std::unique_ptr<flexbox_node> m_flexItem;
-  flexbox_node* m_flexItemPtr{ nullptr };
+  std::unique_ptr<flexbox_node> m_flexNode;
+  flexbox_node* m_flexNodePtr{ nullptr };
 
   std::unique_ptr<grid_layout> m_gridContainer;
   grid_layout* m_gridContainerPtr{ nullptr };
@@ -65,16 +62,16 @@ public:
 
   flexbox_node* getFlexContainer()
   {
-    return m_flexContainerPtr;
+    return getFlexNode();
   }
 
   std::unique_ptr<flexbox_node>& takeFlexItem()
   {
-    return m_flexItem;
+    return m_flexNode;
   }
   flexbox_node* getFlexItem()
   {
-    return m_flexItemPtr;
+    return getFlexNode();
   }
 
   grid_layout* getGridContainer()
@@ -90,9 +87,6 @@ public:
     return m_gridItemFrames;
   }
 
-  void resetContainer();
-  void resetItem();
-
 private:
   Size calculateLayout(Size size);
   void configureFlexNodeSize(flexbox_node* node);
@@ -100,12 +94,22 @@ private:
 
   flexbox_node* createFlexContainer();
   flexbox_node* createFlexItem();
+  flexbox_node* createFlexNode();
 
   void configureFlexContainer(Rule::FlexboxLayout* layout);
   void configureFlexItem(Rule::FlexboxItem* layout);
 
   void configureGridContainer(Rule::GridLayout* layout);
   void configureGridItem(Rule::GridItem* layout);
+
+  void resetFlexNode();
+  void resetGridContainer();
+  void resetGridItem();
+
+  flexbox_node* getFlexNode()
+  {
+    return m_flexNodePtr;
+  }
 };
 
 } // namespace Internal

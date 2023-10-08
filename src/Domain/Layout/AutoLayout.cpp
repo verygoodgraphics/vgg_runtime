@@ -426,16 +426,10 @@ Size AutoLayout::calculateLayout(Size size)
     attachNodesFromViewHierachy(sharedView);
   }
 
-  if (auto flexContainer = getFlexContainer())
+  if (auto flexNode = getFlexNode())
   {
-    flexContainer->calc_layout();
-    return { flexContainer->get_layout_width(), flexContainer->get_layout_height() };
-  }
-
-  if (auto flexItem = getFlexItem())
-  {
-    flexItem->calc_layout();
-    return { flexItem->get_layout_width(), flexItem->get_layout_height() };
+    flexNode->calc_layout();
+    return { flexNode->get_layout_width(), flexNode->get_layout_height() };
   }
   else if (auto gridContainer = getGridContainer())
   {
@@ -505,7 +499,7 @@ void AutoLayout::frameChanged()
 
 flexbox_node* AutoLayout::createFlexContainer()
 {
-  auto node = new flexbox_node;
+  auto node = createFlexNode();
 
   if (auto sharedView = view.lock())
   {
@@ -515,15 +509,12 @@ flexbox_node* AutoLayout::createFlexContainer()
           node);
   }
 
-  m_flexContainer.reset(node);
-  m_flexContainerPtr = node;
-
   return node;
 }
 
 flexbox_node* AutoLayout::createFlexItem()
 {
-  auto node = new flexbox_node;
+  auto node = createFlexNode();
 
   if (auto sharedView = view.lock())
   {
@@ -533,44 +524,50 @@ flexbox_node* AutoLayout::createFlexItem()
           node);
   }
 
-  m_flexItem.reset(node);
-  m_flexItemPtr = node;
+  return node;
+}
+
+flexbox_node* AutoLayout::createFlexNode()
+{
+  auto node = new flexbox_node;
+
+  m_flexNode.reset(node);
+  m_flexNodePtr = node;
 
   return node;
 }
 
-void AutoLayout::resetContainer()
+void AutoLayout::resetGridContainer()
 {
   if (auto sharedView = view.lock())
   {
-    DEBUG("AutoLayout::resetContainer, view[%p, %s], flex container[%p], grid container[%p]",
+    DEBUG("AutoLayout::resetGridContainer, view[%p, %s], grid container[%p]",
           sharedView.get(),
           sharedView->path().c_str(),
-          m_flexContainerPtr,
           m_gridContainerPtr);
   }
-
-  m_flexContainer.reset();
-  m_flexContainerPtr = nullptr;
 
   m_gridContainer.reset();
   m_gridContainerPtr = nullptr;
 }
 
-void AutoLayout::resetItem()
+void AutoLayout::resetGridItem()
 {
   if (auto sharedView = view.lock())
   {
-    DEBUG("AutoLayout::resetItem, view[%p, %s], flex item[%p], grid item[%p]",
+    DEBUG("AutoLayout::resetGridItem, view[%p, %s], grid item[%p]",
           sharedView.get(),
           sharedView->path().c_str(),
-          m_flexItemPtr,
           m_gridItem.get());
   }
 
-  m_flexItem.reset();
-  m_flexItemPtr = nullptr;
   m_gridItem.reset();
+}
+
+void AutoLayout::resetFlexNode()
+{
+  m_flexNode.reset();
+  m_flexNodePtr = nullptr;
 }
 
 void AutoLayout::configure()
@@ -587,7 +584,7 @@ void AutoLayout::configure()
     return;
   }
 
-  if (const auto detail = std::get_if<FlexboxLayout>(&sharedRule->layout))
+  if (const auto detail = sharedRule->getFlexContainerRule())
   {
     DEBUG("AutoLayout::configure, flex container, view[%p, %s]",
           sharedView.get(),
@@ -596,8 +593,10 @@ void AutoLayout::configure()
     m_isContainer = true;
     configureFlexContainer(detail);
     configureFlexNodeSize(getFlexContainer());
+
+    resetGridContainer();
   }
-  else if (const auto detail = std::get_if<GridLayout>(&sharedRule->layout))
+  else if (const auto detail = sharedRule->getGridContainerRule())
   {
     DEBUG("AutoLayout::configure, grid container, view[%p, %s]",
           sharedView.get(),
@@ -606,8 +605,12 @@ void AutoLayout::configure()
     m_isContainer = true;
     configureGridContainer(detail);
   }
+  else
+  {
+    m_isContainer = false;
+  }
 
-  if (const auto detail = std::get_if<FlexboxItem>(&sharedRule->item_in_layout))
+  if (const auto detail = sharedRule->getFlexItemRule())
   {
     DEBUG("AutoLayout::configure, flex item, view[%p, %s]",
           sharedView.get(),
@@ -615,14 +618,21 @@ void AutoLayout::configure()
 
     configureFlexItem(detail);
     configureFlexNodeSize(getFlexItem());
+
+    resetGridItem();
   }
-  else if (const auto detail = std::get_if<GridItem>(&sharedRule->item_in_layout))
+  else if (const auto detail = sharedRule->getGridItemRule())
   {
     DEBUG("AutoLayout::configure, grid item, view[%p, %s]",
           sharedView.get(),
           sharedView->path().c_str());
     configureGridItem(detail);
     configureGridItemSize();
+  }
+
+  if (!sharedRule->isFlexContainer() && !sharedRule->isFlexItem())
+  {
+    resetFlexNode();
   }
 }
 

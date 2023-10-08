@@ -61,13 +61,11 @@ void LayoutNode::layoutIfNeeded()
     m_needsLayout = false;
 
     // configure container
-    m_autoLayout->resetContainer();
     configureAutoLayout();
 
     // configure child items
     for (auto child : m_children)
     {
-      child->autoLayout()->resetItem();
       child->configureAutoLayout();
     }
 

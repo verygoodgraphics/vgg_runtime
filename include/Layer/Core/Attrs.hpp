@@ -51,6 +51,13 @@ struct Pattern
   glm::mat3 transform;
 };
 
+struct AlphaMask
+{
+  std::string id;
+  AlphaMaskType type{ AM_ALPHA };
+  bool crop{ true };
+};
+
 struct Color
 {
   float r{ 0. };

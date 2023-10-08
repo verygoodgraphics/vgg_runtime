@@ -95,6 +95,7 @@ public:
     // draw inner shadow
     canvas->save();
     canvas->clipPath(skPath, SkClipOp::kIntersect);
+
     for (const auto& s : style.shadows)
     {
       if (!s.is_enabled || !s.inner)

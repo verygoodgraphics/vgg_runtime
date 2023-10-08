@@ -216,6 +216,13 @@ enum EBlurType : uint8_t
   BT_Background = 3
 };
 
+enum AlphaMaskType
+{
+  AM_ALPHA,
+  AM_LUMINOSITY,
+  AM_INVERSE_LUMINOSITY
+};
+
 enum ETextLineType : uint8_t
 {
   TLT_Plain = 0,

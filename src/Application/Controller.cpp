@@ -115,7 +115,7 @@ void Controller::onResize()
   if (isNormalMode())
   {
     m_presenter->resetForRunning();
-    ResizeWindow{ m_layout }.onResize(m_presenter->viewSize());
+    scaleContent(m_presenter->viewSize());
   }
   else
   {
@@ -149,7 +149,7 @@ void Controller::setEditMode(bool editMode)
   if (isNormalMode())
   {
     m_presenter->resetForRunning();
-    m_layout->layout(m_presenter->viewSize()); // windows size
+    scaleContent(m_presenter->viewSize()); // windows size
   }
   else
   {
@@ -348,7 +348,7 @@ std::shared_ptr<ViewModel> Controller::generateViewModel(std::shared_ptr<Daruma>
   if (isNormalMode())
   {
     m_presenter->resetForRunning();
-    startRunning.layout(size);
+    scaleContent(size);
   }
   else
   {
@@ -416,6 +416,33 @@ void Controller::onFirstRender()
 {
   ASSERT(m_reporter);
   m_reporter->onFirstRender();
+}
+
+void Controller::scaleContent(Layout::Size size)
+{
+  m_layout->layout(size); // scale to fill
+  // todo, aspect fill & scroll
+  // aspectFill(size.width);
+  // aspectFit(size);
+}
+
+void Controller::aspectFill(int width)
+{
+  auto pageSize = m_layout->pageSize(m_presenter->currentPageIndex());
+  auto scaleFactor = width / pageSize.width;
+  Layout::Size size = { pageSize.width * scaleFactor, pageSize.height * scaleFactor };
+  m_layout->layout(size);
+}
+
+void Controller::aspectFit(Layout::Size size)
+{
+  auto pageSize = m_layout->pageSize(m_presenter->currentPageIndex());
+
+  auto xScale = size.width / pageSize.width;
+  auto yScale = size.height / pageSize.height;
+  auto scale = std::min(xScale, yScale);
+
+  m_layout->layout({ pageSize.width * scale, pageSize.height * scale });
 }
 
 } // namespace VGG

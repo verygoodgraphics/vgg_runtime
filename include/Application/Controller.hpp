@@ -96,6 +96,10 @@ private:
   void observeEditViewEvent();
   void fitPageForEditing();
 
+  void scaleContent(Layout::Size size);
+  void aspectFill(int width);
+  void aspectFit(Layout::Size size);
+
   std::shared_ptr<ViewModel> generateViewModel(std::shared_ptr<Daruma> model, Layout::Size size);
   MakeJsonDocFn createMakeJsonDocFn(const char* pJsonSchemaFilePath);
 };

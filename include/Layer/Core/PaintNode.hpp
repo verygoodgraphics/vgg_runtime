@@ -30,6 +30,7 @@
 #include <string>
 #include <unordered_map>
 class SkCanvas;
+class SkImageFilter;
 namespace VGG
 {
 
@@ -145,7 +146,9 @@ public:
 
   bool isMasked() const;
 
-  void setMaskBy(const std::vector<std::string> masks);
+  void setMaskBy(std::vector<std::string> masks);
+
+  void setAlphaMaskBy(std::vector<AlphaMask> masks);
 
   EMaskType maskType() const;
 
@@ -168,6 +171,7 @@ public:
   void setOutlineMask(const Mask& mask);
 
   virtual Mask asOutlineMask(const glm::mat3* mat);
+  sk_sp<SkImageFilter> asAlphaMask(const glm::mat3* mat);
 
   ~PaintNode();
 

@@ -24,6 +24,7 @@
 
 #include <core/SkMatrix.h>
 #include <core/SkPaint.h>
+#include <core/SkSurfaceProps.h>
 #include <core/SkTileMode.h>
 #include <include/core/SkCanvas.h>
 #include <core/SkPath.h>
@@ -185,6 +186,10 @@ void PaintNode::paintPass(SkiaRenderer* renderer, int zorder)
   {
     _->mask = makeMaskBy(BO_Intersection, renderer).outlineMask;
   }
+
+  if (!_->alphaMask)
+  {
+  }
   // renderer->displayList.emplace_back(renderer->canvas()->getTotalMatrix(), this);
   renderer->pushItem(this, zorder);
   // this->paintEvent(renderer);
@@ -201,6 +206,12 @@ void PaintNode::setMaskBy(std::vector<std::string> masks)
 {
   VGG_IMPL(PaintNode);
   _->maskedBy = std::move(masks);
+}
+
+void PaintNode::setAlphaMaskBy(std::vector<AlphaMask> masks)
+{
+  VGG_IMPL(PaintNode);
+  _->alphaMaskBy = std::move(masks);
 }
 
 SkPath PaintNode::makeBoundPath()
@@ -345,6 +356,11 @@ SkPath PaintNode::makeContourImpl(ContourOption option, const glm::mat3* mat)
     path.transform(toSkMatrix(*mat));
   }
   return path;
+}
+
+sk_sp<SkImageFilter> PaintNode::asAlphaMask(const glm::mat3* mat)
+{
+  return nullptr;
 }
 
 Mask PaintNode::asOutlineMask(const glm::mat3* mat)

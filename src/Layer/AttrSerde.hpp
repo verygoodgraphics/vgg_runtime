@@ -279,5 +279,12 @@ inline void from_json(const json& j, TextAttr& x)
   x.horzAlignment = j.at("horizontalAlignment");
   x.size = j.at("size");
 }
+
+inline void from_json(const json& j, AlphaMask& x)
+{
+  x.id = j.value("id", "");
+  x.type = j.value("alphaType", AM_ALPHA);
+  x.crop = j.value("crop", true);
+}
 // NOLINTEND
 } // namespace VGG

@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Utility/HelperMacro.hpp"
 #include "Layer/Core/PaintNode.hpp"
+#include <core/SkImageFilter.h>
 namespace VGG
 {
 
@@ -29,6 +31,7 @@ public:
   glm::mat3 transform{ 1.0 };
   std::string guid{};
   std::vector<std::string> maskedBy{};
+  std::vector<AlphaMask> alphaMaskBy;
   Mask outlineMask;
   EMaskType maskType{ MT_None };
   EMaskShowType maskShowType{ MST_Invisible };
@@ -46,6 +49,7 @@ public:
 
   std::optional<SkPath> path;
   std::optional<SkPath> mask;
+  std::optional<sk_sp<SkImageFilter>> alphaMask;
 
   PaintNode__pImpl(PaintNode* api, ObjectType type)
     : q_ptr(api)

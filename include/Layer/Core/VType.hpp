@@ -138,6 +138,13 @@ enum EMaskType : uint8_t
   MT_Alpha
 };
 
+enum EMaskShowType : uint8_t
+{
+  MST_Content = 0,
+  MST_Bound = 1,
+  MST_Invisible = 2
+};
+
 enum ECoutourType : uint8_t
 {
   MCT_FrameOnly, // not recursive

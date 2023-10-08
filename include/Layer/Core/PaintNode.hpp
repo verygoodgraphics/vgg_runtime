@@ -151,6 +151,8 @@ public:
 
   void setMaskType(EMaskType type);
 
+  void setMaskShowType(EMaskShowType type);
+
   void setContourOption(ContourOption option);
 
   void setContourData(ContourPtr contour);
@@ -184,7 +186,7 @@ public:
 
 public:
   // TODO:: chagne the following functions accessbility
-  void invokeRenderPass(SkiaRenderer* renderer);
+  void invokeRenderPass(SkiaRenderer* renderer, int zorder = 0);
 
 protected:
   // Render traverse
@@ -192,7 +194,7 @@ protected:
   void paintChildrenRecursively(SkiaRenderer* renderer);
   virtual void prePaintPass(SkiaRenderer* renderer);
   virtual void postPaintPass(SkiaRenderer* renderer);
-  virtual void paintPass(SkiaRenderer* renderer);
+  virtual void paintPass(SkiaRenderer* renderer, int zorder = 0);
   void renderPass(SkiaRenderer* renderer); // TODO:: should be private access
   virtual void paintEvent(SkiaRenderer* renderer);
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/Core/VType.hpp"
 #include "VSkia.hpp"
 #include "RenderState.hpp"
 #include "PaintNodePrivate.hpp"
@@ -42,10 +43,12 @@ struct DisplayItem
 {
   SkMatrix matrix;
   PaintNode* item{ nullptr };
+  int zorder = 0;
 
-  DisplayItem(SkMatrix m, PaintNode* item)
+  DisplayItem(SkMatrix m, PaintNode* item, int zorder)
     : matrix(std::move(m))
     , item(item)
+    , zorder(zorder)
   {
   }
 };
@@ -68,6 +71,7 @@ class SkiaRenderer
   Scene* m_scene{ nullptr };
   std::vector<glm::mat3> m_transforms;
   std::vector<DisplayItem> m_displayList;
+  int m_zOrder = -1;
 
   void updateMaskObject(PaintNode* p, std::unordered_map<std::string, PaintNode*>& objects)
   {
@@ -87,13 +91,14 @@ class SkiaRenderer
   }
 
 public:
-  void drawDebugBound(PaintNode* p)
+  void drawDebugBound(PaintNode* p, int zorder)
   {
     const auto& b = p->getBound();
     SkPaint strokePen;
     strokePen.setStyle(SkPaint::kStroke_Style);
     SkColor color = nodeType2Color(p->d_ptr->type);
     strokePen.setColor(color);
+    // strokePen.setAlpha(zorder2Alpha(zorder));
     strokePen.setStrokeWidth(2);
     m_canvas->drawRect(toSkRect(p->getBound()), strokePen);
   }
@@ -112,6 +117,7 @@ public:
     m_canvas = canvas;
     canvas->save();
     canvas->scale(1, -1); // convert the whole root to canvas coords
+
     root->renderPass(this);
     canvas->restore();
   }
@@ -121,7 +127,7 @@ public:
     m_transforms.push_back(matrix);
   }
 
-  void pushItem(PaintNode* item)
+  void pushItem(PaintNode* item, int zorder)
   {
     // OPTIMIZATION
     auto m = glm::identity<glm::mat3>();
@@ -129,7 +135,7 @@ public:
     {
       m = m * ma;
     }
-    m_displayList.emplace_back(toSkMatrix(m), item);
+    m_displayList.emplace_back(toSkMatrix(m), item, zorder);
   }
 
   void popMatrix()
@@ -179,7 +185,7 @@ public:
       {
         canvas->save();
         canvas->concat(item.matrix);
-        drawDebugBound(item.item);
+        drawDebugBound(item.item, item.zorder);
         item.item->paintEvent(this);
         canvas->restore();
       }

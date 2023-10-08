@@ -22,6 +22,9 @@
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Node.hpp"
 
+#include <core/SkMatrix.h>
+#include <core/SkPaint.h>
+#include <core/SkTileMode.h>
 #include <include/core/SkCanvas.h>
 #include <core/SkPath.h>
 #include <core/SkRRect.h>
@@ -146,7 +149,7 @@ Mask PaintNode::makeMaskBy(EBoolOp maskOp, SkiaRenderer* renderer)
 
 void PaintNode::renderPass(SkiaRenderer* renderer)
 {
-  invokeRenderPass(renderer);
+  invokeRenderPass(renderer, 0);
 }
 
 // void PaintNode::visitNode(VGG::Node* p, ObjectTableType& table)
@@ -167,7 +170,7 @@ void PaintNode::renderPass(SkiaRenderer* renderer)
 //   }
 // }
 //
-void PaintNode::paintPass(SkiaRenderer* renderer)
+void PaintNode::paintPass(SkiaRenderer* renderer, int zorder)
 {
   VGG_IMPL(PaintNode);
   if (!_->path)
@@ -183,7 +186,7 @@ void PaintNode::paintPass(SkiaRenderer* renderer)
     _->mask = makeMaskBy(BO_Intersection, renderer).outlineMask;
   }
   // renderer->displayList.emplace_back(renderer->canvas()->getTotalMatrix(), this);
-  renderer->pushItem(this);
+  renderer->pushItem(this, zorder);
   // this->paintEvent(renderer);
 }
 
@@ -477,6 +480,12 @@ void PaintNode::setMaskType(EMaskType type)
   _->maskType = type;
 }
 
+void PaintNode::setMaskShowType(EMaskShowType type)
+{
+  VGG_IMPL(PaintNode);
+  _->maskShowType = type;
+}
+
 void PaintNode::setContourOption(ContourOption option)
 {
   VGG_IMPL(PaintNode);
@@ -505,7 +514,7 @@ const PaintOption& PaintNode::paintOption() const
   return d_ptr->paintOption;
 }
 
-void PaintNode::invokeRenderPass(SkiaRenderer* renderer)
+void PaintNode::invokeRenderPass(SkiaRenderer* renderer, int zorder)
 {
   VGG_IMPL(PaintNode);
   if (!_->visible)
@@ -513,13 +522,13 @@ void PaintNode::invokeRenderPass(SkiaRenderer* renderer)
   if (_->paintOption.paintStrategy == EPaintStrategy::PS_SelfOnly)
   {
     prePaintPass(renderer);
-    paintPass(renderer);
+    paintPass(renderer, zorder);
     postPaintPass(renderer);
   }
   else if (_->paintOption.paintStrategy == EPaintStrategy::PS_Recursively)
   {
     prePaintPass(renderer);
-    paintPass(renderer);
+    paintPass(renderer, zorder);
     paintChildrenPass(renderer);
     postPaintPass(renderer);
   }
@@ -542,33 +551,45 @@ void PaintNode::paintChildrenRecursively(SkiaRenderer* renderer)
   {
     auto c = static_cast<PaintNode*>(p.get());
     if (c->maskType() == MT_Outline)
-      masked.push_back(c);
-    else
+    {
+      if (c->d_ptr->maskShowType == MST_Content)
+      {
+        masked.push_back(c);
+      }
+    }
+    if (c->maskType() == MT_None)
+    {
       noneMasked.push_back(c);
+    }
   }
 
+  int zorder = 0;
   auto paintCall = [&](std::vector<PaintNode*>& nodes)
   {
     if (_->contextSetting.TransparencyKnockoutGroup)
     {
       for (const auto& p : nodes)
       {
+
         // TODO:: blend mode r = s!=0?s:d is needed.
         // SkPaint paint;
         // paint.setBlendMode(SkBlendMode::kSrc);
         // canvas->save();
         // canvas->scale(1, -1);
         // canvas->saveLayer(toSkRect(getBound()), &paint);
-        p->invokeRenderPass(renderer);
+        //
+        p->invokeRenderPass(renderer, zorder);
         // canvas->restore();
         // canvas->restore();
+        zorder++;
       }
     }
     else
     {
       for (const auto& p : nodes)
       {
-        p->invokeRenderPass(renderer);
+        p->invokeRenderPass(renderer, zorder);
+        zorder++;
       }
     }
   };
@@ -695,8 +716,14 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
   bool hasBlur = style().blurs.empty() ? false : style().blurs[0].isEnabled;
   if (hasBlur)
   {
-    auto pen = styleRenderer.makeBlurPen(style().blurs[0]);
-    canvas->saveLayer(nullptr, &pen);
+    const auto blur = style().blurs[0];
+    auto pen = styleRenderer.makeBlurPen(blur);
+    auto b = toSkRect(getBound());
+    SkMatrix m;
+    m.preScale(1, 1);
+    b = m.mapRect(b);
+    SkCanvas::SaveLayerRec slr(&b, &pen, SkCanvas::kInitWithPrevious_SaveLayerFlag);
+    canvas->saveLayer(slr);
   }
 
   if (outlineMask.isEmpty())

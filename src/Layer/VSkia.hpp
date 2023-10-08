@@ -651,3 +651,12 @@ inline SkColor nodeType2Color(ObjectType type)
       return SK_ColorRED;
   }
 }
+
+inline uint8_t zorder2Alpha(int zorder)
+{
+  if (zorder < 0)
+  {
+    return 255;
+  }
+  return float(zorder) / 5 * 255.0;
+}

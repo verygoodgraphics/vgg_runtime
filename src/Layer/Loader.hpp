@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/Core/VType.hpp"
 #include "Utility/Log.hpp"
 #include "AttrSerde.hpp"
 
@@ -135,7 +136,15 @@ class NlohmannBuilder
     obj->setStyle(j.value("style", Style()));
     obj->setContectSettings(j.value("contextSettings", ContextSetting()));
     obj->setMaskBy(std::move(j.value("outlineMaskBy", std::vector<std::string>{})));
-    obj->setMaskType(j.value("maskType", EMaskType::MT_None));
+
+    const auto maskType = j.value("maskType", EMaskType::MT_None);
+    const auto defaultShowType =
+      maskType == EMaskType::MT_Outline
+        ? MST_Content
+        : (maskType == EMaskType::MT_Alpha && false ? MST_Bound : MST_Invisible);
+    const auto maskShowType = j.value("maskShowType", defaultShowType);
+    obj->setMaskType(maskType);
+    obj->setMaskShowType(maskShowType);
     obj->setOverflow(j.value("overflow", EOverflow::OF_Visible));
     obj->setVisible(j.value("visible", true));
     override(obj.get());

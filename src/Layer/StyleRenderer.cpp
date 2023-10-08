@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "StyleRenderer.hpp"
+#include "Layer/Core/VType.hpp"
 #include "VSkia.hpp"
 
 using namespace VGG;
@@ -122,6 +123,11 @@ SkPaint StyleRenderer::makeBlurPen(const Blur& blur)
   else if (blur.blurType == BT_Motion)
   {
     pen.setImageFilter(SkImageFilters::Blur(sigma, 0, nullptr));
+  }
+  else if (blur.blurType == VGG::BT_Background)
+  {
+    sk_sp<SkImageFilter> newBlurFilter = SkImageFilters::Blur(3, 3, SkTileMode::kDecal, nullptr);
+    pen.setImageFilter(std::move(newBlurFilter));
   }
   return pen;
 }

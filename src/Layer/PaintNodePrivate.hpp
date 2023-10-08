@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/Core/VType.hpp"
 #include "Utility/HelperMacro.hpp"
 #include "Layer/Core/PaintNode.hpp"
 namespace VGG
@@ -30,6 +31,7 @@ public:
   std::vector<std::string> maskedBy{};
   Mask outlineMask;
   EMaskType maskType{ MT_None };
+  EMaskShowType maskShowType{ MST_Invisible };
   EBoolOp clipOperator{ BO_None };
   EOverflow overflow{ OF_Hidden };
   EWindingType windingRule{ WR_EvenOdd };

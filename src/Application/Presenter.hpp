@@ -45,7 +45,7 @@ public:
   void fitForEditing(Layout::Size pageSize);
   void resetForRunning();
 
-  int currentPageIndex()
+  virtual int currentPageIndex()
   {
     return m_view->currentPageIndex();
   }

@@ -103,8 +103,8 @@ private:
   }
   nlohmann::json* findLayoutObject(nlohmann::json& instance,
                                    const std::vector<std::string>& instanceIdStack,
-                                   nlohmann::json& overrideItem);
-  nlohmann::json* findLayoutObjectById(const std::string id);
+                                   const nlohmann::json& overrideItem);
+  nlohmann::json* findLayoutObjectById(const std::string& id);
 };
 } // namespace Layout
 

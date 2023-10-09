@@ -425,15 +425,15 @@ void ExpandSymbol::processLayoutOverrides(nlohmann::json& instance,
       continue;
     }
 
-    nl::json* childObject = findLayoutObject(instance, instanceIdStack, overrideItem);
-    if (!childObject || !childObject->is_object())
+    auto layoutObject = findLayoutObject(instance, instanceIdStack, overrideItem);
+    if (!layoutObject || !layoutObject->is_object())
     {
       continue;
     }
 
     std::string path = overrideItem[K_OVERRIDE_NAME];
     auto value = overrideItem[K_OVERRIDE_VALUE];
-    applyOverrides((*childObject), path, value);
+    applyOverrides((*layoutObject), path, value);
   }
 }
 
@@ -1114,33 +1114,19 @@ void ExpandSymbol::layoutTree(nlohmann::json& rootJson, const nlohmann::json& ne
 
 nlohmann::json* ExpandSymbol::findLayoutObject(nlohmann::json& instance,
                                                const std::vector<std::string>& instanceIdStack,
-                                               nlohmann::json& overrideItem)
+                                               const nlohmann::json& overrideItem)
 {
-  auto instanceMasterId = instance[K_MASTER_ID];
-
-  auto& objectIdPaths = overrideItem[K_OBJECT_ID];
-  if (!objectIdPaths.is_array() || objectIdPaths.empty())
+  std::vector<std::string> _;
+  auto childObject = findChildObject(instance, instanceIdStack, overrideItem, _);
+  if (!childObject || !childObject->is_object())
   {
     return nullptr;
   }
-  else if (objectIdPaths.size() == 1 && objectIdPaths[0] == instanceMasterId)
-  {
-    return findLayoutObjectById(instance[K_ID]);
-  }
-  else
-  {
-    // todo, find by override key first
 
-    auto idChain = instanceIdStack;
-    for (auto& idJson : objectIdPaths)
-    {
-      idChain.push_back(idJson);
-    }
-    return findLayoutObjectById(join(idChain));
-  }
+  return findLayoutObjectById((*childObject)[K_ID]);
 }
 
-nlohmann::json* ExpandSymbol::findLayoutObjectById(const std::string id)
+nlohmann::json* ExpandSymbol::findLayoutObjectById(const std::string& id)
 {
   auto& rules = m_outLayoutJson[K_OBJ];
   for (auto& targetRule : rules)

@@ -77,7 +77,7 @@ const Layout::Rect& LayoutNode::frame() const
 {
   return m_frame;
 }
-void LayoutNode::setFrame(const Layout::Rect& frame)
+void LayoutNode::setFrame(const Layout::Rect& frame, bool updateRule)
 {
   if (m_frame != frame)
   {
@@ -130,7 +130,7 @@ void LayoutNode::setFrame(const Layout::Rect& frame)
 
     if (m_autoLayout && m_autoLayout->isEnabled())
     {
-      m_autoLayout->frameChanged();
+      m_autoLayout->frameChanged(updateRule);
 
       if (!m_autoLayout->isContainer())
       {

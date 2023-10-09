@@ -465,7 +465,7 @@ bool AutoLayout::isLeaf()
   return true;
 }
 
-void AutoLayout::frameChanged()
+void AutoLayout::frameChanged(bool updateRule)
 {
   auto sharedView = view.lock();
   auto sharedRule = rule.lock();
@@ -474,12 +474,14 @@ void AutoLayout::frameChanged()
     auto newSize = sharedView->frame().size;
     if (newSize != frame.size)
     {
-      // todo, old type is PERCENT
-      sharedRule->width.value.types = Rule::Length::ETypes::PX;
-      sharedRule->width.value.value = newSize.width;
+      if (updateRule)
+      {
+        sharedRule->width.value.types = Rule::Length::ETypes::PX;
+        sharedRule->width.value.value = newSize.width;
 
-      sharedRule->height.value.types = Rule::Length::ETypes::PX;
-      sharedRule->height.value.value = newSize.height;
+        sharedRule->height.value.types = Rule::Length::ETypes::PX;
+        sharedRule->height.value.value = newSize.height;
+      }
 
       if (sharedRule->isFlexContainer() || sharedRule->isGridContainer())
       {

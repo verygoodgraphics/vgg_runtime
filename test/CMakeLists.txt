@@ -9,6 +9,7 @@ else()
     controller/controller_test.cpp
     domain/layout/expand_symbol_tests.cpp
     domain/layout/layout_tests.cpp
+    domain/layout/lib_layout_tests.cpp
     domain/model/daruma_helper.cpp
     editor/save_test.cpp
     exec/vgg_exec_test.cpp

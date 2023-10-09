@@ -48,7 +48,7 @@ public:
 public:
   void configure();
   void applyLayout(bool preservingOrigin);
-  void frameChanged();
+  void frameChanged(bool updateRule);
 
   bool isLeaf();
   bool isEnabled()

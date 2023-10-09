@@ -42,10 +42,12 @@ void StyleRenderer::drawPathBorder(SkCanvas* canvas,
                                    const SkPath& skPath,
                                    const Border& b,
                                    float globalAlpha,
-                                   const Bound2& bound)
+                                   const Bound2& bound,
+                                   sk_sp<SkImageFilter> imageFilter)
 {
   SkPaint strokePen;
   strokePen.setAntiAlias(true);
+  strokePen.setImageFilter(imageFilter);
   strokePen.setStyle(SkPaint::kStroke_Style);
   strokePen.setPathEffect(
     SkDashPathEffect::Make(b.dashed_pattern.data(), b.dashed_pattern.size(), 0));
@@ -111,7 +113,7 @@ void StyleRenderer::drawPathBorder(SkCanvas* canvas,
   }
 }
 
-SkPaint StyleRenderer::makeBlurPen(const Blur& blur)
+SkPaint StyleRenderer::makeBlurPen(const Blur& blur, sk_sp<SkImageFilter> imageFilter)
 {
   SkPaint pen;
   pen.setAntiAlias(true);
@@ -136,7 +138,8 @@ void StyleRenderer::drawShadow(SkCanvas* canvas,
                                const SkPath& skPath,
                                const Shadow& s,
                                SkPaint::Style style,
-                               const Bound2& bound)
+                               const Bound2& bound,
+                               sk_sp<SkImageFilter> imageFilter)
 {
 
   SkPaint pen;
@@ -162,7 +165,8 @@ void StyleRenderer::drawInnerShadow(SkCanvas* canvas,
                                     const SkPath& skPath,
                                     const Shadow& s,
                                     SkPaint::Style style,
-                                    const Bound2& bound)
+                                    const Bound2& bound,
+                                    sk_sp<SkImageFilter> imageFilter)
 {
   SkPaint pen;
   auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
@@ -186,7 +190,8 @@ void StyleRenderer::drawFill(SkCanvas* canvas,
                              float globalAlpha,
                              const Style& style,
                              const SkPath& skPath,
-                             const Bound2& bound)
+                             const Bound2& bound,
+                             sk_sp<SkImageFilter> imageFilter)
 {
   for (const auto& f : style.fills)
   {

@@ -31,6 +31,7 @@
 #include <unordered_map>
 class SkCanvas;
 class SkImageFilter;
+class SkImage;
 namespace VGG
 {
 
@@ -171,7 +172,8 @@ public:
   void setOutlineMask(const Mask& mask);
 
   virtual Mask asOutlineMask(const glm::mat3* mat);
-  sk_sp<SkImageFilter> asAlphaMask(const glm::mat3* mat);
+
+  void drawAlphaMask(SkCanvas* maskCanvas);
 
   ~PaintNode();
 
@@ -208,6 +210,7 @@ protected:
   virtual SkPath makeContourImpl(ContourOption option, const glm::mat3* mat);
   SkPath childPolyOperation() const;
   Mask makeMaskBy(EBoolOp maskOp, SkiaRenderer* renderer);
+  sk_sp<SkImageFilter> makeAlphaMaskBy(SkiaRenderer* renderer);
 
 protected:
   // Style

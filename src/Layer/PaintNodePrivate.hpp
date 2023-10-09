@@ -22,6 +22,20 @@
 namespace VGG
 {
 
+template<typename F>
+Bound2 calcMaskAreaIntersection(const Bound2& pruneBound, PaintNode* obj, F&& f)
+{
+  Bound2 bound;
+  while (auto m = f())
+  {
+    const auto t = m->mapTransform(obj);
+    const auto transformedBound = m->getBound() * t;
+    bound.intersectWith(transformedBound);
+    // auto outlineMask = m->asOutlineMask(&t);
+  }
+  return bound;
+}
+
 class PaintNode__pImpl // NOLINT
 {
   VGG_DECL_API(PaintNode);

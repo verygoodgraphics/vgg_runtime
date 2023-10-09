@@ -39,7 +39,9 @@ void Layout::Layout::layout(Size size)
 
   // Always update the root size because resizing the page does not update the root size
   frame.size = size;
-  root->setFrame(frame);
+
+  // Update rule when expanding symbol; Do NOT update rule when resizing window in RunMode
+  root->setFrame(frame, !m_isRootTree);
 
   if (m_isRootTree)
   {

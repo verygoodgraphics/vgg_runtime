@@ -85,6 +85,11 @@ public:
     m_children.push_back(child);
   }
 
+  const std::shared_ptr<LayoutNode> parent() const
+  {
+    return m_parent.lock();
+  }
+
   const std::vector<std::shared_ptr<LayoutNode>>& children() const
   {
     return m_children;
@@ -96,7 +101,7 @@ public:
   }
 
   const Layout::Rect& frame() const;
-  void setFrame(const Layout::Rect& frame);
+  void setFrame(const Layout::Rect& frame, bool updateRule = false);
   void setViewModel(JsonDocumentPtr viewModel);
 
 public:

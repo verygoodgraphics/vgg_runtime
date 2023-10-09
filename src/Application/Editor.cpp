@@ -424,7 +424,7 @@ void Editor::resizeNode(MouseEvent* mouseMove)
   frame.size.width = std::max(frame.size.width, K_RESIZE_MIN_LENGTH);
   frame.size.height = std::max(frame.size.height, K_RESIZE_MIN_LENGTH);
 
-  selectedNode->setFrame(frame);
+  selectedNode->setFrame(frame, true);
 }
 
 Layout::Rect Editor::getSelectNodeRect(EResizePosition position)

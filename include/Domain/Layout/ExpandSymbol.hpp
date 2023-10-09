@@ -84,8 +84,8 @@ private:
 
   nlohmann::json* findChildObject(nlohmann::json& instance,
                                   const std::vector<std::string>& instanceIdStack,
-                                  std::vector<std::string>& expandContextInstanceIdStack,
-                                  nlohmann::json& overrideItem);
+                                  const nlohmann::json& overrideItem,
+                                  std::vector<std::string>& outChildInstanceIdStack);
   nlohmann::json* findChildObjectInTree(nlohmann::json& json, const std::string& objectId);
 
   void makeIdUnique(nlohmann::json& json, const std::string& idPrefix);

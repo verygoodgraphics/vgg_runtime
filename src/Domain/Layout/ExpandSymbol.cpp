@@ -374,9 +374,9 @@ void ExpandSymbol::processMasterIdOverrides(nlohmann::json& instance,
       continue;
     }
 
-    auto expandContextInstanceIdStack = instanceIdStack;
-    nl::json* childObject =
-      findChildObject(instance, instanceIdStack, expandContextInstanceIdStack, overrideItem);
+    std::vector<std::string> childInstanceIdStack;
+    auto childObject =
+      findChildObject(instance, instanceIdStack, overrideItem, childInstanceIdStack);
     if (!childObject || !childObject->is_object())
     {
       continue;
@@ -398,7 +398,7 @@ void ExpandSymbol::processMasterIdOverrides(nlohmann::json& instance,
 
     // restore to symbolInstance to expand again
     (*childObject)[K_CLASS] = K_SYMBOL_INSTANCE;
-    expandInstance(*childObject, expandContextInstanceIdStack, true);
+    expandInstance(*childObject, childInstanceIdStack, true);
   }
 }
 
@@ -470,9 +470,8 @@ void ExpandSymbol::processBoundsOverrides(nlohmann::json& instance,
       continue;
     }
 
-    auto expandContextInstanceIdStack = instanceIdStack;
-    nl::json* childObject =
-      findChildObject(instance, instanceIdStack, expandContextInstanceIdStack, overrideItem);
+    std::vector<std::string> _;
+    auto childObject = findChildObject(instance, instanceIdStack, overrideItem, _);
     if (!childObject || !childObject->is_object())
     {
       continue;
@@ -505,9 +504,8 @@ void ExpandSymbol::processOtherOverrides(nlohmann::json& instance,
       continue;
     }
 
-    auto expandContextInstanceIdStack = instanceIdStack;
-    nl::json* childObject =
-      findChildObject(instance, instanceIdStack, expandContextInstanceIdStack, overrideItem);
+    std::vector<std::string> _;
+    auto childObject = findChildObject(instance, instanceIdStack, overrideItem, _);
     if (!childObject || !childObject->is_object())
     {
       continue;
@@ -766,11 +764,10 @@ void ExpandSymbol::makeMaskIdUnique(nlohmann::json& json,
   }
 }
 
-nlohmann::json* ExpandSymbol::findChildObject(
-  nlohmann::json& instance,
-  const std::vector<std::string>& instanceIdStack,
-  std::vector<std::string>& expandContextInstanceIdStack,
-  nlohmann::json& overrideItem)
+nlohmann::json* ExpandSymbol::findChildObject(nlohmann::json& instance,
+                                              const std::vector<std::string>& instanceIdStack,
+                                              const nlohmann::json& overrideItem,
+                                              std::vector<std::string>& outChildInstanceIdStack)
 {
   auto instanceMasterId = instance[K_MASTER_ID];
 
@@ -781,6 +778,7 @@ nlohmann::json* ExpandSymbol::findChildObject(
   }
   else if (objectIdPaths.size() == 1 && objectIdPaths[0] == instanceMasterId)
   {
+    outChildInstanceIdStack = instanceIdStack;
     return &instance;
   }
   else
@@ -790,7 +788,7 @@ nlohmann::json* ExpandSymbol::findChildObject(
     {
       newInstanceIdStack.push_back(idJson);
     }
-    expandContextInstanceIdStack = newInstanceIdStack;
+    outChildInstanceIdStack = newInstanceIdStack;
     return findChildObjectInTree(instance[K_CHILD_OBJECTS], join(newInstanceIdStack));
   }
 }
@@ -1131,6 +1129,8 @@ nlohmann::json* ExpandSymbol::findLayoutObject(nlohmann::json& instance,
   }
   else
   {
+    // todo, find by override key first
+
     auto idChain = instanceIdStack;
     for (auto& idJson : objectIdPaths)
     {

@@ -87,6 +87,64 @@ struct Bound2
   {
     return std::sqrt(squaredDistance());
   }
+
+  Bound2 transform(const glm::mat3& transform) const
+  {
+    auto topLeft3 = transform * glm::vec3{ topLeft, 1.0 };
+    auto bottomRight3 = transform * glm::vec3{ bottomRight, 1.0 };
+    Bound2 newBound;
+    newBound.topLeft = topLeft3;
+    newBound.bottomRight = bottomRight3;
+    return newBound;
+  }
+
+  Bound2 operator*(const glm::mat3& transform) const
+  {
+    return this->transform(transform);
+  }
+
+  void unionWith(const Bound2& bound)
+  {
+    topLeft.x = std::min(topLeft.x, bound.topLeft.x);
+    topLeft.y = std::max(topLeft.y, bound.topLeft.y);
+    bottomRight.x = std::max(bottomRight.x, bound.bottomRight.x);
+    bottomRight.y = std::min(bottomRight.y, bound.bottomRight.y);
+  }
+
+  Bound2 unionAs(const Bound2& bound) const
+  {
+    auto newBound = *this;
+    newBound.unionWith(bound);
+    return newBound;
+  }
+
+  void intersectWith(const Bound2& bound)
+  {
+    topLeft.x = std::max(topLeft.x, bound.topLeft.x);
+    topLeft.y = std::min(topLeft.y, bound.topLeft.y);
+    bottomRight.x = std::min(bottomRight.x, bound.bottomRight.x);
+    bottomRight.y = std::max(bottomRight.y, bound.bottomRight.y);
+  }
+
+  Bound2 intersectAs(const Bound2& bound) const
+  {
+    auto newBound = *this;
+    newBound.intersectWith(bound);
+    return newBound;
+  }
+
+  bool isIntersectWith(const Bound2& bound) const
+  {
+    auto isect = intersectAs(bound);
+    return isect.valid();
+  }
+
+  bool isIntersectWithEx(const Bound2& bound) const
+  {
+    auto isect = intersectAs(bound);
+    auto size = isect.size();
+    return size.x >= 0 && size.y >= 0;
+  }
 };
 
 struct RoundedBound2 : public Bound2

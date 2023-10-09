@@ -22,10 +22,17 @@
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Node.hpp"
 
+#include <core/SkBlendMode.h>
+#include <core/SkColorFilter.h>
+#include <core/SkImageFilter.h>
+#include <core/SkImageInfo.h>
 #include <core/SkMatrix.h>
 #include <core/SkPaint.h>
+#include <core/SkSamplingOptions.h>
 #include <core/SkSurfaceProps.h>
 #include <core/SkTileMode.h>
+#include <effects/SkImageFilters.h>
+#include <include/core/SkSurface.h>
 #include <include/core/SkCanvas.h>
 #include <core/SkPath.h>
 #include <core/SkRRect.h>
@@ -113,6 +120,53 @@ glm::mat3 PaintNode::mapTransform(const PaintNode* node) const
   return mat;
 }
 
+sk_sp<SkImageFilter> PaintNode::makeAlphaMaskBy(SkiaRenderer* renderer)
+{
+  VGG_IMPL(PaintNode);
+  if (_->alphaMaskBy.empty())
+    return nullptr;
+  auto canvas = renderer->canvas();
+  const auto& objects = renderer->maskObjects();
+  std::vector<std::pair<PaintNode*, glm::mat3>> cache;
+  Bound2 maskAreaBound;
+  const auto& selfBound = getBound();
+  for (const auto mask : _->alphaMaskBy)
+  {
+    if (mask.id != this->guid())
+    {
+      if (auto obj = objects.find(mask.id); obj != objects.end())
+      {
+        const auto t = obj->second->mapTransform(this);
+        const auto transformedBound = obj->second->getBound() * t;
+        if (selfBound.isIntersectWith(transformedBound))
+        {
+          cache.emplace_back(obj->second, t);
+          maskAreaBound.intersectWith(transformedBound);
+        }
+      }
+      else
+      {
+        DEBUG("No such mask: %s", mask.id.c_str());
+      }
+    }
+  }
+  if (cache.empty() || !maskAreaBound.valid())
+    return nullptr;
+  maskAreaBound.unionWith(selfBound);
+  const auto [w, h] = std::pair{ maskAreaBound.width(), maskAreaBound.height() };
+  if (w <= 0 || h <= 0)
+    return nullptr;
+  auto maskSurface = canvas->getSurface()->makeSurface(w, h);
+  const auto maskCanvas = maskSurface->getCanvas();
+  for (const auto& p : cache)
+  {
+    maskCanvas->setMatrix(toSkMatrix(p.second));
+    p.first->drawAlphaMask(maskCanvas);
+  }
+  auto image = maskSurface->makeImageSnapshot();
+  return SkImageFilters::Image(image, SkSamplingOptions());
+}
+
 Mask PaintNode::makeMaskBy(EBoolOp maskOp, SkiaRenderer* renderer)
 {
   VGG_IMPL(PaintNode);
@@ -189,6 +243,7 @@ void PaintNode::paintPass(SkiaRenderer* renderer, int zorder)
 
   if (!_->alphaMask)
   {
+    _->alphaMask = makeAlphaMaskBy(renderer);
   }
   // renderer->displayList.emplace_back(renderer->canvas()->getTotalMatrix(), this);
   renderer->pushItem(this, zorder);
@@ -358,9 +413,25 @@ SkPath PaintNode::makeContourImpl(ContourOption option, const glm::mat3* mat)
   return path;
 }
 
-sk_sp<SkImageFilter> PaintNode::asAlphaMask(const glm::mat3* mat)
+void PaintNode::drawAlphaMask(SkCanvas* canvas)
 {
-  return nullptr;
+  VGG_IMPL(PaintNode);
+  if (!_->path)
+  {
+    _->path = asOutlineMask(0).outlineMask;
+  }
+  if (_->path->isEmpty())
+  {
+    return;
+  }
+  StyleRenderer styleRenderer;
+  styleRenderer.drawContour(canvas,
+                            contextSetting(),
+                            style(),
+                            *_->path,
+                            getBound(),
+                            nullptr,
+                            [&]() { paintFill(canvas, *_->path); });
 }
 
 Mask PaintNode::asOutlineMask(const glm::mat3* mat)
@@ -727,13 +798,20 @@ SkPath PaintNode::stylePath()
 
 void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& outlineMask)
 {
+  VGG_IMPL(PaintNode);
   StyleRenderer styleRenderer;
+
+  sk_sp<SkImageFilter> alphaMaskFilter;
+  if (*_->alphaMask)
+  {
+    alphaMaskFilter = SkImageFilters::Blend(SkBlendMode::kSrcIn, *_->alphaMask);
+  }
   // draw blur, we assume that there is only one blur style
   bool hasBlur = style().blurs.empty() ? false : style().blurs[0].isEnabled;
   if (hasBlur)
   {
     const auto blur = style().blurs[0];
-    auto pen = styleRenderer.makeBlurPen(blur);
+    auto pen = styleRenderer.makeBlurPen(blur, alphaMaskFilter);
     auto b = toSkRect(getBound());
     SkMatrix m;
     m.preScale(1, 1);
@@ -749,6 +827,7 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
                               style(),
                               path,
                               getBound(),
+                              alphaMaskFilter,
                               [&]() { paintFill(canvas, path); });
   }
   else
@@ -760,6 +839,7 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
                               style(),
                               path,
                               getBound(),
+                              alphaMaskFilter,
                               [&]() { paintFill(canvas, path); });
     canvas->restore();
   }
@@ -773,8 +853,14 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
 
 void PaintNode::paintFill(SkCanvas* canvas, const SkPath& path)
 {
+  VGG_IMPL(PaintNode);
   StyleRenderer render;
-  render.drawFill(canvas, contextSetting().Opacity, style(), path, getBound());
+  sk_sp<SkImageFilter> alphaMaskFilter;
+  if (*_->alphaMask)
+  {
+    alphaMaskFilter = SkImageFilters::Blend(SkBlendMode::kSrcIn, *_->alphaMask);
+  }
+  render.drawFill(canvas, contextSetting().Opacity, style(), path, getBound(), alphaMaskFilter);
 }
 
 PaintNode::~PaintNode() = default;

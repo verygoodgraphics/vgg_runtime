@@ -19,6 +19,7 @@
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
 
+#include <core/SkImageFilter.h>
 #include <include/core/SkClipOp.h>
 #include <include/core/SkPaint.h>
 #include <include/core/SkPathTypes.h>
@@ -42,6 +43,7 @@ public:
                    const Style& style,
                    const SkPath& skPath,
                    const Bound2& bound,
+                   sk_sp<SkImageFilter> imageFilter,
                    F&& drawFill)
   {
 
@@ -63,13 +65,13 @@ public:
         if (!s.is_enabled || s.inner)
           continue;
         if (filled)
-          drawShadow(canvas, skPath, s, SkPaint::kFill_Style, bound);
+          drawShadow(canvas, skPath, s, SkPaint::kFill_Style, bound, imageFilter);
 
         for (const auto& b : style.borders)
         {
           if (!b.isEnabled)
             continue;
-          drawShadow(canvas, skPath, s, SkPaint::kStroke_Style, bound);
+          drawShadow(canvas, skPath, s, SkPaint::kStroke_Style, bound, imageFilter);
           break;
         }
       }
@@ -89,7 +91,7 @@ public:
     {
       if (!b.isEnabled)
         continue;
-      drawPathBorder(canvas, skPath, b, globalAlpha, bound);
+      drawPathBorder(canvas, skPath, b, globalAlpha, bound, imageFilter);
     }
 
     // draw inner shadow
@@ -100,7 +102,7 @@ public:
     {
       if (!s.is_enabled || !s.inner)
         continue;
-      drawInnerShadow(canvas, skPath, s, SkPaint::kFill_Style, bound);
+      drawInnerShadow(canvas, skPath, s, SkPaint::kFill_Style, bound, imageFilter);
     }
     canvas->restore();
   }
@@ -109,15 +111,17 @@ public:
                   const SkPath& skPath,
                   const Shadow& s,
                   SkPaint::Style style,
-                  const Bound2& bound);
+                  const Bound2& bound,
+                  sk_sp<SkImageFilter> imageFilter);
 
   void drawInnerShadow(SkCanvas* canvas,
                        const SkPath& skPath,
                        const Shadow& s,
                        SkPaint::Style style,
-                       const Bound2& bound);
+                       const Bound2& bound,
+                       sk_sp<SkImageFilter> imageFilter);
 
-  SkPaint makeBlurPen(const Blur& blur);
+  SkPaint makeBlurPen(const Blur& blur, sk_sp<SkImageFilter> imageFilter);
 
   bool hasFill(const Style& style) const
   {
@@ -133,7 +137,8 @@ public:
                 float globalAlpha,
                 const Style& style,
                 const SkPath& skPath,
-                const Bound2& bound);
+                const Bound2& bound,
+                sk_sp<SkImageFilter> imageFilter);
 
   sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound2& bound);
 
@@ -141,5 +146,6 @@ public:
                       const SkPath& skPath,
                       const Border& b,
                       float globalAlpha,
-                      const Bound2& bound);
+                      const Bound2& bound,
+                      sk_sp<SkImageFilter> imageFilter);
 };

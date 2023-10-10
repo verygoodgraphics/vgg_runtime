@@ -46,7 +46,8 @@ void StyleRenderer::drawPathBorder(SkCanvas* canvas,
                                    sk_sp<SkImageFilter> imageFilter)
 {
   SkPaint strokePen;
-  strokePen.setAntiAlias(true);
+  strokePen.setAntiAlias(m_antiAlias);
+  strokePen.setBlendMode(m_mode);
   strokePen.setImageFilter(imageFilter);
   strokePen.setStyle(SkPaint::kStroke_Style);
   strokePen.setPathEffect(
@@ -116,7 +117,7 @@ void StyleRenderer::drawPathBorder(SkCanvas* canvas,
 SkPaint StyleRenderer::makeBlurPen(const Blur& blur, sk_sp<SkImageFilter> imageFilter)
 {
   SkPaint pen;
-  pen.setAntiAlias(true);
+  pen.setAntiAlias(m_antiAlias);
   auto sigma = SkBlurMask::ConvertRadiusToSigma(blur.radius);
   if (blur.blurType == BT_Gaussian)
   {
@@ -143,7 +144,8 @@ void StyleRenderer::drawShadow(SkCanvas* canvas,
 {
 
   SkPaint pen;
-  pen.setAntiAlias(true);
+  pen.setAntiAlias(m_antiAlias);
+  pen.setBlendMode(m_mode);
   auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
   pen.setImageFilter(
     SkImageFilters::DropShadowOnly(s.offset_x, -s.offset_y, sigma, sigma, s.color, nullptr));
@@ -170,6 +172,7 @@ void StyleRenderer::drawInnerShadow(SkCanvas* canvas,
 {
   SkPaint pen;
   auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
+  pen.setAntiAlias(m_antiAlias);
   pen.setImageFilter(
     SkMyImageFilters::DropInnerShadowOnly(s.offset_x, -s.offset_y, sigma, sigma, s.color, nullptr));
   canvas->saveLayer(nullptr, &pen);
@@ -177,7 +180,7 @@ void StyleRenderer::drawInnerShadow(SkCanvas* canvas,
     canvas->scale(1.0 / s.spread, 1.0 / s.spread);
   SkPaint fillPen;
   fillPen.setStyle(style);
-  fillPen.setAntiAlias(true);
+  fillPen.setAntiAlias(m_antiAlias);
   // if (mask)
   // {
   //   canvas->clipPath(*mask);
@@ -199,7 +202,8 @@ void StyleRenderer::drawFill(SkCanvas* canvas,
       continue;
     SkPaint fillPen;
     fillPen.setStyle(SkPaint::kFill_Style);
-    fillPen.setAntiAlias(true);
+    fillPen.setAntiAlias(m_antiAlias);
+    fillPen.setBlendMode(m_mode);
     if (f.fillType == FT_Color)
     {
       fillPen.setColor(f.color);

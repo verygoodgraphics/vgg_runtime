@@ -17,6 +17,7 @@
 
 #include <glm/glm.hpp>
 #include <iostream>
+#include <limits>
 #include <ostream>
 
 namespace VGG
@@ -144,6 +145,17 @@ struct Bound2
     auto isect = intersectAs(bound);
     auto size = isect.size();
     return size.x >= 0 && size.y >= 0;
+  }
+
+public:
+  static Bound2 makeInfinite()
+  {
+    Bound2 b;
+    b.topLeft.x = std::numeric_limits<float>::lowest();
+    b.topLeft.y = std::numeric_limits<float>::max();
+    b.bottomRight.x = std::numeric_limits<float>::max();
+    b.bottomRight.y = std::numeric_limits<float>::lowest();
+    return b;
   }
 };
 

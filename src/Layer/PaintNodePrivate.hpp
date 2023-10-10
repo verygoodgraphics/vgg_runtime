@@ -16,8 +16,10 @@
 #pragma once
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VType.hpp"
+#include "Layer/Renderer.hpp"
 #include "Utility/HelperMacro.hpp"
 #include "Layer/Core/PaintNode.hpp"
+#include "Renderer.hpp"
 #include <core/SkImageFilter.h>
 namespace VGG
 {
@@ -64,6 +66,7 @@ public:
   std::optional<SkPath> path;
   std::optional<SkPath> mask;
   std::optional<sk_sp<SkImageFilter>> alphaMask;
+  std::optional<std::vector<std::pair<PaintNode*, glm::mat3>>> maskObjects;
 
   PaintNode__pImpl(PaintNode* api, ObjectType type)
     : q_ptr(api)
@@ -93,6 +96,43 @@ public:
     paintOption = other.paintOption;
     maskOption = other.maskOption;
     return *this;
+  }
+
+  std::vector<std::pair<PaintNode*, glm::mat3>> calcMaskObjects(SkiaRenderer* renderer)
+  {
+    auto canvas = renderer->canvas();
+    const auto& objects = renderer->maskObjects();
+    std::vector<std::pair<PaintNode*, glm::mat3>> cache;
+    auto maskAreaBound = Bound2::makeInfinite();
+    const auto& selfBound = q_ptr->getBound();
+    for (int i = 0; i < alphaMaskBy.size(); i++)
+    {
+      const auto& mask = alphaMaskBy[i];
+      if (mask.id != q_ptr->guid())
+      {
+        if (auto obj = objects.find(mask.id); obj != objects.end())
+        {
+          const auto t = obj->second->mapTransform(q_ptr);
+          const auto transformedBound = obj->second->getBound() * t;
+          if (selfBound.isIntersectWith(transformedBound))
+          {
+            cache.emplace_back(obj->second, t);
+            maskAreaBound.intersectWith(transformedBound);
+          }
+        }
+        else
+        {
+          DEBUG("No such mask: %s", mask.id.c_str());
+        }
+      }
+    }
+    if (cache.empty() || !maskAreaBound.valid())
+      return {};
+    maskAreaBound.unionWith(selfBound);
+    const auto [w, h] = std::pair{ maskAreaBound.width(), maskAreaBound.height() };
+    if (w <= 0 || h <= 0)
+      return {};
+    return cache;
   }
 
   PaintNode__pImpl(PaintNode__pImpl&&) noexcept = default;

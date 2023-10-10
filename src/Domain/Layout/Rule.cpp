@@ -17,7 +17,7 @@ constexpr auto K_COLUMN_ALIGN = "column_align";
 constexpr auto K_COLUMN_SPAN = "column_span";
 constexpr auto K_FLEXBOX_ITEM = "flexbox_item";
 constexpr auto K_FLEXBOX_LAYOUT = "flexbox_layout";
-constexpr auto K_FLEX_GROW = "flex_grow";
+constexpr auto K_FLEX_GROW_SHRINK = "flex_grow_shrink";
 constexpr auto K_GRID_ITEM = "grid_item";
 constexpr auto K_GRID_LAYOUT = "grid_layout";
 constexpr auto K_HEIGHT = "height";
@@ -66,7 +66,7 @@ void to_json(nlohmann::json& json, const FlexboxItem& obj)
 }
 void from_json(const nlohmann::json& json, FlexboxItem& obj)
 {
-  obj.flex_grow = json.at(K_FLEX_GROW);
+  obj.flex_grow_shrink = json.at(K_FLEX_GROW_SHRINK);
 
   getPositionFromJson(json, obj);
 }

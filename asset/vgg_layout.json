@@ -303,7 +303,7 @@
       "description": "Describes the properties of an element located in the flexbox layout.",
       "type": "object",
       "$id": "#FlexboxItem",
-      "required": ["class", "position", "flex_grow"],
+      "required": ["class", "position", "flex_grow_shrink"],
       "properties": {
         "class": {
           "const": "flexbox_item"
@@ -323,9 +323,9 @@
         "left": {
           "$ref": "#/definitions/Left"
         },
-        "flex_grow": {
+        "flex_grow_shrink": {
           "type": "number",
-          "description": "The flex-grow property sets the flex grow factor, which specifies how much of the flex container's remaining space should be assigned to the flex item's main size."
+          "description": " Set both flex-grow and flex_shrink to the same value.\nThe flex-grow property sets the flex grow factor,  which specifies how much of the flex container's remaining space should be assigned to the flex item's main size.\nThe flex-shrink property sets the flex shrink factor of a flex item.  If the size of all flex items is larger than the flex container, items shrink to fit according to flex-shrink.              "
         }
       },
       "additionalProperties": false

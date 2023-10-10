@@ -2394,6 +2394,10 @@
         "masterId": {
           "type": "string",
           "description": "This field refers to the symbol master id."
+        },
+        "radius": {
+          "type": "array",
+          "description": " The radius of the four corners. [left-top, right-top, right-bottom, left-bottom] default value: [0, 0, 0, 0] "
         }
       },
       "additionalProperties": false
@@ -2580,6 +2584,10 @@
         },
         "class": {
           "const": "symbolMaster"
+        },
+        "radius": {
+          "type": "array",
+          "description": " The radius of the four corners. [left-top, right-top, right-bottom, left-bottom] default value: [0, 0, 0, 0] "
         }
       },
       "additionalProperties": false

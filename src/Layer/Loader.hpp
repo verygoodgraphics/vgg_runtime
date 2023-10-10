@@ -134,7 +134,7 @@ class NlohmannBuilder
     obj->setBound(bound);
     obj->setLocalTransform(transform);
     obj->setStyle(j.value("style", Style()));
-    obj->setContectSettings(j.value("contextSettings", ContextSetting()));
+    obj->setContextSettings(j.value("contextSettings", ContextSetting()));
     obj->setMaskBy(std::move(j.value("outlineMaskBy", std::vector<std::string>{})));
     obj->setAlphaMaskBy(std::move(j.value("alphaMaskBy", std::vector<AlphaMask>{})));
 

@@ -66,7 +66,7 @@ NodePtr PaintNode::clone() const
   return newNode;
 }
 
-void PaintNode::setContectSettings(const ContextSetting& settings)
+void PaintNode::setContextSettings(const ContextSetting& settings)
 {
   VGG_IMPL(PaintNode);
   _->contextSetting = settings;

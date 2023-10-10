@@ -105,7 +105,7 @@ public:
     addChild(node);
   }
 
-  void setContectSettings(const ContextSetting& settings);
+  void setContextSettings(const ContextSetting& settings);
 
   void setOverflow(EOverflow overflow);
 

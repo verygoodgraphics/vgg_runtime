@@ -190,7 +190,7 @@ TEST_F(VggExpandSymbolTestSuite, override_master_own_style)
   EXPECT_EQ(fills, "[]");
 }
 
-TEST_F(VggExpandSymbolTestSuite, override_duplicated_object_id)
+TEST_F(VggExpandSymbolTestSuite, override_multi_times)
 {
   // Given
   std::string filePath = "testDataDir/symbol/symbol_instance/design.json";
@@ -582,5 +582,31 @@ TEST_F(VggExpandSymbolTestSuite, NestedLayoutOverride)
     Matrix instanceMatrix = expandedDesignJson[matrixPath];
     Matrix matrix{ 1, 0, 0, 1, 303, -112 };
     EXPECT_EQ(instanceMatrix, matrix);
+  }
+}
+
+TEST_F(VggExpandSymbolTestSuite, OwnOverrideKey)
+{
+  // Given
+  std::string designFilePath = "testDataDir/symbol/own_overrideKey/design.json";
+  std::string layoutFilePath = "testDataDir/symbol/own_overrideKey/layout.json";
+  auto designJson = Helper::load_json(designFilePath);
+  auto layoutJson = Helper::load_json(layoutFilePath);
+  ExpandSymbol sut{ designJson, layoutJson };
+
+  // When
+  auto result = sut.run();
+
+  // Then
+  auto expandedDesignJson = std::get<0>(result);
+  auto expandedLayoutJson = std::get<1>(result);
+
+  // layout
+  {
+    nlohmann::json::json_pointer visiblePath{
+      "/frames/0/childObjects/0/childObjects/0/childObjects/1/visible"
+    };
+    bool visible = expandedDesignJson[visiblePath];
+    EXPECT_EQ(visible, false);
   }
 }

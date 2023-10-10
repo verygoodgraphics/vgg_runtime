@@ -88,7 +88,8 @@ private:
                                   std::vector<std::string>& outChildInstanceIdStack);
   nlohmann::json* findChildObjectInTree(nlohmann::json& json, const std::string& objectId);
 
-  void makeIdUnique(nlohmann::json& json, const std::string& idPrefix);
+  void makeTreeKeysUnique(nlohmann::json& json, const std::string& idPrefix);
+  void makeNodeKeysUnique(nlohmann::json& json, const std::string& idPrefix);
   void makeMaskIdUnique(nlohmann::json& json,
                         nlohmann::json& instanceJson,
                         const std::string& idPrefix);

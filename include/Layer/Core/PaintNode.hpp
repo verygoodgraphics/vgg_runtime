@@ -217,6 +217,7 @@ protected:
   virtual SkPath stylePath();
   void paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& mask);
   virtual void paintFill(SkCanvas* canvas,
+                         SkBlendMode mode,
                          const SkPath& path); // TODO:: only for ImageNode overriding
 };
 } // namespace VGG

@@ -19,6 +19,7 @@
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
 
+#include <core/SkBlendMode.h>
 #include <core/SkImageFilter.h>
 #include <include/core/SkClipOp.h>
 #include <include/core/SkPaint.h>
@@ -36,7 +37,17 @@
 using namespace VGG;
 class StyleRenderer
 {
+  SkBlendMode m_mode{ SkBlendMode::kSrcOver };
+  sk_sp<SkImageFilter> m_filter;
+  bool m_antiAlias{ true };
+
 public:
+  StyleRenderer(SkBlendMode mode = SkBlendMode::kSrcOver, sk_sp<SkImageFilter> filter = nullptr)
+    : m_mode(mode)
+    , m_filter(std::move(filter))
+  {
+  }
+
   template<typename F>
   void drawContour(SkCanvas* canvas,
                    const ContextSetting& contextSetting,

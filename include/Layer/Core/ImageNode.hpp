@@ -17,6 +17,7 @@
 #include "Layer/Core/Node.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Config.hpp"
+#include <core/SkBlendMode.h>
 
 class SkImage;
 class SkCanvas;
@@ -44,6 +45,6 @@ public:
   virtual ~ImageNode() override;
 
 protected:
-  void paintFill(SkCanvas* canvas, const SkPath& path) override;
+  void paintFill(SkCanvas* canvas, SkBlendMode mode, const SkPath& path) override;
 };
 } // namespace VGG

@@ -17,7 +17,7 @@
 #include "Layer/Core/VType.hpp"
 #include "VSkia.hpp"
 #include "RenderState.hpp"
-#include "PaintNodePrivate.hpp"
+// #include "PaintNodePrivate.hpp"
 
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Config.hpp"
@@ -96,7 +96,7 @@ public:
     const auto& b = p->getBound();
     SkPaint strokePen;
     strokePen.setStyle(SkPaint::kStroke_Style);
-    SkColor color = nodeType2Color(p->d_ptr->type);
+    SkColor color = nodeType2Color(VGG_PATH);
     strokePen.setColor(color);
     // strokePen.setAlpha(zorder2Alpha(zorder));
     strokePen.setStrokeWidth(2);

@@ -750,7 +750,8 @@ void AutoLayout::configureFlexItem(Rule::FlexboxItem* layout)
   }
 
   node->set_position(toLibPosition(layout->position.value));
-  node->set_grow(layout->flex_grow);
+  node->set_grow(layout->flex_grow_shrink);
+  node->set_shrink(layout->flex_grow_shrink);
 
   if (layout->top.has_value())
   {

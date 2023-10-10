@@ -141,7 +141,7 @@ enum class EAlignStyle
 struct FlexboxItem
 {
   Position position;
-  double flex_grow; // NOLINT
+  double flex_grow_shrink; // NOLINT
 
   std::optional<Top> top;
   std::optional<Right> right;

@@ -5,7 +5,7 @@
 
 #include <gtest/gtest.h>
 
-TEST(LibLayoutTest, GrowWithWidth)
+TEST(LibLayoutTest, GrowShrinkWithWidth)
 {
   auto form = std::make_unique<flexbox_node>();
   auto frame1 = std::make_unique<flexbox_node>();
@@ -43,14 +43,15 @@ TEST(LibLayoutTest, GrowWithWidth)
 
   frame1->set_position(position_relative);
   frame1->set_grow(1.0);
+  frame1->set_shrink(1.0);
 
-  // frame1->set_width(unit_point, 365.0);
-  frame1->set_width(unit_point, 36.0);
+  frame1->set_width(unit_point, 365.0);
   frame1->set_height(unit_point, 38.0);
 
   // 0/0/0
   text->set_position(position_relative);
   text->set_grow(0.0);
+  text->set_shrink(0.0);
 
   text->set_width(unit_point, 91.0);
   text->set_height(unit_point, 20.0);

@@ -486,7 +486,7 @@ void ExpandSymbol::processBoundsOverrides(nlohmann::json& instance,
     }
 
     auto value = overrideItem[K_OVERRIDE_VALUE];
-    resizeTree(*childObject, value);
+    resizeSubtree(instance, *childObject, value);
   }
 }
 
@@ -834,15 +834,17 @@ bool ExpandSymbol::applyReferenceOverride(nlohmann::json& destObjectJson,
   return false;
 }
 
-void ExpandSymbol::resizeTree(nlohmann::json& rootJson, const nlohmann::json& newBoundsJson)
+void ExpandSymbol::resizeSubtree(nlohmann::json& rootTreeJson,
+                                 nlohmann::json& subtreeJson,
+                                 const nlohmann::json& newBoundsJson)
 {
-  if (isLayoutNode(rootJson) && hasLayoutRule(rootJson[K_ID]))
+  if (isLayoutNode(subtreeJson) && hasLayoutRule(subtreeJson[K_ID]))
   {
-    layoutTree(rootJson, newBoundsJson);
+    layoutSubtree(rootTreeJson, subtreeJson[K_ID], newBoundsJson);
   }
   else
   {
-    scaleTree(rootJson, newBoundsJson);
+    scaleTree(subtreeJson, newBoundsJson);
   }
 }
 
@@ -1096,13 +1098,15 @@ void ExpandSymbol::overrideLayoutRuleSize(const std::string& instanceId, const S
   }
 }
 
-void ExpandSymbol::layoutTree(nlohmann::json& rootJson, const nlohmann::json& newBoundsJson)
+void ExpandSymbol::layoutSubtree(nlohmann::json& rootTreeJson,
+                                 const std::string& subtreeNodeId,
+                                 const nlohmann::json& newBoundsJson)
 {
   Rect newBounds = newBoundsJson;
-  Layout layout{ JsonDocumentPtr{ new ReferenceJsonDocument{ rootJson } },
+  Layout layout{ JsonDocumentPtr{ new ReferenceJsonDocument{ rootTreeJson } },
                  JsonDocumentPtr{ new ReferenceJsonDocument{ m_outLayoutJson } },
                  false };
-  layout.layout(newBounds.size, true);
+  layout.resizeNodeThenLayout(subtreeNodeId, newBounds.size);
 }
 
 nlohmann::json* ExpandSymbol::findLayoutObject(nlohmann::json& instance,

@@ -115,6 +115,8 @@ public:
   void setNeedLayout();
   void layoutIfNeeded();
 
+  std::string id();
+
   Layout::Rect frameToAncestor(std::shared_ptr<LayoutNode> ancestorNode = nullptr)
   {
     return convertRectToAncestor(m_frame, ancestorNode);

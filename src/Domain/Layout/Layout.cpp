@@ -278,3 +278,37 @@ void Layout::Layout::reverseChildren(nlohmann::json& json)
     reverseChildren(el.value());
   }
 }
+
+void Layout::Layout::resizeNodeThenLayout(const std::string& nodeId, Size size)
+{
+  if (auto node = findNodeById(m_layoutTree, nodeId))
+  {
+    node->setFrame(VGG::Layout::Rect{ node->frame().origin, size }, true);
+
+    m_layoutTree->layoutIfNeeded();
+  }
+}
+
+std::shared_ptr<LayoutNode> Layout::Layout::findNodeById(const std::shared_ptr<LayoutNode> node,
+                                                         const std::string& id)
+{
+  if (!node)
+  {
+    return nullptr;
+  }
+
+  if (node->id() == id)
+  {
+    return node;
+  }
+
+  for (auto child : node->children())
+  {
+    if (auto found = findNodeById(child, id))
+    {
+      return found;
+    }
+  }
+
+  return nullptr;
+}

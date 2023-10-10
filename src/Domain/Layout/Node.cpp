@@ -247,4 +247,15 @@ void LayoutNode::scalePoint(nlohmann::json& json,
   }
 }
 
+std::string LayoutNode::id()
+{
+  if (auto docJson = m_viewModel.lock())
+  {
+    nlohmann::json::json_pointer path{ m_path };
+    return docJson->content()[path][K_ID];
+  }
+
+  return {};
+}
+
 } // namespace VGG

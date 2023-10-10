@@ -610,3 +610,29 @@ TEST_F(VggExpandSymbolTestSuite, OwnOverrideKey)
     EXPECT_EQ(visible, false);
   }
 }
+
+TEST_F(VggExpandSymbolTestSuite, layout_container_when_child_bounds_are_overridden)
+{
+  // Given
+  std::string designFilePath =
+    "testDataDir/symbol/layout_container_when_child_bounds_are_overridden/design.json";
+  std::string layoutFilePath =
+    "testDataDir/symbol/layout_container_when_child_bounds_are_overridden/layout.json";
+  auto designJson = Helper::load_json(designFilePath);
+  auto layoutJson = Helper::load_json(layoutFilePath);
+  ExpandSymbol sut{ designJson, layoutJson };
+
+  // When
+  auto result = sut.run();
+
+  // Then
+  auto expandedDesignJson = std::get<0>(result);
+
+  // layout
+  {
+    nlohmann::json::json_pointer path{ "/frames/0/childObjects/0/childObjects/1/frame" };
+    auto childFrame = expandedDesignJson[path].get<Rect>();
+    Rect expectFrame{ 73.0, -7.0, 10.0, 10.0 };
+    EXPECT_EQ(childFrame, expectFrame);
+  }
+}

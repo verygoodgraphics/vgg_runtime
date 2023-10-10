@@ -1,0 +1,1076 @@
+{
+  "class": "Daruma_Layout",
+  "obj": [
+    {
+      "class": "object",
+      "id": "1:39",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "layout": {
+        "class": "flexbox_layout",
+        "direction": 1,
+        "justify_content": 1,
+        "align_items": 2,
+        "align_content": 2,
+        "wrap": 1,
+        "row_gap": 0,
+        "column_gap": 4.0,
+        "padding": [
+          2.0,
+          4.0,
+          2.0,
+          8.0
+        ],
+        "z_order": false
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:40",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 61.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 20.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:41",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 10.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 10.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:42",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "layout": {
+        "class": "flexbox_layout",
+        "direction": 1,
+        "justify_content": 1,
+        "align_items": 2,
+        "align_content": 2,
+        "wrap": 1,
+        "row_gap": 0,
+        "column_gap": 4.0,
+        "padding": [
+          2.0,
+          4.0,
+          2.0,
+          8.0
+        ],
+        "z_order": false
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:43",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 61.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 20.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:44",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 10.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 10.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:37",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "layout": {
+        "class": "flexbox_layout",
+        "direction": 1,
+        "justify_content": 1,
+        "align_items": 2,
+        "align_content": 2,
+        "wrap": 1,
+        "row_gap": 0,
+        "column_gap": 4.0,
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "z_order": false
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:38",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 87.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 24.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:4",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 16.0,
+          "types": 1
+        }
+      },
+      "layout": {
+        "class": "flexbox_layout",
+        "direction": 1,
+        "justify_content": 1,
+        "align_items": 2,
+        "align_content": 2,
+        "wrap": 1,
+        "row_gap": 0,
+        "column_gap": 10.0,
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "z_order": false
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:5",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 37.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 20.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:3",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "layout": {
+        "class": "flexbox_layout",
+        "direction": 1,
+        "justify_content": 1,
+        "align_items": 2,
+        "align_content": 2,
+        "wrap": 1,
+        "row_gap": 0,
+        "column_gap": 4.0,
+        "padding": [
+          0,
+          8.0,
+          0,
+          8.0
+        ],
+        "z_order": false
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:6",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "layout": {
+        "class": "flexbox_layout",
+        "direction": 1,
+        "justify_content": 1,
+        "align_items": 2,
+        "align_content": 2,
+        "wrap": 1,
+        "row_gap": 0,
+        "column_gap": 4.0,
+        "padding": [
+          4.0,
+          8.0,
+          4.0,
+          8.0
+        ],
+        "z_order": false
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:7",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 50.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 24.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:8",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "layout": {
+        "class": "flexbox_layout",
+        "direction": 1,
+        "justify_content": 1,
+        "align_items": 2,
+        "align_content": 2,
+        "wrap": 1,
+        "row_gap": 0,
+        "column_gap": 4.0,
+        "padding": [
+          2.0,
+          8.0,
+          2.0,
+          8.0
+        ],
+        "z_order": false
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:9",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 37.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 20.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:11",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 16.0,
+          "types": 1
+        }
+      },
+      "layout": {
+        "class": "flexbox_layout",
+        "direction": 1,
+        "justify_content": 1,
+        "align_items": 2,
+        "align_content": 2,
+        "wrap": 1,
+        "row_gap": 0,
+        "column_gap": 10.0,
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "z_order": false
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:12",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 37.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 20.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:10",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "layout": {
+        "class": "flexbox_layout",
+        "direction": 1,
+        "justify_content": 1,
+        "align_items": 2,
+        "align_content": 2,
+        "wrap": 1,
+        "row_gap": 0,
+        "column_gap": 4.0,
+        "padding": [
+          0,
+          8.0,
+          0,
+          8.0
+        ],
+        "z_order": false
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:13",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "layout": {
+        "class": "flexbox_layout",
+        "direction": 1,
+        "justify_content": 1,
+        "align_items": 2,
+        "align_content": 2,
+        "wrap": 1,
+        "row_gap": 0,
+        "column_gap": 4.0,
+        "padding": [
+          4.0,
+          8.0,
+          4.0,
+          8.0
+        ],
+        "z_order": false
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:14",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 50.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 24.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:15",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "layout": {
+        "class": "flexbox_layout",
+        "direction": 1,
+        "justify_content": 1,
+        "align_items": 2,
+        "align_content": 2,
+        "wrap": 1,
+        "row_gap": 0,
+        "column_gap": 4.0,
+        "padding": [
+          2.0,
+          8.0,
+          2.0,
+          8.0
+        ],
+        "z_order": false
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:16",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 37.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 20.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:18",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 16.0,
+          "types": 1
+        }
+      },
+      "layout": {
+        "class": "flexbox_layout",
+        "direction": 1,
+        "justify_content": 1,
+        "align_items": 2,
+        "align_content": 2,
+        "wrap": 1,
+        "row_gap": 0,
+        "column_gap": 10.0,
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "z_order": false
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:19",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 37.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 20.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:17",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "layout": {
+        "class": "flexbox_layout",
+        "direction": 1,
+        "justify_content": 1,
+        "align_items": 2,
+        "align_content": 2,
+        "wrap": 1,
+        "row_gap": 0,
+        "column_gap": 4.0,
+        "padding": [
+          0,
+          4.0,
+          0,
+          8.0
+        ],
+        "z_order": false
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:20",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 10.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 10.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:21",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "layout": {
+        "class": "flexbox_layout",
+        "direction": 1,
+        "justify_content": 1,
+        "align_items": 2,
+        "align_content": 2,
+        "wrap": 1,
+        "row_gap": 0,
+        "column_gap": 4.0,
+        "padding": [
+          4.0,
+          4.0,
+          4.0,
+          8.0
+        ],
+        "z_order": false
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:22",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 50.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 24.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:23",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 10.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 10.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:24",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "layout": {
+        "class": "flexbox_layout",
+        "direction": 1,
+        "justify_content": 1,
+        "align_items": 2,
+        "align_content": 2,
+        "wrap": 1,
+        "row_gap": 0,
+        "column_gap": 4.0,
+        "padding": [
+          2.0,
+          4.0,
+          2.0,
+          8.0
+        ],
+        "z_order": false
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:25",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 37.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 20.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:26",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 10.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 10.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 0.0
+      }
+    }
+  ]
+}

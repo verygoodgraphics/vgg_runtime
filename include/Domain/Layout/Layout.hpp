@@ -38,6 +38,7 @@ public:
   Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc, bool isRootTree = true);
 
   void layout(Size size, bool updateRule = false);
+  void resizeNodeThenLayout(const std::string& nodeId, Size size);
 
   std::shared_ptr<LayoutNode> layoutTree() const
   {
@@ -68,6 +69,9 @@ private:
 
   bool hasFirstOnTopNode();
   void reverseChildren(nlohmann::json& nodeJson);
+
+  std::shared_ptr<LayoutNode> findNodeById(const std::shared_ptr<LayoutNode> node,
+                                           const std::string& id);
 };
 
 } // namespace Layout

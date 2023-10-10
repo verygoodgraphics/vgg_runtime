@@ -20,6 +20,11 @@ protected:
   {
     m_sut.reset();
   }
+
+  void layout(Layout::Layout& layout, Layout::Size size)
+  {
+    layout.layout(size, true);
+  }
 };
 
 TEST_F(VggLayoutTestSuite, Smoke)
@@ -48,7 +53,7 @@ TEST_F(VggLayoutTestSuite, Layout)
   Layout::Size windowSize{ 1400, 900 };
 
   // When
-  sut.layout(windowSize);
+  layout(sut, windowSize);
 
   // Then
   auto tree = sut.layoutTree();
@@ -75,7 +80,7 @@ TEST_F(VggLayoutTestSuite, GridWrap)
   Layout::Size windowSize{ 1400, 900 };
 
   // When
-  sut.layout(windowSize);
+  layout(sut, windowSize);
 
   // Then
   auto tree = sut.layoutTree();
@@ -105,7 +110,7 @@ TEST_F(VggLayoutTestSuite, ScaleSubtree)
   Layout::Size windowSize{ 1400, 900 };
 
   // When
-  sut->layout(windowSize);
+  layout(*sut, windowSize);
 
   // Then
   auto tree = sut->layoutTree();

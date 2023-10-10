@@ -126,13 +126,21 @@ void ExpandSymbol::expandInstance(nlohmann::json& json,
 
         // 2 make instance tree nodes id unique
         // 2.1
-        auto newInstanceId = join(instanceIdStack);
-        auto idPrefix = newInstanceId + K_SEPARATOR;
-        DEBUG("ExpandSymbol: instance id: %s -> %s", instanceId.c_str(), newInstanceId.c_str());
-        json[K_ID] = newInstanceId; // self
+        if (!again && instanceIdStack.size() > 1)
+        {
+          std::vector<std::string> idStackWithoutSelf{ instanceIdStack.begin(),
+                                                       instanceIdStack.end() - 1 };
+          auto prefix = join(idStackWithoutSelf) + K_SEPARATOR;
+          makeNodeKeysUnique(json, prefix);
+        }
+
+        std::string newInstanceId = json[K_ID];
         mergeLayoutRule(instanceId, newInstanceId);
         mergeLayoutRule(masterId, newInstanceId);
-        makeIdUnique(json[K_CHILD_OBJECTS], idPrefix); // children
+
+        auto idPrefix = newInstanceId + K_SEPARATOR;
+        makeTreeKeysUnique(json[K_CHILD_OBJECTS], idPrefix); // children
+
         // 2.2. update mask by: id -> unique id
         makeMaskIdUnique(json[K_CHILD_OBJECTS], json, idPrefix);
 
@@ -634,7 +642,7 @@ nlohmann::json* ExpandSymbol::findChildObjectInTree(nlohmann::json& json,
   return nullptr;
 }
 
-void ExpandSymbol::makeIdUnique(nlohmann::json& json, const std::string& idPrefix)
+void ExpandSymbol::makeTreeKeysUnique(nlohmann::json& json, const std::string& idPrefix)
 {
   if (!json.is_object() && !json.is_array())
   {
@@ -650,31 +658,16 @@ void ExpandSymbol::makeIdUnique(nlohmann::json& json, const std::string& idPrefi
       return;
     }
 
-    if (json.contains(K_ID))
-    {
-      auto objectId = json[K_ID].get<std::string>();
-      auto newObjectId = idPrefix + objectId;
-      DEBUG("ExpandSymbol::makeIdUnique: object id: %s -> %s",
-            objectId.c_str(),
-            newObjectId.c_str());
-      json[K_ID] = newObjectId;
-      mergeLayoutRule(objectId, newObjectId);
-    }
+    auto oldObjectId = json[K_ID].get<std::string>();
+    makeNodeKeysUnique(json, idPrefix);
 
-    if (json.contains(K_OVERRIDE_KEY))
-    {
-      auto objectKey = json[K_OVERRIDE_KEY].get<std::string>();
-      auto newObjectKey = idPrefix + objectKey;
-      DEBUG("ExpandSymbol::makeIdUnique: object key: %s -> %s",
-            objectKey.c_str(),
-            newObjectKey.c_str());
-      json[K_OVERRIDE_KEY] = newObjectKey;
-    }
+    auto newObjectId = json[K_ID].get<std::string>();
+    mergeLayoutRule(oldObjectId, newObjectId);
   }
 
   for (auto& el : json.items())
   {
-    makeIdUnique(el.value(), idPrefix);
+    makeTreeKeysUnique(el.value(), idPrefix);
   }
 }
 std::string ExpandSymbol::join(const std::vector<std::string>& instanceIdStack,
@@ -1081,7 +1074,7 @@ void ExpandSymbol::layoutInstance(nlohmann::json& instance,
   root->layoutIfNeeded();
 
   // layout with new size
-  layout.layout(instanceSize);
+  layout.layout(instanceSize, true);
 
   overrideLayoutRuleSize(instance[K_ID], instanceSize);
 }
@@ -1109,7 +1102,7 @@ void ExpandSymbol::layoutTree(nlohmann::json& rootJson, const nlohmann::json& ne
   Layout layout{ JsonDocumentPtr{ new ReferenceJsonDocument{ rootJson } },
                  JsonDocumentPtr{ new ReferenceJsonDocument{ m_outLayoutJson } },
                  false };
-  layout.layout(newBounds.size);
+  layout.layout(newBounds.size, true);
 }
 
 nlohmann::json* ExpandSymbol::findLayoutObject(nlohmann::json& instance,
@@ -1206,5 +1199,28 @@ void ExpandSymbol::deleteLeafElement(nlohmann::json& json, const std::string& ke
   else
   {
     json.erase(key);
+  }
+}
+
+void ExpandSymbol::makeNodeKeysUnique(nlohmann::json& json, const std::string& idPrefix)
+{
+  if (json.contains(K_ID))
+  {
+    auto objectId = json[K_ID].get<std::string>();
+    auto newObjectId = idPrefix + objectId;
+    DEBUG("ExpandSymbol::makeNodeKeysUnique: object id: %s -> %s",
+          objectId.c_str(),
+          newObjectId.c_str());
+    json[K_ID] = newObjectId;
+  }
+
+  if (json.contains(K_OVERRIDE_KEY))
+  {
+    auto objectKey = json[K_OVERRIDE_KEY].get<std::string>();
+    auto newObjectKey = idPrefix + objectKey;
+    DEBUG("ExpandSymbol::makeNodeKeysUnique: object key: %s -> %s",
+          objectKey.c_str(),
+          newObjectKey.c_str());
+    json[K_OVERRIDE_KEY] = newObjectKey;
   }
 }

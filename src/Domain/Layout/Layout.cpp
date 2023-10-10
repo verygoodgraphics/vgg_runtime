@@ -29,7 +29,7 @@ Layout::Layout::Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc, boo
   configureNodeAutoLayout(m_layoutTree);
 }
 
-void Layout::Layout::layout(Size size)
+void Layout::Layout::layout(Size size, bool updateRule)
 {
   // todo, layout current page only
 
@@ -41,7 +41,7 @@ void Layout::Layout::layout(Size size)
   frame.size = size;
 
   // Update rule when expanding symbol; Do NOT update rule when resizing window in RunMode
-  root->setFrame(frame, !m_isRootTree);
+  root->setFrame(frame, updateRule);
 
   if (m_isRootTree)
   {
@@ -50,7 +50,7 @@ void Layout::Layout::layout(Size size)
     {
       auto frame = page->frame();
       frame.size = size;
-      page->setFrame(frame);
+      page->setFrame(frame, updateRule);
     }
   }
 

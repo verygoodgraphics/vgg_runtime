@@ -37,9 +37,9 @@ class Layout
 public:
   Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc, bool isRootTree = true);
 
-  void layout(Size size);
+  void layout(Size size, bool updateRule = false);
 
-  std::shared_ptr<LayoutNode> layoutTree()
+  std::shared_ptr<LayoutNode> layoutTree() const
   {
     return m_layoutTree;
   }

@@ -73,6 +73,8 @@ class SkiaRenderer
   std::vector<DisplayItem> m_displayList;
   int m_zOrder = -1;
 
+  SkMatrix m_currentMatrix;
+
   void updateMaskObject(PaintNode* p, std::unordered_map<std::string, PaintNode*>& objects)
   {
     if (!p)
@@ -163,6 +165,11 @@ public:
     return m_canvas;
   }
 
+  const SkMatrix& currentMatrix()
+  {
+    return m_currentMatrix;
+  }
+
   void commit(SkCanvas* canvas)
   {
     m_canvas = canvas;
@@ -186,6 +193,7 @@ public:
         canvas->save();
         canvas->concat(item.matrix);
         drawDebugBound(item.item, item.zorder);
+        m_currentMatrix = item.matrix;
         item.item->paintEvent(this);
         canvas->restore();
       }

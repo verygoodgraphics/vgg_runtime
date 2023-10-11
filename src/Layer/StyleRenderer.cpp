@@ -129,7 +129,7 @@ SkPaint StyleRenderer::makeBlurPen(const Blur& blur, sk_sp<SkImageFilter> imageF
   }
   else if (blur.blurType == VGG::BT_Background)
   {
-    sk_sp<SkImageFilter> newBlurFilter = SkImageFilters::Blur(3, 3, SkTileMode::kDecal, nullptr);
+    sk_sp<SkImageFilter> newBlurFilter = SkImageFilters::Blur(5, 5, SkTileMode::kDecal, nullptr);
     pen.setImageFilter(std::move(newBlurFilter));
   }
   return pen;
@@ -204,6 +204,7 @@ void StyleRenderer::drawFill(SkCanvas* canvas,
     fillPen.setStyle(SkPaint::kFill_Style);
     fillPen.setAntiAlias(m_antiAlias);
     fillPen.setBlendMode(m_mode);
+    fillPen.setImageFilter(imageFilter);
     if (f.fillType == FT_Color)
     {
       fillPen.setColor(f.color);

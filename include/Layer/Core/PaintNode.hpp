@@ -139,6 +139,8 @@ public:
 
   const glm::mat3& localTransform() const;
 
+  glm::mat3 worldTransform() const;
+
   const Bound2& getBound() const;
 
   void setBound(const Bound2& bound);

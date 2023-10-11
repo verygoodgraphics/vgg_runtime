@@ -135,6 +135,18 @@ public:
     return cache;
   }
 
+  void worldTransform(glm::mat3& mat)
+  {
+    auto p = q_ptr->parent();
+    if (!p)
+    {
+      mat *= q_ptr->localTransform();
+      return;
+    }
+    static_cast<PaintNode*>(p.get())->d_ptr->worldTransform(mat);
+    mat *= q_ptr->localTransform();
+  }
+
   PaintNode__pImpl(PaintNode__pImpl&&) noexcept = default;
   PaintNode__pImpl& operator=(PaintNode__pImpl&&) noexcept = default;
 };

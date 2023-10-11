@@ -39,12 +39,16 @@ class StyleRenderer
 {
   SkBlendMode m_mode{ SkBlendMode::kSrcOver };
   sk_sp<SkImageFilter> m_filter;
+  sk_sp<SkImageFilter> m_backgroundBlur;
   bool m_antiAlias{ true };
 
 public:
-  StyleRenderer(SkBlendMode mode = SkBlendMode::kSrcOver, sk_sp<SkImageFilter> filter = nullptr)
+  StyleRenderer(SkBlendMode mode = SkBlendMode::kSrcOver,
+                sk_sp<SkImageFilter> filter = nullptr,
+                sk_sp<SkImageFilter> backgroundBlur = nullptr)
     : m_mode(mode)
     , m_filter(std::move(filter))
+    , m_backgroundBlur(std::move(backgroundBlur))
   {
   }
 

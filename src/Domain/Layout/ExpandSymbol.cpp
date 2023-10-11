@@ -104,10 +104,17 @@ void ExpandSymbol::expandInstance(nlohmann::json& json,
         return;
       }
 
+      auto instanceId = json[K_ID].get<std::string>();
+      if (std::find(instanceIdStack.begin(), instanceIdStack.end(), instanceId) !=
+          instanceIdStack.end())
+      {
+        FAIL("ExpandSymbol::expandInstance: infinite expanding, a->b->a, return");
+        return;
+      }
+
       auto masterId = json[K_MASTER_ID].get<std::string>();
       if (m_masters.find(masterId) != m_masters.end())
       {
-        auto instanceId = json[K_ID].get<std::string>();
         DEBUG("#ExpandSymbol: expand instance[id=%s, ptr=%p] with masterId=%s",
               instanceId.c_str(),
               &json,

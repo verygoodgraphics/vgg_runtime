@@ -193,9 +193,9 @@ using Views = std::vector<std::shared_ptr<LayoutNode>>;
 
 void removeAllChildren(flexbox_node* node)
 {
-  DEBUG("removeAllChildren, flex node[%p]", node);
   while (node->child_count() > 0)
   {
+    DEBUG("removeAllChildren, flex node[%p]", node);
     node->remove_child(node->child_count() - 1);
   }
 }
@@ -311,7 +311,7 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutNode> view)
 
 void applyLayoutToViewHierarchy(std::shared_ptr<LayoutNode> view,
                                 bool preserveOrigin,
-                                bool container)
+                                bool isContainer)
 {
   auto autoLayout = view->autoLayout();
   if (!autoLayout->isIncludedInLayout)
@@ -319,7 +319,7 @@ void applyLayoutToViewHierarchy(std::shared_ptr<LayoutNode> view,
     return;
   }
 
-  auto node = container ? autoLayout->getFlexContainer() : autoLayout->getFlexItem();
+  auto node = isContainer ? autoLayout->getFlexContainer() : autoLayout->getFlexItem();
   if (node)
   {
     Point origin;
@@ -340,7 +340,7 @@ void applyLayoutToViewHierarchy(std::shared_ptr<LayoutNode> view,
           static_cast<int>(frame.size.width),
           static_cast<int>(frame.size.height));
 
-    autoLayout->frame = frame;
+    autoLayout->setFrame(frame);
     view->setFrame(frame);
   }
   else if (auto gridContainer = autoLayout->getGridContainer())
@@ -357,7 +357,7 @@ void applyLayoutToViewHierarchy(std::shared_ptr<LayoutNode> view,
           static_cast<int>(frame.origin.y),
           static_cast<int>(frame.size.width),
           static_cast<int>(frame.size.height));
-    autoLayout->frame = frame;
+    autoLayout->setFrame(frame);
     view->setFrame(frame);
 
     // grid items
@@ -386,7 +386,7 @@ void applyLayoutToViewHierarchy(std::shared_ptr<LayoutNode> view,
             static_cast<int>(frame.origin.y),
             static_cast<int>(frame.size.width),
             static_cast<int>(frame.size.height));
-      subview->autoLayout()->frame = frame;
+      subview->autoLayout()->setFrame(frame);
       subview->setFrame(frame);
     }
   }
@@ -463,40 +463,6 @@ bool AutoLayout::isLeaf()
   }
 
   return true;
-}
-
-void AutoLayout::frameChanged(bool updateRule)
-{
-  auto sharedView = view.lock();
-  auto sharedRule = rule.lock();
-  if (isEnabled() && sharedView && sharedRule)
-  {
-    auto newSize = sharedView->frame().size;
-    if (newSize != frame.size)
-    {
-      if (updateRule)
-      {
-        sharedRule->width.value.types = Rule::Length::ETypes::PX;
-        sharedRule->width.value.value = newSize.width;
-
-        sharedRule->height.value.types = Rule::Length::ETypes::PX;
-        sharedRule->height.value.value = newSize.height;
-      }
-
-      if (sharedRule->isFlexContainer() || sharedRule->isGridContainer())
-      {
-        sharedView->setNeedLayout();
-      }
-
-      if (sharedRule->isFlexItem() || sharedRule->isGridItem())
-      {
-        if (auto container = sharedView->autoLayoutContainer())
-        {
-          container->setNeedLayout();
-        }
-      }
-    }
-  }
 }
 
 flexbox_node* AutoLayout::createFlexContainer()
@@ -830,6 +796,62 @@ void AutoLayout::configureGridItem(Rule::GridItem* layout)
 
   node->set_horizontal_align(toLibAlign(layout->row_align));
   node->set_vertical_align(toLibAlign(layout->column_align));
+}
+
+void AutoLayout::setFrame(Rect newFrame)
+{
+  if (newFrame == m_frame)
+  {
+    return;
+  }
+
+  m_frame = newFrame;
+}
+
+void AutoLayout::updateSizeRule()
+{
+  auto sharedView = view.lock();
+  auto sharedRule = rule.lock();
+  if (isEnabled() && sharedView && sharedRule)
+  {
+    auto newSize = sharedView->frame().size;
+    if (newSize != m_frame.size)
+    {
+      sharedRule->width.value.types = Rule::Length::ETypes::PX;
+      sharedRule->width.value.value = newSize.width;
+
+      sharedRule->height.value.types = Rule::Length::ETypes::PX;
+      sharedRule->height.value.value = newSize.height;
+    }
+  }
+}
+
+void AutoLayout::setNeedsLayout()
+{
+  auto sharedView = view.lock();
+  auto sharedRule = rule.lock();
+  if (!sharedRule || !sharedView)
+  {
+    return;
+  }
+
+  if (sharedRule->isFlexItem() || sharedRule->isGridItem())
+  {
+    if (auto container = sharedView->autoLayoutContainer())
+    {
+      container->autoLayout()->setNeedsLayout();
+      return;
+    }
+    else
+    {
+      WARN("AutoLayout::setNeedsLayout: no layout container found");
+    }
+  }
+
+  if (sharedRule->isFlexContainer() || sharedRule->isGridContainer())
+  {
+    sharedView->setNeedLayout();
+  }
 }
 
 } // namespace Internal

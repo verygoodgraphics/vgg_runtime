@@ -57,17 +57,26 @@ TEST(LibLayoutTest, GrowShrinkWithWidth)
   text->set_height(unit_point, 20.0);
 
   // 0/0/1
-  // todo
+  icon->set_position(position_relative);
+  icon->set_grow(0.0);
+  icon->set_shrink(0.0);
+
+  icon->set_width(unit_point, 20.0);
+  icon->set_height(unit_point, 20.0);
 
   // setup tree
   auto formPtr = form.get();
   auto frame1Ptr = frame1.get();
   auto textPtr = text.get();
 
+  // when
   frame1->add_child(text, 0);
-  form->add_child(frame1, 0);
-
+  frame1->add_child(icon, 1);
   frame1Ptr->calc_layout();
+  EXPECT_DOUBLE_EQ(365.0, frame1Ptr->get_layout_width());
+
+  // when
+  form->add_child(frame1, 0);
   formPtr->calc_layout();
 
   EXPECT_DOUBLE_EQ(237.0, frame1Ptr->get_layout_width());

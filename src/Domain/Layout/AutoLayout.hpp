@@ -36,19 +36,21 @@ private:
   decltype(m_gridContainerPtr->calc_layout(-1, -1)) m_gridItemFrames;
 
   bool m_isContainer{ false };
+  Rect m_frame;
 
 public:
   std::weak_ptr<LayoutNode> view;
   std::weak_ptr<Rule::Rule> rule;
-
-  VGG::Layout::Rect frame;
 
   bool isIncludedInLayout{ true };
 
 public:
   void configure();
   void applyLayout(bool preservingOrigin);
-  void frameChanged(bool updateRule);
+  void setFrame(Rect frame);
+  void updateSizeRule();
+
+  void setNeedsLayout();
 
   bool isLeaf();
   bool isEnabled()

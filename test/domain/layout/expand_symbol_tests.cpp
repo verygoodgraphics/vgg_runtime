@@ -609,6 +609,12 @@ TEST_F(VggExpandSymbolTestSuite, OwnOverrideKey)
     bool visible = expandedDesignJson[visiblePath];
     EXPECT_EQ(visible, false);
   }
+  {
+    nlohmann::json::json_pointer path{ "/frames/0/childObjects/0/childObjects/0/frame" };
+    auto childFrame = expandedDesignJson[path].get<Rect>();
+    Rect expectFrame{ 0, 0, 237, 38 };
+    EXPECT_EQ(childFrame, expectFrame);
+  }
 }
 
 TEST_F(VggExpandSymbolTestSuite, layout_container_when_child_bounds_are_overridden)

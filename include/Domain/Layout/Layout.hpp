@@ -69,9 +69,6 @@ private:
 
   bool hasFirstOnTopNode();
   void reverseChildren(nlohmann::json& nodeJson);
-
-  std::shared_ptr<LayoutNode> findNodeById(const std::shared_ptr<LayoutNode> node,
-                                           const std::string& id);
 };
 
 } // namespace Layout

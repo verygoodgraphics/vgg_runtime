@@ -42,6 +42,7 @@ void Layout::Layout::layout(Size size, bool updateRule)
 
   // Update rule when expanding symbol; Do NOT update rule when resizing window in RunMode
   root->setFrame(frame, updateRule);
+  root->autoLayout()->setNeedsLayout();
 
   if (m_isRootTree)
   {
@@ -51,6 +52,7 @@ void Layout::Layout::layout(Size size, bool updateRule)
       auto frame = page->frame();
       frame.size = size;
       page->setFrame(frame, updateRule);
+      page->autoLayout()->setNeedsLayout();
     }
   }
 
@@ -281,34 +283,13 @@ void Layout::Layout::reverseChildren(nlohmann::json& json)
 
 void Layout::Layout::resizeNodeThenLayout(const std::string& nodeId, Size size)
 {
-  if (auto node = findNodeById(m_layoutTree, nodeId))
+  if (auto node = m_layoutTree->findDescendantNodeById(nodeId))
   {
+    DEBUG("Layout::resizeNodeThenLayout: resize subtree, %s", nodeId.c_str());
     node->setFrame(VGG::Layout::Rect{ node->frame().origin, size }, true);
+    node->autoLayout()->setNeedsLayout();
 
+    DEBUG("Layout::resizeNodeThenLayout: layout subtree, %s", nodeId.c_str());
     m_layoutTree->layoutIfNeeded();
   }
-}
-
-std::shared_ptr<LayoutNode> Layout::Layout::findNodeById(const std::shared_ptr<LayoutNode> node,
-                                                         const std::string& id)
-{
-  if (!node)
-  {
-    return nullptr;
-  }
-
-  if (node->id() == id)
-  {
-    return node;
-  }
-
-  for (auto child : node->children())
-  {
-    if (auto found = findNodeById(child, id))
-    {
-      return found;
-    }
-  }
-
-  return nullptr;
 }

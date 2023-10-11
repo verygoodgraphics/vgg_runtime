@@ -111,11 +111,10 @@ public:
 
   std::shared_ptr<LayoutNode> autoLayoutContainer();
 
-  void applyLayout();
   void setNeedLayout();
   void layoutIfNeeded();
 
-  std::string id();
+  std::shared_ptr<LayoutNode> findDescendantNodeById(const std::string& id);
 
   Layout::Rect frameToAncestor(std::shared_ptr<LayoutNode> ancestorNode = nullptr)
   {
@@ -123,6 +122,8 @@ public:
   }
 
 private:
+  std::string id();
+
   bool pointInside(Layout::Point point)
   {
     auto rect = convertRectToAncestor(m_frame);

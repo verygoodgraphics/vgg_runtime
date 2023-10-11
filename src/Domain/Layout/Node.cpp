@@ -31,19 +31,6 @@ std::shared_ptr<LayoutNode> LayoutNode::autoLayoutContainer()
   return m_parent.lock();
 }
 
-void LayoutNode::applyLayout()
-{
-  for (auto subview : m_children)
-  {
-    subview->applyLayout();
-  }
-
-  if (m_autoLayout)
-  {
-    m_autoLayout->applyLayout(true);
-  }
-}
-
 void LayoutNode::setNeedLayout()
 {
   m_needsLayout = true;
@@ -60,6 +47,8 @@ void LayoutNode::layoutIfNeeded()
   {
     m_needsLayout = false;
 
+    DEBUG("LayoutNode::layoutIfNeeded: node: %s, %s", id().c_str(), path().c_str());
+
     // configure container
     configureAutoLayout();
 
@@ -69,7 +58,10 @@ void LayoutNode::layoutIfNeeded()
       child->configureAutoLayout();
     }
 
-    applyLayout();
+    if (m_autoLayout)
+    {
+      m_autoLayout->applyLayout(true);
+    }
   }
 }
 
@@ -81,7 +73,9 @@ void LayoutNode::setFrame(const Layout::Rect& frame, bool updateRule)
 {
   if (m_frame != frame)
   {
-    DEBUG("LayoutNode::setFrame: %s, %4d, %4d, %4d, %4d -> %4d, %4d, %4d, %4d, %s",
+    DEBUG("LayoutNode::setFrame: %s, %s, %s, %4d, %4d, %4d, %4d -> %4d, %4d, %4d, %4d",
+          id().c_str(),
+          path().c_str(),
           m_autoLayout->isEnabled() ? "layout" : "scale",
           static_cast<int>(m_frame.origin.x),
           static_cast<int>(m_frame.origin.y),
@@ -90,8 +84,7 @@ void LayoutNode::setFrame(const Layout::Rect& frame, bool updateRule)
           static_cast<int>(frame.origin.x),
           static_cast<int>(frame.origin.y),
           static_cast<int>(frame.size.width),
-          static_cast<int>(frame.size.height),
-          path().c_str());
+          static_cast<int>(frame.size.height));
 
     auto oldSize = m_frame.size;
     auto newSize = frame.size;
@@ -130,7 +123,10 @@ void LayoutNode::setFrame(const Layout::Rect& frame, bool updateRule)
 
     if (m_autoLayout && m_autoLayout->isEnabled())
     {
-      m_autoLayout->frameChanged(updateRule);
+      if (updateRule)
+      {
+        m_autoLayout->updateSizeRule();
+      }
 
       if (!m_autoLayout->isContainer())
       {
@@ -256,6 +252,24 @@ std::string LayoutNode::id()
   }
 
   return {};
+}
+
+std::shared_ptr<LayoutNode> LayoutNode::findDescendantNodeById(const std::string& id)
+{
+  if (this->id() == id)
+  {
+    return shared_from_this();
+  }
+
+  for (auto child : children())
+  {
+    if (auto found = child->findDescendantNodeById(id))
+    {
+      return found;
+    }
+  }
+
+  return nullptr;
 }
 
 } // namespace VGG

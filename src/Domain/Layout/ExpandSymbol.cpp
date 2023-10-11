@@ -194,7 +194,7 @@ void ExpandSymbol::resizeInstance(nlohmann::json& instance, nlohmann::json& mast
 
   if (hasLayoutRule(master[K_ID]))
   {
-    layoutInstance(instance, masterSize, instanceSize);
+    layoutInstance(instance, instanceSize);
   }
   else
   {
@@ -838,6 +838,10 @@ void ExpandSymbol::resizeSubtree(nlohmann::json& rootTreeJson,
                                  nlohmann::json& subtreeJson,
                                  const nlohmann::json& newBoundsJson)
 {
+  DEBUG("#ExpandSymbol::resizeSubtree: node [id=%s, ptr=%p], value=%s",
+        subtreeJson[K_ID].get<std::string>().c_str(),
+        &subtreeJson,
+        newBoundsJson.dump().c_str());
   if (isLayoutNode(subtreeJson) && hasLayoutRule(subtreeJson[K_ID]))
   {
     layoutSubtree(rootTreeJson, subtreeJson[K_ID], newBoundsJson);
@@ -1062,10 +1066,13 @@ void ExpandSymbol::removeInvalidLayoutRule(const nlohmann::json& json)
   }
 }
 
-void ExpandSymbol::layoutInstance(nlohmann::json& instance,
-                                  const Size& masterSize,
-                                  const Size& instanceSize)
+void ExpandSymbol::layoutInstance(nlohmann::json& instance, const Size& instanceSize)
 {
+  DEBUG("ExpandSymbol::layoutInstance, instanceId: %s, size: %f, %f",
+        instance[K_ID].get<std::string>().c_str(),
+        instanceSize.width,
+        instanceSize.height);
+
   Layout layout{ JsonDocumentPtr{ new ReferenceJsonDocument{ instance } },
                  JsonDocumentPtr{ new ReferenceJsonDocument{ m_outLayoutJson } },
                  false };
@@ -1083,6 +1090,10 @@ void ExpandSymbol::layoutInstance(nlohmann::json& instance,
 
 void ExpandSymbol::overrideLayoutRuleSize(const std::string& instanceId, const Size& instanceSize)
 {
+  DEBUG("ExpandSymbol::overrideLayoutRuleSize, instanceId: %s, size: %f, %f",
+        instanceId.c_str(),
+        instanceSize.width,
+        instanceSize.height);
   auto& rules = m_outLayoutJson[K_OBJ];
   for (auto& dstRule : rules)
   {

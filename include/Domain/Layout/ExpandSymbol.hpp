@@ -50,7 +50,7 @@ private:
   void recalculateIntanceChildrenGeometry(nlohmann::json& json, Size containerSize);
   void recalculatePoint(nlohmann::json& json, const char* key, const Size& containerSize);
 
-  void layoutInstance(nlohmann::json& instance, const Size& masterSize, const Size& instanceSize);
+  void layoutInstance(nlohmann::json& instance, const Size& instanceSize);
   void overrideLayoutRuleSize(const std::string& instanceId, const Size& instanceSize);
 
   void resizeSubtree(nlohmann::json& rootTreeJson,

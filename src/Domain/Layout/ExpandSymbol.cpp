@@ -1072,7 +1072,7 @@ void ExpandSymbol::removeInvalidLayoutRule(const nlohmann::json& json)
     m_layoutRules.erase(id);
 
     auto& rules = m_outLayoutJson[K_OBJ];
-    for (auto i = 0; i < rules[K_OBJ].size(); ++i)
+    for (auto i = 0; i < rules.size(); ++i)
     {
       if (rules[i][K_ID] == id)
       {

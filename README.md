@@ -71,4 +71,4 @@ ctest
 
 ## LICENSE
 
-VGG Runtime is licensed under [AGPL](./LICENSE).
+VGG Runtime is licensed under [VGG License](./LICENSE).

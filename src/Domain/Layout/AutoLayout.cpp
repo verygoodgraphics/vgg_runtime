@@ -857,10 +857,6 @@ void AutoLayout::setNeedsLayout()
       container->autoLayout()->setNeedsLayout();
       return;
     }
-    else
-    {
-      WARN("AutoLayout::setNeedsLayout: no layout container found");
-    }
   }
 
   if (sharedRule->isFlexContainer() || sharedRule->isGridContainer())

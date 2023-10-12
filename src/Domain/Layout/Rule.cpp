@@ -15,6 +15,8 @@
  */
 #include "Rule.hpp"
 
+#include "JsonKeys.hpp"
+
 #include "Utility/Log.hpp"
 
 namespace VGG
@@ -124,7 +126,7 @@ void from_json(const nlohmann::json& json, Rule& obj)
 
   if (json.contains(K_LAYOUT))
   {
-    auto className = json[K_LAYOUT].at(K_CLASS);
+    auto className = json[K_LAYOUT].value(K_CLASS, K_EMPTY_STRING);
     if (className == K_FLEXBOX_LAYOUT)
     {
       obj.layout = json.at(K_LAYOUT).get<FlexboxLayout>();

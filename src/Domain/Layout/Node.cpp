@@ -84,6 +84,7 @@ const Layout::Rect& LayoutNode::frame() const
 {
   return m_frame;
 }
+
 void LayoutNode::setFrame(const Layout::Rect& frame, bool updateRule)
 {
   if (m_frame != frame)
@@ -153,6 +154,11 @@ void LayoutNode::setFrame(const Layout::Rect& frame, bool updateRule)
       scaleChildNodes(oldSize, newSize);
     }
   }
+}
+
+const Layout::Rect& LayoutNode::bounds() const
+{
+  return m_bounds;
 }
 
 void LayoutNode::setViewModel(JsonDocumentPtr viewModel)

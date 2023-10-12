@@ -50,6 +50,7 @@ class LayoutNode : public std::enable_shared_from_this<LayoutNode>
   std::weak_ptr<JsonDocument> m_viewModel;
   const std::string m_path;
   Layout::Rect m_frame;
+  Layout::Rect m_bounds;
 
   std::shared_ptr<Layout::Internal::AutoLayout> m_autoLayout;
   bool m_needsLayout{ false };
@@ -57,9 +58,10 @@ class LayoutNode : public std::enable_shared_from_this<LayoutNode>
 public:
   using HitTestHook = std::function<bool(const std::string&)>;
 
-  LayoutNode(const std::string& path, const Layout::Rect& frame)
+  LayoutNode(const std::string& path, const Layout::Rect& frame, const Layout::Rect& bounds)
     : m_path{ path }
     , m_frame{ frame }
+    , m_bounds{ bounds }
   {
   }
 
@@ -116,6 +118,7 @@ public:
   }
 
   const Layout::Rect& frame() const;
+  const Layout::Rect& bounds() const;
   void setFrame(const Layout::Rect& frame, bool updateRule = false);
   void setViewModel(JsonDocumentPtr viewModel);
 

@@ -126,3 +126,23 @@ TEST_F(VggLayoutTestSuite, ScaleSubtree)
   Layout::Rect expectChild1Frame{ { 104.170006, 188.999985 }, { 130.685989, 361.199982 } };
   EXPECT_TRUE(child1Frame == expectChild1Frame);
 }
+
+TEST_F(VggLayoutTestSuite, FrameOfNodeWhoseParentPositionInBoundsIsNotZero)
+{
+  // Given
+  std::shared_ptr<Daruma> daruma{ new Daruma(Helper::RawJsonDocumentBuilder,
+                                             Helper::RawJsonDocumentBuilder) };
+  std::string filePath = "testDataDir/layout/21_layout_node_frame/";
+  daruma->load(filePath);
+
+  // When
+  Layout::Layout sut{ daruma->designDoc(), daruma->layoutDoc() };
+
+  // Then
+  auto tree = sut.layoutTree();
+  auto page = tree->children()[0];
+
+  auto child1Frame = page->children()[1]->frame();
+  Layout::Rect expectChild0Frame{ { 0, 0 }, { 120, 140 } };
+  EXPECT_TRUE(child1Frame == expectChild0Frame);
+}

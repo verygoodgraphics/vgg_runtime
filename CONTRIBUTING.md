@@ -1,6 +1,6 @@
 # VGG Contribution Guidelines
 
-We sincerely appreciate your interest in and use of VGG. We welcome for issues, pull requests, or engaging in discussions on our [Discord channel](#contact-us). Before that, please read [Code of Conduct](CODE_OF_CONDUCT.md).
+We sincerely appreciate your interest in and use of VGG. We welcome for issues, pull requests, or engaging in discussions on our [Discord channel](https://discord.gg/g3HJuKP54D). Before that, please read [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Create an Issue
 
@@ -38,6 +38,6 @@ Upon opening a pull request, you will be prompted to sign a [Contributor License
 ## Need More Help?
 
 Please contact us through
-- Twitter: https://twitter.com/VGG_Design
 - Discord: https://discord.gg/g3HJuKP54D
+- Twitter: https://twitter.com/VGG_Design
 - E-mail: bd@verygoodgraphics.com

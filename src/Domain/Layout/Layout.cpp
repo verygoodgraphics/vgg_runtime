@@ -24,6 +24,9 @@
 
 #include <algorithm>
 
+#undef DEBUG
+#define DEBUG(msg, ...)
+
 using namespace VGG;
 using namespace VGG::Layout::Internal::Rule;
 

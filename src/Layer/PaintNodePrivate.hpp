@@ -20,6 +20,8 @@
 #include "Utility/HelperMacro.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Renderer.hpp"
+#include <core/SkCanvas.h>
+#include <core/SkSurface.h>
 #include <core/SkImageFilter.h>
 namespace VGG
 {
@@ -67,6 +69,8 @@ public:
   std::optional<SkPath> mask;
   std::optional<sk_sp<SkImageFilter>> alphaMask;
   std::optional<std::vector<std::pair<PaintNode*, glm::mat3>>> maskObjects;
+  std::optional<sk_sp<SkImage>> blurBG;
+  sk_sp<SkImageFilter> blurFilter;
 
   PaintNode__pImpl(PaintNode* api, ObjectType type)
     : q_ptr(api)
@@ -145,6 +149,36 @@ public:
     }
     static_cast<PaintNode*>(p.get())->d_ptr->worldTransform(mat);
     mat *= q_ptr->localTransform();
+  }
+
+  sk_sp<SkImage> fetchBackground(SkCanvas* canvas)
+  {
+    auto b = toSkRect(q_ptr->getBound());
+    b = canvas->getTotalMatrix().mapRect(b);
+    std::cout << "Image scale: " << canvas->getTotalMatrix().getScaleX() << ", " << q_ptr->name()
+              << std::endl;
+    SkIRect ir = SkIRect::MakeXYWH(b.x(), b.y(), b.width(), b.height());
+    if (!ir.isEmpty())
+    {
+      auto bg = canvas->getSurface()->makeImageSnapshot(ir);
+      DEBUG("Image Area: f[%f, %f, %f, %f]", b.x(), b.y(), b.width(), b.height());
+      // std::cout << bg->width() << ", " << bg->height() << std::endl;
+      // std::ofstream ofs("bg_" + name() + ".png");
+      // if (ofs.is_open())
+      // {
+      //   auto data =
+      //   SkPngEncoder::Encode((GrDirectContext*)canvas->getSurface()->recordingContext(),
+      //                                    bg.get(),
+      //                                    SkPngEncoder::Options());
+      //   ofs.write((char*)data->bytes(), data->size());
+      // }
+      return bg;
+    }
+    else
+    {
+      DEBUG("Invalid bg image area:[%f, %f, %f, %f]", b.x(), b.y(), b.width(), b.height());
+    }
+    return nullptr;
   }
 
   PaintNode__pImpl(PaintNode__pImpl&&) noexcept = default;

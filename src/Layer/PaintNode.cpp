@@ -35,30 +35,55 @@
 #include <core/SkSurfaceProps.h>
 #include <core/SkTileMode.h>
 #include <effects/SkImageFilters.h>
+#include <effects/SkRuntimeEffect.h>
 #include <encode/SkPngEncoder.h>
 #include <gpu/GrDirectContext.h>
 #include <include/core/SkSurface.h>
 #include <include/core/SkCanvas.h>
 #include <core/SkPath.h>
 #include <core/SkRRect.h>
+#include <src/core/SkRuntimeEffectPriv.h>
 #include <limits>
 #include <fstream>
-static sk_sp<SkImageFilter> makeBackgroundBlurFilter(sk_sp<SkImage> bg)
+static sk_sp<SkImageFilter> makeBackgroundBlurFilter(sk_sp<SkImage> bg, SkMatrix mat)
 {
-  sk_sp<SkRuntimeEffect> effect = SkRuntimeEffect::MakeForShader(SkString(R"(
+  SkRuntimeEffect::Options opts;
+  SkRuntimeEffectPriv::AllowPrivateAccess(&opts);
+  auto r = SkRuntimeEffect::MakeForShader(SkString(R"(
         uniform shader content;
         uniform shader bg;
+		uniform float2 size;
+		uniform float3x3 scale;
+		uniform float3x3 rotate;
         vec4 main(vec2 coord) {
-            vec4 c = content.eval(coord);
-            vec4 b = bg.eval(coord);
-            return vec4(coord,0.0,1.0);
+		    float2 bgcoord = (scale*vec3(coord, 1.0)).xy;
+            vec4 c = content.eval(coord.xy);
+            vec4 b = bg.eval(bgcoord);
+			//vec2 n = coord.xy/size.xy;
+			vec2 n = bgcoord.xy/size.xy;
+			if(n.x <= 1.0 && n.y <= 1.0 && n.x>=0 &&n.y>=0.0){
+               //return c*0.3 + b*0.3 + 0.4*vec4(sk_FragCoord.xy/size.xy, 0.0,1.0);
+			   return 0.9*b + 0.1*vec4(n ,0,1);
+			}
+			return vec4(0,0,0,0);
         }
-    )"))
-                                    .effect;
-  auto blurredSrc = SkImageFilters::Image(bg, SkSamplingOptions());
+    )"),
+                                          opts);
+  if (!r.effect)
+  {
+    DEBUG("%s", r.errorText.c_str());
+  }
+  auto image = SkImageFilters::Image(bg, SkSamplingOptions());
+  auto s = SkMatrix::I();
+  auto bgContent =
+    SkImageFilters::MatrixTransform(SkMatrix::Scale(1, 1), SkSamplingOptions(), image);
   std::string_view childNames[] = { "content", "bg" };
-  sk_sp<SkImageFilter> childNodes[] = { nullptr, blurredSrc };
-  SkRuntimeShaderBuilder builder(std::move(effect));
+  sk_sp<SkImageFilter> childNodes[] = { nullptr, bgContent };
+  SkRuntimeShaderBuilder builder(std::move(r.effect));
+  builder.uniform("scale") = SkMatrix::Scale(1, -1);
+  auto b = mat.invert(&mat);
+  builder.uniform("rotate") = mat;
+  builder.uniform("size") = SkVector{ (float)bg->width(), (float)bg->height() };
   auto blur = SkImageFilters::RuntimeShader(builder, childNames, childNodes, 2);
   return blur;
 }
@@ -309,27 +334,6 @@ void PaintNode::paintEvent(SkiaRenderer* renderer)
   {
     _->maskObjects = _->calcMaskObjects(renderer);
   }
-
-  auto canvas = renderer->canvas();
-  auto b = toSkRect(getBound());
-  b = canvas->getTotalMatrix().mapRect(b);
-  SkIRect ir = SkIRect::MakeXYWH(b.x(), b.y(), b.width(), b.height());
-  if (!ir.isEmpty())
-  {
-    auto bg = canvas->getSurface()->makeImageSnapshot(ir);
-    // std::cout << b.x() << " " << b.y() << " " << b.width() << " " << b.height() << std::endl;
-    // std::cout << bg->width() << ", " << bg->height() << std::endl;
-    // std::ofstream ofs("bg_" + name() + ".png");
-    // if (ofs.is_open())
-    // {
-    //   auto data =
-    //   SkPngEncoder::Encode((GrDirectContext*)canvas->getSurface()->recordingContext(),
-    //                                    bg.get(),
-    //                                    SkPngEncoder::Options());
-    //   ofs.write((char*)data->bytes(), data->size());
-    // }
-  }
-
   paintStyle(renderer->canvas(), *_->path, *_->mask);
 }
 
@@ -970,16 +974,19 @@ void PaintNode::paintFill(SkCanvas* canvas, SkBlendMode mode, const SkPath& path
 {
   VGG_IMPL(PaintNode);
   bool hasBlur = style().blurs.empty() ? false : style().blurs[0].isEnabled;
-  sk_sp<SkImageFilter> backgroundBlurFilter;
   if (hasBlur)
   {
-    // backgroundBlurFilter = makeBackgroundBlurFilter(std::move(bg));
+    if (!_->blurBG)
+    {
+      auto m = canvas->getTotalMatrix();
+      auto f = makeBackgroundBlurFilter(_->fetchBackground(canvas), m);
+      _->blurFilter = f;
+    }
   }
 
-  StyleRenderer render(mode, nullptr, backgroundBlurFilter);
+  StyleRenderer render(mode, nullptr, _->blurFilter);
   // sk_sp<SkImageFilter> alphaMaskFilter = _->alphaMask.value_or(nullptr);
-  render
-    .drawFill(canvas, contextSetting().Opacity, style(), path, getBound(), backgroundBlurFilter);
+  render.drawFill(canvas, contextSetting().Opacity, style(), path, getBound(), _->blurFilter);
 }
 
 PaintNode::~PaintNode() = default;

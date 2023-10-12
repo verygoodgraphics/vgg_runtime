@@ -89,7 +89,7 @@ void Layout::Layout::buildLayoutTree()
 
   if (m_isRootTree)
   {
-    m_layoutTree.reset(new LayoutNode{ "/", {} });
+    m_layoutTree.reset(new LayoutNode{ "/", {}, {} });
     json::json_pointer framesPath{ "/frames" };
     for (auto i = 0; i < designJson[K_FRAMES].size(); ++i)
     {
@@ -120,10 +120,25 @@ std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(const nlohmann::
     return nullptr;
   }
 
-  auto frame = j[K_FRAME].get<Rect>();
-  frame.origin.y *= FLIP_Y_FACTOR;
+  auto bounds = j[K_BOUNDS].get<Rect>();
+  auto matrix = j[K_MATRIX].get<Matrix>();
+  auto [x, y] = bounds.origin;
+  auto [a, b, c, d, tx, ty] = matrix;
+  auto newX = a * x + c * y + tx;
+  auto newY = b * x + d * y + ty;
 
-  auto node = std::make_shared<LayoutNode>(currentPath.to_string(), frame);
+  Point relativePosition{ newX, newY * FLIP_Y_FACTOR };
+  if (parent)
+  {
+    const auto& parentOrigin = parent->bounds().origin;
+    relativePosition.x -= parentOrigin.x;
+    relativePosition.y -= parentOrigin.y;
+  }
+
+  bounds.origin.y *= FLIP_Y_FACTOR;
+  auto node = std::make_shared<LayoutNode>(currentPath.to_string(),
+                                           Rect{ relativePosition, bounds.size },
+                                           bounds);
   node->setViewModel(m_designDoc);
   if (parent)
   {

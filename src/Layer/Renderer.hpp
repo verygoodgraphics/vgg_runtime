@@ -102,8 +102,6 @@ public:
     strokePen.setColor(color);
     // strokePen.setAlpha(zorder2Alpha(zorder));
     strokePen.setStrokeWidth(2);
-    std::cout << "Bound scale:" << m_canvas->getTotalMatrix().getScaleX() << ", " << p->name()
-              << std::endl;
     m_canvas->drawRect(toSkRect(p->getBound()), strokePen);
   }
   void updateMaskObject(PaintNode* p)

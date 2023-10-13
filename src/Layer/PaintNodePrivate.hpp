@@ -67,10 +67,9 @@ public:
 
   std::optional<SkPath> path;
   std::optional<SkPath> mask;
-  std::optional<sk_sp<SkImageFilter>> alphaMask;
   std::optional<std::vector<std::pair<PaintNode*, glm::mat3>>> maskObjects;
-  std::optional<sk_sp<SkImage>> blurBG;
-  sk_sp<SkImageFilter> blurFilter;
+  std::optional<sk_sp<SkImage>> alphaMaskImage;
+  std::optional<sk_sp<SkImageFilter>> alphaMask;
 
   PaintNode__pImpl(PaintNode* api, ObjectType type)
     : q_ptr(api)
@@ -81,6 +80,7 @@ public:
   {
     this->operator=(other);
   }
+
   PaintNode__pImpl& operator=(const PaintNode__pImpl& other)
   {
     bound = other.bound;

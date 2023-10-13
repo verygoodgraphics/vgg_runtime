@@ -214,7 +214,7 @@ void ExpandSymbol::resizeInstance(nlohmann::json& instance, nlohmann::json& mast
     return;
   }
 
-  if (hasLayoutRule(master[K_ID]))
+  if (hasOriginalLayoutRule(master[K_ID]))
   {
     layoutInstance(instance, instanceSize);
   }
@@ -864,7 +864,7 @@ void ExpandSymbol::resizeSubtree(nlohmann::json& rootTreeJson,
         subtreeJson[K_ID].get<std::string>().c_str(),
         &subtreeJson,
         newBoundsJson.dump().c_str());
-  if (isLayoutNode(subtreeJson) && hasLayoutRule(subtreeJson[K_ID]))
+  if (isLayoutNode(subtreeJson) && hasRuntimeLayoutRule(subtreeJson[K_ID]))
   {
     layoutSubtree(rootTreeJson, subtreeJson[K_ID], newBoundsJson);
   }
@@ -1024,39 +1024,33 @@ void ExpandSymbol::mergeLayoutRule(const std::string& srcId, const std::string& 
     return;
   }
 
-  if (!hasLayoutRule(srcId))
+  if (!hasOriginalLayoutRule(srcId))
   {
     DEBUG("ExpandSymbol, no src layout rule, %s -x-> %s", srcId.c_str(), dstId.c_str());
     return;
   }
 
-  if (hasLayoutRule(dstId)) // merge
+  // merge layout and return
+  for (auto& dstRule : m_outLayoutJson[K_OBJ])
   {
-    DEBUG("ExpandSymbol, merge layout rule, %s -> %s", srcId.c_str(), dstId.c_str());
-    auto srcRule = m_layoutRules[srcId];
-    if (srcRule.contains(K_LAYOUT)) // copy container layout
+    // erased item in json array is null
+    if (dstRule.is_object() && dstRule[K_ID] == dstId)
     {
-      auto& rules = m_outLayoutJson[K_OBJ];
-      for (auto& dstRule : rules)
+      auto srcRule = m_layoutRules[srcId];
+      if (srcRule.contains(K_LAYOUT)) // copy container layout
       {
-        if (dstRule[K_ID] == dstId)
-        {
-          dstRule[K_LAYOUT] = srcRule[K_LAYOUT];
-          m_layoutRules[dstId] = dstRule;
-          break;
-        }
+        DEBUG("ExpandSymbol, merge layout rule, %s -> %s", srcId.c_str(), dstId.c_str());
+        dstRule[K_LAYOUT] = srcRule[K_LAYOUT];
       }
+      return;
     }
   }
-  else // copy
-  {
-    DEBUG("ExpandSymbol, copy layout rule, %s -> %s", srcId.c_str(), dstId.c_str());
-    auto dstRule = m_layoutRules[srcId];
-    dstRule[K_ID] = dstId;
 
-    m_outLayoutJson[K_OBJ].push_back(std::move(dstRule));
-    m_layoutRules[dstId] = dstRule;
-  }
+  // copy layout
+  DEBUG("ExpandSymbol, copy layout rule, %s -> %s", srcId.c_str(), dstId.c_str());
+  auto dstRule = m_layoutRules[srcId];
+  dstRule[K_ID] = dstId;
+  m_outLayoutJson[K_OBJ].push_back(std::move(dstRule));
 }
 
 void ExpandSymbol::removeInvalidLayoutRule(const nlohmann::json& json)
@@ -1069,7 +1063,6 @@ void ExpandSymbol::removeInvalidLayoutRule(const nlohmann::json& json)
   if (json.is_object() && json.contains(K_ID))
   {
     auto id = json[K_ID];
-    m_layoutRules.erase(id);
 
     auto& rules = m_outLayoutJson[K_OBJ];
     for (auto i = 0; i < rules.size(); ++i)
@@ -1116,8 +1109,7 @@ void ExpandSymbol::overrideLayoutRuleSize(const std::string& instanceId, const S
         instanceId.c_str(),
         instanceSize.width,
         instanceSize.height);
-  auto& rules = m_outLayoutJson[K_OBJ];
-  for (auto& dstRule : rules)
+  for (auto& dstRule : m_outLayoutJson[K_OBJ])
   {
     if (dstRule[K_ID] == instanceId)
     {
@@ -1158,8 +1150,7 @@ nlohmann::json* ExpandSymbol::findLayoutObject(nlohmann::json& instance,
 
 nlohmann::json* ExpandSymbol::findLayoutObjectById(const std::string& id)
 {
-  auto& rules = m_outLayoutJson[K_OBJ];
-  for (auto& targetRule : rules)
+  for (auto& targetRule : m_outLayoutJson[K_OBJ])
   {
     if (targetRule[K_ID] == id)
     {
@@ -1260,4 +1251,17 @@ void ExpandSymbol::makeNodeKeysUnique(nlohmann::json& json, const std::string& i
           newObjectKey.c_str());
     json[K_OVERRIDE_KEY] = newObjectKey;
   }
+}
+
+bool ExpandSymbol::hasOriginalLayoutRule(const std::string& id)
+{
+  return m_layoutRules.find(id) != m_layoutRules.end();
+}
+
+bool ExpandSymbol::hasRuntimeLayoutRule(const nlohmann::json& id)
+{
+  auto& rules = m_outLayoutJson[K_OBJ];
+  return std::find_if(rules.begin(),
+                      rules.end(),
+                      [id](const nlohmann::json& item) { return item[K_ID] == id; }) != rules.end();
 }

@@ -199,6 +199,11 @@ void Layout::Layout::collectRules(const nlohmann::json& json)
   {
     for (auto& item : obj)
     {
+      if (!item.is_object() || !item.contains(K_ID))
+      {
+        continue;
+      }
+
       auto& id = item[K_ID];
       auto rule = std::make_shared<Internal::Rule::Rule>();
       *rule = item;

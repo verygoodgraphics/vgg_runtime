@@ -117,10 +117,8 @@ private:
 
   void mergeLayoutRule(const std::string& srcId, const std::string& dstId);
   void removeInvalidLayoutRule(const nlohmann::json& instanceChildren);
-  bool hasLayoutRule(const std::string& id)
-  {
-    return m_layoutRules.find(id) != m_layoutRules.end();
-  }
+  bool hasOriginalLayoutRule(const std::string& id);
+  bool hasRuntimeLayoutRule(const nlohmann::json& id);
   nlohmann::json* findLayoutObject(nlohmann::json& instance,
                                    const std::vector<std::string>& instanceIdStack,
                                    const nlohmann::json& overrideItem);

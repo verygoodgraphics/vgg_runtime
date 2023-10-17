@@ -170,27 +170,23 @@ void LayoutNode::configureAutoLayout()
   }
 }
 
-void LayoutNode::scaleChildNodes(const Layout::Size& containerOldSize,
-                                 const Layout::Size& containerNewSize,
+void LayoutNode::scaleChildNodes(const Layout::Size& oldContainerSize,
+                                 const Layout::Size& newContainerSize,
                                  bool useOldFrame)
 {
-  if (containerOldSize == Layout::Size{ 0, 0 })
+  if (oldContainerSize == Layout::Size{ 0, 0 })
   {
     return;
   }
-  auto xScaleFactor = containerNewSize.width / containerOldSize.width;
-  auto yScaleFactor = containerNewSize.height / containerOldSize.height;
+  auto xScaleFactor = newContainerSize.width / oldContainerSize.width;
+  auto yScaleFactor = newContainerSize.height / oldContainerSize.height;
 
   for (auto& child : m_children)
   {
     auto oldFame = useOldFrame ? child->m_oldFrame : child->frame();
     auto [oldOrigin, oldSize] = oldFame;
 
-    // todo, support more constraints
-    Layout::Rect newFrame{ { oldOrigin.x * xScaleFactor, oldOrigin.y * yScaleFactor },
-                           { oldSize.width * xScaleFactor, oldSize.height * yScaleFactor } };
-
-    child->setFrame(newFrame, false, useOldFrame);
+    child->resize(oldContainerSize, newContainerSize, useOldFrame);
   }
 
   scaleContour(xScaleFactor, yScaleFactor);
@@ -388,7 +384,7 @@ Layout::Point LayoutNode::converPointToAncestor(Layout::Point point,
   auto y = point.y;
 
   auto parent = m_parent.lock();
-  while (parent != ancestorNode)
+  while (parent && parent != ancestorNode)
   {
     auto origin = parent->origin();
     x += origin.x;
@@ -432,6 +428,218 @@ void LayoutNode::saveChildrendOldFrame()
   {
     child->saveOldFrame();
   }
+}
+
+void LayoutNode::resize(const Layout::Size& oldContainerSize,
+                        const Layout::Size& newContainerSize,
+                        bool useOldFrame)
+{
+  auto [x, w] = resizeH(oldContainerSize, newContainerSize);
+  auto [y, h] = resizeV(oldContainerSize, newContainerSize);
+
+  Layout::Rect newFrame{ { x, y }, { w, h } };
+
+  setFrame(newFrame, false, useOldFrame);
+}
+
+std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeH(
+  const Layout::Size& oldContainerSize,
+  const Layout::Size& newContainerSize) const
+{
+  Layout::Scalar x{ 0 }, w{ 0 };
+
+  const auto oldFrame = frame();
+  const auto rightMargin = oldContainerSize.width - oldFrame.right();
+
+  switch (horizontalResizing())
+  {
+    case EResizing::FIX_START_FIX_END:
+    {
+      x = oldFrame.left();
+      w = newContainerSize.width - rightMargin - x;
+    }
+    break;
+
+    case EResizing::FIX_START_FIX_SIZE:
+    {
+      x = oldFrame.left();
+      w = oldFrame.width();
+    }
+    break;
+
+    case EResizing::FIX_START_SCALE:
+    {
+      x = oldFrame.left();
+      w = oldFrame.width() * (newContainerSize.width - x) /
+          (oldContainerSize.width - oldFrame.left());
+    }
+    break;
+
+    case EResizing::FIX_END_FIX_SIZE:
+    {
+      w = oldFrame.width();
+      x = newContainerSize.width - rightMargin - w;
+    }
+    break;
+
+    case EResizing::FIX_END_SCALE:
+    {
+      w = oldFrame.width() * (newContainerSize.width - rightMargin) /
+          (oldContainerSize.width - rightMargin);
+      x = newContainerSize.width - rightMargin - w;
+    }
+    break;
+
+    case EResizing::SCALE:
+    {
+      const auto xScale = newContainerSize.width / oldContainerSize.width;
+      x = oldFrame.left() * xScale;
+      w = oldFrame.width() * xScale;
+    }
+    break;
+
+    case EResizing::FIX_CENTER_RATIO_FIX_SIZE:
+    {
+      const auto centerRatio = oldFrame.centerX() / oldContainerSize.width;
+      w = oldFrame.width();
+      x = newContainerSize.width * centerRatio - w / 2;
+    }
+    break;
+
+    case EResizing::FIX_CENTER_OFFSET_FIX_SIZE:
+    {
+      const auto offset = oldFrame.centerX() - oldContainerSize.width / 2;
+      w = oldFrame.width();
+      x = newContainerSize.width / 2 + offset - w / 2;
+    }
+    break;
+
+    default:
+      break;
+  }
+
+  return { x, w };
+}
+
+std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeV(
+  const Layout::Size& oldContainerSize,
+  const Layout::Size& newContainerSize) const
+{
+  Layout::Scalar y{ 0 }, h{ 0 };
+
+  const auto oldFrame = frame();
+  const auto bottomMargin = oldContainerSize.height - oldFrame.bottom();
+
+  switch (verticalResizing())
+  {
+    case EResizing::FIX_START_FIX_END:
+    {
+      y = oldFrame.top();
+      h = newContainerSize.height - bottomMargin - y;
+    }
+    break;
+
+    case EResizing::FIX_START_FIX_SIZE:
+    {
+      y = oldFrame.top();
+      h = oldFrame.height();
+    }
+    break;
+
+    case EResizing::FIX_START_SCALE:
+    {
+      y = oldFrame.top();
+      h = oldFrame.height() * (newContainerSize.height - y) /
+          (oldContainerSize.height - oldFrame.top());
+    }
+    break;
+
+    case EResizing::FIX_END_FIX_SIZE:
+    {
+      h = oldFrame.height();
+      y = newContainerSize.height - bottomMargin - h;
+    }
+    break;
+
+    case EResizing::FIX_END_SCALE:
+    {
+      h = oldFrame.height() * (newContainerSize.height - bottomMargin) /
+          (oldContainerSize.height - bottomMargin);
+      y = newContainerSize.height - bottomMargin - h;
+    }
+    break;
+
+    case EResizing::SCALE:
+    {
+      const auto yScale = newContainerSize.height / oldContainerSize.height;
+      y = oldFrame.top() * yScale;
+      h = oldFrame.height() * yScale;
+    }
+    break;
+
+    case EResizing::FIX_CENTER_RATIO_FIX_SIZE:
+    {
+      const auto centerRatio = oldFrame.centerY() / oldContainerSize.height;
+      h = oldFrame.height();
+      y = newContainerSize.height * centerRatio - h / 2;
+    }
+    break;
+
+    case EResizing::FIX_CENTER_OFFSET_FIX_SIZE:
+    {
+      const auto offset = oldFrame.centerY() - oldContainerSize.height / 2;
+      h = oldFrame.height();
+      y = newContainerSize.height / 2 + offset - h / 2;
+    }
+    break;
+
+    default:
+      break;
+  }
+
+  return { y, h };
+}
+
+LayoutNode::EResizing LayoutNode::horizontalResizing() const
+{
+  // todo, check ancestor's resizing content flag
+  return getValue(K_HORIZONTAL_CONSTRAINT, EResizing::FIX_START_FIX_SIZE);
+}
+
+LayoutNode::EResizing LayoutNode::verticalResizing() const
+{
+  // todo, check ancestor's resizing content flag
+  return getValue(K_VERTICAL_CONSTRAINT, EResizing::FIX_START_FIX_SIZE);
+}
+
+LayoutNode::EResizingContent LayoutNode::resizingContent() const
+{
+  return getValue(K_RESIZES_CONTENT, EResizingContent::USE_CHILD_OWN);
+}
+
+template<typename T>
+T LayoutNode::getValue(const char* key, T v) const
+{
+  if (auto json = model())
+  {
+    return json->value(key, v);
+  }
+
+  return v;
+}
+
+const nlohmann::json* LayoutNode::model() const
+{
+  auto viewModel = m_viewModel.lock();
+  if (!viewModel)
+  {
+    return nullptr;
+  }
+
+  nlohmann::json::json_pointer path{ m_path };
+  const auto& objectJson = viewModel->content()[path];
+
+  return &objectJson;
 }
 
 } // namespace VGG

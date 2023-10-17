@@ -44,6 +44,24 @@ struct Rule;
 
 class LayoutNode : public std::enable_shared_from_this<LayoutNode>
 {
+  enum class EResizing
+  {
+    FIX_START_FIX_END,
+    FIX_START_FIX_SIZE,
+    FIX_START_SCALE,
+    FIX_END_FIX_SIZE,
+    FIX_END_SCALE,
+    SCALE,
+    FIX_CENTER_RATIO_FIX_SIZE,
+    FIX_CENTER_OFFSET_FIX_SIZE
+  };
+  enum class EResizingContent
+  {
+    DEPEND_ON_ANCESTOR,
+    FIX_POSITION_FIX_SIZE,
+    USE_CHILD_OWN,
+  };
+
   std::weak_ptr<LayoutNode> m_parent;
   std::vector<std::shared_ptr<LayoutNode>> m_children;
 
@@ -155,8 +173,8 @@ private:
   Layout::Point converPointToAncestor(Layout::Point point,
                                       std::shared_ptr<LayoutNode> ancestorNode = nullptr);
 
-  void scaleChildNodes(const Layout::Size& containerOldSize,
-                       const Layout::Size& containerNewSize,
+  void scaleChildNodes(const Layout::Size& oldContainerSize,
+                       const Layout::Size& newContainerSize,
                        bool useOldFrame);
   void scaleContour(float xScaleFactor, float yScaleFactor);
   void scalePoint(nlohmann::json& json, const char* key, float xScaleFactor, float yScaleFactor);
@@ -169,6 +187,25 @@ private:
   void updateModel(const Layout::Rect& frame);
   Layout::Point modelOrigin() const;
   Layout::Rect modelBounds() const;
+
+  void resize(const Layout::Size& oldContainerSize,
+              const Layout::Size& newContainerSize,
+              bool useOldFrame);
+  std::pair<Layout::Scalar, Layout::Scalar> resizeH(
+    const Layout::Size& oldContainerSize,
+    const Layout::Size& newContainerSize) const; // return x, w
+  std::pair<Layout::Scalar, Layout::Scalar> resizeV(
+    const Layout::Size& oldContainerSize,
+    const Layout::Size& newContainerSize) const; // return y, h
+
+  EResizing horizontalResizing() const;
+  EResizing verticalResizing() const;
+  EResizingContent resizingContent() const;
+
+  const nlohmann::json* model() const;
+
+  template<typename T>
+  T getValue(const char* key, T v) const;
 };
 
 } // namespace VGG

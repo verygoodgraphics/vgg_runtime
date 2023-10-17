@@ -86,6 +86,46 @@ struct Rect
   {
     return { origin.toModelPoint(), size };
   }
+
+  Scalar left() const
+  {
+    return origin.x;
+  }
+
+  Scalar top() const
+  {
+    return origin.y;
+  }
+
+  Scalar right() const
+  {
+    return origin.x + size.width;
+  }
+
+  Scalar bottom() const
+  {
+    return origin.y + size.height;
+  }
+
+  Scalar width() const
+  {
+    return size.width;
+  }
+
+  Scalar height() const
+  {
+    return size.height;
+  }
+
+  Scalar centerX() const
+  {
+    return left() + width() / 2;
+  }
+
+  Scalar centerY() const
+  {
+    return top() + height() / 2;
+  }
 };
 
 struct Matrix

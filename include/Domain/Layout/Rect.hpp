@@ -23,6 +23,7 @@ namespace Layout
 
 using Scalar = float;
 
+constexpr auto FLIP_Y_FACTOR = -1;
 #define TO_VGG_LAYOUT_SCALAR(x) static_cast<Layout::Scalar>(x)
 
 struct Point
@@ -31,6 +32,19 @@ struct Point
   Scalar y{ 0 };
 
   bool operator==(const Point& rhs) const noexcept;
+  bool operator!=(const Point& rhs) const noexcept
+  {
+    return !(*this == rhs);
+  }
+
+  Point fromModelPoint() const
+  {
+    return { x, y * FLIP_Y_FACTOR };
+  }
+  Point toModelPoint() const
+  {
+    return { x, y * FLIP_Y_FACTOR };
+  }
 };
 
 struct Size
@@ -62,6 +76,15 @@ struct Rect
   bool operator!=(const Rect& rhs) const noexcept
   {
     return !(*this == rhs);
+  }
+
+  Rect fromModelRect() const
+  {
+    return { origin.fromModelPoint(), size };
+  }
+  Rect toModelRect() const
+  {
+    return { origin.toModelPoint(), size };
   }
 };
 

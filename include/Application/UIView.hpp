@@ -76,6 +76,7 @@ public:
 
   void show(const ViewModel& viewModel);
   void fitContent(float xOffset, float yOffset, float scale);
+  void fitCurrentPage();
 
   void registerEventListener(HasEventListener hasEventListener)
   {

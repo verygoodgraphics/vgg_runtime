@@ -80,85 +80,81 @@ void LayoutNode::layoutIfNeeded()
   }
 }
 
-const Layout::Rect& LayoutNode::frame() const
+Layout::Rect LayoutNode::frame() const
 {
-  return m_frame;
+  return { origin(), size() };
 }
 
-void LayoutNode::setFrame(const Layout::Rect& frame, bool updateRule)
+void LayoutNode::setFrame(const Layout::Rect& newFrame, bool updateRule, bool useOldFrame)
 {
-  if (m_frame != frame)
+  auto oldFrame = useOldFrame ? m_oldFrame : frame();
+  if (oldFrame == newFrame)
   {
-    DEBUG("LayoutNode::setFrame: %s, %s, %s, %4d, %4d, %4d, %4d -> %4d, %4d, %4d, %4d",
-          id().c_str(),
-          path().c_str(),
-          m_autoLayout->isEnabled() ? "layout" : "scale",
-          static_cast<int>(m_frame.origin.x),
-          static_cast<int>(m_frame.origin.y),
-          static_cast<int>(m_frame.size.width),
-          static_cast<int>(m_frame.size.height),
-          static_cast<int>(frame.origin.x),
-          static_cast<int>(frame.origin.y),
-          static_cast<int>(frame.size.width),
-          static_cast<int>(frame.size.height));
+    return;
+  }
 
-    auto oldSize = m_frame.size;
-    auto newSize = frame.size;
+  DEBUG("LayoutNode::setFrame: %s, %s, %s, %4d, %4d, %4d, %4d -> %4d, %4d, %4d, %4d",
+        id().c_str(),
+        path().c_str(),
+        m_autoLayout->isEnabled() ? "layout" : "scale",
+        static_cast<int>(oldFrame.origin.x),
+        static_cast<int>(oldFrame.origin.y),
+        static_cast<int>(oldFrame.size.width),
+        static_cast<int>(oldFrame.size.height),
+        static_cast<int>(newFrame.origin.x),
+        static_cast<int>(newFrame.origin.y),
+        static_cast<int>(newFrame.size.width),
+        static_cast<int>(newFrame.size.height));
 
-    m_frame = frame;
+  saveChildrendOldFrame();
+  updateModel(newFrame);
 
-    // updateAt
-    if (auto viewModel = m_viewModel.lock())
+  auto oldSize = oldFrame.size;
+  auto newSize = newFrame.size;
+  if (newSize == oldSize)
+  {
+    return;
+  }
+
+  if (m_autoLayout && m_autoLayout->isEnabled())
+  {
+    if (updateRule)
     {
-      nlohmann::json::json_pointer path{ m_path };
-      const auto& objectJson = viewModel->content()[path];
-      auto frameJson = objectJson[K_FRAME];
-      auto boundsJson = objectJson[K_BOUNDS];
-      auto matrixJson = objectJson[K_MATRIX];
-
-      const Layout::Rect vggFrame{ { frame.origin.x, frame.origin.y * VGG::Layout::FLIP_Y_FACTOR },
-                                   frame.size };
-
-      to_json(frameJson, vggFrame);
-
-      boundsJson[K_WIDTH] = vggFrame.size.width;
-      boundsJson[K_HEIGHT] = vggFrame.size.height;
-
-      matrixJson[4] = vggFrame.origin.x;
-      matrixJson[5] = vggFrame.origin.y;
-
-      viewModel->replaceAt(path / K_FRAME, frameJson);
-      viewModel->replaceAt(path / K_BOUNDS, boundsJson);
-      viewModel->replaceAt(path / K_MATRIX, matrixJson);
+      m_autoLayout->updateSizeRule();
     }
 
-    if (newSize == oldSize)
+    if (m_autoLayout->isContainer())
     {
       return;
     }
-
-    if (m_autoLayout && m_autoLayout->isEnabled())
-    {
-      if (updateRule)
-      {
-        m_autoLayout->updateSizeRule();
-      }
-
-      if (!m_autoLayout->isContainer())
-      {
-        scaleChildNodes(oldSize, newSize);
-      }
-    }
-    else
-    {
-      scaleChildNodes(oldSize, newSize);
-    }
   }
+
+  scaleChildNodes(oldSize, newSize, true);
 }
 
-const Layout::Rect& LayoutNode::bounds() const
+Layout::Rect LayoutNode::bounds() const
 {
-  return m_bounds;
+  return modelBounds().fromModelRect();
+}
+
+Layout::Rect LayoutNode::modelBounds() const
+{
+  Layout::Rect bounds;
+
+  auto viewModel = m_viewModel.lock();
+  if (viewModel)
+  {
+    nlohmann::json::json_pointer path{ m_path };
+    const auto& objectJson = viewModel->content()[path];
+    bounds = objectJson[K_BOUNDS].get<Layout::Rect>();
+  }
+
+  return bounds;
+}
+
+Layout::Size LayoutNode::size() const
+{
+  return modelBounds().size;
 }
 
 void LayoutNode::setViewModel(JsonDocumentPtr viewModel)
@@ -174,26 +170,27 @@ void LayoutNode::configureAutoLayout()
   }
 }
 
-void LayoutNode::scaleChildNodes(const Layout::Size& oldSize, const Layout::Size& newSize)
+void LayoutNode::scaleChildNodes(const Layout::Size& containerOldSize,
+                                 const Layout::Size& containerNewSize,
+                                 bool useOldFrame)
 {
-  if (oldSize == Layout::Size{ 0, 0 })
+  if (containerOldSize == Layout::Size{ 0, 0 })
   {
     return;
   }
+  auto xScaleFactor = containerNewSize.width / containerOldSize.width;
+  auto yScaleFactor = containerNewSize.height / containerOldSize.height;
 
-  auto xScaleFactor = newSize.width / oldSize.width;
-  auto yScaleFactor = newSize.height / oldSize.height;
   for (auto& child : m_children)
   {
-    auto frame = child->frame();
+    auto oldFame = useOldFrame ? child->m_oldFrame : child->frame();
+    auto [oldOrigin, oldSize] = oldFame;
 
     // todo, support more constraints
-    frame.origin.x *= xScaleFactor;
-    frame.origin.y *= yScaleFactor;
-    frame.size.width *= xScaleFactor;
-    frame.size.height *= yScaleFactor;
+    Layout::Rect newFrame{ { oldOrigin.x * xScaleFactor, oldOrigin.y * yScaleFactor },
+                           { oldSize.width * xScaleFactor, oldSize.height * yScaleFactor } };
 
-    child->setFrame(frame);
+    child->setFrame(newFrame, false, useOldFrame);
   }
 
   scaleContour(xScaleFactor, yScaleFactor);
@@ -291,6 +288,150 @@ std::shared_ptr<LayoutNode> LayoutNode::findDescendantNodeById(const std::string
   }
 
   return nullptr;
+}
+
+void LayoutNode::updateModel(const Layout::Rect& toFrame)
+{
+  auto viewModel = m_viewModel.lock();
+  if (!viewModel)
+  {
+    return;
+  }
+
+  const auto newFrame = toFrame.toModelRect();
+
+  nlohmann::json::json_pointer path{ m_path };
+  const auto& objectJson = viewModel->content()[path];
+
+  // do not update useless frame
+
+  // scale, bounds & matrix
+  auto boundsJson = objectJson[K_BOUNDS];
+  auto oldBounds = modelBounds();
+  auto matrix = objectJson[K_MATRIX].get<Layout::Matrix>();
+  if (oldBounds.size.width > 0)
+  {
+    auto xScale = newFrame.size.width / oldBounds.size.width;
+    boundsJson[K_X] = oldBounds.origin.x * xScale;
+    matrix.tx *= xScale;
+  }
+  if (oldBounds.size.height > 0)
+  {
+    auto yScale = newFrame.size.height / oldBounds.size.height;
+    boundsJson[K_Y] = oldBounds.origin.y * yScale;
+    matrix.ty *= yScale;
+  }
+  boundsJson[K_WIDTH] = newFrame.size.width;
+  boundsJson[K_HEIGHT] = newFrame.size.height;
+  viewModel->replaceAt(path / K_BOUNDS, boundsJson);
+
+  auto matrixJson = objectJson[K_MATRIX];
+  matrixJson[4] = matrix.tx;
+  matrixJson[5] = matrix.ty;
+  viewModel->replaceAt(path / K_MATRIX, matrixJson);
+
+  // translate if needed
+  auto originAfterScale = modelOrigin();
+  if (originAfterScale != newFrame.origin)
+  {
+    matrix.tx += newFrame.origin.x - originAfterScale.x;
+    matrix.ty += newFrame.origin.y - originAfterScale.y;
+    matrixJson[4] = matrix.tx;
+    matrixJson[5] = matrix.ty;
+    viewModel->replaceAt(path / K_MATRIX, matrixJson);
+  }
+}
+
+Layout::Point LayoutNode::origin() const
+{
+  return modelOrigin().fromModelPoint();
+}
+
+Layout::Point LayoutNode::modelOrigin() const
+{
+  auto viewModel = m_viewModel.lock();
+  if (!viewModel)
+  {
+    return {};
+  }
+
+  nlohmann::json::json_pointer path{ m_path };
+  const auto& j = viewModel->content()[path];
+
+  auto bounds = j[K_BOUNDS].get<Layout::Rect>();
+  auto matrix = j[K_MATRIX].get<Layout::Matrix>();
+  auto [x, y] = bounds.origin;
+  auto [a, b, c, d, tx, ty] = matrix;
+  auto newX = a * x + c * y + tx;
+  auto newY = b * x + d * y + ty;
+
+  Layout::Point relativePosition{ newX, newY };
+  if (auto parent = m_parent.lock())
+  {
+    const auto& parentOrigin = parent->modelBounds().origin;
+    relativePosition.x -= parentOrigin.x;
+    relativePosition.y -= parentOrigin.y;
+  }
+
+  return relativePosition;
+}
+
+Layout::Point LayoutNode::converPointToAncestor(Layout::Point point,
+                                                std::shared_ptr<LayoutNode> ancestorNode)
+{
+  if (ancestorNode.get() == this)
+  {
+    return point;
+  }
+
+  auto x = point.x;
+  auto y = point.y;
+
+  auto parent = m_parent.lock();
+  while (parent != ancestorNode)
+  {
+    auto origin = parent->origin();
+    x += origin.x;
+    y += origin.y;
+    parent = parent->m_parent.lock();
+  }
+
+  return { x, y };
+}
+
+void LayoutNode::scaleTo(const Layout::Size& newSize, bool updateRule)
+{
+  auto oldFrame = frame();
+  auto oldSize = oldFrame.size;
+  auto newFrame = oldFrame;
+  if (oldSize.width > 0)
+  {
+    auto xScale = newSize.width / oldSize.width;
+    newFrame.origin.x *= xScale;
+  }
+  if (oldSize.height > 0)
+  {
+    auto yScale = newSize.height / oldSize.height;
+    newFrame.origin.y *= yScale;
+  }
+  newFrame.size = newSize;
+
+  saveOldFrame();
+  setFrame(newFrame, updateRule, true);
+  autoLayout()->setNeedsLayout();
+}
+
+void LayoutNode::saveOldFrame()
+{
+  m_oldFrame = frame();
+}
+
+void LayoutNode::saveChildrendOldFrame()
+{
+  for (auto& child : m_children)
+  {
+    child->saveOldFrame();
+  }
 }
 
 } // namespace VGG

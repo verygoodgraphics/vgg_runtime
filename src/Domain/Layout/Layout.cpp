@@ -58,20 +58,18 @@ void Layout::Layout::layout(Size size, bool updateRule)
   // Always update the root size because resizing the page does not update the root size
   frame.size = size;
 
-  // Update rule when expanding symbol; Do NOT update rule when resizing window in RunMode
-  root->setFrame(frame, updateRule);
-  root->autoLayout()->setNeedsLayout();
-
   if (m_isRootTree)
   {
     // udpate page frame
     for (auto& page : root->children())
     {
-      auto frame = page->frame();
-      frame.size = size;
-      page->setFrame(frame, updateRule);
-      page->autoLayout()->setNeedsLayout();
+      page->scaleTo(size, updateRule);
     }
+  }
+  else
+  {
+    root->setFrame(frame, updateRule);
+    root->autoLayout()->setNeedsLayout();
   }
 
   // layout
@@ -89,7 +87,7 @@ void Layout::Layout::buildLayoutTree()
 
   if (m_isRootTree)
   {
-    m_layoutTree.reset(new LayoutNode{ "/", {}, {} });
+    m_layoutTree.reset(new LayoutNode{ "/" });
     json::json_pointer framesPath{ "/frames" };
     for (auto i = 0; i < designJson[K_FRAMES].size(); ++i)
     {
@@ -120,25 +118,7 @@ std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(const nlohmann::
     return nullptr;
   }
 
-  auto bounds = j[K_BOUNDS].get<Rect>();
-  auto matrix = j[K_MATRIX].get<Matrix>();
-  auto [x, y] = bounds.origin;
-  auto [a, b, c, d, tx, ty] = matrix;
-  auto newX = a * x + c * y + tx;
-  auto newY = b * x + d * y + ty;
-
-  Point relativePosition{ newX, newY * FLIP_Y_FACTOR };
-  if (parent)
-  {
-    const auto& parentOrigin = parent->bounds().origin;
-    relativePosition.x -= parentOrigin.x;
-    relativePosition.y -= parentOrigin.y;
-  }
-
-  bounds.origin.y *= FLIP_Y_FACTOR;
-  auto node = std::make_shared<LayoutNode>(currentPath.to_string(),
-                                           Rect{ relativePosition, bounds.size },
-                                           bounds);
+  auto node = std::make_shared<LayoutNode>(currentPath.to_string());
   node->setViewModel(m_designDoc);
   if (parent)
   {

@@ -103,10 +103,6 @@
             "not show. (default for other condition)"
           ]
         },
-        "maskBoundsBorder": {
-          "$ref": "#/definitions/Border",
-          "description": " Used to draw the bounds of the mask. Only applies if the mask show type is 1. if omit, use r = g = b = 1 position = outside thickness = 1 opacity = 1 blend-mode = normal style = solid "
-        },
         "overflow": {
           "description": "Sets what happens when a child element of a parent overflows its space.",
           "type": "integer",
@@ -124,6 +120,23 @@
         "overrideKey": {
           "type": "string",
           "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+        },
+        "horizontalConstraint": {
+          "$ref": "#/definitions/Constraint",
+          "description": "Horizontal layout constraints for object. Default value is 1."
+        },
+        "verticalConstraint": {
+          "$ref": "#/definitions/Constraint",
+          "description": "Vertical layout constraints for object. Default value is 1."
+        },
+        "resizesContent": {
+          "type": "integer",
+          "enum": [0, 1, 2],
+          "enumDescriptions": [
+            " If the current object contains children(suitable for path with boolean operations),  the current object is used as the starting point, and for all children,  If the object chain has a frame or symbol without layout, then the constraint on the child object is applied(the constraints of group and top-level path with boolean operations will be ignored),  otherwise scale is applied. ",
+            "force child object fix position and fix size.",
+            "use child object constraint.(default value)"
+          ]
         },
         "childObjects": {
           "type": "array",
@@ -1294,6 +1307,23 @@
       },
       "additionalProperties": false
     },
+    "Constraint": {
+      "title": "Constraint",
+      "description": "Horizontal and vertical layout constraints for object. In the horizontal direction, start indicates left, end indicates right. In the vertical direction, start identifies top, end identifies bottom.",
+      "type": "integer",
+      "enum": [0, 1, 2, 3, 4, 5, 6, 7],
+      "enumDescriptions": [
+        "fix start and fix end.",
+        "fix start and fix size.",
+        " fix start and scale.\nFor example, let the parent container be 200 wide and the child object x-coordinate be 60 and the width be 50.  When the width of the parent container becomes 300, the x-coordinate of the child object remains 60, and the width becomes (50 / (200 - 60)) * (300 - 60) = 85.71 ",
+        "fix end and fix size.",
+        "fix end and scale.",
+        " scale.\nFor example, let the parent container be 200 wide, the child object x-coordinate be 60, and the width be 50.  When the width of the parent container becomes 300, the x-coordinate of the child object becomes 60 / 200 * 300 = 90, and the width becomes 50 / 200 * 300 = 75 ",
+        " fix center proportion and fix size. \nFor example, let the parent container be 200 wide, the child object x-coordinate be 60, and the width be 50. When the width of the parent container becomes 300, the x-coordinate of the child object becomes (60 + 50 / 2) / 200 * 300 - 50 / 2 = 102.5, and the width remains 50 ",
+        " Keep the centerline distance between the child object and the parent container constant.\nFor example, let the parent container be 200 wide, the child object x-coordinate be 60, and the width be 50.  When the width of the parent container becomes 300, the x-coordinate of the child object becomes 300 / 2 - (200 / 2 - (60 + 50 / 2)) - 50 / 2 = 110, and the width remains 50 "
+      ],
+      "$id": "#Constraint"
+    },
     "Path": {
       "title": "Path",
       "description": "Path represents a vector geometry which is formed by individual subpaths combined together via boolean operations.",
@@ -1392,10 +1422,6 @@
             "not show. (default for other condition)"
           ]
         },
-        "maskBoundsBorder": {
-          "$ref": "#/definitions/Border",
-          "description": " Used to draw the bounds of the mask. Only applies if the mask show type is 1. if omit, use r = g = b = 1 position = outside thickness = 1 opacity = 1 blend-mode = normal style = solid "
-        },
         "overflow": {
           "description": "Sets what happens when a child element of a parent overflows its space.",
           "type": "integer",
@@ -1413,6 +1439,23 @@
         "overrideKey": {
           "type": "string",
           "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+        },
+        "horizontalConstraint": {
+          "$ref": "#/definitions/Constraint",
+          "description": "Horizontal layout constraints for object. Default value is 1."
+        },
+        "verticalConstraint": {
+          "$ref": "#/definitions/Constraint",
+          "description": "Vertical layout constraints for object. Default value is 1."
+        },
+        "resizesContent": {
+          "type": "integer",
+          "enum": [0, 1, 2],
+          "enumDescriptions": [
+            " If the current object contains children(suitable for path with boolean operations),  the current object is used as the starting point, and for all children,  If the object chain has a frame or symbol without layout, then the constraint on the child object is applied(the constraints of group and top-level path with boolean operations will be ignored),  otherwise scale is applied. ",
+            "force child object fix position and fix size.",
+            "use child object constraint.(default value)"
+          ]
         },
         "class": {
           "const": "path"
@@ -1686,10 +1729,6 @@
             "not show. (default for other condition)"
           ]
         },
-        "maskBoundsBorder": {
-          "$ref": "#/definitions/Border",
-          "description": " Used to draw the bounds of the mask. Only applies if the mask show type is 1. if omit, use r = g = b = 1 position = outside thickness = 1 opacity = 1 blend-mode = normal style = solid "
-        },
         "overflow": {
           "description": "Sets what happens when a child element of a parent overflows its space.",
           "type": "integer",
@@ -1707,6 +1746,23 @@
         "overrideKey": {
           "type": "string",
           "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+        },
+        "horizontalConstraint": {
+          "$ref": "#/definitions/Constraint",
+          "description": "Horizontal layout constraints for object. Default value is 1."
+        },
+        "verticalConstraint": {
+          "$ref": "#/definitions/Constraint",
+          "description": "Vertical layout constraints for object. Default value is 1."
+        },
+        "resizesContent": {
+          "type": "integer",
+          "enum": [0, 1, 2],
+          "enumDescriptions": [
+            " If the current object contains children(suitable for path with boolean operations),  the current object is used as the starting point, and for all children,  If the object chain has a frame or symbol without layout, then the constraint on the child object is applied(the constraints of group and top-level path with boolean operations will be ignored),  otherwise scale is applied. ",
+            "force child object fix position and fix size.",
+            "use child object constraint.(default value)"
+          ]
         },
         "class": {
           "const": "text"
@@ -2063,10 +2119,6 @@
             "not show. (default for other condition)"
           ]
         },
-        "maskBoundsBorder": {
-          "$ref": "#/definitions/Border",
-          "description": " Used to draw the bounds of the mask. Only applies if the mask show type is 1. if omit, use r = g = b = 1 position = outside thickness = 1 opacity = 1 blend-mode = normal style = solid "
-        },
         "overflow": {
           "description": "Sets what happens when a child element of a parent overflows its space.",
           "type": "integer",
@@ -2084,6 +2136,23 @@
         "overrideKey": {
           "type": "string",
           "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+        },
+        "horizontalConstraint": {
+          "$ref": "#/definitions/Constraint",
+          "description": "Horizontal layout constraints for object. Default value is 1."
+        },
+        "verticalConstraint": {
+          "$ref": "#/definitions/Constraint",
+          "description": "Vertical layout constraints for object. Default value is 1."
+        },
+        "resizesContent": {
+          "type": "integer",
+          "enum": [0, 1, 2],
+          "enumDescriptions": [
+            " If the current object contains children(suitable for path with boolean operations),  the current object is used as the starting point, and for all children,  If the object chain has a frame or symbol without layout, then the constraint on the child object is applied(the constraints of group and top-level path with boolean operations will be ignored),  otherwise scale is applied. ",
+            "force child object fix position and fix size.",
+            "use child object constraint.(default value)"
+          ]
         },
         "class": {
           "const": "image"
@@ -2200,10 +2269,6 @@
             "not show. (default for other condition)"
           ]
         },
-        "maskBoundsBorder": {
-          "$ref": "#/definitions/Border",
-          "description": " Used to draw the bounds of the mask. Only applies if the mask show type is 1. if omit, use r = g = b = 1 position = outside thickness = 1 opacity = 1 blend-mode = normal style = solid "
-        },
         "overflow": {
           "description": "Sets what happens when a child element of a parent overflows its space.",
           "type": "integer",
@@ -2221,6 +2286,23 @@
         "overrideKey": {
           "type": "string",
           "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+        },
+        "horizontalConstraint": {
+          "$ref": "#/definitions/Constraint",
+          "description": "Horizontal layout constraints for object. Default value is 1."
+        },
+        "verticalConstraint": {
+          "$ref": "#/definitions/Constraint",
+          "description": "Vertical layout constraints for object. Default value is 1."
+        },
+        "resizesContent": {
+          "type": "integer",
+          "enum": [0, 1, 2],
+          "enumDescriptions": [
+            " If the current object contains children(suitable for path with boolean operations),  the current object is used as the starting point, and for all children,  If the object chain has a frame or symbol without layout, then the constraint on the child object is applied(the constraints of group and top-level path with boolean operations will be ignored),  otherwise scale is applied. ",
+            "force child object fix position and fix size.",
+            "use child object constraint.(default value)"
+          ]
         },
         "childObjects": {
           "type": "array",
@@ -2360,10 +2442,6 @@
             "not show. (default for other condition)"
           ]
         },
-        "maskBoundsBorder": {
-          "$ref": "#/definitions/Border",
-          "description": " Used to draw the bounds of the mask. Only applies if the mask show type is 1. if omit, use r = g = b = 1 position = outside thickness = 1 opacity = 1 blend-mode = normal style = solid "
-        },
         "overflow": {
           "description": "Sets what happens when a child element of a parent overflows its space.",
           "type": "integer",
@@ -2381,6 +2459,23 @@
         "overrideKey": {
           "type": "string",
           "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+        },
+        "horizontalConstraint": {
+          "$ref": "#/definitions/Constraint",
+          "description": "Horizontal layout constraints for object. Default value is 1."
+        },
+        "verticalConstraint": {
+          "$ref": "#/definitions/Constraint",
+          "description": "Vertical layout constraints for object. Default value is 1."
+        },
+        "resizesContent": {
+          "type": "integer",
+          "enum": [0, 1, 2],
+          "enumDescriptions": [
+            " If the current object contains children(suitable for path with boolean operations),  the current object is used as the starting point, and for all children,  If the object chain has a frame or symbol without layout, then the constraint on the child object is applied(the constraints of group and top-level path with boolean operations will be ignored),  otherwise scale is applied. ",
+            "force child object fix position and fix size.",
+            "use child object constraint.(default value)"
+          ]
         },
         "class": {
           "const": "symbolInstance"
@@ -2531,10 +2626,6 @@
             "not show. (default for other condition)"
           ]
         },
-        "maskBoundsBorder": {
-          "$ref": "#/definitions/Border",
-          "description": " Used to draw the bounds of the mask. Only applies if the mask show type is 1. if omit, use r = g = b = 1 position = outside thickness = 1 opacity = 1 blend-mode = normal style = solid "
-        },
         "overflow": {
           "description": "Sets what happens when a child element of a parent overflows its space.",
           "type": "integer",
@@ -2552,6 +2643,23 @@
         "overrideKey": {
           "type": "string",
           "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+        },
+        "horizontalConstraint": {
+          "$ref": "#/definitions/Constraint",
+          "description": "Horizontal layout constraints for object. Default value is 1."
+        },
+        "verticalConstraint": {
+          "$ref": "#/definitions/Constraint",
+          "description": "Vertical layout constraints for object. Default value is 1."
+        },
+        "resizesContent": {
+          "type": "integer",
+          "enum": [0, 1, 2],
+          "enumDescriptions": [
+            " If the current object contains children(suitable for path with boolean operations),  the current object is used as the starting point, and for all children,  If the object chain has a frame or symbol without layout, then the constraint on the child object is applied(the constraints of group and top-level path with boolean operations will be ignored),  otherwise scale is applied. ",
+            "force child object fix position and fix size.",
+            "use child object constraint.(default value)"
+          ]
         },
         "childObjects": {
           "type": "array",
@@ -2719,10 +2827,6 @@
             "not show. (default for other condition)"
           ]
         },
-        "maskBoundsBorder": {
-          "$ref": "#/definitions/Border",
-          "description": " Used to draw the bounds of the mask. Only applies if the mask show type is 1. if omit, use r = g = b = 1 position = outside thickness = 1 opacity = 1 blend-mode = normal style = solid "
-        },
         "overflow": {
           "description": "Sets what happens when a child element of a parent overflows its space.",
           "type": "integer",
@@ -2740,6 +2844,23 @@
         "overrideKey": {
           "type": "string",
           "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+        },
+        "horizontalConstraint": {
+          "$ref": "#/definitions/Constraint",
+          "description": "Horizontal layout constraints for object. Default value is 1."
+        },
+        "verticalConstraint": {
+          "$ref": "#/definitions/Constraint",
+          "description": "Vertical layout constraints for object. Default value is 1."
+        },
+        "resizesContent": {
+          "type": "integer",
+          "enum": [0, 1, 2],
+          "enumDescriptions": [
+            " If the current object contains children(suitable for path with boolean operations),  the current object is used as the starting point, and for all children,  If the object chain has a frame or symbol without layout, then the constraint on the child object is applied(the constraints of group and top-level path with boolean operations will be ignored),  otherwise scale is applied. ",
+            "force child object fix position and fix size.",
+            "use child object constraint.(default value)"
+          ]
         },
         "childObjects": {
           "type": "array",

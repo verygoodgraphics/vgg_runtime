@@ -610,10 +610,10 @@ TEST_F(VggExpandSymbolTestSuite, OwnOverrideKey)
     EXPECT_EQ(visible, false);
   }
   {
-    nlohmann::json::json_pointer path{ "/frames/0/childObjects/0/childObjects/0/frame" };
-    auto childFrame = expandedDesignJson[path].get<Rect>();
-    Rect expectFrame{ 0, 0, 237, 38 };
-    EXPECT_EQ(childFrame, expectFrame);
+    nlohmann::json::json_pointer path{ "/frames/0/childObjects/0/childObjects/0/bounds" };
+    auto childBounds = expandedDesignJson[path].get<Rect>();
+    Rect expectBounds{ 0, 0, 237, 38 };
+    EXPECT_EQ(childBounds, expectBounds);
   }
 }
 
@@ -636,9 +636,9 @@ TEST_F(VggExpandSymbolTestSuite, layout_container_when_child_bounds_are_overridd
 
   // layout
   {
-    nlohmann::json::json_pointer path{ "/frames/0/childObjects/0/childObjects/1/frame" };
-    auto childFrame = expandedDesignJson[path].get<Rect>();
-    Rect expectFrame{ 73.0, -7.0, 10.0, 10.0 };
-    EXPECT_EQ(childFrame, expectFrame);
+    nlohmann::json::json_pointer path{ "/frames/0/childObjects/0/childObjects/1/matrix" };
+    auto childMatrix = expandedDesignJson[path].get<Matrix>();
+    EXPECT_DOUBLE_EQ(childMatrix.tx, 73.0);
+    EXPECT_DOUBLE_EQ(childMatrix.ty, -7.0);
   }
 }

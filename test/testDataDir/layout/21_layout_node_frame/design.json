@@ -1,6 +1,6 @@
 {
   "fileType": 3,
-  "fileName": "/Users/houguanhua/code/vgg/vgg_runtime_A/test/testDataDir/_bug/bug_incorrect_highlight_frame_position.fig",
+  "fileName": "/Users/houguanhua/code/vgg/vgg_runtime_A/test/testDataDir/layout/21_layout_node_frame/bug_incorrect_highlight_frame_position.fig",
   "frames": [
     {
       "id": "0:1 default-frame",
@@ -25,18 +25,18 @@
       "bounds": {
         "class": "rect",
         "constrainProportions": false,
-        "width": 240.0,
-        "height": 360.0,
-        "x": -100.0,
-        "y": 200.0
+        "width": 300.0,
+        "height": 300.0,
+        "x": -200.0,
+        "y": 100.0
       },
       "frame": {
         "class": "rect",
         "constrainProportions": false,
-        "width": 240.0,
-        "height": 360.0,
-        "x": -100.0,
-        "y": 200.0
+        "width": 300.0,
+        "height": 300.0,
+        "x": -200.0,
+        "y": 100.0
       },
       "style": {
         "class": "style",
@@ -76,16 +76,16 @@
           "bounds": {
             "class": "rect",
             "constrainProportions": false,
-            "width": 140.0,
-            "height": 160.0,
+            "width": 100.0,
+            "height": 200.0,
             "x": 0,
             "y": 0
           },
           "frame": {
             "class": "rect",
             "constrainProportions": false,
-            "width": 140.0,
-            "height": 160.0,
+            "width": 100.0,
+            "height": 200.0,
             "x": 0.0,
             "y": 0.0
           },
@@ -97,9 +97,9 @@
                 "fillType": 0,
                 "color": {
                   "class": "color",
-                  "red": 0.8509804010391235,
-                  "green": 0.8509804010391235,
-                  "blue": 0.8509804010391235,
+                  "red": 0.987500011920929,
+                  "green": 0.8105729222297668,
+                  "blue": 0.8105729222297668,
                   "alpha": 1.0
                 },
                 "class": "fill",
@@ -123,6 +123,9 @@
           "maskShowType": 2,
           "overflow": 1,
           "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "path",
           "shape": {
             "class": "shape",
@@ -145,7 +148,7 @@
                       "class": "pointAttr",
                       "radius": 0.0,
                       "point": [
-                        140.0,
+                        100.0,
                         0.0
                       ]
                     },
@@ -153,8 +156,8 @@
                       "class": "pointAttr",
                       "radius": 0.0,
                       "point": [
-                        140.0,
-                        -160.0
+                        100.0,
+                        -200.0
                       ]
                     },
                     {
@@ -162,7 +165,7 @@
                       "radius": 0.0,
                       "point": [
                         0.0,
-                        -160.0
+                        -200.0
                       ]
                     }
                   ]
@@ -191,24 +194,24 @@
             0.0,
             0.0,
             1.0,
-            -100.0,
-            200.0
+            -200.0,
+            100.0
           ],
           "bounds": {
             "class": "rect",
             "constrainProportions": false,
-            "width": 120.0,
-            "height": 140.0,
+            "width": 200.0,
+            "height": 100.0,
             "x": 0,
             "y": 0
           },
           "frame": {
             "class": "rect",
             "constrainProportions": false,
-            "width": 120.0,
-            "height": 140.0,
-            "x": -100.0,
-            "y": 200.0
+            "width": 200.0,
+            "height": 100.0,
+            "x": -200.0,
+            "y": 100.0
           },
           "style": {
             "class": "style",
@@ -244,6 +247,9 @@
           "maskShowType": 2,
           "overflow": 1,
           "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "path",
           "shape": {
             "class": "shape",
@@ -266,7 +272,7 @@
                       "class": "pointAttr",
                       "radius": 0.0,
                       "point": [
-                        120.0,
+                        200.0,
                         0.0
                       ]
                     },
@@ -274,8 +280,8 @@
                       "class": "pointAttr",
                       "radius": 0.0,
                       "point": [
-                        120.0,
-                        -140.0
+                        200.0,
+                        -100.0
                       ]
                     },
                     {
@@ -283,7 +289,7 @@
                       "radius": 0.0,
                       "point": [
                         0.0,
-                        -140.0
+                        -100.0
                       ]
                     }
                   ]

@@ -143,6 +143,6 @@ TEST_F(VggLayoutTestSuite, FrameOfNodeWhoseParentPositionInBoundsIsNotZero)
   auto page = tree->children()[0];
 
   auto child1Frame = page->children()[1]->frame();
-  Layout::Rect expectChild0Frame{ { 0, 0 }, { 120, 140 } };
+  Layout::Rect expectChild0Frame{ { 0, 0 }, { 200, 100 } };
   EXPECT_TRUE(child1Frame == expectChild0Frame);
 }

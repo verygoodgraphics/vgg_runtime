@@ -23,7 +23,6 @@ namespace VGG
 {
 namespace Layout
 {
-constexpr auto FLIP_Y_FACTOR = -1;
 
 // NOLINTBEGIN
 void to_json(nlohmann::json& j, const Point& point);

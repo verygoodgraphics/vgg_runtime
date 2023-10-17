@@ -344,6 +344,14 @@ void UIView::fitContent(float xOffset, float yOffset, float scale)
   m_zoomerListener->setZoom(scale);
 }
 
+void UIView::fitCurrentPage()
+{
+  ASSERT(m_zoomerListener);
+
+  m_zoomerListener->setOffset({ 0, 0 });
+  m_zoomerListener->setZoom(1);
+}
+
 void UIView::enableZoomer(bool enabled)
 {
   m_isZoomerEnabled = enabled;

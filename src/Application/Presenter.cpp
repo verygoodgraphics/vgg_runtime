@@ -65,7 +65,7 @@ void Presenter::resetForRunning()
   {
     return;
   }
-  m_view->fitContent(0, 0, 1);
+  m_view->fitCurrentPage();
   m_view->enableZoomer(false);
 }
 

@@ -49,19 +49,16 @@ class LayoutNode : public std::enable_shared_from_this<LayoutNode>
 
   std::weak_ptr<JsonDocument> m_viewModel;
   const std::string m_path;
-  Layout::Rect m_frame;
-  Layout::Rect m_bounds;
 
   std::shared_ptr<Layout::Internal::AutoLayout> m_autoLayout;
   bool m_needsLayout{ false };
+  Layout::Rect m_oldFrame;
 
 public:
   using HitTestHook = std::function<bool(const std::string&)>;
 
-  LayoutNode(const std::string& path, const Layout::Rect& frame, const Layout::Rect& bounds)
+  LayoutNode(const std::string& path)
     : m_path{ path }
-    , m_frame{ frame }
-    , m_bounds{ bounds }
   {
   }
 
@@ -117,9 +114,9 @@ public:
     return m_path;
   }
 
-  const Layout::Rect& frame() const;
-  const Layout::Rect& bounds() const;
-  void setFrame(const Layout::Rect& frame, bool updateRule = false);
+  Layout::Rect frame() const;
+  Layout::Rect bounds() const;
+  void setFrame(const Layout::Rect& newFrame, bool updateRule = false, bool useOldFrame = false);
   void setViewModel(JsonDocumentPtr viewModel);
 
 public:
@@ -131,12 +128,13 @@ public:
 
   void setNeedLayout();
   void layoutIfNeeded();
+  void scaleTo(const Layout::Size& newSize, bool updateRule);
 
   std::shared_ptr<LayoutNode> findDescendantNodeById(const std::string& id);
 
   Layout::Rect frameToAncestor(std::shared_ptr<LayoutNode> ancestorNode = nullptr)
   {
-    return convertRectToAncestor(m_frame, ancestorNode);
+    return convertRectToAncestor(frame(), ancestorNode);
   }
 
 private:
@@ -144,7 +142,7 @@ private:
 
   bool pointInside(Layout::Point point)
   {
-    auto rect = convertRectToAncestor(m_frame);
+    auto rect = convertRectToAncestor(frame());
     return rect.contains(point);
   }
 
@@ -155,30 +153,22 @@ private:
   }
 
   Layout::Point converPointToAncestor(Layout::Point point,
-                                      std::shared_ptr<LayoutNode> ancestorNode = nullptr)
-  {
-    if (ancestorNode.get() == this)
-    {
-      return point;
-    }
+                                      std::shared_ptr<LayoutNode> ancestorNode = nullptr);
 
-    auto x = point.x;
-    auto y = point.y;
-
-    auto parent = m_parent.lock();
-    while (parent != ancestorNode)
-    {
-      x += parent->m_frame.origin.x;
-      y += parent->m_frame.origin.y;
-      parent = parent->m_parent.lock();
-    }
-
-    return { x, y };
-  }
-
-  void scaleChildNodes(const Layout::Size& oldSize, const Layout::Size& newSize);
+  void scaleChildNodes(const Layout::Size& containerOldSize,
+                       const Layout::Size& containerNewSize,
+                       bool useOldFrame);
   void scaleContour(float xScaleFactor, float yScaleFactor);
   void scalePoint(nlohmann::json& json, const char* key, float xScaleFactor, float yScaleFactor);
+
+  Layout::Point origin() const;
+  Layout::Size size() const;
+  void saveOldFrame();
+  void saveChildrendOldFrame();
+
+  void updateModel(const Layout::Rect& frame);
+  Layout::Point modelOrigin() const;
+  Layout::Rect modelBounds() const;
 };
 
 } // namespace VGG

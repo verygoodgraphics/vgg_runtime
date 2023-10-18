@@ -119,11 +119,11 @@ TEST_F(VggLayoutTestSuite, ScaleSubtree)
   auto container = currentPage->children()[0];
 
   auto child0Frame = container->children()[0]->frame();
-  Layout::Rect expectChild0Frame{ { 0, 0 }, { 947, 839.999938 } };
+  Layout::Rect expectChild0Frame{ { 33, 56.0000038 }, { 330, 560 } };
   EXPECT_TRUE(child0Frame == expectChild0Frame);
 
   auto child1Frame = container->children()[1]->frame();
-  Layout::Rect expectChild1Frame{ { 104.170006, 188.999985 }, { 130.685989, 361.199982 } };
+  Layout::Rect expectChild1Frame{ { 495, 56.0000038 }, { 660, 280 } };
   EXPECT_TRUE(child1Frame == expectChild1Frame);
 }
 

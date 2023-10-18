@@ -207,21 +207,29 @@ void ExpandSymbol::expandInstance(nlohmann::json& json,
 
 void ExpandSymbol::resizeInstance(nlohmann::json& instance, nlohmann::json& master)
 {
-  auto masterSize = master[K_BOUNDS].get<Rect>().size;
-  auto instanceSize = instance[K_BOUNDS].get<Rect>().size;
-  if (masterSize == instanceSize)
+  auto masterBounds = master[K_BOUNDS].get<Rect>();
+  auto instanceBounds = instance[K_BOUNDS].get<Rect>();
+
+  // todo: handle translate if masterBounds.origin != instanceBounds.origin
+  if (masterBounds.size == instanceBounds.size)
   {
     return;
   }
 
-  if (hasOriginalLayoutRule(master[K_ID]))
-  {
-    layoutInstance(instance, instanceSize);
-  }
-  else
-  {
-    scaleInstance(instance, masterSize, instanceSize);
-  }
+  // if (hasOriginalLayoutRule(master[K_ID]))
+  // {
+  //   layoutInstance(instance, instanceSize);
+  // }
+  // else
+  // {
+  //   scaleInstance(instance, masterSize, instanceSize);
+  // }
+
+  to_json(instance[K_BOUNDS], masterBounds); // use master's bounds for layout
+  layoutInstance(instance, instanceBounds.size);
+  to_json(instance[K_BOUNDS], instanceBounds); // restore instance bounds
+
+  // todo: handle translate if masterBounds.origin != instanceBounds.origin
 }
 
 void ExpandSymbol::scaleInstance(nlohmann::json& instance,

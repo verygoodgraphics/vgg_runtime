@@ -50,6 +50,7 @@
                 "x": 0.0,
                 "y": 0.0
               },
+              "horizontalConstraint": 5,
               "id": "ECE732AD-6EAE-4E20-A4BA-33993515DD94",
               "isLocked": false,
               "maskType": 0,
@@ -271,6 +272,7 @@
                 "shadows": []
               },
               "styleEffectMaskArea": 0,
+              "verticalConstraint": 5,
               "visible": true
             },
             {
@@ -308,7 +310,7 @@
                   "length": 5,
                   "letterSpacing": 0.0,
                   "lettertransform": 0,
-                  "lineSpace": 24.0,
+                  "lineSpace": 90.0,
                   "linethrough": false,
                   "name": "PingFangHK-Semibold",
                   "proportionalSpacing": 0.0,
@@ -348,6 +350,7 @@
                 "y": -150.0
               },
               "frameMode": 1,
+              "horizontalConstraint": 6,
               "id": "DBBE9B1B-2E54-4C3F-9943-7504AB37A93F",
               "isLocked": false,
               "maskType": 0,
@@ -384,6 +387,7 @@
               },
               "styleEffectMaskArea": 0,
               "verticalAlignment": 0,
+              "verticalConstraint": 6,
               "visible": true
             },
             {
@@ -423,6 +427,7 @@
                     "x": 0.0,
                     "y": 0.0
                   },
+                  "horizontalConstraint": 5,
                   "id": "8B33AFCB-BD70-44A8-B425-72E146ADE8DF",
                   "isLocked": false,
                   "maskType": 0,
@@ -644,6 +649,7 @@
                     "shadows": []
                   },
                   "styleEffectMaskArea": 0,
+                  "verticalConstraint": 5,
                   "visible": true
                 }
               ],
@@ -663,6 +669,7 @@
                 "x": 250.0,
                 "y": -61.0
               },
+              "horizontalConstraint": 5,
               "id": "DDFC8523-752D-43AC-8D53-521ABC0E34C8",
               "isLocked": false,
               "maskType": 0,
@@ -698,6 +705,7 @@
                 "shadows": []
               },
               "styleEffectMaskArea": 0,
+              "verticalConstraint": 5,
               "visible": true
             }
           ],
@@ -717,6 +725,7 @@
             "x": 0.0,
             "y": 0.0
           },
+          "horizontalConstraint": 5,
           "id": "81894DBE-1252-4F17-AB86-490011BB3F27",
           "isLocked": false,
           "maskType": 0,
@@ -731,6 +740,7 @@
           "name": "Rectangle",
           "outlineMaskBy": [],
           "overflow": 2,
+          "resizesContent": 1,
           "style": {
             "blurs": [
               {
@@ -752,6 +762,7 @@
             "shadows": []
           },
           "styleEffectMaskArea": 0,
+          "verticalConstraint": 5,
           "visible": true
         }
       ],
@@ -832,6 +843,7 @@
             "x": 259.0,
             "y": -170.0
           },
+          "horizontalConstraint": 5,
           "id": "3819DB6E-4651-47A2-919E-180FCE54D194",
           "isLocked": false,
           "maskType": 0,
@@ -884,6 +896,7 @@
             "shadows": []
           },
           "styleEffectMaskArea": 0,
+          "verticalConstraint": 5,
           "visible": true
         }
       ],
@@ -927,5 +940,6 @@
       "styleEffectMaskArea": 0,
       "visible": true
     }
-  ]
+  ],
+  "references": []
 }

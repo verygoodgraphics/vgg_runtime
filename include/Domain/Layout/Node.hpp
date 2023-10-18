@@ -191,12 +191,12 @@ private:
   void resize(const Layout::Size& oldContainerSize,
               const Layout::Size& newContainerSize,
               bool useOldFrame);
-  std::pair<Layout::Scalar, Layout::Scalar> resizeH(
-    const Layout::Size& oldContainerSize,
-    const Layout::Size& newContainerSize) const; // return x, w
-  std::pair<Layout::Scalar, Layout::Scalar> resizeV(
-    const Layout::Size& oldContainerSize,
-    const Layout::Size& newContainerSize) const; // return y, h
+  std::pair<Layout::Scalar, Layout::Scalar> resizeH(const Layout::Size& oldContainerSize,
+                                                    const Layout::Size& newContainerSize,
+                                                    bool useOldFrame) const; // return x, w
+  std::pair<Layout::Scalar, Layout::Scalar> resizeV(const Layout::Size& oldContainerSize,
+                                                    const Layout::Size& newContainerSize,
+                                                    bool useOldFrame) const; // return y, h
 
   EResizing horizontalResizing() const;
   EResizing verticalResizing() const;

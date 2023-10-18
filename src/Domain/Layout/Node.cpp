@@ -178,17 +178,14 @@ void LayoutNode::scaleChildNodes(const Layout::Size& oldContainerSize,
   {
     return;
   }
-  auto xScaleFactor = newContainerSize.width / oldContainerSize.width;
-  auto yScaleFactor = newContainerSize.height / oldContainerSize.height;
 
   for (auto& child : m_children)
   {
-    auto oldFame = useOldFrame ? child->m_oldFrame : child->frame();
-    auto [oldOrigin, oldSize] = oldFame;
-
     child->resize(oldContainerSize, newContainerSize, useOldFrame);
   }
 
+  auto xScaleFactor = newContainerSize.width / oldContainerSize.width;
+  auto yScaleFactor = newContainerSize.height / oldContainerSize.height;
   scaleContour(xScaleFactor, yScaleFactor);
 }
 
@@ -434,21 +431,20 @@ void LayoutNode::resize(const Layout::Size& oldContainerSize,
                         const Layout::Size& newContainerSize,
                         bool useOldFrame)
 {
-  auto [x, w] = resizeH(oldContainerSize, newContainerSize);
-  auto [y, h] = resizeV(oldContainerSize, newContainerSize);
-
+  auto [x, w] = resizeH(oldContainerSize, newContainerSize, useOldFrame);
+  auto [y, h] = resizeV(oldContainerSize, newContainerSize, useOldFrame);
   Layout::Rect newFrame{ { x, y }, { w, h } };
 
   setFrame(newFrame, false, useOldFrame);
 }
 
-std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeH(
-  const Layout::Size& oldContainerSize,
-  const Layout::Size& newContainerSize) const
+std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeH(const Layout::Size& oldContainerSize,
+                                                              const Layout::Size& newContainerSize,
+                                                              bool useOldFrame) const
 {
   Layout::Scalar x{ 0 }, w{ 0 };
 
-  const auto oldFrame = frame();
+  const auto oldFrame = useOldFrame ? m_oldFrame : frame();
   const auto rightMargin = oldContainerSize.width - oldFrame.right();
 
   switch (horizontalResizing())
@@ -521,13 +517,13 @@ std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeH(
   return { x, w };
 }
 
-std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeV(
-  const Layout::Size& oldContainerSize,
-  const Layout::Size& newContainerSize) const
+std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeV(const Layout::Size& oldContainerSize,
+                                                              const Layout::Size& newContainerSize,
+                                                              bool useOldFrame) const
 {
   Layout::Scalar y{ 0 }, h{ 0 };
 
-  const auto oldFrame = frame();
+  const auto oldFrame = useOldFrame ? m_oldFrame : frame();
   const auto bottomMargin = oldContainerSize.height - oldFrame.bottom();
 
   switch (verticalResizing())

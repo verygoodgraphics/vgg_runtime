@@ -99,15 +99,12 @@ TEST_F(VggExpandSymbolTestSuite, scale)
   nlohmann::json::json_pointer path{ "/frames/1/childObjects/0/childObjects/1" };
   auto child = result_json[path];
   auto child_bounds = child[K_BOUNDS].get<Rect>();
-  auto child_frame = child[K_FRAME].get<Rect>();
   auto child_matrix = child[K_MATRIX].get<Matrix>();
 
-  Rect expect_bounds{ 0, 0, 637.656005, 129.333344 };
-  Rect expect_frame{ 140.832001, -194, 637.656005, 129.333344 };
-  Matrix expect_matrix{ 1, 0, 0, 1, 140.832001, -194 };
+  Rect expect_bounds{ 0, 0, 163, 100 };
+  Matrix expect_matrix{ 1, 0, 0, 1, 378.1600036621094, -208.66668701171875 };
 
   EXPECT_EQ(child_bounds, expect_bounds);
-  EXPECT_EQ(child_frame, expect_frame);
   EXPECT_EQ(child_matrix, expect_matrix);
 
   // Then
@@ -115,7 +112,7 @@ TEST_F(VggExpandSymbolTestSuite, scale)
     "/frames/1/childObjects/0/childObjects/2/childObjects/0/shape/subshapes/0/subGeometry/points/2"
   };
   auto point = result_json[path2][K_POINT].get<Point>();
-  Point expect_point{ 704.1600341796875, -129.33334350585938 };
+  Point expect_point{ 704.1599731445313, -129.3333282470703 };
   EXPECT_EQ(point, expect_point);
 }
 

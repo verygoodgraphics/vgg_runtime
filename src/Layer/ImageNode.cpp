@@ -112,7 +112,7 @@ bool ImageNode::fill() const
   return d_ptr->fillReplacesImage;
 }
 
-void ImageNode::paintFill(SkCanvas* canvas, SkBlendMode mode, const SkPath& path)
+void ImageNode::paintFill(SkCanvas* canvas, sk_sp<SkBlender> blender, const SkPath& path)
 {
   (void)path;
   VGG_IMPL(ImageNode)
@@ -143,7 +143,7 @@ void ImageNode::paintFill(SkCanvas* canvas, SkBlendMode mode, const SkPath& path
 
     SkPaint p;
     p.setShader(_->shader);
-    p.setBlendMode(mode);
+    p.setBlender(std::move(blender));
     canvas->drawPaint(p);
     // Another weird drawing method
     // SkSamplingOptions opt;

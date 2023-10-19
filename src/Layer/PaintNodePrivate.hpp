@@ -21,6 +21,9 @@
 #include "Utility/HelperMacro.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Renderer.hpp"
+
+#include <core/SkBlender.h>
+#include <encode/SkPngEncoder.h>
 #include <core/SkBlendMode.h>
 #include <core/SkCanvas.h>
 #include <core/SkSurface.h>
@@ -69,9 +72,7 @@ public:
 
   std::optional<SkPath> path;
   std::optional<SkPath> mask;
-  std::optional<std::vector<std::pair<PaintNode*, glm::mat3>>> maskObjects;
-  std::optional<sk_sp<SkImage>> alphaMaskImage;
-  std::optional<sk_sp<SkImageFilter>> alphaMask;
+  std::optional<std::vector<std::pair<PaintNode*, glm::mat3>>> alphaMaskObjects;
 
   PaintNode__pImpl(PaintNode* api, ObjectType type)
     : q_ptr(api)
@@ -104,19 +105,20 @@ public:
     return *this;
   }
 
-  std::vector<std::pair<PaintNode*, glm::mat3>> calcMaskObjects(SkiaRenderer* renderer)
+  template<typename G>
+  std::vector<std::pair<PaintNode*, glm::mat3>> calcMaskObjects(SkiaRenderer* renderer, G&& g)
   {
     auto canvas = renderer->canvas();
     const auto& objects = renderer->maskObjects();
     std::vector<std::pair<PaintNode*, glm::mat3>> cache;
     auto maskAreaBound = Bound2::makeInfinite();
     const auto& selfBound = q_ptr->getBound();
-    for (int i = 0; i < alphaMaskBy.size(); i++)
+    while (auto opt = g())
     {
-      const auto& mask = alphaMaskBy[i];
-      if (mask.id != q_ptr->guid())
+      const auto& id = opt.value();
+      if (id != q_ptr->guid())
       {
-        if (auto obj = objects.find(mask.id); obj != objects.end())
+        if (auto obj = objects.find(id); obj != objects.end())
         {
           const auto t = obj->second->mapTransform(q_ptr);
           const auto transformedBound = obj->second->getBound() * t;
@@ -128,7 +130,7 @@ public:
         }
         else
         {
-          DEBUG("No such mask: %s", mask.id.c_str());
+          DEBUG("No such mask: %s", id.c_str());
         }
       }
     }
@@ -183,7 +185,108 @@ public:
     return nullptr;
   }
 
-  void drawRawStyle(Painter& painter, const SkPath& skPath)
+  sk_sp<SkImageFilter> makeAlphaMaskBy(SkiaRenderer* renderer)
+  {
+    if (alphaMaskBy.empty())
+      return nullptr;
+    auto canvas = renderer->canvas();
+    const auto& objects = renderer->maskObjects();
+    std::vector<std::pair<PaintNode*, glm::mat3>> cache;
+    auto maskAreaBound = Bound2::makeInfinite();
+    const auto& selfBound = bound;
+    for (int i = 0; i < alphaMaskBy.size(); i++)
+    {
+      const auto& mask = alphaMaskBy[i];
+      if (mask.id != q_ptr->guid())
+      {
+        if (auto obj = objects.find(mask.id); obj != objects.end())
+        {
+          const auto t = obj->second->mapTransform(q_ptr);
+          const auto transformedBound = obj->second->getBound() * t;
+          if (selfBound.isIntersectWith(transformedBound))
+          {
+            cache.emplace_back(obj->second, t);
+            maskAreaBound.intersectWith(transformedBound);
+          }
+        }
+        else
+        {
+          DEBUG("No such mask: %s", mask.id.c_str());
+        }
+      }
+    }
+    if (cache.empty() || !maskAreaBound.valid())
+      return nullptr;
+    maskAreaBound.unionWith(selfBound);
+    const auto [w, h] = std::pair{ maskAreaBound.width(), maskAreaBound.height() };
+    if (w <= 0 || h <= 0)
+      return nullptr;
+    auto maskSurface = canvas->getSurface()->makeSurface(w, h);
+    const auto maskCanvas = maskSurface->getCanvas();
+    // SkPaint pen;
+    // pen.setColor(SK_ColorRED);
+    // pen.setStrokeWidth(2);
+    // pen.setStyle(SkPaint::kStroke_Style);
+    // maskCanvas->drawRect({ 0, 0, w, h }, pen);
+    // pen.setColor(SK_ColorBLUE);
+    // pen.setStyle(SkPaint::kFill_Style);
+    // maskCanvas->drawCircle(0, 0, 10, pen);
+    for (const auto& p : cache)
+    {
+      auto skm = toSkMatrix(p.second);
+      skm.postScale(1, -1);
+      maskCanvas->setMatrix(skm);
+      // pen.setStrokeWidth(5);
+      // pen.setColor(SK_ColorGREEN);
+      // maskCanvas->drawCircle(0, 0, 10, pen);
+      // maskCanvas->drawLine(0, 0, skm.getTranslateX(), -skm.getTranslateY(), pen);
+      p.first->d_ptr->drawAlphaMask(maskCanvas);
+    }
+    auto image = maskSurface->makeImageSnapshot();
+    auto data = SkPngEncoder::Encode((GrDirectContext*)maskSurface->recordingContext(),
+                                     image.get(),
+                                     SkPngEncoder::Options());
+    // std::ofstream ofs("alphamask.png");
+    // if (ofs.is_open())
+    // {
+    //   ofs.write((char*)data->data(), data->size());
+    // }
+    auto filter = SkImageFilters::Image(image, SkSamplingOptions());
+    auto blend = SkImageFilters::Blend(SkBlendMode::kSrcIn, filter);
+    // SkMatrix mat;
+    // mat.postScale(1, -1);
+    return blend;
+  }
+
+  void drawAlphaMask(SkCanvas* canvas)
+  {
+    if (!path)
+    {
+      path = q_ptr->asOutlineMask(0).outlineMask;
+    }
+    if (path->isEmpty())
+    {
+      return;
+    }
+
+    Painter render(canvas);
+    auto result = SkRuntimeEffect::MakeForBlender(SkString(R"(
+			vec4 main(vec4 srcColor, vec4 dstColor){
+		       return vec4(dstColor.rgb * srcColor.a, srcColor.a);
+			}
+)"))
+                    .effect;
+
+    auto blender = result->makeBlender(nullptr);
+    for (const auto& f : style.fills)
+    {
+      if (!f.isEnabled)
+        continue;
+      render.drawFill(*path, bound, f, contextSetting.Opacity, nullptr, blender);
+    }
+  }
+
+  void drawRawStyle(Painter& painter, const SkPath& skPath, sk_sp<SkBlender> blender)
   {
     const auto globalAlpha = contextSetting.Opacity;
     auto filled = false;
@@ -195,6 +298,7 @@ public:
         break;
       }
     }
+
     // draw outer shadows
     // 1. check out fills
     {
@@ -224,13 +328,13 @@ public:
       }
     }
 
-    q_ptr->paintFill(painter.canvas(), SkBlendMode::kSrcOver, skPath);
+    q_ptr->paintFill(painter.canvas(), blender, skPath);
 
     for (const auto& b : style.borders)
     {
       if (!b.isEnabled)
         continue;
-      painter.drawPathBorder(skPath, bound, b, globalAlpha, nullptr, nullptr);
+      painter.drawPathBorder(skPath, bound, b, globalAlpha, nullptr, blender);
     }
 
     // draw inner shadow

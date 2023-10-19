@@ -45,6 +45,6 @@ public:
   virtual ~ImageNode() override;
 
 protected:
-  void paintFill(SkCanvas* canvas, SkBlendMode mode, const SkPath& path) override;
+  void paintFill(SkCanvas* canvas, sk_sp<SkBlender> blender, const SkPath& path) override;
 };
 } // namespace VGG

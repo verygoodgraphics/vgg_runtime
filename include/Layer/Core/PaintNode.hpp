@@ -175,8 +175,6 @@ public:
 
   virtual Mask asOutlineMask(const glm::mat3* mat);
 
-  void drawAlphaMask(SkCanvas* maskCanvas);
-
   ~PaintNode();
 
 public:
@@ -212,7 +210,6 @@ protected:
   virtual SkPath makeContourImpl(ContourOption option, const glm::mat3* mat);
   SkPath childPolyOperation() const;
   Mask makeMaskBy(EBoolOp maskOp, SkiaRenderer* renderer);
-  sk_sp<SkImageFilter> makeAlphaMaskBy(SkiaRenderer* renderer);
 
 protected:
   // Style
@@ -220,7 +217,7 @@ protected:
   void paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& mask);
 
   [[deprecated]] virtual void paintFill(SkCanvas* canvas,
-                                        SkBlendMode mode,
+                                        sk_sp<SkBlender> blender,
                                         const SkPath& path); // TODO:: only for ImageNode overriding
 };
 } // namespace VGG

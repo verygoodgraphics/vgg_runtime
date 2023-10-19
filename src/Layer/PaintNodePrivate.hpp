@@ -17,9 +17,11 @@
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Renderer.hpp"
+#include "Layer/Painter.hpp"
 #include "Utility/HelperMacro.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Renderer.hpp"
+#include <core/SkBlendMode.h>
 #include <core/SkCanvas.h>
 #include <core/SkSurface.h>
 #include <core/SkImageFilter.h>
@@ -179,6 +181,67 @@ public:
       DEBUG("Invalid bg image area:[%f, %f, %f, %f]", b.x(), b.y(), b.width(), b.height());
     }
     return nullptr;
+  }
+
+  void drawRawStyle(Painter& painter, const SkPath& skPath)
+  {
+    const auto globalAlpha = contextSetting.Opacity;
+    auto filled = false;
+    for (const auto& f : style.fills)
+    {
+      if (f.isEnabled)
+      {
+        filled = true;
+        break;
+      }
+    }
+    // draw outer shadows
+    // 1. check out fills
+    {
+      if (filled)
+      {
+        // transparent fill clip out the shadow
+        painter.beginClip(skPath, SkClipOp::kDifference);
+      }
+      for (const auto& s : style.shadows) // simplified into one shadow
+      {
+        if (!s.is_enabled || s.inner)
+          continue;
+        if (filled)
+          painter.drawShadow(skPath, bound, s, SkPaint::kFill_Style, nullptr);
+
+        for (const auto& b : style.borders)
+        {
+          if (!b.isEnabled)
+            continue;
+          painter.drawShadow(skPath, bound, s, SkPaint::kStroke_Style, nullptr);
+          break;
+        }
+      }
+      if (filled)
+      {
+        painter.endClip();
+      }
+    }
+
+    q_ptr->paintFill(painter.canvas(), SkBlendMode::kSrcOver, skPath);
+
+    for (const auto& b : style.borders)
+    {
+      if (!b.isEnabled)
+        continue;
+      painter.drawPathBorder(skPath, bound, b, globalAlpha, nullptr, nullptr);
+    }
+
+    // draw inner shadow
+    painter.beginClip(skPath);
+    for (const auto& s : style.shadows)
+    {
+      if (!s.is_enabled || !s.inner)
+        continue;
+      painter.drawInnerShadow(skPath, bound, s, SkPaint::kFill_Style, nullptr);
+    }
+    painter.endClip();
   }
 
   PaintNode__pImpl(PaintNode__pImpl&&) noexcept = default;

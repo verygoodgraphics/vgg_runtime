@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 #include "VSkia.hpp"
-#include "PaintNodePrivate.hpp"
-#include "StyleRenderer.hpp"
+#include "Painter.hpp"
 #include "Renderer.hpp"
 #include "RenderState.hpp"
+#include "PaintNodePrivate.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Node.hpp"
@@ -304,25 +304,6 @@ void PaintNode::renderPass(SkiaRenderer* renderer)
 {
   invokeRenderPass(renderer, 0);
 }
-
-// void PaintNode::visitNode(VGG::Node* p, ObjectTableType& table)
-// {
-//   if (!p)
-//     return;
-//   auto sptr = std::static_pointer_cast<PaintNode>(p->shared_from_this());
-//   if (sptr->d_ptr->maskType != MT_None)
-//   {
-//     if (auto it = table.find(sptr->guid()); it == table.end())
-//     {
-//       table[sptr->guid()] = sptr; // type of all children of paintnode must be paintnode
-//     }
-//   }
-//   for (auto it = p->begin(); it != p->end(); ++it)
-//   {
-//     visitNode(it->get(), table);
-//   }
-// }
-//
 void PaintNode::paintPass(SkiaRenderer* renderer, int zorder)
 {
   VGG_IMPL(PaintNode);
@@ -526,26 +507,11 @@ void PaintNode::drawAlphaMask(SkCanvas* canvas)
   {
     return;
   }
-
-  canvas->save();
-  canvas->clipPath(*_->path);
-  StyleRenderer styleRenderer(canvas);
-  // styleRenderer.drawContour(canvas,
-  //                           contextSetting(),
-  //                           style(),
-  //                           *_->path,
-  //                           getBound(),
-  //                           nullptr,
-  //                           [&]() { paintFill(canvas, SkBlendMode::kSrcOver, *_->path); });
-
-  styleRenderer.drawStyle(*_->path,
-                          getBound(),
-                          contextSetting(),
-                          style(),
-                          nullptr,
-                          [&]() { paintFill(canvas, SkBlendMode::kSrcOver, *_->path); });
-
-  canvas->restore();
+  // canvas->save();
+  // canvas->clipPath(*_->path);
+  Painter painter(canvas);
+  _->drawRawStyle(painter, *_->path);
+  // canvas->restore();
 }
 
 Mask PaintNode::asOutlineMask(const glm::mat3* mat)
@@ -920,71 +886,52 @@ SkPath PaintNode::stylePath()
 void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& outlineMask)
 {
   VGG_IMPL(PaintNode);
-  sk_sp<SkImageFilter> alphaMaskFilter = nullptr;
-  SkBlendMode blendMode{ SkBlendMode::kSrcOver };
-  StyleRenderer styleRenderer(canvas);
+  Painter painter(canvas);
   // draw blur, we assume that there is only one blur style
   bool hasBlur = style().blurs.empty() ? false : style().blurs[0].isEnabled;
   if (hasBlur)
   {
     const auto blur = style().blurs[0];
-    if (blur.blurType != BT_Background)
+    const auto blurType = blur.blurType;
+    if (blurType == BT_Gaussian)
     {
-      auto pen = styleRenderer.makeBlurPen(blur, nullptr);
-      auto b = toSkRect(getBound());
-      SkMatrix m;
-      m.preScale(1, 1);
-      b = m.mapRect(b);
-      canvas->saveLayer(&b, &pen);
+      painter.blurContentBegin(blur.radius, blur.radius, getBound());
+    }
+    else if (blurType == BT_Zoom)
+    {
+      painter.blurContentBegin(blur.radius, 0, getBound());
+    }
+    else if (blurType == BT_Background)
+    {
+      painter.blurBackgroundBegin(blur.radius, blur.radius, getBound(), &path);
     }
   }
 
-  if (outlineMask.isEmpty())
+  if (!outlineMask.isEmpty())
   {
-    // styleRenderer.drawContour(canvas,
-    //                           contextSetting(),
-    //                           style(),
-    //                           path,
-    //                           getBound(),
-    //                           alphaMaskFilter,
-    //                           [&]() { paintFill(canvas, SkBlendMode::kSrcOver, path); });
-
-    styleRenderer.drawStyle(path,
-                            getBound(),
-                            contextSetting(),
-                            style(),
-                            alphaMaskFilter,
-                            [&]() { paintFill(canvas, SkBlendMode::kSrcOver, path); });
+    painter.beginClip(outlineMask);
   }
-  else
+  _->drawRawStyle(painter, path);
+  if (!outlineMask.isEmpty())
   {
-    canvas->save();
-    canvas->clipPath(outlineMask);
-    // styleRenderer.drawContour(canvas,
-    //                           contextSetting(),
-    //                           style(),
-    //                           path,
-    //                           getBound(),
-    //                           alphaMaskFilter,
-    //                           [&]() { paintFill(canvas, SkBlendMode::kSrcOver, path); });
-
-    styleRenderer.drawStyle(path,
-                            getBound(),
-                            contextSetting(),
-                            style(),
-                            alphaMaskFilter,
-                            [&]() { paintFill(canvas, SkBlendMode::kSrcOver, path); });
-    canvas->restore();
+    painter.endClip();
   }
 
-  // restore blur
   if (hasBlur)
   {
-
     const auto blur = style().blurs[0];
-    if (blur.blurType != BT_Background)
+    const auto blurType = blur.blurType;
+    if (blurType == BT_Gaussian)
     {
-      canvas->restore();
+      painter.blurContentEnd();
+    }
+    else if (blurType == BT_Zoom)
+    {
+      painter.blurContentEnd();
+    }
+    else if (blurType == BT_Background)
+    {
+      painter.blurBackgroundEnd();
     }
   }
 }
@@ -992,21 +939,6 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
 void PaintNode::paintFill(SkCanvas* canvas, SkBlendMode mode, const SkPath& path)
 {
   VGG_IMPL(PaintNode);
-
-  const auto hintRect = toSkRect(getBound());
-
-  // background blur
-  bool hasBlur = style().blurs.empty() ? false : style().blurs[0].isEnabled;
-  if (hasBlur)
-  {
-    if (style().blurs[0].blurType == BT_Background)
-    {
-      canvas->save();
-      canvas->clipPath(path);
-      auto blurFilter = SkImageFilters::Blur(20, 20, 0);
-      canvas->saveLayer(SkCanvas::SaveLayerRec(&hintRect, nullptr, blurFilter.get(), 0));
-    }
-  }
 
   // // masks
   // if (_->maskObjects)
@@ -1021,22 +953,13 @@ void PaintNode::paintFill(SkCanvas* canvas, SkBlendMode mode, const SkPath& path
   //   }
   // }
 
-  StyleRenderer render(canvas);
+  Painter render(canvas);
   auto blender = SkBlender::Mode(mode);
   for (const auto& f : style().fills)
   {
     if (!f.isEnabled)
       continue;
-    render.drawFill(path, getBound(), f, contextSetting().Opacity, nullptr, std::move(blender));
-  }
-
-  if (hasBlur)
-  {
-    if (style().blurs[0].blurType == BT_Background)
-    {
-      canvas->restore();
-      canvas->restore();
-    }
+    render.drawFill(path, getBound(), f, contextSetting().Opacity, nullptr, blender);
   }
 }
 

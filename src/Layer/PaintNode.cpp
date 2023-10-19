@@ -42,9 +42,11 @@
 #include <include/core/SkCanvas.h>
 #include <core/SkPath.h>
 #include <core/SkRRect.h>
+#include <optional>
 #include <src/core/SkRuntimeEffectPriv.h>
 #include <limits>
 #include <fstream>
+#include <string_view>
 
 static sk_sp<SkShader> makeMaskShader(sk_sp<SkImage> mask, const SkMatrix* mat)
 {
@@ -191,80 +193,6 @@ glm::mat3 PaintNode::mapTransform(const PaintNode* node) const
   return mat;
 }
 
-sk_sp<SkImageFilter> PaintNode::makeAlphaMaskBy(SkiaRenderer* renderer)
-{
-  VGG_IMPL(PaintNode);
-  if (_->alphaMaskBy.empty())
-    return nullptr;
-  auto canvas = renderer->canvas();
-  const auto& objects = renderer->maskObjects();
-  std::vector<std::pair<PaintNode*, glm::mat3>> cache;
-  auto maskAreaBound = Bound2::makeInfinite();
-  const auto& selfBound = getBound();
-  for (int i = 0; i < _->alphaMaskBy.size(); i++)
-  {
-    const auto& mask = _->alphaMaskBy[i];
-    if (mask.id != this->guid())
-    {
-      if (auto obj = objects.find(mask.id); obj != objects.end())
-      {
-        const auto t = obj->second->mapTransform(this);
-        const auto transformedBound = obj->second->getBound() * t;
-        if (selfBound.isIntersectWith(transformedBound))
-        {
-          cache.emplace_back(obj->second, t);
-          maskAreaBound.intersectWith(transformedBound);
-        }
-      }
-      else
-      {
-        DEBUG("No such mask: %s", mask.id.c_str());
-      }
-    }
-  }
-  if (cache.empty() || !maskAreaBound.valid())
-    return nullptr;
-  maskAreaBound.unionWith(selfBound);
-  const auto [w, h] = std::pair{ maskAreaBound.width(), maskAreaBound.height() };
-  if (w <= 0 || h <= 0)
-    return nullptr;
-  auto maskSurface = canvas->getSurface()->makeSurface(w, h);
-  const auto maskCanvas = maskSurface->getCanvas();
-  // SkPaint pen;
-  // pen.setColor(SK_ColorRED);
-  // pen.setStrokeWidth(2);
-  // pen.setStyle(SkPaint::kStroke_Style);
-  // maskCanvas->drawRect({ 0, 0, w, h }, pen);
-  // pen.setColor(SK_ColorBLUE);
-  // pen.setStyle(SkPaint::kFill_Style);
-  // maskCanvas->drawCircle(0, 0, 10, pen);
-  for (const auto& p : cache)
-  {
-    auto skm = toSkMatrix(p.second);
-    skm.postScale(1, -1);
-    maskCanvas->setMatrix(skm);
-    // pen.setStrokeWidth(5);
-    // pen.setColor(SK_ColorGREEN);
-    // maskCanvas->drawCircle(0, 0, 10, pen);
-    // maskCanvas->drawLine(0, 0, skm.getTranslateX(), -skm.getTranslateY(), pen);
-    p.first->drawAlphaMask(maskCanvas);
-  }
-  auto image = maskSurface->makeImageSnapshot();
-  auto data = SkPngEncoder::Encode((GrDirectContext*)maskSurface->recordingContext(),
-                                   image.get(),
-                                   SkPngEncoder::Options());
-  // std::ofstream ofs("alphamask.png");
-  // if (ofs.is_open())
-  // {
-  //   ofs.write((char*)data->data(), data->size());
-  // }
-  auto filter = SkImageFilters::Image(image, SkSamplingOptions());
-  auto blend = SkImageFilters::Blend(SkBlendMode::kSrcIn, filter);
-  // SkMatrix mat;
-  // mat.postScale(1, -1);
-  return blend;
-}
-
 Mask PaintNode::makeMaskBy(EBoolOp maskOp, SkiaRenderer* renderer)
 {
   VGG_IMPL(PaintNode);
@@ -320,9 +248,22 @@ void PaintNode::paintPass(SkiaRenderer* renderer, int zorder)
     _->mask = makeMaskBy(BO_Intersection, renderer).outlineMask;
   }
 
-  if (!_->alphaMask)
+  if (!_->alphaMaskBy.empty() && _->alphaMaskObjects->empty())
   {
-    _->alphaMask = makeAlphaMaskBy(renderer);
+    auto iter = _->alphaMaskBy.cbegin();
+    auto end = _->alphaMaskBy.cend();
+    _->alphaMaskObjects = _->calcMaskObjects(renderer,
+                                             [&]() -> std::optional<std::string>
+                                             {
+                                               if (iter != end)
+                                               {
+                                                 // TODO:: unnecessary string copy
+                                                 auto id = iter->id;
+                                                 ++iter;
+                                                 return std::optional<std::string>(id);
+                                               }
+                                               return std::nullopt;
+                                             });
   }
   // renderer->displayList.emplace_back(renderer->canvas()->getTotalMatrix(), this);
   renderer->pushItem(this, zorder);
@@ -494,24 +435,6 @@ SkPath PaintNode::makeContourImpl(ContourOption option, const glm::mat3* mat)
     path.transform(toSkMatrix(*mat));
   }
   return path;
-}
-
-void PaintNode::drawAlphaMask(SkCanvas* canvas)
-{
-  VGG_IMPL(PaintNode);
-  if (!_->path)
-  {
-    _->path = asOutlineMask(0).outlineMask;
-  }
-  if (_->path->isEmpty())
-  {
-    return;
-  }
-  // canvas->save();
-  // canvas->clipPath(*_->path);
-  Painter painter(canvas);
-  _->drawRawStyle(painter, *_->path);
-  // canvas->restore();
 }
 
 Mask PaintNode::asOutlineMask(const glm::mat3* mat)
@@ -911,7 +834,45 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
   {
     painter.beginClip(outlineMask);
   }
-  _->drawRawStyle(painter, path);
+
+  // draw alpha mask first if any
+
+  auto blender = SkBlender::Mode(SkBlendMode::kSrcOver);
+  auto hasAlphaMask = !_->alphaMaskObjects->empty();
+  if (hasAlphaMask)
+  {
+    if (!hasBlur)
+    {
+      // save a layer
+      SkPath res;
+      Op(path, outlineMask, SkPathOp::kIntersect_SkPathOp, &res);
+      canvas->saveLayer(toSkRect(getBound()), nullptr);
+      canvas->clipPath(res);
+    }
+
+    auto result = SkRuntimeEffect::MakeForBlender(SkString(R"(
+			vec4 main(vec4 srcColor, vec4 dstColor){
+			 vec4 color = srcColor + dstColor * (1.0 - srcColor.a);
+			 // return color * dstColor.a;
+			 // return srcColor * dstColor.a;
+			 return vec4(color.rgb, dstColor.a);
+			}
+			)"))
+                    .effect;
+    blender = result->makeBlender(nullptr);
+  }
+
+  _->drawRawStyle(painter, path, blender);
+
+  if (hasAlphaMask)
+  {
+    if (!hasBlur)
+    {
+      // restore a ther layer
+      canvas->restore();
+    }
+  }
+
   if (!outlineMask.isEmpty())
   {
     painter.endClip();
@@ -936,7 +897,7 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
   }
 }
 
-void PaintNode::paintFill(SkCanvas* canvas, SkBlendMode mode, const SkPath& path)
+void PaintNode::paintFill(SkCanvas* canvas, sk_sp<SkBlender> blender, const SkPath& path)
 {
   VGG_IMPL(PaintNode);
 
@@ -954,7 +915,6 @@ void PaintNode::paintFill(SkCanvas* canvas, SkBlendMode mode, const SkPath& path
   // }
 
   Painter render(canvas);
-  auto blender = SkBlender::Mode(mode);
   for (const auto& f : style().fills)
   {
     if (!f.isEnabled)

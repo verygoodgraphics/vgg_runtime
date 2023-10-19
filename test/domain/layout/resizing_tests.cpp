@@ -1,4 +1,5 @@
 #include "Domain/Layout/Layout.hpp"
+#include "UseCase/StartRunning.hpp"
 
 #include "domain/model/daruma_helper.hpp"
 
@@ -19,19 +20,43 @@ protected:
   {
   }
 
-  void setup(const char* fileDir)
+  auto setupModel(const char* fileDir)
   {
     std::shared_ptr<Daruma> daruma{ new Daruma(Helper::RawJsonDocumentBuilder,
                                                Helper::RawJsonDocumentBuilder) };
     daruma->load(fileDir);
+    return daruma;
+  }
+
+  void setup(const char* fileDir)
+  {
+    auto daruma = setupModel(fileDir);
     m_sut.reset(new Layout::Layout{ daruma->designDoc(), daruma->layoutDoc() });
+  }
+
+  void setupWithExpanding(const char* fileDir)
+  {
+    auto daruma = setupModel(fileDir);
+
+    StartRunning startRunning{ daruma };
+    m_sut = startRunning.layout();
+  }
+
+  auto firstPage()
+  {
+    auto tree = m_sut->layoutTree();
+    return tree->children()[0];
   }
 
   auto childFrame(int index)
   {
-    auto tree = m_sut->layoutTree();
-    auto currentPage = tree->children()[0];
-    auto frame = currentPage->children()[index]->frame();
+    auto frame = firstPage()->children()[index]->frame();
+    return frame;
+  }
+
+  auto grandsonFrame(int index, int index2)
+  {
+    auto frame = firstPage()->children()[index]->children()[index2]->frame();
     return frame;
   }
 };
@@ -124,4 +149,24 @@ TEST_F(VggResizingTestSuite, SketchVertical)
   EXPECT_TRUE(childFrame(4) == expectedFrames[4]);
   EXPECT_TRUE(childFrame(5) == expectedFrames[5]);
   EXPECT_TRUE(childFrame(6) == expectedFrames[6]);
+}
+
+TEST_F(VggResizingTestSuite, ExpandingSymbol)
+{
+  // Given
+  setupWithExpanding("testDataDir/resizing/fig_instance_width/");
+
+  // When
+
+  // Then
+  std::vector<Layout::Rect> expectedFrames{ { { 20, 0 }, { 100, 40 } },
+                                            { { 620, 50 }, { 100, 40 } },
+                                            { { 20, 100 }, { 700, 40 } },
+                                            { { 320, 150 }, { 100, 40 } },
+                                            { { 39.9999962, 200 }, { 199.999985, 40 } } };
+  EXPECT_TRUE(grandsonFrame(1, 0) == expectedFrames[0]);
+  EXPECT_TRUE(grandsonFrame(1, 1) == expectedFrames[1]);
+  EXPECT_TRUE(grandsonFrame(1, 2) == expectedFrames[2]);
+  EXPECT_TRUE(grandsonFrame(1, 3) == expectedFrames[3]);
+  EXPECT_TRUE(grandsonFrame(1, 4) == expectedFrames[4]);
 }

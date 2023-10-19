@@ -91,21 +91,5 @@ bool isLayoutNode(const nlohmann::json& json)
   return false;
 }
 
-bool isPointAttrNode(const nlohmann::json& json)
-{
-  if (!json.is_object())
-  {
-    return false;
-  }
-
-  auto className = json.value(K_CLASS, "");
-  if (className == K_POINT_ATTR)
-  {
-    return true;
-  }
-
-  return false;
-}
-
 } // namespace Layout
 } // namespace VGG

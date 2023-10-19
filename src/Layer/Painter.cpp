@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "StyleRenderer.hpp"
+#include "Painter.hpp"
 #include "Layer/Core/VType.hpp"
 #include "VSkia.hpp"
 #include <core/SkPaint.h>
 
 using namespace VGG;
 
-sk_sp<SkShader> StyleRenderer::getGradientShader(const Gradient& g, const Bound2& bound)
+sk_sp<SkShader> Painter::getGradientShader(const Gradient& g, const Bound2& bound)
 {
   sk_sp<SkShader> shader;
   const auto type = g.gradientType;
@@ -39,12 +39,12 @@ sk_sp<SkShader> StyleRenderer::getGradientShader(const Gradient& g, const Bound2
   return shader;
 }
 
-void StyleRenderer::drawPathBorder(const SkPath& skPath,
-                                   const Bound2& bound,
-                                   const Border& b,
-                                   float globalAlpha,
-                                   sk_sp<SkImageFilter> imageFilter,
-                                   sk_sp<SkBlender> blender)
+void Painter::drawPathBorder(const SkPath& skPath,
+                             const Bound2& bound,
+                             const Border& b,
+                             float globalAlpha,
+                             sk_sp<SkImageFilter> imageFilter,
+                             sk_sp<SkBlender> blender)
 {
   SkPaint strokePen;
   strokePen.setAntiAlias(m_antiAlias);
@@ -115,43 +115,22 @@ void StyleRenderer::drawPathBorder(const SkPath& skPath,
   }
 }
 
-void StyleRenderer::drawPathBorder(SkCanvas* canvas,
-                                   const SkPath& skPath,
-                                   const Border& b,
-                                   float globalAlpha,
-                                   const Bound2& bound,
-                                   sk_sp<SkImageFilter> imageFilter)
+void Painter::drawPathBorder(SkCanvas* canvas,
+                             const SkPath& skPath,
+                             const Border& b,
+                             float globalAlpha,
+                             const Bound2& bound,
+                             sk_sp<SkImageFilter> imageFilter)
 {
   m_canvas = canvas;
   drawPathBorder(skPath, bound, b, globalAlpha, imageFilter, nullptr);
 }
 
-SkPaint StyleRenderer::makeBlurPen(const Blur& blur, sk_sp<SkImageFilter> imageFilter)
-{
-  SkPaint pen;
-  pen.setAntiAlias(m_antiAlias);
-  auto sigma = SkBlurMask::ConvertRadiusToSigma(blur.radius);
-  if (blur.blurType == BT_Gaussian)
-  {
-    pen.setImageFilter(SkImageFilters::Blur(sigma, sigma, nullptr));
-  }
-  else if (blur.blurType == BT_Motion)
-  {
-    pen.setImageFilter(SkImageFilters::Blur(sigma, 0, nullptr));
-  }
-  else if (blur.blurType == VGG::BT_Background)
-  {
-    sk_sp<SkImageFilter> newBlurFilter = SkImageFilters::Blur(5, 5, SkTileMode::kDecal, nullptr);
-    pen.setImageFilter(std::move(newBlurFilter));
-  }
-  return pen;
-}
-
-void StyleRenderer::drawShadow(const SkPath& skPath,
-                               const Bound2& bound,
-                               const Shadow& s,
-                               SkPaint::Style style,
-                               sk_sp<SkImageFilter> imageFilter)
+void Painter::drawShadow(const SkPath& skPath,
+                         const Bound2& bound,
+                         const Shadow& s,
+                         SkPaint::Style style,
+                         sk_sp<SkImageFilter> imageFilter)
 {
   SkPaint pen;
   pen.setAntiAlias(m_antiAlias);
@@ -167,22 +146,22 @@ void StyleRenderer::drawShadow(const SkPath& skPath,
   m_canvas->restore();
 }
 
-void StyleRenderer::drawShadow(SkCanvas* canvas,
-                               const SkPath& skPath,
-                               const Shadow& s,
-                               SkPaint::Style style,
-                               const Bound2& bound,
-                               sk_sp<SkImageFilter> imageFilter)
+void Painter::drawShadow(SkCanvas* canvas,
+                         const SkPath& skPath,
+                         const Shadow& s,
+                         SkPaint::Style style,
+                         const Bound2& bound,
+                         sk_sp<SkImageFilter> imageFilter)
 {
   m_canvas = canvas;
   drawShadow(skPath, bound, s, style, imageFilter);
 }
 
-void StyleRenderer::drawInnerShadow(const SkPath& skPath,
-                                    const Bound2& bound,
-                                    const Shadow& s,
-                                    SkPaint::Style style,
-                                    sk_sp<SkImageFilter> imageFilter)
+void Painter::drawInnerShadow(const SkPath& skPath,
+                              const Bound2& bound,
+                              const Shadow& s,
+                              SkPaint::Style style,
+                              sk_sp<SkImageFilter> imageFilter)
 {
   SkPaint pen;
   auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
@@ -199,23 +178,22 @@ void StyleRenderer::drawInnerShadow(const SkPath& skPath,
   m_canvas->restore();
 }
 
-void StyleRenderer::drawInnerShadow(SkCanvas* canvas,
-                                    const SkPath& skPath,
-                                    const Shadow& s,
-                                    SkPaint::Style style,
-                                    const Bound2& bound,
-                                    sk_sp<SkImageFilter> imageFilter)
+void Painter::drawInnerShadow(SkCanvas* canvas,
+                              const SkPath& skPath,
+                              const Shadow& s,
+                              SkPaint::Style style,
+                              const Bound2& bound,
+                              sk_sp<SkImageFilter> imageFilter)
 {
-  m_canvas = canvas;
   drawInnerShadow(skPath, bound, s, style, imageFilter);
 }
 
-void StyleRenderer::drawFill(const SkPath& skPath,
-                             const Bound2& bound,
-                             const Fill& f,
-                             float globalAlpha,
-                             sk_sp<SkImageFilter> imageFilter,
-                             sk_sp<SkBlender> blender)
+void Painter::drawFill(const SkPath& skPath,
+                       const Bound2& bound,
+                       const Fill& f,
+                       float globalAlpha,
+                       sk_sp<SkImageFilter> imageFilter,
+                       sk_sp<SkBlender> blender)
 {
   SkPaint fillPen;
   fillPen.setStyle(SkPaint::kFill_Style);
@@ -257,19 +235,18 @@ void StyleRenderer::drawFill(const SkPath& skPath,
   m_canvas->drawPath(skPath, fillPen);
 }
 
-void StyleRenderer::drawFill(SkCanvas* canvas,
-                             float globalAlpha,
-                             const Style& style,
-                             const SkPath& skPath,
-                             const Bound2& bound,
-                             sk_sp<SkImageFilter> imageFilter,
-                             sk_sp<SkBlender> blender)
+void Painter::drawFill(SkCanvas* canvas,
+                       float globalAlpha,
+                       const Style& style,
+                       const SkPath& skPath,
+                       const Bound2& bound,
+                       sk_sp<SkImageFilter> imageFilter,
+                       sk_sp<SkBlender> blender)
 {
   for (const auto& f : style.fills)
   {
     if (!f.isEnabled)
       continue;
-    m_canvas = canvas;
     drawFill(skPath, bound, f, globalAlpha, imageFilter, blender);
   }
 }

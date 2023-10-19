@@ -55,11 +55,11 @@ class LayoutNode : public std::enable_shared_from_this<LayoutNode>
     FIX_CENTER_RATIO_FIX_SIZE,
     FIX_CENTER_OFFSET_FIX_SIZE
   };
-  enum class EResizingContent
+  enum class EAdjustContentOnResize
   {
-    DEPEND_ON_ANCESTOR,
-    FIX_POSITION_FIX_SIZE,
-    USE_CHILD_OWN,
+    SKIP_GROUP_OR_UNION,
+    DISABLED,
+    ENABLED,
   };
 
   std::weak_ptr<LayoutNode> m_parent;
@@ -200,7 +200,7 @@ private:
 
   EResizing horizontalResizing() const;
   EResizing verticalResizing() const;
-  EResizingContent resizingContent() const;
+  EAdjustContentOnResize adjustContentOnResize() const;
 
   const nlohmann::json* model() const;
 

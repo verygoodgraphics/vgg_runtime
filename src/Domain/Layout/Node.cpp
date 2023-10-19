@@ -179,6 +179,11 @@ void LayoutNode::scaleChildNodes(const Layout::Size& oldContainerSize,
     return;
   }
 
+  if (adjustContentOnResize() == EAdjustContentOnResize::DISABLED)
+  {
+    return;
+  }
+
   for (auto& child : m_children)
   {
     child->resize(oldContainerSize, newContainerSize, useOldFrame);
@@ -608,9 +613,9 @@ LayoutNode::EResizing LayoutNode::verticalResizing() const
   return getValue(K_VERTICAL_CONSTRAINT, EResizing::FIX_START_FIX_SIZE);
 }
 
-LayoutNode::EResizingContent LayoutNode::resizingContent() const
+LayoutNode::EAdjustContentOnResize LayoutNode::adjustContentOnResize() const
 {
-  return getValue(K_RESIZES_CONTENT, EResizingContent::USE_CHILD_OWN);
+  return getValue(K_RESIZES_CONTENT, EAdjustContentOnResize::ENABLED);
 }
 
 template<typename T>

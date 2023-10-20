@@ -57,7 +57,7 @@ class LayoutNode : public std::enable_shared_from_this<LayoutNode>
   };
   enum class EAdjustContentOnResize
   {
-    SKIP_GROUP_OR_UNION,
+    SKIP_GROUP_OR_BOOLEAN_GROUP,
     DISABLED,
     ENABLED,
   };

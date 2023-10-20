@@ -174,39 +174,35 @@ private:
   Layout::Point converPointToAncestor(Layout::Point point,
                                       std::shared_ptr<LayoutNode> ancestorNode = nullptr);
 
-  void scaleChildNodes(const Layout::Size& oldContainerSize,
-                       const Layout::Size& newContainerSize,
-                       bool useOldFrame);
+  void scaleChildNodes(const Layout::Size& oldContainerSize, const Layout::Size& newContainerSize);
   void scaleContour(float xScaleFactor, float yScaleFactor);
   void scalePoint(nlohmann::json& json, const char* key, float xScaleFactor, float yScaleFactor);
 
   Layout::Point origin() const;
   Layout::Size size() const;
+  Layout::Rect transformedFrame() const;
   void saveOldFrame();
   void saveChildrendOldFrame();
 
   void updateModel(const Layout::Rect& frame);
   Layout::Point modelOrigin() const;
   Layout::Rect modelBounds() const;
+  Layout::Matrix modelMatrix() const;
 
   Layout::Rect resize(const Layout::Size& oldContainerSize,
                       const Layout::Size& newContainerSize,
-                      bool useOldFrame,
                       const Layout::Point* parentOrigin = nullptr,
                       bool dry = false);
   Layout::Rect resizeGroup(const Layout::Size& oldContainerSize,
                            const Layout::Size& newContainerSize,
-                           const Layout::Point* parentOrigin,
-                           bool useOldFrame);
+                           const Layout::Point* parentOrigin);
   std::pair<Layout::Scalar, Layout::Scalar> resizeH(
     const Layout::Size& oldContainerSize,
     const Layout::Size& newContainerSize,
-    bool useOldFrame,
     const Layout::Point* parentOrigin) const; // return x, w
   std::pair<Layout::Scalar, Layout::Scalar> resizeV(
     const Layout::Size& oldContainerSize,
     const Layout::Size& newContainerSize,
-    bool useOldFrame,
     const Layout::Point* parentOrigin) const; // return y, h
 
   EResizing horizontalResizing() const;

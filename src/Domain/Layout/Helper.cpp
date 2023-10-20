@@ -102,5 +102,16 @@ bool isGroupNode(const nlohmann::json& json)
   return className == K_GROUP;
 }
 
+bool isPathNode(const nlohmann::json& json)
+{
+  if (!json.is_object())
+  {
+    return false;
+  }
+
+  auto className = json.value(K_CLASS, "");
+  return className == K_PATH;
+}
+
 } // namespace Layout
 } // namespace VGG

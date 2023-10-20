@@ -679,14 +679,23 @@ const nlohmann::json* LayoutNode::model() const
 
 bool LayoutNode::shouldSkip()
 {
-  // if group && parent adjust content is skip group
-  if (auto json = model(); Layout::isGroupNode(*json))
+  // parent adjust content is skip group or boolean group && (group || (boolean group))
+  if (auto parent = m_parent.lock();
+      parent &&
+      parent->adjustContentOnResize() == EAdjustContentOnResize::SKIP_GROUP_OR_BOOLEAN_GROUP)
   {
-    if (auto parent = m_parent.lock())
+    auto json = model();
+    if (Layout::isGroupNode(*json))
     {
-      return parent->adjustContentOnResize() == EAdjustContentOnResize::SKIP_GROUP_OR_UNION;
+      return true;
+    }
+
+    if (Layout::isPathNode(*json))
+    {
+      return m_children.size() > 1;
     }
   }
+
   return false;
 }
 

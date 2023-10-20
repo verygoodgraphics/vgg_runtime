@@ -45,6 +45,11 @@ Bound2 calcMaskAreaIntersection(const Bound2& pruneBound, PaintNode* obj, F&& f)
   return bound;
 }
 
+struct MaskContour
+{
+  SkPath contour;
+};
+
 class PaintNode__pImpl // NOLINT
 {
   VGG_DECL_API(PaintNode);
@@ -72,7 +77,9 @@ public:
 
   std::optional<SkPath> path;
   std::optional<SkPath> mask;
+
   std::optional<std::vector<std::pair<PaintNode*, glm::mat3>>> alphaMaskObjects;
+  std::optional<SkPath> alphaMaskContour;
 
   PaintNode__pImpl(PaintNode* api, ObjectType type)
     : q_ptr(api)
@@ -105,28 +112,32 @@ public:
     return *this;
   }
 
-  template<typename G>
-  std::vector<std::pair<PaintNode*, glm::mat3>> calcMaskObjects(SkiaRenderer* renderer, G&& g)
+  template<typename Iter1, typename Iter2, typename F>
+  std::vector<std::pair<PaintNode*, glm::mat3>> calcMaskObjects(SkiaRenderer* renderer,
+                                                                Iter1 begin,
+                                                                Iter2 end,
+                                                                F&& f)
   {
     auto canvas = renderer->canvas();
     const auto& objects = renderer->maskObjects();
     std::vector<std::pair<PaintNode*, glm::mat3>> cache;
     auto maskAreaBound = Bound2::makeInfinite();
     const auto& selfBound = q_ptr->getBound();
-    while (auto opt = g())
+    for (auto it = begin; it != end; ++it)
     {
-      const auto& id = opt.value();
+      const auto& id = f(*it);
       if (id != q_ptr->guid())
       {
         if (auto obj = objects.find(id); obj != objects.end())
         {
           const auto t = obj->second->mapTransform(q_ptr);
           const auto transformedBound = obj->second->getBound() * t;
-          if (selfBound.isIntersectWith(transformedBound))
-          {
-            cache.emplace_back(obj->second, t);
-            maskAreaBound.intersectWith(transformedBound);
-          }
+          cache.emplace_back(obj->second, t);
+          // if (selfBound.isIntersectWith(transformedBound))
+          // {
+          //   cache.emplace_back(obj->second, t);
+          //   maskAreaBound.intersectWith(transformedBound);
+          // }
         }
         else
         {
@@ -134,13 +145,14 @@ public:
         }
       }
     }
-    if (cache.empty() || !maskAreaBound.valid())
-      return {};
-    maskAreaBound.unionWith(selfBound);
-    const auto [w, h] = std::pair{ maskAreaBound.width(), maskAreaBound.height() };
-    if (w <= 0 || h <= 0)
-      return {};
     return cache;
+    // if (cache.empty() || !maskAreaBound.valid())
+    //   return {};
+    // maskAreaBound.unionWith(selfBound);
+    // const auto [w, h] = std::pair{ maskAreaBound.width(), maskAreaBound.height() };
+    // if (w <= 0 || h <= 0)
+    //   return {};
+    // return cache;
   }
 
   void worldTransform(glm::mat3& mat)
@@ -153,6 +165,45 @@ public:
     }
     static_cast<PaintNode*>(p.get())->d_ptr->worldTransform(mat);
     mat *= q_ptr->localTransform();
+  }
+
+  template<typename Iter1, typename Iter2, typename F>
+  std::optional<SkPath> mapContourFromThis(EBoolOp maskOp,
+                                           Iter1 itr1,
+                                           Iter2 itr2,
+                                           F&& f,
+                                           SkiaRenderer* renderer)
+  {
+    if (itr1 == itr2)
+      return std::nullopt;
+    SkPath result;
+    auto op = toSkPathOp(maskOp);
+    const auto& objects = renderer->maskObjects();
+    for (auto it = itr1; it != itr2; ++it)
+    {
+      const auto& id = f(*it);
+      if (id != q_ptr->guid())
+      {
+        if (auto obj = objects.find(id); obj != objects.end())
+        {
+          const auto t = obj->second->mapTransform(q_ptr);
+          auto m = obj->second->asOutlineMask(&t);
+          if (result.isEmpty())
+          {
+            result = m.outlineMask;
+          }
+          else
+          {
+            Op(result, m.outlineMask, op, &result);
+          }
+        }
+        else
+        {
+          DEBUG("No such mask: %s", id.c_str());
+        }
+      }
+    }
+    return result;
   }
 
   sk_sp<SkImage> fetchBackground(SkCanvas* canvas)
@@ -272,17 +323,18 @@ public:
     Painter render(canvas);
     auto result = SkRuntimeEffect::MakeForBlender(SkString(R"(
 			vec4 main(vec4 srcColor, vec4 dstColor){
-		       return vec4(dstColor.rgb * srcColor.a, srcColor.a);
+		       return vec4(srcColor.rgb , srcColor.a);
 			}
 )"))
                     .effect;
 
     auto blender = result->makeBlender(nullptr);
+    // auto blender = SkBlender::Mode(SkBlendMode::kSrcOver);
     for (const auto& f : style.fills)
     {
       if (!f.isEnabled)
         continue;
-      render.drawFill(*path, bound, f, contextSetting.Opacity, nullptr, blender);
+      render.drawFill(*path, bound, f, contextSetting.Opacity, nullptr, blender, nullptr);
     }
   }
 

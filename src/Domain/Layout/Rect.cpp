@@ -46,3 +46,30 @@ Rect Rect::makeIntersect(const Rect& rhs) const
   auto maxBottom = std::max(bottom(), rhs.bottom());
   return { { minLeft, minTop }, { maxRight - minLeft, maxBottom - minTop } };
 }
+
+Rect Rect::makeTransform(const Matrix& matrix, ECoordinateType type) const
+{
+  const auto isYAxisDown = type == ECoordinateType::LAYOUT;
+
+  auto x1 = left();
+  auto y1 = top();
+  auto x2 = right();
+  auto y2 = isYAxisDown ? bottom() : y1 - height();
+
+  Point p1{ x1, y1 };
+  Point p2{ x2, y1 };
+  Point p3{ x1, y2 };
+  Point p4{ x2, y2 };
+
+  p1 = p1.makeTransform(matrix);
+  p2 = p2.makeTransform(matrix);
+  p3 = p3.makeTransform(matrix);
+  p4 = p4.makeTransform(matrix);
+
+  auto minX = std::min(std::min(p1.x, p2.x), std::min(p3.x, p4.x));
+  auto maxX = std::max(std::max(p1.x, p2.x), std::max(p3.x, p4.x));
+  auto minY = std::min(std::min(p1.y, p2.y), std::min(p3.y, p4.y));
+  auto maxY = std::max(std::max(p1.y, p2.y), std::max(p3.y, p4.y));
+
+  return { { minX, isYAxisDown ? minY : maxY }, { maxX - minX, maxY - minY } };
+}

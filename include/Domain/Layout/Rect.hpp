@@ -26,6 +26,18 @@ using Scalar = float;
 constexpr auto FLIP_Y_FACTOR = -1;
 #define TO_VGG_LAYOUT_SCALAR(x) static_cast<Layout::Scalar>(x)
 
+struct Matrix
+{
+  Scalar a{ 1 };
+  Scalar b{ 0 };
+  Scalar c{ 0 };
+  Scalar d{ 1 };
+  Scalar tx{ 0 };
+  Scalar ty{ 0 };
+
+  bool operator==(const Matrix& rhs) const noexcept;
+};
+
 struct Point
 {
   Scalar x{ 0 };
@@ -54,6 +66,11 @@ struct Point
   {
     return { x, y * FLIP_Y_FACTOR };
   }
+  Point makeTransform(const Matrix& matrix) const
+  {
+    const auto [a, b, c, d, tx, ty] = matrix;
+    return { a * x + c * y + tx, b * x + d * y + ty };
+  }
 };
 
 struct Size
@@ -70,6 +87,12 @@ struct Size
 
 struct Rect
 {
+  enum class ECoordinateType
+  {
+    MODEL, // x: → y: ↑
+    LAYOUT // x: → y: ↓
+  };
+
   Point origin;
   Size size;
 
@@ -101,6 +124,7 @@ struct Rect
   }
 
   Rect makeIntersect(const Rect& rhs) const;
+  Rect makeTransform(const Matrix& matrix, ECoordinateType type) const;
 
   Scalar left() const
   {
@@ -141,18 +165,6 @@ struct Rect
   {
     return top() + height() / 2;
   }
-};
-
-struct Matrix
-{
-  Scalar a;
-  Scalar b;
-  Scalar c;
-  Scalar d;
-  Scalar tx;
-  Scalar ty;
-
-  bool operator==(const Matrix& rhs) const noexcept;
 };
 
 } // namespace Layout

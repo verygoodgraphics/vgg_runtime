@@ -138,7 +138,7 @@ void LayoutNode::setFrame(const Layout::Rect& newFrame, bool updateRule, bool us
     }
   }
 
-  scaleChildNodes(oldSize, newSize, true);
+  scaleChildNodes(oldSize, newSize);
 }
 
 Layout::Rect LayoutNode::bounds() const
@@ -148,17 +148,20 @@ Layout::Rect LayoutNode::bounds() const
 
 Layout::Rect LayoutNode::modelBounds() const
 {
-  Layout::Rect bounds;
-
-  auto viewModel = m_viewModel.lock();
-  if (viewModel)
+  if (auto json = model())
   {
-    nlohmann::json::json_pointer path{ m_path };
-    const auto& objectJson = viewModel->content()[path];
-    bounds = objectJson[K_BOUNDS].get<Layout::Rect>();
+    return (*json)[K_BOUNDS].get<Layout::Rect>();
   }
+  return {};
+}
 
-  return bounds;
+Layout::Matrix LayoutNode::modelMatrix() const
+{
+  if (auto json = model())
+  {
+    return (*json)[K_MATRIX].get<Layout::Matrix>();
+  }
+  return {};
 }
 
 Layout::Size LayoutNode::size() const
@@ -180,8 +183,7 @@ void LayoutNode::configureAutoLayout()
 }
 
 void LayoutNode::scaleChildNodes(const Layout::Size& oldContainerSize,
-                                 const Layout::Size& newContainerSize,
-                                 bool useOldFrame)
+                                 const Layout::Size& newContainerSize)
 {
   if (oldContainerSize == Layout::Size{ 0, 0 })
   {
@@ -195,7 +197,7 @@ void LayoutNode::scaleChildNodes(const Layout::Size& oldContainerSize,
 
   for (auto& child : m_children)
   {
-    child->resize(oldContainerSize, newContainerSize, useOldFrame);
+    child->resize(oldContainerSize, newContainerSize);
   }
 
   auto xScaleFactor = newContainerSize.width / oldContainerSize.width;
@@ -314,7 +316,7 @@ void LayoutNode::updateModel(const Layout::Rect& toFrame)
   // scale, bounds & matrix
   auto boundsJson = objectJson[K_BOUNDS];
   auto oldBounds = modelBounds();
-  auto matrix = objectJson[K_MATRIX].get<Layout::Matrix>();
+  auto matrix = modelMatrix();
   if (oldBounds.size.width > 0)
   {
     auto xScale = newFrame.size.width / oldBounds.size.width;
@@ -361,11 +363,8 @@ Layout::Point LayoutNode::modelOrigin() const
     return {};
   }
 
-  nlohmann::json::json_pointer path{ m_path };
-  const auto& j = viewModel->content()[path];
-
-  auto bounds = j[K_BOUNDS].get<Layout::Rect>();
-  auto matrix = j[K_MATRIX].get<Layout::Matrix>();
+  auto bounds = modelBounds();
+  auto matrix = modelMatrix();
   auto [x, y] = bounds.origin;
   auto [a, b, c, d, tx, ty] = matrix;
   auto newX = a * x + c * y + tx;
@@ -442,22 +441,21 @@ void LayoutNode::saveChildrendOldFrame()
 
 Layout::Rect LayoutNode::resize(const Layout::Size& oldContainerSize,
                                 const Layout::Size& newContainerSize,
-                                bool useOldFrame,
                                 const Layout::Point* parentOrigin,
                                 bool dry)
 {
   if (shouldSkip())
   {
-    return resizeGroup(oldContainerSize, newContainerSize, parentOrigin, useOldFrame);
+    return resizeGroup(oldContainerSize, newContainerSize, parentOrigin);
   }
 
-  auto [x, w] = resizeH(oldContainerSize, newContainerSize, useOldFrame, parentOrigin);
-  auto [y, h] = resizeV(oldContainerSize, newContainerSize, useOldFrame, parentOrigin);
+  auto [x, w] = resizeH(oldContainerSize, newContainerSize, parentOrigin);
+  auto [y, h] = resizeV(oldContainerSize, newContainerSize, parentOrigin);
   Layout::Rect newFrame{ { x, y }, { w, h } };
 
   if (!dry)
   {
-    setFrame(newFrame, false, useOldFrame);
+    setFrame(newFrame, false, true);
   }
 
   return newFrame;
@@ -466,12 +464,11 @@ Layout::Rect LayoutNode::resize(const Layout::Size& oldContainerSize,
 std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeH(
   const Layout::Size& oldContainerSize,
   const Layout::Size& newContainerSize,
-  bool useOldFrame,
   const Layout::Point* parentOrigin) const
 {
   Layout::Scalar x{ 0 }, w{ 0 };
 
-  auto oldFrame = useOldFrame ? m_oldFrame : frame();
+  auto oldFrame = frame();
   if (parentOrigin)
   {
     oldFrame = oldFrame.makeOffset(parentOrigin->x, parentOrigin->y);
@@ -552,12 +549,11 @@ std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeH(
 std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeV(
   const Layout::Size& oldContainerSize,
   const Layout::Size& newContainerSize,
-  bool useOldFrame,
   const Layout::Point* parentOrigin) const
 {
   Layout::Scalar y{ 0 }, h{ 0 };
 
-  auto oldFrame = useOldFrame ? m_oldFrame : frame();
+  auto oldFrame = frame();
   if (parentOrigin)
   {
     oldFrame = oldFrame.makeOffset(parentOrigin->x, parentOrigin->y);
@@ -701,43 +697,75 @@ bool LayoutNode::shouldSkip()
 
 Layout::Rect LayoutNode::resizeGroup(const Layout::Size& oldContainerSize,
                                      const Layout::Size& newContainerSize,
-                                     const Layout::Point* parentOrigin,
-                                     bool useOldFrame)
+                                     const Layout::Point* parentOrigin)
 {
   if (m_children.empty())
   {
     return {};
   }
 
-  auto oldOrigin = useOldFrame ? m_oldFrame.origin : origin();
+  auto oldOrigin = origin();
   if (parentOrigin)
   {
     oldOrigin += *parentOrigin;
   }
 
-  std::vector<Layout::Rect> childFrames;
+  std::vector<Layout::Rect> childFrames; // relative to ancestor(closest non group container)
 
   // resize child without group
   for (auto& child : m_children)
   {
-    auto childFrame = child->resize(oldContainerSize, newContainerSize, false, &oldOrigin, true);
+    auto childFrame = child->resize(oldContainerSize, newContainerSize, &oldOrigin, true);
     childFrames.push_back(childFrame);
   }
 
-  Layout::Rect newFrame = std::reduce(childFrames.begin() + 1,
-                                      childFrames.end(),
-                                      childFrames[0],
-                                      std::mem_fn(&Layout::Rect::makeIntersect));
-  setFrame(newFrame, false, useOldFrame);
+  Layout::Rect newGroupFrame = std::reduce(childFrames.begin() + 1,
+                                           childFrames.end(),
+                                           childFrames[0],
+                                           std::mem_fn(&Layout::Rect::makeIntersect));
+  setFrame(newGroupFrame, false, true);
 
-  const auto newOrigin = origin();
+  auto newOrigin = origin();
+  for (auto i = 0; i < childFrames.size(); i++)
+  {
+    const auto relativeFrame = childFrames[i].makeOffset(-newOrigin.x, -newOrigin.y);
+    m_children[i]->setFrame(relativeFrame, false, true);
+  }
+
+  // update group frame to fit transformed children
+  std::vector<Layout::Rect> childTransformedFrames;
+  for (auto& child : m_children)
+  {
+    childTransformedFrames.push_back(child->transformedFrame());
+  }
+
+  newGroupFrame = std::reduce(childTransformedFrames.begin() + 1,
+                              childTransformedFrames.end(),
+                              childTransformedFrames[0],
+                              std::mem_fn(&Layout::Rect::makeIntersect))
+                    .makeOffset(newOrigin.x, newOrigin.y);
+  setFrame(newGroupFrame, false, false);
+
+  newOrigin = origin();
   for (auto i = 0; i < childFrames.size(); i++)
   {
     const auto relateiveFrame = childFrames[i].makeOffset(-newOrigin.x, -newOrigin.y);
-    m_children[i]->setFrame(relateiveFrame, false, useOldFrame);
+    m_children[i]->setFrame(relateiveFrame, false, true);
   }
 
-  return newFrame;
+  return newGroupFrame;
+}
+
+Layout::Rect LayoutNode::transformedFrame() const
+{
+  auto bounds = modelBounds().makeTransform(modelMatrix(), Layout::Rect::ECoordinateType::MODEL);
+  if (auto parent = m_parent.lock())
+  {
+    const auto& parentOrigin = parent->modelBounds().origin;
+    bounds = bounds.makeOffset(-parentOrigin.x, -parentOrigin.y);
+  }
+
+  return bounds.makeFromModelRect();
 }
 
 } // namespace VGG

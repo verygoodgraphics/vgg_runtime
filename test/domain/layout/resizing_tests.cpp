@@ -226,3 +226,23 @@ TEST_F(VggResizingTestSuite, FigNestedGroup)
   EXPECT_TRUE(grandsonFrame(0, 0) == expectedFrames[1]);
   EXPECT_TRUE(grandsonFrame(0, 1) == expectedFrames[2]);
 }
+
+TEST_F(VggResizingTestSuite, FigGroupWithRotatedChild)
+{
+  // Given
+  setup("testDataDir/resizing/fig_group_with_rotated_child/");
+
+  // When
+  m_sut->layout(Layout::Size{ 800, 800 });
+
+  // Then
+  std::vector<Layout::Rect> expectedFrames{ { { 89, 45 },
+                                              { 655.8948364257813, 703.8250122070313 } },
+                                            { { 0, 0 }, { 100, 40 } },
+                                            { { 600, 600 }, { 40, 100 } },
+                                            { { 584.105103, 609.855774 }, { 40, 100 } } };
+  EXPECT_TRUE(childFrame(0) == expectedFrames[0]);
+  EXPECT_TRUE(grandsonFrame(0, 0) == expectedFrames[1]);
+  EXPECT_TRUE(grandsonFrame(0, 1) == expectedFrames[2]);
+  EXPECT_TRUE(grandsonFrame(0, 2) == expectedFrames[3]);
+}

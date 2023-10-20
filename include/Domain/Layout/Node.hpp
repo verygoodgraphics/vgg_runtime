@@ -157,6 +157,7 @@ public:
 
 private:
   std::string id();
+  std::string name();
 
   bool pointInside(Layout::Point point)
   {
@@ -195,6 +196,7 @@ private:
                       bool dry = false);
   Layout::Rect resizeGroup(const Layout::Size& oldContainerSize,
                            const Layout::Size& newContainerSize,
+                           const Layout::Point* parentOrigin,
                            bool useOldFrame);
   std::pair<Layout::Scalar, Layout::Scalar> resizeH(
     const Layout::Size& oldContainerSize,

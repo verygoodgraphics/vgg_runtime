@@ -41,6 +41,10 @@ struct Point
   {
     return { x + rhs.x, y + rhs.y };
   }
+  Point& operator+=(const Point& rhs) noexcept
+  {
+    return *this = *this + rhs;
+  }
 
   Point makeFromModelPoint() const
   {

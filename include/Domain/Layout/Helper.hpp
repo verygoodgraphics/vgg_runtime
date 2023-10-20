@@ -36,6 +36,7 @@ void from_json(const nlohmann::json& j, Matrix& matrix);
 // NOLINTEND
 
 bool isLayoutNode(const nlohmann::json& json);
+bool isGroupNode(const nlohmann::json& json);
 
 } // namespace Layout
 } // namespace VGG

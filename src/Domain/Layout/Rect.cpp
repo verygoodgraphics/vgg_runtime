@@ -17,6 +17,8 @@
 
 #include "Utility/VggFloat.hpp"
 
+#include <algorithm>
+
 using namespace VGG;
 using namespace VGG::Layout;
 
@@ -34,4 +36,13 @@ bool Matrix::operator==(const Matrix& rhs) const noexcept
 {
   return nearlyEqual(a, rhs.a) && nearlyEqual(b, rhs.b) && nearlyEqual(c, rhs.c) &&
          nearlyEqual(d, rhs.d) && nearlyEqual(tx, rhs.tx) && nearlyEqual(ty, rhs.ty);
+}
+
+Rect Rect::makeIntersect(const Rect& rhs) const
+{
+  auto minLeft = std::min(left(), rhs.left());
+  auto minTop = std::min(top(), rhs.top());
+  auto maxRight = std::max(right(), rhs.right());
+  auto maxBottom = std::max(bottom(), rhs.bottom());
+  return { { minLeft, minTop }, { maxRight - minLeft, maxBottom - minTop } };
 }

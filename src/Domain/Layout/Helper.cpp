@@ -91,5 +91,16 @@ bool isLayoutNode(const nlohmann::json& json)
   return false;
 }
 
+bool isGroupNode(const nlohmann::json& json)
+{
+  if (!json.is_object())
+  {
+    return false;
+  }
+
+  auto className = json.value(K_CLASS, "");
+  return className == K_GROUP;
+}
+
 } // namespace Layout
 } // namespace VGG

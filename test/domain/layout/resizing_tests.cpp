@@ -170,3 +170,20 @@ TEST_F(VggResizingTestSuite, ExpandingSymbol)
   EXPECT_TRUE(grandsonFrame(1, 3) == expectedFrames[3]);
   EXPECT_TRUE(grandsonFrame(1, 4) == expectedFrames[4]);
 }
+
+TEST_F(VggResizingTestSuite, FigGroup)
+{
+  // Given
+  setup("testDataDir/resizing/fig_group/");
+
+  // When
+  m_sut->layout(Layout::Size{ 600, 600 });
+
+  // Then
+  std::vector<Layout::Rect> expectedFrames{ { { 89, 45 }, { 440, 500 } },
+                                            { { 0, 0 }, { 100, 40 } },
+                                            { { 400, 400 }, { 40, 100 } } };
+  EXPECT_TRUE(childFrame(0) == expectedFrames[0]);
+  EXPECT_TRUE(grandsonFrame(0, 0) == expectedFrames[1]);
+  EXPECT_TRUE(grandsonFrame(0, 1) == expectedFrames[2]);
+}

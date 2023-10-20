@@ -188,15 +188,24 @@ private:
   Layout::Point modelOrigin() const;
   Layout::Rect modelBounds() const;
 
-  void resize(const Layout::Size& oldContainerSize,
-              const Layout::Size& newContainerSize,
-              bool useOldFrame);
-  std::pair<Layout::Scalar, Layout::Scalar> resizeH(const Layout::Size& oldContainerSize,
-                                                    const Layout::Size& newContainerSize,
-                                                    bool useOldFrame) const; // return x, w
-  std::pair<Layout::Scalar, Layout::Scalar> resizeV(const Layout::Size& oldContainerSize,
-                                                    const Layout::Size& newContainerSize,
-                                                    bool useOldFrame) const; // return y, h
+  Layout::Rect resize(const Layout::Size& oldContainerSize,
+                      const Layout::Size& newContainerSize,
+                      bool useOldFrame,
+                      const Layout::Point* parentOrigin = nullptr,
+                      bool dry = false);
+  Layout::Rect resizeGroup(const Layout::Size& oldContainerSize,
+                           const Layout::Size& newContainerSize,
+                           bool useOldFrame);
+  std::pair<Layout::Scalar, Layout::Scalar> resizeH(
+    const Layout::Size& oldContainerSize,
+    const Layout::Size& newContainerSize,
+    bool useOldFrame,
+    const Layout::Point* parentOrigin) const; // return x, w
+  std::pair<Layout::Scalar, Layout::Scalar> resizeV(
+    const Layout::Size& oldContainerSize,
+    const Layout::Size& newContainerSize,
+    bool useOldFrame,
+    const Layout::Point* parentOrigin) const; // return y, h
 
   EResizing horizontalResizing() const;
   EResizing verticalResizing() const;
@@ -206,6 +215,8 @@ private:
 
   template<typename T>
   T getValue(const char* key, T v) const;
+
+  bool shouldSkip();
 };
 
 } // namespace VGG

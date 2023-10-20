@@ -22,6 +22,9 @@
 
 #include "Utility/Log.hpp"
 
+#include <functional>
+#include <numeric>
+
 #undef DEBUG
 #define DEBUG(msg, ...)
 
@@ -109,6 +112,11 @@ void LayoutNode::setFrame(const Layout::Rect& newFrame, bool updateRule, bool us
   saveChildrendOldFrame();
   updateModel(newFrame);
 
+  if (shouldSkip())
+  {
+    return;
+  }
+
   auto oldSize = oldFrame.size;
   auto newSize = newFrame.size;
   if (newSize == oldSize)
@@ -134,7 +142,7 @@ void LayoutNode::setFrame(const Layout::Rect& newFrame, bool updateRule, bool us
 
 Layout::Rect LayoutNode::bounds() const
 {
-  return modelBounds().fromModelRect();
+  return modelBounds().makeFromModelRect();
 }
 
 Layout::Rect LayoutNode::modelBounds() const
@@ -296,7 +304,7 @@ void LayoutNode::updateModel(const Layout::Rect& toFrame)
     return;
   }
 
-  const auto newFrame = toFrame.toModelRect();
+  const auto newFrame = toFrame.makeModelRect();
 
   nlohmann::json::json_pointer path{ m_path };
   const auto& objectJson = viewModel->content()[path];
@@ -342,7 +350,7 @@ void LayoutNode::updateModel(const Layout::Rect& toFrame)
 
 Layout::Point LayoutNode::origin() const
 {
-  return modelOrigin().fromModelPoint();
+  return modelOrigin().makeFromModelPoint();
 }
 
 Layout::Point LayoutNode::modelOrigin() const
@@ -432,24 +440,43 @@ void LayoutNode::saveChildrendOldFrame()
   }
 }
 
-void LayoutNode::resize(const Layout::Size& oldContainerSize,
-                        const Layout::Size& newContainerSize,
-                        bool useOldFrame)
+Layout::Rect LayoutNode::resize(const Layout::Size& oldContainerSize,
+                                const Layout::Size& newContainerSize,
+                                bool useOldFrame,
+                                const Layout::Point* parentOrigin,
+                                bool dry)
 {
-  auto [x, w] = resizeH(oldContainerSize, newContainerSize, useOldFrame);
-  auto [y, h] = resizeV(oldContainerSize, newContainerSize, useOldFrame);
+  if (shouldSkip())
+  {
+    return resizeGroup(oldContainerSize, newContainerSize, useOldFrame);
+  }
+
+  auto [x, w] = resizeH(oldContainerSize, newContainerSize, useOldFrame, parentOrigin);
+  auto [y, h] = resizeV(oldContainerSize, newContainerSize, useOldFrame, parentOrigin);
   Layout::Rect newFrame{ { x, y }, { w, h } };
 
-  setFrame(newFrame, false, useOldFrame);
+  if (!dry)
+  {
+    setFrame(newFrame, false, useOldFrame);
+  }
+
+  return newFrame;
 }
 
-std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeH(const Layout::Size& oldContainerSize,
-                                                              const Layout::Size& newContainerSize,
-                                                              bool useOldFrame) const
+std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeH(
+  const Layout::Size& oldContainerSize,
+  const Layout::Size& newContainerSize,
+  bool useOldFrame,
+  const Layout::Point* parentOrigin) const
 {
   Layout::Scalar x{ 0 }, w{ 0 };
 
-  const auto oldFrame = useOldFrame ? m_oldFrame : frame();
+  auto oldFrame = useOldFrame ? m_oldFrame : frame();
+  if (parentOrigin)
+  {
+    oldFrame = oldFrame.makeOffset(parentOrigin->x, parentOrigin->y);
+  }
+
   const auto rightMargin = oldContainerSize.width - oldFrame.right();
 
   switch (horizontalResizing())
@@ -522,13 +549,20 @@ std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeH(const Layout::Size
   return { x, w };
 }
 
-std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeV(const Layout::Size& oldContainerSize,
-                                                              const Layout::Size& newContainerSize,
-                                                              bool useOldFrame) const
+std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeV(
+  const Layout::Size& oldContainerSize,
+  const Layout::Size& newContainerSize,
+  bool useOldFrame,
+  const Layout::Point* parentOrigin) const
 {
   Layout::Scalar y{ 0 }, h{ 0 };
 
-  const auto oldFrame = useOldFrame ? m_oldFrame : frame();
+  auto oldFrame = useOldFrame ? m_oldFrame : frame();
+  if (parentOrigin)
+  {
+    oldFrame = oldFrame.makeOffset(parentOrigin->x, parentOrigin->y);
+  }
+
   const auto bottomMargin = oldContainerSize.height - oldFrame.bottom();
 
   switch (verticalResizing())
@@ -641,6 +675,59 @@ const nlohmann::json* LayoutNode::model() const
   const auto& objectJson = viewModel->content()[path];
 
   return &objectJson;
+}
+
+bool LayoutNode::shouldSkip()
+{
+  // if group && parent adjust content is skip group
+  if (auto json = model(); Layout::isGroupNode(*json))
+  {
+    if (auto parent = m_parent.lock())
+    {
+      return parent->adjustContentOnResize() == EAdjustContentOnResize::SKIP_GROUP_OR_UNION;
+    }
+  }
+  return false;
+}
+
+Layout::Rect LayoutNode::resizeGroup(const Layout::Size& oldContainerSize,
+                                     const Layout::Size& newContainerSize,
+                                     bool useOldFrame)
+{
+  if (m_children.empty())
+  {
+    return {};
+  }
+
+  const auto oldOrigin = useOldFrame ? m_oldFrame.origin : origin();
+
+  std::vector<Layout::Rect> childFrames;
+
+  // resize child without group
+  for (auto& child : m_children)
+  {
+    auto childFrame = child->resize(oldContainerSize, newContainerSize, false, &oldOrigin, true);
+    childFrames.push_back(childFrame);
+  }
+
+  Layout::Rect newFrame = std::reduce(childFrames.begin() + 1,
+                                      childFrames.end(),
+                                      childFrames[0],
+                                      std::mem_fn(&Layout::Rect::makeIntersect));
+  setFrame(newFrame, false, useOldFrame);
+
+  const auto newOrigin = origin();
+  for (auto i = 0; i < childFrames.size(); i++)
+  {
+    if (m_children[i]->shouldSkip())
+    {
+      continue;
+    }
+    const auto relateiveFrame = childFrames[i].makeOffset(-newOrigin.x, -newOrigin.y);
+    m_children[i]->setFrame(relateiveFrame, false, useOldFrame);
+  }
+
+  return newFrame;
 }
 
 } // namespace VGG

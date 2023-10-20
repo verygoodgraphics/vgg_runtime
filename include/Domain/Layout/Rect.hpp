@@ -37,7 +37,12 @@ struct Point
     return !(*this == rhs);
   }
 
-  Point fromModelPoint() const
+  Point operator+(const Point& rhs) const noexcept
+  {
+    return { x + rhs.x, y + rhs.y };
+  }
+
+  Point makeFromModelPoint() const
   {
     return { x, y * FLIP_Y_FACTOR };
   }
@@ -78,14 +83,20 @@ struct Rect
     return !(*this == rhs);
   }
 
-  Rect fromModelRect() const
+  Rect makeFromModelRect() const
   {
-    return { origin.fromModelPoint(), size };
+    return { origin.makeFromModelPoint(), size };
   }
-  Rect toModelRect() const
+  Rect makeModelRect() const
   {
     return { origin.toModelPoint(), size };
   }
+  Rect makeOffset(Scalar dx, Scalar dy) const
+  {
+    return { { origin.x + dx, origin.y + dy }, size };
+  }
+
+  Rect makeIntersect(const Rect& rhs) const;
 
   Scalar left() const
   {

@@ -16,6 +16,8 @@
 #include "Painter.hpp"
 #include "Layer/Core/VType.hpp"
 #include "VSkia.hpp"
+#include <core/SkColor.h>
+#include <core/SkMaskFilter.h>
 #include <core/SkPaint.h>
 
 using namespace VGG;
@@ -193,13 +195,15 @@ void Painter::drawFill(const SkPath& skPath,
                        const Fill& f,
                        float globalAlpha,
                        sk_sp<SkImageFilter> imageFilter,
-                       sk_sp<SkBlender> blender)
+                       sk_sp<SkBlender> blender,
+                       sk_sp<SkMaskFilter> mask)
 {
   SkPaint fillPen;
   fillPen.setStyle(SkPaint::kFill_Style);
   fillPen.setAntiAlias(m_antiAlias);
   fillPen.setBlender(blender);
   fillPen.setImageFilter(imageFilter);
+  fillPen.setMaskFilter(mask);
   if (f.fillType == FT_Color)
   {
     fillPen.setColor(f.color);
@@ -247,6 +251,6 @@ void Painter::drawFill(SkCanvas* canvas,
   {
     if (!f.isEnabled)
       continue;
-    drawFill(skPath, bound, f, globalAlpha, imageFilter, blender);
+    drawFill(skPath, bound, f, globalAlpha, imageFilter, blender, nullptr);
   }
 }

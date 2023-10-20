@@ -22,6 +22,7 @@
 
 #include <core/SkBlendMode.h>
 #include <core/SkImageFilter.h>
+#include <core/SkMaskFilter.h>
 #include <include/core/SkClipOp.h>
 #include <include/core/SkPaint.h>
 #include <include/core/SkPathTypes.h>
@@ -33,6 +34,8 @@
 #include <include/core/SkCanvas.h>
 #include <pathops/SkPathOps.h>
 #include <src/core/SkBlurMask.h>
+
+#include <stack>
 
 using namespace VGG;
 class Painter
@@ -68,23 +71,27 @@ public:
     m_canvas->restore();
     m_canvas->restore();
   }
-
-  void blurContentBegin(float radiusX, float radiusY, const Bound2& bound)
+  void blurContentBegin(float radiusX, float radiusY, const Bound2& bound, const SkPath* path)
   {
     SkPaint pen;
     auto filter = SkImageFilters::Blur(SkBlurMask::ConvertRadiusToSigma(radiusX),
                                        SkBlurMask::ConvertRadiusToSigma(radiusY),
                                        nullptr);
-    pen.setImageFilter(std::move(filter));
+    // pen.setImageFilter(std::move(filter));
+    pen.setBlendMode(SkBlendMode::kSrcOver);
     auto b = toSkRect(bound);
     SkMatrix m;
     m.preScale(1, 1);
     b = m.mapRect(b);
+    m_canvas->save();
+    if (path)
+      m_canvas->clipPath(*path);
     m_canvas->saveLayer(&b, &pen);
   }
 
   void blurContentEnd()
   {
+    m_canvas->restore();
     m_canvas->restore();
   }
 
@@ -138,7 +145,8 @@ public:
                 const Fill& f,
                 float globalAlpha,
                 sk_sp<SkImageFilter> imageFilter,
-                sk_sp<SkBlender> blender);
+                sk_sp<SkBlender> blender,
+                sk_sp<SkMaskFilter> mask);
 
   sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound2& bound);
 

@@ -37,6 +37,14 @@ struct Bound2
   {
   }
 
+  void extend(float delta)
+  {
+    topLeft.x -= delta;
+    topLeft.y += delta;
+    bottomRight.y -= delta;
+    bottomRight.x += delta;
+  }
+
   // Bound2(const glm::vec2& p1, const glm::vec2& p2)
   //   : topLeft{ std::min(p1.x, p2.x), std::min(p1.y, p2.y) }
   //   , bottomRight{ std::max(p1.x, p2.x), std::max(p1.y, p2.y) }

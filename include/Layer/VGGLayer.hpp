@@ -43,6 +43,7 @@ class VLayer : public GraphicsLayer
   float m_scale{ 1.0 };
   bool m_drawPos{ false };
   int m_position[2] = { 0, 0 };
+  std::optional<std::string> m_skpPath;
 
 protected:
   virtual std::optional<ELayerError> onInit() override;
@@ -82,6 +83,11 @@ public:
   float scaleFactor() const
   {
     return m_scale;
+  }
+
+  void saveSKP(const std::string& path)
+  {
+    m_skpPath = path;
   }
 
   std::optional<std::vector<char>> makeImageSnapshot(const ImageOptions& opts);

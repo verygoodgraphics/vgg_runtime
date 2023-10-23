@@ -5,6 +5,9 @@
 
 #include <gtest/gtest.h>
 
+#include <glm/ext.hpp>
+#include <glm/glm.hpp>
+
 using namespace VGG;
 
 class VggResizingTestSuite : public ::testing::Test
@@ -245,4 +248,32 @@ TEST_F(VggResizingTestSuite, FigGroupWithRotatedChild)
   EXPECT_TRUE(grandsonFrame(0, 0) == expectedFrames[1]);
   EXPECT_TRUE(grandsonFrame(0, 1) == expectedFrames[2]);
   EXPECT_TRUE(grandsonFrame(0, 2) == expectedFrames[3]);
+}
+
+TEST_F(VggResizingTestSuite, GetAffineTransform)
+{
+  // Given
+  const glm::mat3x2 glmMatrix{ 0.9396926164627075, 0.3420201241970062, -0.3420201241970062,
+                               0.9396926164627075, 177.10513305664062, -228.8557586669922 };
+  const glm::mat3 oldGlmPoints{ 0, 0, 1, 0, 40, 1, 100, 0, 1 };
+  const auto newGlmPoints = glmMatrix * oldGlmPoints;
+
+  const std::array<Layout::Point, 3> oldPoints{
+    Layout::Point{ oldGlmPoints[0].x, oldGlmPoints[0].y },
+    Layout::Point{ oldGlmPoints[1].x, oldGlmPoints[1].y },
+    Layout::Point{ oldGlmPoints[2].x, oldGlmPoints[2].y }
+  };
+  const std::array<Layout::Point, 3> newPoints{
+    Layout::Point{ newGlmPoints[0].x, newGlmPoints[0].y },
+    Layout::Point{ newGlmPoints[1].x, newGlmPoints[1].y },
+    Layout::Point{ newGlmPoints[2].x, newGlmPoints[2].y }
+  };
+
+  // When
+  const auto computedMatrix = Layout::getAffineTransform(oldPoints, newPoints);
+
+  // Then
+  Layout::Matrix layoutMatrix{ glmMatrix[0].x, glmMatrix[0].y, glmMatrix[1].x,
+                               glmMatrix[1].y, glmMatrix[2].x, glmMatrix[2].y };
+  EXPECT_TRUE(layoutMatrix == computedMatrix);
 }

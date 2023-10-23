@@ -15,6 +15,8 @@
  */
 #pragma once
 
+#include <array>
+
 namespace VGG
 {
 
@@ -166,6 +168,9 @@ struct Rect
     return top() + height() / 2;
   }
 };
+
+Matrix getAffineTransform(const std::array<Point, 3>& oldPoints,
+                          const std::array<Point, 3>& newPoints);
 
 } // namespace Layout
 

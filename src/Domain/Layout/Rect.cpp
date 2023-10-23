@@ -17,6 +17,8 @@
 
 #include "Utility/VggFloat.hpp"
 
+#include <glm/glm.hpp>
+
 #include <algorithm>
 
 using namespace VGG;
@@ -72,4 +74,19 @@ Rect Rect::makeTransform(const Matrix& matrix, ECoordinateType type) const
   auto maxY = std::max(std::max(p1.y, p2.y), std::max(p3.y, p4.y));
 
   return { { minX, isYAxisDown ? minY : maxY }, { maxX - minX, maxY - minY } };
+}
+
+Matrix Layout::getAffineTransform(const std::array<Point, 3>& oldPoints,
+                                  const std::array<Point, 3>& newPoints)
+{
+  const glm::mat3 oldGlmPoints{ oldPoints[0].x, oldPoints[0].y, 1,
+                                oldPoints[1].x, oldPoints[1].y, 1,
+                                oldPoints[2].x, oldPoints[2].y, 1 };
+  const glm::mat3x2 newGlmPoints{ newPoints[0].x, newPoints[0].y, newPoints[1].x,
+                                  newPoints[1].y, newPoints[2].x, newPoints[2].y };
+
+  const auto gmMatrix = newGlmPoints * glm::inverse(oldGlmPoints);
+  return {
+    gmMatrix[0].x, gmMatrix[0].y, gmMatrix[1].x, gmMatrix[1].y, gmMatrix[2].x, gmMatrix[2].y
+  };
 }

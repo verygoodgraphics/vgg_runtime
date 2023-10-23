@@ -32,6 +32,7 @@ target_include_directories(vgg_domain PRIVATE
   ${CMAKE_SOURCE_DIR}/include/Domain/Layout
   ${CMAKE_SOURCE_DIR}/include/Domain/Model
   ${VGG_CONTRIB_BOOST_INCLUDE}
+  ${VGG_CONTRIB_GLM_INCLUDE}
 )
 target_link_libraries(vgg_domain
   flexbox

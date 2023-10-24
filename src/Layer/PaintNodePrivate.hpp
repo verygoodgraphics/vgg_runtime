@@ -23,6 +23,7 @@
 #include "Renderer.hpp"
 
 #include <core/SkBlender.h>
+#include <core/SkMatrix.h>
 #include <encode/SkPngEncoder.h>
 #include <core/SkBlendMode.h>
 #include <core/SkCanvas.h>
@@ -45,9 +46,10 @@ Bound2 calcMaskAreaIntersection(const Bound2& pruneBound, PaintNode* obj, F&& f)
   return bound;
 }
 
-struct MaskContour
+struct MaskObject
 {
   SkPath contour;
+  std::vector<std::pair<PaintNode*, glm::mat3>> components;
 };
 
 class PaintNode__pImpl // NOLINT
@@ -77,9 +79,7 @@ public:
 
   std::optional<SkPath> path;
   std::optional<SkPath> mask;
-
-  std::optional<std::vector<std::pair<PaintNode*, glm::mat3>>> alphaMaskObjects;
-  std::optional<SkPath> alphaMaskContour;
+  std::optional<MaskObject> alphaMask;
 
   PaintNode__pImpl(PaintNode* api, ObjectType type)
     : q_ptr(api)
@@ -109,6 +109,10 @@ public:
     contour = other.contour;
     paintOption = other.paintOption;
     maskOption = other.maskOption;
+
+    path = other.path;
+    mask = other.mask;
+    alphaMask = other.alphaMask;
     return *this;
   }
 
@@ -291,7 +295,7 @@ public:
       // pen.setColor(SK_ColorGREEN);
       // maskCanvas->drawCircle(0, 0, 10, pen);
       // maskCanvas->drawLine(0, 0, skm.getTranslateX(), -skm.getTranslateY(), pen);
-      p.first->d_ptr->drawAlphaMask(maskCanvas);
+      p.first->d_ptr->drawAsAlphaMask(maskCanvas);
     }
     auto image = maskSurface->makeImageSnapshot();
     auto data = SkPngEncoder::Encode((GrDirectContext*)maskSurface->recordingContext(),
@@ -309,7 +313,7 @@ public:
     return blend;
   }
 
-  void drawAlphaMask(SkCanvas* canvas)
+  void drawAsAlphaMask(SkCanvas* canvas, sk_sp<SkBlender> blender = nullptr)
   {
     if (!path)
     {
@@ -319,23 +323,126 @@ public:
     {
       return;
     }
-
     Painter render(canvas);
-    auto result = SkRuntimeEffect::MakeForBlender(SkString(R"(
-			vec4 main(vec4 srcColor, vec4 dstColor){
-		       return vec4(dstColor.rgb, srcColor.a);
-			}
-)"))
-                    .effect;
-
-    auto blender = result->makeBlender(nullptr);
-    // auto blender = SkBlender::Mode(SkBlendMode::kSrcOver);
-    for (const auto& f : style.fills)
+    if (!blender)
     {
-      if (!f.isEnabled)
-        continue;
-      render.drawFill(*path, bound, f, contextSetting.Opacity, nullptr, blender, nullptr);
+      blender = Painter::getMaskBlender();
     }
+    Painter painter(canvas);
+    drawRawStyle(painter, *path, blender);
+  }
+
+  void drawWithAlphaMask(SkCanvas* canvas, const SkPath& path, const SkPath& outlineMask)
+  {
+    SkPaint p;
+    auto b = toSkRect(bound);
+    p.setBlendMode(SkBlendMode::kSrcOver);
+    canvas->saveLayer(0, 0);
+    canvas->clipRect(b);
+    canvas->clipPath(path);
+    // clip with path
+    Painter painter(canvas);
+    drawMaskObjectIntoMaskLayer(canvas, nullptr);
+    if (!outlineMask.isEmpty())
+    {
+      painter.beginClip(outlineMask);
+    }
+    auto blender = SkBlender::Mode(SkBlendMode::kSrcIn);
+    drawRawStyle(painter, path, blender);
+    if (!outlineMask.isEmpty())
+    {
+      painter.endClip();
+    }
+    canvas->restore();
+  }
+
+  // return nullopt indicates no blur effects
+  std::optional<EBlurType> blurType(Blur& blur)
+  {
+    auto hasBlur = style.blurs.empty() ? false : style.blurs[0].isEnabled;
+    if (hasBlur)
+    {
+      blur = style.blurs[0];
+      return style.blurs[0].blurType;
+    }
+    return std::nullopt;
+  }
+
+  void drawBlurBgWithAlphaMask(SkCanvas* canvas, const SkPath& path, const SkPath& outlineMask)
+  {
+    Painter painter(canvas);
+    const auto blur = style.blurs[0];
+    SkPath res = path;
+    if (alphaMask && !alphaMask->contour.isEmpty())
+    {
+      Op(res, alphaMask->contour, SkPathOp::kIntersect_SkPathOp, &res);
+    }
+    if (!outlineMask.isEmpty())
+    {
+      Op(res, outlineMask, SkPathOp::kIntersect_SkPathOp, &res);
+    }
+    painter.blurBackgroundBegin(blur.radius, blur.radius, bound, &res);
+
+    // draw alpha mask
+    drawMaskObjectIntoMaskLayer(canvas, 0);
+
+    // Objects need to be drawn with SrcOver into layer contains blured background
+    // and mask them by dstColor.a
+
+    auto blender = Painter::getStyleMaskBlender();
+    if (!outlineMask.isEmpty())
+    {
+      painter.beginClip(outlineMask);
+    }
+    drawRawStyle(painter, path, blender);
+    if (!outlineMask.isEmpty())
+    {
+      painter.endClip();
+    }
+    painter.blurBackgroundEnd();
+  }
+
+  void drawMaskObjectIntoMaskLayer(SkCanvas* canvas, sk_sp<SkBlender> blender)
+  {
+    if (alphaMask)
+    {
+      for (const auto& p : alphaMask->components)
+      {
+        auto skm = toSkMatrix(p.second);
+        canvas->save();
+        canvas->concat(skm);
+        p.first->d_ptr->drawAsAlphaMask(canvas);
+        canvas->restore();
+      }
+    }
+  }
+
+  void drawBlurContentWithAlphaMask(SkCanvas* canvas, const SkPath& path, const SkPath& outlineMask)
+  {
+    SkPaint p;
+    auto bb = bound;
+    const auto blur = style.blurs[0];
+    bb.extend(blur.radius * 2);
+    auto b = toSkRect(bb);
+    canvas->saveLayer(0, 0);
+    canvas->clipRect(b);
+    drawMaskObjectIntoMaskLayer(canvas, 0);
+    Painter painter(canvas);
+    // the blured layer need to be drawn into the parent layer contains alpha mask
+    // SrcIn blend mode is necessary
+    auto blender = SkBlender::Mode(SkBlendMode::kSrcIn);
+    painter.blurContentBegin(blur.radius, blur.radius, bound, nullptr, blender);
+    if (!outlineMask.isEmpty())
+    {
+      painter.beginClip(outlineMask);
+    }
+    drawRawStyle(painter, path, SkBlender::Mode(SkBlendMode::kSrcOver));
+    if (!outlineMask.isEmpty())
+    {
+      painter.endClip();
+    }
+    painter.blurContentEnd(); // draw blur content layer into mask layer
+    canvas->restore();        // draw masked layer into canvas
   }
 
   void drawRawStyle(Painter& painter, const SkPath& skPath, sk_sp<SkBlender> blender)

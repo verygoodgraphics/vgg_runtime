@@ -71,18 +71,25 @@ public:
     m_canvas->restore();
     m_canvas->restore();
   }
-  void blurContentBegin(float radiusX, float radiusY, const Bound2& bound, const SkPath* path)
+  void blurContentBegin(float radiusX,
+                        float radiusY,
+                        const Bound2& bound,
+                        const SkPath* path,
+                        sk_sp<SkBlender> blender)
   {
     SkPaint pen;
     auto filter = SkImageFilters::Blur(SkBlurMask::ConvertRadiusToSigma(radiusX),
                                        SkBlurMask::ConvertRadiusToSigma(radiusY),
                                        nullptr);
-    // pen.setImageFilter(std::move(filter));
-    pen.setBlendMode(SkBlendMode::kSrcOver);
-    auto b = toSkRect(bound);
+    pen.setImageFilter(std::move(filter));
+    // pen.setBlendMode(SkBlendMode::kSrcOver);
+    auto bb = bound;
+    // bb.extend(radiusX * 1.5);
+    auto b = toSkRect(bb);
     SkMatrix m;
     m.preScale(1, 1);
     b = m.mapRect(b);
+    pen.setBlender(std::move(blender));
     m_canvas->save();
     if (path)
       m_canvas->clipPath(*path);

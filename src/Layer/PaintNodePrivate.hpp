@@ -323,7 +323,7 @@ public:
     Painter render(canvas);
     auto result = SkRuntimeEffect::MakeForBlender(SkString(R"(
 			vec4 main(vec4 srcColor, vec4 dstColor){
-		       return vec4(srcColor.rgb , srcColor.a);
+		       return vec4(dstColor.rgb, srcColor.a);
 			}
 )"))
                     .effect;

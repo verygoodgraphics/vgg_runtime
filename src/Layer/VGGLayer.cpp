@@ -16,6 +16,7 @@
 #ifdef VGG_USE_VULKAN
 #include "VSkiaVK.hpp"
 #endif
+#include <core/SkPictureRecorder.h>
 #include "Renderer.hpp"
 #include "VSkiaContext.hpp"
 #include "VSkiaGL.hpp"
@@ -30,6 +31,7 @@
 
 #include <optional>
 #include <sstream>
+#include <fstream>
 
 namespace VGG::layer
 {
@@ -138,7 +140,18 @@ void VLayer::beginFrame()
 void VLayer::render()
 {
   VGG_IMPL(VLayer)
-  auto canvas = _->skiaContext->canvas();
+  SkCanvas* canvas = nullptr;
+  SkPictureRecorder rec;
+  if (m_skpPath && !m_skpPath->empty())
+  {
+    auto w = _->skiaContext->surface()->width();
+    auto h = _->skiaContext->surface()->height();
+    canvas = rec.beginRecording(w, h);
+  }
+  else
+  {
+    canvas = _->skiaContext->canvas();
+  }
   if (canvas)
   {
     canvas->save();
@@ -170,6 +183,25 @@ void VLayer::render()
     }
     canvas->restore();
     canvas->flush();
+  }
+
+  if (m_skpPath && !m_skpPath->empty())
+  {
+    auto pic = rec.finishRecordingAsPicture();
+    if (pic)
+    {
+      auto data = pic->serialize();
+      if (data)
+      {
+        std::ofstream ofs(*m_skpPath);
+        if (ofs.is_open())
+        {
+          ofs.write((char*)data->data(), data->size());
+          DEBUG("skp saved");
+        }
+      }
+    }
+    m_skpPath = std::nullopt;
   }
 }
 

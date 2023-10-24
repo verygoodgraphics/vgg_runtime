@@ -178,6 +178,7 @@ public:
     if (key == VGGK_c)
     {
       INFO("Capture");
+      m_layer->saveSKP("draw.skp");
       return true;
     }
 

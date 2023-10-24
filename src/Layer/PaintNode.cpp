@@ -36,6 +36,7 @@
 #include <core/SkSurfaceProps.h>
 #include <core/SkTileMode.h>
 #include <core/SkMaskFilter.h>
+#include <src/core/SkBlurMask.h>
 #include <src/core/SkMask.h>
 #include <effects/SkImageFilters.h>
 #include <effects/SkRuntimeEffect.h>
@@ -827,15 +828,33 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
   VGG_IMPL(PaintNode);
   Painter painter(canvas);
   // draw blur, we assume that there is only one blur style
-  auto hasBgBlur = style().blurs.empty()
-                     ? false
-                     : (style().blurs[0].isEnabled && style().blurs[0].blurType == BT_Background);
+  auto hasBlur = style().blurs.empty() ? false : style().blurs[0].isEnabled;
+  auto hasAlphaMask = _->alphaMaskObjects.has_value() && !_->alphaMaskObjects->empty();
+  // 1. normal drawing
+  // 2. only alphamask: alphamask layer
+  // 3. alphamask + background blur: blured content layer
+  // 4. alphamask + content blur: content blur layer + alphamask layer
+  // TODO 4 should be modified as alphamask layer + content blur layer
+  auto bgBlur = false;
+  auto contentBlur = false;
 
-  if (hasBgBlur)
+  if (hasBlur)
+  {
+    auto blurType = style().blurs[0].blurType;
+    if (blurType != BT_Background)
+    {
+      contentBlur = true;
+    }
+    else
+    {
+      bgBlur = true;
+    }
+  }
+
+  if (hasBlur)
   {
     const auto blur = style().blurs[0];
     const auto blurType = blur.blurType;
-
     SkPath res = path;
     if (_->alphaMaskContour && !_->alphaMaskContour->isEmpty())
     {
@@ -845,7 +864,24 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
     {
       Op(res, outlineMask, SkPathOp::kIntersect_SkPathOp, &res);
     }
-    painter.blurBackgroundBegin(blur.radius, blur.radius, getBound(), &res);
+    if (blurType == BT_Gaussian)
+    {
+      painter.blurContentBegin(blur.radius, blur.radius, getBound(), nullptr, 0);
+      contentBlur = true;
+    }
+    else if (blurType == BT_Background)
+    {
+      painter.blurBackgroundBegin(blur.radius, blur.radius, getBound(), &res);
+      bgBlur = true;
+    }
+    else if (blurType == BT_Motion)
+    {
+      DEBUG("Motion blur has not been implemeted");
+    }
+    else if (blurType == BT_Zoom)
+    {
+      DEBUG("Zoom blur has not been implemeted");
+    }
   }
 
   if (!outlineMask.isEmpty())
@@ -855,25 +891,23 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
   }
   // draw alpha mask first if any
   auto blender = SkBlender::Mode(SkBlendMode::kSrcOver);
-  auto hasAlphaMask = _->alphaMaskObjects.has_value() && !_->alphaMaskObjects->empty();
   if (hasAlphaMask)
   {
-    if (!hasBgBlur)
+    if (!bgBlur)
     {
-      // save a layer
+      // An additional layer is necessary to store the mask value into alpha channel for alpha
+      // blur effect will create a layer
       SkPath res = path;
       if (_->alphaMaskContour && _->alphaMaskContour->isEmpty())
       {
         Op(path, *_->alphaMaskContour, SkPathOp::kIntersect_SkPathOp, &res);
       }
-      // canvas->saveLayer(toSkRect(getBound()), nullptr);
       SkPaint p;
       p.setBlendMode(SkBlendMode::kSrcOver);
       canvas->saveLayer(0, &p);
       canvas->clipPath(res);
     }
 
-    DEBUG("has alpha mask");
     auto result = SkRuntimeEffect::MakeForBlender(SkString(R"(
 			vec4 main(vec4 srcColor, vec4 dstColor){
 			 vec4 color = srcColor + dstColor * (1.0 - srcColor.a);
@@ -882,7 +916,6 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
 			)"))
                     .effect;
     blender = result->makeBlender(nullptr);
-
     for (const auto& p : *_->alphaMaskObjects)
     {
       auto skm = toSkMatrix(p.second);
@@ -893,13 +926,13 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
     }
   }
 
+  // draw normal blurs
   _->drawRawStyle(painter, path, blender);
 
   if (hasAlphaMask)
   {
-    if (!hasBgBlur)
+    if (!bgBlur)
     {
-      // restore a ther layer
       canvas->restore();
     }
   }
@@ -909,37 +942,42 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
     painter.endClip();
   }
 
-  if (hasBgBlur)
+  if (hasBlur)
   {
-    // const auto blur = style().blurs[0];
-    // const auto blurType = blur.blurType;
-    painter.blurBackgroundEnd();
+    const auto blur = style().blurs[0];
+    const auto blurType = blur.blurType;
+    if (blurType == BT_Gaussian)
+    {
+      painter.blurContentEnd();
+    }
+    else if (blurType == BT_Background)
+    {
+      if (bgBlur)
+      {
+        painter.blurBackgroundEnd();
+      }
+    }
+    else if (blurType == BT_Zoom)
+    {
+      DEBUG("Zoom blur has not been implemeted");
+    }
+    else if (blurType == BT_Motion)
+    {
+      DEBUG("Zoom blur has not been implemeted");
+    }
   }
 }
 
 void PaintNode::paintFill(SkCanvas* canvas, sk_sp<SkBlender> blender, const SkPath& path)
 {
   VGG_IMPL(PaintNode);
-
   Painter render(canvas);
-
-  sk_sp<SkImageFilter> blur;
-  if (!style().blurs.empty() && style().blurs[0].isEnabled)
-  {
-    const auto& b = style().blurs[0];
-    if (b.blurType == BT_Gaussian)
-    {
-
-      blur = SkImageFilters::Blur(SkBlurMask::ConvertRadiusToSigma(20),
-                                  SkBlurMask::ConvertRadiusToSigma(20),
-                                  nullptr);
-    }
-  }
+  sk_sp<SkMaskFilter> blur;
   for (const auto& f : style().fills)
   {
     if (!f.isEnabled)
       continue;
-    render.drawFill(path, getBound(), f, contextSetting().Opacity, blur, blender, 0);
+    render.drawFill(path, getBound(), f, contextSetting().Opacity, 0, blender, blur);
   }
 }
 

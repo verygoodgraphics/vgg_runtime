@@ -18,6 +18,7 @@
 
 #include <include/gpu/gl/GrGLInterface.h>
 #include <include/gpu/GrDirectContext.h>
+#include <include/core/SkPictureRecorder.h>
 #include <include/docs/SkPDFDocument.h>
 #include <include/core/SkSurface.h>
 #include <include/core/SkCanvas.h>

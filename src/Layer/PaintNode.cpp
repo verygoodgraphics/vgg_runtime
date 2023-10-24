@@ -253,35 +253,35 @@ void PaintNode::paintPass(SkiaRenderer* renderer, int zorder)
     _->mask = makeMaskBy(BO_Intersection, renderer).outlineMask;
   }
 
-  if (!_->alphaMaskBy.empty() && _->alphaMaskObjects->empty())
+  if (!_->alphaMask)
   {
+    MaskObject mo;
     auto iter = _->alphaMaskBy.cbegin();
     auto end = _->alphaMaskBy.cend();
-    _->alphaMaskObjects =
-      _->calcMaskObjects(renderer, iter, end, [](const auto& e) { return e.id; });
-    if (_->alphaMaskObjects)
+    auto comp = _->calcMaskObjects(renderer, iter, end, [](const auto& e) { return e.id; });
+    SkPath path;
+    for (const auto& e : comp)
     {
-      SkPath path;
-      for (const auto& e : *_->alphaMaskObjects)
+      if (path.isEmpty())
       {
-        if (path.isEmpty())
-        {
-          path = e.first->asOutlineMask(&e.second).outlineMask;
-        }
-        else
-        {
-          Op(path,
-             e.first->asOutlineMask(&e.second).outlineMask,
-             SkPathOp::kIntersect_SkPathOp,
-             &path);
-        }
+        path = e.first->asOutlineMask(&e.second).outlineMask;
       }
-      if (!path.isEmpty())
+      else
       {
-        _->alphaMaskContour = path;
+        Op(path,
+           e.first->asOutlineMask(&e.second).outlineMask,
+           SkPathOp::kIntersect_SkPathOp,
+           &path);
       }
     }
+    if (!path.isEmpty())
+    {
+      mo.contour = std::move(path);
+      mo.components = std::move(comp);
+      _->alphaMask = std::move(mo);
+    }
   }
+
   // renderer->displayList.emplace_back(renderer->canvas()->getTotalMatrix(), this);
   renderer->pushItem(this, zorder);
   // this->paintEvent(renderer);
@@ -828,143 +828,59 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
   VGG_IMPL(PaintNode);
   Painter painter(canvas);
   // draw blur, we assume that there is only one blur style
-  auto hasBlur = style().blurs.empty() ? false : style().blurs[0].isEnabled;
-  auto hasAlphaMask = _->alphaMaskObjects.has_value() && !_->alphaMaskObjects->empty();
-  // 1. normal drawing
-  // 2. only alphamask: alphamask layer
-  // 3. alphamask + background blur: blured content layer
-  // 4. alphamask + content blur: content blur layer + alphamask layer
-  // TODO 4 should be modified as alphamask layer + content blur layer
-  auto bgBlur = false;
-  auto contentBlur = false;
-
-  if (hasBlur)
+  Blur blur;
+  auto blurType = _->blurType(blur);
+  if (!_->alphaMask)
   {
-    auto blurType = style().blurs[0].blurType;
-    if (blurType != BT_Background)
+    // 1. normal drawing
+    if (blurType)
     {
-      contentBlur = true;
-    }
-    else
-    {
-      bgBlur = true;
-    }
-  }
-
-  if (hasBlur)
-  {
-    const auto blur = style().blurs[0];
-    const auto blurType = blur.blurType;
-    SkPath res = path;
-    if (_->alphaMaskContour && !_->alphaMaskContour->isEmpty())
-    {
-      Op(res, *_->alphaMaskContour, SkPathOp::kIntersect_SkPathOp, &res);
+      SkPath res = path;
+      if (!outlineMask.isEmpty())
+        Op(res, outlineMask, SkPathOp::kIntersect_SkPathOp, &res);
+      if (*blurType == BT_Gaussian)
+        painter.blurContentBegin(blur.radius, blur.radius, getBound(), nullptr, 0);
+      else if (*blurType == BT_Background)
+        painter.blurBackgroundBegin(blur.radius, blur.radius, getBound(), &res);
+      else if (*blurType == BT_Motion)
+        DEBUG("Motion blur has not been implemeted");
+      else if (*blurType == BT_Zoom)
+        DEBUG("Zoom blur has not been implemeted");
     }
     if (!outlineMask.isEmpty())
     {
-      Op(res, outlineMask, SkPathOp::kIntersect_SkPathOp, &res);
+      painter.beginClip(outlineMask);
     }
-    if (blurType == BT_Gaussian)
+    auto blender = SkBlender::Mode(SkBlendMode::kSrcOver);
+    _->drawRawStyle(painter, path, blender);
+    if (!outlineMask.isEmpty())
     {
-      painter.blurContentBegin(blur.radius, blur.radius, getBound(), nullptr, 0);
-      contentBlur = true;
+      painter.endClip();
     }
-    else if (blurType == BT_Background)
+    if (blurType)
     {
-      painter.blurBackgroundBegin(blur.radius, blur.radius, getBound(), &res);
-      bgBlur = true;
-    }
-    else if (blurType == BT_Motion)
-    {
-      DEBUG("Motion blur has not been implemeted");
-    }
-    else if (blurType == BT_Zoom)
-    {
-      DEBUG("Zoom blur has not been implemeted");
-    }
-  }
-
-  if (!outlineMask.isEmpty())
-  {
-    DEBUG("has outline mask");
-    painter.beginClip(outlineMask);
-  }
-  // draw alpha mask first if any
-  auto blender = SkBlender::Mode(SkBlendMode::kSrcOver);
-  if (hasAlphaMask)
-  {
-    if (!bgBlur)
-    {
-      // An additional layer is necessary to store the mask value into alpha channel for alpha
-      // blur effect will create a layer
-      SkPath res = path;
-      if (_->alphaMaskContour && _->alphaMaskContour->isEmpty())
-      {
-        Op(path, *_->alphaMaskContour, SkPathOp::kIntersect_SkPathOp, &res);
-      }
-      SkPaint p;
-      p.setBlendMode(SkBlendMode::kSrcOver);
-      canvas->saveLayer(0, &p);
-      canvas->clipPath(res);
-    }
-
-    auto result = SkRuntimeEffect::MakeForBlender(SkString(R"(
-			vec4 main(vec4 srcColor, vec4 dstColor){
-			 vec4 color = srcColor + dstColor * (1.0 - srcColor.a);
-			 return color * dstColor.a;
-			}
-			)"))
-                    .effect;
-    blender = result->makeBlender(nullptr);
-    for (const auto& p : *_->alphaMaskObjects)
-    {
-      auto skm = toSkMatrix(p.second);
-      canvas->save();
-      canvas->concat(skm);
-      p.first->d_ptr->drawAlphaMask(canvas);
-      canvas->restore();
-    }
-  }
-
-  // draw normal blurs
-  _->drawRawStyle(painter, path, blender);
-
-  if (hasAlphaMask)
-  {
-    if (!bgBlur)
-    {
-      canvas->restore();
-    }
-  }
-
-  if (!outlineMask.isEmpty())
-  {
-    painter.endClip();
-  }
-
-  if (hasBlur)
-  {
-    const auto blur = style().blurs[0];
-    const auto blurType = blur.blurType;
-    if (blurType == BT_Gaussian)
-    {
-      painter.blurContentEnd();
-    }
-    else if (blurType == BT_Background)
-    {
-      if (bgBlur)
-      {
+      const auto bt = blurType.value();
+      if (*blurType == BT_Gaussian)
+        painter.blurContentEnd();
+      else if (*blurType == BT_Background)
         painter.blurBackgroundEnd();
-      }
+      else if (*blurType == BT_Zoom)
+        DEBUG("Zoom blur has not been implemeted");
+      else if (*blurType == BT_Motion)
+        DEBUG("Zoom blur has not been implemeted");
     }
-    else if (blurType == BT_Zoom)
-    {
-      DEBUG("Zoom blur has not been implemeted");
-    }
-    else if (blurType == BT_Motion)
-    {
-      DEBUG("Zoom blur has not been implemeted");
-    }
+  }
+  else
+  {
+    // 1. only alphamask: alphamask layer
+    // 2. alphamask + background blur: blured content layer
+    // 3. alphamask + content blur: alphamask layer + content blur layer
+    if (!blurType)
+      return _->drawWithAlphaMask(canvas, path, outlineMask);
+    else if (*blurType == BT_Background)
+      return _->drawBlurBgWithAlphaMask(canvas, path, outlineMask);
+    else if (*blurType == BT_Gaussian)
+      return _->drawBlurContentWithAlphaMask(canvas, path, outlineMask);
   }
 }
 

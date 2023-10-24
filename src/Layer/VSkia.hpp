@@ -588,6 +588,8 @@ inline sk_sp<SkImageFilter> makeBlendModeFilter(EBlendMode blendMode)
 inline SkRect toSkRect(const VGG::Bound2& bound)
 {
   const auto& b = bound;
+  SkRect a;
+  a.isEmpty();
   return SkRect{ b.topLeft.x, b.topLeft.y, b.bottomRight.x, b.bottomRight.y };
 }
 

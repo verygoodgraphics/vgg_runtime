@@ -25,15 +25,30 @@ namespace VGG::layer
 
 enum class EImageEncode
 {
-  IE_PNG
+  IE_PNG,
+  IE_JPEG,
+  IE_WEBP,
+  IE_RAW
 };
 
 struct ImageOptions
 {
   EImageEncode encode;
+  int position[2] = { 0, 0 };
+  int extend[2] = { 0, 0 };
+  int quality{ 100 };
+};
+
+struct SVGOptions
+{
   int position[2];
   int extend[2];
-  int quality{ 100 };
+};
+
+struct PDFOptions
+{
+  int position[2];
+  int extend[2];
 };
 
 class VLayer__pImpl;
@@ -55,6 +70,7 @@ public:
   virtual void render() override;
   virtual void endFrame() override;
   virtual void shutdown() override;
+
   void resize(int w, int h) override;
   void addRenderItem(std::shared_ptr<Renderable> item);
   void addScene(std::shared_ptr<Scene> scene);
@@ -85,12 +101,17 @@ public:
     return m_scale;
   }
 
-  void saveSKP(const std::string& path)
-  {
-    m_skpPath = path;
-  }
-
   std::optional<std::vector<char>> makeImageSnapshot(const ImageOptions& opts);
+  void makeImageSnapshot(const ImageOptions& opts, std::ostream& os);
+
+  std::optional<std::vector<char>> makeSVG(const SVGOptions& opts);
+  void makeSVG(const SVGOptions& opts, std::ostream& os);
+
+  std::optional<std::vector<char>> makePDF(const PDFOptions& opts);
+  void makePDF(const PDFOptions& opts, std::ostream& os);
+
+  std::optional<std::vector<char>> makeSKP();
+  void makeSKP(std::ostream& os);
 };
 
 } // namespace VGG::layer

@@ -175,10 +175,65 @@ public:
       return true;
     }
 
-    if (key == VGGK_c)
+    if (key == VGGK_1)
     {
-      INFO("Capture");
-      m_layer->saveSKP("draw.skp");
+      INFO("Capture SKP");
+      std::ofstream ofs("capture.skp");
+      if (ofs.is_open())
+      {
+        m_layer->makeSKP(ofs);
+      }
+      return true;
+    }
+
+    if (key == VGGK_2)
+    {
+      INFO("Capture SVG");
+      std::ofstream ofs("capture.svg");
+      if (ofs.is_open())
+      {
+        m_layer->makeSVG(layer::SVGOptions(), ofs);
+      }
+      return true;
+    }
+
+    if (key == VGGK_3)
+    {
+      INFO("Capture PNG");
+      std::ofstream ofs("capture.png");
+      layer::ImageOptions opt;
+      opt.extend;
+      opt.encode = VGG::layer::EImageEncode::IE_PNG;
+      if (ofs.is_open())
+      {
+        m_layer->makeImageSnapshot(opt, ofs);
+      }
+      return true;
+    }
+
+    if (key == VGGK_4)
+    {
+      INFO("Capture JPEG");
+      std::ofstream ofs("capture.jpg");
+      layer::ImageOptions opt;
+      opt.encode = VGG::layer::EImageEncode::IE_JPEG;
+      if (ofs.is_open())
+      {
+        m_layer->makeImageSnapshot(opt, ofs);
+      }
+      return true;
+    }
+
+    if (key == VGGK_5)
+    {
+      INFO("Capture WEBP");
+      std::ofstream ofs("capture.webp");
+      layer::ImageOptions opt;
+      opt.encode = VGG::layer::EImageEncode::IE_WEBP;
+      if (ofs.is_open())
+      {
+        m_layer->makeImageSnapshot(opt, ofs);
+      }
       return true;
     }
 

@@ -784,9 +784,9 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
       else if (*blurType == BT_Background)
         painter.blurBackgroundBegin(blur.radius, blur.radius, getBound(), &res);
       else if (*blurType == BT_Motion)
-        DEBUG("Motion blur has not been implemeted");
+        DEBUG("Motion blur has not been implemented");
       else if (*blurType == BT_Zoom)
-        DEBUG("Zoom blur has not been implemeted");
+        DEBUG("Zoom blur has not been implemented");
     }
     if (!outlineMask.isEmpty())
     {
@@ -806,9 +806,9 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
       else if (*blurType == BT_Background)
         painter.blurBackgroundEnd();
       else if (*blurType == BT_Zoom)
-        DEBUG("Zoom blur has not been implemeted");
+        DEBUG("Zoom blur has not been implemented");
       else if (*blurType == BT_Motion)
-        DEBUG("Zoom blur has not been implemeted");
+        DEBUG("Motion blur has not been implemented");
     }
   }
   else

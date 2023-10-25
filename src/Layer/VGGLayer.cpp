@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <core/SkStream.h>
+#include <iterator>
+#include <ostream>
+#include <sstream>
 #ifdef VGG_USE_VULKAN
 #include "VSkiaVK.hpp"
 #endif
-#include <core/SkPictureRecorder.h>
 #include "Renderer.hpp"
 #include "VSkiaContext.hpp"
 #include "VSkiaGL.hpp"
@@ -29,14 +32,86 @@
 #include "Layer/Core/Node.hpp"
 #include "Utility/CappingProfiler.hpp"
 
+#include <core/SkPictureRecorder.h>
+#include <gpu/GrDirectContext.h>
+#include <svg/SkSVGCanvas.h>
+#include <encode/SkJpegEncoder.h>
+#include <encode/SkWebpEncoder.h>
+
 #include <optional>
-#include <sstream>
-#include <fstream>
+
+class SkStdOStream : public SkWStream
+{
+  std::ostream& m_os;
+  std::ostream::pos_type m_begin{ 0 };
+
+public:
+  SkStdOStream(const SkStdOStream&) = delete;
+  SkStdOStream& operator=(const SkStdOStream&) = delete;
+  SkStdOStream(std::ostream& os)
+    : m_os(os)
+  {
+    m_begin = m_os.tellp();
+  }
+
+  virtual bool write(const void* buffer, size_t size) override
+  {
+    m_os.write((char*)buffer, size);
+    return m_os.good();
+  }
+
+  virtual size_t bytesWritten() const override
+  {
+    return m_os.tellp() - m_begin;
+  }
+};
 
 namespace VGG::layer
 {
 
 using namespace VGG::layer::skia_impl;
+
+std::optional<std::vector<char>> encodeImage(GrDirectContext* ctx,
+                                             EImageEncode encode,
+                                             SkImage* image,
+                                             int quality)
+{
+  quality = std::max(std::min(quality, 100), 0);
+  if (encode == EImageEncode::IE_PNG)
+  {
+    SkPngEncoder::Options opt;
+    opt.fZLibLevel = std::max(std::min(9, (100 - quality) / 10), 0);
+    if (auto data = SkPngEncoder::Encode(ctx, image, opt))
+    {
+      return std::vector<char>{ data->bytes(), data->bytes() + data->size() };
+    }
+  }
+  else if (encode == EImageEncode::IE_JPEG)
+  {
+    SkJpegEncoder::Options opt;
+    opt.fQuality = quality;
+    if (auto data = SkJpegEncoder::Encode(ctx, image, opt))
+    {
+      return std::vector<char>{ data->bytes(), data->bytes() + data->size() };
+    }
+  }
+  else if (encode == EImageEncode::IE_WEBP)
+  {
+    SkWebpEncoder::Options opt;
+    opt.fQuality = quality;
+    if (auto data = SkWebpEncoder::Encode(ctx, image, opt))
+    {
+      return std::vector<char>{ data->bytes(), data->bytes() + data->size() };
+    }
+  }
+  else
+  {
+    DEBUG("format (%d) is not supported", encode);
+    return std::nullopt;
+  }
+  DEBUG("Failed to encode image data for type(%d)", encode);
+  return std::nullopt;
+}
 
 class VLayer__pImpl
 {
@@ -60,6 +135,42 @@ public:
   void cleanup()
   {
     skiaContext = nullptr;
+  }
+
+  void renderInternal(SkCanvas* canvas, bool drawTextInfo)
+  {
+    ASSERT(canvas);
+    canvas->save();
+    canvas->clear(SK_ColorWHITE);
+    const auto scale = q_ptr->context()->property().dpiScaling * q_ptr->scaleFactor();
+    canvas->scale(scale, scale);
+    for (auto& scene : scenes)
+    {
+      scene->render(canvas);
+    }
+    for (auto& item : items)
+    {
+      item->render(canvas);
+    }
+    if (drawTextInfo)
+    {
+      std::vector<std::string> info;
+      for (auto& scene : scenes)
+      {
+        auto z = scene->zoomer();
+        if (z)
+        {
+          info.push_back(mapCanvasPositionToScene(z,
+                                                  scene->name().c_str(),
+                                                  q_ptr->m_position[0],
+                                                  q_ptr->m_position[1]));
+        }
+      }
+
+      drawTextAt(canvas, info, q_ptr->m_position[0], q_ptr->m_position[1]);
+    }
+    canvas->restore();
+    canvas->flush();
   }
 
   std::string mapCanvasPositionToScene(const Zoomer* zoomer,
@@ -141,68 +252,8 @@ void VLayer::render()
 {
   VGG_IMPL(VLayer)
   SkCanvas* canvas = nullptr;
-  SkPictureRecorder rec;
-  if (m_skpPath && !m_skpPath->empty())
-  {
-    auto w = _->skiaContext->surface()->width();
-    auto h = _->skiaContext->surface()->height();
-    canvas = rec.beginRecording(w, h);
-  }
-  else
-  {
-    canvas = _->skiaContext->canvas();
-  }
-  if (canvas)
-  {
-    canvas->save();
-    canvas->clear(SK_ColorWHITE);
-    const auto scale = context()->property().dpiScaling * scaleFactor();
-    canvas->scale(scale, scale);
-    for (auto& scene : _->scenes)
-    {
-      scene->render(canvas);
-    }
-    for (auto& item : _->items)
-    {
-      item->render(canvas);
-    }
-    if (enableDrawPosition())
-    {
-      std::vector<std::string> info;
-      for (auto& scene : _->scenes)
-      {
-        auto z = scene->zoomer();
-        if (z)
-        {
-          info.push_back(
-            _->mapCanvasPositionToScene(z, scene->name().c_str(), m_position[0], m_position[1]));
-        }
-      }
-
-      _->drawTextAt(canvas, info, m_position[0], m_position[1]);
-    }
-    canvas->restore();
-    canvas->flush();
-  }
-
-  if (m_skpPath && !m_skpPath->empty())
-  {
-    auto pic = rec.finishRecordingAsPicture();
-    if (pic)
-    {
-      auto data = pic->serialize();
-      if (data)
-      {
-        std::ofstream ofs(*m_skpPath);
-        if (ofs.is_open())
-        {
-          ofs.write((char*)data->data(), data->size());
-          DEBUG("skp saved");
-        }
-      }
-    }
-    m_skpPath = std::nullopt;
-  }
+  canvas = _->skiaContext->canvas();
+  _->renderInternal(canvas, enableDrawPosition());
 }
 
 void VLayer::addRenderItem(std::shared_ptr<Renderable> item)
@@ -240,6 +291,84 @@ void VLayer::endFrame()
   context()->swap();
 }
 
+std::optional<std::vector<char>> VLayer::makeSVG(const SVGOptions& opts)
+{
+  VGG_IMPL(VLayer);
+  std::stringstream data;
+  makeSVG(opts, data);
+  return std::vector<char>{ std::istream_iterator<char>(data), std::istream_iterator<char>() };
+}
+
+void VLayer::makeSVG(const SVGOptions& opts, std::ostream& os)
+{
+  VGG_IMPL(VLayer);
+  auto s = _->skiaContext->surface();
+  auto rect = SkRect::MakeWH(s->width(), s->height());
+  SkStdOStream skos(os);
+  auto svgCanvas = SkSVGCanvas::Make(rect, &skos);
+  _->renderInternal(svgCanvas.get(), false);
+}
+
+std::optional<std::vector<char>> VLayer::makePDF(const PDFOptions& opts)
+{
+  std::stringstream data;
+  makePDF(opts, data);
+  return std::vector<char>{ std::istream_iterator<char>(data), std::istream_iterator<char>() };
+}
+
+void VLayer::makePDF(const PDFOptions& opts, std::ostream& os)
+{
+  VGG_IMPL(VLayer);
+  SkStdOStream skos(os);
+  auto pdfDoc = SkPDF::MakeDocument(&skos);
+  auto s = _->skiaContext->surface();
+  if (s)
+  {
+    SkCanvas* pdfCanvas = pdfDoc->beginPage(s->width(), s->height());
+    if (pdfCanvas)
+    {
+      _->renderInternal(pdfCanvas, false);
+    }
+    pdfDoc->endPage();
+    pdfDoc->close();
+    return;
+  }
+  DEBUG("[PDF] Get surface failed");
+}
+
+std::optional<std::vector<char>> VLayer::makeSKP()
+{
+  std::stringstream data;
+  makeSKP(data);
+  return std::vector<char>{ std::istream_iterator<char>(data), std::istream_iterator<char>() };
+}
+
+void VLayer::makeSKP(std::ostream& os)
+{
+  VGG_IMPL(VLayer);
+  SkPictureRecorder rec;
+  auto w = _->skiaContext->surface()->width();
+  auto h = _->skiaContext->surface()->height();
+  auto canvas = rec.beginRecording(w, h);
+  _->renderInternal(canvas, false);
+  auto pic = rec.finishRecordingAsPicture();
+  if (pic)
+  {
+    SkStdOStream skos(os);
+    pic->serialize(&skos, 0);
+  }
+}
+
+void VLayer::makeImageSnapshot(const ImageOptions& opts, std::ostream& os)
+{
+  if (auto data = makeImageSnapshot(opts))
+  {
+    os.write(data->data(), data->size());
+    return;
+  }
+  DEBUG("make image snapshot failed");
+}
+
 std::optional<std::vector<char>> VLayer::makeImageSnapshot(const ImageOptions& opts)
 {
   VGG_IMPL(VLayer);
@@ -248,15 +377,14 @@ std::optional<std::vector<char>> VLayer::makeImageSnapshot(const ImageOptions& o
   if (auto image = surface->makeImageSnapshot(
         SkIRect::MakeXYWH(opts.position[0], opts.position[1], opts.extend[0], opts.extend[1])))
   {
-    SkPngEncoder::Options opt;
-    opt.fZLibLevel = std::max(std::min(9, (100 - opts.quality) / 10), 0);
-    if (auto data = SkPngEncoder::Encode(ctx, image.get(), opt))
+    if (opts.encode != EImageEncode::IE_RAW)
     {
-      return std::vector<char>{ data->bytes(), data->bytes() + data->size() };
+      return encodeImage(ctx, opts.encode, image.get(), opts.quality);
     }
     else
     {
-      DEBUG("Failed to encode image data");
+      DEBUG("raw data is not supported now");
+      return std::nullopt;
     }
   }
   return std::nullopt;

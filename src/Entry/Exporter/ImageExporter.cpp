@@ -183,6 +183,7 @@ public:
   float maxSurfaceSize[2];
   int totalFrames{ 0 };
   int index{ 0 };
+  const ImageOption imgOpts;
   std::shared_ptr<Scene> scene;
   Iterator__pImpl(Exporter::Iterator* api,
                   Exporter& exporter,
@@ -191,15 +192,31 @@ public:
                   const ImageOption& opt)
     : q_api(api)
     , exporter(exporter)
+    , imgOpts(opt)
   {
     getMaxSurfaceSize(opt.resolutionLevel, maxSurfaceSize);
     scene = std::make_shared<Scene>();
     Layout::ExpandSymbol e(json);
     scene->loadFileContent(e());
-    scene->setResRepo(resource);
+    scene->setResRepo(std::move(resource));
     totalFrames = scene->frameCount();
     index = 0;
     exporter.d_impl->resize(maxSurfaceSize[0], maxSurfaceSize[1]);
+  }
+
+  layer::EImageEncode toEImageEncode(EImageType type)
+  {
+    switch (type)
+    {
+      case PNG:
+        return layer::EImageEncode::IE_PNG;
+      case JPEG:
+        return layer::EImageEncode::IE_JPEG;
+      case WEBP:
+        return layer::EImageEncode::IE_WEBP;
+      default:
+        return layer::EImageEncode::IE_PNG;
+    }
   }
 
   bool next(std::string& key, std::vector<char>& image)
@@ -234,7 +251,7 @@ public:
     auto scale =
       calcScaleFactor(w, h, maxSurfaceSize[0], maxSurfaceSize[1], actualSize[0], actualSize[1]);
     layer::ImageOptions opts;
-    opts.encode = layer::EImageEncode::IE_PNG;
+    opts.encode = toEImageEncode(imgOpts.type);
     opts.position[0] = 0;
     opts.position[1] = 0;
     opts.extend[0] = actualSize[0];

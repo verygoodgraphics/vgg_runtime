@@ -24,10 +24,25 @@
 namespace VGG::exporter
 {
 
+enum EFileType
+{
+  SVG,
+  PDF,
+  SKP
+};
+
+enum EImageType
+{
+  PNG,
+  JPEG,
+  WEBP,
+};
+
 struct ImageOption
 {
   int imageQuality = 100;
   int resolutionLevel = 2;
+  EImageType type{ EImageType::PNG };
 };
 
 enum class EBackend
@@ -78,6 +93,7 @@ public:
   {
     return Exporter::Iterator{ *this, std::move(j), std::move(resources), opt };
   }
+
   void setOutputCallback(OutputCallback callback);
   ~Exporter();
 };

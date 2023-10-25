@@ -11,14 +11,14 @@
 using namespace VGG;
 
 template<typename F>
-void write(exporter::Exporter::Iterator iter, F&& f)
+void write(exporter::Exporter::Iterator iter, F&& f, const std::string& ext = ".png")
 {
   std::string key;
   std::vector<char> image;
   auto ok = iter.next(key, image);
   while (ok)
   {
-    std::ofstream ofs(f(key) + ".png", std::ios::binary);
+    std::ofstream ofs(f(key) + ext, std::ios::binary);
     if (ofs.is_open())
     {
       ofs.write((const char*)image.data(), image.size());
@@ -49,6 +49,7 @@ int main(int argc, char** argv)
   program.add_argument("-c", "--config").help("specify config file");
   program.add_argument("-q", "--quality").help("canvas scale").scan<'i', int>().default_value(80);
   program.add_argument("-o", "--output").help("output directory");
+  program.add_argument("-f", "--file-format").help("imageformat: png, jpg, webp");
   program.add_argument("-t").help("postfix for output filename");
 
   try
@@ -73,6 +74,36 @@ int main(int argc, char** argv)
   desc.prefix = program.present("-p").value_or("");
 
   exporter::ImageOption opts;
+  bool isBitmap = false;
+  std::string extension;
+  if (auto v = program.present("-f"))
+  {
+    auto ext = v.value();
+    if (ext == "png")
+    {
+      opts.type = VGG::exporter::PNG;
+      extension = ".png";
+      isBitmap = true;
+    }
+    else if (ext == "jpg")
+    {
+      opts.type = VGG::exporter::JPEG;
+      extension = ".jpg";
+      isBitmap = true;
+    }
+    else if (ext == "webp")
+    {
+      opts.type = VGG::exporter::WEBP;
+      extension = ".webp";
+      isBitmap = true;
+    }
+    else
+    {
+      isBitmap = true;
+      extension = ".png";
+      std::cout << "unsupported format: use png as default\n";
+    }
+  }
   opts.resolutionLevel = 2;
   opts.imageQuality = 80;
 
@@ -96,8 +127,10 @@ int main(int argc, char** argv)
       const auto folder = fs::path(fp).filename().stem();
       const fs::path prefix = outputDir;
       fs::create_directory(prefix);
-      write(std::move(iter),
-            [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); });
+      write(
+        std::move(iter),
+        [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); },
+        extension);
     }
   }
   else if (auto d = program.present("-L"))
@@ -117,8 +150,10 @@ int main(int argc, char** argv)
             auto iter = exporter.render(data.Format, data.Resource, opts);
             const fs::path prefix = outputDir;
             fs::create_directory(prefix);
-            write(std::move(iter),
-                  [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); });
+            write(
+              std::move(iter),
+              [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); },
+              extension);
           }
         }
       }

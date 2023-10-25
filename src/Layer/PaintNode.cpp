@@ -283,8 +283,8 @@ void PaintNode::paintPass(SkiaRenderer* renderer, int zorder)
   }
 
   // renderer->displayList.emplace_back(renderer->canvas()->getTotalMatrix(), this);
-  renderer->pushItem(this, zorder);
-  // this->paintEvent(renderer);
+  // renderer->pushItem(this, zorder);
+  this->paintEvent(renderer);
 }
 
 void PaintNode::paintEvent(SkiaRenderer* renderer)
@@ -746,17 +746,21 @@ void PaintNode::prePaintPass(SkiaRenderer* renderer)
     // canvas->saveLayer(toSkRect(getBound()), &paint);
   }
 
-  // canvas->save();
-  // canvas->concat(toSkMatrix(_->transform));
-  renderer->pushMatrix(this->localTransform());
+  canvas->save();
+  canvas->concat(toSkMatrix(_->transform));
+  if (renderer->isEnableDrawDebugBound())
+  {
+    renderer->drawDebugBound(this, 0);
+  }
+  // renderer->pushMatrix(this->localTransform());
 }
 
 void PaintNode::postPaintPass(SkiaRenderer* renderer)
 {
   VGG_IMPL(PaintNode);
   auto canvas = renderer->canvas();
-  renderer->popMatrix();
-  // canvas->restore(); // store the state in paintPass
+  // renderer->popMatrix();
+  canvas->restore(); // store the state in paintPass
 
   if (_->contextSetting.IsolateBlending)
   {

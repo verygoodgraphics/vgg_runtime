@@ -78,16 +78,18 @@ public:
 
   void render(SkCanvas* canvas)
   {
-    PaintNode* node = nullptr;
-    if (!container.frames.empty() && maskDirty)
+    PaintNode* node = container.frames[page].get();
+    if (!container.frames.empty() && maskDirty && node)
     {
-      auto frame = container.frames[page].get();
       renderer.clearCache();
-      renderer.updateMaskObject(frame);
-      renderer.draw(canvas, frame);
+      renderer.updateMaskObject(node);
       maskDirty = false;
     }
-    renderer.commit(canvas);
+    if (node)
+    {
+      renderer.draw(canvas, node);
+    }
+    // renderer.commit(canvas);
   }
 };
 

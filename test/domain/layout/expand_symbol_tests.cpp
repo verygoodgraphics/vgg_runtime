@@ -2,6 +2,7 @@
 
 #include "Domain/JsonSchemaValidator.hpp"
 #include "Domain/Layout/Helper.hpp"
+#include "Domain/Layout/Rule.hpp"
 #include "Domain/Model/JsonKeys.hpp"
 #include "Utility/VggFloat.hpp"
 
@@ -30,17 +31,17 @@ protected:
     Helper::write_json(json, out_file_path);
   }
 
-  bool hasLayoutRule(const nlohmann::json& layoutJson, const std::string& id)
+  const nlohmann::json* layoutRule(const nlohmann::json& layoutJson, const std::string& id)
   {
     if (!layoutJson.is_object())
     {
-      return false;
+      return nullptr;
     }
 
     auto& obj = layoutJson[K_OBJ];
     if (!obj.is_array())
     {
-      return false;
+      return nullptr;
     }
 
     for (auto& item : obj)
@@ -48,11 +49,16 @@ protected:
       auto& jsonId = item[K_ID];
       if (jsonId == id)
       {
-        return true;
+        return &item;
       }
     }
 
-    return false;
+    return nullptr;
+  }
+
+  bool hasLayoutRule(const nlohmann::json& layoutJson, const std::string& id)
+  {
+    return layoutRule(layoutJson, id) != nullptr;
   }
 };
 
@@ -630,12 +636,46 @@ TEST_F(VggExpandSymbolTestSuite, layout_container_when_child_bounds_are_overridd
 
   // Then
   auto expandedDesignJson = std::get<0>(result);
+  auto expandedLayoutJson = std::get<1>(result);
 
   // layout
   {
-    nlohmann::json::json_pointer path{ "/frames/0/childObjects/0/childObjects/1/matrix" };
-    auto childMatrix = expandedDesignJson[path].get<Matrix>();
-    EXPECT_DOUBLE_EQ(childMatrix.tx, 73.0);
-    EXPECT_DOUBLE_EQ(childMatrix.ty, -7.0);
+    nlohmann::json::json_pointer nodePath{ "/frames/0/childObjects/0/childObjects/0" };
+    { // bounds
+      auto path = nodePath / "bounds";
+      auto bounds = expandedDesignJson[path].get<Rect>();
+      EXPECT_DOUBLE_EQ(bounds.width(), 61.0);
+      EXPECT_DOUBLE_EQ(bounds.height(), 20.0);
+    }
+    { // matrix
+      auto path = nodePath / "matrix";
+      auto childMatrix = expandedDesignJson[path].get<Matrix>();
+      EXPECT_DOUBLE_EQ(childMatrix.tx, 8.0);
+      EXPECT_DOUBLE_EQ(childMatrix.ty, -2.0);
+    }
+  }
+  {
+    nlohmann::json::json_pointer nodePath{
+      "/frames/0/childObjects/0/childObjects/1/childObjects/0"
+    };
+    { // bounds
+      auto path = nodePath / "bounds";
+      auto bounds = expandedDesignJson[path].get<Rect>();
+      EXPECT_DOUBLE_EQ(bounds.height(), 7.276787757873535);
+      EXPECT_DOUBLE_EQ(bounds.width(), 7.067143440246582);
+    }
+    { // matrix
+      auto path = nodePath / "matrix";
+      auto childMatrix = expandedDesignJson[path].get<Matrix>();
+      EXPECT_DOUBLE_EQ(childMatrix.tx, 1.4617968797683716);
+      EXPECT_DOUBLE_EQ(childMatrix.ty, -1.3610986471176147);
+    }
+  }
+  { // layout
+    auto json = layoutRule(expandedLayoutJson, "1:38__1:25");
+    EXPECT_NE(json, nullptr);
+    Layout::Internal::Rule::Rule rule = *json;
+    EXPECT_EQ(rule.width.value.types, Internal::Rule::Length::ETypes::PX);
+    EXPECT_DOUBLE_EQ(rule.width.value.value, 61.0);
   }
 }

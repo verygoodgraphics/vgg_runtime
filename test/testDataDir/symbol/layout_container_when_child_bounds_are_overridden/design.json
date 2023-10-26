@@ -1,6 +1,6 @@
 {
   "fileType": 3,
-  "fileName": "/Users/houguanhua/code/vgg/vgg_runtime_A/test/testDataDir/_bug/bug-delete-icon-position.fig",
+  "fileName": "/Users/houguanhua/code/vgg/vgg_runtime_A/test/testDataDir/symbol/layout_container_when_child_bounds_are_overridden/bug-delete-icon-position.fig",
   "frames": [
     {
       "id": "1:37",
@@ -52,6 +52,9 @@
       "maskShowType": 2,
       "overflow": 2,
       "cornerSmoothing": 0.0,
+      "horizontalConstraint": 1,
+      "verticalConstraint": 1,
+      "resizesContent": 0,
       "class": "frame",
       "childObjects": [
         {
@@ -158,6 +161,9 @@
           "maskShowType": 2,
           "overflow": 1,
           "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "symbolInstance",
           "masterId": "1:24",
           "overrideValues": [
@@ -373,6 +379,9 @@
           "maskShowType": 2,
           "overflow": 1,
           "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "frame",
           "childObjects": [
             {
@@ -445,6 +454,9 @@
               "maskShowType": 2,
               "overflow": 2,
               "cornerSmoothing": 0.0,
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
               "class": "text",
               "content": "2022-11-04",
               "frameMode": 1,
@@ -556,6 +568,9 @@
               "maskShowType": 2,
               "overflow": 1,
               "cornerSmoothing": 0.0,
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
               "class": "symbolInstance",
               "masterId": "1:27",
               "overrideValues": [
@@ -711,6 +726,9 @@
           "maskShowType": 2,
           "overflow": 1,
           "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "frame",
           "childObjects": [
             {
@@ -783,6 +801,9 @@
               "maskShowType": 2,
               "overflow": 2,
               "cornerSmoothing": 0.0,
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
               "class": "text",
               "content": "2022-11-11",
               "frameMode": 1,
@@ -894,6 +915,9 @@
               "maskShowType": 2,
               "overflow": 1,
               "cornerSmoothing": 0.0,
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
               "class": "symbolInstance",
               "masterId": "1:27",
               "overrideValues": [
@@ -1040,6 +1064,9 @@
       "maskShowType": 2,
       "overflow": 1,
       "cornerSmoothing": 0.0,
+      "horizontalConstraint": 1,
+      "verticalConstraint": 1,
+      "resizesContent": 0,
       "class": "frame",
       "childObjects": [
         {
@@ -1147,6 +1174,9 @@
           "overflow": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "45449:84279",
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -1200,6 +1230,9 @@
               "overflow": 2,
               "cornerSmoothing": 0.0,
               "overrideKey": "45452:2",
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
               "class": "frame",
               "childObjects": [
                 {
@@ -1273,6 +1306,9 @@
                   "overflow": 2,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "45449:84280",
+                  "horizontalConstraint": 7,
+                  "verticalConstraint": 7,
+                  "resizesContent": 0,
                   "class": "text",
                   "content": "Apples",
                   "frameMode": 1,
@@ -1455,6 +1491,9 @@
           "overflow": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "45449:84285",
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -1528,6 +1567,9 @@
               "overflow": 2,
               "cornerSmoothing": 0.0,
               "overrideKey": "45449:84286",
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
               "class": "text",
               "content": "Apples",
               "frameMode": 1,
@@ -1702,6 +1744,9 @@
           "overflow": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "45449:84291",
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -1775,6 +1820,9 @@
               "overflow": 2,
               "cornerSmoothing": 0.0,
               "overrideKey": "45:2571",
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
               "class": "text",
               "content": "Apples",
               "frameMode": 1,
@@ -1949,6 +1997,9 @@
           "overflow": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "45449:84282",
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -2002,6 +2053,9 @@
               "overflow": 2,
               "cornerSmoothing": 0.0,
               "overrideKey": "45452:1",
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
               "class": "frame",
               "childObjects": [
                 {
@@ -2075,6 +2129,9 @@
                   "overflow": 2,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "45449:84283",
+                  "horizontalConstraint": 7,
+                  "verticalConstraint": 7,
+                  "resizesContent": 0,
                   "class": "text",
                   "content": "Apples",
                   "frameMode": 1,
@@ -2257,6 +2314,9 @@
           "overflow": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "45449:84288",
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -2330,6 +2390,9 @@
               "overflow": 2,
               "cornerSmoothing": 0.0,
               "overrideKey": "45449:84289",
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
               "class": "text",
               "content": "Apples",
               "frameMode": 1,
@@ -2504,6 +2567,9 @@
           "overflow": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "45449:84294",
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -2577,6 +2643,9 @@
               "overflow": 2,
               "cornerSmoothing": 0.0,
               "overrideKey": "45:2571",
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
               "class": "text",
               "content": "Apples",
               "frameMode": 1,
@@ -2751,6 +2820,9 @@
           "overflow": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "45438:13",
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -2804,6 +2876,9 @@
               "overflow": 2,
               "cornerSmoothing": 0.0,
               "overrideKey": "45489:0",
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
               "class": "frame",
               "childObjects": [
                 {
@@ -2877,6 +2952,9 @@
                   "overflow": 2,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "45438:5",
+                  "horizontalConstraint": 1,
+                  "verticalConstraint": 1,
+                  "resizesContent": 0,
                   "class": "text",
                   "content": "Apples",
                   "frameMode": 1,
@@ -2997,6 +3075,9 @@
               "overflow": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "45438:6",
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
               "class": "symbolInstance",
               "masterId": "1:27",
               "overrideValues": [
@@ -3153,6 +3234,9 @@
           "overflow": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "45446:4",
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -3226,6 +3310,9 @@
               "overflow": 2,
               "cornerSmoothing": 0.0,
               "overrideKey": "45446:1",
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
               "class": "text",
               "content": "Apples",
               "frameMode": 1,
@@ -3338,6 +3425,9 @@
               "overflow": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "45446:2",
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
               "class": "symbolInstance",
               "masterId": "1:27",
               "overrideValues": [
@@ -3494,6 +3584,9 @@
           "overflow": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "45434:0",
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -3567,6 +3660,9 @@
               "overflow": 2,
               "cornerSmoothing": 0.0,
               "overrideKey": "45:2571",
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
               "class": "text",
               "content": "Apples",
               "frameMode": 1,
@@ -3679,6 +3775,9 @@
               "overflow": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "45434:2",
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
               "class": "symbolInstance",
               "masterId": "1:27",
               "overrideValues": [
@@ -3840,6 +3939,9 @@
           "overflow": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "806:7915",
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -3913,6 +4015,9 @@
               "overflow": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "806:7916",
+              "horizontalConstraint": 5,
+              "verticalConstraint": 5,
+              "resizesContent": 0,
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -4282,6 +4387,9 @@
           "maskShowType": 2,
           "overflow": 1,
           "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "path",
           "shape": {
             "class": "shape",
@@ -4403,6 +4511,9 @@
           "maskShowType": 2,
           "overflow": 1,
           "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "path",
           "shape": {
             "class": "shape",
@@ -4524,6 +4635,9 @@
           "maskShowType": 2,
           "overflow": 1,
           "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "path",
           "shape": {
             "class": "shape",
@@ -4645,6 +4759,9 @@
           "maskShowType": 2,
           "overflow": 2,
           "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "text",
           "content": "Rag 123",
           "frameMode": 1,
@@ -4776,6 +4893,9 @@
           "maskShowType": 2,
           "overflow": 1,
           "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "path",
           "shape": {
             "class": "shape",
@@ -4897,6 +5017,9 @@
           "maskShowType": 2,
           "overflow": 1,
           "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "path",
           "shape": {
             "class": "shape",
@@ -5018,6 +5141,9 @@
           "maskShowType": 2,
           "overflow": 1,
           "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "path",
           "shape": {
             "class": "shape",
@@ -5139,6 +5265,9 @@
           "maskShowType": 2,
           "overflow": 2,
           "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
           "class": "text",
           "content": "Rag 123",
           "frameMode": 1,

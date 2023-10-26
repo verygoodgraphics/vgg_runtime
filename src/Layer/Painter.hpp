@@ -233,39 +233,17 @@ public:
     m_canvas->restore();
   }
 
-  [[deprecated]] void drawShadow(SkCanvas* canvas,
-                                 const SkPath& skPath,
-                                 const Shadow& s,
-                                 SkPaint::Style style,
-                                 const Bound2& bound,
-                                 sk_sp<SkImageFilter> imageFilter);
-
   void drawShadow(const SkPath& skPath,
                   const Bound2& bound,
                   const Shadow& s,
                   SkPaint::Style style,
                   sk_sp<SkImageFilter> imageFilter);
 
-  [[deprecated]] void drawInnerShadow(SkCanvas* canvas,
-                                      const SkPath& skPath,
-                                      const Shadow& s,
-                                      SkPaint::Style style,
-                                      const Bound2& bound,
-                                      sk_sp<SkImageFilter> imageFilter);
-
   void drawInnerShadow(const SkPath& skPath,
                        const Bound2& bound,
                        const Shadow& s,
                        SkPaint::Style style,
                        sk_sp<SkImageFilter> imageFilter);
-
-  [[deprecated]] void drawFill(SkCanvas* canvas,
-                               float globalAlpha,
-                               const Style& style,
-                               const SkPath& skPath,
-                               const Bound2& bound,
-                               sk_sp<SkImageFilter> imageFilter,
-                               sk_sp<SkBlender> blender);
 
   void drawFill(const SkPath& skPath,
                 const Bound2& bound,
@@ -276,13 +254,6 @@ public:
                 sk_sp<SkMaskFilter> mask);
 
   sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound2& bound);
-
-  [[deprecated]] void drawPathBorder(SkCanvas* canvas,
-                                     const SkPath& skPath,
-                                     const Border& b,
-                                     float globalAlpha,
-                                     const Bound2& bound,
-                                     sk_sp<SkImageFilter> imageFilter);
 
   void drawPathBorder(const SkPath& skPath,
                       const Bound2& bound,

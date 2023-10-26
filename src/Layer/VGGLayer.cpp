@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <core/SkStream.h>
 #include <iterator>
 #include <ostream>
 #include <sstream>
@@ -24,6 +23,7 @@
 #include "VSkiaContext.hpp"
 #include "VSkiaGL.hpp"
 
+#include "Layer/Core/Stream.hpp"
 #include "Layer/VGGLayer.hpp"
 #include "Layer/Zoomer.hpp"
 #include "Layer/Scene.hpp"
@@ -34,37 +34,10 @@
 
 #include <core/SkPictureRecorder.h>
 #include <gpu/GrDirectContext.h>
-#include <svg/SkSVGCanvas.h>
 #include <encode/SkJpegEncoder.h>
 #include <encode/SkWebpEncoder.h>
 
 #include <optional>
-
-class SkStdOStream : public SkWStream
-{
-  std::ostream& m_os;
-  std::ostream::pos_type m_begin{ 0 };
-
-public:
-  SkStdOStream(const SkStdOStream&) = delete;
-  SkStdOStream& operator=(const SkStdOStream&) = delete;
-  SkStdOStream(std::ostream& os)
-    : m_os(os)
-  {
-    m_begin = m_os.tellp();
-  }
-
-  virtual bool write(const void* buffer, size_t size) override
-  {
-    m_os.write((char*)buffer, size);
-    return m_os.good();
-  }
-
-  virtual size_t bytesWritten() const override
-  {
-    return m_os.tellp() - m_begin;
-  }
-};
 
 namespace VGG::layer
 {
@@ -289,51 +262,6 @@ void VLayer::endFrame()
   ASSERT(context());
   _->skiaContext->flushAndSubmit();
   context()->swap();
-}
-
-std::optional<std::vector<char>> VLayer::makeSVG(const SVGOptions& opts)
-{
-  VGG_IMPL(VLayer);
-  std::stringstream data;
-  makeSVG(opts, data);
-  return std::vector<char>{ std::istream_iterator<char>(data), std::istream_iterator<char>() };
-}
-
-void VLayer::makeSVG(const SVGOptions& opts, std::ostream& os)
-{
-  VGG_IMPL(VLayer);
-  auto s = _->skiaContext->surface();
-  auto rect = SkRect::MakeWH(s->width(), s->height());
-  SkStdOStream skos(os);
-  auto svgCanvas = SkSVGCanvas::Make(rect, &skos);
-  _->renderInternal(svgCanvas.get(), false);
-}
-
-std::optional<std::vector<char>> VLayer::makePDF(const PDFOptions& opts)
-{
-  std::stringstream data;
-  makePDF(opts, data);
-  return std::vector<char>{ std::istream_iterator<char>(data), std::istream_iterator<char>() };
-}
-
-void VLayer::makePDF(const PDFOptions& opts, std::ostream& os)
-{
-  VGG_IMPL(VLayer);
-  SkStdOStream skos(os);
-  auto pdfDoc = SkPDF::MakeDocument(&skos);
-  auto s = _->skiaContext->surface();
-  if (s)
-  {
-    SkCanvas* pdfCanvas = pdfDoc->beginPage(s->width(), s->height());
-    if (pdfCanvas)
-    {
-      _->renderInternal(pdfCanvas, false);
-    }
-    pdfDoc->endPage();
-    pdfDoc->close();
-    return;
-  }
-  DEBUG("[PDF] Get surface failed");
 }
 
 std::optional<std::vector<char>> VLayer::makeSKP()

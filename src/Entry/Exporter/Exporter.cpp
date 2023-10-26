@@ -19,10 +19,17 @@
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/VGGLayer.hpp"
 #include "Layer/Scene.hpp"
+#include "Layer/Exporter/SVGExporter.hpp"
+#include "Layer/Exporter/PDFExporter.hpp"
+
 #include "VGG/Exporter/ImageExporter.hpp"
+#include "VGG/Exporter/SVGExporter.hpp"
+#include "VGG/Exporter/PDFExporter.hpp"
 
 #include <iostream>
 #include <algorithm>
+#include <iterator>
+#include <variant>
 #include <exception>
 #include <memory>
 #include <optional>
@@ -100,6 +107,21 @@ float calcScaleFactor(float inputWidth,
   return widthScale > heightScale ? heightScale : widthScale;
 }
 
+layer::EImageEncode toEImageEncode(EImageType type)
+{
+  switch (type)
+  {
+    case PNG:
+      return layer::EImageEncode::IE_PNG;
+    case JPEG:
+      return layer::EImageEncode::IE_JPEG;
+    case WEBP:
+      return layer::EImageEncode::IE_WEBP;
+    default:
+      return layer::EImageEncode::IE_PNG;
+  }
+}
+
 class Exporter__pImpl
 {
   Exporter* q_api; // NOLINT
@@ -122,7 +144,7 @@ public:
                                           float scale,
                                           const layer::ImageOptions& opts)
   {
-    auto id = scene->frame(scene->currentPage())->guid();
+    // auto id = scene->frame(scene->currentPage())->guid();
     layer->setScene(std::move(scene));
     layer->setScaleFactor(scale);
 
@@ -175,51 +197,25 @@ void Exporter::setOutputCallback(OutputCallback callback)
   d_impl->outputCallback = std::move(callback);
 }
 
-class Exporter::Iterator__pImpl
+class IteratorImplBase
 {
-  Exporter::Iterator* q_api{ nullptr }; // NOLINT
 public:
-  Exporter& exporter;
   float maxSurfaceSize[2];
   int totalFrames{ 0 };
   int index{ 0 };
-  const ImageOption imgOpts;
   std::shared_ptr<Scene> scene;
-  Iterator__pImpl(Exporter::Iterator* api,
-                  Exporter& exporter,
-                  nlohmann::json json,
-                  Resource resource,
-                  const ImageOption& opt)
-    : q_api(api)
-    , exporter(exporter)
-    , imgOpts(opt)
+
+  IteratorImplBase(nlohmann::json json, nlohmann::json layout, Resource resource)
   {
-    getMaxSurfaceSize(opt.resolutionLevel, maxSurfaceSize);
     scene = std::make_shared<Scene>();
     Layout::ExpandSymbol e(json);
     scene->loadFileContent(e());
     scene->setResRepo(std::move(resource));
     totalFrames = scene->frameCount();
     index = 0;
-    exporter.d_impl->resize(maxSurfaceSize[0], maxSurfaceSize[1]);
   }
-
-  layer::EImageEncode toEImageEncode(EImageType type)
-  {
-    switch (type)
-    {
-      case PNG:
-        return layer::EImageEncode::IE_PNG;
-      case JPEG:
-        return layer::EImageEncode::IE_JPEG;
-      case WEBP:
-        return layer::EImageEncode::IE_WEBP;
-      default:
-        return layer::EImageEncode::IE_PNG;
-    }
-  }
-
-  bool next(std::string& key, std::vector<char>& image)
+  ~IteratorImplBase() = default;
+  bool tryNext()
   {
     if (index >= scene->frameCount())
     {
@@ -238,20 +234,49 @@ public:
     }
     if (!f)
       return false;
+    return true;
+  }
 
+  void advance()
+  {
+    index++;
+  }
+};
+
+class ImageIteratorImpl : public IteratorImplBase
+{
+public:
+  Exporter& exporter;
+  ImageIteratorImpl(Exporter& exporter,
+                    nlohmann::json json,
+                    nlohmann::json layout,
+                    Resource resource,
+                    int resolutionLevel)
+    : IteratorImplBase(std::move(json), std::move(layout), std::move(resource))
+    , exporter(exporter)
+  {
+    getMaxSurfaceSize(resolutionLevel, maxSurfaceSize);
+    exporter.d_impl->resize(maxSurfaceSize[0], maxSurfaceSize[1]);
+  }
+
+  bool next(std::string& key, std::vector<char>& image, EImageType type)
+  {
+    if (!tryNext())
+      return false;
+
+    auto f = scene->frame(index);
     scene->setPage(index);
     const auto b = f->getBound();
     const auto id = f->guid();
     int w = b.size().x;
     int h = b.size().y;
 
-    // f is visible
     auto state = exporter.d_impl.get();
     float actualSize[2];
     auto scale =
       calcScaleFactor(w, h, maxSurfaceSize[0], maxSurfaceSize[1], actualSize[0], actualSize[1]);
     layer::ImageOptions opts;
-    opts.encode = toEImageEncode(imgOpts.type);
+    opts.encode = toEImageEncode(type);
     opts.position[0] = 0;
     opts.position[1] = 0;
     opts.extend[0] = actualSize[0];
@@ -263,128 +288,117 @@ public:
     }
     key = std::move(id);
     image = std::move(res.value());
-
-    index++;
+    advance();
     return true;
   }
 };
 
-bool Exporter::Iterator::next(std::string& key, std::vector<char>& image)
+// ImageIterator
+bool ImageIterator::next(std::string& key, std::vector<char>& image)
 {
-  return d_impl->next(key, image);
+  return d_impl->next(key, image, m_opts.type);
 }
 
-Exporter::Iterator::Iterator(Exporter::Iterator&& other) noexcept
+ImageIterator::ImageIterator(ImageIterator&& other) noexcept
 {
   *this = std::move(other);
 }
-Exporter::Iterator& Exporter::Iterator::Iterator::operator=(Exporter::Iterator&& other) noexcept
+ImageIterator& ImageIterator::ImageIterator::operator=(ImageIterator&& other) noexcept
 {
   d_impl = std::move(other.d_impl);
   return *this;
 }
 
-Exporter::Iterator::~Iterator() = default;
-
-Exporter::Iterator::Iterator(Exporter& exporter,
-                             nlohmann::json json,
-                             Resource resources,
+ImageIterator::ImageIterator(Exporter& exporter,
+                             nlohmann::json design,
+                             nlohmann::json layout,
+                             Resource resource,
                              const ImageOption& opt)
+  : d_impl(std::make_unique<ImageIteratorImpl>(exporter,
+                                               std::move(design),
+                                               std::move(layout),
+                                               std::move(resource),
+                                               opt.resolutionLevel))
+  , m_opts(opt)
+{
+}
+
+ImageIterator::~ImageIterator() = default;
+
+svg::SVGIterator::SVGIterator(nlohmann::json design, nlohmann::json layout, Resource resource)
   : d_impl(
-      new Exporter::Iterator__pImpl(this, exporter, std::move(json), std::move(resources), opt))
+      std::make_unique<IteratorImplBase>(std::move(design), std::move(layout), std::move(resource)))
 {
 }
 
-void render(const nlohmann::json& j,
-            const std::map<std::string, std::vector<char>>& resources,
-            int resolutionLevel)
+svg::SVGIterator::SVGIterator(SVGIterator&& other) noexcept
 {
-  float maxSurfaceSize[2];
-  getMaxSurfaceSize(resolutionLevel, maxSurfaceSize);
-
-  std::shared_ptr<layer::GraphicsContext> ctx;
-  ctx = std::make_shared<VkGraphicsContext>();
-  layer::ContextConfig cfg;
-  cfg.stencilBit = 8;
-  cfg.multiSample = 0;
-  ctx->init(cfg);
-  Layout::ExpandSymbol e(j);
-  auto scene = std::make_shared<Scene>();
-  scene->loadFileContent(e());
-  scene->setResRepo(resources);
-  auto count = scene->frameCount();
-  int threadNum = 2;
-
-  const auto task = [&](int begin, int end)
+  *this = std::move(other);
+}
+svg::SVGIterator& svg::SVGIterator::operator=(SVGIterator&& other) noexcept
+{
+  d_impl = std::move(other.d_impl);
+  return *this;
+}
+bool svg::SVGIterator::next(std::string& key, std::vector<char>& data)
+{
+  if (!d_impl->tryNext())
+    return false;
+  auto scene = d_impl->scene.get();
+  auto f = scene->frame(d_impl->index);
+  auto b = f->getBound();
+  auto id = f->guid();
+  layer::exporter::svg::SVGOptions opts;
+  opts.extend[0] = b.width();
+  opts.extend[1] = b.height();
+  auto res = layer::exporter::svg::makeSVG(scene, d_impl->index, opts);
+  if (!res.has_value())
   {
-    std::stringstream ss;
-    std::vector<std::pair<std::string, std::vector<char>>> res;
-    auto layer = std::make_shared<layer::VLayer>();
-    layer->init(ctx.get());
-    layer->resize(maxSurfaceSize[0], maxSurfaceSize[1]);
-
-    auto scene = std::make_shared<Scene>();
-    scene->loadFileContent(j);
-    scene->setResRepo(resources);
-    layer->addScene(scene);
-    for (int i = begin; i < end; i++)
-    {
-      auto f = scene->frame(i);
-      if (!f->isVisible())
-        continue;
-      auto b = f->getBound();
-      int w = b.size().x;
-      int h = b.size().y;
-      scene->setPage(i);
-
-      float actualSize[2];
-      auto scale =
-        calcScaleFactor(w, h, maxSurfaceSize[0], maxSurfaceSize[1], actualSize[0], actualSize[1]);
-      layer->setScaleFactor(scale);
-
-      DEBUG("Render Canvas Size: [%d, %d]", (int)maxSurfaceSize[0], (int)maxSurfaceSize[1]);
-      DEBUG("Original [%d, %d] x Scale[%f] = Final[%d, %d]",
-            w,
-            h,
-            scale,
-            (int)actualSize[0],
-            (int)actualSize[1]);
-
-      // begin render one frame
-      layer->beginFrame();
-      layer->render();
-      layer->endFrame();
-      // end render one frame
-
-      layer::ImageOptions opts;
-      opts.encode = layer::EImageEncode::IE_PNG;
-      opts.position[0] = 0;
-      opts.position[1] = 0;
-      opts.extend[0] = actualSize[0];
-      opts.extend[1] = actualSize[1];
-      if (auto img = layer->makeImageSnapshot(opts); img)
-      {
-        // res.emplace_back(scene->frame(i)->guid(), std::move(img.value()));
-        auto name = scene->frame(i)->guid();
-        std::cout << "Thread: " << std::this_thread::get_id() << " ," << name << std::endl;
-        std::ofstream ofs(name);
-        if (ofs.is_open())
-          ofs.write(img->data(), img->size());
-      }
-      else
-      {
-        ss << "Failed to encode image for artboard: " << i + 1 << std::endl;
-      }
-    }
-    return res;
-  };
-
-  std::thread task1(task, 0, count);
-  std::thread task2(task, count / 2, count);
-
-  if (task1.joinable())
-    task1.join();
-  if (task2.joinable())
-    task2.join();
+    return false;
+  }
+  key = std::move(id);
+  data = std::move(res.value());
+  d_impl->advance();
+  return true;
 }
+svg::SVGIterator::~SVGIterator() = default;
+
+pdf::PDFIterator::PDFIterator(nlohmann::json design, nlohmann::json layout, Resource resource)
+  : d_impl(
+      std::make_unique<IteratorImplBase>(std::move(design), std::move(layout), std::move(resource)))
+{
+}
+
+pdf::PDFIterator::PDFIterator(PDFIterator&& other) noexcept
+{
+  *this = std::move(other);
+}
+pdf::PDFIterator& pdf::PDFIterator::operator=(PDFIterator&& other) noexcept
+{
+  d_impl = std::move(other.d_impl);
+  return *this;
+}
+bool pdf::PDFIterator::next(std::string& key, std::vector<char>& data)
+{
+  if (!d_impl->tryNext())
+    return false;
+  auto scene = d_impl->scene.get();
+  auto f = scene->frame(d_impl->index);
+  auto id = f->guid();
+  auto b = f->getBound();
+  layer::exporter::pdf::PDFOptions opts;
+  opts.extend[0] = b.width();
+  opts.extend[1] = b.height();
+  auto res = layer::exporter::pdf::makePDF(scene, d_impl->index, opts);
+  if (!res.has_value())
+  {
+    return false;
+  }
+  key = std::move(id);
+  data = std::move(res.value());
+  d_impl->advance();
+  return true;
+}
+
+pdf::PDFIterator::~PDFIterator() = default;
 }; // namespace VGG::exporter

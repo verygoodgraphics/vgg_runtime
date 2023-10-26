@@ -10,7 +10,10 @@
 #include "Application/Event/Keycode.hpp"
 
 #include "Layer/Scene.hpp"
+#include "Layer/Core/PaintNode.hpp"
 #include "Layer/VGGLayer.hpp"
+#include "Layer/Exporter/SVGExporter.hpp"
+#include "Layer/Exporter/PDFExporter.hpp"
 
 #include <exception>
 #include <fstream>
@@ -192,7 +195,14 @@ public:
       std::ofstream ofs("capture.svg");
       if (ofs.is_open())
       {
-        m_layer->makeSVG(layer::SVGOptions(), ofs);
+        using namespace VGG::layer::exporter;
+        auto page = m_scene->currentPage();
+        auto f = m_scene->frame(page);
+        auto b = f->getBound();
+        svg::SVGOptions opt;
+        opt.extend[0] = b.width();
+        opt.extend[1] = b.height();
+        svg::makeSVG(m_scene.get(), page, opt, ofs);
       }
       return true;
     }
@@ -233,6 +243,24 @@ public:
       if (ofs.is_open())
       {
         m_layer->makeImageSnapshot(opt, ofs);
+      }
+      return true;
+    }
+
+    if (key == VGGK_6)
+    {
+      INFO("Capture PDF");
+      std::ofstream ofs("capture.pdf");
+      if (ofs.is_open())
+      {
+        using namespace VGG::layer::exporter;
+        auto page = m_scene->currentPage();
+        auto f = m_scene->frame(page);
+        auto b = f->getBound();
+        pdf::PDFOptions opt;
+        opt.extend[0] = b.width();
+        opt.extend[1] = b.height();
+        pdf::makePDF(m_scene.get(), page, opt, ofs);
       }
       return true;
     }

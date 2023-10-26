@@ -8,7 +8,7 @@ else()
 set(VULKAN_AVAILABLE "false")
 endif()
 set(SKIA_PRESET_FEATURES_FOR_LINUX
-"skia_use_egl=true
+"skia_use_egl=false
 skia_use_freetype=true
 skia_use_system_freetype2=false
 skia_use_system_libjpeg_turbo=false

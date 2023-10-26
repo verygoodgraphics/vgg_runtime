@@ -117,17 +117,6 @@ void Painter::drawPathBorder(const SkPath& skPath,
   }
 }
 
-void Painter::drawPathBorder(SkCanvas* canvas,
-                             const SkPath& skPath,
-                             const Border& b,
-                             float globalAlpha,
-                             const Bound2& bound,
-                             sk_sp<SkImageFilter> imageFilter)
-{
-  m_canvas = canvas;
-  drawPathBorder(skPath, bound, b, globalAlpha, imageFilter, nullptr);
-}
-
 void Painter::drawShadow(const SkPath& skPath,
                          const Bound2& bound,
                          const Shadow& s,
@@ -146,17 +135,6 @@ void Painter::drawShadow(const SkPath& skPath,
   fillPen.setStyle(style);
   m_canvas->drawPath(skPath, fillPen);
   m_canvas->restore();
-}
-
-void Painter::drawShadow(SkCanvas* canvas,
-                         const SkPath& skPath,
-                         const Shadow& s,
-                         SkPaint::Style style,
-                         const Bound2& bound,
-                         sk_sp<SkImageFilter> imageFilter)
-{
-  m_canvas = canvas;
-  drawShadow(skPath, bound, s, style, imageFilter);
 }
 
 void Painter::drawInnerShadow(const SkPath& skPath,
@@ -178,16 +156,6 @@ void Painter::drawInnerShadow(const SkPath& skPath,
   fillPen.setAntiAlias(m_antiAlias);
   m_canvas->drawPath(skPath, fillPen);
   m_canvas->restore();
-}
-
-void Painter::drawInnerShadow(SkCanvas* canvas,
-                              const SkPath& skPath,
-                              const Shadow& s,
-                              SkPaint::Style style,
-                              const Bound2& bound,
-                              sk_sp<SkImageFilter> imageFilter)
-{
-  drawInnerShadow(skPath, bound, s, style, imageFilter);
 }
 
 void Painter::drawFill(const SkPath& skPath,
@@ -237,20 +205,4 @@ void Painter::drawFill(const SkPath& skPath,
     fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);
   }
   m_canvas->drawPath(skPath, fillPen);
-}
-
-void Painter::drawFill(SkCanvas* canvas,
-                       float globalAlpha,
-                       const Style& style,
-                       const SkPath& skPath,
-                       const Bound2& bound,
-                       sk_sp<SkImageFilter> imageFilter,
-                       sk_sp<SkBlender> blender)
-{
-  for (const auto& f : style.fills)
-  {
-    if (!f.isEnabled)
-      continue;
-    drawFill(skPath, bound, f, globalAlpha, imageFilter, blender, nullptr);
-  }
 }

@@ -373,7 +373,6 @@ void ExpandSymbol::processOtherOverrides(nlohmann::json& instance,
     return;
   }
 
-  auto instanceMasterId = instance[K_MASTER_ID];
   for (auto& el : overrideValues.items())
   {
     auto& overrideItem = el.value();
@@ -637,13 +636,20 @@ nlohmann::json* ExpandSymbol::findChildObject(nlohmann::json& instance,
                                               std::vector<std::string>& outChildInstanceIdStack)
 {
   auto instanceMasterId = instance[K_MASTER_ID];
+  std::string masterOverrideKey;
+  if (m_masters.find(instanceMasterId) != m_masters.end())
+  {
+    auto& masterJson = m_masters[instanceMasterId];
+    masterOverrideKey = masterJson.value(K_OVERRIDE_KEY, K_EMPTY_STRING);
+  }
 
   auto& objectIdPaths = overrideItem[K_OBJECT_ID];
   if (!objectIdPaths.is_array() || objectIdPaths.empty())
   {
     return nullptr;
   }
-  else if (objectIdPaths.size() == 1 && objectIdPaths[0] == instanceMasterId)
+  else if (objectIdPaths.size() == 1 &&
+           (objectIdPaths[0] == instanceMasterId || objectIdPaths[0] == masterOverrideKey))
   {
     outChildInstanceIdStack = instanceIdStack;
     return &instance;
@@ -984,6 +990,7 @@ void ExpandSymbol::layoutSubtree(nlohmann::json& rootTreeJson,
                  JsonDocumentPtr{ new ReferenceJsonDocument{ m_outLayoutJson } },
                  false };
   layout.resizeNodeThenLayout(subtreeNodeId, newBounds.size);
+  overrideLayoutRuleSize(subtreeNodeId, newBounds.size);
 }
 
 nlohmann::json* ExpandSymbol::findLayoutObject(nlohmann::json& instance,

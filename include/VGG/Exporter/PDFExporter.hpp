@@ -33,7 +33,7 @@ public:
   PDFIterator(const PDFIterator& other) = delete;
   PDFIterator& operator=(const PDFIterator& other) = delete;
   PDFIterator(PDFIterator&& other) noexcept;
-  PDFIterator& operator=(PDFIterator&& other) noexcept;
+  PDFIterator& operator=(PDFIterator&& other) noexcept = delete;
   ~PDFIterator();
 };
 

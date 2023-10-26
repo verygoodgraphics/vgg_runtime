@@ -8,6 +8,7 @@
 #include "VGG/Exporter/Type.hpp"
 
 #include <argparse/argparse.hpp>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <optional>
@@ -75,7 +76,10 @@ int main(int argc, char** argv)
   program.add_argument("-L", "--loaddir").help("iterates all the files in the given dir");
   program.add_argument("-s", "--scale").help("canvas scale").scan<'g', float>().default_value(1.0);
   program.add_argument("-c", "--config").help("specify config file");
-  program.add_argument("-q", "--quality").help("canvas scale").scan<'i', int>().default_value(80);
+  program.add_argument("-q", "--quality")
+    .help("image quality [0(low),100(high)]")
+    .scan<'i', int>()
+    .default_value(80);
   program.add_argument("-o", "--output").help("output directory");
   program.add_argument("-f", "--file-format").help("imageformat: png, jpg, webp, svg, pdf");
   program.add_argument("-t").help("postfix for output filename");
@@ -102,8 +106,8 @@ int main(int argc, char** argv)
   desc.prefix = program.present("-p").value_or("");
 
   exporter::ImageOption opts;
-  bool isBitmap = false;
-  std::string extension;
+  bool isBitmap = true;
+  std::string extension = ".png";
   if (auto v = program.present("-f"))
   {
     auto ext = v.value();
@@ -144,6 +148,8 @@ int main(int argc, char** argv)
   }
   opts.resolutionLevel = 2;
   opts.imageQuality = 80;
+  int s = program.get<int>("-q");
+  opts.imageQuality = s;
 
   if (auto cfg = program.present("-c"))
   {

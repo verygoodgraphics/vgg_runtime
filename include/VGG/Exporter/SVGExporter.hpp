@@ -31,7 +31,7 @@ public:
   SVGIterator(const SVGIterator&) = delete;
   SVGIterator& operator=(const SVGIterator&) = delete;
   SVGIterator(SVGIterator&& other) noexcept;
-  SVGIterator& operator=(SVGIterator&& other) noexcept;
+  SVGIterator& operator=(SVGIterator&& other) noexcept = delete;
   ~SVGIterator();
 };
 } // namespace svg

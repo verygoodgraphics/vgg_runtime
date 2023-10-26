@@ -738,7 +738,6 @@ void ExpandSymbol::scaleTree(nlohmann::json& rootJson, const nlohmann::json& new
 
   auto hasBounds = isLayoutNode(rootJson);
   Rect oldBounds, frame;
-  Matrix matrix;
   if (!hasBounds)
   {
     return;

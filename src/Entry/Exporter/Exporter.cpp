@@ -208,7 +208,7 @@ public:
   IteratorImplBase(nlohmann::json json, nlohmann::json layout, Resource resource)
   {
     scene = std::make_shared<Scene>();
-    Layout::ExpandSymbol e(json);
+    Layout::ExpandSymbol e(std::move(json), std::move(layout));
     scene->loadFileContent(e());
     scene->setResRepo(std::move(resource));
     totalFrames = scene->frameCount();

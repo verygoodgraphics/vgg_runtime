@@ -104,12 +104,6 @@ public:
   std::optional<std::vector<char>> makeImageSnapshot(const ImageOptions& opts);
   void makeImageSnapshot(const ImageOptions& opts, std::ostream& os);
 
-  std::optional<std::vector<char>> makeSVG(const SVGOptions& opts);
-  void makeSVG(const SVGOptions& opts, std::ostream& os);
-
-  std::optional<std::vector<char>> makePDF(const PDFOptions& opts);
-  void makePDF(const PDFOptions& opts, std::ostream& os);
-
   std::optional<std::vector<char>> makeSKP();
   void makeSKP(std::ostream& os);
 };

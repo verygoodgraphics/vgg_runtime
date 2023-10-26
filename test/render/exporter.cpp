@@ -3,6 +3,9 @@
 #include "Layer/Scene.hpp"
 
 #include "VGG/Exporter/ImageExporter.hpp"
+#include "VGG/Exporter/SVGExporter.hpp"
+#include "VGG/Exporter/PDFExporter.hpp"
+#include "VGG/Exporter/Type.hpp"
 
 #include <argparse/argparse.hpp>
 #include <filesystem>
@@ -10,8 +13,8 @@
 #include <optional>
 using namespace VGG;
 
-template<typename F>
-void write(exporter::Exporter::Iterator iter, F&& f, const std::string& ext = ".png")
+template<typename InputIterator, typename F>
+void write(InputIterator iter, F&& f, const std::string& ext = ".png")
 {
   std::string key;
   std::vector<char> image;
@@ -24,6 +27,31 @@ void write(exporter::Exporter::Iterator iter, F&& f, const std::string& ext = ".
       ofs.write((const char*)image.data(), image.size());
     }
     ok = iter.next(key, image);
+  }
+}
+
+void writeDoc(const std::string& extension,
+              const fs::path& prefix,
+              const std::string& outputFilePostfix,
+              nlohmann::json design,
+              nlohmann::json layout,
+              Resource res)
+{
+  if (extension == ".pdf")
+  {
+    auto iter = exporter::pdf::PDFIterator(std::move(design), std::move(layout), std::move(res));
+    write(
+      std::move(iter),
+      [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); },
+      extension);
+  }
+  else
+  {
+    auto iter = exporter::svg::SVGIterator(std::move(design), std::move(layout), std::move(res));
+    write(
+      std::move(iter),
+      [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); },
+      extension);
   }
 }
 
@@ -49,7 +77,7 @@ int main(int argc, char** argv)
   program.add_argument("-c", "--config").help("specify config file");
   program.add_argument("-q", "--quality").help("canvas scale").scan<'i', int>().default_value(80);
   program.add_argument("-o", "--output").help("output directory");
-  program.add_argument("-f", "--file-format").help("imageformat: png, jpg, webp");
+  program.add_argument("-f", "--file-format").help("imageformat: png, jpg, webp, svg, pdf");
   program.add_argument("-t").help("postfix for output filename");
 
   try
@@ -97,6 +125,16 @@ int main(int argc, char** argv)
       extension = ".webp";
       isBitmap = true;
     }
+    else if (ext == "pdf")
+    {
+      extension = ".pdf";
+      isBitmap = false;
+    }
+    else if (ext == "svg")
+    {
+      extension = ".svg";
+      isBitmap = false;
+    }
     else
     {
       isBitmap = true;
@@ -123,14 +161,26 @@ int main(int argc, char** argv)
     if (r)
     {
       auto data = r->read(desc.prefix.value_or(fs::path(".")) / desc.filepath);
-      auto iter = exporter.render(data.Format, data.Resource, opts);
-      const auto folder = fs::path(fp).filename().stem();
       const fs::path prefix = outputDir;
       fs::create_directory(prefix);
-      write(
-        std::move(iter),
-        [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); },
-        extension);
+      const auto folder = fs::path(fp).filename().stem();
+      if (isBitmap)
+      {
+        auto iter = exporter.render(data.Format, nlohmann::json{}, data.Resource, opts);
+        write(
+          std::move(iter),
+          [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); },
+          extension);
+      }
+      else
+      {
+        writeDoc(extension,
+                 prefix,
+                 outputFilePostfix,
+                 data.Format,
+                 nlohmann::json{},
+                 data.Resource);
+      }
     }
   }
   else if (auto d = program.present("-L"))
@@ -147,13 +197,25 @@ int main(int argc, char** argv)
           if (r)
           {
             auto data = r->read(desc.prefix.value_or(fs::path(".")) / desc.filepath);
-            auto iter = exporter.render(data.Format, data.Resource, opts);
             const fs::path prefix = outputDir;
             fs::create_directory(prefix);
-            write(
-              std::move(iter),
-              [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); },
-              extension);
+            if (isBitmap)
+            {
+              auto iter = exporter.render(data.Format, nlohmann::json{}, data.Resource, opts);
+              write(
+                std::move(iter),
+                [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); },
+                extension);
+            }
+            else
+            {
+              writeDoc(extension,
+                       prefix,
+                       outputFilePostfix,
+                       data.Format,
+                       nlohmann::json{},
+                       data.Resource);
+            }
           }
         }
       }

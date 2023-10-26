@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 #pragma once
+#include "Type.hpp"
+
 #include <stdint.h>
 #include <stddef.h>
 #include <string>
@@ -24,31 +26,6 @@
 namespace VGG::exporter
 {
 
-enum EFileType
-{
-  SVG,
-  PDF,
-  SKP
-};
-
-enum EImageType
-{
-  PNG,
-  JPEG,
-  WEBP,
-};
-
-struct ImageOption
-{
-  int imageQuality = 100;
-  int resolutionLevel = 2;
-  EImageType type{ EImageType::PNG };
-};
-
-enum class EBackend
-{
-  VULKAN,
-};
 struct BackendInfo
 {
   EBackend type;
@@ -62,36 +39,42 @@ struct ExporterInfo
   BackendInfo backend;
 };
 
-using OutputCallback = std::function<bool(const std::string&, const std::vector<char>&)>;
-using Resource = std::map<std::string, std::vector<char>>;
+class ImageIteratorImpl;
+class Exporter;
+class ImageIterator
+{
+  std::unique_ptr<ImageIteratorImpl> d_impl; // NOLINT
+  ImageIterator(Exporter& exporter,
+                nlohmann::json design,
+                nlohmann::json layout,
+                Resource resource,
+                const ImageOption& opt);
+  friend class Exporter;
+  const ImageOption m_opts;
+
+public:
+  bool next(std::string& key, std::vector<char>& image);
+  ImageIterator(ImageIterator&& other) noexcept;
+  ImageIterator& operator=(ImageIterator&& other) noexcept;
+  ~ImageIterator();
+};
 
 class Exporter__pImpl;
 class Exporter
 {
   std::unique_ptr<Exporter__pImpl> d_impl; // NOLINT
+  friend class ImageIteratorImpl;
+
 public:
-  class Iterator__pImpl;
-  class Iterator
-  {
-    std::unique_ptr<Iterator__pImpl> d_impl; // NOLINT
-    Iterator(Exporter& exporter, nlohmann::json json, Resource resource, const ImageOption& opt);
-    friend class Exporter;
-
-  public:
-    bool next(std::string& key, std::vector<char>& image);
-    Iterator(Iterator&& other) noexcept;
-    Iterator& operator=(Iterator&& other) noexcept;
-    ~Iterator();
-  };
-
   Exporter();
   void info(ExporterInfo* info);
 
-  Iterator render(nlohmann::json j,
-                  std::map<std::string, std::vector<char>> resources,
-                  const ImageOption& opt)
+  ImageIterator render(nlohmann::json design,
+                       nlohmann::json layout,
+                       std::map<std::string, std::vector<char>> resources,
+                       const ImageOption& opt)
   {
-    return Exporter::Iterator{ *this, std::move(j), std::move(resources), opt };
+    return ImageIterator{ *this, std::move(design), std::move(layout), std::move(resources), opt };
   }
 
   void setOutputCallback(OutputCallback callback);

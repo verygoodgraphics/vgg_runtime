@@ -40,7 +40,7 @@ skia_use_fontconfig=false
 skia_use_libheif=false
 skia_use_system_expat=false
 skia_use_expat=false
-skia_enable_pdf=false")
+skia_enable_pdf=true")
 
 set(SKIA_PRESET_FEATURES_FOR_WIN
 "skia_use_egl=false
@@ -68,7 +68,7 @@ skia_use_dng_sdk=false
 skia_use_fontconfig=false
 skia_use_libheif=false
 skia_use_expat=false
-skia_enable_pdf=false")
+skia_enable_pdf=true")
 
 set(SKIA_PRESET_FEATURES_FOR_MACOS
 "skia_use_egl=false
@@ -103,7 +103,7 @@ skia_use_fontconfig=false
 skia_use_libheif=false
 skia_use_system_expat=false
 skia_use_expat=false
-skia_enable_pdf=false")
+skia_enable_pdf=true")
 
 if (EMSCRIPTEN)
 message(STATUS "EMSDK=$ENV{EMSDK}")
@@ -133,7 +133,7 @@ skia_use_fontconfig=false
 skia_use_libheif=false
 skia_use_expat=false
 skia_use_vulkan=false
-skia_enable_pdf=false")
+skia_enable_pdf=true")
 endif()
 
 cmake_minimum_required(VERSION 3.19) # for string(JSON ...)

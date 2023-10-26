@@ -259,7 +259,7 @@ public:
     exporter.d_impl->resize(maxSurfaceSize[0], maxSurfaceSize[1]);
   }
 
-  bool next(std::string& key, std::vector<char>& image, EImageType type)
+  bool next(std::string& key, std::vector<char>& image, EImageType type, int quality)
   {
     if (!tryNext())
       return false;
@@ -281,6 +281,7 @@ public:
     opts.position[1] = 0;
     opts.extend[0] = actualSize[0];
     opts.extend[1] = actualSize[1];
+    opts.quality = quality;
     auto res = state->render(scene, scale, opts);
     if (!res.has_value())
     {
@@ -296,19 +297,14 @@ public:
 // ImageIterator
 bool ImageIterator::next(std::string& key, std::vector<char>& image)
 {
-  return d_impl->next(key, image, m_opts.type);
+  return d_impl->next(key, image, m_opts.type, m_opts.imageQuality);
 }
 
 ImageIterator::ImageIterator(ImageIterator&& other) noexcept
+  : m_opts(other.m_opts)
+  , d_impl(std::move(other.d_impl))
 {
-  *this = std::move(other);
 }
-ImageIterator& ImageIterator::ImageIterator::operator=(ImageIterator&& other) noexcept
-{
-  d_impl = std::move(other.d_impl);
-  return *this;
-}
-
 ImageIterator::ImageIterator(Exporter& exporter,
                              nlohmann::json design,
                              nlohmann::json layout,
@@ -332,13 +328,8 @@ svg::SVGIterator::SVGIterator(nlohmann::json design, nlohmann::json layout, Reso
 }
 
 svg::SVGIterator::SVGIterator(SVGIterator&& other) noexcept
+  : d_impl(std::move(other.d_impl))
 {
-  *this = std::move(other);
-}
-svg::SVGIterator& svg::SVGIterator::operator=(SVGIterator&& other) noexcept
-{
-  d_impl = std::move(other.d_impl);
-  return *this;
 }
 bool svg::SVGIterator::next(std::string& key, std::vector<char>& data)
 {
@@ -370,13 +361,8 @@ pdf::PDFIterator::PDFIterator(nlohmann::json design, nlohmann::json layout, Reso
 }
 
 pdf::PDFIterator::PDFIterator(PDFIterator&& other) noexcept
+  : d_impl(std::move(other.d_impl))
 {
-  *this = std::move(other);
-}
-pdf::PDFIterator& pdf::PDFIterator::operator=(PDFIterator&& other) noexcept
-{
-  d_impl = std::move(other.d_impl);
-  return *this;
 }
 bool pdf::PDFIterator::next(std::string& key, std::vector<char>& data)
 {

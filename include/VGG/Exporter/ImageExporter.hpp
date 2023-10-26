@@ -55,7 +55,7 @@ class ImageIterator
 public:
   bool next(std::string& key, std::vector<char>& image);
   ImageIterator(ImageIterator&& other) noexcept;
-  ImageIterator& operator=(ImageIterator&& other) noexcept;
+  ImageIterator& operator=(ImageIterator&& other) noexcept = delete;
   ~ImageIterator();
 };
 

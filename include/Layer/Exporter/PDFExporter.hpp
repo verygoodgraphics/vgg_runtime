@@ -23,16 +23,11 @@ class Scene;
 }
 namespace VGG::layer::exporter
 {
-namespace pdf
-{
-
 struct PDFOptions
 {
   int position[2];
   int extend[2];
 };
-
-std::optional<std::vector<char>> makePDF(Scene* scene, int page, const PDFOptions& opts);
-void makePDF(Scene* scene, int page, const PDFOptions& opts, std::ostream& os);
-} // namespace pdf
+std::optional<std::vector<char>> makePDF(Scene* scene, const PDFOptions& opts);
+void makePDF(Scene* scene, const PDFOptions& opts, std::ostream& os);
 } // namespace VGG::layer::exporter

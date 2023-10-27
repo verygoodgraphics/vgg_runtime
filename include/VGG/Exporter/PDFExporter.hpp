@@ -22,8 +22,6 @@
 namespace VGG::exporter
 {
 class IteratorImplBase;
-namespace pdf
-{
 class PDFIterator
 {
   std::unique_ptr<IteratorImplBase> d_impl; // NOLINT
@@ -37,5 +35,4 @@ public:
   ~PDFIterator();
 };
 
-} // namespace pdf
 } // namespace VGG::exporter

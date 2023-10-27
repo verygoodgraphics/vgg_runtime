@@ -20,8 +20,6 @@
 namespace VGG::exporter
 {
 class IteratorImplBase;
-namespace svg
-{
 class SVGIterator
 {
   std::unique_ptr<IteratorImplBase> d_impl; // NOLINT
@@ -34,5 +32,4 @@ public:
   SVGIterator& operator=(SVGIterator&& other) noexcept = delete;
   ~SVGIterator();
 };
-} // namespace svg
 } // namespace VGG::exporter

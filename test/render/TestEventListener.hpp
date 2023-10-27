@@ -199,10 +199,10 @@ public:
         auto page = m_scene->currentPage();
         auto f = m_scene->frame(page);
         auto b = f->getBound();
-        svg::SVGOptions opt;
+        SVGOptions opt;
         opt.extend[0] = b.width();
         opt.extend[1] = b.height();
-        svg::makeSVG(m_scene.get(), page, opt, ofs);
+        makeSVG(m_scene.get(), opt, ofs);
       }
       return true;
     }
@@ -212,7 +212,10 @@ public:
       INFO("Capture PNG");
       std::ofstream ofs("capture.png");
       layer::ImageOptions opt;
-      opt.extend;
+      auto f = m_scene->frame(m_scene->currentPage());
+      auto b = f->getBound();
+      opt.extend[0] = b.width();
+      opt.extend[1] = b.height();
       opt.encode = VGG::layer::EImageEncode::IE_PNG;
       if (ofs.is_open())
       {
@@ -226,6 +229,10 @@ public:
       INFO("Capture JPEG");
       std::ofstream ofs("capture.jpg");
       layer::ImageOptions opt;
+      auto f = m_scene->frame(m_scene->currentPage());
+      auto b = f->getBound();
+      opt.extend[0] = b.width();
+      opt.extend[1] = b.height();
       opt.encode = VGG::layer::EImageEncode::IE_JPEG;
       if (ofs.is_open())
       {
@@ -239,6 +246,10 @@ public:
       INFO("Capture WEBP");
       std::ofstream ofs("capture.webp");
       layer::ImageOptions opt;
+      auto f = m_scene->frame(m_scene->currentPage());
+      auto b = f->getBound();
+      opt.extend[0] = b.width();
+      opt.extend[1] = b.height();
       opt.encode = VGG::layer::EImageEncode::IE_WEBP;
       if (ofs.is_open())
       {
@@ -257,10 +268,10 @@ public:
         auto page = m_scene->currentPage();
         auto f = m_scene->frame(page);
         auto b = f->getBound();
-        pdf::PDFOptions opt;
+        PDFOptions opt;
         opt.extend[0] = b.width();
         opt.extend[1] = b.height();
-        pdf::makePDF(m_scene.get(), page, opt, ofs);
+        makePDF(m_scene.get(), opt, ofs);
       }
       return true;
     }

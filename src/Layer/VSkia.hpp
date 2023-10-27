@@ -442,14 +442,9 @@ inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
                                       bool imageTileMirrored,
                                       const SkMatrix* matrix = nullptr)
 {
-
   SkTileMode modeX = SkTileMode::kDecal;
   SkTileMode modeY = SkTileMode::kDecal;
   SkMatrix mat = SkMatrix::I();
-  if (matrix)
-  {
-    mat.postConcat(*matrix);
-  }
   SkImageInfo mi = img->imageInfo();
   float sx = (float)width / mi.width();
   float sy = (float)height / mi.height();
@@ -459,7 +454,7 @@ inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
     mat.postScale(s, s);
     if (matrix)
     {
-      mat.postConcat(upperMatrix22(*matrix));
+      mat.postConcat(*matrix);
     }
     if (sx > sy)
     {
@@ -474,10 +469,9 @@ inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
   }
   else if (imageFillType == IFT_Fit)
   {
-
     if (matrix)
     {
-      mat.postConcat(upperMatrix22(*matrix));
+      mat.postConcat(*matrix);
     }
     double s = std::min(sx, sy);
     mat.postScale(s, s);
@@ -500,9 +494,8 @@ inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
   {
     if (matrix)
     {
-      mat.postConcat(upperMatrix22(*matrix));
+      mat.postConcat(*matrix);
     }
-    mat.postScale(sx, sy);
   }
   else if (imageFillType == VGG::IFT_Tile)
   {
@@ -526,7 +519,7 @@ inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
     modeX = imageTileMirrored ? SkTileMode::kMirror : SkTileMode::kRepeat;
   }
   SkSamplingOptions opt;
-  mat.postScale(1, -1); // convert to skia
+  mat.preScale(1, -1); // convert to skia
 
   return img->makeShader(modeX, modeY, opt, &mat);
 }

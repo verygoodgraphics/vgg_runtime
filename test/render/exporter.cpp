@@ -40,7 +40,7 @@ void writeDoc(const std::string& extension,
 {
   if (extension == ".pdf")
   {
-    auto iter = exporter::pdf::PDFIterator(std::move(design), std::move(layout), std::move(res));
+    auto iter = exporter::PDFIterator(std::move(design), std::move(layout), std::move(res));
     write(
       std::move(iter),
       [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); },
@@ -48,7 +48,7 @@ void writeDoc(const std::string& extension,
   }
   else
   {
-    auto iter = exporter::svg::SVGIterator(std::move(design), std::move(layout), std::move(res));
+    auto iter = exporter::SVGIterator(std::move(design), std::move(layout), std::move(res));
     write(
       std::move(iter),
       [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); },

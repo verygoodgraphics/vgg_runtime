@@ -23,15 +23,12 @@ class Scene;
 }
 namespace VGG::layer::exporter
 {
-namespace svg
-{
 struct SVGOptions
 {
   int position[2];
   int extend[2];
 };
 
-std::optional<std::vector<char>> makeSVG(VGG::Scene* scene, int page, const SVGOptions& opts);
-void makeSVG(VGG::Scene* scene, int page, const SVGOptions& opts, std::ostream& os);
-}; // namespace svg
+std::optional<std::vector<char>> makeSVG(VGG::Scene* scene, const SVGOptions& opts);
+void makeSVG(VGG::Scene* scene, const SVGOptions& opts, std::ostream& os);
 } // namespace VGG::layer::exporter

@@ -321,17 +321,17 @@ ImageIterator::ImageIterator(Exporter& exporter,
 
 ImageIterator::~ImageIterator() = default;
 
-svg::SVGIterator::SVGIterator(nlohmann::json design, nlohmann::json layout, Resource resource)
+SVGIterator::SVGIterator(nlohmann::json design, nlohmann::json layout, Resource resource)
   : d_impl(
       std::make_unique<IteratorImplBase>(std::move(design), std::move(layout), std::move(resource)))
 {
 }
 
-svg::SVGIterator::SVGIterator(SVGIterator&& other) noexcept
+SVGIterator::SVGIterator(SVGIterator&& other) noexcept
   : d_impl(std::move(other.d_impl))
 {
 }
-bool svg::SVGIterator::next(std::string& key, std::vector<char>& data)
+bool SVGIterator::next(std::string& key, std::vector<char>& data)
 {
   if (!d_impl->tryNext())
     return false;
@@ -339,10 +339,11 @@ bool svg::SVGIterator::next(std::string& key, std::vector<char>& data)
   auto f = scene->frame(d_impl->index);
   auto b = f->getBound();
   auto id = f->guid();
-  layer::exporter::svg::SVGOptions opts;
+  layer::exporter::SVGOptions opts;
   opts.extend[0] = b.width();
   opts.extend[1] = b.height();
-  auto res = layer::exporter::svg::makeSVG(scene, d_impl->index, opts);
+  scene->setPage(d_impl->index);
+  auto res = layer::exporter::makeSVG(scene, opts);
   if (!res.has_value())
   {
     return false;
@@ -352,19 +353,19 @@ bool svg::SVGIterator::next(std::string& key, std::vector<char>& data)
   d_impl->advance();
   return true;
 }
-svg::SVGIterator::~SVGIterator() = default;
+SVGIterator::~SVGIterator() = default;
 
-pdf::PDFIterator::PDFIterator(nlohmann::json design, nlohmann::json layout, Resource resource)
+PDFIterator::PDFIterator(nlohmann::json design, nlohmann::json layout, Resource resource)
   : d_impl(
       std::make_unique<IteratorImplBase>(std::move(design), std::move(layout), std::move(resource)))
 {
 }
 
-pdf::PDFIterator::PDFIterator(PDFIterator&& other) noexcept
+PDFIterator::PDFIterator(PDFIterator&& other) noexcept
   : d_impl(std::move(other.d_impl))
 {
 }
-bool pdf::PDFIterator::next(std::string& key, std::vector<char>& data)
+bool PDFIterator::next(std::string& key, std::vector<char>& data)
 {
   if (!d_impl->tryNext())
     return false;
@@ -372,10 +373,11 @@ bool pdf::PDFIterator::next(std::string& key, std::vector<char>& data)
   auto f = scene->frame(d_impl->index);
   auto id = f->guid();
   auto b = f->getBound();
-  layer::exporter::pdf::PDFOptions opts;
+  layer::exporter::PDFOptions opts;
   opts.extend[0] = b.width();
   opts.extend[1] = b.height();
-  auto res = layer::exporter::pdf::makePDF(scene, d_impl->index, opts);
+  scene->setPage(d_impl->index);
+  auto res = layer::exporter::makePDF(scene, opts);
   if (!res.has_value())
   {
     return false;
@@ -386,5 +388,5 @@ bool pdf::PDFIterator::next(std::string& key, std::vector<char>& data)
   return true;
 }
 
-pdf::PDFIterator::~PDFIterator() = default;
+PDFIterator::~PDFIterator() = default;
 }; // namespace VGG::exporter

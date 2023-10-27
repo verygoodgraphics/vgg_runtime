@@ -45,10 +45,7 @@ static void renderInternal(SkCanvas* canvas, VGG::Scene* scene)
 namespace VGG::layer::exporter
 {
 
-namespace pdf
-{
-
-void makePDF(VGG::Scene* scene, int page, const PDFOptions& opts, std::ostream& os)
+void makePDF(VGG::Scene* scene, const PDFOptions& opts, std::ostream& os)
 {
   SkStdOStream skos(os);
   auto pdfDoc = SkPDF::MakeDocument(&skos);
@@ -70,27 +67,23 @@ void makePDF(VGG::Scene* scene, int page, const PDFOptions& opts, std::ostream& 
   }
 }
 
-std::optional<std::vector<char>> makePDF(VGG::Scene* scene, int page, const PDFOptions& opts)
+std::optional<std::vector<char>> makePDF(VGG::Scene* scene, const PDFOptions& opts)
 {
   std::stringstream data;
-  makePDF(scene, page, opts, data);
-  auto d = data.str();
-  return std::vector<char>{ d.begin(), d.end() };
-}
-} // namespace pdf
-
-namespace svg
-{
-
-std::optional<std::vector<char>> makeSVG(VGG::Scene* scene, int page, const SVGOptions& opts)
-{
-  std::stringstream data;
-  makeSVG(scene, page, opts, data);
+  layer::exporter::makePDF(scene, opts, data);
   auto d = data.str();
   return std::vector<char>{ d.begin(), d.end() };
 }
 
-void makeSVG(VGG::Scene* scene, int page, const SVGOptions& opts, std::ostream& os)
+std::optional<std::vector<char>> makeSVG(VGG::Scene* scene, const SVGOptions& opts)
+{
+  std::stringstream data;
+  makeSVG(scene, opts, data);
+  auto d = data.str();
+  return std::vector<char>{ d.begin(), d.end() };
+}
+
+void makeSVG(VGG::Scene* scene, const SVGOptions& opts, std::ostream& os)
 {
   auto rect = SkRect::MakeWH(opts.extend[0], opts.extend[1]);
   SkStdOStream skos(os);
@@ -104,5 +97,4 @@ void makeSVG(VGG::Scene* scene, int page, const SVGOptions& opts, std::ostream& 
     DEBUG("Create SVG Canvas failed\n");
   }
 }
-} // namespace svg
 } // namespace VGG::layer::exporter

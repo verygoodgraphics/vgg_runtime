@@ -62,6 +62,17 @@ protected:
     auto frame = firstPage()->children()[index]->children()[index2]->frame();
     return frame;
   }
+
+  auto descendantFrame(std::vector<int> indexs)
+  {
+    auto node = firstPage();
+    for (auto index : indexs)
+    {
+      node = node->children()[index];
+    }
+
+    return node->frame();
+  }
 };
 
 TEST_F(VggResizingTestSuite, FigHorizontal)
@@ -276,4 +287,22 @@ TEST_F(VggResizingTestSuite, GetAffineTransform)
   Layout::Matrix layoutMatrix{ glmMatrix[0].x, glmMatrix[0].y, glmMatrix[1].x,
                                glmMatrix[1].y, glmMatrix[2].x, glmMatrix[2].y };
   EXPECT_TRUE(layoutMatrix == computedMatrix);
+}
+
+TEST_F(VggResizingTestSuite, AdjustChildPostionIfTheChildSizeChanged)
+{
+  // Given
+  setupWithExpanding("testDataDir/resizing/child_size_changed/");
+
+  // When
+
+  // Then
+  std::vector<Layout::Rect> expectedFrames{ { { 147.5, 14.0 }, { 221.0, 27.0 } },
+                                            { { 0, 2 }, { 24, 24 } },
+                                            { { 40, 0 }, { 181, 27 } },
+                                            { { 139.0, 14.0 }, { 239.0, 27.0 } } };
+  EXPECT_TRUE(descendantFrame({ 0, 0 }) == expectedFrames[0]);
+  EXPECT_TRUE(descendantFrame({ 0, 0, 0 }) == expectedFrames[1]);
+  EXPECT_TRUE(descendantFrame({ 0, 0, 1 }) == expectedFrames[2]);
+  EXPECT_TRUE(descendantFrame({ 2, 0 }) == expectedFrames[3]);
 }

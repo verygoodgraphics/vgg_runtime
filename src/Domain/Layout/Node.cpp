@@ -406,20 +406,7 @@ Layout::Point LayoutNode::converPointToAncestor(Layout::Point point,
 
 void LayoutNode::scaleTo(const Layout::Size& newSize, bool updateRule)
 {
-  auto oldFrame = frame();
-  auto oldSize = oldFrame.size;
-  auto newFrame = oldFrame;
-  if (oldSize.width > 0)
-  {
-    auto xScale = newSize.width / oldSize.width;
-    newFrame.origin.x *= xScale;
-  }
-  if (oldSize.height > 0)
-  {
-    auto yScale = newSize.height / oldSize.height;
-    newFrame.origin.y *= yScale;
-  }
-  newFrame.size = newSize;
+  const auto newFrame = calculateResizedFrame(newSize);
 
   saveOldFrame();
   setFrame(newFrame, updateRule, true);
@@ -766,6 +753,112 @@ Layout::Rect LayoutNode::transformedFrame() const
   }
 
   return bounds.makeFromModelRect();
+}
+
+Layout::Rect LayoutNode::calculateResizedFrame(const Layout::Size& newSize)
+{
+  const auto oldFrame = frame();
+  const Layout::Rect newFrame{ oldFrame.origin, newSize };
+  if (autoLayout()->isFlexOrGridItem())
+  {
+    // container will layout later, update size only
+    return newFrame;
+  }
+
+  const auto parentNode = m_parent.lock();
+  if (!parentNode || parentNode->adjustContentOnResize() == EAdjustContentOnResize::DISABLED)
+  {
+    return newFrame;
+  }
+
+  // update by resize flag
+  const auto containerSize = parentNode->size();
+
+  // x, w
+  Layout::Scalar x{ oldFrame.left() }, w{ newSize.width };
+  switch (horizontalResizing())
+  {
+    case EResizing::FIX_START_FIX_END:
+    case EResizing::FIX_START_FIX_SIZE:
+    case EResizing::FIX_START_SCALE:
+      break;
+
+    case EResizing::FIX_END_FIX_SIZE:
+    case EResizing::FIX_END_SCALE:
+    {
+      const auto rightMargin = containerSize.width - oldFrame.right();
+      x = containerSize.width - rightMargin - w;
+    }
+    break;
+
+    case EResizing::SCALE:
+    {
+      const auto xScale = w / oldFrame.width();
+      x = oldFrame.left() * xScale;
+    }
+    break;
+
+    case EResizing::FIX_CENTER_RATIO_FIX_SIZE:
+    {
+      const auto centerRatio = oldFrame.centerX() / containerSize.width;
+      x = containerSize.width * centerRatio - w / 2;
+    }
+    break;
+
+    case EResizing::FIX_CENTER_OFFSET_FIX_SIZE:
+    {
+      const auto offset = oldFrame.centerX() - containerSize.width / 2;
+      x = containerSize.width / 2 + offset - w / 2;
+    }
+    break;
+
+    default:
+      break;
+  }
+
+  // y, h
+  Layout::Scalar y{ oldFrame.top() }, h{ newSize.height };
+  switch (verticalResizing())
+  {
+    case EResizing::FIX_START_FIX_END:
+    case EResizing::FIX_START_FIX_SIZE:
+    case EResizing::FIX_START_SCALE:
+      break;
+
+    case EResizing::FIX_END_FIX_SIZE:
+    case EResizing::FIX_END_SCALE:
+    {
+      const auto bottomMargin = containerSize.height - oldFrame.bottom();
+      y = containerSize.height - bottomMargin - h;
+    }
+    break;
+
+    case EResizing::SCALE:
+    {
+      const auto yScale = h / oldFrame.height();
+      y = oldFrame.top() * yScale;
+    }
+    break;
+
+    case EResizing::FIX_CENTER_RATIO_FIX_SIZE:
+    {
+      const auto centerRatio = oldFrame.centerY() / containerSize.height;
+      y = containerSize.height * centerRatio - h / 2;
+    }
+    break;
+
+    case EResizing::FIX_CENTER_OFFSET_FIX_SIZE:
+    {
+      const auto offset = oldFrame.centerY() - containerSize.height / 2;
+      y = containerSize.height / 2 + offset - h / 2;
+    }
+    break;
+
+    default:
+      break;
+  }
+
+  return { { x, y }, { w, h } };
 }
 
 } // namespace VGG

@@ -304,8 +304,7 @@ void Layout::Layout::resizeNodeThenLayout(const std::string& nodeId, Size size)
   if (auto node = m_layoutTree->findDescendantNodeById(nodeId))
   {
     DEBUG("Layout::resizeNodeThenLayout: resize subtree, %s", nodeId.c_str());
-    node->setFrame(VGG::Layout::Rect{ node->frame().origin, size }, true);
-    node->autoLayout()->setNeedsLayout();
+    node->scaleTo(size, true);
 
     m_layoutTree->layoutIfNeeded();
   }

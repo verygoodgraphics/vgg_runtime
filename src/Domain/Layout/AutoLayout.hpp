@@ -76,6 +76,7 @@ public:
   {
     return m_isContainer;
   }
+  bool isFlexOrGridItem();
 
   flexbox_node* getFlexContainer()
   {

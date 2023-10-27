@@ -150,6 +150,7 @@ public:
 
   std::shared_ptr<LayoutNode> findDescendantNodeById(const std::string& id);
 
+  Layout::Rect calculateResizedFrame(const Layout::Size& newSize);
   Layout::Rect frameToAncestor(std::shared_ptr<LayoutNode> ancestorNode = nullptr)
   {
     return convertRectToAncestor(frame(), ancestorNode);

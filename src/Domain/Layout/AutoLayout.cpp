@@ -337,23 +337,21 @@ void applyLayoutToViewHierarchy(std::shared_ptr<LayoutNode> view,
   auto node = isContainer ? autoLayout->getFlexContainer() : autoLayout->getFlexItem();
   if (node)
   {
-    Point origin;
+    Layout::Rect frame = { { .x = node->get_layout_left(), .y = node->get_layout_top() },
+                           { .width = node->get_layout_width(),
+                             .height = node->get_layout_height() } };
     if (preserveOrigin)
     {
-      origin = view->frame().origin;
+      frame = view->calculateResizedFrame(frame.size);
     }
-    Layout::Rect frame = {
-      { .x = node->get_layout_left() + origin.x, .y = node->get_layout_top() + origin.y },
-      { .width = node->get_layout_width(), .height = node->get_layout_height() }
-    };
 
-    DEBUG("applyLayoutToViewHierarchy, view[%p, %s], x=%d, y=%d, width=%d, height=%d",
+    DEBUG("applyLayoutToViewHierarchy, view[%p, %s], x=%f, y=%f, width=%f, height=%f",
           view.get(),
           view->path().c_str(),
-          static_cast<int>(frame.origin.x),
-          static_cast<int>(frame.origin.y),
-          static_cast<int>(frame.size.width),
-          static_cast<int>(frame.size.height));
+          frame.origin.x,
+          frame.origin.y,
+          frame.size.width,
+          frame.size.height);
 
     autoLayout->setFrame(frame);
     view->setFrame(frame);
@@ -361,10 +359,13 @@ void applyLayoutToViewHierarchy(std::shared_ptr<LayoutNode> view,
   else if (auto gridContainer = autoLayout->getGridContainer())
   {
     // grid container
-    Point origin = view->frame().origin;
-    Layout::Rect frame = { origin,
+    Layout::Rect frame = { {},
                            { .width = TO_VGG_LAYOUT_SCALAR(gridContainer->get_layout_width()),
                              .height = TO_VGG_LAYOUT_SCALAR(gridContainer->get_layout_height()) } };
+    if (preserveOrigin)
+    {
+      frame = view->calculateResizedFrame(frame.size);
+    }
     DEBUG("applyLayoutToViewHierarchy, view[%p, %s], x=%d, y=%d, width=%d, height=%d",
           view.get(),
           view->path().c_str(),
@@ -420,6 +421,11 @@ void applyLayoutToViewHierarchy(std::shared_ptr<LayoutNode> view,
 void AutoLayout::applyLayout(bool preservingOrigin)
 {
   if (isLeaf())
+  {
+    return;
+  }
+
+  if (!m_isContainer)
   {
     return;
   }
@@ -863,6 +869,17 @@ void AutoLayout::setNeedsLayout()
   {
     sharedView->setNeedLayout();
   }
+}
+
+bool AutoLayout::isFlexOrGridItem()
+{
+  auto sharedRule = rule.lock();
+  if (!sharedRule)
+  {
+    return false;
+  }
+
+  return sharedRule->isFlexItem() || sharedRule->isGridItem();
 }
 
 } // namespace Internal

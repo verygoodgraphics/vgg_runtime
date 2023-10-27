@@ -276,7 +276,11 @@ void ExpandSymbol::processMasterIdOverrides(nlohmann::json& instance,
 
     (*childObject)[K_MASTER_ID] = value;
     (*childObject).erase(K_OVERRIDE_VALUES);
-    removeInvalidLayoutRule((*childObject));
+    if (childObject->contains(K_CHILD_OBJECTS))
+    {
+      // Keep own layout rule; Remove children layout rule only;
+      removeInvalidLayoutRule((*childObject)[K_CHILD_OBJECTS]);
+    }
 
     // restore to symbolInstance to expand again
     (*childObject)[K_CLASS] = K_SYMBOL_INSTANCE;

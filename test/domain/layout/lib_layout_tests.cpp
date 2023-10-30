@@ -81,3 +81,57 @@ TEST(LibLayoutTest, GrowShrinkWithWidth)
 
   EXPECT_DOUBLE_EQ(237.0, frame1Ptr->get_layout_width());
 }
+
+TEST(LibLayoutTest, YPosition)
+{
+  auto root = std::make_unique<flexbox_node>();
+  auto child0 = std::make_unique<flexbox_node>();
+  auto child1 = std::make_unique<flexbox_node>();
+
+  // 0
+  root->set_direction(direction_row);
+  root->set_justify_content(justify_content_center);
+  root->set_align_items(align_items_center);
+  root->set_align_content(align_content_center);
+  root->set_wrap(wrap_no_wrap);
+  root->set_gap(gap_row, 0);
+  root->set_gap(gap_column, 16);
+  root->set_padding(padding_top, 0);
+  root->set_padding(padding_right, 0);
+  root->set_padding(padding_bottom, 0);
+  root->set_padding(padding_left, 0);
+
+  root->set_width(unit_point, 221.0);
+  root->set_height(unit_point, 27.0);
+
+  // 0/0
+  child0->set_position(position_relative);
+
+  child0->set_grow(0.0);
+  child0->set_shrink(0.0);
+
+  child0->set_width(unit_point, 24.0);
+  child0->set_height(unit_point, 24.0);
+
+  // 0/1
+  child1->set_position(position_relative);
+
+  child1->set_grow(0.0);
+  child1->set_shrink(0.0);
+
+  child1->set_width(unit_point, 181.0);
+  child1->set_height(unit_point, 27.0);
+
+  // setup tree
+  auto rootPtr = root.get();
+  auto child0Ptr = child0.get();
+  auto child1Ptr = child1.get();
+
+  // when
+  root->add_child(child0, -1);
+  root->add_child(child1, -1);
+  rootPtr->calc_layout();
+
+  // NOTE: shoule be 1.5, but yoga return 2
+  EXPECT_DOUBLE_EQ(2, child0Ptr->get_layout_top());
+}

@@ -26,17 +26,10 @@
 namespace VGG::exporter
 {
 
-struct BackendInfo
-{
-  EBackend type;
-  int majorVersion;
-  int minorVersion;
-};
-
 struct ExporterInfo
 {
   std::string buildCommit;
-  BackendInfo backend;
+  std::string graphicsInfo;
 };
 
 class ImageIteratorImpl;

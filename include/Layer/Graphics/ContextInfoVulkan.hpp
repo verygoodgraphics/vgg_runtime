@@ -16,6 +16,7 @@
 #pragma once
 
 #include <vulkan/vulkan_core.h>
+#include <string>
 
 struct ContextInfoVulkan
 {
@@ -26,4 +27,5 @@ struct ContextInfoVulkan
   VkSurfaceKHR surface{ VK_NULL_HANDLE };
   int graphicsQueueIndex{ -1 };
   PFN_vkVoidFunction getProc{ nullptr };
+
 };

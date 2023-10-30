@@ -126,7 +126,7 @@ class Exporter__pImpl
 {
   Exporter* q_api; // NOLINT
 public:
-  std::shared_ptr<layer::GraphicsContext> ctx;
+  std::shared_ptr<VkGraphicsContext> ctx;
   std::shared_ptr<layer::VLayer> layer;
   std::shared_ptr<Scene> scene;
   OutputCallback outputCallback;
@@ -179,9 +179,7 @@ void Exporter::info(ExporterInfo* info)
 {
   if (info)
   {
-    info->backend.type = EBackend::VULKAN;
-    info->backend.majorVersion = 1;
-    info->backend.minorVersion = 3;
+    info->graphicsInfo = d_impl->ctx->vulkanInfo();
 #ifdef GIT_COMMIT
     info->buildCommit = GIT_COMMIT;
 #else

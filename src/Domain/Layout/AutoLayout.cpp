@@ -407,7 +407,7 @@ void applyLayoutToViewHierarchy(std::shared_ptr<LayoutNode> view,
     }
   }
 
-  if (!autoLayout->isLeaf())
+  if (!autoLayout->isLeaf() && autoLayout->isContainer())
   {
     for (auto subview : view->children())
     {

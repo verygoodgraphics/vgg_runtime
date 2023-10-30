@@ -1,3 +1,5 @@
+#include "base.hpp"
+
 #include "Domain/Layout/Layout.hpp"
 #include "UseCase/StartRunning.hpp"
 
@@ -7,20 +9,9 @@
 
 using namespace VGG;
 
-class VggLayoutTestSuite : public ::testing::Test
+class VggLayoutTestSuite : public BaseVggLayoutTestSuite
 {
 protected:
-  std::shared_ptr<Layout::Layout> m_sut;
-
-  void SetUp() override
-  {
-  }
-
-  void TearDown() override
-  {
-    m_sut.reset();
-  }
-
   void layout(Layout::Layout& layout, Layout::Size size)
   {
     layout.layout(size, true);
@@ -145,4 +136,42 @@ TEST_F(VggLayoutTestSuite, FrameOfNodeWhoseParentPositionInBoundsIsNotZero)
   auto child1Frame = page->children()[1]->frame();
   Layout::Rect expectChild0Frame{ { 0, 0 }, { 200, 100 } };
   EXPECT_TRUE(child1Frame == expectChild0Frame);
+}
+
+TEST_F(VggLayoutTestSuite, ApplyLayoutToViewHierarchy)
+{
+  /*
+  Apply layout to container and items only.
+
+  ---
+  Given:
+    node: A -> B -> C
+    A is a flex container
+    B is a flex item
+    C is another flex container
+  When:
+    calculate layout for node A
+  Then:
+    apply layout to container A and item B, not C
+
+  ---
+  Given:
+    node: A -> B -> C
+    A is a flex container
+    B is a flex item and flex container
+    C is a flex item of B
+  When:
+    calculate layout for node A
+  Then:
+    apply layout to node A, B, and C
+  */
+
+  // Given
+  setupWithExpanding("testDataDir/layout/101_self_and_grandson_layout/");
+
+  // When
+
+  // Then
+  std::vector<Layout::Rect> expectedFrames{ { { 24, 14 }, { 104, 27 } } };
+  EXPECT_TRUE(descendantFrame({ 0, 1, 0 }) == expectedFrames[0]);
 }

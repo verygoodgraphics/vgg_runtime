@@ -1,78 +1,12 @@
-#include "Domain/Layout/Layout.hpp"
-#include "UseCase/StartRunning.hpp"
-
-#include "domain/model/daruma_helper.hpp"
+#include "base.hpp"
 
 #include <gtest/gtest.h>
 
 #include <glm/ext.hpp>
 #include <glm/glm.hpp>
 
-using namespace VGG;
-
-class VggResizingTestSuite : public ::testing::Test
+class VggResizingTestSuite : public BaseVggLayoutTestSuite
 {
-protected:
-  std::shared_ptr<Layout::Layout> m_sut;
-
-  void SetUp() override
-  {
-  }
-
-  void TearDown() override
-  {
-  }
-
-  auto setupModel(const char* fileDir)
-  {
-    std::shared_ptr<Daruma> daruma{ new Daruma(Helper::RawJsonDocumentBuilder,
-                                               Helper::RawJsonDocumentBuilder) };
-    daruma->load(fileDir);
-    return daruma;
-  }
-
-  void setup(const char* fileDir)
-  {
-    auto daruma = setupModel(fileDir);
-    m_sut.reset(new Layout::Layout{ daruma->designDoc(), daruma->layoutDoc() });
-  }
-
-  void setupWithExpanding(const char* fileDir)
-  {
-    auto daruma = setupModel(fileDir);
-
-    StartRunning startRunning{ daruma };
-    m_sut = startRunning.layout();
-  }
-
-  auto firstPage()
-  {
-    auto tree = m_sut->layoutTree();
-    return tree->children()[0];
-  }
-
-  auto childFrame(int index)
-  {
-    auto frame = firstPage()->children()[index]->frame();
-    return frame;
-  }
-
-  auto grandsonFrame(int index, int index2)
-  {
-    auto frame = firstPage()->children()[index]->children()[index2]->frame();
-    return frame;
-  }
-
-  auto descendantFrame(std::vector<int> indexs)
-  {
-    auto node = firstPage();
-    for (auto index : indexs)
-    {
-      node = node->children()[index];
-    }
-
-    return node->frame();
-  }
 };
 
 TEST_F(VggResizingTestSuite, FigHorizontal)

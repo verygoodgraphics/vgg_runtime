@@ -64,6 +64,11 @@ public:
     return initVulkanContextInfo();
   }
 
+  std::string vulkanInfo()
+  {
+    return m_context->vkPhysicalDevice->deviceInfo.value_or("");
+  }
+
   void shutdown() override
   {
     cleanup();

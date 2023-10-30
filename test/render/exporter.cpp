@@ -1,6 +1,7 @@
 #include "loader.hpp"
 #include "Utility/ConfigManager.hpp"
 #include "Layer/Scene.hpp"
+#include "Utility/Log.hpp"
 
 #include "VGG/Exporter/ImageExporter.hpp"
 #include "VGG/Exporter/SVGExporter.hpp"
@@ -156,7 +157,10 @@ int main(int argc, char** argv)
     exporter::setGlobalConfig(cfg.value());
   }
 
+  exporter::ExporterInfo info;
   exporter::Exporter exporter;
+  exporter.info(&info);
+  INFO("%s", info.graphicsInfo.c_str());
 
   if (auto loadfile = program.present(POS_ARG_INPUT_FILE))
   {

@@ -16,8 +16,11 @@
 #pragma once
 #include "Utility/Log.hpp"
 #include <cstdint>
+#include <string>
 #include <vector>
 #include <iostream>
+#include <optional>
+#include <sstream>
 #include <functional>
 #include <memory>
 #include <glm/glm.hpp>
@@ -224,10 +227,24 @@ struct VkPhysicalDeviceObject : public std::enable_shared_from_this<VkPhysicalDe
   std::vector<VkQueueFamilyProperties> queueFamilies;
   VkPhysicalDeviceFeatures physicalDeviceFeatures;
 
+  std::optional<std::string> deviceInfo;
+
   VkPhysicalDeviceObject() = default;
   VkPhysicalDeviceObject(std::shared_ptr<VkInstanceObject> instance)
     : instance(std::move(instance))
   {
+
+    auto apiVersion = [](uint32_t apiVersion)
+    {
+      return std::to_string(VK_API_VERSION_MAJOR(apiVersion)) + "." +
+             std::to_string(VK_API_VERSION_MINOR(apiVersion)) + "." +
+             std::to_string(VK_API_VERSION_PATCH(apiVersion));
+    };
+
+    VkPhysicalDeviceDriverProperties dp;
+    dp.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES;
+    dp.pNext = 0;
+
     uint32_t count = 0;
     VK_CHECK(vkEnumeratePhysicalDevices(*(this->instance), &count, nullptr));
     using namespace std;
@@ -237,15 +254,22 @@ struct VkPhysicalDeviceObject : public std::enable_shared_from_this<VkPhysicalDe
 
     for (int i = 0; i < count; i++)
     {
-      VkPhysicalDeviceProperties prop;
+      VkPhysicalDeviceProperties2 prop2;
+      prop2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+      prop2.pNext = &dp;
       auto d = dev[i];
-      vkGetPhysicalDeviceProperties(d, &prop);
+      vkGetPhysicalDeviceProperties2(d, &prop2);
+      VkPhysicalDeviceProperties prop = prop2.properties;
       VkPhysicalDeviceMemoryProperties memProp;
       vkGetPhysicalDeviceMemoryProperties(d, &memProp);
       for (int i = 0; i < memProp.memoryTypeCount; i++)
       {
         allowedMemoryType.push_back(memProp.memoryTypes[i]);
       }
+      std::string info;
+      info = "Version: Vulkan " + apiVersion(prop.apiVersion) + "\nDevice: " + prop.deviceName +
+             "\nDriver: " + dp.driverName + " " + dp.driverInfo;
+      deviceInfo = info;
 
       // vkGetPhysicalDeviceProperties(d,&prop);
       // vkGetPhysicalDeviceFeatures(d, &feat);

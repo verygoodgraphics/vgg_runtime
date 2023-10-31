@@ -504,9 +504,9 @@ Layout::Rect LayoutNode::resize(const Layout::Size& oldContainerSize,
     return resizeGroup(oldContainerSize, newContainerSize, parentOrigin);
   }
 
-  if (auto json = model(); Layout::isRectangleNode(*json))
+  if (auto json = model(); Layout::isPathNode(*json))
   {
-    return resizeRectangle(oldContainerSize, newContainerSize, parentOrigin);
+    return resizePath(oldContainerSize, newContainerSize, parentOrigin);
   }
 
   // todo, resize other shape
@@ -937,11 +937,11 @@ Layout::Rect LayoutNode::calculateResizedFrame(const Layout::Size& newSize)
   return { { x, y }, { w, h } };
 }
 
-Layout::Rect LayoutNode::resizeRectangle(const Layout::Size& oldContainerSize,
-                                         const Layout::Size& newContainerSize,
-                                         const Layout::Point* parentOrigin)
+Layout::Rect LayoutNode::resizePath(const Layout::Size& oldContainerSize,
+                                    const Layout::Size& newContainerSize,
+                                    const Layout::Point* parentOrigin)
 {
-  DEBUG("resize rectangle: %s, %s", name().c_str(), id().c_str());
+  DEBUG("resizePath: %s, %s", name().c_str(), id().c_str());
 
   auto json = model();
   ASSERT(json);
@@ -958,7 +958,7 @@ Layout::Rect LayoutNode::resizeRectangle(const Layout::Size& oldContainerSize,
 
   // get model point
   auto& points = subGeometry[K_POINTS];
-  ASSERT(points.size() == 4);
+  ASSERT(points.size() > 0);
   auto pointsPath = path / 0 / K_SUBGEOMETRY / K_POINTS;
 
   const auto oldSize = modelBounds().size;
@@ -970,13 +970,13 @@ Layout::Rect LayoutNode::resizeRectangle(const Layout::Size& oldContainerSize,
     oldModelPoints.push_back(point);
     oldFlipYModelPoints.push_back(point.makeFromModelPoint());
 
-    DEBUG("resize rectangle, flip y model point %d: %f, %f",
+    DEBUG("resizePath: old flip y model point %d: %f, %f",
           j,
           oldFlipYModelPoints[j].x,
           oldFlipYModelPoints[j].y);
   }
   auto oldFrameBeforeTransform = Layout::Rect::makeFromPoints(oldFlipYModelPoints);
-  DEBUG("resize rectangle, old frame before transform: %f, %f, %f, %f",
+  DEBUG("resizePath: old frame before transform: %f, %f, %f, %f",
         oldFrameBeforeTransform.left(),
         oldFrameBeforeTransform.top(),
         oldFrameBeforeTransform.width(),
@@ -988,7 +988,7 @@ Layout::Rect LayoutNode::resizeRectangle(const Layout::Size& oldContainerSize,
   for (const auto& point : oldModelPoints)
   {
     oldLayoutPoints.push_back(point.makeTransform(oldModelMatrix).makeFromModelPoint());
-    DEBUG("resize rectangle, old layout point: %f, %f",
+    DEBUG("resizePath: old layout point: %f, %f",
           oldLayoutPoints.back().x,
           oldLayoutPoints.back().y);
   }
@@ -998,12 +998,12 @@ Layout::Rect LayoutNode::resizeRectangle(const Layout::Size& oldContainerSize,
   auto [x, w] = resizeH(oldContainerSize, newContainerSize, oldLayoutFrame, parentOrigin);
   auto [y, h] = resizeV(oldContainerSize, newContainerSize, oldLayoutFrame, parentOrigin);
   Layout::Rect newLayoutFrame{ { x, y }, { w, h } };
-  DEBUG("resize rectangle, old layout frame: %f, %f, %f, %f",
+  DEBUG("resizePath: old layout frame: %f, %f, %f, %f",
         oldLayoutFrame.left(),
         oldLayoutFrame.top(),
         oldLayoutFrame.width(),
         oldLayoutFrame.height());
-  DEBUG("resize rectangle, new layout frame: %f, %f, %f, %f",
+  DEBUG("resizePath: new layout frame: %f, %f, %f, %f",
         newLayoutFrame.left(),
         newLayoutFrame.top(),
         newLayoutFrame.width(),
@@ -1018,7 +1018,7 @@ Layout::Rect LayoutNode::resizeRectangle(const Layout::Size& oldContainerSize,
     auto yRatio = (oldLayoutPoint.y - oldLayoutFrame.top()) / oldLayoutFrame.height();
     Layout::Point newLayoutPoint{ x + xRatio * w, y + yRatio * h };
     newLayoutPoints.push_back(newLayoutPoint);
-    DEBUG("resize rectangle, new layout point, %lu: %f, %f",
+    DEBUG("resizePath: new layout point, %lu: %f, %f",
           newLayoutPoints.size() - 1,
           newLayoutPoint.x,
           newLayoutPoint.y);
@@ -1044,22 +1044,22 @@ Layout::Rect LayoutNode::resizeRectangle(const Layout::Size& oldContainerSize,
   decompose(mat, scale, radian, quat, skew, trans, persp);
 
   std::vector<Layout::Point> reverseRotatedLayoutPoints;
-  auto [centerX, centerY] = newLayoutFrame.center();
+  auto [newLayoutCenterX, newLayoutCenterY] = newLayoutFrame.center();
   const auto reverseRotateTransform = glm::rotate(glm::mat3{ 1 }, -radian);
   for (const auto& newLayoutPoint : newLayoutPoints)
   {
-    glm::vec3 p{ newLayoutPoint.x - centerX, newLayoutPoint.y - centerY, 1 };
+    glm::vec3 p{ newLayoutPoint.x - newLayoutCenterX, newLayoutPoint.y - newLayoutCenterY, 1 };
     p = p * reverseRotateTransform;
 
-    Layout::Point reverseRotatedPoint{ p.x + centerX, p.y + centerY };
+    Layout::Point reverseRotatedPoint{ p.x + newLayoutCenterX, p.y + newLayoutCenterY };
     reverseRotatedLayoutPoints.push_back(reverseRotatedPoint);
 
-    DEBUG("resize rectangle, back rotated point, %f, %f",
+    DEBUG("resizePath: reverse rotated point, %f, %f",
           reverseRotatedPoint.x,
           reverseRotatedPoint.y);
   }
   auto reverseRotatedFrame = Layout::Rect::makeFromPoints(reverseRotatedLayoutPoints);
-  DEBUG("resize rectangle, tmp frame, %f, %f, %f, %f",
+  DEBUG("resizePath: reverse rotated frame, %f, %f, %f, %f",
         reverseRotatedFrame.left(),
         reverseRotatedFrame.top(),
         reverseRotatedFrame.width(),
@@ -1072,18 +1072,21 @@ Layout::Rect LayoutNode::resizeRectangle(const Layout::Size& oldContainerSize,
     auto newModelPoint = Layout::Point{ reverseRotatedPoint.x - reverseRotatedFrame.left(),
                                         reverseRotatedPoint.y - reverseRotatedFrame.top() }
                            .makeModelPoint();
-    DEBUG("resize rectangle, new model point, %f, %f", newModelPoint.x, newModelPoint.y);
+    DEBUG("resizePath: new model point, %f, %f", newModelPoint.x, newModelPoint.y);
     newModelPoints.push_back(newModelPoint);
   }
 
   // calculate new matrix
-  glm::vec3 relativeTopLeftPoint{ -reverseRotatedFrame.width() / 2,
-                                  -reverseRotatedFrame.height() / 2,
-                                  1 }; // top left point, rectangle center is at {0, 0}
+  glm::vec3 relativeFirstPoint{ reverseRotatedLayoutPoints[0].x - reverseRotatedFrame.left(),
+                                reverseRotatedLayoutPoints[0].y - reverseRotatedFrame.top(),
+                                1 }; // rotate anchor is top left point
   const auto rotateTransform = glm::rotate(glm::mat3{ 1 }, radian);
-  auto relativeRotatedTopRightPoint = relativeTopLeftPoint * rotateTransform;
-  Layout::Point layoutTopLeft{ relativeRotatedTopRightPoint.x + reverseRotatedFrame.centerX(),
-                               relativeRotatedTopRightPoint.y + reverseRotatedFrame.centerY() };
+  auto rotatedRelativeFirstPoint = relativeFirstPoint * rotateTransform;
+  auto xOffset = newLayoutPoints[0].x - rotatedRelativeFirstPoint.x;
+  auto yOffset = newLayoutPoints[0].y - rotatedRelativeFirstPoint.y;
+
+  Layout::Point layoutTopLeft{ xOffset, yOffset };
+  DEBUG("resizePath: top left point of layout rectangle, %f, %f", layoutTopLeft.x, layoutTopLeft.y);
   const auto newModelTopLeft = layoutTopLeft.makeModelPoint();
 
   auto newTransform = glm::mat3{ 1 };

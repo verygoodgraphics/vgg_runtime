@@ -1,0 +1,317 @@
+{
+  "fileName": "hello-sketch",
+  "fileType": 1,
+  "frames": [
+    {
+      "alphaMaskBy": [],
+      "bounds": {
+        "class": "rect",
+        "constrainProportions": false,
+        "height": 400.0,
+        "width": 400.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "childObjects": [
+        {
+          "alphaMaskBy": [],
+          "bounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "height": 137.2811406087904,
+            "width": 105.1614319334613,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "class": "path",
+          "contextSettings": {
+            "blendMode": 0,
+            "class": "graphicsContextSettings",
+            "isolateBlending": false,
+            "opacity": 1.0,
+            "transparencyKnockoutGroup": 0
+          },
+          "frame": {
+            "class": "rect",
+            "constrainProportions": false,
+            "height": 172.75992046363322,
+            "width": 168.80094634264935,
+            "x": 176.060603843926,
+            "y": -166.5979908344261
+          },
+          "horizontalConstraint": 5,
+          "id": "FEBCFDD5-6B97-4633-A173-2D10F20BBC4B",
+          "isLocked": false,
+          "maskType": 0,
+          "matrix": [
+            0.7660444507738347,
+            -0.6427876005638363,
+            0.6427876005638363,
+            0.7660444507738347,
+            264.303218818517,
+            -166.5979908344261
+          ],
+          "name": "Triangle",
+          "outlineMaskBy": [],
+          "overflow": 1,
+          "pathType": 4,
+          "shape": {
+            "class": "shape",
+            "subshapes": [
+              {
+                "booleanOperation": 4,
+                "class": "subshape",
+                "subGeometry": {
+                  "class": "contour",
+                  "closed": true,
+                  "points": [
+                    {
+                      "class": "pointAttr",
+                      "cornerStyle": 0,
+                      "point": [
+                        62.02611214881574,
+                        -3.638864124548027e-14
+                      ],
+                      "radius": 0.0
+                    },
+                    {
+                      "class": "pointAttr",
+                      "cornerStyle": 0,
+                      "point": [
+                        105.16143193346126,
+                        -130.03012881428205
+                      ],
+                      "radius": 0.0
+                    },
+                    {
+                      "class": "pointAttr",
+                      "cornerStyle": 0,
+                      "point": [
+                        1.529767005150273e-14,
+                        -137.2811406087904
+                      ],
+                      "radius": 0.0
+                    }
+                  ]
+                }
+              }
+            ],
+            "windingRule": 1
+          },
+          "style": {
+            "blurs": [
+              {
+                "center": [
+                  0.5,
+                  0.5
+                ],
+                "class": "blur",
+                "isEnabled": false,
+                "motionAngle": 0.0,
+                "radius": 10.0,
+                "saturation": 1.0,
+                "type": 0
+              }
+            ],
+            "borders": [
+              {
+                "class": "border",
+                "color": {
+                  "alpha": 1.0,
+                  "blue": 0.592,
+                  "class": "color",
+                  "green": 0.592,
+                  "red": 0.592
+                },
+                "contextSettings": {
+                  "blendMode": 0,
+                  "class": "graphicsContextSettings",
+                  "isolateBlending": false,
+                  "opacity": 1.0,
+                  "transparencyKnockoutGroup": 0
+                },
+                "dashedOffset": 0.0,
+                "dashedPattern": [],
+                "endMarkerType": 0,
+                "fillType": 0,
+                "flat": 0.0,
+                "gradient": {
+                  "class": "gradient",
+                  "instance": {
+                    "class": "gradientLinear",
+                    "from": [
+                      0.5,
+                      0.0
+                    ],
+                    "invert": false,
+                    "stops": [
+                      {
+                        "class": "gradientStop",
+                        "color": {
+                          "alpha": 1.0,
+                          "blue": 1.0,
+                          "class": "color",
+                          "green": 1.0,
+                          "red": 1.0
+                        },
+                        "midPoint": 0.5,
+                        "position": 0.0
+                      },
+                      {
+                        "class": "gradientStop",
+                        "color": {
+                          "alpha": 1.0,
+                          "blue": 0.0,
+                          "class": "color",
+                          "green": 0.0,
+                          "red": 0.0
+                        },
+                        "midPoint": 0.5,
+                        "position": 1.0
+                      }
+                    ],
+                    "to": [
+                      0.5,
+                      1.0
+                    ]
+                  }
+                },
+                "isEnabled": true,
+                "lineCapStyle": 0,
+                "lineJoinStyle": 0,
+                "miterLimit": 10.0,
+                "position": 1,
+                "startMarkerType": 0,
+                "style": 0,
+                "thickness": 1
+              }
+            ],
+            "class": "style",
+            "fills": [
+              {
+                "class": "fill",
+                "color": {
+                  "alpha": 1.0,
+                  "blue": 0.7446819533303922,
+                  "class": "color",
+                  "green": 0.7446819533303922,
+                  "red": 0.9666553442028986
+                },
+                "contextSettings": {
+                  "blendMode": 0,
+                  "class": "graphicsContextSettings",
+                  "isolateBlending": false,
+                  "opacity": 1.0,
+                  "transparencyKnockoutGroup": 0
+                },
+                "fillType": 0,
+                "gradient": {
+                  "class": "gradient",
+                  "instance": {
+                    "class": "gradientLinear",
+                    "from": [
+                      0.5,
+                      0.0
+                    ],
+                    "invert": false,
+                    "stops": [
+                      {
+                        "class": "gradientStop",
+                        "color": {
+                          "alpha": 1.0,
+                          "blue": 1.0,
+                          "class": "color",
+                          "green": 1.0,
+                          "red": 1.0
+                        },
+                        "midPoint": 0.5,
+                        "position": 0.0
+                      },
+                      {
+                        "class": "gradientStop",
+                        "color": {
+                          "alpha": 1.0,
+                          "blue": 0.0,
+                          "class": "color",
+                          "green": 0.0,
+                          "red": 0.0
+                        },
+                        "midPoint": 0.5,
+                        "position": 1.0
+                      }
+                    ],
+                    "to": [
+                      0.5,
+                      1.0
+                    ]
+                  }
+                },
+                "isEnabled": true
+              }
+            ],
+            "shadows": []
+          },
+          "styleEffectMaskArea": 0,
+          "verticalConstraint": 5,
+          "visible": true
+        }
+      ],
+      "class": "frame",
+      "contextSettings": {
+        "blendMode": 0,
+        "class": "graphicsContextSettings",
+        "isolateBlending": false,
+        "opacity": 1.0,
+        "transparencyKnockoutGroup": 0
+      },
+      "frame": {
+        "class": "rect",
+        "constrainProportions": false,
+        "height": 400.0,
+        "width": 400.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "horizontalConstraint": 5,
+      "id": "271F303A-2FC3-44FC-BC4C-C942D1F27D66",
+      "isLocked": false,
+      "maskType": 0,
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "name": "Artboard",
+      "outlineMaskBy": [],
+      "overflow": 1,
+      "resizesContent": 2,
+      "style": {
+        "blurs": [
+          {
+            "center": [
+              0.5,
+              0.5
+            ],
+            "class": "blur",
+            "isEnabled": false,
+            "motionAngle": 0.0,
+            "radius": 10.0,
+            "saturation": 1.0,
+            "type": 0
+          }
+        ],
+        "borders": [],
+        "class": "style",
+        "fills": [],
+        "shadows": []
+      },
+      "styleEffectMaskArea": 0,
+      "verticalConstraint": 5,
+      "visible": true
+    }
+  ],
+  "references": []
+}

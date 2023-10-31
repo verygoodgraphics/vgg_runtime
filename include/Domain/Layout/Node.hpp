@@ -207,7 +207,7 @@ private:
   Layout::Rect resizeGroup(const Layout::Size& oldContainerSize,
                            const Layout::Size& newContainerSize,
                            const Layout::Point* parentOrigin);
-  Layout::Rect resizeRectangle(const Layout::Size& oldContainerSize,
+  Layout::Rect resizePath(const Layout::Size& oldContainerSize,
                                const Layout::Size& newContainerSize,
                                const Layout::Point* parentOrigin);
   std::pair<Layout::Scalar, Layout::Scalar> resizeH(

@@ -231,8 +231,103 @@ inline SkMatrix upperMatrix22(const SkMatrix& matrix)
   return m;
 }
 
+inline SkPath makePath(const std::vector<PointAttr>& points, bool isClosed)
+{
+  auto peek1 = [](const PointAttr* pp, const PointAttr& cp, SkPath& path) -> int
+  {
+    const auto prevHasFrom = pp->from.has_value();
+    const auto curHasTo = cp.to.has_value();
+    if (prevHasFrom && curHasTo)
+      path.cubicTo(pp->from->x, pp->from->y, cp.to->x, cp.to->y, cp.point.x, cp.point.y);
+    else if (prevHasFrom && !curHasTo)
+      path.quadTo(pp->from->x, pp->from->y, cp.point.x, cp.point.y);
+    else if (!prevHasFrom && curHasTo)
+      path.quadTo(cp.to->x, cp.to->y, cp.point.x, cp.point.y);
+    else if (!prevHasFrom && !curHasTo)
+      path.lineTo(cp.point.x, cp.point.y);
+    return 1;
+  };
+
+  auto peek2 =
+    [&peek1](const PointAttr* pp, PointAttr& cp, const PointAttr& np, SkPath& path) -> int
+  {
+    const auto prevHasFrom = pp->from.has_value();
+    const auto curHasTo = cp.to.has_value();
+    const auto nextHasFrom = np.from.has_value();
+    const auto nextHasTo = np.to.has_value();
+    const auto curHasFrom = cp.from.has_value();
+    int c = 0;
+    if (!prevHasFrom && !curHasTo && !curHasFrom && !nextHasTo)
+    {
+      // two straight lines
+      double r = calcRadius(cp.radius, pp->point, cp.point, np.point, 0, 0);
+      path.arcTo(cp.point.x, cp.point.y, np.point.x, np.point.y, r);
+      return 1;
+    }
+    else
+    {
+      // cp could be modified
+      WARN("Rounded point by two curve is not implemented");
+      c += peek1(pp, cp, path);
+      c += peek1(pp, np, path);
+    }
+    return c;
+  };
+  if (points.size() < 2)
+  {
+    WARN("Too few path points.");
+    return {};
+  }
+
+  SkPath path;
+  size_t prev = 0;
+  size_t cur = 1;
+  size_t next = cur + 1;
+
+  int segments = isClosed ? points.size() : points.size() - 1;
+  PointAttr buffer[2] = { points[prev], points[cur] };
+
+  int cp = 1;
+  int pp = 1 - cp;
+
+  if (!isClosed || buffer[pp].radius <= 0)
+  {
+    path.moveTo(buffer[pp].point.x, buffer[pp].point.y);
+  }
+  else // handle the special case that a closed path begin with a rounded point
+  {
+    // the start point should be calculated first as the rounded curve's end point
+    // TODO::update buffer[pp]
+    path.moveTo(buffer[pp].point.x, buffer[pp].point.y);
+  }
+
+  while (segments > 0)
+  {
+    int consumed = 0;
+    if (buffer[cp].radius <= 0)
+      consumed = peek1(&buffer[pp], buffer[cp], path);
+    else
+      consumed = peek2(&buffer[pp], buffer[cp], points[next], path);
+    segments -= consumed;
+    prev = cur;
+    cur = next;
+    next = (next + consumed) % points.size();
+
+    // swap buffer
+    pp = cp;
+    cp = 1 - cp;
+    buffer[cp] = points[cur];
+  }
+  if (isClosed)
+  {
+    path.close();
+  }
+  return path;
+};
+
 inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
 {
+  return makePath(points, isClosed);
   constexpr float W = 1.0;
   constexpr float H = 1.0;
   auto& pts = points;
@@ -277,8 +372,10 @@ inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
   {
     if (currP->mode() == PM::PM_Straight && nextP->mode() == PM::PM_Straight)
     {
+      // curren point and next point has no control points at all
       if (nextP->radius > 0 && nextP->mode() == PM::PM_Straight)
       {
+        // next point is a rounded point if current point has radius property
         auto* next2P = (nextP == endP) ? startP : (nextP + 1);
         auto next2Pp = next2P->to.has_value() ? next2P->to.value() : next2P->point;
         double r = calcRadius(nextP->radius, currP->point * s, nextP->point * s, next2Pp * s, 0, 0);
@@ -291,24 +388,30 @@ inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
     }
     else if (currP->mode() == PM::PM_Disconnected && nextP->mode() == PM::PM_Disconnected)
     {
+      // current point and next point has one control point at least
       bool hasFrom = currP->from.has_value();
       bool hasTo = nextP->to.has_value();
       if (!hasFrom && !hasTo)
       {
+        // no control point, just a string line between current point and next point
         skPath.lineTo(W * nextP->point.x, H * nextP->point.y);
       }
       else if (hasFrom && !hasTo)
       {
+        // quadric bezier: current point -> controllpoint(from) -> next point
         auto& from = currP->from.value();
         skPath.quadTo(W * from.x, H * from.y, W * nextP->point.x, H * nextP->point.y);
       }
       else if (!hasFrom && hasTo)
       {
+        // quadric bezier: current point -> controllpoint(to) -> next point
         auto& to = nextP->to.value();
         skPath.quadTo(W * to.x, H * to.y, W * nextP->point.x, H * nextP->point.y);
       }
       else
       {
+        // general cubic bezier: current point -> controllpoint(from) -> controllpoint(to) -> next
+        // point
         auto& from = currP->from.value();
         auto& to = nextP->to.value();
         skPath.cubicTo(W * from.x,
@@ -321,6 +424,8 @@ inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
     }
     else if (currP->mode() != PM::PM_Straight && nextP->mode() != PM::PM_Straight)
     {
+      ASSERT(false); // this branch should be equaled to the above one
+      // current point and next point has one control point at least
       if ((currP->mode() == PM::PM_Disconnected && !currP->from.has_value()) ||
           (nextP->mode() == PM::PM_Disconnected && !nextP->to.has_value()) ||
           (currP->mode() != PM::PM_Disconnected &&
@@ -342,6 +447,7 @@ inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
     }
     else if (currP->mode() == PM::PM_Straight && nextP->mode() != PM::PM_Straight)
     {
+      // current point has no controll point and the next point at least has one
       if (!nextP->to.has_value())
       {
         skPath.lineTo(W * nextP->point.x, H * nextP->point.y);
@@ -354,6 +460,7 @@ inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
     }
     else if (currP->mode() != PM::PM_Straight && nextP->mode() == PM::PM_Straight)
     {
+      // current point has at least controll point and the next point has no controll point
       if (nextP->radius > 0 && nextP->mode() == PM::PM_Straight)
       {
         auto* next2P = (nextP == endP) ? startP : (nextP + 1);
@@ -376,7 +483,7 @@ inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
         else
         {
           auto currPfrom = currP->from.value();
-          constexpr float RADIUS_COEFF = 1.0;
+          constexpr float RADIUS_COEFF = 0.88;
           // glm::vec2 p =
           glm::vec2 p = (currP->point + RADIUS_COEFF * (currPfrom - currP->point)) * s;
           glm::vec2 start;

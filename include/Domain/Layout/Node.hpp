@@ -30,6 +30,8 @@ namespace VGG
 {
 namespace Layout
 {
+struct Matrix;
+
 namespace Internal
 {
 struct AutoLayout;
@@ -175,9 +177,17 @@ private:
   Layout::Point converPointToAncestor(Layout::Point point,
                                       std::shared_ptr<LayoutNode> ancestorNode = nullptr);
 
-  void scaleChildNodes(const Layout::Size& oldContainerSize, const Layout::Size& newContainerSize);
-  void scaleContour(float xScaleFactor, float yScaleFactor);
-  void scalePoint(nlohmann::json& json, const char* key, float xScaleFactor, float yScaleFactor);
+  void resizeChildNodes(const Layout::Size& oldContainerSize, const Layout::Size& newContainerSize);
+  void resizeContour(float xScaleFactor,
+                     float yScaleFactor,
+                     const Layout::Size& oldContainerSize,
+                     const Layout::Size& newContainerSize);
+  void resizePoint(nlohmann::json& json,
+                   const char* key,
+                   float xScaleFactor,
+                   float yScaleFactor,
+                   const Layout::Size& oldContainerSize,
+                   const Layout::Size& newContainerSize);
 
   Layout::Point origin() const;
   Layout::Size size() const;
@@ -197,13 +207,18 @@ private:
   Layout::Rect resizeGroup(const Layout::Size& oldContainerSize,
                            const Layout::Size& newContainerSize,
                            const Layout::Point* parentOrigin);
+  Layout::Rect resizeRectangle(const Layout::Size& oldContainerSize,
+                               const Layout::Size& newContainerSize,
+                               const Layout::Point* parentOrigin);
   std::pair<Layout::Scalar, Layout::Scalar> resizeH(
     const Layout::Size& oldContainerSize,
     const Layout::Size& newContainerSize,
+    Layout::Rect oldFrame,
     const Layout::Point* parentOrigin) const; // return x, w
   std::pair<Layout::Scalar, Layout::Scalar> resizeV(
     const Layout::Size& oldContainerSize,
     const Layout::Size& newContainerSize,
+    Layout::Rect oldFrame,
     const Layout::Point* parentOrigin) const; // return y, h
 
   EResizing horizontalResizing() const;
@@ -216,6 +231,10 @@ private:
   T getValue(const char* key, T v) const;
 
   bool shouldSkip();
+
+  void updatePathNodeModel(const Layout::Rect& newFrame,
+                           const Layout::Matrix& matrix,
+                           const std::vector<Layout::Point>& newPoints);
 };
 
 } // namespace VGG

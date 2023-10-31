@@ -50,6 +50,7 @@ constexpr auto K_OVERRIDE_NAME = "overrideName";
 constexpr auto K_OVERRIDE_VALUE = "overrideValue";
 constexpr auto K_OVERRIDE_VALUES = "overrideValues";
 constexpr auto K_PATH = "path";
+constexpr auto K_PATH_TYPE = "pathType";
 constexpr auto K_POINT = "point";
 constexpr auto K_POINTS = "points";
 constexpr auto K_POINT_ATTR = "pointAttr";

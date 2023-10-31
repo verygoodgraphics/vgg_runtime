@@ -4,6 +4,7 @@ add_library(vgg_domain STATIC
   Layout/ExpandSymbol.cpp
   Layout/Helper.cpp
   Layout/Layout.cpp
+  Layout/Math.cpp
   Layout/Node.cpp
   Layout/Rect.cpp
   Layout/Rule.cpp

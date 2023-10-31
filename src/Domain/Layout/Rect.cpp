@@ -15,9 +15,10 @@
  */
 #include "Rect.hpp"
 
-#include "Utility/VggFloat.hpp"
+#include "Math.hpp"
 
-#include <glm/glm.hpp>
+#include "Utility/Log.hpp"
+#include "Utility/VggFloat.hpp"
 
 #include <algorithm>
 
@@ -27,6 +28,11 @@ using namespace VGG::Layout;
 bool Point::operator==(const Point& rhs) const noexcept
 {
   return nearlyEqual(x, rhs.x) && nearlyEqual(y, rhs.y);
+}
+Point Point::makeTransform(const Matrix& matrix) const
+{
+  const auto [a, b, c, d, tx, ty] = matrix;
+  return { a * x + c * y + tx, b * x + d * y + ty };
 }
 
 bool Size::operator==(const Size& rhs) const noexcept
@@ -76,17 +82,26 @@ Rect Rect::makeTransform(const Matrix& matrix, ECoordinateType type) const
   return { { minX, isYAxisDown ? minY : maxY }, { maxX - minX, maxY - minY } };
 }
 
-Matrix Layout::getAffineTransform(const std::array<Point, 3>& oldPoints,
-                                  const std::array<Point, 3>& newPoints)
+Rect Rect::makeFromPoints(const std::vector<Point>& points)
 {
-  const glm::mat3 oldGlmPoints{ oldPoints[0].x, oldPoints[0].y, 1,
-                                oldPoints[1].x, oldPoints[1].y, 1,
-                                oldPoints[2].x, oldPoints[2].y, 1 };
-  const glm::mat3x2 newGlmPoints{ newPoints[0].x, newPoints[0].y, newPoints[1].x,
-                                  newPoints[1].y, newPoints[2].x, newPoints[2].y };
+  ASSERT(points.size() > 1);
+  if (points.empty())
+  {
+    return {};
+  }
 
-  const auto gmMatrix = newGlmPoints * glm::inverse(oldGlmPoints);
-  return {
-    gmMatrix[0].x, gmMatrix[0].y, gmMatrix[1].x, gmMatrix[1].y, gmMatrix[2].x, gmMatrix[2].y
-  };
+  auto left = points[0].x;
+  auto right = points[0].x;
+  auto top = points[0].y;
+  auto bottom = points[0].y;
+
+  for (auto& point : points)
+  {
+    top = std::min(top, point.y);
+    bottom = std::max(bottom, point.y);
+    left = std::min(left, point.x);
+    right = std::max(right, point.x);
+  }
+
+  return { { left, top }, { right - left, bottom - top } };
 }

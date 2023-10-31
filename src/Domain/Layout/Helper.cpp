@@ -124,21 +124,5 @@ bool isPathNode(const nlohmann::json& json)
   return className == K_PATH;
 }
 
-bool isRectangleNode(const nlohmann::json& json)
-{
-  if (!isPathNode(json))
-  {
-    return false;
-  }
-
-  if (json.contains(K_PATH_TYPE))
-  {
-    auto pathType = json[K_PATH_TYPE].get<EPathType>();
-    return pathType == EPathType::RECTANGLE;
-  }
-
-  return false;
-}
-
 } // namespace Layout
 } // namespace VGG

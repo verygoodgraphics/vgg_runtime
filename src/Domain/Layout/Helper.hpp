@@ -40,7 +40,6 @@ void from_json(const nlohmann::json& j, Matrix& matrix);
 bool isLayoutNode(const nlohmann::json& json);
 bool isGroupNode(const nlohmann::json& json);
 bool isPathNode(const nlohmann::json& json);
-bool isRectangleNode(const nlohmann::json& json);
 
 } // namespace Layout
 } // namespace VGG

@@ -413,7 +413,21 @@ TEST_F(VggResizingTestSuite, ResizeRectangle)
   m_sut->layout(Layout::Size{ 800, 400 });
 
   // Then
-  std::vector<Layout::Rect> expectedFrames{ { { 546.2101440429688, 254.8557586669922 },
+  std::vector<Layout::Rect> expectedFrames{ { { 546.2101440429688, 254.85577392578125 },
                                               { 107.77313232421875, 124.28289794921875 } } };
   EXPECT_TRUE(descendantFrame({ 2 }) == expectedFrames[0]);
+}
+
+TEST_F(VggResizingTestSuite, ResizeTriangle)
+{
+  // Given
+  setupWithExpanding("testDataDir/resizing/rotated/triangle/sketch/");
+
+  // When
+  m_sut->layout(Layout::Size{ 800, 400 });
+
+  // Then
+  std::vector<Layout::Rect> expectedFrames{ { { 496.6272888183594, 99.76119232177734 },
+                                              { 170.40484619140625, 224.64659118652344 } } };
+  EXPECT_TRUE(descendantFrame({ 0 }) == expectedFrames[0]);
 }

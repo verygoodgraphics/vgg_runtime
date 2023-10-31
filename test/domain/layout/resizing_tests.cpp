@@ -403,3 +403,17 @@ TEST_F(VggResizingTestSuite, DecomposeMatrix)
     auto _ = 1 + 1;
   }
 }
+
+TEST_F(VggResizingTestSuite, ResizeRectangle)
+{
+  // Given
+  setupWithExpanding("testDataDir/resizing/rotated/rectangle/");
+
+  // When
+  m_sut->layout(Layout::Size{ 800, 400 });
+
+  // Then
+  std::vector<Layout::Rect> expectedFrames{ { { 546.2101440429688, 254.8557586669922 },
+                                              { 107.77313232421875, 124.28289794921875 } } };
+  EXPECT_TRUE(descendantFrame({ 2 }) == expectedFrames[0]);
+}

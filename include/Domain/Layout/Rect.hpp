@@ -16,6 +16,7 @@
 #pragma once
 
 #include <array>
+#include <vector>
 
 namespace VGG
 {
@@ -23,22 +24,12 @@ namespace VGG
 namespace Layout
 {
 
+struct Matrix;
+
 using Scalar = float;
 
 constexpr auto FLIP_Y_FACTOR = -1;
 #define TO_VGG_LAYOUT_SCALAR(x) static_cast<Layout::Scalar>(x)
-
-struct Matrix
-{
-  Scalar a{ 1 };
-  Scalar b{ 0 };
-  Scalar c{ 0 };
-  Scalar d{ 1 };
-  Scalar tx{ 0 };
-  Scalar ty{ 0 };
-
-  bool operator==(const Matrix& rhs) const noexcept;
-};
 
 struct Point
 {
@@ -64,15 +55,11 @@ struct Point
   {
     return { x, y * FLIP_Y_FACTOR };
   }
-  Point toModelPoint() const
+  Point makeModelPoint() const
   {
     return { x, y * FLIP_Y_FACTOR };
   }
-  Point makeTransform(const Matrix& matrix) const
-  {
-    const auto [a, b, c, d, tx, ty] = matrix;
-    return { a * x + c * y + tx, b * x + d * y + ty };
-  }
+  Point makeTransform(const Matrix& matrix) const;
 };
 
 struct Size
@@ -118,7 +105,7 @@ struct Rect
   }
   Rect makeModelRect() const
   {
-    return { origin.toModelPoint(), size };
+    return { origin.makeModelPoint(), size };
   }
   Rect makeOffset(Scalar dx, Scalar dy) const
   {
@@ -127,6 +114,7 @@ struct Rect
 
   Rect makeIntersect(const Rect& rhs) const;
   Rect makeTransform(const Matrix& matrix, ECoordinateType type) const;
+  static Rect makeFromPoints(const std::vector<Point>& points);
 
   Scalar left() const
   {
@@ -167,10 +155,12 @@ struct Rect
   {
     return top() + height() / 2;
   }
-};
 
-Matrix getAffineTransform(const std::array<Point, 3>& oldPoints,
-                          const std::array<Point, 3>& newPoints);
+  Point center() const
+  {
+    return { centerX(), centerY() };
+  }
+};
 
 } // namespace Layout
 

@@ -25,6 +25,17 @@ namespace VGG
 namespace Layout
 {
 
+enum class EPathType
+{
+  RECTANGLE,
+  LINE,
+  ARROW,
+  ELLIPSE,
+  POLYGON,
+  STAR,
+  VECTOR
+};
+
 void to_json(nlohmann::json& j, const Point& point)
 {
   j = { point.x, point.y };
@@ -111,6 +122,22 @@ bool isPathNode(const nlohmann::json& json)
 
   auto className = json.value(K_CLASS, "");
   return className == K_PATH;
+}
+
+bool isRectangleNode(const nlohmann::json& json)
+{
+  if (!isPathNode(json))
+  {
+    return false;
+  }
+
+  if (json.contains(K_PATH_TYPE))
+  {
+    auto pathType = json[K_PATH_TYPE].get<EPathType>();
+    return pathType == EPathType::RECTANGLE;
+  }
+
+  return false;
 }
 
 } // namespace Layout

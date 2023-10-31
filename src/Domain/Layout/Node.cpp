@@ -20,7 +20,11 @@
 #include "JsonKeys.hpp"
 #include "Rect.hpp"
 
+#include "Math/Algebra.hpp"
 #include "Utility/Log.hpp"
+
+#include <glm/glm.hpp>
+#include <glm/gtx/matrix_transform_2d.hpp>
 
 #include <functional>
 #include <numeric>
@@ -138,7 +142,7 @@ void LayoutNode::setFrame(const Layout::Rect& newFrame, bool updateRule, bool us
     }
   }
 
-  scaleChildNodes(oldSize, newSize);
+  resizeChildNodes(oldSize, newSize);
 }
 
 Layout::Rect LayoutNode::bounds() const
@@ -182,8 +186,8 @@ void LayoutNode::configureAutoLayout()
   }
 }
 
-void LayoutNode::scaleChildNodes(const Layout::Size& oldContainerSize,
-                                 const Layout::Size& newContainerSize)
+void LayoutNode::resizeChildNodes(const Layout::Size& oldContainerSize,
+                                  const Layout::Size& newContainerSize)
 {
   if (oldContainerSize == Layout::Size{ 0, 0 })
   {
@@ -200,12 +204,15 @@ void LayoutNode::scaleChildNodes(const Layout::Size& oldContainerSize,
     child->resize(oldContainerSize, newContainerSize);
   }
 
-  auto xScaleFactor = newContainerSize.width / oldContainerSize.width;
-  auto yScaleFactor = newContainerSize.height / oldContainerSize.height;
-  scaleContour(xScaleFactor, yScaleFactor);
+  // auto xScaleFactor = newContainerSize.width / oldContainerSize.width;
+  // auto yScaleFactor = newContainerSize.height / oldContainerSize.height;
+  // resizeContour(xScaleFactor, yScaleFactor, oldContainerSize, newContainerSize);
 }
 
-void LayoutNode::scaleContour(float xScaleFactor, float yScaleFactor)
+void LayoutNode::resizeContour(float xScaleFactor,
+                               float yScaleFactor,
+                               const Layout::Size& oldContainerSize,
+                               const Layout::Size& newContainerSize)
 {
   // updateAt
   auto viewModel = m_viewModel.lock();
@@ -239,12 +246,22 @@ void LayoutNode::scaleContour(float xScaleFactor, float yScaleFactor)
     for (auto j = 0; j < points.size(); ++j)
     {
       auto point = points[j];
-      scalePoint(point, K_POINT, xScaleFactor, yScaleFactor);
-      scalePoint(point, K_CURVE_FROM, xScaleFactor, yScaleFactor);
-      scalePoint(point, K_CURVE_TO, xScaleFactor, yScaleFactor);
+      resizePoint(point, K_POINT, xScaleFactor, yScaleFactor, oldContainerSize, newContainerSize);
+      resizePoint(point,
+                  K_CURVE_FROM,
+                  xScaleFactor,
+                  yScaleFactor,
+                  oldContainerSize,
+                  newContainerSize);
+      resizePoint(point,
+                  K_CURVE_TO,
+                  xScaleFactor,
+                  yScaleFactor,
+                  oldContainerSize,
+                  newContainerSize);
 
       auto pointPath = pointsPath / j;
-      DEBUG("LayoutNode::scaleContour: %s, -> %s, %s",
+      DEBUG("LayoutNode::resizeContour: %s, -> %s, %s",
             pointPath.to_string().c_str(),
             points[j].dump().c_str(),
             point.dump().c_str());
@@ -254,17 +271,68 @@ void LayoutNode::scaleContour(float xScaleFactor, float yScaleFactor)
   }
 }
 
-void LayoutNode::scalePoint(nlohmann::json& json,
-                            const char* key,
-                            float xScaleFactor,
-                            float yScaleFactor)
+void LayoutNode::resizePoint(nlohmann::json& json,
+                             const char* key,
+                             float xScaleFactor,
+                             float yScaleFactor,
+                             const Layout::Size& oldContainerSize,
+                             const Layout::Size& newContainerSize)
 {
   if (json.contains(key))
   {
     auto point = json[key].get<Layout::Point>();
 
-    point.x *= xScaleFactor;
-    point.y *= yScaleFactor;
+    // todo, offset by parent group origin
+
+    switch (horizontalResizing())
+    {
+      case EResizing::FIX_START_FIX_END:
+      case EResizing::FIX_START_FIX_SIZE:
+      case EResizing::FIX_START_SCALE:
+        break;
+
+      case EResizing::FIX_END_FIX_SIZE:
+      case EResizing::FIX_END_SCALE:
+        break;
+
+      case EResizing::SCALE:
+        point.x *= xScaleFactor;
+        break;
+
+      case EResizing::FIX_CENTER_RATIO_FIX_SIZE:
+        break;
+
+      case EResizing::FIX_CENTER_OFFSET_FIX_SIZE:
+        break;
+
+      default:
+        break;
+    }
+
+    switch (verticalResizing())
+    {
+      case EResizing::FIX_START_FIX_END:
+      case EResizing::FIX_START_FIX_SIZE:
+      case EResizing::FIX_START_SCALE:
+        break;
+
+      case EResizing::FIX_END_FIX_SIZE:
+      case EResizing::FIX_END_SCALE:
+        break;
+
+      case EResizing::SCALE:
+        point.y *= yScaleFactor;
+        break;
+
+      case EResizing::FIX_CENTER_RATIO_FIX_SIZE:
+        break;
+
+      case EResizing::FIX_CENTER_OFFSET_FIX_SIZE:
+        break;
+
+      default:
+        break;
+    }
 
     json[key] = point;
   }
@@ -436,8 +504,16 @@ Layout::Rect LayoutNode::resize(const Layout::Size& oldContainerSize,
     return resizeGroup(oldContainerSize, newContainerSize, parentOrigin);
   }
 
-  auto [x, w] = resizeH(oldContainerSize, newContainerSize, parentOrigin);
-  auto [y, h] = resizeV(oldContainerSize, newContainerSize, parentOrigin);
+  if (auto json = model(); Layout::isRectangleNode(*json))
+  {
+    return resizeRectangle(oldContainerSize, newContainerSize, parentOrigin);
+  }
+
+  // todo, resize other shape
+
+  auto oldFrame = frame();
+  auto [x, w] = resizeH(oldContainerSize, newContainerSize, oldFrame, parentOrigin);
+  auto [y, h] = resizeV(oldContainerSize, newContainerSize, oldFrame, parentOrigin);
   Layout::Rect newFrame{ { x, y }, { w, h } };
 
   if (!dry)
@@ -451,11 +527,11 @@ Layout::Rect LayoutNode::resize(const Layout::Size& oldContainerSize,
 std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeH(
   const Layout::Size& oldContainerSize,
   const Layout::Size& newContainerSize,
+  Layout::Rect oldFrame,
   const Layout::Point* parentOrigin) const
 {
   Layout::Scalar x{ 0 }, w{ 0 };
 
-  auto oldFrame = frame();
   if (parentOrigin)
   {
     oldFrame = oldFrame.makeOffset(parentOrigin->x, parentOrigin->y);
@@ -536,11 +612,11 @@ std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeH(
 std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeV(
   const Layout::Size& oldContainerSize,
   const Layout::Size& newContainerSize,
+  Layout::Rect oldFrame,
   const Layout::Point* parentOrigin) const
 {
   Layout::Scalar y{ 0 }, h{ 0 };
 
-  auto oldFrame = frame();
   if (parentOrigin)
   {
     oldFrame = oldFrame.makeOffset(parentOrigin->x, parentOrigin->y);
@@ -859,6 +935,236 @@ Layout::Rect LayoutNode::calculateResizedFrame(const Layout::Size& newSize)
   }
 
   return { { x, y }, { w, h } };
+}
+
+Layout::Rect LayoutNode::resizeRectangle(const Layout::Size& oldContainerSize,
+                                         const Layout::Size& newContainerSize,
+                                         const Layout::Point* parentOrigin)
+{
+  DEBUG("resize rectangle: %s, %s", name().c_str(), id().c_str());
+
+  auto json = model();
+  ASSERT(json);
+
+  nlohmann::json::json_pointer path{ m_path };
+  auto& subshapes = (*json)[K_SHAPE][K_SUBSHAPES];
+  ASSERT(subshapes.size() == 1);
+  path /= K_SHAPE;
+  path /= K_SUBSHAPES;
+
+  auto& subshape = subshapes[0];
+  auto& subGeometry = subshape[K_SUBGEOMETRY];
+  ASSERT(subGeometry[K_CLASS] == K_CONTOUR);
+
+  // get model point
+  auto& points = subGeometry[K_POINTS];
+  ASSERT(points.size() == 4);
+  auto pointsPath = path / 0 / K_SUBGEOMETRY / K_POINTS;
+
+  const auto oldSize = modelBounds().size;
+  std::vector<Layout::Point> oldModelPoints;
+  std::vector<Layout::Point> oldFlipYModelPoints;
+  for (auto j = 0; j < points.size(); ++j)
+  {
+    auto point = points[j][K_POINT].get<Layout::Point>();
+    oldModelPoints.push_back(point);
+    oldFlipYModelPoints.push_back(point.makeFromModelPoint());
+
+    DEBUG("resize rectangle, flip y model point %d: %f, %f",
+          j,
+          oldFlipYModelPoints[j].x,
+          oldFlipYModelPoints[j].y);
+  }
+  auto oldFrameBeforeTransform = Layout::Rect::makeFromPoints(oldFlipYModelPoints);
+  DEBUG("resize rectangle, old frame before transform: %f, %f, %f, %f",
+        oldFrameBeforeTransform.left(),
+        oldFrameBeforeTransform.top(),
+        oldFrameBeforeTransform.width(),
+        oldFrameBeforeTransform.height());
+
+  // multiply matrix, to layout point
+  const auto oldModelMatrix = modelMatrix();
+  std::vector<Layout::Point> oldLayoutPoints;
+  for (const auto& point : oldModelPoints)
+  {
+    oldLayoutPoints.push_back(point.makeTransform(oldModelMatrix).makeFromModelPoint());
+    DEBUG("resize rectangle, old layout point: %f, %f",
+          oldLayoutPoints.back().x,
+          oldLayoutPoints.back().y);
+  }
+
+  // resize
+  auto oldLayoutFrame = Layout::Rect::makeFromPoints(oldLayoutPoints);
+  auto [x, w] = resizeH(oldContainerSize, newContainerSize, oldLayoutFrame, parentOrigin);
+  auto [y, h] = resizeV(oldContainerSize, newContainerSize, oldLayoutFrame, parentOrigin);
+  Layout::Rect newLayoutFrame{ { x, y }, { w, h } };
+  DEBUG("resize rectangle, old layout frame: %f, %f, %f, %f",
+        oldLayoutFrame.left(),
+        oldLayoutFrame.top(),
+        oldLayoutFrame.width(),
+        oldLayoutFrame.height());
+  DEBUG("resize rectangle, new layout frame: %f, %f, %f, %f",
+        newLayoutFrame.left(),
+        newLayoutFrame.top(),
+        newLayoutFrame.width(),
+        newLayoutFrame.height());
+
+  // new point
+  std::vector<Layout::Point> newLayoutPoints;
+  for (const auto& oldLayoutPoint : oldLayoutPoints)
+  {
+    // todo, width = 0; height = 0
+    auto xRatio = (oldLayoutPoint.x - oldLayoutFrame.left()) / oldLayoutFrame.width();
+    auto yRatio = (oldLayoutPoint.y - oldLayoutFrame.top()) / oldLayoutFrame.height();
+    Layout::Point newLayoutPoint{ x + xRatio * w, y + yRatio * h };
+    newLayoutPoints.push_back(newLayoutPoint);
+    DEBUG("resize rectangle, new layout point, %lu: %f, %f",
+          newLayoutPoints.size() - 1,
+          newLayoutPoint.x,
+          newLayoutPoint.y);
+  }
+
+  // todo, test fig rotated matrix
+  const glm::mat3 mat{ oldModelMatrix.a,
+                       oldModelMatrix.b,
+                       oldModelMatrix.tx,
+                       oldModelMatrix.c,
+                       oldModelMatrix.d,
+                       oldModelMatrix.ty,
+                       0,
+                       0,
+                       1 };
+  glm::vec2 scale;
+  float radian;
+  glm::quat quat;
+  glm::vec2 skew;
+  glm::vec2 trans;
+  glm::vec3 persp;
+
+  decompose(mat, scale, radian, quat, skew, trans, persp);
+
+  std::vector<Layout::Point> reverseRotatedLayoutPoints;
+  auto [centerX, centerY] = newLayoutFrame.center();
+  const auto reverseRotateTransform = glm::rotate(glm::mat3{ 1 }, -radian);
+  for (const auto& newLayoutPoint : newLayoutPoints)
+  {
+    glm::vec3 p{ newLayoutPoint.x - centerX, newLayoutPoint.y - centerY, 1 };
+    p = p * reverseRotateTransform;
+
+    Layout::Point reverseRotatedPoint{ p.x + centerX, p.y + centerY };
+    reverseRotatedLayoutPoints.push_back(reverseRotatedPoint);
+
+    DEBUG("resize rectangle, back rotated point, %f, %f",
+          reverseRotatedPoint.x,
+          reverseRotatedPoint.y);
+  }
+  auto reverseRotatedFrame = Layout::Rect::makeFromPoints(reverseRotatedLayoutPoints);
+  DEBUG("resize rectangle, tmp frame, %f, %f, %f, %f",
+        reverseRotatedFrame.left(),
+        reverseRotatedFrame.top(),
+        reverseRotatedFrame.width(),
+        reverseRotatedFrame.height());
+
+  // calculate new model point
+  std::vector<Layout::Point> newModelPoints;
+  for (const auto& reverseRotatedPoint : reverseRotatedLayoutPoints)
+  {
+    auto newModelPoint = Layout::Point{ reverseRotatedPoint.x - reverseRotatedFrame.left(),
+                                        reverseRotatedPoint.y - reverseRotatedFrame.top() }
+                           .makeModelPoint();
+    DEBUG("resize rectangle, new model point, %f, %f", newModelPoint.x, newModelPoint.y);
+    newModelPoints.push_back(newModelPoint);
+  }
+
+  // calculate new matrix
+  glm::vec3 relativeTopLeftPoint{ -reverseRotatedFrame.width() / 2,
+                                  -reverseRotatedFrame.height() / 2,
+                                  1 }; // top left point, rectangle center is at {0, 0}
+  const auto rotateTransform = glm::rotate(glm::mat3{ 1 }, radian);
+  auto relativeRotatedTopRightPoint = relativeTopLeftPoint * rotateTransform;
+  Layout::Point layoutTopLeft{ relativeRotatedTopRightPoint.x + reverseRotatedFrame.centerX(),
+                               relativeRotatedTopRightPoint.y + reverseRotatedFrame.centerY() };
+  const auto newModelTopLeft = layoutTopLeft.makeModelPoint();
+
+  auto newTransform = glm::mat3{ 1 };
+  newTransform = glm::translate(newTransform, { newModelTopLeft.x, newModelTopLeft.y });
+  newTransform = glm::rotate(newTransform, radian);
+
+  Layout::Rect newFrame{ newModelTopLeft, reverseRotatedFrame.size };
+
+  Layout::Matrix newMatrix{ newTransform[0][0], newTransform[0][1], newTransform[1][0],
+                            newTransform[1][1], newTransform[2][0], newTransform[2][1] };
+  updatePathNodeModel(newFrame.makeModelRect(), newMatrix, newModelPoints);
+
+  return newFrame;
+}
+
+void LayoutNode::updatePathNodeModel(const Layout::Rect& newFrame,
+                                     const Layout::Matrix& matrix,
+                                     const std::vector<Layout::Point>& newPoints)
+{
+  auto viewModel = m_viewModel.lock();
+  if (!viewModel)
+  {
+    return;
+  }
+
+  nlohmann::json::json_pointer path{ m_path };
+  const auto& objectJson = viewModel->content()[path];
+
+  if (objectJson[K_CLASS] != K_PATH)
+  {
+    return;
+  }
+  // do not update useless frame
+
+  // bounds
+  auto boundsJson = objectJson[K_BOUNDS];
+  boundsJson[K_WIDTH] = newFrame.width();
+  boundsJson[K_HEIGHT] = newFrame.height();
+  viewModel->replaceAt(path / K_BOUNDS, boundsJson);
+
+  // matrix
+  auto matrixJson = objectJson[K_MATRIX];
+  matrixJson[0] = matrix.a;
+  matrixJson[1] = matrix.b;
+  matrixJson[2] = matrix.c;
+  matrixJson[3] = matrix.d;
+  matrixJson[4] = matrix.tx;
+  matrixJson[5] = matrix.ty;
+  viewModel->replaceAt(path / K_MATRIX, matrixJson);
+
+  // points
+  // ./shape/subshapes/XXX/subGeometry/points/XXX
+  auto& subshapes = objectJson[K_SHAPE][K_SUBSHAPES];
+  path /= K_SHAPE;
+  path /= K_SUBSHAPES;
+  for (auto i = 0; i < subshapes.size(); ++i)
+  {
+    auto& subshape = subshapes[i];
+    auto& subGeometry = subshape[K_SUBGEOMETRY];
+    if (subGeometry[K_CLASS] != K_CONTOUR)
+    {
+      continue;
+    }
+
+    auto& points = subGeometry[K_POINTS];
+    auto pointsPath = path / i / K_SUBGEOMETRY / K_POINTS;
+    for (auto j = 0; j < points.size(); ++j)
+    {
+      auto point = points[j];
+      point[K_POINT] = newPoints[j];
+      // todo, from, to
+
+      auto pointPath = pointsPath / j;
+      DEBUG("LayoutNode::resizeContour: %s, -> %s, %s",
+            pointPath.to_string().c_str(),
+            points[j].dump().c_str(),
+            point.dump().c_str());
+
+      viewModel->replaceAt(pointPath, point);
+    }
+  }
 }
 
 } // namespace VGG

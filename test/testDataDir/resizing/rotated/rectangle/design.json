@@ -1,0 +1,461 @@
+{
+  "fileType": 3,
+  "fileName": "/Users/houguanhua/code/vgg/vgg_runtime_B/test/testDataDir/resizing/rotated/rectangle/feature_resizing_rotated_child.fig",
+  "frames": [
+    {
+      "id": "1:6",
+      "name": "Frame 1",
+      "isLocked": false,
+      "visible": true,
+      "contextSettings": {
+        "class": "graphicsContextSettings",
+        "blendMode": 27,
+        "opacity": 1.0,
+        "isolateBlending": false,
+        "transparencyKnockoutGroup": 0
+      },
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "bounds": {
+        "class": "rect",
+        "constrainProportions": false,
+        "width": 400.0,
+        "height": 400.0,
+        "x": 0,
+        "y": 0
+      },
+      "frame": {
+        "class": "rect",
+        "constrainProportions": false,
+        "width": 400.0,
+        "height": 400.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "style": {
+        "class": "style",
+        "borders": [],
+        "fills": [
+          {
+            "fillType": 0,
+            "color": {
+              "class": "color",
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "class": "fill",
+            "isEnabled": true,
+            "contextSettings": {
+              "class": "graphicsContextSettings",
+              "blendMode": 0,
+              "opacity": 1.0,
+              "isolateBlending": false,
+              "transparencyKnockoutGroup": 0
+            }
+          }
+        ],
+        "blurs": [],
+        "shadows": []
+      },
+      "alphaMaskBy": [],
+      "outlineMaskBy": [],
+      "maskType": 0,
+      "styleEffectMaskArea": 2,
+      "maskShowType": 2,
+      "overflow": 1,
+      "cornerSmoothing": 0.0,
+      "horizontalConstraint": 1,
+      "verticalConstraint": 1,
+      "resizesContent": 0,
+      "class": "frame",
+      "childObjects": [
+        {
+          "id": "1:4",
+          "name": "_1",
+          "isLocked": false,
+          "visible": true,
+          "contextSettings": {
+            "class": "graphicsContextSettings",
+            "blendMode": 27,
+            "opacity": 1.0,
+            "isolateBlending": false,
+            "transparencyKnockoutGroup": 0
+          },
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            89.0,
+            -45.0
+          ],
+          "bounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "width": 100.0,
+            "height": 40.0,
+            "x": 0,
+            "y": 0
+          },
+          "frame": {
+            "class": "rect",
+            "constrainProportions": false,
+            "width": 100.0,
+            "height": 40.0,
+            "x": 89.0,
+            "y": -45.0
+          },
+          "style": {
+            "class": "style",
+            "borders": [],
+            "fills": [
+              {
+                "fillType": 0,
+                "color": {
+                  "class": "color",
+                  "red": 0.9125000238418579,
+                  "green": 0.7071874737739563,
+                  "blue": 0.7071874737739563,
+                  "alpha": 1.0
+                },
+                "class": "fill",
+                "isEnabled": true,
+                "contextSettings": {
+                  "class": "graphicsContextSettings",
+                  "blendMode": 0,
+                  "opacity": 1.0,
+                  "isolateBlending": false,
+                  "transparencyKnockoutGroup": 0
+                }
+              }
+            ],
+            "blurs": [],
+            "shadows": []
+          },
+          "alphaMaskBy": [],
+          "outlineMaskBy": [],
+          "maskType": 0,
+          "styleEffectMaskArea": 2,
+          "maskShowType": 2,
+          "overflow": 1,
+          "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
+          "class": "path",
+          "shape": {
+            "class": "shape",
+            "subshapes": [
+              {
+                "class": "subshape",
+                "subGeometry": {
+                  "class": "contour",
+                  "closed": true,
+                  "points": [
+                    {
+                      "class": "pointAttr",
+                      "radius": 0.0,
+                      "point": [
+                        0.0,
+                        0.0
+                      ]
+                    },
+                    {
+                      "class": "pointAttr",
+                      "radius": 0.0,
+                      "point": [
+                        100.0,
+                        0.0
+                      ]
+                    },
+                    {
+                      "class": "pointAttr",
+                      "radius": 0.0,
+                      "point": [
+                        100.0,
+                        -40.0
+                      ]
+                    },
+                    {
+                      "class": "pointAttr",
+                      "radius": 0.0,
+                      "point": [
+                        0.0,
+                        -40.0
+                      ]
+                    }
+                  ]
+                },
+                "booleanOperation": 4
+              }
+            ],
+            "windingRule": 0
+          },
+          "pathType": 0
+        },
+        {
+          "id": "1:5",
+          "name": "_2",
+          "isLocked": false,
+          "visible": true,
+          "contextSettings": {
+            "class": "graphicsContextSettings",
+            "blendMode": 27,
+            "opacity": 1.0,
+            "isolateBlending": false,
+            "transparencyKnockoutGroup": 0
+          },
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            289.00006103515625,
+            -245.0
+          ],
+          "bounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "width": 40.00000762939453,
+            "height": 100.0,
+            "x": 0,
+            "y": 0
+          },
+          "frame": {
+            "class": "rect",
+            "constrainProportions": false,
+            "width": 40.00000762939453,
+            "height": 100.0,
+            "x": 289.00006103515625,
+            "y": -245.0
+          },
+          "style": {
+            "class": "style",
+            "borders": [],
+            "fills": [
+              {
+                "fillType": 0,
+                "color": {
+                  "class": "color",
+                  "red": 0.9125000238418579,
+                  "green": 0.7071874737739563,
+                  "blue": 0.7071874737739563,
+                  "alpha": 1.0
+                },
+                "class": "fill",
+                "isEnabled": true,
+                "contextSettings": {
+                  "class": "graphicsContextSettings",
+                  "blendMode": 0,
+                  "opacity": 1.0,
+                  "isolateBlending": false,
+                  "transparencyKnockoutGroup": 0
+                }
+              }
+            ],
+            "blurs": [],
+            "shadows": []
+          },
+          "alphaMaskBy": [],
+          "outlineMaskBy": [],
+          "maskType": 0,
+          "styleEffectMaskArea": 2,
+          "maskShowType": 2,
+          "overflow": 1,
+          "cornerSmoothing": 0.0,
+          "horizontalConstraint": 5,
+          "verticalConstraint": 3,
+          "resizesContent": 0,
+          "class": "path",
+          "shape": {
+            "class": "shape",
+            "subshapes": [
+              {
+                "class": "subshape",
+                "subGeometry": {
+                  "class": "contour",
+                  "closed": true,
+                  "points": [
+                    {
+                      "class": "pointAttr",
+                      "radius": 0.0,
+                      "point": [
+                        0.0,
+                        0.0
+                      ]
+                    },
+                    {
+                      "class": "pointAttr",
+                      "radius": 0.0,
+                      "point": [
+                        40.00000762939453,
+                        0.0
+                      ]
+                    },
+                    {
+                      "class": "pointAttr",
+                      "radius": 0.0,
+                      "point": [
+                        40.00000762939453,
+                        -100.0
+                      ]
+                    },
+                    {
+                      "class": "pointAttr",
+                      "radius": 0.0,
+                      "point": [
+                        0.0,
+                        -100.0
+                      ]
+                    }
+                  ]
+                },
+                "booleanOperation": 4
+              }
+            ],
+            "windingRule": 0
+          },
+          "pathType": 0
+        },
+        {
+          "id": "201:2",
+          "name": "3target",
+          "isLocked": false,
+          "visible": true,
+          "contextSettings": {
+            "class": "graphicsContextSettings",
+            "blendMode": 27,
+            "opacity": 1.0,
+            "isolateBlending": false,
+            "transparencyKnockoutGroup": 0
+          },
+          "matrix": [
+            0.939692497253418,
+            0.34202006459236145,
+            -0.3420202136039734,
+            0.9396928548812866,
+            273.1050720214844,
+            -254.85577392578125
+          ],
+          "bounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "width": 39.99999237060547,
+            "height": 99.99999237060547,
+            "x": 0,
+            "y": 0
+          },
+          "frame": {
+            "class": "rect",
+            "constrainProportions": false,
+            "width": 71.78971147184211,
+            "height": 107.65007829312958,
+            "x": 273.1050720214844,
+            "y": -241.1749739514928
+          },
+          "style": {
+            "class": "style",
+            "borders": [],
+            "fills": [
+              {
+                "fillType": 0,
+                "color": {
+                  "class": "color",
+                  "red": 0.7728874683380127,
+                  "green": 0.9125000238418579,
+                  "blue": 0.7071874737739563,
+                  "alpha": 1.0
+                },
+                "class": "fill",
+                "isEnabled": true,
+                "contextSettings": {
+                  "class": "graphicsContextSettings",
+                  "blendMode": 0,
+                  "opacity": 1.0,
+                  "isolateBlending": false,
+                  "transparencyKnockoutGroup": 0
+                }
+              }
+            ],
+            "blurs": [],
+            "shadows": []
+          },
+          "alphaMaskBy": [],
+          "outlineMaskBy": [],
+          "maskType": 0,
+          "styleEffectMaskArea": 2,
+          "maskShowType": 2,
+          "overflow": 1,
+          "cornerSmoothing": 0.0,
+          "horizontalConstraint": 5,
+          "verticalConstraint": 3,
+          "resizesContent": 0,
+          "class": "path",
+          "shape": {
+            "class": "shape",
+            "subshapes": [
+              {
+                "class": "subshape",
+                "subGeometry": {
+                  "class": "contour",
+                  "closed": true,
+                  "points": [
+                    {
+                      "class": "pointAttr",
+                      "radius": 0.0,
+                      "point": [
+                        0.0,
+                        0.0
+                      ]
+                    },
+                    {
+                      "class": "pointAttr",
+                      "radius": 0.0,
+                      "point": [
+                        39.99999237060547,
+                        0.0
+                      ]
+                    },
+                    {
+                      "class": "pointAttr",
+                      "radius": 0.0,
+                      "point": [
+                        39.99999237060547,
+                        -99.99999237060547
+                      ]
+                    },
+                    {
+                      "class": "pointAttr",
+                      "radius": 0.0,
+                      "point": [
+                        0.0,
+                        -99.99999237060547
+                      ]
+                    }
+                  ]
+                },
+                "booleanOperation": 4
+              }
+            ],
+            "windingRule": 0
+          },
+          "pathType": 0
+        }
+      ],
+      "radius": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ]
+}

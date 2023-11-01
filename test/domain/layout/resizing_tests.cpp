@@ -221,7 +221,7 @@ TEST_F(VggResizingTestSuite, GetAffineTransform)
   };
 
   // When
-  const auto computedMatrix = Layout::getAffineTransform(oldPoints, newPoints);
+  const auto computedMatrix = Layout::Matrix::getAffineTransform(oldPoints, newPoints);
 
   // Then
   Layout::Matrix layoutMatrix{ glmMatrix[0].x, glmMatrix[0].y, glmMatrix[1].x,
@@ -429,5 +429,19 @@ TEST_F(VggResizingTestSuite, ResizeTriangle)
   // Then
   std::vector<Layout::Rect> expectedFrames{ { { 496.6272888183594, 99.76119232177734 },
                                               { 170.40484619140625, 224.64659118652344 } } };
+  EXPECT_TRUE(descendantFrame({ 0 }) == expectedFrames[0]);
+}
+
+TEST_F(VggResizingTestSuite, ResizeEllipse)
+{
+  // Given
+  setupWithExpanding("testDataDir/resizing/rotated/ellipse/");
+
+  // When
+  m_sut->layout(Layout::Size{ 800, 400 });
+
+  // Then
+  std::vector<Layout::Rect> expectedFrames{ { { 576.744873046875, 133.9481658935547 },
+                                              { 238.4503173828125, 163.7313232421875 } } };
   EXPECT_TRUE(descendantFrame({ 0 }) == expectedFrames[0]);
 }

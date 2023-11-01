@@ -13,45 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "Domain/Layout/Rect.hpp"
 
-#include <glm/glm.hpp>
+#include <nlohmann/json.hpp>
 
-#include <array>
-#include <vector>
+#include <optional>
 
 namespace VGG
 {
-
 namespace Layout
 {
 
-struct Matrix
+struct BezierPoint
 {
-  Scalar a{ 1 };
-  Scalar b{ 0 };
-  Scalar c{ 0 };
-  Scalar d{ 1 };
-  Scalar tx{ 0 };
-  Scalar ty{ 0 };
+  Layout::Point point;
+  std::optional<Layout::Point> from;
+  std::optional<Layout::Point> to;
 
-  bool operator==(const Matrix& rhs) const noexcept;
-  Matrix makeInverse() const;
-  Scalar decomposeRotateRadian() const;
+  BezierPoint makeFromModelFormat() const;
+  BezierPoint makeModelFormat() const;
 
-  static Matrix make(Scalar tx, Scalar ty, Scalar radian);
-  static Matrix makeRotate(Scalar radian);
-  static Matrix make(glm::mat3 t);
-
-  static Matrix getAffineTransform(const std::array<Point, 3>& oldPoints,
-                                   const std::array<Point, 3>& newPoints);
-
-private:
-  glm::mat3 makeMat3() const;
+  BezierPoint makeTransform(const Matrix& matrix) const;
+  BezierPoint makeScale(const Rect& oldContainerFrame, const Rect& newContainerFrame) const;
+  BezierPoint makeTranslate(const Scalar tx, const Scalar ty) const;
 };
 
-} // namespace Layout
+// NOLINTBEGIN
+void to_json(nlohmann::json& j, const BezierPoint& beziorPoint);
+void from_json(const nlohmann::json& j, BezierPoint& beziorPoint);
+// NOLINTEND
 
+} // namespace Layout
 } // namespace VGG

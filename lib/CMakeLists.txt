@@ -1,4 +1,5 @@
 add_subdirectory(vgg_contrib/argparse EXCLUDE_FROM_ALL)
+add_subdirectory(vgg_contrib/bezier EXCLUDE_FROM_ALL)
 add_subdirectory(vgg_contrib/boost EXCLUDE_FROM_ALL)
 add_subdirectory(vgg_contrib/glm EXCLUDE_FROM_ALL)
 add_subdirectory(vgg_contrib/json EXCLUDE_FROM_ALL)

@@ -18,7 +18,10 @@
 
 #include "Rect.hpp"
 
+#include "Math/Algebra.hpp"
+
 #include <glm/glm.hpp>
+#include <glm/gtx/matrix_transform_2d.hpp>
 
 #include <array>
 #include <vector>
@@ -28,13 +31,39 @@ using namespace Layout;
 
 Matrix Matrix::makeInverse() const
 {
-  const glm::mat3 glmMatrix{ a, b, 0, a, d, 0, tx, ty, 1 };
-  const auto inversedGlmMatirx = glm::inverse(glmMatrix);
-
-  return {};
+  const auto t = glm::inverse(makeMat3());
+  return make(t);
 }
 
-Matrix Layout::getAffineTransform(const std::array<Point, 3>& oldPoints,
+Scalar Matrix::decomposeRotateRadian() const
+{
+  glm::vec2 scale;
+  float radian;
+  glm::quat quat;
+  glm::vec2 skew;
+  glm::vec2 trans;
+  glm::vec3 persp;
+
+  decompose(makeMat3(), scale, radian, quat, skew, trans, persp);
+
+  return radian;
+}
+
+Matrix Matrix::make(Scalar tx, Scalar ty, Scalar radian)
+{
+  auto t = glm::mat3{ 1 };
+  t = glm::translate(t, { tx, ty });
+  t = glm::rotate(t, radian);
+  return make(t);
+}
+
+Matrix Matrix::makeRotate(Scalar radian)
+{
+  const auto t = glm::rotate(glm::mat3{ 1 }, radian);
+  return make(t);
+}
+
+Matrix Matrix::getAffineTransform(const std::array<Point, 3>& oldPoints,
                                   const std::array<Point, 3>& newPoints)
 {
   const glm::mat3 oldGlmPoints{ oldPoints[0].x, oldPoints[0].y, 1,
@@ -43,8 +72,17 @@ Matrix Layout::getAffineTransform(const std::array<Point, 3>& oldPoints,
   const glm::mat3x2 newGlmPoints{ newPoints[0].x, newPoints[0].y, newPoints[1].x,
                                   newPoints[1].y, newPoints[2].x, newPoints[2].y };
 
-  const auto gmMatrix = newGlmPoints * glm::inverse(oldGlmPoints);
-  return {
-    gmMatrix[0].x, gmMatrix[0].y, gmMatrix[1].x, gmMatrix[1].y, gmMatrix[2].x, gmMatrix[2].y
-  };
+  const auto mat3 = newGlmPoints * glm::inverse(oldGlmPoints);
+  return make(mat3);
+}
+
+Matrix Matrix::make(glm::mat3 t)
+{
+  // t[col][row]
+  return { t[0][0], t[0][1], t[1][0], t[1][1], t[2][0], t[2][1] };
+}
+
+glm::mat3 Matrix::makeMat3() const
+{
+  return { a, b, 0, c, d, 0, tx, ty, 1 };
 }

@@ -459,7 +459,7 @@ inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
     if (sx > sy)
     {
       // scaled image's width == frame's width
-      mat.postTranslate(0, (height - sx * mi.height()) / 2);
+      mat.postTranslate(0, -(height - sx * mi.height()) / 2);
     }
     else
     {
@@ -482,7 +482,7 @@ inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
     if (sx < sy)
     {
       // scaled image's width == frame's width
-      mat.postTranslate(0, (height - sx * mi.height()) / 2);
+      mat.postTranslate(0, -(height - sx * mi.height()) / 2);
     }
     else
     {

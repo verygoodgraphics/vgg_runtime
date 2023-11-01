@@ -23,6 +23,7 @@ constexpr auto K_ATTR = "attr";
 constexpr auto K_BOUNDS = "bounds";
 constexpr auto K_CHILD_OBJECTS = "childObjects";
 constexpr auto K_CLASS = "class";
+constexpr auto K_CLOSED = "closed";
 constexpr auto K_CONTEXT_SETTINGS = "contextSettings";
 constexpr auto K_CONTOUR = "contour";
 constexpr auto K_CURVE_FROM = "curveFrom";

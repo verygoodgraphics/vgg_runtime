@@ -24,7 +24,9 @@ namespace VGG
 namespace Layout
 {
 
+struct BezierPoint;
 struct Matrix;
+struct Rect;
 
 using Scalar = float;
 
@@ -60,6 +62,7 @@ struct Point
     return { x, y * FLIP_Y_FACTOR };
   }
   Point makeTransform(const Matrix& matrix) const;
+  Point makeScale(const Rect& oldContainerFrame, const Rect& newContainerFrame) const;
 };
 
 struct Size
@@ -112,9 +115,16 @@ struct Rect
     return { { origin.x + dx, origin.y + dy }, size };
   }
 
-  Rect makeIntersect(const Rect& rhs) const;
+  Rect makeJoin(const Rect& rhs) const;
+  Rect& join(const Rect& rhs)
+  {
+    return *this = makeJoin(rhs);
+  }
+
   Rect makeTransform(const Matrix& matrix, ECoordinateType type) const;
   static Rect makeFromPoints(const std::vector<Point>& points);
+  static Rect makeFromPoints(const std::vector<BezierPoint>& points, bool isClosed);
+  static Rect makeFromPoints(const BezierPoint p1, const BezierPoint p2);
 
   Scalar left() const
   {

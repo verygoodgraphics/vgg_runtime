@@ -1,6 +1,7 @@
 add_library(vgg_domain STATIC
   Exec/VggExec.cpp
   Layout/AutoLayout.cpp
+  Layout/BezierPoint.cpp
   Layout/ExpandSymbol.cpp
   Layout/Helper.cpp
   Layout/Layout.cpp
@@ -32,6 +33,7 @@ target_include_directories(vgg_domain PRIVATE
   ${CMAKE_SOURCE_DIR}/include/Domain
   ${CMAKE_SOURCE_DIR}/include/Domain/Layout
   ${CMAKE_SOURCE_DIR}/include/Domain/Model
+  ${VGG_CONTRIB_BEZIER_INCLUDE}
   ${VGG_CONTRIB_BOOST_INCLUDE}
   ${VGG_CONTRIB_GLM_INCLUDE}
 )

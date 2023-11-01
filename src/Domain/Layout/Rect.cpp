@@ -15,10 +15,13 @@
  */
 #include "Rect.hpp"
 
+#include "BezierPoint.hpp"
 #include "Math.hpp"
 
 #include "Utility/Log.hpp"
 #include "Utility/VggFloat.hpp"
+
+#include <bezier.h>
 
 #include <algorithm>
 
@@ -35,6 +38,18 @@ Point Point::makeTransform(const Matrix& matrix) const
   return { a * x + c * y + tx, b * x + d * y + ty };
 }
 
+Point Point::makeScale(const Rect& oldContainerFrame, const Rect& newContainerFrame) const
+{
+  const auto newOrigin = newContainerFrame.origin;
+  const auto [newW, newH] = newContainerFrame.size;
+  const auto xRatio =
+    oldContainerFrame.width() == 0 ? 0 : (x - oldContainerFrame.left()) / oldContainerFrame.width();
+  const auto yRatio = oldContainerFrame.height() == 0
+                        ? 0
+                        : (y - oldContainerFrame.top()) / oldContainerFrame.height();
+  return { newOrigin.x + xRatio * newW, newOrigin.y + yRatio * newH };
+}
+
 bool Size::operator==(const Size& rhs) const noexcept
 {
   return nearlyEqual(width, rhs.width) && nearlyEqual(height, rhs.height);
@@ -46,7 +61,7 @@ bool Matrix::operator==(const Matrix& rhs) const noexcept
          nearlyEqual(d, rhs.d) && nearlyEqual(tx, rhs.tx) && nearlyEqual(ty, rhs.ty);
 }
 
-Rect Rect::makeIntersect(const Rect& rhs) const
+Rect Rect::makeJoin(const Rect& rhs) const
 {
   auto minLeft = std::min(left(), rhs.left());
   auto minTop = std::min(top(), rhs.top());
@@ -104,4 +119,82 @@ Rect Rect::makeFromPoints(const std::vector<Point>& points)
   }
 
   return { { left, top }, { right - left, bottom - top } };
+}
+
+Rect Rect::makeFromPoints(const std::vector<BezierPoint>& points, bool isClosed)
+{
+  ASSERT(points.size() > 1);
+
+  if (points.empty())
+  {
+    return {};
+  }
+
+  Rect result{ points[0].point, {} };
+
+  if (points.size() == 1)
+  {
+    return result;
+  }
+
+  for (auto it = points.cbegin(); it + 1 != points.cend(); ++it)
+  {
+    auto partRect = makeFromPoints(*it, *(it + 1));
+    result.join(partRect);
+  }
+
+  // last point
+  if (isClosed)
+  {
+    auto partRect = makeFromPoints(points.back(), points.front());
+    result.join(partRect);
+  }
+
+  return result;
+}
+
+Rect Rect::makeFromPoints(const BezierPoint p1, const BezierPoint p2)
+{
+  std::vector<bezier::Point> libPoints;
+  libPoints.emplace_back(p1.point.x, p1.point.y);
+  if (p1.from.has_value())
+  {
+    libPoints.emplace_back(p1.from->x, p1.from->y);
+  }
+  if (p2.to.has_value())
+  {
+    libPoints.emplace_back(p2.to->x, p2.to->y);
+  }
+  libPoints.emplace_back(p2.point.x, p2.point.y);
+  switch (libPoints.size())
+  {
+    case 2:
+    {
+      return makeFromPoints({ p1.point, p2.point });
+    }
+    break;
+
+    case 3:
+    {
+      bezier::Bezier<2> curve{ libPoints };
+      auto r = curve.aabb();
+      return { { TO_VGG_LAYOUT_SCALAR(r.minX()), TO_VGG_LAYOUT_SCALAR(r.minY()) },
+               { TO_VGG_LAYOUT_SCALAR(r.width()), TO_VGG_LAYOUT_SCALAR(r.height()) } };
+    }
+    break;
+
+    case 4:
+    {
+      bezier::Bezier<3> curve{ libPoints };
+      auto r = curve.aabb();
+      return { { TO_VGG_LAYOUT_SCALAR(r.minX()), TO_VGG_LAYOUT_SCALAR(r.minY()) },
+               { TO_VGG_LAYOUT_SCALAR(r.width()), TO_VGG_LAYOUT_SCALAR(r.height()) } };
+    }
+    break;
+
+    default:
+      break;
+  }
+
+  return {};
 }

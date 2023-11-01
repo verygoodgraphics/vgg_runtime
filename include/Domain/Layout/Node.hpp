@@ -178,16 +178,6 @@ private:
                                       std::shared_ptr<LayoutNode> ancestorNode = nullptr);
 
   void resizeChildNodes(const Layout::Size& oldContainerSize, const Layout::Size& newContainerSize);
-  void resizeContour(float xScaleFactor,
-                     float yScaleFactor,
-                     const Layout::Size& oldContainerSize,
-                     const Layout::Size& newContainerSize);
-  void resizePoint(nlohmann::json& json,
-                   const char* key,
-                   float xScaleFactor,
-                   float yScaleFactor,
-                   const Layout::Size& oldContainerSize,
-                   const Layout::Size& newContainerSize);
 
   Layout::Point origin() const;
   Layout::Size size() const;
@@ -208,8 +198,8 @@ private:
                            const Layout::Size& newContainerSize,
                            const Layout::Point* parentOrigin);
   Layout::Rect resizePath(const Layout::Size& oldContainerSize,
-                               const Layout::Size& newContainerSize,
-                               const Layout::Point* parentOrigin);
+                          const Layout::Size& newContainerSize,
+                          const Layout::Point* parentOrigin);
   std::pair<Layout::Scalar, Layout::Scalar> resizeH(
     const Layout::Size& oldContainerSize,
     const Layout::Size& newContainerSize,
@@ -234,7 +224,7 @@ private:
 
   void updatePathNodeModel(const Layout::Rect& newFrame,
                            const Layout::Matrix& matrix,
-                           const std::vector<Layout::Point>& newPoints);
+                           const std::vector<Layout::BezierPoint>& newPoints);
 };
 
 } // namespace VGG

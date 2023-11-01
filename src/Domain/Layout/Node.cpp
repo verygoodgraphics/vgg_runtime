@@ -1013,9 +1013,12 @@ Layout::Rect LayoutNode::resizePath(const Layout::Size& oldContainerSize,
   std::vector<Layout::Point> newLayoutPoints;
   for (const auto& oldLayoutPoint : oldLayoutPoints)
   {
-    // todo, width = 0; height = 0
-    auto xRatio = (oldLayoutPoint.x - oldLayoutFrame.left()) / oldLayoutFrame.width();
-    auto yRatio = (oldLayoutPoint.y - oldLayoutFrame.top()) / oldLayoutFrame.height();
+    auto xRatio = oldLayoutFrame.width() == 0
+                    ? 0
+                    : (oldLayoutPoint.x - oldLayoutFrame.left()) / oldLayoutFrame.width();
+    auto yRatio = oldLayoutFrame.height() == 0
+                    ? 0
+                    : (oldLayoutPoint.y - oldLayoutFrame.top()) / oldLayoutFrame.height();
     Layout::Point newLayoutPoint{ x + xRatio * w, y + yRatio * h };
     newLayoutPoints.push_back(newLayoutPoint);
     DEBUG("resizePath: new layout point, %lu: %f, %f",

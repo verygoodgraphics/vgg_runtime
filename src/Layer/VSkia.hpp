@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #pragma once
+#include "Path.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Scene.hpp"
@@ -167,62 +168,6 @@ inline SkPathOp toSkPathOp(VGG::EBoolOp blop)
   SWITCH_MAP_ITEM_END(SkPathOp::kUnion_SkPathOp)
 }
 
-constexpr float EPS = std::numeric_limits<float>::epsilon();
-
-inline double calcRadius(double r0,
-                         const glm::vec2& p0,
-                         const glm::vec2& p1,
-                         const glm::vec2& p2,
-                         glm::vec2* left,
-                         glm::vec2* right)
-{
-  glm::vec2 a = p0 - p1;
-  glm::vec2 b = p2 - p1;
-  double alen = glm::distance(p0, p1);
-  double blen = glm::distance(p2, p1);
-  if (std::fabs(alen) < EPS || std::fabs(blen) < EPS)
-  {
-    return 0.;
-  }
-  ASSERT(alen > 0 && blen > 0);
-  double cosTheta = glm::dot(a, b) / alen / blen;
-  if (cosTheta + 1 < EPS) // cosTheta == -1
-  {
-    if (left)
-    {
-      left->x = p1.x;
-      left->y = p1.y;
-    }
-    if (right)
-    {
-      right->x = p1.x;
-      right->y = p1.y;
-    }
-    return r0;
-  }
-  else if (1 - cosTheta < EPS) // cosTheta == 1
-  {
-    return 0.;
-  }
-  double tanHalfTheta = std::sqrt((1 - cosTheta) / (1 + cosTheta));
-  double radius = r0;
-  radius = std::min(radius, 0.5 * alen * tanHalfTheta);
-  radius = std::min(radius, 0.5 * blen * tanHalfTheta);
-  if (left)
-  {
-    ASSERT(tanHalfTheta > 0);
-    float len = radius / tanHalfTheta;
-    *left = p1 + float(len / alen) * a;
-  }
-  if (right)
-  {
-    ASSERT(tanHalfTheta > 0);
-    double len = radius / tanHalfTheta;
-    *right = p1 + (float(len / blen) * b);
-  }
-  return radius;
-}
-
 inline SkMatrix upperMatrix22(const SkMatrix& matrix)
 {
   SkMatrix m = matrix;
@@ -231,103 +176,9 @@ inline SkMatrix upperMatrix22(const SkMatrix& matrix)
   return m;
 }
 
-inline SkPath makePath(const std::vector<PointAttr>& points, bool isClosed)
-{
-  auto peek1 = [](const PointAttr* pp, const PointAttr& cp, SkPath& path) -> int
-  {
-    const auto prevHasFrom = pp->from.has_value();
-    const auto curHasTo = cp.to.has_value();
-    if (prevHasFrom && curHasTo)
-      path.cubicTo(pp->from->x, pp->from->y, cp.to->x, cp.to->y, cp.point.x, cp.point.y);
-    else if (prevHasFrom && !curHasTo)
-      path.quadTo(pp->from->x, pp->from->y, cp.point.x, cp.point.y);
-    else if (!prevHasFrom && curHasTo)
-      path.quadTo(cp.to->x, cp.to->y, cp.point.x, cp.point.y);
-    else if (!prevHasFrom && !curHasTo)
-      path.lineTo(cp.point.x, cp.point.y);
-    return 1;
-  };
-
-  auto peek2 =
-    [&peek1](const PointAttr* pp, PointAttr& cp, const PointAttr& np, SkPath& path) -> int
-  {
-    const auto prevHasFrom = pp->from.has_value();
-    const auto curHasTo = cp.to.has_value();
-    const auto nextHasFrom = np.from.has_value();
-    const auto nextHasTo = np.to.has_value();
-    const auto curHasFrom = cp.from.has_value();
-    int c = 0;
-    if (!prevHasFrom && !curHasTo && !curHasFrom && !nextHasTo)
-    {
-      // two straight lines
-      double r = calcRadius(cp.radius, pp->point, cp.point, np.point, 0, 0);
-      path.arcTo(cp.point.x, cp.point.y, np.point.x, np.point.y, r);
-      return 1;
-    }
-    else
-    {
-      // cp could be modified
-      WARN("Rounded point by two curve is not implemented");
-      c += peek1(pp, cp, path);
-      c += peek1(pp, np, path);
-    }
-    return c;
-  };
-  if (points.size() < 2)
-  {
-    WARN("Too few path points.");
-    return {};
-  }
-
-  SkPath path;
-  size_t prev = 0;
-  size_t cur = 1;
-  size_t next = cur + 1;
-
-  int segments = isClosed ? points.size() : points.size() - 1;
-  PointAttr buffer[2] = { points[prev], points[cur] };
-
-  int cp = 1;
-  int pp = 1 - cp;
-
-  if (!isClosed || buffer[pp].radius <= 0)
-  {
-    path.moveTo(buffer[pp].point.x, buffer[pp].point.y);
-  }
-  else // handle the special case that a closed path begin with a rounded point
-  {
-    // the start point should be calculated first as the rounded curve's end point
-    // TODO::update buffer[pp]
-    path.moveTo(buffer[pp].point.x, buffer[pp].point.y);
-  }
-
-  while (segments > 0)
-  {
-    int consumed = 0;
-    if (buffer[cp].radius <= 0)
-      consumed = peek1(&buffer[pp], buffer[cp], path);
-    else
-      consumed = peek2(&buffer[pp], buffer[cp], points[next], path);
-    segments -= consumed;
-    prev = cur;
-    cur = next;
-    next = (next + consumed) % points.size();
-
-    // swap buffer
-    pp = cp;
-    cp = 1 - cp;
-    buffer[cp] = points[cur];
-  }
-  if (isClosed)
-  {
-    path.close();
-  }
-  return path;
-};
-
 inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
 {
-  return makePath(points, isClosed);
+  return layer::makePath(points, isClosed, 50);
   constexpr float W = 1.0;
   constexpr float H = 1.0;
   auto& pts = points;
@@ -355,12 +206,12 @@ inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
   if (currP->radius > 0 && currP->mode() == PM::PM_Straight)
   {
     glm::vec2 start = currP->point * s;
-    calcRadius(currP->radius,
-               prevP->point * s,
-               currP->point * s,
-               nextP->point * s,
-               nullptr,
-               &start);
+    layer::calcRadius(currP->radius,
+                      prevP->point * s,
+                      currP->point * s,
+                      nextP->point * s,
+                      nullptr,
+                      &start);
     skPath.moveTo(start.x, start.y);
   }
   else
@@ -378,7 +229,8 @@ inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
         // next point is a rounded point if current point has radius property
         auto* next2P = (nextP == endP) ? startP : (nextP + 1);
         auto next2Pp = next2P->to.has_value() ? next2P->to.value() : next2P->point;
-        double r = calcRadius(nextP->radius, currP->point * s, nextP->point * s, next2Pp * s, 0, 0);
+        double r =
+          layer::calcRadius(nextP->radius, currP->point * s, nextP->point * s, next2Pp * s, 0, 0);
         skPath.arcTo(W * nextP->point.x, H * nextP->point.y, W * next2Pp.x, H * next2Pp.y, r);
       }
       else
@@ -467,12 +319,12 @@ inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
         if (!currP->from.has_value())
         {
           glm::vec2 start;
-          double r = calcRadius(nextP->radius,
-                                currP->point * s,
-                                nextP->point * s,
-                                next2P->point * s,
-                                &start,
-                                nullptr);
+          double r = layer::calcRadius(nextP->radius,
+                                       currP->point * s,
+                                       nextP->point * s,
+                                       next2P->point * s,
+                                       &start,
+                                       nullptr);
           skPath.lineTo(start.x, start.y);
           skPath.arcTo(W * nextP->point.x,
                        H * nextP->point.y,
@@ -487,8 +339,12 @@ inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
           // glm::vec2 p =
           glm::vec2 p = (currP->point + RADIUS_COEFF * (currPfrom - currP->point)) * s;
           glm::vec2 start;
-          double r =
-            calcRadius(nextP->radius, p, nextP->point * s, next2P->point * s, &start, nullptr);
+          double r = layer::calcRadius(nextP->radius,
+                                       p,
+                                       nextP->point * s,
+                                       next2P->point * s,
+                                       &start,
+                                       nullptr);
           skPath.quadTo(p.x, p.y, start.x, start.y);
           skPath.arcTo(W * nextP->point.x,
                        H * nextP->point.y,

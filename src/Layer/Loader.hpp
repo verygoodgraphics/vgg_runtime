@@ -395,6 +395,8 @@ class NlohmannBuilder
       },
       [this, &j](PaintNode* p)
       {
+        const auto radius = get_stack_optional<std::array<float, 4>>(j, "radius");
+        p->style().frameRadius = radius;
         const auto& chidlObject = get_or_default(j, "childObjects");
         for (const auto& e : chidlObject)
         {

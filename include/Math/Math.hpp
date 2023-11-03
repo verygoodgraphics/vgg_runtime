@@ -21,7 +21,6 @@
 #include <vector>
 #include <cassert>
 
-
 #define FZERO 1e-10
 #define FTOLER 1e-2
 
@@ -31,6 +30,13 @@
 
 namespace VGG
 {
+
+namespace math::number
+{
+// NOLINTBEGIN
+constexpr double Pi = 3.141592653589793;
+// NOLINTEND
+} // namespace math::number
 
 struct Vec2
 {

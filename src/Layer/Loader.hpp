@@ -133,7 +133,9 @@ class NlohmannBuilder
     const auto [bound, transform] = fromTransform(j);
     obj->setBound(bound);
     obj->setLocalTransform(transform);
-    obj->setStyle(j.value("style", Style()));
+    auto style = j.value("style", Style());
+    obj->setStyle(style);
+    obj->style().cornerSmooth = get_opt<float>(j, "cornerSmoothing").value_or(0.f);
     obj->setContextSettings(j.value("contextSettings", ContextSetting()));
     obj->setMaskBy(std::move(j.value("outlineMaskBy", std::vector<std::string>{})));
     obj->setAlphaMaskBy(std::move(j.value("alphaMaskBy", std::vector<AlphaMask>{})));
@@ -152,7 +154,8 @@ class NlohmannBuilder
     return obj;
   }
 
-  inline std::shared_ptr<PaintNode> fromContour(const nlohmann::json& j)
+  inline std::shared_ptr<PaintNode> fromContour(const nlohmann::json& j,
+                                                const nlohmann::json& parent)
   {
     Contour contour;
     contour.closed = j.value("closed", false);
@@ -170,7 +173,9 @@ class NlohmannBuilder
     auto p = std::make_shared<PaintNode>("contour", VGG_CONTOUR, "");
     p->setOverflow(OF_Visible);
     p->setContourOption(ContourOption{ ECoutourType::MCT_FrameOnly, false });
-    p->setContourData(std::make_shared<Contour>(contour));
+    auto ptr = std::make_shared<Contour>(contour);
+    ptr->cornerSmooth = get_opt<float>(parent, "cornerSmoothing").value_or(0.f);
+    p->setContourData(std::move(ptr));
     return p;
   }
 
@@ -269,7 +274,7 @@ class NlohmannBuilder
           const auto klass = geo.value("class", "");
           if (klass == "contour")
           {
-            p->addSubShape(fromContour(geo), blop);
+            p->addSubShape(fromContour(geo, j), blop);
           }
           else if (klass == "path")
           {

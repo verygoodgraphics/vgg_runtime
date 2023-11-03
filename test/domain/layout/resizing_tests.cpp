@@ -200,6 +200,27 @@ TEST_F(VggResizingTestSuite, FigGroupWithRotatedChild)
   EXPECT_TRUE(grandsonFrame(0, 1) == expectedFrames[2]);
 }
 
+TEST_F(VggResizingTestSuite, FigGroupWithRotatedScaleChild)
+{
+  // Given
+  setup("testDataDir/resizing/fig_group_with_rotated_scale_child/");
+
+  // When
+  m_sut->layout(Layout::Size{ 800, 600 });
+
+  // Then
+  std::vector<Layout::Rect> expectedFrames{
+    { { 89, 45 }, { 639.9019165039063, 531.8336791992188 } },
+    { { 0, 0 }, { 100, 40 } },
+    { { 401.10247802734375, 350.21063232421875 }, { 112.78667449951172, 237.092041015625 } }
+  };
+  EXPECT_TRUE(childFrame(0) == expectedFrames[0]); // Group's frame is different from figma because
+                                                   // the rotation angle of the child is different.
+  EXPECT_TRUE(grandsonFrame(0, 0) == expectedFrames[1]);
+  EXPECT_TRUE(grandsonFrame(0, 1) == expectedFrames[2]); // Child's frame is different from figma
+                                                         // because the rotation angle is different
+}
+
 TEST_F(VggResizingTestSuite, GetAffineTransform)
 {
   // Given

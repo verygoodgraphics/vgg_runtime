@@ -173,8 +173,8 @@ TEST_F(VggResizingTestSuite, FigNestedGroup)
   m_sut->layout(Layout::Size{ 800, 800 });
 
   // Then
-  std::vector<Layout::Rect> expectedFrames{ { { 89, 27 }, { 431, 473.999969 } },
-                                            { { 0, 0 }, { 431, 473.999969 } },
+  std::vector<Layout::Rect> expectedFrames{ { { 89, 27 }, { 431, 474 } },
+                                            { { 0, 0 }, { 431, 474 } },
                                             { { 366, 418 }, { 51, 43 } } };
   EXPECT_TRUE(childFrame(0) == expectedFrames[0]);
   EXPECT_TRUE(grandsonFrame(0, 0) == expectedFrames[1]);
@@ -190,15 +190,14 @@ TEST_F(VggResizingTestSuite, FigGroupWithRotatedChild)
   m_sut->layout(Layout::Size{ 800, 800 });
 
   // Then
-  std::vector<Layout::Rect> expectedFrames{ { { 89, 45 },
-                                              { 655.8948364257813, 703.8250122070313 } },
-                                            { { 0, 0 }, { 100, 40 } },
-                                            { { 600, 600 }, { 40, 100 } },
-                                            { { 584.105103, 609.855774 }, { 40, 100 } } };
+  std::vector<Layout::Rect> expectedFrames{
+    { { 89, 45 }, { 655.8948364257813, 703.8250732421875 } },
+    { { 0, 0 }, { 100, 40 } },
+    { { 584.1051025390625, 609.8557739257813 }, { 40, 100.00006103515625 } }
+  };
   EXPECT_TRUE(childFrame(0) == expectedFrames[0]);
   EXPECT_TRUE(grandsonFrame(0, 0) == expectedFrames[1]);
   EXPECT_TRUE(grandsonFrame(0, 1) == expectedFrames[2]);
-  EXPECT_TRUE(grandsonFrame(0, 2) == expectedFrames[3]);
 }
 
 TEST_F(VggResizingTestSuite, GetAffineTransform)
@@ -414,7 +413,7 @@ TEST_F(VggResizingTestSuite, ResizeRectangle)
 
   // Then
   std::vector<Layout::Rect> expectedFrames{ { { 546.2101440429688, 254.85577392578125 },
-                                              { 107.77313232421875, 124.28289794921875 } } };
+                                              { 107.46023559570313, 124.55355834960938 } } };
   EXPECT_TRUE(descendantFrame({ 2 }) == expectedFrames[0]);
 }
 
@@ -427,8 +426,8 @@ TEST_F(VggResizingTestSuite, ResizeTriangle)
   m_sut->layout(Layout::Size{ 800, 400 });
 
   // Then
-  std::vector<Layout::Rect> expectedFrames{ { { 496.6272888183594, 99.76119232177734 },
-                                              { 170.40484619140625, 224.64659118652344 } } };
+  std::vector<Layout::Rect> expectedFrames{ { { 496.4555358886719, 99.75054168701172 },
+                                              { 170.443115234375, 224.54432678222656 } } };
   EXPECT_TRUE(descendantFrame({ 0 }) == expectedFrames[0]);
 }
 

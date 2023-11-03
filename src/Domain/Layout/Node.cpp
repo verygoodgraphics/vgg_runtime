@@ -263,11 +263,17 @@ void LayoutNode::updateModel(const Layout::Rect& toFrame)
   }
   boundsJson[K_WIDTH] = newFrame.size.width;
   boundsJson[K_HEIGHT] = newFrame.size.height;
+  DEBUG("LayoutNode::updateModel: bounds, -> %s, %s",
+        objectJson[K_BOUNDS].dump().c_str(),
+        boundsJson.dump().c_str());
   viewModel->replaceAt(path / K_BOUNDS, boundsJson);
 
   auto matrixJson = objectJson[K_MATRIX];
   matrixJson[4] = matrix.tx;
   matrixJson[5] = matrix.ty;
+  DEBUG("LayoutNode::updateModel: matrix, -> %s, %s",
+        objectJson[K_MATRIX].dump().c_str(),
+        matrixJson.dump().c_str());
   viewModel->replaceAt(path / K_MATRIX, matrixJson);
 
   // translate if needed
@@ -278,6 +284,9 @@ void LayoutNode::updateModel(const Layout::Rect& toFrame)
     matrix.ty += newFrame.origin.y - originAfterScale.y;
     matrixJson[4] = matrix.tx;
     matrixJson[5] = matrix.ty;
+    DEBUG("LayoutNode::updateModel: matrix, -> %s, %s",
+          objectJson[K_MATRIX].dump().c_str(),
+          matrixJson.dump().c_str());
     viewModel->replaceAt(path / K_MATRIX, matrixJson);
   }
 }
@@ -841,9 +850,17 @@ Layout::Rect LayoutNode::resizePath(const Layout::Size& oldContainerSize,
   // multiply matrix, to layout point
   const auto oldModelMatrix = modelMatrix();
   std::vector<Layout::BezierPoint> oldLayoutPoints;
-  for (const auto& point : oldModelPoints)
+  for (auto tmpPoint : oldModelPoints)
   {
-    oldLayoutPoints.push_back(point.makeTransform(oldModelMatrix).makeFromModelFormat());
+    tmpPoint = tmpPoint.makeTransform(oldModelMatrix).makeFromModelFormat();
+    if (parentOrigin)
+    {
+      // todo, use parent's matrix
+
+      // Make the point's coordinates relative to the group's parent
+      tmpPoint = tmpPoint.makeTranslate(parentOrigin->x, parentOrigin->y);
+    }
+    oldLayoutPoints.push_back(tmpPoint);
     DEBUG("resizePath: old layout point: %f, %f",
           oldLayoutPoints.back().point.x,
           oldLayoutPoints.back().point.y);
@@ -851,8 +868,12 @@ Layout::Rect LayoutNode::resizePath(const Layout::Size& oldContainerSize,
 
   // resize
   auto oldLayoutFrame = Layout::Rect::makeFromPoints(oldLayoutPoints, isClosed);
-  auto [x, w] = resizeH(oldContainerSize, newContainerSize, oldLayoutFrame, parentOrigin);
-  auto [y, h] = resizeV(oldContainerSize, newContainerSize, oldLayoutFrame, parentOrigin);
+  auto [x, w] =
+    resizeH(oldContainerSize,
+            newContainerSize,
+            oldLayoutFrame,
+            nullptr); // Pass nullptr because oldLayoutPoints has been translated by parentOrigin
+  auto [y, h] = resizeV(oldContainerSize, newContainerSize, oldLayoutFrame, nullptr);
   Layout::Rect newLayoutFrame{ { x, y }, { w, h } };
   DEBUG("resizePath: old layout frame: %f, %f, %f, %f",
         oldLayoutFrame.left(),
@@ -925,12 +946,12 @@ Layout::Rect LayoutNode::resizePath(const Layout::Size& oldContainerSize,
   DEBUG("resizePath: top left point of layout rectangle, %f, %f", layoutTopLeft.x, layoutTopLeft.y);
   const auto newModelTopLeft = layoutTopLeft.makeModelPoint();
 
-  Layout::Rect newFrame{ newModelTopLeft, reverseRotatedFrame.size };
+  Layout::Rect newModelFrame{ newModelTopLeft, reverseRotatedFrame.size };
   auto newMatrix = Layout::Matrix::make(newModelTopLeft.x, newModelTopLeft.y, modelRadian);
 
-  updatePathNodeModel(newFrame.makeModelRect(), newMatrix, newModelPoints);
+  updatePathNodeModel(newModelFrame.makeModelRect(), newMatrix, newModelPoints);
 
-  return newFrame;
+  return newModelFrame.makeFromModelRect();
 }
 
 void LayoutNode::updatePathNodeModel(const Layout::Rect& newFrame,
@@ -956,6 +977,9 @@ void LayoutNode::updatePathNodeModel(const Layout::Rect& newFrame,
   auto boundsJson = objectJson[K_BOUNDS];
   boundsJson[K_WIDTH] = newFrame.width();
   boundsJson[K_HEIGHT] = newFrame.height();
+  DEBUG("LayoutNode::updatePathNodeModel: bounds, -> %s, %s",
+        objectJson[K_BOUNDS].dump().c_str(),
+        boundsJson.dump().c_str());
   viewModel->replaceAt(path / K_BOUNDS, boundsJson);
 
   // matrix
@@ -966,6 +990,9 @@ void LayoutNode::updatePathNodeModel(const Layout::Rect& newFrame,
   matrixJson[3] = matrix.d;
   matrixJson[4] = matrix.tx;
   matrixJson[5] = matrix.ty;
+  DEBUG("LayoutNode::updatePathNodeModel: matrix, -> %s, %s",
+        objectJson[K_MATRIX].dump().c_str(),
+        matrixJson.dump().c_str());
   viewModel->replaceAt(path / K_MATRIX, matrixJson);
 
   // points

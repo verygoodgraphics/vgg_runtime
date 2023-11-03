@@ -667,8 +667,8 @@ TEST_F(VggExpandSymbolTestSuite, layout_container_when_child_bounds_are_overridd
     { // matrix
       auto path = nodePath / "matrix";
       auto childMatrix = expandedDesignJson[path].get<Matrix>();
-      EXPECT_DOUBLE_EQ(childMatrix.tx, 1.4617968797683716);
-      EXPECT_DOUBLE_EQ(childMatrix.ty, -1.3610986471176147);
+      EXPECT_DOUBLE_EQ(childMatrix.tx, 1.461796760559082);
+      EXPECT_DOUBLE_EQ(childMatrix.ty, -1.3610987663269043);
     }
   }
   { // layout

@@ -25,16 +25,16 @@
       "bounds": {
         "class": "rect",
         "constrainProportions": false,
-        "width": 667.0,
-        "height": 627.0,
+        "width": 600.0,
+        "height": 600.0,
         "x": 0,
         "y": 0
       },
       "frame": {
         "class": "rect",
         "constrainProportions": false,
-        "width": 667.0,
-        "height": 627.0,
+        "width": 600.0,
+        "height": 600.0,
         "x": 0.0,
         "y": 0.0
       },
@@ -101,7 +101,7 @@
             "class": "rect",
             "constrainProportions": false,
             "width": 417.0,
-            "height": 301.0,
+            "height": 274.0,
             "x": 0,
             "y": 0
           },
@@ -109,7 +109,7 @@
             "class": "rect",
             "constrainProportions": false,
             "width": 417.0,
-            "height": 301.0,
+            "height": 274.0,
             "x": 89.0,
             "y": -27.0
           },
@@ -155,16 +155,16 @@
               "bounds": {
                 "class": "rect",
                 "constrainProportions": false,
-                "width": 298.0,
-                "height": 301.0,
+                "width": 231.0,
+                "height": 274.0,
                 "x": 0,
                 "y": 0
               },
               "frame": {
                 "class": "rect",
                 "constrainProportions": false,
-                "width": 298.0,
-                "height": 301.0,
+                "width": 231.0,
+                "height": 274.0,
                 "x": 0.0,
                 "y": 0.0
               },
@@ -210,16 +210,16 @@
                   "bounds": {
                     "class": "rect",
                     "constrainProportions": false,
-                    "width": 169.0,
-                    "height": 283.0,
+                    "width": 102.00001525878906,
+                    "height": 255.99998474121094,
                     "x": 0,
                     "y": 0
                   },
                   "frame": {
                     "class": "rect",
                     "constrainProportions": false,
-                    "width": 169.0,
-                    "height": 283.0,
+                    "width": 102.00001525878906,
+                    "height": 255.99998474121094,
                     "x": 0.0,
                     "y": -18.0
                   },
@@ -286,9 +286,9 @@
                             "fillType": 0,
                             "color": {
                               "class": "color",
-                              "red": 0.9125000238418579,
-                              "green": 0.7071874737739563,
-                              "blue": 0.7071874737739563,
+                              "red": 0.9730142951011658,
+                              "green": 0.05706006661057472,
+                              "blue": 0.05706006661057472,
                               "alpha": 1.0
                             },
                             "class": "fill",
@@ -383,8 +383,8 @@
                         0.0,
                         0.0,
                         1.0,
-                        155.0500946044922,
-                        -240.27699279785156
+                        88.05010986328125,
+                        -213.2769775390625
                       ],
                       "bounds": {
                         "class": "rect",
@@ -399,8 +399,8 @@
                         "constrainProportions": false,
                         "width": 13.94990348815918,
                         "height": 42.72300338745117,
-                        "x": 155.0500946044922,
-                        "y": -240.27699279785156
+                        "x": 88.05010986328125,
+                        "y": -213.2769775390625
                       },
                       "style": {
                         "class": "style",
@@ -410,9 +410,9 @@
                             "fillType": 0,
                             "color": {
                               "class": "color",
-                              "red": 0.9125000238418579,
-                              "green": 0.7071874737739563,
-                              "blue": 0.7071874737739563,
+                              "red": 0.9752278923988342,
+                              "green": 0.5252446532249451,
+                              "blue": 0.19939473271369934,
                               "alpha": 1.0
                             },
                             "class": "fill",
@@ -510,7 +510,7 @@
                     0.0,
                     0.0,
                     1.0,
-                    257.0,
+                    190.0,
                     0.0
                   ],
                   "bounds": {
@@ -526,7 +526,7 @@
                     "constrainProportions": false,
                     "width": 41.0,
                     "height": 69.0,
-                    "x": 257.0,
+                    "x": 190.0,
                     "y": 0.0
                   },
                   "style": {
@@ -537,9 +537,9 @@
                         "fillType": 0,
                         "color": {
                           "class": "color",
-                          "red": 0.8509804010391235,
-                          "green": 0.8509804010391235,
-                          "blue": 0.8509804010391235,
+                          "red": 0.9525228142738342,
+                          "green": 0.9130421280860901,
+                          "blue": 0.5577157139778137,
                           "alpha": 1.0
                         },
                         "class": "fill",
@@ -638,7 +638,7 @@
                 0.0,
                 1.0,
                 366.0,
-                -245.0
+                -218.0
               ],
               "bounds": {
                 "class": "rect",
@@ -654,7 +654,7 @@
                 "width": 51.0,
                 "height": 43.0,
                 "x": 366.0,
-                "y": -245.0
+                "y": -218.0
               },
               "style": {
                 "class": "style",
@@ -664,9 +664,9 @@
                     "fillType": 0,
                     "color": {
                       "class": "color",
-                      "red": 0.8509804010391235,
-                      "green": 0.8509804010391235,
-                      "blue": 0.8509804010391235,
+                      "red": 0.4982331097126007,
+                      "green": 0.9515299201011658,
+                      "blue": 0.4244405925273895,
                       "alpha": 1.0
                     },
                     "class": "fill",

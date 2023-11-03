@@ -25,16 +25,16 @@
       "bounds": {
         "class": "rect",
         "constrainProportions": false,
-        "width": 393.0,
-        "height": 419.0,
+        "width": 400.0,
+        "height": 400.0,
         "x": 0,
         "y": 0
       },
       "frame": {
         "class": "rect",
         "constrainProportions": false,
-        "width": 393.0,
-        "height": 419.0,
+        "width": 400.0,
+        "height": 400.0,
         "x": 0.0,
         "y": 0.0
       },
@@ -100,16 +100,16 @@
           "bounds": {
             "class": "rect",
             "constrainProportions": false,
-            "width": 248.8948516845703,
-            "height": 322.82501220703125,
+            "width": 255.8948211669922,
+            "height": 303.8250427246094,
             "x": 0,
             "y": 0
           },
           "frame": {
             "class": "rect",
             "constrainProportions": false,
-            "width": 248.8948516845703,
-            "height": 322.82501220703125,
+            "width": 255.8948211669922,
+            "height": 303.8250427246094,
             "x": 89.0,
             "y": -45.0
           },
@@ -176,9 +176,9 @@
                     "fillType": 0,
                     "color": {
                       "class": "color",
-                      "red": 0.9125000238418579,
-                      "green": 0.7071874737739563,
-                      "blue": 0.7071874737739563,
+                      "red": 0.856005847454071,
+                      "green": 0.20628292858600616,
+                      "blue": 0.20628292858600616,
                       "alpha": 1.0
                     },
                     "class": "fill",
@@ -257,130 +257,6 @@
               "pathType": 0
             },
             {
-              "id": "1:5",
-              "name": "Rectangle 2",
-              "isLocked": false,
-              "visible": true,
-              "contextSettings": {
-                "class": "graphicsContextSettings",
-                "blendMode": 27,
-                "opacity": 1.0,
-                "isolateBlending": false,
-                "transparencyKnockoutGroup": 0
-              },
-              "matrix": [
-                1.0,
-                0.0,
-                0.0,
-                1.0,
-                193.0,
-                -219.0
-              ],
-              "bounds": {
-                "class": "rect",
-                "constrainProportions": false,
-                "width": 40.0,
-                "height": 100.0,
-                "x": 0,
-                "y": 0
-              },
-              "frame": {
-                "class": "rect",
-                "constrainProportions": false,
-                "width": 40.0,
-                "height": 100.0,
-                "x": 193.0,
-                "y": -219.0
-              },
-              "style": {
-                "class": "style",
-                "borders": [],
-                "fills": [
-                  {
-                    "fillType": 0,
-                    "color": {
-                      "class": "color",
-                      "red": 0.9125000238418579,
-                      "green": 0.7071874737739563,
-                      "blue": 0.7071874737739563,
-                      "alpha": 1.0
-                    },
-                    "class": "fill",
-                    "isEnabled": true,
-                    "contextSettings": {
-                      "class": "graphicsContextSettings",
-                      "blendMode": 0,
-                      "opacity": 1.0,
-                      "isolateBlending": false,
-                      "transparencyKnockoutGroup": 0
-                    }
-                  }
-                ],
-                "blurs": [],
-                "shadows": []
-              },
-              "alphaMaskBy": [],
-              "outlineMaskBy": [],
-              "maskType": 0,
-              "styleEffectMaskArea": 2,
-              "maskShowType": 2,
-              "overflow": 1,
-              "cornerSmoothing": 0.0,
-              "horizontalConstraint": 3,
-              "verticalConstraint": 3,
-              "resizesContent": 0,
-              "class": "path",
-              "shape": {
-                "class": "shape",
-                "subshapes": [
-                  {
-                    "class": "subshape",
-                    "subGeometry": {
-                      "class": "contour",
-                      "closed": true,
-                      "points": [
-                        {
-                          "class": "pointAttr",
-                          "radius": 0.0,
-                          "point": [
-                            0.0,
-                            0.0
-                          ]
-                        },
-                        {
-                          "class": "pointAttr",
-                          "radius": 0.0,
-                          "point": [
-                            40.0,
-                            0.0
-                          ]
-                        },
-                        {
-                          "class": "pointAttr",
-                          "radius": 0.0,
-                          "point": [
-                            40.0,
-                            -100.0
-                          ]
-                        },
-                        {
-                          "class": "pointAttr",
-                          "radius": 0.0,
-                          "point": [
-                            0.0,
-                            -100.0
-                          ]
-                        }
-                      ]
-                    },
-                    "booleanOperation": 4
-                  }
-                ],
-                "windingRule": 0
-              },
-              "pathType": 0
-            },
-            {
               "id": "201:2",
               "name": "Rotated Rectangle 3",
               "isLocked": false,
@@ -397,8 +273,8 @@
                 0.3420201241970062,
                 -0.3420201241970062,
                 0.9396926164627075,
-                177.10513305664062,
-                -228.8557586669922
+                184.1051025390625,
+                -209.85577392578125
               ],
               "bounds": {
                 "class": "rect",
@@ -413,8 +289,8 @@
                 "constrainProportions": false,
                 "width": 71.78971707820892,
                 "height": 107.650066614151,
-                "x": 177.10513305664062,
-                "y": -215.17495369911194
+                "x": 184.1051025390625,
+                "y": -196.174968957901
               },
               "style": {
                 "class": "style",
@@ -424,9 +300,9 @@
                     "fillType": 0,
                     "color": {
                       "class": "color",
-                      "red": 0.9125000238418579,
-                      "green": 0.7071874737739563,
-                      "blue": 0.7071874737739563,
+                      "red": 0.9899088740348816,
+                      "green": 0.6238616704940796,
+                      "blue": 0.07479096204042435,
                       "alpha": 1.0
                     },
                     "class": "fill",

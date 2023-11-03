@@ -375,6 +375,7 @@ struct Style
   std::vector<Fill> fills;
   std::vector<Shadow> shadows;
   std::optional<std::array<float, 4>> frameRadius;
+  float cornerSmooth;
 };
 
 struct TextLineAttr
@@ -451,6 +452,7 @@ struct PointAttr
 struct Contour : public std::vector<PointAttr>
 {
   bool closed = true;
+  float cornerSmooth{ 0.f };
   EBoolOp blop;
 };
 

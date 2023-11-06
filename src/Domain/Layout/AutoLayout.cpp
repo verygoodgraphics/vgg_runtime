@@ -838,11 +838,23 @@ void AutoLayout::updateSizeRule()
     auto newSize = sharedView->frame().size;
     if (newSize != m_frame.size)
     {
-      sharedRule->width.value.types = Rule::Length::ETypes::PX;
-      sharedRule->width.value.value = newSize.width;
+      if (sharedRule->width.value.types == Rule::Length::ETypes::PX)
+      {
+        sharedRule->width.value.value = newSize.width;
+      }
+      else
+      {
+        DEBUG("AutoLayout::updateSizeRule: width type is not PX, do not update");
+      }
 
-      sharedRule->height.value.types = Rule::Length::ETypes::PX;
-      sharedRule->height.value.value = newSize.height;
+      if (sharedRule->height.value.types == Rule::Length::ETypes::PX)
+      {
+        sharedRule->height.value.value = newSize.height;
+      }
+      else
+      {
+        DEBUG("AutoLayout::updateSizeRule: height type is not PX, do not update");
+      }
     }
   }
 }

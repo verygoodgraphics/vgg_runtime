@@ -91,9 +91,12 @@ TEST_F(VggResizingTestSuite, SketchVertical)
 
   // Then
   std::vector<Layout::Rect> expectedFrames{
-    { { 0, 40 }, { 40, 200 } },          { { 50, 90 }, { 40, 100 } },
-    { { 100, 20 }, { 40, 211.111115 } }, { { 150, 53.3333435 }, { 40, 266.666656 } },
-    { { 200, 20 }, { 40, 300 } },        { { 250, 20 }, { 40, 100 } },
+    { { 0, 40 }, { 40, 200 } },
+    { { 50, 90 }, { 40, 100 } },
+    { { 100, 20 }, { 40, 211.111115 } },
+    { { 150, 53.333332061767578 }, { 40, 266.66665649414063 } },
+    { { 200, 20 }, { 40, 300 } },
+    { { 250, 20 }, { 40, 100 } },
     { { 300, 220 }, { 40, 100 } }
   };
   EXPECT_TRUE(childFrame(0) == expectedFrames[0]);
@@ -173,8 +176,8 @@ TEST_F(VggResizingTestSuite, FigNestedGroup)
   m_sut->layout(Layout::Size{ 800, 800 });
 
   // Then
-  std::vector<Layout::Rect> expectedFrames{ { { 89, 27 }, { 431, 474 } },
-                                            { { 0, 0 }, { 431, 474 } },
+  std::vector<Layout::Rect> expectedFrames{ { { 89, 27 }, { 431, 473.99996948242188 } },
+                                            { { 0, 0 }, { 431, 473.99996948242188 } },
                                             { { 366, 418 }, { 51, 43 } } };
   EXPECT_TRUE(childFrame(0) == expectedFrames[0]);
   EXPECT_TRUE(grandsonFrame(0, 0) == expectedFrames[1]);
@@ -191,9 +194,9 @@ TEST_F(VggResizingTestSuite, FigGroupWithRotatedChild)
 
   // Then
   std::vector<Layout::Rect> expectedFrames{
-    { { 89, 45 }, { 655.8948364257813, 703.8250732421875 } },
+    { { 89, 45 }, { 655.89483642578125, 703.82501220703125 } },
     { { 0, 0 }, { 100, 40 } },
-    { { 584.1051025390625, 609.8557739257813 }, { 40, 100.00006103515625 } }
+    { { 584.10510215593126, 609.85577287313663 }, { 40, 100 } }
   };
   EXPECT_TRUE(childFrame(0) == expectedFrames[0]);
   EXPECT_TRUE(grandsonFrame(0, 0) == expectedFrames[1]);
@@ -210,9 +213,9 @@ TEST_F(VggResizingTestSuite, FigGroupWithRotatedScaleChild)
 
   // Then
   std::vector<Layout::Rect> expectedFrames{
-    { { 89, 45 }, { 639.9019165039063, 531.8336791992188 } },
+    { { 89, 45 }, { 639.90191650390625, 531.833740234375 } },
     { { 0, 0 }, { 100, 40 } },
-    { { 401.10247802734375, 350.21063232421875 }, { 112.78667449951172, 237.092041015625 } }
+    { { 401.10248921214236, 350.21069997189215 }, { 112.78665924072266, 237.09202575683594 } }
   };
   EXPECT_TRUE(childFrame(0) == expectedFrames[0]); // Group's frame is different from figma because
                                                    // the rotation angle of the child is different.
@@ -433,8 +436,8 @@ TEST_F(VggResizingTestSuite, ResizeRectangle)
   m_sut->layout(Layout::Size{ 800, 400 });
 
   // Then
-  std::vector<Layout::Rect> expectedFrames{ { { 546.2101440429688, 254.85577392578125 },
-                                              { 107.46023559570313, 124.55355834960938 } } };
+  std::vector<Layout::Rect> expectedFrames{ { { 546.21014404296875, 254.85577392578125 },
+                                              { 107.46025085449219, 124.55353546142578 } } };
   EXPECT_TRUE(descendantFrame({ 2 }) == expectedFrames[0]);
 }
 
@@ -447,8 +450,8 @@ TEST_F(VggResizingTestSuite, ResizeTriangle)
   m_sut->layout(Layout::Size{ 800, 400 });
 
   // Then
-  std::vector<Layout::Rect> expectedFrames{ { { 496.4555358886719, 99.75054168701172 },
-                                              { 170.443115234375, 224.54432678222656 } } };
+  std::vector<Layout::Rect> expectedFrames{ { { 496.45550537109375, 99.750534057617188 },
+                                              { 170.443115234375, 224.5443115234375 } } };
   EXPECT_TRUE(descendantFrame({ 0 }) == expectedFrames[0]);
 }
 
@@ -461,7 +464,7 @@ TEST_F(VggResizingTestSuite, ResizeEllipse)
   m_sut->layout(Layout::Size{ 800, 400 });
 
   // Then
-  std::vector<Layout::Rect> expectedFrames{ { { 576.744873046875, 133.9481658935547 },
-                                              { 238.4503173828125, 163.7313232421875 } } };
+  std::vector<Layout::Rect> expectedFrames{ { { 576.74481201171875, 133.94818115234375 },
+                                              { 238.45028686523438, 163.73127746582031 } } };
   EXPECT_TRUE(descendantFrame({ 0 }) == expectedFrames[0]);
 }

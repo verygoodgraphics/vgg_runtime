@@ -53,13 +53,13 @@ Matrix Matrix::make(Scalar tx, Scalar ty, Scalar radian)
 {
   auto t = glm::mat3{ 1 };
   t = glm::translate(t, { tx, ty });
-  t = glm::rotate(t, radian);
+  t = glm::rotate(t, static_cast<float>(radian));
   return make(t);
 }
 
 Matrix Matrix::makeRotate(Scalar radian)
 {
-  const auto t = glm::rotate(glm::mat3{ 1 }, radian);
+  const auto t = glm::rotate(glm::mat3{ 1 }, static_cast<float>(radian));
   return make(t);
 }
 

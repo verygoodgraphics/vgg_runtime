@@ -68,6 +68,7 @@ protected:
       node = node->children()[index];
     }
 
-    return node->frame();
+    auto frame = node->frame();
+    return frame;
   }
 };

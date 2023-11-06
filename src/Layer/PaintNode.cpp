@@ -347,7 +347,8 @@ SkPath PaintNode::makeContourImpl(ContourOption option, const glm::mat3* mat)
   SkPath path;
   if (_->contour)
   {
-    path = getSkiaPath(*_->contour, _->contour->closed, _->contour->cornerSmooth);
+    // path = getSkiaPath(*_->contour, _->contour->closed, _->contour->cornerSmooth);
+    path = layer::makePath(*_->contour);
     if (mat)
     {
       path.transform(toSkMatrix(*mat));

@@ -88,34 +88,18 @@ TEST_F(VggLayoutTestSuite, GridWrap)
   EXPECT_TRUE(child3Frame == expectChild3Frame);
 }
 
-TEST_F(VggLayoutTestSuite, ScaleSubtree)
+TEST_F(VggLayoutTestSuite, LayoutInstance)
 {
   // Given
-  std::shared_ptr<Daruma> daruma{ new Daruma(Helper::RawJsonDocumentBuilder,
-                                             Helper::RawJsonDocumentBuilder) };
-  std::string filePath = "testDataDir/layout/3_flex_with_symbol_instance/";
-  daruma->load(filePath);
-
-  StartRunning startRunning{ daruma };
-  auto sut = startRunning.layout();
-  Layout::Size windowSize{ 1400, 900 };
+  setupWithExpanding("testDataDir/layout/3_flex_with_symbol_instance/");
 
   // When
-  layout(*sut, windowSize);
 
   // Then
-  auto tree = sut->layoutTree();
-  auto currentPage = tree->children()[1];
-
-  auto container = currentPage->children()[0];
-
-  auto child0Frame = container->children()[0]->frame();
-  Layout::Rect expectChild0Frame{ { 33, 40 }, { 330, 400 } };
-  EXPECT_TRUE(child0Frame == expectChild0Frame);
-
-  auto child1Frame = container->children()[1]->frame();
-  Layout::Rect expectChild1Frame{ { 495, 40 }, { 660, 200 } };
-  EXPECT_TRUE(child1Frame == expectChild1Frame);
+  std::vector<Layout::Rect> expectedFrames{ { { 10, 10 }, { 100, 200 } },
+                                            { { 590, 10 }, { 200, 100 } } };
+  EXPECT_TRUE(descendantFrame({ 0, 0 }) == expectedFrames[0]);
+  EXPECT_TRUE(descendantFrame({ 0, 1 }) == expectedFrames[1]);
 }
 
 TEST_F(VggLayoutTestSuite, FrameOfNodeWhoseParentPositionInBoundsIsNotZero)

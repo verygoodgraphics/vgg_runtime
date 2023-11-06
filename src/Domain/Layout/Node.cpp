@@ -812,7 +812,7 @@ Layout::Rect LayoutNode::resizePath(const Layout::Size& oldContainerSize,
                                     const Layout::Size& newContainerSize,
                                     const Layout::Point* parentOrigin)
 {
-  DEBUG("resizePath: %s, %s", name().c_str(), id().c_str());
+  DEBUG("resizePath: begin, name = %s, id = %s", name().c_str(), id().c_str());
 
   const auto json = model();
   ASSERT(json);
@@ -942,14 +942,21 @@ Layout::Rect LayoutNode::resizePath(const Layout::Size& oldContainerSize,
   auto xOffset = newLayoutPoints[0].point.x - rotatedRelativeFirstPoint.x;
   auto yOffset = newLayoutPoints[0].point.y - rotatedRelativeFirstPoint.y;
 
-  Layout::Point layoutTopLeft{ xOffset, yOffset };
-  DEBUG("resizePath: top left point of layout rectangle, %f, %f", layoutTopLeft.x, layoutTopLeft.y);
+  const Layout::Point layoutTopLeft{ xOffset, yOffset };
   const auto newModelTopLeft = layoutTopLeft.makeModelPoint();
 
-  Layout::Rect newModelFrame{ newModelTopLeft, reverseRotatedFrame.size };
+  const Layout::Rect newModelFrame{ newModelTopLeft, reverseRotatedFrame.size };
   auto newMatrix = Layout::Matrix::make(newModelTopLeft.x, newModelTopLeft.y, modelRadian);
 
   updatePathNodeModel(newModelFrame.makeModelRect(), newMatrix, newModelPoints);
+
+  DEBUG("resizePath: end, name = %s, id = %s, new frame, %f, %f, %f, %f",
+        name().c_str(),
+        id().c_str(),
+        layoutTopLeft.x,
+        layoutTopLeft.y,
+        reverseRotatedFrame.width(),
+        reverseRotatedFrame.height());
 
   return newModelFrame.makeFromModelRect();
 }

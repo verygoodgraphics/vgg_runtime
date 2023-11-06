@@ -28,7 +28,7 @@ struct BezierPoint;
 struct Matrix;
 struct Rect;
 
-using Scalar = float;
+using Scalar = double;
 
 constexpr auto FLIP_Y_FACTOR = -1;
 #define TO_VGG_LAYOUT_SCALAR(x) static_cast<Layout::Scalar>(x)

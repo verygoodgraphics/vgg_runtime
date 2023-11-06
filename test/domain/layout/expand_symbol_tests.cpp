@@ -108,7 +108,7 @@ TEST_F(VggExpandSymbolTestSuite, scale)
   auto child_matrix = child[K_MATRIX].get<Matrix>();
 
   Rect expect_bounds{ 0, 0, 163, 100 };
-  Matrix expect_matrix{ 1, 0, 0, 1, 378.1600036621094, -208.66668701171875 };
+  Matrix expect_matrix{ 1, 0, 0, 1, 378.15999999999997, -208.66666666666663 };
 
   EXPECT_EQ(child_bounds, expect_bounds);
   EXPECT_EQ(child_matrix, expect_matrix);
@@ -118,7 +118,7 @@ TEST_F(VggExpandSymbolTestSuite, scale)
     "/frames/1/childObjects/0/childObjects/2/childObjects/0/shape/subshapes/0/subGeometry/points/2"
   };
   auto point = result_json[path2][K_POINT].get<Point>();
-  Point expect_point{ 704.1599731445313, -129.3333282470703 };
+  Point expect_point{ 704.15999999999997, -129.33333333333331 };
   EXPECT_EQ(point, expect_point);
 }
 
@@ -277,8 +277,8 @@ TEST_F(VggExpandSymbolTestSuite, BoundsOverride)
     auto& bounds = resultJson[path];
     double width = bounds[K_WIDTH];
     double height = bounds[K_HEIGHT];
-    EXPECT_DOUBLE_EQ(width, 102.578125);
-    EXPECT_DOUBLE_EQ(height, 123.4413833618164);
+    EXPECT_DOUBLE_EQ(width, 102.57812747143907);
+    EXPECT_DOUBLE_EQ(height, 123.44138674141686);
   }
   {
     nlohmann::json::json_pointer path{
@@ -287,8 +287,8 @@ TEST_F(VggExpandSymbolTestSuite, BoundsOverride)
     auto& bounds = resultJson[path];
     double width = bounds[K_WIDTH];
     double height = bounds[K_HEIGHT];
-    EXPECT_DOUBLE_EQ(width, 193.6458282470703);
-    EXPECT_DOUBLE_EQ(height, 83.01298522949219);
+    EXPECT_DOUBLE_EQ(width, 193.64582824707031);
+    EXPECT_DOUBLE_EQ(height, 83.012985229492188);
   }
 }
 
@@ -661,14 +661,14 @@ TEST_F(VggExpandSymbolTestSuite, layout_container_when_child_bounds_are_overridd
     { // bounds
       auto path = nodePath / "bounds";
       auto bounds = expandedDesignJson[path].get<Rect>();
-      EXPECT_DOUBLE_EQ(bounds.height(), 7.276787757873535);
-      EXPECT_DOUBLE_EQ(bounds.width(), 7.067143440246582);
+      EXPECT_DOUBLE_EQ(bounds.height(), 7.276787281036377);
+      EXPECT_DOUBLE_EQ(bounds.width(), 7.0671429634094238);
     }
     { // matrix
       auto path = nodePath / "matrix";
       auto childMatrix = expandedDesignJson[path].get<Matrix>();
       EXPECT_DOUBLE_EQ(childMatrix.tx, 1.461796760559082);
-      EXPECT_DOUBLE_EQ(childMatrix.ty, -1.3610987663269043);
+      EXPECT_DOUBLE_EQ(childMatrix.ty, -1.3610985279083252);
     }
   }
   { // layout

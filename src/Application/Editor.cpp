@@ -31,17 +31,17 @@
 
 using namespace VGG;
 
-constexpr auto K_MOUSE_CONTAINER_WIDTH = 10.0f;
-constexpr auto K_RESIZE_MIN_LENGTH = 1.0f;
+constexpr auto K_MOUSE_CONTAINER_WIDTH = 10.0;
+constexpr auto K_RESIZE_MIN_LENGTH = 1.0;
 
 namespace
 {
 SkRect toSkRect(const Layout::Rect rect)
 {
-  return { rect.origin.x,
-           rect.origin.y,
-           rect.origin.x + rect.size.width,
-           rect.origin.y + rect.size.height };
+  return { SkDoubleToScalar(rect.origin.x),
+           SkDoubleToScalar(rect.origin.y),
+           SkDoubleToScalar(rect.origin.x + rect.size.width),
+           SkDoubleToScalar(rect.origin.y + rect.size.height) };
 }
 
 void drawFrame(SkCanvas* canvas, const SkRect& rect, const SkScalar strokeWidth = 1)

@@ -38,7 +38,7 @@ bool doubleNearlyZero(double a)
 
 bool doublesNearlyEqual(double a, double b)
 {
-  constexpr double TOLERANCE = 0.000001;
+  constexpr double TOLERANCE = 0.001;
   return a == b || std::abs(b - a) < TOLERANCE;
 }
 

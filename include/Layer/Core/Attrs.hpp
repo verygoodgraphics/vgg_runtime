@@ -423,10 +423,10 @@ struct TextAttr
 struct PointAttr
 {
   glm::vec2 point;
-  float radius = 0.0;
   std::optional<glm::vec2> from;
   std::optional<glm::vec2> to;
   std::optional<int> cornerStyle;
+  float radius = 0.0;
 
   PointAttr(glm::vec2 point,
             float radius,
@@ -454,6 +454,31 @@ struct Contour : public std::vector<PointAttr>
   bool closed = true;
   float cornerSmooth{ 0.f };
   EBoolOp blop;
+
+  bool allStraightLines() const
+  {
+    size_t prev = 0;
+    size_t cur = 1;
+    size_t next = cur + 1;
+    int segments = closed ? size() : size() - 1;
+    const int total = size();
+    while (segments)
+    {
+      const auto prevHasFrom = (*this)[prev].from.has_value();
+      const auto curHasTo = (*this)[cur].to.has_value();
+      const auto nextHasTo = (*this)[next].to.has_value();
+      const auto curHasFrom = (*this)[cur].from.has_value();
+      if (prevHasFrom || curHasTo || curHasFrom || nextHasTo)
+      {
+        return false;
+      }
+      segments--;
+      prev = (prev + 1) % total;
+      cur = (cur + 1) % total;
+      next = (next + 1) % total;
+    }
+    return true;
+  }
 };
 
 using ContourPtr = std::shared_ptr<Contour>;

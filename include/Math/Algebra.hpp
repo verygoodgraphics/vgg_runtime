@@ -49,7 +49,7 @@ inline bool decompose(const glm::mat3& mat,
 inline int vectorSign(const glm::vec2& v1, const glm::vec2& v2)
 {
   const auto c = glm::cross(glm::vec3{ v1, 0 }, glm::vec3{ v2, 0 });
-  return c.z > 0 ? 1 : (c.z < 0 ? -1 : 0);
+  return c.z >= 0 ? 1 : (c.z < 0 ? -1 : 0);
 }
 
 inline float vectorAngle(const glm::vec2& v1, const glm::vec2& v2)
@@ -62,6 +62,5 @@ inline float signedVectorAngle(const glm::vec2& v1, const glm::vec2& v2)
 {
   return vectorSign(v1, v2) * vectorAngle(v1, v2);
 }
-
 
 } // namespace VGG

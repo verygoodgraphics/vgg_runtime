@@ -178,7 +178,6 @@ inline SkMatrix upperMatrix22(const SkMatrix& matrix)
 
 inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed, float smooth = 0.f)
 {
-  return layer::makePath(points, isClosed, smooth);
   constexpr float W = 1.0;
   constexpr float H = 1.0;
   auto& pts = points;

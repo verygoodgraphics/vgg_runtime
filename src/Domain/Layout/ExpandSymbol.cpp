@@ -974,11 +974,23 @@ void ExpandSymbol::overrideLayoutRuleSize(const std::string& instanceId, const S
   {
     if (dstRule[K_ID] == instanceId)
     {
-      dstRule[K_WIDTH][K_VALUE][K_TYPES] = Internal::Rule::Length::ETypes::PX;
-      dstRule[K_WIDTH][K_VALUE][K_VALUE] = instanceSize.width;
+      if (dstRule[K_WIDTH][K_VALUE][K_TYPES] == Internal::Rule::Length::ETypes::PX)
+      {
+        dstRule[K_WIDTH][K_VALUE][K_VALUE] = instanceSize.width;
+      }
+      else
+      {
+        DEBUG("ExpandSymbol::overrideLayoutRuleSize: width type is not PX, do not update");
+      }
 
-      dstRule[K_HEIGHT][K_VALUE][K_TYPES] = Internal::Rule::Length::ETypes::PX;
-      dstRule[K_HEIGHT][K_VALUE][K_VALUE] = instanceSize.height;
+      if (dstRule[K_HEIGHT][K_VALUE][K_TYPES] == Internal::Rule::Length::ETypes::PX)
+      {
+        dstRule[K_HEIGHT][K_VALUE][K_VALUE] = instanceSize.height;
+      }
+      else
+      {
+        DEBUG("ExpandSymbol::overrideLayoutRuleSize: height type is not PX, do not update");
+      }
       break;
     }
   }

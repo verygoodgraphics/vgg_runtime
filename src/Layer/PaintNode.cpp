@@ -15,6 +15,7 @@
  */
 #include "VSkia.hpp"
 #include "Painter.hpp"
+#include "PathGenerator.hpp"
 #include "Renderer.hpp"
 #include "RenderState.hpp"
 #include "PaintNodePrivate.hpp"

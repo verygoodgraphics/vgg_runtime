@@ -159,9 +159,11 @@ public:
   }
 
 private:
-  std::string id();
-  std::string name();
-  bool isResizingAroundCenter();
+  std::string id() const;
+  std::string name() const;
+  bool isResizingAroundCenter() const;
+  bool isVectorNetwork() const;
+  bool isVectorNetworkDescendant() const;
 
   bool pointInside(Layout::Point point)
   {

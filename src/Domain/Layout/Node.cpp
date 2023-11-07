@@ -210,19 +210,40 @@ void LayoutNode::resizeChildNodes(const Layout::Size& oldContainerSize,
   }
 }
 
-std::string LayoutNode::id()
+std::string LayoutNode::id() const
 {
   return getValue(K_ID, std::string{});
 }
 
-std::string LayoutNode::name()
+std::string LayoutNode::name() const
 {
   return getValue(K_NAME, std::string{});
 }
 
-bool LayoutNode::isResizingAroundCenter()
+bool LayoutNode::isResizingAroundCenter() const
 {
   return getValue(K_KEEP_SHAPE_WHEN_RESIZE, false);
+}
+
+bool LayoutNode::isVectorNetwork() const
+{
+  return getValue(K_IS_VECTOR_NETWORK, false);
+}
+
+bool LayoutNode::isVectorNetworkDescendant() const
+{
+  auto parent = m_parent.lock();
+  while (parent)
+  {
+    if (parent->isVectorNetwork())
+    {
+      return true;
+    }
+
+    parent = parent->m_parent.lock();
+  }
+
+  return false;
 }
 
 std::shared_ptr<LayoutNode> LayoutNode::findDescendantNodeById(const std::string& id)
@@ -596,13 +617,21 @@ std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeV(
 
 LayoutNode::EResizing LayoutNode::horizontalResizing() const
 {
-  // todo, check ancestor's resizing content flag
+  if (isVectorNetworkDescendant())
+  {
+    return EResizing::SCALE;
+  }
+
   return getValue(K_HORIZONTAL_CONSTRAINT, EResizing::FIX_START_FIX_SIZE);
 }
 
 LayoutNode::EResizing LayoutNode::verticalResizing() const
 {
-  // todo, check ancestor's resizing content flag
+  if (isVectorNetworkDescendant())
+  {
+    return EResizing::SCALE;
+  }
+
   return getValue(K_VERTICAL_CONSTRAINT, EResizing::FIX_START_FIX_SIZE);
 }
 
@@ -643,6 +672,11 @@ bool LayoutNode::shouldSkip()
       parent &&
       parent->adjustContentOnResize() == EAdjustContentOnResize::SKIP_GROUP_OR_BOOLEAN_GROUP)
   {
+    if (isVectorNetwork())
+    {
+      return false;
+    }
+
     auto json = model();
     if (Layout::isGroupNode(*json))
     {

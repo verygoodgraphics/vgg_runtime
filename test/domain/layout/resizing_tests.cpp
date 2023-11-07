@@ -482,3 +482,17 @@ TEST_F(VggResizingTestSuite, ResizeTextScale)
                                               { 400, 100 } } };
   EXPECT_TRUE(descendantFrame({ 0 }) == expectedFrames[0]);
 }
+
+TEST_F(VggResizingTestSuite, ResizeVectorNetwork)
+{
+  // Given
+  setupWithExpanding("testDataDir/resizing/vector_network/");
+
+  // When
+  m_sut->layout(Layout::Size{ 800, 800 });
+
+  // Then
+  std::vector<Layout::Rect> expectedFrames{ { { 117.78839874267578, 0.0 },
+                                              { 34.54272211814413, 78.95296786693817 } } };
+  EXPECT_TRUE(descendantFrame({ 1, 0, 0 }) == expectedFrames[0]);
+}

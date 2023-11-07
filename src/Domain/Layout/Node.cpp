@@ -165,6 +165,14 @@ Layout::Matrix LayoutNode::modelMatrix() const
   return {};
 }
 
+Layout::Matrix LayoutNode::modelMatrixWithoutTranslate() const
+{
+  auto result = modelMatrix();
+  result.tx = 0;
+  result.ty = 0;
+  return result;
+}
+
 Layout::Size LayoutNode::size() const
 {
   return modelBounds().size;
@@ -210,6 +218,11 @@ std::string LayoutNode::id()
 std::string LayoutNode::name()
 {
   return getValue(K_NAME, std::string{});
+}
+
+bool LayoutNode::isResizingAroundCenter()
+{
+  return getValue(K_KEEP_SHAPE_WHEN_RESIZE, false);
 }
 
 std::shared_ptr<LayoutNode> LayoutNode::findDescendantNodeById(const std::string& id)
@@ -383,9 +396,25 @@ Layout::Rect LayoutNode::resize(const Layout::Size& oldContainerSize,
   }
 
   auto oldFrame = frame();
+  if (isResizingAroundCenter())
+  {
+    Layout::Point center{ oldFrame.width() / 2, oldFrame.height() / 2 };
+    center = center.makeModelPoint().makeTransform(modelMatrix()).makeFromModelPoint();
+    oldFrame.setCenter(center);
+  }
   auto [x, w] = resizeH(oldContainerSize, newContainerSize, oldFrame, parentOrigin);
   auto [y, h] = resizeV(oldContainerSize, newContainerSize, oldFrame, parentOrigin);
-  Layout::Rect newFrame{ { x, y }, { w, h } };
+  Layout::Point newOrigin{ x, y };
+  Layout::Rect newFrame{ newOrigin, { w, h } };
+  if (isResizingAroundCenter())
+  {
+    newOrigin = (newOrigin - newFrame.center())
+                  .makeModelPoint()
+                  .makeTransform(modelMatrixWithoutTranslate())
+                  .makeFromModelPoint() +
+                newFrame.center();
+    newFrame.origin = newOrigin;
+  }
 
   if (!dry)
   {

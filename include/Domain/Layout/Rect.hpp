@@ -52,6 +52,10 @@ struct Point
   {
     return *this = *this + rhs;
   }
+  Point operator-(const Point& rhs) const noexcept
+  {
+    return { x - rhs.x, y - rhs.y };
+  }
 
   Point makeFromModelPoint() const
   {
@@ -169,6 +173,12 @@ struct Rect
   Point center() const
   {
     return { centerX(), centerY() };
+  }
+
+  void setCenter(const Point& newCenter)
+  {
+    origin.x = newCenter.x - width() / 2;
+    origin.y = newCenter.y - height() / 2;
   }
 };
 

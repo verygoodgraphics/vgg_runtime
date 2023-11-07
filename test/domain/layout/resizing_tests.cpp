@@ -468,3 +468,17 @@ TEST_F(VggResizingTestSuite, ResizeEllipse)
                                               { 238.45028686523438, 163.73127746582031 } } };
   EXPECT_TRUE(descendantFrame({ 0 }) == expectedFrames[0]);
 }
+
+TEST_F(VggResizingTestSuite, ResizeTextScale)
+{
+  // Given
+  setupWithExpanding("testDataDir/resizing/rotated/text/");
+
+  // When
+  m_sut->layout(Layout::Size{ 800, 400 });
+
+  // Then
+  std::vector<Layout::Rect> expectedFrames{ { { 258.9304898734249, -26.859742651458987 },
+                                              { 400, 100 } } };
+  EXPECT_TRUE(descendantFrame({ 0 }) == expectedFrames[0]);
+}

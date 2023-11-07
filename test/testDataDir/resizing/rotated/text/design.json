@@ -1,0 +1,191 @@
+{
+  "fileName": "hello-sketch",
+  "fileType": 1,
+  "frames": [
+    {
+      "alphaMaskBy": [],
+      "bounds": {
+        "class": "rect",
+        "constrainProportions": false,
+        "height": 400.0,
+        "width": 400.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "childObjects": [
+        {
+          "alphaMaskBy": [],
+          "attr": [
+            {
+              "baseline": 0,
+              "baselineShift": 0.0,
+              "class": "fontAttr",
+              "fillUseType": 1,
+              "fills": [
+                {
+                  "class": "fill",
+                  "color": {
+                    "alpha": 0.5,
+                    "blue": 0.9782608695652174,
+                    "class": "color",
+                    "green": 0.0727480366928939,
+                    "red": 0.01908801696712621
+                  },
+                  "contextSettings": {
+                    "blendMode": 0,
+                    "class": "graphicsContextSettings",
+                    "isolateBlending": false,
+                    "opacity": 1.0,
+                    "transparencyKnockoutGroup": 0
+                  },
+                  "fillType": 0,
+                  "isEnabled": true
+                }
+              ],
+              "horizontalAlignment": 0,
+              "horizontalScale": 1.0,
+              "kerning": false,
+              "length": 11,
+              "letterSpacing": 0.0,
+              "lettertransform": 0,
+              "lineSpace": 20.0,
+              "linethrough": false,
+              "name": "PingFangHK-Semibold",
+              "proportionalSpacing": 0.0,
+              "rotate": 0.0,
+              "size": 16.0,
+              "textParagraph": {
+                "class": "textParagraph",
+                "paragraphSpacing": 0.0
+              },
+              "underline": 0,
+              "verticalScale": 1.0
+            }
+          ],
+          "bounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "height": 100.0,
+            "width": 200.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "class": "text",
+          "content": "Hello world",
+          "contextSettings": {
+            "blendMode": 0,
+            "class": "graphicsContextSettings",
+            "isolateBlending": false,
+            "opacity": 1.0,
+            "transparencyKnockoutGroup": 0
+          },
+          "frame": {
+            "class": "rect",
+            "constrainProportions": false,
+            "height": 205.16196519015074,
+            "width": 217.4876502111506,
+            "x": 81.25617489442472,
+            "y": -37.41901740492463
+          },
+          "frameMode": 0,
+          "horizontalConstraint": 5,
+          "id": "61232AB0-C78E-46E0-9384-E4BBB2E2BC69",
+          "isLocked": false,
+          "keepShapeWhenResize": true,
+          "maskType": 0,
+          "matrix": [
+            0.7660444507738347,
+            -0.6427876005638363,
+            0.6427876005638363,
+            0.7660444507738347,
+            145.53493495080835,
+            -37.41901740492463
+          ],
+          "name": "Hello world",
+          "outlineMaskBy": [],
+          "overflow": 1,
+          "style": {
+            "blurs": [
+              {
+                "center": [
+                  0.5,
+                  0.5
+                ],
+                "class": "blur",
+                "isEnabled": false,
+                "motionAngle": 0.0,
+                "radius": 10.0,
+                "saturation": 1.0,
+                "type": 0
+              }
+            ],
+            "borders": [],
+            "class": "style",
+            "fills": [],
+            "shadows": []
+          },
+          "styleEffectMaskArea": 0,
+          "verticalAlignment": 0,
+          "verticalConstraint": 5,
+          "visible": true
+        }
+      ],
+      "class": "frame",
+      "contextSettings": {
+        "blendMode": 0,
+        "class": "graphicsContextSettings",
+        "isolateBlending": false,
+        "opacity": 1.0,
+        "transparencyKnockoutGroup": 0
+      },
+      "frame": {
+        "class": "rect",
+        "constrainProportions": false,
+        "height": 400.0,
+        "width": 400.0,
+        "x": 75.0,
+        "y": -63.0
+      },
+      "horizontalConstraint": 5,
+      "id": "6F9D79A4-17F2-4698-9063-774835120F85",
+      "isLocked": false,
+      "maskType": 0,
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        75.0,
+        -63.0
+      ],
+      "name": "Artboard",
+      "outlineMaskBy": [],
+      "overflow": 1,
+      "resizesContent": 2,
+      "style": {
+        "blurs": [
+          {
+            "center": [
+              0.5,
+              0.5
+            ],
+            "class": "blur",
+            "isEnabled": false,
+            "motionAngle": 0.0,
+            "radius": 10.0,
+            "saturation": 1.0,
+            "type": 0
+          }
+        ],
+        "borders": [],
+        "class": "style",
+        "fills": [],
+        "shadows": []
+      },
+      "styleEffectMaskArea": 0,
+      "verticalConstraint": 5,
+      "visible": true
+    }
+  ],
+  "references": []
+}

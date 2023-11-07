@@ -161,6 +161,7 @@ public:
 private:
   std::string id();
   std::string name();
+  bool isResizingAroundCenter();
 
   bool pointInside(Layout::Point point)
   {
@@ -189,6 +190,7 @@ private:
   Layout::Point modelOrigin() const;
   Layout::Rect modelBounds() const;
   Layout::Matrix modelMatrix() const;
+  Layout::Matrix modelMatrixWithoutTranslate() const;
 
   Layout::Rect resize(const Layout::Size& oldContainerSize,
                       const Layout::Size& newContainerSize,

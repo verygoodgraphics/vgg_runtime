@@ -27,36 +27,19 @@
 
 #include "Layer/Core/Node.hpp"
 
-namespace VGG
+namespace VGG::layer
 {
 
 using namespace skia::textlayout;
 
 struct TextView
 {
-  std::string_view Text;
-  size_t Count;
+  std::string_view text;
+  size_t count;
   TextView() = default;
   TextView(const std::string_view& text, size_t count)
-    : Text(text)
-    , Count(count)
-  {
-  }
-};
-class TextParagraph
-{
-public:
-  std::unique_ptr<ParagraphBuilder> Builder{ nullptr };
-  int Level{ 0 };
-  TextView Utf8TextView;
-  TextParagraph() = default;
-  TextParagraph(std::string_view view,
-                std::unique_ptr<ParagraphBuilder> builder,
-                int level,
-                size_t charCount)
-    : Builder(std::move(builder))
-    , Level(level)
-    , Utf8TextView({ view, charCount })
+    : text(text)
+    , count(count)
   {
   }
 };
@@ -99,7 +82,7 @@ protected:
   virtual void onTextStyle(int paraIndex,
                            int styleIndex,
                            const TextView& textView,
-                           const TextAttr& textAttr) = 0;
+                           const TextStyleAttr& textAttr) = 0;
 };
 
 class ParagraphParser
@@ -153,7 +136,7 @@ public:
 
   void parse(ParagraphListener& listener,
              const std::string& text,
-             const std::vector<TextAttr>& textAttrs,
+             const std::vector<TextStyleAttr>& textAttrs,
              const std::vector<ParagraphAttr>& paragraphAttributes);
 };
-} // namespace VGG
+} // namespace VGG::layer

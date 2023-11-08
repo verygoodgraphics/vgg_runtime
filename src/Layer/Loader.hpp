@@ -35,10 +35,10 @@
 #include <memory>
 #include <optional>
 
-namespace VGG
+namespace VGG::layer
 {
-// NOLINTBEGIN
 using namespace nlohmann;
+// NOLINTBEGIN
 template<typename T>
 inline std::optional<T> get_opt(const nlohmann::json& obj, const std::string& key)
 {
@@ -225,15 +225,23 @@ class NlohmannBuilder
       j,
       [&j](std::string name, std::string guid)
       {
-        auto p = std::make_shared<TextNode>(std::move(name), std::move(guid));
+        auto p = std::make_shared<layer::TextNode>(std::move(name), std::move(guid));
         return p;
       },
-      [&j](TextNode* p)
+      [&j](layer::TextNode* p)
       {
         std::string text = j.value("content", "");
         auto lineType = get_stack_optional<std::vector<TextLineAttr>>(j, "lineType")
                           .value_or(std::vector<TextLineAttr>());
-        p->setParagraph(std::move(text), j.value("attr", std::vector<TextAttr>{}), lineType);
+        auto attr = j.value("attr", std::vector<TextStyleAttr>{});
+        for (auto& t : attr)
+        {
+          if (!t.fills)
+          {
+            t.fills = p->style().fills;
+          }
+        }
+        p->setParagraph(std::move(text), attr, lineType);
         p->setVerticalAlignment(j.value("verticalAlignment", ETextVerticalAlignment::VA_Top));
         const auto& b = p->getBound();
         p->setFrameMode(j.value("frameMode", ETextLayoutMode::TL_Fixed));
@@ -459,4 +467,4 @@ public:
   }
 };
 
-} // namespace VGG
+} // namespace VGG::layer

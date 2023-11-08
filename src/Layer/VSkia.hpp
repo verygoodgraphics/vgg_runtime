@@ -167,6 +167,8 @@ inline SkPathOp toSkPathOp(VGG::EBoolOp blop)
   SWITCH_MAP_ITEM_END(SkPathOp::kUnion_SkPathOp)
 }
 
+
+
 inline double calcRadius(double r0,
                          const glm::vec2& p0,
                          const glm::vec2& p1,

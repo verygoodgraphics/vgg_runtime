@@ -111,7 +111,7 @@ void Scene::loadFileContent(const nlohmann::json& json)
   _->page = 0;
   _->symbolIndex = 0;
   repaint();
-  _->container = NlohmannBuilder::build(json);
+  _->container = layer::NlohmannBuilder::build(json);
 }
 
 int Scene::currentPage() const

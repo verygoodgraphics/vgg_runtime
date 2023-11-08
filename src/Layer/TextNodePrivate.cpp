@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "TextNodePrivate.hpp"
 #include "ParagraphParser.hpp"
+#include "ParagraphPainter.hpp"
+#include "TextNodePrivate.hpp"
+#include "DebugCanvas.hpp"
+#include "Painter.hpp"
 #include "VSkia.hpp"
 
 #include "Layer/Core/TextNode.hpp"
@@ -25,36 +28,14 @@
 #include <core/SkColor.h>
 #include <core/SkString.h>
 #include <modules/skparagraph/include/FontCollection.h>
+#include <modules/skparagraph/include/Paragraph.h>
 
 #include <glm/detail/qualifier.hpp>
+#include <optional>
 
-
-namespace VGG
+namespace sktxt = skia::textlayout;
+namespace
 {
-
-void drawParagraphDebugInfo(DebugCanvas& canvas,
-                            const TextParagraph& textParagraph,
-                            Paragraph* p,
-                            int curX,
-                            int curY,
-                            int index)
-{
-  static SkColor s_colorTable[9] = {
-    SK_ColorBLUE,   SK_ColorGREEN,  SK_ColorRED,  SK_ColorCYAN,   SK_ColorMAGENTA,
-    SK_ColorYELLOW, SK_ColorDKGRAY, SK_ColorGRAY, SK_ColorLTGRAY,
-  };
-  canvas.get()->save();
-  canvas.get()->translate(curX, curY);
-  auto rects = p->getRectsForRange(0, 10000, RectHeightStyle::kMax, RectWidthStyle::kMax);
-  auto h = p->getHeight();
-  auto mw = p->getMaxWidth();
-  SkPaint pen;
-  SkColor color = s_colorTable[index % 9];
-  pen.setColor(SkColorSetA(color, 0x11));
-  canvas.get()->drawRect(SkRect{ 0, 0, mw, h }, pen);
-  canvas.drawRects(color, rects);
-  canvas.get()->restore();
-}
 
 int calcWhitespace(int count,
                    int fontSize,
@@ -83,7 +64,7 @@ int calcWhitespace(int count,
     return 0;
   return rects[0].rect.width();
 }
-sktxt::ParagraphStyle createParagraphStyle(const ParagraphAttr& attr)
+sktxt::ParagraphStyle createParagraphStyle(const layer::ParagraphAttr& attr)
 {
   ParagraphStyle style;
   style.setEllipsis(u"...");
@@ -106,12 +87,22 @@ std::vector<std::string> split(const std::string& s, char seperator)
   return output;
 }
 
-sktxt::TextStyle createTextStyle(const TextAttr& attr, VGGFontCollection* font)
+template<typename F>
+sktxt::TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&& fun)
 {
   sktxt::TextStyle style;
-  SkColor color = attr.color;
-  style.setColor(color);
+  SkColor color = SK_ColorBLACK;
+  if (attr.fills && !attr.fills->empty())
+  {
+    auto painterID = fun();
+    style.setForegroundPaintID(painterID);
+  }
+  else
+  {
+    style.setColor(color);
+  }
   style.setDecorationColor(color);
+
   std::string fontName;
   std::string subFamilyName;
 
@@ -214,7 +205,34 @@ sktxt::TextStyle createTextStyle(const TextAttr& attr, VGGFontCollection* font)
   }
   return style;
 }
+} // namespace
 
+namespace VGG::layer
+{
+
+void drawParagraphDebugInfo(DebugCanvas& canvas,
+                            const TextParagraph& textParagraph,
+                            Paragraph* p,
+                            int curX,
+                            int curY,
+                            int index)
+{
+  static SkColor s_colorTable[9] = {
+    SK_ColorBLUE,   SK_ColorGREEN,  SK_ColorRED,  SK_ColorCYAN,   SK_ColorMAGENTA,
+    SK_ColorYELLOW, SK_ColorDKGRAY, SK_ColorGRAY, SK_ColorLTGRAY,
+  };
+  canvas.get()->save();
+  canvas.get()->translate(curX, curY);
+  auto rects = p->getRectsForRange(0, 10000, RectHeightStyle::kMax, RectWidthStyle::kMax);
+  auto h = p->getHeight();
+  auto mw = p->getMaxWidth();
+  SkPaint pen;
+  SkColor color = s_colorTable[index % 9];
+  pen.setColor(SkColorSetA(color, 0x11));
+  canvas.get()->drawRect(SkRect{ 0, 0, mw, h }, pen);
+  canvas.drawRects(color, rects);
+  canvas.get()->restore();
+}
 void TextParagraphCache::onBegin()
 {
   paragraph.clear();
@@ -231,11 +249,11 @@ void TextParagraphCache::onParagraphBegin(int paraIndex,
   auto& p = paragraph.back();
   if (paragraAttr.type.lineType != TLT_Plain)
   {
-    p.Level = paragraAttr.type.level;
+    p.level = paragraAttr.type.level;
   }
   else
   {
-    p.Level = 0;
+    p.level = 0;
   }
   m_newParagraph = true;
   m_paraAttr = paragraAttr;
@@ -245,10 +263,10 @@ void TextParagraphCache::onParagraphEnd(int paraIndex, const TextView& textView)
 {
   assert(!paragraph.empty());
   auto& p = paragraph.back();
-  p.Utf8TextView = textView;
+  p.utf8TextView = textView;
   if (m_newParagraph)
   {
-    if (textView.Text.empty())
+    if (textView.text.empty())
       paragraph.pop_back();
     m_newParagraph = false;
   }
@@ -258,20 +276,23 @@ void TextParagraphCache::onParagraphEnd(int paraIndex, const TextView& textView)
 void TextParagraphCache::onTextStyle(int paraIndex,
                                      int styleIndex,
                                      const TextView& textView,
-                                     const TextAttr& textAttr)
+                                     const TextStyleAttr& textAttr)
 {
   assert(!paragraph.empty());
   auto& p = paragraph.back();
   if (m_newParagraph)
   {
-    p.Builder = skia::textlayout::ParagraphBuilder::make(
+    p.builder = skia::textlayout::ParagraphBuilder::make(
       createParagraphStyle(ParagraphAttr{ m_paraAttr.type, textAttr.horzAlignment }),
       m_fontCollection);
     m_newParagraph = false;
   }
-  p.Builder->pushStyle(createTextStyle(textAttr, m_fontCollection.get()));
-  p.Builder->addText(textView.Text.data(), textView.Text.size());
-  p.Builder->pop();
+
+  auto style =
+    createTextStyle(textAttr, m_fontCollection.get(), [&, this]() { return styleIndex; });
+  p.builder->pushStyle(style);
+  p.builder->addText(textView.text.data(), textView.text.size());
+  p.builder->pop();
   // std::cout << "Style Text: " << styleIndex << ", [" << textView.Text << "]\n";
 }
-} // namespace VGG
+} // namespace VGG::layer

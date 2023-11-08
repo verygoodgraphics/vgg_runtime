@@ -21,6 +21,8 @@
 #include "VSkFontMgr.hpp"
 #include "DebugCanvas.hpp"
 #include "ParagraphParser.hpp"
+#include "ParagraphPainter.hpp"
+
 #include <include/core/SkColor.h>
 #include <include/core/SkFontMetrics.h>
 #include <include/core/SkFontStyle.h>
@@ -30,14 +32,47 @@
 #include <modules/skparagraph/include/Metrics.h>
 #include <modules/skparagraph/include/Paragraph.h>
 #include <modules/skparagraph/include/ParagraphBuilder.h>
+#include <modules/skparagraph/include/ParagraphPainter.h>
 #include <modules/skparagraph/include/ParagraphStyle.h>
 #include <modules/skparagraph/include/FontCollection.h>
 #include <modules/skparagraph/include/TextStyle.h>
 #include <modules/skparagraph/include/TypefaceFontProvider.h>
 
-
-namespace VGG
+namespace sktxt = skia::textlayout;
+namespace VGG::layer
 {
+
+struct ParagraphInfo
+{
+  int offsetX{ 0 };
+  std::unique_ptr<sktxt::Paragraph> paragraph;
+  std::vector<layer::CustomeStyle> styles;
+};
+
+class TextParagraph
+{
+
+public:
+  std::unique_ptr<ParagraphBuilder> builder{ nullptr };
+  int level{ 0 };
+  std::vector<layer::CustomeStyle> style;
+  TextView utf8TextView;
+  TextParagraph() = default;
+  TextParagraph(std::string_view view,
+                std::unique_ptr<ParagraphBuilder> builder,
+                int level,
+                size_t charCount)
+    : builder(std::move(builder))
+    , level(level)
+    , utf8TextView({ view, charCount })
+  {
+  }
+
+  ParagraphInfo build()
+  {
+    return { level, builder->Build(), std::move(style) };
+  }
+};
 
 void drawParagraphDebugInfo(DebugCanvas& canvas,
                             const TextParagraph& textParagraph,
@@ -58,11 +93,6 @@ public:
   };
 
   std::vector<TextParagraph> paragraph;
-  struct ParagraphInfo
-  {
-    int offsetX{ 0 };
-    std::unique_ptr<sktxt::Paragraph> paragraph;
-  };
   std::vector<ParagraphInfo> paragraphCache;
 
   void setFontCollection(sk_sp<VGGFontCollection> fontCollection)
@@ -73,6 +103,7 @@ public:
 private:
   int m_height{ 0 };
   bool m_newParagraph{ true };
+
   ParagraphAttr m_paraAttr;
   TextParagraphCacheDirtyFlags m_dirtyFlags{ D_ALL };
   sk_sp<VGGFontCollection> m_fontCollection;
@@ -85,12 +116,11 @@ protected:
   void onTextStyle(int paraIndex,
                    int styleIndex,
                    const TextView& textView,
-                   const TextAttr& textAttr) override;
+                   const TextStyleAttr& textAttr) override;
 
 public:
-  TextParagraphCache()
+  TextParagraphCache(Bound2 bound)
   {
-
     auto mgr = sk_sp<SkFontMgrVGG>(FontManager::instance().defaultFontManager());
     if (mgr)
     {
@@ -144,8 +174,8 @@ public:
     paragraphCache.reserve(paragraph.size());
     for (auto& d : paragraph)
     {
-      assert(d.Builder);
-      paragraphCache.push_back({ 0, std ::move(d.Builder->Build()) });
+      assert(d.builder);
+      paragraphCache.push_back(std::move(d.build()));
     }
     set(D_LAYOUT);
   }
@@ -163,8 +193,8 @@ public:
       const auto& d = paragraph[i];
       const auto& paragraph = paragraphCache[i].paragraph;
       SkFontMetrics metrics;
-      d.Builder->getParagraphStyle().getTextStyle().getFontMetrics(&metrics);
-      const auto curX = metrics.fAvgCharWidth * d.Level;
+      d.builder->getParagraphStyle().getTextStyle().getFontMetrics(&metrics);
+      const auto curX = metrics.fAvgCharWidth * d.level;
       paragraphCache[i].offsetX = curX;
       if (mode == ETextLayoutMode::TL_WidthAuto)
       {
@@ -182,8 +212,8 @@ public:
       auto lastLine = paragraph->lineNumber();
       if (lastLine < 1)
         continue;
-      assert(!d.Utf8TextView.Text.empty());
-      auto c = d.Utf8TextView.Text.back();
+      assert(!d.utf8TextView.text.empty());
+      auto c = d.utf8TextView.text.back();
       if (c == '\n' && i < paragraphCache.size() - 1)
       {
         // It not a neat design because list item must be rendered seperately.
@@ -222,17 +252,23 @@ class TextNode__pImpl
 {
   VGG_DECL_API(TextNode)
 public:
-  TextNode__pImpl(TextNode* api)
+  TextNode__pImpl(TextNode* api, const Bound2& bound)
     : q_ptr(api)
+    , paragraphCache(bound)
+    , painter(nullptr, nullptr, Bound2())
   {
   }
 
   std::string text;
   TextParagraphCache paragraphCache;
   ETextLayoutMode mode;
+  std::vector<TextStyleAttr> textAttr;
+  VParagraphPainter painter;
   ETextVerticalAlignment vertAlign{ ETextVerticalAlignment::VA_Top };
 
   TextNode__pImpl(const TextNode__pImpl& p)
+    : paragraphCache(Bound2())
+    , painter(nullptr, nullptr, Bound2())
   {
     this->operator=(p);
   }
@@ -249,4 +285,4 @@ public:
   TextNode__pImpl(TextNode__pImpl&& p) noexcept = default;
   TextNode__pImpl& operator=(TextNode__pImpl&& p) noexcept = default;
 };
-} // namespace VGG
+} // namespace VGG::layer

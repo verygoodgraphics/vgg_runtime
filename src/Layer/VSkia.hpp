@@ -230,7 +230,7 @@ inline SkMatrix upperMatrix22(const SkMatrix& matrix)
   return m;
 }
 
-inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed, float smooth = 0.f)
+[[deprecated]] inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
 {
   constexpr float W = 1.0;
   constexpr float H = 1.0;

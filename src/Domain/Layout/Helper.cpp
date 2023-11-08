@@ -124,5 +124,15 @@ bool isPathNode(const nlohmann::json& json)
   return className == K_PATH;
 }
 
+bool isVectorNetworkGroupNode(const nlohmann::json& json)
+{
+  if (!isGroupNode(json))
+  {
+    return false;
+  }
+
+  return json.value(K_IS_VECTOR_NETWORK, false);
+}
+
 } // namespace Layout
 } // namespace VGG

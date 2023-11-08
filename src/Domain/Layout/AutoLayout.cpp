@@ -265,6 +265,14 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutNode> view)
       std::vector<std::shared_ptr<LayoutNode>> subviewsToInclude;
       for (auto subview : view->children())
       {
+        if (!subview->isVisible())
+        {
+          DEBUG("attachNodesFromViewHierachy, skip invisible child, %s, %s",
+                subview->id().c_str(),
+                subview->name().c_str());
+          continue;
+        }
+
         if (subview->autoLayout()->isEnabled() && subview->autoLayout()->isIncludedInLayout)
         {
           subviewsToInclude.push_back(subview);
@@ -274,12 +282,15 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutNode> view)
       if (!layoutNodeHasExactSameChildren(node, subviewsToInclude))
       {
         removeAllChildren(node);
-        for (auto i = 0; i < subviewsToInclude.size(); ++i)
+        for (auto subview : subviewsToInclude)
         {
-          DEBUG("attachNodesFromViewHierachy, flex container[%p] add child[%s]",
+          DEBUG("attachNodesFromViewHierachy, flex container[%p] add child[%s, %s, %s]",
                 node,
-                subviewsToInclude[i]->path().c_str());
-          node->add_child(subviewsToInclude[i]->autoLayout()->takeFlexItem(), i);
+                subview->id().c_str(),
+                subview->name().c_str(),
+                subview->path().c_str());
+
+          node->add_child(subview->autoLayout()->takeFlexItem());
         }
       }
 
@@ -328,9 +339,20 @@ void applyLayoutToViewHierarchy(std::shared_ptr<LayoutNode> view,
                                 bool preserveOrigin,
                                 bool isContainer)
 {
+  if (!view->isVisible())
+  {
+    DEBUG("applyLayoutToViewHierarchy, view, %s, %s, [%p, %s], invisible, return",
+          view->id().c_str(),
+          view->name().c_str(),
+          view.get(),
+          view->path().c_str());
+    return;
+  }
+
   auto autoLayout = view->autoLayout();
   if (!autoLayout->isIncludedInLayout)
   {
+    DEBUG("applyLayoutToViewHierarchy, not included in layout, return");
     return;
   }
 
@@ -345,7 +367,9 @@ void applyLayoutToViewHierarchy(std::shared_ptr<LayoutNode> view,
       frame = view->calculateResizedFrame(frame.size);
     }
 
-    DEBUG("applyLayoutToViewHierarchy, view[%p, %s], x=%f, y=%f, width=%f, height=%f",
+    DEBUG("applyLayoutToViewHierarchy, view, %s, %s, [%p, %s], x=%f, y=%f, width=%f, height=%f",
+          view->id().c_str(),
+          view->name().c_str(),
           view.get(),
           view->path().c_str(),
           frame.origin.x,

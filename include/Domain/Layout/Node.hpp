@@ -158,9 +158,12 @@ public:
     return convertRectToAncestor(frame(), ancestorNode);
   }
 
-private:
+public:
   std::string id() const;
   std::string name() const;
+  bool isVisible() const;
+
+private:
   bool isResizingAroundCenter() const;
   bool isVectorNetwork() const;
   bool isVectorNetworkDescendant() const;

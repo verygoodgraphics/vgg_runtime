@@ -87,6 +87,9 @@ private:
   void applyOverridesDetail(nlohmann::json& json,
                             std::stack<std::string> reversedPath,
                             const nlohmann::json& value);
+  void applyOverridesDetailToTree(nlohmann::json& json,
+                                  std::stack<std::string> reversedPath,
+                                  const nlohmann::json& value);
   void applyLeafOverrides(nlohmann::json& json,
                           const std::string& key,
                           const nlohmann::json& value);

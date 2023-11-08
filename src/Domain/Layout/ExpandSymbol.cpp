@@ -32,6 +32,7 @@
 #define DEBUG(msg, ...)
 
 constexpr auto K_PREFIX = "referenced_style_";
+constexpr auto K_BORDER_PREFIX = "style.borders";
 
 namespace nl = nlohmann;
 using namespace VGG::Layout;
@@ -416,6 +417,8 @@ void ExpandSymbol::applyOverrides(nlohmann::json& json,
                                   std::string& name,
                                   const nlohmann::json& value)
 {
+  const auto isBorder = name.rfind(K_BORDER_PREFIX, 0) == 0;
+
   // make name to json pointer string: x.y -> /x/y
   while (true)
   {
@@ -440,7 +443,14 @@ void ExpandSymbol::applyOverrides(nlohmann::json& json,
     path.pop_back();
   }
 
-  applyOverridesDetail(json, reversedPath, value);
+  if (isBorder && isVectorNetworkGroupNode(json))
+  {
+    applyOverridesDetailToTree(json, reversedPath, value);
+  }
+  else
+  {
+    applyOverridesDetail(json, reversedPath, value);
+  }
 }
 
 void ExpandSymbol::applyOverridesDetail(nlohmann::json& json,
@@ -482,6 +492,28 @@ void ExpandSymbol::applyOverridesDetail(nlohmann::json& json,
   {
     applyOverridesDetail(json[key], reversedPath, value);
   }
+}
+
+void ExpandSymbol::applyOverridesDetailToTree(nlohmann::json& json,
+                                              std::stack<std::string> reversedPath,
+                                              const nlohmann::json& value)
+{
+  if (!json.is_object() && !json.is_array())
+  {
+    return;
+  }
+
+  for (auto& el : json.items())
+  {
+    applyOverridesDetailToTree(el.value(), reversedPath, value);
+  }
+
+  if (!isLayoutNode(json))
+  {
+    return;
+  }
+
+  applyOverridesDetail(json, reversedPath, value);
 }
 
 nlohmann::json* ExpandSymbol::findChildObjectInTree(nlohmann::json& json,

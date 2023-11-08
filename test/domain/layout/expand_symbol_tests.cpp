@@ -679,3 +679,30 @@ TEST_F(VggExpandSymbolTestSuite, layout_container_when_child_bounds_are_overridd
     EXPECT_DOUBLE_EQ(rule.width.value.value, 61.0);
   }
 }
+
+TEST_F(VggExpandSymbolTestSuite, VectorNetworkGroupOverride)
+{
+  // Given
+  std::string designFilePath = "testDataDir/symbol/vector_network/design.json";
+  auto designJson = Helper::load_json(designFilePath);
+  ExpandSymbol sut{ designJson };
+
+  // When
+  auto result = sut.run();
+
+  // Then
+  auto expandedDesignJson = std::get<0>(result);
+  {
+    nlohmann::json::json_pointer path{
+      "/frames/0/childObjects/0/childObjects/0/childObjects/0/style/borders/0/thickness"
+    };
+    double value = expandedDesignJson[path];
+    EXPECT_DOUBLE_EQ(value, 10);
+  }
+  {
+    nlohmann::json::json_pointer path{ "/frames/0/childObjects/0/childObjects/0/childObjects/1/"
+                                       "shape/subshapes/0/subGeometry/style/borders/0/thickness" };
+    double value = expandedDesignJson[path];
+    EXPECT_DOUBLE_EQ(value, 10);
+  }
+}

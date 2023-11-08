@@ -178,6 +178,8 @@ void ExpandSymbol::expandInstance(nlohmann::json& json,
         processBoundsOverrides(json, instanceIdStack);
         // 3.5 other overrides
         processOtherOverrides(json, instanceIdStack);
+        // 3.6
+        layoutDirtyNodes(json);
         if (!again)
         {
           instanceIdStack.pop_back();
@@ -1040,6 +1042,21 @@ void ExpandSymbol::layoutSubtree(nlohmann::json& rootTreeJson,
   overrideLayoutRuleSize(subtreeNodeId, newBounds.size);
 }
 
+void ExpandSymbol::layoutDirtyNodes(nlohmann::json& rootTreeJson)
+{
+  if (m_tmpDirtyNodeIds.empty())
+  {
+    return;
+  }
+
+  Layout layout{ JsonDocumentPtr{ new ReferenceJsonDocument{ rootTreeJson } },
+                 JsonDocumentPtr{ new ReferenceJsonDocument{ m_outLayoutJson } },
+                 false };
+  layout.layoutNodes(m_tmpDirtyNodeIds);
+
+  m_tmpDirtyNodeIds.clear();
+}
+
 nlohmann::json* ExpandSymbol::findLayoutObject(nlohmann::json& instance,
                                                const std::vector<std::string>& instanceIdStack,
                                                const nlohmann::json& overrideItem)
@@ -1099,6 +1116,13 @@ void ExpandSymbol::applyLeafOverrides(nlohmann::json& json,
   else
   {
     json[key] = value;
+
+    if (key == K_VISIBLE)
+    {
+      DEBUG("applyLeafOverrides, node's visible changed, add to dirty list, %s",
+            json[K_ID].dump().c_str());
+      m_tmpDirtyNodeIds.push_back(json[K_ID]);
+    }
   }
 }
 

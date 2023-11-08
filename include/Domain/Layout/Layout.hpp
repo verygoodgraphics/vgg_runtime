@@ -54,6 +54,7 @@ public:
 
   void layout(Size size, bool updateRule = false);
   void resizeNodeThenLayout(const std::string& nodeId, Size size);
+  void layoutNodes(const std::vector<std::string>& nodeIds);
 
   std::shared_ptr<LayoutNode> layoutTree() const
   {

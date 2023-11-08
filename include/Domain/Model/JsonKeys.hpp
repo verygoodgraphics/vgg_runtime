@@ -69,6 +69,7 @@ constexpr auto K_TEXT = "text";
 constexpr auto K_TYPES = "types";
 constexpr auto K_VALUE = "value";
 constexpr auto K_VERTICAL_CONSTRAINT = "verticalConstraint";
+constexpr auto K_VISIBLE = "visible";
 constexpr auto K_WIDTH = "width";
 constexpr auto K_X = "x";
 constexpr auto K_Y = "y";

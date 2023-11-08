@@ -309,3 +309,17 @@ void Layout::Layout::resizeNodeThenLayout(const std::string& nodeId, Size size)
     m_layoutTree->layoutIfNeeded();
   }
 }
+
+void Layout::Layout::layoutNodes(const std::vector<std::string>& nodeIds)
+{
+  for (const auto& nodeId : nodeIds)
+  {
+    if (auto node = m_layoutTree->findDescendantNodeById(nodeId))
+    {
+      DEBUG("Layout::layoutNodes: set flex container need to layout, %s", nodeId.c_str());
+      node->autoLayout()->setNeedsLayout();
+    }
+  }
+
+  m_layoutTree->layoutIfNeeded();
+}

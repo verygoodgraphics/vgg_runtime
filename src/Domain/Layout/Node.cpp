@@ -210,6 +210,11 @@ void LayoutNode::resizeChildNodes(const Layout::Size& oldContainerSize,
   }
 }
 
+bool LayoutNode::isVisible() const
+{
+  return getValue(K_VISIBLE, true);
+}
+
 std::string LayoutNode::id() const
 {
   return getValue(K_ID, std::string{});

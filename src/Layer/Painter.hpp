@@ -37,6 +37,8 @@
 
 #include <stack>
 
+sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound2& bound);
+
 template<typename K, typename V>
 class LRUCache
 {
@@ -252,8 +254,6 @@ public:
                 sk_sp<SkImageFilter> imageFilter,
                 sk_sp<SkBlender> blender,
                 sk_sp<SkMaskFilter> mask);
-
-  sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound2& bound);
 
   void drawPathBorder(const SkPath& skPath,
                       const Bound2& bound,

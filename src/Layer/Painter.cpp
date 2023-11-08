@@ -22,7 +22,7 @@
 
 using namespace VGG;
 
-sk_sp<SkShader> Painter::getGradientShader(const Gradient& g, const Bound2& bound)
+sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound2& bound)
 {
   sk_sp<SkShader> shader;
   const auto type = g.gradientType;

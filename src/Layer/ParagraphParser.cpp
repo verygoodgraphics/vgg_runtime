@@ -20,7 +20,7 @@
 #include <iterator>
 #include <list>
 
-namespace VGG
+namespace VGG::layer
 {
 
 enum class Reason
@@ -81,7 +81,7 @@ Reason runOnUtf8(const char* utf8, size_t bytes, F&& f)
 }
 void ParagraphParser::parse(ParagraphListener& listener,
                             const std::string& text,
-                            const std::vector<TextAttr>& textAttrs,
+                            const std::vector<TextStyleAttr>& textAttrs,
                             const std::vector<ParagraphAttr>& paragraphAttributes)
 {
   assert(!textAttrs.empty());
@@ -202,4 +202,4 @@ void ParagraphParser::parse(ParagraphListener& listener,
   listener.onEnd();
 }
 
-} // namespace VGG
+} // namespace VGG::layer

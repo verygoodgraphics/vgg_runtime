@@ -22,7 +22,7 @@
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/VType.hpp"
 
-namespace VGG
+namespace VGG::layer
 {
 
 class TextNode__pImpl;
@@ -38,7 +38,7 @@ public:
   TextNode(TextNode&&) noexcept = default;
   TextNode& operator=(TextNode&&) noexcept = default;
   void setParagraph(std::string utf8,
-                    const std::vector<TextAttr>& attrs,
+                    std::vector<TextStyleAttr> attrs,
                     const std::vector<TextLineAttr>& lineAttr);
   void setFrameMode(ETextLayoutMode mode);
   void setVerticalAlignment(ETextVerticalAlignment vertAlign);
@@ -49,4 +49,4 @@ protected:
   void paintEvent(SkiaRenderer* renderer) override;
 };
 
-} // namespace VGG
+} // namespace VGG::layer

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "Layer/ParagraphPainter.hpp"
 #include "VSkFontMgr.hpp"
 #include "TextNodePrivate.hpp"
 #include "Renderer.hpp"
@@ -35,12 +36,12 @@
 #include <string_view>
 #include <memory>
 
-namespace VGG
+namespace VGG::layer
 {
 
 TextNode::TextNode(const std::string& name, std::string guid)
   : PaintNode(name, VGG_TEXT, std::move(guid))
-  , d_ptr(new TextNode__pImpl(this))
+  , d_ptr(new TextNode__pImpl(this, getBound()))
 {
   auto mgr = sk_sp<SkFontMgrVGG>(FontManager::instance().defaultFontManager());
   if (mgr)
@@ -64,12 +65,14 @@ NodePtr TextNode::clone() const
 }
 
 void TextNode::setParagraph(std::string utf8,
-                            const std::vector<TextAttr>& attrs,
+                            std::vector<TextStyleAttr> attrs,
                             const std::vector<TextLineAttr>& lineAttr)
 {
   VGG_IMPL(TextNode);
   std::vector<ParagraphAttr> paraAttrs;
   _->text = std::move(utf8);
+  _->textAttr = std::move(attrs);
+  _->painter.updateTextStyle(&_->textAttr);
   if (_->text.empty())
     return;
   for (const auto a : lineAttr)
@@ -85,7 +88,7 @@ void TextNode::setParagraph(std::string utf8,
     paraAttrs.emplace_back(attr, ETextHorizontalAlignment::HA_Left);
   }
   ParagraphParser parser;
-  parser.parse(_->paragraphCache, _->text, attrs, paraAttrs);
+  parser.parse(_->paragraphCache, _->text, _->textAttr, paraAttrs);
 }
 
 void TextNode::setFrameMode(ETextLayoutMode mode)
@@ -108,6 +111,7 @@ void TextNode::paintEvent(SkiaRenderer* renderer)
   if (_->paragraphCache.test(TextParagraphCache::ETextParagraphCacheFlagsBits::D_LAYOUT))
   {
     setBound(_->paragraphCache.layout(getBound(), _->mode)); // update bound
+    _->painter.updateBound(getBound());
     _->paragraphCache.clear(TextParagraphCache::ETextParagraphCacheFlagsBits::D_LAYOUT);
   }
 
@@ -122,6 +126,7 @@ void TextNode::paintEvent(SkiaRenderer* renderer)
   canvas->scale(1, -1);
   {
     const auto bound = getBound();
+    _->painter.setCanvas(canvas);
     int totalHeight = _->paragraphCache.getHeight();
     int curY = 0;
     if (_->vertAlign == ETextVerticalAlignment::VA_Bottom)
@@ -136,7 +141,7 @@ void TextNode::paintEvent(SkiaRenderer* renderer)
     {
       auto& p = _->paragraphCache.paragraphCache[i].paragraph;
       const auto curX = _->paragraphCache.paragraphCache[i].offsetX;
-      p->paint(canvas, curX, curY);
+      p->paint(&_->painter, curX, curY);
       if (renderer->isEnableDrawDebugBound())
       {
         DebugCanvas debugCanvas(canvas);
@@ -166,4 +171,4 @@ void TextNode::setVerticalAlignment(ETextVerticalAlignment vertAlign)
 
 TextNode::~TextNode() = default;
 
-} // namespace VGG
+} // namespace VGG::layer

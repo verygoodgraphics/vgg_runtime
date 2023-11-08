@@ -19,6 +19,7 @@
 #include "Math/Math.hpp"
 #include "Math/Geometry.hpp"
 #include "Layer/Core/VType.hpp"
+#include "Utility/Log.hpp"
 
 #include <include/effects/SkGradientShader.h>
 #include <include/effects/SkDashPathEffect.h>
@@ -199,18 +200,20 @@ struct Gradient
     std::vector<SkScalar> positions;
     for (size_t i = 0; i < indices.size(); i++)
     {
-      colors.push_back(stops[indices[i]].color);
+      auto c = stops[indices[i]].color;
+      colors.push_back(c);
       auto p = stops[indices[i]].position;
       positions.push_back((p - minPosition) / (maxPosition - minPosition));
     }
-    SkMatrix mat;
-    return SkGradientShader::MakeLinear(pts,
-                                        colors.data(),
-                                        positions.data(),
-                                        indices.size(),
-                                        SkTileMode::kClamp,
-                                        0,
-                                        &mat);
+    SkMatrix mat = SkMatrix::I();
+    auto s = SkGradientShader::MakeLinear(pts,
+                                          colors.data(),
+                                          positions.data(),
+                                          indices.size(),
+                                          SkTileMode::kClamp,
+                                          0,
+                                          &mat);
+    return s;
   }
 
   inline sk_sp<SkShader> getRadialShader(const Bound2& bound) const
@@ -385,11 +388,11 @@ struct TextLineAttr
   int lineType{ TLT_Plain };
 };
 
-struct TextAttr
+struct TextStyleAttr
 {
   std::string fontName;
   std::string subFamilyName;
-  Color color{ 0, 0, 0, 1 };
+  std::optional<std::vector<Fill>> fills;
   float letterSpacing{ 0.0 };
   float baselineShift{ 0.0 };
   size_t length{ 0 };
@@ -398,11 +401,12 @@ struct TextAttr
   bool italic{ false };
   bool lineThrough{ false };
   bool kerning{ false };
+  int fillUseType{ 0 };
   ETextUnderline underline{ UT_None };
   ETextHorizontalAlignment horzAlignment{ HA_Left };
   ELetterTransform letterTransform{ ELT_Nothing };
 
-  bool operator==(const TextAttr& other) const
+  bool operator==(const TextStyleAttr& other) const
   {
     size_t h = 0;
     hash_combine(h,

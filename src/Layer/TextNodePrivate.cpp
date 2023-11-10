@@ -92,7 +92,7 @@ sktxt::TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* f
 {
   sktxt::TextStyle style;
   SkColor color = SK_ColorBLACK;
-  if (attr.fills && !attr.fills->empty())
+  if (!attr.fills.empty())
   {
     auto painterID = fun();
     style.setForegroundPaintID(painterID);

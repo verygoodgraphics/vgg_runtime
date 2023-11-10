@@ -50,13 +50,13 @@ void VParagraphPainter::drawTextBlob(const sk_sp<SkTextBlob>& blob,
       SkPaint fillPen;
       fillPen.setColor(SK_ColorBLACK);
       const auto fills = (*m_textStyle)[styleID].fills;
-      if (!fills || fills->empty())
+      if (fills.empty())
       {
         fillPen.setColor(SK_ColorBLACK);
       }
       else
       {
-        auto& f = fills.value()[0];
+        auto& f = fills[0];
         fillPen.setStyle(SkPaint::kFill_Style);
         fillPen.setAntiAlias(true);
         if (f.fillType == FT_Color)

@@ -264,10 +264,11 @@ inline void from_json(const json& j, TextStyleAttr& x)
   x.fontName = get_stack_optional<std::string>(j, "name").value_or("");
   x.subFamilyName = get_stack_optional<std::string>(j, "subFamilyName").value_or("");
   x.fillUseType = get_stack_optional<int>(j, "fillUseType").value_or(0);
-  x.fills = get_stack_optional<std::vector<Fill>>(j, "fills");
+  x.fills = j.value("fills", std::vector<Fill>());
   x.baselineShift = j.value("baselineShift", 0.0);
   x.lineThrough = j.value("linethrough", false);
-  x.letterSpacing = j.value("letterSpacing", 0.0);
+  x.letterSpacing = j.value("letterSpacingValue", 0.0);
+  x.lineSpace = j.value("lineSpaceValue", 0.0);
   x.underline = j.value("underline", UT_None);
   x.kerning = j.value("kerning", false);
   x.horzAlignment = j.value("horizontalAlignment", HA_Left);

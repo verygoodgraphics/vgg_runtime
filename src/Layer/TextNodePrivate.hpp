@@ -46,7 +46,6 @@ struct ParagraphInfo
 {
   int offsetX{ 0 };
   std::unique_ptr<sktxt::Paragraph> paragraph;
-  std::vector<layer::CustomeStyle> styles;
 };
 
 class TextParagraph
@@ -55,7 +54,6 @@ class TextParagraph
 public:
   std::unique_ptr<ParagraphBuilder> builder{ nullptr };
   int level{ 0 };
-  std::vector<layer::CustomeStyle> style;
   TextView utf8TextView;
   TextParagraph() = default;
   TextParagraph(std::string_view view,
@@ -70,7 +68,7 @@ public:
 
   ParagraphInfo build()
   {
-    return { level, builder->Build(), std::move(style) };
+    return { level, builder->Build() };
   }
 };
 

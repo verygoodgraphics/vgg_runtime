@@ -37,63 +37,8 @@
 
 namespace VGG::layer
 {
+
 using namespace nlohmann;
-// NOLINTBEGIN
-template<typename T>
-inline std::optional<T> get_opt(const nlohmann::json& obj, const std::string& key)
-{
-  if (auto p = obj.find(key); p != obj.end())
-    return p.value().get<T>();
-  return std::nullopt;
-}
-
-template<typename T>
-inline std::optional<T> get_opt(const nlohmann::json& obj, const char* key)
-{
-  if (auto p = obj.find(key); p != obj.end())
-    return p.value().get<T>();
-  return std::nullopt;
-}
-
-template<typename K>
-inline const nlohmann::json& get_or_default(const nlohmann::json& j, K&& key)
-{
-  if (auto it = j.find(key); it != j.end())
-  {
-    return it.value();
-  }
-
-  static const nlohmann::json s_json;
-  return s_json;
-}
-
-template<>
-inline std::optional<glm::vec2> get_opt(const nlohmann::json& obj, const std::string& key)
-{
-  if (auto it = obj.find(key); it != obj.end())
-  {
-    auto v = obj.value(key, std::array<float, 2>{ 0, 0 });
-    auto p0 = v[0];
-    auto p1 = v[1];
-    return glm::vec2(p0, p1);
-  }
-  return std::nullopt;
-}
-
-template<>
-inline std::optional<glm::vec2> get_opt(const nlohmann::json& obj, const char* key)
-{
-  if (auto it = obj.find(key); it != obj.end())
-  {
-    auto v = obj.value(key, std::array<float, 2>{ 0, 0 });
-    auto p0 = v[0];
-    auto p1 = v[1];
-    return glm::vec2(p0, p1);
-  }
-  return std::nullopt;
-}
-
-// NOLINTEND
 
 class NlohmannBuilder
 {
@@ -102,19 +47,19 @@ class NlohmannBuilder
 
   inline glm::mat3 fromMatrix(const nlohmann::json& j)
   {
-    const auto v = j.value("matrix", std::array<float, 6>{ 1, 0, 0, 1, 0, 0 });
-    const auto m = glm::mat3{ glm::vec3{ v[0], v[1], 0 },
-                              glm::vec3{ v[2], v[3], 0 },
-                              glm::vec3{ v[4], v[5], 1 } };
-    return m;
+    auto v = j.value("matrix", std::array<float, 6>{ 1, 0, 0, 1, 0, 0 });
+    return flipCoord(glm::mat3{ glm::vec3{ v[0], v[1], 0 },
+                                glm::vec3{ v[2], v[3], 0 },
+                                glm::vec3{ v[4], v[5], 1 } });
   }
   inline Bound2 fromBound(const nlohmann::json& j)
   {
     auto x = j.value("x", 0.f);
     auto y = j.value("y", 0.f);
+    const auto topLeft = flipCoord(glm::vec2{ x, y });
     auto width = j.value("width", 0.f);
     auto height = j.value("height", 0.f);
-    return Bound2{ x, y, width, height };
+    return Bound2{ topLeft, width, height };
   }
 
   inline std::tuple<Bound2, glm::mat3> fromTransform(const nlohmann::json& j)
@@ -162,8 +107,7 @@ class NlohmannBuilder
     const auto& points = get_or_default(j, "points");
     for (const auto& e : points)
     {
-      const auto p = e.value("point", std::array<float, 2>{ 0, 0 });
-      contour.emplace_back(glm::vec2{ p[0], p[1] },
+      contour.emplace_back(get_opt<glm::vec2>(e, "point").value_or(glm::vec2{ 0, 0 }),
                            get_opt<float>(e, "radius").value_or(0.0),
                            get_opt<glm::vec2>(e, "curveFrom"),
                            get_opt<glm::vec2>(e, "curveTo"),

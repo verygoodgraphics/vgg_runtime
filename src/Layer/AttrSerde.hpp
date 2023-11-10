@@ -18,20 +18,94 @@
 #include "Layer/Core/Attrs.hpp"
 
 #include <nlohmann/json.hpp>
-
-#include <glm/fwd.hpp>
+#include <glm/glm.hpp>
 #include <optional>
 using nlohmann::json;
 
 namespace VGG
 {
-// NOLINTBEGIN
-inline void from_json(const json& j, glm::mat3& x)
+constexpr bool FLIP_COORD = false;
+inline glm::vec2 flipCoord(const glm::vec2& point)
 {
-  assert(j.size() == 6);
-  x =
-    glm::mat3{ glm::vec3{ j[0], j[1], 0 }, glm::vec3{ j[2], j[3], 0 }, glm::vec3{ j[4], j[5], 1 } };
+  if (FLIP_COORD)
+    return glm::vec2(point.x, -point.y);
+  return point;
 }
+
+inline glm::vec2 flipGradientCoord(const glm::vec2& point)
+{
+  return glm::vec2(point.x, point.y);
+}
+
+inline glm::mat3 flipCoord(const glm::mat3& mat)
+{
+  if (FLIP_COORD)
+  {
+    auto newMat = mat;
+    auto v = newMat[2];
+    v[2] = -v[2];
+    newMat[2] = v;
+  }
+  return mat;
+}
+} // namespace VGG
+
+// NOLINTBEGIN
+template<typename T>
+inline std::optional<T> get_opt(const nlohmann::json& obj, const std::string& key)
+{
+  if (auto p = obj.find(key); p != obj.end())
+    return p.value().get<T>();
+  return std::nullopt;
+}
+
+template<typename T>
+inline std::optional<T> get_opt(const nlohmann::json& obj, const char* key)
+{
+  if (auto p = obj.find(key); p != obj.end())
+    return p.value().get<T>();
+  return std::nullopt;
+}
+
+template<typename K>
+inline const nlohmann::json& get_or_default(const nlohmann::json& j, K&& key)
+{
+  if (auto it = j.find(key); it != j.end())
+  {
+    return it.value();
+  }
+
+  static const nlohmann::json s_json;
+  return s_json;
+}
+
+template<>
+inline std::optional<glm::vec2> get_opt(const nlohmann::json& obj, const std::string& key)
+{
+  if (auto it = obj.find(key); it != obj.end())
+  {
+    auto v = obj.value(key, std::array<float, 2>{ 0, 0 });
+    return flipCoord(glm::vec2(v[0], v[1]));
+  }
+  return std::nullopt;
+}
+
+template<>
+inline std::optional<glm::vec2> get_opt(const nlohmann::json& obj, const char* key)
+{
+  if (auto it = obj.find(key); it != obj.end())
+  {
+    auto v = obj.value(key, std::array<float, 2>{ 0, 0 });
+    return flipCoord(glm::vec2(v[0], v[1]));
+  }
+  return std::nullopt;
+}
+
+// NOLINTEND
+
+namespace VGG
+{
+// NOLINTBEGIN
 
 template<typename T>
 inline std::optional<T> get_stack_optional(const json& j, const char* property)
@@ -50,27 +124,12 @@ inline std::optional<T> get_stack_optional(const json& j, const std::string& pro
   return get_stack_optional<T>(j, property.data());
 }
 
-// template<typename T>
-// inline T get_or_default(const json& j, const std::string& property, const T& dft)
-// {
-//   auto it = j.find(property);
-//   if (it != j.end() && !it->is_null())
-//   {
-//     return j.at(property).get<T>();
-//   }
-//   return dft;
-// }
-
-// template<typename T>
-// inline T get_or_default(const json& j, const char* property)
-// {
-//   auto it = j.find(property);
-//   if (it != j.end() && !it->is_null())
-//   {
-//     return j.at(property).get<T>();
-//   }
-//   return T{};
-// }
+inline void from_json(const json& j, glm::mat3& x)
+{
+  x = flipCoord(glm::mat3{ glm::vec3{ j[0], j[1], 0 },
+                           glm::vec3{ j[2], j[3], 0 },
+                           glm::vec3{ j[4], j[5], 1 } });
+}
 
 inline void from_json(const json& j, Color& x)
 {
@@ -95,10 +154,10 @@ inline void from_json(const json& j, Pattern& x)
     glm::mat3 m{ 1.0 };
     if (it != instance.end())
     {
-      auto v = instance.at("matrix").get<std::vector<double>>();
-      m = glm::mat3{ glm::vec3{ v[0], v[1], 0 },
-                     glm::vec3{ v[2], v[3], 0 },
-                     glm::vec3{ v[4], v[5], 1 } };
+      auto v = instance.at("matrix").get<std::array<float, 6>>();
+      m = flipCoord(glm::mat3{ glm::vec3{ v[0], v[1], 0 },
+                               glm::vec3{ v[2], v[3], 0 },
+                               glm::vec3{ v[4], v[5], 1 } });
     }
     x.transform = m;
   }
@@ -118,14 +177,13 @@ inline void from_json(const json& j, Gradient::GradientStop& x)
 inline void transformGredient(const json& j, Gradient& x)
 {
   x.aiCoordinate = true;
-  auto v = j.at("matrix").get<std::vector<double>>();
-  assert(v.size() == 6);
-  const auto matrix =
-    glm::mat3{ glm::vec3{ v[0], v[1], 0 }, glm::vec3{ v[2], v[3], 0 }, glm::vec3{ v[4], v[5], 1 } };
+  const auto v = j.value("matrix", std::array<float, 6>{ 1, 0, 0, 1, 0, 0 });
+  const auto matrix = flipCoord(glm::mat3{ glm::vec3{ v[0], v[1], 0 },
+                                           glm::vec3{ v[2], v[3], 0 },
+                                           glm::vec3{ v[4], v[5], 1 } });
   const float length = j["length"];
   const float angle = j["angle"];
-  x.from.x = j["xOrigin"];
-  x.from.y = 0;
+  x.from = flipCoord(glm::vec2(j["xOrigin"], 0));
   x.to.x = angle;
   x.to.y = length;
 }
@@ -138,8 +196,8 @@ inline void from_json(const json& j, Gradient& x)
   {
     const auto f = g["from"];
     const auto t = g["to"];
-    x.from = glm::vec2{ f[0], f[1] };
-    x.to = glm::vec2{ t[0], t[1] };
+    x.from = flipGradientCoord(glm::vec2{ f[0], f[1] });
+    x.to = flipGradientCoord(glm::vec2{ t[0], t[1] });
     x.stops = g["stops"];
     x.invert = g["invert"];
     x.gradientType = EGradientType::GT_Linear;
@@ -201,8 +259,9 @@ inline void from_json(const json& j, Shadow& x)
   x.context_settings = j.at("contextSettings").get<ContextSetting>();
   x.inner = j.at("inner").get<bool>();
   x.is_enabled = j.at("isEnabled").get<bool>();
-  x.offset_x = j.at("offsetX").get<double>();
-  x.offset_y = j.at("offsetY").get<double>();
+  const auto p = flipCoord(glm::vec2{ j.value("offsetX", 0.f), j.value("offsetY", 0.f) });
+  x.offset_x = p.x;
+  x.offset_y = p.y;
   x.spread = j.at("spread").get<double>();
 }
 
@@ -210,12 +269,11 @@ inline void from_json(const json& j, Blur& x)
 {
   x.radius = get_stack_optional<float>(j, "radius").value_or(0.f);
   x.motionAngle = get_stack_optional<float>(j, "motionAngle").value_or(0.f);
-  const auto v = j.at("center").get<std::vector<double>>();
-  x.center.x = v[0];
-  x.center.y = v[1];
-  x.isEnabled = j["isEnabled"];
-  x.blurType = j.at("type").get<EBlurType>();
-  x.saturation = j.at("saturation").get<double>();
+  const auto v = j.value("center", std::array<float, 2>{ 0, 0 });
+  x.center = flipCoord(glm::vec2(v[0], v[1]));
+  x.isEnabled = j.value("isEnabled", false);
+  x.blurType = j.value("type", EBlurType());
+  x.saturation = j.value("saturation", 0.f);
 }
 
 inline void from_json(const json& j, Fill& x)
@@ -251,9 +309,10 @@ inline void from_json(const json& j, Bound2& b)
 {
   auto x = j.value("x", 0.f);
   auto y = j.value("y", 0.f);
+  const auto topLeft = flipCoord(glm::vec2{ x, y });
   auto width = j.value("width", 0.f);
   auto height = j.value("height", 0.f);
-  b = Bound2{ x, y, width, height };
+  b = Bound2{ topLeft, width, height };
 }
 
 inline void from_json(const json& j, TextStyleAttr& x)

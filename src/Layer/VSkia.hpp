@@ -167,8 +167,6 @@ inline SkPathOp toSkPathOp(VGG::EBoolOp blop)
   SWITCH_MAP_ITEM_END(SkPathOp::kUnion_SkPathOp)
 }
 
-
-
 inline double calcRadius(double r0,
                          const glm::vec2& p0,
                          const glm::vec2& p1,
@@ -594,8 +592,6 @@ inline sk_sp<SkImageFilter> makeBlendModeFilter(EBlendMode blendMode)
 inline SkRect toSkRect(const VGG::Bound2& bound)
 {
   const auto& b = bound;
-  SkRect a;
-  a.isEmpty();
   return SkRect{ b.topLeft.x, b.topLeft.y, b.bottomRight.x, b.bottomRight.y };
 }
 

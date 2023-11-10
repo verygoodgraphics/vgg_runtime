@@ -33,15 +33,21 @@ struct Bound2
   }
   Bound2(float x, float y, float w, float h)
     : topLeft{ x, y }
-    , bottomRight{ x + w, y - h }
+    , bottomRight{ x + w, y + h }
+  {
+  }
+
+  Bound2(const glm::vec2& topLeft, float w, float h)
+    : topLeft(topLeft)
+    , bottomRight{ topLeft.x + w, topLeft.y + h }
   {
   }
 
   void extend(float delta)
   {
     topLeft.x -= delta;
-    topLeft.y += delta;
-    bottomRight.y -= delta;
+    topLeft.y -= delta;
+    bottomRight.y += delta;
     bottomRight.x += delta;
   }
 
@@ -54,7 +60,7 @@ struct Bound2
   // map the given p into the bound coordinate
   glm::vec2 map(const glm::vec2& p) const
   {
-    return glm::vec2{ p.x + topLeft.x, -(p.y + topLeft.y) };
+    return glm::vec2{ p.x + topLeft.x, (p.y + topLeft.y) };
   }
 
   float width() const
@@ -69,12 +75,12 @@ struct Bound2
 
   void setHeight(float h)
   {
-    bottomRight.y = topLeft.y - h;
+    bottomRight.y = topLeft.y + h;
   }
 
   float height() const
   {
-    return topLeft.y - bottomRight.y;
+    return -topLeft.y + bottomRight.y;
   }
 
   bool valid() const
@@ -115,9 +121,9 @@ struct Bound2
   void unionWith(const Bound2& bound)
   {
     topLeft.x = std::min(topLeft.x, bound.topLeft.x);
-    topLeft.y = std::max(topLeft.y, bound.topLeft.y);
+    topLeft.y = std::min(topLeft.y, bound.topLeft.y);
     bottomRight.x = std::max(bottomRight.x, bound.bottomRight.x);
-    bottomRight.y = std::min(bottomRight.y, bound.bottomRight.y);
+    bottomRight.y = std::max(bottomRight.y, bound.bottomRight.y);
   }
 
   Bound2 unionAs(const Bound2& bound) const
@@ -130,9 +136,9 @@ struct Bound2
   void intersectWith(const Bound2& bound)
   {
     topLeft.x = std::max(topLeft.x, bound.topLeft.x);
-    topLeft.y = std::min(topLeft.y, bound.topLeft.y);
+    topLeft.y = std::max(topLeft.y, bound.topLeft.y);
     bottomRight.x = std::min(bottomRight.x, bound.bottomRight.x);
-    bottomRight.y = std::max(bottomRight.y, bound.bottomRight.y);
+    bottomRight.y = std::min(bottomRight.y, bound.bottomRight.y);
   }
 
   Bound2 intersectAs(const Bound2& bound) const
@@ -160,35 +166,35 @@ public:
   {
     Bound2 b;
     b.topLeft.x = std::numeric_limits<float>::lowest();
-    b.topLeft.y = std::numeric_limits<float>::max();
+    b.topLeft.y = std::numeric_limits<float>::lowest();
     b.bottomRight.x = std::numeric_limits<float>::max();
-    b.bottomRight.y = std::numeric_limits<float>::lowest();
+    b.bottomRight.y = std::numeric_limits<float>::max();
     return b;
   }
 };
 
-struct RoundedBound2 : public Bound2
-{
-private:
-  float m_xRadius{ 0.0f }, m_yRadius{ 0.0f };
-
-public:
-  RoundedBound2(float x, float y, float w, float h, float xR, float yR)
-    : Bound2(x, y, w, h)
-    , m_xRadius(xR)
-    , m_yRadius(yR)
-  {
-  }
-  RoundedBound2() = default;
-  float xRadius() const
-  {
-    return m_xRadius;
-  }
-
-  float yRadius() const
-  {
-    return m_yRadius;
-  }
-};
+// struct RoundedBound2 : public Bound2
+// {
+// private:
+//   float m_xRadius{ 0.0f }, m_yRadius{ 0.0f };
+//
+// public:
+//   RoundedBound2(float x, float y, float w, float h, float xR, float yR)
+//     : Bound2(x, y, w, h)
+//     , m_xRadius(xR)
+//     , m_yRadius(yR)
+//   {
+//   }
+//   RoundedBound2() = default;
+//   float xRadius() const
+//   {
+//     return m_xRadius;
+//   }
+//
+//   float yRadius() const
+//   {
+//     return m_yRadius;
+//   }
+// };
 
 } // namespace VGG

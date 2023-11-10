@@ -233,15 +233,29 @@ class NlohmannBuilder
         std::string text = j.value("content", "");
         auto lineType = get_stack_optional<std::vector<TextLineAttr>>(j, "lineType")
                           .value_or(std::vector<TextLineAttr>());
-        auto attr = j.value("attr", std::vector<TextStyleAttr>{});
-        for (auto& t : attr)
+
+        auto defaultAttr = defaultTextAttr();
+        defaultAttr.update(j.value("defaultAttr", nlohmann::json::object()), true);
+        auto fontAttr = j.value("attr", std::vector<nlohmann::json>{});
+        std::vector<TextStyleAttr> textStyleAttrs;
+        for (auto& att : fontAttr)
         {
-          if (!t.fills)
+          auto json = defaultAttr;
+          json.update(att, true);
+          if (auto it = json.find("fills"); it == json.end())
           {
-            t.fills = p->style().fills;
+            json["fills"] =
+              j.value("style", nlohmann::json{}).value("fills", std::vector<nlohmann::json>());
           }
+          if (auto it = json.find("borders"); it == json.end())
+          {
+
+            json["borders"] =
+              j.value("style", nlohmann::json{}).value("borders", std::vector<nlohmann::json>());
+          }
+          textStyleAttrs.push_back(json);
         }
-        p->setParagraph(std::move(text), attr, lineType);
+        p->setParagraph(std::move(text), textStyleAttrs, lineType);
         p->setVerticalAlignment(j.value("verticalAlignment", ETextVerticalAlignment::VA_Top));
         const auto& b = p->getBound();
         p->setFrameMode(j.value("frameMode", ETextLayoutMode::TL_Fixed));
@@ -459,6 +473,38 @@ class NlohmannBuilder
   }
 
 public:
+  static nlohmann::json defaultTextAttr()
+  {
+    auto j = R"({
+        "length":0,
+        "borders":[],
+        "fills":[],
+        "fillUseType":0,
+        "horizontalAlignment":0,
+        "name":"Fira Sans",
+        "subFamilyName":"",
+        "size":14,
+        "kerning":true,
+        "letterSpacingValue":0,
+        "letterSpacingUnit":0,
+   "lineSpaceValue":0,
+   "lineSpaceUnit":0,
+   "underline":0,
+   "linethrough":false,
+   "bold":false,
+   "italic":false,
+   "fontVariantCaps":0,
+   "textCase":0,
+   "baselineShift":0,
+   "baseline":0,
+   "horizontalScale":1,
+   "verticalScale":1,
+   "proportionalSpacing":0,
+   "rotate":0,
+   "textParagraph":{}
+    })"_json;
+    return j;
+  }
   static NodeContainer build(const nlohmann::json& j)
   {
     NlohmannBuilder builder;

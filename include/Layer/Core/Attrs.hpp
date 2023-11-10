@@ -392,8 +392,9 @@ struct TextStyleAttr
 {
   std::string fontName;
   std::string subFamilyName;
-  std::optional<std::vector<Fill>> fills;
+  std::vector<Fill> fills;
   float letterSpacing{ 0.0 };
+  float lineSpace{ 0.f };
   float baselineShift{ 0.0 };
   size_t length{ 0 };
   uint8_t size{ 14 };

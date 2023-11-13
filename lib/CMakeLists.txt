@@ -19,7 +19,7 @@ mark_as_advanced(VGG_AUTOMERGE_INCLUDE)
 # layout
 option(open_vgg_layout_test "Disable vgg_layout test" OFF)
 add_subdirectory(vgg_contrib/yoga EXCLUDE_FROM_ALL)
-add_subdirectory(vgg_layout EXCLUDE_FROM_ALL)
+add_subdirectory(vgg_layout)
 
 if (NOT EMSCRIPTEN)
   set(NODE_FOLDER "node$ENV{name}${CMAKE_CXX_COMPILER_ID}${CMAKE_CXX_COMPILER_VERSION}" CACHE STRING "node folder name" FORCE)

@@ -416,9 +416,9 @@ Layout::Rect LayoutNode::resize(const Layout::Size& oldContainerSize,
     return resizeGroup(oldContainerSize, newContainerSize, parentOrigin);
   }
 
-  if (auto json = model(); Layout::isPathNode(*json))
+  if (auto json = model(); Layout::isContourPathNode(*json))
   {
-    return resizePath(oldContainerSize, newContainerSize, parentOrigin);
+    return resizeContour(oldContainerSize, newContainerSize, parentOrigin);
   }
 
   auto oldFrame = frame();
@@ -876,20 +876,17 @@ Layout::Rect LayoutNode::calculateResizedFrame(const Layout::Size& newSize)
   return { { x, y }, { w, h } };
 }
 
-Layout::Rect LayoutNode::resizePath(const Layout::Size& oldContainerSize,
-                                    const Layout::Size& newContainerSize,
-                                    const Layout::Point* parentOrigin)
+Layout::Rect LayoutNode::resizeContour(const Layout::Size& oldContainerSize,
+                                       const Layout::Size& newContainerSize,
+                                       const Layout::Point* parentOrigin)
 {
-  DEBUG("resizePath: begin, name = %s, id = %s", name().c_str(), id().c_str());
+  DEBUG("resizeContour: begin, name = %s, id = %s", name().c_str(), id().c_str());
 
   const auto json = model();
   ASSERT(json);
 
-  nlohmann::json::json_pointer path{ m_path };
   const auto& subshapes = (*json)[K_SHAPE][K_SUBSHAPES];
   ASSERT(subshapes.size() == 1);
-  path /= K_SHAPE;
-  path /= K_SUBSHAPES;
 
   const auto& subshape = subshapes[0];
   const auto& subGeometry = subshape[K_SUBGEOMETRY];
@@ -899,7 +896,6 @@ Layout::Rect LayoutNode::resizePath(const Layout::Size& oldContainerSize,
   const auto& points = subGeometry[K_POINTS];
   ASSERT(points.size() > 0);
   const bool isClosed = subGeometry[K_CLOSED];
-  auto pointsPath = path / 0 / K_SUBGEOMETRY / K_POINTS;
 
   const auto oldSize = modelBounds().size;
   std::vector<Layout::BezierPoint> oldModelPoints;
@@ -909,7 +905,7 @@ Layout::Rect LayoutNode::resizePath(const Layout::Size& oldContainerSize,
     oldModelPoints.push_back(point);
 
     auto oldFlipYModelPoint = point.point.makeFromModelPoint();
-    DEBUG("resizePath: old flip y model point %d: %f, %f",
+    DEBUG("resizeContour: old flip y model point %d: %f, %f",
           j,
           oldFlipYModelPoint.x,
           oldFlipYModelPoint.y);
@@ -929,7 +925,7 @@ Layout::Rect LayoutNode::resizePath(const Layout::Size& oldContainerSize,
       tmpPoint = tmpPoint.makeTranslate(parentOrigin->x, parentOrigin->y);
     }
     oldLayoutPoints.push_back(tmpPoint);
-    DEBUG("resizePath: old layout point: %f, %f",
+    DEBUG("resizeContour: old layout point: %f, %f",
           oldLayoutPoints.back().point.x,
           oldLayoutPoints.back().point.y);
   }
@@ -943,12 +939,12 @@ Layout::Rect LayoutNode::resizePath(const Layout::Size& oldContainerSize,
             nullptr); // Pass nullptr because oldLayoutPoints has been translated by parentOrigin
   auto [y, h] = resizeV(oldContainerSize, newContainerSize, oldLayoutFrame, nullptr);
   Layout::Rect newLayoutFrame{ { x, y }, { w, h } };
-  DEBUG("resizePath: old layout frame: %f, %f, %f, %f",
+  DEBUG("resizeContour: old layout frame: %f, %f, %f, %f",
         oldLayoutFrame.left(),
         oldLayoutFrame.top(),
         oldLayoutFrame.width(),
         oldLayoutFrame.height());
-  DEBUG("resizePath: new layout frame: %f, %f, %f, %f",
+  DEBUG("resizeContour: new layout frame: %f, %f, %f, %f",
         newLayoutFrame.left(),
         newLayoutFrame.top(),
         newLayoutFrame.width(),
@@ -959,7 +955,7 @@ Layout::Rect LayoutNode::resizePath(const Layout::Size& oldContainerSize,
   for (const auto& oldLayoutPoint : oldLayoutPoints)
   {
     newLayoutPoints.push_back(oldLayoutPoint.makeScale(oldLayoutFrame, newLayoutFrame));
-    DEBUG("resizePath: new layout point, %lu: %f, %f",
+    DEBUG("resizeContour: new layout point, %lu: %f, %f",
           newLayoutPoints.size() - 1,
           newLayoutPoints.back().point.x,
           newLayoutPoints.back().point.y);
@@ -976,13 +972,13 @@ Layout::Rect LayoutNode::resizePath(const Layout::Size& oldContainerSize,
   {
     reverseRotatedLayoutPoints.push_back(newLayoutPoint.makeTransform(reverseRotateTransform));
 
-    DEBUG("resizePath: reverse rotated point, %f, %f",
+    DEBUG("resizeContour: reverse rotated point, %f, %f",
           reverseRotatedLayoutPoints.back().point.x,
           reverseRotatedLayoutPoints.back().point.y);
   }
   const auto reverseRotatedFrame =
     Layout::Rect::makeFromPoints(reverseRotatedLayoutPoints, isClosed);
-  DEBUG("resizePath: reverse rotated frame, %f, %f, %f, %f",
+  DEBUG("resizeContour: reverse rotated frame, %f, %f, %f, %f",
         reverseRotatedFrame.left(),
         reverseRotatedFrame.top(),
         reverseRotatedFrame.width(),
@@ -995,7 +991,7 @@ Layout::Rect LayoutNode::resizePath(const Layout::Size& oldContainerSize,
     auto newModelPoint =
       reverseRotatedPoint.makeTranslate(-reverseRotatedFrame.left(), -reverseRotatedFrame.top())
         .makeModelFormat();
-    DEBUG("resizePath: new model point, %f, %f", newModelPoint.point.x, newModelPoint.point.y);
+    DEBUG("resizeContour: new model point, %f, %f", newModelPoint.point.x, newModelPoint.point.y);
     newModelPoints.push_back(newModelPoint);
   }
 
@@ -1018,7 +1014,7 @@ Layout::Rect LayoutNode::resizePath(const Layout::Size& oldContainerSize,
 
   updatePathNodeModel(newModelFrame.makeModelRect(), newMatrix, newModelPoints);
 
-  DEBUG("resizePath: end, name = %s, id = %s, new frame, %f, %f, %f, %f",
+  DEBUG("resizeContour: end, name = %s, id = %s, new frame, %f, %f, %f, %f",
         name().c_str(),
         id().c_str(),
         layoutTopLeft.x,

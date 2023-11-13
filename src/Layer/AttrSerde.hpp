@@ -16,6 +16,11 @@
 #pragma once
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
+#include "Math/Algebra.hpp"
+#include "glm/ext/matrix_transform.hpp"
+#include "glm/gtx/matrix_transform_2d.hpp"
+#include "glm/gtx/quaternion.hpp"
+#include "glm/gtx/transform.hpp"
 
 #include <nlohmann/json.hpp>
 #include <glm/glm.hpp>
@@ -27,9 +32,25 @@ namespace VGG
 constexpr bool FLIP_COORD = false;
 inline glm::vec2 flipCoord(const glm::vec2& point)
 {
-  if (FLIP_COORD)
+  if (!FLIP_COORD)
     return glm::vec2(point.x, -point.y);
   return point;
+}
+
+inline glm::mat3 flipTransform(const glm::mat3& mat)
+{
+  glm::vec2 scale;
+  float angle;
+  glm::quat quat;
+  glm::vec2 skew;
+  glm::vec2 trans;
+  glm::vec3 persp;
+  VGG::decompose(mat, scale, angle, quat, skew, trans, persp);
+  glm::mat3 newMat = glm::identity<glm::mat3>();
+  newMat = glm::translate(newMat, glm::vec2(trans.x, -trans.y));
+  newMat = glm::rotate(newMat, angle);
+  newMat = glm::scale(newMat, scale);
+  return newMat;
 }
 
 inline glm::vec2 flipGradientCoord(const glm::vec2& point)
@@ -39,12 +60,22 @@ inline glm::vec2 flipGradientCoord(const glm::vec2& point)
 
 inline glm::mat3 flipCoord(const glm::mat3& mat)
 {
-  if (FLIP_COORD)
+  if (!FLIP_COORD)
   {
-    auto newMat = mat;
-    auto v = newMat[2];
-    v[2] = -v[2];
-    newMat[2] = v;
+    return mat;
+    // glm::vec2 scale;
+    // float angle;
+    // glm::quat quat;
+    // glm::vec2 skew;
+    // glm::vec2 trans;
+    // glm::vec3 persp;
+    // VGG::decompose(mat, scale, angle, quat, skew, trans, persp);
+    //
+    // glm::mat3 newMat = glm::identity<glm::mat3>();
+    // newMat = glm::translate(newMat, glm::vec2(trans.x, -trans.y));
+    // newMat = glm::rotate(newMat, angle);
+    // newMat = glm::scale(newMat, scale);
+    // return newMat;
   }
   return mat;
 }
@@ -85,7 +116,7 @@ inline std::optional<glm::vec2> get_opt(const nlohmann::json& obj, const std::st
   if (auto it = obj.find(key); it != obj.end())
   {
     auto v = obj.value(key, std::array<float, 2>{ 0, 0 });
-    return flipCoord(glm::vec2(v[0], v[1]));
+    return VGG::flipCoord(glm::vec2(v[0], v[1]));
   }
   return std::nullopt;
 }
@@ -96,7 +127,7 @@ inline std::optional<glm::vec2> get_opt(const nlohmann::json& obj, const char* k
   if (auto it = obj.find(key); it != obj.end())
   {
     auto v = obj.value(key, std::array<float, 2>{ 0, 0 });
-    return flipCoord(glm::vec2(v[0], v[1]));
+    return VGG::flipCoord(glm::vec2(v[0], v[1]));
   }
   return std::nullopt;
 }

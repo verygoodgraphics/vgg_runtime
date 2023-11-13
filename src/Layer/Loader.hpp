@@ -401,11 +401,10 @@ class NlohmannBuilder
     }
     for (const auto& p : frames)
     {
-      auto t = p->localTransform();
-      const auto b = p->getBound();
-      t = glm::translate(t, glm::vec2{ -t[2][0], -t[2][1] });
-      t = glm::translate(t, glm::vec2{ -b.topLeft.x, -b.topLeft.y });
-      p->setLocalTransform(t);
+      // auto t = p->localTransform();
+      // const auto b = p->getBound();
+      // p->setLocalTransform(t);
+      // p->setOverflow(EOverflow::OF_Visible);
     }
     return frames;
   }

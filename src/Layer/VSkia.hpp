@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/AttrSerde.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Scene.hpp"
@@ -530,7 +531,8 @@ inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
     modeX = imageTileMirrored ? SkTileMode::kMirror : SkTileMode::kRepeat;
   }
   SkSamplingOptions opt;
-  mat.preScale(1, -1); // convert to skia
+  if (FLIP_COORD)
+    mat.preScale(1, -1); // convert to skia
 
   return img->makeShader(modeX, modeY, opt, &mat);
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "Layer/AttrSerde.hpp"
 #include "Layer/ParagraphPainter.hpp"
 #include "VSkFontMgr.hpp"
 #include "TextNodePrivate.hpp"
@@ -123,7 +124,9 @@ void TextNode::paintEvent(SkiaRenderer* renderer)
 
   canvas->save();
   // we need to convert to skia coordinate to render text
-  canvas->scale(1, -1);
+
+  if (FLIP_COORD)
+    canvas->scale(1, -1);
   {
     const auto bound = getBound();
     _->painter.setCanvas(canvas);

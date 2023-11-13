@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/AttrSerde.hpp"
 #include "Layer/Core/VType.hpp"
 #include "VSkia.hpp"
 #include "RenderState.hpp"
@@ -118,7 +119,8 @@ public:
   {
     m_canvas = canvas;
     canvas->save();
-    canvas->scale(1, -1); // convert the whole root to canvas coords
+    if (FLIP_COORD)
+      canvas->scale(1, -1); // convert the whole root to canvas coords
 
     root->renderPass(this);
     canvas->restore();
@@ -174,7 +176,8 @@ public:
   {
     m_canvas = canvas;
     canvas->save();
-    canvas->scale(1, -1); // convert the whole root to canvas coords
+    if (FLIP_COORD)
+      canvas->scale(1, -1); // convert the whole root to canvas coords
 
     if (!m_enableDrawDebugBound)
     {

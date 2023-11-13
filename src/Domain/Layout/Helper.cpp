@@ -124,6 +124,24 @@ bool isPathNode(const nlohmann::json& json)
   return className == K_PATH;
 }
 
+bool isContourPathNode(const nlohmann::json& json)
+{
+  if (!isPathNode(json))
+  {
+    return false;
+  }
+
+  const auto& subshapes = (json)[K_SHAPE][K_SUBSHAPES];
+  if (subshapes.size() != 1)
+  {
+    return false;
+  }
+
+  const auto& subshape = subshapes[0];
+  const auto& subGeometry = subshape[K_SUBGEOMETRY];
+  return (subGeometry[K_CLASS] == K_CONTOUR);
+}
+
 bool isVectorNetworkGroupNode(const nlohmann::json& json)
 {
   if (!isGroupNode(json))

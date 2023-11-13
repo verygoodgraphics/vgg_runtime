@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/AttrSerde.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Renderer.hpp"
@@ -289,7 +290,8 @@ public:
     for (const auto& p : cache)
     {
       auto skm = toSkMatrix(p.second);
-      skm.postScale(1, -1);
+      if (FLIP_COORD)
+        skm.postScale(1, -1);
       maskCanvas->setMatrix(skm);
       // pen.setStrokeWidth(5);
       // pen.setColor(SK_ColorGREEN);

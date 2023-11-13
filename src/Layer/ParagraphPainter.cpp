@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "ParagraphPainter.hpp"
+#include "Layer/AttrSerde.hpp"
 #include "Painter.hpp"
 #include "Utility/Log.hpp"
 
@@ -69,8 +70,8 @@ void VParagraphPainter::drawTextBlob(const sk_sp<SkTextBlob>& blob,
           assert(f.gradient.has_value());
           auto gradientShader = getGradientShader(f.gradient.value(), m_bound);
 
-          // TODO::
-          gradientShader = gradientShader->makeWithLocalMatrix(SkMatrix::Scale(1, -1));
+          if (FLIP_COORD)
+            gradientShader = gradientShader->makeWithLocalMatrix(SkMatrix::Scale(1, -1));
 
           fillPen.setShader(gradientShader);
         }
@@ -90,7 +91,8 @@ void VParagraphPainter::drawTextBlob(const sk_sp<SkTextBlob>& blob,
                                        f.pattern->tileMirrored,
                                        &m);
 
-          shader = shader->makeWithLocalMatrix(SkMatrix::Scale(1, -1));
+          if (FLIP_COORD)
+            shader = shader->makeWithLocalMatrix(SkMatrix::Scale(1, -1));
           fillPen.setShader(shader);
         }
       }

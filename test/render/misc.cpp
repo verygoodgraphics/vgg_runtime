@@ -1,4 +1,5 @@
 
+#include "Layer/AttrSerde.hpp"
 #include <core/SkBlendMode.h>
 #include <core/SkBlurTypes.h>
 #include <core/SkColor.h>
@@ -83,7 +84,8 @@ static sk_sp<SkImageFilter> makeBackgroundBlurFilter(sk_sp<SkImage> bg, SkMatrix
   std::string_view childNames[] = { "content", "bg" };
   sk_sp<SkImageFilter> childNodes[] = { nullptr, bgContent };
   SkRuntimeShaderBuilder builder(std::move(r.effect));
-  builder.uniform("scale") = SkMatrix::Scale(1, -1);
+  if (VGG::FLIP_COORD)
+    builder.uniform("scale") = SkMatrix::Scale(1, -1);
   auto b = mat.invert(&mat);
   builder.uniform("rotate") = mat;
   builder.uniform("size") = SkVector{ (float)bg->width(), (float)bg->height() };

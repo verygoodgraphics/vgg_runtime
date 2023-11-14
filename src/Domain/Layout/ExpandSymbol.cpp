@@ -1010,7 +1010,8 @@ void ExpandSymbol::layoutInstance(nlohmann::json& instance, const Size& instance
   overrideLayoutRuleSize(instance[K_ID], instanceSize);
 }
 
-void ExpandSymbol::overrideLayoutRuleSize(const std::string& instanceId, const Size& instanceSize)
+void ExpandSymbol::overrideLayoutRuleSize(const nlohmann::json& instanceId,
+                                          const Size& instanceSize)
 {
   DEBUG("ExpandSymbol::overrideLayoutRuleSize, instanceId: %s, size: %f, %f",
         instanceId.c_str(),
@@ -1046,7 +1047,7 @@ void ExpandSymbol::overrideLayoutRuleSize(const std::string& instanceId, const S
 }
 
 void ExpandSymbol::layoutSubtree(nlohmann::json& rootTreeJson,
-                                 const std::string& subtreeNodeId,
+                                 const nlohmann::json& subtreeNodeId,
                                  const nlohmann::json& newBoundsJson)
 {
   Rect newBounds = newBoundsJson;
@@ -1205,10 +1206,7 @@ bool ExpandSymbol::hasOriginalLayoutRule(const std::string& id)
 
 bool ExpandSymbol::hasRuntimeLayoutRule(const nlohmann::json& id)
 {
-  auto& rules = m_outLayoutJson[K_OBJ];
-  return std::find_if(rules.begin(),
-                      rules.end(),
-                      [id](const nlohmann::json& item) { return item[K_ID] == id; }) != rules.end();
+  return m_layoutRulesCache.find(id) != m_layoutRulesCache.end();
 }
 
 ExpandSymbol::RuleMap ExpandSymbol::getLayoutRules()

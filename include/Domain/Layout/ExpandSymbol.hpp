@@ -73,7 +73,7 @@ private:
   void resizeInstance(nlohmann::json& instance, nlohmann::json& master);
 
   void layoutInstance(nlohmann::json& instance, const Size& instanceSize);
-  void overrideLayoutRuleSize(const std::string& instanceId, const Size& instanceSize);
+  void overrideLayoutRuleSize(const nlohmann::json& instanceId, const Size& instanceSize);
 
   void resizeSubtree(nlohmann::json& rootTreeJson,
                      nlohmann::json& subtreeJson,
@@ -85,7 +85,7 @@ private:
   void scalePoint(nlohmann::json& json, const char* key, float xScaleFactor, float yScaleFactor);
 
   void layoutSubtree(nlohmann::json& rootTreeJson,
-                     const std::string& subtreeNodeId,
+                     const nlohmann::json& subtreeNodeId,
                      const nlohmann::json& newBoundsJson);
   void layoutDirtyNodes(nlohmann::json& rootTreeJson);
 

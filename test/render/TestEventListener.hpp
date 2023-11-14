@@ -118,10 +118,10 @@ protected:
       if (r)
       {
         auto data = r->read(prefix / fp);
-        Scene::setResRepo(data.Resource);
+        Scene::setResRepo(data.resource);
         try
         {
-          Layout::ExpandSymbol e(data.Format);
+          Layout::ExpandSymbol e(data.format, data.layout);
           m_scene->loadFileContent(e());
           auto editor = std::make_shared<Editor>();
           m_layer->addAppRenderable(editor);

@@ -176,7 +176,7 @@ int main(int argc, char** argv)
       const auto folder = fs::path(fp).filename().stem();
       if (isBitmap)
       {
-        auto iter = exporter.render(data.Format, nlohmann::json{}, data.Resource, opts);
+        auto iter = exporter.render(data.format, data.layout, data.resource, opts);
         write(
           std::move(iter),
           [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); },
@@ -187,9 +187,9 @@ int main(int argc, char** argv)
         writeDoc(extension,
                  prefix,
                  outputFilePostfix,
-                 data.Format,
+                 data.format,
                  nlohmann::json{},
-                 data.Resource);
+                 data.resource);
       }
     }
   }
@@ -211,7 +211,7 @@ int main(int argc, char** argv)
             fs::create_directory(prefix);
             if (isBitmap)
             {
-              auto iter = exporter.render(data.Format, nlohmann::json{}, data.Resource, opts);
+              auto iter = exporter.render(data.format, nlohmann::json{}, data.resource, opts);
               write(
                 std::move(iter),
                 [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); },
@@ -222,9 +222,9 @@ int main(int argc, char** argv)
               writeDoc(extension,
                        prefix,
                        outputFilePostfix,
-                       data.Format,
+                       data.format,
                        nlohmann::json{},
-                       data.Resource);
+                       data.resource);
             }
           }
         }

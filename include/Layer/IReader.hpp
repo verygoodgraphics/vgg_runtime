@@ -56,8 +56,9 @@ inline std::optional<std::vector<char>> GetBinFromFile(const std::filesystem::pa
 
 struct DataWrapper
 {
-  nlohmann::json Format;
-  std::map<std::string, std::vector<char>> Resource;
+  nlohmann::json format;
+  nlohmann::json layout;
+  std::map<std::string, std::vector<char>> resource;
 };
 
 class IReader : public std::enable_shared_from_this<IReader>

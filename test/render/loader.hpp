@@ -29,8 +29,9 @@ protected:
     DataWrapper data;
     if (ret == 0)
     {
-      data.Format = readJson(getReadFile());
-      data.Resource = readRes(getResource());
+      data.format = readJson(getReadFile());
+      data.layout = readJson(layoutFileName());
+      data.resource = readRes(getResource());
     }
     return data;
   }
@@ -57,6 +58,13 @@ protected:
   {
     const auto outputDir = fs::path(config.value("outputDir", ""));
     const auto fileName = fs::path(config.value("outputFileName", ""));
+    return outputDir / fileName;
+  }
+
+  fs::path layoutFileName()
+  {
+    const auto outputDir = fs::path(config.value("outputDir", ""));
+    const auto fileName = fs::path(config.value("layoutFileName", ""));
     return outputDir / fileName;
   }
 
@@ -125,10 +133,10 @@ public:
   DataWrapper read(const fs::path& fullpath) override
   {
     DataWrapper data;
-    data.Format = readJson(fullpath);
+    data.format = readJson(fullpath);
     const fs::path prefix = this->config.value("outputImageDir", "resources");
     auto stem = fullpath.parent_path() / prefix;
-    data.Resource = readRes(stem);
+    data.resource = readRes(stem);
     return data;
   }
 };

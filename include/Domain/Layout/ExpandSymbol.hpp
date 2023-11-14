@@ -31,11 +31,22 @@ namespace Layout
 {
 constexpr auto K_SEPARATOR = "__";
 
+namespace Internal
+{
+namespace Rule
+{
+struct Rule;
+}
+} // namespace Internal
+
 class ExpandSymbol
 {
+  using RuleMap = std::unordered_map<std::string, std::shared_ptr<Internal::Rule::Rule>>;
+
   const nlohmann::json& m_designJson;
   const nlohmann::json& m_layoutJson;
   nlohmann::json m_outLayoutJson;
+  RuleMap m_layoutRulesCache;
   std::unordered_map<std::string, nlohmann::json> m_masters;
   std::unordered_map<std::string, nlohmann::json> m_layoutRules;
 
@@ -123,6 +134,8 @@ private:
                                    const std::vector<std::string>& instanceIdStack,
                                    const nlohmann::json& overrideItem);
   nlohmann::json* findLayoutObjectById(const std::string& id);
+
+  RuleMap getLayoutRules();
 };
 } // namespace Layout
 

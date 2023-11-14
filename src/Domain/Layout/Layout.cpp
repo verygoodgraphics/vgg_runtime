@@ -31,16 +31,22 @@ using namespace VGG;
 using namespace VGG::Layout::Internal::Rule;
 
 Layout::Layout::Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc, bool isRootTree)
+{
+  RuleMap rules;
+  if (layoutDoc)
+  {
+    rules = collectRules(layoutDoc->content());
+  }
+
+  new (this) Layout(designDoc, rules, isRootTree);
+}
+
+Layout::Layout::Layout(JsonDocumentPtr designDoc, RuleMap rules, bool isRootTree)
   : m_designDoc{ designDoc }
-  , m_layoutDoc{ layoutDoc }
+  , m_rules{ rules }
   , m_isRootTree{ isRootTree }
 {
   ASSERT(m_designDoc);
-
-  if (m_layoutDoc)
-  {
-    collectRules(m_layoutDoc->content());
-  }
 
   // initial config
   buildLayoutTree();
@@ -182,11 +188,13 @@ void Layout::Layout::createOneOrMoreLayoutNodes(const nlohmann::json& j,
   }
 }
 
-void Layout::Layout::collectRules(const nlohmann::json& json)
+Layout::Layout::RuleMap Layout::Layout::collectRules(const nlohmann::json& json)
 {
+  RuleMap result;
+
   if (!json.is_object())
   {
-    return;
+    return result;
   }
 
   auto& obj = json[K_OBJ];
@@ -203,9 +211,11 @@ void Layout::Layout::collectRules(const nlohmann::json& json)
       auto rule = std::make_shared<Internal::Rule::Rule>();
       *rule = item;
 
-      m_rules[id] = rule;
+      result[id] = rule;
     }
   }
+
+  return result;
 }
 
 void Layout::Layout::configureNodeAutoLayout(std::shared_ptr<LayoutNode> node)

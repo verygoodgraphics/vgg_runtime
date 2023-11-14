@@ -49,6 +49,7 @@ std::pair<nlohmann::json, nlohmann::json> ExpandSymbol::run()
 
   auto designJson = m_designJson;
   m_outLayoutJson = m_layoutJson;
+  m_layoutRulesCache = Layout::collectRules(m_outLayoutJson);
 
   std::vector<std::string> instanceIdStack{};
   expandInstance(designJson, instanceIdStack);
@@ -323,6 +324,7 @@ void ExpandSymbol::processLayoutOverrides(nlohmann::json& instance,
     std::string path = overrideItem[K_OVERRIDE_NAME];
     auto value = overrideItem[K_OVERRIDE_VALUE];
     applyOverrides((*layoutObject), path, value);
+    *m_layoutRulesCache[(*layoutObject)[K_ID]] = *layoutObject;
   }
 }
 
@@ -929,23 +931,32 @@ void ExpandSymbol::mergeLayoutRule(const std::string& srcId, const std::string& 
   for (auto& dstRule : m_outLayoutJson[K_OBJ])
   {
     // erased item in json array is null
-    if (dstRule.is_object() && dstRule[K_ID] == dstId)
+    if (dstRule.is_object() && dstRule[K_ID] == dstId && hasOriginalLayoutRule(srcId))
     {
       auto srcRule = m_layoutRules[srcId];
       if (srcRule.contains(K_LAYOUT)) // copy container layout
       {
         DEBUG("ExpandSymbol, merge layout rule, %s -> %s", srcId.c_str(), dstId.c_str());
         dstRule[K_LAYOUT] = srcRule[K_LAYOUT];
+        *m_layoutRulesCache[dstId] = dstRule;
       }
       return;
     }
   }
 
   // copy layout
-  DEBUG("ExpandSymbol, copy layout rule, %s -> %s", srcId.c_str(), dstId.c_str());
-  auto dstRule = m_layoutRules[srcId];
-  dstRule[K_ID] = dstId;
-  m_outLayoutJson[K_OBJ].push_back(std::move(dstRule));
+  if (hasOriginalLayoutRule(srcId))
+  {
+    auto dstRule = m_layoutRules[srcId];
+    DEBUG("ExpandSymbol, copy layout rule, %s -> %s", srcId.c_str(), dstId.c_str());
+    dstRule[K_ID] = dstId;
+
+    auto rule = std::make_shared<Internal::Rule::Rule>();
+    *rule = dstRule; // must before being moved
+    m_layoutRulesCache[dstId] = rule;
+
+    m_outLayoutJson[K_OBJ].push_back(std::move(dstRule));
+  }
 }
 
 void ExpandSymbol::removeInvalidLayoutRule(const nlohmann::json& json)
@@ -965,6 +976,7 @@ void ExpandSymbol::removeInvalidLayoutRule(const nlohmann::json& json)
       if (rules[i][K_ID] == id)
       {
         rules.erase(i);
+        m_layoutRulesCache.erase(id);
         break;
       }
     }
@@ -984,7 +996,7 @@ void ExpandSymbol::layoutInstance(nlohmann::json& instance, const Size& instance
         instanceSize.height);
 
   Layout layout{ JsonDocumentPtr{ new ReferenceJsonDocument{ instance } },
-                 JsonDocumentPtr{ new ReferenceJsonDocument{ m_outLayoutJson } },
+                 getLayoutRules(),
                  false };
 
   // layout first, update instance size with rule size
@@ -1008,9 +1020,11 @@ void ExpandSymbol::overrideLayoutRuleSize(const std::string& instanceId, const S
   {
     if (dstRule[K_ID] == instanceId)
     {
+      auto ruleCache = m_layoutRulesCache[instanceId];
       if (dstRule[K_WIDTH][K_VALUE][K_TYPES] == Internal::Rule::Length::ETypes::PX)
       {
         dstRule[K_WIDTH][K_VALUE][K_VALUE] = instanceSize.width;
+        ruleCache->width.value.value = instanceSize.width;
       }
       else
       {
@@ -1020,6 +1034,7 @@ void ExpandSymbol::overrideLayoutRuleSize(const std::string& instanceId, const S
       if (dstRule[K_HEIGHT][K_VALUE][K_TYPES] == Internal::Rule::Length::ETypes::PX)
       {
         dstRule[K_HEIGHT][K_VALUE][K_VALUE] = instanceSize.height;
+        ruleCache->height.value.value = instanceSize.height;
       }
       else
       {
@@ -1036,7 +1051,7 @@ void ExpandSymbol::layoutSubtree(nlohmann::json& rootTreeJson,
 {
   Rect newBounds = newBoundsJson;
   Layout layout{ JsonDocumentPtr{ new ReferenceJsonDocument{ rootTreeJson } },
-                 JsonDocumentPtr{ new ReferenceJsonDocument{ m_outLayoutJson } },
+                 getLayoutRules(),
                  false };
   layout.resizeNodeThenLayout(subtreeNodeId, newBounds.size);
   overrideLayoutRuleSize(subtreeNodeId, newBounds.size);
@@ -1050,7 +1065,7 @@ void ExpandSymbol::layoutDirtyNodes(nlohmann::json& rootTreeJson)
   }
 
   Layout layout{ JsonDocumentPtr{ new ReferenceJsonDocument{ rootTreeJson } },
-                 JsonDocumentPtr{ new ReferenceJsonDocument{ m_outLayoutJson } },
+                 getLayoutRules(),
                  false };
   layout.layoutNodes(m_tmpDirtyNodeIds);
 
@@ -1194,4 +1209,9 @@ bool ExpandSymbol::hasRuntimeLayoutRule(const nlohmann::json& id)
   return std::find_if(rules.begin(),
                       rules.end(),
                       [id](const nlohmann::json& item) { return item[K_ID] == id; }) != rules.end();
+}
+
+ExpandSymbol::RuleMap ExpandSymbol::getLayoutRules()
+{
+  return m_layoutRulesCache;
 }

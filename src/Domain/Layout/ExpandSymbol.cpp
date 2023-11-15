@@ -48,14 +48,15 @@ std::pair<nlohmann::json, nlohmann::json> ExpandSymbol::run()
   collectLayoutRules(m_layoutJson);
 
   auto designJson = m_designJson;
-  m_outLayoutJson = m_layoutJson;
-  m_layoutRulesCache = Layout::collectRules(m_outLayoutJson);
+  m_layoutRulesCache = Layout::collectRules(m_layoutJson);
+  m_outLayoutJsonMap = m_layoutRules;
 
   std::vector<std::string> instanceIdStack{};
   expandInstance(designJson, instanceIdStack);
 
-  // It's OK to move m_outLayoutJson, it's like a temporary variable
-  return { std::move(designJson), std::move(m_outLayoutJson) };
+  auto outLayoutJson = generateOutLayoutJson();
+
+  return { std::move(designJson), std::move(outLayoutJson) };
 }
 
 void ExpandSymbol::collectMaster(const nlohmann::json& json)
@@ -315,7 +316,7 @@ void ExpandSymbol::processLayoutOverrides(nlohmann::json& instance,
       continue;
     }
 
-    auto layoutObject = findLayoutObject(instance, instanceIdStack, overrideItem);
+    auto layoutObject = findOutLayoutObject(instance, instanceIdStack, overrideItem);
     if (!layoutObject || !layoutObject->is_object())
     {
       continue;
@@ -324,7 +325,15 @@ void ExpandSymbol::processLayoutOverrides(nlohmann::json& instance,
     std::string path = overrideItem[K_OVERRIDE_NAME];
     auto value = overrideItem[K_OVERRIDE_VALUE];
     applyOverrides((*layoutObject), path, value);
-    *m_layoutRulesCache[(*layoutObject)[K_ID]] = *layoutObject;
+
+    if (layoutObject->contains(K_ID))
+    {
+      *(*m_layoutRulesCache)[(*layoutObject)[K_ID]] = *layoutObject;
+    }
+    else
+    {
+      WARN("ExpandSymbol::processLayoutOverrides: layout object has no id");
+    }
   }
 }
 
@@ -928,17 +937,18 @@ void ExpandSymbol::mergeLayoutRule(const std::string& srcId, const std::string& 
   }
 
   // merge layout and return
-  for (auto& dstRule : m_outLayoutJson[K_OBJ])
+  if (auto dstRulePtr = findOutLayoutObjectById(dstId); dstRulePtr)
   {
     // erased item in json array is null
-    if (dstRule.is_object() && dstRule[K_ID] == dstId && hasOriginalLayoutRule(srcId))
+    auto& dstRule = *dstRulePtr;
+    if (dstRule.is_object() && hasOriginalLayoutRule(srcId))
     {
-      auto srcRule = m_layoutRules[srcId];
+      auto& srcRule = m_layoutRules[srcId];
       if (srcRule.contains(K_LAYOUT)) // copy container layout
       {
         DEBUG("ExpandSymbol, merge layout rule, %s -> %s", srcId.c_str(), dstId.c_str());
         dstRule[K_LAYOUT] = srcRule[K_LAYOUT];
-        *m_layoutRulesCache[dstId] = dstRule;
+        *(*m_layoutRulesCache)[dstId] = dstRule;
       }
       return;
     }
@@ -952,10 +962,10 @@ void ExpandSymbol::mergeLayoutRule(const std::string& srcId, const std::string& 
     dstRule[K_ID] = dstId;
 
     auto rule = std::make_shared<Internal::Rule::Rule>();
-    *rule = dstRule; // must before being moved
-    m_layoutRulesCache[dstId] = rule;
+    *rule = dstRule;
+    (*m_layoutRulesCache)[dstId] = rule;
 
-    m_outLayoutJson[K_OBJ].push_back(std::move(dstRule));
+    m_outLayoutJsonMap[dstId] = dstRule;
   }
 }
 
@@ -968,17 +978,13 @@ void ExpandSymbol::removeInvalidLayoutRule(const nlohmann::json& json)
 
   if (json.is_object() && json.contains(K_ID))
   {
-    auto id = json[K_ID];
-
-    auto& rules = m_outLayoutJson[K_OBJ];
-    for (auto i = 0; i < rules.size(); ++i)
+    std::string id = json[K_ID];
+    if (auto dstRulePtr = findOutLayoutObjectById(id); dstRulePtr)
     {
-      if (rules[i][K_ID] == id)
-      {
-        rules.erase(i);
-        m_layoutRulesCache.erase(id);
-        break;
-      }
+      auto& dstRule = *dstRulePtr;
+      dstRule = nlohmann::json(); // assign a null json; same as rules.erase(i);
+      m_layoutRulesCache->erase(id);
+      m_outLayoutJsonMap.erase(id);
     }
   }
 
@@ -1014,35 +1020,36 @@ void ExpandSymbol::overrideLayoutRuleSize(const nlohmann::json& instanceId,
                                           const Size& instanceSize)
 {
   DEBUG("ExpandSymbol::overrideLayoutRuleSize, instanceId: %s, size: %f, %f",
-        instanceId.c_str(),
+        instanceId.dump().c_str(),
         instanceSize.width,
         instanceSize.height);
-  for (auto& dstRule : m_outLayoutJson[K_OBJ])
+  auto dstRulePtr = findOutLayoutObjectById(instanceId);
+  if (!dstRulePtr || !dstRulePtr->is_object())
   {
-    if (dstRule[K_ID] == instanceId)
-    {
-      auto ruleCache = m_layoutRulesCache[instanceId];
-      if (dstRule[K_WIDTH][K_VALUE][K_TYPES] == Internal::Rule::Length::ETypes::PX)
-      {
-        dstRule[K_WIDTH][K_VALUE][K_VALUE] = instanceSize.width;
-        ruleCache->width.value.value = instanceSize.width;
-      }
-      else
-      {
-        DEBUG("ExpandSymbol::overrideLayoutRuleSize: width type is not PX, do not update");
-      }
+    return;
+  }
 
-      if (dstRule[K_HEIGHT][K_VALUE][K_TYPES] == Internal::Rule::Length::ETypes::PX)
-      {
-        dstRule[K_HEIGHT][K_VALUE][K_VALUE] = instanceSize.height;
-        ruleCache->height.value.value = instanceSize.height;
-      }
-      else
-      {
-        DEBUG("ExpandSymbol::overrideLayoutRuleSize: height type is not PX, do not update");
-      }
-      break;
-    }
+  auto& dstRule = *dstRulePtr;
+
+  auto ruleCache = (*m_layoutRulesCache)[instanceId];
+  if (dstRule[K_WIDTH][K_VALUE][K_TYPES] == Internal::Rule::Length::ETypes::PX)
+  {
+    dstRule[K_WIDTH][K_VALUE][K_VALUE] = instanceSize.width;
+    ruleCache->width.value.value = instanceSize.width;
+  }
+  else
+  {
+    DEBUG("ExpandSymbol::overrideLayoutRuleSize: width type is not PX, do not update");
+  }
+
+  if (dstRule[K_HEIGHT][K_VALUE][K_TYPES] == Internal::Rule::Length::ETypes::PX)
+  {
+    dstRule[K_HEIGHT][K_VALUE][K_VALUE] = instanceSize.height;
+    ruleCache->height.value.value = instanceSize.height;
+  }
+  else
+  {
+    DEBUG("ExpandSymbol::overrideLayoutRuleSize: height type is not PX, do not update");
   }
 }
 
@@ -1073,9 +1080,9 @@ void ExpandSymbol::layoutDirtyNodes(nlohmann::json& rootTreeJson)
   m_tmpDirtyNodeIds.clear();
 }
 
-nlohmann::json* ExpandSymbol::findLayoutObject(nlohmann::json& instance,
-                                               const std::vector<std::string>& instanceIdStack,
-                                               const nlohmann::json& overrideItem)
+nlohmann::json* ExpandSymbol::findOutLayoutObject(nlohmann::json& instance,
+                                                  const std::vector<std::string>& instanceIdStack,
+                                                  const nlohmann::json& overrideItem)
 {
   std::vector<std::string> _;
   auto childObject = findChildObject(instance, instanceIdStack, overrideItem, _);
@@ -1084,20 +1091,19 @@ nlohmann::json* ExpandSymbol::findLayoutObject(nlohmann::json& instance,
     return nullptr;
   }
 
-  return findLayoutObjectById((*childObject)[K_ID]);
+  return findOutLayoutObjectById((*childObject)[K_ID]);
 }
 
-nlohmann::json* ExpandSymbol::findLayoutObjectById(const std::string& id)
+nlohmann::json* ExpandSymbol::findOutLayoutObjectById(const std::string& id)
 {
-  for (auto& targetRule : m_outLayoutJson[K_OBJ])
+  if (m_outLayoutJsonMap.find(id) != m_outLayoutJsonMap.end())
   {
-    if (targetRule[K_ID] == id)
-    {
-      return &targetRule;
-    }
+    return &m_outLayoutJsonMap[id];
   }
-
-  return nullptr;
+  else
+  {
+    return nullptr;
+  }
 }
 
 void ExpandSymbol::applyLeafOverrides(nlohmann::json& json,
@@ -1206,10 +1212,32 @@ bool ExpandSymbol::hasOriginalLayoutRule(const std::string& id)
 
 bool ExpandSymbol::hasRuntimeLayoutRule(const nlohmann::json& id)
 {
-  return m_layoutRulesCache.find(id) != m_layoutRulesCache.end();
+  return m_layoutRulesCache->find(id) != m_layoutRulesCache->end();
 }
 
-ExpandSymbol::RuleMap ExpandSymbol::getLayoutRules()
+ExpandSymbol::RuleMapPtr ExpandSymbol::getLayoutRules()
 {
   return m_layoutRulesCache;
+}
+
+nlohmann::json ExpandSymbol::generateOutLayoutJson()
+{
+  if (!m_layoutJson.is_object())
+  {
+    return m_layoutJson;
+  }
+
+  nlohmann::json result(nlohmann::json::value_t::object);
+  result[K_CLASS] = m_layoutJson[K_CLASS];
+
+  result[K_OBJ] = nlohmann::json(nlohmann::json::value_t::array);
+  for (auto& [key, value] : m_outLayoutJsonMap)
+  {
+    if (value.is_object())
+    {
+      result[K_OBJ].push_back(value);
+    }
+  }
+
+  return result;
 }

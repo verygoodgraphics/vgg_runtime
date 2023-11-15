@@ -32,7 +32,7 @@ using namespace VGG::Layout::Internal::Rule;
 
 Layout::Layout::Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc, bool isRootTree)
 {
-  RuleMap rules;
+  RuleMapPtr rules;
   if (layoutDoc)
   {
     rules = collectRules(layoutDoc->content());
@@ -41,12 +41,17 @@ Layout::Layout::Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc, boo
   new (this) Layout(designDoc, rules, isRootTree);
 }
 
-Layout::Layout::Layout(JsonDocumentPtr designDoc, RuleMap rules, bool isRootTree)
+Layout::Layout::Layout(JsonDocumentPtr designDoc, RuleMapPtr rules, bool isRootTree)
   : m_designDoc{ designDoc }
   , m_rules{ rules }
   , m_isRootTree{ isRootTree }
 {
   ASSERT(m_designDoc);
+
+  if (!m_rules)
+  {
+    m_rules = std::make_shared<RuleMap>();
+  }
 
   // initial config
   buildLayoutTree();
@@ -188,9 +193,9 @@ void Layout::Layout::createOneOrMoreLayoutNodes(const nlohmann::json& j,
   }
 }
 
-Layout::Layout::RuleMap Layout::Layout::collectRules(const nlohmann::json& json)
+Layout::Layout::RuleMapPtr Layout::Layout::collectRules(const nlohmann::json& json)
 {
-  RuleMap result;
+  auto result = std::make_shared<RuleMap>();
 
   if (!json.is_object())
   {
@@ -211,7 +216,7 @@ Layout::Layout::RuleMap Layout::Layout::collectRules(const nlohmann::json& json)
       auto rule = std::make_shared<Internal::Rule::Rule>();
       *rule = item;
 
-      result[id] = rule;
+      (*result)[id] = rule;
     }
   }
 
@@ -229,9 +234,9 @@ void Layout::Layout::configureNodeAutoLayout(std::shared_ptr<LayoutNode> node)
     if (json.contains(K_ID))
     {
       auto nodeId = json.at(K_ID).get<std::string>();
-      if (m_rules.find(nodeId) != m_rules.end())
+      if (m_rules->find(nodeId) != m_rules->end())
       {
-        rule = m_rules[nodeId];
+        rule = (*m_rules)[nodeId];
       }
     }
   }
@@ -251,7 +256,7 @@ void Layout::Layout::configureNodeAutoLayout(std::shared_ptr<LayoutNode> node)
 
 bool Layout::Layout::hasFirstOnTopNode()
 {
-  for (const auto& [id, rule] : m_rules)
+  for (const auto& [id, rule] : *m_rules)
   {
     if (auto flexContainerRule = rule->getFlexContainerRule();
         flexContainerRule && flexContainerRule->z_order)
@@ -288,9 +293,9 @@ void Layout::Layout::reverseChildren(nlohmann::json& json)
   if (json.contains(K_ID) && json.contains(K_CHILD_OBJECTS))
   {
     auto nodeId = json[K_ID].get<std::string>();
-    if (m_rules.find(nodeId) != m_rules.end())
+    if (m_rules->find(nodeId) != m_rules->end())
     {
-      auto rule = m_rules[nodeId];
+      auto rule = (*m_rules)[nodeId];
       if (auto flexContainerRule = rule->getFlexContainerRule();
           flexContainerRule && flexContainerRule->z_order)
       {

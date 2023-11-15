@@ -42,11 +42,12 @@ struct Rule;
 class ExpandSymbol
 {
   using RuleMap = std::unordered_map<std::string, std::shared_ptr<Internal::Rule::Rule>>;
+  using RuleMapPtr = std::shared_ptr<RuleMap>;
 
   const nlohmann::json& m_designJson;
   const nlohmann::json& m_layoutJson;
-  nlohmann::json m_outLayoutJson;
-  RuleMap m_layoutRulesCache;
+  std::unordered_map<std::string, nlohmann::json> m_outLayoutJsonMap; // performance
+  RuleMapPtr m_layoutRulesCache;                                      // performance
   std::unordered_map<std::string, nlohmann::json> m_masters;
   std::unordered_map<std::string, nlohmann::json> m_layoutRules;
 
@@ -130,12 +131,13 @@ private:
   void removeInvalidLayoutRule(const nlohmann::json& instanceChildren);
   bool hasOriginalLayoutRule(const std::string& id);
   bool hasRuntimeLayoutRule(const nlohmann::json& id);
-  nlohmann::json* findLayoutObject(nlohmann::json& instance,
-                                   const std::vector<std::string>& instanceIdStack,
-                                   const nlohmann::json& overrideItem);
-  nlohmann::json* findLayoutObjectById(const std::string& id);
+  nlohmann::json* findOutLayoutObject(nlohmann::json& instance,
+                                      const std::vector<std::string>& instanceIdStack,
+                                      const nlohmann::json& overrideItem);
+  nlohmann::json* findOutLayoutObjectById(const std::string& id);
 
-  RuleMap getLayoutRules();
+  RuleMapPtr getLayoutRules();
+  nlohmann::json generateOutLayoutJson();
 };
 } // namespace Layout
 

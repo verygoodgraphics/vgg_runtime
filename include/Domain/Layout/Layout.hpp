@@ -41,17 +41,18 @@ class Layout
 {
 public:
   using RuleMap = std::unordered_map<std::string, std::shared_ptr<Internal::Rule::Rule>>;
+  using RuleMapPtr = std::shared_ptr<RuleMap>;
 
 private:
   JsonDocumentPtr m_designDoc;
   std::shared_ptr<LayoutNode> m_layoutTree;
-  RuleMap m_rules;
+  RuleMapPtr m_rules;
   bool m_isRootTree{ true }; // root document or fragment
   std::vector<Size> m_pageSize;
 
 public:
   Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc, bool isRootTree = true);
-  Layout(JsonDocumentPtr designDoc, RuleMap rules, bool isRootTree = true);
+  Layout(JsonDocumentPtr designDoc, RuleMapPtr rules, bool isRootTree = true);
 
   void layout(Size size, bool updateRule = false);
   void resizeNodeThenLayout(const std::string& nodeId, Size size);
@@ -70,7 +71,7 @@ public:
   JsonDocumentPtr displayDesignDoc();
 
 public:
-  static RuleMap collectRules(const nlohmann::json& json);
+  static RuleMapPtr collectRules(const nlohmann::json& json);
 
 private:
   void buildLayoutTree();

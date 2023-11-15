@@ -41,7 +41,7 @@ namespace VGG::layer
 
 using namespace nlohmann;
 
-class NlohmannBuilder
+class DocBuilder
 {
   std::vector<std::shared_ptr<PaintNode>> m_frames;
   std::vector<std::shared_ptr<PaintNode>> m_symbols;
@@ -434,7 +434,7 @@ class NlohmannBuilder
     return frames;
   }
 
-  NlohmannBuilder() = default;
+  DocBuilder() = default;
   void buildImpl(const nlohmann::json& j)
   {
     glm::mat3 mat = glm::identity<glm::mat3>();
@@ -590,7 +590,7 @@ public:
   // Given a local matrix, return the coordinate-flipped matrix and its inversed matrix
   static NodeContainer build(const nlohmann::json& j)
   {
-    NlohmannBuilder builder;
+    DocBuilder builder;
     builder.buildImpl(j);
     return NodeContainer{ std::move(builder.m_frames), std::move(builder.m_symbols) };
   }

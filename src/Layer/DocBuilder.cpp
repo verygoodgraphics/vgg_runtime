@@ -14,4 +14,9 @@
  * limitations under the License.
  */
 
-#include "Loader.hpp"
+#include "DocBuilder.hpp"
+
+namespace VGG
+{
+
+}

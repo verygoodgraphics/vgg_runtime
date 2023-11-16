@@ -456,15 +456,22 @@ class DocBuilder
         decompose(t, scale, angle, quat, skew, offset, persp);
         const auto b = p->getBound();
         auto newMatrix = glm::identity<glm::mat3>();
-        newMatrix = glm::scale(newMatrix, scale);
+        newMatrix = glm::translate(newMatrix, -b.topLeft() - offset);
+        newMatrix = glm::rotate(newMatrix, (float)math::number::Pi - angle);
         newMatrix = glm::shearX(newMatrix, skew.x);
         newMatrix = glm::shearY(newMatrix, skew.y);
-        newMatrix = glm::rotate(newMatrix, (float)math::number::Pi);
-        newMatrix = glm::translate(newMatrix, -b.topLeft());
+        newMatrix = glm::scale(newMatrix, scale);
         p->setLocalTransform(newMatrix);
         p->setOverflow(EOverflow::OF_Visible);
       }
     }
+  }
+
+  static glm::mat3 convertPatternMatrix(const glm::mat3& mat)
+  {
+    glm::mat3 scale = glm::identity<glm::mat3>();
+    scale = glm::scale(scale, glm::vec2(1, -1));
+    return scale * mat;
   }
 
   static std::pair<glm::mat3, glm::mat3> convertMatrixCoordinate(const glm::mat3& mat)
@@ -489,8 +496,8 @@ class DocBuilder
                  glm::vec3{ -c * inv, -a * inv, 0 },
                  glm::vec3{ -(d * tx + c * ty) * inv, -(b * tx + a * ty) * inv, 1.0 } };
     // return { mat, glm::inverse(mat) };
-    // return { flipped, glm::inverse(flipped) };
-    return { flipped, inversed };
+    return { flipped, glm::inverse(flipped) };
+    // return { flipped, inversed };
   }
 
   static void convertCoordinateSystem(glm::vec2& point, const glm::mat3& totalMatrix)
@@ -518,14 +525,15 @@ class DocBuilder
 
   static void convertCoordinateSystem(Pattern& pattern, const glm::mat3& totalMatrix)
   {
-    const auto p = convertMatrixCoordinate(pattern.transform);
-    pattern.transform = p.first;
+    const auto p = convertPatternMatrix(pattern.transform);
+    // const auto p = convertMatrixCoordinate(pattern.transform);
+    pattern.transform = p;
   }
 
   static void convertCoordinateSystem(Gradient& gradient, const glm::mat3& totalMatrix)
   {
-    convertCoordinateSystem(gradient.from, totalMatrix);
-    convertCoordinateSystem(gradient.to, totalMatrix);
+    // convertCoordinateSystem(gradient.from, totalMatrix);
+    // convertCoordinateSystem(gradient.to, totalMatrix);
   }
 
   static void convertCoordinateSystem(Style& style, const glm::mat3& totalMatrix)
@@ -560,21 +568,6 @@ class DocBuilder
     {
       convertCoordinateSystem(b.center, totalMatrix);
     }
-  }
-
-  static glm::mat3 convertCoordinateSystem(PaintNode* p, const glm::mat3& totalMatrix)
-  {
-    if (FLIP_COORD)
-      return totalMatrix;
-    const auto originalMatrix = p->localTransform();
-    const auto [newMatrix, inversed] = convertMatrixCoordinate(originalMatrix);
-    p->setLocalTransform(newMatrix);
-    auto convertMatrix = inversed * totalMatrix * originalMatrix;
-
-    auto bound = p->getBound();
-    p->setBound(bound);
-    convertCoordinateSystem(p->style(), convertMatrix);
-    return convertMatrix;
   }
 
   static nlohmann::json defaultTextAttr()

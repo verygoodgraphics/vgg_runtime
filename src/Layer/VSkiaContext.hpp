@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "Layer/Graphics/GraphicsContext.hpp"
+#include "Layer/Graphics/GraphicsSkia.hpp"
 
 #include <include/gpu/gl/GrGLInterface.h>
 #include <include/gpu/GrDirectContext.h>
@@ -54,10 +55,6 @@ public:
     API_VULKAN
   };
 
-  using SurfaceCreateProc = std::function<
-    sk_sp<SkSurface>(GrDirectContext* grContext, int w, int h, const ContextConfig& cfg)>;
-  using ContextCreateProc = std::function<sk_sp<GrDirectContext>()>;
-
   SkiaContext(const SkiaContext&) = delete;
   SkiaContext& operator=(const SkiaContext&) = delete;
   SkiaContext(SkiaContext&& other) noexcept
@@ -73,7 +70,10 @@ public:
   SkiaContext& operator=(SkiaContext&& other) noexcept
   {
     release();
-    *this = SkiaContext(std::move(other));
+    m_stream = std::move(other.m_stream);
+    m_document = std::move(other.m_document);
+    m_surface = std::move(other.m_surface);
+    m_grContext = std::move(other.m_grContext);
     return *this;
   }
 

@@ -28,7 +28,8 @@ class GraphicsLayer;
 enum class EGraphicsAPIBackend
 {
   API_OPENGL,
-  API_VULKAN
+  API_VULKAN,
+  API_METAL,
 };
 
 struct ContextConfig

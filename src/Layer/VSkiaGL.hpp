@@ -16,7 +16,7 @@
 #pragma once
 
 #include "VSkiaContext.hpp"
-
+#include "Layer/Graphics/GraphicsSkia.hpp"
 #include "Layer/Graphics/ContextInfoGL.hpp"
 
 #include <include/gpu/ganesh/SkSurfaceGanesh.h>
@@ -25,7 +25,7 @@
 
 namespace VGG::layer::skia_impl::gl
 {
-SkiaContext::SurfaceCreateProc glSurfaceCreateProc()
+SurfaceCreateProc glSurfaceCreateProc()
 {
   return [](GrDirectContext* context, int w, int h, const ContextConfig& cfg)
   {
@@ -43,7 +43,7 @@ SkiaContext::SurfaceCreateProc glSurfaceCreateProc()
   };
 }
 
-SkiaContext::ContextCreateProc glContextCreateProc(ContextInfoGL* context)
+ContextCreateProc glContextCreateProc(ContextInfoGL* context)
 {
   return [context]()
   {

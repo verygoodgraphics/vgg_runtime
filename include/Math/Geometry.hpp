@@ -43,6 +43,12 @@ struct Bound2
   {
   }
 
+  Bound2(const glm::vec2& p1, const glm::vec2& p2)
+  {
+    topLeft = glm::vec2(std::min(p1.x, p2.x), std::min(p1.y, p2.y));
+    bottomRight = glm::vec2(std::max(p1.x, p2.x), std::max(p1.y, p2.y));
+  }
+
   void extend(float delta)
   {
     topLeft.x -= delta;
@@ -105,8 +111,8 @@ struct Bound2
 
   Bound2 transform(const glm::mat3& transform) const
   {
-    auto topLeft3 = transform * glm::vec3{ topLeft, 1.0 };
-    auto bottomRight3 = transform * glm::vec3{ bottomRight, 1.0 };
+    auto   topLeft3 = transform * glm::vec3{ topLeft, 1.0 };
+    auto   bottomRight3 = transform * glm::vec3{ bottomRight, 1.0 };
     Bound2 newBound;
     newBound.topLeft = topLeft3;
     newBound.bottomRight = bottomRight3;

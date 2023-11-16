@@ -100,10 +100,10 @@ glm::mat3 PaintNode::mapTransform(const PaintNode* node) const
     }
     return path;
   };
-  auto path1 = findPath(node);
-  auto path2 = findPath(this);
+  auto        path1 = findPath(node);
+  auto        path2 = findPath(this);
   const Node* lca = nullptr;
-  int lcaIdx = -1;
+  int         lcaIdx = -1;
   for (int i = path1.size() - 1, j = path2.size() - 1; i >= 0 && j >= 0; i--, j--)
   {
     auto n1 = path1[i];
@@ -143,7 +143,7 @@ Mask PaintNode::makeMaskBy(EBoolOp maskOp, SkiaRenderer* renderer)
   if (_->maskedBy.empty())
     return result;
 
-  auto op = toSkPathOp(maskOp);
+  auto        op = toSkPathOp(maskOp);
   const auto& objects = renderer->maskObjects();
   for (const auto id : _->maskedBy)
   {
@@ -152,7 +152,7 @@ Mask PaintNode::makeMaskBy(EBoolOp maskOp, SkiaRenderer* renderer)
       if (auto obj = objects.find(id); obj != objects.end())
       {
         const auto t = obj->second->mapTransform(this);
-        auto m = obj->second->asOutlineMask(&t);
+        auto       m = obj->second->asOutlineMask(&t);
         if (result.outlineMask.isEmpty())
         {
           result = m;
@@ -194,10 +194,10 @@ void PaintNode::paintPass(SkiaRenderer* renderer, int zorder)
   if (!_->alphaMask)
   {
     MaskObject mo;
-    auto iter = _->alphaMaskBy.cbegin();
-    auto end = _->alphaMaskBy.cend();
-    auto comp = _->calcMaskObjects(renderer, iter, end, [](const auto& e) { return e.id; });
-    SkPath path;
+    auto       iter = _->alphaMaskBy.cbegin();
+    auto       end = _->alphaMaskBy.cend();
+    auto       comp = _->calcMaskObjects(renderer, iter, end, [](const auto& e) { return e.id; });
+    SkPath     path;
     for (const auto& e : comp)
     {
       if (path.isEmpty())
@@ -250,12 +250,12 @@ void PaintNode::setAlphaMaskBy(std::vector<AlphaMask> masks)
 
 SkPath PaintNode::makeBoundPath()
 {
-  SkPath p;
+  SkPath      p;
   const auto& skRect = toSkRect(getBound());
   const auto& radius = style().frameRadius;
 
-  bool rounded = false;
-  float maxR = 0.0, minR = std::numeric_limits<float>::max();
+  bool        rounded = false;
+  float       maxR = 0.0, minR = std::numeric_limits<float>::max();
 
   if (!radius.has_value())
   {
@@ -286,6 +286,7 @@ SkPath PaintNode::makeBoundPath()
   }
   else
   {
+    DEBUG("[%f %f %f %f]", skRect.left(), skRect.top(), skRect.right(), skRect.bottom());
     p.addRect(skRect);
   }
   return p;
@@ -314,11 +315,11 @@ SkPath PaintNode::childPolyOperation() const
   std::vector<SkPath> res;
 
   // eval mask by operator
-  SkPath skPath = ct[0].first;
+  SkPath              skPath = ct[0].first;
   for (int i = 1; i < ct.size(); i++)
   {
     SkPath rhs;
-    auto op = ct[i].second;
+    auto   op = ct[i].second;
     if (op != BO_None)
     {
       auto skop = toSkPathOp(op);
@@ -599,7 +600,7 @@ void PaintNode::paintChildrenRecursively(SkiaRenderer* renderer)
   VGG_IMPL(PaintNode);
   std::vector<PaintNode*> masked;
   std::vector<PaintNode*> noneMasked;
-  auto canvas = renderer->canvas();
+  auto                    canvas = renderer->canvas();
   for (const auto& p : this->m_firstChild)
   {
     auto c = static_cast<PaintNode*>(p.get());
@@ -616,7 +617,7 @@ void PaintNode::paintChildrenRecursively(SkiaRenderer* renderer)
     }
   }
 
-  int zorder = 0;
+  int  zorder = 0;
   auto paintCall = [&](std::vector<PaintNode*>& nodes)
   {
     if (_->contextSetting.TransparencyKnockoutGroup)
@@ -736,11 +737,11 @@ SkPath PaintNode::stylePath()
   }
 
   std::vector<SkPath> res;
-  SkPath skPath = ct[0].first;
+  SkPath              skPath = ct[0].first;
   for (int i = 1; i < ct.size(); i++)
   {
     SkPath rhs;
-    auto op = ct[i].second;
+    auto   op = ct[i].second;
     if (op != BO_None)
     {
       auto skop = toSkPathOp(op);
@@ -771,8 +772,8 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
   VGG_IMPL(PaintNode);
   Painter painter(canvas);
   // draw blur, we assume that there is only one blur style
-  Blur blur;
-  auto blurType = _->blurType(blur);
+  Blur    blur;
+  auto    blurType = _->blurType(blur);
   if (!_->alphaMask)
   {
     // 1. normal drawing
@@ -830,12 +831,21 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
 void PaintNode::paintFill(SkCanvas* canvas, sk_sp<SkBlender> blender, const SkPath& path)
 {
   VGG_IMPL(PaintNode);
-  Painter render(canvas);
+  Painter             render(canvas);
   sk_sp<SkMaskFilter> blur;
   for (const auto& f : style().fills)
   {
     if (!f.isEnabled)
       continue;
+
+    // auto m = canvas->getTotalMatrix();
+    // DEBUG("--------");
+    // std::cout << d_ptr->transform << std::endl;
+    // for (auto i = 0; i < path.countPoints(); i++)
+    // {
+    //   auto p = path.getPoint(i);
+    //   DEBUG("%f %f", p.x(), p.y());
+    // }
     render.drawFill(path, getBound(), f, contextSetting().Opacity, 0, blender, blur);
   }
 }

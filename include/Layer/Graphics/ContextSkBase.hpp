@@ -14,51 +14,21 @@
  * limitations under the License.
  */
 #pragma once
-#include "../GraphicsSkia.hpp"
+#include "GraphicsSkia.hpp"
+#include "Layer/Graphics/GraphicsContext.hpp"
 
-#ifdef VGG_USE_METAL
 namespace VGG::layer
 {
 
-class MtlGraphicsContext : public layer::GraphicsContext
+// TODO:: refactor
+class SkiaGraphicsContext : public layer::GraphicsContext
 {
 public:
-  MtlGraphicsContext()
+  virtual SurfaceCreateProc surfaceCreateProc() = 0;
+  virtual ContextCreateProc contextCreateProc() = 0;
+  virtual void onInitProperties(ContextProperty& property) override
   {
-  }
-  void onInitProperties(layer::ContextProperty& property) override
-  {
-  }
-
-  bool onInit() override
-  {
-    return false;
-  }
-
-  void shutdown() override
-  {
-  }
-
-  void* contextInfo() override
-  {
-    return nullptr;
-  }
-
-  bool makeCurrent() override
-  {
-    return true;
-  }
-
-  bool swap() override
-  {
-    return true;
-  }
-
-  SurfaceCreateProc surfaceCreateProc();
-  ContextCreateProc contextCreateProc();
-  ~MtlGraphicsContext()
-  {
+    property.api = EGraphicsAPIBackend::API_METAL;
   }
 };
 } // namespace VGG::layer
-#endif

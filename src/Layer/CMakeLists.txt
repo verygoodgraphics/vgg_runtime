@@ -16,10 +16,6 @@ if(ENABLE_EMBBED_FONT)
   install(TARGETS zip DESTINATION lib COMPONENT vgg_module_zip)
 endif()
 
-if(VGG_VAR_PLATFORM_TARGET MATCHES "iOS|iOS-simulator")
-   target_compile_definitions(vgg_layer PRIVATE VGG_USE_METAL)
-   list(APPEND SrcVar ${CMAKE_CURRENT_SOURCE_DIR}/Metal/ContextMtl.mm)
-endif()
 target_sources(vgg_layer PRIVATE ${SrcVar})
 target_include_directories(vgg_layer PUBLIC ${CMAKE_SOURCE_DIR}/include)
 

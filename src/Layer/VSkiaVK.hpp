@@ -41,7 +41,7 @@
 namespace VGG::layer::skia_impl::vk
 {
 
-SkiaContext::SurfaceCreateProc vkSurfaceCreateProc()
+SurfaceCreateProc vkSurfaceCreateProc()
 {
   return [](GrDirectContext* context, int w, int h, const ContextConfig& cfg)
   {
@@ -57,7 +57,7 @@ SkiaContext::SurfaceCreateProc vkSurfaceCreateProc()
   };
 }
 
-SkiaContext::ContextCreateProc vkContextCreateProc(ContextInfoVulkan* context)
+ContextCreateProc vkContextCreateProc(ContextInfoVulkan* context)
 {
   return [context]()
   {

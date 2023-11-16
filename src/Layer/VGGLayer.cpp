@@ -29,6 +29,9 @@
 #include "Layer/Scene.hpp"
 #include "Layer/Graphics/GraphicsLayer.hpp"
 #include "Layer/Graphics/GraphicsContext.hpp"
+#ifdef VGG_USE_METAL
+#include "Layer/Graphics/Metal/ContextMtl.hpp"
+#endif
 #include "Layer/Core/Node.hpp"
 #include "Utility/CappingProfiler.hpp"
 
@@ -207,6 +210,17 @@ std::optional<ELayerError> VLayer::onInit()
       std::make_unique<SkiaContext>(vk::vkContextCreateProc(ctx), vk::vkSurfaceCreateProc(), cfg);
 #else
     ASSERT(false && "Vulkan is not support on the platform");
+    _->skiaContext = nullptr;
+#endif
+  }
+  else if (api == EGraphicsAPIBackend::API_METAL)
+  {
+#ifdef VGG_USE_METAL
+    auto* mtlCtx = reinterpret_cast<MtlGraphicsContext*>(context());
+    _->skiaContext =
+      std::make_unique<SkiaContext>(mtlCtx->contextCreateProc(), mtlCtx->surfaceCreateProc(), cfg);
+#else
+    ASSERT(false && "Metal is not support on the platform");
     _->skiaContext = nullptr;
 #endif
   }

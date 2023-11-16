@@ -126,7 +126,7 @@ inline void from_json(const json& j, Pattern& x)
     x.tileScale = 1.0;
 
     const auto it = instance.find("matrix");
-    glm::mat3 m{ 1.0 };
+    glm::mat3  m{ 1.0 };
     if (it != instance.end())
     {
       auto v = instance.at("matrix").get<std::array<float, 6>>();
@@ -278,11 +278,11 @@ inline void from_json(const json& j, TextLineAttr& x)
 
 inline void from_json(const json& j, Bound2& b)
 {
-  auto x = j.value("x", 0.f);
-  auto y = j.value("y", 0.f);
+  auto       x = j.value("x", 0.f);
+  auto       y = j.value("y", 0.f);
   const auto topLeft = glm::vec2{ x, y };
-  auto width = j.value("width", 0.f);
-  auto height = j.value("height", 0.f);
+  auto       width = j.value("width", 0.f);
+  auto       height = j.value("height", 0.f);
   b = Bound2{ topLeft, width, height };
 }
 

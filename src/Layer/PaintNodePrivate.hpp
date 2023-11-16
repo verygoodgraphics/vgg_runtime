@@ -49,7 +49,7 @@ Bound2 calcMaskAreaIntersection(const Bound2& pruneBound, PaintNode* obj, F&& f)
 
 struct MaskObject
 {
-  SkPath contour;
+  SkPath                                        contour;
   std::vector<std::pair<PaintNode*, glm::mat3>> components;
 };
 
@@ -58,28 +58,28 @@ class PaintNode__pImpl // NOLINT
   VGG_DECL_API(PaintNode);
 
 public:
-  Bound2 bound;
-  glm::mat3 transform{ 1.0 };
-  std::string guid{};
-  std::vector<std::string> maskedBy{};
-  std::vector<AlphaMask> alphaMaskBy;
-  Mask outlineMask;
-  EMaskType maskType{ MT_None };
-  EMaskShowType maskShowType{ MST_Invisible };
-  EBoolOp clipOperator{ BO_None };
-  EOverflow overflow{ OF_Hidden };
-  EWindingType windingRule{ WR_EvenOdd };
-  Style style;
-  ContextSetting contextSetting;
-  ObjectType type;
-  bool visible{ true };
+  Bound2                    bound;
+  glm::mat3                 transform{ 1.0 };
+  std::string               guid{};
+  std::vector<std::string>  maskedBy{};
+  std::vector<AlphaMask>    alphaMaskBy;
+  Mask                      outlineMask;
+  EMaskType                 maskType{ MT_None };
+  EMaskShowType             maskShowType{ MST_Invisible };
+  EBoolOp                   clipOperator{ BO_None };
+  EOverflow                 overflow{ OF_Hidden };
+  EWindingType              windingRule{ WR_EvenOdd };
+  Style                     style;
+  ContextSetting            contextSetting;
+  ObjectType                type;
+  bool                      visible{ true };
 
-  ContourPtr contour;
-  PaintOption paintOption;
-  ContourOption maskOption;
+  ContourPtr                contour;
+  PaintOption               paintOption;
+  ContourOption             maskOption;
 
-  std::optional<SkPath> path;
-  std::optional<SkPath> mask;
+  std::optional<SkPath>     path;
+  std::optional<SkPath>     mask;
   std::optional<MaskObject> alphaMask;
 
   PaintNode__pImpl(PaintNode* api, ObjectType type)
@@ -119,15 +119,15 @@ public:
 
   template<typename Iter1, typename Iter2, typename F>
   std::vector<std::pair<PaintNode*, glm::mat3>> calcMaskObjects(SkiaRenderer* renderer,
-                                                                Iter1 begin,
-                                                                Iter2 end,
-                                                                F&& f)
+                                                                Iter1         begin,
+                                                                Iter2         end,
+                                                                F&&           f)
   {
-    auto canvas = renderer->canvas();
-    const auto& objects = renderer->maskObjects();
+    auto                                          canvas = renderer->canvas();
+    const auto&                                   objects = renderer->maskObjects();
     std::vector<std::pair<PaintNode*, glm::mat3>> cache;
-    auto maskAreaBound = Bound2::makeInfinite();
-    const auto& selfBound = q_ptr->getBound();
+    auto                                          maskAreaBound = Bound2::makeInfinite();
+    const auto&                                   selfBound = q_ptr->getBound();
     for (auto it = begin; it != end; ++it)
     {
       const auto& id = f(*it);
@@ -173,16 +173,16 @@ public:
   }
 
   template<typename Iter1, typename Iter2, typename F>
-  std::optional<SkPath> mapContourFromThis(EBoolOp maskOp,
-                                           Iter1 itr1,
-                                           Iter2 itr2,
-                                           F&& f,
+  std::optional<SkPath> mapContourFromThis(EBoolOp       maskOp,
+                                           Iter1         itr1,
+                                           Iter2         itr2,
+                                           F&&           f,
                                            SkiaRenderer* renderer)
   {
     if (itr1 == itr2)
       return std::nullopt;
-    SkPath result;
-    auto op = toSkPathOp(maskOp);
+    SkPath      result;
+    auto        op = toSkPathOp(maskOp);
     const auto& objects = renderer->maskObjects();
     for (auto it = itr1; it != itr2; ++it)
     {
@@ -192,7 +192,7 @@ public:
         if (auto obj = objects.find(id); obj != objects.end())
         {
           const auto t = obj->second->mapTransform(q_ptr);
-          auto m = obj->second->asOutlineMask(&t);
+          auto       m = obj->second->asOutlineMask(&t);
           if (result.isEmpty())
           {
             result = m.outlineMask;
@@ -245,11 +245,11 @@ public:
   {
     if (alphaMaskBy.empty())
       return nullptr;
-    auto canvas = renderer->canvas();
-    const auto& objects = renderer->maskObjects();
+    auto                                          canvas = renderer->canvas();
+    const auto&                                   objects = renderer->maskObjects();
     std::vector<std::pair<PaintNode*, glm::mat3>> cache;
-    auto maskAreaBound = Bound2::makeInfinite();
-    const auto& selfBound = bound;
+    auto                                          maskAreaBound = Bound2::makeInfinite();
+    const auto&                                   selfBound = bound;
     for (int i = 0; i < alphaMaskBy.size(); i++)
     {
       const auto& mask = alphaMaskBy[i];
@@ -277,7 +277,7 @@ public:
     const auto [w, h] = std::pair{ maskAreaBound.width(), maskAreaBound.height() };
     if (w <= 0 || h <= 0)
       return nullptr;
-    auto maskSurface = canvas->getSurface()->makeSurface(w, h);
+    auto       maskSurface = canvas->getSurface()->makeSurface(w, h);
     const auto maskCanvas = maskSurface->getCanvas();
     // SkPaint pen;
     // pen.setColor(SK_ColorRED);
@@ -337,7 +337,7 @@ public:
   void drawWithAlphaMask(SkCanvas* canvas, const SkPath& path, const SkPath& outlineMask)
   {
     SkPaint p;
-    auto b = toSkRect(bound);
+    auto    b = toSkRect(bound);
     p.setBlendMode(SkBlendMode::kSrcOver);
     canvas->saveLayer(0, 0);
     canvas->clipRect(b);
@@ -372,9 +372,9 @@ public:
 
   void drawBlurBgWithAlphaMask(SkCanvas* canvas, const SkPath& path, const SkPath& outlineMask)
   {
-    Painter painter(canvas);
+    Painter    painter(canvas);
     const auto blur = style.blurs[0];
-    SkPath res = path;
+    SkPath     res = path;
     if (alphaMask && !alphaMask->contour.isEmpty())
     {
       Op(res, alphaMask->contour, SkPathOp::kIntersect_SkPathOp, &res);
@@ -421,8 +421,8 @@ public:
 
   void drawBlurContentWithAlphaMask(SkCanvas* canvas, const SkPath& path, const SkPath& outlineMask)
   {
-    SkPaint p;
-    auto bb = bound;
+    SkPaint    p;
+    auto       bb = bound;
     const auto blur = style.blurs[0];
     bb.extend(blur.radius * 2);
     auto b = toSkRect(bb);
@@ -432,7 +432,7 @@ public:
     Painter painter(canvas);
     // the blured layer need to be drawn into the parent layer contains alpha mask
     // SrcIn blend mode is necessary
-    auto blender = SkBlender::Mode(SkBlendMode::kSrcIn);
+    auto    blender = SkBlender::Mode(SkBlendMode::kSrcIn);
     painter.blurContentBegin(blur.radius, blur.radius, bound, nullptr, blender);
     if (!outlineMask.isEmpty())
     {
@@ -450,7 +450,7 @@ public:
   void drawRawStyle(Painter& painter, const SkPath& skPath, sk_sp<SkBlender> blender)
   {
     const auto globalAlpha = contextSetting.Opacity;
-    auto filled = false;
+    auto       filled = false;
     for (const auto& f : style.fills)
     {
       if (f.isEnabled)

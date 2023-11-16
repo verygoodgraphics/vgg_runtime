@@ -52,43 +52,53 @@ class DocBuilder
   std::vector<std::shared_ptr<PaintNode>> m_frames;
   std::vector<std::shared_ptr<PaintNode>> m_symbols;
 
-  inline glm::mat3                        fromMatrix(const nlohmann::json& j)
+  inline Bound2 fromBound(const nlohmann::json& j, const glm::mat3& totalMatrix)
   {
-    auto v = j.value("matrix", std::array<float, 6>{ 1, 0, 0, 1, 0, 0 });
-    return glm::mat3{ glm::vec3{ v[0], v[1], 0 },
-                      glm::vec3{ v[2], v[3], 0 },
-                      glm::vec3{ v[4], v[5], 1 } };
-  }
-  inline Bound2 fromBound(const nlohmann::json& j)
-  {
-    auto       x = j.value("x", 0.f);
-    auto       y = j.value("y", 0.f);
-    auto       width = j.value("width", 0.f);
-    auto       height = j.value("height", 0.f);
-    const auto topLeft = glm::vec2{ x, y };
-    return Bound2{ topLeft, width, height };
+    auto x = j.value("x", 0.f);
+    auto y = j.value("y", 0.f);
+    auto width = j.value("width", 0.f);
+    auto height = j.value("height", 0.f);
+    auto topLeft = glm::vec2{ x, y };
+    auto bottomRight = glm::vec2{ x + width, y - height };
+    convertCoordinateSystem(topLeft, totalMatrix);
+    convertCoordinateSystem(bottomRight, totalMatrix);
+    return Bound2{ topLeft, bottomRight };
   }
 
-  inline std::tuple<Bound2, glm::mat3> fromTransform(const nlohmann::json& j,
-                                                     const glm::mat3&      totalMatrix)
+  inline std::tuple<glm::mat3, glm::mat3, glm::mat3> fromMatrix(const nlohmann::json& j)
   {
-    return { fromBound(get_or_default(j, "bounds")), fromMatrix(j) };
+    std::array<float, 6> v = j;
+    auto original = glm::mat3{ glm::vec3{ v[0], v[1], 0 },
+                               glm::vec3{ v[2], v[3], 0 },
+                               glm::vec3{ v[4], v[5], 1 } };
+    const auto [newMatrix, inversed] = convertMatrixCoordinate(original);
+    return { original, newMatrix, inversed };
+  }
+
+  inline Style fromStyle(const nlohmann::json& j, const glm::mat3& totalMatrix)
+  {
+    Style style;
+    from_json(j, style);
+    convertCoordinateSystem(style, totalMatrix);
+    return style;
   }
 
   template<typename F1, typename F2>
   inline std::shared_ptr<PaintNode> makeObjectCommonProperty(const nlohmann::json& j,
-                                                             const glm::mat3&      totalMatrix,
-                                                             F1&&                  creator,
-                                                             F2&&                  override)
+                                                             const glm::mat3& totalMatrix,
+                                                             F1&& creator,
+                                                             F2&& override)
   {
     auto obj = creator(std::move(j.value("name", "")), std::move(j.value("id", "")));
     if (!obj)
       return nullptr;
-    const auto [bound, transform] = fromTransform(j, totalMatrix);
-    obj->setBound(bound);
-    obj->setLocalTransform(transform);
-    auto style = j.value("style", Style());
-    obj->setStyle(style);
+    auto [originalMatrix, newMatrix, inversedNewMatrix] =
+      fromMatrix(j.value("matrix", nlohmann::json::array_t{}));
+    const auto convertedMatrix = inversedNewMatrix * totalMatrix * originalMatrix;
+
+    obj->setLocalTransform(newMatrix);
+    obj->setBound(fromBound(j.value("bounds", nlohmann::json::object_t{}), convertedMatrix));
+    obj->setStyle(fromStyle(j.value("style", nlohmann::json::object_t{}), convertedMatrix));
     obj->style().cornerSmooth = get_opt<float>(j, "cornerSmoothing").value_or(0.f);
     obj->setContextSettings(j.value("contextSettings", ContextSetting()));
     obj->setMaskBy(std::move(j.value("outlineMaskBy", std::vector<std::string>{})));
@@ -103,13 +113,13 @@ class DocBuilder
     obj->setMaskShowType(maskShowType);
     obj->setOverflow(j.value("overflow", EOverflow::OF_Visible));
     obj->setVisible(j.value("visible", true));
-    override(obj.get());
+    override(obj.get(), convertedMatrix);
     return obj;
   }
 
   inline std::shared_ptr<PaintNode> makeContour(const nlohmann::json& j,
                                                 const nlohmann::json& parent,
-                                                const glm::mat3&      totalMatrix)
+                                                const glm::mat3& totalMatrix)
   {
     Contour contour;
     contour.closed = j.value("closed", false);
@@ -143,13 +153,12 @@ class DocBuilder
         auto p = std::make_shared<PaintNode>(std::move(name), VGG_FRAME, std::move(guid));
         return p;
       },
-      [&, this](PaintNode* p)
+      [&, this](PaintNode* p, const glm::mat3& matrix)
       {
         p->setContourOption(ContourOption(ECoutourType::MCT_FrameOnly, false));
         const auto radius = get_stack_optional<std::array<float, 4>>(j, "radius");
         p->style().frameRadius = radius;
         const auto& childObjects = get_or_default(j, "childObjects");
-        auto        matrix = convertCoordinateSystem(p, totalMatrix);
         for (const auto& c : childObjects)
         {
           p->addChild(fromObject(c, matrix));
@@ -169,9 +178,8 @@ class DocBuilder
         auto p = std::make_shared<ImageNode>(j.value("name", ""), std::move(guid));
         return p;
       },
-      [&](ImageNode* p)
+      [&](ImageNode* p, const glm::mat3& matrix)
       {
-        convertCoordinateSystem(p, totalMatrix);
         p->setImage(j.value("imageFileName", ""));
         p->setReplacesImage(j.value("fillReplacesImage", false));
       });
@@ -187,15 +195,15 @@ class DocBuilder
         auto p = std::make_shared<layer::TextNode>(std::move(name), std::move(guid));
         return p;
       },
-      [&](layer::TextNode* p)
+      [&](layer::TextNode* p, const glm::mat3& matrix)
       {
         std::string text = j.value("content", "");
-        auto        lineType = get_stack_optional<std::vector<TextLineAttr>>(j, "lineType")
+        auto lineType = get_stack_optional<std::vector<TextLineAttr>>(j, "lineType")
                           .value_or(std::vector<TextLineAttr>());
 
         auto defaultAttr = defaultTextAttr();
         defaultAttr.update(j.value("defaultAttr", nlohmann::json::object()), true);
-        auto                       fontAttr = j.value("attr", std::vector<nlohmann::json>{});
+        auto fontAttr = j.value("attr", std::vector<nlohmann::json>{});
         std::vector<TextStyleAttr> textStyleAttrs;
         for (auto& att : fontAttr)
         {
@@ -228,7 +236,6 @@ class DocBuilder
           // TODO:: force to Fixed now because the bound computed by text layout is not accurate.
           p->setFrameMode(ETextLayoutMode::TL_Fixed);
         }
-        convertCoordinateSystem(p, totalMatrix);
         return p;
       });
   }
@@ -243,7 +250,7 @@ class DocBuilder
         auto p = std::make_shared<PaintNode>(std::move(name), VGG_PATH, std::move(guid));
         return p;
       },
-      [&, this](PaintNode* p)
+      [&, this](PaintNode* p, const glm::mat3& matrix)
       {
         // const auto& shape = get_or_default(j, "shape");
         const auto shape = j.value("shape", nlohmann::json{});
@@ -252,8 +259,6 @@ class DocBuilder
         p->setPaintOption(PaintOption(EPaintStrategy::PS_SelfOnly));
         const auto shapes = shape.value("subshapes", std::vector<nlohmann::json>{});
         // const auto& shapes = get_or_default(shape, "subshapes");
-
-        auto       matrix = convertCoordinateSystem(p, totalMatrix);
         for (const auto& subshape : shapes)
         {
           const auto blop = subshape.value("booleanOperation", EBoolOp::BO_None);
@@ -299,7 +304,7 @@ class DocBuilder
   std::shared_ptr<PaintNode> fromObject(const nlohmann::json& j, const glm::mat3& totalMatrix)
   {
     std::shared_ptr<PaintNode> ro;
-    auto                       klass = j.value("class", "");
+    auto klass = j.value("class", "");
     if (klass == "group")
     {
       ro = fromGroup(j, totalMatrix);
@@ -348,14 +353,12 @@ class DocBuilder
         auto p = std::make_shared<PaintNode>(std::move(name), VGG_GROUP, std::move(guid));
         return p;
       },
-      [&, this](PaintNode* p)
+      [&, this](PaintNode* p, const glm::mat3& matrix)
       {
         p->setOverflow(OF_Visible); // Group do not clip inner content
         p->setContourOption(ContourOption(ECoutourType::MCT_Union, false));
         p->setPaintOption(EPaintStrategy(EPaintStrategy::PS_ChildOnly));
         const auto& childObjects = get_or_default(j, "childObjects");
-
-        auto        matrix = convertCoordinateSystem(p, totalMatrix);
         for (const auto& c : childObjects)
         {
           p->addChild(fromObject(c, matrix));
@@ -364,10 +367,10 @@ class DocBuilder
   }
 
   inline std::vector<std::shared_ptr<PaintNode>> fromFrames(const nlohmann::json& j,
-                                                            const glm::mat3&      totalMatrix)
+                                                            const glm::mat3& totalMatrix)
   {
     std::vector<std::shared_ptr<PaintNode>> frames;
-    const auto&                             fs = get_or_default(j, "frames");
+    const auto& fs = get_or_default(j, "frames");
     for (const auto& e : fs)
     {
       frames.push_back(fromFrame(e, totalMatrix));
@@ -376,7 +379,7 @@ class DocBuilder
   }
 
   inline std::shared_ptr<PaintNode> fromSymbolInstance(const nlohmann::json& j,
-                                                       const glm::mat3&      totalMatrix)
+                                                       const glm::mat3& totalMatrix)
   {
     return nullptr;
   }
@@ -392,12 +395,11 @@ class DocBuilder
         // appendSymbolMaster(p);
         return p;
       },
-      [&, this](PaintNode* p)
+      [&, this](PaintNode* p, const glm::mat3& matrix)
       {
         const auto radius = get_stack_optional<std::array<float, 4>>(j, "radius");
         p->style().frameRadius = radius;
         const auto& chidlObject = get_or_default(j, "childObjects");
-        auto        matrix = convertCoordinateSystem(p, totalMatrix);
         for (const auto& e : chidlObject)
         {
           p->addChild(fromObject(e, matrix));
@@ -409,7 +411,7 @@ class DocBuilder
                                                                    const glm::mat3& totalMatrix)
   {
     std::vector<std::shared_ptr<PaintNode>> symbols;
-    const auto&                             symbolMasters = get_or_default(j, "symbolMaster");
+    const auto& symbolMasters = get_or_default(j, "symbolMaster");
     for (const auto& e : symbolMasters)
     {
       symbols.emplace_back(fromSymbolMaster(e, totalMatrix));
@@ -444,21 +446,21 @@ class DocBuilder
     {
       for (const auto& p : m_frames)
       {
-        auto      t = p->localTransform();
+        auto t = p->localTransform();
         glm::vec2 scale;
-        float     angle;
+        float angle;
         glm::quat quat;
         glm::vec2 skew;
         glm::vec2 offset;
         glm::vec3 persp;
         decompose(t, scale, angle, quat, skew, offset, persp);
         const auto b = p->getBound();
-        auto       newMatrix = glm::identity<glm::mat3>();
+        auto newMatrix = glm::identity<glm::mat3>();
         newMatrix = glm::scale(newMatrix, scale);
         newMatrix = glm::shearX(newMatrix, skew.x);
         newMatrix = glm::shearY(newMatrix, skew.y);
         newMatrix = glm::rotate(newMatrix, (float)math::number::Pi);
-        newMatrix = glm::translate(newMatrix, -b.topLeft);
+        newMatrix = glm::translate(newMatrix, -b.topLeft());
         p->setLocalTransform(newMatrix);
         p->setOverflow(EOverflow::OF_Visible);
       }
@@ -470,19 +472,19 @@ class DocBuilder
     const auto& v0 = mat[0];
     const auto& v1 = mat[1];
     const auto& v2 = mat[2];
-    const auto  a = v0[0];
-    const auto  b = v0[1];
-    const auto  c = v1[0];
-    const auto  d = v1[1];
-    const auto  tx = v2[0];
-    const auto  ty = v2[1];
-    glm::mat3   flipped =
+    const auto a = v0[0];
+    const auto b = v0[1];
+    const auto c = v1[0];
+    const auto d = v1[1];
+    const auto tx = v2[0];
+    const auto ty = v2[1];
+    glm::mat3 flipped =
       glm::mat3{ glm::vec3{ a, b, 0 }, glm::vec3{ -c, -d, 0 }, glm::vec3{ tx, -ty, 1 } };
     return { flipped, glm::inverse(flipped) };
 
     const auto domonator = (a * d - b * c);
     const auto inv = 1.f / domonator;
-    glm::mat3  inversed =
+    glm::mat3 inversed =
       glm::mat3{ glm::vec3{ d * inv, b * inv, 0 },
                  glm::vec3{ -c * inv, -a * inv, 0 },
                  glm::vec3{ -(d * tx + c * ty) * inv, -(b * tx + a * ty) * inv, 1.0 } };
@@ -493,17 +495,7 @@ class DocBuilder
 
   static void convertCoordinateSystem(glm::vec2& point, const glm::mat3& totalMatrix)
   {
-    // point.y = -point.y;
     point = totalMatrix * glm::vec3(point, 1.f);
-  }
-
-  static void convertCoordinateSystem(Bound2& bound, const glm::mat3& totalMatrix)
-  {
-    auto topLeft = bound.topLeft;
-    auto bottomRight = bound.bottomRight;
-    convertCoordinateSystem(topLeft, totalMatrix);
-    convertCoordinateSystem(bottomRight, totalMatrix);
-    bound = Bound2(topLeft, bottomRight);
   }
 
   static void convertCoordinateSystem(Contour& contour, const glm::mat3& totalMatrix)
@@ -580,7 +572,6 @@ class DocBuilder
     auto convertMatrix = inversed * totalMatrix * originalMatrix;
 
     auto bound = p->getBound();
-    convertCoordinateSystem(bound, convertMatrix);
     p->setBound(bound);
     convertCoordinateSystem(p->style(), convertMatrix);
     return convertMatrix;

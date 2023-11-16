@@ -24,37 +24,40 @@ namespace VGG
 {
 struct Bound2
 {
-  glm::vec2 topLeft;
-  glm::vec2 bottomRight;
+private:
+  glm::vec2 m_topLeft;
+  glm::vec2 m_bottomRight;
+
+public:
   Bound2()
-    : topLeft{ 0, 0 }
-    , bottomRight{ 0, 0 }
+    : m_topLeft{ 0, 0 }
+    , m_bottomRight{ 0, 0 }
   {
   }
   Bound2(float x, float y, float w, float h)
-    : topLeft{ x, y }
-    , bottomRight{ x + w, y + h }
+    : m_topLeft{ x, y }
+    , m_bottomRight{ x + w, y + h }
   {
   }
 
   Bound2(const glm::vec2& topLeft, float w, float h)
-    : topLeft(topLeft)
-    , bottomRight{ topLeft.x + w, topLeft.y + h }
+    : m_topLeft(topLeft)
+    , m_bottomRight{ topLeft.x + w, topLeft.y + h }
   {
   }
 
   Bound2(const glm::vec2& p1, const glm::vec2& p2)
   {
-    topLeft = glm::vec2(std::min(p1.x, p2.x), std::min(p1.y, p2.y));
-    bottomRight = glm::vec2(std::max(p1.x, p2.x), std::max(p1.y, p2.y));
+    m_topLeft = glm::vec2(std::min(p1.x, p2.x), std::min(p1.y, p2.y));
+    m_bottomRight = glm::vec2(std::max(p1.x, p2.x), std::max(p1.y, p2.y));
   }
 
   void extend(float delta)
   {
-    topLeft.x -= delta;
-    topLeft.y -= delta;
-    bottomRight.y += delta;
-    bottomRight.x += delta;
+    m_topLeft.x -= delta;
+    m_topLeft.y -= delta;
+    m_bottomRight.y += delta;
+    m_bottomRight.x += delta;
   }
 
   // Bound2(const glm::vec2& p1, const glm::vec2& p2)
@@ -66,27 +69,47 @@ struct Bound2
   // map the given p into the bound coordinate
   glm::vec2 map(const glm::vec2& p) const
   {
-    return glm::vec2{ p.x + topLeft.x, (p.y + topLeft.y) };
+    return glm::vec2{ p.x + m_topLeft.x, (p.y + m_topLeft.y) };
+  }
+
+  const glm::vec2& topLeft() const
+  {
+    return m_topLeft;
+  }
+
+  glm::vec2& topLeft()
+  {
+    return m_topLeft;
+  }
+
+  const glm::vec2& bottomRight() const
+  {
+    return m_bottomRight;
+  }
+
+  glm::vec2 bottomRight()
+  {
+    return m_bottomRight;
   }
 
   float width() const
   {
-    return bottomRight.x - topLeft.x;
+    return m_bottomRight.x - m_topLeft.x;
   }
 
   void setWidth(float w)
   {
-    bottomRight.x = topLeft.x + w;
+    m_bottomRight.x = m_topLeft.x + w;
   }
 
   void setHeight(float h)
   {
-    bottomRight.y = topLeft.y + h;
+    m_bottomRight.y = m_topLeft.y + h;
   }
 
   float height() const
   {
-    return -topLeft.y + bottomRight.y;
+    return -m_topLeft.y + m_bottomRight.y;
   }
 
   bool valid() const
@@ -111,11 +134,11 @@ struct Bound2
 
   Bound2 transform(const glm::mat3& transform) const
   {
-    auto   topLeft3 = transform * glm::vec3{ topLeft, 1.0 };
-    auto   bottomRight3 = transform * glm::vec3{ bottomRight, 1.0 };
+    auto topLeft3 = transform * glm::vec3{ m_topLeft, 1.0 };
+    auto bottomRight3 = transform * glm::vec3{ m_bottomRight, 1.0 };
     Bound2 newBound;
-    newBound.topLeft = topLeft3;
-    newBound.bottomRight = bottomRight3;
+    newBound.m_topLeft = topLeft3;
+    newBound.m_bottomRight = bottomRight3;
     return newBound;
   }
 
@@ -126,10 +149,10 @@ struct Bound2
 
   void unionWith(const Bound2& bound)
   {
-    topLeft.x = std::min(topLeft.x, bound.topLeft.x);
-    topLeft.y = std::min(topLeft.y, bound.topLeft.y);
-    bottomRight.x = std::max(bottomRight.x, bound.bottomRight.x);
-    bottomRight.y = std::max(bottomRight.y, bound.bottomRight.y);
+    m_topLeft.x = std::min(m_topLeft.x, bound.m_topLeft.x);
+    m_topLeft.y = std::min(m_topLeft.y, bound.m_topLeft.y);
+    m_bottomRight.x = std::max(m_bottomRight.x, bound.m_bottomRight.x);
+    m_bottomRight.y = std::max(m_bottomRight.y, bound.m_bottomRight.y);
   }
 
   Bound2 unionAs(const Bound2& bound) const
@@ -141,10 +164,10 @@ struct Bound2
 
   void intersectWith(const Bound2& bound)
   {
-    topLeft.x = std::max(topLeft.x, bound.topLeft.x);
-    topLeft.y = std::max(topLeft.y, bound.topLeft.y);
-    bottomRight.x = std::min(bottomRight.x, bound.bottomRight.x);
-    bottomRight.y = std::min(bottomRight.y, bound.bottomRight.y);
+    m_topLeft.x = std::max(m_topLeft.x, bound.m_topLeft.x);
+    m_topLeft.y = std::max(m_topLeft.y, bound.m_topLeft.y);
+    m_bottomRight.x = std::min(m_bottomRight.x, bound.m_bottomRight.x);
+    m_bottomRight.y = std::min(m_bottomRight.y, bound.m_bottomRight.y);
   }
 
   Bound2 intersectAs(const Bound2& bound) const
@@ -171,36 +194,12 @@ public:
   static Bound2 makeInfinite()
   {
     Bound2 b;
-    b.topLeft.x = std::numeric_limits<float>::lowest();
-    b.topLeft.y = std::numeric_limits<float>::lowest();
-    b.bottomRight.x = std::numeric_limits<float>::max();
-    b.bottomRight.y = std::numeric_limits<float>::max();
+    b.m_topLeft.x = std::numeric_limits<float>::lowest();
+    b.m_topLeft.y = std::numeric_limits<float>::lowest();
+    b.m_bottomRight.x = std::numeric_limits<float>::max();
+    b.m_bottomRight.y = std::numeric_limits<float>::max();
     return b;
   }
 };
-
-// struct RoundedBound2 : public Bound2
-// {
-// private:
-//   float m_xRadius{ 0.0f }, m_yRadius{ 0.0f };
-//
-// public:
-//   RoundedBound2(float x, float y, float w, float h, float xR, float yR)
-//     : Bound2(x, y, w, h)
-//     , m_xRadius(xR)
-//     , m_yRadius(yR)
-//   {
-//   }
-//   RoundedBound2() = default;
-//   float xRadius() const
-//   {
-//     return m_xRadius;
-//   }
-//
-//   float yRadius() const
-//   {
-//     return m_yRadius;
-//   }
-// };
 
 } // namespace VGG

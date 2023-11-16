@@ -131,10 +131,10 @@ struct Gradient
     return 0;
   }
 
-  inline glm::vec2 convert(const glm::vec2& p, const Bound2& b) const
-  {
-    return glm::vec2{ p.x + b.topLeft.x, p.y - b.height() + b.topLeft.y };
-  }
+  // inline glm::vec2 convert(const glm::vec2& p, const Bound2& b) const
+  // {
+  //   return glm::vec2{ p.x + b.topLeft.x, p.y - b.height() + b.topLeft.y };
+  // }
 
   inline std::pair<glm::vec2, glm::vec2> aiConvert(const glm::vec2& from,
                                                    const glm::vec2& to,
@@ -144,8 +144,8 @@ struct Gradient
     const auto length = to.y;
     const auto radians = glm::radians(angle);
     glm::vec2 dir = { std::cos(radians), std::sin(radians) };
-    const auto center = glm::vec2(b.topLeft.x + b.width() / 2, b.topLeft.y - b.height() / 2);
-    const auto x = from.x * b.width() + b.topLeft.x;
+    const auto center = glm::vec2(b.topLeft().x + b.width() / 2, b.topLeft().y - b.height() / 2);
+    const auto x = from.x * b.width() + b.topLeft().x;
     float k = 1;
     if ((angle <= 45 && angle >= -45) || (angle >= 135 || angle <= -135))
     {

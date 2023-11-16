@@ -109,7 +109,7 @@ public:
 
   float height() const
   {
-    return -m_topLeft.y + m_bottomRight.y;
+    return m_bottomRight.y - m_topLeft.y;
   }
 
   bool valid() const

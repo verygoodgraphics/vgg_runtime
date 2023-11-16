@@ -25,7 +25,7 @@ using namespace VGG;
 sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound2& bound)
 {
   sk_sp<SkShader> shader;
-  const auto      type = g.gradientType;
+  const auto type = g.gradientType;
   if (type == GT_Linear)
   {
     shader = g.getLinearShader(bound);
@@ -41,12 +41,12 @@ sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound2& bound)
   return shader;
 }
 
-void Painter::drawPathBorder(const SkPath&        skPath,
-                             const Bound2&        bound,
-                             const Border&        b,
-                             float                globalAlpha,
+void Painter::drawPathBorder(const SkPath& skPath,
+                             const Bound2& bound,
+                             const Border& b,
+                             float globalAlpha,
                              sk_sp<SkImageFilter> imageFilter,
-                             sk_sp<SkBlender>     blender)
+                             sk_sp<SkBlender> blender)
 {
   SkPaint strokePen;
   strokePen.setAntiAlias(m_antiAlias);
@@ -96,9 +96,9 @@ void Painter::drawPathBorder(const SkPath&        skPath,
     auto img = loadImage(b.pattern->imageGUID, Scene::getResRepo());
     if (!img)
       return;
-    auto       bs = bound.size();
+    auto bs = bound.size();
     const auto m = toSkMatrix(b.pattern->transform);
-    auto       shader = getImageShader(img,
+    auto shader = getImageShader(img,
                                  bs.x,
                                  bs.y,
                                  b.pattern->imageFillType,
@@ -117,10 +117,10 @@ void Painter::drawPathBorder(const SkPath&        skPath,
   }
 }
 
-void Painter::drawShadow(const SkPath&        skPath,
-                         const Bound2&        bound,
-                         const Shadow&        s,
-                         SkPaint::Style       style,
+void Painter::drawShadow(const SkPath& skPath,
+                         const Bound2& bound,
+                         const Shadow& s,
+                         SkPaint::Style style,
                          sk_sp<SkImageFilter> imageFilter)
 {
   SkPaint pen;
@@ -137,14 +137,14 @@ void Painter::drawShadow(const SkPath&        skPath,
   m_canvas->restore();
 }
 
-void Painter::drawInnerShadow(const SkPath&        skPath,
-                              const Bound2&        bound,
-                              const Shadow&        s,
-                              SkPaint::Style       style,
+void Painter::drawInnerShadow(const SkPath& skPath,
+                              const Bound2& bound,
+                              const Shadow& s,
+                              SkPaint::Style style,
                               sk_sp<SkImageFilter> imageFilter)
 {
   SkPaint pen;
-  auto    sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
+  auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
   pen.setAntiAlias(m_antiAlias);
   pen.setImageFilter(
     SkMyImageFilters::DropInnerShadowOnly(s.offset_x, -s.offset_y, sigma, sigma, s.color, nullptr));
@@ -158,13 +158,13 @@ void Painter::drawInnerShadow(const SkPath&        skPath,
   m_canvas->restore();
 }
 
-void Painter::drawFill(const SkPath&        skPath,
-                       const Bound2&        bound,
-                       const Fill&          f,
-                       float                globalAlpha,
+void Painter::drawFill(const SkPath& skPath,
+                       const Bound2& bound,
+                       const Fill& f,
+                       float globalAlpha,
                        sk_sp<SkImageFilter> imageFilter,
-                       sk_sp<SkBlender>     blender,
-                       sk_sp<SkMaskFilter>  mask)
+                       sk_sp<SkBlender> blender,
+                       sk_sp<SkMaskFilter> mask)
 {
   SkPaint fillPen;
   fillPen.setStyle(SkPaint::kFill_Style);
@@ -191,9 +191,9 @@ void Painter::drawFill(const SkPath&        skPath,
     auto img = loadImage(f.pattern->imageGUID, Scene::getResRepo());
     if (!img)
       return;
-    auto       bs = bound.size();
+    auto bs = bound.size();
     const auto m = toSkMatrix(f.pattern->transform);
-    auto       shader = getImageShader(img,
+    auto shader = getImageShader(img,
                                  bs.x,
                                  bs.y,
                                  f.pattern->imageFillType,

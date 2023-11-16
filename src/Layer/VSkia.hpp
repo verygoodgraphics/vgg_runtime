@@ -460,70 +460,52 @@ inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
   SkImageInfo mi = img->imageInfo();
   float sx = (float)width / mi.width();
   float sy = (float)height / mi.height();
+  if (matrix)
+  {
+    mat.postConcat(*matrix);
+  }
   if (imageFillType == IFT_Fill)
   {
     double s = std::max(sx, sy);
     mat.postScale(s, s);
-    if (matrix)
-    {
-      mat.postConcat(*matrix);
-    }
+    // translate along the side with minimal scale
     if (sx > sy)
     {
-      // scaled image's width == frame's width
-      mat.postTranslate(0, -(height - sx * mi.height()) / 2);
+      mat.postTranslate(0, (height - sx * mi.height()) / 2);
     }
     else
     {
-      // scaled image's height == frame's height
       mat.postTranslate((width - sy * mi.width()) / 2, 0);
     }
   }
   else if (imageFillType == IFT_Fit)
   {
-    if (matrix)
-    {
-      mat.postConcat(*matrix);
-    }
     double s = std::min(sx, sy);
     mat.postScale(s, s);
     if (matrix)
     {
       mat.postConcat(*matrix);
     }
+    // translate along the side with maximal scale
     if (sx < sy)
     {
-      // scaled image's width == frame's width
       mat.postTranslate(0, -(height - sx * mi.height()) / 2);
     }
     else
     {
-      // scaled image's height == frame's height
       mat.postTranslate((width - sy * mi.width()) / 2, 0);
     }
   }
   else if (imageFillType == VGG::IFT_Stretch)
   {
-    if (matrix)
-    {
-      mat.postConcat(*matrix);
-    }
   }
   else if (imageFillType == VGG::IFT_Tile)
   {
     modeX = imageTileMirrored ? SkTileMode::kMirror : SkTileMode::kRepeat;
     modeY = imageTileMirrored ? SkTileMode::kMirror : SkTileMode::kRepeat;
-    if (matrix)
-    {
-      mat.postConcat(*matrix);
-    }
   }
   else if (imageFillType == IFT_OnlyTileVertical)
   {
-    if (matrix)
-    {
-      mat.postConcat(*matrix);
-    }
     modeY = imageTileMirrored ? SkTileMode::kMirror : SkTileMode::kRepeat;
   }
   else if (imageFillType == IFT_OnlyTileHorizontal)
@@ -533,6 +515,7 @@ inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
   SkSamplingOptions opt;
   if (FLIP_COORD)
     mat.preScale(1, -1); // convert to skia
+                         //
 
   return img->makeShader(modeX, modeY, opt, &mat);
 }

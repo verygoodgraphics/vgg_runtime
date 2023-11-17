@@ -161,6 +161,38 @@ skia_enable_skshaper=true
 skia_enable_skparagraph=true")
 endif()
 
+set(SKIA_PRESET_FEATURES_FOR_IOS
+"skia_enable_fontmgr_empty=false
+skia_enable_ganesh=true 
+skia_enable_gpu=true
+skia_enable_pdf=false
+skia_enable_skottie=false
+skia_enable_spirv_validation=false
+skia_enable_tools=false
+skia_use_angle=false
+skia_use_dng_sdk=false
+skia_use_egl=false
+skia_use_expat=false
+skia_use_fontconfig=false
+skia_use_freetype=false
+skia_use_icu=false
+skia_use_libheif=false
+skia_use_libjpeg_turbo_decode=true
+skia_use_libjpeg_turbo_encode=false
+skia_use_libpng_decode=true
+skia_use_libpng_encode=true
+skia_use_libwebp_decode=true
+skia_use_libwebp_encode=false
+skia_use_lua=false
+skia_use_metal=true
+skia_use_piex=false
+skia_use_system_libjpeg_turbo=false
+skia_use_system_libpng=false
+skia_use_system_libwebp=false
+skia_use_system_zlib=false
+skia_use_vulkan=false
+skia_use_zlib=true")
+
 cmake_minimum_required(VERSION 3.19) # for string(JSON ...)
 
 function(list_from_json out_var json)
@@ -208,11 +240,42 @@ elseif(platform STREQUAL "WASM" AND DEFINED EMSCRIPTEN)
   foreach(OPT ${SKIA_PRESET_FEATURES_FOR_WASM})
     string(APPEND OPTIONS " ${OPT}")
   endforeach(OPT)
+elseif(platform MATCHES "^iOS")
+  string(APPEND OPTIONS " target_os=\"ios\"")
+  string(APPEND OPTIONS " target_cpu=\"arm64\"")
+
+  foreach(OPT ${SKIA_PRESET_FEATURES_FOR_IOS})
+    string(APPEND OPTIONS " ${OPT}")
+  endforeach(OPT)
+
+  if(platform STREQUAL "iOS-simulator")
+    string(APPEND OPTIONS " extra_ldflags=[\"--target=arm64-apple-ios12.0.0-simulator\"]")
+  endif()
 else()
   message(Fatal "target type for skia build is invalid: " ${platform})
 endif()
 
-if(NOT ${platform} IN_LIST VGG_WIN_TARGET_LIST)
+if(platform MATCHES "^iOS")
+  set(IOS_EXTRA_CFLAGS,
+    " extra_cflags=[\
+        \"-fno-rtti\", \
+        \"-fembed-bitcode\", \
+        \"-mios-version-min=10.0\", \
+        \"-flto=full\", \
+        \"-dsk_disable_skpicture\", \
+        \"-dsk_disable_text\", \
+        \"-drive_optimized\", \ 
+        \"-dsk_disable_legacy_shadercontext\", \
+        \"-dsk_disable_lowp_raster_pipeline\", \
+        \"-dsk_force_raster_pipeline_blitter\", \
+        \"-dsk_disable_aaa\", \
+        \"-dsk_disable_effect_deserialization\"")
+  if(platform STREQUAL "iOS-simulator")
+    string(APPEND IOS_EXTRA_CFLAGS, ", \"--target=arm64-apple-ios12.0.0-simulator\"")
+  endif()
+  string(APPEND IOS_EXTRA_CFLAGS, "]")
+  string(APPEND OPTIONS ${IOS_EXTRA_CFLAGS})
+elseif(NOT ${platform} IN_LIST VGG_WIN_TARGET_LIST)
 # we assume non-window using gcc compatible compiler
 if(config STREQUAL "RelWithDebInfo")
   string(APPEND OPTIONS " extra_cflags_cc=[\"-fvisibility=default\", \"-g\", \"-frtti\"]")

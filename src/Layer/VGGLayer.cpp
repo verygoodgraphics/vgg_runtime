@@ -16,12 +16,19 @@
 #include <iterator>
 #include <ostream>
 #include <sstream>
+
+#include <core/SkPictureRecorder.h>
+#include <gpu/GrDirectContext.h>
+#include <encode/SkJpegEncoder.h>
+#include <encode/SkWebpEncoder.h>
+
+#include "VSkiaGL.hpp" // this header and the skia headers must be included first for ios build
+
 #ifdef VGG_USE_VULKAN
 #include "VSkiaVK.hpp"
 #endif
 #include "Renderer.hpp"
 #include "VSkiaContext.hpp"
-#include "VSkiaGL.hpp"
 
 #include "Layer/Core/Stream.hpp"
 #include "Layer/VGGLayer.hpp"
@@ -32,11 +39,6 @@
 #include "Layer/Graphics/ContextSkBase.hpp"
 #include "Layer/Core/Node.hpp"
 #include "Utility/CappingProfiler.hpp"
-
-#include <core/SkPictureRecorder.h>
-#include <gpu/GrDirectContext.h>
-#include <encode/SkJpegEncoder.h>
-#include <encode/SkWebpEncoder.h>
 
 #include <optional>
 

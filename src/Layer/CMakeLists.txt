@@ -26,13 +26,17 @@ target_include_directories(
 
 # find OpenGL library
 cmake_policy(SET CMP0072 NEW)
+if(NOT VGG_VAR_HOST STREQUAL "iOS")
 find_package(OpenGL REQUIRED)
+endif()
 
 target_include_directories(vgg_layer PUBLIC ${VGG_CONTRIB_JSON_INCLUDE})
 # REFACTOR:: make skia hidden from public
 target_link_libraries(vgg_layer PUBLIC ${SKIA_LIBS} glm)
 target_link_libraries(vgg_layer PRIVATE ${OPENGL_LIBRARIES} vgg_utility)
+if(NOT VGG_VAR_HOST STREQUAL "iOS")
 find_package(Vulkan)
+endif()
 if(Vulkan_FOUND)
   message("Vulkan found: enabling vulkan ...")
   target_compile_definitions(vgg_layer PRIVATE VGG_USE_VULKAN)

@@ -143,17 +143,3 @@ if(${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_ANDROID_TARGET_LIST)
     set(ANDROID_ABI "x86_64")
   endif()
 endif()
-
-
-# Setup ios.toolchian.cmake variables
-if(${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_APPLE_TARGET_LIST)
-  # PLATFORM 是ios.toolchain.cmake 的变量
-  if(VGG_VAR_PLATFORM_TARGET STREQUAL "iOS")
-    set(PLATFORM "OS64")
-    # TODO:: iphone device need a signature to build
-  elseif(VGG_VAR_PLATFORM_TARGET STREQUAL "iOS-simulator")
-    set(PLATFORM "SIMULATOR64")
-  elseif(VGG_VAR_PLATFORM_TARGET STREQUAL "macOS")
-    set(PLATFORM "MACOS")
-  endif()
-endif()

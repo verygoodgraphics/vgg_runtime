@@ -91,17 +91,19 @@ template<typename F>
 sktxt::TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&& fun)
 {
   sktxt::TextStyle style;
-  SkColor color = SK_ColorBLACK;
   if (!attr.fills.empty())
   {
     auto painterID = fun();
     style.setForegroundPaintID(painterID);
+    SkColor c = attr.fills[0].color;
+    style.setDecorationColor(c);
   }
   else
   {
+    SkColor color = SK_ColorBLACK;
     style.setColor(color);
+    style.setDecorationColor(color);
   }
-  style.setDecorationColor(color);
 
   std::string fontName;
   std::string subFamilyName;

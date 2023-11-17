@@ -477,8 +477,6 @@ public:
   {
     auto j = R"({
         "length":0,
-        "borders":[],
-        "fills":[],
         "fillUseType":0,
         "horizontalAlignment":0,
         "name":"Fira Sans",

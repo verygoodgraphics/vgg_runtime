@@ -21,6 +21,7 @@
 #include "AttrSerde.hpp"
 
 #include "Layer/Core/Attrs.hpp"
+#include "Layer/VSkia.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/Node.hpp"
 #include "Layer/Core/PaintNode.hpp"
@@ -75,11 +76,11 @@ class DocBuilder
     return { original, newMatrix, inversed };
   }
 
-  inline Style fromStyle(const nlohmann::json& j, const glm::mat3& totalMatrix)
+  inline Style fromStyle(const nlohmann::json& j, const Bound2& bound, const glm::mat3& totalMatrix)
   {
     Style style;
     from_json(j, style);
-    convertCoordinateSystem(style, totalMatrix);
+    convertCoordinateSystem(style, bound, totalMatrix);
     return style;
   }
 
@@ -97,8 +98,14 @@ class DocBuilder
     const auto convertedMatrix = inversedNewMatrix * totalMatrix * originalMatrix;
 
     obj->setLocalTransform(newMatrix);
-    obj->setBound(fromBound(j.value("bounds", nlohmann::json::object_t{}), convertedMatrix));
-    obj->setStyle(fromStyle(j.value("style", nlohmann::json::object_t{}), convertedMatrix));
+    const auto b = fromBound(j.value("bounds", nlohmann::json::object_t{}), convertedMatrix);
+    obj->setBound(b);
+
+    // Pattern point in style are implicitly given by bound, we must supply the points in original
+    // coordinates for correct converting
+    const auto boundInOriginal = Bound2({ 0, -b.height() }, { b.width(), 0 });
+    obj->setStyle(
+      fromStyle(j.value("style", nlohmann::json::object_t{}), boundInOriginal, convertedMatrix));
     obj->style().cornerSmooth = get_opt<float>(j, "cornerSmoothing").value_or(0.f);
     obj->setContextSettings(j.value("contextSettings", ContextSetting()));
     obj->setMaskBy(std::move(j.value("outlineMaskBy", std::vector<std::string>{})));
@@ -476,6 +483,7 @@ class DocBuilder
 
   static std::pair<glm::mat3, glm::mat3> convertMatrixCoordinate(const glm::mat3& mat)
   {
+    return { mat, glm::inverse(mat) };
     const auto& v0 = mat[0];
     const auto& v1 = mat[1];
     const auto& v2 = mat[2];
@@ -486,7 +494,7 @@ class DocBuilder
     const auto tx = v2[0];
     const auto ty = v2[1];
     glm::mat3 flipped =
-      glm::mat3{ glm::vec3{ a, b, 0 }, glm::vec3{ -c, -d, 0 }, glm::vec3{ tx, -ty, 1 } };
+      glm::mat3{ glm::vec3{ a, -b, 0 }, glm::vec3{ c, -d, 0 }, glm::vec3{ tx, -ty, 1 } };
     return { flipped, glm::inverse(flipped) };
 
     const auto domonator = (a * d - b * c);
@@ -523,11 +531,17 @@ class DocBuilder
     }
   }
 
-  static void convertCoordinateSystem(Pattern& pattern, const glm::mat3& totalMatrix)
+  static void convertCoordinateSystem(Pattern& pattern,
+                                      const Bound2& bound,
+                                      const glm::mat3& totalMatrix)
   {
-    const auto p = convertPatternMatrix(pattern.transform);
-    // const auto p = convertMatrixCoordinate(pattern.transform);
-    pattern.transform = p;
+
+    std::cout << "convert: " << std::endl;
+    std::cout << bound.topLeft() << " " << bound.bottomRight() << std::endl;
+
+    glm::mat3 scale = glm::identity<glm::mat3>();
+    scale = glm::scale(scale, { 1, -1 });
+    pattern.transform = totalMatrix * pattern.transform * scale;
   }
 
   static void convertCoordinateSystem(Gradient& gradient, const glm::mat3& totalMatrix)
@@ -536,13 +550,15 @@ class DocBuilder
     // convertCoordinateSystem(gradient.to, totalMatrix);
   }
 
-  static void convertCoordinateSystem(Style& style, const glm::mat3& totalMatrix)
+  static void convertCoordinateSystem(Style& style,
+                                      const Bound2& bound,
+                                      const glm::mat3& totalMatrix)
   {
     for (auto& b : style.borders)
     {
       if (b.pattern)
       {
-        convertCoordinateSystem(b.pattern.value(), totalMatrix);
+        convertCoordinateSystem(b.pattern.value(), bound, totalMatrix);
       }
       if (b.gradient)
       {
@@ -557,7 +573,7 @@ class DocBuilder
       }
       if (f.pattern)
       {
-        convertCoordinateSystem(f.pattern.value(), totalMatrix);
+        convertCoordinateSystem(f.pattern.value(), bound, totalMatrix);
       }
     }
     for (auto& s : style.shadows)

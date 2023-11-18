@@ -200,6 +200,37 @@ public:
     b.m_bottomRight.y = std::numeric_limits<float>::max();
     return b;
   }
+
+  static Bound2 makeBoundLRTB(float l, float r, float t, float b)
+  {
+    Bound2 bound;
+    bound.m_topLeft = { l, t };
+    bound.m_bottomRight = { r, b };
+    return bound;
+  }
 };
+
+inline std::ostream& operator<<(std::ostream& os, const glm::vec2& v)
+{
+  os << "[" << v[0] << ", " << v[1] << "]\n";
+  return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const Bound2& b)
+{
+  os << "[" << b.topLeft() << ", " << b.bottomRight() << "]" << std::endl;
+  return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const glm::mat3& mat)
+{
+  const auto& v0 = mat[0];
+  const auto& v1 = mat[1];
+  const auto& v2 = mat[2];
+  os << "[" << v0[0] << ", " << v1[0] << ", " << v2[0] << std::endl;
+  os << v0[1] << ", " << v1[1] << ", " << v2[1] << std::endl;
+  os << v0[2] << ", " << v1[2] << ", 1]" << std::endl;
+  return os;
+}
 
 } // namespace VGG

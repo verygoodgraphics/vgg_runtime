@@ -687,6 +687,12 @@ void PaintNode::prePaintPass(SkiaRenderer* renderer)
 
   canvas->save();
   canvas->concat(toSkMatrix(_->transform));
+  DEBUG("currentLocalMatrix");
+  std::cout << toSkMatrix(_->transform) << std::endl;
+  DEBUG("currentTotalMatrix");
+  std::cout << canvas->getTotalMatrix() << std::endl;
+  DEBUG("current Bound");
+  std::cout << getBound() << std::endl;
   if (renderer->isEnableDrawDebugBound())
   {
     renderer->drawDebugBound(this, 0);

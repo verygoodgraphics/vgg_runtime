@@ -460,41 +460,46 @@ inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
   SkImageInfo mi = img->imageInfo();
   float sx = (float)width / mi.width();
   float sy = (float)height / mi.height();
-  if (matrix)
-  {
-    mat.postConcat(*matrix);
-  }
+
   if (imageFillType == IFT_Fill)
   {
-    double s = std::max(sx, sy);
+    const float s = std::max(sx, sy);
     mat.postScale(s, s);
-    // translate along the side with minimal scale
-    if (sx > sy)
-    {
-      mat.postTranslate(0, (height - sx * mi.height()) / 2);
-    }
-    else
-    {
-      mat.postTranslate((width - sy * mi.width()) / 2, 0);
-    }
-  }
-  else if (imageFillType == IFT_Fit)
-  {
-    double s = std::min(sx, sy);
-    mat.postScale(s, s);
+
     if (matrix)
     {
       mat.postConcat(*matrix);
     }
-    // translate along the side with maximal scale
-    if (sx < sy)
+    // translate along the side with minimal scale
+    if (sx > sy)
     {
-      mat.postTranslate(0, -(height - sx * mi.height()) / 2);
+      mat.postTranslate(0, -(s * mi.height() - height) / 2.f);
     }
     else
     {
-      mat.postTranslate((width - sy * mi.width()) / 2, 0);
+      mat.postTranslate(-(s * mi.width() - width) / 2.f, 0);
     }
+  }
+  else if (imageFillType == IFT_Fit)
+  {
+    float s = std::min(sx, sy);
+    DEBUG("%f", s);
+    DEBUG("[%d, %d], [%d, %d] %f", mi.width(), mi.height(), width, height, s);
+    glm::vec2 offset = { (width - s * mi.width()) / 2.f, (height - s * mi.height()) / 2.f };
+    //  translate along the side with maximal scale
+    if (sx < sy)
+    {
+      // mat.preTranslate(0, (height - s * mi.height()) / 2);
+    }
+    else
+    {
+      // mat.preTranslate((width - s * mi.width()) / 2, 0);
+    }
+    // if (matrix)
+    // {
+    //   mat.preConcat(*matrix);
+    // }
+    // mat.preScale(s, s);
   }
   else if (imageFillType == VGG::IFT_Stretch)
   {
@@ -593,6 +598,15 @@ inline SkMatrix toSkMatrix(const glm::mat3& mat)
                   mat[1][2],
                   mat[2][2]);
   return skMatrix;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const SkMatrix& mat)
+{
+  os << "[" << mat.getScaleX() << ", " << mat.getSkewX() << ", " << mat.getTranslateX()
+     << std::endl;
+  os << mat.getSkewY() << ", " << mat.getScaleY() << ", " << mat.getTranslateY() << std::endl;
+  os << mat.getPerspX() << ", " << mat.getPerspY() << ", 1]" << std::endl;
+  return os;
 }
 
 inline float calcRotationAngle(const glm::mat3& mat)

@@ -1,6 +1,7 @@
 if(NOT EMSCRIPTEN)
   add_subdirectory(SDL)
   add_subdirectory(Exporter)
+  add_subdirectory(Component)
 else()
   add_subdirectory(WASM)
 endif()

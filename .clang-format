@@ -20,4 +20,9 @@ PointerAlignment: Left
 SortIncludes: false
 SpaceAfterTemplateKeyword: false
 TabWidth: 2
+AlignConsecutiveBitFields: true
+AlignConsecutiveDeclarations:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
 ...

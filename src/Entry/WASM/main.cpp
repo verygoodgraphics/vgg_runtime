@@ -58,7 +58,7 @@ extern "C"
     cfg.appName = "SdlRuntime";
     cfg.windowSize[0] = width;
     cfg.windowSize[1] = height;
-    cfg.graphicsContextConfig.multiSample = 0;
+    cfg.graphicsContextConfig.multiSample = 4;
     cfg.graphicsContextConfig.stencilBit = 8;
 
     auto app = application();

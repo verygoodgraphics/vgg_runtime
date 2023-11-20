@@ -170,7 +170,7 @@ Exporter::Exporter()
   d_impl->ctx = std::make_shared<VkGraphicsContext>();
   d_impl->layer = std::make_shared<layer::VLayer>();
   cfg.stencilBit = 8;
-  cfg.multiSample = 0;
+  cfg.multiSample = 4;
   d_impl->ctx->init(cfg);
   d_impl->layer->init(d_impl->ctx.get());
 }

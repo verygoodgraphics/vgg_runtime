@@ -50,6 +50,9 @@ struct Pattern
   float tileScale;
   std::string imageGUID;
   glm::mat3 transform;
+  glm::vec2 scale;
+  float rotate;
+  glm::vec2 offset;
 };
 
 struct AlphaMask

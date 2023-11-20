@@ -193,24 +193,17 @@ void Painter::drawFill(const SkPath& skPath,
       return;
     auto bs = bound.size();
     const auto m = toSkMatrix(f.pattern->transform);
+
     auto shader = getImageShader(img,
                                  bs.x,
                                  bs.y,
                                  f.pattern->imageFillType,
                                  f.pattern->tileScale,
                                  f.pattern->tileMirrored,
-                                 &m);
-
-    std::cout << "Pattern Transform\n";
-    std::cout << m;
-
-    auto t = m_canvas->getTotalMatrix();
-    // std::cout << "Total transform:\n";
-    // std::cout << t << std::endl;
-    SkPaint p;
-    p.setColor(SK_ColorBLUE);
-    p.setStyle(SkPaint::kFill_Style);
-    // m_canvas->drawRect({ 0, 0, 500, 500 }, p);
+                                 &m,
+                                 f.pattern->offset,
+                                 f.pattern->scale,
+                                 f.pattern->rotate);
 
     fillPen.setShader(shader);
     fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);

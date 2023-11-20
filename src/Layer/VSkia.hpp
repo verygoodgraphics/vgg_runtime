@@ -18,7 +18,9 @@
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Scene.hpp"
+#include "Math/Math.hpp"
 #include "Utility/Log.hpp"
+#include "glm/gtx/transform.hpp"
 
 #include <include/core/SkBlendMode.h>
 #include <include/core/SkImageFilter.h>
@@ -53,6 +55,26 @@ extern std::unordered_map<std::string, sk_sp<SkImage>> g_skiaImageRepo;
     return fallback;                                                                               \
     }
 
+inline SkRect toSkRect(const VGG::Bound2& bound)
+{
+  const auto& b = bound;
+  return SkRect{ b.topLeft().x, b.topLeft().y, b.bottomRight().x, b.bottomRight().y };
+}
+
+inline SkMatrix toSkMatrix(const glm::mat3& mat)
+{
+  SkMatrix skMatrix;
+  skMatrix.setAll(mat[0][0],
+                  mat[1][0],
+                  mat[2][0],
+                  mat[0][1],
+                  mat[1][1],
+                  mat[2][1],
+                  mat[0][2],
+                  mat[1][2],
+                  mat[2][2]);
+  return skMatrix;
+}
 inline SkPaint::Join toSkPaintJoin(VGG::ELineJoin join)
 {
   SWITCH_MAP_ITEM_BEGIN(join)
@@ -452,7 +474,10 @@ inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
                                       EImageFillType imageFillType,
                                       float imageTileScale,
                                       bool imageTileMirrored,
-                                      const SkMatrix* matrix = nullptr)
+                                      const SkMatrix* matrix = nullptr,
+                                      glm::vec2 offset = { 0, 0 },
+                                      glm::vec2 scale = { 1, 1 },
+                                      float rotate = 0.f)
 {
   SkTileMode modeX = SkTileMode::kDecal;
   SkTileMode modeY = SkTileMode::kDecal;
@@ -464,48 +489,53 @@ inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
   if (imageFillType == IFT_Fill)
   {
     const float s = std::max(sx, sy);
-    mat.postScale(s, s);
-
-    if (matrix)
-    {
-      mat.postConcat(*matrix);
-    }
     // translate along the side with minimal scale
+    auto m = glm::mat3{ 1.0 };
     if (sx > sy)
     {
-      mat.postTranslate(0, -(s * mi.height() - height) / 2.f);
+      m = glm::translate(m, { 0, (height - s * mi.height()) / 2.f });
     }
     else
     {
-      mat.postTranslate(-(s * mi.width() - width) / 2.f, 0);
+      m = glm::translate(m, { (width - s * mi.width()) / 2.f, 0 });
     }
+    m = glm::scale(m, { s, s });
+    m = glm::translate(m, { mi.width() / 2, mi.height() / 2 });
+    m = glm::rotate(m, rotate);
+    m = glm::translate(m, { -mi.width() / 2, -mi.height() / 2 });
+    mat.preConcat(toSkMatrix(m));
   }
   else if (imageFillType == IFT_Fit)
   {
     float s = std::min(sx, sy);
-    DEBUG("%f", s);
-    DEBUG("[%d, %d], [%d, %d] %f", mi.width(), mi.height(), width, height, s);
-    glm::vec2 offset = { (width - s * mi.width()) / 2.f, (height - s * mi.height()) / 2.f };
-    //  translate along the side with maximal scale
+    auto m = glm::mat3{ 1.0 };
     if (sx < sy)
     {
-      // mat.preTranslate(0, (height - s * mi.height()) / 2);
+      m = glm::translate(m, { 0, (height - s * mi.height()) / 2 });
     }
     else
     {
-      // mat.preTranslate((width - s * mi.width()) / 2, 0);
+      m = glm::translate(m, { (width - s * mi.width()) / 2, 0 });
     }
-    // if (matrix)
-    // {
-    //   mat.preConcat(*matrix);
-    // }
-    // mat.preScale(s, s);
+    m = glm::scale(m, { s, s });
+    m = glm::translate(m, { mi.width() / 2, mi.height() / 2 });
+    m = glm::rotate(m, rotate);
+    m = glm::translate(m, { -mi.width() / 2, -mi.height() / 2 });
+    mat.preConcat(toSkMatrix(m));
   }
   else if (imageFillType == VGG::IFT_Stretch)
   {
+    if (matrix)
+    {
+      mat.preConcat(*matrix);
+    }
   }
   else if (imageFillType == VGG::IFT_Tile)
   {
+    if (matrix)
+    {
+      mat.preConcat(*matrix);
+    }
     modeX = imageTileMirrored ? SkTileMode::kMirror : SkTileMode::kRepeat;
     modeY = imageTileMirrored ? SkTileMode::kMirror : SkTileMode::kRepeat;
   }
@@ -521,7 +551,6 @@ inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
   if (FLIP_COORD)
     mat.preScale(1, -1); // convert to skia
                          //
-
   return img->makeShader(modeX, modeY, opt, &mat);
 }
 
@@ -577,27 +606,6 @@ inline sk_sp<SkImageFilter> makeBlendModeFilter(EBlendMode blendMode)
     default:
       return nullptr;
   }
-}
-
-inline SkRect toSkRect(const VGG::Bound2& bound)
-{
-  const auto& b = bound;
-  return SkRect{ b.topLeft().x, b.topLeft().y, b.bottomRight().x, b.bottomRight().y };
-}
-
-inline SkMatrix toSkMatrix(const glm::mat3& mat)
-{
-  SkMatrix skMatrix;
-  skMatrix.setAll(mat[0][0],
-                  mat[1][0],
-                  mat[2][0],
-                  mat[0][1],
-                  mat[1][1],
-                  mat[2][1],
-                  mat[0][2],
-                  mat[1][2],
-                  mat[2][2]);
-  return skMatrix;
 }
 
 inline std::ostream& operator<<(std::ostream& os, const SkMatrix& mat)

@@ -103,9 +103,7 @@ class DocBuilder
 
     // Pattern point in style are implicitly given by bound, we must supply the points in original
     // coordinates for correct converting
-    const auto boundInOriginal = Bound2({ 0, -b.height() }, { b.width(), 0 });
-    obj->setStyle(
-      fromStyle(j.value("style", nlohmann::json::object_t{}), boundInOriginal, convertedMatrix));
+    obj->setStyle(fromStyle(j.value("style", nlohmann::json::object_t{}), b, convertedMatrix));
     obj->style().cornerSmooth = get_opt<float>(j, "cornerSmoothing").value_or(0.f);
     obj->setContextSettings(j.value("contextSettings", ContextSetting()));
     obj->setMaskBy(std::move(j.value("outlineMaskBy", std::vector<std::string>{})));
@@ -483,7 +481,9 @@ class DocBuilder
 
   static std::pair<glm::mat3, glm::mat3> convertMatrixCoordinate(const glm::mat3& mat)
   {
-    return { mat, glm::inverse(mat) };
+    glm::mat3 scale = glm::identity<glm::mat3>();
+    scale = glm::scale(scale, { 1, -1 });
+    return { scale * mat * scale, scale * glm::inverse(mat) * scale };
     const auto& v0 = mat[0];
     const auto& v1 = mat[1];
     const auto& v2 = mat[2];
@@ -510,7 +510,8 @@ class DocBuilder
 
   static void convertCoordinateSystem(glm::vec2& point, const glm::mat3& totalMatrix)
   {
-    point = totalMatrix * glm::vec3(point, 1.f);
+    // point = totalMatrix * glm::vec3(point, 1.f);
+    point.y = -point.y;
   }
 
   static void convertCoordinateSystem(Contour& contour, const glm::mat3& totalMatrix)
@@ -535,13 +536,18 @@ class DocBuilder
                                       const Bound2& bound,
                                       const glm::mat3& totalMatrix)
   {
-
-    std::cout << "convert: " << std::endl;
-    std::cout << bound.topLeft() << " " << bound.bottomRight() << std::endl;
-
-    glm::mat3 scale = glm::identity<glm::mat3>();
-    scale = glm::scale(scale, { 1, -1 });
-    pattern.transform = totalMatrix * pattern.transform * scale;
+    auto newMatrix = convertMatrixCoordinate(pattern.transform).first;
+    glm::vec2 scale;
+    float rotate;
+    glm::quat quat;
+    glm::vec2 skew;
+    glm::vec2 offset;
+    glm::vec3 persp;
+    decompose(newMatrix, scale, rotate, quat, skew, offset, persp);
+    pattern.rotate = rotate;
+    pattern.scale = scale;
+    pattern.offset = { 0.5, 0.5 };
+    pattern.transform = newMatrix;
   }
 
   static void convertCoordinateSystem(Gradient& gradient, const glm::mat3& totalMatrix)

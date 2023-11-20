@@ -68,5 +68,5 @@ public:
 
   bool onEvent(UEvent evt, void* userData) override;
 
-  void run(int fps);
+  bool run(int fps);
 };

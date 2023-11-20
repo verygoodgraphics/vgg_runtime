@@ -99,7 +99,7 @@ bool UIApplication::onEvent(UEvent evt, void* userData)
   return false;
 }
 
-void UIApplication::run(int fps)
+bool UIApplication::run(int fps)
 {
   m_view->updateOncePerLoop();
 
@@ -118,6 +118,10 @@ void UIApplication::run(int fps)
         m_firstRender = false;
         m_controller->onFirstRender();
       }
+
+      return true;
     }
   }
+
+  return false;
 }

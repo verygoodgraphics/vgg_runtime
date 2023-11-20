@@ -10,9 +10,9 @@ add_executable(vgg_runtime "main.cpp" "WasmBindings.cpp")
       -s USE_SDL=2 \
       -s NO_DISABLE_EXCEPTION_CATCHING \
       -s ASSERTIONS=1 \
-      -s INITIAL_MEMORY=1024MB \
+      -s INITIAL_MEMORY=64MB \
       -s ALLOW_MEMORY_GROWTH=1 \
-      -s STACK_SIZE=128MB \
+      -s STACK_SIZE=32MB \
       --no-heap-copy \
       -s EXPORTED_FUNCTIONS=\['_load_file_from_mem','_is_latest_version','_emscripten_main'\] \
       -s EXPORTED_RUNTIME_METHODS=\['ccall','cwrap','writeArrayToMemory','stringToUTF8'\] \

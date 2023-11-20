@@ -67,7 +67,7 @@ int main(int argc, char** argv)
   cfg.appName = "SdlRuntime";
   cfg.windowSize[0] = 1920;
   cfg.windowSize[1] = 1080;
-  cfg.graphicsContextConfig.multiSample = 0;
+  cfg.graphicsContextConfig.multiSample = 4;
   cfg.graphicsContextConfig.stencilBit = 8;
   cfg.argc = argc;
   cfg.argv = argv;

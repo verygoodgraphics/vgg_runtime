@@ -104,7 +104,10 @@ void Painter::drawPathBorder(const SkPath& skPath,
                                  b.pattern->imageFillType,
                                  b.pattern->tileScale,
                                  b.pattern->tileMirrored,
-                                 &m);
+                                 &m,
+                                 b.pattern->offset,
+                                 b.pattern->scale,
+                                 b.pattern->rotate);
     strokePen.setShader(shader);
     strokePen.setAlphaf(b.context_settings.Opacity * globalAlpha);
   }

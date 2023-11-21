@@ -122,13 +122,6 @@ void ImageNode::paintFill(SkCanvas* canvas, sk_sp<SkBlender> blender, const SkPa
   }
   if (_->image)
   {
-    if (!_->shader)
-    {
-      const auto& b = getBound();
-      _->shader =
-        getImageShader(_->image, b.width(), b.height(), EImageFillType::IFT_Stretch, 1.0, false);
-    }
-
     bool hasMask = false;
     if (PaintNode::d_ptr.get()->mask)
     {
@@ -142,17 +135,10 @@ void ImageNode::paintFill(SkCanvas* canvas, sk_sp<SkBlender> blender, const SkPa
     }
 
     SkPaint p;
-    p.setShader(_->shader);
     p.setBlender(std::move(blender));
-    canvas->drawPaint(p);
-    // Another weird drawing method
-    // SkSamplingOptions opt;
-    // const auto& b = getBound();
-    // SkRect imageRect = SkRect::MakeXYWH(b.topLeft.x, -b.topLeft.y, b.width(), b.height());
-    // canvas->save();
-    // canvas->scale(1, -1);
-    // canvas->drawImageRect(image, imageRect, opt);
-    // canvas->restore();
+    SkSamplingOptions opt;
+    const auto& b = getBound();
+    canvas->drawImageRect(_->image, toSkRect(getBound()), opt, &p);
 
     if (hasMask)
     {

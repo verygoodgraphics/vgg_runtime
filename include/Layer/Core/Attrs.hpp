@@ -103,13 +103,10 @@ struct Gradient
 {
   struct GradientStop
   {
-    static constexpr double minPos = 0.0;
-    static constexpr double maxPos = 1.0;
     Color color{ 1., 1., 1., 1. };
     float position{ 1.0 }; // [0,1]
     float midPoint;
   };
-  static constexpr double minElipseLength = 0.01;
   EGradientType gradientType{ EGradientType::GT_Linear };
 
   glm::vec2 from{ 0.5, 0 };
@@ -133,11 +130,6 @@ struct Gradient
     }
     return 0;
   }
-
-  // inline glm::vec2 convert(const glm::vec2& p, const Bound2& b) const
-  // {
-  //   return glm::vec2{ p.x + b.topLeft.x, p.y - b.height() + b.topLeft.y };
-  // }
 
   inline std::pair<glm::vec2, glm::vec2> aiConvert(const glm::vec2& from,
                                                    const glm::vec2& to,
@@ -182,7 +174,8 @@ struct Gradient
 
     auto minPosition = stops[indices[0]].position;
     auto maxPosition = stops[indices[indices.size() - 1]].position;
-    clampPairByLimits(minPosition, maxPosition, 0.f, 1.f, 0.0001f);
+
+    // clampPairByLimits(minPosition, maxPosition, 0.f, 1.f, 0.0001f);
 
     auto f = bound.map(bound.size() * from);
     auto t = bound.map(bound.size() * to);
@@ -225,19 +218,10 @@ struct Gradient
     auto indices = getSortedIndices();
     auto minPosition = stops[indices[0]].position;
     auto maxPosition = stops[indices[indices.size() - 1]].position;
-    clampPairByLimits(minPosition, maxPosition, 0.0f, 1.0f, 0.0001f);
 
     auto f = bound.map(bound.size() * from);
     auto t = bound.map(bound.size() * to);
 
-    // auto f = bound.size() * from;
-    // auto t = bound.size() * to;
-    // if (aiCoordinate)
-    // {
-    //   auto r = aiConvert(from, to, bound);
-    //   f = r.first;
-    //   t = r.second;
-    // }
     auto start = glm::mix(f, t, minPosition);
     auto end = glm::mix(f, t, maxPosition);
 
@@ -254,9 +238,8 @@ struct Gradient
     SkMatrix mat;
     mat.postTranslate(-start.x, -start.y);
     mat.postScale(elipseLength, 1.0);
-    mat.postRotate(rad2deg(getTheta()));
+    mat.postRotate(-rad2deg(getTheta()));
     mat.postTranslate(start.x, start.y);
-    // mat.postScale(1, -1);
     return SkGradientShader::MakeRadial(center,
                                         r,
                                         colors.data(),
@@ -269,26 +252,20 @@ struct Gradient
 
   inline sk_sp<SkShader> getAngularShader(const Bound2& bound) const
   {
-    // ASSERT(stops.size() > 1);
-    auto indices = getSortedIndices();
-    auto minPosition = stops[indices[0]].position;
-    auto maxPosition = stops[indices[indices.size() - 1]].position;
-    clampPairByLimits(minPosition, maxPosition, 0.f, 1.f, 0.0001f);
+    auto minPositionIter = stops.begin();
+    auto maxPositionIter = stops.end();
+    const auto minPosition = minPositionIter->position;
+    const auto maxPosition = maxPositionIter->position;
     auto f = bound.map(bound.size() * from);
     auto t = bound.map(bound.size() * to);
-    // if (aiCoordinate)
-    // {
-    //   auto r = aiConvert(from, to, bound);
-    //   f = r.first;
-    //   t = r.second;
-    // }
     auto center = f;
-
     std::vector<SkColor> colors;
+    colors.reserve(2);
     std::vector<SkScalar> positions;
-    auto minPosColor = stops[indices[0]].color;
-    auto maxPosColor = stops[indices[indices.size() - 1]].color;
-    size_t sz = indices.size();
+    positions.reserve(2);
+    auto minPosColor = minPositionIter->color;
+    auto maxPosColor = maxPositionIter->color;
+    size_t sz = stops.size();
     if (minPosition > 0)
     {
       auto c = lerp(minPosColor, maxPosColor, (float)minPosition / (minPosition + 1 - maxPosition));
@@ -296,10 +273,10 @@ struct Gradient
       positions.push_back(0);
       sz += 1;
     }
-    for (auto i = 0; i < indices.size(); i++)
+    for (auto iter = minPositionIter; iter != maxPositionIter; ++iter)
     {
-      colors.push_back(stops[indices[i]].color);
-      positions.push_back(stops[indices[i]].position);
+      colors.push_back(iter->color);
+      positions.push_back(iter->position);
     }
     if (maxPosition < 1)
     {

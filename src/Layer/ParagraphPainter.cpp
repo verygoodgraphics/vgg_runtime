@@ -89,7 +89,10 @@ void VParagraphPainter::drawTextBlob(const sk_sp<SkTextBlob>& blob,
                                        f.pattern->imageFillType,
                                        f.pattern->tileScale,
                                        f.pattern->tileMirrored,
-                                       &m);
+                                       &m,
+                                       f.pattern->offset,
+                                       f.pattern->scale,
+                                       f.pattern->rotate);
 
           if (FLIP_COORD)
             shader = shader->makeWithLocalMatrix(SkMatrix::Scale(1, -1));

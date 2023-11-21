@@ -190,283 +190,285 @@ inline SkPathOp toSkPathOp(VGG::EBoolOp blop)
   SWITCH_MAP_ITEM_END(SkPathOp::kUnion_SkPathOp)
 }
 
-inline double calcRadius(double r0,
-                         const glm::vec2& p0,
-                         const glm::vec2& p1,
-                         const glm::vec2& p2,
-                         glm::vec2* left,
-                         glm::vec2* right)
-{
-  constexpr float EPS = std::numeric_limits<float>::epsilon();
-  glm::vec2 a = p0 - p1;
-  glm::vec2 b = p2 - p1;
-  double alen = glm::distance(p0, p1);
-  double blen = glm::distance(p2, p1);
-  if (std::fabs(alen) < EPS || std::fabs(blen) < EPS)
-  {
-    return 0.;
-  }
-  ASSERT(alen > 0 && blen > 0);
-  double cosTheta = glm::dot(a, b) / alen / blen;
-  if (cosTheta + 1 < EPS) // cosTheta == -1
-  {
-    if (left)
-    {
-      left->x = p1.x;
-      left->y = p1.y;
-    }
-    if (right)
-    {
-      right->x = p1.x;
-      right->y = p1.y;
-    }
-    return r0;
-  }
-  else if (1 - cosTheta < EPS) // cosTheta == 1
-  {
-    return 0.;
-  }
-  double tanHalfTheta = std::sqrt((1 - cosTheta) / (1 + cosTheta));
-  double radius = r0;
-  radius = std::min(radius, 0.5 * alen * tanHalfTheta);
-  radius = std::min(radius, 0.5 * blen * tanHalfTheta);
-  if (left)
-  {
-    ASSERT(tanHalfTheta > 0);
-    float len = radius / tanHalfTheta;
-    *left = p1 + float(len / alen) * a;
-  }
-  if (right)
-  {
-    ASSERT(tanHalfTheta > 0);
-    double len = radius / tanHalfTheta;
-    *right = p1 + (float(len / blen) * b);
-  }
-  return radius;
-}
+// inline double calcRadius(double r0,
+//                          const glm::vec2& p0,
+//                          const glm::vec2& p1,
+//                          const glm::vec2& p2,
+//                          glm::vec2* left,
+//                          glm::vec2* right)
+// {
+//   constexpr float EPS = std::numeric_limits<float>::epsilon();
+//   glm::vec2 a = p0 - p1;
+//   glm::vec2 b = p2 - p1;
+//   double alen = glm::distance(p0, p1);
+//   double blen = glm::distance(p2, p1);
+//   if (std::fabs(alen) < EPS || std::fabs(blen) < EPS)
+//   {
+//     return 0.;
+//   }
+//   ASSERT(alen > 0 && blen > 0);
+//   double cosTheta = glm::dot(a, b) / alen / blen;
+//   if (cosTheta + 1 < EPS) // cosTheta == -1
+//   {
+//     if (left)
+//     {
+//       left->x = p1.x;
+//       left->y = p1.y;
+//     }
+//     if (right)
+//     {
+//       right->x = p1.x;
+//       right->y = p1.y;
+//     }
+//     return r0;
+//   }
+//   else if (1 - cosTheta < EPS) // cosTheta == 1
+//   {
+//     return 0.;
+//   }
+//   double tanHalfTheta = std::sqrt((1 - cosTheta) / (1 + cosTheta));
+//   double radius = r0;
+//   radius = std::min(radius, 0.5 * alen * tanHalfTheta);
+//   radius = std::min(radius, 0.5 * blen * tanHalfTheta);
+//   if (left)
+//   {
+//     ASSERT(tanHalfTheta > 0);
+//     float len = radius / tanHalfTheta;
+//     *left = p1 + float(len / alen) * a;
+//   }
+//   if (right)
+//   {
+//     ASSERT(tanHalfTheta > 0);
+//     double len = radius / tanHalfTheta;
+//     *right = p1 + (float(len / blen) * b);
+//   }
+//   return radius;
+// }
 
-inline SkMatrix upperMatrix22(const SkMatrix& matrix)
-{
-  SkMatrix m = matrix;
-  m.setTranslateX(0);
-  m.setTranslateY(1);
-  return m;
-}
+// inline SkMatrix upperMatrix22(const SkMatrix& matrix)
+// {
+//   SkMatrix m = matrix;
+//   m.setTranslateX(0);
+//   m.setTranslateY(1);
+//   return m;
+// }
 
-[[deprecated]] inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
-{
-  constexpr float W = 1.0;
-  constexpr float H = 1.0;
-  auto& pts = points;
-
-  ASSERT(W > 0);
-  ASSERT(H > 0);
-
-  SkPath skPath;
-
-  if (pts.size() < 2)
-  {
-    // WARN("Too few path points.");
-    return skPath;
-  }
-
-  using PM = EPointMode;
-  auto* startP = &pts[0];
-  auto* endP = &pts[pts.size() - 1];
-  auto* prevP = endP;
-  auto* currP = startP;
-  auto* nextP = currP + 1;
-
-  const glm::vec2 s = { W, H };
-
-  if (currP->radius > 0 && currP->mode() == PM::PM_Straight)
-  {
-    glm::vec2 start = currP->point * s;
-    calcRadius(currP->radius,
-               prevP->point * s,
-               currP->point * s,
-               nextP->point * s,
-               nullptr,
-               &start);
-    skPath.moveTo(start.x, start.y);
-  }
-  else
-  {
-    skPath.moveTo(W * currP->point.x, H * currP->point.y);
-  }
-
-  while (true)
-  {
-    if (currP->mode() == PM::PM_Straight && nextP->mode() == PM::PM_Straight)
-    {
-      // curren point and next point has no control points at all
-      if (nextP->radius > 0 && nextP->mode() == PM::PM_Straight)
-      {
-        // next point is a rounded point if current point has radius property
-        auto* next2P = (nextP == endP) ? startP : (nextP + 1);
-        auto next2Pp = next2P->to.has_value() ? next2P->to.value() : next2P->point;
-        double r = calcRadius(nextP->radius, currP->point * s, nextP->point * s, next2Pp * s, 0, 0);
-        skPath.arcTo(W * nextP->point.x, H * nextP->point.y, W * next2Pp.x, H * next2Pp.y, r);
-      }
-      else
-      {
-        skPath.lineTo(W * nextP->point.x, H * nextP->point.y);
-      }
-    }
-    else if (currP->mode() == PM::PM_Disconnected && nextP->mode() == PM::PM_Disconnected)
-    {
-      // current point and next point has one control point at least
-      bool hasFrom = currP->from.has_value();
-      bool hasTo = nextP->to.has_value();
-      if (!hasFrom && !hasTo)
-      {
-        // no control point, just a string line between current point and next point
-        skPath.lineTo(W * nextP->point.x, H * nextP->point.y);
-      }
-      else if (hasFrom && !hasTo)
-      {
-        // quadric bezier: current point -> controllpoint(from) -> next point
-        auto& from = currP->from.value();
-        skPath.quadTo(W * from.x, H * from.y, W * nextP->point.x, H * nextP->point.y);
-      }
-      else if (!hasFrom && hasTo)
-      {
-        // quadric bezier: current point -> controllpoint(to) -> next point
-        auto& to = nextP->to.value();
-        skPath.quadTo(W * to.x, H * to.y, W * nextP->point.x, H * nextP->point.y);
-      }
-      else
-      {
-        // general cubic bezier: current point -> controllpoint(from) -> controllpoint(to) -> next
-        // point
-        auto& from = currP->from.value();
-        auto& to = nextP->to.value();
-        skPath.cubicTo(W * from.x,
-                       H * from.y,
-                       W * to.x,
-                       H * to.y,
-                       W * nextP->point.x,
-                       H * nextP->point.y);
-      }
-    }
-    else if (currP->mode() != PM::PM_Straight && nextP->mode() != PM::PM_Straight)
-    {
-      ASSERT(false); // this branch should be equaled to the above one
-      // current point and next point has one control point at least
-      if ((currP->mode() == PM::PM_Disconnected && !currP->from.has_value()) ||
-          (nextP->mode() == PM::PM_Disconnected && !nextP->to.has_value()) ||
-          (currP->mode() != PM::PM_Disconnected &&
-           !(currP->from.has_value() && currP->to.has_value())) ||
-          (nextP->mode() != PM::PM_Disconnected &&
-           !(nextP->from.has_value() && nextP->to.has_value())))
-      {
-        WARN("Missing control points.");
-        return skPath;
-      }
-      auto& from = currP->from.value();
-      auto& to = nextP->to.value();
-      skPath.cubicTo(W * from.x,
-                     H * from.y,
-                     W * to.x,
-                     H * to.y,
-                     W * nextP->point.x,
-                     H * nextP->point.y);
-    }
-    else if (currP->mode() == PM::PM_Straight && nextP->mode() != PM::PM_Straight)
-    {
-      // current point has no controll point and the next point at least has one
-      if (!nextP->to.has_value())
-      {
-        skPath.lineTo(W * nextP->point.x, H * nextP->point.y);
-      }
-      else
-      {
-        auto& to = nextP->to.value();
-        skPath.quadTo(W * to.x, H * to.y, W * nextP->point.x, H * nextP->point.y);
-      }
-    }
-    else if (currP->mode() != PM::PM_Straight && nextP->mode() == PM::PM_Straight)
-    {
-      // current point has at least controll point and the next point has no controll point
-      if (nextP->radius > 0 && nextP->mode() == PM::PM_Straight)
-      {
-        auto* next2P = (nextP == endP) ? startP : (nextP + 1);
-        if (!currP->from.has_value())
-        {
-          glm::vec2 start;
-          double r = calcRadius(nextP->radius,
-                                currP->point * s,
-                                nextP->point * s,
-                                next2P->point * s,
-                                &start,
-                                nullptr);
-          skPath.lineTo(start.x, start.y);
-          skPath.arcTo(W * nextP->point.x,
-                       H * nextP->point.y,
-                       W * next2P->point.x,
-                       H * next2P->point.y,
-                       r);
-        }
-        else
-        {
-          auto currPfrom = currP->from.value();
-          constexpr float RADIUS_COEFF = 0.88;
-          // glm::vec2 p =
-          glm::vec2 p = (currP->point + RADIUS_COEFF * (currPfrom - currP->point)) * s;
-          glm::vec2 start;
-          double r =
-            calcRadius(nextP->radius, p, nextP->point * s, next2P->point * s, &start, nullptr);
-          skPath.quadTo(p.x, p.y, start.x, start.y);
-          skPath.arcTo(W * nextP->point.x,
-                       H * nextP->point.y,
-                       W * next2P->point.x,
-                       H * next2P->point.y,
-                       r);
-        }
-      }
-      else
-      {
-        if (!currP->from.has_value())
-        {
-          skPath.lineTo(W * nextP->point.x, H * nextP->point.y);
-        }
-        else
-        {
-          auto& from = currP->from.value();
-          skPath.quadTo(W * from.x, H * from.y, W * nextP->point.x, H * nextP->point.y);
-        }
-      }
-    }
-    else
-    {
-      WARN("Invalid point mode combination: %d %d", (int)currP->mode(), (int)nextP->mode());
-    }
-    currP = nextP;
-    nextP = (nextP == endP) ? startP : (nextP + 1);
-
-    if (isClosed)
-    {
-      if (currP == startP)
-      {
-        break;
-      }
-    }
-    else
-    {
-      if (nextP == startP)
-      {
-        break;
-      }
-    }
-  }
-
-  if (isClosed)
-  {
-    skPath.close();
-  }
-
-  return skPath;
-}
+// [[deprecated]] inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
+// {
+//   constexpr float W = 1.0;
+//   constexpr float H = 1.0;
+//   auto& pts = points;
+//
+//   ASSERT(W > 0);
+//   ASSERT(H > 0);
+//
+//   SkPath skPath;
+//
+//   if (pts.size() < 2)
+//   {
+//     // WARN("Too few path points.");
+//     return skPath;
+//   }
+//
+//   using PM = EPointMode;
+//   auto* startP = &pts[0];
+//   auto* endP = &pts[pts.size() - 1];
+//   auto* prevP = endP;
+//   auto* currP = startP;
+//   auto* nextP = currP + 1;
+//
+//   const glm::vec2 s = { W, H };
+//
+//   if (currP->radius > 0 && currP->mode() == PM::PM_Straight)
+//   {
+//     glm::vec2 start = currP->point * s;
+//     calcRadius(currP->radius,
+//                prevP->point * s,
+//                currP->point * s,
+//                nextP->point * s,
+//                nullptr,
+//                &start);
+//     skPath.moveTo(start.x, start.y);
+//   }
+//   else
+//   {
+//     skPath.moveTo(W * currP->point.x, H * currP->point.y);
+//   }
+//
+//   while (true)
+//   {
+//     if (currP->mode() == PM::PM_Straight && nextP->mode() == PM::PM_Straight)
+//     {
+//       // curren point and next point has no control points at all
+//       if (nextP->radius > 0 && nextP->mode() == PM::PM_Straight)
+//       {
+//         // next point is a rounded point if current point has radius property
+//         auto* next2P = (nextP == endP) ? startP : (nextP + 1);
+//         auto next2Pp = next2P->to.has_value() ? next2P->to.value() : next2P->point;
+//         double r = calcRadius(nextP->radius, currP->point * s, nextP->point * s, next2Pp * s, 0,
+//         0); skPath.arcTo(W * nextP->point.x, H * nextP->point.y, W * next2Pp.x, H * next2Pp.y,
+//         r);
+//       }
+//       else
+//       {
+//         skPath.lineTo(W * nextP->point.x, H * nextP->point.y);
+//       }
+//     }
+//     else if (currP->mode() == PM::PM_Disconnected && nextP->mode() == PM::PM_Disconnected)
+//     {
+//       // current point and next point has one control point at least
+//       bool hasFrom = currP->from.has_value();
+//       bool hasTo = nextP->to.has_value();
+//       if (!hasFrom && !hasTo)
+//       {
+//         // no control point, just a string line between current point and next point
+//         skPath.lineTo(W * nextP->point.x, H * nextP->point.y);
+//       }
+//       else if (hasFrom && !hasTo)
+//       {
+//         // quadric bezier: current point -> controllpoint(from) -> next point
+//         auto& from = currP->from.value();
+//         skPath.quadTo(W * from.x, H * from.y, W * nextP->point.x, H * nextP->point.y);
+//       }
+//       else if (!hasFrom && hasTo)
+//       {
+//         // quadric bezier: current point -> controllpoint(to) -> next point
+//         auto& to = nextP->to.value();
+//         skPath.quadTo(W * to.x, H * to.y, W * nextP->point.x, H * nextP->point.y);
+//       }
+//       else
+//       {
+//         // general cubic bezier: current point -> controllpoint(from) -> controllpoint(to) ->
+//         next
+//         // point
+//         auto& from = currP->from.value();
+//         auto& to = nextP->to.value();
+//         skPath.cubicTo(W * from.x,
+//                        H * from.y,
+//                        W * to.x,
+//                        H * to.y,
+//                        W * nextP->point.x,
+//                        H * nextP->point.y);
+//       }
+//     }
+//     else if (currP->mode() != PM::PM_Straight && nextP->mode() != PM::PM_Straight)
+//     {
+//       ASSERT(false); // this branch should be equaled to the above one
+//       // current point and next point has one control point at least
+//       if ((currP->mode() == PM::PM_Disconnected && !currP->from.has_value()) ||
+//           (nextP->mode() == PM::PM_Disconnected && !nextP->to.has_value()) ||
+//           (currP->mode() != PM::PM_Disconnected &&
+//            !(currP->from.has_value() && currP->to.has_value())) ||
+//           (nextP->mode() != PM::PM_Disconnected &&
+//            !(nextP->from.has_value() && nextP->to.has_value())))
+//       {
+//         WARN("Missing control points.");
+//         return skPath;
+//       }
+//       auto& from = currP->from.value();
+//       auto& to = nextP->to.value();
+//       skPath.cubicTo(W * from.x,
+//                      H * from.y,
+//                      W * to.x,
+//                      H * to.y,
+//                      W * nextP->point.x,
+//                      H * nextP->point.y);
+//     }
+//     else if (currP->mode() == PM::PM_Straight && nextP->mode() != PM::PM_Straight)
+//     {
+//       // current point has no controll point and the next point at least has one
+//       if (!nextP->to.has_value())
+//       {
+//         skPath.lineTo(W * nextP->point.x, H * nextP->point.y);
+//       }
+//       else
+//       {
+//         auto& to = nextP->to.value();
+//         skPath.quadTo(W * to.x, H * to.y, W * nextP->point.x, H * nextP->point.y);
+//       }
+//     }
+//     else if (currP->mode() != PM::PM_Straight && nextP->mode() == PM::PM_Straight)
+//     {
+//       // current point has at least controll point and the next point has no controll point
+//       if (nextP->radius > 0 && nextP->mode() == PM::PM_Straight)
+//       {
+//         auto* next2P = (nextP == endP) ? startP : (nextP + 1);
+//         if (!currP->from.has_value())
+//         {
+//           glm::vec2 start;
+//           double r = calcRadius(nextP->radius,
+//                                 currP->point * s,
+//                                 nextP->point * s,
+//                                 next2P->point * s,
+//                                 &start,
+//                                 nullptr);
+//           skPath.lineTo(start.x, start.y);
+//           skPath.arcTo(W * nextP->point.x,
+//                        H * nextP->point.y,
+//                        W * next2P->point.x,
+//                        H * next2P->point.y,
+//                        r);
+//         }
+//         else
+//         {
+//           auto currPfrom = currP->from.value();
+//           constexpr float RADIUS_COEFF = 0.88;
+//           // glm::vec2 p =
+//           glm::vec2 p = (currP->point + RADIUS_COEFF * (currPfrom - currP->point)) * s;
+//           glm::vec2 start;
+//           double r =
+//             calcRadius(nextP->radius, p, nextP->point * s, next2P->point * s, &start, nullptr);
+//           skPath.quadTo(p.x, p.y, start.x, start.y);
+//           skPath.arcTo(W * nextP->point.x,
+//                        H * nextP->point.y,
+//                        W * next2P->point.x,
+//                        H * next2P->point.y,
+//                        r);
+//         }
+//       }
+//       else
+//       {
+//         if (!currP->from.has_value())
+//         {
+//           skPath.lineTo(W * nextP->point.x, H * nextP->point.y);
+//         }
+//         else
+//         {
+//           auto& from = currP->from.value();
+//           skPath.quadTo(W * from.x, H * from.y, W * nextP->point.x, H * nextP->point.y);
+//         }
+//       }
+//     }
+//     else
+//     {
+//       WARN("Invalid point mode combination: %d %d", (int)currP->mode(), (int)nextP->mode());
+//     }
+//     currP = nextP;
+//     nextP = (nextP == endP) ? startP : (nextP + 1);
+//
+//     if (isClosed)
+//     {
+//       if (currP == startP)
+//       {
+//         break;
+//       }
+//     }
+//     else
+//     {
+//       if (nextP == startP)
+//       {
+//         break;
+//       }
+//     }
+//   }
+//
+//   if (isClosed)
+//   {
+//     skPath.close();
+//   }
+//
+//   return skPath;
+// }
 
 inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
                                       int width,
@@ -474,10 +476,10 @@ inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
                                       EImageFillType imageFillType,
                                       float imageTileScale,
                                       bool imageTileMirrored,
-                                      const SkMatrix* matrix = nullptr,
-                                      glm::vec2 offset = { 0, 0 },
-                                      glm::vec2 scale = { 1, 1 },
-                                      float rotate = 0.f)
+                                      const SkMatrix* matrix,
+                                      glm::vec2 offset,
+                                      glm::vec2 scale,
+                                      float rotate)
 {
   SkTileMode modeX = SkTileMode::kDecal;
   SkTileMode modeY = SkTileMode::kDecal;

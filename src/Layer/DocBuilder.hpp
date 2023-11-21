@@ -546,7 +546,7 @@ class DocBuilder
     decompose(newMatrix, scale, rotate, quat, skew, offset, persp);
     pattern.rotate = rotate;
     pattern.scale = scale;
-    pattern.offset = { 0.5, 0.5 };
+    pattern.offset = offset;
     pattern.transform = newMatrix;
   }
 

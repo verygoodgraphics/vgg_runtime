@@ -505,6 +505,12 @@ inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
     m = glm::translate(m, { mi.width() / 2, mi.height() / 2 });
     m = glm::rotate(m, rotate);
     m = glm::translate(m, { -mi.width() / 2, -mi.height() / 2 });
+    // m = glm::scale(m, { width, height });
+    // m = glm::scale(m, { s, s });
+    // m = glm::translate(m, { 0.5, 0.5 });
+    // m = glm::rotate(m, rotate);
+    // m = glm::translate(m, { -0.5, -0.5 });
+    // m = glm::scale(m, { 1 / mi.width(), 1.f / mi.height() });
     mat.preConcat(toSkMatrix(m));
   }
   else if (imageFillType == IFT_Fit)
@@ -523,14 +529,23 @@ inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
     m = glm::translate(m, { mi.width() / 2, mi.height() / 2 });
     m = glm::rotate(m, rotate);
     m = glm::translate(m, { -mi.width() / 2, -mi.height() / 2 });
+    // m = glm::scale(m, { width, height });
+    // m = glm::scale(m, { s, s });
+    // m = glm::translate(m, { 0.5, 0.5 });
+    // m = glm::rotate(m, rotate);
+    // m = glm::translate(m, { -0.5, -0.5 });
+    // m = glm::scale(m, { 1 / mi.width(), 1.f / mi.height() });
     mat.preConcat(toSkMatrix(m));
   }
   else if (imageFillType == VGG::IFT_Stretch)
   {
-    if (matrix)
-    {
-      mat.preConcat(*matrix);
-    }
+    auto m = glm::mat3{ 1.0 };
+    m = glm::scale(m, { width, height });
+    m = glm::translate(m, offset);
+    m = glm::rotate(m, rotate);
+    m = glm::scale(m, scale);
+    m = glm::scale(m, { 1.f / mi.width(), 1.f / mi.height() });
+    mat.preConcat(toSkMatrix(m));
   }
   else if (imageFillType == VGG::IFT_Tile)
   {

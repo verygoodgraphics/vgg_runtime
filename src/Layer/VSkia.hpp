@@ -18,6 +18,7 @@
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Scene.hpp"
+#include "Math/Geometry.hpp"
 #include "Math/Math.hpp"
 #include "Utility/Log.hpp"
 #include "glm/gtx/transform.hpp"
@@ -469,6 +470,98 @@ inline SkPathOp toSkPathOp(VGG::EBoolOp blop)
 //
 //   return skPath;
 // }
+
+inline sk_sp<SkShader> makeFitFillPattern(SkImage* img,
+                                          const Bound2& bound,
+                                          const FitFillPattern& p)
+{
+  SkImageInfo mi = img->imageInfo();
+  float width = bound.width();
+  float height = bound.height();
+  float sx = (float)width / mi.width();
+  float sy = (float)height / mi.height();
+  auto m = glm::mat3{ 1.0 };
+  if (p.type == VGG::FILL_FILL)
+  {
+    const float s = std::max(sx, sy);
+    if (sx > sy)
+    {
+      m = glm::translate(m, { 0, (height - s * mi.height()) / 2.f });
+    }
+    else
+    {
+      m = glm::translate(m, { (width - s * mi.width()) / 2.f, 0 });
+    }
+    m = glm::scale(m, { s, s });
+  }
+  else
+  {
+    float s = std::min(sx, sy);
+    if (sx < sy)
+    {
+      m = glm::translate(m, { 0, (height - s * mi.height()) / 2 });
+    }
+    else
+    {
+      m = glm::translate(m, { (width - s * mi.width()) / 2, 0 });
+    }
+    m = glm::scale(m, { s, s });
+  }
+  m = glm::translate(m, { mi.width() / 2, mi.height() / 2 });
+  m = glm::rotate(m, p.rotate);
+  m = glm::translate(m, { -mi.width() / 2, -mi.height() / 2 });
+  SkSamplingOptions opt;
+  SkTileMode modeX = SkTileMode::kDecal;
+  SkTileMode modeY = SkTileMode::kDecal;
+  const auto mat = toSkMatrix(m);
+  return img->makeShader(modeX, modeY, opt, &mat);
+}
+
+inline sk_sp<SkShader> makeStretchPattern(SkImage* img,
+                                          const Bound2& bound,
+                                          const StretchPattern& p)
+{
+  SkImageInfo mi = img->imageInfo();
+  float width = bound.width();
+  float height = bound.height();
+  auto m = glm::mat3{ 1.0 };
+  m = glm::scale(m, { width, height });
+  m = glm::translate(m, p.offset);
+  m = glm::rotate(m, p.rotate);
+  m = glm::scale(m, p.scale);
+  m = glm::scale(m, { 1.f / mi.width(), 1.f / mi.height() });
+  const auto mat = toSkMatrix(m);
+  SkSamplingOptions opt;
+  SkTileMode modeX = SkTileMode::kDecal;
+  SkTileMode modeY = SkTileMode::kDecal;
+  return img->makeShader(modeX, modeY, opt, &mat);
+}
+
+inline sk_sp<SkShader> makeTilePattern(SkImage* img, const Bound2& bound, const TilePattern& p)
+{
+  SkTileMode modeX = SkTileMode::kDecal;
+  SkTileMode modeY = SkTileMode::kDecal;
+  if (p.type == VGG::TILE_VERTICAL)
+  {
+    modeY = p.mirror ? SkTileMode::kMirror : SkTileMode::kRepeat;
+  }
+  if (p.type == VGG::TILE_HORIZONTAL)
+  {
+    modeX = p.mirror ? SkTileMode::kMirror : SkTileMode::kRepeat;
+  }
+  if (p.type == VGG::TILE_BOTH)
+  {
+    modeY = p.mirror ? SkTileMode::kMirror : SkTileMode::kRepeat;
+    modeX = p.mirror ? SkTileMode::kMirror : SkTileMode::kRepeat;
+  }
+  auto m = glm::mat3{ 1.0 };
+  m = glm::translate(m, p.offset);
+  m = glm::rotate(m, p.rotate);
+  m = glm::scale(m, p.scale);
+  const auto mat = toSkMatrix(m);
+  SkSamplingOptions opt;
+  return img->makeShader(modeX, modeY, opt, &mat);
+}
 
 inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
                                       int width,

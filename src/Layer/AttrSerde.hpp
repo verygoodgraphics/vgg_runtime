@@ -120,11 +120,10 @@ inline void from_json(const json& j, Pattern& x)
   const auto klass = instance["class"];
   if (klass == "patternImage")
   {
-    x.imageFillType = instance["fillType"];
+    const auto fillType = instance["fillType"];
+    x.imageFillType = instance["fillType"]; // TODO:: removed
     x.imageGUID = instance["imageFileName"];
-    x.tileMirrored = instance["imageTileMirrored"];
-    x.tileScale = 1.0;
-
+    x.tileMirrored = instance["imageTileMirrored"]; // TODO:: removed
     const auto it = instance.find("matrix");
     glm::mat3 m{ 1.0 };
     if (it != instance.end())
@@ -134,7 +133,32 @@ inline void from_json(const json& j, Pattern& x)
                      glm::vec3{ v[2], v[3], 0 },
                      glm::vec3{ v[4], v[5], 1 } };
     }
-    x.transform = m;
+    if (fillType == IFT_Fit || fillType == IFT_Fill)
+    {
+      FitFillPattern pattern;
+      pattern.type = fillType == IFT_Fit ? FILL_FIT : FILL_FILL;
+      pattern.rotate = 0; // TODO::
+      x.type = pattern;
+    }
+    else if (fillType == IFT_Stretch)
+    {
+      StretchPattern pattern;
+      pattern.offset = {};
+      pattern.rotate = 0; // TODO::
+      pattern.scale = {};
+      x.type = pattern;
+    }
+    else if (fillType == IFT_Tile || fillType == IFT_OnlyTileVertical ||
+             fillType == IFT_OnlyTileHorizontal)
+    {
+      TilePattern pattern;
+      pattern.offset = {};
+      pattern.rotate = 0; // TODO::
+      pattern.scale = {};
+      pattern.mirror = instance["imageTileMirrored"];
+      x.type = pattern;
+    }
+    x.transform = m; // TODO::removed
   }
   else if (klass == "patternLayer")
   {

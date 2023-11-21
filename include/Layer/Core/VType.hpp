@@ -15,6 +15,7 @@
  */
 #pragma once
 #include <cstdint>
+#include <sys/types.h>
 namespace VGG
 {
 // NOLINTBEGIN
@@ -199,6 +200,19 @@ enum EImageFillType : uint8_t
   IFT_Fit = 3,
   IFT_OnlyTileHorizontal = 4,
   IFT_OnlyTileVertical = 5
+};
+
+enum ETilePatternType : uint8_t
+{
+  TILE_BOTH = 0,
+  TILE_HORIZONTAL = 1,
+  TILE_VERTICAL = 2,
+};
+
+enum EFillModeType : uint8_t
+{
+  FILL_FILL = 0,
+  FILL_FIT = 1
 };
 
 enum EKnockoutType : uint8_t

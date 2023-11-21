@@ -108,7 +108,7 @@ sktxt::TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* f
   std::string fontName;
   std::string subFamilyName;
 
-  auto resolve = [&fontName, &subFamilyName](const std::vector<std::string>& candidates)
+  auto resolve = [&fontName, &subFamilyName, &attr](const std::vector<std::string>& candidates)
   {
     subFamilyName = "Regular";
     for (const auto& candidate : candidates)
@@ -132,12 +132,17 @@ sktxt::TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* f
     {
       subFamilyName += components[i];
     }
+    if (components.size() <= 1)
+    {
+      subFamilyName = attr.subFamilyName;
+    }
     auto matched = font->fuzzyMatch(fontName);
     if (matched)
     {
-      INFO("Font [%s] matches real name [%s][%f]",
+      INFO("Font [%s] matches real name [%s %s][%f]",
            fontName.c_str(),
            matched->first.c_str(),
+           subFamilyName.c_str(),
            matched->second);
       fontName = std::string(matched->first.c_str());
 
@@ -170,7 +175,10 @@ sktxt::TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* f
     // the worst case
     fontName = "FiraSans";
   }
-  DEBUG("Given [%s], [%s] is choosed finally", attr.fontName.c_str(), fontName.c_str());
+  DEBUG("Given [%s], [%s %s] is choosed finally",
+        attr.fontName.c_str(),
+        fontName.c_str(),
+        subFamilyName.c_str());
   std::vector<SkString> fontFamilies;
   fontFamilies.push_back(SkString(fontName));
   if (const auto& fallbackFonts = font->fallbackFonts(); !fallbackFonts.empty())

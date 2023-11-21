@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <vector>
 #include <stdint.h>
+#include <variant>
 
 namespace VGG
 {
@@ -43,16 +44,41 @@ struct ContextSetting
   EKnockoutType TransparencyKnockoutGroup{ KT_Off };
 };
 
+struct TilePattern
+{
+  ETilePatternType type{ TILE_BOTH };
+  bool mirror{ true };
+  glm::vec2 scale;
+  float rotate;
+  glm::vec2 offset;
+};
+
+struct StretchPattern
+{
+  glm::vec2 scale;
+  float rotate;
+  glm::vec2 offset;
+};
+
+struct FitFillPattern
+{
+  EFillModeType type;
+  float rotate;
+};
+
 struct Pattern
 {
-  EImageFillType imageFillType;
-  bool tileMirrored;
-  float tileScale;
+  EImageFillType imageFillType; // remove
+  bool tileMirrored;            // remove
+  float tileScale;              // TODO:: remove
   std::string imageGUID;
+
   glm::mat3 transform;
   glm::vec2 scale;
   float rotate;
   glm::vec2 offset;
+
+  std::variant<FitFillPattern, StretchPattern, TilePattern> type;
 };
 
 struct AlphaMask

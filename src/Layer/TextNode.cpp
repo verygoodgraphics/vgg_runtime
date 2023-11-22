@@ -42,7 +42,7 @@ namespace VGG::layer
 
 TextNode::TextNode(const std::string& name, std::string guid)
   : PaintNode(name, VGG_TEXT, std::move(guid))
-  , d_ptr(new TextNode__pImpl(this, getBound()))
+  , d_ptr(new TextNode__pImpl(this, bound()))
 {
   auto mgr = sk_sp<SkFontMgrVGG>(FontManager::instance().defaultFontManager());
   if (mgr)
@@ -65,8 +65,8 @@ NodePtr TextNode::clone() const
   return newNode;
 }
 
-void TextNode::setParagraph(std::string utf8,
-                            std::vector<TextStyleAttr> attrs,
+void TextNode::setParagraph(std::string                      utf8,
+                            std::vector<TextStyleAttr>       attrs,
                             const std::vector<TextLineAttr>& lineAttr)
 {
   VGG_IMPL(TextNode);
@@ -111,8 +111,8 @@ void TextNode::paintEvent(SkiaRenderer* renderer)
   }
   if (_->paragraphCache.test(TextParagraphCache::ETextParagraphCacheFlagsBits::D_LAYOUT))
   {
-    setBound(_->paragraphCache.layout(getBound(), _->mode)); // update bound
-    _->painter.updateBound(getBound());
+    setBound(_->paragraphCache.layout(bound(), _->mode)); // update bound
+    _->painter.updateBound(bound());
     _->paragraphCache.clear(TextParagraphCache::ETextParagraphCacheFlagsBits::D_LAYOUT);
   }
 
@@ -128,21 +128,21 @@ void TextNode::paintEvent(SkiaRenderer* renderer)
   if (FLIP_COORD)
     canvas->scale(1, -1);
   {
-    const auto bound = getBound();
+    const auto b = bound();
     _->painter.setCanvas(canvas);
     int totalHeight = _->paragraphCache.getHeight();
     int curY = 0;
     if (_->vertAlign == ETextVerticalAlignment::VA_Bottom)
     {
-      curY = bound.height() - totalHeight;
+      curY = b.height() - totalHeight;
     }
     else if (_->vertAlign == ETextVerticalAlignment::VA_Center)
     {
-      curY = (bound.height() - totalHeight) / 2;
+      curY = (b.height() - totalHeight) / 2;
     }
     for (int i = 0; i < _->paragraphCache.paragraphCache.size(); i++)
     {
-      auto& p = _->paragraphCache.paragraphCache[i].paragraph;
+      auto&      p = _->paragraphCache.paragraphCache[i].paragraph;
       const auto curX = _->paragraphCache.paragraphCache[i].offsetX;
       p->paint(&_->painter, curX, curY);
       if (renderer->isEnableDrawDebugBound())
@@ -150,7 +150,7 @@ void TextNode::paintEvent(SkiaRenderer* renderer)
         DebugCanvas debugCanvas(canvas);
         drawParagraphDebugInfo(debugCanvas, _->paragraphCache.paragraph[i], p.get(), curX, curY, i);
       }
-      auto lastLine = p->lineNumber();
+      auto        lastLine = p->lineNumber();
       LineMetrics lineMetric;
       if (lastLine < 1)
         continue;

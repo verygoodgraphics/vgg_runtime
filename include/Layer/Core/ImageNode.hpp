@@ -17,6 +17,7 @@
 #include "Layer/Core/Node.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Config.hpp"
+#include "Layer/Core/Transform.hpp"
 #include <core/SkBlendMode.h>
 
 class SkImage;
@@ -40,7 +41,7 @@ public:
   const std::string& getImageGUID() const;
   void               setReplacesImage(bool fill);
   bool               fill() const;
-  Mask               asOutlineMask(const glm::mat3* mat) override;
+  Mask               asOutlineMask(const Transform* mat) override;
 
   virtual ~ImageNode() override;
 

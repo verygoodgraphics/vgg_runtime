@@ -41,14 +41,14 @@ void SkiaRenderer::updateMaskObject(PaintNode*                                  
 
 void SkiaRenderer::drawDebugBound(layer::PaintNode* p, int zorder)
 {
-  const auto& b = p->getBound();
+  const auto& b = p->bound();
   SkPaint     strokePen;
   strokePen.setStyle(SkPaint::kStroke_Style);
   SkColor color = nodeType2Color(VGG_PATH);
   strokePen.setColor(color);
   // strokePen.setAlpha(zorder2Alpha(zorder));
   strokePen.setStrokeWidth(2);
-  m_canvas->drawRect(toSkRect(p->getBound()), strokePen);
+  m_canvas->drawRect(toSkRect(p->bound()), strokePen);
 }
 void SkiaRenderer::updateMaskObject(layer::PaintNode* p)
 {

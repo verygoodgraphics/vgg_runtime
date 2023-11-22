@@ -22,7 +22,7 @@
 class SkImage;
 class SkCanvas;
 
-namespace VGG
+namespace VGG::layer
 {
 class ImageNode__pImpl;
 class VGG_EXPORTS ImageNode final : public PaintNode
@@ -34,17 +34,17 @@ public:
   ImageNode& operator=(const ImageNode&) = delete;
 
   ImageNode(ImageNode&&) noexcept = default;
-  ImageNode& operator=(ImageNode&&) noexcept = default;
+  ImageNode&         operator=(ImageNode&&) noexcept = default;
   // void paintEvent(SkCanvas* canvas) override;
-  void setImage(const std::string& guid);
+  void               setImage(const std::string& guid);
   const std::string& getImageGUID() const;
-  void setReplacesImage(bool fill);
-  bool fill() const;
-  Mask asOutlineMask(const glm::mat3* mat) override;
+  void               setReplacesImage(bool fill);
+  bool               fill() const;
+  Mask               asOutlineMask(const glm::mat3* mat) override;
 
   virtual ~ImageNode() override;
 
 protected:
   void paintFill(SkCanvas* canvas, sk_sp<SkBlender> blender, const SkPath& path) override;
 };
-} // namespace VGG
+} // namespace VGG::layer

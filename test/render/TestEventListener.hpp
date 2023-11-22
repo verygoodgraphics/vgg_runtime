@@ -51,7 +51,7 @@ constexpr char POS_ARG_INPUT_FILE[] = "fig/ai/sketch/json";
 template<typename App>
 class MyEventListener : public VGG::app::EventListener
 {
-  AppRender* m_layer{ nullptr };
+  AppRender*                m_layer{ nullptr };
   std::shared_ptr<AppScene> m_scene;
 
 protected:
@@ -94,8 +94,8 @@ protected:
     m_scene->setZoomerListener(std::make_shared<AppZoomer>());
 
     std::map<std::string, std::vector<char>> resources;
-    std::filesystem::path prefix;
-    std::filesystem::path respath;
+    std::filesystem::path                    prefix;
+    std::filesystem::path                    respath;
 
     if (auto p = program.present("-p"))
     {
@@ -196,10 +196,10 @@ public:
       if (ofs.is_open())
       {
         using namespace VGG::layer::exporter;
-        auto page = m_scene->currentPage();
-        auto f = m_scene->frame(page);
-        auto b = f->getBound();
-        SVGOptions opt;
+        auto                 page = m_scene->currentPage();
+        auto                 f = m_scene->frame(page);
+        auto                 b = f->getBound();
+        exporter::SVGOptions opt;
         opt.extend[0] = b.width();
         opt.extend[1] = b.height();
         makeSVG(m_scene.get(), opt, ofs);
@@ -210,10 +210,10 @@ public:
     if (key == VGGK_3)
     {
       INFO("Capture PNG");
-      std::ofstream ofs("capture.png");
+      std::ofstream       ofs("capture.png");
       layer::ImageOptions opt;
-      auto f = m_scene->frame(m_scene->currentPage());
-      auto b = f->getBound();
+      auto                f = m_scene->frame(m_scene->currentPage());
+      auto                b = f->getBound();
       opt.extend[0] = b.width();
       opt.extend[1] = b.height();
       opt.encode = VGG::layer::EImageEncode::IE_PNG;
@@ -227,10 +227,10 @@ public:
     if (key == VGGK_4)
     {
       INFO("Capture JPEG");
-      std::ofstream ofs("capture.jpg");
+      std::ofstream       ofs("capture.jpg");
       layer::ImageOptions opt;
-      auto f = m_scene->frame(m_scene->currentPage());
-      auto b = f->getBound();
+      auto                f = m_scene->frame(m_scene->currentPage());
+      auto                b = f->getBound();
       opt.extend[0] = b.width();
       opt.extend[1] = b.height();
       opt.encode = VGG::layer::EImageEncode::IE_JPEG;
@@ -244,10 +244,10 @@ public:
     if (key == VGGK_5)
     {
       INFO("Capture WEBP");
-      std::ofstream ofs("capture.webp");
+      std::ofstream       ofs("capture.webp");
       layer::ImageOptions opt;
-      auto f = m_scene->frame(m_scene->currentPage());
-      auto b = f->getBound();
+      auto                f = m_scene->frame(m_scene->currentPage());
+      auto                b = f->getBound();
       opt.extend[0] = b.width();
       opt.extend[1] = b.height();
       opt.encode = VGG::layer::EImageEncode::IE_WEBP;
@@ -265,10 +265,10 @@ public:
       if (ofs.is_open())
       {
         using namespace VGG::layer::exporter;
-        auto page = m_scene->currentPage();
-        auto f = m_scene->frame(page);
-        auto b = f->getBound();
-        PDFOptions opt;
+        auto                 page = m_scene->currentPage();
+        auto                 f = m_scene->frame(page);
+        auto                 b = f->getBound();
+        exporter::PDFOptions opt;
         opt.extend[0] = b.width();
         opt.extend[1] = b.height();
         makePDF(m_scene.get(), opt, ofs);

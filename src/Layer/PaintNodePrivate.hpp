@@ -22,6 +22,7 @@
 #include "Utility/HelperMacro.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Renderer.hpp"
+#include "Layer/Core/Transform.hpp"
 
 #include <core/SkBlender.h>
 #include <core/SkMatrix.h>
@@ -30,7 +31,7 @@
 #include <core/SkCanvas.h>
 #include <core/SkSurface.h>
 #include <core/SkImageFilter.h>
-namespace VGG
+namespace VGG::layer
 {
 
 template<typename F>
@@ -63,6 +64,7 @@ public:
   std::string               guid{};
   std::vector<std::string>  maskedBy{};
   std::vector<AlphaMask>    alphaMaskBy;
+  // layer::Transform          transformation;
   Mask                      outlineMask;
   EMaskType                 maskType{ MT_None };
   EMaskShowType             maskShowType{ MST_Invisible };
@@ -73,11 +75,9 @@ public:
   ContextSetting            contextSetting;
   ObjectType                type;
   bool                      visible{ true };
-
   ContourPtr                contour;
   PaintOption               paintOption;
   ContourOption             maskOption;
-
   std::optional<SkPath>     path;
   std::optional<SkPath>     mask;
   std::optional<MaskObject> alphaMask;
@@ -512,4 +512,4 @@ public:
   PaintNode__pImpl(PaintNode__pImpl&&) noexcept = default;
   PaintNode__pImpl& operator=(PaintNode__pImpl&&) noexcept = default;
 };
-} // namespace VGG
+} // namespace VGG::layer

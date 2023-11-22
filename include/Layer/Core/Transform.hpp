@@ -23,50 +23,75 @@ namespace VGG::layer
 
 class Transform
 {
-  glm::vec2 m_offset;
-  glm::vec2 m_scale;
-  float m_rotate;
-  glm::mat3 m_matrix;
-  mutable uint8_t m_dirty{ 0 }; // 0 clean, 1 component dirty, 2 matrix dirty
-
-  void updateDecomposeFromMatrix()
+  enum EFlags
   {
-    if (m_dirty == 2)
+    COMP_INVAL = 1 << 0,
+    MAT_INVAL = 1 << 1,
+    INV_INVAL = 1 << 2,
+  };
+  glm::vec2 m_offset{ 0, 0 };
+  glm::vec2 m_scale{ 1, 1 };
+  float     m_rotate{ 0 };
+  glm::mat3 m_matrix{ 1 };
+  glm::mat3 m_inv{ 1 };
+  uint8_t   m_flags{ 0 };
+
+  void revalidateDecompose()
+  {
+    if (m_flags & COMP_INVAL)
     {
       glm::quat quat;
       glm::vec2 skew;
       glm::vec3 persp;
       decompose(m_matrix, m_scale, m_rotate, quat, skew, m_offset, persp);
-      m_dirty = 0;
+      m_flags &= ~COMP_INVAL;
     }
   }
 
-  void ensureUpdate() const
+  void revalidateInvsereMatrix()
   {
-    const_cast<Transform*>(this)->updateDecomposeFromMatrix();
+    if (m_flags & INV_INVAL)
+    {
+      m_inv = glm::inverse(m_matrix);
+      m_flags &= ~INV_INVAL;
+    }
   }
 
-  void updateMatrixFromDecompose()
+  void ensureDecomposeValidate() const
   {
-    if (m_dirty == 1)
+    const_cast<Transform*>(this)->revalidateDecompose();
+  }
+
+  void revalidateMatrix()
+  {
+    if (m_flags == MAT_INVAL)
     {
       m_matrix = glm::mat3{ 1.0 };
       m_matrix = glm::scale(m_matrix, m_scale);
       m_matrix = glm::translate(m_matrix, m_offset);
       m_matrix = glm::rotate(m_matrix, m_rotate);
-      m_dirty = 0;
+      m_flags &= MAT_INVAL;
     }
   }
 
-  void ensureUpdateMatrix() const
+  void ensureRevalidateMatrix() const
   {
-    const_cast<Transform*>(this)->updateMatrixFromDecompose();
+    const_cast<Transform*>(this)->revalidateMatrix();
+  }
+
+  void ensureRevalidateInverseMatrix() const
+  {
+    ensureRevalidateMatrix();
+    const_cast<Transform*>(this)->revalidateInvsereMatrix();
   }
 
 public:
-  Transform(const glm::mat3& mat)
+  Transform()
+  {
+  }
+  explicit Transform(const glm::mat3& mat)
     : m_matrix(mat)
-    , m_dirty(2)
+    , m_flags(COMP_INVAL | INV_INVAL)
   {
   }
 
@@ -74,7 +99,7 @@ public:
     : m_offset(offset)
     , m_scale(scale)
     , m_rotate(rotate)
-    , m_dirty(1)
+    , m_flags(MAT_INVAL | INV_INVAL)
   {
   }
 
@@ -83,52 +108,61 @@ public:
   Transform(Transform&& other) noexcept = default;
   Transform& operator=(Transform& other) noexcept = default;
 
-  void setTranslate(float sx, float sy)
+  void setTranslate(float tx, float ty)
   {
-    m_dirty = 1;
-    m_offset = { sx, sy };
+    ensureDecomposeValidate();
+    m_offset = { tx, ty };
+    m_flags |= MAT_INVAL | INV_INVAL;
   }
 
   void setScale(float sx, float sy)
   {
-    m_dirty = 1;
+    ensureDecomposeValidate();
     m_scale = { sx, sy };
-  }
-
-  void setMatrix(const glm::mat3& mat)
-  {
-    m_dirty = 2;
-    m_matrix = mat;
+    m_flags |= MAT_INVAL | INV_INVAL;
   }
 
   void setRotate(float radians)
   {
-    m_dirty = 1;
+    ensureDecomposeValidate();
     m_rotate = radians;
+    m_flags |= MAT_INVAL | INV_INVAL;
+  }
+
+  void setMatrix(const glm::mat3& mat)
+  {
+    m_matrix = mat;
+    m_flags |= COMP_INVAL | INV_INVAL;
   }
 
   const glm::vec2& translate() const
   {
-    ensureUpdate();
+    ensureDecomposeValidate();
     return m_offset;
   }
 
   float rotate() const
   {
-    ensureUpdate();
+    ensureDecomposeValidate();
     return m_rotate;
   }
 
   const glm::vec2& scale() const
   {
-    ensureUpdate();
+    ensureDecomposeValidate();
     return m_scale;
   }
 
   const glm::mat3& matrix() const
   {
-    ensureUpdateMatrix();
+    ensureRevalidateMatrix();
     return m_matrix;
+  }
+
+  const glm::mat3& inverse() const
+  {
+    ensureRevalidateInverseMatrix();
+    return m_inv;
   }
 
   Transform operator*(const Transform& other)

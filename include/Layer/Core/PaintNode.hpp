@@ -21,6 +21,7 @@
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/Mask.hpp"
+#include "Layer/Core/Transform.hpp"
 #include "Layer/Config.hpp"
 #include "Layer/Scene.hpp"
 
@@ -134,15 +135,15 @@ public:
 
   EBoolOp clipOperator() const;
 
-  glm::mat3 mapTransform(const PaintNode* node) const;
+  Transform mapTransform(const PaintNode* node) const;
 
-  void setLocalTransform(const glm::mat3& transform);
+  void setTransform(const Transform& transform);
 
-  const glm::mat3& localTransform() const;
+  const Transform& transform() const;
 
-  glm::mat3 worldTransform() const;
+  Transform globalTransform() const;
 
-  const Bound2& getBound() const;
+  const Bound2& bound() const;
 
   void setBound(const Bound2& bound);
 
@@ -174,7 +175,7 @@ public:
 
   void setOutlineMask(const Mask& mask);
 
-  virtual Mask asOutlineMask(const glm::mat3* mat);
+  virtual Mask asOutlineMask(const Transform* transform);
 
   ~PaintNode();
 
@@ -208,7 +209,7 @@ protected:
 protected:
   // Mask
   SkPath         makeBoundPath();
-  virtual SkPath makeContourImpl(ContourOption option, const glm::mat3* mat);
+  virtual SkPath makeContourImpl(ContourOption option, const Transform* mat);
   SkPath         childPolyOperation() const;
   Mask           makeMaskBy(EBoolOp maskOp, SkiaRenderer* renderer);
 

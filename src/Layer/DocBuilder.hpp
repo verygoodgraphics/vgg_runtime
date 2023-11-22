@@ -97,7 +97,7 @@ class DocBuilder
       fromMatrix(j.value("matrix", nlohmann::json::array_t{}));
     const auto convertedMatrix = inversedNewMatrix * totalMatrix * originalMatrix;
 
-    obj->setLocalTransform(newMatrix);
+    obj->setTransform(Transform(newMatrix));
     const auto b = fromBound(j.value("bounds", nlohmann::json::object_t{}), convertedMatrix);
     obj->setBound(b);
 
@@ -229,7 +229,7 @@ class DocBuilder
         }
         p->setParagraph(std::move(text), textStyleAttrs, lineType);
         p->setVerticalAlignment(j.value("verticalAlignment", ETextVerticalAlignment::VA_Top));
-        const auto& b = p->getBound();
+        const auto& b = p->bound();
         p->setFrameMode(j.value("frameMode", ETextLayoutMode::TL_Fixed));
         if (b.width() == 0 || b.height() == 0)
         {
@@ -451,22 +451,22 @@ class DocBuilder
     {
       for (const auto& p : m_frames)
       {
-        auto      t = p->localTransform();
+        auto      t = p->transform();
         glm::vec2 scale;
         float     angle;
         glm::quat quat;
         glm::vec2 skew;
         glm::vec2 offset;
         glm::vec3 persp;
-        decompose(t, scale, angle, quat, skew, offset, persp);
-        const auto b = p->getBound();
+        decompose(t.matrix(), scale, angle, quat, skew, offset, persp);
+        const auto b = p->bound();
         auto       newMatrix = glm::identity<glm::mat3>();
         newMatrix = glm::translate(newMatrix, { 0, 0 });
         newMatrix = glm::rotate(newMatrix, -angle);
         newMatrix = glm::shearX(newMatrix, skew.x);
         newMatrix = glm::shearY(newMatrix, skew.y);
         newMatrix = glm::scale(newMatrix, scale);
-        p->setLocalTransform(newMatrix);
+        p->setTransform(Transform(newMatrix));
         p->setOverflow(EOverflow::OF_Visible);
       }
     }

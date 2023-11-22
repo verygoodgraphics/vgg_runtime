@@ -84,15 +84,15 @@ void getMaxSurfaceSize(int resolutionLevel, float* maxSurfaceSize)
   }
 }
 
-float calcScaleFactor(float inputWidth,
-                      float inputHeight,
-                      float maxWidth,
-                      float maxHeight,
+float calcScaleFactor(float  inputWidth,
+                      float  inputHeight,
+                      float  maxWidth,
+                      float  maxHeight,
                       float& outWidth,
                       float& outHeight)
 {
-  auto widthScale = maxWidth / inputWidth;
-  auto heightScale = maxHeight / inputHeight;
+  auto  widthScale = maxWidth / inputWidth;
+  auto  heightScale = maxHeight / inputHeight;
   float outputSize[2] = { 0.f, 0.f };
   if (widthScale < heightScale)
   {
@@ -127,9 +127,9 @@ class Exporter__pImpl
   Exporter* q_api; // NOLINT
 public:
   std::shared_ptr<VkGraphicsContext> ctx;
-  std::shared_ptr<layer::VLayer> layer;
-  std::shared_ptr<Scene> scene;
-  OutputCallback outputCallback;
+  std::shared_ptr<layer::VLayer>     layer;
+  std::shared_ptr<Scene>             scene;
+  OutputCallback                     outputCallback;
   Exporter__pImpl(Exporter* api)
     : q_api(api)
   {
@@ -140,8 +140,8 @@ public:
     layer->resize(w, h);
   }
 
-  std::optional<std::vector<char>> render(std::shared_ptr<Scene> scene,
-                                          float scale,
+  std::optional<std::vector<char>> render(std::shared_ptr<Scene>     scene,
+                                          float                      scale,
                                           const layer::ImageOptions& opts)
   {
     // auto id = scene->frame(scene->currentPage())->guid();
@@ -198,9 +198,9 @@ void Exporter::setOutputCallback(OutputCallback callback)
 class IteratorImplBase
 {
 public:
-  float maxSurfaceSize[2];
-  int totalFrames{ 0 };
-  int index{ 0 };
+  float                  maxSurfaceSize[2];
+  int                    totalFrames{ 0 };
+  int                    index{ 0 };
   std::shared_ptr<Scene> scene;
 
   IteratorImplBase(nlohmann::json json, nlohmann::json layout, Resource resource)
@@ -245,11 +245,11 @@ class ImageIteratorImpl : public IteratorImplBase
 {
 public:
   Exporter& exporter;
-  ImageIteratorImpl(Exporter& exporter,
+  ImageIteratorImpl(Exporter&      exporter,
                     nlohmann::json json,
                     nlohmann::json layout,
-                    Resource resource,
-                    int resolutionLevel)
+                    Resource       resource,
+                    int            resolutionLevel)
     : IteratorImplBase(std::move(json), std::move(layout), std::move(resource))
     , exporter(exporter)
   {
@@ -264,14 +264,14 @@ public:
 
     auto f = scene->frame(index);
     scene->setPage(index);
-    const auto b = f->getBound();
+    const auto b = f->bound();
     const auto id = f->guid();
-    int w = b.size().x;
-    int h = b.size().y;
+    int        w = b.size().x;
+    int        h = b.size().y;
 
-    auto state = exporter.d_impl.get();
+    auto  state = exporter.d_impl.get();
     float actualSize[2];
-    auto scale =
+    auto  scale =
       calcScaleFactor(w, h, maxSurfaceSize[0], maxSurfaceSize[1], actualSize[0], actualSize[1]);
     layer::ImageOptions opts;
     opts.encode = toEImageEncode(type);
@@ -303,10 +303,10 @@ ImageIterator::ImageIterator(ImageIterator&& other) noexcept
   , d_impl(std::move(other.d_impl))
 {
 }
-ImageIterator::ImageIterator(Exporter& exporter,
-                             nlohmann::json design,
-                             nlohmann::json layout,
-                             Resource resource,
+ImageIterator::ImageIterator(Exporter&          exporter,
+                             nlohmann::json     design,
+                             nlohmann::json     layout,
+                             Resource           resource,
                              const ImageOption& opt)
   : d_impl(std::make_unique<ImageIteratorImpl>(exporter,
                                                std::move(design),
@@ -333,10 +333,10 @@ bool SVGIterator::next(std::string& key, std::vector<char>& data)
 {
   if (!d_impl->tryNext())
     return false;
-  auto scene = d_impl->scene.get();
-  auto f = scene->frame(d_impl->index);
-  auto b = f->getBound();
-  auto id = f->guid();
+  auto                        scene = d_impl->scene.get();
+  auto                        f = scene->frame(d_impl->index);
+  auto                        b = f->bound();
+  auto                        id = f->guid();
   layer::exporter::SVGOptions opts;
   opts.extend[0] = b.width();
   opts.extend[1] = b.height();
@@ -367,10 +367,10 @@ bool PDFIterator::next(std::string& key, std::vector<char>& data)
 {
   if (!d_impl->tryNext())
     return false;
-  auto scene = d_impl->scene.get();
-  auto f = scene->frame(d_impl->index);
-  auto id = f->guid();
-  auto b = f->getBound();
+  auto                        scene = d_impl->scene.get();
+  auto                        f = scene->frame(d_impl->index);
+  auto                        id = f->guid();
+  auto                        b = f->bound();
   layer::exporter::PDFOptions opts;
   opts.extend[0] = b.width();
   opts.extend[1] = b.height();

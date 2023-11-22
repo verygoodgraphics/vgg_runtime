@@ -51,7 +51,7 @@ Bound2 calcMaskAreaIntersection(const Bound2& pruneBound, PaintNode* obj, F&& f)
 struct MaskObject
 {
   SkPath                                        contour;
-  std::vector<std::pair<PaintNode*, glm::mat3>> components;
+  std::vector<std::pair<PaintNode*, Transform>> components;
 };
 
 class PaintNode__pImpl // NOLINT
@@ -60,11 +60,11 @@ class PaintNode__pImpl // NOLINT
 
 public:
   Bound2                    bound;
-  glm::mat3                 transform{ 1.0 };
+  // glm::mat3                 transform{ 1.0 };
+  Transform                 transform;
   std::string               guid{};
   std::vector<std::string>  maskedBy{};
   std::vector<AlphaMask>    alphaMaskBy;
-  // layer::Transform          transformation;
   Mask                      outlineMask;
   EMaskType                 maskType{ MT_None };
   EMaskShowType             maskShowType{ MST_Invisible };
@@ -118,16 +118,16 @@ public:
   }
 
   template<typename Iter1, typename Iter2, typename F>
-  std::vector<std::pair<PaintNode*, glm::mat3>> calcMaskObjects(SkiaRenderer* renderer,
+  std::vector<std::pair<PaintNode*, Transform>> calcMaskObjects(SkiaRenderer* renderer,
                                                                 Iter1         begin,
                                                                 Iter2         end,
                                                                 F&&           f)
   {
     auto                                          canvas = renderer->canvas();
     const auto&                                   objects = renderer->maskObjects();
-    std::vector<std::pair<PaintNode*, glm::mat3>> cache;
+    std::vector<std::pair<PaintNode*, Transform>> cache;
     auto                                          maskAreaBound = Bound2::makeInfinite();
-    const auto&                                   selfBound = q_ptr->getBound();
+    const auto&                                   selfBound = q_ptr->bound();
     for (auto it = begin; it != end; ++it)
     {
       const auto& id = f(*it);
@@ -136,7 +136,7 @@ public:
         if (auto obj = objects.find(id); obj != objects.end())
         {
           const auto t = obj->second->mapTransform(q_ptr);
-          const auto transformedBound = obj->second->getBound() * t;
+          const auto transformedBound = obj->second->bound() * t.matrix();
           cache.emplace_back(obj->second, t);
           // if (selfBound.isIntersectWith(transformedBound))
           // {
@@ -165,11 +165,11 @@ public:
     auto p = q_ptr->parent();
     if (!p)
     {
-      mat *= q_ptr->localTransform();
+      mat *= q_ptr->transform().matrix();
       return;
     }
     static_cast<PaintNode*>(p.get())->d_ptr->worldTransform(mat);
-    mat *= q_ptr->localTransform();
+    mat *= q_ptr->transform().matrix();
   }
 
   template<typename Iter1, typename Iter2, typename F>
@@ -213,7 +213,7 @@ public:
 
   sk_sp<SkImage> fetchBackground(SkCanvas* canvas)
   {
-    auto b = toSkRect(q_ptr->getBound());
+    auto b = toSkRect(q_ptr->bound());
     b = canvas->getTotalMatrix().mapRect(b);
     std::cout << "Image scale: " << canvas->getTotalMatrix().getScaleX() << ", " << q_ptr->name()
               << std::endl;
@@ -258,10 +258,10 @@ public:
         if (auto obj = objects.find(mask.id); obj != objects.end())
         {
           const auto t = obj->second->mapTransform(q_ptr);
-          const auto transformedBound = obj->second->getBound() * t;
+          const auto transformedBound = obj->second->bound() * t.matrix();
           if (selfBound.isIntersectWith(transformedBound))
           {
-            cache.emplace_back(obj->second, t);
+            cache.emplace_back(obj->second, t.matrix());
             maskAreaBound.intersectWith(transformedBound);
           }
         }
@@ -410,7 +410,7 @@ public:
     {
       for (const auto& p : alphaMask->components)
       {
-        auto skm = toSkMatrix(p.second);
+        auto skm = toSkMatrix(p.second.matrix());
         canvas->save();
         canvas->concat(skm);
         p.first->d_ptr->drawAsAlphaMask(canvas);

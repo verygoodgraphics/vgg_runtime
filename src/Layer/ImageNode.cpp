@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "Layer/Core/Transform.hpp"
 #include "VSkia.hpp"
 #include "PaintNodePrivate.hpp"
 #include "Layer/Core/ImageNode.hpp"
@@ -78,14 +79,14 @@ ImageNode::ImageNode(const ImageNode& other)
 {
 }
 
-Mask ImageNode::asOutlineMask(const glm::mat3* mat)
+Mask ImageNode::asOutlineMask(const Transform* mat)
 {
   Mask mask;
-  auto rect = toSkRect(getBound());
+  auto rect = toSkRect(bound());
   mask.outlineMask.addRect(rect);
   if (mat)
   {
-    mask.outlineMask.transform(toSkMatrix(*mat));
+    mask.outlineMask.transform(toSkMatrix(mat->matrix()));
   }
   return mask;
 }
@@ -137,8 +138,8 @@ void ImageNode::paintFill(SkCanvas* canvas, sk_sp<SkBlender> blender, const SkPa
     SkPaint p;
     p.setBlender(std::move(blender));
     SkSamplingOptions opt;
-    const auto&       b = getBound();
-    canvas->drawImageRect(_->image, toSkRect(getBound()), opt, &p);
+    const auto&       b = bound();
+    canvas->drawImageRect(_->image, toSkRect(bound()), opt, &p);
 
     if (hasMask)
     {

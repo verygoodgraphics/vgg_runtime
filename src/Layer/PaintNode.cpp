@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "Layer/Core/Transform.hpp"
 #include "VSkia.hpp"
 #include "Painter.hpp"
 #include "PathGenerator.hpp"
@@ -87,7 +88,7 @@ void PaintNode::setContextSettings(const ContextSetting& settings)
   _->contextSetting = settings;
 }
 
-glm::mat3 PaintNode::mapTransform(const PaintNode* node) const
+Transform PaintNode::mapTransform(const PaintNode* node) const
 {
   auto findPath = [](const Node* node) -> std::vector<const Node*>
   {
@@ -119,20 +120,20 @@ glm::mat3 PaintNode::mapTransform(const PaintNode* node) const
   }
   glm::mat3 mat{ 1.0 };
   if (!lca)
-    return mat;
+    return Transform(mat);
   for (int i = 0; i < path1.size() && path1[i] != lca; i++)
   {
-    auto skm = static_cast<const PaintNode*>(path1[i])->d_ptr->transform;
+    auto skm = static_cast<const PaintNode*>(path1[i])->d_ptr->transform.matrix();
     auto inv = glm::inverse(skm);
     mat = mat * inv;
   }
 
   for (int i = lcaIdx - 1; i >= 0; i--)
   {
-    const auto m = static_cast<const PaintNode*>(path2[i])->d_ptr->transform;
+    const auto m = static_cast<const PaintNode*>(path2[i])->d_ptr->transform.matrix();
     mat = mat * m;
   }
-  return mat;
+  return Transform(mat);
 }
 
 Mask PaintNode::makeMaskBy(EBoolOp maskOp, SkiaRenderer* renderer)
@@ -250,7 +251,7 @@ void PaintNode::setAlphaMaskBy(std::vector<AlphaMask> masks)
 SkPath PaintNode::makeBoundPath()
 {
   SkPath      p;
-  const auto& skRect = toSkRect(getBound());
+  const auto& skRect = toSkRect(bound());
   const auto& radius = style().frameRadius;
 
   bool  rounded = false;
@@ -301,7 +302,7 @@ SkPath PaintNode::childPolyOperation() const
   for (auto it = m_firstChild.cbegin(); it != m_firstChild.cend(); ++it)
   {
     auto paintNode = static_cast<PaintNode*>(it->get());
-    auto childMask = paintNode->asOutlineMask(&paintNode->localTransform());
+    auto childMask = paintNode->asOutlineMask(&paintNode->transform());
     ct.emplace_back(childMask.outlineMask, paintNode->clipOperator());
   }
 
@@ -341,7 +342,7 @@ SkPath PaintNode::childPolyOperation() const
   return path;
 }
 
-SkPath PaintNode::makeContourImpl(ContourOption option, const glm::mat3* mat)
+SkPath PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
 {
   VGG_IMPL(PaintNode);
   SkPath path;
@@ -351,7 +352,7 @@ SkPath PaintNode::makeContourImpl(ContourOption option, const glm::mat3* mat)
     path = layer::makePath(*_->contour);
     if (mat)
     {
-      path.transform(toSkMatrix(*mat));
+      path.transform(toSkMatrix(mat->matrix()));
     }
     return path;
   }
@@ -361,7 +362,7 @@ SkPath PaintNode::makeContourImpl(ContourOption option, const glm::mat3* mat)
     for (auto it = begin(); it != end(); ++it)
     {
       auto paintNode = static_cast<PaintNode*>(it->get());
-      auto childMask = paintNode->makeContourImpl(option, &paintNode->localTransform());
+      auto childMask = paintNode->makeContourImpl(option, &paintNode->transform());
       Op(path, childMask, op, &path);
     }
   };
@@ -387,12 +388,12 @@ SkPath PaintNode::makeContourImpl(ContourOption option, const glm::mat3* mat)
   }
   if (mat)
   {
-    path.transform(toSkMatrix(*mat));
+    path.transform(toSkMatrix(mat->matrix()));
   }
   return path;
 }
 
-Mask PaintNode::asOutlineMask(const glm::mat3* mat)
+Mask PaintNode::asOutlineMask(const Transform* mat)
 {
   VGG_IMPL(PaintNode);
   Mask mask;
@@ -481,26 +482,25 @@ EBoolOp PaintNode::clipOperator() const
 {
   return d_ptr->clipOperator;
 }
-void PaintNode::setLocalTransform(const glm::mat3& transform)
+void PaintNode::setTransform(const Transform& transform)
 {
   VGG_IMPL(PaintNode);
   _->transform = transform;
 }
 
-const glm::mat3& PaintNode::localTransform() const
+const Transform& PaintNode::transform() const
 {
-  // TODO:: if the node is detached from the parent, this transform should be reset;
   return d_ptr->transform;
 }
 
-glm::mat3 PaintNode::worldTransform() const
+Transform PaintNode::globalTransform() const
 {
   auto mat = glm::identity<glm::mat3>();
   d_ptr->worldTransform(mat);
-  return mat;
+  return Transform(mat);
 }
 
-const Bound2& PaintNode::getBound() const
+const Bound2& PaintNode::bound() const
 {
   return d_ptr->bound;
 }
@@ -685,7 +685,7 @@ void PaintNode::prePaintPass(SkiaRenderer* renderer)
   }
 
   canvas->save();
-  canvas->concat(toSkMatrix(_->transform));
+  canvas->concat(toSkMatrix(_->transform.matrix()));
   if (renderer->isEnableDrawDebugBound())
   {
     renderer->drawDebugBound(this, 0);
@@ -720,7 +720,7 @@ SkPath PaintNode::stylePath()
   for (const auto& c : m_firstChild)
   {
     auto p = static_cast<PaintNode*>(c.get());
-    auto outline = p->asOutlineMask(&p->localTransform());
+    auto outline = p->asOutlineMask(&p->transform());
     ct.emplace_back(outline.outlineMask, p->clipOperator());
   }
   if (m_firstChild.empty())
@@ -781,9 +781,9 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
       if (!outlineMask.isEmpty())
         Op(res, outlineMask, SkPathOp::kIntersect_SkPathOp, &res);
       if (*blurType == BT_Gaussian)
-        painter.blurContentBegin(blur.radius, blur.radius, getBound(), nullptr, 0);
+        painter.blurContentBegin(blur.radius, blur.radius, bound(), nullptr, 0);
       else if (*blurType == BT_Background)
-        painter.blurBackgroundBegin(blur.radius, blur.radius, getBound(), &res);
+        painter.blurBackgroundBegin(blur.radius, blur.radius, bound(), &res);
       else if (*blurType == BT_Motion)
         DEBUG("Motion blur has not been implemented");
       else if (*blurType == BT_Zoom)
@@ -844,7 +844,7 @@ void PaintNode::paintFill(SkCanvas* canvas, sk_sp<SkBlender> blender, const SkPa
     //   auto p = path.getPoint(i);
     //   DEBUG("%f %f", p.x(), p.y());
     // }
-    render.drawFill(path, getBound(), f, contextSetting().Opacity, 0, blender, blur);
+    render.drawFill(path, bound(), f, contextSetting().Opacity, 0, blender, blur);
   }
 }
 

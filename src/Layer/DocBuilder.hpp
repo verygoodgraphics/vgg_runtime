@@ -53,7 +53,7 @@ class DocBuilder
   std::vector<std::shared_ptr<PaintNode>> m_frames;
   std::vector<std::shared_ptr<PaintNode>> m_symbols;
 
-  inline Bound2 fromBound(const nlohmann::json& j, const glm::mat3& totalMatrix)
+  inline Bound fromBound(const nlohmann::json& j, const glm::mat3& totalMatrix)
   {
     auto x = j.value("x", 0.f);
     auto y = j.value("y", 0.f);
@@ -63,7 +63,7 @@ class DocBuilder
     auto bottomRight = glm::vec2{ x + width, y - height };
     convertCoordinateSystem(topLeft, totalMatrix);
     convertCoordinateSystem(bottomRight, totalMatrix);
-    return Bound2{ topLeft, bottomRight };
+    return Bound{ topLeft, bottomRight };
   }
 
   inline std::tuple<glm::mat3, glm::mat3, glm::mat3> fromMatrix(const nlohmann::json& j)
@@ -76,7 +76,7 @@ class DocBuilder
     return { original, newMatrix, inversed };
   }
 
-  inline Style fromStyle(const nlohmann::json& j, const Bound2& bound, const glm::mat3& totalMatrix)
+  inline Style fromStyle(const nlohmann::json& j, const Bound& bound, const glm::mat3& totalMatrix)
   {
     Style style;
     from_json(j, style);
@@ -511,7 +511,7 @@ class DocBuilder
   }
 
   static void convertCoordinateSystem(Pattern&         pattern,
-                                      const Bound2&    bound,
+                                      const Bound&    bound,
                                       const glm::mat3& totalMatrix)
   {
     auto      newMatrix = convertMatrixCoordinate(pattern.transform).first;
@@ -535,7 +535,7 @@ class DocBuilder
   }
 
   static void convertCoordinateSystem(Style&           style,
-                                      const Bound2&    bound,
+                                      const Bound&    bound,
                                       const glm::mat3& totalMatrix)
   {
     for (auto& b : style.borders)

@@ -35,9 +35,9 @@ namespace VGG::layer
 {
 
 template<typename F>
-Bound2 calcMaskAreaIntersection(const Bound2& pruneBound, PaintNode* obj, F&& f)
+Bound calcMaskAreaIntersection(const Bound& pruneBound, PaintNode* obj, F&& f)
 {
-  Bound2 bound;
+  Bound bound;
   while (auto m = f())
   {
     const auto t = m->mapTransform(obj);
@@ -59,7 +59,7 @@ class PaintNode__pImpl // NOLINT
   VGG_DECL_API(PaintNode);
 
 public:
-  Bound2                    bound;
+  Bound                     bound;
   // glm::mat3                 transform{ 1.0 };
   Transform                 transform;
   std::string               guid{};
@@ -126,7 +126,7 @@ public:
     auto                                          canvas = renderer->canvas();
     const auto&                                   objects = renderer->maskObjects();
     std::vector<std::pair<PaintNode*, Transform>> cache;
-    auto                                          maskAreaBound = Bound2::makeInfinite();
+    auto                                          maskAreaBound = Bound::makeInfinite();
     const auto&                                   selfBound = q_ptr->bound();
     for (auto it = begin; it != end; ++it)
     {
@@ -136,7 +136,7 @@ public:
         if (auto obj = objects.find(id); obj != objects.end())
         {
           const auto t = obj->second->mapTransform(q_ptr);
-          const auto transformedBound = obj->second->bound() * t.matrix();
+          const auto transformedBound = obj->second->bound() * t;
           cache.emplace_back(obj->second, t);
           // if (selfBound.isIntersectWith(transformedBound))
           // {
@@ -248,7 +248,7 @@ public:
     auto                                          canvas = renderer->canvas();
     const auto&                                   objects = renderer->maskObjects();
     std::vector<std::pair<PaintNode*, glm::mat3>> cache;
-    auto                                          maskAreaBound = Bound2::makeInfinite();
+    auto                                          maskAreaBound = Bound::makeInfinite();
     const auto&                                   selfBound = bound;
     for (int i = 0; i < alphaMaskBy.size(); i++)
     {
@@ -258,7 +258,7 @@ public:
         if (auto obj = objects.find(mask.id); obj != objects.end())
         {
           const auto t = obj->second->mapTransform(q_ptr);
-          const auto transformedBound = obj->second->bound() * t.matrix();
+          const auto transformedBound = obj->second->bound() * t;
           if (selfBound.isIntersectWith(transformedBound))
           {
             cache.emplace_back(obj->second, t.matrix());

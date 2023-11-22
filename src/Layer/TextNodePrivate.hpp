@@ -117,7 +117,7 @@ protected:
                    const TextStyleAttr& textAttr) override;
 
 public:
-  TextParagraphCache(Bound2 bound)
+  TextParagraphCache(Bound bound)
   {
     auto mgr = sk_sp<SkFontMgrVGG>(FontManager::instance().defaultFontManager());
     if (mgr)
@@ -178,9 +178,9 @@ public:
     set(D_LAYOUT);
   }
 
-  Bound2 layout(const Bound2& bound, ETextLayoutMode mode)
+  Bound layout(const Bound& bound, ETextLayoutMode mode)
   {
-    Bound2 newBound = bound;
+    Bound newBound = bound;
     const auto layoutWidth = bound.width();
     m_height = 0;
     int newWidth = bound.width();
@@ -250,10 +250,10 @@ class TextNode__pImpl
 {
   VGG_DECL_API(TextNode)
 public:
-  TextNode__pImpl(TextNode* api, const Bound2& bound)
+  TextNode__pImpl(TextNode* api, const Bound& bound)
     : q_ptr(api)
     , paragraphCache(bound)
-    , painter(nullptr, nullptr, Bound2())
+    , painter(nullptr, nullptr, Bound())
   {
   }
 
@@ -265,8 +265,8 @@ public:
   ETextVerticalAlignment vertAlign{ ETextVerticalAlignment::VA_Top };
 
   TextNode__pImpl(const TextNode__pImpl& p)
-    : paragraphCache(Bound2())
-    , painter(nullptr, nullptr, Bound2())
+    : paragraphCache(Bound())
+    , painter(nullptr, nullptr, Bound())
   {
     this->operator=(p);
   }

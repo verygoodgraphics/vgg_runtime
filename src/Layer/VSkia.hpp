@@ -56,7 +56,7 @@ extern std::unordered_map<std::string, sk_sp<SkImage>> g_skiaImageRepo;
     return fallback;                                                                               \
     }
 
-inline SkRect toSkRect(const VGG::Bound2& bound)
+inline SkRect toSkRect(const VGG::Bound& bound)
 {
   const auto& b = bound;
   return SkRect{ b.topLeft().x, b.topLeft().y, b.bottomRight().x, b.bottomRight().y };
@@ -472,7 +472,7 @@ inline SkPathOp toSkPathOp(VGG::EBoolOp blop)
 // }
 
 inline sk_sp<SkShader> makeFitFillPattern(SkImage* img,
-                                          const Bound2& bound,
+                                          const Bound& bound,
                                           const FitFillPattern& p)
 {
   SkImageInfo mi = img->imageInfo();
@@ -518,7 +518,7 @@ inline sk_sp<SkShader> makeFitFillPattern(SkImage* img,
 }
 
 inline sk_sp<SkShader> makeStretchPattern(SkImage* img,
-                                          const Bound2& bound,
+                                          const Bound& bound,
                                           const StretchPattern& p)
 {
   SkImageInfo mi = img->imageInfo();
@@ -537,7 +537,7 @@ inline sk_sp<SkShader> makeStretchPattern(SkImage* img,
   return img->makeShader(modeX, modeY, opt, &mat);
 }
 
-inline sk_sp<SkShader> makeTilePattern(SkImage* img, const Bound2& bound, const TilePattern& p)
+inline sk_sp<SkShader> makeTilePattern(SkImage* img, const Bound& bound, const TilePattern& p)
 {
   SkTileMode modeX = SkTileMode::kDecal;
   SkTileMode modeY = SkTileMode::kDecal;

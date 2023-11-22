@@ -20,33 +20,35 @@
 #include <limits>
 #include <ostream>
 
+#include "Layer/Core/Transform.hpp"
+
 namespace VGG
 {
-struct Bound2
+class Bound
 {
 private:
   glm::vec2 m_topLeft;
   glm::vec2 m_bottomRight;
 
 public:
-  Bound2()
+  Bound()
     : m_topLeft{ 0, 0 }
     , m_bottomRight{ 0, 0 }
   {
   }
-  Bound2(float x, float y, float w, float h)
+  Bound(float x, float y, float w, float h)
     : m_topLeft{ x, y }
     , m_bottomRight{ x + w, y + h }
   {
   }
 
-  Bound2(const glm::vec2& topLeft, float w, float h)
+  Bound(const glm::vec2& topLeft, float w, float h)
     : m_topLeft(topLeft)
     , m_bottomRight{ topLeft.x + w, topLeft.y + h }
   {
   }
 
-  Bound2(const glm::vec2& p1, const glm::vec2& p2)
+  Bound(const glm::vec2& p1, const glm::vec2& p2)
   {
     m_topLeft = glm::vec2(std::min(p1.x, p2.x), std::min(p1.y, p2.y));
     m_bottomRight = glm::vec2(std::max(p1.x, p2.x), std::max(p1.y, p2.y));
@@ -60,13 +62,6 @@ public:
     m_bottomRight.x += delta;
   }
 
-  // Bound2(const glm::vec2& p1, const glm::vec2& p2)
-  //   : topLeft{ std::min(p1.x, p2.x), std::min(p1.y, p2.y) }
-  //   , bottomRight{ std::max(p1.x, p2.x), std::max(p1.y, p2.y) }
-  // {
-  // }
-
-  // map the given p into the bound coordinate
   glm::vec2 map(const glm::vec2& p) const
   {
     return glm::vec2{ p.x + m_topLeft.x, (p.y + m_topLeft.y) };
@@ -132,22 +127,22 @@ public:
     return std::sqrt(squaredDistance());
   }
 
-  Bound2 transform(const glm::mat3& transform) const
+  Bound transform(const layer::Transform& transform) const
   {
-    auto topLeft3 = transform * glm::vec3{ m_topLeft, 1.0 };
-    auto bottomRight3 = transform * glm::vec3{ m_bottomRight, 1.0 };
-    Bound2 newBound;
+    auto  topLeft3 = transform * glm::vec3{ m_topLeft, 1.0 };
+    auto  bottomRight3 = transform * glm::vec3{ m_bottomRight, 1.0 };
+    Bound newBound;
     newBound.m_topLeft = topLeft3;
     newBound.m_bottomRight = bottomRight3;
     return newBound;
   }
 
-  Bound2 operator*(const glm::mat3& transform) const
+  Bound operator*(const layer::Transform& transform) const
   {
     return this->transform(transform);
   }
 
-  void unionWith(const Bound2& bound)
+  void unionWith(const Bound& bound)
   {
     m_topLeft.x = std::min(m_topLeft.x, bound.m_topLeft.x);
     m_topLeft.y = std::min(m_topLeft.y, bound.m_topLeft.y);
@@ -155,14 +150,14 @@ public:
     m_bottomRight.y = std::max(m_bottomRight.y, bound.m_bottomRight.y);
   }
 
-  Bound2 unionAs(const Bound2& bound) const
+  Bound unionAs(const Bound& bound) const
   {
     auto newBound = *this;
     newBound.unionWith(bound);
     return newBound;
   }
 
-  void intersectWith(const Bound2& bound)
+  void intersectWith(const Bound& bound)
   {
     m_topLeft.x = std::max(m_topLeft.x, bound.m_topLeft.x);
     m_topLeft.y = std::max(m_topLeft.y, bound.m_topLeft.y);
@@ -170,20 +165,20 @@ public:
     m_bottomRight.y = std::min(m_bottomRight.y, bound.m_bottomRight.y);
   }
 
-  Bound2 intersectAs(const Bound2& bound) const
+  Bound intersectAs(const Bound& bound) const
   {
     auto newBound = *this;
     newBound.intersectWith(bound);
     return newBound;
   }
 
-  bool isIntersectWith(const Bound2& bound) const
+  bool isIntersectWith(const Bound& bound) const
   {
     auto isect = intersectAs(bound);
     return isect.valid();
   }
 
-  bool isIntersectWithEx(const Bound2& bound) const
+  bool isIntersectWithEx(const Bound& bound) const
   {
     auto isect = intersectAs(bound);
     auto size = isect.size();
@@ -191,9 +186,9 @@ public:
   }
 
 public:
-  static Bound2 makeInfinite()
+  static Bound makeInfinite()
   {
-    Bound2 b;
+    Bound b;
     b.m_topLeft.x = std::numeric_limits<float>::lowest();
     b.m_topLeft.y = std::numeric_limits<float>::lowest();
     b.m_bottomRight.x = std::numeric_limits<float>::max();
@@ -201,9 +196,9 @@ public:
     return b;
   }
 
-  static Bound2 makeBoundLRTB(float l, float r, float t, float b)
+  static Bound makeBoundLRTB(float l, float r, float t, float b)
   {
-    Bound2 bound;
+    Bound bound;
     bound.m_topLeft = { l, t };
     bound.m_bottomRight = { r, b };
     return bound;
@@ -216,7 +211,7 @@ inline std::ostream& operator<<(std::ostream& os, const glm::vec2& v)
   return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const Bound2& b)
+inline std::ostream& operator<<(std::ostream& os, const Bound& b)
 {
   os << "[" << b.topLeft() << ", " << b.bottomRight() << "]" << std::endl;
   return os;

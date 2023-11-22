@@ -37,7 +37,7 @@
 
 #include <stack>
 
-sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound2& bound);
+sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound& bound);
 
 template<typename K, typename V>
 class LRUCache
@@ -176,7 +176,7 @@ public:
     return m_canvas;
   }
 
-  void blurBackgroundBegin(float radiusX, float radiusY, const Bound2& bound, const SkPath* path)
+  void blurBackgroundBegin(float radiusX, float radiusY, const Bound& bound, const SkPath* path)
   {
     auto filter = SkImageFilters::Blur(SkBlurMask::ConvertRadiusToSigma(radiusX),
                                        SkBlurMask::ConvertRadiusToSigma(radiusY),
@@ -195,7 +195,7 @@ public:
   }
   void blurContentBegin(float radiusX,
                         float radiusY,
-                        const Bound2& bound,
+                        const Bound& bound,
                         const SkPath* path,
                         sk_sp<SkBlender> blender)
   {
@@ -236,19 +236,19 @@ public:
   }
 
   void drawShadow(const SkPath& skPath,
-                  const Bound2& bound,
+                  const Bound& bound,
                   const Shadow& s,
                   SkPaint::Style style,
                   sk_sp<SkImageFilter> imageFilter);
 
   void drawInnerShadow(const SkPath& skPath,
-                       const Bound2& bound,
+                       const Bound& bound,
                        const Shadow& s,
                        SkPaint::Style style,
                        sk_sp<SkImageFilter> imageFilter);
 
   void drawFill(const SkPath& skPath,
-                const Bound2& bound,
+                const Bound& bound,
                 const Fill& f,
                 float globalAlpha,
                 sk_sp<SkImageFilter> imageFilter,
@@ -256,13 +256,13 @@ public:
                 sk_sp<SkMaskFilter> mask);
 
   void drawPathBorder(const SkPath& skPath,
-                      const Bound2& bound,
+                      const Bound& bound,
                       const Border& b,
                       float globalAlpha,
                       sk_sp<SkImageFilter> imageFilter,
                       sk_sp<SkBlender> blender);
 
-  void drawImage(const Bound2 bound,
+  void drawImage(const Bound bound,
                  sk_sp<SkShader> imageShader,
                  sk_sp<SkImageFilter> imageFilter,
                  sk_sp<SkBlender> blender)

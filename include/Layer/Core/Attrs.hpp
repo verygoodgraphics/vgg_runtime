@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include "Layer/Core/Transform.hpp"
 #include "Math/Hash.hpp"
 #include "Math/Math.hpp"
 #include "Math/Geometry.hpp"
@@ -38,54 +39,60 @@ namespace VGG
 
 struct ContextSetting
 {
-  EBlendMode BlendMode{ BM_Normal };
-  float Opacity{ 1.0 };
-  bool IsolateBlending{ false };
+  EBlendMode    BlendMode{ BM_Normal };
+  float         Opacity{ 1.0 };
+  bool          IsolateBlending{ false };
   EKnockoutType TransparencyKnockoutGroup{ KT_Off };
 };
 
-struct TilePattern
+struct PatternTile
 {
-  ETilePatternType type{ TILE_BOTH };
-  bool mirror{ true };
-  glm::vec2 scale;
-  float rotate;
-  glm::vec2 offset;
+  std::string      guid;
+  ETilePatternType mode{ TILE_BOTH };
+  bool             mirror{ true };
+  float            rotation{ 0.f };
+  float            scale{ 1.f };
 };
 
-struct StretchPattern
+struct PatternStretch
 {
-  glm::vec2 scale;
-  float rotate;
-  glm::vec2 offset;
+  std::string      guid;
+  layer::Transform transform;
+  bool             clip{ false };
 };
 
-struct FitFillPattern
+struct PatternFill
 {
-  EFillModeType type;
-  float rotate;
+  std::string guid;
+  float       rotation;
+};
+
+struct PatternFit
+{
+  std::string guid;
+  float       rotation;
 };
 
 struct Pattern
 {
   EImageFillType imageFillType; // remove
-  bool tileMirrored;            // remove
-  float tileScale;              // TODO:: remove
-  std::string imageGUID;
+  bool           tileMirrored;  // remove
+  float          tileScale;     // TODO:: remove
+  std::string    imageGUID;
 
   glm::mat3 transform;
   glm::vec2 scale;
-  float rotate;
+  float     rotate;
   glm::vec2 offset;
 
-  std::variant<FitFillPattern, StretchPattern, TilePattern> type;
+  std::variant<PatternFill, PatternFit, PatternStretch, PatternTile> instance;
 };
 
 struct AlphaMask
 {
-  std::string id;
+  std::string   id;
   AlphaMaskType type{ AM_ALPHA };
-  bool crop{ true };
+  bool          crop{ true };
 };
 
 struct Color
@@ -137,10 +144,10 @@ struct Gradient
 
   glm::vec2 from{ 0.5, 0 };
   glm::vec2 to{ 0.5, 1 };
-  float elipseLength{ 1.0 };  // (0, inf) : radial
-  float rotation{ 0.0 };      // degree : angular
-  float invert{ false };      //
-  bool aiCoordinate{ false }; // This flag indicates if these positions are Ai exported.
+  float     elipseLength{ 1.0 };   // (0, inf) : radial
+  float     rotation{ 0.0 };       // degree : angular
+  float     invert{ false };       //
+  bool      aiCoordinate{ false }; // This flag indicates if these positions are Ai exported.
   std::vector<GradientStop> stops{
     { Color::fromRGB(0xEE, 0xEE, 0xEE), 0.0 },
     { Color::fromRGB(0xD8, 0xD8, 0xD8), 1.0 },
@@ -159,15 +166,15 @@ struct Gradient
 
   inline std::pair<glm::vec2, glm::vec2> aiConvert(const glm::vec2& from,
                                                    const glm::vec2& to,
-                                                   const Bound& b) const
+                                                   const Bound&     b) const
   {
     const auto angle = to.x;
     const auto length = to.y;
     const auto radians = glm::radians(angle);
-    glm::vec2 dir = { std::cos(radians), std::sin(radians) };
+    glm::vec2  dir = { std::cos(radians), std::sin(radians) };
     const auto center = glm::vec2(b.topLeft().x + b.width() / 2, b.topLeft().y - b.height() / 2);
     const auto x = from.x * b.width() + b.topLeft().x;
-    float k = 1;
+    float      k = 1;
     if ((angle <= 45 && angle >= -45) || (angle >= 135 || angle <= -135))
     {
       const float k = dir.y / dir.x;
@@ -218,7 +225,7 @@ struct Gradient
       { (SkScalar)start.x, (SkScalar)start.y },
       { (SkScalar)end.x, (SkScalar)end.y },
     };
-    std::vector<SkColor> colors;
+    std::vector<SkColor>  colors;
     std::vector<SkScalar> positions;
     for (size_t i = 0; i < indices.size(); i++)
     {
@@ -228,7 +235,7 @@ struct Gradient
       positions.push_back((p - minPosition) / (maxPosition - minPosition));
     }
     SkMatrix mat = SkMatrix::I();
-    auto s = SkGradientShader::MakeLinear(pts,
+    auto     s = SkGradientShader::MakeLinear(pts,
                                           colors.data(),
                                           positions.data(),
                                           indices.size(),
@@ -251,9 +258,9 @@ struct Gradient
     auto start = glm::mix(f, t, minPosition);
     auto end = glm::mix(f, t, maxPosition);
 
-    SkPoint center{ (SkScalar)start.x, (SkScalar)start.y };
-    SkScalar r = glm::distance(end, start);
-    std::vector<SkColor> colors;
+    SkPoint               center{ (SkScalar)start.x, (SkScalar)start.y };
+    SkScalar              r = glm::distance(end, start);
+    std::vector<SkColor>  colors;
     std::vector<SkScalar> positions;
     for (size_t i = 0; i < indices.size(); i++)
     {
@@ -278,19 +285,19 @@ struct Gradient
 
   inline sk_sp<SkShader> getAngularShader(const Bound& bound) const
   {
-    auto minPositionIter = stops.begin();
-    auto maxPositionIter = stops.end();
-    const auto minPosition = minPositionIter->position;
-    const auto maxPosition = maxPositionIter->position;
-    auto f = bound.map(bound.size() * from);
-    auto t = bound.map(bound.size() * to);
-    auto center = f;
+    auto                 minPositionIter = stops.begin();
+    auto                 maxPositionIter = stops.end();
+    const auto           minPosition = minPositionIter->position;
+    const auto           maxPosition = maxPositionIter->position;
+    auto                 f = bound.map(bound.size() * from);
+    auto                 t = bound.map(bound.size() * to);
+    auto                 center = f;
     std::vector<SkColor> colors;
     colors.reserve(2);
     std::vector<SkScalar> positions;
     positions.reserve(2);
-    auto minPosColor = minPositionIter->color;
-    auto maxPosColor = maxPositionIter->color;
+    auto   minPosColor = minPositionIter->color;
+    auto   maxPosColor = maxPositionIter->color;
     size_t sz = stops.size();
     if (minPosition > 0)
     {
@@ -312,7 +319,7 @@ struct Gradient
       sz += 1;
     }
 
-    SkMatrix rot;
+    SkMatrix   rot;
     const auto dir = t - f;
     const auto rotate = std::atan2(dir.y, dir.x);
     rot.setRotate(glm::degrees(rotate), center.x, center.y);
@@ -328,90 +335,90 @@ struct Gradient
 
 struct Border
 {
-  std::optional<Color> color;
-  ContextSetting context_settings;
-  double dashed_offset;
-  std::vector<float> dashed_pattern;
-  EPathFillType fill_type; // TODO:
-  double flat;
+  std::optional<Color>    color;
+  ContextSetting          context_settings;
+  double                  dashed_offset;
+  std::vector<float>      dashed_pattern;
+  EPathFillType           fill_type; // TODO:
+  double                  flat;
   std::optional<Gradient> gradient;
-  bool isEnabled;
-  ELineCap lineCapStyle;
-  ELineJoin lineJoinStyle;
-  double miterLimit;
-  std::optional<Pattern> pattern;
-  EPathPosition position;
-  int64_t style;
-  double thickness;
+  bool                    isEnabled;
+  ELineCap                lineCapStyle;
+  ELineJoin               lineJoinStyle;
+  double                  miterLimit;
+  std::optional<Pattern>  pattern;
+  EPathPosition           position;
+  int64_t                 style;
+  double                  thickness;
 };
 
 struct Shadow
 {
-  float blur;
-  Color color;
+  float          blur;
+  Color          color;
   ContextSetting context_settings;
-  bool inner;
-  bool is_enabled;
-  float offset_x;
-  float offset_y;
-  float spread;
+  bool           inner;
+  bool           is_enabled;
+  float          offset_x;
+  float          offset_y;
+  float          spread;
 };
 
 struct Blur
 {
   EBlurType blurType;
-  float radius;
-  float motionAngle;
+  float     radius;
+  float     motionAngle;
   glm::vec2 center;
-  float saturation;
-  bool isEnabled;
+  float     saturation;
+  bool      isEnabled;
 };
 
 struct Fill
 {
-  bool isEnabled{ true };
-  Color color;
-  EPathFillType fillType{};
-  ContextSetting contextSettings{};
+  bool                    isEnabled{ true };
+  Color                   color;
+  EPathFillType           fillType{};
+  ContextSetting          contextSettings{};
   std::optional<Gradient> gradient{ std::nullopt };
-  std::optional<Pattern> pattern{ std::nullopt };
+  std::optional<Pattern>  pattern{ std::nullopt };
 };
 
 struct Style
 {
-  std::vector<Blur> blurs;
-  std::vector<Border> borders;
-  std::vector<Fill> fills;
-  std::vector<Shadow> shadows;
+  std::vector<Blur>                   blurs;
+  std::vector<Border>                 borders;
+  std::vector<Fill>                   fills;
+  std::vector<Shadow>                 shadows;
   std::optional<std::array<float, 4>> frameRadius;
-  float cornerSmooth;
+  float                               cornerSmooth;
 };
 
 struct TextLineAttr
 {
   bool firstLine{ false };
-  int level{ 0 };
-  int lineType{ TLT_Plain };
+  int  level{ 0 };
+  int  lineType{ TLT_Plain };
 };
 
 struct TextStyleAttr
 {
-  std::string fontName;
-  std::string subFamilyName;
-  std::vector<Fill> fills;
-  float letterSpacing{ 0.0 };
-  float lineSpace{ 0.f };
-  float baselineShift{ 0.0 };
-  size_t length{ 0 };
-  uint8_t size{ 14 };
-  bool bold{ false };
-  bool italic{ false };
-  bool lineThrough{ false };
-  bool kerning{ false };
-  int fillUseType{ 0 };
-  ETextUnderline underline{ UT_None };
+  std::string              fontName;
+  std::string              subFamilyName;
+  std::vector<Fill>        fills;
+  float                    letterSpacing{ 0.0 };
+  float                    lineSpace{ 0.f };
+  float                    baselineShift{ 0.0 };
+  size_t                   length{ 0 };
+  uint8_t                  size{ 14 };
+  bool                     bold{ false };
+  bool                     italic{ false };
+  bool                     lineThrough{ false };
+  bool                     kerning{ false };
+  int                      fillUseType{ 0 };
+  ETextUnderline           underline{ UT_None };
   ETextHorizontalAlignment horzAlignment{ HA_Left };
-  ELetterTransform letterTransform{ ELT_Nothing };
+  ELetterTransform         letterTransform{ ELT_Nothing };
 
   bool operator==(const TextStyleAttr& other) const
   {
@@ -433,17 +440,17 @@ struct TextStyleAttr
 
 struct PointAttr
 {
-  glm::vec2 point;
+  glm::vec2                point;
   std::optional<glm::vec2> from;
   std::optional<glm::vec2> to;
-  std::optional<int> cornerStyle;
-  float radius = 0.0;
+  std::optional<int>       cornerStyle;
+  float                    radius = 0.0;
 
-  PointAttr(glm::vec2 point,
-            float radius,
+  PointAttr(glm::vec2                point,
+            float                    radius,
             std::optional<glm::vec2> from,
             std::optional<glm::vec2> to,
-            std::optional<int> cornerStyle)
+            std::optional<int>       cornerStyle)
     : point(point)
     , radius(radius)
     , from(from)
@@ -462,16 +469,16 @@ struct PointAttr
 
 struct Contour : public std::vector<PointAttr>
 {
-  bool closed = true;
-  float cornerSmooth{ 0.f };
+  bool    closed = true;
+  float   cornerSmooth{ 0.f };
   EBoolOp blop;
 
   bool allStraightLines() const
   {
-    size_t prev = 0;
-    size_t cur = 1;
-    size_t next = cur + 1;
-    int segments = closed ? size() : size() - 1;
+    size_t    prev = 0;
+    size_t    cur = 1;
+    size_t    next = cur + 1;
+    int       segments = closed ? size() : size() - 1;
     const int total = size();
     while (segments)
     {

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/Core/Transform.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Math/Algebra.hpp"
@@ -114,55 +115,64 @@ inline void from_json(const json& j, Color& x)
   x.r = j["red"];
 }
 
+inline void from_json(const json& j, PatternFill& x)
+{
+  x.guid = j.value("imageFileName", "");
+  x.rotation = glm::radians(j.value("rotation", 0.f));
+}
+
+inline void from_json(const json& j, PatternFit& x)
+{
+  x.guid = j.value("imageFileName", "");
+  x.rotation = glm::radians(j.value("rotation", 0.f));
+}
+
+inline void from_json(const json& j, PatternStretch& x)
+{
+  x.guid = j.value("imageFileName", "");
+  x.clip = j.value("crop", true);
+  layer::Transform transform;
+  auto             v = j.at("matrix").get<std::array<float, 6>>();
+  auto             m =
+    glm::mat3{ glm::vec3{ v[0], v[1], 0 }, glm::vec3{ v[2], v[3], 0 }, glm::vec3{ v[4], v[5], 1 } };
+  x.transform = layer::Transform(m);
+}
+
+inline void from_json(const json& j, PatternTile& x)
+{
+  x.guid = j.value("imageFileName", "");
+  x.mirror = j.value("mirror", false);
+  x.rotation = glm::radians(j.value("rotation", 0.f));
+  x.scale = j.value("scale", 1.f);
+  x.mode = j.value("mode", TILE_BOTH);
+}
+
 inline void from_json(const json& j, Pattern& x)
 {
-  const auto instance = j["instance"];
-  const auto klass = instance["class"];
-  if (klass == "patternImage")
+  auto       instance = j.value("instance", json{});
+  const auto klass = instance.value("class", "");
+  if (klass == "patternImageFit")
   {
-    const auto fillType = instance["fillType"];
-    x.imageFillType = instance["fillType"]; // TODO:: removed
-    x.imageGUID = instance["imageFileName"];
-    x.tileMirrored = instance["imageTileMirrored"]; // TODO:: removed
-    const auto it = instance.find("matrix");
-    glm::mat3 m{ 1.0 };
-    if (it != instance.end())
-    {
-      auto v = instance.at("matrix").get<std::array<float, 6>>();
-      m = glm::mat3{ glm::vec3{ v[0], v[1], 0 },
-                     glm::vec3{ v[2], v[3], 0 },
-                     glm::vec3{ v[4], v[5], 1 } };
-    }
-    if (fillType == IFT_Fit || fillType == IFT_Fill)
-    {
-      FitFillPattern pattern;
-      pattern.type = fillType == IFT_Fit ? FILL_FIT : FILL_FILL;
-      pattern.rotate = 0; // TODO::
-      x.type = pattern;
-    }
-    else if (fillType == IFT_Stretch)
-    {
-      StretchPattern pattern;
-      pattern.offset = {};
-      pattern.rotate = 0; // TODO::
-      pattern.scale = {};
-      x.type = pattern;
-    }
-    else if (fillType == IFT_Tile || fillType == IFT_OnlyTileVertical ||
-             fillType == IFT_OnlyTileHorizontal)
-    {
-      TilePattern pattern;
-      pattern.offset = {};
-      pattern.rotate = 0; // TODO::
-      pattern.scale = {};
-      pattern.mirror = instance["imageTileMirrored"];
-      x.type = pattern;
-    }
-    x.transform = m; // TODO::removed
+    x.instance = PatternFit(instance);
+  }
+  else if (klass == "patternImageFill")
+  {
+    x.instance = PatternFill(instance);
+  }
+  else if (klass == "patternImageStretch")
+  {
+    x.instance = PatternStretch(instance);
+  }
+  else if (klass == "patternImageTile")
+  {
+    x.instance = PatternTile(instance);
   }
   else if (klass == "patternLayer")
   {
     // TODO:: Feature for patternLayer
+  }
+  else
+  {
   }
 }
 
@@ -298,11 +308,11 @@ inline void from_json(const json& j, TextLineAttr& x)
 
 inline void from_json(const json& j, Bound& b)
 {
-  auto x = j.value("x", 0.f);
-  auto y = j.value("y", 0.f);
+  auto       x = j.value("x", 0.f);
+  auto       y = j.value("y", 0.f);
   const auto topLeft = glm::vec2{ x, y };
-  auto width = j.value("width", 0.f);
-  auto height = j.value("height", 0.f);
+  auto       width = j.value("width", 0.f);
+  auto       height = j.value("height", 0.f);
   b = Bound{ topLeft, width, height };
 }
 

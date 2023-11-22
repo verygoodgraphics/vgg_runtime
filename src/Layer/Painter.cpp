@@ -15,6 +15,7 @@
  */
 #include "Painter.hpp"
 #include "Layer/Core/VType.hpp"
+#include "Layer/PathGenerator.hpp"
 #include "VSkia.hpp"
 #include <core/SkColor.h>
 #include <core/SkMaskFilter.h>
@@ -25,7 +26,7 @@ using namespace VGG;
 sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound& bound)
 {
   sk_sp<SkShader> shader;
-  const auto type = g.gradientType;
+  const auto      type = g.gradientType;
   if (type == GT_Linear)
   {
     shader = g.getLinearShader(bound);
@@ -41,12 +42,12 @@ sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound& bound)
   return shader;
 }
 
-void Painter::drawPathBorder(const SkPath& skPath,
-                             const Bound& bound,
-                             const Border& b,
-                             float globalAlpha,
+void Painter::drawPathBorder(const SkPath&        skPath,
+                             const Bound&         bound,
+                             const Border&        b,
+                             float                globalAlpha,
                              sk_sp<SkImageFilter> imageFilter,
-                             sk_sp<SkBlender> blender)
+                             sk_sp<SkBlender>     blender)
 {
   SkPaint strokePen;
   strokePen.setAntiAlias(m_antiAlias);
@@ -93,21 +94,7 @@ void Painter::drawPathBorder(const SkPath& skPath,
   else if (b.fill_type == FT_Pattern)
   {
     assert(b.pattern.has_value());
-    auto img = loadImage(b.pattern->imageGUID, Scene::getResRepo());
-    if (!img)
-      return;
-    auto bs = bound.size();
-    const auto m = toSkMatrix(b.pattern->transform);
-    auto shader = getImageShader(img,
-                                 bs.x,
-                                 bs.y,
-                                 b.pattern->imageFillType,
-                                 b.pattern->tileScale,
-                                 b.pattern->tileMirrored,
-                                 &m,
-                                 b.pattern->offset,
-                                 b.pattern->scale,
-                                 b.pattern->rotate);
+    auto shader = makePatternShader(bound, b.pattern.value());
     strokePen.setShader(shader);
     strokePen.setAlphaf(b.context_settings.Opacity * globalAlpha);
   }
@@ -120,10 +107,10 @@ void Painter::drawPathBorder(const SkPath& skPath,
   }
 }
 
-void Painter::drawShadow(const SkPath& skPath,
-                         const Bound& bound,
-                         const Shadow& s,
-                         SkPaint::Style style,
+void Painter::drawShadow(const SkPath&        skPath,
+                         const Bound&         bound,
+                         const Shadow&        s,
+                         SkPaint::Style       style,
                          sk_sp<SkImageFilter> imageFilter)
 {
   SkPaint pen;
@@ -140,14 +127,14 @@ void Painter::drawShadow(const SkPath& skPath,
   m_canvas->restore();
 }
 
-void Painter::drawInnerShadow(const SkPath& skPath,
-                              const Bound& bound,
-                              const Shadow& s,
-                              SkPaint::Style style,
+void Painter::drawInnerShadow(const SkPath&        skPath,
+                              const Bound&         bound,
+                              const Shadow&        s,
+                              SkPaint::Style       style,
                               sk_sp<SkImageFilter> imageFilter)
 {
   SkPaint pen;
-  auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
+  auto    sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
   pen.setAntiAlias(m_antiAlias);
   pen.setImageFilter(
     SkMyImageFilters::DropInnerShadowOnly(s.offset_x, -s.offset_y, sigma, sigma, s.color, nullptr));
@@ -161,13 +148,13 @@ void Painter::drawInnerShadow(const SkPath& skPath,
   m_canvas->restore();
 }
 
-void Painter::drawFill(const SkPath& skPath,
-                       const Bound& bound,
-                       const Fill& f,
-                       float globalAlpha,
+void Painter::drawFill(const SkPath&        skPath,
+                       const Bound&         bound,
+                       const Fill&          f,
+                       float                globalAlpha,
                        sk_sp<SkImageFilter> imageFilter,
-                       sk_sp<SkBlender> blender,
-                       sk_sp<SkMaskFilter> mask)
+                       sk_sp<SkBlender>     blender,
+                       sk_sp<SkMaskFilter>  mask)
 {
   SkPaint fillPen;
   fillPen.setStyle(SkPaint::kFill_Style);
@@ -191,23 +178,7 @@ void Painter::drawFill(const SkPath& skPath,
   else if (f.fillType == FT_Pattern)
   {
     assert(f.pattern.has_value());
-    auto img = loadImage(f.pattern->imageGUID, Scene::getResRepo());
-    if (!img)
-      return;
-    auto bs = bound.size();
-    const auto m = toSkMatrix(f.pattern->transform);
-
-    auto shader = getImageShader(img,
-                                 bs.x,
-                                 bs.y,
-                                 f.pattern->imageFillType,
-                                 f.pattern->tileScale,
-                                 f.pattern->tileMirrored,
-                                 &m,
-                                 f.pattern->offset,
-                                 f.pattern->scale,
-                                 f.pattern->rotate);
-
+    auto shader = makePatternShader(bound, f.pattern.value());
     fillPen.setShader(shader);
     fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);
   }

@@ -42,9 +42,19 @@
 #include <exception>
 #include <memory>
 #include <optional>
+#include <variant>
 
 namespace VGG::layer
 {
+
+template<class... Ts>
+struct Overloaded : Ts...
+{
+  using Ts::operator()...;
+};
+// explicit deduction guide (not needed as of C++20)
+template<class... Ts>
+Overloaded(Ts...) -> Overloaded<Ts...>;
 
 using namespace nlohmann;
 
@@ -526,6 +536,16 @@ class DocBuilder
     pattern.scale = scale;
     pattern.offset = offset;
     pattern.transform = newMatrix;
+
+    std::visit(Overloaded{ [](PatternFill& p) { p.rotation = -p.rotation; },
+                           [](PatternFit& p) { p.rotation = -p.rotation; },
+                           [](PatternStretch& p)
+                           {
+                             auto newMatrix = convertMatrixCoordinate(p.transform.matrix()).first;
+                             p.transform.setMatrix(newMatrix);
+                           },
+                           [](PatternTile& p) { p.rotation = -p.rotation; } },
+               pattern.instance);
   }
 
   static void convertCoordinateSystem(Gradient& gradient, const glm::mat3& totalMatrix)

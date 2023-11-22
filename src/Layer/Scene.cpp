@@ -49,12 +49,14 @@ public:
     : q_ptr(api)
   {
   }
-  std::vector<std::shared_ptr<layer::PaintNode>> roots;
-  int                                            page{ 0 };
-  int                                            symbolIndex{ 0 };
-  bool                                           maskDirty{ true };
-  SkiaRenderer                                   renderer;
-  std::shared_ptr<Zoomer>                        zoomer;
+  using RootArray = std::vector<std::shared_ptr<layer::PaintNode>>;
+
+  RootArray               roots;
+  int                     page{ 0 };
+  int                     symbolIndex{ 0 };
+  bool                    maskDirty{ true };
+  SkiaRenderer            renderer;
+  std::shared_ptr<Zoomer> zoomer;
 
   void applyZoom(SkCanvas* canvas)
   {

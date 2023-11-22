@@ -64,13 +64,13 @@ class Transform
 
   void revalidateMatrix()
   {
-    if (m_flags == MAT_INVAL)
+    if (m_flags & MAT_INVAL)
     {
       m_matrix = glm::mat3{ 1.0 };
       m_matrix = glm::scale(m_matrix, m_scale);
       m_matrix = glm::translate(m_matrix, m_offset);
       m_matrix = glm::rotate(m_matrix, m_rotate);
-      m_flags &= MAT_INVAL;
+      m_flags &= ~MAT_INVAL;
     }
   }
 

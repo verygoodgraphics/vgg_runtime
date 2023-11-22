@@ -69,18 +69,12 @@ void VParagraphPainter::drawTextBlob(const sk_sp<SkTextBlob>& blob,
         {
           assert(f.gradient.has_value());
           auto gradientShader = getGradientShader(f.gradient.value(), m_bound);
-
-          if (FLIP_COORD)
-            gradientShader = gradientShader->makeWithLocalMatrix(SkMatrix::Scale(1, -1));
-
           fillPen.setShader(gradientShader);
         }
         else if (f.fillType == FT_Pattern)
         {
           assert(f.pattern.has_value());
           auto shader = makePatternShader(m_bound, f.pattern.value());
-          if (FLIP_COORD)
-            shader = shader->makeWithLocalMatrix(SkMatrix::Scale(1, -1));
           fillPen.setShader(shader);
         }
       }

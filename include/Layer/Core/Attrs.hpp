@@ -75,16 +75,6 @@ struct PatternFit
 
 struct Pattern
 {
-  EImageFillType imageFillType; // remove
-  bool           tileMirrored;  // remove
-  float          tileScale;     // TODO:: remove
-  std::string    imageGUID;
-
-  glm::mat3 transform;
-  glm::vec2 scale;
-  float     rotate;
-  glm::vec2 offset;
-
   std::variant<PatternFill, PatternFit, PatternStretch, PatternTile> instance;
 };
 

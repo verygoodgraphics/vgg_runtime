@@ -289,8 +289,6 @@ public:
     for (const auto& p : cache)
     {
       auto skm = toSkMatrix(p.second);
-      if (FLIP_COORD)
-        skm.postScale(1, -1);
       maskCanvas->setMatrix(skm);
       // pen.setStrokeWidth(5);
       // pen.setColor(SK_ColorGREEN);

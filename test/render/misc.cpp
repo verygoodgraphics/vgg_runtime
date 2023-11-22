@@ -84,8 +84,6 @@ static sk_sp<SkImageFilter> makeBackgroundBlurFilter(sk_sp<SkImage> bg, SkMatrix
   std::string_view childNames[] = { "content", "bg" };
   sk_sp<SkImageFilter> childNodes[] = { nullptr, bgContent };
   SkRuntimeShaderBuilder builder(std::move(r.effect));
-  if (VGG::FLIP_COORD)
-    builder.uniform("scale") = SkMatrix::Scale(1, -1);
   auto b = mat.invert(&mat);
   builder.uniform("rotate") = mat;
   builder.uniform("size") = SkVector{ (float)bg->width(), (float)bg->height() };

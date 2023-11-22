@@ -17,10 +17,7 @@
 #include "Layer/AttrSerde.hpp"
 #include "Layer/Core/VType.hpp"
 #include "VSkia.hpp"
-#include "RenderState.hpp"
-// #include "PaintNodePrivate.hpp"
-
-#include "Layer/Core/PaintNode.hpp"
+// #include "RenderState.hpp"
 #include "Layer/Config.hpp"
 
 #include <glm/ext/matrix_transform.hpp>
@@ -28,8 +25,6 @@
 #include <include/core/SkMatrix.h>
 #include <include/core/SkCanvas.h>
 
-namespace VGG
-{
 // NOLINTBEGIN
 inline void PrintSkMatrix(const SkMatrix& m)
 {
@@ -42,9 +37,9 @@ inline void PrintSkMatrix(const SkMatrix& m)
 
 struct DisplayItem
 {
-  SkMatrix matrix;
+  SkMatrix   matrix;
   PaintNode* item{ nullptr };
-  int zorder = 0;
+  int        zorder = 0;
 
   DisplayItem(SkMatrix m, PaintNode* item, int zorder)
     : matrix(std::move(m))
@@ -62,76 +57,40 @@ inline std::ostream& operator<<(std::ostream& os, const glm::mat3 m)
   return os;
 }
 
+namespace VGG::layer
+{
 // NOLINTEND
 class SkiaRenderer
 {
-  RenderState m_state;
-  SkCanvas* m_canvas{ nullptr };
-  bool m_enableDrawDebugBound{ false };
+  // RenderState                                 m_state;
+  SkCanvas*                                   m_canvas{ nullptr };
+  bool                                        m_enableDrawDebugBound{ false };
   std::unordered_map<std::string, PaintNode*> m_maskObjects;
-  Scene* m_scene{ nullptr };
-  std::vector<glm::mat3> m_transforms;
-  std::vector<DisplayItem> m_displayList;
-  int m_zOrder = -1;
+  Scene*                                      m_scene{ nullptr };
+  std::vector<glm::mat3>                      m_transforms;
+  std::vector<DisplayItem>                    m_displayList;
+  int                                         m_zOrder = -1;
 
   SkMatrix m_currentMatrix;
 
-  void updateMaskObject(PaintNode* p, std::unordered_map<std::string, PaintNode*>& objects)
-  {
-    if (!p)
-      return;
-    if (p->maskType() != MT_None)
-    {
-      if (auto it = objects.find(p->guid()); it == objects.end())
-      {
-        objects[p->guid()] = p; // type of all children of paintnode must be paintnode
-      }
-    }
-    for (auto it = p->begin(); it != p->end(); ++it)
-    {
-      updateMaskObject(static_cast<PaintNode*>(it->get()), objects);
-    }
-  }
+  void updateMaskObject(PaintNode* p, std::unordered_map<std::string, PaintNode*>& objects);
 
 public:
-  void drawDebugBound(PaintNode* p, int zorder)
-  {
-    const auto& b = p->getBound();
-    SkPaint strokePen;
-    strokePen.setStyle(SkPaint::kStroke_Style);
-    SkColor color = nodeType2Color(VGG_PATH);
-    strokePen.setColor(color);
-    // strokePen.setAlpha(zorder2Alpha(zorder));
-    strokePen.setStrokeWidth(2);
-    m_canvas->drawRect(toSkRect(p->getBound()), strokePen);
-  }
-  void updateMaskObject(PaintNode* p)
-  {
-    m_maskObjects.clear();
-    updateMaskObject(p, m_maskObjects);
-  }
-  const std::unordered_map<std::string, PaintNode*>& maskObjects() const
+  void drawDebugBound(layer::PaintNode* p, int zorder);
+  void updateMaskObject(layer::PaintNode* p);
+  const std::unordered_map<std::string, layer::PaintNode*>& maskObjects() const
   {
     return m_maskObjects;
   }
 
-  void draw(SkCanvas* canvas, PaintNode* root)
-  {
-    m_canvas = canvas;
-    canvas->save();
-    if (FLIP_COORD)
-      canvas->scale(1, -1); // convert the whole root to canvas coords
-
-    root->renderPass(this);
-    canvas->restore();
-  }
+  void draw(SkCanvas* canvas, layer::PaintNode* root);
 
   void pushMatrix(glm::mat3 matrix)
   {
     m_transforms.push_back(matrix);
   }
 
-  void pushItem(PaintNode* item, int zorder)
+  void pushItem(layer::PaintNode* item, int zorder)
   {
     // OPTIMIZATION
     auto m = glm::identity<glm::mat3>();
@@ -172,37 +131,7 @@ public:
     return m_currentMatrix;
   }
 
-  void commit(SkCanvas* canvas)
-  {
-    m_canvas = canvas;
-    canvas->save();
-    if (FLIP_COORD)
-      canvas->scale(1, -1); // convert the whole root to canvas coords
-
-    if (!m_enableDrawDebugBound)
-    {
-      for (const auto& item : m_displayList)
-      {
-        canvas->save();
-        canvas->concat(item.matrix);
-        item.item->paintEvent(this);
-        canvas->restore();
-      }
-    }
-    else
-    {
-      for (const auto& item : m_displayList)
-      {
-        canvas->save();
-        canvas->concat(item.matrix);
-        drawDebugBound(item.item, item.zorder);
-        m_currentMatrix = item.matrix;
-        item.item->paintEvent(this);
-        canvas->restore();
-      }
-    }
-    canvas->restore();
-  }
+  void commit(SkCanvas* canvas);
 };
 
-} // namespace VGG
+} // namespace VGG::layer

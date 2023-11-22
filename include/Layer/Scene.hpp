@@ -27,8 +27,13 @@ class SkCanvas;
 
 namespace VGG
 {
-class SymbolMasterNode;
+namespace layer
+{
 class PaintNode;
+}
+using namespace layer;
+
+class SymbolMasterNode;
 using ResourceRepo = std::map<std::string, std::vector<char>>;
 using ObjectTableType = std::unordered_map<std::string, std::weak_ptr<PaintNode>>;
 using ObjectTableType = std::unordered_map<std::string, std::weak_ptr<PaintNode>>;
@@ -75,21 +80,21 @@ public:
   {
     return m_name;
   }
-  void nextArtboard();
-  void preArtboard();
-  int frameCount() const;
+  void       nextArtboard();
+  void       preArtboard();
+  int        frameCount() const;
   PaintNode* frame(int index);
-  void setPage(int num);
-  void nextSymbol();
-  void prevSymbol();
-  int currentPage() const;
+  void       setPage(int num);
+  void       nextSymbol();
+  void       prevSymbol();
+  int        currentPage() const;
   // To remove zoomer, just set nullptr
-  void setZoomer(std::shared_ptr<Zoomer> zoomer);
-  Zoomer* zoomer();
-  void enableDrawDebugBound(bool enabled);
-  bool isEnableDrawDebugBound();
+  void       setZoomer(std::shared_ptr<Zoomer> zoomer);
+  Zoomer*    zoomer();
+  void       enableDrawDebugBound(bool enabled);
+  bool       isEnableDrawDebugBound();
 
-  void repaint();
+  void                 repaint();
   static ResourceRepo& getResRepo()
   {
     return s_resRepo;

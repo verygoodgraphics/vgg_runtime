@@ -49,12 +49,12 @@ public:
     : q_ptr(api)
   {
   }
-  NodeContainer container;
-  int page{ 0 };
-  int symbolIndex{ 0 };
-  bool maskDirty{ true };
-  SkiaRenderer renderer;
-  std::shared_ptr<Zoomer> zoomer;
+  std::vector<std::shared_ptr<layer::PaintNode>> roots;
+  int                                            page{ 0 };
+  int                                            symbolIndex{ 0 };
+  bool                                           maskDirty{ true };
+  SkiaRenderer                                   renderer;
+  std::shared_ptr<Zoomer>                        zoomer;
 
   void applyZoom(SkCanvas* canvas)
   {
@@ -78,8 +78,8 @@ public:
 
   void render(SkCanvas* canvas)
   {
-    PaintNode* node = container.frames[page].get();
-    if (!container.frames.empty() && maskDirty && node)
+    layer::PaintNode* node = roots[page].get();
+    if (!roots.empty() && maskDirty && node)
     {
       renderer.clearCache();
       renderer.updateMaskObject(node);
@@ -111,7 +111,7 @@ void Scene::loadFileContent(const nlohmann::json& json)
   _->page = 0;
   _->symbolIndex = 0;
   repaint();
-  _->container = layer::DocBuilder::build(json);
+  _->roots = layer::DocBuilder::build(json);
 }
 
 int Scene::currentPage() const
@@ -137,15 +137,15 @@ void Scene::onRender(SkCanvas* canvas)
 
 int Scene::frameCount() const
 {
-  return d_ptr->container.frames.size();
+  return d_ptr->roots.size();
 }
 
 PaintNode* Scene::frame(int index)
 {
   VGG_IMPL(Scene);
-  if (index >= 0 && index < _->container.frames.size())
+  if (index >= 0 && index < _->roots.size())
   {
-    return _->container.frames[index].get();
+    return _->roots[index].get();
   }
   return nullptr;
 }
@@ -169,7 +169,7 @@ void Scene::setZoomer(std::shared_ptr<Zoomer> zoomer)
 void Scene::setPage(int num)
 {
   VGG_IMPL(Scene)
-  if (num >= 0 && num < _->container.frames.size())
+  if (num >= 0 && num < _->roots.size())
   {
     _->page = num;
     repaint();
@@ -185,7 +185,7 @@ void Scene::repaint()
 void Scene::nextArtboard()
 {
   VGG_IMPL(Scene)
-  _->page = (_->page + 1 >= _->container.frames.size()) ? _->page : _->page + 1;
+  _->page = (_->page + 1 >= _->roots.size()) ? _->page : _->page + 1;
   repaint();
 }
 
@@ -199,8 +199,8 @@ void Scene::preArtboard()
 void Scene::nextSymbol()
 {
   VGG_IMPL(Scene)
-  _->symbolIndex =
-    (_->symbolIndex + 1 >= _->container.symbols.size()) ? _->symbolIndex : _->symbolIndex + 1;
+  // _->symbolIndex =
+  //   (_->symbolIndex + 1 >= _->container.symbols.size()) ? _->symbolIndex : _->symbolIndex + 1;
 }
 
 void Scene::prevSymbol()

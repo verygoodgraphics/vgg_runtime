@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 #pragma once
+// #include "Layer/DocBuilder.hpp"
 #include "Math/Geometry.hpp"
+#include "Layer/Renderer.hpp"
 #include "Layer/Core/Node.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
@@ -32,18 +34,18 @@
 class SkCanvas;
 class SkImageFilter;
 class SkImage;
-namespace VGG
-{
 
-class RenderState;
+namespace VGG::layer
+{
 class SkiaRenderer;
+class RenderState;
 
 struct ContourOption
 {
   ECoutourType contourType{ ECoutourType::MCT_FrameOnly };
-  bool visibilityAware{ true };
+  bool         visibilityAware{ true };
   ContourOption(ECoutourType contourType = ECoutourType::MCT_FrameOnly,
-                bool visibilityAware = false)
+                bool         visibilityAware = false)
     : contourType(contourType)
     , visibilityAware(visibilityAware)
   {
@@ -75,7 +77,7 @@ protected:
   VGG_DECL_IMPL(PaintNode)
 
 protected:
-  friend class NlohmannBuilder;
+  friend class DocBuilder;
   friend class SkiaRenderer;
 
 private:
@@ -197,27 +199,27 @@ public:
 protected:
   // Render traverse
   virtual void paintChildrenPass(SkiaRenderer* renderer);
-  void paintChildrenRecursively(SkiaRenderer* renderer);
+  void         paintChildrenRecursively(SkiaRenderer* renderer);
   virtual void prePaintPass(SkiaRenderer* renderer);
   virtual void postPaintPass(SkiaRenderer* renderer);
   virtual void paintPass(SkiaRenderer* renderer, int zorder = 0);
-  void renderPass(SkiaRenderer* renderer); // TODO:: should be private access
+  void         renderPass(SkiaRenderer* renderer); // TODO:: should be private access
   virtual void paintEvent(SkiaRenderer* renderer);
 
 protected:
   // Mask
-  SkPath makeBoundPath();
+  SkPath         makeBoundPath();
   virtual SkPath makeContourImpl(ContourOption option, const glm::mat3* mat);
-  SkPath childPolyOperation() const;
-  Mask makeMaskBy(EBoolOp maskOp, SkiaRenderer* renderer);
+  SkPath         childPolyOperation() const;
+  Mask           makeMaskBy(EBoolOp maskOp, SkiaRenderer* renderer);
 
 protected:
   // Style
   virtual SkPath stylePath();
-  void paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& mask);
+  void           paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& mask);
 
-  [[deprecated]] virtual void paintFill(SkCanvas* canvas,
+  [[deprecated]] virtual void paintFill(SkCanvas*        canvas,
                                         sk_sp<SkBlender> blender,
                                         const SkPath& path); // TODO:: only for ImageNode overriding
 };
-} // namespace VGG
+} // namespace VGG::layer

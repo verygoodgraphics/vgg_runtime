@@ -31,7 +31,7 @@
 #include <include/core/SkCanvas.h>
 #include <include/core/SkImage.h>
 
-namespace VGG
+namespace VGG::layer
 {
 
 class ImageNode__pImpl
@@ -39,9 +39,9 @@ class ImageNode__pImpl
   VGG_DECL_API(ImageNode);
 
 public:
-  std::string imageGuid;
-  bool fillReplacesImage = false;
-  sk_sp<SkImage> image;
+  std::string     imageGuid;
+  bool            fillReplacesImage = false;
+  sk_sp<SkImage>  image;
   sk_sp<SkShader> shader;
   ImageNode__pImpl(ImageNode* api)
     : q_ptr(api)
@@ -137,7 +137,7 @@ void ImageNode::paintFill(SkCanvas* canvas, sk_sp<SkBlender> blender, const SkPa
     SkPaint p;
     p.setBlender(std::move(blender));
     SkSamplingOptions opt;
-    const auto& b = getBound();
+    const auto&       b = getBound();
     canvas->drawImageRect(_->image, toSkRect(getBound()), opt, &p);
 
     if (hasMask)
@@ -149,4 +149,4 @@ void ImageNode::paintFill(SkCanvas* canvas, sk_sp<SkBlender> blender, const SkPa
 
 ImageNode::~ImageNode() = default;
 
-} // namespace VGG
+} // namespace VGG::layer

@@ -17,7 +17,6 @@
 #include "Layer/AttrSerde.hpp"
 #include "Layer/Core/VType.hpp"
 #include "VSkia.hpp"
-// #include "RenderState.hpp"
 #include "Layer/Config.hpp"
 
 #include <glm/ext/matrix_transform.hpp>
@@ -62,7 +61,6 @@ namespace VGG::layer
 // NOLINTEND
 class SkiaRenderer
 {
-  // RenderState                                 m_state;
   SkCanvas*                                   m_canvas{ nullptr };
   bool                                        m_enableDrawDebugBound{ false };
   std::unordered_map<std::string, PaintNode*> m_maskObjects;

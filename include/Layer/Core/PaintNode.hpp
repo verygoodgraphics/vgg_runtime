@@ -38,7 +38,6 @@ class SkImage;
 namespace VGG::layer
 {
 class SkiaRenderer;
-class RenderState;
 
 struct ContourOption
 {

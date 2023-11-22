@@ -18,6 +18,34 @@
 
 #include <core/SkCanvas.h>
 
+namespace
+{
+inline SkColor nodeType2Color(ObjectType type)
+{
+  switch (type)
+  {
+    case ObjectType::VGG_PATH:
+      return SK_ColorRED;
+    case ObjectType::VGG_IMAGE:
+      return SK_ColorRED;
+    case ObjectType::VGG_GROUP:
+      return SK_ColorRED;
+    case ObjectType::VGG_TEXT:
+      return SK_ColorRED;
+    case ObjectType::VGG_ARTBOARD:
+      return SK_ColorRED;
+    case ObjectType::VGG_LAYER:
+      return SK_ColorRED;
+    case ObjectType::VGG_MASTER:
+      return SK_ColorRED;
+    case ObjectType::VGG_CONTOUR:
+      return SK_ColorYELLOW;
+    default:
+      return SK_ColorRED;
+  }
+}
+} // namespace
+
 namespace VGG::layer
 {
 
@@ -60,8 +88,6 @@ void SkiaRenderer::draw(SkCanvas* canvas, layer::PaintNode* root)
 {
   m_canvas = canvas;
   canvas->save();
-  if (FLIP_COORD)
-    canvas->scale(1, -1); // convert the whole root to canvas coords
 
   root->renderPass(this);
   canvas->restore();
@@ -71,8 +97,6 @@ void SkiaRenderer::commit(SkCanvas* canvas)
 {
   m_canvas = canvas;
   canvas->save();
-  if (FLIP_COORD)
-    canvas->scale(1, -1); // convert the whole root to canvas coords
 
   if (!m_enableDrawDebugBound)
   {

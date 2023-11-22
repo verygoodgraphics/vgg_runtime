@@ -63,7 +63,7 @@ class DocBuilder
   std::vector<std::shared_ptr<PaintNode>> m_frames;
   std::vector<std::shared_ptr<PaintNode>> m_symbols;
 
-  inline Bound fromBound(const nlohmann::json& j, const glm::mat3& totalMatrix)
+  inline Bound fromBound(const json& j, const glm::mat3& totalMatrix)
   {
     auto x = j.value("x", 0.f);
     auto y = j.value("y", 0.f);
@@ -76,7 +76,7 @@ class DocBuilder
     return Bound{ topLeft, bottomRight };
   }
 
-  inline std::tuple<glm::mat3, glm::mat3, glm::mat3> fromMatrix(const nlohmann::json& j)
+  inline std::tuple<glm::mat3, glm::mat3, glm::mat3> fromMatrix(const json& j)
   {
     std::array<float, 6> v = j;
     auto                 original = glm::mat3{ glm::vec3{ v[0], v[1], 0 },
@@ -86,7 +86,7 @@ class DocBuilder
     return { original, newMatrix, inversed };
   }
 
-  inline Style fromStyle(const nlohmann::json& j, const Bound& bound, const glm::mat3& totalMatrix)
+  inline Style fromStyle(const json& j, const Bound& bound, const glm::mat3& totalMatrix)
   {
     Style style;
     from_json(j, style);
@@ -95,25 +95,25 @@ class DocBuilder
   }
 
   template<typename F1, typename F2>
-  inline std::shared_ptr<PaintNode> makeObjectCommonProperty(const nlohmann::json& j,
-                                                             const glm::mat3&      totalMatrix,
-                                                             F1&&                  creator,
-                                                             F2&&                  override)
+  inline std::shared_ptr<PaintNode> makeObjectCommonProperty(const json&      j,
+                                                             const glm::mat3& totalMatrix,
+                                                             F1&&             creator,
+                                                             F2&&             override)
   {
     auto obj = creator(std::move(j.value("name", "")), std::move(j.value("id", "")));
     if (!obj)
       return nullptr;
     auto [originalMatrix, newMatrix, inversedNewMatrix] =
-      fromMatrix(j.value("matrix", nlohmann::json::array_t{}));
+      fromMatrix(j.value("matrix", json::array_t{}));
     const auto convertedMatrix = inversedNewMatrix * totalMatrix * originalMatrix;
 
     obj->setTransform(Transform(newMatrix));
-    const auto b = fromBound(j.value("bounds", nlohmann::json::object_t{}), convertedMatrix);
+    const auto b = fromBound(j.value("bounds", json::object_t{}), convertedMatrix);
     obj->setBound(b);
 
     // Pattern point in style are implicitly given by bound, we must supply the points in original
     // coordinates for correct converting
-    obj->setStyle(fromStyle(j.value("style", nlohmann::json::object_t{}), b, convertedMatrix));
+    obj->setStyle(fromStyle(j.value("style", json::object_t{}), b, convertedMatrix));
     obj->style().cornerSmooth = get_opt<float>(j, "cornerSmoothing").value_or(0.f);
     obj->setContextSettings(j.value("contextSettings", ContextSetting()));
     obj->setMaskBy(std::move(j.value("outlineMaskBy", std::vector<std::string>{})));
@@ -132,9 +132,9 @@ class DocBuilder
     return obj;
   }
 
-  inline std::shared_ptr<PaintNode> makeContour(const nlohmann::json& j,
-                                                const nlohmann::json& parent,
-                                                const glm::mat3&      totalMatrix)
+  inline std::shared_ptr<PaintNode> makeContour(const json&      j,
+                                                const json&      parent,
+                                                const glm::mat3& totalMatrix)
   {
     Contour contour;
     contour.closed = j.value("closed", false);
@@ -158,7 +158,7 @@ class DocBuilder
     return p;
   }
 
-  inline std::shared_ptr<PaintNode> fromFrame(const nlohmann::json& j, const glm::mat3& totalMatrix)
+  inline std::shared_ptr<PaintNode> fromFrame(const json& j, const glm::mat3& totalMatrix)
   {
     auto p = makeObjectCommonProperty(
       j,
@@ -183,7 +183,7 @@ class DocBuilder
     return p;
   }
 
-  inline std::shared_ptr<PaintNode> fromImage(const nlohmann::json& j, const glm::mat3& totalMatrix)
+  inline std::shared_ptr<PaintNode> fromImage(const json& j, const glm::mat3& totalMatrix)
   {
     return makeObjectCommonProperty(
       j,
@@ -200,7 +200,7 @@ class DocBuilder
       });
   }
 
-  inline std::shared_ptr<PaintNode> fromText(const nlohmann::json& j, const glm::mat3& totalMatrix)
+  inline std::shared_ptr<PaintNode> fromText(const json& j, const glm::mat3& totalMatrix)
   {
     return makeObjectCommonProperty(
       j,
@@ -217,8 +217,8 @@ class DocBuilder
                           .value_or(std::vector<TextLineAttr>());
 
         auto defaultAttr = defaultTextAttr();
-        defaultAttr.update(j.value("defaultAttr", nlohmann::json::object()), true);
-        auto                       fontAttr = j.value("attr", std::vector<nlohmann::json>{});
+        defaultAttr.update(j.value("defaultAttr", json::object()), true);
+        auto                       fontAttr = j.value("attr", std::vector<json>{});
         std::vector<TextStyleAttr> textStyleAttrs;
         for (auto& att : fontAttr)
         {
@@ -255,7 +255,7 @@ class DocBuilder
       });
   }
 
-  inline std::shared_ptr<PaintNode> fromPath(const nlohmann::json& j, const glm::mat3& totalMatrix)
+  inline std::shared_ptr<PaintNode> fromPath(const json& j, const glm::mat3& totalMatrix)
   {
     return makeObjectCommonProperty(
       j,
@@ -268,11 +268,11 @@ class DocBuilder
       [&, this](PaintNode* p, const glm::mat3& matrix)
       {
         // const auto& shape = get_or_default(j, "shape");
-        const auto shape = j.value("shape", nlohmann::json{});
+        const auto shape = j.value("shape", json{});
         p->setChildWindingType(shape.value("windingRule", EWindingType::WR_EvenOdd));
         p->setContourOption(ContourOption(ECoutourType::MCT_ByObjectOps, false));
         p->setPaintOption(PaintOption(EPaintStrategy::PS_SelfOnly));
-        const auto shapes = shape.value("subshapes", std::vector<nlohmann::json>{});
+        const auto shapes = shape.value("subshapes", std::vector<json>{});
         // const auto& shapes = get_or_default(shape, "subshapes");
         for (const auto& subshape : shapes)
         {
@@ -316,7 +316,7 @@ class DocBuilder
       });
   }
 
-  std::shared_ptr<PaintNode> fromObject(const nlohmann::json& j, const glm::mat3& totalMatrix)
+  std::shared_ptr<PaintNode> fromObject(const json& j, const glm::mat3& totalMatrix)
   {
     std::shared_ptr<PaintNode> ro;
     auto                       klass = j.value("class", "");
@@ -356,7 +356,7 @@ class DocBuilder
     return ro;
   }
 
-  inline std::shared_ptr<PaintNode> fromGroup(const nlohmann::json& j, const glm::mat3& totalMatrix)
+  inline std::shared_ptr<PaintNode> fromGroup(const json& j, const glm::mat3& totalMatrix)
   {
     // auto p = std::make_shared<PaintNode>(j.value("name", ""), VGG_GROUP);
     //  init group properties
@@ -381,8 +381,8 @@ class DocBuilder
       });
   }
 
-  inline std::vector<std::shared_ptr<PaintNode>> fromFrames(const nlohmann::json& j,
-                                                            const glm::mat3&      totalMatrix)
+  inline std::vector<std::shared_ptr<PaintNode>> fromFrames(const json&      j,
+                                                            const glm::mat3& totalMatrix)
   {
     std::vector<std::shared_ptr<PaintNode>> frames;
     const auto&                             fs = get_or_default(j, "frames");
@@ -393,13 +393,12 @@ class DocBuilder
     return frames;
   }
 
-  inline std::shared_ptr<PaintNode> fromSymbolInstance(const nlohmann::json& j,
-                                                       const glm::mat3&      totalMatrix)
+  inline std::shared_ptr<PaintNode> fromSymbolInstance(const json& j, const glm::mat3& totalMatrix)
   {
     return nullptr;
   }
 
-  std::shared_ptr<PaintNode> fromSymbolMaster(const nlohmann::json& j, const glm::mat3& totalMatrix)
+  std::shared_ptr<PaintNode> fromSymbolMaster(const json& j, const glm::mat3& totalMatrix)
   {
     return makeObjectCommonProperty(
       j,
@@ -422,7 +421,7 @@ class DocBuilder
       });
   }
 
-  inline std::vector<std::shared_ptr<PaintNode>> fromSymbolMasters(const nlohmann::json& j,
+  inline std::vector<std::shared_ptr<PaintNode>> fromSymbolMasters(const json&      j,
                                                                    const glm::mat3& totalMatrix)
   {
     std::vector<std::shared_ptr<PaintNode>> symbols;
@@ -439,7 +438,7 @@ class DocBuilder
     m_symbols.push_back(std::move(master));
   }
 
-  inline std::vector<std::shared_ptr<PaintNode>> fromTopLevelFrames(const nlohmann::json& j,
+  inline std::vector<std::shared_ptr<PaintNode>> fromTopLevelFrames(const json&      j,
                                                                     const glm::mat3& totalMatrix)
   {
     std::vector<std::shared_ptr<PaintNode>> frames;
@@ -451,42 +450,20 @@ class DocBuilder
   }
 
   DocBuilder() = default;
-  void buildImpl(const nlohmann::json& j, bool resetOrigin)
+  void buildImpl(const json& j, bool resetOrigin)
   {
     glm::mat3 mat = glm::identity<glm::mat3>();
-    if (!FLIP_COORD)
-      mat = glm::scale(mat, glm::vec2(1, -1));
+    mat = glm::scale(mat, glm::vec2(1, -1));
     m_frames = fromTopLevelFrames(get_or_default(j, "frames"), mat);
     if (resetOrigin)
     {
       for (const auto& p : m_frames)
       {
-        auto      t = p->transform();
-        glm::vec2 scale;
-        float     angle;
-        glm::quat quat;
-        glm::vec2 skew;
-        glm::vec2 offset;
-        glm::vec3 persp;
-        decompose(t.matrix(), scale, angle, quat, skew, offset, persp);
-        const auto b = p->bound();
-        auto       newMatrix = glm::identity<glm::mat3>();
-        newMatrix = glm::translate(newMatrix, { 0, 0 });
-        newMatrix = glm::rotate(newMatrix, -angle);
-        newMatrix = glm::shearX(newMatrix, skew.x);
-        newMatrix = glm::shearY(newMatrix, skew.y);
-        newMatrix = glm::scale(newMatrix, scale);
-        p->setTransform(Transform(newMatrix));
+        const auto m = p->transform();
+        p->transform().setTranslate(0, 0);
         p->setOverflow(EOverflow::OF_Visible);
       }
     }
-  }
-
-  static glm::mat3 convertPatternMatrix(const glm::mat3& mat)
-  {
-    glm::mat3 scale = glm::identity<glm::mat3>();
-    scale = glm::scale(scale, glm::vec2(1, -1));
-    return scale * mat;
   }
 
   static std::pair<glm::mat3, glm::mat3> convertMatrixCoordinate(const glm::mat3& mat)
@@ -498,14 +475,12 @@ class DocBuilder
 
   static void convertCoordinateSystem(glm::vec2& point, const glm::mat3& totalMatrix)
   {
-    // point = totalMatrix * glm::vec3(point, 1.f);
+    // evaluated form of 'point = totalMatrix * glm::vec3(point, 1.f);'
     point.y = -point.y;
   }
 
   static void convertCoordinateSystem(Contour& contour, const glm::mat3& totalMatrix)
   {
-    if (FLIP_COORD)
-      return;
     for (auto& p : contour)
     {
       convertCoordinateSystem(p.point, totalMatrix);
@@ -524,18 +499,6 @@ class DocBuilder
                                       const Bound&     bound,
                                       const glm::mat3& totalMatrix)
   {
-    auto      newMatrix = convertMatrixCoordinate(pattern.transform).first;
-    glm::vec2 scale;
-    float     rotate;
-    glm::quat quat;
-    glm::vec2 skew;
-    glm::vec2 offset;
-    glm::vec3 persp;
-    decompose(newMatrix, scale, rotate, quat, skew, offset, persp);
-    pattern.rotate = rotate;
-    pattern.scale = scale;
-    pattern.offset = offset;
-    pattern.transform = newMatrix;
 
     std::visit(Overloaded{ [](PatternFill& p) { p.rotation = -p.rotation; },
                            [](PatternFit& p) { p.rotation = -p.rotation; },
@@ -590,7 +553,7 @@ class DocBuilder
     }
   }
 
-  static nlohmann::json defaultTextAttr()
+  static json defaultTextAttr()
   {
     auto j = R"({
         "length":0,
@@ -622,10 +585,8 @@ class DocBuilder
   }
 
 public:
-  static std::vector<std::shared_ptr<PaintNode>> build(const nlohmann::json& j,
-                                                       bool                  resetOrigin = true)
+  static std::vector<std::shared_ptr<PaintNode>> build(const json& j, bool resetOrigin = true)
   {
-
     DocBuilder builder;
     builder.buildImpl(j, resetOrigin);
     return builder.m_frames;

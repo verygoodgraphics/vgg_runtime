@@ -125,8 +125,6 @@ void TextNode::paintEvent(SkiaRenderer* renderer)
   canvas->save();
   // we need to convert to skia coordinate to render text
 
-  if (FLIP_COORD)
-    canvas->scale(1, -1);
   {
     const auto b = bound();
     _->painter.setCanvas(canvas);

@@ -333,10 +333,11 @@ bool SVGIterator::next(std::string& key, std::vector<char>& data)
 {
   if (!d_impl->tryNext())
     return false;
-  auto                        scene = d_impl->scene.get();
-  auto                        f = scene->frame(d_impl->index);
-  auto                        b = f->bound();
-  auto                        id = f->guid();
+  auto scene = d_impl->scene.get();
+  auto f = scene->frame(d_impl->index);
+  auto b = f->bound();
+  auto id = f->guid();
+
   layer::exporter::SVGOptions opts;
   opts.extend[0] = b.width();
   opts.extend[1] = b.height();

@@ -141,6 +141,8 @@ public:
 
   const Transform& transform() const;
 
+  Transform& transform();
+
   Transform globalTransform() const;
 
   const Bound& bound() const;

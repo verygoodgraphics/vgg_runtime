@@ -28,11 +28,6 @@
 #include <optional>
 using nlohmann::json;
 
-namespace VGG
-{
-constexpr bool FLIP_COORD = false;
-} // namespace VGG
-
 // NOLINTBEGIN
 template<typename T>
 inline std::optional<T> get_opt(const nlohmann::json& obj, const std::string& key)

@@ -488,6 +488,11 @@ void PaintNode::setTransform(const Transform& transform)
   _->transform = transform;
 }
 
+Transform& PaintNode::transform()
+{
+  return d_ptr->transform;
+}
+
 const Transform& PaintNode::transform() const
 {
   return d_ptr->transform;

@@ -60,7 +60,6 @@ class PaintNode__pImpl // NOLINT
 
 public:
   Bound                     bound;
-  // glm::mat3                 transform{ 1.0 };
   Transform                 transform;
   std::string               guid{};
   std::vector<std::string>  maskedBy{};

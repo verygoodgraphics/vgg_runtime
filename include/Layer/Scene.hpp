@@ -33,28 +33,13 @@ class PaintNode;
 }
 using namespace layer;
 
-class SymbolMasterNode;
 using ResourceRepo = std::map<std::string, std::vector<char>>;
-using ObjectTableType = std::unordered_map<std::string, std::weak_ptr<PaintNode>>;
 using ObjectTableType = std::unordered_map<std::string, std::weak_ptr<PaintNode>>;
 using InstanceTable =
   std::unordered_map<std::string,
                      std::pair<std::weak_ptr<PaintNode>,
                                std::string>>; // {instance_id: {instance_object: master_id}}
                                               //
-struct NodeContainer
-{
-public:
-  std::vector<std::shared_ptr<PaintNode>> frames;
-  std::vector<std::shared_ptr<PaintNode>> symbols;
-  NodeContainer() = default;
-  NodeContainer(std::vector<std::shared_ptr<PaintNode>> frames,
-                std::vector<std::shared_ptr<PaintNode>> symbols)
-    : frames(std::move(frames))
-    , symbols(std::move(symbols))
-  {
-  }
-};
 class Scene__pImpl;
 struct VGG_EXPORTS Scene : public layer::Renderable
 {

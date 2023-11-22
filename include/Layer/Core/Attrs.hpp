@@ -159,7 +159,7 @@ struct Gradient
 
   inline std::pair<glm::vec2, glm::vec2> aiConvert(const glm::vec2& from,
                                                    const glm::vec2& to,
-                                                   const Bound2& b) const
+                                                   const Bound& b) const
   {
     const auto angle = to.x;
     const auto length = to.y;
@@ -194,7 +194,7 @@ struct Gradient
     return indices;
   }
 
-  inline sk_sp<SkShader> getLinearShader(const Bound2& bound) const
+  inline sk_sp<SkShader> getLinearShader(const Bound& bound) const
   {
     auto indices = getSortedIndices();
 
@@ -238,7 +238,7 @@ struct Gradient
     return s;
   }
 
-  inline sk_sp<SkShader> getRadialShader(const Bound2& bound) const
+  inline sk_sp<SkShader> getRadialShader(const Bound& bound) const
   {
     // ASSERT(stops.size() > 1);
     auto indices = getSortedIndices();
@@ -276,7 +276,7 @@ struct Gradient
                                         &mat);
   }
 
-  inline sk_sp<SkShader> getAngularShader(const Bound2& bound) const
+  inline sk_sp<SkShader> getAngularShader(const Bound& bound) const
   {
     auto minPositionIter = stops.begin();
     auto maxPositionIter = stops.end();

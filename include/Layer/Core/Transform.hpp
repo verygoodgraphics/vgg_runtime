@@ -169,6 +169,11 @@ public:
   {
     return Transform(this->matrix() * other.matrix());
   }
+
+  glm::vec3 operator*(const glm::vec3& other) const
+  {
+    return this->matrix() * other;
+  }
 };
 
 } // namespace VGG::layer

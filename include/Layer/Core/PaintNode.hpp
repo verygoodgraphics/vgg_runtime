@@ -143,9 +143,9 @@ public:
 
   Transform globalTransform() const;
 
-  const Bound2& bound() const;
+  const Bound& bound() const;
 
-  void setBound(const Bound2& bound);
+  void setBound(const Bound& bound);
 
   const std::string& guid() const;
 

@@ -31,12 +31,12 @@ class VParagraphPainter : public skia::textlayout::ParagraphPainter
 {
   const std::vector<TextStyleAttr>* m_textStyle;
   std::unordered_map<int, SkPaint> m_cache;
-  Bound2 m_bound;
+  Bound m_bound;
 
 public:
   VParagraphPainter(SkCanvas* canvas,
                     const std::vector<TextStyleAttr>* textAttr,
-                    const Bound2& bound)
+                    const Bound& bound)
     : m_canvas(canvas)
     , m_textStyle(textAttr)
     , m_bound(bound)
@@ -48,7 +48,7 @@ public:
     m_canvas = canvas;
   }
 
-  void updateBound(const Bound2& bound)
+  void updateBound(const Bound& bound)
   {
     m_bound = bound;
     m_cache.clear();

@@ -500,12 +500,12 @@ Transform PaintNode::globalTransform() const
   return Transform(mat);
 }
 
-const Bound2& PaintNode::bound() const
+const Bound& PaintNode::bound() const
 {
   return d_ptr->bound;
 }
 
-void PaintNode::setBound(const Bound2& bound)
+void PaintNode::setBound(const Bound& bound)
 {
   VGG_IMPL(PaintNode);
   _->bound = bound;

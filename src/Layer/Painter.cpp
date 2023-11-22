@@ -22,7 +22,7 @@
 
 using namespace VGG;
 
-sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound2& bound)
+sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound& bound)
 {
   sk_sp<SkShader> shader;
   const auto type = g.gradientType;
@@ -42,7 +42,7 @@ sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound2& bound)
 }
 
 void Painter::drawPathBorder(const SkPath& skPath,
-                             const Bound2& bound,
+                             const Bound& bound,
                              const Border& b,
                              float globalAlpha,
                              sk_sp<SkImageFilter> imageFilter,
@@ -121,7 +121,7 @@ void Painter::drawPathBorder(const SkPath& skPath,
 }
 
 void Painter::drawShadow(const SkPath& skPath,
-                         const Bound2& bound,
+                         const Bound& bound,
                          const Shadow& s,
                          SkPaint::Style style,
                          sk_sp<SkImageFilter> imageFilter)
@@ -141,7 +141,7 @@ void Painter::drawShadow(const SkPath& skPath,
 }
 
 void Painter::drawInnerShadow(const SkPath& skPath,
-                              const Bound2& bound,
+                              const Bound& bound,
                               const Shadow& s,
                               SkPaint::Style style,
                               sk_sp<SkImageFilter> imageFilter)
@@ -162,7 +162,7 @@ void Painter::drawInnerShadow(const SkPath& skPath,
 }
 
 void Painter::drawFill(const SkPath& skPath,
-                       const Bound2& bound,
+                       const Bound& bound,
                        const Fill& f,
                        float globalAlpha,
                        sk_sp<SkImageFilter> imageFilter,

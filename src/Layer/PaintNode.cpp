@@ -17,7 +17,6 @@
 #include "Painter.hpp"
 #include "PathGenerator.hpp"
 #include "Renderer.hpp"
-// #include "RenderState.hpp"
 #include "PaintNodePrivate.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/VType.hpp"
@@ -851,4 +850,4 @@ void PaintNode::paintFill(SkCanvas* canvas, sk_sp<SkBlender> blender, const SkPa
 
 PaintNode::~PaintNode() = default;
 
-} // namespace VGG
+} // namespace VGG::layer

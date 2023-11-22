@@ -511,7 +511,7 @@ class DocBuilder
   }
 
   static void convertCoordinateSystem(Pattern&         pattern,
-                                      const Bound&    bound,
+                                      const Bound&     bound,
                                       const glm::mat3& totalMatrix)
   {
     auto      newMatrix = convertMatrixCoordinate(pattern.transform).first;
@@ -535,7 +535,7 @@ class DocBuilder
   }
 
   static void convertCoordinateSystem(Style&           style,
-                                      const Bound&    bound,
+                                      const Bound&     bound,
                                       const glm::mat3& totalMatrix)
   {
     for (auto& b : style.borders)
@@ -602,13 +602,6 @@ class DocBuilder
   }
 
 public:
-  // static NodeContainer build(const nlohmann::json& j, bool resetOrigin = true)
-  // {
-  //   DocBuilder builder;
-  //   builder.buildImpl(j, resetOrigin);
-  //   return NodeContainer{ std::move(builder.m_frames), std::move(builder.m_symbols) };
-  // }
-
   static std::vector<std::shared_ptr<PaintNode>> build(const nlohmann::json& j,
                                                        bool                  resetOrigin = true)
   {

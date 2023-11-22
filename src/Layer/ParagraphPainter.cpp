@@ -30,9 +30,9 @@ namespace VGG::layer
 {
 
 void VParagraphPainter::drawTextBlob(const sk_sp<SkTextBlob>& blob,
-                                     SkScalar x,
-                                     SkScalar y,
-                                     const SkPaintOrID& paint)
+                                     SkScalar                 x,
+                                     SkScalar                 y,
+                                     const SkPaintOrID&       paint)
 {
   if (auto p = std::get_if<SkPaint>(&paint))
   {
@@ -78,22 +78,7 @@ void VParagraphPainter::drawTextBlob(const sk_sp<SkTextBlob>& blob,
         else if (f.fillType == FT_Pattern)
         {
           assert(f.pattern.has_value());
-          auto img = loadImage(f.pattern->imageGUID, Scene::getResRepo());
-          if (!img)
-            return;
-          auto bs = m_bound.size();
-          const auto m = toSkMatrix(f.pattern->transform);
-          auto shader = getImageShader(img,
-                                       bs.x,
-                                       bs.y,
-                                       f.pattern->imageFillType,
-                                       f.pattern->tileScale,
-                                       f.pattern->tileMirrored,
-                                       &m,
-                                       f.pattern->offset,
-                                       f.pattern->scale,
-                                       f.pattern->rotate);
-
+          auto shader = makePatternShader(m_bound, f.pattern.value());
           if (FLIP_COORD)
             shader = shader->makeWithLocalMatrix(SkMatrix::Scale(1, -1));
           fillPen.setShader(shader);
@@ -106,10 +91,10 @@ void VParagraphPainter::drawTextBlob(const sk_sp<SkTextBlob>& blob,
 }
 
 void VParagraphPainter::drawTextShadow(const sk_sp<SkTextBlob>& blob,
-                                       SkScalar x,
-                                       SkScalar y,
-                                       SkColor color,
-                                       SkScalar blurSigma)
+                                       SkScalar                 x,
+                                       SkScalar                 y,
+                                       SkColor                  color,
+                                       SkScalar                 blurSigma)
 {
   SkPaint paint;
   paint.setColor(color);
@@ -139,10 +124,10 @@ void VParagraphPainter::drawPath(const SkPath& path, const DecorationStyle& deco
   m_canvas->drawPath(path, decorStyle.skPaint());
 }
 
-void VParagraphPainter::drawLine(SkScalar x0,
-                                 SkScalar y0,
-                                 SkScalar x1,
-                                 SkScalar y1,
+void VParagraphPainter::drawLine(SkScalar               x0,
+                                 SkScalar               y0,
+                                 SkScalar               x1,
+                                 SkScalar               y1,
                                  const DecorationStyle& decorStyle)
 {
   m_canvas->drawLine(x0, y0, x1, y1, decorStyle.skPaint());

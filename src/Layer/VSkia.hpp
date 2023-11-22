@@ -23,6 +23,8 @@
 #include "Utility/Log.hpp"
 #include "glm/gtx/transform.hpp"
 
+#include <core/SkRefCnt.h>
+#include <core/SkShader.h>
 #include <include/core/SkBlendMode.h>
 #include <include/core/SkImageFilter.h>
 #include <include/core/SkMatrix.h>
@@ -40,6 +42,15 @@
 using namespace VGG;
 
 extern std::unordered_map<std::string, sk_sp<SkImage>> g_skiaImageRepo;
+
+template<class... Ts>
+struct Overloaded : Ts...
+{
+  using Ts::operator()...;
+};
+// explicit deduction guide (not needed as of C++20)
+template<class... Ts>
+Overloaded(Ts...) -> Overloaded<Ts...>;
 
 #define SWITCH_MAP_ITEM_BEGIN(var)                                                                 \
   switch (var)                                                                                     \
@@ -191,479 +202,6 @@ inline SkPathOp toSkPathOp(VGG::EBoolOp blop)
   SWITCH_MAP_ITEM_END(SkPathOp::kUnion_SkPathOp)
 }
 
-// inline double calcRadius(double r0,
-//                          const glm::vec2& p0,
-//                          const glm::vec2& p1,
-//                          const glm::vec2& p2,
-//                          glm::vec2* left,
-//                          glm::vec2* right)
-// {
-//   constexpr float EPS = std::numeric_limits<float>::epsilon();
-//   glm::vec2 a = p0 - p1;
-//   glm::vec2 b = p2 - p1;
-//   double alen = glm::distance(p0, p1);
-//   double blen = glm::distance(p2, p1);
-//   if (std::fabs(alen) < EPS || std::fabs(blen) < EPS)
-//   {
-//     return 0.;
-//   }
-//   ASSERT(alen > 0 && blen > 0);
-//   double cosTheta = glm::dot(a, b) / alen / blen;
-//   if (cosTheta + 1 < EPS) // cosTheta == -1
-//   {
-//     if (left)
-//     {
-//       left->x = p1.x;
-//       left->y = p1.y;
-//     }
-//     if (right)
-//     {
-//       right->x = p1.x;
-//       right->y = p1.y;
-//     }
-//     return r0;
-//   }
-//   else if (1 - cosTheta < EPS) // cosTheta == 1
-//   {
-//     return 0.;
-//   }
-//   double tanHalfTheta = std::sqrt((1 - cosTheta) / (1 + cosTheta));
-//   double radius = r0;
-//   radius = std::min(radius, 0.5 * alen * tanHalfTheta);
-//   radius = std::min(radius, 0.5 * blen * tanHalfTheta);
-//   if (left)
-//   {
-//     ASSERT(tanHalfTheta > 0);
-//     float len = radius / tanHalfTheta;
-//     *left = p1 + float(len / alen) * a;
-//   }
-//   if (right)
-//   {
-//     ASSERT(tanHalfTheta > 0);
-//     double len = radius / tanHalfTheta;
-//     *right = p1 + (float(len / blen) * b);
-//   }
-//   return radius;
-// }
-
-// inline SkMatrix upperMatrix22(const SkMatrix& matrix)
-// {
-//   SkMatrix m = matrix;
-//   m.setTranslateX(0);
-//   m.setTranslateY(1);
-//   return m;
-// }
-
-// [[deprecated]] inline SkPath getSkiaPath(const std::vector<PointAttr>& points, bool isClosed)
-// {
-//   constexpr float W = 1.0;
-//   constexpr float H = 1.0;
-//   auto& pts = points;
-//
-//   ASSERT(W > 0);
-//   ASSERT(H > 0);
-//
-//   SkPath skPath;
-//
-//   if (pts.size() < 2)
-//   {
-//     // WARN("Too few path points.");
-//     return skPath;
-//   }
-//
-//   using PM = EPointMode;
-//   auto* startP = &pts[0];
-//   auto* endP = &pts[pts.size() - 1];
-//   auto* prevP = endP;
-//   auto* currP = startP;
-//   auto* nextP = currP + 1;
-//
-//   const glm::vec2 s = { W, H };
-//
-//   if (currP->radius > 0 && currP->mode() == PM::PM_Straight)
-//   {
-//     glm::vec2 start = currP->point * s;
-//     calcRadius(currP->radius,
-//                prevP->point * s,
-//                currP->point * s,
-//                nextP->point * s,
-//                nullptr,
-//                &start);
-//     skPath.moveTo(start.x, start.y);
-//   }
-//   else
-//   {
-//     skPath.moveTo(W * currP->point.x, H * currP->point.y);
-//   }
-//
-//   while (true)
-//   {
-//     if (currP->mode() == PM::PM_Straight && nextP->mode() == PM::PM_Straight)
-//     {
-//       // curren point and next point has no control points at all
-//       if (nextP->radius > 0 && nextP->mode() == PM::PM_Straight)
-//       {
-//         // next point is a rounded point if current point has radius property
-//         auto* next2P = (nextP == endP) ? startP : (nextP + 1);
-//         auto next2Pp = next2P->to.has_value() ? next2P->to.value() : next2P->point;
-//         double r = calcRadius(nextP->radius, currP->point * s, nextP->point * s, next2Pp * s, 0,
-//         0); skPath.arcTo(W * nextP->point.x, H * nextP->point.y, W * next2Pp.x, H * next2Pp.y,
-//         r);
-//       }
-//       else
-//       {
-//         skPath.lineTo(W * nextP->point.x, H * nextP->point.y);
-//       }
-//     }
-//     else if (currP->mode() == PM::PM_Disconnected && nextP->mode() == PM::PM_Disconnected)
-//     {
-//       // current point and next point has one control point at least
-//       bool hasFrom = currP->from.has_value();
-//       bool hasTo = nextP->to.has_value();
-//       if (!hasFrom && !hasTo)
-//       {
-//         // no control point, just a string line between current point and next point
-//         skPath.lineTo(W * nextP->point.x, H * nextP->point.y);
-//       }
-//       else if (hasFrom && !hasTo)
-//       {
-//         // quadric bezier: current point -> controllpoint(from) -> next point
-//         auto& from = currP->from.value();
-//         skPath.quadTo(W * from.x, H * from.y, W * nextP->point.x, H * nextP->point.y);
-//       }
-//       else if (!hasFrom && hasTo)
-//       {
-//         // quadric bezier: current point -> controllpoint(to) -> next point
-//         auto& to = nextP->to.value();
-//         skPath.quadTo(W * to.x, H * to.y, W * nextP->point.x, H * nextP->point.y);
-//       }
-//       else
-//       {
-//         // general cubic bezier: current point -> controllpoint(from) -> controllpoint(to) ->
-//         next
-//         // point
-//         auto& from = currP->from.value();
-//         auto& to = nextP->to.value();
-//         skPath.cubicTo(W * from.x,
-//                        H * from.y,
-//                        W * to.x,
-//                        H * to.y,
-//                        W * nextP->point.x,
-//                        H * nextP->point.y);
-//       }
-//     }
-//     else if (currP->mode() != PM::PM_Straight && nextP->mode() != PM::PM_Straight)
-//     {
-//       ASSERT(false); // this branch should be equaled to the above one
-//       // current point and next point has one control point at least
-//       if ((currP->mode() == PM::PM_Disconnected && !currP->from.has_value()) ||
-//           (nextP->mode() == PM::PM_Disconnected && !nextP->to.has_value()) ||
-//           (currP->mode() != PM::PM_Disconnected &&
-//            !(currP->from.has_value() && currP->to.has_value())) ||
-//           (nextP->mode() != PM::PM_Disconnected &&
-//            !(nextP->from.has_value() && nextP->to.has_value())))
-//       {
-//         WARN("Missing control points.");
-//         return skPath;
-//       }
-//       auto& from = currP->from.value();
-//       auto& to = nextP->to.value();
-//       skPath.cubicTo(W * from.x,
-//                      H * from.y,
-//                      W * to.x,
-//                      H * to.y,
-//                      W * nextP->point.x,
-//                      H * nextP->point.y);
-//     }
-//     else if (currP->mode() == PM::PM_Straight && nextP->mode() != PM::PM_Straight)
-//     {
-//       // current point has no controll point and the next point at least has one
-//       if (!nextP->to.has_value())
-//       {
-//         skPath.lineTo(W * nextP->point.x, H * nextP->point.y);
-//       }
-//       else
-//       {
-//         auto& to = nextP->to.value();
-//         skPath.quadTo(W * to.x, H * to.y, W * nextP->point.x, H * nextP->point.y);
-//       }
-//     }
-//     else if (currP->mode() != PM::PM_Straight && nextP->mode() == PM::PM_Straight)
-//     {
-//       // current point has at least controll point and the next point has no controll point
-//       if (nextP->radius > 0 && nextP->mode() == PM::PM_Straight)
-//       {
-//         auto* next2P = (nextP == endP) ? startP : (nextP + 1);
-//         if (!currP->from.has_value())
-//         {
-//           glm::vec2 start;
-//           double r = calcRadius(nextP->radius,
-//                                 currP->point * s,
-//                                 nextP->point * s,
-//                                 next2P->point * s,
-//                                 &start,
-//                                 nullptr);
-//           skPath.lineTo(start.x, start.y);
-//           skPath.arcTo(W * nextP->point.x,
-//                        H * nextP->point.y,
-//                        W * next2P->point.x,
-//                        H * next2P->point.y,
-//                        r);
-//         }
-//         else
-//         {
-//           auto currPfrom = currP->from.value();
-//           constexpr float RADIUS_COEFF = 0.88;
-//           // glm::vec2 p =
-//           glm::vec2 p = (currP->point + RADIUS_COEFF * (currPfrom - currP->point)) * s;
-//           glm::vec2 start;
-//           double r =
-//             calcRadius(nextP->radius, p, nextP->point * s, next2P->point * s, &start, nullptr);
-//           skPath.quadTo(p.x, p.y, start.x, start.y);
-//           skPath.arcTo(W * nextP->point.x,
-//                        H * nextP->point.y,
-//                        W * next2P->point.x,
-//                        H * next2P->point.y,
-//                        r);
-//         }
-//       }
-//       else
-//       {
-//         if (!currP->from.has_value())
-//         {
-//           skPath.lineTo(W * nextP->point.x, H * nextP->point.y);
-//         }
-//         else
-//         {
-//           auto& from = currP->from.value();
-//           skPath.quadTo(W * from.x, H * from.y, W * nextP->point.x, H * nextP->point.y);
-//         }
-//       }
-//     }
-//     else
-//     {
-//       WARN("Invalid point mode combination: %d %d", (int)currP->mode(), (int)nextP->mode());
-//     }
-//     currP = nextP;
-//     nextP = (nextP == endP) ? startP : (nextP + 1);
-//
-//     if (isClosed)
-//     {
-//       if (currP == startP)
-//       {
-//         break;
-//       }
-//     }
-//     else
-//     {
-//       if (nextP == startP)
-//       {
-//         break;
-//       }
-//     }
-//   }
-//
-//   if (isClosed)
-//   {
-//     skPath.close();
-//   }
-//
-//   return skPath;
-// }
-
-inline sk_sp<SkShader> makeFitFillPattern(SkImage* img,
-                                          const Bound& bound,
-                                          const FitFillPattern& p)
-{
-  SkImageInfo mi = img->imageInfo();
-  float width = bound.width();
-  float height = bound.height();
-  float sx = (float)width / mi.width();
-  float sy = (float)height / mi.height();
-  auto m = glm::mat3{ 1.0 };
-  if (p.type == VGG::FILL_FILL)
-  {
-    const float s = std::max(sx, sy);
-    if (sx > sy)
-    {
-      m = glm::translate(m, { 0, (height - s * mi.height()) / 2.f });
-    }
-    else
-    {
-      m = glm::translate(m, { (width - s * mi.width()) / 2.f, 0 });
-    }
-    m = glm::scale(m, { s, s });
-  }
-  else
-  {
-    float s = std::min(sx, sy);
-    if (sx < sy)
-    {
-      m = glm::translate(m, { 0, (height - s * mi.height()) / 2 });
-    }
-    else
-    {
-      m = glm::translate(m, { (width - s * mi.width()) / 2, 0 });
-    }
-    m = glm::scale(m, { s, s });
-  }
-  m = glm::translate(m, { mi.width() / 2, mi.height() / 2 });
-  m = glm::rotate(m, p.rotate);
-  m = glm::translate(m, { -mi.width() / 2, -mi.height() / 2 });
-  SkSamplingOptions opt;
-  SkTileMode modeX = SkTileMode::kDecal;
-  SkTileMode modeY = SkTileMode::kDecal;
-  const auto mat = toSkMatrix(m);
-  return img->makeShader(modeX, modeY, opt, &mat);
-}
-
-inline sk_sp<SkShader> makeStretchPattern(SkImage* img,
-                                          const Bound& bound,
-                                          const StretchPattern& p)
-{
-  SkImageInfo mi = img->imageInfo();
-  float width = bound.width();
-  float height = bound.height();
-  auto m = glm::mat3{ 1.0 };
-  m = glm::scale(m, { width, height });
-  m = glm::translate(m, p.offset);
-  m = glm::rotate(m, p.rotate);
-  m = glm::scale(m, p.scale);
-  m = glm::scale(m, { 1.f / mi.width(), 1.f / mi.height() });
-  const auto mat = toSkMatrix(m);
-  SkSamplingOptions opt;
-  SkTileMode modeX = SkTileMode::kDecal;
-  SkTileMode modeY = SkTileMode::kDecal;
-  return img->makeShader(modeX, modeY, opt, &mat);
-}
-
-inline sk_sp<SkShader> makeTilePattern(SkImage* img, const Bound& bound, const TilePattern& p)
-{
-  SkTileMode modeX = SkTileMode::kDecal;
-  SkTileMode modeY = SkTileMode::kDecal;
-  if (p.type == VGG::TILE_VERTICAL)
-  {
-    modeY = p.mirror ? SkTileMode::kMirror : SkTileMode::kRepeat;
-  }
-  if (p.type == VGG::TILE_HORIZONTAL)
-  {
-    modeX = p.mirror ? SkTileMode::kMirror : SkTileMode::kRepeat;
-  }
-  if (p.type == VGG::TILE_BOTH)
-  {
-    modeY = p.mirror ? SkTileMode::kMirror : SkTileMode::kRepeat;
-    modeX = p.mirror ? SkTileMode::kMirror : SkTileMode::kRepeat;
-  }
-  auto m = glm::mat3{ 1.0 };
-  m = glm::translate(m, p.offset);
-  m = glm::rotate(m, p.rotate);
-  m = glm::scale(m, p.scale);
-  const auto mat = toSkMatrix(m);
-  SkSamplingOptions opt;
-  return img->makeShader(modeX, modeY, opt, &mat);
-}
-
-inline sk_sp<SkShader> getImageShader(sk_sp<SkImage> img,
-                                      int width,
-                                      int height,
-                                      EImageFillType imageFillType,
-                                      float imageTileScale,
-                                      bool imageTileMirrored,
-                                      const SkMatrix* matrix,
-                                      glm::vec2 offset,
-                                      glm::vec2 scale,
-                                      float rotate)
-{
-  SkTileMode modeX = SkTileMode::kDecal;
-  SkTileMode modeY = SkTileMode::kDecal;
-  SkMatrix mat = SkMatrix::I();
-  SkImageInfo mi = img->imageInfo();
-  float sx = (float)width / mi.width();
-  float sy = (float)height / mi.height();
-
-  if (imageFillType == IFT_Fill)
-  {
-    const float s = std::max(sx, sy);
-    // translate along the side with minimal scale
-    auto m = glm::mat3{ 1.0 };
-    if (sx > sy)
-    {
-      m = glm::translate(m, { 0, (height - s * mi.height()) / 2.f });
-    }
-    else
-    {
-      m = glm::translate(m, { (width - s * mi.width()) / 2.f, 0 });
-    }
-    m = glm::scale(m, { s, s });
-    m = glm::translate(m, { mi.width() / 2, mi.height() / 2 });
-    m = glm::rotate(m, rotate);
-    m = glm::translate(m, { -mi.width() / 2, -mi.height() / 2 });
-    // m = glm::scale(m, { width, height });
-    // m = glm::scale(m, { s, s });
-    // m = glm::translate(m, { 0.5, 0.5 });
-    // m = glm::rotate(m, rotate);
-    // m = glm::translate(m, { -0.5, -0.5 });
-    // m = glm::scale(m, { 1 / mi.width(), 1.f / mi.height() });
-    mat.preConcat(toSkMatrix(m));
-  }
-  else if (imageFillType == IFT_Fit)
-  {
-    float s = std::min(sx, sy);
-    auto m = glm::mat3{ 1.0 };
-    if (sx < sy)
-    {
-      m = glm::translate(m, { 0, (height - s * mi.height()) / 2 });
-    }
-    else
-    {
-      m = glm::translate(m, { (width - s * mi.width()) / 2, 0 });
-    }
-    m = glm::scale(m, { s, s });
-    m = glm::translate(m, { mi.width() / 2, mi.height() / 2 });
-    m = glm::rotate(m, rotate);
-    m = glm::translate(m, { -mi.width() / 2, -mi.height() / 2 });
-    // m = glm::scale(m, { width, height });
-    // m = glm::scale(m, { s, s });
-    // m = glm::translate(m, { 0.5, 0.5 });
-    // m = glm::rotate(m, rotate);
-    // m = glm::translate(m, { -0.5, -0.5 });
-    // m = glm::scale(m, { 1 / mi.width(), 1.f / mi.height() });
-    mat.preConcat(toSkMatrix(m));
-  }
-  else if (imageFillType == VGG::IFT_Stretch)
-  {
-    auto m = glm::mat3{ 1.0 };
-    m = glm::scale(m, { width, height });
-    m = glm::translate(m, offset);
-    m = glm::rotate(m, rotate);
-    m = glm::scale(m, scale);
-    m = glm::scale(m, { 1.f / mi.width(), 1.f / mi.height() });
-    mat.preConcat(toSkMatrix(m));
-  }
-  else if (imageFillType == VGG::IFT_Tile)
-  {
-    if (matrix)
-    {
-      mat.preConcat(*matrix);
-    }
-    modeX = imageTileMirrored ? SkTileMode::kMirror : SkTileMode::kRepeat;
-    modeY = imageTileMirrored ? SkTileMode::kMirror : SkTileMode::kRepeat;
-  }
-  else if (imageFillType == IFT_OnlyTileVertical)
-  {
-    modeY = imageTileMirrored ? SkTileMode::kMirror : SkTileMode::kRepeat;
-  }
-  else if (imageFillType == IFT_OnlyTileHorizontal)
-  {
-    modeX = imageTileMirrored ? SkTileMode::kMirror : SkTileMode::kRepeat;
-  }
-  SkSamplingOptions opt;
-  if (FLIP_COORD)
-    mat.preScale(1, -1); // convert to skia
-                         //
-  return img->makeShader(modeX, modeY, opt, &mat);
-}
-
 inline sk_sp<SkImage> loadImage(const std::string& imageGUID, const ResourceRepo& repo)
 {
   sk_sp<SkImage> image;
@@ -707,6 +245,127 @@ inline sk_sp<SkImage> loadImage(const std::string& imageGUID, const ResourceRepo
   return image;
 }
 
+inline sk_sp<SkShader> makeFitPattern(const Bound& bound, const PatternFit& p)
+{
+  auto img = loadImage(p.guid, Scene::getResRepo());
+  if (!img)
+    return nullptr;
+  SkImageInfo mi = img->imageInfo();
+  float       width = bound.width();
+  float       height = bound.height();
+  float       sx = (float)width / mi.width();
+  float       sy = (float)height / mi.height();
+  auto        m = glm::mat3{ 1.0 };
+  float       s = std::min(sx, sy);
+  if (sx < sy)
+  {
+    m = glm::translate(m, { 0, (height - s * mi.height()) / 2 });
+  }
+  else
+  {
+    m = glm::translate(m, { (width - s * mi.width()) / 2, 0 });
+  }
+  m = glm::scale(m, { s, s });
+  m = glm::translate(m, { mi.width() / 2, mi.height() / 2 });
+  m = glm::rotate(m, p.rotation);
+  m = glm::translate(m, { -mi.width() / 2, -mi.height() / 2 });
+  SkSamplingOptions opt;
+  SkTileMode        modeX = SkTileMode::kDecal;
+  SkTileMode        modeY = SkTileMode::kDecal;
+  const auto        mat = toSkMatrix(m);
+  return img->makeShader(modeX, modeY, opt, &mat);
+}
+inline sk_sp<SkShader> makeFillPattern(const Bound& bound, const PatternFill& p)
+{
+  auto img = loadImage(p.guid, Scene::getResRepo());
+
+  if (!img)
+    return nullptr;
+  SkImageInfo mi = img->imageInfo();
+  float       width = bound.width();
+  float       height = bound.height();
+  float       sx = (float)width / mi.width();
+  float       sy = (float)height / mi.height();
+  auto        m = glm::mat3{ 1.0 };
+  const float s = std::max(sx, sy);
+  if (sx > sy)
+  {
+    m = glm::translate(m, { 0, (height - s * mi.height()) / 2.f });
+  }
+  else
+  {
+    m = glm::translate(m, { (width - s * mi.width()) / 2.f, 0 });
+  }
+  m = glm::scale(m, { s, s });
+  m = glm::translate(m, { mi.width() / 2, mi.height() / 2 });
+  m = glm::rotate(m, p.rotation);
+  m = glm::translate(m, { -mi.width() / 2, -mi.height() / 2 });
+  SkSamplingOptions opt;
+  SkTileMode        modeX = SkTileMode::kDecal;
+  SkTileMode        modeY = SkTileMode::kDecal;
+  const auto        mat = toSkMatrix(m);
+  return img->makeShader(modeX, modeY, opt, &mat);
+}
+
+inline sk_sp<SkShader> makeStretchPattern(const Bound& bound, const PatternStretch& p)
+{
+  auto img = loadImage(p.guid, Scene::getResRepo());
+  if (!img)
+    return nullptr;
+  SkImageInfo mi = img->imageInfo();
+  float       width = bound.width();
+  float       height = bound.height();
+  auto        m = glm::mat3{ 1.0 };
+  m = glm::scale(m, { width, height });
+  m *= p.transform.matrix();
+  m = glm::scale(m, { 1.f / mi.width(), 1.f / mi.height() });
+  const auto        mat = toSkMatrix(m);
+  SkSamplingOptions opt;
+  SkTileMode        modeX = SkTileMode::kDecal;
+  SkTileMode        modeY = SkTileMode::kDecal;
+  return img->makeShader(modeX, modeY, opt, &mat);
+}
+
+inline sk_sp<SkShader> makeTilePattern(const Bound& bound, const PatternTile& p)
+{
+  auto img = loadImage(p.guid, Scene::getResRepo());
+
+  if (!img)
+    return nullptr;
+  SkTileMode modeX = SkTileMode::kDecal;
+  SkTileMode modeY = SkTileMode::kDecal;
+  if (p.mode == VGG::TILE_VERTICAL)
+  {
+    modeY = p.mirror ? SkTileMode::kMirror : SkTileMode::kRepeat;
+  }
+  if (p.mode == VGG::TILE_HORIZONTAL)
+  {
+    modeX = p.mirror ? SkTileMode::kMirror : SkTileMode::kRepeat;
+  }
+  if (p.mode == VGG::TILE_BOTH)
+  {
+    modeY = p.mirror ? SkTileMode::kMirror : SkTileMode::kRepeat;
+    modeX = p.mirror ? SkTileMode::kMirror : SkTileMode::kRepeat;
+  }
+  auto m = glm::mat3{ 1.0 };
+  m = glm::rotate(m, p.rotation);
+  m = glm::scale(m, { p.scale, p.scale });
+  const auto        mat = toSkMatrix(m);
+  SkSamplingOptions opt;
+  return img->makeShader(modeX, modeY, opt, &mat);
+}
+
+inline sk_sp<SkShader> makePatternShader(const Bound& bound, const Pattern& pattern)
+{
+  sk_sp<SkShader> shader;
+  std::visit(Overloaded{ [&](const PatternFill& p) { shader = makeFillPattern(bound, p); },
+                         [&](const PatternFit& p) { shader = makeFitPattern(bound, p); },
+                         [&](const PatternStretch& p) { shader = makeStretchPattern(bound, p); },
+                         [&](const PatternTile& p) { shader = makeTilePattern(bound, p); } },
+             pattern.instance);
+  return shader;
+}
+
 inline sk_sp<SkImageFilter> makeBlendModeFilter(EBlendMode blendMode)
 {
   switch (blendMode)
@@ -729,12 +388,12 @@ inline std::ostream& operator<<(std::ostream& os, const SkMatrix& mat)
 
 inline float calcRotationAngle(const glm::mat3& mat)
 {
-  glm::vec3 v{ 1, 0, 0 };
-  auto r = mat * v;
+  glm::vec3  v{ 1, 0, 0 };
+  auto       r = mat * v;
   const auto v1 = glm::vec2{ r.x, r.y };
-  auto d = glm::dot(glm::vec2{ 1, 0 }, v1);
-  float cosAngle = d / glm::length(v1);
-  float radian = acos(cosAngle);
+  auto       d = glm::dot(glm::vec2{ 1, 0 }, v1);
+  float      cosAngle = d / glm::length(v1);
+  float      radian = acos(cosAngle);
   return radian * 180.0 / 3.141592653;
 }
 

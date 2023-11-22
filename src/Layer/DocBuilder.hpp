@@ -447,7 +447,7 @@ class DocBuilder
     if (!FLIP_COORD)
       mat = glm::scale(mat, glm::vec2(1, -1));
     m_frames = fromTopLevelFrames(get_or_default(j, "frames"), mat);
-    if (false)
+    if (resetOrigin)
     {
       for (const auto& p : m_frames)
       {
@@ -461,8 +461,8 @@ class DocBuilder
         decompose(t, scale, angle, quat, skew, offset, persp);
         const auto b = p->getBound();
         auto newMatrix = glm::identity<glm::mat3>();
-        newMatrix = glm::translate(newMatrix, -b.topLeft() - offset);
-        newMatrix = glm::rotate(newMatrix, (float)math::number::Pi - angle);
+        newMatrix = glm::translate(newMatrix, { 0, 0 });
+        newMatrix = glm::rotate(newMatrix, -angle);
         newMatrix = glm::shearX(newMatrix, skew.x);
         newMatrix = glm::shearY(newMatrix, skew.y);
         newMatrix = glm::scale(newMatrix, scale);
@@ -484,28 +484,6 @@ class DocBuilder
     glm::mat3 scale = glm::identity<glm::mat3>();
     scale = glm::scale(scale, { 1, -1 });
     return { scale * mat * scale, scale * glm::inverse(mat) * scale };
-    const auto& v0 = mat[0];
-    const auto& v1 = mat[1];
-    const auto& v2 = mat[2];
-    const auto a = v0[0];
-    const auto b = v0[1];
-    const auto c = v1[0];
-    const auto d = v1[1];
-    const auto tx = v2[0];
-    const auto ty = v2[1];
-    glm::mat3 flipped =
-      glm::mat3{ glm::vec3{ a, -b, 0 }, glm::vec3{ c, -d, 0 }, glm::vec3{ tx, -ty, 1 } };
-    return { flipped, glm::inverse(flipped) };
-
-    const auto domonator = (a * d - b * c);
-    const auto inv = 1.f / domonator;
-    glm::mat3 inversed =
-      glm::mat3{ glm::vec3{ d * inv, b * inv, 0 },
-                 glm::vec3{ -c * inv, -a * inv, 0 },
-                 glm::vec3{ -(d * tx + c * ty) * inv, -(b * tx + a * ty) * inv, 1.0 } };
-    // return { mat, glm::inverse(mat) };
-    return { flipped, glm::inverse(flipped) };
-    // return { flipped, inversed };
   }
 
   static void convertCoordinateSystem(glm::vec2& point, const glm::mat3& totalMatrix)

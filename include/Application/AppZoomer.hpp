@@ -52,7 +52,7 @@ public:
     {
       int mx = e.wheel.mouseX;
       int my = e.wheel.mouseY;
-      doZoom((e.wheel.y > 0 ? 1.0 : -1.0) * 0.03, mx, my);
+      doZoom((e.wheel.preciseY > 0 ? 1.0 : -1.0) * 0.03, mx, my); // use preciseY, int y maybe 0
       return true;
     }
     return false;

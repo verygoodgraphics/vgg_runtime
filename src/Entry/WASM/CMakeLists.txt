@@ -2,7 +2,6 @@ add_executable(vgg_runtime "main.cpp" "WasmBindings.cpp")
   set_target_properties(vgg_runtime PROPERTIES
     COMPILE_FLAGS "-s USE_SDL=2 -fexceptions"
     LINK_FLAGS "\
-      -s DETERMINISTIC \
       -s MODULARIZE=1 \
       -s EXPORT_NAME=\"_vgg_createWasmInstance\" \
       -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 \
@@ -10,8 +9,7 @@ add_executable(vgg_runtime "main.cpp" "WasmBindings.cpp")
       -s USE_WEBGL2=1 \
       -s USE_SDL=2 \
       -s NO_DISABLE_EXCEPTION_CATCHING \
-      -s ASSERTIONS=1 \
-      -s INITIAL_MEMORY=64MB \
+      -s INITIAL_MEMORY=128MB \
       -s ALLOW_MEMORY_GROWTH=1 \
       -s STACK_SIZE=32MB \
       --no-heap-copy \

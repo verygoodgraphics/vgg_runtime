@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-#include "ComponentComposer.hpp"
 #include "../Common/FakeMouse.hpp"
+#include "Component.hpp"
+#include "ComponentComposer.hpp"
 
 #include "Application/AppRender.hpp"
 #include "Application/MainComposer.hpp"
 #include "Application/RunLoop.hpp"
 #include "Application/UIApplication.hpp"
+#include "Application/UIView.hpp"
 #include "Layer/Graphics/ContextSkBase.hpp"
-
-#include "VGG/Component/Component.hpp"
 
 namespace VGG
 {
@@ -33,10 +33,10 @@ class ComponentImpl
 {
   Component* m_api;
 
-  std::shared_ptr<app::AppRender> m_appRender;
+  std::shared_ptr<app::AppRender>             m_appRender;
   std::unique_ptr<layer::SkiaGraphicsContext> m_context;
 
-  std::unique_ptr<MainComposer> m_mainComposer;
+  std::unique_ptr<MainComposer>  m_mainComposer;
   std::unique_ptr<UIApplication> m_application;
 
   layer::ContextConfig m_graphicsContextConfig;
@@ -60,8 +60,8 @@ public:
   }
 
   bool load(const std::string& filePath,
-            const char* designDocSchemaFilePath = nullptr,
-            const char* layoutDocSchemaFilePath = nullptr)
+            const char*        designDocSchemaFilePath = nullptr,
+            const char*        layoutDocSchemaFilePath = nullptr)
   {
     return m_mainComposer->controller()->start(filePath,
                                                designDocSchemaFilePath,
@@ -74,6 +74,8 @@ public:
 
     m_context->init(m_graphicsContextConfig);
     m_appRender->init(m_context.get());
+
+    m_mainComposer->view()->setSize(w, h);
 
     UEvent evt;
     evt.type = VGG_APP_INIT;
@@ -106,8 +108,8 @@ Component::Component()
 Component::~Component() = default;
 
 bool Component::load(const std::string& filePath,
-                     const char* designDocSchemaFilePath,
-                     const char* layoutDocSchemaFilePath)
+                     const char*        designDocSchemaFilePath,
+                     const char*        layoutDocSchemaFilePath)
 {
 
   return m_impl->load(filePath, designDocSchemaFilePath, layoutDocSchemaFilePath);
@@ -119,8 +121,8 @@ bool Component::run()
 }
 
 void Component::setGraphicsContext(std::unique_ptr<layer::SkiaGraphicsContext>& context,
-                                   int w,
-                                   int h)
+                                   int                                          w,
+                                   int                                          h)
 {
   m_impl->setGraphicsContext(context, w, h);
 }

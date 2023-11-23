@@ -1,5 +1,6 @@
 add_library(vgg_component STATIC
-  component.cpp
+  Component.cpp
+  MetalComponent.cpp
 )
 
 target_include_directories(vgg_component PUBLIC

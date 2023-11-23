@@ -16,7 +16,7 @@
 
 #include "MockSkiaGraphicsContext.hpp"
 
-#include "VGG/Component/Component.hpp"
+#include "Entry/Component/Component.hpp"
 
 #include "test_config.hpp"
 
@@ -64,7 +64,7 @@ TEST_F(ComponentTestSuite, Render)
   m_sut->setGraphicsContext(graphicsContext, 600, 800);
 
   std::string filePath = "testDataDir/vgg-daruma-2";
-  auto result = m_sut->load(filePath);
+  auto        result = m_sut->load(filePath);
   EXPECT_TRUE(result);
 
   // When

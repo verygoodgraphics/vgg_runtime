@@ -15,10 +15,10 @@
  */
 #pragma once
 #include "VSkImageFilters.hpp"
-#include "Math/Geometry.hpp"
-#include "Layer/Core/VType.hpp"
 #include "VSkia.hpp"
+
 #include "Layer/Core/Attrs.hpp"
+#include "Layer/Core/VType.hpp"
 
 #include <core/SkBlendMode.h>
 #include <core/SkImageFilter.h>
@@ -118,8 +118,8 @@ private:
 using namespace VGG;
 class Painter
 {
-  bool m_antiAlias{ true };
-  SkCanvas* m_canvas{ nullptr };
+  bool                           m_antiAlias{ true };
+  SkCanvas*                      m_canvas{ nullptr };
   inline static sk_sp<SkBlender> s_maskBlender1;
   inline static sk_sp<SkBlender> s_maskBlender2;
 
@@ -193,21 +193,21 @@ public:
     m_canvas->restore();
     m_canvas->restore();
   }
-  void blurContentBegin(float radiusX,
-                        float radiusY,
-                        const Bound& bound,
-                        const SkPath* path,
+  void blurContentBegin(float            radiusX,
+                        float            radiusY,
+                        const Bound&     bound,
+                        const SkPath*    path,
                         sk_sp<SkBlender> blender)
   {
     SkPaint pen;
-    auto filter = SkImageFilters::Blur(SkBlurMask::ConvertRadiusToSigma(radiusX),
+    auto    filter = SkImageFilters::Blur(SkBlurMask::ConvertRadiusToSigma(radiusX),
                                        SkBlurMask::ConvertRadiusToSigma(radiusY),
                                        nullptr);
     pen.setImageFilter(std::move(filter));
     // pen.setBlendMode(SkBlendMode::kSrcOver);
-    auto bb = bound;
+    auto     bb = bound;
     // bb.extend(radiusX * 1.5);
-    auto b = toSkRect(bb);
+    auto     b = toSkRect(bb);
     SkMatrix m = SkMatrix::I();
     // m.preScale(1, 1);
     b = m.mapRect(b);
@@ -235,37 +235,37 @@ public:
     m_canvas->restore();
   }
 
-  void drawShadow(const SkPath& skPath,
-                  const Bound& bound,
-                  const Shadow& s,
-                  SkPaint::Style style,
+  void drawShadow(const SkPath&        skPath,
+                  const Bound&         bound,
+                  const Shadow&        s,
+                  SkPaint::Style       style,
                   sk_sp<SkImageFilter> imageFilter);
 
-  void drawInnerShadow(const SkPath& skPath,
-                       const Bound& bound,
-                       const Shadow& s,
-                       SkPaint::Style style,
+  void drawInnerShadow(const SkPath&        skPath,
+                       const Bound&         bound,
+                       const Shadow&        s,
+                       SkPaint::Style       style,
                        sk_sp<SkImageFilter> imageFilter);
 
-  void drawFill(const SkPath& skPath,
-                const Bound& bound,
-                const Fill& f,
-                float globalAlpha,
+  void drawFill(const SkPath&        skPath,
+                const Bound&         bound,
+                const Fill&          f,
+                float                globalAlpha,
                 sk_sp<SkImageFilter> imageFilter,
-                sk_sp<SkBlender> blender,
-                sk_sp<SkMaskFilter> mask);
+                sk_sp<SkBlender>     blender,
+                sk_sp<SkMaskFilter>  mask);
 
-  void drawPathBorder(const SkPath& skPath,
-                      const Bound& bound,
-                      const Border& b,
-                      float globalAlpha,
+  void drawPathBorder(const SkPath&        skPath,
+                      const Bound&         bound,
+                      const Border&        b,
+                      float                globalAlpha,
                       sk_sp<SkImageFilter> imageFilter,
-                      sk_sp<SkBlender> blender);
+                      sk_sp<SkBlender>     blender);
 
-  void drawImage(const Bound bound,
-                 sk_sp<SkShader> imageShader,
+  void drawImage(const Bound          bound,
+                 sk_sp<SkShader>      imageShader,
                  sk_sp<SkImageFilter> imageFilter,
-                 sk_sp<SkBlender> blender)
+                 sk_sp<SkBlender>     blender)
   {
     SkPaint p;
     p.setShader(std::move(imageShader));

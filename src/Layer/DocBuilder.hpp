@@ -569,7 +569,7 @@ class DocBuilder
     }
     for (auto& s : style.shadows)
     {
-      s.offset_y = -s.offset_y;
+      s.offsetY = -s.offsetY;
     }
     for (auto& b : style.blurs)
     {

@@ -623,7 +623,7 @@ void PaintNode::paintChildrenRecursively(SkiaRenderer* renderer)
   int  zorder = 0;
   auto paintCall = [&](std::vector<PaintNode*>& nodes)
   {
-    if (_->contextSetting.TransparencyKnockoutGroup)
+    if (_->contextSetting.transparencyKnockoutGroup)
     {
       for (const auto& p : nodes)
       {
@@ -673,13 +673,13 @@ void PaintNode::prePaintPass(SkiaRenderer* renderer)
 {
   VGG_IMPL(PaintNode);
   auto canvas = renderer->canvas();
-  if (_->contextSetting.Opacity < 1.0)
+  if (_->contextSetting.opacity < 1.0)
   {
     // TODO:: more accurate bound is needed
-    canvas->saveLayerAlpha(0, _->contextSetting.Opacity * 255);
+    canvas->saveLayerAlpha(0, _->contextSetting.opacity * 255);
   }
 
-  if (_->contextSetting.IsolateBlending)
+  if (_->contextSetting.isolateBlending)
   {
     // TODO:: blend mode r = s!=0?s:d is needed.
     // SkPaint paint;
@@ -705,13 +705,13 @@ void PaintNode::postPaintPass(SkiaRenderer* renderer)
   // renderer->popMatrix();
   canvas->restore(); // store the state in paintPass
 
-  if (_->contextSetting.IsolateBlending)
+  if (_->contextSetting.isolateBlending)
   {
     // canvas->restore();
     // canvas->restore();
   }
 
-  if (_->contextSetting.Opacity < 1.0)
+  if (_->contextSetting.opacity < 1.0)
   {
     canvas->restore();
   }
@@ -849,7 +849,7 @@ void PaintNode::paintFill(SkCanvas* canvas, sk_sp<SkBlender> blender, const SkPa
     //   auto p = path.getPoint(i);
     //   DEBUG("%f %f", p.x(), p.y());
     // }
-    render.drawFill(path, bound(), f, contextSetting().Opacity, 0, blender, blur);
+    render.drawFill(path, bound(), f, contextSetting().opacity, 0, blender, blur);
   }
 }
 

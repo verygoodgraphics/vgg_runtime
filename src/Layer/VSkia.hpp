@@ -18,7 +18,6 @@
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Scene.hpp"
-#include "Math/Geometry.hpp"
 #include "Math/Math.hpp"
 #include "Utility/Log.hpp"
 #include "glm/gtx/transform.hpp"

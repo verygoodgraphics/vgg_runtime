@@ -16,6 +16,7 @@
 #pragma once
 
 #include <core/SkColor.h>
+#include "Math/Math.hpp"
 
 namespace VGG
 {
@@ -44,4 +45,15 @@ struct Color
     return Color{ ur / 255.f, ug / 255.f, ub / 255.f, ua / 255.f };
   }
 };
+
+template<>
+inline Color lerp(const Color& a, const Color& b, double t)
+{
+  return Color{
+    lerp(a.r, b.r, t),
+    lerp(a.g, b.g, t),
+    lerp(a.b, b.b, t),
+    lerp(a.a, b.a, t),
+  };
+}
 } // namespace VGG

@@ -19,7 +19,7 @@
 #include "Layer/Core/VColor.hpp"
 #include "Math/Hash.hpp"
 #include "Math/Math.hpp"
-#include "Math/Geometry.hpp"
+#include "Layer/Core/VBound.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Utility/Log.hpp"
 
@@ -40,10 +40,10 @@ namespace VGG
 
 struct ContextSetting
 {
-  EBlendMode    BlendMode{ BM_Normal };
-  float         Opacity{ 1.0 };
-  bool          IsolateBlending{ false };
-  EKnockoutType TransparencyKnockoutGroup{ KT_Off };
+  EBlendMode    blendMode{ BM_Normal };
+  float         opacity{ 1.0 };
+  bool          isolateBlending{ false };
+  EKnockoutType transparencyKnockoutGroup{ KT_Off };
 };
 
 struct PatternTile
@@ -85,17 +85,6 @@ struct AlphaMask
   AlphaMaskType type{ AM_ALPHA };
   bool          crop{ true };
 };
-
-template<>
-inline Color lerp(const Color& a, const Color& b, double t)
-{
-  return Color{
-    lerp(a.r, b.r, t),
-    lerp(a.g, b.g, t),
-    lerp(a.b, b.b, t),
-    lerp(a.a, b.a, t),
-  };
-}
 
 struct GradientStop
 {
@@ -148,202 +137,15 @@ struct Gradient
 {
   std::variant<GradientLinear, GradientRadial, GradientAngular, GradientBasic, GradientDiamond>
     instance;
-  /*
-    [[deprecated]] bool                                           aiCoordinate
-    {
-      [[deprecated]] EGradientType gradientType{ EGradientType::GT_Linear };
-      [[deprecated]] glm::vec2     from{ 0.5, 0 };
-      [[deprecated]] glm::vec2     to{ 0.5, 1 };
-      [[deprecated]] float         elipseLength{ 1.0 }; // (0, inf) : radial
-      [[deprecated]] float         rotation{ 0.0 };     // degree : angular
-      [[deprecated]] float         invert{ false };     //
-
-      false
-    }; // This flag indicates if these positions are Ai exported.
-    [[deprecated]] std::vector<GradientStop> stops{
-      { Color::fromRGB(0xEE, 0xEE, 0xEE), 0.0 },
-      { Color::fromRGB(0xD8, 0xD8, 0xD8), 1.0 },
-    };
-
-    [[deprecated]] inline double getTheta() const
-    {
-      const auto r = glm::distance(from, to);
-      if (r > 0)
-      {
-        const auto theta = (to.x > from.x ? 1 : -1) * std::acos((to.y - from.y) / r);
-        return theta;
-      }
-      return 0;
-    }
-    [[deprecated]] inline std::pair<glm::vec2, glm::vec2> aiConvert(const glm::vec2& from,
-                                                                    const glm::vec2& to,
-                                                                    const Bound&     b) const
-    {
-      const auto angle = to.x;
-      const auto length = to.y;
-      const auto radians = glm::radians(angle);
-      glm::vec2  dir = { std::cos(radians), std::sin(radians) };
-      const auto center = glm::vec2(b.topLeft().x + b.width() / 2, b.topLeft().y - b.height() / 2);
-      const auto x = from.x * b.width() + b.topLeft().x;
-      float      k = 1;
-      if ((angle <= 45 && angle >= -45) || (angle >= 135 || angle <= -135))
-      {
-        const float k = dir.y / dir.x;
-      }
-      else
-      {
-        const float k = dir.x / dir.y;
-      }
-      glm::vec2 f = { x, k * (x - center.x) + center.y };
-      glm::vec2 t = f + length * dir * b.distance();
-      return { f, t };
-    }
-    [[deprecated]] inline std::vector<size_t> getSortedIndices() const
-    {
-      std::vector<size_t> indices;
-      for (size_t i = 0; i < stops.size(); i++)
-      {
-        indices.push_back(i);
-      }
-      std::sort(indices.begin(),
-                indices.end(),
-                [&](size_t i, size_t j) { return stops[i].position < stops[j].position; });
-      return indices;
-    }
-    [[deprecated]] inline sk_sp<SkShader> getLinearShader(const Bound& bound) const
-    {
-      auto indices = getSortedIndices();
-
-      auto minPosition = stops[indices[0]].position;
-      auto maxPosition = stops[indices[indices.size() - 1]].position;
-
-      // clampPairByLimits(minPosition, maxPosition, 0.f, 1.f, 0.0001f);
-
-      auto f = bound.map(bound.size() * from);
-      auto t = bound.map(bound.size() * to);
-      if (aiCoordinate)
-      {
-        auto r = aiConvert(from, to, bound);
-        f = r.first;
-        t = r.second;
-      }
-      auto start = glm::mix(f, t, minPosition);
-      auto end = glm::mix(f, t, maxPosition);
-
-      SkPoint pts[2] = {
-        { (SkScalar)start.x, (SkScalar)start.y },
-        { (SkScalar)end.x, (SkScalar)end.y },
-      };
-      std::vector<SkColor>  colors;
-      std::vector<SkScalar> positions;
-      for (size_t i = 0; i < indices.size(); i++)
-      {
-        auto c = stops[indices[i]].color;
-        colors.push_back(c);
-        auto p = stops[indices[i]].position;
-        positions.push_back((p - minPosition) / (maxPosition - minPosition));
-      }
-      SkMatrix mat = SkMatrix::I();
-      auto     s = SkGradientShader::MakeLinear(pts,
-                                            colors.data(),
-                                            positions.data(),
-                                            indices.size(),
-                                            SkTileMode::kClamp,
-                                            0,
-                                            &mat);
-      return s;
-    }
-    [[deprecated]] inline sk_sp<SkShader> getRadialShader(const Bound& bound) const
-    {
-      // ASSERT(stops.size() > 1);
-      auto indices = getSortedIndices();
-      auto minPosition = stops[indices[0]].position;
-      auto maxPosition = stops[indices[indices.size() - 1]].position;
-
-      auto f = bound.map(bound.size() * from);
-      auto t = bound.map(bound.size() * to);
-
-      auto start = glm::mix(f, t, minPosition);
-      auto end = glm::mix(f, t, maxPosition);
-
-      SkPoint               center{ (SkScalar)start.x, (SkScalar)start.y };
-      SkScalar              r = glm::distance(end, start);
-      std::vector<SkColor>  colors;
-      std::vector<SkScalar> positions;
-      for (size_t i = 0; i < indices.size(); i++)
-      {
-        colors.push_back(stops[indices[i]].color);
-        auto p = stops[indices[i]].position;
-        positions.push_back((p - minPosition) / (maxPosition - minPosition));
-      }
-      SkMatrix mat;
-      mat.postTranslate(-start.x, -start.y);
-      mat.postScale(elipseLength, 1.0);
-      mat.postRotate(-rad2deg(getTheta()));
-      mat.postTranslate(start.x, start.y);
-      return SkGradientShader::MakeRadial(center,
-                                          r,
-                                          colors.data(),
-                                          positions.data(),
-                                          indices.size(),
-                                          SkTileMode::kClamp,
-                                          0,
-                                          &mat);
-    }
-    [[deprecated]] inline sk_sp<SkShader> getAngularShader(const Bound& bound) const
-    {
-      auto                 minPositionIter = stops.begin();
-      auto                 maxPositionIter = stops.end();
-      const auto           minPosition = minPositionIter->position;
-      const auto           maxPosition = maxPositionIter->position;
-      auto                 f = bound.map(bound.size() * from);
-      auto                 t = bound.map(bound.size() * to);
-      auto                 center = f;
-      std::vector<SkColor> colors;
-      colors.reserve(2);
-      std::vector<SkScalar> positions;
-      positions.reserve(2);
-      auto   minPosColor = minPositionIter->color;
-      auto   maxPosColor = maxPositionIter->color;
-      size_t sz = stops.size();
-      if (minPosition > 0)
-      {
-        auto c = lerp(minPosColor, maxPosColor, (float)minPosition / (minPosition + 1 -
-    maxPosition)); colors.push_back(c); positions.push_back(0); sz += 1;
-      }
-      for (auto iter = minPositionIter; iter != maxPositionIter; ++iter)
-      {
-        colors.push_back(iter->color);
-        positions.push_back(iter->position);
-      }
-      if (maxPosition < 1)
-      {
-        auto c = lerp(minPosColor, maxPosColor, (float)minPosition / (minPosition + 1 -
-    maxPosition)); colors.push_back(c); positions.push_back(1); sz += 1;
-      }
-
-      SkMatrix   rot;
-      const auto dir = t - f;
-      const auto rotate = std::atan2(dir.y, dir.x);
-      rot.setRotate(glm::degrees(rotate), center.x, center.y);
-      return SkGradientShader::MakeSweep(center.x,
-                                         center.y,
-                                         colors.data(),
-                                         positions.data(),
-                                         sz,
-                                         0,
-                                         &rot);
-    }
-  */
 };
 
 struct Border
 {
   std::optional<Color>    color;
-  ContextSetting          context_settings;
-  double                  dashed_offset;
-  std::vector<float>      dashed_pattern;
-  EPathFillType           fill_type; // TODO:
+  ContextSetting          contextSettings;
+  double                  dashedOffset;
+  std::vector<float>      dashedPattern;
+  EPathFillType           fillType; // TODO:
   double                  flat;
   std::optional<Gradient> gradient;
   bool                    isEnabled;
@@ -360,11 +162,11 @@ struct Shadow
 {
   float          blur;
   Color          color;
-  ContextSetting context_settings;
+  ContextSetting contextSettings;
   bool           inner;
-  bool           is_enabled;
-  float          offset_x;
-  float          offset_y;
+  bool           isEnabled;
+  float          offsetX;
+  float          offsetY;
   float          spread;
 };
 
@@ -462,13 +264,6 @@ struct PointAttr
     , cornerStyle(cornerStyle)
   {
   }
-
-  EPointMode mode() const
-  {
-    if (from.has_value() || to.has_value())
-      return EPointMode::PM_Disconnected;
-    return EPointMode::PM_Straight;
-  }
 };
 
 struct Contour : public std::vector<PointAttr>
@@ -476,31 +271,6 @@ struct Contour : public std::vector<PointAttr>
   bool    closed = true;
   float   cornerSmooth{ 0.f };
   EBoolOp blop;
-
-  bool allStraightLines() const
-  {
-    size_t    prev = 0;
-    size_t    cur = 1;
-    size_t    next = cur + 1;
-    int       segments = closed ? size() : size() - 1;
-    const int total = size();
-    while (segments)
-    {
-      const auto prevHasFrom = (*this)[prev].from.has_value();
-      const auto curHasTo = (*this)[cur].to.has_value();
-      const auto nextHasTo = (*this)[next].to.has_value();
-      const auto curHasFrom = (*this)[cur].from.has_value();
-      if (prevHasFrom || curHasTo || curHasFrom || nextHasTo)
-      {
-        return false;
-      }
-      segments--;
-      prev = (prev + 1) % total;
-      cur = (cur + 1) % total;
-      next = (next + 1) % total;
-    }
-    return true;
-  }
 };
 
 using ContourPtr = std::shared_ptr<Contour>;

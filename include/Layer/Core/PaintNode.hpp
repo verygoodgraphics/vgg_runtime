@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 #pragma once
-// #include "Layer/DocBuilder.hpp"
-#include "Math/Geometry.hpp"
 #include "Layer/Renderer.hpp"
+#include "Layer/Core/VBound.hpp"
 #include "Layer/Core/Node.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"

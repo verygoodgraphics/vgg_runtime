@@ -41,7 +41,7 @@ void Painter::drawPathBorder(const SkPath&        skPath,
   strokePen.setImageFilter(imageFilter);
   strokePen.setStyle(SkPaint::kStroke_Style);
   strokePen.setPathEffect(
-    SkDashPathEffect::Make(b.dashed_pattern.data(), b.dashed_pattern.size(), 0));
+    SkDashPathEffect::Make(b.dashedPattern.data(), b.dashedPattern.size(), 0));
   strokePen.setStrokeJoin(toSkPaintJoin(b.lineJoinStyle));
   strokePen.setStrokeCap(toSkPaintCap(b.lineCapStyle));
   strokePen.setStrokeMiter(b.miterLimit);
@@ -66,23 +66,23 @@ void Painter::drawPathBorder(const SkPath&        skPath,
   }
 
   // draw fill for border
-  if (b.fill_type == FT_Gradient)
+  if (b.fillType == FT_Gradient)
   {
     assert(b.gradient.has_value());
     strokePen.setShader(getGradientShader(b.gradient.value(), bound));
-    strokePen.setAlphaf(b.context_settings.Opacity * globalAlpha);
+    strokePen.setAlphaf(b.contextSettings.opacity * globalAlpha);
   }
-  else if (b.fill_type == FT_Color)
+  else if (b.fillType == FT_Color)
   {
     strokePen.setColor(b.color.value_or(Color{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
     strokePen.setAlphaf(strokePen.getAlphaf() * globalAlpha);
   }
-  else if (b.fill_type == FT_Pattern)
+  else if (b.fillType == FT_Pattern)
   {
     assert(b.pattern.has_value());
     auto shader = makePatternShader(bound, b.pattern.value());
     strokePen.setShader(shader);
-    strokePen.setAlphaf(b.context_settings.Opacity * globalAlpha);
+    strokePen.setAlphaf(b.contextSettings.opacity * globalAlpha);
   }
 
   m_canvas->drawPath(skPath, strokePen);
@@ -103,7 +103,7 @@ void Painter::drawShadow(const SkPath&        skPath,
   pen.setAntiAlias(m_antiAlias);
   auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
   pen.setImageFilter(
-    SkImageFilters::DropShadowOnly(s.offset_x, -s.offset_y, sigma, sigma, s.color, nullptr));
+    SkImageFilters::DropShadowOnly(s.offsetX, -s.offsetY, sigma, sigma, s.color, nullptr));
   m_canvas->saveLayer(nullptr, &pen); // TODO:: test hint rect
   if (s.spread > 0)
     m_canvas->scale(1 + s.spread / 100.0, 1 + s.spread / 100.0);
@@ -123,7 +123,7 @@ void Painter::drawInnerShadow(const SkPath&        skPath,
   auto    sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
   pen.setAntiAlias(m_antiAlias);
   pen.setImageFilter(
-    SkMyImageFilters::DropInnerShadowOnly(s.offset_x, -s.offset_y, sigma, sigma, s.color, nullptr));
+    SkMyImageFilters::DropInnerShadowOnly(s.offsetX, -s.offsetY, sigma, sigma, s.color, nullptr));
   m_canvas->saveLayer(nullptr, &pen);
   if (s.spread > 0)
     m_canvas->scale(1.0 / s.spread, 1.0 / s.spread);
@@ -152,21 +152,21 @@ void Painter::drawFill(const SkPath&        skPath,
   {
     fillPen.setColor(f.color);
     const auto currentAlpha = fillPen.getAlphaf();
-    fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha * currentAlpha);
+    fillPen.setAlphaf(f.contextSettings.opacity * globalAlpha * currentAlpha);
   }
   else if (f.fillType == FT_Gradient)
   {
     assert(f.gradient.has_value());
     auto gradientShader = getGradientShader(f.gradient.value(), bound);
     fillPen.setShader(gradientShader);
-    fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);
+    fillPen.setAlphaf(f.contextSettings.opacity * globalAlpha);
   }
   else if (f.fillType == FT_Pattern)
   {
     assert(f.pattern.has_value());
     auto shader = makePatternShader(bound, f.pattern.value());
     fillPen.setShader(shader);
-    fillPen.setAlphaf(f.contextSettings.Opacity * globalAlpha);
+    fillPen.setAlphaf(f.contextSettings.opacity * globalAlpha);
   }
   m_canvas->drawPath(skPath, fillPen);
 }

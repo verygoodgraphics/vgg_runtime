@@ -122,12 +122,8 @@ protected:
 public:
   TextParagraphCache(Bound bound)
   {
-    auto mgr = sk_sp<SkFontMgrVGG>(FontManager::instance().defaultFontManager());
-    if (mgr)
-    {
-      mgr->ref();
-    }
-    m_fontCollection = sk_ref_sp(new VGGFontCollection(std::move(mgr)));
+    auto mgr = sk_ref_sp(FontManager::instance().defaultFontManager());
+    m_fontCollection = sk_make_sp<VGGFontCollection>(std::move(mgr));
   }
   TextParagraphCache(const TextParagraphCache&) = default;
   TextParagraphCache& operator=(const TextParagraphCache&) = default;

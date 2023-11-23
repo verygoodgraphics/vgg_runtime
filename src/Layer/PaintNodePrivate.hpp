@@ -117,10 +117,11 @@ public:
   }
 
   template<typename Iter1, typename Iter2, typename F>
-  std::vector<std::pair<PaintNode*, Transform>> calcMaskObjects(SkiaRenderer* renderer,
-                                                                Iter1         begin,
-                                                                Iter2         end,
-                                                                F&&           f)
+  std::vector<std::pair<PaintNode*, Transform>> calcMaskObjects(
+    SkiaRenderer* renderer,
+    Iter1         begin,
+    Iter2         end,
+    F&&           f)
   {
     auto                                          canvas = renderer->canvas();
     const auto&                                   objects = renderer->maskObjects();
@@ -172,11 +173,12 @@ public:
   }
 
   template<typename Iter1, typename Iter2, typename F>
-  std::optional<SkPath> mapContourFromThis(EBoolOp       maskOp,
-                                           Iter1         itr1,
-                                           Iter2         itr2,
-                                           F&&           f,
-                                           SkiaRenderer* renderer)
+  std::optional<SkPath> mapContourFromThis(
+    EBoolOp       maskOp,
+    Iter1         itr1,
+    Iter2         itr2,
+    F&&           f,
+    SkiaRenderer* renderer)
   {
     if (itr1 == itr2)
       return std::nullopt;
@@ -297,9 +299,10 @@ public:
       p.first->d_ptr->drawAsAlphaMask(maskCanvas);
     }
     auto image = maskSurface->makeImageSnapshot();
-    auto data = SkPngEncoder::Encode((GrDirectContext*)maskSurface->recordingContext(),
-                                     image.get(),
-                                     SkPngEncoder::Options());
+    auto data = SkPngEncoder::Encode(
+      (GrDirectContext*)maskSurface->recordingContext(),
+      image.get(),
+      SkPngEncoder::Options());
     // std::ofstream ofs("alphamask.png");
     // if (ofs.is_open())
     // {

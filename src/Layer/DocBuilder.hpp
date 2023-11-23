@@ -95,10 +95,11 @@ class DocBuilder
   }
 
   template<typename F1, typename F2>
-  inline std::shared_ptr<PaintNode> makeObjectCommonProperty(const json&      j,
-                                                             const glm::mat3& totalMatrix,
-                                                             F1&&             creator,
-                                                             F2&&             override)
+  inline std::shared_ptr<PaintNode> makeObjectCommonProperty(
+    const json&      j,
+    const glm::mat3& totalMatrix,
+    F1&&             creator,
+    F2&&             override)
   {
     auto obj = creator(std::move(j.value("name", "")), std::move(j.value("id", "")));
     if (!obj)
@@ -132,20 +133,22 @@ class DocBuilder
     return obj;
   }
 
-  inline std::shared_ptr<PaintNode> makeContour(const json&      j,
-                                                const json&      parent,
-                                                const glm::mat3& totalMatrix)
+  inline std::shared_ptr<PaintNode> makeContour(
+    const json&      j,
+    const json&      parent,
+    const glm::mat3& totalMatrix)
   {
     Contour contour;
     contour.closed = j.value("closed", false);
     const auto& points = get_or_default(j, "points");
     for (const auto& e : points)
     {
-      contour.emplace_back(get_opt<glm::vec2>(e, "point").value_or(glm::vec2{ 0, 0 }),
-                           get_opt<float>(e, "radius").value_or(0.0),
-                           get_opt<glm::vec2>(e, "curveFrom"),
-                           get_opt<glm::vec2>(e, "curveTo"),
-                           get_opt<int>(e, "cornerStyle"));
+      contour.emplace_back(
+        get_opt<glm::vec2>(e, "point").value_or(glm::vec2{ 0, 0 }),
+        get_opt<float>(e, "radius").value_or(0.0),
+        get_opt<glm::vec2>(e, "curveFrom"),
+        get_opt<glm::vec2>(e, "curveTo"),
+        get_opt<int>(e, "cornerStyle"));
     }
     // auto p = std::make_shared<ContourNode>("contour", std::make_shared<Contour>(contour), "");
     auto p = std::make_shared<PaintNode>("contour", VGG_CONTOUR, "");
@@ -381,8 +384,9 @@ class DocBuilder
       });
   }
 
-  inline std::vector<std::shared_ptr<PaintNode>> fromFrames(const json&      j,
-                                                            const glm::mat3& totalMatrix)
+  inline std::vector<std::shared_ptr<PaintNode>> fromFrames(
+    const json&      j,
+    const glm::mat3& totalMatrix)
   {
     std::vector<std::shared_ptr<PaintNode>> frames;
     const auto&                             fs = get_or_default(j, "frames");
@@ -421,8 +425,9 @@ class DocBuilder
       });
   }
 
-  inline std::vector<std::shared_ptr<PaintNode>> fromSymbolMasters(const json&      j,
-                                                                   const glm::mat3& totalMatrix)
+  inline std::vector<std::shared_ptr<PaintNode>> fromSymbolMasters(
+    const json&      j,
+    const glm::mat3& totalMatrix)
   {
     std::vector<std::shared_ptr<PaintNode>> symbols;
     const auto&                             symbolMasters = get_or_default(j, "symbolMaster");
@@ -438,8 +443,9 @@ class DocBuilder
     m_symbols.push_back(std::move(master));
   }
 
-  inline std::vector<std::shared_ptr<PaintNode>> fromTopLevelFrames(const json&      j,
-                                                                    const glm::mat3& totalMatrix)
+  inline std::vector<std::shared_ptr<PaintNode>> fromTopLevelFrames(
+    const json&      j,
+    const glm::mat3& totalMatrix)
   {
     std::vector<std::shared_ptr<PaintNode>> frames;
     for (const auto& e : j)
@@ -495,20 +501,22 @@ class DocBuilder
     }
   }
 
-  static void convertCoordinateSystem(Pattern&         pattern,
-                                      const Bound&     bound,
-                                      const glm::mat3& totalMatrix)
+  static void convertCoordinateSystem(
+    Pattern&         pattern,
+    const Bound&     bound,
+    const glm::mat3& totalMatrix)
   {
 
-    std::visit(Overloaded{ [](PatternFill& p) { p.rotation = -p.rotation; },
-                           [](PatternFit& p) { p.rotation = -p.rotation; },
-                           [](PatternStretch& p)
-                           {
-                             auto newMatrix = convertMatrixCoordinate(p.transform.matrix()).first;
-                             p.transform.setMatrix(newMatrix);
-                           },
-                           [](PatternTile& p) { p.rotation = -p.rotation; } },
-               pattern.instance);
+    std::visit(
+      Overloaded{ [](PatternFill& p) { p.rotation = -p.rotation; },
+                  [](PatternFit& p) { p.rotation = -p.rotation; },
+                  [](PatternStretch& p)
+                  {
+                    auto newMatrix = convertMatrixCoordinate(p.transform.matrix()).first;
+                    p.transform.setMatrix(newMatrix);
+                  },
+                  [](PatternTile& p) { p.rotation = -p.rotation; } },
+      pattern.instance);
   }
 
   static void convertCoordinateSystem(Gradient& gradient, const glm::mat3& totalMatrix)
@@ -541,9 +549,10 @@ class DocBuilder
       gradient.instance);
   }
 
-  static void convertCoordinateSystem(Style&           style,
-                                      const Bound&     bound,
-                                      const glm::mat3& totalMatrix)
+  static void convertCoordinateSystem(
+    Style&           style,
+    const Bound&     bound,
+    const glm::mat3& totalMatrix)
   {
     for (auto& b : style.borders)
     {

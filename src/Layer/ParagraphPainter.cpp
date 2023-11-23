@@ -29,10 +29,11 @@
 namespace VGG::layer
 {
 
-void VParagraphPainter::drawTextBlob(const sk_sp<SkTextBlob>& blob,
-                                     SkScalar                 x,
-                                     SkScalar                 y,
-                                     const SkPaintOrID&       paint)
+void VParagraphPainter::drawTextBlob(
+  const sk_sp<SkTextBlob>& blob,
+  SkScalar                 x,
+  SkScalar                 y,
+  const SkPaintOrID&       paint)
 {
   if (auto p = std::get_if<SkPaint>(&paint))
   {
@@ -84,11 +85,12 @@ void VParagraphPainter::drawTextBlob(const sk_sp<SkTextBlob>& blob,
   }
 }
 
-void VParagraphPainter::drawTextShadow(const sk_sp<SkTextBlob>& blob,
-                                       SkScalar                 x,
-                                       SkScalar                 y,
-                                       SkColor                  color,
-                                       SkScalar                 blurSigma)
+void VParagraphPainter::drawTextShadow(
+  const sk_sp<SkTextBlob>& blob,
+  SkScalar                 x,
+  SkScalar                 y,
+  SkColor                  color,
+  SkScalar                 blurSigma)
 {
   SkPaint paint;
   paint.setColor(color);
@@ -118,11 +120,12 @@ void VParagraphPainter::drawPath(const SkPath& path, const DecorationStyle& deco
   m_canvas->drawPath(path, decorStyle.skPaint());
 }
 
-void VParagraphPainter::drawLine(SkScalar               x0,
-                                 SkScalar               y0,
-                                 SkScalar               x1,
-                                 SkScalar               y1,
-                                 const DecorationStyle& decorStyle)
+void VParagraphPainter::drawLine(
+  SkScalar               x0,
+  SkScalar               y0,
+  SkScalar               x1,
+  SkScalar               y1,
+  const DecorationStyle& decorStyle)
 {
   m_canvas->drawLine(x0, y0, x1, y1, decorStyle.skPaint());
 }

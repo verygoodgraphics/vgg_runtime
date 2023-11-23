@@ -229,17 +229,18 @@ struct TextStyleAttr
   bool operator==(const TextStyleAttr& other) const
   {
     size_t h = 0;
-    hash_combine(h,
-                 fontName,
-                 subFamilyName,
-                 letterSpacing,
-                 length,
-                 size,
-                 bold,
-                 italic,
-                 lineThrough,
-                 underline,
-                 horzAlignment);
+    hash_combine(
+      h,
+      fontName,
+      subFamilyName,
+      letterSpacing,
+      length,
+      size,
+      bold,
+      italic,
+      lineThrough,
+      underline,
+      horzAlignment);
     return h;
   }
 };
@@ -252,11 +253,12 @@ struct PointAttr
   std::optional<int>       cornerStyle;
   float                    radius = 0.0;
 
-  PointAttr(glm::vec2                point,
-            float                    radius,
-            std::optional<glm::vec2> from,
-            std::optional<glm::vec2> to,
-            std::optional<int>       cornerStyle)
+  PointAttr(
+    glm::vec2                point,
+    float                    radius,
+    std::optional<glm::vec2> from,
+    std::optional<glm::vec2> to,
+    std::optional<int>       cornerStyle)
     : point(point)
     , radius(radius)
     , from(from)

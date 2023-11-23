@@ -30,13 +30,14 @@ namespace layer
 class VParagraphPainter : public skia::textlayout::ParagraphPainter
 {
   const std::vector<TextStyleAttr>* m_textStyle;
-  std::unordered_map<int, SkPaint> m_cache;
-  Bound m_bound;
+  std::unordered_map<int, SkPaint>  m_cache;
+  Bound                             m_bound;
 
 public:
-  VParagraphPainter(SkCanvas* canvas,
-                    const std::vector<TextStyleAttr>* textAttr,
-                    const Bound& bound)
+  VParagraphPainter(
+    SkCanvas*                         canvas,
+    const std::vector<TextStyleAttr>* textAttr,
+    const Bound&                      bound)
     : m_canvas(canvas)
     , m_textStyle(textAttr)
     , m_bound(bound)
@@ -65,23 +66,23 @@ public:
   VParagraphPainter(VParagraphPainter&&) = delete;
   VParagraphPainter& operator=(VParagraphPainter&&) = delete;
 
-  void drawTextBlob(const sk_sp<SkTextBlob>& blob,
-                    SkScalar x,
-                    SkScalar y,
-                    const SkPaintOrID& paint) override;
-  void drawTextShadow(const sk_sp<SkTextBlob>& blob,
-                      SkScalar x,
-                      SkScalar y,
-                      SkColor color,
-                      SkScalar blurSigma) override;
+  void drawTextBlob(const sk_sp<SkTextBlob>& blob, SkScalar x, SkScalar y, const SkPaintOrID& paint)
+    override;
+  void drawTextShadow(
+    const sk_sp<SkTextBlob>& blob,
+    SkScalar                 x,
+    SkScalar                 y,
+    SkColor                  color,
+    SkScalar                 blurSigma) override;
   void drawRect(const SkRect& rect, const SkPaintOrID& paint) override;
   void drawFilledRect(const SkRect& rect, const DecorationStyle& decorStyle) override;
   void drawPath(const SkPath& path, const DecorationStyle& decorStyle) override;
-  void drawLine(SkScalar x0,
-                SkScalar y0,
-                SkScalar x1,
-                SkScalar y1,
-                const DecorationStyle& decorStyle) override;
+  void drawLine(
+    SkScalar               x0,
+    SkScalar               y0,
+    SkScalar               x1,
+    SkScalar               y1,
+    const DecorationStyle& decorStyle) override;
 
   void clipRect(const SkRect& rect) override;
   void translate(SkScalar dx, SkScalar dy) override;

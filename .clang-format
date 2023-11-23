@@ -25,4 +25,5 @@ AlignConsecutiveDeclarations:
   Enabled: true
   AcrossEmptyLines: false
   AcrossComments: true
+AlignAfterOpenBracket: AlwaysBreak
 ...

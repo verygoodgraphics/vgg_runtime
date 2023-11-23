@@ -206,10 +206,11 @@ void PaintNode::paintPass(SkiaRenderer* renderer, int zorder)
       }
       else
       {
-        Op(path,
-           e.first->asOutlineMask(&e.second).outlineMask,
-           SkPathOp::kIntersect_SkPathOp,
-           &path);
+        Op(
+          path,
+          e.first->asOutlineMask(&e.second).outlineMask,
+          SkPathOp::kIntersect_SkPathOp,
+          &path);
       }
     }
     if (!path.isEmpty())
@@ -398,9 +399,9 @@ Mask PaintNode::asOutlineMask(const Transform* mat)
   VGG_IMPL(PaintNode);
   Mask mask;
   mask.outlineMask = makeContourImpl(maskOption(), mat);
-  mask.outlineMask.setFillType(childWindingType() == EWindingType::WR_EvenOdd
-                                 ? SkPathFillType::kEvenOdd
-                                 : SkPathFillType::kWinding);
+  mask.outlineMask.setFillType(
+    childWindingType() == EWindingType::WR_EvenOdd ? SkPathFillType::kEvenOdd
+                                                   : SkPathFillType::kWinding);
   return mask;
 }
 
@@ -764,8 +765,9 @@ SkPath PaintNode::stylePath()
   {
     skPath.addPath(s);
   }
-  skPath.setFillType(childWindingType() == EWindingType::WR_EvenOdd ? SkPathFillType::kEvenOdd
-                                                                    : SkPathFillType::kWinding);
+  skPath.setFillType(
+    childWindingType() == EWindingType::WR_EvenOdd ? SkPathFillType::kEvenOdd
+                                                   : SkPathFillType::kWinding);
 
   return skPath;
 }

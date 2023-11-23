@@ -2,6 +2,7 @@ add_executable(vgg_runtime "main.cpp" "WasmBindings.cpp")
   set_target_properties(vgg_runtime PROPERTIES
     COMPILE_FLAGS "-s USE_SDL=2 -fexceptions"
     LINK_FLAGS "\
+      -s DETERMINISTIC \
       -s MODULARIZE=1 \
       -s EXPORT_NAME=\"_vgg_createWasmInstance\" \
       -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 \

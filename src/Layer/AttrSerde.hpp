@@ -110,6 +110,16 @@ inline void from_json(const json& j, Color& x)
   x.r = j["red"];
 }
 
+inline void from_json(const json& j, glm::vec2& x)
+{
+  if (j.is_array())
+  {
+    std::array<float, 2> v = j.get<std::array<float, 2>>();
+    x = { v[0], v[1] };
+  }
+  x = { 0.f, 0.f };
+}
+
 inline void from_json(const json& j, PatternFill& x)
 {
   x.guid = j.value("imageFileName", "");
@@ -171,53 +181,68 @@ inline void from_json(const json& j, Pattern& x)
   }
 }
 
-inline void from_json(const json& j, Gradient::GradientStop& x)
+inline void from_json(const json& j, GradientStop& x)
 {
   x.color = j["color"];
   x.position = j["position"];
   x.midPoint = j["midPoint"];
 }
 
-inline void transformGredient(const json& j, Gradient& x)
-{
-  x.aiCoordinate = true;
-  const float length = j["length"];
-  const float angle = j["angle"];
-  x.from = glm::vec2(j["xOrigin"], 0);
-  x.to.x = angle;
-  x.to.y = length;
-}
-
 inline void from_json(const json& j, Gradient& x)
 {
   const auto g = j["instance"];
   const auto klass = g["class"];
-  if (klass != "gradientBasic")
+  if (klass == "gradientLinear")
   {
-    const auto f = g["from"];
-    const auto t = g["to"];
-    x.from = glm::vec2{ f[0], f[1] };
-    x.to = glm::vec2{ t[0], t[1] };
-    x.stops = g["stops"];
-    x.invert = g["invert"];
-    x.gradientType = EGradientType::GT_Linear;
-    if (klass == "gradientRadial")
-    {
-      x.elipseLength = g["elipseLength"];
-      x.elipseLength = x.elipseLength == 0.0 ? 1.0 : x.elipseLength; // TODO::fixup
-      x.gradientType = EGradientType::GT_Radial;
-    }
-    else if (klass == "gradientAngular")
-    {
-      x.gradientType = EGradientType::GT_Angular;
-    }
+    const auto     f = g.value("from", std::array<float, 2>{ 0, 0 });
+    const auto     t = g.value("to", std::array<float, 2>{ 0, 0 });
+    GradientLinear linear;
+    linear.from = glm::vec2{ f[0], f[1] };
+    linear.to = glm::vec2{ t[0], t[1] };
+    linear.invert = g.value("invert", false);
+    linear.stops = g.value("stops", std::vector<GradientStop>());
+    x.instance = linear;
   }
-  else
+  else if (klass == "gradientRadial")
   {
-    x.stops = g["stops"];
-    x.gradientType = g["gradientType"];
-    auto geo = g["geometry"];
-    transformGredient(geo, x);
+    const auto     f = g.value("from", std::array<float, 2>{ 0, 0 });
+    const auto     t = g.value("to", std::array<float, 2>{ 0, 0 });
+    GradientRadial radial;
+    radial.from = glm::vec2{ f[0], f[1] };
+    radial.to = glm::vec2{ t[0], t[1] };
+    radial.stops = g.value("stops", std::vector<GradientStop>());
+    radial.invert = g.value("invert", false);
+    radial.ellipse = g.value("elipseLength", 1.f);
+    x.instance = radial;
+  }
+  else if (klass == "gradientAngular")
+  {
+    const auto      f = g.value("from", std::array<float, 2>{ 0, 0 });
+    const auto      t = g.value("to", std::array<float, 2>{ 0, 0 });
+    GradientAngular angular;
+    angular.from = glm::vec2{ f[0], f[1] };
+    angular.to = glm::vec2{ t[0], t[1] };
+    angular.stops = g.value("stops", std::vector<GradientStop>());
+    angular.invert = g.value("invert", false);
+    angular.ellipse = g.value("elipseLength", 1.f);
+    x.instance = angular;
+  }
+  else if (klass == "gradientDiamond")
+  {
+    const auto      f = g.value("from", std::array<float, 2>{ 0, 0 });
+    const auto      t = g.value("to", std::array<float, 2>{ 0, 0 });
+    GradientDiamond diamond;
+    diamond.from = glm::vec2{ f[0], f[1] };
+    diamond.to = glm::vec2{ t[0], t[1] };
+    diamond.stops = g.value("stops", std::vector<GradientStop>());
+    diamond.invert = g.value("invert", false);
+    diamond.ellipse = g.value("elipseLength", 1.f);
+    x.instance = diamond;
+  }
+  else if (klass == "gradientBasic")
+  {
+    GradientBasic basic;
+    x.instance = basic;
   }
 }
 

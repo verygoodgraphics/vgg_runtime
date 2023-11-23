@@ -36,6 +36,7 @@
 #include <modules/skparagraph/include/DartTypes.h>
 #include <modules/skparagraph/include/TextStyle.h>
 
+#include <variant>
 #include <vector>
 #include <unordered_map>
 #include <string>
@@ -363,6 +364,178 @@ inline sk_sp<SkShader> makePatternShader(const Bound& bound, const Pattern& patt
                          [&](const PatternStretch& p) { shader = makeStretchPattern(bound, p); },
                          [&](const PatternTile& p) { shader = makeTilePattern(bound, p); } },
              pattern.instance);
+  return shader;
+}
+
+inline sk_sp<SkShader> makeGradientLinear(const Bound& bound, const GradientLinear& g)
+{
+  if (g.stops.empty())
+    return nullptr;
+  auto minPosition = g.stops.front().position;
+  auto maxPosition = g.stops.back().position;
+  // clampPairByLimits(minPosition, maxPosition, 0.f, 1.f, 0.0001f);
+
+  auto f = bound.map(bound.size() * g.from);
+  auto t = bound.map(bound.size() * g.to);
+  auto start = glm::mix(f, t, minPosition);
+  auto end = glm::mix(f, t, maxPosition);
+
+  SkPoint pts[2] = {
+    { (SkScalar)start.x, (SkScalar)start.y },
+    { (SkScalar)end.x, (SkScalar)end.y },
+  };
+  std::vector<SkColor>  colors;
+  std::vector<SkScalar> positions;
+  for (auto it = g.stops.begin(); it != g.stops.end(); ++it)
+  {
+    colors.push_back(it->color);
+    auto p = it->position;
+    positions.push_back((p - minPosition) / (maxPosition - minPosition));
+  }
+  SkMatrix mat = SkMatrix::I();
+  auto     s = SkGradientShader::MakeLinear(pts,
+                                        colors.data(),
+                                        positions.data(),
+                                        colors.size(),
+                                        SkTileMode::kClamp,
+                                        0,
+                                        &mat);
+  return s;
+}
+
+template<typename G>
+inline sk_sp<SkShader> makeGradientRadial(const Bound& bound, const G& g)
+{
+  if (g.stops.empty())
+    return nullptr;
+  auto minPosition = g.stops.front().position;
+  auto maxPosition = g.stops.back().position;
+
+  auto f = bound.map(bound.size() * g.from);
+  auto t = bound.map(bound.size() * g.to);
+  auto start = glm::mix(f, t, minPosition);
+  auto end = glm::mix(f, t, maxPosition);
+
+  SkPoint  center{ (SkScalar)start.x, (SkScalar)start.y };
+  SkScalar r = glm::distance(end, start);
+
+  std::vector<SkColor>  colors;
+  std::vector<SkScalar> positions;
+  for (auto it = g.stops.begin(); it != g.stops.end(); ++it)
+  {
+    colors.push_back(it->color);
+    auto p = it->position;
+    positions.push_back((p - minPosition) / (maxPosition - minPosition));
+  }
+
+  auto theta = [](const glm::vec2& from, const glm::vec2& to)
+  {
+    const auto r = glm::distance(from, to);
+    if (r > 0)
+    {
+      const auto theta = (to.x > from.x ? 1 : -1) * std::acos((to.y - from.y) / r);
+      return theta;
+    }
+    return 0.f;
+  };
+  SkMatrix mat;
+  if (auto p = std::get_if<float>(&g.ellipse); p)
+  {
+    mat.postTranslate(-start.x, -start.y);
+    mat.postScale(*p, 1.0);
+    mat.postRotate(-rad2deg(theta(g.from, g.to)));
+    mat.postTranslate(start.x, start.y);
+  }
+  else if (auto p = std::get_if<glm::vec2>(&g.ellipse); p)
+  {
+    mat.postTranslate(-start.x, -start.y);
+    const auto a = glm::distance(g.from, g.to);
+    const auto b = glm::distance(g.from, { p->x, p->y });
+    const auto ratio = (a == 0.f) ? 0.f : b / a;
+    mat.postScale(ratio, 1.0);
+    mat.postRotate(-rad2deg(theta(g.from, g.to)));
+    mat.postTranslate(start.x, start.y);
+  }
+  return SkGradientShader::MakeRadial(center,
+                                      r,
+                                      colors.data(),
+                                      positions.data(),
+                                      colors.size(),
+                                      SkTileMode::kClamp,
+                                      0,
+                                      &mat);
+}
+
+template<typename G>
+inline sk_sp<SkShader> makeGradientAngular(const Bound& bound, const G& g)
+{
+  if (g.stops.empty())
+    return nullptr;
+
+  const auto minPosition = g.stops.front().position;
+  const auto maxPosition = g.stops.back().position;
+
+  const glm::vec2 from = { g.from[0], g.from[1] };
+  const glm::vec2 to = { g.to[0], g.to[1] };
+
+  auto f = bound.map(bound.size() * from);
+  auto t = bound.map(bound.size() * to);
+
+  auto center = f;
+
+  std::vector<SkColor>  colors;
+  std::vector<SkScalar> positions;
+
+  auto minPosColor = g.stops.front().color;
+  auto maxPosColor = g.stops.back().color;
+
+  size_t sz = g.stops.size();
+  if (minPosition > 0)
+  {
+    auto c = lerp(minPosColor, maxPosColor, (float)minPosition / (minPosition + 1 - maxPosition));
+    colors.push_back(c);
+    positions.push_back(0);
+    sz += 1;
+  }
+  for (auto iter = g.stops.begin(); iter != g.stops.end(); ++iter)
+  {
+    colors.push_back(iter->color);
+    positions.push_back(iter->position);
+  }
+  if (maxPosition < 1)
+  {
+    auto c = lerp(minPosColor, maxPosColor, (float)minPosition / (minPosition + 1 - maxPosition));
+    colors.push_back(c);
+    positions.push_back(1);
+    sz += 1;
+  }
+
+  SkMatrix   rot;
+  const auto dir = t - f;
+  const auto rotate = std::atan2(dir.y, dir.x);
+  rot.setRotate(glm::degrees(rotate), center.x, center.y);
+  return SkGradientShader::MakeSweep(center.x,
+                                     center.y,
+                                     colors.data(),
+                                     positions.data(),
+                                     sz,
+                                     0,
+                                     &rot);
+}
+
+inline sk_sp<SkShader> makeGradientShader(const Bound& bound, const Gradient& gradient)
+{
+  sk_sp<SkShader> shader;
+  std::visit(
+    Overloaded{
+      [&](const GradientLinear& p) { shader = makeGradientLinear(bound, p); },
+      [&](const GradientRadial& p) { shader = makeGradientRadial(bound, p); },
+      [&](const GradientAngular& p) { shader = makeGradientAngular(bound, p); },
+      [&](const GradientDiamond& p) { shader = makeGradientRadial(bound, p); },
+      [&](const GradientBasic& p) { // TODO::
+      },
+    },
+    gradient.instance);
   return shader;
 }
 

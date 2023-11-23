@@ -25,21 +25,7 @@ using namespace VGG;
 
 sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound& bound)
 {
-  sk_sp<SkShader> shader;
-  const auto      type = g.gradientType;
-  if (type == GT_Linear)
-  {
-    shader = g.getLinearShader(bound);
-  }
-  else if (type == GT_Radial)
-  {
-    shader = g.getRadialShader(bound);
-  }
-  else if (type == GT_Angular)
-  {
-    shader = g.getAngularShader(bound);
-  }
-  return shader;
+  return makeGradientShader(bound, g);
 }
 
 void Painter::drawPathBorder(const SkPath&        skPath,

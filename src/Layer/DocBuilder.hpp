@@ -513,8 +513,32 @@ class DocBuilder
 
   static void convertCoordinateSystem(Gradient& gradient, const glm::mat3& totalMatrix)
   {
-    // convertCoordinateSystem(gradient.from, totalMatrix);
-    // convertCoordinateSystem(gradient.to, totalMatrix);
+    return;
+    std::visit(
+      Overloaded{
+        [&](GradientLinear& p)
+        {
+          convertCoordinateSystem(p.from, totalMatrix);
+          convertCoordinateSystem(p.to, totalMatrix);
+        },
+        [&](GradientRadial& p)
+        {
+          convertCoordinateSystem(p.from, totalMatrix);
+          convertCoordinateSystem(p.to, totalMatrix);
+        },
+        [&](GradientAngular& p)
+        {
+          convertCoordinateSystem(p.from, totalMatrix);
+          convertCoordinateSystem(p.to, totalMatrix);
+        },
+        [&](GradientDiamond& p)
+        {
+          convertCoordinateSystem(p.from, totalMatrix);
+          convertCoordinateSystem(p.to, totalMatrix);
+        },
+        [&](GradientBasic& p) {},
+      },
+      gradient.instance);
   }
 
   static void convertCoordinateSystem(Style&           style,

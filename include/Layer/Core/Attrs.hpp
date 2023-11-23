@@ -16,6 +16,7 @@
 #pragma once
 
 #include "Layer/Core/Transform.hpp"
+#include "Layer/Core/VColor.hpp"
 #include "Math/Hash.hpp"
 #include "Math/Math.hpp"
 #include "Math/Geometry.hpp"
@@ -85,32 +86,6 @@ struct AlphaMask
   bool          crop{ true };
 };
 
-struct Color
-{
-  float r{ 0. };
-  float g{ 0. };
-  float b{ 0. };
-  float a{ 1. };
-
-  operator SkColor() const
-  {
-    return SkColorSetARGB(255 * a, 255 * r, 255 * g, 255 * b);
-  }
-
-  inline static Color fromRGB(unsigned char ur, unsigned char ug, unsigned char ub)
-  {
-    return Color{ ur / 255.f, ug / 255.f, ub / 255.f, 1. };
-  }
-
-  inline static Color fromARGB(unsigned char ua,
-                               unsigned char ur,
-                               unsigned char ug,
-                               unsigned char ub)
-  {
-    return Color{ ur / 255.f, ug / 255.f, ub / 255.f, ua / 255.f };
-  }
-};
-
 template<>
 inline Color lerp(const Color& a, const Color& b, double t)
 {
@@ -122,205 +97,244 @@ inline Color lerp(const Color& a, const Color& b, double t)
   };
 }
 
+struct GradientStop
+{
+  Color color{ 1., 1., 1., 1. };
+  float position{ 1.0 }; // [0,1]
+  float midPoint;
+};
+
+struct GradientLinear
+{
+  glm::vec2                 from;
+  glm::vec2                 to;
+  std::vector<GradientStop> stops;
+  bool                      invert{ false };
+};
+
+struct GradientRadial
+{
+  glm::vec2                      from;
+  glm::vec2                      to;
+  std::vector<GradientStop>      stops;
+  std::variant<float, glm::vec2> ellipse;
+  bool                           invert{ false };
+};
+
+struct GradientDiamond
+{
+  glm::vec2                      from;
+  glm::vec2                      to;
+  std::vector<GradientStop>      stops;
+  std::variant<float, glm::vec2> ellipse;
+  bool                           invert{ false };
+};
+
+struct GradientAngular
+{
+  glm::vec2                      from;
+  glm::vec2                      to;
+  std::vector<GradientStop>      stops;
+  std::variant<float, glm::vec2> ellipse;
+  bool                           invert{ false };
+};
+
+struct GradientBasic
+{
+  // Ai specific
+};
+
 struct Gradient
 {
-  struct GradientStop
-  {
-    Color color{ 1., 1., 1., 1. };
-    float position{ 1.0 }; // [0,1]
-    float midPoint;
-  };
-  EGradientType gradientType{ EGradientType::GT_Linear };
-
-  glm::vec2 from{ 0.5, 0 };
-  glm::vec2 to{ 0.5, 1 };
-  float     elipseLength{ 1.0 };   // (0, inf) : radial
-  float     rotation{ 0.0 };       // degree : angular
-  float     invert{ false };       //
-  bool      aiCoordinate{ false }; // This flag indicates if these positions are Ai exported.
-  std::vector<GradientStop> stops{
-    { Color::fromRGB(0xEE, 0xEE, 0xEE), 0.0 },
-    { Color::fromRGB(0xD8, 0xD8, 0xD8), 1.0 },
-  };
-
-  inline double getTheta() const
-  {
-    const auto r = glm::distance(from, to);
-    if (r > 0)
+  std::variant<GradientLinear, GradientRadial, GradientAngular, GradientBasic, GradientDiamond>
+    instance;
+  /*
+    [[deprecated]] bool                                           aiCoordinate
     {
-      const auto theta = (to.x > from.x ? 1 : -1) * std::acos((to.y - from.y) / r);
-      return theta;
-    }
-    return 0;
-  }
+      [[deprecated]] EGradientType gradientType{ EGradientType::GT_Linear };
+      [[deprecated]] glm::vec2     from{ 0.5, 0 };
+      [[deprecated]] glm::vec2     to{ 0.5, 1 };
+      [[deprecated]] float         elipseLength{ 1.0 }; // (0, inf) : radial
+      [[deprecated]] float         rotation{ 0.0 };     // degree : angular
+      [[deprecated]] float         invert{ false };     //
 
-  inline std::pair<glm::vec2, glm::vec2> aiConvert(const glm::vec2& from,
-                                                   const glm::vec2& to,
-                                                   const Bound&     b) const
-  {
-    const auto angle = to.x;
-    const auto length = to.y;
-    const auto radians = glm::radians(angle);
-    glm::vec2  dir = { std::cos(radians), std::sin(radians) };
-    const auto center = glm::vec2(b.topLeft().x + b.width() / 2, b.topLeft().y - b.height() / 2);
-    const auto x = from.x * b.width() + b.topLeft().x;
-    float      k = 1;
-    if ((angle <= 45 && angle >= -45) || (angle >= 135 || angle <= -135))
-    {
-      const float k = dir.y / dir.x;
-    }
-    else
-    {
-      const float k = dir.x / dir.y;
-    }
-    glm::vec2 f = { x, k * (x - center.x) + center.y };
-    glm::vec2 t = f + length * dir * b.distance();
-    return { f, t };
-  }
-
-  inline std::vector<size_t> getSortedIndices() const
-  {
-    std::vector<size_t> indices;
-    for (size_t i = 0; i < stops.size(); i++)
-    {
-      indices.push_back(i);
-    }
-    std::sort(indices.begin(),
-              indices.end(),
-              [&](size_t i, size_t j) { return stops[i].position < stops[j].position; });
-    return indices;
-  }
-
-  inline sk_sp<SkShader> getLinearShader(const Bound& bound) const
-  {
-    auto indices = getSortedIndices();
-
-    auto minPosition = stops[indices[0]].position;
-    auto maxPosition = stops[indices[indices.size() - 1]].position;
-
-    // clampPairByLimits(minPosition, maxPosition, 0.f, 1.f, 0.0001f);
-
-    auto f = bound.map(bound.size() * from);
-    auto t = bound.map(bound.size() * to);
-    if (aiCoordinate)
-    {
-      auto r = aiConvert(from, to, bound);
-      f = r.first;
-      t = r.second;
-    }
-    auto start = glm::mix(f, t, minPosition);
-    auto end = glm::mix(f, t, maxPosition);
-
-    SkPoint pts[2] = {
-      { (SkScalar)start.x, (SkScalar)start.y },
-      { (SkScalar)end.x, (SkScalar)end.y },
+      false
+    }; // This flag indicates if these positions are Ai exported.
+    [[deprecated]] std::vector<GradientStop> stops{
+      { Color::fromRGB(0xEE, 0xEE, 0xEE), 0.0 },
+      { Color::fromRGB(0xD8, 0xD8, 0xD8), 1.0 },
     };
-    std::vector<SkColor>  colors;
-    std::vector<SkScalar> positions;
-    for (size_t i = 0; i < indices.size(); i++)
+
+    [[deprecated]] inline double getTheta() const
     {
-      auto c = stops[indices[i]].color;
-      colors.push_back(c);
-      auto p = stops[indices[i]].position;
-      positions.push_back((p - minPosition) / (maxPosition - minPosition));
+      const auto r = glm::distance(from, to);
+      if (r > 0)
+      {
+        const auto theta = (to.x > from.x ? 1 : -1) * std::acos((to.y - from.y) / r);
+        return theta;
+      }
+      return 0;
     }
-    SkMatrix mat = SkMatrix::I();
-    auto     s = SkGradientShader::MakeLinear(pts,
+    [[deprecated]] inline std::pair<glm::vec2, glm::vec2> aiConvert(const glm::vec2& from,
+                                                                    const glm::vec2& to,
+                                                                    const Bound&     b) const
+    {
+      const auto angle = to.x;
+      const auto length = to.y;
+      const auto radians = glm::radians(angle);
+      glm::vec2  dir = { std::cos(radians), std::sin(radians) };
+      const auto center = glm::vec2(b.topLeft().x + b.width() / 2, b.topLeft().y - b.height() / 2);
+      const auto x = from.x * b.width() + b.topLeft().x;
+      float      k = 1;
+      if ((angle <= 45 && angle >= -45) || (angle >= 135 || angle <= -135))
+      {
+        const float k = dir.y / dir.x;
+      }
+      else
+      {
+        const float k = dir.x / dir.y;
+      }
+      glm::vec2 f = { x, k * (x - center.x) + center.y };
+      glm::vec2 t = f + length * dir * b.distance();
+      return { f, t };
+    }
+    [[deprecated]] inline std::vector<size_t> getSortedIndices() const
+    {
+      std::vector<size_t> indices;
+      for (size_t i = 0; i < stops.size(); i++)
+      {
+        indices.push_back(i);
+      }
+      std::sort(indices.begin(),
+                indices.end(),
+                [&](size_t i, size_t j) { return stops[i].position < stops[j].position; });
+      return indices;
+    }
+    [[deprecated]] inline sk_sp<SkShader> getLinearShader(const Bound& bound) const
+    {
+      auto indices = getSortedIndices();
+
+      auto minPosition = stops[indices[0]].position;
+      auto maxPosition = stops[indices[indices.size() - 1]].position;
+
+      // clampPairByLimits(minPosition, maxPosition, 0.f, 1.f, 0.0001f);
+
+      auto f = bound.map(bound.size() * from);
+      auto t = bound.map(bound.size() * to);
+      if (aiCoordinate)
+      {
+        auto r = aiConvert(from, to, bound);
+        f = r.first;
+        t = r.second;
+      }
+      auto start = glm::mix(f, t, minPosition);
+      auto end = glm::mix(f, t, maxPosition);
+
+      SkPoint pts[2] = {
+        { (SkScalar)start.x, (SkScalar)start.y },
+        { (SkScalar)end.x, (SkScalar)end.y },
+      };
+      std::vector<SkColor>  colors;
+      std::vector<SkScalar> positions;
+      for (size_t i = 0; i < indices.size(); i++)
+      {
+        auto c = stops[indices[i]].color;
+        colors.push_back(c);
+        auto p = stops[indices[i]].position;
+        positions.push_back((p - minPosition) / (maxPosition - minPosition));
+      }
+      SkMatrix mat = SkMatrix::I();
+      auto     s = SkGradientShader::MakeLinear(pts,
+                                            colors.data(),
+                                            positions.data(),
+                                            indices.size(),
+                                            SkTileMode::kClamp,
+                                            0,
+                                            &mat);
+      return s;
+    }
+    [[deprecated]] inline sk_sp<SkShader> getRadialShader(const Bound& bound) const
+    {
+      // ASSERT(stops.size() > 1);
+      auto indices = getSortedIndices();
+      auto minPosition = stops[indices[0]].position;
+      auto maxPosition = stops[indices[indices.size() - 1]].position;
+
+      auto f = bound.map(bound.size() * from);
+      auto t = bound.map(bound.size() * to);
+
+      auto start = glm::mix(f, t, minPosition);
+      auto end = glm::mix(f, t, maxPosition);
+
+      SkPoint               center{ (SkScalar)start.x, (SkScalar)start.y };
+      SkScalar              r = glm::distance(end, start);
+      std::vector<SkColor>  colors;
+      std::vector<SkScalar> positions;
+      for (size_t i = 0; i < indices.size(); i++)
+      {
+        colors.push_back(stops[indices[i]].color);
+        auto p = stops[indices[i]].position;
+        positions.push_back((p - minPosition) / (maxPosition - minPosition));
+      }
+      SkMatrix mat;
+      mat.postTranslate(-start.x, -start.y);
+      mat.postScale(elipseLength, 1.0);
+      mat.postRotate(-rad2deg(getTheta()));
+      mat.postTranslate(start.x, start.y);
+      return SkGradientShader::MakeRadial(center,
+                                          r,
                                           colors.data(),
                                           positions.data(),
                                           indices.size(),
                                           SkTileMode::kClamp,
                                           0,
                                           &mat);
-    return s;
-  }
-
-  inline sk_sp<SkShader> getRadialShader(const Bound& bound) const
-  {
-    // ASSERT(stops.size() > 1);
-    auto indices = getSortedIndices();
-    auto minPosition = stops[indices[0]].position;
-    auto maxPosition = stops[indices[indices.size() - 1]].position;
-
-    auto f = bound.map(bound.size() * from);
-    auto t = bound.map(bound.size() * to);
-
-    auto start = glm::mix(f, t, minPosition);
-    auto end = glm::mix(f, t, maxPosition);
-
-    SkPoint               center{ (SkScalar)start.x, (SkScalar)start.y };
-    SkScalar              r = glm::distance(end, start);
-    std::vector<SkColor>  colors;
-    std::vector<SkScalar> positions;
-    for (size_t i = 0; i < indices.size(); i++)
-    {
-      colors.push_back(stops[indices[i]].color);
-      auto p = stops[indices[i]].position;
-      positions.push_back((p - minPosition) / (maxPosition - minPosition));
     }
-    SkMatrix mat;
-    mat.postTranslate(-start.x, -start.y);
-    mat.postScale(elipseLength, 1.0);
-    mat.postRotate(-rad2deg(getTheta()));
-    mat.postTranslate(start.x, start.y);
-    return SkGradientShader::MakeRadial(center,
-                                        r,
-                                        colors.data(),
-                                        positions.data(),
-                                        indices.size(),
-                                        SkTileMode::kClamp,
-                                        0,
-                                        &mat);
-  }
+    [[deprecated]] inline sk_sp<SkShader> getAngularShader(const Bound& bound) const
+    {
+      auto                 minPositionIter = stops.begin();
+      auto                 maxPositionIter = stops.end();
+      const auto           minPosition = minPositionIter->position;
+      const auto           maxPosition = maxPositionIter->position;
+      auto                 f = bound.map(bound.size() * from);
+      auto                 t = bound.map(bound.size() * to);
+      auto                 center = f;
+      std::vector<SkColor> colors;
+      colors.reserve(2);
+      std::vector<SkScalar> positions;
+      positions.reserve(2);
+      auto   minPosColor = minPositionIter->color;
+      auto   maxPosColor = maxPositionIter->color;
+      size_t sz = stops.size();
+      if (minPosition > 0)
+      {
+        auto c = lerp(minPosColor, maxPosColor, (float)minPosition / (minPosition + 1 -
+    maxPosition)); colors.push_back(c); positions.push_back(0); sz += 1;
+      }
+      for (auto iter = minPositionIter; iter != maxPositionIter; ++iter)
+      {
+        colors.push_back(iter->color);
+        positions.push_back(iter->position);
+      }
+      if (maxPosition < 1)
+      {
+        auto c = lerp(minPosColor, maxPosColor, (float)minPosition / (minPosition + 1 -
+    maxPosition)); colors.push_back(c); positions.push_back(1); sz += 1;
+      }
 
-  inline sk_sp<SkShader> getAngularShader(const Bound& bound) const
-  {
-    auto                 minPositionIter = stops.begin();
-    auto                 maxPositionIter = stops.end();
-    const auto           minPosition = minPositionIter->position;
-    const auto           maxPosition = maxPositionIter->position;
-    auto                 f = bound.map(bound.size() * from);
-    auto                 t = bound.map(bound.size() * to);
-    auto                 center = f;
-    std::vector<SkColor> colors;
-    colors.reserve(2);
-    std::vector<SkScalar> positions;
-    positions.reserve(2);
-    auto   minPosColor = minPositionIter->color;
-    auto   maxPosColor = maxPositionIter->color;
-    size_t sz = stops.size();
-    if (minPosition > 0)
-    {
-      auto c = lerp(minPosColor, maxPosColor, (float)minPosition / (minPosition + 1 - maxPosition));
-      colors.push_back(c);
-      positions.push_back(0);
-      sz += 1;
+      SkMatrix   rot;
+      const auto dir = t - f;
+      const auto rotate = std::atan2(dir.y, dir.x);
+      rot.setRotate(glm::degrees(rotate), center.x, center.y);
+      return SkGradientShader::MakeSweep(center.x,
+                                         center.y,
+                                         colors.data(),
+                                         positions.data(),
+                                         sz,
+                                         0,
+                                         &rot);
     }
-    for (auto iter = minPositionIter; iter != maxPositionIter; ++iter)
-    {
-      colors.push_back(iter->color);
-      positions.push_back(iter->position);
-    }
-    if (maxPosition < 1)
-    {
-      auto c = lerp(minPosColor, maxPosColor, (float)minPosition / (minPosition + 1 - maxPosition));
-      colors.push_back(c);
-      positions.push_back(1);
-      sz += 1;
-    }
-
-    SkMatrix   rot;
-    const auto dir = t - f;
-    const auto rotate = std::atan2(dir.y, dir.x);
-    rot.setRotate(glm::degrees(rotate), center.x, center.y);
-    return SkGradientShader::MakeSweep(center.x,
-                                       center.y,
-                                       colors.data(),
-                                       positions.data(),
-                                       sz,
-                                       0,
-                                       &rot);
-  }
+  */
 };
 
 struct Border

@@ -65,9 +65,10 @@ NodePtr TextNode::clone() const
   return newNode;
 }
 
-void TextNode::setParagraph(std::string                      utf8,
-                            std::vector<TextStyleAttr>       attrs,
-                            const std::vector<TextLineAttr>& lineAttr)
+void TextNode::setParagraph(
+  std::string                      utf8,
+  std::vector<TextStyleAttr>       attrs,
+  const std::vector<TextLineAttr>& lineAttr)
 {
   VGG_IMPL(TextNode);
   std::vector<ParagraphAttr> paraAttrs;

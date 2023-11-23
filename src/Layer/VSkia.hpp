@@ -76,15 +76,16 @@ inline SkRect toSkRect(const VGG::Bound& bound)
 inline SkMatrix toSkMatrix(const glm::mat3& mat)
 {
   SkMatrix skMatrix;
-  skMatrix.setAll(mat[0][0],
-                  mat[1][0],
-                  mat[2][0],
-                  mat[0][1],
-                  mat[1][1],
-                  mat[2][1],
-                  mat[0][2],
-                  mat[1][2],
-                  mat[2][2]);
+  skMatrix.setAll(
+    mat[0][0],
+    mat[1][0],
+    mat[2][0],
+    mat[0][1],
+    mat[1][1],
+    mat[2][1],
+    mat[0][2],
+    mat[1][2],
+    mat[2][2]);
   return skMatrix;
 }
 inline SkPaint::Join toSkPaintJoin(VGG::ELineJoin join)
@@ -156,10 +157,12 @@ inline skia::textlayout::TextAlign toSkTextAlign(ETextHorizontalAlignment align)
   SWITCH_MAP_ITEM_BEGIN(align)
   SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_Left, skia::textlayout::TextAlign::kLeft);
   SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_Right, skia::textlayout::TextAlign::kRight);
-  SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_Justify,
-                      skia::textlayout::TextAlign::kJustify);
-  SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_Center,
-                      skia::textlayout::TextAlign::kCenter);
+  SWITCH_MAP_ITEM_DEF(
+    VGG::ETextHorizontalAlignment::HA_Justify,
+    skia::textlayout::TextAlign::kJustify);
+  SWITCH_MAP_ITEM_DEF(
+    VGG::ETextHorizontalAlignment::HA_Center,
+    skia::textlayout::TextAlign::kCenter);
   SWITCH_MAP_ITEM_DEF_NULL(VGG::ETextHorizontalAlignment::HA_Natural)
   SWITCH_MAP_ITEM_END(skia::textlayout::TextAlign::kLeft)
 }
@@ -174,15 +177,17 @@ inline SkFontStyle toSkFontStyle(const std::string_view& subFamilyName)
   {
     return SkFontStyle::Normal();
   }
-  else if (subFamilyName == "ExtraBold" || subFamilyName == "Extra Bold" ||
-           subFamilyName == "Extra-Bold")
+  else if (
+    subFamilyName == "ExtraBold" || subFamilyName == "Extra Bold" || subFamilyName == "Extra-Bold")
   {
-    return SkFontStyle(SkFontStyle::kExtraBold_Weight,
-                       SkFontStyle::kNormal_Width,
-                       SkFontStyle::kUpright_Slant);
+    return SkFontStyle(
+      SkFontStyle::kExtraBold_Weight,
+      SkFontStyle::kNormal_Width,
+      SkFontStyle::kUpright_Slant);
   }
-  else if (subFamilyName == "Bold Italic" || subFamilyName == "BoldItalic" ||
-           subFamilyName == "Bold-Italic")
+  else if (
+    subFamilyName == "Bold Italic" || subFamilyName == "BoldItalic" ||
+    subFamilyName == "Bold-Italic")
   {
     return SkFontStyle::BoldItalic();
   }
@@ -358,11 +363,12 @@ inline sk_sp<SkShader> makeTilePattern(const Bound& bound, const PatternTile& p)
 inline sk_sp<SkShader> makePatternShader(const Bound& bound, const Pattern& pattern)
 {
   sk_sp<SkShader> shader;
-  std::visit(Overloaded{ [&](const PatternFill& p) { shader = makeFillPattern(bound, p); },
-                         [&](const PatternFit& p) { shader = makeFitPattern(bound, p); },
-                         [&](const PatternStretch& p) { shader = makeStretchPattern(bound, p); },
-                         [&](const PatternTile& p) { shader = makeTilePattern(bound, p); } },
-             pattern.instance);
+  std::visit(
+    Overloaded{ [&](const PatternFill& p) { shader = makeFillPattern(bound, p); },
+                [&](const PatternFit& p) { shader = makeFitPattern(bound, p); },
+                [&](const PatternStretch& p) { shader = makeStretchPattern(bound, p); },
+                [&](const PatternTile& p) { shader = makeTilePattern(bound, p); } },
+    pattern.instance);
   return shader;
 }
 
@@ -392,13 +398,14 @@ inline sk_sp<SkShader> makeGradientLinear(const Bound& bound, const GradientLine
     positions.push_back((p - minPosition) / (maxPosition - minPosition));
   }
   SkMatrix mat = SkMatrix::I();
-  auto     s = SkGradientShader::MakeLinear(pts,
-                                        colors.data(),
-                                        positions.data(),
-                                        colors.size(),
-                                        SkTileMode::kClamp,
-                                        0,
-                                        &mat);
+  auto     s = SkGradientShader::MakeLinear(
+    pts,
+    colors.data(),
+    positions.data(),
+    colors.size(),
+    SkTileMode::kClamp,
+    0,
+    &mat);
   return s;
 }
 
@@ -455,14 +462,15 @@ inline sk_sp<SkShader> makeGradientRadial(const Bound& bound, const G& g)
     mat.postRotate(-rad2deg(theta(g.from, g.to)));
     mat.postTranslate(start.x, start.y);
   }
-  return SkGradientShader::MakeRadial(center,
-                                      r,
-                                      colors.data(),
-                                      positions.data(),
-                                      colors.size(),
-                                      SkTileMode::kClamp,
-                                      0,
-                                      &mat);
+  return SkGradientShader::MakeRadial(
+    center,
+    r,
+    colors.data(),
+    positions.data(),
+    colors.size(),
+    SkTileMode::kClamp,
+    0,
+    &mat);
 }
 
 template<typename G>
@@ -513,13 +521,14 @@ inline sk_sp<SkShader> makeGradientAngular(const Bound& bound, const G& g)
   const auto dir = t - f;
   const auto rotate = std::atan2(dir.y, dir.x);
   rot.setRotate(glm::degrees(rotate), center.x, center.y);
-  return SkGradientShader::MakeSweep(center.x,
-                                     center.y,
-                                     colors.data(),
-                                     positions.data(),
-                                     sz,
-                                     0,
-                                     &rot);
+  return SkGradientShader::MakeSweep(
+    center.x,
+    center.y,
+    colors.data(),
+    positions.data(),
+    sz,
+    0,
+    &rot);
 }
 
 inline sk_sp<SkShader> makeGradientShader(const Bound& bound, const Gradient& gradient)

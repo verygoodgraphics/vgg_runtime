@@ -84,12 +84,13 @@ void getMaxSurfaceSize(int resolutionLevel, float* maxSurfaceSize)
   }
 }
 
-float calcScaleFactor(float  inputWidth,
-                      float  inputHeight,
-                      float  maxWidth,
-                      float  maxHeight,
-                      float& outWidth,
-                      float& outHeight)
+float calcScaleFactor(
+  float  inputWidth,
+  float  inputHeight,
+  float  maxWidth,
+  float  maxHeight,
+  float& outWidth,
+  float& outHeight)
 {
   auto  widthScale = maxWidth / inputWidth;
   auto  heightScale = maxHeight / inputHeight;
@@ -140,9 +141,10 @@ public:
     layer->resize(w, h);
   }
 
-  std::optional<std::vector<char>> render(std::shared_ptr<Scene>     scene,
-                                          float                      scale,
-                                          const layer::ImageOptions& opts)
+  std::optional<std::vector<char>> render(
+    std::shared_ptr<Scene>     scene,
+    float                      scale,
+    const layer::ImageOptions& opts)
   {
     // auto id = scene->frame(scene->currentPage())->guid();
     layer->setScene(std::move(scene));
@@ -245,11 +247,12 @@ class ImageIteratorImpl : public IteratorImplBase
 {
 public:
   Exporter& exporter;
-  ImageIteratorImpl(Exporter&      exporter,
-                    nlohmann::json json,
-                    nlohmann::json layout,
-                    Resource       resource,
-                    int            resolutionLevel)
+  ImageIteratorImpl(
+    Exporter&      exporter,
+    nlohmann::json json,
+    nlohmann::json layout,
+    Resource       resource,
+    int            resolutionLevel)
     : IteratorImplBase(std::move(json), std::move(layout), std::move(resource))
     , exporter(exporter)
   {
@@ -303,16 +306,18 @@ ImageIterator::ImageIterator(ImageIterator&& other) noexcept
   , d_impl(std::move(other.d_impl))
 {
 }
-ImageIterator::ImageIterator(Exporter&          exporter,
-                             nlohmann::json     design,
-                             nlohmann::json     layout,
-                             Resource           resource,
-                             const ImageOption& opt)
-  : d_impl(std::make_unique<ImageIteratorImpl>(exporter,
-                                               std::move(design),
-                                               std::move(layout),
-                                               std::move(resource),
-                                               opt.resolutionLevel))
+ImageIterator::ImageIterator(
+  Exporter&          exporter,
+  nlohmann::json     design,
+  nlohmann::json     layout,
+  Resource           resource,
+  const ImageOption& opt)
+  : d_impl(std::make_unique<ImageIteratorImpl>(
+      exporter,
+      std::move(design),
+      std::move(layout),
+      std::move(resource),
+      opt.resolutionLevel))
   , m_opts(opt)
 {
 }

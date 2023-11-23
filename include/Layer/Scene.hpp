@@ -35,11 +35,12 @@ using namespace layer;
 
 using ResourceRepo = std::map<std::string, std::vector<char>>;
 using ObjectTableType = std::unordered_map<std::string, std::weak_ptr<PaintNode>>;
-using InstanceTable =
-  std::unordered_map<std::string,
-                     std::pair<std::weak_ptr<PaintNode>,
-                               std::string>>; // {instance_id: {instance_object: master_id}}
-                                              //
+using InstanceTable = std::unordered_map<
+  std::string,
+  std::pair<
+    std::weak_ptr<PaintNode>,
+    std::string>>; // {instance_id: {instance_object: master_id}}
+                   //
 class Scene__pImpl;
 struct VGG_EXPORTS Scene : public layer::Renderable
 {

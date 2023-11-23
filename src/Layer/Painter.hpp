@@ -178,9 +178,10 @@ public:
 
   void blurBackgroundBegin(float radiusX, float radiusY, const Bound& bound, const SkPath* path)
   {
-    auto filter = SkImageFilters::Blur(SkBlurMask::ConvertRadiusToSigma(radiusX),
-                                       SkBlurMask::ConvertRadiusToSigma(radiusY),
-                                       nullptr);
+    auto filter = SkImageFilters::Blur(
+      SkBlurMask::ConvertRadiusToSigma(radiusX),
+      SkBlurMask::ConvertRadiusToSigma(radiusY),
+      nullptr);
     auto b = toSkRect(bound);
     m_canvas->save();
     if (path)
@@ -193,16 +194,18 @@ public:
     m_canvas->restore();
     m_canvas->restore();
   }
-  void blurContentBegin(float            radiusX,
-                        float            radiusY,
-                        const Bound&     bound,
-                        const SkPath*    path,
-                        sk_sp<SkBlender> blender)
+  void blurContentBegin(
+    float            radiusX,
+    float            radiusY,
+    const Bound&     bound,
+    const SkPath*    path,
+    sk_sp<SkBlender> blender)
   {
     SkPaint pen;
-    auto    filter = SkImageFilters::Blur(SkBlurMask::ConvertRadiusToSigma(radiusX),
-                                       SkBlurMask::ConvertRadiusToSigma(radiusY),
-                                       nullptr);
+    auto    filter = SkImageFilters::Blur(
+      SkBlurMask::ConvertRadiusToSigma(radiusX),
+      SkBlurMask::ConvertRadiusToSigma(radiusY),
+      nullptr);
     pen.setImageFilter(std::move(filter));
     // pen.setBlendMode(SkBlendMode::kSrcOver);
     auto     bb = bound;
@@ -235,37 +238,42 @@ public:
     m_canvas->restore();
   }
 
-  void drawShadow(const SkPath&        skPath,
-                  const Bound&         bound,
-                  const Shadow&        s,
-                  SkPaint::Style       style,
-                  sk_sp<SkImageFilter> imageFilter);
+  void drawShadow(
+    const SkPath&        skPath,
+    const Bound&         bound,
+    const Shadow&        s,
+    SkPaint::Style       style,
+    sk_sp<SkImageFilter> imageFilter);
 
-  void drawInnerShadow(const SkPath&        skPath,
-                       const Bound&         bound,
-                       const Shadow&        s,
-                       SkPaint::Style       style,
-                       sk_sp<SkImageFilter> imageFilter);
+  void drawInnerShadow(
+    const SkPath&        skPath,
+    const Bound&         bound,
+    const Shadow&        s,
+    SkPaint::Style       style,
+    sk_sp<SkImageFilter> imageFilter);
 
-  void drawFill(const SkPath&        skPath,
-                const Bound&         bound,
-                const Fill&          f,
-                float                globalAlpha,
-                sk_sp<SkImageFilter> imageFilter,
-                sk_sp<SkBlender>     blender,
-                sk_sp<SkMaskFilter>  mask);
+  void drawFill(
+    const SkPath&        skPath,
+    const Bound&         bound,
+    const Fill&          f,
+    float                globalAlpha,
+    sk_sp<SkImageFilter> imageFilter,
+    sk_sp<SkBlender>     blender,
+    sk_sp<SkMaskFilter>  mask);
 
-  void drawPathBorder(const SkPath&        skPath,
-                      const Bound&         bound,
-                      const Border&        b,
-                      float                globalAlpha,
-                      sk_sp<SkImageFilter> imageFilter,
-                      sk_sp<SkBlender>     blender);
+  void drawPathBorder(
+    const SkPath&        skPath,
+    const Bound&         bound,
+    const Border&        b,
+    float                globalAlpha,
+    sk_sp<SkImageFilter> imageFilter,
+    sk_sp<SkBlender>     blender);
 
-  void drawImage(const Bound          bound,
-                 sk_sp<SkShader>      imageShader,
-                 sk_sp<SkImageFilter> imageFilter,
-                 sk_sp<SkBlender>     blender)
+  void drawImage(
+    const Bound          bound,
+    sk_sp<SkShader>      imageShader,
+    sk_sp<SkImageFilter> imageFilter,
+    sk_sp<SkBlender>     blender)
   {
     SkPaint p;
     p.setShader(std::move(imageShader));

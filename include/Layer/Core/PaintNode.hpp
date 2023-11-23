@@ -43,8 +43,9 @@ struct ContourOption
 {
   ECoutourType contourType{ ECoutourType::MCT_FrameOnly };
   bool         visibilityAware{ true };
-  ContourOption(ECoutourType contourType = ECoutourType::MCT_FrameOnly,
-                bool         visibilityAware = false)
+  ContourOption(
+    ECoutourType contourType = ECoutourType::MCT_FrameOnly,
+    bool         visibilityAware = false)
     : contourType(contourType)
     , visibilityAware(visibilityAware)
   {
@@ -219,8 +220,9 @@ protected:
   virtual SkPath stylePath();
   void           paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& mask);
 
-  [[deprecated]] virtual void paintFill(SkCanvas*        canvas,
-                                        sk_sp<SkBlender> blender,
-                                        const SkPath& path); // TODO:: only for ImageNode overriding
+  [[deprecated]] virtual void paintFill(
+    SkCanvas*        canvas,
+    sk_sp<SkBlender> blender,
+    const SkPath&    path); // TODO:: only for ImageNode overriding
 };
 } // namespace VGG::layer

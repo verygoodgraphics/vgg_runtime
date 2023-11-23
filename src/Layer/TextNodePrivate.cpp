@@ -37,10 +37,11 @@ namespace sktxt = skia::textlayout;
 namespace
 {
 
-int calcWhitespace(int count,
-                   int fontSize,
-                   const std::vector<SkString>& fontFamilies,
-                   sk_sp<FontCollection> fontCollection)
+int calcWhitespace(
+  int                          count,
+  int                          fontSize,
+  const std::vector<SkString>& fontFamilies,
+  sk_sp<FontCollection>        fontCollection)
 {
   // cassert(count < 40);
   ParagraphStyle style;
@@ -76,7 +77,7 @@ sktxt::ParagraphStyle createParagraphStyle(const layer::ParagraphAttr& attr)
 std::vector<std::string> split(const std::string& s, char seperator)
 {
   std::vector<std::string> output;
-  std::string::size_type prevPos = 0, pos = 0;
+  std::string::size_type   prevPos = 0, pos = 0;
   while ((pos = s.find(seperator, pos)) != std::string::npos)
   {
     std::string substring(s.substr(prevPos, pos - prevPos));
@@ -139,11 +140,12 @@ sktxt::TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* f
     auto matched = font->fuzzyMatch(fontName);
     if (matched)
     {
-      INFO("Font [%s] matches real name [%s %s][%f]",
-           fontName.c_str(),
-           matched->first.c_str(),
-           subFamilyName.c_str(),
-           matched->second);
+      INFO(
+        "Font [%s] matches real name [%s %s][%f]",
+        fontName.c_str(),
+        matched->first.c_str(),
+        subFamilyName.c_str(),
+        matched->second);
       fontName = std::string(matched->first.c_str());
 
       // When font name is provided, we match the real name first.
@@ -175,10 +177,11 @@ sktxt::TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* f
     // the worst case
     fontName = "FiraSans";
   }
-  DEBUG("Given [%s], [%s %s] is choosed finally",
-        attr.fontName.c_str(),
-        fontName.c_str(),
-        subFamilyName.c_str());
+  DEBUG(
+    "Given [%s], [%s %s] is choosed finally",
+    attr.fontName.c_str(),
+    fontName.c_str(),
+    subFamilyName.c_str());
   std::vector<SkString> fontFamilies;
   fontFamilies.push_back(SkString(fontName));
   if (const auto& fallbackFonts = font->fallbackFonts(); !fallbackFonts.empty())
@@ -220,12 +223,13 @@ sktxt::TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* f
 namespace VGG::layer
 {
 
-void drawParagraphDebugInfo(DebugCanvas& canvas,
-                            const TextParagraph& textParagraph,
-                            Paragraph* p,
-                            int curX,
-                            int curY,
-                            int index)
+void drawParagraphDebugInfo(
+  DebugCanvas&         canvas,
+  const TextParagraph& textParagraph,
+  Paragraph*           p,
+  int                  curX,
+  int                  curY,
+  int                  index)
 {
   static SkColor s_colorTable[9] = {
     SK_ColorBLUE,   SK_ColorGREEN,  SK_ColorRED,  SK_ColorCYAN,   SK_ColorMAGENTA,
@@ -233,9 +237,9 @@ void drawParagraphDebugInfo(DebugCanvas& canvas,
   };
   canvas.get()->save();
   canvas.get()->translate(curX, curY);
-  auto rects = p->getRectsForRange(0, 10000, RectHeightStyle::kMax, RectWidthStyle::kMax);
-  auto h = p->getHeight();
-  auto mw = p->getMaxWidth();
+  auto    rects = p->getRectsForRange(0, 10000, RectHeightStyle::kMax, RectWidthStyle::kMax);
+  auto    h = p->getHeight();
+  auto    mw = p->getMaxWidth();
   SkPaint pen;
   SkColor color = s_colorTable[index % 9];
   pen.setColor(SkColorSetA(color, 0x11));
@@ -251,9 +255,10 @@ void TextParagraphCache::onEnd()
 {
   set(D_ALL);
 }
-void TextParagraphCache::onParagraphBegin(int paraIndex,
-                                          int order,
-                                          const ParagraphAttr& paragraAttr)
+void TextParagraphCache::onParagraphBegin(
+  int                  paraIndex,
+  int                  order,
+  const ParagraphAttr& paragraAttr)
 {
   paragraph.emplace_back();
   auto& p = paragraph.back();
@@ -283,10 +288,11 @@ void TextParagraphCache::onParagraphEnd(int paraIndex, const TextView& textView)
   // std::cout << "onParagraphEnd: " << paraIndex << ", [" << textView.Text << "]\n";
 }
 
-void TextParagraphCache::onTextStyle(int paraIndex,
-                                     int styleIndex,
-                                     const TextView& textView,
-                                     const TextStyleAttr& textAttr)
+void TextParagraphCache::onTextStyle(
+  int                  paraIndex,
+  int                  styleIndex,
+  const TextView&      textView,
+  const TextStyleAttr& textAttr)
 {
   assert(!paragraph.empty());
   auto& p = paragraph.back();

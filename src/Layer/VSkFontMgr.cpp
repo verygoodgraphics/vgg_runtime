@@ -38,10 +38,10 @@ using namespace skia_private;
 class SkData;
 
 SkTypeface_VGG::SkTypeface_VGG(const SkFontStyle& style,
-                               bool isFixedPitch,
-                               bool sysFont,
-                               const SkString familyName,
-                               int index)
+                               bool               isFixedPitch,
+                               bool               sysFont,
+                               const SkString     familyName,
+                               int                index)
   : INHERITED(style, isFixedPitch)
   , fIsSysFont(sysFont)
   , fFamilyName(familyName)
@@ -93,11 +93,11 @@ std::unique_ptr<SkFontData> SkTypeface_VGG_Empty::onMakeFontData() const
 }
 
 SkTypeface_VGG_File::SkTypeface_VGG_File(const SkFontStyle& style,
-                                         bool isFixedPitch,
-                                         bool sysFont,
-                                         const SkString familyName,
-                                         const char path[],
-                                         int index)
+                                         bool               isFixedPitch,
+                                         bool               sysFont,
+                                         const SkString     familyName,
+                                         const char         path[],
+                                         int                index)
   : INHERITED(style, isFixedPitch, sysFont, familyName, index)
   , fPath(path)
 {
@@ -120,15 +120,15 @@ sk_sp<SkTypeface> SkTypeface_VGG_File::onMakeClone(const SkFontArguments& args) 
   SkString familyName;
   this->getFamilyName(&familyName);
 
-  return sk_ref_sp(new SkTypeface_FreeTypeStream(std::move(data),
-                                                 familyName,
-                                                 this->fontStyle(),
-                                                 this->isFixedPitch()));
+  return sk_make_sp<SkTypeface_FreeTypeStream>(std::move(data),
+                                               familyName,
+                                               this->fontStyle(),
+                                               this->isFixedPitch());
 }
 
 std::unique_ptr<SkFontData> SkTypeface_VGG_File::onMakeFontData() const
 {
-  int index;
+  int                            index;
   std::unique_ptr<SkStreamAsset> stream(this->onOpenStream(&index));
   if (!stream)
   {
@@ -250,7 +250,7 @@ sk_sp<SkFontStyleSet> SkFontMgrVGG::onMatchFamily(const char familyName[]) const
   return nullptr;
 }
 
-sk_sp<SkTypeface> SkFontMgrVGG::onMatchFamilyStyle(const char familyName[],
+sk_sp<SkTypeface> SkFontMgrVGG::onMatchFamilyStyle(const char         familyName[],
                                                    const SkFontStyle& fontStyle) const
 {
   sk_sp<SkFontStyleSet> sset(this->matchFamily(familyName));
@@ -260,7 +260,7 @@ sk_sp<SkTypeface> SkFontMgrVGG::onMatchFamilyStyle(const char familyName[],
 sk_sp<SkTypeface> SkFontMgrVGG::onMatchFamilyStyleCharacter(const char familyName[],
                                                             const SkFontStyle&,
                                                             const char* bcp47[],
-                                                            int bcp47Count,
+                                                            int         bcp47Count,
                                                             SkUnichar) const
 {
   return nullptr;
@@ -272,13 +272,13 @@ sk_sp<SkTypeface> SkFontMgrVGG::onMakeFromData(sk_sp<SkData> data, int ttcIndex)
 }
 
 sk_sp<SkTypeface> SkFontMgrVGG::onMakeFromStreamIndex(std::unique_ptr<SkStreamAsset> stream,
-                                                      int ttcIndex) const
+                                                      int                            ttcIndex) const
 {
   return this->makeFromStream(std::move(stream), SkFontArguments().setCollectionIndex(ttcIndex));
 }
 
 sk_sp<SkTypeface> SkFontMgrVGG::onMakeFromStreamArgs(std::unique_ptr<SkStreamAsset> stream,
-                                                     const SkFontArguments& args) const
+                                                     const SkFontArguments&         args) const
 {
   return SkTypeface_FreeType::MakeFromStream(std::move(stream), args);
 }
@@ -295,9 +295,9 @@ bool SkFontMgrVGG::addFont(const fs::path& path)
 }
 
 bool SkFontMgrVGG::addFont(const uint8_t* data,
-                           size_t length,
-                           const char* defaultRealName,
-                           bool copyData)
+                           size_t         length,
+                           const char*    defaultRealName,
+                           bool           copyData)
 {
   auto stream = std::make_unique<SkMemoryStream>(data, length, copyData);
   return VGGFontLoader::loadFontFromData(fScanner,
@@ -314,13 +314,13 @@ std::optional<std::pair<SkString, float>> SkFontMgrVGG::fuzzyMatchFontFamilyName
   {
     return std::nullopt;
   }
-  bool matchFound = false;
-  double bestScore = 0.0;
-  SkString bestMatch;
+  bool                               matchFound = false;
+  double                             bestScore = 0.0;
+  SkString                           bestMatch;
   rapidfuzz::fuzz::CachedRatio<char> scorer(fontName);
   for (const auto& style : fFamilies.fFamilies)
   {
-    auto choice = std::string(style->getFamilyName().c_str());
+    auto   choice = std::string(style->getFamilyName().c_str());
     double score = scorer.similarity(choice, bestScore);
 
     if (score >= bestScore)
@@ -333,7 +333,7 @@ std::optional<std::pair<SkString, float>> SkFontMgrVGG::fuzzyMatchFontFamilyName
   return std::pair{ bestMatch, bestScore };
 }
 
-sk_sp<SkTypeface> SkFontMgrVGG::onLegacyMakeTypeface(const char familyName[],
+sk_sp<SkTypeface> SkFontMgrVGG::onLegacyMakeTypeface(const char  familyName[],
                                                      SkFontStyle style) const
 {
   sk_sp<SkTypeface> tf;
@@ -352,10 +352,10 @@ sk_sp<SkTypeface> SkFontMgrVGG::onLegacyMakeTypeface(const char familyName[],
 }
 
 bool VGGFontLoader::loadFontFromData(const SkTypeface_FreeType::Scanner& scanner,
-                                     std::unique_ptr<SkMemoryStream> stream,
-                                     int index,
-                                     SkFontMgrVGG::Families* families,
-                                     const char* defaultRealName)
+                                     std::unique_ptr<SkMemoryStream>     stream,
+                                     int                                 index,
+                                     SkFontMgrVGG::Families*             families,
+                                     const char*                         defaultRealName)
 {
   int numFaces;
   if (!scanner.recognizedFont(stream.get(), &numFaces))
@@ -366,8 +366,8 @@ bool VGGFontLoader::loadFontFromData(const SkTypeface_FreeType::Scanner& scanner
 
   for (int faceIndex = 0; faceIndex < numFaces; ++faceIndex)
   {
-    bool isFixedPitch;
-    SkString realname;
+    bool        isFixedPitch;
+    SkString    realname;
     SkFontStyle style = SkFontStyle(); // avoid uninitialized warning
     if (!scanner.scanFont(stream.get(), faceIndex, &realname, &style, &isFixedPitch, nullptr))
     {
@@ -394,9 +394,9 @@ bool VGGFontLoader::loadFontFromData(const SkTypeface_FreeType::Scanner& scanner
 }
 
 void VGGFontLoader::loadDirectoryFonts(const SkTypeface_FreeType::Scanner& scanner,
-                                       const SkString& directory,
-                                       const char* suffix,
-                                       SkFontMgrVGG::Families* families)
+                                       const SkString&                     directory,
+                                       const char*                         suffix,
+                                       SkFontMgrVGG::Families*             families)
 {
   const std::filesystem::path dir{ directory.c_str() };
 
@@ -406,7 +406,7 @@ void VGGFontLoader::loadDirectoryFonts(const SkTypeface_FreeType::Scanner& scann
     {
       continue;
     }
-    auto filename = entry.path().string();
+    auto                           filename = entry.path().string();
     std::unique_ptr<SkStreamAsset> stream = SkStream::MakeFromFile(filename.c_str());
     if (!stream)
     {
@@ -423,8 +423,8 @@ void VGGFontLoader::loadDirectoryFonts(const SkTypeface_FreeType::Scanner& scann
 
     for (int faceIndex = 0; faceIndex < numFaces; ++faceIndex)
     {
-      bool isFixedPitch;
-      SkString realname;
+      bool        isFixedPitch;
+      SkString    realname;
       SkFontStyle style = SkFontStyle(); // avoid uninitialized warning
       if (!scanner.scanFont(stream.get(), faceIndex, &realname, &style, &isFixedPitch, nullptr))
       {
@@ -440,8 +440,12 @@ void VGGFontLoader::loadDirectoryFonts(const SkTypeface_FreeType::Scanner& scann
         families->push_back().reset(addTo);
         families->lookUp[realname.c_str()] = families->size() - 1;
       }
-      addTo->appendTypeface(sk_ref_sp(
-        new SkTypeface_VGG_File(style, isFixedPitch, true, realname, filename.c_str(), faceIndex)));
+      addTo->appendTypeface(sk_make_sp<SkTypeface_VGG_File>(style,
+                                                            isFixedPitch,
+                                                            true,
+                                                            realname,
+                                                            filename.c_str(),
+                                                            faceIndex));
     }
   }
 
@@ -467,7 +471,7 @@ template<class... Ts>
 Overloaded(Ts...) -> Overloaded<Ts...>;
 
 void VGGFontLoader::loadSystemFonts(const SkTypeface_FreeType::Scanner& scanner,
-                                    SkFontMgrVGG::Families* families) const
+                                    SkFontMgrVGG::Families*             families) const
 {
   // helper type for the visitor #4
   std::visit(Overloaded{ [&, this](const SkString& arg)
@@ -499,6 +503,6 @@ void VGGFontLoader::loadSystemFonts(const SkTypeface_FreeType::Scanner& scanner,
   {
     SkFontStyleSet_VGG* family = new SkFontStyleSet_VGG(SkString());
     families->push_back().reset(family);
-    family->appendTypeface(sk_ref_sp(new SkTypeface_VGG_Empty()));
+    family->appendTypeface(sk_make_sp<SkTypeface_VGG_Empty>());
   }
 }

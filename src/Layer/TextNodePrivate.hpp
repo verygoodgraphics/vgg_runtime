@@ -44,7 +44,7 @@ namespace VGG::layer
 
 struct ParagraphInfo
 {
-  int offsetX{ 0 };
+  int                               offsetX{ 0 };
   std::unique_ptr<sktxt::Paragraph> paragraph;
 };
 
@@ -53,13 +53,13 @@ class TextParagraph
 
 public:
   std::unique_ptr<ParagraphBuilder> builder{ nullptr };
-  int level{ 0 };
-  TextView utf8TextView;
+  int                               level{ 0 };
+  TextView                          utf8TextView;
   TextParagraph() = default;
-  TextParagraph(std::string_view view,
+  TextParagraph(std::string_view                  view,
                 std::unique_ptr<ParagraphBuilder> builder,
-                int level,
-                size_t charCount)
+                int                               level,
+                size_t                            charCount)
     : builder(std::move(builder))
     , level(level)
     , utf8TextView({ view, charCount })
@@ -72,12 +72,12 @@ public:
   }
 };
 
-void drawParagraphDebugInfo(DebugCanvas& canvas,
+void drawParagraphDebugInfo(DebugCanvas&         canvas,
                             const TextParagraph& textParagraph,
-                            Paragraph* p,
-                            int curX,
-                            int curY,
-                            int index);
+                            Paragraph*           p,
+                            int                  curX,
+                            int                  curY,
+                            int                  index);
 
 class TextParagraphCache : public ParagraphListener
 {
@@ -99,32 +99,28 @@ public:
   }
 
 private:
-  int m_height{ 0 };
+  int  m_height{ 0 };
   bool m_newParagraph{ true };
 
-  ParagraphAttr m_paraAttr;
+  ParagraphAttr                m_paraAttr;
   TextParagraphCacheDirtyFlags m_dirtyFlags{ D_ALL };
-  sk_sp<VGGFontCollection> m_fontCollection;
+  sk_sp<VGGFontCollection>     m_fontCollection;
 
 protected:
   void onBegin() override;
   void onEnd() override;
   void onParagraphBegin(int paraIndex, int order, const ParagraphAttr& paragraAttr) override;
   void onParagraphEnd(int paraIndex, const TextView& textView) override;
-  void onTextStyle(int paraIndex,
-                   int styleIndex,
-                   const TextView& textView,
+  void onTextStyle(int                  paraIndex,
+                   int                  styleIndex,
+                   const TextView&      textView,
                    const TextStyleAttr& textAttr) override;
 
 public:
   TextParagraphCache(Bound2 bound)
   {
-    auto mgr = sk_sp<SkFontMgrVGG>(FontManager::instance().defaultFontManager());
-    if (mgr)
-    {
-      mgr->ref();
-    }
-    m_fontCollection = sk_ref_sp(new VGGFontCollection(std::move(mgr)));
+    auto mgr = sk_ref_sp(FontManager::instance().defaultFontManager());
+    m_fontCollection = sk_make_sp<VGGFontCollection>(std::move(mgr));
   }
   TextParagraphCache(const TextParagraphCache&) = default;
   TextParagraphCache& operator=(const TextParagraphCache&) = default;
@@ -188,8 +184,8 @@ public:
     for (int i = 0; i < paragraphCache.size(); i++)
     {
       // auto paragraph = d.builder->Build();
-      const auto& d = paragraph[i];
-      const auto& paragraph = paragraphCache[i].paragraph;
+      const auto&   d = paragraph[i];
+      const auto&   paragraph = paragraphCache[i].paragraph;
       SkFontMetrics metrics;
       d.builder->getParagraphStyle().getTextStyle().getFontMetrics(&metrics);
       const auto curX = metrics.fAvgCharWidth * d.level;
@@ -257,12 +253,12 @@ public:
   {
   }
 
-  std::string text;
-  TextParagraphCache paragraphCache;
-  ETextLayoutMode mode;
+  std::string                text;
+  TextParagraphCache         paragraphCache;
+  ETextLayoutMode            mode;
   std::vector<TextStyleAttr> textAttr;
-  VParagraphPainter painter;
-  ETextVerticalAlignment vertAlign{ ETextVerticalAlignment::VA_Top };
+  VParagraphPainter          painter;
+  ETextVerticalAlignment     vertAlign{ ETextVerticalAlignment::VA_Top };
 
   TextNode__pImpl(const TextNode__pImpl& p)
     : paragraphCache(Bound2())

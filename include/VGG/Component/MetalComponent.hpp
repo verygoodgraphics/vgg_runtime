@@ -21,25 +21,21 @@
 namespace VGG
 {
 
-namespace layer
+class MetalComponentImpl;
+class MetalComponent
 {
-class SkiaGraphicsContext;
-}
-
-class ComponentImpl;
-class Component
-{
-  std::unique_ptr<ComponentImpl> m_impl;
+  std::unique_ptr<MetalComponentImpl> m_impl;
 
 public:
-  Component();
-  ~Component();
+  using MTLHandle = const void*;
+
+  MetalComponent();
+  ~MetalComponent();
 
   bool load(const std::string& filePath,
-            const char* designDocSchemaFilePath = nullptr,
-            const char* layoutDocSchemaFilePath = nullptr);
-  void setGraphicsContext(std::unique_ptr<layer::SkiaGraphicsContext>& context, int w, int h);
-
+            const char*        designDocSchemaFilePath = nullptr,
+            const char*        layoutDocSchemaFilePath = nullptr);
+  void setView(MTLHandle mtkView);
   bool run();
 };
 

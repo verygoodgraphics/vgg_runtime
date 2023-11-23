@@ -262,9 +262,10 @@ else()
   message(Fatal "target type for skia build is invalid: " ${platform})
 endif()
 
-if(platform MATCHES "^iOS")
-  set(IOS_EXTRA_CFLAGS,
+if(platform MATCHES "^iOS") # iOS
+  set(IOS_EXTRA_CFLAGS
     " extra_cflags=[\
+        \"-fvisibility=default\", \
         \"-fembed-bitcode\", \
         \"-mios-version-min=10.0\", \
         \"-flto=full\", \
@@ -277,18 +278,20 @@ if(platform MATCHES "^iOS")
         \"-dsk_disable_aaa\", \
         \"-dsk_disable_effect_deserialization\"")
   if(platform STREQUAL "iOS-simulator")
-    string(APPEND IOS_EXTRA_CFLAGS, ", \"--target=arm64-apple-ios12.0.0-simulator\"")
+    string(APPEND IOS_EXTRA_CFLAGS ", \"--target=arm64-apple-ios15.0.0-simulator\"")
   endif()
-  string(APPEND IOS_EXTRA_CFLAGS, "]")
+  string(APPEND IOS_EXTRA_CFLAGS "]")
   string(APPEND OPTIONS ${IOS_EXTRA_CFLAGS})
-elseif(NOT ${platform} IN_LIST VGG_WIN_TARGET_LIST)
+
+elseif(NOT ${platform} IN_LIST VGG_WIN_TARGET_LIST) # not in window
 # we assume non-window using gcc compatible compiler
 if(config STREQUAL "RelWithDebInfo")
   string(APPEND OPTIONS " extra_cflags_cc=[\"-fvisibility=default\", \"-g\", \"-frtti\"]")
 else()
   string(APPEND OPTIONS " extra_cflags_cc=[\"-fvisibility=default\", \"-frtti\"]")
 endif()
-elseif(platform STREQUAL "WASM" AND DEFINED EMSCRIPTEN)
+
+elseif(platform STREQUAL "WASM" AND DEFINED EMSCRIPTEN) # wasm
 string(APPEND OPTIONS " extra_cflags_cc=[\"-frtti\",\"-s\", \"-fvisibility=default\"] extra_cflags=[\"-Wno-unknown-warning-option\",\"-s\",\"-s\"]")
 endif()
 

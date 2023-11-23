@@ -446,7 +446,7 @@ public:
 
   void drawRawStyle(Painter& painter, const SkPath& skPath, sk_sp<SkBlender> blender)
   {
-    const auto globalAlpha = contextSetting.Opacity;
+    const auto globalAlpha = contextSetting.opacity;
     auto       filled = false;
     for (const auto& f : style.fills)
     {
@@ -467,7 +467,7 @@ public:
       }
       for (const auto& s : style.shadows) // simplified into one shadow
       {
-        if (!s.is_enabled || s.inner)
+        if (!s.isEnabled || s.inner)
           continue;
         if (filled)
           painter.drawShadow(skPath, bound, s, SkPaint::kFill_Style, nullptr);
@@ -499,7 +499,7 @@ public:
     painter.beginClip(skPath);
     for (const auto& s : style.shadows)
     {
-      if (!s.is_enabled || !s.inner)
+      if (!s.isEnabled || !s.inner)
         continue;
       painter.drawInnerShadow(skPath, bound, s, SkPaint::kFill_Style, nullptr);
     }

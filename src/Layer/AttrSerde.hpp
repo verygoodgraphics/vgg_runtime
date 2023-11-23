@@ -248,19 +248,19 @@ inline void from_json(const json& j, Gradient& x)
 
 inline void from_json(const json& j, ContextSetting& x)
 {
-  x.BlendMode = j.at("blendMode").get<EBlendMode>();
-  x.IsolateBlending = j.at("isolateBlending").get<bool>();
-  x.Opacity = j.at("opacity").get<double>();
-  x.TransparencyKnockoutGroup = j.at("transparencyKnockoutGroup").get<EKnockoutType>();
+  x.blendMode = j.at("blendMode").get<EBlendMode>();
+  x.isolateBlending = j.at("isolateBlending").get<bool>();
+  x.opacity = j.at("opacity").get<double>();
+  x.transparencyKnockoutGroup = j.at("transparencyKnockoutGroup").get<EKnockoutType>();
 }
 
 inline void from_json(const json& j, Border& x)
 {
   x.color = get_stack_optional<Color>(j, "color");
-  x.context_settings = j.at("contextSettings").get<ContextSetting>();
-  x.dashed_offset = j.at("dashedOffset").get<double>();
-  x.dashed_pattern = j.at("dashedPattern").get<std::vector<float>>();
-  x.fill_type = j.at("fillType").get<EPathFillType>();
+  x.contextSettings = j.at("contextSettings").get<ContextSetting>();
+  x.dashedOffset = j.at("dashedOffset").get<double>();
+  x.dashedPattern = j.at("dashedPattern").get<std::vector<float>>();
+  x.fillType = j.at("fillType").get<EPathFillType>();
   x.flat = j.at("flat").get<double>();
   x.gradient = get_stack_optional<Gradient>(j, "gradient");
   x.isEnabled = j.at("isEnabled").get<bool>();
@@ -277,12 +277,12 @@ inline void from_json(const json& j, Shadow& x)
 {
   x.blur = j.at("blur").get<double>();
   x.color = j.at("color").get<Color>();
-  x.context_settings = j.at("contextSettings").get<ContextSetting>();
+  x.contextSettings = j.at("contextSettings").get<ContextSetting>();
   x.inner = j.at("inner").get<bool>();
-  x.is_enabled = j.at("isEnabled").get<bool>();
+  x.isEnabled = j.at("isEnabled").get<bool>();
   const auto p = glm::vec2{ j.value("offsetX", 0.f), j.value("offsetY", 0.f) };
-  x.offset_x = p.x;
-  x.offset_y = p.y;
+  x.offsetX = p.x;
+  x.offsetY = p.y;
   x.spread = j.at("spread").get<double>();
 }
 

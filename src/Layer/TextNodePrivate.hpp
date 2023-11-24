@@ -39,6 +39,20 @@
 #include <modules/skparagraph/include/TypefaceFontProvider.h>
 
 namespace sktxt = skia::textlayout;
+
+namespace
+{
+
+#define cauto const auto // NOLINT
+void printShapingInfo(sktxt::Paragraph& p)
+{
+  cauto maxWidth = p.getMaxWidth();
+  cauto height = p.getHeight();
+}
+
+#undef catuo
+} // namespace
+
 namespace VGG::layer
 {
 

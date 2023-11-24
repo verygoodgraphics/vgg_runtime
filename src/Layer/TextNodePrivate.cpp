@@ -26,8 +26,11 @@
 
 #include <core/SkCanvas.h>
 #include <core/SkColor.h>
+#include <core/SkPathEffect.h>
 #include <core/SkString.h>
+#include <modules/skparagraph/include/DartTypes.h>
 #include <modules/skparagraph/include/FontCollection.h>
+#include <modules/skparagraph/include/Metrics.h>
 #include <modules/skparagraph/include/Paragraph.h>
 
 #include <glm/detail/qualifier.hpp>
@@ -237,14 +240,80 @@ void drawParagraphDebugInfo(
   };
   canvas.get()->save();
   canvas.get()->translate(curX, curY);
-  auto    rects = p->getRectsForRange(0, 10000, RectHeightStyle::kMax, RectWidthStyle::kMax);
   auto    h = p->getHeight();
   auto    mw = p->getMaxWidth();
   SkPaint pen;
   SkColor color = s_colorTable[index % 9];
-  pen.setColor(SkColorSetA(color, 0x11));
-  canvas.get()->drawRect(SkRect{ 0, 0, mw, h }, pen);
-  canvas.drawRects(color, rects);
+  pen.setColor(SkColorSetA(SK_ColorBLUE, 0x11));
+
+  canvas.get()->drawRect(SkRect{ 0, 0, mw, h }, pen); // draw the paragraph background
+
+  auto rects = p->getRectsForRange(0, 10000, RectHeightStyle::kMax, RectWidthStyle::kMax);
+  canvas.drawRects(SkColorSetA(SK_ColorGREEN, 0x11), rects);
+
+  rects = p->getRectsForPlaceholders();
+  canvas.drawRects(SK_ColorRED, rects);
+
+  p->visit(
+    [&](int lineNumber, const Paragraph::VisitorInfo* info)
+    {
+      if (!info)
+        return;
+      SkPaint paint;
+
+      //
+      // paint.setColor(SK_ColorMAGENTA);
+      // paint.setStrokeWidth(5);
+      // canvas.get()->drawPoint(info->origin, paint);
+      //
+      // paint.setStrokeWidth(1);
+      // paint.setColor(SK_ColorRED);
+      // SkPoint to = { info->origin.x() + info->advanceX, info->origin.y() };
+      // canvas.get()->drawLine(info->origin, to, paint);
+      // paint.setStrokeWidth(5);
+      // canvas.get()->drawPoint(to, paint);
+      //
+
+      for (int i = 0; i < info->count; i++)
+      {
+        paint.setStrokeWidth(info->font.getSize() / 20);
+        paint.setColor(SK_ColorBLUE);
+        SkPoint pos = info->origin + info->positions[i];
+        canvas.get()->drawPoint(pos, paint);
+      }
+    });
+
+  std::vector<LineMetrics> lineMetrics;
+  p->getLineMetrics(lineMetrics);
+
+  float   offsetY = 0;
+  SkPaint paint;
+  paint.setColor(SK_ColorRED);
+
+  static float s_intervals[2] = { 5, 5 };
+  auto         effect = SkDashPathEffect::Make(s_intervals, 2, 25);
+  for (const auto& m : lineMetrics)
+  {
+    offsetY += m.fHeight;
+    // baseline
+    canvas.drawHorizontalLine(m.fLeft, m.fWidth + m.fLeft, m.fBaseline, SK_ColorRED, effect);
+    // ascent
+    canvas
+      .drawHorizontalLine(m.fLeft, m.fWidth + m.fLeft, m.fBaseline - m.fAscent, SK_ColorMAGENTA, 0);
+    // descent
+    canvas
+      .drawHorizontalLine(m.fLeft, m.fWidth + m.fLeft, m.fBaseline + m.fDescent, SK_ColorBLUE, 0);
+
+    paint.setColor(SK_ColorRED);
+    paint.setStyle(SkPaint::kStroke_Style);
+    for (auto i = m.fStartIndex; i < m.fEndIndex; i++)
+    {
+      auto a = p->getRectsForRange(i, i + 1, RectHeightStyle::kStrut, RectWidthStyle::kMax);
+      if (a.empty() == false)
+        canvas.get()->drawRect(a[0].rect, paint); // draw the paragraph background
+    }
+  }
+
   canvas.get()->restore();
 }
 void TextParagraphCache::onBegin()

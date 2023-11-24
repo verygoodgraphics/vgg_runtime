@@ -16,6 +16,8 @@
 #pragma once
 
 #include "core/SkCanvas.h"
+#include <core/SkColor.h>
+#include <core/SkPathEffect.h>
 #include <modules/skparagraph/include/DartTypes.h>
 #include <modules/skparagraph/include/Metrics.h>
 #include <modules/skparagraph/include/Paragraph.h>
@@ -30,7 +32,7 @@ class DebugCanvas
 {
 public:
   DebugCanvas(SkCanvas* canvas)
-    : canvas(canvas)
+    : m_canvas(canvas)
   {
   }
 
@@ -47,12 +49,44 @@ public:
     }
   }
 
+  void drawHorizontalLine(
+    float               left,
+    float               right,
+    float               y,
+    SkColor             color = SK_ColorBLACK,
+    sk_sp<SkPathEffect> effect = nullptr)
+  {
+    SkPoint lp{ left, y };
+    SkPoint rp{ right, y };
+    SkPaint paint;
+    paint.setStrokeWidth(1);
+    paint.setPathEffect(effect);
+    paint.setColor(color);
+    m_canvas->drawLine(lp, rp, paint);
+  }
+
+  void drawVerticalLine(
+    float               top,
+    float               bottom,
+    float               x,
+    SkColor             color = SK_ColorBLACK,
+    sk_sp<SkPathEffect> effect = nullptr)
+  {
+    SkPoint tp{ x, top };
+    SkPoint bp{ x, bottom };
+    SkPaint paint;
+    paint.setStrokeWidth(1);
+    paint.setPathEffect(effect);
+    paint.setColor(color);
+    m_canvas->drawLine(tp, bp, paint);
+  }
+
   SkCanvas* get()
   {
-    return canvas;
+    return m_canvas;
   }
 
 private:
-  SkCanvas* canvas;
-  const char* name;
+  SkCanvas*   m_canvas;
+  const char* m_name;
 };

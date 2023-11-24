@@ -32,7 +32,6 @@ void Painter::drawPathBorder(
   const SkPath&        skPath,
   const Bound&         bound,
   const Border&        b,
-  float                globalAlpha,
   sk_sp<SkImageFilter> imageFilter,
   sk_sp<SkBlender>     blender)
 {
@@ -71,19 +70,19 @@ void Painter::drawPathBorder(
   {
     assert(b.gradient.has_value());
     strokePen.setShader(getGradientShader(b.gradient.value(), bound));
-    strokePen.setAlphaf(b.contextSettings.opacity * globalAlpha);
+    strokePen.setAlphaf(b.contextSettings.opacity);
   }
   else if (b.fillType == FT_Color)
   {
     strokePen.setColor(b.color.value_or(Color{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
-    strokePen.setAlphaf(strokePen.getAlphaf() * globalAlpha);
+    strokePen.setAlphaf(strokePen.getAlphaf());
   }
   else if (b.fillType == FT_Pattern)
   {
     assert(b.pattern.has_value());
     auto shader = makePatternShader(bound, b.pattern.value());
     strokePen.setShader(shader);
-    strokePen.setAlphaf(b.contextSettings.opacity * globalAlpha);
+    strokePen.setAlphaf(b.contextSettings.opacity);
   }
 
   m_canvas->drawPath(skPath, strokePen);
@@ -141,7 +140,6 @@ void Painter::drawFill(
   const SkPath&        skPath,
   const Bound&         bound,
   const Fill&          f,
-  float                globalAlpha,
   sk_sp<SkImageFilter> imageFilter,
   sk_sp<SkBlender>     blender,
   sk_sp<SkMaskFilter>  mask)
@@ -156,21 +154,21 @@ void Painter::drawFill(
   {
     fillPen.setColor(f.color);
     const auto currentAlpha = fillPen.getAlphaf();
-    fillPen.setAlphaf(f.contextSettings.opacity * globalAlpha * currentAlpha);
+    fillPen.setAlphaf(f.contextSettings.opacity * currentAlpha);
   }
   else if (f.fillType == FT_Gradient)
   {
     assert(f.gradient.has_value());
     auto gradientShader = getGradientShader(f.gradient.value(), bound);
     fillPen.setShader(gradientShader);
-    fillPen.setAlphaf(f.contextSettings.opacity * globalAlpha);
+    fillPen.setAlphaf(f.contextSettings.opacity);
   }
   else if (f.fillType == FT_Pattern)
   {
     assert(f.pattern.has_value());
     auto shader = makePatternShader(bound, f.pattern.value());
     fillPen.setShader(shader);
-    fillPen.setAlphaf(f.contextSettings.opacity * globalAlpha);
+    fillPen.setAlphaf(f.contextSettings.opacity);
   }
   m_canvas->drawPath(skPath, fillPen);
 }

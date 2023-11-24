@@ -256,7 +256,6 @@ public:
     const SkPath&        skPath,
     const Bound&         bound,
     const Fill&          f,
-    float                globalAlpha,
     sk_sp<SkImageFilter> imageFilter,
     sk_sp<SkBlender>     blender,
     sk_sp<SkMaskFilter>  mask);
@@ -265,7 +264,6 @@ public:
     const SkPath&        skPath,
     const Bound&         bound,
     const Border&        b,
-    float                globalAlpha,
     sk_sp<SkImageFilter> imageFilter,
     sk_sp<SkBlender>     blender);
 

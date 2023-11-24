@@ -221,19 +221,12 @@ void PaintNode::paintPass(SkiaRenderer* renderer, int zorder)
     }
   }
 
-  // renderer->displayList.emplace_back(renderer->canvas()->getTotalMatrix(), this);
-  // renderer->pushItem(this, zorder);
   this->paintEvent(renderer);
 }
 
 void PaintNode::paintEvent(SkiaRenderer* renderer)
 {
   VGG_IMPL(PaintNode);
-  // const auto path = stylePath();
-  // if (!_->maskObjects)
-  // {
-  //   _->maskObjects = _->calcMaskObjects(renderer);
-  // }
   paintStyle(renderer->canvas(), *_->path, *_->mask);
 }
 
@@ -842,16 +835,7 @@ void PaintNode::paintFill(SkCanvas* canvas, sk_sp<SkBlender> blender, const SkPa
   {
     if (!f.isEnabled)
       continue;
-
-    // auto m = canvas->getTotalMatrix();
-    // DEBUG("--------");
-    // std::cout << d_ptr->transform << std::endl;
-    // for (auto i = 0; i < path.countPoints(); i++)
-    // {
-    //   auto p = path.getPoint(i);
-    //   DEBUG("%f %f", p.x(), p.y());
-    // }
-    render.drawFill(path, bound(), f, contextSetting().opacity, 0, blender, blur);
+    render.drawFill(path, bound(), f, 0, blender, blur);
   }
 }
 

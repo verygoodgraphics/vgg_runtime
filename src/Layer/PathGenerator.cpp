@@ -16,18 +16,32 @@
 #include "PathGenerator.hpp"
 #include "Layer/Renderer.hpp"
 
+#include <glm/ext/matrix_float3x3.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/quaternion_geometric.hpp>
+#include <glm/ext/quaternion_trigonometric.hpp>
+#include <glm/geometric.hpp>
+#include <glm/gtx/matrix_transform_2d.hpp>
+#include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/vector_angle.hpp>
+#include <glm/gtx/transform2.hpp>
+#include <glm/ext/matrix_float3x3.hpp>
+#include <glm/gtx/compatibility.hpp>
+#include <glm/gtx/quaternion.hpp>
+
 namespace
 {
 
-void inline computeAdjacent3PointsInfo(const glm::vec2& p0,
-                                       const glm::vec2& p1,
-                                       const glm::vec2& p2,
-                                       float& vectorAngle,
-                                       int& vectorAngleSign,
-                                       float& normAngleFromXAxis,
-                                       int& normAngleSign,
-                                       float& len1,
-                                       float& len2)
+void inline computeAdjacent3PointsInfo(
+  const glm::vec2& p0,
+  const glm::vec2& p1,
+  const glm::vec2& p2,
+  float&           vectorAngle,
+  int&             vectorAngleSign,
+  float&           normAngleFromXAxis,
+  int&             normAngleSign,
+  float&           len1,
+  float&           len2)
 {
   const auto v1 = p0 - p1;
   const auto v2 = p2 - p1;
@@ -41,35 +55,39 @@ void inline computeAdjacent3PointsInfo(const glm::vec2& p0,
   normAngleSign = VGG::vectorSign(glm::vec2{ 1, 0 }, norm);
 }
 
-void inline computeAdjacent5PointsInfo(const PointAttr& prevPrevPoint,
-                                       const PointAttr& prevPoint,
-                                       const PointAttr& curPoint,
-                                       const PointAttr& nextPoint,
-                                       const PointAttr& nextNextPoint,
-                                       float& theta,
-                                       int& thetaSign,
-                                       float& pivotAngle,
-                                       int& pivotSign,
-                                       float& len1,
-                                       float& len2)
+void inline computeAdjacent5PointsInfo(
+  const PointAttr& prevPrevPoint,
+  const PointAttr& prevPoint,
+  const PointAttr& curPoint,
+  const PointAttr& nextPoint,
+  const PointAttr& nextNextPoint,
+  float&           theta,
+  int&             thetaSign,
+  float&           pivotAngle,
+  int&             pivotSign,
+  float&           len1,
+  float&           len2)
 {
   auto radius = curPoint.radius;
-  computeAdjacent3PointsInfo(prevPoint.point,
-                             curPoint.point,
-                             nextPoint.point,
-                             theta,
-                             thetaSign,
-                             pivotAngle,
-                             pivotSign,
-                             len1,
-                             len2);
+  computeAdjacent3PointsInfo(
+    prevPoint.point,
+    curPoint.point,
+    nextPoint.point,
+    theta,
+    thetaSign,
+    pivotAngle,
+    pivotSign,
+    len1,
+    len2);
 
   auto halfCot = [](float& a) { a = 1.0 / std::tan(a / 2); };
-  auto prevAngle = glm::angle(glm::normalize(prevPrevPoint.point - prevPoint.point),
-                              glm::normalize(curPoint.point - prevPoint.point));
+  auto prevAngle = glm::angle(
+    glm::normalize(prevPrevPoint.point - prevPoint.point),
+    glm::normalize(curPoint.point - prevPoint.point));
   auto curAngle = theta;
-  auto nextAngle = glm::angle(glm::normalize(nextNextPoint.point - nextPoint.point),
-                              glm::normalize(curPoint.point - nextPoint.point));
+  auto nextAngle = glm::angle(
+    glm::normalize(nextNextPoint.point - nextPoint.point),
+    glm::normalize(curPoint.point - nextPoint.point));
 
   halfCot(prevAngle);
   halfCot(curAngle);
@@ -78,14 +96,15 @@ void inline computeAdjacent5PointsInfo(const PointAttr& prevPrevPoint,
   len1 = (curAngle * len1) / (prevAngle + curAngle);
   len2 = (curAngle * len2) / (nextAngle + curAngle);
 }
-inline bool addSmoothingRadiusCurveInLocalSpace(const glm::vec2& point,
-                                                float theta,
-                                                int thetaSign,
-                                                float signedPivotVectorAngle,
-                                                float smooth,
-                                                float radius,
-                                                float maxLength,
-                                                SkPath& path)
+inline bool addSmoothingRadiusCurveInLocalSpace(
+  const glm::vec2& point,
+  float            theta,
+  int              thetaSign,
+  float            signedPivotVectorAngle,
+  float            smooth,
+  float            radius,
+  float            maxLength,
+  SkPath&          path)
 {
   const auto cosTheta = std::cos(theta);
   const auto singedTheta = thetaSign * theta;
@@ -94,8 +113,8 @@ inline bool addSmoothingRadiusCurveInLocalSpace(const glm::vec2& point,
   radius = std::min(maxLength * halfTanTheta, radius);
   const auto halfVec =
     glm::normalize(glm::vec2{ std::cos(singedTheta), std::sin(singedTheta) } + glm::vec2{ 1, 0 });
-  const auto arcCenter = halfVec * (radius / halfSinTheta);
-  float roundedLength = radius / halfTanTheta;
+  const auto  arcCenter = halfVec * (radius / halfSinTheta);
+  float       roundedLength = radius / halfTanTheta;
   const float maxSmooth = std::max(maxLength / roundedLength - 1.0f, 0.f);
   smooth = std::min(maxSmooth, smooth);
 
@@ -117,11 +136,9 @@ inline bool addSmoothingRadiusCurveInLocalSpace(const glm::vec2& point,
   const float consume = (1.0f + smooth) * roundedLength;
 
   const auto halfArcRadian = (1.0f - smooth) * (math::number::Pi - theta) / 2.0f;
-  auto pointOnCircle = [](const glm::vec2& center,
-                          float radius,
-                          float radianFromBisect,
-                          float theta,
-                          int sign) -> glm::vec2
+  auto       pointOnCircle =
+    [](const glm::vec2& center, float radius, float radianFromBisect, float theta, int sign)
+    -> glm::vec2
   {
     const auto radian = sign * ((math::number::Pi - theta / 2.f) - radianFromBisect);
     return glm::vec2{ center.x + radius * std::cos(radian), center.y + radius * std::sin(radian) };
@@ -131,14 +148,14 @@ inline bool addSmoothingRadiusCurveInLocalSpace(const glm::vec2& point,
   glm::vec2 last = pointOnCircle(arcCenter, radius, halfArcRadian, theta, -thetaSign);
 
   const auto arcNormal = arcCenter - last;
-  float x;
+  float      x;
   if (arcNormal.x != 0.f)
     x = (last.y * (arcNormal.y) + last.x * (arcNormal.x)) / (arcNormal.x);
   else
     x = last.x;
-  glm::vec2 third = glm::vec2{ x, 0 };
+  glm::vec2       third = glm::vec2{ x, 0 };
   constexpr float PROPORTION = 2.f / 3.f; // between (0, 1)
-  glm::vec2 second = glm::lerp(first, third, PROPORTION);
+  glm::vec2       second = glm::lerp(first, third, PROPORTION);
 
   glm::mat3 reflect = glm::identity<glm::mat3>();
   reflect = glm::reflect2D(reflect, glm::normalize(glm::vec3{ -arcCenter.y, arcCenter.x, 0 }));
@@ -186,13 +203,14 @@ int peek1Point(const PointAttr* pp, const PointAttr& cp, SkPath& path)
   return 1;
 }
 
-int peek5Points(const PointAttr& prevPrevPoint,
-                const PointAttr& prevPoint,
-                const PointAttr& curPoint,
-                const PointAttr& nextPoint,
-                const PointAttr& nextNextPoint,
-                float smooth,
-                SkPath& path)
+int peek5Points(
+  const PointAttr& prevPrevPoint,
+  const PointAttr& prevPoint,
+  const PointAttr& curPoint,
+  const PointAttr& nextPoint,
+  const PointAttr& nextNextPoint,
+  float            smooth,
+  SkPath&          path)
 {
   const auto prevHasFrom = prevPoint.from.has_value();
   const auto curHasTo = curPoint.to.has_value();
@@ -202,24 +220,25 @@ int peek5Points(const PointAttr& prevPrevPoint,
   if (!prevHasFrom && !curHasTo && !curHasFrom && !nextHasTo)
   {
     float theta;
-    int thetaSign;
+    int   thetaSign;
     float pivotAngle;
-    int pivotSign;
+    int   pivotSign;
     float len1, len2;
-    auto radius = curPoint.radius;
-    computeAdjacent5PointsInfo(prevPrevPoint,
-                               prevPoint,
-                               curPoint,
-                               nextPoint,
-                               nextNextPoint,
-                               theta,
-                               thetaSign,
-                               pivotAngle,
-                               pivotSign,
-                               len1,
-                               len2);
+    auto  radius = curPoint.radius;
+    computeAdjacent5PointsInfo(
+      prevPrevPoint,
+      prevPoint,
+      curPoint,
+      nextPoint,
+      nextNextPoint,
+      theta,
+      thetaSign,
+      pivotAngle,
+      pivotSign,
+      len1,
+      len2);
     const auto halfTanTheta = std::tan(theta / 2.f);
-    if (smooth < 0)
+    if (smooth <= 0)
     {
       radius = std::min(std::min(halfTanTheta * len1, halfTanTheta * len2), radius);
       path.arcTo(curPoint.point.x, curPoint.point.y, nextPoint.point.x, nextPoint.point.y, radius);
@@ -227,23 +246,22 @@ int peek5Points(const PointAttr& prevPrevPoint,
     else
     {
       const float maxLength = std::min(len1, len2);
-      auto added = addSmoothingRadiusCurveInLocalSpace(curPoint.point,
-                                                       theta,
-                                                       thetaSign,
-                                                       pivotSign * pivotAngle,
-                                                       smooth,
-                                                       radius,
-                                                       maxLength,
-                                                       path);
+
+      auto added = addSmoothingRadiusCurveInLocalSpace(
+        curPoint.point,
+        theta,
+        thetaSign,
+        pivotSign * pivotAngle,
+        smooth,
+        radius,
+        maxLength,
+        path);
 
       if (!added)
       {
         radius = std::min(maxLength * halfTanTheta, radius);
-        path.arcTo(curPoint.point.x,
-                   curPoint.point.y,
-                   nextPoint.point.x,
-                   nextPoint.point.y,
-                   radius);
+        path
+          .arcTo(curPoint.point.x, curPoint.point.y, nextPoint.point.x, nextPoint.point.y, radius);
       }
     }
     return 1;
@@ -263,30 +281,30 @@ namespace VGG::layer
 SkPath makePath(const Contour& contour)
 {
   const auto& points = contour;
-  auto isClosed = contour.closed;
-  auto smooth = contour.cornerSmooth;
+  auto        isClosed = contour.closed;
+  auto        smooth = contour.cornerSmooth;
   if (points.size() < 2)
   {
     WARN("Too few path points.");
     return {};
   }
-  SkPath path;
+  SkPath     path;
   const auto total = points.size();
-  size_t prev = 0;
-  size_t cur = 1;
-  size_t next = (cur + 1) % total;
-  size_t prev2 = points.size() - 1;
-  size_t next2 = (next + 1) % total;
+  size_t     prev = 0;
+  size_t     cur = 1;
+  size_t     next = (cur + 1) % total;
+  size_t     prev2 = points.size() - 1;
+  size_t     next2 = (next + 1) % total;
 
-  int segments = isClosed ? total : total - 1;
+  int       segments = isClosed ? total : total - 1;
   PointAttr buffer[2] = { points[prev], points[cur] };
-  int cp = 1;
-  int pp = 1 - cp;
+  int       cp = 1;
+  int       pp = 1 - cp;
 
   path.moveTo(buffer[pp].point.x, buffer[pp].point.y);
   while (segments > 0)
   {
-    int consumed = 0;
+    int         consumed = 0;
     const auto& prevPoint = buffer[pp];
     const auto& curPoint = buffer[cp];
     const auto& nextPoint = points[next];

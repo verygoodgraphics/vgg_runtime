@@ -119,9 +119,6 @@ void TextNode::paintEvent(SkiaRenderer* renderer)
     canvas->clipPath(makeBoundPath());
   }
 
-  canvas->save();
-  // we need to convert to skia coordinate to render text
-
   {
     const auto b = bound();
     _->painter.setCanvas(canvas);
@@ -153,7 +150,6 @@ void TextNode::paintEvent(SkiaRenderer* renderer)
       curY += p->getHeight() - lineMetric.fHeight;
     }
   }
-  canvas->restore();
 
   if (overflow() == OF_Hidden)
   {

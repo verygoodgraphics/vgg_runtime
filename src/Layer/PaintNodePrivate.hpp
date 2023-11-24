@@ -495,7 +495,7 @@ public:
     {
       if (!b.isEnabled)
         continue;
-      painter.drawPathBorder(skPath, bound, b, globalAlpha, nullptr, blender);
+      painter.drawPathBorder(skPath, bound, b, nullptr, blender);
     }
 
     // draw inner shadow

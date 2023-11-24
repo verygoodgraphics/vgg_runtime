@@ -29,7 +29,6 @@ class TextNode__pImpl;
 class VGG_EXPORTS TextNode final : public PaintNode
 {
   VGG_DECL_IMPL(TextNode);
-  friend class NlohmannBuilder;
 
 public:
   TextNode(const std::string& name, std::string guid);
@@ -37,11 +36,12 @@ public:
   TextNode& operator=(const TextNode&) = delete;
   TextNode(TextNode&&) noexcept = default;
   TextNode& operator=(TextNode&&) noexcept = default;
-  void setParagraph(std::string utf8,
-                    std::vector<TextStyleAttr> attrs,
-                    const std::vector<TextLineAttr>& lineAttr);
-  void setFrameMode(ETextLayoutMode mode);
-  void setVerticalAlignment(ETextVerticalAlignment vertAlign);
+  void      setParagraph(
+         std::string                      utf8,
+         std::vector<TextStyleAttr>       attrs,
+         const std::vector<TextLineAttr>& lineAttr);
+  void    setFrameMode(ETextLayoutMode mode);
+  void    setVerticalAlignment(ETextVerticalAlignment vertAlign);
   NodePtr clone() const override;
   ~TextNode();
 

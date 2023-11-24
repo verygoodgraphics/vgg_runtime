@@ -28,7 +28,7 @@ void DebugCanvas::drawRects(SkColor color, std::vector<sktxt::TextBox>& result, 
   paint.setColor(color);
   for (auto& r : result)
   {
-    canvas->drawRect(r.rect, paint);
+    m_canvas->drawRect(r.rect, paint);
   }
 }
 
@@ -42,10 +42,10 @@ void DebugCanvas::drawLine(SkColor color, SkRect rect, bool vertical)
   paint.setColor(color);
   if (vertical)
   {
-    canvas->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
+    m_canvas->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
   }
   else
   {
-    canvas->drawLine(rect.fLeft, rect.fTop, rect.fRight, rect.fTop, paint);
+    m_canvas->drawLine(rect.fLeft, rect.fTop, rect.fRight, rect.fTop, paint);
   }
 }

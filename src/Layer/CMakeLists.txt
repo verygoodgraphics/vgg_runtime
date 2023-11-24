@@ -27,10 +27,10 @@ target_include_directories(
   ${VGG_CONTRIB_JSON_INCLUDE}
   ${VGG_CONTRIB_RAPIDFUZZCPP_INCLUDE})
 
-# find OpenGL library
-cmake_policy(SET CMP0072 NEW)
 if(NOT VGG_VAR_HOST STREQUAL "iOS")
-find_package(OpenGL REQUIRED)
+  # find OpenGL library
+  cmake_policy(SET CMP0072 NEW)
+  find_package(OpenGL REQUIRED)
 endif()
 
 target_include_directories(vgg_layer PUBLIC ${VGG_CONTRIB_JSON_INCLUDE})
@@ -38,7 +38,7 @@ target_include_directories(vgg_layer PUBLIC ${VGG_CONTRIB_JSON_INCLUDE})
 target_link_libraries(vgg_layer PUBLIC ${SKIA_LIBS} glm)
 target_link_libraries(vgg_layer PRIVATE ${OPENGL_LIBRARIES} vgg_utility)
 if(NOT VGG_VAR_HOST STREQUAL "iOS")
-find_package(Vulkan)
+  find_package(Vulkan)
 endif()
 if(Vulkan_FOUND)
   message("Vulkan found: enabling vulkan ...")

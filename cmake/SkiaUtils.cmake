@@ -251,37 +251,25 @@ elseif(platform MATCHES "^iOS")
   string(APPEND OPTIONS " target_os=\"ios\"")
   string(APPEND OPTIONS " target_cpu=\"arm64\"")
 
+  if(platform STREQUAL "iOS-simulator")
+    string(APPEND OPTIONS " ios_use_simulator=true")
+  endif()
+
   foreach(OPT ${SKIA_PRESET_FEATURES_FOR_IOS})
     string(APPEND OPTIONS " ${OPT}")
   endforeach(OPT)
-
-  if(platform STREQUAL "iOS-simulator")
-    string(APPEND OPTIONS " extra_ldflags=[\"--target=arm64-apple-ios12.0.0-simulator\"]")
-  endif()
 else()
   message(Fatal "target type for skia build is invalid: " ${platform})
 endif()
 
 if(platform MATCHES "^iOS") # iOS
-  set(IOS_EXTRA_CFLAGS
-    " extra_cflags=[\
-        \"-fvisibility=default\", \
-        \"-fembed-bitcode\", \
-        \"-mios-version-min=10.0\", \
-        \"-flto=full\", \
-        \"-dsk_disable_skpicture\", \
-        \"-dsk_disable_text\", \
-        \"-drive_optimized\", \ 
-        \"-dsk_disable_legacy_shadercontext\", \
-        \"-dsk_disable_lowp_raster_pipeline\", \
-        \"-dsk_force_raster_pipeline_blitter\", \
-        \"-dsk_disable_aaa\", \
-        \"-dsk_disable_effect_deserialization\"")
+  # Begin: extra_cflags=[,  
+  string(APPEND OPTIONS " extra_cflags=[\"-fvisibility=default\", \"-fembed-bitcode\", \"-mios-version-min=15.0\", \"-flto=full\"")
   if(platform STREQUAL "iOS-simulator")
-    string(APPEND IOS_EXTRA_CFLAGS ", \"--target=arm64-apple-ios15.0.0-simulator\"")
+    string(APPEND OPTIONS ", \"--target=arm64-apple-ios15.0-simulator\"")
   endif()
-  string(APPEND IOS_EXTRA_CFLAGS "]")
-  string(APPEND OPTIONS ${IOS_EXTRA_CFLAGS})
+  string(APPEND OPTIONS "]")
+  # End extra_cflags: ] 
 
 elseif(NOT ${platform} IN_LIST VGG_WIN_TARGET_LIST) # not in window
 # we assume non-window using gcc compatible compiler

@@ -29,28 +29,36 @@
 #include <Metal/Metal.h>
 #include <MetalKit/MetalKit.h>
 
+#include "Utility/Log.hpp"
+
 namespace {
 
-sk_sp<SkSurface> SkMtkViewToSurface(MTKView* mtkView, GrRecordingContext* rContext) {
-  if (!rContext ||
-    MTLPixelFormatDepth32Float_Stencil8 != [mtkView depthStencilPixelFormat] ||
-    MTLPixelFormatBGRA8Unorm != [mtkView colorPixelFormat]) {
+sk_sp<SkSurface> SkMtkViewToSurface(MTKView* mtkView, GrRecordingContext* rContext)
+{
+  if (!rContext)
+  {
     return nullptr;
   }
+  if (MTLPixelFormatDepth32Float_Stencil8 != [mtkView depthStencilPixelFormat]
+   || MTLPixelFormatRGBA8Unorm != [mtkView colorPixelFormat])
+  {
+    WARN("Inconsistent pixel format with mtkView! Expected MTLPixelFormatRGBA8Unorm and MTLPixelFormatDepth32Float_Stencil8");
+  }
 
-  const SkColorType colorType = kBGRA_8888_SkColorType;  // MTLPixelFormatBGRA8Unorm
-  sk_sp<SkColorSpace> colorSpace = nullptr;  // MTLPixelFormatBGRA8Unorm
+  const SkColorType colorType = kRGBA_8888_SkColorType;  // MTLPixelFormatRGBA8Unorm
+  sk_sp<SkColorSpace> colorSpace = nullptr;  // MTLPixelFormatRGBA8Unorm
   const GrSurfaceOrigin origin = kTopLeft_GrSurfaceOrigin;
   const SkSurfaceProps surfaceProps;
   int sampleCount = (int)[mtkView sampleCount];
 
-  return SkSurfaces::WrapMTKView(rContext,
-                                  (__bridge GrMTLHandle)mtkView,
-                                  origin,
-                                  sampleCount,
-                                  colorType,
-                                  colorSpace,
-                                  &surfaceProps);
+  return SkSurfaces::WrapMTKView(
+    rContext,
+    (__bridge GrMTLHandle)mtkView,
+    origin,
+    sampleCount,
+    colorType,
+    colorSpace,
+    &surfaceProps);
 }
 
 }
@@ -58,13 +66,13 @@ sk_sp<SkSurface> SkMtkViewToSurface(MTKView* mtkView, GrRecordingContext* rConte
 namespace VGG
 {
 // impl ------------------------------------------------------------------------
-class MetalGraphicsContextImpl {
-  MetalGraphicsContext*            m_api;
-
-  MTKView* m_mtkView;
+class MetalGraphicsContextImpl
+{
+  MetalGraphicsContext*       m_api;
+  MTKView*                    m_mtkView;
   sk_cfp<id<MTLDevice>>       m_device;
   sk_cfp<id<MTLCommandQueue>> m_queue;
-  sk_sp<GrDirectContext> m_Context;
+  sk_sp<GrDirectContext>      m_Context;
 
 public:
   MetalGraphicsContextImpl(MetalGraphicsContext* api, MetalComponent::MTLHandle mtkView)
@@ -73,15 +81,17 @@ public:
     setView(mtkView);
   }
 
-  int width(){
+  int width()
+  {
     return m_mtkView.frame.size.width;
   }
 
-  int height(){
+  int height()
+  {
     return m_mtkView.frame.size.height;
   }
 
-  bool swap() 
+  bool swap()
   {
     id<MTLCommandBuffer> commandBuffer = [m_queue.get() commandBuffer];
     [commandBuffer presentDrawable:[m_mtkView currentDrawable]];
@@ -105,7 +115,7 @@ public:
     };
   }
 
-  void onInitProperties(VGG::layer::ContextProperty& property) 
+  void onInitProperties(VGG::layer::ContextProperty& property)
   {
     property.dpiScaling = m_mtkView.contentScaleFactor;
     property.api = VGG::layer::EGraphicsAPIBackend::API_METAL;
@@ -115,11 +125,11 @@ private:
   void setView(MetalComponent::MTLHandle view)
   {
     m_mtkView = (MTKView *)view;
-    
+
     if(m_mtkView) {
       m_device.reset(m_mtkView.device);
       m_queue.reset([*m_device newCommandQueue]);
-      
+
       GrMtlBackendContext backendContext = {};
       backendContext.fDevice.retain((__bridge GrMTLHandle)(m_device.get()));
       backendContext.fQueue.retain((__bridge GrMTLHandle)(m_queue.get()));
@@ -134,36 +144,38 @@ MetalGraphicsContext::MetalGraphicsContext(MetalComponent::MTLHandle mtkView)
 {
 }
 
-int MetalGraphicsContext::width(){
+int MetalGraphicsContext::width()
+{
   return m_impl->width();
 }
 
-int MetalGraphicsContext::height(){
+int MetalGraphicsContext::height()
+{
   return m_impl->height();
 }
 
-bool MetalGraphicsContext::swap() 
+bool MetalGraphicsContext::swap()
 {
   return m_impl->swap();
 }
 
 
-bool MetalGraphicsContext::makeCurrent() 
+bool MetalGraphicsContext::makeCurrent()
 {
   return true;
 }
 
-void MetalGraphicsContext::shutdown() 
+void MetalGraphicsContext::shutdown()
 {
   return;
 }
 
-void* MetalGraphicsContext::contextInfo() 
+void* MetalGraphicsContext::contextInfo()
 {
   return nullptr;
 }
 
-bool MetalGraphicsContext::onInit() 
+bool MetalGraphicsContext::onInit()
 {
   return true;
 }
@@ -178,7 +190,7 @@ ContextCreateProc MetalGraphicsContext::contextCreateProc()
   return m_impl->contextCreateProc();
 }
 
-void MetalGraphicsContext::onInitProperties(VGG::layer::ContextProperty& property) 
+void MetalGraphicsContext::onInitProperties(VGG::layer::ContextProperty& property)
 {
   m_impl->onInitProperties(property);
 }

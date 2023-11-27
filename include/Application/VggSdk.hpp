@@ -42,29 +42,29 @@ public:
 
   virtual ~VggSdk() = default;
 
+  // env
+  std::string getEnvKey();
+  void        setContainerKey(const std::string& containerKey);
+  void        setInstanceKey(const std::string& instanceKey);
+  void        setListenerKey(const std::string& listenerKey);
+
   // design document
-  const std::string designDocument(IndexType index = main_or_editor_daruma_index);
-  void designDocumentAddAt(const std::string& jsonPointer,
-                           const std::string& value,
-                           IndexType index = main_or_editor_daruma_index);
-  void designDocumentReplaceAt(const std::string& jsonPointer,
-                               const std::string& value,
-                               IndexType index = main_or_editor_daruma_index);
-  void designDocumentDeleteAt(const std::string& jsonPointer,
-                              IndexType index = main_or_editor_daruma_index);
+  const std::string designDocument();
+  void              designDocumentAddAt(const std::string& jsonPointer, const std::string& value);
+  void designDocumentReplaceAt(const std::string& jsonPointer, const std::string& value);
+  void designDocumentDeleteAt(const std::string& jsonPointer);
 
   // event listener
   // event types: https://developer.mozilla.org/en-US/docs/Web/API/Element#events
-  void addEventListener(const std::string& elementPath,
-                        const std::string& eventType,
-                        const std::string& listenerCode,
-                        IndexType index = main_or_editor_daruma_index);
-  void removeEventListener(const std::string& elementPath,
-                           const std::string& eventType,
-                           const std::string& listenerCode,
-                           IndexType index = main_or_editor_daruma_index);
-  ListenersType getEventListeners(const std::string& elementPath,
-                                  IndexType index = main_or_editor_daruma_index);
+  void addEventListener(
+    const std::string& elementPath,
+    const std::string& eventType,
+    const std::string& listenerCode);
+  void removeEventListener(
+    const std::string& elementPath,
+    const std::string& eventType,
+    const std::string& listenerCode);
+  ListenersType getEventListeners(const std::string& elementPath);
 
   // editor
   //   void undo();
@@ -84,5 +84,5 @@ public:
 
 private:
   std::shared_ptr<JsonDocument> getDesignDocument(IndexType index = main_or_editor_daruma_index);
-  std::shared_ptr<VGG::Daruma> getModel(IndexType index = main_or_editor_daruma_index);
+  std::shared_ptr<VGG::Daruma>  getModel(IndexType index = main_or_editor_daruma_index);
 };

@@ -17,8 +17,10 @@
 
 #include "Domain/Daruma.hpp"
 #include "Domain/DarumaContainer.hpp"
+#include "Domain/IVggEnv.hpp"
 #include "Domain/Model/JsonKeys.hpp"
 #include "Domain/VggExec.hpp"
+#include "Utility/DIContainer.hpp"
 #include "Utility/Log.hpp"
 
 #include <sstream>
@@ -34,6 +36,14 @@ constexpr auto K_TYPE = "type";
 // event type
 constexpr auto K_SELECT = "select";
 constexpr auto K_FIRST_RENDER = "firstRender";
+
+namespace
+{
+auto env()
+{
+  return VGG::DIContainer<std::shared_ptr<IVggEnv>>::get();
+}
+} // namespace
 
 void Reporter::onSelectNode(std::weak_ptr<LayoutNode> node)
 {
@@ -58,7 +68,7 @@ void Reporter::onSelectNode(std::weak_ptr<LayoutNode> node)
   }
 
   nlohmann::json::json_pointer path{ target->path() };
-  const auto& jsonNode = designDoc->content()[path];
+  const auto&                  jsonNode = designDoc->content()[path];
 
   nlohmann::json event;
   event[K_TYPE] = K_SELECT;
@@ -87,14 +97,14 @@ void Reporter::sendEventToJs(const nlohmann::json& event)
     return;
   }
 
-  auto dicUrl = "https://s5.vgg.cool/vgg-di-container.esm.js";
   std::ostringstream oss;
-  oss << R"((async function (event) {
-      let container = await import(')"
-      << dicUrl << "');"
+  oss << R"((function (event) {
+         const containerKey = ')"
+      << env()->getContainerKey() << "';"
+      << "const envKey = '" << env()->getEnv() << "';"
+      << "const listenerKey = '" << env()->getListenerKey() << "';"
       << R"(
-      const key = 'vggListener';
-      const listener = container.vggGetObject(key);
+      const listener = globalThis[containerKey][envKey][listenerKey];
       if(listener) {
         listener(event);
       }

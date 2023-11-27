@@ -15,11 +15,12 @@
  */
 #include "VggSdk.hpp"
 
-#include "Utility/DIContainer.hpp"
 #include "Domain/DarumaContainer.hpp"
+#include "Domain/IVggEnv.hpp"
 #include "Domain/Saver/DirSaver.hpp"
-#include "Utility/Log.hpp"
 #include "UseCase/SaveModel.hpp"
+#include "Utility/DIContainer.hpp"
+#include "Utility/Log.hpp"
 
 #ifdef EMSCRIPTEN
 constexpr auto listener_code_key = "listener";
@@ -27,55 +28,76 @@ constexpr auto listener_code_key = "listener";
 
 using namespace VGG;
 
+namespace
+{
+auto env()
+{
+  return VGG::DIContainer<std::shared_ptr<IVggEnv>>::get();
+}
+} // namespace
+
+std::string VggSdk::getEnvKey()
+{
+  return env()->getEnv();
+}
+void VggSdk::setContainerKey(const std::string& containerKey)
+{
+  env()->setContainerKey(containerKey);
+}
+void VggSdk::setInstanceKey(const std::string& instanceKey)
+{
+  env()->setInstanceKey(instanceKey);
+}
+void VggSdk::setListenerKey(const std::string& listenerKey)
+{
+  env()->setListenerKey(listenerKey);
+}
+
 // design document in vgg daruma file
-const std::string VggSdk::designDocument(IndexType index)
+const std::string VggSdk::designDocument()
 {
-  return getDesignDocument(index)->content().dump();
+  return getDesignDocument()->content().dump();
 }
 
-void VggSdk::designDocumentReplaceAt(const std::string& jsonPointer,
-                                     const std::string& value,
-                                     IndexType index)
+void VggSdk::designDocumentReplaceAt(const std::string& jsonPointer, const std::string& value)
 {
-  getDesignDocument(index)->replaceAt(jsonPointer, value);
+  getDesignDocument()->replaceAt(jsonPointer, value);
 }
 
-void VggSdk::designDocumentAddAt(const std::string& jsonPointer,
-                                 const std::string& value,
-                                 IndexType index)
+void VggSdk::designDocumentAddAt(const std::string& jsonPointer, const std::string& value)
 {
-  getDesignDocument(index)->addAt(jsonPointer, value);
+  getDesignDocument()->addAt(jsonPointer, value);
 }
 
-void VggSdk::designDocumentDeleteAt(const std::string& jsonPointer, IndexType index)
+void VggSdk::designDocumentDeleteAt(const std::string& jsonPointer)
 {
-  getDesignDocument(index)->deleteAt(jsonPointer);
+  getDesignDocument()->deleteAt(jsonPointer);
 }
 
 // event listener
-void VggSdk::addEventListener(const std::string& elementPath,
-                              const std::string& eventType,
-                              const std::string& listenerCode,
-                              IndexType index)
+void VggSdk::addEventListener(
+  const std::string& elementPath,
+  const std::string& eventType,
+  const std::string& listenerCode)
 {
-  getModel(index)->addEventListener(elementPath, eventType, listenerCode);
+  getModel()->addEventListener(elementPath, eventType, listenerCode);
 }
 
-void VggSdk::removeEventListener(const std::string& elementPath,
-                                 const std::string& eventType,
-                                 const std::string& listenerCode,
-                                 IndexType index)
+void VggSdk::removeEventListener(
+  const std::string& elementPath,
+  const std::string& eventType,
+  const std::string& listenerCode)
 {
-  getModel(index)->removeEventListener(elementPath, eventType, listenerCode);
+  getModel()->removeEventListener(elementPath, eventType, listenerCode);
 }
 
-VggSdk::ListenersType VggSdk::getEventListeners(const std::string& elementPath, IndexType index)
+VggSdk::ListenersType VggSdk::getEventListeners(const std::string& elementPath)
 {
 #ifdef EMSCRIPTEN
   using namespace emscripten;
 
   auto result_listeners_map = val::object();
-  auto listenersMap = getModel(index)->getEventListeners(elementPath);
+  auto listenersMap = getModel()->getEventListeners(elementPath);
   for (auto& map_item : listenersMap)
   {
     if (map_item.second.empty())
@@ -89,7 +111,7 @@ VggSdk::ListenersType VggSdk::getEventListeners(const std::string& elementPath, 
     for (int i = 0; i < map_item.second.size(); ++i)
     {
       auto& listenerCode = map_item.second[i];
-      auto js_listener_object = val::object();
+      auto  js_listener_object = val::object();
 
       js_listener_object.set(listener_code_key, val(listenerCode.c_str()));
       js_listener_code_array.set(i, js_listener_object);
@@ -100,7 +122,7 @@ VggSdk::ListenersType VggSdk::getEventListeners(const std::string& elementPath, 
 
   return result_listeners_map;
 #else
-  return getModel(index)->getEventListeners(elementPath);
+  return getModel()->getEventListeners(elementPath);
 #endif
 }
 
@@ -123,8 +145,8 @@ void VggSdk::save()
   {
     // todo, choose location to save, or save to remote server
     std::string dstDir{ "tmp/" };
-    auto saver{ std::make_shared<Model::DirSaver>(dstDir) };
-    SaveModel saveModel{ editModel, saver };
+    auto        saver{ std::make_shared<Model::DirSaver>(dstDir) };
+    SaveModel   saveModel{ editModel, saver };
 
     saveModel.save();
   }

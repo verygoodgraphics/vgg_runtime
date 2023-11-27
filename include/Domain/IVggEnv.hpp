@@ -22,5 +22,14 @@ class IVggEnv
 public:
   virtual ~IVggEnv() = default;
 
-  virtual const std::string getEnv() = 0;
+  virtual std::string getEnv() = 0;
+
+  virtual std::string getContainerKey() = 0;
+  virtual void        setContainerKey(const std::string& containerKey) = 0;
+
+  virtual std::string getInstanceKey() = 0;
+  virtual void        setInstanceKey(const std::string& instanceKey) = 0;
+
+  virtual std::string getListenerKey() = 0;
+  virtual void        setListenerKey(const std::string& listenerKey) = 0;
 };

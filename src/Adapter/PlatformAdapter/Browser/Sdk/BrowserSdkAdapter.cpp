@@ -35,13 +35,21 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
 {
   class_<VggSdk>("VggSdk")
     .constructor<>()
+    // env
+    .function("getEnvKey", &VggSdk::getEnvKey)
+    .function("setContainerKey", &VggSdk::setContainerKey)
+    .function("setInstanceKey", &VggSdk::setInstanceKey)
+    .function("setListenerKey", &VggSdk::setListenerKey)
+    // doc
     .function("getDesignDocument", &VggSdk::designDocument)
     .function("addAt", &VggSdk::designDocumentAddAt)
     .function("deleteAt", &VggSdk::designDocumentDeleteAt)
     .function("updateAt", &VggSdk::designDocumentReplaceAt)
+    // event listener
     .function("addEventListener", &VggSdk::addEventListener)
     .function("removeEventListener", &VggSdk::removeEventListener)
     .function("getEventListeners", &VggSdk::getEventListeners)
+    // editor
     .function("save", &VggSdk::save);
 }
 

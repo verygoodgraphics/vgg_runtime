@@ -22,12 +22,45 @@
 
 class VggEnv : public IVggEnv
 {
+  std::string m_containerKey{ "vggInstances" };
+  std::string m_instanceKey{ "instance" };
+  std::string m_listenerKey{ "listener" };
+
 public:
-  const std::string getEnv()
+  virtual std::string getEnv() override
   {
-    const void* address = static_cast<const void*>(this);
+    const void*       address = static_cast<const void*>(this);
     std::stringstream ss;
-    ss << address;
+    ss << "_" << address;
     return ss.str();
+  }
+
+  virtual std::string getContainerKey() override
+  {
+    return m_containerKey;
+  }
+  virtual void setContainerKey(const std::string& containerKey) override
+  {
+    m_containerKey = containerKey;
+  }
+
+  virtual std::string getInstanceKey() override
+  {
+    return m_instanceKey;
+  }
+
+  virtual void setInstanceKey(const std::string& instanceKey) override
+  {
+    m_instanceKey = instanceKey;
+  }
+
+  virtual std::string getListenerKey() override
+  {
+    return m_listenerKey;
+  }
+
+  virtual void setListenerKey(const std::string& listenerKey) override
+  {
+    m_listenerKey = listenerKey;
   }
 };

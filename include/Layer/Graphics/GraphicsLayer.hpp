@@ -21,15 +21,6 @@
 namespace VGG::layer
 {
 
-struct LayerConfig
-{
-  layer::GraphicsContext* context{ nullptr };
-  float drawableSize[2];
-  float dpi{ 1.0 };
-  int stencilBit{ 8 };
-  int multiSample{ 0 };
-};
-
 enum class ELayerError
 {
   TEXTURE_SIZE_OUT_OF_RANGE,

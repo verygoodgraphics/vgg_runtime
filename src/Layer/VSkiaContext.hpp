@@ -49,12 +49,6 @@ Overloaded(Ts...) -> Overloaded<Ts...>;
 class SkiaContext
 {
 public:
-  enum class ESkiaGraphicsAPIBackend
-  {
-    API_OPENGL,
-    API_VULKAN
-  };
-
   SkiaContext(const SkiaContext&) = delete;
   SkiaContext& operator=(const SkiaContext&) = delete;
   SkiaContext(SkiaContext&& other) noexcept
@@ -89,17 +83,18 @@ public:
 
 private:
   std::unique_ptr<SkFILEWStream> m_stream;
-  sk_sp<SkDocument> m_document;
-  sk_sp<GrDirectContext> m_grContext{ nullptr };
-  sk_sp<SkSurface> m_surface{ nullptr };
-  SurfaceCreateProc m_skiaSurfaceCreateProc;
-  ContextCreateProc m_skiaContextCreateProc;
-  ContextConfig m_ctxConfig;
+  sk_sp<SkDocument>              m_document;
+  sk_sp<GrDirectContext>         m_grContext{ nullptr };
+  sk_sp<SkSurface>               m_surface{ nullptr };
+  SurfaceCreateProc              m_skiaSurfaceCreateProc;
+  ContextCreateProc              m_skiaContextCreateProc;
+  ContextConfig                  m_ctxConfig;
 
 public:
-  SkiaContext(ContextCreateProc contextProc,
-              SurfaceCreateProc surfaceProc,
-              const ContextConfig& cfg)
+  SkiaContext(
+    ContextCreateProc    contextProc,
+    SurfaceCreateProc    surfaceProc,
+    const ContextConfig& cfg)
     : m_skiaContextCreateProc(std::move(contextProc))
     , m_skiaSurfaceCreateProc(std::move(surfaceProc))
     , m_ctxConfig(cfg)

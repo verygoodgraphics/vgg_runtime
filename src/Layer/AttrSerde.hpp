@@ -28,6 +28,26 @@
 #include <optional>
 using nlohmann::json;
 
+namespace nlohmann
+{
+
+template<>
+struct adl_serializer<std::variant<float, glm::vec2>>
+{
+  static void from_json(const json& j, std::variant<float, glm::vec2>& x) // NOLINT
+  {
+    if (j.is_number())
+    {
+      x = (float)j;
+    }
+    else if (j.is_array())
+    {
+      std::array<float, 2> v = j;
+      x = glm::vec2{ v[0], v[1] };
+    }
+  }
+};
+} // namespace nlohmann
 // NOLINTBEGIN
 template<typename T>
 inline std::optional<T> get_opt(const nlohmann::json& obj, const std::string& key)
@@ -118,6 +138,19 @@ inline void from_json(const json& j, glm::vec2& x)
     x = { v[0], v[1] };
   }
   x = { 0.f, 0.f };
+}
+
+inline void from_json(const json& j, std::variant<float, glm::vec2>& x)
+{
+  if (j.is_number())
+  {
+    x = (float)j;
+  }
+  else if (j.is_array())
+  {
+    std::array<float, 2> v = j.get<std::array<float, 2>>();
+    x = glm::vec2{ v[0], v[1] };
+  }
 }
 
 inline void from_json(const json& j, PatternFill& x)
@@ -212,7 +245,7 @@ inline void from_json(const json& j, Gradient& x)
     radial.to = glm::vec2{ t[0], t[1] };
     radial.stops = g.value("stops", std::vector<GradientStop>());
     radial.invert = g.value("invert", false);
-    radial.ellipse = g.value("elipseLength", 1.f);
+    radial.ellipse = g.value("ellipse", std::variant<float, glm::vec2>(1.f));
     x.instance = radial;
   }
   else if (klass == "gradientAngular")
@@ -224,7 +257,7 @@ inline void from_json(const json& j, Gradient& x)
     angular.to = glm::vec2{ t[0], t[1] };
     angular.stops = g.value("stops", std::vector<GradientStop>());
     angular.invert = g.value("invert", false);
-    angular.ellipse = g.value("elipseLength", 1.f);
+    angular.ellipse = g.value("ellipse", std::variant<float, glm::vec2>(1.f));
     x.instance = angular;
   }
   else if (klass == "gradientDiamond")
@@ -236,7 +269,7 @@ inline void from_json(const json& j, Gradient& x)
     diamond.to = glm::vec2{ t[0], t[1] };
     diamond.stops = g.value("stops", std::vector<GradientStop>());
     diamond.invert = g.value("invert", false);
-    diamond.ellipse = g.value("elipseLength", 1.f);
+    diamond.ellipse = g.value("ellipse", std::variant<float, glm::vec2>(1.f));
     x.instance = diamond;
   }
   else if (klass == "gradientBasic")

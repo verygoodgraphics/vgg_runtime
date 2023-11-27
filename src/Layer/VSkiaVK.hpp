@@ -48,11 +48,13 @@ SurfaceCreateProc vkSurfaceCreateProc()
     ASSERT(context);
     GrVkImageInfo vkImageInfo;
     vkImageInfo.fFormat = VK_FORMAT_R8G8B8A8_UNORM;
+    vkImageInfo.fSampleCount = cfg.multiSample;
     GrBackendRenderTarget target(w, h, vkImageInfo);
-    SkImageInfo info = SkImageInfo::Make(w,
-                                         h,
-                                         SkColorType::kRGBA_8888_SkColorType,
-                                         SkAlphaType::kPremul_SkAlphaType);
+    SkImageInfo           info = SkImageInfo::Make(
+      w,
+      h,
+      SkColorType::kRGBA_8888_SkColorType,
+      SkAlphaType::kPremul_SkAlphaType);
     return SkSurfaces::RenderTarget(context, skgpu::Budgeted::kYes, info);
   };
 }

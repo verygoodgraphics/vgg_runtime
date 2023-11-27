@@ -466,7 +466,8 @@ class DocBuilder
       for (const auto& p : m_frames)
       {
         const auto m = p->transform();
-        p->transform().setTranslate(0, 0);
+        const auto b = p->bound();
+        p->transform().setTranslate(-b.topLeft().x, -b.topLeft().y);
         p->setOverflow(EOverflow::OF_Visible);
       }
     }
@@ -521,7 +522,6 @@ class DocBuilder
 
   static void convertCoordinateSystem(Gradient& gradient, const glm::mat3& totalMatrix)
   {
-    return;
     std::visit(
       Overloaded{
         [&](GradientLinear& p)
@@ -533,16 +533,28 @@ class DocBuilder
         {
           convertCoordinateSystem(p.from, totalMatrix);
           convertCoordinateSystem(p.to, totalMatrix);
+          if (auto d = std::get_if<glm::vec2>(&p.ellipse); d)
+          {
+            convertCoordinateSystem(*d, totalMatrix);
+          }
         },
         [&](GradientAngular& p)
         {
           convertCoordinateSystem(p.from, totalMatrix);
           convertCoordinateSystem(p.to, totalMatrix);
+          if (auto d = std::get_if<glm::vec2>(&p.ellipse); d)
+          {
+            convertCoordinateSystem(*d, totalMatrix);
+          }
         },
         [&](GradientDiamond& p)
         {
           convertCoordinateSystem(p.from, totalMatrix);
           convertCoordinateSystem(p.to, totalMatrix);
+          if (auto d = std::get_if<glm::vec2>(&p.ellipse); d)
+          {
+            convertCoordinateSystem(*d, totalMatrix);
+          }
         },
         [&](GradientBasic& p) {},
       },

@@ -80,6 +80,8 @@ public:
 
   void render(SkCanvas* canvas)
   {
+    if (roots.empty())
+      return;
     layer::PaintNode* node = roots[page].get();
     if (!roots.empty() && maskDirty && node)
     {

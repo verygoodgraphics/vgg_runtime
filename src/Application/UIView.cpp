@@ -44,31 +44,33 @@ bool UIView::onEvent(UEvent evt, void* userData)
 
   // todo, capturing
   // todo, bubbling
-  UIEvent::PathType targetPath;
-  auto& hasEventListener = m_hasEventListener;
+  UIEvent::PathType           targetPath;
+  auto&                       hasEventListener = m_hasEventListener;
   std::shared_ptr<LayoutNode> targetNode;
   switch (evt.type)
   {
     case VGG_MOUSEBUTTONDOWN:
     {
       auto jsButtonIndex{ evt.button.button - 1 };
-      return handleMouseEvent(jsButtonIndex,
-                              evt.button.windowX,
-                              evt.button.windowY,
-                              0,
-                              0,
-                              EUIEventType::MOUSEDOWN);
+      return handleMouseEvent(
+        jsButtonIndex,
+        evt.button.windowX,
+        evt.button.windowY,
+        0,
+        0,
+        EUIEventType::MOUSEDOWN);
     }
     break;
 
     case VGG_MOUSEMOTION:
     {
-      return handleMouseEvent(0,
-                              evt.motion.windowX,
-                              evt.motion.windowY,
-                              evt.motion.xrel,
-                              evt.motion.yrel,
-                              EUIEventType::MOUSEMOVE);
+      return handleMouseEvent(
+        0,
+        evt.motion.windowX,
+        evt.motion.windowY,
+        evt.motion.xrel,
+        evt.motion.yrel,
+        EUIEventType::MOUSEMOVE);
     }
     break;
 
@@ -76,39 +78,43 @@ bool UIView::onEvent(UEvent evt, void* userData)
     {
       auto jsButtonIndex{ evt.button.button - 1 };
 
-      handleMouseEvent(jsButtonIndex,
-                       evt.button.windowX,
-                       evt.button.windowY,
-                       0,
-                       0,
-                       EUIEventType::MOUSEUP);
+      handleMouseEvent(
+        jsButtonIndex,
+        evt.button.windowX,
+        evt.button.windowY,
+        0,
+        0,
+        EUIEventType::MOUSEUP);
 
       if (jsButtonIndex == 0)
       {
-        handleMouseEvent(jsButtonIndex,
-                         evt.button.windowX,
-                         evt.button.windowY,
-                         0,
-                         0,
-                         EUIEventType::CLICK);
+        handleMouseEvent(
+          jsButtonIndex,
+          evt.button.windowX,
+          evt.button.windowY,
+          0,
+          0,
+          EUIEventType::CLICK);
       }
       else
       {
-        handleMouseEvent(jsButtonIndex,
-                         evt.button.windowX,
-                         evt.button.windowY,
-                         0,
-                         0,
-                         EUIEventType::AUXCLICK);
+        handleMouseEvent(
+          jsButtonIndex,
+          evt.button.windowX,
+          evt.button.windowY,
+          0,
+          0,
+          EUIEventType::AUXCLICK);
 
         if (jsButtonIndex == 2)
         {
-          handleMouseEvent(jsButtonIndex,
-                           evt.button.windowX,
-                           evt.button.windowY,
-                           0,
-                           0,
-                           EUIEventType::CONTEXTMENU);
+          handleMouseEvent(
+            jsButtonIndex,
+            evt.button.windowX,
+            evt.button.windowY,
+            0,
+            0,
+            EUIEventType::CONTEXTMENU);
         }
       }
     }
@@ -122,48 +128,57 @@ bool UIView::onEvent(UEvent evt, void* userData)
     case VGG_KEYDOWN:
     {
       auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
-      m_eventListener(UIEventPtr(new KeyboardEvent(targetPath,
-                                                   EUIEventType::KEYDOWN,
-                                                   evt.key.keysym.sym,
-                                                   evt.key.repeat,
-                                                   alt,
-                                                   ctrl,
-                                                   meta,
-                                                   shift)),
-                      targetNode);
+      m_eventListener(
+        UIEventPtr(new KeyboardEvent(
+          targetPath,
+          EUIEventType::KEYDOWN,
+          evt.key.keysym.sym,
+          evt.key.repeat,
+          alt,
+          ctrl,
+          meta,
+          shift)),
+        targetNode);
     }
     break;
 
     case VGG_KEYUP:
     {
       auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
-      m_eventListener(UIEventPtr(new KeyboardEvent(targetPath,
-                                                   EUIEventType::KEYUP,
-                                                   evt.key.keysym.sym,
-                                                   evt.key.repeat,
-                                                   alt,
-                                                   ctrl,
-                                                   meta,
-                                                   shift)),
-                      targetNode);
+      m_eventListener(
+        UIEventPtr(new KeyboardEvent(
+          targetPath,
+          EUIEventType::KEYUP,
+          evt.key.keysym.sym,
+          evt.key.repeat,
+          alt,
+          ctrl,
+          meta,
+          shift)),
+        targetNode);
     }
     break;
 
-    case VGG_FINGERDOWN:
+    case VGG_TOUCHDOWN:
     {
-      m_eventListener(UIEventPtr(new TouchEvent(targetPath, EUIEventType::TOUCHSTART)), targetNode);
+      handleTouchEvent(evt.touch.windowX, evt.touch.windowY, 0, 0, EUIEventType::TOUCHSTART);
     }
     break;
 
-    case VGG_FINGERMOTION:
+    case VGG_TOUCHMOTION:
     {
-      m_eventListener(UIEventPtr(new TouchEvent(targetPath, EUIEventType::TOUCHMOVE)), targetNode);
+      handleTouchEvent(
+        evt.touch.windowX,
+        evt.touch.windowY,
+        evt.touch.xrel,
+        evt.touch.yrel,
+        EUIEventType::TOUCHMOVE);
     }
     break;
 
-    case VGG_FINGERUP:
+    case VGG_TOUCHUP:
     {
-      m_eventListener(UIEventPtr(new TouchEvent(targetPath, EUIEventType::TOUCHEND)), targetNode);
+      handleTouchEvent(evt.touch.windowX, evt.touch.windowY, 0, 0, EUIEventType::TOUCHEND);
     }
     break;
 
@@ -191,10 +206,11 @@ std::tuple<bool, bool, bool, bool> UIView::getKeyModifier(int keyMod)
   return { lAlt || rAlt, lCtrl || rCtrl, lMeta || rMeta, lShift || rShift };
 }
 
-void UIView::becomeEditorWithSidebar(ScalarType top,
-                                     ScalarType right,
-                                     ScalarType bottom,
-                                     ScalarType left)
+void UIView::becomeEditorWithSidebar(
+  ScalarType top,
+  ScalarType right,
+  ScalarType bottom,
+  ScalarType left)
 {
   m_isEditor = true;
 
@@ -280,12 +296,13 @@ std::shared_ptr<LayoutNode> UIView::currentPage()
   return nullptr;
 }
 
-bool UIView::handleMouseEvent(int jsButtonIndex,
-                              int x,
-                              int y,
-                              int motionX,
-                              int motionY,
-                              EUIEventType type)
+bool UIView::handleMouseEvent(
+  int          jsButtonIndex,
+  int          x,
+  int          y,
+  int          motionX,
+  int          motionY,
+  EUIEventType type)
 {
   auto page = currentPage();
   if (!page)
@@ -298,24 +315,26 @@ bool UIView::handleMouseEvent(int jsButtonIndex,
   Layout::Point pointToDocument{ pointToPage.x + page->frame().origin.x,
                                  pointToPage.y + page->frame().origin.y };
 
-  auto targetNode =
-    page->hitTest(pointToDocument,
-                  [&queryHasEventListener = m_hasEventListener, type](const std::string& path)
-                  { return queryHasEventListener(path, type); });
+  auto targetNode = page->hitTest(
+    pointToDocument,
+    [&queryHasEventListener = m_hasEventListener, type](const std::string& path)
+    { return queryHasEventListener(path, type); });
   auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
 
-  m_eventListener(UIEventPtr(new MouseEvent(targetNode ? targetNode->path() : K_EMPTY_STRING,
-                                            type,
-                                            jsButtonIndex,
-                                            pointToPage.x,
-                                            pointToPage.y,
-                                            motionX,
-                                            motionY,
-                                            alt,
-                                            ctrl,
-                                            meta,
-                                            shift)),
-                  targetNode);
+  m_eventListener(
+    UIEventPtr(new MouseEvent(
+      targetNode ? targetNode->path() : K_EMPTY_STRING,
+      type,
+      jsButtonIndex,
+      pointToPage.x,
+      pointToPage.y,
+      motionX,
+      motionY,
+      alt,
+      ctrl,
+      meta,
+      shift)),
+    targetNode);
 
   return true;
 }
@@ -355,4 +374,29 @@ void UIView::fitCurrentPage()
 void UIView::enableZoomer(bool enabled)
 {
   m_isZoomerEnabled = enabled;
+}
+
+bool UIView::handleTouchEvent(int x, int y, int motionX, int motionY, EUIEventType type)
+{
+  auto page = currentPage();
+  if (!page)
+  {
+    return false;
+  }
+
+  Layout::Point pointToPage =
+    converPointFromWindowAndScale({ TO_VGG_LAYOUT_SCALAR(x), TO_VGG_LAYOUT_SCALAR(y) });
+  Layout::Point pointToDocument{ pointToPage.x + page->frame().origin.x,
+                                 pointToPage.y + page->frame().origin.y };
+
+  auto targetNode = page->hitTest(
+    pointToDocument,
+    [&queryHasEventListener = m_hasEventListener, type](const std::string& path)
+    { return queryHasEventListener(path, type); });
+
+  m_eventListener(
+    UIEventPtr(new TouchEvent(targetNode ? targetNode->path() : K_EMPTY_STRING, type)),
+    targetNode);
+
+  return true;
 }

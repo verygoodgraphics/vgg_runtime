@@ -10,6 +10,7 @@ endif()
 
 target_include_directories(vgg_component PUBLIC
   ${CMAKE_SOURCE_DIR}/include
+  ${CMAKE_SOURCE_DIR}/include/Application/Event
 )
 
 target_include_directories(vgg_component PRIVATE
@@ -24,6 +25,9 @@ target_link_libraries(vgg_component PUBLIC
 install(TARGETS vgg_component DESTINATION lib)
 if(VGG_VAR_TARGET MATCHES "^iOS")
   install(FILES
+    ${CMAKE_SOURCE_DIR}/include/Application/Event/Event.hpp
+    ${CMAKE_SOURCE_DIR}/include/Application/Event/Keycode.hpp
+    ${CMAKE_SOURCE_DIR}/include/Application/Event/Scancode.hpp
     ${CMAKE_SOURCE_DIR}/include/VGG/Component/MetalComponent.hpp
     DESTINATION VGG)
 endif()

@@ -16,6 +16,9 @@ elseif(VGG_VAR_TARGET MATCHES "^iOS")
   target_compile_options(vgg_adapter PRIVATE
     -fno-objc-arc
   )
+  target_include_directories(vgg_adapter PUBLIC
+    ${CMAKE_SOURCE_DIR}/include/Application/Event
+  )
 else()
   target_link_libraries(vgg_adapter vgg_libnode)
   target_sources(vgg_adapter PRIVATE

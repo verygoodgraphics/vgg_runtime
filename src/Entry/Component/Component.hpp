@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "Event.hpp"
+
 #include <memory>
 
 namespace VGG
@@ -35,12 +37,14 @@ public:
   Component();
   ~Component();
 
-  bool load(const std::string& filePath,
-            const char*        designDocSchemaFilePath = nullptr,
-            const char*        layoutDocSchemaFilePath = nullptr);
+  bool load(
+    const std::string& filePath,
+    const char*        designDocSchemaFilePath = nullptr,
+    const char*        layoutDocSchemaFilePath = nullptr);
   void setGraphicsContext(std::unique_ptr<layer::SkiaGraphicsContext>& context, int w, int h);
 
   bool run();
+  bool onEvent(UEvent evt);
 };
 
 } // namespace VGG

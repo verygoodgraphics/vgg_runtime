@@ -27,7 +27,10 @@ public:
 
   auto setup()
   {
-    auto jsEngine = std::make_shared<VggExec>(createJsEngine(), std::make_shared<VggEnv>());
+    auto vggEnv = std::make_shared<VggEnv>();
+    VGG::DIContainer<std::shared_ptr<IVggEnv>>::get() = vggEnv;
+
+    auto jsEngine = std::make_shared<VggExec>(createJsEngine(), vggEnv);
     VGG::DIContainer<std::shared_ptr<VggExec>>::get() = jsEngine;
 
     platformSetup();

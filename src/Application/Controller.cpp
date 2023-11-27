@@ -39,11 +39,12 @@ constexpr auto PSEUDO_PATH_EDIT_VIEW = "::editView";
 namespace VGG
 {
 
-Controller::Controller(std::shared_ptr<RunLoop> runLoop,
-                       std::shared_ptr<VggExec> jsEngine,
-                       std::shared_ptr<Presenter> presenter,
-                       std::shared_ptr<Editor> editor,
-                       ERunMode mode)
+Controller::Controller(
+  std::shared_ptr<RunLoop>   runLoop,
+  std::shared_ptr<VggExec>   jsEngine,
+  std::shared_ptr<Presenter> presenter,
+  std::shared_ptr<Editor>    editor,
+  ERunMode                   mode)
   : m_runLoop(runLoop)
   , m_jsEngine{ jsEngine }
   , m_presenter(presenter)
@@ -59,9 +60,10 @@ Controller::Controller(std::shared_ptr<RunLoop> runLoop,
   }
 }
 
-bool Controller::start(const std::string& filePath,
-                       const char* designDocSchemaFilePath,
-                       const char* layoutDocSchemaFilePath)
+bool Controller::start(
+  const std::string& filePath,
+  const char*        designDocSchemaFilePath,
+  const char*        layoutDocSchemaFilePath)
 {
   initModel(designDocSchemaFilePath, layoutDocSchemaFilePath);
   auto ret = m_model->load(filePath);
@@ -76,9 +78,10 @@ bool Controller::start(const std::string& filePath,
   return ret;
 }
 
-bool Controller::start(std::vector<char>& buffer,
-                       const char* designDocSchemaFilePath,
-                       const char* layoutDocSchemaFilePath)
+bool Controller::start(
+  std::vector<char>& buffer,
+  const char*        designDocSchemaFilePath,
+  const char*        layoutDocSchemaFilePath)
 {
   initModel(designDocSchemaFilePath, layoutDocSchemaFilePath);
   auto ret = m_model->load(buffer);
@@ -96,7 +99,7 @@ bool Controller::start(std::vector<char>& buffer,
 bool Controller::edit(const std::string& filePath)
 {
   EditModel editModel{ m_designSchemaFilePath };
-  auto darumaToEdit = editModel.open(filePath);
+  auto      darumaToEdit = editModel.open(filePath);
   if (darumaToEdit)
   {
     m_editModel = darumaToEdit;
@@ -112,7 +115,7 @@ bool Controller::edit(const std::string& filePath)
 bool Controller::edit(std::vector<char>& buffer)
 {
   EditModel editModel{ m_designSchemaFilePath };
-  auto darumaToEdit = editModel.open(buffer);
+  auto      darumaToEdit = editModel.open(buffer);
   if (darumaToEdit)
   {
     m_editModel = darumaToEdit;
@@ -184,8 +187,9 @@ void Controller::initModel(const char* designDocSchemaFilePath, const char* layo
     m_designSchemaFilePath.append(designDocSchemaFilePath);
   }
 
-  m_model.reset(new Daruma(createMakeJsonDocFn(designDocSchemaFilePath),
-                           createMakeJsonDocFn(layoutDocSchemaFilePath)));
+  m_model.reset(new Daruma(
+    createMakeJsonDocFn(designDocSchemaFilePath),
+    createMakeJsonDocFn(layoutDocSchemaFilePath)));
 
   DarumaContainer().add(m_model);
 }
@@ -270,7 +274,7 @@ void Controller::observeViewEvent()
         return;
       }
 
-      auto listenersMap = sharedThis->m_model->getEventListeners(evt->path());
+      auto        listenersMap = sharedThis->m_model->getEventListeners(evt->path());
       std::string type = evt->type();
       if (auto it = listenersMap.find(type); it != listenersMap.end())
       {
@@ -309,7 +313,7 @@ void Controller::observeEditViewEvent()
         return;
       }
 
-      auto listenersMap = sharedThis->m_model->getEventListeners(PSEUDO_PATH_EDIT_VIEW);
+      auto        listenersMap = sharedThis->m_model->getEventListeners(PSEUDO_PATH_EDIT_VIEW);
       std::string type = evt->type();
       if (auto it = listenersMap.find(type); it != listenersMap.end())
       {
@@ -354,8 +358,9 @@ JsonDocumentPtr Controller::wrapJsonDoc(std::shared_ptr<JsonDocument> jsonDoc)
   }
 }
 
-std::shared_ptr<ViewModel> Controller::generateViewModel(std::shared_ptr<Daruma> model,
-                                                         Layout::Size size)
+std::shared_ptr<ViewModel> Controller::generateViewModel(
+  std::shared_ptr<Daruma> model,
+  Layout::Size            size)
 {
   StartRunning startRunning{ model };
   m_layout = startRunning.layout();
@@ -435,6 +440,11 @@ void Controller::onFirstRender()
 
 void Controller::scaleContent(Layout::Size size)
 {
+  if (!m_layout)
+  {
+    return;
+  }
+
   m_layout->layout(size); // scale to fill
   // todo, aspect fill & scroll
   // aspectFill(size.width);
@@ -443,8 +453,8 @@ void Controller::scaleContent(Layout::Size size)
 
 void Controller::aspectFill(int width)
 {
-  auto pageSize = m_layout->pageSize(m_presenter->currentPageIndex());
-  auto scaleFactor = width / pageSize.width;
+  auto         pageSize = m_layout->pageSize(m_presenter->currentPageIndex());
+  auto         scaleFactor = width / pageSize.width;
   Layout::Size size = { pageSize.width * scaleFactor, pageSize.height * scaleFactor };
   m_layout->layout(size);
 }

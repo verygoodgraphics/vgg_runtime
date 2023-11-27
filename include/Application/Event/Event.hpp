@@ -77,9 +77,9 @@ enum EEventType
   VGG_MOUSEWHEEL,          /**< Mouse wheel motion */
 
   /* Touch events */
-  VGG_FINGERDOWN = 0x700,
-  VGG_FINGERUP,
-  VGG_FINGERMOTION,
+  VGG_TOUCHDOWN = 0x700,
+  VGG_TOUCHUP,
+  VGG_TOUCHMOTION,
 
   /* Clipboard events */
   VGG_CLIPBOARDUPDATE = 0x900, /**< The clipboard or primary selection changed */
@@ -107,9 +107,9 @@ enum EEventType
 struct VKeysym
 {
   EVGGScancode scancode; /**< VGG physical key code - see ::SDL_Scancode for details */
-  EVGGKeyCode sym;       /**< VGG virtual key code - see ::SDL_Keycode for details */
-  EVGGKeymod mod;        /**< current key modifiers */
-  uint32_t unused;
+  EVGGKeyCode  sym;      /**< VGG virtual key code - see ::SDL_Keycode for details */
+  EVGGKeymod   mod;      /**< current key modifiers */
+  uint32_t     unused;
 };
 
 /**
@@ -117,13 +117,13 @@ struct VKeysym
  */
 struct VKeyboardEvent
 {
-  uint32_t type;      /**< ::VGG_KEYDOWN or ::VGG_KEYUP */
-  uint32_t timestamp; /**< In milliseconds, populated using VGG_GetTicks() */
-  EButtonState state; /**< ::VGG_Pressed or ::VGG_Release */
-  uint8_t repeat;     /**< Non-zero if this is a key repeat */
-  uint8_t padding2;
-  uint8_t padding3;
-  VKeysym keysym; /**< The key that was pressed or released */
+  uint32_t     type;      /**< ::VGG_KEYDOWN or ::VGG_KEYUP */
+  uint32_t     timestamp; /**< In milliseconds, populated using VGG_GetTicks() */
+  EButtonState state;     /**< ::VGG_Pressed or ::VGG_Release */
+  uint8_t      repeat;    /**< Non-zero if this is a key repeat */
+  uint8_t      padding2;
+  uint8_t      padding3;
+  VKeysym      keysym; /**< The key that was pressed or released */
 };
 
 #define VGG_TEXTEDITINGEVENT_TEXT_SIZE (32)
@@ -132,11 +132,11 @@ struct VKeyboardEvent
  */
 struct VTextEditingEvent
 {
-  uint32_t type;                             /**< ::VGG_TEXTEDITING */
-  uint32_t timestamp;                        /**< In milliseconds, populated using VGG_GetTicks() */
-  char text[VGG_TEXTEDITINGEVENT_TEXT_SIZE]; /**< The editing text */
-  int32_t start;                             /**< The start cursor of selected editing text */
-  int32_t length;                            /**< The length of selected editing text */
+  uint32_t type;      /**< ::VGG_TEXTEDITING */
+  uint32_t timestamp; /**< In milliseconds, populated using VGG_GetTicks() */
+  char     text[VGG_TEXTEDITINGEVENT_TEXT_SIZE]; /**< The editing text */
+  int32_t  start;                                /**< The start cursor of selected editing text */
+  int32_t  length;                               /**< The length of selected editing text */
 };
 
 /**
@@ -158,9 +158,9 @@ struct VTextEditingExtEvent
  */
 struct VTextInputEvent
 {
-  uint32_t type;                           /**< ::VGG_TEXTINPUT */
-  uint32_t timestamp;                      /**< In milliseconds, populated using VGG_GetTicks() */
-  char text[VGG_TEXTINPUTEVENT_TEXT_SIZE]; /**< The input text */
+  uint32_t type;      /**< ::VGG_TEXTINPUT */
+  uint32_t timestamp; /**< In milliseconds, populated using VGG_GetTicks() */
+  char     text[VGG_TEXTINPUTEVENT_TEXT_SIZE]; /**< The input text */
 };
 
 /**
@@ -168,20 +168,20 @@ struct VTextInputEvent
  */
 struct VMouseMotionEvent
 {
-  uint32_t type;      /**< ::VGG_MOUSEMOTION */
-  uint32_t timestamp; /**< In milliseconds, populated using VGG_GetTicks() */
-  uint32_t which;     /**< The mouse instance id, or VGG_TOUCH_MOUSEID */
-  EButtonState state; /**< ::VGG_PRESSED or ::VGG_RELEASED */
-  int32_t windowX;    /**< X coordinate, relative to window */
-  int32_t windowY;    /**< Y coordinate, relative to window */
-  int32_t xrel;       /**< The relative motion in the X direction */
-  int32_t yrel;       /**< The relative motion in the Y direction */
-  int32_t canvasXRel; /**< The relative motion in the X direction in canvas space*/
-  int32_t canvasYRel; /**< The relative motion in the Y direction in canvas space*/
-  int32_t canvasX;    /*mouse position on canvas means that the mapped position on the drawable
-                                texture beacuse of high dpi screen, its value should be given correctly
-                                by the app, same with mouse position by default*/
-  int32_t canvasY;
+  uint32_t     type;       /**< ::VGG_MOUSEMOTION */
+  uint32_t     timestamp;  /**< In milliseconds, populated using VGG_GetTicks() */
+  uint32_t     which;      /**< The mouse instance id, or VGG_TOUCH_MOUSEID */
+  EButtonState state;      /**< ::VGG_PRESSED or ::VGG_RELEASED */
+  int32_t      windowX;    /**< X coordinate, relative to window */
+  int32_t      windowY;    /**< Y coordinate, relative to window */
+  int32_t      xrel;       /**< The relative motion in the X direction */
+  int32_t      yrel;       /**< The relative motion in the Y direction */
+  int32_t      canvasXRel; /**< The relative motion in the X direction in canvas space*/
+  int32_t      canvasYRel; /**< The relative motion in the Y direction in canvas space*/
+  int32_t      canvasX;    /*mouse position on canvas means that the mapped position on the drawable
+                                     texture beacuse of high dpi screen, its value should be given correctly
+                                     by the app, same with mouse position by default*/
+  int32_t      canvasY;
 };
 
 /**
@@ -189,17 +189,17 @@ struct VMouseMotionEvent
  */
 struct VMouseButtonEvent
 {
-  uint32_t type;      /**< ::VGG_MOUSEBUTTONDOWN or ::VGG_MOUSEBUTTONUP */
-  uint32_t timestamp; /**< In milliseconds, populated using VGG_GetTicks() */
-  uint32_t which;     /**< The mouse instance id, or VGG_TOUCH_MOUSEID */
-  uint8_t button;     /**< The mouse button index */
-  EButtonState state; /**< ::VGG_PRESSED or ::VGG_RELEASED */
-  uint8_t clicks;     /**< 1 for single-click, 2 for double-click, etc. */
-  uint8_t padding1;
-  int32_t windowX; /**< X coordinate, relative to window */
-  int32_t windowY; /**< Y coordinate, relative to window */
-  int32_t canvasX;
-  int32_t canvasY;
+  uint32_t     type;      /**< ::VGG_MOUSEBUTTONDOWN or ::VGG_MOUSEBUTTONUP */
+  uint32_t     timestamp; /**< In milliseconds, populated using VGG_GetTicks() */
+  uint32_t     which;     /**< The mouse instance id, or VGG_TOUCH_MOUSEID */
+  uint8_t      button;    /**< The mouse button index */
+  EButtonState state;     /**< ::VGG_PRESSED or ::VGG_RELEASED */
+  uint8_t      clicks;    /**< 1 for single-click, 2 for double-click, etc. */
+  uint8_t      padding1;
+  int32_t      windowX; /**< X coordinate, relative to window */
+  int32_t      windowY; /**< Y coordinate, relative to window */
+  int32_t      canvasX;
+  int32_t      canvasY;
 };
 
 /**
@@ -212,18 +212,27 @@ struct VMouseWheelEvent
   uint32_t which;     /**< The mouse instance id, or VGG_TOUCH_MOUSEID */
   int32_t
     x; /**< The amount scrolled horizontally, positive to the right and negative to the left */
-  int32_t y; /**< The amount scrolled vertically, positive away from the user and negative toward
-               the user */
+  int32_t  y; /**< The amount scrolled vertically, positive away from the user and negative toward
+                the user */
   uint32_t direction; /**< Set to one of the VGG_MOUSEWHEEL_* defines. When FLIPPED the values in
                          X and Y will be opposite. Multiply by -1 to change them back */
-  float preciseX;  /**< The amount scrolled horizontally, positive to the right and negative to the
-                      left, with float precision (added in 2.0.18) */
-  float preciseY;  /**< The amount scrolled vertically, positive away from the user and negative
-                      toward the user, with float precision (added in 2.0.18) */
-  int32_t mouseX;  /**< X coordinate, relative to window (added in 2.26.0) */
-  int32_t mouseY;  /**< Y coordinate, relative to window (added in 2.26.0) */
-  int32_t canvasX; /**<X coordiante, relative to canvas  */
-  int32_t canvasY; /**<Y coordiante, relative to canvas  */
+  float   preciseX; /**< The amount scrolled horizontally, positive to the right and negative to the
+                       left, with float precision (added in 2.0.18) */
+  float   preciseY; /**< The amount scrolled vertically, positive away from the user and negative
+                       toward the user, with float precision (added in 2.0.18) */
+  int32_t mouseX;   /**< X coordinate, relative to window (added in 2.26.0) */
+  int32_t mouseY;   /**< Y coordinate, relative to window (added in 2.26.0) */
+  int32_t canvasX;  /**<X coordiante, relative to canvas  */
+  int32_t canvasY;  /**<Y coordiante, relative to canvas  */
+};
+
+struct VTouchEvent
+{
+  uint32_t type;
+  int32_t  windowX; /**< X coordinate, relative to window */
+  int32_t  windowY; /**< Y coordinate, relative to window */
+  int32_t  xrel;    /**< The relative motion in the X direction */
+  int32_t  yrel;    /**< The relative motion in the Y direction */
 };
 
 enum EWindowEventID
@@ -257,14 +266,14 @@ enum EWindowEventID
 
 struct VWindowEvent
 {
-  uint32_t type;         /**< ::VGG_WINDOWEVENT */
-  uint32_t timestamp;    /**< In milliseconds, populated using VGG_GetTicks() */
-  uint32_t windowID;     /**< The associated window */
-  EWindowEventID event;  /**< ::VGG_WindowEventID */
-  int32_t data1;         /**< event dependent data */
-  int32_t data2;         /**< event dependent data */
-  int32_t drawableWidth; /*window drawable size width: */
-  int32_t drawableHeight;
+  uint32_t       type;          /**< ::VGG_WINDOWEVENT */
+  uint32_t       timestamp;     /**< In milliseconds, populated using VGG_GetTicks() */
+  uint32_t       windowID;      /**< The associated window */
+  EWindowEventID event;         /**< ::VGG_WindowEventID */
+  int32_t        data1;         /**< event dependent data */
+  int32_t        data2;         /**< event dependent data */
+  int32_t        drawableWidth; /*window drawable size width: */
+  int32_t        drawableHeight;
 };
 
 /**
@@ -300,17 +309,17 @@ struct VUserEvent
 {
   uint32_t type;      /**< ::VGG_USEREVENT through ::VGG_LASTEVENT-1 */
   uint32_t timestamp; /**< In milliseconds, populated using VGG_GetTicks() */
-  int32_t code;       /**< User defined event code */
-  void* data1;        /**< User defined data pointer */
-  void* data2;        /**< User defined data pointer */
+  int32_t  code;      /**< User defined event code */
+  void*    data1;     /**< User defined data pointer */
+  void*    data2;     /**< User defined data pointer */
 };
 
 struct VPaintEvent
 {
   uint32_t type;
   uint32_t timestamp;
-  void* data;
-  float dpi;
+  void*    data;
+  float    dpi;
 };
 
 struct VAppInitEvent
@@ -321,8 +330,8 @@ struct VAppInitEvent
   uint32_t windowHeight;
   uint32_t drawableWidth;
   uint32_t drawableHeight;
-  int argc;
-  char** argv;
+  int      argc;
+  char**   argv;
 };
 
 /**
@@ -330,18 +339,19 @@ struct VAppInitEvent
  */
 union UEvent
 {
-  uint32_t type; /**< Event type, shared with all events */
-  VAppInitEvent init;
-  VKeyboardEvent key;
-  VWindowEvent window;
-  VTextEditingEvent edit;
+  uint32_t             type; /**< Event type, shared with all events */
+  VAppInitEvent        init;
+  VKeyboardEvent       key;
+  VWindowEvent         window;
+  VTextEditingEvent    edit;
   VTextEditingExtEvent editExt;
-  VTextInputEvent text;
-  VMouseMotionEvent motion;
-  VMouseButtonEvent button;
-  VMouseWheelEvent wheel;
-  VQuitEvent quit;
-  VUserEvent user;
-  VDropEvent drop;
-  VPaintEvent paint;
+  VTextInputEvent      text;
+  VMouseMotionEvent    motion;
+  VMouseButtonEvent    button;
+  VMouseWheelEvent     wheel;
+  VTouchEvent          touch;
+  VQuitEvent           quit;
+  VUserEvent           user;
+  VDropEvent           drop;
+  VPaintEvent          paint;
 };

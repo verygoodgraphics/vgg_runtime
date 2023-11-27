@@ -36,9 +36,10 @@ public:
     m_component.reset(new Component);
   }
 
-  bool load(const std::string& filePath,
-            const char*        designDocSchemaFilePath = nullptr,
-            const char*        layoutDocSchemaFilePath = nullptr)
+  bool load(
+    const std::string& filePath,
+    const char*        designDocSchemaFilePath = nullptr,
+    const char*        layoutDocSchemaFilePath = nullptr)
   {
     return m_component->load(filePath, designDocSchemaFilePath, layoutDocSchemaFilePath);
   }
@@ -54,6 +55,11 @@ public:
     std::unique_ptr<VGG::layer::SkiaGraphicsContext> graphicsContext{ metalContext };
     m_component->setGraphicsContext(graphicsContext, metalContext->width(), metalContext->height());
   }
+
+  bool onEvent(UEvent evt)
+  {
+    return m_component->onEvent(evt);
+  }
 };
 
 // api ----------------------------------------------------------------------
@@ -65,9 +71,10 @@ MetalComponent::MetalComponent()
 
 MetalComponent::~MetalComponent() = default;
 
-bool MetalComponent::load(const std::string& filePath,
-                          const char*        designDocSchemaFilePath,
-                          const char*        layoutDocSchemaFilePath)
+bool MetalComponent::load(
+  const std::string& filePath,
+  const char*        designDocSchemaFilePath,
+  const char*        layoutDocSchemaFilePath)
 {
 
   return m_impl->load(filePath, designDocSchemaFilePath, layoutDocSchemaFilePath);
@@ -81,6 +88,11 @@ bool MetalComponent::run()
 void MetalComponent::setView(MTLHandle mtkView)
 {
   m_impl->setView(mtkView);
+}
+
+bool MetalComponent::onEvent(UEvent evt)
+{
+  return m_impl->onEvent(evt);
 }
 
 } // namespace VGG

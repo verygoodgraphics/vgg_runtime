@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "Event.hpp"
+
 #include <memory>
 
 namespace VGG
@@ -32,11 +34,14 @@ public:
   MetalComponent();
   ~MetalComponent();
 
-  bool load(const std::string& filePath,
-            const char*        designDocSchemaFilePath = nullptr,
-            const char*        layoutDocSchemaFilePath = nullptr);
+  bool load(
+    const std::string& filePath,
+    const char*        designDocSchemaFilePath = nullptr,
+    const char*        layoutDocSchemaFilePath = nullptr);
   void setView(MTLHandle mtkView);
   bool run();
+
+  bool onEvent(UEvent evt);
 };
 
 } // namespace VGG

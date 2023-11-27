@@ -44,20 +44,20 @@ public:
 private:
   friend class Editor;
 
-  EventListener m_eventListener;
+  EventListener    m_eventListener;
   HasEventListener m_hasEventListener;
 
-  UIView* m_superview{ nullptr };
+  UIView*                              m_superview{ nullptr };
   std::vector<std::shared_ptr<UIView>> m_subviews;
 
   std::weak_ptr<LayoutNode> m_document;
-  int m_page{ 0 };
+  int                       m_page{ 0 };
 
   Layout::Rect m_frame;
   Layout::Rect m_bounds;
 
   // editor
-  bool m_isEditor = false;
+  bool       m_isEditor = false;
   // sidebar
   ScalarType m_top{ 0 };
   ScalarType m_right{ 0 };
@@ -111,10 +111,11 @@ public:
     layoutSubviews();
   }
 
-  void becomeEditorWithSidebar(ScalarType top,
-                               ScalarType right,
-                               ScalarType bottom,
-                               ScalarType left);
+  void becomeEditorWithSidebar(
+    ScalarType top,
+    ScalarType right,
+    ScalarType bottom,
+    ScalarType left);
 
   bool isDirty()
   {
@@ -137,7 +138,7 @@ public:
 
   void nextArtboard();
   void preArtboard();
-  int currentPageIndex()
+  int  currentPageIndex()
   {
     return m_page;
   }
@@ -147,16 +148,19 @@ public:
 private:
   std::tuple<bool, bool, bool, bool> getKeyModifier(int keyMod);
 
-  void layoutSubviews();
-  Layout::Point converPointFromWindowAndScale(Layout::Point point);
+  void                        layoutSubviews();
+  Layout::Point               converPointFromWindowAndScale(Layout::Point point);
   std::shared_ptr<LayoutNode> currentPage();
 
-  bool handleMouseEvent(int jsButtonIndex,
-                        int x,
-                        int y,
-                        int motionX,
-                        int motionY,
-                        EUIEventType type);
+  bool handleMouseEvent(
+    int          jsButtonIndex,
+    int          x,
+    int          y,
+    int          motionX,
+    int          motionY,
+    EUIEventType type);
+
+  bool handleTouchEvent(int x, int y, int motionX, int motionY, EUIEventType type);
 };
 
 } // namespace VGG

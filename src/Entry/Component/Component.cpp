@@ -49,9 +49,6 @@ public:
       new MainComposer{ new ComponentComposer{}, std::make_shared<FakeMouse>() });
     m_application.reset(new UIApplication);
 
-    // todo, event listener
-
-    // todo, init layer
     m_appRender = std::make_shared<app::AppRender>();
     m_application->setLayer(m_appRender.get());
 
@@ -59,13 +56,15 @@ public:
     m_application->setController(m_mainComposer->controller());
   }
 
-  bool load(const std::string& filePath,
-            const char*        designDocSchemaFilePath = nullptr,
-            const char*        layoutDocSchemaFilePath = nullptr)
+  bool load(
+    const std::string& filePath,
+    const char*        designDocSchemaFilePath = nullptr,
+    const char*        layoutDocSchemaFilePath = nullptr)
   {
-    return m_mainComposer->controller()->start(filePath,
-                                               designDocSchemaFilePath,
-                                               layoutDocSchemaFilePath);
+    return m_mainComposer->controller()->start(
+      filePath,
+      designDocSchemaFilePath,
+      layoutDocSchemaFilePath);
   }
 
   void setGraphicsContext(std::unique_ptr<layer::SkiaGraphicsContext>& context, int w, int h)
@@ -77,6 +76,7 @@ public:
 
     m_mainComposer->view()->setSize(w, h);
 
+    // VGG_APP_INIT
     UEvent evt;
     evt.type = VGG_APP_INIT;
     evt.init.argc = 0;
@@ -97,6 +97,33 @@ public:
     m_mainComposer->runLoop()->dispatch();
     return rendered;
   }
+
+  bool onEvent(UEvent evt)
+  {
+    switch (evt.type)
+    {
+      case VGG_WINDOWEVENT:
+        if (auto& window = evt.window;
+            (window.event == VGG_WINDOWEVENT_RESIZED ||
+             window.event == VGG_WINDOWEVENT_SIZE_CHANGED))
+        {
+          int drawableWidth = window.drawableWidth;
+          int drawableHeight = window.drawableHeight;
+          if (m_appRender)
+          {
+            m_appRender->resize(drawableWidth, drawableHeight);
+          }
+        }
+        break;
+      default:
+        break;
+    }
+
+    m_application->onEvent(evt, nullptr);
+    m_appRender->sendEvent(evt, nullptr);
+
+    return true;
+  }
 };
 
 // api ----------------------------------------------------------------------
@@ -107,9 +134,10 @@ Component::Component()
 
 Component::~Component() = default;
 
-bool Component::load(const std::string& filePath,
-                     const char*        designDocSchemaFilePath,
-                     const char*        layoutDocSchemaFilePath)
+bool Component::load(
+  const std::string& filePath,
+  const char*        designDocSchemaFilePath,
+  const char*        layoutDocSchemaFilePath)
 {
 
   return m_impl->load(filePath, designDocSchemaFilePath, layoutDocSchemaFilePath);
@@ -120,11 +148,17 @@ bool Component::run()
   return m_impl->run();
 }
 
-void Component::setGraphicsContext(std::unique_ptr<layer::SkiaGraphicsContext>& context,
-                                   int                                          w,
-                                   int                                          h)
+void Component::setGraphicsContext(
+  std::unique_ptr<layer::SkiaGraphicsContext>& context,
+  int                                          w,
+  int                                          h)
 {
   m_impl->setGraphicsContext(context, w, h);
+}
+
+bool Component::onEvent(UEvent evt)
+{
+  return m_impl->onEvent(evt);
 }
 
 } // namespace VGG

@@ -35,7 +35,7 @@ using namespace VGG::adapter;
   {                                                                                                \
     const napi_extended_error_info* error_info;                                                    \
     napi_get_last_error_info((env), &error_info);                                                  \
-    bool is_pending;                                                                               \
+    bool        is_pending;                                                                        \
     const char* err_message = error_info->error_message;                                           \
     napi_is_exception_pending((env), &is_pending);                                                 \
     /* If an exception is already pending, don't rethrow it */                                     \
@@ -134,15 +134,17 @@ void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
   };
 
   napi_value cons;
-  NODE_API_CALL_RETURN_VOID(env,
-                            napi_define_class(env,
-                                              "VggSdk",
-                                              -1,
-                                              New,
-                                              nullptr,
-                                              sizeof(properties) / sizeof(napi_property_descriptor),
-                                              properties,
-                                              &cons));
+  NODE_API_CALL_RETURN_VOID(
+    env,
+    napi_define_class(
+      env,
+      "VggSdk",
+      -1,
+      New,
+      nullptr,
+      sizeof(properties) / sizeof(napi_property_descriptor),
+      properties,
+      &cons));
 
   NODE_API_CALL_RETURN_VOID(env, napi_create_reference(env, cons, 1, &constructor));
 
@@ -155,7 +157,7 @@ napi_value VggSdkNodeAdapter::New(napi_env env, napi_callback_info info)
   NODE_API_CALL(env, napi_get_new_target(env, info, &new_target));
   bool is_constructor = (new_target != nullptr);
 
-  size_t argc = 1;
+  size_t     argc = 1;
   napi_value args[1];
   napi_value _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, nullptr));
@@ -166,13 +168,15 @@ napi_value VggSdkNodeAdapter::New(napi_env env, napi_callback_info info)
     VggSdkNodeAdapter* sdk_adapter = new VggSdkNodeAdapter();
     sdk_adapter->m_env = env;
 
-    NODE_API_CALL(env,
-                  napi_wrap(env,
-                            _this,
-                            sdk_adapter,
-                            VggSdkNodeAdapter::Destructor,
-                            nullptr /* finalize_hint */,
-                            &sdk_adapter->m_wrapper));
+    NODE_API_CALL(
+      env,
+      napi_wrap(
+        env,
+        _this,
+        sdk_adapter,
+        VggSdkNodeAdapter::Destructor,
+        nullptr /* finalize_hint */,
+        &sdk_adapter->m_wrapper));
 
     return _this;
   }
@@ -205,7 +209,7 @@ napi_value VggSdkNodeAdapter::GetDesignDocument(napi_env env, napi_callback_info
 
 napi_value VggSdkNodeAdapter::DesignDocumentReplaceAt(napi_env env, napi_callback_info info)
 {
-  size_t argc = 3;
+  size_t     argc = 3;
   napi_value args[3];
   napi_value _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
@@ -220,14 +224,11 @@ napi_value VggSdkNodeAdapter::DesignDocumentReplaceAt(napi_env env, napi_callbac
   {
     auto json_pointer_string = GetArgString(env, args[0]);
     auto json_value_string = GetArgString(env, args[1]);
-    auto docIndex = argc == 3 ? GetArgIntValue(env, args[2]) : 0;
 
     VggSdkNodeAdapter* sdk_adapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
 
-    sdk_adapter->m_vggSdk->designDocumentReplaceAt(json_pointer_string,
-                                                   json_value_string,
-                                                   docIndex);
+    sdk_adapter->m_vggSdk->designDocumentReplaceAt(json_pointer_string, json_value_string);
   }
   catch (std::exception& e)
   {
@@ -239,7 +240,7 @@ napi_value VggSdkNodeAdapter::DesignDocumentReplaceAt(napi_env env, napi_callbac
 
 napi_value VggSdkNodeAdapter::DesignDocumentAddAt(napi_env env, napi_callback_info info)
 {
-  size_t argc = 3;
+  size_t     argc = 3;
   napi_value args[3];
   napi_value _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
@@ -254,12 +255,11 @@ napi_value VggSdkNodeAdapter::DesignDocumentAddAt(napi_env env, napi_callback_in
   {
     auto json_pointer_string = GetArgString(env, args[0]);
     auto json_value_string = GetArgString(env, args[1]);
-    auto docIndex = argc == 3 ? GetArgIntValue(env, args[2]) : 0;
 
     VggSdkNodeAdapter* sdk_adapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
 
-    sdk_adapter->m_vggSdk->designDocumentAddAt(json_pointer_string, json_value_string, docIndex);
+    sdk_adapter->m_vggSdk->designDocumentAddAt(json_pointer_string, json_value_string);
   }
   catch (std::exception& e)
   {
@@ -271,7 +271,7 @@ napi_value VggSdkNodeAdapter::DesignDocumentAddAt(napi_env env, napi_callback_in
 
 napi_value VggSdkNodeAdapter::DesignDocumentDeleteAt(napi_env env, napi_callback_info info)
 {
-  size_t argc = 2;
+  size_t     argc = 2;
   napi_value args[2];
   napi_value _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
@@ -285,12 +285,11 @@ napi_value VggSdkNodeAdapter::DesignDocumentDeleteAt(napi_env env, napi_callback
   try
   {
     auto json_pointer_string = GetArgString(env, args[0]);
-    auto docIndex = argc == 2 ? GetArgIntValue(env, args[1]) : 0;
 
     VggSdkNodeAdapter* sdk_adapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
 
-    sdk_adapter->m_vggSdk->designDocumentDeleteAt(json_pointer_string, docIndex);
+    sdk_adapter->m_vggSdk->designDocumentDeleteAt(json_pointer_string);
   }
   catch (std::exception& e)
   {
@@ -303,7 +302,7 @@ napi_value VggSdkNodeAdapter::DesignDocumentDeleteAt(napi_env env, napi_callback
 // event listener
 napi_value VggSdkNodeAdapter::AddEventListener(napi_env env, napi_callback_info info)
 {
-  size_t argc = 4;
+  size_t     argc = 4;
   napi_value args[4];
   napi_value _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
@@ -322,9 +321,8 @@ napi_value VggSdkNodeAdapter::AddEventListener(napi_env env, napi_callback_info 
     auto elementPath = GetArgString(env, args[0]);
     auto eventType = GetArgString(env, args[1]);
     auto listenerCode = GetArgString(env, args[2]);
-    auto docIndex = argc == 4 ? GetArgIntValue(env, args[3]) : 0;
 
-    sdk_adapter->m_vggSdk->addEventListener(elementPath, eventType, listenerCode, docIndex);
+    sdk_adapter->m_vggSdk->addEventListener(elementPath, eventType, listenerCode);
   }
   catch (std::exception& e)
   {
@@ -336,7 +334,7 @@ napi_value VggSdkNodeAdapter::AddEventListener(napi_env env, napi_callback_info 
 
 napi_value VggSdkNodeAdapter::RemoveEventListener(napi_env env, napi_callback_info info)
 {
-  size_t argc = 4;
+  size_t     argc = 4;
   napi_value args[4];
   napi_value _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
@@ -355,9 +353,8 @@ napi_value VggSdkNodeAdapter::RemoveEventListener(napi_env env, napi_callback_in
     auto elementPath = GetArgString(env, args[0]);
     auto eventType = GetArgString(env, args[1]);
     auto listenerCode = GetArgString(env, args[2]);
-    auto docIndex = argc == 4 ? GetArgIntValue(env, args[3]) : 0;
 
-    sdk_adapter->m_vggSdk->removeEventListener(elementPath, eventType, listenerCode, docIndex);
+    sdk_adapter->m_vggSdk->removeEventListener(elementPath, eventType, listenerCode);
   }
   catch (std::exception& e)
   {
@@ -408,7 +405,7 @@ google chrome console, getEventListeners result:
 */
 napi_value VggSdkNodeAdapter::GetEventListeners(napi_env env, napi_callback_info info)
 {
-  size_t argc = 2;
+  size_t     argc = 2;
   napi_value args[2];
   napi_value _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
@@ -422,7 +419,6 @@ napi_value VggSdkNodeAdapter::GetEventListeners(napi_env env, napi_callback_info
   try
   {
     auto elementPath = GetArgString(env, args[0]);
-    auto docIndex = argc == 2 ? GetArgIntValue(env, args[1]) : 0;
 
     VggSdkNodeAdapter* sdk_adapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
@@ -430,7 +426,7 @@ napi_value VggSdkNodeAdapter::GetEventListeners(napi_env env, napi_callback_info
     napi_value result_listeners_map; // result object
     napi_create_object(env, &result_listeners_map);
 
-    auto listenersMap = sdk_adapter->m_vggSdk->getEventListeners(elementPath, docIndex);
+    auto listenersMap = sdk_adapter->m_vggSdk->getEventListeners(elementPath);
     for (auto& map_item : listenersMap)
     {
       if (map_item.second.empty())
@@ -450,11 +446,13 @@ napi_value VggSdkNodeAdapter::GetEventListeners(napi_env env, napi_callback_info
         napi_create_object(env, &js_listener_object);
 
         napi_value js_listener_code; // code string
-        NODE_API_CALL(env,
-                      napi_create_string_utf8(env,
-                                              listenerCode.data(),
-                                              listenerCode.size(),
-                                              &js_listener_code));
+        NODE_API_CALL(
+          env,
+          napi_create_string_utf8(
+            env,
+            listenerCode.data(),
+            listenerCode.size(),
+            &js_listener_code));
         NODE_API_CALL(
           env,
           napi_set_named_property(env, js_listener_object, listener_code_key, js_listener_code));
@@ -462,11 +460,13 @@ napi_value VggSdkNodeAdapter::GetEventListeners(napi_env env, napi_callback_info
         NODE_API_CALL(env, napi_set_element(env, js_listener_code_array, i, js_listener_object));
       }
 
-      NODE_API_CALL(env,
-                    napi_set_named_property(env,
-                                            result_listeners_map,
-                                            eventType.c_str(),
-                                            js_listener_code_array));
+      NODE_API_CALL(
+        env,
+        napi_set_named_property(
+          env,
+          result_listeners_map,
+          eventType.c_str(),
+          js_listener_code_array));
     }
     return result_listeners_map;
   }
@@ -479,7 +479,7 @@ napi_value VggSdkNodeAdapter::GetEventListeners(napi_env env, napi_callback_info
 
 napi_value VggSdkNodeAdapter::Save(napi_env env, napi_callback_info info)
 {
-  size_t argc = 0;
+  size_t     argc = 0;
   napi_value _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, nullptr, &_this, nullptr));
 

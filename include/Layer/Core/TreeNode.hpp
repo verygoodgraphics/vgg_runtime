@@ -16,6 +16,7 @@
 #pragma once
 #include "Utility/HelperMacro.hpp"
 
+#include "Layer/Core/VNode.hpp"
 #include "Layer/Config.hpp"
 #include <algorithm>
 #include <string>
@@ -30,12 +31,12 @@ class TreeNode;
 using TreeNodePtr = std::shared_ptr<TreeNode>;
 using TreeNodeRef = std::weak_ptr<TreeNode>;
 
-class VGG_EXPORTS TreeNode : public std::enable_shared_from_this<TreeNode>
+class VGG_EXPORTS TreeNode : public layer::VNode
 {
-  using FirstChildNode = std::list<std::shared_ptr<TreeNode>>;
+  using FirstChildNode = std::list<TreeNodePtr>;
 
 public:
-  using NodeIter = std::list<std::shared_ptr<TreeNode>>::iterator;
+  using NodeIter = std::list<TreeNodePtr>::iterator;
   TreeNode(const TreeNode& other)
   {
     m_name = other.m_name;
@@ -172,14 +173,14 @@ public:
 
   TreeNodePtr cloneChildren() const;
 
-  virtual ~TreeNode() = default;
+  virtual ~TreeNode();
 
 protected:
-  std::string                                          m_name;
-  FirstChildNode                                       m_firstChild;
-  std::list<std::shared_ptr<TreeNode>>::iterator       m_iter;
-  TreeNodeRef                                          m_parent;
-  std::list<std::shared_ptr<TreeNode>>::const_iterator findChildImpl(const std::string& name) const
+  std::string                            m_name;
+  FirstChildNode                         m_firstChild;
+  std::list<TreeNodePtr>::iterator       m_iter;
+  TreeNodeRef                            m_parent;
+  std::list<TreeNodePtr>::const_iterator findChildImpl(const std::string& name) const
   {
     return std::find_if(
       m_firstChild.begin(),
@@ -188,6 +189,11 @@ protected:
   }
 
   TreeNodePtr findChildRecursiveImpl(const TreeNodePtr& ptr, const std::string& name) const;
+
+  Bound onRevalidate() override
+  {
+    return Bound();
+  }
 
 protected:
   TreeNode(const std::string& name)

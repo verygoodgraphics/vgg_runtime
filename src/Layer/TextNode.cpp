@@ -42,7 +42,7 @@ namespace VGG::layer
 
 TextNode::TextNode(const std::string& name, std::string guid)
   : PaintNode(name, VGG_TEXT, std::move(guid))
-  , d_ptr(new TextNode__pImpl(this, bound()))
+  , d_ptr(new TextNode__pImpl(this, frameBound()))
 {
   auto mgr = sk_ref_sp(FontManager::instance().defaultFontManager());
   auto fontCollection = sk_make_sp<VGGFontCollection>(std::move(mgr));
@@ -106,10 +106,12 @@ void TextNode::paintEvent(SkiaRenderer* renderer)
     _->paragraphCache.rebuild();
     _->paragraphCache.clear(TextParagraphCache::ETextParagraphCacheFlagsBits::D_REBUILD);
   }
+  Bound newBound = frameBound();
   if (_->paragraphCache.test(TextParagraphCache::ETextParagraphCacheFlagsBits::D_LAYOUT))
   {
-    setBound(_->paragraphCache.layout(bound(), _->mode)); // update bound
-    _->painter.updateBound(bound());
+    newBound = _->paragraphCache.layout(frameBound(), _->mode);
+    setFrameBound(newBound); // update bound
+    _->painter.updateBound(newBound);
     _->paragraphCache.clear(TextParagraphCache::ETextParagraphCacheFlagsBits::D_LAYOUT);
   }
 
@@ -120,7 +122,7 @@ void TextNode::paintEvent(SkiaRenderer* renderer)
   }
 
   {
-    const auto b = bound();
+    const auto b = frameBound();
     _->painter.setCanvas(canvas);
     int totalHeight = _->paragraphCache.getHeight();
     int curY = 0;

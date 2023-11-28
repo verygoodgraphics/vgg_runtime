@@ -110,7 +110,7 @@ class DocBuilder
 
     obj->setTransform(Transform(newMatrix));
     const auto b = fromBound(j.value("bounds", json::object_t{}), convertedMatrix);
-    obj->setBound(b);
+    obj->setFrameBound(b);
 
     // Pattern point in style are implicitly given by bound, we must supply the points in original
     // coordinates for correct converting
@@ -242,12 +242,12 @@ class DocBuilder
         }
         p->setParagraph(std::move(text), textStyleAttrs, lineType);
         p->setVerticalAlignment(j.value("verticalAlignment", ETextVerticalAlignment::VA_Top));
-        const auto& b = p->bound();
+        const auto& b = p->frameBound();
         p->setFrameMode(j.value("frameMode", ETextLayoutMode::TL_Fixed));
         if (b.width() == 0 || b.height() == 0)
         {
           // for Ai speicific
-          p->setFrameMode(ETextLayoutMode::TL_WidthAuto);
+          p->setFrameMode(ETextLayoutMode::TL_Fixed);
         }
         else
         {
@@ -466,7 +466,7 @@ class DocBuilder
       for (const auto& p : m_frames)
       {
         const auto m = p->transform();
-        const auto b = p->bound();
+        const auto b = p->frameBound();
         p->transform().setTranslate(-b.topLeft().x, -b.topLeft().y);
         p->setOverflow(EOverflow::OF_Visible);
       }

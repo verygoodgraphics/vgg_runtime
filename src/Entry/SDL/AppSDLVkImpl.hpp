@@ -308,7 +308,7 @@ public:
 
   float resolutionScale()
   {
-#ifdef VGG_HOST_macOS
+#ifdef VGG_TARGET_PLATFORM_macOS
     int dw, dh;
     int ww, wh;
     SDL_Vulkan_GetDrawableSize(this->m_sdlState.window, &dw, &dh);

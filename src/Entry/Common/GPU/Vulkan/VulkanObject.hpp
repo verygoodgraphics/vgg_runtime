@@ -32,7 +32,7 @@ inline const std::vector<const char*> g_validationLayers = {
 };
 // const std::vector<const char*> g_validationLayers = {};
 inline const std::vector<const char*> g_deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME
-#ifdef VGG_HOST_macOS
+#ifdef VGG_TARGET_PLATFORM_macOS
                                                              ,
                                                              "VK_KHR_portability_subset",
                                                              "VK_KHR_get_memory_requirements2",
@@ -110,7 +110,7 @@ struct VkInstanceObject : public std::enable_shared_from_this<VkInstanceObject>
     ci.enabledLayerCount = 0;
     ci.ppEnabledLayerNames = nullptr;
 
-#ifdef VGG_HOST_macOS
+#ifdef VGG_TARGET_PLATFORM_macOS
     extNames.push_back("VK_KHR_portability_enumeration");
     ci.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
 #endif

@@ -1,145 +1,187 @@
 # This file will output some cmake varibles for configure control and global macros for in C/C++ detection.
 #
-# --------- CMake Variables Inputs ---------
-# VGG_VAR_PLATFORM_TARGET: possible values defined bellow
+# --------- INPUT CMake Variables ---------
+#
+# - VGG_VAR_TARGET: Possible values defined in ${VGG_ALL_TARGETS}. If not provided, it is set automatically depending on the building host.
 #
 #
-# ----------- OUTPUT Variables and Macros ---------
+# ----------- OUTPUT CMake Variables ---------
 #
 # The following CMake variable will be defined:
 #
-# - VGG_VAR_HOST will be a string containing the prefix of ${VGG_VAR_PLATFORM_TARGET}
+# - VGG_VAR_TARGET_PLATFORM will be the prefix of ${VGG_VAR_TARGET}, namely one of the following values:
+#   - iOS
+#   - macOS
+#   - Android
+#   - Linux
+#   - Windows
+#   - WASM
 #
-# - VGG_VAR_ARCH will be one of the following values:
-#   - "ARM" and macro VGG_ARCH_ARM will be defined
-#   - "X86" and macro VGG_ARCH_X86 will be defined
-#   - "WASM" and macro VGG_ARCH_WASM will be defined
+# - VGG_VAR_TARGET_ARCH will be categorized into one of the following values, depending on the suffix of ${VGG_VAR_TARGET}
+#   - ARM
+#   - X86
+#   - WASM
 #
-# - VGG_VAR_BUILDING_OS_STR will be one of the following value:
-#   - "macOS" and macro VGG_BUILDING_OS_MACOS defined
-#   - "Linux" and macro VGG_BUILDING_OS_LINUX defined
-#   - "Windows" and macro VGG_BUILDING_OS_WIN defined
+# - VGG_VAR_HOST_PLATFORM refers to the host platform, and will be one of the following value:
+#   - macOS
+#   - Linux
+#   - Windows
 #
-# and more macros will be defined:
+# - VGG_VAR_HOST_ARCH refers to the host cpu architecture, and will be one of the following values:
+#   - ARM
+#   - X86
 #
-# - VGG_TARGET_${VGG_VAR_PLATFORM_TARGET}: the '-' in VGG_VAR_PLATFORM_TARGET will be replaced by '_'
-#
-# - VGG_HOST_${the prefix of ${VGG_VAR_PLATFORM_TARGET}}
+# The VGG_VAR_HOST_PLATFORM and VGG_VAR_HOST_ARCH will be consistent with target variables without cross-compiling.
 #
 #
+# ----------- OUTPUT Compiler Macros ---------
 #
-# For example, if VGG_VAR_PLATFORM_TARGET is specified as "Android-arm64_v8a", the following macros are defined:
+# The following compiler macros will be defined:
 #
-# - VGG_TARGET_Android_arm64_v8a
-#
-# - VGG_HOST_Android
-#
-# and CMake variable VGG_VAR_HOST equals "Android"
+# - VGG_TARGET_${VGG_VAR_TARGET}, with '-' replaced with '_'
+# - VGG_TARGET_PLATFORM_${VGG_VAR_TARGET_PLATFORM}
+# - VGG_TARGET_ARCH_${VGG_VAR_TARGET_ARCH}
+# - VGG_HOST_PLATFORM_${VGG_VAR_HOST_PLATFORM}
+# - VGG_HOST_ARCH_${VGG_VAR_HOST_ARCH}
 
 #
-# VGG Variables && Macros Summary
+# ----------- Example ---------
 #
-# - VGG_VAR_PLATFORM_TARGET/VGG_TARGET_XXX => VGG_VAR_HOST/VGG_HOST_YYY => VGG_VAR_ARCH/VGG_ARCH_ZZZ
-# - VGG_VAR_BUILDING_OS_STR/VGG_BUILDING_OS_WWW
+# For example, if VGG_VAR_TARGET is specified as "Android-arm64_v8a", the following variables and macros are defined:
+#
+# - CMake Variable: VGG_VAR_TARGET_PLATFORM == "Android"
+# - CMake Variable: VGG_VAR_TARGET_ARCH == "ARM"
+# - CMake Variable: VGG_VAR_HOST_PLATFORM == "macOS" or "Linux" or "Windows", depending on your building OS
+# - CMake Variable: VGG_VAR_HOST_ARCH == "ARM" or "X86", depending on your building OS
+#
+# - Macro: VGG_TARGET_Android_arm64_v8a
+# - Macro: VGG_TARGET_PLATFORM_Android
+# - Macro: VGG_TARGET_ARCH_ARM
+# - Macro: VGG_HOST_PLATFORM_macOS or VGG_HOST_Linux or VGG_Windows, depending on your building OS
+# - Macro: VGG_HOST_ARCH_ARM or VGG_HOST_ARCH_X86, depending on your building OS
+#
 #
 
 
+###############################################################################
 
-# apple targets:
-list(APPEND VGG_APPLE_TARGET_LIST "iOS" "iOS-simulator" "macOS-apple_silicon" "macOS-x86" )
+# Apple targets:
+list(APPEND VGG_APPLE_TARGET_LIST "iOS" "iOS-simulator" "macOS-arm64" "macOS-x86_64") # ios defaults to arm64
 
-# android targets:
+# Android targets:
 # Keep same with Andorid SDK https://developer.android.com/ndk/guides/abis
-list(APPEND VGG_ANDROID_TARGET_LIST "Android-armeabi_v7a" "Android-arm64_v8a" "Android-x86" "Android-x86_64")
+list(APPEND VGG_ANDROID_TARGET_LIST "Android-armeabi_v7a" "Android-arm64_v8a" "Android-x86_64")
 
-# Windows targets
-list(APPEND VGG_WIN_TARGET_LIST "Windows-x86_64" "Windows-x86")
-
-# linux targets
+# Linux targets
 list(APPEND VGG_LINUX_TARGET_LIST "Linux-x86" "Linux-x86_64")
 
-# other targets
-list(APPEND VGG_OTHER_TARGET_LIST "WASM")
+# Windows targets
+list(APPEND VGG_WIN_TARGET_LIST "Windows-x86" "Windows-x86_64")
 
-list(APPEND VGG_ALL_TARGETS ${VGG_APPLE_TARGET_LIST} ${VGG_ANDROID_TARGET_LIST} ${VGG_WIN_TARGET_LIST} ${VGG_LINUX_TARGET_LIST} ${VGG_OTHER_TARGET_LIST})
-list(APPEND X86_ARCH_LIST "Windows-x86_64" "Windows-x86" "Linux-x86" "Linux-x86_64" "Android-x86" "Android-x86_64" "macOS-x86")
+# WebAssembly targets
+list(APPEND VGG_WASM_TARGET_LIST "WASM") # defaults to WASM32
 
-if(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
-  set(VGG_VAR_BUILDING_OS_STR "macOS" CACHE STRING "" FORCE)
-  add_compile_definitions(VGG_BUILDING_OS_MACOS)
-elseif(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
-  set(VGG_VAR_BUILDING_OS_STR "Windows" CACHE STRING "" FORCE)
-  add_compile_definitions(VGG_BUILDING_OS_WIN)
-elseif(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
+# All targets
+list(APPEND VGG_ALL_TARGETS ${VGG_APPLE_TARGET_LIST} ${VGG_ANDROID_TARGET_LIST} ${VGG_LINUX_TARGET_LIST} ${VGG_WIN_TARGET_LIST} ${VGG_WASM_TARGET_LIST})
+
+# Arch Lists
+list(APPEND X86_ARCH_LIST "x86" "x86_64" "amd64" "i386" "i486" "i586" "i686" "x86-32" "x86-64")
+list(APPEND ARM_ARCH_LIST "arm" "arm64" "armeabi" "armeabi-v7a")
+
+
+###############################################################################
+
+# Detect building host platform
+if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
+  set(VGG_VAR_HOST_PLATFORM "macOS" CACHE STRING "" FORCE)
+  add_compile_definitions(VGG_HOST_PLATFORM_macOS)
+elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux")
   # NOTE: When android.toolchain.cmake specified on windows, this branch also reached, A better way for platform detection is necessary.
-  set(VGG_VAR_BUILDING_OS_STR "Linux" CACHE STRING "" FORCE)
-  add_compile_definitions(VGG_BUILDING_OS_LINUX)
-endif()
-
-#if emscripten is provided, wasm target is set forced.
-if(EMSCRIPTEN)
-  set(VGG_VAR_PLATFORM_TARGET "WASM" CACHE STRING "" FORCE)
-endif()
-
-
-# Give default value dependent on current building platform
-if(NOT VGG_VAR_PLATFORM_TARGET)
-  if(VGG_VAR_BUILDING_OS_STR STREQUAL "macOS")
-    set(VGG_VAR_PLATFORM_TARGET "macOS-apple_silicon")
-  elseif(VGG_VAR_BUILDING_OS_STR STREQUAL "Windows")
-    set(VGG_VAR_PLATFORM_TARGET "Windows-x86_64")
-  elseif(VGG_VAR_BUILDING_OS_STR STREQUAL "Linux")
-    set(VGG_VAR_PLATFORM_TARGET "Linux-x86_64")
-  endif()
-endif()
-
-# Variables checking
-if(NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_APPLE_TARGET_LIST AND
-   NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_WIN_TARGET_LIST AND
-   NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_ANDROID_TARGET_LIST AND
-   NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_LINUX_TARGET_LIST AND
-   NOT ${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_OTHER_TARGET_LIST)
-  message(FATAL_ERROR "Please specifies a platform target by VGG_VAR_PLATFORM_TARGET. ${VGG_VAR_PLATFORM_TARGET}\n Candidate platforms: ${VGG_APPLE_TARGET_LIST} ${VGG_WIN_TARGET_LIST} ${VGG_ANDROID_TARGET_LIST} ${VGG_LINUX_TARGET_LIST}")
-endif()
-
-if(${VGG_VAR_PLATFORM_TARGET} MATCHES "WASM" AND NOT EMSCRIPTEN)
-  message(FATAL_ERROR "emscripten tool chain not set, WASM target is invalid\n")
-endif()
-
-
-
-# preprocessor definition
-string(REPLACE "-" "_" _TARGET_PLATROM_STR ${VGG_VAR_PLATFORM_TARGET})
-add_compile_definitions(VGG_TARGET_${_TARGET_PLATROM_STR})
-
-
-string(FIND ${VGG_VAR_PLATFORM_TARGET} "-" POS)
-string(SUBSTRING ${VGG_VAR_PLATFORM_TARGET} 0 ${POS} _HOST_PREFIX)
-add_compile_definitions(VGG_HOST_${_HOST_PREFIX})
-set(VGG_VAR_HOST ${_HOST_PREFIX})
-
-if(${VGG_VAR_PLATFORM_TARGET} IN_LIST X86_ARCH_LIST)
-  add_compile_definitions(VGG_ARCH_X86)
-  set(VGG_VAR_ARCH "X86" CACHE STRING "" FORCE)
-elseif(${VGG_VAR_PLATFORM_TARGET} STREQUAL "WASM")
-  add_compile_definitions(VGG_ARCH_WASM)
-  set(VGG_VAR_ARCH "WASM" CACHE STRING "" FORCE)
+  set(VGG_VAR_HOST_PLATFORM "Linux" CACHE STRING "" FORCE)
+  add_compile_definitions(VGG_HOST_PLATFORM_Linux)
+elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
+  set(VGG_VAR_HOST_PLATFORM "Windows" CACHE STRING "" FORCE)
+  add_compile_definitions(VGG_HOST_PLATFORM_Windows)
 else()
-  add_compile_definitions(VGG_ARCH_ARM)
-  set(VGG_VAR_ARCH "ARM" CACHE STRING "" FORCE)
+  message(FATAL_ERROR "Unknown host platform: ${CMAKE_HOST_SYSTEM_NAME}")
+endif()
+
+# Detect building host arch
+if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "x86|x86_64")
+  set(VGG_VAR_HOST_ARCH "X86" CACHE STRING "" FORCE)
+  add_compile_definitions(VGG_HOST_ARCH_X86)
+elseif(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "arm|arm64")
+  set(VGG_VAR_HOST_ARCH "ARM" CACHE STRING "" FORCE)
+  add_compile_definitions(VGG_HOST_ARCH_ARM)
+else()
+  message(FATAL_ERROR "Unknown host arch: ${CMAKE_HOST_SYSTEM_PROCESSOR}")
 endif()
 
 
-# Setup android.toolchian.cmake variables
-if(${VGG_VAR_PLATFORM_TARGET} IN_LIST VGG_ANDROID_TARGET_LIST)
-  # See https://developer.android.com/ndk/guides/abis
-  if(${VGG_VAR_PLATFORM_TARGET} MATCHES "Android-armeabi_v7a")
-    set(ANDROID_ABI "armeabi-v7a with NEON")
-  elseif(${VGG_VAR_PLATFORM_TARGET} MATCHES "Android-arm64_v8a")
-    set(ANDROID_ABI "arm64-v8a")
-  elseif(${VGG_VAR_PLATFORM_TARGET} MATCHES "Android-x86")
-    set(ANDROID_ABI "x86")
-  elseif(${VGG_VAR_PLATFORM_TARGET} MATCHES "Android-x86_64")
-    set(ANDROID_ABI "x86_64")
+###############################################################################
+
+# If emscripten is used, WASM target is forced.
+if(EMSCRIPTEN)
+  set(VGG_VAR_TARGET "WASM" CACHE STRING "" FORCE)
+endif()
+
+# WASM target requires emscripten
+if(${VGG_VAR_TARGET} MATCHES "WASM" AND NOT EMSCRIPTEN)
+  message(FATAL_ERROR "WASM target requires emscripten SDK. See https://emscripten.org/docs/getting_started/downloads.html")
+endif()
+
+
+# Setup target variables
+if(NOT VGG_VAR_TARGET)
+  # Give default value depending on current building host
+  set(VGG_VAR_TARGET "${VGG_VAR_HOST_PLATFORM}-${CMAKE_HOST_SYSTEM_PROCESSOR}" CACHE STRING "" FORCE)
+
+  # Check target validity
+  if(NOT ${VGG_VAR_TARGET} IN_LIST VGG_ALL_TARGETS)
+    message(FATAL_ERROR "Unsupported target: ${VGG_VAR_TARGET}\nPlease specify a target. Candidates: ${VGG_ALL_TARGETS}")
+  endif()
+  message(STATUS "VGG_VAR_TARGET: ${VGG_VAR_TARGET}")
+
+  # Set target platform and arch by host variables
+  set(VGG_VAR_TARGET_PLATFORM "${VGG_VAR_HOST_PLATFORM}" CACHE STRING "" FORCE)
+  set(VGG_VAR_TARGET_ARCH "${VGG_VAR_HOST_ARCH}" CACHE STRING "" FORCE)
+else()
+  # Check target validity
+  if(NOT ${VGG_VAR_TARGET} IN_LIST VGG_ALL_TARGETS)
+    message(FATAL_ERROR "Unsupported target: ${VGG_VAR_TARGET}\nPlease specify a target. Candidates: ${VGG_ALL_TARGETS}")
+  endif()
+  message(STATUS "VGG_VAR_TARGET: ${VGG_VAR_TARGET}")
+
+  # Deal with special cases first
+  if (VGG_VAR_TARGET MATCHES "^iOS")
+    set(VGG_VAR_TARGET_PLATFORM "iOS" CACHE STRING "" FORCE)
+    set(VGG_VAR_TARGET_ARCH "ARM" CACHE STRING "" FORCE)
+  elseif (VGG_VAR_TARGET STREQUAL "WASM")
+    set(VGG_VAR_TARGET_PLATFORM "WASM" CACHE STRING "" FORCE)
+    set(VGG_VAR_TARGET_ARCH "WASM" CACHE STRING "" FORCE)
+  else()
+    # Set target platform and arch by VGG_VAR_TARGET
+    string(FIND "${VGG_VAR_TARGET}" "-" POS0)
+    if (POS0 EQUAL -1)
+      message(FATAL_ERROR "Unexpected target: ${VGG_VAR_TARGET}. Maybe you forget to add a special case for it.")
+    endif()
+    string(SUBSTRING "${VGG_VAR_TARGET}" 0 ${POS0} _TARGET_PART1)
+    math(EXPR POS1 "${POS0} + 1")
+    string(SUBSTRING "${VGG_VAR_TARGET}" ${POS1} -1 _TARGET_PART2)
+
+    set(VGG_VAR_TARGET_PLATFORM "${_TARGET_PART1}" CACHE STRING "" FORCE)
+    if(_TARGET_PART2 IN_LIST X86_ARCH_LIST)
+      set(VGG_VAR_TARGET_ARCH "X86" CACHE STRING "" FORCE)
+    elseif(_TARGET_PART2 IN_LIST ARM_ARCH_LIST)
+      set(VGG_VAR_TARGET_ARCH "ARM" CACHE STRING "" FORCE)
+    endif()
   endif()
 endif()
+
+
+# Setup target macros
+string(REPLACE "-" "_" _TARGET_STRING "${VGG_VAR_TARGET}")
+add_compile_definitions(VGG_TARGET_${_TARGET_STRING})
+add_compile_definitions(VGG_TARGET_PLATFORM_${VGG_VAR_TARGET_PLATFORM})
+add_compile_definitions(VGG_TARGET_ARCH_${VGG_VAR_TARGET_ARCH})
+

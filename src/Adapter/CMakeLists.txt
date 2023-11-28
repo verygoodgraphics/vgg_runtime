@@ -9,7 +9,7 @@ if (EMSCRIPTEN)
     PlatformAdapter/Browser/Exec/BrowserJSEngine.cpp
     PlatformAdapter/Browser/Sdk/BrowserSdkAdapter.cpp
   )
-elseif(VGG_VAR_PLATFORM_TARGET MATCHES "^iOS")
+elseif(VGG_VAR_TARGET MATCHES "^iOS")
   target_sources(vgg_adapter PRIVATE
     Component/MetalGraphicsContext.mm
   )

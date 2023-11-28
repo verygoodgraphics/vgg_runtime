@@ -164,7 +164,7 @@ endif()
 set(SKIA_PRESET_FEATURES_FOR_IOS
 "is_trivial_abi=false
 skia_enable_fontmgr_empty=false
-skia_enable_ganesh=true 
+skia_enable_ganesh=true
 skia_enable_gpu=true
 skia_enable_pdf=false
 skia_enable_skottie=false
@@ -237,14 +237,14 @@ elseif(${platform} IN_LIST VGG_WIN_TARGET_LIST)
   foreach(OPT ${SKIA_PRESET_FEATURES_FOR_WIN})
     string(APPEND OPTIONS " ${OPT}")
   endforeach(OPT)
-elseif(platform STREQUAL "macOS-apple_silicon")
-  string(APPEND OPTIONS " target_cpu=\"arm64\"")
-  foreach(OPT ${SKIA_PRESET_FEATURES_FOR_MACOS})
-    string(APPEND OPTIONS " ${OPT}")
-  endforeach(OPT)
 elseif(platform STREQUAL "WASM" AND DEFINED EMSCRIPTEN)
   string(APPEND OPTIONS " target_cpu=\"wasm\"")
   foreach(OPT ${SKIA_PRESET_FEATURES_FOR_WASM})
+    string(APPEND OPTIONS " ${OPT}")
+  endforeach(OPT)
+elseif(platform MATCHES "macOS-arm64")
+  string(APPEND OPTIONS " target_cpu=\"arm64\"")
+  foreach(OPT ${SKIA_PRESET_FEATURES_FOR_MACOS})
     string(APPEND OPTIONS " ${OPT}")
   endforeach(OPT)
 elseif(platform MATCHES "^iOS")
@@ -259,17 +259,17 @@ elseif(platform MATCHES "^iOS")
     string(APPEND OPTIONS " ${OPT}")
   endforeach(OPT)
 else()
-  message(Fatal "target type for skia build is invalid: " ${platform})
+  message(FATAL_ERROR "target type for skia build is invalid: " ${platform})
 endif()
 
 if(platform MATCHES "^iOS") # iOS
-  # Begin: extra_cflags=[,  
+  # Begin: extra_cflags=[,
   string(APPEND OPTIONS " extra_cflags=[\"-fvisibility=default\", \"-fembed-bitcode\", \"-mios-version-min=15.0\", \"-flto=full\"")
   if(platform STREQUAL "iOS-simulator")
     string(APPEND OPTIONS ", \"--target=arm64-apple-ios15.0-simulator\"")
   endif()
   string(APPEND OPTIONS "]")
-  # End extra_cflags: ] 
+  # End extra_cflags: ]
 
 elseif(NOT ${platform} IN_LIST VGG_WIN_TARGET_LIST) # not in window
 # we assume non-window using gcc compatible compiler

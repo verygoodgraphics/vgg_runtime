@@ -158,7 +158,7 @@ inline std::string scalarfmt(double v, size_t maxFractionalDigitNums = 2)
 #define _BG_WHITE_ "47"
 
 /// Common formatters
-#if !defined(EMSCRIPTEN) && !defined(VGG_HOST_iOS)
+#if !defined(EMSCRIPTEN) && !defined(VGG_TARGET_PLATFORM_iOS)
 #define FAIL_COLOR(X) "\x1b[" _FMT_BRIGHT_ ";" _FG_RED_ "m" X "\x1b[" _FMT_RESET_ "m"
 #define WARN_COLOR(X) "\x1b[" _FMT_BRIGHT_ ";" _FG_YELLOW_ "m" X "\x1b[" _FMT_RESET_ "m"
 #define INFO_COLOR(X) "\x1b[" _FMT_BRIGHT_ ";" _FG_BLUE_ "m" X "\x1b[" _FMT_RESET_ "m"

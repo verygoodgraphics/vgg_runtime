@@ -242,7 +242,7 @@ public:
 
   float resolutionScale()
   {
-#if defined(VGG_HOST_macOS) || defined(EMSCRIPTEN)
+#if defined(VGG_TARGET_PLATFORM_macOS) || defined(EMSCRIPTEN)
     int dw, dh;
     int ww, wh;
     SDL_GL_GetDrawableSize(this->m_sdlState.window, &dw, &dh);

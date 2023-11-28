@@ -2,7 +2,7 @@ add_library(vgg_component STATIC
   Component.cpp
 )
 
-if(VGG_VAR_PLATFORM_TARGET MATCHES "^iOS")
+if(VGG_VAR_TARGET MATCHES "^iOS")
   target_sources(vgg_component PRIVATE
     MetalComponent.cpp
   )
@@ -22,7 +22,7 @@ target_link_libraries(vgg_component PUBLIC
 )
 
 install(TARGETS vgg_component DESTINATION lib)
-if(VGG_VAR_PLATFORM_TARGET MATCHES "^iOS")
+if(VGG_VAR_TARGET MATCHES "^iOS")
   install(FILES
     ${CMAKE_SOURCE_DIR}/include/VGG/Component/MetalComponent.hpp
     DESTINATION VGG)

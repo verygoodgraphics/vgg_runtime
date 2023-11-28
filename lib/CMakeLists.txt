@@ -105,7 +105,7 @@ if (NOT EMSCRIPTEN)
   )
   if(APPLE)
     target_link_directories(vgg_libnode PUBLIC ${NODE_FOLDER}/out/Release)
-    if (VGG_VAR_ARCH STREQUAL "ARM")
+    if (VGG_VAR_TARGET_ARCH STREQUAL "ARM")
       target_link_libraries(vgg_libnode PRIVATE
         ${LIBNODE_DEPS}
         icutools

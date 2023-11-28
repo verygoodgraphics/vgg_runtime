@@ -75,39 +75,55 @@ if (NOT EMSCRIPTEN)
     ${NODE_FOLDER}/deps/uv/include
     ${NODE_FOLDER}/deps/v8/include)
 
+  set(LIBNODE_DEPS
+    base64
+    brotli
+    cares
+    histogram
+    icudata
+    icui18n
+    icuucx
+    llhttp
+    nghttp2
+    nghttp3
+    ngtcp2
+    node
+    openssl
+    simdutf
+    torque_base
+    uv
+    uvwasi
+    v8_base_without_compiler
+    v8_compiler
+    v8_initializers
+    v8_libbase
+    v8_libplatform
+    v8_snapshot
+    v8_zlib
+    zlib
+    vgg_libnode_stub
+  )
   if(APPLE)
     target_link_directories(vgg_libnode PUBLIC ${NODE_FOLDER}/out/Release)
-    target_link_libraries(vgg_libnode PRIVATE
-      base64
-      base64_neon64
-      brotli
-      cares
-      histogram
-      icudata
-      icui18n
-      icutools
-      icuucx
-      llhttp
-      nghttp2
-      nghttp3
-      ngtcp2
-      node
-      openssl
-      simdutf
-      torque_base
-      uv
-      uvwasi
-      v8_base_without_compiler
-      v8_compiler
-      v8_init
-      v8_initializers
-      v8_libbase
-      v8_libplatform
-      v8_snapshot
-      v8_zlib
-      zlib
-      vgg_libnode_stub
-    )
+    if (VGG_VAR_ARCH STREQUAL "ARM")
+      target_link_libraries(vgg_libnode PRIVATE
+        ${LIBNODE_DEPS}
+        icutools
+        v8_init
+        base64_neon64
+      )
+    else()
+      target_link_libraries(vgg_libnode PRIVATE
+        ${LIBNODE_DEPS}
+        icutools
+        v8_init
+        base64_avx
+        base64_avx2
+        base64_sse41
+        base64_sse42
+        base64_ssse3
+      )
+    endif()
   else()
     target_link_directories(vgg_libnode PUBLIC
       ${NODE_FOLDER}/out/Release/obj
@@ -128,37 +144,12 @@ if (NOT EMSCRIPTEN)
     )
     target_link_libraries(vgg_libnode PRIVATE
       "-Wl,--whole-archive"
-      base64
+      ${LIBNODE_DEPS}
       base64_avx
       base64_avx2
       base64_sse41
       base64_sse42
       base64_ssse3
-      brotli
-      cares
-      histogram
-      icudata
-      icui18n
-      icuucx
-      llhttp
-      nghttp2
-      nghttp3
-      ngtcp2
-      node
-      openssl
-      simdutf
-      torque_base
-      uv
-      uvwasi
-      v8_base_without_compiler
-      v8_compiler
-      v8_initializers
-      v8_libbase
-      v8_libplatform
-      v8_snapshot
-      v8_zlib
-      zlib
-      vgg_libnode_stub
       "-Wl,--no-whole-archive"
     )
   endif()

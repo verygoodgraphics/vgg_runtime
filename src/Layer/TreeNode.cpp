@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Layer/Core/Node.hpp"
+#include "Layer/Core/TreeNode.hpp"
 
 namespace VGG
 {
 
-NodePtr Node::root() const
+TreeNodePtr TreeNode::root() const
 {
   auto p = parent();
   while (true)
@@ -32,21 +32,21 @@ NodePtr Node::root() const
   return nullptr;
 }
 
-void Node::pushChildBack(NodePtr node)
+void TreeNode::pushChildBack(TreeNodePtr node)
 {
   auto it = m_firstChild.insert(m_firstChild.end(), node);
   node->m_iter = it;
   node->m_parent = shared_from_this();
 }
 
-void Node::pushChildFront(NodePtr node)
+void TreeNode::pushChildFront(TreeNodePtr node)
 {
   auto it = m_firstChild.insert(m_firstChild.begin(), node);
   node->m_iter = it;
   node->m_parent = shared_from_this();
 }
 
-void Node::pushChildAt(const std::string& name, NodePtr node)
+void TreeNode::pushChildAt(const std::string& name, TreeNodePtr node)
 {
   auto it = std::find_if(m_firstChild.begin(),
                          m_firstChild.end(),
@@ -58,7 +58,7 @@ void Node::pushChildAt(const std::string& name, NodePtr node)
   }
 }
 
-void Node::pushSiblingFront(NodePtr node)
+void TreeNode::pushSiblingFront(TreeNodePtr node)
 {
   auto p = m_parent.lock();
   if (p)
@@ -68,7 +68,7 @@ void Node::pushSiblingFront(NodePtr node)
   }
 }
 
-void Node::pushSiblingAt(const std::string& name, NodePtr node)
+void TreeNode::pushSiblingAt(const std::string& name, TreeNodePtr node)
 {
   auto p = m_parent.lock();
   if (p)
@@ -84,7 +84,7 @@ void Node::pushSiblingAt(const std::string& name, NodePtr node)
   }
 }
 
-void Node::pushSiblingBack(NodePtr node)
+void TreeNode::pushSiblingBack(TreeNodePtr node)
 {
   auto p = m_parent.lock();
   if (p)
@@ -94,7 +94,7 @@ void Node::pushSiblingBack(NodePtr node)
   }
 }
 
-NodePtr Node::removeChild(const std::string& name)
+TreeNodePtr TreeNode::removeChild(const std::string& name)
 {
   auto it = findChildImpl(name);
   if (it == m_firstChild.end())
@@ -108,12 +108,12 @@ NodePtr Node::removeChild(const std::string& name)
   return r;
 }
 
-NodePtr Node::removeSibling(const std::string& name)
+TreeNodePtr TreeNode::removeSibling(const std::string& name)
 {
   return nullptr;
 }
 
-NodePtr Node::findChild(const std::string& name) const
+TreeNodePtr TreeNode::findChild(const std::string& name) const
 {
   auto it = findChildImpl(name);
   if (it != m_firstChild.end())
@@ -123,7 +123,7 @@ NodePtr Node::findChild(const std::string& name) const
   return nullptr;
 }
 
-NodePtr Node::findNextSblingFromCurrent(const std::string& name) const
+TreeNodePtr TreeNode::findNextSblingFromCurrent(const std::string& name) const
 {
   auto p = m_parent.lock();
   if (!p)
@@ -139,7 +139,7 @@ NodePtr Node::findNextSblingFromCurrent(const std::string& name) const
   return nullptr;
 }
 
-NodePtr Node::findPrevSiblingFromCurrent(const std::string& name) const
+TreeNodePtr TreeNode::findPrevSiblingFromCurrent(const std::string& name) const
 {
   auto p = m_parent.lock();
   if (!p)
@@ -155,7 +155,7 @@ NodePtr Node::findPrevSiblingFromCurrent(const std::string& name) const
   return nullptr;
 }
 
-NodePtr Node::findSibling(const std::string& name)
+TreeNodePtr TreeNode::findSibling(const std::string& name)
 {
   auto p = m_parent.lock();
   if (!p)
@@ -172,7 +172,7 @@ NodePtr Node::findSibling(const std::string& name)
   return nullptr;
 }
 
-NodePtr Node::findChildRecursive(const std::string& name) const
+TreeNodePtr TreeNode::findChildRecursive(const std::string& name) const
 {
   for (const auto& a : m_firstChild)
   {
@@ -190,7 +190,7 @@ NodePtr Node::findChildRecursive(const std::string& name) const
   return nullptr;
 }
 
-NodePtr Node::findChildRecursiveImpl(const NodePtr& ptr, const std::string& name) const
+TreeNodePtr TreeNode::findChildRecursiveImpl(const TreeNodePtr& ptr, const std::string& name) const
 {
   for (const auto& a : ptr->m_firstChild)
   {
@@ -208,12 +208,12 @@ NodePtr Node::findChildRecursiveImpl(const NodePtr& ptr, const std::string& name
   return nullptr;
 }
 
-NodePtr Node::clone() const
+TreeNodePtr TreeNode::clone() const
 {
   return createNode(m_name);
 }
 
-NodePtr Node::cloneChildren() const
+TreeNodePtr TreeNode::cloneChildren() const
 {
   auto newNode = clone();
   if (newNode)

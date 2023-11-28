@@ -16,7 +16,6 @@
 #include "VSkFontMgr.hpp"
 #include "Utility/ConfigManager.hpp"
 #include "Utility/Log.hpp"
-#include "Layer/Core/Node.hpp"
 #include "Layer/FontManager.hpp"
 
 #include <core/SkFont.h>

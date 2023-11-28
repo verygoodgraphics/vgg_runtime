@@ -16,7 +16,7 @@
 #pragma once
 #include "Layer/Renderable.hpp"
 #include "Layer/Zoomer.hpp"
-#include "Layer/Core/Node.hpp"
+#include "Layer/Core/TreeNode.hpp"
 #include "Layer/Config.hpp"
 
 #include <nlohmann/json.hpp>

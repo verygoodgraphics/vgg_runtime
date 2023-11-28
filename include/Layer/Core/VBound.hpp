@@ -141,6 +141,11 @@ public:
     return this->transform(transform);
   }
 
+  bool operator==(const Bound& other) const
+  {
+    return m_topLeft == other.topLeft() && m_bottomRight == other.bottomRight();
+  }
+
   void unionWith(const Bound& bound)
   {
     m_topLeft.x = std::min(m_topLeft.x, bound.m_topLeft.x);

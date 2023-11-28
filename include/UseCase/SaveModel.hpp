@@ -24,13 +24,13 @@ namespace VGG
 {
 
 // todo, not edit mode
-class Editor
+class SaveModel
 {
-  std::shared_ptr<Daruma> m_model;
+  std::shared_ptr<Daruma>       m_model;
   std::shared_ptr<Model::Saver> m_saver;
 
 public:
-  Editor(std::shared_ptr<Daruma> model, std::shared_ptr<Model::Saver> saver)
+  SaveModel(std::shared_ptr<Daruma> model, std::shared_ptr<Model::Saver> saver)
     : m_model{ model }
     , m_saver{ saver }
   {

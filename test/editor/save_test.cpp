@@ -15,7 +15,7 @@ namespace fs = std::filesystem;
 constexpr auto model_src_dir_path = "testDataDir/vgg-daruma/";
 constexpr auto model_src_zip_path = "testDataDir/vgg-daruma.zip";
 
-class EditorSaveTestSuite : public ::testing::Test
+class SaveModelTestSuite : public ::testing::Test
 {
 protected:
   std::shared_ptr<Daruma> m_model;
@@ -52,15 +52,15 @@ protected:
   void save_to_dir()
   {
     std::string dstDir{ "tmp/" };
-    auto saver{ std::make_shared<Model::DirSaver>(dstDir) };
-    Editor sut{ m_model, saver };
+    auto        saver{ std::make_shared<Model::DirSaver>(dstDir) };
+    SaveModel   sut{ m_model, saver };
 
     // When
     sut.save();
 
     // Then
     std::filesystem::path dir{ dstDir };
-    auto ret = fs::is_regular_file(dir / design_file_name);
+    auto                  ret = fs::is_regular_file(dir / design_file_name);
     EXPECT_TRUE(ret);
 
     ret = fs::is_regular_file(dir / event_listeners_file_name);
@@ -70,8 +70,8 @@ protected:
   void save_to_zip()
   {
     std::string dst_file{ "tmp/1.zip" };
-    auto saver{ std::make_shared<Model::ZipSaver>(dst_file) };
-    Editor sut{ m_model, saver };
+    auto        saver{ std::make_shared<Model::ZipSaver>(dst_file) };
+    SaveModel   sut{ m_model, saver };
 
     // When
     sut.save();
@@ -82,25 +82,25 @@ protected:
   }
 };
 
-TEST_F(EditorSaveTestSuite, dir_to_dir)
+TEST_F(SaveModelTestSuite, dir_to_dir)
 {
   load_from_dir();
   save_to_dir();
 }
 
-TEST_F(EditorSaveTestSuite, dir_to_zip)
+TEST_F(SaveModelTestSuite, dir_to_zip)
 {
   load_from_dir();
   save_to_zip();
 }
 
-TEST_F(EditorSaveTestSuite, zip_to_dir)
+TEST_F(SaveModelTestSuite, zip_to_dir)
 {
   load_from_zip();
   save_to_dir();
 }
 
-TEST_F(EditorSaveTestSuite, zip_to_zip)
+TEST_F(SaveModelTestSuite, zip_to_zip)
 {
   load_from_zip();
   save_to_zip();

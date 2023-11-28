@@ -81,7 +81,7 @@ ImageNode::ImageNode(const ImageNode& other)
 Mask ImageNode::asOutlineMask(const Transform* mat)
 {
   Mask mask;
-  auto rect = toSkRect(bound());
+  auto rect = toSkRect(frameBound());
   mask.outlineMask.addRect(rect);
   if (mat)
   {
@@ -137,8 +137,8 @@ void ImageNode::paintFill(SkCanvas* canvas, sk_sp<SkBlender> blender, const SkPa
     SkPaint p;
     p.setBlender(std::move(blender));
     SkSamplingOptions opt;
-    const auto&       b = bound();
-    canvas->drawImageRect(_->image, toSkRect(bound()), opt, &p);
+    const auto&       b = frameBound();
+    canvas->drawImageRect(_->image, toSkRect(frameBound()), opt, &p);
 
     if (hasMask)
     {

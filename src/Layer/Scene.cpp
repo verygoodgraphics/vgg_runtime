@@ -90,6 +90,7 @@ public:
     }
     if (node)
     {
+      node->revalidate();
       renderer.draw(canvas, node);
     }
     // renderer.commit(canvas);

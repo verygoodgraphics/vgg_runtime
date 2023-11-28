@@ -145,9 +145,9 @@ public:
 
   Transform globalTransform() const;
 
-  const Bound& bound() const;
+  const Bound& frameBound() const; // content bound
 
-  void setBound(const Bound& bound);
+  void setFrameBound(const Bound& bound);
 
   const std::string& guid() const;
 
@@ -214,6 +214,8 @@ protected:
   virtual SkPath makeContourImpl(ContourOption option, const Transform* mat);
   SkPath         childPolyOperation() const;
   Mask           makeMaskBy(EBoolOp maskOp, SkiaRenderer* renderer);
+
+  Bound onRevalidate() override;
 
 protected:
   // Style

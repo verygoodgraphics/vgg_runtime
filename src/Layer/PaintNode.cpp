@@ -100,10 +100,10 @@ Transform PaintNode::mapTransform(const PaintNode* node) const
     }
     return path;
   };
-  auto        path1 = findPath(node);
-  auto        path2 = findPath(this);
+  auto            path1 = findPath(node);
+  auto            path2 = findPath(this);
   const TreeNode* lca = nullptr;
-  int         lcaIdx = -1;
+  int             lcaIdx = -1;
   for (int i = path1.size() - 1, j = path2.size() - 1; i >= 0 && j >= 0; i--, j--)
   {
     auto n1 = path1[i];
@@ -245,7 +245,7 @@ void PaintNode::setAlphaMaskBy(std::vector<AlphaMask> masks)
 SkPath PaintNode::makeBoundPath()
 {
   SkPath      p;
-  const auto& skRect = toSkRect(bound());
+  const auto& skRect = toSkRect(frameBound());
   const auto& radius = style().frameRadius;
 
   bool  rounded = false;
@@ -499,15 +499,26 @@ Transform PaintNode::globalTransform() const
   return Transform(mat);
 }
 
-const Bound& PaintNode::bound() const
+const Bound& PaintNode::frameBound() const
 {
   return d_ptr->bound;
 }
 
-void PaintNode::setBound(const Bound& bound)
+void PaintNode::setFrameBound(const Bound& bound)
 {
   VGG_IMPL(PaintNode);
   _->bound = bound;
+  invalidate();
+}
+
+Bound PaintNode::onRevalidate()
+{
+  for (const auto& e : m_firstChild)
+  {
+    e->revalidate();
+  }
+  DEBUG("Revalidate %s", m_name.c_str());
+  return d_ptr->bound;
 }
 
 const std::string& PaintNode::guid() const
@@ -781,9 +792,9 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
       if (!outlineMask.isEmpty())
         Op(res, outlineMask, SkPathOp::kIntersect_SkPathOp, &res);
       if (*blurType == BT_Gaussian)
-        painter.blurContentBegin(blur.radius, blur.radius, bound(), nullptr, 0);
+        painter.blurContentBegin(blur.radius, blur.radius, frameBound(), nullptr, 0);
       else if (*blurType == BT_Background)
-        painter.blurBackgroundBegin(blur.radius, blur.radius, bound(), &res);
+        painter.blurBackgroundBegin(blur.radius, blur.radius, frameBound(), &res);
       else if (*blurType == BT_Motion)
         DEBUG("Motion blur has not been implemented");
       else if (*blurType == BT_Zoom)
@@ -835,7 +846,7 @@ void PaintNode::paintFill(SkCanvas* canvas, sk_sp<SkBlender> blender, const SkPa
   {
     if (!f.isEnabled)
       continue;
-    render.drawFill(path, bound(), f, 0, blender, blur);
+    render.drawFill(path, frameBound(), f, 0, blender, blur);
   }
 }
 

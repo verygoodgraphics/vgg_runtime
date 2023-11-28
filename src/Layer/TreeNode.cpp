@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "Layer/Core/TreeNode.hpp"
+#include <memory>
 
 namespace VGG
 {
@@ -36,25 +37,29 @@ void TreeNode::pushChildBack(TreeNodePtr node)
 {
   auto it = m_firstChild.insert(m_firstChild.end(), node);
   node->m_iter = it;
-  node->m_parent = shared_from_this();
+  node->m_parent = std::static_pointer_cast<TreeNode>(shared_from_this());
+  observe(node);
 }
 
 void TreeNode::pushChildFront(TreeNodePtr node)
 {
   auto it = m_firstChild.insert(m_firstChild.begin(), node);
   node->m_iter = it;
-  node->m_parent = shared_from_this();
+  node->m_parent = std::static_pointer_cast<TreeNode>(shared_from_this());
+  observe(node);
 }
 
 void TreeNode::pushChildAt(const std::string& name, TreeNodePtr node)
 {
-  auto it = std::find_if(m_firstChild.begin(),
-                         m_firstChild.end(),
-                         [&name](const auto& a) { return a->m_name == name; });
+  auto it = std::find_if(
+    m_firstChild.begin(),
+    m_firstChild.end(),
+    [&name](const auto& a) { return a->m_name == name; });
   if (it != m_firstChild.end())
   {
     node->m_iter = m_firstChild.insert(it, node);
-    node->m_parent = shared_from_this();
+    node->m_parent = std::static_pointer_cast<TreeNode>(shared_from_this());
+    observe(node);
   }
 }
 
@@ -65,6 +70,7 @@ void TreeNode::pushSiblingFront(TreeNodePtr node)
   {
     p->m_firstChild.push_front(node);
     node->m_parent = p;
+    observe(node);
   }
 }
 
@@ -73,13 +79,15 @@ void TreeNode::pushSiblingAt(const std::string& name, TreeNodePtr node)
   auto p = m_parent.lock();
   if (p)
   {
-    auto it = std::find_if(p->m_firstChild.begin(),
-                           p->m_firstChild.end(),
-                           [&name](const auto& a) { return a->m_name == name; });
+    auto it = std::find_if(
+      p->m_firstChild.begin(),
+      p->m_firstChild.end(),
+      [&name](const auto& a) { return a->m_name == name; });
     if (it != p->m_firstChild.end())
     {
       node->m_iter = p->m_firstChild.insert(it, node);
       node->m_parent = p;
+      observe(node);
     }
   }
 }
@@ -91,6 +99,7 @@ void TreeNode::pushSiblingBack(TreeNodePtr node)
   {
     node->m_iter = p->m_firstChild.insert(p->m_firstChild.end(), node);
     node->m_parent = p;
+    observe(node);
   }
 }
 
@@ -102,6 +111,7 @@ TreeNodePtr TreeNode::removeChild(const std::string& name)
     return nullptr;
   }
   auto r = *it;
+  unobserve(*it);
   r->m_parent.reset();
   r->m_iter = m_firstChild.end();
   m_firstChild.erase(it);
@@ -224,6 +234,10 @@ TreeNodePtr TreeNode::cloneChildren() const
     }
   }
   return newNode;
+}
+
+TreeNode::~TreeNode()
+{
 }
 
 } // namespace VGG

@@ -30,6 +30,8 @@ class VGG_EXPORTS TextNode final : public PaintNode
 {
   VGG_DECL_IMPL(TextNode);
 
+  Bound m_textBound;
+
 public:
   TextNode(const std::string& name, std::string guid);
   TextNode(const TextNode&);
@@ -40,8 +42,9 @@ public:
          std::string                      utf8,
          std::vector<TextStyleAttr>       attrs,
          const std::vector<TextLineAttr>& lineAttr);
-  void    setFrameMode(ETextLayoutMode mode);
-  void    setVerticalAlignment(ETextVerticalAlignment vertAlign);
+  void setFrameMode(ETextLayoutMode mode);
+  void setVerticalAlignment(ETextVerticalAlignment vertAlign);
+
   TreeNodePtr clone() const override;
   ~TextNode();
 

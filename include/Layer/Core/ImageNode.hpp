@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #pragma once
-#include "Layer/Core/Node.hpp"
+#include "Layer/Core/TreeNode.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Config.hpp"
 #include "Layer/Core/Transform.hpp"

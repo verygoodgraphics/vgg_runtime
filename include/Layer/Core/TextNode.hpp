@@ -18,7 +18,7 @@
 #include "Layer/Config.hpp"
 
 #include "Layer/FontManager.hpp"
-#include "Layer/Core/Node.hpp"
+#include "Layer/Core/TreeNode.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/VType.hpp"
 
@@ -42,7 +42,7 @@ public:
          const std::vector<TextLineAttr>& lineAttr);
   void    setFrameMode(ETextLayoutMode mode);
   void    setVerticalAlignment(ETextVerticalAlignment vertAlign);
-  NodePtr clone() const override;
+  TreeNodePtr clone() const override;
   ~TextNode();
 
 protected:

@@ -23,7 +23,7 @@
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/VSkia.hpp"
 #include "Layer/Core/PaintNode.hpp"
-#include "Layer/Core/Node.hpp"
+#include "Layer/Core/TreeNode.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/TextNode.hpp"
 #include "Layer/Core/ImageNode.hpp"

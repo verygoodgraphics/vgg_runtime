@@ -21,7 +21,7 @@
 
 #include "Layer/Core/TextNode.hpp"
 #include "Layer/Core/Attrs.hpp"
-#include "Layer/Core/Node.hpp"
+#include "Layer/Core/TreeNode.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/FontManager.hpp"
@@ -55,7 +55,7 @@ TextNode::TextNode(const TextNode& other)
 {
 }
 
-NodePtr TextNode::clone() const
+TreeNodePtr TextNode::clone() const
 {
   auto newNode = std::make_shared<TextNode>(*this);
   return newNode;

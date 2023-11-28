@@ -37,7 +37,7 @@
 #include "Layer/Graphics/GraphicsLayer.hpp"
 #include "Layer/Graphics/GraphicsContext.hpp"
 #include "Layer/Graphics/ContextSkBase.hpp"
-#include "Layer/Core/Node.hpp"
+#include "Layer/Core/TreeNode.hpp"
 #include "Utility/CappingProfiler.hpp"
 
 #include <optional>

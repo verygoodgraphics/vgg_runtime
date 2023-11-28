@@ -22,7 +22,6 @@
 #include "Renderer.hpp"
 #include "Layer/Zoomer.hpp"
 #include "Layer/Core/PaintNode.hpp"
-#include "Layer/Core/Node.hpp"
 
 #include <glm/gtx/matrix_transform_2d.hpp>
 #include <glm/matrix.hpp>

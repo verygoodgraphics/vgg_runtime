@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "Utility/HelperMacro.hpp"
+
 #include "Layer/Config.hpp"
 #include <algorithm>
 #include <string>
@@ -25,31 +26,31 @@
 
 namespace VGG
 {
-class Node;
-using NodePtr = std::shared_ptr<Node>;
-using NodeRef = std::weak_ptr<Node>;
+class TreeNode;
+using TreeNodePtr = std::shared_ptr<TreeNode>;
+using TreeNodeRef = std::weak_ptr<TreeNode>;
 
-class VGG_EXPORTS Node : public std::enable_shared_from_this<Node>
+class VGG_EXPORTS TreeNode : public std::enable_shared_from_this<TreeNode>
 {
-  using FirstChildNode = std::list<std::shared_ptr<Node>>;
+  using FirstChildNode = std::list<std::shared_ptr<TreeNode>>;
 
 public:
-  using NodeIter = std::list<std::shared_ptr<Node>>::iterator;
-  Node(const Node& other)
+  using NodeIter = std::list<std::shared_ptr<TreeNode>>::iterator;
+  TreeNode(const TreeNode& other)
   {
     m_name = other.m_name;
   }
-  Node& operator=(const Node& other) = delete;
-  Node(Node&&) noexcept = default;
-  Node& operator=(Node&&) noexcept = default;
+  TreeNode& operator=(const TreeNode& other) = delete;
+  TreeNode(TreeNode&&) noexcept = default;
+  TreeNode& operator=(TreeNode&&) noexcept = default;
   struct Iterator
   {
     // NOLINTBEGIN
     using iterator_category = std::forward_iterator_tag;
     using difference_type = std::ptrdiff_t;
-    using value_type = NodePtr;
-    using pointer = NodePtr*;
-    using reference = NodePtr&;
+    using value_type = TreeNodePtr;
+    using pointer = TreeNodePtr*;
+    using reference = TreeNodePtr&;
     // NOLINTEND
 
     Iterator(pointer ptr)
@@ -99,7 +100,7 @@ public:
     m_name = name;
   }
 
-  NodePtr parent() const
+  TreeNodePtr parent() const
   {
     return !m_parent.expired() ? m_parent.lock() : nullptr;
   }
@@ -109,38 +110,38 @@ public:
     return !m_firstChild.empty();
   }
 
-  NodePtr root() const;
+  TreeNodePtr root() const;
 
   NodeIter iter()
   {
     return m_iter;
   }
 
-  void pushChildBack(NodePtr node);
+  void pushChildBack(TreeNodePtr node);
 
-  void pushChildFront(NodePtr node);
+  void pushChildFront(TreeNodePtr node);
 
-  void pushChildAt(const std::string& name, NodePtr node);
+  void pushChildAt(const std::string& name, TreeNodePtr node);
 
-  void pushSiblingFront(NodePtr node);
+  void pushSiblingFront(TreeNodePtr node);
 
-  void pushSiblingAt(const std::string& name, NodePtr node);
+  void pushSiblingAt(const std::string& name, TreeNodePtr node);
 
-  void pushSiblingBack(NodePtr node);
+  void pushSiblingBack(TreeNodePtr node);
 
-  NodePtr removeChild(const std::string& name);
+  TreeNodePtr removeChild(const std::string& name);
 
-  NodePtr removeSibling(const std::string& name);
+  TreeNodePtr removeSibling(const std::string& name);
 
-  NodePtr findChild(const std::string& name) const;
+  TreeNodePtr findChild(const std::string& name) const;
 
-  NodePtr findNextSblingFromCurrent(const std::string& name) const;
+  TreeNodePtr findNextSblingFromCurrent(const std::string& name) const;
 
-  NodePtr findPrevSiblingFromCurrent(const std::string& name) const;
+  TreeNodePtr findPrevSiblingFromCurrent(const std::string& name) const;
 
-  NodePtr findSibling(const std::string& name);
+  TreeNodePtr findSibling(const std::string& name);
 
-  NodePtr findChildRecursive(const std::string& name) const;
+  TreeNodePtr findChildRecursive(const std::string& name) const;
 
   auto begin()
   {
@@ -162,33 +163,34 @@ public:
     return m_firstChild.cend();
   }
 
-  static NodePtr createNode(const std::string& name)
+  static TreeNodePtr createNode(const std::string& name)
   {
-    return NodePtr(new Node(name));
+    return TreeNodePtr(new TreeNode(name));
   }
 
-  virtual NodePtr clone() const;
+  virtual TreeNodePtr clone() const;
 
-  NodePtr cloneChildren() const;
+  TreeNodePtr cloneChildren() const;
 
-  virtual ~Node() = default;
+  virtual ~TreeNode() = default;
 
 protected:
-  std::string m_name;
-  FirstChildNode m_firstChild;
-  std::list<std::shared_ptr<Node>>::iterator m_iter;
-  NodeRef m_parent;
-  std::list<std::shared_ptr<Node>>::const_iterator findChildImpl(const std::string& name) const
+  std::string                                          m_name;
+  FirstChildNode                                       m_firstChild;
+  std::list<std::shared_ptr<TreeNode>>::iterator       m_iter;
+  TreeNodeRef                                          m_parent;
+  std::list<std::shared_ptr<TreeNode>>::const_iterator findChildImpl(const std::string& name) const
   {
-    return std::find_if(m_firstChild.begin(),
-                        m_firstChild.end(),
-                        [&name](const auto& a) { return a->m_name == name; });
+    return std::find_if(
+      m_firstChild.begin(),
+      m_firstChild.end(),
+      [&name](const auto& a) { return a->m_name == name; });
   }
 
-  NodePtr findChildRecursiveImpl(const NodePtr& ptr, const std::string& name) const;
+  TreeNodePtr findChildRecursiveImpl(const TreeNodePtr& ptr, const std::string& name) const;
 
 protected:
-  Node(const std::string& name)
+  TreeNode(const std::string& name)
     : m_name(name)
     , m_iter(m_firstChild.end())
   {

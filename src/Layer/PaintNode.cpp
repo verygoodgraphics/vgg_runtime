@@ -21,7 +21,7 @@
 #include "PaintNodePrivate.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/VType.hpp"
-#include "Layer/Core/Node.hpp"
+#include "Layer/Core/TreeNode.hpp"
 #include "glm/ext/matrix_transform.hpp"
 
 #include <core/SkBlendMode.h>
@@ -58,25 +58,25 @@ namespace VGG::layer
 {
 
 PaintNode::PaintNode(const std::string& name, ObjectType type, const std::string& guid)
-  : Node(name)
+  : TreeNode(name)
   , d_ptr(new PaintNode__pImpl(this, type))
 {
   d_ptr->guid = guid;
 }
 
 PaintNode::PaintNode(const std::string& name, std::unique_ptr<PaintNode__pImpl> impl)
-  : Node(name)
+  : TreeNode(name)
   , d_ptr(std::move(impl))
 {
 }
 
 PaintNode::PaintNode(const PaintNode& other)
-  : Node(other.name())
+  : TreeNode(other.name())
   , d_ptr(new PaintNode__pImpl(*other.d_ptr))
 {
 }
 
-NodePtr PaintNode::clone() const
+TreeNodePtr PaintNode::clone() const
 {
   auto newNode = std::make_shared<PaintNode>(*this);
   return newNode;
@@ -90,9 +90,9 @@ void PaintNode::setContextSettings(const ContextSetting& settings)
 
 Transform PaintNode::mapTransform(const PaintNode* node) const
 {
-  auto findPath = [](const Node* node) -> std::vector<const Node*>
+  auto findPath = [](const TreeNode* node) -> std::vector<const TreeNode*>
   {
-    std::vector<const Node*> path = { node };
+    std::vector<const TreeNode*> path = { node };
     while (node->parent())
     {
       node = node->parent().get();
@@ -102,7 +102,7 @@ Transform PaintNode::mapTransform(const PaintNode* node) const
   };
   auto        path1 = findPath(node);
   auto        path2 = findPath(this);
-  const Node* lca = nullptr;
+  const TreeNode* lca = nullptr;
   int         lcaIdx = -1;
   for (int i = path1.size() - 1, j = path2.size() - 1; i >= 0 && j >= 0; i--, j--)
   {

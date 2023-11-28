@@ -16,7 +16,7 @@
 #pragma once
 #include "Layer/Renderer.hpp"
 #include "Layer/Core/VBound.hpp"
-#include "Layer/Core/Node.hpp"
+#include "Layer/Core/TreeNode.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/Mask.hpp"
@@ -71,7 +71,7 @@ struct PaintOption
 };
 
 class PaintNode__pImpl;
-class VGG_EXPORTS PaintNode : public Node
+class VGG_EXPORTS PaintNode : public TreeNode
 {
 protected:
   VGG_DECL_IMPL(PaintNode)
@@ -90,7 +90,7 @@ public:
   PaintNode(PaintNode&&) = delete;
   PaintNode& operator=(PaintNode&&) = delete;
 
-  virtual NodePtr clone() const override;
+  virtual TreeNodePtr clone() const override;
 
   void addChild(const std::shared_ptr<PaintNode> node)
   {
@@ -183,7 +183,7 @@ public:
 
 public:
   template<typename F>
-  void visitFunc(VGG::Node* p, F&& f)
+  void visitFunc(VGG::TreeNode* p, F&& f)
   {
     if (!p)
       return;

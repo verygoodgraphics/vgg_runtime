@@ -17,7 +17,6 @@
 #include "VSkia.hpp"
 #include "PaintNodePrivate.hpp"
 #include "Layer/Core/ImageNode.hpp"
-#include "Layer/Core/Node.hpp"
 #include "Layer/Core/PaintNode.hpp"
 
 #include <glm/matrix.hpp>

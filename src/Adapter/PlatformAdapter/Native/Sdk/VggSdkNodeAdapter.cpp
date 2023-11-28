@@ -199,7 +199,7 @@ napi_value VggSdkNodeAdapter::GetDesignDocument(napi_env env, napi_callback_info
   VggSdkNodeAdapter* sdk_adapter;
   NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
 
-  auto& json = sdk_adapter->m_vggSdk->designDocument();
+  const auto& json = sdk_adapter->m_vggSdk->designDocument();
 
   napi_value ret;
   NODE_API_CALL(env, napi_create_string_utf8(env, json.data(), json.size(), &ret));

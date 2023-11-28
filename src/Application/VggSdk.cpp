@@ -54,7 +54,7 @@ void VggSdk::setListenerKey(const std::string& listenerKey)
 }
 
 // design document in vgg daruma file
-const std::string VggSdk::designDocument()
+std::string VggSdk::designDocument()
 {
   return getDesignDocument()->content().dump();
 }

@@ -49,10 +49,10 @@ public:
   void        setListenerKey(const std::string& listenerKey);
 
   // design document
-  const std::string designDocument();
-  void              designDocumentAddAt(const std::string& jsonPointer, const std::string& value);
-  void designDocumentReplaceAt(const std::string& jsonPointer, const std::string& value);
-  void designDocumentDeleteAt(const std::string& jsonPointer);
+  std::string designDocument();
+  void        designDocumentAddAt(const std::string& jsonPointer, const std::string& value);
+  void        designDocumentReplaceAt(const std::string& jsonPointer, const std::string& value);
+  void        designDocumentDeleteAt(const std::string& jsonPointer);
 
   // event listener
   // event types: https://developer.mozilla.org/en-US/docs/Web/API/Element#events

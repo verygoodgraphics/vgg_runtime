@@ -17,7 +17,18 @@
 
 #include "Application/EventVisitor.hpp"
 #include "Application/UIEvent.hpp"
+#include "Domain/IVggEnv.hpp"
 #include "UIEvent.hpp"
+#include "Utility/DIContainer.hpp"
+
+#include <sstream>
+namespace
+{
+auto env()
+{
+  return VGG::DIContainer<std::shared_ptr<IVggEnv>>::get();
+}
+} // namespace
 
 namespace VGG
 {
@@ -58,14 +69,14 @@ public:
 private:
   void makeScript(std::string_view event)
   {
-    m_script = R"(
-      const { getVgg } = await import('https://s5.vgg.cool/vgg-sdk.esm.js');
-      const vgg = await getVgg();
-      var theVggEvent = new vgg.)";
-    m_script.append(event);
-    m_script.append("(); theVggEvent.bindCppEvent(");
-    m_script.append(m_event_id);
-    m_script.append(");");
+    std::ostringstream oss;
+    oss << "const containerKey = '" << env()->getContainerKey() << "';"
+        << "const envKey = '" << env()->getEnv() << "';"
+        << "const instanceKey = '" << env()->getInstanceKey() << "';"
+        << "const vgg = globalThis[containerKey][envKey][instanceKey];"
+        << "var theVggEvent = new vgg." << event << "();"
+        << "theVggEvent.bindCppEvent(" << m_event_id << ");";
+    m_script.append(oss.str());
   }
 };
 

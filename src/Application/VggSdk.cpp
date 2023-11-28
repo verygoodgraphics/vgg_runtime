@@ -124,9 +124,9 @@ void VggSdk::save()
     // todo, choose location to save, or save to remote server
     std::string dstDir{ "tmp/" };
     auto saver{ std::make_shared<Model::DirSaver>(dstDir) };
-    Editor editor{ editModel, saver };
+    SaveModel saveModel{ editModel, saver };
 
-    editor.save();
+    saveModel.save();
   }
   else
   {

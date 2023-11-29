@@ -308,7 +308,6 @@ void TextParagraphCache::onBegin()
 }
 void TextParagraphCache::onEnd()
 {
-  set(D_ALL);
 }
 void TextParagraphCache::onParagraphBegin(
   int                  paraIndex,
@@ -355,7 +354,6 @@ void TextParagraphCache::onTextStyle(
   auto& p = paragraph.back();
   if (m_newParagraph)
   {
-
     ETextHorizontalAlignment align;
     std::visit(
       internal::Overloaded{ [&](const TextLayoutAutoHeight& l) { align = textAttr.horzAlignment; },

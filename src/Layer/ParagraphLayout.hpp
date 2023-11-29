@@ -138,7 +138,6 @@ public:
   }
 
 private:
-  int  m_height{ 0 };
   bool m_newParagraph{ true };
 
   ParagraphAttr                m_paraAttr;
@@ -147,12 +146,13 @@ private:
 
   enum EState
   {
+    EMPTY,
     INIT,
     PARSE,
     BUILT,
     LAYOUT,
   };
-  uint8_t m_state{ INIT };
+  uint8_t m_state{ EMPTY };
 
   std::string m_utf8Text;
 
@@ -203,83 +203,48 @@ public:
     : m_fontCollection(std::move(fontCollection))
   {
   }
+
+private:
   bool empty() const
   {
     return paragraph.empty();
   }
 
-  bool isDirty() const
+  bool ensureBuild(TextLayoutMode mode)
   {
-    return m_dirtyFlags != 0;
-  }
-
-  void clear(ETextParagraphCacheFlagsBits bit)
-  {
-    m_dirtyFlags &= ~bit;
-  }
-
-  void set(TextParagraphCacheDirtyFlags bit)
-  {
-    m_dirtyFlags |= bit;
-  }
-
-  bool test(ETextParagraphCacheFlagsBits bit) const
-  {
-    return m_dirtyFlags & bit;
-  }
-
-  bool testAll(ETextParagraphCacheFlagsBits bit) const
-  {
-    return (m_dirtyFlags & bit) == bit;
-  }
-
-  void parse(TextLayoutMode mode)
-  {
-    ParagraphParser p;
-    p.parse(*this, m_utf8Text, m_textStyle, m_lineStyle, &mode);
-    m_state = PARSE;
-  }
-
-  void ensureBuild(TextLayoutMode mode)
-  {
-    if (m_state <= PARSE)
-      parse(mode);
-    if (m_state <= BUILT)
-      rebuild(mode);
-  }
-
-  void rebuild(TextLayoutMode mode)
-  {
-    paragraphCache.clear();
-    paragraphCache.reserve(paragraph.size());
-    for (auto& d : paragraph)
+    bool ok = false;
+    if (m_state <= EMPTY)
+      return ok;
+    if (m_state < PARSE)
     {
-      assert(d.builder);
-      paragraphCache.push_back(std::move(d.build()));
+      ParagraphParser p;
+      p.parse(*this, m_utf8Text, m_textStyle, m_lineStyle, &mode);
+      m_state = PARSE;
     }
-    m_state = BUILT;
-  }
-
-  void rebuild()
-  {
-    // DEPRECATED
-    paragraphCache.clear();
-    paragraphCache.reserve(paragraph.size());
-    for (auto& d : paragraph)
+    if (!paragraph.empty() && m_state < BUILT)
     {
-      assert(d.builder);
-      paragraphCache.push_back(std::move(d.build()));
+      paragraphCache.clear();
+      paragraphCache.reserve(paragraph.size());
+      for (auto& d : paragraph)
+      {
+        assert(d.builder);
+        paragraphCache.push_back(std::move(d.build()));
+      }
+      m_state = BUILT;
     }
-    m_state = BUILT;
+    if (m_state >= BUILT)
+    {
+      ok = true;
+    }
+    return ok;
   }
 
-  Bound layout(const Bound& bound, ETextLayoutMode mode)
+  Bound internalLayout(const Bound& bound, ETextLayoutMode mode)
   {
     Bound      newBound = bound;
     const auto layoutWidth = bound.width();
-    m_height = 0;
-    int newWidth = bound.width();
-    int newHeight = bound.height();
+    float      newWidth = bound.width();
+    float      newHeight = bound.height();
     for (int i = 0; i < paragraphCache.size(); i++)
     {
       // auto paragraph = d.builder->Build();
@@ -291,16 +256,14 @@ public:
       paragraphCache[i].offsetX = curX;
       if (mode == ETextLayoutMode::TL_WidthAuto)
       {
-        // TODO:: unexpected behavior occurs here.
-        // A fixed number provided as a workaround temporarily.
-        paragraph->layout(100000);
-        newWidth = paragraph->getLongestLine();
+        constexpr float MAX_WIDTH = 100000;
+        paragraph->layout(MAX_WIDTH);
       }
       else
       {
         paragraph->layout(layoutWidth - curX);
       }
-      newWidth = std::max((int)paragraph->getLongestLine(), newWidth);
+      newWidth = std::max((float)paragraph->getLongestLine(), newWidth);
       auto lastLine = paragraph->lineNumber();
       if (lastLine < 1)
         continue;
@@ -313,34 +276,36 @@ public:
         // specially
         LineMetrics lineMetric;
         paragraph->getLineMetricsAt(lastLine - 1, &lineMetric);
-        m_height += paragraph->getHeight() - lineMetric.fHeight;
+        newHeight += paragraph->getHeight() - lineMetric.fHeight;
       }
       else
       {
-        m_height += paragraph->getHeight();
+        newHeight += paragraph->getHeight();
       }
     }
     if (mode == ETextLayoutMode::TL_HeightAuto)
     {
-      // update height only
       newBound.setHeight(newHeight);
     }
     if (mode == ETextLayoutMode::TL_WidthAuto)
     {
       newBound.setHeight(newHeight);
       newBound.setWidth(newWidth);
-      // update both
     }
     return newBound;
   }
 
-  // make private above
-
+public:
   void setText(std::string utf8)
   {
-    m_utf8Text = utf8;
+    m_utf8Text = std::move(utf8);
     m_state = INIT;
     invalidate();
+  }
+
+  const std::string& text() const
+  {
+    return m_utf8Text;
   }
 
   void setTextStyle(std::vector<TextStyleAttr> styles)
@@ -350,6 +315,11 @@ public:
     invalidate();
   }
 
+  const std::vector<TextStyleAttr>& textStyles() const
+  {
+    return m_textStyle;
+  }
+
   void setLineStyle(std::vector<ParagraphAttr> styles)
   {
     m_lineStyle = std::move(styles);
@@ -357,32 +327,46 @@ public:
     invalidate();
   }
 
+  const std::vector<ParagraphAttr>& lineStyle() const
+  {
+    return m_lineStyle;
+  }
+
   void setTextLayoutMode(TextLayoutMode mode)
   {
-    m_state = INIT;
     m_textLayoutMode = mode;
-    invalidate();
-    // ensureBuild(mode);
-    // m_textLayoutMode = mode;
-    // m_state = BUILT;
-    //
-    // ETextHorizontalAlignment align;
-    // std::visit(
-    //   internal::Overloaded{ [&](const TextLayoutAutoHeight& l) {},
-    //                         [&](const TextLayoutAutoWidth& l)
-    //                         {
-    //                           align = HA_Left;
-    //                           std::cout << "ffff\n";
-    //                         },
-    //                         [&](const TextLayoutFixed& l) {} },
-    //   mode);
-    // for (auto& d : paragraphCache)
+    // if (ensureBuild(mode))
     // {
-    //   std::cout << align << std::endl;
-    //   ;
-    //   d.paragraph->updateTextAlign(toSkTextAlign(align));
+    //   ETextHorizontalAlignment align;
+    //   std::visit(
+    //     internal::Overloaded{ [&](const TextLayoutAutoHeight& l) {},
+    //                           [&](const TextLayoutAutoWidth& l) { align = HA_Left; },
+    //                           [&](const TextLayoutFixed& l) {} },
+    //     mode);
+    //   for (auto& d : paragraphCache)
+    //   {
+    //     d.paragraph->updateTextAlign(toSkTextAlign(align));
+    //   }
     // }
-    // invalidate();
+    invalidate();
+  }
+
+  TextLayoutMode textLayoutMode() const
+  {
+    return m_textLayoutMode;
+  }
+
+  void setVerticalAlignment(ETextVerticalAlignment align)
+  {
+    if (m_verticalAlign == align)
+      return;
+    m_verticalAlign = align;
+    invalidate();
+  }
+
+  ETextVerticalAlignment verticalAlignment() const
+  {
+    return m_verticalAlign;
   }
 
   Bound layout(TextLayoutFixed mode)
@@ -390,14 +374,9 @@ public:
     if (m_state >= LAYOUT)
       return m_textBound;
     ensureBuild(mode);
-    m_textBound = layout(mode.textBound, TL_Fixed);
+    m_textBound = internalLayout(mode.textBound, TL_Fixed);
     m_state = LAYOUT;
     return m_textBound;
-  }
-
-  const std::vector<TextStyleAttr>& textStyles() const
-  {
-    return m_textStyle;
   }
 
   Bound layout(TextLayoutAutoWidth mode)
@@ -405,7 +384,7 @@ public:
     if (m_state >= LAYOUT)
       return m_textBound;
     ensureBuild(mode);
-    m_textBound = layout(Bound(), TL_WidthAuto);
+    m_textBound = internalLayout(Bound(), TL_WidthAuto);
     m_state = LAYOUT;
     return m_textBound;
   }
@@ -417,27 +396,9 @@ public:
     ensureBuild(mode);
     Bound b;
     b.setWidth(mode.width);
-    m_textBound = layout(b, TL_HeightAuto);
+    m_textBound = internalLayout(b, TL_HeightAuto);
     m_state = LAYOUT;
     return m_textBound;
-  }
-
-  int getHeight() const
-  {
-    return m_height;
-  }
-
-  ETextVerticalAlignment verticalAlignment() const
-  {
-    return m_verticalAlign;
-  }
-
-  void setVerticalAlignment(ETextVerticalAlignment align)
-  {
-    if (m_verticalAlign == align)
-      return;
-    m_verticalAlign = align;
-    invalidate();
   }
 };
 

@@ -98,19 +98,18 @@ void Reporter::sendEventToJs(const nlohmann::json& event)
   }
 
   std::ostringstream oss;
-  oss << R"((function (event) {
-         const containerKey = ')"
-      << env()->getContainerKey() << "';"
+  oss << "(function (event) {"
+      << "const containerKey = '" << env()->getContainerKey() << "';"
       << "const envKey = '" << env()->getEnv() << "';"
       << "const listenerKey = '" << env()->getListenerKey() << "';"
       << R"(
-      const listener = globalThis[containerKey][envKey][listenerKey];
-      if(listener) {
-        listener(event);
-      }
-    })(')"
-      << event.dump() << "');";
-
+          const listener = globalThis[containerKey]?.[envKey]?.[listenerKey]
+          if(listener) {
+            listener(event);
+          }
+        })
+      )"
+      << "('" << event.dump() << "');";
   DEBUG("Reporter::sendEventToJs, script is: %s", oss.str().c_str());
 
   jsEngine->evalModule(oss.str());

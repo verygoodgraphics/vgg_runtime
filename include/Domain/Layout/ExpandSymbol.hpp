@@ -83,7 +83,7 @@ private:
     nlohmann::json&       subtreeJson,
     const nlohmann::json& newBoundsJson);
 
-  void scaleTree(nlohmann::json& rootJson, const nlohmann::json& newBoundsJson);
+  void scaleTreeToBounds(nlohmann::json& rootJson, const nlohmann::json& newBoundsJson);
   void scaleTree(nlohmann::json& rootJson, float xScaleFactor, float yScaleFactor);
   void scaleContour(nlohmann::json& nodeJson, float xScaleFactor, float yScaleFactor);
   void scalePoint(nlohmann::json& json, const char* key, float xScaleFactor, float yScaleFactor);

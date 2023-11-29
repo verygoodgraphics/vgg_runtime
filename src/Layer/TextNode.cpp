@@ -15,8 +15,8 @@
  */
 #include "Layer/AttrSerde.hpp"
 #include "Layer/ParagraphPainter.hpp"
+#include "ParagraphLayout.hpp"
 #include "VSkFontMgr.hpp"
-#include "TextNodePrivate.hpp"
 #include "Renderer.hpp"
 
 #include "Layer/Core/TextNode.hpp"
@@ -39,6 +39,44 @@
 
 namespace VGG::layer
 {
+
+class TextNode__pImpl
+{
+  VGG_DECL_API(TextNode)
+public:
+  TextNode__pImpl(TextNode* api, const Bound& bound)
+    : q_ptr(api)
+    , paragraphCache(bound)
+    , painter(nullptr, nullptr, Bound())
+  {
+  }
+
+  std::string                text;
+  TextParagraphCache         paragraphCache;
+  ETextLayoutMode            mode;
+  std::vector<TextStyleAttr> textAttr;
+  VParagraphPainter          painter;
+  ETextVerticalAlignment     vertAlign{ ETextVerticalAlignment::VA_Top };
+
+  TextNode__pImpl(const TextNode__pImpl& p)
+    : paragraphCache(Bound())
+    , painter(nullptr, nullptr, Bound())
+  {
+    this->operator=(p);
+  }
+
+  TextNode__pImpl& operator=(const TextNode__pImpl& p)
+  {
+    text = p.text;
+    mode = p.mode;
+    vertAlign = p.vertAlign;
+    // do not copy cache
+    return *this;
+  }
+
+  TextNode__pImpl(TextNode__pImpl&& p) noexcept = default;
+  TextNode__pImpl& operator=(TextNode__pImpl&& p) noexcept = default;
+};
 
 TextNode::TextNode(const std::string& name, std::string guid)
   : PaintNode(name, VGG_TEXT, std::move(guid))

@@ -267,9 +267,10 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutNode> view)
       {
         if (!subview->isVisible())
         {
-          DEBUG("attachNodesFromViewHierachy, skip invisible child, %s, %s",
-                subview->id().c_str(),
-                subview->name().c_str());
+          DEBUG(
+            "attachNodesFromViewHierachy, skip invisible child, %s, %s",
+            subview->id().c_str(),
+            subview->name().c_str());
           continue;
         }
 
@@ -284,11 +285,12 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutNode> view)
         removeAllChildren(node);
         for (auto subview : subviewsToInclude)
         {
-          DEBUG("attachNodesFromViewHierachy, flex container[%p] add child[%s, %s, %s]",
-                node,
-                subview->id().c_str(),
-                subview->name().c_str(),
-                subview->path().c_str());
+          DEBUG(
+            "attachNodesFromViewHierachy, flex container[%p] add child[%s, %s, %s]",
+            node,
+            subview->id().c_str(),
+            subview->name().c_str(),
+            subview->path().c_str());
 
           node->add_child(subview->autoLayout()->takeFlexItem());
         }
@@ -335,17 +337,19 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutNode> view)
   }
 }
 
-void applyLayoutToViewHierarchy(std::shared_ptr<LayoutNode> view,
-                                bool preserveOrigin,
-                                bool isContainer)
+void applyLayoutToViewHierarchy(
+  std::shared_ptr<LayoutNode> view,
+  bool                        preserveOrigin,
+  bool                        isContainer)
 {
   if (!view->isVisible())
   {
-    DEBUG("applyLayoutToViewHierarchy, view, %s, %s, [%p, %s], invisible, return",
-          view->id().c_str(),
-          view->name().c_str(),
-          view.get(),
-          view->path().c_str());
+    DEBUG(
+      "applyLayoutToViewHierarchy, view, %s, %s, [%p, %s], invisible, return",
+      view->id().c_str(),
+      view->name().c_str(),
+      view.get(),
+      view->path().c_str());
     return;
   }
 
@@ -367,15 +371,16 @@ void applyLayoutToViewHierarchy(std::shared_ptr<LayoutNode> view,
       frame = view->calculateResizedFrame(frame.size);
     }
 
-    DEBUG("applyLayoutToViewHierarchy, view, %s, %s, [%p, %s], x=%f, y=%f, width=%f, height=%f",
-          view->id().c_str(),
-          view->name().c_str(),
-          view.get(),
-          view->path().c_str(),
-          frame.origin.x,
-          frame.origin.y,
-          frame.size.width,
-          frame.size.height);
+    DEBUG(
+      "applyLayoutToViewHierarchy, view, %s, %s, [%p, %s], x=%f, y=%f, width=%f, height=%f",
+      view->id().c_str(),
+      view->name().c_str(),
+      view.get(),
+      view->path().c_str(),
+      frame.origin.x,
+      frame.origin.y,
+      frame.size.width,
+      frame.size.height);
 
     autoLayout->setFrame(frame);
     view->setFrame(frame);
@@ -390,13 +395,14 @@ void applyLayoutToViewHierarchy(std::shared_ptr<LayoutNode> view,
     {
       frame = view->calculateResizedFrame(frame.size);
     }
-    DEBUG("applyLayoutToViewHierarchy, view[%p, %s], x=%d, y=%d, width=%d, height=%d",
-          view.get(),
-          view->path().c_str(),
-          static_cast<int>(frame.origin.x),
-          static_cast<int>(frame.origin.y),
-          static_cast<int>(frame.size.width),
-          static_cast<int>(frame.size.height));
+    DEBUG(
+      "applyLayoutToViewHierarchy, view[%p, %s], x=%d, y=%d, width=%d, height=%d",
+      view.get(),
+      view->path().c_str(),
+      static_cast<int>(frame.origin.x),
+      static_cast<int>(frame.origin.y),
+      static_cast<int>(frame.size.width),
+      static_cast<int>(frame.size.height));
     autoLayout->setFrame(frame);
     view->setFrame(frame);
 
@@ -419,13 +425,14 @@ void applyLayoutToViewHierarchy(std::shared_ptr<LayoutNode> view,
         { .x = TO_VGG_LAYOUT_SCALAR(libFrame[1]), .y = TO_VGG_LAYOUT_SCALAR(libFrame[0]) },
         { .width = TO_VGG_LAYOUT_SCALAR(libFrame[2]), .height = TO_VGG_LAYOUT_SCALAR(libFrame[3]) }
       };
-      DEBUG("applyLayoutToViewHierarchy, view[%p, %s], x=%d, y=%d, width=%d, height=%d",
-            subview.get(),
-            subview->path().c_str(),
-            static_cast<int>(frame.origin.x),
-            static_cast<int>(frame.origin.y),
-            static_cast<int>(frame.size.width),
-            static_cast<int>(frame.size.height));
+      DEBUG(
+        "applyLayoutToViewHierarchy, view[%p, %s], x=%d, y=%d, width=%d, height=%d",
+        subview.get(),
+        subview->path().c_str(),
+        static_cast<int>(frame.origin.x),
+        static_cast<int>(frame.origin.y),
+        static_cast<int>(frame.size.width),
+        static_cast<int>(frame.size.height));
       subview->autoLayout()->setFrame(frame);
       subview->setFrame(frame);
     }
@@ -465,9 +472,10 @@ Size AutoLayout::calculateLayout(Size size)
 {
   if (auto sharedView = view.lock())
   {
-    DEBUG("AutoLayout::calculateLayout, view[%p, %s]",
-          sharedView.get(),
-          sharedView->path().c_str());
+    DEBUG(
+      "AutoLayout::calculateLayout, view[%p, %s]",
+      sharedView.get(),
+      sharedView->path().c_str());
     attachNodesFromViewHierachy(sharedView);
   }
 
@@ -516,10 +524,11 @@ flexbox_node* AutoLayout::createFlexContainer()
 
   if (auto sharedView = view.lock())
   {
-    DEBUG("AutoLayout::createFlexContainer, view[%p, %s], container[%p]",
-          sharedView.get(),
-          sharedView->path().c_str(),
-          node);
+    DEBUG(
+      "AutoLayout::createFlexContainer, view[%p, %s], container[%p]",
+      sharedView.get(),
+      sharedView->path().c_str(),
+      node);
   }
 
   return node;
@@ -531,10 +540,11 @@ flexbox_node* AutoLayout::createFlexItem()
 
   if (auto sharedView = view.lock())
   {
-    DEBUG("AutoLayout::createFlexItem, view[%p, %s], item[%p]",
-          sharedView.get(),
-          sharedView->path().c_str(),
-          node);
+    DEBUG(
+      "AutoLayout::createFlexItem, view[%p, %s], item[%p]",
+      sharedView.get(),
+      sharedView->path().c_str(),
+      node);
   }
 
   return node;
@@ -554,10 +564,11 @@ void AutoLayout::resetGridContainer()
 {
   if (auto sharedView = view.lock())
   {
-    DEBUG("AutoLayout::resetGridContainer, view[%p, %s], grid container[%p]",
-          sharedView.get(),
-          sharedView->path().c_str(),
-          m_gridContainerPtr);
+    DEBUG(
+      "AutoLayout::resetGridContainer, view[%p, %s], grid container[%p]",
+      sharedView.get(),
+      sharedView->path().c_str(),
+      m_gridContainerPtr);
   }
 
   m_gridContainer.reset();
@@ -568,10 +579,11 @@ void AutoLayout::resetGridItem()
 {
   if (auto sharedView = view.lock())
   {
-    DEBUG("AutoLayout::resetGridItem, view[%p, %s], grid item[%p]",
-          sharedView.get(),
-          sharedView->path().c_str(),
-          m_gridItem.get());
+    DEBUG(
+      "AutoLayout::resetGridItem, view[%p, %s], grid item[%p]",
+      sharedView.get(),
+      sharedView->path().c_str(),
+      m_gridItem.get());
   }
 
   m_gridItem.reset();
@@ -599,9 +611,10 @@ void AutoLayout::configure()
 
   if (const auto detail = sharedRule->getFlexContainerRule())
   {
-    DEBUG("AutoLayout::configure, flex container, view[%p, %s]",
-          sharedView.get(),
-          sharedView->path().c_str());
+    DEBUG(
+      "AutoLayout::configure, flex container, view[%p, %s]",
+      sharedView.get(),
+      sharedView->path().c_str());
 
     m_isContainer = true;
     configureFlexContainer(detail);
@@ -611,9 +624,10 @@ void AutoLayout::configure()
   }
   else if (const auto detail = sharedRule->getGridContainerRule())
   {
-    DEBUG("AutoLayout::configure, grid container, view[%p, %s]",
-          sharedView.get(),
-          sharedView->path().c_str());
+    DEBUG(
+      "AutoLayout::configure, grid container, view[%p, %s]",
+      sharedView.get(),
+      sharedView->path().c_str());
 
     m_isContainer = true;
     configureGridContainer(detail);
@@ -625,9 +639,10 @@ void AutoLayout::configure()
 
   if (const auto detail = sharedRule->getFlexItemRule())
   {
-    DEBUG("AutoLayout::configure, flex item, view[%p, %s]",
-          sharedView.get(),
-          sharedView->path().c_str());
+    DEBUG(
+      "AutoLayout::configure, flex item, view[%p, %s]",
+      sharedView.get(),
+      sharedView->path().c_str());
 
     configureFlexItem(detail);
     configureFlexNodeSize(getFlexItem());
@@ -636,9 +651,10 @@ void AutoLayout::configure()
   }
   else if (const auto detail = sharedRule->getGridItemRule())
   {
-    DEBUG("AutoLayout::configure, grid item, view[%p, %s]",
-          sharedView.get(),
-          sharedView->path().c_str());
+    DEBUG(
+      "AutoLayout::configure, grid item, view[%p, %s]",
+      sharedView.get(),
+      sharedView->path().c_str());
     configureGridItem(detail);
     configureGridItemSize();
   }
@@ -665,25 +681,29 @@ void AutoLayout::configureFlexNodeSize(flexbox_node* node)
   node->set_width(toLibUnit(sharedRule->width.value.types), sharedRule->width.value.value);
   if (sharedRule->max_width.has_value())
   {
-    node->set_max_width(toLibUnit(sharedRule->max_width->value.types),
-                        sharedRule->max_width->value.value);
+    node->set_max_width(
+      toLibUnit(sharedRule->max_width->value.types),
+      sharedRule->max_width->value.value);
   }
   if (sharedRule->min_width.has_value())
   {
-    node->set_min_width(toLibUnit(sharedRule->min_width->value.types),
-                        sharedRule->min_width->value.value);
+    node->set_min_width(
+      toLibUnit(sharedRule->min_width->value.types),
+      sharedRule->min_width->value.value);
   }
 
   node->set_height(toLibUnit(sharedRule->height.value.types), sharedRule->height.value.value);
   if (sharedRule->max_height.has_value())
   {
-    node->set_max_height(toLibUnit(sharedRule->max_height->value.types),
-                         sharedRule->max_height->value.value);
+    node->set_max_height(
+      toLibUnit(sharedRule->max_height->value.types),
+      sharedRule->max_height->value.value);
   }
   if (sharedRule->min_height.has_value())
   {
-    node->set_min_height(toLibUnit(sharedRule->min_height->value.types),
-                         sharedRule->min_height->value.value);
+    node->set_min_height(
+      toLibUnit(sharedRule->min_height->value.types),
+      sharedRule->min_height->value.value);
   }
 }
 
@@ -787,7 +807,7 @@ void AutoLayout::configureFlexItem(Rule::FlexboxItem* layout)
 void AutoLayout::configureGridContainer(GridLayout* layout)
 {
   std::optional<uint32_t> minRow;
-  auto columnCount = layout->expand_strategy.column_count;
+  auto                    columnCount = layout->expand_strategy.column_count;
   if (layout->expand_strategy.strategy == ExpandStrategy::EStrategy::FIX_COLUMN)
   {
     minRow = layout->expand_strategy.min_row;
@@ -800,27 +820,31 @@ void AutoLayout::configureGridContainer(GridLayout* layout)
       WARN("configureGridContainer, invaid view, return");
       return;
     }
-    columnCount = grid_layout::calc_column_count(sharedView->frame().size.width,
-                                                 layout->column_width.width_value);
+    columnCount = grid_layout::calc_column_count(
+      sharedView->frame().size.width,
+      layout->column_width.width_value);
   }
 
   auto node = new grid_layout(columnCount, minRow);
   m_gridContainer.reset(node);
   m_gridContainerPtr = node;
 
-  node->set_column_width(toLibColumnWidthStrategy(layout->column_width.strategy),
-                         layout->column_width.width_value);
-  node->set_row_height(toLibRowHeightStrategy(layout->row_height.strategy),
-                       layout->row_height.fixed_value);
+  node->set_column_width(
+    toLibColumnWidthStrategy(layout->column_width.strategy),
+    layout->column_width.width_value);
+  node->set_row_height(
+    toLibRowHeightStrategy(layout->row_height.strategy),
+    layout->row_height.fixed_value);
   node->set_base_height(layout->base_height);
   node->set_column_gap(layout->column_gap);
   node->set_row_gap(layout->row_gap);
   node->set_grid_auto_flow(static_cast<grid_auto_flow>(layout->grid_auto_flow));
 
-  node->set_padding(layout->padding.top,
-                    layout->padding.right,
-                    layout->padding.bottom,
-                    layout->padding.left);
+  node->set_padding(
+    layout->padding.top,
+    layout->padding.right,
+    layout->padding.bottom,
+    layout->padding.left);
 
   node->set_horizontal_align(toLibAlign(layout->cell_align));
 }

@@ -42,12 +42,12 @@ class AutoLayout
 {
 private:
   std::unique_ptr<flexbox_node> m_flexNode;
-  flexbox_node* m_flexNodePtr{ nullptr };
+  flexbox_node*                 m_flexNodePtr{ nullptr };
 
   std::unique_ptr<grid_layout> m_gridContainer;
-  grid_layout* m_gridContainerPtr{ nullptr };
+  grid_layout*                 m_gridContainerPtr{ nullptr };
 
-  std::shared_ptr<grid_item> m_gridItem;
+  std::shared_ptr<grid_item>                        m_gridItem;
   decltype(m_gridContainerPtr->calc_layout(-1, -1)) m_gridItemFrames;
 
   bool m_isContainer{ false };

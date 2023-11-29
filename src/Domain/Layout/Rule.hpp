@@ -94,8 +94,8 @@ struct GridItemPos
   };
 
   EStrategy strategy;
-  int64_t column_id; // NOLINT
-  int64_t row_id;    // NOLINT
+  int64_t   column_id; // NOLINT
+  int64_t   row_id;    // NOLINT
 };
 
 struct Position
@@ -119,7 +119,7 @@ struct ColumnWidth
     FIX = 2
   };
   EStrategy strategy;
-  double width_value; // NOLINT
+  double    width_value; // NOLINT
 };
 
 struct ExpandStrategy
@@ -130,8 +130,8 @@ struct ExpandStrategy
     FIX_COLUMN = 2
   };
   EStrategy strategy;
-  int64_t min_row;      // NOLINT
-  int64_t column_count; // NOLINT
+  int64_t   min_row;      // NOLINT
+  int64_t   column_count; // NOLINT
 };
 
 struct RowHeight
@@ -143,7 +143,7 @@ struct RowHeight
     FIXED = 3
   };
   EStrategy strategy;
-  double fixed_value; // NOLINT
+  double    fixed_value; // NOLINT
 };
 
 enum class EAlignStyle
@@ -156,27 +156,27 @@ enum class EAlignStyle
 struct FlexboxItem
 {
   Position position;
-  double flex_grow_shrink; // NOLINT
+  double   flex_grow_shrink; // NOLINT
 
-  std::optional<Top> top;
-  std::optional<Right> right;
+  std::optional<Top>    top;
+  std::optional<Right>  right;
   std::optional<Bottom> bottom;
-  std::optional<Left> left;
+  std::optional<Left>   left;
 };
 struct GridItem
 {
   // NOLINTBEGIN
   GridItemPos item_pos;
-  int64_t row_span;
-  int64_t column_span;
-  Position position;
+  int64_t     row_span;
+  int64_t     column_span;
+  Position    position;
   EAlignStyle row_align;
   EAlignStyle column_align;
 
-  std::optional<Top> top;
-  std::optional<Right> right;
+  std::optional<Top>    top;
+  std::optional<Right>  right;
   std::optional<Bottom> bottom;
-  std::optional<Left> left;
+  std::optional<Left>   left;
   // NOLINTEND
 };
 
@@ -210,15 +210,15 @@ struct FlexboxLayout
     WRAP = 2
   };
   // NOLINTBEGIN
-  EDirection direction;
+  EDirection      direction;
   EJustifyContent justify_content;
-  EAlignStyle align_items;
-  EAlignStyle align_content;
-  EWrap wrap;
-  double row_gap;
-  double column_gap;
-  Padding padding;
-  bool z_order;
+  EAlignStyle     align_items;
+  EAlignStyle     align_content;
+  EWrap           wrap;
+  double          row_gap;
+  double          column_gap;
+  Padding         padding;
+  bool            z_order;
   // NOLINTEND
 };
 
@@ -226,14 +226,14 @@ struct GridLayout
 {
   // NOLINTBEGIN
   ExpandStrategy expand_strategy;
-  ColumnWidth column_width;
-  RowHeight row_height;
-  int base_height;
-  int column_gap;
-  int row_gap;
-  int grid_auto_flow;
-  Padding padding;
-  EAlignStyle cell_align;
+  ColumnWidth    column_width;
+  RowHeight      row_height;
+  int            base_height;
+  int            column_gap;
+  int            row_gap;
+  int            grid_auto_flow;
+  Padding        padding;
+  EAlignStyle    cell_align;
   // NOLINTEND
 };
 
@@ -243,13 +243,13 @@ struct Rule
   std::string id;
 
   std::variant<std::monostate, FlexboxLayout, GridLayout> layout;
-  std::variant<std::monostate, FlexboxItem, GridItem> item_in_layout;
+  std::variant<std::monostate, FlexboxItem, GridItem>     item_in_layout;
 
-  Width width;
+  Width                   width;
   std::optional<MaxWidth> max_width;
   std::optional<MinWidth> min_width;
 
-  Height height;
+  Height                   height;
   std::optional<MaxHeight> max_height;
   std::optional<MinHeight> min_height;
 
@@ -317,26 +317,28 @@ void to_json(nlohmann::json& json, const FlexboxItem& obj);
 void to_json(nlohmann::json& json, const GridItem& obj);
 void to_json(nlohmann::json& json, const Padding& obj);
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FlexboxLayout,
-                                                direction,
-                                                justify_content,
-                                                align_items,
-                                                align_content,
-                                                wrap,
-                                                row_gap,
-                                                column_gap,
-                                                padding,
-                                                z_order);
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(GridLayout,
-                                                expand_strategy,
-                                                column_width,
-                                                row_height,
-                                                base_height,
-                                                column_gap,
-                                                row_gap,
-                                                grid_auto_flow,
-                                                padding,
-                                                cell_align);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+  FlexboxLayout,
+  direction,
+  justify_content,
+  align_items,
+  align_content,
+  wrap,
+  row_gap,
+  column_gap,
+  padding,
+  z_order);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+  GridLayout,
+  expand_strategy,
+  column_width,
+  row_height,
+  base_height,
+  column_gap,
+  row_gap,
+  grid_auto_flow,
+  padding,
+  cell_align);
 
 void from_json(const nlohmann::json& json, Rule& obj);
 void to_json(nlohmann::json& json, const Rule& obj);

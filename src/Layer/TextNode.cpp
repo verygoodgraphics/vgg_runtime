@@ -50,7 +50,6 @@ public:
     paragraphLayout = std::make_shared<TextParagraphCache>();
     auto mgr = sk_ref_sp(FontManager::instance().defaultFontManager());
     auto fontCollection = sk_make_sp<VGGFontCollection>(std::move(mgr));
-    // paragraphLayout->setFontCollection(fontCollection);
     painter = std::make_shared<VParagraphPainter>();
     painter->setParagraph(paragraphLayout);
   }

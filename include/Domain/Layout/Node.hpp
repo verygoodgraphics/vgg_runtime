@@ -64,15 +64,15 @@ class LayoutNode : public std::enable_shared_from_this<LayoutNode>
     ENABLED,
   };
 
-  std::weak_ptr<LayoutNode> m_parent;
+  std::weak_ptr<LayoutNode>                m_parent;
   std::vector<std::shared_ptr<LayoutNode>> m_children;
 
   std::weak_ptr<JsonDocument> m_viewModel;
-  const std::string m_path;
+  const std::string           m_path;
 
   std::shared_ptr<Layout::Internal::AutoLayout> m_autoLayout;
-  bool m_needsLayout{ false };
-  Layout::Rect m_oldFrame;
+  bool                                          m_needsLayout{ false };
+  Layout::Rect                                  m_oldFrame;
 
 public:
   using HitTestHook = std::function<bool(const std::string&)>;
@@ -82,8 +82,9 @@ public:
   {
   }
 
-  std::shared_ptr<LayoutNode> hitTest(const Layout::Point& point,
-                                      const HitTestHook& hasEventListener)
+  std::shared_ptr<LayoutNode> hitTest(
+    const Layout::Point& point,
+    const HitTestHook&   hasEventListener)
   {
     // test front child first
     for (auto it = m_children.rbegin(); it != m_children.rend(); ++it)
@@ -142,7 +143,7 @@ public:
 public:
   std::shared_ptr<Layout::Internal::AutoLayout> autoLayout() const;
   std::shared_ptr<Layout::Internal::AutoLayout> createAutoLayout();
-  void configureAutoLayout();
+  void                                          configureAutoLayout();
 
   std::shared_ptr<LayoutNode> autoLayoutContainer();
 
@@ -161,7 +162,7 @@ public:
 public:
   std::string id() const;
   std::string name() const;
-  bool isVisible() const;
+  bool        isVisible() const;
 
 private:
   bool isResizingAroundCenter() const;
@@ -174,52 +175,57 @@ private:
     return rect.contains(point);
   }
 
-  Layout::Rect convertRectToAncestor(Layout::Rect rect,
-                                     std::shared_ptr<LayoutNode> ancestorNode = nullptr)
+  Layout::Rect convertRectToAncestor(
+    Layout::Rect                rect,
+    std::shared_ptr<LayoutNode> ancestorNode = nullptr)
   {
     return { converPointToAncestor(rect.origin, ancestorNode), rect.size };
   }
 
-  Layout::Point converPointToAncestor(Layout::Point point,
-                                      std::shared_ptr<LayoutNode> ancestorNode = nullptr);
+  Layout::Point converPointToAncestor(
+    Layout::Point               point,
+    std::shared_ptr<LayoutNode> ancestorNode = nullptr);
 
   void resizeChildNodes(const Layout::Size& oldContainerSize, const Layout::Size& newContainerSize);
 
   Layout::Point origin() const;
-  Layout::Size size() const;
-  Layout::Rect transformedFrame() const;
-  void saveOldFrame();
-  void saveChildrendOldFrame();
+  Layout::Size  size() const;
+  Layout::Rect  transformedFrame() const;
+  void          saveOldFrame();
+  void          saveChildrendOldFrame();
 
-  void updateModel(const Layout::Rect& frame);
-  Layout::Point modelOrigin() const;
-  Layout::Rect modelBounds() const;
+  void           updateModel(const Layout::Rect& frame);
+  Layout::Point  modelOrigin() const;
+  Layout::Rect   modelBounds() const;
   Layout::Matrix modelMatrix() const;
   Layout::Matrix modelMatrixWithoutTranslate() const;
 
-  Layout::Rect resize(const Layout::Size& oldContainerSize,
-                      const Layout::Size& newContainerSize,
-                      const Layout::Point* parentOrigin = nullptr,
-                      bool dry = false);
-  Layout::Rect resizeGroup(const Layout::Size& oldContainerSize,
-                           const Layout::Size& newContainerSize,
-                           const Layout::Point* parentOrigin);
-  Layout::Rect resizeContour(const Layout::Size& oldContainerSize,
-                             const Layout::Size& newContainerSize,
-                             const Layout::Point* parentOrigin);
+  Layout::Rect resize(
+    const Layout::Size&  oldContainerSize,
+    const Layout::Size&  newContainerSize,
+    const Layout::Point* parentOrigin = nullptr,
+    bool                 dry = false);
+  Layout::Rect resizeGroup(
+    const Layout::Size&  oldContainerSize,
+    const Layout::Size&  newContainerSize,
+    const Layout::Point* parentOrigin);
+  Layout::Rect resizeContour(
+    const Layout::Size&  oldContainerSize,
+    const Layout::Size&  newContainerSize,
+    const Layout::Point* parentOrigin);
   std::pair<Layout::Scalar, Layout::Scalar> resizeH(
-    const Layout::Size& oldContainerSize,
-    const Layout::Size& newContainerSize,
-    Layout::Rect oldFrame,
+    const Layout::Size&  oldContainerSize,
+    const Layout::Size&  newContainerSize,
+    Layout::Rect         oldFrame,
     const Layout::Point* parentOrigin) const; // return x, w
   std::pair<Layout::Scalar, Layout::Scalar> resizeV(
-    const Layout::Size& oldContainerSize,
-    const Layout::Size& newContainerSize,
-    Layout::Rect oldFrame,
+    const Layout::Size&  oldContainerSize,
+    const Layout::Size&  newContainerSize,
+    Layout::Rect         oldFrame,
     const Layout::Point* parentOrigin) const; // return y, h
 
-  EResizing horizontalResizing() const;
-  EResizing verticalResizing() const;
+  EResizing              horizontalResizing() const;
+  EResizing              verticalResizing() const;
   EAdjustContentOnResize adjustContentOnResize() const;
 
   const nlohmann::json* model() const;
@@ -229,9 +235,10 @@ private:
 
   bool shouldSkip();
 
-  void updatePathNodeModel(const Layout::Rect& newFrame,
-                           const Layout::Matrix& matrix,
-                           const std::vector<Layout::BezierPoint>& newPoints);
+  void updatePathNodeModel(
+    const Layout::Rect&                     newFrame,
+    const Layout::Matrix&                   matrix,
+    const std::vector<Layout::BezierPoint>& newPoints);
 };
 
 } // namespace VGG

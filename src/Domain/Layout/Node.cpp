@@ -97,19 +97,20 @@ void LayoutNode::setFrame(const Layout::Rect& newFrame, bool updateRule, bool us
     return;
   }
 
-  DEBUG("LayoutNode::setFrame: %s, %s, %s, %s, %f, %f, %f, %f -> %f, %f, %f, %f",
-        name().c_str(),
-        id().c_str(),
-        path().c_str(),
-        m_autoLayout->isEnabled() ? "layout" : "scale",
-        oldFrame.origin.x,
-        oldFrame.origin.y,
-        oldFrame.size.width,
-        oldFrame.size.height,
-        newFrame.origin.x,
-        newFrame.origin.y,
-        newFrame.size.width,
-        newFrame.size.height);
+  DEBUG(
+    "LayoutNode::setFrame: %s, %s, %s, %s, %f, %f, %f, %f -> %f, %f, %f, %f",
+    name().c_str(),
+    id().c_str(),
+    path().c_str(),
+    m_autoLayout->isEnabled() ? "layout" : "scale",
+    oldFrame.origin.x,
+    oldFrame.origin.y,
+    oldFrame.size.width,
+    oldFrame.size.height,
+    newFrame.origin.x,
+    newFrame.origin.y,
+    newFrame.size.width,
+    newFrame.size.height);
 
   saveChildrendOldFrame();
   updateModel(newFrame);
@@ -191,8 +192,9 @@ void LayoutNode::configureAutoLayout()
   }
 }
 
-void LayoutNode::resizeChildNodes(const Layout::Size& oldContainerSize,
-                                  const Layout::Size& newContainerSize)
+void LayoutNode::resizeChildNodes(
+  const Layout::Size& oldContainerSize,
+  const Layout::Size& newContainerSize)
 {
   if (oldContainerSize == Layout::Size{ 0, 0 })
   {
@@ -280,7 +282,7 @@ void LayoutNode::updateModel(const Layout::Rect& toFrame)
   const auto newFrame = toFrame.makeModelRect();
 
   nlohmann::json::json_pointer path{ m_path };
-  const auto& objectJson = viewModel->content()[path];
+  const auto&                  objectJson = viewModel->content()[path];
 
   // do not update useless frame
 
@@ -302,17 +304,19 @@ void LayoutNode::updateModel(const Layout::Rect& toFrame)
   }
   boundsJson[K_WIDTH] = newFrame.size.width;
   boundsJson[K_HEIGHT] = newFrame.size.height;
-  DEBUG("LayoutNode::updateModel: bounds, -> %s, %s",
-        objectJson[K_BOUNDS].dump().c_str(),
-        boundsJson.dump().c_str());
+  DEBUG(
+    "LayoutNode::updateModel: bounds, -> %s, %s",
+    objectJson[K_BOUNDS].dump().c_str(),
+    boundsJson.dump().c_str());
   viewModel->replaceAt(path / K_BOUNDS, boundsJson);
 
   auto matrixJson = objectJson[K_MATRIX];
   matrixJson[4] = matrix.tx;
   matrixJson[5] = matrix.ty;
-  DEBUG("LayoutNode::updateModel: matrix, -> %s, %s",
-        objectJson[K_MATRIX].dump().c_str(),
-        matrixJson.dump().c_str());
+  DEBUG(
+    "LayoutNode::updateModel: matrix, -> %s, %s",
+    objectJson[K_MATRIX].dump().c_str(),
+    matrixJson.dump().c_str());
   viewModel->replaceAt(path / K_MATRIX, matrixJson);
 
   // translate if needed
@@ -323,9 +327,10 @@ void LayoutNode::updateModel(const Layout::Rect& toFrame)
     matrix.ty += newFrame.origin.y - originAfterScale.y;
     matrixJson[4] = matrix.tx;
     matrixJson[5] = matrix.ty;
-    DEBUG("LayoutNode::updateModel: matrix, -> %s, %s",
-          objectJson[K_MATRIX].dump().c_str(),
-          matrixJson.dump().c_str());
+    DEBUG(
+      "LayoutNode::updateModel: matrix, -> %s, %s",
+      objectJson[K_MATRIX].dump().c_str(),
+      matrixJson.dump().c_str());
     viewModel->replaceAt(path / K_MATRIX, matrixJson);
   }
 }
@@ -361,8 +366,9 @@ Layout::Point LayoutNode::modelOrigin() const
   return relativePosition;
 }
 
-Layout::Point LayoutNode::converPointToAncestor(Layout::Point point,
-                                                std::shared_ptr<LayoutNode> ancestorNode)
+Layout::Point LayoutNode::converPointToAncestor(
+  Layout::Point               point,
+  std::shared_ptr<LayoutNode> ancestorNode)
 {
   if (ancestorNode.get() == this)
   {
@@ -406,10 +412,11 @@ void LayoutNode::saveChildrendOldFrame()
   }
 }
 
-Layout::Rect LayoutNode::resize(const Layout::Size& oldContainerSize,
-                                const Layout::Size& newContainerSize,
-                                const Layout::Point* parentOrigin,
-                                bool dry)
+Layout::Rect LayoutNode::resize(
+  const Layout::Size&  oldContainerSize,
+  const Layout::Size&  newContainerSize,
+  const Layout::Point* parentOrigin,
+  bool                 dry)
 {
   if (shouldSkip())
   {
@@ -431,7 +438,7 @@ Layout::Rect LayoutNode::resize(const Layout::Size& oldContainerSize,
   auto [x, w] = resizeH(oldContainerSize, newContainerSize, oldFrame, parentOrigin);
   auto [y, h] = resizeV(oldContainerSize, newContainerSize, oldFrame, parentOrigin);
   Layout::Point newOrigin{ x, y };
-  Layout::Rect newFrame{ newOrigin, { w, h } };
+  Layout::Rect  newFrame{ newOrigin, { w, h } };
   if (isResizingAroundCenter())
   {
     newOrigin = (newOrigin - newFrame.center())
@@ -451,9 +458,9 @@ Layout::Rect LayoutNode::resize(const Layout::Size& oldContainerSize,
 }
 
 std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeH(
-  const Layout::Size& oldContainerSize,
-  const Layout::Size& newContainerSize,
-  Layout::Rect oldFrame,
+  const Layout::Size&  oldContainerSize,
+  const Layout::Size&  newContainerSize,
+  Layout::Rect         oldFrame,
   const Layout::Point* parentOrigin) const
 {
   Layout::Scalar x{ 0 }, w{ 0 };
@@ -536,9 +543,9 @@ std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeH(
 }
 
 std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeV(
-  const Layout::Size& oldContainerSize,
-  const Layout::Size& newContainerSize,
-  Layout::Rect oldFrame,
+  const Layout::Size&  oldContainerSize,
+  const Layout::Size&  newContainerSize,
+  Layout::Rect         oldFrame,
   const Layout::Point* parentOrigin) const
 {
   Layout::Scalar y{ 0 }, h{ 0 };
@@ -665,7 +672,7 @@ const nlohmann::json* LayoutNode::model() const
   }
 
   nlohmann::json::json_pointer path{ m_path };
-  const auto& objectJson = viewModel->content()[path];
+  const auto&                  objectJson = viewModel->content()[path];
 
   return &objectJson;
 }
@@ -697,9 +704,10 @@ bool LayoutNode::shouldSkip()
   return false;
 }
 
-Layout::Rect LayoutNode::resizeGroup(const Layout::Size& oldContainerSize,
-                                     const Layout::Size& newContainerSize,
-                                     const Layout::Point* parentOrigin)
+Layout::Rect LayoutNode::resizeGroup(
+  const Layout::Size&  oldContainerSize,
+  const Layout::Size&  newContainerSize,
+  const Layout::Point* parentOrigin)
 {
   if (m_children.empty())
   {
@@ -721,10 +729,11 @@ Layout::Rect LayoutNode::resizeGroup(const Layout::Size& oldContainerSize,
     childFrames.push_back(childFrame);
   }
 
-  Layout::Rect newGroupFrame = std::reduce(childFrames.begin() + 1,
-                                           childFrames.end(),
-                                           childFrames[0],
-                                           std::mem_fn(&Layout::Rect::makeJoin));
+  Layout::Rect newGroupFrame = std::reduce(
+    childFrames.begin() + 1,
+    childFrames.end(),
+    childFrames[0],
+    std::mem_fn(&Layout::Rect::makeJoin));
   setFrame(newGroupFrame, false, true);
 
   auto newOrigin = origin();
@@ -741,10 +750,11 @@ Layout::Rect LayoutNode::resizeGroup(const Layout::Size& oldContainerSize,
     childTransformedFrames.push_back(child->transformedFrame());
   }
 
-  newGroupFrame = std::reduce(childTransformedFrames.begin() + 1,
-                              childTransformedFrames.end(),
-                              childTransformedFrames[0],
-                              std::mem_fn(&Layout::Rect::makeJoin))
+  newGroupFrame = std::reduce(
+                    childTransformedFrames.begin() + 1,
+                    childTransformedFrames.end(),
+                    childTransformedFrames[0],
+                    std::mem_fn(&Layout::Rect::makeJoin))
                     .makeOffset(newOrigin.x, newOrigin.y);
   setFrame(newGroupFrame, false, false);
 
@@ -772,7 +782,7 @@ Layout::Rect LayoutNode::transformedFrame() const
 
 Layout::Rect LayoutNode::calculateResizedFrame(const Layout::Size& newSize)
 {
-  const auto oldFrame = frame();
+  const auto         oldFrame = frame();
   const Layout::Rect newFrame{ oldFrame.origin, newSize };
   if (autoLayout()->isFlexOrGridItem())
   {
@@ -876,9 +886,10 @@ Layout::Rect LayoutNode::calculateResizedFrame(const Layout::Size& newSize)
   return { { x, y }, { w, h } };
 }
 
-Layout::Rect LayoutNode::resizeContour(const Layout::Size& oldContainerSize,
-                                       const Layout::Size& newContainerSize,
-                                       const Layout::Point* parentOrigin)
+Layout::Rect LayoutNode::resizeContour(
+  const Layout::Size&  oldContainerSize,
+  const Layout::Size&  newContainerSize,
+  const Layout::Point* parentOrigin)
 {
   DEBUG("resizeContour: begin, name = %s, id = %s", name().c_str(), id().c_str());
 
@@ -897,7 +908,7 @@ Layout::Rect LayoutNode::resizeContour(const Layout::Size& oldContainerSize,
   ASSERT(points.size() > 0);
   const bool isClosed = subGeometry[K_CLOSED];
 
-  const auto oldSize = modelBounds().size;
+  const auto                       oldSize = modelBounds().size;
   std::vector<Layout::BezierPoint> oldModelPoints;
   for (auto j = 0; j < points.size(); ++j)
   {
@@ -905,14 +916,15 @@ Layout::Rect LayoutNode::resizeContour(const Layout::Size& oldContainerSize,
     oldModelPoints.push_back(point);
 
     auto oldFlipYModelPoint = point.point.makeFromModelPoint();
-    DEBUG("resizeContour: old flip y model point %d: %f, %f",
-          j,
-          oldFlipYModelPoint.x,
-          oldFlipYModelPoint.y);
+    DEBUG(
+      "resizeContour: old flip y model point %d: %f, %f",
+      j,
+      oldFlipYModelPoint.x,
+      oldFlipYModelPoint.y);
   }
 
   // multiply matrix, to layout point
-  const auto oldModelMatrix = modelMatrix();
+  const auto                       oldModelMatrix = modelMatrix();
   std::vector<Layout::BezierPoint> oldLayoutPoints;
   for (auto tmpPoint : oldModelPoints)
   {
@@ -925,40 +937,44 @@ Layout::Rect LayoutNode::resizeContour(const Layout::Size& oldContainerSize,
       tmpPoint = tmpPoint.makeTranslate(parentOrigin->x, parentOrigin->y);
     }
     oldLayoutPoints.push_back(tmpPoint);
-    DEBUG("resizeContour: old layout point: %f, %f",
-          oldLayoutPoints.back().point.x,
-          oldLayoutPoints.back().point.y);
+    DEBUG(
+      "resizeContour: old layout point: %f, %f",
+      oldLayoutPoints.back().point.x,
+      oldLayoutPoints.back().point.y);
   }
 
   // resize
   auto oldLayoutFrame = Layout::Rect::makeFromPoints(oldLayoutPoints, isClosed);
-  auto [x, w] =
-    resizeH(oldContainerSize,
-            newContainerSize,
-            oldLayoutFrame,
-            nullptr); // Pass nullptr because oldLayoutPoints has been translated by parentOrigin
+  auto [x, w] = resizeH(
+    oldContainerSize,
+    newContainerSize,
+    oldLayoutFrame,
+    nullptr); // Pass nullptr because oldLayoutPoints has been translated by parentOrigin
   auto [y, h] = resizeV(oldContainerSize, newContainerSize, oldLayoutFrame, nullptr);
   Layout::Rect newLayoutFrame{ { x, y }, { w, h } };
-  DEBUG("resizeContour: old layout frame: %f, %f, %f, %f",
-        oldLayoutFrame.left(),
-        oldLayoutFrame.top(),
-        oldLayoutFrame.width(),
-        oldLayoutFrame.height());
-  DEBUG("resizeContour: new layout frame: %f, %f, %f, %f",
-        newLayoutFrame.left(),
-        newLayoutFrame.top(),
-        newLayoutFrame.width(),
-        newLayoutFrame.height());
+  DEBUG(
+    "resizeContour: old layout frame: %f, %f, %f, %f",
+    oldLayoutFrame.left(),
+    oldLayoutFrame.top(),
+    oldLayoutFrame.width(),
+    oldLayoutFrame.height());
+  DEBUG(
+    "resizeContour: new layout frame: %f, %f, %f, %f",
+    newLayoutFrame.left(),
+    newLayoutFrame.top(),
+    newLayoutFrame.width(),
+    newLayoutFrame.height());
 
   // new point
   std::vector<Layout::BezierPoint> newLayoutPoints;
   for (const auto& oldLayoutPoint : oldLayoutPoints)
   {
     newLayoutPoints.push_back(oldLayoutPoint.makeScale(oldLayoutFrame, newLayoutFrame));
-    DEBUG("resizeContour: new layout point, %lu: %f, %f",
-          newLayoutPoints.size() - 1,
-          newLayoutPoints.back().point.x,
-          newLayoutPoints.back().point.y);
+    DEBUG(
+      "resizeContour: new layout point, %lu: %f, %f",
+      newLayoutPoints.size() - 1,
+      newLayoutPoints.back().point.x,
+      newLayoutPoints.back().point.y);
   }
 
   const float modelRadian = oldModelMatrix.decomposeRotateRadian();
@@ -972,17 +988,19 @@ Layout::Rect LayoutNode::resizeContour(const Layout::Size& oldContainerSize,
   {
     reverseRotatedLayoutPoints.push_back(newLayoutPoint.makeTransform(reverseRotateTransform));
 
-    DEBUG("resizeContour: reverse rotated point, %f, %f",
-          reverseRotatedLayoutPoints.back().point.x,
-          reverseRotatedLayoutPoints.back().point.y);
+    DEBUG(
+      "resizeContour: reverse rotated point, %f, %f",
+      reverseRotatedLayoutPoints.back().point.x,
+      reverseRotatedLayoutPoints.back().point.y);
   }
   const auto reverseRotatedFrame =
     Layout::Rect::makeFromPoints(reverseRotatedLayoutPoints, isClosed);
-  DEBUG("resizeContour: reverse rotated frame, %f, %f, %f, %f",
-        reverseRotatedFrame.left(),
-        reverseRotatedFrame.top(),
-        reverseRotatedFrame.width(),
-        reverseRotatedFrame.height());
+  DEBUG(
+    "resizeContour: reverse rotated frame, %f, %f, %f, %f",
+    reverseRotatedFrame.left(),
+    reverseRotatedFrame.top(),
+    reverseRotatedFrame.width(),
+    reverseRotatedFrame.height());
 
   // calculate new model point
   std::vector<Layout::BezierPoint> newModelPoints;
@@ -996,38 +1014,40 @@ Layout::Rect LayoutNode::resizeContour(const Layout::Size& oldContainerSize,
   }
 
   // calculate new matrix
-  auto relativeFirstLayoutPoint = newModelPoints[0].makeFromModelFormat();
+  auto          relativeFirstLayoutPoint = newModelPoints[0].makeFromModelFormat();
   Layout::Point relativeFirstPoint{
     relativeFirstLayoutPoint.point.x,
     relativeFirstLayoutPoint.point.y
   }; // rotate anchor is top left point
   const auto rotateTransform = Layout::Matrix::makeRotate(layoutRadian);
-  auto rotatedRelativeFirstPoint = relativeFirstPoint.makeTransform(rotateTransform);
-  auto xOffset = newLayoutPoints[0].point.x - rotatedRelativeFirstPoint.x;
-  auto yOffset = newLayoutPoints[0].point.y - rotatedRelativeFirstPoint.y;
+  auto       rotatedRelativeFirstPoint = relativeFirstPoint.makeTransform(rotateTransform);
+  auto       xOffset = newLayoutPoints[0].point.x - rotatedRelativeFirstPoint.x;
+  auto       yOffset = newLayoutPoints[0].point.y - rotatedRelativeFirstPoint.y;
 
   const Layout::Point layoutTopLeft{ xOffset, yOffset };
-  const auto newModelTopLeft = layoutTopLeft.makeModelPoint();
+  const auto          newModelTopLeft = layoutTopLeft.makeModelPoint();
 
   const Layout::Rect newModelFrame{ newModelTopLeft, reverseRotatedFrame.size };
   auto newMatrix = Layout::Matrix::make(newModelTopLeft.x, newModelTopLeft.y, modelRadian);
 
   updatePathNodeModel(newModelFrame.makeModelRect(), newMatrix, newModelPoints);
 
-  DEBUG("resizeContour: end, name = %s, id = %s, new frame, %f, %f, %f, %f",
-        name().c_str(),
-        id().c_str(),
-        layoutTopLeft.x,
-        layoutTopLeft.y,
-        reverseRotatedFrame.width(),
-        reverseRotatedFrame.height());
+  DEBUG(
+    "resizeContour: end, name = %s, id = %s, new frame, %f, %f, %f, %f",
+    name().c_str(),
+    id().c_str(),
+    layoutTopLeft.x,
+    layoutTopLeft.y,
+    reverseRotatedFrame.width(),
+    reverseRotatedFrame.height());
 
   return newModelFrame.makeFromModelRect();
 }
 
-void LayoutNode::updatePathNodeModel(const Layout::Rect& newFrame,
-                                     const Layout::Matrix& matrix,
-                                     const std::vector<Layout::BezierPoint>& newPoints)
+void LayoutNode::updatePathNodeModel(
+  const Layout::Rect&                     newFrame,
+  const Layout::Matrix&                   matrix,
+  const std::vector<Layout::BezierPoint>& newPoints)
 {
   auto viewModel = m_viewModel.lock();
   if (!viewModel)
@@ -1036,7 +1056,7 @@ void LayoutNode::updatePathNodeModel(const Layout::Rect& newFrame,
   }
 
   nlohmann::json::json_pointer path{ m_path };
-  const auto& objectJson = viewModel->content()[path];
+  const auto&                  objectJson = viewModel->content()[path];
 
   if (objectJson[K_CLASS] != K_PATH)
   {
@@ -1048,9 +1068,10 @@ void LayoutNode::updatePathNodeModel(const Layout::Rect& newFrame,
   auto boundsJson = objectJson[K_BOUNDS];
   boundsJson[K_WIDTH] = newFrame.width();
   boundsJson[K_HEIGHT] = newFrame.height();
-  DEBUG("LayoutNode::updatePathNodeModel: bounds, -> %s, %s",
-        objectJson[K_BOUNDS].dump().c_str(),
-        boundsJson.dump().c_str());
+  DEBUG(
+    "LayoutNode::updatePathNodeModel: bounds, -> %s, %s",
+    objectJson[K_BOUNDS].dump().c_str(),
+    boundsJson.dump().c_str());
   viewModel->replaceAt(path / K_BOUNDS, boundsJson);
 
   // matrix
@@ -1061,9 +1082,10 @@ void LayoutNode::updatePathNodeModel(const Layout::Rect& newFrame,
   matrixJson[3] = matrix.d;
   matrixJson[4] = matrix.tx;
   matrixJson[5] = matrix.ty;
-  DEBUG("LayoutNode::updatePathNodeModel: matrix, -> %s, %s",
-        objectJson[K_MATRIX].dump().c_str(),
-        matrixJson.dump().c_str());
+  DEBUG(
+    "LayoutNode::updatePathNodeModel: matrix, -> %s, %s",
+    objectJson[K_MATRIX].dump().c_str(),
+    matrixJson.dump().c_str());
   viewModel->replaceAt(path / K_MATRIX, matrixJson);
 
   // points
@@ -1081,17 +1103,18 @@ void LayoutNode::updatePathNodeModel(const Layout::Rect& newFrame,
     }
 
     auto& points = subGeometry[K_POINTS];
-    auto pointsPath = path / i / K_SUBGEOMETRY / K_POINTS;
+    auto  pointsPath = path / i / K_SUBGEOMETRY / K_POINTS;
     for (auto j = 0; j < points.size(); ++j)
     {
       auto point = points[j];
       to_json(point, newPoints[j]);
 
       auto pointPath = pointsPath / j;
-      DEBUG("LayoutNode::updatePathNodeModel: %s, -> %s, %s",
-            pointPath.to_string().c_str(),
-            points[j].dump().c_str(),
-            point.dump().c_str());
+      DEBUG(
+        "LayoutNode::updatePathNodeModel: %s, -> %s, %s",
+        pointPath.to_string().c_str(),
+        points[j].dump().c_str(),
+        point.dump().c_str());
 
       viewModel->replaceAt(pointPath, point);
     }

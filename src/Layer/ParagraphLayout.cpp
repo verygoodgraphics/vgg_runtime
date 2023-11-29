@@ -15,6 +15,7 @@
  */
 #include "ParagraphLayout.hpp"
 
+#include "Layer/Core/VType.hpp"
 #include "VSkia.hpp"
 
 #include <modules/skparagraph/include/DartTypes.h>
@@ -312,7 +313,8 @@ void TextParagraphCache::onEnd()
 void TextParagraphCache::onParagraphBegin(
   int                  paraIndex,
   int                  order,
-  const ParagraphAttr& paragraAttr)
+  const ParagraphAttr& paragraAttr,
+  void*                userData)
 {
   paragraph.emplace_back();
   auto& p = paragraph.back();
@@ -328,7 +330,7 @@ void TextParagraphCache::onParagraphBegin(
   m_paraAttr = paragraAttr;
 }
 
-void TextParagraphCache::onParagraphEnd(int paraIndex, const TextView& textView)
+void TextParagraphCache::onParagraphEnd(int paraIndex, const TextView& textView, void* userData)
 {
   assert(!paragraph.empty());
   auto& p = paragraph.back();
@@ -346,14 +348,22 @@ void TextParagraphCache::onTextStyle(
   int                  paraIndex,
   int                  styleIndex,
   const TextView&      textView,
-  const TextStyleAttr& textAttr)
+  const TextStyleAttr& textAttr,
+  void*                userData)
 {
   assert(!paragraph.empty());
   auto& p = paragraph.back();
   if (m_newParagraph)
   {
+
+    ETextHorizontalAlignment align;
+    std::visit(
+      internal::Overloaded{ [&](const TextLayoutAutoHeight& l) { align = textAttr.horzAlignment; },
+                            [&](const TextLayoutAutoWidth& l) { align = HA_Left; },
+                            [&](const TextLayoutFixed& l) { align = textAttr.horzAlignment; } },
+      *(TextLayoutMode*)userData);
     p.builder = skia::textlayout::ParagraphBuilder::make(
-      createParagraphStyle(ParagraphAttr{ m_paraAttr.type, textAttr.horzAlignment }),
+      createParagraphStyle(ParagraphAttr{ m_paraAttr.type, align }),
       m_fontCollection);
     m_newParagraph = false;
   }

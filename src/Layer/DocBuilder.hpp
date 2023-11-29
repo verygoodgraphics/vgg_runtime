@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "Layer/Core/VType.hpp"
+#include "Layer/ParagraphLayout.hpp"
 #include "Math/Algebra.hpp"
 #include "Math/Math.hpp"
 #include "Utility/Log.hpp"
@@ -242,17 +243,26 @@ class DocBuilder
         }
         p->setParagraph(std::move(text), textStyleAttrs, lineType);
         p->setVerticalAlignment(j.value("verticalAlignment", ETextVerticalAlignment::VA_Top));
-        const auto& b = p->frameBound();
-        p->setFrameMode(j.value("frameMode", ETextLayoutMode::TL_Fixed));
+        const auto&    b = p->frameBound();
+        auto           layoutMode = j.value("frameMode", ETextLayoutMode::TL_Fixed);
+        TextLayoutMode mode;
+        switch (layoutMode)
+        {
+          case TL_Fixed:
+            mode = TextLayoutFixed(b);
+            break;
+          case TL_WidthAuto:
+            mode = TextLayoutAutoWidth();
+            break;
+          case TL_HeightAuto:
+            mode = TextLayoutAutoHeight(b.width());
+            break;
+        }
+        p->setFrameMode(mode);
         if (b.width() == 0 || b.height() == 0)
         {
           // for Ai speicific
-          p->setFrameMode(ETextLayoutMode::TL_Fixed);
-        }
-        else
-        {
-          // TODO:: force to Fixed now because the bound computed by text layout is not accurate.
-          p->setFrameMode(ETextLayoutMode::TL_Fixed);
+          p->setFrameMode(TextLayoutAutoWidth());
         }
         return p;
       });

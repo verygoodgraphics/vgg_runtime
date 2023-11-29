@@ -15,12 +15,8 @@
  */
 #pragma once
 
-#include "Layer/Config.hpp"
-
-#include "Layer/FontManager.hpp"
-#include "Layer/Core/TreeNode.hpp"
 #include "Layer/Core/PaintNode.hpp"
-#include "Layer/Core/VType.hpp"
+#include "Layer/ParagraphLayout.hpp"
 
 namespace VGG::layer
 {
@@ -30,19 +26,18 @@ class VGG_EXPORTS TextNode final : public PaintNode
 {
   VGG_DECL_IMPL(TextNode);
 
-  Bound m_textBound;
-
 public:
   TextNode(const std::string& name, std::string guid);
   TextNode(const TextNode&);
   TextNode& operator=(const TextNode&) = delete;
   TextNode(TextNode&&) noexcept = default;
   TextNode& operator=(TextNode&&) noexcept = default;
-  void      setParagraph(
-         std::string                      utf8,
-         std::vector<TextStyleAttr>       attrs,
-         const std::vector<TextLineAttr>& lineAttr);
-  void setFrameMode(ETextLayoutMode mode);
+
+  void setParagraph(
+    std::string                      utf8,
+    std::vector<TextStyleAttr>       attrs,
+    const std::vector<TextLineAttr>& lineAttr);
+  void setFrameMode(TextLayoutMode mode);
   void setVerticalAlignment(ETextVerticalAlignment vertAlign);
 
   TreeNodePtr clone() const override;
@@ -50,6 +45,8 @@ public:
 
 protected:
   void paintEvent(SkiaRenderer* renderer) override;
+
+  Bound onRevalidate() override;
 };
 
 } // namespace VGG::layer

@@ -35,7 +35,7 @@ using namespace skia::textlayout;
 struct TextView
 {
   std::string_view text;
-  size_t count;
+  size_t           count;
   TextView() = default;
   TextView(const std::string_view& text, size_t count)
     : text(text)
@@ -46,7 +46,7 @@ struct TextView
 
 struct ParagraphAttr
 {
-  TextLineAttr type;
+  TextLineAttr             type;
   ETextHorizontalAlignment horiAlign;
   ParagraphAttr() = default;
   ParagraphAttr(TextLineAttr type, ETextHorizontalAlignment align)
@@ -77,27 +77,33 @@ public:
 protected:
   virtual void onBegin() = 0;
   virtual void onEnd() = 0;
-  virtual void onParagraphBegin(int paraIndex, int order, const ParagraphAttr& paragraAttr) = 0;
-  virtual void onParagraphEnd(int paraIndex, const TextView& textView) = 0;
-  virtual void onTextStyle(int paraIndex,
-                           int styleIndex,
-                           const TextView& textView,
-                           const TextStyleAttr& textAttr) = 0;
+  virtual void onParagraphBegin(
+    int                  paraIndex,
+    int                  order,
+    const ParagraphAttr& paragraAttr,
+    void*                userData) = 0;
+  virtual void onParagraphEnd(int paraIndex, const TextView& textView, void* userData) = 0;
+  virtual void onTextStyle(
+    int                  paraIndex,
+    int                  styleIndex,
+    const TextView&      textView,
+    const TextStyleAttr& textAttr,
+    void*                userData) = 0;
 };
 
 class ParagraphParser
 {
-  int m_length{ 0 };
-  int m_styleIndex{ 0 };
-  int m_paragraphAttrIndex{ 0 };
+  int         m_length{ 0 };
+  int         m_styleIndex{ 0 };
+  int         m_paragraphAttrIndex{ 0 };
   const char* m_prevStyleBegin{ nullptr };
   const char* m_prevParagraphBegin{ nullptr };
-  int m_offset{ 0 };
-  bool m_seperateLines{ false };
+  int         m_offset{ 0 };
+  bool        m_seperateLines{ false };
   struct LevelOrderState
   {
     std::unordered_map<int, int> level2Order;
-    void reset()
+    void                         reset()
     {
       level2Order.clear();
     }
@@ -134,9 +140,11 @@ public:
   {
   }
 
-  void parse(ParagraphListener& listener,
-             const std::string& text,
-             const std::vector<TextStyleAttr>& textAttrs,
-             const std::vector<ParagraphAttr>& paragraphAttributes);
+  void parse(
+    ParagraphListener&                listener,
+    const std::string&                text,
+    const std::vector<TextStyleAttr>& textAttrs,
+    const std::vector<ParagraphAttr>& paragraphAttributes,
+    void*                             userData = nullptr);
 };
 } // namespace VGG::layer

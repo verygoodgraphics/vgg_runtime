@@ -44,47 +44,48 @@ class TextNode__pImpl
 {
   VGG_DECL_API(TextNode)
 public:
-  TextNode__pImpl(TextNode* api, const Bound& bound)
+  TextNode__pImpl(TextNode* api)
     : q_ptr(api)
-    , paragraphCache(bound)
-    , painter(nullptr, nullptr, Bound())
   {
+    paragraphLayout = std::make_shared<TextParagraphCache>();
+    auto mgr = sk_ref_sp(FontManager::instance().defaultFontManager());
+    auto fontCollection = sk_make_sp<VGGFontCollection>(std::move(mgr));
+    // paragraphLayout->setFontCollection(fontCollection);
+    painter = std::make_shared<VParagraphPainter>();
+    painter->setParagraph(paragraphLayout);
   }
 
-  std::string                text;
-  TextParagraphCache         paragraphCache;
-  ETextLayoutMode            mode;
-  std::vector<TextStyleAttr> textAttr;
-  VParagraphPainter          painter;
-  ETextVerticalAlignment     vertAlign{ ETextVerticalAlignment::VA_Top };
+  std::shared_ptr<VParagraphPainter>  painter;
+  std::shared_ptr<TextParagraphCache> paragraphLayout;
+  bool                                observed{ false };
 
   TextNode__pImpl(const TextNode__pImpl& p)
-    : paragraphCache(Bound())
-    , painter(nullptr, nullptr, Bound())
   {
     this->operator=(p);
   }
 
   TextNode__pImpl& operator=(const TextNode__pImpl& p)
   {
-    text = p.text;
-    mode = p.mode;
-    vertAlign = p.vertAlign;
-    // do not copy cache
     return *this;
   }
 
   TextNode__pImpl(TextNode__pImpl&& p) noexcept = default;
   TextNode__pImpl& operator=(TextNode__pImpl&& p) noexcept = default;
+
+  void ensureObserve()
+  {
+    if (!observed)
+    {
+      painter->setParagraph(paragraphLayout);
+      observed = true;
+    }
+  }
 };
 
 TextNode::TextNode(const std::string& name, std::string guid)
   : PaintNode(name, VGG_TEXT, std::move(guid))
-  , d_ptr(new TextNode__pImpl(this, frameBound()))
+  , d_ptr(new TextNode__pImpl(this))
 {
-  auto mgr = sk_ref_sp(FontManager::instance().defaultFontManager());
-  auto fontCollection = sk_make_sp<VGGFontCollection>(std::move(mgr));
-  d_ptr->paragraphCache.setFontCollection(fontCollection);
 }
 
 TextNode::TextNode(const TextNode& other)
@@ -105,12 +106,8 @@ void TextNode::setParagraph(
   const std::vector<TextLineAttr>& lineAttr)
 {
   VGG_IMPL(TextNode);
+  _->ensureObserve();
   std::vector<ParagraphAttr> paraAttrs;
-  _->text = std::move(utf8);
-  _->textAttr = std::move(attrs);
-  _->painter.updateTextStyle(&_->textAttr);
-  if (_->text.empty())
-    return;
   for (const auto a : lineAttr)
   {
     paraAttrs.emplace_back(a, ETextHorizontalAlignment::HA_Left);
@@ -123,73 +120,69 @@ void TextNode::setParagraph(
     attr.firstLine = false;
     paraAttrs.emplace_back(attr, ETextHorizontalAlignment::HA_Left);
   }
-  ParagraphParser parser;
-  parser.parse(_->paragraphCache, _->text, _->textAttr, paraAttrs);
+
+  _->paragraphLayout->setText(std::move(utf8));
+  _->paragraphLayout->setTextStyle(std::move(attrs));
+  _->paragraphLayout->setLineStyle(std::move(paraAttrs));
+
+  // ParagraphParser parser;
+  // parser.parse(_->paragraphCache, _->text, _->textAttr, paraAttrs);
 }
 
-void TextNode::setFrameMode(ETextLayoutMode mode)
+void TextNode::setFrameMode(TextLayoutMode mode)
 {
-  VGG_IMPL(TextNode)
-  _->mode = mode;
+  VGG_IMPL(TextNode);
+  _->ensureObserve();
+  _->paragraphLayout->setTextLayoutMode(mode);
 }
 
 void TextNode::paintEvent(SkiaRenderer* renderer)
 {
   auto canvas = renderer->canvas();
   VGG_IMPL(TextNode);
-  if (_->paragraphCache.empty())
-    return;
-  if (_->paragraphCache.test(TextParagraphCache::ETextParagraphCacheFlagsBits::D_REBUILD))
-  {
-    _->paragraphCache.rebuild();
-    _->paragraphCache.clear(TextParagraphCache::ETextParagraphCacheFlagsBits::D_REBUILD);
-  }
-  Bound newBound = frameBound();
-  if (_->paragraphCache.test(TextParagraphCache::ETextParagraphCacheFlagsBits::D_LAYOUT))
-  {
-    newBound = _->paragraphCache.layout(frameBound(), _->mode);
-    setFrameBound(newBound); // update bound
-    _->painter.updateBound(newBound);
-    _->paragraphCache.clear(TextParagraphCache::ETextParagraphCacheFlagsBits::D_LAYOUT);
-  }
 
+  if (_->paragraphLayout->paragraphCache.empty())
+    return;
   if (overflow() == OF_Hidden)
   {
     canvas->save();
     canvas->clipPath(makeBoundPath());
   }
 
-  {
-    const auto b = frameBound();
-    _->painter.setCanvas(canvas);
-    int totalHeight = _->paragraphCache.getHeight();
-    int curY = 0;
-    if (_->vertAlign == ETextVerticalAlignment::VA_Bottom)
-    {
-      curY = b.height() - totalHeight;
-    }
-    else if (_->vertAlign == ETextVerticalAlignment::VA_Center)
-    {
-      curY = (b.height() - totalHeight) / 2;
-    }
-    for (int i = 0; i < _->paragraphCache.paragraphCache.size(); i++)
-    {
-      auto&      p = _->paragraphCache.paragraphCache[i].paragraph;
-      const auto curX = _->paragraphCache.paragraphCache[i].offsetX;
-      p->paint(&_->painter, curX, curY);
-      if (renderer->isEnableDrawDebugBound())
-      {
-        DebugCanvas debugCanvas(canvas);
-        drawParagraphDebugInfo(debugCanvas, _->paragraphCache.paragraph[i], p.get(), curX, curY, i);
-      }
-      auto        lastLine = p->lineNumber();
-      LineMetrics lineMetric;
-      if (lastLine < 1)
-        continue;
-      p->getLineMetricsAt(lastLine - 1, &lineMetric);
-      curY += p->getHeight() - lineMetric.fHeight;
-    }
-  }
+  _->painter->paint(renderer);
+
+  // {
+  //   const auto b = frameBound();
+  //   _->painter.setCanvas(canvas);
+  //   int totalHeight = _->paragraphCache.getHeight();
+  //   int curY = 0;
+  //   if (_->vertAlign == ETextVerticalAlignment::VA_Bottom)
+  //   {
+  //     curY = b.height() - totalHeight;
+  //   }
+  //   else if (_->vertAlign == ETextVerticalAlignment::VA_Center)
+  //   {
+  //     curY = (b.height() - totalHeight) / 2;
+  //   }
+  //   for (int i = 0; i < _->paragraphCache.paragraphCache.size(); i++)
+  //   {
+  //     auto&      p = _->paragraphCache.paragraphCache[i].paragraph;
+  //     const auto curX = _->paragraphCache.paragraphCache[i].offsetX;
+  //     p->paint(&_->painter, curX, curY);
+  //     if (renderer->isEnableDrawDebugBound())
+  //     {
+  //       DebugCanvas debugCanvas(canvas);
+  //       drawParagraphDebugInfo(debugCanvas, _->paragraphCache.paragraph[i], p.get(), curX, curY,
+  //       i);
+  //     }
+  //     auto        lastLine = p->lineNumber();
+  //     LineMetrics lineMetric;
+  //     if (lastLine < 1)
+  //       continue;
+  //     p->getLineMetricsAt(lastLine - 1, &lineMetric);
+  //     curY += p->getHeight() - lineMetric.fHeight;
+  //   }
+  // }
 
   if (overflow() == OF_Hidden)
   {
@@ -200,7 +193,14 @@ void TextNode::paintEvent(SkiaRenderer* renderer)
 void TextNode::setVerticalAlignment(ETextVerticalAlignment vertAlign)
 {
   VGG_IMPL(TextNode);
-  _->vertAlign = vertAlign;
+  _->ensureObserve();
+  _->paragraphLayout->setVerticalAlignment(vertAlign);
+}
+
+Bound TextNode::onRevalidate()
+{
+  VGG_IMPL(TextNode);
+  return _->painter->revalidate();
 }
 
 TextNode::~TextNode() = default;

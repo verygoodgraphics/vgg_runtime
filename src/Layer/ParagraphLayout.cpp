@@ -13,30 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ParagraphParser.hpp"
-#include "ParagraphPainter.hpp"
-#include "TextNodePrivate.hpp"
-#include "DebugCanvas.hpp"
-#include "Painter.hpp"
+#include "ParagraphLayout.hpp"
+
 #include "VSkia.hpp"
 
-#include "Layer/Core/TextNode.hpp"
-#include "Layer/Core/VType.hpp"
-#include "Layer/FontManager.hpp"
-
-#include <core/SkCanvas.h>
-#include <core/SkColor.h>
-#include <core/SkPathEffect.h>
-#include <core/SkString.h>
 #include <modules/skparagraph/include/DartTypes.h>
 #include <modules/skparagraph/include/FontCollection.h>
 #include <modules/skparagraph/include/Metrics.h>
 #include <modules/skparagraph/include/Paragraph.h>
 
-#include <glm/detail/qualifier.hpp>
-#include <optional>
-
-namespace sktxt = skia::textlayout;
+using namespace skia::textlayout;
 namespace
 {
 
@@ -68,7 +54,7 @@ int calcWhitespace(
     return 0;
   return rects[0].rect.width();
 }
-sktxt::ParagraphStyle createParagraphStyle(const layer::ParagraphAttr& attr)
+ParagraphStyle createParagraphStyle(const layer::ParagraphAttr& attr)
 {
   ParagraphStyle style;
   style.setEllipsis(u"...");
@@ -92,9 +78,9 @@ std::vector<std::string> split(const std::string& s, char seperator)
 }
 
 template<typename F>
-sktxt::TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&& fun)
+TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&& fun)
 {
-  sktxt::TextStyle style;
+  TextStyle style;
   if (!attr.fills.empty())
   {
     auto painterID = fun();
@@ -222,7 +208,6 @@ sktxt::TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* f
   return style;
 }
 } // namespace
-
 namespace VGG::layer
 {
 

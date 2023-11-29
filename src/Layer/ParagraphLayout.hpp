@@ -13,21 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Layer/Core/Attrs.hpp"
-#include "Layer/FontManager.hpp"
-#include "Layer/Core/TextNode.hpp"
-#include "Layer/Core/VType.hpp"
-#include "VSkia.hpp"
-#include "VSkFontMgr.hpp"
-#include "DebugCanvas.hpp"
-#include "ParagraphParser.hpp"
-#include "ParagraphPainter.hpp"
+#pragma once
 
-#include <include/core/SkColor.h>
-#include <include/core/SkFontMetrics.h>
-#include <include/core/SkFontStyle.h>
-#include <include/core/SkRefCnt.h>
-#include <include/core/SkScalar.h>
+#include "ParagraphParser.hpp"
+#include "DebugCanvas.hpp"
+
+#include "Layer/FontManager.hpp"
+#include "VSkFontMgr.hpp"
+
 #include <modules/skparagraph/include/DartTypes.h>
 #include <modules/skparagraph/include/Metrics.h>
 #include <modules/skparagraph/include/Paragraph.h>
@@ -38,24 +31,10 @@
 #include <modules/skparagraph/include/TextStyle.h>
 #include <modules/skparagraph/include/TypefaceFontProvider.h>
 
-namespace sktxt = skia::textlayout;
-
-namespace
-{
-
-#define cauto const auto // NOLINT
-void printShapingInfo(sktxt::Paragraph& p)
-{
-  cauto maxWidth = p.getMaxWidth();
-  cauto height = p.getHeight();
-}
-
-#undef catuo
-} // namespace
-
 namespace VGG::layer
 {
 
+namespace sktxt = skia::textlayout;
 struct ParagraphInfo
 {
   int                               offsetX{ 0 };
@@ -259,41 +238,8 @@ public:
   }
 };
 
-class TextNode__pImpl
+class ParagraphLayout
 {
-  VGG_DECL_API(TextNode)
-public:
-  TextNode__pImpl(TextNode* api, const Bound& bound)
-    : q_ptr(api)
-    , paragraphCache(bound)
-    , painter(nullptr, nullptr, Bound())
-  {
-  }
-
-  std::string                text;
-  TextParagraphCache         paragraphCache;
-  ETextLayoutMode            mode;
-  std::vector<TextStyleAttr> textAttr;
-  VParagraphPainter          painter;
-  ETextVerticalAlignment     vertAlign{ ETextVerticalAlignment::VA_Top };
-
-  TextNode__pImpl(const TextNode__pImpl& p)
-    : paragraphCache(Bound())
-    , painter(nullptr, nullptr, Bound())
-  {
-    this->operator=(p);
-  }
-
-  TextNode__pImpl& operator=(const TextNode__pImpl& p)
-  {
-    text = p.text;
-    mode = p.mode;
-    vertAlign = p.vertAlign;
-    // do not copy cache
-    return *this;
-  }
-
-  TextNode__pImpl(TextNode__pImpl&& p) noexcept = default;
-  TextNode__pImpl& operator=(TextNode__pImpl&& p) noexcept = default;
 };
+
 } // namespace VGG::layer

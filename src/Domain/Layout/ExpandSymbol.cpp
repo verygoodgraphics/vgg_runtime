@@ -37,6 +37,26 @@ constexpr auto K_BORDER_PREFIX = "style.borders";
 namespace nl = nlohmann;
 using namespace VGG::Layout;
 
+namespace
+{
+std::vector<std::string> split(const std::string& s, const std::string& delimiter = K_SEPARATOR)
+{
+  size_t                   pos_start = 0, pos_end, delim_len = delimiter.length();
+  std::string              token;
+  std::vector<std::string> res;
+
+  while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos)
+  {
+    token = s.substr(pos_start, pos_end - pos_start);
+    pos_start = pos_end + delim_len;
+    res.push_back(token);
+  }
+
+  res.push_back(s.substr(pos_start));
+  return res;
+}
+} // namespace
+
 nlohmann::json ExpandSymbol::operator()()
 {
   return std::get<0>(run());
@@ -547,35 +567,64 @@ void ExpandSymbol::applyOverridesDetailToTree(
 }
 
 nlohmann::json* ExpandSymbol::findChildObjectInTree(
-  nlohmann::json&    json,
-  const std::string& objectId)
+  nlohmann::json&                 json,
+  const std::vector<std::string>& keyStack,
+  std::vector<std::string>*       outInstanceIdStack)
 {
   if (!json.is_object() && !json.is_array())
   {
     return nullptr;
   }
 
+  if (keyStack.empty())
+  {
+    return nullptr;
+  }
+
   if (json.is_object())
   {
-    // 1. find by overrideKey first
-    if (json.contains(K_OVERRIDE_KEY) && json[K_OVERRIDE_KEY] == objectId)
+    std::vector<std::string>  tmpInstanceIdStack;
+    std::vector<std::string>* theOutInstanceIdStack;
+    if (outInstanceIdStack)
     {
-      return &json;
+      tmpInstanceIdStack = *outInstanceIdStack;
+      theOutInstanceIdStack = outInstanceIdStack;
     }
-
-    // 2. find by id
-    if (json.contains(K_ID) && json[K_ID] == objectId)
+    else
     {
-      return &json;
+      theOutInstanceIdStack = &tmpInstanceIdStack;
+    }
+    tmpInstanceIdStack.push_back(keyStack[0]);
+
+    // 1. find by overrideKey first; 2. find by id
+    if (const auto& firstObjectId = join(tmpInstanceIdStack);
+        (json.contains(K_OVERRIDE_KEY) && json[K_OVERRIDE_KEY] == firstObjectId) ||
+        (json.contains(K_ID) && json[K_ID] == firstObjectId))
+    {
+      if (keyStack.size() == 1) // is last key
+      {
+        return &json;
+      }
+      else
+      {
+        // the id is already prefixed: xxx__yyy__zzz;
+        const auto originalId = split(json[K_ID]).back();
+        theOutInstanceIdStack->push_back(originalId);
+
+        return findChildObjectInTree(
+          json,
+          { keyStack.begin() + 1, keyStack.end() },
+          theOutInstanceIdStack);
+      }
     }
   }
 
   for (auto& el : json.items())
   {
-    auto ret = findChildObjectInTree(el.value(), objectId);
-    if (ret)
+    auto target = findChildObjectInTree(el.value(), keyStack, outInstanceIdStack);
+    if (target)
     {
-      return ret;
+      return target;
     }
   }
 
@@ -652,7 +701,7 @@ void ExpandSymbol::makeMaskIdUnique(
           {
             auto id = item[K_ID].get<std::string>();
             auto uniqueId = idPrefix + id;
-            if (findChildObjectInTree(instanceJson, uniqueId))
+            if (findChildObjectInTree(instanceJson, { uniqueId }, nullptr))
             {
               DEBUG(
                 "ExpandSymbol::makeMaskIdUnique: json node[id=%s]: alphaMaskBy, id: %s -> %s",
@@ -675,7 +724,7 @@ void ExpandSymbol::makeMaskIdUnique(
         {
           auto id = item.get<std::string>();
           auto uniqueId = idPrefix + id;
-          if (findChildObjectInTree(instanceJson, uniqueId))
+          if (findChildObjectInTree(instanceJson, { uniqueId }, nullptr))
           {
             DEBUG(
               "ExpandSymbol::makeMaskIdUnique: json node[id=%s]: outlineMaskBy, id: %s -> %s",
@@ -730,13 +779,13 @@ nlohmann::json* ExpandSymbol::findChildObject(
   }
   else
   {
-    auto newInstanceIdStack = instanceIdStack;
-    for (auto& idJson : objectIdPaths)
+    outChildInstanceIdStack = instanceIdStack;
+    std::vector<std::string> keyStack;
+    for (auto& keyJson : objectIdPaths) // overrideKey or id
     {
-      newInstanceIdStack.push_back(idJson);
+      keyStack.push_back(keyJson);
     }
-    outChildInstanceIdStack = newInstanceIdStack;
-    return findChildObjectInTree(instance[K_CHILD_OBJECTS], join(newInstanceIdStack));
+    return findChildObjectInTree(instance[K_CHILD_OBJECTS], keyStack, &outChildInstanceIdStack);
   }
 }
 

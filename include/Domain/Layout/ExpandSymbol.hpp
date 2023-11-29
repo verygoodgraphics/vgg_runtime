@@ -130,7 +130,10 @@ private:
     const std::vector<std::string>& instanceIdStack,
     const nlohmann::json&           overrideItem,
     std::vector<std::string>&       outChildInstanceIdStack);
-  nlohmann::json* findChildObjectInTree(nlohmann::json& json, const std::string& objectId);
+  nlohmann::json* findChildObjectInTree(
+    nlohmann::json&                 json,
+    const std::vector<std::string>& keyStack,
+    std::vector<std::string>*       outInstanceIdStack);
 
   void makeTreeKeysUnique(nlohmann::json& json, const std::string& idPrefix);
   void makeNodeKeysUnique(nlohmann::json& json, const std::string& idPrefix);

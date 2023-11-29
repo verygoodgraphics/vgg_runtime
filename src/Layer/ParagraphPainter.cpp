@@ -48,10 +48,10 @@ void VParagraphPainter::drawTextBlob(
     }
     else
     {
-      ASSERT(m_textStyle);
+      ASSERT(m_paragraph);
       SkPaint fillPen;
       fillPen.setColor(SK_ColorBLACK);
-      const auto fills = (*m_textStyle)[styleID].fills;
+      const auto fills = m_paragraph->textStyles()[styleID].fills;
       if (fills.empty())
       {
         fillPen.setColor(SK_ColorBLACK);
@@ -63,19 +63,19 @@ void VParagraphPainter::drawTextBlob(
         fillPen.setAntiAlias(true);
         if (f.fillType == FT_Color)
         {
-          fillPen.setColor(f.color);
+          fillPen.setColor(SK_ColorRED);
           const auto currentAlpha = fillPen.getAlphaf();
         }
         else if (f.fillType == FT_Gradient)
         {
           assert(f.gradient.has_value());
-          auto gradientShader = getGradientShader(f.gradient.value(), m_bound);
+          auto gradientShader = getGradientShader(f.gradient.value(), m_paragraph->bound());
           fillPen.setShader(gradientShader);
         }
         else if (f.fillType == FT_Pattern)
         {
           assert(f.pattern.has_value());
-          auto shader = makePatternShader(m_bound, f.pattern.value());
+          auto shader = makePatternShader(m_paragraph->bound(), f.pattern.value());
           fillPen.setShader(shader);
         }
       }

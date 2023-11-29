@@ -164,7 +164,12 @@ void ExpandSymbol::expandInstance(
         json[K_CHILD_OBJECTS] = masterJson[K_CHILD_OBJECTS];
         json[K_STYLE] = masterJson[K_STYLE];
 
-        if (!again)
+        if (again)
+        {
+          auto originalId = split(instanceId).back();
+          instanceIdStack.push_back(originalId);
+        }
+        else
         {
           instanceIdStack.push_back(instanceId);
         }
@@ -182,11 +187,11 @@ void ExpandSymbol::expandInstance(
           makeNodeKeysUnique(json, prefix);
         }
 
-        std::string newInstanceId = json[K_ID];
-        mergeLayoutRule(instanceId, newInstanceId);
-        mergeLayoutRule(masterId, newInstanceId);
+        std::string instanceIdWithPrefix = json[K_ID];
+        mergeLayoutRule(instanceId, instanceIdWithPrefix);
+        mergeLayoutRule(masterId, instanceIdWithPrefix);
 
-        auto idPrefix = newInstanceId + K_SEPARATOR;
+        auto idPrefix = instanceIdWithPrefix + K_SEPARATOR;
         makeTreeKeysUnique(json[K_CHILD_OBJECTS], idPrefix); // children
 
         // 2.2. update mask by: id -> unique id
@@ -205,10 +210,7 @@ void ExpandSymbol::expandInstance(
         processOtherOverrides(json, instanceIdStack);
         // 3.6
         layoutDirtyNodes(json);
-        if (!again)
-        {
-          instanceIdStack.pop_back();
-        }
+        instanceIdStack.pop_back();
 
         // 4. again, makeMaskIdUnique after override: id -> unique id
         makeMaskIdUnique(json[K_CHILD_OBJECTS], json, idPrefix);
@@ -854,11 +856,11 @@ void ExpandSymbol::resizeSubtree(
   }
   else
   {
-    scaleTree(subtreeJson, newBoundsJson);
+    scaleTreeToBounds(subtreeJson, newBoundsJson);
   }
 }
 
-void ExpandSymbol::scaleTree(nlohmann::json& rootJson, const nlohmann::json& newBoundsJson)
+void ExpandSymbol::scaleTreeToBounds(nlohmann::json& rootJson, const nlohmann::json& newBoundsJson)
 {
   Rect newBounds = newBoundsJson;
 
@@ -881,17 +883,12 @@ void ExpandSymbol::scaleTree(nlohmann::json& rootJson, const nlohmann::json& new
   auto yScaleFactor = newSize.height / oldSize.height;
 
   DEBUG(
-    "ExpandSymbol::scaleTree, id=%s, bounds: %s -> %s",
+    "ExpandSymbol::scaleTreeToBounds, id=%s, bounds: %s -> %s",
     rootJson[K_ID].dump().c_str(),
     rootJson[K_BOUNDS].dump().c_str(),
     newBoundsJson.dump().c_str());
-  rootJson[K_BOUNDS] = newBoundsJson;
-  scaleContour(rootJson, xScaleFactor, yScaleFactor);
 
-  for (auto& el : rootJson.items())
-  {
-    scaleTree(el.value(), xScaleFactor, yScaleFactor);
-  }
+  scaleTree(rootJson, xScaleFactor, yScaleFactor);
 }
 
 void ExpandSymbol::scaleTree(nlohmann::json& rootJson, float xScaleFactor, float yScaleFactor)
@@ -902,23 +899,17 @@ void ExpandSymbol::scaleTree(nlohmann::json& rootJson, float xScaleFactor, float
   }
 
   auto   hasBounds = isLayoutNode(rootJson);
-  Rect   bounds, frame;
+  Rect   bounds;
   Matrix matrix;
   if (hasBounds)
   {
     bounds = rootJson[K_BOUNDS].get<Rect>();
-    frame = rootJson[K_FRAME].get<Rect>();
     matrix = rootJson[K_MATRIX].get<Matrix>();
 
     bounds.origin.x *= xScaleFactor;
     bounds.origin.y *= yScaleFactor;
     bounds.size.width *= xScaleFactor;
     bounds.size.height *= yScaleFactor;
-
-    frame.origin.x *= xScaleFactor;
-    frame.origin.y *= yScaleFactor;
-    frame.size.width *= xScaleFactor;
-    frame.size.height *= yScaleFactor;
 
     matrix.tx *= xScaleFactor;
     matrix.ty *= yScaleFactor;
@@ -932,19 +923,11 @@ void ExpandSymbol::scaleTree(nlohmann::json& rootJson, float xScaleFactor, float
       bounds.size.width,
       bounds.size.height);
     DEBUG(
-      "ExpandSymbol::scaleTree, frames, %s -> %f, %f, %f, %f",
-      rootJson[K_FRAME].dump().c_str(),
-      frame.origin.x,
-      frame.origin.y,
-      frame.size.width,
-      frame.size.height);
-    DEBUG(
       "ExpandSymbol::scaleTree, matrix, %s -> %f, %f",
       rootJson[K_MATRIX].dump().c_str(),
       matrix.tx,
       matrix.ty);
     to_json(rootJson[K_BOUNDS], bounds);
-    to_json(rootJson[K_FRAME], frame);
     to_json(rootJson[K_MATRIX], matrix);
 
     scaleContour(rootJson, xScaleFactor, yScaleFactor);

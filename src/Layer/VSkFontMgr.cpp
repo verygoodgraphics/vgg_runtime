@@ -33,6 +33,8 @@
 #include <optional>
 #include <iostream>
 
+#include "Utility/Log.hpp"
+
 using namespace skia_private;
 
 class SkData;
@@ -412,65 +414,77 @@ void VGGFontLoader::loadDirectoryFonts(
 {
   const std::filesystem::path dir{ directory.c_str() };
 
-  for (auto const& entry : fs::recursive_directory_iterator(dir))
+  if (!(fs::exists(dir) && fs::is_directory(dir)))
   {
-    if (!entry.is_regular_file())
-    {
-      continue;
-    }
-    auto                           filename = entry.path().string();
-    std::unique_ptr<SkStreamAsset> stream = SkStream::MakeFromFile(filename.c_str());
-    if (!stream)
-    {
-      // SkDebugf("---- failed to open <%s>\n", filename.c_str());
-      continue;
-    }
+    WARN("Invalid dir: %s", directory.c_str());
+    return;
+  }
 
-    int numFaces;
-    if (!scanner.recognizedFont(stream.get(), &numFaces))
+  try
+  {
+    for (auto const& entry : fs::recursive_directory_iterator(dir))
     {
-      // SkDebugf("---- failed to open <%s> as a font\n", filename.c_str());
-      continue;
-    }
-
-    for (int faceIndex = 0; faceIndex < numFaces; ++faceIndex)
-    {
-      bool        isFixedPitch;
-      SkString    realname;
-      SkFontStyle style = SkFontStyle(); // avoid uninitialized warning
-      if (!scanner.scanFont(stream.get(), faceIndex, &realname, &style, &isFixedPitch, nullptr))
+      if (!entry.is_regular_file())
       {
-        // SkDebugf("---- failed to open <%s> <%d> as a font\n",
-        //          filename.c_str(), faceIndex);
+        continue;
+      }
+      auto                           filename = entry.path().string();
+      std::unique_ptr<SkStreamAsset> stream = SkStream::MakeFromFile(filename.c_str());
+      if (!stream)
+      {
+        // SkDebugf("---- failed to open <%s>\n", filename.c_str());
         continue;
       }
 
-      SkFontStyleSet_VGG* addTo = find_family(*families, realname.c_str());
-      if (nullptr == addTo)
+      int numFaces;
+      if (!scanner.recognizedFont(stream.get(), &numFaces))
       {
-        addTo = new SkFontStyleSet_VGG(realname);
-        families->push_back().reset(addTo);
-        families->lookUp[realname.c_str()] = families->size() - 1;
+        // SkDebugf("---- failed to open <%s> as a font\n", filename.c_str());
+        continue;
       }
-      addTo->appendTypeface(sk_make_sp<SkTypeface_VGG_File>(
-        style,
-        isFixedPitch,
-        true,
-        realname,
-        filename.c_str(),
-        faceIndex));
-    }
-  }
 
-  for (auto const& entry : fs::recursive_directory_iterator(dir))
-  {
-    if (!entry.is_directory())
+      for (int faceIndex = 0; faceIndex < numFaces; ++faceIndex)
+      {
+        bool        isFixedPitch;
+        SkString    realname;
+        SkFontStyle style = SkFontStyle(); // avoid uninitialized warning
+        if (!scanner.scanFont(stream.get(), faceIndex, &realname, &style, &isFixedPitch, nullptr))
+        {
+          // SkDebugf("---- failed to open <%s> <%d> as a font\n",
+          //          filename.c_str(), faceIndex);
+          continue;
+        }
+
+        SkFontStyleSet_VGG* addTo = find_family(*families, realname.c_str());
+        if (nullptr == addTo)
+        {
+          addTo = new SkFontStyleSet_VGG(realname);
+          families->push_back().reset(addTo);
+          families->lookUp[realname.c_str()] = families->size() - 1;
+        }
+        addTo->appendTypeface(sk_make_sp<SkTypeface_VGG_File>(
+          style,
+          isFixedPitch,
+          true,
+          realname,
+          filename.c_str(),
+          faceIndex));
+      }
+    }
+
+    for (auto const& entry : fs::recursive_directory_iterator(dir))
     {
-      continue;
-    }
+      if (!entry.is_directory())
+      {
+        continue;
+      }
 
-    auto dirName = entry.path().string();
-    loadDirectoryFonts(scanner, SkString{ dirName }, suffix, families);
+      auto dirName = entry.path().string();
+      loadDirectoryFonts(scanner, SkString{ dirName }, suffix, families);
+    }
+  } catch (...) {
+    WARN("Failed to read contents in dir: %s", directory.c_str());
+    return;
   }
 }
 

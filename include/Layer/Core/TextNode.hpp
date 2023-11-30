@@ -45,7 +45,7 @@ public:
   ~TextNode();
 
 protected:
-  void paintFill(SkiaRenderer* renderer, sk_sp<SkBlender> blender, const SkPath& path) override;
+  void paintFill(Renderer* renderer, sk_sp<SkBlender> blender, const SkPath& path) override;
 
   Bound onRevalidate() override;
 };

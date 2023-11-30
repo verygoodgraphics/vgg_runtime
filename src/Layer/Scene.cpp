@@ -54,7 +54,7 @@ public:
   int                     page{ 0 };
   int                     symbolIndex{ 0 };
   bool                    maskDirty{ true };
-  SkiaRenderer            renderer;
+  Renderer            renderer;
   std::shared_ptr<Zoomer> zoomer;
 
   void applyZoom(SkCanvas* canvas)

@@ -57,7 +57,7 @@ public:
     m_canvas = canvas;
   }
 
-  void paint(SkiaRenderer* renderer)
+  void paint(Renderer* renderer)
   {
     const auto b = m_paragraph->bound();
     setCanvas(renderer->canvas());

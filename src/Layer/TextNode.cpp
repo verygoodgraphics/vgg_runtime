@@ -148,7 +148,7 @@ void TextNode::setFrameMode(ETextLayoutMode layoutMode)
   _->paragraphLayout->setTextLayoutMode(mode);
 }
 
-void TextNode::paintFill(SkiaRenderer* renderer, sk_sp<SkBlender> blender, const SkPath& path)
+void TextNode::paintFill(Renderer* renderer, sk_sp<SkBlender> blender, const SkPath& path)
 {
   VGG_IMPL(TextNode);
   auto canvas = renderer->canvas();

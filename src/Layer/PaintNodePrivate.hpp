@@ -119,7 +119,7 @@ public:
 
   template<typename Iter1, typename Iter2, typename F>
   std::vector<std::pair<PaintNode*, Transform>> calcMaskObjects(
-    SkiaRenderer* renderer,
+    Renderer* renderer,
     Iter1         begin,
     Iter2         end,
     F&&           f)
@@ -179,7 +179,7 @@ public:
     Iter1         itr1,
     Iter2         itr2,
     F&&           f,
-    SkiaRenderer* renderer)
+    Renderer* renderer)
   {
     if (itr1 == itr2)
       return std::nullopt;
@@ -316,7 +316,7 @@ public:
   //   return blend;
   // }
 
-  void drawAsAlphaMask(SkiaRenderer* renderer, sk_sp<SkBlender> blender = nullptr)
+  void drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender = nullptr)
   {
     if (!path)
     {
@@ -334,7 +334,7 @@ public:
     drawRawStyle(painter, *path, blender);
   }
 
-  void drawWithAlphaMask(SkiaRenderer* renderer, const SkPath& path, const SkPath& outlineMask)
+  void drawWithAlphaMask(Renderer* renderer, const SkPath& path, const SkPath& outlineMask)
   {
     SkPaint p;
     auto    b = toSkRect(bound);
@@ -372,7 +372,7 @@ public:
   }
 
   void drawBlurBgWithAlphaMask(
-    SkiaRenderer* renderer,
+    Renderer* renderer,
     const SkPath& path,
     const SkPath& outlineMask)
   {
@@ -408,7 +408,7 @@ public:
     painter.blurBackgroundEnd();
   }
 
-  void drawMaskObjectIntoMaskLayer(SkiaRenderer* renderer, sk_sp<SkBlender> blender)
+  void drawMaskObjectIntoMaskLayer(Renderer* renderer, sk_sp<SkBlender> blender)
   {
     if (alphaMask)
     {
@@ -425,7 +425,7 @@ public:
   }
 
   void drawBlurContentWithAlphaMask(
-    SkiaRenderer* renderer,
+    Renderer* renderer,
     const SkPath& path,
     const SkPath& outlineMask)
   {

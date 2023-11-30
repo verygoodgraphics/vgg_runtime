@@ -47,6 +47,6 @@ public:
   virtual ~ImageNode() override;
 
 protected:
-  void paintFill(SkiaRenderer* renderer, sk_sp<SkBlender> blender, const SkPath& path) override;
+  void paintFill(Renderer* renderer, sk_sp<SkBlender> blender, const SkPath& path) override;
 };
 } // namespace VGG::layer

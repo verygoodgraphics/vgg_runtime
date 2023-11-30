@@ -136,7 +136,7 @@ Transform PaintNode::mapTransform(const PaintNode* node) const
   return Transform(mat);
 }
 
-Mask PaintNode::makeMaskBy(EBoolOp maskOp, SkiaRenderer* renderer)
+Mask PaintNode::makeMaskBy(EBoolOp maskOp, Renderer* renderer)
 {
   VGG_IMPL(PaintNode);
   Mask result;
@@ -171,11 +171,11 @@ Mask PaintNode::makeMaskBy(EBoolOp maskOp, SkiaRenderer* renderer)
   return result;
 }
 
-void PaintNode::renderPass(SkiaRenderer* renderer)
+void PaintNode::renderPass(Renderer* renderer)
 {
   invokeRenderPass(renderer, 0);
 }
-void PaintNode::paintPass(SkiaRenderer* renderer, int zorder)
+void PaintNode::paintPass(Renderer* renderer, int zorder)
 {
   VGG_IMPL(PaintNode);
   if (!_->path)
@@ -224,7 +224,7 @@ void PaintNode::paintPass(SkiaRenderer* renderer, int zorder)
   this->paintEvent(renderer);
 }
 
-void PaintNode::paintEvent(SkiaRenderer* renderer)
+void PaintNode::paintEvent(Renderer* renderer)
 {
   VGG_IMPL(PaintNode);
   paintStyle(renderer, *_->path, *_->mask);
@@ -576,7 +576,7 @@ const PaintOption& PaintNode::paintOption() const
   return d_ptr->paintOption;
 }
 
-void PaintNode::invokeRenderPass(SkiaRenderer* renderer, int zorder)
+void PaintNode::invokeRenderPass(Renderer* renderer, int zorder)
 {
   VGG_IMPL(PaintNode);
   if (!_->visible)
@@ -602,7 +602,7 @@ void PaintNode::invokeRenderPass(SkiaRenderer* renderer, int zorder)
   }
 }
 
-void PaintNode::paintChildrenRecursively(SkiaRenderer* renderer)
+void PaintNode::paintChildrenRecursively(Renderer* renderer)
 {
 
   VGG_IMPL(PaintNode);
@@ -669,12 +669,12 @@ void PaintNode::paintChildrenRecursively(SkiaRenderer* renderer)
   }
 }
 
-void PaintNode::paintChildrenPass(SkiaRenderer* renderer)
+void PaintNode::paintChildrenPass(Renderer* renderer)
 {
   VGG_IMPL(PaintNode);
   paintChildrenRecursively(renderer);
 }
-void PaintNode::prePaintPass(SkiaRenderer* renderer)
+void PaintNode::prePaintPass(Renderer* renderer)
 {
   VGG_IMPL(PaintNode);
   auto canvas = renderer->canvas();
@@ -703,7 +703,7 @@ void PaintNode::prePaintPass(SkiaRenderer* renderer)
   // renderer->pushMatrix(this->localTransform());
 }
 
-void PaintNode::postPaintPass(SkiaRenderer* renderer)
+void PaintNode::postPaintPass(Renderer* renderer)
 {
   VGG_IMPL(PaintNode);
   auto canvas = renderer->canvas();
@@ -776,7 +776,7 @@ SkPath PaintNode::stylePath()
   return skPath;
 }
 
-void PaintNode::paintStyle(SkiaRenderer* renderer, const SkPath& path, const SkPath& outlineMask)
+void PaintNode::paintStyle(Renderer* renderer, const SkPath& path, const SkPath& outlineMask)
 {
   VGG_IMPL(PaintNode);
   Painter painter(renderer);
@@ -837,7 +837,7 @@ void PaintNode::paintStyle(SkiaRenderer* renderer, const SkPath& path, const SkP
   }
 }
 
-void PaintNode::paintFill(SkiaRenderer* renderer, sk_sp<SkBlender> blender, const SkPath& path)
+void PaintNode::paintFill(Renderer* renderer, sk_sp<SkBlender> blender, const SkPath& path)
 {
   VGG_IMPL(PaintNode);
   Painter             painter(renderer);

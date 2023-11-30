@@ -37,7 +37,7 @@ class SkImage;
 
 namespace VGG::layer
 {
-class SkiaRenderer;
+class Renderer;
 
 struct ContourOption
 {
@@ -78,7 +78,7 @@ protected:
 
 protected:
   friend class DocBuilder;
-  friend class SkiaRenderer;
+  friend class Renderer;
 
 private:
   PaintNode(const std::string& name, std::unique_ptr<PaintNode__pImpl> impl);
@@ -196,34 +196,34 @@ public:
 
 public:
   // TODO:: chagne the following functions accessbility
-  void invokeRenderPass(SkiaRenderer* renderer, int zorder = 0);
+  void invokeRenderPass(Renderer* renderer, int zorder = 0);
 
 protected:
   // Render traverse
-  virtual void paintChildrenPass(SkiaRenderer* renderer);
-  void         paintChildrenRecursively(SkiaRenderer* renderer);
-  virtual void prePaintPass(SkiaRenderer* renderer);
-  virtual void postPaintPass(SkiaRenderer* renderer);
-  virtual void paintPass(SkiaRenderer* renderer, int zorder = 0);
-  void         renderPass(SkiaRenderer* renderer); // TODO:: should be private access
-  virtual void paintEvent(SkiaRenderer* renderer);
+  virtual void paintChildrenPass(Renderer* renderer);
+  void         paintChildrenRecursively(Renderer* renderer);
+  virtual void prePaintPass(Renderer* renderer);
+  virtual void postPaintPass(Renderer* renderer);
+  virtual void paintPass(Renderer* renderer, int zorder = 0);
+  void         renderPass(Renderer* renderer); // TODO:: should be private access
+  virtual void paintEvent(Renderer* renderer);
 
 protected:
   // Mask
   SkPath         makeBoundPath();
   virtual SkPath makeContourImpl(ContourOption option, const Transform* mat);
   SkPath         childPolyOperation() const;
-  Mask           makeMaskBy(EBoolOp maskOp, SkiaRenderer* renderer);
+  Mask           makeMaskBy(EBoolOp maskOp, Renderer* renderer);
 
   Bound onRevalidate() override;
 
 protected:
   // Style
   virtual SkPath stylePath();
-  void           paintStyle(SkiaRenderer* renderer, const SkPath& path, const SkPath& mask);
+  void           paintStyle(Renderer* renderer, const SkPath& path, const SkPath& mask);
 
   [[deprecated]] virtual void paintFill(
-    SkiaRenderer*    renderer,
+    Renderer*    renderer,
     sk_sp<SkBlender> blender,
     const SkPath&    path); // TODO:: only for ImageNode overriding
 };

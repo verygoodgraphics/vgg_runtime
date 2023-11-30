@@ -120,7 +120,7 @@ using namespace VGG;
 class Painter
 {
   bool                           m_antiAlias{ true };
-  SkiaRenderer*                  m_renderer{ nullptr };
+  Renderer*                  m_renderer{ nullptr };
   inline static sk_sp<SkBlender> s_maskBlender1;
   inline static sk_sp<SkBlender> s_maskBlender2;
 
@@ -167,7 +167,7 @@ public:
     return s_maskBlender2;
   }
 
-  Painter(SkiaRenderer* renderer)
+  Painter(Renderer* renderer)
     : m_renderer(renderer)
   {
   }
@@ -177,7 +177,7 @@ public:
     return m_renderer->canvas();
   }
 
-  SkiaRenderer* renderer()
+  Renderer* renderer()
   {
     return m_renderer;
   }

@@ -59,7 +59,7 @@ inline std::ostream& operator<<(std::ostream& os, const glm::mat3 m)
 namespace VGG::layer
 {
 // NOLINTEND
-class SkiaRenderer
+class Renderer
 {
   using InternalObjectMap = std::unordered_map<std::string, PaintNode*>;
 
@@ -71,7 +71,7 @@ class SkiaRenderer
   void updateMaskObject(PaintNode* p, std::unordered_map<std::string, PaintNode*>& objects);
 
 public:
-  SkiaRenderer(SkCanvas* canvas = nullptr)
+  Renderer(SkCanvas* canvas = nullptr)
     : m_canvas(canvas)
     , m_enableDrawDebugBound(false)
   {

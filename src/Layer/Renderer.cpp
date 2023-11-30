@@ -49,7 +49,7 @@ inline SkColor nodeType2Color(ObjectType type)
 namespace VGG::layer
 {
 
-void SkiaRenderer::updateMaskObject(
+void Renderer::updateMaskObject(
   PaintNode*                                   p,
   std::unordered_map<std::string, PaintNode*>& objects)
 {
@@ -68,7 +68,7 @@ void SkiaRenderer::updateMaskObject(
   }
 }
 
-void SkiaRenderer::drawDebugBound(layer::PaintNode* p, int zorder)
+void Renderer::drawDebugBound(layer::PaintNode* p, int zorder)
 {
   const auto& b = p->bound();
   SkPaint     strokePen;
@@ -79,13 +79,13 @@ void SkiaRenderer::drawDebugBound(layer::PaintNode* p, int zorder)
   strokePen.setStrokeWidth(2);
   m_canvas->drawRect(toSkRect(p->bound()), strokePen);
 }
-void SkiaRenderer::updateMaskObject(layer::PaintNode* p)
+void Renderer::updateMaskObject(layer::PaintNode* p)
 {
   m_maskObjects.clear();
   updateMaskObject(p, m_maskObjects);
 }
 
-void SkiaRenderer::draw(SkCanvas* canvas, layer::PaintNode* root)
+void Renderer::draw(SkCanvas* canvas, layer::PaintNode* root)
 {
   m_canvas = canvas;
   canvas->save();

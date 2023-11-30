@@ -19,6 +19,7 @@
 
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VType.hpp"
+#include "Renderer.hpp"
 
 #include <core/SkBlendMode.h>
 #include <core/SkImageFilter.h>
@@ -119,7 +120,7 @@ using namespace VGG;
 class Painter
 {
   bool                           m_antiAlias{ true };
-  SkCanvas*                      m_canvas{ nullptr };
+  SkiaRenderer*                  m_renderer{ nullptr };
   inline static sk_sp<SkBlender> s_maskBlender1;
   inline static sk_sp<SkBlender> s_maskBlender2;
 
@@ -166,14 +167,19 @@ public:
     return s_maskBlender2;
   }
 
-  Painter(SkCanvas* canvas)
-    : m_canvas(canvas)
+  Painter(SkiaRenderer* renderer)
+    : m_renderer(renderer)
   {
   }
 
   SkCanvas* canvas()
   {
-    return m_canvas;
+    return m_renderer->canvas();
+  }
+
+  SkiaRenderer* renderer()
+  {
+    return m_renderer;
   }
 
   void blurBackgroundBegin(float radiusX, float radiusY, const Bound& bound, const SkPath* path)
@@ -183,16 +189,16 @@ public:
       SkBlurMask::ConvertRadiusToSigma(radiusY),
       nullptr);
     auto b = toSkRect(bound);
-    m_canvas->save();
+    m_renderer->canvas()->save();
     if (path)
-      m_canvas->clipPath(*path);
-    m_canvas->saveLayer(SkCanvas::SaveLayerRec(&b, nullptr, filter.get(), 0));
+      m_renderer->canvas()->clipPath(*path);
+    m_renderer->canvas()->saveLayer(SkCanvas::SaveLayerRec(&b, nullptr, filter.get(), 0));
   }
 
   void blurBackgroundEnd()
   {
-    m_canvas->restore();
-    m_canvas->restore();
+    m_renderer->canvas()->restore();
+    m_renderer->canvas()->restore();
   }
   void blurContentBegin(
     float            radiusX,
@@ -215,27 +221,27 @@ public:
     // m.preScale(1, 1);
     b = m.mapRect(b);
     pen.setBlender(std::move(blender));
-    m_canvas->save();
+    m_renderer->canvas()->save();
     if (path)
-      m_canvas->clipPath(*path);
-    m_canvas->saveLayer(&b, &pen);
+      m_renderer->canvas()->clipPath(*path);
+    m_renderer->canvas()->saveLayer(&b, &pen);
   }
 
   void blurContentEnd()
   {
-    m_canvas->restore();
-    m_canvas->restore();
+    m_renderer->canvas()->restore();
+    m_renderer->canvas()->restore();
   }
 
   void beginClip(const SkPath& path, SkClipOp clipOp = SkClipOp::kIntersect)
   {
-    m_canvas->save();
-    m_canvas->clipPath(path, clipOp);
+    m_renderer->canvas()->save();
+    m_renderer->canvas()->clipPath(path, clipOp);
   }
 
   void endClip()
   {
-    m_canvas->restore();
+    m_renderer->canvas()->restore();
   }
 
   void drawShadow(
@@ -277,6 +283,6 @@ public:
     p.setShader(std::move(imageShader));
     p.setBlender(std::move(blender));
     p.setImageFilter(std::move(imageFilter));
-    m_canvas->drawPaint(p);
+    m_renderer->canvas()->drawPaint(p);
   }
 };

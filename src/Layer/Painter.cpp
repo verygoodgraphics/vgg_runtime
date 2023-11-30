@@ -50,15 +50,15 @@ void Painter::drawPathBorder(
   {
     // inside
     strokePen.setStrokeWidth(2. * b.thickness);
-    m_canvas->save();
-    m_canvas->clipPath(skPath, SkClipOp::kIntersect);
+    m_renderer->canvas()->save();
+    m_renderer->canvas()->clipPath(skPath, SkClipOp::kIntersect);
   }
   else if (b.position == PP_Outside)
   {
     // outside
     strokePen.setStrokeWidth(2. * b.thickness);
-    m_canvas->save();
-    m_canvas->clipPath(skPath, SkClipOp::kDifference);
+    m_renderer->canvas()->save();
+    m_renderer->canvas()->clipPath(skPath, SkClipOp::kDifference);
   }
   else
   {
@@ -85,11 +85,11 @@ void Painter::drawPathBorder(
     strokePen.setAlphaf(b.contextSettings.opacity);
   }
 
-  m_canvas->drawPath(skPath, strokePen);
+  m_renderer->canvas()->drawPath(skPath, strokePen);
 
   if (b.position != PP_Center)
   {
-    m_canvas->restore(); // pop border position style
+    m_renderer->canvas()->restore(); // pop border position style
   }
 }
 
@@ -105,13 +105,13 @@ void Painter::drawShadow(
   auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
   pen.setImageFilter(
     SkImageFilters::DropShadowOnly(s.offsetX, -s.offsetY, sigma, sigma, s.color, nullptr));
-  m_canvas->saveLayer(nullptr, &pen); // TODO:: test hint rect
+  m_renderer->canvas()->saveLayer(nullptr, &pen); // TODO:: test hint rect
   if (s.spread > 0)
-    m_canvas->scale(1 + s.spread / 100.0, 1 + s.spread / 100.0);
+    m_renderer->canvas()->scale(1 + s.spread / 100.0, 1 + s.spread / 100.0);
   SkPaint fillPen;
   fillPen.setStyle(style);
-  m_canvas->drawPath(skPath, fillPen);
-  m_canvas->restore();
+  m_renderer->canvas()->drawPath(skPath, fillPen);
+  m_renderer->canvas()->restore();
 }
 
 void Painter::drawInnerShadow(
@@ -126,14 +126,14 @@ void Painter::drawInnerShadow(
   pen.setAntiAlias(m_antiAlias);
   pen.setImageFilter(
     SkMyImageFilters::DropInnerShadowOnly(s.offsetX, -s.offsetY, sigma, sigma, s.color, nullptr));
-  m_canvas->saveLayer(nullptr, &pen);
+  m_renderer->canvas()->saveLayer(nullptr, &pen);
   if (s.spread > 0)
-    m_canvas->scale(1.0 / s.spread, 1.0 / s.spread);
+    m_renderer->canvas()->scale(1.0 / s.spread, 1.0 / s.spread);
   SkPaint fillPen;
   fillPen.setStyle(style);
   fillPen.setAntiAlias(m_antiAlias);
-  m_canvas->drawPath(skPath, fillPen);
-  m_canvas->restore();
+  m_renderer->canvas()->drawPath(skPath, fillPen);
+  m_renderer->canvas()->restore();
 }
 
 void Painter::drawFill(
@@ -170,5 +170,5 @@ void Painter::drawFill(
     fillPen.setShader(shader);
     fillPen.setAlphaf(f.contextSettings.opacity);
   }
-  m_canvas->drawPath(skPath, fillPen);
+  m_renderer->canvas()->drawPath(skPath, fillPen);
 }

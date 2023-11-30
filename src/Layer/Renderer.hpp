@@ -61,19 +61,21 @@ namespace VGG::layer
 // NOLINTEND
 class SkiaRenderer
 {
-  SkCanvas*                                   m_canvas{ nullptr };
-  bool                                        m_enableDrawDebugBound{ false };
-  std::unordered_map<std::string, PaintNode*> m_maskObjects;
-  Scene*                                      m_scene{ nullptr };
-  std::vector<glm::mat3>                      m_transforms;
-  std::vector<DisplayItem>                    m_displayList;
-  int                                         m_zOrder = -1;
+  using InternalObjectMap = std::unordered_map<std::string, PaintNode*>;
 
-  SkMatrix m_currentMatrix;
+  SkCanvas*         m_canvas{ nullptr };
+  bool              m_enableDrawDebugBound{ false };
+  InternalObjectMap m_maskObjects;
+  Scene*            m_scene{ nullptr };
 
   void updateMaskObject(PaintNode* p, std::unordered_map<std::string, PaintNode*>& objects);
 
 public:
+  SkiaRenderer(SkCanvas* canvas = nullptr)
+    : m_canvas(canvas)
+    , m_enableDrawDebugBound(false)
+  {
+  }
   void drawDebugBound(layer::PaintNode* p, int zorder);
   void updateMaskObject(layer::PaintNode* p);
   const std::unordered_map<std::string, layer::PaintNode*>& maskObjects() const
@@ -82,33 +84,6 @@ public:
   }
 
   void draw(SkCanvas* canvas, layer::PaintNode* root);
-
-  void pushMatrix(glm::mat3 matrix)
-  {
-    m_transforms.push_back(matrix);
-  }
-
-  void pushItem(layer::PaintNode* item, int zorder)
-  {
-    // OPTIMIZATION
-    auto m = glm::identity<glm::mat3>();
-    for (const auto& ma : m_transforms)
-    {
-      m = m * ma;
-    }
-    m_displayList.emplace_back(toSkMatrix(m), item, zorder);
-  }
-
-  void popMatrix()
-  {
-    m_transforms.pop_back();
-  }
-
-  void clearCache()
-  {
-    m_displayList.clear();
-    m_transforms.clear();
-  }
 
   void enableDrawDebugBound(bool enabled)
   {
@@ -123,13 +98,6 @@ public:
   {
     return m_canvas;
   }
-
-  const SkMatrix& currentMatrix()
-  {
-    return m_currentMatrix;
-  }
-
-  void commit(SkCanvas* canvas);
 };
 
 } // namespace VGG::layer

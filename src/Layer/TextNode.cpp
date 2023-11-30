@@ -148,12 +148,12 @@ void TextNode::setFrameMode(ETextLayoutMode layoutMode)
   _->paragraphLayout->setTextLayoutMode(mode);
 }
 
-void TextNode::paintEvent(SkiaRenderer* renderer)
+void TextNode::paintFill(SkiaRenderer* renderer, sk_sp<SkBlender> blender, const SkPath& path)
 {
   VGG_IMPL(TextNode);
+  auto canvas = renderer->canvas();
   if (_->paragraphLayout->empty())
     return;
-  auto canvas = renderer->canvas();
   if (overflow() == OF_Hidden)
   {
     canvas->save();

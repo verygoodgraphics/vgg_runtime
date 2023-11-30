@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "Layer/Core/Transform.hpp"
+#include "Layer/Renderer.hpp"
 #include "VSkia.hpp"
 #include "PaintNodePrivate.hpp"
 #include "Layer/Core/ImageNode.hpp"
@@ -112,10 +113,11 @@ bool ImageNode::fill() const
   return d_ptr->fillReplacesImage;
 }
 
-void ImageNode::paintFill(SkCanvas* canvas, sk_sp<SkBlender> blender, const SkPath& path)
+void ImageNode::paintFill(SkiaRenderer* renderer, sk_sp<SkBlender> blender, const SkPath& path)
 {
   (void)path;
   VGG_IMPL(ImageNode)
+  auto canvas = renderer->canvas();
   if (!_->image)
   {
     _->image = loadImage(_->imageGuid, Scene::getResRepo());

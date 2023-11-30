@@ -220,10 +220,10 @@ protected:
 protected:
   // Style
   virtual SkPath stylePath();
-  void           paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& mask);
+  void           paintStyle(SkiaRenderer* renderer, const SkPath& path, const SkPath& mask);
 
   [[deprecated]] virtual void paintFill(
-    SkCanvas*        canvas,
+    SkiaRenderer*    renderer,
     sk_sp<SkBlender> blender,
     const SkPath&    path); // TODO:: only for ImageNode overriding
 };

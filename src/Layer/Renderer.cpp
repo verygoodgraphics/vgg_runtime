@@ -94,34 +94,4 @@ void SkiaRenderer::draw(SkCanvas* canvas, layer::PaintNode* root)
   canvas->restore();
 }
 
-void SkiaRenderer::commit(SkCanvas* canvas)
-{
-  m_canvas = canvas;
-  canvas->save();
-
-  if (!m_enableDrawDebugBound)
-  {
-    for (const auto& item : m_displayList)
-    {
-      canvas->save();
-      canvas->concat(item.matrix);
-      item.item->paintEvent(this);
-      canvas->restore();
-    }
-  }
-  else
-  {
-    for (const auto& item : m_displayList)
-    {
-      canvas->save();
-      canvas->concat(item.matrix);
-      drawDebugBound(item.item, item.zorder);
-      m_currentMatrix = item.matrix;
-      item.item->paintEvent(this);
-      canvas->restore();
-    }
-  }
-  canvas->restore();
-}
-
 } // namespace VGG::layer

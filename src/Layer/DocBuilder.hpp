@@ -82,7 +82,7 @@ class DocBuilder
   {
     Style style;
     from_json(j, style);
-    convertCoordinateSystem(style, bound, totalMatrix);
+    convertCoordinateSystem(style, totalMatrix);
     return style;
   }
 
@@ -232,10 +232,14 @@ class DocBuilder
           }
           textStyleAttrs.push_back(json);
         }
+        const auto& b = p->frameBound();
+        for (auto& style : textStyleAttrs)
+        {
+          convertCoordinateSystem(style, totalMatrix);
+        }
         p->setParagraph(std::move(text), textStyleAttrs, lineType);
         p->setVerticalAlignment(j.value("verticalAlignment", ETextVerticalAlignment::VA_Top));
-        const auto& b = p->frameBound();
-        auto        layoutMode = j.value("frameMode", ETextLayoutMode::TL_Fixed);
+        auto layoutMode = j.value("frameMode", ETextLayoutMode::TL_Fixed);
         p->setFrameMode(layoutMode);
         if (b.width() == 0 || b.height() == 0)
         {
@@ -490,10 +494,7 @@ class DocBuilder
     }
   }
 
-  static void convertCoordinateSystem(
-    Pattern&         pattern,
-    const Bound&     bound,
-    const glm::mat3& totalMatrix)
+  static void convertCoordinateSystem(Pattern& pattern, const glm::mat3& totalMatrix)
   {
 
     std::visit(
@@ -549,16 +550,24 @@ class DocBuilder
       gradient.instance);
   }
 
-  static void convertCoordinateSystem(
-    Style&           style,
-    const Bound&     bound,
-    const glm::mat3& totalMatrix)
+  static void convertCoordinateSystem(TextStyleAttr& textStyle, const glm::mat3& totalMatrix)
+  {
+    for (auto& f : textStyle.fills)
+    {
+      if (f.gradient.has_value())
+        convertCoordinateSystem(f.gradient.value(), totalMatrix);
+      if (f.pattern.has_value())
+        convertCoordinateSystem(f.pattern.value(), totalMatrix);
+    }
+  }
+
+  static void convertCoordinateSystem(Style& style, const glm::mat3& totalMatrix)
   {
     for (auto& b : style.borders)
     {
       if (b.pattern)
       {
-        convertCoordinateSystem(b.pattern.value(), bound, totalMatrix);
+        convertCoordinateSystem(b.pattern.value(), totalMatrix);
       }
       if (b.gradient)
       {
@@ -573,7 +582,7 @@ class DocBuilder
       }
       if (f.pattern)
       {
-        convertCoordinateSystem(f.pattern.value(), bound, totalMatrix);
+        convertCoordinateSystem(f.pattern.value(), totalMatrix);
       }
     }
     for (auto& s : style.shadows)

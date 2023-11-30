@@ -216,7 +216,7 @@ struct TextStyleAttr
   float                    lineSpace{ 0.f };
   float                    baselineShift{ 0.0 };
   size_t                   length{ 0 };
-  uint8_t                  size{ 14 };
+  int                      size{ 14 };
   bool                     bold{ false };
   bool                     italic{ false };
   bool                     lineThrough{ false };

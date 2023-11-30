@@ -55,6 +55,28 @@ std::vector<std::string> split(const std::string& s, const std::string& delimite
   res.push_back(s.substr(pos_start));
   return res;
 }
+
+bool isAncestor(const nlohmann::json& ancestor, const nlohmann::json& descendant)
+{
+  if (&ancestor == &descendant)
+  {
+    return true;
+  }
+
+  if (ancestor.is_array() || ancestor.is_object())
+  {
+    for (auto& el : ancestor.items())
+    {
+      if (isAncestor(el.value(), descendant))
+      {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 } // namespace
 
 nlohmann::json ExpandSymbol::operator()()
@@ -389,11 +411,28 @@ void ExpandSymbol::processBoundsOverrides(
   std::stable_sort(
     boundsOverrideValues.begin(),
     boundsOverrideValues.end(),
-    [](const nlohmann::json& a, const nlohmann::json& b)
+    [self = this, &instance, &instanceIdStack](const nlohmann::json& a, const nlohmann::json& b)
     {
       auto& aObjectIdPaths = a[K_OBJECT_ID];
       auto& bObjectIdPaths = b[K_OBJECT_ID];
-      return aObjectIdPaths.size() < bObjectIdPaths.size();
+      if (aObjectIdPaths.size() == bObjectIdPaths.size())
+      {
+        std::vector<std::string> _;
+        auto aChildObject = self->findChildObject(instance, instanceIdStack, a, _);
+        auto bChildObject = self->findChildObject(instance, instanceIdStack, b, _);
+
+        // a is b's ancestor
+        if (aChildObject && bChildObject)
+        {
+          return isAncestor(*aChildObject, *bChildObject);
+        }
+
+        return false;
+      }
+      else
+      {
+        return aObjectIdPaths.size() < bObjectIdPaths.size();
+      }
     });
 
   for (auto& el : boundsOverrideValues.items())

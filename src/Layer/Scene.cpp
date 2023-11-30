@@ -84,7 +84,6 @@ public:
     layer::PaintNode* node = roots[page].get();
     if (!roots.empty() && maskDirty && node)
     {
-      renderer.clearCache();
       renderer.updateMaskObject(node);
       maskDirty = false;
     }
@@ -93,7 +92,6 @@ public:
       node->revalidate();
       renderer.draw(canvas, node);
     }
-    // renderer.commit(canvas);
   }
 };
 

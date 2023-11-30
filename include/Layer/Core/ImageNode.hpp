@@ -18,6 +18,7 @@
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Config.hpp"
 #include "Layer/Core/Transform.hpp"
+#include "Layer/Renderer.hpp"
 #include <core/SkBlendMode.h>
 
 class SkImage;
@@ -46,6 +47,6 @@ public:
   virtual ~ImageNode() override;
 
 protected:
-  void paintFill(SkCanvas* canvas, sk_sp<SkBlender> blender, const SkPath& path) override;
+  void paintFill(SkiaRenderer* renderer, sk_sp<SkBlender> blender, const SkPath& path) override;
 };
 } // namespace VGG::layer

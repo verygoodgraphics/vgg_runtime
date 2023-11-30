@@ -227,7 +227,7 @@ void PaintNode::paintPass(SkiaRenderer* renderer, int zorder)
 void PaintNode::paintEvent(SkiaRenderer* renderer)
 {
   VGG_IMPL(PaintNode);
-  paintStyle(renderer->canvas(), *_->path, *_->mask);
+  paintStyle(renderer, *_->path, *_->mask);
 }
 
 void PaintNode::setMaskBy(std::vector<std::string> masks)
@@ -776,10 +776,10 @@ SkPath PaintNode::stylePath()
   return skPath;
 }
 
-void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& outlineMask)
+void PaintNode::paintStyle(SkiaRenderer* renderer, const SkPath& path, const SkPath& outlineMask)
 {
   VGG_IMPL(PaintNode);
-  Painter painter(canvas);
+  Painter painter(renderer);
   // draw blur, we assume that there is only one blur style
   Blur    blur;
   auto    blurType = _->blurType(blur);
@@ -829,24 +829,24 @@ void PaintNode::paintStyle(SkCanvas* canvas, const SkPath& path, const SkPath& o
     // 2. alphamask + background blur: blured content layer
     // 3. alphamask + content blur: alphamask layer + content blur layer
     if (!blurType)
-      return _->drawWithAlphaMask(canvas, path, outlineMask);
+      return _->drawWithAlphaMask(renderer, path, outlineMask);
     else if (*blurType == BT_Background)
-      return _->drawBlurBgWithAlphaMask(canvas, path, outlineMask);
+      return _->drawBlurBgWithAlphaMask(renderer, path, outlineMask);
     else if (*blurType == BT_Gaussian)
-      return _->drawBlurContentWithAlphaMask(canvas, path, outlineMask);
+      return _->drawBlurContentWithAlphaMask(renderer, path, outlineMask);
   }
 }
 
-void PaintNode::paintFill(SkCanvas* canvas, sk_sp<SkBlender> blender, const SkPath& path)
+void PaintNode::paintFill(SkiaRenderer* renderer, sk_sp<SkBlender> blender, const SkPath& path)
 {
   VGG_IMPL(PaintNode);
-  Painter             render(canvas);
+  Painter             painter(renderer);
   sk_sp<SkMaskFilter> blur;
   for (const auto& f : style().fills)
   {
     if (!f.isEnabled)
       continue;
-    render.drawFill(path, frameBound(), f, 0, blender, blur);
+    painter.drawFill(path, frameBound(), f, 0, blender, blur);
   }
 }
 

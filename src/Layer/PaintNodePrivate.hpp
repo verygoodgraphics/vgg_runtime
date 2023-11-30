@@ -25,6 +25,7 @@
 #include "Layer/Core/Transform.hpp"
 
 #include <core/SkBlender.h>
+#include <core/SkColor.h>
 #include <core/SkMatrix.h>
 #include <encode/SkPngEncoder.h>
 #include <core/SkBlendMode.h>
@@ -242,80 +243,80 @@ public:
     return nullptr;
   }
 
-  sk_sp<SkImageFilter> makeAlphaMaskBy(SkiaRenderer* renderer)
-  {
-    if (alphaMaskBy.empty())
-      return nullptr;
-    auto                                          canvas = renderer->canvas();
-    const auto&                                   objects = renderer->maskObjects();
-    std::vector<std::pair<PaintNode*, glm::mat3>> cache;
-    auto                                          maskAreaBound = Bound::makeInfinite();
-    const auto&                                   selfBound = bound;
-    for (int i = 0; i < alphaMaskBy.size(); i++)
-    {
-      const auto& mask = alphaMaskBy[i];
-      if (mask.id != q_ptr->guid())
-      {
-        if (auto obj = objects.find(mask.id); obj != objects.end())
-        {
-          const auto t = obj->second->mapTransform(q_ptr);
-          const auto transformedBound = obj->second->bound() * t;
-          if (selfBound.isIntersectWith(transformedBound))
-          {
-            cache.emplace_back(obj->second, t.matrix());
-            maskAreaBound.intersectWith(transformedBound);
-          }
-        }
-        else
-        {
-          DEBUG("No such mask: %s", mask.id.c_str());
-        }
-      }
-    }
-    if (cache.empty() || !maskAreaBound.valid())
-      return nullptr;
-    maskAreaBound.unionWith(selfBound);
-    const auto [w, h] = std::pair{ maskAreaBound.width(), maskAreaBound.height() };
-    if (w <= 0 || h <= 0)
-      return nullptr;
-    auto       maskSurface = canvas->getSurface()->makeSurface(w, h);
-    const auto maskCanvas = maskSurface->getCanvas();
-    // SkPaint pen;
-    // pen.setColor(SK_ColorRED);
-    // pen.setStrokeWidth(2);
-    // pen.setStyle(SkPaint::kStroke_Style);
-    // maskCanvas->drawRect({ 0, 0, w, h }, pen);
-    // pen.setColor(SK_ColorBLUE);
-    // pen.setStyle(SkPaint::kFill_Style);
-    // maskCanvas->drawCircle(0, 0, 10, pen);
-    for (const auto& p : cache)
-    {
-      auto skm = toSkMatrix(p.second);
-      maskCanvas->setMatrix(skm);
-      // pen.setStrokeWidth(5);
-      // pen.setColor(SK_ColorGREEN);
-      // maskCanvas->drawCircle(0, 0, 10, pen);
-      // maskCanvas->drawLine(0, 0, skm.getTranslateX(), -skm.getTranslateY(), pen);
-      p.first->d_ptr->drawAsAlphaMask(maskCanvas);
-    }
-    auto image = maskSurface->makeImageSnapshot();
-    auto data = SkPngEncoder::Encode(
-      (GrDirectContext*)maskSurface->recordingContext(),
-      image.get(),
-      SkPngEncoder::Options());
-    // std::ofstream ofs("alphamask.png");
-    // if (ofs.is_open())
-    // {
-    //   ofs.write((char*)data->data(), data->size());
-    // }
-    auto filter = SkImageFilters::Image(image, SkSamplingOptions());
-    auto blend = SkImageFilters::Blend(SkBlendMode::kSrcIn, filter);
-    // SkMatrix mat;
-    // mat.postScale(1, -1);
-    return blend;
-  }
+  // sk_sp<SkImageFilter> makeAlphaMaskBy(SkiaRenderer* renderer)
+  // {
+  //   if (alphaMaskBy.empty())
+  //     return nullptr;
+  //   auto                                          canvas = renderer->canvas();
+  //   const auto&                                   objects = renderer->maskObjects();
+  //   std::vector<std::pair<PaintNode*, glm::mat3>> cache;
+  //   auto                                          maskAreaBound = Bound::makeInfinite();
+  //   const auto&                                   selfBound = bound;
+  //   for (int i = 0; i < alphaMaskBy.size(); i++)
+  //   {
+  //     const auto& mask = alphaMaskBy[i];
+  //     if (mask.id != q_ptr->guid())
+  //     {
+  //       if (auto obj = objects.find(mask.id); obj != objects.end())
+  //       {
+  //         const auto t = obj->second->mapTransform(q_ptr);
+  //         const auto transformedBound = obj->second->bound() * t;
+  //         if (selfBound.isIntersectWith(transformedBound))
+  //         {
+  //           cache.emplace_back(obj->second, t.matrix());
+  //           maskAreaBound.intersectWith(transformedBound);
+  //         }
+  //       }
+  //       else
+  //       {
+  //         DEBUG("No such mask: %s", mask.id.c_str());
+  //       }
+  //     }
+  //   }
+  //   if (cache.empty() || !maskAreaBound.valid())
+  //     return nullptr;
+  //   maskAreaBound.unionWith(selfBound);
+  //   const auto [w, h] = std::pair{ maskAreaBound.width(), maskAreaBound.height() };
+  //   if (w <= 0 || h <= 0)
+  //     return nullptr;
+  //   auto       maskSurface = canvas->getSurface()->makeSurface(w, h);
+  //   const auto maskCanvas = maskSurface->getCanvas();
+  //   // SkPaint pen;
+  //   // pen.setColor(SK_ColorRED);
+  //   // pen.setStrokeWidth(2);
+  //   // pen.setStyle(SkPaint::kStroke_Style);
+  //   // maskCanvas->drawRect({ 0, 0, w, h }, pen);
+  //   // pen.setColor(SK_ColorBLUE);
+  //   // pen.setStyle(SkPaint::kFill_Style);
+  //   // maskCanvas->drawCircle(0, 0, 10, pen);
+  //   for (const auto& p : cache)
+  //   {
+  //     auto skm = toSkMatrix(p.second);
+  //     maskCanvas->setMatrix(skm);
+  //     // pen.setStrokeWidth(5);
+  //     // pen.setColor(SK_ColorGREEN);
+  //     // maskCanvas->drawCircle(0, 0, 10, pen);
+  //     // maskCanvas->drawLine(0, 0, skm.getTranslateX(), -skm.getTranslateY(), pen);
+  //     p.first->d_ptr->drawAsAlphaMask(maskCanvas);
+  //   }
+  //   auto image = maskSurface->makeImageSnapshot();
+  //   auto data = SkPngEncoder::Encode(
+  //     (GrDirectContext*)maskSurface->recordingContext(),
+  //     image.get(),
+  //     SkPngEncoder::Options());
+  //   // std::ofstream ofs("alphamask.png");
+  //   // if (ofs.is_open())
+  //   // {
+  //   //   ofs.write((char*)data->data(), data->size());
+  //   // }
+  //   auto filter = SkImageFilters::Image(image, SkSamplingOptions());
+  //   auto blend = SkImageFilters::Blend(SkBlendMode::kSrcIn, filter);
+  //   // SkMatrix mat;
+  //   // mat.postScale(1, -1);
+  //   return blend;
+  // }
 
-  void drawAsAlphaMask(SkCanvas* canvas, sk_sp<SkBlender> blender = nullptr)
+  void drawAsAlphaMask(SkiaRenderer* renderer, sk_sp<SkBlender> blender = nullptr)
   {
     if (!path)
     {
@@ -325,26 +326,26 @@ public:
     {
       return;
     }
-    Painter render(canvas);
     if (!blender)
     {
       blender = Painter::getMaskBlender();
     }
-    Painter painter(canvas);
+    Painter painter(renderer);
     drawRawStyle(painter, *path, blender);
   }
 
-  void drawWithAlphaMask(SkCanvas* canvas, const SkPath& path, const SkPath& outlineMask)
+  void drawWithAlphaMask(SkiaRenderer* renderer, const SkPath& path, const SkPath& outlineMask)
   {
     SkPaint p;
     auto    b = toSkRect(bound);
     p.setBlendMode(SkBlendMode::kSrcOver);
+    auto canvas = renderer->canvas();
     canvas->saveLayer(0, 0);
     canvas->clipRect(b);
     canvas->clipPath(path);
     // clip with path
-    Painter painter(canvas);
-    drawMaskObjectIntoMaskLayer(canvas, nullptr);
+    Painter painter(renderer);
+    drawMaskObjectIntoMaskLayer(renderer, nullptr);
     if (!outlineMask.isEmpty())
     {
       painter.beginClip(outlineMask);
@@ -370,9 +371,12 @@ public:
     return std::nullopt;
   }
 
-  void drawBlurBgWithAlphaMask(SkCanvas* canvas, const SkPath& path, const SkPath& outlineMask)
+  void drawBlurBgWithAlphaMask(
+    SkiaRenderer* renderer,
+    const SkPath& path,
+    const SkPath& outlineMask)
   {
-    Painter    painter(canvas);
+    Painter    painter(renderer);
     const auto blur = style.blurs[0];
     SkPath     res = path;
     if (alphaMask && !alphaMask->contour.isEmpty())
@@ -386,7 +390,7 @@ public:
     painter.blurBackgroundBegin(blur.radius, blur.radius, bound, &res);
 
     // draw alpha mask
-    drawMaskObjectIntoMaskLayer(canvas, 0);
+    drawMaskObjectIntoMaskLayer(renderer, 0);
 
     // Objects need to be drawn with SrcOver into layer contains blured background
     // and mask them by dstColor.a
@@ -404,32 +408,37 @@ public:
     painter.blurBackgroundEnd();
   }
 
-  void drawMaskObjectIntoMaskLayer(SkCanvas* canvas, sk_sp<SkBlender> blender)
+  void drawMaskObjectIntoMaskLayer(SkiaRenderer* renderer, sk_sp<SkBlender> blender)
   {
     if (alphaMask)
     {
+      auto canvas = renderer->canvas();
       for (const auto& p : alphaMask->components)
       {
         auto skm = toSkMatrix(p.second.matrix());
         canvas->save();
         canvas->concat(skm);
-        p.first->d_ptr->drawAsAlphaMask(canvas);
+        p.first->d_ptr->drawAsAlphaMask(renderer);
         canvas->restore();
       }
     }
   }
 
-  void drawBlurContentWithAlphaMask(SkCanvas* canvas, const SkPath& path, const SkPath& outlineMask)
+  void drawBlurContentWithAlphaMask(
+    SkiaRenderer* renderer,
+    const SkPath& path,
+    const SkPath& outlineMask)
   {
     SkPaint    p;
     auto       bb = bound;
     const auto blur = style.blurs[0];
     bb.extend(blur.radius * 2);
     auto b = toSkRect(bb);
+    auto canvas = renderer->canvas();
     canvas->saveLayer(0, 0);
     canvas->clipRect(b);
-    drawMaskObjectIntoMaskLayer(canvas, 0);
-    Painter painter(canvas);
+    drawMaskObjectIntoMaskLayer(renderer, 0);
+    Painter painter(renderer);
     // the blured layer need to be drawn into the parent layer contains alpha mask
     // SrcIn blend mode is necessary
     auto    blender = SkBlender::Mode(SkBlendMode::kSrcIn);
@@ -489,7 +498,7 @@ public:
       }
     }
 
-    q_ptr->paintFill(painter.canvas(), blender, skPath);
+    q_ptr->paintFill(painter.renderer(), blender, skPath);
 
     for (const auto& b : style.borders)
     {

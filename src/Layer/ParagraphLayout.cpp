@@ -27,33 +27,6 @@ using namespace skia::textlayout;
 namespace
 {
 
-int calcWhitespace(
-  int                          count,
-  int                          fontSize,
-  const std::vector<SkString>& fontFamilies,
-  sk_sp<FontCollection>        fontCollection)
-{
-  ParagraphStyle style;
-  style.setEllipsis(u"...");
-  style.setTextAlign(TextAlign::kLeft);
-  style.setMaxLines(1);
-  skia::textlayout::TextStyle txtStyle;
-  txtStyle.setFontFamilies(fontFamilies);
-  txtStyle.setFontSize(fontSize);
-  style.setTextAlign(TextAlign::kLeft);
-  style.setTextStyle(txtStyle);
-  auto builder = ParagraphBuilder::make(style, fontCollection);
-  char tabs[40];
-  memset(tabs, '\t', count);
-  tabs[count] = '\0';
-  builder->addText(tabs);
-  auto p = builder->Build();
-  p->layout(1000);
-  const auto rects = p->getRectsForRange(0, count, RectHeightStyle::kMax, RectWidthStyle::kMax);
-  if (rects.empty())
-    return 0;
-  return rects[0].rect.width();
-}
 ParagraphStyle createParagraphStyle(const layer::ParagraphAttr& attr)
 {
   ParagraphStyle style;

@@ -55,10 +55,10 @@ void to_json(nlohmann::json& j, const Rect& rect)
 
 void from_json(const nlohmann::json& j, Rect& rect)
 {
-  rect.origin.x = j.value(K_X, 0.f);
-  rect.origin.y = j.value(K_Y, 0.f);
-  rect.size.width = j.value(K_WIDTH, 0.f);
-  rect.size.height = j.value(K_HEIGHT, 0.f);
+  rect.origin.x = j.value(K_X, 0.); // double
+  rect.origin.y = j.value(K_Y, 0.);
+  rect.size.width = j.value(K_WIDTH, 0.);
+  rect.size.height = j.value(K_HEIGHT, 0.);
 }
 
 void to_json(nlohmann::json& j, const Matrix& matrix)
@@ -93,8 +93,9 @@ bool isLayoutNode(const nlohmann::json& json)
   }
 
   auto className = json.value(K_CLASS, "");
-  if (className == K_FRAME || className == K_GROUP || className == K_IMAGE || className == K_PATH ||
-      className == K_SYMBOL_INSTANCE || className == K_SYMBOL_MASTER || className == K_TEXT)
+  if (
+    className == K_FRAME || className == K_GROUP || className == K_IMAGE || className == K_PATH ||
+    className == K_SYMBOL_INSTANCE || className == K_SYMBOL_MASTER || className == K_TEXT)
   {
     return true;
   }

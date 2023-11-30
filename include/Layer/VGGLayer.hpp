@@ -34,9 +34,9 @@ enum class EImageEncode
 struct ImageOptions
 {
   EImageEncode encode;
-  int position[2] = { 0, 0 };
-  int extend[2] = { 0, 0 };
-  int quality{ 100 };
+  int          position[2] = { 0, 0 };
+  int          extend[2] = { 0, 0 };
+  int          quality{ 100 };
 };
 
 struct SVGOptions
@@ -55,9 +55,9 @@ class VLayer__pImpl;
 class VLayer : public GraphicsLayer
 {
   VGG_DECL_IMPL(VLayer);
-  float m_scale{ 1.0 };
-  bool m_drawPos{ false };
-  int m_position[2] = { 0, 0 };
+  float                      m_scale{ 1.0 };
+  bool                       m_drawPos{ false };
+  int                        m_position[2] = { 0, 0 };
   std::optional<std::string> m_skpPath;
 
 protected:
@@ -102,10 +102,10 @@ public:
   }
 
   std::optional<std::vector<char>> makeImageSnapshot(const ImageOptions& opts);
-  void makeImageSnapshot(const ImageOptions& opts, std::ostream& os);
+  void                             makeImageSnapshot(const ImageOptions& opts, std::ostream& os);
 
   std::optional<std::vector<char>> makeSKP();
-  void makeSKP(std::ostream& os);
+  void                             makeSKP(std::ostream& os);
 };
 
 } // namespace VGG::layer

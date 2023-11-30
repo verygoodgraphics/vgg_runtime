@@ -23,4 +23,3 @@
 #else
 #define VGG_EXPORTS
 #endif
-

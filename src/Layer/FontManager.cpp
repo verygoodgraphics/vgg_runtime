@@ -35,7 +35,7 @@ namespace
 std::vector<char> readFromZip(const char* zip, size_t length, const char* entry)
 {
   std::vector<char> data;
-  auto zipStream = zip_stream_open(zip, length, 0, 'r');
+  auto              zipStream = zip_stream_open(zip, length, 0, 'r');
   if (zipStream)
   {
     if (0 == zip_entry_open(zipStream, entry))
@@ -52,13 +52,12 @@ std::vector<char> readFromZip(const char* zip, size_t length, const char* entry)
 
 bool addEmbbedFont(SkFontMgrVGG* mgr)
 {
-  auto data = readFromZip((const char*)VGG::layer::resources::FiraSans::FIRA_SANS_ZIP,
-                          VGG::layer::resources::FiraSans::FiraSans::DATA_LENGTH,
-                          "FiraSans.ttf");
-  return mgr->addFont((uint8_t*)data.data(),
-                      data.size(),
-                      VGG::layer::resources::FiraSans::FONT_NAME,
-                      true);
+  auto data = readFromZip(
+    (const char*)VGG::layer::resources::FiraSans::FIRA_SANS_ZIP,
+    VGG::layer::resources::FiraSans::FiraSans::DATA_LENGTH,
+    "FiraSans.ttf");
+  return mgr
+    ->addFont((uint8_t*)data.data(), data.size(), VGG::layer::resources::FiraSans::FONT_NAME, true);
 }
 
 }; // namespace
@@ -79,17 +78,20 @@ public:
   }
 
   std::unordered_map<std::string, sk_sp<SkFontMgrVGG>> fontMgrs;
-  SkFontMgrVGG* defaultFontMgr{ nullptr };
-  SkFontMgrVGG* registerFont(const std::string& key,
-                             const fs::path& fontDir,
-                             std::vector<std::string> fallbackFonts)
+  SkFontMgrVGG*                                        defaultFontMgr{ nullptr };
+
+  SkFontMgrVGG* registerFont(
+    const std::string&       key,
+    const fs::path&          fontDir,
+    std::vector<std::string> fallbackFonts)
   {
     return registerFont(key, std::vector<fs::path>{ fontDir }, std::move(fallbackFonts));
   }
 
-  SkFontMgrVGG* registerFont(const std::string& key,
-                             std::vector<fs::path> dirs,
-                             std::vector<std::string> fallbacks)
+  SkFontMgrVGG* registerFont(
+    const std::string&       key,
+    std::vector<fs::path>    dirs,
+    std::vector<std::string> fallbacks)
   {
     DEBUG("Font directory: -----------");
     for (const auto p : dirs)
@@ -124,17 +126,17 @@ public:
 FontManager::FontManager()
   : d_ptr(new FontManager__pImpl(this))
 {
-  auto font = Config::globalConfig().value("fonts", nlohmann::json{});
-  std::vector<fs::path> fontDir;
+  auto                     font = Config::globalConfig().value("fonts", nlohmann::json{});
+  std::vector<fs::path>    fontDir;
   std::vector<std::string> fallback;
   if (font.is_object())
   {
     fontDir = font.value("directory", std::vector<fs::path>());
     fallback = font.value("fallbackFont", std::vector<std::string>());
   }
-  std::set<fs::path> fontDirSet{ fontDir.begin(), fontDir.end() }; // remove duplicate elements
+  std::set<fs::path>    fontDirSet{ fontDir.begin(), fontDir.end() }; // remove duplicate elements
   std::set<std::string> fallbackSet{ fallback.begin(), fallback.end() };
-  const auto systemFontCfg = Config::genDefaultFontConfig();
+  const auto            systemFontCfg = Config::genDefaultFontConfig();
   if (systemFontCfg.is_object())
   {
     auto systemFontDir = systemFontCfg.value("directory", std::vector<fs::path>{});

@@ -41,14 +41,14 @@ struct ContextConfig
 
 struct ContextProperty
 {
-  float dpiScaling{ 1.0 };
+  float                              dpiScaling{ 1.0 };
   std::optional<EGraphicsAPIBackend> api;
 };
 
 class GraphicsContext : public std::enable_shared_from_this<GraphicsContext>
 {
 private:
-  ContextConfig m_config;
+  ContextConfig   m_config;
   ContextProperty m_property;
   friend class GraphicsLayer;
 
@@ -74,9 +74,9 @@ public:
   {
     return m_property;
   }
-  virtual bool swap() = 0;
-  virtual bool makeCurrent() = 0;
-  virtual void shutdown() = 0;
+  virtual bool  swap() = 0;
+  virtual bool  makeCurrent() = 0;
+  virtual void  shutdown() = 0;
   virtual void* contextInfo() = 0;
   virtual ~GraphicsContext() = default;
 

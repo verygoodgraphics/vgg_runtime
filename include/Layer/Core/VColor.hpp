@@ -37,10 +37,11 @@ struct Color
     return Color{ ur / 255.f, ug / 255.f, ub / 255.f, 1. };
   }
 
-  inline static Color fromARGB(unsigned char ua,
-                               unsigned char ur,
-                               unsigned char ug,
-                               unsigned char ub)
+  inline static Color fromARGB(
+    unsigned char ua,
+    unsigned char ur,
+    unsigned char ug,
+    unsigned char ub)
   {
     return Color{ ur / 255.f, ug / 255.f, ub / 255.f, ua / 255.f };
   }

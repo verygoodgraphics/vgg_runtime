@@ -33,7 +33,7 @@ struct Viewport
 class VGG_EXPORTS Renderable : public std::enable_shared_from_this<Renderable>
 {
   std::optional<Viewport> m_viewport;
-  bool m_visible{ true };
+  bool                    m_visible{ true };
 
 protected:
   virtual void onRender(SkCanvas* canvas) = 0;

@@ -680,7 +680,7 @@ struct FiraSans
     0xbe, 0x28, 0x00, 0x00, 0x00, 0x00
   };
   constexpr static unsigned int DATA_LENGTH = 10534;
-  constexpr static char FONT_NAME[] = "Fira Sans";
+  constexpr static char         FONT_NAME[] = "Fira Sans";
 };
 
 }; // namespace VGG::layer::resources

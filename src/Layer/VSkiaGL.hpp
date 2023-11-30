@@ -33,13 +33,14 @@ SurfaceCreateProc glSurfaceCreateProc()
     info.fFBOID = 0;
     info.fFormat = GR_GL_RGBA8;
     GrBackendRenderTarget target(w, h, cfg.multiSample, cfg.stencilBit, info);
-    SkSurfaceProps props;
-    return SkSurfaces::WrapBackendRenderTarget(context,
-                                               target,
-                                               kBottomLeft_GrSurfaceOrigin,
-                                               SkColorType::kRGBA_8888_SkColorType,
-                                               nullptr,
-                                               &props);
+    SkSurfaceProps        props;
+    return SkSurfaces::WrapBackendRenderTarget(
+      context,
+      target,
+      kBottomLeft_GrSurfaceOrigin,
+      SkColorType::kRGBA_8888_SkColorType,
+      nullptr,
+      &props);
   };
 }
 

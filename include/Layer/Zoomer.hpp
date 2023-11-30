@@ -29,13 +29,13 @@ class Zoomer
 {
   Scene* m_owner{ nullptr };
   double m_zoom{ 1.0 };
-  Vec2 m_offset{ 0.0, 0.0 };
+  Vec2   m_offset{ 0.0, 0.0 };
 
 public:
   void setOwnerScene(Scene* owner);
 
   // dx and dy is in the canvas(texture) space.
-  Vec2 doTranslate(float dx, float dy);
+  Vec2  doTranslate(float dx, float dy);
   // cx and cy is in the canvas(texture) space
   float doZoom(float speed, float cx, float cy);
   float scale() const

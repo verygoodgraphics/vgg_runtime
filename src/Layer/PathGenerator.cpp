@@ -61,12 +61,12 @@ void inline computeAdjacent5PointsInfo(
   const ControlPoint& curPoint,
   const ControlPoint& nextPoint,
   const ControlPoint& nextNextPoint,
-  float&           theta,
-  int&             thetaSign,
-  float&           pivotAngle,
-  int&             pivotSign,
-  float&           len1,
-  float&           len2)
+  float&              theta,
+  int&                thetaSign,
+  float&              pivotAngle,
+  int&                pivotSign,
+  float&              len1,
+  float&              len2)
 {
   auto radius = curPoint.radius;
   computeAdjacent3PointsInfo(
@@ -209,8 +209,8 @@ int peek5Points(
   const ControlPoint& curPoint,
   const ControlPoint& nextPoint,
   const ControlPoint& nextNextPoint,
-  float            smooth,
-  SkPath&          path)
+  float               smooth,
+  SkPath&             path)
 {
   const auto prevHasFrom = prevPoint.from.has_value();
   const auto curHasTo = curPoint.to.has_value();
@@ -296,10 +296,10 @@ SkPath makePath(const Contour& contour)
   size_t     prev2 = points.size() - 1;
   size_t     next2 = (next + 1) % total;
 
-  int       segments = isClosed ? total : total - 1;
+  int          segments = isClosed ? total : total - 1;
   ControlPoint buffer[2] = { points[prev], points[cur] };
-  int       cp = 1;
-  int       pp = 1 - cp;
+  int          cp = 1;
+  int          pp = 1 - cp;
 
   path.moveTo(buffer[pp].point.x, buffer[pp].point.y);
   while (segments > 0)

@@ -29,5 +29,5 @@ struct PDFOptions
   int extend[2];
 };
 std::optional<std::vector<char>> makePDF(Scene* scene, const PDFOptions& opts);
-void makePDF(Scene* scene, const PDFOptions& opts, std::ostream& os);
+void                             makePDF(Scene* scene, const PDFOptions& opts, std::ostream& os);
 } // namespace VGG::layer::exporter

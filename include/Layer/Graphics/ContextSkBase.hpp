@@ -26,7 +26,7 @@ class SkiaGraphicsContext : public layer::GraphicsContext
 public:
   virtual SurfaceCreateProc surfaceCreateProc() = 0;
   virtual ContextCreateProc contextCreateProc() = 0;
-  virtual void onInitProperties(ContextProperty& property) override
+  virtual void              onInitProperties(ContextProperty& property) override
   {
     property.api = EGraphicsAPIBackend::API_METAL;
   }

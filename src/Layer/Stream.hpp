@@ -19,7 +19,7 @@
 #include "Utility/Log.hpp"
 class SkStdOStream : public SkWStream
 {
-  std::ostream& m_os;
+  std::ostream&          m_os;
   std::ostream::pos_type m_begin{ 0 };
 
 public:

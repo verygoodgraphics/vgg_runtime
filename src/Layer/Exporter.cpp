@@ -48,11 +48,11 @@ namespace VGG::layer::exporter
 void makePDF(VGG::Scene* scene, const PDFOptions& opts, std::ostream& os)
 {
   SkStdOStream skos(os);
-  auto pdfDoc = SkPDF::MakeDocument(&skos);
+  auto         pdfDoc = SkPDF::MakeDocument(&skos);
   if (pdfDoc)
   {
-    int w = opts.extend[0];
-    int h = opts.extend[1];
+    int       w = opts.extend[0];
+    int       h = opts.extend[1];
     SkCanvas* pdfCanvas = pdfDoc->beginPage(w, h);
     if (pdfCanvas)
     {
@@ -85,9 +85,9 @@ std::optional<std::vector<char>> makeSVG(VGG::Scene* scene, const SVGOptions& op
 
 void makeSVG(VGG::Scene* scene, const SVGOptions& opts, std::ostream& os)
 {
-  auto rect = SkRect::MakeWH(opts.extend[0], opts.extend[1]);
+  auto         rect = SkRect::MakeWH(opts.extend[0], opts.extend[1]);
   SkStdOStream skos(os);
-  auto svgCanvas = SkSVGCanvas::Make(rect, &skos);
+  auto         svgCanvas = SkSVGCanvas::Make(rect, &skos);
   if (svgCanvas)
   {
     renderInternal(svgCanvas.get(), scene);

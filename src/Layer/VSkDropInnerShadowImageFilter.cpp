@@ -31,14 +31,15 @@ namespace
 class SkDropInnerShadowImageFilter final : public SkImageFilter_Base
 {
 public:
-  SkDropInnerShadowImageFilter(SkScalar dx,
-                               SkScalar dy,
-                               SkScalar sigmaX,
-                               SkScalar sigmaY,
-                               SkColor color,
-                               bool shadowOnly,
-                               sk_sp<SkImageFilter> input,
-                               const SkRect* cropRect)
+  SkDropInnerShadowImageFilter(
+    SkScalar             dx,
+    SkScalar             dy,
+    SkScalar             sigmaX,
+    SkScalar             sigmaY,
+    SkColor              color,
+    bool                 shadowOnly,
+    sk_sp<SkImageFilter> input,
+    const SkRect*        cropRect)
     : INHERITED(&input, 1, cropRect)
     , fDx(dx)
     , fDy(dy)
@@ -49,90 +50,99 @@ public:
   {
   }
 
-  static sk_sp<SkImageFilter> Make(SkScalar dx,
-                                   SkScalar dy,
-                                   SkScalar sigmaX,
-                                   SkScalar sigmaY,
-                                   SkColor color,
-                                   bool shadowOnly,
-                                   sk_sp<SkImageFilter> input,
-                                   const SkRect* cropRect)
+  static sk_sp<SkImageFilter> Make(
+    SkScalar             dx,
+    SkScalar             dy,
+    SkScalar             sigmaX,
+    SkScalar             sigmaY,
+    SkColor              color,
+    bool                 shadowOnly,
+    sk_sp<SkImageFilter> input,
+    const SkRect*        cropRect)
   {
-    return sk_sp<SkImageFilter>(new SkDropInnerShadowImageFilter(dx,
-                                                                 dy,
-                                                                 sigmaX,
-                                                                 sigmaY,
-                                                                 color,
-                                                                 shadowOnly,
-                                                                 std::move(input),
-                                                                 cropRect));
+    return sk_sp<SkImageFilter>(new SkDropInnerShadowImageFilter(
+      dx,
+      dy,
+      sigmaX,
+      sigmaY,
+      color,
+      shadowOnly,
+      std::move(input),
+      cropRect));
   }
 
   SkRect computeFastBounds(const SkRect&) const override;
 
 protected:
-  void flatten(SkWriteBuffer&) const override;
+  void                  flatten(SkWriteBuffer&) const override;
   sk_sp<SkSpecialImage> onFilterImage(const skif::Context&, SkIPoint* offset) const override;
-  SkIRect onFilterNodeBounds(const SkIRect& src,
-                             const SkMatrix& ctm,
-                             MapDirection,
-                             const SkIRect* inputRect) const override;
+
+  SkIRect onFilterNodeBounds(
+    const SkIRect&  src,
+    const SkMatrix& ctm,
+    MapDirection,
+    const SkIRect* inputRect) const override;
 
 private:
   friend void ::SkRegisterDropInnerShadowImageFilterFlattenable();
   SK_FLATTENABLE_HOOKS(SkDropInnerShadowImageFilter)
 
   SkScalar fDx, fDy, fSigmaX, fSigmaY;
-  SkColor fColor;
-  bool fShadowOnly;
+  SkColor  fColor;
+  bool     fShadowOnly;
 
   using INHERITED = SkImageFilter_Base;
 };
 
 } // end namespace
 
-sk_sp<SkImageFilter> SkMyImageFilters::DropInnerShadow(SkScalar dx,
-                                                       SkScalar dy,
-                                                       SkScalar sigmaX,
-                                                       SkScalar sigmaY,
-                                                       SkColor color,
-                                                       sk_sp<SkImageFilter> input,
-                                                       const CropRect& cropRect)
+sk_sp<SkImageFilter> SkMyImageFilters::DropInnerShadow(
+  SkScalar             dx,
+  SkScalar             dy,
+  SkScalar             sigmaX,
+  SkScalar             sigmaY,
+  SkColor              color,
+  sk_sp<SkImageFilter> input,
+  const CropRect&      cropRect)
 {
-  return SkDropInnerShadowImageFilter::Make(dx,
-                                            dy,
-                                            sigmaX,
-                                            sigmaY,
-                                            color,
-                                            /* shadowOnly */ false,
-                                            std::move(input),
-                                            cropRect);
+  return SkDropInnerShadowImageFilter::Make(
+    dx,
+    dy,
+    sigmaX,
+    sigmaY,
+    color,
+    /* shadowOnly */ false,
+    std::move(input),
+    cropRect);
 }
 
-sk_sp<SkImageFilter> SkMyImageFilters::DropInnerShadowOnly(SkScalar dx,
-                                                           SkScalar dy,
-                                                           SkScalar sigmaX,
-                                                           SkScalar sigmaY,
-                                                           SkColor color,
-                                                           sk_sp<SkImageFilter> input,
-                                                           const CropRect& cropRect)
+sk_sp<SkImageFilter> SkMyImageFilters::DropInnerShadowOnly(
+  SkScalar             dx,
+  SkScalar             dy,
+  SkScalar             sigmaX,
+  SkScalar             sigmaY,
+  SkColor              color,
+  sk_sp<SkImageFilter> input,
+  const CropRect&      cropRect)
 {
-  return SkDropInnerShadowImageFilter::Make(dx,
-                                            dy,
-                                            sigmaX,
-                                            sigmaY,
-                                            color,
-                                            /* shadowOnly */ true,
-                                            std::move(input),
-                                            cropRect);
+  return SkDropInnerShadowImageFilter::Make(
+    dx,
+    dy,
+    sigmaX,
+    sigmaY,
+    color,
+    /* shadowOnly */ true,
+    std::move(input),
+    cropRect);
 }
 
 void SkRegisterDropInnerShadowImageFilterFlattenable()
 {
   SK_REGISTER_FLATTENABLE(SkDropInnerShadowImageFilter);
   // TODO (michaelludwig) - Remove after grace period for SKPs to stop using old name
-  SkFlattenable::Register("SkDropInnerShadowImageFilterImpl",
-                          SkDropInnerShadowImageFilter::CreateProc);
+  SkFlattenable::Register(
+    "SkDropInnerShadowImageFilterImpl",
+    SkDropInnerShadowImageFilter::CreateProc);
 }
 
 sk_sp<SkFlattenable> SkDropInnerShadowImageFilter::CreateProc(SkReadBuffer& buffer)
@@ -142,20 +152,21 @@ sk_sp<SkFlattenable> SkDropInnerShadowImageFilter::CreateProc(SkReadBuffer& buff
   SkScalar dy = buffer.readScalar();
   SkScalar sigmaX = buffer.readScalar();
   SkScalar sigmaY = buffer.readScalar();
-  SkColor color = buffer.readColor();
+  SkColor  color = buffer.readColor();
 
   // For backwards compatibility, the shadow mode had been saved as an enum cast to a 32LE int,
   // where shadow-and-foreground was 0 and shadow-only was 1. Other than the number of bits, this
   // is equivalent to the bool that SkDropInnerShadowImageFilter now uses.
   bool shadowOnly = SkToBool(buffer.read32LE(1));
-  return SkDropInnerShadowImageFilter::Make(dx,
-                                            dy,
-                                            sigmaX,
-                                            sigmaY,
-                                            color,
-                                            shadowOnly,
-                                            common.getInput(0),
-                                            common.cropRect());
+  return SkDropInnerShadowImageFilter::Make(
+    dx,
+    dy,
+    sigmaX,
+    sigmaY,
+    color,
+    shadowOnly,
+    common.getInput(0),
+    common.cropRect());
 }
 
 void SkDropInnerShadowImageFilter::flatten(SkWriteBuffer& buffer) const
@@ -172,10 +183,11 @@ void SkDropInnerShadowImageFilter::flatten(SkWriteBuffer& buffer) const
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-sk_sp<SkSpecialImage> SkDropInnerShadowImageFilter::onFilterImage(const skif::Context& ctx,
-                                                                  SkIPoint* offset) const
+sk_sp<SkSpecialImage> SkDropInnerShadowImageFilter::onFilterImage(
+  const skif::Context& ctx,
+  SkIPoint*            offset) const
 {
-  SkIPoint inputOffset = SkIPoint::Make(0, 0);
+  SkIPoint              inputOffset = SkIPoint::Make(0, 0);
   sk_sp<SkSpecialImage> input(this->filterInput(0, ctx, &inputOffset));
   if (!input)
   {
@@ -214,8 +226,9 @@ sk_sp<SkSpecialImage> SkDropInnerShadowImageFilter::onFilterImage(const skif::Co
   SkVector offsetVec = SkVector::Make(fDx, fDy);
   ctx.ctm().mapVectors(&offsetVec, 1);
 
-  canvas->translate(SkIntToScalar(inputOffset.fX) - SkIntToScalar(bounds.fLeft),
-                    SkIntToScalar(inputOffset.fY) - SkIntToScalar(bounds.fTop));
+  canvas->translate(
+    SkIntToScalar(inputOffset.fX) - SkIntToScalar(bounds.fLeft),
+    SkIntToScalar(inputOffset.fY) - SkIntToScalar(bounds.fTop));
   input->draw(canvas, offsetVec.fX, offsetVec.fY, SkSamplingOptions(), &paint);
 
   if (!fShadowOnly)
@@ -244,10 +257,11 @@ SkRect SkDropInnerShadowImageFilter::computeFastBounds(const SkRect& src) const
   return bounds;
 }
 
-SkIRect SkDropInnerShadowImageFilter::onFilterNodeBounds(const SkIRect& src,
-                                                         const SkMatrix& ctm,
-                                                         MapDirection dir,
-                                                         const SkIRect* inputRect) const
+SkIRect SkDropInnerShadowImageFilter::onFilterNodeBounds(
+  const SkIRect&  src,
+  const SkMatrix& ctm,
+  MapDirection    dir,
+  const SkIRect*  inputRect) const
 {
   SkVector offsetVec = SkVector::Make(fDx, fDy);
   if (kReverse_MapDirection == dir)
@@ -255,11 +269,12 @@ SkIRect SkDropInnerShadowImageFilter::onFilterNodeBounds(const SkIRect& src,
     offsetVec.negate();
   }
   ctm.mapVectors(&offsetVec, 1);
-  SkIRect dst = src.makeOffset(SkScalarCeilToInt(offsetVec.x()), SkScalarCeilToInt(offsetVec.y()));
+  SkIRect  dst = src.makeOffset(SkScalarCeilToInt(offsetVec.x()), SkScalarCeilToInt(offsetVec.y()));
   SkVector sigma = SkVector::Make(fSigmaX, fSigmaY);
   ctm.mapVectors(&sigma, 1);
-  dst.outset(SkScalarCeilToInt(SkScalarAbs(sigma.x() * 3)),
-             SkScalarCeilToInt(SkScalarAbs(sigma.y() * 3)));
+  dst.outset(
+    SkScalarCeilToInt(SkScalarAbs(sigma.x() * 3)),
+    SkScalarCeilToInt(SkScalarAbs(sigma.y() * 3)));
   if (!fShadowOnly)
   {
     dst.join(src);

@@ -34,15 +34,15 @@ class VParagraphPainter
   : public skia::textlayout::ParagraphPainter
   , public VNode
 {
-  std::unordered_map<int, SkPaint>    m_cache;
-  std::shared_ptr<TextParagraphCache> m_paragraph;
+  std::unordered_map<int, SkPaint> m_cache;
+  std::shared_ptr<RichTextBlock>   m_paragraph;
 
 public:
   VParagraphPainter()
   {
   }
 
-  void setParagraph(std::shared_ptr<TextParagraphCache> paragraph)
+  void setParagraph(std::shared_ptr<RichTextBlock> paragraph)
   {
     if (m_paragraph == paragraph)
       return;

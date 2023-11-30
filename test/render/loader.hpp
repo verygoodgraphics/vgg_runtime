@@ -1,6 +1,6 @@
 #pragma once
 #include "Utility/ConfigManager.hpp"
-#include "Layer/IReader.hpp"
+#include "reader.hpp"
 
 #include <nlohmann/json.hpp>
 
@@ -18,14 +18,14 @@ public:
   }
   void setConfig(const nlohmann::json& j)
   {
-    this->config = j;
+    this->m_config = j;
   }
 
 protected:
   DataWrapper readImpl(const fs::path& file)
   {
-    const auto cmd = genCmd(file);
-    auto ret = executeExternalCmd(cmd);
+    const auto  cmd = genCmd(file);
+    auto        ret = executeExternalCmd(cmd);
     DataWrapper data;
     if (ret == 0)
     {
@@ -37,14 +37,14 @@ protected:
   }
   std::string genCmd(const fs::path& filepath)
   {
-    std::string cmd = config.value("cmd", "");
-    std::string outputImageDir = config.value("outputDir", "");
+    std::string cmd = m_config.value("cmd", "");
+    std::string outputImageDir = m_config.value("outputDir", "");
     return cmd + " " + filepath.string() + " " + outputImageDir;
   }
   int executeExternalCmd(const std::string& cmd)
   {
-    auto back = fs::current_path();
-    const std::string cwd = config.value("cwd", "");
+    auto              back = fs::current_path();
+    const std::string cwd = m_config.value("cwd", "");
     if (!cwd.empty())
     {
       fs::current_path(cwd);
@@ -56,22 +56,22 @@ protected:
 
   fs::path getReadFile()
   {
-    const auto outputDir = fs::path(config.value("outputDir", ""));
-    const auto fileName = fs::path(config.value("outputFileName", ""));
+    const auto outputDir = fs::path(m_config.value("outputDir", ""));
+    const auto fileName = fs::path(m_config.value("outputFileName", ""));
     return outputDir / fileName;
   }
 
   fs::path layoutFileName()
   {
-    const auto outputDir = fs::path(config.value("outputDir", ""));
-    const auto fileName = fs::path(config.value("layoutFileName", ""));
+    const auto outputDir = fs::path(m_config.value("outputDir", ""));
+    const auto fileName = fs::path(m_config.value("layoutFileName", ""));
     return outputDir / fileName;
   }
 
   fs::path getResource()
   {
-    const auto outputDir = fs::path(config.value("outputDir", ""));
-    const auto image = fs::path(config.value("outputImageDir", ""));
+    const auto outputDir = fs::path(m_config.value("outputDir", ""));
+    const auto image = fs::path(m_config.value("outputImageDir", ""));
     return outputDir / image;
   }
 
@@ -80,12 +80,12 @@ protected:
     std::map<std::string, std::vector<char>> resources;
     if (std::filesystem::exists(fullpath) == false)
       return resources;
-    const fs::path prefix = this->config.value("outputImageDir", "resources");
+    const fs::path prefix = this->m_config.value("outputImageDir", "resources");
     for (const auto& entry : std::filesystem::recursive_directory_iterator(fullpath))
     {
       std::string key = (prefix / entry.path().filename()).string();
       std::cout << "read image: " << entry.path() << " which key is: " << key << std::endl;
-      auto data = GetBinFromFile(entry.path());
+      auto data = readBinary(entry.path());
       if (data.has_value())
       {
         if (data.value().empty())
@@ -106,7 +106,7 @@ protected:
   }
   nlohmann::json readJson(const fs::path& fullpath) const
   {
-    std::ifstream fs(fullpath);
+    std::ifstream  fs(fullpath);
     nlohmann::json json;
     if (fs.is_open())
     {
@@ -134,8 +134,8 @@ public:
   {
     DataWrapper data;
     data.format = readJson(fullpath);
-    const fs::path prefix = this->config.value("outputImageDir", "resources");
-    auto stem = fullpath.parent_path() / prefix;
+    const fs::path prefix = this->m_config.value("outputImageDir", "resources");
+    auto           stem = fullpath.parent_path() / prefix;
     data.resource = readRes(stem);
     return data;
   }
@@ -148,7 +148,7 @@ class SketchFileReader : public ExternalToolReader
 inline std::shared_ptr<IReader> load(const std::string ext)
 {
   std::shared_ptr<IReader> reader;
-  auto& cfg = Config::globalConfig();
+  auto&                    cfg = Config::globalConfig();
   if (ext == ".sketch")
   {
     try

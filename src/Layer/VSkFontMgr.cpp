@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "VSkFontMgr.hpp"
+#include "Layer/Core/VUtils.hpp"
 
 #include <include/core/SkFontArguments.h>
 #include <include/core/SkFontMgr.h>
@@ -482,26 +483,20 @@ void VGGFontLoader::loadDirectoryFonts(
       auto dirName = entry.path().string();
       loadDirectoryFonts(scanner, SkString{ dirName }, suffix, families);
     }
-  } catch (...) {
+  }
+  catch (...)
+  {
     WARN("Failed to read contents in dir: %s", directory.c_str());
     return;
   }
 }
-
-template<class... Ts>
-struct Overloaded : Ts...
-{
-  using Ts::operator()...;
-};
-// explicit deduction guide (not needed as of C++20)
-template<class... Ts>
-Overloaded(Ts...) -> Overloaded<Ts...>;
 
 void VGGFontLoader::loadSystemFonts(
   const SkTypeface_FreeType::Scanner& scanner,
   SkFontMgrVGG::Families*             families) const
 {
   // helper type for the visitor #4
+  using namespace VGG::layer;
   std::visit(
     Overloaded{ [&, this](const SkString& arg)
                 {

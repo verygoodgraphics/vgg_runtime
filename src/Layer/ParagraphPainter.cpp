@@ -67,18 +67,21 @@ void VParagraphPainter::drawTextBlob(
         {
           fillPen.setColor(f.color);
           const auto currentAlpha = fillPen.getAlphaf();
+          fillPen.setAlphaf(currentAlpha * f.contextSettings.opacity);
         }
         else if (f.fillType == FT_Gradient)
         {
           assert(f.gradient.has_value());
           auto gradientShader = getGradientShader(f.gradient.value(), m_paragraph->bound());
           fillPen.setShader(gradientShader);
+          fillPen.setAlphaf(f.contextSettings.opacity);
         }
         else if (f.fillType == FT_Pattern)
         {
           assert(f.pattern.has_value());
           auto shader = makePatternShader(m_paragraph->bound(), f.pattern.value());
           fillPen.setShader(shader);
+          fillPen.setAlphaf(f.contextSettings.opacity);
         }
       }
       m_canvas->drawTextBlob(blob, x, y, fillPen);

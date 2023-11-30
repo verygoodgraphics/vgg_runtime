@@ -56,11 +56,11 @@ void inline computeAdjacent3PointsInfo(
 }
 
 void inline computeAdjacent5PointsInfo(
-  const PointAttr& prevPrevPoint,
-  const PointAttr& prevPoint,
-  const PointAttr& curPoint,
-  const PointAttr& nextPoint,
-  const PointAttr& nextNextPoint,
+  const ControlPoint& prevPrevPoint,
+  const ControlPoint& prevPoint,
+  const ControlPoint& curPoint,
+  const ControlPoint& nextPoint,
+  const ControlPoint& nextNextPoint,
   float&           theta,
   int&             thetaSign,
   float&           pivotAngle,
@@ -188,7 +188,7 @@ inline bool addSmoothingRadiusCurveInLocalSpace(
   return true;
 }
 
-int peek1Point(const PointAttr* pp, const PointAttr& cp, SkPath& path)
+int peek1Point(const ControlPoint* pp, const ControlPoint& cp, SkPath& path)
 {
   const auto prevHasFrom = pp->from.has_value();
   const auto curHasTo = cp.to.has_value();
@@ -204,11 +204,11 @@ int peek1Point(const PointAttr* pp, const PointAttr& cp, SkPath& path)
 }
 
 int peek5Points(
-  const PointAttr& prevPrevPoint,
-  const PointAttr& prevPoint,
-  const PointAttr& curPoint,
-  const PointAttr& nextPoint,
-  const PointAttr& nextNextPoint,
+  const ControlPoint& prevPrevPoint,
+  const ControlPoint& prevPoint,
+  const ControlPoint& curPoint,
+  const ControlPoint& nextPoint,
+  const ControlPoint& nextNextPoint,
   float            smooth,
   SkPath&          path)
 {
@@ -297,7 +297,7 @@ SkPath makePath(const Contour& contour)
   size_t     next2 = (next + 1) % total;
 
   int       segments = isClosed ? total : total - 1;
-  PointAttr buffer[2] = { points[prev], points[cur] };
+  ControlPoint buffer[2] = { points[prev], points[cur] };
   int       cp = 1;
   int       pp = 1 - cp;
 

@@ -104,45 +104,18 @@ struct TextLayoutFixed
 
 using TextLayoutMode = std::variant<TextLayoutFixed, TextLayoutAutoWidth, TextLayoutAutoHeight>;
 
-namespace internal
-{
-
-template<class... Ts>
-struct Overloaded : Ts...
-{
-  using Ts::operator()...;
-};
-template<class... Ts>
-Overloaded(Ts...) -> Overloaded<Ts...>;
-} // namespace internal
-
-class TextParagraphCache
+class RichTextBlock
   : public ParagraphListener
   , public VNode
 {
 public:
-  using TextParagraphCacheDirtyFlags = uint8_t;
-  enum ETextParagraphCacheFlagsBits : TextParagraphCacheDirtyFlags
-  {
-    D_REBUILD = 1,
-    D_LAYOUT = 2,
-    D_ALL = D_REBUILD | D_LAYOUT,
-  };
-
   std::vector<TextParagraph> paragraph;
   std::vector<ParagraphInfo> paragraphCache;
 
-  void setFontCollection(sk_sp<VGGFontCollection> fontCollection)
-  {
-    this->m_fontCollection = std::move(fontCollection);
-  }
-
 private:
-  bool m_newParagraph{ true };
-
-  ParagraphAttr                m_paraAttr;
-  TextParagraphCacheDirtyFlags m_dirtyFlags{ D_ALL };
-  sk_sp<VGGFontCollection>     m_fontCollection;
+  bool                     m_newParagraph{ true };
+  ParagraphAttr            m_paraAttr;
+  sk_sp<VGGFontCollection> m_fontCollection;
 
   enum EState
   {
@@ -154,14 +127,16 @@ private:
   };
   uint8_t m_state{ EMPTY };
 
-  std::string m_utf8Text;
-
+  std::string            m_utf8Text;
   ETextVerticalAlignment m_verticalAlign;
   TextLayoutMode         m_textLayoutMode;
 
   Bound                      m_textBound;
   std::vector<TextStyleAttr> m_textStyle;
   std::vector<ParagraphAttr> m_lineStyle;
+
+  bool  ensureBuild(TextLayoutMode mode);
+  Bound internalLayout(const Bound& bound, ETextLayoutMode mode);
 
 protected:
   void onBegin() override;
@@ -180,122 +155,36 @@ protected:
   {
     Bound newBound;
     std::visit(
-      internal::Overloaded{ [&](const TextLayoutAutoHeight& l) { newBound = layout(l); },
-                            [&](const TextLayoutAutoWidth& l) { newBound = layout(l); },
-                            [&](const TextLayoutFixed& l) { newBound = layout(l); } },
+      Overloaded{ [&](const TextLayoutAutoHeight& l) { newBound = layout(l); },
+                  [&](const TextLayoutAutoWidth& l) { newBound = layout(l); },
+                  [&](const TextLayoutFixed& l) { newBound = layout(l); } },
       m_textLayoutMode);
     return newBound;
   }
 
 public:
-  TextParagraphCache()
+  RichTextBlock()
   {
     auto mgr = sk_ref_sp(FontManager::instance().defaultFontManager());
     m_fontCollection = sk_make_sp<VGGFontCollection>(std::move(mgr));
   }
-  TextParagraphCache(const TextParagraphCache&) = default;
-  TextParagraphCache& operator=(const TextParagraphCache&) = default;
+  RichTextBlock(const RichTextBlock&) = default;
+  RichTextBlock& operator=(const RichTextBlock&) = default;
 
-  TextParagraphCache(TextParagraphCache&&) noexcept = default;
-  TextParagraphCache& operator=(TextParagraphCache&&) noexcept = default;
+  RichTextBlock(RichTextBlock&&) noexcept = default;
+  RichTextBlock& operator=(RichTextBlock&&) noexcept = default;
 
-  TextParagraphCache(sk_sp<VGGFontCollection> fontCollection)
+  RichTextBlock(sk_sp<VGGFontCollection> fontCollection)
     : m_fontCollection(std::move(fontCollection))
   {
   }
 
-private:
+public:
   bool empty() const
   {
-    return paragraph.empty();
+    return m_state == EMPTY;
   }
 
-  bool ensureBuild(TextLayoutMode mode)
-  {
-    bool ok = false;
-    if (m_state <= EMPTY)
-      return ok;
-    if (m_state < PARSE)
-    {
-      ParagraphParser p;
-      p.parse(*this, m_utf8Text, m_textStyle, m_lineStyle, &mode);
-      m_state = PARSE;
-    }
-    if (!paragraph.empty() && m_state < BUILT)
-    {
-      paragraphCache.clear();
-      paragraphCache.reserve(paragraph.size());
-      for (auto& d : paragraph)
-      {
-        assert(d.builder);
-        paragraphCache.push_back(std::move(d.build()));
-      }
-      m_state = BUILT;
-    }
-    if (m_state >= BUILT)
-    {
-      ok = true;
-    }
-    return ok;
-  }
-
-  Bound internalLayout(const Bound& bound, ETextLayoutMode mode)
-  {
-    Bound      newBound = bound;
-    const auto layoutWidth = bound.width();
-    float      newWidth = bound.width();
-    float      newHeight = bound.height();
-    for (int i = 0; i < paragraphCache.size(); i++)
-    {
-      // auto paragraph = d.builder->Build();
-      const auto&   d = paragraph[i];
-      const auto&   paragraph = paragraphCache[i].paragraph;
-      SkFontMetrics metrics;
-      d.builder->getParagraphStyle().getTextStyle().getFontMetrics(&metrics);
-      const auto curX = metrics.fAvgCharWidth * d.level;
-      paragraphCache[i].offsetX = curX;
-      if (mode == ETextLayoutMode::TL_WidthAuto)
-      {
-        constexpr float MAX_WIDTH = 100000;
-        paragraph->layout(MAX_WIDTH);
-      }
-      else
-      {
-        paragraph->layout(layoutWidth - curX);
-      }
-      newWidth = std::max((float)paragraph->getLongestLine(), newWidth);
-      auto lastLine = paragraph->lineNumber();
-      if (lastLine < 1)
-        continue;
-      assert(!d.utf8TextView.text.empty());
-      auto c = d.utf8TextView.text.back();
-      if (c == '\n' && i < paragraphCache.size() - 1)
-      {
-        // It not a neat design because list item must be rendered seperately.
-        // The line height of newline at each end of paragraph except for the last need to be dealt
-        // specially
-        LineMetrics lineMetric;
-        paragraph->getLineMetricsAt(lastLine - 1, &lineMetric);
-        newHeight += paragraph->getHeight() - lineMetric.fHeight;
-      }
-      else
-      {
-        newHeight += paragraph->getHeight();
-      }
-    }
-    if (mode == ETextLayoutMode::TL_HeightAuto)
-    {
-      newBound.setHeight(newHeight);
-    }
-    if (mode == ETextLayoutMode::TL_WidthAuto)
-    {
-      newBound.setHeight(newHeight);
-      newBound.setWidth(newWidth);
-    }
-    return newBound;
-  }
-
-public:
   void setText(std::string utf8)
   {
     m_utf8Text = std::move(utf8);
@@ -332,6 +221,15 @@ public:
     return m_lineStyle;
   }
 
+  void setFontCollection(sk_sp<VGGFontCollection> fontCollection)
+  {
+    if (this->m_fontCollection == fontCollection)
+      return;
+    m_fontCollection = std::move(fontCollection);
+    m_state = INIT;
+    revalidate();
+  }
+
   void setTextLayoutMode(TextLayoutMode mode)
   {
     m_textLayoutMode = mode;
@@ -339,7 +237,7 @@ public:
     // {
     //   ETextHorizontalAlignment align;
     //   std::visit(
-    //     internal::Overloaded{ [&](const TextLayoutAutoHeight& l) {},
+    //     Overloaded{ [&](const TextLayoutAutoHeight& l) {},
     //                           [&](const TextLayoutAutoWidth& l) { align = HA_Left; },
     //                           [&](const TextLayoutFixed& l) {} },
     //     mode);

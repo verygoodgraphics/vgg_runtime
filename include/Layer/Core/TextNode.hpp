@@ -16,6 +16,7 @@
 #pragma once
 
 #include "Layer/Core/PaintNode.hpp"
+#include "Layer/Core/VType.hpp"
 #include "Layer/ParagraphLayout.hpp"
 
 namespace VGG::layer
@@ -37,7 +38,7 @@ public:
     std::string                      utf8,
     std::vector<TextStyleAttr>       attrs,
     const std::vector<TextLineAttr>& lineAttr);
-  void setFrameMode(TextLayoutMode mode);
+  void setFrameMode(ETextLayoutMode mode);
   void setVerticalAlignment(ETextVerticalAlignment vertAlign);
 
   TreeNodePtr clone() const override;

@@ -1,0 +1,98 @@
+{
+  "class": "Daruma_Layout",
+  "obj": [
+    {
+      "class": "object",
+      "id": "171:422",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 406.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "layout": {
+        "class": "flexbox_layout",
+        "direction": 1,
+        "justify_content": 1,
+        "align_items": 2,
+        "align_content": 2,
+        "wrap": 1,
+        "row_gap": 0,
+        "column_gap": 24.0,
+        "padding": [
+          32.0,
+          32.0,
+          32.0,
+          32.0
+        ],
+        "z_order": false
+      }
+    },
+    {
+      "class": "object",
+      "id": "171:423",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 342.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 46.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flex_grow_shrink": 1.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "171:424",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 40.000038146972656,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 48.0,
+          "types": 1
+        }
+      },
+      "item_in_layout": {
+        "class": "flexbox_item",
+        "position": {
+          "class": "position",
+          "value": 2
+        },
+        "flex_grow_shrink": 0.0
+      }
+    }
+  ]
+}

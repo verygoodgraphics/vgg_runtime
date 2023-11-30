@@ -274,7 +274,7 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutNode> view)
           continue;
         }
 
-        if (subview->autoLayout()->isEnabled() && subview->autoLayout()->isIncludedInLayout)
+        if (subview->autoLayout()->isEnabled() && subview->autoLayout()->isIncludedInLayout())
         {
           subviewsToInclude.push_back(subview);
         }
@@ -313,7 +313,7 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutNode> view)
       std::vector<std::shared_ptr<LayoutNode>> subviewsToInclude;
       for (auto subview : view->children())
       {
-        if (subview->autoLayout()->isEnabled() && subview->autoLayout()->isIncludedInLayout)
+        if (subview->autoLayout()->isEnabled() && subview->autoLayout()->isIncludedInLayout())
         {
           subviewsToInclude.push_back(subview);
         }
@@ -354,7 +354,7 @@ void applyLayoutToViewHierarchy(
   }
 
   auto autoLayout = view->autoLayout();
-  if (!autoLayout->isIncludedInLayout)
+  if (!autoLayout->isIncludedInLayout())
   {
     DEBUG("applyLayoutToViewHierarchy, not included in layout, return");
     return;
@@ -507,7 +507,7 @@ bool AutoLayout::isLeaf()
       for (auto& child : sharedView->children())
       {
         auto autoLayout = child->autoLayout();
-        if (autoLayout->isEnabled() && autoLayout->isIncludedInLayout)
+        if (autoLayout->isEnabled() && autoLayout->isIncludedInLayout())
         {
           return false;
         }
@@ -940,6 +940,27 @@ bool AutoLayout::isFlexOrGridItem()
   }
 
   return sharedRule->isFlexItem() || sharedRule->isGridItem();
+}
+
+bool AutoLayout::isIncludedInLayout()
+{
+  return !isAboslutePosition();
+}
+
+bool AutoLayout::isAboslutePosition()
+{
+  auto sharedRule = rule.lock();
+  if (!sharedRule)
+  {
+    return false;
+  }
+
+  if (const auto detail = sharedRule->getFlexItemRule())
+  {
+    return detail->position.value == Position::ETypes::ABSOLUTE;
+  }
+
+  return false;
 }
 
 } // namespace Internal

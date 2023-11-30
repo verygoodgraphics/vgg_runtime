@@ -136,6 +136,7 @@ void LayoutNode::setFrame(const Layout::Rect& newFrame, bool updateRule, bool us
 
     if (m_autoLayout->isContainer())
     {
+      resizeChildNodes(oldSize, newSize, true); // resize absolute child
       return;
     }
   }
@@ -194,7 +195,8 @@ void LayoutNode::configureAutoLayout()
 
 void LayoutNode::resizeChildNodes(
   const Layout::Size& oldContainerSize,
-  const Layout::Size& newContainerSize)
+  const Layout::Size& newContainerSize,
+  bool                onlyWhichHasAbsolutePostion)
 {
   if (oldContainerSize == Layout::Size{ 0, 0 })
   {
@@ -208,7 +210,17 @@ void LayoutNode::resizeChildNodes(
 
   for (auto& child : m_children)
   {
-    child->resize(oldContainerSize, newContainerSize);
+    if (onlyWhichHasAbsolutePostion)
+    {
+      if (child->autoLayout() && child->autoLayout()->isAboslutePosition())
+      {
+        child->resize(oldContainerSize, newContainerSize);
+      }
+    }
+    else
+    {
+      child->resize(oldContainerSize, newContainerSize);
+    }
   }
 }
 

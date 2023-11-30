@@ -57,8 +57,6 @@ public:
   std::weak_ptr<LayoutNode> view;
   std::weak_ptr<Rule::Rule> rule;
 
-  bool isIncludedInLayout{ true };
-
 public:
   void configure();
   void applyLayout(bool preservingOrigin);
@@ -66,6 +64,9 @@ public:
   void updateSizeRule();
 
   void setNeedsLayout();
+
+  bool isIncludedInLayout();
+  bool isAboslutePosition();
 
   bool isLeaf();
   bool isEnabled()

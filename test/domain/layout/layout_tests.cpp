@@ -21,8 +21,9 @@ protected:
 TEST_F(VggLayoutTestSuite, Smoke)
 {
   // Given
-  std::shared_ptr<Daruma> daruma{ new Daruma(Helper::RawJsonDocumentBuilder,
-                                             Helper::RawJsonDocumentBuilder) };
+  std::shared_ptr<Daruma> daruma{
+    new Daruma(Helper::RawJsonDocumentBuilder, Helper::RawJsonDocumentBuilder)
+  };
   std::string filePath = "testDataDir/layout/0_space_between/";
   daruma->load(filePath);
 
@@ -35,13 +36,14 @@ TEST_F(VggLayoutTestSuite, Smoke)
 TEST_F(VggLayoutTestSuite, Layout)
 {
   // Given
-  std::shared_ptr<Daruma> daruma{ new Daruma(Helper::RawJsonDocumentBuilder,
-                                             Helper::RawJsonDocumentBuilder) };
+  std::shared_ptr<Daruma> daruma{
+    new Daruma(Helper::RawJsonDocumentBuilder, Helper::RawJsonDocumentBuilder)
+  };
   std::string filePath = "testDataDir/layout/0_space_between/";
   daruma->load(filePath);
 
   Layout::Layout sut{ daruma->designDoc(), daruma->layoutDoc() };
-  Layout::Size windowSize{ 1400, 900 };
+  Layout::Size   windowSize{ 1400, 900 };
 
   // When
   layout(sut, windowSize);
@@ -50,11 +52,11 @@ TEST_F(VggLayoutTestSuite, Layout)
   auto tree = sut.layoutTree();
   auto currentPage = tree->children()[0];
 
-  auto leftChildFrame = currentPage->children()[0]->frame();
+  auto         leftChildFrame = currentPage->children()[0]->frame();
   Layout::Rect expectedLeftChildFrame{ { 100, 40 }, { 200, 150 } };
   EXPECT_TRUE(leftChildFrame == expectedLeftChildFrame);
 
-  auto rightChildFrame = currentPage->children()[1]->frame();
+  auto         rightChildFrame = currentPage->children()[1]->frame();
   Layout::Rect expectedRightChildFrame{ { 1100, 40 }, { 200, 250 } };
   EXPECT_TRUE(rightChildFrame == expectedRightChildFrame);
 }
@@ -62,13 +64,14 @@ TEST_F(VggLayoutTestSuite, Layout)
 TEST_F(VggLayoutTestSuite, GridWrap)
 {
   // Given
-  std::shared_ptr<Daruma> daruma{ new Daruma(Helper::RawJsonDocumentBuilder,
-                                             Helper::RawJsonDocumentBuilder) };
+  std::shared_ptr<Daruma> daruma{
+    new Daruma(Helper::RawJsonDocumentBuilder, Helper::RawJsonDocumentBuilder)
+  };
   std::string filePath = "testDataDir/layout/1_grid_wrap/";
   daruma->load(filePath);
 
   Layout::Layout sut{ daruma->designDoc(), daruma->layoutDoc() };
-  Layout::Size windowSize{ 1400, 900 };
+  Layout::Size   windowSize{ 1400, 900 };
 
   // When
   layout(sut, windowSize);
@@ -79,11 +82,11 @@ TEST_F(VggLayoutTestSuite, GridWrap)
 
   auto gridContainer = currentPage;
 
-  auto child0Frame = gridContainer->children()[0]->frame();
+  auto         child0Frame = gridContainer->children()[0]->frame();
   Layout::Rect expectChild0Frame{ { 100, 40 }, { 200, 250 } };
   EXPECT_TRUE(child0Frame == expectChild0Frame);
 
-  auto child3Frame = gridContainer->children()[3]->frame();
+  auto         child3Frame = gridContainer->children()[3]->frame();
   Layout::Rect expectChild3Frame{ { 1060, 40 }, { 200, 200 } };
   EXPECT_TRUE(child3Frame == expectChild3Frame);
 }
@@ -105,8 +108,9 @@ TEST_F(VggLayoutTestSuite, LayoutInstance)
 TEST_F(VggLayoutTestSuite, FrameOfNodeWhoseParentPositionInBoundsIsNotZero)
 {
   // Given
-  std::shared_ptr<Daruma> daruma{ new Daruma(Helper::RawJsonDocumentBuilder,
-                                             Helper::RawJsonDocumentBuilder) };
+  std::shared_ptr<Daruma> daruma{
+    new Daruma(Helper::RawJsonDocumentBuilder, Helper::RawJsonDocumentBuilder)
+  };
   std::string filePath = "testDataDir/layout/21_layout_node_frame/";
   daruma->load(filePath);
 
@@ -117,7 +121,7 @@ TEST_F(VggLayoutTestSuite, FrameOfNodeWhoseParentPositionInBoundsIsNotZero)
   auto tree = sut.layoutTree();
   auto page = tree->children()[0];
 
-  auto child1Frame = page->children()[1]->frame();
+  auto         child1Frame = page->children()[1]->frame();
   Layout::Rect expectChild0Frame{ { 0, 0 }, { 200, 100 } };
   EXPECT_TRUE(child1Frame == expectChild0Frame);
 }
@@ -158,4 +162,17 @@ TEST_F(VggLayoutTestSuite, ApplyLayoutToViewHierarchy)
   // Then
   std::vector<Layout::Rect> expectedFrames{ { { 24, 14 }, { 104, 27 } } };
   EXPECT_TRUE(descendantFrame({ 0, 1, 0 }) == expectedFrames[0]);
+}
+
+TEST_F(VggLayoutTestSuite, AbosoluteFlexItem)
+{
+  // Given
+  setupWithExpanding("testDataDir/layout/31_absolute_flex_item/");
+
+  // When
+
+  // Then
+  std::vector<Layout::Rect> expectedFrames{ { { 233.99996948242188, 24 },
+                                              { 40.000038146972656, 48 } } };
+  EXPECT_TRUE(descendantFrame({ 0, 1 }) == expectedFrames[0]);
 }

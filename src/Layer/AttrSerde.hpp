@@ -380,12 +380,17 @@ inline void from_json(const json& j, TextStyleAttr& x)
   x.fills = j.value("fills", std::vector<Fill>());
   x.baselineShift = j.value("baselineShift", 0.0);
   x.lineThrough = j.value("linethrough", false);
-  x.letterSpacing = j.value("letterSpacingValue", 0.0);
   x.lineSpace = j.value("lineSpaceValue", 0.0);
   x.underline = j.value("underline", UT_None);
   x.kerning = j.value("kerning", false);
   x.horzAlignment = j.value("horizontalAlignment", HA_Left);
   x.size = j.value("size", 14);
+  x.letterSpacing = j.value("letterSpacingValue", 0.0);
+  auto unit = j.value("letterSpacingUnit", 1);
+  if (unit == 1)
+  {
+    x.letterSpacing = x.size * x.letterSpacing / 100.f;
+  }
 }
 
 inline void from_json(const json& j, AlphaMask& x)

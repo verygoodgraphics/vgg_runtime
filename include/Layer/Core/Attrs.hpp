@@ -141,21 +141,21 @@ struct Gradient
 
 struct Border
 {
-  std::optional<Color>    color;
   ContextSetting          contextSettings;
   double                  dashedOffset;
   std::vector<float>      dashedPattern;
   EPathFillType           fillType; // TODO:
   double                  flat;
-  std::optional<Gradient> gradient;
   bool                    isEnabled;
   ELineCap                lineCapStyle;
   ELineJoin               lineJoinStyle;
   double                  miterLimit;
-  std::optional<Pattern>  pattern;
   EPathPosition           position;
   int64_t                 style;
   double                  thickness;
+  std::optional<Color>    color;
+  std::optional<Gradient> gradient;
+  std::optional<Pattern>  pattern;
 };
 
 struct Shadow
@@ -245,7 +245,7 @@ struct TextStyleAttr
   }
 };
 
-struct PointAttr
+struct ControlPoint
 {
   glm::vec2                point;
   std::optional<glm::vec2> from;
@@ -253,7 +253,7 @@ struct PointAttr
   std::optional<int>       cornerStyle;
   float                    radius = 0.0;
 
-  PointAttr(
+  ControlPoint(
     glm::vec2                point,
     float                    radius,
     std::optional<glm::vec2> from,
@@ -268,7 +268,7 @@ struct PointAttr
   }
 };
 
-struct Contour : public std::vector<PointAttr>
+struct Contour : public std::vector<ControlPoint>
 {
   bool    closed = true;
   float   cornerSmooth{ 0.f };

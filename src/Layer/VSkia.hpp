@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "Layer/AttrSerde.hpp"
+#include "Layer/Core/VUtils.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Scene.hpp"
@@ -43,30 +44,6 @@
 using namespace VGG;
 
 extern std::unordered_map<std::string, sk_sp<SkImage>> g_skiaImageRepo;
-
-template<class... Ts>
-struct Overloaded : Ts...
-{
-  using Ts::operator()...;
-};
-// explicit deduction guide (not needed as of C++20)
-template<class... Ts>
-Overloaded(Ts...) -> Overloaded<Ts...>;
-
-#define SWITCH_MAP_ITEM_BEGIN(var)                                                                 \
-  switch (var)                                                                                     \
-  {
-
-#define SWITCH_MAP_ITEM_DEF(from, to)                                                              \
-  case from:                                                                                       \
-    return to;
-
-#define SWITCH_MAP_ITEM_DEF_NULL(from) case from:;
-
-#define SWITCH_MAP_ITEM_END(fallback)                                                              \
-  default:                                                                                         \
-    return fallback;                                                                               \
-    }
 
 inline SkRect toSkRect(const VGG::Bound& bound)
 {

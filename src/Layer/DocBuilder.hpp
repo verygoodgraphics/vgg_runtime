@@ -48,15 +48,6 @@
 namespace VGG::layer
 {
 
-template<class... Ts>
-struct Overloaded : Ts...
-{
-  using Ts::operator()...;
-};
-// explicit deduction guide (not needed as of C++20)
-template<class... Ts>
-Overloaded(Ts...) -> Overloaded<Ts...>;
-
 using namespace nlohmann;
 
 class DocBuilder
@@ -243,26 +234,13 @@ class DocBuilder
         }
         p->setParagraph(std::move(text), textStyleAttrs, lineType);
         p->setVerticalAlignment(j.value("verticalAlignment", ETextVerticalAlignment::VA_Top));
-        const auto&    b = p->frameBound();
-        auto           layoutMode = j.value("frameMode", ETextLayoutMode::TL_Fixed);
-        TextLayoutMode mode;
-        switch (layoutMode)
-        {
-          case TL_Fixed:
-            mode = TextLayoutFixed(b);
-            break;
-          case TL_WidthAuto:
-            mode = TextLayoutAutoWidth();
-            break;
-          case TL_HeightAuto:
-            mode = TextLayoutAutoHeight(b.width());
-            break;
-        }
-        p->setFrameMode(mode);
+        const auto& b = p->frameBound();
+        auto        layoutMode = j.value("frameMode", ETextLayoutMode::TL_Fixed);
+        p->setFrameMode(layoutMode);
         if (b.width() == 0 || b.height() == 0)
         {
           // for Ai speicific
-          p->setFrameMode(TextLayoutAutoWidth());
+          p->setFrameMode(TL_WidthAuto);
         }
         return p;
       });

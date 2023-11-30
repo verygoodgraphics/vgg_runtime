@@ -268,7 +268,7 @@ public:
     sk_sp<SkBlender>     blender);
 
   void drawImage(
-    const Bound          bound,
+    const Bound&         bound,
     sk_sp<SkShader>      imageShader,
     sk_sp<SkImageFilter> imageFilter,
     sk_sp<SkBlender>     blender)

@@ -33,7 +33,6 @@ int calcWhitespace(
   const std::vector<SkString>& fontFamilies,
   sk_sp<FontCollection>        fontCollection)
 {
-  // cassert(count < 40);
   ParagraphStyle style;
   style.setEllipsis(u"...");
   style.setTextAlign(TextAlign::kLeft);
@@ -302,14 +301,14 @@ void drawParagraphDebugInfo(
 
   canvas.get()->restore();
 }
-void TextParagraphCache::onBegin()
+void RichTextBlock::onBegin()
 {
   paragraph.clear();
 }
-void TextParagraphCache::onEnd()
+void RichTextBlock::onEnd()
 {
 }
-void TextParagraphCache::onParagraphBegin(
+void RichTextBlock::onParagraphBegin(
   int                  paraIndex,
   int                  order,
   const ParagraphAttr& paragraAttr,
@@ -329,7 +328,7 @@ void TextParagraphCache::onParagraphBegin(
   m_paraAttr = paragraAttr;
 }
 
-void TextParagraphCache::onParagraphEnd(int paraIndex, const TextView& textView, void* userData)
+void RichTextBlock::onParagraphEnd(int paraIndex, const TextView& textView, void* userData)
 {
   assert(!paragraph.empty());
   auto& p = paragraph.back();
@@ -340,10 +339,9 @@ void TextParagraphCache::onParagraphEnd(int paraIndex, const TextView& textView,
       paragraph.pop_back();
     m_newParagraph = false;
   }
-  // std::cout << "onParagraphEnd: " << paraIndex << ", [" << textView.Text << "]\n";
 }
 
-void TextParagraphCache::onTextStyle(
+void RichTextBlock::onTextStyle(
   int                  paraIndex,
   int                  styleIndex,
   const TextView&      textView,
@@ -356,9 +354,9 @@ void TextParagraphCache::onTextStyle(
   {
     ETextHorizontalAlignment align;
     std::visit(
-      internal::Overloaded{ [&](const TextLayoutAutoHeight& l) { align = textAttr.horzAlignment; },
-                            [&](const TextLayoutAutoWidth& l) { align = HA_Left; },
-                            [&](const TextLayoutFixed& l) { align = textAttr.horzAlignment; } },
+      Overloaded{ [&](const TextLayoutAutoHeight& l) { align = textAttr.horzAlignment; },
+                  [&](const TextLayoutAutoWidth& l) { align = HA_Left; },
+                  [&](const TextLayoutFixed& l) { align = textAttr.horzAlignment; } },
       *(TextLayoutMode*)userData);
     p.builder = skia::textlayout::ParagraphBuilder::make(
       createParagraphStyle(ParagraphAttr{ m_paraAttr.type, align }),
@@ -371,6 +369,91 @@ void TextParagraphCache::onTextStyle(
   p.builder->pushStyle(style);
   p.builder->addText(textView.text.data(), textView.text.size());
   p.builder->pop();
-  // std::cout << "Style Text: " << styleIndex << ", [" << textView.Text << "]\n";
 }
+
+bool RichTextBlock::ensureBuild(TextLayoutMode mode)
+{
+  bool ok = false;
+  if (m_state <= EMPTY)
+    return ok;
+  if (m_state < PARSE)
+  {
+    ParagraphParser p;
+    p.parse(*this, m_utf8Text, m_textStyle, m_lineStyle, &mode);
+    m_state = PARSE;
+  }
+  if (!paragraph.empty() && m_state < BUILT)
+  {
+    paragraphCache.clear();
+    paragraphCache.reserve(paragraph.size());
+    for (auto& d : paragraph)
+    {
+      assert(d.builder);
+      paragraphCache.push_back(std::move(d.build()));
+    }
+    m_state = BUILT;
+  }
+  if (m_state >= BUILT)
+  {
+    ok = true;
+  }
+  return ok;
+}
+
+Bound RichTextBlock::internalLayout(const Bound& bound, ETextLayoutMode mode)
+{
+  Bound      newBound = bound;
+  const auto layoutWidth = bound.width();
+  float      newWidth = bound.width();
+  float      newHeight = bound.height();
+  for (int i = 0; i < paragraphCache.size(); i++)
+  {
+    // auto paragraph = d.builder->Build();
+    const auto&   d = paragraph[i];
+    const auto&   paragraph = paragraphCache[i].paragraph;
+    SkFontMetrics metrics;
+    d.builder->getParagraphStyle().getTextStyle().getFontMetrics(&metrics);
+    const auto curX = metrics.fAvgCharWidth * d.level;
+    paragraphCache[i].offsetX = curX;
+    if (mode == ETextLayoutMode::TL_WidthAuto)
+    {
+      constexpr float MAX_WIDTH = 100000;
+      paragraph->layout(MAX_WIDTH);
+    }
+    else
+    {
+      paragraph->layout(layoutWidth - curX);
+    }
+    newWidth = std::max((float)paragraph->getLongestLine(), newWidth);
+    auto lastLine = paragraph->lineNumber();
+    if (lastLine < 1)
+      continue;
+    assert(!d.utf8TextView.text.empty());
+    auto c = d.utf8TextView.text.back();
+    if (c == '\n' && i < paragraphCache.size() - 1)
+    {
+      // It not a neat design because list item must be rendered seperately.
+      // The line height of newline at each end of paragraph except for the last need to be dealt
+      // specially
+      LineMetrics lineMetric;
+      paragraph->getLineMetricsAt(lastLine - 1, &lineMetric);
+      newHeight += paragraph->getHeight() - lineMetric.fHeight;
+    }
+    else
+    {
+      newHeight += paragraph->getHeight();
+    }
+  }
+  if (mode == ETextLayoutMode::TL_HeightAuto)
+  {
+    newBound.setHeight(newHeight);
+  }
+  if (mode == ETextLayoutMode::TL_WidthAuto)
+  {
+    newBound.setHeight(newHeight);
+    newBound.setWidth(newWidth);
+  }
+  return newBound;
+}
+
 } // namespace VGG::layer

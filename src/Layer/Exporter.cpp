@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Layer/Core/Stream.hpp"
+#include "Stream.hpp"
 #include "Layer/Exporter/PDFExporter.hpp"
 #include "Layer/Exporter/SVGExporter.hpp"
 #include "Layer/Scene.hpp"

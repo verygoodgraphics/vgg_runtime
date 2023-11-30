@@ -29,8 +29,8 @@
 #endif
 #include "Renderer.hpp"
 #include "VSkiaContext.hpp"
+#include "Stream.hpp"
 
-#include "Layer/Core/Stream.hpp"
 #include "Layer/VGGLayer.hpp"
 #include "Layer/Zoomer.hpp"
 #include "Layer/Scene.hpp"
@@ -47,10 +47,11 @@ namespace VGG::layer
 
 using namespace VGG::layer::skia_impl;
 
-std::optional<std::vector<char>> encodeImage(GrDirectContext* ctx,
-                                             EImageEncode encode,
-                                             SkImage* image,
-                                             int quality)
+std::optional<std::vector<char>> encodeImage(
+  GrDirectContext* ctx,
+  EImageEncode     encode,
+  SkImage*         image,
+  int              quality)
 {
   quality = std::max(std::min(quality, 100), 0);
   if (encode == EImageEncode::IE_PNG)
@@ -94,14 +95,14 @@ class VLayer__pImpl
   VGG_DECL_API(VLayer);
 
 public:
-  Zoomer zoomer;
+  Zoomer                                   zoomer;
   // SkiaState skiaState;
-  std::unique_ptr<SkiaContext> skiaContext;
-  int surfaceWidth;
-  int surfaceHeight;
-  SkCanvas* canvas{ nullptr };
+  std::unique_ptr<SkiaContext>             skiaContext;
+  int                                      surfaceWidth;
+  int                                      surfaceHeight;
+  SkCanvas*                                canvas{ nullptr };
   std::vector<std::shared_ptr<Renderable>> items;
-  std::vector<std::shared_ptr<Scene>> scenes;
+  std::vector<std::shared_ptr<Scene>>      scenes;
 
   VLayer__pImpl(VLayer* api)
     : q_ptr(api)
@@ -136,10 +137,11 @@ public:
         auto z = scene->zoomer();
         if (z)
         {
-          info.push_back(mapCanvasPositionToScene(z,
-                                                  scene->name().c_str(),
-                                                  q_ptr->m_position[0],
-                                                  q_ptr->m_position[1]));
+          info.push_back(mapCanvasPositionToScene(
+            z,
+            scene->name().c_str(),
+            q_ptr->m_position[0],
+            q_ptr->m_position[1]));
         }
       }
 
@@ -149,40 +151,43 @@ public:
     canvas->flush();
   }
 
-  std::string mapCanvasPositionToScene(const Zoomer* zoomer,
-                                       const char* name,
-                                       int curMouseX,
-                                       int curMouseY)
+  std::string mapCanvasPositionToScene(
+    const Zoomer* zoomer,
+    const char*   name,
+    int           curMouseX,
+    int           curMouseY)
   {
     std::stringstream ss;
-    float windowPos[2] = { (float)curMouseX, (float)curMouseY };
-    float logixXY[2];
+    float             windowPos[2] = { (float)curMouseX, (float)curMouseY };
+    float             logixXY[2];
     zoomer->mapCanvasPosToLogicalPosition(windowPos, logixXY);
     ss << name << ": (" << (int)logixXY[0] << ", " << (int)logixXY[1] << ")";
     std::string res{ std::istreambuf_iterator<char>{ ss }, {} };
     return res;
   }
 
-  void drawTextAt(SkCanvas* canvas,
-                  const std::vector<std::string>& strings,
-                  int curMouseX,
-                  int curMouseY)
+  void drawTextAt(
+    SkCanvas*                       canvas,
+    const std::vector<std::string>& strings,
+    int                             curMouseX,
+    int                             curMouseY)
   {
     SkPaint textPaint;
     textPaint.setColor(SK_ColorBLACK);
-    SkFont font;
+    SkFont        font;
     constexpr int FONTSIZE = 20;
     font.setSize(FONTSIZE);
     int dy = 0;
     for (const auto& text : strings)
     {
-      canvas->drawSimpleText(text.c_str(),
-                             text.size(),
-                             SkTextEncoding::kUTF8,
-                             curMouseX,
-                             curMouseY + dy,
-                             font,
-                             textPaint);
+      canvas->drawSimpleText(
+        text.c_str(),
+        text.size(),
+        SkTextEncoding::kUTF8,
+        curMouseX,
+        curMouseY + dy,
+        font,
+        textPaint);
       dy += FONTSIZE;
     }
   }
@@ -194,7 +199,7 @@ std::optional<ELayerError> VLayer::onInit()
   context()->makeCurrent();
 
   const auto& cfg = context()->config();
-  const auto api = context()->property().api;
+  const auto  api = context()->property().api;
 
   if (api == EGraphicsAPIBackend::API_OPENGL)
   {
@@ -284,9 +289,9 @@ void VLayer::makeSKP(std::ostream& os)
 {
   VGG_IMPL(VLayer);
   SkPictureRecorder rec;
-  auto w = _->skiaContext->surface()->width();
-  auto h = _->skiaContext->surface()->height();
-  auto canvas = rec.beginRecording(w, h);
+  auto              w = _->skiaContext->surface()->width();
+  auto              h = _->skiaContext->surface()->height();
+  auto              canvas = rec.beginRecording(w, h);
   _->renderInternal(canvas, false);
   auto pic = rec.finishRecordingAsPicture();
   if (pic)
@@ -311,8 +316,9 @@ std::optional<std::vector<char>> VLayer::makeImageSnapshot(const ImageOptions& o
   VGG_IMPL(VLayer);
   auto surface = _->skiaContext->surface();
   auto ctx = _->skiaContext->context();
-  if (auto image = surface->makeImageSnapshot(
-        SkIRect::MakeXYWH(opts.position[0], opts.position[1], opts.extend[0], opts.extend[1])))
+  if (
+    auto image = surface->makeImageSnapshot(
+      SkIRect::MakeXYWH(opts.position[0], opts.position[1], opts.extend[0], opts.extend[1])))
   {
     if (opts.encode != EImageEncode::IE_RAW)
     {

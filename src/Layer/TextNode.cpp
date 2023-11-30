@@ -47,16 +47,16 @@ public:
   TextNode__pImpl(TextNode* api)
     : q_ptr(api)
   {
-    paragraphLayout = std::make_shared<TextParagraphCache>();
+    paragraphLayout = std::make_shared<RichTextBlock>();
     auto mgr = sk_ref_sp(FontManager::instance().defaultFontManager());
     auto fontCollection = sk_make_sp<VGGFontCollection>(std::move(mgr));
     painter = std::make_shared<VParagraphPainter>();
     painter->setParagraph(paragraphLayout);
   }
 
-  std::shared_ptr<VParagraphPainter>  painter;
-  std::shared_ptr<TextParagraphCache> paragraphLayout;
-  bool                                observed{ false };
+  std::shared_ptr<VParagraphPainter> painter;
+  std::shared_ptr<RichTextBlock>     paragraphLayout;
+  bool                               observed{ false };
 
   TextNode__pImpl(const TextNode__pImpl& p)
   {
@@ -128,61 +128,38 @@ void TextNode::setParagraph(
   // parser.parse(_->paragraphCache, _->text, _->textAttr, paraAttrs);
 }
 
-void TextNode::setFrameMode(TextLayoutMode mode)
+void TextNode::setFrameMode(ETextLayoutMode layoutMode)
 {
   VGG_IMPL(TextNode);
   _->ensureObserve();
+  TextLayoutMode mode;
+  switch (layoutMode)
+  {
+    case TL_Fixed:
+      mode = TextLayoutFixed(frameBound());
+      break;
+    case TL_WidthAuto:
+      mode = TextLayoutAutoWidth();
+      break;
+    case TL_HeightAuto:
+      mode = TextLayoutAutoHeight(frameBound().width());
+      break;
+  }
   _->paragraphLayout->setTextLayoutMode(mode);
 }
 
 void TextNode::paintEvent(SkiaRenderer* renderer)
 {
-  auto canvas = renderer->canvas();
   VGG_IMPL(TextNode);
-
-  if (_->paragraphLayout->paragraphCache.empty())
+  if (_->paragraphLayout->empty())
     return;
+  auto canvas = renderer->canvas();
   if (overflow() == OF_Hidden)
   {
     canvas->save();
     canvas->clipPath(makeBoundPath());
   }
-
   _->painter->paint(renderer);
-
-  // {
-  //   const auto b = frameBound();
-  //   _->painter.setCanvas(canvas);
-  //   int totalHeight = _->paragraphCache.getHeight();
-  //   int curY = 0;
-  //   if (_->vertAlign == ETextVerticalAlignment::VA_Bottom)
-  //   {
-  //     curY = b.height() - totalHeight;
-  //   }
-  //   else if (_->vertAlign == ETextVerticalAlignment::VA_Center)
-  //   {
-  //     curY = (b.height() - totalHeight) / 2;
-  //   }
-  //   for (int i = 0; i < _->paragraphCache.paragraphCache.size(); i++)
-  //   {
-  //     auto&      p = _->paragraphCache.paragraphCache[i].paragraph;
-  //     const auto curX = _->paragraphCache.paragraphCache[i].offsetX;
-  //     p->paint(&_->painter, curX, curY);
-  //     if (renderer->isEnableDrawDebugBound())
-  //     {
-  //       DebugCanvas debugCanvas(canvas);
-  //       drawParagraphDebugInfo(debugCanvas, _->paragraphCache.paragraph[i], p.get(), curX, curY,
-  //       i);
-  //     }
-  //     auto        lastLine = p->lineNumber();
-  //     LineMetrics lineMetric;
-  //     if (lastLine < 1)
-  //       continue;
-  //     p->getLineMetricsAt(lastLine - 1, &lineMetric);
-  //     curY += p->getHeight() - lineMetric.fHeight;
-  //   }
-  // }
-
   if (overflow() == OF_Hidden)
   {
     canvas->restore();

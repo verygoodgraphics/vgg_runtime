@@ -186,7 +186,10 @@ private:
     Layout::Point               point,
     std::shared_ptr<LayoutNode> ancestorNode = nullptr);
 
-  void resizeChildNodes(const Layout::Size& oldContainerSize, const Layout::Size& newContainerSize);
+  void resizeChildNodes(
+    const Layout::Size& oldContainerSize,
+    const Layout::Size& newContainerSize,
+    bool                onlyWhichHasAbsolutePostion = false);
 
   Layout::Point origin() const;
   Layout::Size  size() const;

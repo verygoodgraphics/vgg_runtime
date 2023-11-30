@@ -1,4 +1,4 @@
-/*Painterw
+/*
  * Copyright 2023 VeryGoodGraphics LTD <bd@verygoodgraphics.com>
  *
  * Licensed under the VGG License, Version 1.0 (the "License");

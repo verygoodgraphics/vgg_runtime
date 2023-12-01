@@ -46,19 +46,22 @@ void Painter::drawPathBorder(
   strokePen.setStrokeCap(toSkPaintCap(b.lineCapStyle));
   strokePen.setStrokeMiter(b.miterLimit);
   strokePen.setColor(b.color.value_or(Color{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
-  if (b.position == PP_Inside)
+  bool inCenter = true;
+  if (b.position == PP_Inside && skPath.isLastContourClosed())
   {
     // inside
     strokePen.setStrokeWidth(2. * b.thickness);
     m_renderer->canvas()->save();
     m_renderer->canvas()->clipPath(skPath, SkClipOp::kIntersect);
+    inCenter = false;
   }
-  else if (b.position == PP_Outside)
+  else if (b.position == PP_Outside && skPath.isLastContourClosed())
   {
     // outside
     strokePen.setStrokeWidth(2. * b.thickness);
     m_renderer->canvas()->save();
     m_renderer->canvas()->clipPath(skPath, SkClipOp::kDifference);
+    inCenter = false;
   }
   else
   {
@@ -87,7 +90,7 @@ void Painter::drawPathBorder(
 
   m_renderer->canvas()->drawPath(skPath, strokePen);
 
-  if (b.position != PP_Center)
+  if (!inCenter)
   {
     m_renderer->canvas()->restore(); // pop border position style
   }

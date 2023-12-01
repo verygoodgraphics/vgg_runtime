@@ -17,6 +17,7 @@
 #pragma once
 
 #include "Event.hpp"
+#include "VggTypes.hpp"
 
 #include <memory>
 
@@ -42,6 +43,7 @@ public:
   bool run();
 
   bool onEvent(UEvent evt);
+  void setEventListener(EventListener listener);
 };
 
 } // namespace VGG

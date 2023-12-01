@@ -31,7 +31,7 @@ void Presenter::fitForEditing(Layout::Size pageSize)
   maxSize.width -= 2 * K_EDITOR_PADDING;
   maxSize.height -= 2 * K_EDITOR_PADDING;
 
-  auto scale = 1.0;
+  auto         scale = 1.0;
   Layout::Size contentSize;
   if (pageSize.width > maxSize.width || pageSize.height > maxSize.height)
   {
@@ -92,7 +92,7 @@ void Presenter::listenViewEvent()
         return false;
       }
 
-      auto listenersMap = sharedModel->getEventListeners(path);
+      auto        listenersMap = sharedModel->getEventListeners(path);
       std::string type = uiEventTypeToString(eventType);
 
       auto hasUserListener = listenersMap.find(type) != listenersMap.end();
@@ -118,6 +118,42 @@ void Presenter::listenViewEvent()
         }
       }
 
+      if (sharedThis->m_listenAllEvents)
+      {
+        return true;
+      }
+
       return false;
+    });
+}
+void Presenter::setView(std::shared_ptr<UIView> view)
+{
+  m_view = view;
+
+  if (!m_view)
+  {
+    WARN("#Presenter::setView, null m_view, return");
+    return;
+  }
+
+  auto weakThis = weak_from_this();
+  m_view->setEventListener(
+    [weakThis](UIEventPtr evtPtr, std::weak_ptr<LayoutNode> targetNode)
+    {
+      if (auto sharedThis = weakThis.lock())
+      {
+        if (sharedThis->m_editMode)
+        {
+          sharedThis->m_editorEventListener(evtPtr, targetNode);
+        }
+        else if (sharedThis->m_listenAllEvents)
+        {
+          sharedThis->m_subject.get_subscriber().on_next(evtPtr);
+        }
+        else if (!targetNode.expired())
+        {
+          sharedThis->m_subject.get_subscriber().on_next(evtPtr);
+        }
+      }
     });
 }

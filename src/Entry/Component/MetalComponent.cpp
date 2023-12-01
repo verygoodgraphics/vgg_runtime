@@ -26,6 +26,8 @@ namespace VGG
 // impl ----------------------------------------------------------------------
 class MetalComponentImpl
 {
+  friend MetalComponent;
+
   MetalComponent*            m_api;
   std::unique_ptr<Component> m_component;
 
@@ -93,6 +95,11 @@ void MetalComponent::setView(MTLHandle mtkView)
 bool MetalComponent::onEvent(UEvent evt)
 {
   return m_impl->onEvent(evt);
+}
+
+void MetalComponent::setEventListener(EventListener listener)
+{
+  return m_impl->m_component->setEventListener(listener);
 }
 
 } // namespace VGG

@@ -93,7 +93,7 @@ void Daruma::accept(VGG::Model::Visitor* visitor)
   }
 
   // resouces
-  auto resouces = m_loader->resources();
+  auto        resouces = m_loader->resources();
   std::string resoucesDir{ Model::ResourcesDirWithSlash };
 
   for (auto& [name, content] : resouces)
@@ -184,9 +184,10 @@ JsonDocumentPtr& Daruma::layoutDoc()
   return m_layoutDoc;
 }
 
-void Daruma::addEventListener(const std::string& jsonPointer,
-                              const std::string& type,
-                              const std::string& code)
+void Daruma::addEventListener(
+  const std::string& jsonPointer,
+  const std::string& type,
+  const std::string& code)
 {
   const std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -239,9 +240,10 @@ void Daruma::addEventListener(const std::string& jsonPointer,
   // todo, edit mode, save code & meta to remote server
 }
 
-void Daruma::removeEventListener(const std::string& jsonPointer,
-                                 const std::string& type,
-                                 const std::string& code)
+void Daruma::removeEventListener(
+  const std::string& jsonPointer,
+  const std::string& type,
+  const std::string& code)
 {
   if (!m_eventListeners.contains(jsonPointer))
   {
@@ -282,7 +284,7 @@ auto Daruma::getEventListeners(const std::string& jsonPointer) -> ListenersType
 
   ListenersType result{};
 
-  if (!m_eventListeners.contains(jsonPointer))
+  if (jsonPointer.empty() || !m_eventListeners.contains(jsonPointer))
   {
     return result;
   }

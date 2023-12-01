@@ -33,21 +33,22 @@ class Mouse;
 
 class Presenter : public std::enable_shared_from_this<Presenter>
 {
-  std::shared_ptr<UIView> m_view;
+  std::shared_ptr<UIView>    m_view;
   std::shared_ptr<ViewModel> m_viewModel;
+  bool                       m_listenAllEvents{ false };
 
-  std::shared_ptr<UIView> m_editView;
+  std::shared_ptr<UIView>    m_editView;
   std::shared_ptr<ViewModel> m_editViewModel;
 
   std::shared_ptr<Mouse> m_mouse;
 
-  bool m_editMode{ false };
+  bool                  m_editMode{ false };
   UIView::EventListener m_editorEventListener;
 
   rxcpp::subjects::subject<VGG::UIEventPtr> m_subject;
   rxcpp::subjects::subject<VGG::UIEventPtr> m_editSubject;
-  rxcpp::observer<VGG::ModelEventPtr> m_modelObserver;
-  rxcpp::observer<VGG::ModelEventPtr> m_editModelObserver;
+  rxcpp::observer<VGG::ModelEventPtr>       m_modelObserver;
+  rxcpp::observer<VGG::ModelEventPtr>       m_editModelObserver;
 
 public:
   Presenter(std::shared_ptr<Mouse> mouse = nullptr)
@@ -56,6 +57,11 @@ public:
   }
 
   virtual ~Presenter() = default;
+
+  void setListenAllEvents(bool enabled)
+  {
+    m_listenAllEvents = enabled;
+  }
 
   void fitForEditing(Layout::Size pageSize);
   void resetForRunning();
@@ -111,33 +117,7 @@ public:
     }
   }
 
-  void setView(std::shared_ptr<UIView> view)
-  {
-    m_view = view;
-
-    if (!m_view)
-    {
-      WARN("#Presenter::setView, null m_view, return");
-      return;
-    }
-
-    auto weakThis = weak_from_this();
-    m_view->setEventListener(
-      [weakThis](UIEventPtr evtPtr, std::weak_ptr<LayoutNode> targetNode)
-      {
-        if (auto sharedThis = weakThis.lock())
-        {
-          if (sharedThis->m_editMode)
-          {
-            sharedThis->m_editorEventListener(evtPtr, targetNode);
-          }
-          else if (!targetNode.expired())
-          {
-            sharedThis->m_subject.get_subscriber().on_next(evtPtr);
-          }
-        }
-      });
-  }
+  void setView(std::shared_ptr<UIView> view);
 
   void setEditorEventListener(UIView::EventListener listener)
   {

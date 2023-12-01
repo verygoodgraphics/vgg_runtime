@@ -29,7 +29,7 @@ namespace VGG
 {
 
 // impl ----------------------------------------------------------------------
-class ComponentImpl
+class ComponentImpl : public std::enable_shared_from_this<ComponentImpl>
 {
   Component* m_api;
 
@@ -40,6 +40,8 @@ class ComponentImpl
   std::unique_ptr<UIApplication> m_application;
 
   layer::ContextConfig m_graphicsContextConfig;
+
+  EventListener m_listener;
 
 public:
   ComponentImpl(Component* api)
@@ -124,6 +126,36 @@ public:
 
     return true;
   }
+
+  void setEventListener(EventListener listener)
+  {
+    m_listener = listener;
+    if (m_listener)
+    {
+      auto weakThis = weak_from_this();
+      m_mainComposer->controller()->setEventListener(
+        [weakThis](UIEventPtr evt)
+        {
+          if (auto strongThis = weakThis.lock())
+          {
+            strongThis->handleEvent(evt);
+          }
+        });
+    }
+    else
+    {
+      m_mainComposer->controller()->setEventListener(nullptr);
+    }
+  }
+
+private:
+  void handleEvent(UIEventPtr evt)
+  {
+    if (m_listener && evt)
+    {
+      m_listener(evt->type(), evt->path());
+    }
+  }
 };
 
 // api ----------------------------------------------------------------------
@@ -159,6 +191,11 @@ void Component::setGraphicsContext(
 bool Component::onEvent(UEvent evt)
 {
   return m_impl->onEvent(evt);
+}
+
+void Component::setEventListener(EventListener listener)
+{
+  return m_impl->setEventListener(listener);
 }
 
 } // namespace VGG

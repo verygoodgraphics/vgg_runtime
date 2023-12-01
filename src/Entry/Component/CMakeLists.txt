@@ -9,12 +9,8 @@ if(VGG_VAR_TARGET MATCHES "^iOS")
 endif()
 
 target_include_directories(vgg_component PUBLIC
-  ${CMAKE_SOURCE_DIR}/include
   ${CMAKE_SOURCE_DIR}/include/Application/Event
-)
-
-target_include_directories(vgg_component PRIVATE
-  ${CMAKE_SOURCE_DIR}/include/Component
+  ${CMAKE_SOURCE_DIR}/include/VGG/Component
 )
 
 target_link_libraries(vgg_component PUBLIC
@@ -29,5 +25,6 @@ if(VGG_VAR_TARGET MATCHES "^iOS")
     ${CMAKE_SOURCE_DIR}/include/Application/Event/Keycode.hpp
     ${CMAKE_SOURCE_DIR}/include/Application/Event/Scancode.hpp
     ${CMAKE_SOURCE_DIR}/include/VGG/Component/MetalComponent.hpp
+    ${CMAKE_SOURCE_DIR}/include/VGG/Component/VggTypes.hpp
     DESTINATION VGG)
 endif()

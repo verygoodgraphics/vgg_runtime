@@ -64,7 +64,7 @@ public:
 
   const Bound& bound() const
   {
-    assert(!isInvalid());
+    ASSERT(!isInvalid());
     return m_bound;
   }
 };

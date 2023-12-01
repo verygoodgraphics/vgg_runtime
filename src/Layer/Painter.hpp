@@ -120,7 +120,7 @@ using namespace VGG;
 class Painter
 {
   bool                           m_antiAlias{ true };
-  Renderer*                  m_renderer{ nullptr };
+  Renderer*                      m_renderer{ nullptr };
   inline static sk_sp<SkBlender> s_maskBlender1;
   inline static sk_sp<SkBlender> s_maskBlender2;
 

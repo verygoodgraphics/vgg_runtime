@@ -54,7 +54,7 @@ public:
   int                     page{ 0 };
   int                     symbolIndex{ 0 };
   bool                    maskDirty{ true };
-  Renderer            renderer;
+  Renderer                renderer;
   std::shared_ptr<Zoomer> zoomer;
 
   void applyZoom(SkCanvas* canvas)
@@ -147,7 +147,9 @@ PaintNode* Scene::frame(int index)
   VGG_IMPL(Scene);
   if (index >= 0 && index < _->roots.size())
   {
-    return _->roots[index].get();
+    auto f = _->roots[index].get();
+    f->revalidate();
+    return f;
   }
   return nullptr;
 }

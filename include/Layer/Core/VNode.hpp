@@ -30,7 +30,7 @@ using VNodeRef = std::weak_ptr<VNode>;
 class VNode : public std::enable_shared_from_this<VNode>
 {
   Bound                             m_bound;
-  uint8_t                           m_state;
+  uint8_t                           m_state{ 0 };
   std::vector<std::weak_ptr<VNode>> m_observers;
 
   template<typename Visitor>
@@ -64,7 +64,7 @@ public:
 
   const Bound& bound() const
   {
-    ASSERT(!isInvalid());
+    assert(!isInvalid());
     return m_bound;
   }
 };

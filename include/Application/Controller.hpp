@@ -105,6 +105,7 @@ public:
   void onFirstRender();
 
   void setEventListener(EventListener listener);
+  void listenAllEvents(bool enabled);
 
 private:
   void          initModel(const char* designDocSchemaFilePath, const char* layoutDocSchemaFilePath);

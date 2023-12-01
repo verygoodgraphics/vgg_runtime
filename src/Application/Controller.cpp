@@ -448,6 +448,24 @@ void Controller::setEventListener(EventListener listener)
   m_presenter->setListenAllEvents(m_listener ? true : false);
 }
 
+void Controller::listenAllEvents(bool enabled)
+{
+  EventListener listener;
+  if (enabled)
+  {
+    std::weak_ptr<Reporter> weakReporter = m_reporter;
+    listener = [weakReporter](UIEventPtr event)
+    {
+      if (auto reporter = weakReporter.lock())
+      {
+        reporter->onEvent(event);
+      }
+    };
+  }
+
+  setEventListener(listener);
+}
+
 void Controller::scaleContent(Layout::Size size)
 {
   if (!m_layout)

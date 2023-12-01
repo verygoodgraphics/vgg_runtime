@@ -75,7 +75,7 @@ public:
   {
     if (!observed)
     {
-      painter->setParagraph(paragraphLayout);
+      q_ptr->observe(painter);
       observed = true;
     }
   }

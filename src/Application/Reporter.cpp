@@ -86,6 +86,19 @@ void Reporter::onFirstRender()
   sendEventToJs(event);
 }
 
+void Reporter::onEvent(UIEventPtr evt)
+{
+  if (!evt)
+  {
+    return;
+  }
+
+  nlohmann::json event;
+  event[K_TYPE] = evt->type();
+  event[K_PATH] = evt->path();
+  sendEventToJs(event);
+}
+
 void Reporter::sendEventToJs(const nlohmann::json& event)
 {
   DEBUG("Reporter::sendEventToJs, event is: %s", event.dump().c_str());

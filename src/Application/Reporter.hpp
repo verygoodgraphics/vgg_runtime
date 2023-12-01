@@ -16,6 +16,7 @@
 #pragma once
 
 #include "Editor.hpp"
+#include "UIEvent.hpp"
 
 #include <nlohmann/json.hpp>
 
@@ -38,6 +39,7 @@ public:
 
   void onSelectNode(std::weak_ptr<LayoutNode> node) override;
   void onFirstRender();
+  void onEvent(UIEventPtr evt);
 
 private:
   void sendEventToJs(const nlohmann::json& event);

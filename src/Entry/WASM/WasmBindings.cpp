@@ -26,7 +26,7 @@ extern "C"
   bool load_file_from_mem(const char* name, char* data, int len)
   {
     std::vector<char> buf(data, data + len);
-    auto controller = VggBrowser::mainComposer().controller();
+    auto              controller = VggBrowser::mainComposer().controller();
     return controller->start(buf, "/asset/vgg-format.json", "/asset/vgg_layout.json");
   }
 
@@ -47,6 +47,13 @@ extern "C"
 
     std::vector<char> buffer(data, data + len);
     return mainComposer.controller()->edit(buffer);
+  }
+
+  EMSCRIPTEN_KEEPALIVE void listenAllEvents(bool enabled)
+  {
+    auto& mainComposer = VggBrowser::mainComposer();
+
+    return mainComposer.controller()->listenAllEvents(enabled);
   }
 };
 

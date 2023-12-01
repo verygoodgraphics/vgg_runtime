@@ -17,6 +17,7 @@
 #pragma once
 
 #include "Event.hpp"
+#include "VggTypes.hpp"
 
 #include <memory>
 
@@ -31,7 +32,7 @@ class SkiaGraphicsContext;
 class ComponentImpl;
 class Component
 {
-  std::unique_ptr<ComponentImpl> m_impl;
+  std::shared_ptr<ComponentImpl> m_impl;
 
 public:
   Component();
@@ -45,6 +46,7 @@ public:
 
   bool run();
   bool onEvent(UEvent evt);
+  void setEventListener(EventListener listener);
 };
 
 } // namespace VGG

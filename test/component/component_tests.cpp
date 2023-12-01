@@ -77,3 +77,28 @@ TEST_F(ComponentTestSuite, Render)
 
   // Then
 }
+
+TEST_F(ComponentTestSuite, HandleEvent)
+{
+  // Given
+  std::unique_ptr<layer::SkiaGraphicsContext> graphicsContext{ new MockSkiaGraphicsContext };
+  m_sut->setGraphicsContext(graphicsContext, 600, 800);
+
+  std::string filePath = "testDataDir/vgg-daruma-2";
+  auto        result = m_sut->load(filePath);
+  EXPECT_TRUE(result);
+
+  bool called{ false };
+  m_sut->setEventListener([&called](std::string type, std::string path) { called = true; });
+
+  // When
+  UEvent evt;
+  evt.touch.type = VGG_TOUCHDOWN;
+  evt.touch.windowX = 100;
+  evt.touch.windowY = 100;
+
+  m_sut->onEvent(evt);
+
+  // Then
+  EXPECT_TRUE(called);
+}

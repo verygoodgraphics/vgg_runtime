@@ -263,27 +263,9 @@ void Controller::observeViewEvent()
   auto observer = rxcpp::make_observer_dynamic<UIEventPtr>(
     [weakThis](UIEventPtr evt)
     {
-      auto sharedThis = weakThis.lock();
-      if (!sharedThis)
+      if (auto sharedThis = weakThis.lock())
       {
-        return;
-      }
-
-      if (sharedThis->isEditMode())
-      {
-        return;
-      }
-
-      auto        listenersMap = sharedThis->m_model->getEventListeners(evt->path());
-      std::string type = evt->type();
-      if (auto it = listenersMap.find(type); it != listenersMap.end())
-      {
-        for (auto& listener : it->second)
-        {
-          // todo, evt phase // kCapturingPhase = 1, // kAtTarget = 2, // kBubblingPhase = 3
-          // todo, evt PropagationStopped
-          sharedThis->vggExec()->evalModule(listener, evt);
-        }
+        sharedThis->handleEvent(evt);
       }
     });
 
@@ -291,14 +273,36 @@ void Controller::observeViewEvent()
   m_presenter->setEditorEventListener(
     [weakThis](UIEventPtr event, std::weak_ptr<LayoutNode> targetNode)
     {
-      auto sharedThis = weakThis.lock();
-      if (!sharedThis)
+      if (auto sharedThis = weakThis.lock())
       {
-        return;
+        sharedThis->m_editor->handleUIEvent(event, targetNode);
       }
-
-      sharedThis->m_editor->handleUIEvent(event, targetNode);
     });
+}
+
+void Controller::handleEvent(UIEventPtr evt)
+{
+  if (isEditMode())
+  {
+    return;
+  }
+
+  auto        listenersMap = m_model->getEventListeners(evt->path());
+  std::string type = evt->type();
+  if (auto it = listenersMap.find(type); it != listenersMap.end())
+  {
+    for (auto& listener : it->second)
+    {
+      // todo, evt phase // kCapturingPhase = 1, // kAtTarget = 2, // kBubblingPhase = 3
+      // todo, evt PropagationStopped
+      vggExec()->evalModule(listener, evt);
+    }
+  }
+
+  if (m_listener)
+  {
+    m_listener(evt);
+  }
 }
 
 void Controller::observeEditViewEvent()
@@ -436,6 +440,12 @@ void Controller::onFirstRender()
 {
   ASSERT(m_reporter);
   m_reporter->onFirstRender();
+}
+
+void Controller::setEventListener(EventListener listener)
+{
+  m_listener = listener;
+  m_presenter->setListenAllEvents(m_listener ? true : false);
 }
 
 void Controller::scaleContent(Layout::Size size)

@@ -86,10 +86,8 @@ void ParagraphParser::parse(
   const std::vector<ParagraphAttr>& paragraphAttributes,
   void*                             userData)
 {
-  assert(!textAttrs.empty());
-  assert(!paragraphAttributes.empty());
-  assert(!text.empty());
-
+  if (text.empty() || paragraphAttributes.empty() || textAttrs.empty())
+    return;
   reset(text, textAttrs[0].length);
   listener.onBegin();
   size_t paragraphCharCount = 0;

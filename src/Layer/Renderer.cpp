@@ -49,9 +49,7 @@ inline SkColor nodeType2Color(ObjectType type)
 namespace VGG::layer
 {
 
-void Renderer::updateMaskObject(
-  PaintNode*                                   p,
-  std::unordered_map<std::string, PaintNode*>& objects)
+void Renderer::updateMaskObject(PaintNode* p, std::unordered_map<std::string, PaintNode*>& objects)
 {
   if (!p)
     return;

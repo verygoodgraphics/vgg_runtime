@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/Core/Timer.hpp"
 #include "Domain/JsonDocument.hpp"
 #include "Domain/Layout/ExpandSymbol.hpp"
 #include "Domain/Layout/Layout.hpp"
@@ -102,16 +103,25 @@ public:
     std::string info;
     if (m_enableExpand)
     {
-      m_doc = Layout::ExpandSymbol(m_doc, m_layout)();
+      auto dur =
+        layer::Timer::time([this]() { m_doc = Layout::ExpandSymbol(m_doc, m_layout)(); }).s().fmt();
+      info += "[Expand Time: " + dur + "]\n";
       if (m_enableLayout)
       {
+        auto dur = layer::Timer::time(
+                     [this]()
+                     {
+                       JsonDocumentPtr docPtr = std::make_shared<RawJsonDocument>();
+                       docPtr->setContent(m_doc);
+                       JsonDocumentPtr layoutPtr = std::make_shared<RawJsonDocument>();
+                       layoutPtr->setContent(m_layout);
+                       Layout::Layout layout(std::move(docPtr), std::move(layoutPtr), true);
+                       m_doc = layout.displayDesignDoc()->content();
+                     })
+                     .s()
+                     .fmt();
 
-        JsonDocumentPtr docPtr = std::make_shared<RawJsonDocument>();
-        docPtr->setContent(m_doc);
-        JsonDocumentPtr layoutPtr = std::make_shared<RawJsonDocument>();
-        layoutPtr->setContent(m_layout);
-        Layout::Layout layout(std::move(docPtr), std::move(layoutPtr), true);
-        m_doc = layout.displayDesignDoc()->content();
+        info += "[Layout Time: " + dur + "]\n";
       }
     }
     Result res{ std::move(info), std::move(m_doc) };

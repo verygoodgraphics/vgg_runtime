@@ -18,30 +18,40 @@ using namespace VGG;
 template<typename InputIterator, typename F>
 void write(InputIterator iter, F&& f, const std::string& ext = ".png")
 {
-  std::string key;
-  std::vector<char> image;
-  auto ok = iter.next(key, image);
-  while (ok)
+  auto res = iter.next();
+  while (res)
   {
-    std::ofstream ofs(f(key) + ext, std::ios::binary);
+    INFO("Render Time Cost: [%f]", res.timeCost->render);
+    INFO("Encode Time Cost: [%f]", res.timeCost->encode);
+    std::ofstream ofs(f(res.data->first) + ext, std::ios::binary);
     if (ofs.is_open())
     {
-      ofs.write((const char*)image.data(), image.size());
+      ofs.write((const char*)res.data->second.data(), res.data->second.size());
     }
-    ok = iter.next(key, image);
+    res = iter.next();
   }
 }
 
-void writeDoc(const std::string& extension,
-              const fs::path& prefix,
-              const std::string& outputFilePostfix,
-              nlohmann::json design,
-              nlohmann::json layout,
-              Resource res)
+void writeDoc(
+  const std::string&            extension,
+  const fs::path&               prefix,
+  const std::string&            outputFilePostfix,
+  nlohmann::json                design,
+  nlohmann::json                layout,
+  Resource                      res,
+  const exporter::ExportOption& opts)
 {
+  exporter::BuilderResult buildResult;
   if (extension == ".pdf")
   {
-    auto iter = exporter::PDFIterator(std::move(design), std::move(layout), std::move(res));
+    auto iter = exporter::PDFIterator(
+      std::move(design),
+      std::move(layout),
+      std::move(res),
+      opts,
+      buildResult);
+    INFO("Expand Time Cost: [%f]", buildResult.timeCost->expand);
+    INFO("Layout Time Cost: [%f]", buildResult.timeCost->layout);
     write(
       std::move(iter),
       [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); },
@@ -49,7 +59,14 @@ void writeDoc(const std::string& extension,
   }
   else
   {
-    auto iter = exporter::SVGIterator(std::move(design), std::move(layout), std::move(res));
+    auto iter = exporter::SVGIterator(
+      std::move(design),
+      std::move(layout),
+      std::move(res),
+      opts,
+      buildResult);
+    INFO("Expand Time Cost: [%f]", buildResult.timeCost->expand);
+    INFO("Layout Time Cost: [%f]", buildResult.timeCost->layout);
     write(
       std::move(iter),
       [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); },
@@ -59,9 +76,9 @@ void writeDoc(const std::string& extension,
 
 struct InputDesc
 {
-  fs::path filepath;
-  int imageQuality{ 80 };
-  int resolutionLevel{ 2 };
+  fs::path                filepath;
+  int                     imageQuality{ 80 };
+  int                     resolutionLevel{ 2 };
   std::optional<fs::path> configFilePath;
   std::optional<fs::path> prefix;
 };
@@ -84,6 +101,10 @@ int main(int argc, char** argv)
   program.add_argument("-o", "--output").help("output directory");
   program.add_argument("-f", "--file-format").help("imageformat: png, jpg, webp, svg, pdf");
   program.add_argument("-t").help("postfix for output filename");
+  program.add_argument("--disable-layout").help("disable layout").implicit_value(true);
+  program.add_argument("--disable-expand")
+    .help("disable replace for symbol instance")
+    .implicit_value(true);
 
   try
   {
@@ -103,12 +124,12 @@ int main(int argc, char** argv)
   }
 
   std::string outputFilePostfix = program.present("-t").value_or("");
-  InputDesc desc;
+  InputDesc   desc;
   desc.prefix = program.present("-p").value_or("");
 
   exporter::ImageOption opts;
-  bool isBitmap = true;
-  std::string extension = ".png";
+  bool                  isBitmap = true;
+  std::string           extension = ".png";
   if (auto v = program.present("-f"))
   {
     auto ext = v.value();
@@ -157,8 +178,15 @@ int main(int argc, char** argv)
     exporter::setGlobalConfig(cfg.value());
   }
 
+  exporter::ExportOption exportOpt;
+  if (auto cfg = program.present<bool>("--disable-expand"))
+    exportOpt.enableExpand = false;
+
+  if (auto cfg = program.present<bool>("--disable-layout"))
+    exportOpt.enableLayout = false;
+
   exporter::ExporterInfo info;
-  exporter::Exporter exporter;
+  exporter::Exporter     exporter;
   exporter.info(&info);
   INFO("%s", info.graphicsInfo.c_str());
 
@@ -170,13 +198,17 @@ int main(int argc, char** argv)
     auto r = load(ext);
     if (r)
     {
-      auto data = r->read(desc.prefix.value_or(fs::path(".")) / desc.filepath);
+      auto           data = r->read(desc.prefix.value_or(fs::path(".")) / desc.filepath);
       const fs::path prefix = outputDir;
       fs::create_directory(prefix);
       const auto folder = fs::path(fp).filename().stem();
       if (isBitmap)
       {
-        auto iter = exporter.render(data.format, data.layout, data.resource, opts);
+        exporter::BuilderResult res;
+        auto iter = exporter.render(data.format, data.layout, data.resource, opts, exportOpt, res);
+        INFO("Expand Time Cost: [%f]", res.timeCost->expand);
+        INFO("Layout Time Cost: [%f]", res.timeCost->layout);
+
         write(
           std::move(iter),
           [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); },
@@ -184,12 +216,14 @@ int main(int argc, char** argv)
       }
       else
       {
-        writeDoc(extension,
-                 prefix,
-                 outputFilePostfix,
-                 data.format,
-                 nlohmann::json{},
-                 data.resource);
+        writeDoc(
+          extension,
+          prefix,
+          outputFilePostfix,
+          data.format,
+          nlohmann::json{},
+          data.resource,
+          exportOpt);
       }
     }
   }
@@ -206,12 +240,16 @@ int main(int argc, char** argv)
           auto r = load(desc.filepath.extension().string());
           if (r)
           {
-            auto data = r->read(desc.prefix.value_or(fs::path(".")) / desc.filepath);
+            auto           data = r->read(desc.prefix.value_or(fs::path(".")) / desc.filepath);
             const fs::path prefix = outputDir;
             fs::create_directory(prefix);
             if (isBitmap)
             {
-              auto iter = exporter.render(data.format, nlohmann::json{}, data.resource, opts);
+              exporter::BuilderResult res;
+              auto                    iter =
+                exporter.render(data.format, nlohmann::json{}, data.resource, opts, exportOpt, res);
+              std::cout << "Expand Time Cost: " << res.timeCost->expand << std::endl;
+              std::cout << "Layout Time Cost: " << res.timeCost->layout << std::endl;
               write(
                 std::move(iter),
                 [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); },
@@ -219,12 +257,14 @@ int main(int argc, char** argv)
             }
             else
             {
-              writeDoc(extension,
-                       prefix,
-                       outputFilePostfix,
-                       data.format,
-                       nlohmann::json{},
-                       data.resource);
+              writeDoc(
+                extension,
+                prefix,
+                outputFilePostfix,
+                data.format,
+                nlohmann::json{},
+                data.resource,
+                exportOpt);
             }
           }
         }

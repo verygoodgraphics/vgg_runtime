@@ -128,7 +128,10 @@ protected:
                        .setExpandEnabled(true)
                        .setLayoutEnabled(true)
                        .build();
-          m_scene->loadFileContent(*res.doc);
+          INFO("Preprocess Time Cost: ");
+          std::cout << res.info;
+          auto dur = Timer::time([&, this]() { m_scene->loadFileContent(*res.doc); });
+          INFO("Scene Build Time Cost: %f", (double)dur.s());
           auto editor = std::make_shared<Editor>();
           m_layer->addAppRenderable(editor);
           m_layer->addAppScene(m_scene);

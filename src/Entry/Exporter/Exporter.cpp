@@ -15,6 +15,7 @@
  */
 #include "ContextVk.hpp"
 #include "Domain/Layout/ExpandSymbol.hpp"
+#include "Entry/Common/DocBuilder.hpp"
 #include "Utility/ConfigManager.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/VGGLayer.hpp"
@@ -208,8 +209,13 @@ public:
   IteratorImplBase(nlohmann::json json, nlohmann::json layout, Resource resource)
   {
     scene = std::make_shared<Scene>();
-    Layout::ExpandSymbol e(std::move(json), std::move(layout));
-    scene->loadFileContent(e());
+    auto res = VGG::entry::DocBuilder::builder()
+                 .setDocument(std::move(json))
+                 .setLayout(std::move(layout))
+                 .setExpandEnabled(true)
+                 .setLayoutEnabled(true)
+                 .build();
+    scene->loadFileContent(std::move(*res.doc));
     scene->setResRepo(std::move(resource));
     totalFrames = scene->frameCount();
     index = 0;

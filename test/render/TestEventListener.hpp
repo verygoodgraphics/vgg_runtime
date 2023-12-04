@@ -1,6 +1,7 @@
 #pragma once
 
 #include "loader.hpp"
+#include "Entry/Common/DocBuilder.hpp"
 #include "Utility/ConfigManager.hpp"
 #include "Application/AppRender.hpp"
 #include "Application/AppRenderable.hpp"
@@ -121,8 +122,13 @@ protected:
         Scene::setResRepo(data.resource);
         try
         {
-          Layout::ExpandSymbol e(data.format, data.layout);
-          m_scene->loadFileContent(e());
+          auto res = VGG::entry::DocBuilder::builder()
+                       .setDocument(std::move(data.format))
+                       .setLayout(std::move(data.layout))
+                       .setExpandEnabled(true)
+                       .setLayoutEnabled(true)
+                       .build();
+          m_scene->loadFileContent(*res.doc);
           auto editor = std::make_shared<Editor>();
           m_layer->addAppRenderable(editor);
           m_layer->addAppScene(m_scene);

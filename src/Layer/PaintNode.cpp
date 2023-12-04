@@ -517,7 +517,6 @@ Bound PaintNode::onRevalidate()
   {
     e->revalidate();
   }
-  DEBUG("Revalidate %s", m_name.c_str());
   return d_ptr->bound;
 }
 

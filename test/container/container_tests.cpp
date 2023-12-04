@@ -16,7 +16,7 @@
 
 #include "MockSkiaGraphicsContext.hpp"
 
-#include "Entry/Component/Component.hpp"
+#include "Entry/Container/Container.hpp"
 
 #include "test_config.hpp"
 
@@ -25,18 +25,18 @@
 #include <thread>
 
 using namespace VGG;
-class ComponentTestSuite : public ::testing::Test
+class ContainerTestSuite : public ::testing::Test
 {
 protected:
-  std::shared_ptr<Component> m_sut;
+  std::shared_ptr<Container> m_sut;
 
   void SetUp() override
   {
-    m_sut.reset(new Component);
+    m_sut.reset(new Container);
   }
 };
 
-TEST_F(ComponentTestSuite, Smoke)
+TEST_F(ContainerTestSuite, Smoke)
 {
   // Given
 
@@ -45,7 +45,7 @@ TEST_F(ComponentTestSuite, Smoke)
   // Then
 }
 
-TEST_F(ComponentTestSuite, LoadModel)
+TEST_F(ContainerTestSuite, LoadModel)
 {
   // Given
   std::string filePath = "testDataDir/vgg-daruma-2";
@@ -57,7 +57,7 @@ TEST_F(ComponentTestSuite, LoadModel)
   EXPECT_TRUE(result);
 }
 
-TEST_F(ComponentTestSuite, Render)
+TEST_F(ContainerTestSuite, Render)
 {
   // Given
   std::unique_ptr<layer::SkiaGraphicsContext> graphicsContext{ new MockSkiaGraphicsContext };
@@ -78,7 +78,7 @@ TEST_F(ComponentTestSuite, Render)
   // Then
 }
 
-TEST_F(ComponentTestSuite, HandleEvent)
+TEST_F(ContainerTestSuite, HandleEvent)
 {
   // Given
   std::unique_ptr<layer::SkiaGraphicsContext> graphicsContext{ new MockSkiaGraphicsContext };

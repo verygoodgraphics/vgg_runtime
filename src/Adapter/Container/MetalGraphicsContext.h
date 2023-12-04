@@ -19,7 +19,7 @@
 #include "Layer/Graphics/ContextSkBase.hpp"
 #include "Layer/Graphics/GraphicsContext.hpp"
 
-#include "VGG/Component/MetalComponent.hpp"
+#include "VGG/Container/MetalContainer.hpp"
 
 namespace VGG
 {
@@ -30,7 +30,7 @@ class MetalGraphicsContext : public VGG::layer::SkiaGraphicsContext
   MetalGraphicsContextImpl* m_impl;
 
 public:
-  MetalGraphicsContext(MetalComponent::MTLHandle mtkView);
+  MetalGraphicsContext(MetalContainer::MTLHandle mtkView);
 
   int width();
   int height();

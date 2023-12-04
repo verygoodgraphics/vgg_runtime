@@ -15,8 +15,8 @@
  */
 
 #include "../Common/FakeMouse.hpp"
-#include "Component.hpp"
-#include "ComponentComposer.hpp"
+#include "Container.hpp"
+#include "ContainerComposer.hpp"
 
 #include "Application/AppRender.hpp"
 #include "Application/MainComposer.hpp"
@@ -29,9 +29,9 @@ namespace VGG
 {
 
 // impl ----------------------------------------------------------------------
-class ComponentImpl : public std::enable_shared_from_this<ComponentImpl>
+class ContainerImpl : public std::enable_shared_from_this<ContainerImpl>
 {
-  Component* m_api;
+  Container* m_api;
 
   std::shared_ptr<app::AppRender>             m_appRender;
   std::unique_ptr<layer::SkiaGraphicsContext> m_context;
@@ -44,11 +44,11 @@ class ComponentImpl : public std::enable_shared_from_this<ComponentImpl>
   EventListener m_listener;
 
 public:
-  ComponentImpl(Component* api)
+  ContainerImpl(Container* api)
     : m_api(api)
   {
     m_mainComposer.reset(
-      new MainComposer{ new ComponentComposer{}, std::make_shared<FakeMouse>() });
+      new MainComposer{ new ContainerComposer{}, std::make_shared<FakeMouse>() });
     m_application.reset(new UIApplication);
 
     m_appRender = std::make_shared<app::AppRender>();
@@ -159,14 +159,14 @@ private:
 };
 
 // api ----------------------------------------------------------------------
-Component::Component()
-  : m_impl(new ComponentImpl(this))
+Container::Container()
+  : m_impl(new ContainerImpl(this))
 {
 }
 
-Component::~Component() = default;
+Container::~Container() = default;
 
-bool Component::load(
+bool Container::load(
   const std::string& filePath,
   const char*        designDocSchemaFilePath,
   const char*        layoutDocSchemaFilePath)
@@ -175,12 +175,12 @@ bool Component::load(
   return m_impl->load(filePath, designDocSchemaFilePath, layoutDocSchemaFilePath);
 }
 
-bool Component::run()
+bool Container::run()
 {
   return m_impl->run();
 }
 
-void Component::setGraphicsContext(
+void Container::setGraphicsContext(
   std::unique_ptr<layer::SkiaGraphicsContext>& context,
   int                                          w,
   int                                          h)
@@ -188,12 +188,12 @@ void Component::setGraphicsContext(
   m_impl->setGraphicsContext(context, w, h);
 }
 
-bool Component::onEvent(UEvent evt)
+bool Container::onEvent(UEvent evt)
 {
   return m_impl->onEvent(evt);
 }
 
-void Component::setEventListener(EventListener listener)
+void Container::setEventListener(EventListener listener)
 {
   return m_impl->setEventListener(listener);
 }

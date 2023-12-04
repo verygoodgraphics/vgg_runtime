@@ -16,34 +16,14 @@
 
 #pragma once
 
-#include "Event.hpp"
-#include "VggTypes.hpp"
+#include "Application/PlatformComposer.hpp"
+#include "Adapter/ComponentJsEngine.hpp"
 
-#include <memory>
-
-namespace VGG
+class ContainerComposer : public PlatformComposer
 {
-
-class MetalComponentImpl;
-class MetalComponent
-{
-  std::unique_ptr<MetalComponentImpl> m_impl;
-
 public:
-  using MTLHandle = const void*;
-
-  MetalComponent();
-  ~MetalComponent();
-
-  bool load(
-    const std::string& filePath,
-    const char*        designDocSchemaFilePath = nullptr,
-    const char*        layoutDocSchemaFilePath = nullptr);
-  void setView(MTLHandle mtkView);
-  bool run();
-
-  bool onEvent(UEvent evt);
-  void setEventListener(EventListener listener);
+  virtual std::shared_ptr<VggJSEngine> createJsEngine()
+  {
+    return std::make_shared<ComponentJSEngine>();
+  }
 };
-
-} // namespace VGG

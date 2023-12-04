@@ -1,7 +1,7 @@
 #pragma once
 
 #include "loader.hpp"
-#include "Entry/Common/DocBuilder.hpp"
+#include "Layer/DocBuilder.hpp"
 #include "Utility/ConfigManager.hpp"
 #include "Application/AppRender.hpp"
 #include "Application/AppRenderable.hpp"

@@ -26,6 +26,7 @@
 #include "VGG/Exporter/ImageExporter.hpp"
 #include "VGG/Exporter/SVGExporter.hpp"
 #include "VGG/Exporter/PDFExporter.hpp"
+#include "VGG/Exporter/Type.hpp"
 
 #include <iostream>
 #include <algorithm>
@@ -145,19 +146,26 @@ public:
   std::optional<std::vector<char>> render(
     std::shared_ptr<Scene>     scene,
     float                      scale,
-    const layer::ImageOptions& opts)
+    const layer::ImageOptions& opts,
+    IteratorResult::TimeCost&  cost)
   {
     // auto id = scene->frame(scene->currentPage())->guid();
     layer->setScene(std::move(scene));
     layer->setScaleFactor(scale);
-
     // begin render one frame
-    layer->beginFrame();
-    layer->render();
-    layer->endFrame();
+    {
+      ScopedTimer t([&](auto d) { cost.render = d.s(); });
+      layer->beginFrame();
+      layer->render();
+      layer->endFrame();
+    }
     // end render one frame
-
-    return layer->makeImageSnapshot(opts);
+    std::optional<std::vector<char>> img;
+    {
+      ScopedTimer t([&](auto d) { cost.encode = d.s(); });
+      img = layer->makeImageSnapshot(opts);
+    }
+    return img;
   }
 };
 
@@ -206,19 +214,43 @@ public:
   int                    index{ 0 };
   std::shared_ptr<Scene> scene;
 
-  IteratorImplBase(nlohmann::json json, nlohmann::json layout, Resource resource)
+  void initInternal(
+    nlohmann::json      json,
+    nlohmann::json      layout,
+    Resource            resource,
+    const ExportOption& exportOpt,
+    BuilderResult&      result)
   {
     scene = std::make_shared<Scene>();
     auto res = VGG::entry::DocBuilder::builder()
                  .setDocument(std::move(json))
                  .setLayout(std::move(layout))
-                 .setExpandEnabled(true)
-                 .setLayoutEnabled(true)
+                 .setExpandEnabled(exportOpt.enableExpand)
+                 .setLayoutEnabled(exportOpt.enableLayout)
                  .build();
+    BuilderResult::TimeCost cost;
+    cost.layout = res.timeCost.layout.s();
+    cost.expand = res.timeCost.expand.s();
+    result.timeCost = cost;
     scene->loadFileContent(std::move(*res.doc));
     scene->setResRepo(std::move(resource));
     totalFrames = scene->frameCount();
     index = 0;
+  }
+
+  IteratorImplBase(nlohmann::json json, nlohmann::json layout, Resource resource)
+  {
+    BuilderResult result;
+    initInternal(std::move(json), std::move(layout), std::move(resource), ExportOption(), result);
+  }
+  IteratorImplBase(
+    nlohmann::json      json,
+    nlohmann::json      layout,
+    Resource            resource,
+    const ExportOption& exportOpt,
+    BuilderResult&      result)
+  {
+    initInternal(std::move(json), std::move(layout), std::move(resource), exportOpt, result);
   }
   ~IteratorImplBase() = default;
   bool tryNext()
@@ -254,19 +286,26 @@ class ImageIteratorImpl : public IteratorImplBase
 public:
   Exporter& exporter;
   ImageIteratorImpl(
-    Exporter&      exporter,
-    nlohmann::json json,
-    nlohmann::json layout,
-    Resource       resource,
-    int            resolutionLevel)
-    : IteratorImplBase(std::move(json), std::move(layout), std::move(resource))
+    Exporter&           exporter,
+    nlohmann::json      json,
+    nlohmann::json      layout,
+    Resource            resource,
+    int                 resolutionLevel,
+    const ExportOption& opt,
+    BuilderResult&      result)
+    : IteratorImplBase(std::move(json), std::move(layout), std::move(resource), opt, result)
     , exporter(exporter)
   {
     getMaxSurfaceSize(resolutionLevel, maxSurfaceSize);
     exporter.d_impl->resize(maxSurfaceSize[0], maxSurfaceSize[1]);
   }
 
-  bool next(std::string& key, std::vector<char>& image, EImageType type, int quality)
+  bool next(
+    std::string&              key,
+    std::vector<char>&        image,
+    EImageType                type,
+    int                       quality,
+    IteratorResult::TimeCost& cost)
   {
     if (!tryNext())
       return false;
@@ -289,7 +328,7 @@ public:
     opts.extend[0] = actualSize[0];
     opts.extend[1] = actualSize[1];
     opts.quality = quality;
-    auto res = state->render(scene, scale, opts);
+    auto res = state->render(scene, scale, opts, cost);
     if (!res.has_value())
     {
       return false;
@@ -304,7 +343,19 @@ public:
 // ImageIterator
 bool ImageIterator::next(std::string& key, std::vector<char>& image)
 {
-  return d_impl->next(key, image, m_opts.type, m_opts.imageQuality);
+  IteratorResult::TimeCost cost;
+  return d_impl->next(key, image, m_opts.type, m_opts.imageQuality, cost);
+}
+
+IteratorResult ImageIterator::next()
+{
+  std::string              key;
+  std::vector<char>        image;
+  IteratorResult::TimeCost cost;
+  IteratorResult           res(d_impl->next(key, image, m_opts.type, m_opts.imageQuality, cost));
+  res.data = { std::move(key), std::move(image) };
+  res.timeCost = cost;
+  return res;
 }
 
 ImageIterator::ImageIterator(ImageIterator&& other) noexcept
@@ -312,18 +363,23 @@ ImageIterator::ImageIterator(ImageIterator&& other) noexcept
   , d_impl(std::move(other.d_impl))
 {
 }
+
 ImageIterator::ImageIterator(
-  Exporter&          exporter,
-  nlohmann::json     design,
-  nlohmann::json     layout,
-  Resource           resource,
-  const ImageOption& opt)
+  Exporter&           exporter,
+  nlohmann::json      design,
+  nlohmann::json      layout,
+  Resource            resource,
+  const ImageOption&  opt,
+  const ExportOption& exportOpt,
+  BuilderResult&      result)
   : d_impl(std::make_unique<ImageIteratorImpl>(
       exporter,
       std::move(design),
       std::move(layout),
       std::move(resource),
-      opt.resolutionLevel))
+      opt.resolutionLevel,
+      exportOpt,
+      result))
   , m_opts(opt)
 {
 }
@@ -333,6 +389,21 @@ ImageIterator::~ImageIterator() = default;
 SVGIterator::SVGIterator(nlohmann::json design, nlohmann::json layout, Resource resource)
   : d_impl(
       std::make_unique<IteratorImplBase>(std::move(design), std::move(layout), std::move(resource)))
+{
+}
+
+SVGIterator::SVGIterator(
+  nlohmann::json      design,
+  nlohmann::json      layout,
+  Resource            resource,
+  const ExportOption& opt,
+  BuilderResult&      result)
+  : d_impl(std::make_unique<IteratorImplBase>(
+      std::move(design),
+      std::move(layout),
+      std::move(resource),
+      opt,
+      result))
 {
 }
 
@@ -363,11 +434,42 @@ bool SVGIterator::next(std::string& key, std::vector<char>& data)
   d_impl->advance();
   return true;
 }
+
+IteratorResult SVGIterator::next()
+{
+  std::string       key;
+  std::vector<char> image;
+  Timer             t;
+  t.start();
+  IteratorResult res(next(key, image));
+  t.stop();
+  res.data = { std::move(key), std::move(image) };
+  IteratorResult::TimeCost cost;
+  cost.render = t.duration().s();
+  cost.encode = 0.f;
+  res.timeCost = cost;
+  return res;
+}
 SVGIterator::~SVGIterator() = default;
 
 PDFIterator::PDFIterator(nlohmann::json design, nlohmann::json layout, Resource resource)
   : d_impl(
       std::make_unique<IteratorImplBase>(std::move(design), std::move(layout), std::move(resource)))
+{
+}
+
+PDFIterator::PDFIterator(
+  nlohmann::json      design,
+  nlohmann::json      layout,
+  Resource            resource,
+  const ExportOption& opt,
+  BuilderResult&      result)
+  : d_impl(std::make_unique<IteratorImplBase>(
+      std::move(design),
+      std::move(layout),
+      std::move(resource),
+      opt,
+      result))
 {
 }
 
@@ -396,6 +498,22 @@ bool PDFIterator::next(std::string& key, std::vector<char>& data)
   data = std::move(res.value());
   d_impl->advance();
   return true;
+}
+
+IteratorResult PDFIterator::next()
+{
+  std::string       key;
+  std::vector<char> image;
+  Timer             t;
+  t.start();
+  IteratorResult res(next(key, image));
+  t.stop();
+  res.data = { std::move(key), std::move(image) };
+  IteratorResult::TimeCost cost;
+  cost.render = t.duration().s();
+  cost.encode = 0.f;
+  res.timeCost = cost;
+  return res;
 }
 
 PDFIterator::~PDFIterator() = default;

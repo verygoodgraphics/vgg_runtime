@@ -57,10 +57,15 @@ class DocBuilder
 public:
   struct Result
   {
-    std::string         info;
+    struct TimeCost
+    {
+      layer::Duration expand;
+      layer::Duration layout;
+    };
+    TimeCost            timeCost;
     std::optional<json> doc;
-    Result(std::string info, json doc)
-      : info(std::move(info))
+    Result(TimeCost timeCost, json doc)
+      : timeCost(timeCost)
       , doc(std::move(doc))
     {
     }
@@ -100,31 +105,26 @@ public:
   Result build()
   {
     ASSERT(!m_invalid);
-    std::string info;
+    Result::TimeCost cost;
     if (m_enableExpand)
     {
-      auto dur =
-        layer::Timer::time([this]() { m_doc = Layout::ExpandSymbol(m_doc, m_layout)(); }).s().fmt();
-      info += "[Expand Time: " + dur + "]\n";
+      cost.expand =
+        layer::Timer::time([this]() { m_doc = Layout::ExpandSymbol(m_doc, m_layout)(); });
       if (m_enableLayout)
       {
-        auto dur = layer::Timer::time(
-                     [this]()
-                     {
-                       JsonDocumentPtr docPtr = std::make_shared<RawJsonDocument>();
-                       docPtr->setContent(m_doc);
-                       JsonDocumentPtr layoutPtr = std::make_shared<RawJsonDocument>();
-                       layoutPtr->setContent(m_layout);
-                       Layout::Layout layout(std::move(docPtr), std::move(layoutPtr), true);
-                       m_doc = layout.displayDesignDoc()->content();
-                     })
-                     .s()
-                     .fmt();
-
-        info += "[Layout Time: " + dur + "]\n";
+        cost.layout = layer::Timer::time(
+          [this]()
+          {
+            JsonDocumentPtr docPtr = std::make_shared<RawJsonDocument>();
+            docPtr->setContent(m_doc);
+            JsonDocumentPtr layoutPtr = std::make_shared<RawJsonDocument>();
+            layoutPtr->setContent(m_layout);
+            Layout::Layout layout(std::move(docPtr), std::move(layoutPtr), true);
+            m_doc = layout.displayDesignDoc()->content();
+          });
       }
     }
-    Result res{ std::move(info), std::move(m_doc) };
+    Result res{ cost, std::move(m_doc) };
     m_invalid = true;
     return res;
   }

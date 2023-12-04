@@ -15,7 +15,7 @@
  */
 #include "ContextVk.hpp"
 #include "Domain/Layout/ExpandSymbol.hpp"
-#include "Entry/Common/DocBuilder.hpp"
+#include "Layer/DocBuilder.hpp"
 #include "Utility/ConfigManager.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/VGGLayer.hpp"

@@ -37,16 +37,23 @@ class Exporter;
 class ImageIterator
 {
   std::unique_ptr<ImageIteratorImpl> d_impl; // NOLINT
-  ImageIterator(Exporter& exporter,
-                nlohmann::json design,
-                nlohmann::json layout,
-                Resource resource,
-                const ImageOption& opt);
+                                             //
+  ImageIterator(
+    Exporter&           exporter,
+    nlohmann::json      design,
+    nlohmann::json      layout,
+    Resource            resource,
+    const ImageOption&  imageOpt,
+    const ExportOption& exporterOpt,
+    BuilderResult&      result);
   friend class Exporter;
-  const ImageOption m_opts;
+
+  const ImageOption  m_opts;
+  const ExportOption m_exporterOpts;
 
 public:
-  bool next(std::string& key, std::vector<char>& image);
+  bool           next(std::string& key, std::vector<char>& image);
+  IteratorResult next();
   ImageIterator(ImageIterator&& other) noexcept;
   ImageIterator& operator=(ImageIterator&& other) noexcept = delete;
   ~ImageIterator();
@@ -62,12 +69,30 @@ public:
   Exporter();
   void info(ExporterInfo* info);
 
-  ImageIterator render(nlohmann::json design,
-                       nlohmann::json layout,
-                       std::map<std::string, std::vector<char>> resources,
-                       const ImageOption& opt)
+  ImageIterator render(
+    nlohmann::json                           design,
+    nlohmann::json                           layout,
+    std::map<std::string, std::vector<char>> resources,
+    const ImageOption&                       opt)
   {
-    return ImageIterator{ *this, std::move(design), std::move(layout), std::move(resources), opt };
+    BuilderResult result;
+    return ImageIterator{
+      *this, std::move(design), std::move(layout), std::move(resources), opt, ExportOption(), result
+    };
+  }
+
+  ImageIterator render(
+    nlohmann::json                           design,
+    nlohmann::json                           layout,
+    std::map<std::string, std::vector<char>> resources,
+    const ImageOption&                       imageOpt,
+    const ExportOption&                      exporterOpt,
+    BuilderResult&                           result)
+  {
+    return ImageIterator{
+      *this, std::move(design), std::move(layout), std::move(resources), imageOpt, exporterOpt,
+      result
+    };
   }
 
   void setOutputCallback(OutputCallback callback);

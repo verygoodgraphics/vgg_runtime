@@ -50,7 +50,7 @@ namespace VGG::layer
 
 using namespace nlohmann;
 
-class DocBuilder
+class SceneBuilder
 {
   std::vector<std::shared_ptr<PaintNode>> m_frames;
   std::vector<std::shared_ptr<PaintNode>> m_symbols;
@@ -447,7 +447,7 @@ class DocBuilder
     return frames;
   }
 
-  DocBuilder() = default;
+  SceneBuilder() = default;
   void buildImpl(const json& j, bool resetOrigin)
   {
     glm::mat3 mat = glm::identity<glm::mat3>();
@@ -629,7 +629,7 @@ class DocBuilder
 public:
   static std::vector<std::shared_ptr<PaintNode>> build(const json& j, bool resetOrigin = true)
   {
-    DocBuilder builder;
+    SceneBuilder builder;
     builder.buildImpl(j, resetOrigin);
     return builder.m_frames;
   }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "DocBuilder.hpp"
+#include "SceneBuilder.hpp"
 #include "Renderer.hpp"
 
 #include "Utility/ConfigManager.hpp"
@@ -113,7 +113,7 @@ void Scene::loadFileContent(const nlohmann::json& json)
   _->page = 0;
   _->symbolIndex = 0;
   repaint();
-  _->roots = layer::DocBuilder::build(json);
+  _->roots = layer::SceneBuilder::build(json);
 }
 
 int Scene::currentPage() const

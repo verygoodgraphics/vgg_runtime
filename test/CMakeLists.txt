@@ -6,8 +6,8 @@ else()
   endif()
 
   add_executable(unit_tests
-    component/MockSkiaGraphicsContext.cpp
-    component/component_tests.cpp
+    container/MockSkiaGraphicsContext.cpp
+    container/container_tests.cpp
     controller/controller_test.cpp
     domain/layout/expand_symbol_tests.cpp
     domain/layout/layout_tests.cpp
@@ -53,7 +53,7 @@ else()
   )
 
   target_link_libraries(unit_tests PRIVATE vgg_internal gtest_main gmock vgg_utility automerge
-    vgg_component
+    vgg_container
   )
   include(GoogleTest)
   gtest_discover_tests(unit_tests)

@@ -11,7 +11,7 @@ if (EMSCRIPTEN)
   )
 elseif(VGG_VAR_TARGET MATCHES "^iOS")
   target_sources(vgg_adapter PRIVATE
-    Component/MetalGraphicsContext.mm
+    Container/MetalGraphicsContext.mm
   )
   target_compile_options(vgg_adapter PRIVATE
     -fno-objc-arc

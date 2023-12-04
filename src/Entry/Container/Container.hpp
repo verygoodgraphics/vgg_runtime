@@ -29,14 +29,14 @@ namespace layer
 class SkiaGraphicsContext;
 }
 
-class ComponentImpl;
-class Component
+class ContainerImpl;
+class Container
 {
-  std::shared_ptr<ComponentImpl> m_impl;
+  std::shared_ptr<ContainerImpl> m_impl;
 
 public:
-  Component();
-  ~Component();
+  Container();
+  ~Container();
 
   bool load(
     const std::string& filePath,

@@ -75,7 +75,7 @@ class MetalGraphicsContextImpl
   sk_sp<GrDirectContext>      m_Context;
 
 public:
-  MetalGraphicsContextImpl(MetalGraphicsContext* api, MetalComponent::MTLHandle mtkView)
+  MetalGraphicsContextImpl(MetalGraphicsContext* api, MetalContainer::MTLHandle mtkView)
     : m_api(api)
   {
     setView(mtkView);
@@ -122,7 +122,7 @@ public:
   }
 
 private:
-  void setView(MetalComponent::MTLHandle view)
+  void setView(MetalContainer::MTLHandle view)
   {
     m_mtkView = (MTKView *)view;
 
@@ -139,7 +139,7 @@ private:
 };
 
 // api ------------------------------------------------------------------------
-MetalGraphicsContext::MetalGraphicsContext(MetalComponent::MTLHandle mtkView)
+MetalGraphicsContext::MetalGraphicsContext(MetalContainer::MTLHandle mtkView)
   : m_impl(new MetalGraphicsContextImpl(this, mtkView))
 {
 }

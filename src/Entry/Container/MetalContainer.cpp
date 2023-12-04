@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-#include "Component.hpp"
+#include "Container.hpp"
 
-#include "Adapter/Component/MetalGraphicsContext.h"
+#include "Adapter/Container/MetalGraphicsContext.h"
 
-#include "VGG/Component/MetalComponent.hpp"
+#include "VGG/Container/MetalContainer.hpp"
 
 namespace VGG
 {
 
 // impl ----------------------------------------------------------------------
-class MetalComponentImpl
+class MetalContainerImpl
 {
-  friend MetalComponent;
+  friend MetalContainer;
 
-  MetalComponent*            m_api;
-  std::unique_ptr<Component> m_component;
+  MetalContainer*            m_api;
+  std::unique_ptr<Container> m_component;
 
 public:
-  MetalComponentImpl(MetalComponent* api)
+  MetalContainerImpl(MetalContainer* api)
     : m_api(api)
   {
-    m_component.reset(new Component);
+    m_component.reset(new Container);
   }
 
   bool load(
@@ -51,7 +51,7 @@ public:
     return m_component->run();
   }
 
-  void setView(MetalComponent::MTLHandle mtkView)
+  void setView(MetalContainer::MTLHandle mtkView)
   {
     auto metalContext = new MetalGraphicsContext(mtkView);
     std::unique_ptr<VGG::layer::SkiaGraphicsContext> graphicsContext{ metalContext };
@@ -66,14 +66,14 @@ public:
 
 // api ----------------------------------------------------------------------
 
-MetalComponent::MetalComponent()
-  : m_impl(new MetalComponentImpl(this))
+MetalContainer::MetalContainer()
+  : m_impl(new MetalContainerImpl(this))
 {
 }
 
-MetalComponent::~MetalComponent() = default;
+MetalContainer::~MetalContainer() = default;
 
-bool MetalComponent::load(
+bool MetalContainer::load(
   const std::string& filePath,
   const char*        designDocSchemaFilePath,
   const char*        layoutDocSchemaFilePath)
@@ -82,22 +82,22 @@ bool MetalComponent::load(
   return m_impl->load(filePath, designDocSchemaFilePath, layoutDocSchemaFilePath);
 }
 
-bool MetalComponent::run()
+bool MetalContainer::run()
 {
   return m_impl->run();
 }
 
-void MetalComponent::setView(MTLHandle mtkView)
+void MetalContainer::setView(MTLHandle mtkView)
 {
   m_impl->setView(mtkView);
 }
 
-bool MetalComponent::onEvent(UEvent evt)
+bool MetalContainer::onEvent(UEvent evt)
 {
   return m_impl->onEvent(evt);
 }
 
-void MetalComponent::setEventListener(EventListener listener)
+void MetalContainer::setEventListener(EventListener listener)
 {
   return m_impl->m_component->setEventListener(listener);
 }

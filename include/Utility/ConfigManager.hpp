@@ -23,20 +23,25 @@ namespace Config
 
 inline nlohmann::json genDefaultFontConfig()
 {
-  nlohmann::json font = {};
+  nlohmann::json           font = {};
   std::vector<std::string> dirs;
   std::vector<std::string> fallbacks;
+  std::vector<std::string> emojiFallback;
 #if defined(VGG_TARGET_PLATFORM_Linux)
   dirs = { "/usr/share/fonts" };
   fallbacks = { "DejaVuSans" };
+  emojiFallback = {"Apple Color Emoji"};
 #elif defined(VGG_TARGET_PLATFORM_macOS)
-  dirs = { "/System/Library/Fonts/", std::filesystem::path(std::getenv("HOME"))/"Library"/"Fonts" };
+  dirs = { "/System/Library/Fonts/",
+           std::filesystem::path(std::getenv("HOME")) / "Library" / "Fonts" };
   fallbacks = { "Helvetica" };
+  emojiFallback = {"Apple Color Emoji"};
 #elif defined(VGG_TARGET_PLATFORM_Windows)
   // TODO:: for other platform config
 #endif
   font["directory"] = dirs;
   font["fallbackFont"] = fallbacks;
+  font["defaultEmojiFont"] = emojiFallback;
   return font;
 }
 

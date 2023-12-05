@@ -16,8 +16,8 @@
 
 #include "../Common/FakeMouse.hpp"
 #include "Container.hpp"
-#include "ContainerComposer.hpp"
 
+#include "Adapter/NativeComposer.hpp"
 #include "Application/AppRender.hpp"
 #include "Application/MainComposer.hpp"
 #include "Application/RunLoop.hpp"
@@ -47,8 +47,13 @@ public:
   ContainerImpl(Container* api)
     : m_api(api)
   {
+    bool catchJsException = false;
+#ifdef NDEBUG
+    catchJsException = true;
+#endif
     m_mainComposer.reset(
-      new MainComposer{ new ContainerComposer{}, std::make_shared<FakeMouse>() });
+      new MainComposer{ new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js", catchJsException),
+                        std::make_shared<FakeMouse>() });
     m_application.reset(new UIApplication);
 
     m_appRender = std::make_shared<app::AppRender>();

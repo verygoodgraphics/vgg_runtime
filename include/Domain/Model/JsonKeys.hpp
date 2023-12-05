@@ -68,6 +68,7 @@ constexpr auto K_SYMBOL_MASTER = "symbolMaster";
 constexpr auto K_TEXT = "text";
 constexpr auto K_TYPES = "types";
 constexpr auto K_VALUE = "value";
+constexpr auto K_VERSION = "version";
 constexpr auto K_VERTICAL_CONSTRAINT = "verticalConstraint";
 constexpr auto K_VISIBLE = "visible";
 constexpr auto K_WIDTH = "width";

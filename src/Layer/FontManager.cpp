@@ -64,6 +64,19 @@ bool addEmbbedFont(SkFontMgrVGG* mgr)
 
 #endif
 
+namespace
+{
+
+template<typename T>
+std::vector<T> mergeArrayConfig(const nlohmann::json& config1, const nlohmann::json& config2)
+{
+  std::set<T> set{ config1.begin(), config1.end() };
+  set.insert(config2.begin(), config2.end());
+  return { set.begin(), set.end() };
+}
+
+} // namespace
+
 namespace VGG
 {
 
@@ -83,15 +96,21 @@ public:
   SkFontMgrVGG* registerFont(
     const std::string&       key,
     const fs::path&          fontDir,
-    std::vector<std::string> fallbackFonts)
+    std::vector<std::string> fallbackFonts,
+    std::vector<std::string> fallbackEmojiFonts)
   {
-    return registerFont(key, std::vector<fs::path>{ fontDir }, std::move(fallbackFonts));
+    return registerFont(
+      key,
+      std::vector<fs::path>{ fontDir },
+      std::move(fallbackFonts),
+      std::move(fallbackEmojiFonts));
   }
 
   SkFontMgrVGG* registerFont(
     const std::string&       key,
     std::vector<fs::path>    dirs,
-    std::vector<std::string> fallbacks)
+    std::vector<std::string> fallbacks,
+    std::vector<std::string> fallbackEmojiFonts)
   {
     DEBUG("Font directory: -----------");
     for (const auto p : dirs)
@@ -112,7 +131,12 @@ public:
       {
         DEBUG("%s", f.c_str());
       }
+      for (const auto f : fallbackEmojiFonts)
+      {
+        DEBUG("%s", f.c_str());
+      }
       vggFontMgr->setFallbackFonts(std::move(fallbacks));
+      vggFontMgr->setFallbackEmojiFonts(std::move(fallbackEmojiFonts));
       auto result = fontMgrs.insert({ key, std::move(vggFontMgr) });
       if (result.second)
       {
@@ -126,39 +150,46 @@ public:
 FontManager::FontManager()
   : d_ptr(new FontManager__pImpl(this))
 {
-  auto                     font = Config::globalConfig().value("fonts", nlohmann::json{});
-  std::vector<fs::path>    fontDir;
-  std::vector<std::string> fallback;
-  if (font.is_object())
-  {
-    fontDir = font.value("directory", std::vector<fs::path>());
-    fallback = font.value("fallbackFont", std::vector<std::string>());
-  }
-  std::set<fs::path>    fontDirSet{ fontDir.begin(), fontDir.end() }; // remove duplicate elements
-  std::set<std::string> fallbackSet{ fallback.begin(), fallback.end() };
-  const auto            systemFontCfg = Config::genDefaultFontConfig();
-  if (systemFontCfg.is_object())
-  {
-    auto systemFontDir = systemFontCfg.value("directory", std::vector<fs::path>{});
-    fontDirSet.insert(systemFontDir.begin(), systemFontDir.end());
+  auto       font = Config::globalConfig().value("fonts", nlohmann::json{});
+  const auto systemFontCfg = Config::genDefaultFontConfig();
 
-    auto systemFallback = systemFontCfg.value("fallbackFont", std::vector<std::string>{});
-    fallbackSet.insert(systemFallback.begin(), systemFallback.end());
-  }
-
-  std::vector<fs::path> dirs{ fontDirSet.begin(), fontDirSet.end() };
-  auto fallbacks = std::vector<std::string>{ fallbackSet.begin(), fallbackSet.end() };
+  auto arrayEntries = [&](const char* entry)
+  {
+    std::vector<std::string> result;
+    if (font.is_object())
+    {
+      result = font.value(entry, decltype(result){});
+    }
+    if (systemFontCfg.is_object())
+    {
+      result = mergeArrayConfig<std::string>(
+        std::move(result),
+        systemFontCfg.value(entry, decltype(result){}));
+    }
+    return result;
+  };
 
   bool atLeastOne = false;
+
+  std::vector<std::string> dirStr(arrayEntries("directory"));
+  std::vector<fs::path>    dirs;
+  for (const auto& ds : dirStr)
+    dirs.push_back(ds);
+  std::vector<std::string> fallbackFonts(arrayEntries("fallbackFont"));
+  std::vector<std::string> fallbackEmojiFonts(arrayEntries("fallbackEmojiFont"));
   if (!dirs.empty())
   {
-    auto mgr = d_ptr->registerFont("default", dirs, fallbacks);
+    auto mgr = d_ptr->registerFont(
+      "default",
+      std::move(dirs),
+      std::move(fallbackFonts),
+      std::move(fallbackEmojiFonts));
     d_ptr->defaultFontMgr = mgr;
     atLeastOne = true;
   }
   if (!atLeastOne)
   {
-    if (auto mgr = d_ptr->registerFont("default", fs::path(), {}))
+    if (auto mgr = d_ptr->registerFont("default", fs::path(), {}, {}))
     {
       d_ptr->defaultFontMgr = mgr;
     }

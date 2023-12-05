@@ -207,6 +207,16 @@ public:
     return m_fallbackFonts;
   }
 
+  void setFallbackEmojiFonts(std::vector<std::string> fallbacks)
+  {
+    m_fallbackEmojiFonts = std::move(fallbacks);
+  }
+
+  const std::vector<std::string>& fallbackEmojiFonts() const
+  {
+    return m_fallbackEmojiFonts;
+  }
+
   void saveFontInfo(const fs::path& path)
   {
     std::ofstream ofs(path);
@@ -246,6 +256,7 @@ private:
   Families                     fFamilies;
   sk_sp<SkFontStyleSet>        fDefaultFamily;
   std::vector<std::string>     m_fallbackFonts;
+  std::vector<std::string>     m_fallbackEmojiFonts;
   SkTypeface_FreeType::Scanner fScanner;
 };
 
@@ -315,6 +326,10 @@ public:
     if (m_fontMgr)
     {
       for (const auto& f : m_fontMgr->fallbackFonts())
+      {
+        defFonts.push_back(SkString(f));
+      }
+      for (const auto& f : m_fontMgr->fallbackEmojiFonts())
       {
         defFonts.push_back(SkString(f));
       }

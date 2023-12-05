@@ -16,6 +16,7 @@
 #include "Daruma.hpp"
 
 #include "Config.hpp"
+#include "JsonKeys.hpp"
 #include "Loader/DirLoader.hpp"
 #include "Loader/ZipLoader.hpp"
 #include "SubjectJsonDocument.hpp"
@@ -336,4 +337,9 @@ std::string Daruma::uuidFor(const std::string& content)
 {
   boost::uuids::name_generator_sha1 generator{ boost::uuids::ns::oid() };
   return boost::uuids::to_string(generator(content));
+}
+
+std::string Daruma::docVersion() const
+{
+  return m_runtimeDesignDoc->content().value(K_VERSION, K_EMPTY_STRING);
 }

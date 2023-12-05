@@ -17,6 +17,7 @@ target_include_directories(vgg_application PUBLIC
 )
 
 target_include_directories(vgg_application PRIVATE
+  ${CMAKE_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/include/Application
 )
 

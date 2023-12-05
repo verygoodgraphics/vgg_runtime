@@ -32,9 +32,60 @@
 #include "UseCase/ResizeWindow.hpp"
 #include "UseCase/StartRunning.hpp"
 
+#include "VGGVersion_generated.h"
+
 #include <cassert>
 
 constexpr auto PSEUDO_PATH_EDIT_VIEW = "::editView";
+
+#define MIN_DOC_VERSION VGG_PARSE_FORMAT_VER_STR
+
+namespace
+{
+// Method to compare two versions.
+// Returns 1 if v2 is smaller, -1
+// if v1 is smaller, 0 if equal
+int versionCompare(const std::string& v1, const std::string& v2)
+{
+  // vnum stores each numeric
+  // part of version
+  int vnum1 = 0, vnum2 = 0;
+
+  // loop until both string are
+  // processed
+  for (int i = 0, j = 0; (i < v1.length() || j < v2.length());)
+  {
+    // storing numeric part of
+    // version 1 in vnum1
+    while (i < v1.length() && v1[i] != '.')
+    {
+      vnum1 = vnum1 * 10 + (v1[i] - '0');
+      i++;
+    }
+
+    // storing numeric part of
+    // version 2 in vnum2
+    while (j < v2.length() && v2[j] != '.')
+    {
+      vnum2 = vnum2 * 10 + (v2[j] - '0');
+      j++;
+    }
+
+    if (vnum1 > vnum2)
+      return 1;
+    if (vnum2 > vnum1)
+      return -1;
+
+    // if equal, reset variables and
+    // go for next numeric part
+    vnum1 = vnum2 = 0;
+    i++;
+    j++;
+  }
+  return 0;
+}
+
+} // namespace
 
 namespace VGG
 {
@@ -197,6 +248,15 @@ void Controller::initModel(const char* designDocSchemaFilePath, const char* layo
 void Controller::start()
 {
   m_presenter->setModel(generateViewModel(m_model, m_presenter->viewSize()));
+
+  const auto& modelFileVersion = m_model->docVersion();
+  if (versionCompare(modelFileVersion, MIN_DOC_VERSION) < 0)
+  {
+    WARN(
+      "The loaded file version %s is lower than the minimum required version %s",
+      modelFileVersion.c_str(),
+      MIN_DOC_VERSION);
+  }
 
   observeModelState();
   observeViewEvent();

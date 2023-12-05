@@ -40,13 +40,13 @@ class Daruma
   std::shared_ptr<VGG::Model::Loader> m_loader;
 
   std::unordered_map<std::string, std::string> m_memoryCode; // fileName: code_content
-  json m_eventListeners;
+  json                                         m_eventListeners;
 
   // original model
-  JsonDocumentPtr m_designDoc;
-  MakeJsonDocFn m_makeDesignDocFn;
-  JsonDocumentPtr m_layoutDoc;
-  MakeJsonDocFn m_makeLayoutDocFn;
+  JsonDocumentPtr              m_designDoc;
+  MakeJsonDocFn                m_makeDesignDocFn;
+  JsonDocumentPtr              m_layoutDoc;
+  MakeJsonDocFn                m_makeLayoutDocFn;
   Model::Loader::ResourcesType m_resources;
 
   // runtime view model, symbol instance expanded
@@ -54,7 +54,7 @@ class Daruma
   JsonDocumentPtr m_runtimeLayoutDoc;
 
   rxcpp::subjects::subject<VGG::ModelEventPtr> m_subject;
-  std::mutex m_mutex;
+  std::mutex                                   m_mutex;
 
 public:
   using ListenersType = std::unordered_map<std::string, std::vector<std::string>>;
@@ -68,23 +68,27 @@ public:
 
   JsonDocumentPtr runtimeDesignDoc();
   JsonDocumentPtr runtimeLayoutDoc();
-  void setRuntimeDesignDoc(const nlohmann::json& designJson);
-  void setRuntimeLayoutDoc(const nlohmann::json& layoutJson);
+  void            setRuntimeDesignDoc(const nlohmann::json& designJson);
+  void            setRuntimeLayoutDoc(const nlohmann::json& layoutJson);
 
   JsonDocumentPtr& designDoc();
   JsonDocumentPtr& layoutDoc();
-  auto resources()
+  auto             resources()
   {
     return m_resources;
   }
 
+  std::string docVersion() const;
+
   // event listener
-  void addEventListener(const std::string& jsonPointer,
-                        const std::string& type,
-                        const std::string& code);
-  void removeEventListener(const std::string& jsonPointer,
-                           const std::string& type,
-                           const std::string& code);
+  void addEventListener(
+    const std::string& jsonPointer,
+    const std::string& type,
+    const std::string& code);
+  void removeEventListener(
+    const std::string& jsonPointer,
+    const std::string& type,
+    const std::string& code);
   auto getEventListeners(const std::string& jsonPointer) -> ListenersType;
 
   // todo, make sure the wasm files (*.mjs *.wasm) are in the correct directory or url

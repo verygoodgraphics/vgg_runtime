@@ -78,7 +78,7 @@ void Painter::drawPathBorder(
   else if (b.fillType == FT_Color)
   {
     strokePen.setColor(b.color.value_or(Color{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
-    strokePen.setAlphaf(strokePen.getAlphaf());
+    strokePen.setAlphaf(strokePen.getAlphaf() * b.contextSettings.opacity);
   }
   else if (b.fillType == FT_Pattern)
   {

@@ -5,3 +5,4 @@ message(STATUS "Parse for version: " ${version} ${GLOBAL_CONSTANT})
 set(VGG_PARSE_FORMAT_VER_STR ${version})
 configure_file(${CMAKE_SOURCE_DIR}/cmake/configure.in/VGGVersion.h.in VGGVersion_generated.h @ONLY)
 
+include_directories(${CMAKE_BINARY_DIR})

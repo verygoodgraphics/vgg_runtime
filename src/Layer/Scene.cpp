@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "SceneBuilder.hpp"
+
 #include "Renderer.hpp"
 
-#include "Utility/ConfigManager.hpp"
-#include "Utility/Log.hpp"
 #include "Layer/Scene.hpp"
-#include "Renderer.hpp"
+#include "Layer/SceneBuilder.hpp"
 #include "Layer/Zoomer.hpp"
 #include "Layer/Core/PaintNode.hpp"
+#include "Utility/ConfigManager.hpp"
+#include "Utility/Log.hpp"
 
 #include <glm/gtx/matrix_transform_2d.hpp>
 #include <glm/matrix.hpp>
@@ -99,10 +99,6 @@ Scene::Scene()
   : d_ptr(new Scene__pImpl(this))
 {
 }
-void Scene::loadFileContent(const std::string& json)
-{
-  loadFileContent(nlohmann::json::parse(json));
-}
 Scene::~Scene() = default;
 
 void Scene::loadFileContent(const nlohmann::json& json)
@@ -113,7 +109,26 @@ void Scene::loadFileContent(const nlohmann::json& json)
   _->page = 0;
   _->symbolIndex = 0;
   repaint();
-  _->roots = layer::SceneBuilder::build(json);
+  auto result = layer::SceneBuilder::builder().setDoc(json).setResetOriginEnable(true).build();
+  if (result.type.has_value())
+  {
+    DEBUG("SceneBuilder Result: %d", result.type.value());
+  }
+  if (result.root.has_value())
+  {
+    _->roots = std::move(result.root.value());
+  }
+}
+
+void Scene::setSceneRoots(std::vector<std::shared_ptr<PaintNode>> roots)
+{
+  VGG_IMPL(Scene)
+  if (roots.empty())
+    return;
+  _->page = 0;
+  _->symbolIndex = 0;
+  repaint();
+  _->roots = std::move(roots);
 }
 
 int Scene::currentPage() const

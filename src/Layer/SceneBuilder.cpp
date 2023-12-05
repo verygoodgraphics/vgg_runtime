@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "SceneBuilder.hpp"
-
+#include "Layer/SceneBuilder.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/ParagraphLayout.hpp"
 #include "Math/Algebra.hpp"

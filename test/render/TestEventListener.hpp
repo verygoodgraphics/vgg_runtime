@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Layer/SceneBuilder.hpp"
 #include "loader.hpp"
 #include "Layer/DocBuilder.hpp"
 #include "Utility/ConfigManager.hpp"
@@ -128,10 +129,30 @@ protected:
                        .setExpandEnabled(true)
                        .setLayoutEnabled(true)
                        .build();
-          auto dur = Timer::time([&, this]() { m_scene->loadFileContent(*res.doc); });
+          Timer t;
+          t.start();
+          auto sceneBuilderResult = VGG::layer::SceneBuilder::builder()
+                                      .setResetOriginEnable(true)
+                                      .setDoc(std::move(*res.doc))
+                                      .build();
+          t.stop();
+          auto dur = t.elapsed();
           INFO("Doc Expand Time Cost: %f", (double)res.timeCost.expand.s());
           INFO("Doc Layout Time Cost: %f", (double)res.timeCost.layout.s());
           INFO("Scene Build Time Cost: %f", (double)dur.s());
+          if (sceneBuilderResult.type)
+          {
+            if (
+              *sceneBuilderResult.type ==
+              VGG::layer::SceneBuilderResult::EResultType::VERSION_MISMATCH)
+            {
+              DEBUG("Format Version mismatch:");
+            }
+          }
+          if (sceneBuilderResult.root)
+          {
+            m_scene->setSceneRoots(std::move(*sceneBuilderResult.root));
+          }
           auto editor = std::make_shared<Editor>();
           m_layer->addAppRenderable(editor);
           m_layer->addAppScene(m_scene);

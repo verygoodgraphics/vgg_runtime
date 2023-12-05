@@ -59,16 +59,10 @@ public:
     : m_hasNext(hasNext)
   {
   }
-  enum EWarnType
+  enum EResult
   {
     // No value yet
   };
-
-  enum EErrType
-  {
-    // No value yet
-  };
-
   struct TimeCost
   {
     // Connting in seconds
@@ -98,8 +92,7 @@ public:
   };
   using ExportData = std::pair<std::string, std::vector<char>>;
 
-  std::optional<EWarnType>  warnType;
-  std::optional<EErrType>   errType;
+  std::optional<EResult>    type;
   std::optional<TimeCost>   timeCost;
   std::optional<ExportData> data;
 
@@ -115,14 +108,9 @@ public:
 
 struct BuilderResult
 {
-  enum EWarnType
+  enum EResult
   {
-    INCONSISITENT_FORMAT_VERSION,
-  };
-
-  enum EErrType
-  {
-    // No value yet
+    VERSION_MISMATCH,
   };
 
   struct TimeCost
@@ -152,9 +140,8 @@ struct BuilderResult
       return s;
     }
   };
-  std::optional<EWarnType> warnType;
-  std::optional<EErrType>  errType;
-  std::optional<TimeCost>  timeCost;
+  std::optional<EResult>  type;
+  std::optional<TimeCost> timeCost;
 };
 
 struct ExportOption

@@ -49,6 +49,7 @@ class DocBuilder
     m_enableLayout = that.m_enableLayout;
     m_layout = std::move(that.m_layout);
     m_doc = std::move(that.m_doc);
+    m_invalid = std::move(that.m_invalid);
     that.m_invalid = true;
   }
 

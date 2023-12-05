@@ -56,8 +56,9 @@ protected:
 public:
   Scene();
   ~Scene();
-  void loadFileContent(const std::string& json);
-  void loadFileContent(const nlohmann::json& j);
+  [[deprecated("Use SceneBuilder for data preparation")]] void loadFileContent(
+    const nlohmann::json& j);
+  void setSceneRoots(std::vector<std::shared_ptr<PaintNode>> roots);
   void setName(std::string name)
   {
     m_name = std::move(name);

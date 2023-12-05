@@ -16,6 +16,7 @@
 #include "ContextVk.hpp"
 #include "Domain/Layout/ExpandSymbol.hpp"
 #include "Layer/DocBuilder.hpp"
+#include "Layer/SceneBuilder.hpp"
 #include "Utility/ConfigManager.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/VGGLayer.hpp"
@@ -28,9 +29,12 @@
 #include "VGG/Exporter/PDFExporter.hpp"
 #include "VGG/Exporter/Type.hpp"
 
+#include <VGGVersion_generated.h>
+
 #include <iostream>
 #include <algorithm>
 #include <iterator>
+#include <src/base/SkVx.h>
 #include <variant>
 #include <exception>
 #include <memory>
@@ -231,8 +235,27 @@ public:
     BuilderResult::TimeCost cost;
     cost.layout = res.timeCost.layout.s();
     cost.expand = res.timeCost.expand.s();
+    Timer t;
+    t.start();
+    auto sceneBuilderResult = VGG::layer::SceneBuilder::builder()
+                                .setResetOriginEnable(true)
+                                .setCheckVersion(VGG_PARSE_FORMAT_VER_STR)
+                                .setDoc(std::move(*res.doc))
+                                .build();
+    t.stop();
+    auto dur = t.elapsed();
+    if (sceneBuilderResult.type)
+    {
+      if (*sceneBuilderResult.type == VGG::layer::SceneBuilderResult::EResultType::VERSION_MISMATCH)
+      {
+        result.type = BuilderResult::VERSION_MISMATCH;
+      }
+    }
+    if (sceneBuilderResult.root)
+    {
+      scene->setSceneRoots(std::move(*sceneBuilderResult.root));
+    }
     result.timeCost = cost;
-    scene->loadFileContent(std::move(*res.doc));
     scene->setResRepo(std::move(resource));
     totalFrames = scene->frameCount();
     index = 0;

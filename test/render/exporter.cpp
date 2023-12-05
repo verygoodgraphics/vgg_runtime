@@ -50,6 +50,10 @@ void writeDoc(
       std::move(res),
       opts,
       buildResult);
+    if (buildResult.type)
+    {
+      DEBUG("Version mismatch: ");
+    }
     INFO("Expand Time Cost: [%f]", buildResult.timeCost->expand);
     INFO("Layout Time Cost: [%f]", buildResult.timeCost->layout);
     write(
@@ -206,6 +210,10 @@ int main(int argc, char** argv)
       {
         exporter::BuilderResult res;
         auto iter = exporter.render(data.format, data.layout, data.resource, opts, exportOpt, res);
+        if (res.type)
+        {
+          DEBUG("Version mismatch");
+        }
         INFO("Expand Time Cost: [%f]", res.timeCost->expand);
         INFO("Layout Time Cost: [%f]", res.timeCost->layout);
 

@@ -17,9 +17,12 @@
 #include "Layer/Core/VType.hpp"
 #include "Layer/PathGenerator.hpp"
 #include "VSkia.hpp"
+#include <core/SkCanvas.h>
 #include <core/SkColor.h>
 #include <core/SkMaskFilter.h>
 #include <core/SkPaint.h>
+#include <core/SkTextBlob.h>
+#include <string>
 
 using namespace VGG;
 
@@ -87,12 +90,36 @@ void Painter::drawPathBorder(
     strokePen.setShader(shader);
     strokePen.setAlphaf(b.contextSettings.opacity);
   }
-
   m_renderer->canvas()->drawPath(skPath, strokePen);
-
   if (!inCenter)
   {
     m_renderer->canvas()->restore(); // pop border position style
+  }
+
+  if (false)
+  {
+    std::vector<SkPoint> pts(skPath.countPoints());
+    SkPaint              p;
+    skPath.getPoints(pts.data(), skPath.countPoints());
+    p.setStrokeWidth(2);
+    p.setColor(SK_ColorRED);
+    SkFont a;
+    m_renderer->canvas()->drawPoints(SkCanvas::kPoints_PointMode, pts.size(), pts.data(), p);
+    for (auto i = 0; i < pts.size(); i++)
+    {
+      SkPaint textPaint;
+      textPaint.setStrokeWidth(0.5);
+      textPaint.setColor(SK_ColorBLACK);
+      std::string index = std::to_string(i);
+      m_renderer->canvas()->drawSimpleText(
+        index.c_str(),
+        index.size(),
+        SkTextEncoding::kUTF8,
+        pts[i].x(),
+        pts[i].y(),
+        a,
+        textPaint);
+    }
   }
 }
 

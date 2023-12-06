@@ -65,6 +65,7 @@ class Renderer
 
   SkCanvas*         m_canvas{ nullptr };
   bool              m_enableDrawDebugBound{ false };
+  bool              m_enableDrawDebugPath{ false };
   InternalObjectMap m_maskObjects;
   Scene*            m_scene{ nullptr };
 
@@ -92,6 +93,16 @@ public:
   bool isEnableDrawDebugBound()
   {
     return m_enableDrawDebugBound;
+  }
+
+  void setDrawDebugPathEnable(bool enabled)
+  {
+    m_enableDrawDebugPath = enabled;
+  }
+
+  bool drawDebugPathEnable()
+  {
+    return m_enableDrawDebugPath;
   }
 
   SkCanvas* canvas()

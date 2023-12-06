@@ -15,8 +15,6 @@
  */
 #pragma once
 
-#include "Domain/Daruma.hpp"
-
 #ifdef EMSCRIPTEN
 #include <emscripten/val.h>
 #endif
@@ -26,6 +24,10 @@
 #include <memory>
 
 class JsonDocument;
+namespace VGG
+{
+class Daruma;
+}
 
 constexpr int main_or_editor_daruma_index = 0;
 constexpr int edited_daruma_index = 1;
@@ -36,7 +38,7 @@ public:
 #ifdef EMSCRIPTEN
   using ListenersType = emscripten::val;
 #else
-  using ListenersType = VGG::Daruma::ListenersType;
+  using ListenersType = std::unordered_map<std::string, std::vector<std::string>>;
 #endif
   using IndexType = std::size_t;
 

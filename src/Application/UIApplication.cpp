@@ -103,9 +103,9 @@ bool UIApplication::run(int fps)
 {
   m_view->updateOncePerLoop();
 
-  if (m_layer->beginFrame(fps))
+  if (m_view->isDirty() || m_controller->hasDirtyEditor())
   {
-    if (m_view->isDirty() || m_controller->hasDirtyEditor())
+    if (m_layer->beginFrame(fps))
     {
       m_view->setDirty(false);
       m_controller->resetEditorDirty();

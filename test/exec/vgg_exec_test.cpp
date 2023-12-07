@@ -32,7 +32,11 @@ TEST_F(VggExecTestSuite, Smoke)
 
   VggExec sut(js_ptr, env_ptr);
 
-  EXPECT_CALL(*mock_js_engine, evalScript(_)).WillOnce(Return(true)).WillOnce(Return(false));
+  EXPECT_CALL(*mock_js_engine, evalScript(_))
+    .WillOnce(Return(true)) // setEnv
+    .WillOnce(Return(true))
+    .WillOnce(Return(true)) // setEnv
+    .WillOnce(Return(false));
 
   // When
   auto result = sut.evalScript("1");

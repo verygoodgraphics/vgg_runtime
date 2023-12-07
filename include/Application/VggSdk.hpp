@@ -52,6 +52,7 @@ public:
 
   // design document
   std::string designDocument();
+  std::string designDocumentValueAt(const std::string& jsonPointer);
   void        designDocumentAddAt(const std::string& jsonPointer, const std::string& value);
   void        designDocumentReplaceAt(const std::string& jsonPointer, const std::string& value);
   void        designDocumentDeleteAt(const std::string& jsonPointer);

@@ -38,6 +38,7 @@ private:
   // design document in vgg daruma file
   static napi_value GetDesignDocument(napi_env env, napi_callback_info info);
 
+  static napi_value DesignDocumentValueAt(napi_env env, napi_callback_info info);
   static napi_value DesignDocumentReplaceAt(napi_env env, napi_callback_info info);
   static napi_value DesignDocumentAddAt(napi_env env, napi_callback_info info);
   static napi_value DesignDocumentDeleteAt(napi_env env, napi_callback_info info);
@@ -54,8 +55,8 @@ private:
 
   static napi_ref constructor;
 
-  napi_env m_env;
-  napi_ref m_wrapper;
+  napi_env                m_env;
+  napi_ref                m_wrapper;
   std::shared_ptr<VggSdk> m_vggSdk;
 };
 

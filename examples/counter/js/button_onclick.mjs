@@ -1,5 +1,3 @@
-let count = 0;
-
 function handleEvent(event) {
   console.log('handle event:', event, ', type:', event.type, ', target:', event.target);
 
@@ -17,12 +15,10 @@ function handleEvent(event) {
     }
 
     case 'click': {
-      // const valuePath = '/frames/0/childObjects/3/content';
-      // let count = valueNode.content;
-      // count = parseInt(count) + 1;
-      count++;
-
-      vggSdk.updateAt('/frames/0/childObjects/3/content', JSON.stringify(count.toString()));
+      const valuePath = '/frames/0/childObjects/3/content';
+      let countJsonString = vggSdk.valueAt(valuePath);
+      let count = parseInt(JSON.parse(countJsonString)) + 1;
+      vggSdk.updateAt(valuePath, JSON.stringify(count.toString()));
       break;
     }
 

@@ -92,15 +92,6 @@ public:
   {
     m_grContext = m_skiaContextCreateProc();
     ASSERT(m_grContext);
-    // m_surface = m_skiaSurfaceCreateProc(m_grContext.get(),
-    //                                     m_ctxConfig.windowSize[0],
-    //                                     m_ctxConfig.windowSize[1],
-    //                                     m_ctxConfig);
-    // if (m_surface == nullptr)
-    // {
-    //   DEBUG("null m_surface");
-    // }
-    // ASSERT(m_surface);
   }
 
   void resizeSurface(int w, int h)

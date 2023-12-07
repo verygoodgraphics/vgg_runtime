@@ -241,15 +241,11 @@ public:
     BuilderResult::TimeCost cost;
     cost.layout = res.timeCost.layout.s();
     cost.expand = res.timeCost.expand.s();
-    Timer t;
-    t.start();
     auto sceneBuilderResult = VGG::layer::SceneBuilder::builder()
                                 .setResetOriginEnable(true)
                                 .setCheckVersion(VGG_PARSE_FORMAT_VER_STR)
                                 .setDoc(std::move(*res.doc))
                                 .build();
-    t.stop();
-    auto dur = t.elapsed();
     if (sceneBuilderResult.type)
     {
       if (*sceneBuilderResult.type == VGG::layer::SceneBuilderResult::EResultType::VERSION_MISMATCH)

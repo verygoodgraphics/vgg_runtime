@@ -116,7 +116,7 @@ void Scene::loadFileContent(const nlohmann::json& json)
   }
   if (result.root.has_value())
   {
-    _->roots = std::move(result.root.value());
+    _->roots = std::move(*result.root);
   }
 }
 

@@ -59,6 +59,13 @@ std::string VggSdk::designDocument()
   return getDesignDocument()->content().dump();
 }
 
+std::string VggSdk::designDocumentValueAt(const std::string& jsonPointer)
+{
+  const auto&                  docJson = getDesignDocument()->content();
+  nlohmann::json::json_pointer path{ jsonPointer };
+  return docJson.at(path).dump();
+}
+
 void VggSdk::designDocumentReplaceAt(const std::string& jsonPointer, const std::string& value)
 {
   getDesignDocument()->replaceAt(jsonPointer, value);

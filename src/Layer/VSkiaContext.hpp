@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/Core/Timer.hpp"
 #include "Layer/Graphics/GraphicsContext.hpp"
 #include "Layer/Graphics/GraphicsSkia.hpp"
 
@@ -34,6 +35,7 @@
 #include <include/effects/SkDashPathEffect.h>
 #include <include/core/SkStream.h>
 #include <encode/SkPngEncoder.h>
+
 namespace VGG::layer::skia_impl
 {
 
@@ -73,6 +75,8 @@ public:
   }
 
 private:
+  using Size = std::array<int, 2>;
+
   std::unique_ptr<SkFILEWStream> m_stream;
   sk_sp<SkDocument>              m_document;
   sk_sp<GrDirectContext>         m_grContext{ nullptr };
@@ -80,6 +84,13 @@ private:
   SurfaceCreateProc              m_skiaSurfaceCreateProc;
   ContextCreateProc              m_skiaContextCreateProc;
   ContextConfig                  m_ctxConfig;
+  std::optional<Size>            m_surfaceSize;
+  bool                           m_surfaceSwapped{ false };
+
+  void clearSwap()
+  {
+    m_surfaceSwapped = false;
+  }
 
 public:
   SkiaContext(
@@ -97,7 +108,18 @@ public:
   void resizeSurface(int w, int h)
   {
     ASSERT(m_skiaSurfaceCreateProc);
+    if (m_surfaceSize)
+    {
+      auto [width, height] = *m_surfaceSize;
+      if (width == w && height == h)
+        return;
+    }
     m_surface = m_skiaSurfaceCreateProc(m_grContext.get(), w, h, m_ctxConfig);
+    m_surfaceSize = { w, h };
+    if (m_surface)
+      clearSwap();
+    else
+      DEBUG("In resizeSurface: Recreate surface failed");
   }
 
   bool flushAndSubmit()
@@ -105,6 +127,27 @@ public:
     auto ok = m_grContext->submit();
     m_grContext->flush();
     return ok;
+  }
+
+  void markSwap()
+  {
+    m_surfaceSwapped = true;
+  }
+
+  bool prepareFrame()
+  {
+    if (m_surfaceSize && m_surfaceSwapped)
+    {
+      auto [w, h] = *m_surfaceSize;
+      m_surface = m_skiaSurfaceCreateProc(m_grContext.get(), w, h, m_ctxConfig);
+      if (m_surface)
+        clearSwap();
+      else
+        DEBUG("In prepareFrame: Recreate surface failed");
+    }
+    if (m_surface && !m_surfaceSwapped)
+      return true;
+    return false;
   }
 
   SkSurface* surface()

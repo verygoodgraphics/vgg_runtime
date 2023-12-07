@@ -52,8 +52,7 @@ public:
     catchJsException = true;
 #endif
     m_mainComposer.reset(
-      new MainComposer{ new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js", catchJsException),
-                        std::make_shared<FakeMouse>() });
+      new MainComposer{ new NativeComposer(catchJsException), std::make_shared<FakeMouse>() });
     m_application.reset(new UIApplication);
 
     m_appRender = std::make_shared<app::AppRender>();

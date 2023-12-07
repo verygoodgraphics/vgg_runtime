@@ -15,6 +15,8 @@
  */
 #include "VggExec.hpp"
 
+#include <sstream>
+
 bool VggExec::evalScript(const std::string& program)
 {
   setEnv();
@@ -35,7 +37,15 @@ bool VggExec::evalModule(const std::string& code, VGG::EventPtr event)
 
 void VggExec::setEnv()
 {
-  auto env = m_env->getEnv();
-  // todo: set env, then eval
-  // m_jsEngine->eval("setEnv");
+  std::ostringstream oss;
+  oss << "(function () {"
+      << "const containerKey = '" << m_env->getContainerKey() << "';"
+      << "const envKey = '" << m_env->getEnv() << "';"
+      << "const instanceKey = '" << m_env->getInstanceKey() << "';"
+      << "const currentVggName = '" << m_env->getCurrrentVggName() << "';"
+      << R"(
+          globalThis[currentVggName]  = globalThis[containerKey][envKey][instanceKey];
+        })();
+      )";
+  m_jsEngine->evalScript(oss.str());
 }

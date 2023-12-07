@@ -172,7 +172,7 @@ int main(int argc, char** argv)
       std::cout << "unsupported format: use png as default\n";
     }
   }
-  opts.resolutionLevel = 2;
+  opts.resolutionLevel = 1;
   opts.imageQuality = 80;
   int s = program.get<int>("-q");
   opts.imageQuality = s;

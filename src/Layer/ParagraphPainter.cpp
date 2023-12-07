@@ -44,7 +44,10 @@ void VParagraphPainter::drawTextBlob(
     auto styleID = *p;
     if (auto it = m_cache.find(styleID); it != m_cache.end())
     {
-      m_canvas->drawTextBlob(blob, x, y, it->second);
+      for (const auto p : it->second)
+      {
+        m_canvas->drawTextBlob(blob, x, y, p);
+      }
     }
     else
     {
@@ -52,40 +55,50 @@ void VParagraphPainter::drawTextBlob(
       const auto& style = m_paragraph->textStyles();
       assert(!style.empty());
       const auto fills = style[styleID].fills;
-      SkPaint    fillPen;
-      fillPen.setAntiAlias(true);
       if (fills.empty())
       {
-        fillPen.setColor(SK_ColorBLACK);
+        SkPaint defaultPaint;
+        defaultPaint.setColor(SK_ColorBLACK);
+        defaultPaint.setAntiAlias(true);
+        m_canvas->drawTextBlob(blob, x, y, defaultPaint);
       }
       else
       {
-        auto& f = fills[0];
-        fillPen.setStyle(SkPaint::kFill_Style);
+        SkPaint fillPen;
         fillPen.setAntiAlias(true);
-        if (f.fillType == FT_Color)
+        std::vector<SkPaint> paints;
+        for (const auto& f : fills)
         {
-          fillPen.setColor(f.color);
-          const auto currentAlpha = fillPen.getAlphaf();
-          fillPen.setAlphaf(currentAlpha * f.contextSettings.opacity);
+          fillPen.setStyle(SkPaint::kFill_Style);
+          fillPen.setAntiAlias(true);
+          if (f.fillType == FT_Color)
+          {
+            fillPen.setColor(f.color);
+            const auto currentAlpha = fillPen.getAlphaf();
+            fillPen.setAlphaf(currentAlpha * f.contextSettings.opacity);
+          }
+          else if (f.fillType == FT_Gradient)
+          {
+            assert(f.gradient.has_value());
+            auto gradientShader = getGradientShader(f.gradient.value(), m_paragraph->bound());
+            fillPen.setShader(gradientShader);
+            fillPen.setAlphaf(f.contextSettings.opacity);
+          }
+          else if (f.fillType == FT_Pattern)
+          {
+            assert(f.pattern.has_value());
+            auto shader = makePatternShader(m_paragraph->bound(), f.pattern.value());
+            fillPen.setShader(shader);
+            fillPen.setAlphaf(f.contextSettings.opacity);
+          }
+          paints.push_back(fillPen);
         }
-        else if (f.fillType == FT_Gradient)
+        for (const auto p : paints)
         {
-          assert(f.gradient.has_value());
-          auto gradientShader = getGradientShader(f.gradient.value(), m_paragraph->bound());
-          fillPen.setShader(gradientShader);
-          fillPen.setAlphaf(f.contextSettings.opacity);
+          m_canvas->drawTextBlob(blob, x, y, p);
         }
-        else if (f.fillType == FT_Pattern)
-        {
-          assert(f.pattern.has_value());
-          auto shader = makePatternShader(m_paragraph->bound(), f.pattern.value());
-          fillPen.setShader(shader);
-          fillPen.setAlphaf(f.contextSettings.opacity);
-        }
+        m_cache[styleID] = std::move(paints);
       }
-      m_canvas->drawTextBlob(blob, x, y, fillPen);
-      m_cache[styleID] = fillPen;
     }
   }
 }

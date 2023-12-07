@@ -19,6 +19,7 @@
 #include "Layer/Core/VType.hpp"
 #include "Layer/ParagraphLayout.hpp"
 #include "Layer/Renderer.hpp"
+#include <core/SkPaint.h>
 #include <include/core/SkCanvas.h>
 #include <include/core/SkPath.h>
 #include <modules/skparagraph/include/ParagraphPainter.h>
@@ -34,8 +35,8 @@ class VParagraphPainter
   : public skia::textlayout::ParagraphPainter
   , public VNode
 {
-  std::unordered_map<int, SkPaint> m_cache;
-  std::shared_ptr<RichTextBlock>   m_paragraph;
+  std::unordered_map<int, std::vector<SkPaint>> m_cache;
+  std::shared_ptr<RichTextBlock>                m_paragraph;
 
 public:
   VParagraphPainter()

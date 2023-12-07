@@ -233,6 +233,9 @@ std::optional<ELayerError> VLayer::onInit()
 }
 void VLayer::beginFrame()
 {
+  VGG_IMPL(VLayer);
+  if (!_->skiaContext->prepareFrame())
+    DEBUG("begin frame failed");
 }
 
 void VLayer::render()
@@ -276,6 +279,7 @@ void VLayer::endFrame()
   ASSERT(context());
   _->skiaContext->flushAndSubmit();
   context()->swap();
+  _->skiaContext->markSwap();
 }
 
 std::optional<std::vector<char>> VLayer::makeSKP()

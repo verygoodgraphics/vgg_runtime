@@ -31,6 +31,7 @@
 
 #include <VGGVersion_generated.h>
 
+#include <cmath>
 #include <iostream>
 #include <algorithm>
 #include <iterator>
@@ -53,30 +54,35 @@ void getMaxSurfaceSize(int resolutionLevel, float* maxSurfaceSize)
   {
     case 0:
     {
-      maxSurfaceSize[0] = 2048;
-      maxSurfaceSize[1] = 2048;
+      maxSurfaceSize[0] = 1024;
+      maxSurfaceSize[1] = 1024;
     }
     break;
     case 1:
-
+    {
+      maxSurfaceSize[0] = 1024;
+      maxSurfaceSize[1] = 1024;
+    }
+    break;
+    case 2:
     {
       maxSurfaceSize[0] = 2048;
       maxSurfaceSize[1] = 2048;
     }
     break;
-    case 2:
+    case 3:
     {
       maxSurfaceSize[0] = 4096;
       maxSurfaceSize[1] = 4096;
     }
     break;
-    case 3:
+    case 4:
     {
       maxSurfaceSize[0] = 8192;
       maxSurfaceSize[1] = 8192;
     }
     break;
-    case 4:
+    case 5:
     {
       maxSurfaceSize[0] = 16384;
       maxSurfaceSize[1] = 16384;
@@ -348,8 +354,8 @@ public:
     opts.encode = toEImageEncode(type);
     opts.position[0] = 0;
     opts.position[1] = 0;
-    opts.extend[0] = actualSize[0];
-    opts.extend[1] = actualSize[1];
+    opts.extend[0] = std::lroundf(actualSize[0]);
+    opts.extend[1] = std::lroundf(actualSize[1]);
     opts.quality = quality;
     auto res = state->render(scene, scale, opts, cost);
     if (!res.has_value())

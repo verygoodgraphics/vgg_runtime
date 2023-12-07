@@ -88,9 +88,7 @@ int main(int argc, char** argv)
 #ifdef NDEBUG
   catchJsException = true;
 #endif
-  MainComposer mainComposer{ new NativeComposer("https://s5.vgg.cool/vgg-sdk.esm.js",
-                                                catchJsException),
-                             std::make_shared<SdlMouse>() };
+  MainComposer mainComposer{ new NativeComposer(catchJsException), std::make_shared<SdlMouse>() };
 
   auto sdlApp = AppImpl::app();
 

@@ -24,6 +24,7 @@ else()
 
   target_link_libraries(vgg_adapter vgg_libnode)
   target_sources(vgg_adapter PRIVATE
+    PlatformAdapter/Native/Composer/NativeComposer.cpp
     PlatformAdapter/Native/Exec/NativeExec.cpp
     PlatformAdapter/Native/Exec/NativeExecImpl.cpp
     PlatformAdapter/Native/Sdk/Event/KeyboardEvent.cpp

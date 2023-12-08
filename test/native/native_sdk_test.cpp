@@ -13,14 +13,14 @@
 class VggNativeSdkTestSuite : public ::testing::Test
 {
 protected:
-  std::shared_ptr<NativeExec> m_sut_ptr;
+  NativeExec* m_sut_ptr;
   VggSdkMock* m_mock_sdk_ptr = nullptr;
 
   void SetUp() override
   {
     SKIP_S3_DEPENDENT_TEST
 
-    m_sut_ptr.reset(new NativeExec);
+    m_sut_ptr = NativeExec::sharedInstance().get();
     m_mock_sdk_ptr = new VggSdkMock();
     VGG::DIContainer<std::shared_ptr<VggSdk>>::get().reset(m_mock_sdk_ptr);
 
@@ -30,7 +30,6 @@ protected:
 
   void TearDown() override
   {
-    m_sut_ptr.reset();
     m_mock_sdk_ptr = nullptr;
     VGG::DIContainer<std::shared_ptr<VggSdk>>::get().reset();
   }

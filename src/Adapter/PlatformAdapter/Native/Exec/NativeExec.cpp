@@ -24,6 +24,12 @@
 
 using namespace VGG;
 
+std::shared_ptr<NativeExec> NativeExec::sharedInstance()
+{
+  static auto s_sharedInstance = std::shared_ptr<NativeExec>(new NativeExec);
+  return s_sharedInstance;
+}
+
 NativeExec::NativeExec()
   : m_impl(new NativeExecImpl)
 {
@@ -60,7 +66,7 @@ bool NativeExec::evalModule(const std::string& code)
 
 bool NativeExec::evalModule(const std::string& code, VGG::EventPtr event)
 {
-  NodeAdapter::EventStore event_store{ event };
+  NodeAdapter::EventStore       event_store{ event };
   NodeAdapter::JsEventGenerator event_generator{ event_store.eventId() };
   event->accept(&event_generator);
 

@@ -32,7 +32,7 @@ struct NativeExecImpl;
 class NativeExec final : public VggJSEngine
 {
 public:
-  NativeExec();
+  static std::shared_ptr<NativeExec> sharedInstance();
   ~NativeExec();
 
   bool evalScript(const std::string& code) override;
@@ -43,8 +43,10 @@ public:
   bool inject(InjectFn fn);
 
 private:
-  std::shared_ptr<std::thread> m_thread;
+  std::shared_ptr<std::thread>    m_thread;
   std::shared_ptr<NativeExecImpl> m_impl;
+
+  NativeExec();
 
   void teardown();
 };

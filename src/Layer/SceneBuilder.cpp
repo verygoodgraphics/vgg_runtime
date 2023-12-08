@@ -15,6 +15,7 @@
  */
 #include "Layer/SceneBuilder.hpp"
 #include "Layer/Core/VType.hpp"
+#include "Layer/Core/VUtils.hpp"
 #include "Layer/ParagraphLayout.hpp"
 #include "Math/Algebra.hpp"
 #include "Math/Math.hpp"
@@ -123,10 +124,13 @@ public:
   {
     for (auto& f : textStyle.fills)
     {
-      if (f.gradient.has_value())
-        convertCoordinateSystem(f.gradient.value(), totalMatrix);
-      if (f.pattern.has_value())
-        convertCoordinateSystem(f.pattern.value(), totalMatrix);
+      std::visit(
+        Overloaded{
+          [&](Gradient& g) { convertCoordinateSystem(g, totalMatrix); },
+          [&](Pattern& p) { convertCoordinateSystem(p, totalMatrix); },
+          [&](Color& c) {},
+        },
+        f.type);
     }
   }
 
@@ -134,25 +138,23 @@ public:
   {
     for (auto& b : style.borders)
     {
-      if (b.pattern)
-      {
-        convertCoordinateSystem(b.pattern.value(), totalMatrix);
-      }
-      if (b.gradient)
-      {
-        convertCoordinateSystem(b.gradient.value(), totalMatrix);
-      }
+      std::visit(
+        Overloaded{
+          [&](Gradient& g) { convertCoordinateSystem(g, totalMatrix); },
+          [&](Pattern& p) { convertCoordinateSystem(p, totalMatrix); },
+          [&](Color& c) {},
+        },
+        b.type);
     }
     for (auto& f : style.fills)
     {
-      if (f.gradient)
-      {
-        convertCoordinateSystem(f.gradient.value(), totalMatrix);
-      }
-      if (f.pattern)
-      {
-        convertCoordinateSystem(f.pattern.value(), totalMatrix);
-      }
+      std::visit(
+        Overloaded{
+          [&](Gradient& g) { convertCoordinateSystem(g, totalMatrix); },
+          [&](Pattern& p) { convertCoordinateSystem(p, totalMatrix); },
+          [&](Color& c) {},
+        },
+        f.type);
     }
     for (auto& s : style.shadows)
     {

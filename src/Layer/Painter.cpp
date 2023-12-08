@@ -48,12 +48,12 @@ void Painter::drawPathBorder(
   strokePen.setStrokeJoin(toSkPaintJoin(b.lineJoinStyle));
   strokePen.setStrokeCap(toSkPaintCap(b.lineCapStyle));
   strokePen.setStrokeMiter(b.miterLimit);
-  strokePen.setColor(b.color.value_or(Color{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
-  bool inCenter = true;
+  bool  inCenter = true;
+  float strokeWidth = b.thickness;
   if (b.position == PP_Inside && skPath.isLastContourClosed())
   {
     // inside
-    strokePen.setStrokeWidth(2. * b.thickness);
+    strokeWidth = 2.f * b.thickness;
     m_renderer->canvas()->save();
     m_renderer->canvas()->clipPath(skPath, SkClipOp::kIntersect);
     inCenter = false;
@@ -61,39 +61,17 @@ void Painter::drawPathBorder(
   else if (b.position == PP_Outside && skPath.isLastContourClosed())
   {
     // outside
-    strokePen.setStrokeWidth(2. * b.thickness);
+    strokeWidth = 2.f * b.thickness;
     m_renderer->canvas()->save();
     m_renderer->canvas()->clipPath(skPath, SkClipOp::kDifference);
     inCenter = false;
   }
-  else
-  {
-    strokePen.setStrokeWidth(b.thickness);
-  }
-
-  // draw fill for border
-  if (b.fillType == FT_Gradient)
-  {
-    assert(b.gradient.has_value());
-    strokePen.setShader(getGradientShader(b.gradient.value(), bound));
-    strokePen.setAlphaf(b.contextSettings.opacity);
-  }
-  else if (b.fillType == FT_Color)
-  {
-    strokePen.setColor(b.color.value_or(Color{ .r = 0, .g = 0, .b = 0, .a = 1.0 }));
-    strokePen.setAlphaf(strokePen.getAlphaf() * b.contextSettings.opacity);
-  }
-  else if (b.fillType == FT_Pattern)
-  {
-    assert(b.pattern.has_value());
-    auto shader = makePatternShader(bound, b.pattern.value());
-    strokePen.setShader(shader);
-    strokePen.setAlphaf(b.contextSettings.opacity);
-  }
+  strokePen.setStrokeWidth(strokeWidth);
+  populateSkPaint(b.type, b.contextSettings, bound, strokePen);
   m_renderer->canvas()->drawPath(skPath, strokePen);
   if (!inCenter)
   {
-    m_renderer->canvas()->restore(); // pop border position style
+    m_renderer->canvas()->restore();
   }
 
   if (false)
@@ -180,25 +158,6 @@ void Painter::drawFill(
   fillPen.setBlender(blender);
   fillPen.setImageFilter(imageFilter);
   fillPen.setMaskFilter(mask);
-  if (f.fillType == FT_Color)
-  {
-    fillPen.setColor(f.color);
-    const auto currentAlpha = fillPen.getAlphaf();
-    fillPen.setAlphaf(f.contextSettings.opacity * currentAlpha);
-  }
-  else if (f.fillType == FT_Gradient)
-  {
-    assert(f.gradient.has_value());
-    auto gradientShader = getGradientShader(f.gradient.value(), bound);
-    fillPen.setShader(gradientShader);
-    fillPen.setAlphaf(f.contextSettings.opacity);
-  }
-  else if (f.fillType == FT_Pattern)
-  {
-    assert(f.pattern.has_value());
-    auto shader = makePatternShader(bound, f.pattern.value());
-    fillPen.setShader(shader);
-    fillPen.setAlphaf(f.contextSettings.opacity);
-  }
+  populateSkPaint(f.type, f.contextSettings, bound, fillPen);
   m_renderer->canvas()->drawPath(skPath, fillPen);
 }

@@ -69,6 +69,8 @@ void VParagraphPainter::drawTextBlob(
         std::vector<SkPaint> paints;
         for (const auto& f : fills)
         {
+          if (!f.isEnabled)
+            continue;
           fillPen.setStyle(SkPaint::kFill_Style);
           fillPen.setAntiAlias(true);
           if (f.fillType == FT_Color)
@@ -93,11 +95,14 @@ void VParagraphPainter::drawTextBlob(
           }
           paints.push_back(fillPen);
         }
-        for (const auto p : paints)
+        if (!paints.empty())
         {
-          m_canvas->drawTextBlob(blob, x, y, p);
+          for (const auto p : paints)
+          {
+            m_canvas->drawTextBlob(blob, x, y, p);
+          }
+          m_cache[styleID] = std::move(paints);
         }
-        m_cache[styleID] = std::move(paints);
       }
     }
   }

@@ -20,8 +20,10 @@
 #endif
 
 #include <cstddef>
-#include <string>
 #include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 class JsonDocument;
 namespace VGG

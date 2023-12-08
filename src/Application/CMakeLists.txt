@@ -6,6 +6,7 @@ add_library(vgg_application STATIC
   MainComposer.cpp
   Presenter.cpp
   Reporter.cpp
+  RunLoop.cpp
   UIApplication.cpp
   UIView.cpp
   VggSdk.cpp

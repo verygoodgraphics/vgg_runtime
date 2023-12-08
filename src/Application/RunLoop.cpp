@@ -13,37 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
 
-#include <rxcpp/rx.hpp>
+#include "RunLoop.hpp"
 
-#include <memory>
+using namespace VGG;
 
-namespace VGG
+std::shared_ptr<RunLoop> RunLoop::sharedInstance()
 {
-
-class RunLoop
-{
-  rxcpp::schedulers::run_loop m_runLoop;
-
-public:
-  static std::shared_ptr<RunLoop> sharedInstance();
-
-  rxcpp::observe_on_one_worker thread()
-  {
-    return rxcpp::observe_on_run_loop(m_runLoop);
-  }
-
-  void dispatch()
-  {
-    while (!m_runLoop.empty() && m_runLoop.peek().when < m_runLoop.now())
-    {
-      m_runLoop.dispatch();
-    }
-  }
-
-private:
-  RunLoop() = default;
-};
-
-} // namespace VGG
+  static auto s_sharedInstance = std::shared_ptr<RunLoop>(new RunLoop);
+  return s_sharedInstance;
+}

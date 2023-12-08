@@ -34,13 +34,6 @@ MainComposer::MainComposer(PlatformComposer* platformComposer, std::shared_ptr<M
 
   auto jsEngine = m_platformComposer->setup();
   m_controller.reset(new Controller{ m_runLoop, jsEngine, m_presenter, m_editor });
-
-#ifdef EMSCRIPTEN
-  AsyncWorkerFactory::setTaskWorkerFactory([runLoop = m_runLoop]() { return runLoop->thread(); });
-#else
-  AsyncWorkerFactory::setTaskWorkerFactory([]() { return rxcpp::observe_on_new_thread(); });
-#endif
-  AsyncWorkerFactory::setResultWorkerFactory([runLoop = m_runLoop]() { return runLoop->thread(); });
 }
 
 void MainComposer::enableEdit(int top, int right, int bottom, int left)

@@ -171,6 +171,12 @@ public:
     m_modelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>(
       [weakThis](ModelEventPtr event)
       {
+        auto strongThis = weakThis.lock();
+        if (!strongThis || !event)
+        {
+          return;
+        }
+
         switch (event->type)
         {
           case ModelEventType::Add:
@@ -195,11 +201,8 @@ public:
             break;
         }
 
-        if (auto p = weakThis.lock())
-        {
-          // todo, diff & update
-          p->update();
-        }
+        // todo, diff & update
+        strongThis->update();
       });
 
     return m_modelObserver;

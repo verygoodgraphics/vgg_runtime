@@ -29,7 +29,7 @@ class ControllerTestSuite : public ::testing::Test
 protected:
   std::shared_ptr<Controller>     m_sut;
   std::shared_ptr<NativeComposer> m_nativeComposer;
-  std::shared_ptr<RunLoop>        m_runLoop = std::make_shared<RunLoop>();
+  std::shared_ptr<RunLoop>        m_runLoop = RunLoop::sharedInstance();
   std::shared_ptr<MockPresenter>  m_mockPresenter = std::make_shared<MockPresenter>();
 
   rxcpp::subjects::subject<VGG::UIEventPtr> m_fakeViewSubject;

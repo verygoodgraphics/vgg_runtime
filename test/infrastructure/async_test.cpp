@@ -9,11 +9,11 @@ class VggAsyncTestSuite : public ::testing::Test
 {
 protected:
   std::shared_ptr<RunLoop> m_runLoop;
-  bool m_exitLoop = false;
+  bool                     m_exitLoop = false;
 
   void SetUp() override
   {
-    m_runLoop = std::make_shared<RunLoop>();
+    m_runLoop = RunLoop::sharedInstance();
 
     AsyncWorkerFactory::setTaskWorkerFactory([]() { return rxcpp::observe_on_new_thread(); });
     AsyncWorkerFactory::setResultWorkerFactory([runLoop = m_runLoop]()
@@ -35,7 +35,7 @@ protected:
 TEST_F(VggAsyncTestSuite, Smoke)
 {
   // Given
-  auto current_thread_id = std::this_thread::get_id();
+  auto           current_thread_id = std::this_thread::get_id();
   constexpr auto fake_result = 1;
 
   Async<int> sut{ [fake_result, &current_thread_id]()
@@ -67,7 +67,7 @@ TEST_F(VggAsyncTestSuite, Smoke)
 TEST_F(VggAsyncTestSuite, Exception)
 {
   // Given
-  auto current_thread_id = std::this_thread::get_id();
+  auto           current_thread_id = std::this_thread::get_id();
   constexpr auto fake_result = 1;
 
   Async<int, std::function<void(std::exception_ptr)>> sut{

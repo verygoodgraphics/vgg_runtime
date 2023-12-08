@@ -27,7 +27,7 @@ MainComposer::MainComposer(PlatformComposer* platformComposer, std::shared_ptr<M
   : m_view{ new UIView }
   , m_presenter{ new Presenter{ mouse } }
   , m_editor{ new Editor{ m_view, mouse } }
-  , m_runLoop{ new RunLoop }
+  , m_runLoop{ RunLoop::sharedInstance() }
   , m_platformComposer{ platformComposer }
 {
   m_presenter->setView(m_view);

@@ -61,8 +61,9 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
   {
     auto painterID = fun();
     style.setForegroundPaintID(painterID);
-    SkColor c = attr.fills[0].color;
-    style.setDecorationColor(c);
+    // TODO::
+    //  SkColor c = attr.fills[0].color;
+    // style.setDecorationColor(c);
   }
   else
   {

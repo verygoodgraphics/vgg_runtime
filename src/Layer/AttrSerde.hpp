@@ -103,6 +103,7 @@ inline std::optional<glm::vec2> get_opt(const nlohmann::json& obj, const char* k
 
 namespace VGG
 {
+
 // NOLINTBEGIN
 
 template<typename T>
@@ -281,26 +282,54 @@ inline void from_json(const json& j, Gradient& x)
 
 inline void from_json(const json& j, ContextSetting& x)
 {
-  x.blendMode = j.at("blendMode").get<EBlendMode>();
-  x.isolateBlending = j.at("isolateBlending").get<bool>();
-  x.opacity = j.at("opacity").get<double>();
-  x.transparencyKnockoutGroup = j.at("transparencyKnockoutGroup").get<EKnockoutType>();
+  x.blendMode = j.value("blendMode", EBlendMode{});
+  x.isolateBlending = j.value("isolateBlending", false);
+  x.opacity = j.value("opacity", 1.f);
+  x.transparencyKnockoutGroup = j.value("transparencyKnockoutGroup", EKnockoutType{});
+}
+
+///
+/// json object j must have key:
+/// "fillType"
+/// "color"
+/// "pattern"
+/// "gradient"
+///
+inline FillType makeFillType(const nlohmann::json& j)
+{
+  FillType type;
+  switch (j.value("fillType", EPathFillType{}))
+  {
+    case FT_Color:
+      type = j.value("color", Color{});
+      break;
+    case FT_Pattern:
+      type = j.value("pattern", Pattern{});
+      break;
+    case FT_Gradient:
+      type = j.value("gradient", Gradient{});
+      break;
+    default:
+      break;
+  }
+  return type;
 }
 
 inline void from_json(const json& j, Border& x)
 {
-  x.color = get_stack_optional<Color>(j, "color");
+  // x.color = get_stack_optional<Color>(j, "color");
+  // x.fillType = j.at("fillType").get<EPathFillType>();
+  // x.gradient = get_stack_optional<Gradient>(j, "gradient");
+  // x.pattern = get_stack_optional<Pattern>(j, "pattern");
+  x.type = makeFillType(j);
   x.contextSettings = j.at("contextSettings").get<ContextSetting>();
   x.dashedOffset = j.at("dashedOffset").get<double>();
   x.dashedPattern = j.at("dashedPattern").get<std::vector<float>>();
-  x.fillType = j.at("fillType").get<EPathFillType>();
   x.flat = j.at("flat").get<double>();
-  x.gradient = get_stack_optional<Gradient>(j, "gradient");
   x.isEnabled = j.at("isEnabled").get<bool>();
   x.lineCapStyle = j.at("lineCapStyle").get<ELineCap>();
   x.lineJoinStyle = j.at("lineJoinStyle").get<ELineJoin>();
   x.miterLimit = j.at("miterLimit").get<double>();
-  x.pattern = get_stack_optional<Pattern>(j, "pattern");
   x.position = j.at("position").get<EPathPosition>();
   x.style = j.at("style").get<int64_t>();
   x.thickness = j.at("thickness").get<double>();
@@ -332,16 +361,13 @@ inline void from_json(const json& j, Blur& x)
 
 inline void from_json(const json& j, Fill& x)
 {
-  x.color = Color{ 0, 0, 0, 1 };
-  if (auto it = j.find("color"); it != j.end())
-  {
-    x.color = j.at("color").get<Color>();
-  }
-  x.fillType = (EPathFillType)j.at("fillType").get<int>();
   x.isEnabled = j.at("isEnabled").get<bool>();
   x.contextSettings = j.at("contextSettings").get<ContextSetting>();
-  x.gradient = get_stack_optional<Gradient>(j, "gradient");
-  x.pattern = get_stack_optional<Pattern>(j, "pattern");
+  x.type = makeFillType(j);
+  // x.fillType = (EPathFillType)j.at("fillType").get<int>();
+  // x.gradient = get_stack_optional<Gradient>(j, "gradient");
+  // x.pattern = get_stack_optional<Pattern>(j, "pattern");
+  // x.color = j.value("color", Color{});
 }
 
 inline void from_json(const json& j, Style& x)

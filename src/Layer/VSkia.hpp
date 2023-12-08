@@ -537,6 +537,31 @@ inline sk_sp<SkImageFilter> makeBlendModeFilter(EBlendMode blendMode)
   }
 }
 
+inline void populateSkPaint(
+  const FillType&       fillType,
+  const ContextSetting& st,
+  const Bound&          bound,
+  SkPaint&              paint)
+{
+  std::visit(
+    Overloaded{ [&](const Gradient& g)
+                {
+                  paint.setShader(makeGradientShader(bound, g));
+                  paint.setAlphaf(st.opacity);
+                },
+                [&](const Color& c)
+                {
+                  paint.setColor(c);
+                  paint.setAlphaf(c.a * st.opacity);
+                },
+                [&](const Pattern& p)
+                {
+                  paint.setShader(makePatternShader(bound, p));
+                  paint.setAlphaf(st.opacity);
+                } },
+    fillType);
+}
+
 inline std::ostream& operator<<(std::ostream& os, const SkMatrix& mat)
 {
   os << "[" << mat.getScaleX() << ", " << mat.getSkewX() << ", " << mat.getTranslateX()

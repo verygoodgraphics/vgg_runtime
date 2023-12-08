@@ -17,6 +17,7 @@
 #include "Layer/AttrSerde.hpp"
 #include "Painter.hpp"
 #include "Utility/Log.hpp"
+#include "VSkia.hpp"
 
 #include <core/SkColor.h>
 #include <core/SkPaint.h>
@@ -73,26 +74,7 @@ void VParagraphPainter::drawTextBlob(
             continue;
           fillPen.setStyle(SkPaint::kFill_Style);
           fillPen.setAntiAlias(true);
-          if (f.fillType == FT_Color)
-          {
-            fillPen.setColor(f.color);
-            const auto currentAlpha = fillPen.getAlphaf();
-            fillPen.setAlphaf(currentAlpha * f.contextSettings.opacity);
-          }
-          else if (f.fillType == FT_Gradient)
-          {
-            assert(f.gradient.has_value());
-            auto gradientShader = getGradientShader(f.gradient.value(), m_paragraph->bound());
-            fillPen.setShader(gradientShader);
-            fillPen.setAlphaf(f.contextSettings.opacity);
-          }
-          else if (f.fillType == FT_Pattern)
-          {
-            assert(f.pattern.has_value());
-            auto shader = makePatternShader(m_paragraph->bound(), f.pattern.value());
-            fillPen.setShader(shader);
-            fillPen.setAlphaf(f.contextSettings.opacity);
-          }
+          populateSkPaint(f.type, f.contextSettings, m_paragraph->bound(), fillPen);
           paints.push_back(fillPen);
         }
         if (!paints.empty())

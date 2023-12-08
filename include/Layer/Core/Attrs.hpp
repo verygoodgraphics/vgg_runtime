@@ -139,23 +139,29 @@ struct Gradient
     instance;
 };
 
+using FillType = std::variant<Gradient, Pattern, Color>;
+
+struct Fill
+{
+  bool           isEnabled{ true };
+  ContextSetting contextSettings{};
+  FillType       type;
+};
+
 struct Border
 {
-  ContextSetting          contextSettings;
-  double                  dashedOffset;
-  std::vector<float>      dashedPattern;
-  EPathFillType           fillType; // TODO:
-  double                  flat;
-  bool                    isEnabled;
-  ELineCap                lineCapStyle;
-  ELineJoin               lineJoinStyle;
-  double                  miterLimit;
-  EPathPosition           position;
-  int64_t                 style;
-  double                  thickness;
-  std::optional<Color>    color;
-  std::optional<Gradient> gradient;
-  std::optional<Pattern>  pattern;
+  ContextSetting     contextSettings;
+  FillType           type;
+  std::vector<float> dashedPattern;
+  float              dashedOffset;
+  float              flat;
+  ELineCap           lineCapStyle;
+  ELineJoin          lineJoinStyle;
+  float              miterLimit;
+  EPathPosition      position;
+  int                style;
+  float              thickness;
+  bool               isEnabled;
 };
 
 struct Shadow
@@ -178,16 +184,6 @@ struct Blur
   glm::vec2 center;
   float     saturation;
   bool      isEnabled;
-};
-
-struct Fill
-{
-  bool                    isEnabled{ true };
-  Color                   color;
-  EPathFillType           fillType{};
-  ContextSetting          contextSettings{};
-  std::optional<Gradient> gradient{ std::nullopt };
-  std::optional<Pattern>  pattern{ std::nullopt };
 };
 
 struct Style

@@ -36,7 +36,7 @@ public:
   NativeComposer(bool catchJsException = true)
     : PlatformComposer()
     , m_catchJsException{ catchJsException }
-    , m_native_exec{ std::make_shared<NativeExec>() }
+    , m_native_exec{ NativeExec::sharedInstance() }
   {
   }
 

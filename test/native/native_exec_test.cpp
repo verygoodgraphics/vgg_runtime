@@ -10,11 +10,11 @@
 class VggNativeExecTestSuite : public ::testing::Test
 {
 protected:
-  NativeExec sut;
-  NativeExec* sut_ptr = &sut;
+  NativeExec* sut_ptr{ nullptr };
 
   void SetUp() override
   {
+    sut_ptr = NativeExec::sharedInstance().get();
   }
 
   void TearDown() override

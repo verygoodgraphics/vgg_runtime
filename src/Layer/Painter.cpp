@@ -42,12 +42,7 @@ void Painter::drawPathBorder(
   strokePen.setAntiAlias(m_antiAlias);
   strokePen.setBlender(blender);
   strokePen.setImageFilter(imageFilter);
-  strokePen.setStyle(SkPaint::kStroke_Style);
-  strokePen.setPathEffect(
-    SkDashPathEffect::Make(b.dashedPattern.data(), b.dashedPattern.size(), 0));
-  strokePen.setStrokeJoin(toSkPaintJoin(b.lineJoinStyle));
-  strokePen.setStrokeCap(toSkPaintCap(b.lineCapStyle));
-  strokePen.setStrokeMiter(b.miterLimit);
+  populateSkPaint(b, bound, strokePen);
   bool  inCenter = true;
   float strokeWidth = b.thickness;
   if (b.position == PP_Inside && skPath.isLastContourClosed())
@@ -67,7 +62,6 @@ void Painter::drawPathBorder(
     inCenter = false;
   }
   strokePen.setStrokeWidth(strokeWidth);
-  populateSkPaint(b.type, b.contextSettings, bound, strokePen);
   m_renderer->canvas()->drawPath(skPath, strokePen);
   if (!inCenter)
   {

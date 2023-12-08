@@ -559,6 +559,18 @@ inline void populateSkPaint(
     fillType);
 }
 
+inline void populateSkPaint(const Border& border, const Bound& bound, SkPaint& paint)
+{
+  paint.setStyle(SkPaint::kStroke_Style);
+  paint.setPathEffect(
+    SkDashPathEffect::Make(border.dashedPattern.data(), border.dashedPattern.size(), 0));
+  paint.setStrokeJoin(toSkPaintJoin(border.lineJoinStyle));
+  paint.setStrokeCap(toSkPaintCap(border.lineCapStyle));
+  paint.setStrokeMiter(border.miterLimit);
+  paint.setStrokeWidth(border.thickness);
+  populateSkPaint(border.type, border.contextSettings, bound, paint);
+}
+
 inline std::ostream& operator<<(std::ostream& os, const SkMatrix& mat)
 {
   os << "[" << mat.getScaleX() << ", " << mat.getSkewX() << ", " << mat.getTranslateX()

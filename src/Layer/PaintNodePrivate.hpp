@@ -120,9 +120,9 @@ public:
   template<typename Iter1, typename Iter2, typename F>
   std::vector<std::pair<PaintNode*, Transform>> calcMaskObjects(
     Renderer* renderer,
-    Iter1         begin,
-    Iter2         end,
-    F&&           f)
+    Iter1     begin,
+    Iter2     end,
+    F&&       f)
   {
     // auto                                          canvas = renderer->canvas();
     const auto&                                   objects = renderer->maskObjects();
@@ -175,10 +175,10 @@ public:
 
   template<typename Iter1, typename Iter2, typename F>
   std::optional<SkPath> mapContourFromThis(
-    EBoolOp       maskOp,
-    Iter1         itr1,
-    Iter2         itr2,
-    F&&           f,
+    EBoolOp   maskOp,
+    Iter1     itr1,
+    Iter2     itr2,
+    F&&       f,
     Renderer* renderer)
   {
     if (itr1 == itr2)
@@ -371,10 +371,7 @@ public:
     return std::nullopt;
   }
 
-  void drawBlurBgWithAlphaMask(
-    Renderer* renderer,
-    const SkPath& path,
-    const SkPath& outlineMask)
+  void drawBlurBgWithAlphaMask(Renderer* renderer, const SkPath& path, const SkPath& outlineMask)
   {
     Painter    painter(renderer);
     const auto blur = style.blurs[0];
@@ -425,7 +422,7 @@ public:
   }
 
   void drawBlurContentWithAlphaMask(
-    Renderer* renderer,
+    Renderer*     renderer,
     const SkPath& path,
     const SkPath& outlineMask)
   {

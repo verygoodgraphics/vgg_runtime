@@ -143,54 +143,54 @@ using FillType = std::variant<Gradient, Pattern, Color>;
 
 struct Fill
 {
-  bool           isEnabled{ true };
+  bool           isEnabled{ true }; // TODO:: Removed
   ContextSetting contextSettings{};
   FillType       type;
 };
 
 struct Border
 {
-  ContextSetting     contextSettings;
   FillType           type;
+  ContextSetting     contextSettings;
   std::vector<float> dashedPattern;
   float              dashedOffset;
   float              flat;
-  ELineCap           lineCapStyle;
-  ELineJoin          lineJoinStyle;
   float              miterLimit;
-  EPathPosition      position;
   int                style;
   float              thickness;
+  ELineCap           lineCapStyle;
+  ELineJoin          lineJoinStyle;
+  EPathPosition      position;
   bool               isEnabled;
 };
 
 struct Shadow
 {
-  float          blur;
-  Color          color;
   ContextSetting contextSettings;
-  bool           inner;
-  bool           isEnabled;
-  float          offsetX;
-  float          offsetY;
-  float          spread;
+  float          blur{ 0.f };
+  Color          color;
+  float          offsetX{ 0.f };
+  float          offsetY{ 0.f };
+  float          spread{ 0.f };
+  bool           inner{ false };
+  bool           isEnabled{ false };
 };
 
 struct Blur
 {
-  EBlurType blurType;
+  glm::vec2 center;
   float     radius;
   float     motionAngle;
-  glm::vec2 center;
   float     saturation;
   bool      isEnabled;
+  EBlurType blurType;
 };
 
 struct Style
 {
   std::vector<Blur>                   blurs;
-  std::vector<Border>                 borders;
-  std::vector<Fill>                   fills;
+  std::vector<Border>            borders;
+  std::vector<Fill>              fills;
   std::vector<Shadow>                 shadows;
   std::optional<std::array<float, 4>> frameRadius;
   float                               cornerSmooth;
@@ -207,7 +207,7 @@ struct TextStyleAttr
 {
   std::string              fontName;
   std::string              subFamilyName;
-  std::vector<Fill>        fills;
+  std::vector<Fill>   fills;
   float                    letterSpacing{ 0.0 };
   float                    lineSpace{ 0.f };
   float                    baselineShift{ 0.0 };

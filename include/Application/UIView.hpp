@@ -41,6 +41,12 @@ public:
 
   using ScalarType = int;
 
+  struct Offset
+  {
+    double x;
+    double y;
+  };
+
 private:
   friend class Editor;
 
@@ -144,6 +150,9 @@ public:
   }
 
   void enableZoomer(bool enabled);
+
+  Offset getOffset();
+  void   setOffset(Offset offset);
 
 private:
   std::tuple<bool, bool, bool, bool> getKeyModifier(int keyMod);

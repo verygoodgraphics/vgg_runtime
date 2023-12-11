@@ -18,8 +18,12 @@
 #include "Mouse.hpp"
 
 #include "Utility/Log.hpp"
+#include "Utility/VggFloat.hpp"
 
 #include <algorithm>
+
+#undef DEBUG
+#define DEBUG(msg, ...)
 
 using namespace VGG;
 
@@ -126,6 +130,7 @@ void Presenter::listenViewEvent()
       return false;
     });
 }
+
 void Presenter::setView(std::shared_ptr<UIView> view)
 {
   m_view = view;
@@ -156,4 +161,43 @@ void Presenter::setView(std::shared_ptr<UIView> view)
         }
       }
     });
+}
+
+bool Presenter::handleTranslate(double pageWidth, double pageHeight, float x, float y)
+{
+  const auto [_, viewHeight] = viewSize();
+  if (viewHeight >= pageHeight)
+  {
+    return true;
+  }
+
+  // vertical scoll
+  y *= 10; // scroll faster
+  const auto oldOffset = m_view->getOffset();
+  auto       newOffset = oldOffset;
+  newOffset.y += y;
+  // limit offset range
+  newOffset.y = std::max(viewHeight - pageHeight, newOffset.y);
+  newOffset.y = std::min(newOffset.y, 0.0);
+
+  if (doublesNearlyEqual(newOffset.y, oldOffset.y))
+  {
+    return false;
+  }
+  else
+  {
+    DEBUG(
+      "Presenter::handleTranslate: page size: %f, %f, scroll, %f, %f; old offset is: %f, %f, new "
+      "offset is: %f, %f",
+      pageWidth,
+      pageHeight,
+      x,
+      y,
+      oldOffset.x,
+      oldOffset.y,
+      newOffset.x,
+      newOffset.y);
+    m_view->setOffset(newOffset);
+    return true;
+  }
 }

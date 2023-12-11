@@ -58,6 +58,8 @@ public:
 
   virtual ~Presenter() = default;
 
+  bool handleTranslate(double pageWidth, double pageHeight, float x, float y);
+
   void setListenAllEvents(bool enabled)
   {
     m_listenAllEvents = enabled;

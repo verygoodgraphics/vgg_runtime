@@ -36,7 +36,7 @@ bool UIApplication::onEvent(UEvent evt, void* userData)
   switch (evt.type)
   {
     case VGG_KEYDOWN:
-      break; // break to continue processing
+      return handleKeyEvent(evt.key);
 
     case VGG_WINDOWEVENT:
     {
@@ -52,12 +52,46 @@ bool UIApplication::onEvent(UEvent evt, void* userData)
           break;
       }
     }
+
+    case VGG_MOUSEWHEEL:
+      return m_controller->handleTranslate(evt.wheel.preciseX, evt.wheel.preciseY);
+
     default:
       return false;
   }
+}
 
-  auto key = evt.key.keysym.sym;
-  auto mod = evt.key.keysym.mod;
+bool UIApplication::run(int fps)
+{
+  m_view->updateOncePerLoop();
+
+  if (m_view->isDirty() || m_controller->hasDirtyEditor())
+  {
+    if (m_layer->beginFrame(fps))
+    {
+      m_view->setDirty(false);
+      m_controller->resetEditorDirty();
+
+      m_layer->render();
+      m_layer->endFrame();
+
+      if (m_firstRender)
+      {
+        m_firstRender = false;
+        m_controller->onFirstRender();
+      }
+
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool UIApplication::handleKeyEvent(VKeyboardEvent evt)
+{
+  auto key = evt.keysym.sym;
+  auto mod = evt.keysym.mod;
 
   if (key == VGGK_PAGEUP && (mod & VGG_KMOD_CTRL))
   {
@@ -94,33 +128,6 @@ bool UIApplication::onEvent(UEvent evt, void* userData)
     INFO("Toggle cursor position");
     m_layer->setDrawPositionEnabled(!m_layer->enableDrawPosition());
     return true;
-  }
-
-  return false;
-}
-
-bool UIApplication::run(int fps)
-{
-  m_view->updateOncePerLoop();
-
-  if (m_view->isDirty() || m_controller->hasDirtyEditor())
-  {
-    if (m_layer->beginFrame(fps))
-    {
-      m_view->setDirty(false);
-      m_controller->resetEditorDirty();
-
-      m_layer->render();
-      m_layer->endFrame();
-
-      if (m_firstRender)
-      {
-        m_firstRender = false;
-        m_controller->onFirstRender();
-      }
-
-      return true;
-    }
   }
 
   return false;

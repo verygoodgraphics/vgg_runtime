@@ -107,6 +107,8 @@ public:
   void setEventListener(EventListener listener);
   void listenAllEvents(bool enabled);
 
+  bool handleTranslate(float x, float y);
+
 private:
   void          initModel(const char* designDocSchemaFilePath, const char* layoutDocSchemaFilePath);
   JsonDocument* createJsonDoc();

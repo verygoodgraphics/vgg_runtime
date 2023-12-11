@@ -1,6 +1,7 @@
 {
+  "version": "1.0.8",
   "fileType": 3,
-  "fileName": "hi-figma",
+  "fileName": "/Users/houguanhua/code/vgg/vgg_runtime_B/test/testDataDir/instance_layout/11_nested_override/feature-nested-instance-layout-override.fig",
   "frames": [
     {
       "id": "0:1 default-frame",
@@ -51,6 +52,7 @@
       "styleEffectMaskArea": 2,
       "maskShowType": 2,
       "overflow": 2,
+      "styleEffectBoolean": 1,
       "class": "frame",
       "childObjects": [
         {
@@ -122,6 +124,13 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
+          "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -193,6 +202,13 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
+              "cornerSmoothing": 0.0,
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "path",
               "shape": {
                 "class": "shape",
@@ -241,8 +257,7 @@
                   }
                 ],
                 "windingRule": 0
-              },
-              "pathType": 0
+              }
             },
             {
               "id": "601:8",
@@ -313,6 +328,13 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
+              "cornerSmoothing": 0.0,
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "symbolInstance",
               "masterId": "601:7",
               "overrideValues": [
@@ -325,8 +347,21 @@
                   "overrideValue": "Frame 2",
                   "effectOnLayout": false
                 }
+              ],
+              "variableAssignments": [],
+              "radius": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
               ]
             }
+          ],
+          "radius": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
           ]
         },
         {
@@ -398,6 +433,13 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
+          "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolInstance",
           "masterId": "208:2",
           "overrideValues": [
@@ -406,7 +448,7 @@
               "objectId": [
                 "601:8"
               ],
-              "overrideName": "layout.justify_content",
+              "overrideName": "layout.justifyContent",
               "overrideValue": 3,
               "effectOnLayout": true
             },
@@ -415,7 +457,7 @@
               "objectId": [
                 "601:8"
               ],
-              "overrideName": "layout.align_items",
+              "overrideName": "layout.alignItems",
               "overrideValue": 3,
               "effectOnLayout": true
             },
@@ -424,7 +466,7 @@
               "objectId": [
                 "601:8"
               ],
-              "overrideName": "layout.align_content",
+              "overrideName": "layout.alignContent",
               "overrideValue": 3,
               "effectOnLayout": true
             },
@@ -442,7 +484,7 @@
               "objectId": [
                 "208:2"
               ],
-              "overrideName": "layout.justify_content",
+              "overrideName": "layout.justifyContent",
               "overrideValue": 4,
               "effectOnLayout": true
             },
@@ -462,6 +504,13 @@
               },
               "effectOnLayout": false
             }
+          ],
+          "variableAssignments": [],
+          "radius": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
           ]
         },
         {
@@ -533,6 +582,13 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
+          "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -604,6 +660,13 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
+              "cornerSmoothing": 0.0,
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "path",
               "shape": {
                 "class": "shape",
@@ -652,8 +715,7 @@
                   }
                 ],
                 "windingRule": 0
-              },
-              "pathType": 0
+              }
             },
             {
               "id": "601:6",
@@ -724,6 +786,13 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
+              "cornerSmoothing": 0.0,
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "path",
               "shape": {
                 "class": "shape",
@@ -772,9 +841,14 @@
                   }
                 ],
                 "windingRule": 0
-              },
-              "pathType": 0
+              }
             }
+          ],
+          "radius": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
           ]
         }
       ]

@@ -1,6 +1,7 @@
 {
+  "version": "1.0.8",
   "fileType": 3,
-  "fileName": "/Users/houguanhua/code/vgg/vgg_runtime_C/test/testDataDir/layout/_1129/feature_flex_item_with_constraints_1128_1108.fig",
+  "fileName": "/Users/houguanhua/code/vgg/vgg_runtime_A/test/testDataDir/layout/31_absolute_flex_item/feature_flex_item_with_constraints_1128_1108.fig",
   "frames": [
     {
       "id": "0:1 default-frame",
@@ -51,6 +52,7 @@
       "styleEffectMaskArea": 2,
       "maskShowType": 2,
       "overflow": 2,
+      "styleEffectBoolean": 1,
       "class": "frame",
       "childObjects": [
         {
@@ -122,6 +124,7 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 2,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
@@ -372,6 +375,7 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 2,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
@@ -472,6 +476,7 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 2,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "horizontalConstraint": 1,
               "verticalConstraint": 1,
@@ -506,11 +511,8 @@
                 "class": "fontAttr",
                 "name": "Patrick Hand",
                 "subFamilyName": "Regular",
-                "textCase": 0,
                 "fontVariantCaps": 0,
                 "size": 34.0,
-                "underline": 0,
-                "linethrough": false,
                 "letterSpacingValue": 0.0,
                 "letterSpacingUnit": 1,
                 "horizontalAlignment": 0,
@@ -573,6 +575,7 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 2,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "horizontalConstraint": 3,
               "verticalConstraint": 7,
@@ -630,6 +633,7 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 2,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "horizontalConstraint": 3,
                   "verticalConstraint": 7,
@@ -758,6 +762,7 @@
       "styleEffectMaskArea": 2,
       "maskShowType": 2,
       "overflow": 2,
+      "styleEffectBoolean": 1,
       "class": "frame",
       "childObjects": [
         {
@@ -829,6 +834,7 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 2,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
@@ -939,6 +945,7 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 2,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
@@ -1028,11 +1035,11 @@
                     "class": "gradientLinear",
                     "from": [
                       -8.881784197001252e-16,
-                      -8.881784197001252e-16
+                      8.881784197001252e-16
                     ],
                     "to": [
                       0.9999999850988381,
-                      0.9999999850988381
+                      -0.9999999850988381
                     ],
                     "stops": [
                       {
@@ -1083,6 +1090,7 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
@@ -1137,8 +1145,7 @@
               }
             ],
             "windingRule": 0
-          },
-          "pathType": 0
+          }
         },
         {
           "id": "171:378",
@@ -1189,6 +1196,7 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 2,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "7456:7742",
           "horizontalConstraint": 1,
@@ -1247,6 +1255,7 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "7401:7881",
               "horizontalConstraint": 1,
@@ -1330,6 +1339,7 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "7401:7882",
                   "horizontalConstraint": 5,
@@ -1408,6 +1418,7 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "7401:7883",
                       "horizontalConstraint": 3,
@@ -1519,8 +1530,7 @@
                         ],
                         "windingRule": 1
                       },
-                      "class": "path",
-                      "pathType": 6
+                      "class": "path"
                     },
                     {
                       "id": "171:382",
@@ -1571,6 +1581,7 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "7401:7884",
                       "horizontalConstraint": 5,
@@ -1636,6 +1647,7 @@
                           "styleEffectMaskArea": 2,
                           "maskShowType": 2,
                           "overflow": 1,
+                          "styleEffectBoolean": 1,
                           "cornerSmoothing": 0.0,
                           "overrideKey": "7401:7885",
                           "horizontalConstraint": 5,
@@ -1721,6 +1733,7 @@
                               "styleEffectMaskArea": 2,
                               "maskShowType": 2,
                               "overflow": 1,
+                              "styleEffectBoolean": 1,
                               "cornerSmoothing": 0.0,
                               "overrideKey": "7401:7886",
                               "horizontalConstraint": 3,
@@ -1832,8 +1845,7 @@
                                 ],
                                 "windingRule": 1
                               },
-                              "class": "path",
-                              "pathType": 6
+                              "class": "path"
                             }
                           ],
                           "groupNestMaskType": true
@@ -1914,6 +1926,7 @@
                           "styleEffectMaskArea": 2,
                           "maskShowType": 2,
                           "overflow": 1,
+                          "styleEffectBoolean": 1,
                           "cornerSmoothing": 0.0,
                           "overrideKey": "7401:7887",
                           "horizontalConstraint": 3,
@@ -1995,6 +2008,7 @@
                                   "styleEffectMaskArea": 2,
                                   "maskShowType": 2,
                                   "overflow": 1,
+                                  "styleEffectBoolean": 1,
                                   "cornerSmoothing": 0.0,
                                   "overrideKey": "7401:7887",
                                   "horizontalConstraint": 3,
@@ -2050,8 +2064,7 @@
                                       }
                                     ],
                                     "windingRule": 0
-                                  },
-                                  "pathType": 6
+                                  }
                                 },
                                 "booleanOperation": 4
                               },
@@ -2126,6 +2139,7 @@
                                   "styleEffectMaskArea": 2,
                                   "maskShowType": 2,
                                   "overflow": 1,
+                                  "styleEffectBoolean": 1,
                                   "cornerSmoothing": 0.0,
                                   "overrideKey": "7401:7887",
                                   "horizontalConstraint": 3,
@@ -2181,8 +2195,7 @@
                                       }
                                     ],
                                     "windingRule": 0
-                                  },
-                                  "pathType": 6
+                                  }
                                 },
                                 "booleanOperation": 4
                               },
@@ -2257,6 +2270,7 @@
                                   "styleEffectMaskArea": 2,
                                   "maskShowType": 2,
                                   "overflow": 1,
+                                  "styleEffectBoolean": 1,
                                   "cornerSmoothing": 0.0,
                                   "overrideKey": "7401:7887",
                                   "horizontalConstraint": 3,
@@ -2312,8 +2326,7 @@
                                       }
                                     ],
                                     "windingRule": 0
-                                  },
-                                  "pathType": 6
+                                  }
                                 },
                                 "booleanOperation": 4
                               },
@@ -2388,6 +2401,7 @@
                                   "styleEffectMaskArea": 2,
                                   "maskShowType": 2,
                                   "overflow": 1,
+                                  "styleEffectBoolean": 1,
                                   "cornerSmoothing": 0.0,
                                   "overrideKey": "7401:7887",
                                   "horizontalConstraint": 3,
@@ -2459,8 +2473,7 @@
                                       }
                                     ],
                                     "windingRule": 0
-                                  },
-                                  "pathType": 6
+                                  }
                                 },
                                 "booleanOperation": 4
                               },
@@ -2535,6 +2548,7 @@
                                   "styleEffectMaskArea": 2,
                                   "maskShowType": 2,
                                   "overflow": 1,
+                                  "styleEffectBoolean": 1,
                                   "cornerSmoothing": 0.0,
                                   "overrideKey": "7401:7887",
                                   "horizontalConstraint": 3,
@@ -2590,8 +2604,7 @@
                                       }
                                     ],
                                     "windingRule": 0
-                                  },
-                                  "pathType": 6
+                                  }
                                 },
                                 "booleanOperation": 4
                               },
@@ -2666,6 +2679,7 @@
                                   "styleEffectMaskArea": 2,
                                   "maskShowType": 2,
                                   "overflow": 1,
+                                  "styleEffectBoolean": 1,
                                   "cornerSmoothing": 0.0,
                                   "overrideKey": "7401:7887",
                                   "horizontalConstraint": 3,
@@ -2737,8 +2751,7 @@
                                       }
                                     ],
                                     "windingRule": 0
-                                  },
-                                  "pathType": 6
+                                  }
                                 },
                                 "booleanOperation": 4
                               },
@@ -2813,6 +2826,7 @@
                                   "styleEffectMaskArea": 2,
                                   "maskShowType": 2,
                                   "overflow": 1,
+                                  "styleEffectBoolean": 1,
                                   "cornerSmoothing": 0.0,
                                   "overrideKey": "7401:7887",
                                   "horizontalConstraint": 3,
@@ -2868,8 +2882,7 @@
                                       }
                                     ],
                                     "windingRule": 0
-                                  },
-                                  "pathType": 6
+                                  }
                                 },
                                 "booleanOperation": 4
                               },
@@ -2944,6 +2957,7 @@
                                   "styleEffectMaskArea": 2,
                                   "maskShowType": 2,
                                   "overflow": 1,
+                                  "styleEffectBoolean": 1,
                                   "cornerSmoothing": 0.0,
                                   "overrideKey": "7401:7887",
                                   "horizontalConstraint": 3,
@@ -3015,8 +3029,7 @@
                                       }
                                     ],
                                     "windingRule": 0
-                                  },
-                                  "pathType": 6
+                                  }
                                 },
                                 "booleanOperation": 4
                               },
@@ -3091,6 +3104,7 @@
                                   "styleEffectMaskArea": 2,
                                   "maskShowType": 2,
                                   "overflow": 1,
+                                  "styleEffectBoolean": 1,
                                   "cornerSmoothing": 0.0,
                                   "overrideKey": "7401:7887",
                                   "horizontalConstraint": 3,
@@ -3146,8 +3160,7 @@
                                       }
                                     ],
                                     "windingRule": 0
-                                  },
-                                  "pathType": 6
+                                  }
                                 },
                                 "booleanOperation": 4
                               },
@@ -3222,6 +3235,7 @@
                                   "styleEffectMaskArea": 2,
                                   "maskShowType": 2,
                                   "overflow": 1,
+                                  "styleEffectBoolean": 1,
                                   "cornerSmoothing": 0.0,
                                   "overrideKey": "7401:7887",
                                   "horizontalConstraint": 3,
@@ -3277,16 +3291,14 @@
                                       }
                                     ],
                                     "windingRule": 0
-                                  },
-                                  "pathType": 6
+                                  }
                                 },
                                 "booleanOperation": 4
                               }
                             ],
                             "windingRule": 0
                           },
-                          "class": "path",
-                          "pathType": 6
+                          "class": "path"
                         }
                       ],
                       "groupNestMaskType": true
@@ -3363,6 +3375,7 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "7401:7888",
                   "horizontalConstraint": 3,
@@ -3426,8 +3439,7 @@
                     ],
                     "windingRule": 1
                   },
-                  "class": "path",
-                  "pathType": 6
+                  "class": "path"
                 },
                 {
                   "id": "171:387",
@@ -3498,6 +3510,7 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "7401:7889",
                   "horizontalConstraint": 3,
@@ -3585,8 +3598,7 @@
                     ],
                     "windingRule": 0
                   },
-                  "class": "path",
-                  "pathType": 6
+                  "class": "path"
                 },
                 {
                   "id": "171:388",
@@ -3657,6 +3669,7 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "7401:7890",
                   "horizontalConstraint": 3,
@@ -3744,8 +3757,7 @@
                     ],
                     "windingRule": 0
                   },
-                  "class": "path",
-                  "pathType": 6
+                  "class": "path"
                 },
                 {
                   "id": "171:389",
@@ -3816,6 +3828,7 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "7401:7891",
                   "horizontalConstraint": 3,
@@ -3903,8 +3916,7 @@
                     ],
                     "windingRule": 0
                   },
-                  "class": "path",
-                  "pathType": 6
+                  "class": "path"
                 },
                 {
                   "id": "171:390",
@@ -3975,6 +3987,7 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "7401:7892",
                   "horizontalConstraint": 3,
@@ -4030,8 +4043,7 @@
                     ],
                     "windingRule": 0
                   },
-                  "class": "path",
-                  "pathType": 6
+                  "class": "path"
                 }
               ],
               "groupNestMaskType": true
@@ -4113,6 +4125,7 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
@@ -4167,8 +4180,7 @@
               }
             ],
             "windingRule": 0
-          },
-          "pathType": 0
+          }
         },
         {
           "id": "171:392",
@@ -4239,6 +4251,7 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
@@ -4293,8 +4306,7 @@
               }
             ],
             "windingRule": 0
-          },
-          "pathType": 0
+          }
         },
         {
           "id": "171:393",
@@ -4365,6 +4377,7 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 2,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "horizontalConstraint": 1,
           "verticalConstraint": 1,

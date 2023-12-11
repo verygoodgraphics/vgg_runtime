@@ -33,62 +33,34 @@ TEST_F(VggLayoutTestSuite, Smoke)
   // Then
 }
 
-TEST_F(VggLayoutTestSuite, Layout)
+TEST_F(VggLayoutTestSuite, SpaceBetween)
 {
   // Given
-  std::shared_ptr<Daruma> daruma{
-    new Daruma(Helper::RawJsonDocumentBuilder, Helper::RawJsonDocumentBuilder)
-  };
-  std::string filePath = "testDataDir/layout/0_space_between/";
-  daruma->load(filePath);
-
-  Layout::Layout sut{ daruma->designDoc(), daruma->layoutDoc() };
-  Layout::Size   windowSize{ 1400, 900 };
+  setupWithExpanding("testDataDir/layout/0_space_between/");
 
   // When
-  layout(sut, windowSize);
+  layout(*m_sut, Layout::Size{ 1400, 900 });
 
   // Then
-  auto tree = sut.layoutTree();
-  auto currentPage = tree->children()[0];
-
-  auto         leftChildFrame = currentPage->children()[0]->frame();
-  Layout::Rect expectedLeftChildFrame{ { 100, 40 }, { 200, 150 } };
-  EXPECT_TRUE(leftChildFrame == expectedLeftChildFrame);
-
-  auto         rightChildFrame = currentPage->children()[1]->frame();
-  Layout::Rect expectedRightChildFrame{ { 1100, 40 }, { 200, 250 } };
-  EXPECT_TRUE(rightChildFrame == expectedRightChildFrame);
+  std::vector<Layout::Rect> expectedFrames{ { { 0, 0 }, { 200, 150 } },
+                                            { { 1200, 0 }, { 200, 250 } } };
+  EXPECT_TRUE(descendantFrame({ 0 }) == expectedFrames[0]);
+  EXPECT_TRUE(descendantFrame({ 1 }) == expectedFrames[1]);
 }
 
-TEST_F(VggLayoutTestSuite, GridWrap)
+TEST_F(VggLayoutTestSuite, Wrap)
 {
   // Given
-  std::shared_ptr<Daruma> daruma{
-    new Daruma(Helper::RawJsonDocumentBuilder, Helper::RawJsonDocumentBuilder)
-  };
-  std::string filePath = "testDataDir/layout/1_grid_wrap/";
-  daruma->load(filePath);
-
-  Layout::Layout sut{ daruma->designDoc(), daruma->layoutDoc() };
-  Layout::Size   windowSize{ 1400, 900 };
+  setupWithExpanding("testDataDir/layout/1_wrap/");
 
   // When
-  layout(sut, windowSize);
+  layout(*m_sut, Layout::Size{ 800, 900 });
 
   // Then
-  auto tree = sut.layoutTree();
-  auto currentPage = tree->children()[0];
-
-  auto gridContainer = currentPage;
-
-  auto         child0Frame = gridContainer->children()[0]->frame();
-  Layout::Rect expectChild0Frame{ { 100, 40 }, { 200, 250 } };
-  EXPECT_TRUE(child0Frame == expectChild0Frame);
-
-  auto         child3Frame = gridContainer->children()[3]->frame();
-  Layout::Rect expectChild3Frame{ { 1060, 40 }, { 200, 200 } };
-  EXPECT_TRUE(child3Frame == expectChild3Frame);
+  std::vector<Layout::Rect> expectedFrames{ { { 0, 0 }, { 200, 150 } },
+                                            { { 0, 310 }, { 200, 200 } } };
+  EXPECT_TRUE(descendantFrame({ 0 }) == expectedFrames[0]);
+  EXPECT_TRUE(descendantFrame({ 3 }) == expectedFrames[1]);
 }
 
 TEST_F(VggLayoutTestSuite, LayoutInstance)

@@ -1,14 +1,14 @@
 {
-  "class": "Vgg_Layout",
+  "class": "VGGLayout",
   "obj": [
     {
       "class": "object",
-      "id": "208:2",
+      "id": "1:2",
       "width": {
         "class": "width",
         "value": {
           "class": "length",
-          "value": 1600.0,
+          "value": 1000.0,
           "types": 1
         }
       },
@@ -16,44 +16,31 @@
         "class": "height",
         "value": {
           "class": "length",
-          "value": 900.0,
+          "value": 600.0,
           "types": 1
         }
       },
       "layout": {
-        "class": "grid_layout",
-        "expand_strategy": {
-          "class": "expand_strategy",
-          "strategy": 1,
-          "min_row": 1,
-          "column_count": 1
-        },
-        "column_width": {
-          "class": "column_width",
-          "strategy": 2,
-          "width_value": 300
-        },
-        "row_height": {
-          "class": "row_height",
-          "strategy": 2,
-          "fixed_value": -1
-        },
-        "base_height": 100,
-        "column_gap": 20,
-        "row_gap": 30,
-        "grid_auto_flow": 1,
+        "class": "flexboxLayout",
+        "direction": 1,
+        "justifyContent": 4,
+        "alignItems": 1,
+        "alignContent": 1,
+        "wrap": 2,
+        "rowGap": 60.0,
+        "columnGap": 60.0,
         "padding": [
-          40.0,
-          100.0,
-          40.0,
-          100.0
+          0.0,
+          0.0,
+          0.0,
+          0.0
         ],
-        "cell_align": 1
+        "zOrder": false
       }
     },
     {
       "class": "object",
-      "id": "1:4",
+      "id": "1:5",
       "width": {
         "class": "width",
         "value": {
@@ -66,63 +53,17 @@
         "class": "height",
         "value": {
           "class": "length",
-          "value": 250.0,
+          "value": 150.0,
           "types": 1
         }
       },
-      "item_in_layout": {
-        "class": "grid_item",
-        "item_pos": {
-          "class": "grid_item_pos",
-          "strategy": 1,
-          "row_id": -1,
-          "column_id": -1
-        },
-        "row_span": 1,
-        "column_span": 1,
+      "itemInLayout": {
+        "class": "flexboxItem",
         "position": {
           "class": "position",
           "value": 1
         },
-        "row_align": 1,
-        "column_align": 1
-      }
-    },
-    {
-      "class": "object",
-      "id": "401:2",
-      "width": {
-        "class": "width",
-        "value": {
-          "class": "length",
-          "value": 200.0,
-          "types": 1
-        }
-      },
-      "height": {
-        "class": "height",
-        "value": {
-          "class": "length",
-          "value": 100.0,
-          "types": 1
-        }
-      },
-      "item_in_layout": {
-        "class": "grid_item",
-        "item_pos": {
-          "class": "grid_item_pos",
-          "strategy": 1,
-          "row_id": -1,
-          "column_id": -1
-        },
-        "row_span": 1,
-        "column_span": 1,
-        "position": {
-          "class": "position",
-          "value": 1
-        },
-        "row_align": 1,
-        "column_align": 1
+        "flexBasis": 0.0
       }
     },
     {
@@ -140,31 +81,50 @@
         "class": "height",
         "value": {
           "class": "length",
-          "value": 150.0,
+          "value": 250.0,
           "types": 1
         }
       },
-      "item_in_layout": {
-        "class": "grid_item",
-        "item_pos": {
-          "class": "grid_item_pos",
-          "strategy": 1,
-          "row_id": -1,
-          "column_id": -1
-        },
-        "row_span": 1,
-        "column_span": 1,
+      "itemInLayout": {
+        "class": "flexboxItem",
         "position": {
           "class": "position",
           "value": 1
         },
-        "row_align": 1,
-        "column_align": 1
+        "flexBasis": 0.0
       }
     },
     {
       "class": "object",
-      "id": "401:3",
+      "id": "1:4",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 200.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 100.0,
+          "types": 1
+        }
+      },
+      "itemInLayout": {
+        "class": "flexboxItem",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flexBasis": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "1:6",
       "width": {
         "class": "width",
         "value": {
@@ -181,22 +141,13 @@
           "types": 1
         }
       },
-      "item_in_layout": {
-        "class": "grid_item",
-        "item_pos": {
-          "class": "grid_item_pos",
-          "strategy": 1,
-          "row_id": -1,
-          "column_id": -1
-        },
-        "row_span": 1,
-        "column_span": 1,
+      "itemInLayout": {
+        "class": "flexboxItem",
         "position": {
           "class": "position",
           "value": 1
         },
-        "row_align": 1,
-        "column_align": 1
+        "flexBasis": 0.0
       }
     }
   ]

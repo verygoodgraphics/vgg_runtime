@@ -1,4 +1,5 @@
 {
+  "version": "1.0.8",
   "fileType": 3,
   "fileName": "/Users/houguanhua/code/vgg/vgg_runtime_A/test/testDataDir/layout/21_layout_node_frame/bug_incorrect_highlight_frame_position.fig",
   "frames": [
@@ -51,6 +52,7 @@
       "styleEffectMaskArea": 2,
       "maskShowType": 2,
       "overflow": 2,
+      "styleEffectBoolean": 1,
       "class": "frame",
       "childObjects": [
         {
@@ -122,10 +124,13 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "path",
           "shape": {
             "class": "shape",
@@ -174,8 +179,7 @@
               }
             ],
             "windingRule": 0
-          },
-          "pathType": 0
+          }
         },
         {
           "id": "1:3",
@@ -246,10 +250,13 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "path",
           "shape": {
             "class": "shape",
@@ -298,8 +305,7 @@
               }
             ],
             "windingRule": 0
-          },
-          "pathType": 0
+          }
         }
       ]
     }

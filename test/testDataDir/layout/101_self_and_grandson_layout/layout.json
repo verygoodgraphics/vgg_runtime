@@ -1,5 +1,5 @@
 {
-  "class": "Daruma_Layout",
+  "class": "VGGLayout",
   "obj": [
     {
       "class": "object",
@@ -21,21 +21,21 @@
         }
       },
       "layout": {
-        "class": "flexbox_layout",
+        "class": "flexboxLayout",
         "direction": 1,
-        "justify_content": 1,
-        "align_items": 2,
-        "align_content": 2,
+        "justifyContent": 1,
+        "alignItems": 2,
+        "alignContent": 2,
         "wrap": 1,
-        "row_gap": 0,
-        "column_gap": 0,
+        "rowGap": 0,
+        "columnGap": 0,
         "padding": [
           0,
           0,
           0,
           0
         ],
-        "z_order": false
+        "zOrder": false
       }
     },
     {
@@ -57,13 +57,13 @@
           "types": 1
         }
       },
-      "item_in_layout": {
-        "class": "flexbox_item",
+      "itemInLayout": {
+        "class": "flexboxItem",
         "position": {
           "class": "position",
           "value": 1
         },
-        "flex_grow_shrink": 0.0
+        "flexBasis": 0.0
       }
     },
     {
@@ -85,13 +85,13 @@
           "types": 1
         }
       },
-      "item_in_layout": {
-        "class": "flexbox_item",
+      "itemInLayout": {
+        "class": "flexboxItem",
         "position": {
           "class": "position",
           "value": 1
         },
-        "flex_grow_shrink": 0.0
+        "flexBasis": 0.0
       }
     },
     {
@@ -114,21 +114,21 @@
         }
       },
       "layout": {
-        "class": "flexbox_layout",
+        "class": "flexboxLayout",
         "direction": 2,
-        "justify_content": 1,
-        "align_items": 1,
-        "align_content": 1,
+        "justifyContent": 1,
+        "alignItems": 1,
+        "alignContent": 1,
         "wrap": 1,
-        "row_gap": 4.0,
-        "column_gap": 0,
+        "rowGap": 4.0,
+        "columnGap": 0,
         "padding": [
           0,
           0,
           0,
           0
         ],
-        "z_order": false
+        "zOrder": false
       }
     },
     {
@@ -150,13 +150,13 @@
           "types": 1
         }
       },
-      "item_in_layout": {
-        "class": "flexbox_item",
+      "itemInLayout": {
+        "class": "flexboxItem",
         "position": {
           "class": "position",
           "value": 1
         },
-        "flex_grow_shrink": 0.0
+        "flexBasis": 0.0
       }
     },
     {
@@ -178,13 +178,13 @@
           "types": 1
         }
       },
-      "item_in_layout": {
-        "class": "flexbox_item",
+      "itemInLayout": {
+        "class": "flexboxItem",
         "position": {
           "class": "position",
           "value": 1
         },
-        "flex_grow_shrink": 0.0
+        "flexBasis": 0.0
       }
     },
     {
@@ -206,13 +206,13 @@
           "types": 1
         }
       },
-      "item_in_layout": {
-        "class": "flexbox_item",
+      "itemInLayout": {
+        "class": "flexboxItem",
         "position": {
           "class": "position",
           "value": 1
         },
-        "flex_grow_shrink": 0.0
+        "flexBasis": 0.0
       }
     },
     {
@@ -235,29 +235,29 @@
         }
       },
       "layout": {
-        "class": "flexbox_layout",
+        "class": "flexboxLayout",
         "direction": 1,
-        "justify_content": 2,
-        "align_items": 2,
-        "align_content": 2,
+        "justifyContent": 2,
+        "alignItems": 2,
+        "alignContent": 2,
         "wrap": 1,
-        "row_gap": 0,
-        "column_gap": 8.0,
+        "rowGap": 0,
+        "columnGap": 8.0,
         "padding": [
           0,
           0,
           0,
           0
         ],
-        "z_order": false
+        "zOrder": false
       },
-      "item_in_layout": {
-        "class": "flexbox_item",
+      "itemInLayout": {
+        "class": "flexboxItem",
         "position": {
           "class": "position",
           "value": 1
         },
-        "flex_grow_shrink": 0.0
+        "flexBasis": 0.0
       }
     },
     {
@@ -279,14 +279,14 @@
           "types": 1
         }
       },
-      "aspect_ratio": 1.3846153846153846,
-      "item_in_layout": {
-        "class": "flexbox_item",
+      "aspectRatio": 1.3846153846153846,
+      "itemInLayout": {
+        "class": "flexboxItem",
         "position": {
           "class": "position",
           "value": 1
         },
-        "flex_grow_shrink": 0.0
+        "flexBasis": 0.0
       }
     },
     {
@@ -308,14 +308,14 @@
           "types": 1
         }
       },
-      "aspect_ratio": 1.0,
-      "item_in_layout": {
-        "class": "flexbox_item",
+      "aspectRatio": 1.0,
+      "itemInLayout": {
+        "class": "flexboxItem",
         "position": {
           "class": "position",
           "value": 1
         },
-        "flex_grow_shrink": 0.0
+        "flexBasis": 0.0
       }
     },
     {
@@ -338,29 +338,29 @@
         }
       },
       "layout": {
-        "class": "flexbox_layout",
+        "class": "flexboxLayout",
         "direction": 1,
-        "justify_content": 1,
-        "align_items": 2,
-        "align_content": 2,
+        "justifyContent": 1,
+        "alignItems": 2,
+        "alignContent": 2,
         "wrap": 1,
-        "row_gap": 0,
-        "column_gap": 0,
+        "rowGap": 0,
+        "columnGap": 0,
         "padding": [
           0,
           0,
           0,
           0
         ],
-        "z_order": false
+        "zOrder": false
       },
-      "item_in_layout": {
-        "class": "flexbox_item",
+      "itemInLayout": {
+        "class": "flexboxItem",
         "position": {
           "class": "position",
           "value": 1
         },
-        "flex_grow_shrink": 0.0
+        "flexBasis": 0.0
       }
     },
     {
@@ -382,13 +382,13 @@
           "types": 1
         }
       },
-      "item_in_layout": {
-        "class": "flexbox_item",
+      "itemInLayout": {
+        "class": "flexboxItem",
         "position": {
           "class": "position",
           "value": 1
         },
-        "flex_grow_shrink": 0.0
+        "flexBasis": 0.0
       }
     },
     {
@@ -410,13 +410,13 @@
           "types": 1
         }
       },
-      "item_in_layout": {
-        "class": "flexbox_item",
+      "itemInLayout": {
+        "class": "flexboxItem",
         "position": {
           "class": "position",
           "value": 1
         },
-        "flex_grow_shrink": 0.0
+        "flexBasis": 0.0
       }
     },
     {
@@ -439,21 +439,21 @@
         }
       },
       "layout": {
-        "class": "flexbox_layout",
+        "class": "flexboxLayout",
         "direction": 1,
-        "justify_content": 2,
-        "align_items": 2,
-        "align_content": 2,
+        "justifyContent": 2,
+        "alignItems": 2,
+        "alignContent": 2,
         "wrap": 1,
-        "row_gap": 0,
-        "column_gap": 16.0,
+        "rowGap": 0,
+        "columnGap": 16.0,
         "padding": [
           0,
           0,
           0,
           0
         ],
-        "z_order": false
+        "zOrder": false
       }
     },
     {
@@ -476,21 +476,21 @@
         }
       },
       "layout": {
-        "class": "flexbox_layout",
+        "class": "flexboxLayout",
         "direction": 2,
-        "justify_content": 1,
-        "align_items": 1,
-        "align_content": 1,
+        "justifyContent": 1,
+        "alignItems": 1,
+        "alignContent": 1,
         "wrap": 1,
-        "row_gap": 4.0,
-        "column_gap": 0,
+        "rowGap": 4.0,
+        "columnGap": 0,
         "padding": [
           0,
           0,
           0,
           0
         ],
-        "z_order": false
+        "zOrder": false
       }
     },
     {
@@ -512,13 +512,13 @@
           "types": 1
         }
       },
-      "item_in_layout": {
-        "class": "flexbox_item",
+      "itemInLayout": {
+        "class": "flexboxItem",
         "position": {
           "class": "position",
           "value": 1
         },
-        "flex_grow_shrink": 0.0
+        "flexBasis": 0.0
       }
     },
     {
@@ -540,13 +540,13 @@
           "types": 1
         }
       },
-      "item_in_layout": {
-        "class": "flexbox_item",
+      "itemInLayout": {
+        "class": "flexboxItem",
         "position": {
           "class": "position",
           "value": 1
         },
-        "flex_grow_shrink": 0.0
+        "flexBasis": 0.0
       }
     }
   ]

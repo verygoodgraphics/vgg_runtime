@@ -217,11 +217,12 @@ struct TextStyleAttr
   float                    baselineShift{ 0.0 };
   size_t                   length{ 0 };
   int                      size{ 14 };
+  int                      fillUseType{ 0 };
+  int                      fontWeight{ 100 };
   bool                     bold{ false };
   bool                     italic{ false };
   bool                     lineThrough{ false };
   bool                     kerning{ false };
-  int                      fillUseType{ 0 };
   ETextUnderline           underline{ UT_None };
   ETextHorizontalAlignment horzAlignment{ HA_Left };
   ELetterTransform         letterTransform{ ELT_Nothing };

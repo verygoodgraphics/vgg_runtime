@@ -400,3 +400,15 @@ bool UIView::handleTouchEvent(int x, int y, int motionX, int motionY, EUIEventTy
 
   return true;
 }
+
+UIView::Offset UIView::getOffset()
+{
+  auto offset = m_zoomerListener->translate();
+  return { offset.x, offset.y };
+}
+
+void UIView::setOffset(Offset offset)
+{
+  m_zoomerListener->setOffset(Vec2{ offset.x, offset.y });
+  setDirty(true);
+}

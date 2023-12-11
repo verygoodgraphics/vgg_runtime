@@ -42,8 +42,8 @@ class UIView;
 
 class UIApplication : public app::EventListener
 {
-  app::AppRender* m_layer{ nullptr };
-  std::shared_ptr<UIView> m_view;
+  app::AppRender*             m_layer{ nullptr };
+  std::shared_ptr<UIView>     m_view;
   std::shared_ptr<Controller> m_controller;
 
   bool m_firstRender{ true };
@@ -69,4 +69,7 @@ public:
   bool onEvent(UEvent evt, void* userData) override;
 
   bool run(int fps);
+
+private:
+  bool handleKeyEvent(VKeyboardEvent evt);
 };

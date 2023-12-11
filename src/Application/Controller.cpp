@@ -27,6 +27,7 @@
 #include "Domain/UndoRedoJsonDocument.hpp"
 #include "Domain/VggExec.hpp"
 #include "Utility/Log.hpp"
+#include "Utility/VggFloat.hpp"
 #include "UseCase/EditModel.hpp"
 #include "UseCase/ModelChanged.hpp"
 #include "UseCase/ResizeWindow.hpp"
@@ -533,9 +534,7 @@ void Controller::scaleContent(Layout::Size size)
     return;
   }
 
-  m_layout->layout(size); // scale to fill
-  // todo, aspect fill & scroll
-  // aspectFill(size.width);
+  aspectFill(size.width);
   // aspectFit(size);
 }
 
@@ -556,6 +555,22 @@ void Controller::aspectFit(Layout::Size size)
   auto scale = std::min(xScale, yScale);
 
   m_layout->layout({ pageSize.width * scale, pageSize.height * scale });
+}
+
+bool Controller::handleTranslate(float x, float y)
+{
+  if (isEditMode())
+  {
+    return false;
+  }
+
+  if (doubleNearlyZero(y))
+  {
+    return true;
+  }
+
+  auto pageSize = m_layout->pageSize(m_presenter->currentPageIndex());
+  return m_presenter->handleTranslate(pageSize.width, pageSize.height, x, y);
 }
 
 } // namespace VGG

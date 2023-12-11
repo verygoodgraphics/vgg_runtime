@@ -377,6 +377,7 @@ inline void from_json(const json& j, TextStyleAttr& x)
   x.fontName = get_stack_optional<std::string>(j, "name").value_or("");
   x.subFamilyName = get_stack_optional<std::string>(j, "subFamilyName").value_or("");
   x.fillUseType = get_stack_optional<int>(j, "fillUseType").value_or(0);
+  x.fontWeight = get_stack_optional<int>(j, "weight").value_or(100);
   x.fills = j.value("fills", std::vector<Fill>());
   x.baselineShift = j.value("baselineShift", 0.0);
   x.lineThrough = j.value("linethrough", false);

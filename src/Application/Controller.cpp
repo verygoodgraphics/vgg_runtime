@@ -38,7 +38,7 @@
 
 constexpr auto PSEUDO_PATH_EDIT_VIEW = "::editView";
 
-#define MIN_DOC_VERSION VGG_PARSE_FORMAT_VER_STR
+#define REQUIRED_DOC_VERSION VGG_PARSE_FORMAT_VER_STR
 
 namespace
 {
@@ -250,12 +250,12 @@ void Controller::start()
   m_presenter->setModel(generateViewModel(m_model, m_presenter->viewSize()));
 
   const auto& modelFileVersion = m_model->docVersion();
-  if (versionCompare(modelFileVersion, MIN_DOC_VERSION) < 0)
+  if (versionCompare(modelFileVersion, REQUIRED_DOC_VERSION) != 0)
   {
     WARN(
-      "The loaded file version %s is lower than the minimum required version %s",
+      "The loaded file version %s is not equal to the required version %s",
       modelFileVersion.c_str(),
-      MIN_DOC_VERSION);
+      REQUIRED_DOC_VERSION);
   }
 
   observeModelState();

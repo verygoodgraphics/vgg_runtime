@@ -27,30 +27,30 @@ namespace Internal
 {
 namespace Rule
 {
-constexpr auto K_ASPECT_RATIO = "aspect_ratio";
+constexpr auto K_ASPECT_RATIO = "aspectRatio";
 constexpr auto K_BOTTOM = "bottom";
 constexpr auto K_CLASS = "class";
-constexpr auto K_COLUMN_ALIGN = "column_align";
-constexpr auto K_COLUMN_SPAN = "column_span";
-constexpr auto K_FLEXBOX_ITEM = "flexbox_item";
-constexpr auto K_FLEXBOX_LAYOUT = "flexbox_layout";
-constexpr auto K_FLEX_GROW_SHRINK = "flex_grow_shrink";
-constexpr auto K_GRID_ITEM = "grid_item";
-constexpr auto K_GRID_LAYOUT = "grid_layout";
+constexpr auto K_COLUMN_ALIGN = "columnAlign";
+constexpr auto K_COLUMN_SPAN = "columnSpan";
+constexpr auto K_FLEXBOX_ITEM = "flexboxItem";
+constexpr auto K_FLEXBOX_LAYOUT = "flexboxLayout";
+constexpr auto K_FLEX_BASIS = "flexBasis";
+constexpr auto K_GRID_ITEM = "gridItem";
+constexpr auto K_GRID_LAYOUT = "gridLayout";
 constexpr auto K_HEIGHT = "height";
 constexpr auto K_ID = "id";
-constexpr auto K_ITEM_IN_LAYOUT = "item_in_layout";
-constexpr auto K_ITEM_POS = "item_pos";
+constexpr auto K_ITEM_IN_LAYOUT = "itemInLayout";
+constexpr auto K_ITEM_POS = "itemPos";
 constexpr auto K_LAYOUT = "layout";
 constexpr auto K_LEFT = "left";
-constexpr auto K_MAX_HEIGHT = "max_height";
-constexpr auto K_MAX_WIDTH = "max_width";
-constexpr auto K_MIN_HEIGHT = "min_height";
-constexpr auto K_MIN_WIDTH = "min_width";
+constexpr auto K_MAX_HEIGHT = "maxHeight";
+constexpr auto K_MAX_WIDTH = "maxWidth";
+constexpr auto K_MIN_HEIGHT = "minHeight";
+constexpr auto K_MIN_WIDTH = "minWidth";
 constexpr auto K_POSITION = "position";
 constexpr auto K_RIGHT = "right";
-constexpr auto K_ROW_ALIGN = "row_align";
-constexpr auto K_ROW_SPAN = "row_span";
+constexpr auto K_ROW_ALIGN = "rowAlign";
+constexpr auto K_ROW_SPAN = "rowSpan";
 constexpr auto K_TOP = "top";
 constexpr auto K_VALUE = "value";
 constexpr auto K_WIDTH = "width";
@@ -83,7 +83,7 @@ void to_json(nlohmann::json& json, const FlexboxItem& obj)
 }
 void from_json(const nlohmann::json& json, FlexboxItem& obj)
 {
-  obj.flex_grow_shrink = json.at(K_FLEX_GROW_SHRINK);
+  obj.flexBasis = json.at(K_FLEX_BASIS);
 
   getPositionFromJson(json, obj);
 }
@@ -94,12 +94,12 @@ void to_json(nlohmann::json& json, const GridItem& obj)
 }
 void from_json(const nlohmann::json& json, GridItem& obj)
 {
-  obj.item_pos = json.at(K_ITEM_POS);
-  obj.row_span = json.at(K_ROW_SPAN);
-  obj.column_span = json.at(K_COLUMN_SPAN);
+  obj.itemPos = json.at(K_ITEM_POS);
+  obj.rowSpan = json.at(K_ROW_SPAN);
+  obj.columnSpan = json.at(K_COLUMN_SPAN);
   obj.position = json.at(K_POSITION);
-  obj.row_align = json.at(K_ROW_ALIGN);
-  obj.column_align = json.at(K_COLUMN_ALIGN);
+  obj.rowAlign = json.at(K_ROW_ALIGN);
+  obj.columnAlign = json.at(K_COLUMN_ALIGN);
 
   getPositionFromJson(json, obj);
 }
@@ -142,37 +142,37 @@ void from_json(const nlohmann::json& json, Rule& obj)
     auto className = json[K_ITEM_IN_LAYOUT].at(K_CLASS);
     if (className == K_FLEXBOX_ITEM)
     {
-      obj.item_in_layout = json.at(K_ITEM_IN_LAYOUT).get<FlexboxItem>();
+      obj.itemInLayout = json.at(K_ITEM_IN_LAYOUT).get<FlexboxItem>();
     }
     else if (className == K_GRID_ITEM)
     {
-      obj.item_in_layout = json.at(K_ITEM_IN_LAYOUT).get<GridItem>();
+      obj.itemInLayout = json.at(K_ITEM_IN_LAYOUT).get<GridItem>();
     }
   }
 
   obj.width = json.at(K_WIDTH);
   if (json.contains(K_MAX_WIDTH))
   {
-    obj.max_width = json[K_MAX_WIDTH].get<MaxWidth>();
+    obj.maxWidth = json[K_MAX_WIDTH].get<MaxWidth>();
   }
   if (json.contains(K_MIN_WIDTH))
   {
-    obj.min_width = json[K_MIN_WIDTH].get<MinWidth>();
+    obj.minWidth = json[K_MIN_WIDTH].get<MinWidth>();
   }
 
   obj.height = json.at(K_HEIGHT);
   if (json.contains(K_MAX_HEIGHT))
   {
-    obj.max_height = json[K_MAX_HEIGHT].get<MaxHeight>();
+    obj.maxHeight = json[K_MAX_HEIGHT].get<MaxHeight>();
   }
   if (json.contains(K_MIN_HEIGHT))
   {
-    obj.min_height = json[K_MIN_HEIGHT].get<MinHeight>();
+    obj.minHeight = json[K_MIN_HEIGHT].get<MinHeight>();
   }
 
   if (json.contains(K_ASPECT_RATIO))
   {
-    obj.aspect_ratio = json[K_ASPECT_RATIO].get<double>();
+    obj.aspectRatio = json[K_ASPECT_RATIO].get<double>();
   }
 }
 

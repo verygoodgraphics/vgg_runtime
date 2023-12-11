@@ -1,6 +1,7 @@
 {
+  "version": "1.0.8",
   "fileType": 3,
-  "fileName": "/Users/houguanhua/code/vgg/vgg_runtime_A/_bug/1027_1025/bug_1027_1025_button.fig",
+  "fileName": "/Users/houguanhua/code/vgg/vgg_runtime_A/test/testDataDir/resizing/child_size_changed/bug_1027_1025_button.fig",
   "frames": [
     {
       "id": "1:113",
@@ -51,10 +52,13 @@
       "styleEffectMaskArea": 2,
       "maskShowType": 2,
       "overflow": 2,
+      "styleEffectBoolean": 1,
       "cornerSmoothing": 0.0,
       "horizontalConstraint": 1,
       "verticalConstraint": 1,
       "resizesContent": 0,
+      "variableDefs": [],
+      "variableRefs": [],
       "class": "frame",
       "childObjects": [
         {
@@ -160,10 +164,13 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "horizontalConstraint": 0,
           "verticalConstraint": 0,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolInstance",
           "masterId": "1:2",
           "overrideValues": [
@@ -215,17 +222,35 @@
               "objectId": [
                 "26:2567"
               ],
-              "overrideName": "masterId",
-              "overrideValue": "1:19",
+              "overrideName": "visible",
+              "overrideValue": true,
               "effectOnLayout": false
             },
             {
               "class": "overrideValue",
               "objectId": [
-                "26:2567"
+                "2:649"
               ],
-              "overrideName": "visible",
-              "overrideValue": true,
+              "overrideName": "defaultAttr.size",
+              "overrideValue": 20.0,
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "2:649"
+              ],
+              "overrideName": "defaultAttr.name",
+              "overrideValue": "Avenir",
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "2:649"
+              ],
+              "overrideName": "defaultAttr.subFamilyName",
+              "overrideValue": "Roman",
               "effectOnLayout": false
             },
             {
@@ -294,7 +319,7 @@
               "objectId": [
                 "26:2714"
               ],
-              "overrideName": "layout.row_gap",
+              "overrideName": "layout.rowGap",
               "overrideValue": 0,
               "effectOnLayout": true
             },
@@ -303,25 +328,9 @@
               "objectId": [
                 "26:2714"
               ],
-              "overrideName": "layout.column_gap",
+              "overrideName": "layout.columnGap",
               "overrideValue": 16.0,
               "effectOnLayout": true
-            },
-            {
-              "class": "overrideValue",
-              "objectId": [
-                "2:649"
-              ],
-              "overrideName": "bounds",
-              "overrideValue": {
-                "class": "rect",
-                "constrainProportions": false,
-                "width": 181.0,
-                "height": 27.0,
-                "x": 0,
-                "y": 0
-              },
-              "effectOnLayout": false
             },
             {
               "class": "overrideValue",
@@ -357,30 +366,26 @@
               "objectId": [
                 "2:649"
               ],
+              "overrideName": "bounds",
+              "overrideValue": {
+                "class": "rect",
+                "constrainProportions": false,
+                "width": 181.0,
+                "height": 27.0,
+                "x": 0,
+                "y": 0
+              },
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "2:649"
+              ],
               "overrideName": "attr",
               "overrideValue": [
                 {
                   "class": "fontAttr",
-                  "name": "Avenir",
-                  "subFamilyName": "Roman",
-                  "lettertransform": 0,
-                  "size": 20.0,
-                  "underline": 0,
-                  "linethrough": false,
-                  "letterSpacing": 0.0,
-                  "horizontalAlignment": 2,
-                  "lineSpace": 20.0,
-                  "textParagraph": {
-                    "class": "textParagraph",
-                    "paragraphSpacing": null
-                  },
-                  "baseline": 0,
-                  "kerning": false,
-                  "baselineShift": 0,
-                  "horizontalScale": 1,
-                  "verticalScale": 1,
-                  "proportionalSpacing": 0,
-                  "rotate": 0,
                   "length": 19
                 }
               ],
@@ -398,17 +403,35 @@
             {
               "class": "overrideValue",
               "objectId": [
-                "2:650"
+                "2:649"
               ],
-              "overrideName": "bounds",
-              "overrideValue": {
-                "class": "rect",
-                "constrainProportions": false,
-                "width": 516.0,
-                "height": 56.0,
-                "x": 0,
-                "y": 0
-              },
+              "overrideName": "truncatedHeight",
+              "overrideValue": null,
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "2:649"
+              ],
+              "overrideName": "lineType",
+              "overrideValue": [
+                {
+                  "class": "lineType",
+                  "styleType": 0,
+                  "level": 0,
+                  "isFirst": false
+                }
+              ],
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "26:2567"
+              ],
+              "overrideName": "masterId",
+              "overrideValue": "1:19",
               "effectOnLayout": false
             },
             {
@@ -438,6 +461,22 @@
                   }
                 }
               ],
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "2:650"
+              ],
+              "overrideName": "bounds",
+              "overrideValue": {
+                "class": "rect",
+                "constrainProportions": false,
+                "width": 516.0,
+                "height": 56.0,
+                "x": 0,
+                "y": 0
+              },
               "effectOnLayout": false
             },
             {
@@ -485,6 +524,7 @@
               "effectOnLayout": false
             }
           ],
+          "variableAssignments": [],
           "radius": [
             40.0,
             40.0,
@@ -595,13 +635,25 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolInstance",
           "masterId": "1:72",
           "overrideValues": [
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "2:952"
+              ],
+              "overrideName": "defaultAttr.size",
+              "overrideValue": 20.0,
+              "effectOnLayout": false
+            },
             {
               "class": "overrideValue",
               "objectId": [
@@ -643,27 +695,41 @@
               "overrideValue": [
                 {
                   "class": "fontAttr",
-                  "name": "Avenir",
-                  "subFamilyName": "Roman",
-                  "lettertransform": 0,
-                  "size": 20.0,
-                  "underline": 0,
-                  "linethrough": false,
-                  "letterSpacing": 0.0,
-                  "horizontalAlignment": 0,
-                  "lineSpace": 20.0,
-                  "textParagraph": {
-                    "class": "textParagraph",
-                    "paragraphSpacing": 28.0
-                  },
-                  "baseline": 0,
-                  "kerning": false,
-                  "baselineShift": 0,
-                  "horizontalScale": 1,
-                  "verticalScale": 1,
-                  "proportionalSpacing": 0,
-                  "rotate": 0,
                   "length": 22
+                }
+              ],
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "2:952"
+              ],
+              "overrideName": "content",
+              "overrideValue": "Continue with Facebook",
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "2:952"
+              ],
+              "overrideName": "truncatedHeight",
+              "overrideValue": null,
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "2:952"
+              ],
+              "overrideName": "lineType",
+              "overrideValue": [
+                {
+                  "class": "lineType",
+                  "styleType": 0,
+                  "level": 0,
+                  "isFirst": false
                 }
               ],
               "effectOnLayout": false
@@ -685,6 +751,7 @@
               "effectOnLayout": false
             }
           ],
+          "variableAssignments": [],
           "radius": [
             40.0,
             40.0,
@@ -795,13 +862,25 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolInstance",
           "masterId": "1:80",
           "overrideValues": [
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "2:966"
+              ],
+              "overrideName": "defaultAttr.size",
+              "overrideValue": 20.0,
+              "effectOnLayout": false
+            },
             {
               "class": "overrideValue",
               "objectId": [
@@ -827,27 +906,41 @@
               "overrideValue": [
                 {
                   "class": "fontAttr",
-                  "name": "Avenir",
-                  "subFamilyName": "Roman",
-                  "lettertransform": 0,
-                  "size": 20.0,
-                  "underline": 0,
-                  "linethrough": false,
-                  "letterSpacing": 0.0,
-                  "horizontalAlignment": 0,
-                  "lineSpace": 20.0,
-                  "textParagraph": {
-                    "class": "textParagraph",
-                    "paragraphSpacing": 28.0
-                  },
-                  "baseline": 0,
-                  "kerning": false,
-                  "baselineShift": 0,
-                  "horizontalScale": 1,
-                  "verticalScale": 1,
-                  "proportionalSpacing": 0,
-                  "rotate": 0,
                   "length": 20
+                }
+              ],
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "2:966"
+              ],
+              "overrideName": "content",
+              "overrideValue": "Continue with Google",
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "2:966"
+              ],
+              "overrideName": "truncatedHeight",
+              "overrideValue": null,
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "2:966"
+              ],
+              "overrideName": "lineType",
+              "overrideValue": [
+                {
+                  "class": "lineType",
+                  "styleType": 0,
+                  "level": 0,
+                  "isFirst": false
                 }
               ],
               "effectOnLayout": false
@@ -885,6 +978,7 @@
               "effectOnLayout": false
             }
           ],
+          "variableAssignments": [],
           "radius": [
             40.0,
             40.0,
@@ -986,10 +1080,13 @@
       "styleEffectMaskArea": 2,
       "maskShowType": 2,
       "overflow": 1,
+      "styleEffectBoolean": 1,
       "cornerSmoothing": 0.0,
       "horizontalConstraint": 1,
       "verticalConstraint": 1,
       "resizesContent": 0,
+      "variableDefs": [],
+      "variableRefs": [],
       "class": "frame",
       "childObjects": [
         {
@@ -1061,11 +1158,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "2:550",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -1117,11 +1217,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "2:548",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -1170,8 +1273,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             },
             {
               "id": "1:9",
@@ -1242,11 +1344,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "2:549",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -1321,11 +1426,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "2:549",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -1406,8 +1514,7 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   },
@@ -1482,11 +1589,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "2:549",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -1535,8 +1645,7 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   },
@@ -1611,11 +1720,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "2:549",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -1800,16 +1912,14 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   }
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             }
           ],
           "radius": [
@@ -1888,11 +1998,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "6:1630",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -1944,11 +2057,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "6:1628",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -1997,8 +2113,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             },
             {
               "id": "1:12",
@@ -2069,11 +2184,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "6:1629",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -2186,8 +2304,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             }
           ],
           "radius": [
@@ -2266,11 +2383,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "12:394",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -2322,11 +2442,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "12:392",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -2375,8 +2498,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             },
             {
               "id": "1:15",
@@ -2447,11 +2569,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "12:393",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -2492,8 +2617,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             }
           ],
           "radius": [
@@ -2572,11 +2696,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "12:1348",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -2628,11 +2755,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "12:1334",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -2681,8 +2811,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             },
             {
               "id": "1:18",
@@ -2753,11 +2882,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "12:1335",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -2822,8 +2954,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             }
           ],
           "radius": [
@@ -2902,11 +3033,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "26:2566",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -2958,11 +3092,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "26:2564",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -3011,8 +3148,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             },
             {
               "id": "1:21",
@@ -3083,11 +3219,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "26:2565",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -3162,11 +3301,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "26:2565",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -3279,8 +3421,7 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   },
@@ -3355,11 +3496,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "26:2565",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -3424,16 +3568,14 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   }
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             }
           ],
           "radius": [
@@ -3512,11 +3654,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "26:3177",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -3568,11 +3713,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "26:3175",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -3621,8 +3769,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             },
             {
               "id": "1:24",
@@ -3693,11 +3840,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "26:3176",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -3772,11 +3922,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "26:3176",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -3889,8 +4042,7 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   },
@@ -3965,11 +4117,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "26:3176",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -4050,8 +4205,7 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   },
@@ -4126,11 +4280,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "26:3176",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -4179,16 +4336,14 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   }
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             }
           ],
           "radius": [
@@ -4267,11 +4422,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "26:4035",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -4323,11 +4481,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "26:4033",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -4376,8 +4537,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             },
             {
               "id": "1:27",
@@ -4448,11 +4608,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "26:4034",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -4527,11 +4690,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "26:4034",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -4612,8 +4778,7 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   },
@@ -4688,11 +4853,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "26:4034",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -4805,16 +4973,14 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   }
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             }
           ],
           "radius": [
@@ -4893,11 +5059,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "26:4468",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -4949,11 +5118,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "26:4469",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -5002,8 +5174,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             },
             {
               "id": "1:30",
@@ -5074,11 +5245,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "26:4470",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -5153,11 +5327,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "26:4470",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -5238,8 +5415,7 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   },
@@ -5314,11 +5490,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "26:4470",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -5391,16 +5570,14 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   }
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             }
           ],
           "radius": [
@@ -5479,11 +5656,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "35:2837",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -5535,11 +5715,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "35:2835",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -5588,8 +5771,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             },
             {
               "id": "1:33",
@@ -5660,11 +5842,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "35:2836",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -5753,8 +5938,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             }
           ],
           "radius": [
@@ -5833,11 +6017,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "36:3359",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -5889,11 +6076,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "36:3344",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "group",
               "childObjects": [
                 {
@@ -5945,11 +6135,14 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "36:3345",
                   "horizontalConstraint": 5,
                   "verticalConstraint": 5,
                   "resizesContent": 0,
+                  "variableDefs": [],
+                  "variableRefs": [],
                   "shape": {
                     "class": "shape",
                     "subshapes": [
@@ -5998,8 +6191,7 @@
                     ],
                     "windingRule": 0
                   },
-                  "class": "path",
-                  "pathType": 6
+                  "class": "path"
                 }
               ],
               "groupNestMaskType": true
@@ -6053,11 +6245,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "36:3346",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "group",
               "childObjects": [
                 {
@@ -6109,11 +6304,14 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "36:3347",
                   "horizontalConstraint": 5,
                   "verticalConstraint": 5,
                   "resizesContent": 0,
+                  "variableDefs": [],
+                  "variableRefs": [],
                   "class": "group",
                   "childObjects": [
                     {
@@ -6185,11 +6383,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "36:3348",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "shape": {
                         "class": "shape",
                         "subshapes": [
@@ -6264,11 +6465,14 @@
                               "styleEffectMaskArea": 2,
                               "maskShowType": 2,
                               "overflow": 1,
+                              "styleEffectBoolean": 1,
                               "cornerSmoothing": 0.0,
                               "overrideKey": "36:3348",
                               "horizontalConstraint": 5,
                               "verticalConstraint": 5,
                               "resizesContent": 0,
+                              "variableDefs": [],
+                              "variableRefs": [],
                               "class": "path",
                               "shape": {
                                 "class": "shape",
@@ -6317,8 +6521,7 @@
                                   }
                                 ],
                                 "windingRule": 0
-                              },
-                              "pathType": 6
+                              }
                             },
                             "booleanOperation": 4
                           },
@@ -6393,11 +6596,14 @@
                               "styleEffectMaskArea": 2,
                               "maskShowType": 2,
                               "overflow": 1,
+                              "styleEffectBoolean": 1,
                               "cornerSmoothing": 0.0,
                               "overrideKey": "36:3348",
                               "horizontalConstraint": 5,
                               "verticalConstraint": 5,
                               "resizesContent": 0,
+                              "variableDefs": [],
+                              "variableRefs": [],
                               "class": "path",
                               "shape": {
                                 "class": "shape",
@@ -6446,16 +6652,14 @@
                                   }
                                 ],
                                 "windingRule": 0
-                              },
-                              "pathType": 6
+                              }
                             },
                             "booleanOperation": 4
                           }
                         ],
                         "windingRule": 0
                       },
-                      "class": "path",
-                      "pathType": 6
+                      "class": "path"
                     },
                     {
                       "id": "1:40",
@@ -6526,11 +6730,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "36:3349",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "shape": {
                         "class": "shape",
                         "subshapes": [
@@ -6605,11 +6812,14 @@
                               "styleEffectMaskArea": 2,
                               "maskShowType": 2,
                               "overflow": 1,
+                              "styleEffectBoolean": 1,
                               "cornerSmoothing": 0.0,
                               "overrideKey": "36:3349",
                               "horizontalConstraint": 5,
                               "verticalConstraint": 5,
                               "resizesContent": 0,
+                              "variableDefs": [],
+                              "variableRefs": [],
                               "class": "path",
                               "shape": {
                                 "class": "shape",
@@ -6658,8 +6868,7 @@
                                   }
                                 ],
                                 "windingRule": 0
-                              },
-                              "pathType": 6
+                              }
                             },
                             "booleanOperation": 4
                           },
@@ -6734,11 +6943,14 @@
                               "styleEffectMaskArea": 2,
                               "maskShowType": 2,
                               "overflow": 1,
+                              "styleEffectBoolean": 1,
                               "cornerSmoothing": 0.0,
                               "overrideKey": "36:3349",
                               "horizontalConstraint": 5,
                               "verticalConstraint": 5,
                               "resizesContent": 0,
+                              "variableDefs": [],
+                              "variableRefs": [],
                               "class": "path",
                               "shape": {
                                 "class": "shape",
@@ -6787,16 +6999,14 @@
                                   }
                                 ],
                                 "windingRule": 0
-                              },
-                              "pathType": 6
+                              }
                             },
                             "booleanOperation": 4
                           }
                         ],
                         "windingRule": 0
                       },
-                      "class": "path",
-                      "pathType": 6
+                      "class": "path"
                     },
                     {
                       "id": "1:41",
@@ -6867,11 +7077,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "36:3350",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "shape": {
                         "class": "shape",
                         "subshapes": [
@@ -6946,11 +7159,14 @@
                               "styleEffectMaskArea": 2,
                               "maskShowType": 2,
                               "overflow": 1,
+                              "styleEffectBoolean": 1,
                               "cornerSmoothing": 0.0,
                               "overrideKey": "36:3350",
                               "horizontalConstraint": 5,
                               "verticalConstraint": 5,
                               "resizesContent": 0,
+                              "variableDefs": [],
+                              "variableRefs": [],
                               "class": "path",
                               "shape": {
                                 "class": "shape",
@@ -6999,8 +7215,7 @@
                                   }
                                 ],
                                 "windingRule": 0
-                              },
-                              "pathType": 6
+                              }
                             },
                             "booleanOperation": 4
                           },
@@ -7075,11 +7290,14 @@
                               "styleEffectMaskArea": 2,
                               "maskShowType": 2,
                               "overflow": 1,
+                              "styleEffectBoolean": 1,
                               "cornerSmoothing": 0.0,
                               "overrideKey": "36:3350",
                               "horizontalConstraint": 5,
                               "verticalConstraint": 5,
                               "resizesContent": 0,
+                              "variableDefs": [],
+                              "variableRefs": [],
                               "class": "path",
                               "shape": {
                                 "class": "shape",
@@ -7128,16 +7346,14 @@
                                   }
                                 ],
                                 "windingRule": 0
-                              },
-                              "pathType": 6
+                              }
                             },
                             "booleanOperation": 4
                           }
                         ],
                         "windingRule": 0
                       },
-                      "class": "path",
-                      "pathType": 6
+                      "class": "path"
                     },
                     {
                       "id": "1:42",
@@ -7208,11 +7424,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "36:3351",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "shape": {
                         "class": "shape",
                         "subshapes": [
@@ -7261,8 +7480,7 @@
                         ],
                         "windingRule": 0
                       },
-                      "class": "path",
-                      "pathType": 6
+                      "class": "path"
                     },
                     {
                       "id": "1:43",
@@ -7333,11 +7551,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "36:3352",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "shape": {
                         "class": "shape",
                         "subshapes": [
@@ -7386,8 +7607,7 @@
                         ],
                         "windingRule": 0
                       },
-                      "class": "path",
-                      "pathType": 6
+                      "class": "path"
                     },
                     {
                       "id": "1:44",
@@ -7458,11 +7678,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "36:3353",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "shape": {
                         "class": "shape",
                         "subshapes": [
@@ -7511,8 +7734,7 @@
                         ],
                         "windingRule": 0
                       },
-                      "class": "path",
-                      "pathType": 6
+                      "class": "path"
                     },
                     {
                       "id": "1:45",
@@ -7583,11 +7805,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "36:3354",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "shape": {
                         "class": "shape",
                         "subshapes": [
@@ -7636,8 +7861,7 @@
                         ],
                         "windingRule": 0
                       },
-                      "class": "path",
-                      "pathType": 6
+                      "class": "path"
                     },
                     {
                       "id": "1:46",
@@ -7708,11 +7932,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "36:3355",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "shape": {
                         "class": "shape",
                         "subshapes": [
@@ -7761,8 +7988,7 @@
                         ],
                         "windingRule": 0
                       },
-                      "class": "path",
-                      "pathType": 6
+                      "class": "path"
                     },
                     {
                       "id": "1:47",
@@ -7833,11 +8059,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "36:3356",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "shape": {
                         "class": "shape",
                         "subshapes": [
@@ -7886,8 +8115,7 @@
                         ],
                         "windingRule": 0
                       },
-                      "class": "path",
-                      "pathType": 6
+                      "class": "path"
                     },
                     {
                       "id": "1:48",
@@ -7958,11 +8186,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "36:3357",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "shape": {
                         "class": "shape",
                         "subshapes": [
@@ -8011,8 +8242,7 @@
                         ],
                         "windingRule": 0
                       },
-                      "class": "path",
-                      "pathType": 6
+                      "class": "path"
                     },
                     {
                       "id": "1:49",
@@ -8083,11 +8313,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "36:3358",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "shape": {
                         "class": "shape",
                         "subshapes": [
@@ -8136,8 +8369,7 @@
                         ],
                         "windingRule": 0
                       },
-                      "class": "path",
-                      "pathType": 6
+                      "class": "path"
                     }
                   ],
                   "groupNestMaskType": true
@@ -8222,11 +8454,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "45:3220",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -8278,11 +8513,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "45:3218",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -8331,8 +8569,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             },
             {
               "id": "1:52",
@@ -8403,11 +8640,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "45:3219",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -8482,11 +8722,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "45:3219",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -8655,8 +8898,7 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   },
@@ -8731,11 +8973,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "45:3219",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -8816,8 +9061,7 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   },
@@ -8892,11 +9136,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "45:3219",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -8969,16 +9216,14 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   }
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             }
           ],
           "radius": [
@@ -9057,11 +9302,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "50:3208",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -9113,11 +9361,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "50:3206",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -9166,8 +9417,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             },
             {
               "id": "1:55",
@@ -9238,11 +9488,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "50:3207",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -9317,11 +9570,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "50:3207",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -9482,8 +9738,7 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   },
@@ -9558,11 +9813,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "50:3207",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -9643,16 +9901,14 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   }
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             }
           ],
           "radius": [
@@ -9731,11 +9987,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "50:3212",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -9787,11 +10046,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "50:3210",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -9840,8 +10102,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             },
             {
               "id": "1:58",
@@ -9912,11 +10173,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "50:3211",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -9991,11 +10255,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "50:3211",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -10124,8 +10391,7 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   },
@@ -10200,11 +10466,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "50:3211",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -10341,16 +10610,14 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   }
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             }
           ],
           "radius": [
@@ -10429,11 +10696,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "50:3217",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -10485,11 +10755,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "50:3214",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "group",
               "childObjects": [
                 {
@@ -10541,11 +10814,14 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "50:3215",
                   "horizontalConstraint": 5,
                   "verticalConstraint": 5,
                   "resizesContent": 0,
+                  "variableDefs": [],
+                  "variableRefs": [],
                   "shape": {
                     "class": "shape",
                     "subshapes": [
@@ -10594,8 +10870,7 @@
                     ],
                     "windingRule": 0
                   },
-                  "class": "path",
-                  "pathType": 6
+                  "class": "path"
                 },
                 {
                   "id": "1:62",
@@ -10666,11 +10941,14 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "50:3216",
                   "horizontalConstraint": 5,
                   "verticalConstraint": 5,
                   "resizesContent": 0,
+                  "variableDefs": [],
+                  "variableRefs": [],
                   "shape": {
                     "class": "shape",
                     "subshapes": [
@@ -10745,11 +11023,14 @@
                           "styleEffectMaskArea": 2,
                           "maskShowType": 2,
                           "overflow": 1,
+                          "styleEffectBoolean": 1,
                           "cornerSmoothing": 0.0,
                           "overrideKey": "50:3216",
                           "horizontalConstraint": 5,
                           "verticalConstraint": 5,
                           "resizesContent": 0,
+                          "variableDefs": [],
+                          "variableRefs": [],
                           "class": "path",
                           "shape": {
                             "class": "shape",
@@ -10902,8 +11183,7 @@
                               }
                             ],
                             "windingRule": 0
-                          },
-                          "pathType": 6
+                          }
                         },
                         "booleanOperation": 4
                       },
@@ -10978,11 +11258,14 @@
                           "styleEffectMaskArea": 2,
                           "maskShowType": 2,
                           "overflow": 1,
+                          "styleEffectBoolean": 1,
                           "cornerSmoothing": 0.0,
                           "overrideKey": "50:3216",
                           "horizontalConstraint": 5,
                           "verticalConstraint": 5,
                           "resizesContent": 0,
+                          "variableDefs": [],
+                          "variableRefs": [],
                           "class": "path",
                           "shape": {
                             "class": "shape",
@@ -11055,8 +11338,7 @@
                               }
                             ],
                             "windingRule": 0
-                          },
-                          "pathType": 6
+                          }
                         },
                         "booleanOperation": 4
                       },
@@ -11131,11 +11413,14 @@
                           "styleEffectMaskArea": 2,
                           "maskShowType": 2,
                           "overflow": 1,
+                          "styleEffectBoolean": 1,
                           "cornerSmoothing": 0.0,
                           "overrideKey": "50:3216",
                           "horizontalConstraint": 5,
                           "verticalConstraint": 5,
                           "resizesContent": 0,
+                          "variableDefs": [],
+                          "variableRefs": [],
                           "class": "path",
                           "shape": {
                             "class": "shape",
@@ -11192,8 +11477,7 @@
                               }
                             ],
                             "windingRule": 0
-                          },
-                          "pathType": 6
+                          }
                         },
                         "booleanOperation": 4
                       },
@@ -11268,11 +11552,14 @@
                           "styleEffectMaskArea": 2,
                           "maskShowType": 2,
                           "overflow": 1,
+                          "styleEffectBoolean": 1,
                           "cornerSmoothing": 0.0,
                           "overrideKey": "50:3216",
                           "horizontalConstraint": 5,
                           "verticalConstraint": 5,
                           "resizesContent": 0,
+                          "variableDefs": [],
+                          "variableRefs": [],
                           "class": "path",
                           "shape": {
                             "class": "shape",
@@ -11345,16 +11632,14 @@
                               }
                             ],
                             "windingRule": 0
-                          },
-                          "pathType": 6
+                          }
                         },
                         "booleanOperation": 4
                       }
                     ],
                     "windingRule": 0
                   },
-                  "class": "path",
-                  "pathType": 6
+                  "class": "path"
                 }
               ],
               "groupNestMaskType": true
@@ -11461,10 +11746,13 @@
       "styleEffectMaskArea": 2,
       "maskShowType": 2,
       "overflow": 1,
+      "styleEffectBoolean": 1,
       "cornerSmoothing": 0.0,
       "horizontalConstraint": 1,
       "verticalConstraint": 1,
       "resizesContent": 0,
+      "variableDefs": [],
+      "variableRefs": [],
       "class": "frame",
       "childObjects": [
         {
@@ -11570,11 +11858,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "2:984",
           "horizontalConstraint": 0,
           "verticalConstraint": 0,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -11626,11 +11917,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 2,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "36:4182",
               "horizontalConstraint": 7,
               "verticalConstraint": 7,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "frame",
               "childObjects": [
                 {
@@ -11681,12 +11975,15 @@
                   "maskType": 0,
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
-                  "overflow": 1,
+                  "overflow": 2,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "2:977",
                   "horizontalConstraint": 1,
                   "verticalConstraint": 1,
                   "resizesContent": 0,
+                  "variableDefs": [],
+                  "variableRefs": [],
                   "class": "symbolInstance",
                   "masterId": "1:89",
                   "overrideValues": [
@@ -11749,6 +12046,7 @@
                       "effectOnLayout": false
                     }
                   ],
+                  "variableAssignments": [],
                   "radius": [
                     0.0,
                     0.0,
@@ -11825,63 +12123,22 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 2,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "2:952",
                   "horizontalConstraint": 1,
                   "verticalConstraint": 1,
                   "resizesContent": 0,
+                  "variableDefs": [],
+                  "variableRefs": [],
                   "class": "text",
                   "content": "Continue with Facebook",
-                  "frameMode": 1,
-                  "verticalAlignment": 1,
                   "attr": [
                     {
                       "class": "fontAttr",
-                      "name": "Avenir",
-                      "subFamilyName": "Roman",
-                      "fills": [
-                        {
-                          "fillType": 0,
-                          "color": {
-                            "class": "color",
-                            "red": 0.20000000298023224,
-                            "green": 0.20000000298023224,
-                            "blue": 0.20000000298023224,
-                            "alpha": 1.0
-                          },
-                          "class": "fill",
-                          "isEnabled": true,
-                          "contextSettings": {
-                            "class": "graphicsContextSettings",
-                            "blendMode": 0,
-                            "opacity": 1.0,
-                            "isolateBlending": false,
-                            "transparencyKnockoutGroup": 0
-                          }
-                        }
-                      ],
-                      "lettertransform": 0,
-                      "size": 24.0,
-                      "underline": 0,
-                      "linethrough": false,
-                      "letterSpacing": 0.0,
-                      "horizontalAlignment": 0,
-                      "lineSpace": 24.0,
-                      "textParagraph": {
-                        "class": "textParagraph",
-                        "paragraphSpacing": 28.0
-                      },
-                      "baseline": 0,
-                      "kerning": false,
-                      "baselineShift": 0,
-                      "horizontalScale": 1,
-                      "verticalScale": 1,
-                      "proportionalSpacing": 0,
-                      "rotate": 0,
                       "length": 22
                     }
                   ],
-                  "verticalTrim": false,
                   "lineType": [
                     {
                       "class": "lineType",
@@ -11889,7 +12146,27 @@
                       "level": 0,
                       "isFirst": false
                     }
-                  ]
+                  ],
+                  "frameMode": 1,
+                  "verticalAlignment": 1,
+                  "defaultAttr": {
+                    "class": "fontAttr",
+                    "name": "Avenir",
+                    "subFamilyName": "Roman",
+                    "fontVariantCaps": 0,
+                    "size": 24.0,
+                    "letterSpacingValue": 0.0,
+                    "letterSpacingUnit": 1,
+                    "horizontalAlignment": 0,
+                    "lineSpaceValue": 100.0,
+                    "lineSpaceUnit": 1,
+                    "textParagraph": {
+                      "class": "textParagraph",
+                      "paragraphSpacing": 28.0
+                    },
+                    "baseline": 0
+                  },
+                  "verticalTrim": false
                 }
               ],
               "radius": [
@@ -12010,11 +12287,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "2:983",
           "horizontalConstraint": 0,
           "verticalConstraint": 3,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -12066,11 +12346,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 2,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "2:954",
               "horizontalConstraint": 7,
               "verticalConstraint": 7,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "frame",
               "childObjects": [
                 {
@@ -12142,11 +12425,14 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "2:978",
                   "horizontalConstraint": 5,
                   "verticalConstraint": 5,
                   "resizesContent": 0,
+                  "variableDefs": [],
+                  "variableRefs": [],
                   "class": "symbolInstance",
                   "masterId": "1:92",
                   "overrideValues": [
@@ -12209,6 +12495,7 @@
                       "effectOnLayout": false
                     }
                   ],
+                  "variableAssignments": [],
                   "radius": [
                     0.0,
                     0.0,
@@ -12285,63 +12572,22 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 2,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "2:958",
                   "horizontalConstraint": 1,
                   "verticalConstraint": 1,
                   "resizesContent": 0,
+                  "variableDefs": [],
+                  "variableRefs": [],
                   "class": "text",
                   "content": "Continue with Apple",
-                  "frameMode": 1,
-                  "verticalAlignment": 1,
                   "attr": [
                     {
                       "class": "fontAttr",
-                      "name": "Avenir",
-                      "subFamilyName": "Roman",
-                      "fills": [
-                        {
-                          "fillType": 0,
-                          "color": {
-                            "class": "color",
-                            "red": 0.20000000298023224,
-                            "green": 0.20000000298023224,
-                            "blue": 0.20000000298023224,
-                            "alpha": 1.0
-                          },
-                          "class": "fill",
-                          "isEnabled": true,
-                          "contextSettings": {
-                            "class": "graphicsContextSettings",
-                            "blendMode": 0,
-                            "opacity": 1.0,
-                            "isolateBlending": false,
-                            "transparencyKnockoutGroup": 0
-                          }
-                        }
-                      ],
-                      "lettertransform": 0,
-                      "size": 24.0,
-                      "underline": 0,
-                      "linethrough": false,
-                      "letterSpacing": 0.0,
-                      "horizontalAlignment": 0,
-                      "lineSpace": 24.0,
-                      "textParagraph": {
-                        "class": "textParagraph",
-                        "paragraphSpacing": 28.0
-                      },
-                      "baseline": 0,
-                      "kerning": false,
-                      "baselineShift": 0,
-                      "horizontalScale": 1,
-                      "verticalScale": 1,
-                      "proportionalSpacing": 0,
-                      "rotate": 0,
                       "length": 19
                     }
                   ],
-                  "verticalTrim": false,
                   "lineType": [
                     {
                       "class": "lineType",
@@ -12349,7 +12595,27 @@
                       "level": 0,
                       "isFirst": false
                     }
-                  ]
+                  ],
+                  "frameMode": 1,
+                  "verticalAlignment": 1,
+                  "defaultAttr": {
+                    "class": "fontAttr",
+                    "name": "Avenir",
+                    "subFamilyName": "Roman",
+                    "fontVariantCaps": 0,
+                    "size": 24.0,
+                    "letterSpacingValue": 0.0,
+                    "letterSpacingUnit": 1,
+                    "horizontalAlignment": 0,
+                    "lineSpaceValue": 100.0,
+                    "lineSpaceUnit": 1,
+                    "textParagraph": {
+                      "class": "textParagraph",
+                      "paragraphSpacing": 28.0
+                    },
+                    "baseline": 0
+                  },
+                  "verticalTrim": false
                 }
               ],
               "radius": [
@@ -12470,11 +12736,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "2:982",
           "horizontalConstraint": 0,
           "verticalConstraint": 3,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -12526,11 +12795,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 2,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "2:960",
               "horizontalConstraint": 7,
               "verticalConstraint": 7,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "frame",
               "childObjects": [
                 {
@@ -12602,14 +12874,18 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "2:979",
                   "horizontalConstraint": 1,
                   "verticalConstraint": 1,
                   "resizesContent": 0,
+                  "variableDefs": [],
+                  "variableRefs": [],
                   "class": "symbolInstance",
                   "masterId": "1:95",
                   "overrideValues": [],
+                  "variableAssignments": [],
                   "radius": [
                     0.0,
                     0.0,
@@ -12686,63 +12962,22 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 2,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "2:966",
                   "horizontalConstraint": 1,
                   "verticalConstraint": 1,
                   "resizesContent": 0,
+                  "variableDefs": [],
+                  "variableRefs": [],
                   "class": "text",
                   "content": "Continue with Google",
-                  "frameMode": 1,
-                  "verticalAlignment": 1,
                   "attr": [
                     {
                       "class": "fontAttr",
-                      "name": "Avenir",
-                      "subFamilyName": "Roman",
-                      "fills": [
-                        {
-                          "fillType": 0,
-                          "color": {
-                            "class": "color",
-                            "red": 0.20000000298023224,
-                            "green": 0.20000000298023224,
-                            "blue": 0.20000000298023224,
-                            "alpha": 1.0
-                          },
-                          "class": "fill",
-                          "isEnabled": true,
-                          "contextSettings": {
-                            "class": "graphicsContextSettings",
-                            "blendMode": 0,
-                            "opacity": 1.0,
-                            "isolateBlending": false,
-                            "transparencyKnockoutGroup": 0
-                          }
-                        }
-                      ],
-                      "lettertransform": 0,
-                      "size": 24.0,
-                      "underline": 0,
-                      "linethrough": false,
-                      "letterSpacing": 0.0,
-                      "horizontalAlignment": 0,
-                      "lineSpace": 24.0,
-                      "textParagraph": {
-                        "class": "textParagraph",
-                        "paragraphSpacing": 28.0
-                      },
-                      "baseline": 0,
-                      "kerning": false,
-                      "baselineShift": 0,
-                      "horizontalScale": 1,
-                      "verticalScale": 1,
-                      "proportionalSpacing": 0,
-                      "rotate": 0,
                       "length": 20
                     }
                   ],
-                  "verticalTrim": false,
                   "lineType": [
                     {
                       "class": "lineType",
@@ -12750,7 +12985,27 @@
                       "level": 0,
                       "isFirst": false
                     }
-                  ]
+                  ],
+                  "frameMode": 1,
+                  "verticalAlignment": 1,
+                  "defaultAttr": {
+                    "class": "fontAttr",
+                    "name": "Avenir",
+                    "subFamilyName": "Roman",
+                    "fontVariantCaps": 0,
+                    "size": 24.0,
+                    "letterSpacingValue": 0.0,
+                    "letterSpacingUnit": 1,
+                    "horizontalAlignment": 0,
+                    "lineSpaceValue": 100.0,
+                    "lineSpaceUnit": 1,
+                    "textParagraph": {
+                      "class": "textParagraph",
+                      "paragraphSpacing": 28.0
+                    },
+                    "baseline": 0
+                  },
+                  "verticalTrim": false
                 }
               ],
               "radius": [
@@ -12871,11 +13126,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "2:981",
           "horizontalConstraint": 0,
           "verticalConstraint": 3,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -12927,11 +13185,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 2,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "2:968",
               "horizontalConstraint": 7,
               "verticalConstraint": 7,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "frame",
               "childObjects": [
                 {
@@ -13002,31 +13263,18 @@
                   "maskType": 0,
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
-                  "overflow": 1,
+                  "overflow": 2,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "2:980",
                   "horizontalConstraint": 1,
                   "verticalConstraint": 1,
                   "resizesContent": 0,
+                  "variableDefs": [],
+                  "variableRefs": [],
                   "class": "symbolInstance",
                   "masterId": "1:100",
                   "overrideValues": [
-                    {
-                      "class": "overrideValue",
-                      "objectId": [
-                        "2:976"
-                      ],
-                      "overrideName": "bounds",
-                      "overrideValue": {
-                        "class": "rect",
-                        "constrainProportions": false,
-                        "width": 28.0,
-                        "height": 23.0,
-                        "x": 0,
-                        "y": 0
-                      },
-                      "effectOnLayout": false
-                    },
                     {
                       "class": "overrideValue",
                       "objectId": [
@@ -13059,6 +13307,22 @@
                     {
                       "class": "overrideValue",
                       "objectId": [
+                        "2:976"
+                      ],
+                      "overrideName": "bounds",
+                      "overrideValue": {
+                        "class": "rect",
+                        "constrainProportions": false,
+                        "width": 28.0,
+                        "height": 23.0,
+                        "x": 0,
+                        "y": 0
+                      },
+                      "effectOnLayout": false
+                    },
+                    {
+                      "class": "overrideValue",
+                      "objectId": [
                         "2:975"
                       ],
                       "overrideName": "bounds",
@@ -13073,6 +13337,7 @@
                       "effectOnLayout": false
                     }
                   ],
+                  "variableAssignments": [],
                   "radius": [
                     0.0,
                     0.0,
@@ -13149,63 +13414,22 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 2,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "2:970",
                   "horizontalConstraint": 1,
                   "verticalConstraint": 1,
                   "resizesContent": 0,
+                  "variableDefs": [],
+                  "variableRefs": [],
                   "class": "text",
                   "content": "Continue with Twitter",
-                  "frameMode": 1,
-                  "verticalAlignment": 1,
                   "attr": [
                     {
                       "class": "fontAttr",
-                      "name": "Avenir",
-                      "subFamilyName": "Roman",
-                      "fills": [
-                        {
-                          "fillType": 0,
-                          "color": {
-                            "class": "color",
-                            "red": 0.20000000298023224,
-                            "green": 0.20000000298023224,
-                            "blue": 0.20000000298023224,
-                            "alpha": 1.0
-                          },
-                          "class": "fill",
-                          "isEnabled": true,
-                          "contextSettings": {
-                            "class": "graphicsContextSettings",
-                            "blendMode": 0,
-                            "opacity": 1.0,
-                            "isolateBlending": false,
-                            "transparencyKnockoutGroup": 0
-                          }
-                        }
-                      ],
-                      "lettertransform": 0,
-                      "size": 24.0,
-                      "underline": 0,
-                      "linethrough": false,
-                      "letterSpacing": 0.0,
-                      "horizontalAlignment": 0,
-                      "lineSpace": 24.0,
-                      "textParagraph": {
-                        "class": "textParagraph",
-                        "paragraphSpacing": 28.0
-                      },
-                      "baseline": 0,
-                      "kerning": false,
-                      "baselineShift": 0,
-                      "horizontalScale": 1,
-                      "verticalScale": 1,
-                      "proportionalSpacing": 0,
-                      "rotate": 0,
                       "length": 21
                     }
                   ],
-                  "verticalTrim": false,
                   "lineType": [
                     {
                       "class": "lineType",
@@ -13213,7 +13437,27 @@
                       "level": 0,
                       "isFirst": false
                     }
-                  ]
+                  ],
+                  "frameMode": 1,
+                  "verticalAlignment": 1,
+                  "defaultAttr": {
+                    "class": "fontAttr",
+                    "name": "Avenir",
+                    "subFamilyName": "Roman",
+                    "fontVariantCaps": 0,
+                    "size": 24.0,
+                    "letterSpacingValue": 0.0,
+                    "letterSpacingUnit": 1,
+                    "horizontalAlignment": 0,
+                    "lineSpaceValue": 100.0,
+                    "lineSpaceUnit": 1,
+                    "textParagraph": {
+                      "class": "textParagraph",
+                      "paragraphSpacing": 28.0
+                    },
+                    "baseline": 0
+                  },
+                  "verticalTrim": false
                 }
               ],
               "radius": [
@@ -13325,10 +13569,13 @@
       "styleEffectMaskArea": 2,
       "maskShowType": 2,
       "overflow": 1,
+      "styleEffectBoolean": 1,
       "cornerSmoothing": 0.0,
       "horizontalConstraint": 1,
       "verticalConstraint": 1,
       "resizesContent": 0,
+      "variableDefs": [],
+      "variableRefs": [],
       "class": "frame",
       "childObjects": [
         {
@@ -13380,11 +13627,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 2,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "2:949",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -13456,11 +13706,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "2:950",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "path",
               "shape": {
                 "class": "shape",
@@ -13537,8 +13790,7 @@
                   }
                 ],
                 "windingRule": 0
-              },
-              "pathType": 3
+              }
             },
             {
               "id": "1:91",
@@ -13588,11 +13840,11 @@
                         "class": "gradientLinear",
                         "from": [
                           0.5,
-                          -3.0616171314629196e-17
+                          3.0616171314629196e-17
                         ],
                         "to": [
                           0.5,
-                          0.9999999999999999
+                          -0.9999999999999999
                         ],
                         "stops": [
                           {
@@ -13643,11 +13895,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "2:951",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -13836,8 +14091,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             }
           ],
           "radius": [
@@ -13916,11 +14170,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "2:955",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -13992,11 +14249,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "2:956",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -14077,8 +14337,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             },
             {
               "id": "1:94",
@@ -14128,11 +14387,11 @@
                         "class": "gradientLinear",
                         "from": [
                           0.5,
-                          -3.0616171314629196e-17
+                          3.0616171314629196e-17
                         ],
                         "to": [
                           0.5,
-                          0.9999999999999999
+                          -0.9999999999999999
                         ],
                         "stops": [
                           {
@@ -14183,11 +14442,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "2:957",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -14241,11 +14503,11 @@
                                 "class": "gradientLinear",
                                 "from": [
                                   0.5,
-                                  -3.0616171314629196e-17
+                                  3.0616171314629196e-17
                                 ],
                                 "to": [
                                   0.5,
-                                  0.9999999999999999
+                                  -0.9999999999999999
                                 ],
                                 "stops": [
                                   {
@@ -14296,11 +14558,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "2:957",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -14525,8 +14790,7 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   },
@@ -14580,11 +14844,11 @@
                                 "class": "gradientLinear",
                                 "from": [
                                   0.5,
-                                  -3.0616171314629196e-17
+                                  3.0616171314629196e-17
                                 ],
                                 "to": [
                                   0.5,
-                                  0.9999999999999999
+                                  -0.9999999999999999
                                 ],
                                 "stops": [
                                   {
@@ -14635,11 +14899,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "2:957",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -14720,16 +14987,14 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   }
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             }
           ],
           "radius": [
@@ -14808,11 +15073,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "2:961",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -14884,11 +15152,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "2:962",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -14900,7 +15171,6 @@
                       "points": [
                         {
                           "class": "pointAttr",
-                          "radius": 0.0,
                           "curveFrom": [
                             10.285701751708984,
                             -1.2833244874813616
@@ -14992,7 +15262,6 @@
                         },
                         {
                           "class": "pointAttr",
-                          "radius": 0.0,
                           "curveTo": [
                             10.285701751708984,
                             -5.343297326631243
@@ -15009,8 +15278,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             },
             {
               "id": "1:97",
@@ -15081,11 +15349,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "2:963",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -15198,8 +15469,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             },
             {
               "id": "1:98",
@@ -15270,11 +15540,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "2:964",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -15286,7 +15559,6 @@
                       "points": [
                         {
                           "class": "pointAttr",
-                          "radius": 0.0,
                           "curveFrom": [
                             4.392810957532125,
                             -6.187799766252003
@@ -15382,7 +15654,6 @@
                         },
                         {
                           "class": "pointAttr",
-                          "radius": 0.0,
                           "point": [
                             4.618996620178223,
                             -6.8411239928096235
@@ -15395,8 +15666,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             },
             {
               "id": "1:99",
@@ -15467,11 +15737,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "2:965",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -15483,7 +15756,6 @@
                       "points": [
                         {
                           "class": "pointAttr",
-                          "radius": 0.0,
                           "curveFrom": [
                             11.583347761357496,
                             -4.059972238950755
@@ -15559,7 +15831,6 @@
                         },
                         {
                           "class": "pointAttr",
-                          "radius": 0.0,
                           "curveTo": [
                             6.738151978550013,
                             -4.059972238950755
@@ -15576,8 +15847,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             }
           ],
           "radius": [
@@ -15656,11 +15926,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 2,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "2:975",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -15732,11 +16005,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "2:976",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -16009,8 +16285,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             }
           ],
           "radius": [
@@ -16089,11 +16364,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "6:54",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -16165,11 +16443,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "6:55",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -16244,11 +16525,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "6:55",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -16401,8 +16685,7 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   },
@@ -16477,11 +16760,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "6:55",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -16558,8 +16844,7 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   },
@@ -16634,11 +16919,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "6:55",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -16943,16 +17231,14 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   }
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             },
             {
               "id": "1:104",
@@ -17023,11 +17309,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "6:56",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -17524,8 +17813,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             },
             {
               "id": "1:105",
@@ -17596,11 +17884,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "6:57",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -17649,8 +17940,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             },
             {
               "id": "1:106",
@@ -17721,11 +18011,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "6:58",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -18030,8 +18323,7 @@
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             },
             {
               "id": "1:107",
@@ -18102,11 +18394,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "6:59",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -18181,11 +18476,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "6:59",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -18358,8 +18656,7 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   },
@@ -18434,11 +18731,14 @@
                       "styleEffectMaskArea": 2,
                       "maskShowType": 2,
                       "overflow": 1,
+                      "styleEffectBoolean": 1,
                       "cornerSmoothing": 0.0,
                       "overrideKey": "6:59",
                       "horizontalConstraint": 5,
                       "verticalConstraint": 5,
                       "resizesContent": 0,
+                      "variableDefs": [],
+                      "variableRefs": [],
                       "class": "path",
                       "shape": {
                         "class": "shape",
@@ -18527,16 +18827,14 @@
                           }
                         ],
                         "windingRule": 0
-                      },
-                      "pathType": 6
+                      }
                     },
                     "booleanOperation": 4
                   }
                 ],
                 "windingRule": 0
               },
-              "class": "path",
-              "pathType": 6
+              "class": "path"
             }
           ],
           "radius": [
@@ -18615,11 +18913,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 2,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "17:1501",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -18670,13 +18971,16 @@
                         "class": "gradientRadial",
                         "from": [
                           0.35714281768518663,
-                          0.7500000434870644
+                          -0.7500000434870644
                         ],
                         "to": [
                           0.8750000150342082,
-                          2.128737741635689e-09
+                          -2.128737741635689e-09
                         ],
-                        "elipseLength": 1.0,
+                        "ellipse": [
+                          1.1071428590435133,
+                          -1.267857240836086
+                        ],
                         "invert": false,
                         "stops": [
                           {
@@ -18738,11 +19042,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.6000000238418579,
               "overrideKey": "17:1502",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "path",
               "shape": {
                 "class": "shape",
@@ -18791,8 +19098,7 @@
                   }
                 ],
                 "windingRule": 0
-              },
-              "pathType": 0
+              }
             },
             {
               "id": "1:110",
@@ -18842,13 +19148,16 @@
                         "class": "gradientRadial",
                         "from": [
                           0.32142857070632136,
-                          1.0357142096499485
+                          -1.0357142096499485
                         ],
                         "to": [
                           0.6607142474350315,
-                          0.3035714335511529
+                          -0.3035714335511529
                         ],
-                        "elipseLength": 0.9999999999999999,
+                        "ellipse": [
+                          1.0535713468051169,
+                          -1.3749998863786586
+                        ],
                         "invert": false,
                         "stops": [
                           {
@@ -18922,11 +19231,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.6000000238418579,
               "overrideKey": "17:1503",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "path",
               "shape": {
                 "class": "shape",
@@ -18975,8 +19287,7 @@
                   }
                 ],
                 "windingRule": 0
-              },
-              "pathType": 0
+              }
             },
             {
               "id": "1:111",
@@ -19026,13 +19337,16 @@
                         "class": "gradientRadial",
                         "from": [
                           -0.053571370628753626,
-                          0.03571427839501229
+                          -0.03571427839501229
                         ],
                         "to": [
                           1.3214285587448404,
-                          -0.1607142934848444
+                          0.1607142934848444
                         ],
-                        "elipseLength": 0.21388967241437906,
+                        "ellipse": [
+                          -0.011557329085188056,
+                          -0.3298125630511877
+                        ],
                         "invert": false,
                         "stops": [
                           {
@@ -19094,11 +19408,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.6000000238418579,
               "overrideKey": "17:1504",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "path",
               "shape": {
                 "class": "shape",
@@ -19147,8 +19464,7 @@
                   }
                 ],
                 "windingRule": 0
-              },
-              "pathType": 0
+              }
             },
             {
               "id": "1:112",
@@ -19199,11 +19515,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.6000000238418579,
               "overrideKey": "17:1505",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "group",
               "childObjects": [
                 {
@@ -19275,11 +19594,14 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.6000000238418579,
                   "overrideKey": "17:1505",
                   "horizontalConstraint": 5,
                   "verticalConstraint": 5,
                   "resizesContent": 0,
+                  "variableDefs": [],
+                  "variableRefs": [],
                   "class": "path",
                   "shape": {
                     "class": "shape",
@@ -19360,8 +19682,7 @@
                       }
                     ],
                     "windingRule": 0
-                  },
-                  "pathType": 6
+                  }
                 },
                 {
                   "id": "1:112_child_3",
@@ -19432,11 +19753,14 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.6000000238418579,
                   "overrideKey": "17:1505",
                   "horizontalConstraint": 5,
                   "verticalConstraint": 5,
                   "resizesContent": 0,
+                  "variableDefs": [],
+                  "variableRefs": [],
                   "class": "path",
                   "shape": {
                     "class": "shape",
@@ -19512,11 +19836,14 @@
                           "styleEffectMaskArea": 2,
                           "maskShowType": 2,
                           "overflow": 1,
+                          "styleEffectBoolean": 1,
                           "cornerSmoothing": 0.6000000238418579,
                           "overrideKey": "17:1505",
                           "horizontalConstraint": 5,
                           "verticalConstraint": 5,
                           "resizesContent": 0,
+                          "variableDefs": [],
+                          "variableRefs": [],
                           "class": "path",
                           "shape": {
                             "class": "shape",
@@ -19597,8 +19924,7 @@
                               }
                             ],
                             "windingRule": 0
-                          },
-                          "pathType": 6
+                          }
                         },
                         "booleanOperation": 4
                       },
@@ -19673,11 +19999,14 @@
                           "styleEffectMaskArea": 2,
                           "maskShowType": 2,
                           "overflow": 1,
+                          "styleEffectBoolean": 1,
                           "cornerSmoothing": 0.6000000238418579,
                           "overrideKey": "17:1505",
                           "horizontalConstraint": 5,
                           "verticalConstraint": 5,
                           "resizesContent": 0,
+                          "variableDefs": [],
+                          "variableRefs": [],
                           "class": "path",
                           "shape": {
                             "class": "shape",
@@ -19758,15 +20087,13 @@
                               }
                             ],
                             "windingRule": 0
-                          },
-                          "pathType": 6
+                          }
                         },
                         "booleanOperation": 4
                       }
                     ],
                     "windingRule": 1
-                  },
-                  "pathType": 6
+                  }
                 },
                 {
                   "id": "1:112_child_6",
@@ -19837,11 +20164,14 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.6000000238418579,
                   "overrideKey": "17:1505",
                   "horizontalConstraint": 5,
                   "verticalConstraint": 5,
                   "resizesContent": 0,
+                  "variableDefs": [],
+                  "variableRefs": [],
                   "class": "path",
                   "shape": {
                     "class": "shape",
@@ -19917,11 +20247,14 @@
                           "styleEffectMaskArea": 2,
                           "maskShowType": 2,
                           "overflow": 1,
+                          "styleEffectBoolean": 1,
                           "cornerSmoothing": 0.6000000238418579,
                           "overrideKey": "17:1505",
                           "horizontalConstraint": 5,
                           "verticalConstraint": 5,
                           "resizesContent": 0,
+                          "variableDefs": [],
+                          "variableRefs": [],
                           "class": "path",
                           "shape": {
                             "class": "shape",
@@ -20162,8 +20495,7 @@
                               }
                             ],
                             "windingRule": 0
-                          },
-                          "pathType": 6
+                          }
                         },
                         "booleanOperation": 4
                       },
@@ -20238,11 +20570,14 @@
                           "styleEffectMaskArea": 2,
                           "maskShowType": 2,
                           "overflow": 1,
+                          "styleEffectBoolean": 1,
                           "cornerSmoothing": 0.6000000238418579,
                           "overrideKey": "17:1505",
                           "horizontalConstraint": 5,
                           "verticalConstraint": 5,
                           "resizesContent": 0,
+                          "variableDefs": [],
+                          "variableRefs": [],
                           "class": "path",
                           "shape": {
                             "class": "shape",
@@ -20611,17 +20946,16 @@
                               }
                             ],
                             "windingRule": 0
-                          },
-                          "pathType": 6
+                          }
                         },
                         "booleanOperation": 4
                       }
                     ],
                     "windingRule": 1
-                  },
-                  "pathType": 6
+                  }
                 }
-              ]
+              ],
+              "isVectorNetwork": true
             }
           ],
           "radius": [
@@ -20688,6 +21022,7 @@
       "styleEffectMaskArea": 2,
       "maskShowType": 2,
       "overflow": 2,
+      "styleEffectBoolean": 1,
       "class": "frame",
       "childObjects": [
         {
@@ -20759,11 +21094,14 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "2:650",
           "horizontalConstraint": 0,
           "verticalConstraint": 0,
           "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -20815,11 +21153,14 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 2,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "26:2714",
               "horizontalConstraint": 7,
               "verticalConstraint": 7,
               "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "frame",
               "childObjects": [
                 {
@@ -20891,11 +21232,14 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "26:2567",
                   "horizontalConstraint": 1,
                   "verticalConstraint": 1,
                   "resizesContent": 0,
+                  "variableDefs": [],
+                  "variableRefs": [],
                   "class": "symbolInstance",
                   "masterId": "1:7",
                   "overrideValues": [
@@ -20929,6 +21273,7 @@
                       "effectOnLayout": false
                     }
                   ],
+                  "variableAssignments": [],
                   "radius": [
                     0.0,
                     0.0,
@@ -21005,63 +21350,22 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 2,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "2:649",
                   "horizontalConstraint": 7,
                   "verticalConstraint": 7,
                   "resizesContent": 0,
+                  "variableDefs": [],
+                  "variableRefs": [],
                   "class": "text",
                   "content": "Sign up",
-                  "frameMode": 1,
-                  "verticalAlignment": 1,
                   "attr": [
                     {
                       "class": "fontAttr",
-                      "name": "Poppins",
-                      "subFamilyName": "Medium",
-                      "fills": [
-                        {
-                          "fillType": 0,
-                          "color": {
-                            "class": "color",
-                            "red": 1.0,
-                            "green": 1.0,
-                            "blue": 1.0,
-                            "alpha": 1.0
-                          },
-                          "class": "fill",
-                          "isEnabled": true,
-                          "contextSettings": {
-                            "class": "graphicsContextSettings",
-                            "blendMode": 0,
-                            "opacity": 1.0,
-                            "isolateBlending": false,
-                            "transparencyKnockoutGroup": 0
-                          }
-                        }
-                      ],
-                      "lettertransform": 0,
-                      "size": 22.0,
-                      "underline": 0,
-                      "linethrough": false,
-                      "letterSpacing": 0.0,
-                      "horizontalAlignment": 2,
-                      "lineSpace": 22.0,
-                      "textParagraph": {
-                        "class": "textParagraph",
-                        "paragraphSpacing": 0
-                      },
-                      "baseline": 0,
-                      "kerning": false,
-                      "baselineShift": 0,
-                      "horizontalScale": 1,
-                      "verticalScale": 1,
-                      "proportionalSpacing": 0,
-                      "rotate": 0,
                       "length": 7
                     }
                   ],
-                  "verticalTrim": false,
                   "lineType": [
                     {
                       "class": "lineType",
@@ -21069,7 +21373,23 @@
                       "level": 0,
                       "isFirst": false
                     }
-                  ]
+                  ],
+                  "frameMode": 1,
+                  "verticalAlignment": 1,
+                  "defaultAttr": {
+                    "class": "fontAttr",
+                    "name": "Poppins",
+                    "subFamilyName": "Medium",
+                    "fontVariantCaps": 0,
+                    "size": 22.0,
+                    "letterSpacingValue": 0.0,
+                    "letterSpacingUnit": 1,
+                    "horizontalAlignment": 2,
+                    "lineSpaceValue": 100.0,
+                    "lineSpaceUnit": 1,
+                    "baseline": 0
+                  },
+                  "verticalTrim": false
                 }
               ],
               "radius": [

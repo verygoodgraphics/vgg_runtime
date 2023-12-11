@@ -1,23 +1,24 @@
 {
-  "title": "Daruma Layout",
-  "description": "Daruma Layout describes the layout information of an element. Daruma layout does not contain hierarchical relationships between objects, which are described in Daruma-Format.",
+  "title": "VGG Layout",
+  "description": "VGG Layout describes the layout information of an element. VGG Layout does not contain hierarchical relationships between objects, which are described in VGG-Format.",
   "type": "object",
   "$id": "https://git.vgg.cool/verygoodgraphics/vgg_format/src/branch/master/sketch-document-6.4.0/packages/layout-format/src/vgg-layout.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
     "Object": {
       "title": "Object",
-      "description": "Describes properties related to the layout of an object.",
+      "description": "This property provides control over the layout-related properties of design elements, including controlling the size, position, and layout behavior of elements to ensure their correct display and layout on the page.",
       "type": "object",
       "$id": "#Object",
       "required": ["class", "id", "width", "height"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "object"
         },
         "id": {
           "type": "string",
-          "description": "object identifier. Use this value to associate objects in daruma-format."
+          "description": "This property is used in the layout to uniquely identify a specific object. Use this value to associate objects in VGG format."
         },
         "layout": {
           "oneOf": [
@@ -28,9 +29,9 @@
               "$ref": "#/definitions/GridLayout"
             }
           ],
-          "description": "Describes the layout information used by the current object."
+          "description": "This property describes the layout characteristics of the current object and can be used to determine its layout type."
         },
-        "item_in_layout": {
+        "itemInLayout": {
           "oneOf": [
             {
               "$ref": "#/definitions/FlexboxItem"
@@ -39,61 +40,63 @@
               "$ref": "#/definitions/GridItem"
             }
           ],
-          "description": "Describes information about the current object when it is in the layout."
+          "description": "This property refers to the layout information of the current object in the layout, which can be adjusted in terms of its position and style through corresponding layout properties. In Flex layout, it refers to the flex items within a flex container. In grid layout, it refers to individual grid items within a grid container."
         },
         "width": {
           "$ref": "#/definitions/Width"
         },
-        "max_width": {
+        "maxWidth": {
           "$ref": "#/definitions/MaxWidth"
         },
-        "min_width": {
+        "minWidth": {
           "$ref": "#/definitions/MinWidth"
         },
         "height": {
           "$ref": "#/definitions/Height"
         },
-        "max_height": {
+        "maxHeight": {
           "$ref": "#/definitions/MaxHeight"
         },
-        "min_height": {
+        "minHeight": {
           "$ref": "#/definitions/MinHeight"
         },
-        "aspect_ratio": {
+        "aspectRatio": {
           "type": "number",
           "exclusiveMinimum": 0,
-          "description": "Defined as the ratio between the width and the height of a node. if a node has an aspect ratio of 2 then its width is twice the size of its height. If this item does not exist, there is no limit to the aspect ratio."
+          "description": "This property refers to the proportional relationship between the width and height of an element. This property can be used to define the aspect ratio of an element, allowing you to set the desired width-to-height ratio. It ensures that the element maintains the same aspect ratio in containers of different sizes."
         }
       },
       "additionalProperties": false
     },
     "FlexboxLayout": {
       "title": "Flexbox Layout",
-      "description": "The Flexible Box Module, usually referred to as flexbox, was designed as a one-dimensional layout model, and as a method that could offer space distribution between items in an interface and powerful alignment capabilities.",
+      "description": "Flexbox is a layout model used to design flexible and efficient page layouts. \nFlexbox provides a more efficient and predictable way to arrange, align, and distribute elements within containers, especially suitable for building responsive and dynamic layouts.\n",
       "type": "object",
       "$id": "#FlexboxLayout",
       "required": [
         "class",
         "direction",
-        "justify_content",
-        "align_items",
-        "align_content",
+        "justifyContent",
+        "alignItems",
+        "alignContent",
         "wrap",
-        "row_gap",
-        "column_gap",
+        "rowGap",
+        "columnGap",
         "padding"
       ],
       "properties": {
         "class": {
-          "const": "flexbox_layout"
+          "type": "string",
+          "const": "flexboxLayout"
         },
         "direction": {
+          "description": "This property is used to set the arrangement of child elements within a flex container.",
           "type": "integer",
           "enum": [1, 2],
           "enumDescriptions": ["horizontal", "vertical"]
         },
-        "justify_content": {
-          "description": " The justify-content property defines how the render engine distributes space between and around content items  along the main-axis of a flex container, and the inline axis of a grid container.\nFor more information:  https://developer.mozilla.org/en-US/docs/Web/CSS/justify-content ",
+        "justifyContent": {
+          "description": "This property is used to set the alignment of flex container's child elements along the main axis.",
           "type": "integer",
           "enum": [1, 2, 3, 4, 5, 6],
           "enumDescriptions": [
@@ -105,15 +108,16 @@
             "space evenly"
           ]
         },
-        "align_items": {
-          "description": "The align-items property sets the align-self value on all direct children as a group. In Flexbox, it controls the alignment of items on the Cross Axis.",
-          "$ref": "#/definitions/AlignStyle"
+        "alignItems": {
+          "description": "This property is used to set the alignment of flex container's children along the cross axis.",
+          "$ref": "#/definitions/Alignment"
         },
-        "align_content": {
-          "description": "The align-content property sets the distribution of space between and around content items along a flexbox's cross-axis or a grid's block axis.",
-          "$ref": "#/definitions/AlignStyle"
+        "alignContent": {
+          "description": "This property is used to align the children of a flex container along the cross axis. It applies to multi-line flex containers and affects the alignment of multiple lines.",
+          "$ref": "#/definitions/Alignment"
         },
         "wrap": {
+          "description": "This property sets whether flex items are forced to be placed on a single line or can wrap onto multiple lines.",
           "type": "integer",
           "enum": [1, 2],
           "enumDescriptions": [
@@ -121,126 +125,130 @@
             "wrap: The parent container under the wrap definition is a multi-line container. When the parent container does not have enough space left to hold the minimum size of the child,  the child items are wrapped in rows or columns along the layout direction"
           ]
         },
-        "row_gap": {
+        "rowGap": {
           "type": "number",
-          "description": " The row-gap property sets the size of the gap (gutter) between an element's rows. Unit: px "
+          "description": "This property is used to set the size of the gap between rows in a grid layout. It defines the whitespace distance between adjacent rows within the grid container, allowing for a certain vertical spacing between grid items. This property accepts values in pixels (px) as units."
         },
-        "column_gap": {
+        "columnGap": {
           "type": "number",
-          "description": " The column-gap property sets the size of the gap (gutter) between an element's columns. Unit: px "
+          "description": "This property is used to set the size of the gap between columns in a grid layout. It defines the whitespace distance between adjacent columns within the grid container, allowing for a certain amount of spacing horizontally for grid items. This property accepts values in pixels (px) as units."
         },
         "padding": {
           "type": "array",
           "maxItems": 4,
           "minItems": 4,
-          "description": " The padding property sets the padding area on all four sides of an element at once. [top right bottom left]\nUnit: px ",
+          "description": "This property is used to control the whitespace area between an element's content and its border. It is commonly used to increase the visual space of an element, preventing the content from being too close to the border. Padding can be set as one value (indicating that all four directions have the same padding), four values (representing top, right, bottom, left padding respectively), or two or three values for specific specifications. This property accepts values in pixels (px) as units.",
           "items": {
             "type": "number"
           }
         },
-        "z_order": {
+        "zOrder": {
           "type": "boolean",
-          "description": "Default value is false. If this value is true, the child object order of the corresponding object defined in the daruma design format should be reversed."
+          "description": "This property is used in the layout to define the arrangement order of child elements within a flex container. By default, all child elements have an order value of false, and you can change their display order to reverse by setting the order value to true."
         }
       },
       "additionalProperties": false
     },
-    "AlignStyle": {
-      "title": "Ailgn Style",
-      "description": "The alignment is described.",
+    "Alignment": {
+      "title": "Alignment",
+      "description": "This property refers to adjusting the position of elements on a page. With different property values, you can control the alignment of elements in both horizontal and vertical directions.",
       "type": "integer",
       "enum": [1, 2, 3],
       "enumDescriptions": ["start", "center", "end"],
-      "$id": "#AlignStyle"
+      "$id": "#Alignment"
     },
     "GridLayout": {
       "title": "Grid Layout",
-      "description": "Grid Layout introduces a two-dimensional grid system.",
+      "description": "Grid Layout is a module designed for webpage layout. It allows you to create a two-dimensional grid system, providing flexibility for arranging page elements both horizontally and vertically. By placing elements in the grid's rows and columns, you can easily achieve complex layout structures.",
       "type": "object",
       "$id": "#GridLayout",
       "required": [
         "class",
-        "expand_strategy",
-        "column_width",
-        "row_height",
-        "base_height",
-        "column_gap",
-        "row_gap",
-        "grid_auto_flow",
+        "dynamicColumn",
+        "columnWidth",
+        "rowHeight",
+        "baseHeight",
+        "columnGap",
+        "rowGap",
+        "gridAutoFlow",
         "padding",
-        "cell_align"
+        "cellAlign"
       ],
       "properties": {
         "class": {
-          "const": "grid_layout"
+          "type": "string",
+          "const": "gridLayout"
         },
-        "expand_strategy": {
-          "$ref": "#/definitions/ExpandStrategy"
+        "dynamicColumn": {
+          "$ref": "#/definitions/DynamicColumn"
         },
-        "column_width": {
+        "columnWidth": {
           "$ref": "#/definitions/ColumnWidth"
         },
-        "row_height": {
+        "rowHeight": {
           "$ref": "#/definitions/RowHeight"
         },
-        "base_height": {
+        "baseHeight": {
           "type": "number",
-          "description": "This value is used as the fiducial value when there are empty rows or high row circular dependencies."
+          "description": "When there are empty rows or row height cyclic dependencies within the grid container, this value is used as a reference value. To avoid this issue, it is generally recommended that you explicitly set the height of subgrids or elements in the grid layout, either by using fixed heights or automatic heights to avoid height cyclic dependencies."
         },
-        "column_gap": {
+        "columnGap": {
           "type": "number",
-          "description": "The column-gap property sets the size of the gap (gutter) between an element's columns. Unit is px."
+          "description": "This property sets the size of the gap (gutter) between an element's columns. This property accepts values in pixels (px) as units."
         },
-        "row_gap": {
+        "rowGap": {
           "type": "number",
-          "description": "The row-gap property sets the size of the gap (gutter) between an element's rows. Unit is px."
+          "description": "This property sets the size of the gap (gutter) between an element's rows. This property accepts values in pixels (px) as units."
         },
-        "grid_auto_flow": {
+        "gridAutoFlow": {
           "type": "integer",
-          "description": "The grid-auto-flow property controls how the auto-placement algorithm works, specifying exactly how auto-placed items get flowed into the grid.",
+          "description": "This property used to set the automatic placement behavior of items in a grid layout. \nThis property defines how items are automatically placed within the grid container when their position is not explicitly specified. \n",
           "enum": [1, 2],
-          "enumDescriptions": ["row", "row dense"]
+          "enumDescriptions": [
+            "row: Items are placed in order from left to right and top to bottom.",
+            "row dense: The purpose of this value is to fill the empty spaces in the grid container as much as possible, even if it means that the order of grid items may change."
+          ]
         },
         "padding": {
           "type": "array",
           "maxItems": 4,
           "minItems": 4,
-          "description": " The padding property sets the padding area on all four sides of an element at once. [top right bottom left]\nUnit: px ",
+          "description": "This property is used to set the inner spacing for grid containers and grid items, increasing the space between them and around their content. You can adjust the value of padding as needed. This property accepts values in pixels (px) as units.",
           "items": {
             "type": "number"
           }
         },
-        "cell_align": {
-          "type": "integer",
-          "description": "Describes the alignment of the row direction. Valid when the sum of column widths is less than the width of the container. The column orientation is fixed to start and does not need to be set.",
-          "$ref": "#/definitions/AlignStyle"
+        "cellAlign": {
+          "description": "This property is used to control the alignment of content within cells in the horizontal direction.\nIt is effective when the sum of column widths is less than the container width. Columns are fixed at \"start\" by default. \nThis property applies to all grid items, allowing you to uniformly adjust the position of all content within cells in the horizontal direction.\n",
+          "$ref": "#/definitions/Alignment"
         }
       },
       "additionalProperties": false
     },
-    "ExpandStrategy": {
-      "title": "Expand Strategy",
+    "DynamicColumn": {
+      "title": "Dynamic Column",
       "type": "object",
-      "description": "The growth strategy of row and column of grid-layout is described.",
-      "$id": "#ExpandStrategy",
-      "required": ["class", "strategy", "min_row", "column_count"],
+      "description": "The algorithm is a strategy for dynamically determining the number of columns in a grid container based on content and container size. \nWhen using the `auto-fill` property, the algorithm will attempt to place grid items within the current row and create new columns as needed. \nIt flexibly adjusts the number of columns based on the available space in the current row, prioritizing existing space. \nOnly when there is insufficient space in the current row to accommodate new grid items will it create new columns to achieve a more flexible layout.\n",
+      "$id": "#DynamicColumn",
+      "required": ["class", "strategy", "minRow", "columnCount"],
       "properties": {
         "class": {
-          "const": "expand_strategy"
+          "type": "string",
+          "const": "dynamicColumn"
         },
         "strategy": {
           "type": "integer",
           "enum": [1, 2],
           "enumDescriptions": [
-            "auto (The number of columns and rows is calculated automatically by the algorithm and is not controlled by the user.)",
+            "auto-fill (The number of columns and rows is calculated automatically by the algorithm and is not controlled by the user.)",
             "fix-column (A fixed number of columns is specified by the user. The number of rows is automatically adjusted as needed and is always greater than or equal to the minimum number of rows.)"
           ]
         },
-        "min_row": {
+        "minRow": {
           "type": "integer",
           "description": "Takes effect only in fix-column mode and indicates the minimum number of rows."
         },
-        "column_count": {
+        "columnCount": {
           "type": "integer",
           "description": "Takes effect only in fix-column mode, indicating a fixed number of columns."
         }
@@ -249,13 +257,14 @@
     },
     "ColumnWidth": {
       "title": "Column Width",
-      "description": "Describes the attribute of column width in grid-layout.",
+      "description": "This property is used to set the width of columns in a multi-column layout. \nBy setting this property of an element, you can specify either a fixed width or minimum width for each column, thus affecting the appearance of the multi-column layout.\n",
       "type": "object",
       "$id": "#ColumnWidth",
-      "required": ["class", "strategy", "width_value"],
+      "required": ["class", "strategy", "widthValue"],
       "properties": {
         "class": {
-          "const": "column_width"
+          "type": "string",
+          "const": "columnWidth"
         },
         "strategy": {
           "type": "integer",
@@ -265,22 +274,23 @@
             "fix (Specifies the fixed width of the column.)"
           ]
         },
-        "width_value": {
+        "widthValue": {
           "type": "number",
-          "description": "Describes the width of the column. The practical implications depend on the strategy. Unit is px."
+          "description": "You can set this value to a uniform fixed width value or minimum width value for all columns in the grid, with a minimum column width of 1. This property accepts values in pixels (px) as units."
         }
       },
       "additionalProperties": false
     },
     "RowHeight": {
       "title": "Row Height",
-      "description": "Describes the height attributes of rows in grid-layout.",
+      "description": "This property is used to define the size of rows in a grid layout.\nBy setting this property of an element, you can specify the size of rows in a grid container.\n",
       "type": "object",
       "$id": "#RowHeight",
-      "required": ["class", "strategy", "fixed_value"],
+      "required": ["class", "strategy", "fixedValue"],
       "properties": {
         "class": {
-          "const": "row_height"
+          "type": "string",
+          "const": "rowHeight"
         },
         "strategy": {
           "type": "integer",
@@ -291,7 +301,7 @@
             "fixed (decided by row height)"
           ]
         },
-        "fixed_value": {
+        "fixedValue": {
           "type": "number",
           "description": "Only applies when strategy is fixed, indicating a fixed row height value."
         }
@@ -300,146 +310,73 @@
     },
     "FlexboxItem": {
       "title": "Flexbox Item",
-      "description": "Describes the properties of an element located in the flexbox layout.",
+      "description": "This property refers to the child elements within a flex container, which will be controlled by the Flexbox layout model. \nThe style and layout of child elements can be adjusted by setting corresponding properties on the flex container.\n",
       "type": "object",
       "$id": "#FlexboxItem",
-      "required": ["class", "position", "flex_grow_shrink"],
+      "required": ["class", "position", "flexBasis"],
       "properties": {
         "class": {
-          "const": "flexbox_item"
+          "type": "string",
+          "const": "flexboxItem"
         },
         "position": {
           "$ref": "#/definitions/Position"
         },
-        "top": {
-          "$ref": "#/definitions/Top"
-        },
-        "right": {
-          "$ref": "#/definitions/Right"
-        },
-        "bottom": {
-          "$ref": "#/definitions/Bottom"
-        },
-        "left": {
-          "$ref": "#/definitions/Left"
-        },
-        "flex_grow_shrink": {
+        "flexBasis": {
           "type": "number",
-          "description": " Set both flex-grow and flex_shrink to the same value.\nThe flex-grow property sets the flex grow factor,  which specifies how much of the flex container's remaining space should be assigned to the flex item's main size.\nThe flex-shrink property sets the flex shrink factor of a flex item.  If the size of all flex items is larger than the flex container, items shrink to fit according to flex-shrink.              "
+          "description": "This property is used to control the growth or shrinkage ratio of child elements in the allocation of remaining space within a flex container. The values of flex-grow and flex-shrink for all Flex items are the same, and based on the size of the remaining space in the container, flex items will automatically adjust its size to grow or shrink base on this property value."
         }
       },
       "additionalProperties": false
     },
     "Position": {
       "title": "Position",
-      "description": "The position property sets how an element is positioned in a document. The top, right, bottom, and left properties determine the final location of positioned elements.",
+      "description": "This property is used to control the positioning of an element within the document flow. The top, right, bottom, and left properties determine the final location of positioned elements.",
       "type": "object",
       "$id": "#Position",
       "required": ["class", "value"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "position"
         },
         "value": {
           "type": "integer",
           "enum": [1, 2, 3, 4],
           "enumDescriptions": ["relative", "absolute", "fixed", "sticky"],
-          "description": " relative:  The element is positioned according to the normal flow of the document,  and then offset relative to itself based on the values of top, right, bottom, and left.  The offset does not affect the position of any other elements;  thus, the space given for the element in the page layout is the same as if position were static.\nabsolute: The element is removed from the normal document flow,  and no space is created for the element in the page layout.  It is positioned relative to its closest positioned ancestor, if any;  otherwise, it is placed relative to the initial containing block.  Its final position is determined by the values of top, right, bottom, and left.\nfixed: The element is removed from the normal document flow,  and no space is created for the element in the page layout.  It is positioned relative to the initial containing block established by the viewport,  except when one of its ancestors has a transform, perspective,  or filter property set to something other than none (see the CSS Transforms Spec),  or the will-change property is set to transform, in which case that ancestor behaves as the containing block.  (Note that there are browser inconsistencies with perspective and filter contributing to containing block formation.)  Its final position is determined by the values of top, right, bottom, and left.\nsticky: The element is positioned according to the normal flow of the document,  and then offset relative to its nearest scrolling ancestor and containing block (nearest block-level ancestor),  including table-related elements, based on the values of top, right, bottom, and left.  The offset does not affect the position of any other elements.\nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/position "
-        }
-      },
-      "additionalProperties": false
-    },
-    "Top": {
-      "title": "Top",
-      "type": "object",
-      "$id": "#Top",
-      "required": ["class", "value"],
-      "properties": {
-        "class": {
-          "const": "top"
-        },
-        "value": {
-          "type": "number",
-          "description": " Unit: px\nThe top property participates in specifying the vertical position of a positioned element.  It has no effect on non-positioned elements.\nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/top "
-        }
-      },
-      "additionalProperties": false
-    },
-    "Right": {
-      "title": "Right",
-      "type": "object",
-      "$id": "#Right",
-      "required": ["class", "value"],
-      "properties": {
-        "class": {
-          "const": "right"
-        },
-        "value": {
-          "type": "number",
-          "description": " Unit: px\nThe right CSS property participates in specifying the horizontal position of a positioned element.  It has no effect on non-positioned elements.\nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/right "
-        }
-      },
-      "additionalProperties": false
-    },
-    "Bottom": {
-      "title": "Bottom",
-      "type": "object",
-      "$id": "#Bottom",
-      "required": ["class", "value"],
-      "properties": {
-        "class": {
-          "const": "bottom"
-        },
-        "value": {
-          "type": "number",
-          "description": " Unit: px\nThe bottom property participates in setting the vertical position of a positioned element.  It has no effect on non-positioned elements.\nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/bottom "
-        }
-      },
-      "additionalProperties": false
-    },
-    "Left": {
-      "title": "Left",
-      "type": "object",
-      "$id": "#Left",
-      "required": ["class", "value"],
-      "properties": {
-        "class": {
-          "const": "left"
-        },
-        "value": {
-          "type": "number",
-          "description": " Unit: px\nThe left property participates in specifying the horizontal position of a positioned element.  It has no effect on non-positioned elements.\nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/left "
+          "description": " relative:  The element is positioned according to the normal flow of the document,  and then offset relative to itself based on the values of top, right, bottom, and left.  The offset does not affect the position of any other elements;  thus, the space given for the element in the page layout is the same as if position were static.\nabsolute: The element is removed from the normal document flow,  and no space is created for the element in the page layout.  It is positioned relative to its closest positioned ancestor, if any;  otherwise, it is placed relative to the initial containing block.  Its final position is determined by the values of top, right, bottom, and left.\nfixed: The element is removed from the normal document flow,  and no space is created for the element in the page layout.  It is positioned relative to the initial containing block established by the viewport,  except when one of its ancestors has a transform, perspective,  or filter property set to something other than none (see the CSS Transforms Spec),  or the will-change property is set to transform, in which case that ancestor behaves as the containing block.  (Note that there are browser inconsistencies with perspective and filter contributing to containing block formation.)  Its final position is determined by the values of top, right, bottom, and left.\nsticky: The element is positioned according to the normal flow of the document,  and then offset relative to its nearest scrolling ancestor and containing block (nearest block-level ancestor),  including table-related elements, based on the values of top, right, bottom, and left.  The offset does not affect the position of any other elements. "
         }
       },
       "additionalProperties": false
     },
     "GridItem": {
       "title": "Grid Item",
-      "description": "Describes the properties of an element located in the grid layout.",
+      "description": "This property refers to the individual grid item or cell in a grid layout and its configurable properties.",
       "type": "object",
       "$id": "#GridItem",
       "required": [
         "class",
-        "item_pos",
-        "row_span",
-        "column_span",
+        "itemPos",
+        "rowSpan",
+        "columnSpan",
         "position",
-        "row_align",
-        "column_align"
+        "rowAlign",
+        "columnAlign"
       ],
       "properties": {
         "class": {
-          "const": "grid_item"
+          "type": "string",
+          "const": "gridItem"
         },
-        "item_pos": {
+        "itemPos": {
           "$ref": "#/definitions/GridItemPos"
         },
-        "row_span": {
+        "rowSpan": {
           "type": "integer",
           "description": "The number of rows occupied by the element.",
           "minimum": 1
         },
-        "column_span": {
+        "columnSpan": {
           "type": "integer",
           "description": "The number of columns occupied by the element.",
           "minimum": 1
@@ -447,42 +384,30 @@
         "position": {
           "$ref": "#/definitions/Position"
         },
-        "top": {
-          "$ref": "#/definitions/Top"
-        },
-        "right": {
-          "$ref": "#/definitions/Right"
-        },
-        "bottom": {
-          "$ref": "#/definitions/Bottom"
-        },
-        "left": {
-          "$ref": "#/definitions/Left"
-        },
-        "row_align": {
-          "type": "integer",
+        "rowAlign": {
           "description": "Valid when the position type is relative or sticky, specifies how the element's row direction is aligned to it.",
-          "$ref": "#/definitions/AlignStyle"
+          "$ref": "#/definitions/Alignment"
         },
-        "column_align": {
-          "type": "integer",
+        "columnAlign": {
           "description": "Valid when the position type is relative or sticky, specifies how the element's column direction is aligned to it.",
-          "$ref": "#/definitions/AlignStyle"
+          "$ref": "#/definitions/Alignment"
         }
       },
       "additionalProperties": false
     },
     "GridItemPos": {
       "title": "Grid Item Pos",
-      "description": "Describes the position information of rows and columns of an element in a grid-layout.",
+      "description": "In grid layout, the position of grid items is determined by the grid lines defined by the rows and columns of the grid container. Grid rows and grid columns are used to specify the properties for positioning grid items within the grid.",
       "type": "object",
       "$id": "#GridItemPos",
-      "required": ["class", "strategy", "row_id", "column_id"],
+      "required": ["class", "strategy", "rowId", "columnId"],
       "properties": {
         "class": {
-          "const": "grid_item_pos"
+          "type": "string",
+          "const": "gridItemPos"
         },
         "strategy": {
+          "description": " This property is used to define the position of grid items on the row and column axes in a grid.  By default, grid items will be automatically placed from left to right in the direction of rows.  However, you can also specify specific fixed positions for grid items on both rows and columns. ",
           "type": "integer",
           "enum": [1, 2],
           "enumDescriptions": [
@@ -490,12 +415,12 @@
             "fix (Coordinates are specified by the user.)"
           ]
         },
-        "row_id": {
+        "rowId": {
           "type": "integer",
           "description": "Takes effect only in fix mode, specifies the element start row coordinates. Value start with 0.",
           "minimum": 0
         },
-        "column_id": {
+        "columnId": {
           "type": "integer",
           "description": "Takes effect only in fix mode, specifies the element start column coordinates. Value start with 0.",
           "minimum": 0
@@ -506,11 +431,12 @@
     "Width": {
       "title": "Width",
       "type": "object",
-      "description": " The width property sets an element's width. \nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/width ",
+      "description": "This property is used to set the width of an element. By setting the width property of an element, you control its size in the horizontal direction.",
       "$id": "#Width",
       "required": ["class", "value"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "width"
         },
         "value": {
@@ -526,11 +452,12 @@
       "required": ["class", "value", "types"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "length"
         },
         "value": {
           "type": "number",
-          "description": "The units and meaning of value depend on the types."
+          "description": "This property is used to describe the type of behavior for distance or size values in various properties. Length properties can be applied with different units to set the width, height, etc. of elements. The units and meaning of values depend on their types."
         },
         "types": {
           "type": "integer",
@@ -547,12 +474,13 @@
     "MaxWidth": {
       "title": "Max Width",
       "type": "object",
-      "description": " The max-width property sets the maximum width of an element.  It prevents the used value of the width property from becoming larger than the value specified by max-width.\nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/max-width ",
+      "description": "This property is used to set the maximum width of an element and is only available when the size type is fixed or relative. By setting the max-width property of an element, you can specify the maximum width of the element in the horizontal direction, so that it will not exceed this width. This is useful for ensuring that elements do not stretch excessively when displayed on different devices.",
       "$id": "#MaxWidth",
       "required": ["class", "value"],
       "properties": {
         "class": {
-          "const": "max_width"
+          "type": "string",
+          "const": "maxWidth"
         },
         "value": {
           "$ref": "#/definitions/Length",
@@ -564,12 +492,13 @@
     "MinWidth": {
       "title": "Min Width",
       "type": "object",
-      "description": " The min-width property sets the minimum width of an element.  It prevents the used value of the width property from becoming smaller than the value specified for min-width.\nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/min-width ",
+      "description": "This property is used to set the minimum width of an element and is only available when the size type is fixed or relative. By setting the min-width property of an element, you can specify the minimum width in the horizontal direction, ensuring that the element does not shrink below this width. This is useful for ensuring that content has adequate visual space.",
       "$id": "#MinWidth",
       "required": ["class", "value"],
       "properties": {
         "class": {
-          "const": "min_width"
+          "type": "string",
+          "const": "minWidth"
         },
         "value": {
           "$ref": "#/definitions/Length",
@@ -581,11 +510,12 @@
     "Height": {
       "title": "Height",
       "type": "object",
-      "description": " The height property specifies the height of an element.\nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/height ",
+      "description": "This property is used to set the height of an element. By setting the height property of an element, you control its size in the vertical direction.",
       "$id": "#Height",
       "required": ["class", "value"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "height"
         },
         "value": {
@@ -597,12 +527,13 @@
     "MaxHeight": {
       "title": "Max Height",
       "type": "object",
-      "description": " The max-height property sets the maximum height of an element.  It prevents the used value of the height property from becoming larger than the value specified for max-height.\nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/max-height ",
+      "description": "This property is used to limit the height of an element and is only available when the size type is fixed or relative. By setting the max-height property of an element, you can specify the maximum height of the element in the vertical direction, meaning that it will not exceed this height. This is useful for ensuring that elements are not overly stretched when displayed on different devices.",
       "$id": "#MaxHeight",
       "required": ["class", "value"],
       "properties": {
         "class": {
-          "const": "max_height"
+          "type": "string",
+          "const": "maxHeight"
         },
         "value": {
           "$ref": "#/definitions/Length",
@@ -614,12 +545,13 @@
     "MinHeight": {
       "title": "Min Height",
       "type": "object",
-      "description": " The min-height property sets the minimum height of an element.  It prevents the used value of the height property from becoming smaller than the value specified for min-height.\nFor more information: https://developer.mozilla.org/en-US/docs/Web/CSS/min-height ",
+      "description": "This property is used to set the minimum height of an element and is only available when the size type is fixed or relative. By setting the min-height property of an element, you can specify the minimum height in the vertical direction, ensuring that the element will not be smaller than this height. This is useful for ensuring a minimum visible space for content.",
       "$id": "#MinHeight",
       "required": ["class", "value"],
       "properties": {
         "class": {
-          "const": "min_height"
+          "type": "string",
+          "const": "minHeight"
         },
         "value": {
           "$ref": "#/definitions/Length",
@@ -632,7 +564,8 @@
   "required": ["class", "obj"],
   "properties": {
     "class": {
-      "const": "Daruma_Layout"
+      "type": "string",
+      "const": "VGGLayout"
     },
     "obj": {
       "type": "array",

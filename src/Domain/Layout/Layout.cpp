@@ -114,9 +114,10 @@ void Layout::Layout::buildLayoutTree()
   }
 }
 
-std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(const nlohmann::json& j,
-                                                                json::json_pointer currentPath,
-                                                                std::shared_ptr<LayoutNode> parent)
+std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(
+  const nlohmann::json&       j,
+  json::json_pointer          currentPath,
+  std::shared_ptr<LayoutNode> parent)
 {
   if (!j.is_object())
   {
@@ -148,8 +149,8 @@ std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(const nlohmann::
   {
     // ./shape/subshapes/i/subGeometry
     auto& subShapes = j[K_SHAPE][K_SUBSHAPES];
-    auto subShapesPath = currentPath / K_SHAPE / K_SUBSHAPES;
-    auto size = subShapes.size();
+    auto  subShapesPath = currentPath / K_SHAPE / K_SUBSHAPES;
+    auto  size = subShapes.size();
     for (auto i = 0; i < size; ++i)
     {
       createOneLayoutNode(subShapes[i][K_SUBGEOMETRY], subShapesPath / i / K_SUBGEOMETRY, node);
@@ -159,9 +160,10 @@ std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(const nlohmann::
   return node;
 }
 
-void Layout::Layout::createLayoutNodes(const nlohmann::json& j,
-                                       json::json_pointer currentPath,
-                                       std::shared_ptr<LayoutNode> parent)
+void Layout::Layout::createLayoutNodes(
+  const nlohmann::json&       j,
+  json::json_pointer          currentPath,
+  std::shared_ptr<LayoutNode> parent)
 {
   if (!j.is_array())
   {
@@ -179,9 +181,10 @@ void Layout::Layout::createLayoutNodes(const nlohmann::json& j,
   }
 }
 
-void Layout::Layout::createOneOrMoreLayoutNodes(const nlohmann::json& j,
-                                                json::json_pointer currentPath,
-                                                std::shared_ptr<LayoutNode> parent)
+void Layout::Layout::createOneOrMoreLayoutNodes(
+  const nlohmann::json&       j,
+  json::json_pointer          currentPath,
+  std::shared_ptr<LayoutNode> parent)
 {
   if (j.is_object())
   {
@@ -213,7 +216,7 @@ Layout::Layout::RuleMapPtr Layout::Layout::collectRules(const nlohmann::json& js
       }
 
       auto& id = item[K_ID];
-      auto rule = std::make_shared<Internal::Rule::Rule>();
+      auto  rule = std::make_shared<Internal::Rule::Rule>();
       *rule = item;
 
       (*result)[id] = rule;
@@ -259,7 +262,7 @@ bool Layout::Layout::hasFirstOnTopNode()
   for (const auto& [id, rule] : *m_rules)
   {
     if (auto flexContainerRule = rule->getFlexContainerRule();
-        flexContainerRule && flexContainerRule->z_order)
+        flexContainerRule && flexContainerRule->zOrder)
     {
       return true;
     }
@@ -297,7 +300,7 @@ void Layout::Layout::reverseChildren(nlohmann::json& json)
     {
       auto rule = (*m_rules)[nodeId];
       if (auto flexContainerRule = rule->getFlexContainerRule();
-          flexContainerRule && flexContainerRule->z_order)
+          flexContainerRule && flexContainerRule->zOrder)
       {
         auto& children = json[K_CHILD_OBJECTS];
         if (children.is_array())

@@ -1,13 +1,13 @@
 {
-  "title": "Daruma Design Format",
-  "description": "Daruma Design Format is a JSON-based format for describing the content of various design pieces.",
+  "title": "VGG Design Format",
+  "description": "VGG Design Format is a JSON-based format for describing the content of various design pieces.",
   "type": "object",
   "$id": "https://git.vgg.cool/verygoodgraphics/vgg_format/src/branch/master/sketch-document-6.4.0/packages/file-format/src/vgg-format.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
     "Frame": {
       "title": "Frame",
-      "description": " The frame itself is a object that can be rendered and a container that can contain other objects. In contrast to a group, a group is simply a collection of objects. For example:  The group's fill acts on all of its children. The frame's fill acts on itself. ",
+      "description": "A frame is an object that can be rendered and a container that holds objects.\nIn contrast to a group, a group is not an object but rather a collection of objects.\nFor example:\n  The frame's fills affect itself.\n  The group's fills affect all of its children.",
       "$id": "#Frame",
       "type": "object",
       "required": [
@@ -30,31 +30,31 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Object identifier, unique."
+          "description": "ID of the object, globally unique."
         },
         "name": {
           "type": "string",
-          "description": "Name of object (utf-8)."
+          "description": "Name of the object, for user identification, encoded in UTF-8."
         },
         "isLocked": {
           "type": "boolean",
-          "description": "Describes whether the object is locked."
+          "description": "If `true`, the object will be unable to be edited."
         },
         "visible": {
           "type": "boolean",
-          "description": "Describes the visibility of the object."
+          "description": "If `false`, the object will be invisible."
         },
         "contextSettings": {
           "$ref": "#/definitions/GraphicsContextSettings",
-          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
+          "description": "The opacity and blending-related configurations of the object."
         },
         "style": {
           "$ref": "#/definitions/Style",
-          "description": "Object styles descriptor."
+          "description": "The borders, fills, and other styles of the object."
         },
         "bounds": {
           "$ref": "#/definitions/Rect",
-          "description": "This property records the bounds information of the object before it is matrixed."
+          "description": "The bounds of the object before undergoing matrix transformations."
         },
         "frame": {
           "$ref": "#/definitions/Rect",
@@ -62,89 +62,114 @@
         },
         "matrix": {
           "$ref": "#/definitions/Matrix",
-          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
+          "description": "Matrix used for translating, rotating, and scaling the object."
         },
         "alphaMaskBy": {
           "type": "array",
+          "description": "A list of alpha masks applied to the object.",
           "items": {
             "$ref": "#/definitions/AlphaMask"
           }
         },
         "outlineMaskBy": {
           "type": "array",
-          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
+          "description": "A list of outline masks applied to the object, clipped by the intersection of their outlines.\nThe items in the list are object IDs of the masks.",
           "items": {
-            "type": "string",
-            "description": "The value is ID of a object that is a outline mask of this object."
+            "type": "string"
           }
         },
         "maskType": {
           "type": "integer",
-          "description": "Describes the mask type of the object.",
+          "description": "The mask type of the object.",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
+          "enumDescriptions": ["not a mask", "outline mask", "alpha mask"]
         },
         "styleEffectMaskArea": {
           "type": "integer",
+          "description": "How the `style` and `visible` of the mask object affect the area of the mask.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            "The style and visible of the object not affects the area of the mask. The area of mask depends on bound.",
-            "The style of the object not affects the area of the mask. The visible of the object affects the area of the mask.",
-            "The style and visible of the object affects the area of the mask."
+            "The `style` and `visible` of the mask object do not affect the area of the mask, which depends on its bounds.",
+            "The `style` of the mask object does not affect the area of the mask, while the `visible` does.",
+            "The `style` and `visible` of the mask object do affect the area of the mask."
           ]
         },
         "maskShowType": {
           "type": "integer",
-          "description": "Decide how the mask object should be displayed.",
+          "description": "How the mask object is displayed.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            "depends on the style. (default value for outline mask)",
-            "only show bounds. (default value for alpha mask when it alphaType equal 0)",
-            "not show. (default for other condition)"
+            "depend on its `style`. (Default value for `outline mask`.)",
+            "only display its bounds. (Default value for `alpha mask` when its `alphaType` equals `0`.)",
+            "do not display. (Default value for other conditions.)"
           ]
         },
         "overflow": {
-          "description": "Sets what happens when a child element of a parent overflows its space.",
+          "description": "How to display the child element of the object when it overflows its container.",
           "type": "integer",
           "enum": [1, 2, 3],
           "enumDescriptions": [
-            "hidden: Anything outside the scope of the container will be cropped and invisible.",
-            "visible: Contents outside the scope of the container will not be cropped and will be visible.",
-            "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
+            "hidden. Anything outside the scope of the container will be cropped and invisible.",
+            "visible. Contents outside the scope of the container will not be cropped and will be visible.",
+            "scrolled. Content that is outside the container's scope is cropped, and a scrollbar is displayed to view the content that is beyond the container's boundaries."
           ]
         },
         "cornerSmoothing": {
           "type": "number",
-          "description": " Used to control corner smooth. Range: [0, 1] "
+          "description": "Smoothness of rounded corners. Range: `[0, 1]`.\n`0` is the default value, indicating no smoothing for rounded corners."
         },
         "overrideKey": {
           "type": "string",
-          "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+          "description": "Used to be associated with the object by symbol instances for overriding its attributes. Check the `objectId` in the `OverrideValue` for details.\nIf `overrideKey` exists, find a symbol master through upward traversal (which could be the object itself); `overrideKey` is unique within the symbol master."
         },
         "horizontalConstraint": {
           "$ref": "#/definitions/Constraint",
-          "description": "Horizontal layout constraints for object. Default value is 1."
+          "description": "Horizontal layout constraints for the object.\nDefault value is `1`."
         },
         "verticalConstraint": {
           "$ref": "#/definitions/Constraint",
-          "description": "Vertical layout constraints for object. Default value is 1."
+          "description": "Vertical layout constraints for the object.\nDefault value is `1`."
         },
         "resizesContent": {
           "type": "integer",
+          "description": "How child objects behave when the object is resized.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            " If the current object contains children(suitable for path with boolean operations),  the current object is used as the starting point, and for all children,  If the object chain has a frame or symbol without layout, then the constraint on the child object is applied(the constraints of group and top-level path with boolean operations will be ignored),  otherwise scale is applied. ",
-            "force child object fix position and fix size.",
-            "use child object constraint.(default value)"
+            "If the current object contains children (suitable for paths with boolean operations), the current object serves as the starting point. For each child, if the object chain includes a frame or symbol without a layout, the constraints on the child object are applied (ignoring constraints for groups and top-level paths with boolean operations). Otherwise, scaling is applied.",
+            "Force child objects to have fixed positions and sizes.",
+            "Apply child object constraints. (Default value.)"
           ]
         },
         "keepShapeWhenResize": {
           "type": "boolean",
-          "description": " False: The behavior of scale refers to the description in horizontalConstraint.(default value) True: When resize occurs, the object itself does not change angle, the center position is scaled, and the scale is along the length and width direction. "
+          "description": "`False`: When resizing occurs, the object scales according to the `horizontalConstraint` and `verticalConstraint`. (Default value.)\n`True`: When resizing occurs, the object itself maintains its angle, and the center position is scaled. The scaling occurs along both the length and width directions."
+        },
+        "variableDefs": {
+          "type": "array",
+          "description": "A list of variables that can be used by children.",
+          "items": {
+            "$ref": "#/definitions/VariableDef"
+          }
+        },
+        "variableRefs": {
+          "type": "array",
+          "description": "A list of referenced variables.",
+          "items": {
+            "$ref": "#/definitions/VariableRef"
+          }
+        },
+        "styleEffectBoolean": {
+          "type": "integer",
+          "description": "How the `style` of the object affects the region participating in a Boolean operation with another object.",
+          "enum": [0, 1],
+          "enumDescriptions": [
+            "ignore style(default value): The region in which an object participates in a Boolean operation is independent of its `style`.",
+            " If the object is a path and the path has `borders` without `fills`, then the `borders` will be used as a region to participate in the Boolean operation calculation. If the object is a text and the text has `borders` without `fills`, then the object will be ignored during the Boolean operation. In other cases, it behaves the same as `ignore style`. "
+          ]
         },
         "childObjects": {
           "type": "array",
-          "description": "Describes all child object information. The child item that appears later will be above the child item that appears first.",
+          "description": "A list of all child objects.\n**Note:** The child object that appears later in the list will be displayed above the one that appears first.",
           "items": {
             "oneOf": [
               {
@@ -172,18 +197,24 @@
           }
         },
         "class": {
+          "type": "string",
           "const": "frame"
         },
         "radius": {
           "type": "array",
-          "description": " The radius of the four corners. [left-top, right-top, right-bottom, left-bottom] default value: [0, 0, 0, 0] "
+          "description": "The radius values correspond to the corners in the following order: left-top, right-top, right-bottom, left-bottom.\nDefault value is `[0, 0, 0, 0]`.",
+          "maxItems": 4,
+          "minItems": 4,
+          "items": {
+            "type": "number"
+          }
         }
       },
       "additionalProperties": false
     },
     "GraphicsContextSettings": {
       "title": "Graphics Context Settings",
-      "description": "Defines the opacity and blend mode and isolate blending and transparency knockout group of a object.",
+      "description": "Define the opacity, blend mode, isolation blending, and transparency knockout group of the object.",
       "type": "object",
       "$id": "#GraphicsContextSettings",
       "required": [
@@ -195,17 +226,20 @@
       ],
       "properties": {
         "class": {
+          "type": "string",
           "const": "graphicsContextSettings"
         },
         "blendMode": {
-          "$ref": "#/definitions/BlendMode"
+          "$ref": "#/definitions/BlendMode",
+          "description": "The blend mode of the object."
         },
         "opacity": {
-          "$ref": "#/definitions/UnitInterval"
+          "$ref": "#/definitions/UnitInterval",
+          "description": "The opacity of the object. `0` represents transparent, and `1` represents opaque."
         },
         "isolateBlending": {
           "type": "boolean",
-          "description": "You can isolate the blending mode to a targeted layer or group in order to leave objects beneath unaffected."
+          "description": "To leave objects beneath unaffected, you can isolate the blending mode to a targeted layer or group."
         },
         "transparencyKnockoutGroup": {
           "type": "integer",
@@ -225,42 +259,42 @@
         20, 21, 22, 23, 24, 25, 26, 27, 28, 29
       ],
       "enumDescriptions": [
-        "Normal",
-        "Darken",
-        "Multiply",
-        "Color burn",
-        "Lighten",
-        "Screen",
-        "Color dodge",
-        "Overlay",
-        "Soft light",
-        "Hard light",
-        "Difference",
-        "Exclusion",
-        "Hue",
-        "Saturation",
-        "Color",
-        "Luminosity",
-        "Plus darker",
-        "Plus lighter",
-        "Blend divide",
-        "Blend subtraction",
-        "Darker color",
-        "Dissolve",
-        "Hard mix",
-        "Lighter color",
-        "Lighten burn",
-        "Lighten dodge",
-        "Lighten light",
-        "Pass through",
-        "Pin Light",
-        "Vivid light"
+        "normal",
+        "darken",
+        "multiply",
+        "color burn",
+        "lighten",
+        "screen",
+        "color dodge",
+        "overlay",
+        "soft light",
+        "hard light",
+        "difference",
+        "exclusion",
+        "hue",
+        "saturation",
+        "color",
+        "luminosity",
+        "plus darker",
+        "plus lighter",
+        "blend divide",
+        "blend subtraction",
+        "darker color",
+        "dissolve",
+        "hard mix",
+        "lighter color",
+        "lighten burn",
+        "lighten dodge",
+        "lighten light",
+        "pass through",
+        "pin Light",
+        "vivid light"
       ],
       "$id": "#BlendMode"
     },
     "UnitInterval": {
       "title": "Unit Interval",
-      "description": "Encode normalised scalar values, for example RGB color components.",
+      "description": "Encode normalized scalar values, such as RGB color components.",
       "type": "number",
       "minimum": 0,
       "maximum": 1,
@@ -268,38 +302,39 @@
     },
     "Style": {
       "title": "Style",
-      "description": "Defines a object style.",
+      "description": "Define an object style.",
       "type": "object",
       "$id": "#Style",
       "required": ["class", "borders", "fills", "blurs", "shadows"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "style"
         },
         "borders": {
           "type": "array",
-          "description": "An array containing the border styles of the object.",
+          "description": "A list of the border styles of the object.",
           "items": {
             "$ref": "#/definitions/Border"
           }
         },
         "fills": {
           "type": "array",
-          "description": "An array containing the fill effects of the object. When a fill is applied to a group, the fill acts as a tint.",
+          "description": "A list of the fill styles of the object.",
           "items": {
             "$ref": "#/definitions/Fill"
           }
         },
         "blurs": {
           "type": "array",
-          "description": "An array containing the blur effects of the object.",
+          "description": "A list of the blur styles of the object.",
           "items": {
             "$ref": "#/definitions/Blur"
           }
         },
         "shadows": {
           "type": "array",
-          "description": "An array containing the shadow effects of the object.",
+          "description": "A list of the shadow styles of the object.",
           "items": {
             "$ref": "#/definitions/Shadow"
           }
@@ -309,7 +344,7 @@
     },
     "Border": {
       "title": "Border",
-      "description": "Defines a border style",
+      "description": "Define a border style of an object.",
       "type": "object",
       "$id": "#Border",
       "required": [
@@ -329,89 +364,100 @@
       ],
       "properties": {
         "class": {
+          "type": "string",
           "const": "border"
         },
         "isEnabled": {
           "type": "boolean"
         },
         "color": {
-          "$ref": "#/definitions/Color"
+          "$ref": "#/definitions/Color",
+          "description": "The color of the border's fill."
         },
         "fillType": {
-          "$ref": "#/definitions/FillType"
+          "$ref": "#/definitions/FillType",
+          "description": "The content types of the border's fill."
         },
         "position": {
-          "$ref": "#/definitions/BorderPosition"
+          "$ref": "#/definitions/BorderPosition",
+          "description": "The position types of the border relative to the boundary."
         },
         "thickness": {
           "type": "number",
-          "description": "Thickness of the border. A line width of 0 is acceptable, this is interpreted as the thinnest line width that can be rendered at device resolution. This item only work if strokeWeightsIndependent is false."
+          "description": "The thickness of the border.\nValue `0` is acceptable, as it is interpreted as the thinnest line width that can be displayed at device resolution.\nThis attribute only works if `strokeWeightsIndependent` is set to `false`."
         },
         "strokeWeightsIndependent": {
           "type": "boolean",
-          "description": "For rectangle, enable or disable the four side stroke weight independently. Default is false."
+          "description": "For rectangles only. If `true`, independent stroke weights for all four sides.\nDefault value is `false`."
         },
         "topWeight": {
           "type": "number",
-          "description": "Used only when strokeWeightsIndependent is true to specify the stroke weight at the top of the rectangle. Default is 0."
+          "description": "This is used only when `strokeWeightsIndependent` is set to true, in order to specify the stroke weight at the top of the rectangle. Default value is `0`."
         },
         "leftWeight": {
           "type": "number",
-          "description": "Used only when strokeWeightsIndependent is true to specify the stroke weight at the left of the rectangle. Default is 0."
+          "description": "This is used only when `strokeWeightsIndependent` is set to true, in order to specify the stroke weight at the left of the rectangle. Default value is `0`."
         },
         "bottomWeight": {
           "type": "number",
-          "description": "Used only when strokeWeightsIndependent is true to specify the stroke weight at the bottom of the rectangle. Default is 0."
+          "description": "This is used only when `strokeWeightsIndependent` is set to true, in order to specify the stroke weight at the bottom of the rectangle. Default value is `0`."
         },
         "rightWeight": {
           "type": "number",
-          "description": "Used only when strokeWeightsIndependent is true to specify the stroke weight at the right of the rectangle. Default is 0."
+          "description": "This is used only when `strokeWeightsIndependent` is set to true, in order to specify the stroke weight at the right of the rectangle. Default value is `0`."
         },
         "contextSettings": {
-          "$ref": "#/definitions/GraphicsContextSettings"
+          "$ref": "#/definitions/GraphicsContextSettings",
+          "description": "The opacity and blending-related configurations of the border."
         },
         "gradient": {
-          "$ref": "#/definitions/Gradient"
+          "$ref": "#/definitions/Gradient",
+          "description": "The gradient of the border's fill."
         },
         "pattern": {
-          "$ref": "#/definitions/Pattern"
+          "$ref": "#/definitions/Pattern",
+          "description": "The pattern of the border's fill."
         },
         "style": {
           "type": "integer",
-          "description": "Type of the border style, the dashed style is further specified in dashedOffset and dashedPattern.",
+          "description": "The type of the border style. The dashed style is further specified in `dashedOffset` and `dashedPattern`.",
           "enum": [0, 1, 2],
           "enumDescriptions": ["solid", "dotted", "dashed"]
         },
         "dashedPattern": {
           "type": "array",
-          "description": "A set of alternating dashes (filled regions) and gaps (empty regions). (applies to 'dashed' borders)",
+          "description": "A list of values that describe the lengths of dashes (filled regions) and gaps (empty regions) in a `dashed` border by repeating themselves.",
           "items": {
             "type": "number"
           }
         },
         "dashedOffset": {
           "type": "number",
-          "descript": "Border dash initial offset. (applies to 'dashed' borders)"
+          "description": "Border dash initial offset. (applies to `dashed` borders)"
         },
         "lineCapStyle": {
-          "$ref": "#/definitions/LineCapStyle"
+          "$ref": "#/definitions/LineCapStyle",
+          "description": "The shape styles at the end of stroked lines."
         },
         "startMarkerType": {
-          "$ref": "#/definitions/MarkerType"
+          "$ref": "#/definitions/MarkerType",
+          "description": "The shape type of the border's starting point."
         },
         "endMarkerType": {
-          "$ref": "#/definitions/MarkerType"
+          "$ref": "#/definitions/MarkerType",
+          "description": "The shape type of the border's ending point."
         },
         "lineJoinStyle": {
-          "$ref": "#/definitions/LineJoinStyle"
+          "$ref": "#/definitions/LineJoinStyle",
+          "description": "The shape style at the corner of two stroked lines."
         },
         "miterLimit": {
           "type": "number",
-          "descript": "A value limiting the extension of a sharp tip created by adjacent border segments using 'miter' join."
+          "description": "When the angle between two adjacent stroked lines is less than this value, a `miter` join is used instead."
         },
         "flat": {
           "type": "number",
-          "descript": "equivalent to the PostScript language setflat operator, which sets the flatness parameter in the graphics state. The flatness parameter specifies the accuracy or smoothness with which curves are rendered as a sequence of flat line segments.",
+          "description": "The flatness parameter specifies the accuracy or smoothness with which curves are rendered as a sequence of flat line segments.",
           "maximum": 100,
           "minimum": 0
         }
@@ -420,15 +466,17 @@
     },
     "Color": {
       "title": "Color",
-      "description": "Defines a RGBA color value.",
+      "description": "A RGBA color value.",
       "type": "object",
       "$id": "#Color",
       "required": ["class", "alpha", "red", "green", "blue"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "color"
         },
         "alpha": {
+          "description": "The opacity of the object. `0` represents transparent, and `1` represents opaque.",
           "$ref": "#/definitions/UnitInterval"
         },
         "red": {
@@ -446,31 +494,32 @@
     "FillType": {
       "title": "Fill Type",
       "type": "integer",
-      "description": "Enumeration of the fill types.",
+      "description": "The content types of a fill.",
       "enum": [0, 1, 2],
-      "enumDescriptions": ["Color", "Gradient", "Pattern"],
+      "enumDescriptions": ["color", "gradient", "pattern"],
       "$id": "#FillType"
     },
     "BorderPosition": {
       "title": "Border Position",
       "type": "integer",
-      "description": "Enumeration of border positions.",
+      "description": "The position types of the border relative to the boundary.",
       "enum": [0, 1, 2],
-      "enumDescriptions": ["Center", "Inside", "Outside"],
+      "enumDescriptions": ["center", "inside", "outside"],
       "$id": "#BorderPosition"
     },
     "Gradient": {
       "title": "Gradient",
-      "description": "Defines a gradient.",
+      "description": "Define a gradient.",
       "type": "object",
       "$id": "#Gradient",
       "required": ["class", "instance"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "gradient"
         },
         "instance": {
-          "description": "The current gradient instance.",
+          "description": "One of the gradients listed below.",
           "oneOf": [
             {
               "$ref": "#/definitions/GradientAngular"
@@ -494,22 +543,26 @@
     },
     "GradientAngular": {
       "title": "Gradient Angular",
-      "description": "Described parameters required by gradient angular.",
+      "description": "An angular gradient is a color effect that transitions radially or angularly, typically originating from a central point and expanding outward in a rotational pattern.",
       "type": "object",
       "$id": "#GradientAngular",
-      "required": ["class", "from", "to", "stops", "invert", "elipseLength"],
+      "required": ["class", "from", "to", "stops", "invert", "ellipse"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "gradientAngular"
         },
         "from": {
-          "$ref": "#/definitions/Point"
+          "$ref": "#/definitions/Point",
+          "description": "A relative coordinate according to the `bounds`, where `(0, 0)` represents the top-left corner of the `bounds`, and `(1, -1)` represents the bottom-right corner of the `bounds`."
         },
         "to": {
-          "$ref": "#/definitions/Point"
+          "$ref": "#/definitions/Point",
+          "description": "A relative coordinate according to the `bounds`, where `(0, 0)` represents the top-left corner of the `bounds`, and `(1, -1)` represents the bottom-right corner of the `bounds`."
         },
         "stops": {
           "type": "array",
+          "description": "A list of positions shows how the colors transition from one to another in a clockwise direction.\nIf the number of items is `1`, it means the color of the stop will not transition.",
           "minItems": 1,
           "items": {
             "$ref": "#/definitions/GradientStop"
@@ -517,18 +570,25 @@
         },
         "invert": {
           "type": "boolean",
-          "description": "Flag describing if gradient has been inverted."
+          "description": "Whether the gradient has been inverted."
         },
-        "elipseLength": {
-          "type": "number",
-          "description": "For elliptic gradients describes ratio of major to minor semi-axis of the ellipse."
+        "ellipse": {
+          "oneOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/Point"
+            }
+          ],
+          "description": "When the type is set to `number`, the line connecting `from` to `to` is regarded as one semi-axis of the ellipse, denoted as `A`. The length of the other semi-axis of the ellipse is denoted as `B`. Then, `ellipse = B / A`, which is used to represent the shape of the gradient. The semi-axis `B` is perpendicular to `A` and takes the counterclockwise direction.\nWhen the type is set to `point`, it represents another point on the ellipse with a relative coordinate according to the `bounds`, where `(0, 0)` represents the top-left corner of the `bounds`, and `(1, -1)` represents the bottom-right corner of the `bounds`."
         }
       },
       "additionalProperties": false
     },
     "Point": {
       "title": "Point",
-      "description": "An array holds two elements, The first term is x, the second term is y.",
+      "description": "A list of two elements: `[x, y]`.",
       "type": "array",
       "maxItems": 2,
       "minItems": 2,
@@ -539,12 +599,13 @@
     },
     "GradientStop": {
       "title": "Gradient Stop",
-      "description": "Defines a position on a gradient that marks the end of a transition to a new color.",
+      "description": "A color stop defines a position on the gradient ramp that marks the start or stop of a color transition.",
       "type": "object",
       "$id": "#GradientStop",
       "required": ["class", "color", "position", "midPoint"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "gradientStop"
         },
         "color": {
@@ -552,33 +613,37 @@
         },
         "position": {
           "$ref": "#/definitions/UnitInterval",
-          "description": "A number giving the position of a color stop on the gradient ramp."
+          "description": "A number giving the position of the color stop on the gradient ramp."
         },
         "midPoint": {
           "$ref": "#/definitions/UnitInterval",
-          "description": "Specifies the location between two ramp points where there is an equal mix of the two colors. midPoint is a percentage of the distance between two ramp points. The mid point for the last color stop is ignored."
+          "description": "A position between the current color stop and the next one, where there is an equal mix of the two colors.\n`midPoint` is a percentage of the distance between the two color stops. ***Default value is `0.5`.***\nThe `midPoint` is ignored for the last color stop, except in the case of angular gradients."
         }
       },
       "additionalProperties": false
     },
     "GradientLinear": {
       "title": "Gradient Linear",
-      "description": "Described parameters required by gradient linear.",
+      "description": "A linear gradient refers to the effect of transitioning between two or more different colors in a straight line.",
       "type": "object",
       "$id": "#GradientLinear",
       "required": ["class", "from", "to", "stops", "invert"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "gradientLinear"
         },
         "from": {
-          "$ref": "#/definitions/Point"
+          "$ref": "#/definitions/Point",
+          "description": "A relative coordinate according to the `bounds`, where `(0, 0)` represents the top-left corner of the `bounds`, and `(1, -1)` represents the bottom-right corner of the `bounds`."
         },
         "to": {
-          "$ref": "#/definitions/Point"
+          "$ref": "#/definitions/Point",
+          "description": "A relative coordinate according to the `bounds`, where `(0, 0)` represents the top-left corner of the `bounds`, and `(1, -1)` represents the bottom-right corner of the `bounds`."
         },
         "stops": {
           "type": "array",
+          "description": "A list of positions shows how the colors transition from one to another.\nIf the number of items is `1`, it means the color of the stop will not transition.",
           "minItems": 1,
           "items": {
             "$ref": "#/definitions/GradientStop"
@@ -586,29 +651,33 @@
         },
         "invert": {
           "type": "boolean",
-          "description": "Flag describing if gradient has been inverted."
+          "description": "Whether the gradient has been inverted."
         }
       },
       "additionalProperties": false
     },
     "GradientRadial": {
       "title": "Gradient Radial",
-      "description": "Described parameters required by gradient radial.",
+      "description": "A radial gradient is a color effect that transitions radially around a point.",
       "type": "object",
       "$id": "#GradientRadial",
-      "required": ["class", "from", "to", "stops", "invert", "elipseLength"],
+      "required": ["class", "from", "to", "stops", "invert", "ellipse"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "gradientRadial"
         },
         "from": {
-          "$ref": "#/definitions/Point"
+          "$ref": "#/definitions/Point",
+          "description": "A relative coordinate according to the `bounds`, where `(0, 0)` represents the top-left corner of the `bounds`, and `(1, -1)` represents the bottom-right corner of the `bounds`."
         },
         "to": {
-          "$ref": "#/definitions/Point"
+          "$ref": "#/definitions/Point",
+          "description": "A relative coordinate according to the `bounds`, where `(0, 0)` represents the top-left corner of the `bounds`, and `(1, -1)` represents the bottom-right corner of the `bounds`."
         },
         "stops": {
           "type": "array",
+          "description": "A list of positions shows how the colors transition from one to another.\nIf the number of items is `1`, it means the color of the stop will not transition.",
           "minItems": 1,
           "items": {
             "$ref": "#/definitions/GradientStop"
@@ -616,33 +685,44 @@
         },
         "invert": {
           "type": "boolean",
-          "description": "Flag describing if gradient has been inverted."
+          "description": "Whether the gradient has been inverted."
         },
-        "elipseLength": {
-          "type": "number",
-          "description": "For elliptic gradients describes ratio of major to minor semi-axis of the ellipse."
+        "ellipse": {
+          "oneOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/Point"
+            }
+          ],
+          "description": "When the type is set to `number`, the line connecting `from` to `to` is regarded as one semi-axis of the ellipse, denoted as `A`. The length of the other semi-axis of the ellipse is denoted as `B`. Then, `ellipse = B / A`, which is used to represent the shape of the gradient. The semi-axis `B` is perpendicular to `A` and takes the counterclockwise direction.\nWhen the type is set to `point`, it represents another point on the ellipse with a relative coordinate according to the `bounds`, where `(0, 0)` represents the top-left corner of the `bounds`, and `(1, -1)` represents the bottom-right corner of the `bounds`."
         }
       },
       "additionalProperties": false
     },
     "GradientDiamond": {
       "title": "Gradient Diamond",
-      "description": "Described parameters required by gradient diamond.",
+      "description": "A diamond gradient is a color effect that transitions similar to the luster of a diamond.",
       "type": "object",
       "$id": "#GradientDiamond",
-      "required": ["class", "from", "to", "stops", "invert", "elipseLength"],
+      "required": ["class", "from", "to", "stops", "invert", "ellipse"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "gradientDiamond"
         },
         "from": {
-          "$ref": "#/definitions/Point"
+          "$ref": "#/definitions/Point",
+          "description": "A relative coordinate according to the `bounds`, where `(0, 0)` represents the top-left corner of the `bounds`, and `(1, -1)` represents the bottom-right corner of the `bounds`."
         },
         "to": {
-          "$ref": "#/definitions/Point"
+          "$ref": "#/definitions/Point",
+          "description": "A relative coordinate according to the `bounds`, where `(0, 0)` represents the top-left corner of the `bounds`, and `(1, -1)` represents the bottom-right corner of the `bounds`."
         },
         "stops": {
           "type": "array",
+          "description": "A list of positions shows how the colors transition from one to another.\nIf the number of items is `1`, it means the color of the stop will not transition.",
           "minItems": 1,
           "items": {
             "$ref": "#/definitions/GradientStop"
@@ -650,23 +730,31 @@
         },
         "invert": {
           "type": "boolean",
-          "description": "Flag describing if gradient has been inverted."
+          "description": "Whether the gradient has been inverted."
         },
-        "elipseLength": {
-          "type": "number",
-          "description": "For elliptic gradients describes ratio of major to minor semi-axis of the ellipse."
+        "ellipse": {
+          "oneOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/Point"
+            }
+          ],
+          "description": "When the type is set to `number`, the line connecting `from` to `to` is regarded as one semi-axis of the ellipse, denoted as `A`. The length of the other semi-axis of the ellipse is denoted as `B`. Then, `ellipse = B / A`, which is used to represent the shape of the gradient. The semi-axis `B` is perpendicular to `A` and takes the counterclockwise direction.\nWhen the type is set to `point`, it represents another point on the ellipse with a relative coordinate according to the `bounds`, where `(0, 0)` represents the top-left corner of the `bounds`, and `(1, -1)` represents the bottom-right corner of the `bounds`."
         }
       },
       "additionalProperties": false
     },
     "GradientBasic": {
       "title": "Gradient Basic",
-      "description": "Describes the parameters of gradients in a more basic form.",
+      "description": "> ***Unstable.*** This gradient format is only used to represent the gradient effect converted from AI and is not the final format. It is likely to be modified in the future.",
       "type": "object",
       "$id": "#GradientBasic",
       "required": ["class", "gradientType", "stops", "invert", "geometry"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "gradientBasic"
         },
         "gradientType": {
@@ -683,7 +771,7 @@
         },
         "invert": {
           "type": "boolean",
-          "description": "Flag describing if gradient has been inverted."
+          "description": "Flag indicating whether the gradient has been inverted."
         },
         "geometry": {
           "$ref": "#/definitions/GradientBasicGeometry",
@@ -723,7 +811,7 @@
     },
     "GradientBasicGeometry": {
       "title": "Gradient basic geometry",
-      "description": "Gradient geometry defines much of the appearance of the gradient within the path.",
+      "description": "> ***Unstable.*** It is only used to represent the gradient effect converted from AI and is not the final format. It is likely to be modified in the future.\n\nGradient geometry defines much of the appearance of the gradient within the path.",
       "type": "object",
       "$id": "#GradientBasicGeometry",
       "required": [
@@ -738,6 +826,7 @@
       ],
       "properties": {
         "class": {
+          "type": "string",
           "const": "gradientBasicGeometry"
         },
         "flag": {
@@ -752,7 +841,7 @@
         },
         "xOrigin": {
           "type": "number",
-          "description": "xOrigin and yOrigin give the origin of the gradient in page coordinates. The origin can be located anywhere on the artwork, and corresponds to 0 on the gradient ramp."
+          "description": "`xOrigin` and `yOrigin` give the origin of the gradient in page coordinates. The origin can be located anywhere on the artwork, and corresponds to 0 on the gradient ramp."
         },
         "yOrigin": {
           "type": "number",
@@ -760,7 +849,7 @@
         },
         "angle": {
           "type": "number",
-          "description": "This argument specifies the direction of the gradient vector, in degrees. The gradient ramp extends from the origin at the value of angle, which is measured counterclockwise from the x axis."
+          "description": "This argument specifies the direction of the gradient vector, in degrees. The gradient ramp extends from the origin at the value of angle, which is measured counterclockwise from the X axis."
         },
         "length": {
           "type": "number",
@@ -768,18 +857,18 @@
         },
         "matrix": {
           "$ref": "#/definitions/Matrix",
-          "description": "The six values make up a transformation matrix. When a gradient is first applied to an object, these values are the identity matrix. If the user transforms the object, the user transformation matrix is concatenated to the gradient instance’s matrix."
+          "description": "The six values make up a transformation matrix. \nWhen a gradient is first applied to an object, these values are the identity matrix. \nIf the user transforms the object, the user transformation matrix is concatenated to the gradient instance's matrix."
         },
         "widthRatio": {
           "type": "number",
-          "description": "0.5 Indicates that the width is half the length. 2 Indicates that the width is twice the length. and so on."
+          "description": "0.5 indicates that the width is half the length.\n2 indicates that the width is twice the length.\nAnd so on."
         }
       },
       "additionalProperties": false
     },
     "Matrix": {
       "title": "Matrix",
-      "description": "a b c d tx ty",
+      "description": "A list of six elements: `[a, b, c, d, tx, ty]`.",
       "type": "array",
       "maxItems": 6,
       "minItems": 6,
@@ -790,25 +879,26 @@
     },
     "GradientHilight": {
       "title": "Gradient Hilight",
-      "description": "Radial gradients have an additional attribute called a hilight. The hilight serves at the starting point for the gradient ramp as it expands outward. It is still contained within the gradient vector circle.",
+      "description": "> ***Unstable.*** It is only used to represent the gradient effect converted from AI and is not the final format. It is likely to be modified in the future.\n\nRadial gradients have an additional attribute called a hilight. The hilight serves at the starting point for the gradient ramp as it expands outward. It is still contained within the gradient vector circle.",
       "type": "object",
       "$id": "#GradientHilight",
       "required": ["class", "xHilight", "yHilight", "angle", "length"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "gradientHilight"
         },
         "xHilight": {
           "type": "number",
-          "description": "xHilight and yHilight specify the hilight placement, in x and y offsets from the gradient vector origin."
+          "description": "`xHilight` and `yHilight` specify the hilight placement, in x and y offsets from the gradient vector origin."
         },
         "yHilight": {
           "type": "number",
-          "description": "Refer to xHilight for details."
+          "description": "Refer to `xHilight` for details."
         },
         "angle": {
           "type": "number",
-          "description": "This argument is the angle (in degrees) to the hilight point, measured counterclockwise from the x axis."
+          "description": "This argument is the angle (in degrees) to the hilight point, measured counterclockwise from the X axis."
         },
         "length": {
           "$ref": "#/definitions/UnitInterval",
@@ -819,18 +909,29 @@
     },
     "Pattern": {
       "title": "Pattern",
-      "description": "Pattern descriptor.",
+      "description": "Define a pattern.",
       "type": "object",
       "$id": "#Pattern",
       "required": ["class", "instance"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "pattern"
         },
         "instance": {
+          "description": "One of the patterns listed below.",
           "oneOf": [
             {
-              "$ref": "#/definitions/PatternImage"
+              "$ref": "#/definitions/PatternImageFill"
+            },
+            {
+              "$ref": "#/definitions/PatternImageStretch"
+            },
+            {
+              "$ref": "#/definitions/PatternImageFit"
+            },
+            {
+              "$ref": "#/definitions/PatternImageTile"
             },
             {
               "$ref": "#/definitions/PatternLayerInstance"
@@ -840,69 +941,45 @@
       },
       "additionalProperties": false
     },
-    "PatternImage": {
-      "title": "Pattern Image",
-      "description": "Use an image as the content of pattern.",
+    "PatternImageFill": {
+      "title": "Pattern Image Fill",
+      "description": "Use an image as the content of the pattern. The pattern type is fill.",
       "type": "object",
-      "$id": "#PatternImage",
-      "required": [
-        "class",
-        "fillType",
-        "imageTileMirrored",
-        "imageFileName",
-        "matrix"
-      ],
+      "$id": "#PatternImageFill",
+      "required": ["class", "imageFileName", "rotation"],
       "properties": {
         "class": {
-          "const": "patternImage"
-        },
-        "fillType": {
-          "$ref": "#/definitions/PatternFillType"
-        },
-        "imageTileMirrored": {
-          "type": "boolean",
-          "description": "Whether to mirror the image. Only available for tiles."
+          "type": "string",
+          "const": "patternImageFill"
         },
         "imageFileName": {
           "type": "string",
-          "description": "image filename."
+          "description": "File name of the image."
         },
-        "matrix": {
-          "description": "Image matrix. When the fillType are Fill and Fit, only the rotation information of the image itself is contained in the matrix.",
-          "$ref": "#/definitions/Matrix"
+        "rotation": {
+          "type": "number",
+          "description": "Rotation of the image in degrees. Positive values represent counterclockwise rotation. Rotate around the center of the image."
         },
         "imageAdjust": {
-          "$ref": "#/definitions/ImageAdjust"
+          "$ref": "#/definitions/ImageAdjust",
+          "description": "Adjust the colors of the image."
         }
       },
       "additionalProperties": false
     },
-    "PatternFillType": {
-      "title": "Pattern Fill Type",
-      "type": "integer",
-      "description": "Enumeration of pattern fill types.",
-      "enum": [0, 1, 2, 3, 4, 5],
-      "enumDescriptions": [
-        "Tile",
-        "Fill",
-        "Stretch",
-        "Fit",
-        "Tile only horizontal",
-        "Tile only vertical"
-      ],
-      "$id": "#PatternFillType"
-    },
     "ImageAdjust": {
       "title": "Image Adjust",
-      "description": "Defines color adjust styles on images.",
+      "description": "Adjust the colors of an image.",
       "type": "object",
       "$id": "#ImageAdjust",
       "required": ["class", "instance"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "imageAdjust"
         },
         "instance": {
+          "description": "There are two ways to adjust the image color, choose either one.",
           "oneOf": [
             {
               "$ref": "#/definitions/ColorControls"
@@ -917,7 +994,7 @@
     },
     "ColorControls": {
       "title": "Color Controls",
-      "description": "Defines color adjust styles on images",
+      "description": "Adjust the colors.",
       "type": "object",
       "$id": "#ColorControls",
       "required": [
@@ -930,6 +1007,7 @@
       ],
       "properties": {
         "class": {
+          "type": "string",
           "const": "colorControls"
         },
         "isEnabled": {
@@ -960,7 +1038,7 @@
     },
     "ImageFilters": {
       "title": "Image Filters",
-      "description": "Defines the image filters applied to an image paint.",
+      "description": "Adjust the detailed colors of an image.",
       "type": "object",
       "$id": "#ImageFilters",
       "required": [
@@ -976,6 +1054,7 @@
       ],
       "properties": {
         "class": {
+          "type": "string",
           "const": "imageFilter"
         },
         "isEnabled": {
@@ -1019,9 +1098,104 @@
       },
       "additionalProperties": false
     },
+    "PatternImageStretch": {
+      "title": "Pattern Image Stretch",
+      "description": "Use an image as the content of the pattern. The pattern type is stretch.",
+      "type": "object",
+      "$id": "#PatternImageStretch",
+      "required": ["class", "imageFileName", "matrix"],
+      "properties": {
+        "class": {
+          "type": "string",
+          "const": "patternImageStretch"
+        },
+        "imageFileName": {
+          "type": "string",
+          "description": "File name of the image."
+        },
+        "matrix": {
+          "description": "Image matrix.\nLet the width and height of the widget be `w` and `h`, the width and height of the image be `iw` and `ih`.\nDefine `Mw = [[w, 0, 0], [0, h, 0], [0, 0, 1]]`, and `Mi = [[1 / iw, 0, 0], [0, 1 / ih, 0], [0, 0, 1]]`.\nFinally, apply the `Mw * matrix * Mi * P` transformation to each of the four vertices of the image `(0, 0), (0, iw), (iw, -ih), (0, -ih)`, where `P` represents a vertex of the image, to obtain the position of the image in the widget coordinate system.",
+          "$ref": "#/definitions/Matrix"
+        },
+        "imageAdjust": {
+          "$ref": "#/definitions/ImageAdjust"
+        }
+      },
+      "additionalProperties": false
+    },
+    "PatternImageFit": {
+      "title": "Pattern Image Fit",
+      "description": "Use an image as the content of the pattern. The pattern type is fit.",
+      "type": "object",
+      "$id": "#PatternImageFit",
+      "required": ["class", "imageFileName", "rotation"],
+      "properties": {
+        "class": {
+          "type": "string",
+          "const": "patternImageFit"
+        },
+        "imageFileName": {
+          "type": "string",
+          "description": "File name of the image."
+        },
+        "rotation": {
+          "type": "number",
+          "description": "Rotation of the image in degrees. Positive values represent counterclockwise rotation. Rotate around the center of the image."
+        },
+        "imageAdjust": {
+          "$ref": "#/definitions/ImageAdjust",
+          "description": "Adjust the colors of the image."
+        }
+      },
+      "additionalProperties": false
+    },
+    "PatternImageTile": {
+      "title": "Pattern Image Tile",
+      "description": "Use an image as the content of the pattern. The pattern type is tile.",
+      "type": "object",
+      "$id": "#PatternImageTile",
+      "required": ["class", "scale", "rotation", "imageFileName"],
+      "properties": {
+        "class": {
+          "type": "string",
+          "const": "patternImageTile"
+        },
+        "mirror": {
+          "type": "boolean",
+          "description": "Whether to mirror the image repetitively.\nDefault value is `false`."
+        },
+        "scale": {
+          "type": "number",
+          "description": "Image scaling ratio.\n`0.5` means `50%`, `2` means `200%`, and so on."
+        },
+        "mode": {
+          "type": "integer",
+          "description": "Tile the image in which direction.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": [
+            "horizontal and vertical(default value)",
+            "only horizontal",
+            "only vertical"
+          ]
+        },
+        "rotation": {
+          "type": "number",
+          "description": "Rotation of the image in degrees. Positive values represent counterclockwise rotation. Rotate around the center of the image."
+        },
+        "imageFileName": {
+          "type": "string",
+          "description": "File name of the image."
+        },
+        "imageAdjust": {
+          "$ref": "#/definitions/ImageAdjust",
+          "description": "Adjust the colors of the image."
+        }
+      },
+      "additionalProperties": false
+    },
     "PatternLayerInstance": {
       "title": "Pattern layer",
-      "description": "Use an layer as the content of pattern.",
+      "description": "Use a layer as the content of the pattern.",
       "type": "object",
       "$id": "#PatternLayerInstance",
       "required": [
@@ -1038,15 +1212,16 @@
       ],
       "properties": {
         "class": {
+          "type": "string",
           "const": "patternLayer"
         },
         "refLayerName": {
           "type": "string",
-          "description": "The name(utf-8) of the referenced pattern layer. Note that this is the name of the pattern layer, not its id. The pattern layer name is unique."
+          "description": "The name (UTF-8) of the referenced pattern layer. Note that this is the name of the pattern layer, not its ID. The pattern layer name is unique."
         },
         "offset": {
           "$ref": "#/definitions/Point",
-          "description": "Specify the offset from the ruler origin of the origin to be used for tiling the pattern. Each distance specified in points."
+          "description": "Specify the offset from the ruler origin to be used for tiling the pattern. Each distance is specified in points."
         },
         "scale": {
           "$ref": "#/definitions/Point",
@@ -1058,11 +1233,11 @@
         },
         "reflection": {
           "type": "boolean",
-          "description": "Flag indicating whether to apply a reflection to the pattern."
+          "description": "Whether to apply a reflection to the pattern."
         },
         "r": {
           "type": "number",
-          "description": "Specifies the angle of the line from the origin about which the pattern is reflected. Used if the reflection operand is true."
+          "description": "Specifies the angle of the line about which the pattern is reflected, measured in degrees counterclockwise from the origin. This is used if the `reflection` operand is `true`."
         },
         "shear": {
           "type": "number",
@@ -1082,117 +1257,125 @@
     "LineCapStyle": {
       "title": "Line Cap Style",
       "type": "integer",
-      "description": "Enumeration of the line cap styles.",
+      "description": "The shape styles at the end of stroked lines.",
       "enum": [0, 1, 2],
-      "enumDescriptions": ["Butt", "Round", "Square"],
+      "enumDescriptions": ["butt", "round", "square"],
       "$id": "#LineCapStyle"
     },
     "MarkerType": {
       "title": "Marker Type",
-      "description": "Enumeration of the possible types of vector line endings",
+      "description": "A shape type used to identify the starting and ending points in a path.",
       "type": "integer",
       "enum": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
       "enumDescriptions": [
-        "None",
-        "Open arrow",
-        "Filled arrow",
-        "Line",
-        "Open circle",
-        "Filled circle",
-        "Open square",
-        "Filled square",
-        "Reversed triangle",
-        "Diamond arrow",
-        "Round",
-        "Square"
+        "none",
+        "open arrow",
+        "filled arrow",
+        "line",
+        "open circle",
+        "filled circle",
+        "open square",
+        "filled square",
+        "reversed triangle",
+        "diamond arrow",
+        "round",
+        "square"
       ],
       "$id": "#MarkerType"
     },
     "LineJoinStyle": {
       "title": "Line Join Style",
       "type": "integer",
-      "description": "Enumeration of the line join styles.",
+      "description": "The shape style at the corner of two stroked lines.",
       "enum": [0, 1, 2],
-      "enumDescriptions": ["Miter", "Round", "Bevel"],
+      "enumDescriptions": ["miter", "round", "bevel"],
       "$id": "#LineJoinStyle"
     },
     "Fill": {
       "title": "Fill",
-      "description": "Defines a fill style.",
+      "description": "Define a fill style of an object.",
       "type": "object",
       "$id": "#Fill",
       "required": ["class", "isEnabled", "fillType", "contextSettings"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "fill"
         },
         "isEnabled": {
           "type": "boolean"
         },
         "color": {
-          "$ref": "#/definitions/Color"
+          "$ref": "#/definitions/Color",
+          "description": "The color of the fill."
         },
         "fillType": {
-          "$ref": "#/definitions/FillType"
+          "$ref": "#/definitions/FillType",
+          "description": "The content type of the fill."
         },
         "contextSettings": {
-          "$ref": "#/definitions/GraphicsContextSettings"
+          "$ref": "#/definitions/GraphicsContextSettings",
+          "description": "The opacity and blending-related configurations of the fill."
         },
         "gradient": {
-          "$ref": "#/definitions/Gradient"
+          "$ref": "#/definitions/Gradient",
+          "description": "The gradient of the fill."
         },
         "pattern": {
-          "$ref": "#/definitions/Pattern"
+          "$ref": "#/definitions/Pattern",
+          "description": "The pattern of the fill."
         }
       },
       "additionalProperties": false
     },
     "Blur": {
       "title": "Blur",
-      "description": "Defines a blur style.",
+      "description": "Define a blur style of an object.",
       "type": "object",
       "$id": "#Blur",
       "required": ["class", "type", "isEnabled", "center", "saturation"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "blur"
         },
         "type": {
-          "$ref": "#/definitions/BlurType"
+          "$ref": "#/definitions/BlurType",
+          "description": "The type of blur."
         },
         "isEnabled": {
           "type": "boolean"
         },
         "radius": {
           "type": "number",
-          "description": "Blur radius."
+          "description": "The range of the area where the blur takes effect."
         },
         "motionAngle": {
           "type": "number",
-          "description": "Motion blur angle (in degrees)."
+          "description": "The angle of the blur direction applies only to the `motion` blur."
         },
         "center": {
           "$ref": "#/definitions/Point",
-          "description": "The center of the zoom blur."
+          "description": "The center of the blur applies only to the `zoom` blur."
         },
         "saturation": {
           "type": "number",
-          "description": "For background blur."
+          "description": "The saturation level of the blur applies only to the `background` blur."
         }
       },
       "additionalProperties": false
     },
     "BlurType": {
       "title": "Blur Type",
-      "description": "Enumeration of the various blur types.",
+      "description": "The types of blur.",
       "type": "integer",
       "enum": [0, 1, 2, 3],
-      "enumDescriptions": ["Gaussian", "Motion", "Zoom", "Background"],
+      "enumDescriptions": ["gaussian", "motion", "zoom", "background"],
       "$id": "#BlurType"
     },
     "Shadow": {
       "title": "Shadow",
-      "description": "Defines a shadow style",
+      "description": "Define a shadow style of an object.",
       "type": "object",
       "$id": "#Shadow",
       "required": [
@@ -1208,6 +1391,7 @@
       ],
       "properties": {
         "class": {
+          "type": "string",
           "const": "shadow"
         },
         "isEnabled": {
@@ -1219,37 +1403,38 @@
         },
         "offsetX": {
           "type": "number",
-          "description": "Horizontal offset of the shadow."
+          "description": "The horizontal offset of the shadow in relation to the object. Direction to the right."
         },
         "offsetY": {
           "type": "number",
-          "description": "Vertical offset of the shadow."
+          "description": "The vertical downward offset of the shadow in relation to the object."
         },
         "blur": {
           "type": "number",
-          "description": "Blur value of the shadow."
+          "description": "The degree of shadow blur."
         },
         "spread": {
           "type": "number",
-          "description": "Spread amount of the shadow contour."
+          "description": "The distance that the shadow spreads from the object, the farther it is, the larger the shadow."
         },
         "contextSettings": {
-          "$ref": "#/definitions/GraphicsContextSettings"
+          "$ref": "#/definitions/GraphicsContextSettings",
+          "description": "The opacity and blending-related configurations of the shadow."
         },
         "inner": {
           "type": "boolean",
-          "description": "True means inner shadows. False means shadows."
+          "description": "If `true`, it's an inner shadow."
         },
         "showBehindTransparentAreas": {
           "type": "boolean",
-          "description": " When the object itself has a transparent fill, if the object has a shadow(not inner shadow), whether the shadow can be seen through the object itself. (default false) "
+          "description": "When the object has a transparent fill and a non-inner shadow, whether the shadow is visible through the transparent area.\nDefault value is `false`."
         }
       },
       "additionalProperties": false
     },
     "Rect": {
       "title": "Rect",
-      "description": "Defines an abstract rectangle.",
+      "description": "A rectangle.",
       "type": "object",
       "$id": "#Rect",
       "required": [
@@ -1262,6 +1447,7 @@
       ],
       "properties": {
         "class": {
+          "type": "string",
           "const": "rect"
         },
         "constrainProportions": {
@@ -1276,11 +1462,11 @@
         },
         "x": {
           "type": "number",
-          "description": "Top left X coordinate. The X value in the top left corner is 0. The X-axis increases to the right."
+          "description": "The X coordinate of the top-left corner point.\nThe X-axis increases to the right."
         },
         "y": {
           "type": "number",
-          "description": "Top left Y coordinate. The Y value in the top left corner is 0. The Y-axis increases to the up."
+          "description": "The Y coordinate of the top-left corner point.\nThe Y-axis increases to the up."
         }
       },
       "additionalProperties": false
@@ -1288,45 +1474,105 @@
     "AlphaMask": {
       "title": "Alpha Mask",
       "type": "object",
-      "description": "Describes the properties of the alpha mask.",
+      "description": "Define the alpha mask effect for the object, using some values of the mask to control the transparency of the object.",
       "$id": "#AlphaMask",
       "required": ["class", "id", "alphaType", "crop"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "alphaMask"
         },
         "id": {
           "type": "string",
-          "description": "The value is ID of a object that is a alpha mask of this object."
+          "description": "Object ID of the mask."
         },
         "alphaType": {
           "type": "integer",
+          "description": "The data type whose values are used to control the transparency of the object.",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["alpha", "luminosity", "inverse-luminosity"]
+          "enumDescriptions": [
+            "alpha. Directly control the object's transparency using the values of the mask's Alpha channel.",
+            "luminosity. Control the object's transparency using the values of the mask's luminosity.",
+            "inverse-luminosity. Similar to `luminosity`, but with the opposite effect."
+          ]
         },
         "crop": {
           "type": "boolean",
-          "description": "Crops the masked object to the boundaries of the masking object."
+          "description": "Whether to use the mask's boundary to crop the masked object."
         }
       },
       "additionalProperties": false
     },
     "Constraint": {
       "title": "Constraint",
-      "description": "Horizontal and vertical layout constraints for object. In the horizontal direction, start indicates left, end indicates right. In the vertical direction, start identifies top, end identifies bottom.",
+      "description": "Horizontal and vertical layout constraints for the object relative to its parent container.\nIn the horizontal direction, `start` indicates the left, and `end` indicates the right.\nIn the vertical direction, `start` identifies the top, and `end` identifies the bottom.",
       "type": "integer",
       "enum": [0, 1, 2, 3, 4, 5, 6, 7],
       "enumDescriptions": [
-        "fix start and fix end.",
-        "fix start and fix size.",
-        " fix start and scale.\nFor example, let the parent container be 200 wide and the child object x-coordinate be 60 and the width be 50.  When the width of the parent container becomes 300, the x-coordinate of the child object remains 60, and the width becomes (50 / (200 - 60)) * (300 - 60) = 85.71 ",
-        "fix end and fix size.",
-        "fix end and scale.",
-        " scale.\nFor example, let the parent container be 200 wide, the child object x-coordinate be 60, and the width be 50.  When the width of the parent container becomes 300, the x-coordinate of the child object becomes 60 / 200 * 300 = 90, and the width becomes 50 / 200 * 300 = 75 ",
-        " fix center proportion and fix size. \nFor example, let the parent container be 200 wide, the child object x-coordinate be 60, and the width be 50. When the width of the parent container becomes 300, the x-coordinate of the child object becomes (60 + 50 / 2) / 200 * 300 - 50 / 2 = 102.5, and the width remains 50 ",
-        " Keep the centerline distance between the child object and the parent container constant.\nFor example, let the parent container be 200 wide, the child object x-coordinate be 60, and the width be 50.  When the width of the parent container becomes 300, the x-coordinate of the child object becomes 300 / 2 - (200 / 2 - (60 + 50 / 2)) - 50 / 2 = 110, and the width remains 50 "
+        "Fix the `start` and `end` positions.",
+        "Fix the `start` position and size.",
+        "Fix the `start` position and apply scaling.\nFor example, let the parent container be `200` units wide, and the child object has an x-coordinate of `60` and a width of `50`. When the width of the parent container becomes `300`, the x-coordinate of the child object remains `60`, and the width becomes `(50 / (200 - 60)) * (300 - 60) = 85.71`.",
+        "Fix the `end` position and size.",
+        "Fix the `end` position and apply scaling.",
+        "Scale.\nFor example, let the parent container be `200` units wide, and the child object has an x-coordinate of `60` and a width of `50`. When the width of the parent container becomes `300`, the x-coordinate of the child object becomes `60 / 200 * 300 = 90`, and the width becomes `50 / 200 * 300 = 75`.",
+        "Fix the center proportion and maintain a fixed size.\nFor example, let the parent container be `200` units wide, and the child object has an x-coordinate of `60` and a width of `50`. When the width of the parent container becomes `300`, the x-coordinate of the child object becomes `(60 + 50 / 2) / 200 * 300 - 50 / 2 = 102.5`, and the width remains `50`.",
+        "Keep the centerline distance between the child object and the parent container constant.\nFor example, let the parent container be `200` units wide, and the child object has an x-coordinate of `60` and a width of `50`. When the width of the parent container becomes `300`, the x-coordinate of the child object becomes `300 / 2 - (200 / 2 - (60 + 50 / 2)) - 50 / 2 = 110`, and the width remains `50`."
       ],
       "$id": "#Constraint"
+    },
+    "VariableDef": {
+      "title": "Variable Define",
+      "description": "Define a variable.",
+      "type": "object",
+      "$id": "#VariableDef",
+      "required": ["class", "id", "varType", "value"],
+      "properties": {
+        "class": {
+          "type": "string",
+          "const": "variableDef"
+        },
+        "id": {
+          "type": "string",
+          "description": "The ID of the variable is not globally unique but unique under the object tree."
+        },
+        "varType": {
+          "type": "integer",
+          "description": "The value type of the variable.",
+          "enum": [1, 2, 3, 4],
+          "enumDescriptions": [
+            "boolean",
+            "textProperty: contains some attributes of the text.",
+            "string",
+            "reference: references the definition of another variable, where `value` is a string and pointing to the ID of the referenced variable."
+          ]
+        },
+        "value": {
+          "description": "The value of the variable, whose type is determined by `varType`.\nIn the master, the object refers to a variable, and you don't need to care about the value of the variable; you just use its own value.\nIn an instance, if the variable is not reassigned, the value of the corresponding variable in the master is used.\nIn an instance, reassigning a variable affects all objects in that instance that reference the variable.\nIn an instance, the direct override of a property takes precedence over the value of the corresponding variable."
+        }
+      },
+      "additionalProperties": false
+    },
+    "VariableRef": {
+      "title": "Variable Refer",
+      "description": "Referencing a variable.",
+      "type": "object",
+      "$id": "#VariableRef",
+      "required": ["class", "id", "objectField"],
+      "properties": {
+        "class": {
+          "type": "string",
+          "const": "variableRef"
+        },
+        "id": {
+          "type": "string",
+          "description": "The ID of the referenced variable which defined in `Variable Define`."
+        },
+        "objectField": {
+          "type": "string",
+          "description": "Describes how a referenced variable acts on a specific property of an object.\nWhen the `varType` of the variable is `2`, the field is fixed to 'text_data'.\nWhen the `varType` is anything else, the field points to a property of the object (see `overrideName` in `Override Value`)."
+        }
+      },
+      "additionalProperties": false
     },
     "Path": {
       "title": "Path",
@@ -1353,31 +1599,31 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Object identifier, unique."
+          "description": "ID of the object, globally unique."
         },
         "name": {
           "type": "string",
-          "description": "Name of object (utf-8)."
+          "description": "Name of the object, for user identification, encoded in UTF-8."
         },
         "isLocked": {
           "type": "boolean",
-          "description": "Describes whether the object is locked."
+          "description": "If `true`, the object will be unable to be edited."
         },
         "visible": {
           "type": "boolean",
-          "description": "Describes the visibility of the object."
+          "description": "If `false`, the object will be invisible."
         },
         "contextSettings": {
           "$ref": "#/definitions/GraphicsContextSettings",
-          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
+          "description": "The opacity and blending-related configurations of the object."
         },
         "style": {
           "$ref": "#/definitions/Style",
-          "description": "Object styles descriptor."
+          "description": "The borders, fills, and other styles of the object."
         },
         "bounds": {
           "$ref": "#/definitions/Rect",
-          "description": "This property records the bounds information of the object before it is matrixed."
+          "description": "The bounds of the object before undergoing matrix transformations."
         },
         "frame": {
           "$ref": "#/definitions/Rect",
@@ -1385,155 +1631,181 @@
         },
         "matrix": {
           "$ref": "#/definitions/Matrix",
-          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
+          "description": "Matrix used for translating, rotating, and scaling the object."
         },
         "alphaMaskBy": {
           "type": "array",
+          "description": "A list of alpha masks applied to the object.",
           "items": {
             "$ref": "#/definitions/AlphaMask"
           }
         },
         "outlineMaskBy": {
           "type": "array",
-          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
+          "description": "A list of outline masks applied to the object, clipped by the intersection of their outlines.\nThe items in the list are object IDs of the masks.",
           "items": {
-            "type": "string",
-            "description": "The value is ID of a object that is a outline mask of this object."
+            "type": "string"
           }
         },
         "maskType": {
           "type": "integer",
-          "description": "Describes the mask type of the object.",
+          "description": "The mask type of the object.",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
+          "enumDescriptions": ["not a mask", "outline mask", "alpha mask"]
         },
         "styleEffectMaskArea": {
           "type": "integer",
+          "description": "How the `style` and `visible` of the mask object affect the area of the mask.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            "The style and visible of the object not affects the area of the mask. The area of mask depends on bound.",
-            "The style of the object not affects the area of the mask. The visible of the object affects the area of the mask.",
-            "The style and visible of the object affects the area of the mask."
+            "The `style` and `visible` of the mask object do not affect the area of the mask, which depends on its bounds.",
+            "The `style` of the mask object does not affect the area of the mask, while the `visible` does.",
+            "The `style` and `visible` of the mask object do affect the area of the mask."
           ]
         },
         "maskShowType": {
           "type": "integer",
-          "description": "Decide how the mask object should be displayed.",
+          "description": "How the mask object is displayed.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            "depends on the style. (default value for outline mask)",
-            "only show bounds. (default value for alpha mask when it alphaType equal 0)",
-            "not show. (default for other condition)"
+            "depend on its `style`. (Default value for `outline mask`.)",
+            "only display its bounds. (Default value for `alpha mask` when its `alphaType` equals `0`.)",
+            "do not display. (Default value for other conditions.)"
           ]
         },
         "overflow": {
-          "description": "Sets what happens when a child element of a parent overflows its space.",
+          "description": "How to display the child element of the object when it overflows its container.",
           "type": "integer",
           "enum": [1, 2, 3],
           "enumDescriptions": [
-            "hidden: Anything outside the scope of the container will be cropped and invisible.",
-            "visible: Contents outside the scope of the container will not be cropped and will be visible.",
-            "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
+            "hidden. Anything outside the scope of the container will be cropped and invisible.",
+            "visible. Contents outside the scope of the container will not be cropped and will be visible.",
+            "scrolled. Content that is outside the container's scope is cropped, and a scrollbar is displayed to view the content that is beyond the container's boundaries."
           ]
         },
         "cornerSmoothing": {
           "type": "number",
-          "description": " Used to control corner smooth. Range: [0, 1] "
+          "description": "Smoothness of rounded corners. Range: `[0, 1]`.\n`0` is the default value, indicating no smoothing for rounded corners."
         },
         "overrideKey": {
           "type": "string",
-          "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+          "description": "Used to be associated with the object by symbol instances for overriding its attributes. Check the `objectId` in the `OverrideValue` for details.\nIf `overrideKey` exists, find a symbol master through upward traversal (which could be the object itself); `overrideKey` is unique within the symbol master."
         },
         "horizontalConstraint": {
           "$ref": "#/definitions/Constraint",
-          "description": "Horizontal layout constraints for object. Default value is 1."
+          "description": "Horizontal layout constraints for the object.\nDefault value is `1`."
         },
         "verticalConstraint": {
           "$ref": "#/definitions/Constraint",
-          "description": "Vertical layout constraints for object. Default value is 1."
+          "description": "Vertical layout constraints for the object.\nDefault value is `1`."
         },
         "resizesContent": {
           "type": "integer",
+          "description": "How child objects behave when the object is resized.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            " If the current object contains children(suitable for path with boolean operations),  the current object is used as the starting point, and for all children,  If the object chain has a frame or symbol without layout, then the constraint on the child object is applied(the constraints of group and top-level path with boolean operations will be ignored),  otherwise scale is applied. ",
-            "force child object fix position and fix size.",
-            "use child object constraint.(default value)"
+            "If the current object contains children (suitable for paths with boolean operations), the current object serves as the starting point. For each child, if the object chain includes a frame or symbol without a layout, the constraints on the child object are applied (ignoring constraints for groups and top-level paths with boolean operations). Otherwise, scaling is applied.",
+            "Force child objects to have fixed positions and sizes.",
+            "Apply child object constraints. (Default value.)"
           ]
         },
         "keepShapeWhenResize": {
           "type": "boolean",
-          "description": " False: The behavior of scale refers to the description in horizontalConstraint.(default value) True: When resize occurs, the object itself does not change angle, the center position is scaled, and the scale is along the length and width direction. "
+          "description": "`False`: When resizing occurs, the object scales according to the `horizontalConstraint` and `verticalConstraint`. (Default value.)\n`True`: When resizing occurs, the object itself maintains its angle, and the center position is scaled. The scaling occurs along both the length and width directions."
+        },
+        "variableDefs": {
+          "type": "array",
+          "description": "A list of variables that can be used by children.",
+          "items": {
+            "$ref": "#/definitions/VariableDef"
+          }
+        },
+        "variableRefs": {
+          "type": "array",
+          "description": "A list of referenced variables.",
+          "items": {
+            "$ref": "#/definitions/VariableRef"
+          }
+        },
+        "styleEffectBoolean": {
+          "type": "integer",
+          "description": "How the `style` of the object affects the region participating in a Boolean operation with another object.",
+          "enum": [0, 1],
+          "enumDescriptions": [
+            "ignore style(default value): The region in which an object participates in a Boolean operation is independent of its `style`.",
+            " If the object is a path and the path has `borders` without `fills`, then the `borders` will be used as a region to participate in the Boolean operation calculation. If the object is a text and the text has `borders` without `fills`, then the object will be ignored during the Boolean operation. In other cases, it behaves the same as `ignore style`. "
+          ]
         },
         "class": {
+          "type": "string",
           "const": "path"
-        },
-        "pathType": {
-          "type": "integer",
-          "description": "The type of path is described.",
-          "enum": [0, 1, 2, 3, 4, 5, 6],
-          "enumDescriptions": [
-            "rectangle",
-            "line",
-            "arrow",
-            "ellipse",
-            "polygon",
-            "star",
-            "vector"
-          ]
         },
         "shape": {
           "$ref": "#/definitions/Shape",
-          "description": "Specifies shape of the path."
+          "description": "The shape of the path, describing the details of the path."
         }
       },
       "additionalProperties": false
     },
     "Shape": {
       "title": "Shape",
-      "description": "Shape descriptor.",
+      "description": "The shape of a path. Shape represents a vector geometry which is formed by individual subshapes combined together via boolean operations.",
       "type": "object",
       "$id": "#Shape",
       "required": ["class", "subshapes", "windingRule"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "shape"
         },
         "subshapes": {
           "type": "array",
-          "description": "An array of subshape in the shape.",
+          "description": "A list of subshapes in the shape.",
           "items": {
             "$ref": "#/definitions/SubShape"
           }
         },
         "windingRule": {
           "type": "integer",
-          "description": "The value describes the shape's 'winding rule' (policy determining how overlapping contours fill an area).",
+          "description": "The rule determining whether an area is inside or outside a path.",
           "enum": [0, 1],
           "enumDescriptions": ["non-zero", "even-odd"]
         },
         "radius": {
           "type": "number",
-          "description": "Indicates the radius of the Boolean object. If this item doesn't exist or has the value 0, recurse upward to get its value. If a point of an inner object has no radius specified or its value is 0, use this value for the point's radius. This value also has an impact on the corners of the overlapping region."
+          "description": "The radius of the shape, when the `subshapes` have boolean operations.\nAffects the corners of all `subshapes` under the shape, as well as the corners of the overlapping region of the `subshapes`.\nThe `radius` of the subshapes override this radius."
         }
       },
       "additionalProperties": false
     },
     "SubShape": {
       "title": "Subshape",
-      "description": "A single subshape descriptor.",
+      "description": "One subshape in a shape.",
       "type": "object",
       "$id": "#SubShape",
       "required": ["class", "subGeometry", "booleanOperation"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "subshape"
         },
         "subGeometry": {
-          "description": "The contour of the subpath is described. When the frame and symbol-instance and symbol-master are in subGeometry, only the childObjects will be used, and the bounding box will not be used. Any mask nested within this object will be invalidated.",
+          "description": "Describes the detailed shape of the subshape through a contour with a list of points, a specified geometry, or another object.\nWhen the `frame`, `symbol-instance`, and `symbol-master` are in `subGeometry`, only the `childObjects` will be used, and the bounding box will be ignored.\nAny mask nested within this object will be invalidated.",
           "oneOf": [
             {
               "$ref": "#/definitions/Contour"
+            },
+            {
+              "$ref": "#/definitions/Ellipse"
+            },
+            {
+              "$ref": "#/definitions/Polygon"
+            },
+            {
+              "$ref": "#/definitions/Rectangle"
+            },
+            {
+              "$ref": "#/definitions/Star"
             },
             {
               "$ref": "#/definitions/Text"
@@ -1560,7 +1832,7 @@
         },
         "booleanOperation": {
           "type": "integer",
-          "description": "Boolean operation combining this and before-in-the-array path.",
+          "description": "Boolean operations that combine the current subshape with the previous subshape in the array.",
           "enum": [0, 1, 2, 3, 4],
           "enumDescriptions": [
             "union",
@@ -1575,20 +1847,22 @@
     },
     "Contour": {
       "title": "Contour",
-      "description": "Describes the contour of a shape.",
+      "description": "The contour of a shape.",
       "type": "object",
       "$id": "#Contour",
       "required": ["class", "closed", "points"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "contour"
         },
         "closed": {
           "type": "boolean",
-          "description": "Describes if the path is opened or closed."
+          "description": "Whether the path is open or closed."
         },
         "points": {
           "type": "array",
+          "description": "An array of points representing the contour of the shape.",
           "items": {
             "$ref": "#/definitions/PointAttr"
           }
@@ -1598,12 +1872,13 @@
     },
     "PointAttr": {
       "title": "Point Attr",
-      "description": "A single point descriptor.",
+      "description": "One point on the contour of a shape.",
       "type": "object",
       "$id": "#PointAttr",
       "required": ["class", "point"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "pointAttr"
         },
         "radius": {
@@ -1612,33 +1887,134 @@
         },
         "cornerStyle": {
           "type": "integer",
-          "description": "Enumeration of the corner styles that can be applied to vector points.",
+          "description": "Corner shapes of the point.",
           "enum": [0, 1, 2, 3],
           "enumDescriptions": [
-            "Rounded",
-            "RoundedInverted",
-            "Angled",
-            "Squared"
+            "rounded",
+            "inverted rounded",
+            "angled",
+            "squared"
           ]
         },
         "curveFrom": {
           "$ref": "#/definitions/Point",
-          "description": "When the current point is the starting point of the Bezier curve, this attribute describes the control point at the starting point of the Bezier curve."
+          "description": "When the current point is the starting point of the Bezier curve, this attribute represents its control point."
         },
         "curveTo": {
           "$ref": "#/definitions/Point",
-          "description": "When the current point is the end point of the Bezier curve, this attribute describes the control point of the Bezier curve's end point."
+          "description": "When the current point is the end point of the Bezier curve, this attribute represents its control point."
         },
         "point": {
           "$ref": "#/definitions/Point",
-          "description": "The actual point on the curve. The coordinates are before the matrix transformation."
+          "description": "The coordinates of the point before the matrix transformation."
+        }
+      },
+      "additionalProperties": false
+    },
+    "Ellipse": {
+      "title": "Ellipse",
+      "type": "object",
+      "description": "An elliptical or sector shape. The object's bounds determine the size of the ellipse.",
+      "$id": "#Ellipse",
+      "required": ["class", "startingAngle", "endingAngle", "innerRadius"],
+      "properties": {
+        "class": {
+          "type": "string",
+          "const": "ellipse"
+        },
+        "startingAngle": {
+          "type": "number",
+          "description": "The starting angle of the sector sweep.\nThe three o'clock direction is defined as `0`, and increasing angles rotate clockwise."
+        },
+        "endingAngle": {
+          "type": "number",
+          "description": "The ending angle of the sector sweep.\nThe three o'clock direction is defined as `0`, and increasing angles rotate clockwise."
+        },
+        "innerRadius": {
+          "type": "number",
+          "description": "A ratio of inner radius to the outer radius.",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "Polygon": {
+      "title": "polygon",
+      "type": "object",
+      "description": "A polygon shape.",
+      "$id": "#Polygon",
+      "required": ["class", "pointCount"],
+      "properties": {
+        "class": {
+          "type": "string",
+          "const": "polygon"
+        },
+        "radius": {
+          "type": "number",
+          "description": "The radius of all the corners of the polygon.\nDefault value is `0`."
+        },
+        "pointCount": {
+          "type": "integer",
+          "description": "The number of polygon vertices, which can determine the positions of the vertices on the object's bounds."
+        }
+      },
+      "additionalProperties": false
+    },
+    "Rectangle": {
+      "title": "Rectangle",
+      "type": "object",
+      "description": "A rectangular shape, determined by the object's bounds.",
+      "$id": "#Rectangle",
+      "required": ["class"],
+      "properties": {
+        "class": {
+          "type": "string",
+          "const": "rectangle"
+        },
+        "radius": {
+          "type": "array",
+          "description": "The radius values correspond to the corners in the following order: left-top, right-top, right-bottom, left-bottom.\nDefault value is `[0, 0, 0, 0]`.",
+          "maxItems": 4,
+          "minItems": 4,
+          "items": {
+            "type": "number"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "Star": {
+      "title": "Star",
+      "type": "object",
+      "description": "A star shape.",
+      "$id": "#Star",
+      "required": ["class", "ratio", "pointCount"],
+      "properties": {
+        "class": {
+          "type": "string",
+          "const": "star"
+        },
+        "radius": {
+          "type": "number",
+          "description": "The radius of all the corners of the star.\nDefault value is `0`."
+        },
+        "ratio": {
+          "type": "number",
+          "description": "Ratio refers to the size of the star within the polygon shape.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "pointCount": {
+          "type": "integer",
+          "description": "The number of star vertices, which can determine the positions of the vertices on the object's bounds."
         }
       },
       "additionalProperties": false
     },
     "Text": {
       "title": "Text",
-      "description": "Contains the information needed to draw the text.",
+      "description": "Details of a text.",
       "$id": "#Text",
       "type": "object",
       "required": [
@@ -1664,31 +2040,31 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Object identifier, unique."
+          "description": "ID of the object, globally unique."
         },
         "name": {
           "type": "string",
-          "description": "Name of object (utf-8)."
+          "description": "Name of the object, for user identification, encoded in UTF-8."
         },
         "isLocked": {
           "type": "boolean",
-          "description": "Describes whether the object is locked."
+          "description": "If `true`, the object will be unable to be edited."
         },
         "visible": {
           "type": "boolean",
-          "description": "Describes the visibility of the object."
+          "description": "If `false`, the object will be invisible."
         },
         "contextSettings": {
           "$ref": "#/definitions/GraphicsContextSettings",
-          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
+          "description": "The opacity and blending-related configurations of the object."
         },
         "style": {
           "$ref": "#/definitions/Style",
-          "description": "Object styles descriptor."
+          "description": "The borders, fills, and other styles of the object."
         },
         "bounds": {
           "$ref": "#/definitions/Rect",
-          "description": "This property records the bounds information of the object before it is matrixed."
+          "description": "The bounds of the object before undergoing matrix transformations."
         },
         "frame": {
           "$ref": "#/definitions/Rect",
@@ -1696,133 +2072,168 @@
         },
         "matrix": {
           "$ref": "#/definitions/Matrix",
-          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
+          "description": "Matrix used for translating, rotating, and scaling the object."
         },
         "alphaMaskBy": {
           "type": "array",
+          "description": "A list of alpha masks applied to the object.",
           "items": {
             "$ref": "#/definitions/AlphaMask"
           }
         },
         "outlineMaskBy": {
           "type": "array",
-          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
+          "description": "A list of outline masks applied to the object, clipped by the intersection of their outlines.\nThe items in the list are object IDs of the masks.",
           "items": {
-            "type": "string",
-            "description": "The value is ID of a object that is a outline mask of this object."
+            "type": "string"
           }
         },
         "maskType": {
           "type": "integer",
-          "description": "Describes the mask type of the object.",
+          "description": "The mask type of the object.",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
+          "enumDescriptions": ["not a mask", "outline mask", "alpha mask"]
         },
         "styleEffectMaskArea": {
           "type": "integer",
+          "description": "How the `style` and `visible` of the mask object affect the area of the mask.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            "The style and visible of the object not affects the area of the mask. The area of mask depends on bound.",
-            "The style of the object not affects the area of the mask. The visible of the object affects the area of the mask.",
-            "The style and visible of the object affects the area of the mask."
+            "The `style` and `visible` of the mask object do not affect the area of the mask, which depends on its bounds.",
+            "The `style` of the mask object does not affect the area of the mask, while the `visible` does.",
+            "The `style` and `visible` of the mask object do affect the area of the mask."
           ]
         },
         "maskShowType": {
           "type": "integer",
-          "description": "Decide how the mask object should be displayed.",
+          "description": "How the mask object is displayed.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            "depends on the style. (default value for outline mask)",
-            "only show bounds. (default value for alpha mask when it alphaType equal 0)",
-            "not show. (default for other condition)"
+            "depend on its `style`. (Default value for `outline mask`.)",
+            "only display its bounds. (Default value for `alpha mask` when its `alphaType` equals `0`.)",
+            "do not display. (Default value for other conditions.)"
           ]
         },
         "overflow": {
-          "description": "Sets what happens when a child element of a parent overflows its space.",
+          "description": "How to display the child element of the object when it overflows its container.",
           "type": "integer",
           "enum": [1, 2, 3],
           "enumDescriptions": [
-            "hidden: Anything outside the scope of the container will be cropped and invisible.",
-            "visible: Contents outside the scope of the container will not be cropped and will be visible.",
-            "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
+            "hidden. Anything outside the scope of the container will be cropped and invisible.",
+            "visible. Contents outside the scope of the container will not be cropped and will be visible.",
+            "scrolled. Content that is outside the container's scope is cropped, and a scrollbar is displayed to view the content that is beyond the container's boundaries."
           ]
         },
         "cornerSmoothing": {
           "type": "number",
-          "description": " Used to control corner smooth. Range: [0, 1] "
+          "description": "Smoothness of rounded corners. Range: `[0, 1]`.\n`0` is the default value, indicating no smoothing for rounded corners."
         },
         "overrideKey": {
           "type": "string",
-          "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+          "description": "Used to be associated with the object by symbol instances for overriding its attributes. Check the `objectId` in the `OverrideValue` for details.\nIf `overrideKey` exists, find a symbol master through upward traversal (which could be the object itself); `overrideKey` is unique within the symbol master."
         },
         "horizontalConstraint": {
           "$ref": "#/definitions/Constraint",
-          "description": "Horizontal layout constraints for object. Default value is 1."
+          "description": "Horizontal layout constraints for the object.\nDefault value is `1`."
         },
         "verticalConstraint": {
           "$ref": "#/definitions/Constraint",
-          "description": "Vertical layout constraints for object. Default value is 1."
+          "description": "Vertical layout constraints for the object.\nDefault value is `1`."
         },
         "resizesContent": {
           "type": "integer",
+          "description": "How child objects behave when the object is resized.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            " If the current object contains children(suitable for path with boolean operations),  the current object is used as the starting point, and for all children,  If the object chain has a frame or symbol without layout, then the constraint on the child object is applied(the constraints of group and top-level path with boolean operations will be ignored),  otherwise scale is applied. ",
-            "force child object fix position and fix size.",
-            "use child object constraint.(default value)"
+            "If the current object contains children (suitable for paths with boolean operations), the current object serves as the starting point. For each child, if the object chain includes a frame or symbol without a layout, the constraints on the child object are applied (ignoring constraints for groups and top-level paths with boolean operations). Otherwise, scaling is applied.",
+            "Force child objects to have fixed positions and sizes.",
+            "Apply child object constraints. (Default value.)"
           ]
         },
         "keepShapeWhenResize": {
           "type": "boolean",
-          "description": " False: The behavior of scale refers to the description in horizontalConstraint.(default value) True: When resize occurs, the object itself does not change angle, the center position is scaled, and the scale is along the length and width direction. "
+          "description": "`False`: When resizing occurs, the object scales according to the `horizontalConstraint` and `verticalConstraint`. (Default value.)\n`True`: When resizing occurs, the object itself maintains its angle, and the center position is scaled. The scaling occurs along both the length and width directions."
+        },
+        "variableDefs": {
+          "type": "array",
+          "description": "A list of variables that can be used by children.",
+          "items": {
+            "$ref": "#/definitions/VariableDef"
+          }
+        },
+        "variableRefs": {
+          "type": "array",
+          "description": "A list of referenced variables.",
+          "items": {
+            "$ref": "#/definitions/VariableRef"
+          }
+        },
+        "styleEffectBoolean": {
+          "type": "integer",
+          "description": "How the `style` of the object affects the region participating in a Boolean operation with another object.",
+          "enum": [0, 1],
+          "enumDescriptions": [
+            "ignore style(default value): The region in which an object participates in a Boolean operation is independent of its `style`.",
+            " If the object is a path and the path has `borders` without `fills`, then the `borders` will be used as a region to participate in the Boolean operation calculation. If the object is a text and the text has `borders` without `fills`, then the object will be ignored during the Boolean operation. In other cases, it behaves the same as `ignore style`. "
+          ]
         },
         "class": {
+          "type": "string",
           "const": "text"
         },
         "content": {
           "type": "string",
-          "description": "Text content of the text object. The encoding format is utf-8."
+          "description": "The text content of the text object.\nThe encoding format is UTF-8."
         },
         "textOnPath": {
           "$ref": "#/definitions/TextOnPath",
-          "description": "If this item exists, the text is on the path."
+          "description": "The text is arranged along the path."
         },
         "frameMode": {
           "type": "integer",
-          "description": "Specifies the text frame semantics. fixed mode strictly sets the typeset area according to the frame. auto width and auto height mode expands associated bounds as needed.",
+          "description": "The mode of the text frame size.",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["fixed", "auto width", "auto height"]
+          "enumDescriptions": [
+            "fixed. The size of the text frame is fixed.",
+            "auto width. The width and height of the text frame are both adaptive.",
+            "auto height. The height of the text frame is adaptive, and the width is fixed."
+          ]
         },
         "truncatedHeight": {
           "type": "number",
-          "description": "Text truncation height. omit represents no such attribute."
+          "description": "The maximum height that can be displayed inside the text frame, with any text exceeding this height being truncated."
         },
         "verticalAlignment": {
           "type": "integer",
-          "description": "Text vertical alignment.",
+          "description": "The type of vertical alignment for the text.",
           "enum": [0, 1, 2],
           "enumDescriptions": ["top", "center", "bottom"]
         },
+        "defaultAttr": {
+          "$ref": "#/definitions/FontAttr",
+          "description": "The default font attributes of the text. If some font attributes are missing in `attr`, take the font attributes here.\nThe value of `length` in this field is meaningless."
+        },
         "attr": {
           "type": "array",
-          "description": "An array containing font style ranges. Note: Arrays are ordered.",
+          "description": "An ordered list, where each item sequentially describes the font attributes of a text fragment.\nIf some font attributes are missing in an item, take the font attributes from `defaultAttr`.",
           "items": {
             "$ref": "#/definitions/FontAttr"
           }
         },
         "lineType": {
           "type": "array",
+          "description": "A list with a length equals to the number of text lines, where each item describes the index preceding each line of text.",
           "items": {
             "$ref": "#/definitions/LineType"
           }
         },
         "verticalTrim": {
           "type": "boolean",
-          "description": " True: cap height to baseline. False: do nothing.(default value) "
+          "description": "If true, trim the text portion that extends beyond the text frame starting from the baseline, based on `verticalAlignment`\nDefault value is `false`."
         },
         "lineAnchorPoint": {
           "type": "array",
-          "description": " If item doesn't exist 1. The anchor is in the top-left corner of the object 2. The internal horizontal alignment of the object is determined by attr.horizontalAlignment If it exists and the frameMode is auto width: 1. The items in the object's bounds are all 0 2. There are as many lines of text as there are elements in the field 3. Ignore the attr.horizontalAlignment property 4. The values tx and ty in the matrix of the object, together with the values at the head of this item, determine where the text is drawn 5. For non-first lines of text, this corresponds to the horizontal alignment between the line and the anchor If it exists and frameMode is not auto width: 1. The anchor is in the top-left corner of the object 2. There are as many lines of text as there are elements in the field 3. Ignore the attr.horizontalAlignment property 4. Each element of this field determines the horizontal alignment of the corresponding line ",
+          "description": "**IF** item doesn't exist,\n  The anchor point is at the top-left corner of the object.\n  The internal horizontal alignment of the object is determined by `attr.horizontalAlignment`.\n**IF** it exists and the `frameMode` is `auto width`,\n  The items in the object's bounds are all `0`.\n  There are as many lines of text as there are elements in the field.\n  Ignore the `attr.horizontalAlignment` property.\n  The values `tx` and `ty` in the matrix of the object, together with the values at the head of this item, determine where the text is drawn.\n  For non-first lines of text, this corresponds to the horizontal alignment between the line and the anchor.\n**IF** it exists and `frameMode` is not `auto width`,\n  The anchor is at the top-left corner of the object.\n  There are as many lines of text as there are elements in the field.\n  Ignore the `attr.horizontalAlignment` property.\n  Each element of this field determines the horizontal alignment of the corresponding line.",
           "items": {
             "$ref": "#/definitions/TextLineAnchorPoint"
           }
@@ -1832,210 +2243,222 @@
     },
     "TextOnPath": {
       "title": "Text On Path",
-      "description": "Describes information about text on a path.",
+      "description": "Text on path, allowing text to be arranged along a specified path.",
       "type": "object",
       "$id": "#TextOnPath",
       "required": ["class"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "textOnPath"
         }
       },
       "additionalProperties": false
     },
     "FontAttr": {
-      "title": "Text Attr",
-      "description": "Text Attr defined for particular fragments of the text (text ranges).",
+      "title": "Text Font Attributes",
+      "description": "The font attributes of a text fragment.",
       "type": "object",
       "$id": "#FontAttr",
-      "required": [
-        "class",
-        "horizontalAlignment",
-        "size",
-        "kerning",
-        "letterSpacing",
-        "lineSpace",
-        "underline",
-        "linethrough",
-        "lettertransform",
-        "baselineShift",
-        "baseline",
-        "horizontalScale",
-        "verticalScale",
-        "proportionalSpacing",
-        "rotate",
-        "textParagraph"
-      ],
+      "required": ["class"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "fontAttr"
         },
         "length": {
           "type": "integer",
-          "description": " The number of characters(utf-8) that the current attribute acts on. If this item omit, it means current attribute acts on all remainder characters. note: If a utf8 character is 4 bytes, its length counts as 2 If a utf8 character is 1 ~ 3 bytes, its length counts as 1 "
+          "description": "The number of characters(UTF-8) that these attributes apply to.\nIf this item is missing, it means these attributes apply to all remaining characters in the text.\n**Note**:\n  If a UTF-8 character is `4` bytes, its length counts as `2`.\n  If a UTF-8 character is `1 ~ 3` bytes, its length counts as `1`."
         },
         "borders": {
           "type": "array",
-          "description": "An array containing the border styles of the character. Take precedence over the corresponding property of the object. If the entry is not exists, the corresponding property of the object itself is used.",
+          "description": "A list of the character's border styles. \nPriority: The `borders` of the text fragment > the `borders` in `defaultAttr` of the text > the `borders` in the text object's `style`.",
           "items": {
             "$ref": "#/definitions/Border"
           }
         },
         "fills": {
           "type": "array",
-          "description": "An array containing the fill effects of the character.",
+          "description": "A list of the character's fill effects. The priority of `fills` is listed in `fillUseType`.",
           "items": {
             "$ref": "#/definitions/Fill"
           }
         },
         "fillUseType": {
           "type": "integer",
+          "description": "The priority of `fills`.",
           "enum": [0, 1],
           "enumDescriptions": [
-            "fills take precedence over the corresponding property of the object, unless fills not exists.(default value)",
-            "The corresponding property of the object take precedence over fills. When style.fills only has one valid solid color object and fills only has one valid solid color object, the opacity of the two solid color objects is added to the solid color object of style.fills."
+            "Priority of the `fills`. The `fills` of the text fragment > the `fills` in `defaultAttr` of the text > the `fills` in the text object's `style`. (Default value)",
+            "The corresponding property of the object takes precedence over `fills`. When `style.fills` and `fills` each have only one valid solid color object, the opacity of the two solid color objects is combined into the `style.fills` solid color object."
           ]
         },
         "horizontalAlignment": {
           "type": "integer",
-          "description": "Horizontal alignment of the text.",
+          "description": "The type of horizontal alignment for the text.",
           "enum": [0, 1, 2, 3, 4],
           "enumDescriptions": [
-            "Left",
-            "Right",
-            "Centered",
-            "Justified",
-            "Natural"
+            "left (default value)",
+            "right",
+            "center",
+            "justified",
+            "natural"
           ]
         },
         "name": {
           "type": "string",
-          "description": "Common name of font. The font name may contain subfamily, in which case the subFamilyName will not appear. If this item does not exist, the font name cannot be obtained(maybe some error occur), application can fall back to using the default font name."
+          "description": "Common name of the font.\nThe font name may contain subfamily, in which case the `subFamilyName` will not appear.\nIf this item does not exist or is empty, the application can fall back to using its default font name."
         },
         "subFamilyName": {
           "type": "string",
-          "description": "Font type (called 'subfamily' in OpenType specification)."
+          "description": "Subfamily name or font type.\nThe value may be empty."
         },
         "size": {
           "type": "number",
-          "description": "Font's size."
+          "description": "Font size.\nDefault value is `1`."
         },
-        "kerning": {
-          "type": "boolean",
-          "description": "Describes if kerning feature is enabled in the text."
-        },
-        "letterSpacing": {
+        "letterSpacingValue": {
           "type": "number",
-          "description": "Text letter spacing (can be negative)."
+          "description": "Text character spacing value (can be negative).\nMust be used together with `letterSpacingUnit`.\nDefault value is `0`."
         },
-        "lineSpace": {
+        "letterSpacingUnit": {
+          "type": "integer",
+          "description": "The unit of `letterSpacingValue` value.",
+          "enum": [0, 1],
+          "enumDescriptions": [
+            "pixel (default value)",
+            "percent. Final pixel value equals to `size * letterSpacingValue / 100`."
+          ]
+        },
+        "lineSpaceValue": {
           "type": "number",
-          "description": "Describes the line spacing values of the text."
+          "description": "The spacing value of the text lines.\nMust be used together with `lineSpaceUnit`.\nDefault value is `0`."
+        },
+        "lineSpaceUnit": {
+          "type": "integer",
+          "description": "The unit of `lineSpaceValue` value.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": [
+            "pixel (default value)",
+            "percent. Final pixel value equals to `size * lineSpaceValue * 1.25 / 100`.",
+            "raw. Final pixel value equals to `size * lineSpaceValue`."
+          ]
         },
         "underline": {
           "type": "integer",
-          "description": "Text underline type.",
+          "description": "The underline type of the text.",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["none", "single line", "double line"]
+          "enumDescriptions": [
+            "none (default value)",
+            "single line",
+            "double line"
+          ]
         },
         "linethrough": {
           "type": "boolean",
-          "description": "Describes if the text has line through."
+          "description": "Whether the text has a line through.\nDefault value is `false`."
         },
-        "bold": {
-          "type": "boolean",
-          "description": "Describes if the text is bold. If missing the information is not known."
-        },
-        "italic": {
-          "type": "boolean",
-          "description": "Describes if the text is italic. If missing the information is not known."
-        },
-        "lettertransform": {
+        "textCase": {
           "type": "integer",
-          "enum": [0, 1, 2, 3, 4, 5],
+          "description": "The type of text case.\n**Note**:\n  `textCase` and `fontVariantCaps` are mutually exclusive. If either item is nonzero, you can ignore the value of the other, as they will not be nonzero at the same time.",
+          "enum": [0, 1, 2, 3],
           "enumDescriptions": [
-            "do nothing.",
-            "open smallcaps.",
-            "open uppercase.",
-            "open lowercase.",
-            "force smallcaps.",
-            "title"
+            "do nothing (default value)",
+            "uppercase",
+            "lowercase",
+            "title case"
+          ]
+        },
+        "fontVariantCaps": {
+          "type": "integer",
+          "description": "The type of small caps.\n**Note**:\n  `textCase` and `fontVariantCaps` are mutually exclusive. If either item is nonzero, you can ignore the value of the other, as they will not be nonzero at the same time.",
+          "enum": [0, 1, 2],
+          "enumDescriptions": [
+            "do nothing (default value)",
+            "small caps",
+            "force small caps, including uppercase characters"
           ]
         },
         "baselineShift": {
           "type": "number",
-          "description": "Describes baselineShift value."
+          "description": "Vertical offset of the text baseline.\nDefault value is `0`."
         },
         "baseline": {
           "type": "integer",
-          "description": "Describes baseline's position type.",
+          "description": "The type of the text baseline's position.",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["normal", "superScript", "subScript"]
+          "enumDescriptions": [
+            "normal (default value)",
+            "superscript",
+            "subscript"
+          ]
         },
         "horizontalScale": {
           "type": "number",
-          "description": "Describes the horizontal scaling value of text.\nValue example:\n  1:    not scale\n  1.75: 175%\n  2:    200%\n  0.5:  50%\n"
+          "description": "Scale the text characters horizontally.\nDefault value is `1`.\nValue examples:\n  0.5:  50%\n  1:    not scale\n  1.75: 175%\n  2:    200%"
         },
         "verticalScale": {
           "type": "number",
-          "description": "Describes the vertical scaling value of text. Value example reference horizontalScale."
-        },
-        "proportionalSpacing": {
-          "type": "number",
-          "description": "Describes the proportional spacing of text.\nValue example:\n  1:    100%\n  0.5:  50%\n  0:    0%\n",
-          "maximum": 1,
-          "minimum": 0
+          "description": "Scale the text characters vertically.\nDefault value is `1`.\nRefer to `horizontalScale` for value examples."
         },
         "rotate": {
           "type": "number",
-          "description": "Describes the value of text rotation(in degree).",
+          "description": "Rotation angle of text characters.\nDefault value is `0`.",
           "maximum": 180,
           "minimum": -180
         },
         "textParagraph": {
-          "$ref": "#/definitions/TextParagraph"
+          "$ref": "#/definitions/TextParagraph",
+          "description": "The properties of the text paragraph, which are consistent across the same text paragraph."
         }
       },
       "additionalProperties": false
     },
     "TextParagraph": {
       "title": "Text Paragraph",
-      "description": "Describes the paragraph properties of the text.",
+      "description": "The properties of a text paragraph.",
       "type": "object",
       "$id": "#TextParagraph",
       "required": ["class", "paragraphSpacing"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "textParagraph"
         },
         "paragraphSpacing": {
-          "type": "number"
+          "type": "number",
+          "description": "Additional spacing between paragraphs, in addition to line spacing.\nDefault value is `0`."
         }
       },
       "additionalProperties": false
     },
     "LineType": {
       "title": "Line Type",
-      "description": "Describes the list behavior of a row.",
+      "description": "The properties of a text line within a text list.",
       "type": "object",
       "$id": "#LineType",
       "required": ["class", "styleType", "level", "isFirst"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "lineType"
         },
         "styleType": {
           "type": "integer",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["plain", "ordered list", "unordered list"]
+          "enumDescriptions": [
+            "plain, not a list",
+            "ordered list",
+            "unordered list"
+          ]
         },
         "level": {
           "type": "integer",
-          "description": "Starting with 0(default value), the level of rows is described."
+          "description": "The hierarchy level of the text line, starting with `0`(default value)."
         },
         "isFirst": {
           "type": "boolean",
-          "description": "Whether the current row is the first row in the hierarchy."
+          "description": "Whether the text line is the first line in the text list of the same hierarchy level.\nOnly has meaning for an ordered list."
         }
       },
       "additionalProperties": false
@@ -2045,19 +2468,19 @@
       "type": "integer",
       "enum": [1, 2, 3, 4, 5, 6, 7],
       "enumDescriptions": [
-        "left.",
-        "center.",
-        "right.",
+        "Left.",
+        "Center.",
+        "Right.",
         "Justified, and the last line to the left.",
         "Justified, and the last line to the center.",
         "Justified, and the last line to the right.",
-        "Justified"
+        "Justified."
       ],
       "$id": "#TextLineAnchorPoint"
     },
     "Image": {
       "title": "Image",
-      "description": "Contains the information needed to draw the image.",
+      "description": "Details of an image.",
       "$id": "#Image",
       "type": "object",
       "required": [
@@ -2080,31 +2503,31 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Object identifier, unique."
+          "description": "ID of the object, globally unique."
         },
         "name": {
           "type": "string",
-          "description": "Name of object (utf-8)."
+          "description": "Name of the object, for user identification, encoded in UTF-8."
         },
         "isLocked": {
           "type": "boolean",
-          "description": "Describes whether the object is locked."
+          "description": "If `true`, the object will be unable to be edited."
         },
         "visible": {
           "type": "boolean",
-          "description": "Describes the visibility of the object."
+          "description": "If `false`, the object will be invisible."
         },
         "contextSettings": {
           "$ref": "#/definitions/GraphicsContextSettings",
-          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
+          "description": "The opacity and blending-related configurations of the object."
         },
         "style": {
           "$ref": "#/definitions/Style",
-          "description": "Object styles descriptor."
+          "description": "The borders, fills, and other styles of the object."
         },
         "bounds": {
           "$ref": "#/definitions/Rect",
-          "description": "This property records the bounds information of the object before it is matrixed."
+          "description": "The bounds of the object before undergoing matrix transformations."
         },
         "frame": {
           "$ref": "#/definitions/Rect",
@@ -2112,106 +2535,133 @@
         },
         "matrix": {
           "$ref": "#/definitions/Matrix",
-          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
+          "description": "Matrix used for translating, rotating, and scaling the object."
         },
         "alphaMaskBy": {
           "type": "array",
+          "description": "A list of alpha masks applied to the object.",
           "items": {
             "$ref": "#/definitions/AlphaMask"
           }
         },
         "outlineMaskBy": {
           "type": "array",
-          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
+          "description": "A list of outline masks applied to the object, clipped by the intersection of their outlines.\nThe items in the list are object IDs of the masks.",
           "items": {
-            "type": "string",
-            "description": "The value is ID of a object that is a outline mask of this object."
+            "type": "string"
           }
         },
         "maskType": {
           "type": "integer",
-          "description": "Describes the mask type of the object.",
+          "description": "The mask type of the object.",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
+          "enumDescriptions": ["not a mask", "outline mask", "alpha mask"]
         },
         "styleEffectMaskArea": {
           "type": "integer",
+          "description": "How the `style` and `visible` of the mask object affect the area of the mask.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            "The style and visible of the object not affects the area of the mask. The area of mask depends on bound.",
-            "The style of the object not affects the area of the mask. The visible of the object affects the area of the mask.",
-            "The style and visible of the object affects the area of the mask."
+            "The `style` and `visible` of the mask object do not affect the area of the mask, which depends on its bounds.",
+            "The `style` of the mask object does not affect the area of the mask, while the `visible` does.",
+            "The `style` and `visible` of the mask object do affect the area of the mask."
           ]
         },
         "maskShowType": {
           "type": "integer",
-          "description": "Decide how the mask object should be displayed.",
+          "description": "How the mask object is displayed.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            "depends on the style. (default value for outline mask)",
-            "only show bounds. (default value for alpha mask when it alphaType equal 0)",
-            "not show. (default for other condition)"
+            "depend on its `style`. (Default value for `outline mask`.)",
+            "only display its bounds. (Default value for `alpha mask` when its `alphaType` equals `0`.)",
+            "do not display. (Default value for other conditions.)"
           ]
         },
         "overflow": {
-          "description": "Sets what happens when a child element of a parent overflows its space.",
+          "description": "How to display the child element of the object when it overflows its container.",
           "type": "integer",
           "enum": [1, 2, 3],
           "enumDescriptions": [
-            "hidden: Anything outside the scope of the container will be cropped and invisible.",
-            "visible: Contents outside the scope of the container will not be cropped and will be visible.",
-            "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
+            "hidden. Anything outside the scope of the container will be cropped and invisible.",
+            "visible. Contents outside the scope of the container will not be cropped and will be visible.",
+            "scrolled. Content that is outside the container's scope is cropped, and a scrollbar is displayed to view the content that is beyond the container's boundaries."
           ]
         },
         "cornerSmoothing": {
           "type": "number",
-          "description": " Used to control corner smooth. Range: [0, 1] "
+          "description": "Smoothness of rounded corners. Range: `[0, 1]`.\n`0` is the default value, indicating no smoothing for rounded corners."
         },
         "overrideKey": {
           "type": "string",
-          "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+          "description": "Used to be associated with the object by symbol instances for overriding its attributes. Check the `objectId` in the `OverrideValue` for details.\nIf `overrideKey` exists, find a symbol master through upward traversal (which could be the object itself); `overrideKey` is unique within the symbol master."
         },
         "horizontalConstraint": {
           "$ref": "#/definitions/Constraint",
-          "description": "Horizontal layout constraints for object. Default value is 1."
+          "description": "Horizontal layout constraints for the object.\nDefault value is `1`."
         },
         "verticalConstraint": {
           "$ref": "#/definitions/Constraint",
-          "description": "Vertical layout constraints for object. Default value is 1."
+          "description": "Vertical layout constraints for the object.\nDefault value is `1`."
         },
         "resizesContent": {
           "type": "integer",
+          "description": "How child objects behave when the object is resized.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            " If the current object contains children(suitable for path with boolean operations),  the current object is used as the starting point, and for all children,  If the object chain has a frame or symbol without layout, then the constraint on the child object is applied(the constraints of group and top-level path with boolean operations will be ignored),  otherwise scale is applied. ",
-            "force child object fix position and fix size.",
-            "use child object constraint.(default value)"
+            "If the current object contains children (suitable for paths with boolean operations), the current object serves as the starting point. For each child, if the object chain includes a frame or symbol without a layout, the constraints on the child object are applied (ignoring constraints for groups and top-level paths with boolean operations). Otherwise, scaling is applied.",
+            "Force child objects to have fixed positions and sizes.",
+            "Apply child object constraints. (Default value.)"
           ]
         },
         "keepShapeWhenResize": {
           "type": "boolean",
-          "description": " False: The behavior of scale refers to the description in horizontalConstraint.(default value) True: When resize occurs, the object itself does not change angle, the center position is scaled, and the scale is along the length and width direction. "
+          "description": "`False`: When resizing occurs, the object scales according to the `horizontalConstraint` and `verticalConstraint`. (Default value.)\n`True`: When resizing occurs, the object itself maintains its angle, and the center position is scaled. The scaling occurs along both the length and width directions."
+        },
+        "variableDefs": {
+          "type": "array",
+          "description": "A list of variables that can be used by children.",
+          "items": {
+            "$ref": "#/definitions/VariableDef"
+          }
+        },
+        "variableRefs": {
+          "type": "array",
+          "description": "A list of referenced variables.",
+          "items": {
+            "$ref": "#/definitions/VariableRef"
+          }
+        },
+        "styleEffectBoolean": {
+          "type": "integer",
+          "description": "How the `style` of the object affects the region participating in a Boolean operation with another object.",
+          "enum": [0, 1],
+          "enumDescriptions": [
+            "ignore style(default value): The region in which an object participates in a Boolean operation is independent of its `style`.",
+            " If the object is a path and the path has `borders` without `fills`, then the `borders` will be used as a region to participate in the Boolean operation calculation. If the object is a text and the text has `borders` without `fills`, then the object will be ignored during the Boolean operation. In other cases, it behaves the same as `ignore style`. "
+          ]
         },
         "class": {
+          "type": "string",
           "const": "image"
         },
         "imageFileName": {
           "type": "string",
-          "description": "The relative path to the image file (utf-8)."
+          "description": "The path (UTF-8) of the image file."
         },
         "fillReplacesImage": {
           "type": "boolean",
-          "description": "If the value is true, only fill is used. Otherwise, the content of the image and the fill effect are used simultaneously. If missing, equivalent to false."
+          "description": "If the value is `true`, the image content is not displayed, and only the `fill` effect is shown.\nOtherwise, both the image content and the `fill` effect take effect simultaneously.\nDefault value is `false`."
         },
         "imageAdjust": {
-          "$ref": "#/definitions/ImageAdjust"
+          "$ref": "#/definitions/ImageAdjust",
+          "description": "Adjust the colors of the image."
         }
       },
       "additionalProperties": false
     },
     "Group": {
       "title": "Group",
-      "description": "A group is a combination of a series of objects.",
+      "description": "A group combines a list of objects, but it is not considered an object itself.\nIn contrast to a frame, a frame is an object that can be rendered and a container that holds objects.\nFor example:\n  The group's fills affect all of its children.\n  The frame's fills affect itself.",
       "$id": "#Group",
       "type": "object",
       "required": [
@@ -2234,31 +2684,31 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Object identifier, unique."
+          "description": "ID of the object, globally unique."
         },
         "name": {
           "type": "string",
-          "description": "Name of object (utf-8)."
+          "description": "Name of the object, for user identification, encoded in UTF-8."
         },
         "isLocked": {
           "type": "boolean",
-          "description": "Describes whether the object is locked."
+          "description": "If `true`, the object will be unable to be edited."
         },
         "visible": {
           "type": "boolean",
-          "description": "Describes the visibility of the object."
+          "description": "If `false`, the object will be invisible."
         },
         "contextSettings": {
           "$ref": "#/definitions/GraphicsContextSettings",
-          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
+          "description": "The opacity and blending-related configurations of the object."
         },
         "style": {
           "$ref": "#/definitions/Style",
-          "description": "Object styles descriptor."
+          "description": "The borders, fills, and other styles of the object."
         },
         "bounds": {
           "$ref": "#/definitions/Rect",
-          "description": "This property records the bounds information of the object before it is matrixed."
+          "description": "The bounds of the object before undergoing matrix transformations."
         },
         "frame": {
           "$ref": "#/definitions/Rect",
@@ -2266,89 +2716,114 @@
         },
         "matrix": {
           "$ref": "#/definitions/Matrix",
-          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
+          "description": "Matrix used for translating, rotating, and scaling the object."
         },
         "alphaMaskBy": {
           "type": "array",
+          "description": "A list of alpha masks applied to the object.",
           "items": {
             "$ref": "#/definitions/AlphaMask"
           }
         },
         "outlineMaskBy": {
           "type": "array",
-          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
+          "description": "A list of outline masks applied to the object, clipped by the intersection of their outlines.\nThe items in the list are object IDs of the masks.",
           "items": {
-            "type": "string",
-            "description": "The value is ID of a object that is a outline mask of this object."
+            "type": "string"
           }
         },
         "maskType": {
           "type": "integer",
-          "description": "Describes the mask type of the object.",
+          "description": "The mask type of the object.",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
+          "enumDescriptions": ["not a mask", "outline mask", "alpha mask"]
         },
         "styleEffectMaskArea": {
           "type": "integer",
+          "description": "How the `style` and `visible` of the mask object affect the area of the mask.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            "The style and visible of the object not affects the area of the mask. The area of mask depends on bound.",
-            "The style of the object not affects the area of the mask. The visible of the object affects the area of the mask.",
-            "The style and visible of the object affects the area of the mask."
+            "The `style` and `visible` of the mask object do not affect the area of the mask, which depends on its bounds.",
+            "The `style` of the mask object does not affect the area of the mask, while the `visible` does.",
+            "The `style` and `visible` of the mask object do affect the area of the mask."
           ]
         },
         "maskShowType": {
           "type": "integer",
-          "description": "Decide how the mask object should be displayed.",
+          "description": "How the mask object is displayed.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            "depends on the style. (default value for outline mask)",
-            "only show bounds. (default value for alpha mask when it alphaType equal 0)",
-            "not show. (default for other condition)"
+            "depend on its `style`. (Default value for `outline mask`.)",
+            "only display its bounds. (Default value for `alpha mask` when its `alphaType` equals `0`.)",
+            "do not display. (Default value for other conditions.)"
           ]
         },
         "overflow": {
-          "description": "Sets what happens when a child element of a parent overflows its space.",
+          "description": "How to display the child element of the object when it overflows its container.",
           "type": "integer",
           "enum": [1, 2, 3],
           "enumDescriptions": [
-            "hidden: Anything outside the scope of the container will be cropped and invisible.",
-            "visible: Contents outside the scope of the container will not be cropped and will be visible.",
-            "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
+            "hidden. Anything outside the scope of the container will be cropped and invisible.",
+            "visible. Contents outside the scope of the container will not be cropped and will be visible.",
+            "scrolled. Content that is outside the container's scope is cropped, and a scrollbar is displayed to view the content that is beyond the container's boundaries."
           ]
         },
         "cornerSmoothing": {
           "type": "number",
-          "description": " Used to control corner smooth. Range: [0, 1] "
+          "description": "Smoothness of rounded corners. Range: `[0, 1]`.\n`0` is the default value, indicating no smoothing for rounded corners."
         },
         "overrideKey": {
           "type": "string",
-          "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+          "description": "Used to be associated with the object by symbol instances for overriding its attributes. Check the `objectId` in the `OverrideValue` for details.\nIf `overrideKey` exists, find a symbol master through upward traversal (which could be the object itself); `overrideKey` is unique within the symbol master."
         },
         "horizontalConstraint": {
           "$ref": "#/definitions/Constraint",
-          "description": "Horizontal layout constraints for object. Default value is 1."
+          "description": "Horizontal layout constraints for the object.\nDefault value is `1`."
         },
         "verticalConstraint": {
           "$ref": "#/definitions/Constraint",
-          "description": "Vertical layout constraints for object. Default value is 1."
+          "description": "Vertical layout constraints for the object.\nDefault value is `1`."
         },
         "resizesContent": {
           "type": "integer",
+          "description": "How child objects behave when the object is resized.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            " If the current object contains children(suitable for path with boolean operations),  the current object is used as the starting point, and for all children,  If the object chain has a frame or symbol without layout, then the constraint on the child object is applied(the constraints of group and top-level path with boolean operations will be ignored),  otherwise scale is applied. ",
-            "force child object fix position and fix size.",
-            "use child object constraint.(default value)"
+            "If the current object contains children (suitable for paths with boolean operations), the current object serves as the starting point. For each child, if the object chain includes a frame or symbol without a layout, the constraints on the child object are applied (ignoring constraints for groups and top-level paths with boolean operations). Otherwise, scaling is applied.",
+            "Force child objects to have fixed positions and sizes.",
+            "Apply child object constraints. (Default value.)"
           ]
         },
         "keepShapeWhenResize": {
           "type": "boolean",
-          "description": " False: The behavior of scale refers to the description in horizontalConstraint.(default value) True: When resize occurs, the object itself does not change angle, the center position is scaled, and the scale is along the length and width direction. "
+          "description": "`False`: When resizing occurs, the object scales according to the `horizontalConstraint` and `verticalConstraint`. (Default value.)\n`True`: When resizing occurs, the object itself maintains its angle, and the center position is scaled. The scaling occurs along both the length and width directions."
+        },
+        "variableDefs": {
+          "type": "array",
+          "description": "A list of variables that can be used by children.",
+          "items": {
+            "$ref": "#/definitions/VariableDef"
+          }
+        },
+        "variableRefs": {
+          "type": "array",
+          "description": "A list of referenced variables.",
+          "items": {
+            "$ref": "#/definitions/VariableRef"
+          }
+        },
+        "styleEffectBoolean": {
+          "type": "integer",
+          "description": "How the `style` of the object affects the region participating in a Boolean operation with another object.",
+          "enum": [0, 1],
+          "enumDescriptions": [
+            "ignore style(default value): The region in which an object participates in a Boolean operation is independent of its `style`.",
+            " If the object is a path and the path has `borders` without `fills`, then the `borders` will be used as a region to participate in the Boolean operation calculation. If the object is a text and the text has `borders` without `fills`, then the object will be ignored during the Boolean operation. In other cases, it behaves the same as `ignore style`. "
+          ]
         },
         "childObjects": {
           "type": "array",
-          "description": "Describes all child object information. The child item that appears later will be above the child item that appears first.",
+          "description": "A list of all child objects.\n**Note:** The child object that appears later in the list will be displayed above the one that appears first.",
           "items": {
             "oneOf": [
               {
@@ -2376,18 +2851,23 @@
           }
         },
         "class": {
+          "type": "string",
           "const": "group"
         },
         "groupNestMaskType": {
           "type": "boolean",
-          "description": " When the group itself is a mask and the group contains a mask, this value affects the valid area of the group as a mask. True: The mask region of the group is the result after the inner mask. False: A mask inside a group does not affect the region of the group's mask. (default value) If the object does not act as a mask, or does not have a mask child inside it, then this property is ignored. "
+          "description": "When the group itself is a mask and the group contains a mask, this value affects the valid area of the group as a mask.\n`True`: The mask region of the group is the result after the inner mask.\n`False`: A mask inside a group does not affect the region of the group's mask (default value).\nIf the object does not act as a mask or does not have a mask child inside it, then this property is ignored."
+        },
+        "isVectorNetwork": {
+          "type": "boolean",
+          "description": "Currently, the vector network is represented by a group and identified by this field.\nDefault value is `false`."
         }
       },
       "additionalProperties": false
     },
     "SymbolInstance": {
-      "title": "Symbol Instance Layer",
-      "description": "Symbol instance object represent an instance of a symbol source.",
+      "title": "Symbol Instance",
+      "description": "Symbol instance object is an instance of a symbol master which can be overriden.",
       "type": "object",
       "$id": "#SymbolInstance",
       "required": [
@@ -2411,31 +2891,31 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Object identifier, unique."
+          "description": "ID of the object, globally unique."
         },
         "name": {
           "type": "string",
-          "description": "Name of object (utf-8)."
+          "description": "Name of the object, for user identification, encoded in UTF-8."
         },
         "isLocked": {
           "type": "boolean",
-          "description": "Describes whether the object is locked."
+          "description": "If `true`, the object will be unable to be edited."
         },
         "visible": {
           "type": "boolean",
-          "description": "Describes the visibility of the object."
+          "description": "If `false`, the object will be invisible."
         },
         "contextSettings": {
           "$ref": "#/definitions/GraphicsContextSettings",
-          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
+          "description": "The opacity and blending-related configurations of the object."
         },
         "style": {
           "$ref": "#/definitions/Style",
-          "description": "Object styles descriptor."
+          "description": "The borders, fills, and other styles of the object."
         },
         "bounds": {
           "$ref": "#/definitions/Rect",
-          "description": "This property records the bounds information of the object before it is matrixed."
+          "description": "The bounds of the object before undergoing matrix transformations."
         },
         "frame": {
           "$ref": "#/definitions/Rect",
@@ -2443,140 +2923,201 @@
         },
         "matrix": {
           "$ref": "#/definitions/Matrix",
-          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
+          "description": "Matrix used for translating, rotating, and scaling the object."
         },
         "alphaMaskBy": {
           "type": "array",
+          "description": "A list of alpha masks applied to the object.",
           "items": {
             "$ref": "#/definitions/AlphaMask"
           }
         },
         "outlineMaskBy": {
           "type": "array",
-          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
+          "description": "A list of outline masks applied to the object, clipped by the intersection of their outlines.\nThe items in the list are object IDs of the masks.",
           "items": {
-            "type": "string",
-            "description": "The value is ID of a object that is a outline mask of this object."
+            "type": "string"
           }
         },
         "maskType": {
           "type": "integer",
-          "description": "Describes the mask type of the object.",
+          "description": "The mask type of the object.",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
+          "enumDescriptions": ["not a mask", "outline mask", "alpha mask"]
         },
         "styleEffectMaskArea": {
           "type": "integer",
+          "description": "How the `style` and `visible` of the mask object affect the area of the mask.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            "The style and visible of the object not affects the area of the mask. The area of mask depends on bound.",
-            "The style of the object not affects the area of the mask. The visible of the object affects the area of the mask.",
-            "The style and visible of the object affects the area of the mask."
+            "The `style` and `visible` of the mask object do not affect the area of the mask, which depends on its bounds.",
+            "The `style` of the mask object does not affect the area of the mask, while the `visible` does.",
+            "The `style` and `visible` of the mask object do affect the area of the mask."
           ]
         },
         "maskShowType": {
           "type": "integer",
-          "description": "Decide how the mask object should be displayed.",
+          "description": "How the mask object is displayed.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            "depends on the style. (default value for outline mask)",
-            "only show bounds. (default value for alpha mask when it alphaType equal 0)",
-            "not show. (default for other condition)"
+            "depend on its `style`. (Default value for `outline mask`.)",
+            "only display its bounds. (Default value for `alpha mask` when its `alphaType` equals `0`.)",
+            "do not display. (Default value for other conditions.)"
           ]
         },
         "overflow": {
-          "description": "Sets what happens when a child element of a parent overflows its space.",
+          "description": "How to display the child element of the object when it overflows its container.",
           "type": "integer",
           "enum": [1, 2, 3],
           "enumDescriptions": [
-            "hidden: Anything outside the scope of the container will be cropped and invisible.",
-            "visible: Contents outside the scope of the container will not be cropped and will be visible.",
-            "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
+            "hidden. Anything outside the scope of the container will be cropped and invisible.",
+            "visible. Contents outside the scope of the container will not be cropped and will be visible.",
+            "scrolled. Content that is outside the container's scope is cropped, and a scrollbar is displayed to view the content that is beyond the container's boundaries."
           ]
         },
         "cornerSmoothing": {
           "type": "number",
-          "description": " Used to control corner smooth. Range: [0, 1] "
+          "description": "Smoothness of rounded corners. Range: `[0, 1]`.\n`0` is the default value, indicating no smoothing for rounded corners."
         },
         "overrideKey": {
           "type": "string",
-          "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+          "description": "Used to be associated with the object by symbol instances for overriding its attributes. Check the `objectId` in the `OverrideValue` for details.\nIf `overrideKey` exists, find a symbol master through upward traversal (which could be the object itself); `overrideKey` is unique within the symbol master."
         },
         "horizontalConstraint": {
           "$ref": "#/definitions/Constraint",
-          "description": "Horizontal layout constraints for object. Default value is 1."
+          "description": "Horizontal layout constraints for the object.\nDefault value is `1`."
         },
         "verticalConstraint": {
           "$ref": "#/definitions/Constraint",
-          "description": "Vertical layout constraints for object. Default value is 1."
+          "description": "Vertical layout constraints for the object.\nDefault value is `1`."
         },
         "resizesContent": {
           "type": "integer",
+          "description": "How child objects behave when the object is resized.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            " If the current object contains children(suitable for path with boolean operations),  the current object is used as the starting point, and for all children,  If the object chain has a frame or symbol without layout, then the constraint on the child object is applied(the constraints of group and top-level path with boolean operations will be ignored),  otherwise scale is applied. ",
-            "force child object fix position and fix size.",
-            "use child object constraint.(default value)"
+            "If the current object contains children (suitable for paths with boolean operations), the current object serves as the starting point. For each child, if the object chain includes a frame or symbol without a layout, the constraints on the child object are applied (ignoring constraints for groups and top-level paths with boolean operations). Otherwise, scaling is applied.",
+            "Force child objects to have fixed positions and sizes.",
+            "Apply child object constraints. (Default value.)"
           ]
         },
         "keepShapeWhenResize": {
           "type": "boolean",
-          "description": " False: The behavior of scale refers to the description in horizontalConstraint.(default value) True: When resize occurs, the object itself does not change angle, the center position is scaled, and the scale is along the length and width direction. "
+          "description": "`False`: When resizing occurs, the object scales according to the `horizontalConstraint` and `verticalConstraint`. (Default value.)\n`True`: When resizing occurs, the object itself maintains its angle, and the center position is scaled. The scaling occurs along both the length and width directions."
+        },
+        "variableDefs": {
+          "type": "array",
+          "description": "A list of variables that can be used by children.",
+          "items": {
+            "$ref": "#/definitions/VariableDef"
+          }
+        },
+        "variableRefs": {
+          "type": "array",
+          "description": "A list of referenced variables.",
+          "items": {
+            "$ref": "#/definitions/VariableRef"
+          }
+        },
+        "styleEffectBoolean": {
+          "type": "integer",
+          "description": "How the `style` of the object affects the region participating in a Boolean operation with another object.",
+          "enum": [0, 1],
+          "enumDescriptions": [
+            "ignore style(default value): The region in which an object participates in a Boolean operation is independent of its `style`.",
+            " If the object is a path and the path has `borders` without `fills`, then the `borders` will be used as a region to participate in the Boolean operation calculation. If the object is a text and the text has `borders` without `fills`, then the object will be ignored during the Boolean operation. In other cases, it behaves the same as `ignore style`. "
+          ]
         },
         "class": {
+          "type": "string",
           "const": "symbolInstance"
         },
         "overrideValues": {
           "type": "array",
+          "description": "A list of overridden values.",
           "items": {
             "$ref": "#/definitions/OverrideValue"
           }
         },
         "masterId": {
           "type": "string",
-          "description": "This field refers to the symbol master id."
+          "description": "The object ID of the symbol master."
         },
         "radius": {
           "type": "array",
-          "description": " The radius of the four corners. [left-top, right-top, right-bottom, left-bottom] default value: [0, 0, 0, 0] "
+          "description": "The radius values correspond to the corners in the following order: left-top, right-top, right-bottom, left-bottom.\nDefault value is `[0, 0, 0, 0]`.",
+          "maxItems": 4,
+          "minItems": 4,
+          "items": {
+            "type": "number"
+          }
+        },
+        "variableAssignments": {
+          "type": "array",
+          "description": "Reassign the value of the variable defined in symbol master.",
+          "items": {
+            "$ref": "#/definitions/VariableAssign"
+          }
         }
       },
       "additionalProperties": false
     },
     "OverrideValue": {
       "title": "Override Value",
-      "description": "Defines an individual symbol override.",
+      "description": "Define an individual symbol override.",
       "type": "object",
       "$id": "#OverrideValue",
       "required": ["class", "objectId", "overrideName", "overrideValue"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "overrideValue"
         },
         "objectId": {
           "type": "array",
-          "description": " This array describes the overridden chain, where the last one is the object whose value shall be overridden.\nFor example: Suppose this array is [D456, 6516, FB09]. Suppose the current instance (of id XXXX) points to a symbol-master (of id C1CF), which contains a symbol-instance (of id D456). And this instance (of id D456) points to another symbol-master (of id 0739), which contains another symbol-instance (of id 6516). Recursively, this instance (of id 6516) points to yet another symbol-master (of id 59B5), which contains the final object (of id FB09).\nSo the current instance (of id XXXX) will override the value of the final object (of id FB09) according to `overrideName` and `overrideValue`.\nNote: each item in the array is associated with the object's overrideKey first. If overrideKey does not exist, the object's id is associated. ",
+          "description": "A list of IDs or keys that refer to objects, describing an overridden chain. The value of the last object will be overridden. The other objects on the chain are instances.\n**For example**:\nSuppose this array is `[D456, 6516, FB09]`.\nSuppose the current instance (of ID `XXXX`) points to a symbol-master (of ID `C1CF`), which contains a symbol-instance (of ID `D456`).\nAnd this instance (of ID `D456`) points to another symbol-master (of ID `0739`), which contains another symbol-instance (of ID `6516`).\nRecursively, this instance (of ID `6516`) points to yet another symbol-master (of ID `59B5`), which contains the final object (of ID `FB09`).\nSo the current instance (of ID `XXXX`) will override the value of the final object (of ID `FB09`) according to `overrideName` and `overrideValue`.\n**Note**: Each item in the array is associated with the object's `overrideKey` first. If `overrideKey` does not exist, the object's ID is associated.",
           "items": {
             "type": "string"
           }
         },
         "overrideName": {
           "type": "string",
-          "description": " Starting with the top-level property of the object, use . as a separator. If the property is an array, it contains the index of the array, starting at 0, and * is valid for all items.\nFor example: style: override whole style style.fills: override the style.fills style.fills.0: override the first item of style.fills style.fills.0.color: override the color of the first style.fills style.fills.*.color: override the color of all items in style.fills "
+          "description": "Starting with the top-level property of the object, use `.` as a separator.\nIf the property is an array, it contains the index of the array, starting at `0`, and `*` is valid for all items.\nFor example:\n`style`: override whole style.\n`style.fills`: override the `style.fills`.\n`style.fills.0`: override the first item of `style.fills`.\n`style.fills.0.color`: override the color of the first `style.fills`.\n`style.fills.*.color`: override the color of all items in `style.fills`."
         },
         "overrideValue": {
-          "description": " The value of the overridden attribute. The type depends on the concrete property. A special case: when overrideName end with 'style' and overrideValue conform to 'referenced_style_<id>', then use corresponding value in references(top level attr). Another special case: When the value is null, it indicates deletion. "
+          "description": "The value of the overridden attribute, whose type depends on the concrete property. There are two special cases:\nWhen `overrideName` ends with `style` and `overrideValue` conforms to `referenced_style_<id>`, then it uses the corresponding value in references (top-level attribute).\nWhen the value is `null`, it indicates deletion."
         },
         "effectOnLayout": {
           "type": "boolean",
-          "description": " Default value is false. If the value of this item is true, the current override applies to the layout. Note: layout information is defined in layout.json, not design.json "
+          "description": "If the value of this item is `true`, the current override applies to the layout.\nDefault value is `false`.\n**Note**: Layout information is defined in `layout.json`, not `design.json`."
+        }
+      },
+      "additionalProperties": false
+    },
+    "VariableAssign": {
+      "title": "Variable Assign",
+      "description": "Assign a new value to the variable.",
+      "type": "object",
+      "$id": "#VariableAssign",
+      "required": ["class", "id", "value"],
+      "properties": {
+        "class": {
+          "type": "string",
+          "const": "variableAssign"
+        },
+        "id": {
+          "type": "string",
+          "description": "The ID of the reassigned variable defined in `Variable Define`."
+        },
+        "value": {
+          "description": "The new value of the variable."
         }
       },
       "additionalProperties": false
     },
     "SymbolMaster": {
       "title": "Symbol Master",
-      "description": "A symbol source object represents a reusable group of objects.",
+      "description": "A symbol master is a reusable object that contains a group of objects.",
       "$id": "#SymbolMaster",
       "type": "object",
       "required": [
@@ -2599,31 +3140,31 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Object identifier, unique."
+          "description": "ID of the object, globally unique."
         },
         "name": {
           "type": "string",
-          "description": "Name of object (utf-8)."
+          "description": "Name of the object, for user identification, encoded in UTF-8."
         },
         "isLocked": {
           "type": "boolean",
-          "description": "Describes whether the object is locked."
+          "description": "If `true`, the object will be unable to be edited."
         },
         "visible": {
           "type": "boolean",
-          "description": "Describes the visibility of the object."
+          "description": "If `false`, the object will be invisible."
         },
         "contextSettings": {
           "$ref": "#/definitions/GraphicsContextSettings",
-          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
+          "description": "The opacity and blending-related configurations of the object."
         },
         "style": {
           "$ref": "#/definitions/Style",
-          "description": "Object styles descriptor."
+          "description": "The borders, fills, and other styles of the object."
         },
         "bounds": {
           "$ref": "#/definitions/Rect",
-          "description": "This property records the bounds information of the object before it is matrixed."
+          "description": "The bounds of the object before undergoing matrix transformations."
         },
         "frame": {
           "$ref": "#/definitions/Rect",
@@ -2631,89 +3172,114 @@
         },
         "matrix": {
           "$ref": "#/definitions/Matrix",
-          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
+          "description": "Matrix used for translating, rotating, and scaling the object."
         },
         "alphaMaskBy": {
           "type": "array",
+          "description": "A list of alpha masks applied to the object.",
           "items": {
             "$ref": "#/definitions/AlphaMask"
           }
         },
         "outlineMaskBy": {
           "type": "array",
-          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
+          "description": "A list of outline masks applied to the object, clipped by the intersection of their outlines.\nThe items in the list are object IDs of the masks.",
           "items": {
-            "type": "string",
-            "description": "The value is ID of a object that is a outline mask of this object."
+            "type": "string"
           }
         },
         "maskType": {
           "type": "integer",
-          "description": "Describes the mask type of the object.",
+          "description": "The mask type of the object.",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
+          "enumDescriptions": ["not a mask", "outline mask", "alpha mask"]
         },
         "styleEffectMaskArea": {
           "type": "integer",
+          "description": "How the `style` and `visible` of the mask object affect the area of the mask.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            "The style and visible of the object not affects the area of the mask. The area of mask depends on bound.",
-            "The style of the object not affects the area of the mask. The visible of the object affects the area of the mask.",
-            "The style and visible of the object affects the area of the mask."
+            "The `style` and `visible` of the mask object do not affect the area of the mask, which depends on its bounds.",
+            "The `style` of the mask object does not affect the area of the mask, while the `visible` does.",
+            "The `style` and `visible` of the mask object do affect the area of the mask."
           ]
         },
         "maskShowType": {
           "type": "integer",
-          "description": "Decide how the mask object should be displayed.",
+          "description": "How the mask object is displayed.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            "depends on the style. (default value for outline mask)",
-            "only show bounds. (default value for alpha mask when it alphaType equal 0)",
-            "not show. (default for other condition)"
+            "depend on its `style`. (Default value for `outline mask`.)",
+            "only display its bounds. (Default value for `alpha mask` when its `alphaType` equals `0`.)",
+            "do not display. (Default value for other conditions.)"
           ]
         },
         "overflow": {
-          "description": "Sets what happens when a child element of a parent overflows its space.",
+          "description": "How to display the child element of the object when it overflows its container.",
           "type": "integer",
           "enum": [1, 2, 3],
           "enumDescriptions": [
-            "hidden: Anything outside the scope of the container will be cropped and invisible.",
-            "visible: Contents outside the scope of the container will not be cropped and will be visible.",
-            "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
+            "hidden. Anything outside the scope of the container will be cropped and invisible.",
+            "visible. Contents outside the scope of the container will not be cropped and will be visible.",
+            "scrolled. Content that is outside the container's scope is cropped, and a scrollbar is displayed to view the content that is beyond the container's boundaries."
           ]
         },
         "cornerSmoothing": {
           "type": "number",
-          "description": " Used to control corner smooth. Range: [0, 1] "
+          "description": "Smoothness of rounded corners. Range: `[0, 1]`.\n`0` is the default value, indicating no smoothing for rounded corners."
         },
         "overrideKey": {
           "type": "string",
-          "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+          "description": "Used to be associated with the object by symbol instances for overriding its attributes. Check the `objectId` in the `OverrideValue` for details.\nIf `overrideKey` exists, find a symbol master through upward traversal (which could be the object itself); `overrideKey` is unique within the symbol master."
         },
         "horizontalConstraint": {
           "$ref": "#/definitions/Constraint",
-          "description": "Horizontal layout constraints for object. Default value is 1."
+          "description": "Horizontal layout constraints for the object.\nDefault value is `1`."
         },
         "verticalConstraint": {
           "$ref": "#/definitions/Constraint",
-          "description": "Vertical layout constraints for object. Default value is 1."
+          "description": "Vertical layout constraints for the object.\nDefault value is `1`."
         },
         "resizesContent": {
           "type": "integer",
+          "description": "How child objects behave when the object is resized.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            " If the current object contains children(suitable for path with boolean operations),  the current object is used as the starting point, and for all children,  If the object chain has a frame or symbol without layout, then the constraint on the child object is applied(the constraints of group and top-level path with boolean operations will be ignored),  otherwise scale is applied. ",
-            "force child object fix position and fix size.",
-            "use child object constraint.(default value)"
+            "If the current object contains children (suitable for paths with boolean operations), the current object serves as the starting point. For each child, if the object chain includes a frame or symbol without a layout, the constraints on the child object are applied (ignoring constraints for groups and top-level paths with boolean operations). Otherwise, scaling is applied.",
+            "Force child objects to have fixed positions and sizes.",
+            "Apply child object constraints. (Default value.)"
           ]
         },
         "keepShapeWhenResize": {
           "type": "boolean",
-          "description": " False: The behavior of scale refers to the description in horizontalConstraint.(default value) True: When resize occurs, the object itself does not change angle, the center position is scaled, and the scale is along the length and width direction. "
+          "description": "`False`: When resizing occurs, the object scales according to the `horizontalConstraint` and `verticalConstraint`. (Default value.)\n`True`: When resizing occurs, the object itself maintains its angle, and the center position is scaled. The scaling occurs along both the length and width directions."
+        },
+        "variableDefs": {
+          "type": "array",
+          "description": "A list of variables that can be used by children.",
+          "items": {
+            "$ref": "#/definitions/VariableDef"
+          }
+        },
+        "variableRefs": {
+          "type": "array",
+          "description": "A list of referenced variables.",
+          "items": {
+            "$ref": "#/definitions/VariableRef"
+          }
+        },
+        "styleEffectBoolean": {
+          "type": "integer",
+          "description": "How the `style` of the object affects the region participating in a Boolean operation with another object.",
+          "enum": [0, 1],
+          "enumDescriptions": [
+            "ignore style(default value): The region in which an object participates in a Boolean operation is independent of its `style`.",
+            " If the object is a path and the path has `borders` without `fills`, then the `borders` will be used as a region to participate in the Boolean operation calculation. If the object is a text and the text has `borders` without `fills`, then the object will be ignored during the Boolean operation. In other cases, it behaves the same as `ignore style`. "
+          ]
         },
         "childObjects": {
           "type": "array",
-          "description": "Describes all child object information. The child item that appears later will be above the child item that appears first.",
+          "description": "A list of all child objects.\n**Note:** The child object that appears later in the list will be displayed above the one that appears first.",
           "items": {
             "oneOf": [
               {
@@ -2741,11 +3307,17 @@
           }
         },
         "class": {
+          "type": "string",
           "const": "symbolMaster"
         },
         "radius": {
           "type": "array",
-          "description": " The radius of the four corners. [left-top, right-top, right-bottom, left-bottom] default value: [0, 0, 0, 0] "
+          "description": "The radius values correspond to the corners in the following order: left-top, right-top, right-bottom, left-bottom.\nDefault value is `[0, 0, 0, 0]`.",
+          "maxItems": 4,
+          "minItems": 4,
+          "items": {
+            "type": "number"
+          }
         }
       },
       "additionalProperties": false
@@ -2757,23 +3329,24 @@
       "required": ["class", "id", "style"],
       "properties": {
         "class": {
+          "type": "string",
           "const": "referencedStyle"
         },
         "id": {
           "type": "string",
-          "description": "identifier, unique."
+          "description": "ID of the referenced style, globally unique."
         },
         "style": {
-          "description": "object style.",
-          "$ref": "#/definitions/Style"
+          "$ref": "#/definitions/Style",
+          "description": "The style attributes."
         },
         "contextSettings": {
-          "description": "object contextSettings.",
-          "$ref": "#/definitions/GraphicsContextSettings"
+          "$ref": "#/definitions/GraphicsContextSettings",
+          "description": "The opacity and blending-related configurations."
         },
         "fontAttr": {
-          "description": "only effect for text object.",
-          "$ref": "#/definitions/FontAttr"
+          "$ref": "#/definitions/FontAttr",
+          "description": "Font attributes only affect for text objects."
         }
       },
       "additionalProperties": false
@@ -2804,31 +3377,31 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Object identifier, unique."
+          "description": "ID of the object, globally unique."
         },
         "name": {
           "type": "string",
-          "description": "Name of object (utf-8)."
+          "description": "Name of the object, for user identification, encoded in UTF-8."
         },
         "isLocked": {
           "type": "boolean",
-          "description": "Describes whether the object is locked."
+          "description": "If `true`, the object will be unable to be edited."
         },
         "visible": {
           "type": "boolean",
-          "description": "Describes the visibility of the object."
+          "description": "If `false`, the object will be invisible."
         },
         "contextSettings": {
           "$ref": "#/definitions/GraphicsContextSettings",
-          "description": "This property of path itself is meaningless, and is represented by its style, such as stroke, fill, etc."
+          "description": "The opacity and blending-related configurations of the object."
         },
         "style": {
           "$ref": "#/definitions/Style",
-          "description": "Object styles descriptor."
+          "description": "The borders, fills, and other styles of the object."
         },
         "bounds": {
           "$ref": "#/definitions/Rect",
-          "description": "This property records the bounds information of the object before it is matrixed."
+          "description": "The bounds of the object before undergoing matrix transformations."
         },
         "frame": {
           "$ref": "#/definitions/Rect",
@@ -2836,89 +3409,114 @@
         },
         "matrix": {
           "$ref": "#/definitions/Matrix",
-          "description": "Matrix, as defined in PostScript Language Reference Manual, Second Edition."
+          "description": "Matrix used for translating, rotating, and scaling the object."
         },
         "alphaMaskBy": {
           "type": "array",
+          "description": "A list of alpha masks applied to the object.",
           "items": {
             "$ref": "#/definitions/AlphaMask"
           }
         },
         "outlineMaskBy": {
           "type": "array",
-          "description": "The result of the outline mask area is the intersection of multiple outline mask object results.",
+          "description": "A list of outline masks applied to the object, clipped by the intersection of their outlines.\nThe items in the list are object IDs of the masks.",
           "items": {
-            "type": "string",
-            "description": "The value is ID of a object that is a outline mask of this object."
+            "type": "string"
           }
         },
         "maskType": {
           "type": "integer",
-          "description": "Describes the mask type of the object.",
+          "description": "The mask type of the object.",
           "enum": [0, 1, 2],
-          "enumDescriptions": ["not mask", "outline mask", "alpha mask"]
+          "enumDescriptions": ["not a mask", "outline mask", "alpha mask"]
         },
         "styleEffectMaskArea": {
           "type": "integer",
+          "description": "How the `style` and `visible` of the mask object affect the area of the mask.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            "The style and visible of the object not affects the area of the mask. The area of mask depends on bound.",
-            "The style of the object not affects the area of the mask. The visible of the object affects the area of the mask.",
-            "The style and visible of the object affects the area of the mask."
+            "The `style` and `visible` of the mask object do not affect the area of the mask, which depends on its bounds.",
+            "The `style` of the mask object does not affect the area of the mask, while the `visible` does.",
+            "The `style` and `visible` of the mask object do affect the area of the mask."
           ]
         },
         "maskShowType": {
           "type": "integer",
-          "description": "Decide how the mask object should be displayed.",
+          "description": "How the mask object is displayed.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            "depends on the style. (default value for outline mask)",
-            "only show bounds. (default value for alpha mask when it alphaType equal 0)",
-            "not show. (default for other condition)"
+            "depend on its `style`. (Default value for `outline mask`.)",
+            "only display its bounds. (Default value for `alpha mask` when its `alphaType` equals `0`.)",
+            "do not display. (Default value for other conditions.)"
           ]
         },
         "overflow": {
-          "description": "Sets what happens when a child element of a parent overflows its space.",
+          "description": "How to display the child element of the object when it overflows its container.",
           "type": "integer",
           "enum": [1, 2, 3],
           "enumDescriptions": [
-            "hidden: Anything outside the scope of the container will be cropped and invisible.",
-            "visible: Contents outside the scope of the container will not be cropped and will be visible.",
-            "scroll: Content that is out of scope of the container is cropped and a scroll bar is displayed to view the content that is out of scope."
+            "hidden. Anything outside the scope of the container will be cropped and invisible.",
+            "visible. Contents outside the scope of the container will not be cropped and will be visible.",
+            "scrolled. Content that is outside the container's scope is cropped, and a scrollbar is displayed to view the content that is beyond the container's boundaries."
           ]
         },
         "cornerSmoothing": {
           "type": "number",
-          "description": " Used to control corner smooth. Range: [0, 1] "
+          "description": "Smoothness of rounded corners. Range: `[0, 1]`.\n`0` is the default value, indicating no smoothing for rounded corners."
         },
         "overrideKey": {
           "type": "string",
-          "description": "Object association when overridden by the symbolInstance attribute. This value is globally unique."
+          "description": "Used to be associated with the object by symbol instances for overriding its attributes. Check the `objectId` in the `OverrideValue` for details.\nIf `overrideKey` exists, find a symbol master through upward traversal (which could be the object itself); `overrideKey` is unique within the symbol master."
         },
         "horizontalConstraint": {
           "$ref": "#/definitions/Constraint",
-          "description": "Horizontal layout constraints for object. Default value is 1."
+          "description": "Horizontal layout constraints for the object.\nDefault value is `1`."
         },
         "verticalConstraint": {
           "$ref": "#/definitions/Constraint",
-          "description": "Vertical layout constraints for object. Default value is 1."
+          "description": "Vertical layout constraints for the object.\nDefault value is `1`."
         },
         "resizesContent": {
           "type": "integer",
+          "description": "How child objects behave when the object is resized.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
-            " If the current object contains children(suitable for path with boolean operations),  the current object is used as the starting point, and for all children,  If the object chain has a frame or symbol without layout, then the constraint on the child object is applied(the constraints of group and top-level path with boolean operations will be ignored),  otherwise scale is applied. ",
-            "force child object fix position and fix size.",
-            "use child object constraint.(default value)"
+            "If the current object contains children (suitable for paths with boolean operations), the current object serves as the starting point. For each child, if the object chain includes a frame or symbol without a layout, the constraints on the child object are applied (ignoring constraints for groups and top-level paths with boolean operations). Otherwise, scaling is applied.",
+            "Force child objects to have fixed positions and sizes.",
+            "Apply child object constraints. (Default value.)"
           ]
         },
         "keepShapeWhenResize": {
           "type": "boolean",
-          "description": " False: The behavior of scale refers to the description in horizontalConstraint.(default value) True: When resize occurs, the object itself does not change angle, the center position is scaled, and the scale is along the length and width direction. "
+          "description": "`False`: When resizing occurs, the object scales according to the `horizontalConstraint` and `verticalConstraint`. (Default value.)\n`True`: When resizing occurs, the object itself maintains its angle, and the center position is scaled. The scaling occurs along both the length and width directions."
+        },
+        "variableDefs": {
+          "type": "array",
+          "description": "A list of variables that can be used by children.",
+          "items": {
+            "$ref": "#/definitions/VariableDef"
+          }
+        },
+        "variableRefs": {
+          "type": "array",
+          "description": "A list of referenced variables.",
+          "items": {
+            "$ref": "#/definitions/VariableRef"
+          }
+        },
+        "styleEffectBoolean": {
+          "type": "integer",
+          "description": "How the `style` of the object affects the region participating in a Boolean operation with another object.",
+          "enum": [0, 1],
+          "enumDescriptions": [
+            "ignore style(default value): The region in which an object participates in a Boolean operation is independent of its `style`.",
+            " If the object is a path and the path has `borders` without `fills`, then the `borders` will be used as a region to participate in the Boolean operation calculation. If the object is a text and the text has `borders` without `fills`, then the object will be ignored during the Boolean operation. In other cases, it behaves the same as `ignore style`. "
+          ]
         },
         "childObjects": {
           "type": "array",
-          "description": "Describes all child object information. The child item that appears later will be above the child item that appears first.",
+          "description": "A list of all child objects.\n**Note:** The child object that appears later in the list will be displayed above the one that appears first.",
           "items": {
             "oneOf": [
               {
@@ -2946,6 +3544,7 @@
           }
         },
         "class": {
+          "type": "string",
           "const": "patternLayerDef"
         },
         "patternBoundingBox": {
@@ -2960,27 +3559,33 @@
       "additionalProperties": false
     }
   },
-  "required": ["fileType", "frames"],
+  "required": ["version", "fileType", "frames"],
   "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0.8",
+      "description": "Version number information in the format: `major.minor.patch`.\n"
+    },
     "fileType": {
       "type": "integer",
-      "description": "Specifies the file type.",
+      "description": "The file type of current file.",
       "enum": [1, 3, 4],
       "enumDescriptions": ["sketch", "figma", "adobe illustrator"]
     },
     "fileName": {
       "type": "string",
-      "description": "Specifies the name to the input design file. The encoding format is utf-8."
+      "description": "The file name of the input design file, encoding in UTF-8."
     },
     "frames": {
       "type": "array",
+      "description": "A list of the frames.",
       "items": {
         "$ref": "#/definitions/Frame"
       }
     },
     "references": {
       "type": "array",
-      "description": "Describes the referenced resources.",
+      "description": "A list of the referenced resources.",
       "items": {
         "oneOf": [
           {

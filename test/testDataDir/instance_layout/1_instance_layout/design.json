@@ -1,6 +1,7 @@
 {
+  "version": "1.0.8",
   "fileType": 3,
-  "fileName": "hi-figma",
+  "fileName": "/Users/houguanhua/code/vgg/vgg_runtime_A/test/testDataDir/instance_layout/1_instance_layout/feature-instance-layout_space_between.fig",
   "frames": [
     {
       "id": "0:1 default-frame",
@@ -51,6 +52,7 @@
       "styleEffectMaskArea": 2,
       "maskShowType": 2,
       "overflow": 2,
+      "styleEffectBoolean": 1,
       "class": "frame",
       "childObjects": [
         {
@@ -122,6 +124,13 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
+          "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -193,6 +202,13 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
+              "cornerSmoothing": 0.0,
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "path",
               "shape": {
                 "class": "shape",
@@ -241,8 +257,7 @@
                   }
                 ],
                 "windingRule": 0
-              },
-              "pathType": 0
+              }
             },
             {
               "id": "1:4",
@@ -313,6 +328,13 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
+              "cornerSmoothing": 0.0,
+              "horizontalConstraint": 1,
+              "verticalConstraint": 1,
+              "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "path",
               "shape": {
                 "class": "shape",
@@ -361,9 +383,14 @@
                   }
                 ],
                 "windingRule": 0
-              },
-              "pathType": 0
+              }
             }
+          ],
+          "radius": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
           ]
         },
         {
@@ -435,6 +462,13 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
+          "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolInstance",
           "masterId": "208:2",
           "overrideValues": [
@@ -463,6 +497,13 @@
               },
               "effectOnLayout": false
             }
+          ],
+          "variableAssignments": [],
+          "radius": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
           ]
         }
       ]

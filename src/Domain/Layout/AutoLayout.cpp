@@ -673,37 +673,37 @@ void AutoLayout::configureFlexNodeSize(flexbox_node* node)
     return;
   }
 
-  if (sharedRule->aspect_ratio.has_value())
+  if (sharedRule->aspectRatio.has_value())
   {
     // todo
   }
 
   node->set_width(toLibUnit(sharedRule->width.value.types), sharedRule->width.value.value);
-  if (sharedRule->max_width.has_value())
+  if (sharedRule->maxWidth.has_value())
   {
     node->set_max_width(
-      toLibUnit(sharedRule->max_width->value.types),
-      sharedRule->max_width->value.value);
+      toLibUnit(sharedRule->maxWidth->value.types),
+      sharedRule->maxWidth->value.value);
   }
-  if (sharedRule->min_width.has_value())
+  if (sharedRule->minWidth.has_value())
   {
     node->set_min_width(
-      toLibUnit(sharedRule->min_width->value.types),
-      sharedRule->min_width->value.value);
+      toLibUnit(sharedRule->minWidth->value.types),
+      sharedRule->minWidth->value.value);
   }
 
   node->set_height(toLibUnit(sharedRule->height.value.types), sharedRule->height.value.value);
-  if (sharedRule->max_height.has_value())
+  if (sharedRule->maxHeight.has_value())
   {
     node->set_max_height(
-      toLibUnit(sharedRule->max_height->value.types),
-      sharedRule->max_height->value.value);
+      toLibUnit(sharedRule->maxHeight->value.types),
+      sharedRule->maxHeight->value.value);
   }
-  if (sharedRule->min_height.has_value())
+  if (sharedRule->minHeight.has_value())
   {
     node->set_min_height(
-      toLibUnit(sharedRule->min_height->value.types),
-      sharedRule->min_height->value.value);
+      toLibUnit(sharedRule->minHeight->value.types),
+      sharedRule->minHeight->value.value);
   }
 }
 
@@ -717,35 +717,35 @@ void AutoLayout::configureGridItemSize()
 
   auto node = getGridItem();
 
-  if (sharedRule->aspect_ratio.has_value())
+  if (sharedRule->aspectRatio.has_value())
   {
     // todo
   }
 
   node->set_width(grid_item::t_length{ toLibLengthUnit(sharedRule->width.value.types),
                                        sharedRule->width.value.value });
-  if (sharedRule->max_width.has_value())
+  if (sharedRule->maxWidth.has_value())
   {
-    node->set_max_width(grid_item::t_length{ toLibLengthUnit(sharedRule->max_width->value.types),
-                                             sharedRule->max_width->value.value });
+    node->set_max_width(grid_item::t_length{ toLibLengthUnit(sharedRule->maxWidth->value.types),
+                                             sharedRule->maxWidth->value.value });
   }
-  if (sharedRule->min_width.has_value())
+  if (sharedRule->minWidth.has_value())
   {
-    node->set_min_width(grid_item::t_length{ toLibLengthUnit(sharedRule->min_width->value.types),
-                                             sharedRule->min_width->value.value });
+    node->set_min_width(grid_item::t_length{ toLibLengthUnit(sharedRule->minWidth->value.types),
+                                             sharedRule->minWidth->value.value });
   }
 
   node->set_height(grid_item::t_length{ toLibLengthUnit(sharedRule->height.value.types),
                                         sharedRule->height.value.value });
-  if (sharedRule->max_height.has_value())
+  if (sharedRule->maxHeight.has_value())
   {
-    node->set_max_height(grid_item::t_length{ toLibLengthUnit(sharedRule->max_height->value.types),
-                                              sharedRule->max_height->value.value });
+    node->set_max_height(grid_item::t_length{ toLibLengthUnit(sharedRule->maxHeight->value.types),
+                                              sharedRule->maxHeight->value.value });
   }
-  if (sharedRule->min_height.has_value())
+  if (sharedRule->minHeight.has_value())
   {
-    node->set_min_height(grid_item::t_length{ toLibLengthUnit(sharedRule->min_height->value.types),
-                                              sharedRule->min_height->value.value });
+    node->set_min_height(grid_item::t_length{ toLibLengthUnit(sharedRule->minHeight->value.types),
+                                              sharedRule->minHeight->value.value });
   }
 }
 
@@ -758,12 +758,12 @@ void AutoLayout::configureFlexContainer(Rule::FlexboxLayout* layout)
   }
 
   node->set_direction(toLibDirecion(layout->direction));
-  node->set_justify_content(toLibJustifyContent(layout->justify_content));
-  node->set_align_items(toLibAlignItem(layout->align_items));
-  node->set_align_content(toLibAlignContent(layout->align_content));
+  node->set_justify_content(toLibJustifyContent(layout->justifyContent));
+  node->set_align_items(toLibAlignItem(layout->alignItems));
+  node->set_align_content(toLibAlignContent(layout->alignContent));
   node->set_wrap(toLibWrap(layout->wrap));
-  node->set_gap(gap_row, layout->row_gap);
-  node->set_gap(gap_column, layout->column_gap);
+  node->set_gap(gap_row, layout->rowGap);
+  node->set_gap(gap_column, layout->columnGap);
   node->set_padding(padding_top, layout->padding.top);
   node->set_padding(padding_right, layout->padding.right);
   node->set_padding(padding_bottom, layout->padding.bottom);
@@ -781,8 +781,8 @@ void AutoLayout::configureFlexItem(Rule::FlexboxItem* layout)
   }
 
   node->set_position(toLibPosition(layout->position.value));
-  node->set_grow(layout->flex_grow_shrink);
-  node->set_shrink(layout->flex_grow_shrink);
+  node->set_grow(layout->flexBasis);
+  node->set_shrink(layout->flexBasis);
 
   if (layout->top.has_value())
   {
@@ -807,10 +807,10 @@ void AutoLayout::configureFlexItem(Rule::FlexboxItem* layout)
 void AutoLayout::configureGridContainer(GridLayout* layout)
 {
   std::optional<uint32_t> minRow;
-  auto                    columnCount = layout->expand_strategy.column_count;
-  if (layout->expand_strategy.strategy == ExpandStrategy::EStrategy::FIX_COLUMN)
+  auto                    columnCount = layout->expandStrategy.columnCount;
+  if (layout->expandStrategy.strategy == ExpandStrategy::EStrategy::FIX_COLUMN)
   {
-    minRow = layout->expand_strategy.min_row;
+    minRow = layout->expandStrategy.minRow;
   }
   else
   {
@@ -822,7 +822,7 @@ void AutoLayout::configureGridContainer(GridLayout* layout)
     }
     columnCount = grid_layout::calc_column_count(
       sharedView->frame().size.width,
-      layout->column_width.width_value);
+      layout->columnWidth.widthValue);
   }
 
   auto node = new grid_layout(columnCount, minRow);
@@ -830,15 +830,15 @@ void AutoLayout::configureGridContainer(GridLayout* layout)
   m_gridContainerPtr = node;
 
   node->set_column_width(
-    toLibColumnWidthStrategy(layout->column_width.strategy),
-    layout->column_width.width_value);
+    toLibColumnWidthStrategy(layout->columnWidth.strategy),
+    layout->columnWidth.widthValue);
   node->set_row_height(
-    toLibRowHeightStrategy(layout->row_height.strategy),
-    layout->row_height.fixed_value);
-  node->set_base_height(layout->base_height);
-  node->set_column_gap(layout->column_gap);
-  node->set_row_gap(layout->row_gap);
-  node->set_grid_auto_flow(static_cast<grid_auto_flow>(layout->grid_auto_flow));
+    toLibRowHeightStrategy(layout->rowHeight.strategy),
+    layout->rowHeight.fixedValue);
+  node->set_base_height(layout->baseHeight);
+  node->set_column_gap(layout->columnGap);
+  node->set_row_gap(layout->rowGap);
+  node->set_grid_auto_flow(static_cast<grid_auto_flow>(layout->gridAutoFlow));
 
   node->set_padding(
     layout->padding.top,
@@ -846,7 +846,7 @@ void AutoLayout::configureGridContainer(GridLayout* layout)
     layout->padding.bottom,
     layout->padding.left);
 
-  node->set_horizontal_align(toLibAlign(layout->cell_align));
+  node->set_horizontal_align(toLibAlign(layout->cellAlign));
 }
 
 void AutoLayout::configureGridItem(Rule::GridItem* layout)
@@ -854,17 +854,17 @@ void AutoLayout::configureGridItem(Rule::GridItem* layout)
   auto node = new grid_item();
   m_gridItem.reset(node);
 
-  node->set_item_pos_strategy(toLibItemPosStrategy(layout->item_pos.strategy));
-  node->set_column_id(layout->item_pos.column_id);
-  node->set_row_id(layout->item_pos.row_id);
+  node->set_item_pos_strategy(toLibItemPosStrategy(layout->itemPos.strategy));
+  node->set_column_id(layout->itemPos.columnId);
+  node->set_row_id(layout->itemPos.rowId);
 
-  node->set_row_span(layout->row_span);
-  node->set_column_span(layout->column_span);
+  node->set_row_span(layout->rowSpan);
+  node->set_column_span(layout->columnSpan);
 
   // todo, hanlde position, top/right/bottom/left
 
-  node->set_horizontal_align(toLibAlign(layout->row_align));
-  node->set_vertical_align(toLibAlign(layout->column_align));
+  node->set_horizontal_align(toLibAlign(layout->rowAlign));
+  node->set_vertical_align(toLibAlign(layout->columnAlign));
 }
 
 void AutoLayout::setFrame(Rect newFrame)

@@ -120,6 +120,8 @@ void VggSdkNodeAdapter::Destructor(napi_env env, void* nativeObject, void* /*fin
 void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
 {
   napi_property_descriptor properties[] = {
+    DECLARE_NODE_API_PROPERTY("setEnvKey", SetEnvKey),
+
     DECLARE_NODE_API_PROPERTY("getDesignDocument", GetDesignDocument),
 
     DECLARE_NODE_API_PROPERTY("valueAt", DesignDocumentValueAt),
@@ -190,6 +192,36 @@ napi_value VggSdkNodeAdapter::New(napi_env env, napi_callback_info info)
   NODE_API_CALL(env, napi_new_instance(env, cons, 0, nullptr, &instance));
 
   return instance;
+}
+
+napi_value VggSdkNodeAdapter::SetEnvKey(napi_env env, napi_callback_info info)
+{
+  size_t     argc = 1;
+  napi_value args[1];
+  napi_value _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc != 1)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    auto envKey = GetArgString(env, args[0]);
+
+    VggSdkNodeAdapter* sdk_adapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
+
+    sdk_adapter->m_vggSdk->setEnvKey(envKey);
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
 }
 
 napi_value VggSdkNodeAdapter::GetDesignDocument(napi_env env, napi_callback_info info)

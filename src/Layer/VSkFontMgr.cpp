@@ -190,8 +190,8 @@ SkString SkFontStyleSet_VGG::getFamilyName()
 }
 
 SkFontMgrVGG::SkFontMgrVGG(std::unique_ptr<SystemFontLoader> loader)
-  : fDefaultFamily(nullptr)
-  , m_loader(std::move(loader))
+  : m_loader(std::move(loader))
+  , fDefaultFamily(nullptr)
 {
   m_loader->loadSystemFonts(fScanner, &fFamilies);
 
@@ -231,13 +231,13 @@ int SkFontMgrVGG::onCountFamilies() const
 
 void SkFontMgrVGG::onGetFamilyName(int index, SkString* familyName) const
 {
-  SkASSERT(index < fFamilies.size());
+  SkASSERT(index < (int)fFamilies.size());
   familyName->set(fFamilies[index]->getFamilyName());
 }
 
 sk_sp<SkFontStyleSet> SkFontMgrVGG::onCreateStyleSet(int index) const
 {
-  SkASSERT(index < fFamilies.size());
+  SkASSERT(index < (int)fFamilies.size());
   return fFamilies[index];
 }
 
@@ -327,7 +327,7 @@ std::optional<std::pair<SkString, float>> SkFontMgrVGG::fuzzyMatchFontFamilyName
   {
     return std::nullopt;
   }
-  bool                               matchFound = false;
+  // bool                               matchFound = false;
   double                             bestScore = 0.0;
   SkString                           bestMatch;
   rapidfuzz::fuzz::CachedRatio<char> scorer(fontName);
@@ -338,7 +338,7 @@ std::optional<std::pair<SkString, float>> SkFontMgrVGG::fuzzyMatchFontFamilyName
 
     if (score >= bestScore)
     {
-      matchFound = true;
+      // matchFound = true;
       bestScore = score;
       bestMatch = style->getFamilyName();
     }

@@ -113,7 +113,7 @@ public:
     std::vector<std::string> fallbackEmojiFonts)
   {
     DEBUG("Font directory: -----------");
-    for (const auto p : dirs)
+    for (const auto& p : dirs)
     {
       DEBUG("%s", p.string().c_str());
     }
@@ -127,11 +127,11 @@ public:
       }
 #endif
       DEBUG("----  Fallback font:  -----------");
-      for (const auto f : fallbacks)
+      for (const auto& f : fallbacks)
       {
         DEBUG("%s", f.c_str());
       }
-      for (const auto f : fallbackEmojiFonts)
+      for (const auto& f : fallbackEmojiFonts)
       {
         DEBUG("%s", f.c_str());
       }

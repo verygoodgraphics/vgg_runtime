@@ -44,7 +44,7 @@ void VParagraphPainter::drawTextBlob(
     auto styleID = *p;
     if (auto it = m_cache.find(styleID); it != m_cache.end())
     {
-      for (const auto p : it->second)
+      for (const auto& p : it->second)
       {
         m_canvas->drawTextBlob(blob, x, y, p);
       }
@@ -97,7 +97,7 @@ void VParagraphPainter::drawTextBlob(
         }
         if (!paints.empty())
         {
-          for (const auto p : paints)
+          for (const auto& p : paints)
           {
             m_canvas->drawTextBlob(blob, x, y, p);
           }

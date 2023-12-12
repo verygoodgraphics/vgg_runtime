@@ -472,7 +472,7 @@ void ExpandSymbol::processOtherOverrides(
     {
       continue;
     }
-    if (auto isLayoutOverride = overrideItem.value(K_EFFECT_ON_LAYOUT, false))
+    if (overrideItem.value(K_EFFECT_ON_LAYOUT, false))
     {
       continue;
     }
@@ -989,7 +989,7 @@ void ExpandSymbol::scaleContour(nlohmann::json& nodeJson, float xScaleFactor, fl
 
   // ./shape/subshapes/XXX/subGeometry/points/XXX
   auto& subshapes = nodeJson[K_SHAPE][K_SUBSHAPES];
-  for (auto i = 0; i < subshapes.size(); ++i)
+  for (std::size_t i = 0; i < subshapes.size(); ++i)
   {
     auto& subshape = subshapes[i];
     auto& subGeometry = subshape[K_SUBGEOMETRY];
@@ -999,7 +999,7 @@ void ExpandSymbol::scaleContour(nlohmann::json& nodeJson, float xScaleFactor, fl
     }
 
     auto& points = subGeometry[K_POINTS];
-    for (auto j = 0; j < points.size(); ++j)
+    for (std::size_t j = 0; j < points.size(); ++j)
     {
       auto& point = points[j];
       scalePoint(point, K_POINT, xScaleFactor, yScaleFactor);

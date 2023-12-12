@@ -139,7 +139,7 @@ void ImageNode::paintFill(Renderer* renderer, sk_sp<SkBlender> blender, const Sk
     SkPaint p;
     p.setBlender(std::move(blender));
     SkSamplingOptions opt;
-    const auto&       b = frameBound();
+    // const auto&       b = frameBound();
     canvas->drawImageRect(_->image, toSkRect(frameBound()), opt, &p);
 
     if (hasMask)

@@ -105,7 +105,7 @@ void Painter::drawPathBorder(
     p.setColor(SK_ColorRED);
     SkFont a;
     m_renderer->canvas()->drawPoints(SkCanvas::kPoints_PointMode, pts.size(), pts.data(), p);
-    for (auto i = 0; i < pts.size(); i++)
+    for (std::size_t i = 0; i < pts.size(); i++)
     {
       SkPaint textPaint;
       textPaint.setStrokeWidth(0.5);

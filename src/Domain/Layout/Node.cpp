@@ -764,7 +764,7 @@ Layout::Rect LayoutNode::resizeGroup(
   setFrame(newGroupFrame, false, true);
 
   auto newOrigin = origin();
-  for (auto i = 0; i < childFrames.size(); i++)
+  for (std::size_t i = 0; i < childFrames.size(); i++)
   {
     const auto relativeFrame = childFrames[i].makeOffset(-newOrigin.x, -newOrigin.y);
     m_children[i]->setFrame(relativeFrame, false, true);
@@ -819,7 +819,7 @@ Layout::Rect LayoutNode::resizeGroup(
   setFrame(newGroupFrame, false, false);
 
   newOrigin = origin();
-  for (auto i = 0; i < childFrames.size(); i++)
+  for (std::size_t i = 0; i < childFrames.size(); i++)
   {
     const auto relateiveFrame = childFrames[i].makeOffset(-newOrigin.x, -newOrigin.y);
     m_children[i]->setFrame(relateiveFrame, false, true);
@@ -968,19 +968,19 @@ Layout::Rect LayoutNode::resizeContour(
   ASSERT(points.size() > 0);
   const bool isClosed = subGeometry[K_CLOSED];
 
-  const auto                       oldSize = modelBounds().size;
+  // const auto                       oldSize = modelBounds().size;
   std::vector<Layout::BezierPoint> oldModelPoints;
-  for (auto j = 0; j < points.size(); ++j)
+  for (std::size_t j = 0; j < points.size(); ++j)
   {
     auto point = points[j].get<Layout::BezierPoint>();
     oldModelPoints.push_back(point);
 
-    auto oldFlipYModelPoint = point.point.makeFromModelPoint();
-    DEBUG(
-      "resizeContour: old flip y model point %d: %f, %f",
-      j,
-      oldFlipYModelPoint.x,
-      oldFlipYModelPoint.y);
+    // auto oldFlipYModelPoint = point.point.makeFromModelPoint();
+    // DEBUG(
+    //   "resizeContour: old flip y model point %d: %f, %f",
+    //   j,
+    //   oldFlipYModelPoint.x,
+    //   oldFlipYModelPoint.y);
   }
 
   // multiply matrix, to layout point
@@ -1153,7 +1153,7 @@ void LayoutNode::updatePathNodeModel(
   auto& subshapes = objectJson[K_SHAPE][K_SUBSHAPES];
   path /= K_SHAPE;
   path /= K_SUBSHAPES;
-  for (auto i = 0; i < subshapes.size(); ++i)
+  for (std::size_t i = 0; i < subshapes.size(); ++i)
   {
     auto& subshape = subshapes[i];
     auto& subGeometry = subshape[K_SUBGEOMETRY];
@@ -1164,7 +1164,7 @@ void LayoutNode::updatePathNodeModel(
 
     auto& points = subGeometry[K_POINTS];
     auto  pointsPath = path / i / K_SUBGEOMETRY / K_POINTS;
-    for (auto j = 0; j < points.size(); ++j)
+    for (std::size_t j = 0; j < points.size(); ++j)
     {
       auto point = points[j];
       to_json(point, newPoints[j]);

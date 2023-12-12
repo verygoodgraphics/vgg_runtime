@@ -112,7 +112,7 @@ void Scene::loadFileContent(const nlohmann::json& json)
   auto result = layer::SceneBuilder::builder().setDoc(json).setResetOriginEnable(true).build();
   if (result.type.has_value())
   {
-    DEBUG("SceneBuilder Result: %d", result.type.value());
+    DEBUG("SceneBuilder Result: %d", (int)result.type.value());
   }
   if (result.root.has_value())
   {
@@ -160,7 +160,7 @@ int Scene::frameCount() const
 PaintNode* Scene::frame(int index)
 {
   VGG_IMPL(Scene);
-  if (index >= 0 && index < _->roots.size())
+  if (index >= 0 && (std::size_t)index < _->roots.size())
   {
     auto f = _->roots[index].get();
     f->revalidate();
@@ -188,7 +188,7 @@ void Scene::setZoomer(std::shared_ptr<Zoomer> zoomer)
 void Scene::setPage(int num)
 {
   VGG_IMPL(Scene)
-  if (num >= 0 && num < _->roots.size())
+  if (num >= 0 && (std::size_t)num < _->roots.size())
   {
     _->page = num;
     repaint();
@@ -204,7 +204,7 @@ void Scene::repaint()
 void Scene::nextArtboard()
 {
   VGG_IMPL(Scene)
-  _->page = (_->page + 1 >= _->roots.size()) ? _->page : _->page + 1;
+  _->page = (_->page + 1 >= (int)_->roots.size()) ? _->page : _->page + 1;
   repaint();
 }
 

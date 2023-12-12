@@ -123,7 +123,7 @@ VggSdk::ListenersType VggSdk::getEventListeners(const std::string& elementPath)
     auto& eventType = map_item.first;
 
     auto js_listener_code_array = val::array();
-    for (int i = 0; i < map_item.second.size(); ++i)
+    for (std::size_t i = 0; i < map_item.second.size(); ++i)
     {
       auto& listenerCode = map_item.second[i];
       auto  js_listener_object = val::object();

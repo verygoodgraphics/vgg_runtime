@@ -121,7 +121,7 @@ Transform PaintNode::mapTransform(const PaintNode* node) const
   glm::mat3 mat{ 1.0 };
   if (!lca)
     return Transform(mat);
-  for (int i = 0; i < path1.size() && path1[i] != lca; i++)
+  for (std::size_t i = 0; i < path1.size() && path1[i] != lca; i++)
   {
     auto skm = static_cast<const PaintNode*>(path1[i])->d_ptr->transform.matrix();
     auto inv = glm::inverse(skm);
@@ -145,7 +145,7 @@ Mask PaintNode::makeMaskBy(EBoolOp maskOp, Renderer* renderer)
 
   auto        op = toSkPathOp(maskOp);
   const auto& objects = renderer->maskObjects();
-  for (const auto id : _->maskedBy)
+  for (const auto& id : _->maskedBy)
   {
     if (id != this->guid())
     {
@@ -309,7 +309,7 @@ SkPath PaintNode::childPolyOperation() const
 
   // eval mask by operator
   SkPath skPath = ct[0].first;
-  for (int i = 1; i < ct.size(); i++)
+  for (std::size_t i = 1; i < ct.size(); i++)
   {
     SkPath rhs;
     auto   op = ct[i].second;
@@ -329,7 +329,7 @@ SkPath PaintNode::childPolyOperation() const
   res.push_back(skPath);
 
   SkPath path;
-  for (const auto s : res)
+  for (const auto& s : res)
   {
     path.addPath(s);
   }
@@ -745,7 +745,7 @@ SkPath PaintNode::stylePath()
 
   std::vector<SkPath> res;
   SkPath              skPath = ct[0].first;
-  for (int i = 1; i < ct.size(); i++)
+  for (std::size_t i = 1; i < ct.size(); i++)
   {
     SkPath rhs;
     auto   op = ct[i].second;
@@ -764,7 +764,7 @@ SkPath PaintNode::stylePath()
   }
   res.push_back(skPath);
 
-  for (const auto s : res)
+  for (const auto& s : res)
   {
     skPath.addPath(s);
   }
@@ -811,7 +811,7 @@ void PaintNode::paintStyle(Renderer* renderer, const SkPath& path, const SkPath&
     }
     if (blurType)
     {
-      const auto bt = blurType.value();
+      // const auto bt = blurType.value();
       if (*blurType == BT_Gaussian)
         painter.blurContentEnd();
       else if (*blurType == BT_Background)

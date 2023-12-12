@@ -169,16 +169,16 @@ void drawParagraphDebugInfo(
   int                  curY,
   int                  index)
 {
-  static SkColor s_colorTable[9] = {
-    SK_ColorBLUE,   SK_ColorGREEN,  SK_ColorRED,  SK_ColorCYAN,   SK_ColorMAGENTA,
-    SK_ColorYELLOW, SK_ColorDKGRAY, SK_ColorGRAY, SK_ColorLTGRAY,
-  };
+  // static SkColor s_colorTable[9] = {
+  //   SK_ColorBLUE,   SK_ColorGREEN,  SK_ColorRED,  SK_ColorCYAN,   SK_ColorMAGENTA,
+  //   SK_ColorYELLOW, SK_ColorDKGRAY, SK_ColorGRAY, SK_ColorLTGRAY,
+  // };
   canvas.get()->save();
   canvas.get()->translate(curX, curY);
   auto    h = p->getHeight();
   auto    mw = p->getMaxWidth();
   SkPaint pen;
-  SkColor color = s_colorTable[index % 9];
+  // SkColor color = s_colorTable[index % 9];
   pen.setColor(SkColorSetA(SK_ColorBLUE, 0x11));
 
   canvas.get()->drawRect(SkRect{ 0, 0, mw, h }, pen); // draw the paragraph background
@@ -356,7 +356,7 @@ Bound RichTextBlock::internalLayout(const Bound& bound, ETextLayoutMode mode)
   const auto layoutWidth = bound.width();
   float      newWidth = bound.width();
   float      newHeight = bound.height();
-  for (int i = 0; i < paragraphCache.size(); i++)
+  for (std::size_t i = 0; i < paragraphCache.size(); i++)
   {
     // auto paragraph = d.builder->Build();
     const auto&   d = paragraph[i];

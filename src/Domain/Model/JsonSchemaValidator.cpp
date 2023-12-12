@@ -86,7 +86,7 @@ const valijson::Subschema* JsonSchemaValidator::getSubschemaByClassName(
     auto result = m_classSubschemaMap.at(className);
     return result;
   }
-  catch (std::out_of_range)
+  catch (std::out_of_range&)
   {
     try
     {

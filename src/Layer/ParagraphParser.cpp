@@ -32,11 +32,11 @@ enum class EReason
 template<typename F>
 EReason runOnUtf8(const char* utf8, size_t bytes, F&& f)
 {
-  const char* cur = utf8;
-  const char* nextChar = nullptr;
-  int         charCount = 0;
-  int         bytesCount = 0;
-  auto        nextUtf8Char = [](unsigned char* pBegin, int& charCount) -> const char*
+  const char*  cur = utf8;
+  const char*  nextChar = nullptr;
+  std::size_t charCount = 0;
+  std::size_t bytesCount = 0;
+  auto         nextUtf8Char = [](unsigned char* pBegin, std::size_t& charCount) -> const char*
   {
     if (*pBegin >> 7 == 0)
     {
@@ -193,7 +193,7 @@ void ParagraphParser::parse(
     WARN("Invalid utf8\n");
   }
   assert(m_styleIndex < textAttrs.size());
-  if (m_prevStyleBegin - text.data() < text.size())
+  if (m_prevStyleBegin < text.data() + text.size())
   {
     WARN("No more style for text");
     listener.onTextStyle(

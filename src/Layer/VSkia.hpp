@@ -490,9 +490,9 @@ inline sk_sp<SkShader> makeGradientAngular(const Bound& bound, const G& g)
   {
     auto pp = bound.map(bound.size() * (*p));
     mat.postTranslate(-center.x, -center.y);
-    const auto a = glm::distance(f, t);
-    const auto b = glm::distance(f, pp);
-    const auto ratio = (a == 0.f) ? 0.f : b / a;
+    // const auto a = glm::distance(f, t);
+    // const auto b = glm::distance(f, pp);
+    // const auto ratio = (a == 0.f) ? 0.f : b / a;
     mat.postScale(1.0, -vectorSign(pp - f, t - f));
     mat.postRotate(rad2deg(theta(f, t)));
     mat.postTranslate(center.x, center.y);

@@ -53,7 +53,7 @@ int versionCompare(const std::string& v1, const std::string& v2)
 
   // loop until both string are
   // processed
-  for (int i = 0, j = 0; (i < v1.length() || j < v2.length());)
+  for (std::size_t i = 0, j = 0; (i < v1.length() || j < v2.length());)
   {
     // storing numeric part of
     // version 1 in vnum1

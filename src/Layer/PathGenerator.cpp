@@ -111,7 +111,7 @@ bool inline computeAdjacent5PointsInfo(
   float&              len1,
   float&              len2)
 {
-  auto radius = curPoint.radius;
+  // auto radius = curPoint.radius;
   computeAdjacent3PointsInfo(
     prevPoint.point,
     curPoint.point,
@@ -141,7 +141,7 @@ bool inline computeAdjacent5PointsInfo(
   halfCot(prevAngle);
   halfCot(curAngle);
   halfCot(nextAngle);
-  const auto halfTanTheta = std::tan(theta / 2.f);
+  // const auto halfTanTheta = std::tan(theta / 2.f);
   len1 = (curAngle * len1) / (prevAngle + curAngle);
   len2 = (curAngle * len2) / (nextAngle + curAngle);
   return false;
@@ -156,7 +156,7 @@ std::optional<SmoothResult> addSmoothingRadiusCurveInLocalSpace(
   float            radius,
   float            maxLength)
 {
-  const auto cosTheta = std::cos(theta);
+  // const auto cosTheta = std::cos(theta);
   const auto singedTheta = thetaSign * theta;
   const auto halfSinTheta = std::sin(theta / 2.f);
   const auto halfTanTheta = std::tan(theta / 2.f);
@@ -266,7 +266,7 @@ std::pair<int, RadiusCurveResult> curveWithRadius(
 {
   const auto prevHasFrom = pp->from.has_value();
   const auto curHasTo = cp.to.has_value();
-  const auto nextHasFrom = np.from.has_value();
+  // const auto nextHasFrom = np.from.has_value();
   const auto nextHasTo = np.to.has_value();
   const auto curHasFrom = cp.from.has_value();
 
@@ -278,8 +278,8 @@ std::pair<int, RadiusCurveResult> curveWithRadius(
     const auto& p2 = c2.point;
     const auto& p3 = c3.point;
     auto        halfCot = [](float& a) { return (float)1.0 / std::tan(a / 2); };
-    auto        n1 = glm::normalize(p1 - p2);
-    auto        n2 = glm::normalize(p3 - p2);
+    // auto        n1 = glm::normalize(p1 - p2);
+    // auto        n2 = glm::normalize(p3 - p2);
     auto        prevAngle = glm::angle(glm::normalize(p2 - p1), glm::normalize(p2 - p3));
     // float       len = halfCot(prevAngle) * c2.radius;
     return halfCot(prevAngle);
@@ -335,7 +335,7 @@ std::pair<int, SmoothCurveResult> smoothCurveWithRadius(
 {
   const auto prevHasFrom = prevPoint.from.has_value();
   const auto curHasTo = curPoint.to.has_value();
-  const auto nextHasFrom = nextPoint.from.has_value();
+  // const auto nextHasFrom = nextPoint.from.has_value();
   const auto nextHasTo = nextPoint.to.has_value();
   const auto curHasFrom = curPoint.from.has_value();
   if (!prevHasFrom && !curHasTo && !curHasFrom && !nextHasTo)
@@ -379,7 +379,7 @@ std::pair<int, SmoothCurveResult> smoothCurveWithRadius(
     {
       radius = std::min(maxLength * halfTanTheta, radius);
       ArcCurve arcCurve{ curPoint.point, nextPoint.point, radius };
-      SkPoint  lastPt;
+      // SkPoint  lastPt;
       return { 1, arcCurve };
     }
     return { 1, SmoothCurveResult{} };
@@ -477,11 +477,11 @@ SkPath makePath(const Contour& contour)
       path.moveTo(buffer[pp].point.x, buffer[pp].point.y);
     else
     {
-      const auto& prevPrevPoint = points[(-2 + total) % total];
+      // const auto& prevPrevPoint = points[(-2 + total) % total];
       const auto& prevPoint = points[(-1 + total) % total];
       const auto& curPoint = points[0];
       const auto& nextPoint = points[1 % total];
-      const auto& nextNextPoint = points[2 % total];
+      // const auto& nextNextPoint = points[2 % total];
       glm::vec2   first, second;
       calcPointsFromCircle(
         prevPoint.point,

@@ -53,7 +53,7 @@ enum class EUIEventType
   TOUCHSTART
 };
 
-constexpr const char* uiEventTypeToString(EUIEventType e) noexcept
+constexpr const char* uiEventTypeToString(EUIEventType e)
 {
   switch (e)
   {

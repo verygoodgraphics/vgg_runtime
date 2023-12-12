@@ -15,11 +15,10 @@
  */
 #include "VggSdk.hpp"
 
-#include "Domain/DarumaContainer.hpp"
+#include "Application/VggEnv.hpp"
 #include "Domain/IVggEnv.hpp"
 #include "Domain/Saver/DirSaver.hpp"
 #include "UseCase/SaveModel.hpp"
-#include "Utility/DIContainer.hpp"
 #include "Utility/Log.hpp"
 
 #ifdef EMSCRIPTEN
@@ -28,13 +27,22 @@ constexpr auto listener_code_key = "listener";
 
 using namespace VGG;
 
-namespace
+std::shared_ptr<VGG::VggEnv> VggSdk::env()
 {
-auto env()
-{
-  return VGG::DIContainer<std::shared_ptr<IVggEnv>>::get();
+  if (auto env = m_env.lock())
+  {
+    return env;
+  }
+  else
+  {
+    return VggEnv::getDefault().lock();
+  }
 }
-} // namespace
+
+void VggSdk::setEnvKey(const std::string& key)
+{
+  m_env = VggEnv::get(key);
+}
 
 std::string VggSdk::getEnvKey()
 {

@@ -2,7 +2,6 @@
 
 #include "Adapter/VggSdkAddon.hpp"
 #include "Application/VggSdk.hpp"
-#include "Utility/DIContainer.hpp"
 #include "VggSdkMock.hpp"
 #include "test_config.hpp"
 
@@ -24,7 +23,6 @@ protected:
 
     m_sut_ptr = NativeExec::sharedInstance().get();
     m_mock_sdk_ptr = new VggSdkMock();
-    VGG::DIContainer<std::shared_ptr<VggSdk>>::get().reset(m_mock_sdk_ptr);
 
     m_sut_ptr->inject([](node::Environment* env) { link_vgg_sdk_addon(env); });
     injectVgg();
@@ -33,7 +31,6 @@ protected:
   void TearDown() override
   {
     m_mock_sdk_ptr = nullptr;
-    VGG::DIContainer<std::shared_ptr<VggSdk>>::get().reset();
   }
 
 private:

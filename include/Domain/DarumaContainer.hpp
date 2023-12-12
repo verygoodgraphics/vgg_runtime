@@ -31,15 +31,18 @@ public:
     Edited
   };
 
-  void add(std::shared_ptr<Daruma> daruma, KeyType key = KeyType::MainOrEditor);
-  void remove(KeyType key = KeyType::MainOrEditor);
+private:
+  std::unordered_map<KeyType, std::shared_ptr<Daruma>> m_repo;
+
+public:
+  void                    add(std::shared_ptr<Daruma> daruma, KeyType key = KeyType::MainOrEditor);
+  void                    remove(KeyType key = KeyType::MainOrEditor);
   std::shared_ptr<Daruma> get(KeyType key = KeyType::MainOrEditor);
 
 private:
   auto& getRepo()
   {
-    static std::unordered_map<KeyType, std::shared_ptr<Daruma>> repo;
-    return repo;
+    return m_repo;
   }
 };
 

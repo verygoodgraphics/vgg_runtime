@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-class VggSdkMock : public VggSdk
+class VggSdkMock : public VGG::VggSdk
 {
 public:
   MOCK_METHOD(void, updateStyle, (), ());

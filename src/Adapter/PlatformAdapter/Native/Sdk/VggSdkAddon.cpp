@@ -26,7 +26,7 @@
 
 napi_value InitializeLocalNapiBinding(napi_env env, napi_value exports)
 {
-  VggSdkNodeAdapter::Init(env, exports);
+  VGG::VggSdkNodeAdapter::Init(env, exports);
   VGG::NodeAdapter::MouseEvent::Init(env, exports);
   VGG::NodeAdapter::KeyboardEvent::Init(env, exports);
   VGG::NodeAdapter::TouchEvent::Init(env, exports);

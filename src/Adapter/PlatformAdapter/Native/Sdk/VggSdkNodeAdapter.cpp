@@ -25,6 +25,7 @@
 constexpr auto listener_code_key = "listener";
 
 using namespace VGG::adapter;
+using namespace VGG;
 
 // Empty value so that macros here are able to return NULL or void
 #define NODE_API_RETVAL_NOTHING // Intentionally blank #define

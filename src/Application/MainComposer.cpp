@@ -31,6 +31,8 @@ MainComposer::MainComposer(PlatformComposer* platformComposer, std::shared_ptr<M
   , m_runLoop{ RunLoop::sharedInstance() }
   , m_platformComposer{ platformComposer }
 {
+  VggEnv::set(m_env->getEnv(), m_env);
+
   m_presenter->setView(m_view);
 
   auto jsEngine = m_platformComposer->setup(m_env);

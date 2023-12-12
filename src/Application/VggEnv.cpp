@@ -13,23 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
 
-namespace VGG
+#include "Application/VggEnv.hpp"
+
+#include "Utility/Log.hpp"
+
+#include <unordered_map>
+
+using namespace VGG;
+
+std::weak_ptr<VggEnv> VggEnv::getDefault()
 {
+  auto& repo = getRepo();
+  ASSERT(!repo.empty());
+  return repo.begin()->second;
+}
 
-template<typename T>
-class DIContainer
+std::weak_ptr<VggEnv> VggEnv::get(const std::string& key)
 {
-public:
-  static T& get()
-  {
-    static T obj;
-    return obj;
-  }
+  return getRepo()[key];
+}
 
-private:
-  DIContainer() = default;
-};
+void VggEnv::set(const std::string& key, std::weak_ptr<VggEnv> env)
+{
+  getRepo()[key] = env;
+}
 
+std::unordered_map<std::string, std::weak_ptr<VggEnv>>& VggEnv::getRepo()
+{
+  static std::unordered_map<std::string, std::weak_ptr<VggEnv>> repo;
+  return repo;
 }

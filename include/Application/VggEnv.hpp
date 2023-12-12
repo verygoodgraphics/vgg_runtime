@@ -17,6 +17,7 @@
 
 #include "Domain/IVggEnv.hpp"
 
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -28,6 +29,8 @@ class VggEnv : public IVggEnv
   std::string m_containerKey{ "vggInstances" };
   std::string m_instanceKey{ "instance" };
   std::string m_listenerKey{ "listener" };
+
+  DarumaContainer m_darumaContainer;
 
 public:
   virtual std::string getEnv() override
@@ -66,6 +69,19 @@ public:
   {
     m_listenerKey = listenerKey;
   }
+
+  virtual DarumaContainer& darumaContainer() override
+  {
+    return m_darumaContainer;
+  }
+
+public:
+  static std::weak_ptr<VggEnv> getDefault();
+  static std::weak_ptr<VggEnv> get(const std::string& key);
+  static void                  set(const std::string& key, std::weak_ptr<VggEnv> env);
+
+private:
+  static std::unordered_map<std::string, std::weak_ptr<VggEnv>>& getRepo();
 };
 
 } // namespace VGG

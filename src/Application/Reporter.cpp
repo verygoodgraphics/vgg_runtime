@@ -16,7 +16,6 @@
 #include "Reporter.hpp"
 
 #include "Domain/Daruma.hpp"
-#include "Domain/DarumaContainer.hpp"
 #include "Domain/IVggEnv.hpp"
 #include "Domain/Model/JsonKeys.hpp"
 #include "Domain/VggExec.hpp"
@@ -44,7 +43,14 @@ void Reporter::onSelectNode(std::weak_ptr<LayoutNode> node)
     return;
   }
 
-  auto model = DarumaContainer().get();
+  auto env = m_env.lock();
+  ASSERT(env);
+  if (!env)
+  {
+    return;
+  }
+
+  auto model = env->darumaContainer().get();
   ASSERT(model);
   if (!model)
   {

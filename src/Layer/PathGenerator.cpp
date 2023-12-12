@@ -17,6 +17,8 @@
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VUtils.hpp"
 #include "Layer/Renderer.hpp"
+#include "Math/Math.hpp"
+#include "Utility/VggFloat.hpp"
 
 #include <glm/ext/matrix_float3x3.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -30,6 +32,7 @@
 #include <glm/ext/matrix_float3x3.hpp>
 #include <glm/gtx/compatibility.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <limits>
 #include <variant>
 
 namespace
@@ -95,7 +98,7 @@ void inline computeAdjacent3PointsInfo(
   normAngleSign = VGG::vectorSign(glm::vec2{ 1, 0 }, norm);
 }
 
-void inline computeAdjacent5PointsInfo(
+bool inline computeAdjacent5PointsInfo(
   const ControlPoint& prevPrevPoint,
   const ControlPoint& prevPoint,
   const ControlPoint& curPoint,
@@ -129,12 +132,19 @@ void inline computeAdjacent5PointsInfo(
     glm::normalize(nextNextPoint.point - nextPoint.point),
     glm::normalize(curPoint.point - nextPoint.point));
 
+  if (
+    floatNearlyEqual(prevAngle, math::number::Pi) || floatNearlyEqual(curAngle, math::number::Pi) ||
+    floatNearlyEqual(nextAngle, math::number::Pi))
+  {
+    return false;
+  }
   halfCot(prevAngle);
   halfCot(curAngle);
   halfCot(nextAngle);
   const auto halfTanTheta = std::tan(theta / 2.f);
   len1 = (curAngle * len1) / (prevAngle + curAngle);
   len2 = (curAngle * len2) / (nextAngle + curAngle);
+  return false;
 }
 
 std::optional<SmoothResult> addSmoothingRadiusCurveInLocalSpace(
@@ -337,7 +347,7 @@ std::pair<int, SmoothCurveResult> smoothCurveWithRadius(
     int   pivotSign;
     float len1, len2;
     auto  radius = curPoint.radius;
-    computeAdjacent5PointsInfo(
+    auto  smoothable = computeAdjacent5PointsInfo(
       prevPrevPoint,
       prevPoint,
       curPoint,
@@ -351,19 +361,21 @@ std::pair<int, SmoothCurveResult> smoothCurveWithRadius(
       len2);
     const auto  halfTanTheta = std::tan(theta / 2.f);
     const float maxLength = std::min(len1, len2);
-    auto        result = addSmoothingRadiusCurveInLocalSpace(
-      curPoint.point,
-      theta,
-      thetaSign,
-      pivotSign * pivotAngle,
-      smooth,
-      radius,
-      maxLength);
-    if (result)
+    if (smoothable)
     {
-      return { 1, result.value() };
+      auto result = addSmoothingRadiusCurveInLocalSpace(
+        curPoint.point,
+        theta,
+        thetaSign,
+        pivotSign * pivotAngle,
+        smooth,
+        radius,
+        maxLength);
+      if (result)
+        return { 1, *result };
+      smoothable = false;
     }
-    else
+    if (!smoothable)
     {
       radius = std::min(maxLength * halfTanTheta, radius);
       ArcCurve arcCurve{ curPoint.point, nextPoint.point, radius };
@@ -506,7 +518,7 @@ SkPath makePath(const Contour& contour)
       prev = (prev + consumed) % total;
       cur = (cur + consumed) % total;
       next = (next + consumed) % total;
-      next2 = (next + consumed) % total;
+      next2 = (next2 + consumed) % total;
       // swap buffer
       pp = cp;
       cp = 1 - cp;
@@ -528,34 +540,33 @@ SkPath makePath(const Contour& contour)
         smoothCurveWithRadius(prevPrevPoint, prevPoint, curPoint, nextPoint, nextNextPoint, smooth)
           .second;
       std::visit(
-        Overloaded{
-          [&](const SmoothResult& c)
-          {
-            if (auto smooth = std::get_if<PartialSmooth>(&c); smooth)
-            {
-              const auto& [cubic1, arc, cubic2] = *smooth;
-              path.moveTo(cubic2.p2.x, cubic2.p2.y);
-            }
-            else if (auto smooth = std::get_if<FullSmooth>(&c); smooth)
-            {
-              const auto& [cubic1, cubic2] = *smooth;
-              path.moveTo(cubic2.p2.x, cubic2.p2.y);
-            }
-          },
-          [&](const ArcCurve& c)
-          {
-            glm::vec2 first, second;
-            calcPointsFromCircle(prevPrevPoint.point, c.p1, c.p2, c.radius, first, second);
-            path.moveTo(second.x, second.y);
-          },
-          [&](const NoRadiusCurveResult& l)
-          {
-            std::visit(
-              Overloaded{ [&](const CubicCurve& c) { path.moveTo(c.p2.x, c.p2.y); },
-                          [&](const QuadricCurve& c) { path.moveTo(c.p2.x, c.p2.y); },
-                          [&](const Line& l) { path.lineTo(l.p2.x, l.p2.y); } },
-              l);
-          } },
+        Overloaded{ [&](const SmoothResult& c)
+                    {
+                      if (auto smooth = std::get_if<PartialSmooth>(&c); smooth)
+                      {
+                        const auto& [cubic1, arc, cubic2] = *smooth;
+                        path.moveTo(cubic2.p2.x, cubic2.p2.y);
+                      }
+                      else if (auto smooth = std::get_if<FullSmooth>(&c); smooth)
+                      {
+                        const auto& [cubic1, cubic2] = *smooth;
+                        path.moveTo(cubic2.p2.x, cubic2.p2.y);
+                      }
+                    },
+                    [&](const ArcCurve& c)
+                    {
+                      glm::vec2 first, second;
+                      calcPointsFromCircle(prevPoint.point, c.p1, c.p2, c.radius, first, second);
+                      path.moveTo(second.x, second.y);
+                    },
+                    [&](const NoRadiusCurveResult& l)
+                    {
+                      std::visit(
+                        Overloaded{ [&](const CubicCurve& c) { path.moveTo(c.p2.x, c.p2.y); },
+                                    [&](const QuadricCurve& c) { path.moveTo(c.p2.x, c.p2.y); },
+                                    [&](const Line& l) { path.lineTo(l.p2.x, l.p2.y); } },
+                        l);
+                    } },
         res);
     }
     while (segments > 0)
@@ -589,7 +600,7 @@ SkPath makePath(const Contour& contour)
       prev = (prev + consumed) % total;
       cur = (cur + consumed) % total;
       next = (next + consumed) % total;
-      next2 = (next + consumed) % total;
+      next2 = (next2 + consumed) % total;
       // swap buffer
       pp = cp;
       cp = 1 - cp;

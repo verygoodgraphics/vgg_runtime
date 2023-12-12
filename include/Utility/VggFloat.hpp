@@ -16,6 +16,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cmath>
 
 namespace VGG
 {
@@ -23,4 +24,23 @@ bool nearlyEqual(double x, double y);
 
 bool doubleNearlyZero(double a);
 bool doublesNearlyEqual(double a, double b);
+
+inline bool floatNearlyZero(float a)
+{
+  return a == 0 || std::fabs(a) < std::numeric_limits<float>::epsilon();
+}
+inline bool floatsNearlyEqual(float a, float b)
+{
+  constexpr float TOLERANCE = 0.001;
+  return a == b || std::abs(b - a) < TOLERANCE;
+}
+inline bool floatNearlyEqual(float a, float b)
+{
+  if (floatNearlyZero(a))
+  {
+    return floatNearlyZero(b);
+  }
+  return floatsNearlyEqual(a, b);
+}
+
 } // namespace VGG

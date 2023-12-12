@@ -904,7 +904,7 @@ void ExpandSymbol::scaleTreeToBounds(nlohmann::json& rootJson, const nlohmann::j
   Rect newBounds = newBoundsJson;
 
   auto hasBounds = isLayoutNode(rootJson);
-  Rect oldBounds, frame;
+  Rect oldBounds;
   if (!hasBounds)
   {
     return;

@@ -54,6 +54,11 @@ public:
     m_platformComposer->teardown();
   }
 
+  auto env()
+  {
+    return m_env;
+  }
+
   auto runLoop()
   {
     return m_runLoop;

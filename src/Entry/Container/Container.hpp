@@ -17,6 +17,8 @@
 #pragma once
 
 #include "Event.hpp"
+#include "IContainer.hpp"
+#include "ISdk.hpp"
 #include "VggTypes.hpp"
 
 #include <memory>
@@ -30,7 +32,7 @@ class SkiaGraphicsContext;
 }
 
 class ContainerImpl;
-class Container
+class Container : public IContainer
 {
   std::shared_ptr<ContainerImpl> m_impl;
 
@@ -38,15 +40,10 @@ public:
   Container();
   ~Container();
 
-  bool load(
-    const std::string& filePath,
-    const char*        designDocSchemaFilePath = nullptr,
-    const char*        layoutDocSchemaFilePath = nullptr);
   void setGraphicsContext(std::unique_ptr<layer::SkiaGraphicsContext>& context, int w, int h);
 
-  bool run();
-  bool onEvent(UEvent evt);
-  void setEventListener(EventListener listener);
+private:
+  virtual IContainer* container() override;
 };
 
 } // namespace VGG

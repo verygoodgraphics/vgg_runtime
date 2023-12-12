@@ -17,30 +17,45 @@
 #pragma once
 
 #include "Event.hpp"
-#include "IContainer.hpp"
 #include "ISdk.hpp"
 #include "VggTypes.hpp"
-
-#include <memory>
 
 namespace VGG
 {
 
-class MetalContainerImpl;
-class MetalContainer : public IContainer
+class IContainer
 {
-  std::unique_ptr<MetalContainerImpl> m_impl;
+protected:
+  virtual IContainer* container() = 0;
 
 public:
-  using MTLHandle = const void*;
+  virtual ~IContainer() = default;
 
-  MetalContainer();
-  ~MetalContainer();
+  virtual bool load(
+    const std::string& filePath,
+    const char*        designDocSchemaFilePath = nullptr,
+    const char*        layoutDocSchemaFilePath = nullptr)
+  {
+    return container()->load(filePath, designDocSchemaFilePath, layoutDocSchemaFilePath);
+  }
+  virtual bool run()
+  {
+    return container()->run();
+  }
 
-  void setView(MTLHandle mtkView);
+  virtual bool onEvent(UEvent evt)
+  {
+    return container()->onEvent(evt);
+  }
+  virtual void setEventListener(EventListener listener)
+  {
+    return container()->setEventListener(listener);
+  }
 
-private:
-  virtual IContainer* container() override;
+  virtual std::shared_ptr<ISdk> sdk()
+  {
+    return container()->sdk();
+  }
 };
 
 } // namespace VGG

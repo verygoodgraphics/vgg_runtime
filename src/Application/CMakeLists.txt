@@ -16,6 +16,7 @@ add_library(vgg_application STATIC
 
 target_include_directories(vgg_application PUBLIC
   ${CMAKE_SOURCE_DIR}/include
+  ${CMAKE_SOURCE_DIR}/include/VGG/Container
 )
 
 target_include_directories(vgg_application PRIVATE

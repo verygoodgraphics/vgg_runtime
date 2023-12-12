@@ -24,7 +24,8 @@ if(VGG_VAR_TARGET MATCHES "^iOS")
     ${CMAKE_SOURCE_DIR}/include/Application/Event/Event.hpp
     ${CMAKE_SOURCE_DIR}/include/Application/Event/Keycode.hpp
     ${CMAKE_SOURCE_DIR}/include/Application/Event/Scancode.hpp
-    ${CMAKE_SOURCE_DIR}/include/Application/VggSdk.hpp
+    ${CMAKE_SOURCE_DIR}/include/VGG/Container/IContainer.hpp
+    ${CMAKE_SOURCE_DIR}/include/VGG/Container/ISdk.hpp
     ${CMAKE_SOURCE_DIR}/include/VGG/Container/MetalContainer.hpp
     ${CMAKE_SOURCE_DIR}/include/VGG/Container/VggTypes.hpp
     DESTINATION VGG)

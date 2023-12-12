@@ -24,7 +24,8 @@
 using namespace VGG;
 
 MainComposer::MainComposer(PlatformComposer* platformComposer, std::shared_ptr<Mouse> mouse)
-  : m_view{ new UIView }
+  : m_env{ new VggEnv }
+  , m_view{ new UIView }
   , m_presenter{ new Presenter{ mouse } }
   , m_editor{ new Editor{ m_view, mouse } }
   , m_runLoop{ RunLoop::sharedInstance() }
@@ -32,8 +33,8 @@ MainComposer::MainComposer(PlatformComposer* platformComposer, std::shared_ptr<M
 {
   m_presenter->setView(m_view);
 
-  auto jsEngine = m_platformComposer->setup();
-  m_controller.reset(new Controller{ m_runLoop, jsEngine, m_presenter, m_editor });
+  auto jsEngine = m_platformComposer->setup(m_env);
+  m_controller.reset(new Controller{ m_env, m_runLoop, jsEngine, m_presenter, m_editor });
 }
 
 void MainComposer::enableEdit(int top, int right, int bottom, int left)

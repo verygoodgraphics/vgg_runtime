@@ -8,6 +8,8 @@
 using ::testing::_;
 using ::testing::Return;
 
+using namespace VGG;
+
 class VggExecTestSuite : public ::testing::Test
 {
 protected:

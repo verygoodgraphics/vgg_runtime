@@ -17,6 +17,9 @@
 
 #include <string>
 
+namespace VGG
+{
+
 class IVggEnv
 {
 public:
@@ -38,3 +41,5 @@ public:
     return "_currentVgg";
   }
 };
+
+} // namespace VGG

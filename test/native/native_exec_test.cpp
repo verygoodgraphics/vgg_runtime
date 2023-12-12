@@ -7,6 +7,8 @@
 
 #include <memory>
 
+using namespace VGG;
+
 class VggNativeExecTestSuite : public ::testing::Test
 {
 protected:

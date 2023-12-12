@@ -20,6 +20,9 @@
 #include <sstream>
 #include <string>
 
+namespace VGG
+{
+
 class VggEnv : public IVggEnv
 {
   std::string m_containerKey{ "vggInstances" };
@@ -64,3 +67,5 @@ public:
     m_listenerKey = listenerKey;
   }
 };
+
+} // namespace VGG

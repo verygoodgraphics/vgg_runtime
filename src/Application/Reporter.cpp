@@ -20,7 +20,6 @@
 #include "Domain/IVggEnv.hpp"
 #include "Domain/Model/JsonKeys.hpp"
 #include "Domain/VggExec.hpp"
-#include "Utility/DIContainer.hpp"
 #include "Utility/Log.hpp"
 
 #include <sstream>
@@ -36,14 +35,6 @@ constexpr auto K_TYPE = "type";
 // event type
 constexpr auto K_SELECT = "select";
 constexpr auto K_FIRST_RENDER = "firstRender";
-
-namespace
-{
-auto env()
-{
-  return VGG::DIContainer<std::shared_ptr<IVggEnv>>::get();
-}
-} // namespace
 
 void Reporter::onSelectNode(std::weak_ptr<LayoutNode> node)
 {
@@ -103,6 +94,13 @@ void Reporter::sendEventToJs(const nlohmann::json& event)
 {
   DEBUG("Reporter::sendEventToJs, event is: %s", event.dump().c_str());
 
+  auto env = m_env.lock();
+  if (!env)
+  {
+    FAIL("#Reporter::sendEventToJs, no env");
+    return;
+  }
+
   auto jsEngine = m_jsEngine.lock();
   if (!jsEngine)
   {
@@ -112,9 +110,9 @@ void Reporter::sendEventToJs(const nlohmann::json& event)
 
   std::ostringstream oss;
   oss << "(function (event) {"
-      << "const containerKey = '" << env()->getContainerKey() << "';"
-      << "const envKey = '" << env()->getEnv() << "';"
-      << "const listenerKey = '" << env()->getListenerKey() << "';"
+      << "const containerKey = '" << env->getContainerKey() << "';"
+      << "const envKey = '" << env->getEnv() << "';"
+      << "const listenerKey = '" << env->getListenerKey() << "';"
       << R"(
           const listener = globalThis[containerKey]?.[envKey]?.[listenerKey]
           if(listener) {

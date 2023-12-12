@@ -18,22 +18,26 @@
 #include "Editor.hpp"
 #include "UIEvent.hpp"
 
+#include "Domain/IVggEnv.hpp"
+
 #include <nlohmann/json.hpp>
 
 #include <memory>
 
-class VggExec;
-
 namespace VGG
 {
 
+class VggExec;
+
 class Reporter : public Editor::Listener
 {
+  std::weak_ptr<IVggEnv> m_env;
   std::weak_ptr<VggExec> m_jsEngine;
 
 public:
-  Reporter(std::weak_ptr<VggExec> jsEngine)
-    : m_jsEngine{ jsEngine }
+  Reporter(std::weak_ptr<IVggEnv> env, std::weak_ptr<VggExec> jsEngine)
+    : m_env{ env }
+    , m_jsEngine{ jsEngine }
   {
   }
 

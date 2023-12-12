@@ -10,6 +10,8 @@
 
 #include <memory>
 
+using namespace VGG;
+
 class VggNativeSdkTestSuite : public ::testing::Test
 {
 protected:

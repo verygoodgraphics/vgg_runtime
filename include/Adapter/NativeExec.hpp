@@ -27,6 +27,9 @@ namespace node
 class Environment;
 }
 
+namespace VGG
+{
+
 struct NativeExecImpl;
 
 class NativeExec final : public VggJSEngine
@@ -37,7 +40,8 @@ public:
 
   bool evalScript(const std::string& code) override;
   bool evalModule(const std::string& code) override;
-  bool evalModule(const std::string& code, VGG::EventPtr event) override;
+  bool evalModule(const std::string& code, VGG::EventPtr event, std::shared_ptr<IVggEnv> env)
+    override;
 
   using InjectFn = std::function<void(node::Environment*)>;
   bool inject(InjectFn fn);
@@ -50,5 +54,7 @@ private:
 
   void teardown();
 };
+
+} // namespace VGG
 
 #endif

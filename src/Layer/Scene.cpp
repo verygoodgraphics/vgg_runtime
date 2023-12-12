@@ -217,9 +217,6 @@ void Scene::preArtboard()
 
 void Scene::nextSymbol()
 {
-  VGG_IMPL(Scene)
-  // _->symbolIndex =
-  //   (_->symbolIndex + 1 >= _->container.symbols.size()) ? _->symbolIndex : _->symbolIndex + 1;
 }
 
 void Scene::prevSymbol()

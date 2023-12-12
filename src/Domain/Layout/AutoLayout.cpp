@@ -97,6 +97,8 @@ justify_content toLibJustifyContent(FlexboxLayout::EJustifyContent type)
       return justify_content_space_around;
     case FlexboxLayout::EJustifyContent::SPACE_EVENLY:
       return justify_content_space_evenly;
+    default:
+      return justify_content_flex_start;
   }
 }
 
@@ -110,6 +112,8 @@ align_content toLibAlignContent(EAlignStyle type)
       return align_content_center;
     case EAlignStyle::END:
       return align_content_flex_end;
+    default:
+      return align_content_flex_start;
   }
 }
 
@@ -123,6 +127,8 @@ align_items toLibAlignItem(EAlignStyle type)
       return align_items_center;
     case EAlignStyle::END:
       return align_items_flex_end;
+    default:
+      return align_items_flex_start;
   }
 }
 
@@ -134,6 +140,8 @@ wrap toLibWrap(FlexboxLayout::EWrap type)
       return wrap_no_wrap;
     case FlexboxLayout::EWrap::WRAP:
       return wrap_wrap;
+    default:
+      return wrap_no_wrap;
   }
 }
 
@@ -145,6 +153,8 @@ column_width_strategy toLibColumnWidthStrategy(ColumnWidth::EStrategy type)
       return column_width_strategy_min;
     case ColumnWidth::EStrategy::FIX:
       return column_width_strategy_fix;
+    default:
+      return column_width_strategy_min;
   }
 }
 
@@ -158,6 +168,8 @@ row_height_strategy toLibRowHeightStrategy(RowHeight::EStrategy type)
       return row_height_strategy_fit;
     case RowHeight::EStrategy::FIXED:
       return row_height_strategy_fix;
+    default:
+      return row_height_strategy_fill;
   }
 }
 
@@ -171,6 +183,8 @@ align toLibAlign(EAlignStyle type)
       return align_center;
     case EAlignStyle::END:
       return align_end;
+    default:
+      return align_start;
   }
 }
 
@@ -182,6 +196,8 @@ item_pos_strategy toLibItemPosStrategy(GridItemPos::EStrategy type)
       return item_pos_strategy_auto;
     case GridItemPos::EStrategy::FIX:
       return item_pos_strategy_fix;
+    default:
+      return item_pos_strategy_auto;
   }
 }
 
@@ -197,6 +213,8 @@ length_unit toLibLengthUnit(Length::ETypes type)
       // todo
       ASSERT(false);
       return length_unit_percent;
+    default:
+      return length_unit_point;
   }
 }
 
@@ -222,7 +240,7 @@ bool layoutNodeHasExactSameChildren(flexbox_node* node, Views subviews)
     return false;
   }
 
-  for (auto i = 0; i < subviews.size(); ++i)
+  for (std::size_t i = 0; i < subviews.size(); ++i)
   {
     if (node->get_child(i) != subviews[i]->autoLayout()->getFlexItem())
     {
@@ -240,7 +258,7 @@ bool layoutNodeHasExactSameChildren(grid_layout* node, Views subviews)
     return false;
   }
 
-  for (auto i = 0; i < subviews.size(); ++i)
+  for (std::size_t i = 0; i < subviews.size(); ++i)
   {
     if (node->get_child(i) != subviews[i]->autoLayout()->getGridItem())
     {
@@ -322,7 +340,7 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutNode> view)
       if (!layoutNodeHasExactSameChildren(container, subviewsToInclude))
       {
         container->clear_child();
-        for (auto i = 0; i < subviewsToInclude.size(); ++i)
+        for (std::size_t i = 0; i < subviewsToInclude.size(); ++i)
         {
           DEBUG("attachNodesFromViewHierachy, grid container add child");
           container->add_child(subviewsToInclude[i]->autoLayout()->getGridItem(), i);
@@ -416,7 +434,7 @@ void applyLayoutToViewHierarchy(
 
     auto& libFrames = *maybeLibFrames;
     auto& subviews = view->children();
-    for (auto i = 0; i < subviews.size(); ++i)
+    for (std::size_t i = 0; i < subviews.size(); ++i)
     {
       auto& libFrame = libFrames[i];
       auto& subview = subviews[i];

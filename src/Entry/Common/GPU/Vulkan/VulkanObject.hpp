@@ -93,7 +93,7 @@ struct VkInstanceObject : public std::enable_shared_from_this<VkInstanceObject>
     vkEnumerateInstanceExtensionProperties(nullptr, &extPropCount, nullptr);
     std::vector<VkExtensionProperties> props(extPropCount);
     vkEnumerateInstanceExtensionProperties(nullptr, &extPropCount, props.data());
-    for (int i = 0; i < props.size(); i++)
+    for (std::size_t i = 0; i < props.size(); i++)
     {
       DEBUG("%s", props[i].extensionName);
     }
@@ -252,7 +252,7 @@ struct VkPhysicalDeviceObject : public std::enable_shared_from_this<VkPhysicalDe
     VK_CHECK(vkEnumeratePhysicalDevices(*(this->instance), &count, dev.data()));
     DEBUG("%d physical device found", count);
 
-    for (int i = 0; i < count; i++)
+    for (uint32_t i = 0; i < count; i++)
     {
       VkPhysicalDeviceProperties2 prop2;
       prop2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
@@ -262,7 +262,7 @@ struct VkPhysicalDeviceObject : public std::enable_shared_from_this<VkPhysicalDe
       VkPhysicalDeviceProperties prop = prop2.properties;
       VkPhysicalDeviceMemoryProperties memProp;
       vkGetPhysicalDeviceMemoryProperties(d, &memProp);
-      for (int i = 0; i < memProp.memoryTypeCount; i++)
+      for (uint32_t i = 0; i < memProp.memoryTypeCount; i++)
       {
         allowedMemoryType.push_back(memProp.memoryTypes[i]);
       }
@@ -301,7 +301,7 @@ struct VkPhysicalDeviceObject : public std::enable_shared_from_this<VkPhysicalDe
   }
   uint32_t findProperMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags)
   {
-    for (int i = 0; i < allowedMemoryType.size(); i++)
+    for (std::size_t i = 0; i < allowedMemoryType.size(); i++)
     {
       if ((typeFilter & (1 << i)) && (allowedMemoryType[i].propertyFlags & flags) == flags)
       {
@@ -376,7 +376,7 @@ struct VkPhysicalDeviceObject : public std::enable_shared_from_this<VkPhysicalDe
   int getQueueIndex(VkQueueFlagBits queueFlags) const
   {
     const auto count = queueFamilies.size();
-    for (int i = 0; i < count; i++)
+    for (std::size_t i = 0; i < count; i++)
     {
       const auto q = queueFamilies[i];
       if (q.queueCount > 0 && q.queueFlags & queueFlags)
@@ -546,7 +546,7 @@ struct VkSurfaceObject
                                          m_supportedFormat.data());
 
     DEBUG("Supported Format: %d.\n", count);
-    for (int i = 0; i < count; i++)
+    for (uint32_t i = 0; i < count; i++)
     {
       if (m_supportedFormat[i].format == VK_FORMAT_B8G8R8A8_UNORM &&
           m_supportedFormat[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)

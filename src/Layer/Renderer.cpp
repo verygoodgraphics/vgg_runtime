@@ -68,7 +68,7 @@ void Renderer::updateMaskObject(PaintNode* p, std::unordered_map<std::string, Pa
 
 void Renderer::drawDebugBound(layer::PaintNode* p, int zorder)
 {
-  const auto& b = p->bound();
+  // const auto& b = p->bound();
   SkPaint     strokePen;
   strokePen.setStyle(SkPaint::kStroke_Style);
   SkColor color = nodeType2Color(VGG_PATH);

@@ -506,7 +506,7 @@ napi_value VggSdkNodeAdapter::GetEventListeners(napi_env env, napi_callback_info
 
       napi_value js_listener_code_array; // listener array of the eventType
       napi_create_array_with_length(env, map_item.second.size(), &js_listener_code_array);
-      for (int i = 0; i < map_item.second.size(); ++i)
+      for (std::size_t i = 0; i < map_item.second.size(); ++i)
       {
         auto& listenerCode = map_item.second[i];
 

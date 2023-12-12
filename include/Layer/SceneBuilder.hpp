@@ -102,7 +102,7 @@ class SceneBuilder
     F1&&             creator,
     F2&&             override)
   {
-    auto obj = creator(std::move(j.value("name", "")), std::move(j.value("id", "")));
+    auto obj = creator(j.value("name", ""), j.value("id", ""));
     if (!obj)
       return nullptr;
     auto [originalMatrix, newMatrix, inversedNewMatrix] =
@@ -118,8 +118,8 @@ class SceneBuilder
     obj->setStyle(fromStyle(j.value("style", json::object_t{}), b, convertedMatrix));
     obj->style().cornerSmooth = get_opt<float>(j, "cornerSmoothing").value_or(0.f);
     obj->setContextSettings(j.value("contextSettings", ContextSetting()));
-    obj->setMaskBy(std::move(j.value("outlineMaskBy", std::vector<std::string>{})));
-    obj->setAlphaMaskBy(std::move(j.value("alphaMaskBy", std::vector<AlphaMask>{})));
+    obj->setMaskBy(j.value("outlineMaskBy", std::vector<std::string>{}));
+    obj->setAlphaMaskBy(j.value("alphaMaskBy", std::vector<AlphaMask>{}));
     const auto maskType = j.value("maskType", EMaskType::MT_None);
     const auto defaultShowType =
       maskType == EMaskType::MT_Outline

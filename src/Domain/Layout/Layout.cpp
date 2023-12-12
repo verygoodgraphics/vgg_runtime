@@ -100,7 +100,7 @@ void Layout::Layout::buildLayoutTree()
   {
     m_layoutTree.reset(new LayoutNode{ "/" });
     json::json_pointer framesPath{ "/frames" };
-    for (auto i = 0; i < designJson[K_FRAMES].size(); ++i)
+    for (std::size_t i = 0; i < designJson[K_FRAMES].size(); ++i)
     {
       auto path = framesPath / i;
       auto page = createOneLayoutNode(designJson[path], path, m_layoutTree);
@@ -151,7 +151,7 @@ std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(
     auto& subShapes = j[K_SHAPE][K_SUBSHAPES];
     auto  subShapesPath = currentPath / K_SHAPE / K_SUBSHAPES;
     auto  size = subShapes.size();
-    for (auto i = 0; i < size; ++i)
+    for (std::size_t i = 0; i < size; ++i)
     {
       createOneLayoutNode(subShapes[i][K_SUBGEOMETRY], subShapesPath / i / K_SUBGEOMETRY, node);
     }
@@ -172,7 +172,7 @@ void Layout::Layout::createLayoutNodes(
   }
 
   auto size = j.size();
-  for (auto i = 0; i < size; ++i)
+  for (std::size_t i = 0; i < size; ++i)
   {
     auto path = currentPath;
     path /= i;

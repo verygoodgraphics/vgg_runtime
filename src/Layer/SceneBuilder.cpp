@@ -545,7 +545,7 @@ void SceneBuilder::buildImpl(const json& j, bool resetOrigin)
   {
     for (const auto& p : m_frames)
     {
-      const auto m = p->transform();
+      // const auto m = p->transform();
       const auto b = p->frameBound();
       p->transform().setTranslate(-b.topLeft().x, -b.topLeft().y);
       p->setOverflow(EOverflow::OF_Visible);

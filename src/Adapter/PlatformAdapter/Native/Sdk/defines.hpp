@@ -59,7 +59,8 @@
     if ((the_call) != napi_ok)                                                                     \
     {                                                                                              \
       GET_AND_THROW_LAST_ERROR((env));                                                             \
-      return ret_val;                                                                              \
+      if (ret_val != NULL)                                                                         \
+        return ret_val;                                                                            \
     }                                                                                              \
   } while (0)
 

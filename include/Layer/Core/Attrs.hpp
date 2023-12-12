@@ -261,10 +261,10 @@ struct ControlPoint
     std::optional<glm::vec2> to,
     std::optional<int>       cornerStyle)
     : point(point)
-    , radius(radius)
     , from(from)
     , to(to)
     , cornerStyle(cornerStyle)
+    , radius(radius)
   {
   }
 };

@@ -93,13 +93,13 @@ protected:
 
 class ParagraphParser
 {
-  int         m_length{ 0 };
-  int         m_styleIndex{ 0 };
-  int         m_paragraphAttrIndex{ 0 };
-  const char* m_prevStyleBegin{ nullptr };
-  const char* m_prevParagraphBegin{ nullptr };
-  int         m_offset{ 0 };
-  bool        m_seperateLines{ false };
+  int          m_length{ 0 };
+  unsigned int m_styleIndex{ 0 };
+  unsigned int m_paragraphAttrIndex{ 0 };
+  const char*  m_prevStyleBegin{ nullptr };
+  const char*  m_prevParagraphBegin{ nullptr };
+  int          m_offset{ 0 };
+  bool         m_seperateLines{ false };
   struct LevelOrderState
   {
     std::unordered_map<int, int> level2Order;

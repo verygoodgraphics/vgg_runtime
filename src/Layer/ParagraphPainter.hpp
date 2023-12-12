@@ -73,7 +73,7 @@ public:
     {
       curY = (b.height() - totalHeight) / 2;
     }
-    for (int i = 0; i < m_paragraph->paragraphCache.size(); i++)
+    for (std::size_t i = 0; i < m_paragraph->paragraphCache.size(); i++)
     {
       auto&      p = m_paragraph->paragraphCache[i].paragraph;
       const auto curX = m_paragraph->paragraphCache[i].offsetX;

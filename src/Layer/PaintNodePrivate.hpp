@@ -124,11 +124,11 @@ public:
     Iter2         end,
     F&&           f)
   {
-    auto                                          canvas = renderer->canvas();
+    // auto                                          canvas = renderer->canvas();
     const auto&                                   objects = renderer->maskObjects();
     std::vector<std::pair<PaintNode*, Transform>> cache;
-    auto                                          maskAreaBound = Bound::makeInfinite();
-    const auto&                                   selfBound = q_ptr->bound();
+    // auto                                          maskAreaBound = Bound::makeInfinite();
+    // const auto&                                   selfBound = q_ptr->bound();
     for (auto it = begin; it != end; ++it)
     {
       const auto& id = f(*it);
@@ -137,7 +137,7 @@ public:
         if (auto obj = objects.find(id); obj != objects.end())
         {
           const auto t = obj->second->mapTransform(q_ptr);
-          const auto transformedBound = obj->second->bound() * t;
+          // const auto transformedBound = obj->second->bound() * t;
           cache.emplace_back(obj->second, t);
           // if (selfBound.isIntersectWith(transformedBound))
           // {
@@ -458,7 +458,7 @@ public:
 
   void drawRawStyle(Painter& painter, const SkPath& skPath, sk_sp<SkBlender> blender)
   {
-    const auto globalAlpha = contextSetting.opacity;
+    // const auto globalAlpha = contextSetting.opacity;
     auto       filled = false;
     for (const auto& f : style.fills)
     {

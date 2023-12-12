@@ -83,10 +83,10 @@ std::optional<std::vector<char>> encodeImage(
   }
   else
   {
-    DEBUG("format (%d) is not supported", encode);
+    DEBUG("format (%d) is not supported", (int)encode);
     return std::nullopt;
   }
-  DEBUG("Failed to encode image data for type(%d)", encode);
+  DEBUG("Failed to encode image data for type(%d)", (int)encode);
   return std::nullopt;
 }
 

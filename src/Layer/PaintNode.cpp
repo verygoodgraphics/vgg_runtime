@@ -389,7 +389,6 @@ SkPath PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
 
 Mask PaintNode::asOutlineMask(const Transform* mat)
 {
-  VGG_IMPL(PaintNode);
   Mask mask;
   mask.outlineMask = makeContourImpl(maskOption(), mat);
   mask.outlineMask.setFillType(
@@ -670,7 +669,6 @@ void PaintNode::paintChildrenRecursively(Renderer* renderer)
 
 void PaintNode::paintChildrenPass(Renderer* renderer)
 {
-  VGG_IMPL(PaintNode);
   paintChildrenRecursively(renderer);
 }
 void PaintNode::prePaintPass(Renderer* renderer)
@@ -838,7 +836,6 @@ void PaintNode::paintStyle(Renderer* renderer, const SkPath& path, const SkPath&
 
 void PaintNode::paintFill(Renderer* renderer, sk_sp<SkBlender> blender, const SkPath& path)
 {
-  VGG_IMPL(PaintNode);
   Painter             painter(renderer);
   sk_sp<SkMaskFilter> blur;
   for (const auto& f : style().fills)

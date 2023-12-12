@@ -36,6 +36,12 @@ public:
   {
   }
 
+  DebugCanvas(SkCanvas* canvas, const char* name)
+    : m_canvas(canvas)
+    , m_name(name)
+  {
+  }
+
   void drawRects(SkColor color, std::vector<sktxt::TextBox>& result, bool fill = false);
 
   void drawLine(SkColor color, SkRect rect, bool vertical = true);

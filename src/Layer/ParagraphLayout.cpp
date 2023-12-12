@@ -18,6 +18,7 @@
 #include "Layer/Core/VType.hpp"
 #include "VSkia.hpp"
 
+#include <core/SkFontStyle.h>
 #include <modules/skparagraph/include/DartTypes.h>
 #include <modules/skparagraph/include/FontCollection.h>
 #include <modules/skparagraph/include/Metrics.h>
@@ -69,20 +70,14 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
   }
 
   std::string fontName;
-  std::string subFamilyName;
 
-  auto resolve = [&fontName, &subFamilyName, &attr](const std::vector<std::string>& candidates)
+  auto resolveFromFallback = [&fontName, &attr](const std::vector<std::string>& candidates)
   {
-    subFamilyName = "Regular";
     for (const auto& candidate : candidates)
     {
       if (const auto components = split(candidate, '-'); !components.empty())
       {
         fontName = components[0];
-        for (int i = 1; i < components.size(); i++)
-        {
-          subFamilyName += components[i];
-        }
         break;
       }
     }
@@ -91,22 +86,13 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
   if (const auto components = split(attr.fontName, '-'); !components.empty())
   {
     fontName = components[0];
-    for (int i = 1; i < components.size(); i++)
-    {
-      subFamilyName += components[i];
-    }
-    if (components.size() <= 1)
-    {
-      subFamilyName = attr.subFamilyName;
-    }
     auto matched = font->fuzzyMatch(fontName);
     if (matched)
     {
       INFO(
-        "Font [%s] matches real name [%s %s][%f]",
+        "Font [%s] matches real name [%s][%f]",
         fontName.c_str(),
         matched->first.c_str(),
-        subFamilyName.c_str(),
         matched->second);
       fontName = std::string(matched->first.c_str());
 
@@ -117,7 +103,7 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
       if (const auto& fallbackFonts = font->fallbackFonts();
           !fallbackFonts.empty() && matched->second < THRESHOLD)
       {
-        resolve(fallbackFonts);
+        resolveFromFallback(fallbackFonts);
       }
     }
     else
@@ -127,23 +113,14 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
   }
   else if (const auto& fallbackFonts = font->fallbackFonts(); !fallbackFonts.empty())
   {
-    resolve(fallbackFonts);
-  }
-
-  if (subFamilyName.empty())
-  {
-    subFamilyName = "Regular";
+    resolveFromFallback(fallbackFonts);
   }
   if (fontName.empty())
   {
     // the worst case
     fontName = "FiraSans";
   }
-  DEBUG(
-    "Given [%s], [%s %s] is choosed finally",
-    attr.fontName.c_str(),
-    fontName.c_str(),
-    subFamilyName.c_str());
+  DEBUG("Given [%s], [%s] is choosed finally", attr.fontName.c_str(), fontName.c_str());
   std::vector<SkString> fontFamilies;
   fontFamilies.push_back(SkString(fontName));
   if (const auto& fallbackFonts = font->fallbackFonts(); !fallbackFonts.empty())
@@ -156,9 +133,9 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
       }
     }
   }
-  style.setFontFamilies(fontFamilies);
-  style.setFontStyle(toSkFontStyle(subFamilyName));
 
+  style.setFontFamilies(fontFamilies);
+  style.setFontStyle(toSkFontStyle(attr));
   style.setFontSize(attr.size);
   style.setLetterSpacing(attr.letterSpacing);
   style.setBaselineShift(attr.baselineShift);

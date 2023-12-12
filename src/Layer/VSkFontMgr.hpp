@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include <core/SkStream.h>
 #include <include/core/SkFontMgr.h>
 #include <include/core/SkFontStyle.h>
 #include <include/core/SkRefCnt.h>
@@ -273,6 +274,12 @@ public:
   {
   }
 
+  using TypefaceCreator = std::function<sk_sp<SkTypeface>(
+    int                variationFaceIndex,
+    const SkFontStyle& style,
+    const SkString&    familyName,
+    bool               isFixedPitch)>;
+
   void loadSystemFonts(
     const SkTypeface_FreeType::Scanner& scanner,
     SkFontMgrVGG::Families*             families) const override;
@@ -299,6 +306,12 @@ private:
     }
     return nullptr;
   }
+
+  static bool appendTypeface(
+    const SkTypeface_FreeType::Scanner& scanner,
+    SkStreamAsset*                      stream,
+    SkFontMgrVGG::Families*             families,
+    TypefaceCreator                     creator);
 
   std::variant<SkString, std::vector<fs::path>> dir;
 };

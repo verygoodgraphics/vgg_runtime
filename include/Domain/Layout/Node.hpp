@@ -34,7 +34,7 @@ struct Matrix;
 
 namespace Internal
 {
-struct AutoLayout;
+class AutoLayout;
 
 namespace Rule
 {

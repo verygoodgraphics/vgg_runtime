@@ -29,13 +29,15 @@ class JsonDocument;
 namespace VGG
 {
 class Daruma;
-}
+class VggEnv;
 
 constexpr int main_or_editor_daruma_index = 0;
 constexpr int edited_daruma_index = 1;
 
 class VggSdk
 {
+  std::weak_ptr<VggEnv> m_env;
+
 public:
 #ifdef EMSCRIPTEN
   using ListenersType = emscripten::val;
@@ -47,6 +49,7 @@ public:
   virtual ~VggSdk() = default;
 
   // env
+  void        setEnvKey(const std::string& key);
   std::string getEnvKey();
   void        setContainerKey(const std::string& containerKey);
   void        setInstanceKey(const std::string& instanceKey);
@@ -90,4 +93,8 @@ public:
 private:
   std::shared_ptr<JsonDocument> getDesignDocument(IndexType index = main_or_editor_daruma_index);
   std::shared_ptr<VGG::Daruma>  getModel(IndexType index = main_or_editor_daruma_index);
+
+  std::shared_ptr<VGG::VggEnv> env();
 };
+
+} // namespace VGG

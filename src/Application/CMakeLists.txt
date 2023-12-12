@@ -9,6 +9,7 @@ add_library(vgg_application STATIC
   RunLoop.cpp
   UIApplication.cpp
   UIView.cpp
+  VggEnv.cpp
   VggSdk.cpp
   ViewModel.cpp
 )

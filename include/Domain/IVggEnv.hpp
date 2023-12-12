@@ -15,6 +15,8 @@
  */
 #pragma once
 
+#include "Domain/DarumaContainer.hpp"
+
 #include <string>
 
 namespace VGG
@@ -40,6 +42,8 @@ public:
   {
     return "_currentVgg";
   }
+
+  virtual DarumaContainer& darumaContainer() = 0;
 };
 
 } // namespace VGG

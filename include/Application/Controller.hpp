@@ -53,6 +53,8 @@ public:
   using EventListener = std::function<void(UIEventPtr event)>;
 
 private:
+  std::weak_ptr<IVggEnv> m_env;
+
   std::string                m_designSchemaFilePath;
   std::shared_ptr<RunLoop>   m_runLoop;
   std::shared_ptr<VggExec>   m_jsEngine;

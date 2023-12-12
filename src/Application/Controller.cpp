@@ -21,7 +21,6 @@
 #include "RunLoop.hpp"
 
 #include "Domain/Daruma.hpp"
-#include "Domain/DarumaContainer.hpp"
 #include "Domain/RawJsonDocument.hpp"
 #include "Domain/SchemaValidJsonDocument.hpp"
 #include "Domain/UndoRedoJsonDocument.hpp"
@@ -98,7 +97,8 @@ Controller::Controller(
   std::shared_ptr<Presenter> presenter,
   std::shared_ptr<Editor>    editor,
   ERunMode                   mode)
-  : m_runLoop(runLoop)
+  : m_env{ env }
+  , m_runLoop(runLoop)
   , m_jsEngine{ jsEngine }
   , m_presenter(presenter)
   , m_editor{ editor }
@@ -244,7 +244,10 @@ void Controller::initModel(const char* designDocSchemaFilePath, const char* layo
     createMakeJsonDocFn(designDocSchemaFilePath),
     createMakeJsonDocFn(layoutDocSchemaFilePath)));
 
-  DarumaContainer().add(m_model);
+  if (auto env = m_env.lock())
+  {
+    env->darumaContainer().add(m_model);
+  }
 }
 
 void Controller::start()
@@ -271,7 +274,10 @@ void Controller::startEditing()
   observeEditModelState();
   observeEditViewEvent();
 
-  DarumaContainer().add(m_editModel, DarumaContainer::KeyType::Edited);
+  if (auto env = m_env.lock())
+  {
+    env->darumaContainer().add(m_editModel, DarumaContainer::KeyType::Edited);
+  }
 }
 
 void Controller::observeModelState()

@@ -21,6 +21,9 @@
 
 #include <node_api.h>
 
+namespace VGG
+{
+
 class VggSdk;
 
 class VggSdkNodeAdapter
@@ -59,5 +62,7 @@ private:
   napi_ref                m_wrapper;
   std::shared_ptr<VggSdk> m_vggSdk;
 };
+
+} // namespace VGG
 
 #endif

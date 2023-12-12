@@ -17,6 +17,8 @@
 
 #include <sstream>
 
+using namespace VGG;
+
 bool VggExec::evalScript(const std::string& program)
 {
   setEnv();
@@ -32,7 +34,7 @@ bool VggExec::evalModule(const std::string& program)
 bool VggExec::evalModule(const std::string& code, VGG::EventPtr event)
 {
   setEnv();
-  return m_jsEngine->evalModule(code, event);
+  return m_jsEngine->evalModule(code, event, m_env);
 }
 
 void VggExec::setEnv()

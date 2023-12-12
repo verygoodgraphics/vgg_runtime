@@ -15,11 +15,12 @@
  */
 #pragma once
 
-#include "Controller.hpp"
-#include "PlatformComposer.hpp"
-#include "Domain/Daruma.hpp"
-
+#include "Application/Controller.hpp"
 #include "Application/Mouse.hpp"
+#include "Application/PlatformComposer.hpp"
+#include "Application/VggEnv.hpp"
+
+#include "Domain/Daruma.hpp"
 
 #include <memory>
 
@@ -33,12 +34,14 @@ class UIView;
 
 class MainComposer
 {
-  std::shared_ptr<UIView> m_view;
-  std::shared_ptr<UIView> m_editView;
-  std::shared_ptr<Presenter> m_presenter;
-  std::shared_ptr<Editor> m_editor;
+  std::shared_ptr<VggEnv> m_env;
 
-  std::shared_ptr<RunLoop> m_runLoop;
+  std::shared_ptr<UIView>    m_view;
+  std::shared_ptr<UIView>    m_editView;
+  std::shared_ptr<Presenter> m_presenter;
+  std::shared_ptr<Editor>    m_editor;
+
+  std::shared_ptr<RunLoop>    m_runLoop;
   std::shared_ptr<Controller> m_controller;
 
   std::shared_ptr<PlatformComposer> m_platformComposer;

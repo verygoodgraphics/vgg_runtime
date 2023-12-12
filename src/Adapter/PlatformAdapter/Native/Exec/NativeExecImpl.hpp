@@ -41,11 +41,14 @@ using v8::MaybeLocal;
 using v8::V8;
 using v8::Value;
 
+namespace VGG
+{
+
 struct NativeExecImpl;
 
 struct NativeEvalTask
 {
-  std::string m_code;
+  std::string     m_code;
   NativeExecImpl* m_exec_impl_ptr;
 };
 
@@ -53,7 +56,7 @@ class NativeExecImpl
 {
 public:
   bool schedule_eval(const std::string& code);
-  int run_node(const int argc, const char** argv, std::shared_ptr<std::thread>& nodeThread);
+  int  run_node(const int argc, const char** argv, std::shared_ptr<std::thread>& nodeThread);
   void notify_node_thread_to_stop();
   void stop_node();
 
@@ -63,9 +66,10 @@ private:
   int eval(const std::string_view buffer);
 
   int node_main(const std::vector<std::string>& args);
-  int run_node_instance(MultiIsolatePlatform* platform,
-                        const std::vector<std::string>& args,
-                        const std::vector<std::string>& exec_args);
+  int run_node_instance(
+    MultiIsolatePlatform*           platform,
+    const std::vector<std::string>& args,
+    const std::vector<std::string>& exec_args);
   void run_task();
   bool check_state();
 
@@ -79,17 +83,19 @@ private:
     RUNNING,
     DEAD,
   };
-  volatile ExecState m_state{ INIT };
+  volatile ExecState      m_state{ INIT };
   CommonEnvironmentSetup* m_setup;
-  Isolate* m_isolate;
-  Environment* m_env;
-  uv_loop_t* m_loop;
+  Isolate*                m_isolate;
+  Environment*            m_env;
+  uv_loop_t*              m_loop;
 
   std::queue<NativeEvalTask*> m_tasks;
-  std::mutex m_tasks_mutex;
+  std::mutex                  m_tasks_mutex;
 
   std::mutex m_state_mutex;
   uv_timer_t m_keep_alive_timer;
   uv_async_t m_stop_timer_async;
   uv_async_t m_async_task;
 };
+
+} // namespace VGG

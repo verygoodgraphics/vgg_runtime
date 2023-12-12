@@ -19,16 +19,9 @@
 #include "Application/UIEvent.hpp"
 #include "Domain/IVggEnv.hpp"
 #include "UIEvent.hpp"
-#include "Utility/DIContainer.hpp"
+#include "Utility/Log.hpp"
 
 #include <sstream>
-namespace
-{
-auto env()
-{
-  return VGG::DIContainer<std::shared_ptr<IVggEnv>>::get();
-}
-} // namespace
 
 namespace VGG
 {
@@ -37,12 +30,14 @@ namespace BrowserAdapter
 
 class JsEventGenerator : public EventVisitor
 {
-  std::string m_event_id;
-  std::string m_script;
+  std::shared_ptr<IVggEnv> m_env;
+  std::string              m_event_id;
+  std::string              m_script;
 
 public:
-  JsEventGenerator(std::string eventId)
-    : m_event_id{ eventId }
+  JsEventGenerator(std::shared_ptr<IVggEnv> env, std::string eventId)
+    : m_env{ env }
+    , m_event_id{ eventId }
   {
   }
 
@@ -69,10 +64,12 @@ public:
 private:
   void makeScript(std::string_view event)
   {
+    ASSERT(m_env);
+
     std::ostringstream oss;
-    oss << "const containerKey = '" << env()->getContainerKey() << "';"
-        << "const envKey = '" << env()->getEnv() << "';"
-        << "const instanceKey = '" << env()->getInstanceKey() << "';"
+    oss << "const containerKey = '" << m_env->getContainerKey() << "';"
+        << "const envKey = '" << m_env->getEnv() << "';"
+        << "const instanceKey = '" << m_env->getInstanceKey() << "';"
         << "const vgg = globalThis[containerKey][envKey][instanceKey];"
         << "var theVggEvent = new vgg." << event << "();"
         << "theVggEvent.bindCppEvent(" << m_event_id << ");";

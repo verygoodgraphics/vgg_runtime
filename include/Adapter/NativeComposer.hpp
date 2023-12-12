@@ -49,13 +49,10 @@ public:
   {
     m_native_exec->inject([](node::Environment* env) { link_vgg_sdk_addon(env); });
     setupVgg();
-
-    VGG::DIContainer<std::shared_ptr<VggSdk>>::get().reset(new VggSdk);
   }
 
   virtual void platformTeardown() override
   {
-    VGG::DIContainer<std::shared_ptr<VggSdk>>::get().reset();
   }
 
 private:

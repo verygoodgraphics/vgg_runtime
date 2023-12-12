@@ -18,7 +18,6 @@
 #include "PlatformAdapter/Native/Sdk/AdapterHelper.hpp"
 
 #include "Application/VggSdk.hpp"
-#include "Utility/DIContainer.hpp"
 
 #include <string>
 #include <cassert>
@@ -100,7 +99,7 @@ using namespace VGG::adapter;
 napi_ref VggSdkNodeAdapter::constructor;
 
 VggSdkNodeAdapter::VggSdkNodeAdapter()
-  : m_vggSdk(VGG::DIContainer<std::shared_ptr<VggSdk>>::get())
+  : m_vggSdk(new VggSdk) // todo, env
   , m_env(nullptr)
   , m_wrapper(nullptr)
 {

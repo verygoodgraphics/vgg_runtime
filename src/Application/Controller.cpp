@@ -92,6 +92,7 @@ namespace VGG
 {
 
 Controller::Controller(
+  std::weak_ptr<IVggEnv>     env,
   std::shared_ptr<RunLoop>   runLoop,
   std::shared_ptr<VggExec>   jsEngine,
   std::shared_ptr<Presenter> presenter,
@@ -102,7 +103,7 @@ Controller::Controller(
   , m_presenter(presenter)
   , m_editor{ editor }
   , m_mode(mode)
-  , m_reporter{ new Reporter{ jsEngine } }
+  , m_reporter{ new Reporter{ env, jsEngine } }
 {
   assert(m_runLoop);
 

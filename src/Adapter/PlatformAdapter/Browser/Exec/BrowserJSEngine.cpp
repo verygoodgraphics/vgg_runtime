@@ -33,9 +33,12 @@ bool BrowserJSEngine::evalModule(const std::string& code)
   return evalScript(code);
 }
 
-bool BrowserJSEngine::evalModule(const std::string& code, VGG::EventPtr event)
+bool BrowserJSEngine::evalModule(
+  const std::string&       code,
+  VGG::EventPtr            event,
+  std::shared_ptr<IVggEnv> env)
 {
-  auto event_id{ BrowserAdapter::Event::store(event) };
+  auto                             event_id{ BrowserAdapter::Event::store(event) };
   BrowserAdapter::JsEventGenerator event_generator{ event_id };
   event->accept(&event_generator);
 

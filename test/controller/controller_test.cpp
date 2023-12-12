@@ -1,6 +1,7 @@
 #include "Application/Controller.hpp"
 
 #include "Application/RunLoop.hpp"
+#include "Application/VggEnv.hpp"
 #include "Domain/Daruma.hpp"
 #include "Domain/DarumaContainer.hpp"
 #include "Adapter/NativeComposer.hpp"
@@ -28,6 +29,7 @@ class ControllerTestSuite : public ::testing::Test
 {
 protected:
   std::shared_ptr<Controller>     m_sut;
+  std::shared_ptr<VggEnv>         m_env;
   std::shared_ptr<NativeComposer> m_nativeComposer;
   std::shared_ptr<RunLoop>        m_runLoop = RunLoop::sharedInstance();
   std::shared_ptr<MockPresenter>  m_mockPresenter = std::make_shared<MockPresenter>();
@@ -37,6 +39,7 @@ protected:
 
   void SetUp() override
   {
+    m_env.reset(new VggEnv);
   }
 
   void TearDown() override
@@ -45,31 +48,32 @@ protected:
     {
       m_nativeComposer->teardown();
     }
+    m_env.reset();
   }
 
   auto setupSdkWithLocalDic(bool catchJsException = false)
   {
     m_nativeComposer.reset(new NativeComposer(catchJsException));
-    return m_nativeComposer->setup();
+    return m_nativeComposer->setup(m_env);
   }
 
   auto setupSdkWithRemoteDic(bool catchJsException = false)
   {
     m_nativeComposer.reset(new NativeComposer(catchJsException));
-    return m_nativeComposer->setup();
+    return m_nativeComposer->setup(m_env);
   }
 
   auto setupUsingS5Sdk(bool catchJsException = false)
   {
     m_nativeComposer.reset(new NativeComposer(catchJsException));
-    return m_nativeComposer->setup();
+    return m_nativeComposer->setup(m_env);
   }
 
   void setupSut(std::shared_ptr<VggExec> jsEngine)
   {
     EXPECT_CALL(*m_mockPresenter, getObservable())
       .WillOnce(Return(m_fakeViewSubject.get_observable()));
-    m_sut.reset(new Controller(m_runLoop, jsEngine, m_mockPresenter, {}));
+    m_sut.reset(new Controller(m_env, m_runLoop, jsEngine, m_mockPresenter, {}));
   }
 
   void loopUntilExit()

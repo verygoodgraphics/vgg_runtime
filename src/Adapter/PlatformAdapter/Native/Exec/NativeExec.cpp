@@ -64,7 +64,10 @@ bool NativeExec::evalModule(const std::string& code)
   return m_impl->schedule_eval(wrapped_script);
 }
 
-bool NativeExec::evalModule(const std::string& code, VGG::EventPtr event)
+bool NativeExec::evalModule(
+  const std::string&       code,
+  VGG::EventPtr            event,
+  std::shared_ptr<IVggEnv> env)
 {
   NodeAdapter::EventStore       event_store{ event };
   NodeAdapter::JsEventGenerator event_generator{ event_store.eventId() };

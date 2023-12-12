@@ -19,6 +19,7 @@
 #include "Application/AppScene.hpp"
 #include "Application/UIEvent.hpp"
 
+#include "Domain/IVggEnv.hpp"
 #include "Domain/Layout/Layout.hpp"
 #include "Domain/Layout/Rect.hpp"
 
@@ -27,7 +28,6 @@
 #include <memory>
 #include <string>
 
-class VggExec;
 class JsonDocument;
 
 namespace VGG
@@ -38,6 +38,7 @@ class Editor;
 class Presenter;
 class Reporter;
 class RunLoop;
+class VggExec;
 struct ViewModel;
 
 class Controller : public std::enable_shared_from_this<Controller>
@@ -68,6 +69,7 @@ private:
 
 public:
   Controller(
+    std::weak_ptr<IVggEnv>     env,
     std::shared_ptr<RunLoop>   runLoop,
     std::shared_ptr<VggExec>   jsEngine,
     std::shared_ptr<Presenter> presenter,

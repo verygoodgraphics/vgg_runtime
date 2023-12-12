@@ -25,6 +25,8 @@
 
 constexpr int THREAD_POOL_SIZE = 4;
 
+using namespace VGG;
+
 /*
  * NativeExecImpl
  */
@@ -53,11 +55,11 @@ int NativeExecImpl::eval(std::string_view buffer)
 {
   DEBUG("#NativeExecImpl::eval, enter");
 
-  Locker locker(m_isolate);
+  Locker         locker(m_isolate);
   Isolate::Scope isolate_scope(m_isolate);
-  HandleScope handle_scope(m_isolate);
+  HandleScope    handle_scope(m_isolate);
 
-  auto context = m_setup->context();
+  auto           context = m_setup->context();
   Context::Scope context_scope(context);
 
   auto maybe_local_v8_string = v8::String::NewFromUtf8(m_isolate, buffer.data());
@@ -89,9 +91,10 @@ int NativeExecImpl::eval(std::string_view buffer)
   return 0;
 }
 
-int NativeExecImpl::run_node(const int argc,
-                             const char** argv,
-                             std::shared_ptr<std::thread>& nodeThread)
+int NativeExecImpl::run_node(
+  const int                     argc,
+  const char**                  argv,
+  std::shared_ptr<std::thread>& nodeThread)
 {
   uv_setup_args(argc, const_cast<char**>(argv));
   std::vector<std::string> args(argv, argv + argc);
@@ -159,13 +162,14 @@ bool NativeExecImpl::check_state()
   return true;
 }
 
-int NativeExecImpl::run_node_instance(MultiIsolatePlatform* platform,
-                                      const std::vector<std::string>& args,
-                                      const std::vector<std::string>& exec_args)
+int NativeExecImpl::run_node_instance(
+  MultiIsolatePlatform*           platform,
+  const std::vector<std::string>& args,
+  const std::vector<std::string>& exec_args)
 {
   int exit_code = 0;
 
-  std::vector<std::string> errors;
+  std::vector<std::string>                errors;
   std::unique_ptr<CommonEnvironmentSetup> setup =
     CommonEnvironmentSetup::Create(platform, &errors, args, exec_args);
   if (!setup)
@@ -175,7 +179,7 @@ int NativeExecImpl::run_node_instance(MultiIsolatePlatform* platform,
     return 1;
   }
 
-  Isolate* isolate = setup->isolate();
+  Isolate*     isolate = setup->isolate();
   Environment* env = setup->env();
 
   // save ptr ref to member filed
@@ -185,9 +189,9 @@ int NativeExecImpl::run_node_instance(MultiIsolatePlatform* platform,
   m_loop = setup->event_loop();
 
   {
-    Locker locker(isolate);
+    Locker         locker(isolate);
     Isolate::Scope isolate_scope(isolate);
-    HandleScope handle_scope(isolate);
+    HandleScope    handle_scope(isolate);
     Context::Scope context_scope(setup->context());
 
     MaybeLocal<Value> loadenv_ret = node::LoadEnvironment(
@@ -252,26 +256,28 @@ void NativeExecImpl::notify_node_thread_to_stop()
 
 void NativeExecImpl::init_uv_async_task()
 {
-  uv_async_init(m_loop,
-                &m_async_task,
-                [](uv_async_t* async)
-                {
-                  // Run task in uv event loop.
-                  auto self_ptr = static_cast<NativeExecImpl*>(async->data);
-                  self_ptr->run_task();
-                });
+  uv_async_init(
+    m_loop,
+    &m_async_task,
+    [](uv_async_t* async)
+    {
+      // Run task in uv event loop.
+      auto self_ptr = static_cast<NativeExecImpl*>(async->data);
+      self_ptr->run_task();
+    });
   m_async_task.data = static_cast<void*>(this);
 
-  uv_async_init(m_loop,
-                &m_stop_timer_async,
-                [](uv_async_t* async)
-                {
-                  DEBUG("#exec, stop keep alive timer");
-                  auto self_ptr = static_cast<NativeExecImpl*>(async->data);
-                  uv_timer_stop(&self_ptr->m_keep_alive_timer);
-                  uv_close(reinterpret_cast<uv_handle_t*>(&self_ptr->m_keep_alive_timer), nullptr);
-                  uv_close(reinterpret_cast<uv_handle_t*>(&self_ptr->m_stop_timer_async), nullptr);
-                });
+  uv_async_init(
+    m_loop,
+    &m_stop_timer_async,
+    [](uv_async_t* async)
+    {
+      DEBUG("#exec, stop keep alive timer");
+      auto self_ptr = static_cast<NativeExecImpl*>(async->data);
+      uv_timer_stop(&self_ptr->m_keep_alive_timer);
+      uv_close(reinterpret_cast<uv_handle_t*>(&self_ptr->m_keep_alive_timer), nullptr);
+      uv_close(reinterpret_cast<uv_handle_t*>(&self_ptr->m_stop_timer_async), nullptr);
+    });
   m_stop_timer_async.data = static_cast<void*>(this);
 }
 

@@ -15,23 +15,26 @@
  */
 #pragma once
 
-#include "VggEnv.hpp"
+#include "Application/VggEnv.hpp"
 #include "Domain/VggExec.hpp"
 #include "Domain/VggJSEngine.hpp"
-#include "Utility/DIContainer.hpp"
+
+namespace VGG
+{
 
 class PlatformComposer
 {
+protected:
+  std::weak_ptr<VggEnv> m_env;
+
 public:
   virtual ~PlatformComposer() = default;
 
-  auto setup()
+  auto setup(std::shared_ptr<VggEnv> env)
   {
-    auto vggEnv = std::make_shared<VggEnv>();
-    VGG::DIContainer<std::shared_ptr<IVggEnv>>::get() = vggEnv;
+    m_env = env;
 
-    auto jsEngine = std::make_shared<VggExec>(createJsEngine(), vggEnv);
-    VGG::DIContainer<std::shared_ptr<VggExec>>::get() = jsEngine;
+    auto jsEngine = std::make_shared<VggExec>(createJsEngine(), env);
 
     platformSetup();
 
@@ -40,7 +43,6 @@ public:
 
   void teardown()
   {
-    VGG::DIContainer<std::shared_ptr<VggExec>>::get().reset();
     platformTeardown();
   }
 
@@ -53,3 +55,5 @@ public:
   {
   }
 };
+
+} // namespace VGG

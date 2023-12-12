@@ -16,9 +16,14 @@
 #ifndef VGG_JS_ENGINE_HPP
 #define VGG_JS_ENGINE_HPP
 
-#include "Event.hpp"
+#include "Domain/Event.hpp"
+#include "Domain/IVggEnv.hpp"
 
+#include <memory>
 #include <string_view>
+
+namespace VGG
+{
 
 class VggJSEngine
 {
@@ -27,7 +32,11 @@ public:
 
   virtual bool evalScript(const std::string& code) = 0;
   virtual bool evalModule(const std::string& code) = 0;
-  virtual bool evalModule(const std::string& code, VGG::EventPtr event) = 0;
+  virtual bool evalModule(
+    const std::string&       code,
+    VGG::EventPtr            event,
+    std::shared_ptr<IVggEnv> env) = 0;
 };
 
+} // namespace VGG
 #endif

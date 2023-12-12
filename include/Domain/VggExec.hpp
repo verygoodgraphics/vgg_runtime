@@ -22,6 +22,9 @@
 #include <memory>
 #include <string>
 
+namespace VGG
+{
+
 class VggExec
 {
 public:
@@ -38,9 +41,11 @@ public:
 
 private:
   std::shared_ptr<VggJSEngine> m_jsEngine;
-  std::shared_ptr<IVggEnv> m_env;
+  std::shared_ptr<IVggEnv>     m_env;
 
   void setEnv();
 };
+
+} // namespace VGG
 
 #endif

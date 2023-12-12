@@ -17,25 +17,20 @@
 #include "NativeComposer.hpp"
 
 #include "Domain/IVggEnv.hpp"
-#include "Utility/DIContainer.hpp"
+#include "Utility/Log.hpp"
 
 using namespace VGG;
 
-namespace
-{
-auto env()
-{
-  return VGG::DIContainer<std::shared_ptr<IVggEnv>>::get();
-}
-} // namespace
-
 void NativeComposer::setupVgg()
 {
+  auto env = m_env.lock();
+  ASSERT(env);
+
   std::ostringstream oss;
   oss << "(function () {"
-      << "const containerKey = '" << env()->getContainerKey() << "';"
-      << "const envKey = '" << env()->getEnv() << "';"
-      << "const instanceKey = '" << env()->getInstanceKey() << "';"
+      << "const containerKey = '" << env->getContainerKey() << "';"
+      << "const envKey = '" << env->getEnv() << "';"
+      << "const instanceKey = '" << env->getInstanceKey() << "';"
       << R"(
           var vggSdkAddon = process._linkedBinding('vgg_sdk_addon');
 

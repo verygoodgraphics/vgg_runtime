@@ -23,13 +23,16 @@
 #include "Application/RunLoop.hpp"
 #include "Application/UIApplication.hpp"
 #include "Application/UIView.hpp"
+#include "Application/VggSdk.hpp"
 #include "Layer/Graphics/ContextSkBase.hpp"
 
 namespace VGG
 {
 
 // impl ----------------------------------------------------------------------
-class ContainerImpl : public std::enable_shared_from_this<ContainerImpl>
+class ContainerImpl
+  : public std::enable_shared_from_this<ContainerImpl>
+  , public IContainer
 {
   Container* m_api;
 
@@ -65,7 +68,7 @@ public:
   bool load(
     const std::string& filePath,
     const char*        designDocSchemaFilePath = nullptr,
-    const char*        layoutDocSchemaFilePath = nullptr)
+    const char*        layoutDocSchemaFilePath = nullptr) override
   {
     return m_mainComposer->controller()->start(
       filePath,
@@ -97,14 +100,14 @@ public:
     m_appRender->sendEvent(evt, nullptr);
   }
 
-  bool run()
+  bool run() override
   {
     auto rendered = m_application->run(60);
     m_mainComposer->runLoop()->dispatch();
     return rendered;
   }
 
-  bool onEvent(UEvent evt)
+  bool onEvent(UEvent evt) override
   {
     switch (evt.type)
     {
@@ -131,7 +134,7 @@ public:
     return true;
   }
 
-  void setEventListener(EventListener listener)
+  void setEventListener(EventListener listener) override
   {
     m_listener = listener;
     if (m_listener)
@@ -152,6 +155,13 @@ public:
     }
   }
 
+  std::shared_ptr<ISdk> sdk() override
+  {
+    auto sdk = std::make_shared<VggSdk>();
+    sdk->setEnvKey(m_mainComposer->env()->getEnv());
+    return sdk;
+  }
+
 private:
   void handleEvent(UIEventPtr evt)
   {
@@ -159,6 +169,11 @@ private:
     {
       m_listener(evt->type(), evt->path());
     }
+  }
+
+  IContainer* container() override
+  {
+    return nullptr;
   }
 };
 
@@ -170,20 +185,6 @@ Container::Container()
 
 Container::~Container() = default;
 
-bool Container::load(
-  const std::string& filePath,
-  const char*        designDocSchemaFilePath,
-  const char*        layoutDocSchemaFilePath)
-{
-
-  return m_impl->load(filePath, designDocSchemaFilePath, layoutDocSchemaFilePath);
-}
-
-bool Container::run()
-{
-  return m_impl->run();
-}
-
 void Container::setGraphicsContext(
   std::unique_ptr<layer::SkiaGraphicsContext>& context,
   int                                          w,
@@ -192,14 +193,9 @@ void Container::setGraphicsContext(
   m_impl->setGraphicsContext(context, w, h);
 }
 
-bool Container::onEvent(UEvent evt)
+IContainer* Container::container()
 {
-  return m_impl->onEvent(evt);
-}
-
-void Container::setEventListener(EventListener listener)
-{
-  return m_impl->setEventListener(listener);
+  return m_impl.get();
 }
 
 } // namespace VGG

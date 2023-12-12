@@ -24,43 +24,30 @@ namespace VGG
 {
 
 // impl ----------------------------------------------------------------------
-class MetalContainerImpl
+class MetalContainerImpl : public IContainer
 {
   friend MetalContainer;
 
   MetalContainer*            m_api;
-  std::unique_ptr<Container> m_component;
+  std::unique_ptr<Container> m_impl;
 
 public:
   MetalContainerImpl(MetalContainer* api)
     : m_api(api)
   {
-    m_component.reset(new Container);
+    m_impl.reset(new Container);
   }
 
-  bool load(
-    const std::string& filePath,
-    const char*        designDocSchemaFilePath = nullptr,
-    const char*        layoutDocSchemaFilePath = nullptr)
+  IContainer* container() override
   {
-    return m_component->load(filePath, designDocSchemaFilePath, layoutDocSchemaFilePath);
-  }
-
-  bool run()
-  {
-    return m_component->run();
+    return m_impl.get();
   }
 
   void setView(MetalContainer::MTLHandle mtkView)
   {
     auto metalContext = new MetalGraphicsContext(mtkView);
     std::unique_ptr<VGG::layer::SkiaGraphicsContext> graphicsContext{ metalContext };
-    m_component->setGraphicsContext(graphicsContext, metalContext->width(), metalContext->height());
-  }
-
-  bool onEvent(UEvent evt)
-  {
-    return m_component->onEvent(evt);
+    m_impl->setGraphicsContext(graphicsContext, metalContext->width(), metalContext->height());
   }
 };
 
@@ -73,33 +60,14 @@ MetalContainer::MetalContainer()
 
 MetalContainer::~MetalContainer() = default;
 
-bool MetalContainer::load(
-  const std::string& filePath,
-  const char*        designDocSchemaFilePath,
-  const char*        layoutDocSchemaFilePath)
-{
-
-  return m_impl->load(filePath, designDocSchemaFilePath, layoutDocSchemaFilePath);
-}
-
-bool MetalContainer::run()
-{
-  return m_impl->run();
-}
-
 void MetalContainer::setView(MTLHandle mtkView)
 {
   m_impl->setView(mtkView);
 }
 
-bool MetalContainer::onEvent(UEvent evt)
+IContainer* MetalContainer::container()
 {
-  return m_impl->onEvent(evt);
-}
-
-void MetalContainer::setEventListener(EventListener listener)
-{
-  return m_impl->m_component->setEventListener(listener);
+  return m_impl.get();
 }
 
 } // namespace VGG

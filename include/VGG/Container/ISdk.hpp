@@ -16,31 +16,23 @@
 
 #pragma once
 
-#include "Event.hpp"
-#include "IContainer.hpp"
-#include "ISdk.hpp"
-#include "VggTypes.hpp"
-
-#include <memory>
+#include <string>
 
 namespace VGG
 {
 
-class MetalContainerImpl;
-class MetalContainer : public IContainer
+class ISdk
 {
-  std::unique_ptr<MetalContainerImpl> m_impl;
-
 public:
-  using MTLHandle = const void*;
+  virtual ~ISdk() = default;
 
-  MetalContainer();
-  ~MetalContainer();
-
-  void setView(MTLHandle mtkView);
-
-private:
-  virtual IContainer* container() override;
+  virtual std::string designDocument() = 0;
+  virtual std::string designDocumentValueAt(const std::string& jsonPointer) = 0;
+  virtual void designDocumentAddAt(const std::string& jsonPointer, const std::string& value) = 0;
+  virtual void designDocumentReplaceAt(
+    const std::string& jsonPointer,
+    const std::string& value) = 0;
+  virtual void designDocumentDeleteAt(const std::string& jsonPointer) = 0;
 };
 
 } // namespace VGG

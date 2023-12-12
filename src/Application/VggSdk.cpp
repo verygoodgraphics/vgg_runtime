@@ -150,7 +150,14 @@ std::shared_ptr<Daruma> VggSdk::getModel(IndexType index)
 {
   auto key = index == main_or_editor_daruma_index ? DarumaContainer::KeyType::MainOrEditor
                                                   : DarumaContainer::KeyType::Edited;
-  return DarumaContainer().get(key);
+  if (auto theEnv = env())
+  {
+    return theEnv->darumaContainer().get(key);
+  }
+  else
+  {
+    return nullptr;
+  }
 }
 
 void VggSdk::save()

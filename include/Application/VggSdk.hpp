@@ -19,6 +19,8 @@
 #include <emscripten/val.h>
 #endif
 
+#include "ISdk.hpp"
+
 #include <cstddef>
 #include <memory>
 #include <string>
@@ -34,7 +36,7 @@ class VggEnv;
 constexpr int main_or_editor_daruma_index = 0;
 constexpr int edited_daruma_index = 1;
 
-class VggSdk
+class VggSdk : public ISdk
 {
   std::weak_ptr<VggEnv> m_env;
 
@@ -56,11 +58,11 @@ public:
   void        setListenerKey(const std::string& listenerKey);
 
   // design document
-  std::string designDocument();
-  std::string designDocumentValueAt(const std::string& jsonPointer);
-  void        designDocumentAddAt(const std::string& jsonPointer, const std::string& value);
-  void        designDocumentReplaceAt(const std::string& jsonPointer, const std::string& value);
-  void        designDocumentDeleteAt(const std::string& jsonPointer);
+  std::string designDocument() override;
+  std::string designDocumentValueAt(const std::string& jsonPointer) override;
+  void designDocumentAddAt(const std::string& jsonPointer, const std::string& value) override;
+  void designDocumentReplaceAt(const std::string& jsonPointer, const std::string& value) override;
+  void designDocumentDeleteAt(const std::string& jsonPointer) override;
 
   // event listener
   // event types: https://developer.mozilla.org/en-US/docs/Web/API/Element#events

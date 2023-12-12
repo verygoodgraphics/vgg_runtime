@@ -145,34 +145,14 @@ inline skia::textlayout::TextAlign toSkTextAlign(ETextHorizontalAlignment align)
   SWITCH_MAP_ITEM_END(skia::textlayout::TextAlign::kLeft)
 }
 
-inline SkFontStyle toSkFontStyle(const std::string_view& subFamilyName)
+inline SkFontStyle toSkFontStyle(const TextStyleAttr& attr)
 {
-  if (subFamilyName == "Bold")
-  {
-    return SkFontStyle::Bold();
-  }
-  else if (subFamilyName == "Regular")
-  {
-    return SkFontStyle::Normal();
-  }
-  else if (
-    subFamilyName == "ExtraBold" || subFamilyName == "Extra Bold" || subFamilyName == "Extra-Bold")
-  {
-    return SkFontStyle(
-      SkFontStyle::kExtraBold_Weight,
-      SkFontStyle::kNormal_Width,
-      SkFontStyle::kUpright_Slant);
-  }
-  else if (
-    subFamilyName == "Bold Italic" || subFamilyName == "BoldItalic" ||
-    subFamilyName == "Bold-Italic")
-  {
-    return SkFontStyle::BoldItalic();
-  }
-  else
-  {
-    return SkFontStyle::Normal();
-  }
+  SkFontStyle::Slant slant = SkFontStyle::kUpright_Slant;
+  if (
+    attr.subFamilyName.find("Italic") != std::string::npos ||
+    attr.fontName.find("Italic") != std::string::npos)
+    slant = SkFontStyle::kItalic_Slant;
+  return { attr.fontWeight, SkFontStyle::kNormal_Width, slant };
 }
 
 inline SkPathOp toSkPathOp(VGG::EBoolOp blop)

@@ -364,17 +364,17 @@ sk_sp<SkTypeface> SkFontMgrVGG::onLegacyMakeTypeface(const char familyName[], Sk
   return tf;
 }
 
-bool VGGFontLoader::loadFontFromData(
+bool VGGFontLoader::appendTypeface(
   const SkTypeface_FreeType::Scanner& scanner,
-  std::unique_ptr<SkMemoryStream>     stream,
-  int                                 index,
+  SkStreamAsset*                      stream,
   SkFontMgrVGG::Families*             families,
-  const char*                         defaultRealName)
+  TypefaceCreator                     creator)
 {
+  ASSERT(stream);
   int numFaces;
-  if (!scanner.recognizedFont(stream.get(), &numFaces))
+  int numVariations = 0;
+  if (!scanner.recognizedFont(stream, &numFaces, &numVariations))
   {
-    // SkDebugf("---- failed to open <%d> as a font\n", index);
     return false;
   }
 
@@ -383,27 +383,51 @@ bool VGGFontLoader::loadFontFromData(
     bool        isFixedPitch;
     SkString    realname;
     SkFontStyle style = SkFontStyle(); // avoid uninitialized warning
-    if (!scanner.scanFont(stream.get(), faceIndex, &realname, &style, &isFixedPitch, nullptr))
+    int         variantions = 0;
+    int         variantionFaceIndex = (variantions << 16) + faceIndex;
+    while (variantions < numVariations &&
+           scanner.scanFont(stream, variantionFaceIndex, &realname, &style, &isFixedPitch, nullptr))
     {
-      // SkDebugf("---- failed to open <%d> <%d> as a font\n", index, faceIndex);
-      return false;
+      SkFontStyleSet_VGG* addTo = find_family(*families, realname.c_str());
+      if (nullptr == addTo)
+      {
+        addTo = new SkFontStyleSet_VGG(realname);
+        families->push_back().reset(addTo);
+        families->lookUp[realname.c_str()] = families->size() - 1;
+      }
+      auto typeface = creator(variantionFaceIndex, style, realname, isFixedPitch);
+      if (typeface)
+      {
+        addTo->appendTypeface(std::move(typeface));
+      }
+      variantions++;
+      variantionFaceIndex = (variantions << 16) + faceIndex;
     }
-    if (realname.isEmpty())
-    {
-      realname = defaultRealName;
-    }
-    SkFontStyleSet_VGG* addTo = find_family(*families, realname.c_str());
-    if (nullptr == addTo)
-    {
-      addTo = new SkFontStyleSet_VGG(realname);
-      families->push_back().reset(addTo);
-      families->lookUp[realname.c_str()] = families->size() - 1;
-    }
-    auto data =
-      std::make_unique<SkFontData>(stream->duplicate(), faceIndex, 0, nullptr, 0, nullptr, 0);
-    addTo->appendTypeface(
-      sk_make_sp<SkTypeface_FreeTypeStream>(std::move(data), realname, style, isFixedPitch));
   }
+  return true;
+}
+
+bool VGGFontLoader::loadFontFromData(
+  const SkTypeface_FreeType::Scanner& scanner,
+  std::unique_ptr<SkMemoryStream>     stream,
+  int                                 index,
+  SkFontMgrVGG::Families*             families,
+  const char*                         defaultRealName)
+{
+  appendTypeface(
+    scanner,
+    stream.get(),
+    families,
+    [&](int index, const SkFontStyle& style, const SkString& familyName, bool isFixedPitch)
+      -> sk_sp<SkTypeface>
+    {
+      SkString name = familyName;
+      if (familyName.isEmpty())
+        name = defaultRealName;
+      auto data =
+        std::make_unique<SkFontData>(stream->duplicate(), index, 0, nullptr, 0, nullptr, 0);
+      return sk_make_sp<SkTypeface_FreeTypeStream>(std::move(data), name, style, isFixedPitch);
+    });
   return true;
 }
 
@@ -433,44 +457,23 @@ void VGGFontLoader::loadDirectoryFonts(
       std::unique_ptr<SkStreamAsset> stream = SkStream::MakeFromFile(filename.c_str());
       if (!stream)
       {
-        // SkDebugf("---- failed to open <%s>\n", filename.c_str());
         continue;
       }
-
-      int numFaces;
-      if (!scanner.recognizedFont(stream.get(), &numFaces))
-      {
-        // SkDebugf("---- failed to open <%s> as a font\n", filename.c_str());
-        continue;
-      }
-
-      for (int faceIndex = 0; faceIndex < numFaces; ++faceIndex)
-      {
-        bool        isFixedPitch;
-        SkString    realname;
-        SkFontStyle style = SkFontStyle(); // avoid uninitialized warning
-        if (!scanner.scanFont(stream.get(), faceIndex, &realname, &style, &isFixedPitch, nullptr))
+      appendTypeface(
+        scanner,
+        stream.get(),
+        families,
+        [&](int index, const SkFontStyle& style, const SkString& familyName, bool isFixedPitch)
+          -> sk_sp<SkTypeface>
         {
-          // SkDebugf("---- failed to open <%s> <%d> as a font\n",
-          //          filename.c_str(), faceIndex);
-          continue;
-        }
-
-        SkFontStyleSet_VGG* addTo = find_family(*families, realname.c_str());
-        if (nullptr == addTo)
-        {
-          addTo = new SkFontStyleSet_VGG(realname);
-          families->push_back().reset(addTo);
-          families->lookUp[realname.c_str()] = families->size() - 1;
-        }
-        addTo->appendTypeface(sk_make_sp<SkTypeface_VGG_File>(
-          style,
-          isFixedPitch,
-          true,
-          realname,
-          filename.c_str(),
-          faceIndex));
-      }
+          return sk_make_sp<SkTypeface_VGG_File>(
+            style,
+            isFixedPitch,
+            true,
+            familyName,
+            filename.c_str(),
+            index);
+        });
     }
 
     for (auto const& entry : fs::recursive_directory_iterator(dir))

@@ -39,7 +39,7 @@ bool BrowserJSEngine::evalModule(
   std::shared_ptr<IVggEnv> env)
 {
   auto                             event_id{ BrowserAdapter::Event::store(event) };
-  BrowserAdapter::JsEventGenerator event_generator{ event_id };
+  BrowserAdapter::JsEventGenerator event_generator{ env, event_id };
   event->accept(&event_generator);
 
   std::string call_imported_function{ event_generator.getScript() };

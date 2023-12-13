@@ -19,14 +19,20 @@
 
 #include <string>
 
+namespace VGG
+{
+
 class BrowserJSEngine final : public VggJSEngine
 {
 public:
   bool evalScript(const std::string& code) override;
   bool evalModule(const std::string& code) override;
-  bool evalModule(const std::string& code, VGG::EventPtr event) override;
+  bool evalModule(const std::string& code, VGG::EventPtr event, std::shared_ptr<IVggEnv> env)
+    override;
 
 private:
   std::string m_moduleWrapper;
-  int m_evalTimes = 0;
+  int         m_evalTimes = 0;
 };
+
+} // namespace VGG

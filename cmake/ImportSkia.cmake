@@ -15,10 +15,13 @@ if(DEFINED SKIA_DIR)
 # case 2: no skia source code is prepared, so we download and uncompress it
 #
 elseif(NOT IS_DIRECTORY ${SKIA_SOURCE_DIR})
-  set(SKIA_ARCHIVE_TAG "20231213")
-  set(SKIA_ARCHIVE_MD5_CHECKSUM "5fa2dae51fa00879187c8f37527666d5")
-  set(SKIA_URL "https://github.com/verygoodgraphics/skia/releases/download/${SKIA_ARCHIVE_TAG}/skia-with-deps.tar.gz")
-  set(SKIA_ARCHIVE_LOCATION "${CMAKE_SOURCE_DIR}/downloads/skia-with-deps-${SKIA_ARCHIVE_TAG}.tar.gz")
+  file(READ ${CMAKE_SOURCE_DIR}/config/DepsConfig.json DEPS_CONFIG)
+  string(JSON SKIA_URL GET ${DEPS_CONFIG} skia url)
+  string(JSON SKIA_ARCHIVE_MD5_CHECKSUM GET ${DEPS_CONFIG} skia md5)
+  if(NOT DEFINED SKIA_URL OR SKIA_ARCHIVE_TAG STREQUAL "" OR NOT DEFINED SKIA_ARCHIVE_MD5_CHECKSUM OR SKIA_ARCHIVE_MD5_CHECKSUM STREQUAL "")
+    message(FATAL "Invalid skia url or md5")
+  endif()
+  set(SKIA_ARCHIVE_LOCATION "${CMAKE_SOURCE_DIR}/downloads/skia-with-deps-${SKIA_ARCHIVE_MD5_CHECKSUM}.tar.gz")
 
   message(STATUS "Downloading ${SKIA_URL} to ${SKIA_ARCHIVE_LOCATION}")
   file(DOWNLOAD ${SKIA_URL} ${SKIA_ARCHIVE_LOCATION}

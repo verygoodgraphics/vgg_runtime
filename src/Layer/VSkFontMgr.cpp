@@ -385,9 +385,9 @@ bool VGGFontLoader::appendTypeface(
     SkFontStyle style = SkFontStyle(); // avoid uninitialized warning
     int         variantions = 0;
     int         variantionFaceIndex = (variantions << 16) + faceIndex;
-    while (variantions < numVariations &&
-           scanner.scanFont(stream, variantionFaceIndex, &realname, &style, &isFixedPitch, nullptr))
+    do
     {
+      scanner.scanFont(stream, variantionFaceIndex, &realname, &style, &isFixedPitch, nullptr);
       SkFontStyleSet_VGG* addTo = find_family(*families, realname.c_str());
       if (nullptr == addTo)
       {
@@ -402,7 +402,7 @@ bool VGGFontLoader::appendTypeface(
       }
       variantions++;
       variantionFaceIndex = (variantions << 16) + faceIndex;
-    }
+    } while (variantions <= numVariations);
   }
   return true;
 }

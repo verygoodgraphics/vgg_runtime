@@ -189,34 +189,34 @@ void drawParagraphDebugInfo(
   rects = p->getRectsForPlaceholders();
   canvas.drawRects(SK_ColorRED, rects);
 
-  p->visit(
-    [&](int lineNumber, const Paragraph::VisitorInfo* info)
-    {
-      if (!info)
-        return;
-      SkPaint paint;
-
-      //
-      // paint.setColor(SK_ColorMAGENTA);
-      // paint.setStrokeWidth(5);
-      // canvas.get()->drawPoint(info->origin, paint);
-      //
-      // paint.setStrokeWidth(1);
-      // paint.setColor(SK_ColorRED);
-      // SkPoint to = { info->origin.x() + info->advanceX, info->origin.y() };
-      // canvas.get()->drawLine(info->origin, to, paint);
-      // paint.setStrokeWidth(5);
-      // canvas.get()->drawPoint(to, paint);
-      //
-
-      for (int i = 0; i < info->count; i++)
-      {
-        paint.setStrokeWidth(info->font.getSize() / 20);
-        paint.setColor(SK_ColorBLUE);
-        SkPoint pos = info->origin + info->positions[i];
-        canvas.get()->drawPoint(pos, paint);
-      }
-    });
+  // p->visit(
+  //   [&](int lineNumber, const Paragraph::VisitorInfo* info)
+  //   {
+  //     if (!info)
+  //       return;
+  //     SkPaint paint;
+  //
+  //     //
+  //     // paint.setColor(SK_ColorMAGENTA);
+  //     // paint.setStrokeWidth(5);
+  //     // canvas.get()->drawPoint(info->origin, paint);
+  //     //
+  //     // paint.setStrokeWidth(1);
+  //     // paint.setColor(SK_ColorRED);
+  //     // SkPoint to = { info->origin.x() + info->advanceX, info->origin.y() };
+  //     // canvas.get()->drawLine(info->origin, to, paint);
+  //     // paint.setStrokeWidth(5);
+  //     // canvas.get()->drawPoint(to, paint);
+  //     //
+  //
+  //     for (int i = 0; i < info->count; i++)
+  //     {
+  //       paint.setStrokeWidth(info->font.getSize() / 20);
+  //       paint.setColor(SK_ColorBLUE);
+  //       SkPoint pos = info->origin + info->positions[i];
+  //       canvas.get()->drawPoint(pos, paint);
+  //     }
+  //   });
 
   std::vector<LineMetrics> lineMetrics;
   p->getLineMetrics(lineMetrics);

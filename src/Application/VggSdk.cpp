@@ -39,12 +39,12 @@ std::shared_ptr<VGG::VggEnv> VggSdk::env()
   }
 }
 
-void VggSdk::setEnvKey(const std::string& key)
+void VggSdk::setEnv(const std::string& key)
 {
   m_env = VggEnv::get(key);
 }
 
-std::string VggSdk::getEnvKey()
+std::string VggSdk::getEnv()
 {
   return env()->getEnv();
 }

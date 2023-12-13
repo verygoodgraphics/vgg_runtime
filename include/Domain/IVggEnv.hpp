@@ -38,7 +38,11 @@ public:
   virtual std::string getListenerKey() = 0;
   virtual void        setListenerKey(const std::string& listenerKey) = 0;
 
-  std::string getCurrrentVggName()
+  std::string currrentEnvName()
+  {
+    return "_currentVggEnv";
+  }
+  std::string currrentVggName()
   {
     return "_currentVgg";
   }

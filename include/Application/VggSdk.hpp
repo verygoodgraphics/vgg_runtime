@@ -51,8 +51,8 @@ public:
   virtual ~VggSdk() = default;
 
   // env
-  void        setEnvKey(const std::string& key);
-  std::string getEnvKey();
+  void        setEnv(const std::string& key);
+  std::string getEnv();
   void        setContainerKey(const std::string& containerKey);
   void        setInstanceKey(const std::string& instanceKey);
   void        setListenerKey(const std::string& listenerKey);

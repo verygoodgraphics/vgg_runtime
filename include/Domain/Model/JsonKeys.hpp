@@ -20,6 +20,7 @@ namespace VGG
 
 constexpr auto K_ALPHA_MASK_BY = "alphaMaskBy";
 constexpr auto K_ATTR = "attr";
+constexpr auto K_BOOLEANOPERATION = "booleanOperation";
 constexpr auto K_BOUNDS = "bounds";
 constexpr auto K_CHILD_OBJECTS = "childObjects";
 constexpr auto K_CLASS = "class";

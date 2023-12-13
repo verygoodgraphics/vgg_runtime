@@ -70,6 +70,21 @@ Rect Rect::makeJoin(const Rect& rhs) const
   return { { minLeft, minTop }, { maxRight - minLeft, maxBottom - minTop } };
 }
 
+Rect Rect::makeIntersectOrJoin(const Rect& rhs) const
+{
+  auto newLeft = std::max(left(), rhs.left());
+  auto newTop = std::max(top(), rhs.top());
+  auto newRight = std::min(right(), rhs.right());
+  auto newBottom = std::min(bottom(), rhs.bottom());
+
+  if (newLeft >= newRight || newTop >= newBottom)
+  {
+    return makeJoin(rhs);
+  }
+
+  return { { newLeft, newTop }, { newRight - newLeft, newBottom - newTop } };
+}
+
 Rect Rect::makeTransform(const Matrix& matrix, ECoordinateType type) const
 {
   const auto isYAxisDown = type == ECoordinateType::LAYOUT;
@@ -177,7 +192,7 @@ Rect Rect::makeFromPoints(const BezierPoint p1, const BezierPoint p2)
     case 3:
     {
       bezier::Bezier<2> curve{ libPoints };
-      auto r = curve.aabb();
+      auto              r = curve.aabb();
       return { { TO_VGG_LAYOUT_SCALAR(r.minX()), TO_VGG_LAYOUT_SCALAR(r.minY()) },
                { TO_VGG_LAYOUT_SCALAR(r.width()), TO_VGG_LAYOUT_SCALAR(r.height()) } };
     }
@@ -186,7 +201,7 @@ Rect Rect::makeFromPoints(const BezierPoint p1, const BezierPoint p2)
     case 4:
     {
       bezier::Bezier<3> curve{ libPoints };
-      auto r = curve.aabb();
+      auto              r = curve.aabb();
       return { { TO_VGG_LAYOUT_SCALAR(r.minX()), TO_VGG_LAYOUT_SCALAR(r.minY()) },
                { TO_VGG_LAYOUT_SCALAR(r.width()), TO_VGG_LAYOUT_SCALAR(r.height()) } };
     }

@@ -237,6 +237,7 @@ private:
   T getValue(const char* key, T v) const;
 
   bool shouldSkip();
+  bool isBooleanGroup();
 
   void updatePathNodeModel(
     const Layout::Rect&                     newFrame,

@@ -20,6 +20,8 @@
 #include "ISdk.hpp"
 #include "VggTypes.hpp"
 
+#include <memory>
+
 namespace VGG
 {
 

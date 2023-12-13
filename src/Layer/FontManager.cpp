@@ -112,11 +112,13 @@ public:
     std::vector<std::string> fallbacks,
     std::vector<std::string> fallbackEmojiFonts)
   {
+#ifndef NDEBUG
     DEBUG("Font directory: -----------");
     for (const auto& p : dirs)
     {
       DEBUG("%s", p.string().c_str());
     }
+#endif
     sk_sp<SkFontMgrVGG> vggFontMgr = VGGFontDirectory(std::move(dirs));
     if (vggFontMgr)
     {
@@ -126,6 +128,7 @@ public:
         fallbacks.push_back(layer::resources::FiraSans::FONT_NAME);
       }
 #endif
+#ifndef NDEBUG
       DEBUG("----  Fallback font:  -----------");
       for (const auto& f : fallbacks)
       {
@@ -135,6 +138,7 @@ public:
       {
         DEBUG("%s", f.c_str());
       }
+#endif
       vggFontMgr->setFallbackFonts(std::move(fallbacks));
       vggFontMgr->setFallbackEmojiFonts(std::move(fallbackEmojiFonts));
       auto result = fontMgrs.insert({ key, std::move(vggFontMgr) });

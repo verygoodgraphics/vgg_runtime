@@ -34,7 +34,7 @@ std::string GetArgString(napi_env env, napi_value arg)
   }
 
   size_t len = 0;
-  auto status = napi_get_value_string_utf8(env, arg, NULL, 0, &len);
+  auto status __attribute__((unused)) = napi_get_value_string_utf8(env, arg, NULL, 0, &len);
   assert(status == napi_ok);
 
   char* buf = (char*)malloc(len + 1);
@@ -59,7 +59,7 @@ int GetArgIntValue(napi_env env, napi_value arg)
   }
 
   int32_t result = 0;
-  auto status = napi_get_value_int32(env, arg, &result);
+  auto status __attribute__((unused)) = napi_get_value_int32(env, arg, &result);
   assert(status == napi_ok);
 
   return result;

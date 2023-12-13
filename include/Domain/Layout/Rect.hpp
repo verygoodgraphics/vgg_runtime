@@ -90,7 +90,7 @@ struct Rect
   };
 
   Point origin;
-  Size size;
+  Size  size;
 
   bool contains(Point point)
   {
@@ -119,13 +119,19 @@ struct Rect
     return { { origin.x + dx, origin.y + dy }, size };
   }
 
-  Rect makeJoin(const Rect& rhs) const;
+  Rect  makeJoin(const Rect& rhs) const;
   Rect& join(const Rect& rhs)
   {
     return *this = makeJoin(rhs);
   }
 
-  Rect makeTransform(const Matrix& matrix, ECoordinateType type) const;
+  Rect  makeIntersectOrJoin(const Rect& rhs) const;
+  Rect& intersectOrJoin(const Rect& rhs)
+  {
+    return *this = makeIntersectOrJoin(rhs);
+  }
+
+  Rect        makeTransform(const Matrix& matrix, ECoordinateType type) const;
   static Rect makeFromPoints(const std::vector<Point>& points);
   static Rect makeFromPoints(const std::vector<BezierPoint>& points, bool isClosed);
   static Rect makeFromPoints(const BezierPoint p1, const BezierPoint p2);

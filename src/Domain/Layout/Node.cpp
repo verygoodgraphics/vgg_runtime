@@ -29,6 +29,18 @@
 #undef DEBUG
 #define DEBUG(msg, ...)
 
+namespace
+{
+enum class EBooleanOperation
+{
+  UNION,
+  SUBTRACTION,
+  INTERSECION,
+  EXCLUSION,
+  NONE
+};
+} // namespace
+
 namespace VGG
 {
 
@@ -707,13 +719,16 @@ bool LayoutNode::shouldSkip()
       return true;
     }
 
-    if (Layout::isPathNode(*json))
-    {
-      return m_children.size() > 1;
-    }
+    return isBooleanGroup();
   }
 
   return false;
+}
+
+bool LayoutNode::isBooleanGroup()
+{
+  auto json = model();
+  return Layout::isPathNode(*json) && m_children.size() > 1;
 }
 
 Layout::Rect LayoutNode::resizeGroup(
@@ -762,12 +777,45 @@ Layout::Rect LayoutNode::resizeGroup(
     childTransformedFrames.push_back(child->transformedFrame());
   }
 
-  newGroupFrame = std::reduce(
-                    childTransformedFrames.begin() + 1,
-                    childTransformedFrames.end(),
-                    childTransformedFrames[0],
-                    std::mem_fn(&Layout::Rect::makeJoin))
-                    .makeOffset(newOrigin.x, newOrigin.y);
+  if (auto json = model(); json && isBooleanGroup())
+  {
+    auto& subShapes = (*json)[K_SHAPE][K_SUBSHAPES];
+
+    newGroupFrame = childTransformedFrames[0];
+    for (std::size_t i = 1; i < m_children.size(); i++)
+    {
+      auto& subShape = subShapes[i];
+      auto  op = subShape.value(K_BOOLEANOPERATION, EBooleanOperation::NONE);
+      switch (op)
+      {
+        case EBooleanOperation::SUBTRACTION:
+          break;
+
+        case EBooleanOperation::INTERSECION:
+          newGroupFrame.intersectOrJoin(childTransformedFrames[i]);
+          break;
+
+        case EBooleanOperation::UNION:
+        case EBooleanOperation::EXCLUSION:
+        case EBooleanOperation::NONE:
+          newGroupFrame.join(childTransformedFrames[i]);
+          break;
+
+        default:
+          break;
+      }
+    }
+  }
+  else
+  {
+    newGroupFrame = std::reduce(
+      childTransformedFrames.begin() + 1,
+      childTransformedFrames.end(),
+      childTransformedFrames[0],
+      std::mem_fn(&Layout::Rect::makeJoin));
+  }
+  newGroupFrame = newGroupFrame.makeOffset(newOrigin.x, newOrigin.y);
+
   setFrame(newGroupFrame, false, false);
 
   newOrigin = origin();

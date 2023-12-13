@@ -1,6 +1,8 @@
 # VGG Runtime
 
-VGG Runtime is a design-as-code engine for rendering and running [VGG Daruma](https://verygoodgraphics.com/daruma) files.
+VGG Runtime is an implementation of [VGG Specs](https://docs.verygoodgraphics.com/specs/overview) with cross-platform rendering and scripting capabilities.
+
+For now [VGG Daruma](https://verygoodgraphics.com/daruma) will produce files conforming to VGG Specs that VGG Runtime can read and display. Or you can use [VGG Sketch Parser](https://github.com/verygoodgraphics/vgg_sketch_parser) to convert Sketch files into Daruma files.
 
 ## Build Instructions
 

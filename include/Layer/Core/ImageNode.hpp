@@ -35,8 +35,8 @@ public:
   ImageNode(const ImageNode&);
   ImageNode& operator=(const ImageNode&) = delete;
 
-  ImageNode(ImageNode&&) noexcept = default;
-  ImageNode&         operator=(ImageNode&&) noexcept = default;
+  ImageNode(ImageNode&&) noexcept = delete;
+  ImageNode&         operator=(ImageNode&&) noexcept = delete;
   // void paintEvent(SkCanvas* canvas) override;
   void               setImage(const std::string& guid);
   const std::string& getImageGUID() const;

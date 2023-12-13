@@ -67,7 +67,6 @@ class Renderer
   bool              m_enableDrawDebugBound{ false };
   bool              m_enableDrawDebugPath{ false };
   InternalObjectMap m_maskObjects;
-  Scene*            m_scene{ nullptr };
 
   void updateMaskObject(PaintNode* p, std::unordered_map<std::string, PaintNode*>& objects);
 

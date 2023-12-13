@@ -102,8 +102,8 @@ Controller::Controller(
   , m_jsEngine{ jsEngine }
   , m_presenter(presenter)
   , m_editor{ editor }
-  , m_mode(mode)
   , m_reporter{ new Reporter{ env, jsEngine } }
+  , m_mode(mode)
 {
   assert(m_runLoop);
 

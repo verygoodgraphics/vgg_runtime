@@ -501,7 +501,7 @@ void VGGFontLoader::loadSystemFonts(
   // helper type for the visitor #4
   using namespace VGG::layer;
   std::visit(
-    Overloaded{ [&, this](const SkString& arg)
+    Overloaded{ [&](const SkString& arg)
                 {
                   if (arg.isEmpty() == false)
                   {
@@ -511,7 +511,7 @@ void VGGFontLoader::loadSystemFonts(
                     loadDirectoryFonts(scanner, arg, ".pfb", families);
                   }
                 },
-                [&, this](const std::vector<fs::path>& arg)
+                [&](const std::vector<fs::path>& arg)
                 {
                   for (const auto& p : arg)
                   {

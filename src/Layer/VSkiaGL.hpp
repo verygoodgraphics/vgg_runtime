@@ -46,7 +46,7 @@ SurfaceCreateProc glSurfaceCreateProc()
 
 ContextCreateProc glContextCreateProc(ContextInfoGL* context)
 {
-  return [context]()
+  return []()
   {
     sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
     ASSERT(interface);

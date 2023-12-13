@@ -104,7 +104,7 @@ struct TextLayoutFixed
 
 using TextLayoutMode = std::variant<TextLayoutFixed, TextLayoutAutoWidth, TextLayoutAutoHeight>;
 
-class RichTextBlock
+class RichTextBlock final
   : public ParagraphListener
   , public VNode
 {

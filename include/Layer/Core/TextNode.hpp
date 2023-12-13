@@ -31,8 +31,8 @@ public:
   TextNode(const std::string& name, std::string guid);
   TextNode(const TextNode&);
   TextNode& operator=(const TextNode&) = delete;
-  TextNode(TextNode&&) noexcept = default;
-  TextNode& operator=(TextNode&&) noexcept = default;
+  TextNode(TextNode&&) noexcept = delete;
+  TextNode& operator=(TextNode&&) noexcept = delete;
 
   void setParagraph(
     std::string                      utf8,

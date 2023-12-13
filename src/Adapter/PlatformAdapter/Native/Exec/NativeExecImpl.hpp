@@ -44,7 +44,7 @@ using v8::Value;
 namespace VGG
 {
 
-struct NativeExecImpl;
+class NativeExecImpl;
 
 struct NativeEvalTask
 {

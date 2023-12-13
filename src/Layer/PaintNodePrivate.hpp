@@ -519,6 +519,6 @@ public:
   }
 
   PaintNode__pImpl(PaintNode__pImpl&&) noexcept = default;
-  PaintNode__pImpl& operator=(PaintNode__pImpl&&) noexcept = default;
+  PaintNode__pImpl& operator=(PaintNode__pImpl&&) noexcept = delete;
 };
 } // namespace VGG::layer

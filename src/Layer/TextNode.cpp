@@ -69,7 +69,7 @@ public:
   }
 
   TextNode__pImpl(TextNode__pImpl&& p) noexcept = default;
-  TextNode__pImpl& operator=(TextNode__pImpl&& p) noexcept = default;
+  TextNode__pImpl& operator=(TextNode__pImpl&& p) noexcept = delete;
 
   void ensureObserve()
   {

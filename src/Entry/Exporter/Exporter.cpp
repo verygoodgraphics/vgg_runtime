@@ -106,7 +106,7 @@ float calcScaleFactor(
 {
   auto  widthScale = maxWidth / inputWidth;
   auto  heightScale = maxHeight / inputHeight;
-  float outputSize[2] = { 0.f, 0.f };
+  // float outputSize[2] = { 0.f, 0.f };
   if (widthScale < heightScale)
   {
     outWidth = maxWidth;
@@ -384,8 +384,8 @@ IteratorResult ImageIterator::next()
 }
 
 ImageIterator::ImageIterator(ImageIterator&& other) noexcept
-  : m_opts(other.m_opts)
-  , d_impl(std::move(other.d_impl))
+  : d_impl(std::move(other.d_impl))
+  , m_opts(other.m_opts)
 {
 }
 

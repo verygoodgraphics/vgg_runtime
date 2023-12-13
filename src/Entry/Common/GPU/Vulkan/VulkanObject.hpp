@@ -463,10 +463,10 @@ struct VkDeviceObject : public std::enable_shared_from_this<VkDeviceObject>
                                            { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 10 },
                                            { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 10 } };
 
-    VkDescriptorPoolCreateInfo dpCI = {
-      VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO, nullptr,        0, 1,
-      static_cast<uint32_t>(poolSize.size()),        poolSize.data()
-    };
+    // VkDescriptorPoolCreateInfo dpCI = {
+    //   VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO, nullptr,        0, 1,
+    //   static_cast<uint32_t>(poolSize.size()),        poolSize.data()
+    // };
     // DescriptorPool = CreateDescriptorPool(dpCI);
   }
   ~VkDeviceObject()
@@ -500,7 +500,7 @@ struct VkDeviceObject : public std::enable_shared_from_this<VkDeviceObject>
   {
     return m_device;
   }
-  friend class VkSurfaceObject;
+  friend struct VkSurfaceObject;
   std::shared_ptr<VkPhysicalDeviceObject> physicalDevice;
   uint32_t graphicsQueueIndex = -1;
   VkQueue graphicsQueue = VK_NULL_HANDLE;
@@ -517,9 +517,9 @@ struct VkSurfaceObject
   VkSurfaceObject(std::shared_ptr<VkInstanceObject> instance,
                   std::shared_ptr<VkDeviceObject> device,
                   VkSurfaceKHR surface)
-    : m_instance(std::move(instance))
+    : m_surface(std::move(surface))
+    , m_instance(std::move(instance))
     , m_device(std::move(device))
-    , m_surface(std::move(surface))
   {
     ASSERT(m_surface != VK_NULL_HANDLE);
     VkBool32 support = VK_FALSE;
@@ -575,8 +575,8 @@ struct VkSurfaceObject
   VkSurfaceObject(const VkSurfaceObject&) = delete;
   VkSurfaceObject& operator=(const VkSurfaceObject&) = delete;
   VkSurfaceObject(VkSurfaceObject&& rhs) noexcept
-    : m_instance(std::move(rhs.m_instance))
-    , m_surface(rhs.m_surface)
+    : m_surface(rhs.m_surface)
+    , m_instance(std::move(rhs.m_instance))
     , m_device(std::move(rhs.m_device))
   {
     rhs.m_surface = VK_NULL_HANDLE;
@@ -599,7 +599,7 @@ struct VkSurfaceObject
   }
 
 private:
-  friend class VkSwapchainObject;
+  friend struct VkSwapchainObject;
   void release()
   {
     vkDestroySurfaceKHR(*m_instance, m_surface, m_instance->allocationCallback);
@@ -632,8 +632,8 @@ struct VkSwapchainObject
   VkSwapchainObject(std::shared_ptr<VkDeviceObject> device,
                     std::shared_ptr<VkSurfaceObject> surface,
                     VkSwapchainKHR oldSwapchain)
-    : device(std::move(device))
-    , surface(std::move(surface))
+    : surface(std::move(surface))
+    , device(std::move(device))
   {
 
     // Get other swap chain related features
@@ -642,7 +642,8 @@ struct VkSwapchainObject
 
     // Size of the images
     // Default size = window size
-    int gWindowWidth, gWindowHeight;
+    int gWindowWidth = 0;
+    int gWindowHeight = 0;
     VkExtent2D swapImageExtent = { (unsigned int)gWindowWidth, (unsigned int)gWindowHeight };
 
     // This happens when the window scales based on the size of an image

@@ -116,7 +116,6 @@ void AppRender::endFrame()
 
 bool AppRender::onEvent(UEvent e)
 {
-  VGG_IMPL(AppRender);
   auto type = e.type;
   if (type == VGG_MOUSEMOTION)
   {

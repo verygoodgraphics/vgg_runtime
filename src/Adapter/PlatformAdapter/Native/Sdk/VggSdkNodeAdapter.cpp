@@ -100,9 +100,9 @@ using namespace VGG;
 napi_ref VggSdkNodeAdapter::constructor;
 
 VggSdkNodeAdapter::VggSdkNodeAdapter()
-  : m_vggSdk(new VggSdk) // todo, env
-  , m_env(nullptr)
+  : m_env(nullptr)
   , m_wrapper(nullptr)
+  , m_vggSdk(new VggSdk) // todo, env
 {
 }
 

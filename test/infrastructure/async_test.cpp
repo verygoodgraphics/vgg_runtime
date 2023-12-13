@@ -78,7 +78,7 @@ TEST_F(VggAsyncTestSuite, Exception)
       EXPECT_NE(task_thread_id, current_thread_id);
 
       // run task
-      std::string().at(1); // this generates a std::out_of_range
+      (void)std::string().at(1); // this generates a std::out_of_range
 
       return fake_result;
     },

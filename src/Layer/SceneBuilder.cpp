@@ -296,7 +296,7 @@ std::shared_ptr<PaintNode> SceneBuilder::fromPath(const json& j, const glm::mat3
   return makeObjectCommonProperty(
     j,
     totalMatrix,
-    [&, this](std::string name, std::string guid)
+    [&](std::string name, std::string guid)
     {
       auto p = std::make_shared<PaintNode>(std::move(name), VGG_PATH, std::move(guid));
       return p;
@@ -357,7 +357,7 @@ std::shared_ptr<PaintNode> SceneBuilder::fromText(const json& j, const glm::mat3
   return makeObjectCommonProperty(
     j,
     totalMatrix,
-    [&j](std::string name, std::string guid)
+    [](std::string name, std::string guid)
     {
       auto p = std::make_shared<layer::TextNode>(std::move(name), std::move(guid));
       return p;
@@ -438,7 +438,7 @@ std::shared_ptr<PaintNode> SceneBuilder::fromFrame(const json& j, const glm::mat
   auto p = makeObjectCommonProperty(
     j,
     totalMatrix,
-    [&j](std::string name, std::string guid)
+    [](std::string name, std::string guid)
     {
       auto p = std::make_shared<PaintNode>(std::move(name), VGG_FRAME, std::move(guid));
       return p;
@@ -465,7 +465,7 @@ std::shared_ptr<PaintNode> SceneBuilder::fromSymbolMaster(
   return makeObjectCommonProperty(
     j,
     totalMatrix,
-    [&, this](std::string name, std::string guid)
+    [&](std::string name, std::string guid)
     {
       auto p = std::make_shared<PaintNode>(std::move(name), VGG_MASTER, std::move(guid));
       // appendSymbolMaster(p);
@@ -518,7 +518,7 @@ std::shared_ptr<PaintNode> SceneBuilder::fromGroup(const json& j, const glm::mat
   return makeObjectCommonProperty(
     j,
     totalMatrix,
-    [&, this](std::string name, std::string guid)
+    [&](std::string name, std::string guid)
     {
       auto p = std::make_shared<PaintNode>(std::move(name), VGG_GROUP, std::move(guid));
       return p;

@@ -30,7 +30,7 @@ class Environment;
 namespace VGG
 {
 
-struct NativeExecImpl;
+class NativeExecImpl;
 
 class NativeExec final : public VggJSEngine
 {

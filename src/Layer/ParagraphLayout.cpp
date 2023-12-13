@@ -221,7 +221,7 @@ void drawParagraphDebugInfo(
   std::vector<LineMetrics> lineMetrics;
   p->getLineMetrics(lineMetrics);
 
-  float   offsetY = 0;
+  // float   offsetY = 0;
   SkPaint paint;
   paint.setColor(SK_ColorRED);
 
@@ -229,7 +229,7 @@ void drawParagraphDebugInfo(
   auto         effect = SkDashPathEffect::Make(s_intervals, 2, 25);
   for (const auto& m : lineMetrics)
   {
-    offsetY += m.fHeight;
+    // offsetY += m.fHeight;
     // baseline
     canvas.drawHorizontalLine(m.fLeft, m.fWidth + m.fLeft, m.fBaseline, SK_ColorRED, effect);
     // ascent
@@ -315,7 +315,7 @@ void RichTextBlock::onTextStyle(
   }
 
   auto style =
-    createTextStyle(textAttr, m_fontCollection.get(), [&, this]() { return styleIndex; });
+    createTextStyle(textAttr, m_fontCollection.get(), [&]() { return styleIndex; });
   p.builder->pushStyle(style);
   p.builder->addText(textView.text.data(), textView.text.size());
   p.builder->pop();
@@ -339,7 +339,7 @@ bool RichTextBlock::ensureBuild(TextLayoutMode mode)
     for (auto& d : paragraph)
     {
       assert(d.builder);
-      paragraphCache.push_back(std::move(d.build()));
+      paragraphCache.push_back(d.build());
     }
     m_state = BUILT;
   }

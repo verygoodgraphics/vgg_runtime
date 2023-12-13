@@ -177,30 +177,6 @@ public:
           return;
         }
 
-        switch (event->type)
-        {
-          case ModelEventType::Add:
-          {
-            auto addEventPtr = static_cast<ModelEventAdd*>(event.get());
-          }
-          break;
-
-          case ModelEventType::Delete:
-          {
-            auto deleteEventPtr = static_cast<ModelEventDelete*>(event.get());
-          }
-          break;
-
-          case ModelEventType::Update:
-          {
-            auto udpateEventPtr = static_cast<ModelEventUpdate*>(event.get());
-          }
-          break;
-
-          default:
-            break;
-        }
-
         // todo, diff & update
         strongThis->update();
       });
@@ -214,30 +190,6 @@ public:
     m_editModelObserver = rxcpp::make_observer_dynamic<ModelEventPtr>(
       [weakThis](ModelEventPtr event)
       {
-        switch (event->type)
-        {
-          case ModelEventType::Add:
-          {
-            auto addEventPtr = static_cast<ModelEventAdd*>(event.get());
-          }
-          break;
-
-          case ModelEventType::Delete:
-          {
-            auto deleteEventPtr = static_cast<ModelEventDelete*>(event.get());
-          }
-          break;
-
-          case ModelEventType::Update:
-          {
-            auto udpateEventPtr = static_cast<ModelEventUpdate*>(event.get());
-          }
-          break;
-
-          default:
-            break;
-        }
-
         if (auto p = weakThis.lock())
         {
           // todo, diff & update

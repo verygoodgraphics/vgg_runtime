@@ -42,7 +42,7 @@ using InstanceTable = std::unordered_map<
     std::string>>; // {instance_id: {instance_object: master_id}}
                    //
 class Scene__pImpl;
-struct VGG_EXPORTS Scene : public layer::Renderable
+class VGG_EXPORTS Scene : public layer::Renderable
 {
   static ResourceRepo s_resRepo;
 
@@ -55,7 +55,7 @@ protected:
 
 public:
   Scene();
-  ~Scene();
+  virtual ~Scene();
   [[deprecated("Use SceneBuilder for data preparation")]] void loadFileContent(
     const nlohmann::json& j);
   void setSceneRoots(std::vector<std::shared_ptr<PaintNode>> roots);

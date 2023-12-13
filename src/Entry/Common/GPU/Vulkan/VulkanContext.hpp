@@ -70,7 +70,7 @@ public:
   {
     cleanup();
     vkInstance = std::make_shared<vk::VkInstanceObject>(
-      [this]()
+      []()
       {
         std::vector<const char*> extNames;
         // extNames.push_back("VK_KHR_get_physical_device_properties2");

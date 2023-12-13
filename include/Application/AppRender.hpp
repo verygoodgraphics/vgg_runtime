@@ -37,6 +37,7 @@ public:
   void addAppRenderable(std::shared_ptr<AppRenderable> listener);
   void addAppScene(std::shared_ptr<AppScene> listener);
   std::shared_ptr<AppScene> popAppScene();
+  using VLayer::beginFrame;
   bool beginFrame(int fps);
   void render();
   void endFrame();

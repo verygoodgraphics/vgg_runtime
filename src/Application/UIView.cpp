@@ -45,7 +45,7 @@ bool UIView::onEvent(UEvent evt, void* userData)
   // todo, capturing
   // todo, bubbling
   UIEvent::PathType           targetPath;
-  auto&                       hasEventListener = m_hasEventListener;
+  // auto&                       hasEventListener = m_hasEventListener;
   std::shared_ptr<LayoutNode> targetNode;
   switch (evt.type)
   {
@@ -258,7 +258,7 @@ void UIView::nextArtboard()
   auto document = m_document.lock();
   if (document)
   {
-    if (m_page >= document->children().size() - 1)
+    if (m_page >= (int)document->children().size() - 1)
     {
       return;
     }

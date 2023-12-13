@@ -158,7 +158,7 @@ public:
   std::shared_ptr<ISdk> sdk() override
   {
     auto sdk = std::make_shared<VggSdk>();
-    sdk->setEnvKey(m_mainComposer->env()->getEnv());
+    sdk->setEnv(m_mainComposer->env()->getEnv());
     return sdk;
   }
 

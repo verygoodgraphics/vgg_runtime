@@ -120,7 +120,7 @@ void VggSdkNodeAdapter::Destructor(napi_env env, void* nativeObject, void* /*fin
 void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
 {
   napi_property_descriptor properties[] = {
-    DECLARE_NODE_API_PROPERTY("setEnvKey", SetEnvKey),
+    DECLARE_NODE_API_PROPERTY("setEnv", SetEnv),
 
     DECLARE_NODE_API_PROPERTY("getDesignDocument", GetDesignDocument),
 
@@ -194,7 +194,7 @@ napi_value VggSdkNodeAdapter::New(napi_env env, napi_callback_info info)
   return instance;
 }
 
-napi_value VggSdkNodeAdapter::SetEnvKey(napi_env env, napi_callback_info info)
+napi_value VggSdkNodeAdapter::SetEnv(napi_env env, napi_callback_info info)
 {
   size_t     argc = 1;
   napi_value args[1];
@@ -214,7 +214,7 @@ napi_value VggSdkNodeAdapter::SetEnvKey(napi_env env, napi_callback_info info)
     VggSdkNodeAdapter* sdk_adapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
 
-    sdk_adapter->m_vggSdk->setEnvKey(envKey);
+    sdk_adapter->m_vggSdk->setEnv(envKey);
   }
   catch (std::exception& e)
   {

@@ -41,12 +41,14 @@ void VggExec::setEnv()
 {
   std::ostringstream oss;
   oss << "(function () {"
-      << "const containerKey = '" << m_env->getContainerKey() << "';"
-      << "const envKey = '" << m_env->getEnv() << "';"
+      << "const containersKey = '" << m_env->getContainerKey() << "';"
+      << "const envName = '" << m_env->getEnv() << "';"
       << "const instanceKey = '" << m_env->getInstanceKey() << "';"
-      << "const currentVggName = '" << m_env->getCurrrentVggName() << "';"
+      << "const currentVggEnvName = '" << m_env->currrentEnvName() << "';"
+      << "const currentVggName = '" << m_env->currrentVggName() << "';"
       << R"(
-          globalThis[currentVggName]  = globalThis[containerKey][envKey][instanceKey];
+          globalThis[currentVggEnvName]  = envName;
+          globalThis[currentVggName]  = globalThis[containersKey][envName][instanceKey];
         })();
       )";
   m_jsEngine->evalScript(oss.str());

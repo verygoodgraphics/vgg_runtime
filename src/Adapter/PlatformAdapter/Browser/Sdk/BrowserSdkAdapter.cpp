@@ -36,7 +36,7 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
   class_<VggSdk>("VggSdk")
     .constructor<>()
     // env
-    .function("getEnvKey", &VggSdk::getEnvKey)
+    .function("getEnv", &VggSdk::getEnv)
     .function("setContainerKey", &VggSdk::setContainerKey)
     .function("setInstanceKey", &VggSdk::setInstanceKey)
     .function("setListenerKey", &VggSdk::setListenerKey)

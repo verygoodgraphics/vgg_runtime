@@ -34,8 +34,8 @@ void NativeComposer::setupVgg()
       << R"(
           var vggSdkAddon = process._linkedBinding('vgg_sdk_addon');
 
-          globalThis[containerKey] = {};
-          globalThis[containerKey][envKey] = {};
+          globalThis[containerKey] ??= {};
+          globalThis[containerKey][envKey] ??= {};
           globalThis[containerKey][envKey][instanceKey] = vggSdkAddon;
         })();
       )";

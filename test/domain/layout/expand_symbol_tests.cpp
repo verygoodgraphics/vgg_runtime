@@ -277,8 +277,8 @@ TEST_F(VggExpandSymbolTestSuite, BoundsOverride)
     auto&  bounds = resultJson[path];
     double width = bounds[K_WIDTH];
     double height = bounds[K_HEIGHT];
-    EXPECT_DOUBLE_EQ(width, 102.57812305110838);
-    EXPECT_DOUBLE_EQ(height, 123.44138532329077);
+    EXPECT_DOUBLE_EQ(width, 102.578125);
+    EXPECT_DOUBLE_EQ(height, 123.44138977905212);
   }
   {
     nlohmann::json::json_pointer path{
@@ -287,8 +287,8 @@ TEST_F(VggExpandSymbolTestSuite, BoundsOverride)
     auto&  bounds = resultJson[path];
     double width = bounds[K_WIDTH];
     double height = bounds[K_HEIGHT];
-    EXPECT_DOUBLE_EQ(width, 193.64581990242004);
-    EXPECT_DOUBLE_EQ(height, 83.012984275817871);
+    EXPECT_DOUBLE_EQ(width, 193.64583333333331);
+    EXPECT_DOUBLE_EQ(height, 83.012987012987011);
   }
   {
     nlohmann::json::json_pointer matrixPath{
@@ -734,7 +734,7 @@ TEST_F(VggExpandSymbolTestSuite, BoundsOverrideOrderRootFirst)
       "/frames/0/childObjects/0/childObjects/0/childObjects/1/bounds"
     };
     auto bounds = expandedDesignJson[path].get<Rect>();
-    EXPECT_DOUBLE_EQ(bounds.height(), 278.1938923835696);
+    EXPECT_DOUBLE_EQ(bounds.height(), 278.19389205276883);
     EXPECT_DOUBLE_EQ(bounds.width(), 120.29999542236328);
   }
 }

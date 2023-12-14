@@ -1,6 +1,7 @@
 {
+  "version": "1.0.9.10",
   "fileType": 3,
-  "fileName": "hi-figma",
+  "fileName": "/Users/houguanhua/code/vgg/vgg_runtime_C/test/testDataDir/symbol/BoundsOverrides/fill_with_replace_master.fig",
   "frames": [
     {
       "id": "0:1 default-frame",
@@ -51,6 +52,7 @@
       "styleEffectMaskArea": 2,
       "maskShowType": 2,
       "overflow": 2,
+      "styleEffectBoolean": 1,
       "class": "frame",
       "childObjects": [
         {
@@ -121,7 +123,14 @@
           "maskType": 0,
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
-          "overflow": 1,
+          "overflow": 2,
+          "styleEffectBoolean": 1,
+          "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -193,6 +202,13 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
+              "cornerSmoothing": 0.0,
+              "horizontalConstraint": 5,
+              "verticalConstraint": 5,
+              "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "path",
               "shape": {
                 "class": "shape",
@@ -215,24 +231,24 @@
                           "class": "pointAttr",
                           "radius": 0.0,
                           "point": [
-                            0.0,
-                            -136.0
-                          ]
-                        },
-                        {
-                          "class": "pointAttr",
-                          "radius": 0.0,
-                          "point": [
-                            169.0,
-                            -136.0
-                          ]
-                        },
-                        {
-                          "class": "pointAttr",
-                          "radius": 0.0,
-                          "point": [
                             169.0,
                             0.0
+                          ]
+                        },
+                        {
+                          "class": "pointAttr",
+                          "radius": 0.0,
+                          "point": [
+                            169.0,
+                            -136.0
+                          ]
+                        },
+                        {
+                          "class": "pointAttr",
+                          "radius": 0.0,
+                          "point": [
+                            0.0,
+                            -136.0
                           ]
                         }
                       ]
@@ -241,9 +257,14 @@
                   }
                 ],
                 "windingRule": 0
-              },
-              "pathType": 0
+              }
             }
+          ],
+          "radius": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
           ]
         },
         {
@@ -314,7 +335,14 @@
           "maskType": 0,
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
-          "overflow": 1,
+          "overflow": 2,
+          "styleEffectBoolean": 1,
+          "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -386,6 +414,13 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
+              "cornerSmoothing": 0.0,
+              "horizontalConstraint": 5,
+              "verticalConstraint": 5,
+              "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "path",
               "shape": {
                 "class": "shape",
@@ -482,9 +517,14 @@
                   }
                 ],
                 "windingRule": 0
-              },
-              "pathType": 5
+              }
             }
+          ],
+          "radius": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
           ]
         },
         {
@@ -555,7 +595,14 @@
           "maskType": 0,
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
-          "overflow": 1,
+          "overflow": 2,
+          "styleEffectBoolean": 1,
+          "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -626,7 +673,14 @@
               "maskType": 0,
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
-              "overflow": 1,
+              "overflow": 2,
+              "styleEffectBoolean": 1,
+              "cornerSmoothing": 0.0,
+              "horizontalConstraint": 5,
+              "verticalConstraint": 5,
+              "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "symbolInstance",
               "masterId": "27:104",
               "overrideValues": [
@@ -636,8 +690,16 @@
                     "27:104"
                   ],
                   "overrideName": "name",
-                  "overrideValue": "ins_rect_27_106"
+                  "overrideValue": "ins_rect_27_106",
+                  "effectOnLayout": false
                 }
+              ],
+              "variableAssignments": [],
+              "radius": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
               ]
             },
             {
@@ -708,7 +770,14 @@
               "maskType": 0,
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
-              "overflow": 1,
+              "overflow": 2,
+              "styleEffectBoolean": 1,
+              "cornerSmoothing": 0.0,
+              "horizontalConstraint": 5,
+              "verticalConstraint": 5,
+              "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "symbolInstance",
               "masterId": "27:105",
               "overrideValues": [
@@ -718,10 +787,24 @@
                     "27:105"
                   ],
                   "overrideName": "name",
-                  "overrideValue": "ins_star_27_108"
+                  "overrideValue": "ins_star_27_108",
+                  "effectOnLayout": false
                 }
+              ],
+              "variableAssignments": [],
+              "radius": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
               ]
             }
+          ],
+          "radius": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
           ]
         },
         {
@@ -792,7 +875,14 @@
           "maskType": 0,
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
-          "overflow": 1,
+          "overflow": 2,
+          "styleEffectBoolean": 1,
+          "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -863,49 +953,34 @@
               "maskType": 0,
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
-              "overflow": 1,
+              "overflow": 2,
+              "styleEffectBoolean": 1,
+              "cornerSmoothing": 0.0,
+              "horizontalConstraint": 5,
+              "verticalConstraint": 5,
+              "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "symbolInstance",
               "masterId": "27:110",
               "overrideValues": [
                 {
                   "class": "overrideValue",
                   "objectId": [
-                    "27:108"
-                  ],
-                  "overrideName": "masterId",
-                  "overrideValue": "27:104"
-                },
-                {
-                  "class": "overrideValue",
-                  "objectId": [
-                    "27:108"
-                  ],
-                  "overrideName": "name",
-                  "overrideValue": "ins_star_27_108"
-                },
-                {
-                  "class": "overrideValue",
-                  "objectId": [
                     "27:110"
                   ],
                   "overrideName": "name",
-                  "overrideValue": "ins_nest_27_183"
+                  "overrideValue": "ins_nest_27_183",
+                  "effectOnLayout": false
                 },
                 {
                   "class": "overrideValue",
                   "objectId": [
-                    "27:106",
-                    "27:102"
+                    "27:108"
                   ],
-                  "overrideName": "bounds",
-                  "overrideValue": {
-                    "class": "rect",
-                    "constrainProportions": false,
-                    "width": 193.6458282470703,
-                    "height": 83.01298522949219,
-                    "x": 0,
-                    "y": 0
-                  }
+                  "overrideName": "name",
+                  "overrideValue": "ins_star_27_108",
+                  "effectOnLayout": false
                 },
                 {
                   "class": "overrideValue",
@@ -934,12 +1009,14 @@
                         "transparencyKnockoutGroup": 0
                       }
                     }
-                  ]
+                  ],
+                  "effectOnLayout": false
                 },
                 {
                   "class": "overrideValue",
                   "objectId": [
-                    "27:106"
+                    "27:106",
+                    "27:102"
                   ],
                   "overrideName": "bounds",
                   "overrideValue": {
@@ -949,22 +1026,24 @@
                     "height": 83.01298522949219,
                     "x": 0,
                     "y": 0
-                  }
+                  },
+                  "effectOnLayout": false
                 },
                 {
                   "class": "overrideValue",
                   "objectId": [
-                    "27:108"
+                    "27:110"
                   ],
                   "overrideName": "bounds",
                   "overrideValue": {
                     "class": "rect",
                     "constrainProportions": false,
-                    "width": 211.97915649414062,
+                    "width": 495.0,
                     "height": 94.0,
                     "x": 0,
                     "y": 0
-                  }
+                  },
+                  "effectOnLayout": false
                 },
                 {
                   "class": "overrideValue",
@@ -992,13 +1071,13 @@
                         "transparencyKnockoutGroup": 0
                       }
                     }
-                  ]
+                  ],
+                  "effectOnLayout": false
                 },
                 {
                   "class": "overrideValue",
                   "objectId": [
-                    "27:108",
-                    "27:102"
+                    "27:108"
                   ],
                   "overrideName": "bounds",
                   "overrideValue": {
@@ -1008,7 +1087,17 @@
                     "height": 94.0,
                     "x": 0,
                     "y": 0
-                  }
+                  },
+                  "effectOnLayout": false
+                },
+                {
+                  "class": "overrideValue",
+                  "objectId": [
+                    "27:108"
+                  ],
+                  "overrideName": "masterId",
+                  "overrideValue": "27:104",
+                  "effectOnLayout": false
                 },
                 {
                   "class": "overrideValue",
@@ -1037,23 +1126,49 @@
                         "transparencyKnockoutGroup": 0
                       }
                     }
-                  ]
+                  ],
+                  "effectOnLayout": false
                 },
                 {
                   "class": "overrideValue",
                   "objectId": [
-                    "27:110"
+                    "27:108",
+                    "27:102"
                   ],
                   "overrideName": "bounds",
                   "overrideValue": {
                     "class": "rect",
                     "constrainProportions": false,
-                    "width": 495.0,
+                    "width": 211.97915649414062,
                     "height": 94.0,
                     "x": 0,
                     "y": 0
-                  }
+                  },
+                  "effectOnLayout": false
+                },
+                {
+                  "class": "overrideValue",
+                  "objectId": [
+                    "27:106"
+                  ],
+                  "overrideName": "bounds",
+                  "overrideValue": {
+                    "class": "rect",
+                    "constrainProportions": false,
+                    "width": 193.6458282470703,
+                    "height": 83.01298522949219,
+                    "x": 0,
+                    "y": 0
+                  },
+                  "effectOnLayout": false
                 }
+              ],
+              "variableAssignments": [],
+              "radius": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
               ]
             },
             {
@@ -1125,6 +1240,13 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
+              "cornerSmoothing": 0.0,
+              "horizontalConstraint": 5,
+              "verticalConstraint": 5,
+              "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "path",
               "shape": {
                 "class": "shape",
@@ -1147,24 +1269,24 @@
                           "class": "pointAttr",
                           "radius": 0.0,
                           "point": [
-                            0.0,
-                            -59.0
-                          ]
-                        },
-                        {
-                          "class": "pointAttr",
-                          "radius": 0.0,
-                          "point": [
-                            63.0,
-                            -59.0
-                          ]
-                        },
-                        {
-                          "class": "pointAttr",
-                          "radius": 0.0,
-                          "point": [
                             63.0,
                             0.0
+                          ]
+                        },
+                        {
+                          "class": "pointAttr",
+                          "radius": 0.0,
+                          "point": [
+                            63.0,
+                            -59.0
+                          ]
+                        },
+                        {
+                          "class": "pointAttr",
+                          "radius": 0.0,
+                          "point": [
+                            0.0,
+                            -59.0
                           ]
                         }
                       ]
@@ -1173,9 +1295,14 @@
                   }
                 ],
                 "windingRule": 0
-              },
-              "pathType": 0
+              }
             }
+          ],
+          "radius": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
           ]
         },
         {
@@ -1246,7 +1373,14 @@
           "maskType": 0,
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
-          "overflow": 1,
+          "overflow": 2,
+          "styleEffectBoolean": 1,
+          "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -1318,6 +1452,13 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
+              "cornerSmoothing": 0.0,
+              "horizontalConstraint": 5,
+              "verticalConstraint": 5,
+              "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "path",
               "shape": {
                 "class": "shape",
@@ -1340,24 +1481,24 @@
                           "class": "pointAttr",
                           "radius": 0.0,
                           "point": [
-                            0.0,
-                            -181.32713317871094
-                          ]
-                        },
-                        {
-                          "class": "pointAttr",
-                          "radius": 0.0,
-                          "point": [
-                            212.8311004638672,
-                            -181.32713317871094
-                          ]
-                        },
-                        {
-                          "class": "pointAttr",
-                          "radius": 0.0,
-                          "point": [
                             212.8311004638672,
                             0.0
+                          ]
+                        },
+                        {
+                          "class": "pointAttr",
+                          "radius": 0.0,
+                          "point": [
+                            212.8311004638672,
+                            -181.32713317871094
+                          ]
+                        },
+                        {
+                          "class": "pointAttr",
+                          "radius": 0.0,
+                          "point": [
+                            0.0,
+                            -181.32713317871094
                           ]
                         }
                       ]
@@ -1366,9 +1507,14 @@
                   }
                 ],
                 "windingRule": 0
-              },
-              "pathType": 0
+              }
             }
+          ],
+          "radius": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
           ]
         },
         {
@@ -1439,7 +1585,14 @@
           "maskType": 0,
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
-          "overflow": 1,
+          "overflow": 2,
+          "styleEffectBoolean": 1,
+          "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
             {
@@ -1510,7 +1663,14 @@
               "maskType": 0,
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
-              "overflow": 1,
+              "overflow": 2,
+              "styleEffectBoolean": 1,
+              "cornerSmoothing": 0.0,
+              "horizontalConstraint": 5,
+              "verticalConstraint": 5,
+              "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [],
               "class": "symbolInstance",
               "masterId": "27:210",
               "overrideValues": [
@@ -1520,7 +1680,8 @@
                     "27:210"
                   ],
                   "overrideName": "name",
-                  "overrideValue": "Rectangle_27_211"
+                  "overrideValue": "Rectangle_27_211",
+                  "effectOnLayout": false
                 },
                 {
                   "class": "overrideValue",
@@ -1548,10 +1709,24 @@
                         "transparencyKnockoutGroup": 0
                       }
                     }
-                  ]
+                  ],
+                  "effectOnLayout": false
                 }
+              ],
+              "variableAssignments": [],
+              "radius": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
               ]
             }
+          ],
+          "radius": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
           ]
         },
         {
@@ -1622,71 +1797,112 @@
           "maskType": 0,
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
-          "overflow": 1,
+          "overflow": 2,
+          "styleEffectBoolean": 1,
+          "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
           "class": "symbolInstance",
           "masterId": "27:213",
           "overrideValues": [
             {
               "class": "overrideValue",
               "objectId": [
+                "27:211"
+              ],
+              "overrideName": "name",
+              "overrideValue": "Rectangle_27_211",
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "27:211",
+                "27:183",
+                "27:108"
+              ],
+              "overrideName": "name",
+              "overrideValue": "d1_ins_star_27_108",
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "27:211",
+                "27:183",
+                "27:106"
+              ],
+              "overrideName": "name",
+              "overrideValue": "ins_rect_27_106",
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
                 "27:213"
               ],
               "overrideName": "name",
-              "overrideValue": "Rectangle_27_214"
-            },
-            {
-              "class": "overrideValue",
-              "objectId": [
-                "27:211"
-              ],
-              "overrideName": "name",
-              "overrideValue": "Rectangle_27_211"
+              "overrideValue": "Rectangle_27_214",
+              "effectOnLayout": false
             },
             {
               "class": "overrideValue",
               "objectId": [
                 "27:211",
-                "27:183",
-                "27:106"
+                "27:188"
               ],
-              "overrideName": "masterId",
-              "overrideValue": "27:105"
+              "overrideName": "style.fills",
+              "overrideValue": [
+                {
+                  "fillType": 0,
+                  "color": {
+                    "class": "color",
+                    "red": 0.0,
+                    "green": 1.0,
+                    "blue": 0.3400000035762787,
+                    "alpha": 1.0
+                  },
+                  "class": "fill",
+                  "isEnabled": true,
+                  "contextSettings": {
+                    "class": "graphicsContextSettings",
+                    "blendMode": 0,
+                    "opacity": 1.0,
+                    "isolateBlending": false,
+                    "transparencyKnockoutGroup": 0
+                  }
+                }
+              ],
+              "effectOnLayout": false
             },
             {
               "class": "overrideValue",
               "objectId": [
                 "27:211",
-                "27:183",
-                "27:106"
-              ],
-              "overrideName": "name",
-              "overrideValue": "ins_rect_27_106"
-            },
-            {
-              "class": "overrideValue",
-              "objectId": [
-                "27:211"
-              ],
-              "overrideName": "masterId",
-              "overrideValue": "27:189"
-            },
-            {
-              "class": "overrideValue",
-              "objectId": [
-                "27:211",
-                "27:183",
-                "27:108",
-                "27:102"
+                "27:188"
               ],
               "overrideName": "bounds",
               "overrideValue": {
                 "class": "rect",
                 "constrainProportions": false,
-                "width": 112.28965759277344,
-                "height": 139.7792205810547,
+                "width": 33.37237548828125,
+                "height": 87.73377227783203,
                 "x": 0,
                 "y": 0
-              }
+              },
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "27:211"
+              ],
+              "overrideName": "masterId",
+              "overrideValue": "27:189",
+              "effectOnLayout": false
             },
             {
               "class": "overrideValue",
@@ -1717,25 +1933,27 @@
                     "transparencyKnockoutGroup": 0
                   }
                 }
-              ]
+              ],
+              "effectOnLayout": false
             },
             {
               "class": "overrideValue",
               "objectId": [
                 "27:211",
                 "27:183",
-                "27:106",
-                "27:103"
+                "27:108",
+                "27:102"
               ],
               "overrideName": "bounds",
               "overrideValue": {
                 "class": "rect",
                 "constrainProportions": false,
-                "width": 102.578125,
-                "height": 123.4413833618164,
+                "width": 112.28965759277344,
+                "height": 139.7792205810547,
                 "x": 0,
                 "y": 0
-              }
+              },
+              "effectOnLayout": false
             },
             {
               "class": "overrideValue",
@@ -1766,85 +1984,27 @@
                     "transparencyKnockoutGroup": 0
                   }
                 }
-              ]
+              ],
+              "effectOnLayout": false
             },
             {
               "class": "overrideValue",
               "objectId": [
                 "27:211",
                 "27:183",
-                "27:108"
+                "27:106",
+                "27:103"
               ],
               "overrideName": "bounds",
               "overrideValue": {
                 "class": "rect",
                 "constrainProportions": false,
-                "width": 112.28965759277344,
-                "height": 139.7792205810547,
+                "width": 102.578125,
+                "height": 123.4413833618164,
                 "x": 0,
                 "y": 0
-              }
-            },
-            {
-              "class": "overrideValue",
-              "objectId": [
-                "27:211",
-                "27:183"
-              ],
-              "overrideName": "bounds",
-              "overrideValue": {
-                "class": "rect",
-                "constrainProportions": false,
-                "width": 262.2115478515625,
-                "height": 139.7792205810547,
-                "x": 0,
-                "y": 0
-              }
-            },
-            {
-              "class": "overrideValue",
-              "objectId": [
-                "27:211",
-                "27:188"
-              ],
-              "overrideName": "bounds",
-              "overrideValue": {
-                "class": "rect",
-                "constrainProportions": false,
-                "width": 33.37237548828125,
-                "height": 87.73377227783203,
-                "x": 0,
-                "y": 0
-              }
-            },
-            {
-              "class": "overrideValue",
-              "objectId": [
-                "27:211",
-                "27:188"
-              ],
-              "overrideName": "style.fills",
-              "overrideValue": [
-                {
-                  "fillType": 0,
-                  "color": {
-                    "class": "color",
-                    "red": 0.0,
-                    "green": 1.0,
-                    "blue": 0.3400000035762787,
-                    "alpha": 1.0
-                  },
-                  "class": "fill",
-                  "isEnabled": true,
-                  "contextSettings": {
-                    "class": "graphicsContextSettings",
-                    "blendMode": 0,
-                    "opacity": 1.0,
-                    "isolateBlending": false,
-                    "transparencyKnockoutGroup": 0
-                  }
-                }
-              ]
+              },
+              "effectOnLayout": false
             },
             {
               "class": "overrideValue",
@@ -1861,8 +2021,62 @@
                 "height": 123.4413833618164,
                 "x": 0,
                 "y": 0
-              }
+              },
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "27:211",
+                "27:183",
+                "27:106"
+              ],
+              "overrideName": "masterId",
+              "overrideValue": "27:105",
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "27:211",
+                "27:183",
+                "27:108"
+              ],
+              "overrideName": "bounds",
+              "overrideValue": {
+                "class": "rect",
+                "constrainProportions": false,
+                "width": 112.28965759277344,
+                "height": 139.7792205810547,
+                "x": 0,
+                "y": 0
+              },
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "27:211",
+                "27:183"
+              ],
+              "overrideName": "bounds",
+              "overrideValue": {
+                "class": "rect",
+                "constrainProportions": false,
+                "width": 262.2115478515625,
+                "height": 139.7792205810547,
+                "x": 0,
+                "y": 0
+              },
+              "effectOnLayout": false
             }
+          ],
+          "variableAssignments": [],
+          "radius": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
           ]
         }
       ]

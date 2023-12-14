@@ -1,20 +1,7 @@
 # SKIA_SOURCE_DIR is for saving uncompressed skia source code
 set(SKIA_SOURCE_DIR "${CMAKE_SOURCE_DIR}/lib/skia")
 
-# SKIA_DIR is for user to provide a custom skia directory
-# SKIA_EXTERNAL_PROJECT_DIR if for internal use
-#
-# case 1: user provides a custom skia directory
-#
-if(DEFINED SKIA_DIR)
-  if(NOT IS_DIRECTORY ${SKIA_DIR})
-    message(FATAL_ERROR "SKIA_DIR: ${SKIA_DIR} is not a directory")
-  endif()
-  set(SKIA_EXTERNAL_PROJECT_DIR ${SKIA_DIR} CACHE STRING "" FORCE)
-#
-# case 2: no skia source code is prepared, so we download and uncompress it
-#
-elseif(NOT IS_DIRECTORY ${SKIA_SOURCE_DIR})
+function(prepare_skia_source_dir)
   file(READ ${CMAKE_SOURCE_DIR}/config/DepsConfig.json DEPS_CONFIG)
 
   string(JSON SKIA_URL ERROR_VARIABLE SKIA_URL_NOTFOUND GET ${DEPS_CONFIG} skia url)
@@ -42,12 +29,47 @@ elseif(NOT IS_DIRECTORY ${SKIA_SOURCE_DIR})
     message(FATAL_ERROR "Downloading failed with ${DOWNLOAD_STATUS}")
   endif()
 
+  file(REMOVE_RECURSE ${SKIA_SOURCE_DIR})
   file(ARCHIVE_EXTRACT INPUT ${SKIA_ARCHIVE_LOCATION} DESTINATION ${SKIA_SOURCE_DIR})
+endfunction()
+
+# SKIA_DIR is for user to provide a custom skia directory
+# SKIA_EXTERNAL_PROJECT_DIR if for internal use
+#
+# case 1: user provides a custom skia directory
+#
+if(DEFINED SKIA_DIR)
+  if(NOT IS_DIRECTORY ${SKIA_DIR})
+    message(FATAL_ERROR "SKIA_DIR: ${SKIA_DIR} is not a directory")
+  endif()
+  set(SKIA_EXTERNAL_PROJECT_DIR ${SKIA_DIR} CACHE STRING "" FORCE)
+#
+# case 2: no skia source code is prepared, so we download and uncompress it
+#
+elseif(NOT IS_DIRECTORY ${SKIA_SOURCE_DIR})
+  prepare_skia_source_dir()
   set(SKIA_EXTERNAL_PROJECT_DIR ${SKIA_SOURCE_DIR} CACHE STRING "" FORCE)
 #
 # case 3: skia source is already prepared before
 #
 else()
+  file(READ ${CMAKE_SOURCE_DIR}/config/DepsConfig.json DEPS_CONFIG)
+
+  string(JSON SKIA_ARCHIVE_COMMIT ERROR_VARIABLE SKIA_ARCHIVE_COMMIT_NOTFOUND GET ${DEPS_CONFIG} skia commit)
+  if (SKIA_ARCHIVE_COMMIT_NOTFOUND)
+    message(WARNING "Skia commit id not found in config/DepsConfig.json. Skipped skia directory checking...")
+  else()
+    message(STATUS "Expected skia commit: ${SKIA_ARCHIVE_COMMIT}")
+    file(READ ${SKIA_SOURCE_DIR}/COMMIT_ID SKIA_DIRECTORY_COMMIT_FILE)
+    string(STRIP "${SKIA_DIRECTORY_COMMIT_FILE}" SKIA_DIRECTORY_COMMIT)
+    message(STATUS "Actual skia commit:   ${SKIA_DIRECTORY_COMMIT}")
+    if(NOT SKIA_DIRECTORY_COMMIT STREQUAL "${SKIA_ARCHIVE_COMMIT}")
+      prepare_skia_source_dir()
+    else()
+      message(STATUS "Skia commit is consistent! Skipping re-preparing skia source dir...")
+    endif()
+  endif()
+
   set(SKIA_EXTERNAL_PROJECT_DIR ${SKIA_SOURCE_DIR} CACHE STRING "" FORCE)
 endif()
 

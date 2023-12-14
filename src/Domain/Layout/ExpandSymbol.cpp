@@ -1341,8 +1341,6 @@ nlohmann::json ExpandSymbol::generateOutLayoutJson()
   }
 
   nlohmann::json result(nlohmann::json::value_t::object);
-  result[K_CLASS] = m_layoutJson[K_CLASS];
-
   result[K_OBJ] = nlohmann::json(nlohmann::json::value_t::array);
   for (auto& [key, value] : m_outLayoutJsonMap)
   {

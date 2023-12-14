@@ -18,7 +18,9 @@
 #include "Layer/Core/VType.hpp"
 #include "VSkia.hpp"
 
+#include <core/SkFontArguments.h>
 #include <core/SkFontStyle.h>
+#include <core/SkTypes.h>
 #include <modules/skparagraph/include/DartTypes.h>
 #include <modules/skparagraph/include/FontCollection.h>
 #include <modules/skparagraph/include/Metrics.h>
@@ -133,9 +135,17 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
       }
     }
   }
-
   style.setFontFamilies(fontFamilies);
   style.setFontStyle(toSkFontStyle(attr));
+  SkFontArguments::VariationPosition::Coordinate weight{ SkSetFourByteTag('w', 'g', 'h', 't'),
+                                                         attr.fontWeight };
+
+  SkFontArguments::VariationPosition::Coordinate width{ SkSetFourByteTag('w', 'd', 't', 'h'),
+                                                        attr.fontWidth };
+
+  SkFontArguments::VariationPosition::Coordinate coords[2] = { weight, width };
+  SkFontArguments::VariationPosition             position = { coords, 2 };
+  style.setFontArguments(SkFontArguments().setVariationDesignPosition(position));
   style.setFontSize(attr.size);
   style.setLetterSpacing(attr.letterSpacing);
   style.setBaselineShift(attr.baselineShift);
@@ -314,8 +324,7 @@ void RichTextBlock::onTextStyle(
     m_newParagraph = false;
   }
 
-  auto style =
-    createTextStyle(textAttr, m_fontCollection.get(), [&]() { return styleIndex; });
+  auto style = createTextStyle(textAttr, m_fontCollection.get(), [&]() { return styleIndex; });
   p.builder->pushStyle(style);
   p.builder->addText(textView.text.data(), textView.text.size());
   p.builder->pop();

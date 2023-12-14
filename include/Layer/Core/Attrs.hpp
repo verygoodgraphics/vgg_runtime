@@ -218,7 +218,8 @@ struct TextStyleAttr
   size_t                   length{ 0 };
   int                      size{ 14 };
   int                      fillUseType{ 0 };
-  int                      fontWeight{ 100 };
+  float                    fontWeight{ 100 };
+  float                    fontWidth{ 100 };
   bool                     bold{ false };
   bool                     italic{ false };
   bool                     lineThrough{ false };

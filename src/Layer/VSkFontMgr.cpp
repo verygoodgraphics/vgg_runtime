@@ -26,6 +26,7 @@
 #include <include/core/SkTypes.h>
 #include <include/private/base/SkTArray.h>
 #include <include/private/base/SkTemplates.h>
+#include <private/base/SkFixed.h>
 #include <src/core/SkFontDescriptor.h>
 #include <rapidfuzz/fuzz.hpp>
 
@@ -33,6 +34,7 @@
 #include <memory>
 #include <optional>
 #include <iostream>
+#include <src/ports/SkFontHost_FreeType_common.h>
 
 #include "Utility/Log.hpp"
 
@@ -372,8 +374,8 @@ bool VGGFontLoader::appendTypeface(
 {
   ASSERT(stream);
   int numFaces;
-  int numVariations = 0;
-  if (!scanner.recognizedFont(stream, &numFaces, &numVariations))
+
+  if (!scanner.recognizedFont(stream, &numFaces))
   {
     return false;
   }
@@ -383,11 +385,8 @@ bool VGGFontLoader::appendTypeface(
     bool        isFixedPitch;
     SkString    realname;
     SkFontStyle style = SkFontStyle(); // avoid uninitialized warning
-    int         variantions = 0;
-    int         variantionFaceIndex = (variantions << 16) + faceIndex;
-    do
+    if (scanner.scanFont(stream, faceIndex, &realname, &style, &isFixedPitch, nullptr))
     {
-      scanner.scanFont(stream, variantionFaceIndex, &realname, &style, &isFixedPitch, nullptr);
       SkFontStyleSet_VGG* addTo = find_family(*families, realname.c_str());
       if (nullptr == addTo)
       {
@@ -395,14 +394,12 @@ bool VGGFontLoader::appendTypeface(
         families->push_back().reset(addTo);
         families->lookUp[realname.c_str()] = families->size() - 1;
       }
-      auto typeface = creator(variantionFaceIndex, style, realname, isFixedPitch);
+      auto typeface = creator(faceIndex, style, realname, isFixedPitch);
       if (typeface)
       {
         addTo->appendTypeface(std::move(typeface));
       }
-      variantions++;
-      variantionFaceIndex = (variantions << 16) + faceIndex;
-    } while (variantions <= numVariations);
+    }
   }
   return true;
 }

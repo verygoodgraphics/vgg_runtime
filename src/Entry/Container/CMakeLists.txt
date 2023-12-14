@@ -29,4 +29,6 @@ if(VGG_VAR_TARGET MATCHES "^iOS")
     ${CMAKE_SOURCE_DIR}/include/VGG/Container/MetalContainer.hpp
     ${CMAKE_SOURCE_DIR}/include/VGG/Container/VggTypes.hpp
     DESTINATION VGG)
+  install(DIRECTORY ${CMAKE_SOURCE_DIR}/lib/nodejs-mobile-ios/NodeMobile.xcframework
+    DESTINATION .)
 endif()

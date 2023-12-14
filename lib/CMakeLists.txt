@@ -26,9 +26,11 @@ if(EMSCRIPTEN)
 endif()
 
 if(VGG_VAR_TARGET MATCHES "^iOS")
+  set(NODE_VERSION "18.17.2")
+
+  # Download src
   set(NODE_FOLDER "nodejs-mobile" CACHE STRING "node folder name" FORCE)
   if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${NODE_FOLDER}")
-    set(NODE_VERSION "18.17.2")
     set(DOWNLOAD_URL "https://github.com/nodejs-mobile/nodejs-mobile/archive/refs/tags/v${NODE_VERSION}.tar.gz")
     set(DOWNLOAD_AT_PATH "${CMAKE_SOURCE_DIR}/downloads/nodejs-mobile-${NODE_VERSION}.tar.gz")
 
@@ -46,6 +48,22 @@ if(VGG_VAR_TARGET MATCHES "^iOS")
     file(ARCHIVE_EXTRACT INPUT ${DOWNLOAD_AT_PATH}
       DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}")
     file(RENAME "${CMAKE_CURRENT_SOURCE_DIR}/nodejs-mobile-${NODE_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/${NODE_FOLDER}")
+  endif()
+
+  # Download the pre-built binary (NodeMobile.xcframework)
+  set(LIB_NODE_FOLDER "nodejs-mobile-ios" CACHE STRING "lib node folder name" FORCE)
+  if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NODE_FOLDER}")
+    set(LIB_DOWNLOAD_URL "https://github.com/nodejs-mobile/nodejs-mobile/releases/download/v${NODE_VERSION}/nodejs-mobile-v${NODE_VERSION}-ios.zip")
+    set(LIB_DOWNLOAD_AT_PATH "${CMAKE_SOURCE_DIR}/downloads/nodejs-mobile-v${NODE_VERSION}-ios.zip")
+
+    message(STATUS "Downloading ${LIB_DOWNLOAD_URL} to ${LIB_DOWNLOAD_AT_PATH}")
+    file(DOWNLOAD ${LIB_DOWNLOAD_URL} ${LIB_DOWNLOAD_AT_PATH} SHOW_PROGRESS STATUS DOWNLOAD_STATUS)
+    if(NOT DOWNLOAD_STATUS MATCHES "^0;")
+      message(FATAL_ERROR "Downloading failed with ${DOWNLOAD_STATUS}")
+    endif()
+
+    file(ARCHIVE_EXTRACT INPUT ${LIB_DOWNLOAD_AT_PATH} DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}")
+    file(RENAME "${CMAKE_CURRENT_SOURCE_DIR}/nodejs-mobile-v${NODE_VERSION}-ios" "${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NODE_FOLDER}")
   endif()
 
 else()

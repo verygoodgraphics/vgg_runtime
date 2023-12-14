@@ -402,7 +402,7 @@ inline sk_sp<SkShader> makeGradientRadial(const Bound& bound, const G& g)
   {
     mat.postTranslate(-start.x, -start.y);
     mat.postScale(*p, 1.0);
-    mat.postRotate(-rad2deg(theta(f, t)));
+    mat.postRotate(rad2deg(theta(f, t)));
     mat.postTranslate(start.x, start.y);
   }
   else if (auto p = std::get_if<glm::vec2>(&g.ellipse); p)
@@ -413,7 +413,7 @@ inline sk_sp<SkShader> makeGradientRadial(const Bound& bound, const G& g)
     const auto b = glm::distance(f, pp);
     const auto ratio = (a == 0.f) ? 0.f : b / a;
     mat.postScale(ratio, 1.0);
-    mat.postRotate(-rad2deg(theta(f, t)));
+    mat.postRotate(rad2deg(theta(f, t)));
     mat.postTranslate(start.x, start.y);
   }
   return SkGradientShader::MakeRadial(
@@ -483,7 +483,7 @@ inline sk_sp<SkShader> makeGradientAngular(const Bound& bound, const G& g)
   {
     mat.postTranslate(-center.x, -center.y);
     mat.postScale(*p, 1.0);
-    mat.postRotate(rad2deg(theta(f, t)));
+    mat.postRotate(-rad2deg(theta(f, t)));
     mat.postTranslate(center.x, center.y);
   }
   else if (auto p = std::get_if<glm::vec2>(&g.ellipse); p)
@@ -494,7 +494,7 @@ inline sk_sp<SkShader> makeGradientAngular(const Bound& bound, const G& g)
     // const auto b = glm::distance(f, pp);
     // const auto ratio = (a == 0.f) ? 0.f : b / a;
     mat.postScale(1.0, -vectorSign(pp - f, t - f));
-    mat.postRotate(rad2deg(theta(f, t)));
+    mat.postRotate(-rad2deg(theta(f, t)));
     mat.postTranslate(center.x, center.y);
   }
   return SkGradientShader::MakeSweep(

@@ -71,7 +71,7 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
 
   std::string fontName;
 
-  auto resolveFromFallback = [&fontName, &attr](const std::vector<std::string>& candidates)
+  auto resolveFromFallback = [&fontName](const std::vector<std::string>& candidates)
   {
     for (const auto& candidate : candidates)
     {

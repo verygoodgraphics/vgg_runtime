@@ -152,7 +152,7 @@ inline SkFontStyle toSkFontStyle(const TextStyleAttr& attr)
     attr.subFamilyName.find("Italic") != std::string::npos ||
     attr.fontName.find("Italic") != std::string::npos)
     slant = SkFontStyle::kItalic_Slant;
-  return { attr.fontWeight, SkFontStyle::kNormal_Width, slant };
+  return { SkFontStyle::kNormal_Weight, SkFontStyle::kNormal_Width, slant };
 }
 
 inline SkPathOp toSkPathOp(VGG::EBoolOp blop)

@@ -192,6 +192,7 @@ json SceneBuilder::defaultTextAttr()
         "textCase":0,
         "baselineShift":0,
         "weight":100,
+        "width":100,
         "baseline":0,
         "horizontalScale":1,
         "verticalScale":1,

@@ -2,6 +2,6 @@
     "skia": {
         "url": "https://github.com/verygoodgraphics/skia/releases/download/20231213/skia-with-deps.tar.gz",
         "md5": "5fa2dae51fa00879187c8f37527666d5",
-        "filename":"skia-with-deps-20231212.tar.gz"
+        "filename":"skia-with-deps-20231213.tar.gz"
     }
 }

@@ -55,6 +55,18 @@ emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --parallel
 ```
 
+#### iOS building example
+Build & install vgg_container libraries for [vgg_ios](https://github.com/verygoodgraphics/vgg_ios). 
+
+```bash
+mkdir build.ios
+cd build.ios
+cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=../cmake/vgg.ios.toolchain.cmake -DVGG_VAR_TARGET="iOS"
+# cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=../cmake/vgg.ios.toolchain.cmake -DVGG_VAR_TARGET="iOS-simulator"
+cmake --build . --parallel -t vgg_container
+cmake --install . --prefix <path/to/vgg_ios/VggRuntime/external>
+```
+
 #### Windows building example
 
 Compiling on Windows need extra efforts. It will be released once being stable.

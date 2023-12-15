@@ -166,6 +166,7 @@ struct Border
 
 struct Shadow
 {
+  /*Deprecated: Replaced by ShadowStyle in the future*/
   ContextSetting contextSettings;
   float          blur{ 0.f };
   Color          color;
@@ -175,6 +176,7 @@ struct Shadow
   bool           inner{ false };
   bool           isEnabled{ false };
 };
+
 
 struct Blur
 {
@@ -189,8 +191,8 @@ struct Blur
 struct Style
 {
   std::vector<Blur>                   blurs;
-  std::vector<Border>            borders;
-  std::vector<Fill>              fills;
+  std::vector<Border>                 borders;
+  std::vector<Fill>                   fills;
   std::vector<Shadow>                 shadows;
   std::optional<std::array<float, 4>> frameRadius;
   float                               cornerSmooth;
@@ -207,7 +209,7 @@ struct TextStyleAttr
 {
   std::string              fontName;
   std::string              subFamilyName;
-  std::vector<Fill>   fills;
+  std::vector<Fill>        fills;
   float                    letterSpacing{ 0.0 };
   float                    lineSpace{ 0.f };
   float                    baselineShift{ 0.0 };

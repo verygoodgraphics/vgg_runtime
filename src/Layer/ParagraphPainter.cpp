@@ -74,7 +74,7 @@ void VParagraphPainter::drawTextBlob(
             continue;
           fillPen.setStyle(SkPaint::kFill_Style);
           fillPen.setAntiAlias(true);
-          populateSkPaint(f.type, f.contextSettings, m_paragraph->bound(), fillPen);
+          populateSkPaint(f.type, f.contextSettings, toSkRect(m_paragraph->bound()), fillPen);
           paints.push_back(fillPen);
         }
         if (!paints.empty())

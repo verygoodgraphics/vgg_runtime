@@ -26,6 +26,7 @@
 
 #include <core/SkRefCnt.h>
 #include <core/SkShader.h>
+#include <core/SkPathEffect.h>
 #include <include/core/SkBlendMode.h>
 #include <include/core/SkImageFilter.h>
 #include <include/core/SkMatrix.h>

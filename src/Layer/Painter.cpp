@@ -42,7 +42,7 @@ void Painter::drawPathBorder(
   strokePen.setAntiAlias(m_antiAlias);
   strokePen.setBlender(blender);
   strokePen.setImageFilter(imageFilter);
-  populateSkPaint(b, bound, strokePen);
+  populateSkPaint(b, toSkRect(bound), strokePen);
   bool  inCenter = true;
   float strokeWidth = b.thickness;
   if (b.position == PP_Inside && skPath.isLastContourClosed())
@@ -152,6 +152,6 @@ void Painter::drawFill(
   fillPen.setBlender(blender);
   fillPen.setImageFilter(imageFilter);
   fillPen.setMaskFilter(mask);
-  populateSkPaint(f.type, f.contextSettings, bound, fillPen);
+  populateSkPaint(f.type, f.contextSettings, toSkRect(bound), fillPen);
   m_renderer->canvas()->drawPath(skPath, fillPen);
 }

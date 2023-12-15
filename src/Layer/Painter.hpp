@@ -184,8 +184,8 @@ public:
     sk_sp<SkBlender>     blender)
     : m_renderer(renderer)
     , m_imageFilter(std::move(imageFilter))
-    , m_maskFilter(std::move(maskFilter))
     , m_blender(std::move(blender))
+    , m_maskFilter(std::move(maskFilter))
   {
   }
 
@@ -299,7 +299,6 @@ public:
     fillPen.setBlender(m_blender);
     fillPen.setImageFilter(m_imageFilter);
     fillPen.setMaskFilter(m_maskFilter);
-    Bound actualBound = bound;
     populateSkPaint(f.type, f.contextSettings, bound, fillPen);
     primitive.draw(m_renderer->canvas(), fillPen);
   }

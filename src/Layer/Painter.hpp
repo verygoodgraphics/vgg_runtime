@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "Layer/VSkiaPrimitive.hpp"
+#include "Layer/Core/Style.hpp"
 #include "VSkImageFilters.hpp"
 #include "VSkia.hpp"
 
@@ -121,6 +122,15 @@ private:
 using namespace VGG;
 class Painter
 {
+public:
+  enum class EStyle
+  {
+    FILL,
+    STROKE,
+    FILL_AND_STROKE
+  };
+
+private:
   bool                           m_antiAlias{ true };
   Renderer*                      m_renderer{ nullptr };
   sk_sp<SkImageFilter>           m_imageFilter;
@@ -128,6 +138,22 @@ class Painter
   sk_sp<SkMaskFilter>            m_maskFilter;
   inline static sk_sp<SkBlender> s_maskBlender1;
   inline static sk_sp<SkBlender> s_maskBlender2;
+
+  static SkPaint::Style toSkPaintStyle(EStyle style)
+  {
+    switch (style)
+    {
+      case EStyle::FILL:
+        return SkPaint::kFill_Style;
+      case EStyle::STROKE:
+        return SkPaint::kStroke_Style;
+      case EStyle::FILL_AND_STROKE:
+        return SkPaint::kStrokeAndFill_Style;
+      default:
+        return SkPaint::kStroke_Style;
+    };
+    return SkPaint::kStroke_Style;
+  }
 
 public:
   static sk_sp<SkBlender> getMaskBlender()
@@ -291,7 +317,7 @@ public:
     sk_sp<SkBlender>     blender);
 
   template<typename Primitive>
-  void drawFill(const Primitive& primitive, const Bound& bound, const Fill& f)
+  void drawFill(const Primitive& primitive, const SkRect& bound, const Fill& f)
   {
     SkPaint fillPen;
     fillPen.setStyle(SkPaint::kFill_Style);
@@ -304,7 +330,7 @@ public:
   }
 
   template<typename Primitive>
-  void drawBorder(const Primitive& primitive, const Bound& bound, const Border& b)
+  void drawBorder(const Primitive& primitive, const SkRect& bound, const Border& b)
   {
     SkPaint strokePen;
     strokePen.setAntiAlias(m_antiAlias);
@@ -339,10 +365,10 @@ public:
 
   template<typename Primitive>
   void drawInnerShadow(
-    const Primitive& primitive,
-    const Bound&     bound,
-    const Shadow&    s,
-    SkPaint::Style   style)
+    const Primitive&        primitive,
+    const SkRect&           bound,
+    const InnerShadowStyle& s,
+    EStyle                  style)
   {
 
     SkPaint pen;
@@ -354,18 +380,18 @@ public:
     if (s.spread > 0)
       m_renderer->canvas()->scale(1.0 / s.spread, 1.0 / s.spread);
     SkPaint fillPen;
-    fillPen.setStyle(style);
+    fillPen.setStyle(toSkPaintStyle(style));
     fillPen.setAntiAlias(m_antiAlias);
     primitive.draw(m_renderer->canvas(), fillPen);
     m_renderer->canvas()->restore();
   }
 
   template<typename Primitive>
-  void drawShadow(
-    const Primitive primitive,
-    const Bound&    bound,
-    const Shadow&   s,
-    SkPaint::Style  style)
+  void drawOuterShadow(
+    const Primitive         primitive,
+    const SkRect&           bound,
+    const OuterShadowStyle& s,
+    EStyle                  style)
   {
     SkPaint pen;
     pen.setAntiAlias(m_antiAlias);
@@ -376,61 +402,83 @@ public:
     if (s.spread > 0)
       m_renderer->canvas()->scale(1 + s.spread / 100.0, 1 + s.spread / 100.0);
     SkPaint fillPen;
-    fillPen.setStyle(style);
+    fillPen.setStyle(toSkPaintStyle(style));
     primitive.draw(m_renderer->canvas(), fillPen);
     m_renderer->canvas()->restore();
-  }
-
-  // draw rect
-
-  void drawRectFill(const Bound& rect, const Fill& fill, const Bound* hint)
-  {
-    if (hint)
-      drawFill(Rect(rect), *hint, fill);
-    else
-      drawFill(Rect(rect), rect, fill);
   }
 
   void drawPathFill(const SkPath& path, const Fill& fill, const Bound* hint)
   {
     if (hint)
-      drawFill(Path(path), *hint, fill);
+      drawFill(Path(path), toSkRect(*hint), fill);
     else
     {
       auto p = Path(path);
-      drawFill(p, p.bound(), fill);
+      drawFill(p, path.getBounds(), fill);
     }
   }
 
   void drawPathBorder(const SkPath& path, const Fill& fill, const Bound* hint)
   {
     if (hint)
-      drawFill(Path(path), *hint, fill);
+      drawFill(Path(path), toSkRect(*hint), fill);
     else
     {
       auto p = Path(path);
-      drawFill(p, p.bound(), fill);
+      drawFill(p, path.getBounds(), fill);
     }
   }
 
-  void drawRectShadow(
-    const Bound&   rect,
-    const Shadow&  shadow,
-    SkPaint::Style style,
-    const Bound*   hint)
+  void drawPathOuterShadow(
+    SkPath                  path,
+    const OuterShadowStyle& shadow,
+    EStyle                  style,
+    const Bound*            hint)
   {
     if (hint)
-      drawShadow(Rect(rect), *hint, shadow, style);
+    {
+      drawOuterShadow(Path(path), toSkRect(*hint), shadow, style);
+    }
     else
-      drawShadow(Rect(rect), rect, shadow, style);
+    {
+      drawOuterShadow(Path(path), toSkRect(*hint), shadow, style);
+    }
+  }
+
+  void drawPathInnerShadow(
+    SkPath                  path,
+    const InnerShadowStyle& shadow,
+    EStyle                  style,
+    const Bound*            hint)
+  {
+  }
+
+  void drawRectFill(const Bound& rect, const Fill& fill, const Bound* hint)
+  {
+    if (hint)
+      drawFill(Rect(rect), toSkRect(*hint), fill);
+    else
+      drawFill(Rect(rect), toSkRect(rect), fill);
+  }
+
+  void drawRectOuterShadow(
+    const Bound&            rect,
+    const OuterShadowStyle& shadow,
+    EStyle                  style,
+    const Bound*            hint)
+  {
+    if (hint)
+      drawOuterShadow(Rect(rect), toSkRect(*hint), shadow, style);
+    else
+      drawOuterShadow(Rect(rect), toSkRect(rect), shadow, style);
   }
 
   void drawRectBorder(const Bound& rect, const Border& fill, const Bound* hint)
   {
     if (!hint)
-      drawBorder(Rect(rect), *hint, fill);
+      drawBorder(Rect(rect), toSkRect(*hint), fill);
     else
-      drawBorder(Rect(rect), rect, fill);
+      drawBorder(Rect(rect), toSkRect(rect), fill);
   }
 
   // void drawRectBlur(const Bound& rect, const Blur& blur, const Bound* hint)
@@ -439,7 +487,10 @@ public:
 
   void drawOvalFill(const Bound& oval, const Fill& fill, const Bound* hint)
   {
-    drawFill(Oval(oval), *hint, fill);
+    if (hint)
+      drawFill(Oval(oval), toSkRect(*hint), fill);
+    else
+      drawFill(Oval(oval), toSkRect(oval), fill);
   }
   //
   // void drawOvalShadow(const Bound& oval, const Shadow& shadow, const Bound* hint)
@@ -448,7 +499,10 @@ public:
   //
   void drawOvalBorder(const Bound& oval, const Border& fill, const Bound* hint)
   {
-    drawBorder(Oval(oval), *hint, fill);
+    if (hint)
+      drawBorder(Oval(oval), toSkRect(*hint), fill);
+    else
+      drawBorder(Oval(oval), toSkRect(oval), fill);
   }
   //
   // void drawOvalBlur(const Bound& oval, const Blur& blur, const Bound* hint)

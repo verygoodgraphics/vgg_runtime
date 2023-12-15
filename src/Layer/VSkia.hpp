@@ -538,9 +538,10 @@ inline sk_sp<SkImageFilter> makeBlendModeFilter(EBlendMode blendMode)
 inline void populateSkPaint(
   const FillType&       fillType,
   const ContextSetting& st,
-  const Bound&          bound,
+  const SkRect&         rect,
   SkPaint&              paint)
 {
+  Bound bound{ rect.x(), rect.y(), rect.width(), rect.height() };
   std::visit(
     Overloaded{ [&](const Gradient& g)
                 {
@@ -560,7 +561,7 @@ inline void populateSkPaint(
     fillType);
 }
 
-inline void populateSkPaint(const Border& border, const Bound& bound, SkPaint& paint)
+inline void populateSkPaint(const Border& border, const SkRect& bound, SkPaint& paint)
 {
   paint.setStyle(SkPaint::kStroke_Style);
   paint.setPathEffect(

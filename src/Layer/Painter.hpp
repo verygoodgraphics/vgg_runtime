@@ -155,6 +155,97 @@ private:
     return SkPaint::kStroke_Style;
   }
 
+  template<typename Primitive>
+  void drawFill(const Primitive& primitive, const SkRect& bound, const Fill& f)
+  {
+    SkPaint fillPen;
+    fillPen.setStyle(SkPaint::kFill_Style);
+    fillPen.setAntiAlias(m_antiAlias);
+    fillPen.setBlender(m_blender);
+    fillPen.setImageFilter(m_imageFilter);
+    fillPen.setMaskFilter(m_maskFilter);
+    populateSkPaint(f.type, f.contextSettings, bound, fillPen);
+    primitive.draw(m_renderer->canvas(), fillPen);
+  }
+
+  template<typename Primitive>
+  void drawBorder(const Primitive& primitive, const SkRect& bound, const Border& b)
+  {
+    SkPaint strokePen;
+    strokePen.setAntiAlias(m_antiAlias);
+    strokePen.setBlender(m_blender);
+    strokePen.setImageFilter(m_imageFilter);
+    populateSkPaint(b, bound, strokePen);
+    bool  inCenter = true;
+    float strokeWidth = b.thickness;
+    if (b.position == PP_Inside && primitive.isClosed())
+    {
+      // inside
+      strokeWidth = 2.f * b.thickness;
+      m_renderer->canvas()->save();
+      primitive.clip(m_renderer->canvas(), SkClipOp::kIntersect);
+      inCenter = false;
+    }
+    else if (b.position == PP_Outside && primitive.isClosed())
+    {
+      // outside
+      strokeWidth = 2.f * b.thickness;
+      m_renderer->canvas()->save();
+      primitive.clip(m_renderer->canvas(), SkClipOp::kDifference);
+      inCenter = false;
+    }
+    strokePen.setStrokeWidth(strokeWidth);
+    primitive.draw(m_renderer->canvas(), strokePen);
+    if (!inCenter)
+    {
+      m_renderer->canvas()->restore();
+    }
+  }
+
+  template<typename Primitive>
+  void drawInnerShadow(
+    const Primitive&        primitive,
+    const SkRect&           bound,
+    const InnerShadowStyle& s,
+    EStyle                  style)
+  {
+
+    SkPaint pen;
+    auto    sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
+    pen.setAntiAlias(m_antiAlias);
+    pen.setImageFilter(
+      SkMyImageFilters::DropInnerShadowOnly(s.offsetX, s.offsetY, sigma, sigma, s.color, nullptr));
+    m_renderer->canvas()->saveLayer(nullptr, &pen);
+    if (s.spread > 0)
+      m_renderer->canvas()->scale(1.0 / s.spread, 1.0 / s.spread);
+    SkPaint fillPen;
+    fillPen.setStyle(toSkPaintStyle(style));
+    fillPen.setAntiAlias(m_antiAlias);
+    primitive.draw(m_renderer->canvas(), fillPen);
+    m_renderer->canvas()->restore();
+  }
+
+  template<typename Primitive>
+  void drawOuterShadow(
+    const Primitive         primitive,
+    const SkRect&           bound,
+    const OuterShadowStyle& s,
+    EStyle                  style)
+  {
+    SkPaint pen;
+    pen.setAntiAlias(m_antiAlias);
+    auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
+    pen.setImageFilter(
+      SkImageFilters::DropShadowOnly(s.offsetX, -s.offsetY, sigma, sigma, s.color, nullptr));
+    m_renderer->canvas()->saveLayer(nullptr, &pen); // TODO:: test hint rect
+    if (s.spread > 0)
+      m_renderer->canvas()->scale(1 + s.spread / 100.0, 1 + s.spread / 100.0);
+    SkPaint fillPen;
+    fillPen.setStyle(toSkPaintStyle(style));
+    primitive.draw(m_renderer->canvas(), fillPen);
+    m_renderer->canvas()->restore();
+  }
+
 public:
   static sk_sp<SkBlender> getMaskBlender()
   {
@@ -316,97 +407,7 @@ public:
     sk_sp<SkImageFilter> imageFilter,
     sk_sp<SkBlender>     blender);
 
-  template<typename Primitive>
-  void drawFill(const Primitive& primitive, const SkRect& bound, const Fill& f)
-  {
-    SkPaint fillPen;
-    fillPen.setStyle(SkPaint::kFill_Style);
-    fillPen.setAntiAlias(m_antiAlias);
-    fillPen.setBlender(m_blender);
-    fillPen.setImageFilter(m_imageFilter);
-    fillPen.setMaskFilter(m_maskFilter);
-    populateSkPaint(f.type, f.contextSettings, bound, fillPen);
-    primitive.draw(m_renderer->canvas(), fillPen);
-  }
-
-  template<typename Primitive>
-  void drawBorder(const Primitive& primitive, const SkRect& bound, const Border& b)
-  {
-    SkPaint strokePen;
-    strokePen.setAntiAlias(m_antiAlias);
-    strokePen.setBlender(m_blender);
-    strokePen.setImageFilter(m_imageFilter);
-    populateSkPaint(b, bound, strokePen);
-    bool  inCenter = true;
-    float strokeWidth = b.thickness;
-    if (b.position == PP_Inside && primitive.isClosed())
-    {
-      // inside
-      strokeWidth = 2.f * b.thickness;
-      m_renderer->canvas()->save();
-      primitive.clip(m_renderer->canvas(), SkClipOp::kIntersect);
-      inCenter = false;
-    }
-    else if (b.position == PP_Outside && primitive.isClosed())
-    {
-      // outside
-      strokeWidth = 2.f * b.thickness;
-      m_renderer->canvas()->save();
-      primitive.clip(m_renderer->canvas(), SkClipOp::kDifference);
-      inCenter = false;
-    }
-    strokePen.setStrokeWidth(strokeWidth);
-    primitive.draw(m_renderer->canvas(), strokePen);
-    if (!inCenter)
-    {
-      m_renderer->canvas()->restore();
-    }
-  }
-
-  template<typename Primitive>
-  void drawInnerShadow(
-    const Primitive&        primitive,
-    const SkRect&           bound,
-    const InnerShadowStyle& s,
-    EStyle                  style)
-  {
-
-    SkPaint pen;
-    auto    sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
-    pen.setAntiAlias(m_antiAlias);
-    pen.setImageFilter(
-      SkMyImageFilters::DropInnerShadowOnly(s.offsetX, s.offsetY, sigma, sigma, s.color, nullptr));
-    m_renderer->canvas()->saveLayer(nullptr, &pen);
-    if (s.spread > 0)
-      m_renderer->canvas()->scale(1.0 / s.spread, 1.0 / s.spread);
-    SkPaint fillPen;
-    fillPen.setStyle(toSkPaintStyle(style));
-    fillPen.setAntiAlias(m_antiAlias);
-    primitive.draw(m_renderer->canvas(), fillPen);
-    m_renderer->canvas()->restore();
-  }
-
-  template<typename Primitive>
-  void drawOuterShadow(
-    const Primitive         primitive,
-    const SkRect&           bound,
-    const OuterShadowStyle& s,
-    EStyle                  style)
-  {
-    SkPaint pen;
-    pen.setAntiAlias(m_antiAlias);
-    auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
-    pen.setImageFilter(
-      SkImageFilters::DropShadowOnly(s.offsetX, -s.offsetY, sigma, sigma, s.color, nullptr));
-    m_renderer->canvas()->saveLayer(nullptr, &pen); // TODO:: test hint rect
-    if (s.spread > 0)
-      m_renderer->canvas()->scale(1 + s.spread / 100.0, 1 + s.spread / 100.0);
-    SkPaint fillPen;
-    fillPen.setStyle(toSkPaintStyle(style));
-    primitive.draw(m_renderer->canvas(), fillPen);
-    m_renderer->canvas()->restore();
-  }
-
+  // Path Drawing
   void drawPathFill(const SkPath& path, const Fill& fill, const Bound* hint)
   {
     if (hint)
@@ -418,14 +419,14 @@ public:
     }
   }
 
-  void drawPathBorder(const SkPath& path, const Fill& fill, const Bound* hint)
+  void drawPathBorder(const SkPath& path, const Border& border, const Bound* hint)
   {
     if (hint)
-      drawFill(Path(path), toSkRect(*hint), fill);
+      drawBorder(Path(path), toSkRect(*hint), border);
     else
     {
       auto p = Path(path);
-      drawFill(p, path.getBounds(), fill);
+      drawBorder(p, path.getBounds(), border);
     }
   }
 
@@ -453,12 +454,23 @@ public:
   {
   }
 
+  // Rect Drawing
   void drawRectFill(const Bound& rect, const Fill& fill, const Bound* hint)
   {
     if (hint)
       drawFill(Rect(rect), toSkRect(*hint), fill);
     else
       drawFill(Rect(rect), toSkRect(rect), fill);
+  }
+
+  void drawRectBorder(const Bound& rect, const Border& border, const Bound* hint)
+  {
+    if (hint)
+      drawBorder(Rect(rect), toSkRect(*hint), border);
+    else
+    {
+      drawBorder(Rect(rect), toSkRect(rect), border);
+    }
   }
 
   void drawRectOuterShadow(
@@ -473,18 +485,19 @@ public:
       drawOuterShadow(Rect(rect), toSkRect(rect), shadow, style);
   }
 
-  void drawRectBorder(const Bound& rect, const Border& fill, const Bound* hint)
+  void drawRectInnerShadow(
+    const Bound&            rect,
+    const InnerShadowStyle& shadow,
+    EStyle                  style,
+    const Bound*            hint)
   {
-    if (!hint)
-      drawBorder(Rect(rect), toSkRect(*hint), fill);
+    if (hint)
+      drawInnerShadow(Rect(rect), toSkRect(*hint), shadow, style);
     else
-      drawBorder(Rect(rect), toSkRect(rect), fill);
+      drawInnerShadow(Rect(rect), toSkRect(rect), shadow, style);
   }
 
-  // void drawRectBlur(const Bound& rect, const Blur& blur, const Bound* hint)
-  // {
-  // }
-
+  // Oval Drawing
   void drawOvalFill(const Bound& oval, const Fill& fill, const Bound* hint)
   {
     if (hint)
@@ -492,11 +505,7 @@ public:
     else
       drawFill(Oval(oval), toSkRect(oval), fill);
   }
-  //
-  // void drawOvalShadow(const Bound& oval, const Shadow& shadow, const Bound* hint)
-  // {
-  // }
-  //
+
   void drawOvalBorder(const Bound& oval, const Border& fill, const Bound* hint)
   {
     if (hint)
@@ -504,10 +513,37 @@ public:
     else
       drawBorder(Oval(oval), toSkRect(oval), fill);
   }
-  //
-  // void drawOvalBlur(const Bound& oval, const Blur& blur, const Bound* hint)
-  // {
-  // }
+
+  void drawOvalOuterShadow(
+    const Bound&            oval,
+    const OuterShadowStyle& shadow,
+    EStyle                  style,
+    const Bound*            hint)
+  {
+    if (hint)
+      drawOuterShadow(Rect(oval), toSkRect(*hint), shadow, style);
+    else
+      drawOuterShadow(Rect(oval), toSkRect(oval), shadow, style);
+  }
+
+  void drawOvalInnerShadow(
+    const Bound&            oval,
+    const InnerShadowStyle& shadow,
+    EStyle                  style,
+    const Bound*            hint)
+  {
+
+    if (hint)
+      drawInnerShadow(Rect(oval), toSkRect(*hint), shadow, style);
+    else
+      drawInnerShadow(Rect(oval), toSkRect(oval), shadow, style);
+  }
+
+  // Polygon Drawing
+  void drawPolygonFill()
+  {
+  }
+
   void drawImage(
     const Bound&         bound,
     sk_sp<SkShader>      imageShader,

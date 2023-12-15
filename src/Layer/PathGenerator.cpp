@@ -72,8 +72,7 @@ using SmoothResult = std::variant<FullSmooth, PartialSmooth>;
 
 using NoRadiusCurveResult = std::variant<CubicCurve, QuadricCurve, Line>;
 using RadiusCurveResult = std::variant<CubicCurve, QuadricCurve, ArcCurve, Line>;
-
-using SmoothCurveResult = std::variant<SmoothResult, ArcCurve, NoRadiusCurveResult>;
+using SmoothCurveResult = std::variant<SmoothResult, ArcCurve, RadiusCurveResult>;
 
 void inline computeAdjacent3PointsInfo(
   const glm::vec2& p0,
@@ -335,7 +334,6 @@ std::pair<int, SmoothCurveResult> smoothCurveWithRadius(
 {
   const auto prevHasFrom = prevPoint.from.has_value();
   const auto curHasTo = curPoint.to.has_value();
-  // const auto nextHasFrom = nextPoint.from.has_value();
   const auto nextHasTo = nextPoint.to.has_value();
   const auto curHasFrom = curPoint.from.has_value();
   if (!prevHasFrom && !curHasTo && !curHasFrom && !nextHasTo)
@@ -386,7 +384,7 @@ std::pair<int, SmoothCurveResult> smoothCurveWithRadius(
   }
   else
   {
-    return curveWithNoRadius(&prevPoint, curPoint);
+    return curveWithRadius(prevPrevPoint, &prevPoint, curPoint, nextPoint, nextNextPoint);
   }
 }
 
@@ -460,14 +458,7 @@ SkPath makePath(const Contour& contour)
                     }
                   },
                   [&](const ArcCurve& c) { path.arcTo(c.p1.x, c.p1.y, c.p2.x, c.p2.y, c.radius); },
-                  [&](const NoRadiusCurveResult& l)
-                  {
-                    std::visit(
-                      Overloaded{ [&](const CubicCurve& c) { path.moveTo(c.p2.x, c.p2.y); },
-                                  [&](const QuadricCurve& c) { path.moveTo(c.p2.x, c.p2.y); },
-                                  [&](const Line& l) { path.moveTo(l.p2.x, l.p2.y); } },
-                      l);
-                  } },
+                  [&](const RadiusCurveResult& result) { resolveRadiusCurveResult(result); } },
       result);
   };
 
@@ -485,21 +476,15 @@ SkPath makePath(const Contour& contour)
       const auto& [_, curve] =
         curveWithRadius(prevPrevPoint, &prevPoint, curPoint, nextPoint, nextNextPoint);
       std::visit(
-        Overloaded{ [&](const CubicCurve& c) {},
-                    [&](const QuadricCurve& c) {},
+        Overloaded{ [&](const CubicCurve& c) { path.moveTo(c.p2.x, c.p2.y); },
+                    [&](const QuadricCurve& c) { path.moveTo(c.p2.x, c.p2.y); },
                     [&](const ArcCurve& c)
                     {
                       glm::vec2 first, second;
-                      calcPointsFromCircle(
-                        prevPoint.point,
-                        curPoint.point,
-                        nextPoint.point,
-                        c.radius,
-                        first,
-                        second);
+                      calcPointsFromCircle(prevPoint.point, c.p1, c.p2, c.radius, first, second);
                       path.moveTo(second.x, second.y);
                     },
-                    [&](const Line& l) {} },
+                    [&](const Line& l) { path.moveTo(l.p2.x, l.p2.y); } },
         curve);
     }
     while (segments > 0)
@@ -537,8 +522,10 @@ SkPath makePath(const Contour& contour)
   }
   else
   {
-    if (buffer[pp].radius <= 0.f)
-      path.moveTo(buffer[pp].point.x, buffer[pp].point.y);
+    if (points[0].radius <= 0.f)
+    {
+      path.moveTo(points[0].point.x, points[0].point.y);
+    }
     else
     {
       const auto& prevPrevPoint = points[(-2 + total) % total];
@@ -550,33 +537,42 @@ SkPath makePath(const Contour& contour)
         smoothCurveWithRadius(prevPrevPoint, prevPoint, curPoint, nextPoint, nextNextPoint, smooth)
           .second;
       std::visit(
-        Overloaded{ [&](const SmoothResult& c)
-                    {
-                      if (auto smooth = std::get_if<PartialSmooth>(&c); smooth)
-                      {
-                        const auto& [cubic1, arc, cubic2] = *smooth;
-                        path.moveTo(cubic2.p2.x, cubic2.p2.y);
-                      }
-                      else if (auto smooth = std::get_if<FullSmooth>(&c); smooth)
-                      {
-                        const auto& [cubic1, cubic2] = *smooth;
-                        path.moveTo(cubic2.p2.x, cubic2.p2.y);
-                      }
-                    },
-                    [&](const ArcCurve& c)
-                    {
-                      glm::vec2 first, second;
-                      calcPointsFromCircle(prevPoint.point, c.p1, c.p2, c.radius, first, second);
-                      path.moveTo(second.x, second.y);
-                    },
-                    [&](const NoRadiusCurveResult& l)
-                    {
-                      std::visit(
-                        Overloaded{ [&](const CubicCurve& c) { path.moveTo(c.p2.x, c.p2.y); },
-                                    [&](const QuadricCurve& c) { path.moveTo(c.p2.x, c.p2.y); },
-                                    [&](const Line& l) { path.lineTo(l.p2.x, l.p2.y); } },
-                        l);
-                    } },
+        Overloaded{
+          [&](const SmoothResult& c)
+          {
+            if (auto smooth = std::get_if<PartialSmooth>(&c); smooth)
+            {
+              const auto& [cubic1, arc, cubic2] = *smooth;
+              path.moveTo(cubic2.p2.x, cubic2.p2.y);
+            }
+            else if (auto smooth = std::get_if<FullSmooth>(&c); smooth)
+            {
+              const auto& [cubic1, cubic2] = *smooth;
+              path.moveTo(cubic2.p2.x, cubic2.p2.y);
+            }
+          },
+          [&](const ArcCurve& c)
+          {
+            glm::vec2 first, second;
+            calcPointsFromCircle(prevPoint.point, c.p1, c.p2, c.radius, first, second);
+            path.moveTo(second.x, second.y);
+          },
+
+          [&](const RadiusCurveResult& result)
+          {
+            std::visit(
+              Overloaded{
+                [&](const CubicCurve& c) { path.moveTo(c.p2.x, c.p2.y); },
+                [&](const QuadricCurve& c) { path.moveTo(c.p2.x, c.p2.y); },
+                [&](const ArcCurve& c)
+                {
+                  glm::vec2 first, second;
+                  calcPointsFromCircle(prevPoint.point, c.p1, c.p2, c.radius, first, second);
+                  path.moveTo(second.x, second.y);
+                },
+                [&](const Line& l) { path.moveTo(l.p2.x, l.p2.y); } },
+              result);
+          } },
         res);
     }
     while (segments > 0)

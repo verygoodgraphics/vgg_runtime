@@ -20,6 +20,7 @@
 #include "Event/Keycode.hpp"
 #include "ViewModel.hpp"
 
+#include "Layer/SceneBuilder.hpp"
 #include "Utility/Log.hpp"
 
 using namespace VGG;
@@ -347,7 +348,8 @@ void UIView::show(const ViewModel& viewModel)
   }
   m_skipUntilNextLoop = true;
 
-  loadFileContent(viewModel.designDoc()->content());
+  setSceneRoots(layer::SceneBuilder::build(viewModel.designDoc()->content()));
+
   m_document = viewModel.layoutTree();
   // todo, merge edited doc resouces ?
   Scene::setResRepo(viewModel.resources());

@@ -60,7 +60,7 @@ cmake --build . --parallel
 ```
 
 #### iOS building example
-Build & install vgg_container libraries for [vgg_ios](https://github.com/verygoodgraphics/vgg_ios). 
+Build & install vgg_container libraries for [vgg_ios](https://github.com/verygoodgraphics/vgg_ios).
 
 ```bash
 mkdir build.ios
@@ -85,39 +85,25 @@ cmake --build . --parallel -t unit_tests
 ctest
 ```
 
-## Execute Instructions
+## How to run
 
-Executing VGG Runtime is simple.
-```bash
-cd build
-./sdl_runtime your_file.daruma
-```
-`your_file.daruma` is a file adhering to [VGG Specs](https://docs.verygoodgraphics.com/specs/overview), which can be generated using [VGG Daruma](https://verygoodgraphics.com/daruma) or [VGG Sketch Parser](https://github.com/verygoodgraphics/vgg_sketch_parser).
-
-### Fonts Configuration
-
-VGG Runtime defaults to using fonts in the system font folders. At the same time, you can specify another font folder through a configuration file, which can contain various fonts.
+Make sure you have built `sdl_runtime` target. Then in the build directory, running it with
 
 ```bash
-./sdl_runtime your_file.daruma -c config.json
+./sdl_runtime /path/to/your/file.daruma
 ```
 
-The `config.json` file would look like the following, while the `fallbackFont` and `defaultEmojiFont` are optional.
-```json
-{
-    "fonts": {
-        "directory": [
-            "/path/to/fonts"
-        ],
-        "fallbackFont": [
-            "Fallback font name"
-        ],
-        "defaultEmojiFont": [
-            "Emoji font name"
-        ]
-    },
-}
+where `file.daruma` is the file conforming to [VGG Specs](https://docs.verygoodgraphics.com/specs/overview), which can be generated using [VGG Daruma](https://verygoodgraphics.com/daruma) or [VGG Sketch Parser](https://github.com/verygoodgraphics/vgg_sketch_parser).
+
+### Running with custom font configuration
+
+VGG Runtime uses fonts in system directories by default. But you can assign extra font folders in a configuration file as follows
+
+```bash
+./sdl_runtime /path/to/your/file.daruma -c config.json
 ```
+
+where an example of `config.json` is provided in [asset/etc/config.json](https://github.com/verygoodgraphics/vgg_runtime/blob/feature-readme/asset/etc/config.json).
 
 ## LICENSE
 

@@ -477,20 +477,30 @@ SkPath makePath(const Contour& contour)
       path.moveTo(buffer[pp].point.x, buffer[pp].point.y);
     else
     {
-      // const auto& prevPrevPoint = points[(-2 + total) % total];
+      const auto& prevPrevPoint = points[(-2 + total) % total];
       const auto& prevPoint = points[(-1 + total) % total];
       const auto& curPoint = points[0];
       const auto& nextPoint = points[1 % total];
-      // const auto& nextNextPoint = points[2 % total];
-      glm::vec2   first, second;
-      calcPointsFromCircle(
-        prevPoint.point,
-        curPoint.point,
-        nextPoint.point,
-        curPoint.radius,
-        first,
-        second);
-      path.moveTo(second.x, second.y);
+      const auto& nextNextPoint = points[2 % total];
+      const auto& [_, curve] =
+        curveWithRadius(prevPrevPoint, &prevPoint, curPoint, nextPoint, nextNextPoint);
+      std::visit(
+        Overloaded{ [&](const CubicCurve& c) {},
+                    [&](const QuadricCurve& c) {},
+                    [&](const ArcCurve& c)
+                    {
+                      glm::vec2 first, second;
+                      calcPointsFromCircle(
+                        prevPoint.point,
+                        curPoint.point,
+                        nextPoint.point,
+                        c.radius,
+                        first,
+                        second);
+                      path.moveTo(second.x, second.y);
+                    },
+                    [&](const Line& l) {} },
+        curve);
     }
     while (segments > 0)
     {

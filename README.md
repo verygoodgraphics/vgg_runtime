@@ -1,8 +1,12 @@
 # VGG Runtime
 
-VGG Runtime is a design-as-code engine for rendering and running [VGG Daruma](https://verygoodgraphics.com/daruma) files.
+VGG Runtime is an implementation of [VGG Specs](https://docs.verygoodgraphics.com/specs/overview) with cross-platform rendering and scripting capabilities.
 
-## Build Instructions
+VGG Runtime only supports reading and rendering of `.daruma` files, which
+- you can use [VGG Daruma](https://verygoodgraphics.com/daruma) to convert from other design files online,
+- or you can use [VGG Sketch Parser](https://github.com/verygoodgraphics/vgg_sketch_parser) to convert from Sketch file locally.
+
+## How To Build
 
 This project can be built with CMake using common practice.
 
@@ -56,7 +60,7 @@ cmake --build . --parallel
 ```
 
 #### iOS building example
-Build & install vgg_container libraries for [vgg_ios](https://github.com/verygoodgraphics/vgg_ios). 
+Build & install vgg_container libraries for [vgg_ios](https://github.com/verygoodgraphics/vgg_ios).
 
 ```bash
 mkdir build.ios
@@ -80,6 +84,26 @@ cmake .. -DENABLE_UNIT_TEST=ON
 cmake --build . --parallel -t unit_tests
 ctest
 ```
+
+## How To Run
+
+Make sure you have built the `sdl_runtime` target. Then in the build directory, run it with
+
+```bash
+./sdl_runtime /path/to/your/file.daruma
+```
+
+where `file.daruma` is a file conforming to [VGG Specs](https://docs.verygoodgraphics.com/specs/overview), which can be generated using [VGG Daruma](https://verygoodgraphics.com/daruma) or [VGG Sketch Parser](https://github.com/verygoodgraphics/vgg_sketch_parser).
+
+### Running with custom font configuration
+
+VGG Runtime uses fonts in system directories by default, but you can extra font folders in a configuration file as follows
+
+```bash
+./sdl_runtime /path/to/your/file.daruma -c /path/to/your/config.json
+```
+
+where an example of `config.json` is provided in [asset/etc/config.json](https://github.com/verygoodgraphics/vgg_runtime/blob/feature-readme/asset/etc/config.json).
 
 ## LICENSE
 

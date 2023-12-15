@@ -1,10 +1,13 @@
 {
-	"fonts": {
-		"directory": [
-			"/asset/fonts"
-		],
-		"fallbackFont": [
-			"WenQuanYi Micro Hei"
-		]
-	}
+    "fonts": {
+        "directory": [
+            "/asset/fonts"
+        ],
+        "fallbackFont": [
+            "Fira Sans"
+        ],
+        "defaultEmojiFont": [
+            "Apple Color Emoji"
+        ]
+    }
 }

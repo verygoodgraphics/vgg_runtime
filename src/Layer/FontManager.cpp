@@ -19,6 +19,7 @@
 #include "Layer/FontManager.hpp"
 
 #include <core/SkFont.h>
+#include <iterator>
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
@@ -68,11 +69,12 @@ namespace
 {
 
 template<typename T>
-std::vector<T> mergeArrayConfig(const nlohmann::json& config1, const nlohmann::json& config2)
+std::vector<T> mergeArrayConfig(std::vector<std::string> config1, std::vector<std::string> config2)
 {
-  std::set<T> set{ config1.begin(), config1.end() };
-  set.insert(config2.begin(), config2.end());
-  return { set.begin(), set.end() };
+  std::set<T> set{ std::make_move_iterator(config1.begin()),
+                   std::make_move_iterator(config1.end()) };
+  set.insert(std::make_move_iterator(config2.begin()), std::make_move_iterator(config2.end()));
+  return { std::make_move_iterator(set.begin()), std::make_move_iterator(set.end()) };
 }
 
 } // namespace

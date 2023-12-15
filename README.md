@@ -97,13 +97,13 @@ where `file.daruma` is a file conforming to [VGG Specs](https://docs.verygoodgra
 
 ### Running with custom font configuration
 
-VGG Runtime uses fonts in system directories by default, but you can extra font folders in a configuration file as follows
+VGG Runtime uses fonts in system directories by default, but you can assign extra font folders in a configuration file as follows
 
 ```bash
 ./sdl_runtime /path/to/your/file.daruma -c /path/to/your/config.json
 ```
 
-where an example of `config.json` is provided in [asset/etc/config.json](https://github.com/verygoodgraphics/vgg_runtime/blob/feature-readme/asset/etc/config.json).
+where an example of `config.json` is provided in [asset/etc/config.json](https://github.com/verygoodgraphics/vgg_runtime/blob/main/asset/etc/config.json).
 
 ## LICENSE
 

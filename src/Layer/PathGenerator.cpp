@@ -143,7 +143,7 @@ bool inline computeAdjacent5PointsInfo(
   // const auto halfTanTheta = std::tan(theta / 2.f);
   len1 = (curAngle * len1) / (prevAngle + curAngle);
   len2 = (curAngle * len2) / (nextAngle + curAngle);
-  return false;
+  return true;
 }
 
 std::optional<SmoothResult> addSmoothingRadiusCurveInLocalSpace(

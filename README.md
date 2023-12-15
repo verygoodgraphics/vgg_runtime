@@ -6,7 +6,7 @@ VGG Runtime only supports reading and rendering of `.daruma` files, which
 - you can use [VGG Daruma](https://verygoodgraphics.com/daruma) to convert from other design files online,
 - or you can use [VGG Sketch Parser](https://github.com/verygoodgraphics/vgg_sketch_parser) to convert from Sketch file locally.
 
-## Build Instructions
+## How To Build
 
 This project can be built with CMake using common practice.
 
@@ -85,22 +85,22 @@ cmake --build . --parallel -t unit_tests
 ctest
 ```
 
-## How to run
+## How To Run
 
-Make sure you have built `sdl_runtime` target. Then in the build directory, running it with
+Make sure you have built the `sdl_runtime` target. Then in the build directory, run it with
 
 ```bash
 ./sdl_runtime /path/to/your/file.daruma
 ```
 
-where `file.daruma` is the file conforming to [VGG Specs](https://docs.verygoodgraphics.com/specs/overview), which can be generated using [VGG Daruma](https://verygoodgraphics.com/daruma) or [VGG Sketch Parser](https://github.com/verygoodgraphics/vgg_sketch_parser).
+where `file.daruma` is a file adhering to [VGG Specs](https://docs.verygoodgraphics.com/specs/overview), which can be generated using [VGG Daruma](https://verygoodgraphics.com/daruma) or [VGG Sketch Parser](https://github.com/verygoodgraphics/vgg_sketch_parser).
 
 ### Running with custom font configuration
 
-VGG Runtime uses fonts in system directories by default. But you can assign extra font folders in a configuration file as follows
+VGG Runtime uses fonts in system directories by default, but you can assign additional font folders in a configuration file as follows
 
 ```bash
-./sdl_runtime /path/to/your/file.daruma -c config.json
+./sdl_runtime /path/to/your/file.daruma -c /path/to/your/config.json
 ```
 
 where an example of `config.json` is provided in [asset/etc/config.json](https://github.com/verygoodgraphics/vgg_runtime/blob/feature-readme/asset/etc/config.json).

@@ -2,7 +2,9 @@
 
 VGG Runtime is an implementation of [VGG Specs](https://docs.verygoodgraphics.com/specs/overview) with cross-platform rendering and scripting capabilities.
 
-For now [VGG Daruma](https://verygoodgraphics.com/daruma) will produce files conforming to VGG Specs that VGG Runtime can read and display. Or you can use [VGG Sketch Parser](https://github.com/verygoodgraphics/vgg_sketch_parser) to convert Sketch files into Daruma files.
+VGG Runtime only supports reading and rendering of `.daruma` files, which
+- you can use [VGG Daruma](https://verygoodgraphics.com/daruma) to convert from other design files online,
+- or you can use [VGG Sketch Parser](https://github.com/verygoodgraphics/vgg_sketch_parser) to convert from Sketch file locally.
 
 ## Build Instructions
 
@@ -81,6 +83,40 @@ cd build
 cmake .. -DENABLE_UNIT_TEST=ON
 cmake --build . --parallel -t unit_tests
 ctest
+```
+
+## Execute Instructions
+
+Executing VGG Runtime is simple.
+```bash
+cd build
+./sdl_runtime your_file.daruma
+```
+`your_file.daruma` is a file adhering to [VGG Specs](https://docs.verygoodgraphics.com/specs/overview), which can be generated using [VGG Daruma](https://verygoodgraphics.com/daruma) or [VGG Sketch Parser](https://github.com/verygoodgraphics/vgg_sketch_parser).
+
+### Fonts Configuration
+
+VGG Runtime defaults to using fonts in the system font folders. At the same time, you can specify another font folder through a configuration file, which can contain various fonts.
+
+```bash
+./sdl_runtime your_file.daruma -c config.json
+```
+
+The `config.json` file would look like the following, while the `fallbackFont` and `defaultEmojiFont` are optional.
+```json
+{
+    "fonts": {
+        "directory": [
+            "/path/to/fonts"
+        ],
+        "fallbackFont": [
+            "Fallback font name"
+        ],
+        "defaultEmojiFont": [
+            "Emoji font name"
+        ]
+    },
+}
 ```
 
 ## LICENSE

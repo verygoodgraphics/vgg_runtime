@@ -6,10 +6,14 @@
         "commit": "1ab0b1d2242264a945c2c5ca45b8ec326e8946b7"
     },
     "nodejs": {
-        "version": "v18.15.0",
+        "url": "https://nodejs.org/dist/v18.15.0/node-v18.15.0.tar.gz",
+        "filename": "node-v18.15.0.tar.gz",
         "md5": "a517c1c055ba65757ccb2d446d165335"
     },
     "nodejs-mobile": {
-        "version": "18.17.2"
+        "url": "https://github.com/nodejs-mobile/nodejs-mobile/archive/refs/tags/v18.17.2.tar.gz",
+        "filename": "nodejs-mobile-v18.17.2.tar.gz",
+        "ios-binary-url": "https://github.com/nodejs-mobile/nodejs-mobile/releases/download/v18.17.2/nodejs-mobile-v18.17.2-ios.zip",
+        "ios-binary-filename": "nodejs-mobile-v18.17.2-ios.zip"
     }
 }

@@ -456,7 +456,7 @@ public:
   void drawRawStyle(Painter& painter, const SkPath& skPath, sk_sp<SkBlender> blender)
   {
     // const auto globalAlpha = contextSetting.opacity;
-    auto       filled = false;
+    auto filled = false;
     for (const auto& f : style.fills)
     {
       if (f.isEnabled)

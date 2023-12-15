@@ -93,11 +93,11 @@ Make sure you have built the `sdl_runtime` target. Then in the build directory, 
 ./sdl_runtime /path/to/your/file.daruma
 ```
 
-where `file.daruma` is a file adhering to [VGG Specs](https://docs.verygoodgraphics.com/specs/overview), which can be generated using [VGG Daruma](https://verygoodgraphics.com/daruma) or [VGG Sketch Parser](https://github.com/verygoodgraphics/vgg_sketch_parser).
+where `file.daruma` is a file conforming to [VGG Specs](https://docs.verygoodgraphics.com/specs/overview), which can be generated using [VGG Daruma](https://verygoodgraphics.com/daruma) or [VGG Sketch Parser](https://github.com/verygoodgraphics/vgg_sketch_parser).
 
 ### Running with custom font configuration
 
-VGG Runtime uses fonts in system directories by default, but you can assign additional font folders in a configuration file as follows
+VGG Runtime uses fonts in system directories by default, but you can extra font folders in a configuration file as follows
 
 ```bash
 ./sdl_runtime /path/to/your/file.daruma -c /path/to/your/config.json

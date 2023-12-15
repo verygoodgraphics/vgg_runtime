@@ -25,14 +25,18 @@ if(EMSCRIPTEN)
   return()  # Return from this file
 endif()
 
+file(READ ${CMAKE_SOURCE_DIR}/config/DepsConfig.json DEPS_CONFIG)
 if(VGG_VAR_TARGET MATCHES "^iOS")
-  set(NODE_VERSION "18.17.2")
+  string(JSON NODEJS_MOBILE_VERSION ERROR_VARIABLE NODEJS_MOBILE_VERSION_NOTFOUND GET ${DEPS_CONFIG} nodejs-mobile version)
+  if(NODEJS_MOBILE_VERSION_NOTFOUND)
+    message(FATAL_ERROR "Nodejs-mobile version not found in config/DepsConfig.json")
+  endif()
 
   # Download src
   set(NODE_FOLDER "nodejs-mobile" CACHE STRING "node folder name" FORCE)
   if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${NODE_FOLDER}")
-    set(DOWNLOAD_URL "https://github.com/nodejs-mobile/nodejs-mobile/archive/refs/tags/v${NODE_VERSION}.tar.gz")
-    set(DOWNLOAD_AT_PATH "${CMAKE_SOURCE_DIR}/downloads/nodejs-mobile-${NODE_VERSION}.tar.gz")
+    set(DOWNLOAD_URL "https://github.com/nodejs-mobile/nodejs-mobile/archive/refs/tags/v${NODEJS_MOBILE_VERSION}.tar.gz")
+    set(DOWNLOAD_AT_PATH "${CMAKE_SOURCE_DIR}/downloads/nodejs-mobile-${NODEJS_MOBILE_VERSION}.tar.gz")
 
     message(STATUS "Downloading ${DOWNLOAD_URL} to ${DOWNLOAD_AT_PATH}")
     file(DOWNLOAD
@@ -47,14 +51,14 @@ if(VGG_VAR_TARGET MATCHES "^iOS")
 
     file(ARCHIVE_EXTRACT INPUT ${DOWNLOAD_AT_PATH}
       DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}")
-    file(RENAME "${CMAKE_CURRENT_SOURCE_DIR}/nodejs-mobile-${NODE_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/${NODE_FOLDER}")
+    file(RENAME "${CMAKE_CURRENT_SOURCE_DIR}/nodejs-mobile-${NODEJS_MOBILE_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/${NODE_FOLDER}")
   endif()
 
   # Download the pre-built binary (NodeMobile.xcframework)
   set(LIB_NODE_FOLDER "nodejs-mobile-ios" CACHE STRING "lib node folder name" FORCE)
   if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NODE_FOLDER}")
-    set(LIB_DOWNLOAD_URL "https://github.com/nodejs-mobile/nodejs-mobile/releases/download/v${NODE_VERSION}/nodejs-mobile-v${NODE_VERSION}-ios.zip")
-    set(LIB_DOWNLOAD_AT_PATH "${CMAKE_SOURCE_DIR}/downloads/nodejs-mobile-v${NODE_VERSION}-ios.zip")
+    set(LIB_DOWNLOAD_URL "https://github.com/nodejs-mobile/nodejs-mobile/releases/download/v${NODEJS_MOBILE_VERSION}/nodejs-mobile-v${NODEJS_MOBILE_VERSION}-ios.zip")
+    set(LIB_DOWNLOAD_AT_PATH "${CMAKE_SOURCE_DIR}/downloads/nodejs-mobile-v${NODEJS_MOBILE_VERSION}-ios.zip")
 
     message(STATUS "Downloading ${LIB_DOWNLOAD_URL} to ${LIB_DOWNLOAD_AT_PATH}")
     file(DOWNLOAD ${LIB_DOWNLOAD_URL} ${LIB_DOWNLOAD_AT_PATH} SHOW_PROGRESS STATUS DOWNLOAD_STATUS)
@@ -63,22 +67,26 @@ if(VGG_VAR_TARGET MATCHES "^iOS")
     endif()
 
     file(ARCHIVE_EXTRACT INPUT ${LIB_DOWNLOAD_AT_PATH} DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}")
-    file(RENAME "${CMAKE_CURRENT_SOURCE_DIR}/nodejs-mobile-v${NODE_VERSION}-ios" "${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NODE_FOLDER}")
+    file(RENAME "${CMAKE_CURRENT_SOURCE_DIR}/nodejs-mobile-v${NODEJS_MOBILE_VERSION}-ios" "${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NODE_FOLDER}")
   endif()
 
 else()
+  string(JSON NODEJS_VERSION ERROR_VARIABLE NODEJS_VERSION_NOTFOUND GET ${DEPS_CONFIG} nodejs version)
+  string(JSON NODEJS_ARCHIVE_MD5_CHECKSUM ERROR_VARIABLE NODEJS_ARCHIVE_MD5_CHECKSUM_NOTFOUND GET ${DEPS_CONFIG} nodejs md5)
+  if(NODEJS_VERSION_NOTFOUND OR NODEJS_ARCHIVE_MD5_CHECKSUM_NOTFOUND)
+    message(FATAL_ERROR "Nodejs version or md5 not found in config/DepsConfig.json")
+  endif()
+
   set(NODE_FOLDER "node$ENV{name}${CMAKE_CXX_COMPILER_ID}${CMAKE_CXX_COMPILER_VERSION}" CACHE STRING "node folder name" FORCE)
   if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${NODE_FOLDER}")
-    set(NODE_VERSION "v18.15.0")
-    set(NODE_MD5_CHECKSUM "a517c1c055ba65757ccb2d446d165335")
-    set(DOWNLOAD_URL "https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz")
-    set(DOWNLOAD_AT_PATH "${CMAKE_SOURCE_DIR}/downloads/node-${NODE_VERSION}.tar.gz")
+    set(DOWNLOAD_URL "https://nodejs.org/dist/${NODEJS_VERSION}/node-${NODEJS_VERSION}.tar.gz")
+    set(DOWNLOAD_AT_PATH "${CMAKE_SOURCE_DIR}/downloads/node-${NODEJS_VERSION}.tar.gz")
 
     message(STATUS "Downloading ${DOWNLOAD_URL} to ${DOWNLOAD_AT_PATH}")
     file(DOWNLOAD
       ${DOWNLOAD_URL}
       ${DOWNLOAD_AT_PATH}
-      EXPECTED_MD5 ${NODE_MD5_CHECKSUM}
+      EXPECTED_MD5 ${NODEJS_ARCHIVE_MD5_CHECKSUM}
       STATUS DOWNLOAD_STATUS
       SHOW_PROGRESS)
     if(NOT DOWNLOAD_STATUS MATCHES "^0;")
@@ -87,7 +95,7 @@ else()
 
     file(ARCHIVE_EXTRACT INPUT ${DOWNLOAD_AT_PATH}
       DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}")
-    file(RENAME "${CMAKE_CURRENT_SOURCE_DIR}/node-${NODE_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/${NODE_FOLDER}")
+    file(RENAME "${CMAKE_CURRENT_SOURCE_DIR}/node-${NODEJS_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/${NODE_FOLDER}")
     #file(REMOVE ${DOWNLOAD_AT_PATH})
   endif()
 

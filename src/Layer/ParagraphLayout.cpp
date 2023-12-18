@@ -139,7 +139,8 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
   auto fontStyle = toSkFontStyle(attr);
   auto fontMgr = font->getFallbackManager();
   ASSERT(fontMgr);
-  if (fontMgr->matchFamilyStyle(fontName.c_str(), fontStyle))
+  auto ft = fontMgr->matchFamilyStyle(fontName.c_str(), fontStyle);
+  if (ft && ft->fontStyle() == fontStyle)
   {
     style.setFontStyle(fontStyle);
     SkFontArguments::VariationPosition::Coordinate width{ SkSetFourByteTag('w', 'd', 't', 'h'),

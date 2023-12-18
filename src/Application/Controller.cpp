@@ -576,7 +576,8 @@ bool Controller::handleTranslate(float x, float y)
     return true;
   }
 
-  auto pageSize = m_layout->pageSize(m_presenter->currentPageIndex());
+  auto root = m_layout->layoutTree();
+  auto pageSize = root->children()[m_presenter->currentPageIndex()]->frame().size;
   return m_presenter->handleTranslate(pageSize.width, pageSize.height, x, y);
 }
 

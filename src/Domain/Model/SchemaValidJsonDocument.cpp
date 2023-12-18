@@ -21,8 +21,9 @@ using json = nlohmann::json;
 
 constexpr auto const_class_name = "class";
 
-SchemaValidJsonDocument::SchemaValidJsonDocument(const JsonDocumentPtr& jsonDoc,
-                                                 const ValidatorPtr& schemaValidator)
+SchemaValidJsonDocument::SchemaValidJsonDocument(
+  const JsonDocumentPtr& jsonDoc,
+  const ValidatorPtr&    schemaValidator)
   : JsonDocument(jsonDoc)
   , m_validator(schemaValidator)
 {
@@ -63,9 +64,9 @@ void SchemaValidJsonDocument::deleteAt(const json::json_pointer& path)
 }
 
 void SchemaValidJsonDocument::editTemplate(
-  const json::json_pointer& path,
-  const json& value,
-  std::function<void(json&, json::json_pointer&, const json&)> tryEditFn,
+  const json::json_pointer&                                                     path,
+  const json&                                                                   value,
+  std::function<void(json&, json::json_pointer&, const json&)>                  tryEditFn,
   std::function<void(JsonDocumentPtr&, const json::json_pointer&, const json&)> editFn)
 {
   auto ancestor_path = getNearestHavingClassAncestorPath(path);
@@ -92,15 +93,16 @@ bool SchemaValidJsonDocument::validateDocument(const json& document)
     return false;
   }
 
-  if (document.is_object() && document.contains(const_class_name) &&
-      document[const_class_name].is_string())
+  if (
+    document.is_object() && document.contains(const_class_name) &&
+    document[const_class_name].is_string())
   {
     auto className = document[const_class_name].get<std::string>();
     return m_validator->validate(className, document);
   }
   else
   {
-    WARN("#SchemaValidJsonDocument::validate: fallback, validate whole document");
+    DEBUG("#SchemaValidJsonDocument::validate: fallback, validate whole document");
     return m_validator->validate(document);
   }
 }
@@ -115,8 +117,9 @@ const json::json_pointer SchemaValidJsonDocument::getNearestHavingClassAncestorP
     do
     {
       auto& ancestor_json = document[ancestor_path];
-      if (ancestor_json.is_object() && ancestor_json.contains(const_class_name) &&
-          ancestor_json[const_class_name].is_string())
+      if (
+        ancestor_json.is_object() && ancestor_json.contains(const_class_name) &&
+        ancestor_json[const_class_name].is_string())
       {
         return ancestor_path;
       }
@@ -132,13 +135,14 @@ const json::json_pointer SchemaValidJsonDocument::getNearestHavingClassAncestorP
     WARN("#SchemaValidJsonDocument::getNearestAncestorHavingClass: error: %d, %s", e.id, e.what());
   }
 
-  WARN("#SchemaValidJsonDocument::getNearestAncestorHavingClass: return root path");
+  DEBUG("#SchemaValidJsonDocument::getNearestAncestorHavingClass: return root path");
   return ""_json_pointer;
 }
 
-void SchemaValidJsonDocument::calculateRelativePath(const json::json_pointer& ancestorPath,
-                                                    const json::json_pointer& currentPath,
-                                                    json::json_pointer& relativePath)
+void SchemaValidJsonDocument::calculateRelativePath(
+  const json::json_pointer& ancestorPath,
+  const json::json_pointer& currentPath,
+  json::json_pointer&       relativePath)
 {
   if (currentPath == ancestorPath)
   {

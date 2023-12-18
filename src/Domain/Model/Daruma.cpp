@@ -130,7 +130,7 @@ bool Daruma::loadFiles()
     }
     else
     {
-      WARN("#Daruma::loadFiles(), read layout file failed");
+      DEBUG("#Daruma::loadFiles(), read layout file failed");
     }
 
     if (m_loader->readFile(event_listeners_file_name, fileContent))

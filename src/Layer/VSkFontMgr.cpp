@@ -450,6 +450,8 @@ void VGGFontLoader::loadDirectoryFonts(
       {
         continue;
       }
+      if (entry.path().extension() != suffix)
+        continue;
       auto                           filename = entry.path().string();
       std::unique_ptr<SkStreamAsset> stream = SkStream::MakeFromFile(filename.c_str());
       if (!stream)

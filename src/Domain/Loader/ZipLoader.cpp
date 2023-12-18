@@ -61,7 +61,7 @@ bool ZipLoader::readFile(const std::string& name, std::string& content) const
     return true;
   }
 
-  WARN("#ZipLoader::readFile(), read file failed, %s", name.c_str());
+  DEBUG("#ZipLoader::readFile(), read file failed, %s", name.c_str());
   return false;
 }
 

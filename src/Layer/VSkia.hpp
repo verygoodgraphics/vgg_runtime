@@ -37,6 +37,7 @@
 #include <modules/skparagraph/include/DartTypes.h>
 #include <modules/skparagraph/include/TextStyle.h>
 
+#include <src/core/SkFontDescriptor.h>
 #include <variant>
 #include <vector>
 #include <unordered_map>
@@ -152,7 +153,9 @@ inline SkFontStyle toSkFontStyle(const TextStyleAttr& attr)
     attr.subFamilyName.find("Italic") != std::string::npos ||
     attr.fontName.find("Italic") != std::string::npos)
     slant = SkFontStyle::kItalic_Slant;
-  return { (int)attr.fontWeight, (int)attr.fontWidth, slant };
+  return { SkScalarRoundToInt(attr.fontWeight),
+           SkFontDescriptor::SkFontStyleWidthForWidthAxisValue(attr.fontWidth),
+           slant };
 }
 
 inline SkPathOp toSkPathOp(VGG::EBoolOp blop)

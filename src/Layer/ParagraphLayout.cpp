@@ -136,16 +136,28 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
     }
   }
   style.setFontFamilies(fontFamilies);
-  style.setFontStyle(toSkFontStyle(attr));
-  SkFontArguments::VariationPosition::Coordinate weight{ SkSetFourByteTag('w', 'g', 'h', 't'),
-                                                         attr.fontWeight };
-
-  SkFontArguments::VariationPosition::Coordinate width{ SkSetFourByteTag('w', 'd', 't', 'h'),
-                                                        attr.fontWidth };
-
-  SkFontArguments::VariationPosition::Coordinate coords[2] = { weight, width };
-  SkFontArguments::VariationPosition             position = { coords, 2 };
-  style.setFontArguments(SkFontArguments().setVariationDesignPosition(position));
+  auto fontStyle = toSkFontStyle(attr);
+  auto fontMgr = font->getFallbackManager();
+  ASSERT(fontMgr);
+  if (fontMgr->matchFamilyStyle(fontName.c_str(), fontStyle))
+  {
+    style.setFontStyle(fontStyle);
+    SkFontArguments::VariationPosition::Coordinate width{ SkSetFourByteTag('w', 'd', 't', 'h'),
+                                                          attr.fontWidth };
+    SkFontArguments::VariationPosition::Coordinate coords[1] = { width };
+    SkFontArguments::VariationPosition             position = { coords, 1 };
+    style.setFontArguments(SkFontArguments().setVariationDesignPosition(position));
+  }
+  else
+  {
+    SkFontArguments::VariationPosition::Coordinate weight{ SkSetFourByteTag('w', 'g', 'h', 't'),
+                                                           attr.fontWeight };
+    SkFontArguments::VariationPosition::Coordinate width{ SkSetFourByteTag('w', 'd', 't', 'h'),
+                                                          attr.fontWidth };
+    SkFontArguments::VariationPosition::Coordinate coords[2] = { weight, width };
+    SkFontArguments::VariationPosition             position = { coords, 2 };
+    style.setFontArguments(SkFontArguments().setVariationDesignPosition(position));
+  }
   style.setFontSize(attr.size);
   style.setLetterSpacing(attr.letterSpacing);
   style.setBaselineShift(attr.baselineShift);

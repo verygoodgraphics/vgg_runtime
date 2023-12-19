@@ -104,8 +104,8 @@ BezierPoint BezierPoint::makeModelFormat() const
   return result;
 }
 
-BezierPoint BezierPoint::makeScale(const Rect& oldContainerFrame,
-                                   const Rect& newContainerFrame) const
+BezierPoint BezierPoint::makeScale(const Rect& oldContainerFrame, const Rect& newContainerFrame)
+  const
 {
   BezierPoint result;
 
@@ -138,4 +138,18 @@ BezierPoint BezierPoint::makeTranslate(const Scalar tx, const Scalar ty) const
   }
 
   return result;
+}
+
+BezierPoint& BezierPoint::scale(const Scalar xScale, const Scalar yScale)
+{
+  point.scale(xScale, yScale);
+  if (from.has_value())
+  {
+    from = from->scale(xScale, yScale);
+  }
+  if (to.has_value())
+  {
+    to = to->scale(xScale, yScale);
+  }
+  return *this;
 }

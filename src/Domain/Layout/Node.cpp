@@ -103,6 +103,8 @@ Layout::Rect LayoutNode::frame() const
 
 void LayoutNode::setFrame(const Layout::Rect& newFrame, bool updateRule, bool useOldFrame)
 {
+  saveChildrendOldFrame(); // save first, before all return
+
   auto oldFrame = useOldFrame ? m_oldFrame : frame();
   if (oldFrame == newFrame)
   {
@@ -124,7 +126,6 @@ void LayoutNode::setFrame(const Layout::Rect& newFrame, bool updateRule, bool us
     newFrame.size.width,
     newFrame.size.height);
 
-  saveChildrendOldFrame();
   updateModel(newFrame);
 
   if (shouldSkip())
@@ -136,6 +137,12 @@ void LayoutNode::setFrame(const Layout::Rect& newFrame, bool updateRule, bool us
   auto newSize = newFrame.size;
   if (newSize == oldSize)
   {
+    return;
+  }
+
+  if (auto json = model(); Layout::isContourPathNode(*json))
+  {
+    scaleContour(oldFrame, newFrame);
     return;
   }
 
@@ -426,6 +433,13 @@ void LayoutNode::scaleTo(const Layout::Size& newSize, bool updateRule)
 void LayoutNode::saveOldFrame()
 {
   m_oldFrame = frame();
+  DEBUG(
+    "LayoutNode::saveOldFrame: node: %s, %f, %f, %f, %f",
+    id().c_str(),
+    m_oldFrame.left(),
+    m_oldFrame.top(),
+    m_oldFrame.width(),
+    m_oldFrame.height());
 }
 
 void LayoutNode::saveChildrendOldFrame()
@@ -1104,6 +1118,46 @@ Layout::Rect LayoutNode::resizeContour(
   return newModelFrame.makeFromModelRect();
 }
 
+void LayoutNode::scaleContour(const Layout::Rect& oldFrame, const Layout::Rect& newFrame)
+{
+  DEBUG("LayoutNode::scaleContour, id=%s", id().c_str());
+
+  const auto oldSize = oldFrame.size;
+  const auto newSize = newFrame.size;
+
+  ASSERT(oldSize.width > 0);
+  const auto xScaleFactor = newSize.width / oldSize.width;
+
+  ASSERT(oldSize.height > 0);
+  const auto yScaleFactor = newSize.height / oldSize.height;
+
+  const auto nodeJson = model();
+  ASSERT(nodeJson);
+
+  // ./shape/subshapes/XXX/subGeometry/points/XXX
+  auto& subshapes = (*nodeJson)[K_SHAPE][K_SUBSHAPES];
+  for (std::size_t i = 0; i < subshapes.size(); ++i)
+  {
+    auto& subshape = subshapes[i];
+    auto& subGeometry = subshape[K_SUBGEOMETRY];
+    if (subGeometry[K_CLASS] != K_CONTOUR)
+    {
+      continue;
+    }
+
+    std::vector<Layout::BezierPoint> newModelPoints;
+    auto&                            points = subGeometry[K_POINTS];
+    for (std::size_t j = 0; j < points.size(); ++j)
+    {
+      auto point = points[j].get<Layout::BezierPoint>();
+      point.scale(xScaleFactor, yScaleFactor);
+
+      newModelPoints.push_back(point);
+    }
+    updateContourNodeModelPoints(i, newModelPoints);
+  }
+}
+
 void LayoutNode::updatePathNodeModel(
   const Layout::Rect&                     newFrame,
   const Layout::Matrix&                   matrix,
@@ -1178,6 +1232,50 @@ void LayoutNode::updatePathNodeModel(
 
       viewModel->replaceAt(pointPath, point);
     }
+  }
+}
+
+void LayoutNode::updateContourNodeModelPoints(
+  const std::size_t                       subshapeIndex,
+  const std::vector<Layout::BezierPoint>& newPoints)
+{
+  auto viewModel = m_viewModel.lock();
+  if (!viewModel)
+  {
+    return;
+  }
+
+  auto json = model();
+  if (!json)
+  {
+    return;
+  }
+
+  // points
+  // ./shape/subshapes/XXX/subGeometry/points/XXX
+  nlohmann::json::json_pointer path{ m_path };
+  auto&                        subshapes = (*json)[K_SHAPE][K_SUBSHAPES];
+  path /= K_SHAPE;
+  path /= K_SUBSHAPES;
+
+  auto& subshape = subshapes[subshapeIndex];
+  auto& subGeometry = subshape[K_SUBGEOMETRY];
+
+  auto& points = subGeometry[K_POINTS];
+  auto  pointsPath = path / subshapeIndex / K_SUBGEOMETRY / K_POINTS;
+  for (std::size_t j = 0; j < points.size(); ++j)
+  {
+    auto point = points[j];
+    to_json(point, newPoints[j]);
+
+    auto pointPath = pointsPath / j;
+    DEBUG(
+      "LayoutNode::updateContourNodeModelPoints: %s, -> %s, %s",
+      pointPath.to_string().c_str(),
+      points[j].dump().c_str(),
+      point.dump().c_str());
+
+    viewModel->replaceAt(pointPath, point);
   }
 }
 

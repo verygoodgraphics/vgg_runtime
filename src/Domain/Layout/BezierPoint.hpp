@@ -29,7 +29,7 @@ namespace Layout
 
 struct BezierPoint
 {
-  Layout::Point point;
+  Layout::Point                point;
   std::optional<Layout::Point> from;
   std::optional<Layout::Point> to;
 
@@ -39,6 +39,8 @@ struct BezierPoint
   BezierPoint makeTransform(const Matrix& matrix) const;
   BezierPoint makeScale(const Rect& oldContainerFrame, const Rect& newContainerFrame) const;
   BezierPoint makeTranslate(const Scalar tx, const Scalar ty) const;
+
+  BezierPoint& scale(const Scalar xScale, const Scalar yScale);
 };
 
 // NOLINTBEGIN

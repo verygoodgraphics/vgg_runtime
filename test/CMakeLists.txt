@@ -21,12 +21,13 @@ else()
     model/json_schema_validator_test.cpp
     model/schema_valid_json_document_test.cpp
     model/vgg_model_test.cpp
-    # model/treenode_test.cpp
     native/native_exec_test.cpp
     native/native_sdk_test.cpp
     native/node_test.cpp
     native/node_test_helper.cpp
     usecase/start_running_tests.cpp
+    layer/refcounter_test.cpp
+    # layer/treenode_test.cpp
   )
   target_include_directories(unit_tests PRIVATE
     .

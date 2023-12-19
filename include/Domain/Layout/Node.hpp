@@ -216,6 +216,8 @@ private:
     const Layout::Size&  oldContainerSize,
     const Layout::Size&  newContainerSize,
     const Layout::Point* parentOrigin);
+  void scaleContour(const Layout::Rect& oldFrame, const Layout::Rect& newFrame);
+
   std::pair<Layout::Scalar, Layout::Scalar> resizeH(
     const Layout::Size&  oldContainerSize,
     const Layout::Size&  newContainerSize,
@@ -242,6 +244,9 @@ private:
   void updatePathNodeModel(
     const Layout::Rect&                     newFrame,
     const Layout::Matrix&                   matrix,
+    const std::vector<Layout::BezierPoint>& newPoints);
+  void updateContourNodeModelPoints(
+    const std::size_t                       subshapeIndex,
     const std::vector<Layout::BezierPoint>& newPoints);
 };
 

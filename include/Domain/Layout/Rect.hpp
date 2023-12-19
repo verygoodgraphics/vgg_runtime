@@ -65,8 +65,9 @@ struct Point
   {
     return { x, y * FLIP_Y_FACTOR };
   }
-  Point makeTransform(const Matrix& matrix) const;
-  Point makeScale(const Rect& oldContainerFrame, const Rect& newContainerFrame) const;
+  Point  makeTransform(const Matrix& matrix) const;
+  Point  makeScale(const Rect& oldContainerFrame, const Rect& newContainerFrame) const;
+  Point& scale(const Scalar xScale, const Scalar yScale);
 };
 
 struct Size

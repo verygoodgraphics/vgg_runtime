@@ -50,6 +50,13 @@ Point Point::makeScale(const Rect& oldContainerFrame, const Rect& newContainerFr
   return { newOrigin.x + xRatio * newW, newOrigin.y + yRatio * newH };
 }
 
+Point& Point::scale(const Scalar xScale, const Scalar yScale)
+{
+  x *= xScale;
+  y *= yScale;
+  return *this;
+}
+
 bool Size::operator==(const Size& rhs) const noexcept
 {
   return nearlyEqual(width, rhs.width) && nearlyEqual(height, rhs.height);

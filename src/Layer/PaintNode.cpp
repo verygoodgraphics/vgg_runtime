@@ -57,24 +57,28 @@
 namespace VGG::layer
 {
 
-PaintNode::PaintNode(const std::string& name, ObjectType type, const std::string& guid)
-  : TreeNode(name)
+PaintNode::PaintNode(
+  VRefCnt*           cnt,
+  const std::string& name,
+  ObjectType         type,
+  const std::string& guid)
+  : TreeNode(cnt, name)
   , d_ptr(new PaintNode__pImpl(this, type))
 {
   d_ptr->guid = guid;
 }
 
-PaintNode::PaintNode(const std::string& name, std::unique_ptr<PaintNode__pImpl> impl)
-  : TreeNode(name)
+PaintNode::PaintNode(VRefCnt* cnt, const std::string& name, std::unique_ptr<PaintNode__pImpl> impl)
+  : TreeNode(cnt, name)
   , d_ptr(std::move(impl))
 {
 }
 
-PaintNode::PaintNode(const PaintNode& other)
-  : TreeNode(other.name())
-  , d_ptr(new PaintNode__pImpl(*other.d_ptr))
-{
-}
+// PaintNode::PaintNode(const PaintNode& other)
+//   : TreeNode(other.name())
+//   , d_ptr(new PaintNode__pImpl(*other.d_ptr))
+// {
+// }
 
 TreeNodePtr PaintNode::clone() const
 {

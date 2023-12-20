@@ -17,7 +17,10 @@
 
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/VType.hpp"
+#include "Layer/Memory/VNew.hpp"
+#include "Layer/Memory/VRefCnt.hpp"
 #include "Layer/ParagraphLayout.hpp"
+#include <utility>
 
 namespace VGG::layer
 {
@@ -33,12 +36,11 @@ using TextNodeRef = WeakRef<TextNode>;
 template<typename... Args>
 inline TextNodePtr makeTextNodePtr(Args&&... args)
 {
-
 #ifdef USE_SHARED_PTR
   auto p = std::make_shared<TextNode>(std::forward<Args>(args)...);
   return p;
 #else
-  return TextNodePtr();
+  return TextNodePtr(V_NEW<TextNode>(std::forward<Args>(args)...));
 #endif
 }
 
@@ -48,8 +50,8 @@ class VGG_EXPORTS TextNode final : public PaintNode
   VGG_DECL_IMPL(TextNode);
 
 public:
-  TextNode(const std::string& name, std::string guid);
-  TextNode(const TextNode&);
+  TextNode(VRefCnt* cnt, const std::string& name, std::string guid);
+  TextNode(const TextNode&) = delete;
   TextNode& operator=(const TextNode&) = delete;
   TextNode(TextNode&&) noexcept = delete;
   TextNode& operator=(TextNode&&) noexcept = delete;

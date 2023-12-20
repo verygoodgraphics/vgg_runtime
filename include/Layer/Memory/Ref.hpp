@@ -20,7 +20,6 @@
 
 #include <cstddef>
 #include <memory>
-#include <regex>
 #include <cassert>
 
 namespace VGG::layer
@@ -95,7 +94,12 @@ public:
   }
 
 public:
-  explicit Ref(T* p = nullptr)
+  explicit Ref()
+    : m_ptr(nullptr)
+  {
+  }
+
+  explicit Ref(T* p)
     : m_ptr(p)
   {
   }
@@ -206,11 +210,6 @@ public:
   {
     return m_ptr;
   }
-
-  // const T* get() const
-  // {
-  //   return m_ptr;
-  // }
 
   T* take()
   {
@@ -333,7 +332,7 @@ public:
     }
   }
 
-  explicit WeakRef(Ref<T>& p) noexcept
+  WeakRef(Ref<T> p) noexcept
     : m_cnt(p ? p->refCnt() : nullptr)
     , m_object(static_cast<T*>(p))
   {
@@ -381,15 +380,14 @@ public:
     return operator=(WeakRef(object));
   }
 
-  WeakRef& operator=(Ref<T>& p) noexcept
+  WeakRef& operator=(Ref<T> p) noexcept
   {
     release();
     m_object = static_cast<T*>(p);
-    m_cnt = m_object ? m_object->refCnt() : nullptr;
-    if (m_cnt)
-    {
-      m_cnt->weakRef();
-    }
+    assert(m_object);
+    m_cnt = m_object->refCnt();
+    assert(m_cnt);
+    m_cnt->weakRef();
     return *this;
   }
 
@@ -423,21 +421,13 @@ public:
 
   Ref<T> lock() const
   {
-    Ref<T> ret;
-    assert(false);
-    // if (m_cnt)
-    // {
-    //   Ref<T> p((T*)m_cnt->object());
-    //   if (p)
-    //   {
-    //     ret = m_object; // why
-    //   }
-    //   else
-    //   {
-    //     release();
-    //   }
-    // }
-    return ret;
+    if (m_cnt)
+    {
+      m_cnt->ref();
+      Ref<T> p((T*)m_cnt->object());
+      return p;
+    }
+    return nullptr;
   }
 
   void release()

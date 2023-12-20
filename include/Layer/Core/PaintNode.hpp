@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "Layer/Renderer.hpp"
+#include "Layer/Memory/VNew.hpp"
 #include "Layer/Core/VBound.hpp"
 #include "Layer/Core/TreeNode.hpp"
 #include "Layer/Core/VType.hpp"
@@ -86,7 +87,7 @@ inline PaintNodePtr makePaintNodePtr(Args&&... args)
   auto p = std::make_shared<PaintNode>(std::forward<Args>(args)...);
   return p;
 #else
-  return PaintNodePtr();
+  return PaintNodePtr(V_NEW<PaintNode>(std::forward<Args>(args)...));
 #endif
 };
 
@@ -101,11 +102,11 @@ protected:
   friend class Renderer;
 
 private:
-  PaintNode(const std::string& name, std::unique_ptr<PaintNode__pImpl> impl);
+  PaintNode(VRefCnt* cnt, const std::string& name, std::unique_ptr<PaintNode__pImpl> impl);
 
 public:
-  PaintNode(const std::string& name, ObjectType type, const std::string& guid);
-  PaintNode(const PaintNode&);
+  PaintNode(VRefCnt* cnt, const std::string& name, ObjectType type, const std::string& guid);
+  PaintNode(const PaintNode&) = delete;
   PaintNode& operator=(const PaintNode&) = delete;
   PaintNode(PaintNode&&) = delete;
   PaintNode& operator=(PaintNode&&) = delete;

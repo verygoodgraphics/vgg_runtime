@@ -43,7 +43,7 @@ public:
   ObjectType* operator()(Args&&... args)
   {
     auto refcnt = std::unique_ptr<RefCounterImpl<ObjectType, Allocator>>(
-      new RefCounterImpl<ObjectType, Allocator>);
+      new RefCounterImpl<ObjectType, Allocator>());
 
     ObjectType* obj = nullptr;
     if (m_allocator)

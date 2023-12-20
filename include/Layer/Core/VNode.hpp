@@ -50,9 +50,9 @@ class VNode
   public ObjectImpl<VObject>
 #endif
 {
-  Bound                 m_bound;
-  uint8_t               m_state{ 0 };
-  std::vector<VNodeRef> m_observers;
+  Bound               m_bound;
+  uint8_t             m_state{ 0 };
+  std::vector<VNode*> m_observers;
 
   template<typename Visitor>
   void visitObservers(Visitor&& v)

@@ -18,6 +18,7 @@
 
 #include "Layer/Memory/ObjectImpl.hpp"
 #include "Layer/Memory/VObject.hpp"
+#include "Layer/Memory/VRefCnt.hpp"
 #include "Utility/Log.hpp"
 #include "Layer/Core/VBound.hpp"
 
@@ -76,10 +77,10 @@ protected:
   void unobserve(VNodePtr sender);
 
 public:
-  VNode()
+  VNode(VRefCnt* cnt)
 #ifdef USE_SHARED_PTR
 #else
-    : ObjectImpl<VObject>(0)
+    : ObjectImpl<VObject>(cnt)
 #endif
   {
   }

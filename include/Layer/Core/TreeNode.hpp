@@ -18,6 +18,8 @@
 
 #include "Layer/Core/VNode.hpp"
 #include "Layer/Config.hpp"
+#include "Layer/Memory/VNew.hpp"
+#include "Layer/Memory/VRefCnt.hpp"
 #include <algorithm>
 #include <string>
 #include <memory>
@@ -45,7 +47,7 @@ inline TreeNodePtr makeTreeNodePtr(Args&&... args)
   auto p = std::make_shared<TreeNode>(std::forward<Args>(args)...);
   return p;
 #else
-  return TreeNodePtr();
+  return TreeNodePtr(layer::V_NEW<TreeNode>(std::forward<Args>(args)...));
 #endif
 };
 class VGG_EXPORTS TreeNode : public layer::VNode
@@ -54,10 +56,11 @@ class VGG_EXPORTS TreeNode : public layer::VNode
 
 public:
   using NodeIter = std::list<TreeNodePtr>::iterator;
-  TreeNode(const TreeNode& other)
+  TreeNode(layer::VRefCnt* cnt)
+    : VNode(cnt)
   {
-    m_name = other.m_name;
   }
+  TreeNode(TreeNode&) = delete;
   TreeNode& operator=(const TreeNode& other) = delete;
   TreeNode(TreeNode&&) noexcept = delete;
   TreeNode& operator=(TreeNode&&) noexcept = delete;
@@ -219,8 +222,9 @@ protected:
   }
 
 protected:
-  TreeNode(const std::string& name)
-    : m_name(name)
+  TreeNode(layer::VRefCnt* cnt, const std::string& name)
+    : VNode(cnt)
+    , m_name(name)
     , m_iter(m_firstChild.end())
   {
   }

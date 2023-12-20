@@ -18,8 +18,10 @@
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Config.hpp"
 #include "Layer/Core/Transform.hpp"
+#include "Layer/Memory/VNew.hpp"
 #include "Layer/Renderer.hpp"
 #include <core/SkBlendMode.h>
+#include <utility>
 
 class SkImage;
 class SkCanvas;
@@ -41,7 +43,7 @@ inline ImageNodePtr makeImageNodePtr(Args&&... args)
   auto p = std::make_shared<ImageNode>(std::forward<Args>(args)...);
   return p;
 #else
-  return ImageNodePtr();
+  return ImageNodePtr(V_NEW<ImageNode>(std::forward<Args>(args)...));
 #endif
 };
 class ImageNode__pImpl;
@@ -49,8 +51,8 @@ class VGG_EXPORTS ImageNode final : public PaintNode
 {
   VGG_DECL_IMPL(ImageNode)
 public:
-  ImageNode(const std::string& name, std::string guid);
-  ImageNode(const ImageNode&);
+  ImageNode(VRefCnt* cnt, const std::string& name, std::string guid);
+  ImageNode(const ImageNode&) = delete;
   ImageNode& operator=(const ImageNode&) = delete;
 
   ImageNode(ImageNode&&) noexcept = delete;

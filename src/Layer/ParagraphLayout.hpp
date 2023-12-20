@@ -16,7 +16,10 @@
 #pragma once
 
 #include "Layer/Core/Attrs.hpp"
+#include "Layer/Core/VNode.hpp"
 #include "Layer/Core/VType.hpp"
+#include "Layer/Memory/VNew.hpp"
+#include "Layer/Memory/VRefCnt.hpp"
 #include "Layer/VSkia.hpp"
 #include "ParagraphParser.hpp"
 #include "DebugCanvas.hpp"
@@ -33,6 +36,7 @@
 #include <modules/skparagraph/include/FontCollection.h>
 #include <modules/skparagraph/include/TextStyle.h>
 #include <modules/skparagraph/include/TypefaceFontProvider.h>
+#include <utility>
 #include <variant>
 
 namespace VGG::layer
@@ -118,7 +122,7 @@ inline RichTextBlockPtr makeRichTextBlockPtr(Args&&... args)
   auto p = std::make_shared<RichTextBlock>(std::forward<Args>(args)...);
   return p;
 #else
-  return RichTextBlockPtr();
+  return RichTextBlockPtr(V_NEW<RichTextBlock>(std::forward<Args>(args)...));
 #endif
 };
 
@@ -181,19 +185,21 @@ protected:
   }
 
 public:
-  RichTextBlock()
+  RichTextBlock(VRefCnt* cnt)
+    : VNode(cnt)
   {
     auto mgr = sk_ref_sp(FontManager::instance().defaultFontManager());
     m_fontCollection = sk_make_sp<VGGFontCollection>(std::move(mgr));
   }
-  RichTextBlock(const RichTextBlock&) = default;
-  RichTextBlock& operator=(const RichTextBlock&) = default;
+  RichTextBlock(const RichTextBlock&) = delete;
+  RichTextBlock& operator=(const RichTextBlock&) = delete;
 
-  RichTextBlock(RichTextBlock&&) noexcept = default;
-  RichTextBlock& operator=(RichTextBlock&&) noexcept = default;
+  RichTextBlock(RichTextBlock&&) noexcept = delete;
+  RichTextBlock& operator=(RichTextBlock&&) noexcept = delete;
 
-  RichTextBlock(sk_sp<VGGFontCollection> fontCollection)
-    : m_fontCollection(std::move(fontCollection))
+  RichTextBlock(VRefCnt* cnt, sk_sp<VGGFontCollection> fontCollection)
+    : VNode(cnt)
+    , m_fontCollection(std::move(fontCollection))
   {
   }
 

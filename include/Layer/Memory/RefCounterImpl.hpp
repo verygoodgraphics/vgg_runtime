@@ -116,7 +116,6 @@ public:
     auto cnt = m_weakCnt--;
 
     std::unique_lock<std::mutex> lk(m_mtx);
-    lk.lock();
     // Deletes counter itself if and only if weak_ref == 0 and the object state is DESTROYED
     if (cnt == 0 && m_objectState == EObjectState::DESTROYED)
     {
@@ -140,6 +139,7 @@ public:
     auto cnt = m_cnt++;
     if (m_objectState == EObjectState::ALIVE && cnt > 1)
     {
+      lk.unlock();
       auto objectWrapper =
         reinterpret_cast<ObjectWrapper<ManagedObjectType, AllocatorType>*>(m_objectBuffer);
       return objectWrapper->object();

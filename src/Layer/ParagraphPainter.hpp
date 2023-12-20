@@ -17,6 +17,7 @@
 
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VType.hpp"
+#include "Layer/Memory/VNew.hpp"
 #include "Layer/ParagraphLayout.hpp"
 #include "Layer/Renderer.hpp"
 #include <core/SkPaint.h>
@@ -45,7 +46,7 @@ inline VParagraphPainterPtr makeVParagraphPainterPtr(Args&&... args)
   auto p = std::make_shared<VParagraphPainter>(std::forward<Args>(args)...);
   return p;
 #else
-  return VParagraphPainterPtr();
+  return VParagraphPainterPtr(V_NEW<VParagraphPainter>(std::forward<Args>(args)...));
 #endif
 };
 
@@ -57,7 +58,8 @@ class VParagraphPainter
   RichTextBlockPtr                              m_paragraph;
 
 public:
-  VParagraphPainter()
+  VParagraphPainter(VRefCnt* cnt)
+    : VNode(cnt)
   {
   }
 

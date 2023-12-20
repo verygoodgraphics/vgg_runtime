@@ -70,6 +70,26 @@ struct PaintOption
   }
 };
 
+class PaintNode;
+#ifdef USE_SHARED_PTR
+using PaintNodePtr = std::shared_ptr<PaintNode>;
+using PaintNodeRef = std::weak_ptr<PaintNode>;
+#else
+using PaintNodePtr = VGG::layer::Ref<PaintNode>;
+using PaintNodeRef = VGG::layer::WeakRef<PaintNode>;
+#endif
+
+template<typename... Args>
+inline PaintNodePtr makePaintNodePtr(Args&&... args)
+{
+#ifdef USE_SHARED_PTR
+  auto p = std::make_shared<PaintNode>(std::forward<Args>(args)...);
+  return p;
+#else
+  return PaintNodePtr();
+#endif
+};
+
 class PaintNode__pImpl;
 class VGG_EXPORTS PaintNode : public TreeNode
 {
@@ -92,14 +112,14 @@ public:
 
   virtual TreeNodePtr clone() const override;
 
-  void addChild(const std::shared_ptr<PaintNode> node)
+  void addChild(const PaintNodePtr node)
   {
     if (!node)
       return;
     pushChildBack(std::move(node));
   }
 
-  void addSubShape(const std::shared_ptr<PaintNode> node, EBoolOp op)
+  void addSubShape(PaintNodePtr node, EBoolOp op)
   {
     if (!node)
       return;
@@ -223,7 +243,7 @@ protected:
   void           paintStyle(Renderer* renderer, const SkPath& path, const SkPath& mask);
 
   [[deprecated]] virtual void paintFill(
-    Renderer*    renderer,
+    Renderer*        renderer,
     sk_sp<SkBlender> blender,
     const SkPath&    path); // TODO:: only for ImageNode overriding
 };

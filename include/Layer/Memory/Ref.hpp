@@ -21,6 +21,7 @@
 #include <cstddef>
 #include <memory>
 #include <regex>
+#include <cassert>
 
 namespace VGG::layer
 {
@@ -182,15 +183,15 @@ public:
     return *m_ptr;
   }
 
-  const T* operator->() const
+  T* operator->() const
   {
     return m_ptr;
   }
 
-  T* operator->()
-  {
-    return m_ptr;
-  }
+  // T* operator->()
+  // {
+  //   return m_ptr;
+  // }
 
   operator T*()
   {
@@ -201,15 +202,15 @@ public:
     return m_ptr;
   }
 
-  T* get()
+  T* get() const
   {
     return m_ptr;
   }
 
-  const T* get() const
-  {
-    return m_ptr;
-  }
+  // const T* get() const
+  // {
+  //   return m_ptr;
+  // }
 
   T* take()
   {
@@ -423,18 +424,19 @@ public:
   Ref<T> lock() const
   {
     Ref<T> ret;
-    if (m_cnt)
-    {
-      Ref<VObject> p((VObject*)m_cnt->object());
-      if (p)
-      {
-        ret = m_object; // why
-      }
-      else
-      {
-        release();
-      }
-    }
+    assert(false);
+    // if (m_cnt)
+    // {
+    //   Ref<T> p((T*)m_cnt->object());
+    //   if (p)
+    //   {
+    //     ret = m_object; // why
+    //   }
+    //   else
+    //   {
+    //     release();
+    //   }
+    // }
     return ret;
   }
 

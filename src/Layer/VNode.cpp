@@ -22,8 +22,9 @@ bool VNode::isInvalid() const
   return m_state & INVALIDATE;
 }
 
-void VNode::observe(const VNodePtr& sender)
+void VNode::observe(VNodePtr sender)
 {
+#ifdef USE_SHARED_PTR
   if (auto it = std::find_if(
         sender->m_observers.begin(),
         sender->m_observers.end(),
@@ -32,10 +33,22 @@ void VNode::observe(const VNodePtr& sender)
   {
     sender->m_observers.push_back(shared_from_this());
   }
+#else
+  if (auto it = std::find_if(
+        sender->m_observers.begin(),
+        sender->m_observers.end(),
+        [&](const auto& o) { return o.lock() == this; });
+      it == sender->m_observers.end())
+  {
+    sender->m_observers.push_back(VNodeRef(this));
+  }
+#endif
 }
 
-void VNode::unobserve(const VNodePtr& sender)
+void VNode::unobserve(VNodePtr sender)
 {
+
+#ifdef USE_SHARED_PTR
   if (auto it = std::find_if(
         sender->m_observers.begin(),
         sender->m_observers.end(),
@@ -44,6 +57,16 @@ void VNode::unobserve(const VNodePtr& sender)
   {
     sender->m_observers.erase(it);
   }
+#else
+  if (auto it = std::find_if(
+        sender->m_observers.begin(),
+        sender->m_observers.end(),
+        [&](const auto& o) { return o.lock() == this; });
+      it != sender->m_observers.end())
+  {
+    sender->m_observers.erase(it);
+  }
+#endif
 }
 
 void VNode::invalidate()

@@ -16,6 +16,7 @@
 #pragma once
 #include "Layer/Renderable.hpp"
 #include "Layer/Zoomer.hpp"
+// #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/TreeNode.hpp"
 #include "Layer/Config.hpp"
 
@@ -30,15 +31,22 @@ namespace VGG
 namespace layer
 {
 class PaintNode;
-}
+#ifdef USE_SHARED_PTR
+using PaintNodePtr = std::shared_ptr<PaintNode>;
+using PaintNodeRef = std::weak_ptr<PaintNode>;
+#else
+using PaintNodePtr = VGG::layer::Ref<PaintNode>;
+using PaintNodeRef = VGG::layer::WeakRef<PaintNode>;
+#endif
+} // namespace layer
 using namespace layer;
 
 using ResourceRepo = std::map<std::string, std::vector<char>>;
-using ObjectTableType = std::unordered_map<std::string, std::weak_ptr<PaintNode>>;
+using ObjectTableType = std::unordered_map<std::string, PaintNodeRef>;
 using InstanceTable = std::unordered_map<
   std::string,
   std::pair<
-    std::weak_ptr<PaintNode>,
+    PaintNodeRef,
     std::string>>; // {instance_id: {instance_object: master_id}}
                    //
 class Scene__pImpl;
@@ -58,7 +66,7 @@ public:
   virtual ~Scene();
   [[deprecated("Use SceneBuilder for data preparation")]] void loadFileContent(
     const nlohmann::json& j);
-  void setSceneRoots(std::vector<std::shared_ptr<PaintNode>> roots);
+  void setSceneRoots(std::vector<PaintNodePtr> roots);
   void setName(std::string name)
   {
     m_name = std::move(name);

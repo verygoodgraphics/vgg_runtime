@@ -26,6 +26,24 @@ class SkCanvas;
 
 namespace VGG::layer
 {
+class ImageNode;
+#ifdef USE_SHARED_PTR
+using ImageNodePtr = std::shared_ptr<ImageNode>;
+#else
+using ImageNodePtr = Ref<ImageNode>;
+using ImageNodeRef = WeakRef<ImageNode>;
+#endif
+
+template<typename... Args>
+inline ImageNodePtr makeImageNodePtr(Args&&... args)
+{
+#ifdef USE_SHARED_PTR
+  auto p = std::make_shared<ImageNode>(std::forward<Args>(args)...);
+  return p;
+#else
+  return ImageNodePtr();
+#endif
+};
 class ImageNode__pImpl;
 class VGG_EXPORTS ImageNode final : public PaintNode
 {

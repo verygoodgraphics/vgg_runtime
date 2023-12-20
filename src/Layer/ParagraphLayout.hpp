@@ -104,6 +104,24 @@ struct TextLayoutFixed
 
 using TextLayoutMode = std::variant<TextLayoutFixed, TextLayoutAutoWidth, TextLayoutAutoHeight>;
 
+class RichTextBlock;
+#ifdef USE_SHARED_PTR
+using RichTextBlockPtr = std::shared_ptr<RichTextBlock>;
+#else
+using RichTextBlockPtr = VGG::layer::Ref<RichTextBlock>;
+#endif
+
+template<typename... Args>
+inline RichTextBlockPtr makeRichTextBlockPtr(Args&&... args)
+{
+#ifdef USE_SHARED_PTR
+  auto p = std::make_shared<RichTextBlock>(std::forward<Args>(args)...);
+  return p;
+#else
+  return RichTextBlockPtr();
+#endif
+};
+
 class RichTextBlock final
   : public ParagraphListener
   , public VNode

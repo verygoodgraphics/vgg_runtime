@@ -28,9 +28,26 @@
 namespace VGG
 {
 class TreeNode;
+
+#ifdef USE_SHARED_PTR
 using TreeNodePtr = std::shared_ptr<TreeNode>;
 using TreeNodeRef = std::weak_ptr<TreeNode>;
+#else
+using TreeNodePtr = VGG::layer::Ref<TreeNode>;
+using TreeNodeRef = VGG::layer::WeakRef<TreeNode>;
 
+#endif
+
+template<typename... Args>
+inline TreeNodePtr makeTreeNodePtr(Args&&... args)
+{
+#ifdef USE_SHARED_PTR
+  auto p = std::make_shared<TreeNode>(std::forward<Args>(args)...);
+  return p;
+#else
+  return TreeNodePtr();
+#endif
+};
 class VGG_EXPORTS TreeNode : public layer::VNode
 {
   using FirstChildNode = std::list<TreeNodePtr>;
@@ -42,8 +59,8 @@ public:
     m_name = other.m_name;
   }
   TreeNode& operator=(const TreeNode& other) = delete;
-  TreeNode(TreeNode&&) noexcept = default;
-  TreeNode& operator=(TreeNode&&) noexcept = default;
+  TreeNode(TreeNode&&) noexcept = delete;
+  TreeNode& operator=(TreeNode&&) noexcept = delete;
   struct Iterator
   {
     // NOLINTBEGIN
@@ -166,7 +183,13 @@ public:
 
   static TreeNodePtr createNode(const std::string& name)
   {
+#ifdef USE_SHARED_PTR
     return TreeNodePtr(new TreeNode(name));
+#else
+    return nullptr;
+    // TreeNodePtr();
+    //  makeTreeNodePtr(name);
+#endif
   }
 
   virtual TreeNodePtr clone() const;

@@ -235,10 +235,10 @@ Style SceneBuilder::fromStyle(const json& j, const Bound& bound, const glm::mat3
   return style;
 }
 
-std::shared_ptr<PaintNode> SceneBuilder::fromObject(const json& j, const glm::mat3& totalMatrix)
+PaintNodePtr SceneBuilder::fromObject(const json& j, const glm::mat3& totalMatrix)
 {
-  std::shared_ptr<PaintNode> ro;
-  auto                       klass = j.value("class", "");
+  PaintNodePtr ro;
+  auto         klass = j.value("class", "");
   if (klass == "group")
   {
     ro = fromGroup(j, totalMatrix);
@@ -275,16 +275,14 @@ std::shared_ptr<PaintNode> SceneBuilder::fromObject(const json& j, const glm::ma
   return ro;
 }
 
-inline std::shared_ptr<PaintNode> SceneBuilder::fromImage(
-  const json&      j,
-  const glm::mat3& totalMatrix)
+inline PaintNodePtr SceneBuilder::fromImage(const json& j, const glm::mat3& totalMatrix)
 {
   return makeObjectCommonProperty(
     j,
     totalMatrix,
     [&j](std::string name, std::string guid)
     {
-      auto p = std::make_shared<ImageNode>(j.value("name", ""), std::move(guid));
+      auto p = makeImageNodePtr(j.value("name", ""), std::move(guid));
       return p;
     },
     [&](ImageNode* p, const glm::mat3& matrix)
@@ -294,14 +292,14 @@ inline std::shared_ptr<PaintNode> SceneBuilder::fromImage(
     });
 }
 
-std::shared_ptr<PaintNode> SceneBuilder::fromPath(const json& j, const glm::mat3& totalMatrix)
+PaintNodePtr SceneBuilder::fromPath(const json& j, const glm::mat3& totalMatrix)
 {
   return makeObjectCommonProperty(
     j,
     totalMatrix,
     [&](std::string name, std::string guid)
     {
-      auto p = std::make_shared<PaintNode>(std::move(name), VGG_PATH, std::move(guid));
+      auto p = makePaintNodePtr(std::move(name), VGG_PATH, std::move(guid));
       return p;
     },
     [&, this](PaintNode* p, const glm::mat3& matrix)
@@ -355,14 +353,14 @@ std::shared_ptr<PaintNode> SceneBuilder::fromPath(const json& j, const glm::mat3
     });
 }
 
-std::shared_ptr<PaintNode> SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
+PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
 {
   return makeObjectCommonProperty(
     j,
     totalMatrix,
     [](std::string name, std::string guid)
     {
-      auto p = std::make_shared<layer::TextNode>(std::move(name), std::move(guid));
+      auto p = makeTextNodePtr(std::move(name), std::move(guid));
       return p;
     },
     [&](layer::TextNode* p, const glm::mat3& matrix)
@@ -410,12 +408,10 @@ std::shared_ptr<PaintNode> SceneBuilder::fromText(const json& j, const glm::mat3
     });
 }
 
-std::vector<std::shared_ptr<PaintNode>> SceneBuilder::fromFrames(
-  const json&      j,
-  const glm::mat3& totalMatrix)
+std::vector<PaintNodePtr> SceneBuilder::fromFrames(const json& j, const glm::mat3& totalMatrix)
 {
-  std::vector<std::shared_ptr<PaintNode>> frames;
-  const auto&                             fs = get_or_default(j, "frames");
+  std::vector<PaintNodePtr> frames;
+  const auto&               fs = get_or_default(j, "frames");
   for (const auto& e : fs)
   {
     frames.push_back(fromFrame(e, totalMatrix));
@@ -423,12 +419,12 @@ std::vector<std::shared_ptr<PaintNode>> SceneBuilder::fromFrames(
   return frames;
 }
 
-inline std::vector<std::shared_ptr<PaintNode>> SceneBuilder::fromSymbolMasters(
+inline std::vector<PaintNodePtr> SceneBuilder::fromSymbolMasters(
   const json&      j,
   const glm::mat3& totalMatrix)
 {
-  std::vector<std::shared_ptr<PaintNode>> symbols;
-  const auto&                             symbolMasters = get_or_default(j, "symbolMaster");
+  std::vector<PaintNodePtr> symbols;
+  const auto&               symbolMasters = get_or_default(j, "symbolMaster");
   for (const auto& e : symbolMasters)
   {
     symbols.emplace_back(fromSymbolMaster(e, totalMatrix));
@@ -436,14 +432,14 @@ inline std::vector<std::shared_ptr<PaintNode>> SceneBuilder::fromSymbolMasters(
   return symbols;
 }
 
-std::shared_ptr<PaintNode> SceneBuilder::fromFrame(const json& j, const glm::mat3& totalMatrix)
+PaintNodePtr SceneBuilder::fromFrame(const json& j, const glm::mat3& totalMatrix)
 {
   auto p = makeObjectCommonProperty(
     j,
     totalMatrix,
     [](std::string name, std::string guid)
     {
-      auto p = std::make_shared<PaintNode>(std::move(name), VGG_FRAME, std::move(guid));
+      auto p = makePaintNodePtr(std::move(name), VGG_FRAME, std::move(guid));
       return p;
     },
     [&, this](PaintNode* p, const glm::mat3& matrix)
@@ -461,16 +457,14 @@ std::shared_ptr<PaintNode> SceneBuilder::fromFrame(const json& j, const glm::mat
   return p;
 }
 
-std::shared_ptr<PaintNode> SceneBuilder::fromSymbolMaster(
-  const json&      j,
-  const glm::mat3& totalMatrix)
+PaintNodePtr SceneBuilder::fromSymbolMaster(const json& j, const glm::mat3& totalMatrix)
 {
   return makeObjectCommonProperty(
     j,
     totalMatrix,
     [&](std::string name, std::string guid)
     {
-      auto p = std::make_shared<PaintNode>(std::move(name), VGG_MASTER, std::move(guid));
+      auto p = makePaintNodePtr(std::move(name), VGG_MASTER, std::move(guid));
       // appendSymbolMaster(p);
       return p;
     },
@@ -486,7 +480,7 @@ std::shared_ptr<PaintNode> SceneBuilder::fromSymbolMaster(
     });
 }
 
-std::shared_ptr<PaintNode> SceneBuilder::makeContour(
+PaintNodePtr SceneBuilder::makeContour(
   const json&      j,
   const json&      parent,
   const glm::mat3& totalMatrix)
@@ -504,7 +498,7 @@ std::shared_ptr<PaintNode> SceneBuilder::makeContour(
       get_opt<int>(e, "cornerStyle"));
   }
   // auto p = std::make_shared<ContourNode>("contour", std::make_shared<Contour>(contour), "");
-  auto p = std::make_shared<PaintNode>("contour", VGG_CONTOUR, "");
+  auto p = makePaintNodePtr("contour", VGG_CONTOUR, "");
   p->setOverflow(OF_Visible);
   p->setContourOption(ContourOption{ ECoutourType::MCT_FrameOnly, false });
   CoordinateConvert::convertCoordinateSystem(contour, totalMatrix);
@@ -514,7 +508,7 @@ std::shared_ptr<PaintNode> SceneBuilder::makeContour(
   return p;
 }
 
-std::shared_ptr<PaintNode> SceneBuilder::fromGroup(const json& j, const glm::mat3& totalMatrix)
+PaintNodePtr SceneBuilder::fromGroup(const json& j, const glm::mat3& totalMatrix)
 {
   // auto p = std::make_shared<PaintNode>(j.value("name", ""), VGG_GROUP);
   //  init group properties
@@ -523,7 +517,7 @@ std::shared_ptr<PaintNode> SceneBuilder::fromGroup(const json& j, const glm::mat
     totalMatrix,
     [&](std::string name, std::string guid)
     {
-      auto p = std::make_shared<PaintNode>(std::move(name), VGG_GROUP, std::move(guid));
+      auto p = makePaintNodePtr(std::move(name), VGG_GROUP, std::move(guid));
       return p;
     },
     [&, this](PaintNode* p, const glm::mat3& matrix)

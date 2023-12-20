@@ -78,8 +78,13 @@ PaintNode::PaintNode(const PaintNode& other)
 
 TreeNodePtr PaintNode::clone() const
 {
+#ifdef USE_SHARED_PTR
   auto newNode = std::make_shared<PaintNode>(*this);
   return newNode;
+#else
+  ASSERT(false);
+  return nullptr;
+#endif
 }
 
 void PaintNode::setContextSettings(const ContextSetting& settings)
@@ -293,7 +298,7 @@ SkPath PaintNode::childPolyOperation() const
     return SkPath();
   }
   std::vector<std::pair<SkPath, EBoolOp>> ct;
-  for (auto it = m_firstChild.cbegin(); it != m_firstChild.cend(); ++it)
+  for (auto it = m_firstChild.begin(); it != m_firstChild.end(); ++it)
   {
     auto paintNode = static_cast<PaintNode*>(it->get());
     auto childMask = paintNode->asOutlineMask(&paintNode->transform());

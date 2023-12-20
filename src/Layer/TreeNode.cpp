@@ -37,7 +37,11 @@ void TreeNode::pushChildBack(TreeNodePtr node)
 {
   auto it = m_firstChild.insert(m_firstChild.end(), node);
   node->m_iter = it;
+#ifdef USE_SHARED_PTR
   node->m_parent = std::static_pointer_cast<TreeNode>(shared_from_this());
+#else
+  node->m_parent = this;
+#endif
   observe(node);
 }
 
@@ -45,7 +49,11 @@ void TreeNode::pushChildFront(TreeNodePtr node)
 {
   auto it = m_firstChild.insert(m_firstChild.begin(), node);
   node->m_iter = it;
+#ifdef USE_SHARED_PTR
   node->m_parent = std::static_pointer_cast<TreeNode>(shared_from_this());
+#else
+  node->m_parent = this;
+#endif
   observe(node);
 }
 
@@ -58,13 +66,18 @@ void TreeNode::pushChildAt(const std::string& name, TreeNodePtr node)
   if (it != m_firstChild.end())
   {
     node->m_iter = m_firstChild.insert(it, node);
+#ifdef USE_SHARED_PTR
     node->m_parent = std::static_pointer_cast<TreeNode>(shared_from_this());
+#else
+    node->m_parent = this;
+#endif
     observe(node);
   }
 }
 
 void TreeNode::pushSiblingFront(TreeNodePtr node)
 {
+#ifdef USE_SHARED_PTR
   auto p = m_parent.lock();
   if (p)
   {
@@ -72,6 +85,15 @@ void TreeNode::pushSiblingFront(TreeNodePtr node)
     node->m_parent = p;
     observe(node);
   }
+#else
+  auto p = m_parent.lock();
+  if (p)
+  {
+    p->m_firstChild.push_front(node);
+    node->m_parent = p;
+    observe(node);
+  }
+#endif
 }
 
 void TreeNode::pushSiblingAt(const std::string& name, TreeNodePtr node)
@@ -112,7 +134,11 @@ TreeNodePtr TreeNode::removeChild(const std::string& name)
   }
   auto r = *it;
   unobserve(*it);
+#ifdef USE_SHARED_PTR
   r->m_parent.reset();
+#else
+  r->m_parent.release();
+#endif
   r->m_iter = m_firstChild.end();
   m_firstChild.erase(it);
   return r;
@@ -135,6 +161,7 @@ TreeNodePtr TreeNode::findChild(const std::string& name) const
 
 TreeNodePtr TreeNode::findNextSblingFromCurrent(const std::string& name) const
 {
+#ifdef USE_SHARED_PTR
   auto p = m_parent.lock();
   if (!p)
   {
@@ -147,6 +174,20 @@ TreeNodePtr TreeNode::findNextSblingFromCurrent(const std::string& name) const
     return *it;
   }
   return nullptr;
+#else
+  auto p = m_parent.lock();
+  if (!p)
+  {
+    return nullptr;
+  }
+  auto it =
+    std::find_if(m_iter, p->m_firstChild.end(), [&name](auto& a) { return a->m_name == name; });
+  if (it != p->m_firstChild.end())
+  {
+    return *it;
+  }
+  return nullptr;
+#endif
 }
 
 TreeNodePtr TreeNode::findPrevSiblingFromCurrent(const std::string& name) const
@@ -220,7 +261,8 @@ TreeNodePtr TreeNode::findChildRecursiveImpl(const TreeNodePtr& ptr, const std::
 
 TreeNodePtr TreeNode::clone() const
 {
-  return createNode(m_name);
+  // return createNode(m_name);
+  return TreeNodePtr();
 }
 
 TreeNodePtr TreeNode::cloneChildren() const

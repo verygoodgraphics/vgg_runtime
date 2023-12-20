@@ -34,7 +34,8 @@ namespace VGG::layer
 {
 
 using namespace nlohmann;
-using RootArray = std::vector<std::shared_ptr<PaintNode>>;
+
+using RootArray = std::vector<PaintNodePtr>;
 
 struct SceneBuilderResult
 {
@@ -55,8 +56,8 @@ struct SceneBuilderResult
 
 class SceneBuilder
 {
-  std::vector<std::shared_ptr<PaintNode>> m_frames;
-  std::vector<std::shared_ptr<PaintNode>> m_symbols;
+  std::vector<PaintNodePtr> m_frames;
+  std::vector<PaintNodePtr> m_symbols;
 
   std::optional<std::string> m_version;
   bool                       m_invalid{ false };
@@ -96,7 +97,7 @@ class SceneBuilder
   Style fromStyle(const json& j, const Bound& bound, const glm::mat3& totalMatrix);
 
   template<typename F1, typename F2>
-  inline std::shared_ptr<PaintNode> makeObjectCommonProperty(
+  inline PaintNodePtr makeObjectCommonProperty(
     const json&      j,
     const glm::mat3& totalMatrix,
     F1&&             creator,
@@ -134,46 +135,46 @@ class SceneBuilder
     return obj;
   }
 
-  std::shared_ptr<PaintNode> makeContour(
+  PaintNodePtr makeContour(
     const json&      j,
     const json&      parent,
     const glm::mat3& totalMatrix);
 
-  std::shared_ptr<PaintNode> fromFrame(const json& j, const glm::mat3& totalMatrix);
+  PaintNodePtr fromFrame(const json& j, const glm::mat3& totalMatrix);
 
-  std::shared_ptr<PaintNode> fromImage(const json& j, const glm::mat3& totalMatrix);
+  PaintNodePtr fromImage(const json& j, const glm::mat3& totalMatrix);
 
-  std::shared_ptr<PaintNode> fromText(const json& j, const glm::mat3& totalMatrix);
+  PaintNodePtr fromText(const json& j, const glm::mat3& totalMatrix);
 
-  std::shared_ptr<PaintNode> fromPath(const json& j, const glm::mat3& totalMatrix);
+  PaintNodePtr fromPath(const json& j, const glm::mat3& totalMatrix);
 
-  std::shared_ptr<PaintNode> fromObject(const json& j, const glm::mat3& totalMatrix);
+  PaintNodePtr fromObject(const json& j, const glm::mat3& totalMatrix);
 
-  std::shared_ptr<PaintNode> fromGroup(const json& j, const glm::mat3& totalMatrix);
+  PaintNodePtr fromGroup(const json& j, const glm::mat3& totalMatrix);
 
-  std::vector<std::shared_ptr<PaintNode>> fromFrames(const json& j, const glm::mat3& totalMatrix);
+  std::vector<PaintNodePtr> fromFrames(const json& j, const glm::mat3& totalMatrix);
 
-  std::shared_ptr<PaintNode> fromSymbolInstance(const json& j, const glm::mat3& totalMatrix)
+  PaintNodePtr fromSymbolInstance(const json& j, const glm::mat3& totalMatrix)
   {
     return nullptr;
   }
 
-  std::shared_ptr<PaintNode> fromSymbolMaster(const json& j, const glm::mat3& totalMatrix);
+  PaintNodePtr fromSymbolMaster(const json& j, const glm::mat3& totalMatrix);
 
-  std::vector<std::shared_ptr<PaintNode>> fromSymbolMasters(
+  std::vector<PaintNodePtr> fromSymbolMasters(
     const json&      j,
     const glm::mat3& totalMatrix);
 
-  void appendSymbolMaster(std::shared_ptr<PaintNode> master)
+  void appendSymbolMaster(PaintNodePtr master)
   {
     m_symbols.push_back(std::move(master));
   }
 
-  std::vector<std::shared_ptr<PaintNode>> fromTopLevelFrames(
+  std::vector<PaintNodePtr> fromTopLevelFrames(
     const json&      j,
     const glm::mat3& totalMatrix)
   {
-    std::vector<std::shared_ptr<PaintNode>> frames;
+    std::vector<PaintNodePtr> frames;
     for (const auto& e : j)
     {
       frames.push_back(fromFrame(e, totalMatrix));
@@ -188,7 +189,7 @@ class SceneBuilder
   static json defaultTextAttr();
 
 public:
-  static std::vector<std::shared_ptr<PaintNode>> build(const json& j, bool resetOrigin = true)
+  static std::vector<PaintNodePtr> build(const json& j, bool resetOrigin = true)
   {
     SceneBuilder builder;
     builder.buildImpl(j, resetOrigin);

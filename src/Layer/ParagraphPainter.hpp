@@ -31,19 +31,37 @@ namespace VGG
 namespace layer
 {
 
+class VParagraphPainter;
+#ifdef USE_SHARED_PTR
+using VParagraphPainterPtr = std::shared_ptr<VParagraphPainter>;
+#else
+using VParagraphPainterPtr = Ref<VParagraphPainter>;
+#endif
+
+template<typename... Args>
+inline VParagraphPainterPtr makeVParagraphPainterPtr(Args&&... args)
+{
+#ifdef USE_SHARED_PTR
+  auto p = std::make_shared<VParagraphPainter>(std::forward<Args>(args)...);
+  return p;
+#else
+  return VParagraphPainterPtr();
+#endif
+};
+
 class VParagraphPainter
   : public skia::textlayout::ParagraphPainter
   , public VNode
 {
   std::unordered_map<int, std::vector<SkPaint>> m_cache;
-  std::shared_ptr<RichTextBlock>                m_paragraph;
+  RichTextBlockPtr                              m_paragraph;
 
 public:
   VParagraphPainter()
   {
   }
 
-  void setParagraph(std::shared_ptr<RichTextBlock> paragraph)
+  void setParagraph(RichTextBlockPtr paragraph)
   {
     if (m_paragraph == paragraph)
       return;

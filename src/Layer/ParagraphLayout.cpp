@@ -61,9 +61,11 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
   {
     auto painterID = fun();
     style.setForegroundPaintID(painterID);
-    // TODO::
-    //  SkColor c = attr.fills[0].color;
-    // style.setDecorationColor(c);
+    std::visit(
+      Overloaded{ [&](const Gradient& g) { WARN("Don't support gradient decoration"); },
+                  [&](const Color& c) { style.setDecorationColor(c); },
+                  [&](const Pattern& p) { WARN("Don't support pattern decoration"); } },
+      attr.fills[0].type);
   }
   else
   {

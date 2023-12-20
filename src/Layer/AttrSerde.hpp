@@ -331,7 +331,6 @@ inline void from_json(const json& j, Border& x)
   x.lineJoinStyle = j.at("lineJoinStyle").get<ELineJoin>();
   x.miterLimit = j.at("miterLimit").get<double>();
   x.position = j.at("position").get<EPathPosition>();
-  x.style = j.at("style").get<int64_t>();
   x.thickness = j.at("thickness").get<double>();
 }
 

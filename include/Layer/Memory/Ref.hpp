@@ -197,6 +197,11 @@ public:
   //   return m_ptr;
   // }
 
+  operator bool() const
+  {
+    return m_ptr != nullptr;
+  }
+
   operator T*()
   {
     return m_ptr;
@@ -402,6 +407,11 @@ public:
     p.m_object = nullptr;
     p.m_cnt = nullptr;
     return *this;
+  }
+
+  operator bool() const
+  {
+    return m_cnt != nullptr;
   }
 
   bool operator==(const WeakRef& other) noexcept

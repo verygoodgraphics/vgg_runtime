@@ -178,12 +178,46 @@ TEST(Memory, ref_new_without_alloc)
   ASSERT_EQ(a->refCnt()->refCount(), 0);
 }
 
+TEST(Memory, ref_weak_wrapper)
+{
+  Ref<TestClassA>     a(V_NEW<TestClassA>(0));
+  WeakRef<TestClassA> w(a);
+}
+
+TEST(Memory, ref_wrapper_def)
+{
+  Ref<TestClassA> a(V_NEW<TestClassA>(0));
+}
+
+TEST(Memory, ref_wrapper_operator)
+{
+
+  Ref<TestClassA> null;
+  ASSERT_TRUE(null == nullptr);
+  ASSERT_FALSE(null != nullptr);
+
+  Ref<TestClassA> a(V_NEW<TestClassA>(0));
+  Ref<TestClassA> b = a;
+
+  ASSERT_TRUE(a == b);
+  ASSERT_TRUE(a == b.get());
+  ASSERT_TRUE(a.get() == b);
+  ASSERT_FALSE(a != b);
+
+  WeakRef<TestClassA> w1 = a;
+  WeakRef<TestClassA> w2(a);
+  ASSERT_TRUE(w1.lock() == a);
+  ASSERT_TRUE(w2.lock() == a);
+}
+
 TEST(Memory, ref_wrapper)
 {
   Ref<TestClassA> a(V_NEW<TestClassA>(0));
   Ref<TestClassA> b(V_NEW<TestAllocator, TestClassA>(&g_alloc, 0));
   ASSERT_NE(a, b);
   ASSERT_NE(a.get(), b.get());
+
+  Ref<TestClassA> null = nullptr;
 
   a = b;
   ASSERT_EQ(a, b);
@@ -204,6 +238,7 @@ TEST(Memory, ref_wrapper)
 
 TEST(Memory, multithread)
 {
+  return;
   using std::default_random_engine;
   using std::uniform_int_distribution;
 

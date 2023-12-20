@@ -156,7 +156,6 @@ struct Border
   float              dashedOffset;
   float              flat;
   float              miterLimit;
-  int                style;
   float              thickness;
   ELineCap           lineCapStyle;
   ELineJoin          lineJoinStyle;

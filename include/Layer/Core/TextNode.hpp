@@ -22,6 +22,26 @@
 namespace VGG::layer
 {
 
+class TextNode;
+#ifdef USE_SHARED_PTR
+using TextNodePtr = std::shared_ptr<TextNode>;
+#else
+using TextNodePtr = Ref<TextNode>;
+using TextNodeRef = WeakRef<TextNode>;
+#endif
+
+template<typename... Args>
+inline TextNodePtr makeTextNodePtr(Args&&... args)
+{
+
+#ifdef USE_SHARED_PTR
+  auto p = std::make_shared<TextNode>(std::forward<Args>(args)...);
+  return p;
+#else
+  return TextNodePtr();
+#endif
+}
+
 class TextNode__pImpl;
 class VGG_EXPORTS TextNode final : public PaintNode
 {

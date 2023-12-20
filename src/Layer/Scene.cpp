@@ -48,7 +48,7 @@ public:
     : q_ptr(api)
   {
   }
-  using RootArray = std::vector<std::shared_ptr<layer::PaintNode>>;
+  using RootArray = std::vector<PaintNodePtr>;
 
   RootArray               roots;
   int                     page{ 0 };
@@ -120,7 +120,7 @@ void Scene::loadFileContent(const nlohmann::json& json)
   }
 }
 
-void Scene::setSceneRoots(std::vector<std::shared_ptr<PaintNode>> roots)
+void Scene::setSceneRoots(std::vector<PaintNodePtr> roots)
 {
   VGG_IMPL(Scene)
   if (roots.empty())

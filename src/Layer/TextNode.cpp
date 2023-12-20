@@ -47,16 +47,16 @@ public:
   TextNode__pImpl(TextNode* api)
     : q_ptr(api)
   {
-    paragraphLayout = std::make_shared<RichTextBlock>();
+    paragraphLayout = makeRichTextBlockPtr();
     auto mgr = sk_ref_sp(FontManager::instance().defaultFontManager());
     auto fontCollection = sk_make_sp<VGGFontCollection>(std::move(mgr));
-    painter = std::make_shared<VParagraphPainter>();
+    painter = makeVParagraphPainterPtr();
     painter->setParagraph(paragraphLayout);
   }
 
-  std::shared_ptr<VParagraphPainter> painter;
-  std::shared_ptr<RichTextBlock>     paragraphLayout;
-  bool                               observed{ false };
+  VParagraphPainterPtr painter;
+  RichTextBlockPtr     paragraphLayout;
+  bool                 observed{ false };
 
   TextNode__pImpl(const TextNode__pImpl& p)
   {
@@ -95,8 +95,13 @@ TextNode::TextNode(const TextNode& other)
 
 TreeNodePtr TextNode::clone() const
 {
+#ifdef USE_SHARED_PTR
   auto newNode = std::make_shared<TextNode>(*this);
   return newNode;
+#else
+  ASSERT(false);
+  return nullptr;
+#endif
 }
 
 void TextNode::setParagraph(

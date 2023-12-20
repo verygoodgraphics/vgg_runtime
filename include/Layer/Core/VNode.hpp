@@ -14,24 +14,44 @@
  * limitations under the License.
  */
 
+#pragma once
+
+#include "Layer/Memory/ObjectImpl.hpp"
+#include "Layer/Memory/VObject.hpp"
 #include "Utility/Log.hpp"
 #include "Layer/Core/VBound.hpp"
+
+#include "Layer/Memory/Ref.hpp"
 
 #include <memory>
 #include <vector>
 #include <algorithm>
 
+// #define USE_SHARED_PTR 1
+
 namespace VGG::layer
 {
 class VNode;
+
+#ifdef USE_SHARED_PTR
 using VNodePtr = std::shared_ptr<VNode>;
 using VNodeRef = std::weak_ptr<VNode>;
+#else
+using VNodePtr = Ref<VNode>;
+using VNodeRef = WeakRef<VNode>;
+#endif
 
-class VNode : public std::enable_shared_from_this<VNode>
+class VNode
+  :
+#ifdef USE_SHARED_PTR
+  public std::enable_shared_from_this<VNode>
+#else
+  public ObjectImpl<VObject>
+#endif
 {
-  Bound                             m_bound;
-  uint8_t                           m_state{ 0 };
-  std::vector<std::weak_ptr<VNode>> m_observers;
+  Bound                 m_bound;
+  uint8_t               m_state{ 0 };
+  std::vector<VNodeRef> m_observers;
 
   template<typename Visitor>
   void visitObservers(Visitor&& v)
@@ -51,12 +71,18 @@ protected:
 
   bool isInvalid() const;
 
-  void observe(const VNodePtr& sender);
+  void observe(VNodePtr sender);
 
-  void unobserve(const VNodePtr& sender);
+  void unobserve(VNodePtr sender);
 
 public:
-  VNode() = default;
+  VNode()
+#ifdef USE_SHARED_PTR
+#else
+    : ObjectImpl<VObject>(0)
+#endif
+  {
+  }
 
   void invalidate();
 

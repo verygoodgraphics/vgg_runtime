@@ -177,6 +177,28 @@ struct Shadow
   bool           isEnabled{ false };
 };
 
+struct InnerShadowStyle
+{
+  ContextSetting contextSettings;
+  float          blur{ 0.f };
+  Color          color;
+  float          offsetX{ 0.f };
+  float          offsetY{ 0.f };
+  float          spread{ 0.f };
+  bool           isEnabled{ false };
+};
+
+struct OuterShadowStyle
+{
+  ContextSetting contextSettings;
+  float          blur{ 0.f };
+  Color          color;
+  float          offsetX{ 0.f };
+  float          offsetY{ 0.f };
+  float          spread{ 0.f };
+  bool           isEnabled{ false };
+};
+using ShadowStyle = std::variant<InnerShadowStyle, OuterShadowStyle>;
 
 struct Blur
 {

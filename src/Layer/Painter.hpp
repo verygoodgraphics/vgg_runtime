@@ -15,7 +15,6 @@
  */
 #pragma once
 #include "Layer/VSkiaPrimitive.hpp"
-#include "Layer/Core/Style.hpp"
 #include "VSkImageFilters.hpp"
 #include "VSkia.hpp"
 

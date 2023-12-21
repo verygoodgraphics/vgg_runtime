@@ -25,6 +25,10 @@
 #undef DEBUG
 #define DEBUG(msg, ...)
 
+#define VERBOSE DEBUG
+#undef VERBOSE
+#define VERBOSE(msg, ...)
+
 using namespace VGG::Layout::Internal::Rule;
 
 namespace VGG
@@ -582,7 +586,7 @@ void AutoLayout::resetGridContainer()
 {
   if (auto sharedView = view.lock())
   {
-    DEBUG(
+    VERBOSE(
       "AutoLayout::resetGridContainer, view[%p, %s], grid container[%p]",
       sharedView.get(),
       sharedView->path().c_str(),
@@ -597,7 +601,7 @@ void AutoLayout::resetGridItem()
 {
   if (auto sharedView = view.lock())
   {
-    DEBUG(
+    VERBOSE(
       "AutoLayout::resetGridItem, view[%p, %s], grid item[%p]",
       sharedView.get(),
       sharedView->path().c_str(),
@@ -696,29 +700,44 @@ void AutoLayout::configureFlexNodeSize(flexbox_node* node)
     // todo
   }
 
+  if (auto sharedView = view.lock())
+  {
+    VERBOSE(
+      "AutoLayout::configureFlexNodeSize, view[%s, %s, %p, %s]",
+      sharedView->id().c_str(),
+      sharedView->name().c_str(),
+      sharedView.get(),
+      sharedView->path().c_str());
+  }
+  VERBOSE("AutoLayout::configureFlexNodeSize, width %f", sharedRule->width.value.value);
   node->set_width(toLibUnit(sharedRule->width.value.types), sharedRule->width.value.value);
   if (sharedRule->maxWidth.has_value())
   {
+    VERBOSE("AutoLayout::configureFlexNodeSize, max width %f", sharedRule->maxWidth->value.value);
     node->set_max_width(
       toLibUnit(sharedRule->maxWidth->value.types),
       sharedRule->maxWidth->value.value);
   }
   if (sharedRule->minWidth.has_value())
   {
+    VERBOSE("AutoLayout::configureFlexNodeSize, min width %f", sharedRule->minWidth->value.value);
     node->set_min_width(
       toLibUnit(sharedRule->minWidth->value.types),
       sharedRule->minWidth->value.value);
   }
 
+  VERBOSE("AutoLayout::configureFlexNodeSize, height %f", sharedRule->height.value.value);
   node->set_height(toLibUnit(sharedRule->height.value.types), sharedRule->height.value.value);
   if (sharedRule->maxHeight.has_value())
   {
+    VERBOSE("AutoLayout::configureFlexNodeSize, max height %f", sharedRule->maxHeight->value.value);
     node->set_max_height(
       toLibUnit(sharedRule->maxHeight->value.types),
       sharedRule->maxHeight->value.value);
   }
   if (sharedRule->minHeight.has_value())
   {
+    VERBOSE("AutoLayout::configureFlexNodeSize, min height %f", sharedRule->minHeight->value.value);
     node->set_min_height(
       toLibUnit(sharedRule->minHeight->value.types),
       sharedRule->minHeight->value.value);
@@ -901,12 +920,22 @@ void AutoLayout::updateSizeRule()
   auto sharedRule = rule.lock();
   if (isEnabled() && sharedView && sharedRule)
   {
+    bool configureSize{ false };
     auto newSize = sharedView->frame().size;
     if (newSize != m_frame.size)
     {
       if (sharedRule->width.value.types == Rule::Length::ETypes::PX)
       {
+        DEBUG(
+          "AutoLayout::updateSizeRule, width = %f, view[%s, %s, %p, %s]",
+          newSize.width,
+          sharedView->id().c_str(),
+          sharedView->name().c_str(),
+          sharedView.get(),
+          sharedView->path().c_str());
+
         sharedRule->width.value.value = newSize.width;
+        configureSize = true;
       }
       else
       {
@@ -915,11 +944,31 @@ void AutoLayout::updateSizeRule()
 
       if (sharedRule->height.value.types == Rule::Length::ETypes::PX)
       {
+        DEBUG(
+          "AutoLayout::updateSizeRule, height = %f, view[%s, %s, %p, %s]",
+          newSize.height,
+          sharedView->id().c_str(),
+          sharedView->name().c_str(),
+          sharedView.get(),
+          sharedView->path().c_str());
         sharedRule->height.value.value = newSize.height;
+        configureSize = true;
       }
       else
       {
         DEBUG("AutoLayout::updateSizeRule: height type is not PX, do not update");
+      }
+
+      if (configureSize)
+      {
+        if (auto node = getFlexContainer())
+        {
+          configureFlexNodeSize(node);
+        }
+        else if (auto node = getFlexItem())
+        {
+          configureFlexNodeSize(node);
+        }
       }
     }
   }

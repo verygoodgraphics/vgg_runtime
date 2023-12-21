@@ -324,11 +324,9 @@ template<typename T>
 class WeakRef
 {
   VRefCnt* m_cnt = nullptr;
-  T*       m_object = nullptr;
 
 public:
   WeakRef(T* object = nullptr) noexcept
-    : m_object(object)
   {
     if (object)
     {
@@ -339,7 +337,6 @@ public:
 
   WeakRef(Ref<T> p) noexcept
     : m_cnt(p ? p->refCnt() : nullptr)
-    , m_object(static_cast<T*>(p))
   {
     if (m_cnt)
     {
@@ -349,7 +346,6 @@ public:
 
   WeakRef(const WeakRef& p) noexcept
     : m_cnt(p.m_cnt)
-    , m_object(p.m_object)
   {
     if (m_cnt)
     {
@@ -359,10 +355,8 @@ public:
 
   WeakRef(WeakRef&& p) noexcept
     : m_cnt(std::move(p.m_cnt))
-    , m_object(std::move(p.m_object))
   {
     p.m_cnt = nullptr;
-    p.m_object = nullptr;
   }
 
   WeakRef& operator=(const WeakRef& p) noexcept
@@ -371,7 +365,6 @@ public:
       return *this;
     release();
 
-    m_object = p.m_object;
     m_cnt = p.m_cnt;
     if (m_cnt)
     {
@@ -388,9 +381,7 @@ public:
   WeakRef& operator=(Ref<T> p) noexcept
   {
     release();
-    m_object = static_cast<T*>(p);
-    assert(m_object);
-    m_cnt = m_object->refCnt();
+    m_cnt = p->refCnt();
     assert(m_cnt);
     m_cnt->weakRef();
     return *this;
@@ -402,9 +393,7 @@ public:
       return *this;
 
     release();
-    m_object = std::move(p.m_object);
     m_cnt = std::move(p.m_cnt);
-    p.m_object = nullptr;
     p.m_cnt = nullptr;
     return *this;
   }
@@ -426,7 +415,7 @@ public:
 
   bool expired() const
   {
-    return !(m_object != nullptr && m_cnt != nullptr && m_cnt->refCount() > 0);
+    return !(m_cnt != nullptr && m_cnt->refCount() > 0);
   }
 
   // Only for debug use
@@ -447,9 +436,8 @@ public:
     if (m_cnt)
     {
       m_cnt->weakDeref();
+      m_cnt = nullptr;
     }
-    m_object = nullptr;
-    m_cnt = nullptr;
   }
 
   ~WeakRef()

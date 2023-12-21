@@ -22,6 +22,7 @@
 #include "Rect.hpp"
 
 #include "Utility/Log.hpp"
+#include "Utility/VggFloat.hpp"
 
 #include <functional>
 #include <numeric>
@@ -1125,11 +1126,8 @@ void LayoutNode::scaleContour(const Layout::Rect& oldFrame, const Layout::Rect& 
   const auto oldSize = oldFrame.size;
   const auto newSize = newFrame.size;
 
-  ASSERT(oldSize.width > 0);
-  const auto xScaleFactor = newSize.width / oldSize.width;
-
-  ASSERT(oldSize.height > 0);
-  const auto yScaleFactor = newSize.height / oldSize.height;
+  const auto xScaleFactor = doubleNearlyZero(oldSize.width) ? 0 : newSize.width / oldSize.width;
+  const auto yScaleFactor = doubleNearlyZero(oldSize.height) ? 0 : newSize.height / oldSize.height;
 
   const auto nodeJson = model();
   ASSERT(nodeJson);

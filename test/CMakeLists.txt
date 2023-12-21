@@ -28,6 +28,7 @@ else()
     usecase/start_running_tests.cpp
     layer/refcounter_test.cpp
     layer/treenode_test.cpp
+    layer/observe_test.cpp
   )
   target_include_directories(unit_tests PRIVATE
     .

@@ -27,7 +27,7 @@ else()
     native/node_test_helper.cpp
     usecase/start_running_tests.cpp
     layer/refcounter_test.cpp
-    # layer/treenode_test.cpp
+    layer/treenode_test.cpp
   )
   target_include_directories(unit_tests PRIVATE
     .

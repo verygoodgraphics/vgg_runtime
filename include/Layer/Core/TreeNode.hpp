@@ -60,6 +60,13 @@ public:
     : VNode(cnt)
   {
   }
+
+  TreeNode(layer::VRefCnt* cnt, const std::string& name)
+    : VNode(cnt)
+    , m_name(name)
+    , m_iter(m_firstChild.end())
+  {
+  }
   TreeNode(TreeNode&) = delete;
   TreeNode& operator=(const TreeNode& other) = delete;
   TreeNode(TreeNode&&) noexcept = delete;
@@ -219,14 +226,6 @@ protected:
   Bound onRevalidate() override
   {
     return Bound();
-  }
-
-protected:
-  TreeNode(layer::VRefCnt* cnt, const std::string& name)
-    : VNode(cnt)
-    , m_name(name)
-    , m_iter(m_firstChild.end())
-  {
   }
 };
 } // namespace VGG

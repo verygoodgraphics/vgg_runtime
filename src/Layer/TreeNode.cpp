@@ -199,7 +199,7 @@ TreeNodePtr TreeNode::findPrevSiblingFromCurrent(const std::string& name) const
   }
   auto it =
     std::find_if(p->m_firstChild.begin(), m_iter, [&name](auto& a) { return a->m_name == name; });
-  if (it != p->m_firstChild.end())
+  if (it != m_iter)
   {
     return *it;
   }

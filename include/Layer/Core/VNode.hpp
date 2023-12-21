@@ -50,14 +50,14 @@ class VNode
   public ObjectImpl<VObject>
 #endif
 {
-  Bound               m_bound;
-  uint8_t             m_state{ 0 };
-  std::vector<VNode*> m_observers;
+  Bound                       m_bound;
+  uint8_t                     m_state{ 0 };
+  std::vector<WeakRef<VNode>> m_observers;
 
   template<typename Visitor>
   void visitObservers(Visitor&& v)
   {
-    for (auto obs : m_observers)
+    for (auto& obs : m_observers)
     {
       v(obs);
     }

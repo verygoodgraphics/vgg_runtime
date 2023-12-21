@@ -429,14 +429,16 @@ public:
     return !(m_object != nullptr && m_cnt != nullptr && m_cnt->refCount() > 0);
   }
 
+  // Only for debug use
+  VRefCnt* cnt() const
+  {
+    return m_cnt;
+  }
+
   Ref<T> lock() const
   {
     if (m_cnt)
-    {
-      m_cnt->ref();
-      Ref<T> p((T*)m_cnt->object());
-      return p;
-    }
+      return Ref<T>(static_cast<T*>(m_cnt->object()));
     return nullptr;
   }
 

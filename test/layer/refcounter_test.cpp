@@ -127,10 +127,11 @@ inline ThreadPool::~ThreadPool()
 
 class TestAllocator : public VAllocator
 {
-  std::atomic_int m_count{ 0 };
+  std::atomic_int                   m_count{ 0 };
+  std::unordered_map<void*, size_t> m_info;
 
 public:
-  virtual void free(void* ptr) override
+  virtual void dealloc(void* ptr) override
   {
     free(ptr);
     m_count--;
@@ -166,7 +167,7 @@ public:
   }
 };
 
-TEST(Memory, ref_new_without_alloc)
+TEST(Memory, ref_raw)
 {
   auto a = V_NEW<TestClassA>(0);
   ASSERT_EQ(a->refCnt()->refCount(), 1);
@@ -175,18 +176,91 @@ TEST(Memory, ref_new_without_alloc)
   a->deref();
   ASSERT_EQ(a->refCnt()->refCount(), 1);
   a->deref();
-  ASSERT_EQ(a->refCnt()->refCount(), 0);
 }
 
 TEST(Memory, ref_weak_wrapper)
 {
-  Ref<TestClassA>     a(V_NEW<TestClassA>(0));
-  WeakRef<TestClassA> w(a);
+  Ref<TestClassA> pa(V_NEW<TestClassA>(0));
+  Ref<TestClassA> pb(V_NEW<TestClassA>(1));
+
+  ASSERT_EQ(pa->refCnt()->refCount(), 1);
+  WeakRef<TestClassA> w(pa);
+  ASSERT_EQ(pa->refCnt()->refCount(), 1);
+  ASSERT_EQ(pa->refCnt()->weakRefCount(), 1);
+  {
+    auto locked = w.lock();
+    ASSERT_EQ(pa->refCnt()->refCount(), 2);
+  }
+  ASSERT_EQ(pa->refCnt()->refCount(), 1);
+
+  std::vector<WeakRef<TestClassA>> vec;
+  int                              count = 100;
+  for (int i = 0; i < count; i++)
+  {
+    vec.push_back(WeakRef<TestClassA>(pa));
+  }
+
+  for (auto w : vec)
+  {
+    ASSERT_TRUE(w.lock() == pa);
+    ASSERT_EQ(w.lock(), pa);
+
+    ASSERT_TRUE(w.lock() == pa.get());
+    ASSERT_EQ(w.lock(), pa.get());
+  }
+
+  ASSERT_EQ(pa->refCnt()->weakRefCount(), count + 1);
+  ASSERT_EQ(pa->refCnt()->refCount(), 1);
+
+  for (auto& w : vec)
+  {
+    ASSERT_TRUE(w.lock() == pa);
+    ASSERT_EQ(w.lock(), pa);
+
+    ASSERT_TRUE(w.lock() == pa.get());
+    ASSERT_EQ(w.lock(), pa.get());
+  }
+
+  ASSERT_EQ(pa->refCnt()->weakRefCount(), count + 1);
+  ASSERT_EQ(pa->refCnt()->refCount(), 1);
+
+  for (const auto& w : vec)
+  {
+    ASSERT_TRUE(w.lock() == pa);
+    ASSERT_EQ(w.lock(), pa);
+
+    ASSERT_TRUE(w.lock() == pa.get());
+    ASSERT_EQ(w.lock(), pa.get());
+  }
+  ASSERT_EQ(pa->refCnt()->weakRefCount(), count + 1);
+  ASSERT_EQ(pa->refCnt()->refCount(), 1);
+
+  vec.clear();
+  ASSERT_EQ(pa->refCnt()->weakRefCount(), 1);
+  ASSERT_EQ(pa->refCnt()->refCount(), 1);
+  ASSERT_TRUE(w.lock() == pa);
+  ASSERT_TRUE(w.lock() != pb);
+  ASSERT_TRUE(w.lock() == pa.get());
+  ASSERT_TRUE(w.lock() != pb.get());
+
+  pa.reset();
+  ASSERT_TRUE(w);
+  ASSERT_TRUE(w.cnt());
+  ASSERT_TRUE(w.cnt()->refCount() == 0);
+  ASSERT_TRUE(w.cnt()->weakRefCount() == 1);
+
+  ASSERT_FALSE(w.lock());
+  ASSERT_TRUE(w.lock() == nullptr);
+  ASSERT_TRUE(w.expired());
+
+  w.release();
+  ASSERT_FALSE(w.cnt());
 }
 
 TEST(Memory, ref_wrapper_def)
 {
-  Ref<TestClassA> a(V_NEW<TestClassA>(0));
+  Ref<TestClassA>     a(V_NEW<TestClassA>(0));
+  WeakRef<TestClassA> w;
 }
 
 TEST(Memory, ref_wrapper_operator)
@@ -208,6 +282,9 @@ TEST(Memory, ref_wrapper_operator)
   WeakRef<TestClassA> w2(a);
   ASSERT_TRUE(w1.lock() == a);
   ASSERT_TRUE(w2.lock() == a);
+
+  ASSERT_TRUE(w1 == a.get()); // weak ref and raw pointer
+                              //
 }
 
 TEST(Memory, ref_wrapper)

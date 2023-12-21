@@ -50,7 +50,7 @@ class RefCounterImpl : public VRefCnt
       if (m_allocator)
       {
         m_obj->~ObjectType();
-        m_allocator->free(m_obj);
+        m_allocator->dealloc(m_obj);
       }
       else
       {
@@ -76,27 +76,20 @@ public:
 
   size_t deref() override
   {
-    auto cnt = m_cnt--;
+    auto cnt = --m_cnt;
     if (cnt == 0)
     {
       // 1. delete managed object
 
-      // The only variables in critical section are m_objectState and weak reference counter
-      // So release the lock after accessing them as soon as possible for uncessary overheading
       std::unique_lock<std::mutex> lk(m_mtx);
-      lk.lock();
-      auto objWrapper =
+      auto                         objWrapper =
         reinterpret_cast<ObjectWrapper<ManagedObjectType, AllocatorType>*>(m_objectBuffer);
       m_objectState = EObjectState::DESTROYED;
-      auto deleteCnt = m_weakCnt.load() == 0;
+      auto deleteSelf = m_weakCnt.load() == 0;
       lk.unlock();
-
       objWrapper->destroy();
-      if (deleteCnt)
-      {
-        // 2. delete self if necessary
+      if (deleteSelf)
         destroy();
-      }
     }
     return cnt;
   }
@@ -108,18 +101,18 @@ public:
 
   size_t weakRef() override
   {
-    return m_weakCnt;
+    return ++m_weakCnt;
   }
 
   size_t weakDeref() override
   {
-    auto cnt = m_weakCnt--;
+    auto cnt = --m_weakCnt;
 
     std::unique_lock<std::mutex> lk(m_mtx);
     // Deletes counter itself if and only if weak_ref == 0 and the object state is DESTROYED
     if (cnt == 0 && m_objectState == EObjectState::DESTROYED)
     {
-      lk.unlock(); // release lock as soon as possible
+      lk.unlock();
       destroy();
     }
     return cnt;
@@ -136,7 +129,7 @@ public:
       return nullptr;
     std::unique_lock<std::mutex> lk(m_mtx);
 
-    auto cnt = m_cnt++;
+    auto cnt = ++m_cnt;
     if (m_objectState == EObjectState::ALIVE && cnt > 1)
     {
       lk.unlock();
@@ -144,7 +137,7 @@ public:
         reinterpret_cast<ObjectWrapper<ManagedObjectType, AllocatorType>*>(m_objectBuffer);
       return objectWrapper->object();
     }
-    m_cnt--;
+    --m_cnt;
     return nullptr;
   }
 

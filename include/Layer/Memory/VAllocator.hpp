@@ -22,7 +22,7 @@ namespace VGG::layer
 class VAllocator
 {
 public:
-  virtual void  free(void* size) = 0;
+  virtual void  dealloc(void* size) = 0;
   virtual void* alloc(size_t size) = 0;
 };
 }; // namespace VGG::layer

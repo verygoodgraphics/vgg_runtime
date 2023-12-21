@@ -13,12 +13,12 @@ using namespace VGG;
 // NOLINTBEGIN
 
 template<typename F>
-void PreorderVisit(const TreeNodePtr& root, F&& f)
+void PreorderVisit(TreeNodePtr& root, F&& f)
 {
   if (root)
   {
     f(root);
-    for (const auto& p : *root)
+    for (auto& p : *root)
     {
       PreorderVisit(p, std::forward<F>(f));
     }
@@ -26,11 +26,11 @@ void PreorderVisit(const TreeNodePtr& root, F&& f)
 }
 
 template<typename F>
-void PostorderVisit(const TreeNodePtr& root, F&& f)
+void PostorderVisit(TreeNodePtr& root, F&& f)
 {
   if (root)
   {
-    for (const auto& p : *root)
+    for (auto& p : *root)
     {
       PostorderVisit(p, std::forward<F>(f));
     }
@@ -62,13 +62,12 @@ protected:
   static void print()
   {
     PreorderVisit(s_root, [](const auto& p) { std::cout << p->name() << " "; });
-    std::cout << "\n";
+    std::cerr << "\n";
   }
 
   static void SetUpTestCase()
   {
-    // TODO::
-    //  s_root = VGG::Node::createNode("1");
+    s_root = makeTreeNodePtr("1");
   }
   static void TearDownTestCase()
   {
@@ -80,8 +79,7 @@ protected:
     // a string(leaf node) or an object(non-leaf node)
     if (j.is_array())
     {
-      TreeNodePtr tree; //= Node::createNode(j[0].get<std::string>());
-                        // TODO
+      TreeNodePtr tree = makeTreeNodePtr(j[0].get<std::string>());
       return tree;
     }
     else if (j.is_object())
@@ -97,7 +95,7 @@ protected:
     TreeNodePtr tree;
     for (const auto& [k, v] : j.items())
     {
-      tree; // =createNode(k);
+      tree = makeTreeNodePtr(k);
       fromArray(v, tree);
     }
     return tree;
@@ -112,8 +110,7 @@ protected:
       }
       else if (e.is_string())
       {
-        // tree->pushChildBack(VGG::Node::createNode(e.get<std::string>()));
-        // TODO::
+        tree->pushChildBack(makeTreeNodePtr(e.get<std::string>()));
       }
     }
     return tree;
@@ -148,7 +145,7 @@ TreeNodePtr TreeNodeTestSuit::s_root = nullptr;
 
 TEST_F(TreeNodeTestSuit, Create)
 {
-  // s_root = Node::createNode("1");
+  s_root = makeTreeNodePtr("1");
 }
 
 TEST_F(TreeNodeTestSuit, InitTreeFromJson)
@@ -194,7 +191,7 @@ TEST_F(TreeNodeTestSuit, InitTreeFromJson)
 		)json";
 
   auto j = json::parse(str);
-  initTreeFromJson(j);
+  s_root = initTreeFromJson(j);
 }
 
 TEST_F(TreeNodeTestSuit, Print)
@@ -251,15 +248,15 @@ TEST_F(TreeNodeTestSuit, FindChildNode)
 
 TEST_F(TreeNodeTestSuit, FindSiblingNode)
 {
-  auto c = s_root->findChild("10");
+  auto c = s_root->findChildRecursive("10");
   EXPECT_TRUE(c);
   EXPECT_FALSE(c->findNextSblingFromCurrent("9"));
   EXPECT_TRUE(c->findNextSblingFromCurrent("10"));
   EXPECT_TRUE(c->findNextSblingFromCurrent("11"));
   // prev find
   EXPECT_TRUE(c->findPrevSiblingFromCurrent("9"));
-  EXPECT_FALSE(c->findNextSblingFromCurrent("10"));
-  EXPECT_FALSE(c->findNextSblingFromCurrent("11"));
+  EXPECT_FALSE(c->findPrevSiblingFromCurrent("10"));
+  EXPECT_FALSE(c->findPrevSiblingFromCurrent("11"));
 }
 
 TEST_F(TreeNodeTestSuit, SeekRoot)

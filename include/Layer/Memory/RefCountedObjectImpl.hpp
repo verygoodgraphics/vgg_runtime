@@ -78,7 +78,7 @@ protected:
     const char*          dbgFileName,
     const uint32_t       dbgLineNumber)
   {
-    return allocator.free(ptr);
+    return allocator.dealloc(ptr);
   }
 
 private:

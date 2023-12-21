@@ -37,7 +37,7 @@ void VNode::observe(VNodePtr sender)
   if (auto it = std::find_if(
         sender->m_observers.begin(),
         sender->m_observers.end(),
-        [&](const auto& o) { return o == this; });
+        [&](const auto& o) { return o.lock() == this; });
       it == sender->m_observers.end())
   {
     sender->m_observers.push_back(this);
@@ -61,7 +61,7 @@ void VNode::unobserve(VNodePtr sender)
   if (auto it = std::find_if(
         sender->m_observers.begin(),
         sender->m_observers.end(),
-        [&](const auto& o) { return o == this; });
+        [&](const auto& o) { return o.lock() == this; });
       it != sender->m_observers.end())
   {
     sender->m_observers.erase(it);
@@ -75,9 +75,9 @@ void VNode::invalidate()
     return;
   m_state |= INVALIDATE;
   visitObservers(
-    [](auto obs)
+    [](auto& obs)
     {
-      if (auto p = obs; p)
+      if (auto p = obs.lock(); p)
       {
         p->invalidate();
       }

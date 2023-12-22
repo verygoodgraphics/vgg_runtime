@@ -37,7 +37,7 @@ target_include_directories(vgg_layer PUBLIC ${VGG_CONTRIB_JSON_INCLUDE})
 # REFACTOR:: make skia hidden from public
 target_link_libraries(vgg_layer PUBLIC ${SKIA_LIBS} glm)
 target_link_libraries(vgg_layer PRIVATE ${OPENGL_LIBRARIES} vgg_utility)
-if(NOT VGG_VAR_TARGET MATCHES "^iOS")
+if(NOT VGG_CONTAINER_FOR_QT AND NOT VGG_VAR_TARGET MATCHES "^iOS")
   find_package(Vulkan)
 endif()
 if(Vulkan_FOUND)
@@ -57,6 +57,9 @@ foreach(SKIA_TARGET ${SKIA_LIBS})
   list(APPEND SKIA_ARTIFACTS_LOCATION ${location})
 endforeach()
 if(SKIA_ARTIFACTS_LOCATION)
-  install(FILES ${SKIA_ARTIFACTS_LOCATION} DESTINATION lib COMPONENT vgg_module_layer)
+  install(FILES ${SKIA_ARTIFACTS_LOCATION} DESTINATION lib
+    COMPONENT vgg_module_layer
+    COMPONENT container
+  )
 endif()
 install(TARGETS vgg_layer ARCHIVE DESTINATION lib COMPONENT vgg_module_layer)

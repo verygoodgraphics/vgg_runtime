@@ -218,7 +218,7 @@ std::optional<ELayerError> VLayer::onInit()
     _->skiaContext = nullptr;
 #endif
   }
-  else if (api == EGraphicsAPIBackend::API_METAL)
+  else if (api == EGraphicsAPIBackend::API_CUSTOM)
   {
     auto* ctx = reinterpret_cast<SkiaGraphicsContext*>(context());
     _->skiaContext =

@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 #pragma once
-#include "Application/Event/Keycode.hpp"
+
+#include "Keycode.hpp"
+#include "Scancode.hpp"
+
 #include <memory>
 
 // These API style is derived from SDL, and the usage is keep same with SDL's currently.
@@ -26,10 +29,10 @@ public:
   EventAPI() = default;
   EventAPI(const EventAPI&) = delete;
   EventAPI(EventAPI&&) = delete;
-  EventAPI& operator=(const EventAPI&) = delete;
-  EventAPI& operator=(EventAPI&&) = delete;
+  EventAPI&          operator=(const EventAPI&) = delete;
+  EventAPI&          operator=(EventAPI&&) = delete;
   virtual EVGGKeymod getModState() = 0;
-  virtual uint8_t* getKeyboardState(int* nums) = 0;
+  virtual uint8_t*   getKeyboardState(int* nums) = 0;
   virtual ~EventAPI() = default;
 };
 
@@ -41,7 +44,9 @@ public:
   EventManager(EventManager&&) = delete;
   EventManager& operator=(const EventManager&) = delete;
   EventManager& operator=(EventManager&&) = delete;
-  static void registerEventAPI(std::unique_ptr<EventAPI> impl);
-  static EVGGKeymod getModState();
-  static uint8_t* getKeyboardState(int* nums);
+
+  static void        registerEventAPI(std::unique_ptr<EventAPI> impl);
+  static EVGGKeymod  getModState();
+  static uint8_t*    getKeyboardState(int* nums);
+  static EVGGKeyCode getKeyFromScancode(EVGGScancode scancode);
 };

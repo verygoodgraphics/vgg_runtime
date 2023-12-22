@@ -213,3 +213,9 @@ else()
 endif()
 
 install(TARGETS vgg_libnode_stub DESTINATION lib)
+if(VGG_CONTAINER_FOR_QT)
+  install(TARGETS zlib 
+    COMPONENT container
+    DESTINATION lib
+  )
+endif()

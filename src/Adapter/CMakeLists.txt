@@ -20,6 +20,13 @@ else()
     target_include_directories(vgg_adapter PUBLIC
       ${CMAKE_SOURCE_DIR}/include/Application/Event
     )
+  elseif(VGG_CONTAINER_FOR_QT)
+    target_sources(vgg_adapter PRIVATE
+      Container/QtGraphicsContext.cpp
+    )
+    target_include_directories(vgg_adapter PUBLIC
+      ${CMAKE_SOURCE_DIR}/include/Application/Event
+    )
   endif()
 
   target_link_libraries(vgg_adapter vgg_libnode)

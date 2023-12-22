@@ -46,7 +46,7 @@ extern "C"
 
     s_sdlApp->poll();
 
-    application()->run(s_sdlApp->appConfig().renderFPSLimit);
+    application()->paint(s_sdlApp->appConfig().renderFPSLimit);
 
     auto& mainComposer = VggBrowser::mainComposer();
     mainComposer.runLoop()->dispatch();

@@ -61,11 +61,11 @@ bool UIApplication::onEvent(UEvent evt, void* userData)
   }
 }
 
-bool UIApplication::run(int fps)
+bool UIApplication::paint(int fps, bool force)
 {
   m_view->updateOncePerLoop();
 
-  if (m_view->isDirty() || m_controller->hasDirtyEditor())
+  if (force || needsPaint())
   {
     if (m_layer->beginFrame(fps))
     {
@@ -86,6 +86,11 @@ bool UIApplication::run(int fps)
   }
 
   return false;
+}
+
+bool UIApplication::needsPaint()
+{
+  return m_view->isDirty() || m_controller->hasDirtyEditor();
 }
 
 bool UIApplication::handleKeyEvent(VKeyboardEvent evt)

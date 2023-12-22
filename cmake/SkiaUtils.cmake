@@ -1,7 +1,9 @@
 # Please refer to the skia build document for all supported featuers.
 # Only those needed are covered here.
 # https://skia.org/docs/user/build/
-find_package(Vulkan)
+if(NOT VGG_CONTAINER_FOR_QT AND NOT VGG_VAR_TARGET MATCHES "^iOS")
+  find_package(Vulkan)
+endif()
 if(Vulkan_FOUND)
 set(VULKAN_AVAILABLE "true")
 else()

@@ -26,8 +26,47 @@
 #include "Application/VggSdk.hpp"
 #include "Layer/Graphics/ContextSkBase.hpp"
 
+// #define DISABLE_JS
+
 namespace VGG
 {
+
+#ifdef DISABLE_JS
+namespace
+{
+class FakeJsEngine : public VggJSEngine
+{
+public:
+  virtual bool evalScript(const std::string& code)
+  {
+    DEBUG("FakeJsEngine::evalScript, do nothing");
+    return true;
+  }
+  virtual bool evalModule(const std::string& code)
+  {
+    DEBUG("FakeJsEngine::evalModule, do nothing");
+    return true;
+  }
+  virtual bool evalModule(
+    const std::string&       code,
+    VGG::EventPtr            event,
+    std::shared_ptr<IVggEnv> env)
+  {
+    DEBUG("FakeJsEngine::evalModule, do nothing");
+    return true;
+  }
+};
+class FakePlatformComposer : public PlatformComposer
+{
+public:
+  virtual std::shared_ptr<VggJSEngine> createJsEngine() override
+  {
+    return std::shared_ptr<VggJSEngine>{ new FakeJsEngine };
+  }
+};
+
+} // namespace
+#endif
 
 // impl ----------------------------------------------------------------------
 class ContainerImpl
@@ -50,12 +89,17 @@ public:
   ContainerImpl(Container* api)
     : m_api(api)
   {
+#ifdef DISABLE_JS
+    m_mainComposer.reset(
+      new MainComposer{ new FakePlatformComposer, std::make_shared<FakeMouse>() });
+#else
     bool catchJsException = false;
 #ifdef NDEBUG
     catchJsException = true;
 #endif
     m_mainComposer.reset(
       new MainComposer{ new NativeComposer(catchJsException), std::make_shared<FakeMouse>() });
+#endif
     m_application.reset(new UIApplication);
 
     m_appRender = std::make_shared<app::AppRender>();
@@ -100,11 +144,19 @@ public:
     m_appRender->sendEvent(evt, nullptr);
   }
 
-  bool run() override
+  bool needsPaint() override
   {
-    auto rendered = m_application->run(60);
+    return m_application->needsPaint();
+  }
+
+  bool paint(bool force) override
+  {
+    return m_application->paint(60, force);
+  }
+
+  void dispatch() override
+  {
     m_mainComposer->runLoop()->dispatch();
-    return rendered;
   }
 
   bool onEvent(UEvent evt) override

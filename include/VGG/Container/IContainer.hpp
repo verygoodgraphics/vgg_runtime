@@ -40,9 +40,26 @@ public:
   {
     return container()->load(filePath, designDocSchemaFilePath, layoutDocSchemaFilePath);
   }
-  virtual bool run()
+
+  void run()
   {
-    return container()->run();
+    container()->paint();
+    container()->dispatch();
+  }
+
+  virtual bool needsPaint()
+  {
+    return container()->needsPaint();
+  }
+
+  virtual bool paint(bool force = false)
+  {
+    return container()->paint(force);
+  }
+
+  virtual void dispatch()
+  {
+    return container()->dispatch();
   }
 
   virtual bool onEvent(UEvent evt)

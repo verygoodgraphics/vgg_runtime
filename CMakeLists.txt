@@ -43,6 +43,7 @@ else()
   message(STATUS "Unit test is disabled. Enable it with option if needed: cmake -DENABLE_UNIT_TEST=ON")
 endif()
 
+option(VGG_CONTAINER_FOR_QT "build vgg container for Qt" OFF)
 
 # add bundled libs
 add_subdirectory(lib)

@@ -69,9 +69,9 @@ TEST_F(ContainerTestSuite, Render)
 
   // When
   {
-    auto ret = m_sut->run();
+    auto ret = m_sut->paint();
     std::this_thread::sleep_for(std::chrono::milliseconds(100)); // makeFrame
-    ret = m_sut->run();
+    ret = m_sut->paint();
     EXPECT_TRUE(ret);
   }
 

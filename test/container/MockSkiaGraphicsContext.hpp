@@ -64,6 +64,6 @@ public:
   virtual void onInitProperties(VGG::layer::ContextProperty& property) override
   {
     property.dpiScaling = 2; // mock
-    property.api = VGG::layer::EGraphicsAPIBackend::API_METAL;
+    property.api = VGG::layer::EGraphicsAPIBackend::API_CUSTOM;
   }
 };

@@ -68,7 +68,8 @@ public:
 
   bool onEvent(UEvent evt, void* userData) override;
 
-  bool run(int fps);
+  bool needsPaint();
+  bool paint(int fps, bool force = false);
 
 private:
   bool handleKeyEvent(VKeyboardEvent evt);

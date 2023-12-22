@@ -29,7 +29,7 @@ enum class EGraphicsAPIBackend
 {
   API_OPENGL,
   API_VULKAN,
-  API_METAL,
+  API_CUSTOM,
 };
 
 struct ContextConfig

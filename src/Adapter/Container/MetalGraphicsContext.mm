@@ -118,7 +118,7 @@ public:
   void onInitProperties(VGG::layer::ContextProperty& property)
   {
     property.dpiScaling = m_mtkView.contentScaleFactor;
-    property.api = VGG::layer::EGraphicsAPIBackend::API_METAL;
+    property.api = VGG::layer::EGraphicsAPIBackend::API_CUSTOM;
   }
 
 private:

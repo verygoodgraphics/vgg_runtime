@@ -13,22 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
-#include "GraphicsSkia.hpp"
-#include "Layer/Graphics/GraphicsContext.hpp"
 
-namespace VGG::layer
+#include "IContainer.hpp"
+
+#include <memory>
+
+namespace VGG
 {
 
-// TODO:: refactor
-class SkiaGraphicsContext : public layer::GraphicsContext
+class QtContainerImpl;
+class QtContainer : public IContainer
 {
+  std::unique_ptr<QtContainerImpl> m_impl;
+
 public:
-  virtual SurfaceCreateProc surfaceCreateProc() = 0;
-  virtual ContextCreateProc contextCreateProc() = 0;
-  virtual void              onInitProperties(ContextProperty& property) override
-  {
-    property.api = EGraphicsAPIBackend::API_CUSTOM;
-  }
+  QtContainer();
+  ~QtContainer();
+
+  void init(int w, int h, float devicePixelRatio);
+
+private:
+  virtual IContainer* container() override;
 };
-} // namespace VGG::layer
+
+} // namespace VGG

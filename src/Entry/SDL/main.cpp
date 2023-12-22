@@ -107,7 +107,7 @@ int main(int argc, char** argv)
   while (!sdlApp->shouldExit())
   {
     sdlApp->poll();
-    app->run(cfg.renderFPSLimit);
+    app->paint(cfg.renderFPSLimit);
     mainComposer.runLoop()->dispatch();
   }
 

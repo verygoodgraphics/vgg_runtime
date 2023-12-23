@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "Layer/Core/PaintNode.hpp"
+#include "Layer/Memory/VAllocator.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/matrix.hpp>
@@ -63,6 +64,7 @@ class SceneBuilder
   bool                       m_invalid{ false };
   bool                       m_resetOrigin{ false };
   std::optional<json>        m_doc;
+  VAllocator*                m_alloc{ nullptr };
 
   void moveToThis(SceneBuilder&& that)
   {
@@ -72,6 +74,7 @@ class SceneBuilder
     m_version = std::move(that.m_version);
     m_resetOrigin = std::move(that.m_resetOrigin);
     m_doc = std::move(that.m_doc);
+    m_alloc = std::move(that.m_alloc);
     m_invalid = std::move(that.m_invalid);
     that.m_invalid = true;
   }
@@ -135,10 +138,7 @@ class SceneBuilder
     return obj;
   }
 
-  PaintNodePtr makeContour(
-    const json&      j,
-    const json&      parent,
-    const glm::mat3& totalMatrix);
+  PaintNodePtr makeContour(const json& j, const json& parent, const glm::mat3& totalMatrix);
 
   PaintNodePtr fromFrame(const json& j, const glm::mat3& totalMatrix);
 
@@ -161,18 +161,14 @@ class SceneBuilder
 
   PaintNodePtr fromSymbolMaster(const json& j, const glm::mat3& totalMatrix);
 
-  std::vector<PaintNodePtr> fromSymbolMasters(
-    const json&      j,
-    const glm::mat3& totalMatrix);
+  std::vector<PaintNodePtr> fromSymbolMasters(const json& j, const glm::mat3& totalMatrix);
 
   void appendSymbolMaster(PaintNodePtr master)
   {
     m_symbols.push_back(std::move(master));
   }
 
-  std::vector<PaintNodePtr> fromTopLevelFrames(
-    const json&      j,
-    const glm::mat3& totalMatrix)
+  std::vector<PaintNodePtr> fromTopLevelFrames(const json& j, const glm::mat3& totalMatrix)
   {
     std::vector<PaintNodePtr> frames;
     for (const auto& e : j)
@@ -212,6 +208,11 @@ public:
   SceneBuilder setDoc(json doc)
   {
     SET_BUILDER_OPTION(m_doc, doc);
+  };
+
+  SceneBuilder setAllocator(VAllocator* allocator)
+  {
+    SET_BUILDER_OPTION(m_alloc, allocator);
   };
 
   SceneBuilderResult build()

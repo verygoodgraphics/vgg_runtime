@@ -1,12 +1,14 @@
 #pragma once
 
-#include "Layer/SceneBuilder.hpp"
 #include "loader.hpp"
+
+#include "Layer/SceneBuilder.hpp"
+#include "Layer/Memory/AllocatorImpl.hpp"
 #include "Layer/DocBuilder.hpp"
+#include "Domain/Layout/ExpandSymbol.hpp"
 #include "Utility/ConfigManager.hpp"
 #include "Application/AppRender.hpp"
 #include "Application/AppRenderable.hpp"
-#include "Domain/Layout/ExpandSymbol.hpp"
 #include "Application/Event/Event.hpp"
 #include "Application/Event/EventListener.hpp"
 #include "Application/Event/Keycode.hpp"
@@ -25,7 +27,6 @@
 #include <filesystem>
 #include <filesystem>
 namespace fs = std::filesystem;
-
 using namespace VGG::app;
 
 class SkCanvas;
@@ -134,6 +135,7 @@ protected:
           auto sceneBuilderResult = VGG::layer::SceneBuilder::builder()
                                       .setResetOriginEnable(true)
                                       .setDoc(std::move(*res.doc))
+                                      .setAllocator(VGG_GlobalMemoryAllocator())
                                       .build();
           t.stop();
           auto dur = t.elapsed();

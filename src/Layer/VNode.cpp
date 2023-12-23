@@ -40,7 +40,8 @@ void VNode::observe(VNodePtr sender)
         [&](const auto& o) { return o.lock() == this; });
       it == sender->m_observers.end())
   {
-    sender->m_observers.push_back(this);
+    this->ref();
+    sender->m_observers.push_back(Ref<VNode>(this));
   }
 #endif
 }

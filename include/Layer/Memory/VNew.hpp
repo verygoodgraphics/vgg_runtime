@@ -19,6 +19,7 @@
 #include "Layer/Memory/VAllocator.hpp"
 
 #include <memory>
+#include <type_traits>
 
 namespace VGG::layer
 {
@@ -61,10 +62,14 @@ public:
 };
 
 // NOLINTBEGIN
-template<typename Allocator, typename Type, typename... Args>
-Type* V_NEW(Allocator* alloc, Args&&... args)
+template<
+  typename Type,
+  typename AllocatorType,
+  typename... Args,
+  typename = typename std::enable_if<std::is_base_of<VAllocator, AllocatorType>::value>::type>
+Type* V_NEW(AllocatorType* alloc, Args&&... args)
 {
-  return VNew<Type, Allocator>(alloc)(std::forward<Args>(args)...);
+  return VNew<Type, AllocatorType>(alloc)(std::forward<Args>(args)...);
 }
 
 template<typename Type, typename... Args>

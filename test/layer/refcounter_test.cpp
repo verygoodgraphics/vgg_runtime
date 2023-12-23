@@ -131,12 +131,12 @@ class TestAllocator : public VAllocator
   std::unordered_map<void*, size_t> m_info;
 
 public:
-  virtual void dealloc(void* ptr) override
+  void dealloc(void* ptr) override
   {
     free(ptr);
     m_count--;
   }
-  virtual void* alloc(size_t size) override
+  void* alloc(size_t size) override
   {
     m_count++;
     return malloc(size);
@@ -167,7 +167,7 @@ public:
   }
 };
 
-TEST(Memory, ref_raw)
+TEST(Memory, RawPointer)
 {
   auto a = V_NEW<TestClassA>(0);
   ASSERT_EQ(a->refCnt()->refCount(), 1);
@@ -178,7 +178,7 @@ TEST(Memory, ref_raw)
   a->deref();
 }
 
-TEST(Memory, ref_weak_wrapper)
+TEST(Memory, WeakRefWrapper)
 {
   Ref<TestClassA> pa(V_NEW<TestClassA>(0));
   Ref<TestClassA> pb(V_NEW<TestClassA>(1));
@@ -257,13 +257,7 @@ TEST(Memory, ref_weak_wrapper)
   ASSERT_FALSE(w.cnt());
 }
 
-TEST(Memory, ref_wrapper_def)
-{
-  Ref<TestClassA>     a(V_NEW<TestClassA>(0));
-  WeakRef<TestClassA> w;
-}
-
-TEST(Memory, ref_wrapper_operator)
+TEST(Memory, RefOperatorOverload)
 {
 
   Ref<TestClassA> null;
@@ -287,10 +281,10 @@ TEST(Memory, ref_wrapper_operator)
                               //
 }
 
-TEST(Memory, ref_wrapper)
+TEST(Memory, RefWrapper)
 {
   Ref<TestClassA> a(V_NEW<TestClassA>(0));
-  Ref<TestClassA> b(V_NEW<TestAllocator, TestClassA>(&g_alloc, 0));
+  Ref<TestClassA> b(V_NEW<TestClassA, TestAllocator>(&g_alloc, 0));
   ASSERT_NE(a, b);
   ASSERT_NE(a.get(), b.get());
 
@@ -313,7 +307,7 @@ TEST(Memory, ref_wrapper)
   ASSERT_EQ(a->refCnt()->refCount(), 1);
 }
 
-TEST(Memory, multithread)
+TEST(Memory, MultiThread)
 {
   return;
   using std::default_random_engine;

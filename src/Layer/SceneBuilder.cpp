@@ -280,9 +280,9 @@ inline PaintNodePtr SceneBuilder::fromImage(const json& j, const glm::mat3& tota
   return makeObjectCommonProperty(
     j,
     totalMatrix,
-    [&j](std::string name, std::string guid)
+    [&](std::string name, std::string guid)
     {
-      auto p = makeImageNodePtr(j.value("name", ""), std::move(guid));
+      auto p = makeImageNodePtr(m_alloc, j.value("name", ""), std::move(guid));
       return p;
     },
     [&](ImageNode* p, const glm::mat3& matrix)
@@ -299,7 +299,7 @@ PaintNodePtr SceneBuilder::fromPath(const json& j, const glm::mat3& totalMatrix)
     totalMatrix,
     [&](std::string name, std::string guid)
     {
-      auto p = makePaintNodePtr(std::move(name), VGG_PATH, std::move(guid));
+      auto p = makePaintNodePtr(m_alloc, std::move(name), VGG_PATH, std::move(guid));
       return p;
     },
     [&, this](PaintNode* p, const glm::mat3& matrix)
@@ -358,9 +358,9 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
   return makeObjectCommonProperty(
     j,
     totalMatrix,
-    [](std::string name, std::string guid)
+    [&](std::string name, std::string guid)
     {
-      auto p = makeTextNodePtr(std::move(name), std::move(guid));
+      auto p = makeTextNodePtr(m_alloc, std::move(name), std::move(guid));
       return p;
     },
     [&](layer::TextNode* p, const glm::mat3& matrix)
@@ -437,9 +437,9 @@ PaintNodePtr SceneBuilder::fromFrame(const json& j, const glm::mat3& totalMatrix
   auto p = makeObjectCommonProperty(
     j,
     totalMatrix,
-    [](std::string name, std::string guid)
+    [&](std::string name, std::string guid)
     {
-      auto p = makePaintNodePtr(std::move(name), VGG_FRAME, std::move(guid));
+      auto p = makePaintNodePtr(m_alloc, std::move(name), VGG_FRAME, std::move(guid));
       return p;
     },
     [&, this](PaintNode* p, const glm::mat3& matrix)
@@ -464,7 +464,7 @@ PaintNodePtr SceneBuilder::fromSymbolMaster(const json& j, const glm::mat3& tota
     totalMatrix,
     [&](std::string name, std::string guid)
     {
-      auto p = makePaintNodePtr(std::move(name), VGG_MASTER, std::move(guid));
+      auto p = makePaintNodePtr(m_alloc, std::move(name), VGG_MASTER, std::move(guid));
       // appendSymbolMaster(p);
       return p;
     },
@@ -498,7 +498,7 @@ PaintNodePtr SceneBuilder::makeContour(
       get_opt<int>(e, "cornerStyle"));
   }
   // auto p = std::make_shared<ContourNode>("contour", std::make_shared<Contour>(contour), "");
-  auto p = makePaintNodePtr("contour", VGG_CONTOUR, "");
+  auto p = makePaintNodePtr(m_alloc, "contour", VGG_CONTOUR, "");
   p->setOverflow(OF_Visible);
   p->setContourOption(ContourOption{ ECoutourType::MCT_FrameOnly, false });
   CoordinateConvert::convertCoordinateSystem(contour, totalMatrix);
@@ -517,7 +517,7 @@ PaintNodePtr SceneBuilder::fromGroup(const json& j, const glm::mat3& totalMatrix
     totalMatrix,
     [&](std::string name, std::string guid)
     {
-      auto p = makePaintNodePtr(std::move(name), VGG_GROUP, std::move(guid));
+      auto p = makePaintNodePtr(m_alloc, std::move(name), VGG_GROUP, std::move(guid));
       return p;
     },
     [&, this](PaintNode* p, const glm::mat3& matrix)

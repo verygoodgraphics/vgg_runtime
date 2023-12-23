@@ -15,8 +15,8 @@
  */
 #pragma once
 #include "Layer/Renderable.hpp"
+#include "Layer/Memory/AllocatorImpl.hpp"
 #include "Layer/Zoomer.hpp"
-// #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/TreeNode.hpp"
 #include "Layer/Config.hpp"
 

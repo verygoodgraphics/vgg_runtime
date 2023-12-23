@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "ContextVk.hpp"
+#include "Layer/Memory/AllocatorImpl.hpp"
 #include "Domain/Layout/ExpandSymbol.hpp"
 #include "Layer/DocBuilder.hpp"
 #include "Layer/SceneBuilder.hpp"
@@ -35,7 +36,6 @@
 #include <iostream>
 #include <algorithm>
 #include <iterator>
-#include <src/base/SkVx.h>
 #include <variant>
 #include <exception>
 #include <memory>
@@ -104,8 +104,8 @@ float calcScaleFactor(
   float& outWidth,
   float& outHeight)
 {
-  auto  widthScale = maxWidth / inputWidth;
-  auto  heightScale = maxHeight / inputHeight;
+  auto widthScale = maxWidth / inputWidth;
+  auto heightScale = maxHeight / inputHeight;
   // float outputSize[2] = { 0.f, 0.f };
   if (widthScale < heightScale)
   {
@@ -245,6 +245,7 @@ public:
                                 .setResetOriginEnable(true)
                                 .setCheckVersion(VGG_PARSE_FORMAT_VER_STR)
                                 .setDoc(std::move(*res.doc))
+                                .setAllocator(VGG_GlobalMemoryAllocator())
                                 .build();
     if (sceneBuilderResult.type)
     {

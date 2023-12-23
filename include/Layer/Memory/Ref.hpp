@@ -18,6 +18,8 @@
 #include "Layer/Memory/VObject.hpp"
 #include "Layer/Memory/VRefCnt.hpp"
 
+#include "Utility/Log.hpp"
+
 #include <cstddef>
 #include <memory>
 #include <cassert>
@@ -192,11 +194,6 @@ public:
     return m_ptr;
   }
 
-  // T* operator->()
-  // {
-  //   return m_ptr;
-  // }
-
   operator bool() const
   {
     return m_ptr != nullptr;
@@ -325,73 +322,92 @@ class WeakRef
 {
   VRefCnt* m_cnt = nullptr;
 
-public:
-  WeakRef(T* object = nullptr) noexcept
+  std::pair<bool, VRefCnt*> equalToRef(const Ref<T>& p)
   {
-    if (object)
+    if (!p && !m_cnt)
+      return { true, nullptr };
+    if (p)
     {
-      m_cnt = object->refCnt();
-      m_cnt->weakRef();
+      auto cnt = p->refCnt();
+      ASSERT(cnt);
+      return { cnt == m_cnt, cnt };
     }
+    return { false, nullptr };
+  }
+
+  bool equalToWeak(const WeakRef<T>& p)
+  {
+    return m_cnt == p.m_cnt;
+  }
+
+public:
+  // object must not be nullptr
+  WeakRef(T* object) noexcept
+    : m_cnt(object->refCnt())
+  {
+    if (m_cnt)
+      m_cnt->weakRef();
+  }
+
+  WeakRef() noexcept
+    : m_cnt(nullptr)
+  {
   }
 
   WeakRef(Ref<T> p) noexcept
     : m_cnt(p ? p->refCnt() : nullptr)
   {
     if (m_cnt)
-    {
       m_cnt->weakRef();
-    }
   }
 
   WeakRef(const WeakRef& p) noexcept
     : m_cnt(p.m_cnt)
   {
     if (m_cnt)
-    {
       m_cnt->weakRef();
-    }
   }
 
   WeakRef(WeakRef&& p) noexcept
-    : m_cnt(std::move(p.m_cnt))
+    : m_cnt(p.m_cnt)
   {
     p.m_cnt = nullptr;
   }
 
   WeakRef& operator=(const WeakRef& p) noexcept
   {
-    if (*this == p)
+    if (equalToWeak(p))
       return *this;
     release();
-
     m_cnt = p.m_cnt;
     if (m_cnt)
-    {
       m_cnt->weakRef();
-    }
     return *this;
   }
 
-  WeakRef& operator=(T* object) noexcept
+  // WeakRef& operator=(T* object) noexcept
+  // {
+  //   return operator=(WeakRef(object));
+  // }
+  //
+  VRefCnt* cnt() const
   {
-    return operator=(WeakRef(object));
+    return m_cnt;
   }
 
   WeakRef& operator=(Ref<T> p) noexcept
   {
+    auto [equal, cnt] = equalToRef(p);
+    if (equal)
+      return *this;
     release();
-    m_cnt = p->refCnt();
-    assert(m_cnt);
+    m_cnt = cnt;
     m_cnt->weakRef();
     return *this;
   }
 
   WeakRef& operator=(WeakRef&& p) noexcept
   {
-    if (*this == p)
-      return *this;
-
     release();
     m_cnt = std::move(p.m_cnt);
     p.m_cnt = nullptr;
@@ -405,23 +421,17 @@ public:
 
   bool operator==(const WeakRef& other) noexcept
   {
-    return m_cnt == other.m_cnt;
+    return equalToWeak(other);
   }
 
   bool operator!=(const WeakRef& other) noexcept
   {
-    return m_cnt != other.m_cnt;
+    return !equalToWeak(other);
   }
 
   bool expired() const
   {
-    return !(m_cnt != nullptr && m_cnt->refCount() > 0);
-  }
-
-  // Only for debug use
-  VRefCnt* cnt() const
-  {
-    return m_cnt;
+    return !(m_cnt && m_cnt->refCount() > 0);
   }
 
   Ref<T> lock() const

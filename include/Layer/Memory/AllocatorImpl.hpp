@@ -13,17 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
-#include <cstddef>
+#include "Utility/Log.hpp"
+#include "Layer/Memory/VAllocator.hpp"
+#include <iostream>
 
 namespace VGG::layer
 {
+
 // NOLINTBEGIN
-class VAllocator
-{
-public:
-  virtual void  dealloc(void* ptr) = 0;
-  virtual void* alloc(size_t size) = 0;
-  virtual ~VAllocator() = default;
-};
-}; // namespace VGG::layer
+VAllocator* VGG_GlobalMemoryAllocator();
+// NOLINTEND
+
+} // namespace VGG::layer

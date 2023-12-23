@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Layer/AttrSerde.hpp"
-#include "Layer/ParagraphPainter.hpp"
 #include "ParagraphLayout.hpp"
+#include "ParagraphPainter.hpp"
+#include "AttrSerde.hpp"
 #include "VSkFontMgr.hpp"
 #include "Renderer.hpp"
 
+#include "Layer/Memory/AllocatorImpl.hpp"
 #include "Layer/Core/TextNode.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/TreeNode.hpp"
@@ -47,16 +48,16 @@ public:
   TextNode__pImpl(TextNode* api)
     : q_ptr(api)
   {
-    paragraphLayout = makeRichTextBlockPtr();
+    paragraphLayout = makeRichTextBlockPtr(VGG_GlobalMemoryAllocator());
     auto mgr = sk_ref_sp(FontManager::instance().defaultFontManager());
     auto fontCollection = sk_make_sp<VGGFontCollection>(std::move(mgr));
-    painter = makeVParagraphPainterPtr();
+    painter = makeVParagraphPainterPtr(VGG_GlobalMemoryAllocator());
     painter->setParagraph(paragraphLayout);
+    q_ptr->observe(painter);
   }
 
   VParagraphPainterPtr painter;
   RichTextBlockPtr     paragraphLayout;
-  bool                 observed{ false };
 
   TextNode__pImpl(const TextNode__pImpl& p)
   {
@@ -71,14 +72,14 @@ public:
   TextNode__pImpl(TextNode__pImpl&& p) noexcept = default;
   TextNode__pImpl& operator=(TextNode__pImpl&& p) noexcept = delete;
 
-  void ensureObserve()
-  {
-    if (!observed)
-    {
-      q_ptr->observe(painter);
-      observed = true;
-    }
-  }
+  // void ensureObserve()
+  // {
+  //   if (!observed)
+  //   {
+  //     q_ptr->observe(painter);
+  //     observed = true;
+  //   }
+  // }
 };
 
 TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
@@ -104,7 +105,7 @@ void TextNode::setParagraph(
   const std::vector<TextLineAttr>& lineAttr)
 {
   VGG_IMPL(TextNode);
-  _->ensureObserve();
+  //_->ensureObserve();
   std::vector<ParagraphAttr> paraAttrs;
   for (const auto a : lineAttr)
   {
@@ -130,7 +131,7 @@ void TextNode::setParagraph(
 void TextNode::setFrameMode(ETextLayoutMode layoutMode)
 {
   VGG_IMPL(TextNode);
-  _->ensureObserve();
+  //_->ensureObserve();
   TextLayoutMode mode;
   switch (layoutMode)
   {
@@ -168,7 +169,7 @@ void TextNode::paintFill(Renderer* renderer, sk_sp<SkBlender> blender, const SkP
 void TextNode::setVerticalAlignment(ETextVerticalAlignment vertAlign)
 {
   VGG_IMPL(TextNode);
-  _->ensureObserve();
+  //_->ensureObserve();
   _->paragraphLayout->setVerticalAlignment(vertAlign);
 }
 

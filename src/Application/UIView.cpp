@@ -45,8 +45,8 @@ bool UIView::onEvent(UEvent evt, void* userData)
 
   // todo, capturing
   // todo, bubbling
-  UIEvent::PathType           targetPath;
-  // auto&                       hasEventListener = m_hasEventListener;
+  UIEvent::TargetIdType       targetId;
+  UIEvent::TargetPathType     targetPath;
   std::shared_ptr<LayoutNode> targetNode;
   switch (evt.type)
   {
@@ -131,8 +131,9 @@ bool UIView::onEvent(UEvent evt, void* userData)
       auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
       m_eventListener(
         UIEventPtr(new KeyboardEvent(
-          targetPath,
           EUIEventType::KEYDOWN,
+          targetId,
+          targetPath,
           evt.key.keysym.sym,
           evt.key.repeat,
           alt,
@@ -148,8 +149,9 @@ bool UIView::onEvent(UEvent evt, void* userData)
       auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
       m_eventListener(
         UIEventPtr(new KeyboardEvent(
-          targetPath,
           EUIEventType::KEYUP,
+          targetId,
+          targetPath,
           evt.key.keysym.sym,
           evt.key.repeat,
           alt,
@@ -316,16 +318,17 @@ bool UIView::handleMouseEvent(
   Layout::Point pointToDocument{ pointToPage.x + page->frame().origin.x,
                                  pointToPage.y + page->frame().origin.y };
 
-  auto targetNode = page->hitTest(
+  auto target = page->hitTest(
     pointToDocument,
-    [&queryHasEventListener = m_hasEventListener, type](const std::string& path)
-    { return queryHasEventListener(path, type); });
+    [&queryHasEventListener = m_hasEventListener, type](const std::string& targetKey)
+    { return queryHasEventListener(targetKey, type); });
   auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
 
   m_eventListener(
     UIEventPtr(new MouseEvent(
-      targetNode ? targetNode->path() : K_EMPTY_STRING,
       type,
+      target ? target->id() : K_EMPTY_STRING,
+      target ? target->path() : K_EMPTY_STRING,
       jsButtonIndex,
       pointToPage.x,
       pointToPage.y,
@@ -335,7 +338,7 @@ bool UIView::handleMouseEvent(
       ctrl,
       meta,
       shift)),
-    targetNode);
+    target);
 
   return true;
 }
@@ -391,14 +394,17 @@ bool UIView::handleTouchEvent(int x, int y, int motionX, int motionY, EUIEventTy
   Layout::Point pointToDocument{ pointToPage.x + page->frame().origin.x,
                                  pointToPage.y + page->frame().origin.y };
 
-  auto targetNode = page->hitTest(
+  auto target = page->hitTest(
     pointToDocument,
-    [&queryHasEventListener = m_hasEventListener, type](const std::string& path)
-    { return queryHasEventListener(path, type); });
+    [&queryHasEventListener = m_hasEventListener, type](const std::string& targetKey)
+    { return queryHasEventListener(targetKey, type); });
 
   m_eventListener(
-    UIEventPtr(new TouchEvent(targetNode ? targetNode->path() : K_EMPTY_STRING, type)),
-    targetNode);
+    UIEventPtr(new TouchEvent(
+      type,
+      target ? target->id() : K_EMPTY_STRING,
+      target ? target->path() : K_EMPTY_STRING)),
+    target);
 
   return true;
 }

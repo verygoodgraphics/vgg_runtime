@@ -24,6 +24,6 @@
 namespace VGG
 {
 
-using EventListener = std::function<void(std::string type, std::string path)>;
+using EventListener = std::function<void(std::string type, std::string id, std::string path)>;
 
 } // namespace VGG

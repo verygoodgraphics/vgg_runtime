@@ -89,7 +89,8 @@ TEST_F(ContainerTestSuite, HandleEvent)
   EXPECT_TRUE(result);
 
   bool called{ false };
-  m_sut->setEventListener([&called](std::string type, std::string path) { called = true; });
+  m_sut->setEventListener([&called](std::string type, std::string id, std::string path)
+                          { called = true; });
 
   // When
   UEvent evt;

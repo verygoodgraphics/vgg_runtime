@@ -82,14 +82,14 @@ public:
 
   // event listener
   void addEventListener(
-    const std::string& jsonPointer,
+    const std::string& targetKey, // id or json pointer path
     const std::string& type,
     const std::string& code);
   void removeEventListener(
-    const std::string& jsonPointer,
+    const std::string& targetKey,
     const std::string& type,
     const std::string& code);
-  auto getEventListeners(const std::string& jsonPointer) -> ListenersType;
+  auto getEventListeners(const std::string& targetKey) -> ListenersType;
 
   // todo, make sure the wasm files (*.mjs *.wasm) are in the correct directory or url
 

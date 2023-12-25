@@ -77,7 +77,7 @@ void Presenter::listenViewEvent()
 {
   auto weakThis = weak_from_this();
   m_view->registerEventListener(
-    [weakThis](std::string path, EUIEventType eventType)
+    [weakThis](std::string targetKey, EUIEventType eventType)
     {
       auto sharedThis = weakThis.lock();
       if (!sharedThis)
@@ -96,7 +96,7 @@ void Presenter::listenViewEvent()
         return false;
       }
 
-      auto        listenersMap = sharedModel->getEventListeners(path);
+      auto        listenersMap = sharedModel->getEventListeners(targetKey);
       std::string type = uiEventTypeToString(eventType);
 
       auto hasUserListener = listenersMap.find(type) != listenersMap.end();

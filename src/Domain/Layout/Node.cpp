@@ -45,6 +45,37 @@ enum class EBooleanOperation
 namespace VGG
 {
 
+std::shared_ptr<LayoutNode> LayoutNode::hitTest(
+  const Layout::Point& point,
+  const HitTestHook&   hasEventListener)
+{
+  // test front child first
+  for (auto it = m_children.rbegin(); it != m_children.rend(); ++it)
+  {
+    if ((*it)->pointInside(point))
+    {
+      if (auto targetNode = (*it)->hitTest(point, hasEventListener))
+      {
+        return targetNode;
+      }
+    }
+  }
+
+  if (pointInside(point))
+  {
+    if (hasEventListener(id()))
+    {
+      return shared_from_this();
+    }
+    if (hasEventListener(m_path))
+    {
+      return shared_from_this();
+    }
+  }
+
+  return nullptr;
+}
+
 std::shared_ptr<Layout::Internal::AutoLayout> LayoutNode::autoLayout() const
 {
   return m_autoLayout;

@@ -18,10 +18,10 @@
 #include "Domain/JsonDocument.hpp"
 #include "Rect.hpp"
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
-#include <functional>
 
 class flexbox_node;
 class grid_layout;
@@ -84,30 +84,7 @@ public:
 
   std::shared_ptr<LayoutNode> hitTest(
     const Layout::Point& point,
-    const HitTestHook&   hasEventListener)
-  {
-    // test front child first
-    for (auto it = m_children.rbegin(); it != m_children.rend(); ++it)
-    {
-      if ((*it)->pointInside(point))
-      {
-        if (auto targetNode = (*it)->hitTest(point, hasEventListener))
-        {
-          return targetNode;
-        }
-      }
-    }
-
-    if (pointInside(point))
-    {
-      if (hasEventListener(m_path))
-      {
-        return shared_from_this();
-      }
-    }
-
-    return nullptr;
-  }
+    const HitTestHook&   hasEventListener);
 
   void addChild(std::shared_ptr<LayoutNode> child)
   {

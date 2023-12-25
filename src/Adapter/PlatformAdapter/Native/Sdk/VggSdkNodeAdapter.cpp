@@ -386,11 +386,11 @@ napi_value VggSdkNodeAdapter::AddEventListener(napi_env env, napi_callback_info 
     VggSdkNodeAdapter* sdk_adapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
 
-    auto elementPath = GetArgString(env, args[0]);
+    auto elementKey = GetArgString(env, args[0]);
     auto eventType = GetArgString(env, args[1]);
     auto listenerCode = GetArgString(env, args[2]);
 
-    sdk_adapter->m_vggSdk->addEventListener(elementPath, eventType, listenerCode);
+    sdk_adapter->m_vggSdk->addEventListener(elementKey, eventType, listenerCode);
   }
   catch (std::exception& e)
   {
@@ -418,11 +418,11 @@ napi_value VggSdkNodeAdapter::RemoveEventListener(napi_env env, napi_callback_in
     VggSdkNodeAdapter* sdk_adapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
 
-    auto elementPath = GetArgString(env, args[0]);
+    auto elementKey = GetArgString(env, args[0]);
     auto eventType = GetArgString(env, args[1]);
     auto listenerCode = GetArgString(env, args[2]);
 
-    sdk_adapter->m_vggSdk->removeEventListener(elementPath, eventType, listenerCode);
+    sdk_adapter->m_vggSdk->removeEventListener(elementKey, eventType, listenerCode);
   }
   catch (std::exception& e)
   {
@@ -486,7 +486,7 @@ napi_value VggSdkNodeAdapter::GetEventListeners(napi_env env, napi_callback_info
 
   try
   {
-    auto elementPath = GetArgString(env, args[0]);
+    auto elementKey = GetArgString(env, args[0]);
 
     VggSdkNodeAdapter* sdk_adapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
@@ -494,7 +494,7 @@ napi_value VggSdkNodeAdapter::GetEventListeners(napi_env env, napi_callback_info
     napi_value result_listeners_map; // result object
     napi_create_object(env, &result_listeners_map);
 
-    auto listenersMap = sdk_adapter->m_vggSdk->getEventListeners(elementPath);
+    auto listenersMap = sdk_adapter->m_vggSdk->getEventListeners(elementKey);
     for (auto& map_item : listenersMap)
     {
       if (map_item.second.empty())

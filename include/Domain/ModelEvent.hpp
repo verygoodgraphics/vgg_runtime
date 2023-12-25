@@ -43,7 +43,7 @@ struct ModelEvent
   using ValueType = nlohmann::json;
 
   const ModelEventType type;
-  const PathType path;
+  const PathType       path;
 
   ModelEvent(const ModelEventType& type, const PathType& path)
     : type{ type }
@@ -105,31 +105,6 @@ struct ModelEventUpdate : ModelEvent
   ModelEventUpdate(PathType&& path, ValueType&& value)
     : ModelEvent(ModelEventType::Update, std::move(path))
     , value{ std::move(value) }
-  {
-  }
-};
-
-struct ModelEventListenerDidAdd : ModelEvent
-{
-  ModelEventListenerDidAdd(const PathType& path)
-    : ModelEvent(ModelEventType::ListenerDidAdd, path)
-  {
-  }
-
-  ModelEventListenerDidAdd(PathType&& path)
-    : ModelEvent(ModelEventType::ListenerDidAdd, std::move(path))
-  {
-  }
-};
-struct ModelEventListenerDidRemove : ModelEvent
-{
-  ModelEventListenerDidRemove(const PathType& path)
-    : ModelEvent(ModelEventType::ListenerDidRemove, path)
-  {
-  }
-
-  ModelEventListenerDidRemove(PathType&& path)
-    : ModelEvent(ModelEventType::ListenerDidRemove, std::move(path))
   {
   }
 };

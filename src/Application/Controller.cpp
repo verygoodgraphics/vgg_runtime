@@ -355,7 +355,10 @@ void Controller::handleEvent(UIEventPtr evt)
     return;
   }
 
-  auto        listenersMap = m_model->getEventListeners(evt->path());
+  auto listenersMap = m_model->getEventListeners(evt->targetId());
+  auto pathListenersMap = m_model->getEventListeners(evt->targetPath());
+  listenersMap.merge(pathListenersMap);
+
   std::string type = evt->type();
   if (auto it = listenersMap.find(type); it != listenersMap.end())
   {

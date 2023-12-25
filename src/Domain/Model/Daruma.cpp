@@ -186,7 +186,7 @@ JsonDocumentPtr& Daruma::layoutDoc()
 }
 
 void Daruma::addEventListener(
-  const std::string& jsonPointer,
+  const std::string& targetKey,
   const std::string& type,
   const std::string& code)
 {
@@ -196,13 +196,13 @@ void Daruma::addEventListener(
   auto fileName = uuidFor(code) + js_file_suffix;
 
   // create element listenters object
-  if (!m_eventListeners.contains(jsonPointer))
+  if (!m_eventListeners.contains(targetKey))
   {
-    m_eventListeners[jsonPointer] = json(json::value_t::object);
+    m_eventListeners[targetKey] = json(json::value_t::object);
   }
 
   // create element listenters array for `type`
-  auto& elementEventListeners = m_eventListeners[jsonPointer];
+  auto& elementEventListeners = m_eventListeners[targetKey];
   if (!elementEventListeners.contains(type))
   {
     elementEventListeners[type] = json(json::value_t::array);
@@ -235,23 +235,21 @@ void Daruma::addEventListener(
   // save meta info
   typeEventListeners.push_back(item);
 
-  m_subject.get_subscriber().on_next(
-    ModelEventPtr{ new ModelEventListenerDidAdd{ json::json_pointer(jsonPointer) } });
-
+  // todo, notify observer?
   // todo, edit mode, save code & meta to remote server
 }
 
 void Daruma::removeEventListener(
-  const std::string& jsonPointer,
+  const std::string& targetKey,
   const std::string& type,
   const std::string& code)
 {
-  if (!m_eventListeners.contains(jsonPointer))
+  if (!m_eventListeners.contains(targetKey))
   {
     return;
   }
 
-  auto& elementEventListeners = m_eventListeners[jsonPointer];
+  auto& elementEventListeners = m_eventListeners[targetKey];
   if (!elementEventListeners.contains(type))
   {
     return;
@@ -271,26 +269,25 @@ void Daruma::removeEventListener(
 
         typeEventListeners.erase(it);
 
-        m_subject.get_subscriber().on_next(
-          ModelEventPtr{ new ModelEventListenerDidRemove{ json::json_pointer(jsonPointer) } });
+        // todo, notify observer?
         return;
       }
     }
   }
 }
 
-auto Daruma::getEventListeners(const std::string& jsonPointer) -> ListenersType
+auto Daruma::getEventListeners(const std::string& targetKey) -> ListenersType
 {
   const std::lock_guard<std::mutex> lock(m_mutex);
 
   ListenersType result{};
 
-  if (jsonPointer.empty() || !m_eventListeners.contains(jsonPointer))
+  if (targetKey.empty() || !m_eventListeners.contains(targetKey))
   {
     return result;
   }
 
-  auto& elementEventListeners = m_eventListeners[jsonPointer];
+  auto& elementEventListeners = m_eventListeners[targetKey];
   for (auto& [type, typeEventListeners] : elementEventListeners.items())
   {
     std::vector<std::string> listeners{};

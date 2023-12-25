@@ -92,7 +92,8 @@ void Reporter::onEvent(UIEventPtr evt)
 
   nlohmann::json event;
   event[K_TYPE] = evt->type();
-  event[K_PATH] = evt->path();
+  event[K_ID] = evt->targetId();
+  event[K_PATH] = evt->targetPath();
   sendEventToJs(event);
 }
 

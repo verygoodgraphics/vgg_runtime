@@ -105,24 +105,36 @@ constexpr const char* uiEventTypeToString(EUIEventType e)
 class UIEvent : public Event
 {
 public:
-  using PathType = std::string;
+  using TargetIdType = std::string;
+  using TargetPathType = std::string;
 
-  UIEvent(const PathType& path, EUIEventType type)
-    : m_path{ path }
-    , m_type{ type }
+private:
+  const EUIEventType   m_type;
+  const TargetIdType   m_targetId;
+  const TargetPathType m_targetPath;
+
+public:
+  UIEvent(EUIEventType type, const TargetIdType& targetId, const TargetPathType& targetPath)
+    : m_type{ type }
+    , m_targetId{ targetId }
+    , m_targetPath{ targetPath }
   {
   }
 
   virtual ~UIEvent() = default;
 
-  PathType path()
+  TargetIdType targetId()
   {
-    return m_path;
+    return m_targetId;
+  }
+  TargetPathType targetPath()
+  {
+    return m_targetPath;
   }
 
   virtual std::string target()
   {
-    return m_path;
+    return targetId();
   }
 
   virtual std::string type()
@@ -134,10 +146,6 @@ public:
   {
     return m_type;
   }
-
-private:
-  const PathType m_path;
-  const EUIEventType m_type;
 };
 
 using UIEventPtr = std::shared_ptr<UIEvent>;
@@ -155,15 +163,17 @@ struct KeyboardEvent
   const bool metaKey;
   const bool shiftKey;
 
-  KeyboardEvent(const PathType& path,
-                EUIEventType type,
-                int key,
-                bool repeat = false,
-                bool altKey = false,
-                bool ctrlKey = false,
-                bool metaKey = false,
-                bool shiftKey = false)
-    : UIEvent(path, type)
+  KeyboardEvent(
+    EUIEventType          type,
+    const TargetIdType&   targetId,
+    const TargetPathType& targetPath,
+    int                   key,
+    bool                  repeat = false,
+    bool                  altKey = false,
+    bool                  ctrlKey = false,
+    bool                  metaKey = false,
+    bool                  shiftKey = false)
+    : UIEvent(type, targetId, targetPath)
     , key{ key }
     , repeat{ repeat }
     , altKey{ altKey }
@@ -197,18 +207,20 @@ struct MouseEvent
   const bool metaKey;
   const bool shiftKey;
 
-  MouseEvent(const PathType& path,
-             EUIEventType type,
-             int button = 0,
-             int x = 0,
-             int y = 0,
-             int movementX = 0,
-             int movementY = 0,
-             bool altKey = false,
-             bool ctrlKey = false,
-             bool metaKey = false,
-             bool shiftKey = false)
-    : UIEvent(path, type)
+  MouseEvent(
+    EUIEventType          type,
+    const TargetIdType&   targetId,
+    const TargetPathType& targetPath,
+    int                   button = 0,
+    int                   x = 0,
+    int                   y = 0,
+    int                   movementX = 0,
+    int                   movementY = 0,
+    bool                  altKey = false,
+    bool                  ctrlKey = false,
+    bool                  metaKey = false,
+    bool                  shiftKey = false)
+    : UIEvent(type, targetId, targetPath)
     , button{ button }
     , x{ x }
     , y{ y }
@@ -232,8 +244,8 @@ struct TouchEvent
   : UIEvent
   , std::enable_shared_from_this<TouchEvent>
 {
-  TouchEvent(const PathType& path, EUIEventType type)
-    : UIEvent(path, type)
+  TouchEvent(EUIEventType type, const TargetIdType& targetId, const TargetPathType& targetPath)
+    : UIEvent(type, targetId, targetPath)
   {
     assert(type >= EUIEventType::TOUCHCANCEL && type <= EUIEventType::TOUCHSTART);
   }

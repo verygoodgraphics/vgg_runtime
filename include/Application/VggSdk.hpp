@@ -67,14 +67,14 @@ public:
   // event listener
   // event types: https://developer.mozilla.org/en-US/docs/Web/API/Element#events
   void addEventListener(
-    const std::string& elementPath,
+    const std::string& elementKey,
     const std::string& eventType,
     const std::string& listenerCode);
   void removeEventListener(
-    const std::string& elementPath,
+    const std::string& elementKey,
     const std::string& eventType,
     const std::string& listenerCode);
-  ListenersType getEventListeners(const std::string& elementPath);
+  ListenersType getEventListeners(const std::string& elementKey);
 
   // editor
   //   void undo();

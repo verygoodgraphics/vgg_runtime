@@ -91,28 +91,28 @@ void VggSdk::designDocumentDeleteAt(const std::string& jsonPointer)
 
 // event listener
 void VggSdk::addEventListener(
-  const std::string& elementPath,
+  const std::string& elementKey,
   const std::string& eventType,
   const std::string& listenerCode)
 {
-  getModel()->addEventListener(elementPath, eventType, listenerCode);
+  getModel()->addEventListener(elementKey, eventType, listenerCode);
 }
 
 void VggSdk::removeEventListener(
-  const std::string& elementPath,
+  const std::string& elementKey,
   const std::string& eventType,
   const std::string& listenerCode)
 {
-  getModel()->removeEventListener(elementPath, eventType, listenerCode);
+  getModel()->removeEventListener(elementKey, eventType, listenerCode);
 }
 
-VggSdk::ListenersType VggSdk::getEventListeners(const std::string& elementPath)
+VggSdk::ListenersType VggSdk::getEventListeners(const std::string& elementKey)
 {
 #ifdef EMSCRIPTEN
   using namespace emscripten;
 
   auto result_listeners_map = val::object();
-  auto listenersMap = getModel()->getEventListeners(elementPath);
+  auto listenersMap = getModel()->getEventListeners(elementKey);
   for (auto& map_item : listenersMap)
   {
     if (map_item.second.empty())
@@ -137,7 +137,7 @@ VggSdk::ListenersType VggSdk::getEventListeners(const std::string& elementPath)
 
   return result_listeners_map;
 #else
-  return getModel()->getEventListeners(elementPath);
+  return getModel()->getEventListeners(elementKey);
 #endif
 }
 

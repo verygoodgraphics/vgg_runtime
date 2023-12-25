@@ -142,22 +142,22 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
   auto ft = fontMgr->matchFamilyStyle(fontName.c_str(), fontStyle);
   if (ft && ft->fontStyle() == fontStyle)
   {
-    style.setFontStyle(fontStyle);
-    SkFontArguments::VariationPosition::Coordinate width{ SkSetFourByteTag('w', 'd', 't', 'h'),
-                                                          attr.fontWidth };
-    SkFontArguments::VariationPosition::Coordinate coords[1] = { width };
-    SkFontArguments::VariationPosition             position = { coords, 1 };
-    style.setFontArguments(SkFontArguments().setVariationDesignPosition(position));
+    // style.setFontStyle(fontStyle);
+    // SkFontArguments::VariationPosition::Coordinate width{ SkSetFourByteTag('w', 'd', 't', 'h'),
+    //                                                       attr.fontWidth };
+    // SkFontArguments::VariationPosition::Coordinate coords[1] = { width };
+    // SkFontArguments::VariationPosition             position = { coords, 1 };
+    // style.setFontArguments(SkFontArguments().setVariationDesignPosition(position));
   }
   else
   {
-    SkFontArguments::VariationPosition::Coordinate weight{ SkSetFourByteTag('w', 'g', 'h', 't'),
-                                                           attr.fontWeight };
-    SkFontArguments::VariationPosition::Coordinate width{ SkSetFourByteTag('w', 'd', 't', 'h'),
-                                                          attr.fontWidth };
-    SkFontArguments::VariationPosition::Coordinate coords[2] = { weight, width };
-    SkFontArguments::VariationPosition             position = { coords, 2 };
-    style.setFontArguments(SkFontArguments().setVariationDesignPosition(position));
+    // SkFontArguments::VariationPosition::Coordinate weight{ SkSetFourByteTag('w', 'g', 'h', 't'),
+    //                                                        attr.fontWeight };
+    // SkFontArguments::VariationPosition::Coordinate width{ SkSetFourByteTag('w', 'd', 't', 'h'),
+    //                                                       attr.fontWidth };
+    // SkFontArguments::VariationPosition::Coordinate coords[2] = { weight, width };
+    // SkFontArguments::VariationPosition             position = { coords, 2 };
+    // style.setFontArguments(SkFontArguments().setVariationDesignPosition(position));
   }
   style.setFontSize(attr.size);
   style.setLetterSpacing(attr.letterSpacing);

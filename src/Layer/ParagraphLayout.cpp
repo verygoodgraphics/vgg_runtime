@@ -18,6 +18,7 @@
 #include "Layer/Core/VType.hpp"
 #include "VSkia.hpp"
 
+#include <algorithm>
 #include <core/SkFontArguments.h>
 #include <core/SkFontStyle.h>
 #include <core/SkTypes.h>
@@ -331,7 +332,7 @@ void RichTextBlock::onTextStyle(
     ETextHorizontalAlignment align;
     std::visit(
       Overloaded{ [&](const TextLayoutAutoHeight& l) { align = textAttr.horzAlignment; },
-                  [&](const TextLayoutAutoWidth& l) { align = HA_Left; },
+                  [&](const TextLayoutAutoWidth& l) { align = textAttr.horzAlignment; },
                   [&](const TextLayoutFixed& l) { align = textAttr.horzAlignment; } },
       *(TextLayoutMode*)userData);
     p.builder = skia::textlayout::ParagraphBuilder::make(
@@ -353,7 +354,7 @@ bool RichTextBlock::ensureBuild(TextLayoutMode mode)
     return ok;
   if (m_state < PARSE)
   {
-    ParagraphParser p;
+    ParagraphParser p(true);
     p.parse(*this, m_utf8Text, m_textStyle, m_lineStyle, &mode);
     m_state = PARSE;
   }
@@ -381,6 +382,24 @@ Bound RichTextBlock::internalLayout(const Bound& bound, ETextLayoutMode mode)
   const auto layoutWidth = bound.width();
   float      newWidth = bound.width();
   float      newHeight = bound.height();
+
+  float maxWidth = 0.f;
+  if (mode == TL_WidthAuto)
+  {
+    for (std::size_t i = 0; i < paragraphCache.size(); i++)
+    {
+      constexpr float MAX_WIDTH = 100000;
+      auto            oldStyle = paragraph[i].builder->getParagraphStyle().getTextAlign();
+      paragraphCache[i].paragraph->updateTextAlign(TextAlign::kLeft);
+      paragraphCache[i].paragraph->layout(MAX_WIDTH);
+      auto width = paragraphCache[i].paragraph->getLongestLine();
+      if (maxWidth < width)
+      {
+        maxWidth = width;
+      }
+      paragraphCache[i].paragraph->updateTextAlign(oldStyle);
+    }
+  }
   for (std::size_t i = 0; i < paragraphCache.size(); i++)
   {
     // auto paragraph = d.builder->Build();
@@ -392,8 +411,7 @@ Bound RichTextBlock::internalLayout(const Bound& bound, ETextLayoutMode mode)
     paragraphCache[i].offsetX = curX;
     if (mode == ETextLayoutMode::TL_WidthAuto)
     {
-      constexpr float MAX_WIDTH = 100000;
-      paragraph->layout(MAX_WIDTH);
+      paragraph->layout(maxWidth + 1);
     }
     else
     {

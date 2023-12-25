@@ -243,7 +243,6 @@ void ExpandSymbol::expandInstance(
           instanceId.c_str(),
           &json);
         json[K_CLASS] = K_SYMBOL_MASTER;
-        json[K_NAME] = json[K_NAME].get<std::string>() + "; expanded_instance";
         json.erase(K_MASTER_ID);
         json.erase(K_OVERRIDE_VALUES);
       }

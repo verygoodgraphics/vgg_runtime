@@ -327,7 +327,7 @@ bool UIView::handleMouseEvent(
   m_eventListener(
     UIEventPtr(new MouseEvent(
       type,
-      target ? target->id() : K_EMPTY_STRING,
+      target ? target->vggId() : K_EMPTY_STRING,
       target ? target->path() : K_EMPTY_STRING,
       jsButtonIndex,
       pointToPage.x,
@@ -402,7 +402,7 @@ bool UIView::handleTouchEvent(int x, int y, int motionX, int motionY, EUIEventTy
   m_eventListener(
     UIEventPtr(new TouchEvent(
       type,
-      target ? target->id() : K_EMPTY_STRING,
+      target ? target->vggId() : K_EMPTY_STRING,
       target ? target->path() : K_EMPTY_STRING)),
     target);
 

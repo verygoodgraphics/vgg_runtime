@@ -137,6 +137,7 @@ public:
   }
 
 public:
+  std::string vggId() const;
   std::string id() const;
   std::string name() const;
   bool        isVisible() const;

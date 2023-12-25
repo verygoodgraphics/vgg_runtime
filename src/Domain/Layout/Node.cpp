@@ -63,7 +63,7 @@ std::shared_ptr<LayoutNode> LayoutNode::hitTest(
 
   if (pointInside(point))
   {
-    if (hasEventListener(id()))
+    if (hasEventListener(vggId()))
     {
       return shared_from_this();
     }
@@ -278,6 +278,11 @@ void LayoutNode::resizeChildNodes(
 bool LayoutNode::isVisible() const
 {
   return getValue(K_VISIBLE, true);
+}
+
+std::string LayoutNode::vggId() const
+{
+  return name();
 }
 
 std::string LayoutNode::id() const

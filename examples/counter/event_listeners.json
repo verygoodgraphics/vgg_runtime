@@ -1,13 +1,11 @@
 {
-  "D9DAF361-1980-4CC2-B4A0-DA729C88C3C6": {
+  "#counterButton": {
     "click": [
       {
         "createdAt": 1691118721013,
         "fileName": "js/button_onclick.mjs"
       }
-    ]
-  },
-  "/frames/0/childObjects/1": {
+    ],
     "mousedown": [
       {
         "createdAt": 1691118721013,

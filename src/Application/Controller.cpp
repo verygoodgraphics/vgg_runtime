@@ -35,6 +35,7 @@
 #include "VGGVersion_generated.h"
 
 #include <cassert>
+#include <chrono>
 
 constexpr auto PSEUDO_PATH_EDIT_VIEW = "::editView";
 
@@ -84,6 +85,67 @@ int versionCompare(const std::string& v1, const std::string& v2)
   }
   return 0;
 }
+
+class Statistic
+{
+  using TimePointType = std::chrono::system_clock::time_point;
+  TimePointType m_loadBegin;
+  TimePointType m_expandBegin;
+  TimePointType m_expandEnd;
+  TimePointType m_fitPageEnd;
+  TimePointType m_firstRenderEnd;
+
+private:
+  auto now()
+  {
+    return std::chrono::system_clock::now();
+  }
+
+public:
+  static std::shared_ptr<Statistic> sharedInstance()
+  {
+    static auto s_sharedInstance = std::shared_ptr<Statistic>(new Statistic);
+    return s_sharedInstance;
+  }
+
+  void report()
+  {
+    using namespace std::chrono;
+
+    INFO(
+      "first render time: total %lld ms, load file %lld ms, expand symbol %lld ms,"
+      "fit page %lld ms, render %lld ms",
+      duration_cast<milliseconds>(m_firstRenderEnd - m_loadBegin).count(),
+      duration_cast<milliseconds>(m_expandBegin - m_loadBegin).count(),
+      duration_cast<milliseconds>(m_expandEnd - m_expandBegin).count(),
+      duration_cast<milliseconds>(m_fitPageEnd - m_expandEnd).count(),
+      duration_cast<milliseconds>(m_firstRenderEnd - m_fitPageEnd).count());
+  }
+
+  void startLoading()
+  {
+    m_loadBegin = now();
+  }
+
+  void startExpanding()
+  {
+    m_expandBegin = now();
+  }
+  void endExpanding()
+  {
+    m_expandEnd = now();
+  }
+
+  void endFittingPage()
+  {
+    m_fitPageEnd = now();
+  }
+
+  void endFirstRender()
+  {
+    m_firstRenderEnd = now();
+  }
+};
 
 } // namespace
 
@@ -235,6 +297,8 @@ std::shared_ptr<app::AppRenderable> Controller::editor()
 
 void Controller::initModel(const char* designDocSchemaFilePath, const char* layoutDocSchemaFilePath)
 {
+  Statistic::sharedInstance()->startLoading();
+
   if (designDocSchemaFilePath)
   {
     m_designSchemaFilePath.append(designDocSchemaFilePath);
@@ -437,7 +501,9 @@ std::shared_ptr<ViewModel> Controller::generateViewModel(
   std::shared_ptr<Daruma> model,
   Layout::Size            size)
 {
+  Statistic::sharedInstance()->startExpanding();
   StartRunning startRunning{ model };
+  Statistic::sharedInstance()->endExpanding();
   m_layout = startRunning.layout();
 
   if (isNormalMode())
@@ -449,6 +515,7 @@ std::shared_ptr<ViewModel> Controller::generateViewModel(
   {
     fitPageForEditing();
   }
+  Statistic::sharedInstance()->endFittingPage();
 
   auto viewModel = std::make_shared<ViewModel>();
   viewModel->model = m_model;
@@ -509,6 +576,9 @@ void Controller::fitPageForEditing()
 
 void Controller::onFirstRender()
 {
+  Statistic::sharedInstance()->endFirstRender();
+  Statistic::sharedInstance()->report();
+
   ASSERT(m_reporter);
   m_reporter->onFirstRender();
 }

@@ -394,29 +394,42 @@ inline void from_json(const json& j, Bound& b)
   b = Bound{ topLeft, width, height };
 }
 
+inline void from_json(const json& j, Font::Axis& x)
+{
+  auto tag = j.value("name", "");
+  if (tag.size() == 4)
+  {
+    x.first = Font::toUint32(tag.c_str());
+    x.second = j.value("value", 0.f);
+  }
+}
+
 inline void from_json(const json& j, TextStyleAttr& x)
 {
   x.length = get_stack_optional<size_t>(j, "length").value_or(false);
-  x.bold = get_stack_optional<bool>(j, "bold").value_or(false);
-  x.italic = get_stack_optional<bool>(j, "italic").value_or(false);
-  x.fontName = get_stack_optional<std::string>(j, "name").value_or("");
-  x.subFamilyName = get_stack_optional<std::string>(j, "subFamilyName").value_or("");
-  x.fillUseType = get_stack_optional<int>(j, "fillUseType").value_or(0);
-  x.fontWeight = get_stack_optional<float>(j, "weight").value_or(100);
-  x.fontWidth = get_stack_optional<float>(j, "width").value_or(100);
+  x.font.fontName = get_stack_optional<std::string>(j, "name").value_or("");
+  x.font.subFamilyName = get_stack_optional<std::string>(j, "subFamilyName").value_or("");
+  x.font.psName = get_stack_optional<std::string>(j, "postScript").value_or("");
+  x.font.axis = get_stack_optional<std::vector<Font::Axis>>("fontVariations", {})
+                  .value_or(std::vector<Font::Axis>{});
+  x.font.size = j.value("size", 14);
   x.fills = j.value("fills", std::vector<Fill>());
   x.baselineShift = j.value("baselineShift", 0.0);
   x.lineThrough = j.value("linethrough", false);
-  x.lineSpace = j.value("lineSpaceValue", 0.0);
   x.underline = j.value("underline", UT_None);
   x.kerning = j.value("kerning", false);
-  x.horzAlignment = j.value("horizontalAlignment", HA_Left);
-  x.size = j.value("size", 14);
   x.letterSpacing = j.value("letterSpacingValue", 0.0);
   auto unit = j.value("letterSpacingUnit", 1);
   if (unit == 1)
   {
-    x.letterSpacing = x.size * x.letterSpacing / 100.f;
+    x.letterSpacing = x.font.size * x.letterSpacing / 100.f;
+  }
+
+  x.lineSpacing = j.value("lineSpacingValue", 0.0);
+  auto lineSpacingUnit = j.value("lineSpacingUnit", 0);
+  if (lineSpacingUnit == 1)
+  {
+    x.lineSpacing = x.font.size * x.lineSpacing * 1.25 / 100.f;
   }
 }
 

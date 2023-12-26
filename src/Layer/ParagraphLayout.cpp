@@ -15,6 +15,7 @@
  */
 #include "ParagraphLayout.hpp"
 
+#include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VType.hpp"
 #include "VSkia.hpp"
 
@@ -26,10 +27,82 @@
 #include <modules/skparagraph/include/FontCollection.h>
 #include <modules/skparagraph/include/Metrics.h>
 #include <modules/skparagraph/include/Paragraph.h>
+#include <optional>
 
 using namespace skia::textlayout;
 namespace
 {
+float findWeight(std::string_view key)
+{
+  static std::unordered_map<const char*, float> s_fontWeightMap = {
+    { "Thin", 100 },   { "ExtraLight", 200 }, { "Light", 300 }, { "Regular", 400 },
+    { "Medium", 500 }, { "SemiBold", 600 },   { "Bold", 700 },  { "ExtraBold", 800 },
+    { "Black", 900 },  { "ExtraBlack", 1000 }
+  };
+  for (const auto& [k, v] : s_fontWeightMap)
+  {
+    if (key.find(k) != std::string::npos)
+    {
+      return v;
+    }
+  }
+  return (float)SkFontStyle::kNormal_Weight;
+}
+
+float findWidth(std::string_view key)
+{
+  static std::unordered_map<const char*, float> s_fontWidthMap = {
+    { "UltraCondensed", 50 },  { "ExtraCondensed", 62.5 }, { "Condensed", 75 },
+    { "SemiCondensed", 87.5 }, { "SemiExpanded", 112.5 },  { "Expanded", 125 },
+    { "ExtraExpanded", 150 },  { "UltraExpanded", 200 }
+  };
+  for (const auto& [k, v] : s_fontWidthMap)
+  {
+    if (key.find(k) != std::string::npos)
+    {
+      return v;
+    }
+  }
+  return 100.f;
+}
+
+std::pair<SkFontStyle, std::vector<Font::Axis>> toSkFontStyle(const Font& font)
+{
+  std::string subFamilyName;
+  std::remove_copy(
+    font.subFamilyName.begin(),
+    font.subFamilyName.end(),
+    std::back_inserter(subFamilyName),
+    ' ');
+
+  SkFontStyle::Slant slant = SkFontStyle::kUpright_Slant;
+  if (
+    subFamilyName.find("Italic") != std::string::npos ||
+    font.fontName.find("Italic") != std::string::npos)
+    slant = SkFontStyle::kItalic_Slant;
+
+  static struct
+  {
+    using Func = float (*)(std::string_view);
+    uint32_t tag;
+    Func     find;
+  } s_axisInSubFamilyName[] = { { Font::wght, findWeight }, { Font::wdth, findWidth } };
+
+  std::vector<Font::Axis> finalAxis;
+  finalAxis.reserve(2 + font.axis.size());
+  for (const auto& [t, f] : s_axisInSubFamilyName)
+  {
+    if (!Font::axisValue(font.axis, t))
+      finalAxis.emplace_back(t, f(subFamilyName));
+  }
+  finalAxis.insert(finalAxis.end(), font.axis.begin(), font.axis.end());
+
+  SkFontStyle::Weight weight = (SkFontStyle::Weight)Font::axisValue(finalAxis, Font::wght).value();
+  SkFontStyle::Width  width = SkFontDescriptor::SkFontStyleWidthForWidthAxisValue(
+    Font::axisValue(finalAxis, Font::wdth).value());
+
+  return { { weight, width, slant }, std::move(finalAxis) };
+}
 
 ParagraphStyle createParagraphStyle(const layer::ParagraphAttr& attr)
 {
@@ -89,7 +162,7 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
     }
   };
 
-  if (const auto components = split(attr.fontName, '-'); !components.empty())
+  if (const auto components = split(attr.font.fontName, '-'); !components.empty())
   {
     fontName = components[0];
     auto matched = font->fuzzyMatch(fontName);
@@ -126,7 +199,8 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
     // the worst case
     fontName = "FiraSans";
   }
-  DEBUG("Given [%s], [%s] is choosed finally", attr.fontName.c_str(), fontName.c_str());
+
+  DEBUG("Given [%s], [%s] is choosed finally", attr.font.fontName.c_str(), fontName.c_str());
   std::vector<SkString> fontFamilies;
   fontFamilies.push_back(SkString(fontName));
   if (const auto& fallbackFonts = font->fallbackFonts(); !fallbackFonts.empty())
@@ -139,33 +213,40 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
       }
     }
   }
+
   style.setFontFamilies(fontFamilies);
-  auto fontStyle = toSkFontStyle(attr);
+  auto [fontStyle, newAxis] = toSkFontStyle(attr.font);
   auto fontMgr = font->getFallbackManager();
   ASSERT(fontMgr);
   auto ft = fontMgr->matchFamilyStyle(fontName.c_str(), fontStyle);
   if (ft && ft->fontStyle() == fontStyle)
   {
     style.setFontStyle(fontStyle);
-    SkFontArguments::VariationPosition::Coordinate width{ SkSetFourByteTag('w', 'd', 't', 'h'),
-                                                          attr.fontWidth };
-    SkFontArguments::VariationPosition::Coordinate coords[1] = { width };
-    SkFontArguments::VariationPosition             position = { coords, 1 };
-    style.setFontArguments(SkFontArguments().setVariationDesignPosition(position));
+    std::vector<SkFontArguments::VariationPosition::Coordinate> coords;
+    coords.reserve(newAxis.size());
+    for (const auto& axis : newAxis)
+    {
+      if (Font::wght == axis.first)
+        continue; // skip wght axis setting
+      coords.push_back({ axis.first, axis.second });
+    }
+    style.setFontArguments(
+      SkFontArguments().setVariationDesignPosition({ coords.data(), (int)coords.size() }));
   }
   else
   {
-    SkFontArguments::VariationPosition::Coordinate weight{ SkSetFourByteTag('w', 'g', 'h', 't'),
-                                                           attr.fontWeight };
-    SkFontArguments::VariationPosition::Coordinate width{ SkSetFourByteTag('w', 'd', 't', 'h'),
-                                                          attr.fontWidth };
-    SkFontArguments::VariationPosition::Coordinate coords[2] = { weight, width };
-    SkFontArguments::VariationPosition             position = { coords, 2 };
-    style.setFontArguments(SkFontArguments().setVariationDesignPosition(position));
+    std::vector<SkFontArguments::VariationPosition::Coordinate> coords;
+    coords.reserve(newAxis.size());
+    for (const auto& axis : newAxis)
+      coords.push_back({ axis.first, axis.second });
+    style.setFontArguments(
+      SkFontArguments().setVariationDesignPosition({ coords.data(), (int)coords.size() }));
   }
-  style.setFontSize(attr.size);
+
+  style.setFontSize(attr.font.size);
   style.setLetterSpacing(attr.letterSpacing);
   style.setBaselineShift(attr.baselineShift);
+
   if (attr.lineThrough)
   {
     style.setDecoration(skia::textlayout::kLineThrough);
@@ -301,6 +382,9 @@ void RichTextBlock::onParagraphBegin(
   {
     p.level = 0;
   }
+  p.builder = skia::textlayout::ParagraphBuilder::make(
+    createParagraphStyle(ParagraphAttr{ m_paraAttr.type, paragraAttr.horiAlign }),
+    m_fontCollection);
   m_newParagraph = true;
   m_paraAttr = paragraAttr;
 }
@@ -329,15 +413,6 @@ void RichTextBlock::onTextStyle(
   auto& p = paragraph.back();
   if (m_newParagraph)
   {
-    ETextHorizontalAlignment align;
-    std::visit(
-      Overloaded{ [&](const TextLayoutAutoHeight& l) { align = textAttr.horzAlignment; },
-                  [&](const TextLayoutAutoWidth& l) { align = textAttr.horzAlignment; },
-                  [&](const TextLayoutFixed& l) { align = textAttr.horzAlignment; } },
-      *(TextLayoutMode*)userData);
-    p.builder = skia::textlayout::ParagraphBuilder::make(
-      createParagraphStyle(ParagraphAttr{ m_paraAttr.type, align }),
-      m_fontCollection);
     m_newParagraph = false;
   }
 

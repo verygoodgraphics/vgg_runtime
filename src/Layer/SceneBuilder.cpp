@@ -17,6 +17,7 @@
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/VUtils.hpp"
 #include "Layer/ParagraphLayout.hpp"
+#include "Layer/ParagraphParser.hpp"
 #include "Math/Algebra.hpp"
 #include "Math/Math.hpp"
 #include "Utility/Log.hpp"
@@ -176,25 +177,22 @@ json SceneBuilder::defaultTextAttr()
 {
   auto j = R"({
         "length":0,
-        "fillUseType":0,
-        "horizontalAlignment":0,
         "name":"Fira Sans",
         "subFamilyName":"",
         "size":14,
+        "fontVariations":[],
+        "postScript":"",
         "kerning":true,
         "letterSpacingValue":0,
         "letterSpacingUnit":0,
-        "lineSpaceValue":0,
-        "lineSpaceUnit":0,
+        "lineSpacingValue":0,
+        "lineSpacingUnit":0,
+        "fillUseType":0,
         "underline":0,
         "linethrough":false,
-        "bold":false,
-        "italic":false,
         "fontVariantCaps":0,
         "textCase":0,
         "baselineShift":0,
-        "weight":100,
-        "width":100,
         "baseline":0,
         "horizontalScale":1,
         "verticalScale":1,
@@ -377,14 +375,16 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
     },
     [&](layer::TextNode* p, const glm::mat3& matrix)
     {
-      std::string text = j.value("content", "");
-      auto        lineType = get_stack_optional<std::vector<TextLineAttr>>(j, "lineType")
-                        .value_or(std::vector<TextLineAttr>());
+      p->setVerticalAlignment(j.value("verticalAlignment", ETextVerticalAlignment::VA_Top));
+      p->setFrameMode(j.value("frameMode", ETextLayoutMode::TL_Fixed));
+
+      // 1.
+
+      std::vector<TextStyleAttr> textStyle;
 
       auto defaultAttr = defaultTextAttr();
       defaultAttr.update(j.value("defaultAttr", json::object()), true);
-      auto                       fontAttr = j.value("attr", std::vector<json>{});
-      std::vector<TextStyleAttr> textStyleAttrs;
+      auto fontAttr = j.value("attr", std::vector<json>{});
       for (auto& att : fontAttr)
       {
         auto json = defaultAttr;
@@ -400,17 +400,37 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
           json["borders"] =
             j.value("style", nlohmann::json{}).value("borders", std::vector<nlohmann::json>());
         }
-        textStyleAttrs.push_back(json);
+        textStyle.push_back(json);
       }
+
       const auto& b = p->frameBound();
-      for (auto& style : textStyleAttrs)
+      for (auto& style : textStyle)
       {
         CoordinateConvert::convertCoordinateSystem(style, totalMatrix);
       }
-      p->setParagraph(std::move(text), textStyleAttrs, lineType);
-      p->setVerticalAlignment(j.value("verticalAlignment", ETextVerticalAlignment::VA_Top));
-      auto layoutMode = j.value("frameMode", ETextLayoutMode::TL_Fixed);
-      p->setFrameMode(layoutMode);
+
+      // 2.
+      auto lineType = j.value("lineType", std::vector<TextLineAttr>{});
+      auto alignments = j.value("horizontalAlignment", std::vector<ETextHorizontalAlignment>{});
+
+      std::vector<ParagraphAttr> parStyle;
+      parStyle.reserve(lineType.size());
+      for (size_t i = 0; i < lineType.size(); i++)
+      {
+        if (i < alignments.size())
+        {
+          parStyle.emplace_back(lineType[i], alignments[i]);
+        }
+        else
+        {
+          if (!alignments.empty())
+            parStyle.emplace_back(lineType[i], alignments.back());
+          else
+            parStyle.emplace_back(lineType[i], HA_Left);
+        }
+      }
+
+      p->setParagraph(j.value("content", ""), std::move(textStyle), std::move(parStyle));
       if (b.width() == 0 || b.height() == 0)
       {
         // for Ai speicific

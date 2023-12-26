@@ -32,11 +32,11 @@ enum class EReason
 template<typename F>
 EReason runOnUtf8(const char* utf8, size_t bytes, F&& f)
 {
-  const char*  cur = utf8;
-  const char*  nextChar = nullptr;
+  const char* cur = utf8;
+  const char* nextChar = nullptr;
   std::size_t charCount = 0;
   std::size_t bytesCount = 0;
-  auto         nextUtf8Char = [](unsigned char* pBegin, std::size_t& charCount) -> const char*
+  auto        nextUtf8Char = [](unsigned char* pBegin, std::size_t& charCount) -> const char*
   {
     if (*pBegin >> 7 == 0)
     {
@@ -113,7 +113,7 @@ void ParagraphParser::parse(
       {
         const auto breakLine =
           m_seperateLines || pa.type.lineType != TLT_Plain || m_styleIndex + 1 < textAttrs.size()
-            ? textAttrs[m_styleIndex + 1].horzAlignment != textAttrs[m_styleIndex].horzAlignment
+            ? true
             : false;
         if (breakLine)
         {

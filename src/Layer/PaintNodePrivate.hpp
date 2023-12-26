@@ -316,7 +316,7 @@ public:
   //   return blend;
   // }
 
-  void drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender = nullptr)
+  void drawAsAlphaMaskImpl(Renderer* renderer, sk_sp<SkBlender> blender = nullptr)
   {
     if (!path)
     {
@@ -331,7 +331,7 @@ public:
       blender = Painter::getMaskBlender();
     }
     Painter painter(renderer);
-    drawRawStyle(painter, *path, blender);
+    drawRawStyleImpl(painter, *path, blender);
   }
 
   void drawWithAlphaMask(Renderer* renderer, const SkPath& path, const SkPath& outlineMask)
@@ -351,7 +351,7 @@ public:
       painter.beginClip(outlineMask);
     }
     auto blender = SkBlender::Mode(SkBlendMode::kSrcIn);
-    drawRawStyle(painter, path, blender);
+    drawRawStyleImpl(painter, path, blender);
     if (!outlineMask.isEmpty())
     {
       painter.endClip();
@@ -397,7 +397,7 @@ public:
     {
       painter.beginClip(outlineMask);
     }
-    drawRawStyle(painter, path, blender);
+    drawRawStyleImpl(painter, path, blender);
     if (!outlineMask.isEmpty())
     {
       painter.endClip();
@@ -415,7 +415,7 @@ public:
         auto skm = toSkMatrix(p.second.matrix());
         canvas->save();
         canvas->concat(skm);
-        p.first->d_ptr->drawAsAlphaMask(renderer);
+        p.first->drawAsAlphaMask(renderer, nullptr);
         canvas->restore();
       }
     }
@@ -444,7 +444,7 @@ public:
     {
       painter.beginClip(outlineMask);
     }
-    drawRawStyle(painter, path, SkBlender::Mode(SkBlendMode::kSrcOver));
+    drawRawStyleImpl(painter, path, SkBlender::Mode(SkBlendMode::kSrcOver));
     if (!outlineMask.isEmpty())
     {
       painter.endClip();
@@ -453,7 +453,7 @@ public:
     canvas->restore();        // draw masked layer into canvas
   }
 
-  void drawRawStyle(Painter& painter, const SkPath& skPath, sk_sp<SkBlender> blender)
+  void drawRawStyleImpl(Painter& painter, const SkPath& skPath, sk_sp<SkBlender> blender)
   {
     // const auto globalAlpha = contextSetting.opacity;
     auto filled = false;

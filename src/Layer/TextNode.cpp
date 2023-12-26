@@ -21,6 +21,7 @@
 
 #include "Layer/Memory/AllocatorImpl.hpp"
 #include "Layer/Core/TextNode.hpp"
+#include "Layer/Painter.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/TreeNode.hpp"
 #include "Layer/Core/PaintNode.hpp"
@@ -157,8 +158,15 @@ void TextNode::setFrameMode(ETextLayoutMode layoutMode)
   _->paragraphLayout->setTextLayoutMode(mode);
 }
 
-void TextNode::paintFill(Renderer* renderer, sk_sp<SkBlender> blender, const SkPath& path)
+void TextNode::drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
 {
+  SkPath path;
+  paintFill(renderer, std::move(blender), path);
+}
+
+void TextNode::drawRawStyle(Painter& painter, const SkPath& path, sk_sp<SkBlender> blender)
+{
+  auto renderer = painter.renderer();
   VGG_IMPL(TextNode);
   auto canvas = renderer->canvas();
   if (_->paragraphLayout->empty())

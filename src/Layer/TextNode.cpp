@@ -106,34 +106,17 @@ TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
 }
 
 void TextNode::setParagraph(
-  std::string                      utf8,
-  std::vector<TextStyleAttr>       attrs,
-  const std::vector<TextLineAttr>& lineAttr)
+  std::string                utf8,
+  std::vector<TextStyleAttr> style,
+  std::vector<ParagraphAttr> parStyle)
 {
   VGG_IMPL(TextNode);
 #ifdef USE_SHARED_PTR
   _->ensureObserve();
 #endif
-  std::vector<ParagraphAttr> paraAttrs;
-  for (const auto a : lineAttr)
-  {
-    paraAttrs.emplace_back(a, ETextHorizontalAlignment::HA_Left);
-  }
-  if (paraAttrs.empty())
-  {
-    TextLineAttr attr;
-    attr.level = 0;
-    attr.lineType = TLT_Plain;
-    attr.firstLine = false;
-    paraAttrs.emplace_back(attr, ETextHorizontalAlignment::HA_Left);
-  }
-
   _->paragraphLayout->setText(std::move(utf8));
-  _->paragraphLayout->setTextStyle(std::move(attrs));
-  _->paragraphLayout->setLineStyle(std::move(paraAttrs));
-
-  // ParagraphParser parser;
-  // parser.parse(_->paragraphCache, _->text, _->textAttr, paraAttrs);
+  _->paragraphLayout->setTextStyle(std::move(style));
+  _->paragraphLayout->setLineStyle(std::move(parStyle));
 }
 
 void TextNode::setFrameMode(ETextLayoutMode layoutMode)

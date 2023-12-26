@@ -15,11 +15,13 @@
  */
 #pragma once
 
+#include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Memory/VNew.hpp"
 #include "Layer/Memory/VRefCnt.hpp"
 #include "Layer/ParagraphLayout.hpp"
+#include "Layer/ParagraphParser.hpp"
 #include <utility>
 
 namespace VGG::layer
@@ -56,9 +58,10 @@ public:
   TextNode& operator=(TextNode&&) noexcept = delete;
 
   void setParagraph(
-    std::string                      utf8,
-    std::vector<TextStyleAttr>       attrs,
-    const std::vector<TextLineAttr>& lineAttr);
+    std::string                utf8,
+    std::vector<TextStyleAttr> style,
+    std::vector<ParagraphAttr> parStyle);
+
   void setFrameMode(ETextLayoutMode mode);
   void setVerticalAlignment(ETextVerticalAlignment vertAlign);
 

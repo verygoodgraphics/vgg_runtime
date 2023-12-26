@@ -25,6 +25,7 @@
 #include "glm/gtx/transform.hpp"
 
 #include <core/SkRefCnt.h>
+#include <core/SkScalar.h>
 #include <core/SkShader.h>
 #include <core/SkPathEffect.h>
 #include <include/core/SkBlendMode.h>
@@ -145,18 +146,6 @@ inline skia::textlayout::TextAlign toSkTextAlign(ETextHorizontalAlignment align)
     skia::textlayout::TextAlign::kCenter);
   SWITCH_MAP_ITEM_DEF_NULL(VGG::ETextHorizontalAlignment::HA_Natural)
   SWITCH_MAP_ITEM_END(skia::textlayout::TextAlign::kLeft)
-}
-
-inline SkFontStyle toSkFontStyle(const TextStyleAttr& attr)
-{
-  SkFontStyle::Slant slant = SkFontStyle::kUpright_Slant;
-  if (
-    attr.subFamilyName.find("Italic") != std::string::npos ||
-    attr.fontName.find("Italic") != std::string::npos)
-    slant = SkFontStyle::kItalic_Slant;
-  return { SkScalarRoundToInt(attr.fontWeight),
-           SkFontDescriptor::SkFontStyleWidthForWidthAxisValue(attr.fontWidth),
-           slant };
 }
 
 inline SkPathOp toSkPathOp(VGG::EBoolOp blop)

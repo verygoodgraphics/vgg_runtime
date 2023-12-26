@@ -34,6 +34,7 @@
 #include <vector>
 #include <stdint.h>
 #include <variant>
+#include <string_view>
 
 namespace VGG
 {
@@ -226,44 +227,54 @@ struct TextLineAttr
   int  lineType{ TLT_Plain };
 };
 
+using namespace std::string_view_literals;
+struct Font
+{
+  using Axis = std::pair<uint32_t, float>;
+  std::string       fontName;
+  std::string       subFamilyName;
+  std::string       psName;
+  std::vector<Axis> axis;
+  int               size{ 14 };
+
+  static std::optional<float> axisValue(const std::vector<Axis>& axis, uint32_t tag)
+  {
+    for (const auto& t : axis)
+    {
+      if (t.first == tag)
+        return t.second;
+    }
+    return std::nullopt;
+  }
+
+  static uint32_t toUint32(const char* tags)
+  {
+    uint32_t value = ((uint32_t)tags[3] << 24) + ((uint32_t)tags[2] << 16) +
+                     ((uint32_t)tags[1] << 8) + (uint32_t)tags[0];
+    return value;
+  }
+
+  // NOLINTBEGIN
+  static constexpr uint32_t wdth =
+    (uint32_t('w') << 24) + (uint32_t('d') << 16) + (uint32_t('t') << 8) + uint32_t('h');
+  static constexpr uint32_t slnt =
+    (uint32_t('s') << 24) + (uint32_t('l') << 16) + (uint32_t('n') << 8) + uint32_t('t');
+  static constexpr uint32_t wght =
+    (uint32_t('w') << 24) + (uint32_t('g') << 16) + (uint32_t('h') << 8) + uint32_t('t');
+  // NOLINTEND
+};
+
 struct TextStyleAttr
 {
-  std::string              fontName;
-  std::string              subFamilyName;
-  std::vector<Fill>        fills;
-  float                    letterSpacing{ 0.0 };
-  float                    lineSpace{ 0.f };
-  float                    baselineShift{ 0.0 };
-  size_t                   length{ 0 };
-  int                      size{ 14 };
-  int                      fillUseType{ 0 };
-  float                    fontWeight{ 100 };
-  float                    fontWidth{ 100 };
-  bool                     bold{ false };
-  bool                     italic{ false };
-  bool                     lineThrough{ false };
-  bool                     kerning{ false };
-  ETextUnderline           underline{ UT_None };
-  ETextHorizontalAlignment horzAlignment{ HA_Left };
-  ELetterTransform         letterTransform{ ELT_Nothing };
-
-  bool operator==(const TextStyleAttr& other) const
-  {
-    size_t h = 0;
-    hash_combine(
-      h,
-      fontName,
-      subFamilyName,
-      letterSpacing,
-      length,
-      size,
-      bold,
-      italic,
-      lineThrough,
-      underline,
-      horzAlignment);
-    return h;
-  }
+  Font              font;
+  std::vector<Fill> fills;
+  size_t            length{ 0 };
+  float             letterSpacing{ 0.0 };
+  float             lineSpacing{ 0.f };
+  float             baselineShift{ 0.0 };
+  bool              lineThrough{ false };
+  bool              kerning{ false };
+  ETextUnderline    underline{ UT_None };
 };
 
 struct ControlPoint

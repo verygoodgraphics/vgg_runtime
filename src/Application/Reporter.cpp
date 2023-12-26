@@ -64,12 +64,9 @@ void Reporter::onSelectNode(std::weak_ptr<LayoutNode> node)
     return;
   }
 
-  nlohmann::json::json_pointer path{ target->path() };
-  const auto&                  jsonNode = designDoc->content()[path];
-
   nlohmann::json event;
   event[K_TYPE] = K_SELECT;
-  event[K_ID] = jsonNode[K_ID];
+  event[K_ID] = target->vggId();
   event[K_PATH] = target->path();
 
   sendEventToJs(event);

@@ -35,6 +35,7 @@
 class SkCanvas;
 class SkImageFilter;
 class SkImage;
+class Painter;
 
 namespace VGG::layer
 {
@@ -233,6 +234,9 @@ protected:
   virtual SkPath makeContourImpl(ContourOption option, const Transform* mat);
   SkPath         childPolyOperation() const;
   Mask           makeMaskBy(EBoolOp maskOp, Renderer* renderer);
+
+  virtual void drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender);
+  virtual void drawRawStyle(Painter& painter, const SkPath& path, sk_sp<SkBlender> blender);
 
   Bound onRevalidate() override;
 

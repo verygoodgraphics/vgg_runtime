@@ -379,6 +379,16 @@ SkPath PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
   return path;
 }
 
+void PaintNode::drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
+{
+  d_ptr->drawAsAlphaMaskImpl(renderer, std::move(blender));
+}
+
+void PaintNode::drawRawStyle(Painter& painter, const SkPath& path, sk_sp<SkBlender> blender)
+{
+  d_ptr->drawRawStyleImpl(painter, path, std::move(blender));
+}
+
 Mask PaintNode::asOutlineMask(const Transform* mat)
 {
   Mask mask;
@@ -772,6 +782,10 @@ void PaintNode::paintStyle(Renderer* renderer, const SkPath& path, const SkPath&
   // draw blur, we assume that there is only one blur style
   Blur    blur;
   auto    blurType = _->blurType(blur);
+  // auto    validPath = path.isValid() && path.isEmpty();
+  // if (validPath)
+  // {
+  // }
   if (!_->alphaMask)
   {
     // 1. normal drawing
@@ -794,7 +808,7 @@ void PaintNode::paintStyle(Renderer* renderer, const SkPath& path, const SkPath&
       painter.beginClip(outlineMask);
     }
     auto blender = SkBlender::Mode(SkBlendMode::kSrcOver);
-    _->drawRawStyle(painter, path, blender);
+    drawRawStyle(painter, path, blender);
     if (!outlineMask.isEmpty())
     {
       painter.endClip();

@@ -65,8 +65,8 @@ public:
   ~TextNode();
 
 protected:
-  void paintFill(Renderer* renderer, sk_sp<SkBlender> blender, const SkPath& path) override;
-
+  void  drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender) override;
+  void  drawRawStyle(Painter& painter, const SkPath& path, sk_sp<SkBlender> blender) override;
   Bound onRevalidate() override;
 };
 

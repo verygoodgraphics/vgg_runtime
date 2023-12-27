@@ -415,21 +415,25 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
 
       std::vector<ParagraphAttr> parStyle;
       parStyle.reserve(lineType.size());
-      for (size_t i = 0; i < lineType.size(); i++)
-      {
-        if (i < alignments.size())
-        {
-          parStyle.emplace_back(lineType[i], alignments[i]);
-        }
-        else
-        {
-          if (!alignments.empty())
-            parStyle.emplace_back(lineType[i], alignments.back());
-          else
-            parStyle.emplace_back(lineType[i], HA_Left);
-        }
-      }
 
+      size_t       i = 0;
+      auto         defaultAlign = alignments.empty() ? HA_Left : alignments.back();
+      TextLineAttr defaultLineType;
+      while (i < lineType.size() && i < alignments.size())
+      {
+        parStyle.emplace_back(lineType[i], alignments[i]);
+        i++;
+      }
+      while (i < lineType.size())
+      {
+        parStyle.emplace_back(lineType[i], defaultAlign);
+        i++;
+      }
+      while (i < alignments.size())
+      {
+        parStyle.emplace_back(defaultLineType, alignments[i]);
+        i++;
+      }
       p->setParagraph(j.value("content", ""), std::move(textStyle), std::move(parStyle));
       if (b.width() == 0 || b.height() == 0)
       {

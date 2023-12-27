@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "Layer/ParagraphParser.hpp"
 #include "ParagraphLayout.hpp"
 #include "ParagraphPainter.hpp"
 #include "AttrSerde.hpp"
@@ -111,6 +112,12 @@ void TextNode::setParagraph(
   std::vector<ParagraphAttr> parStyle)
 {
   VGG_IMPL(TextNode);
+  if (utf8.empty())
+    return;
+  if (style.empty())
+    style.push_back(TextStyleAttr());
+  if (parStyle.empty())
+    parStyle.push_back(ParagraphAttr());
   _->paragraphLayout->setText(std::move(utf8));
   _->paragraphLayout->setTextStyle(std::move(style));
   _->paragraphLayout->setLineStyle(std::move(parStyle));

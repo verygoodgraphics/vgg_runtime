@@ -111,9 +111,6 @@ void TextNode::setParagraph(
   std::vector<ParagraphAttr> parStyle)
 {
   VGG_IMPL(TextNode);
-#ifdef USE_SHARED_PTR
-  _->ensureObserve();
-#endif
   _->paragraphLayout->setText(std::move(utf8));
   _->paragraphLayout->setTextStyle(std::move(style));
   _->paragraphLayout->setLineStyle(std::move(parStyle));

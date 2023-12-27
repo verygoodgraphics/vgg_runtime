@@ -230,7 +230,16 @@ struct TextLineAttr
 using namespace std::string_view_literals;
 struct Font
 {
-  using Axis = std::pair<uint32_t, float>;
+  struct Axis
+  {
+    uint32_t name;
+    float    value;
+    Axis(uint32_t tag = 0, float v = 0.f)
+      : name(tag)
+      , value(v)
+    {
+    }
+  };
   std::string       fontName;
   std::string       subFamilyName;
   std::string       psName;
@@ -241,16 +250,16 @@ struct Font
   {
     for (const auto& t : axis)
     {
-      if (t.first == tag)
-        return t.second;
+      if (t.name == tag)
+        return t.value;
     }
     return std::nullopt;
   }
 
   static uint32_t toUint32(const char* tags)
   {
-    uint32_t value = ((uint32_t)tags[3] << 24) + ((uint32_t)tags[2] << 16) +
-                     ((uint32_t)tags[1] << 8) + (uint32_t)tags[0];
+    uint32_t value = ((uint32_t)tags[0] << 24) + ((uint32_t)tags[1] << 16) +
+                     ((uint32_t)tags[2] << 8) + (uint32_t)tags[3];
     return value;
   }
 

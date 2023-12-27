@@ -399,19 +399,18 @@ inline void from_json(const json& j, Font::Axis& x)
   auto tag = j.value("name", "");
   if (tag.size() == 4)
   {
-    x.first = Font::toUint32(tag.c_str());
-    x.second = j.value("value", 0.f);
+    x.name = Font::toUint32(tag.c_str());
+    x.value = j.value("value", 0.f);
   }
 }
 
 inline void from_json(const json& j, TextStyleAttr& x)
 {
-  x.length = get_stack_optional<size_t>(j, "length").value_or(false);
-  x.font.fontName = get_stack_optional<std::string>(j, "name").value_or("");
-  x.font.subFamilyName = get_stack_optional<std::string>(j, "subFamilyName").value_or("");
-  x.font.psName = get_stack_optional<std::string>(j, "postScript").value_or("");
-  x.font.axis = get_stack_optional<std::vector<Font::Axis>>("fontVariations", {})
-                  .value_or(std::vector<Font::Axis>{});
+  x.length = j.value("length", 0);
+  x.font.fontName = j.value("name", "");
+  x.font.subFamilyName = j.value("subFamilyName", "");
+  x.font.psName = j.value("postScript", "");
+  x.font.axis = j.value("fontVariations", std::vector<Font::Axis>());
   x.font.size = j.value("size", 14);
   x.fills = j.value("fills", std::vector<Fill>());
   x.baselineShift = j.value("baselineShift", 0.0);

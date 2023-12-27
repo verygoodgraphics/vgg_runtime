@@ -226,9 +226,9 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
     coords.reserve(newAxis.size());
     for (const auto& axis : newAxis)
     {
-      if (Font::wght == axis.first)
+      if (Font::wght == axis.name)
         continue; // skip wght axis setting
-      coords.push_back({ axis.first, axis.second });
+      coords.push_back({ axis.name, axis.value });
     }
     style.setFontArguments(
       SkFontArguments().setVariationDesignPosition({ coords.data(), (int)coords.size() }));
@@ -238,7 +238,7 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
     std::vector<SkFontArguments::VariationPosition::Coordinate> coords;
     coords.reserve(newAxis.size());
     for (const auto& axis : newAxis)
-      coords.push_back({ axis.first, axis.second });
+      coords.push_back({ axis.name, axis.value });
     style.setFontArguments(
       SkFontArguments().setVariationDesignPosition({ coords.data(), (int)coords.size() }));
   }

@@ -451,12 +451,12 @@ bool RichTextBlock::ensureBuild(TextLayoutMode mode)
   return ok;
 }
 
-Bound RichTextBlock::internalLayout(const Bound& bound, ETextLayoutMode mode)
+std::pair<Bound, float> RichTextBlock::internalLayout(const Bound& bound, ETextLayoutMode mode)
 {
   Bound      newBound = bound;
   const auto layoutWidth = bound.width();
   float      newWidth = bound.width();
-  float      newHeight = bound.height();
+  float      newHeight = 0.f;
 
   float maxWidth = 0.f;
   if (mode == TL_WidthAuto)
@@ -512,16 +512,19 @@ Bound RichTextBlock::internalLayout(const Bound& bound, ETextLayoutMode mode)
       newHeight += paragraph->getHeight();
     }
   }
-  if (mode == ETextLayoutMode::TL_HeightAuto)
+  switch (mode)
   {
-    newBound.setHeight(newHeight);
+    case TL_HeightAuto:
+      newBound.setHeight(newHeight);
+      break;
+    case TL_WidthAuto:
+      newBound.setHeight(newHeight);
+      newBound.setWidth(newWidth);
+      break;
+    case TL_Fixed:
+      break;
   }
-  if (mode == ETextLayoutMode::TL_WidthAuto)
-  {
-    newBound.setHeight(newHeight);
-    newBound.setWidth(newWidth);
-  }
-  return newBound;
+  return { newBound, newHeight };
 }
 
 } // namespace VGG::layer

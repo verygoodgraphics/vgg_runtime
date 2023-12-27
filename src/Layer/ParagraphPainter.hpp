@@ -82,7 +82,7 @@ public:
   {
     const auto b = m_paragraph->bound();
     setCanvas(renderer->canvas());
-    int  totalHeight = m_paragraph->bound().height();
+    int  totalHeight = m_paragraph->textHeight();
     auto vertAlign = m_paragraph->verticalAlignment();
     int  curY = 0;
     if (vertAlign == ETextVerticalAlignment::VA_Bottom)

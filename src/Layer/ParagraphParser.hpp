@@ -47,19 +47,13 @@ struct TextView
 struct ParagraphAttr
 {
   TextLineAttr             type;
-  ETextHorizontalAlignment horiAlign;
+  ETextHorizontalAlignment horiAlign{ HA_Left };
   ParagraphAttr() = default;
   ParagraphAttr(TextLineAttr type, ETextHorizontalAlignment align)
     : type(type)
     , horiAlign(align)
   {
   }
-
-  ParagraphAttr(const ParagraphAttr&) = default;
-  ParagraphAttr& operator=(const ParagraphAttr&) = default;
-
-  ParagraphAttr(ParagraphAttr&&) = default;
-  ParagraphAttr& operator=(ParagraphAttr&&) = default;
 };
 
 class ParagraphListener

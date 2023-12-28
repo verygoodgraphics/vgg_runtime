@@ -77,7 +77,6 @@ void TreeNode::pushChildAt(const std::string& name, TreeNodePtr node)
 
 void TreeNode::pushSiblingFront(TreeNodePtr node)
 {
-#ifdef USE_SHARED_PTR
   auto p = m_parent.lock();
   if (p)
   {
@@ -85,15 +84,6 @@ void TreeNode::pushSiblingFront(TreeNodePtr node)
     node->m_parent = p;
     observe(node);
   }
-#else
-  auto p = m_parent.lock();
-  if (p)
-  {
-    p->m_firstChild.push_front(node);
-    node->m_parent = p;
-    observe(node);
-  }
-#endif
 }
 
 void TreeNode::pushSiblingAt(const std::string& name, TreeNodePtr node)

@@ -115,11 +115,11 @@ public:
     INFO(
       "first render time: total %lld ms, load file %lld ms, expand symbol %lld ms,"
       "fit page %lld ms, render %lld ms",
-      duration_cast<milliseconds>(m_firstRenderEnd - m_loadBegin).count(),
-      duration_cast<milliseconds>(m_expandBegin - m_loadBegin).count(),
-      duration_cast<milliseconds>(m_expandEnd - m_expandBegin).count(),
-      duration_cast<milliseconds>(m_fitPageEnd - m_expandEnd).count(),
-      duration_cast<milliseconds>(m_firstRenderEnd - m_fitPageEnd).count());
+      (long long int)duration_cast<milliseconds>(m_firstRenderEnd - m_loadBegin).count(),
+      (long long int)duration_cast<milliseconds>(m_expandBegin - m_loadBegin).count(),
+      (long long int)duration_cast<milliseconds>(m_expandEnd - m_expandBegin).count(),
+      (long long int)duration_cast<milliseconds>(m_fitPageEnd - m_expandEnd).count(),
+      (long long int)duration_cast<milliseconds>(m_firstRenderEnd - m_fitPageEnd).count());
   }
 
   void startLoading()

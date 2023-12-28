@@ -139,18 +139,10 @@ protected:
         cases.pop_front();
       });
   }
-};
 
-TreeNodePtr TreeNodeTestSuit::s_root = nullptr;
-
-TEST_F(TreeNodeTestSuit, Create)
-{
-  s_root = makeTreeNodePtr("1");
-}
-
-TEST_F(TreeNodeTestSuit, InitTreeFromJson)
-{
-  // clang-format off
+  static void init()
+  {
+    // clang-format off
 //                               /-6
 //                              |
 //                     /2-------|-7------- /-12
@@ -168,8 +160,8 @@ TEST_F(TreeNodeTestSuit, InitTreeFromJson)
 //                    |          \11------ /-15
 //                    |
 //                     \-5
-  // clang-format on
-  const char* str = R"json(
+    // clang-format on
+    const char* str = R"json(
 		{"1":
 			[
 				{"2":
@@ -190,22 +182,38 @@ TEST_F(TreeNodeTestSuit, InitTreeFromJson)
 		}
 		)json";
 
-  auto j = json::parse(str);
-  s_root = initTreeFromJson(j);
+    auto j = json::parse(str);
+    s_root = initTreeFromJson(j);
+  }
+};
+
+TreeNodePtr TreeNodeTestSuit::s_root = nullptr;
+
+TEST_F(TreeNodeTestSuit, Create)
+{
+  s_root = makeTreeNodePtr("1");
+}
+
+TEST_F(TreeNodeTestSuit, InitTreeFromJson)
+{
+  init();
 }
 
 TEST_F(TreeNodeTestSuit, Print)
 {
+  init();
   print();
 }
 
 TEST_F(TreeNodeTestSuit, TraverseCheck)
 {
+  init();
   check();
 }
 
 TEST_F(TreeNodeTestSuit, RemoveChildAndReattach)
 {
+  init();
   auto removed = s_root->removeChild("4");
 
   std::deque<std::string> cases = { "4", "9", "10", "13", "14", "11", "15" };
@@ -221,6 +229,7 @@ TEST_F(TreeNodeTestSuit, RemoveChildAndReattach)
 
 TEST_F(TreeNodeTestSuit, RemoveSiblingAndReattach)
 {
+  init();
   auto removed = s_root->removeChild("4");
 
   std::deque<std::string> cases = { "4", "9", "10", "13", "14", "11", "15" };
@@ -236,6 +245,7 @@ TEST_F(TreeNodeTestSuit, RemoveSiblingAndReattach)
 
 TEST_F(TreeNodeTestSuit, FindChildNode)
 {
+  init();
   auto c = s_root->findChild("1");
   EXPECT_FALSE(c);
 
@@ -248,6 +258,7 @@ TEST_F(TreeNodeTestSuit, FindChildNode)
 
 TEST_F(TreeNodeTestSuit, FindSiblingNode)
 {
+  init();
   auto c = s_root->findChildRecursive("10");
   EXPECT_TRUE(c);
   EXPECT_FALSE(c->findNextSblingFromCurrent("9"));
@@ -261,6 +272,7 @@ TEST_F(TreeNodeTestSuit, FindSiblingNode)
 
 TEST_F(TreeNodeTestSuit, SeekRoot)
 {
+  init();
   auto c = s_root->findChildRecursive("10");
   EXPECT_TRUE(c != nullptr);
   EXPECT_EQ("10", c->name());
@@ -282,6 +294,7 @@ TEST_F(TreeNodeTestSuit, SeekRoot)
 
 TEST_F(TreeNodeTestSuit, AccessByIterator)
 {
+  init();
   auto c = s_root->findChildRecursive("10");
   EXPECT_TRUE(c);
   EXPECT_EQ(c->name(), "10");

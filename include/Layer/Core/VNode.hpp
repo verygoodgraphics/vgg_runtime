@@ -50,9 +50,9 @@ class VNode
   public ObjectImpl<VObject>
 #endif
 {
-  Bound                       m_bound;
-  uint8_t                     m_state{ 0 };
-  std::vector<WeakRef<VNode>> m_observers;
+  Bound                 m_bound;
+  uint8_t               m_state{ 0 };
+  std::vector<VNodeRef> m_observers;
 
   template<typename Visitor>
   void visitObservers(Visitor&& v)
@@ -78,8 +78,7 @@ protected:
 
 public:
   VNode(VRefCnt* cnt)
-#ifdef USE_SHARED_PTR
-#else
+#ifndef USE_SHARED_PTR
     : ObjectImpl<VObject>(cnt)
 #endif
   {

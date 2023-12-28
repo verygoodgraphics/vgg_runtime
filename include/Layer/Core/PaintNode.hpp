@@ -84,7 +84,7 @@ template<typename... Args>
 inline PaintNodePtr makePaintNodePtr(Args&&... args)
 {
 #ifdef USE_SHARED_PTR
-  auto p = std::make_shared<PaintNode>(std::forward<Args>(args)...);
+  auto p = std::make_shared<PaintNode>(nullptr, std::forward<Args>(args)...);
   return p;
 #else
   return PaintNodePtr(V_NEW<PaintNode>(std::forward<Args>(args)...));
@@ -110,8 +110,6 @@ public:
   PaintNode& operator=(const PaintNode&) = delete;
   PaintNode(PaintNode&&) = delete;
   PaintNode& operator=(PaintNode&&) = delete;
-
-  virtual TreeNodePtr clone() const override;
 
   void addChild(const PaintNodePtr node)
   {

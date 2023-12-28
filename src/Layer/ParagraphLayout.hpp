@@ -119,7 +119,7 @@ template<typename... Args>
 inline RichTextBlockPtr makeRichTextBlockPtr(Args&&... args)
 {
 #ifdef USE_SHARED_PTR
-  auto p = std::make_shared<RichTextBlock>(std::forward<Args>(args)...);
+  auto p = std::make_shared<RichTextBlock>(nullptr);
   return p;
 #else
   return RichTextBlockPtr(V_NEW<RichTextBlock>(std::forward<Args>(args)...));

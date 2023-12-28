@@ -74,23 +74,6 @@ PaintNode::PaintNode(VRefCnt* cnt, const std::string& name, std::unique_ptr<Pain
 {
 }
 
-// PaintNode::PaintNode(const PaintNode& other)
-//   : TreeNode(other.name())
-//   , d_ptr(new PaintNode__pImpl(*other.d_ptr))
-// {
-// }
-
-TreeNodePtr PaintNode::clone() const
-{
-#ifdef USE_SHARED_PTR
-  auto newNode = std::make_shared<PaintNode>(*this);
-  return newNode;
-#else
-  ASSERT(false);
-  return nullptr;
-#endif
-}
-
 void PaintNode::setContextSettings(const ContextSetting& settings)
 {
   VGG_IMPL(PaintNode);

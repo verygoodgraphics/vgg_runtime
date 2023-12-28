@@ -30,14 +30,13 @@ class TextNode;
 using TextNodePtr = std::shared_ptr<TextNode>;
 #else
 using TextNodePtr = Ref<TextNode>;
-using TextNodeRef = WeakRef<TextNode>;
 #endif
 
 template<typename... Args>
 inline TextNodePtr makeTextNodePtr(Args&&... args)
 {
 #ifdef USE_SHARED_PTR
-  auto p = std::make_shared<TextNode>(std::forward<Args>(args)...);
+  auto p = std::make_shared<TextNode>(nullptr, std::forward<Args>(args)...);
   return p;
 #else
   return TextNodePtr(V_NEW<TextNode>(std::forward<Args>(args)...));
@@ -63,7 +62,6 @@ public:
   void setFrameMode(ETextLayoutMode mode);
   void setVerticalAlignment(ETextVerticalAlignment vertAlign);
 
-  TreeNodePtr clone() const override;
   ~TextNode();
 
 protected:

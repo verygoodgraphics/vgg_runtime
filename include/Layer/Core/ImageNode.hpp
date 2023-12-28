@@ -33,14 +33,13 @@ class ImageNode;
 using ImageNodePtr = std::shared_ptr<ImageNode>;
 #else
 using ImageNodePtr = Ref<ImageNode>;
-using ImageNodeRef = WeakRef<ImageNode>;
 #endif
 
 template<typename... Args>
 inline ImageNodePtr makeImageNodePtr(Args&&... args)
 {
 #ifdef USE_SHARED_PTR
-  auto p = std::make_shared<ImageNode>(std::forward<Args>(args)...);
+  auto p = std::make_shared<ImageNode>(nullptr, std::forward<Args>(args)...);
   return p;
 #else
   return ImageNodePtr(V_NEW<ImageNode>(std::forward<Args>(args)...));

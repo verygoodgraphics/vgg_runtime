@@ -36,7 +36,8 @@ static AllocatorImpl g_globalLayerMemoryAllocator{ "Global Memory Allocator" };
 // NOLINTBEGIN
 VAllocator*          VGG_GlobalMemoryAllocator()
 {
-  return &g_globalLayerMemoryAllocator;
+  return nullptr;
+  // return &g_globalLayerMemoryAllocator;
 }
 // NOLINTEND
 

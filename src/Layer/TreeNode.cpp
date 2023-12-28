@@ -161,7 +161,6 @@ TreeNodePtr TreeNode::findChild(const std::string& name) const
 
 TreeNodePtr TreeNode::findNextSblingFromCurrent(const std::string& name) const
 {
-#ifdef USE_SHARED_PTR
   auto p = m_parent.lock();
   if (!p)
   {
@@ -174,20 +173,6 @@ TreeNodePtr TreeNode::findNextSblingFromCurrent(const std::string& name) const
     return *it;
   }
   return nullptr;
-#else
-  auto p = m_parent.lock();
-  if (!p)
-  {
-    return nullptr;
-  }
-  auto it =
-    std::find_if(m_iter, p->m_firstChild.end(), [&name](auto& a) { return a->m_name == name; });
-  if (it != p->m_firstChild.end())
-  {
-    return *it;
-  }
-  return nullptr;
-#endif
 }
 
 TreeNodePtr TreeNode::findPrevSiblingFromCurrent(const std::string& name) const

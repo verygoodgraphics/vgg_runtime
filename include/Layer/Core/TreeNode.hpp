@@ -44,7 +44,7 @@ template<typename... Args>
 inline TreeNodePtr makeTreeNodePtr(Args&&... args)
 {
 #ifdef USE_SHARED_PTR
-  auto p = std::make_shared<TreeNode>(std::forward<Args>(args)...);
+  auto p = std::make_shared<TreeNode>(nullptr, std::forward<Args>(args)...);
   return p;
 #else
   return TreeNodePtr(layer::V_NEW<TreeNode>(std::forward<Args>(args)...));
@@ -191,16 +191,16 @@ public:
     return m_firstChild.cend();
   }
 
-  static TreeNodePtr createNode(const std::string& name)
-  {
-#ifdef USE_SHARED_PTR
-    return TreeNodePtr(new TreeNode(name));
-#else
-    return nullptr;
-    // TreeNodePtr();
-    //  makeTreeNodePtr(name);
-#endif
-  }
+  //   static TreeNodePtr createNode(const std::string& name)
+  //   {
+  // #ifdef USE_SHARED_PTR
+  //     return TreeNodePtr(new TreeNode(name));
+  // #else
+  //     return nullptr;
+  //     // TreeNodePtr();
+  //     //  makeTreeNodePtr(name);
+  // #endif
+  //   }
 
   virtual TreeNodePtr clone() const;
 

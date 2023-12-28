@@ -26,7 +26,10 @@ public:
   }
   ~AllocatorImpl() override
   {
-    ASSERT_MSG(count == 0, "Maybe memory leak in %s, %d VObjects are not released", name, count);
+    if (count > 0)
+    {
+      WARN("Maybe memory leak in %s, %d VObjects are not released", name, count);
+    }
   }
 };
 static AllocatorImpl g_globalLayerMemoryAllocator{ "Global Memory Allocator" };

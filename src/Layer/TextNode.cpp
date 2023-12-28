@@ -48,12 +48,24 @@ public:
   TextNode__pImpl(TextNode* api)
     : q_ptr(api)
   {
+#ifdef USE_SHARED_PTR
+    paragraphLayout = makeRichTextBlockPtr();
+#else
     paragraphLayout = makeRichTextBlockPtr(VGG_GlobalMemoryAllocator());
+#endif
     auto mgr = sk_ref_sp(FontManager::instance().defaultFontManager());
     auto fontCollection = sk_make_sp<VGGFontCollection>(std::move(mgr));
+#ifdef USE_SHARED_PTR
+    painter = makeVParagraphPainterPtr();
+#else
     painter = makeVParagraphPainterPtr(VGG_GlobalMemoryAllocator());
+#endif
     painter->setParagraph(paragraphLayout);
+
+#ifdef USE_SHARED_PTR
+#else
     q_ptr->observe(painter);
+#endif
   }
 
   VParagraphPainterPtr painter;
@@ -72,14 +84,18 @@ public:
   TextNode__pImpl(TextNode__pImpl&& p) noexcept = default;
   TextNode__pImpl& operator=(TextNode__pImpl&& p) noexcept = delete;
 
-  // void ensureObserve()
-  // {
-  //   if (!observed)
-  //   {
-  //     q_ptr->observe(painter);
-  //     observed = true;
-  //   }
-  // }
+#ifdef USE_SHARED_PTR
+  bool observed{ false };
+  void ensureObserve()
+  {
+    if (!observed)
+    {
+      q_ptr->observe(painter);
+      observed = true;
+    }
+  }
+#else
+#endif
 };
 
 TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
@@ -88,24 +104,15 @@ TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
 {
 }
 
-TreeNodePtr TextNode::clone() const
-{
-#ifdef USE_SHARED_PTR
-  auto newNode = std::make_shared<TextNode>(*this);
-  return newNode;
-#else
-  ASSERT(false);
-  return nullptr;
-#endif
-}
-
 void TextNode::setParagraph(
   std::string                      utf8,
   std::vector<TextStyleAttr>       attrs,
   const std::vector<TextLineAttr>& lineAttr)
 {
   VGG_IMPL(TextNode);
-  //_->ensureObserve();
+#ifdef USE_SHARED_PTR
+  _->ensureObserve();
+#endif
   std::vector<ParagraphAttr> paraAttrs;
   for (const auto a : lineAttr)
   {
@@ -131,7 +138,9 @@ void TextNode::setParagraph(
 void TextNode::setFrameMode(ETextLayoutMode layoutMode)
 {
   VGG_IMPL(TextNode);
-  //_->ensureObserve();
+#ifdef USE_SHARED_PTR
+  _->ensureObserve();
+#endif
   TextLayoutMode mode;
   switch (layoutMode)
   {
@@ -169,7 +178,9 @@ void TextNode::paintFill(Renderer* renderer, sk_sp<SkBlender> blender, const SkP
 void TextNode::setVerticalAlignment(ETextVerticalAlignment vertAlign)
 {
   VGG_IMPL(TextNode);
-  //_->ensureObserve();
+#ifdef USE_SHARED_PTR
+  _->ensureObserve();
+#endif
   _->paragraphLayout->setVerticalAlignment(vertAlign);
 }
 

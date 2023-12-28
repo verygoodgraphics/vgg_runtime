@@ -43,7 +43,7 @@ template<typename... Args>
 inline VParagraphPainterPtr makeVParagraphPainterPtr(Args&&... args)
 {
 #ifdef USE_SHARED_PTR
-  auto p = std::make_shared<VParagraphPainter>(std::forward<Args>(args)...);
+  auto p = std::make_shared<VParagraphPainter>(nullptr);
   return p;
 #else
   return VParagraphPainterPtr(V_NEW<VParagraphPainter>(std::forward<Args>(args)...));

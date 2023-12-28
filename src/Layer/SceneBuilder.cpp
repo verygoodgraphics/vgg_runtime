@@ -282,7 +282,11 @@ inline PaintNodePtr SceneBuilder::fromImage(const json& j, const glm::mat3& tota
     totalMatrix,
     [&](std::string name, std::string guid)
     {
+#ifdef USE_SHARED_PTR
+      auto p = makeImageNodePtr(j.value("name", ""), std::move(guid));
+#else
       auto p = makeImageNodePtr(m_alloc, j.value("name", ""), std::move(guid));
+#endif
       return p;
     },
     [&](ImageNode* p, const glm::mat3& matrix)
@@ -299,7 +303,11 @@ PaintNodePtr SceneBuilder::fromPath(const json& j, const glm::mat3& totalMatrix)
     totalMatrix,
     [&](std::string name, std::string guid)
     {
+#ifdef USE_SHARED_PTR
+      auto p = makePaintNodePtr(std::move(name), VGG_PATH, std::move(guid));
+#else
       auto p = makePaintNodePtr(m_alloc, std::move(name), VGG_PATH, std::move(guid));
+#endif
       return p;
     },
     [&, this](PaintNode* p, const glm::mat3& matrix)
@@ -360,7 +368,11 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
     totalMatrix,
     [&](std::string name, std::string guid)
     {
+#ifdef USE_SHARED_PTR
+      auto p = makeTextNodePtr(std::move(name), std::move(guid));
+#else
       auto p = makeTextNodePtr(m_alloc, std::move(name), std::move(guid));
+#endif
       return p;
     },
     [&](layer::TextNode* p, const glm::mat3& matrix)
@@ -439,7 +451,11 @@ PaintNodePtr SceneBuilder::fromFrame(const json& j, const glm::mat3& totalMatrix
     totalMatrix,
     [&](std::string name, std::string guid)
     {
+#ifdef USE_SHARED_PTR
+      auto p = makePaintNodePtr(std::move(name), VGG_FRAME, std::move(guid));
+#else
       auto p = makePaintNodePtr(m_alloc, std::move(name), VGG_FRAME, std::move(guid));
+#endif
       return p;
     },
     [&, this](PaintNode* p, const glm::mat3& matrix)
@@ -464,7 +480,11 @@ PaintNodePtr SceneBuilder::fromSymbolMaster(const json& j, const glm::mat3& tota
     totalMatrix,
     [&](std::string name, std::string guid)
     {
+#ifdef USE_SHARED_PTR
+      auto p = makePaintNodePtr(std::move(name), VGG_MASTER, std::move(guid));
+#else
       auto p = makePaintNodePtr(m_alloc, std::move(name), VGG_MASTER, std::move(guid));
+#endif
       // appendSymbolMaster(p);
       return p;
     },
@@ -498,7 +518,11 @@ PaintNodePtr SceneBuilder::makeContour(
       get_opt<int>(e, "cornerStyle"));
   }
   // auto p = std::make_shared<ContourNode>("contour", std::make_shared<Contour>(contour), "");
+#ifdef USE_SHARED_PTR
+  auto p = makePaintNodePtr("contour", VGG_CONTOUR, "");
+#else
   auto p = makePaintNodePtr(m_alloc, "contour", VGG_CONTOUR, "");
+#endif
   p->setOverflow(OF_Visible);
   p->setContourOption(ContourOption{ ECoutourType::MCT_FrameOnly, false });
   CoordinateConvert::convertCoordinateSystem(contour, totalMatrix);
@@ -517,7 +541,11 @@ PaintNodePtr SceneBuilder::fromGroup(const json& j, const glm::mat3& totalMatrix
     totalMatrix,
     [&](std::string name, std::string guid)
     {
+#ifdef USE_SHARED_PTR
+      auto p = makePaintNodePtr(std::move(name), VGG_GROUP, std::move(guid));
+#else
       auto p = makePaintNodePtr(m_alloc, std::move(name), VGG_GROUP, std::move(guid));
+#endif
       return p;
     },
     [&, this](PaintNode* p, const glm::mat3& matrix)

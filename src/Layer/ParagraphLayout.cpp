@@ -230,8 +230,8 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
         continue; // skip wght axis setting
       coords.push_back({ axis.name, axis.value });
     }
-    style.setFontArguments(
-      SkFontArguments().setVariationDesignPosition({ coords.data(), (int)coords.size() }));
+    // style.setFontArguments(
+    //   SkFontArguments().setVariationDesignPosition({ coords.data(), (int)coords.size() }));
   }
   else
   {
@@ -239,8 +239,8 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
     coords.reserve(newAxis.size());
     for (const auto& axis : newAxis)
       coords.push_back({ axis.name, axis.value });
-    style.setFontArguments(
-      SkFontArguments().setVariationDesignPosition({ coords.data(), (int)coords.size() }));
+    // style.setFontArguments(
+    //   SkFontArguments().setVariationDesignPosition({ coords.data(), (int)coords.size() }));
   }
 
   style.setFontSize(attr.font.size);

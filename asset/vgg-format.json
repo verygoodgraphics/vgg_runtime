@@ -1,8 +1,8 @@
 {
-  "title": "VGG Design Format",
-  "description": "VGG Design Format is a JSON-based format for describing the content of various design pieces.",
+  "title": "VGG Vector Graphics Specification",
+  "description": "VGG Vector Graphics Specification is a JSON-based spec for describing vector graphics.",
   "type": "object",
-  "$id": "https://git.vgg.cool/verygoodgraphics/vgg_format/src/branch/master/sketch-document-6.4.0/packages/file-format/src/vgg-format.json",
+  "$id": "https://docs.verygoodgraphics.com/schemas/vectorgraphics.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
     "Frame": {
@@ -1511,12 +1511,12 @@
       "enumDescriptions": [
         "Fix the `start` and `end` positions.",
         "Fix the `start` position and size.",
-        "Fix the `start` position and apply scaling.\nFor example, let the parent container be `200` units wide, and the child object has an x-coordinate of `60` and a width of `50`. When the width of the parent container becomes `300`, the x-coordinate of the child object remains `60`, and the width becomes `(50 / (200 - 60)) * (300 - 60) = 85.71`.",
+        "Fix the `start` position and apply scaling.\nFor example, let the parent container be `300` units wide, and the child object has an x-coordinate of `30` and a width of `120`. When the width of the parent container becomes `500`, the x-coordinate of the child object remains `30`, and the width becomes `(120 / (300 - 30)) * (500 - 30) = 208.89`.",
         "Fix the `end` position and size.",
         "Fix the `end` position and apply scaling.",
-        "Scale.\nFor example, let the parent container be `200` units wide, and the child object has an x-coordinate of `60` and a width of `50`. When the width of the parent container becomes `300`, the x-coordinate of the child object becomes `60 / 200 * 300 = 90`, and the width becomes `50 / 200 * 300 = 75`.",
-        "Fix the center proportion and maintain a fixed size.\nFor example, let the parent container be `200` units wide, and the child object has an x-coordinate of `60` and a width of `50`. When the width of the parent container becomes `300`, the x-coordinate of the child object becomes `(60 + 50 / 2) / 200 * 300 - 50 / 2 = 102.5`, and the width remains `50`.",
-        "Keep the centerline distance between the child object and the parent container constant.\nFor example, let the parent container be `200` units wide, and the child object has an x-coordinate of `60` and a width of `50`. When the width of the parent container becomes `300`, the x-coordinate of the child object becomes `300 / 2 - (200 / 2 - (60 + 50 / 2)) - 50 / 2 = 110`, and the width remains `50`."
+        "Scale.\nFor example, let the parent container be `300` units wide, and the child object has an x-coordinate of `30` and a width of `120`. When the width of the parent container becomes `500`, the x-coordinate of the child object becomes `30 / 300 * 500 = 50`, and the width becomes `120 / 300 * 500 = 200`.",
+        "Fix the center proportion and maintain a fixed size.\nFor example, let the parent container be `300` units wide, and the child object has an x-coordinate of `90` and a width of `120`. When the width of the parent container becomes `500`, the x-coordinate of the child object becomes `(90 + 120 / 2) / 300 * 500 - 120 / 2 = 190`, and the width remains `120`.",
+        "Keep the centerline distance between the child object and the parent container constant.\nFor example, let the parent container be `300` units wide, and the child object has an x-coordinate of `30` and a width of `120`. When the width of the parent container becomes `500`, the x-coordinate of the child object becomes `500 / 2 - (300 / 2 - (30 + 120 / 2)) - 120 / 2 = 130`, and the width remains `120`."
       ],
       "$id": "#Constraint"
     },
@@ -1565,11 +1565,11 @@
         },
         "id": {
           "type": "string",
-          "description": "The ID of the referenced variable which defined in `Variable Define`."
+          "description": "The ID of the referenced variable which defined in `VariableDefine`."
         },
         "objectField": {
           "type": "string",
-          "description": "Describes how a referenced variable acts on a specific property of an object.\nWhen the `varType` of the variable is `2`, the field is fixed to 'text_data'.\nWhen the `varType` is anything else, the field points to a property of the object (see `overrideName` in `Override Value`)."
+          "description": "Describes how a referenced variable acts on a specific property of an object.\nWhen the `varType` of the variable is `2`, the field is fixed to `text_data`.\nWhen the `varType` is anything else, the field points to a property of the object (check `overrideName` in `OverrideValue`)."
         }
       },
       "additionalProperties": false
@@ -2026,6 +2026,7 @@
         "contextSettings",
         "frame",
         "frameMode",
+        "horizontalAlignment",
         "id",
         "isLocked",
         "maskType",
@@ -2185,6 +2186,10 @@
           "type": "string",
           "description": "The text content of the text object.\nThe encoding format is UTF-8."
         },
+        "anchorPoint": {
+          "$ref": "#/definitions/Point",
+          "description": "The position of the first character baseline when text is drawn.\nHorizontal and vertical alignments have been considered. The given coordinates are in the object's own coordinate system.\nIf this property doesn't exist, text is drawn using `bounds`."
+        },
         "textOnPath": {
           "$ref": "#/definitions/TextOnPath",
           "description": "The text is arranged along the path."
@@ -2209,6 +2214,24 @@
           "enum": [0, 1, 2],
           "enumDescriptions": ["top", "center", "bottom"]
         },
+        "horizontalAlignment": {
+          "type": "array",
+          "description": "The type of horizontal alignment for the text. When the number of items is less than the number of rows, the last value is reused.",
+          "items": {
+            "type": "integer",
+            "enum": [0, 1, 2, 3, 4, 5, 6, 7],
+            "enumDescriptions": [
+              "left",
+              "right",
+              "center",
+              "justified",
+              "natural",
+              "justified, and the last line to the left",
+              "justified, and the last line to the center",
+              "justified, and the last line to the right"
+            ]
+          }
+        },
         "defaultAttr": {
           "$ref": "#/definitions/FontAttr",
           "description": "The default font attributes of the text. If some font attributes are missing in `attr`, take the font attributes here.\nThe value of `length` in this field is meaningless."
@@ -2230,13 +2253,6 @@
         "verticalTrim": {
           "type": "boolean",
           "description": "If true, trim the text portion that extends beyond the text frame starting from the baseline, based on `verticalAlignment`\nDefault value is `false`."
-        },
-        "lineAnchorPoint": {
-          "type": "array",
-          "description": "**IF** item doesn't exist,\n  The anchor point is at the top-left corner of the object.\n  The internal horizontal alignment of the object is determined by `attr.horizontalAlignment`.\n**IF** it exists and the `frameMode` is `auto width`,\n  The items in the object's bounds are all `0`.\n  There are as many lines of text as there are elements in the field.\n  Ignore the `attr.horizontalAlignment` property.\n  The values `tx` and `ty` in the matrix of the object, together with the values at the head of this item, determine where the text is drawn.\n  For non-first lines of text, this corresponds to the horizontal alignment between the line and the anchor.\n**IF** it exists and `frameMode` is not `auto width`,\n  The anchor is at the top-left corner of the object.\n  There are as many lines of text as there are elements in the field.\n  Ignore the `attr.horizontalAlignment` property.\n  Each element of this field determines the horizontal alignment of the corresponding line.",
-          "items": {
-            "$ref": "#/definitions/TextLineAnchorPoint"
-          }
         }
       },
       "additionalProperties": false
@@ -2268,7 +2284,7 @@
         },
         "length": {
           "type": "integer",
-          "description": "The number of characters(UTF-8) that these attributes apply to.\nIf this item is missing, it means these attributes apply to all remaining characters in the text.\n**Note**:\n  If a UTF-8 character is `4` bytes, its length counts as `2`.\n  If a UTF-8 character is `1 ~ 3` bytes, its length counts as `1`."
+          "description": "The number of characters(UTF-8) that these attributes apply to.\nIf this property is missing, it means these attributes apply to all remaining characters in the text.\n**Note**:\n  If a UTF-8 character is `4` bytes, its length counts as `2`.\n  If a UTF-8 character is `1 ~ 3` bytes, its length counts as `1`."
         },
         "borders": {
           "type": "array",
@@ -2289,29 +2305,28 @@
           "description": "The priority of `fills`.",
           "enum": [0, 1],
           "enumDescriptions": [
-            "Priority of the `fills`. The `fills` of the text fragment > the `fills` in `defaultAttr` of the text > the `fills` in the text object's `style`. (Default value)",
+            "The `fills` of the text fragment > the `fills` in `defaultAttr` of the text > the `fills` in the text object's `style`. (Default value)",
             "The corresponding property of the object takes precedence over `fills`. When `style.fills` and `fills` each have only one valid solid color object, the opacity of the two solid color objects is combined into the `style.fills` solid color object."
-          ]
-        },
-        "horizontalAlignment": {
-          "type": "integer",
-          "description": "The type of horizontal alignment for the text.",
-          "enum": [0, 1, 2, 3, 4],
-          "enumDescriptions": [
-            "left (default value)",
-            "right",
-            "center",
-            "justified",
-            "natural"
           ]
         },
         "name": {
           "type": "string",
-          "description": "Common name of the font.\nThe font name may contain subfamily, in which case the `subFamilyName` will not appear.\nIf this item does not exist or is empty, the application can fall back to using its default font name."
+          "description": "Common name of the font.\nThe font name may contain subfamily, in which case the `subFamilyName` will not appear.\nIf this property does not exist or is empty, the application can fall back to using its default font name."
         },
         "subFamilyName": {
           "type": "string",
           "description": "Subfamily name or font type.\nThe value may be empty."
+        },
+        "postScript": {
+          "type": "string",
+          "description": "The PostScript name of the font.\nThe value may be empty."
+        },
+        "fontVariations": {
+          "type": "array",
+          "description": "A list of font variations.",
+          "items": {
+            "$ref": "#/definitions/FontVariation"
+          }
         },
         "size": {
           "type": "number",
@@ -2330,18 +2345,18 @@
             "percent. Final pixel value equals to `size * letterSpacingValue / 100`."
           ]
         },
-        "lineSpaceValue": {
+        "lineSpacingValue": {
           "type": "number",
-          "description": "The spacing value of the text lines.\nMust be used together with `lineSpaceUnit`.\nDefault value is `0`."
+          "description": "The spacing value of the text lines.\nMust be used together with `lineSpacingUnit`.\nDefault value is `0`."
         },
-        "lineSpaceUnit": {
+        "lineSpacingUnit": {
           "type": "integer",
-          "description": "The unit of `lineSpaceValue` value.",
+          "description": "The unit of `lineSpacingValue` value.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
             "pixel (default value)",
-            "percent. Final pixel value equals to `size * lineSpaceValue * 1.25 / 100`.",
-            "raw. Final pixel value equals to `size * lineSpaceValue`."
+            "percent. Final pixel value equals to `size * lineSpacingValue * 1.25 / 100`.",
+            "raw. Final pixel value equals to `size * lineSpacingValue`."
           ]
         },
         "underline": {
@@ -2383,9 +2398,9 @@
           "type": "number",
           "description": "Vertical offset of the text baseline.\nDefault value is `0`."
         },
-        "baseline": {
+        "fontVariantPosition": {
           "type": "integer",
-          "description": "The type of the text baseline's position.",
+          "description": "The position of the text characters.",
           "enum": [0, 1, 2],
           "enumDescriptions": [
             "normal (default value)",
@@ -2403,13 +2418,35 @@
         },
         "rotate": {
           "type": "number",
-          "description": "Rotation angle of text characters.\nDefault value is `0`.",
+          "description": "Rotation angle of the text characters.\nDefault value is `0`.",
           "maximum": 180,
           "minimum": -180
         },
         "textParagraph": {
           "$ref": "#/definitions/TextParagraph",
           "description": "The properties of the text paragraph, which are consistent across the same text paragraph."
+        }
+      },
+      "additionalProperties": false
+    },
+    "FontVariation": {
+      "title": "Font Variation",
+      "description": "One key-value pair of font variation.",
+      "type": "object",
+      "$id": "#FontVariation",
+      "required": ["class", "name", "value"],
+      "properties": {
+        "class": {
+          "type": "string",
+          "const": "fontVariation"
+        },
+        "name": {
+          "type": "string",
+          "description": "The official name of the font variation.\nFor example: \n- `wght` means weight\n- `wdth` means width\n- `slnt` means slant"
+        },
+        "value": {
+          "type": "number",
+          "description": "The value of the font variation."
         }
       },
       "additionalProperties": false
@@ -2462,21 +2499,6 @@
         }
       },
       "additionalProperties": false
-    },
-    "TextLineAnchorPoint": {
-      "title": "Text Line Anchor Point",
-      "type": "integer",
-      "enum": [1, 2, 3, 4, 5, 6, 7],
-      "enumDescriptions": [
-        "Left.",
-        "Center.",
-        "Right.",
-        "Justified, and the last line to the left.",
-        "Justified, and the last line to the center.",
-        "Justified, and the last line to the right.",
-        "Justified."
-      ],
-      "$id": "#TextLineAnchorPoint"
     },
     "Image": {
       "title": "Image",
@@ -3089,7 +3111,7 @@
         },
         "effectOnLayout": {
           "type": "boolean",
-          "description": "If the value of this item is `true`, the current override applies to the layout.\nDefault value is `false`.\n**Note**: Layout information is defined in `layout.json`, not `design.json`."
+          "description": "If the value of this property is `true`, the current override applies to the layout.\nDefault value is `false`.\n**Note**: Layout information is defined in `layout.json`, not `design.json`."
         }
       },
       "additionalProperties": false
@@ -3107,7 +3129,7 @@
         },
         "id": {
           "type": "string",
-          "description": "The ID of the reassigned variable defined in `Variable Define`."
+          "description": "The ID of the reassigned variable defined in `VariableDefine`."
         },
         "value": {
           "description": "The new value of the variable."
@@ -3563,14 +3585,14 @@
   "properties": {
     "version": {
       "type": "string",
-      "const": "1.0.8",
-      "description": "Version number information in the format: `major.minor.patch`.\n"
+      "const": "1.0.10",
+      "description": "Current VGG specs version, conforming to semantic version format like `major.minor.patch`.\n"
     },
     "fileType": {
       "type": "integer",
       "description": "The file type of current file.",
-      "enum": [1, 3, 4],
-      "enumDescriptions": ["sketch", "figma", "adobe illustrator"]
+      "enum": [0, 1, 3, 4],
+      "enumDescriptions": ["Unknown", "Sketch", "Figma", "Adobe Illustrator"]
     },
     "fileName": {
       "type": "string",

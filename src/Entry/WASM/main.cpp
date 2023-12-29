@@ -20,6 +20,8 @@
 #include "Application/UIApplication.hpp"
 #include "Application/UIView.hpp"
 #include "Utility/ConfigManager.hpp"
+#include "Utility/Log.hpp"
+#include "Utility/Version.hpp"
 
 #ifdef EMSCRIPTEN
 #include <emscripten/emscripten.h>
@@ -87,7 +89,33 @@ extern "C"
     auto controller = mainComposer.controller();
     controller->setEditMode(editMode);
     app->setController(controller);
+  }
 
-    emscripten_set_main_loop(emscripten_frame, 0, 1);
+  bool load_file_from_mem(const char* name, char* data, int len)
+  {
+    std::vector<char> buf(data, data + len);
+
+    auto controller = VggBrowser::mainComposer().controller();
+    auto ret = controller->start(buf, "/asset/vgg-format.json", "/asset/vgg_layout.json");
+
+    // pass 0/false as the third argument
+    // https://github.com/emscripten-core/emscripten/issues/16071
+    emscripten_set_main_loop(emscripten_frame, 0, 0);
+
+    return ret;
+  }
+
+  bool is_latest_version(const char* version)
+  {
+    std::string v1(version);
+    std::string v2 = VGG::Version::get();
+    return v1 == v2;
+  }
+
+  EMSCRIPTEN_KEEPALIVE void listenAllEvents(bool enabled)
+  {
+    auto& mainComposer = VggBrowser::mainComposer();
+
+    return mainComposer.controller()->listenAllEvents(enabled);
   }
 }

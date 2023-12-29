@@ -47,8 +47,8 @@ void VggExec::setEnv()
       << "const currentVggEnvName = '" << m_env->currrentEnvName() << "';"
       << "const currentVggName = '" << m_env->currrentVggName() << "';"
       << R"(
-          globalThis[currentVggEnvName]  = envName;
-          globalThis[currentVggName]  = globalThis[containersKey][envName][instanceKey];
+          globalThis[currentVggEnvName] = envName;
+          globalThis[currentVggName] = globalThis[containersKey]?.[envName]?.[instanceKey];
         })();
       )";
   m_jsEngine->evalScript(oss.str());

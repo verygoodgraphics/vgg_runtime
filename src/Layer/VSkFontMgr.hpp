@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include "Layer/FontManager.hpp"
 #include <core/SkStream.h>
 #include <include/core/SkFontMgr.h>
 #include <include/core/SkFontStyle.h>
@@ -326,45 +327,34 @@ inline SK_API sk_sp<SkFontMgrVGG> VGGFontDirectory(const std::vector<fs::path>& 
   return sk_make_sp<SkFontMgrVGG>(std::make_unique<VGGFontLoader>(dir));
 }
 
-using namespace skia::textlayout;
-class VGGFontCollection : public FontCollection
+class VGGFontCollection : public skia::textlayout::FontCollection
 {
-  sk_sp<SkFontMgrVGG> m_fontMgr;
-
 public:
   VGGFontCollection(sk_sp<SkFontMgrVGG> fontMgr)
-    : m_fontMgr(std::move(fontMgr))
   {
     std::vector<SkString> defFonts;
-    if (m_fontMgr)
+    if (fontMgr)
     {
-      for (const auto& f : m_fontMgr->fallbackFonts())
+      for (const auto& f : fontMgr->fallbackFonts())
       {
         defFonts.push_back(SkString(f));
       }
-      for (const auto& f : m_fontMgr->fallbackEmojiFonts())
+      for (const auto& f : fontMgr->fallbackEmojiFonts())
       {
         defFonts.push_back(SkString(f));
       }
     }
-    this->setAssetFontManager(m_fontMgr);
-    this->setDefaultFontManager(m_fontMgr, defFonts);
+    this->setAssetFontManager(fontMgr);
+    this->setDefaultFontManager(fontMgr, defFonts);
     this->enableFontFallback();
     this->defaultFallback();
   }
 
-  const std::vector<std::string>& fallbackFonts()
+  static sk_sp<VGGFontCollection> GlobalFontCollection()
   {
-    return m_fontMgr->fallbackFonts();
-  }
-
-  std::optional<std::pair<SkString, float>> fuzzyMatch(const std::string& fontFamily)
-  {
-    if (m_fontMgr)
-    {
-      return m_fontMgr->fuzzyMatchFontFamilyName(fontFamily);
-    }
-    return std::nullopt;
+    static sk_sp<VGGFontCollection> g_fc = sk_make_sp<VGGFontCollection>(
+      sk_ref_sp<SkFontMgrVGG>(VGG::FontManager::instance().defaultFontManager()));
+    return g_fc;
   }
 };
 // NOLINTEND

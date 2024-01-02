@@ -34,8 +34,6 @@
 #include <include/core/SkFontMetrics.h>
 #include <include/effects/SkRuntimeEffect.h>
 #include <core/SkTextBlob.h>
-#include <modules/skparagraph/include/FontCollection.h>
-#include <modules/skparagraph/include/ParagraphCache.h>
 
 #include <string_view>
 #include <memory>
@@ -51,12 +49,11 @@ public:
     : q_ptr(api)
   {
 #ifdef USE_SHARED_PTR
-    paragraphLayout = makeRichTextBlockPtr();
+    paragraphLayout = makeRichTextBlockPtr(VGGFontCollection::GlobalFontCollection());
 #else
-    paragraphLayout = makeRichTextBlockPtr(VGG_GlobalMemoryAllocator());
+    paragraphLayout =
+      makeRichTextBlockPtr(VGG_GlobalMemoryAllocator(), VGGFontCollection::GlobalFontCollection());
 #endif
-    auto mgr = sk_ref_sp(FontManager::instance().defaultFontManager());
-    auto fontCollection = sk_make_sp<VGGFontCollection>(std::move(mgr));
 #ifdef USE_SHARED_PTR
     painter = makeVParagraphPainterPtr();
 #else

@@ -120,7 +120,7 @@ template<typename... Args>
 inline RichTextBlockPtr makeRichTextBlockPtr(Args&&... args)
 {
 #ifdef USE_SHARED_PTR
-  auto p = std::make_shared<RichTextBlock>(nullptr);
+  auto p = std::make_shared<RichTextBlock>(nullptr, std::forward<Args>(args)...);
   return p;
 #else
   return RichTextBlockPtr(V_NEW<RichTextBlock>(std::forward<Args>(args)...));
@@ -136,9 +136,8 @@ public:
   std::vector<ParagraphInfo> paragraphCache;
 
 private:
-  bool                     m_newParagraph{ true };
-  ParagraphAttr            m_paraAttr;
-  sk_sp<VGGFontCollection> m_fontCollection;
+  bool          m_newParagraph{ true };
+  ParagraphAttr m_paraAttr;
 
   enum EState
   {
@@ -157,6 +156,7 @@ private:
   Bound                      m_textBound;
   std::vector<TextStyleAttr> m_textStyle;
   std::vector<ParagraphAttr> m_lineStyle;
+  sk_sp<FontCollection>      m_fontCollection;
 
   int m_paragraphHeight{ 0 };
 
@@ -189,23 +189,16 @@ protected:
   }
 
 public:
-  RichTextBlock(VRefCnt* cnt)
+  RichTextBlock(VRefCnt* cnt, sk_sp<VGGFontCollection> fontCollection)
     : VNode(cnt)
+    , m_fontCollection(std::move(fontCollection))
   {
-    auto mgr = sk_ref_sp(FontManager::instance().defaultFontManager());
-    m_fontCollection = sk_make_sp<VGGFontCollection>(std::move(mgr));
   }
   RichTextBlock(const RichTextBlock&) = delete;
   RichTextBlock& operator=(const RichTextBlock&) = delete;
 
   RichTextBlock(RichTextBlock&&) noexcept = delete;
   RichTextBlock& operator=(RichTextBlock&&) noexcept = delete;
-
-  RichTextBlock(VRefCnt* cnt, sk_sp<VGGFontCollection> fontCollection)
-    : VNode(cnt)
-    , m_fontCollection(std::move(fontCollection))
-  {
-  }
 
 public:
   bool empty() const
@@ -247,15 +240,6 @@ public:
   const std::vector<ParagraphAttr>& lineStyle() const
   {
     return m_lineStyle;
-  }
-
-  void setFontCollection(sk_sp<VGGFontCollection> fontCollection)
-  {
-    if (this->m_fontCollection == fontCollection)
-      return;
-    m_fontCollection = std::move(fontCollection);
-    m_state = INIT;
-    revalidate();
   }
 
   void setTextLayoutMode(TextLayoutMode mode)

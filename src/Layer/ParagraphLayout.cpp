@@ -17,6 +17,7 @@
 
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VType.hpp"
+#include "Layer/VSkFontMgr.hpp"
 #include "VSkia.hpp"
 
 #include <algorithm>
@@ -128,8 +129,9 @@ std::vector<std::string> split(const std::string& s, char seperator)
 }
 
 template<typename F>
-TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&& fun)
+TextStyle createTextStyle(const TextStyleAttr& attr, F&& fun)
 {
+  auto      fontMgr = FontManager::instance().defaultFontManager();
   TextStyle style;
   if (!attr.fills.empty())
   {
@@ -165,7 +167,7 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
   if (const auto components = split(attr.font.fontName, '-'); !components.empty())
   {
     fontName = components[0];
-    auto matched = font->fuzzyMatch(fontName);
+    auto matched = fontMgr->fuzzyMatchFontFamilyName(fontName);
     if (matched)
     {
       INFO(
@@ -179,7 +181,7 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
       // If the score is lower than a threshold, we choose the
       // fallback font rather pick it fuzzily.
       constexpr float THRESHOLD = 70.f;
-      if (const auto& fallbackFonts = font->fallbackFonts();
+      if (const auto& fallbackFonts = fontMgr->fallbackFonts();
           !fallbackFonts.empty() && matched->second < THRESHOLD)
       {
         resolveFromFallback(fallbackFonts);
@@ -190,7 +192,7 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
       DEBUG("No font in font manager");
     }
   }
-  else if (const auto& fallbackFonts = font->fallbackFonts(); !fallbackFonts.empty())
+  else if (const auto& fallbackFonts = fontMgr->fallbackFonts(); !fallbackFonts.empty())
   {
     resolveFromFallback(fallbackFonts);
   }
@@ -203,7 +205,7 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
   DEBUG("Given [%s], [%s] is choosed finally", attr.font.fontName.c_str(), fontName.c_str());
   std::vector<SkString> fontFamilies;
   fontFamilies.push_back(SkString(fontName));
-  if (const auto& fallbackFonts = font->fallbackFonts(); !fallbackFonts.empty())
+  if (const auto& fallbackFonts = fontMgr->fallbackFonts(); !fallbackFonts.empty())
   {
     for (const auto& f : fallbackFonts)
     {
@@ -216,7 +218,6 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
 
   style.setFontFamilies(fontFamilies);
   auto [fontStyle, newAxis] = toSkFontStyle(attr.font);
-  auto fontMgr = font->getFallbackManager();
   ASSERT(fontMgr);
   auto ft = fontMgr->matchFamilyStyle(fontName.c_str(), fontStyle);
   if (ft && ft->fontStyle() == fontStyle)
@@ -230,8 +231,8 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
         continue; // skip wght axis setting
       coords.push_back({ axis.name, axis.value });
     }
-    // style.setFontArguments(
-    //   SkFontArguments().setVariationDesignPosition({ coords.data(), (int)coords.size() }));
+    style.setFontArguments(
+      SkFontArguments().setVariationDesignPosition({ coords.data(), (int)coords.size() }));
   }
   else
   {
@@ -239,8 +240,8 @@ TextStyle createTextStyle(const TextStyleAttr& attr, VGGFontCollection* font, F&
     coords.reserve(newAxis.size());
     for (const auto& axis : newAxis)
       coords.push_back({ axis.name, axis.value });
-    // style.setFontArguments(
-    //   SkFontArguments().setVariationDesignPosition({ coords.data(), (int)coords.size() }));
+    style.setFontArguments(
+      SkFontArguments().setVariationDesignPosition({ coords.data(), (int)coords.size() }));
   }
 
   style.setFontSize(attr.font.size);
@@ -416,7 +417,7 @@ void RichTextBlock::onTextStyle(
     m_newParagraph = false;
   }
 
-  auto style = createTextStyle(textAttr, m_fontCollection.get(), [&]() { return styleIndex; });
+  auto style = createTextStyle(textAttr, [&]() { return styleIndex; });
   p.builder->pushStyle(style);
   p.builder->addText(textView.text.data(), textView.text.size());
   p.builder->pop();

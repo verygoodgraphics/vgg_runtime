@@ -98,6 +98,10 @@ int main(int argc, char** argv)
   program.add_argument("-L", "--loaddir").help("iterates all the files in the given dir");
   program.add_argument("-s", "--scale").help("canvas scale").scan<'g', float>().default_value(1.0);
   program.add_argument("-c", "--config").help("specify config file");
+  program.add_argument("-r", "--repeat")
+    .help("repeat rendering (DEBUG)")
+    .scan<'i', int>()
+    .default_value(1);
   program.add_argument("-q", "--quality")
     .help("image quality [0(low),100(high)]")
     .scan<'i', int>()
@@ -208,19 +212,23 @@ int main(int argc, char** argv)
       const auto folder = fs::path(fp).filename().stem();
       if (isBitmap)
       {
-        exporter::BuilderResult res;
-        auto iter = exporter.render(data.format, data.layout, data.resource, opts, exportOpt, res);
-        if (res.type)
+        for (auto i = 0; i < program.get<int>("-r"); i++)
         {
-          DEBUG("Version mismatch");
-        }
-        INFO("Expand Time Cost: [%f]", res.timeCost->expand);
-        INFO("Layout Time Cost: [%f]", res.timeCost->layout);
+          exporter::BuilderResult res;
+          auto                    iter =
+            exporter.render(data.format, data.layout, data.resource, opts, exportOpt, res);
+          if (res.type)
+          {
+            DEBUG("Version mismatch");
+          }
+          INFO("Expand Time Cost: [%f]", res.timeCost->expand);
+          INFO("Layout Time Cost: [%f]", res.timeCost->layout);
 
-        write(
-          std::move(iter),
-          [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); },
-          extension);
+          write(
+            std::move(iter),
+            [&](auto guid) { return (prefix / (guid + outputFilePostfix)).string(); },
+            extension);
+        }
       }
       else
       {

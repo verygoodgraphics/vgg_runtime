@@ -57,6 +57,8 @@ public:
   TextNode(TextNode&&) noexcept = delete;
   TextNode& operator=(TextNode&&) noexcept = delete;
 
+  void setTextAnchor(glm::vec2 anchor);
+
   void setParagraph(
     std::string                utf8,
     std::vector<TextStyleAttr> style,

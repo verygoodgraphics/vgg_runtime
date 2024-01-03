@@ -154,5 +154,49 @@ void VParagraphPainter::restore()
 {
   m_canvas->restore();
 }
+void VParagraphPainter::paintRaw(Renderer* renderer, float x, float y)
+{
+  float offsetY = y;
+  setCanvas(renderer->canvas());
+  for (std::size_t i = 0; i < m_paragraph->paragraphCache.size(); i++)
+  {
+    auto&      p = m_paragraph->paragraphCache[i].paragraph;
+    const auto curX = m_paragraph->paragraphCache[i].offsetX + x;
+    p->paint(this, m_paragraph->paragraphCache[i].offsetX, offsetY);
+    if (renderer->isEnableDrawDebugBound())
+    {
+      DebugCanvas debugCanvas(renderer->canvas());
+      drawParagraphDebugInfo(debugCanvas, m_paragraph->paragraph[i], p.get(), curX, offsetY, i);
+    }
+    auto        lastLine = p->lineNumber();
+    LineMetrics lineMetric;
+    if (lastLine < 1)
+      continue;
+    p->getLineMetricsAt(lastLine - 1, &lineMetric);
+    offsetY += p->getHeight() - lineMetric.fHeight;
+  }
+}
+
+void VParagraphPainter::paintParagraph(Renderer* renderer)
+{
+  const auto b = m_paragraph->bound();
+  float      totalHeight = m_paragraph->textHeight();
+  float      offsetY = 0.f;
+  auto       vertAlign = m_paragraph->verticalAlignment();
+  switch (vertAlign)
+  {
+    case VA_Bottom:
+      offsetY = b.height() - totalHeight;
+      break;
+    case VA_Center:
+      offsetY = (b.height() - totalHeight) / 2.f;
+      break;
+    case VA_Top:
+      offsetY = 0.f;
+    default:
+      break;
+  }
+  paintRaw(renderer, 0.f, offsetY);
+}
 
 } // namespace VGG::layer

@@ -411,7 +411,7 @@ inline void from_json(const json& j, TextStyleAttr& x)
   x.font.subFamilyName = j.value("subFamilyName", "");
   x.font.psName = j.value("postScript", "");
   x.font.axis = j.value("fontVariations", std::vector<Font::Axis>());
-  x.font.size = j.value("size", 14);
+  x.font.size = j.value("size", 14.0);
   x.fills = j.value("fills", std::vector<Fill>());
   x.baselineShift = j.value("baselineShift", 0.0);
   x.lineThrough = j.value("linethrough", false);

@@ -77,6 +77,16 @@ bool isAncestor(const nlohmann::json& ancestor, const nlohmann::json& descendant
   return false;
 }
 
+enum class EVarType
+{
+  NONE,
+  BOOLEAN,
+  TEXT_PROPERTY,
+  STRING,
+  REFERENCE,
+  MAX,
+};
+
 } // namespace
 
 nlohmann::json ExpandSymbol::operator()()
@@ -185,6 +195,7 @@ void ExpandSymbol::expandInstance(
         auto& masterJson = m_masters[masterId];
         json[K_CHILD_OBJECTS] = masterJson[K_CHILD_OBJECTS];
         json[K_STYLE] = masterJson[K_STYLE];
+        json[K_VARIABLE_DEFS] = masterJson[K_VARIABLE_DEFS];
 
         if (again)
         {
@@ -222,15 +233,25 @@ void ExpandSymbol::expandInstance(
         // 3 overrides and scale
         // 3.1 master id overrides
         processMasterIdOverrides(json, instanceIdStack);
-        // 3.2: layout overrides
+
+        // 3.2: variables
+        // process variableAssignments overrides
+        processVariableAssignmentsOverrides(json, instanceIdStack);
+        // process variableRefs
+        for (auto& child : json[K_CHILD_OBJECTS])
+        {
+          processVariableRefs(child, &json, instanceIdStack);
+        }
+
+        // 3.3: layout overrides
         processLayoutOverrides(json, instanceIdStack);
-        // 3.3: scale or layout before bounds overrides
+        // 3.4: scale or layout before bounds overrides
         resizeInstance(json, masterJson);
-        // 3.4 bounds overrides must be processed after scaling
+        // 3.5 bounds overrides must be processed after scaling
         processBoundsOverrides(json, instanceIdStack);
-        // 3.5 other overrides
+        // 3.6 other overrides
         processOtherOverrides(json, instanceIdStack);
-        // 3.6
+        // 3.7
         layoutDirtyNodes(json);
         instanceIdStack.pop_back();
 
@@ -340,6 +361,174 @@ void ExpandSymbol::processMasterIdOverrides(
     // restore to symbolInstance to expand again
     (*childObject)[K_CLASS] = K_SYMBOL_INSTANCE;
     expandInstance(*childObject, childInstanceIdStack, true);
+  }
+}
+
+void ExpandSymbol::processVariableAssignmentsOverrides(
+  nlohmann::json&                 instance,
+  const std::vector<std::string>& instanceIdStack)
+{
+  const auto& overrideValues = instance[K_OVERRIDE_VALUES];
+  if (!overrideValues.is_array())
+  {
+    return;
+  }
+
+  auto varAssignsOverrideValues = nlohmann::json::array();
+  std::copy_if(
+    overrideValues.begin(),
+    overrideValues.end(),
+    std::back_inserter(varAssignsOverrideValues),
+    [](const nlohmann::json& item) { return item[K_OVERRIDE_NAME] == K_VARIABLE_ASSIGNMENTS; });
+
+  for (auto& el : varAssignsOverrideValues.items())
+  {
+    auto& overrideItem = el.value();
+    if (!overrideItem.is_object() || (overrideItem[K_CLASS] != K_OVERRIDE_CLASS))
+    {
+      continue;
+    }
+
+    std::vector<std::string> _;
+    auto childObject = findChildObject(instance, instanceIdStack, overrideItem, _);
+    if (!childObject || !childObject->is_object())
+    {
+      continue;
+    }
+
+    std::string name{ K_VARIABLE_ASSIGNMENTS };
+    auto&       value = overrideItem[K_OVERRIDE_VALUE];
+    applyOverrides((*childObject), name, value);
+    for (auto& child : childObject->at(K_CHILD_OBJECTS))
+    {
+      // process var refs
+      processVariableRefs(child, childObject, _);
+    }
+  }
+}
+
+void ExpandSymbol::processVariableRefs(
+  nlohmann::json&                 node,      // in instance tree
+  nlohmann::json*                 container, // instance; master set; parent node
+  const std::vector<std::string>& instanceIdStack)
+{
+  if (!node.is_object() && !node.is_array())
+  {
+    return;
+  }
+
+  if (isLayoutNode(node))
+  {
+    ASSERT(node[K_CLASS] != K_SYMBOL_INSTANCE);
+
+    auto* containerVarAssigns = container && container->contains(K_VARIABLE_ASSIGNMENTS)
+                                  ? &(*container)[K_VARIABLE_ASSIGNMENTS]
+                                  : nullptr;
+    auto* containerVarDefs = container ? &(*container)[K_VARIABLE_DEFS] : nullptr;
+    auto& myVarDefs = node[K_VARIABLE_DEFS];
+
+    auto& refs = node[K_VARIABLE_REFS];
+    for (auto& ref : refs)
+    {
+      // get var id
+      auto&       varId = ref[K_ID];
+      std::string objectField = ref[K_OBJECT_FIELD];
+
+      nlohmann::json* value{ nullptr };
+      auto            varType{ EVarType::NONE };
+      auto            found{ false };
+
+      // find var value
+      // find in container assignments
+      if (containerVarAssigns)
+      {
+        for (auto& assign : *containerVarAssigns)
+        {
+          if (varId == assign[K_ID])
+          {
+            found = true;
+            value = &assign[K_VALUE];
+            if (objectField == K_TEXT_DATA)
+            {
+              varType = EVarType::TEXT_PROPERTY;
+            }
+            // else varType is bool or string
+            break;
+          }
+        }
+      }
+
+      if (!found)
+      {
+        // find in own defs
+        for (auto& def : myVarDefs)
+        {
+          if (varId == def[K_ID])
+          {
+            value = &def[K_VALUE];
+            varType = def[K_VAR_TYPE];
+            // todo? proecess reference type
+            found = true;
+            break;
+          }
+        }
+      }
+
+      if (!found && containerVarDefs)
+      {
+        // find in container defs
+        for (auto& def : *containerVarDefs)
+        {
+          if (varId == def[K_ID])
+          {
+            value = &def[K_VALUE];
+            varType = def[K_VAR_TYPE];
+            // todo? proecess reference type
+            found = true;
+            break;
+          }
+        }
+      }
+
+      // apply value
+      if (found)
+      {
+        if (varType == EVarType::REFERENCE)
+        {
+          DEBUG("processVariableRefs, var type is reference");
+        }
+        else if (varType == EVarType::TEXT_PROPERTY)
+        {
+          for (auto& el : (*value).items())
+          {
+            node[el.key()] = el.value();
+          }
+        }
+        else
+        {
+          node[objectField] = *value;
+          if (objectField == K_MASTER_ID) // masterId
+          {
+            node.erase(K_OVERRIDE_VALUES);
+            if (node.contains(K_CHILD_OBJECTS))
+            {
+              // Keep own layout rule; Remove children layout rule only;
+              removeInvalidLayoutRule(node[K_CHILD_OBJECTS]);
+            }
+
+            // restore to symbolInstance to expand again
+            node[K_CLASS] = K_SYMBOL_INSTANCE;
+            auto childInstanceIdStack = instanceIdStack;
+            expandInstance(node, childInstanceIdStack, true);
+          }
+        }
+      }
+    }
+  }
+
+  for (auto& el : node.items())
+  {
+    processVariableRefs(el.value(), container, instanceIdStack);
   }
 }
 
@@ -484,7 +673,7 @@ void ExpandSymbol::processOtherOverrides(
     }
 
     std::string name = overrideItem[K_OVERRIDE_NAME];
-    if (name == K_MASTER_ID || name == K_BOUNDS || name.empty())
+    if (name == K_MASTER_ID || name == K_BOUNDS || name == K_VARIABLE_ASSIGNMENTS || name.empty())
     {
       continue;
     }

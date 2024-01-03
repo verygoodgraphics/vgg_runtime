@@ -1,0 +1,504 @@
+{
+  "version": "1",
+  "fileType": 3,
+  "fileName": "/Users/houguanhua/code/vgg/vgg_runtime_B/_feature/variables/var_text/feature-var-text.fig",
+  "frames": [
+    {
+      "id": "1:2",
+      "name": "Frame 1",
+      "isLocked": false,
+      "visible": true,
+      "contextSettings": {
+        "class": "graphicsContextSettings",
+        "blendMode": 27,
+        "opacity": 1.0,
+        "isolateBlending": false,
+        "transparencyKnockoutGroup": 0
+      },
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        -328.0,
+        351.0
+      ],
+      "bounds": {
+        "class": "rect",
+        "constrainProportions": false,
+        "width": 581.0,
+        "height": 719.0,
+        "x": 0,
+        "y": 0
+      },
+      "frame": {
+        "class": "rect",
+        "constrainProportions": false,
+        "width": 581.0,
+        "height": 719.0,
+        "x": -328.0,
+        "y": 351.0
+      },
+      "style": {
+        "class": "style",
+        "borders": [],
+        "fills": [
+          {
+            "fillType": 0,
+            "color": {
+              "class": "color",
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "class": "fill",
+            "isEnabled": true,
+            "contextSettings": {
+              "class": "graphicsContextSettings",
+              "blendMode": 0,
+              "opacity": 1.0,
+              "isolateBlending": false,
+              "transparencyKnockoutGroup": 0
+            }
+          }
+        ],
+        "blurs": [],
+        "shadows": []
+      },
+      "alphaMaskBy": [],
+      "outlineMaskBy": [],
+      "maskType": 0,
+      "styleEffectMaskArea": 2,
+      "maskShowType": 2,
+      "overflow": 1,
+      "styleEffectBoolean": 1,
+      "cornerSmoothing": 0.0,
+      "horizontalConstraint": 1,
+      "verticalConstraint": 1,
+      "resizesContent": 0,
+      "variableDefs": [],
+      "variableRefs": [],
+      "class": "frame",
+      "childObjects": [
+        {
+          "id": "1:4",
+          "name": "#1 master having text property",
+          "isLocked": false,
+          "visible": true,
+          "contextSettings": {
+            "class": "graphicsContextSettings",
+            "blendMode": 27,
+            "opacity": 1.0,
+            "isolateBlending": false,
+            "transparencyKnockoutGroup": 0
+          },
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            101.0,
+            -355.0
+          ],
+          "bounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "width": 96.0,
+            "height": 46.0,
+            "x": 0,
+            "y": 0
+          },
+          "frame": {
+            "class": "rect",
+            "constrainProportions": false,
+            "width": 96.0,
+            "height": 46.0,
+            "x": 101.0,
+            "y": -355.0
+          },
+          "style": {
+            "class": "style",
+            "borders": [],
+            "fills": [
+              {
+                "fillType": 0,
+                "color": {
+                  "class": "color",
+                  "red": 1.0,
+                  "green": 1.0,
+                  "blue": 1.0,
+                  "alpha": 1.0
+                },
+                "class": "fill",
+                "isEnabled": false,
+                "contextSettings": {
+                  "class": "graphicsContextSettings",
+                  "blendMode": 0,
+                  "opacity": 1.0,
+                  "isolateBlending": false,
+                  "transparencyKnockoutGroup": 0
+                }
+              }
+            ],
+            "blurs": [],
+            "shadows": []
+          },
+          "alphaMaskBy": [],
+          "outlineMaskBy": [],
+          "maskType": 0,
+          "styleEffectMaskArea": 2,
+          "maskShowType": 2,
+          "overflow": 2,
+          "styleEffectBoolean": 1,
+          "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
+          "variableDefs": [
+            {
+              "class": "variableDef",
+              "id": "1:0",
+              "varType": 2,
+              "value": {
+                "content": "var text",
+                "attr": [
+                  {
+                    "class": "fontAttr",
+                    "length": 8
+                  }
+                ],
+                "lineType": [
+                  {
+                    "class": "lineType",
+                    "styleType": 0,
+                    "level": 0,
+                    "isFirst": false
+                  }
+                ]
+              }
+            }
+          ],
+          "variableRefs": [],
+          "class": "symbolMaster",
+          "childObjects": [
+            {
+              "id": "1:3",
+              "name": "var text",
+              "isLocked": false,
+              "visible": true,
+              "contextSettings": {
+                "class": "graphicsContextSettings",
+                "blendMode": 27,
+                "opacity": 1.0,
+                "isolateBlending": false,
+                "transparencyKnockoutGroup": 0
+              },
+              "matrix": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "bounds": {
+                "class": "rect",
+                "constrainProportions": false,
+                "width": 96.0,
+                "height": 46.0,
+                "x": 0,
+                "y": 0
+              },
+              "frame": {
+                "class": "rect",
+                "constrainProportions": false,
+                "width": 96.0,
+                "height": 46.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "style": {
+                "class": "style",
+                "borders": [],
+                "fills": [
+                  {
+                    "fillType": 0,
+                    "color": {
+                      "class": "color",
+                      "red": 0.0,
+                      "green": 0.0,
+                      "blue": 0.0,
+                      "alpha": 1.0
+                    },
+                    "class": "fill",
+                    "isEnabled": true,
+                    "contextSettings": {
+                      "class": "graphicsContextSettings",
+                      "blendMode": 0,
+                      "opacity": 1.0,
+                      "isolateBlending": false,
+                      "transparencyKnockoutGroup": 0
+                    }
+                  }
+                ],
+                "blurs": [],
+                "shadows": []
+              },
+              "alphaMaskBy": [],
+              "outlineMaskBy": [],
+              "maskType": 0,
+              "styleEffectMaskArea": 2,
+              "maskShowType": 2,
+              "overflow": 2,
+              "styleEffectBoolean": 1,
+              "cornerSmoothing": 0.0,
+              "horizontalConstraint": 5,
+              "verticalConstraint": 5,
+              "resizesContent": 0,
+              "variableDefs": [],
+              "variableRefs": [
+                {
+                  "class": "variableRef",
+                  "id": "1:0",
+                  "objectField": "text_data"
+                }
+              ],
+              "class": "text",
+              "content": "var text",
+              "attr": [
+                {
+                  "class": "fontAttr",
+                  "length": 8
+                }
+              ],
+              "lineType": [
+                {
+                  "class": "lineType",
+                  "styleType": 0,
+                  "level": 0,
+                  "isFirst": false
+                }
+              ],
+              "anchorPoint": [
+                0.0,
+                11.863636016845703
+              ],
+              "frameMode": 0,
+              "verticalAlignment": 0,
+              "defaultAttr": {
+                "class": "fontAttr",
+                "name": "Inter",
+                "subFamilyName": "Regular",
+                "postScript": "",
+                "fontVariantCaps": 0,
+                "size": 12.0,
+                "letterSpacingValue": 0.0,
+                "letterSpacingUnit": 1,
+                "lineSpacingValue": 100.0,
+                "lineSpacingUnit": 1,
+                "fontVariantPosition": 0,
+                "fontVariations": []
+              },
+              "verticalTrim": false,
+              "horizontalAlignment": [
+                0
+              ]
+            }
+          ],
+          "radius": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "id": "1:5",
+          "name": "instance of #1, assign var text",
+          "isLocked": false,
+          "visible": true,
+          "contextSettings": {
+            "class": "graphicsContextSettings",
+            "blendMode": 27,
+            "opacity": 1.0,
+            "isolateBlending": false,
+            "transparencyKnockoutGroup": 0
+          },
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            101.0,
+            -257.0
+          ],
+          "bounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "width": 96.0,
+            "height": 46.0,
+            "x": 0,
+            "y": 0
+          },
+          "frame": {
+            "class": "rect",
+            "constrainProportions": false,
+            "width": 96.0,
+            "height": 46.0,
+            "x": 101.0,
+            "y": -257.0
+          },
+          "style": {
+            "class": "style",
+            "borders": [],
+            "fills": [
+              {
+                "fillType": 0,
+                "color": {
+                  "class": "color",
+                  "red": 1.0,
+                  "green": 1.0,
+                  "blue": 1.0,
+                  "alpha": 1.0
+                },
+                "class": "fill",
+                "isEnabled": false,
+                "contextSettings": {
+                  "class": "graphicsContextSettings",
+                  "blendMode": 0,
+                  "opacity": 1.0,
+                  "isolateBlending": false,
+                  "transparencyKnockoutGroup": 0
+                }
+              }
+            ],
+            "blurs": [],
+            "shadows": []
+          },
+          "alphaMaskBy": [],
+          "outlineMaskBy": [],
+          "maskType": 0,
+          "styleEffectMaskArea": 2,
+          "maskShowType": 2,
+          "overflow": 2,
+          "styleEffectBoolean": 1,
+          "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
+          "class": "symbolInstance",
+          "masterId": "1:4",
+          "overrideValues": [
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "1:4"
+              ],
+              "overrideName": "name",
+              "overrideValue": "instance of #1, assign var text",
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "1:3"
+              ],
+              "overrideName": "attr",
+              "overrideValue": [
+                {
+                  "class": "fontAttr",
+                  "length": 20
+                }
+              ],
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "1:3"
+              ],
+              "overrideName": "content",
+              "overrideValue": "var text in instance",
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "1:3"
+              ],
+              "overrideName": "truncatedHeight",
+              "overrideValue": null,
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "1:3"
+              ],
+              "overrideName": "lineType",
+              "overrideValue": [
+                {
+                  "class": "lineType",
+                  "styleType": 0,
+                  "level": 0,
+                  "isFirst": false
+                }
+              ],
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "1:3"
+              ],
+              "overrideName": "anchorPoint",
+              "overrideValue": [
+                0.0,
+                11.863636016845703
+              ],
+              "effectOnLayout": false
+            }
+          ],
+          "variableAssignments": [
+            {
+              "class": "variableAssign",
+              "id": "1:0",
+              "value": {
+                "content": "var text in instance",
+                "attr": [
+                  {
+                    "class": "fontAttr",
+                    "length": 20
+                  }
+                ],
+                "lineType": [
+                  {
+                    "class": "lineType",
+                    "styleType": 0,
+                    "level": 0,
+                    "isFirst": false
+                  }
+                ]
+              }
+            }
+          ],
+          "radius": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      ],
+      "radius": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ]
+}

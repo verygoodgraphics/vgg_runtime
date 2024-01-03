@@ -92,6 +92,13 @@ private:
   void processMasterIdOverrides(
     nlohmann::json&                 instance,
     const std::vector<std::string>& instanceIdStack);
+  void processVariableAssignmentsOverrides(
+    nlohmann::json&                 instance,
+    const std::vector<std::string>& instanceIdStack);
+  void processVariableRefs(
+    nlohmann::json&                 node,     // in instance tree
+    nlohmann::json*                 instance, // container
+    const std::vector<std::string>& instanceIdStack);
   void processLayoutOverrides(
     nlohmann::json&                 instance,
     const std::vector<std::string>& instanceIdStack);

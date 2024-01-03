@@ -738,3 +738,76 @@ TEST_F(VggExpandSymbolTestSuite, BoundsOverrideOrderRootFirst)
     EXPECT_DOUBLE_EQ(bounds.width(), 120.29999542236328);
   }
 }
+
+TEST_F(VggExpandSymbolTestSuite, VariableBool)
+{
+  // Given
+  std::string  designFilePath = "testDataDir/symbol/component_property/bool/design.json";
+  auto         designJson = Helper::load_json(designFilePath);
+  ExpandSymbol sut{ designJson };
+
+  // When
+  auto result = sut.run();
+
+  // Then
+  auto expandedDesignJson = std::get<0>(result);
+  {
+    nlohmann::json::json_pointer path{
+      "/frames/0/childObjects/1/childObjects/0/childObjects/0/visible"
+    };
+    bool visible = expandedDesignJson[path];
+    EXPECT_FALSE(visible);
+  }
+  {
+    nlohmann::json::json_pointer path{ "/frames/0/childObjects/2/childObjects/0/visible" };
+    bool                         visible = expandedDesignJson[path];
+    EXPECT_TRUE(visible);
+  }
+}
+
+TEST_F(VggExpandSymbolTestSuite, VariableText)
+{
+  // Given
+  std::string  designFilePath = "testDataDir/symbol/component_property/text/design.json";
+  auto         designJson = Helper::load_json(designFilePath);
+  ExpandSymbol sut{ designJson };
+
+  // When
+  auto result = sut.run();
+
+  // Then
+  auto expandedDesignJson = std::get<0>(result);
+  {
+    nlohmann::json::json_pointer path{ "/frames/0/childObjects/1/childObjects/0/content" };
+    std::string                  text = expandedDesignJson[path];
+    EXPECT_TRUE(text == "var text in instance");
+  }
+}
+
+TEST_F(VggExpandSymbolTestSuite, VariableString)
+{
+  // Given
+  std::string  designFilePath = "testDataDir/symbol/component_property/string/design.json";
+  auto         designJson = Helper::load_json(designFilePath);
+  ExpandSymbol sut{ designJson };
+
+  // When
+  auto result = sut.run();
+
+  // Then
+  auto expandedDesignJson = std::get<0>(result);
+  {
+    nlohmann::json::json_pointer path{
+      "/frames/0/childObjects/3/childObjects/0/childObjects/0/name"
+    };
+    std::string name = expandedDesignJson[path];
+    EXPECT_TRUE(name == "Star 1");
+  }
+  {
+    nlohmann::json::json_pointer path{
+      "/frames/0/childObjects/5/childObjects/0/childObjects/0/childObjects/0/name"
+    };
+    std::string name = expandedDesignJson[path];
+    EXPECT_TRUE(name == "Star 1");
+  }
+}

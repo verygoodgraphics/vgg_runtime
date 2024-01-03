@@ -67,8 +67,9 @@ public:
 #endif
   }
 
-  VParagraphPainterPtr painter;
-  RichTextBlockPtr     paragraphLayout;
+  VParagraphPainterPtr     painter;
+  RichTextBlockPtr         paragraphLayout;
+  std::optional<glm::vec2> anchor;
 
   TextNode__pImpl(const TextNode__pImpl& p)
   {
@@ -101,6 +102,12 @@ TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
   : PaintNode(cnt, name, VGG_TEXT, std::move(guid))
   , d_ptr(new TextNode__pImpl(this))
 {
+}
+
+void TextNode::setTextAnchor(glm::vec2 anchor)
+{
+  VGG_IMPL(TextNode);
+  _->anchor = anchor;
 }
 
 void TextNode::setParagraph(
@@ -160,7 +167,16 @@ void TextNode::drawRawStyle(Painter& painter, const SkPath& path, sk_sp<SkBlende
     canvas->save();
     canvas->clipPath(makeBoundPath());
   }
-  _->painter->paint(renderer);
+  _->painter->paintParagraph(renderer);
+  if (_->anchor)
+  {
+    auto offsetY = _->anchor->y - _->paragraphLayout->firstBaseline();
+    _->painter->paintRaw(renderer, _->anchor->x, offsetY);
+  }
+  else
+  {
+    _->painter->paintParagraph(renderer);
+  }
   if (overflow() == OF_Hidden)
   {
     canvas->restore();

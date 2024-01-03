@@ -261,6 +261,14 @@ public:
     invalidate();
   }
 
+  float firstBaseline() const
+  {
+    ASSERT(paragraphCache.empty() == false);
+    LineMetrics metrics;
+    paragraphCache[0].paragraph->getLineMetricsAt(0, &metrics);
+    return metrics.fBaseline;
+  }
+
   float textHeight() const
   {
     return m_paragraphHeight;

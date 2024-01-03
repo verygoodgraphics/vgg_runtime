@@ -377,6 +377,11 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
     {
       p->setVerticalAlignment(j.value("verticalAlignment", ETextVerticalAlignment::VA_Top));
       p->setFrameMode(j.value("frameMode", ETextLayoutMode::TL_Fixed));
+      auto anchor = get_stack_optional<std::array<float, 2>>(j, "anchorPoint");
+      if (anchor)
+      {
+        p->setTextAnchor({ (*anchor)[0], (*anchor)[1] });
+      }
 
       // 1.
 

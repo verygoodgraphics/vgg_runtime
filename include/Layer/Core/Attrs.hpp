@@ -244,7 +244,7 @@ struct Font
   std::string       subFamilyName;
   std::string       psName;
   std::vector<Axis> axis;
-  int               size{ 14 };
+  float             size{ 14 };
 
   static std::optional<float> axisValue(const std::vector<Axis>& axis, uint32_t tag)
   {

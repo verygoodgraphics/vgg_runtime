@@ -78,39 +78,8 @@ public:
     m_canvas = canvas;
   }
 
-  void paint(Renderer* renderer)
-  {
-    const auto b = m_paragraph->bound();
-    setCanvas(renderer->canvas());
-    int  totalHeight = m_paragraph->textHeight();
-    auto vertAlign = m_paragraph->verticalAlignment();
-    int  curY = 0;
-    if (vertAlign == ETextVerticalAlignment::VA_Bottom)
-    {
-      curY = b.height() - totalHeight;
-    }
-    else if (vertAlign == ETextVerticalAlignment::VA_Center)
-    {
-      curY = (b.height() - totalHeight) / 2;
-    }
-    for (std::size_t i = 0; i < m_paragraph->paragraphCache.size(); i++)
-    {
-      auto&      p = m_paragraph->paragraphCache[i].paragraph;
-      const auto curX = m_paragraph->paragraphCache[i].offsetX;
-      p->paint(this, curX, curY);
-      if (renderer->isEnableDrawDebugBound())
-      {
-        DebugCanvas debugCanvas(renderer->canvas());
-        drawParagraphDebugInfo(debugCanvas, m_paragraph->paragraph[i], p.get(), curX, curY, i);
-      }
-      auto        lastLine = p->lineNumber();
-      LineMetrics lineMetric;
-      if (lastLine < 1)
-        continue;
-      p->getLineMetricsAt(lastLine - 1, &lineMetric);
-      curY += p->getHeight() - lineMetric.fHeight;
-    }
-  }
+  void paintRaw(Renderer* renderer, float x, float y);
+  void paintParagraph(Renderer* renderer);
 
   VParagraphPainter(const VParagraphPainter&) = delete;
   VParagraphPainter& operator=(const VParagraphPainter&) = delete;

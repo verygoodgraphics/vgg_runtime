@@ -350,8 +350,13 @@ public:
     {
       painter.beginClip(outlineMask);
     }
-    auto blender = SkBlender::Mode(SkBlendMode::kSrcIn);
+    SkPaint objectLayerPaint;
+    objectLayerPaint.setBlendMode(SkBlendMode::kSrcIn);
+    canvas->saveLayer(0, &objectLayerPaint);
+    canvas->clipRect(b);
+    auto blender = SkBlender::Mode(SkBlendMode::kSrcOver);
     drawRawStyleImpl(painter, path, blender);
+    canvas->restore();
     if (!outlineMask.isEmpty())
     {
       painter.endClip();

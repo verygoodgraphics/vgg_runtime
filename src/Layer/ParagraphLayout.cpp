@@ -35,10 +35,10 @@ namespace
 {
 float findWeight(std::string_view key)
 {
-  static std::unordered_map<const char*, float> s_fontWeightMap = {
-    { "Thin", 100 },   { "ExtraLight", 200 }, { "Light", 300 }, { "Regular", 400 },
-    { "Medium", 500 }, { "SemiBold", 600 },   { "Bold", 700 },  { "ExtraBold", 800 },
-    { "Black", 900 },  { "ExtraBlack", 1000 }
+  static std::vector<std::pair<std::string_view, float>> s_fontWeightMap = {
+    { "ExtraBlack", 1000 }, { "Black", 900 },  { "ExtraBold", 800 },  { "SemiBold", 600 },
+    { "Bold", 700 },        { "Medium", 500 }, { "ExtraLight", 200 }, { "Light", 300 },
+    { "Thin", 100 },        { "Regular", 400 }
   };
   for (const auto& [k, v] : s_fontWeightMap)
   {
@@ -52,10 +52,10 @@ float findWeight(std::string_view key)
 
 float findWidth(std::string_view key)
 {
-  static std::unordered_map<const char*, float> s_fontWidthMap = {
-    { "UltraCondensed", 50 },  { "ExtraCondensed", 62.5 }, { "Condensed", 75 },
-    { "SemiCondensed", 87.5 }, { "SemiExpanded", 112.5 },  { "Expanded", 125 },
-    { "ExtraExpanded", 150 },  { "UltraExpanded", 200 }
+  static std::vector<std::pair<std::string_view, float>> s_fontWidthMap = {
+    { "SemiCondensed", 87.5 }, { "SemiExpanded", 112.5 },  { "ExtraExpanded", 150 },
+    { "UltraExpanded", 200 },  { "ExtraCondensed", 62.5 }, { "UltraCondensed", 50 },
+    { "Expanded", 125 },       { "Condensed", 75 }
   };
   for (const auto& [k, v] : s_fontWidthMap)
   {

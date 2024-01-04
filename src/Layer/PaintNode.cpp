@@ -381,7 +381,16 @@ SkPath PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
 
 void PaintNode::drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
 {
+  VGG_IMPL(PaintNode);
+  if (_->contextSetting.opacity < 1.0)
+  {
+    renderer->canvas()->saveLayerAlpha(0, _->contextSetting.opacity * 255);
+  }
   d_ptr->drawAsAlphaMaskImpl(renderer, std::move(blender));
+  if (_->contextSetting.opacity < 1.0)
+  {
+    renderer->canvas()->restore();
+  }
 }
 
 void PaintNode::drawRawStyle(Painter& painter, const SkPath& path, sk_sp<SkBlender> blender)

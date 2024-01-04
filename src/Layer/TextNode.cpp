@@ -167,7 +167,6 @@ void TextNode::drawRawStyle(Painter& painter, const SkPath& path, sk_sp<SkBlende
     canvas->save();
     canvas->clipPath(makeBoundPath());
   }
-  _->painter->paintParagraph(renderer);
   if (_->anchor)
   {
     auto offsetY = _->anchor->y - _->paragraphLayout->firstBaseline();

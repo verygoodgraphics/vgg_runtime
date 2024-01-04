@@ -247,6 +247,11 @@ TextStyle createTextStyle(const TextStyleAttr& attr, F&& fun)
   style.setFontSize(attr.font.size);
   style.setLetterSpacing(attr.letterSpacing);
   style.setBaselineShift(attr.baselineShift);
+  if (attr.lineHeight)
+  {
+    style.setHeight(*attr.lineHeight);
+    style.setHeightOverride(true);
+  }
 
   if (attr.lineThrough)
   {

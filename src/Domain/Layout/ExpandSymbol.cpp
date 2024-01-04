@@ -419,8 +419,6 @@ void ExpandSymbol::processVariableRefs(
 
   if (isLayoutNode(node))
   {
-    ASSERT(node[K_CLASS] != K_SYMBOL_INSTANCE);
-
     auto* containerVarAssigns = container && container->contains(K_VARIABLE_ASSIGNMENTS)
                                   ? &(*container)[K_VARIABLE_ASSIGNMENTS]
                                   : nullptr;

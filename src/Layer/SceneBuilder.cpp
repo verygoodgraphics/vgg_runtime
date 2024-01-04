@@ -388,8 +388,8 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
       std::vector<TextStyleAttr> textStyle;
 
       auto defaultAttr = defaultTextAttr();
-      defaultAttr.update(j.value("defaultAttr", json::object()), true);
-      auto fontAttr = j.value("attr", std::vector<json>{});
+      defaultAttr.update(j.value("defaultFontAttr", json::object()), true);
+      auto fontAttr = j.value("fontAttr", std::vector<json>{});
       for (auto& att : fontAttr)
       {
         auto json = defaultAttr;
@@ -415,7 +415,7 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
       }
 
       // 2.
-      auto lineType = j.value("lineType", std::vector<TextLineAttr>{});
+      auto lineType = j.value("textLineType", std::vector<TextLineAttr>{});
       auto alignments = j.value("horizontalAlignment", std::vector<ETextHorizontalAlignment>{});
 
       std::vector<ParagraphAttr> parStyle;

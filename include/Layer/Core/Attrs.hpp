@@ -275,15 +275,15 @@ struct Font
 
 struct TextStyleAttr
 {
-  Font              font;
-  std::vector<Fill> fills;
-  size_t            length{ 0 };
-  float             letterSpacing{ 0.0 };
-  float             lineSpacing{ 0.f };
-  float             baselineShift{ 0.0 };
-  bool              lineThrough{ false };
-  bool              kerning{ false };
-  ETextUnderline    underline{ UT_None };
+  Font                 font;
+  std::vector<Fill>    fills;
+  size_t               length{ 0 };
+  float                letterSpacing{ 0.0 };
+  std::optional<float> lineHeight;
+  float                baselineShift{ 0.0 };
+  bool                 lineThrough{ false };
+  bool                 kerning{ false };
+  ETextUnderline       underline{ UT_None };
 };
 
 struct ControlPoint

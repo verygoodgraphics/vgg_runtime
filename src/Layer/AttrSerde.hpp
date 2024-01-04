@@ -424,11 +424,15 @@ inline void from_json(const json& j, TextStyleAttr& x)
     x.letterSpacing = x.font.size * x.letterSpacing / 100.f;
   }
 
-  x.lineSpacing = j.value("lineSpacingValue", 0.0);
   auto lineSpacingUnit = j.value("lineSpacingUnit", 0);
-  if (lineSpacingUnit == 1)
+  auto lineHeightRaw = j.value("lineSpacingValue", 0.0);
+  if (lineSpacingUnit == 0)
   {
-    x.lineSpacing = x.font.size * x.lineSpacing * 1.25 / 100.f;
+    x.lineHeight = lineHeightRaw / x.font.size;
+  }
+  else if (lineSpacingUnit == 2)
+  {
+    x.lineHeight = lineHeightRaw;
   }
 }
 

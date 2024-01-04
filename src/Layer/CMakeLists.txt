@@ -57,9 +57,7 @@ foreach(SKIA_TARGET ${SKIA_LIBS})
   list(APPEND SKIA_ARTIFACTS_LOCATION ${location})
 endforeach()
 if(SKIA_ARTIFACTS_LOCATION)
-  install(FILES ${SKIA_ARTIFACTS_LOCATION} DESTINATION lib
-    COMPONENT vgg_module_layer
-    COMPONENT container
-  )
+  install(FILES ${SKIA_ARTIFACTS_LOCATION} DESTINATION lib COMPONENT vgg_module_layer)
+  install(FILES ${SKIA_ARTIFACTS_LOCATION} DESTINATION lib COMPONENT container)
 endif()
 install(TARGETS vgg_layer ARCHIVE DESTINATION lib COMPONENT vgg_module_layer)

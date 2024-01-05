@@ -89,6 +89,16 @@ void VggSdk::designDocumentDeleteAt(const std::string& jsonPointer)
   getDesignDocument()->deleteAt(jsonPointer);
 }
 
+std::string VggSdk::getElement(const std::string& id)
+{
+  return getDesignDocument()->getElement(id);
+}
+
+void VggSdk::updateElement(const std::string& id, const std::string& contentJsonString)
+{
+  getDesignDocument()->updateElement(id, contentJsonString);
+}
+
 // event listener
 void VggSdk::addEventListener(
   const std::string& elementKey,

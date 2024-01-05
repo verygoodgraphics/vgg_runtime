@@ -41,6 +41,8 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     .function("setInstanceKey", &VggSdk::setInstanceKey)
     .function("setListenerKey", &VggSdk::setListenerKey)
     // doc
+    .function("getElement", &VggSdk::getElement)
+    .function("updateElement", &VggSdk::updateElement)
     .function("getDesignDocument", &VggSdk::designDocument)
     .function("valueAt", &VggSdk::designDocumentValueAt)
     .function("addAt", &VggSdk::designDocumentAddAt)

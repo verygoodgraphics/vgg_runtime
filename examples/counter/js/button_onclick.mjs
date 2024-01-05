@@ -3,22 +3,32 @@ function handleEvent(event) {
 
   // NOTE: _currentVgg is set by vgg_runtime
   const vggSdk = new _currentVgg.VggSdk();
+  const buttonId = '#counterButton'
+  const countId = '#count'
   switch (event.type) {
     case 'mousedown': {
-      vggSdk.updateAt('/frames/0/childObjects/1/style/fills/0/color/alpha', JSON.stringify(1.0));
+      // NOTE: patch in array NOT WORK, other fileds in elemetn.style.fills[0] is removed
+      // let patch = { style: { fills: [{ color: { alpha: 1.0 } }] } };
+      // vggSdk.updateElement(buttonId, JSON.stringify(patch));
+      let element = JSON.parse(vggSdk.getElement(buttonId));
+      element.style.fills[0].color.alpha = 1.0;
+      vggSdk.updateElement(buttonId, JSON.stringify(element));
       break;
     }
 
     case 'mouseup': {
-      vggSdk.updateAt('/frames/0/childObjects/1/style/fills/0/color/alpha', JSON.stringify(0.5));
+      let element = JSON.parse(vggSdk.getElement(buttonId));
+      element.style.fills[0].color.alpha = 0.5;
+      vggSdk.updateElement(buttonId, JSON.stringify(element));
       break;
     }
 
     case 'click': {
-      const valuePath = '/frames/0/childObjects/3/content';
-      let countJsonString = vggSdk.valueAt(valuePath);
-      let count = parseInt(JSON.parse(countJsonString)) + 1;
-      vggSdk.updateAt(valuePath, JSON.stringify(count.toString()));
+      let element = JSON.parse(vggSdk.getElement(countId));
+      let count = parseInt(element.content) + 1;
+      // object patch works
+      let patch = { content: count.toString() };
+      vggSdk.updateElement(countId, JSON.stringify(patch));
       break;
     }
 

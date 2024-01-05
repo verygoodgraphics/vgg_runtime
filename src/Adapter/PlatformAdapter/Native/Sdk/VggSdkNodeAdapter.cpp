@@ -122,6 +122,8 @@ void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
   napi_property_descriptor properties[] = {
     DECLARE_NODE_API_PROPERTY("setEnv", SetEnv),
 
+    DECLARE_NODE_API_PROPERTY("getElement", GetElement),
+    DECLARE_NODE_API_PROPERTY("updateElement", UpdateElement),
     DECLARE_NODE_API_PROPERTY("getDesignDocument", GetDesignDocument),
 
     DECLARE_NODE_API_PROPERTY("valueAt", DesignDocumentValueAt),
@@ -215,6 +217,72 @@ napi_value VggSdkNodeAdapter::SetEnv(napi_env env, napi_callback_info info)
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
 
     sdk_adapter->m_vggSdk->setEnv(envKey);
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+
+napi_value VggSdkNodeAdapter::GetElement(napi_env env, napi_callback_info info)
+{
+  size_t     argc = 2;
+  napi_value args[2];
+  napi_value _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc != 1 && argc != 2)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    auto id = GetArgString(env, args[0]);
+
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
+
+    const auto& value = sdkAdapter->m_vggSdk->getElement(id);
+
+    napi_value ret;
+    NODE_API_CALL(env, napi_create_string_utf8(env, value.data(), value.size(), &ret));
+
+    return ret;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+
+napi_value VggSdkNodeAdapter::UpdateElement(napi_env env, napi_callback_info info)
+{
+  size_t     argc = 3;
+  napi_value args[3];
+  napi_value _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc != 2 && argc != 3)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    auto id = GetArgString(env, args[0]);
+    auto contentPatch = GetArgString(env, args[1]);
+
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
+
+    sdkAdapter->m_vggSdk->updateElement(id, contentPatch);
   }
   catch (std::exception& e)
   {

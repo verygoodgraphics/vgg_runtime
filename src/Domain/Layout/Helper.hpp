@@ -43,5 +43,9 @@ bool isPathNode(const nlohmann::json& json);
 bool isContourPathNode(const nlohmann::json& json);
 bool isVectorNetworkGroupNode(const nlohmann::json& json);
 
+bool isNodeWithId(const nlohmann::json& json, const std::string& id);
+
+const nlohmann::json* getElementInTree(const nlohmann::json& tree, const std::string& id);
+
 } // namespace Layout
 } // namespace VGG

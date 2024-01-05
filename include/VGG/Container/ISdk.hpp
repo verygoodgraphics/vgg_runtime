@@ -33,6 +33,9 @@ public:
     const std::string& jsonPointer,
     const std::string& value) = 0;
   virtual void designDocumentDeleteAt(const std::string& jsonPointer) = 0;
+
+  virtual std::string getElement(const std::string& id) = 0;
+  virtual void updateElement(const std::string& id, const std::string& contentJsonString) = 0;
 };
 
 } // namespace VGG

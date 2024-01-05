@@ -42,6 +42,9 @@ private:
   static napi_value SetEnv(napi_env env, napi_callback_info info);
 
   // design document in vgg daruma file
+  static napi_value GetElement(napi_env env, napi_callback_info info);
+  static napi_value UpdateElement(napi_env env, napi_callback_info info);
+
   static napi_value GetDesignDocument(napi_env env, napi_callback_info info);
 
   static napi_value DesignDocumentValueAt(napi_env env, napi_callback_info info);

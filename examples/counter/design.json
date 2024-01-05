@@ -1,5 +1,5 @@
 {
-  "fileName": "counter-demo",
+  "fileName": "clr06lir100f112sstcqcqbwk/import/clr06lir500f312sso8rkdda2/11_counter_without_symbol.sketch",
   "fileType": 1,
   "frames": [
     {
@@ -39,6 +39,7 @@
             "x": 92.0,
             "y": -169.0
           },
+          "horizontalConstraint": 5,
           "id": "20E5A8D8-9B8F-4914-87EF-2357BD581D54",
           "isLocked": false,
           "maskType": 0,
@@ -53,7 +54,6 @@
           "name": "Rectangle",
           "outlineMaskBy": [],
           "overflow": 1,
-          "pathType": 0,
           "shape": {
             "class": "shape",
             "subshapes": [
@@ -149,7 +149,7 @@
                     "class": "gradientLinear",
                     "from": [
                       0.5,
-                      0.0
+                      -0.0
                     ],
                     "invert": false,
                     "stops": [
@@ -180,7 +180,7 @@
                     ],
                     "to": [
                       0.5,
-                      1.0
+                      -1.0
                     ]
                   }
                 },
@@ -219,7 +219,7 @@
                     "class": "gradientLinear",
                     "from": [
                       0.5,
-                      0.0
+                      -0.0
                     ],
                     "invert": false,
                     "stops": [
@@ -250,7 +250,7 @@
                     ],
                     "to": [
                       0.5,
-                      1.0
+                      -1.0
                     ]
                   }
                 },
@@ -260,6 +260,7 @@
             "shadows": []
           },
           "styleEffectMaskArea": 0,
+          "verticalConstraint": 5,
           "visible": true
         },
         {
@@ -288,6 +289,7 @@
             "x": 325.0,
             "y": -169.0
           },
+          "horizontalConstraint": 5,
           "id": "D9DAF361-1980-4CC2-B4A0-DA729C88C3C6",
           "isLocked": false,
           "maskType": 0,
@@ -302,7 +304,6 @@
           "name": "#counterButton",
           "outlineMaskBy": [],
           "overflow": 1,
-          "pathType": 0,
           "shape": {
             "class": "shape",
             "subshapes": [
@@ -398,7 +399,7 @@
                     "class": "gradientLinear",
                     "from": [
                       0.5,
-                      0.0
+                      -0.0
                     ],
                     "invert": false,
                     "stops": [
@@ -429,7 +430,7 @@
                     ],
                     "to": [
                       0.5,
-                      1.0
+                      -1.0
                     ]
                   }
                 },
@@ -448,7 +449,7 @@
               {
                 "class": "fill",
                 "color": {
-                  "alpha": 0.5,
+                  "alpha": 1.0,
                   "blue": 0.847,
                   "class": "color",
                   "green": 0.847,
@@ -468,7 +469,7 @@
                     "class": "gradientLinear",
                     "from": [
                       0.5,
-                      0.0
+                      -0.0
                     ],
                     "invert": false,
                     "stops": [
@@ -499,7 +500,7 @@
                     ],
                     "to": [
                       0.5,
-                      1.0
+                      -1.0
                     ]
                   }
                 },
@@ -509,13 +510,30 @@
             "shadows": []
           },
           "styleEffectMaskArea": 0,
+          "verticalConstraint": 5,
           "visible": true
         },
         {
           "alphaMaskBy": [],
-          "attr": [
+          "bounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "height": 22.0,
+            "width": 46.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "class": "text",
+          "content": "Count",
+          "contextSettings": {
+            "blendMode": 0,
+            "class": "graphicsContextSettings",
+            "isolateBlending": false,
+            "opacity": 1.0,
+            "transparencyKnockoutGroup": 0
+          },
+          "fontAttr": [
             {
-              "baseline": 0,
               "baselineShift": 0.0,
               "class": "fontAttr",
               "fillUseType": 1,
@@ -540,18 +558,16 @@
                   "isEnabled": true
                 }
               ],
-              "horizontalAlignment": 2,
+              "fontVariantPosition": 0,
               "horizontalScale": 1.0,
-              "kerning": false,
               "length": 5,
-              "letterSpacing": 0.0,
-              "lettertransform": 0,
-              "lineSpace": 24.0,
+              "letterSpacingValue": 0.0,
+              "lineSpacingValue": 20.0,
               "linethrough": false,
               "name": "PingFangSC-Regular",
-              "proportionalSpacing": 0.0,
               "rotate": 0.0,
               "size": 16.0,
+              "textCase": 0,
               "textParagraph": {
                 "class": "textParagraph",
                 "paragraphSpacing": 0.0
@@ -560,23 +576,6 @@
               "verticalScale": 1.0
             }
           ],
-          "bounds": {
-            "class": "rect",
-            "constrainProportions": false,
-            "height": 22.0,
-            "width": 46.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "class": "text",
-          "content": "Count",
-          "contextSettings": {
-            "blendMode": 0,
-            "class": "graphicsContextSettings",
-            "isolateBlending": false,
-            "opacity": 1.0,
-            "transparencyKnockoutGroup": 0
-          },
           "frame": {
             "class": "rect",
             "constrainProportions": false,
@@ -586,8 +585,13 @@
             "y": -179.0
           },
           "frameMode": 1,
+          "horizontalAlignment": [
+            2
+          ],
+          "horizontalConstraint": 6,
           "id": "2633A44B-F00D-467C-AA6E-5E0B692EC376",
           "isLocked": false,
+          "keepShapeWhenResize": true,
           "maskType": 0,
           "matrix": [
             1.0,
@@ -622,13 +626,30 @@
           },
           "styleEffectMaskArea": 0,
           "verticalAlignment": 0,
+          "verticalConstraint": 6,
           "visible": true
         },
         {
           "alphaMaskBy": [],
-          "attr": [
+          "bounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "height": 36.0,
+            "width": 121.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "class": "text",
+          "content": "1",
+          "contextSettings": {
+            "blendMode": 0,
+            "class": "graphicsContextSettings",
+            "isolateBlending": false,
+            "opacity": 1.0,
+            "transparencyKnockoutGroup": 0
+          },
+          "fontAttr": [
             {
-              "baseline": 0,
               "baselineShift": 0.0,
               "class": "fontAttr",
               "fillUseType": 1,
@@ -653,18 +674,16 @@
                   "isEnabled": true
                 }
               ],
-              "horizontalAlignment": 2,
+              "fontVariantPosition": 0,
               "horizontalScale": 1.0,
-              "kerning": false,
               "length": 1,
-              "letterSpacing": 0.0,
-              "lettertransform": 0,
-              "lineSpace": 24.0,
+              "letterSpacingValue": 0.0,
+              "lineSpacingValue": 40.0,
               "linethrough": false,
               "name": "ArialMT",
-              "proportionalSpacing": 0.0,
               "rotate": 0.0,
               "size": 32.0,
+              "textCase": 0,
               "textParagraph": {
                 "class": "textParagraph",
                 "paragraphSpacing": 0.0
@@ -673,23 +692,6 @@
               "verticalScale": 1.0
             }
           ],
-          "bounds": {
-            "class": "rect",
-            "constrainProportions": false,
-            "height": 36.0,
-            "width": 121.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "class": "text",
-          "content": "0",
-          "contextSettings": {
-            "blendMode": 0,
-            "class": "graphicsContextSettings",
-            "isolateBlending": false,
-            "opacity": 1.0,
-            "transparencyKnockoutGroup": 0
-          },
           "frame": {
             "class": "rect",
             "constrainProportions": false,
@@ -699,8 +701,13 @@
             "y": -172.0
           },
           "frameMode": 2,
+          "horizontalAlignment": [
+            2
+          ],
+          "horizontalConstraint": 6,
           "id": "038F6DB1-FE50-4502-B873-278DB19189B8",
           "isLocked": false,
+          "keepShapeWhenResize": true,
           "maskType": 0,
           "matrix": [
             1.0,
@@ -735,6 +742,7 @@
           },
           "styleEffectMaskArea": 0,
           "verticalAlignment": 0,
+          "verticalConstraint": 6,
           "visible": true
         }
       ],
@@ -754,6 +762,7 @@
         "x": 0.0,
         "y": 0.0
       },
+      "horizontalConstraint": 5,
       "id": "A7A23B73-C356-41AA-96D4-B8355A75FCD3",
       "isLocked": false,
       "maskType": 0,
@@ -768,6 +777,7 @@
       "name": "Small",
       "outlineMaskBy": [],
       "overflow": 1,
+      "resizesContent": 1,
       "style": {
         "blurs": [
           {
@@ -809,7 +819,10 @@
         "shadows": []
       },
       "styleEffectMaskArea": 0,
+      "verticalConstraint": 5,
       "visible": true
     }
-  ]
+  ],
+  "references": [],
+  "version": "1.0.11"
 }

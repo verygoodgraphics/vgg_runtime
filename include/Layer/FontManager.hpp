@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 #pragma once
-#include "Layer/Config.hpp"
 #include "Utility/HelperMacro.hpp"
-#include "Utility/ConfigManager.hpp"
 
+#include <memory>
 #include <string>
-#include <unordered_map>
-#include <filesystem>
-#include <iostream>
+#include <vector>
 
 class SkFontMgrVGG;
-namespace VGG
+
+namespace VGG::layer
 {
-namespace fs = std::filesystem;
 class FontManager__pImpl;
+
 class FontManager final
 {
   VGG_DECL_IMPL(FontManager);
@@ -36,18 +34,31 @@ public:
   FontManager(const FontManager& s) = delete;
   FontManager& operator=(const FontManager&) = delete;
   FontManager(FontManager&& s) noexcept = delete;
-  FontManager&  operator=(FontManager&&) noexcept = delete;
-  SkFontMgrVGG* fontManager(const std::string& key) const;
-  SkFontMgrVGG* defaultFontManager() const;
-  ~FontManager();
-  static FontManager& instance()
+  FontManager& operator=(FontManager&&) noexcept = delete;
+
+  /// @brief fuzzy match the given font family name and
+  /// return the actual name with a best score
+  std::string matchFontName(std::string_view familyName) const;
+
+  const std::vector<std::string>& fallbackFonts() const;
+
+  /// @brief Add a font from memory
+  /// defaultName is the name of the font if there is no name field in the font file,
+  /// in most cases, this name is ignored
+  bool addFontFromMemory(const uint8_t* data, size_t size, const char* defaultName);
+
+  /// @brief Get the singleton instance of FontManager
+  static FontManager& GetFontMananger() // NOLINT
   {
     static FontManager s_fontManagerInstance;
     return s_fontManagerInstance;
   }
 
+  ~FontManager();
+
 private:
+  friend class SkiaFontManagerProxy;
   FontManager();
 };
 
-} // namespace VGG
+} // namespace VGG::layer

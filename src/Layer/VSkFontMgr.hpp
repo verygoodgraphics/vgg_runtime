@@ -16,6 +16,7 @@
 #pragma once
 
 #include "Layer/FontManager.hpp"
+#include "Layer/SkiaFontManagerProxy.hpp"
 #include <core/SkStream.h>
 #include <include/core/SkFontMgr.h>
 #include <include/core/SkFontStyle.h>
@@ -352,8 +353,10 @@ public:
 
   static sk_sp<VGGFontCollection> GlobalFontCollection()
   {
-    static sk_sp<VGGFontCollection> g_fc = sk_make_sp<VGGFontCollection>(
-      sk_ref_sp<SkFontMgrVGG>(VGG::FontManager::instance().defaultFontManager()));
+    auto skmgr =
+      VGG::layer::SkiaFontManagerProxy(VGG::layer::FontManager::GetFontMananger()).skFontMgr();
+    static sk_sp<VGGFontCollection> g_fc =
+      sk_make_sp<VGGFontCollection>(sk_ref_sp<SkFontMgrVGG>(skmgr));
     return g_fc;
   }
 };

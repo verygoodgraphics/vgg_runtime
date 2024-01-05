@@ -33,6 +33,21 @@
 
 namespace
 {
+
+std::vector<std::string_view> split(std::string_view s, char seperator)
+{
+  std::vector<std::string_view> output;
+  std::string::size_type        prevPos = 0, pos = 0;
+  while ((pos = s.find(seperator, pos)) != std::string::npos)
+  {
+    std::string substring(s.substr(prevPos, pos - prevPos));
+    output.push_back(substring);
+    prevPos = ++pos;
+  }
+  output.push_back(s.substr(prevPos, pos - prevPos)); // Last word
+  return output;
+}
+
 std::vector<char> readFromZip(const char* zip, size_t length, const char* entry)
 {
   std::vector<char> data;
@@ -79,7 +94,7 @@ std::vector<T> mergeArrayConfig(std::vector<std::string> config1, std::vector<st
 
 } // namespace
 
-namespace VGG
+namespace VGG::layer
 {
 
 class FontManager__pImpl
@@ -202,20 +217,79 @@ FontManager::FontManager()
   }
 }
 
-SkFontMgrVGG* FontManager::fontManager(const std::string& key) const
+SkFontMgrVGG* SkiaFontManagerProxy::skFontMgr() const
 {
-  if (auto it = d_ptr->fontMgrs.find(key); it != d_ptr->fontMgrs.end())
-  {
-    return it->second.get();
-  }
-  return nullptr;
+  return m_mgr.d_ptr->defaultFontMgr;
 }
 
-SkFontMgrVGG* FontManager::defaultFontManager() const
+const std::vector<std::string>& FontManager::fallbackFonts() const
 {
-  return d_ptr->defaultFontMgr;
+  ASSERT(d_ptr->defaultFontMgr);
+  return d_ptr->defaultFontMgr->fallbackFonts();
+}
+
+std::string FontManager::matchFontName(std::string_view inputName) const
+{
+  auto fontMgr = d_ptr->defaultFontMgr;
+  ASSERT(fontMgr);
+  auto resolveFromFallback = [](const std::vector<std::string>& candidates)
+  {
+    for (const auto& candidate : candidates)
+    {
+      if (const auto components = split(candidate, '-'); !components.empty())
+      {
+        return components[0];
+      }
+    }
+    return std::string_view();
+  };
+  std::string fontName;
+  if (const auto components = split(inputName, '-'); !components.empty())
+  {
+    fontName = components[0];
+    auto matched = fontMgr->fuzzyMatchFontFamilyName(fontName);
+    if (matched)
+    {
+      INFO(
+        "Font [%s] matches real name [%s][%f]",
+        fontName.c_str(),
+        matched->first.c_str(),
+        matched->second);
+      fontName = std::string(matched->first.c_str());
+
+      // When font name is provided, we match the real name first.
+      // If the score is lower than a threshold, we choose the
+      // fallback font rather pick it fuzzily.
+      constexpr float THRESHOLD = 70.f;
+      if (const auto& fallbackFonts = fontMgr->fallbackFonts();
+          !fallbackFonts.empty() && matched->second < THRESHOLD)
+      {
+        fontName = resolveFromFallback(fallbackFonts);
+      }
+    }
+    else
+    {
+      DEBUG("No font in font manager");
+    }
+  }
+  else if (const auto& fallbackFonts = fontMgr->fallbackFonts(); !fallbackFonts.empty())
+  {
+    fontName = resolveFromFallback(fallbackFonts);
+  }
+  if (fontName.empty())
+  {
+    // the worst case
+    fontName = "FiraSans";
+  }
+  DEBUG("Given [%s], [%s] is choosed finally", std::string(inputName).c_str(), fontName.c_str());
+  return fontName;
+}
+
+bool FontManager::addFontFromMemory(const uint8_t* data, size_t size, const char* defaultName)
+{
+  return d_ptr->defaultFontMgr->addFont(data, size, defaultName, true);
 }
 
 FontManager::~FontManager() = default;
 
-} // namespace VGG
+} // namespace VGG::layer

@@ -16,7 +16,6 @@
         "childObjects",
         "class",
         "contextSettings",
-        "frame",
         "id",
         "isLocked",
         "maskType",
@@ -384,27 +383,27 @@
         },
         "thickness": {
           "type": "number",
-          "description": "The thickness of the border.\nValue `0` is acceptable, as it is interpreted as the thinnest line width that can be displayed at device resolution.\nThis attribute only works if `strokeWeightsIndependent` is set to `false`."
+          "description": "The thickness of the border.\nValue `0` is acceptable, as it is interpreted as the thinnest line width that can be displayed at device resolution.\nThis attribute only works if `borderWeightsIndependent` is set to `false`."
         },
-        "strokeWeightsIndependent": {
+        "borderWeightsIndependent": {
           "type": "boolean",
-          "description": "For rectangles only. If `true`, independent stroke weights for all four sides.\nDefault value is `false`."
+          "description": "For rectangles only. If `true`, independent border weights for all four sides.\nDefault value is `false`."
         },
         "topWeight": {
           "type": "number",
-          "description": "This is used only when `strokeWeightsIndependent` is set to true, in order to specify the stroke weight at the top of the rectangle. Default value is `0`."
+          "description": "This is used only when `borderWeightsIndependent` is set to true, in order to specify the border weight at the top of the rectangle. Default value is `0`."
         },
         "leftWeight": {
           "type": "number",
-          "description": "This is used only when `strokeWeightsIndependent` is set to true, in order to specify the stroke weight at the left of the rectangle. Default value is `0`."
+          "description": "This is used only when `borderWeightsIndependent` is set to true, in order to specify the border weight at the left of the rectangle. Default value is `0`."
         },
         "bottomWeight": {
           "type": "number",
-          "description": "This is used only when `strokeWeightsIndependent` is set to true, in order to specify the stroke weight at the bottom of the rectangle. Default value is `0`."
+          "description": "This is used only when `borderWeightsIndependent` is set to true, in order to specify the border weight at the bottom of the rectangle. Default value is `0`."
         },
         "rightWeight": {
           "type": "number",
-          "description": "This is used only when `strokeWeightsIndependent` is set to true, in order to specify the stroke weight at the right of the rectangle. Default value is `0`."
+          "description": "This is used only when `borderWeightsIndependent` is set to true, in order to specify the border weight at the right of the rectangle. Default value is `0`."
         },
         "contextSettings": {
           "$ref": "#/definitions/GraphicsContextSettings",
@@ -437,7 +436,7 @@
         },
         "lineCapStyle": {
           "$ref": "#/definitions/LineCapStyle",
-          "description": "The shape styles at the end of stroked lines."
+          "description": "The shape styles at the end of border lines."
         },
         "startMarkerType": {
           "$ref": "#/definitions/MarkerType",
@@ -449,11 +448,11 @@
         },
         "lineJoinStyle": {
           "$ref": "#/definitions/LineJoinStyle",
-          "description": "The shape style at the corner of two stroked lines."
+          "description": "The shape style at the corner of two border lines."
         },
         "miterLimit": {
           "type": "number",
-          "description": "When the angle between two adjacent stroked lines is less than this value, a `miter` join is used instead."
+          "description": "When the angle between two adjacent border lines is less than this value, a `miter` join is used instead."
         },
         "flat": {
           "type": "number",
@@ -1257,7 +1256,7 @@
     "LineCapStyle": {
       "title": "Line Cap Style",
       "type": "integer",
-      "description": "The shape styles at the end of stroked lines.",
+      "description": "The shape styles at the end of border lines.",
       "enum": [0, 1, 2],
       "enumDescriptions": ["butt", "round", "square"],
       "$id": "#LineCapStyle"
@@ -1286,7 +1285,7 @@
     "LineJoinStyle": {
       "title": "Line Join Style",
       "type": "integer",
-      "description": "The shape style at the corner of two stroked lines.",
+      "description": "The shape style at the corner of two border lines.",
       "enum": [0, 1, 2],
       "enumDescriptions": ["miter", "round", "bevel"],
       "$id": "#LineJoinStyle"
@@ -1569,7 +1568,7 @@
         },
         "objectField": {
           "type": "string",
-          "description": "Describes how a referenced variable acts on a specific property of an object.\nWhen the `varType` of the variable is `2`, the field is fixed to `text_data`.\nWhen the `varType` is anything else, the field points to a property of the object (check `overrideName` in `OverrideValue`)."
+          "description": "Describes how a referenced variable acts on a specific property of an object.\nWhen the `varType` of the variable is `2`, the field is fixed to `textData`.\nWhen the `varType` is anything else, the field points to a property of the object (check `overrideName` in `OverrideValue`)."
         }
       },
       "additionalProperties": false
@@ -1584,7 +1583,6 @@
         "bounds",
         "class",
         "contextSettings",
-        "frame",
         "id",
         "isLocked",
         "maskType",
@@ -1924,11 +1922,11 @@
         },
         "startingAngle": {
           "type": "number",
-          "description": "The starting angle of the sector sweep.\nThe three o'clock direction is defined as `0`, and increasing angles rotate clockwise."
+          "description": "The starting angle of the sector sweep.\nThe three o'clock direction is defined as `0`, increasing in the clockwise direction.\nIf `startingAngle` is less than `endingAngle`, the filled area spans from `startingAngle` to `endingAngle` clockwise; otherwise, counterclockwise."
         },
         "endingAngle": {
           "type": "number",
-          "description": "The ending angle of the sector sweep.\nThe three o'clock direction is defined as `0`, and increasing angles rotate clockwise."
+          "description": "The ending angle of the sector sweep.\nThe three o'clock direction is defined as `0`, increasing in the clockwise direction.\nIf `startingAngle` is less than `endingAngle`, the filled area spans from `startingAngle` to `endingAngle` clockwise; otherwise, counterclockwise."
         },
         "innerRadius": {
           "type": "number",
@@ -2019,12 +2017,11 @@
       "type": "object",
       "required": [
         "alphaMaskBy",
-        "attr",
         "bounds",
         "class",
         "content",
         "contextSettings",
-        "frame",
+        "fontAttr",
         "frameMode",
         "horizontalAlignment",
         "id",
@@ -2232,22 +2229,22 @@
             ]
           }
         },
-        "defaultAttr": {
+        "defaultFontAttr": {
           "$ref": "#/definitions/FontAttr",
-          "description": "The default font attributes of the text. If some font attributes are missing in `attr`, take the font attributes here.\nThe value of `length` in this field is meaningless."
+          "description": "The default font attributes of the text. If some font attributes are missing in `fontAttr`, take the font attributes here.\nThe value of `length` in this field is meaningless."
         },
-        "attr": {
+        "fontAttr": {
           "type": "array",
-          "description": "An ordered list, where each item sequentially describes the font attributes of a text fragment.\nIf some font attributes are missing in an item, take the font attributes from `defaultAttr`.",
+          "description": "An ordered list, where each item sequentially describes the font attributes of a text fragment.\nIf some font attributes are missing in an item, take the font attributes from `defaultFontAttr`.",
           "items": {
             "$ref": "#/definitions/FontAttr"
           }
         },
-        "lineType": {
+        "textLineType": {
           "type": "array",
           "description": "A list with a length equals to the number of text lines, where each item describes the index preceding each line of text.",
           "items": {
-            "$ref": "#/definitions/LineType"
+            "$ref": "#/definitions/TextLineType"
           }
         },
         "verticalTrim": {
@@ -2288,7 +2285,7 @@
         },
         "borders": {
           "type": "array",
-          "description": "A list of the character's border styles. \nPriority: The `borders` of the text fragment > the `borders` in `defaultAttr` of the text > the `borders` in the text object's `style`.",
+          "description": "A list of the character's border styles. \nPriority: The `borders` of the text fragment > the `borders` in `defaultFontAttr` of the text > the `borders` in the text object's `style`.",
           "items": {
             "$ref": "#/definitions/Border"
           }
@@ -2305,7 +2302,7 @@
           "description": "The priority of `fills`.",
           "enum": [0, 1],
           "enumDescriptions": [
-            "The `fills` of the text fragment > the `fills` in `defaultAttr` of the text > the `fills` in the text object's `style`. (Default value)",
+            "The `fills` of the text fragment > the `fills` in `defaultFontAttr` of the text > the `fills` in the text object's `style`. (Default value)",
             "The corresponding property of the object takes precedence over `fills`. When `style.fills` and `fills` each have only one valid solid color object, the opacity of the two solid color objects is combined into the `style.fills` solid color object."
           ]
         },
@@ -2469,16 +2466,16 @@
       },
       "additionalProperties": false
     },
-    "LineType": {
-      "title": "Line Type",
+    "TextLineType": {
+      "title": "Text Line Type",
       "description": "The properties of a text line within a text list.",
       "type": "object",
-      "$id": "#LineType",
+      "$id": "#TextLineType",
       "required": ["class", "styleType", "level", "isFirst"],
       "properties": {
         "class": {
           "type": "string",
-          "const": "lineType"
+          "const": "textLineType"
         },
         "styleType": {
           "type": "integer",
@@ -2510,7 +2507,6 @@
         "bounds",
         "class",
         "contextSettings",
-        "frame",
         "id",
         "imageFileName",
         "isLocked",
@@ -2692,7 +2688,6 @@
         "childObjects",
         "class",
         "contextSettings",
-        "frame",
         "id",
         "isLocked",
         "maskType",
@@ -2897,7 +2892,6 @@
         "bounds",
         "class",
         "contextSettings",
-        "frame",
         "id",
         "isLocked",
         "maskType",
@@ -3148,7 +3142,6 @@
         "childObjects",
         "class",
         "contextSettings",
-        "frame",
         "id",
         "isLocked",
         "maskType",
@@ -3384,7 +3377,6 @@
         "childObjects",
         "class",
         "contextSettings",
-        "frame",
         "id",
         "isLocked",
         "maskType",
@@ -3585,7 +3577,7 @@
   "properties": {
     "version": {
       "type": "string",
-      "const": "1.0.10",
+      "const": "1.0.11",
       "description": "Current VGG specs version, conforming to semantic version format like `major.minor.patch`.\n"
     },
     "fileType": {

@@ -16,6 +16,7 @@
 #pragma once
 
 #include "Application/EventVisitor.hpp"
+#include "Domain/IVggEnv.hpp"
 #include "UIEvent.hpp"
 
 namespace VGG
@@ -25,12 +26,14 @@ namespace NodeAdapter
 
 class JsEventGenerator : public EventVisitor
 {
-  std::string m_event_id;
-  std::string m_script;
+  std::shared_ptr<IVggEnv> m_env;
+  std::string              m_event_id;
+  std::string              m_script;
 
 public:
-  JsEventGenerator(std::string eventId)
-    : m_event_id{ eventId }
+  JsEventGenerator(std::shared_ptr<IVggEnv> env, std::string eventId)
+    : m_env{ env }
+    , m_event_id{ eventId }
   {
   }
 
@@ -57,13 +60,17 @@ public:
 private:
   void makeScript(std::string_view event)
   {
-    m_script = R"(
-      var vggSdkAddon = process._linkedBinding('vgg_sdk_addon');
-      var theVggEvent = new vggSdkAddon.)";
-    m_script.append(event);
-    m_script.append("(); theVggEvent.bindCppEvent(");
-    m_script.append(m_event_id);
-    m_script.append(");");
+    ASSERT(m_env);
+
+    std::ostringstream oss;
+    oss << "const containerKey = '" << m_env->getContainerKey() << "';"
+        << "const envKey = '" << m_env->getEnv() << "';"
+        << "const instanceKey = '" << m_env->getInstanceKey() << "';"
+        << "var theWrapper = globalThis[containerKey][envKey];"
+        << "const vgg = theWrapper[instanceKey];"
+        << "var theVggEvent = new vgg." << event << "();"
+        << "theVggEvent.bindCppEvent(" << m_event_id << ");";
+    m_script.append(oss.str());
   }
 };
 

@@ -1,8 +1,9 @@
-function handleEvent(event) {
-  console.log('handle event:', event, ', type:', event.type, ', target:', event.target);
+function handleEvent(event, wrapper) {
+  console.log('handle event:', event, ', type:', event.type, ', target:', event.target, ', wrapper:', wrapper);
 
-  // NOTE: _currentVgg is set by vgg_runtime
-  const vggSdk = new _currentVgg.VggSdk();
+  const wasmInstanceKey = 'instance';
+
+  const vggSdk = new wrapper[wasmInstanceKey].VggSdk();
   const buttonId = '#counterButton'
   const countId = '#count'
   switch (event.type) {

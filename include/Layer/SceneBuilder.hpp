@@ -60,7 +60,8 @@ class SceneBuilder
 public:
   using FontNameVisitor =
     std::function<void(const std::string& familyName, const std::string& subFamilyName)>;
-  static std::vector<PaintNodePtr> build(const json& j, bool resetOrigin = true)
+
+  static std::vector<FramePtr> build(const json& j)
   {
     SceneBuilder builder;
     builder.buildImpl(j, resetOrigin);

@@ -19,6 +19,10 @@
 
 #include <vector>
 class SkCanvas;
+class SkPicture;
+
+template<typename T>
+class sk_sp;
 
 namespace VGG::layer
 {
@@ -106,6 +110,8 @@ public:
 
   std::optional<std::vector<char>> makeSKP();
   void                             makeSKP(std::ostream& os);
+
+  sk_sp<SkPicture> makeSkPicture(int width, int height);
 };
 
 } // namespace VGG::layer

@@ -282,6 +282,15 @@ void VLayer::endFrame()
   _->skiaContext->markSwap();
 }
 
+sk_sp<SkPicture> VLayer::makeSkPicture(int width, int height)
+{
+  VGG_IMPL(VLayer);
+  SkPictureRecorder rec;
+  auto              canvas = rec.beginRecording(width, height);
+  _->renderInternal(canvas, false);
+  return rec.finishRecordingAsPicture();
+}
+
 std::optional<std::vector<char>> VLayer::makeSKP()
 {
   std::stringstream data;

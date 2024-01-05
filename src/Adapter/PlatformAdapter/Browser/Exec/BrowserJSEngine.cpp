@@ -45,8 +45,8 @@ bool BrowserJSEngine::evalModule(
   std::string call_imported_function{ event_generator.getScript() };
   call_imported_function.append("const innerDataUri = ");
   call_imported_function.append(StringHelper::encode_script_to_data_uri(code));
-  call_imported_function.append(
-    "; const { default: handleEvent } = await import(innerDataUri); handleEvent(theVggEvent);");
+  call_imported_function.append("; const { default: handleEvent } = await import(innerDataUri); "
+                                "handleEvent(theVggEvent, theWrapper);");
 
   m_moduleWrapper.erase();
   m_moduleWrapper.append("const outerDataUri = ");

@@ -70,7 +70,8 @@ private:
     oss << "const containerKey = '" << m_env->getContainerKey() << "';"
         << "const envKey = '" << m_env->getEnv() << "';"
         << "const instanceKey = '" << m_env->getInstanceKey() << "';"
-        << "const vgg = globalThis[containerKey][envKey][instanceKey];"
+        << "var theWrapper = globalThis[containerKey][envKey];"
+        << "const vgg = theWrapper[instanceKey];"
         << "var theVggEvent = new vgg." << event << "();"
         << "theVggEvent.bindCppEvent(" << m_event_id << ");";
     m_script.append(oss.str());

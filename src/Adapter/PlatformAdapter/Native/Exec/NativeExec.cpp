@@ -70,7 +70,7 @@ bool NativeExec::evalModule(
   std::shared_ptr<IVggEnv> env)
 {
   NodeAdapter::EventStore       event_store{ event };
-  NodeAdapter::JsEventGenerator event_generator{ event_store.eventId() };
+  NodeAdapter::JsEventGenerator event_generator{ env, event_store.eventId() };
   event->accept(&event_generator);
 
   std::string wrapped_script{ R"(
@@ -80,8 +80,8 @@ bool NativeExec::evalModule(
   std::string call_imported_function{ event_generator.getScript() };
   call_imported_function.append("const dataUri = ");
   call_imported_function.append(StringHelper::encode_script_to_data_uri(code));
-  call_imported_function.append(
-    "; const { default: handleEvent } = await import(dataUri); handleEvent(theVggEvent);");
+  call_imported_function.append("; const { default: handleEvent } = await import(dataUri); "
+                                "handleEvent(theVggEvent, theWrapper);");
   wrapped_script.append(StringHelper::url_encode(call_imported_function));
 
   wrapped_script.append("'; evalModule(decodeURIComponent(encoded_code));");

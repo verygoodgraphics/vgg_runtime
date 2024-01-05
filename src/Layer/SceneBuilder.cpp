@@ -33,6 +33,10 @@
 
 namespace
 {
+
+///
+/// Convert coordinate system from VGG from to skia
+///
 class CoordinateConvert
 {
 public:
@@ -167,6 +171,46 @@ public:
     }
   }
 };
+
+template<typename F1, typename F2>
+inline PaintNodePtr makeObjectCommonProperty(
+  const json&      j,
+  const glm::mat3& totalMatrix,
+  F1&&             creator,
+  F2&&             override)
+{
+  auto obj = creator(j.value("name", ""), j.value("id", ""));
+  if (!obj)
+    return nullptr;
+  auto [originalMatrix, newMatrix, inversedNewMatrix] =
+    SceneBuilder::fromMatrix(j.value("matrix", json::array_t{}));
+  const auto convertedMatrix = inversedNewMatrix * totalMatrix * originalMatrix;
+
+  obj->setTransform(Transform(newMatrix));
+  const auto b = SceneBuilder::fromBound(j.value("bounds", json::object_t{}), convertedMatrix);
+  obj->setFrameBound(b);
+
+  // Pattern point in style are implicitly given by bound, we must supply the points in original
+  // coordinates for correct converting
+  obj->setStyle(SceneBuilder::fromStyle(j.value("style", json::object_t{}), b, convertedMatrix));
+  obj->style().cornerSmooth = get_opt<float>(j, "cornerSmoothing").value_or(0.f);
+  obj->setContextSettings(j.value("contextSettings", ContextSetting()));
+  obj->setMaskBy(j.value("outlineMaskBy", std::vector<std::string>{}));
+  obj->setAlphaMaskBy(j.value("alphaMaskBy", std::vector<AlphaMask>{}));
+  const auto maskType = j.value("maskType", EMaskType::MT_None);
+  const auto defaultShowType =
+    maskType == EMaskType::MT_Outline
+      ? MST_Content
+      : (maskType == EMaskType::MT_Alpha && false ? MST_Bound : MST_Invisible);
+  const auto maskShowType = j.value("maskShowType", defaultShowType);
+  obj->setMaskType(maskType);
+  obj->setMaskShowType(maskShowType);
+  obj->setOverflow(j.value("overflow", EOverflow::OF_Visible));
+  obj->setVisible(j.value("visible", true));
+  override(obj.get(), convertedMatrix);
+  return obj;
+}
+
 } // namespace
 
 namespace VGG::layer
@@ -310,17 +354,14 @@ PaintNodePtr SceneBuilder::fromPath(const json& j, const glm::mat3& totalMatrix)
     },
     [&, this](PaintNode* p, const glm::mat3& matrix)
     {
-      // const auto& shape = get_or_default(j, "shape");
       const auto shape = j.value("shape", json{});
       p->setChildWindingType(shape.value("windingRule", EWindingType::WR_EvenOdd));
       p->setContourOption(ContourOption(ECoutourType::MCT_ByObjectOps, false));
       p->setPaintOption(PaintOption(EPaintStrategy::PS_SelfOnly));
       const auto shapes = shape.value("subshapes", std::vector<json>{});
-      // const auto& shapes = get_or_default(shape, "subshapes");
       for (const auto& subshape : shapes)
       {
         const auto blop = subshape.value("booleanOperation", EBoolOp::BO_None);
-        // const auto& geo = get_or_default(subshape, "subGeometry");
         const auto geo = subshape.value("subGeometry", nlohmann::json{});
         const auto klass = geo.value("class", "");
         if (klass == "contour")
@@ -439,10 +480,17 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
         parStyle.emplace_back(defaultLineType, alignments[i]);
         i++;
       }
+      if (m_fontNameVisitor)
+      {
+        for (const auto& style : textStyle)
+        {
+          m_fontNameVisitor(style.font.fontName, style.font.subFamilyName);
+        }
+      }
       p->setParagraph(j.value("content", ""), std::move(textStyle), std::move(parStyle));
+
       if (b.width() == 0 || b.height() == 0)
       {
-        // for Ai speicific
         p->setFrameMode(TL_WidthAuto);
       }
       return p;
@@ -514,7 +562,6 @@ PaintNodePtr SceneBuilder::fromSymbolMaster(const json& j, const glm::mat3& tota
 #else
       auto p = makePaintNodePtr(m_alloc, std::move(name), VGG_MASTER, std::move(guid));
 #endif
-      // appendSymbolMaster(p);
       return p;
     },
     [&, this](PaintNode* p, const glm::mat3& matrix)
@@ -527,6 +574,23 @@ PaintNodePtr SceneBuilder::fromSymbolMaster(const json& j, const glm::mat3& tota
         p->addChild(fromObject(e, matrix));
       }
     });
+}
+
+PaintNodePtr SceneBuilder::fromSymbolInstance(const json& j, const glm::mat3& totalMatrix)
+{
+  return nullptr;
+}
+
+std::vector<PaintNodePtr> SceneBuilder::fromTopLevelFrames(
+  const json&      j,
+  const glm::mat3& totalMatrix)
+{
+  std::vector<PaintNodePtr> frames;
+  for (const auto& e : j)
+  {
+    frames.push_back(fromFrame(e, totalMatrix));
+  }
+  return frames;
 }
 
 PaintNodePtr SceneBuilder::makeContour(
@@ -605,6 +669,21 @@ void SceneBuilder::buildImpl(const json& j, bool resetOrigin)
       p->setOverflow(EOverflow::OF_Visible);
     }
   }
+}
+
+SceneBuilderResult SceneBuilder::build()
+{
+  SceneBuilderResult result;
+  if (!m_doc)
+    return { SceneBuilderResult::EResultType::BUILD_FAILD, std::nullopt };
+  const auto& doc = *m_doc;
+  if (auto it = doc.find("version");
+      it == doc.end() || (it != doc.end() && m_version && *it != *m_version))
+    result.type = SceneBuilderResult::EResultType::VERSION_MISMATCH;
+  buildImpl(doc, m_resetOrigin);
+  result.root = std::move(m_frames);
+  m_invalid = true;
+  return result;
 }
 
 } // namespace VGG::layer

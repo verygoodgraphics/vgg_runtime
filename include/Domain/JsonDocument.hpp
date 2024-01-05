@@ -33,7 +33,7 @@ public:
   virtual ~JsonDocument() = default;
 
   virtual const json& content() const;
-  virtual void setContent(const json& document);
+  virtual void        setContent(const json& document);
 
   virtual void addAt(const std::string& path, const std::string& value);
   virtual void replaceAt(const std::string& path, const std::string& value);
@@ -47,7 +47,19 @@ public:
   virtual void redo();
   virtual void save();
 
+public:
   static void erase(json& target, const json::json_pointer& path);
+
+public:
+  std::string getElement(const std::string& id);
+  void        updateElement(const std::string& id, const std::string& contentJsonString);
+
+private:
+  void updateElementInTree(
+    const nlohmann::json&     tree,
+    const json::json_pointer& treePath,
+    const std::string&        id,
+    const std::string&        contentJsonString);
 
 protected:
   JsonDocumentPtr m_jsonDoc;

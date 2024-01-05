@@ -15,6 +15,8 @@
  */
 #include "JsonDocument.hpp"
 
+#include "Helper.hpp"
+
 const json& JsonDocument::content() const
 {
   return m_jsonDoc->content();
@@ -74,5 +76,47 @@ void JsonDocument::erase(json& target, const json::json_pointer& path)
   {
     auto index = std::stoul(path.back());
     j.erase(index);
+  }
+}
+
+std::string JsonDocument::getElement(const std::string& id)
+{
+  if (auto* element = VGG::Layout::getElementInTree(content(), id))
+  {
+    return (*element).dump();
+  }
+  else
+  {
+    return std::string{};
+  }
+}
+
+void JsonDocument::updateElement(const std::string& id, const std::string& contentJsonString)
+{
+  updateElementInTree(content(), nlohmann::json::json_pointer{}, id, contentJsonString);
+}
+
+void JsonDocument::updateElementInTree(
+  const nlohmann::json&     node,
+  const json::json_pointer& nodePath,
+  const std::string&        id,
+  const std::string&        contentJsonString)
+{
+  if (!node.is_object() && !node.is_array())
+  {
+    return;
+  }
+
+  if (VGG::Layout::isNodeWithId(node, id))
+  {
+    auto element = content()[nodePath];
+    auto patch = nlohmann::json::parse(contentJsonString);
+    element.merge_patch(patch);
+    replaceAt(nodePath, element);
+  }
+
+  for (auto& el : node.items())
+  {
+    updateElementInTree(el.value(), nodePath / el.key(), id, contentJsonString);
   }
 }

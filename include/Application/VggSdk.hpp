@@ -64,6 +64,9 @@ public:
   void designDocumentReplaceAt(const std::string& jsonPointer, const std::string& value) override;
   void designDocumentDeleteAt(const std::string& jsonPointer) override;
 
+  std::string getElement(const std::string& id) override;
+  void        updateElement(const std::string& id, const std::string& contentJsonString) override;
+
   // event listener
   // event types: https://developer.mozilla.org/en-US/docs/Web/API/Element#events
   void addEventListener(

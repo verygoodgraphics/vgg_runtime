@@ -153,5 +153,45 @@ bool isVectorNetworkGroupNode(const nlohmann::json& json)
   return json.value(K_IS_VECTOR_NETWORK, false);
 }
 
+bool isNodeWithId(const nlohmann::json& node, const std::string& id)
+{
+  if (isLayoutNode(node))
+  {
+    constexpr auto key = K_NAME; // vggId key is name
+    if (node.contains(key))
+    {
+      if (node[key] == id)
+      {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+const nlohmann::json* getElementInTree(const nlohmann::json& node, const std::string& id)
+{
+  if (!node.is_object() && !node.is_array())
+  {
+    return nullptr;
+  }
+
+  if (isNodeWithId(node, id))
+  {
+    return &node;
+  }
+
+  for (auto& el : node.items())
+  {
+    if (auto* element = getElementInTree(el.value(), id))
+    {
+      return element;
+    }
+  }
+
+  return nullptr;
+}
+
 } // namespace Layout
 } // namespace VGG

@@ -17,6 +17,8 @@
 
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VType.hpp"
+#include "Layer/FontManager.hpp"
+#include "Layer/SkiaFontManagerProxy.hpp"
 #include "Layer/VSkFontMgr.hpp"
 #include "VSkia.hpp"
 
@@ -114,24 +116,9 @@ ParagraphStyle createParagraphStyle(const layer::ParagraphAttr& attr)
   return style;
 }
 
-std::vector<std::string> split(const std::string& s, char seperator)
-{
-  std::vector<std::string> output;
-  std::string::size_type   prevPos = 0, pos = 0;
-  while ((pos = s.find(seperator, pos)) != std::string::npos)
-  {
-    std::string substring(s.substr(prevPos, pos - prevPos));
-    output.push_back(substring);
-    prevPos = ++pos;
-  }
-  output.push_back(s.substr(prevPos, pos - prevPos)); // Last word
-  return output;
-}
-
 template<typename F>
 TextStyle createTextStyle(const TextStyleAttr& attr, F&& fun)
 {
-  auto      fontMgr = FontManager::instance().defaultFontManager();
   TextStyle style;
   if (!attr.fills.empty())
   {
@@ -150,62 +137,12 @@ TextStyle createTextStyle(const TextStyleAttr& attr, F&& fun)
     style.setDecorationColor(color);
   }
 
-  std::string fontName;
+  std::string fontName = FontManager::GetFontMananger().matchFontName(attr.font.fontName);
 
-  auto resolveFromFallback = [&fontName](const std::vector<std::string>& candidates)
-  {
-    for (const auto& candidate : candidates)
-    {
-      if (const auto components = split(candidate, '-'); !components.empty())
-      {
-        fontName = components[0];
-        break;
-      }
-    }
-  };
-
-  if (const auto components = split(attr.font.fontName, '-'); !components.empty())
-  {
-    fontName = components[0];
-    auto matched = fontMgr->fuzzyMatchFontFamilyName(fontName);
-    if (matched)
-    {
-      INFO(
-        "Font [%s] matches real name [%s][%f]",
-        fontName.c_str(),
-        matched->first.c_str(),
-        matched->second);
-      fontName = std::string(matched->first.c_str());
-
-      // When font name is provided, we match the real name first.
-      // If the score is lower than a threshold, we choose the
-      // fallback font rather pick it fuzzily.
-      constexpr float THRESHOLD = 70.f;
-      if (const auto& fallbackFonts = fontMgr->fallbackFonts();
-          !fallbackFonts.empty() && matched->second < THRESHOLD)
-      {
-        resolveFromFallback(fallbackFonts);
-      }
-    }
-    else
-    {
-      DEBUG("No font in font manager");
-    }
-  }
-  else if (const auto& fallbackFonts = fontMgr->fallbackFonts(); !fallbackFonts.empty())
-  {
-    resolveFromFallback(fallbackFonts);
-  }
-  if (fontName.empty())
-  {
-    // the worst case
-    fontName = "FiraSans";
-  }
-
-  DEBUG("Given [%s], [%s] is choosed finally", attr.font.fontName.c_str(), fontName.c_str());
   std::vector<SkString> fontFamilies;
   fontFamilies.push_back(SkString(fontName));
-  if (const auto& fallbackFonts = fontMgr->fallbackFonts(); !fallbackFonts.empty())
+  if (const auto& fallbackFonts = FontManager::GetFontMananger().fallbackFonts();
+      !fallbackFonts.empty())
   {
     for (const auto& f : fallbackFonts)
     {
@@ -218,6 +155,7 @@ TextStyle createTextStyle(const TextStyleAttr& attr, F&& fun)
 
   style.setFontFamilies(fontFamilies);
   auto [fontStyle, newAxis] = toSkFontStyle(attr.font);
+  auto fontMgr = SkiaFontManagerProxy(FontManager::GetFontMananger()).skFontMgr();
   ASSERT(fontMgr);
   auto ft = fontMgr->matchFamilyStyle(fontName.c_str(), fontStyle);
   if (ft && ft->fontStyle() == fontStyle)

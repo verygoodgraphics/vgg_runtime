@@ -40,7 +40,7 @@ std::vector<std::string_view> split(std::string_view s, char seperator)
   std::string::size_type        prevPos = 0, pos = 0;
   while ((pos = s.find(seperator, pos)) != std::string::npos)
   {
-    std::string substring(s.substr(prevPos, pos - prevPos));
+    std::string_view substring(s.substr(prevPos, pos - prevPos));
     output.push_back(substring);
     prevPos = ++pos;
   }

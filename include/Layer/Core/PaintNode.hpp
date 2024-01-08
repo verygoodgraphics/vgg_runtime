@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #pragma once
-#include "Layer/Renderer.hpp"
 #include "Layer/Memory/VNew.hpp"
 #include "Layer/Core/VBound.hpp"
 #include "Layer/Core/TreeNode.hpp"
@@ -23,7 +22,6 @@
 #include "Layer/Core/Mask.hpp"
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Config.hpp"
-#include "Layer/Scene.hpp"
 
 #include <glm/matrix.hpp>
 

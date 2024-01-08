@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "Layer/Core/PaintNode.hpp"
+#include "Layer/Core/Frame.hpp"
 #include "Layer/Memory/VAllocator.hpp"
 
 #include <glm/glm.hpp>
@@ -36,7 +37,7 @@ namespace VGG::layer
 
 using namespace nlohmann;
 
-using RootArray = std::vector<PaintNodePtr>;
+using RootArray = std::vector<FramePtr>;
 
 struct SceneBuilderResult
 {
@@ -64,8 +65,13 @@ public:
   static std::vector<FramePtr> build(const json& j)
   {
     SceneBuilder builder;
-    builder.buildImpl(j, resetOrigin);
-    return builder.m_frames;
+    builder.buildImpl(j, false);
+    std::vector<FramePtr> frames;
+    for (auto& frame : builder.m_frames)
+    {
+      frames.emplace_back(makeFramePtr(std::move(frame)));
+    }
+    return frames;
   }
 
   static SceneBuilder builder()

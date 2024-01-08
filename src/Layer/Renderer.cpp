@@ -69,7 +69,7 @@ void Renderer::updateMaskObject(PaintNode* p, std::unordered_map<std::string, Pa
 void Renderer::drawDebugBound(layer::PaintNode* p, int zorder)
 {
   // const auto& b = p->bound();
-  SkPaint     strokePen;
+  SkPaint strokePen;
   strokePen.setStyle(SkPaint::kStroke_Style);
   SkColor color = nodeType2Color(VGG_PATH);
   strokePen.setColor(color);
@@ -83,13 +83,13 @@ void Renderer::updateMaskObject(layer::PaintNode* p)
   updateMaskObject(p, m_maskObjects);
 }
 
-void Renderer::draw(SkCanvas* canvas, layer::PaintNode* root)
+void Renderer::draw(layer::PaintNode* root)
 {
-  m_canvas = canvas;
-  canvas->save();
-
+  ASSERT(m_canvas);
+  ASSERT(root);
+  m_canvas->save();
   root->renderPass(this);
-  canvas->restore();
+  m_canvas->restore();
 }
 
 } // namespace VGG::layer

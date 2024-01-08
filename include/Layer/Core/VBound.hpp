@@ -15,7 +15,9 @@
  */
 #pragma once
 
+#include <algorithm>
 #include <glm/glm.hpp>
+#include <initializer_list>
 #include <iostream>
 #include <limits>
 #include <ostream>
@@ -126,20 +128,23 @@ public:
     return std::sqrt(squaredDistance());
   }
 
-  Bound transform(const layer::Transform& transform) const
+  Bound bound(const layer::Transform& transform) const
   {
-    auto  topLeft3 = transform * glm::vec3{ m_topLeft, 1.0 };
-    auto  bottomRight3 = transform * glm::vec3{ m_bottomRight, 1.0 };
-    Bound newBound;
-    newBound.m_topLeft = topLeft3;
-    newBound.m_bottomRight = bottomRight3;
-    return newBound;
+    auto p1 = transform * glm::vec3{ m_topLeft, 1.0 };
+    auto p2 = transform * glm::vec3{ glm::vec2{ m_bottomRight.x, m_topLeft.y }, 1.0 };
+    auto p3 = transform * glm::vec3{ m_bottomRight, 1.0 };
+    auto p4 = transform * glm::vec3{ glm::vec2{ m_topLeft.x, m_bottomRight.y }, 1.0 };
+    auto a = std::initializer_list<float>{ p1.x, p2.x, p3.x, p4.x };
+    auto b = std::initializer_list<float>{ p1.y, p2.y, p3.y, p4.y };
+    const auto [minX, maxX] = std::minmax_element(a.begin(), a.end());
+    const auto [minY, maxY] = std::minmax_element(b.begin(), b.end());
+    return Bound{ *minX, *minY, *maxX - *minX, *maxY - *minY };
   }
 
-  Bound operator*(const layer::Transform& transform) const
-  {
-    return this->transform(transform);
-  }
+  // Bound operator*(const layer::Transform& transform) const
+  // {
+  //   return this->transform(transform);
+  // }
 
   bool operator==(const Bound& other) const
   {

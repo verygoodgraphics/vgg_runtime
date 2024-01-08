@@ -77,9 +77,12 @@ protected:
   void unobserve(VNodePtr sender);
 
 public:
-  VNode(VRefCnt* cnt)
+  VNode(VRefCnt* cnt, EState initState = (EState)0)
 #ifndef USE_SHARED_PTR
     : ObjectImpl<VObject>(cnt)
+    , m_state(initState)
+#else
+    : m_state(initState)
 #endif
   {
   }

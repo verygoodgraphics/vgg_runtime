@@ -30,6 +30,7 @@
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/TextNode.hpp"
 #include "Layer/Core/ImageNode.hpp"
+#include <iterator>
 
 namespace
 {
@@ -681,7 +682,14 @@ SceneBuilderResult SceneBuilder::build()
       it == doc.end() || (it != doc.end() && m_version && *it != *m_version))
     result.type = SceneBuilderResult::EResultType::VERSION_MISMATCH;
   buildImpl(doc, m_resetOrigin);
-  result.root = std::move(m_frames);
+  if (!m_frames.empty())
+  {
+    result.root = RootArray();
+    for (auto& p : m_frames)
+    {
+      result.root->emplace_back(makeFramePtr(std::move(p)));
+    }
+  }
   m_invalid = true;
   return result;
 }

@@ -48,7 +48,7 @@ public:
     : q_ptr(api)
   {
   }
-  using RootArray = std::vector<PaintNodePtr>;
+  using RootArray = std::vector<FramePtr>;
 
   RootArray               roots;
   int                     page{ 0 };
@@ -81,16 +81,17 @@ public:
   {
     if (roots.empty())
       return;
-    layer::PaintNode* node = roots[page].get();
-    if (!roots.empty() && maskDirty && node)
+    Frame* frame = roots[page];
+    ASSERT(frame);
+    if (maskDirty && frame)
     {
-      renderer.updateMaskObject(node);
+      renderer.updateMaskObject(frame->root());
       maskDirty = false;
     }
-    if (node)
+    if (frame)
     {
-      node->revalidate();
-      renderer.draw(canvas, node);
+      renderer.setCanvas(canvas);
+      frame->render(&renderer);
     }
   }
 };
@@ -101,26 +102,7 @@ Scene::Scene()
 }
 Scene::~Scene() = default;
 
-void Scene::loadFileContent(const nlohmann::json& json)
-{
-  VGG_IMPL(Scene)
-  if (json.empty())
-    return;
-  _->page = 0;
-  _->symbolIndex = 0;
-  repaint();
-  auto result = layer::SceneBuilder::builder().setDoc(json).setResetOriginEnable(true).build();
-  if (result.type.has_value())
-  {
-    DEBUG("SceneBuilder Result: %d", (int)result.type.value());
-  }
-  if (result.root.has_value())
-  {
-    _->roots = std::move(*result.root);
-  }
-}
-
-void Scene::setSceneRoots(std::vector<PaintNodePtr> roots)
+void Scene::setSceneRoots(std::vector<FramePtr> roots)
 {
   VGG_IMPL(Scene)
   if (roots.empty())
@@ -157,12 +139,12 @@ int Scene::frameCount() const
   return d_ptr->roots.size();
 }
 
-PaintNode* Scene::frame(int index)
+Frame* Scene::frame(int index)
 {
   VGG_IMPL(Scene);
   if (index >= 0 && (std::size_t)index < _->roots.size())
   {
-    auto f = _->roots[index].get();
+    auto f = _->roots[index];
     f->revalidate();
     return f;
   }

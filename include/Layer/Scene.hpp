@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "Layer/Renderable.hpp"
+#include "Layer/Core/Frame.hpp"
 #include "Layer/Memory/AllocatorImpl.hpp"
 #include "Layer/Zoomer.hpp"
 #include "Layer/Core/TreeNode.hpp"
@@ -64,9 +65,7 @@ protected:
 public:
   Scene();
   virtual ~Scene();
-  [[deprecated("Use SceneBuilder for data preparation")]] void loadFileContent(
-    const nlohmann::json& j);
-  void setSceneRoots(std::vector<PaintNodePtr> roots);
+  void setSceneRoots(std::vector<FramePtr> roots);
   void setName(std::string name)
   {
     m_name = std::move(name);
@@ -75,19 +74,19 @@ public:
   {
     return m_name;
   }
-  void       nextArtboard();
-  void       preArtboard();
-  int        frameCount() const;
-  PaintNode* frame(int index);
-  void       setPage(int num);
-  void       nextSymbol();
-  void       prevSymbol();
-  int        currentPage() const;
+  void    nextArtboard();
+  void    preArtboard();
+  int     frameCount() const;
+  Frame*  frame(int index);
+  void    setPage(int num);
+  void    nextSymbol();
+  void    prevSymbol();
+  int     currentPage() const;
   // To remove zoomer, just set nullptr
-  void       setZoomer(std::shared_ptr<Zoomer> zoomer);
-  Zoomer*    zoomer();
-  void       enableDrawDebugBound(bool enabled);
-  bool       isEnableDrawDebugBound();
+  void    setZoomer(std::shared_ptr<Zoomer> zoomer);
+  Zoomer* zoomer();
+  void    enableDrawDebugBound(bool enabled);
+  bool    isEnableDrawDebugBound();
 
   void                 repaint();
   static ResourceRepo& getResRepo()

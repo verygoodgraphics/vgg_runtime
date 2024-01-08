@@ -83,7 +83,12 @@ public:
     return m_maskObjects;
   }
 
-  void draw(SkCanvas* canvas, layer::PaintNode* root);
+  void draw(layer::PaintNode* root);
+
+  void setCanvas(SkCanvas* canvas)
+  {
+    m_canvas = canvas;
+  }
 
   void enableDrawDebugBound(bool enabled)
   {

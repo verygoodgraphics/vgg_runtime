@@ -291,6 +291,12 @@ sk_sp<SkPicture> VLayer::makeSkPicture(int width, int height)
   return rec.finishRecordingAsPicture();
 }
 
+sk_sp<SkSurface> VLayer::makeGPUSurface(int width, int height)
+{
+  VGG_IMPL(VLayer);
+  return _->skiaContext->createSurface(width, height);
+}
+
 std::optional<std::vector<char>> VLayer::makeSKP()
 {
   std::stringstream data;

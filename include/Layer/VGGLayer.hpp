@@ -20,6 +20,7 @@
 #include <vector>
 class SkCanvas;
 class SkPicture;
+class SkSurface;
 
 template<typename T>
 class sk_sp;
@@ -112,6 +113,7 @@ public:
   void                             makeSKP(std::ostream& os);
 
   sk_sp<SkPicture> makeSkPicture(int width, int height);
+  sk_sp<SkSurface> makeGPUSurface(int width, int height);
 };
 
 } // namespace VGG::layer

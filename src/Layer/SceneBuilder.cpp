@@ -655,21 +655,11 @@ PaintNodePtr SceneBuilder::fromGroup(const json& j, const glm::mat3& totalMatrix
     });
 }
 
-void SceneBuilder::buildImpl(const json& j, bool resetOrigin)
+void SceneBuilder::buildImpl(const json& j)
 {
   glm::mat3 mat = glm::identity<glm::mat3>();
   mat = glm::scale(mat, glm::vec2(1, -1));
   m_frames = fromTopLevelFrames(get_or_default(j, "frames"), mat);
-  if (resetOrigin)
-  {
-    for (const auto& p : m_frames)
-    {
-      // const auto m = p->transform();
-      const auto b = p->frameBound();
-      p->transform().setTranslate(-b.topLeft().x, -b.topLeft().y);
-      p->setOverflow(EOverflow::OF_Visible);
-    }
-  }
 }
 
 SceneBuilderResult SceneBuilder::build()
@@ -681,13 +671,16 @@ SceneBuilderResult SceneBuilder::build()
   if (auto it = doc.find("version");
       it == doc.end() || (it != doc.end() && m_version && *it != *m_version))
     result.type = SceneBuilderResult::EResultType::VERSION_MISMATCH;
-  buildImpl(doc, m_resetOrigin);
+  buildImpl(doc);
   if (!m_frames.empty())
   {
     result.root = RootArray();
     for (auto& p : m_frames)
     {
-      result.root->emplace_back(makeFramePtr(std::move(p)));
+      auto frame = makeFramePtr(std::move(p));
+      if (m_resetOrigin)
+        frame->resetToOrigin(true);
+      result.root->emplace_back(frame);
     }
   }
   m_invalid = true;

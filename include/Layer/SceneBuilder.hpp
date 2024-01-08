@@ -65,7 +65,7 @@ public:
   static std::vector<FramePtr> build(const json& j)
   {
     SceneBuilder builder;
-    builder.buildImpl(j, false);
+    builder.buildImpl(j);
     std::vector<FramePtr> frames;
     for (auto& frame : builder.m_frames)
     {
@@ -172,7 +172,7 @@ private:
 
   SceneBuilder() = default;
 
-  void buildImpl(const json& j, bool resetOrigin);
+  void buildImpl(const json& j);
 
   static json defaultTextAttr();
 };

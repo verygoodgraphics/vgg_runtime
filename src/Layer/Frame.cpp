@@ -18,6 +18,24 @@
 #include "Layer/Core/VNode.hpp"
 #include "Layer/Renderer.hpp"
 
+#include "include/core/SkSurface.h"
+
+#include <unordered_map>
+
+namespace
+{
+
+struct BoundHashKey
+{
+  size_t operator()(const Bound& b) const
+  {
+    return std::hash<float>()(b.topLeft().x) ^ std::hash<float>()(b.topLeft().y) ^
+           std::hash<float>()(b.bottomRight().x) ^ std::hash<float>()(b.bottomRight().y);
+  }
+};
+
+} // namespace
+
 namespace VGG::layer
 {
 class Frame__pImpl
@@ -26,6 +44,8 @@ class Frame__pImpl
 public:
   PaintNodePtr root;
   bool         enableToOrigin{ false };
+
+  bool dirty{ false };
   Frame__pImpl(Frame* api)
     : q_ptr(api)
   {

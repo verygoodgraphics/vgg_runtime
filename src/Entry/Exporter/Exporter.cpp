@@ -354,6 +354,7 @@ public:
     opts.extend[0] = std::lroundf(actualSize[0]);
     opts.extend[1] = std::lroundf(actualSize[1]);
     opts.quality = quality;
+    f->resetToOrigin(true);
     auto res = state->render(scene, scale, opts, cost);
     if (!res.has_value())
     {

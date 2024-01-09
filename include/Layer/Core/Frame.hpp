@@ -69,7 +69,7 @@ public:
 
 protected:
   Bound      onRevalidate() override;
-  void       render(Renderer* renderer, const Bound* clipBound);
+  void       render(Renderer* renderer, const SkMatrix* mat, const Bound* clipBound);
   SkPicture* picture();
 };
 } // namespace VGG::layer

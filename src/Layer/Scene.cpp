@@ -32,6 +32,10 @@
 
 #include <filesystem>
 #include <fstream>
+#include <gpu/GpuTypes.h>
+#include <gpu/GrDirectContext.h>
+#include <gpu/GrRecordingContext.h>
+#include <gpu/ganesh/SkSurfaceGanesh.h>
 #include <memory>
 #include <string>
 
@@ -62,51 +66,6 @@ public:
 
   std::optional<Bound> viewport;
 
-  void applyZoom(SkCanvas* canvas)
-  {
-    ASSERT(canvas);
-    ASSERT(zoomer);
-    auto offset = zoomer->translate();
-    auto zoom = zoomer->scale();
-    canvas->translate(offset.x, offset.y);
-    canvas->scale(zoom, zoom);
-  }
-
-  void restoreZoom(SkCanvas* canvas)
-  {
-    ASSERT(canvas);
-    ASSERT(zoomer);
-    auto offset = zoomer->translate();
-    auto zoom = zoomer->scale();
-    canvas->scale(1. / zoom, 1. / zoom);
-    canvas->translate(-offset.x, -offset.y);
-  }
-
-  void render(SkCanvas* canvas)
-  {
-    if (roots.empty())
-      return;
-    auto* frame = currentFrame(true);
-    ASSERT(frame);
-    if (maskDirty && frame)
-    {
-      renderer.updateMaskObject(frame->root());
-      maskDirty = false;
-    }
-    if (frame)
-    {
-      auto viewportBound = viewport.value_or(frame->bound());
-      DEBUG(
-        "Render For [%f %f %f %f]",
-        viewportBound.topLeft().x,
-        viewportBound.topLeft().y,
-        viewportBound.width(),
-        viewportBound.height());
-      frame->render(&renderer, &viewportBound);
-      q_ptr->onRenderFrame(canvas, frame->picture(), viewportBound);
-    }
-  }
-
   Bound onRevalidate() override
   {
     // only revalidate cuurent page
@@ -116,6 +75,25 @@ public:
       return f->bound();
     else
       return bound();
+  }
+
+  void setFrames(RootArray roots)
+  {
+    if (!this->roots.empty())
+    {
+      for (const auto& r : this->roots)
+      {
+        unobserve(r);
+      }
+    }
+    this->roots = std::move(roots);
+    for (const auto& r : this->roots)
+    {
+      observe(r);
+    }
+    page = 0;
+    invalidate();
+    invalidateMask();
   }
 
   Frame* currentFrame(bool revalidate = false)
@@ -142,23 +120,17 @@ public:
     return f;
   }
 
-  void setFrames(RootArray roots)
+  void invalidateAllFrames()
   {
-    if (!this->roots.empty())
-    {
-      for (const auto& r : this->roots)
-      {
-        unobserve(r);
-      }
-    }
-    this->roots = std::move(roots);
-    for (const auto& r : this->roots)
-    {
-      observe(r);
-    }
-    page = 0;
-    invalidate();
-    invalidateMask();
+    for (auto& f : this->roots)
+      f->invalidate();
+  }
+
+  void invalidateCurrentFrame()
+  {
+    auto f = currentFrame(false);
+    if (f)
+      f->invalidate();
   }
 
   void ensureImage(SkCanvas* canvas, SkPicture* frame, const Bound& bound)
@@ -195,7 +167,63 @@ public:
     invalidate();
     invalidateMask();
   }
+
+  void applyZoom(SkCanvas* canvas)
+  {
+    ASSERT(canvas);
+    ASSERT(zoomer);
+    auto offset = zoomer->translate();
+    auto zoom = zoomer->scale();
+    canvas->translate(offset.x, offset.y);
+    canvas->scale(zoom, zoom);
+  }
+
+  void restoreZoom(SkCanvas* canvas)
+  {
+    ASSERT(canvas);
+    ASSERT(zoomer);
+    auto offset = zoomer->translate();
+    auto zoom = zoomer->scale();
+    canvas->scale(1. / zoom, 1. / zoom);
+    canvas->translate(-offset.x, -offset.y);
+  }
+
+  void render(SkCanvas* canvas)
+  {
+    if (roots.empty())
+      return;
+    auto* frame = currentFrame(true);
+    ASSERT(frame);
+    if (maskDirty && frame)
+    {
+      renderer.updateMaskObject(frame->root());
+      maskDirty = false;
+    }
+    if (frame)
+    {
+      auto viewportBound = viewport.value_or(frame->bound());
+      auto mat = canvas->getTotalMatrix();
+      frame->render(&renderer, &mat, &viewportBound);
+      canvas->resetMatrix();
+      if (!rasterImage)
+      {
+        rasterImage =
+          q_ptr->onRasterFrame(canvas->recordingContext(), frame->picture(), viewportBound);
+      }
+      if (rasterImage)
+      {
+        canvas->drawImage(rasterImage, 0, 0);
+      }
+      canvas->setMatrix(mat);
+    }
+  }
 };
+
+void Scene::invalidateRasterImage()
+{
+  d_ptr->rasterImage = nullptr;
+  invalidate();
+}
 
 Scene::Scene()
   : d_ptr(V_NEW<Scene__pImpl>(this))
@@ -233,10 +261,20 @@ void Scene::onRender(SkCanvas* canvas)
   }
 }
 
-void Scene::onRenderFrame(SkCanvas* canvas, SkPicture* frame, const Bound& bound)
+sk_sp<SkImage> Scene::onRasterFrame(
+  GrRecordingContext* canvas,
+  SkPicture*          frame,
+  const Bound&        bound)
 {
-  d_ptr->ensureImage(canvas, frame, bound);
-  canvas->drawImage(d_ptr->rasterImage, 0, 0);
+  SkImageInfo info = SkImageInfo::MakeN32Premul(bound.width(), bound.height());
+  auto        surface = SkSurfaces::RenderTarget(canvas, skgpu::Budgeted::kYes, info);
+  if (surface)
+  {
+    surface->getCanvas()->drawPicture(frame);
+    return surface->makeImageSnapshot();
+  }
+  DEBUG("Cannot create surface!");
+  return nullptr;
 }
 
 int Scene::frameCount() const
@@ -289,6 +327,7 @@ void Scene::onZoomScaleChanged(float scale)
 
 void Scene::onZoomTranslationChanged(float x, float y)
 {
+  invalidate();
 }
 
 void Scene::invalidateMask()
@@ -300,7 +339,9 @@ void Scene::invalidateMask()
 void Scene::invalidate()
 {
   VGG_IMPL(Scene);
-  _->invalidate();
+  auto f = _->currentFrame(false);
+  if (f)
+    f->invalidate();
 }
 
 void Scene::nextArtboard()
@@ -324,7 +365,7 @@ void Scene::setResRepo(std::map<std::string, std::vector<char>> repo)
 void Scene::enableDrawDebugBound(bool enabled)
 {
   VGG_IMPL(Scene)
-  invalidate();
+  _->invalidateCurrentFrame();
   _->renderer.enableDrawDebugBound(enabled);
 }
 

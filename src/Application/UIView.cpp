@@ -345,13 +345,18 @@ bool UIView::handleMouseEvent(
 
 void UIView::show(const ViewModel& viewModel)
 {
+  show(viewModel, layer::SceneBuilder::build(viewModel.designDoc()->content()));
+}
+
+void UIView::show(const ViewModel& viewModel, std::vector<PaintNodePtr> frames)
+{
   if (m_skipUntilNextLoop)
   {
     return;
   }
   m_skipUntilNextLoop = true;
 
-  setSceneRoots(layer::SceneBuilder::build(viewModel.designDoc()->content()));
+  setSceneRoots(frames);
 
   m_document = viewModel.layoutTree();
   // todo, merge edited doc resouces ?

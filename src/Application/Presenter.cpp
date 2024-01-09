@@ -17,10 +17,12 @@
 
 #include "Mouse.hpp"
 
+#include "Layer/SceneBuilder.hpp"
 #include "Utility/Log.hpp"
 #include "Utility/VggFloat.hpp"
 
 #include <algorithm>
+#include <unordered_map>
 
 #undef DEBUG
 #define DEBUG(msg, ...)
@@ -200,4 +202,43 @@ bool Presenter::handleTranslate(double pageWidth, double pageHeight, float x, fl
     m_view->setOffset(newOffset);
     return true;
   }
+}
+
+void Presenter::setModel(std::shared_ptr<ViewModel> viewModel)
+{
+  m_viewModel = viewModel;
+
+  if (!m_view)
+  {
+    WARN("#Presenter::setModel, null m_view, return");
+    return;
+  }
+
+  std::unordered_map<std::string, FontInfo> requiredFonts;
+  auto                                      result =
+    layer::SceneBuilder::builder()
+      .setResetOriginEnable(true)
+      .setDoc(viewModel->designDoc()->content())
+      .setFontNameVisitor(
+        [&requiredFonts](const std::string& familyName, const std::string& subfamilyName) {
+          requiredFonts[familyName + subfamilyName] = FontInfo{ familyName, subfamilyName };
+        })
+      .build();
+
+  if (result.root)
+  {
+    m_view->show(*m_viewModel, std::move(*result.root));
+  }
+  else
+  {
+    WARN("#Presenter::setModel, built scene is empty , return");
+    return;
+  }
+
+  for (auto kv : requiredFonts)
+  {
+    m_requiredFonts.push_back(kv.second);
+  }
+
+  listenViewEvent();
 }

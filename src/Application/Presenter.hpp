@@ -31,11 +31,20 @@ namespace VGG
 {
 class Mouse;
 
+struct FontInfo
+{
+  std::string familyName;
+  std::string subfamilyName;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FontInfo, familyName, subfamilyName);
+
 class Presenter : public std::enable_shared_from_this<Presenter>
 {
   std::shared_ptr<UIView>    m_view;
   std::shared_ptr<ViewModel> m_viewModel;
   bool                       m_listenAllEvents{ false };
+
+  std::vector<FontInfo> m_requiredFonts;
 
   std::shared_ptr<UIView>    m_editView;
   std::shared_ptr<ViewModel> m_editViewModel;
@@ -77,19 +86,15 @@ public:
     return m_view->setCurrentPage(index);
   }
 
-  virtual void setModel(std::shared_ptr<ViewModel> viewModel)
+  virtual void setModel(std::shared_ptr<ViewModel> viewModel);
+  auto         requiredFonts()
   {
-    m_viewModel = viewModel;
+    return m_requiredFonts;
+  }
 
-    if (!m_view)
-    {
-      WARN("#Presenter::setModel, null m_view, return");
-      return;
-    }
-
-    m_view->show(*m_viewModel);
-
-    listenViewEvent();
+  void setNeedsReload()
+  {
+    m_view->setDirty(true);
   }
 
   void setEditMode(bool editMode)

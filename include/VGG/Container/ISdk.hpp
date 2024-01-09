@@ -42,6 +42,9 @@ public:
   virtual bool        setCurrentFrame(const std::string& name) = 0;
   virtual int         launchFrame() const = 0;
   virtual bool        setLaunchFrame(const std::string& name) = 0;
+
+  virtual std::string requiredFonts() const = 0;
+  // virtual bool        addFont() const = 0;
 };
 
 } // namespace VGG

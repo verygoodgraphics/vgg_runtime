@@ -53,19 +53,6 @@ using InstanceTable = std::unordered_map<
 class Scene__pImpl;
 class VGG_EXPORTS Scene : public layer::Renderable
 {
-  static ResourceRepo s_resRepo;
-
-  friend class ::Zoomer;
-
-private:
-  VGG_DECL_IMPL(Scene)
-  std::string m_name{ "Default Scene" };
-
-protected:
-  void         onRender(SkCanvas* canvas) override;
-
-  virtual void onRenderFrame(SkCanvas* canvas, SkPicture* frame);
-
 public:
   Scene();
   virtual ~Scene();
@@ -100,10 +87,22 @@ public:
 
   static void setResRepo(std::map<std::string, std::vector<char>> repo);
 
+protected:
+  void onRender(SkCanvas* canvas) override;
+
+protected:
+  virtual void onRenderFrame(SkCanvas* canvas, SkPicture* frame, const Bound& bound);
+  virtual void onZoomScaleChanged(float scale);
+  virtual void onZoomTranslationChanged(float x, float y);
+
 private:
   void invalidateMask();
   void invalidate();
-  void onZoomChanged(float dx, float dy, float scale);
+
+  static ResourceRepo s_resRepo;
+  friend class ::Zoomer;
+  VGG_DECL_IMPL_REF(Scene)
+  std::string m_name{ "Default Scene" };
 };
 
 }; // namespace VGG

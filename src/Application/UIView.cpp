@@ -420,3 +420,17 @@ void UIView::setOffset(Offset offset)
   m_zoomerListener->setOffset(Vec2{ offset.x, offset.y });
   setDirty(true);
 }
+
+bool UIView::setCurrentPage(int index)
+{
+  if (auto document = m_document.lock())
+  {
+    if (index >= 0 && index < document->children().size())
+    {
+      Scene::setPage(index);
+      setDirty(true);
+      return true;
+    }
+  }
+  return false;
+}

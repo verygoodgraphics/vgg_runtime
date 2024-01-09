@@ -113,6 +113,10 @@ public:
 
   bool handleTranslate(float x, float y);
 
+public:
+  int  currentFrame() const;
+  bool setCurrentFrame(const std::string& name);
+
 private:
   void          initModel(const char* designDocSchemaFilePath, const char* layoutDocSchemaFilePath);
   JsonDocument* createJsonDoc();

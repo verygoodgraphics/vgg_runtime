@@ -72,6 +72,10 @@ public:
   {
     return m_view->currentPageIndex();
   }
+  bool setCurrentPage(int index)
+  {
+    return m_view->setCurrentPage(index);
+  }
 
   virtual void setModel(std::shared_ptr<ViewModel> viewModel)
   {

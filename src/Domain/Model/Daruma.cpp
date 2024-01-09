@@ -340,3 +340,53 @@ std::string Daruma::docVersion() const
 {
   return m_runtimeDesignDoc->content().value(K_VERSION, K_EMPTY_STRING);
 }
+
+int Daruma::getFrameIndex(const std::string& name) const
+{
+  ASSERT(m_designDoc);
+
+  const auto& frames = m_designDoc->content()[K_FRAMES];
+  for (std::size_t i = 0; i < frames.size(); ++i)
+  {
+    if (frames[i][K_NAME] == name)
+    {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+std::string Daruma::getFramesInfo() const
+{
+  ASSERT(m_designDoc);
+
+  nlohmann::json info(nlohmann::json::value_t::array);
+  const auto&    frames = m_designDoc->content()[K_FRAMES];
+  for (const auto& frame : frames)
+  {
+    nlohmann::json frameInfo(nlohmann::json::value_t::object);
+    frameInfo[K_ID] = frame[K_ID];
+    frameInfo[K_NAME] = frame[K_NAME];
+    info.push_back(frameInfo);
+  }
+
+  return info.dump();
+}
+
+int Daruma::getLaunchFrameIndex() const
+{
+  return m_launchFrameIndex;
+}
+
+bool Daruma::setLaunchFrame(const std::string& name)
+{
+  auto index = getFrameIndex(name);
+  if (index != -1)
+  {
+    m_launchFrameIndex = index;
+    return true;
+  }
+
+  return false;
+}

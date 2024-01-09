@@ -17,6 +17,8 @@
 
 #include "Domain/IVggEnv.hpp"
 
+#include "Application/Controller.hpp"
+
 #include <memory>
 #include <sstream>
 #include <string>
@@ -31,6 +33,8 @@ class VggEnv : public IVggEnv
   std::string m_listenerKey{ "listener" };
 
   DarumaContainer m_darumaContainer;
+
+  std::weak_ptr<Controller> m_controller;
 
 public:
   virtual std::string getEnv() override
@@ -73,6 +77,15 @@ public:
   virtual DarumaContainer& darumaContainer() override
   {
     return m_darumaContainer;
+  }
+
+  std::shared_ptr<Controller> controller()
+  {
+    return m_controller.lock();
+  }
+  void setController(std::shared_ptr<Controller> controller)
+  {
+    m_controller = controller;
   }
 
 public:

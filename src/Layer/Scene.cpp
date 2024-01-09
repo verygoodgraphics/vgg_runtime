@@ -19,6 +19,7 @@
 #include "Layer/Scene.hpp"
 #include "Layer/SceneBuilder.hpp"
 #include "Layer/Zoomer.hpp"
+#include "Layer/Memory/VNew.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Utility/ConfigManager.hpp"
 #include "Utility/Log.hpp"
@@ -26,6 +27,7 @@
 #include <glm/gtx/matrix_transform_2d.hpp>
 #include <glm/matrix.hpp>
 #include <core/SkCanvas.h>
+#include <core/SkSurface.h>
 #include <core/SkImage.h>
 
 #include <filesystem>
@@ -39,13 +41,14 @@ namespace VGG
 
 ResourceRepo Scene::s_resRepo{};
 
-class Scene__pImpl
+class Scene__pImpl : public VNode
 {
   VGG_DECL_API(Scene);
 
 public:
-  Scene__pImpl(Scene* api)
-    : q_ptr(api)
+  Scene__pImpl(VRefCnt* cnt, Scene* api)
+    : VNode(cnt)
+    , q_ptr(api)
   {
   }
   using RootArray = std::vector<FramePtr>;
@@ -54,6 +57,7 @@ public:
   int                     page{ 0 };
   bool                    maskDirty{ true };
   Renderer                renderer;
+  sk_sp<SkImage>          rasterImage;
   std::shared_ptr<Zoomer> zoomer;
 
   void applyZoom(SkCanvas* canvas)
@@ -80,7 +84,7 @@ public:
   {
     if (roots.empty())
       return;
-    Frame* frame = roots[page];
+    auto* frame = currentFrame(true);
     ASSERT(frame);
     if (maskDirty && frame)
     {
@@ -90,13 +94,100 @@ public:
     if (frame)
     {
       frame->render(&renderer);
-      q_ptr->onRenderFrame(canvas, frame->picture());
+      q_ptr->onRenderFrame(canvas, frame->picture(), frame->bound());
     }
+  }
+
+  Bound onRevalidate() override
+  {
+    // only revalidate cuurent page
+    rasterImage.reset();
+    if (auto f = currentFrame(true); f)
+      return f->bound();
+    else
+      return bound();
+  }
+
+  Frame* currentFrame(bool revalidate = false)
+  {
+    Frame* f = nullptr;
+    if (page >= 0 && page < (int)roots.size())
+    {
+      f = roots[page].get();
+      if (f && revalidate)
+        f->revalidate();
+    }
+    return f;
+  }
+
+  Frame* frame(int index, bool revalidate = false)
+  {
+    Frame* f = nullptr;
+    if (index >= 0 && index < (int)roots.size())
+    {
+      f = roots[index].get();
+      if (f && revalidate)
+        f->revalidate();
+    }
+    return f;
+  }
+
+  void setFrames(RootArray roots)
+  {
+    if (!this->roots.empty())
+    {
+      for (const auto& r : this->roots)
+      {
+        unobserve(r);
+      }
+    }
+    this->roots = std::move(roots);
+    for (const auto& r : this->roots)
+    {
+      observe(r);
+    }
+    page = 0;
+    invalidate();
+    invalidateMask();
+  }
+
+  void ensureImage(SkCanvas* canvas, SkPicture* frame, const Bound& bound)
+  {
+    if (!rasterImage)
+    {
+      SkImageInfo info = SkImageInfo::MakeN32Premul(bound.width(), bound.height());
+      auto        surface = canvas->makeSurface(info);
+      if (surface)
+      {
+        surface->getCanvas()->drawPicture(frame);
+        rasterImage = surface->makeImageSnapshot();
+      }
+    }
+    ASSERT(rasterImage);
+  }
+
+  void nextFrame()
+  {
+    page = (page + 1 >= (int)roots.size()) ? page : page + 1;
+    invalidate();
+    invalidateMask();
+  }
+
+  void invalidateMask()
+  {
+    maskDirty = true;
+  }
+
+  void preFrame()
+  {
+    page = (page - 1 > 0) ? page - 1 : 0;
+    invalidate();
+    invalidateMask();
   }
 };
 
 Scene::Scene()
-  : d_ptr(new Scene__pImpl(this))
+  : d_ptr(V_NEW<Scene__pImpl>(this))
 {
 }
 Scene::~Scene() = default;
@@ -106,9 +197,7 @@ void Scene::setSceneRoots(std::vector<FramePtr> roots)
   VGG_IMPL(Scene)
   if (roots.empty())
     return;
-  _->page = 0;
-  invalidateMask();
-  _->roots = std::move(roots);
+  _->setFrames(std::move(roots));
 }
 
 int Scene::currentPage() const
@@ -119,6 +208,7 @@ int Scene::currentPage() const
 void Scene::onRender(SkCanvas* canvas)
 {
   VGG_IMPL(Scene)
+  _->revalidate();
   if (_->zoomer)
   {
     // handle zooming
@@ -132,9 +222,10 @@ void Scene::onRender(SkCanvas* canvas)
   }
 }
 
-void Scene::onRenderFrame(SkCanvas* canvas, SkPicture* frame)
+void Scene::onRenderFrame(SkCanvas* canvas, SkPicture* frame, const Bound& bound)
 {
-  canvas->drawPicture(frame);
+  d_ptr->ensureImage(canvas, frame, bound);
+  canvas->drawImage(d_ptr->rasterImage, 0, 0);
 }
 
 int Scene::frameCount() const
@@ -145,14 +236,9 @@ int Scene::frameCount() const
 Frame* Scene::frame(int index)
 {
   VGG_IMPL(Scene);
-  if (index >= 0 && (std::size_t)index < _->roots.size())
-  {
-    auto f = _->roots[index];
-    f->revalidate();
-    return f;
-  }
-  return nullptr;
+  return _->frame(index, true);
 }
+
 Zoomer* Scene::zoomer()
 {
   VGG_IMPL(Scene)
@@ -162,12 +248,16 @@ Zoomer* Scene::zoomer()
 void Scene::setZoomer(std::shared_ptr<Zoomer> zoomer)
 {
   VGG_IMPL(Scene);
+  if (_->zoomer == zoomer)
+    return;
+
   if (_->zoomer)
   {
     _->zoomer->setOwnerScene(nullptr);
   }
   _->zoomer = std::move(zoomer);
   _->zoomer->setOwnerScene(this);
+  invalidate();
 }
 
 void Scene::setPage(int num)
@@ -176,40 +266,42 @@ void Scene::setPage(int num)
   if (num >= 0 && (std::size_t)num < _->roots.size())
   {
     _->page = num;
+    invalidate();
     invalidateMask();
   }
 }
 
-void Scene::onZoomChanged(float dx, float dy, float scale)
+void Scene::onZoomScaleChanged(float scale)
+{
+  invalidate();
+}
+
+void Scene::onZoomTranslationChanged(float x, float y)
 {
 }
+
 void Scene::invalidateMask()
 {
   VGG_IMPL(Scene);
-  _->maskDirty = true;
+  _->invalidateMask();
 }
 
 void Scene::invalidate()
 {
   VGG_IMPL(Scene);
-  for (auto& root : _->roots)
-  {
-    root->invalidate();
-  }
+  _->invalidate();
 }
 
 void Scene::nextArtboard()
 {
   VGG_IMPL(Scene)
-  _->page = (_->page + 1 >= (int)_->roots.size()) ? _->page : _->page + 1;
-  invalidateMask();
+  _->nextFrame();
 }
 
 void Scene::preArtboard()
 {
   VGG_IMPL(Scene)
-  _->page = (_->page - 1 > 0) ? _->page - 1 : 0;
-  invalidateMask();
+  _->preFrame();
 }
 
 void Scene::setResRepo(std::map<std::string, std::vector<char>> repo)
@@ -224,6 +316,7 @@ void Scene::enableDrawDebugBound(bool enabled)
   invalidate();
   _->renderer.enableDrawDebugBound(enabled);
 }
+
 bool Scene::isEnableDrawDebugBound()
 {
   VGG_IMPL(Scene)

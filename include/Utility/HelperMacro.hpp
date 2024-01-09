@@ -39,6 +39,18 @@ static inline typename Wrapper::pointer GetImplPtrHelper(const Wrapper& p)
   friend class Class##__pImpl;                                                                     \
   std::unique_ptr<Class##__pImpl> const d_ptr;
 
+#define VGG_DECL_IMPL_REF(Class)                                                                   \
+  inline Class##__pImpl* d_func()                                                                  \
+  {                                                                                                \
+    return reinterpret_cast<Class##__pImpl*>(GetImplPtrHelper(d_ptr.get()));                       \
+  }                                                                                                \
+  inline const Class##__pImpl* d_func() const                                                      \
+  {                                                                                                \
+    return reinterpret_cast<const Class##__pImpl*>(GetImplPtrHelper(d_ptr.get()));                 \
+  }                                                                                                \
+  friend class Class##__pImpl;                                                                     \
+  VGG::layer::Ref<Class##__pImpl> const d_ptr;
+
 #define VGG_DECL_API(Class)                                                                        \
   inline Class* q_func()                                                                           \
   {                                                                                                \

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <core/SkColor.h>
 #include <iterator>
 #include <ostream>
 #include <sstream>
@@ -144,7 +145,6 @@ public:
             q_ptr->m_position[1]));
         }
       }
-
       drawTextAt(canvas, info, q_ptr->m_position[0], q_ptr->m_position[1]);
     }
     canvas->restore();
@@ -190,6 +190,12 @@ public:
         textPaint);
       dy += FONTSIZE;
     }
+  }
+
+  sk_sp<SkImage> makeImage(SkSurface* surface, const ImageOptions& opts)
+  {
+    return surface->makeImageSnapshot(
+      SkIRect::MakeXYWH(opts.position[0], opts.position[1], opts.extend[0], opts.extend[1]));
   }
 };
 
@@ -334,6 +340,7 @@ std::optional<std::vector<char>> VLayer::makeImageSnapshot(const ImageOptions& o
 {
   VGG_IMPL(VLayer);
   auto surface = _->skiaContext->surface();
+  _->renderInternal(surface->getCanvas(), false);
   auto ctx = _->skiaContext->context();
   if (
     auto image = surface->makeImageSnapshot(

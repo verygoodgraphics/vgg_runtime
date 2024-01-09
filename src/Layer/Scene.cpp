@@ -52,7 +52,6 @@ public:
 
   RootArray               roots;
   int                     page{ 0 };
-  int                     symbolIndex{ 0 };
   bool                    maskDirty{ true };
   Renderer                renderer;
   std::shared_ptr<Zoomer> zoomer;
@@ -90,8 +89,8 @@ public:
     }
     if (frame)
     {
-      renderer.setCanvas(canvas);
       frame->render(&renderer);
+      q_ptr->onRenderFrame(canvas, frame->picture());
     }
   }
 };
@@ -108,8 +107,7 @@ void Scene::setSceneRoots(std::vector<FramePtr> roots)
   if (roots.empty())
     return;
   _->page = 0;
-  _->symbolIndex = 0;
-  repaint();
+  invalidateMask();
   _->roots = std::move(roots);
 }
 
@@ -132,6 +130,11 @@ void Scene::onRender(SkCanvas* canvas)
   {
     _->render(canvas);
   }
+}
+
+void Scene::onRenderFrame(SkCanvas* canvas, SkPicture* frame)
+{
+  canvas->drawPicture(frame);
 }
 
 int Scene::frameCount() const
@@ -173,38 +176,40 @@ void Scene::setPage(int num)
   if (num >= 0 && (std::size_t)num < _->roots.size())
   {
     _->page = num;
-    repaint();
+    invalidateMask();
   }
 }
 
-void Scene::repaint()
+void Scene::onZoomChanged(float dx, float dy, float scale)
+{
+}
+void Scene::invalidateMask()
 {
   VGG_IMPL(Scene);
   _->maskDirty = true;
+}
+
+void Scene::invalidate()
+{
+  VGG_IMPL(Scene);
+  for (auto& root : _->roots)
+  {
+    root->invalidate();
+  }
 }
 
 void Scene::nextArtboard()
 {
   VGG_IMPL(Scene)
   _->page = (_->page + 1 >= (int)_->roots.size()) ? _->page : _->page + 1;
-  repaint();
+  invalidateMask();
 }
 
 void Scene::preArtboard()
 {
   VGG_IMPL(Scene)
   _->page = (_->page - 1 > 0) ? _->page - 1 : 0;
-  repaint();
-}
-
-void Scene::nextSymbol()
-{
-}
-
-void Scene::prevSymbol()
-{
-  VGG_IMPL(Scene)
-  _->symbolIndex = (_->symbolIndex - 1 > 0) ? _->symbolIndex - 1 : 0;
+  invalidateMask();
 }
 
 void Scene::setResRepo(std::map<std::string, std::vector<char>> repo)
@@ -216,6 +221,7 @@ void Scene::setResRepo(std::map<std::string, std::vector<char>> repo)
 void Scene::enableDrawDebugBound(bool enabled)
 {
   VGG_IMPL(Scene)
+  invalidate();
   _->renderer.enableDrawDebugBound(enabled);
 }
 bool Scene::isEnableDrawDebugBound()

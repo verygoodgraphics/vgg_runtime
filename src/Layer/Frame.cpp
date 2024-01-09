@@ -16,23 +16,16 @@
 #include "Layer/Core/Frame.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/VNode.hpp"
+#include "core/SkRefCnt.h"
 #include "Layer/Renderer.hpp"
 
-#include "include/core/SkSurface.h"
+#include <core/SkSurface.h>
+#include <core/SkPictureRecorder.h>
 
 #include <unordered_map>
 
 namespace
 {
-
-struct BoundHashKey
-{
-  size_t operator()(const Bound& b) const
-  {
-    return std::hash<float>()(b.topLeft().x) ^ std::hash<float>()(b.topLeft().y) ^
-           std::hash<float>()(b.bottomRight().x) ^ std::hash<float>()(b.bottomRight().y);
-  }
-};
 
 } // namespace
 
@@ -42,13 +35,30 @@ class Frame__pImpl
 {
   VGG_DECL_API(Frame)
 public:
-  PaintNodePtr root;
-  bool         enableToOrigin{ false };
+  PaintNodePtr     root;
+  sk_sp<SkPicture> cache;
+  bool             enableToOrigin{ false };
 
-  bool dirty{ false };
   Frame__pImpl(Frame* api)
     : q_ptr(api)
   {
+  }
+
+  void ensurePicture(Renderer* renderer)
+  {
+    if (cache)
+      return;
+    ASSERT(root);
+    SkPictureRecorder rec;
+    const auto&       b = q_ptr->bound();
+    auto              pictureCanvas = rec.beginRecording(b.width(), b.height());
+    if (enableToOrigin)
+    {
+      pictureCanvas->translate(-b.topLeft().x, -b.topLeft().y);
+    }
+    renderer->draw(pictureCanvas, root);
+    cache = rec.finishRecordingAsPicture();
+    ASSERT(cache);
   }
 };
 
@@ -74,31 +84,26 @@ void Frame::resetToOrigin(bool enable)
 {
   VGG_IMPL(Frame);
   _->enableToOrigin = enable;
+  invalidate();
 }
 
 void Frame::render(Renderer* renderer)
 {
   VGG_IMPL(Frame);
-  ASSERT(_->root);
   revalidate();
-  if (_->enableToOrigin)
-  {
-    const auto& b = bound();
-    renderer->canvas()->save();
-    renderer->canvas()->translate(-b.topLeft().x, -b.topLeft().y);
-    renderer->draw(_->root);
-    renderer->canvas()->restore();
-  }
-  else
-  {
-    renderer->draw(_->root);
-  }
+  _->ensurePicture(renderer);
+}
+
+SkPicture* Frame::picture()
+{
+  return d_ptr->cache.get();
 }
 
 Bound Frame::onRevalidate()
 {
   VGG_IMPL(Frame);
   ASSERT(_->root);
+  _->cache = nullptr;
   return _->root->revalidate().bound(_->root->transform());
 }
 

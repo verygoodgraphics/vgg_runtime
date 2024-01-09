@@ -28,6 +28,10 @@ Vec2 Zoomer::doTranslate(float x, float y)
 {
   m_offset.x += x;
   m_offset.y += y;
+  if (m_owner)
+  {
+    m_owner->onZoomChanged(m_offset.x, m_offset.y, m_zoom);
+  }
   return translate();
 }
 
@@ -40,6 +44,11 @@ float Zoomer::doZoom(float speed, float x, float y)
     m_offset.x -= (x - m_offset.x) * dz;
     m_offset.y -= (y - m_offset.y) * dz;
     m_zoom += m_zoom * dz;
+  }
+
+  if (m_owner)
+  {
+    m_owner->onZoomChanged(m_offset.x, m_offset.y, m_zoom);
   }
   return scale();
 }

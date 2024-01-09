@@ -55,12 +55,16 @@ class VGG_EXPORTS Scene : public layer::Renderable
 {
   static ResourceRepo s_resRepo;
 
+  friend class ::Zoomer;
+
 private:
   VGG_DECL_IMPL(Scene)
   std::string m_name{ "Default Scene" };
 
 protected:
-  void onRender(SkCanvas* canvas) override;
+  void         onRender(SkCanvas* canvas) override;
+
+  virtual void onRenderFrame(SkCanvas* canvas, SkPicture* frame);
 
 public:
   Scene();
@@ -79,16 +83,16 @@ public:
   int     frameCount() const;
   Frame*  frame(int index);
   void    setPage(int num);
-  void    nextSymbol();
-  void    prevSymbol();
   int     currentPage() const;
   // To remove zoomer, just set nullptr
   void    setZoomer(std::shared_ptr<Zoomer> zoomer);
   Zoomer* zoomer();
-  void    enableDrawDebugBound(bool enabled);
-  bool    isEnableDrawDebugBound();
 
-  void                 repaint();
+  Transform transform() const;
+
+  void enableDrawDebugBound(bool enabled);
+  bool isEnableDrawDebugBound();
+
   static ResourceRepo& getResRepo()
   {
     return s_resRepo;
@@ -97,7 +101,9 @@ public:
   static void setResRepo(std::map<std::string, std::vector<char>> repo);
 
 private:
-  void preprocessMask(PaintNode* node);
+  void invalidateMask();
+  void invalidate();
+  void onZoomChanged(float dx, float dy, float scale);
 };
 
 }; // namespace VGG

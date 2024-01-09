@@ -432,6 +432,7 @@ bool UIView::setCurrentPage(int index)
   {
     if (index >= 0 && index < document->children().size())
     {
+      m_page = index;
       Scene::setPage(index);
       setDirty(true);
       return true;

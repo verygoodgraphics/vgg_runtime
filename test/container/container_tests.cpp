@@ -20,6 +20,8 @@
 
 #include "test_config.hpp"
 
+#include <nlohmann/json.hpp>
+
 #include <gtest/gtest.h>
 
 #include <thread>
@@ -102,4 +104,60 @@ TEST_F(ContainerTestSuite, HandleEvent)
 
   // Then
   EXPECT_TRUE(called);
+}
+
+TEST_F(ContainerTestSuite, Sdk)
+{
+  std::string filePath = "testDataDir/frame_list/";
+
+  auto result = m_sut->load(filePath);
+  EXPECT_TRUE(result);
+
+  auto sdk = m_sut->sdk();
+  {
+    const auto& framesJsonString = sdk->getFramesInfo();
+
+    auto frames = nlohmann::json::parse(framesJsonString);
+    EXPECT_EQ(frames.size(), 3);
+  }
+
+  {
+    const auto index = sdk->currentFrame();
+    EXPECT_EQ(index, 0);
+  }
+
+  {
+    auto success = sdk->setCurrentFrame("#invalidFrameName");
+    EXPECT_FALSE(success);
+  }
+  {
+    auto success = sdk->setCurrentFrame("Frame 2");
+    EXPECT_TRUE(success);
+
+    const auto index = sdk->currentFrame();
+    EXPECT_EQ(index, 1);
+  }
+
+  {
+    const auto launchFrameIndex = sdk->launchFrame();
+    EXPECT_EQ(launchFrameIndex, 0);
+  }
+  {
+    auto success = sdk->setLaunchFrame("#invalidFrameName");
+    EXPECT_FALSE(success);
+  }
+  {
+    auto success = sdk->setLaunchFrame("Frame 2");
+    EXPECT_TRUE(success);
+
+    const auto index = sdk->launchFrame();
+    EXPECT_EQ(index, 1);
+  }
+
+  {
+    const auto& fontsJsonString = sdk->requiredFonts();
+
+    auto fonts = nlohmann::json::parse(fontsJsonString);
+    EXPECT_EQ(fonts.size(), 1);
+  }
 }

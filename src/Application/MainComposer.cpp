@@ -37,6 +37,8 @@ MainComposer::MainComposer(PlatformComposer* platformComposer, std::shared_ptr<M
 
   auto jsEngine = m_platformComposer->setup(m_env);
   m_controller.reset(new Controller{ m_env, m_runLoop, jsEngine, m_presenter, m_editor });
+
+  m_env->setController(m_controller);
 }
 
 void MainComposer::enableEdit(int top, int right, int bottom, int left)

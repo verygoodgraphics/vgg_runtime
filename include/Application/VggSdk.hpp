@@ -67,6 +67,12 @@ public:
   std::string getElement(const std::string& id) override;
   void        updateElement(const std::string& id, const std::string& contentJsonString) override;
 
+  virtual std::string getFramesInfo() const override;
+  virtual int         currentFrame() const override;
+  virtual bool        setCurrentFrame(const std::string& name) override;
+  virtual int         launchFrame() const override;
+  virtual bool        setLaunchFrame(const std::string& name) override;
+
   // event listener
   // event types: https://developer.mozilla.org/en-US/docs/Web/API/Element#events
   void addEventListener(
@@ -96,10 +102,11 @@ public:
   //   // char *getInputText(char *id);
 
 private:
-  std::shared_ptr<JsonDocument> getDesignDocument(IndexType index = main_or_editor_daruma_index);
-  std::shared_ptr<VGG::Daruma>  getModel(IndexType index = main_or_editor_daruma_index);
+  std::shared_ptr<JsonDocument> getDesignDocument(
+    IndexType index = main_or_editor_daruma_index) const;
+  std::shared_ptr<VGG::Daruma> getModel(IndexType index = main_or_editor_daruma_index) const;
 
-  std::shared_ptr<VGG::VggEnv> env();
+  std::shared_ptr<VGG::VggEnv> env() const;
 };
 
 } // namespace VGG

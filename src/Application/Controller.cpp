@@ -317,6 +317,7 @@ void Controller::initModel(const char* designDocSchemaFilePath, const char* layo
 void Controller::start()
 {
   m_presenter->setModel(generateViewModel(m_model, m_presenter->viewSize()));
+  m_presenter->setCurrentPage(m_model->getLaunchFrameIndex());
 
   const auto& modelFileVersion = m_model->docVersion();
   if (versionCompare(modelFileVersion, REQUIRED_DOC_VERSION) != 0)
@@ -652,6 +653,18 @@ bool Controller::handleTranslate(float x, float y)
   auto root = m_layout->layoutTree();
   auto pageSize = root->children()[m_presenter->currentPageIndex()]->frame().size;
   return m_presenter->handleTranslate(pageSize.width, pageSize.height, x, y);
+}
+
+int Controller::currentFrame() const
+{
+  return m_presenter->currentPageIndex();
+}
+
+bool Controller::setCurrentFrame(const std::string& name)
+{
+  ASSERT(m_model);
+  auto index = m_model->getFrameIndex(name);
+  return m_presenter->setCurrentPage(index);
 }
 
 } // namespace VGG

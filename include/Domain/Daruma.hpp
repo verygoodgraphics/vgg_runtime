@@ -49,6 +49,8 @@ class Daruma
   MakeJsonDocFn                m_makeLayoutDocFn;
   Model::Loader::ResourcesType m_resources;
 
+  std::size_t m_launchFrameIndex{ 0 };
+
   // runtime view model, symbol instance expanded
   JsonDocumentPtr m_runtimeDesignDoc;
   JsonDocumentPtr m_runtimeLayoutDoc;
@@ -80,7 +82,15 @@ public:
 
   std::string docVersion() const;
 
-  // event listener
+public:
+  int  getLaunchFrameIndex() const;
+  bool setLaunchFrame(const std::string& name);
+
+  std::string getFramesInfo() const;
+
+  int getFrameIndex(const std::string& name) const;
+
+public: // event listener
   void addEventListener(
     const std::string& targetKey, // id or json pointer path
     const std::string& type,
@@ -93,6 +103,7 @@ public:
 
   // todo, make sure the wasm files (*.mjs *.wasm) are in the correct directory or url
 
+public:
   // observable
   rxcpp::observable<VGG::ModelEventPtr> getObservable();
 

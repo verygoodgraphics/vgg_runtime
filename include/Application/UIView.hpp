@@ -148,6 +148,7 @@ public:
   {
     return m_page;
   }
+  bool setCurrentPage(int index);
 
   void enableZoomer(bool enabled);
 

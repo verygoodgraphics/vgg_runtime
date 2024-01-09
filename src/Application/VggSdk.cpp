@@ -27,7 +27,7 @@ constexpr auto listener_code_key = "listener";
 
 using namespace VGG;
 
-std::shared_ptr<VGG::VggEnv> VggSdk::env()
+std::shared_ptr<VGG::VggEnv> VggSdk::env() const
 {
   if (auto env = m_env.lock())
   {
@@ -99,6 +99,46 @@ void VggSdk::updateElement(const std::string& id, const std::string& contentJson
   getDesignDocument()->updateElement(id, contentJsonString);
 }
 
+std::string VggSdk::getFramesInfo() const
+{
+  return getModel()->getFramesInfo();
+}
+
+int VggSdk::currentFrame() const
+{
+  if (auto currentEnv = env())
+  {
+    if (auto controller = currentEnv->controller())
+    {
+      return controller->currentFrame();
+    }
+  }
+
+  return -1;
+}
+
+bool VggSdk::setCurrentFrame(const std::string& name)
+{
+  if (auto currentEnv = env())
+  {
+    if (auto controller = currentEnv->controller())
+    {
+      return controller->setCurrentFrame(name);
+    }
+  }
+  return false;
+}
+
+int VggSdk::launchFrame() const
+{
+  return getModel()->getLaunchFrameIndex();
+}
+
+bool VggSdk::setLaunchFrame(const std::string& name)
+{
+  return getModel()->setLaunchFrame(name);
+}
+
 // event listener
 void VggSdk::addEventListener(
   const std::string& elementKey,
@@ -152,11 +192,11 @@ VggSdk::ListenersType VggSdk::getEventListeners(const std::string& elementKey)
 }
 
 // vgg model
-std::shared_ptr<JsonDocument> VggSdk::getDesignDocument(IndexType index)
+std::shared_ptr<JsonDocument> VggSdk::getDesignDocument(IndexType index) const
 {
   return getModel(index)->runtimeDesignDoc();
 }
-std::shared_ptr<Daruma> VggSdk::getModel(IndexType index)
+std::shared_ptr<Daruma> VggSdk::getModel(IndexType index) const
 {
   auto key = index == main_or_editor_daruma_index ? DarumaContainer::KeyType::MainOrEditor
                                                   : DarumaContainer::KeyType::Edited;

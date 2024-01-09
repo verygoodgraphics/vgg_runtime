@@ -36,6 +36,12 @@ public:
 
   virtual std::string getElement(const std::string& id) = 0;
   virtual void updateElement(const std::string& id, const std::string& contentJsonString) = 0;
+
+  virtual std::string getFramesInfo() const = 0;
+  virtual int         currentFrame() const = 0;
+  virtual bool        setCurrentFrame(const std::string& name) = 0;
+  virtual int         launchFrame() const = 0;
+  virtual bool        setLaunchFrame(const std::string& name) = 0;
 };
 
 } // namespace VGG

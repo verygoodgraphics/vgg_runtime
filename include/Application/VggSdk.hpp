@@ -74,7 +74,7 @@ public:
   virtual bool        setLaunchFrame(const std::string& name) override;
 
   virtual std::string requiredFonts() const override;
-  // virtual bool        addFont() const override;
+  virtual bool        addFont(const uint8_t* data, size_t size, const char* defaultName) override;
 
   // event listener
   // event types: https://developer.mozilla.org/en-US/docs/Web/API/Element#events

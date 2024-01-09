@@ -19,6 +19,7 @@
 #include "Application/VggEnv.hpp"
 #include "Domain/IVggEnv.hpp"
 #include "Domain/Saver/DirSaver.hpp"
+#include "Layer/FontManager.hpp"
 #include "UseCase/SaveModel.hpp"
 #include "Utility/Log.hpp"
 
@@ -152,6 +153,21 @@ std::string VggSdk::requiredFonts() const
   }
 
   return {};
+}
+
+bool VggSdk::addFont(const uint8_t* data, size_t size, const char* defaultName)
+{
+  auto result = layer::FontManager::GetFontMananger().addFontFromMemory(data, size, defaultName);
+
+  if (auto currentEnv = env())
+  {
+    if (auto presenter = currentEnv->presenter())
+    {
+      presenter->setNeedsReload();
+    }
+  }
+
+  return result;
 }
 
 // event listener

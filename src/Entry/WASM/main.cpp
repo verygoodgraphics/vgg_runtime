@@ -19,6 +19,7 @@
 #include "Application/RunLoop.hpp"
 #include "Application/UIApplication.hpp"
 #include "Application/UIView.hpp"
+#include "Layer/FontManager.hpp"
 #include "Utility/ConfigManager.hpp"
 #include "Utility/Log.hpp"
 #include "Utility/Version.hpp"
@@ -117,5 +118,15 @@ extern "C"
     auto& mainComposer = VggBrowser::mainComposer();
 
     return mainComposer.controller()->listenAllEvents(enabled);
+  }
+
+  EMSCRIPTEN_KEEPALIVE bool addFont(const uint8_t* data, size_t size, const char* defaultName)
+  {
+    auto result = layer::FontManager::GetFontMananger().addFontFromMemory(data, size, defaultName);
+
+    auto& mainComposer = VggBrowser::mainComposer();
+    mainComposer.env()->presenter()->setNeedsReload();
+
+    return result;
   }
 }

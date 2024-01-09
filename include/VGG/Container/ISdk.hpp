@@ -44,7 +44,7 @@ public:
   virtual bool        setLaunchFrame(const std::string& name) = 0;
 
   virtual std::string requiredFonts() const = 0;
-  // virtual bool        addFont() const = 0;
+  virtual bool        addFont(const uint8_t* data, size_t size, const char* defaultName) = 0;
 };
 
 } // namespace VGG

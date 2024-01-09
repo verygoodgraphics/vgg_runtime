@@ -277,6 +277,11 @@ void VLayer::resize(int w, int h)
   {
     INFO("resize: [%d, %d], actually (%d, %d)", w, h, finalW, finalH);
     _->skiaContext->resizeSurface(finalW, finalH);
+
+    for (auto& s : d_ptr->scenes)
+    {
+      s->onViewportChange(Bound{ 0, 0, (float)finalW, (float)finalH });
+    }
   }
 }
 void VLayer::endFrame()

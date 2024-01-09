@@ -63,12 +63,13 @@ public:
 
   void resetToOrigin(bool enable);
   bool isVisible() const;
+  void setClipBound(const Bound& bound);
 
   ~Frame();
 
 protected:
   Bound      onRevalidate() override;
-  void       render(Renderer* renderer);
+  void       render(Renderer* renderer, const Bound* clipBound);
   SkPicture* picture();
 };
 } // namespace VGG::layer

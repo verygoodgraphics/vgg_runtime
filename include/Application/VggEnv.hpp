@@ -35,6 +35,7 @@ class VggEnv : public IVggEnv
   DarumaContainer m_darumaContainer;
 
   std::weak_ptr<Controller> m_controller;
+  std::weak_ptr<Presenter>  m_presenter;
 
 public:
   virtual std::string getEnv() override
@@ -86,6 +87,15 @@ public:
   void setController(std::shared_ptr<Controller> controller)
   {
     m_controller = controller;
+  }
+
+  std::shared_ptr<Presenter> presenter()
+  {
+    return m_presenter.lock();
+  }
+  void setPresenter(std::shared_ptr<Presenter> presenter)
+  {
+    m_presenter = presenter;
   }
 
 public:

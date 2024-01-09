@@ -15,6 +15,7 @@
  */
 #include "VggSdk.hpp"
 
+#include "Application/Presenter.hpp"
 #include "Application/VggEnv.hpp"
 #include "Domain/IVggEnv.hpp"
 #include "Domain/Saver/DirSaver.hpp"
@@ -137,6 +138,20 @@ int VggSdk::launchFrame() const
 bool VggSdk::setLaunchFrame(const std::string& name)
 {
   return getModel()->setLaunchFrame(name);
+}
+
+std::string VggSdk::requiredFonts() const
+{
+  if (auto currentEnv = env())
+  {
+    if (auto presenter = currentEnv->presenter())
+    {
+      nlohmann::json fonts = presenter->requiredFonts();
+      return fonts.dump();
+    }
+  }
+
+  return {};
 }
 
 // event listener

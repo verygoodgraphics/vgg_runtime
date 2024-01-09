@@ -73,6 +73,9 @@ public:
   virtual int         launchFrame() const override;
   virtual bool        setLaunchFrame(const std::string& name) override;
 
+  virtual std::string requiredFonts() const override;
+  // virtual bool        addFont() const override;
+
   // event listener
   // event types: https://developer.mozilla.org/en-US/docs/Web/API/Element#events
   void addEventListener(

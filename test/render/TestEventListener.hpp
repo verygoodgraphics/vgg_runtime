@@ -241,18 +241,19 @@ public:
 
     if (key == VGGK_3)
     {
-      INFO("Capture PNG");
       std::ofstream       ofs("capture.png");
       layer::ImageOptions opt;
       auto                f = m_scene->frame(m_scene->currentPage());
       auto                b = f->bound();
       opt.extend[0] = b.width();
       opt.extend[1] = b.height();
+      INFO("Capture PNG [%f, %f]", b.width(), b.height());
       opt.encode = VGG::layer::EImageEncode::IE_PNG;
       if (ofs.is_open())
       {
         m_layer->makeImageSnapshot(opt, ofs);
       }
+
       return true;
     }
 

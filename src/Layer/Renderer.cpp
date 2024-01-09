@@ -83,13 +83,16 @@ void Renderer::updateMaskObject(layer::PaintNode* p)
   updateMaskObject(p, m_maskObjects);
 }
 
-void Renderer::draw(layer::PaintNode* root)
+void Renderer::draw(SkCanvas* canvas, layer::PaintNode* root)
 {
-  ASSERT(m_canvas);
   ASSERT(root);
-  m_canvas->save();
+  ASSERT(canvas);
+  SkCanvas* oldCanvas = m_canvas;
+  m_canvas = canvas;
+  canvas->save();
   root->renderPass(this);
-  m_canvas->restore();
+  canvas->restore();
+  m_canvas = oldCanvas;
 }
 
 } // namespace VGG::layer

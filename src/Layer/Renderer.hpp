@@ -33,20 +33,7 @@ inline void PrintSkMatrix(const SkMatrix& m)
   }
   std::cout << std::endl;
 }
-
-struct DisplayItem
-{
-  SkMatrix   matrix;
-  PaintNode* item{ nullptr };
-  int        zorder = 0;
-
-  DisplayItem(SkMatrix m, PaintNode* item, int zorder)
-    : matrix(std::move(m))
-    , item(item)
-    , zorder(zorder)
-  {
-  }
-};
+// NOLINTEND
 
 inline std::ostream& operator<<(std::ostream& os, const glm::mat3 m)
 {
@@ -58,7 +45,7 @@ inline std::ostream& operator<<(std::ostream& os, const glm::mat3 m)
 
 namespace VGG::layer
 {
-// NOLINTEND
+// TODO:: rename to RenderContext
 class Renderer
 {
   using InternalObjectMap = std::unordered_map<std::string, PaintNode*>;
@@ -71,8 +58,8 @@ class Renderer
   void updateMaskObject(PaintNode* p, std::unordered_map<std::string, PaintNode*>& objects);
 
 public:
-  Renderer(SkCanvas* canvas = nullptr)
-    : m_canvas(canvas)
+  Renderer()
+    : m_canvas(nullptr)
     , m_enableDrawDebugBound(false)
   {
   }
@@ -81,13 +68,6 @@ public:
   const std::unordered_map<std::string, layer::PaintNode*>& maskObjects() const
   {
     return m_maskObjects;
-  }
-
-  void draw(layer::PaintNode* root);
-
-  void setCanvas(SkCanvas* canvas)
-  {
-    m_canvas = canvas;
   }
 
   void enableDrawDebugBound(bool enabled)
@@ -113,6 +93,11 @@ public:
   {
     return m_canvas;
   }
+
+private:
+  friend class Frame;
+  friend class Frame__pImpl;
+  void draw(SkCanvas* canvas, layer::PaintNode* root);
 };
 
 } // namespace VGG::layer

@@ -18,6 +18,15 @@
 #include "Layer/Core/VBound.hpp"
 #include "Utility/HelperMacro.hpp"
 
+class SkPicture;
+template<typename T>
+class sk_sp;
+
+namespace VGG
+{
+class Scene__pImpl;
+class Scene;
+} // namespace VGG
 namespace VGG::layer
 {
 class Frame;
@@ -43,18 +52,23 @@ inline FramePtr makeFramePtr(Args&&... args)
 class Frame__pImpl;
 class Frame final : public VNode
 {
+  friend class VGG::Scene;
+  friend class VGG::Scene__pImpl;
   VGG_DECL_IMPL(Frame);
 
 public:
   Frame(VRefCnt* cnt, PaintNodePtr root);
-  PaintNode*         root() const;
-  void               resetToOrigin(bool enable);
-  bool               isVisible() const;
-  void               render(Renderer* renderer);
   const std::string& guid() const;
+  PaintNode*         root() const;
+
+  void resetToOrigin(bool enable);
+  bool isVisible() const;
+
   ~Frame();
 
 protected:
-  Bound onRevalidate() override;
+  Bound      onRevalidate() override;
+  void       render(Renderer* renderer);
+  SkPicture* picture();
 };
 } // namespace VGG::layer

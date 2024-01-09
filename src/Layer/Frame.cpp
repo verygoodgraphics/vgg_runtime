@@ -19,6 +19,7 @@
 #include "core/SkRefCnt.h"
 #include "Layer/Renderer.hpp"
 
+#include <core/SkBBHFactory.h>
 #include <core/SkSurface.h>
 #include <core/SkPictureRecorder.h>
 
@@ -44,14 +45,15 @@ public:
   {
   }
 
-  void ensurePicture(Renderer* renderer)
+  void ensurePicture(Renderer* renderer, const Bound& clipBound)
   {
     if (cache)
       return;
     ASSERT(root);
     SkPictureRecorder rec;
     const auto&       b = q_ptr->bound();
-    auto              pictureCanvas = rec.beginRecording(b.width(), b.height());
+    auto              rt = SkRTreeFactory();
+    auto pictureCanvas = rec.beginRecording(clipBound.width(), clipBound.height(), &rt);
     if (enableToOrigin)
     {
       pictureCanvas->translate(-b.topLeft().x, -b.topLeft().y);
@@ -87,11 +89,14 @@ void Frame::resetToOrigin(bool enable)
   invalidate();
 }
 
-void Frame::render(Renderer* renderer)
+void Frame::render(Renderer* renderer, const Bound* clipBound)
 {
   VGG_IMPL(Frame);
   revalidate();
-  _->ensurePicture(renderer);
+  if (clipBound)
+    _->ensurePicture(renderer, bound());
+  else
+    _->ensurePicture(renderer, *clipBound);
 }
 
 SkPicture* Frame::picture()
@@ -105,6 +110,13 @@ Bound Frame::onRevalidate()
   ASSERT(_->root);
   _->cache = nullptr;
   return _->root->revalidate().bound(_->root->transform());
+}
+
+void Frame::setClipBound(const Bound& bound)
+{
+  VGG_IMPL(Frame);
+  ASSERT(_->root);
+  invalidate();
 }
 
 Frame::Frame(VRefCnt* cnt, PaintNodePtr root)

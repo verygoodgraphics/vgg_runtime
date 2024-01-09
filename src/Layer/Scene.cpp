@@ -60,6 +60,8 @@ public:
   sk_sp<SkImage>          rasterImage;
   std::shared_ptr<Zoomer> zoomer;
 
+  std::optional<Bound> viewport;
+
   void applyZoom(SkCanvas* canvas)
   {
     ASSERT(canvas);
@@ -93,8 +95,15 @@ public:
     }
     if (frame)
     {
-      frame->render(&renderer);
-      q_ptr->onRenderFrame(canvas, frame->picture(), frame->bound());
+      auto viewportBound = viewport.value_or(frame->bound());
+      DEBUG(
+        "Render For [%f %f %f %f]",
+        viewportBound.topLeft().x,
+        viewportBound.topLeft().y,
+        viewportBound.width(),
+        viewportBound.height());
+      frame->render(&renderer, &viewportBound);
+      q_ptr->onRenderFrame(canvas, frame->picture(), viewportBound);
     }
   }
 
@@ -102,6 +111,7 @@ public:
   {
     // only revalidate cuurent page
     rasterImage.reset();
+    DEBUG("revalidate image");
     if (auto f = currentFrame(true); f)
       return f->bound();
     else
@@ -155,6 +165,7 @@ public:
   {
     if (!rasterImage)
     {
+      DEBUG("ensureImage");
       SkImageInfo info = SkImageInfo::MakeN32Premul(bound.width(), bound.height());
       auto        surface = canvas->makeSurface(info);
       if (surface)
@@ -315,6 +326,11 @@ void Scene::enableDrawDebugBound(bool enabled)
   VGG_IMPL(Scene)
   invalidate();
   _->renderer.enableDrawDebugBound(enabled);
+}
+
+void Scene::onViewportChange(const Bound& bound)
+{
+  d_ptr->viewport = bound;
 }
 
 bool Scene::isEnableDrawDebugBound()

@@ -26,6 +26,7 @@
 #include <map>
 #include <memory>
 class SkCanvas;
+class GrRecordingContext;
 
 namespace VGG
 {
@@ -92,9 +93,14 @@ protected:
   void onRender(SkCanvas* canvas) override;
 
 protected:
-  virtual void onRenderFrame(SkCanvas* canvas, SkPicture* frame, const Bound& bound);
+  virtual sk_sp<SkImage> onRasterFrame(
+    GrRecordingContext* context,
+    SkPicture*          frame,
+    const Bound&        bound);
+
   virtual void onZoomScaleChanged(float scale);
   virtual void onZoomTranslationChanged(float x, float y);
+  void         invalidateRasterImage();
 
 private:
   void invalidateMask();

@@ -45,15 +45,23 @@ public:
   {
   }
 
-  void ensurePicture(Renderer* renderer, const Bound& clipBound)
+  void ensurePicture(Renderer* renderer, const SkMatrix* mat, const Bound& clipBound)
   {
     if (cache)
       return;
+    DEBUG(
+      "Render picture [%f, %f, %f, %f]",
+      clipBound.topLeft().x,
+      clipBound.topLeft().y,
+      clipBound.width(),
+      clipBound.height());
     ASSERT(root);
     SkPictureRecorder rec;
     const auto&       b = q_ptr->bound();
     auto              rt = SkRTreeFactory();
     auto pictureCanvas = rec.beginRecording(clipBound.width(), clipBound.height(), &rt);
+    if (mat)
+      pictureCanvas->setMatrix(*mat);
     if (enableToOrigin)
     {
       pictureCanvas->translate(-b.topLeft().x, -b.topLeft().y);
@@ -89,14 +97,14 @@ void Frame::resetToOrigin(bool enable)
   invalidate();
 }
 
-void Frame::render(Renderer* renderer, const Bound* clipBound)
+void Frame::render(Renderer* renderer, const SkMatrix* mat, const Bound* clipBound)
 {
   VGG_IMPL(Frame);
   revalidate();
   if (clipBound)
-    _->ensurePicture(renderer, bound());
+    _->ensurePicture(renderer, mat, bound());
   else
-    _->ensurePicture(renderer, *clipBound);
+    _->ensurePicture(renderer, mat, *clipBound);
 }
 
 SkPicture* Frame::picture()
@@ -108,6 +116,7 @@ Bound Frame::onRevalidate()
 {
   VGG_IMPL(Frame);
   ASSERT(_->root);
+  DEBUG("Clear frame cache");
   _->cache = nullptr;
   return _->root->revalidate().bound(_->root->transform());
 }

@@ -107,7 +107,7 @@ std::string VggSdk::getFramesInfo() const
   return getModel()->getFramesInfo();
 }
 
-int VggSdk::currentFrame() const
+int VggSdk::currentFrameIndex() const
 {
   if (auto currentEnv = env())
   {
@@ -132,7 +132,7 @@ bool VggSdk::setCurrentFrame(const std::string& name)
   return false;
 }
 
-int VggSdk::launchFrame() const
+int VggSdk::launchFrameIndex() const
 {
   return getModel()->getLaunchFrameIndex();
 }
@@ -277,3 +277,13 @@ std::vector<uint8_t> VggSdk::vggFileBuffer()
     return {};
   }
 }
+
+#ifdef EMSCRIPTEN
+emscripten::val VggSdk::vggFileUint8Array()
+{
+  const auto&     buffer = vggFileBuffer();
+  emscripten::val array = emscripten::val::global("Uint8Array")
+                            .new_(emscripten::typed_memory_view(buffer.size(), buffer.data()));
+  return array;
+}
+#endif

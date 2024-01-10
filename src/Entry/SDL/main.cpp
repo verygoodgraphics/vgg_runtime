@@ -23,8 +23,8 @@
 #include "Application/RunLoop.hpp"
 #include "Application/UIApplication.hpp"
 #include "Application/UIView.hpp"
-#include "Utility/ConfigManager.hpp"
 #include "Layer/Scene.hpp"
+#include "Utility/ConfigManager.hpp"
 
 #include <argparse/argparse.hpp>
 

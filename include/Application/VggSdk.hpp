@@ -68,15 +68,18 @@ public:
   void        updateElement(const std::string& id, const std::string& contentJsonString) override;
 
   virtual std::string getFramesInfo() const override;
-  virtual int         currentFrame() const override;
+  virtual int         currentFrameIndex() const override;
   virtual bool        setCurrentFrame(const std::string& name) override;
-  virtual int         launchFrame() const override;
+  virtual int         launchFrameIndex() const override;
   virtual bool        setLaunchFrame(const std::string& name) override;
 
   virtual std::string requiredFonts() const override;
   virtual bool        addFont(const uint8_t* data, size_t size, const char* defaultName) override;
 
   virtual std::vector<uint8_t> vggFileBuffer() override;
+#ifdef EMSCRIPTEN
+  emscripten::val vggFileUint8Array();
+#endif
 
   // event listener
   // event types: https://developer.mozilla.org/en-US/docs/Web/API/Element#events

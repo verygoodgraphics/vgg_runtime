@@ -31,6 +31,10 @@ protected:
   std::shared_ptr<AppZoomer> m_zoomerListener;
 
 public:
+  AppScene(std::unique_ptr<RasterCache> cache = nullptr)
+    : Scene(std::move(cache))
+  {
+  }
   // By setting a zoomer listener to customize your own operation
   void setZoomerListener(std::shared_ptr<AppZoomer> zoomerListener)
   {

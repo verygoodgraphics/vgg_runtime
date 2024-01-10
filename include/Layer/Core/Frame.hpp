@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "Layer/Core/PaintNode.hpp"
+#include "Layer/Core/Transform.hpp"
 #include "Layer/Core/VBound.hpp"
 #include "Utility/HelperMacro.hpp"
 
@@ -61,15 +62,16 @@ public:
   const std::string& guid() const;
   PaintNode*         root() const;
 
-  void resetToOrigin(bool enable);
-  bool isVisible() const;
-  void setClipBound(const Bound& bound);
+  void             resetToOrigin(bool enable);
+  bool             isVisible() const;
+  const Transform& transform() const;
+  void             setClipBound(const Bound& bound);
 
   ~Frame();
 
 protected:
   Bound      onRevalidate() override;
-  void       render(Renderer* renderer, const SkMatrix* mat, const Bound* clipBound);
+  void       render(Renderer* renderer, const SkMatrix* mat);
   SkPicture* picture();
 };
 } // namespace VGG::layer

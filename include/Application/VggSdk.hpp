@@ -75,6 +75,9 @@ public:
 
   virtual std::string requiredFonts() const override;
   virtual bool        addFont(const uint8_t* data, size_t size, const char* defaultName) override;
+#ifdef EMSCRIPTEN
+  bool jsAddFont(const emscripten::val& jsFontUint8Array, const std::string& defaultName);
+#endif
 
   virtual std::vector<uint8_t> vggFileBuffer() override;
 #ifdef EMSCRIPTEN

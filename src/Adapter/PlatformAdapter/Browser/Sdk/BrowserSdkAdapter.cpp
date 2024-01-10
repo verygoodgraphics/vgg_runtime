@@ -21,6 +21,7 @@
 
 #include <emscripten.h>
 #include <emscripten/bind.h>
+#include <emscripten/val.h>
 
 using namespace emscripten;
 using namespace VGG;
@@ -56,6 +57,7 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     .function("setLaunchFrame", &VggSdk::setLaunchFrame)
     // font
     .function("requiredFonts", &VggSdk::requiredFonts)
+    .function("addFont", &VggSdk::jsAddFont)
     // event listener
     .function("addEventListener", &VggSdk::addEventListener)
     .function("removeEventListener", &VggSdk::removeEventListener)

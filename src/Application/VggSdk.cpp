@@ -279,6 +279,12 @@ std::vector<uint8_t> VggSdk::vggFileBuffer()
 }
 
 #ifdef EMSCRIPTEN
+bool VggSdk::jsAddFont(const emscripten::val& jsFontUint8Array, const std::string& defaultName)
+{
+  const auto& font = emscripten::convertJSArrayToNumberVector<uint8_t>(jsFontUint8Array);
+  return addFont(font.data(), font.size(), defaultName.c_str());
+}
+
 emscripten::val VggSdk::vggFileUint8Array()
 {
   const auto&     buffer = vggFileBuffer();

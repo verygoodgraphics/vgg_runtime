@@ -31,10 +31,10 @@ namespace VGG::layer
 {
 class RasterCacheDefault : public RasterCache
 {
-  std::vector<sk_sp<SkImage>> m_caches;
-  glm::vec2                   m_imageSize;
-  std::optional<float>        m_scale = 1.0f;
-  SkMatrix                    m_transform;
+  std::vector<Tile>    m_caches;
+  std::optional<float> m_scale = 1.0f;
+  SkMatrix             m_transform;
+  bool                 m_transformUpdate{ false };
 
   std::string printReason(uint32_t r)
   {
@@ -67,7 +67,8 @@ public:
     GrRecordingContext* context,
     const SkMatrix*     transform,
     SkPicture*          pic,
-    const SkRect&       bound,
+    const Bound&        bound,
+    const glm::mat3&    mat,
     const Zoomer*       zoomer,
     const Bound&        viewport,
     void*               userData) override
@@ -77,9 +78,10 @@ public:
     if ((reason & ZOOM_TRANSLATION) && !(reason & ZOOM_SCALE))
     {
       DEBUG("ignore zoom translation");
+      m_transformUpdate = false;
       return reason;
     }
-    auto zoomScale = zoomer->scale();
+    // auto zoomScale = zoomer->scale();
     // if (reason & ZOOM_SCALE)
     // {
     //   DEBUG("current zoom scale: %f", zoomScale);
@@ -92,23 +94,23 @@ public:
     //   }
     // }
 
-    DEBUG(
-      "Before Bound: [%f, %f, %f, %f]",
-      bound.left(),
-      bound.top(),
-      bound.width(),
-      bound.height());
-    auto r = transform->mapRect(bound);
-    DEBUG("after bound: [%f, %f, %f, %f]", r.left(), r.top(), r.width(), r.height());
-    SkImageInfo info = SkImageInfo::MakeN32Premul(r.width(), r.height());
+    auto skr = toSkRect(bound);
+    auto skm = *transform * toSkMatrix(mat);
+    auto rect = skm.mapRect(skr);
+
+    SkImageInfo info = SkImageInfo::MakeN32Premul(rect.width(), rect.height());
     if (auto surface = SkSurfaces::RenderTarget(context, skgpu::Budgeted::kYes, info); surface)
     {
-      DEBUG("Raster Image Size: [%f, %f]", r.width(), r.height());
+      DEBUG("Raster Image Size: [%f, %f]", rect.width(), rect.height());
       auto canvas = surface->getCanvas();
-      canvas->translate(-r.left(), -r.top());
+      auto m = skm;
+      m.postTranslate(-rect.left(), -rect.top());
+      canvas->setMatrix(m);
       canvas->drawPicture(pic);
-      m_caches = { surface->makeImageSnapshot() };
-      m_transform = SkMatrix::Translate(transform->getTranslateX(), transform->getTranslateY());
+      m_caches = { { surface->makeImageSnapshot(),
+                     SkRect::MakeXYWH(0, 0, rect.width(), rect.height()) } };
+      m_transform = SkMatrix::Translate(skm.getTranslateX(), skm.getTranslateY());
+      m_transformUpdate = true;
     }
     else
     {
@@ -120,8 +122,10 @@ public:
         canvas->clipRect(toSkRect(viewport));
         canvas->setMatrix(*transform);
         canvas->drawPicture(pic);
-        m_caches = { surface->makeImageSnapshot() };
+        m_caches = { { surface->makeImageSnapshot(),
+                       SkRect::MakeXYWH(0, 0, viewport.width(), viewport.height()) } };
         m_transform = SkMatrix::I();
+        m_transformUpdate = true;
       }
       else
       {
@@ -129,16 +133,21 @@ public:
         return 0;
       }
     }
-    m_scale = zoomScale;
+    // m_scale = zoomScale;
     return reason;
   }
 
-  void onQueryTile(std::vector<sk_sp<SkImage>>* tiles, SkMatrix* transform) override
+  void onQueryTile(std::vector<Tile>* tiles, SkMatrix* transform) override
   {
     if (m_caches.empty())
       return;
     tiles->clear();
-    tiles->emplace_back(m_caches[0]);
+    tiles->push_back(m_caches[0]);
+    if (m_transformUpdate)
+    {
+      *transform = m_transform;
+      m_transformUpdate = false;
+    }
   }
 };
 

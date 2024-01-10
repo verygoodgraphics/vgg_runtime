@@ -30,9 +30,20 @@ class sk_sp;
 
 namespace VGG::layer
 {
+
 class RasterCache
 {
 public:
+  struct Tile
+  {
+    sk_sp<SkImage> image;
+    SkRect         rect;
+    Tile(sk_sp<SkImage> image, SkRect rect)
+      : image(std::move(image))
+      , rect(rect)
+    {
+    }
+  };
   enum EReason : uint32_t
   {
     ZOOM_TRANSLATION = 1,
@@ -59,20 +70,24 @@ public:
   void raster(
     GrRecordingContext* context,
     const SkMatrix*     transform,
-    SkPicture*          pic,
-    const SkRect&       bound,
-    const Zoomer*       zoomer,
-    const Bound&        viewport,
-    void*               userData)
+
+    SkPicture*       pic,
+    const Bound&     bound,
+    const glm::mat3& mat,
+
+    const Zoomer* zoomer,
+    const Bound&  viewport,
+    void*         userData)
   {
     if (isInvalidate())
     {
-      auto clear = onRaster(m_reason, context, transform, pic, bound, zoomer, viewport, userData);
+      auto clear =
+        onRaster(m_reason, context, transform, pic, bound, mat, zoomer, viewport, userData);
       m_reason &= ~clear;
     }
   }
 
-  void queryTile(std::vector<sk_sp<SkImage>>* tiles, SkMatrix* transform)
+  void queryTile(std::vector<Tile>* tiles, SkMatrix* transform)
   {
     onQueryTile(tiles, transform);
   }
@@ -83,12 +98,13 @@ protected:
     GrRecordingContext* context,
     const SkMatrix*     transform,
     SkPicture*          pic,
-    const SkRect&       bound,
+    const Bound&        bound,
+    const glm::mat3&    mat,
     const Zoomer*       zoomer,
     const Bound&        viewport,
     void*               userData) = 0;
 
-  virtual void onQueryTile(std::vector<sk_sp<SkImage>>* tiles, SkMatrix* transform) = 0;
+  virtual void onQueryTile(std::vector<Tile>* tiles, SkMatrix* transform) = 0;
 
 private:
   uint32_t m_reason;

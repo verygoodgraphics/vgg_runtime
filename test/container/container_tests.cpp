@@ -160,4 +160,9 @@ TEST_F(ContainerTestSuite, Sdk)
     auto fonts = nlohmann::json::parse(fontsJsonString);
     EXPECT_EQ(fonts.size(), 1);
   }
+
+  {
+    auto buffer = sdk->vggFileBuffer();
+    EXPECT_EQ(buffer.size(), 1638);
+  }
 }

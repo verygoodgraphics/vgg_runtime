@@ -20,6 +20,7 @@
 #include "Loader/DirLoader.hpp"
 #include "Loader/ZipLoader.hpp"
 #include "SubjectJsonDocument.hpp"
+#include "RawJsonDocument.hpp"
 #include "Utility/Log.hpp"
 
 #include <boost/uuid/name_generator_sha1.hpp>
@@ -74,6 +75,10 @@ void Daruma::accept(VGG::Model::Visitor* visitor)
   if (m_layoutDoc && m_layoutDoc->content().is_object())
   {
     visitor->visit(layout_file_name, m_layoutDoc->content().dump());
+  }
+  if (m_settingsDoc.is_object())
+  {
+    visitor->visit(K_SETTINGS_FILE_NAME, m_settingsDoc.dump());
   }
 
   // js
@@ -131,6 +136,15 @@ bool Daruma::loadFiles()
     else
     {
       DEBUG("#Daruma::loadFiles(), read layout file failed");
+    }
+
+    if (m_loader->readFile(K_SETTINGS_FILE_NAME, fileContent))
+    {
+      m_settingsDoc = json::parse(fileContent);
+    }
+    else
+    {
+      DEBUG("#Daruma::loadFiles(), read settings file failed");
     }
 
     if (m_loader->readFile(event_listeners_file_name, fileContent))
@@ -376,7 +390,14 @@ std::string Daruma::getFramesInfo() const
 
 int Daruma::getLaunchFrameIndex() const
 {
-  return m_launchFrameIndex;
+  if (m_settingsDoc.is_object())
+  {
+    return m_settingsDoc[K_LAUNCH_FRAME_INDEX];
+  }
+  else
+  {
+    return 0;
+  }
 }
 
 bool Daruma::setLaunchFrame(const std::string& name)
@@ -384,7 +405,7 @@ bool Daruma::setLaunchFrame(const std::string& name)
   auto index = getFrameIndex(name);
   if (index != -1)
   {
-    m_launchFrameIndex = index;
+    m_settingsDoc[K_LAUNCH_FRAME_INDEX] = index;
     return true;
   }
 

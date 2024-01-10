@@ -76,6 +76,8 @@ public:
   virtual std::string requiredFonts() const override;
   virtual bool        addFont(const uint8_t* data, size_t size, const char* defaultName) override;
 
+  virtual std::vector<uint8_t> vggFileBuffer() override;
+
   // event listener
   // event types: https://developer.mozilla.org/en-US/docs/Web/API/Element#events
   void addEventListener(

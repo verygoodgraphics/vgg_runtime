@@ -19,6 +19,7 @@
 #include "Application/VggEnv.hpp"
 #include "Domain/IVggEnv.hpp"
 #include "Domain/Saver/DirSaver.hpp"
+#include "Domain/Saver/ZipStreamSaver.hpp"
 #include "Layer/FontManager.hpp"
 #include "UseCase/SaveModel.hpp"
 #include "Utility/Log.hpp"
@@ -256,5 +257,23 @@ void VggSdk::save()
   else
   {
     WARN("VggSdk: no daruma file to save");
+  }
+}
+
+std::vector<uint8_t> VggSdk::vggFileBuffer()
+{
+  auto model = getModel();
+  if (model)
+  {
+    auto      saver{ std::make_shared<Model::ZipStreamSaver>() };
+    SaveModel saveModel{ model, saver };
+
+    saveModel.save();
+    return saver->buffer();
+  }
+  else
+  {
+    WARN("VggSdk: no daruma file to save");
+    return {};
   }
 }

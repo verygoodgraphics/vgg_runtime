@@ -48,8 +48,7 @@ class Daruma
   JsonDocumentPtr              m_layoutDoc;
   MakeJsonDocFn                m_makeLayoutDocFn;
   Model::Loader::ResourcesType m_resources;
-
-  std::size_t m_launchFrameIndex{ 0 };
+  nlohmann::json               m_settingsDoc;
 
   // runtime view model, symbol instance expanded
   JsonDocumentPtr m_runtimeDesignDoc;

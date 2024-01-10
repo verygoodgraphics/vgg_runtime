@@ -17,6 +17,7 @@
 
 #include "Domain/Saver.hpp"
 
+#include <cstdint>
 #include <vector>
 
 struct zip_t;

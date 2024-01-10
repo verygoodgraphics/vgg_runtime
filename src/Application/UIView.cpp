@@ -431,7 +431,7 @@ bool UIView::setCurrentPage(int index)
 {
   if (auto document = m_document.lock())
   {
-    if (index >= 0 && index < document->children().size())
+    if (index >= 0 && static_cast<std::size_t>(index) < document->children().size())
     {
       m_page = index;
       Scene::setPage(index);

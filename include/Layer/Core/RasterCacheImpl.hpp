@@ -1,0 +1,145 @@
+/*
+ * Copyright 2023 VeryGoodGraphics LTD <bd@verygoodgraphics.com>
+ *
+ * Licensed under the VGG License, Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.verygoodgraphics.com/licenses/LICENSE-1.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#pragma once
+#include "Layer/Core/RasterCache.hpp"
+#include "Layer/VSkia.hpp"
+#include "Layer/Zoomer.hpp"
+#include "Utility/Log.hpp"
+
+#include "core/SkCanvas.h"
+#include "core/SkImage.h"
+#include "core/SkPicture.h"
+#include <core/SkSurface.h>
+#include <gpu/ganesh/SkSurfaceGanesh.h>
+#include <gpu/GpuTypes.h>
+
+class Zoomer;
+namespace VGG::layer
+{
+class RasterCacheDefault : public RasterCache
+{
+  std::vector<sk_sp<SkImage>> m_caches;
+  glm::vec2                   m_imageSize;
+  std::optional<float>        m_scale = 1.0f;
+  SkMatrix                    m_transform;
+
+  std::string printReason(uint32_t r)
+  {
+    std::string res;
+    if (r == 0)
+      return "";
+    if (r & ZOOM_TRANSLATION)
+    {
+      res += " ZOOM_TRANSLATION";
+    }
+    if (r & ZOOM_SCALE)
+    {
+      res += " ZOOM_SCALE";
+    }
+    if (r & VIEWPORT)
+    {
+      res += " VIEWPORT";
+    }
+    if (r & CONTENT)
+    {
+      res += " CONTENT";
+    }
+    return res;
+  }
+
+public:
+  RasterCacheDefault() = default;
+  uint32_t onRaster(
+    uint32_t            reason,
+    GrRecordingContext* context,
+    const SkMatrix*     transform,
+    SkPicture*          pic,
+    const SkRect&       bound,
+    const Zoomer*       zoomer,
+    const Bound&        viewport,
+    void*               userData) override
+  {
+    auto str = printReason(reason);
+    DEBUG("recache reason: %s", str.c_str());
+    if ((reason & ZOOM_TRANSLATION) && !(reason & ZOOM_SCALE))
+    {
+      DEBUG("ignore zoom translation");
+      return reason;
+    }
+    auto zoomScale = zoomer->scale();
+    // if (reason & ZOOM_SCALE)
+    // {
+    //   DEBUG("current zoom scale: %f", zoomScale);
+    //   auto ignoreScale = [](float prev, float current) -> bool
+    //   { return std::abs(prev - current) < 0.4; };
+    //   if (m_scale && ignoreScale(*m_scale, zoomScale))
+    //   {
+    //     DEBUG("ignore zoom scale");
+    //     return reason;
+    //   }
+    // }
+
+    DEBUG(
+      "Before Bound: [%f, %f, %f, %f]",
+      bound.left(),
+      bound.top(),
+      bound.width(),
+      bound.height());
+    auto r = transform->mapRect(bound);
+    DEBUG("after bound: [%f, %f, %f, %f]", r.left(), r.top(), r.width(), r.height());
+    SkImageInfo info = SkImageInfo::MakeN32Premul(r.width(), r.height());
+    if (auto surface = SkSurfaces::RenderTarget(context, skgpu::Budgeted::kYes, info); surface)
+    {
+      DEBUG("Raster Image Size: [%f, %f]", r.width(), r.height());
+      auto canvas = surface->getCanvas();
+      canvas->translate(-r.left(), -r.top());
+      canvas->drawPicture(pic);
+      m_caches = { surface->makeImageSnapshot() };
+      m_transform = SkMatrix::Translate(transform->getTranslateX(), transform->getTranslateY());
+    }
+    else
+    {
+      // Maybe it's too large, so just cache as viewport size
+      info = SkImageInfo::MakeN32Premul(viewport.width(), viewport.height());
+      if (auto surface = SkSurfaces::RenderTarget(context, skgpu::Budgeted::kYes, info); surface)
+      {
+        auto canvas = surface->getCanvas();
+        canvas->clipRect(toSkRect(viewport));
+        canvas->setMatrix(*transform);
+        canvas->drawPicture(pic);
+        m_caches = { surface->makeImageSnapshot() };
+        m_transform = SkMatrix::I();
+      }
+      else
+      {
+        DEBUG("Raster cache failed");
+        return 0;
+      }
+    }
+    m_scale = zoomScale;
+    return reason;
+  }
+
+  void onQueryTile(std::vector<sk_sp<SkImage>>* tiles, SkMatrix* transform) override
+  {
+    if (m_caches.empty())
+      return;
+    tiles->clear();
+    tiles->emplace_back(m_caches[0]);
+  }
+};
+
+} // namespace VGG::layer

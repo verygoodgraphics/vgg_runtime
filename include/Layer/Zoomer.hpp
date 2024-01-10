@@ -15,6 +15,8 @@
  */
 #pragma once
 #include "Math/Math.hpp"
+#include "Layer/Core/VBound.hpp"
+#include <optional>
 
 using namespace VGG;
 

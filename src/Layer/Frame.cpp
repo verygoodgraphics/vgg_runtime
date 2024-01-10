@@ -15,6 +15,7 @@
  */
 #include "Layer/Core/Frame.hpp"
 #include "Layer/Core/PaintNode.hpp"
+#include "Layer/Core/Transform.hpp"
 #include "Layer/Core/VNode.hpp"
 #include "core/SkRefCnt.h"
 #include "Layer/Renderer.hpp"
@@ -39,6 +40,7 @@ public:
   PaintNodePtr     root;
   sk_sp<SkPicture> cache;
   bool             enableToOrigin{ false };
+  Transform        transform;
 
   Frame__pImpl(Frame* api)
     : q_ptr(api)
@@ -49,12 +51,6 @@ public:
   {
     if (cache)
       return;
-    DEBUG(
-      "Render picture [%f, %f, %f, %f]",
-      clipBound.topLeft().x,
-      clipBound.topLeft().y,
-      clipBound.width(),
-      clipBound.height());
     ASSERT(root);
     SkPictureRecorder rec;
     const auto&       b = q_ptr->bound();
@@ -65,6 +61,8 @@ public:
     if (enableToOrigin)
     {
       pictureCanvas->translate(-b.topLeft().x, -b.topLeft().y);
+      transform.setMatrix(
+        glm::translate(glm::mat3{ 1 }, glm::vec2(-b.topLeft().x, -b.topLeft().y)));
     }
     renderer->draw(pictureCanvas, root);
     cache = rec.finishRecordingAsPicture();
@@ -76,6 +74,12 @@ PaintNode* Frame::root() const
 {
   ASSERT(d_ptr->root);
   return d_ptr->root.get();
+}
+
+const Transform& Frame::transform() const
+{
+  ASSERT(d_ptr->root);
+  return d_ptr->transform;
 }
 
 const std::string& Frame::guid() const
@@ -97,14 +101,11 @@ void Frame::resetToOrigin(bool enable)
   invalidate();
 }
 
-void Frame::render(Renderer* renderer, const SkMatrix* mat, const Bound* clipBound)
+void Frame::render(Renderer* renderer, const SkMatrix* mat)
 {
   VGG_IMPL(Frame);
   revalidate();
-  if (clipBound)
-    _->ensurePicture(renderer, mat, bound());
-  else
-    _->ensurePicture(renderer, mat, *clipBound);
+  _->ensurePicture(renderer, mat, bound());
 }
 
 SkPicture* Frame::picture()

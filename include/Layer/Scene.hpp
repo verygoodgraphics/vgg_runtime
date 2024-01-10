@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "Layer/Renderable.hpp"
+#include "Layer/Core/RasterCache.hpp"
 #include "Layer/Core/Frame.hpp"
 #include "Layer/Memory/AllocatorImpl.hpp"
 #include "Layer/Zoomer.hpp"
@@ -40,6 +41,9 @@ using PaintNodeRef = std::weak_ptr<PaintNode>;
 using PaintNodePtr = VGG::layer::Ref<PaintNode>;
 using PaintNodeRef = VGG::layer::WeakRef<PaintNode>;
 #endif
+
+class VLayer;
+class RasterCache;
 } // namespace layer
 using namespace layer;
 
@@ -54,8 +58,10 @@ using InstanceTable = std::unordered_map<
 class Scene__pImpl;
 class VGG_EXPORTS Scene : public layer::Renderable
 {
+  friend class layer::VLayer; // Temporary support for VLayer
+
 public:
-  Scene();
+  Scene(std::unique_ptr<RasterCache> cache = nullptr);
   virtual ~Scene();
   void setSceneRoots(std::vector<FramePtr> roots);
   void setName(std::string name)
@@ -91,16 +97,15 @@ public:
 
 protected:
   void onRender(SkCanvas* canvas) override;
+  void onRepaint();
 
 protected:
-  virtual sk_sp<SkImage> onRasterFrame(
-    GrRecordingContext* context,
-    SkPicture*          frame,
-    const Bound&        bound);
-
   virtual void onZoomScaleChanged(float scale);
   virtual void onZoomTranslationChanged(float x, float y);
-  void         invalidateRasterImage();
+  virtual void onZoomViewportChanged(const Bound& bound);
+
+protected:
+  void setOwner(VLayer* owner);
 
 private:
   void invalidateMask();

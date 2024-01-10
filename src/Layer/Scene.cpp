@@ -21,11 +21,10 @@
 #include "Layer/Zoomer.hpp"
 #include "Layer/Memory/VNew.hpp"
 #include "Layer/Core/PaintNode.hpp"
+#include "Layer/Core/RasterCacheImpl.hpp"
 #include "Utility/ConfigManager.hpp"
 #include "Utility/Log.hpp"
 
-#include <glm/gtx/matrix_transform_2d.hpp>
-#include <glm/matrix.hpp>
 #include <core/SkCanvas.h>
 #include <core/SkSurface.h>
 #include <core/SkImage.h>
@@ -61,16 +60,21 @@ public:
   int                     page{ 0 };
   bool                    maskDirty{ true };
   Renderer                renderer;
-  sk_sp<SkImage>          rasterImage;
   std::shared_ptr<Zoomer> zoomer;
 
   std::optional<Bound> viewport;
 
+  std::unique_ptr<RasterCache>        cache;
+  std::optional<RasterCache::EReason> reason;
+  std::vector<sk_sp<SkImage>>         tiles;
+
   Bound onRevalidate() override
   {
     // only revalidate cuurent page
-    rasterImage.reset();
     DEBUG("revalidate image");
+
+    if (cache)
+      cache->invalidate(RasterCache::EReason::CONTENT);
     if (auto f = currentFrame(true); f)
       return f->bound();
     else
@@ -133,22 +137,6 @@ public:
       f->invalidate();
   }
 
-  void ensureImage(SkCanvas* canvas, SkPicture* frame, const Bound& bound)
-  {
-    if (!rasterImage)
-    {
-      DEBUG("ensureImage");
-      SkImageInfo info = SkImageInfo::MakeN32Premul(bound.width(), bound.height());
-      auto        surface = canvas->makeSurface(info);
-      if (surface)
-      {
-        surface->getCanvas()->drawPicture(frame);
-        rasterImage = surface->makeImageSnapshot();
-      }
-    }
-    ASSERT(rasterImage);
-  }
-
   void nextFrame()
   {
     page = (page + 1 >= (int)roots.size()) ? page : page + 1;
@@ -201,33 +189,46 @@ public:
     }
     if (frame)
     {
-      auto viewportBound = viewport.value_or(frame->bound());
-      auto mat = canvas->getTotalMatrix();
-      frame->render(&renderer, &mat, &viewportBound);
-      canvas->resetMatrix();
-      if (!rasterImage)
+      auto mat = canvas->getTotalMatrix(); // DPI * zoom
+      auto recorder = canvas->recordingContext();
+      frame->render(&renderer, nullptr);
+      const auto& b = frame->bound().bound(frame->transform());
+      if (cache)
       {
-        rasterImage =
-          q_ptr->onRasterFrame(canvas->recordingContext(), frame->picture(), viewportBound);
+        cache->raster(
+          recorder,
+          &mat,
+          frame->picture(),
+          SkRect::MakeXYWH(b.topLeft().x, b.topLeft().y, b.width(), b.height()),
+          zoomer.get(),
+          viewport.value_or(b),
+          0);
+        cache->queryTile(&tiles, &mat);
+        canvas->save();
+        canvas->resetMatrix();
+        canvas->setMatrix(mat);
+        for (auto& tile : tiles)
+        {
+          auto r = tile->bounds();
+          canvas->drawImage(tile, r.x(), r.y());
+        }
+        canvas->restore();
       }
-      if (rasterImage)
+      else
       {
-        canvas->drawImage(rasterImage, 0, 0);
+        canvas->drawPicture(frame->picture());
       }
-      canvas->setMatrix(mat);
     }
   }
 };
 
-void Scene::invalidateRasterImage()
-{
-  d_ptr->rasterImage = nullptr;
-  invalidate();
-}
-
-Scene::Scene()
+Scene::Scene(std::unique_ptr<RasterCache> cache)
   : d_ptr(V_NEW<Scene__pImpl>(this))
 {
+  if (cache)
+  {
+    d_ptr->cache = std::move(cache);
+  }
 }
 Scene::~Scene() = default;
 
@@ -259,22 +260,6 @@ void Scene::onRender(SkCanvas* canvas)
   {
     _->render(canvas);
   }
-}
-
-sk_sp<SkImage> Scene::onRasterFrame(
-  GrRecordingContext* canvas,
-  SkPicture*          frame,
-  const Bound&        bound)
-{
-  SkImageInfo info = SkImageInfo::MakeN32Premul(bound.width(), bound.height());
-  auto        surface = SkSurfaces::RenderTarget(canvas, skgpu::Budgeted::kYes, info);
-  if (surface)
-  {
-    surface->getCanvas()->drawPicture(frame);
-    return surface->makeImageSnapshot();
-  }
-  DEBUG("Cannot create surface!");
-  return nullptr;
 }
 
 int Scene::frameCount() const
@@ -322,12 +307,33 @@ void Scene::setPage(int num)
 
 void Scene::onZoomScaleChanged(float scale)
 {
+  DEBUG("Scene: onZoomScaleChanged");
   invalidate();
+  if (d_ptr->cache)
+    d_ptr->cache->invalidate(RasterCache::EReason::ZOOM_SCALE);
 }
 
 void Scene::onZoomTranslationChanged(float x, float y)
 {
+  DEBUG("Scene: onZoomTranslationChanged");
   invalidate();
+  if (d_ptr->cache)
+    d_ptr->cache->invalidate(RasterCache::EReason::ZOOM_TRANSLATION);
+}
+
+void Scene::onZoomViewportChanged(const Bound& bound)
+{
+  DEBUG("Scene: onZoomViewportChanged");
+  invalidate();
+  if (d_ptr->cache)
+    d_ptr->cache->invalidate(RasterCache::EReason::VIEWPORT);
+}
+
+void Scene::onViewportChange(const Bound& bound)
+{
+  d_ptr->viewport = bound;
+  if (d_ptr->cache)
+    d_ptr->cache->invalidate(RasterCache::EReason::VIEWPORT);
 }
 
 void Scene::invalidateMask()
@@ -367,11 +373,6 @@ void Scene::enableDrawDebugBound(bool enabled)
   VGG_IMPL(Scene)
   _->invalidateCurrentFrame();
   _->renderer.enableDrawDebugBound(enabled);
-}
-
-void Scene::onViewportChange(const Bound& bound)
-{
-  d_ptr->viewport = bound;
 }
 
 bool Scene::isEnableDrawDebugBound()

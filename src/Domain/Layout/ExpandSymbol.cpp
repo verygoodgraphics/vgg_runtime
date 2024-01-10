@@ -352,6 +352,7 @@ void ExpandSymbol::processMasterIdOverrides(
 
     (*childObject)[K_MASTER_ID] = value;
     (*childObject).erase(K_OVERRIDE_VALUES);
+    (*childObject).erase(K_VARIABLE_ASSIGNMENTS);
     if (childObject->contains(K_CHILD_OBJECTS))
     {
       // Keep own layout rule; Remove children layout rule only;

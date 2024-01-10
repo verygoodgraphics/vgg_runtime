@@ -38,9 +38,9 @@ public:
   virtual void updateElement(const std::string& id, const std::string& contentJsonString) = 0;
 
   virtual std::string getFramesInfo() const = 0;
-  virtual int         currentFrame() const = 0;
+  virtual int         currentFrameIndex() const = 0;
   virtual bool        setCurrentFrame(const std::string& name) = 0;
-  virtual int         launchFrame() const = 0;
+  virtual int         launchFrameIndex() const = 0;
   virtual bool        setLaunchFrame(const std::string& name) = 0;
 
   virtual std::string requiredFonts() const = 0;

@@ -48,12 +48,20 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     .function("addAt", &VggSdk::designDocumentAddAt)
     .function("deleteAt", &VggSdk::designDocumentDeleteAt)
     .function("updateAt", &VggSdk::designDocumentReplaceAt)
+    // frames
+    .function("getFramesInfo", &VggSdk::getFramesInfo)
+    .function("currentFrameIndex", &VggSdk::currentFrameIndex)
+    .function("setCurrentFrame", &VggSdk::setCurrentFrame)
+    .function("launchFrameIndex", &VggSdk::launchFrameIndex)
+    .function("setLaunchFrame", &VggSdk::setLaunchFrame)
+    // font
+    .function("requiredFonts", &VggSdk::requiredFonts)
     // event listener
     .function("addEventListener", &VggSdk::addEventListener)
     .function("removeEventListener", &VggSdk::removeEventListener)
     .function("getEventListeners", &VggSdk::getEventListeners)
     // editor
-    .function("save", &VggSdk::save);
+    .function("vggFileUint8Array", &VggSdk::vggFileUint8Array);
 }
 
 EMSCRIPTEN_BINDINGS(vgg_event)

@@ -16,6 +16,7 @@
 #include "Entry/SDL/AppSDLImpl.hpp"
 #include "BrowserMainComposer.hpp"
 
+#include "Application/Presenter.hpp"
 #include "Application/RunLoop.hpp"
 #include "Application/UIApplication.hpp"
 #include "Application/UIView.hpp"

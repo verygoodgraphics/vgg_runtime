@@ -122,7 +122,7 @@ TEST_F(ContainerTestSuite, Sdk)
   }
 
   {
-    const auto index = sdk->currentFrame();
+    const auto index = sdk->currentFrameIndex();
     EXPECT_EQ(index, 0);
   }
 
@@ -134,12 +134,12 @@ TEST_F(ContainerTestSuite, Sdk)
     auto success = sdk->setCurrentFrame("Frame 2");
     EXPECT_TRUE(success);
 
-    const auto index = sdk->currentFrame();
+    const auto index = sdk->currentFrameIndex();
     EXPECT_EQ(index, 1);
   }
 
   {
-    const auto launchFrameIndex = sdk->launchFrame();
+    const auto launchFrameIndex = sdk->launchFrameIndex();
     EXPECT_EQ(launchFrameIndex, 0);
   }
   {
@@ -150,7 +150,7 @@ TEST_F(ContainerTestSuite, Sdk)
     auto success = sdk->setLaunchFrame("Frame 2");
     EXPECT_TRUE(success);
 
-    const auto index = sdk->launchFrame();
+    const auto index = sdk->launchFrameIndex();
     EXPECT_EQ(index, 1);
   }
 

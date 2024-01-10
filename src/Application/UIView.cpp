@@ -357,6 +357,7 @@ void UIView::show(const ViewModel& viewModel, std::vector<PaintNodePtr> frames)
   m_skipUntilNextLoop = true;
 
   setSceneRoots(frames);
+  Scene::setPage(m_page);
 
   m_document = viewModel.layoutTree();
   // todo, merge edited doc resouces ?

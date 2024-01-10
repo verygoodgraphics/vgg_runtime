@@ -17,26 +17,25 @@
 #include "Renderer.hpp"
 
 #include "Layer/Scene.hpp"
-#include "Layer/SceneBuilder.hpp"
 #include "Layer/Zoomer.hpp"
 #include "Layer/Memory/VNew.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/RasterCacheImpl.hpp"
-#include "Utility/ConfigManager.hpp"
 #include "Utility/Log.hpp"
 
 #include <core/SkCanvas.h>
+#include <core/SkColor.h>
+#include <encode/SkPngEncoder.h>
 #include <core/SkSurface.h>
 #include <core/SkImage.h>
 
-#include <filesystem>
-#include <fstream>
 #include <gpu/GpuTypes.h>
 #include <gpu/GrDirectContext.h>
 #include <gpu/GrRecordingContext.h>
 #include <gpu/ganesh/SkSurfaceGanesh.h>
 #include <memory>
 #include <string>
+#include <fstream>
 
 extern std::unordered_map<std::string, sk_sp<SkImage>> g_skiaImageRepo;
 namespace VGG
@@ -66,13 +65,11 @@ public:
 
   std::unique_ptr<RasterCache>        cache;
   std::optional<RasterCache::EReason> reason;
-  std::vector<sk_sp<SkImage>>         tiles;
 
   Bound onRevalidate() override
   {
     // only revalidate cuurent page
     DEBUG("revalidate image");
-
     if (cache)
       cache->invalidate(RasterCache::EReason::CONTENT);
     if (auto f = currentFrame(true); f)
@@ -192,25 +189,30 @@ public:
       auto mat = canvas->getTotalMatrix(); // DPI * zoom
       auto recorder = canvas->recordingContext();
       frame->render(&renderer, nullptr);
-      const auto& b = frame->bound().bound(frame->transform());
       if (cache)
       {
         cache->raster(
           recorder,
           &mat,
           frame->picture(),
-          SkRect::MakeXYWH(b.topLeft().x, b.topLeft().y, b.width(), b.height()),
+          frame->bound(),
+          frame->transform().matrix(),
           zoomer.get(),
-          viewport.value_or(b),
+          viewport.value_or(frame->bound()),
           0);
+        std::vector<RasterCache::Tile> tiles;
         cache->queryTile(&tiles, &mat);
         canvas->save();
         canvas->resetMatrix();
         canvas->setMatrix(mat);
+        DEBUG("Translate: %f, %f", mat.getTranslateX(), mat.getTranslateY());
         for (auto& tile : tiles)
         {
-          auto r = tile->bounds();
-          canvas->drawImage(tile, r.x(), r.y());
+          canvas->drawImage(tile.image, tile.rect.left(), tile.rect.top());
+          SkPaint p;
+          p.setColor(SK_ColorCYAN);
+          p.setStyle(SkPaint::kStroke_Style);
+          canvas->drawRect(tile.rect, p);
         }
         canvas->restore();
       }
@@ -308,32 +310,24 @@ void Scene::setPage(int num)
 void Scene::onZoomScaleChanged(float scale)
 {
   DEBUG("Scene: onZoomScaleChanged");
-  invalidate();
-  if (d_ptr->cache)
-    d_ptr->cache->invalidate(RasterCache::EReason::ZOOM_SCALE);
+  d_ptr->cache->invalidate(RasterCache::EReason::ZOOM_SCALE);
 }
 
 void Scene::onZoomTranslationChanged(float x, float y)
 {
   DEBUG("Scene: onZoomTranslationChanged");
-  invalidate();
-  if (d_ptr->cache)
-    d_ptr->cache->invalidate(RasterCache::EReason::ZOOM_TRANSLATION);
+  d_ptr->cache->invalidate(RasterCache::EReason::ZOOM_TRANSLATION);
 }
 
 void Scene::onZoomViewportChanged(const Bound& bound)
 {
   DEBUG("Scene: onZoomViewportChanged");
-  invalidate();
-  if (d_ptr->cache)
-    d_ptr->cache->invalidate(RasterCache::EReason::VIEWPORT);
+  d_ptr->cache->invalidate(RasterCache::EReason::VIEWPORT);
 }
 
 void Scene::onViewportChange(const Bound& bound)
 {
-  d_ptr->viewport = bound;
-  if (d_ptr->cache)
-    d_ptr->cache->invalidate(RasterCache::EReason::VIEWPORT);
+  d_ptr->cache->invalidate(RasterCache::EReason::VIEWPORT);
 }
 
 void Scene::invalidateMask()

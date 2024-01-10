@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Layer/Core/RasterCacheImpl.hpp"
 #include "loader.hpp"
 
 #include "Layer/SceneBuilder.hpp"
@@ -93,7 +94,7 @@ protected:
       Config::readGlobalConfig(file);
     }
 
-    m_scene = std::make_shared<AppScene>();
+    m_scene = std::make_shared<AppScene>(std::make_unique<RasterCacheDefault>());
     m_scene->setZoomerListener(std::make_shared<AppZoomer>());
 
     std::map<std::string, std::vector<char>> resources;

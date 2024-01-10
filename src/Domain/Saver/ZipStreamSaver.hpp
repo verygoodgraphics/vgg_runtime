@@ -15,24 +15,29 @@
  */
 #pragma once
 
+#include "Domain/Saver.hpp"
+
+#include <vector>
+
+struct zip_t;
+
 namespace VGG
 {
 namespace Model
 {
 
-constexpr auto design_file_name = "design.json";
-constexpr auto layout_file_name = "layout.json";
-constexpr auto K_SETTINGS_FILE_NAME = "settings.json";
-constexpr auto event_listeners_file_name = "event_listeners.json";
+class ZipStreamSaver : public Saver
+{
+  zip_t* m_zipFile{ nullptr };
 
-constexpr auto ResourcesDir = "resources";
-constexpr auto ResourcesDirWithSlash = "resources/";
+public:
+  ZipStreamSaver();
+  ~ZipStreamSaver();
 
-constexpr auto js_file_suffix = ".mjs";
+  std::vector<uint8_t> buffer();
 
-constexpr auto file_name_key = "fileName";
-constexpr auto created_at_key = "createdAt";
-constexpr auto K_LAUNCH_FRAME_INDEX = "launchFrameIndex";
+  virtual void visit(const std::string& path, const std::vector<char>& content) override;
+};
 
 } // namespace Model
 } // namespace VGG

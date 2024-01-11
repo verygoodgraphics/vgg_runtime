@@ -43,6 +43,17 @@ public:
       , rect(rect)
     {
     }
+
+    Tile()
+      : image(nullptr)
+      , rect(SkRect::MakeEmpty())
+    {
+    }
+
+    Tile(Tile&& t) = default;
+    Tile& operator=(Tile&& t) = default;
+    Tile(const Tile& t) = default;
+    Tile& operator=(const Tile& t) = default;
   };
 
   struct Key

@@ -21,6 +21,7 @@
 #include "Layer/Memory/VNew.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/RasterCacheImpl.hpp"
+#include "encode/SkPngEncoder.h"
 #include "Utility/Log.hpp"
 
 #include <core/SkCanvas.h>
@@ -202,28 +203,33 @@ public:
 
         RasterCache::Tile* tile = nullptr;
         int                count = 0;
-
-        DEBUG("Translate: %f %f", mat.getTranslateX(), mat.getTranslateY());
         cache->queryTile(key, &tile, &count, &mat);
-        DEBUG("Translate: %f %f", mat.getTranslateX(), mat.getTranslateY());
         canvas->save();
         canvas->resetMatrix();
         canvas->setMatrix(mat);
-
-        DEBUG(
-          "Raster Tile Count: %d %f %f %f %f",
-          count,
-          mat.getScaleX(),
-          mat.getScaleY(),
-          mat.getTranslateX(),
-          mat.getTranslateY());
         for (int i = 0; i < count; i++)
         {
           canvas->drawImage(tile[i].image, tile[i].rect.left(), tile[i].rect.top());
           SkPaint p;
-          p.setColor(SK_ColorCYAN);
+          p.setColor(SK_ColorRED);
           p.setStyle(SkPaint::kStroke_Style);
           canvas->drawRect(tile[i].rect, p);
+
+          // SkPngEncoder::Options opt;
+          // if (auto data =
+          //       SkPngEncoder::Encode((GrDirectContext*)recorder, tile[i].image.get(), opt);
+          //     data)
+          // {
+          //   std::string name = "tile_" + std::to_string(tile->rect.left()) + "_" +
+          //                      std::to_string(tile->rect.top()) + "_" + std::to_string(i) +
+          //                      ".png";
+          //   DEBUG("output %f %f", tile->rect.left(), tile->rect.top());
+          //   std::ofstream out(name, std::ios::binary);
+          //   if (out.is_open())
+          //   {
+          //     out.write((const char*)data->data(), data->size());
+          //   }
+          // }
         }
         canvas->restore();
       }
@@ -344,6 +350,7 @@ void Scene::onZoomViewportChanged(const Bound& bound)
 
 void Scene::onViewportChange(const Bound& bound)
 {
+  d_ptr->viewport = bound;
   if (d_ptr->cache)
     d_ptr->cache->invalidate(RasterCache::EReason::VIEWPORT);
 }

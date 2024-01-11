@@ -51,6 +51,7 @@ class ExpandSymbol
   std::unordered_map<std::string, nlohmann::json> m_masters;
   std::unordered_map<std::string, nlohmann::json> m_layoutRules;
 
+  nlohmann::json           m_tmpOutDesignJson;
   std::vector<std::string> m_tmpDirtyNodeIds;
 
 public:
@@ -78,15 +79,9 @@ private:
   void layoutInstance(nlohmann::json& instance, const Size& instanceSize);
   void overrideLayoutRuleSize(const nlohmann::json& instanceId, const Size& instanceSize);
 
-  void resizeSubtree(
-    nlohmann::json&       rootTreeJson,
-    nlohmann::json&       subtreeJson,
-    const nlohmann::json& newBoundsJson);
+  void resizeSubtree(nlohmann::json& subtreeJson, const nlohmann::json& newBoundsJson);
 
-  void layoutSubtree(
-    nlohmann::json&       rootTreeJson,
-    const nlohmann::json& subtreeNodeId,
-    const nlohmann::json& newBoundsJson);
+  void layoutSubtree(const nlohmann::json& subtreeNodeId, Size size);
   void layoutDirtyNodes(nlohmann::json& rootTreeJson);
 
   void processMasterIdOverrides(

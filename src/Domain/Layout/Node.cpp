@@ -458,9 +458,18 @@ Layout::Point LayoutNode::converPointToAncestor(
   return { x, y };
 }
 
-void LayoutNode::scaleTo(const Layout::Size& newSize, bool updateRule)
+void LayoutNode::scaleTo(const Layout::Size& newSize, bool updateRule, bool preservingOrigin)
 {
-  const auto newFrame = calculateResizedFrame(newSize);
+  Layout::Rect newFrame;
+  if (preservingOrigin)
+  {
+    newFrame.origin = frame().origin;
+    newFrame.size = newSize;
+  }
+  else
+  {
+    newFrame = calculateResizedFrame(newSize);
+  }
 
   saveOldFrame();
   setFrame(newFrame, updateRule, true);

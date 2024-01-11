@@ -31,10 +31,7 @@ namespace VGG::layer
 {
 class RasterCacheDefault : public RasterCache
 {
-  std::vector<Tile>    m_caches;
-  std::optional<float> m_scale = 1.0f;
-  SkMatrix             m_transform;
-  bool                 m_transformUpdate{ false };
+  std::vector<Tile> m_caches;
 
   std::string printReason(uint32_t r)
   {
@@ -89,7 +86,6 @@ public:
       DEBUG("ignore zoom translation");
       return reason;
     }
-
     // if (reason & ZOOM_SCALE)
     // {
     //   DEBUG("current zoom scale: %f", zoomScale);
@@ -103,9 +99,8 @@ public:
     // }
     auto        skr = toSkRect(bound);
     auto        skm = *transform * toSkMatrix(mat);
-    // auto        rect = skm.mapRect(skr);
     float       scaleX = skm.getScaleX();
-    float       scaleY = skm.getScaleX();
+    float       scaleY = skm.getScaleY();
     SkImageInfo info = SkImageInfo::MakeN32Premul(skr.width() * scaleX, skr.height() * scaleY);
     if (auto surface = SkSurfaces::RenderTarget(context, skgpu::Budgeted::kYes, info); surface)
     {
@@ -129,7 +124,6 @@ public:
         canvas->drawPicture(pic);
         m_caches = { { surface->makeImageSnapshot(),
                        SkRect::MakeXYWH(0, 0, viewport.width(), viewport.height()) } };
-        m_transform = SkMatrix::I();
       }
       else
       {

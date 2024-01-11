@@ -191,34 +191,48 @@ public:
       frame->render(&renderer, nullptr);
       if (cache)
       {
-        cache->raster(
-          recorder,
-          &mat,
-          frame->picture(),
-          frame->bound(),
-          frame->transform().matrix(),
-          zoomer.get(),
-          viewport.value_or(frame->bound()),
-          0);
-        std::vector<RasterCache::Tile> tiles;
-        cache->queryTile(&tiles, &mat);
+        RasterCache::Key key{ recorder,
+                              &mat,
+                              frame->picture(),
+                              frame->bound(),
+                              frame->transform().matrix(),
+                              zoomer.get(),
+                              viewport.value_or(frame->bound()),
+                              0 };
+
+        RasterCache::Tile* tile = nullptr;
+        int                count = 0;
+
+        DEBUG("Translate: %f %f", mat.getTranslateX(), mat.getTranslateY());
+        cache->queryTile(key, &tile, &count, &mat);
+        DEBUG("Translate: %f %f", mat.getTranslateX(), mat.getTranslateY());
         canvas->save();
         canvas->resetMatrix();
         canvas->setMatrix(mat);
-        DEBUG("Translate: %f, %f", mat.getTranslateX(), mat.getTranslateY());
-        for (auto& tile : tiles)
+
+        DEBUG(
+          "Raster Tile Count: %d %f %f %f %f",
+          count,
+          mat.getScaleX(),
+          mat.getScaleY(),
+          mat.getTranslateX(),
+          mat.getTranslateY());
+        for (int i = 0; i < count; i++)
         {
-          canvas->drawImage(tile.image, tile.rect.left(), tile.rect.top());
+          canvas->drawImage(tile[i].image, tile[i].rect.left(), tile[i].rect.top());
           SkPaint p;
           p.setColor(SK_ColorCYAN);
           p.setStyle(SkPaint::kStroke_Style);
-          canvas->drawRect(tile.rect, p);
+          canvas->drawRect(tile[i].rect, p);
         }
         canvas->restore();
       }
       else
       {
+        canvas->save();
+        canvas->concat(toSkMatrix(frame->transform().matrix()));
         canvas->drawPicture(frame->picture());
+        canvas->restore();
       }
     }
   }
@@ -310,24 +324,28 @@ void Scene::setPage(int num)
 void Scene::onZoomScaleChanged(float scale)
 {
   DEBUG("Scene: onZoomScaleChanged");
-  d_ptr->cache->invalidate(RasterCache::EReason::ZOOM_SCALE);
+  if (d_ptr->cache)
+    d_ptr->cache->invalidate(RasterCache::EReason::ZOOM_SCALE);
 }
 
 void Scene::onZoomTranslationChanged(float x, float y)
 {
   DEBUG("Scene: onZoomTranslationChanged");
-  d_ptr->cache->invalidate(RasterCache::EReason::ZOOM_TRANSLATION);
+  if (d_ptr->cache)
+    d_ptr->cache->invalidate(RasterCache::EReason::ZOOM_TRANSLATION);
 }
 
 void Scene::onZoomViewportChanged(const Bound& bound)
 {
   DEBUG("Scene: onZoomViewportChanged");
-  d_ptr->cache->invalidate(RasterCache::EReason::VIEWPORT);
+  if (d_ptr->cache)
+    d_ptr->cache->invalidate(RasterCache::EReason::VIEWPORT);
 }
 
 void Scene::onViewportChange(const Bound& bound)
 {
-  d_ptr->cache->invalidate(RasterCache::EReason::VIEWPORT);
+  if (d_ptr->cache)
+    d_ptr->cache->invalidate(RasterCache::EReason::VIEWPORT);
 }
 
 void Scene::invalidateMask()

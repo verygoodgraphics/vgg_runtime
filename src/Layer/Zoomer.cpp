@@ -22,6 +22,11 @@
 void Zoomer::setOwnerScene(Scene* owner)
 {
   m_owner = owner;
+  if (m_owner)
+  {
+    m_owner->onZoomScaleChanged(m_zoom);
+    m_owner->onZoomTranslationChanged(m_offset.x, m_offset.y);
+  }
 }
 
 Vec2 Zoomer::doTranslate(float x, float y)

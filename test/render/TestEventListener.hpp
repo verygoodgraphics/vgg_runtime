@@ -95,6 +95,7 @@ protected:
     }
 
     m_scene = std::make_shared<AppScene>(std::make_unique<RasterCacheDefault>());
+    // m_scene = std::make_shared<AppScene>();
     m_scene->setZoomerListener(std::make_shared<AppZoomer>());
 
     std::map<std::string, std::vector<char>> resources;

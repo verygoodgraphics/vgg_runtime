@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-#include "MockSkiaGraphicsContext.hpp"
-
+#include "Application/Presenter.hpp"
 #include "Entry/Container/Container.hpp"
 
 #include "test_config.hpp"
+#include "MockSkiaGraphicsContext.hpp"
 
 #include <nlohmann/json.hpp>
 
 #include <gtest/gtest.h>
-
 #include <thread>
 
 using namespace VGG;
@@ -159,6 +158,10 @@ TEST_F(ContainerTestSuite, Sdk)
 
     auto fonts = nlohmann::json::parse(fontsJsonString);
     EXPECT_EQ(fonts.size(), 1);
+
+    FontInfo font = fonts[0];
+    EXPECT_EQ(font.familyName, "Inter");
+    EXPECT_EQ(font.subfamilyName, "Regular");
   }
 
   {

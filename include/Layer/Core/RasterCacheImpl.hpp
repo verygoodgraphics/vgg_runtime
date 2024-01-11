@@ -62,6 +62,15 @@ class RasterCacheDefault : public RasterCache
 
 public:
   RasterCacheDefault() = default;
+
+  void onQueryTile(Tile** tiles, int* count, SkMatrix* transform) override
+  {
+    *tiles = m_caches.data();
+    *count = m_caches.size();
+    (*transform)[SkMatrix::kMScaleX] = 1;
+    (*transform)[SkMatrix::kMScaleY] = 1;
+  }
+
   uint32_t onRaster(
     uint32_t            reason,
     GrRecordingContext* context,
@@ -78,10 +87,9 @@ public:
     if ((reason & ZOOM_TRANSLATION) && !(reason & ZOOM_SCALE))
     {
       DEBUG("ignore zoom translation");
-      m_transformUpdate = false;
       return reason;
     }
-    // auto zoomScale = zoomer->scale();
+
     // if (reason & ZOOM_SCALE)
     // {
     //   DEBUG("current zoom scale: %f", zoomScale);
@@ -93,29 +101,26 @@ public:
     //     return reason;
     //   }
     // }
-
-    auto skr = toSkRect(bound);
-    auto skm = *transform * toSkMatrix(mat);
-    auto rect = skm.mapRect(skr);
-
-    SkImageInfo info = SkImageInfo::MakeN32Premul(rect.width(), rect.height());
+    auto        skr = toSkRect(bound);
+    auto        skm = *transform * toSkMatrix(mat);
+    // auto        rect = skm.mapRect(skr);
+    float       scaleX = skm.getScaleX();
+    float       scaleY = skm.getScaleX();
+    SkImageInfo info = SkImageInfo::MakeN32Premul(skr.width() * scaleX, skr.height() * scaleY);
     if (auto surface = SkSurfaces::RenderTarget(context, skgpu::Budgeted::kYes, info); surface)
     {
-      DEBUG("Raster Image Size: [%f, %f]", rect.width(), rect.height());
+      DEBUG("Raster Image Size: [%f, %f]", scaleX, scaleY);
       auto canvas = surface->getCanvas();
-      auto m = skm;
-      m.postTranslate(-rect.left(), -rect.top());
-      canvas->setMatrix(m);
+      canvas->scale(scaleX, scaleY);
+      canvas->concat(toSkMatrix(mat));
       canvas->drawPicture(pic);
       m_caches = { { surface->makeImageSnapshot(),
-                     SkRect::MakeXYWH(0, 0, rect.width(), rect.height()) } };
-      m_transform = SkMatrix::Translate(skm.getTranslateX(), skm.getTranslateY());
-      m_transformUpdate = true;
+                     SkRect::MakeXYWH(0, 0, info.width(), info.height()) } };
     }
     else
     {
-      // Maybe it's too large, so just cache as viewport size
-      info = SkImageInfo::MakeN32Premul(viewport.width(), viewport.height());
+      // Maybe it's too large, so just cache as viewport size info =
+      SkImageInfo::MakeN32Premul(viewport.width(), viewport.height());
       if (auto surface = SkSurfaces::RenderTarget(context, skgpu::Budgeted::kYes, info); surface)
       {
         auto canvas = surface->getCanvas();
@@ -125,7 +130,6 @@ public:
         m_caches = { { surface->makeImageSnapshot(),
                        SkRect::MakeXYWH(0, 0, viewport.width(), viewport.height()) } };
         m_transform = SkMatrix::I();
-        m_transformUpdate = true;
       }
       else
       {
@@ -133,21 +137,7 @@ public:
         return 0;
       }
     }
-    // m_scale = zoomScale;
     return reason;
-  }
-
-  void onQueryTile(std::vector<Tile>* tiles, SkMatrix* transform) override
-  {
-    if (m_caches.empty())
-      return;
-    tiles->clear();
-    tiles->push_back(m_caches[0]);
-    if (m_transformUpdate)
-    {
-      *transform = m_transform;
-      m_transformUpdate = false;
-    }
   }
 };
 

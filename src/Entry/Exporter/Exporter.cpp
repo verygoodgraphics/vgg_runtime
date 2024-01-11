@@ -335,9 +335,9 @@ public:
   {
     if (!tryNext())
       return false;
-
     auto f = scene->frame(index);
     scene->setPage(index);
+    f->revalidate();
     const auto b = f->bound();
     const auto id = f->guid();
     int        w = b.size().x;

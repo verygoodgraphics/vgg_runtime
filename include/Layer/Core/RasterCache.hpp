@@ -44,6 +44,39 @@ public:
     {
     }
   };
+
+  struct Key
+  {
+    GrRecordingContext* context;
+    const SkMatrix*     transform;
+    SkPicture*          pic;
+    const Bound&        bound;
+    const glm::mat3&    mat;
+    const Zoomer*       zoomer;
+    const Bound&        viewport;
+    void*               userData;
+
+    Key(
+      GrRecordingContext* context,
+      const SkMatrix*     transform,
+      SkPicture*          pic,
+      const Bound&        bound,
+      const glm::mat3&    mat,
+      const Zoomer*       zoomer,
+      const Bound&        viewport,
+      void*               userData)
+      : context(context)
+      , transform(transform)
+      , pic(pic)
+      , bound(bound)
+      , mat(mat)
+      , zoomer(zoomer)
+      , viewport(viewport)
+      , userData(userData)
+    {
+    }
+  };
+
   enum EReason : uint32_t
   {
     ZOOM_TRANSLATION = 1,
@@ -67,29 +100,24 @@ public:
   {
     return m_reason != 0;
   }
-  void raster(
-    GrRecordingContext* context,
-    const SkMatrix*     transform,
 
-    SkPicture*       pic,
-    const Bound&     bound,
-    const glm::mat3& mat,
-
-    const Zoomer* zoomer,
-    const Bound&  viewport,
-    void*         userData)
+  void queryTile(const Key& key, Tile** tiles, int* count, SkMatrix* transform)
   {
     if (isInvalidate())
     {
-      auto clear =
-        onRaster(m_reason, context, transform, pic, bound, mat, zoomer, viewport, userData);
+      auto clear = onRaster(
+        m_reason,
+        key.context,
+        key.transform,
+        key.pic,
+        key.bound,
+        key.mat,
+        key.zoomer,
+        key.viewport,
+        key.userData);
       m_reason &= ~clear;
     }
-  }
-
-  void queryTile(std::vector<Tile>* tiles, SkMatrix* transform)
-  {
-    onQueryTile(tiles, transform);
+    onQueryTile(tiles, count, transform);
   }
 
 protected:
@@ -104,7 +132,7 @@ protected:
     const Bound&        viewport,
     void*               userData) = 0;
 
-  virtual void onQueryTile(std::vector<Tile>* tiles, SkMatrix* transform) = 0;
+  virtual void onQueryTile(Tile** tiles, int* count, SkMatrix* transform) = 0;
 
 private:
   uint32_t m_reason;

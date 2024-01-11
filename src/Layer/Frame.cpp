@@ -21,6 +21,7 @@
 #include "Layer/Renderer.hpp"
 
 #include <core/SkBBHFactory.h>
+#include <core/SkColor.h>
 #include <core/SkSurface.h>
 #include <core/SkPictureRecorder.h>
 
@@ -55,16 +56,20 @@ public:
     SkPictureRecorder rec;
     const auto&       b = q_ptr->bound();
     auto              rt = SkRTreeFactory();
-    auto pictureCanvas = rec.beginRecording(clipBound.width(), clipBound.height(), &rt);
+    auto              pictureCanvas = rec.beginRecording(
+      SkRect::MakeXYWH(b.topLeft().x, b.topLeft().y, b.width(), b.height()),
+      &rt);
     if (mat)
       pictureCanvas->setMatrix(*mat);
-    if (enableToOrigin)
-    {
-      pictureCanvas->translate(-b.topLeft().x, -b.topLeft().y);
-      transform.setMatrix(
-        glm::translate(glm::mat3{ 1 }, glm::vec2(-b.topLeft().x, -b.topLeft().y)));
-    }
     renderer->draw(pictureCanvas, root);
+    if (renderer->isEnableDrawDebugBound())
+    {
+      SkPaint paint;
+      paint.setColor(SK_ColorBLUE);
+      paint.setStyle(SkPaint::kStroke_Style);
+      paint.setStrokeWidth(1);
+      pictureCanvas->drawRect(toSkRect(b), paint);
+    }
     cache = rec.finishRecordingAsPicture();
     ASSERT(cache);
   }
@@ -117,9 +122,15 @@ Bound Frame::onRevalidate()
 {
   VGG_IMPL(Frame);
   ASSERT(_->root);
-  DEBUG("Clear frame cache");
   _->cache = nullptr;
-  return _->root->revalidate().bound(_->root->transform());
+  auto b = _->root->revalidate().bound(_->root->transform());
+  _->transform.setMatrix(glm::mat3{ 1 });
+  if (_->enableToOrigin)
+  {
+    _->transform.setMatrix(
+      glm::translate(glm::mat3{ 1 }, glm::vec2(-b.topLeft().x, -b.topLeft().y)));
+  }
+  return b;
 }
 
 void Frame::setClipBound(const Bound& bound)

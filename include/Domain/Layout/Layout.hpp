@@ -44,18 +44,18 @@ public:
   using RuleMapPtr = std::shared_ptr<RuleMap>;
 
 private:
-  JsonDocumentPtr m_designDoc;
+  JsonDocumentPtr             m_designDoc;
   std::shared_ptr<LayoutNode> m_layoutTree;
-  RuleMapPtr m_rules;
-  bool m_isRootTree{ true }; // root document or fragment
-  std::vector<Size> m_pageSize;
+  RuleMapPtr                  m_rules;
+  bool                        m_isRootTree{ true }; // root document or fragment
+  std::vector<Size>           m_pageSize;
 
 public:
   Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc, bool isRootTree = true);
   Layout(JsonDocumentPtr designDoc, RuleMapPtr rules, bool isRootTree = true);
 
   void layout(Size size, bool updateRule = false);
-  void resizeNodeThenLayout(const std::string& nodeId, Size size);
+  void resizeNodeThenLayout(const std::string& nodeId, Size size, bool preservingOrigin);
   void layoutNodes(const std::vector<std::string>& nodeIds);
 
   std::shared_ptr<LayoutNode> layoutTree() const
@@ -74,17 +74,20 @@ public:
   static RuleMapPtr collectRules(const nlohmann::json& json);
 
 private:
-  void buildLayoutTree();
-  std::shared_ptr<LayoutNode> createOneLayoutNode(const nlohmann::json& j,
-                                                  nlohmann::json::json_pointer currentPath,
-                                                  std::shared_ptr<LayoutNode> parent);
-  void createLayoutNodes(const nlohmann::json& j,
-                         nlohmann::json::json_pointer currentPath,
-                         std::shared_ptr<LayoutNode> parent);
+  void                        buildLayoutTree();
+  std::shared_ptr<LayoutNode> createOneLayoutNode(
+    const nlohmann::json&        j,
+    nlohmann::json::json_pointer currentPath,
+    std::shared_ptr<LayoutNode>  parent);
+  void createLayoutNodes(
+    const nlohmann::json&        j,
+    nlohmann::json::json_pointer currentPath,
+    std::shared_ptr<LayoutNode>  parent);
 
-  void createOneOrMoreLayoutNodes(const nlohmann::json& j,
-                                  nlohmann::json::json_pointer currentPath,
-                                  std::shared_ptr<LayoutNode> parent);
+  void createOneOrMoreLayoutNodes(
+    const nlohmann::json&        j,
+    nlohmann::json::json_pointer currentPath,
+    std::shared_ptr<LayoutNode>  parent);
   void configureNodeAutoLayout(std::shared_ptr<LayoutNode> node);
 
   bool hasFirstOnTopNode();

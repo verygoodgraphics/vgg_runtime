@@ -74,7 +74,7 @@ void Layout::Layout::layout(Size size, bool updateRule)
     // udpate page frame
     for (auto& page : root->children())
     {
-      page->scaleTo(size, updateRule);
+      page->scaleTo(size, updateRule, true);
     }
   }
   else
@@ -317,12 +317,15 @@ void Layout::Layout::reverseChildren(nlohmann::json& json)
   }
 }
 
-void Layout::Layout::resizeNodeThenLayout(const std::string& nodeId, Size size)
+void Layout::Layout::resizeNodeThenLayout(
+  const std::string& nodeId,
+  Size               size,
+  bool               preservingOrigin)
 {
   if (auto node = m_layoutTree->findDescendantNodeById(nodeId))
   {
     DEBUG("Layout::resizeNodeThenLayout: resize subtree, %s", nodeId.c_str());
-    node->scaleTo(size, true);
+    node->scaleTo(size, true, preservingOrigin);
 
     m_layoutTree->layoutIfNeeded();
   }

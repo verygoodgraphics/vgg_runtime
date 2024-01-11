@@ -126,7 +126,7 @@ public:
 
   void setNeedLayout();
   void layoutIfNeeded();
-  void scaleTo(const Layout::Size& newSize, bool updateRule);
+  void scaleTo(const Layout::Size& newSize, bool updateRule, bool preservingOrigin);
 
   std::shared_ptr<LayoutNode> findDescendantNodeById(const std::string& id);
 

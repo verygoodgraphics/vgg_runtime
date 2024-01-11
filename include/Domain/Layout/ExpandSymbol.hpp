@@ -81,7 +81,7 @@ private:
 
   void resizeSubtree(nlohmann::json& subtreeJson, const nlohmann::json& newBoundsJson);
 
-  void layoutSubtree(const nlohmann::json& subtreeNodeId, Size size);
+  void layoutSubtree(const nlohmann::json& subtreeNodeId, Size size, bool preservingOrigin);
   void layoutDirtyNodes(nlohmann::json& rootTreeJson);
 
   void processMasterIdOverrides(

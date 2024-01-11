@@ -403,7 +403,7 @@ int Daruma::getLaunchFrameIndex() const
 bool Daruma::setLaunchFrame(const std::string& name)
 {
   auto index = getFrameIndex(name);
-  if (index != -1)
+  if (index >= 0)
   {
     m_settingsDoc[K_LAUNCH_FRAME_INDEX] = index;
     return true;

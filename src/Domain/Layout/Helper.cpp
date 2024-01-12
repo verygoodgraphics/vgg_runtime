@@ -92,7 +92,22 @@ bool isLayoutNode(const nlohmann::json& json)
     return false;
   }
 
-  auto className = json.value(K_CLASS, "");
+  // For better performance, reduce json key string construction
+  static std::string s_classKey{ K_CLASS };
+
+  if (!json.contains(s_classKey))
+  {
+    return false;
+  }
+
+  auto& classJson = json[s_classKey];
+  auto  classNamePtr = classJson.get_ptr<const nlohmann::json::string_t*>();
+  if (!classNamePtr)
+  {
+    return false;
+  }
+
+  auto& className = *classNamePtr;
   if (
     className == K_FRAME || className == K_GROUP || className == K_IMAGE || className == K_PATH ||
     className == K_SYMBOL_INSTANCE || className == K_SYMBOL_MASTER || className == K_TEXT)

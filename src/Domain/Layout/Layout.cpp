@@ -116,7 +116,7 @@ void Layout::Layout::buildLayoutTree()
 
 std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(
   const nlohmann::json&       j,
-  json::json_pointer          currentPath,
+  const json::json_pointer&   currentPath,
   std::shared_ptr<LayoutNode> parent)
 {
   if (!j.is_object())
@@ -130,19 +130,18 @@ std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(
     return nullptr;
   }
 
-  auto node = std::make_shared<LayoutNode>(currentPath.to_string());
+  const auto& path = currentPath.to_string();
+  auto        node = std::make_shared<LayoutNode>(path);
   node->setViewModel(m_designDoc);
   if (parent)
   {
     parent->addChild(node);
   }
 
-  for (auto& [key, val] : j.items())
+  if (j.contains(K_CHILD_OBJECTS))
   {
-    auto path = currentPath;
-    path /= key;
-
-    createOneOrMoreLayoutNodes(val, path, node);
+    auto path = currentPath / K_CHILD_OBJECTS;
+    createLayoutNodes(j[K_CHILD_OBJECTS], path, node);
   }
 
   if (j[K_CLASS] == K_PATH)
@@ -162,7 +161,7 @@ std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(
 
 void Layout::Layout::createLayoutNodes(
   const nlohmann::json&       j,
-  json::json_pointer          currentPath,
+  const json::json_pointer&   currentPath,
   std::shared_ptr<LayoutNode> parent)
 {
   if (!j.is_array())
@@ -172,18 +171,18 @@ void Layout::Layout::createLayoutNodes(
   }
 
   auto size = j.size();
+  auto path = currentPath;
   for (std::size_t i = 0; i < size; ++i)
   {
-    auto path = currentPath;
     path /= i;
-
     createOneOrMoreLayoutNodes(j[i], path, parent);
+    path.pop_back();
   }
 }
 
 void Layout::Layout::createOneOrMoreLayoutNodes(
   const nlohmann::json&       j,
-  json::json_pointer          currentPath,
+  const json::json_pointer&   currentPath,
   std::shared_ptr<LayoutNode> parent)
 {
   if (j.is_object())

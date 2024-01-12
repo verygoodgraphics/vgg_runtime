@@ -76,18 +76,18 @@ public:
 private:
   void                        buildLayoutTree();
   std::shared_ptr<LayoutNode> createOneLayoutNode(
-    const nlohmann::json&        j,
-    nlohmann::json::json_pointer currentPath,
-    std::shared_ptr<LayoutNode>  parent);
+    const nlohmann::json&               j,
+    const nlohmann::json::json_pointer& currentPath,
+    std::shared_ptr<LayoutNode>         parent);
   void createLayoutNodes(
-    const nlohmann::json&        j,
-    nlohmann::json::json_pointer currentPath,
-    std::shared_ptr<LayoutNode>  parent);
+    const nlohmann::json&               j,
+    const nlohmann::json::json_pointer& currentPath,
+    std::shared_ptr<LayoutNode>         parent);
 
   void createOneOrMoreLayoutNodes(
-    const nlohmann::json&        j,
-    nlohmann::json::json_pointer currentPath,
-    std::shared_ptr<LayoutNode>  parent);
+    const nlohmann::json&               j,
+    const nlohmann::json::json_pointer& currentPath,
+    std::shared_ptr<LayoutNode>         parent);
   void configureNodeAutoLayout(std::shared_ptr<LayoutNode> node);
 
   bool hasFirstOnTopNode();

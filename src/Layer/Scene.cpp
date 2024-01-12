@@ -210,10 +210,10 @@ public:
         for (int i = 0; i < count; i++)
         {
           canvas->drawImage(tile[i].image, tile[i].rect.left(), tile[i].rect.top());
-          SkPaint p;
-          p.setColor(SK_ColorRED);
-          p.setStyle(SkPaint::kStroke_Style);
-          canvas->drawRect(tile[i].rect, p);
+          // SkPaint p;
+          // p.setColor(SK_ColorRED);
+          // p.setStyle(SkPaint::kStroke_Style);
+          // canvas->drawRect(tile[i].rect, p);
 
           // SkPngEncoder::Options opt;
           // if (auto data =

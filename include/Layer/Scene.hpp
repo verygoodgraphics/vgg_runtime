@@ -97,7 +97,6 @@ public:
 
 protected:
   void onRender(SkCanvas* canvas) override;
-  void onRepaint();
 
 protected:
   virtual void onZoomScaleChanged(float scale);

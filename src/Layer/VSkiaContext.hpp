@@ -167,12 +167,6 @@ public:
     return m_grContext.get();
   }
 
-  // TODO:: temporary solution
-  sk_sp<SkSurface> createSurface(int w, int h)
-  {
-    return m_skiaSurfaceCreateProc(m_grContext.get(), w, h, m_ctxConfig);
-  }
-
   ~SkiaContext()
   {
     release();

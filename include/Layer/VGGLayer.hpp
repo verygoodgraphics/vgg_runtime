@@ -113,7 +113,6 @@ public:
   void                             makeSKP(std::ostream& os);
 
   sk_sp<SkPicture> makeSkPicture(int width, int height);
-  sk_sp<SkSurface> makeGPUSurface(int width, int height);
 };
 
 } // namespace VGG::layer

@@ -345,6 +345,11 @@ bool UIView::handleMouseEvent(
 
 void UIView::show(const ViewModel& viewModel)
 {
+  if (m_skipUntilNextLoop)
+  {
+    return;
+  }
+
   show(viewModel, layer::SceneBuilder::build(viewModel.designDoc()->content()));
 }
 

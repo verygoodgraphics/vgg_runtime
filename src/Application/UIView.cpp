@@ -353,7 +353,7 @@ void UIView::show(const ViewModel& viewModel)
   show(viewModel, layer::SceneBuilder::build(viewModel.designDoc()->content()));
 }
 
-void UIView::show(const ViewModel& viewModel, std::vector<PaintNodePtr> frames)
+void UIView::show(const ViewModel& viewModel, std::vector<FramePtr> frames)
 {
   if (m_skipUntilNextLoop)
   {

@@ -81,7 +81,7 @@ public:
   }
 
   void show(const ViewModel& viewModel);
-  void show(const ViewModel& viewModel, std::vector<PaintNodePtr> frames);
+  void show(const ViewModel& viewModel, std::vector<FramePtr> frames);
   void fitContent(float xOffset, float yOffset, float scale);
   void fitCurrentPage();
 

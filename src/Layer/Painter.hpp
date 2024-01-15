@@ -42,82 +42,6 @@
 
 sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound& bound);
 
-template<typename K, typename V>
-class LRUCache
-{
-private:
-  struct Entry
-  {
-    Entry(const K& key, V&& value)
-      : fKey(key)
-      , fValue(std::move(value))
-    {
-    }
-
-    K fKey;
-    V fValue;
-  };
-
-public:
-  explicit LRUCache()
-  {
-  }
-
-  LRUCache(const LRUCache&) = delete;
-  LRUCache& operator=(const LRUCache&) = delete;
-
-  V* find(const K& key)
-  {
-    if (auto it = m_map.find(key); it != m_map.end())
-    {
-      return it->second->fValue;
-    }
-    return nullptr;
-  }
-
-  V* insert(const K& key, V value)
-  {
-    if (auto it = m_map.find(key); it != m_map.end())
-    {
-      return nullptr;
-    }
-    Entry* entry = new Entry(key, std::move(value));
-    m_map[key] = entry;
-    return entry;
-  }
-
-  V* insertOrUpdate(const K& key, V value)
-  {
-    if (auto it = m_map.find(key); it != m_map.end())
-    {
-      *(it->second->fValue) = std::move(value);
-      return it->second->fValue;
-    }
-    else
-    {
-      Entry* entry = new Entry(key, std::move(value));
-      m_map[key] = entry;
-      return entry;
-    }
-  }
-
-  int count() const
-  {
-    return m_map.count();
-  }
-
-  void reset()
-  {
-    m_map.clear();
-  }
-
-private:
-  void remove(const K& key)
-  {
-  }
-  std::unordered_map<K, V*> m_map;
-};
-
 using namespace VGG;
 class Painter
 {
@@ -130,13 +54,11 @@ public:
   };
 
 private:
-  bool                           m_antiAlias{ true };
-  Renderer*                      m_renderer{ nullptr };
-  sk_sp<SkImageFilter>           m_imageFilter;
-  sk_sp<SkBlender>               m_blender;
-  sk_sp<SkMaskFilter>            m_maskFilter;
-  inline static sk_sp<SkBlender> s_maskBlender1;
-  inline static sk_sp<SkBlender> s_maskBlender2;
+  bool                 m_antiAlias{ true };
+  Renderer*            m_renderer{ nullptr };
+  sk_sp<SkImageFilter> m_imageFilter;
+  sk_sp<SkBlender>     m_blender;
+  sk_sp<SkMaskFilter>  m_maskFilter;
 
   static SkPaint::Style toSkPaintStyle(EStyle style)
   {
@@ -246,48 +168,6 @@ private:
   }
 
 public:
-  static sk_sp<SkBlender> getMaskBlender()
-  {
-    if (!s_maskBlender1)
-    {
-      auto result = SkRuntimeEffect::MakeForBlender(SkString(R"(
-			vec4 main(vec4 srcColor, vec4 dstColor){
-		       return vec4(dstColor.rgb, srcColor.a);
-			}
-)"));
-
-      if (!result.effect)
-      {
-        DEBUG("Runtime Effect Failed: %s", result.errorText.data());
-        return nullptr;
-      }
-      auto blender = result.effect->makeBlender(nullptr);
-      s_maskBlender1 = std::move(blender);
-    }
-    return s_maskBlender1;
-  };
-
-  static sk_sp<SkBlender> getStyleMaskBlender()
-  {
-    if (s_maskBlender2)
-    {
-      auto result = SkRuntimeEffect::MakeForBlender(SkString(R"(
-			vec4 main(vec4 srcColor, vec4 dstColor){
-			 vec4 color = srcColor + dstColor * (1.0 - srcColor.a);
-			 return color * dstColor.a;
-			}
-			)"));
-      if (!result.effect)
-      {
-        DEBUG("Runtime Effect Failed: %s", result.errorText.data());
-        return nullptr;
-      }
-      auto blender = result.effect->makeBlender(nullptr);
-      s_maskBlender2 = std::move(blender);
-    }
-    return s_maskBlender2;
-  }
-
   Painter(Renderer* renderer)
     : m_renderer(renderer)
   {

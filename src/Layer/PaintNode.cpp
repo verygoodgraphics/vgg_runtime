@@ -183,35 +183,36 @@ void PaintNode::paintPass(Renderer* renderer, int zorder)
     _->mask = makeMaskBy(BO_Intersection, renderer).outlineMask;
   }
 
-  if (!_->alphaMask)
-  {
-    MaskObject mo;
-    auto       iter = _->alphaMaskBy.cbegin();
-    auto       end = _->alphaMaskBy.cend();
-    auto       comp = _->calcMaskObjects(renderer, iter, end, [](const auto& e) { return e.id; });
-    SkPath     path;
-    for (const auto& e : comp)
-    {
-      if (path.isEmpty())
-      {
-        path = e.first->asOutlineMask(&e.second).outlineMask;
-      }
-      else
-      {
-        Op(
-          path,
-          e.first->asOutlineMask(&e.second).outlineMask,
-          SkPathOp::kIntersect_SkPathOp,
-          &path);
-      }
-    }
-    if (!path.isEmpty())
-    {
-      mo.contour = std::move(path);
-      mo.components = std::move(comp);
-      _->alphaMask = std::move(mo);
-    }
-  }
+  _->ensureAlphaMask(renderer);
+
+  // if (!_->alphaMask)
+  // {
+  //   MaskObject mo;
+  //   auto       iter = _->alphaMaskBy.cbegin();
+  //   auto       end = _->alphaMaskBy.cend();
+  //   auto       comp = _->calcMaskObjects(renderer, iter, end, [](const auto& e) { return e.id;
+  //   }); SkPath     path; for (const auto& e : comp)
+  //   {
+  //     if (path.isEmpty())
+  //     {
+  //       path = e.first->asOutlineMask(&e.second).outlineMask;
+  //     }
+  //     else
+  //     {
+  //       Op(
+  //         path,
+  //         e.first->asOutlineMask(&e.second).outlineMask,
+  //         SkPathOp::kIntersect_SkPathOp,
+  //         &path);
+  //     }
+  //   }
+  //   if (!path.isEmpty())
+  //   {
+  //     mo.contour = std::move(path);
+  //     mo.components = std::move(comp);
+  //     _->alphaMask = std::move(mo);
+  //   }
+  // }
 
   this->paintEvent(renderer);
 }

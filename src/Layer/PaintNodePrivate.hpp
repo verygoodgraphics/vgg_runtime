@@ -18,7 +18,9 @@
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Renderer.hpp"
+#include "Layer/BlenderImpl.hpp"
 #include "Layer/Painter.hpp"
+#include "Layer/SkSL.hpp"
 #include "Utility/HelperMacro.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Renderer.hpp"
@@ -51,8 +53,20 @@ Bound calcMaskAreaIntersection(const Bound& pruneBound, PaintNode* obj, F&& f)
 
 struct MaskObject
 {
-  SkPath                                        contour;
-  std::vector<std::pair<PaintNode*, Transform>> components;
+  struct MaskData
+  {
+    PaintNode*       mask{ nullptr };
+    Transform        transform;
+    sk_sp<SkBlender> blender{ nullptr };
+    MaskData(PaintNode* p, const Transform& t, sk_sp<SkBlender> blender)
+      : mask(p)
+      , transform(t)
+      , blender(std::move(blender))
+    {
+    }
+  };
+  std::vector<MaskData> components;
+  SkPath                contour;
 };
 
 class PaintNode__pImpl // NOLINT
@@ -117,31 +131,27 @@ public:
     return *this;
   }
 
-  template<typename Iter1, typename Iter2, typename F>
-  std::vector<std::pair<PaintNode*, Transform>> calcMaskObjects(
-    Renderer* renderer,
-    Iter1     begin,
-    Iter2     end,
-    F&&       f)
+  void ensureAlphaMask(Renderer* renderer)
   {
-    // auto                                          canvas = renderer->canvas();
-    const auto&                                   objects = renderer->maskObjects();
-    std::vector<std::pair<PaintNode*, Transform>> cache;
-    // auto                                          maskAreaBound = Bound::makeInfinite();
-    // const auto&                                   selfBound = q_ptr->bound();
-    for (auto it = begin; it != end; ++it)
+    if (alphaMask)
+      return;
+    auto        cache = MaskObject();
+    const auto& objects = renderer->maskObjects();
+    // auto        maskAreaBound = q_ptr->bound();
+    for (auto it = alphaMaskBy.begin(); it != alphaMaskBy.end(); ++it)
     {
-      const auto& id = f(*it);
+      const auto& id = it->id;
       if (id != q_ptr->guid())
       {
         if (auto obj = objects.find(id); obj != objects.end())
         {
           const auto t = obj->second->mapTransform(q_ptr);
-          // const auto transformedBound = obj->second->bound() * t;
-          cache.emplace_back(obj->second, t);
-          // if (selfBound.isIntersectWith(transformedBound))
+          cache.components.emplace_back(obj->second, t, getMaskBlender(it->type));
+          // OPTIMIZED:
+          // if (auto transformedBound = obj->second->bound().transform(t);
+          //     maskAreaBound.isIntersectWith(transformedBound))
           // {
-          //   cache.emplace_back(obj->second, t);
+          //   cache.components.emplace_back(obj->second, t, nullptr);
           //   maskAreaBound.intersectWith(transformedBound);
           // }
         }
@@ -151,15 +161,61 @@ public:
         }
       }
     }
-    return cache;
-    // if (cache.empty() || !maskAreaBound.valid())
-    //   return {};
-    // maskAreaBound.unionWith(selfBound);
-    // const auto [w, h] = std::pair{ maskAreaBound.width(), maskAreaBound.height() };
-    // if (w <= 0 || h <= 0)
-    //   return {};
-    // return cache;
+    SkPath path;
+    for (const auto& e : cache.components)
+    {
+      if (path.isEmpty())
+      {
+        path = e.mask->asOutlineMask(&e.transform).outlineMask;
+      }
+      else
+      {
+        Op(
+          path,
+          e.mask->asOutlineMask(&e.transform).outlineMask,
+          SkPathOp::kIntersect_SkPathOp,
+          &path);
+      }
+    }
+    if (!path.isEmpty())
+    {
+      alphaMask = std::move(cache);
+    }
   }
+
+  // template<typename Iter1, typename Iter2, typename F, typename R>
+  // std::vector<MaskObject> calcMaskObjects(Renderer* renderer, Iter1 begin, Iter2 end, F&& f)
+  // {
+  //   // auto                                          canvas = renderer->canvas();
+  //   const auto&    objects = renderer->maskObjects();
+  //   std::vector<R> cache;
+  //   // auto                                          maskAreaBound = Bound::makeInfinite();
+  //   // const auto&                                   selfBound = q_ptr->bound();
+  //   for (auto it = begin; it != end; ++it)
+  //   {
+  //     const auto& id = f(*it);
+  //     if (id != q_ptr->guid())
+  //     {
+  //       if (auto obj = objects.find(id); obj != objects.end())
+  //       {
+  //         const auto t = obj->second->mapTransform(q_ptr);
+  //         // const auto transformedBound = obj->second->bound() * t;
+  //         cache.emplace_back(obj->second, t);
+  //         cache.emplace_back(std::move(F()));
+  //         // if (selfBound.isIntersectWith(transformedBound))
+  //         // {
+  //         //   cache.emplace_back(obj->second, t);
+  //         //   maskAreaBound.intersectWith(transformedBound);
+  //         // }
+  //       }
+  //       else
+  //       {
+  //         DEBUG("No such mask: %s", id.c_str());
+  //       }
+  //     }
+  //   }
+  //   return cache;
+  // }
 
   void worldTransform(glm::mat3& mat)
   {
@@ -316,7 +372,7 @@ public:
   //   return blend;
   // }
 
-  void drawAsAlphaMaskImpl(Renderer* renderer, sk_sp<SkBlender> blender = nullptr)
+  void drawAsAlphaMaskImpl(Renderer* renderer, sk_sp<SkBlender> blender)
   {
     if (!path)
     {
@@ -325,10 +381,6 @@ public:
     if (path->isEmpty())
     {
       return;
-    }
-    if (!blender)
-    {
-      blender = Painter::getMaskBlender();
     }
     Painter painter(renderer);
     drawRawStyleImpl(painter, *path, blender);
@@ -397,7 +449,7 @@ public:
     // Objects need to be drawn with SrcOver into layer contains blured background
     // and mask them by dstColor.a
 
-    auto blender = Painter::getStyleMaskBlender();
+    auto blender = GetOrCreateBlender("maskedObject", g_styleMaskBlenderShader);
     if (!outlineMask.isEmpty())
     {
       painter.beginClip(outlineMask);
@@ -417,10 +469,10 @@ public:
       auto canvas = renderer->canvas();
       for (const auto& p : alphaMask->components)
       {
-        auto skm = toSkMatrix(p.second.matrix());
+        auto skm = toSkMatrix(p.transform.matrix());
         canvas->save();
         canvas->concat(skm);
-        p.first->drawAsAlphaMask(renderer, nullptr);
+        p.mask->drawAsAlphaMask(renderer, p.blender);
         canvas->restore();
       }
     }

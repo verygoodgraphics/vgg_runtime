@@ -20,6 +20,7 @@
 #include "Event/Keycode.hpp"
 #include "ViewModel.hpp"
 
+#include "Layer/Core/RasterCacheImpl.hpp"
 #include "Layer/SceneBuilder.hpp"
 #include "Utility/Log.hpp"
 
@@ -28,6 +29,12 @@ using namespace VGG::Layout;
 using namespace nlohmann;
 
 constexpr auto K_EMPTY_STRING = "";
+
+UIView::UIView()
+  : AppScene(std::make_unique<VGG::layer::RasterCacheDefault>())
+{
+  setZoomerListener(std::make_shared<app::AppZoomer>());
+}
 
 bool UIView::onEvent(UEvent evt, void* userData)
 {

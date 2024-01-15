@@ -26,6 +26,8 @@
 
 using namespace VGG;
 
+using namespace VGG::layer;
+
 sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound& bound)
 {
   return makeGradientShader(bound, g);

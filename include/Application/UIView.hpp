@@ -75,10 +75,7 @@ private:
   bool m_isZoomerEnabled{ true };
 
 public:
-  UIView()
-  {
-    setZoomerListener(std::make_shared<app::AppZoomer>());
-  }
+  UIView();
 
   void show(const ViewModel& viewModel);
   void show(const ViewModel& viewModel, std::vector<FramePtr> frames);

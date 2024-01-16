@@ -89,7 +89,7 @@ void Layout::Layout::buildLayoutTree()
     return;
   }
 
-  m_layoutTree.reset(new LayoutNode{ "/" });
+  m_layoutTree.reset(new LayoutNode{ nlohmann::json::json_pointer{ "/" } });
   json::json_pointer framesPath{ "/frames" };
   for (std::size_t i = 0; i < designJson[K_FRAMES].size(); ++i)
   {
@@ -115,8 +115,7 @@ std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(
     return nullptr;
   }
 
-  const auto& path = currentPath.to_string();
-  auto        node = std::make_shared<LayoutNode>(path);
+  auto node = std::make_shared<LayoutNode>(currentPath);
   node->setViewModel(m_designDoc);
   if (parent)
   {

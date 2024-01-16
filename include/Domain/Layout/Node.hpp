@@ -67,17 +67,19 @@ class LayoutNode : public std::enable_shared_from_this<LayoutNode>
   std::weak_ptr<LayoutNode>                m_parent;
   std::vector<std::shared_ptr<LayoutNode>> m_children;
 
-  std::weak_ptr<JsonDocument> m_viewModel;
-  const std::string           m_path;
+  std::weak_ptr<JsonDocument>        m_viewModel;
+  const nlohmann::json::json_pointer m_path;
 
   std::shared_ptr<Layout::Internal::AutoLayout> m_autoLayout;
   bool                                          m_needsLayout{ false };
   Layout::Rect                                  m_oldFrame;
 
+  std::string m_id; // cache
+
 public:
   using HitTestHook = std::function<bool(const std::string&)>;
 
-  LayoutNode(const std::string& path)
+  LayoutNode(const nlohmann::json::json_pointer& path)
     : m_path{ path }
   {
   }
@@ -109,9 +111,9 @@ public:
     return m_children;
   }
 
-  const std::string& path() const
+  std::string path() const
   {
-    return m_path;
+    return m_path.to_string();
   }
 
   Layout::Rect frame() const;
@@ -141,10 +143,12 @@ public:
   }
 
 public:
+  const std::string& id();
+
   std::string vggId() const;
-  std::string id() const;
   std::string name() const;
-  bool        isVisible() const;
+
+  bool isVisible() const;
 
 private:
   bool isResizingAroundCenter() const;

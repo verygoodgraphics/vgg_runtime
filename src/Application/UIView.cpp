@@ -357,7 +357,18 @@ void UIView::show(const ViewModel& viewModel)
     return;
   }
 
-  show(viewModel, layer::SceneBuilder::build(viewModel.designDoc()->content()));
+  auto result = layer::SceneBuilder::builder()
+                  .setResetOriginEnable(true)
+                  .setDoc(viewModel.designDoc()->content())
+                  .build();
+  if (result.root)
+  {
+    show(viewModel, std::move(*result.root));
+  }
+  else
+  {
+    WARN("#UIView::show, built scene is empty");
+  }
 }
 
 void UIView::show(const ViewModel& viewModel, std::vector<FramePtr> frames)

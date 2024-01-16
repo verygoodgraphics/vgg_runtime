@@ -31,6 +31,7 @@ namespace Layout
 {
 constexpr auto K_SEPARATOR = "__";
 
+class Layout;
 namespace Internal
 {
 namespace Rule
@@ -50,6 +51,8 @@ class ExpandSymbol
   RuleMapPtr                                      m_layoutRulesCache; // performance
   std::unordered_map<std::string, nlohmann::json> m_masters;
   std::unordered_map<std::string, nlohmann::json> m_layoutRules;
+
+  std::shared_ptr<VGG::Layout::Layout> m_layout;
 
   nlohmann::json           m_tmpOutDesignJson;
   std::vector<std::string> m_tmpDirtyNodeIds;

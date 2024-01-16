@@ -31,6 +31,8 @@
 #undef DEBUG
 #define DEBUG(msg, ...)
 
+// #define DUMP_TREE
+
 constexpr auto K_PREFIX = "referenced_style_";
 constexpr auto K_BORDER_PREFIX = "style.borders";
 
@@ -102,6 +104,9 @@ std::pair<nlohmann::json, nlohmann::json> ExpandSymbol::run()
   m_tmpOutDesignJson = m_designJson;
   m_layoutRulesCache = Layout::collectRules(m_layoutJson);
   m_outLayoutJsonMap = m_layoutRules;
+
+  m_layout.reset(new Layout{ JsonDocumentPtr{ new ReferenceJsonDocument{ m_tmpOutDesignJson } },
+                             getLayoutRules() });
 
   std::vector<std::string> instanceIdStack{};
   expandInstance(m_tmpOutDesignJson, instanceIdStack);
@@ -188,14 +193,49 @@ void ExpandSymbol::expandInstance(
       if (m_masters.find(masterId) != m_masters.end())
       {
         DEBUG(
-          "#ExpandSymbol: expand instance[id=%s, ptr=%p] with masterId=%s",
+          "#ExpandSymbol: expand instance[id=%s, ptr=%p] in stack [%s] with masterId=%s",
           instanceId.c_str(),
           &json,
+          join(instanceIdStack, ", ").c_str(),
           masterId.c_str());
         auto& masterJson = m_masters[masterId];
         json[K_CHILD_OBJECTS] = masterJson[K_CHILD_OBJECTS];
         json[K_STYLE] = masterJson[K_STYLE];
         json[K_VARIABLE_DEFS] = masterJson[K_VARIABLE_DEFS];
+
+        // build subtree for recursive expand
+        if (instanceIdStack.empty())
+        {
+          m_layout->rebuildSubtreeById(json[K_ID]);
+        }
+        else
+        {
+          std::shared_ptr<LayoutNode> nodeToRebuild;
+
+          // find node to rebuild
+          auto tmpInstanceIdStack = instanceIdStack;
+          while (!tmpInstanceIdStack.empty())
+          {
+            auto parentInstanceNodeId = join(tmpInstanceIdStack);
+            nodeToRebuild = m_layout->layoutTree()->findDescendantNodeById(parentInstanceNodeId);
+            if (nodeToRebuild)
+            {
+              break;
+            }
+
+            tmpInstanceIdStack.pop_back();
+          }
+
+          // rebuild subtree
+          if (nodeToRebuild)
+          {
+            m_layout->rebuildSubtree(nodeToRebuild);
+          }
+          else
+          {
+            DEBUG("ExpandSymbol::expandInstance: node to rebuild not found");
+          }
+        }
 
         if (again)
         {
@@ -357,6 +397,13 @@ void ExpandSymbol::processMasterIdOverrides(
     {
       // Keep own layout rule; Remove children layout rule only;
       removeInvalidLayoutRule((*childObject)[K_CHILD_OBJECTS]);
+
+      (*childObject).erase(K_CHILD_OBJECTS);
+      m_layout->rebuildSubtreeById((*childObject)[K_ID]); // remove all children
+    }
+    else
+    {
+      DEBUG("no child objects");
     }
 
     // restore to symbolInstance to expand again
@@ -891,6 +938,11 @@ std::string ExpandSymbol::join(
   const std::vector<std::string>& instanceIdStack,
   const std::string&              separator)
 {
+  if (instanceIdStack.empty())
+  {
+    return {};
+  }
+
   return std::accumulate(
     std::next(instanceIdStack.begin()),
     instanceIdStack.end(),
@@ -1153,6 +1205,18 @@ void ExpandSymbol::removeInvalidLayoutRule(const nlohmann::json& json)
 
 void ExpandSymbol::layoutInstance(nlohmann::json& instance, const Size& instanceSize)
 {
+  std::string nodeId = instance[K_ID];
+  auto        node = m_layout->layoutTree()->findDescendantNodeById(nodeId);
+  if (!node)
+  {
+    DEBUG("ExpandSymbol::layoutInstance, instance node not found, id: %s ", nodeId.c_str());
+#ifdef DUMP_TREE
+    m_layout->layoutTree()->dump();
+#endif
+
+    return;
+  }
+
   DEBUG(
     "ExpandSymbol::layoutInstance, instanceId: %s, %s, with size: %f, %f",
     instance[K_ID].get<std::string>().c_str(),
@@ -1160,17 +1224,14 @@ void ExpandSymbol::layoutInstance(nlohmann::json& instance, const Size& instance
     instanceSize.width,
     instanceSize.height);
 
-  Layout layout{ JsonDocumentPtr{ new ReferenceJsonDocument{ instance } },
-                 getLayoutRules(),
-                 false };
+  m_layout->rebuildSubtree(node); // force rebuild subtree with updated rules
 
   // layout first, update instance size with rule size
-  auto root = layout.layoutTree();
-  root->setNeedLayout();
-  root->layoutIfNeeded();
+  node->setNeedLayout();
+  node->layoutIfNeeded();
 
   // layout with new size
-  layoutSubtree(instance[K_ID], instanceSize, true);
+  layoutSubtree(nodeId, instanceSize, true);
 }
 
 void ExpandSymbol::overrideLayoutRuleSize(
@@ -1217,10 +1278,7 @@ void ExpandSymbol::layoutSubtree(
   Size                  size,
   bool                  preservingOrigin)
 {
-  Layout layout{ JsonDocumentPtr{ new ReferenceJsonDocument{ m_tmpOutDesignJson } },
-                 getLayoutRules(),
-                 true };
-  layout.resizeNodeThenLayout(subtreeNodeId, size, preservingOrigin);
+  m_layout->resizeNodeThenLayout(subtreeNodeId, size, preservingOrigin);
   overrideLayoutRuleSize(subtreeNodeId, size);
 }
 
@@ -1231,10 +1289,7 @@ void ExpandSymbol::layoutDirtyNodes(nlohmann::json& rootTreeJson)
     return;
   }
 
-  Layout layout{ JsonDocumentPtr{ new ReferenceJsonDocument{ rootTreeJson } },
-                 getLayoutRules(),
-                 false };
-  layout.layoutNodes(m_tmpDirtyNodeIds);
+  m_layout->layoutNodes(m_tmpDirtyNodeIds);
 
   m_tmpDirtyNodeIds.clear();
 }

@@ -391,8 +391,8 @@ TEST_F(VggExpandSymbolTestSuite, ExpandLayout)
   // layout
   {
     nlohmann::json::json_pointer boundsPath{ "/frames/0/childObjects/1/bounds" };
-    Layout::Rect                 instanceBounds = expandedDesignJson[boundsPath];
-    Layout::Rect                 rect{ { 0, 0 }, { 900, 400 } };
+    VGG::Layout::Rect            instanceBounds = expandedDesignJson[boundsPath];
+    VGG::Layout::Rect            rect{ { 0, 0 }, { 900, 400 } };
     EXPECT_EQ(instanceBounds, rect);
 
     nlohmann::json::json_pointer matrixPath{ "/frames/0/childObjects/1/matrix" };
@@ -402,8 +402,8 @@ TEST_F(VggExpandSymbolTestSuite, ExpandLayout)
   }
   {
     nlohmann::json::json_pointer boundsPath{ "/frames/0/childObjects/1/childObjects/0/bounds" };
-    Layout::Rect                 instanceBounds = expandedDesignJson[boundsPath];
-    Layout::Rect                 rect{ Point{ 0, 0 }, { 200, 150 } };
+    VGG::Layout::Rect            instanceBounds = expandedDesignJson[boundsPath];
+    VGG::Layout::Rect            rect{ Point{ 0, 0 }, { 200, 150 } };
     EXPECT_EQ(instanceBounds, rect);
 
     nlohmann::json::json_pointer matrixPath{ "/frames/0/childObjects/1/childObjects/0/matrix" };
@@ -413,8 +413,8 @@ TEST_F(VggExpandSymbolTestSuite, ExpandLayout)
   }
   {
     nlohmann::json::json_pointer boundsPath{ "/frames/0/childObjects/1/childObjects/1/bounds" };
-    Layout::Rect                 instanceBounds = expandedDesignJson[boundsPath];
-    Layout::Rect                 rect{ { 0, 0 }, { 200, 250 } };
+    VGG::Layout::Rect            instanceBounds = expandedDesignJson[boundsPath];
+    VGG::Layout::Rect            rect{ { 0, 0 }, { 200, 250 } };
     EXPECT_EQ(instanceBounds, rect);
 
     nlohmann::json::json_pointer matrixPath{ "/frames/0/childObjects/1/childObjects/1/matrix" };
@@ -443,8 +443,8 @@ TEST_F(VggExpandSymbolTestSuite, OverrideLayout)
   // layout
   {
     nlohmann::json::json_pointer boundsPath{ "/frames/0/childObjects/1/bounds" };
-    Layout::Rect                 instanceBounds = expandedDesignJson[boundsPath];
-    Layout::Rect                 rect{ { 0, 0 }, { 900, 400 } };
+    VGG::Layout::Rect            instanceBounds = expandedDesignJson[boundsPath];
+    VGG::Layout::Rect            rect{ { 0, 0 }, { 900, 400 } };
     EXPECT_EQ(instanceBounds, rect);
 
     nlohmann::json::json_pointer matrixPath{ "/frames/0/childObjects/1/matrix" };
@@ -454,8 +454,8 @@ TEST_F(VggExpandSymbolTestSuite, OverrideLayout)
   }
   {
     nlohmann::json::json_pointer boundsPath{ "/frames/0/childObjects/1/childObjects/0/bounds" };
-    Layout::Rect                 instanceBounds = expandedDesignJson[boundsPath];
-    Layout::Rect                 rect{ Point{ 0, 0 }, { 200, 150 } };
+    VGG::Layout::Rect            instanceBounds = expandedDesignJson[boundsPath];
+    VGG::Layout::Rect            rect{ Point{ 0, 0 }, { 200, 150 } };
     EXPECT_EQ(instanceBounds, rect);
 
     nlohmann::json::json_pointer matrixPath{ "/frames/0/childObjects/1/childObjects/0/matrix" };
@@ -465,8 +465,8 @@ TEST_F(VggExpandSymbolTestSuite, OverrideLayout)
   }
   {
     nlohmann::json::json_pointer boundsPath{ "/frames/0/childObjects/1/childObjects/1/bounds" };
-    Layout::Rect                 instanceBounds = expandedDesignJson[boundsPath];
-    Layout::Rect                 rect{ { 0, 0 }, { 200, 250 } };
+    VGG::Layout::Rect            instanceBounds = expandedDesignJson[boundsPath];
+    VGG::Layout::Rect            rect{ { 0, 0 }, { 200, 250 } };
     EXPECT_EQ(instanceBounds, rect);
 
     nlohmann::json::json_pointer matrixPath{ "/frames/0/childObjects/1/childObjects/1/matrix" };
@@ -500,8 +500,8 @@ TEST_F(VggExpandSymbolTestSuite, NestedLayout)
   // layout
   {
     nlohmann::json::json_pointer boundsPath{ "/frames/0/childObjects/1/bounds" };
-    Layout::Rect                 instanceBounds = expandedDesignJson[boundsPath];
-    Layout::Rect                 rect{ { 0, 0 }, { 1000, 400 } };
+    VGG::Layout::Rect            instanceBounds = expandedDesignJson[boundsPath];
+    VGG::Layout::Rect            rect{ { 0, 0 }, { 1000, 400 } };
     EXPECT_EQ(instanceBounds, rect);
 
     nlohmann::json::json_pointer matrixPath{ "/frames/0/childObjects/1/matrix" };
@@ -511,8 +511,8 @@ TEST_F(VggExpandSymbolTestSuite, NestedLayout)
   }
   {
     nlohmann::json::json_pointer boundsPath{ "/frames/0/childObjects/1/childObjects/1/bounds" };
-    Layout::Rect                 instanceBounds = expandedDesignJson[boundsPath];
-    Layout::Rect                 rect{ { 0, 0 }, { 400, 300 } };
+    VGG::Layout::Rect            instanceBounds = expandedDesignJson[boundsPath];
+    VGG::Layout::Rect            rect{ { 0, 0 }, { 400, 300 } };
     EXPECT_EQ(instanceBounds, rect);
 
     nlohmann::json::json_pointer matrixPath{ "/frames/0/childObjects/1/childObjects/1/matrix" };
@@ -524,8 +524,8 @@ TEST_F(VggExpandSymbolTestSuite, NestedLayout)
     nlohmann::json::json_pointer boundsPath{
       "/frames/0/childObjects/1/childObjects/1/childObjects/0/bounds"
     };
-    Layout::Rect instanceBounds = expandedDesignJson[boundsPath];
-    Layout::Rect rect{ Point{ 0, 0 }, { 57, 110 } };
+    VGG::Layout::Rect instanceBounds = expandedDesignJson[boundsPath];
+    VGG::Layout::Rect rect{ Point{ 0, 0 }, { 57, 110 } };
     EXPECT_EQ(instanceBounds, rect);
 
     nlohmann::json::json_pointer matrixPath{
@@ -561,8 +561,8 @@ TEST_F(VggExpandSymbolTestSuite, NestedLayoutOverride)
   // layout
   {
     nlohmann::json::json_pointer boundsPath{ "/frames/0/childObjects/1/bounds" };
-    Layout::Rect                 instanceBounds = expandedDesignJson[boundsPath];
-    Layout::Rect                 rect{ { 0, 0 }, { 1200, 400 } };
+    VGG::Layout::Rect            instanceBounds = expandedDesignJson[boundsPath];
+    VGG::Layout::Rect            rect{ { 0, 0 }, { 1200, 400 } };
     EXPECT_EQ(instanceBounds, rect);
 
     nlohmann::json::json_pointer matrixPath{ "/frames/0/childObjects/1/matrix" };
@@ -572,8 +572,8 @@ TEST_F(VggExpandSymbolTestSuite, NestedLayoutOverride)
   }
   {
     nlohmann::json::json_pointer boundsPath{ "/frames/0/childObjects/1/childObjects/1/bounds" };
-    Layout::Rect                 instanceBounds = expandedDesignJson[boundsPath];
-    Layout::Rect                 rect{ { 0, 0 }, { 400, 300 } };
+    VGG::Layout::Rect            instanceBounds = expandedDesignJson[boundsPath];
+    VGG::Layout::Rect            rect{ { 0, 0 }, { 400, 300 } };
     EXPECT_EQ(instanceBounds, rect);
 
     nlohmann::json::json_pointer matrixPath{ "/frames/0/childObjects/1/childObjects/1/matrix" };
@@ -585,8 +585,8 @@ TEST_F(VggExpandSymbolTestSuite, NestedLayoutOverride)
     nlohmann::json::json_pointer boundsPath{
       "/frames/0/childObjects/1/childObjects/1/childObjects/0/bounds"
     };
-    Layout::Rect instanceBounds = expandedDesignJson[boundsPath];
-    Layout::Rect rect{ Point{ 0, 0 }, { 57, 110 } };
+    VGG::Layout::Rect instanceBounds = expandedDesignJson[boundsPath];
+    VGG::Layout::Rect rect{ Point{ 0, 0 }, { 57, 110 } };
     EXPECT_EQ(instanceBounds, rect);
 
     nlohmann::json::json_pointer matrixPath{
@@ -684,7 +684,7 @@ TEST_F(VggExpandSymbolTestSuite, layout_container_when_child_bounds_are_overridd
   { // layout
     auto json = layoutRule(expandedLayoutJson, "1:38__1:25");
     EXPECT_NE(json, nullptr);
-    Layout::Internal::Rule::Rule rule = *json;
+    VGG::Layout::Internal::Rule::Rule rule = *json;
     EXPECT_EQ(rule.width.value.types, Internal::Rule::Length::ETypes::PX);
     EXPECT_DOUBLE_EQ(rule.width.value.value, 61.0);
   }

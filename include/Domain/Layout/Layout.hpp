@@ -47,16 +47,18 @@ private:
   JsonDocumentPtr             m_designDoc;
   std::shared_ptr<LayoutNode> m_layoutTree;
   RuleMapPtr                  m_rules;
-  bool                        m_isRootTree{ true }; // root document or fragment
   std::vector<Size>           m_pageSize;
 
 public:
-  Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc, bool isRootTree = true);
-  Layout(JsonDocumentPtr designDoc, RuleMapPtr rules, bool isRootTree = true);
+  Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc);
+  Layout(JsonDocumentPtr designDoc, RuleMapPtr rules);
 
   void layout(Size size, bool updateRule = false);
   void resizeNodeThenLayout(const std::string& nodeId, Size size, bool preservingOrigin);
   void layoutNodes(const std::vector<std::string>& nodeIds);
+
+  void rebuildSubtree(std::shared_ptr<LayoutNode> node);
+  void rebuildSubtreeById(std::string nodeId);
 
   std::shared_ptr<LayoutNode> layoutTree() const
   {
@@ -84,11 +86,16 @@ private:
     const nlohmann::json::json_pointer& currentPath,
     std::shared_ptr<LayoutNode>         parent);
 
+  void buildSubtree(
+    const nlohmann::json&               j,
+    const nlohmann::json::json_pointer& currentPath,
+    std::shared_ptr<LayoutNode>         parent);
+
   void createOneOrMoreLayoutNodes(
     const nlohmann::json&               j,
     const nlohmann::json::json_pointer& currentPath,
     std::shared_ptr<LayoutNode>         parent);
-  void configureNodeAutoLayout(std::shared_ptr<LayoutNode> node);
+  void configureNodeAutoLayout(std::shared_ptr<LayoutNode> node, bool createAutoLayout = true);
 
   bool hasFirstOnTopNode();
   void reverseChildren(nlohmann::json& nodeJson);

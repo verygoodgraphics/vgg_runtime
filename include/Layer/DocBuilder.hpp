@@ -120,7 +120,7 @@ public:
             docPtr->setContent(m_doc);
             JsonDocumentPtr layoutPtr = std::make_shared<RawJsonDocument>();
             layoutPtr->setContent(m_layout);
-            Layout::Layout layout(std::move(docPtr), std::move(layoutPtr), true);
+            Layout::Layout layout(std::move(docPtr), std::move(layoutPtr));
             m_doc = layout.displayDesignDoc()->content();
           });
       }

@@ -97,6 +97,8 @@ public:
     m_children.push_back(child);
   }
 
+  void removeAllChildren();
+
   const std::shared_ptr<LayoutNode> parent() const
   {
     return m_parent.lock();
@@ -116,6 +118,8 @@ public:
   Layout::Rect bounds() const;
   void setFrame(const Layout::Rect& newFrame, bool updateRule = false, bool useOldFrame = false);
   void setViewModel(JsonDocumentPtr viewModel);
+
+  void dump(std::string indent = {});
 
 public:
   std::shared_ptr<Layout::Internal::AutoLayout> autoLayout() const;

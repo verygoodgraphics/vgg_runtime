@@ -65,6 +65,8 @@ public:
 
   void setNeedsLayout();
 
+  void removeSubtree();
+
   bool isIncludedInLayout();
   bool isAboslutePosition();
 
@@ -92,6 +94,7 @@ public:
   {
     return getFlexNode();
   }
+  void resetFlexNode();
 
   grid_layout* getGridContainer()
   {
@@ -121,7 +124,6 @@ private:
   void configureGridContainer(Rule::GridLayout* layout);
   void configureGridItem(Rule::GridItem* layout);
 
-  void resetFlexNode();
   void resetGridContainer();
   void resetGridItem();
 

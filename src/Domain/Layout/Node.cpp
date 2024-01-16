@@ -25,6 +25,7 @@
 #include "Utility/VggFloat.hpp"
 
 #include <functional>
+#include <iostream>
 #include <numeric>
 
 #undef DEBUG
@@ -234,6 +235,16 @@ Layout::Size LayoutNode::size() const
 void LayoutNode::setViewModel(JsonDocumentPtr viewModel)
 {
   m_viewModel = viewModel;
+}
+
+void LayoutNode::dump(std::string indent)
+{
+  std::cout << indent << id() << ", " << path() << std::endl;
+
+  for (auto& child : m_children)
+  {
+    child->dump(indent + "  ");
+  }
 }
 
 void LayoutNode::configureAutoLayout()
@@ -1320,6 +1331,12 @@ void LayoutNode::updateContourNodeModelPoints(
 
     viewModel->replaceAt(pointPath, point);
   }
+}
+
+void LayoutNode::removeAllChildren()
+{
+  autoLayout()->removeSubtree();
+  m_children.clear();
 }
 
 } // namespace VGG

@@ -27,10 +27,12 @@
 #undef DEBUG
 #define DEBUG(msg, ...)
 
+// #define DUMP_TREE
+
 using namespace VGG;
 using namespace VGG::Layout::Internal::Rule;
 
-Layout::Layout::Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc, bool isRootTree)
+Layout::Layout::Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc)
 {
   RuleMapPtr rules;
   if (layoutDoc)
@@ -38,13 +40,12 @@ Layout::Layout::Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc, boo
     rules = collectRules(layoutDoc->content());
   }
 
-  new (this) Layout(designDoc, rules, isRootTree);
+  new (this) Layout(designDoc, rules);
 }
 
-Layout::Layout::Layout(JsonDocumentPtr designDoc, RuleMapPtr rules, bool isRootTree)
+Layout::Layout::Layout(JsonDocumentPtr designDoc, RuleMapPtr rules)
   : m_designDoc{ designDoc }
   , m_rules{ rules }
-  , m_isRootTree{ isRootTree }
 {
   ASSERT(m_designDoc);
 
@@ -69,18 +70,10 @@ void Layout::Layout::layout(Size size, bool updateRule)
   // Always update the root size because resizing the page does not update the root size
   frame.size = size;
 
-  if (m_isRootTree)
+  // udpate page frame
+  for (auto& page : root->children())
   {
-    // udpate page frame
-    for (auto& page : root->children())
-    {
-      page->scaleTo(size, updateRule, true);
-    }
-  }
-  else
-  {
-    root->setFrame(frame, updateRule);
-    root->autoLayout()->setNeedsLayout();
+    page->scaleTo(size, updateRule, true);
   }
 
   // layout
@@ -96,21 +89,13 @@ void Layout::Layout::buildLayoutTree()
     return;
   }
 
-  if (m_isRootTree)
+  m_layoutTree.reset(new LayoutNode{ "/" });
+  json::json_pointer framesPath{ "/frames" };
+  for (std::size_t i = 0; i < designJson[K_FRAMES].size(); ++i)
   {
-    m_layoutTree.reset(new LayoutNode{ "/" });
-    json::json_pointer framesPath{ "/frames" };
-    for (std::size_t i = 0; i < designJson[K_FRAMES].size(); ++i)
-    {
-      auto path = framesPath / i;
-      auto page = createOneLayoutNode(designJson[path], path, m_layoutTree);
-      m_pageSize.push_back(page->frame().size);
-    }
-  }
-  else
-  {
-    json::json_pointer path;
-    m_layoutTree = createOneLayoutNode(designJson, path, nullptr);
+    auto path = framesPath / i;
+    auto page = createOneLayoutNode(designJson[path], path, m_layoutTree);
+    m_pageSize.push_back(page->frame().size);
   }
 }
 
@@ -138,10 +123,20 @@ std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(
     parent->addChild(node);
   }
 
+  buildSubtree(j, currentPath, node);
+
+  return node;
+}
+
+void Layout::Layout::buildSubtree(
+  const nlohmann::json&               j,
+  const nlohmann::json::json_pointer& currentPath,
+  std::shared_ptr<LayoutNode>         parent)
+{
   if (j.contains(K_CHILD_OBJECTS))
   {
     auto path = currentPath / K_CHILD_OBJECTS;
-    createLayoutNodes(j[K_CHILD_OBJECTS], path, node);
+    createLayoutNodes(j[K_CHILD_OBJECTS], path, parent);
   }
 
   if (j[K_CLASS] == K_PATH)
@@ -152,11 +147,9 @@ std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(
     auto  size = subShapes.size();
     for (std::size_t i = 0; i < size; ++i)
     {
-      createOneLayoutNode(subShapes[i][K_SUBGEOMETRY], subShapesPath / i / K_SUBGEOMETRY, node);
+      createOneLayoutNode(subShapes[i][K_SUBGEOMETRY], subShapesPath / i / K_SUBGEOMETRY, parent);
     }
   }
-
-  return node;
 }
 
 void Layout::Layout::createLayoutNodes(
@@ -225,7 +218,9 @@ Layout::Layout::RuleMapPtr Layout::Layout::collectRules(const nlohmann::json& js
   return result;
 }
 
-void Layout::Layout::configureNodeAutoLayout(std::shared_ptr<LayoutNode> node)
+void Layout::Layout::configureNodeAutoLayout(
+  std::shared_ptr<LayoutNode> node,
+  bool                        createAutoLayout)
 {
   std::shared_ptr<VGG::Layout::Internal::Rule::Rule> rule;
 
@@ -243,7 +238,12 @@ void Layout::Layout::configureNodeAutoLayout(std::shared_ptr<LayoutNode> node)
     }
   }
 
-  auto autoLayout = node->createAutoLayout();
+  auto autoLayout = node->autoLayout();
+  if (createAutoLayout || !autoLayout)
+  {
+    autoLayout = node->createAutoLayout();
+  }
+
   if (rule)
   {
     autoLayout->rule = rule;
@@ -328,6 +328,10 @@ void Layout::Layout::resizeNodeThenLayout(
 
     m_layoutTree->layoutIfNeeded();
   }
+  else
+  {
+    WARN("Layout::resizeNodeThenLayout: subtree not found, nodeId: %s", nodeId.c_str());
+  }
 }
 
 void Layout::Layout::layoutNodes(const std::vector<std::string>& nodeIds)
@@ -342,4 +346,41 @@ void Layout::Layout::layoutNodes(const std::vector<std::string>& nodeIds)
   }
 
   m_layoutTree->layoutIfNeeded();
+}
+
+void Layout::Layout::rebuildSubtree(std::shared_ptr<LayoutNode> node)
+{
+  if (!node)
+  {
+    return;
+  }
+
+  DEBUG("Layout::rebuildSubtree: node id is %s", node->id().c_str());
+  node->removeAllChildren();
+
+  const auto& pathString = node->path();
+  const auto& path = json::json_pointer{ pathString };
+  const auto& json = m_designDoc->content()[path];
+
+  buildSubtree(json, path, node);
+  configureNodeAutoLayout(node, false);
+
+#ifdef DUMP_TREE
+  m_layoutTree->dump();
+#endif
+}
+
+void Layout::Layout::rebuildSubtreeById(std::string nodeId)
+{
+  if (auto node = m_layoutTree->findDescendantNodeById(nodeId))
+  {
+    rebuildSubtree(node);
+  }
+  else
+  {
+    DEBUG("Layout::rebuildSubtreeById: node not found, nodeId: %s", nodeId.c_str());
+#ifdef DUMP_TREE
+    m_layoutTree->dump();
+#endif
+  }
 }

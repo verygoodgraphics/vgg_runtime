@@ -305,6 +305,12 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutNode> view)
       if (!layoutNodeHasExactSameChildren(node, subviewsToInclude))
       {
         removeAllChildren(node);
+        for (auto subview : view->children())
+        {
+          subview->autoLayout()->resetFlexNode();
+          subview->configureAutoLayout();
+        }
+
         for (auto subview : subviewsToInclude)
         {
           DEBUG(
@@ -1028,6 +1034,14 @@ bool AutoLayout::isAboslutePosition()
   }
 
   return false;
+}
+
+void AutoLayout::removeSubtree()
+{
+  if (auto node = getFlexContainer())
+  {
+    removeAllChildren(node);
+  }
 }
 
 } // namespace Internal

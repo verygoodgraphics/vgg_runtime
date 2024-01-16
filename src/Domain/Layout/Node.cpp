@@ -102,7 +102,7 @@ void LayoutNode::setNeedLayout()
 
 void LayoutNode::layoutIfNeeded()
 {
-  for (auto child : m_children)
+  for (auto& child : m_children)
   {
     child->layoutIfNeeded();
   }
@@ -296,9 +296,14 @@ std::string LayoutNode::vggId() const
   return name();
 }
 
-std::string LayoutNode::id() const
+const std::string& LayoutNode::id()
 {
-  return getValue(K_ID, std::string{});
+  if (m_id.empty())
+  {
+    m_id = getValue<std::string>(K_ID, std::string{});
+  }
+
+  return m_id;
 }
 
 std::string LayoutNode::name() const
@@ -339,9 +344,9 @@ std::shared_ptr<LayoutNode> LayoutNode::findDescendantNodeById(const std::string
     return shared_from_this();
   }
 
-  for (auto child : children())
+  for (auto& child : children())
   {
-    if (auto found = child->findDescendantNodeById(id))
+    if (const auto& found = child->findDescendantNodeById(id))
     {
       return found;
     }
@@ -766,8 +771,7 @@ const nlohmann::json* LayoutNode::model() const
     return nullptr;
   }
 
-  nlohmann::json::json_pointer path{ m_path };
-  const auto&                  objectJson = viewModel->content()[path];
+  const auto& objectJson = viewModel->content()[m_path];
 
   return &objectJson;
 }

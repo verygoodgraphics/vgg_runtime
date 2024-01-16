@@ -687,21 +687,13 @@ void PaintNode::prePaintPass(Renderer* renderer)
 {
   VGG_IMPL(PaintNode);
   auto canvas = renderer->canvas();
-  if (_->contextSetting.opacity < 1.0)
-  {
-    // TODO:: more accurate bound is needed
-    canvas->saveLayerAlpha(0, _->contextSetting.opacity * 255);
-  }
-
-  if (_->contextSetting.isolateBlending)
-  {
-    // TODO:: blend mode r = s!=0?s:d is needed.
-    // SkPaint paint;
-    // paint.setBlendMode(SkBlendMode::kSrc);
-    // canvas->save();
-    // canvas->scale(1, -1);
-    // canvas->saveLayer(toSkRect(getBound()), &paint);
-  }
+  _->layerContextGuard.saveLayer(
+    _->contextSetting,
+    [&](const SkPaint& p)
+    {
+      // const auto b = toSkRect(bound());
+      canvas->saveLayer(0, &p);
+    });
 
   canvas->save();
   canvas->concat(toSkMatrix(_->transform.matrix()));
@@ -709,26 +701,14 @@ void PaintNode::prePaintPass(Renderer* renderer)
   {
     renderer->drawDebugBound(this, 0);
   }
-  // renderer->pushMatrix(this->localTransform());
 }
 
 void PaintNode::postPaintPass(Renderer* renderer)
 {
   VGG_IMPL(PaintNode);
   auto canvas = renderer->canvas();
-  // renderer->popMatrix();
-  canvas->restore(); // store the state in paintPass
-
-  if (_->contextSetting.isolateBlending)
-  {
-    // canvas->restore();
-    // canvas->restore();
-  }
-
-  if (_->contextSetting.opacity < 1.0)
-  {
-    canvas->restore();
-  }
+  canvas->restore();
+  _->layerContextGuard.restore([&]() { canvas->restore(); });
 }
 
 SkPath PaintNode::stylePath()

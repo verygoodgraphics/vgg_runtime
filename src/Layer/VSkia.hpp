@@ -15,10 +15,12 @@
  */
 #pragma once
 #include "Layer/AttrSerde.hpp"
+#include "Layer/BlenderImpl.hpp"
 #include "Layer/Core/VUtils.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Scene.hpp"
+#include "Layer/SkSL.hpp"
 #include "Math/Algebra.hpp"
 #include "Math/Math.hpp"
 #include "Utility/Log.hpp"
@@ -39,6 +41,7 @@
 #include <modules/skparagraph/include/DartTypes.h>
 #include <modules/skparagraph/include/TextStyle.h>
 
+#include <optional>
 #include <src/core/SkFontDescriptor.h>
 #include <variant>
 #include <vector>
@@ -78,7 +81,7 @@ inline SkPaint::Join toSkPaintJoin(VGG::ELineJoin join)
   SWITCH_MAP_ITEM_END(SkPaint::kMiter_Join)
 }
 
-inline SkBlendMode toSkBlendMode(EBlendMode mode)
+inline std::optional<std::variant<SkBlendMode, sk_sp<SkBlender>>> toSkBlendMode(EBlendMode mode)
 {
   SWITCH_MAP_ITEM_BEGIN(mode)
   SWITCH_MAP_ITEM_DEF(BM_Normal, SkBlendMode::kSrcOver)
@@ -96,7 +99,8 @@ inline SkBlendMode toSkBlendMode(EBlendMode mode)
   SWITCH_MAP_ITEM_DEF(BM_Hue, SkBlendMode::kHue)
   SWITCH_MAP_ITEM_DEF(BM_Saturation, SkBlendMode::kSaturation)
   SWITCH_MAP_ITEM_DEF(BM_Color, SkBlendMode::kColor)
-  SWITCH_MAP_ITEM_DEF(BM_Luminosity, SkBlendMode::kColor)
+  SWITCH_MAP_ITEM_DEF(BM_Luminosity, SkBlendMode::kLuminosity)
+  SWITCH_MAP_ITEM_DEF(BM_Pass_through, std::nullopt)
   SWITCH_MAP_ITEM_DEF_NULL(BM_Plus_darker)
   SWITCH_MAP_ITEM_DEF_NULL(BM_Plus_lighter)
   SWITCH_MAP_ITEM_DEF_NULL(BM_Blend_divide)
@@ -108,7 +112,6 @@ inline SkBlendMode toSkBlendMode(EBlendMode mode)
   SWITCH_MAP_ITEM_DEF_NULL(BM_Lighten_burn)
   SWITCH_MAP_ITEM_DEF_NULL(BM_Lighten_dodge)
   SWITCH_MAP_ITEM_DEF_NULL(BM_Lighten_light)
-  SWITCH_MAP_ITEM_DEF_NULL(BM_Pass_through)
   SWITCH_MAP_ITEM_DEF_NULL(BM_Pin_Light)
   SWITCH_MAP_ITEM_DEF_NULL(BM_Vivid_light)
   SWITCH_MAP_ITEM_END(SkBlendMode::kSrcOver)
@@ -518,6 +521,14 @@ inline void populateSkPaint(
                   paint.setAlphaf(st.opacity);
                 } },
     fillType);
+  auto bm = toSkBlendMode(st.blendMode);
+  if (bm)
+  {
+    std::visit(
+      Overloaded{ [&](const sk_sp<SkBlender>& blender) { paint.setBlender(blender); },
+                  [&](const SkBlendMode& mode) { paint.setBlendMode(mode); } },
+      *bm);
+  }
 }
 
 inline void populateSkPaint(const Border& border, const SkRect& bound, SkPaint& paint)

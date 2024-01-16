@@ -17,10 +17,11 @@
 #include "Layer/AttrSerde.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VType.hpp"
+#include "Layer/Core/VUtils.hpp"
 #include "Layer/Renderer.hpp"
 #include "Layer/BlenderImpl.hpp"
 #include "Layer/Painter.hpp"
-#include "Layer/SkSL.hpp"
+#include "Layer/VSkia.hpp"
 #include "Utility/HelperMacro.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Renderer.hpp"
@@ -34,6 +35,7 @@
 #include <core/SkCanvas.h>
 #include <core/SkSurface.h>
 #include <core/SkImageFilter.h>
+
 namespace VGG::layer
 {
 
@@ -69,6 +71,52 @@ struct MaskObject
   SkPath                contour;
 };
 
+struct LayerContextGuard
+{
+public:
+  std::optional<SkPaint> paint;
+  template<typename F>
+  void saveLayer(const ContextSetting& st, F&& f)
+  {
+    auto bm = toSkBlendMode(st.blendMode);
+    if (bm)
+    {
+      std::visit(
+        Overloaded{ [&, this](const sk_sp<SkBlender>& blender)
+                    {
+                      paint = SkPaint();
+                      paint->setBlender(blender);
+                    },
+                    [&, this](const SkBlendMode& mode)
+                    {
+                      paint = SkPaint();
+                      paint->setBlendMode(mode);
+                    } },
+        *bm);
+    }
+
+    if (st.opacity < 1.0)
+    {
+      if (!paint)
+        paint = SkPaint();
+      paint->setAlphaf(st.opacity);
+    }
+    if (paint)
+    {
+      f(*paint);
+    }
+  }
+  template<typename F>
+  void restore(F&& f)
+  {
+    if (paint)
+    {
+      f();
+    }
+    paint = std::nullopt;
+  }
+};
+
 class PaintNode__pImpl // NOLINT
 {
   VGG_DECL_API(PaintNode);
@@ -95,6 +143,7 @@ public:
   std::optional<SkPath>     path;
   std::optional<SkPath>     mask;
   std::optional<MaskObject> alphaMask;
+  LayerContextGuard         layerContextGuard;
 
   PaintNode__pImpl(PaintNode* api, ObjectType type)
     : q_ptr(api)

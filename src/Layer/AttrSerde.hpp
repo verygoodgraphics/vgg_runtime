@@ -282,7 +282,7 @@ inline void from_json(const json& j, Gradient& x)
 
 inline void from_json(const json& j, ContextSetting& x)
 {
-  x.blendMode = j.value("blendMode", EBlendMode{});
+  x.blendMode = j.value("blendMode", EBlendMode::BM_Pass_through);
   x.isolateBlending = j.value("isolateBlending", false);
   x.opacity = j.value("opacity", 1.f);
   x.transparencyKnockoutGroup = j.value("transparencyKnockoutGroup", EKnockoutType{});

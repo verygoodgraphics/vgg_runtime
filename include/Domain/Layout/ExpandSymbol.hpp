@@ -157,6 +157,8 @@ private:
 
   RuleMapPtr     getLayoutRules();
   nlohmann::json generateOutLayoutJson();
+
+  void resetInstanceInfo(nlohmann::json& instance);
 };
 } // namespace Layout
 

@@ -391,23 +391,7 @@ void ExpandSymbol::processMasterIdOverrides(
       value.get<std::string>().c_str());
 
     (*childObject)[K_MASTER_ID] = value;
-    (*childObject).erase(K_OVERRIDE_VALUES);
-    (*childObject).erase(K_VARIABLE_ASSIGNMENTS);
-    if (childObject->contains(K_CHILD_OBJECTS))
-    {
-      // Keep own layout rule; Remove children layout rule only;
-      removeInvalidLayoutRule((*childObject)[K_CHILD_OBJECTS]);
-
-      (*childObject).erase(K_CHILD_OBJECTS);
-      m_layout->rebuildSubtreeById((*childObject)[K_ID]); // remove all children
-    }
-    else
-    {
-      DEBUG("no child objects");
-    }
-
-    // restore to symbolInstance to expand again
-    (*childObject)[K_CLASS] = K_SYMBOL_INSTANCE;
+    resetInstanceInfo(*childObject);
     expandInstance(*childObject, childInstanceIdStack, true);
   }
 }
@@ -555,15 +539,14 @@ void ExpandSymbol::processVariableRefs(
           node[objectField] = *value;
           if (objectField == K_MASTER_ID) // masterId
           {
-            node.erase(K_OVERRIDE_VALUES);
-            if (node.contains(K_CHILD_OBJECTS))
-            {
-              // Keep own layout rule; Remove children layout rule only;
-              removeInvalidLayoutRule(node[K_CHILD_OBJECTS]);
-            }
+            DEBUG(
+              "#ExpandSymbol::processVariableRefs: overide instance[id=%s, ptr=%p], "
+              "new masterId=%s, restore class to symbolInstance to expand",
+              node[K_ID].dump().c_str(),
+              &node,
+              node[K_MASTER_ID].dump().c_str());
 
-            // restore to symbolInstance to expand again
-            node[K_CLASS] = K_SYMBOL_INSTANCE;
+            resetInstanceInfo(node);
             auto childInstanceIdStack = instanceIdStack;
             expandInstance(node, childInstanceIdStack, true);
           }
@@ -1457,4 +1440,21 @@ nlohmann::json ExpandSymbol::generateOutLayoutJson()
   }
 
   return result;
+}
+
+void ExpandSymbol::resetInstanceInfo(nlohmann::json& instance)
+{
+  instance.erase(K_OVERRIDE_VALUES);
+  instance.erase(K_VARIABLE_ASSIGNMENTS);
+  if (instance.contains(K_CHILD_OBJECTS))
+  {
+    // Keep own layout rule; Remove children layout rule only;
+    removeInvalidLayoutRule(instance[K_CHILD_OBJECTS]);
+
+    instance.erase(K_CHILD_OBJECTS);
+    m_layout->rebuildSubtreeById(instance[K_ID]); // remove all children
+  }
+
+  // restore to symbolInstance to expand again
+  instance[K_CLASS] = K_SYMBOL_INSTANCE;
 }

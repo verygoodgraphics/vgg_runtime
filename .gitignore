@@ -7,3 +7,5 @@ compile_commands.json
 lib/node*
 lib/skia
 downloads
+out
+.vs

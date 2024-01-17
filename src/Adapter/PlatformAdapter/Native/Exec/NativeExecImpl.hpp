@@ -28,7 +28,7 @@
 #include <queue>
 #include <string>
 #include <thread>
-#include <unistd.h>
+//#include <unistd.h>
 
 using node::CommonEnvironmentSetup;
 using node::Environment;

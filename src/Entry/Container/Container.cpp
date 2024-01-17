@@ -26,7 +26,8 @@
 #include "Application/VggSdk.hpp"
 #include "Layer/Graphics/ContextSkBase.hpp"
 
-// #define DISABLE_JS
+// 调试qt时，先disable js
+#define DISABLE_JS
 
 namespace VGG
 {

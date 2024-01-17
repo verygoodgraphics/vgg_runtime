@@ -106,7 +106,7 @@ public:
   Transform(const Transform& other) = default;
   Transform& operator=(const Transform& other) = default;
   Transform(Transform&& other) noexcept = default;
-  Transform& operator=(Transform& other) noexcept = default;
+  Transform& operator=(Transform&& other) noexcept = default;
 
   void setTranslate(float tx, float ty)
   {

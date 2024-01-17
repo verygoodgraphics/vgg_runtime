@@ -307,6 +307,8 @@ elseif(link_type STREQUAL "static")
   string(APPEND OPTIONS " is_component_build=false")
 endif()
 
+string(APPEND OPTIONS " is_trivial_abi=false")
+
 # set features for skia
 set("${out_options}" ${OPTIONS} PARENT_SCOPE)
 endfunction()

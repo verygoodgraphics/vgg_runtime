@@ -28,4 +28,4 @@ function(build_libnode WORK_DIR)
 
 endfunction()
 
-build_libnode(${NODE_DIR})
+#build_libnode(${NODE_DIR})

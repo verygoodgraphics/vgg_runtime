@@ -47,8 +47,30 @@ struct ContextSetting
   EKnockoutType transparencyKnockoutGroup{ KT_Off };
 };
 
+struct ImageFilter
+{
+  float exposure{ 1.f };
+  float contrast{ 1.f };
+  float saturation{ 1.f };
+  float brightness{ 0.f };
+  float temperature{ 0.f };
+  float tint{ 0.f };
+  float highlight{ 0.f };
+  float shadow{ 0.f };
+
+  bool isDefault() const
+  {
+    if (
+      exposure != 1.f || contrast != 1.f || saturation != 1.f || brightness != 0.f ||
+      temperature != 0.f || tint != 0.f || highlight != 0.f || shadow != 0.f)
+      return false;
+    return true;
+  }
+};
+
 struct PatternTile
 {
+  ImageFilter      imageFilter;
   std::string      guid;
   ETilePatternType mode{ TILE_BOTH };
   bool             mirror{ true };
@@ -58,6 +80,7 @@ struct PatternTile
 
 struct PatternStretch
 {
+  ImageFilter      imageFilter;
   std::string      guid;
   layer::Transform transform;
   bool             clip{ false };
@@ -65,12 +88,14 @@ struct PatternStretch
 
 struct PatternFill
 {
+  ImageFilter imageFilter;
   std::string guid;
   float       rotation;
 };
 
 struct PatternFit
 {
+  ImageFilter imageFilter;
   std::string guid;
   float       rotation;
 };

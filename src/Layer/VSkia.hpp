@@ -15,7 +15,7 @@
  */
 #pragma once
 #include "Layer/AttrSerde.hpp"
-#include "Layer/BlenderImpl.hpp"
+#include "Layer/Effects.hpp"
 #include "Layer/Core/VUtils.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
@@ -26,6 +26,7 @@
 #include "Utility/Log.hpp"
 #include "glm/gtx/transform.hpp"
 
+#include <core/SkColorFilter.h>
 #include <core/SkRefCnt.h>
 #include <core/SkScalar.h>
 #include <core/SkShader.h>
@@ -36,6 +37,7 @@
 #include <include/core/SkPaint.h>
 #include <include/core/SkImage.h>
 #include <include/effects/SkImageFilters.h>
+#include <include/effects/SkColorMatrix.h>
 #include <include/pathops/SkPathOps.h>
 #include <include/core/SkFontStyle.h>
 #include <modules/skparagraph/include/DartTypes.h>
@@ -204,6 +206,8 @@ inline sk_sp<SkImage> loadImage(const std::string& imageGUID, const ResourceRepo
   return image;
 }
 
+sk_sp<SkColorFilter> makeColorFilter(const ImageFilter& imageFilter);
+
 inline SkMatrix makeMatrix(
   const Bound&                          bound,
   const glm::vec2&                      f,
@@ -266,7 +270,12 @@ inline sk_sp<SkShader> makeFitPattern(const Bound& bound, const PatternFit& p)
   SkTileMode        modeX = SkTileMode::kDecal;
   SkTileMode        modeY = SkTileMode::kDecal;
   const auto        mat = toSkMatrix(m);
-  return img->makeShader(modeX, modeY, opt, &mat);
+  auto              shader = img->makeShader(modeX, modeY, opt, &mat);
+  if (auto colorFilter = makeColorFilter(p.imageFilter); shader && colorFilter)
+  {
+    return shader->makeWithColorFilter(colorFilter);
+  }
+  return shader;
 }
 inline sk_sp<SkShader> makeFillPattern(const Bound& bound, const PatternFill& p)
 {
@@ -297,7 +306,12 @@ inline sk_sp<SkShader> makeFillPattern(const Bound& bound, const PatternFill& p)
   SkTileMode        modeX = SkTileMode::kDecal;
   SkTileMode        modeY = SkTileMode::kDecal;
   const auto        mat = toSkMatrix(m);
-  return img->makeShader(modeX, modeY, opt, &mat);
+  auto              shader = img->makeShader(modeX, modeY, opt, &mat);
+  if (auto colorFilter = makeColorFilter(p.imageFilter); shader && colorFilter)
+  {
+    return shader->makeWithColorFilter(colorFilter);
+  }
+  return shader;
 }
 
 inline sk_sp<SkShader> makeStretchPattern(const Bound& bound, const PatternStretch& p)
@@ -316,7 +330,12 @@ inline sk_sp<SkShader> makeStretchPattern(const Bound& bound, const PatternStret
   SkSamplingOptions opt;
   SkTileMode        modeX = SkTileMode::kDecal;
   SkTileMode        modeY = SkTileMode::kDecal;
-  return img->makeShader(modeX, modeY, opt, &mat);
+  auto              shader = img->makeShader(modeX, modeY, opt, &mat);
+  if (auto colorFilter = makeColorFilter(p.imageFilter); shader && colorFilter)
+  {
+    return shader->makeWithColorFilter(colorFilter);
+  }
+  return shader;
 }
 
 inline sk_sp<SkShader> makeTilePattern(const Bound& bound, const PatternTile& p)
@@ -345,7 +364,12 @@ inline sk_sp<SkShader> makeTilePattern(const Bound& bound, const PatternTile& p)
   m = glm::scale(m, { p.scale, p.scale });
   const auto        mat = toSkMatrix(m);
   SkSamplingOptions opt;
-  return img->makeShader(modeX, modeY, opt, &mat);
+  auto              shader = img->makeShader(modeX, modeY, opt, &mat);
+  if (auto colorFilter = makeColorFilter(p.imageFilter); shader && colorFilter)
+  {
+    return shader->makeWithColorFilter(colorFilter);
+  }
+  return shader;
 }
 
 inline sk_sp<SkShader> makePatternShader(const Bound& bound, const Pattern& pattern)

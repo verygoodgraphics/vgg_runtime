@@ -13,18 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
-
-#include "Layer/LRUCache.hpp"
-#include "Layer/Core/Attrs.hpp"
+#include "Effects.hpp"
 #include "Layer/LayerCache.h"
-#include "Layer/SkSL.hpp"
-#include <core/SkBlender.h>
-#include <include/effects/SkRuntimeEffect.h>
+#include <effects/SkRuntimeEffect.h>
 
 namespace VGG::layer
 {
-inline sk_sp<SkBlender> GetOrCreateBlender(const char* name, const char* sksl) // NOLINT
+// NOLINTBEGIN
+sk_sp<SkBlender> GetOrCreateBlender(EffectCacheKey name, const char* sksl)
 {
   auto cache = GlobalBlenderCache();
   auto b = cache->find(name);
@@ -42,19 +38,22 @@ inline sk_sp<SkBlender> GetOrCreateBlender(const char* name, const char* sksl) /
   return *b;
 }
 
-inline sk_sp<SkBlender> getMaskBlender(AlphaMaskType type)
+sk_sp<SkRuntimeEffect> GetOrCreateEffect(EffectCacheKey key, const char* sksl)
 {
-  switch (type)
+  auto cache = GlobalEffectCache();
+  auto b = cache->find(key);
+  if (!b)
   {
-    case AM_ALPHA:
-      return GetOrCreateBlender("alpha", g_alphaMaskBlender);
-    case AM_LUMINOSITY:
-      return GetOrCreateBlender("lumi", g_luminosityBlender);
-    case AM_INVERSE_LUMINOSITY:
-      return GetOrCreateBlender("invLumi", g_invLuminosityBlender);
+    auto result = SkRuntimeEffect::MakeForColorFilter(SkString(sksl));
+    if (!result.effect)
+    {
+      DEBUG("Runtime Effect Failed[%s]: %s", key, result.errorText.data());
+      return nullptr;
+    }
+    return *cache->insert(key, std::move(result.effect));
   }
-  DEBUG("No corresponding mask blender");
-  return nullptr;
+  return *b;
 }
+// NOLINTEND
 
 } // namespace VGG::layer

@@ -19,7 +19,7 @@
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/VUtils.hpp"
 #include "Layer/Renderer.hpp"
-#include "Layer/BlenderImpl.hpp"
+#include "Layer/Effects.hpp"
 #include "Layer/Painter.hpp"
 #include "Layer/VSkia.hpp"
 #include "Utility/HelperMacro.hpp"

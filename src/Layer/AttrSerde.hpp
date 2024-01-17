@@ -154,20 +154,36 @@ inline void from_json(const json& j, std::variant<float, glm::vec2>& x)
   }
 }
 
+inline void from_json(const json& j, ImageFilter& x)
+{
+  auto instance = j.value("instance", json{});
+  x.exposure = instance.value("exposure", 0.f);
+  x.contrast = instance.value("contrast", 0.f);
+  x.saturation = instance.value("saturation", 0.f);
+  x.brightness = instance.value("brightness", 0.f);
+  x.temperature = instance.value("temperature", 0.f);
+  x.tint = instance.value("tint", 0.f);
+  x.highlight = instance.value("highlight", 0.f);
+  x.shadow = instance.value("shadow", 0.f);
+}
+
 inline void from_json(const json& j, PatternFill& x)
 {
+  x.imageFilter = j.value("imageAdjust", ImageFilter{});
   x.guid = j.value("imageFileName", "");
   x.rotation = glm::radians(j.value("rotation", 0.f));
 }
 
 inline void from_json(const json& j, PatternFit& x)
 {
+  x.imageFilter = j.value("imageAdjust", ImageFilter{});
   x.guid = j.value("imageFileName", "");
   x.rotation = glm::radians(j.value("rotation", 0.f));
 }
 
 inline void from_json(const json& j, PatternStretch& x)
 {
+  x.imageFilter = j.value("imageAdjust", ImageFilter{});
   x.guid = j.value("imageFileName", "");
   x.clip = j.value("crop", true);
   layer::Transform transform;
@@ -179,6 +195,7 @@ inline void from_json(const json& j, PatternStretch& x)
 
 inline void from_json(const json& j, PatternTile& x)
 {
+  x.imageFilter = j.value("imageAdjust", ImageFilter{});
   x.guid = j.value("imageFileName", "");
   x.mirror = j.value("mirror", false);
   x.rotation = glm::radians(j.value("rotation", 0.f));

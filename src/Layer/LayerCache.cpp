@@ -9,4 +9,10 @@ BlenderCache* GlobalBlenderCache()
   return &s_blenderCache;
 }
 
+EffectCache* GlobalEffectCache()
+{
+  static EffectCache s_blenderCache(40);
+  return &s_blenderCache;
+}
+
 } // namespace VGG::layer

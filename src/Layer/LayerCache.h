@@ -17,12 +17,19 @@
 
 #include "LRUCache.hpp"
 #include <core/SkBlender.h>
+#include <effects/SkRuntimeEffect.h>
 
 namespace VGG::layer
 {
 
-using BlenderCache = LRUCache<const char*, sk_sp<SkBlender>>;
+using BlenderCacheKey = const char*;
+using EffectCacheKey = const char*;
+using BlenderCache = LRUCache<BlenderCacheKey, sk_sp<SkBlender>>;
+using EffectCache = LRUCache<EffectCacheKey, sk_sp<SkRuntimeEffect>>;
 
+// TODO:: merge into EffectCache
 BlenderCache* GlobalBlenderCache(); // NOLINT
+
+EffectCache* GlobalEffectCache(); // NOLINT
 
 } // namespace VGG::layer

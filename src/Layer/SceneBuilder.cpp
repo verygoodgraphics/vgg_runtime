@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "PathPatch.h"
 #include "Layer/SceneBuilder.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/VUtils.hpp"
@@ -368,6 +370,17 @@ PaintNodePtr SceneBuilder::fromPath(const json& j, const glm::mat3& totalMatrix)
         if (klass == "contour")
         {
           p->addSubShape(makeContour(geo, j, matrix), blop);
+        }
+        else if (
+          klass == "rectangle" || klass == "ellipse" || klass == "polygon" || klass == "star")
+        {
+          auto cp = j;
+          if (path_change(cp))
+          {
+            p->addSubShape(
+              makeContour(cp["shape"]["subshapes"][0]["subGeometry"], cp, matrix),
+              blop);
+          }
         }
         else if (klass == "path")
         {

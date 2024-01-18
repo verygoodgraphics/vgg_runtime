@@ -148,12 +148,12 @@ bool inline computeAdjacent5PointsInfo(
 
 std::optional<SmoothResult> addSmoothingRadiusCurveInLocalSpace(
   const glm::vec2& point,
-  float            theta,
+  double           theta,
   int              thetaSign,
-  float            signedPivotVectorAngle,
-  float            smooth,
-  float            radius,
-  float            maxLength)
+  double           signedPivotVectorAngle,
+  double           smooth,
+  double           radius,
+  double           maxLength)
 {
   // const auto cosTheta = std::cos(theta);
   const auto singedTheta = thetaSign * theta;
@@ -162,9 +162,9 @@ std::optional<SmoothResult> addSmoothingRadiusCurveInLocalSpace(
   radius = std::min(maxLength * halfTanTheta, radius);
   const auto halfVec =
     glm::normalize(glm::vec2{ std::cos(singedTheta), std::sin(singedTheta) } + glm::vec2{ 1, 0 });
-  const auto  arcCenter = halfVec * (radius / halfSinTheta);
-  float       roundedLength = radius / halfTanTheta;
-  const float maxSmooth = std::max(maxLength / roundedLength - 1.0f, 0.f);
+  const auto arcCenter = halfVec * (float)(radius / halfSinTheta);
+  const auto roundedLength = radius / halfTanTheta;
+  const auto maxSmooth = std::max(maxLength / roundedLength - 1.0, 0.0);
   smooth = std::min(maxSmooth, smooth);
 
   auto toOriginal = [](const glm::vec2& translate, float rotation) -> glm::mat3
@@ -232,7 +232,7 @@ std::optional<SmoothResult> addSmoothingRadiusCurveInLocalSpace(
   {
     auto arcPoint = arcCenter - halfVec * float(radius / std::cos(halfArcRadian));
     inv(arcPoint);
-    ArcCurve arc{ arcPoint, rFirst, radius };
+    ArcCurve arc{ arcPoint, rFirst, (float)radius };
     return PartialSmooth{ seg1, arc, seg2 };
   }
   return FullSmooth{ seg1, seg2 };

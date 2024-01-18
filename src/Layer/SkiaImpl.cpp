@@ -29,9 +29,11 @@ uniform float exposure;
 uniform float contrast;
 uniform float saturation;
 uniform float temperature;
-uniform float tint;
-uniform float hightlight;
+uniform float highlight;
 uniform float shadow;
+uniform float tint;
+uniform float3 tintColor1;
+uniform float3 tintColor2;
 mat4 brightnessMatrix( float brightness )
 {
     return mat4( 1, 0, 0, 0,
@@ -65,8 +67,54 @@ mat4 saturationMatrix( float saturation )
                  blue,    0,
                  0, 0, 0, 1 );
 }
+
+mat4 temperatureMatrix(float tem){
+    mat4 temperatureMatrix = mat4(
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0
+    );
+    if (tem > 0.0) {
+        temperatureMatrix[0][0] += tem;  // red
+        temperatureMatrix[2][2] -= tem;  // blue
+    } else {
+        temperatureMatrix[0][0] += tem;
+        temperatureMatrix[2][2] -= tem;
+    }
+    return temperatureMatrix;
+}
+
+mat4 tintMatrix(float tint, vec3 tintColor1, vec3 tintColor2){
+    vec3 tc = vec3(1,1,1);
+    if(tint > 0){
+       tc = tintColor1 * tint;
+    }else if(tint < 0){
+       tc = tintColor2 * -tint;
+    }
+    return mat4(
+        tc.r, 0.0, 0.0, 0.0,
+        0.0, tc.g, 0.0, 0.0,
+        0.0, 0.0, tc.b, 0.0,
+        0.0, 0.0, 0.0, 1.0);
+}
+
+vec3 highlightAndShadow(vec3 color){
+    float lumR = 0.299;
+    float lumG = 0.587;
+    float lumB = 0.114;
+    vec3 luminance = sqrt(vec3(lumR,lumG,lumB)*pow(color,vec3(2,2,2)));
+    vec3 h = highlight * 0.05 * ( pow(vec3(8,8,8), luminance) - 1.0 );
+    vec3 s = shadow * 0.05 * ( pow(vec3(8,8,8), 1.0 - luminance) - 1.0 );
+    return color + h + s;
+}
+
 vec4 main(vec4 inColor){
-    return pow(2, exposure) * saturationMatrix(saturation) * contrastMatrix(contrast) * inColor;
+    vec3 color =(pow(3, exposure) * tintMatrix(tint, tintColor1, tintColor2) *
+                temperatureMatrix(temperature *0.5) *
+                saturationMatrix(saturation) *
+                contrastMatrix(contrast) * inColor).rgb;
+    return vec4(highlightAndShadow(color), inColor.a);
 }
 )";
 
@@ -78,9 +126,20 @@ vec4 main(vec4 inColor){
     builder.uniform("contrast") = 1 + imageFilter.contrast;
     builder.uniform("saturation") = 1 + imageFilter.saturation;
     builder.uniform("temperature") = imageFilter.temperature;
-    builder.uniform("tint") = imageFilter.tint;
-    builder.uniform("hightlight") = imageFilter.highlight;
+    builder.uniform("highlight") = imageFilter.highlight;
     builder.uniform("shadow") = imageFilter.shadow;
+    builder.uniform("tint") = imageFilter.tint;
+    builder.uniform("tintColor1") = SkV3{ 1.f, 0.9f, 0.2f };
+    builder.uniform("tintColor2") = SkV3{ 1.f, 0.5f, 0.9f };
+    DEBUG(
+      "makeColorFilter %f %f %f %f %f %f %f",
+      imageFilter.exposure,
+      imageFilter.contrast,
+      imageFilter.saturation,
+      imageFilter.temperature,
+      imageFilter.tint,
+      imageFilter.highlight,
+      imageFilter.shadow);
     return builder.makeColorFilter();
   }
   return nullptr;

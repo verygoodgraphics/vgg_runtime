@@ -163,8 +163,8 @@ inline void from_json(const json& j, ImageFilter& x)
   x.brightness = instance.value("brightness", 0.f);
   x.temperature = instance.value("temperature", 0.f);
   x.tint = instance.value("tint", 0.f);
-  x.highlight = instance.value("highlight", 0.f);
-  x.shadow = instance.value("shadow", 0.f);
+  x.highlight = instance.value("highlights", 0.f);
+  x.shadow = instance.value("shadows", 0.f);
 }
 
 inline void from_json(const json& j, PatternFill& x)

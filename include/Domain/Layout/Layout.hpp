@@ -55,7 +55,7 @@ public:
 
   void layout(Size size, bool updateRule = false);
   void resizeNodeThenLayout(const std::string& nodeId, Size size, bool preservingOrigin);
-  void layoutNodes(const std::vector<std::string>& nodeIds);
+  void layoutNodes(const std::vector<std::string>& nodeIds, const std::string& constainerNodeId);
 
   void rebuildSubtree(std::shared_ptr<LayoutNode> node);
   void rebuildSubtreeById(std::string nodeId);

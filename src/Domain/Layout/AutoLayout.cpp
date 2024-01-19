@@ -1019,28 +1019,30 @@ void AutoLayout::updateSizeRule()
   }
 }
 
-void AutoLayout::setNeedsLayout()
+std::shared_ptr<LayoutNode> AutoLayout::setNeedsLayout()
 {
   auto sharedView = view.lock();
   auto sharedRule = rule.lock();
   if (!sharedRule || !sharedView)
   {
-    return;
+    return nullptr;
   }
 
   if (sharedRule->isFlexItem() || sharedRule->isGridItem())
   {
     if (auto container = sharedView->autoLayoutContainer())
     {
-      container->autoLayout()->setNeedsLayout();
-      return;
+      return container->autoLayout()->setNeedsLayout();
     }
   }
 
   if (sharedRule->isFlexContainer() || sharedRule->isGridContainer())
   {
     sharedView->setNeedLayout();
+    return sharedView;
   }
+
+  return nullptr;
 }
 
 bool AutoLayout::isFlexOrGridItem()

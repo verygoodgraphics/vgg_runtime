@@ -298,9 +298,10 @@ std::string LayoutNode::vggId() const
 
 const std::string& LayoutNode::id()
 {
-  if (m_id.empty())
+  if (!m_hasIdCache)
   {
     m_id = getValue<std::string>(K_ID, std::string{});
+    m_hasIdCache = true;
   }
 
   return m_id;
@@ -309,6 +310,7 @@ const std::string& LayoutNode::id()
 void LayoutNode::invalidateIdCache()
 {
   m_id.clear();
+  m_hasIdCache = false;
   for (auto& child : m_children)
   {
     child->invalidateIdCache();
@@ -483,7 +485,10 @@ Layout::Point LayoutNode::converPointToAncestor(
   return { x, y };
 }
 
-void LayoutNode::scaleTo(const Layout::Size& newSize, bool updateRule, bool preservingOrigin)
+std::shared_ptr<LayoutNode> LayoutNode::scaleTo(
+  const Layout::Size& newSize,
+  bool                updateRule,
+  bool                preservingOrigin)
 {
   Layout::Rect newFrame;
   if (preservingOrigin)
@@ -498,7 +503,7 @@ void LayoutNode::scaleTo(const Layout::Size& newSize, bool updateRule, bool pres
 
   saveOldFrame();
   setFrame(newFrame, updateRule, true);
-  autoLayout()->setNeedsLayout();
+  return autoLayout()->setNeedsLayout();
 }
 
 void LayoutNode::saveOldFrame()
@@ -1367,6 +1372,38 @@ void LayoutNode::detachChildrenFromFlexNodeTree()
     (*it)->autoLayout()->takeFlexNodeFromTree();
     (*it)->configureAutoLayout();
   }
+}
+
+std::shared_ptr<LayoutNode> LayoutNode::closestCommonAncestor(std::shared_ptr<LayoutNode> node)
+{
+  auto parent = shared_from_this();
+  while (parent)
+  {
+    if (parent->isAncestorOf(node))
+    {
+      return parent;
+    }
+
+    parent = parent->m_parent.lock();
+  }
+
+  return nullptr;
+}
+
+bool LayoutNode::isAncestorOf(std::shared_ptr<LayoutNode> node)
+{
+  auto parent = node;
+  while (parent)
+  {
+    if (parent.get() == this)
+    {
+      return true;
+    }
+
+    parent = parent->m_parent.lock();
+  }
+
+  return false;
 }
 
 } // namespace VGG

@@ -211,19 +211,22 @@ void ExpandSymbol::expandInstance(
         }
         else
         {
-          // find node to rebuild
-          // todo, find from root, step by step
-          auto tmpInstanceIdStack = instanceIdStack;
-          while (!tmpInstanceIdStack.empty())
+          // find node to rebuild, find in subtree
+          treeToRebuild = m_layout->layoutTree();
+          std::vector<std::string> tmpIdStack;
+          for (auto& tmpId : instanceIdStack)
           {
-            auto parentInstanceNodeId = join(tmpInstanceIdStack);
-            treeToRebuild = m_layout->layoutTree()->findDescendantNodeById(parentInstanceNodeId);
-            if (treeToRebuild)
+            tmpIdStack.push_back(tmpId);
+            const auto& parentInstanceNodeId = join(tmpIdStack);
+            auto subtreeToRebuild = treeToRebuild->findDescendantNodeById(parentInstanceNodeId);
+            if (subtreeToRebuild)
+            {
+              treeToRebuild = subtreeToRebuild;
+            }
+            else
             {
               break;
             }
-
-            tmpInstanceIdStack.pop_back();
           }
         }
 
@@ -1278,7 +1281,7 @@ void ExpandSymbol::layoutDirtyNodes(nlohmann::json& rootTreeJson)
     return;
   }
 
-  m_layout->layoutNodes(m_tmpDirtyNodeIds);
+  m_layout->layoutNodes(m_tmpDirtyNodeIds, rootTreeJson[K_ID]);
 
   m_tmpDirtyNodeIds.clear();
 }

@@ -203,38 +203,38 @@ void ExpandSymbol::expandInstance(
         json[K_STYLE] = masterJson[K_STYLE];
         json[K_VARIABLE_DEFS] = masterJson[K_VARIABLE_DEFS];
 
+        std::shared_ptr<LayoutNode> treeToRebuild;
         // build subtree for recursive expand
         if (instanceIdStack.empty())
         {
-          m_layout->rebuildSubtreeById(json[K_ID]);
+          treeToRebuild = m_layout->layoutTree()->findDescendantNodeById(json[K_ID]);
         }
         else
         {
-          std::shared_ptr<LayoutNode> nodeToRebuild;
-
           // find node to rebuild
+          // todo, find from root, step by step
           auto tmpInstanceIdStack = instanceIdStack;
           while (!tmpInstanceIdStack.empty())
           {
             auto parentInstanceNodeId = join(tmpInstanceIdStack);
-            nodeToRebuild = m_layout->layoutTree()->findDescendantNodeById(parentInstanceNodeId);
-            if (nodeToRebuild)
+            treeToRebuild = m_layout->layoutTree()->findDescendantNodeById(parentInstanceNodeId);
+            if (treeToRebuild)
             {
               break;
             }
 
             tmpInstanceIdStack.pop_back();
           }
+        }
 
-          // rebuild subtree
-          if (nodeToRebuild)
-          {
-            m_layout->rebuildSubtree(nodeToRebuild);
-          }
-          else
-          {
-            DEBUG("ExpandSymbol::expandInstance: node to rebuild not found");
-          }
+        // rebuild subtree
+        if (treeToRebuild)
+        {
+          m_layout->rebuildSubtree(treeToRebuild);
+        }
+        else
+        {
+          DEBUG("ExpandSymbol::expandInstance: node to rebuild not found");
         }
 
         if (again)
@@ -266,6 +266,12 @@ void ExpandSymbol::expandInstance(
 
         auto idPrefix = instanceIdWithPrefix + K_SEPARATOR;
         makeTreeKeysUnique(json[K_CHILD_OBJECTS], idPrefix); // children
+
+        // invalid tree nodes id cache
+        if (treeToRebuild)
+        {
+          treeToRebuild->invalidateIdCache();
+        }
 
         // 2.2. update mask by: id -> unique id
         makeMaskIdUnique(json[K_CHILD_OBJECTS], json, idPrefix);

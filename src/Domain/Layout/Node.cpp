@@ -306,6 +306,15 @@ const std::string& LayoutNode::id()
   return m_id;
 }
 
+void LayoutNode::invalidateIdCache()
+{
+  m_id.clear();
+  for (auto& child : m_children)
+  {
+    child->invalidateIdCache();
+  }
+}
+
 std::string LayoutNode::name() const
 {
   return getValue(K_NAME, std::string{});

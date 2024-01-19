@@ -17,10 +17,13 @@
 
 #include "Application/Event/Event.hpp"
 #include "Application/Event/Keycode.hpp"
+#include "Utility/Log.hpp"
+
 #include <SDL_events.h>
 #include <SDL_keyboard.h>
 #include <SDL_keycode.h>
 #include <SDL_video.h>
+
 #include <cstring>
 
 #define SWITCH_MAP_ITEM_BEGIN(var)                                                                 \
@@ -50,6 +53,9 @@ inline EEventType toEEventType(SDL_EventType t)
   SWITCH_MAP_ITEM_DEF(SDL_MOUSEBUTTONDOWN, VGG_MOUSEBUTTONDOWN)
   SWITCH_MAP_ITEM_DEF(SDL_MOUSEBUTTONUP, VGG_MOUSEBUTTONUP)
   SWITCH_MAP_ITEM_DEF(SDL_MOUSEMOTION, VGG_MOUSEMOTION)
+  SWITCH_MAP_ITEM_DEF(SDL_FINGERDOWN, VGG_TOUCHDOWN)
+  SWITCH_MAP_ITEM_DEF(SDL_FINGERMOTION, VGG_TOUCHMOTION)
+  SWITCH_MAP_ITEM_DEF(SDL_FINGERUP, VGG_TOUCHUP)
   SWITCH_MAP_ITEM_DEF(SDL_USEREVENT, VGG_USEREVENT)
   SWITCH_MAP_ITEM_DEF(SDL_DROPFILE, VGG_DROPFILE)
   SWITCH_MAP_ITEM_DEF(SDL_DROPTEXT, VGG_DROPTEXT)
@@ -221,6 +227,17 @@ inline VMouseWheelEvent toVMouseWheelEvent(const SDL_MouseWheelEvent& e, float d
   return v;
 }
 
+inline VTouchEvent toVTouchEvent(const SDL_TouchFingerEvent& e)
+{
+  VTouchEvent v;
+  v.windowX = e.x;
+  v.windowY = e.y;
+  v.xrel = e.dx;
+  v.yrel = e.dy;
+
+  return v;
+}
+
 inline VMouseButtonEvent toVMouseButtonEvent(const SDL_MouseButtonEvent& e, float dpiScale)
 {
   VMouseButtonEvent v;
@@ -239,7 +256,7 @@ inline VMouseButtonEvent toVMouseButtonEvent(const SDL_MouseButtonEvent& e, floa
 inline UEvent toUEvent(const SDL_Event& e, float dpiScale = 1.0)
 {
   UEvent u;
-  auto t = toEEventType((SDL_EventType)e.type);
+  auto   t = toEEventType((SDL_EventType)e.type);
   switch (e.type)
   {
     case SDL_MOUSEBUTTONUP:
@@ -251,6 +268,11 @@ inline UEvent toUEvent(const SDL_Event& e, float dpiScale = 1.0)
       break;
     case SDL_MOUSEWHEEL:
       u.wheel = toVMouseWheelEvent(e.wheel, dpiScale);
+      break;
+    case SDL_FINGERDOWN:
+    case SDL_FINGERMOTION:
+    case SDL_FINGERUP:
+      u.touch = toVTouchEvent(e.tfinger);
       break;
     case SDL_KEYUP:
     case SDL_KEYDOWN:

@@ -61,6 +61,7 @@ private:
   std::shared_ptr<Presenter> m_presenter;
   std::shared_ptr<Editor>    m_editor;
   std::shared_ptr<Reporter>  m_reporter;
+  bool                       m_panning{ false };
 
   ERunMode                        m_mode;
   std::shared_ptr<Daruma>         m_model;
@@ -111,7 +112,8 @@ public:
   void setEventListener(EventListener listener);
   void listenAllEvents(bool enabled);
 
-  bool handleTranslate(float x, float y);
+  bool handleTranslate(float x, float y, bool isMouseWheel = false);
+  bool handleTouchEvent(const VTouchEvent& evt);
 
 public:
   int  currentFrame() const;

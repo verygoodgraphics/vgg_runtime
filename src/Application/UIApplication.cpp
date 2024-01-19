@@ -54,7 +54,12 @@ bool UIApplication::onEvent(UEvent evt, void* userData)
     }
 
     case VGG_MOUSEWHEEL:
-      return m_controller->handleTranslate(evt.wheel.preciseX, evt.wheel.preciseY);
+      return m_controller->handleTranslate(evt.wheel.preciseX, evt.wheel.preciseY, true);
+
+    case VGG_TOUCHDOWN:
+    case VGG_TOUCHMOTION:
+    case VGG_TOUCHUP:
+      return m_controller->handleTouchEvent(evt.touch);
 
     default:
       return false;

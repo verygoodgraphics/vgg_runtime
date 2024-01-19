@@ -170,11 +170,10 @@ bool Presenter::handleTranslate(double pageWidth, double pageHeight, float x, fl
   const auto [_, viewHeight] = viewSize();
   if (viewHeight >= pageHeight)
   {
-    return true;
+    return false;
   }
 
   // vertical scoll
-  y *= 10; // scroll faster
   const auto oldOffset = m_view->getOffset();
   auto       newOffset = oldOffset;
   newOffset.y += y;

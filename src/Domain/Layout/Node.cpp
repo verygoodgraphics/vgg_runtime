@@ -1343,4 +1343,21 @@ void LayoutNode::removeAllChildren()
   m_children.clear();
 }
 
+void LayoutNode::detachChildrenFromFlexNodeTree()
+{
+  DEBUG(
+    "LayoutNode::detachChildrenFromFlexNodeTree: name = %s, id = %s, path =  %s",
+    name().c_str(),
+    id().c_str(),
+    path().c_str());
+
+  // Pay attention to the deletion order, the last index must be deleted first, or the index
+  // will change
+  for (auto it = children().rbegin(); it != children().rend(); ++it)
+  {
+    (*it)->autoLayout()->takeFlexNodeFromTree();
+    (*it)->configureAutoLayout();
+  }
+}
+
 } // namespace VGG

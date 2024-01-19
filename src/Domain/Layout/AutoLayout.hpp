@@ -22,6 +22,7 @@
 #include <grid_layout.h>
 
 #include <memory>
+#include <limits>
 
 namespace VGG
 {
@@ -43,6 +44,7 @@ class AutoLayout
 private:
   std::unique_ptr<flexbox_node> m_flexNode;
   flexbox_node*                 m_flexNodePtr{ nullptr };
+  std::size_t                   m_flexNodeIndex{ std::numeric_limits<std::size_t>::max() };
 
   std::unique_ptr<grid_layout> m_gridContainer;
   grid_layout*                 m_gridContainerPtr{ nullptr };
@@ -94,7 +96,9 @@ public:
   {
     return getFlexNode();
   }
+  void setFlexNodeIndex(std::size_t index);
   void resetFlexNode();
+  void takeFlexNodeFromTree();
 
   grid_layout* getGridContainer()
   {

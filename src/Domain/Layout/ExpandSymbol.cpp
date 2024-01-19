@@ -1451,8 +1451,11 @@ void ExpandSymbol::resetInstanceInfo(nlohmann::json& instance)
     // Keep own layout rule; Remove children layout rule only;
     removeInvalidLayoutRule(instance[K_CHILD_OBJECTS]);
 
+    if (auto node = m_layout->layoutTree()->findDescendantNodeById(instance[K_ID]))
+    {
+      node->removeAllChildren(); // remove all children
+    }
     instance.erase(K_CHILD_OBJECTS);
-    m_layout->rebuildSubtreeById(instance[K_ID]); // remove all children
   }
 
   // restore to symbolInstance to expand again

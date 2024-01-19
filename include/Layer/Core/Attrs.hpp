@@ -57,6 +57,7 @@ struct ImageFilter
   float tint{ 0.f };
   float highlight{ 0.f };
   float shadow{ 0.f };
+  float hue{ 0.f };
 
   bool isDefault() const
   {

@@ -145,6 +145,7 @@ public:
 
 public:
   const std::string& id();
+  void               invalidateIdCache();
 
   std::string vggId() const;
   std::string name() const;

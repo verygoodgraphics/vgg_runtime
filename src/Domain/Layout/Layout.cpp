@@ -323,9 +323,15 @@ void Layout::Layout::resizeNodeThenLayout(
   if (auto node = m_layoutTree->findDescendantNodeById(nodeId))
   {
     DEBUG("Layout::resizeNodeThenLayout: resize subtree, %s", nodeId.c_str());
-    node->scaleTo(size, true, preservingOrigin);
-
-    m_layoutTree->layoutIfNeeded();
+    auto treeToLayout = node->scaleTo(size, true, preservingOrigin);
+    if (treeToLayout)
+    {
+      treeToLayout->layoutIfNeeded();
+    }
+    else
+    {
+      DEBUG("Layout::resizeNodeThenLayout: no subtree to layou");
+    }
   }
   else
   {
@@ -333,18 +339,49 @@ void Layout::Layout::resizeNodeThenLayout(
   }
 }
 
-void Layout::Layout::layoutNodes(const std::vector<std::string>& nodeIds)
+void Layout::Layout::layoutNodes(
+  const std::vector<std::string>& nodeIds,
+  const std::string&              constainerNodeId)
 {
+  auto containerNode = m_layoutTree->findDescendantNodeById(constainerNodeId);
+  if (!containerNode)
+  {
+    DEBUG("Layout::layoutNodes: container node not found, %s", constainerNodeId.c_str());
+    return;
+  }
+
+  std::vector<std::shared_ptr<LayoutNode>> subtrees;
   for (const auto& nodeId : nodeIds)
   {
-    if (auto node = m_layoutTree->findDescendantNodeById(nodeId))
+    if (auto node = containerNode->findDescendantNodeById(nodeId))
     {
       DEBUG("Layout::layoutNodes: set flex container need to layout, %s", nodeId.c_str());
-      node->autoLayout()->setNeedsLayout();
+      auto subtree = node->autoLayout()->setNeedsLayout();
+      if (subtree)
+      {
+        subtrees.push_back(subtree);
+      }
     }
   }
 
-  m_layoutTree->layoutIfNeeded();
+  // get closed common ancestor
+  std::shared_ptr<LayoutNode> commonAncestor;
+  for (auto& subtree : subtrees)
+  {
+    if (!commonAncestor)
+    {
+      commonAncestor = subtree;
+    }
+    else
+    {
+      commonAncestor = commonAncestor->closestCommonAncestor(subtree);
+    }
+  }
+
+  if (commonAncestor)
+  {
+    commonAncestor->layoutIfNeeded();
+  }
 }
 
 void Layout::Layout::rebuildSubtree(std::shared_ptr<LayoutNode> node)
@@ -357,8 +394,7 @@ void Layout::Layout::rebuildSubtree(std::shared_ptr<LayoutNode> node)
   DEBUG("Layout::rebuildSubtree: node id is %s", node->id().c_str());
   node->removeAllChildren();
 
-  const auto& pathString = node->path();
-  const auto& path = json::json_pointer{ pathString };
+  const auto& path = node->jsonPointer();
   const auto& json = m_designDoc->content()[path];
 
   buildSubtree(json, path, node);

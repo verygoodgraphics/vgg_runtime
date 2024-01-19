@@ -65,7 +65,7 @@ public:
   void setFrame(Rect frame);
   void updateSizeRule();
 
-  void setNeedsLayout();
+  std::shared_ptr<LayoutNode> setNeedsLayout(); // return node that needs layout
 
   void removeSubtree();
 

@@ -74,6 +74,7 @@ class LayoutNode : public std::enable_shared_from_this<LayoutNode>
   bool                                          m_needsLayout{ false };
   Layout::Rect                                  m_oldFrame;
 
+  bool        m_hasIdCache{ false };
   std::string m_id; // cache
 
 public:
@@ -112,9 +113,16 @@ public:
     return m_children;
   }
 
+  bool                        isAncestorOf(std::shared_ptr<LayoutNode> node);
+  std::shared_ptr<LayoutNode> closestCommonAncestor(std::shared_ptr<LayoutNode> node);
+
   std::string path() const
   {
     return m_path.to_string();
+  }
+  const auto& jsonPointer() const
+  {
+    return m_path;
   }
 
   Layout::Rect frame() const;
@@ -132,8 +140,16 @@ public:
   std::shared_ptr<LayoutNode> autoLayoutContainer();
 
   void setNeedLayout();
+  bool needsLayout() const
+  {
+    return m_needsLayout;
+  }
   void layoutIfNeeded();
-  void scaleTo(const Layout::Size& newSize, bool updateRule, bool preservingOrigin);
+
+  std::shared_ptr<LayoutNode> scaleTo(
+    const Layout::Size& newSize,
+    bool                updateRule,
+    bool                preservingOrigin); // return node that needs layout
 
   std::shared_ptr<LayoutNode> findDescendantNodeById(const std::string& id);
 

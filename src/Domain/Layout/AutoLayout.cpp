@@ -228,15 +228,6 @@ namespace
 {
 using Views = std::vector<std::shared_ptr<LayoutNode>>;
 
-void removeAllChildren(flexbox_node* node)
-{
-  while (node->child_count() > 0)
-  {
-    DEBUG("removeAllChildren, flex node[%p]", node);
-    node->remove_child(node->child_count() - 1);
-  }
-}
-
 bool layoutNodeHasExactSameChildren(flexbox_node* node, Views subviews)
 {
   if (node->child_count() != subviews.size())
@@ -276,11 +267,11 @@ bool layoutNodeHasExactSameChildren(grid_layout* node, Views subviews)
 void attachNodesFromViewHierachy(std::shared_ptr<LayoutNode> view)
 {
   const auto autoLayout = view->autoLayout();
-  if (const auto node = autoLayout->getFlexContainer())
+  if (const auto containerNode = autoLayout->getFlexContainer())
   {
     if (autoLayout->isLeaf())
     {
-      removeAllChildren(node);
+      view->detachChildrenFromFlexNodeTree();
     }
     else
     {
@@ -302,25 +293,26 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutNode> view)
         }
       }
 
-      if (!layoutNodeHasExactSameChildren(node, subviewsToInclude))
+      if (!layoutNodeHasExactSameChildren(containerNode, subviewsToInclude))
       {
-        removeAllChildren(node);
-        for (auto subview : view->children())
-        {
-          subview->autoLayout()->resetFlexNode();
-          subview->configureAutoLayout();
-        }
+        view->detachChildrenFromFlexNodeTree();
 
         for (auto subview : subviewsToInclude)
         {
+          auto index = containerNode->child_count();
+          auto childAutoLayout = subview->autoLayout();
+
           DEBUG(
-            "attachNodesFromViewHierachy, flex container[%p] add child[%s, %s, %s]",
-            node,
+            "attachNodesFromViewHierachy, flex container[%p] add child[%p, %s, %s, %s], index: %d",
+            containerNode,
+            childAutoLayout->getFlexItem(),
             subview->id().c_str(),
             subview->name().c_str(),
-            subview->path().c_str());
+            subview->path().c_str(),
+            index);
 
-          node->add_child(subview->autoLayout()->takeFlexItem());
+          containerNode->add_child(childAutoLayout->takeFlexItem(), index);
+          childAutoLayout->setFlexNodeIndex(index);
         }
       }
 
@@ -617,10 +609,57 @@ void AutoLayout::resetGridItem()
   m_gridItem.reset();
 }
 
+void AutoLayout::setFlexNodeIndex(std::size_t index)
+{
+  ASSERT(m_flexNodeIndex == -1);
+  m_flexNodeIndex = index;
+}
+
 void AutoLayout::resetFlexNode()
 {
   m_flexNode.reset();
   m_flexNodePtr = nullptr;
+  m_flexNodeIndex = -1;
+}
+
+void AutoLayout::takeFlexNodeFromTree()
+{
+  auto sharedView = view.lock();
+  if (!sharedView)
+  {
+    return;
+  }
+
+  auto container = sharedView->autoLayoutContainer();
+  if (!container)
+  {
+    return;
+  }
+
+  auto flexContainerNode = container->autoLayout()->getFlexContainer();
+  if (!flexContainerNode)
+  {
+    return;
+  }
+
+  if (m_flexNodeIndex >= flexContainerNode->child_count())
+  {
+    return;
+  }
+
+  DEBUG("AutoLayout::takeFlexNodeFromTree, index: %zu", m_flexNodeIndex);
+  // Note: Pay attention to the deletion order, the last index must be deleted first
+  auto flexNode = flexContainerNode->remove_child(m_flexNodeIndex);
+  m_flexNode = std::move(flexNode);
+  m_flexNodePtr = m_flexNode.get();
+  m_flexNodeIndex = -1;
+
+  DEBUG(
+    "AutoLayout::takeFlexNodeFromTree, flex node [%p], view[%s, %s, %s]",
+    m_flexNodePtr,
+    sharedView->id().c_str(),
+    sharedView->name().c_str(),
+    sharedView->path().c_str());
 }
 
 void AutoLayout::configure()
@@ -1040,7 +1079,10 @@ void AutoLayout::removeSubtree()
 {
   if (auto node = getFlexContainer())
   {
-    removeAllChildren(node);
+    while (node->child_count() > 0)
+    {
+      node->remove_child(node->child_count() - 1);
+    }
   }
 }
 

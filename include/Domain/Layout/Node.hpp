@@ -100,6 +100,7 @@ public:
   }
 
   void removeAllChildren();
+  void detachChildrenFromFlexNodeTree();
 
   const std::shared_ptr<LayoutNode> parent() const
   {

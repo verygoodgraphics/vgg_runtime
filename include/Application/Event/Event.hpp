@@ -231,8 +231,8 @@ struct VTouchEvent
   uint32_t type;
   int32_t  windowX; /**< X coordinate, relative to window */
   int32_t  windowY; /**< Y coordinate, relative to window */
-  int32_t  xrel;    /**< The relative motion in the X direction */
-  int32_t  yrel;    /**< The relative motion in the Y direction */
+  float    xrel;    /**< The relative motion in the X direction */
+  float    yrel;    /**< The relative motion in the Y direction */
 };
 
 enum EWindowEventID

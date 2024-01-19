@@ -638,7 +638,7 @@ void Controller::aspectFit(Layout::Size size)
   m_layout->layout({ pageSize.width * scale, pageSize.height * scale });
 }
 
-bool Controller::handleTranslate(float x, float y)
+bool Controller::handleTranslate(float x, float y, bool isMouseWheel)
 {
   if (isEditMode())
   {
@@ -647,12 +647,45 @@ bool Controller::handleTranslate(float x, float y)
 
   if (doubleNearlyZero(y))
   {
-    return true;
+    return false;
+  }
+
+  if (isMouseWheel)
+  {
+    y *= 100; // y is step?
+              // SDL_emscriptenevents.c, Emscripten_HandleWheel: 100 pixels make up a step
   }
 
   auto root = m_layout->layoutTree();
   auto pageSize = root->children()[m_presenter->currentPageIndex()]->frame().size;
   return m_presenter->handleTranslate(pageSize.width, pageSize.height, x, y);
+}
+
+bool Controller::handleTouchEvent(const VTouchEvent& evt)
+{
+  if (isEditMode())
+  {
+    return false;
+  }
+
+  if (evt.type == VGG_TOUCHDOWN)
+  {
+    m_panning = true;
+  }
+  else if (evt.type == VGG_TOUCHMOTION)
+  {
+    if (m_panning)
+    {
+      auto clientSize = m_presenter->viewSize();
+      return handleTranslate(evt.xrel * clientSize.width, evt.yrel * clientSize.height);
+    }
+  }
+  else if (evt.type == VGG_TOUCHUP)
+  {
+    m_panning = false;
+  }
+
+  return false;
 }
 
 int Controller::currentFrame() const

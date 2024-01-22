@@ -29,7 +29,7 @@
 class Zoomer;
 namespace VGG::layer
 {
-class RasterCacheDefault : public RasterCache
+class RasterCacheDefault : public Rasterizer
 {
   std::vector<Tile> m_caches;
 
@@ -72,11 +72,10 @@ public:
     uint32_t            reason,
     GrRecordingContext* context,
     const SkMatrix*     transform,
+    const SkRect&       viewport,
     SkPicture*          pic,
-    const Bound&        bound,
-    const glm::mat3&    mat,
-    const Zoomer*       zoomer,
-    const Bound&        viewport,
+    const SkRect&       bound,
+    const SkMatrix&     mat,
     void*               userData) override
   {
     auto str = printReason(reason);
@@ -97,17 +96,16 @@ public:
     //     return reason;
     //   }
     // }
-    auto        skr = toSkRect(bound);
-    auto        skm = *transform * toSkMatrix(mat);
+    auto        skm = *transform * mat;
     float       scaleX = skm.getScaleX();
     float       scaleY = skm.getScaleY();
-    SkImageInfo info = SkImageInfo::MakeN32Premul(skr.width() * scaleX, skr.height() * scaleY);
+    SkImageInfo info = SkImageInfo::MakeN32Premul(bound.width() * scaleX, bound.height() * scaleY);
     if (auto surface = SkSurfaces::RenderTarget(context, skgpu::Budgeted::kYes, info); surface)
     {
       DEBUG("Raster Image Size: [%f, %f]", scaleX, scaleY);
       auto canvas = surface->getCanvas();
       canvas->scale(scaleX, scaleY);
-      canvas->concat(toSkMatrix(mat));
+      canvas->concat(mat);
       canvas->drawPicture(pic);
       m_caches = { { surface->makeImageSnapshot(),
                      SkRect::MakeXYWH(0, 0, info.width(), info.height()) } };
@@ -119,7 +117,7 @@ public:
       if (auto surface = SkSurfaces::RenderTarget(context, skgpu::Budgeted::kYes, info); surface)
       {
         auto canvas = surface->getCanvas();
-        canvas->clipRect(toSkRect(viewport));
+        canvas->clipRect(viewport);
         canvas->setMatrix(*transform);
         canvas->drawPicture(pic);
         m_caches = { { surface->makeImageSnapshot(),

@@ -31,7 +31,7 @@
 class Zoomer;
 namespace VGG::layer
 {
-class RasterCacheTile : public RasterCache
+class RasterCacheTile : public Rasterizer
 {
   SkMatrix m_hitMatrix{ SkMatrix::I() };
 
@@ -84,7 +84,7 @@ class RasterCacheTile : public RasterCache
     }
   };
   // using TileMap = std::unordered_map<SkRect, RasterCache::Tile, SkRectHash>;
-  using TileMap = std::vector<RasterCache::Tile>;
+  using TileMap = std::vector<Rasterizer::Tile>;
 
   TileMap           m_tileCache;
   std::vector<Tile> m_hitTiles;
@@ -138,13 +138,13 @@ class RasterCacheTile : public RasterCache
   const float m_tileWidth = 1024.f;
   const float m_tileHeight = 1024.f;
 
-  void revalidate(const SkMatrix& transform, const SkMatrix& localMatrix, const Bound& bound)
+  void revalidate(const SkMatrix& transform, const SkMatrix& localMatrix, const SkRect& bound)
   {
     m_rasterMatrix = transform;
     m_rasterMatrix[SkMatrix::kMTransX] = 0;
     m_rasterMatrix[SkMatrix::kMTransY] = 0;
     m_rasterMatrix.postConcat(localMatrix);
-    const auto contentRect = m_rasterMatrix.mapRect(toSkRect(bound));
+    const auto contentRect = m_rasterMatrix.mapRect(bound);
     calculateTiles(contentRect);
   }
 
@@ -177,25 +177,17 @@ public:
     uint32_t            reason,
     GrRecordingContext* context,
     const SkMatrix*     transform,
+    const SkRect&       clipRect,
     SkPicture*          pic,
-    const Bound&        bound,
-    const glm::mat3&    mat,
-    const Zoomer*       zoomer,
-    const Bound&        viewport,
+    const SkRect&       bound,
+    const SkMatrix&     mat,
     void*               userData) override
   {
     auto str = printReason(reason);
     DEBUG("recache reason: %s", str.c_str());
 
-    DEBUG(
-      "Viewport: %f %f %f %f",
-      viewport.topLeft().x,
-      viewport.topLeft().y,
-      viewport.width(),
-      viewport.height());
-
-    auto       skv = toSkRect(viewport);
-    const auto localMatrix = toSkMatrix(mat);
+    auto       skv = clipRect;
+    const auto localMatrix = mat;
     m_hitMatrix[SkMatrix::kMTransX] = transform->getTranslateX();
     m_hitMatrix[SkMatrix::kMTransY] = transform->getTranslateY();
 

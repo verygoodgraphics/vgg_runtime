@@ -31,7 +31,7 @@ class sk_sp;
 namespace VGG::layer
 {
 
-class RasterCache
+class Rasterizer
 {
 public:
   struct Tile
@@ -61,28 +61,25 @@ public:
     GrRecordingContext* context;
     const SkMatrix*     transform;
     SkPicture*          pic;
-    Bound               bound;
-    const glm::mat3&    mat;
-    const Zoomer*       zoomer;
-    Bound               viewport;
+    const SkRect&       bound;
+    const SkMatrix&     mat;
+    const SkRect&       viewport;
     void*               userData;
 
     Key(
       GrRecordingContext* context,
       const SkMatrix*     transform,
+      const SkRect&       clipRect,
       SkPicture*          pic,
-      const Bound&        bound,
-      const glm::mat3&    mat,
-      const Zoomer*       zoomer,
-      Bound               viewport,
+      const SkRect&       bound,
+      const SkMatrix&     mat,
       void*               userData)
       : context(context)
       , transform(transform)
       , pic(pic)
       , bound(bound)
       , mat(mat)
-      , zoomer(zoomer)
-      , viewport(viewport)
+      , viewport(clipRect)
       , userData(userData)
     {
     }
@@ -96,12 +93,12 @@ public:
     CONTENT = 8,
     ALL = ZOOM_TRANSLATION | ZOOM_SCALE | VIEWPORT | CONTENT
   };
-  virtual ~RasterCache() = default;
-  RasterCache() = default;
-  RasterCache(const RasterCache&) = delete;
-  RasterCache& operator=(const RasterCache&) = delete;
-  RasterCache(RasterCache&&) = delete;
-  RasterCache& operator=(RasterCache&&) = delete;
+  virtual ~Rasterizer() = default;
+  Rasterizer() = default;
+  Rasterizer(const Rasterizer&) = delete;
+  Rasterizer& operator=(const Rasterizer&) = delete;
+  Rasterizer(Rasterizer&&) = delete;
+  Rasterizer& operator=(Rasterizer&&) = delete;
 
   void invalidate(EReason reason)
   {
@@ -112,7 +109,7 @@ public:
     return m_reason != 0;
   }
 
-  void queryTile(const Key& key, Tile** tiles, int* count, SkMatrix* transform)
+  void rasterize(const Key& key, Tile** tiles, int* count, SkMatrix* transform)
   {
     if (isInvalidate())
     {
@@ -120,11 +117,10 @@ public:
         m_reason,
         key.context,
         key.transform,
+        key.viewport,
         key.pic,
         key.bound,
         key.mat,
-        key.zoomer,
-        key.viewport,
         key.userData);
       m_reason &= ~clear;
     }
@@ -136,11 +132,10 @@ protected:
     uint32_t            reason,
     GrRecordingContext* context,
     const SkMatrix*     transform,
+    const SkRect&       clipRect,
     SkPicture*          pic,
-    const Bound&        bound,
-    const glm::mat3&    mat,
-    const Zoomer*       zoomer,
-    const Bound&        viewport,
+    const SkRect&       bound,
+    const SkMatrix&     mat,
     void*               userData) = 0;
 
   virtual void onQueryTile(Tile** tiles, int* count, SkMatrix* transform) = 0;

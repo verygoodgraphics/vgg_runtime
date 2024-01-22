@@ -611,7 +611,7 @@ void AutoLayout::resetGridItem()
 
 void AutoLayout::setFlexNodeIndex(std::size_t index)
 {
-  ASSERT(m_flexNodeIndex == -1);
+  ASSERT(m_flexNodeIndex == static_cast<std::size_t>(-1));
   m_flexNodeIndex = index;
 }
 

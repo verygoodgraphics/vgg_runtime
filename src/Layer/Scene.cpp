@@ -64,15 +64,15 @@ public:
 
   std::optional<Bound> viewport;
 
-  std::unique_ptr<RasterCache>        cache;
-  std::optional<RasterCache::EReason> reason;
+  std::unique_ptr<Rasterizer>        cache;
+  std::optional<Rasterizer::EReason> reason;
 
   Bound onRevalidate() override
   {
     // only revalidate cuurent page
     DEBUG("revalidate image");
     if (cache)
-      cache->invalidate(RasterCache::EReason::CONTENT);
+      cache->invalidate(Rasterizer::EReason::CONTENT);
     if (auto f = currentFrame(true); f)
       return f->bound();
     else
@@ -188,22 +188,17 @@ public:
     if (frame)
     {
       auto mat = canvas->getTotalMatrix(); // DPI * zoom
-      auto recorder = canvas->recordingContext();
+      auto context = canvas->recordingContext();
       frame->render(&renderer, nullptr);
       if (cache)
       {
-        RasterCache::Key key{ recorder,
-                              &mat,
-                              frame->picture(),
-                              frame->bound(),
-                              frame->transform().matrix(),
-                              zoomer.get(),
-                              viewport.value_or(frame->bound()),
-                              0 };
-
-        RasterCache::Tile* tile = nullptr;
-        int                count = 0;
-        cache->queryTile(key, &tile, &count, &mat);
+        auto              skv = toSkRect(viewport.value_or(frame->bound()));
+        auto              skr = toSkRect(frame->bound());
+        auto              skm = toSkMatrix(frame->transform().matrix());
+        Rasterizer::Key   key{ context, &mat, skv, frame->picture(), skr, skm, 0 };
+        Rasterizer::Tile* tile = nullptr;
+        int               count = 0;
+        cache->rasterize(key, &tile, &count, &mat);
         canvas->save();
         canvas->resetMatrix();
         canvas->setMatrix(mat);
@@ -214,22 +209,6 @@ public:
           // p.setColor(SK_ColorRED);
           // p.setStyle(SkPaint::kStroke_Style);
           // canvas->drawRect(tile[i].rect, p);
-
-          // SkPngEncoder::Options opt;
-          // if (auto data =
-          //       SkPngEncoder::Encode((GrDirectContext*)recorder, tile[i].image.get(), opt);
-          //     data)
-          // {
-          //   std::string name = "tile_" + std::to_string(tile->rect.left()) + "_" +
-          //                      std::to_string(tile->rect.top()) + "_" + std::to_string(i) +
-          //                      ".png";
-          //   DEBUG("output %f %f", tile->rect.left(), tile->rect.top());
-          //   std::ofstream out(name, std::ios::binary);
-          //   if (out.is_open())
-          //   {
-          //     out.write((const char*)data->data(), data->size());
-          //   }
-          // }
         }
         canvas->restore();
       }
@@ -244,7 +223,7 @@ public:
   }
 };
 
-Scene::Scene(std::unique_ptr<RasterCache> cache)
+Scene::Scene(std::unique_ptr<Rasterizer> cache)
   : d_ptr(V_NEW<Scene__pImpl>(this))
 {
   if (cache)
@@ -331,28 +310,28 @@ void Scene::onZoomScaleChanged(float scale)
 {
   DEBUG("Scene: onZoomScaleChanged");
   if (d_ptr->cache)
-    d_ptr->cache->invalidate(RasterCache::EReason::ZOOM_SCALE);
+    d_ptr->cache->invalidate(Rasterizer::EReason::ZOOM_SCALE);
 }
 
 void Scene::onZoomTranslationChanged(float x, float y)
 {
   DEBUG("Scene: onZoomTranslationChanged");
   if (d_ptr->cache)
-    d_ptr->cache->invalidate(RasterCache::EReason::ZOOM_TRANSLATION);
+    d_ptr->cache->invalidate(Rasterizer::EReason::ZOOM_TRANSLATION);
 }
 
 void Scene::onZoomViewportChanged(const Bound& bound)
 {
   DEBUG("Scene: onZoomViewportChanged");
   if (d_ptr->cache)
-    d_ptr->cache->invalidate(RasterCache::EReason::VIEWPORT);
+    d_ptr->cache->invalidate(Rasterizer::EReason::VIEWPORT);
 }
 
 void Scene::onViewportChange(const Bound& bound)
 {
   d_ptr->viewport = bound;
   if (d_ptr->cache)
-    d_ptr->cache->invalidate(RasterCache::EReason::VIEWPORT);
+    d_ptr->cache->invalidate(Rasterizer::EReason::VIEWPORT);
 }
 
 void Scene::invalidateMask()

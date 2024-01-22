@@ -43,7 +43,7 @@ using PaintNodeRef = VGG::layer::WeakRef<PaintNode>;
 #endif
 
 class VLayer;
-class RasterCache;
+class Rasterizer;
 } // namespace layer
 using namespace layer;
 
@@ -61,7 +61,7 @@ class VGG_EXPORTS Scene : public layer::Renderable
   friend class layer::VLayer; // Temporary support for VLayer
 
 public:
-  Scene(std::unique_ptr<RasterCache> cache = nullptr);
+  Scene(std::unique_ptr<Rasterizer> cache = nullptr);
   virtual ~Scene();
   void setSceneRoots(std::vector<FramePtr> roots);
   void setName(std::string name)

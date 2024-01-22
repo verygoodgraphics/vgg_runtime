@@ -33,7 +33,7 @@ namespace VGG::layer
 {
 class RasterCacheTile : public RasterCache
 {
-  SkMatrix m_transform;
+  SkMatrix m_hitMatrix{ SkMatrix::I() };
 
   std::string printReason(uint32_t r)
   {
@@ -84,7 +84,7 @@ class RasterCacheTile : public RasterCache
     }
   };
   // using TileMap = std::unordered_map<SkRect, RasterCache::Tile, SkRectHash>;
-  using TileMap = std::vector<std::tuple<SkRect, RasterCache::Tile>>;
+  using TileMap = std::vector<RasterCache::Tile>;
 
   TileMap           m_tileCache;
   std::vector<Tile> m_hitTiles;
@@ -99,8 +99,8 @@ class RasterCacheTile : public RasterCache
     DEBUG("Hit viewport: %f %f", viewport.width(), viewport.height());
     for (auto it = m_tileCache.begin(); it != m_tileCache.end(); ++it)
     {
-      auto& [_, tile] = *it;
-      auto r = transform.mapRect(tile.rect);
+      auto& tile = *it;
+      auto  r = transform.mapRect(tile.rect);
       if (r.intersects(viewport))
       {
         DEBUG("Hit tile: %f %f [%f %f] ", r.top(), r.left(), tile.rect.top(), tile.rect.left());
@@ -115,8 +115,6 @@ class RasterCacheTile : public RasterCache
     m_tileCache.clear();
     auto x = content.x();
     auto y = content.y();
-    auto localX = 0.f;
-    auto localY = 0.f;
     auto w = content.width();
     auto h = content.height();
     auto tileX = x;
@@ -129,21 +127,36 @@ class RasterCacheTile : public RasterCache
       while (tileY < y + h)
       {
         auto tile = SkRect::MakeXYWH(tileX, tileY, tileW, tileH);
-        m_tileCache.push_back(
-          { SkRect::MakeXYWH(localX, localY, tileW, tileH), { nullptr, tile } });
+        m_tileCache.push_back({ nullptr, tile });
         tileY += tileH;
-        localY += tileH;
       }
       tileY = y;
-      localY = 0.f;
-
       tileX += tileW;
-      localX += tileW;
     }
   }
 
   const float m_tileWidth = 1024.f;
   const float m_tileHeight = 1024.f;
+
+  void revalidate(const SkMatrix& transform, const SkMatrix& localMatrix, const Bound& bound)
+  {
+    m_rasterMatrix = transform;
+    m_rasterMatrix[SkMatrix::kMTransX] = 0;
+    m_rasterMatrix[SkMatrix::kMTransY] = 0;
+    m_rasterMatrix.postConcat(localMatrix);
+    const auto contentRect = m_rasterMatrix.mapRect(toSkRect(bound));
+    calculateTiles(contentRect);
+  }
+
+  const SkMatrix& rasterMatrix() const
+  {
+    return m_rasterMatrix;
+  }
+
+  const SkMatrix& hitMatrix() const
+  {
+    return m_hitMatrix;
+  }
 
 public:
   RasterCacheTile() = default;
@@ -157,9 +170,7 @@ public:
   {
     *tiles = m_hitTiles.data();
     *count = m_hitTiles.size();
-    *transform = m_transform;
-    // (*transform)[SkMatrix::kMScaleX] = 1;
-    // (*transform)[SkMatrix::kMScaleY] = 1;
+    *transform = m_hitMatrix;
   }
 
   uint32_t onRaster(
@@ -183,31 +194,21 @@ public:
       viewport.width(),
       viewport.height());
 
-    auto skv = toSkRect(viewport);
-
+    auto       skv = toSkRect(viewport);
     const auto localMatrix = toSkMatrix(mat);
-    SkMatrix   rasterMatrix = *transform;
-    rasterMatrix[SkMatrix::kMTransX] = 0;
-    rasterMatrix[SkMatrix::kMTransY] = 0;
-    rasterMatrix = rasterMatrix * localMatrix;
-    auto contentRect = rasterMatrix.mapRect(toSkRect(bound));
-
-    SkMatrix hitMatrix = SkMatrix::I();
-    hitMatrix[SkMatrix::kMTransX] = transform->getTranslateX();
-    hitMatrix[SkMatrix::kMTransY] = transform->getTranslateY();
-
-    if (m_tileCache.empty())
-    {
-      calculateTiles(contentRect);
-      m_rasterMatrix = rasterMatrix;
-    }
+    m_hitMatrix[SkMatrix::kMTransX] = transform->getTranslateX();
+    m_hitMatrix[SkMatrix::kMTransY] = transform->getTranslateY();
 
     std::vector<TileMap::iterator> hitTiles;
 
     if ((reason & ZOOM_TRANSLATION) && !(reason & ZOOM_SCALE)) // most case
     {
       DEBUG("ignore zoom translation");
-      hitTiles = hitTile(skv, hitMatrix);
+      if (m_tileCache.empty())
+      {
+        revalidate(*transform, localMatrix, bound);
+      }
+      hitTiles = hitTile(skv, hitMatrix());
       if (hitTiles.empty())
       {
         m_hitTiles.clear();
@@ -217,10 +218,8 @@ public:
 
     if (reason & ZOOM_SCALE || reason & CONTENT)
     {
-      m_tileCache.clear();
-      calculateTiles(contentRect);
-      m_rasterMatrix = rasterMatrix;
-      hitTiles = hitTile(skv, hitMatrix);
+      revalidate(*transform, localMatrix, bound);
+      hitTiles = hitTile(skv, hitMatrix());
     }
 
     if (hitTiles.empty())
@@ -233,7 +232,7 @@ public:
     sk_sp<SkSurface> surface = nullptr;
     for (auto& t : hitTiles)
     {
-      auto& [_, tile] = *t;
+      auto& tile = *t;
       if (tile.image)
         continue;
       if (!surface)
@@ -244,20 +243,13 @@ public:
         {
           DEBUG("Raster failed");
           return 0;
-          m_hitTiles.clear();
         }
       }
       auto canvas = surface->getCanvas();
       canvas->clear(SK_ColorTRANSPARENT);
       canvas->save();
       canvas->translate(-tile.rect.x(), -tile.rect.y());
-      canvas->concat(m_rasterMatrix);
-      DEBUG(
-        "raster title %f %f %f %f",
-        tile.rect.x(),
-        tile.rect.y(),
-        tile.rect.width(),
-        tile.rect.height());
+      canvas->concat(rasterMatrix());
       canvas->drawPicture(pic);
       canvas->restore();
       tile.image = surface->makeImageSnapshot();
@@ -265,9 +257,8 @@ public:
     m_hitTiles.clear();
     for (auto& t : hitTiles)
     {
-      m_hitTiles.push_back(std::get<1>(*t));
+      m_hitTiles.push_back(*t);
     }
-    m_transform = hitMatrix;
     return reason;
   }
 };

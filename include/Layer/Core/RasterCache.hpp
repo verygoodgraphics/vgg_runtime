@@ -61,10 +61,10 @@ public:
     GrRecordingContext* context;
     const SkMatrix*     transform;
     SkPicture*          pic;
-    const Bound&        bound;
+    Bound               bound;
     const glm::mat3&    mat;
     const Zoomer*       zoomer;
-    const Bound&        viewport;
+    Bound               viewport;
     void*               userData;
 
     Key(
@@ -74,7 +74,7 @@ public:
       const Bound&        bound,
       const glm::mat3&    mat,
       const Zoomer*       zoomer,
-      const Bound&        viewport,
+      Bound               viewport,
       void*               userData)
       : context(context)
       , transform(transform)

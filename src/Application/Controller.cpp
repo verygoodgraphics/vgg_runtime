@@ -623,7 +623,8 @@ void Controller::aspectFill(int width)
 {
   auto         pageSize = m_layout->pageSize(m_presenter->currentPageIndex());
   auto         scaleFactor = width / pageSize.width;
-  Layout::Size size = { pageSize.width * scaleFactor, pageSize.height * scaleFactor };
+  Layout::Size size = { pageSize.width * scaleFactor,
+                        std::max(pageSize.height, pageSize.height * scaleFactor) };
   m_layout->layout(size);
 }
 

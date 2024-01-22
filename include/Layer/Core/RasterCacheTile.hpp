@@ -22,6 +22,8 @@
 #include "core/SkCanvas.h"
 #include "core/SkImage.h"
 #include "core/SkPicture.h"
+#include <algorithm>
+#include <core/SkMatrix.h>
 #include <core/SkSurface.h>
 #include <gpu/ganesh/SkSurfaceGanesh.h>
 #include <gpu/GpuTypes.h>
@@ -86,6 +88,7 @@ class RasterCacheTile : public RasterCache
 
   TileMap           m_tileCache;
   std::vector<Tile> m_hitTiles;
+  SkMatrix          m_rasterMatrix;
 
   std::vector<TileMap::iterator> hitTile(const SkRect& viewport, const SkMatrix& transform)
   {
@@ -180,15 +183,23 @@ public:
       viewport.width(),
       viewport.height());
 
-    auto mm = toSkMatrix(mat);
-    auto skm = *transform * mm;
     auto skv = toSkRect(viewport);
-    auto contentRect = toSkRect(bound);
 
-    auto hitMatrix = skm;
+    const auto localMatrix = toSkMatrix(mat);
+    SkMatrix   rasterMatrix = *transform;
+    rasterMatrix[SkMatrix::kMTransX] = 0;
+    rasterMatrix[SkMatrix::kMTransY] = 0;
+    rasterMatrix = rasterMatrix * localMatrix;
+    auto contentRect = rasterMatrix.mapRect(toSkRect(bound));
+
+    SkMatrix hitMatrix = SkMatrix::I();
+    hitMatrix[SkMatrix::kMTransX] = transform->getTranslateX();
+    hitMatrix[SkMatrix::kMTransY] = transform->getTranslateY();
+
     if (m_tileCache.empty())
     {
       calculateTiles(contentRect);
+      m_rasterMatrix = rasterMatrix;
     }
 
     std::vector<TileMap::iterator> hitTiles;
@@ -208,6 +219,7 @@ public:
     {
       m_tileCache.clear();
       calculateTiles(contentRect);
+      m_rasterMatrix = rasterMatrix;
       hitTiles = hitTile(skv, hitMatrix);
     }
 
@@ -238,10 +250,14 @@ public:
       auto canvas = surface->getCanvas();
       canvas->clear(SK_ColorTRANSPARENT);
       canvas->save();
-      auto tr = skm.mapRect(tile.rect);
-      canvas->concat(skm);
-      canvas->translate(-tr.x(), -tr.y());
-      canvas->clipRect(tile.rect);
+      canvas->translate(-tile.rect.x(), -tile.rect.y());
+      canvas->concat(m_rasterMatrix);
+      DEBUG(
+        "raster title %f %f %f %f",
+        tile.rect.x(),
+        tile.rect.y(),
+        tile.rect.width(),
+        tile.rect.height());
       canvas->drawPicture(pic);
       canvas->restore();
       tile.image = surface->makeImageSnapshot();
@@ -251,7 +267,7 @@ public:
     {
       m_hitTiles.push_back(std::get<1>(*t));
     }
-    m_transform = skm;
+    m_transform = hitMatrix;
     return reason;
   }
 };

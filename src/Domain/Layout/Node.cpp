@@ -1035,6 +1035,28 @@ Layout::Rect LayoutNode::calculateResizedFrame(const Layout::Size& newSize)
   return { { x, y }, { w, h } };
 }
 
+Layout::Size LayoutNode::rotatedSize(const Layout::Size& size)
+{
+  const auto& mat = modelMatrix();
+  if (doubleNearlyZero(mat.b) && doubleNearlyZero(mat.c))
+  {
+    return size;
+  }
+
+  Layout::Point p1{ 0, 0 };
+  Layout::Point p2{ size.width, 0 };
+  Layout::Point p3{ size.width, size.height };
+  Layout::Point p4{ 0, size.height };
+
+  p1 = p1.makeTransform(mat);
+  p2 = p2.makeTransform(mat);
+  p3 = p3.makeTransform(mat);
+  p4 = p4.makeTransform(mat);
+
+  const auto& rect = Layout::Rect::makeFromPoints(std::vector<Layout::Point>{ p1, p2, p3, p4 });
+  return rect.size;
+}
+
 Layout::Rect LayoutNode::resizeContour(
   const Layout::Size&  oldContainerSize,
   const Layout::Size&  newContainerSize,

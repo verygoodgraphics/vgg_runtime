@@ -744,8 +744,12 @@ void AutoLayout::configureFlexNodeSize(flexbox_node* node)
   {
     // todo
   }
+  auto sharedView = view.lock();
+  if (!sharedView)
+  {
+    return;
+  }
 
-  if (auto sharedView = view.lock())
   {
     VERBOSE(
       "AutoLayout::configureFlexNodeSize, view[%s, %s, %p, %s]",
@@ -754,8 +758,17 @@ void AutoLayout::configureFlexNodeSize(flexbox_node* node)
       sharedView.get(),
       sharedView->path().c_str());
   }
+
+  Layout::Size size{ sharedRule->width.value.value, sharedRule->height.value.value };
+  if (
+    sharedRule->width.value.types == Rule::Length::ETypes::PX &&
+    sharedRule->height.value.types == Rule::Length::ETypes::PX)
+  {
+    size = sharedView->rotatedSize(size);
+  }
+
   VERBOSE("AutoLayout::configureFlexNodeSize, width %f", sharedRule->width.value.value);
-  node->set_width(toLibUnit(sharedRule->width.value.types), sharedRule->width.value.value);
+  node->set_width(toLibUnit(sharedRule->width.value.types), size.width);
   if (sharedRule->maxWidth.has_value())
   {
     VERBOSE("AutoLayout::configureFlexNodeSize, max width %f", sharedRule->maxWidth->value.value);
@@ -772,7 +785,7 @@ void AutoLayout::configureFlexNodeSize(flexbox_node* node)
   }
 
   VERBOSE("AutoLayout::configureFlexNodeSize, height %f", sharedRule->height.value.value);
-  node->set_height(toLibUnit(sharedRule->height.value.types), sharedRule->height.value.value);
+  node->set_height(toLibUnit(sharedRule->height.value.types), size.height);
   if (sharedRule->maxHeight.has_value())
   {
     VERBOSE("AutoLayout::configureFlexNodeSize, max height %f", sharedRule->maxHeight->value.value);

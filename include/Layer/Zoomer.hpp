@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/Core/VUtils.hpp"
 #include "Math/Math.hpp"
 #include "Layer/Core/VBound.hpp"
 #include <optional>
+#include <variant>
 
 using namespace VGG;
 
@@ -29,35 +31,75 @@ class Scene;
 
 class Zoomer
 {
-  Scene* m_owner{ nullptr };
-  double m_zoom{ 1.0 };
-  Vec2   m_offset{ 0.0, 0.0 };
 
 public:
+  static constexpr int   ZOOM_LEVEL_COUNT = 13;
+  static constexpr float ZOOM_LEVEL[ZOOM_LEVEL_COUNT] = { 1 / 4.f, 1 / 3.f, 1 / 2.f, 2 / 3.f,
+                                                          3 / 4.f, 1.f,     4 / 3.f, 3 / 2.f,
+                                                          2.f,     3.f,     4.f,     5.f };
+
+  enum EScaleLevel
+  {
+    SL_1_4 = 0,
+    SL_1_3,
+    SL_1_2,
+    SL_2_3,
+    SL_3_4,
+    SL_1_1,
+    SL_4_3,
+    SL_3_2,
+    SL_2_1,
+    SL_3_1,
+    SL_4_1,
+    SL_5_1,
+  };
+  struct OtherLevel
+  {
+  };
+
+  using ScaleLevel = std::variant<EScaleLevel, OtherLevel>;
+  using Scale = std::pair<ScaleLevel, float>;
+
   void setOwnerScene(Scene* owner);
 
-  // dx and dy is in the canvas(texture) space.
-  Vec2  doTranslate(float dx, float dy);
-  // cx and cy is in the canvas(texture) space
-  float doZoom(float speed, float cx, float cy);
-  float scale() const
-  {
-    return m_zoom;
-  }
-
-  Vec2 translate() const
+  // translation
+  glm::vec2 translate() const
   {
     return m_offset;
   }
+  void setOffset(glm::vec2 offset);
+  void setTranslate(float dx, float dy);
 
-  void setZoom(double zoom)
+  // scale
+  float scale() const
   {
-    m_zoom = zoom;
+    return m_scale.second;
   }
-  void setOffset(Vec2 offset)
+
+  ScaleLevel scaleLevel() const
   {
-    m_offset = offset;
+    return m_scale.first;
+  }
+
+  std::optional<EScaleLevel> discreteScaleLevel() const
+  {
+    std::optional<EScaleLevel> ret(std::nullopt);
+    std::visit(
+      layer::Overloaded{ [&](EScaleLevel level) { ret = level; }, [](OtherLevel other) {} },
+      m_scale.first);
+    return ret;
+  }
+  void setScale(EScaleLevel level, glm::vec2 anchor = { 0, 0 });
+  void setScale(float zoom, glm::vec2 anchor = { 0, 0 })
+  {
+    updateScale({ OtherLevel{}, zoom }, anchor);
   }
 
   void mapCanvasPosToLogicalPosition(const float canvasXY[2], float logicXY[2]) const;
+
+private:
+  bool      updateScale(Scale scale, glm::vec2 anchor);
+  Scene*    m_owner{ nullptr };
+  glm::vec2 m_offset{ 0.f, 0.f };
+  Scale     m_scale{ SL_1_1, ZOOM_LEVEL[SL_1_1] };
 };

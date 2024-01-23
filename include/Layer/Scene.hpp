@@ -99,7 +99,7 @@ protected:
   void onRender(SkCanvas* canvas) override;
 
 protected:
-  virtual void onZoomScaleChanged(float scale);
+  virtual void onZoomScaleChanged(Zoomer::Scale value);
   virtual void onZoomTranslationChanged(float x, float y);
   virtual void onZoomViewportChanged(const Bound& bound);
 

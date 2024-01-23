@@ -306,7 +306,7 @@ void Scene::setPage(int num)
   }
 }
 
-void Scene::onZoomScaleChanged(float scale)
+void Scene::onZoomScaleChanged(Zoomer::Scale value)
 {
   DEBUG("Scene: onZoomScaleChanged");
   if (d_ptr->cache)

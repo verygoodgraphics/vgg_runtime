@@ -18,6 +18,7 @@
 #include "Event/Event.hpp"
 #include "Event/EventAPI.hpp"
 #include "Event/Keycode.hpp"
+#include "Layer/Core/RasterCacheTile.hpp"
 #include "ViewModel.hpp"
 
 #include "Layer/Core/RasterCacheImpl.hpp"
@@ -31,7 +32,7 @@ using namespace nlohmann;
 constexpr auto K_EMPTY_STRING = "";
 
 UIView::UIView()
-  : AppScene(std::make_unique<VGG::layer::RasterCacheDefault>())
+  : AppScene(std::make_unique<VGG::layer::RasterCacheTile>())
 {
   setZoomerListener(std::make_shared<app::AppZoomer>());
 }
@@ -394,7 +395,7 @@ void UIView::fitContent(float xOffset, float yOffset, float scale)
   ASSERT(m_zoomerListener);
 
   m_zoomerListener->setOffset({ xOffset, yOffset });
-  m_zoomerListener->setZoom(scale);
+  m_zoomerListener->setScale(scale);
 }
 
 void UIView::fitCurrentPage()
@@ -402,7 +403,7 @@ void UIView::fitCurrentPage()
   ASSERT(m_zoomerListener);
 
   m_zoomerListener->setOffset({ 0, 0 });
-  m_zoomerListener->setZoom(1);
+  m_zoomerListener->setScale(1);
 }
 
 void UIView::enableZoomer(bool enabled)
@@ -446,7 +447,7 @@ UIView::Offset UIView::getOffset()
 
 void UIView::setOffset(Offset offset)
 {
-  m_zoomerListener->setOffset(Vec2{ offset.x, offset.y });
+  m_zoomerListener->setOffset(glm::vec2{ offset.x, offset.y });
   setDirty(true);
 }
 

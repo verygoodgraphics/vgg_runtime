@@ -33,7 +33,6 @@ namespace VGG::layer
 {
 class RasterCacheTile : public Rasterizer
 {
-  SkMatrix m_hitMatrix{ SkMatrix::I() };
 
   std::string printReason(uint32_t r)
   {
@@ -59,95 +58,14 @@ class RasterCacheTile : public Rasterizer
     return res;
   }
 
-  struct SkRectLess
-  {
-    bool operator()(const SkRect& lhs, const SkRect& rhs) const
-    {
-      return lhs.x() < rhs.x() && lhs.y() < rhs.y() && lhs.width() < rhs.width();
-    }
-  };
-
-  struct SkRectHash
-  {
-    std::size_t operator()(const SkRect& k) const
-    {
-      using std::hash;
-      using std::size_t;
-      using std::string;
-
-      // Compute individual hash values for first,
-      // second and third and combine them using XOR
-      // and bit shifting:
-
-      return ((hash<float>()(k.x()) ^ (hash<float>()(k.y()) << 1)) >> 1) ^
-             (hash<float>()(k.width()) << 1);
-    }
-  };
   // using TileMap = std::unordered_map<SkRect, RasterCache::Tile, SkRectHash>;
   using TileMap = std::vector<Rasterizer::Tile>;
 
-  TileMap           m_tileCache;
-  std::vector<Tile> m_hitTiles;
-  SkMatrix          m_rasterMatrix;
+  std::vector<TileMap::iterator> hitTile(const SkRect& viewport, const SkMatrix& transform);
 
-  std::vector<TileMap::iterator> hitTile(const SkRect& viewport, const SkMatrix& transform)
-  {
-    if (m_tileCache.empty())
-      return {};
-    std::vector<TileMap::iterator> res;
-    res.reserve(4);
-    DEBUG("Hit viewport: %f %f", viewport.width(), viewport.height());
-    for (auto it = m_tileCache.begin(); it != m_tileCache.end(); ++it)
-    {
-      auto& tile = *it;
-      auto  r = transform.mapRect(tile.rect);
-      if (r.intersects(viewport))
-      {
-        DEBUG("Hit tile: %f %f [%f %f] ", r.top(), r.left(), tile.rect.top(), tile.rect.left());
-        res.push_back(it);
-      }
-    }
-    return res;
-  }
+  void calculateTiles(const SkRect& content);
 
-  void calculateTiles(const SkRect& content)
-  {
-    m_tileCache.clear();
-    auto x = content.x();
-    auto y = content.y();
-    auto w = content.width();
-    auto h = content.height();
-    auto tileX = x;
-    auto tileY = y;
-    auto tileW = m_tileWidth;
-    auto tileH = m_tileHeight;
-
-    while (tileX < x + w)
-    {
-      while (tileY < y + h)
-      {
-        auto tile = SkRect::MakeXYWH(tileX, tileY, tileW, tileH);
-        m_tileCache.push_back({ nullptr, tile });
-        tileY += tileH;
-      }
-      tileY = y;
-      tileX += tileW;
-    }
-  }
-
-  const float m_tileWidth = 1024.f;
-  const float m_tileHeight = 1024.f;
-
-  void revalidate(const SkMatrix& transform, const SkMatrix& localMatrix, const SkRect& bound)
-  {
-    m_rasterMatrix = transform;
-    m_rasterMatrix[SkMatrix::kMTransX] = 0;
-    m_rasterMatrix[SkMatrix::kMTransY] = 0;
-    m_rasterMatrix.postConcat(localMatrix);
-    const auto contentRect = m_rasterMatrix.mapRect(bound);
-    calculateTiles(contentRect);
-  }
-
+  void revalidate(const SkMatrix& transform, const SkMatrix& localMatrix, const SkRect& bound);
   const SkMatrix& rasterMatrix() const
   {
     return m_rasterMatrix;
@@ -181,78 +99,15 @@ public:
     SkPicture*          pic,
     const SkRect&       bound,
     const SkMatrix&     mat,
-    void*               userData) override
-  {
-    auto str = printReason(reason);
-    DEBUG("recache reason: %s", str.c_str());
+    void*               userData) override;
 
-    auto       skv = clipRect;
-    const auto localMatrix = mat;
-    m_hitMatrix[SkMatrix::kMTransX] = transform->getTranslateX();
-    m_hitMatrix[SkMatrix::kMTransY] = transform->getTranslateY();
-
-    std::vector<TileMap::iterator> hitTiles;
-
-    if ((reason & ZOOM_TRANSLATION) && !(reason & ZOOM_SCALE)) // most case
-    {
-      DEBUG("ignore zoom translation");
-      if (m_tileCache.empty())
-      {
-        revalidate(*transform, localMatrix, bound);
-      }
-      hitTiles = hitTile(skv, hitMatrix());
-      if (hitTiles.empty())
-      {
-        m_hitTiles.clear();
-        return reason;
-      }
-    }
-
-    if (reason & ZOOM_SCALE || reason & CONTENT)
-    {
-      revalidate(*transform, localMatrix, bound);
-      hitTiles = hitTile(skv, hitMatrix());
-    }
-
-    if (hitTiles.empty())
-    {
-      DEBUG("no tile hit");
-      m_hitTiles.clear();
-      return reason;
-    }
-
-    sk_sp<SkSurface> surface = nullptr;
-    for (auto& t : hitTiles)
-    {
-      auto& tile = *t;
-      if (tile.image)
-        continue;
-      if (!surface)
-      {
-        auto info = SkImageInfo::MakeN32Premul(m_tileWidth, m_tileHeight);
-        surface = SkSurfaces::RenderTarget(context, skgpu::Budgeted::kYes, info);
-        if (!surface)
-        {
-          DEBUG("Raster failed");
-          return 0;
-        }
-      }
-      auto canvas = surface->getCanvas();
-      canvas->clear(SK_ColorTRANSPARENT);
-      canvas->save();
-      canvas->translate(-tile.rect.x(), -tile.rect.y());
-      canvas->concat(rasterMatrix());
-      canvas->drawPicture(pic);
-      canvas->restore();
-      tile.image = surface->makeImageSnapshot();
-    }
-    m_hitTiles.clear();
-    for (auto& t : hitTiles)
-    {
-      m_hitTiles.push_back(*t);
-    }
-    return reason;
-  }
+private:
+  TileMap           m_tileCache;
+  std::vector<Tile> m_hitTiles;
+  SkMatrix          m_rasterMatrix;
+  SkMatrix          m_hitMatrix{ SkMatrix::I() };
+  const float       m_tileWidth = 1024.f;
+  const float       m_tileHeight = 1024.f;
 };
 
 } // namespace VGG::layer

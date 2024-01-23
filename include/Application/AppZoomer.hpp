@@ -32,8 +32,9 @@ class AppZoomer
 public:
   bool onEvent(UEvent e, void* userData) override
   {
-    if (!m_panning && e.type == VGG_MOUSEBUTTONDOWN &&
-        (EventManager::getKeyboardState(nullptr)[VGG_SCANCODE_SPACE]))
+    if (
+      !m_panning && e.type == VGG_MOUSEBUTTONDOWN &&
+      (EventManager::getKeyboardState(nullptr)[VGG_SCANCODE_SPACE]))
     {
       m_panning = true;
       return true;
@@ -45,14 +46,17 @@ public:
     }
     else if (m_panning && e.type == VGG_MOUSEMOTION)
     {
-      doTranslate(e.motion.xrel, e.motion.yrel);
+      setTranslate(e.motion.xrel, e.motion.yrel);
       return true;
     }
     else if (e.type == VGG_MOUSEWHEEL && (EventManager::getModState() & VGG_KMOD_CTRL))
     {
       int mx = e.wheel.mouseX;
       int my = e.wheel.mouseY;
-      doZoom((e.wheel.preciseY > 0 ? 1.0 : -1.0) * 0.03, mx, my); // use preciseY, int y maybe 0
+      if (auto l = discreteScaleLevel(); l)
+      {
+        setScale(EScaleLevel(*l + int(e.wheel.preciseY > 0 ? 1 : -1)), { mx, my });
+      }
       return true;
     }
     return false;

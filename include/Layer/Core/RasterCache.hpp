@@ -127,6 +127,8 @@ public:
     onQueryTile(tiles, count, transform);
   }
 
+  void raster(SkMatrix* transform, std::vector<Tile>* tiles);
+
 protected:
   virtual uint32_t onRaster(
     uint32_t            reason,

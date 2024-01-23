@@ -158,6 +158,7 @@ public:
   {
     return convertRectToAncestor(frame(), ancestorNode);
   }
+  Layout::Size rotatedSize(const Layout::Size& size);
 
 public:
   const std::string& id();

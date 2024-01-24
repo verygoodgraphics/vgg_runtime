@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "Layer/Core/RasterCache.hpp"
 #include "Renderer.hpp"
 
 #include "Layer/Scene.hpp"
@@ -61,18 +62,18 @@ public:
   bool                    maskDirty{ true };
   Renderer                renderer;
   std::shared_ptr<Zoomer> zoomer;
+  std::optional<Bound>    viewport;
 
-  std::optional<Bound> viewport;
-
-  std::unique_ptr<Rasterizer>        cache;
-  std::optional<Rasterizer::EReason> reason;
+  std::unique_ptr<Rasterizer>   rasterizer;
+  std::vector<Rasterizer::Tile> rasterTiles;
+  SkMatrix                      rasterMatrix;
 
   Bound onRevalidate() override
   {
     // only revalidate cuurent page
     DEBUG("revalidate image");
-    if (cache)
-      cache->invalidate(Rasterizer::EReason::CONTENT);
+    if (rasterizer)
+      rasterizer->invalidate(Rasterizer::EReason::CONTENT);
     if (auto f = currentFrame(true); f)
       return f->bound();
     else
@@ -160,6 +161,7 @@ public:
     ASSERT(zoomer);
     auto offset = zoomer->translate();
     auto zoom = zoomer->scale();
+    canvas->save();
     canvas->translate(offset.x, offset.y);
     canvas->scale(zoom, zoom);
   }
@@ -168,10 +170,7 @@ public:
   {
     ASSERT(canvas);
     ASSERT(zoomer);
-    auto offset = zoomer->translate();
-    auto zoom = zoomer->scale();
-    canvas->scale(1. / zoom, 1. / zoom);
-    canvas->translate(-offset.x, -offset.y);
+    canvas->restore();
   }
 
   void render(SkCanvas* canvas)
@@ -187,24 +186,25 @@ public:
     }
     if (frame)
     {
-      auto mat = canvas->getTotalMatrix(); // DPI * zoom
-      auto context = canvas->recordingContext();
       frame->render(&renderer, nullptr);
-      if (cache)
+      if (rasterizer)
       {
-        auto              skv = toSkRect(viewport.value_or(frame->bound()));
-        auto              skr = toSkRect(frame->bound());
-        auto              skm = toSkMatrix(frame->transform().matrix());
-        Rasterizer::Key   key{ context, &mat, skv, frame->picture(), skr, skm, 0 };
-        Rasterizer::Tile* tile = nullptr;
-        int               count = 0;
-        cache->rasterize(key, &tile, &count, &mat);
+        if (rasterizer->isInvalidate())
+        {
+          auto                      rasterDevice = canvas->recordingContext();
+          const auto                skv = toSkRect(viewport.value_or(frame->bound()));
+          auto                      mat = canvas->getTotalMatrix(); // DPI * zoom
+          const auto                skr = toSkRect(frame->bound());
+          const auto                skm = toSkMatrix(frame->transform().matrix());
+          Rasterizer::RasterContext rasterCtx{ mat, frame->picture(), &skr, skm };
+          rasterizer->rasterize(rasterDevice, rasterCtx, skv, &rasterTiles, &rasterMatrix);
+        }
         canvas->save();
         canvas->resetMatrix();
-        canvas->setMatrix(mat);
-        for (int i = 0; i < count; i++)
+        canvas->setMatrix(rasterMatrix);
+        for (auto& tile : rasterTiles)
         {
-          canvas->drawImage(tile[i].image, tile[i].rect.left(), tile[i].rect.top());
+          canvas->drawImage(tile.image, tile.rect.left(), tile.rect.top());
           // SkPaint p;
           // p.setColor(SK_ColorRED);
           // p.setStyle(SkPaint::kStroke_Style);
@@ -228,7 +228,7 @@ Scene::Scene(std::unique_ptr<Rasterizer> cache)
 {
   if (cache)
   {
-    d_ptr->cache = std::move(cache);
+    d_ptr->rasterizer = std::move(cache);
   }
 }
 Scene::~Scene() = default;
@@ -309,29 +309,29 @@ void Scene::setPage(int num)
 void Scene::onZoomScaleChanged(Zoomer::Scale value)
 {
   DEBUG("Scene: onZoomScaleChanged");
-  if (d_ptr->cache)
-    d_ptr->cache->invalidate(Rasterizer::EReason::ZOOM_SCALE);
+  if (d_ptr->rasterizer)
+    d_ptr->rasterizer->invalidate(Rasterizer::EReason::ZOOM_SCALE);
 }
 
 void Scene::onZoomTranslationChanged(float x, float y)
 {
   DEBUG("Scene: onZoomTranslationChanged");
-  if (d_ptr->cache)
-    d_ptr->cache->invalidate(Rasterizer::EReason::ZOOM_TRANSLATION);
+  if (d_ptr->rasterizer)
+    d_ptr->rasterizer->invalidate(Rasterizer::EReason::ZOOM_TRANSLATION);
 }
 
 void Scene::onZoomViewportChanged(const Bound& bound)
 {
   DEBUG("Scene: onZoomViewportChanged");
-  if (d_ptr->cache)
-    d_ptr->cache->invalidate(Rasterizer::EReason::VIEWPORT);
+  if (d_ptr->rasterizer)
+    d_ptr->rasterizer->invalidate(Rasterizer::EReason::VIEWPORT);
 }
 
 void Scene::onViewportChange(const Bound& bound)
 {
   d_ptr->viewport = bound;
-  if (d_ptr->cache)
-    d_ptr->cache->invalidate(Rasterizer::EReason::VIEWPORT);
+  if (d_ptr->rasterizer)
+    d_ptr->rasterizer->invalidate(Rasterizer::EReason::VIEWPORT);
 }
 
 void Scene::invalidateMask()

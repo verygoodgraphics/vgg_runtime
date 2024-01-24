@@ -79,21 +79,18 @@ std::vector<RasterCacheTile::TileMap::iterator> RasterCacheTile::hitTile(
   return res;
 }
 
-uint32_t RasterCacheTile::onRaster(
-  uint32_t            reason,
-  GrRecordingContext* context,
-  const SkMatrix*     transform,
-  const SkRect&       clipRect,
-  SkPicture*          pic,
-  const SkRect&       bound,
-  const SkMatrix&     mat,
-  void*               userData)
+uint32_t RasterCacheTile::onRevalidateRaster(
+  uint32_t             reason,
+  GrRecordingContext*  context,
+  const SkRect&        clipRect,
+  const RasterContext& rasterContext,
+  void*                userData)
 {
 
   auto       skv = clipRect;
-  const auto localMatrix = mat;
-  m_hitMatrix[SkMatrix::kMTransX] = transform->getTranslateX();
-  m_hitMatrix[SkMatrix::kMTransY] = transform->getTranslateY();
+  const auto localMatrix = rasterContext.localMatrix;
+  m_hitMatrix[SkMatrix::kMTransX] = rasterContext.globalMatrix.getTranslateX();
+  m_hitMatrix[SkMatrix::kMTransY] = rasterContext.globalMatrix.getTranslateY();
 
   std::vector<TileMap::iterator> hitTiles;
 
@@ -102,7 +99,7 @@ uint32_t RasterCacheTile::onRaster(
     DEBUG("ignore zoom translation");
     if (m_tileCache.empty())
     {
-      revalidate(*transform, localMatrix, bound);
+      revalidate(rasterContext.globalMatrix, localMatrix, *rasterContext.bound);
     }
     hitTiles = hitTile(skv, hitMatrix());
     if (hitTiles.empty())
@@ -114,7 +111,7 @@ uint32_t RasterCacheTile::onRaster(
 
   if (reason & ZOOM_SCALE || reason & CONTENT)
   {
-    revalidate(*transform, localMatrix, bound);
+    revalidate(rasterContext.globalMatrix, localMatrix, *rasterContext.bound);
     hitTiles = hitTile(skv, hitMatrix());
   }
 
@@ -146,7 +143,7 @@ uint32_t RasterCacheTile::onRaster(
     canvas->save();
     canvas->translate(-tile.rect.x(), -tile.rect.y());
     canvas->concat(rasterMatrix());
-    canvas->drawPicture(pic);
+    canvas->drawPicture(rasterContext.picture);
     canvas->restore();
     tile.image = surface->makeImageSnapshot();
   }

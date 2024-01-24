@@ -114,6 +114,7 @@ public:
   void rasterize(
     GrRecordingContext*  rasterDevice,
     const RasterContext& rasterContext,
+    int                  lod,
     const SkRect&        clipRect,
     std::vector<Tile>*   tiles,
     SkMatrix*            transform,
@@ -121,7 +122,7 @@ public:
   {
     uint32_t clear;
     std::tie(clear, *tiles, *transform) =
-      onRevalidateRaster(m_reason, rasterDevice, clipRect, rasterContext, userData);
+      onRevalidateRaster(m_reason, rasterDevice, lod, clipRect, rasterContext, userData);
     m_reason &= ~clear;
   }
 
@@ -131,6 +132,7 @@ protected:
   virtual std::tuple<uint32_t, std::vector<Tile>, SkMatrix> onRevalidateRaster(
     uint32_t             reason,
     GrRecordingContext*  context,
+    int                  lod,
     const SkRect&        clipRect,
     const RasterContext& rasterContext,
     void*                userData) = 0;

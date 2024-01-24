@@ -15,6 +15,7 @@
  */
 
 #include "Layer/Core/RasterCache.hpp"
+#include "Layer/Core/VUtils.hpp"
 #include "Renderer.hpp"
 
 #include "Layer/Scene.hpp"
@@ -38,6 +39,7 @@
 #include <memory>
 #include <string>
 #include <fstream>
+#include <variant>
 
 extern std::unordered_map<std::string, sk_sp<SkImage>> g_skiaImageRepo;
 namespace VGG
@@ -67,6 +69,7 @@ public:
   std::unique_ptr<Rasterizer>   rasterizer;
   std::vector<Rasterizer::Tile> rasterTiles;
   SkMatrix                      rasterMatrix;
+  int                           lod{ -1 };
 
   Bound onRevalidate() override
   {
@@ -197,7 +200,7 @@ public:
           const auto                skr = toSkRect(frame->bound());
           const auto                skm = toSkMatrix(frame->transform().matrix());
           Rasterizer::RasterContext rasterCtx{ mat, frame->picture(), &skr, skm };
-          rasterizer->rasterize(rasterDevice, rasterCtx, skv, &rasterTiles, &rasterMatrix);
+          rasterizer->rasterize(rasterDevice, rasterCtx, lod, skv, &rasterTiles, &rasterMatrix, 0);
         }
         canvas->save();
         canvas->resetMatrix();
@@ -309,6 +312,10 @@ void Scene::setPage(int num)
 void Scene::onZoomScaleChanged(Zoomer::Scale value)
 {
   DEBUG("Scene: onZoomScaleChanged");
+  std::visit(
+    Overloaded{ [this](Zoomer::EScaleLevel level) { this->d_ptr->lod = level; },
+                [this](Zoomer::OtherLevel other) { this->d_ptr->lod = -1; } },
+    value.first);
   if (d_ptr->rasterizer)
     d_ptr->rasterizer->invalidate(Rasterizer::EReason::ZOOM_SCALE);
 }

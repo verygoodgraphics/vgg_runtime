@@ -28,7 +28,7 @@
 // NOLINTBEGIN
 namespace VGG::layer
 {
-bool path_change(nlohmann::json& path);
+bool pathChange(nlohmann::json& path);
 }
 
 // NOLINTEND

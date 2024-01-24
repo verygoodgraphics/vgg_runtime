@@ -95,6 +95,16 @@ std::shared_ptr<LayoutNode> LayoutNode::autoLayoutContainer()
   return m_parent.lock();
 }
 
+std::shared_ptr<Layout::Internal::AutoLayout> LayoutNode::containerAutoLayout()
+{
+  if (auto container = autoLayoutContainer())
+  {
+    return container->autoLayout();
+  }
+
+  return nullptr;
+}
+
 void LayoutNode::setNeedLayout()
 {
   m_needsLayout = true;
@@ -1392,7 +1402,6 @@ void LayoutNode::detachChildrenFromFlexNodeTree()
   for (auto it = children().rbegin(); it != children().rend(); ++it)
   {
     (*it)->autoLayout()->takeFlexNodeFromTree();
-    (*it)->configureAutoLayout();
   }
 }
 

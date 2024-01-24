@@ -802,6 +802,72 @@ void AutoLayout::configureFlexNodeSize(flexbox_node* node)
   }
 }
 
+void AutoLayout::configureFlexItemAlignSelf(flexbox_node* node)
+{
+  auto sharedView = view.lock();
+  if (!sharedView)
+  {
+    return;
+  }
+
+  auto container = sharedView->containerAutoLayout();
+  if (!container)
+  {
+    return;
+  }
+
+  if (
+    (container->isHorizontalDirection() && is100PercentHeight()) ||
+    (container->isVerticalDirection() && is100PercentWidth()))
+  {
+    // todo, What if there is rotation?
+    node->set_align_self(align_items_stretch);
+  }
+}
+bool AutoLayout::isHorizontalDirection()
+{
+  return directionIs(FlexboxLayout::EDirection::HORIZONTAL);
+}
+bool AutoLayout::isVerticalDirection()
+{
+  return directionIs(FlexboxLayout::EDirection::VERTICAL);
+}
+bool AutoLayout::directionIs(Rule::FlexboxLayout::EDirection direction)
+{
+  auto sharedRule = rule.lock();
+  if (!sharedRule)
+  {
+    return false;
+  }
+
+  if (const auto detail = sharedRule->getFlexContainerRule())
+  {
+    return detail->direction == direction;
+  }
+  return false;
+}
+
+bool AutoLayout::is100PercentWidth()
+{
+  auto sharedRule = rule.lock();
+  if (!sharedRule)
+  {
+    return false;
+  }
+
+  return sharedRule->width.value.is100Percent();
+}
+bool AutoLayout::is100PercentHeight()
+{
+  auto sharedRule = rule.lock();
+  if (!sharedRule)
+  {
+    return false;
+  }
+
+  return sharedRule->height.value.is100Percent();
+}
+
 void AutoLayout::configureGridItemSize()
 {
   auto sharedRule = rule.lock();
@@ -895,6 +961,8 @@ void AutoLayout::configureFlexItem(Rule::FlexboxItem* layout)
   {
     node->set_ltrb(ltrb_left, layout->left->value);
   }
+
+  configureFlexItemAlignSelf(node);
 
   // todo, hanlde position
 }

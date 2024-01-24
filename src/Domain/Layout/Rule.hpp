@@ -42,6 +42,8 @@ struct Length
 
   ETypes types;
   double value;
+
+  bool is100Percent();
 };
 struct Width
 {

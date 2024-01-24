@@ -135,3 +135,170 @@ TEST(LibLayoutTest, YPosition)
   // NOTE: shoule be 1.5, but yoga return 2
   EXPECT_DOUBLE_EQ(2, child0Ptr->get_layout_top());
 }
+
+TEST(LibLayoutTest, StrechNodeWithPercentHeight)
+{
+  auto          node00 = std::make_unique<flexbox_node>();
+  auto          pNode00 = node00.get();
+  flexbox_node* pNode00_1{ nullptr };
+  {
+    {
+      auto targetNode = node00.get();
+      {
+        targetNode->set_direction(direction_row);
+        targetNode->set_justify_content(justify_content_flex_start);
+        targetNode->set_align_items(align_items_flex_start);
+        targetNode->set_align_content(align_content_flex_start);
+        targetNode->set_wrap(wrap_no_wrap);
+        targetNode->set_gap(gap_row, 0);
+        targetNode->set_gap(gap_column, 40);
+        targetNode->set_padding(padding_top, 48);
+        targetNode->set_padding(padding_right, 0);
+        targetNode->set_padding(padding_bottom, 0);
+        targetNode->set_padding(padding_left, 48);
+      }
+      {
+        targetNode->set_width(unit_auto, 0);
+        targetNode->set_height(unit_auto, 0);
+      }
+    }
+
+    auto node00_0 = std::make_unique<flexbox_node>();
+    {
+      {
+        auto targetNode = node00_0.get();
+        {
+          targetNode->set_direction(direction_column);
+          targetNode->set_justify_content(justify_content_flex_start);
+          targetNode->set_align_items(align_items_flex_start);
+          targetNode->set_align_content(align_content_flex_start);
+          targetNode->set_wrap(wrap_no_wrap);
+          targetNode->set_gap(gap_row, 24);
+          targetNode->set_gap(gap_column, 0);
+          targetNode->set_padding(padding_top, 0);
+          targetNode->set_padding(padding_right, 0);
+          targetNode->set_padding(padding_bottom, 48);
+          targetNode->set_padding(padding_left, 0);
+        }
+        {
+          targetNode->set_width(unit_auto, 0);
+          targetNode->set_height(unit_auto, 0);
+        }
+        {
+          targetNode->set_position(position_relative);
+          targetNode->set_grow(0.0);
+          targetNode->set_shrink(0.0);
+        }
+        {
+          targetNode->set_width(unit_auto, 0);
+          targetNode->set_height(unit_auto, 0);
+        }
+      }
+
+      {
+        auto node00_00 = std::make_unique<flexbox_node>();
+        {
+          auto targetNode = node00_00.get();
+          {
+            targetNode->set_direction(direction_row);
+            targetNode->set_justify_content(justify_content_flex_start);
+            targetNode->set_align_items(align_items_flex_start);
+            targetNode->set_align_content(align_content_flex_start);
+            targetNode->set_wrap(wrap_no_wrap);
+            targetNode->set_gap(gap_row, 0);
+            targetNode->set_gap(gap_column, 8);
+            targetNode->set_padding(padding_top, 24);
+            targetNode->set_padding(padding_right, 0);
+            targetNode->set_padding(padding_bottom, 0);
+            targetNode->set_padding(padding_left, 0);
+          }
+          {
+            targetNode->set_width(unit_auto, 0);
+            targetNode->set_height(unit_auto, 0);
+          }
+          {
+            targetNode->set_position(position_relative);
+            targetNode->set_grow(0.0);
+            targetNode->set_shrink(0.0);
+          }
+          {
+            targetNode->set_width(unit_auto, 0);
+            targetNode->set_height(unit_auto, 0);
+          }
+        }
+        {
+          auto node00_00_0 = std::make_unique<flexbox_node>();
+          auto targetNode = node00_00_0.get();
+          {
+            targetNode->set_direction(direction_row);
+            targetNode->set_justify_content(justify_content_center);
+            targetNode->set_align_items(align_items_center);
+            targetNode->set_align_content(align_content_center);
+            targetNode->set_wrap(wrap_no_wrap);
+            targetNode->set_gap(gap_row, 0);
+            targetNode->set_gap(gap_column, 10);
+            targetNode->set_padding(padding_top, 15);
+            targetNode->set_padding(padding_right, 20);
+            targetNode->set_padding(padding_bottom, 12);
+            targetNode->set_padding(padding_left, 20);
+          }
+          {
+            targetNode->set_width(unit_point, 56);
+            targetNode->set_height(unit_point, 64);
+          }
+          {
+            targetNode->set_position(position_relative);
+            targetNode->set_grow(0.0);
+            targetNode->set_shrink(0.0);
+          }
+          {
+            targetNode->set_width(unit_point, 56);
+            targetNode->set_height(unit_point, 64);
+          }
+
+          {
+            auto node00_00_00 = std::make_unique<flexbox_node>();
+            {
+              auto targetNode = node00_00_00.get();
+              {
+                targetNode->set_position(position_relative);
+                targetNode->set_grow(0.0);
+                targetNode->set_shrink(0.0);
+              }
+              {
+                targetNode->set_width(unit_point, 62);
+                targetNode->set_height(unit_point, 37);
+              }
+            }
+            node00_00_0->add_child(node00_00_00, -1);
+          }
+          node00_00->add_child(node00_00_0, -1);
+        }
+        node00_0->add_child(node00_00, -1);
+      }
+    }
+    node00->add_child(node00_0, -1);
+
+    auto node00_1 = std::make_unique<flexbox_node>();
+    pNode00_1 = node00_1.get();
+    {
+      auto targetNode = node00_1.get();
+      {
+        targetNode->set_position(position_relative);
+        targetNode->set_grow(0.0);
+        targetNode->set_shrink(0.0);
+      }
+      {
+        targetNode->set_width(unit_point, 247);
+        targetNode->set_height(unit_percent, 100);
+        targetNode->set_align_self(align_items_stretch);
+      }
+    }
+    node00->add_child(node00_1, -1);
+  }
+
+  // when
+  pNode00->calc_layout();
+
+  EXPECT_DOUBLE_EQ(136, pNode00_1->get_layout_height());
+}

@@ -391,7 +391,7 @@ void Layout::Layout::rebuildSubtree(std::shared_ptr<LayoutNode> node)
     return;
   }
 
-  DEBUG("Layout::rebuildSubtree: node id is %s", node->id().c_str());
+  DEBUG("Layout::rebuildSubtree: node id is %s, %s", node->id().c_str(), node->path().c_str());
   node->removeAllChildren();
 
   const auto& path = node->jsonPointer();

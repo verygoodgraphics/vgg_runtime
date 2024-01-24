@@ -137,7 +137,8 @@ public:
   std::shared_ptr<Layout::Internal::AutoLayout> createAutoLayout();
   void                                          configureAutoLayout();
 
-  std::shared_ptr<LayoutNode> autoLayoutContainer();
+  std::shared_ptr<LayoutNode>                   autoLayoutContainer();
+  std::shared_ptr<Layout::Internal::AutoLayout> containerAutoLayout();
 
   void setNeedLayout();
   bool needsLayout() const

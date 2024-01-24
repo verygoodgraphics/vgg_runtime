@@ -18,6 +18,7 @@
 #include "JsonKeys.hpp"
 
 #include "Utility/Log.hpp"
+#include "Utility/VggFloat.hpp"
 
 namespace VGG
 {
@@ -174,6 +175,11 @@ void from_json(const nlohmann::json& json, Rule& obj)
   {
     obj.aspectRatio = json[K_ASPECT_RATIO].get<double>();
   }
+}
+
+bool Length::is100Percent()
+{
+  return types == ETypes::PERCENT && doublesNearlyEqual(value, 100);
 }
 
 } // namespace Rule

@@ -124,6 +124,12 @@ private:
 
   void configureFlexContainer(Rule::FlexboxLayout* layout);
   void configureFlexItem(Rule::FlexboxItem* layout);
+  void configureFlexItemAlignSelf(flexbox_node* node);
+  bool isHorizontalDirection();
+  bool isVerticalDirection();
+  bool directionIs(Rule::FlexboxLayout::EDirection direction);
+  bool is100PercentWidth();
+  bool is100PercentHeight();
 
   void configureGridContainer(Rule::GridLayout* layout);
   void configureGridItem(Rule::GridItem* layout);

@@ -119,12 +119,16 @@ void RasterCacheTile::revalidate(
   const SkMatrix& localMatrix,
   const SkRect&   bound)
 {
-  levelCache.rasterMatrix = transform;
-  levelCache.rasterMatrix[SkMatrix::kMTransX] = 0;
-  levelCache.rasterMatrix[SkMatrix::kMTransY] = 0;
-  levelCache.rasterMatrix.postConcat(localMatrix);
-  const auto contentRect = levelCache.rasterMatrix.mapRect(bound);
-  calculateTiles(levelCache.tileCache, contentRect, m_tileWidth, m_tileHeight);
+  if (levelCache.invalid)
+  {
+    levelCache.rasterMatrix = transform;
+    levelCache.rasterMatrix[SkMatrix::kMTransX] = 0;
+    levelCache.rasterMatrix[SkMatrix::kMTransY] = 0;
+    levelCache.rasterMatrix.postConcat(localMatrix);
+    const auto contentRect = levelCache.rasterMatrix.mapRect(bound);
+    calculateTiles(levelCache.tileCache, contentRect, m_tileWidth, m_tileHeight);
+    levelCache.invalid = false;
+  }
 }
 
 SkSurface* RasterCacheTile::rasterSurface(GrRecordingContext* context)
@@ -145,10 +149,12 @@ SkSurface* RasterCacheTile::rasterSurface(GrRecordingContext* context)
 std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::onRevalidateRaster(
   uint32_t             reason,
   GrRecordingContext*  context,
+  int                  lod,
   const SkRect&        clipRect,
   const RasterContext& rasterContext,
   void*                userData)
 {
+  DEBUG("reason: %s", printReason(reason).c_str());
 
   auto       skv = clipRect;
   const auto localMatrix = rasterContext.localMatrix;
@@ -157,18 +163,31 @@ std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::o
   hitMatrix[SkMatrix::kMTransY] = rasterContext.globalMatrix.getTranslateY();
 
   std::vector<TileMap::iterator> hitTiles;
-  std::vector<Tile>              tiles;
 
-  auto& currentLevelCache = m_cacheStack[0];
+  ASSERT(m_cacheStack.size() > 0);
+  ASSERT(lod < int(m_cacheStack.size() - 1));
+
+  size_t cacheIndex = lod < 0 ? m_cacheStack.size() - 1 : lod;
+  auto&  currentLevelCache = m_cacheStack[cacheIndex];
+
+  if (reason & CONTENT)
+  {
+    invalidateContent();
+    revalidate(currentLevelCache, rasterContext.globalMatrix, localMatrix, *rasterContext.bound);
+    hitTiles = hitTile(currentLevelCache.tileCache, skv, hitMatrix);
+    if (hitTiles.empty())
+    {
+      return { reason, {}, hitMatrix };
+    }
+    auto surface = rasterSurface(context);
+    auto tiles = rasterOrGetTile(surface, rasterContext, currentLevelCache.rasterMatrix, hitTiles);
+    return { reason, std::move(tiles), hitMatrix };
+  }
 
   if ((reason & ZOOM_TRANSLATION) && !(reason & ZOOM_SCALE)) // most case
   {
-    DEBUG("ignore zoom translation");
-    if (currentLevelCache.invalid)
-    {
-      revalidate(currentLevelCache, rasterContext.globalMatrix, localMatrix, *rasterContext.bound);
-      currentLevelCache.invalid = false;
-    }
+    DEBUG("translation");
+    revalidate(currentLevelCache, rasterContext.globalMatrix, localMatrix, *rasterContext.bound);
     hitTiles = hitTile(currentLevelCache.tileCache, skv, hitMatrix);
     if (hitTiles.empty())
     {
@@ -176,8 +195,12 @@ std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::o
     }
   }
 
-  if (reason & ZOOM_SCALE || reason & CONTENT)
+  if (reason & ZOOM_SCALE)
   {
+    if (lod < 0)
+    {
+      currentLevelCache.invalid = true;
+    }
     revalidate(currentLevelCache, rasterContext.globalMatrix, localMatrix, *rasterContext.bound);
     hitTiles = hitTile(currentLevelCache.tileCache, skv, hitMatrix);
   }
@@ -188,20 +211,18 @@ std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::o
     return { reason, {}, hitMatrix };
   }
   auto surface = rasterSurface(context);
-  tiles = rasterOrGetTile(surface, rasterContext, currentLevelCache.rasterMatrix, hitTiles);
-  DEBUG("%d", (int)tiles.size());
+  auto tiles = rasterOrGetTile(surface, rasterContext, currentLevelCache.rasterMatrix, hitTiles);
   return { reason, std::move(tiles), hitMatrix };
 }
 RasterCacheTile::RasterCacheTile(float tw, float th)
   : m_tileWidth(tw)
   , m_tileHeight(th)
 {
-  m_cacheStack.resize(Zoomer::ZOOM_LEVEL_COUNT);
+  m_cacheStack.resize(Zoomer::ZOOM_LEVEL_COUNT + 1);
 }
 
 RasterCacheTile::~RasterCacheTile()
 {
-  m_cacheStack.resize(Zoomer::ZOOM_LEVEL_COUNT);
 }
 
 } // namespace VGG::layer

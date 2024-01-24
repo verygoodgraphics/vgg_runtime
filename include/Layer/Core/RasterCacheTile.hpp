@@ -31,7 +31,10 @@ class RasterCacheTile : public Rasterizer
 public:
   // using TileMap = std::unordered_map<SkRect, RasterCache::Tile, SkRectHash>;
   using TileMap = std::vector<Rasterizer::Tile>;
-  RasterCacheTile() = default;
+  RasterCacheTile()
+    : RasterCacheTile(1024, 1024)
+  {
+  }
   RasterCacheTile(float tw, float th);
 
   void purge() override
@@ -48,6 +51,7 @@ protected:
   std::tuple<uint32_t, std::vector<Tile>, SkMatrix> onRevalidateRaster(
     uint32_t             reason,
     GrRecordingContext*  context,
+    int                  lod,
     const SkRect&        clipRect,
     const RasterContext& rasterContext,
     void*                userData) override;
@@ -90,8 +94,7 @@ private:
     const SkMatrix& localMatrix,
     const SkRect&   bound);
   SkSurface* rasterSurface(GrRecordingContext* context);
-
-  void invalidateContent()
+  void       invalidateContent()
   {
     for (auto& c : m_cacheStack)
     {
@@ -99,13 +102,9 @@ private:
     }
   }
   std::vector<LevelCache> m_cacheStack;
-
-  // TileMap  m_tileCache;
-  // SkMatrix m_rasterMatrix;
-
-  const float      m_tileWidth = 1024.f;
-  const float      m_tileHeight = 1024.f;
-  sk_sp<SkSurface> m_surface;
+  const float             m_tileWidth = 1024.f;
+  const float             m_tileHeight = 1024.f;
+  sk_sp<SkSurface>        m_surface;
 };
 
 } // namespace VGG::layer

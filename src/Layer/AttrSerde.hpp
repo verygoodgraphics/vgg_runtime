@@ -176,14 +176,14 @@ inline void from_json(const json& j, PatternFill& x)
 
 inline void from_json(const json& j, PatternFit& x)
 {
-  x.imageFilter = j.value("imageAdjust", ImageFilter{});
+  x.imageFilter = j.value("imageFilters", ImageFilter{});
   x.guid = j.value("imageFileName", "");
   x.rotation = glm::radians(j.value("rotation", 0.f));
 }
 
 inline void from_json(const json& j, PatternStretch& x)
 {
-  x.imageFilter = j.value("imageAdjust", ImageFilter{});
+  x.imageFilter = j.value("imageFilters", ImageFilter{});
   x.guid = j.value("imageFileName", "");
   x.clip = j.value("crop", true);
   layer::Transform transform;
@@ -195,7 +195,7 @@ inline void from_json(const json& j, PatternStretch& x)
 
 inline void from_json(const json& j, PatternTile& x)
 {
-  x.imageFilter = j.value("imageAdjust", ImageFilter{});
+  x.imageFilter = j.value("imageFilters", ImageFilter{});
   x.guid = j.value("imageFileName", "");
   x.mirror = j.value("mirror", false);
   x.rotation = glm::radians(j.value("rotation", 0.f));

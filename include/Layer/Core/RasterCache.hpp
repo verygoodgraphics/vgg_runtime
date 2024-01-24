@@ -16,6 +16,7 @@
 #pragma once
 #include "Layer/Core/VBound.hpp"
 #include <core/SkImage.h>
+#include <gpu/GrDirectContext.h>
 #include <vector>
 
 class GrRecordingContext;
@@ -30,6 +31,14 @@ class sk_sp;
 
 namespace VGG::layer
 {
+
+class DisplayItem
+{
+public:
+  virtual const SkRect&   clipRect() = 0;
+  virtual SkPicture*      picture() = 0;
+  virtual const SkMatrix& matrix() = 0;
+};
 
 class Rasterizer
 {
@@ -56,31 +65,21 @@ public:
     Tile& operator=(const Tile& t) = default;
   };
 
-  struct Key
+  struct RasterContext
   {
-    GrRecordingContext* context;
-    const SkMatrix*     transform;
-    SkPicture*          pic;
-    const SkRect&       bound;
-    const SkMatrix&     mat;
-    const SkRect&       viewport;
-    void*               userData;
-
-    Key(
-      GrRecordingContext* context,
-      const SkMatrix*     transform,
-      const SkRect&       clipRect,
-      SkPicture*          pic,
-      const SkRect&       bound,
-      const SkMatrix&     mat,
-      void*               userData)
-      : context(context)
-      , transform(transform)
-      , pic(pic)
+    const SkMatrix& globalMatrix;
+    SkPicture*      picture;
+    const SkRect*   bound;
+    const SkMatrix& localMatrix;
+    RasterContext(
+      const SkMatrix& transform,
+      SkPicture*      pic,
+      const SkRect*   bound,
+      const SkMatrix& mat)
+      : globalMatrix(transform)
+      , picture(pic)
       , bound(bound)
-      , mat(mat)
-      , viewport(clipRect)
-      , userData(userData)
+      , localMatrix(mat)
     {
     }
   };
@@ -93,6 +92,7 @@ public:
     CONTENT = 8,
     ALL = ZOOM_TRANSLATION | ZOOM_SCALE | VIEWPORT | CONTENT
   };
+
   virtual ~Rasterizer() = default;
   Rasterizer() = default;
   Rasterizer(const Rasterizer&) = delete;
@@ -104,45 +104,39 @@ public:
   {
     m_reason |= reason;
   }
+
   bool isInvalidate() const
   {
     return m_reason != 0;
   }
 
-  void rasterize(const Key& key, Tile** tiles, int* count, SkMatrix* transform)
+  void rasterize(
+    GrRecordingContext*  rasterDevice,
+    const RasterContext& rasterContext,
+    const SkRect&        clipRect,
+    std::vector<Tile>*   tiles,
+    SkMatrix*            transform,
+    void*                userData = 0)
   {
     if (isInvalidate())
     {
-      auto clear = onRaster(
-        m_reason,
-        key.context,
-        key.transform,
-        key.viewport,
-        key.pic,
-        key.bound,
-        key.mat,
-        key.userData);
+      auto clear = onRevalidateRaster(m_reason, rasterDevice, clipRect, rasterContext, userData);
       m_reason &= ~clear;
     }
-    onQueryTile(tiles, count, transform);
+    onTiles(tiles, transform);
   }
 
-  void raster(SkMatrix* transform, std::vector<Tile>* tiles);
-
 protected:
-  virtual uint32_t onRaster(
-    uint32_t            reason,
-    GrRecordingContext* context,
-    const SkMatrix*     transform,
-    const SkRect&       clipRect,
-    SkPicture*          pic,
-    const SkRect&       bound,
-    const SkMatrix&     mat,
-    void*               userData) = 0;
+  virtual uint32_t onRevalidateRaster(
+    uint32_t             reason,
+    GrRecordingContext*  context,
+    const SkRect&        clipRect,
+    const RasterContext& rasterContext,
+    void*                userData) = 0;
 
-  virtual void onQueryTile(Tile** tiles, int* count, SkMatrix* transform) = 0;
+  virtual void onTiles(std::vector<Tile>* tiles, SkMatrix* transform) = 0;
 
 private:
-  uint32_t m_reason;
+  uint32_t m_reason{ ALL };
 };
 } // namespace VGG::layer

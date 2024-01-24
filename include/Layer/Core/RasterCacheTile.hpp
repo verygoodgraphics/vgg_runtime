@@ -60,11 +60,8 @@ class RasterCacheTile : public Rasterizer
 
   // using TileMap = std::unordered_map<SkRect, RasterCache::Tile, SkRectHash>;
   using TileMap = std::vector<Rasterizer::Tile>;
-
   std::vector<TileMap::iterator> hitTile(const SkRect& viewport, const SkMatrix& transform);
-
-  void calculateTiles(const SkRect& content);
-
+  void                           calculateTiles(const SkRect& content);
   void revalidate(const SkMatrix& transform, const SkMatrix& localMatrix, const SkRect& bound);
   const SkMatrix& rasterMatrix() const
   {
@@ -84,22 +81,18 @@ public:
   {
   }
 
-  void onQueryTile(Tile** tiles, int* count, SkMatrix* transform) override
+  void onTiles(std::vector<Tile>* tiles, SkMatrix* transform) override
   {
-    *tiles = m_hitTiles.data();
-    *count = m_hitTiles.size();
+    *tiles = m_hitTiles;
     *transform = m_hitMatrix;
   }
 
-  uint32_t onRaster(
-    uint32_t            reason,
-    GrRecordingContext* context,
-    const SkMatrix*     transform,
-    const SkRect&       clipRect,
-    SkPicture*          pic,
-    const SkRect&       bound,
-    const SkMatrix&     mat,
-    void*               userData) override;
+  uint32_t onRevalidateRaster(
+    uint32_t             reason,
+    GrRecordingContext*  context,
+    const SkRect&        clipRect,
+    const RasterContext& rasterContext,
+    void*                userData) override;
 
 private:
   TileMap           m_tileCache;

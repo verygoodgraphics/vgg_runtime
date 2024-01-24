@@ -119,7 +119,7 @@ vec4 main(vec4 inColor){
 }
 )";
 
-  auto fx = GetOrCreateEffect("imageAdjust", s_sksl);
+  auto fx = GetOrCreateEffect("imageFilters", s_sksl);
   if (fx)
   {
     SkRuntimeColorFilterBuilder builder(fx);

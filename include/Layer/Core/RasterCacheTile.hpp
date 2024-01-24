@@ -19,20 +19,46 @@
 #include "Layer/Zoomer.hpp"
 #include "Utility/Log.hpp"
 
-#include "core/SkCanvas.h"
-#include "core/SkImage.h"
-#include "core/SkPicture.h"
-#include <algorithm>
 #include <core/SkMatrix.h>
-#include <core/SkSurface.h>
-#include <gpu/ganesh/SkSurfaceGanesh.h>
-#include <gpu/GpuTypes.h>
+
+class SkSurface;
 
 class Zoomer;
 namespace VGG::layer
 {
 class RasterCacheTile : public Rasterizer
 {
+public:
+  // using TileMap = std::unordered_map<SkRect, RasterCache::Tile, SkRectHash>;
+  using TileMap = std::vector<Rasterizer::Tile>;
+  RasterCacheTile() = default;
+  RasterCacheTile(float tw, float th);
+
+  void purge() override
+  {
+    for (auto& c : m_cacheStack)
+    {
+      c.tileCache.clear();
+      c.invalid = true;
+    }
+  }
+  ~RasterCacheTile();
+
+protected:
+  std::tuple<uint32_t, std::vector<Tile>, SkMatrix> onRevalidateRaster(
+    uint32_t             reason,
+    GrRecordingContext*  context,
+    const SkRect&        clipRect,
+    const RasterContext& rasterContext,
+    void*                userData) override;
+
+private:
+  struct LevelCache
+  {
+    SkMatrix rasterMatrix;
+    TileMap  tileCache;
+    bool     invalid{ true };
+  };
 
   std::string printReason(uint32_t r)
   {
@@ -58,49 +84,28 @@ class RasterCacheTile : public Rasterizer
     return res;
   }
 
-  // using TileMap = std::unordered_map<SkRect, RasterCache::Tile, SkRectHash>;
-  using TileMap = std::vector<Rasterizer::Tile>;
-  std::vector<TileMap::iterator> hitTile(const SkRect& viewport, const SkMatrix& transform);
-  void                           calculateTiles(const SkRect& content);
-  void revalidate(const SkMatrix& transform, const SkMatrix& localMatrix, const SkRect& bound);
-  const SkMatrix& rasterMatrix() const
+  void revalidate(
+    LevelCache&     levelCache,
+    const SkMatrix& transform,
+    const SkMatrix& localMatrix,
+    const SkRect&   bound);
+  SkSurface* rasterSurface(GrRecordingContext* context);
+
+  void invalidateContent()
   {
-    return m_rasterMatrix;
+    for (auto& c : m_cacheStack)
+    {
+      c.invalid = true;
+    }
   }
+  std::vector<LevelCache> m_cacheStack;
 
-  const SkMatrix& hitMatrix() const
-  {
-    return m_hitMatrix;
-  }
+  // TileMap  m_tileCache;
+  // SkMatrix m_rasterMatrix;
 
-public:
-  RasterCacheTile() = default;
-  RasterCacheTile(float tw, float th)
-    : m_tileWidth(tw)
-    , m_tileHeight(th)
-  {
-  }
-
-  void onTiles(std::vector<Tile>* tiles, SkMatrix* transform) override
-  {
-    *tiles = m_hitTiles;
-    *transform = m_hitMatrix;
-  }
-
-  uint32_t onRevalidateRaster(
-    uint32_t             reason,
-    GrRecordingContext*  context,
-    const SkRect&        clipRect,
-    const RasterContext& rasterContext,
-    void*                userData) override;
-
-private:
-  TileMap           m_tileCache;
-  std::vector<Tile> m_hitTiles;
-  SkMatrix          m_rasterMatrix;
-  SkMatrix          m_hitMatrix{ SkMatrix::I() };
-  const float       m_tileWidth = 1024.f;
-  const float       m_tileHeight = 1024.f;
+  const float      m_tileWidth = 1024.f;
+  const float      m_tileHeight = 1024.f;
+  sk_sp<SkSurface> m_surface;
 };
 
 } // namespace VGG::layer

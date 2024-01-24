@@ -375,7 +375,7 @@ PaintNodePtr SceneBuilder::fromPath(const json& j, const glm::mat3& totalMatrix)
           klass == "rectangle" || klass == "ellipse" || klass == "polygon" || klass == "star")
         {
           auto cp = j;
-          if (path_change(cp))
+          if (pathChange(cp))
           {
             p->addSubShape(
               makeContour(cp["shape"]["subshapes"][0]["subGeometry"], cp, matrix),

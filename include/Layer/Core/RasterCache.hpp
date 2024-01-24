@@ -17,6 +17,7 @@
 #include "Layer/Core/VBound.hpp"
 #include <core/SkImage.h>
 #include <gpu/GrDirectContext.h>
+#include <tuple>
 #include <vector>
 
 class GrRecordingContext;
@@ -118,23 +119,21 @@ public:
     SkMatrix*            transform,
     void*                userData = 0)
   {
-    if (isInvalidate())
-    {
-      auto clear = onRevalidateRaster(m_reason, rasterDevice, clipRect, rasterContext, userData);
-      m_reason &= ~clear;
-    }
-    onTiles(tiles, transform);
+    uint32_t clear;
+    std::tie(clear, *tiles, *transform) =
+      onRevalidateRaster(m_reason, rasterDevice, clipRect, rasterContext, userData);
+    m_reason &= ~clear;
   }
 
+  virtual void purge() = 0;
+
 protected:
-  virtual uint32_t onRevalidateRaster(
+  virtual std::tuple<uint32_t, std::vector<Tile>, SkMatrix> onRevalidateRaster(
     uint32_t             reason,
     GrRecordingContext*  context,
     const SkRect&        clipRect,
     const RasterContext& rasterContext,
     void*                userData) = 0;
-
-  virtual void onTiles(std::vector<Tile>* tiles, SkMatrix* transform) = 0;
 
 private:
   uint32_t m_reason{ ALL };

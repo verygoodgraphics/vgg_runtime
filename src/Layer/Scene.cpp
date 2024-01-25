@@ -22,7 +22,6 @@
 #include "Layer/Zoomer.hpp"
 #include "Layer/Memory/VNew.hpp"
 #include "Layer/Core/PaintNode.hpp"
-#include "Layer/Core/RasterCacheImpl.hpp"
 #include "encode/SkPngEncoder.h"
 #include "Utility/Log.hpp"
 

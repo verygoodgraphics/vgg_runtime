@@ -22,7 +22,6 @@
 #include "Layer/Zoomer.hpp"
 #include "ViewModel.hpp"
 
-#include "Layer/Core/RasterCacheImpl.hpp"
 #include "Layer/SceneBuilder.hpp"
 #include "Utility/Log.hpp"
 

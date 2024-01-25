@@ -383,9 +383,9 @@ void applyLayoutToViewHierarchy(
   auto node = isContainer ? autoLayout->getFlexContainer() : autoLayout->getFlexItem();
   if (node)
   {
-    Layout::Rect frame = { { .x = node->get_layout_left(), .y = node->get_layout_top() },
-                           { .width = node->get_layout_width(),
-                             .height = node->get_layout_height() } };
+    auto size =
+      view->swapWidthAndHeightIfNeeded({ node->get_layout_width(), node->get_layout_height() });
+    Layout::Rect frame = { { .x = node->get_layout_left(), .y = node->get_layout_top() }, size };
     if (preserveOrigin)
     {
       frame = view->calculateResizedFrame(frame.size);
@@ -405,12 +405,12 @@ void applyLayoutToViewHierarchy(
     autoLayout->setFrame(frame);
     view->setFrame(frame);
   }
-  else if (auto gridContainer = autoLayout->getGridContainer())
+  else if (auto node = autoLayout->getGridContainer())
   {
     // grid container
-    Layout::Rect frame = { {},
-                           { .width = TO_VGG_LAYOUT_SCALAR(gridContainer->get_layout_width()),
-                             .height = TO_VGG_LAYOUT_SCALAR(gridContainer->get_layout_height()) } };
+    auto size =
+      view->swapWidthAndHeightIfNeeded({ node->get_layout_width(), node->get_layout_height() });
+    Layout::Rect frame = { {}, size };
     if (preserveOrigin)
     {
       frame = view->calculateResizedFrame(frame.size);
@@ -490,26 +490,27 @@ void AutoLayout::applyLayout(bool preservingOrigin)
 
 Size AutoLayout::calculateLayout(Size size)
 {
-  if (auto sharedView = view.lock())
+  auto sharedView = view.lock();
+  if (!sharedView)
   {
-    DEBUG(
-      "AutoLayout::calculateLayout, view[%p, %s]",
-      sharedView.get(),
-      sharedView->path().c_str());
-    attachNodesFromViewHierachy(sharedView);
+    return size;
   }
+
+  DEBUG("AutoLayout::calculateLayout, view[%p, %s]", sharedView.get(), sharedView->path().c_str());
+  attachNodesFromViewHierachy(sharedView);
 
   if (auto flexNode = getFlexNode())
   {
     flexNode->calc_layout();
-    return { flexNode->get_layout_width(), flexNode->get_layout_height() };
+    return sharedView->swapWidthAndHeightIfNeeded(
+      { flexNode->get_layout_width(), flexNode->get_layout_height() });
   }
   else if (auto gridContainer = getGridContainer())
   {
     DEBUG("AutoLayout::calculateLayout, grid container calculate");
     m_gridItemFrames = gridContainer->calc_layout(size.height, size.width);
-    return { TO_VGG_LAYOUT_SCALAR(gridContainer->get_layout_width()),
-             TO_VGG_LAYOUT_SCALAR(gridContainer->get_layout_height()) };
+    return sharedView->swapWidthAndHeightIfNeeded(
+      { gridContainer->get_layout_width(), gridContainer->get_layout_height() });
   }
   else
   {
@@ -759,16 +760,31 @@ void AutoLayout::configureFlexNodeSize(flexbox_node* node)
       sharedView->path().c_str());
   }
 
-  Layout::Size size{ sharedRule->width.value.value, sharedRule->height.value.value };
-  if (
-    sharedRule->width.value.types == Rule::Length::ETypes::PX &&
-    sharedRule->height.value.types == Rule::Length::ETypes::PX)
+  auto width = sharedRule->width.value;
+  auto height = sharedRule->height.value;
+  auto swapWidthAndHeight = sharedView->shouldSwapWidthAndHeight();
+  if (swapWidthAndHeight)
+  {
+    DEBUG("AutoLayout::configureFlexNodeSize, swap width and height");
+    const auto& modelSize = sharedView->bounds().size;
+    if (width.types == Length::ETypes::PX)
+    {
+      width.value = modelSize.height;
+    }
+    if (height.types == Length::ETypes::PX)
+    {
+      height.value = modelSize.width;
+    }
+  }
+
+  Layout::Size size{ width.value, height.value };
+  if (width.types == Rule::Length::ETypes::PX && height.types == Rule::Length::ETypes::PX)
   {
     size = sharedView->rotatedSize(size);
   }
 
-  VERBOSE("AutoLayout::configureFlexNodeSize, width %f", sharedRule->width.value.value);
-  node->set_width(toLibUnit(sharedRule->width.value.types), size.width);
+  VERBOSE("AutoLayout::configureFlexNodeSize, width %f", size.width);
+  node->set_width(toLibUnit(width.types), size.width);
   if (sharedRule->maxWidth.has_value())
   {
     VERBOSE("AutoLayout::configureFlexNodeSize, max width %f", sharedRule->maxWidth->value.value);
@@ -784,8 +800,8 @@ void AutoLayout::configureFlexNodeSize(flexbox_node* node)
       sharedRule->minWidth->value.value);
   }
 
-  VERBOSE("AutoLayout::configureFlexNodeSize, height %f", sharedRule->height.value.value);
-  node->set_height(toLibUnit(sharedRule->height.value.types), size.height);
+  VERBOSE("AutoLayout::configureFlexNodeSize, height %f", size.height);
+  node->set_height(toLibUnit(height.types), size.height);
   if (sharedRule->maxHeight.has_value())
   {
     VERBOSE("AutoLayout::configureFlexNodeSize, max height %f", sharedRule->maxHeight->value.value);

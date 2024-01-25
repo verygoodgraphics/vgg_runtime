@@ -21,9 +21,11 @@
 #include "JsonKeys.hpp"
 #include "Rect.hpp"
 
+#include "Math/Math.hpp"
 #include "Utility/Log.hpp"
 #include "Utility/VggFloat.hpp"
 
+#include <algorithm>
 #include <functional>
 #include <iostream>
 #include <numeric>
@@ -1065,6 +1067,26 @@ Layout::Size LayoutNode::rotatedSize(const Layout::Size& size)
 
   const auto& rect = Layout::Rect::makeFromPoints(std::vector<Layout::Point>{ p1, p2, p3, p4 });
   return rect.size;
+}
+
+bool LayoutNode::shouldSwapWidthAndHeight()
+{
+  const auto& matrix = modelMatrix();
+  if (doubleNearlyZero(matrix.b) && doubleNearlyZero(matrix.c))
+  {
+    return false;
+  }
+  const auto radian = std::abs(matrix.decomposeRotateRadian());
+  return radian >= M_PI_4 && radian <= M_PI_4 * 3;
+}
+
+Layout::Size LayoutNode::swapWidthAndHeightIfNeeded(Layout::Size size)
+{
+  if (shouldSwapWidthAndHeight())
+  {
+    std::swap(size.width, size.height);
+  }
+  return size;
 }
 
 Layout::Rect LayoutNode::resizeContour(

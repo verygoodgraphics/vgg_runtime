@@ -160,6 +160,8 @@ public:
     return convertRectToAncestor(frame(), ancestorNode);
   }
   Layout::Size rotatedSize(const Layout::Size& size);
+  bool         shouldSwapWidthAndHeight();
+  Layout::Size swapWidthAndHeightIfNeeded(Layout::Size size);
 
 public:
   const std::string& id();

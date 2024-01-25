@@ -159,8 +159,6 @@ protected:
           {
             m_scene->setSceneRoots(std::move(*sceneBuilderResult.root));
           }
-          auto editor = std::make_shared<Editor>();
-          m_layer->addAppRenderable(editor);
           m_layer->addAppScene(m_scene);
           m_layer->setDrawPositionEnabled(true);
         }

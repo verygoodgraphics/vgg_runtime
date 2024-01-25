@@ -88,11 +88,7 @@ private:
     return res;
   }
 
-  void revalidate(
-    LevelCache&     levelCache,
-    const SkMatrix& transform,
-    const SkMatrix& localMatrix,
-    const SkRect&   bound);
+  void       revalidate(LevelCache& levelCache, const SkMatrix& totalMatrix, const SkRect& bound);
   SkSurface* rasterSurface(GrRecordingContext* context);
   void       invalidateContent()
   {

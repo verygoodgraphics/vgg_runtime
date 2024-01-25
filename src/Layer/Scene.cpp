@@ -300,6 +300,7 @@ void Scene::setZoomer(std::shared_ptr<Zoomer> zoomer)
 
 void Scene::setPage(int num)
 {
+  DEBUG("setPage: %d", num);
   VGG_IMPL(Scene)
   if (num >= 0 && (std::size_t)num < _->roots.size())
   {
@@ -325,13 +326,6 @@ void Scene::onZoomTranslationChanged(float x, float y)
   DEBUG("Scene: onZoomTranslationChanged");
   if (d_ptr->rasterizer)
     d_ptr->rasterizer->invalidate(Rasterizer::EReason::ZOOM_TRANSLATION);
-}
-
-void Scene::onZoomViewportChanged(const Bound& bound)
-{
-  DEBUG("Scene: onZoomViewportChanged");
-  if (d_ptr->rasterizer)
-    d_ptr->rasterizer->invalidate(Rasterizer::EReason::VIEWPORT);
 }
 
 void Scene::onViewportChange(const Bound& bound)

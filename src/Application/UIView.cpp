@@ -19,6 +19,7 @@
 #include "Event/EventAPI.hpp"
 #include "Event/Keycode.hpp"
 #include "Layer/Core/RasterCacheTile.hpp"
+#include "Layer/Zoomer.hpp"
 #include "ViewModel.hpp"
 
 #include "Layer/Core/RasterCacheImpl.hpp"
@@ -403,7 +404,7 @@ void UIView::fitCurrentPage()
   ASSERT(m_zoomerListener);
 
   m_zoomerListener->setOffset({ 0, 0 });
-  m_zoomerListener->setScale(1);
+  m_zoomerListener->setScale(Zoomer::SL_1_1);
 }
 
 void UIView::enableZoomer(bool enabled)

@@ -104,6 +104,7 @@ public:
   SkCanvas*                                canvas{ nullptr };
   std::vector<std::shared_ptr<Renderable>> items;
   std::vector<std::shared_ptr<Scene>>      scenes;
+  bool                                     invalid{ true };
 
   VLayer__pImpl(VLayer* api)
     : q_ptr(api)
@@ -197,6 +198,24 @@ public:
     return surface->makeImageSnapshot(
       SkIRect::MakeXYWH(opts.position[0], opts.position[1], opts.extend[0], opts.extend[1]));
   }
+
+  void revalidate()
+  {
+    if (invalid)
+    {
+      float h = skiaContext->surface()->height();
+      float w = skiaContext->surface()->width();
+      for (auto& s : scenes)
+      {
+        s->onViewportChange(Bound{ 0, 0, w, h });
+      }
+      invalid = false;
+    }
+  }
+  void invalidate()
+  {
+    invalid = true;
+  }
 };
 
 std::optional<ELayerError> VLayer::onInit()
@@ -240,6 +259,7 @@ std::optional<ELayerError> VLayer::onInit()
 void VLayer::beginFrame()
 {
   VGG_IMPL(VLayer);
+  _->revalidate();
   if (!_->skiaContext->prepareFrame())
     DEBUG("begin frame failed");
 }
@@ -260,12 +280,14 @@ void VLayer::addRenderItem(std::shared_ptr<Renderable> item)
 void VLayer::addScene(std::shared_ptr<Scene> scene)
 {
   d_ptr->scenes.push_back(std::move(scene));
+  d_ptr->invalidate();
 }
 
 void VLayer::setScene(std::shared_ptr<Scene> scene)
 {
   d_ptr->scenes.clear();
   d_ptr->scenes.push_back(std::move(scene));
+  d_ptr->invalidate();
 }
 
 void VLayer::resize(int w, int h)
@@ -277,11 +299,7 @@ void VLayer::resize(int w, int h)
   {
     INFO("resize: [%d, %d], actually (%d, %d)", w, h, finalW, finalH);
     _->skiaContext->resizeSurface(finalW, finalH);
-
-    for (auto& s : d_ptr->scenes)
-    {
-      s->onViewportChange(Bound{ 0, 0, (float)finalW, (float)finalH });
-    }
+    d_ptr->invalidate();
   }
 }
 void VLayer::endFrame()

@@ -84,7 +84,7 @@ struct AppError
     UNKNOWN_ERROR,
     RENDER_ENGINE_ERROR,
   };
-  EKind kind;
+  EKind       kind;
   std::string text;
   AppError(EKind k, const std::string& error)
     : kind(k)
@@ -95,13 +95,13 @@ struct AppError
 
 struct AppConfig
 {
-  layer::ContextConfig graphicsContextConfig;
-  std::string appName;
+  layer::ContextConfig           graphicsContextConfig;
+  std::string                    appName;
   std::unique_ptr<EventListener> eventListener;
-  int windowSize[2];
-  int renderFPSLimit{ 60 };
-  int argc;
-  char** argv;
+  int                            windowSize[2];
+  int                            renderFPSLimit{ 60 };
+  int                            argc;
+  char**                         argv;
 };
 
 template<typename T>
@@ -117,11 +117,11 @@ class AppBase : public layer::GraphicsContext
   // NOLINTEND
 
 protected:
-  std::shared_ptr<AppRender> m_appRender;
+  std::shared_ptr<AppRender>     m_appRender;
   std::unique_ptr<EventListener> m_eventListener;
-  AppConfig m_appConfig;
-  bool m_shouldExit;
-  bool m_init{ false };
+  AppConfig                      m_appConfig;
+  bool                           m_shouldExit;
+  bool                           m_init{ false };
 
 private:
   std::optional<AppError> initInternal(AppConfig cfg)

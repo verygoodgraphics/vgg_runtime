@@ -115,16 +115,14 @@ namespace VGG::layer
 
 void RasterCacheTile::revalidate(
   LevelCache&     levelCache,
-  const SkMatrix& transform,
-  const SkMatrix& localMatrix,
+  const SkMatrix& totalMatrix,
   const SkRect&   bound)
 {
   if (levelCache.invalid)
   {
-    levelCache.rasterMatrix = transform;
+    levelCache.rasterMatrix = totalMatrix;
     levelCache.rasterMatrix[SkMatrix::kMTransX] = 0;
     levelCache.rasterMatrix[SkMatrix::kMTransY] = 0;
-    levelCache.rasterMatrix.postConcat(localMatrix);
     const auto contentRect = levelCache.rasterMatrix.mapRect(bound);
     calculateTiles(levelCache.tileCache, contentRect, m_tileWidth, m_tileHeight);
     levelCache.invalid = false;
@@ -154,13 +152,13 @@ std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::o
   const RasterContext& rasterContext,
   void*                userData)
 {
-  DEBUG("reason: %s", printReason(reason).c_str());
+  // DEBUG("reason: %s", printReason(reason).c_str());
 
   auto       skv = clipRect;
-  const auto localMatrix = rasterContext.localMatrix;
   auto       hitMatrix = SkMatrix::I();
-  hitMatrix[SkMatrix::kMTransX] = rasterContext.globalMatrix.getTranslateX();
-  hitMatrix[SkMatrix::kMTransY] = rasterContext.globalMatrix.getTranslateY();
+  const auto totalMatrix = rasterContext.globalMatrix * rasterContext.localMatrix;
+  hitMatrix[SkMatrix::kMTransX] = totalMatrix.getTranslateX();
+  hitMatrix[SkMatrix::kMTransY] = totalMatrix.getTranslateY();
 
   std::vector<TileMap::iterator> hitTiles;
 
@@ -173,7 +171,7 @@ std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::o
   if (reason & CONTENT)
   {
     invalidateContent();
-    revalidate(currentLevelCache, rasterContext.globalMatrix, localMatrix, *rasterContext.bound);
+    revalidate(currentLevelCache, totalMatrix, *rasterContext.bound);
     hitTiles = hitTile(currentLevelCache.tileCache, skv, hitMatrix);
     if (hitTiles.empty())
     {
@@ -187,7 +185,7 @@ std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::o
   if ((reason & ZOOM_TRANSLATION) && !(reason & ZOOM_SCALE)) // most case
   {
     DEBUG("translation");
-    revalidate(currentLevelCache, rasterContext.globalMatrix, localMatrix, *rasterContext.bound);
+    revalidate(currentLevelCache, totalMatrix, *rasterContext.bound);
     hitTiles = hitTile(currentLevelCache.tileCache, skv, hitMatrix);
     if (hitTiles.empty())
     {
@@ -201,7 +199,13 @@ std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::o
     {
       currentLevelCache.invalid = true;
     }
-    revalidate(currentLevelCache, rasterContext.globalMatrix, localMatrix, *rasterContext.bound);
+    revalidate(currentLevelCache, totalMatrix, *rasterContext.bound);
+    hitTiles = hitTile(currentLevelCache.tileCache, skv, hitMatrix);
+  }
+
+  if (reason & VIEWPORT)
+  {
+    revalidate(currentLevelCache, totalMatrix, *rasterContext.bound);
     hitTiles = hitTile(currentLevelCache.tileCache, skv, hitMatrix);
   }
 

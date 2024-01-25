@@ -82,8 +82,6 @@ public:
   void    setZoomer(std::shared_ptr<Zoomer> zoomer);
   Zoomer* zoomer();
 
-  Transform transform() const;
-
   void enableDrawDebugBound(bool enabled);
   bool isEnableDrawDebugBound();
 
@@ -91,20 +89,17 @@ public:
   {
     return s_resRepo;
   }
-  void onViewportChange(const Bound& bound);
 
+  void        onViewportChange(const Bound& bound);
   static void setResRepo(std::map<std::string, std::vector<char>> repo);
 
 protected:
   void onRender(SkCanvas* canvas) override;
-
-protected:
-  virtual void onZoomScaleChanged(Zoomer::Scale value);
-  virtual void onZoomTranslationChanged(float x, float y);
-  virtual void onZoomViewportChanged(const Bound& bound);
-
-protected:
+  void onZoomScaleChanged(Zoomer::Scale value);
+  void onZoomTranslationChanged(float x, float y);
   void setOwner(VLayer* owner);
+
+  void onRevalidate();
 
 private:
   void invalidateMask();

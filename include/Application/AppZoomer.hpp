@@ -57,6 +57,11 @@ public:
       {
         setScale(EScaleLevel(*l + int(e.wheel.preciseY > 0 ? 1 : -1)), { mx, my });
       }
+      else
+      {
+        auto newScale = scale() + e.wheel.preciseY * 0.05;
+        setScale(newScale, { mx, my });
+      }
       return true;
     }
     return false;

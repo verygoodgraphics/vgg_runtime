@@ -141,11 +141,11 @@ set(LIBNODE_DEPS
   nghttp2
   nghttp3
   ngtcp2
-  libnode
+  node
   openssl
   simdutf
   torque_base
-  libuv
+  uv
   uvwasi
   v8_base_without_compiler
   v8_compiler
@@ -182,11 +182,39 @@ elseif(APPLE)
       base64_ssse3
     )
   endif()
-else()
+elseif(VGG_VAR_TARGET IN_LIST VGG_WIN_TARGET_LIST)
   target_link_directories(vgg_libnode PUBLIC
     ${NODE_FOLDER}/out/Release
   )
   target_link_libraries(vgg_libnode PRIVATE node)
+else()
+  target_link_directories(vgg_libnode PUBLIC
+    ${NODE_FOLDER}/out/Release/obj
+    ${NODE_FOLDER}/out/Release/obj/deps/base64
+    ${NODE_FOLDER}/out/Release/obj/deps/brotli
+    ${NODE_FOLDER}/out/Release/obj/deps/cares
+    ${NODE_FOLDER}/out/Release/obj/deps/histogram
+    ${NODE_FOLDER}/out/Release/obj/deps/llhttp
+    ${NODE_FOLDER}/out/Release/obj/deps/nghttp2
+    ${NODE_FOLDER}/out/Release/obj/deps/ngtcp2
+    ${NODE_FOLDER}/out/Release/obj/deps/openssl
+    ${NODE_FOLDER}/out/Release/obj/deps/simdutf
+    ${NODE_FOLDER}/out/Release/obj/deps/uv
+    ${NODE_FOLDER}/out/Release/obj/deps/uvwasi
+    ${NODE_FOLDER}/out/Release/obj/deps/zlib
+    ${NODE_FOLDER}/out/Release/obj/tools/icu
+    ${NODE_FOLDER}/out/Release/obj/tools/v8_gypfiles
+  )
+  target_link_libraries(vgg_libnode PRIVATE
+    "-Wl,--whole-archive"
+    ${LIBNODE_DEPS}
+    base64_avx
+    base64_avx2
+    base64_sse41
+    base64_sse42
+    base64_ssse3
+    "-Wl,--no-whole-archive"
+  )
 endif()
 
 install(TARGETS vgg_libnode_stub DESTINATION lib)

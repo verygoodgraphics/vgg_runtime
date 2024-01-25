@@ -104,6 +104,7 @@ int NativeExecImpl::run_node(
     {
       int ret = node_main(args);
       INFO("#node thread exit, ret = %d", ret);
+      UNUSED(ret);
     }));
 
   return 0;
@@ -299,5 +300,6 @@ void NativeExecImpl::run_task()
     DEBUG("#evalScript, before eval");
     int ret = eval(task->m_code);
     DEBUG("#evalScript, after eval, ret = %d", ret);
+    UNUSED(ret);
   }
 }

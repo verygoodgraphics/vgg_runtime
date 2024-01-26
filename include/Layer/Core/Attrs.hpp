@@ -52,6 +52,7 @@ struct ImageFilter
   float exposure{ 0.f };
   float contrast{ 0.f };
   float saturation{ 0.f };
+  float brightness{ 0.f };
   float temperature{ 0.f };
   float tint{ 0.f };
   float highlight{ 0.f };
@@ -241,6 +242,7 @@ struct Style
   std::vector<Border>                 borders;
   std::vector<Fill>                   fills;
   std::vector<Shadow>                 shadows;
+  std::vector<ShadowStyle>            shadowStyle;
   std::optional<std::array<float, 4>> frameRadius;
   float                               cornerSmooth;
 };

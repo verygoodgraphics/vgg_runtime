@@ -830,7 +830,11 @@ void PaintNode::paintStyle(Renderer* renderer, const SkPath& path, const SkPath&
   }
 }
 
-void PaintNode::paintFill(Renderer* renderer, sk_sp<SkBlender> blender, const SkPath& path)
+void PaintNode::paintFill(
+  Renderer*            renderer,
+  sk_sp<SkBlender>     blender,
+  sk_sp<SkImageFilter> imageFilter,
+  const SkPath&        path)
 {
   Painter             painter(renderer);
   sk_sp<SkMaskFilter> blur;
@@ -838,7 +842,7 @@ void PaintNode::paintFill(Renderer* renderer, sk_sp<SkBlender> blender, const Sk
   {
     if (!f.isEnabled)
       continue;
-    painter.drawFill(path, frameBound(), f, 0, blender, blur);
+    painter.drawFill(path, frameBound(), f, imageFilter, blender, blur);
   }
 }
 

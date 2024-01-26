@@ -242,8 +242,9 @@ protected:
   void           paintStyle(Renderer* renderer, const SkPath& path, const SkPath& mask);
 
   [[deprecated]] virtual void paintFill(
-    Renderer*        renderer,
-    sk_sp<SkBlender> blender,
-    const SkPath&    path); // TODO:: only for ImageNode overriding
+    Renderer*            renderer,
+    sk_sp<SkBlender>     blender,
+    sk_sp<SkImageFilter> imageFilter,
+    const SkPath&        path); // TODO:: only for ImageNode overriding
 };
 } // namespace VGG::layer

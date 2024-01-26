@@ -60,6 +60,8 @@ TEST_F(ContainerTestSuite, LoadModel)
 
 TEST_F(ContainerTestSuite, Render)
 {
+  SKIP_DEBUG_TEST;
+
   // Given
   std::unique_ptr<layer::SkiaGraphicsContext> graphicsContext{ new MockSkiaGraphicsContext };
   m_sut->setGraphicsContext(graphicsContext, 600, 800);

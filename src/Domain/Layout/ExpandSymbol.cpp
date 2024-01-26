@@ -108,8 +108,12 @@ std::pair<nlohmann::json, nlohmann::json> ExpandSymbol::run()
   m_layout.reset(new Layout{ JsonDocumentPtr{ new ReferenceJsonDocument{ m_tmpOutDesignJson } },
                              getLayoutRules() });
 
-  std::vector<std::string> instanceIdStack{};
-  expandInstance(m_tmpOutDesignJson, instanceIdStack);
+  // expand instances in `frames` only
+  for (auto& el : m_tmpOutDesignJson[K_FRAMES].items())
+  {
+    std::vector<std::string> instanceIdStack{};
+    expandInstance(el.value(), instanceIdStack);
+  }
 
   auto outLayoutJson = generateOutLayoutJson();
 

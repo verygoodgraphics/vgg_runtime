@@ -266,34 +266,12 @@ VGG::Layout::Point UIView::converPointFromWindowAndScale(Layout::Point point)
 
 void UIView::nextArtboard()
 {
-  auto document = m_document.lock();
-  if (document)
-  {
-    if (m_page >= (int)document->children().size() - 1)
-    {
-      return;
-    }
-
-    ++m_page;
-    Scene::nextArtboard();
-    setDirty(true);
-  }
+  setCurrentPage(m_page + 1);
 }
 
 void UIView::preArtboard()
 {
-  auto document = m_document.lock();
-  if (document)
-  {
-    if (m_page <= 0)
-    {
-      return;
-    }
-
-    --m_page;
-    Scene::preArtboard();
-    setDirty(true);
-  }
+  setCurrentPage(m_page - 1);
 }
 
 std::shared_ptr<LayoutNode> UIView::currentPage()
@@ -453,12 +431,33 @@ void UIView::setOffset(Offset offset)
 
 bool UIView::setCurrentPage(int index)
 {
+  if (m_page == index)
+  {
+    return true;
+  }
+
   if (auto document = m_document.lock())
   {
     if (index >= 0 && static_cast<std::size_t>(index) < document->children().size())
     {
+      INFO("show page: %d, %s", index, document->children()[index]->vggId().c_str());
       m_page = index;
-      Scene::setPage(index);
+      if (index > Scene::currentPage())
+      {
+        auto offset = index - Scene::currentPage();
+        while (offset-- > 0)
+        {
+          Scene::nextArtboard();
+        }
+      }
+      else
+      {
+        auto offset = Scene::currentPage() - index;
+        while (offset-- > 0)
+        {
+          Scene::preArtboard();
+        }
+      }
       setDirty(true);
       return true;
     }

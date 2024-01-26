@@ -105,14 +105,12 @@ bool UIApplication::handleKeyEvent(VKeyboardEvent evt)
 
   if (key == VGGK_PAGEUP && (mod & VGG_KMOD_CTRL))
   {
-    INFO("Previous page");
     m_view->preArtboard();
     return true;
   }
 
   if (key == VGGK_PAGEDOWN && (mod & VGG_KMOD_CTRL))
   {
-    INFO("Next page");
     m_view->nextArtboard();
     return true;
   }

@@ -17,11 +17,13 @@
 #include "Layer/Core/VType.hpp"
 #include "Layer/PathGenerator.hpp"
 #include "VSkia.hpp"
+#include <core/SkBlendMode.h>
 #include <core/SkCanvas.h>
 #include <core/SkColor.h>
 #include <core/SkMaskFilter.h>
 #include <core/SkPaint.h>
 #include <core/SkTextBlob.h>
+#include <core/SkTileMode.h>
 #include <string>
 
 using namespace VGG;
@@ -131,8 +133,8 @@ void Painter::drawInnerShadow(
   pen.setImageFilter(
     SkMyImageFilters::DropInnerShadowOnly(s.offsetX, s.offsetY, sigma, sigma, s.color, nullptr));
   m_renderer->canvas()->saveLayer(nullptr, &pen);
-  if (s.spread > 0)
-    m_renderer->canvas()->scale(1.0 / s.spread, 1.0 / s.spread);
+  // if (s.spread > 0)
+  //   m_renderer->canvas()->scale(1.0 / s.spread, 1.0 / s.spread);
   SkPaint fillPen;
   fillPen.setStyle(style);
   fillPen.setAntiAlias(m_antiAlias);

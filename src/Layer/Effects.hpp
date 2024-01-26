@@ -237,4 +237,9 @@ inline void populateSkPaint(const Border& border, const SkRect& bound, SkPaint& 
 void                     setGlobalSamplingOptions(const SkSamplingOptions& opt);
 const SkSamplingOptions& getGlobalSamplingOptions();
 
+sk_sp<SkImageFilter> makeInnerShaderImageFilter(
+  const InnerShadowStyle& shadow,
+  bool                    shadowOnly,
+  sk_sp<SkImageFilter>    input);
+
 } // namespace VGG::layer

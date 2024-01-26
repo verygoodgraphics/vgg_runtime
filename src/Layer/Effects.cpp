@@ -15,6 +15,8 @@
  */
 #include "Effects.hpp"
 #include "Layer/LayerCache.h"
+#include <core/SkBlendMode.h>
+#include <core/SkColor.h>
 #include <effects/SkRuntimeEffect.h>
 #include <core/SkM44.h>
 
@@ -386,6 +388,30 @@ sk_sp<SkShader> makeGradientLinear(const Bound& bound, const GradientLinear& g)
     0,
     &mat);
   return s;
+}
+
+sk_sp<SkImageFilter> makeInnerShaderImageFilter(
+  const InnerShadowStyle& shadow,
+  bool                    shadowOnly,
+  sk_sp<SkImageFilter>    input)
+{
+  auto sigma = SkBlurMask::ConvertRadiusToSigma(shadow.blur);
+  auto alpha =
+    SkImageFilters::ColorFilter(SkColorFilters::Blend(SK_ColorBLACK, SkBlendMode::kSrcIn), 0);
+
+  auto f1 =
+    SkImageFilters::ColorFilter(SkColorFilters::Blend(shadow.color, SkBlendMode::kSrcOut), 0);
+  auto f2 = SkImageFilters::Offset(shadow.offsetX, shadow.offsetY, f1);
+  auto f3 = SkImageFilters::Blur(sigma, sigma, SkTileMode::kDecal, f2);
+  auto f4 = SkImageFilters::Blend(SkBlendMode::kSrcIn, alpha, f3);
+  // auto f4 = f3;
+  if (shadowOnly)
+  {
+    return f4;
+  }
+  auto src =
+    SkImageFilters::ColorFilter(SkColorFilters::Blend(SK_ColorBLACK, SkBlendMode::kDst), 0);
+  return SkImageFilters::Compose(input, SkImageFilters::Blend(SkBlendMode::kSrcOver, src, f4));
 }
 
 } // namespace VGG::layer

@@ -95,7 +95,11 @@ bool ImageNode::fill() const
   return d_ptr->fillReplacesImage;
 }
 
-void ImageNode::paintFill(Renderer* renderer, sk_sp<SkBlender> blender, const SkPath& path)
+void ImageNode::paintFill(
+  Renderer*            renderer,
+  sk_sp<SkBlender>     blender,
+  sk_sp<SkImageFilter> imageFilter,
+  const SkPath&        path)
 {
   (void)path;
   VGG_IMPL(ImageNode)

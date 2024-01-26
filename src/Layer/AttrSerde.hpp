@@ -387,6 +387,39 @@ inline void from_json(const json& j, Shadow& x)
   x.spread = j.value("spread", 0.f);
 }
 
+inline void from_json(const json& j, InnerShadowStyle& x)
+{
+  x.blur = j.at("blur").get<double>();
+  x.color = j.at("color").get<Color>();
+  x.contextSettings = j.at("contextSettings").get<ContextSetting>();
+  x.isEnabled = j.at("isEnabled").get<bool>();
+  const auto p = glm::vec2{ j.value("offsetX", 0.f), j.value("offsetY", 0.f) };
+  x.offsetX = p.x;
+  x.offsetY = p.y;
+  x.spread = j.at("spread").get<double>();
+}
+
+inline void from_json(const json& j, OuterShadowStyle& x)
+{
+  x.blur = j.at("blur").get<double>();
+  x.color = j.at("color").get<Color>();
+  x.contextSettings = j.at("contextSettings").get<ContextSetting>();
+  x.isEnabled = j.at("isEnabled").get<bool>();
+  const auto p = glm::vec2{ j.value("offsetX", 0.f), j.value("offsetY", 0.f) };
+  x.offsetX = p.x;
+  x.offsetY = p.y;
+  x.spread = j.at("spread").get<double>();
+}
+
+inline void from_json(const json& j, ShadowStyle& x)
+{
+  bool inner = j.at("inner").get<bool>();
+  if (!inner)
+    x = (OuterShadowStyle)j;
+  else
+    x = (InnerShadowStyle)j;
+}
+
 inline void from_json(const json& j, Blur& x)
 {
   if (!j.is_object())
@@ -415,12 +448,11 @@ inline void from_json(const json& j, Fill& x)
 
 inline void from_json(const json& j, Style& x)
 {
-  if (!j.is_object())
-    return;
   x.blurs = j.value("blurs", std::vector<Blur>());
   x.borders = j.value("borders", std::vector<Border>());
-  x.fills = j.value("fills", std::vector<Fill>());
+  x.fills = j.value("fills").get<std::vector<Fill>>();
   x.shadows = j.value("shadows", std::vector<Shadow>());
+  x.shadowStyle = j.value("shadows", std::vector<ShadowStyle>());
 }
 
 inline void from_json(const json& j, TextLineAttr& x)

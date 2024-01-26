@@ -33,6 +33,7 @@
 #include "Layer/Core/TextNode.hpp"
 #include "Layer/Core/ImageNode.hpp"
 #include <iterator>
+#include <variant>
 
 namespace
 {
@@ -164,9 +165,17 @@ public:
         },
         f.type);
     }
-    for (auto& s : style.shadows)
+    for (auto& s : style.shadows) // TODO::remove
     {
       s.offsetY = -s.offsetY;
+    }
+
+    for (auto& s : style.shadowStyle) // TODO:: flip y axis
+    {
+      std::visit(
+        Overloaded{ [&](InnerShadowStyle& s) { s.offsetY = s.offsetY; },
+                    [&](OuterShadowStyle& s) { s.offsetY = s.offsetY; } },
+        s);
     }
     for (auto& b : style.blurs)
     {

@@ -152,7 +152,7 @@ void TextNode::setFrameMode(ETextLayoutMode layoutMode)
 void TextNode::drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
 {
   SkPath path;
-  paintFill(renderer, std::move(blender), path);
+  paintFill(renderer, std::move(blender), 0, path);
 }
 
 void TextNode::drawRawStyle(Painter& painter, const SkPath& path, sk_sp<SkBlender> blender)

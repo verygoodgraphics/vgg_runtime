@@ -601,7 +601,22 @@ public:
       }
     }
 
-    q_ptr->paintFill(painter.renderer(), blender, skPath);
+    sk_sp<SkImageFilter> innerShadowFilter;
+    for (auto it = style.shadowStyle.rbegin(); it != style.shadowStyle.rend(); ++it)
+    {
+      auto& s = *it;
+      std::visit(
+        Overloaded{
+          [&](const InnerShadowStyle& s)
+          { innerShadowFilter = makeInnerShaderImageFilter(s, false, innerShadowFilter); },
+          [&](const OuterShadowStyle& s) {},
+        },
+        s);
+    }
+    DEBUG("shadow filter: %d", innerShadowFilter ? 1 : 0);
+    SkPaint shadow;
+    shadow.setImageFilter(innerShadowFilter);
+    q_ptr->paintFill(painter.renderer(), blender, innerShadowFilter, skPath);
 
     for (const auto& b : style.borders)
     {
@@ -611,14 +626,14 @@ public:
     }
 
     // draw inner shadow
-    painter.beginClip(skPath);
-    for (const auto& s : style.shadows)
-    {
-      if (!s.isEnabled || !s.inner)
-        continue;
-      painter.drawInnerShadow(skPath, bound, s, SkPaint::kFill_Style, nullptr);
-    }
-    painter.endClip();
+    // painter.beginClip(skPath);
+    // for (const auto& s : style.shadows)
+    // {
+    //   if (!s.isEnabled || !s.inner)
+    //     continue;
+    //   painter.drawInnerShadow(skPath, bound, s, SkPaint::kFill_Style, nullptr);
+    // }
+    // painter.endClip();
   }
 
   PaintNode__pImpl(PaintNode__pImpl&&) noexcept = default;

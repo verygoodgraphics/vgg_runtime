@@ -105,17 +105,19 @@ vec3 highlightAndShadow(vec3 color){
     float lumG = 0.587;
     float lumB = 0.114;
     vec3 luminance = sqrt(vec3(lumR,lumG,lumB)*pow(color,vec3(2,2,2)));
-    vec3 h = highlight * 0.05 * ( pow(vec3(8,8,8), luminance) - 1.0 );
-    vec3 s = shadow * 0.05 * ( pow(vec3(8,8,8), 1.0 - luminance) - 1.0 );
+    vec3 h = highlight * 0.05 * (pow(vec3(8,8,8), luminance) - 1.0);
+    vec3 s = shadow * 0.05 * (pow(vec3(8,8,8), 1.0 - luminance) - 1.0);
     return color + h + s;
 }
 
 vec4 main(vec4 inColor){
-    vec3 color =(pow(3, exposure) * tintMatrix(tint, tintColor1, tintColor2) *
-                temperatureMatrix(temperature *0.5) *
-                saturationMatrix(saturation) *
-                contrastMatrix(contrast) * inColor).rgb;
-    return vec4(highlightAndShadow(color), inColor.a);
+    vec4 color = pow(3, exposure) * 
+                 contrastMatrix(contrast) *
+                 saturationMatrix(saturation) *
+                 temperatureMatrix(temperature * 0.25) *
+                 tintMatrix(tint, tintColor1, tintColor2) *
+                 vec4(highlightAndShadow(inColor.rgb),1.0);
+    return vec4(color.rgb, inColor.a);
 }
 )";
 

@@ -86,5 +86,9 @@ protected:
   virtual void onInitContext()
   {
   }
+  void updateDpi(float dpi)
+  {
+    m_property.dpiScaling = dpi;
+  }
 };
 } // namespace VGG::layer

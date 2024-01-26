@@ -154,10 +154,11 @@ protected:
         evt.type == VGG_WINDOWEVENT &&
         (window.event == VGG_WINDOWEVENT_RESIZED || window.event == VGG_WINDOWEVENT_SIZE_CHANGED))
     {
-      int drawableWidth = window.drawableWidth;
-      int drawableHeight = window.drawableHeight;
+      updateDpi(Self()->resolutionScale());
       if (m_appRender)
       {
+        int drawableWidth = window.drawableWidth;
+        int drawableHeight = window.drawableHeight;
         m_appRender->resize(drawableWidth, drawableHeight);
       }
     }

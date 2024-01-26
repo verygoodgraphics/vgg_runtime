@@ -148,3 +148,30 @@ TEST_F(VggLayoutTestSuite, AbosoluteFlexItem)
                                               { 40.000038146972656, 48 } } };
   EXPECT_TRUE(descendantFrame({ 0, 1 }) == expectedFrames[0]);
 }
+
+TEST_F(VggLayoutTestSuite, RotatedLine)
+{
+  // Given
+  setupWithExpanding("testDataDir/layout/201_rotated_line/");
+
+  // When
+  m_sut->layout(Layout::Size{ 1920, 1080 });
+
+  // Then
+  {
+    std::vector<Layout::Rect> expectedFrames{ { { 172, 0 }, { 105, 4 } } };
+    EXPECT_TRUE(descendantFrame({ 1 }, 0) == expectedFrames[0]);
+  }
+  {
+    std::vector<Layout::Rect> expectedFrames{ { { 0, 105 }, { 4, 228 } } };
+    EXPECT_TRUE(descendantFrame({ 1 }, 1) == expectedFrames[0]);
+  }
+  {
+    std::vector<Layout::Rect> expectedFrames{ { { 172, 0 }, { 90, 4 } } };
+    EXPECT_TRUE(descendantFrame({ 1 }, 2) == expectedFrames[0]);
+  }
+  {
+    std::vector<Layout::Rect> expectedFrames{ { { 0, 105 }, { 4, 200 } } };
+    EXPECT_TRUE(descendantFrame({ 1 }, 3) == expectedFrames[0]);
+  }
+}

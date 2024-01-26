@@ -1,0 +1,600 @@
+{
+  "obj": [
+    {
+      "class": "object",
+      "id": "2005:2",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "layout": {
+        "class": "flexboxLayout",
+        "direction": 1,
+        "justifyContent": 1,
+        "alignItems": 1,
+        "alignContent": 1,
+        "wrap": 1,
+        "rowGap": 0,
+        "columnGap": 0.0,
+        "padding": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "zOrder": false
+      }
+    },
+    {
+      "class": "object",
+      "id": "2005:3",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 172.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 105.0,
+          "types": 1
+        }
+      },
+      "itemInLayout": {
+        "class": "flexboxItem",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flexBasis": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "2005:4",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 104.99998474121094,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 100,
+          "types": 2
+        }
+      },
+      "itemInLayout": {
+        "class": "flexboxItem",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flexBasis": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "2006:17",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 113.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 42.0,
+          "types": 1
+        }
+      },
+      "itemInLayout": {
+        "class": "flexboxItem",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flexBasis": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "2005:5",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 228.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 78.0,
+          "types": 1
+        }
+      },
+      "itemInLayout": {
+        "class": "flexboxItem",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flexBasis": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "2:22",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "layout": {
+        "class": "flexboxLayout",
+        "direction": 2,
+        "justifyContent": 1,
+        "alignItems": 1,
+        "alignContent": 1,
+        "wrap": 1,
+        "rowGap": 0.0,
+        "columnGap": 0,
+        "padding": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "zOrder": false
+      }
+    },
+    {
+      "class": "object",
+      "id": "2:23",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 172.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 105.0,
+          "types": 1
+        }
+      },
+      "itemInLayout": {
+        "class": "flexboxItem",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flexBasis": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "2:24",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 100,
+          "types": 2
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 228.0,
+          "types": 1
+        }
+      },
+      "itemInLayout": {
+        "class": "flexboxItem",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flexBasis": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "2006:15",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 113.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 12.0,
+          "types": 1
+        }
+      },
+      "itemInLayout": {
+        "class": "flexboxItem",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flexBasis": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "2:25",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 228.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 78.0,
+          "types": 1
+        }
+      },
+      "itemInLayout": {
+        "class": "flexboxItem",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flexBasis": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "2006:6",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "layout": {
+        "class": "flexboxLayout",
+        "direction": 1,
+        "justifyContent": 1,
+        "alignItems": 1,
+        "alignContent": 1,
+        "wrap": 1,
+        "rowGap": 0,
+        "columnGap": 0.0,
+        "padding": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "zOrder": false
+      }
+    },
+    {
+      "class": "object",
+      "id": "2006:7",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 172.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 105.0,
+          "types": 1
+        }
+      },
+      "itemInLayout": {
+        "class": "flexboxItem",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flexBasis": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "2006:8",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 89.99999237060547,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 3.999999523162842,
+          "types": 1
+        }
+      },
+      "itemInLayout": {
+        "class": "flexboxItem",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flexBasis": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "2006:18",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 113.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 35.0,
+          "types": 1
+        }
+      },
+      "itemInLayout": {
+        "class": "flexboxItem",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flexBasis": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "2006:9",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 228.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 78.0,
+          "types": 1
+        }
+      },
+      "itemInLayout": {
+        "class": "flexboxItem",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flexBasis": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "2006:10",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 0,
+          "types": 4
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 187.0,
+          "types": 1
+        }
+      },
+      "layout": {
+        "class": "flexboxLayout",
+        "direction": 2,
+        "justifyContent": 1,
+        "alignItems": 1,
+        "alignContent": 1,
+        "wrap": 1,
+        "rowGap": 0.0,
+        "columnGap": 0,
+        "padding": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "zOrder": false
+      }
+    },
+    {
+      "class": "object",
+      "id": "2006:11",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 172.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 105.0,
+          "types": 1
+        }
+      },
+      "itemInLayout": {
+        "class": "flexboxItem",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flexBasis": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "2006:12",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 3.999999523162842,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 199.99996948242188,
+          "types": 1
+        }
+      },
+      "itemInLayout": {
+        "class": "flexboxItem",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flexBasis": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "2006:16",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 200.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 12.0,
+          "types": 1
+        }
+      },
+      "itemInLayout": {
+        "class": "flexboxItem",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flexBasis": 0.0
+      }
+    },
+    {
+      "class": "object",
+      "id": "2006:13",
+      "width": {
+        "class": "width",
+        "value": {
+          "class": "length",
+          "value": 228.0,
+          "types": 1
+        }
+      },
+      "height": {
+        "class": "height",
+        "value": {
+          "class": "length",
+          "value": 78.0,
+          "types": 1
+        }
+      },
+      "itemInLayout": {
+        "class": "flexboxItem",
+        "position": {
+          "class": "position",
+          "value": 1
+        },
+        "flexBasis": 0.0
+      }
+    }
+  ]
+}

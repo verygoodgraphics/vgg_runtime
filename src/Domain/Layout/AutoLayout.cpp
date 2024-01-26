@@ -762,25 +762,24 @@ void AutoLayout::configureFlexNodeSize(flexbox_node* node)
 
   auto width = sharedRule->width.value;
   auto height = sharedRule->height.value;
-  auto swapWidthAndHeight = sharedView->shouldSwapWidthAndHeight();
-  if (swapWidthAndHeight)
-  {
-    DEBUG("AutoLayout::configureFlexNodeSize, swap width and height");
-    const auto& modelSize = sharedView->bounds().size;
-    if (width.types == Length::ETypes::PX)
-    {
-      width.value = modelSize.height;
-    }
-    if (height.types == Length::ETypes::PX)
-    {
-      height.value = modelSize.width;
-    }
-  }
 
   Layout::Size size{ width.value, height.value };
   if (width.types == Rule::Length::ETypes::PX && height.types == Rule::Length::ETypes::PX)
   {
     size = sharedView->rotatedSize(size);
+  }
+  else if (sharedView->shouldSwapWidthAndHeight())
+  {
+    DEBUG("AutoLayout::configureFlexNodeSize, swap width and height");
+    const auto& modelSize = sharedView->bounds().size;
+    if (width.types == Length::ETypes::PX) // height.types != Length::ETypes::PX
+    {
+      size.width = modelSize.height;
+    }
+    else if (height.types == Length::ETypes::PX) // width.types != Length::ETypes::PX
+    {
+      size.height = modelSize.width;
+    }
   }
 
   VERBOSE("AutoLayout::configureFlexNodeSize, width %f", size.width);

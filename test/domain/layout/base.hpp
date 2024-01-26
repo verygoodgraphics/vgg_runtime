@@ -22,8 +22,9 @@ protected:
 
   auto setupModel(const char* fileDir)
   {
-    std::shared_ptr<Daruma> daruma{ new Daruma(Helper::RawJsonDocumentBuilder,
-                                               Helper::RawJsonDocumentBuilder) };
+    std::shared_ptr<Daruma> daruma{
+      new Daruma(Helper::RawJsonDocumentBuilder, Helper::RawJsonDocumentBuilder)
+    };
     daruma->load(fileDir);
     return daruma;
   }
@@ -42,10 +43,15 @@ protected:
     m_sut = startRunning.layout();
   }
 
-  auto firstPage()
+  auto page(std::size_t index)
   {
     auto tree = m_sut->layoutTree();
-    return tree->children()[0];
+    return tree->children()[index];
+  }
+
+  auto firstPage()
+  {
+    return page(0);
   }
 
   auto childFrame(int index)
@@ -60,9 +66,9 @@ protected:
     return frame;
   }
 
-  auto descendantFrame(std::vector<int> indexs)
+  auto descendantFrame(std::vector<int> indexs, std::size_t pageIndex = 0)
   {
-    auto node = firstPage();
+    auto node = page(pageIndex);
     for (auto index : indexs)
     {
       node = node->children()[index];

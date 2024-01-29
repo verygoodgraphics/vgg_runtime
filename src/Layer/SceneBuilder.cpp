@@ -338,6 +338,7 @@ inline PaintNodePtr SceneBuilder::fromImage(const json& j, const glm::mat3& tota
     {
       p->setImage(j.value("imageFileName", ""));
       p->setReplacesImage(j.value("fillReplacesImage", false));
+      p->setImageFilter(j.value("imageFilters", ImageFilter()));
     });
 }
 

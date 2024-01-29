@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Renderer.hpp"
 #include "VSkia.hpp"
@@ -40,30 +41,12 @@ class ImageNode__pImpl
   VGG_DECL_API(ImageNode);
 
 public:
-  std::string     imageGuid;
   bool            fillReplacesImage = false;
-  sk_sp<SkImage>  image;
   sk_sp<SkShader> shader;
+  PatternStretch  pattern;
   ImageNode__pImpl(ImageNode* api)
     : q_ptr(api)
   {
-  }
-  ImageNode__pImpl(const ImageNode__pImpl& other)
-  {
-    imageGuid = other.imageGuid;
-    fillReplacesImage = other.fillReplacesImage;
-    image = other.image;
-    shader = other.shader;
-  }
-  ImageNode__pImpl& operator=(const ImageNode__pImpl& other) = delete;
-  ImageNode__pImpl(ImageNode__pImpl&& other) noexcept = default;
-  ImageNode__pImpl& operator=(ImageNode__pImpl&& other) noexcept
-  {
-    image = std::move(other.image);
-    shader = std::move(other.shader);
-    imageGuid = std::move(other.imageGuid);
-    fillReplacesImage = std::move(other.fillReplacesImage);
-    return *this;
   }
 };
 
@@ -88,12 +71,17 @@ Mask ImageNode::asOutlineMask(const Transform* mat)
 void ImageNode::setImage(const std::string& guid)
 {
   VGG_IMPL(ImageNode)
-  _->imageGuid = guid;
+  _->pattern.guid = guid;
 }
 
 const std::string& ImageNode::getImageGUID() const
 {
-  return d_ptr->imageGuid;
+  return d_ptr->pattern.guid;
+}
+
+void ImageNode::setImageFilter(const ImageFilter& filter)
+{
+  d_ptr->pattern.imageFilter = filter;
 }
 
 void ImageNode::setReplacesImage(bool fill)
@@ -112,11 +100,11 @@ void ImageNode::paintFill(Renderer* renderer, sk_sp<SkBlender> blender, const Sk
   (void)path;
   VGG_IMPL(ImageNode)
   auto canvas = renderer->canvas();
-  if (!_->image)
+  if (!_->shader)
   {
-    _->image = loadImage(_->imageGuid, Scene::getResRepo());
+    _->shader = makeStretchPattern(bound(), d_ptr->pattern);
   }
-  if (_->image)
+  if (_->shader)
   {
     bool hasMask = false;
     if (PaintNode::d_ptr.get()->mask)
@@ -129,13 +117,9 @@ void ImageNode::paintFill(Renderer* renderer, sk_sp<SkBlender> blender, const Sk
         hasMask = true;
       }
     }
-
     SkPaint p;
-    p.setBlender(std::move(blender));
-    SkSamplingOptions opt(SkFilterMode::kLinear, SkMipmapMode::kNearest);
-    // const auto&       b = frameBound();
-    canvas->drawImageRect(_->image, toSkRect(frameBound()), opt, &p);
-
+    p.setShader(_->shader);
+    canvas->drawPaint(p);
     if (hasMask)
     {
       canvas->restore();

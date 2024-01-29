@@ -159,7 +159,6 @@ inline void from_json(const json& j, ImageFilter& x)
   x.exposure = j.value("exposure", 0.f);
   x.contrast = j.value("contrast", 0.f);
   x.saturation = j.value("saturation", 0.f);
-  x.brightness = j.value("brightness", 0.f);
   x.temperature = j.value("temperature", 0.f);
   x.tint = j.value("tint", 0.f);
   x.highlight = j.value("highlights", 0.f);

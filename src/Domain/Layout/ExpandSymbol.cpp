@@ -1225,16 +1225,14 @@ void ExpandSymbol::layoutInstance(nlohmann::json& instance, const Size& instance
   node->setNeedLayout();
 
   // layout with new size
-  layoutSubtree(nodeId, instanceSize, true);
+  layoutSubtree(node, instanceSize, true);
 }
 
-void ExpandSymbol::overrideLayoutRuleSize(
-  const nlohmann::json& instanceId,
-  const Size&           instanceSize)
+void ExpandSymbol::overrideLayoutRuleSize(const std::string& instanceId, const Size& instanceSize)
 {
   DEBUG(
     "ExpandSymbol::overrideLayoutRuleSize, instanceId: %s, size: %f, %f",
-    instanceId.dump().c_str(),
+    instanceId.c_str(),
     instanceSize.width,
     instanceSize.height);
   auto dstRulePtr = findOutLayoutObjectById(instanceId);
@@ -1274,6 +1272,16 @@ void ExpandSymbol::layoutSubtree(
 {
   m_layout->resizeNodeThenLayout(subtreeNodeId, size, preservingOrigin);
   overrideLayoutRuleSize(subtreeNodeId, size);
+}
+
+void ExpandSymbol::layoutSubtree(
+  std::shared_ptr<LayoutNode> subtreeNode,
+  Size                        size,
+  bool                        preservingOrigin)
+{
+  ASSERT(subtreeNode);
+  m_layout->resizeNodeThenLayout(subtreeNode, size, preservingOrigin);
+  overrideLayoutRuleSize(subtreeNode->id(), size);
 }
 
 void ExpandSymbol::layoutDirtyNodes(nlohmann::json& rootTreeJson)

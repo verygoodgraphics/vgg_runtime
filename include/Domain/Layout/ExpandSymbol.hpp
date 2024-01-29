@@ -27,6 +27,7 @@
 
 namespace VGG
 {
+class LayoutNode;
 namespace Layout
 {
 constexpr auto K_SEPARATOR = "__";
@@ -80,11 +81,12 @@ private:
   void resizeInstance(nlohmann::json& instance, nlohmann::json& master);
 
   void layoutInstance(nlohmann::json& instance, const Size& instanceSize);
-  void overrideLayoutRuleSize(const nlohmann::json& instanceId, const Size& instanceSize);
+  void overrideLayoutRuleSize(const std::string& instanceId, const Size& instanceSize);
 
   void resizeSubtree(nlohmann::json& subtreeJson, const nlohmann::json& newBoundsJson);
 
   void layoutSubtree(const nlohmann::json& subtreeNodeId, Size size, bool preservingOrigin);
+  void layoutSubtree(std::shared_ptr<LayoutNode> subtreeNode, Size size, bool preservingOrigin);
   void layoutDirtyNodes(nlohmann::json& rootTreeJson);
 
   void processMasterIdOverrides(

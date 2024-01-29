@@ -1222,9 +1222,7 @@ void ExpandSymbol::layoutInstance(nlohmann::json& instance, const Size& instance
 
   m_layout->rebuildSubtree(node); // force rebuild subtree with updated rules
 
-  // layout first, update instance size with rule size
   node->setNeedLayout();
-  node->layoutIfNeeded();
 
   // layout with new size
   layoutSubtree(nodeId, instanceSize, true);

@@ -35,6 +35,7 @@ uniform float tint;
 uniform float hue;
 uniform float3 tintColor1;
 uniform float3 tintColor2;
+
 mat4 brightnessMatrix( float brightness )
 {
     return mat4( 1, 0, 0, 0,
@@ -136,14 +137,15 @@ vec4 main(vec4 inColor){
     builder.uniform("tintColor2") = SkV3{ 1.f, 0.5f, 0.9f };
     builder.uniform("hue") = imageFilter.hue;
     DEBUG(
-      "makeColorFilter %f %f %f %f %f %f %f",
+      "makeColorFilter %f %f %f %f %f %f %f %f",
       imageFilter.exposure,
       imageFilter.contrast,
       imageFilter.saturation,
       imageFilter.temperature,
       imageFilter.tint,
       imageFilter.highlight,
-      imageFilter.shadow);
+      imageFilter.shadow,
+      imageFilter.hue);
     return builder.makeColorFilter();
   }
   return nullptr;

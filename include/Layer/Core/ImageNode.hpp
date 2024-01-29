@@ -60,6 +60,7 @@ public:
   void               setImage(const std::string& guid);
   const std::string& getImageGUID() const;
   void               setReplacesImage(bool fill);
+  void               setImageFilter(const ImageFilter& filter);
   bool               fill() const;
   Mask               asOutlineMask(const Transform* mat) override;
 

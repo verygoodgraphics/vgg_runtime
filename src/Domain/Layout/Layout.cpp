@@ -322,20 +322,33 @@ void Layout::Layout::resizeNodeThenLayout(
 {
   if (auto node = m_layoutTree->findDescendantNodeById(nodeId))
   {
-    DEBUG("Layout::resizeNodeThenLayout: resize subtree, %s", nodeId.c_str());
-    auto treeToLayout = node->scaleTo(size, true, preservingOrigin);
-    if (treeToLayout)
-    {
-      treeToLayout->layoutIfNeeded();
-    }
-    else
-    {
-      DEBUG("Layout::resizeNodeThenLayout: no subtree to layou");
-    }
+    resizeNodeThenLayout(node, size, preservingOrigin);
   }
   else
   {
     WARN("Layout::resizeNodeThenLayout: subtree not found, nodeId: %s", nodeId.c_str());
+  }
+}
+
+void Layout::Layout::resizeNodeThenLayout(
+  std::shared_ptr<LayoutNode> node,
+  Size                        size,
+  bool                        preservingOrigin)
+{
+  if (!node)
+  {
+    return;
+  }
+
+  DEBUG("Layout::resizeNodeThenLayout: resize subtree, %s", node->id().c_str());
+  auto treeToLayout = node->scaleTo(size, true, preservingOrigin);
+  if (treeToLayout)
+  {
+    treeToLayout->layoutIfNeeded();
+  }
+  else
+  {
+    DEBUG("Layout::resizeNodeThenLayout: no subtree to layou");
   }
 }
 

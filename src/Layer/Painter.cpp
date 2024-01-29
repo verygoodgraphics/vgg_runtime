@@ -133,8 +133,8 @@ void Painter::drawInnerShadow(
   pen.setImageFilter(
     SkMyImageFilters::DropInnerShadowOnly(s.offsetX, s.offsetY, sigma, sigma, s.color, nullptr));
   m_renderer->canvas()->saveLayer(nullptr, &pen);
-  // if (s.spread > 0)
-  //   m_renderer->canvas()->scale(1.0 / s.spread, 1.0 / s.spread);
+  if (s.spread > 0)
+    m_renderer->canvas()->scale(1.0 / s.spread, 1.0 / s.spread);
   SkPaint fillPen;
   fillPen.setStyle(style);
   fillPen.setAntiAlias(m_antiAlias);

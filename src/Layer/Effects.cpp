@@ -19,6 +19,7 @@
 #include <core/SkColor.h>
 #include <effects/SkRuntimeEffect.h>
 #include <core/SkM44.h>
+#include <src/core/SkBlurMask.h>
 
 namespace VGG::layer
 {
@@ -390,8 +391,9 @@ sk_sp<SkShader> makeGradientLinear(const Bound& bound, const GradientLinear& g)
   return s;
 }
 
-sk_sp<SkImageFilter> makeInnerShaderImageFilter(
+sk_sp<SkImageFilter> makeInnerShadowImageFilter(
   const InnerShadowStyle& shadow,
+  const Bound&            bound,
   bool                    shadowOnly,
   sk_sp<SkImageFilter>    input)
 {
@@ -411,7 +413,29 @@ sk_sp<SkImageFilter> makeInnerShaderImageFilter(
   }
   auto src =
     SkImageFilters::ColorFilter(SkColorFilters::Blend(SK_ColorBLACK, SkBlendMode::kDst), 0);
-  return SkImageFilters::Compose(input, SkImageFilters::Blend(SkBlendMode::kSrcOver, src, f4));
+  auto res = SkImageFilters::Compose(input, SkImageFilters::Blend(SkBlendMode::kSrcOver, src, f4));
+  auto sx = (bound.width() + shadow.spread) / bound.width();
+  auto sy = (bound.height() + shadow.spread) / bound.height();
+  SkMatrix mat = SkMatrix::Scale(sx, sy);
+  // SkMatrix mat = SkMatrix::I();
+  return SkImageFilters::MatrixTransform(mat, SkSamplingOptions{}, res);
+}
+
+sk_sp<SkImageFilter> makeDropShadowImageFilter(
+  const OuterShadowStyle& shadow,
+  bool                    shadowOnly,
+  sk_sp<SkImageFilter>    input)
+{
+  auto sigma = SkBlurMask::ConvertRadiusToSigma(shadow.blur);
+  auto imageFilter = SkImageFilters::DropShadowOnly(
+    shadow.offsetX,
+    shadow.offsetY,
+    sigma,
+    sigma,
+    shadow.color,
+    input);
+  SkMatrix mat = SkMatrix::I();
+  return SkImageFilters::MatrixTransform(mat, SkSamplingOptions{}, imageFilter);
 }
 
 } // namespace VGG::layer

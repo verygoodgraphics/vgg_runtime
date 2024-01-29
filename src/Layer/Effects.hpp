@@ -237,8 +237,15 @@ inline void populateSkPaint(const Border& border, const SkRect& bound, SkPaint& 
 void                     setGlobalSamplingOptions(const SkSamplingOptions& opt);
 const SkSamplingOptions& getGlobalSamplingOptions();
 
-sk_sp<SkImageFilter> makeInnerShaderImageFilter(
+sk_sp<SkImageFilter> makeInnerShadowImageFilter(
   const InnerShadowStyle& shadow,
+  const Bound&            bound,
+  bool                    shadowOnly,
+  sk_sp<SkImageFilter>    input);
+
+sk_sp<SkImageFilter> makeDropShadowImageFilter(
+  const InnerShadowStyle& shadow,
+  const Bound&            bound,
   bool                    shadowOnly,
   sk_sp<SkImageFilter>    input);
 

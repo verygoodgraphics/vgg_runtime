@@ -19,6 +19,7 @@
 #include <map>
 #include <functional>
 #include <optional>
+#include <variant>
 using OutputCallback = std::function<bool(const std::string&, const std::vector<char>&)>;
 using Resource = std::map<std::string, std::vector<char>>;
 
@@ -40,8 +41,30 @@ enum EImageType
 
 struct ImageOption
 {
+  using Scale = float;
+  struct ScaleDetermine
+  {
+    float value = 1.f;
+  };
+  struct WidthDetermine
+  {
+    float value;
+    WidthDetermine(float width)
+      : value(width)
+    {
+    }
+  };
+  struct HeightDetermine
+  {
+    float value;
+    HeightDetermine(float height)
+      : value(height)
+    {
+    }
+  };
+  using SizePolicy = std::variant<ScaleDetermine, WidthDetermine, HeightDetermine>;
   int        imageQuality = 100;
-  int        resolutionLevel = 2;
+  SizePolicy size = ScaleDetermine{ 1.f };
   EImageType type{ EImageType::PNG };
 };
 

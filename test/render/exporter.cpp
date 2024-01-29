@@ -1,3 +1,4 @@
+#include "Layer/VGGLayer.hpp"
 #include "loader.hpp"
 #include "Utility/ConfigManager.hpp"
 #include "Layer/Scene.hpp"
@@ -97,6 +98,8 @@ int main(int argc, char** argv)
   program.add_argument("-p", "--prefix").help("the prefix of filename or dir");
   program.add_argument("-L", "--loaddir").help("iterates all the files in the given dir");
   program.add_argument("-s", "--scale").help("canvas scale").scan<'g', float>().default_value(1.0);
+  program.add_argument("-w", "--width").help("canvas width").scan<'g', float>();
+  program.add_argument("-h", "--height").help("canvas height").scan<'g', float>();
   program.add_argument("-c", "--config").help("specify config file");
   program.add_argument("-r", "--repeat")
     .help("repeat rendering (DEBUG)")
@@ -176,8 +179,20 @@ int main(int argc, char** argv)
       std::cout << "unsupported format: use png as default\n";
     }
   }
-  opts.resolutionLevel = 1;
   opts.imageQuality = 80;
+  // priority of size: width > height > scale
+  if (auto w = program.present<float>("-w"))
+  {
+    opts.size = exporter::ImageOption::WidthDetermine{ *w };
+  }
+  else if (auto h = program.present<float>("-h"))
+  {
+    opts.size = exporter::ImageOption::HeightDetermine{ *h };
+  }
+  else
+  {
+    opts.size = exporter::ImageOption::ScaleDetermine{ program.get<float>("-s") };
+  }
   int s = program.get<int>("-q");
   opts.imageQuality = s;
 

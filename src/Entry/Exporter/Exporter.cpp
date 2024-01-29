@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 #include "ContextVk.hpp"
+#include "Domain/Layout/Rule.hpp"
+#include "Layer/Core/VUtils.hpp"
 #include "Layer/Memory/AllocatorImpl.hpp"
 #include "Domain/Layout/ExpandSymbol.hpp"
 #include "Layer/DocBuilder.hpp"
@@ -310,20 +312,23 @@ public:
 class ImageIteratorImpl : public IteratorImplBase
 {
 public:
-  Exporter& exporter;
+  static constexpr int    MAX_WIDTH = 8192;
+  static constexpr int    MAX_HEIGHT = 8192;
+  Exporter&               exporter;
+  ImageOption::SizePolicy size;
   ImageIteratorImpl(
-    Exporter&           exporter,
-    nlohmann::json      json,
-    nlohmann::json      layout,
-    Resource            resource,
-    int                 resolutionLevel,
-    const ExportOption& opt,
-    BuilderResult&      result)
+    Exporter&               exporter,
+    nlohmann::json          json,
+    nlohmann::json          layout,
+    Resource                resource,
+    ImageOption::SizePolicy size,
+    const ExportOption&     opt,
+    BuilderResult&          result)
     : IteratorImplBase(std::move(json), std::move(layout), std::move(resource), opt, result)
     , exporter(exporter)
+    , size(size)
   {
-    getMaxSurfaceSize(resolutionLevel, maxSurfaceSize);
-    exporter.d_impl->resize(maxSurfaceSize[0], maxSurfaceSize[1]);
+    exporter.d_impl->resize(MAX_WIDTH, MAX_HEIGHT);
   }
 
   bool next(
@@ -340,19 +345,50 @@ public:
     f->revalidate();
     const auto b = f->bound();
     const auto id = f->guid();
-    int        w = b.size().x;
-    int        h = b.size().y;
+    const auto w = b.size().x;
+    const auto h = b.size().y;
 
-    auto  state = exporter.d_impl.get();
-    float actualSize[2];
-    auto  scale =
-      calcScaleFactor(w, h, maxSurfaceSize[0], maxSurfaceSize[1], actualSize[0], actualSize[1]);
+    auto          state = exporter.d_impl.get();
+    float         actualSize[2];
+    float         scale = 1.0;
+    constexpr int MAX_SIDE = std::min(MAX_WIDTH, MAX_HEIGHT);
+    std::visit(
+      Overloaded{
+        [&](const ImageOption::ScaleDetermine& s)
+        {
+          auto maxScale = MAX_SIDE / std::max(w, h);
+          scale = s.value > maxScale ? maxScale : s.value;
+          actualSize[0] = scale * w;
+          actualSize[1] = scale * h;
+        },
+        [&](const ImageOption::WidthDetermine& width)
+        {
+          auto maxSide = width.value > MAX_SIDE ? MAX_SIDE : width.value;
+          scale = std::min({ MAX_HEIGHT / w, MAX_WIDTH / h, maxSide / w });
+          actualSize[0] = scale * w;
+          actualSize[1] = scale * h;
+        },
+        [&](const ImageOption::HeightDetermine& height)
+        {
+          auto maxSide = height.value > MAX_SIDE ? MAX_SIDE : height.value;
+          scale = std::min({ MAX_HEIGHT / w, MAX_WIDTH / h, maxSide / h });
+          actualSize[0] = scale * w;
+          actualSize[1] = scale * h;
+        },
+      },
+      size);
     layer::ImageOptions opts;
-    opts.encode = toEImageEncode(type);
     opts.position[0] = 0;
     opts.position[1] = 0;
     opts.extend[0] = std::lroundf(actualSize[0]);
     opts.extend[1] = std::lroundf(actualSize[1]);
+    INFO(
+      "scale: %f, [%d(%f), %d(%f)]",
+      scale,
+      opts.extend[0],
+      actualSize[0],
+      opts.extend[1],
+      actualSize[1]);
     opts.quality = quality;
     f->resetToOrigin(true);
     auto res = state->render(scene, scale, opts, cost);
@@ -404,7 +440,7 @@ ImageIterator::ImageIterator(
       std::move(design),
       std::move(layout),
       std::move(resource),
-      opt.resolutionLevel,
+      opt.size,
       exportOpt,
       result))
   , m_opts(opt)

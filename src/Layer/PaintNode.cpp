@@ -772,10 +772,6 @@ void PaintNode::paintStyle(Renderer* renderer, const SkPath& path, const SkPath&
   // draw blur, we assume that there is only one blur style
   Blur    blur;
   auto    blurType = _->blurType(blur);
-  // auto    validPath = path.isValid() && path.isEmpty();
-  // if (validPath)
-  // {
-  // }
   if (!_->alphaMask)
   {
     // 1. normal drawing
@@ -842,7 +838,7 @@ void PaintNode::paintFill(
   {
     if (!f.isEnabled)
       continue;
-    painter.drawFill(path, frameBound(), f, imageFilter, blender, blur);
+    painter.drawFill(path, frameBound(), f, nullptr, blender, blur);
   }
 }
 

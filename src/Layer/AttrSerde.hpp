@@ -408,7 +408,8 @@ inline void from_json(const json& j, OuterShadowStyle& x)
   const auto p = glm::vec2{ j.value("offsetX", 0.f), j.value("offsetY", 0.f) };
   x.offsetX = p.x;
   x.offsetY = p.y;
-  x.spread = j.at("spread").get<double>();
+  x.spread = j.value("spread", 0.f);
+  x.clipShadow = !j.value("showBehindTransparentAreas", true);
 }
 
 inline void from_json(const json& j, ShadowStyle& x)

@@ -223,6 +223,7 @@ struct OuterShadowStyle
   float          offsetY{ 0.f };
   float          spread{ 0.f };
   bool           isEnabled{ false };
+  bool           clipShadow{ true };
 };
 using ShadowStyle = std::variant<InnerShadowStyle, OuterShadowStyle>;
 

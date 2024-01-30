@@ -414,15 +414,13 @@ sk_sp<SkImageFilter> makeInnerShadowImageFilter(
   auto src =
     SkImageFilters::ColorFilter(SkColorFilters::Blend(SK_ColorBLACK, SkBlendMode::kDst), 0);
   auto res = SkImageFilters::Compose(input, SkImageFilters::Blend(SkBlendMode::kSrcOver, src, f4));
-  auto sx = (bound.width() + shadow.spread) / bound.width();
-  auto sy = (bound.height() + shadow.spread) / bound.height();
-  SkMatrix mat = SkMatrix::Scale(sx, sy);
-  // SkMatrix mat = SkMatrix::I();
+  SkMatrix mat = SkMatrix::I();
   return SkImageFilters::MatrixTransform(mat, SkSamplingOptions{}, res);
 }
 
 sk_sp<SkImageFilter> makeDropShadowImageFilter(
   const OuterShadowStyle& shadow,
+  const Bound&            bound,
   bool                    shadowOnly,
   sk_sp<SkImageFilter>    input)
 {

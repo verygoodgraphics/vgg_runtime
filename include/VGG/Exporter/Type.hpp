@@ -41,7 +41,6 @@ enum EImageType
 
 struct ImageOption
 {
-  using Scale = float;
   struct ScaleDetermine
   {
     float value = 1.f;
@@ -62,7 +61,16 @@ struct ImageOption
     {
     }
   };
-  using SizePolicy = std::variant<ScaleDetermine, WidthDetermine, HeightDetermine>;
+
+  struct LevelDetermine
+  {
+    int value;
+    LevelDetermine(int level)
+      : value(level)
+    {
+    }
+  };
+  using SizePolicy = std::variant<ScaleDetermine, WidthDetermine, HeightDetermine, LevelDetermine>;
   int        imageQuality = 100;
   SizePolicy size = ScaleDetermine{ 1.f };
   EImageType type{ EImageType::PNG };

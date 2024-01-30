@@ -23,6 +23,7 @@
 #include "Layer/Zoomer.hpp"
 #include "Layer/Memory/VNew.hpp"
 #include "Layer/Core/PaintNode.hpp"
+#include "Layer/Core/Timer.hpp"
 #include "encode/SkPngEncoder.h"
 #include "Utility/Log.hpp"
 
@@ -199,7 +200,11 @@ public:
           const auto                skr = toSkRect(frame->bound());
           const auto                skm = toSkMatrix(frame->transform().matrix());
           Rasterizer::RasterContext rasterCtx{ mat, frame->picture(), &skr, skm };
+          Timer                     t;
+          t.start();
           rasterizer->rasterize(rasterDevice, rasterCtx, lod, skv, &rasterTiles, &rasterMatrix, 0);
+          t.stop();
+          INFO("raster time: %d", (int)t.elapsed().ms());
         }
         canvas->save();
         canvas->resetMatrix();

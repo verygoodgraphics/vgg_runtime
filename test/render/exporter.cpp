@@ -100,6 +100,7 @@ int main(int argc, char** argv)
   program.add_argument("-s", "--scale").help("canvas scale").scan<'g', float>().default_value(1.0);
   program.add_argument("-w", "--width").help("canvas width").scan<'g', float>();
   program.add_argument("-h", "--height").help("canvas height").scan<'g', float>();
+  program.add_argument("-l", "--level").help("canvas level").scan<'i', int>();
   program.add_argument("-c", "--config").help("specify config file");
   program.add_argument("-r", "--repeat")
     .help("repeat rendering (DEBUG)")
@@ -180,7 +181,7 @@ int main(int argc, char** argv)
     }
   }
   opts.imageQuality = 80;
-  // priority of size: width > height > scale
+  // priority of size: width > height > level > scale
   if (auto w = program.present<float>("-w"))
   {
     opts.size = exporter::ImageOption::WidthDetermine{ *w };
@@ -188,6 +189,10 @@ int main(int argc, char** argv)
   else if (auto h = program.present<float>("-h"))
   {
     opts.size = exporter::ImageOption::HeightDetermine{ *h };
+  }
+  else if (auto l = program.present<int>("-l"))
+  {
+    opts.size = exporter::ImageOption::LevelDetermine{ *l };
   }
   else
   {

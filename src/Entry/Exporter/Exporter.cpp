@@ -47,6 +47,8 @@
 #include <sstream>
 #include <thread>
 
+static constexpr int MAX_WIDTH = 8192;
+static constexpr int MAX_HEIGHT = 8192;
 namespace VGG::exporter
 {
 
@@ -82,12 +84,6 @@ void getMaxSurfaceSize(int resolutionLevel, float* maxSurfaceSize)
     {
       maxSurfaceSize[0] = 8192;
       maxSurfaceSize[1] = 8192;
-    }
-    break;
-    case 5:
-    {
-      maxSurfaceSize[0] = 16384;
-      maxSurfaceSize[1] = 16384;
     }
     break;
     default:
@@ -312,8 +308,6 @@ public:
 class ImageIteratorImpl : public IteratorImplBase
 {
 public:
-  static constexpr int    MAX_WIDTH = 8192;
-  static constexpr int    MAX_HEIGHT = 8192;
   Exporter&               exporter;
   ImageOption::SizePolicy size;
   ImageIteratorImpl(
@@ -353,31 +347,41 @@ public:
     float         scale = 1.0;
     constexpr int MAX_SIDE = std::min(MAX_WIDTH, MAX_HEIGHT);
     std::visit(
-      Overloaded{
-        [&](const ImageOption::ScaleDetermine& s)
-        {
-          auto maxScale = MAX_SIDE / std::max(w, h);
-          scale = s.value > maxScale ? maxScale : s.value;
-          actualSize[0] = scale * w;
-          actualSize[1] = scale * h;
-        },
-        [&](const ImageOption::WidthDetermine& width)
-        {
-          auto maxSide = width.value > MAX_SIDE ? MAX_SIDE : width.value;
-          scale = std::min({ MAX_HEIGHT / w, MAX_WIDTH / h, maxSide / w });
-          actualSize[0] = scale * w;
-          actualSize[1] = scale * h;
-        },
-        [&](const ImageOption::HeightDetermine& height)
-        {
-          auto maxSide = height.value > MAX_SIDE ? MAX_SIDE : height.value;
-          scale = std::min({ MAX_HEIGHT / w, MAX_WIDTH / h, maxSide / h });
-          actualSize[0] = scale * w;
-          actualSize[1] = scale * h;
-        },
-      },
+      Overloaded{ [&](const ImageOption::ScaleDetermine& s)
+                  {
+                    auto maxScale = MAX_SIDE / std::max(w, h);
+                    scale = s.value > maxScale ? maxScale : s.value;
+                    actualSize[0] = scale * w;
+                    actualSize[1] = scale * h;
+                  },
+                  [&](const ImageOption::WidthDetermine& width)
+                  {
+                    auto maxSide = width.value > MAX_SIDE ? MAX_SIDE : width.value;
+                    scale = std::min({ MAX_HEIGHT / w, MAX_WIDTH / h, maxSide / w });
+                    actualSize[0] = scale * w;
+                    actualSize[1] = scale * h;
+                  },
+                  [&](const ImageOption::HeightDetermine& height)
+                  {
+                    auto maxSide = height.value > MAX_SIDE ? MAX_SIDE : height.value;
+                    scale = std::min({ MAX_HEIGHT / w, MAX_WIDTH / h, maxSide / h });
+                    actualSize[0] = scale * w;
+                    actualSize[1] = scale * h;
+                  },
+                  [&, this](const ImageOption::LevelDetermine& level)
+                  {
+                    getMaxSurfaceSize(level.value, maxSurfaceSize);
+                    scale = calcScaleFactor(
+                      w,
+                      h,
+                      maxSurfaceSize[0],
+                      maxSurfaceSize[1],
+                      actualSize[0],
+                      actualSize[1]);
+                  } },
       size);
     layer::ImageOptions opts;
+    opts.encode = toEImageEncode(type);
     opts.position[0] = 0;
     opts.position[1] = 0;
     opts.extend[0] = std::lroundf(actualSize[0]);

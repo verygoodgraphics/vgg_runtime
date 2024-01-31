@@ -318,6 +318,7 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutNode> view)
 
       for (auto subview : subviewsToInclude)
       {
+        subview->autoLayout()->configureFlexItemMargin();
         attachNodesFromViewHierachy(subview);
       }
     }
@@ -581,6 +582,23 @@ flexbox_node* AutoLayout::createFlexNode()
   return node;
 }
 
+flexbox_node* AutoLayout::parentFlexContainer()
+{
+  auto sharedView = view.lock();
+  if (!sharedView)
+  {
+    return nullptr;
+  }
+
+  auto container = sharedView->containerAutoLayout();
+  if (!container)
+  {
+    return nullptr;
+  }
+
+  return container->getFlexContainer();
+}
+
 void AutoLayout::resetGridContainer()
 {
   if (auto sharedView = view.lock())
@@ -733,6 +751,71 @@ void AutoLayout::configure()
   }
 }
 
+void AutoLayout::configureFlexItemMargin()
+{
+  auto node = getFlexItem();
+  ASSERT(node);
+  if (!node)
+  {
+    return;
+  }
+
+  auto sharedRule = rule.lock();
+  if (!sharedRule)
+  {
+    return;
+  }
+
+  auto sharedView = view.lock();
+  if (!sharedView)
+  {
+    return;
+  }
+
+  auto container = sharedView->containerAutoLayout();
+  if (!container)
+  {
+    return;
+  }
+
+  bool shouldConfigureStart{ false };
+  bool shouldConfigureEnd{ false };
+  if (container->isFlexSpaceBetweenAndNoWrap())
+  {
+    if (isOnlyChild())
+    {
+      shouldConfigureStart = true;
+      shouldConfigureEnd = true;
+    }
+    else if (isFirstChild())
+    {
+      shouldConfigureEnd = true;
+    }
+    else if (isLastChild())
+    {
+      shouldConfigureStart = true;
+    }
+    else
+    {
+      shouldConfigureStart = true;
+      shouldConfigureEnd = true;
+    }
+  }
+
+  // set to auto or RESET to undefine
+  auto isHorizontalDirection = container->isHorizontalDirection();
+  {
+    auto side = isHorizontalDirection ? padding_left : padding_top;
+    auto margin = shouldConfigureStart ? unit_auto : unit_undefine;
+    node->set_margin(side, margin);
+  }
+  {
+    auto side = isHorizontalDirection ? padding_right : padding_bottom;
+    auto margin = shouldConfigureEnd ? unit_auto : unit_undefine;
+    node->set_margin(side, margin);
+  }
+}
+
 void AutoLayout::configureFlexNodeSize(flexbox_node* node)
 {
   auto sharedRule = rule.lock();
@@ -881,6 +964,90 @@ bool AutoLayout::is100PercentHeight()
   }
 
   return sharedRule->height.value.is100Percent();
+}
+
+bool AutoLayout::isFlexSpaceBetweenAndNoWrap()
+{
+  auto sharedRule = rule.lock();
+  if (!sharedRule)
+  {
+    return false;
+  }
+
+  const auto detail = sharedRule->getFlexContainerRule();
+  if (!detail)
+  {
+    return false;
+  }
+
+  return detail->justifyContent == FlexboxLayout::EJustifyContent::SPACE_BETWEEN &&
+         detail->wrap == FlexboxLayout::EWrap::NO_WRAP;
+}
+
+bool AutoLayout::isEmptyContainer()
+{
+  auto node = getFlexContainer();
+  ASSERT(node);
+  if (!node)
+  {
+    return false;
+  }
+
+  return 0 == node->child_count();
+}
+
+bool AutoLayout::isOnlyChild()
+{
+  auto node = getFlexItem();
+  ASSERT(node);
+  if (!node)
+  {
+    return false;
+  }
+
+  auto containerNode = parentFlexContainer();
+  if (!containerNode)
+  {
+    return false;
+  }
+
+  return 1 == containerNode->child_count();
+}
+
+bool AutoLayout::isFirstChild()
+{
+  auto node = getFlexItem();
+  ASSERT(node);
+  if (!node)
+  {
+    return false;
+  }
+
+  auto containerNode = parentFlexContainer();
+  if (!containerNode)
+  {
+    return false;
+  }
+
+  return containerNode->get_child(0) == node;
+}
+
+bool AutoLayout::isLastChild()
+{
+  auto node = getFlexItem();
+  ASSERT(node);
+  if (!node)
+  {
+    return false;
+  }
+
+  auto containerNode = parentFlexContainer();
+  if (!containerNode)
+  {
+    return false;
+  }
+
+  return containerNode->get_child(containerNode->child_count() - 1) == node;
 }
 
 void AutoLayout::configureGridItemSize()

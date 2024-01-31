@@ -132,7 +132,7 @@ void ImageNode::paintFill(Renderer* renderer, sk_sp<SkBlender> blender, const Sk
 
     SkPaint p;
     p.setBlender(std::move(blender));
-    SkSamplingOptions opt;
+    SkSamplingOptions opt(SkFilterMode::kLinear, SkMipmapMode::kNearest);
     // const auto&       b = frameBound();
     canvas->drawImageRect(_->image, toSkRect(frameBound()), opt, &p);
 

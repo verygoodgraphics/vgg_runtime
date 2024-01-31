@@ -302,7 +302,7 @@ inline sk_sp<SkShader> makeFillPattern(const Bound& bound, const PatternFill& p)
   m = glm::translate(m, { mi.width() / 2, mi.height() / 2 });
   m = glm::rotate(m, p.rotation);
   m = glm::translate(m, { -mi.width() / 2, -mi.height() / 2 });
-  SkSamplingOptions opt;
+  SkSamplingOptions opt(SkFilterMode::kLinear, SkMipmapMode::kNearest);
   SkTileMode        modeX = SkTileMode::kDecal;
   SkTileMode        modeY = SkTileMode::kDecal;
   const auto        mat = toSkMatrix(m);

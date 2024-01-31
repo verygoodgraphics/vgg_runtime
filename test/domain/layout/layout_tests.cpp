@@ -175,3 +175,18 @@ TEST_F(VggLayoutTestSuite, RotatedLine)
     EXPECT_TRUE(descendantFrame({ 1 }, 3) == expectedFrames[0]);
   }
 }
+
+TEST_F(VggLayoutTestSuite, AddAutoMarginToItemsInNoWrapSpaceBetweenFlexContainer)
+{
+  // Given
+  setupWithExpanding("testDataDir/layout/202_auto_margin/");
+
+  // When
+  m_sut->layout(Layout::Size{ 380, 300 }, true);
+
+  // Then
+  {
+    std::vector<Layout::Rect> expectedFrames{ { { 180, 0 }, { 200, 100 } } };
+    EXPECT_TRUE(descendantFrame({ 1 }, 0) == expectedFrames[0]);
+  }
+}

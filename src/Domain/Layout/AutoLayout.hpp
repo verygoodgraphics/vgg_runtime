@@ -61,6 +61,7 @@ public:
 
 public:
   void configure();
+  void configureFlexItemMargin();
   void applyLayout(bool preservingOrigin);
   void setFrame(Rect frame);
   void updateSizeRule();
@@ -122,6 +123,8 @@ private:
   flexbox_node* createFlexItem();
   flexbox_node* createFlexNode();
 
+  flexbox_node* parentFlexContainer();
+
   void configureFlexContainer(Rule::FlexboxLayout* layout);
   void configureFlexItem(Rule::FlexboxItem* layout);
   void configureFlexItemAlignSelf(flexbox_node* node);
@@ -130,6 +133,11 @@ private:
   bool directionIs(Rule::FlexboxLayout::EDirection direction);
   bool is100PercentWidth();
   bool is100PercentHeight();
+  bool isFlexSpaceBetweenAndNoWrap();
+  bool isEmptyContainer();
+  bool isOnlyChild();
+  bool isFirstChild();
+  bool isLastChild();
 
   void configureGridContainer(Rule::GridLayout* layout);
   void configureGridItem(Rule::GridItem* layout);

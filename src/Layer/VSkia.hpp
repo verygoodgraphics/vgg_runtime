@@ -266,7 +266,7 @@ inline sk_sp<SkShader> makeFitPattern(const Bound& bound, const PatternFit& p)
   m = glm::translate(m, { mi.width() / 2, mi.height() / 2 });
   m = glm::rotate(m, p.rotation);
   m = glm::translate(m, { -mi.width() / 2, -mi.height() / 2 });
-  SkSamplingOptions opt;
+  SkSamplingOptions opt(SkFilterMode::kLinear, SkMipmapMode::kNearest);
   SkTileMode        modeX = SkTileMode::kDecal;
   SkTileMode        modeY = SkTileMode::kDecal;
   const auto        mat = toSkMatrix(m);
@@ -327,7 +327,7 @@ inline sk_sp<SkShader> makeStretchPattern(const Bound& bound, const PatternStret
   m *= p.transform.matrix();
   m = glm::scale(m, { 1.f / mi.width(), 1.f / mi.height() });
   const auto        mat = toSkMatrix(m);
-  SkSamplingOptions opt;
+  SkSamplingOptions opt(SkFilterMode::kLinear, SkMipmapMode::kNearest);
   SkTileMode        modeX = SkTileMode::kDecal;
   SkTileMode        modeY = SkTileMode::kDecal;
   auto              shader = img->makeShader(modeX, modeY, opt, &mat);
@@ -363,7 +363,7 @@ inline sk_sp<SkShader> makeTilePattern(const Bound& bound, const PatternTile& p)
   m = glm::rotate(m, p.rotation);
   m = glm::scale(m, { p.scale, p.scale });
   const auto        mat = toSkMatrix(m);
-  SkSamplingOptions opt;
+  SkSamplingOptions opt(SkFilterMode::kLinear, SkMipmapMode::kNearest);
   auto              shader = img->makeShader(modeX, modeY, opt, &mat);
   if (auto colorFilter = makeColorFilter(p.imageFilter); shader && colorFilter)
   {

@@ -190,3 +190,18 @@ TEST_F(VggLayoutTestSuite, AddAutoMarginToItemsInNoWrapSpaceBetweenFlexContainer
     EXPECT_TRUE(descendantFrame({ 1 }, 0) == expectedFrames[0]);
   }
 }
+
+TEST_F(VggLayoutTestSuite, NonZeroFrameOrigin)
+{
+  // Given
+  setupWithExpanding("testDataDir/layout/203_frame_with_non_zero_origin/");
+
+  // When
+  layout(*m_sut, Layout::Size{ 1920, 1080 });
+
+  // Then
+  std::vector<Layout::Rect> expectedBounds{ { { -742, -477 }, { 1920, 1080 } } };
+
+  auto bounds = firstPage()->bounds();
+  EXPECT_TRUE(bounds == expectedBounds[0]);
+}

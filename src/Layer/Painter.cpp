@@ -108,7 +108,7 @@ void Painter::drawShadow(
   pen.setAntiAlias(m_antiAlias);
   auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
   pen.setImageFilter(
-    SkImageFilters::DropShadowOnly(s.offsetX, -s.offsetY, sigma, sigma, s.color, nullptr));
+    SkImageFilters::DropShadowOnly(s.offsetX, s.offsetY, sigma, sigma, s.color, nullptr));
   m_renderer->canvas()->saveLayer(nullptr, &pen); // TODO:: test hint rect
   if (s.spread > 0)
     m_renderer->canvas()->scale(1 + s.spread / 100.0, 1 + s.spread / 100.0);
@@ -129,7 +129,7 @@ void Painter::drawInnerShadow(
   auto    sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
   pen.setAntiAlias(m_antiAlias);
   pen.setImageFilter(
-    SkMyImageFilters::DropInnerShadowOnly(s.offsetX, -s.offsetY, sigma, sigma, s.color, nullptr));
+    SkMyImageFilters::DropInnerShadowOnly(s.offsetX, s.offsetY, sigma, sigma, s.color, nullptr));
   m_renderer->canvas()->saveLayer(nullptr, &pen);
   if (s.spread > 0)
     m_renderer->canvas()->scale(1.0 / s.spread, 1.0 / s.spread);

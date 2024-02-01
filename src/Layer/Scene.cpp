@@ -223,7 +223,11 @@ public:
       {
         canvas->save();
         canvas->concat(toSkMatrix(frame->transform().matrix()));
+        Timer t;
+        t.start();
         canvas->drawPicture(frame->picture());
+        t.stop();
+        INFO("raster time: %d", (int)t.elapsed().ms());
         canvas->restore();
       }
     }

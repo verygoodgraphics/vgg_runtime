@@ -30,6 +30,7 @@
 #include <core/SkBlender.h>
 #include <core/SkColor.h>
 #include <core/SkMatrix.h>
+#include <core/SkPaint.h>
 #include <encode/SkPngEncoder.h>
 #include <core/SkBlendMode.h>
 #include <core/SkCanvas.h>
@@ -144,6 +145,7 @@ public:
   std::optional<SkPath>     mask;
   std::optional<MaskObject> alphaMask;
   LayerContextGuard         layerContextGuard;
+  // sk_sp<SkImageFilter>      innerShadowFilter{ nullptr };
 
   PaintNode__pImpl(PaintNode* api, EObjectType type)
     : q_ptr(api)
@@ -468,8 +470,30 @@ public:
       }
     }
 
+    auto  border = false;
+    float maxWidth = 0;
+    for (const auto& b : style.borders)
+    {
+      if (b.isEnabled)
+      {
+        border = true;
+        switch (b.position)
+        {
+          case PP_Inside:
+            break;
+          case PP_Center:
+            maxWidth = std::max(b.thickness, maxWidth);
+            break;
+          case PP_Outside:
+            maxWidth = std::max(b.thickness * 2, maxWidth);
+            break;
+        }
+      }
+    }
+
     // #define ENABLE_OLD_SHADOW 1
 
+// #define ENABLE_OLD_SHADOW 1
 #ifdef ENABLE_OLD_SHADOW
     {
       if (filled)
@@ -498,55 +522,73 @@ public:
       }
     }
 #else
-    if (filled)
+    for (auto it = style.shadowStyle.rbegin(); it != style.shadowStyle.rend(); ++it)
     {
-      for (auto it = style.shadowStyle.rbegin(); it != style.shadowStyle.rend(); ++it)
-      {
-        auto& s = *it;
-        std::visit(
-          Overloaded{
-            [&](const InnerShadowStyle& s) {},
-            [&](const OuterShadowStyle& s)
+      auto& s = *it;
+      std::visit(
+        Overloaded{
+          [&](const InnerShadowStyle& s) {},
+          [&](const OuterShadowStyle& s)
+          {
+            if (!s.isEnabled)
+              return;
+            LayerContextGuard g;
+            g.saveLayer(
+              s.contextSettings,
+              [&](const SkPaint& paint) { painter.canvas()->saveLayer(nullptr, &paint); });
+            if (s.clipShadow)
             {
-              if (!s.isEnabled)
-                return;
-              LayerContextGuard g;
-              g.saveLayer(
-                s.contextSettings,
-                [&](const SkPaint& paint) { painter.canvas()->saveLayer(nullptr, &paint); });
-              if (s.clipShadow)
-              {
-                painter.beginClip(skPath, SkClipOp::kDifference);
-              }
-              SkPaint shadowPaint;
-              shadowPaint.setAntiAlias(true);
-              auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
-              shadowPaint.setImageFilter(SkImageFilters::DropShadowOnly(
-                s.offsetX,
-                s.offsetY,
-                sigma,
-                sigma,
-                s.color,
-                nullptr));
-              painter.canvas()->drawPath(*path, shadowPaint);
-              if (s.clipShadow)
-              {
-                painter.endClip();
-              }
-              g.restore([&]() { painter.canvas()->restore(); });
-            },
+              painter.beginClip(skPath, SkClipOp::kDifference);
+            }
+            auto    dropShadowFilter = makeDropShadowImageFilter(s, q_ptr->frameBound(), true, 0);
+            SkPaint p;
+            p.setAntiAlias(true);
+            p.setImageFilter(dropShadowFilter);
+            if (filled)
+            {
+              p.setStyle(SkPaint::kFill_Style);
+              painter.canvas()->drawPath(*path, p);
+            }
+            if (border)
+            {
+              p.setStyle(SkPaint::kStroke_Style);
+              p.setStrokeWidth(maxWidth);
+              painter.canvas()->drawPath(*path, p);
+            }
+            if (s.clipShadow)
+            {
+              painter.endClip();
+            }
+            g.restore([&]() { painter.canvas()->restore(); });
           },
-          s);
-      }
+        },
+        s);
     }
 #endif
-
-    sk_sp<SkImageFilter> innerShadowFilter;
-
 #ifndef ENABLE_OLD_SHADOW
+#endif
+    q_ptr->paintFill(painter.renderer(), blender, 0, skPath);
+    for (const auto& b : style.borders)
+    {
+      if (!b.isEnabled)
+        continue;
+      painter.drawPathBorder(skPath, bound, b, 0, blender);
+    }
+#ifdef ENABLE_OLD_SHADOW
+    // draw inner shadow
+    painter.beginClip(skPath);
+    for (auto it = style.shadows.begin(); it != style.shadows.end(); ++it)
+    {
+      auto& s = *it;
+      if (!s.isEnabled || !s.inner)
+        continue;
+      painter.drawInnerShadow(skPath, bound, s, SkPaint::kFill_Style, nullptr);
+    }
+    painter.endClip();
+#else
     if (filled)
     {
-      for (auto it = style.shadowStyle.rbegin(); it != style.shadowStyle.rend(); ++it)
+      for (auto it = style.shadowStyle.begin(); it != style.shadowStyle.end(); ++it)
       {
         auto& s = *it;
         std::visit(
@@ -555,49 +597,17 @@ public:
             {
               if (!s.isEnabled)
                 return;
-              innerShadowFilter =
-                makeInnerShadowImageFilter(s, q_ptr->bound(), false, innerShadowFilter);
+              auto innerShadowFilter = makeInnerShadowImageFilter(s, q_ptr->frameBound(), true, 0);
+              SkPaint p;
+              p.setImageFilter(innerShadowFilter);
+              p.setAntiAlias(true);
+              painter.canvas()->drawPath(skPath, p);
             },
             [&](const OuterShadowStyle& s) {},
           },
           s);
       }
     }
-#endif
-
-    q_ptr->paintFill(painter.renderer(), blender, 0, skPath);
-#ifndef ENABLE_OLD_SHADOW
-    SkPaint shadowPaint;
-    shadowPaint.setAntiAlias(true);
-    shadowPaint.setImageFilter(innerShadowFilter);
-    painter.renderer()->canvas()->drawPath(skPath, shadowPaint);
-#endif
-    for (const auto& b : style.borders)
-    {
-      if (!b.isEnabled)
-        continue;
-      painter.drawPathBorder(skPath, bound, b, 0, blender);
-    }
-
-#ifdef ENABLE_OLD_SHADOW
-    // draw inner shadow
-    painter.beginClip(skPath);
-    for (const auto& s : style.shadows)
-    {
-      if (!s.isEnabled || !s.inner)
-        continue;
-      painter.drawInnerShadow(skPath, bound, s, SkPaint::kFill_Style, nullptr);
-    }
-    painter.endClip();
-#else
-    // painter.beginClip(skPath);
-    // for (const auto& s : style.shadows)
-    // {
-    //   if (!s.isEnabled || !s.inner)
-    //     continue;
-    //   painter.drawInnerShadow(skPath, bound, s, SkPaint::kFill_Style, nullptr);
-    // }
-    // painter.endClip();
 #endif
   }
 };

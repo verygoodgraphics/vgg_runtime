@@ -15,6 +15,7 @@
  */
 #include "Effects.hpp"
 #include "Layer/LayerCache.h"
+#include "Layer/VSkia.hpp"
 #include <core/SkBlendMode.h>
 #include <core/SkColor.h>
 #include <effects/SkRuntimeEffect.h>
@@ -400,7 +401,6 @@ sk_sp<SkImageFilter> makeInnerShadowImageFilter(
   auto sigma = SkBlurMask::ConvertRadiusToSigma(shadow.blur);
   auto alpha =
     SkImageFilters::ColorFilter(SkColorFilters::Blend(SK_ColorBLACK, SkBlendMode::kSrcIn), 0);
-
   auto f1 =
     SkImageFilters::ColorFilter(SkColorFilters::Blend(shadow.color, SkBlendMode::kSrcOut), 0);
   auto f2 = SkImageFilters::Offset(shadow.offsetX, shadow.offsetY, f1);
@@ -413,9 +413,7 @@ sk_sp<SkImageFilter> makeInnerShadowImageFilter(
   }
   auto src =
     SkImageFilters::ColorFilter(SkColorFilters::Blend(SK_ColorBLACK, SkBlendMode::kDst), 0);
-  auto res = SkImageFilters::Compose(input, SkImageFilters::Blend(SkBlendMode::kSrcOver, src, f4));
-  SkMatrix mat = SkMatrix::I();
-  return SkImageFilters::MatrixTransform(mat, SkSamplingOptions{}, res);
+  return SkImageFilters::Compose(input, SkImageFilters::Blend(SkBlendMode::kSrcOver, src, f4));
 }
 
 sk_sp<SkImageFilter> makeDropShadowImageFilter(
@@ -425,15 +423,23 @@ sk_sp<SkImageFilter> makeDropShadowImageFilter(
   sk_sp<SkImageFilter>    input)
 {
   auto sigma = SkBlurMask::ConvertRadiusToSigma(shadow.blur);
-  auto imageFilter = SkImageFilters::DropShadowOnly(
+  if (shadowOnly)
+  {
+    return SkImageFilters::DropShadowOnly(
+      shadow.offsetX,
+      shadow.offsetY,
+      sigma,
+      sigma,
+      shadow.color,
+      input);
+  }
+  return SkImageFilters::DropShadow(
     shadow.offsetX,
     shadow.offsetY,
     sigma,
     sigma,
     shadow.color,
     input);
-  SkMatrix mat = SkMatrix::I();
-  return SkImageFilters::MatrixTransform(mat, SkSamplingOptions{}, imageFilter);
 }
 
 } // namespace VGG::layer

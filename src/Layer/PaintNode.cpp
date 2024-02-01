@@ -834,11 +834,12 @@ void PaintNode::paintFill(
 {
   Painter             painter(renderer);
   sk_sp<SkMaskFilter> blur;
-  for (const auto& f : style().fills)
+  for (size_t i = 0; i < style().fills.size(); ++i)
   {
+    auto& f = style().fills[i];
     if (!f.isEnabled)
       continue;
-    painter.drawFill(path, frameBound(), f, nullptr, blender, blur);
+    painter.drawFill(path, frameBound(), f, imageFilter, blender, blur);
   }
 }
 

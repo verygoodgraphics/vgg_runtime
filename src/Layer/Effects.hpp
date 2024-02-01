@@ -244,7 +244,7 @@ sk_sp<SkImageFilter> makeInnerShadowImageFilter(
   sk_sp<SkImageFilter>    input);
 
 sk_sp<SkImageFilter> makeDropShadowImageFilter(
-  const InnerShadowStyle& shadow,
+  const OuterShadowStyle& shadow,
   const Bound&            bound,
   bool                    shadowOnly,
   sk_sp<SkImageFilter>    input);

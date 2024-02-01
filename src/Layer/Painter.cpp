@@ -112,8 +112,6 @@ void Painter::drawShadow(
   pen.setImageFilter(
     SkImageFilters::DropShadowOnly(s.offsetX, s.offsetY, sigma, sigma, s.color, nullptr));
   m_renderer->canvas()->saveLayer(nullptr, &pen); // TODO:: test hint rect
-  if (s.spread > 0)
-    m_renderer->canvas()->scale(1 + s.spread / 100.0, 1 + s.spread / 100.0);
   SkPaint fillPen;
   fillPen.setStyle(style);
   m_renderer->canvas()->drawPath(skPath, fillPen);
@@ -133,8 +131,6 @@ void Painter::drawInnerShadow(
   pen.setImageFilter(
     SkMyImageFilters::DropInnerShadowOnly(s.offsetX, s.offsetY, sigma, sigma, s.color, nullptr));
   m_renderer->canvas()->saveLayer(nullptr, &pen);
-  if (s.spread > 0)
-    m_renderer->canvas()->scale(1.0 / s.spread, 1.0 / s.spread);
   SkPaint fillPen;
   fillPen.setStyle(style);
   fillPen.setAntiAlias(m_antiAlias);

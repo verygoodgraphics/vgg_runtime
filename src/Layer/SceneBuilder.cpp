@@ -165,7 +165,7 @@ public:
         },
         f.type);
     }
-    for (auto& s : style.shadows) // TODO::remove
+    for (auto& s : style.shadows)
     {
       s.offsetY = -s.offsetY;
     }
@@ -173,8 +173,8 @@ public:
     for (auto& s : style.shadowStyle) // TODO:: flip y axis
     {
       std::visit(
-        Overloaded{ [&](InnerShadowStyle& s) { s.offsetY = s.offsetY; },
-                    [&](OuterShadowStyle& s) { s.offsetY = s.offsetY; } },
+        Overloaded{ [&](InnerShadowStyle& s) { s.offsetY = -s.offsetY; },
+                    [&](OuterShadowStyle& s) { s.offsetY = -s.offsetY; } },
         s);
     }
     for (auto& b : style.blurs)

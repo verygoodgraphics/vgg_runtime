@@ -400,13 +400,11 @@ void LayoutNode::updateModel(const Layout::Rect& toFrame)
   if (oldBounds.size.width > 0)
   {
     auto xScale = newFrame.size.width / oldBounds.size.width;
-    boundsJson[K_X] = oldBounds.origin.x * xScale;
     matrix.tx *= xScale;
   }
   if (oldBounds.size.height > 0)
   {
     auto yScale = newFrame.size.height / oldBounds.size.height;
-    boundsJson[K_Y] = oldBounds.origin.y * yScale;
     matrix.ty *= yScale;
   }
   boundsJson[K_WIDTH] = newFrame.size.width;

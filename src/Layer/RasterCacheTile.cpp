@@ -41,6 +41,7 @@ std::vector<Rasterizer::Tile> rasterOrGetTile(
     auto canvas = surface->getCanvas();
     canvas->clear(SK_ColorTRANSPARENT);
     canvas->save();
+    canvas->clipRect({ 0, 0, tile.rect.width(), tile.rect.height() });
     canvas->translate(-tile.rect.x(), -tile.rect.y());
     canvas->concat(rasterMatrix);
     canvas->drawPicture(rasterContext.picture);

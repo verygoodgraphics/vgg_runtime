@@ -52,7 +52,6 @@ struct ImageFilter
   float exposure{ 0.f };
   float contrast{ 0.f };
   float saturation{ 0.f };
-  float brightness{ 0.f };
   float temperature{ 0.f };
   float tint{ 0.f };
   float highlight{ 0.f };
@@ -62,8 +61,8 @@ struct ImageFilter
   bool isDefault() const
   {
     if (
-      exposure != 0.f || contrast != 0.f || saturation != 0.f || brightness != 0.f ||
-      temperature != 0.f || tint != 0.f || highlight != 0.f || shadow != 0.f)
+      exposure != 0.f || contrast != 0.f || saturation != 0.f || temperature != 0.f ||
+      tint != 0.f || highlight != 0.f || shadow != 0.f)
       return false;
     return true;
   }

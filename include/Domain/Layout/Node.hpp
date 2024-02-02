@@ -127,7 +127,11 @@ public:
 
   Layout::Rect frame() const;
   Layout::Rect bounds() const;
-  void setFrame(const Layout::Rect& newFrame, bool updateRule = false, bool useOldFrame = false);
+  void         setFrame(
+            const Layout::Rect& newFrame,
+            bool                updateRule = false,
+            bool                useOldFrame = false,
+            bool                duringLayout = false);
   void setViewModel(JsonDocumentPtr viewModel);
 
   void dump(std::string indent = {});

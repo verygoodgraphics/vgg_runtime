@@ -267,11 +267,16 @@ bool layoutNodeHasExactSameChildren(grid_layout* node, Views subviews)
 void attachNodesFromViewHierachy(std::shared_ptr<LayoutNode> view)
 {
   const auto autoLayout = view->autoLayout();
-  if (const auto containerNode = autoLayout->getFlexContainer())
+  if (const auto containerNode = autoLayout->getOrCreateFlexContainer())
   {
     if (autoLayout->isLeaf())
     {
+      DEBUG(
+        "attachNodesFromViewHierachy, leaf node, %s, %s",
+        view->id().c_str(),
+        view->name().c_str());
       view->detachChildrenFromFlexNodeTree();
+      autoLayout->configureFlexContainer();
     }
     else
     {
@@ -315,6 +320,8 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutNode> view)
           childAutoLayout->setFlexNodeIndex(index);
         }
       }
+
+      autoLayout->configureFlexContainer();
 
       for (auto subview : subviewsToInclude)
       {
@@ -404,7 +411,7 @@ void applyLayoutToViewHierarchy(
       frame.size.height);
 
     autoLayout->setFrame(frame);
-    view->setFrame(frame);
+    view->setFrame(frame, false, false, true);
   }
   else if (auto node = autoLayout->getGridContainer())
   {
@@ -425,7 +432,7 @@ void applyLayoutToViewHierarchy(
       static_cast<int>(frame.size.width),
       static_cast<int>(frame.size.height));
     autoLayout->setFrame(frame);
-    view->setFrame(frame);
+    view->setFrame(frame, false, false, true);
 
     // grid items
     auto& maybeLibFrames = autoLayout->gridItemFrames();
@@ -455,7 +462,7 @@ void applyLayoutToViewHierarchy(
         static_cast<int>(frame.size.width),
         static_cast<int>(frame.size.height));
       subview->autoLayout()->setFrame(frame);
-      subview->setFrame(frame);
+      subview->setFrame(frame, false, false, true);
     }
   }
 
@@ -477,7 +484,7 @@ void AutoLayout::applyLayout(bool preservingOrigin)
     return;
   }
 
-  if (!m_isContainer)
+  if (!isContainer())
   {
     return;
   }
@@ -529,7 +536,7 @@ bool AutoLayout::isLeaf()
       for (auto& child : sharedView->children())
       {
         auto autoLayout = child->autoLayout();
-        if (autoLayout->isEnabled() && autoLayout->isIncludedInLayout())
+        if (child->isVisible() && autoLayout->isEnabled() && autoLayout->isIncludedInLayout())
         {
           return false;
         }
@@ -695,32 +702,23 @@ void AutoLayout::configure()
     return;
   }
 
-  if (const auto detail = sharedRule->getFlexContainerRule())
+  if (isFlexContainer())
   {
     DEBUG(
       "AutoLayout::configure, flex container, view[%p, %s]",
       sharedView.get(),
       sharedView->path().c_str());
 
-    m_isContainer = true;
-    configureFlexContainer(detail);
-    configureFlexNodeSize(getFlexContainer());
-
     resetGridContainer();
   }
-  else if (const auto detail = sharedRule->getGridContainerRule())
+  else if (isGridContainer())
   {
     DEBUG(
       "AutoLayout::configure, grid container, view[%p, %s]",
       sharedView.get(),
       sharedView->path().c_str());
 
-    m_isContainer = true;
-    configureGridContainer(detail);
-  }
-  else
-  {
-    m_isContainer = false;
+    configureGridContainer();
   }
 
   if (const auto detail = sharedRule->getFlexItemRule())
@@ -748,6 +746,25 @@ void AutoLayout::configure()
   if (!sharedRule->isFlexContainer() && !sharedRule->isFlexItem())
   {
     resetFlexNode();
+  }
+}
+
+void AutoLayout::configureFlexContainer()
+{
+  auto sharedRule = rule.lock();
+  if (!sharedRule)
+  {
+    return;
+  }
+
+  if (const auto detail = sharedRule->getFlexContainerRule())
+  {
+    // do not configure emplty container
+    if (!isEmptyContainer())
+    {
+      configureFlexContainer(detail);
+    }
+    configureFlexNodeSize(getFlexContainer(), true);
   }
 }
 
@@ -816,7 +833,7 @@ void AutoLayout::configureFlexItemMargin()
   }
 }
 
-void AutoLayout::configureFlexNodeSize(flexbox_node* node)
+void AutoLayout::configureFlexNodeSize(flexbox_node* node, bool forContainer)
 {
   auto sharedRule = rule.lock();
   if (!sharedRule)
@@ -847,14 +864,15 @@ void AutoLayout::configureFlexNodeSize(flexbox_node* node)
   auto height = sharedRule->height.value;
 
   Layout::Size size{ width.value, height.value };
+  auto         swapWidthAndHeight = sharedView->shouldSwapWidthAndHeight();
+  const auto&  modelSize = sharedView->bounds().size;
   if (width.types == Rule::Length::ETypes::PX && height.types == Rule::Length::ETypes::PX)
   {
     size = sharedView->rotatedSize(size);
   }
-  else if (sharedView->shouldSwapWidthAndHeight())
+  else if (swapWidthAndHeight)
   {
     DEBUG("AutoLayout::configureFlexNodeSize, swap width and height");
-    const auto& modelSize = sharedView->bounds().size;
     if (width.types == Length::ETypes::PX) // height.types != Length::ETypes::PX
     {
       size.width = modelSize.height;
@@ -862,6 +880,29 @@ void AutoLayout::configureFlexNodeSize(flexbox_node* node)
     else if (height.types == Length::ETypes::PX) // width.types != Length::ETypes::PX
     {
       size.height = modelSize.width;
+    }
+  }
+
+  if (forContainer && isFlexContainer() && isEmptyContainer())
+  {
+    if (width.types == Length::ETypes::FIT_CONTENT)
+    {
+      width.types = Length::ETypes::PX;
+      width.value = swapWidthAndHeight ? modelSize.height : modelSize.width;
+      size.width = width.value;
+      DEBUG(
+        "AutoLayout::configureFlexNodeSize, empty container with hug width, set to px: %f",
+        size.width);
+    }
+
+    if (height.types == Length::ETypes::FIT_CONTENT)
+    {
+      height.types = Length::ETypes::PX;
+      height.value = swapWidthAndHeight ? modelSize.width : modelSize.height;
+      size.height = height.value;
+      DEBUG(
+        "AutoLayout::configureFlexNodeSize, empty container with hug height, set to px: %f",
+        size.height);
     }
   }
 
@@ -986,6 +1027,11 @@ bool AutoLayout::isFlexSpaceBetweenAndNoWrap()
 
 bool AutoLayout::isEmptyContainer()
 {
+  if (!isFlexContainer())
+  {
+    return false;
+  }
+
   auto node = getFlexContainer();
   ASSERT(node);
   if (!node)
@@ -1149,8 +1195,14 @@ void AutoLayout::configureFlexItem(Rule::FlexboxItem* layout)
   // todo, hanlde position
 }
 
-void AutoLayout::configureGridContainer(GridLayout* layout)
+void AutoLayout::configureGridContainer()
 {
+  auto layout = gridLayout();
+  if (!layout)
+  {
+    return;
+  }
+
   std::optional<uint32_t> minRow;
   auto                    columnCount = layout->expandStrategy.columnCount;
   if (layout->expandStrategy.strategy == ExpandStrategy::EStrategy::FIX_COLUMN)
@@ -1271,7 +1323,7 @@ void AutoLayout::updateSizeRule()
       {
         if (auto node = getFlexContainer())
         {
-          configureFlexNodeSize(node);
+          configureFlexNodeSize(node, true);
         }
         else if (auto node = getFlexItem())
         {
@@ -1306,6 +1358,22 @@ std::shared_ptr<LayoutNode> AutoLayout::setNeedsLayout()
   }
 
   return nullptr;
+}
+
+flexbox_node* AutoLayout::getOrCreateFlexContainer()
+{
+  if (!isFlexContainer())
+  {
+    return nullptr;
+  }
+
+  auto node = getFlexContainer();
+  if (!node)
+  {
+    node = createFlexContainer();
+  }
+
+  return node;
 }
 
 bool AutoLayout::isFlexOrGridItem()
@@ -1351,6 +1419,37 @@ void AutoLayout::removeSubtree()
   }
 }
 
+bool AutoLayout::isContainer()
+{
+  return isFlexContainer() || isGridContainer();
+}
+
+bool AutoLayout::isFlexContainer()
+{
+  auto sharedRule = rule.lock();
+  if (!sharedRule)
+  {
+    return false;
+  }
+
+  return sharedRule->getFlexContainerRule();
+}
+
+bool AutoLayout::isGridContainer()
+{
+  return gridLayout() != nullptr;
+}
+
+GridLayout* AutoLayout::gridLayout()
+{
+  auto sharedRule = rule.lock();
+  if (!sharedRule)
+  {
+    return nullptr;
+  }
+
+  return sharedRule->getGridContainerRule();
+}
 } // namespace Internal
 } // namespace Layout
 } // namespace VGG

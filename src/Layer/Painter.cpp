@@ -47,7 +47,7 @@ void Painter::drawPathBorder(
   populateSkPaint(b, toSkRect(bound), strokePen);
   bool  inCenter = true;
   float strokeWidth = b.thickness;
-  if (b.position == PP_Inside && skPath.isLastContourClosed())
+  if (b.position == PP_INSIDE && skPath.isLastContourClosed())
   {
     // inside
     strokeWidth = 2.f * b.thickness;
@@ -55,7 +55,7 @@ void Painter::drawPathBorder(
     m_renderer->canvas()->clipPath(skPath, SkClipOp::kIntersect);
     inCenter = false;
   }
-  else if (b.position == PP_Outside && skPath.isLastContourClosed())
+  else if (b.position == PP_OUTSIDE && skPath.isLastContourClosed())
   {
     // outside
     strokeWidth = 2.f * b.thickness;

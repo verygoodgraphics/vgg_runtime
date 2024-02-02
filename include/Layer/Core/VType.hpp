@@ -36,170 +36,170 @@ enum ObjectType
 
 enum EBoolOp
 {
-  BO_Union,        // union
-  BO_Substraction, // substraction
-  BO_Intersection, // intersection
-  BO_Exclusion,    // exclusion
-  BO_None          // none
+  BO_UNION,        // union
+  BO_SUBSTRACTION, // substraction
+  BO_INTERSECTION, // intersection
+  BO_EXECLUSION,   // exclusion
+  BO_NONE          // none
 };
 
 enum EWindingType
 {
-  WR_NoneZero,
-  WR_EvenOdd
+  WR_NONE_ZERO,
+  WR_EVEN_ODD
 };
 
 enum EOverflow
 {
-  OF_Hidden = 1,
-  OF_Visible = 2,
-  OF_Scroll = 3
+  OF_HIDDEN = 1,
+  OF_VISIBLE = 2,
+  OF_SCROLL = 3
 };
 
 enum EBlendMode
 {
   // common in ai, sketch, octopus
-  BM_Normal,
-  BM_Darken,
-  BM_Multiply,
-  BM_Color_burn,
-  BM_Lighten,
-  BM_Screen,
-  BM_Color_dodge,
-  BM_Overlay,
-  BM_Soft_light,
-  BM_Hard_light,
-  BM_Difference,
-  BM_Exclusion,
-  BM_Hue,
-  BM_Saturation,
-  BM_Color,
-  BM_Luminosity,
+  BM_NORMAL,
+  BM_DARKEN,
+  BM_MULTIPLY,
+  BM_COLOR_BURN,
+  BM_LIGHTEN,
+  BM_SCREEN,
+  BM_COLOR_DODGE,
+  BM_OVERLAY,
+  BM_SOFT_LIGHT,
+  BM_HARD_LIGHT,
+  BM_DIFFERENCE,
+  BM_EXCLUSION,
+  BM_HUE,
+  BM_SATURATION,
+  BM_COLOR,
+  BM_LUMINOSITY,
 
   // sketch
-  BM_Plus_darker,
-  BM_Plus_lighter,
+  BM_PLUS_DARKER,
+  BM_PlUS_LIGHTER,
 
   //  octopus
-  BM_Blend_divide,
-  BM_Blend_subtraction,
-  BM_Darker_color,
-  BM_Dissolve,
-  BM_Hard_mix,
-  BM_Lighter_color,
-  BM_Lighten_burn,
-  BM_Lighten_dodge,
-  BM_Lighten_light,
-  BM_Pass_through,
-  BM_Pin_Light,
-  BM_Vivid_light,
+  BM_BLEND_DIVIDE,
+  BM_BLEND_SUBSTRACTION,
+  BM_DARKER_COLOR,
+  BM_DISSOLVE,
+  BM_HARD_MIX,
+  BM_LIGHTER_COLOR,
+  BM_LIGHTEN_BURN,
+  BM_LIGHTEN_DODGE,
+  BM_LIGHTEN_LIGHT,
+  BM_PASS_THROUGHT,
+  BM_PIN_LIGHT,
+  BM_VIVID_LIGHT,
 };
 
 enum EPathFillType
 {
-  FT_Color = 0,
-  FT_Gradient,
-  FT_Pattern
+  FT_COLOR = 0,
+  FT_GRADIENT,
+  FT_PATTERN
 };
 
 enum ETextLayoutMode
 {
-  TL_Fixed,
-  TL_WidthAuto,
-  TL_HeightAuto
+  TL_FIXED,
+  TL_AUTOWIDTH,
+  TL_AUTOHEIGHT
 };
 
 enum ETextVerticalAlignment
 {
-  VA_Top,
-  VA_Center,
-  VA_Bottom,
+  VA_TOP,
+  VA_CENTER,
+  VA_BOTTOM,
 };
 
 enum ETextHorizontalAlignment
 {
-  HA_Left,
-  HA_Right,
-  HA_Center,
-  HA_Justify,
-  HA_Natural
+  HA_LEFT,
+  HA_RIGHT,
+  HA_CENTER,
+  HA_JUSTIFY,
+  HA_NATURAL
 };
 
 enum ETextUnderline : uint8_t
 {
-  UT_None,
-  UT_Single,
-  UT_Double
+  UT_NONE,
+  UT_SINGLE,
+  UT_DOUBLE
 };
 
 enum EMaskType : uint8_t
 {
-  MT_None,
-  MT_Outline,
-  MT_Alpha
+  MT_NONE,
+  MT_OUTLINE,
+  MT_ALPHA
 };
 
 enum EMaskShowType : uint8_t
 {
-  MST_Content = 0,
-  MST_Bound = 1,
-  MST_Invisible = 2
+  MST_CONTENT = 0,
+  MST_BOUND = 1,
+  MST_INVISIBLE = 2
 };
 
 enum ECoutourType : uint8_t
 {
-  MCT_FrameOnly, // not recursive
-  MCT_Union,
-  MCT_Intersect,
-  MCT_UnionWithFrame,
-  MCT_IntersectWithFrame,
-  MCT_ByObjectOps
+  MCT_FRAMEONLY, // not recursive
+  MCT_UNION,
+  MCT_INTERSECT,
+  MCT_UNION_WITH_FRAME,
+  MCT_INTERSECT_WITH_FRAME,
+  MCT_OBJECT_OPS
 };
 
 enum ELineJoin : uint8_t
 {
-  LJ_Miter,
-  LJ_Round,
-  LJ_Bevel,
+  LJ_MITER,
+  LJ_ROUND,
+  LJ_BEVEL,
 };
 
 enum ELineCap : uint8_t
 {
-  LC_Butt,
-  LC_Round,
-  LC_Square,
+  LC_BUTT,
+  LC_ROUND,
+  LC_SQUARE,
 };
 
 enum EPathPosition : uint8_t
 {
-  PP_Center,
-  PP_Inside,
-  PP_Outside,
+  PP_CENTER,
+  PP_INSIDE,
+  PP_OUTSIDE,
 };
 
 enum EGradientType : uint8_t
 {
-  GT_Linear,
-  GT_Radial,
-  GT_Angular
+  GT_LINEAR,
+  GT_RADIAL,
+  GT_ANGULAR
 };
 
 enum EPointMode : uint8_t
 {
-  PM_Straight = 1,
-  PM_Mirrored = 2,
-  PM_Asymmetric = 3,
-  PM_Disconnected = 4,
+  PM_STRAIGHT = 1,
+  PM_MIRRORED = 2,
+  PM_ASYMMETRIC = 3,
+  PM_DISCONNECTED = 4,
 };
 
 enum EImageFillType : uint8_t
 {
-  IFT_Tile = 0,
-  IFT_Fill = 1,
-  IFT_Stretch = 2,
-  IFT_Fit = 3,
-  IFT_OnlyTileHorizontal = 4,
-  IFT_OnlyTileVertical = 5
+  IFT_TITL = 0,
+  IFT_FILL = 1,
+  IFT_STRETCH = 2,
+  IFT_FIT = 3,
+  IFT_HORIZONTAL_TILE_ONLY = 4,
+  IFT_VERTICAL_TILE_ONLY = 5
 };
 
 enum ETilePatternType : uint8_t
@@ -217,17 +217,17 @@ enum EFillModeType : uint8_t
 
 enum EKnockoutType : uint8_t
 {
-  KT_Off = 0,
-  KT_On = 1,
-  KT_Neutrual = 2
+  KT_OFF = 0,
+  KT_ON = 1,
+  KT_NEUTRUAL = 2
 };
 
 enum EBlurType : uint8_t
 {
-  BT_Gaussian = 0,
-  BT_Motion = 1,
-  BT_Zoom = 2,
-  BT_Background = 3
+  BT_GAUSSIAN = 0,
+  BT_MOTION = 1,
+  BT_ZOOM = 2,
+  BT_BACKGROUND = 3
 };
 
 enum AlphaMaskType
@@ -239,19 +239,19 @@ enum AlphaMaskType
 
 enum ETextLineType : uint8_t
 {
-  TLT_Plain = 0,
-  TLT_Ordered = 1,
-  TLT_Unordered = 2,
+  TLT_PLAIN = 0,
+  TLT_ORDERED = 1,
+  TLT_UNORDERED = 2,
 };
 
 enum ELetterTransform : uint8_t
 {
-  ELT_Nothing = 0,
-  ELT_SmallCaps,
-  ELT_UpperCaps,
-  ELT_LowerCaps,
-  ELT_ForceSmallCaps,
-  ELT_Title
+  ELT_NOTHING = 0,
+  ELT_SMALL_CAPS,
+  ELT_UPPER_CAPS,
+  ELT_LOWER_CAPS,
+  ELT_FORCE_SMALL_CAPS,
+  ELT_TITLE
 };
 
 } // namespace VGG

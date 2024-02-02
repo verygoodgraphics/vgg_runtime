@@ -41,10 +41,10 @@ namespace VGG
 
 struct ContextSetting
 {
-  EBlendMode    blendMode{ BM_Normal };
+  EBlendMode    blendMode{ BM_NORMAL };
   float         opacity{ 1.0 };
   bool          isolateBlending{ false };
-  EKnockoutType transparencyKnockoutGroup{ KT_Off };
+  EKnockoutType transparencyKnockoutGroup{ KT_OFF };
 };
 
 struct ImageFilter
@@ -249,7 +249,7 @@ struct TextLineAttr
 {
   bool firstLine{ false };
   int  level{ 0 };
-  int  lineType{ TLT_Plain };
+  int  lineType{ TLT_PLAIN };
 };
 
 using namespace std::string_view_literals;
@@ -308,7 +308,7 @@ struct TextStyleAttr
   float                baselineShift{ 0.0 };
   bool                 lineThrough{ false };
   bool                 kerning{ false };
-  ETextUnderline       underline{ UT_None };
+  ETextUnderline       underline{ UT_NONE };
 };
 
 struct ControlPoint

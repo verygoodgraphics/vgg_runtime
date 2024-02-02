@@ -99,7 +99,7 @@ private:
     populateSkPaint(b, bound, strokePen);
     bool  inCenter = true;
     float strokeWidth = b.thickness;
-    if (b.position == PP_Inside && primitive.isClosed())
+    if (b.position == PP_INSIDE && primitive.isClosed())
     {
       // inside
       strokeWidth = 2.f * b.thickness;
@@ -107,7 +107,7 @@ private:
       primitive.clip(m_renderer->canvas(), SkClipOp::kIntersect);
       inCenter = false;
     }
-    else if (b.position == PP_Outside && primitive.isClosed())
+    else if (b.position == PP_OUTSIDE && primitive.isClosed())
     {
       // outside
       strokeWidth = 2.f * b.thickness;

@@ -136,13 +136,13 @@ void TextNode::setFrameMode(ETextLayoutMode layoutMode)
   TextLayoutMode mode;
   switch (layoutMode)
   {
-    case TL_Fixed:
+    case TL_FIXED:
       mode = TextLayoutFixed(frameBound());
       break;
-    case TL_WidthAuto:
+    case TL_AUTOWIDTH:
       mode = TextLayoutAutoWidth();
       break;
-    case TL_HeightAuto:
+    case TL_AUTOHEIGHT:
       mode = TextLayoutAutoHeight(frameBound().width());
       break;
   }
@@ -162,7 +162,7 @@ void TextNode::drawRawStyle(Painter& painter, const SkPath& path, sk_sp<SkBlende
   auto canvas = renderer->canvas();
   if (_->paragraphLayout->empty())
     return;
-  if (overflow() == OF_Hidden)
+  if (overflow() == OF_HIDDEN)
   {
     canvas->save();
     canvas->clipPath(makeBoundPath());
@@ -176,7 +176,7 @@ void TextNode::drawRawStyle(Painter& painter, const SkPath& path, sk_sp<SkBlende
   {
     _->painter->paintParagraph(renderer);
   }
-  if (overflow() == OF_Hidden)
+  if (overflow() == OF_HIDDEN)
   {
     canvas->restore();
   }

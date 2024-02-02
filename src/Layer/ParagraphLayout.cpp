@@ -195,14 +195,14 @@ TextStyle createTextStyle(const TextStyleAttr& attr, F&& fun)
   {
     style.setDecoration(skia::textlayout::kLineThrough);
   }
-  if (attr.underline != UT_None)
+  if (attr.underline != UT_NONE)
   {
     style.setDecoration(skia::textlayout::kUnderline);
-    if (attr.underline == UT_Single)
+    if (attr.underline == UT_SINGLE)
     {
       style.setDecorationStyle(TextDecorationStyle::kSolid);
     }
-    else if (attr.underline == UT_Double)
+    else if (attr.underline == UT_DOUBLE)
     {
       style.setDecorationStyle(TextDecorationStyle::kDouble);
     }
@@ -318,7 +318,7 @@ void RichTextBlock::onParagraphBegin(
 {
   paragraph.emplace_back();
   auto& p = paragraph.back();
-  if (paragraAttr.type.lineType != TLT_Plain)
+  if (paragraAttr.type.lineType != TLT_PLAIN)
   {
     p.level = paragraAttr.type.level;
   }
@@ -403,7 +403,7 @@ std::pair<Bound, float> RichTextBlock::internalLayout(const Bound& bound, ETextL
   float      newHeight = 0.f;
 
   float maxWidth = 0.f;
-  if (mode == TL_WidthAuto)
+  if (mode == TL_AUTOWIDTH)
   {
     for (std::size_t i = 0; i < paragraphCache.size(); i++)
     {
@@ -428,7 +428,7 @@ std::pair<Bound, float> RichTextBlock::internalLayout(const Bound& bound, ETextL
     d.builder->getParagraphStyle().getTextStyle().getFontMetrics(&metrics);
     const auto curX = metrics.fAvgCharWidth * d.level;
     paragraphCache[i].offsetX = curX;
-    if (mode == ETextLayoutMode::TL_WidthAuto)
+    if (mode == ETextLayoutMode::TL_AUTOWIDTH)
     {
       paragraph->layout(maxWidth + 1);
     }
@@ -458,14 +458,14 @@ std::pair<Bound, float> RichTextBlock::internalLayout(const Bound& bound, ETextL
   }
   switch (mode)
   {
-    case TL_HeightAuto:
+    case TL_AUTOHEIGHT:
       newBound.setHeight(newHeight);
       break;
-    case TL_WidthAuto:
+    case TL_AUTOWIDTH:
       newBound.setHeight(newHeight);
       newBound.setWidth(newWidth);
       break;
-    case TL_Fixed:
+    case TL_FIXED:
       break;
   }
   return { newBound, newHeight };

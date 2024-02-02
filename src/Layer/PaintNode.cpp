@@ -180,7 +180,7 @@ void PaintNode::paintPass(Renderer* renderer, int zorder)
   }
   if (!_->mask)
   {
-    _->mask = makeMaskBy(BO_Intersection, renderer).outlineMask;
+    _->mask = makeMaskBy(BO_INTERSECTION, renderer).outlineMask;
   }
 
   _->ensureAlphaMask(renderer);
@@ -306,7 +306,7 @@ SkPath PaintNode::childPolyOperation() const
   {
     SkPath rhs;
     auto   op = ct[i].second;
-    if (op != BO_None)
+    if (op != BO_NONE)
     {
       auto skop = toSkPathOp(op);
       rhs = ct[i].first;
@@ -356,20 +356,20 @@ SkPath PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
 
   switch (option.contourType)
   {
-    case MCT_FrameOnly:
+    case MCT_FRAMEONLY:
       path = this->makeBoundPath();
       break;
-    case MCT_UnionWithFrame:
+    case MCT_UNION_WITH_FRAME:
       path = this->makeBoundPath();
-    case MCT_Union:
+    case MCT_UNION:
       appendPath(path, option, SkPathOp::kUnion_SkPathOp);
       break;
-    case MCT_IntersectWithFrame:
+    case MCT_INTERSECT_WITH_FRAME:
       path = this->makeBoundPath();
-    case MCT_Intersect:
+    case MCT_INTERSECT:
       appendPath(path, option, SkPathOp::kIntersect_SkPathOp);
       break;
-    case MCT_ByObjectOps:
+    case MCT_OBJECT_OPS:
       path = childPolyOperation();
       break;
   }
@@ -404,7 +404,7 @@ Mask PaintNode::asOutlineMask(const Transform* mat)
   Mask mask;
   mask.outlineMask = makeContourImpl(maskOption(), mat);
   mask.outlineMask.setFillType(
-    childWindingType() == EWindingType::WR_EvenOdd ? SkPathFillType::kEvenOdd
+    childWindingType() == EWindingType::WR_EVEN_ODD ? SkPathFillType::kEvenOdd
                                                    : SkPathFillType::kWinding);
   return mask;
 }
@@ -622,14 +622,14 @@ void PaintNode::paintChildrenRecursively(Renderer* renderer)
   for (const auto& p : this->m_firstChild)
   {
     auto c = static_cast<PaintNode*>(p.get());
-    if (c->maskType() == MT_Outline)
+    if (c->maskType() == MT_OUTLINE)
     {
-      if (c->d_ptr->maskShowType == MST_Content)
+      if (c->d_ptr->maskShowType == MST_CONTENT)
       {
         masked.push_back(c);
       }
     }
-    if (c->maskType() == MT_None)
+    if (c->maskType() == MT_NONE)
     {
       noneMasked.push_back(c);
     }
@@ -666,14 +666,14 @@ void PaintNode::paintChildrenRecursively(Renderer* renderer)
     }
   };
 
-  if (overflow() == OF_Hidden)
+  if (overflow() == OF_HIDDEN)
   {
     canvas->save();
     canvas->clipPath(makeBoundPath());
   }
   paintCall(masked);
   paintCall(noneMasked);
-  if (overflow() == OF_Hidden)
+  if (overflow() == OF_HIDDEN)
   {
     canvas->restore();
   }
@@ -724,7 +724,7 @@ SkPath PaintNode::stylePath()
   }
   if (m_firstChild.empty())
   {
-    ct.emplace_back(asOutlineMask(0).outlineMask, EBoolOp::BO_None);
+    ct.emplace_back(asOutlineMask(0).outlineMask, EBoolOp::BO_NONE);
   }
   assert(ct.size() >= 1);
 
@@ -739,7 +739,7 @@ SkPath PaintNode::stylePath()
   {
     SkPath rhs;
     auto   op = ct[i].second;
-    if (op != BO_None)
+    if (op != BO_NONE)
     {
       auto skop = toSkPathOp(op);
       rhs = ct[i].first;
@@ -759,7 +759,7 @@ SkPath PaintNode::stylePath()
     skPath.addPath(s);
   }
   skPath.setFillType(
-    childWindingType() == EWindingType::WR_EvenOdd ? SkPathFillType::kEvenOdd
+    childWindingType() == EWindingType::WR_EVEN_ODD ? SkPathFillType::kEvenOdd
                                                    : SkPathFillType::kWinding);
 
   return skPath;
@@ -784,13 +784,13 @@ void PaintNode::paintStyle(Renderer* renderer, const SkPath& path, const SkPath&
       SkPath res = path;
       if (!outlineMask.isEmpty())
         Op(res, outlineMask, SkPathOp::kIntersect_SkPathOp, &res);
-      if (*blurType == BT_Gaussian)
+      if (*blurType == BT_GAUSSIAN)
         painter.blurContentBegin(blur.radius, blur.radius, frameBound(), nullptr, 0);
-      else if (*blurType == BT_Background)
+      else if (*blurType == BT_BACKGROUND)
         painter.blurBackgroundBegin(blur.radius, blur.radius, frameBound(), &res);
-      else if (*blurType == BT_Motion)
+      else if (*blurType == BT_MOTION)
         DEBUG("Motion blur has not been implemented");
-      else if (*blurType == BT_Zoom)
+      else if (*blurType == BT_ZOOM)
         DEBUG("Zoom blur has not been implemented");
     }
     if (!outlineMask.isEmpty())
@@ -806,13 +806,13 @@ void PaintNode::paintStyle(Renderer* renderer, const SkPath& path, const SkPath&
     if (blurType)
     {
       // const auto bt = blurType.value();
-      if (*blurType == BT_Gaussian)
+      if (*blurType == BT_GAUSSIAN)
         painter.blurContentEnd();
-      else if (*blurType == BT_Background)
+      else if (*blurType == BT_BACKGROUND)
         painter.blurBackgroundEnd();
-      else if (*blurType == BT_Zoom)
+      else if (*blurType == BT_ZOOM)
         DEBUG("Zoom blur has not been implemented");
-      else if (*blurType == BT_Motion)
+      else if (*blurType == BT_MOTION)
         DEBUG("Motion blur has not been implemented");
     }
   }
@@ -823,9 +823,9 @@ void PaintNode::paintStyle(Renderer* renderer, const SkPath& path, const SkPath&
     // 3. alphamask + content blur: alphamask layer + content blur layer
     if (!blurType)
       return _->drawWithAlphaMask(renderer, path, outlineMask);
-    else if (*blurType == BT_Background)
+    else if (*blurType == BT_BACKGROUND)
       return _->drawBlurBgWithAlphaMask(renderer, path, outlineMask);
-    else if (*blurType == BT_Gaussian)
+    else if (*blurType == BT_GAUSSIAN)
       return _->drawBlurContentWithAlphaMask(renderer, path, outlineMask);
   }
 }

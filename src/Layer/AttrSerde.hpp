@@ -298,7 +298,7 @@ inline void from_json(const json& j, Gradient& x)
 
 inline void from_json(const json& j, ContextSetting& x)
 {
-  x.blendMode = j.value("blendMode", EBlendMode::BM_Pass_through);
+  x.blendMode = j.value("blendMode", EBlendMode::BM_PASS_THROUGHT);
   x.isolateBlending = j.value("isolateBlending", false);
   x.opacity = j.value("opacity", 1.f);
   x.transparencyKnockoutGroup = j.value("transparencyKnockoutGroup", EKnockoutType{});
@@ -316,13 +316,13 @@ inline FillType makeFillType(const nlohmann::json& j)
   FillType type;
   switch (j.value("fillType", EPathFillType{}))
   {
-    case FT_Color:
+    case FT_COLOR:
       type = j.value("color", Color{});
       break;
-    case FT_Pattern:
+    case FT_PATTERN:
       type = j.value("pattern", Pattern{});
       break;
-    case FT_Gradient:
+    case FT_GRADIENT:
       type = j.value("gradient", Gradient{});
       break;
     default:
@@ -431,7 +431,7 @@ inline void from_json(const json& j, TextStyleAttr& x)
   x.fills = j.value("fills", std::vector<Fill>());
   x.baselineShift = j.value("baselineShift", 0.0);
   x.lineThrough = j.value("linethrough", false);
-  x.underline = j.value("underline", UT_None);
+  x.underline = j.value("underline", UT_NONE);
   x.kerning = j.value("kerning", false);
   x.letterSpacing = j.value("letterSpacingValue", 0.0);
   auto unit = j.value("letterSpacingUnit", 1);

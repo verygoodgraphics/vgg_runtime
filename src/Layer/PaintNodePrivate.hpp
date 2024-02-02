@@ -128,11 +128,11 @@ public:
   std::vector<std::string>  maskedBy{};
   std::vector<AlphaMask>    alphaMaskBy;
   Mask                      outlineMask;
-  EMaskType                 maskType{ MT_None };
-  EMaskShowType             maskShowType{ MST_Invisible };
-  EBoolOp                   clipOperator{ BO_None };
-  EOverflow                 overflow{ OF_Hidden };
-  EWindingType              windingRule{ WR_EvenOdd };
+  EMaskType                 maskType{ MT_NONE };
+  EMaskShowType             maskShowType{ MST_INVISIBLE };
+  EBoolOp                   clipOperator{ BO_NONE };
+  EOverflow                 overflow{ OF_HIDDEN };
+  EWindingType              windingRule{ WR_EVEN_ODD };
   Style                     style;
   ContextSetting            contextSetting;
   ObjectType                type;

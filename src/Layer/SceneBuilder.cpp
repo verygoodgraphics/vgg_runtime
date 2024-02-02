@@ -200,15 +200,15 @@ inline PaintNodePtr makeObjectCommonProperty(
   obj->setContextSettings(j.value("contextSettings", ContextSetting()));
   obj->setMaskBy(j.value("outlineMaskBy", std::vector<std::string>{}));
   obj->setAlphaMaskBy(j.value("alphaMaskBy", std::vector<AlphaMask>{}));
-  const auto maskType = j.value("maskType", EMaskType::MT_None);
+  const auto maskType = j.value("maskType", EMaskType::MT_NONE);
   const auto defaultShowType =
-    maskType == EMaskType::MT_Outline
-      ? MST_Content
-      : (maskType == EMaskType::MT_Alpha && false ? MST_Bound : MST_Invisible);
+    maskType == EMaskType::MT_OUTLINE
+      ? MST_CONTENT
+      : (maskType == EMaskType::MT_ALPHA && false ? MST_BOUND : MST_INVISIBLE);
   const auto maskShowType = j.value("maskShowType", defaultShowType);
   obj->setMaskType(maskType);
   obj->setMaskShowType(maskShowType);
-  obj->setOverflow(j.value("overflow", EOverflow::OF_Visible));
+  obj->setOverflow(j.value("overflow", EOverflow::OF_VISIBLE));
   obj->setVisible(j.value("visible", true));
   override(obj.get(), convertedMatrix);
   return obj;
@@ -359,13 +359,13 @@ PaintNodePtr SceneBuilder::fromPath(const json& j, const glm::mat3& totalMatrix)
     [&, this](PaintNode* p, const glm::mat3& matrix)
     {
       const auto shape = j.value("shape", json{});
-      p->setChildWindingType(shape.value("windingRule", EWindingType::WR_EvenOdd));
-      p->setContourOption(ContourOption(ECoutourType::MCT_ByObjectOps, false));
+      p->setChildWindingType(shape.value("windingRule", EWindingType::WR_EVEN_ODD));
+      p->setContourOption(ContourOption(ECoutourType::MCT_OBJECT_OPS, false));
       p->setPaintOption(PaintOption(EPaintStrategy::PS_SelfOnly));
       const auto shapes = shape.value("subshapes", std::vector<json>{});
       for (const auto& subshape : shapes)
       {
-        const auto blop = subshape.value("booleanOperation", EBoolOp::BO_None);
+        const auto blop = subshape.value("booleanOperation", EBoolOp::BO_NONE);
         const auto geo = subshape.value("subGeometry", nlohmann::json{});
         const auto klass = geo.value("class", "");
         if (klass == "contour")
@@ -431,8 +431,8 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
     },
     [&](layer::TextNode* p, const glm::mat3& matrix)
     {
-      p->setVerticalAlignment(j.value("verticalAlignment", ETextVerticalAlignment::VA_Top));
-      p->setFrameMode(j.value("frameMode", ETextLayoutMode::TL_Fixed));
+      p->setVerticalAlignment(j.value("verticalAlignment", ETextVerticalAlignment::VA_TOP));
+      p->setFrameMode(j.value("frameMode", ETextLayoutMode::TL_FIXED));
       auto anchor = get_stack_optional<std::array<float, 2>>(j, "anchorPoint");
       if (anchor)
       {
@@ -478,7 +478,7 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
       parStyle.reserve(lineType.size());
 
       size_t       i = 0;
-      auto         defaultAlign = alignments.empty() ? HA_Left : alignments.back();
+      auto         defaultAlign = alignments.empty() ? HA_LEFT : alignments.back();
       TextLineAttr defaultLineType;
       while (i < lineType.size() && i < alignments.size())
       {
@@ -506,7 +506,7 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
 
       if (b.width() == 0 || b.height() == 0)
       {
-        p->setFrameMode(TL_WidthAuto);
+        p->setFrameMode(TL_AUTOWIDTH);
       }
       return p;
     });
@@ -552,7 +552,7 @@ PaintNodePtr SceneBuilder::fromFrame(const json& j, const glm::mat3& totalMatrix
     },
     [&, this](PaintNode* p, const glm::mat3& matrix)
     {
-      p->setContourOption(ContourOption(ECoutourType::MCT_FrameOnly, false));
+      p->setContourOption(ContourOption(ECoutourType::MCT_FRAMEONLY, false));
       const auto radius = get_stack_optional<std::array<float, 4>>(j, "radius");
       p->style().frameRadius = radius;
       const auto& childObjects = get_or_default(j, "childObjects");
@@ -631,8 +631,8 @@ PaintNodePtr SceneBuilder::makeContour(
 #else
   auto p = makePaintNodePtr(m_alloc, "contour", VGG_CONTOUR, "");
 #endif
-  p->setOverflow(OF_Visible);
-  p->setContourOption(ContourOption{ ECoutourType::MCT_FrameOnly, false });
+  p->setOverflow(OF_VISIBLE);
+  p->setContourOption(ContourOption{ ECoutourType::MCT_FRAMEONLY, false });
   CoordinateConvert::convertCoordinateSystem(contour, totalMatrix);
   auto ptr = std::make_shared<Contour>(contour);
   ptr->cornerSmooth = get_opt<float>(parent, "cornerSmoothing").value_or(0.f);
@@ -658,8 +658,8 @@ PaintNodePtr SceneBuilder::fromGroup(const json& j, const glm::mat3& totalMatrix
     },
     [&, this](PaintNode* p, const glm::mat3& matrix)
     {
-      p->setOverflow(OF_Visible); // Group do not clip inner content
-      p->setContourOption(ContourOption(ECoutourType::MCT_Union, false));
+      p->setOverflow(OF_VISIBLE); // Group do not clip inner content
+      p->setContourOption(ContourOption(ECoutourType::MCT_UNION, false));
       p->setPaintOption(EPaintStrategy(EPaintStrategy::PS_ChildOnly));
       const auto& childObjects = get_or_default(j, "childObjects");
       for (const auto& c : childObjects)

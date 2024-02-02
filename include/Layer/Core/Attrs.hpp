@@ -52,7 +52,6 @@ struct ImageFilter
   float exposure{ 0.f };
   float contrast{ 0.f };
   float saturation{ 0.f };
-  float brightness{ 0.f };
   float temperature{ 0.f };
   float tint{ 0.f };
   float highlight{ 0.f };

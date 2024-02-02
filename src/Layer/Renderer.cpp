@@ -53,7 +53,7 @@ void Renderer::updateMaskObject(PaintNode* p, std::unordered_map<std::string, Pa
 {
   if (!p)
     return;
-  if (p->maskType() != MT_None)
+  if (p->maskType() != MT_NONE)
   {
     if (auto it = objects.find(p->guid()); it == objects.end())
     {

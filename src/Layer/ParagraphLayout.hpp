@@ -297,7 +297,7 @@ public:
     if (m_state >= LAYOUT)
       return { m_textBound, m_paragraphHeight };
     ensureBuild(mode);
-    std::tie(m_textBound, m_paragraphHeight) = internalLayout(mode.textBound, TL_Fixed);
+    std::tie(m_textBound, m_paragraphHeight) = internalLayout(mode.textBound, TL_FIXED);
     m_state = LAYOUT;
     return { m_textBound, m_paragraphHeight };
   }
@@ -307,7 +307,7 @@ public:
     if (m_state >= LAYOUT)
       return { m_textBound, m_paragraphHeight };
     ensureBuild(mode);
-    std::tie(m_textBound, m_paragraphHeight) = internalLayout(Bound(), TL_WidthAuto);
+    std::tie(m_textBound, m_paragraphHeight) = internalLayout(Bound(), TL_AUTOWIDTH);
     m_state = LAYOUT;
     return { m_textBound, m_paragraphHeight };
   }
@@ -319,7 +319,7 @@ public:
     ensureBuild(mode);
     Bound b;
     b.setWidth(mode.width);
-    std::tie(m_textBound, m_paragraphHeight) = internalLayout(b, TL_HeightAuto);
+    std::tie(m_textBound, m_paragraphHeight) = internalLayout(b, TL_AUTOHEIGHT);
     m_state = LAYOUT;
     return { m_textBound, m_paragraphHeight };
   }

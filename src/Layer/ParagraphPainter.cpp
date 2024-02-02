@@ -185,13 +185,13 @@ void VParagraphPainter::paintParagraph(Renderer* renderer)
   auto       vertAlign = m_paragraph->verticalAlignment();
   switch (vertAlign)
   {
-    case VA_Bottom:
+    case VA_BOTTOM:
       offsetY = b.height() - totalHeight;
       break;
-    case VA_Center:
+    case VA_CENTER:
       offsetY = (b.height() - totalHeight) / 2.f;
       break;
-    case VA_Top:
+    case VA_TOP:
       offsetY = 0.f;
     default:
       break;

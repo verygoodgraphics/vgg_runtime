@@ -112,7 +112,7 @@ void ParagraphParser::parse(
       if (newLine >> 7 == 0 && newLine == '\n')
       {
         const auto breakLine =
-          m_seperateLines || pa.type.lineType != TLT_Plain || m_styleIndex + 1 < textAttrs.size()
+          m_seperateLines || pa.type.lineType != TLT_PLAIN || m_styleIndex + 1 < textAttrs.size()
             ? true
             : false;
         if (breakLine)
@@ -148,7 +148,7 @@ void ParagraphParser::parse(
             m_paragraphAttrIndex++;
           }
           currentOrder = 0;
-          if (pa.type.lineType != TLT_Plain)
+          if (pa.type.lineType != TLT_PLAIN)
           {
             currentOrder = m_orderState.order(pa.type.level, pa.type.firstLine);
           }

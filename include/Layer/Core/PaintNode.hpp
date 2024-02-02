@@ -41,10 +41,10 @@ class Renderer;
 
 struct ContourOption
 {
-  ECoutourType contourType{ ECoutourType::MCT_FrameOnly };
+  ECoutourType contourType{ ECoutourType::MCT_FRAMEONLY };
   bool         visibilityAware{ true };
   ContourOption(
-    ECoutourType contourType = ECoutourType::MCT_FrameOnly,
+    ECoutourType contourType = ECoutourType::MCT_FRAMEONLY,
     bool         visibilityAware = false)
     : contourType(contourType)
     , visibilityAware(visibilityAware)

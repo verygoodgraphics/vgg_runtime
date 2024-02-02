@@ -71,6 +71,17 @@ cmake --build . --parallel -t vgg_container
 cmake --install . --prefix <path/to/vgg_ios/VggRuntime/external>
 ```
 
+#### Qt building example
+Build & install vgg_container libraries for [vgg_qt](https://github.com/verygoodgraphics/vgg_qt).
+
+```bash
+mkdir build.qt
+cd build.qt
+cmake .. -DVGG_CONTAINER_FOR_QT=ON
+cmake --build . --parallel -t vgg_container
+cmake --install . --component container --prefix <path/to/vgg_qt/VggContainer/external>
+```
+
 #### Windows building example
 
 Compiling on Windows need extra efforts. It will be released once being stable.

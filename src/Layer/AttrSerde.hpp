@@ -125,10 +125,12 @@ inline std::optional<T> get_stack_optional(const json& j, const std::string& pro
 
 inline void from_json(const json& j, Color& x)
 {
-  x.a = j["alpha"];
-  x.b = j["blue"];
-  x.g = j["green"];
-  x.r = j["red"];
+  if (!j.is_object())
+    return;
+  x.a = j.value("alpha", 0.f);
+  x.b = j.value("blue", 0.f);
+  x.g = j.value("green", 0.f);
+  x.r = j.value("red", 0.f);
 }
 
 inline void from_json(const json& j, glm::vec2& x)
@@ -156,6 +158,8 @@ inline void from_json(const json& j, std::variant<float, glm::vec2>& x)
 
 inline void from_json(const json& j, ImageFilter& x)
 {
+  if (!j.is_object())
+    return;
   x.exposure = j.value("exposure", 0.f);
   x.contrast = j.value("contrast", 0.f);
   x.saturation = j.value("saturation", 0.f);
@@ -168,6 +172,8 @@ inline void from_json(const json& j, ImageFilter& x)
 
 inline void from_json(const json& j, PatternFill& x)
 {
+  if (!j.is_object())
+    return;
   x.imageFilter = j.value("imageFilters", ImageFilter{});
   x.guid = j.value("imageFileName", "");
   x.rotation = glm::radians(j.value("rotation", 0.f));
@@ -175,6 +181,8 @@ inline void from_json(const json& j, PatternFill& x)
 
 inline void from_json(const json& j, PatternFit& x)
 {
+  if (!j.is_object())
+    return;
   x.imageFilter = j.value("imageFilters", ImageFilter{});
   x.guid = j.value("imageFileName", "");
   x.rotation = glm::radians(j.value("rotation", 0.f));
@@ -182,11 +190,13 @@ inline void from_json(const json& j, PatternFit& x)
 
 inline void from_json(const json& j, PatternStretch& x)
 {
+  if (!j.is_object())
+    return;
   x.imageFilter = j.value("imageFilters", ImageFilter{});
   x.guid = j.value("imageFileName", "");
   x.clip = j.value("crop", true);
   layer::Transform transform;
-  auto             v = j.at("matrix").get<std::array<float, 6>>();
+  auto             v = j.value("matrix", std::array<float, 6>());
   auto             m =
     glm::mat3{ glm::vec3{ v[0], v[1], 0 }, glm::vec3{ v[2], v[3], 0 }, glm::vec3{ v[4], v[5], 1 } };
   x.transform = layer::Transform(m);
@@ -194,6 +204,8 @@ inline void from_json(const json& j, PatternStretch& x)
 
 inline void from_json(const json& j, PatternTile& x)
 {
+  if (!j.is_object())
+    return;
   x.imageFilter = j.value("imageFilters", ImageFilter{});
   x.guid = j.value("imageFileName", "");
   x.mirror = j.value("mirror", false);
@@ -204,6 +216,8 @@ inline void from_json(const json& j, PatternTile& x)
 
 inline void from_json(const json& j, Pattern& x)
 {
+  if (!j.is_object())
+    return;
   auto       instance = j.value("instance", json{});
   const auto klass = instance.value("class", "");
   if (klass == "patternImageFit")
@@ -233,6 +247,8 @@ inline void from_json(const json& j, Pattern& x)
 
 inline void from_json(const json& j, GradientStop& x)
 {
+  if (!j.is_object())
+    return;
   x.color = j["color"];
   x.position = j["position"];
   x.midPoint = j["midPoint"];
@@ -240,6 +256,8 @@ inline void from_json(const json& j, GradientStop& x)
 
 inline void from_json(const json& j, Gradient& x)
 {
+  if (!j.is_object())
+    return;
   const auto g = j["instance"];
   const auto klass = g["class"];
   if (klass == "gradientLinear")
@@ -298,6 +316,8 @@ inline void from_json(const json& j, Gradient& x)
 
 inline void from_json(const json& j, ContextSetting& x)
 {
+  if (!j.is_object())
+    return;
   x.blendMode = j.value("blendMode", EBlendMode::BM_PASS_THROUGHT);
   x.isolateBlending = j.value("isolateBlending", false);
   x.opacity = j.value("opacity", 1.f);
@@ -337,34 +357,40 @@ inline void from_json(const json& j, Border& x)
   // x.fillType = j.at("fillType").get<EPathFillType>();
   // x.gradient = get_stack_optional<Gradient>(j, "gradient");
   // x.pattern = get_stack_optional<Pattern>(j, "pattern");
+  if (!j.is_object())
+    return;
   x.type = makeFillType(j);
-  x.contextSettings = j.at("contextSettings").get<ContextSetting>();
-  x.dashedOffset = j.at("dashedOffset").get<double>();
-  x.dashedPattern = j.at("dashedPattern").get<std::vector<float>>();
-  x.flat = j.at("flat").get<double>();
-  x.isEnabled = j.at("isEnabled").get<bool>();
-  x.lineCapStyle = j.at("lineCapStyle").get<ELineCap>();
-  x.lineJoinStyle = j.at("lineJoinStyle").get<ELineJoin>();
-  x.miterLimit = j.at("miterLimit").get<double>();
-  x.position = j.at("position").get<EPathPosition>();
-  x.thickness = j.at("thickness").get<double>();
+  x.contextSettings = j.value("contextSettings", ContextSetting());
+  x.dashedOffset = j.value("dashedOffset", 0.f);
+  x.dashedPattern = j.value("dashedPattern", std::vector<float>());
+  x.flat = j.value("flat", 0.f);
+  x.isEnabled = j.value("isEnabled", false);
+  x.lineCapStyle = j.value("lineCapStyle", ELineCap::LC_BUTT);
+  x.lineJoinStyle = j.value("lineJoinStyle", ELineJoin::LJ_MITER);
+  x.miterLimit = j.value("miterLimit", 0.f);
+  x.position = j.value("position", EPathPosition::PP_CENTER);
+  x.thickness = j.value("thickness", 0.f);
 }
 
 inline void from_json(const json& j, Shadow& x)
 {
-  x.blur = j.at("blur").get<double>();
-  x.color = j.at("color").get<Color>();
-  x.contextSettings = j.at("contextSettings").get<ContextSetting>();
-  x.inner = j.at("inner").get<bool>();
-  x.isEnabled = j.at("isEnabled").get<bool>();
+  if (!j.is_object())
+    return;
+  x.blur = j.value("blur", 0.f);
+  x.color = j.value("color", Color());
+  x.contextSettings = j.value("contextSettings", ContextSetting());
+  x.inner = j.value("inner", false);
+  x.isEnabled = j.value("isEnabled", false);
   const auto p = glm::vec2{ j.value("offsetX", 0.f), j.value("offsetY", 0.f) };
   x.offsetX = p.x;
   x.offsetY = p.y;
-  x.spread = j.at("spread").get<double>();
+  x.spread = j.value("spread", 0.f);
 }
 
 inline void from_json(const json& j, Blur& x)
 {
+  if (!j.is_object())
+    return;
   x.radius = get_stack_optional<float>(j, "radius").value_or(0.f);
   x.motionAngle = get_stack_optional<float>(j, "motionAngle").value_or(0.f);
   const auto v = j.value("center", std::array<float, 2>{ 0, 0 });
@@ -376,8 +402,10 @@ inline void from_json(const json& j, Blur& x)
 
 inline void from_json(const json& j, Fill& x)
 {
-  x.isEnabled = j.at("isEnabled").get<bool>();
-  x.contextSettings = j.at("contextSettings").get<ContextSetting>();
+  if (!j.is_object())
+    return;
+  x.isEnabled = j.value("isEnabled", false);
+  x.contextSettings = j.value("contextSettings", ContextSetting());
   x.type = makeFillType(j);
   // x.fillType = (EPathFillType)j.at("fillType").get<int>();
   // x.gradient = get_stack_optional<Gradient>(j, "gradient");
@@ -387,21 +415,27 @@ inline void from_json(const json& j, Fill& x)
 
 inline void from_json(const json& j, Style& x)
 {
-  x.blurs = j.at("blurs").get<std::vector<Blur>>();
-  x.borders = j.at("borders").get<std::vector<Border>>();
-  x.fills = j.at("fills").get<std::vector<Fill>>();
-  x.shadows = j.at("shadows").get<std::vector<Shadow>>();
+  if (!j.is_object())
+    return;
+  x.blurs = j.value("blurs", std::vector<Blur>());
+  x.borders = j.value("borders", std::vector<Border>());
+  x.fills = j.value("fills", std::vector<Fill>());
+  x.shadows = j.value("shadows", std::vector<Shadow>());
 }
 
 inline void from_json(const json& j, TextLineAttr& x)
 {
-  x.level = j.at("level");
-  x.firstLine = j.at("isFirst");
-  x.lineType = j.at("styleType");
+  if (!j.is_object())
+    return;
+  x.level = j.value("level", 0);
+  x.firstLine = j.value("isFirst", false);
+  x.lineType = j.value("styleType", 0);
 }
 
 inline void from_json(const json& j, Bound& b)
 {
+  if (!j.is_object())
+    return;
   auto       x = j.value("x", 0.f);
   auto       y = j.value("y", 0.f);
   const auto topLeft = glm::vec2{ x, y };
@@ -412,6 +446,8 @@ inline void from_json(const json& j, Bound& b)
 
 inline void from_json(const json& j, Font::Axis& x)
 {
+  if (!j.is_object())
+    return;
   auto tag = j.value("name", "");
   if (tag.size() == 4)
   {
@@ -422,6 +458,8 @@ inline void from_json(const json& j, Font::Axis& x)
 
 inline void from_json(const json& j, TextStyleAttr& x)
 {
+  if (!j.is_object())
+    return;
   x.length = j.value("length", 0);
   x.font.fontName = j.value("name", "");
   x.font.subFamilyName = j.value("subFamilyName", "");
@@ -454,6 +492,8 @@ inline void from_json(const json& j, TextStyleAttr& x)
 
 inline void from_json(const json& j, AlphaMask& x)
 {
+  if (!j.is_object())
+    return;
   x.id = j.value("id", "");
   x.type = j.value("alphaType", AM_ALPHA);
   x.crop = j.value("crop", true);

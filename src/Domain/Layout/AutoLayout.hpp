@@ -52,7 +52,6 @@ private:
   std::shared_ptr<grid_item>                        m_gridItem;
   decltype(m_gridContainerPtr->calc_layout(-1, -1)) m_gridItemFrames;
 
-  bool m_isContainer{ false };
   Rect m_frame;
 
 public:
@@ -61,6 +60,7 @@ public:
 
 public:
   void configure();
+  void configureFlexContainer();
   void configureFlexItemMargin();
   void applyLayout(bool preservingOrigin);
   void setFrame(Rect frame);
@@ -78,15 +78,13 @@ public:
   {
     return !rule.expired();
   }
-  bool isContainer()
-  {
-    return m_isContainer;
-  }
+  bool isContainer();
   bool isFlexOrGridItem();
 
+  flexbox_node* getOrCreateFlexContainer();
   flexbox_node* getFlexContainer()
   {
-    return getFlexNode();
+    return isFlexContainer() ? getFlexNode() : nullptr;
   }
 
   std::unique_ptr<flexbox_node>& takeFlexItem()
@@ -116,7 +114,7 @@ public:
 
 private:
   Size calculateLayout(Size size);
-  void configureFlexNodeSize(flexbox_node* node);
+  void configureFlexNodeSize(flexbox_node* node, bool forContainer = false);
   void configureGridItemSize();
 
   flexbox_node* createFlexContainer();
@@ -139,7 +137,12 @@ private:
   bool isFirstChild();
   bool isLastChild();
 
-  void configureGridContainer(Rule::GridLayout* layout);
+  bool isFlexContainer();
+  bool isGridContainer();
+
+  Rule::GridLayout* gridLayout();
+
+  void configureGridContainer();
   void configureGridItem(Rule::GridItem* layout);
 
   void resetGridContainer();

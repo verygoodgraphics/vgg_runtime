@@ -33,6 +33,10 @@
 #undef DEBUG
 #define DEBUG(msg, ...)
 
+#define VERBOSE DEBUG
+#undef VERBOSE
+#define VERBOSE(msg, ...)
+
 namespace
 {
 enum class EBooleanOperation
@@ -109,6 +113,7 @@ std::shared_ptr<Layout::Internal::AutoLayout> LayoutNode::containerAutoLayout()
 
 void LayoutNode::setNeedLayout()
 {
+  VERBOSE("LayoutNode::setNeedLayout: node: %s, %s", id().c_str(), path().c_str());
   m_needsLayout = true;
 }
 
@@ -146,7 +151,11 @@ Layout::Rect LayoutNode::frame() const
   return { origin(), size() };
 }
 
-void LayoutNode::setFrame(const Layout::Rect& newFrame, bool updateRule, bool useOldFrame)
+void LayoutNode::setFrame(
+  const Layout::Rect& newFrame,
+  bool                updateRule,
+  bool                useOldFrame,
+  bool                duringLayout)
 {
   saveChildrendOldFrame(); // save first, before all return
 
@@ -201,7 +210,10 @@ void LayoutNode::setFrame(const Layout::Rect& newFrame, bool updateRule, bool us
     if (m_autoLayout->isContainer())
     {
       resizeChildNodes(oldSize, newSize, true); // resize absolute child
-      setNeedLayout();
+      if (!duringLayout)
+      {
+        setNeedLayout();
+      }
       return;
     }
   }

@@ -26,6 +26,8 @@
 #include "Application/VggSdk.hpp"
 #include "Layer/Graphics/ContextSkBase.hpp"
 
+// #define DISABLE_JS
+
 namespace VGG
 {
 

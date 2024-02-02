@@ -25,7 +25,11 @@
 #define FTOLER 1e-2
 
 #ifndef M_PI
-#define M_PI 3.141592653589793
+#define M_PI 3.14159265358979323846
+#endif
+
+#ifndef M_PI_4
+#define M_PI_4 0.785398163397448309616
 #endif
 
 namespace VGG
@@ -34,7 +38,7 @@ namespace VGG
 namespace math::number
 {
 // NOLINTBEGIN
-constexpr double Pi = 3.141592653589793;
+constexpr double Pi = 3.14159265358979323846;
 // NOLINTEND
 } // namespace math::number
 

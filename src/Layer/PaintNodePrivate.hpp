@@ -479,12 +479,12 @@ public:
         border = true;
         switch (b.position)
         {
-          case PP_Inside:
+          case PP_INSIDE:
             break;
-          case PP_Center:
+          case PP_CENTER:
             maxWidth = std::max(b.thickness, maxWidth);
             break;
-          case PP_Outside:
+          case PP_OUTSIDE:
             maxWidth = std::max(b.thickness * 2, maxWidth);
             break;
         }
@@ -551,9 +551,9 @@ public:
             }
             if (border)
             {
-              p.setStyle(SkPaint::kStroke_Style);
-              p.setStrokeWidth(maxWidth);
-              painter.canvas()->drawPath(*path, p);
+              // p.setStyle(SkPaint::kStroke_Style);
+              // p.setStrokeWidth(maxWidth);
+              // painter.canvas()->drawPath(*path, p);
             }
             if (s.clipShadow)
             {

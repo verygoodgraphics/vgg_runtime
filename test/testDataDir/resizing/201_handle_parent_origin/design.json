@@ -1,0 +1,136 @@
+{
+  "fileName": "cls79qhwb00ece40yhdiqwl84/import/cls79qhwe00eee40ynz7jj5p6/only_image.sketch",
+  "fileType": 1,
+  "frames": [
+    {
+      "alphaMaskBy": [],
+      "bounds": {
+        "class": "rect",
+        "constrainProportions": false,
+        "height": 336.0,
+        "width": 1056.0,
+        "x": 389.0,
+        "y": -442.0
+      },
+      "childObjects": [
+        {
+          "alphaMaskBy": [],
+          "bounds": {
+            "class": "rect",
+            "constrainProportions": true,
+            "height": 336.0,
+            "width": 1056.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "class": "image",
+          "contextSettings": {
+            "blendMode": 27,
+            "class": "graphicsContextSettings",
+            "isolateBlending": false,
+            "opacity": 1.0,
+            "transparencyKnockoutGroup": 0
+          },
+          "fillReplacesImage": false,
+          "horizontalConstraint": 5,
+          "id": "BBC556B5-4996-4F77-99D4-327EAF995B69",
+          "imageFileName": "resources/f8faa969b268f6c9503e669d8d07eeccde4fec11.png",
+          "imageFilters": {
+            "class": "imageFilters",
+            "contrast": 0.0,
+            "exposure": 0.0,
+            "hue": 0.0,
+            "isEnabled": false,
+            "saturation": 0.0
+          },
+          "isLocked": false,
+          "keepShapeWhenResize": true,
+          "maskType": 0,
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            389.0,
+            -442.0
+          ],
+          "name": "Bitmap",
+          "outlineMaskBy": [],
+          "overflow": 1,
+          "style": {
+            "blurs": [
+              {
+                "center": [
+                  0.5,
+                  0.5
+                ],
+                "class": "blur",
+                "isEnabled": false,
+                "motionAngle": 0.0,
+                "radius": 10.0,
+                "saturation": 1.0,
+                "type": 0
+              }
+            ],
+            "borders": [],
+            "class": "style",
+            "fills": [],
+            "shadows": []
+          },
+          "styleEffectMaskArea": 0,
+          "transformedBounds": {
+            "class": "rect",
+            "constrainProportions": true,
+            "height": 336.0,
+            "width": 1056.0,
+            "x": 389.0,
+            "y": -442.0
+          },
+          "verticalConstraint": 5,
+          "visible": true
+        }
+      ],
+      "class": "frame",
+      "contextSettings": {
+        "blendMode": 0,
+        "class": "graphicsContextSettings",
+        "isolateBlending": false,
+        "opacity": 1.0,
+        "transparencyKnockoutGroup": 0
+      },
+      "id": "54",
+      "isLocked": false,
+      "maskType": 0,
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "name": "default-frame",
+      "outlineMaskBy": [],
+      "overflow": 1,
+      "style": {
+        "blurs": [],
+        "borders": [],
+        "class": "style",
+        "fills": [],
+        "shadows": []
+      },
+      "styleEffectMaskArea": 0,
+      "transformedBounds": {
+        "class": "rect",
+        "constrainProportions": false,
+        "height": 336.0,
+        "width": 1056.0,
+        "x": 389.0,
+        "y": -442.0
+      },
+      "visible": true
+    }
+  ],
+  "references": [],
+  "version": "1.0.14"
+}

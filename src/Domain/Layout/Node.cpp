@@ -574,6 +574,14 @@ Layout::Rect LayoutNode::resize(
     newFrame.origin = newOrigin;
   }
 
+  // handle parent origin
+  if (auto parent = m_parent.lock())
+  {
+    const auto& parentOrigin = parent->modelBounds().origin.makeFromModelPoint();
+    newOrigin = newOrigin - parentOrigin;
+    newFrame.origin = newOrigin;
+  }
+
   if (!dry)
   {
     setFrame(newFrame, true, true); // udpate layout rule by constraint

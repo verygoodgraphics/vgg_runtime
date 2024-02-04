@@ -229,8 +229,8 @@ TEST_F(VggResizingTestSuite, GetAffineTransform)
   // Given
   const glm::mat3x2 glmMatrix{ 0.9396926164627075, 0.3420201241970062, -0.3420201241970062,
                                0.9396926164627075, 177.10513305664062, -228.8557586669922 };
-  const glm::mat3 oldGlmPoints{ 0, 0, 1, 0, 40, 1, 100, 0, 1 };
-  const auto newGlmPoints = glmMatrix * oldGlmPoints;
+  const glm::mat3   oldGlmPoints{ 0, 0, 1, 0, 40, 1, 100, 0, 1 };
+  const auto        newGlmPoints = glmMatrix * oldGlmPoints;
 
   const std::array<Layout::Point, 3> oldPoints{
     Layout::Point{ oldGlmPoints[0].x, oldGlmPoints[0].y },
@@ -277,16 +277,16 @@ TEST_F(VggResizingTestSuite, ResizeMatrix)
   // Given
   const glm::mat3x2 glmMatrix{ 0.7660444378852844, 0.6427876353263855, -0.6427876353263855,
                                0.7660444378852844, 252.23641967773438, -327.93597412109375 };
-  const glm::mat3 t1{ 0.7660444378852844,  0.6427876353263855,  0,
+  const glm::mat3   t1{ 0.7660444378852844,  0.6427876353263855,  0,
                       -0.6427876353263855, 0.7660444378852844,  0,
                       252.23641967773438,  -327.93597412109375, 1 };
-  const glm::mat3 oldGlmPoints{
+  const glm::mat3   oldGlmPoints{
     56.64102554321289, 0.0, 1, 38.6410243309369, -49.000003814697266, 1, 0.0, -32.25000251069361, 1
   };
   {
     const auto glmPoints = glmMatrix * oldGlmPoints;
-    auto left = std::min(std::min(glmPoints[0].x, glmPoints[1].x), glmPoints[2].x);
-    auto top = std::max(std::max(glmPoints[0].y, glmPoints[1].y), glmPoints[2].y);
+    auto       left = std::min(std::min(glmPoints[0].x, glmPoints[1].x), glmPoints[2].x);
+    auto       top = std::max(std::max(glmPoints[0].y, glmPoints[1].y), glmPoints[2].y);
 
     auto t = glm::translate(glm::mat3{ 1 }, glm::vec2{ -left, -top });
     t = glm::scale(t, glm::vec2{ 2, 1 });
@@ -294,40 +294,40 @@ TEST_F(VggResizingTestSuite, ResizeMatrix)
     t *= t1;
 
     const glm::mat3x2 t2{ t[0].x, t[0].y, t[1].x, t[1].y, t[2].x, t[2].y };
-    auto p1 = oldGlmPoints;
-    const glm::mat3 p2{ p1[0].x, p1[0].y, 1, p1[1].x, p1[1].y, 1, p1[2].x, p1[2].y, 1 };
-    auto p3 = t2 * p2; // good
-    auto _ = 1 + 1;
+    auto              p1 = oldGlmPoints;
+    const glm::mat3   p2{ p1[0].x, p1[0].y, 1, p1[1].x, p1[1].y, 1, p1[2].x, p1[2].y, 1 };
+    auto              p3 = t2 * p2; // good
+    auto              _ = 1 + 1;
   }
   {
     const auto glmPoints = glmMatrix * oldGlmPoints;
-    auto left = std::min(std::min(glmPoints[0].x, glmPoints[1].x), glmPoints[2].x);
-    auto top = std::max(std::max(glmPoints[0].y, glmPoints[1].y), glmPoints[2].y);
+    auto       left = std::min(std::min(glmPoints[0].x, glmPoints[1].x), glmPoints[2].x);
+    auto       top = std::max(std::max(glmPoints[0].y, glmPoints[1].y), glmPoints[2].y);
 
     auto t = glm::translate(glm::mat3{ 1 }, glm::vec2{ -left, -top });
     t = glm::scale(t, glm::vec2{ 2, 1 });
     t = glm::translate(t, glm::vec2{ left / 2, top });
 
     const glm::mat3x2 t2{ t[0].x, t[0].y, t[1].x, t[1].y, t[2].x, t[2].y };
-    auto p1 = glmPoints;
-    const glm::mat3 p2{ p1[0].x, p1[0].y, 1, p1[1].x, p1[1].y, 1, p1[2].x, p1[2].y, 1 };
-    auto p3 = t2 * p2; // good
-    auto _ = 1 + 1;
+    auto              p1 = glmPoints;
+    const glm::mat3   p2{ p1[0].x, p1[0].y, 1, p1[1].x, p1[1].y, 1, p1[2].x, p1[2].y, 1 };
+    auto              p3 = t2 * p2; // good
+    auto              _ = 1 + 1;
   }
   {
     const auto glmPoints = glmMatrix * oldGlmPoints;
-    auto left = std::min(std::min(glmPoints[0].x, glmPoints[1].x), glmPoints[2].x);
-    auto bottom = std::min(std::min(glmPoints[0].y, glmPoints[1].y), glmPoints[2].y);
+    auto       left = std::min(std::min(glmPoints[0].x, glmPoints[1].x), glmPoints[2].x);
+    auto       bottom = std::min(std::min(glmPoints[0].y, glmPoints[1].y), glmPoints[2].y);
 
     auto t = glm::translate(glm::mat3{ 1 }, glm::vec2{ -left, -bottom });
     t = glm::scale(t, glm::vec2{ 2, 1 });
     t = glm::translate(t, glm::vec2{ left / 2, bottom });
 
     const glm::mat3x2 t2{ t[0].x, t[0].y, t[1].x, t[1].y, t[2].x, t[2].y };
-    auto p1 = glmPoints;
-    const glm::mat3 p2{ p1[0].x, p1[0].y, 1, p1[1].x, p1[1].y, 1, p1[2].x, p1[2].y, 1 };
-    auto p3 = t2 * p2; // good
-    auto _ = 1 + 1;
+    auto              p1 = glmPoints;
+    const glm::mat3   p2{ p1[0].x, p1[0].y, 1, p1[1].x, p1[1].y, 1, p1[2].x, p1[2].y, 1 };
+    auto              p3 = t2 * p2; // good
+    auto              _ = 1 + 1;
   }
   {
     auto t = glm::rotate(glm::mat3{ 1 }, 40.f);
@@ -364,12 +364,12 @@ TEST_F(VggResizingTestSuite, DecomposeMatrix)
     const glm::mat3 mat{ 0.7660444378852844, -0.6427876353263855, 0,
                          0.6427876353263855, 0.7660444378852844,  0,
                          264.303218818517,   -166.59799083442599, 1 };
-    glm::vec2 scale;
-    float angle;
-    glm::quat quat;
-    glm::vec2 skew;
-    glm::vec2 trans;
-    glm::vec3 persp;
+    glm::vec2       scale;
+    float           angle;
+    glm::quat       quat;
+    glm::vec2       skew;
+    glm::vec2       trans;
+    glm::vec3       persp;
 
     decompose(mat, scale, angle, quat, skew, trans, persp);
     auto angle2 = glm::degrees(angle);
@@ -381,12 +381,12 @@ TEST_F(VggResizingTestSuite, DecomposeMatrix)
     const glm::mat3 mat{ 0.7660444378852844, -0.6427876353263855, 0,
                          0.6427876353263855, 0.7660444378852844,  0,
                          496.4554988077208,  -99.75053319872075,  1 };
-    glm::vec2 scale;
-    float angle;
-    glm::quat quat;
-    glm::vec2 skew;
-    glm::vec2 trans;
-    glm::vec3 persp;
+    glm::vec2       scale;
+    float           angle;
+    glm::quat       quat;
+    glm::vec2       skew;
+    glm::vec2       trans;
+    glm::vec3       persp;
 
     decompose(mat, scale, angle, quat, skew, trans, persp);
     auto angle2 = glm::degrees(angle);
@@ -397,12 +397,12 @@ TEST_F(VggResizingTestSuite, DecomposeMatrix)
     const glm::mat3 mat{ 0.7660444378852844,  0.6427876353263855,  0,
                          -0.6427876353263855, 0.7660444378852844,  0,
                          252.23641967773438,  -327.93597412109375, 1 };
-    glm::vec2 scale;
-    float angle;
-    glm::quat quat;
-    glm::vec2 skew;
-    glm::vec2 trans;
-    glm::vec3 persp;
+    glm::vec2       scale;
+    float           angle;
+    glm::quat       quat;
+    glm::vec2       skew;
+    glm::vec2       trans;
+    glm::vec3       persp;
 
     decompose(mat, scale, angle, quat, skew, trans, persp);
     auto angle2 = glm::degrees(angle);
@@ -414,12 +414,12 @@ TEST_F(VggResizingTestSuite, DecomposeMatrix)
     const glm::mat3 mat{ 0.9221302270889282,  0.3868795931339264,  0,
                          -0.8590516448020935, 0.5118889212608337,  0,
                          504.47283935546875,  -327.93597412109375, 1 };
-    glm::vec2 scale;
-    float angle;
-    glm::quat quat;
-    glm::vec2 skew;
-    glm::vec2 trans;
-    glm::vec3 persp;
+    glm::vec2       scale;
+    float           angle;
+    glm::quat       quat;
+    glm::vec2       skew;
+    glm::vec2       trans;
+    glm::vec3       persp;
 
     decompose(mat, scale, angle, quat, skew, trans, persp);
     auto angle2 = glm::degrees(angle);
@@ -495,4 +495,26 @@ TEST_F(VggResizingTestSuite, ResizeVectorNetwork)
   std::vector<Layout::Rect> expectedFrames{ { { 117.78839874267578, 0.0 },
                                               { 34.54272211814413, 78.95296786693817 } } };
   EXPECT_TRUE(descendantFrame({ 1, 0, 0 }) == expectedFrames[0]);
+}
+
+TEST_F(VggResizingTestSuite, HandleParentOrigin)
+{
+  // Given
+  setupWithExpanding("testDataDir/resizing/201_handle_parent_origin/");
+
+  // When
+  m_sut->layout(Layout::Size{ 1920, 1080 });
+  // m_sut->layout(Layout::Size{ 1056, 336 });
+
+  // Then
+  {
+    std::vector<Layout::Rect> expectedBounds{ { { 0, 0 }, { 1920, 1080 } } };
+    auto                      bounds = firstPage()->children()[0]->bounds();
+    EXPECT_TRUE(bounds == expectedBounds[0]);
+  }
+  {
+    std::vector<Layout::Rect> expectedFrames{ { { 318.27272727272725, 978.71428571428577 },
+                                                { 1920, 1080 } } };
+    EXPECT_TRUE(descendantFrame({ 0 }, 0) == expectedFrames[0]);
+  }
 }

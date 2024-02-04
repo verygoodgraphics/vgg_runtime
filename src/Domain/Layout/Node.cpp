@@ -201,6 +201,7 @@ void LayoutNode::setFrame(const Layout::Rect& newFrame, bool updateRule, bool us
     if (m_autoLayout->isContainer())
     {
       resizeChildNodes(oldSize, newSize, true); // resize absolute child
+      setNeedLayout();
       return;
     }
   }
@@ -575,7 +576,7 @@ Layout::Rect LayoutNode::resize(
 
   if (!dry)
   {
-    setFrame(newFrame, false, true);
+    setFrame(newFrame, true, true); // udpate layout rule by constraint
   }
 
   return newFrame;

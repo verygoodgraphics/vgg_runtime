@@ -205,3 +205,17 @@ TEST_F(VggLayoutTestSuite, NonZeroFrameOrigin)
   auto bounds = firstPage()->bounds();
   EXPECT_TRUE(bounds == expectedBounds[0]);
 }
+
+TEST_F(VggLayoutTestSuite, UpdateFlexContainerWidthByConstraints)
+{
+  // Given
+  setupWithExpanding("testDataDir/layout/204_resize_flex_container/");
+
+  // When
+  layout(*m_sut, Layout::Size{ 1920, 1080 });
+
+  // Then
+  std::vector<Layout::Rect> expectedFrames{ { { 94, 101 }, { 1762, 342 } } };
+
+  EXPECT_TRUE(descendantFrame({ 0 }, 0) == expectedFrames[0]);
+}

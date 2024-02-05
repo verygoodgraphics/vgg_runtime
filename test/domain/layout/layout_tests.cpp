@@ -219,3 +219,17 @@ TEST_F(VggLayoutTestSuite, UpdateFlexContainerWidthByConstraints)
 
   EXPECT_TRUE(descendantFrame({ 0 }, 0) == expectedFrames[0]);
 }
+
+TEST_F(VggLayoutTestSuite, EmptyContainer)
+{
+  // Given
+  setupWithExpanding("testDataDir/layout/205_empty_container/");
+
+  // When
+  layout(*m_sut, Layout::Size{ 1920, 1080 });
+
+  // Then
+  std::vector<Layout::Rect> expectedFrames{ { { 26, 0 }, { 6, 6 } } };
+
+  EXPECT_TRUE(descendantFrame({ 1 }, 0) == expectedFrames[0]);
+}

@@ -25,6 +25,7 @@
 #include "Layer/Scene.hpp"
 #include "Layer/VGGLayer.hpp"
 
+#include <core/SkSamplingOptions.h>
 #include <nlohmann/json.hpp>
 
 #include <exception>
@@ -53,6 +54,7 @@ public:
   {
     ASSERT(layer);
     m_layer = layer;
+    m_layer->setSamplingOptions({ SkFilterMode::kLinear, SkMipmapMode::kNearest });
   }
 
   void setView(std::shared_ptr<UIView> view);

@@ -69,15 +69,10 @@ namespace VGG::layer
 void SetGlobalSamplingOptions(const SkSamplingOptions& opt)
 {
   g_globalSamplingOption = opt;
-  DEBUG("????");
 }
 
 const SkSamplingOptions& GlobalSamplingOptions()
 {
-  DEBUG(
-    "sampling opt: %d %d",
-    (int)g_globalSamplingOption.filter,
-    (int)g_globalSamplingOption.mipmap);
   return g_globalSamplingOption;
 }
 

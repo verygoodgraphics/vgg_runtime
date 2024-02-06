@@ -71,7 +71,10 @@ public:
     m_map[key] = m_lru.begin();
     while ((int)m_map.size() > m_maxCount)
     {
-      this->remove(--m_lru.end());
+      if (!m_lru.empty())
+      {
+        this->remove(std::prev(m_lru.end()));
+      }
     }
     return &(entry->value);
   }
@@ -129,9 +132,9 @@ private:
 
   void remove(typename LRUListType::iterator it)
   {
-    delete *it; // delete the entry wrapper
     m_map.erase((*it)->key);
     m_lru.erase(it);
+    delete *it; // delete the entry wrapper
   }
 };
 } // namespace VGG::layer

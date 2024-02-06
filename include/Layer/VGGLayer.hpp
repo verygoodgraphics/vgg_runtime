@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/Effects.hpp"
 #include "Layer/Graphics/GraphicsLayer.hpp"
 #include "Layer/Scene.hpp"
 
@@ -104,6 +105,11 @@ public:
   float scaleFactor() const
   {
     return m_scale;
+  }
+
+  void setSamplingOptions(const SkSamplingOptions& opt)
+  {
+    SetGlobalSamplingOptions(opt);
   }
 
   std::optional<std::vector<char>> makeImageSnapshot(const ImageOptions& opts);

@@ -18,9 +18,8 @@
 #include <sys/types.h>
 namespace VGG
 {
-// NOLINTBEGIN
 // TODO:: Could be removed in the future
-enum ObjectType
+enum EObjectType
 {
   VGG_LAYER = 0,
   VGG_PATH,
@@ -230,7 +229,7 @@ enum EBlurType : uint8_t
   BT_BACKGROUND = 3
 };
 
-enum AlphaMaskType
+enum EAlphaMaskType
 {
   AM_ALPHA,
   AM_LUMINOSITY,
@@ -255,4 +254,3 @@ enum ELetterTransform : uint8_t
 };
 
 } // namespace VGG
-  // NOLINTEND

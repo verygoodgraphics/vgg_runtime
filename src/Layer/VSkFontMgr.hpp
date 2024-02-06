@@ -354,7 +354,7 @@ public:
   static sk_sp<VGGFontCollection> GlobalFontCollection()
   {
     auto skmgr =
-      VGG::layer::SkiaFontManagerProxy(VGG::layer::FontManager::GetFontMananger()).skFontMgr();
+      VGG::layer::SkiaFontManagerProxy(VGG::layer::FontManager::getFontMananger()).skFontMgr();
     static sk_sp<VGGFontCollection> g_fc =
       sk_make_sp<VGGFontCollection>(sk_ref_sp<SkFontMgrVGG>(skmgr));
     return g_fc;

@@ -20,8 +20,6 @@
 namespace VGG::layer
 {
 
-// NOLINTBEGIN
-VAllocator* VGG_GlobalMemoryAllocator();
-// NOLINTEND
+VAllocator* getGlobalMemoryAllocator();
 
 } // namespace VGG::layer

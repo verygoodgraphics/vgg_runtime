@@ -243,7 +243,7 @@ public:
                                 .setResetOriginEnable(true)
                                 .setCheckVersion(VGG_PARSE_FORMAT_VER_STR)
                                 .setDoc(std::move(*res.doc))
-                                .setAllocator(VGG_GlobalMemoryAllocator())
+                                .setAllocator(getGlobalMemoryAllocator())
                                 .build();
     if (sceneBuilderResult.type)
     {

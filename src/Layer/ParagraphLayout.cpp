@@ -137,11 +137,11 @@ TextStyle createTextStyle(const TextStyleAttr& attr, F&& fun)
     style.setDecorationColor(color);
   }
 
-  std::string fontName = FontManager::GetFontMananger().matchFontName(attr.font.fontName);
+  std::string fontName = FontManager::getFontMananger().matchFontName(attr.font.fontName);
 
   std::vector<SkString> fontFamilies;
   fontFamilies.push_back(SkString(fontName));
-  if (const auto& fallbackFonts = FontManager::GetFontMananger().fallbackFonts();
+  if (const auto& fallbackFonts = FontManager::getFontMananger().fallbackFonts();
       !fallbackFonts.empty())
   {
     for (const auto& f : fallbackFonts)
@@ -155,7 +155,7 @@ TextStyle createTextStyle(const TextStyleAttr& attr, F&& fun)
 
   style.setFontFamilies(fontFamilies);
   auto [fontStyle, newAxis] = toSkFontStyle(attr.font);
-  auto fontMgr = SkiaFontManagerProxy(FontManager::GetFontMananger()).skFontMgr();
+  auto fontMgr = SkiaFontManagerProxy(FontManager::getFontMananger()).skFontMgr();
   ASSERT(fontMgr);
   auto ft = fontMgr->matchFamilyStyle(fontName.c_str(), fontStyle);
   if (ft && ft->fontStyle() == fontStyle)

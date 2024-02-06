@@ -20,25 +20,25 @@
 
 namespace
 {
-inline SkColor nodeType2Color(ObjectType type)
+inline SkColor nodeType2Color(EObjectType type)
 {
   switch (type)
   {
-    case ObjectType::VGG_PATH:
+    case EObjectType::VGG_PATH:
       return SK_ColorRED;
-    case ObjectType::VGG_IMAGE:
+    case EObjectType::VGG_IMAGE:
       return SK_ColorRED;
-    case ObjectType::VGG_GROUP:
+    case EObjectType::VGG_GROUP:
       return SK_ColorRED;
-    case ObjectType::VGG_TEXT:
+    case EObjectType::VGG_TEXT:
       return SK_ColorRED;
-    case ObjectType::VGG_ARTBOARD:
+    case EObjectType::VGG_ARTBOARD:
       return SK_ColorRED;
-    case ObjectType::VGG_LAYER:
+    case EObjectType::VGG_LAYER:
       return SK_ColorRED;
-    case ObjectType::VGG_MASTER:
+    case EObjectType::VGG_MASTER:
       return SK_ColorRED;
-    case ObjectType::VGG_CONTOUR:
+    case EObjectType::VGG_CONTOUR:
       return SK_ColorYELLOW;
     default:
       return SK_ColorRED;

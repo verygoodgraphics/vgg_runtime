@@ -135,7 +135,7 @@ public:
   EWindingType              windingRule{ WR_EVEN_ODD };
   Style                     style;
   ContextSetting            contextSetting;
-  ObjectType                type;
+  EObjectType                type;
   bool                      visible{ true };
   ContourPtr                contour;
   PaintOption               paintOption;
@@ -145,7 +145,7 @@ public:
   std::optional<MaskObject> alphaMask;
   LayerContextGuard         layerContextGuard;
 
-  PaintNode__pImpl(PaintNode* api, ObjectType type)
+  PaintNode__pImpl(PaintNode* api, EObjectType type)
     : q_ptr(api)
     , type(type)
   {

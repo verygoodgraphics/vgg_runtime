@@ -52,12 +52,12 @@ public:
     paragraphLayout = makeRichTextBlockPtr(VGGFontCollection::GlobalFontCollection());
 #else
     paragraphLayout =
-      makeRichTextBlockPtr(VGG_GlobalMemoryAllocator(), VGGFontCollection::GlobalFontCollection());
+      makeRichTextBlockPtr(getGlobalMemoryAllocator(), VGGFontCollection::GlobalFontCollection());
 #endif
 #ifdef USE_SHARED_PTR
     painter = makeVParagraphPainterPtr();
 #else
-    painter = makeVParagraphPainterPtr(VGG_GlobalMemoryAllocator());
+    painter = makeVParagraphPainterPtr(getGlobalMemoryAllocator());
 #endif
     painter->setParagraph(paragraphLayout);
 

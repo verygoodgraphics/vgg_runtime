@@ -18,7 +18,6 @@
 
 namespace VGG::layer
 {
-// NOLINTBEGIN
 class VAllocator
 {
 public:

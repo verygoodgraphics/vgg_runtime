@@ -158,7 +158,7 @@ std::string VggSdk::requiredFonts() const
 
 bool VggSdk::addFont(const uint8_t* data, size_t size, const char* defaultName)
 {
-  auto result = layer::FontManager::GetFontMananger().addFontFromMemory(data, size, defaultName);
+  auto result = layer::FontManager::getFontMananger().addFontFromMemory(data, size, defaultName);
 
   if (auto currentEnv = env())
   {

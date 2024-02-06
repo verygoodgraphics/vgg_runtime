@@ -39,7 +39,7 @@ sk_sp<SkShader>        makeGradientLinear(const Bound& bound, const GradientLine
 sk_sp<SkRuntimeEffect> getOrCreateEffect(EffectCacheKey key, const char* sksl);
 sk_sp<SkBlender>       getOrCreateBlender(EffectCacheKey name, const char* sksl);
 
-inline sk_sp<SkBlender> getMaskBlender(AlphaMaskType type)
+inline sk_sp<SkBlender> getMaskBlender(EAlphaMaskType type)
 {
   switch (type)
   {

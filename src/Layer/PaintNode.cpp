@@ -60,7 +60,7 @@ namespace VGG::layer
 PaintNode::PaintNode(
   VRefCnt*           cnt,
   const std::string& name,
-  ObjectType         type,
+  EObjectType        type,
   const std::string& guid)
   : TreeNode(cnt, name)
   , d_ptr(new PaintNode__pImpl(this, type))
@@ -405,7 +405,7 @@ Mask PaintNode::asOutlineMask(const Transform* mat)
   mask.outlineMask = makeContourImpl(maskOption(), mat);
   mask.outlineMask.setFillType(
     childWindingType() == EWindingType::WR_EVEN_ODD ? SkPathFillType::kEvenOdd
-                                                   : SkPathFillType::kWinding);
+                                                    : SkPathFillType::kWinding);
   return mask;
 }
 
@@ -591,20 +591,20 @@ void PaintNode::invokeRenderPass(Renderer* renderer, int zorder)
   VGG_IMPL(PaintNode);
   if (!_->visible)
     return;
-  if (_->paintOption.paintStrategy == EPaintStrategy::PS_SelfOnly)
+  if (_->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY)
   {
     prePaintPass(renderer);
     paintPass(renderer, zorder);
     postPaintPass(renderer);
   }
-  else if (_->paintOption.paintStrategy == EPaintStrategy::PS_Recursively)
+  else if (_->paintOption.paintStrategy == EPaintStrategy::PS_RECURSIVELY)
   {
     prePaintPass(renderer);
     paintPass(renderer, zorder);
     paintChildrenPass(renderer);
     postPaintPass(renderer);
   }
-  else if (_->paintOption.paintStrategy == EPaintStrategy::PS_ChildOnly)
+  else if (_->paintOption.paintStrategy == EPaintStrategy::PS_CHILDONLY)
   {
     prePaintPass(renderer);
     paintChildrenPass(renderer);
@@ -760,7 +760,7 @@ SkPath PaintNode::stylePath()
   }
   skPath.setFillType(
     childWindingType() == EWindingType::WR_EVEN_ODD ? SkPathFillType::kEvenOdd
-                                                   : SkPathFillType::kWinding);
+                                                    : SkPathFillType::kWinding);
 
   return skPath;
 }

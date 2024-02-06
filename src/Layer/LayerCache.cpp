@@ -3,20 +3,19 @@
 
 namespace VGG::layer
 {
-// NOLINTBEGIN
-BlenderCache* GlobalBlenderCache()
+BlenderCache* getGlobalBlenderCache()
 {
   static BlenderCache s_blenderCache(40);
   return &s_blenderCache;
 }
 
-EffectCache* GlobalEffectCache()
+EffectCache* getGlobalEffectCache()
 {
   static EffectCache s_blenderCache(40);
   return &s_blenderCache;
 }
 
-ImageCache* GlobalImageCache()
+ImageCache* getGlobalImageCache()
 {
   static ImageCache s_imageCache(40);
   return &s_imageCache;
@@ -33,7 +32,7 @@ sk_sp<SkImage> loadImage(const std::string& imageGUID, const ResourceRepo& repo)
     // remove current dir notation
     guid = guid.substr(2);
   }
-  auto imageCache = GlobalImageCache();
+  auto imageCache = getGlobalImageCache();
   if (auto it = imageCache->find(guid); it)
   {
     image = *it;
@@ -65,6 +64,5 @@ sk_sp<SkImage> loadImage(const std::string& imageGUID, const ResourceRepo& repo)
   }
   return image;
 }
-// NOLINTEND
 
 } // namespace VGG::layer

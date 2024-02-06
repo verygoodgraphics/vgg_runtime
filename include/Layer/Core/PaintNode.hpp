@@ -52,19 +52,17 @@ struct ContourOption
   }
 };
 
-// NOLINTBEGIN
 enum EPaintStrategy
 {
-  PS_Recursively,
-  PS_SelfOnly,
-  PS_ChildOnly,
+  PS_RECURSIVELY,
+  PS_SELFONLY,
+  PS_CHILDONLY,
 };
-// NOLINTEND
 
 struct PaintOption
 {
-  EPaintStrategy paintStrategy{ PS_Recursively };
-  PaintOption(EPaintStrategy paintStrategy = PS_Recursively)
+  EPaintStrategy paintStrategy{ PS_RECURSIVELY };
+  PaintOption(EPaintStrategy paintStrategy = PS_RECURSIVELY)
     : paintStrategy(paintStrategy)
   {
   }
@@ -104,7 +102,7 @@ private:
   PaintNode(VRefCnt* cnt, const std::string& name, std::unique_ptr<PaintNode__pImpl> impl);
 
 public:
-  PaintNode(VRefCnt* cnt, const std::string& name, ObjectType type, const std::string& guid);
+  PaintNode(VRefCnt* cnt, const std::string& name, EObjectType type, const std::string& guid);
   PaintNode(const PaintNode&) = delete;
   PaintNode& operator=(const PaintNode&) = delete;
   PaintNode(PaintNode&&) = delete;

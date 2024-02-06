@@ -196,7 +196,7 @@ inline PaintNodePtr makeObjectCommonProperty(
   // Pattern point in style are implicitly given by bound, we must supply the points in original
   // coordinates for correct converting
   obj->setStyle(SceneBuilder::fromStyle(j.value("style", json::object_t{}), b, convertedMatrix));
-  obj->style().cornerSmooth = get_opt<float>(j, "cornerSmoothing").value_or(0.f);
+  obj->style().cornerSmooth = getOptional<float>(j, "cornerSmoothing").value_or(0.f);
   obj->setContextSettings(j.value("contextSettings", ContextSetting()));
   obj->setMaskBy(j.value("outlineMaskBy", std::vector<std::string>{}));
   obj->setAlphaMaskBy(j.value("alphaMaskBy", std::vector<AlphaMask>{}));
@@ -361,7 +361,7 @@ PaintNodePtr SceneBuilder::fromPath(const json& j, const glm::mat3& totalMatrix)
       const auto shape = j.value("shape", json{});
       p->setChildWindingType(shape.value("windingRule", EWindingType::WR_EVEN_ODD));
       p->setContourOption(ContourOption(ECoutourType::MCT_OBJECT_OPS, false));
-      p->setPaintOption(PaintOption(EPaintStrategy::PS_SelfOnly));
+      p->setPaintOption(PaintOption(EPaintStrategy::PS_SELFONLY));
       const auto shapes = shape.value("subshapes", std::vector<json>{});
       for (const auto& subshape : shapes)
       {
@@ -433,7 +433,7 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
     {
       p->setVerticalAlignment(j.value("verticalAlignment", ETextVerticalAlignment::VA_TOP));
       p->setFrameMode(j.value("frameMode", ETextLayoutMode::TL_FIXED));
-      auto anchor = get_stack_optional<std::array<float, 2>>(j, "anchorPoint");
+      auto anchor = getStackOptional<std::array<float, 2>>(j, "anchorPoint");
       if (anchor)
       {
         p->setTextAnchor({ (*anchor)[0], (*anchor)[1] });
@@ -515,7 +515,7 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
 std::vector<PaintNodePtr> SceneBuilder::fromFrames(const json& j, const glm::mat3& totalMatrix)
 {
   std::vector<PaintNodePtr> frames;
-  const auto&               fs = get_or_default(j, "frames");
+  const auto&               fs = getOrDefault(j, "frames");
   for (const auto& e : fs)
   {
     frames.push_back(fromFrame(e, totalMatrix));
@@ -528,7 +528,7 @@ inline std::vector<PaintNodePtr> SceneBuilder::fromSymbolMasters(
   const glm::mat3& totalMatrix)
 {
   std::vector<PaintNodePtr> symbols;
-  const auto&               symbolMasters = get_or_default(j, "symbolMaster");
+  const auto&               symbolMasters = getOrDefault(j, "symbolMaster");
   for (const auto& e : symbolMasters)
   {
     symbols.emplace_back(fromSymbolMaster(e, totalMatrix));
@@ -553,9 +553,9 @@ PaintNodePtr SceneBuilder::fromFrame(const json& j, const glm::mat3& totalMatrix
     [&, this](PaintNode* p, const glm::mat3& matrix)
     {
       p->setContourOption(ContourOption(ECoutourType::MCT_FRAMEONLY, false));
-      const auto radius = get_stack_optional<std::array<float, 4>>(j, "radius");
+      const auto radius = getStackOptional<std::array<float, 4>>(j, "radius");
       p->style().frameRadius = radius;
-      const auto& childObjects = get_or_default(j, "childObjects");
+      const auto& childObjects = getOrDefault(j, "childObjects");
       for (const auto& c : childObjects)
       {
         p->addChild(fromObject(c, matrix));
@@ -581,9 +581,9 @@ PaintNodePtr SceneBuilder::fromSymbolMaster(const json& j, const glm::mat3& tota
     },
     [&, this](PaintNode* p, const glm::mat3& matrix)
     {
-      const auto radius = get_stack_optional<std::array<float, 4>>(j, "radius");
+      const auto radius = getStackOptional<std::array<float, 4>>(j, "radius");
       p->style().frameRadius = radius;
-      const auto& chidlObject = get_or_default(j, "childObjects");
+      const auto& chidlObject = getOrDefault(j, "childObjects");
       for (const auto& e : chidlObject)
       {
         p->addChild(fromObject(e, matrix));
@@ -615,15 +615,15 @@ PaintNodePtr SceneBuilder::makeContour(
 {
   Contour contour;
   contour.closed = j.value("closed", false);
-  const auto& points = get_or_default(j, "points");
+  const auto& points = getOrDefault(j, "points");
   for (const auto& e : points)
   {
     contour.emplace_back(
-      get_opt<glm::vec2>(e, "point").value_or(glm::vec2{ 0, 0 }),
-      get_opt<float>(e, "radius").value_or(0.0),
-      get_opt<glm::vec2>(e, "curveFrom"),
-      get_opt<glm::vec2>(e, "curveTo"),
-      get_opt<int>(e, "cornerStyle"));
+      getOptional<glm::vec2>(e, "point").value_or(glm::vec2{ 0, 0 }),
+      getOptional<float>(e, "radius").value_or(0.0),
+      getOptional<glm::vec2>(e, "curveFrom"),
+      getOptional<glm::vec2>(e, "curveTo"),
+      getOptional<int>(e, "cornerStyle"));
   }
   // auto p = std::make_shared<ContourNode>("contour", std::make_shared<Contour>(contour), "");
 #ifdef USE_SHARED_PTR
@@ -635,7 +635,7 @@ PaintNodePtr SceneBuilder::makeContour(
   p->setContourOption(ContourOption{ ECoutourType::MCT_FRAMEONLY, false });
   CoordinateConvert::convertCoordinateSystem(contour, totalMatrix);
   auto ptr = std::make_shared<Contour>(contour);
-  ptr->cornerSmooth = get_opt<float>(parent, "cornerSmoothing").value_or(0.f);
+  ptr->cornerSmooth = getOptional<float>(parent, "cornerSmoothing").value_or(0.f);
   p->setContourData(std::move(ptr));
   return p;
 }
@@ -660,8 +660,8 @@ PaintNodePtr SceneBuilder::fromGroup(const json& j, const glm::mat3& totalMatrix
     {
       p->setOverflow(OF_VISIBLE); // Group do not clip inner content
       p->setContourOption(ContourOption(ECoutourType::MCT_UNION, false));
-      p->setPaintOption(EPaintStrategy(EPaintStrategy::PS_ChildOnly));
-      const auto& childObjects = get_or_default(j, "childObjects");
+      p->setPaintOption(EPaintStrategy(EPaintStrategy::PS_CHILDONLY));
+      const auto& childObjects = getOrDefault(j, "childObjects");
       for (const auto& c : childObjects)
       {
         p->addChild(fromObject(c, matrix));
@@ -673,7 +673,7 @@ void SceneBuilder::buildImpl(const json& j)
 {
   glm::mat3 mat = glm::identity<glm::mat3>();
   mat = glm::scale(mat, glm::vec2(1, -1));
-  m_frames = fromTopLevelFrames(get_or_default(j, "frames"), mat);
+  m_frames = fromTopLevelFrames(getOrDefault(j, "frames"), mat);
 }
 
 SceneBuilderResult SceneBuilder::build()

@@ -108,7 +108,7 @@ struct Pattern
 struct AlphaMask
 {
   std::string   id;
-  AlphaMaskType type{ AM_ALPHA };
+  EAlphaMaskType type{ AM_ALPHA };
   bool          crop{ true };
 };
 

@@ -24,8 +24,7 @@
 #include <include/core/SkMatrix.h>
 #include <include/core/SkCanvas.h>
 
-// NOLINTBEGIN
-inline void PrintSkMatrix(const SkMatrix& m)
+inline void printSkMatrix(const SkMatrix& m)
 {
   for (int i = 0; i < 9; i++)
   {
@@ -33,7 +32,6 @@ inline void PrintSkMatrix(const SkMatrix& m)
   }
   std::cout << std::endl;
 }
-// NOLINTEND
 
 inline std::ostream& operator<<(std::ostream& os, const glm::mat3 m)
 {

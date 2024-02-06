@@ -137,7 +137,7 @@ protected:
           auto sceneBuilderResult = VGG::layer::SceneBuilder::builder()
                                       .setResetOriginEnable(true)
                                       .setDoc(std::move(*res.doc))
-                                      .setAllocator(VGG_GlobalMemoryAllocator())
+                                      .setAllocator(getGlobalMemoryAllocator())
                                       .build();
           t.stop();
           auto dur = t.elapsed();

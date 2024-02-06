@@ -24,8 +24,6 @@
 namespace VGG::layer
 {
 
-// NOLINTEND
-
 template<typename ObjectType, typename Allocator>
 class VNew
 {

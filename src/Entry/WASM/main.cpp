@@ -33,26 +33,69 @@
 
 using AppImpl = VGG::entry::AppSDLImpl;
 
+namespace
+{
 UIApplication* application()
 {
   static auto s_app = new UIApplication;
   return s_app;
 }
 
+void vggEmscriptenFrame()
+{
+  static auto s_sdlApp = AppImpl::app();
+  ASSERT(s_sdlApp);
+
+  s_sdlApp->poll();
+
+  application()->paint(s_sdlApp->appConfig().renderFPSLimit);
+
+  auto& mainComposer = VggBrowser::mainComposer();
+  mainComposer.runLoop()->dispatch();
+}
+
+class VggWasm
+{
+  bool m_canceled = false;
+
+public:
+  static VggWasm& instance()
+  {
+    static VggWasm s_instance;
+    return s_instance;
+  }
+
+  bool isCanceled() const
+  {
+    return m_canceled;
+  }
+
+  void startMainLoop()
+  {
+    cancelMainLoop(); // cancel first; emscripten_set_main_loop should be called only ONCE
+
+    m_canceled = false;
+    // pass 0/false as the third argument
+    // https://github.com/emscripten-core/emscripten/issues/16071
+    emscripten_set_main_loop(vggEmscriptenFrame, 0, 0);
+  }
+
+  void cancelMainLoop()
+  {
+    m_canceled = true;
+    emscripten_cancel_main_loop();
+  }
+
+  void exit()
+  {
+    cancelMainLoop();
+    emscripten_force_exit(0);
+  }
+};
+} // namespace
+
 extern "C"
 {
-  void emscripten_frame() // NOLINT
-  {
-    static auto s_sdlApp = AppImpl::app();
-    ASSERT(s_sdlApp);
-
-    s_sdlApp->poll();
-
-    application()->paint(s_sdlApp->appConfig().renderFPSLimit);
-
-    auto& mainComposer = VggBrowser::mainComposer();
-    mainComposer.runLoop()->dispatch();
-  }
 
   void emscripten_main(int width, int height, bool editMode) // NOLINT
   {
@@ -93,6 +136,11 @@ extern "C"
     app->setController(controller);
   }
 
+  EMSCRIPTEN_KEEPALIVE void vggExit()
+  {
+    VggWasm::instance().exit();
+  }
+
   bool load_file_from_mem(const char* name, char* data, int len)
   {
     std::vector<char> buf(data, data + len);
@@ -100,9 +148,13 @@ extern "C"
     auto controller = VggBrowser::mainComposer().controller();
     auto ret = controller->start(buf, "/asset/vgg-format.json", "/asset/vgg_layout.json");
 
-    // pass 0/false as the third argument
-    // https://github.com/emscripten-core/emscripten/issues/16071
-    emscripten_set_main_loop(emscripten_frame, 0, 0);
+    if (VggWasm::instance().isCanceled())
+    {
+      WARN("Vgg main loop is canceled, return");
+      return false;
+    }
+
+    VggWasm::instance().startMainLoop();
 
     return ret;
   }

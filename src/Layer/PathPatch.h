@@ -25,10 +25,7 @@
  * thrown.
  */
 
-// NOLINTBEGIN
 namespace VGG::layer
 {
 bool pathChange(nlohmann::json& path);
 }
-
-// NOLINTEND

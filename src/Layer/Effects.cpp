@@ -20,10 +20,9 @@
 
 namespace VGG::layer
 {
-// NOLINTBEGIN
 sk_sp<SkBlender> getOrCreateBlender(EffectCacheKey name, const char* sksl)
 {
-  auto cache = GlobalBlenderCache();
+  auto cache = getGlobalBlenderCache();
   auto b = cache->find(name);
   if (!b)
   {
@@ -41,7 +40,7 @@ sk_sp<SkBlender> getOrCreateBlender(EffectCacheKey name, const char* sksl)
 
 sk_sp<SkRuntimeEffect> getOrCreateEffect(EffectCacheKey key, const char* sksl)
 {
-  auto cache = GlobalEffectCache();
+  auto cache = getGlobalEffectCache();
   auto b = cache->find(key);
   if (!b)
   {
@@ -55,7 +54,6 @@ sk_sp<SkRuntimeEffect> getOrCreateEffect(EffectCacheKey key, const char* sksl)
   }
   return *b;
 }
-// NOLINTEND
 
 } // namespace VGG::layer
 
@@ -66,17 +64,16 @@ SkSamplingOptions g_globalSamplingOption{};
 
 namespace VGG::layer
 {
-void SetGlobalSamplingOptions(const SkSamplingOptions& opt)
+void setGlobalSamplingOptions(const SkSamplingOptions& opt)
 {
   g_globalSamplingOption = opt;
 }
 
-const SkSamplingOptions& GlobalSamplingOptions()
+const SkSamplingOptions& getGlobalSamplingOptions()
 {
   return g_globalSamplingOption;
 }
 
-// NOLINTEND
 sk_sp<SkColorFilter> makeColorFilter(const ImageFilter& imageFilter)
 {
   if (imageFilter.isDefault())
@@ -225,7 +222,7 @@ sk_sp<SkShader> makeFitPattern(const Bound& bound, const PatternFit& p)
   SkTileMode modeX = SkTileMode::kDecal;
   SkTileMode modeY = SkTileMode::kDecal;
   const auto mat = toSkMatrix(m);
-  auto       shader = img->makeShader(modeX, modeY, GlobalSamplingOptions(), &mat);
+  auto       shader = img->makeShader(modeX, modeY, getGlobalSamplingOptions(), &mat);
   if (auto colorFilter = makeColorFilter(p.imageFilter); shader && colorFilter)
   {
     return shader->makeWithColorFilter(colorFilter);
@@ -261,7 +258,7 @@ sk_sp<SkShader> makeFillPattern(const Bound& bound, const PatternFill& p)
   SkTileMode modeX = SkTileMode::kDecal;
   SkTileMode modeY = SkTileMode::kDecal;
   const auto mat = toSkMatrix(m);
-  auto       shader = img->makeShader(modeX, modeY, GlobalSamplingOptions(), &mat);
+  auto       shader = img->makeShader(modeX, modeY, getGlobalSamplingOptions(), &mat);
   if (auto colorFilter = makeColorFilter(p.imageFilter); shader && colorFilter)
   {
     return shader->makeWithColorFilter(colorFilter);
@@ -284,7 +281,7 @@ sk_sp<SkShader> makeStretchPattern(const Bound& bound, const PatternStretch& p)
   const auto mat = toSkMatrix(m);
   SkTileMode modeX = SkTileMode::kDecal;
   SkTileMode modeY = SkTileMode::kDecal;
-  auto       shader = img->makeShader(modeX, modeY, GlobalSamplingOptions(), &mat);
+  auto       shader = img->makeShader(modeX, modeY, getGlobalSamplingOptions(), &mat);
   if (auto colorFilter = makeColorFilter(p.imageFilter); shader && colorFilter)
   {
     return shader->makeWithColorFilter(colorFilter);
@@ -317,7 +314,7 @@ sk_sp<SkShader> makeTilePattern(const Bound& bound, const PatternTile& p)
   m = glm::rotate(m, p.rotation);
   m = glm::scale(m, { p.scale, p.scale });
   const auto mat = toSkMatrix(m);
-  auto       shader = img->makeShader(modeX, modeY, GlobalSamplingOptions(), &mat);
+  auto       shader = img->makeShader(modeX, modeY, getGlobalSamplingOptions(), &mat);
   if (auto colorFilter = makeColorFilter(p.imageFilter); shader && colorFilter)
   {
     return shader->makeWithColorFilter(colorFilter);

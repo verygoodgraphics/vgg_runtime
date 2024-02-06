@@ -109,7 +109,7 @@ public:
 
   void setSamplingOptions(const SkSamplingOptions& opt)
   {
-    SetGlobalSamplingOptions(opt);
+    setGlobalSamplingOptions(opt);
   }
 
   std::optional<std::vector<char>> makeImageSnapshot(const ImageOptions& opts);

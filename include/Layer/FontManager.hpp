@@ -48,7 +48,7 @@ public:
   bool addFontFromMemory(const uint8_t* data, size_t size, const char* defaultName);
 
   /// @brief Get the singleton instance of FontManager
-  static FontManager& GetFontMananger() // NOLINT
+  static FontManager& getFontMananger()
   {
     static FontManager s_fontManagerInstance;
     return s_fontManagerInstance;

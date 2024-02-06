@@ -28,13 +28,14 @@
 #include <optional>
 using nlohmann::json;
 
+// NOLINTBEGIN
 namespace nlohmann
 {
 
 template<>
 struct adl_serializer<std::variant<float, glm::vec2>>
 {
-  static void from_json(const json& j, std::variant<float, glm::vec2>& x) // NOLINT
+  static void from_json(const json& j, std::variant<float, glm::vec2>& x)
   {
     if (j.is_number())
     {
@@ -48,9 +49,8 @@ struct adl_serializer<std::variant<float, glm::vec2>>
   }
 };
 } // namespace nlohmann
-// NOLINTBEGIN
 template<typename T>
-inline std::optional<T> get_opt(const nlohmann::json& obj, const std::string& key)
+inline std::optional<T> getOptional(const nlohmann::json& obj, const std::string& key)
 {
   if (auto p = obj.find(key); p != obj.end())
     return p.value().get<T>();
@@ -58,7 +58,7 @@ inline std::optional<T> get_opt(const nlohmann::json& obj, const std::string& ke
 }
 
 template<typename T>
-inline std::optional<T> get_opt(const nlohmann::json& obj, const char* key)
+inline std::optional<T> getOptional(const nlohmann::json& obj, const char* key)
 {
   if (auto p = obj.find(key); p != obj.end())
     return p.value().get<T>();
@@ -66,7 +66,7 @@ inline std::optional<T> get_opt(const nlohmann::json& obj, const char* key)
 }
 
 template<typename K>
-inline const nlohmann::json& get_or_default(const nlohmann::json& j, K&& key)
+inline const nlohmann::json& getOrDefault(const nlohmann::json& j, K&& key)
 {
   if (auto it = j.find(key); it != j.end())
   {
@@ -78,7 +78,7 @@ inline const nlohmann::json& get_or_default(const nlohmann::json& j, K&& key)
 }
 
 template<>
-inline std::optional<glm::vec2> get_opt(const nlohmann::json& obj, const std::string& key)
+inline std::optional<glm::vec2> getOptional(const nlohmann::json& obj, const std::string& key)
 {
   if (auto it = obj.find(key); it != obj.end())
   {
@@ -89,7 +89,7 @@ inline std::optional<glm::vec2> get_opt(const nlohmann::json& obj, const std::st
 }
 
 template<>
-inline std::optional<glm::vec2> get_opt(const nlohmann::json& obj, const char* key)
+inline std::optional<glm::vec2> getOptional(const nlohmann::json& obj, const char* key)
 {
   if (auto it = obj.find(key); it != obj.end())
   {
@@ -99,15 +99,11 @@ inline std::optional<glm::vec2> get_opt(const nlohmann::json& obj, const char* k
   return std::nullopt;
 }
 
-// NOLINTEND
-
 namespace VGG
 {
 
-// NOLINTBEGIN
-
 template<typename T>
-inline std::optional<T> get_stack_optional(const json& j, const char* property)
+inline std::optional<T> getStackOptional(const json& j, const char* property)
 {
   auto it = j.find(property);
   if (it != j.end() && !it->is_null())
@@ -118,9 +114,9 @@ inline std::optional<T> get_stack_optional(const json& j, const char* property)
 }
 
 template<typename T>
-inline std::optional<T> get_stack_optional(const json& j, const std::string& property)
+inline std::optional<T> getStackOptional(const json& j, const std::string& property)
 {
-  return get_stack_optional<T>(j, property.data());
+  return getStackOptional<T>(j, property.data());
 }
 
 inline void from_json(const json& j, Color& x)
@@ -391,8 +387,8 @@ inline void from_json(const json& j, Blur& x)
 {
   if (!j.is_object())
     return;
-  x.radius = get_stack_optional<float>(j, "radius").value_or(0.f);
-  x.motionAngle = get_stack_optional<float>(j, "motionAngle").value_or(0.f);
+  x.radius = getStackOptional<float>(j, "radius").value_or(0.f);
+  x.motionAngle = getStackOptional<float>(j, "motionAngle").value_or(0.f);
   const auto v = j.value("center", std::array<float, 2>{ 0, 0 });
   x.center = glm::vec2(v[0], v[1]);
   x.isEnabled = j.value("isEnabled", false);

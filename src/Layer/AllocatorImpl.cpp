@@ -33,12 +33,10 @@ public:
   }
 };
 static AllocatorImpl g_globalLayerMemoryAllocator{ "Global Memory Allocator" };
-// NOLINTBEGIN
-VAllocator*          VGG_GlobalMemoryAllocator()
+VAllocator*          getGlobalMemoryAllocator()
 {
   return nullptr;
   // return &g_globalLayerMemoryAllocator;
 }
-// NOLINTEND
 
 } // namespace VGG::layer

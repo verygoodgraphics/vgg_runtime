@@ -196,7 +196,7 @@ int main(int argc, char** argv)
   }
   else
   {
-    opts.size = exporter::ImageOption::ScaleDetermine{ program.get<float>("-s") };
+    opts.size = exporter::ImageOption::ScaleDetermine{ 1.0 };
   }
   int s = program.get<int>("-q");
   opts.imageQuality = s;

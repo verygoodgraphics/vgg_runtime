@@ -363,7 +363,7 @@ void Scene::preArtboard()
 void Scene::setResRepo(std::map<std::string, std::vector<char>> repo)
 {
   Scene::s_resRepo = std::move(repo);
-  GlobalImageCache()->purge();
+  getGlobalImageCache()->purge();
 }
 
 void Scene::enableDrawDebugBound(bool enabled)

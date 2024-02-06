@@ -23,7 +23,7 @@ namespace VGG::layer
 // NOLINTBEGIN
 sk_sp<SkBlender> getOrCreateBlender(EffectCacheKey name, const char* sksl)
 {
-  auto cache = GlobalBlenderCache();
+  auto cache = getGlobalBlenderCache();
   auto b = cache->find(name);
   if (!b)
   {
@@ -41,7 +41,7 @@ sk_sp<SkBlender> getOrCreateBlender(EffectCacheKey name, const char* sksl)
 
 sk_sp<SkRuntimeEffect> getOrCreateEffect(EffectCacheKey key, const char* sksl)
 {
-  auto cache = GlobalEffectCache();
+  auto cache = getGlobalEffectCache();
   auto b = cache->find(key);
   if (!b)
   {

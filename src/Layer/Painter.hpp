@@ -20,6 +20,7 @@
 
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VType.hpp"
+#include "Layer/Effects.hpp"
 #include "Renderer.hpp"
 
 #include <core/SkBlendMode.h>

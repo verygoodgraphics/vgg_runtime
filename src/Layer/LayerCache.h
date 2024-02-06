@@ -16,6 +16,7 @@
 #pragma once
 
 #include "LRUCache.hpp"
+#include "Layer/Scene.hpp"
 #include <core/SkBlender.h>
 #include <effects/SkRuntimeEffect.h>
 
@@ -27,9 +28,19 @@ using EffectCacheKey = const char*;
 using BlenderCache = LRUCache<BlenderCacheKey, sk_sp<SkBlender>>;
 using EffectCache = LRUCache<EffectCacheKey, sk_sp<SkRuntimeEffect>>;
 
+using ImageCacheKey = std::string;
+using ImageCache = LRUCache<ImageCacheKey, sk_sp<SkImage>>;
+
 // TODO:: merge into EffectCache
+// NOLINTBEGIN
 BlenderCache* GlobalBlenderCache(); // NOLINT
 
 EffectCache* GlobalEffectCache(); // NOLINT
+
+ImageCache* GlobalImageCache();
+
+sk_sp<SkImage> loadImage(const std::string& imageGUID, const ResourceRepo& repo);
+
+// NOLINTEND
 
 } // namespace VGG::layer

@@ -498,7 +498,7 @@ public:
     // Objects need to be drawn with SrcOver into layer contains blured background
     // and mask them by dstColor.a
 
-    auto blender = GetOrCreateBlender("maskedObject", g_styleMaskBlenderShader);
+    auto blender = getOrCreateBlender("maskedObject", g_styleMaskBlenderShader);
     if (!outlineMask.isEmpty())
     {
       painter.beginClip(outlineMask);

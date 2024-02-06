@@ -16,6 +16,7 @@
 
 #include "Layer/Core/RasterCache.hpp"
 #include "Layer/Core/VUtils.hpp"
+#include "Layer/LayerCache.h"
 #include "Renderer.hpp"
 
 #include "Layer/Scene.hpp"
@@ -40,7 +41,6 @@
 #include <fstream>
 #include <variant>
 
-extern std::unordered_map<std::string, sk_sp<SkImage>> g_skiaImageRepo;
 namespace VGG
 {
 
@@ -363,7 +363,7 @@ void Scene::preArtboard()
 void Scene::setResRepo(std::map<std::string, std::vector<char>> repo)
 {
   Scene::s_resRepo = std::move(repo);
-  g_skiaImageRepo.clear();
+  GlobalImageCache()->purge();
 }
 
 void Scene::enableDrawDebugBound(bool enabled)

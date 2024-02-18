@@ -116,6 +116,12 @@ align_content toLibAlignContent(EAlignStyle type)
       return align_content_center;
     case EAlignStyle::END:
       return align_content_flex_end;
+    case EAlignStyle::SPACE_BETWEEN:
+      return align_content_space_between;
+    case EAlignStyle::SPACE_AROUND:
+      return align_content_space_around;
+    case EAlignStyle::SPACE_EVENLY:
+      return align_content_space_evenly;
     default:
       return align_content_flex_start;
   }

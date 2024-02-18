@@ -152,7 +152,10 @@ enum class EAlignStyle
 {
   START = 1,
   CENTER = 2,
-  END = 3
+  END = 3,
+  SPACE_BETWEEN = 4,
+  SPACE_AROUND = 5,
+  SPACE_EVENLY = 6
 };
 
 struct FlexboxItem

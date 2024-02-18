@@ -15,6 +15,7 @@ add_executable(vgg_runtime "main.cpp")
       --no-heap-copy \
       -s EXPORTED_FUNCTIONS=\['_load_file_from_mem','_is_latest_version','_emscripten_main'\] \
       -s EXPORTED_RUNTIME_METHODS=\['ccall','cwrap','writeArrayToMemory','stringToUTF8'\] \
+      -s EXIT_RUNTIME\
       --preload-file ../../../../asset \
     "
   )

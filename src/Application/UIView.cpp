@@ -25,6 +25,8 @@
 #include "Layer/SceneBuilder.hpp"
 #include "Utility/Log.hpp"
 
+#include <include/core/SkCanvas.h>
+
 using namespace VGG;
 using namespace VGG::Layout;
 using namespace nlohmann;
@@ -35,6 +37,15 @@ UIView::UIView()
   : AppScene(std::make_unique<VGG::layer::RasterCacheTile>(1024, 1024))
 {
   setZoomerListener(std::make_shared<app::AppZoomer>());
+}
+
+void UIView::onRender(SkCanvas* canvas)
+{
+  if (m_drawGrayBackground)
+  {
+    canvas->clear(SkColorSetRGB(0xF5, 0xF5, 0xF5));
+  }
+  AppScene::onRender(canvas);
 }
 
 bool UIView::onEvent(UEvent evt, void* userData)

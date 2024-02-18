@@ -73,6 +73,7 @@ private:
   bool m_isDirty{ false };
   bool m_skipUntilNextLoop{ false };
   bool m_isZoomerEnabled{ true };
+  bool m_drawGrayBackground{ false };
 
 public:
   UIView();
@@ -92,6 +93,7 @@ public:
     m_eventListener = listener;
   }
 
+  void onRender(SkCanvas* canvas) override;
   bool onEvent(UEvent e, void* userData) override;
 
   void addSubview(std::shared_ptr<UIView> view)
@@ -152,6 +154,11 @@ public:
 
   Offset getOffset();
   void   setOffset(Offset offset);
+
+  void setDrawBackground(bool drawBackground)
+  {
+    m_drawGrayBackground = drawBackground;
+  }
 
 private:
   std::tuple<bool, bool, bool, bool> getKeyModifier(int keyMod);

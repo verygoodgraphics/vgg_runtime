@@ -71,6 +71,13 @@ public:
   std::pair<nlohmann::json, nlohmann::json> run(); // 0: design.json; 1: layout.json
 
 private:
+  enum class EProcessVarRefOption
+  {
+    ALL,
+    ONLY_MASTER,
+    NOT_MASTER,
+  };
+
   void collectMaster(const nlohmann::json& json);
   void collectLayoutRules(const nlohmann::json& json);
 
@@ -98,7 +105,8 @@ private:
   void processVariableRefs(
     nlohmann::json&                 node,     // in instance tree
     nlohmann::json*                 instance, // container
-    const std::vector<std::string>& instanceIdStack);
+    const std::vector<std::string>& instanceIdStack,
+    EProcessVarRefOption            option);
   void processLayoutOverrides(
     nlohmann::json&                 instance,
     const std::vector<std::string>& instanceIdStack);

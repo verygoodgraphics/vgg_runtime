@@ -41,6 +41,7 @@ private:
   };
 
 public:
+  using Value = V;
   explicit LRUCache(int maxCount)
     : m_maxCount(maxCount)
   {
@@ -129,8 +130,8 @@ private:
 
   void remove(typename LRUListType::iterator it)
   {
-    delete *it; // delete the entry wrapper
     m_map.erase((*it)->key);
+    delete *it; // delete the entry wrapper
     m_lru.erase(it);
   }
 };

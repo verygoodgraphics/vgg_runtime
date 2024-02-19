@@ -136,6 +136,8 @@ public:
 
   void dump(std::string indent = {});
 
+  uint32_t backgroundColor();
+
 public:
   std::shared_ptr<Layout::Internal::AutoLayout> autoLayout() const;
   std::shared_ptr<Layout::Internal::AutoLayout> createAutoLayout();

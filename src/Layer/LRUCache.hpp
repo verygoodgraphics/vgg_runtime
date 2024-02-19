@@ -41,6 +41,7 @@ private:
   };
 
 public:
+  using Value = V;
   explicit LRUCache(int maxCount)
     : m_maxCount(maxCount)
   {

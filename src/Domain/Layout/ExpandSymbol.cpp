@@ -284,6 +284,11 @@ void ExpandSymbol::expandInstance(
         makeMaskIdUnique(json[K_CHILD_OBJECTS], json, idPrefix);
 
         // 3 overrides and scale
+        // 3.0 master id refer to a var
+        for (auto& child : json[K_CHILD_OBJECTS])
+        {
+          processVariableRefs(child, &json, instanceIdStack, EProcessVarRefOption::ONLY_MASTER);
+        }
         // 3.1 master id overrides
         processMasterIdOverrides(json, instanceIdStack);
 
@@ -293,7 +298,7 @@ void ExpandSymbol::expandInstance(
         // process variableRefs
         for (auto& child : json[K_CHILD_OBJECTS])
         {
-          processVariableRefs(child, &json, instanceIdStack);
+          processVariableRefs(child, &json, instanceIdStack, EProcessVarRefOption::NOT_MASTER);
         }
 
         // 3.3: layout overrides
@@ -447,7 +452,7 @@ void ExpandSymbol::processVariableAssignmentsOverrides(
     for (auto& child : childObject->at(K_CHILD_OBJECTS))
     {
       // process var refs
-      processVariableRefs(child, childObject, _);
+      processVariableRefs(child, childObject, _, EProcessVarRefOption::ALL);
     }
   }
 }
@@ -455,7 +460,8 @@ void ExpandSymbol::processVariableAssignmentsOverrides(
 void ExpandSymbol::processVariableRefs(
   nlohmann::json&                 node,      // in instance tree
   nlohmann::json*                 container, // instance; master set; parent node
-  const std::vector<std::string>& instanceIdStack)
+  const std::vector<std::string>& instanceIdStack,
+  EProcessVarRefOption            option)
 {
   if (!node.is_object() && !node.is_array())
   {
@@ -476,6 +482,21 @@ void ExpandSymbol::processVariableRefs(
       // get var id
       auto&       varId = ref[K_ID];
       std::string objectField = ref[K_OBJECT_FIELD];
+
+      if (option == EProcessVarRefOption::ONLY_MASTER)
+      {
+        if (objectField != K_MASTER_ID)
+        {
+          continue;
+        }
+      }
+      else if (option == EProcessVarRefOption::NOT_MASTER)
+      {
+        if (objectField == K_MASTER_ID)
+        {
+          continue;
+        }
+      }
 
       nlohmann::json* value{ nullptr };
       auto            varType{ EVarType::NONE };
@@ -570,7 +591,7 @@ void ExpandSymbol::processVariableRefs(
 
   for (auto& el : node.items())
   {
-    processVariableRefs(el.value(), container, instanceIdStack);
+    processVariableRefs(el.value(), container, instanceIdStack, option);
   }
 }
 

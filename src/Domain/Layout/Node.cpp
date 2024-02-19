@@ -17,6 +17,7 @@
 
 #include "AutoLayout.hpp"
 #include "BezierPoint.hpp"
+#include "Color.hpp"
 #include "Helper.hpp"
 #include "JsonKeys.hpp"
 #include "Rect.hpp"
@@ -270,6 +271,26 @@ void LayoutNode::dump(std::string indent)
   {
     child->dump(indent + "  ");
   }
+}
+
+uint32_t LayoutNode::backgroundColor()
+{
+  uint32_t u32Color = 0xFFF5F5F5;
+
+  auto viewModel = m_viewModel.lock();
+  if (viewModel)
+  {
+    nlohmann::json::json_pointer path{ m_path };
+    const auto&                  objectJson = viewModel->content()[path];
+
+    if (objectJson.contains(K_BACKGROUNDCOLOR))
+    {
+      Layout::Color color = objectJson[K_BACKGROUNDCOLOR];
+      u32Color = color.u32();
+    }
+  }
+
+  return u32Color;
 }
 
 void LayoutNode::configureAutoLayout()

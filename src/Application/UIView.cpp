@@ -43,7 +43,10 @@ void UIView::onRender(SkCanvas* canvas)
 {
   if (m_drawGrayBackground)
   {
-    canvas->clear(SkColorSetRGB(0xF5, 0xF5, 0xF5));
+    if (auto page = currentPage())
+    {
+      canvas->clear(page->backgroundColor());
+    }
   }
   AppScene::onRender(canvas);
 }

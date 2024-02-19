@@ -29,8 +29,20 @@ namespace VGG::layer
 class RasterCacheTile : public Rasterizer
 {
 public:
-  // using TileMap = std::unordered_map<SkRect, RasterCache::Tile, SkRectHash>;
-  using TileMap = std::vector<Rasterizer::Tile>;
+  using TileMap = LRUCache<int, Rasterizer::Tile>;
+  struct LevelCache
+  {
+    SkMatrix rasterMatrix;
+    TileMap  tileCache;
+    SkRect   globalBound;
+    int      tileWidth;
+    int      tileHeight;
+    bool     invalid{ true };
+    LevelCache()
+      : tileCache(20)
+    {
+    }
+  };
   RasterCacheTile()
     : RasterCacheTile(1024, 1024)
   {
@@ -41,7 +53,7 @@ public:
   {
     for (auto& c : m_cacheStack)
     {
-      c.tileCache.clear();
+      c.tileCache.purge();
       c.invalid = true;
     }
   }
@@ -57,13 +69,6 @@ protected:
     void*                userData) override;
 
 private:
-  struct LevelCache
-  {
-    SkMatrix rasterMatrix;
-    TileMap  tileCache;
-    bool     invalid{ true };
-  };
-
   std::string printReason(uint32_t r)
   {
     std::string res;
@@ -88,7 +93,12 @@ private:
     return res;
   }
 
-  void       revalidate(LevelCache& levelCache, const SkMatrix& totalMatrix, const SkRect& bound);
+  void revalidate(
+    LevelCache&     levelCache,
+    const SkMatrix& totalMatrix,
+    int             tileW,
+    int             tileH,
+    const SkRect&   bound);
   SkSurface* rasterSurface(GrRecordingContext* context);
   void       invalidateContent()
   {
@@ -97,10 +107,12 @@ private:
       c.invalid = true;
     }
   }
-  std::vector<LevelCache> m_cacheStack;
-  const float             m_tileWidth = 1024.f;
-  const float             m_tileHeight = 1024.f;
-  sk_sp<SkSurface>        m_surface;
+  void hit(LevelCache& levelCache, const SkRect& clipBound, const SkRect& bound);
+
+  std::array<LevelCache, Zoomer::ZOOM_LEVEL_COUNT + 1> m_cacheStack;
+  const float                                          m_tileWidth = 1024.f;
+  const float                                          m_tileHeight = 1024.f;
+  sk_sp<SkSurface>                                     m_surface;
 };
 
 } // namespace VGG::layer

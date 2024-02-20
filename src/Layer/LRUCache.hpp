@@ -133,8 +133,8 @@ private:
   void remove(typename LRUListType::iterator it)
   {
     m_map.erase((*it)->key);
-    m_lru.erase(it);
     delete *it; // delete the entry wrapper
+    m_lru.erase(it);
   }
 };
 } // namespace VGG::layer

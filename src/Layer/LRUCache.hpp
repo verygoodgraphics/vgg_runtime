@@ -124,6 +124,16 @@ public:
     purge();
   }
 
+  auto begin()
+  {
+    return m_lru.begin();
+  };
+
+  auto end()
+  {
+    return m_lru.end();
+  };
+
 private:
   using LRUListType = std::list<Entry*>;
   using LRUMapType = std::unordered_map<K, typename LRUListType::iterator>;

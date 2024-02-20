@@ -125,23 +125,41 @@ std::vector<Rasterizer::Tile> rasterOrGetTiles(
 {
   std::vector<Rasterizer::Tile> tiles;
   tiles.reserve(8);
+  auto makeRect = [](int tw, int th, int x, int y, float offsetX, float offsetY)
+  { return SkRect::MakeXYWH(x * tw + offsetX, y * th + offsetY, tw, th); };
+
   while (auto tile = iter.next())
   {
     const int key = tile->first + tile->second * iter.column;
-    if (auto cacheTile = cache.tileCache.find(key); cacheTile)
+    if (auto tileState = cache.tileCache.find(key); tileState)
     {
-      tiles.push_back(*cacheTile);
+      if (!tileState->first)
+      {
+        auto rect = makeRect(
+          iter.tileWidth,
+          iter.tileHeight,
+          tile->first,
+          tile->second,
+          cache.globalBound.left(),
+          cache.globalBound.top());
+        tileState->first = true;
+        tileState->second.image =
+          rasterTile(surface, rasterContext.picture, cache.rasterMatrix, rect);
+      }
+      tiles.push_back(tileState->second);
     }
     else
     {
-      const auto rect = SkRect::MakeXYWH(
-        tile->first * iter.tileWidth + cache.globalBound.left(),
-        tile->second * iter.tileHeight + cache.globalBound.top(),
+      const auto rect = makeRect(
         iter.tileWidth,
-        iter.tileHeight);
-      auto v = cache.tileCache.insert(key, { nullptr, rect });
-      v->image = rasterTile(surface, rasterContext.picture, cache.rasterMatrix, rect);
-      tiles.push_back(*v);
+        iter.tileHeight,
+        tile->first,
+        tile->second,
+        cache.globalBound.left(),
+        cache.globalBound.top());
+      auto v = cache.tileCache.insert(key, { true, { nullptr, rect } });
+      v->second.image = rasterTile(surface, rasterContext.picture, cache.rasterMatrix, rect);
+      tiles.push_back(v->second);
     }
   }
   if (rasterIter == iter)
@@ -151,15 +169,34 @@ std::vector<Rasterizer::Tile> rasterOrGetTiles(
   while (auto rt = rasterIter.next())
   {
     const int key = rt->first + rt->second * iter.column;
-    if (!iter.contains(rt->first, rt->second) && !cache.tileCache.find(key))
+    if (!iter.contains(rt->first, rt->second))
     {
-      const auto rect = SkRect::MakeXYWH(
-        rt->first * iter.tileWidth + cache.globalBound.left(),
-        rt->second * iter.tileHeight + cache.globalBound.top(),
-        iter.tileWidth,
-        iter.tileHeight);
-      auto v = cache.tileCache.insert(key, { nullptr, rect });
-      v->image = rasterTile(surface, rasterContext.picture, cache.rasterMatrix, rect);
+      auto tileState = cache.tileCache.find(key);
+      if (!tileState)
+      {
+        const auto rect = makeRect(
+          iter.tileWidth,
+          iter.tileHeight,
+          rt->first,
+          rt->second,
+          cache.globalBound.left(),
+          cache.globalBound.top());
+        auto v = cache.tileCache.insert(key, { true, { nullptr, rect } });
+        v->second.image = rasterTile(surface, rasterContext.picture, cache.rasterMatrix, rect);
+      }
+      else if (!tileState->first)
+      {
+        tileState->first = true;
+        const auto rect = makeRect(
+          iter.tileWidth,
+          iter.tileHeight,
+          rt->first,
+          rt->second,
+          cache.globalBound.left(),
+          cache.globalBound.top());
+        tileState->second.image =
+          rasterTile(surface, rasterContext.picture, cache.rasterMatrix, rect);
+      }
     }
   }
   return tiles;
@@ -204,7 +241,7 @@ public:
   {
     for (auto& c : cacheStack)
     {
-      c.invalid = true;
+      c.inval();
     }
   }
 
@@ -237,16 +274,15 @@ public:
     const SkMatrix&              totalMatrix,
     const SkRect&                bound)
   {
-    if (levelCache.invalid)
+    if (levelCache.isInval())
     {
       levelCache.rasterMatrix = totalMatrix;
       levelCache.rasterMatrix[SkMatrix::kMTransX] = 0;
       levelCache.rasterMatrix[SkMatrix::kMTransY] = 0;
       levelCache.globalBound = levelCache.rasterMatrix.mapRect(bound);
-      levelCache.tileCache.purge();
       levelCache.tileHeight = tileHeight;
       levelCache.tileWidth = tileWidth;
-      levelCache.invalid = false;
+      levelCache.reval();
     }
   }
 };
@@ -294,7 +330,7 @@ std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::o
   if (reason & CONTENT)
   {
     _->invalidateContent();
-    DEBUG("content changed");
+    DEBUG("content chacnged");
     const auto preCacheRect =
       clipRect.makeOutset(clipRect.width(), clipRect.height() * 3)
         .makeOffset(-totalMatrix.getTranslateX(), -totalMatrix.getTranslateY());
@@ -310,7 +346,7 @@ std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::o
     DEBUG("scale changed");
     if (lod < 0)
     {
-      currentLevelCache.invalid = true;
+      currentLevelCache.inval();
     }
     return reval(skv, skv);
   }
@@ -328,8 +364,8 @@ void RasterCacheTile::purge()
   VGG_IMPL(RasterCacheTile);
   for (auto& c : _->cacheStack)
   {
+    c.inval();
     c.tileCache.purge();
-    c.invalid = true;
   }
 }
 

@@ -34,42 +34,6 @@ class RasterCacheTile : public Rasterizer
   VGG_DECL_IMPL(RasterCacheTile);
 
 public:
-  using TileMap =
-    LRUCache<int, std::pair<bool, Rasterizer::Tile>>; // boolean indicates if the tile is valid
-  struct CacheState
-  {
-    SkMatrix rasterMatrix;
-    TileMap  tileCache;
-    SkRect   globalBound;
-    int      tileWidth;
-    int      tileHeight;
-    CacheState()
-      : tileCache(20)
-    {
-    }
-    void inval()
-    {
-      m_invalid = true;
-      // and invalid all tiles
-      for (auto it = tileCache.begin(); it != tileCache.end(); it++)
-      {
-        ASSERT(*it);
-        (*it)->value.first = false;
-      }
-    }
-    bool isInval() const
-    {
-      return m_invalid;
-    }
-
-    void reval()
-    {
-      m_invalid = false;
-    }
-
-  private:
-    bool m_invalid{ true };
-  };
   RasterCacheTile()
     : RasterCacheTile(1024, 1024)
   {

@@ -28,6 +28,42 @@
 namespace
 {
 
+struct CacheState
+{
+  using TileMap =
+    LRUCache<int, std::pair<bool, Rasterizer::Tile>>; // boolean indicates if the tile is valid
+  SkMatrix rasterMatrix;
+  TileMap  tileCache;
+  SkRect   globalBound;
+  int      tileWidth;
+  int      tileHeight;
+  CacheState()
+    : tileCache(20)
+  {
+  }
+  void inval()
+  {
+    m_invalid = true;
+    // and invalid all tiles
+    for (auto it = tileCache.begin(); it != tileCache.end(); it++)
+    {
+      ASSERT(*it);
+      (*it)->value.first = false;
+    }
+  }
+  bool isInval() const
+  {
+    return m_invalid;
+  }
+
+  void reval()
+  {
+    m_invalid = false;
+  }
+
+private:
+  bool m_invalid{ true };
+};
 struct TileIterator
 {
   TileIterator(const SkRect& clip, int tileW, int tileH, const SkRect& bound)
@@ -119,7 +155,7 @@ sk_sp<SkImage> rasterTile(
 std::vector<Rasterizer::Tile> rasterOrGetTiles(
   SkSurface*                       surface,
   const Rasterizer::RasterContext& rasterContext,
-  RasterCacheTile::CacheState&     cache,
+  CacheState&                      cache,
   TileIterator                     iter,
   TileIterator                     rasterIter)
 {
@@ -211,10 +247,10 @@ class RasterCacheTile__pImpl
   VGG_DECL_API(RasterCacheTile);
 
 public:
-  std::array<RasterCacheTile::CacheState, Zoomer::ZOOM_LEVEL_COUNT + 1> cacheStack;
-  const float                                                           tileWidth = 1024.f;
-  const float                                                           tileHeight = 1024.f;
-  sk_sp<SkSurface>                                                      surface;
+  std::array<CacheState, Zoomer::ZOOM_LEVEL_COUNT + 1> cacheStack;
+  const float                                          tileWidth = 1024.f;
+  const float                                          tileHeight = 1024.f;
+  sk_sp<SkSurface>                                     surface;
   RasterCacheTile__pImpl(RasterCacheTile* api, float w, float h)
     : q_ptr(api)
     , tileWidth(w)
@@ -269,10 +305,7 @@ public:
     return res;
   }
 
-  void revalidate(
-    RasterCacheTile::CacheState& levelCache,
-    const SkMatrix&              totalMatrix,
-    const SkRect&                bound)
+  void revalidate(CacheState& levelCache, const SkMatrix& totalMatrix, const SkRect& bound)
   {
     if (levelCache.isInval())
     {

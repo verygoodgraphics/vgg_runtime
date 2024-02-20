@@ -18,6 +18,7 @@
 #include "Layer/LRUCache.hpp"
 #include "Layer/VSkia.hpp"
 #include "Layer/Zoomer.hpp"
+#include "Utility/HelperMacro.hpp"
 #include "Utility/Log.hpp"
 
 #include <core/SkMatrix.h>
@@ -27,11 +28,14 @@ class SkSurface;
 class Zoomer;
 namespace VGG::layer
 {
+class RasterCacheTile__pImpl;
 class RasterCacheTile : public Rasterizer
 {
+  VGG_DECL_IMPL(RasterCacheTile);
+
 public:
   using TileMap = LRUCache<int, Rasterizer::Tile>;
-  struct LevelCache
+  struct CacheState
   {
     SkMatrix rasterMatrix;
     TileMap  tileCache;
@@ -39,7 +43,7 @@ public:
     int      tileWidth;
     int      tileHeight;
     bool     invalid{ true };
-    LevelCache()
+    CacheState()
       : tileCache(20)
     {
     }
@@ -49,15 +53,7 @@ public:
   {
   }
   RasterCacheTile(float tw, float th);
-
-  void purge() override
-  {
-    for (auto& c : m_cacheStack)
-    {
-      c.tileCache.purge();
-      c.invalid = true;
-    }
-  }
+  void purge() override;
   ~RasterCacheTile();
 
 protected:
@@ -68,52 +64,6 @@ protected:
     const SkRect&        clipRect,
     const RasterContext& rasterContext,
     void*                userData) override;
-
-private:
-  std::string printReason(uint32_t r)
-  {
-    std::string res;
-    if (r == 0)
-      return "";
-    if (r & ZOOM_TRANSLATION)
-    {
-      res += " ZOOM_TRANSLATION";
-    }
-    if (r & ZOOM_SCALE)
-    {
-      res += " ZOOM_SCALE";
-    }
-    if (r & VIEWPORT)
-    {
-      res += " VIEWPORT";
-    }
-    if (r & CONTENT)
-    {
-      res += " CONTENT";
-    }
-    return res;
-  }
-
-  void revalidate(
-    LevelCache&     levelCache,
-    const SkMatrix& totalMatrix,
-    int             tileW,
-    int             tileH,
-    const SkRect&   bound);
-  SkSurface* rasterSurface(GrRecordingContext* context);
-  void       invalidateContent()
-  {
-    for (auto& c : m_cacheStack)
-    {
-      c.invalid = true;
-    }
-  }
-  void hit(LevelCache& levelCache, const SkRect& clipBound, const SkRect& bound);
-
-  std::array<LevelCache, Zoomer::ZOOM_LEVEL_COUNT + 1> m_cacheStack;
-  const float                                          m_tileWidth = 1024.f;
-  const float                                          m_tileHeight = 1024.f;
-  sk_sp<SkSurface>                                     m_surface;
 };
 
 } // namespace VGG::layer

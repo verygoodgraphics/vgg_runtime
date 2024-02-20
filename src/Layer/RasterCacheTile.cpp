@@ -119,7 +119,7 @@ sk_sp<SkImage> rasterTile(
 std::vector<Rasterizer::Tile> rasterOrGetTiles(
   SkSurface*                       surface,
   const Rasterizer::RasterContext& rasterContext,
-  RasterCacheTile::LevelCache&     cache,
+  RasterCacheTile::CacheState&     cache,
   TileIterator                     iter,
   TileIterator                     rasterIter)
 {
@@ -169,40 +169,87 @@ std::vector<Rasterizer::Tile> rasterOrGetTiles(
 namespace VGG::layer
 {
 
-void RasterCacheTile::revalidate(
-  LevelCache&     levelCache,
-  const SkMatrix& totalMatrix,
-  int             tileW,
-  int             tileH,
-  const SkRect&   bound)
+class RasterCacheTile__pImpl
 {
-  if (levelCache.invalid)
-  {
-    levelCache.rasterMatrix = totalMatrix;
-    levelCache.rasterMatrix[SkMatrix::kMTransX] = 0;
-    levelCache.rasterMatrix[SkMatrix::kMTransY] = 0;
-    levelCache.globalBound = levelCache.rasterMatrix.mapRect(bound);
-    levelCache.tileCache.purge();
-    levelCache.tileHeight = tileH;
-    levelCache.tileWidth = tileW;
-    levelCache.invalid = false;
-  }
-}
+  VGG_DECL_API(RasterCacheTile);
 
-SkSurface* RasterCacheTile::rasterSurface(GrRecordingContext* context)
-{
-  if (!m_surface)
+public:
+  std::array<RasterCacheTile::CacheState, Zoomer::ZOOM_LEVEL_COUNT + 1> cacheStack;
+  const float                                                           tileWidth = 1024.f;
+  const float                                                           tileHeight = 1024.f;
+  sk_sp<SkSurface>                                                      surface;
+  RasterCacheTile__pImpl(RasterCacheTile* api, float w, float h)
+    : q_ptr(api)
+    , tileWidth(w)
+    , tileHeight(h)
   {
-    ASSERT(m_tileWidth > 0 && m_tileHeight > 0);
-    auto info = SkImageInfo::MakeN32Premul(m_tileWidth, m_tileHeight);
-    m_surface = SkSurfaces::RenderTarget(context, skgpu::Budgeted::kYes, info);
-    if (!m_surface)
+  }
+
+  SkSurface* rasterSurface(GrRecordingContext* context)
+  {
+    if (!surface)
     {
-      return nullptr;
+      ASSERT(tileWidth > 0 && tileHeight > 0);
+      auto info = SkImageInfo::MakeN32Premul(tileWidth, tileHeight);
+      surface = SkSurfaces::RenderTarget(context, skgpu::Budgeted::kYes, info);
+      if (!surface)
+      {
+        return nullptr;
+      }
+    }
+    return surface.get();
+  }
+
+  void invalidateContent()
+  {
+    for (auto& c : cacheStack)
+    {
+      c.invalid = true;
     }
   }
-  return m_surface.get();
-}
+
+  std::string printReason(uint32_t r)
+  {
+    std::string res;
+    if (r == 0)
+      return "";
+    if (r & Rasterizer::ZOOM_TRANSLATION)
+    {
+      res += " ZOOM_TRANSLATION";
+    }
+    if (r & Rasterizer::ZOOM_SCALE)
+    {
+      res += " ZOOM_SCALE";
+    }
+    if (r & Rasterizer::VIEWPORT)
+    {
+      res += " VIEWPORT";
+    }
+    if (r & Rasterizer::CONTENT)
+    {
+      res += " CONTENT";
+    }
+    return res;
+  }
+
+  void revalidate(
+    RasterCacheTile::CacheState& levelCache,
+    const SkMatrix&              totalMatrix,
+    const SkRect&                bound)
+  {
+    if (levelCache.invalid)
+    {
+      levelCache.rasterMatrix = totalMatrix;
+      levelCache.rasterMatrix[SkMatrix::kMTransX] = 0;
+      levelCache.rasterMatrix[SkMatrix::kMTransY] = 0;
+      levelCache.globalBound = levelCache.rasterMatrix.mapRect(bound);
+      levelCache.tileCache.purge();
+      levelCache.tileHeight = tileHeight;
+      levelCache.tileWidth = tileWidth;
+      levelCache.invalid = false;
+    }
+  }
+};
 
 std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::onRevalidateRaster(
   uint32_t             reason,
@@ -213,11 +260,12 @@ std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::o
   void*                userData)
 {
   // DEBUG("reason: %s", printReason(reason).c_str());
-  ASSERT(m_cacheStack.size() > 0);
-  ASSERT(lod < int(m_cacheStack.size()) - 1);
+  VGG_IMPL(RasterCacheTile);
+  ASSERT(_->cacheStack.size() > 0);
+  ASSERT(lod < int(_->cacheStack.size()) - 1);
 
-  size_t cacheIndex = lod < 0 ? m_cacheStack.size() - 1 : lod;
-  auto&  currentLevelCache = m_cacheStack[cacheIndex];
+  size_t cacheIndex = lod < 0 ? _->cacheStack.size() - 1 : lod;
+  auto&  currentLevelCache = _->cacheStack[cacheIndex];
 
   auto       hitMatrix = SkMatrix::I();
   const auto totalMatrix = rasterContext.globalMatrix * rasterContext.localMatrix;
@@ -226,26 +274,26 @@ std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::o
   const auto skv = clipRect.makeOffset(
     -totalMatrix.getTranslateX(),
     -totalMatrix.getTranslateY()); // clipRect * inv(hitMatrix)
-  auto reval = [&, this](const SkRect& clipRect, const SkRect& rasterRect)
+  auto reval = [&](const SkRect& clipRect, const SkRect& rasterRect)
     -> std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix>
   {
-    revalidate(currentLevelCache, totalMatrix, m_tileWidth, m_tileHeight, *rasterContext.bound);
-    auto iter = TileIterator(skv, m_tileWidth, m_tileHeight, currentLevelCache.globalBound);
+    _->revalidate(currentLevelCache, totalMatrix, *rasterContext.bound);
+    auto iter = TileIterator(skv, _->tileWidth, _->tileHeight, currentLevelCache.globalBound);
     auto rasterIter =
-      TileIterator(rasterRect, m_tileWidth, m_tileHeight, currentLevelCache.globalBound);
+      TileIterator(rasterRect, _->tileWidth, _->tileHeight, currentLevelCache.globalBound);
     if (!iter.valid())
     {
       DEBUG("no tile hit");
       return { reason, {}, hitMatrix };
     }
-    auto surface = rasterSurface(context);
+    auto surface = _->rasterSurface(context);
     auto tiles = rasterOrGetTiles(surface, rasterContext, currentLevelCache, iter, rasterIter);
     return { reason, std::move(tiles), hitMatrix };
   };
 
   if (reason & CONTENT)
   {
-    invalidateContent();
+    _->invalidateContent();
     DEBUG("content changed");
     const auto preCacheRect =
       clipRect.makeOutset(clipRect.width(), clipRect.height() * 3)
@@ -274,9 +322,19 @@ std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::o
   DEBUG("other changed");
   return reval(skv, skv);
 }
+
+void RasterCacheTile::purge()
+{
+  VGG_IMPL(RasterCacheTile);
+  for (auto& c : _->cacheStack)
+  {
+    c.tileCache.purge();
+    c.invalid = true;
+  }
+}
+
 RasterCacheTile::RasterCacheTile(float tw, float th)
-  : m_tileWidth(tw)
-  , m_tileHeight(th)
+  : d_ptr(new RasterCacheTile__pImpl(this, tw, th))
 {
 }
 

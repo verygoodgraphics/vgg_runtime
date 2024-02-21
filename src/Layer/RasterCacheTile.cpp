@@ -47,7 +47,7 @@ struct CacheState
     m_invalid = true;
   }
 
-  void revalidate(const Rasterizer::RasterContext& rasterContext, int tileW, int tileH)
+  void revalidate(const Rasterizer::RasterContext& rasterContext, const SkRect& clipRect)
   {
     if (!isInvalid())
       return;
@@ -55,8 +55,7 @@ struct CacheState
     rasterMatrix[SkMatrix::kMTransX] = 0;
     rasterMatrix[SkMatrix::kMTransY] = 0;
     rasterBound = rasterMatrix.mapRect(*rasterContext.bound);
-    tileHeight = tileH;
-    tileWidth = tileW;
+    calcTileSize(rasterBound.width(), rasterBound.height(), clipRect);
     for (auto it = tileCache.begin(); it != tileCache.end(); it++)
     {
       ASSERT(*it);
@@ -69,6 +68,29 @@ private:
   bool isInvalid() const
   {
     return m_invalid;
+  }
+
+  void calcTileSize(float w, float h, const SkRect& clipRect)
+  {
+    ASSERT(w > 0 && h > 0);
+    (void)clipRect;
+    int  newTileHeight = 0;
+    int  newTileWidth = 0;
+    auto length = [](float l, int v)
+    {
+      const float r = (l / v);
+      return r > 2.0 ? int(std::round(std::min(1024.f, l))) : std::min(3072, (int)l);
+    };
+    newTileWidth = length(w, clipRect.width());
+    newTileHeight = length(h, clipRect.height());
+    tileWidth = newTileWidth;
+    tileHeight = newTileHeight;
+    if (w / h > 3)
+    {
+      tileWidth = newTileHeight;
+      tileHeight = newTileWidth;
+    }
+    ASSERT(tileHeight > 0 && tileWidth > 0);
   }
 
   bool m_invalid{ true };
@@ -261,22 +283,18 @@ class RasterCacheTile__pImpl
 
 public:
   std::array<CacheState, Zoomer::ZOOM_LEVEL_COUNT + 1> cacheStack;
-  const float                                          tileWidth = 1024.f;
-  const float                                          tileHeight = 1024.f;
   sk_sp<SkSurface>                                     surface;
-  RasterCacheTile__pImpl(RasterCacheTile* api, float w, float h)
+  RasterCacheTile__pImpl(RasterCacheTile* api)
     : q_ptr(api)
-    , tileWidth(w)
-    , tileHeight(h)
   {
   }
 
-  SkSurface* rasterSurface(GrRecordingContext* context)
+  SkSurface* rasterSurface(GrRecordingContext* context, int w, int h)
   {
-    if (!surface)
+    ASSERT(w > 0 && h > 0);
+    if (!surface || surface->width() != w || surface->height() != h)
     {
-      ASSERT(tileWidth > 0 && tileHeight > 0);
-      auto info = SkImageInfo::MakeN32Premul(tileWidth, tileHeight);
+      auto info = SkImageInfo::MakeN32Premul(w, h);
       surface = SkSurfaces::RenderTarget(context, skgpu::Budgeted::kYes, info);
       if (!surface)
       {
@@ -345,7 +363,7 @@ std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::o
   auto reval = [&](const SkRect& clipRect, const SkRect& rasterRect)
     -> std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix>
   {
-    cache.revalidate(rasterContext, _->tileWidth, _->tileHeight);
+    cache.revalidate(rasterContext, clipRect);
     auto iter = TileIterator(skv, cache.tileWidth, cache.tileHeight, cache.rasterBound);
     auto rasterIter =
       TileIterator(rasterRect, cache.tileWidth, cache.tileHeight, cache.rasterBound);
@@ -354,15 +372,16 @@ std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::o
       DEBUG("no tile hit");
       return { reason, {}, hitMatrix };
     }
-    auto surface = _->rasterSurface(context);
+    auto surface = _->rasterSurface(context, cache.tileWidth, cache.tileHeight);
     auto tiles = rasterOrGetTiles(surface, rasterContext.picture, cache, iter, rasterIter);
     return { reason, std::move(tiles), hitMatrix };
   };
 
   if (reason & CONTENT)
   {
+    purge();
     _->invalidateContent();
-    DEBUG("content chacnged");
+    DEBUG("content changed");
     const auto preCacheRect =
       clipRect.makeOutset(clipRect.width(), clipRect.height() * 3)
         .makeOffset(-totalMatrix.getTranslateX(), -totalMatrix.getTranslateY());
@@ -400,8 +419,8 @@ void RasterCacheTile::purge()
   }
 }
 
-RasterCacheTile::RasterCacheTile(float tw, float th)
-  : d_ptr(new RasterCacheTile__pImpl(this, tw, th))
+RasterCacheTile::RasterCacheTile()
+  : d_ptr(new RasterCacheTile__pImpl(this))
 {
 }
 

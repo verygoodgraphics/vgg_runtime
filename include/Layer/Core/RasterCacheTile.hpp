@@ -34,11 +34,7 @@ class RasterCacheTile : public Rasterizer
   VGG_DECL_IMPL(RasterCacheTile);
 
 public:
-  RasterCacheTile()
-    : RasterCacheTile(1024, 1024)
-  {
-  }
-  RasterCacheTile(float tw, float th);
+  RasterCacheTile();
   void purge() override;
   ~RasterCacheTile();
 

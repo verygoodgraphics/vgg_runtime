@@ -20,6 +20,23 @@
 
 #include <nlohmann/json.hpp>
 
+namespace
+{
+
+const std::string* jsonFieldString(const nlohmann::json& json, const std::string& key)
+{
+  if (json.contains(key))
+  {
+    auto& rawJson = json[key];
+    auto  pString = rawJson.get_ptr<const nlohmann::json::string_t*>();
+    return pString;
+  }
+
+  return nullptr;
+}
+
+} // namespace
+
 namespace VGG
 {
 namespace Layout
@@ -180,6 +197,24 @@ bool isNodeWithId(const nlohmann::json& node, const std::string& id)
         return true;
       }
     }
+  }
+
+  return false;
+}
+
+bool isNodeWithKey(const nlohmann::json& json, const std::string& key)
+{
+  // For better performance, reduce json key string construction
+  static std::string s_overrideKey{ K_OVERRIDE_KEY };
+  if (auto pString = jsonFieldString(json, s_overrideKey); pString && *pString == key)
+  {
+    return true;
+  }
+
+  static std::string s_id{ K_ID };
+  if (auto pString = jsonFieldString(json, s_id); pString && *pString == key)
+  {
+    return true;
   }
 
   return false;

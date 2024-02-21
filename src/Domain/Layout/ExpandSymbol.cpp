@@ -889,9 +889,7 @@ nlohmann::json* ExpandSymbol::findChildObjectInTree(
     tmpInstanceIdStack.push_back(keyStack[0]);
 
     // 1. find by overrideKey first; 2. find by id
-    if (const auto& firstObjectId = join(tmpInstanceIdStack);
-        (json.contains(K_OVERRIDE_KEY) && json[K_OVERRIDE_KEY] == firstObjectId) ||
-        (json.contains(K_ID) && json[K_ID] == firstObjectId))
+    if (const auto& firstObjectId = join(tmpInstanceIdStack); isNodeWithKey(json, firstObjectId))
     {
       if (keyStack.size() == 1) // is last key
       {

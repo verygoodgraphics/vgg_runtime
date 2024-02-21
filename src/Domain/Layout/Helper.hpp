@@ -44,6 +44,7 @@ bool isContourPathNode(const nlohmann::json& json);
 bool isVectorNetworkGroupNode(const nlohmann::json& json);
 
 bool isNodeWithId(const nlohmann::json& json, const std::string& id);
+bool isNodeWithKey(const nlohmann::json& json, const std::string& key);
 
 const nlohmann::json* getElementInTree(const nlohmann::json& tree, const std::string& id);
 

@@ -94,7 +94,7 @@ protected:
       Config::readGlobalConfig(file);
     }
 
-    m_scene = std::make_shared<AppScene>(std::make_unique<RasterCacheTile>(1024, 1024));
+    m_scene = std::make_shared<AppScene>(std::make_unique<RasterCacheTile>());
     // m_scene = std::make_shared<AppScene>();
     m_scene->setZoomerListener(std::make_shared<AppZoomer>());
 

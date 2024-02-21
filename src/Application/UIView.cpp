@@ -34,7 +34,7 @@ using namespace nlohmann;
 constexpr auto K_EMPTY_STRING = "";
 
 UIView::UIView()
-  : AppScene(std::make_unique<VGG::layer::RasterCacheTile>(1024, 1024))
+  : AppScene(std::make_unique<VGG::layer::RasterCacheTile>())
 {
   setZoomerListener(std::make_shared<app::AppZoomer>());
 }

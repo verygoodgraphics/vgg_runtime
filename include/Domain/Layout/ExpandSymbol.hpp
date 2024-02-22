@@ -58,8 +58,8 @@ class ExpandSymbol
   nlohmann::json           m_tmpOutDesignJson;
   std::vector<std::string> m_tmpDirtyNodeIds;
 
-  std::unordered_map<std::string, nlohmann::json*> m_instanceIdToJsonMap;
-  std::unordered_map<std::string, nlohmann::json*> m_instanceKeyToJsonMap;
+  std::unordered_map<std::string, nlohmann::json*> m_idToJsonMap;
+  std::unordered_map<std::string, nlohmann::json*> m_keyToJsonMap;
 
 public:
   ExpandSymbol(
@@ -147,7 +147,7 @@ private:
     nlohmann::json&                 json,
     const std::vector<std::string>& keyStack,
     std::vector<std::string>*       outInstanceIdStack);
-  nlohmann::json* findInstance(const std::string& id);
+  nlohmann::json* findJsonNodeInCache(const std::string& id);
 
   void makeTreeKeysUnique(nlohmann::json& json, const std::string& idPrefix);
   void makeNodeKeysUnique(nlohmann::json& json, const std::string& idPrefix);
@@ -173,6 +173,7 @@ private:
   nlohmann::json generateOutLayoutJson();
 
   void resetInstanceInfo(nlohmann::json& instance);
+  void removeInvalidCache(nlohmann::json& json);
 };
 } // namespace Layout
 

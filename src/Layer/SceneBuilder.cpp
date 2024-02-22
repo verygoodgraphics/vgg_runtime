@@ -636,6 +636,11 @@ PaintNodePtr SceneBuilder::makeContour(
   CoordinateConvert::convertCoordinateSystem(contour, totalMatrix);
   auto ptr = std::make_shared<Contour>(contour);
   ptr->cornerSmooth = getOptional<float>(parent, "cornerSmoothing").value_or(0.f);
+  if (!ptr->closed && !ptr->empty())
+  {
+    ptr->back().radius = 0;
+    ptr->front().radius = 0;
+  }
   p->setContourData(std::move(ptr));
   return p;
 }

@@ -58,6 +58,9 @@ class ExpandSymbol
   nlohmann::json           m_tmpOutDesignJson;
   std::vector<std::string> m_tmpDirtyNodeIds;
 
+  std::unordered_map<std::string, nlohmann::json*> m_instanceIdToJsonMap;
+  std::unordered_map<std::string, nlohmann::json*> m_instanceKeyToJsonMap;
+
 public:
   ExpandSymbol(
     const nlohmann::json& designJson,
@@ -144,6 +147,7 @@ private:
     nlohmann::json&                 json,
     const std::vector<std::string>& keyStack,
     std::vector<std::string>*       outInstanceIdStack);
+  nlohmann::json* findInstance(const std::string& id);
 
   void makeTreeKeysUnique(nlohmann::json& json, const std::string& idPrefix);
   void makeNodeKeysUnique(nlohmann::json& json, const std::string& idPrefix);

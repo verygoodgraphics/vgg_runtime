@@ -266,10 +266,10 @@ void ExpandSymbol::expandInstance(
           auto                     prefix = join(idStackWithoutSelf) + K_SEPARATOR;
           makeNodeKeysUnique(json, prefix);
 
-          m_instanceIdToJsonMap[json[K_ID]] = &json;
+          m_idToJsonMap[json[K_ID]] = &json;
           if (json.contains(K_OVERRIDE_KEY))
           {
-            m_instanceKeyToJsonMap[json[K_OVERRIDE_KEY]] = &json;
+            m_keyToJsonMap[json[K_OVERRIDE_KEY]] = &json;
           }
         }
 
@@ -895,13 +895,19 @@ nlohmann::json* ExpandSymbol::findChildObjectInTree(
   // 1. find by overrideKey first; 2. find by id
   const auto&     firstObjectId = join(tmpInstanceIdStack);
   nlohmann::json* target = nullptr;
-  if (auto instance = findInstance(firstObjectId))
+  if (auto node = findJsonNodeInCache(firstObjectId))
   {
-    target = instance;
+    target = node;
   }
   else if (json.is_object() && isNodeWithKey(json, firstObjectId))
   {
     target = &json;
+
+    m_idToJsonMap[json[K_ID]] = &json;
+    if (json.contains(K_OVERRIDE_KEY))
+    {
+      m_keyToJsonMap[json[K_OVERRIDE_KEY]] = &json;
+    }
   }
 
   if (target)
@@ -935,13 +941,13 @@ nlohmann::json* ExpandSymbol::findChildObjectInTree(
   return nullptr;
 }
 
-nlohmann::json* ExpandSymbol::findInstance(const std::string& id)
+nlohmann::json* ExpandSymbol::findJsonNodeInCache(const std::string& id)
 {
-  if (auto it = m_instanceKeyToJsonMap.find(id); it != m_instanceKeyToJsonMap.end())
+  if (auto it = m_keyToJsonMap.find(id); it != m_keyToJsonMap.end())
   {
     return it->second;
   }
-  if (auto it = m_instanceIdToJsonMap.find(id); it != m_instanceIdToJsonMap.end())
+  if (auto it = m_idToJsonMap.find(id); it != m_idToJsonMap.end())
   {
     return it->second;
   }
@@ -1529,6 +1535,8 @@ void ExpandSymbol::resetInstanceInfo(nlohmann::json& instance)
     // Keep own layout rule; Remove children layout rule only;
     removeInvalidLayoutRule(instance[K_CHILD_OBJECTS]);
 
+    removeInvalidCache(instance[K_CHILD_OBJECTS]);
+
     if (auto node = m_layout->layoutTree()->findDescendantNodeById(instance[K_ID]))
     {
       node->removeAllChildren(); // remove all children
@@ -1538,4 +1546,26 @@ void ExpandSymbol::resetInstanceInfo(nlohmann::json& instance)
 
   // restore to symbolInstance to expand again
   instance[K_CLASS] = K_SYMBOL_INSTANCE;
+}
+
+void ExpandSymbol::removeInvalidCache(nlohmann::json& json)
+{
+  if (!json.is_object() && !json.is_array())
+  {
+    return;
+  }
+
+  if (json.is_object() && json.contains(K_ID))
+  {
+    m_idToJsonMap.erase(json[K_ID]);
+    if (json.contains(K_OVERRIDE_KEY))
+    {
+      m_idToJsonMap.erase(json[K_OVERRIDE_KEY]);
+    }
+  }
+
+  for (auto& el : json.items())
+  {
+    removeInvalidCache(el.value());
+  }
 }

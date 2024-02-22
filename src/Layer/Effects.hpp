@@ -104,14 +104,12 @@ inline sk_sp<SkShader> makeGradientRadial(const Bound& bound, const G& g)
 {
   if (g.stops.empty())
     return nullptr;
-  auto minPosition = g.stops.front().position;
-  auto maxPosition = g.stops.back().position;
 
-  auto     f = bound.map(bound.size() * g.from);
-  auto     t = bound.map(bound.size() * g.to);
-  auto     start = glm::mix(f, t, minPosition);
-  auto     end = glm::mix(f, t, maxPosition);
-  SkScalar r = glm::distance(end, start);
+  auto       f = bound.map(bound.size() * g.from);
+  auto       t = bound.map(bound.size() * g.to);
+  SkScalar   r = glm::distance(f, t);
+  const auto minPosition = 0.f;
+  const auto maxPosition = 1.f;
 
   std::vector<SkColor>  colors;
   std::vector<SkScalar> positions;
@@ -123,7 +121,7 @@ inline sk_sp<SkShader> makeGradientRadial(const Bound& bound, const G& g)
   }
   auto mat = makeMatrix(bound, g.from, g.to, g.ellipse);
   return SkGradientShader::MakeRadial(
-    { start.x, start.y },
+    { f.x, f.y },
     r,
     colors.data(),
     positions.data(),

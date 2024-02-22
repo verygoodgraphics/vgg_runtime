@@ -328,8 +328,6 @@ sk_sp<SkShader> makeGradientLinear(const Bound& bound, const GradientLinear& g)
     return nullptr;
   auto minPosition = g.stops.front().position;
   auto maxPosition = g.stops.back().position;
-  // clampPairByLimits(minPosition, maxPosition, 0.f, 1.f, 0.0001f);
-
   auto f = bound.map(bound.size() * g.from);
   auto t = bound.map(bound.size() * g.to);
   auto start = glm::mix(f, t, minPosition);

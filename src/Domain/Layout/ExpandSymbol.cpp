@@ -265,6 +265,12 @@ void ExpandSymbol::expandInstance(
                                                        instanceIdStack.end() - 1 };
           auto                     prefix = join(idStackWithoutSelf) + K_SEPARATOR;
           makeNodeKeysUnique(json, prefix);
+
+          m_instanceIdToJsonMap[json[K_ID]] = &json;
+          if (json.contains(K_OVERRIDE_KEY))
+          {
+            m_instanceKeyToJsonMap[json[K_OVERRIDE_KEY]] = &json;
+          }
         }
 
         std::string instanceIdWithPrefix = json[K_ID];
@@ -873,39 +879,47 @@ nlohmann::json* ExpandSymbol::findChildObjectInTree(
     return nullptr;
   }
 
-  if (json.is_object())
+  std::vector<std::string>  tmpInstanceIdStack;
+  std::vector<std::string>* theOutInstanceIdStack;
+  if (outInstanceIdStack)
   {
-    std::vector<std::string>  tmpInstanceIdStack;
-    std::vector<std::string>* theOutInstanceIdStack;
-    if (outInstanceIdStack)
+    tmpInstanceIdStack = *outInstanceIdStack;
+    theOutInstanceIdStack = outInstanceIdStack;
+  }
+  else
+  {
+    theOutInstanceIdStack = &tmpInstanceIdStack;
+  }
+  tmpInstanceIdStack.push_back(keyStack[0]);
+
+  // 1. find by overrideKey first; 2. find by id
+  const auto&     firstObjectId = join(tmpInstanceIdStack);
+  nlohmann::json* target = nullptr;
+  if (auto instance = findInstance(firstObjectId))
+  {
+    target = instance;
+  }
+  else if (json.is_object() && isNodeWithKey(json, firstObjectId))
+  {
+    target = &json;
+  }
+
+  if (target)
+  {
+    if (keyStack.size() == 1) // is last key
     {
-      tmpInstanceIdStack = *outInstanceIdStack;
-      theOutInstanceIdStack = outInstanceIdStack;
+      return target;
     }
     else
     {
-      theOutInstanceIdStack = &tmpInstanceIdStack;
-    }
-    tmpInstanceIdStack.push_back(keyStack[0]);
+      // the id is already prefixed: xxx__yyy__zzz;
+      const auto originalId = split((*target)[K_ID]).back();
+      theOutInstanceIdStack->push_back(originalId);
 
-    // 1. find by overrideKey first; 2. find by id
-    if (const auto& firstObjectId = join(tmpInstanceIdStack); isNodeWithKey(json, firstObjectId))
-    {
-      if (keyStack.size() == 1) // is last key
-      {
-        return &json;
-      }
-      else
-      {
-        // the id is already prefixed: xxx__yyy__zzz;
-        const auto originalId = split(json[K_ID]).back();
-        theOutInstanceIdStack->push_back(originalId);
-
-        return findChildObjectInTree(
-          json,
-          { keyStack.begin() + 1, keyStack.end() },
-          theOutInstanceIdStack);
-      }
+      return findChildObjectInTree(
+        *target,
+        { keyStack.begin() + 1, keyStack.end() },
+        theOutInstanceIdStack);
     }
   }
 
@@ -918,6 +932,19 @@ nlohmann::json* ExpandSymbol::findChildObjectInTree(
     }
   }
 
+  return nullptr;
+}
+
+nlohmann::json* ExpandSymbol::findInstance(const std::string& id)
+{
+  if (auto it = m_instanceKeyToJsonMap.find(id); it != m_instanceKeyToJsonMap.end())
+  {
+    return it->second;
+  }
+  if (auto it = m_instanceIdToJsonMap.find(id); it != m_instanceIdToJsonMap.end())
+  {
+    return it->second;
+  }
   return nullptr;
 }
 
@@ -1052,36 +1079,49 @@ nlohmann::json* ExpandSymbol::findChildObject(
   const nlohmann::json&           overrideItem,
   std::vector<std::string>&       outChildInstanceIdStack)
 {
-  auto        instanceMasterId = instance[K_MASTER_ID];
-  std::string masterOverrideKey;
-  if (m_masters.find(instanceMasterId) != m_masters.end())
-  {
-    auto& masterJson = m_masters[instanceMasterId];
-    masterOverrideKey = masterJson.value(K_OVERRIDE_KEY, K_EMPTY_STRING);
-  }
-
   auto& objectIdPaths = overrideItem[K_OBJECT_ID];
   if (!objectIdPaths.is_array() || objectIdPaths.empty())
   {
     return nullptr;
   }
-  else if (
-    objectIdPaths.size() == 1 &&
-    (objectIdPaths[0] == instanceMasterId || objectIdPaths[0] == masterOverrideKey))
+
+  if (objectIdPaths.size() == 1)
   {
-    outChildInstanceIdStack = instanceIdStack;
-    return &instance;
-  }
-  else
-  {
-    outChildInstanceIdStack = instanceIdStack;
-    std::vector<std::string> keyStack;
-    for (auto& keyJson : objectIdPaths) // overrideKey or id
+    auto instanceMasterId = instance[K_MASTER_ID];
+    bool found = false;
+    if (objectIdPaths[0] == instanceMasterId)
     {
-      keyStack.push_back(keyJson);
+      found = true;
     }
-    return findChildObjectInTree(instance[K_CHILD_OBJECTS], keyStack, &outChildInstanceIdStack);
+    else
+    {
+      std::string masterOverrideKey;
+      if (m_masters.find(instanceMasterId) != m_masters.end())
+      {
+        auto& masterJson = m_masters[instanceMasterId];
+        masterOverrideKey = masterJson.value(K_OVERRIDE_KEY, K_EMPTY_STRING);
+      }
+
+      if (objectIdPaths[0] == masterOverrideKey)
+      {
+        found = true;
+      }
+    }
+
+    if (found)
+    {
+      outChildInstanceIdStack = instanceIdStack;
+      return &instance;
+    }
   }
+
+  outChildInstanceIdStack = instanceIdStack;
+  std::vector<std::string> keyStack;
+  for (auto& keyJson : objectIdPaths) // overrideKey or id
+  {
+    keyStack.push_back(keyJson);
+  }
+  return findChildObjectInTree(instance[K_CHILD_OBJECTS], keyStack, &outChildInstanceIdStack);
 }
 
 bool ExpandSymbol::applyReferenceOverride(

@@ -225,8 +225,10 @@ inline void populateSkPaint(
 inline void populateSkPaint(const Border& border, const SkRect& bound, SkPaint& paint)
 {
   paint.setStyle(SkPaint::kStroke_Style);
-  paint.setPathEffect(
-    SkDashPathEffect::Make(border.dashedPattern.data(), border.dashedPattern.size(), 0));
+  paint.setPathEffect(SkDashPathEffect::Make(
+    border.dashedPattern.data(),
+    border.dashedPattern.size(),
+    border.dashedOffset));
   paint.setStrokeJoin(toSkPaintJoin(border.lineJoinStyle));
   paint.setStrokeCap(toSkPaintCap(border.lineCapStyle));
   paint.setStrokeMiter(border.miterLimit);

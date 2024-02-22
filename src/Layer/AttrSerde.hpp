@@ -359,6 +359,10 @@ inline void from_json(const json& j, Border& x)
   x.contextSettings = j.value("contextSettings", ContextSetting());
   x.dashedOffset = j.value("dashedOffset", 0.f);
   x.dashedPattern = j.value("dashedPattern", std::vector<float>());
+  if (x.dashedPattern.size() % 2 != 0)
+  {
+    x.dashedPattern.insert(x.dashedPattern.end(), x.dashedPattern.begin(), x.dashedPattern.end());
+  }
   x.flat = j.value("flat", 0.f);
   x.isEnabled = j.value("isEnabled", false);
   x.lineCapStyle = j.value("lineCapStyle", ELineCap::LC_BUTT);

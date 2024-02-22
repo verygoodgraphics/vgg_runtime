@@ -76,20 +76,24 @@ private:
     (void)clipRect;
     int  newTileHeight = 0;
     int  newTileWidth = 0;
-    auto length = [](float l, int v)
+    auto length = [](float l, int v, int n)
     {
-      const float r = (l / v);
-      return r > 2.0 ? int(std::round(std::min(1024.f, l))) : std::min(3072, (int)l);
+      constexpr int MAX_TILE_SIZE = 3072;
+      constexpr int MIN_TILE_SIZE = 768;
+      const int     a = std::max(std::floor(n * l / v), 1.f);
+      return std::ceil(std::max(std::min(MAX_TILE_SIZE, int(l / a)), MIN_TILE_SIZE));
     };
-    newTileWidth = length(w, clipRect.width());
-    newTileHeight = length(h, clipRect.height());
-    tileWidth = newTileWidth;
+    newTileWidth = length(w, clipRect.width(), 2);
+    newTileHeight = length(h, clipRect.height(), 4);
+    tileWidth = newTileWidth, clipRect.width();
     tileHeight = newTileHeight;
     if (w / h > 3)
     {
       tileWidth = newTileHeight;
       tileHeight = newTileWidth;
     }
+    tileWidth = w < clipRect.width() ? std::ceil(w) : tileWidth;
+    tileHeight = h < clipRect.height() ? std::ceil(h) : tileHeight;
     ASSERT(tileHeight > 0 && tileWidth > 0);
   }
 

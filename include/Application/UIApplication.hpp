@@ -49,12 +49,7 @@ class UIApplication : public app::EventListener
   bool m_firstRender{ true };
 
 public:
-  void setLayer(app::AppRender* layer)
-  {
-    ASSERT(layer);
-    m_layer = layer;
-  }
-
+  void setLayer(app::AppRender* layer);
   void setView(std::shared_ptr<UIView> view);
 
   void setController(std::shared_ptr<Controller> controller)

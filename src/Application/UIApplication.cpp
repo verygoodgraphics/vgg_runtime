@@ -141,3 +141,13 @@ bool UIApplication::handleKeyEvent(VKeyboardEvent evt)
 
   return false;
 }
+
+void UIApplication::setLayer(app::AppRender* layer)
+{
+  ASSERT(layer);
+  m_layer = layer;
+
+#ifdef EMSCRIPTEN
+  m_layer->setSamplingOptions(SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNearest));
+#endif
+}

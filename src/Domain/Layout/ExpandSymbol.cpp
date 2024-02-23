@@ -1560,7 +1560,7 @@ void ExpandSymbol::removeInvalidCache(nlohmann::json& json)
     m_idToJsonMap.erase(json[K_ID]);
     if (json.contains(K_OVERRIDE_KEY))
     {
-      m_idToJsonMap.erase(json[K_OVERRIDE_KEY]);
+      m_keyToJsonMap.erase(json[K_OVERRIDE_KEY]);
     }
   }
 

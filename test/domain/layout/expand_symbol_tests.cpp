@@ -12,7 +12,9 @@
 #include <gtest/gtest.h>
 
 using namespace VGG;
-using namespace VGG::Layout;
+
+namespace VGG::Layout
+{
 
 class VggExpandSymbolTestSuite : public ::testing::Test
 {
@@ -811,3 +813,21 @@ TEST_F(VggExpandSymbolTestSuite, VariableString)
     EXPECT_TRUE(name == "Star 1");
   }
 }
+
+TEST_F(VggExpandSymbolTestSuite, RemoveInvalidJsonCache)
+{
+  // Given
+  std::string  designFilePath = "testDataDir/symbol/overrideKey/design.json";
+  auto         designJson = Helper::load_json(designFilePath);
+  ExpandSymbol sut{ designJson };
+
+  // When
+  auto result = sut.run();
+
+  // Then
+  // removeInvalidCache is called, and the cache size is reduced
+  EXPECT_EQ(sut.m_idToJsonMap.size(), 2);
+  EXPECT_EQ(sut.m_keyToJsonMap.size(), 1);
+}
+
+} // namespace VGG::Layout

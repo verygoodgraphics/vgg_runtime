@@ -43,6 +43,8 @@ struct Rule;
 
 class ExpandSymbol
 {
+  friend class VggExpandSymbolTestSuite_RemoveInvalidJsonCache_Test;
+
   using RuleMap = std::unordered_map<std::string, std::shared_ptr<Internal::Rule::Rule>>;
   using RuleMapPtr = std::shared_ptr<RuleMap>;
 

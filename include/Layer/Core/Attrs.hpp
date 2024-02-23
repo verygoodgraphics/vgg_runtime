@@ -62,7 +62,7 @@ struct ImageFilter
   {
     if (
       exposure != 0.f || contrast != 0.f || saturation != 0.f || temperature != 0.f ||
-      tint != 0.f || highlight != 0.f || shadow != 0.f)
+      tint != 0.f || highlight != 0.f || shadow != 0.f || hue != 0.f)
       return false;
     return true;
   }

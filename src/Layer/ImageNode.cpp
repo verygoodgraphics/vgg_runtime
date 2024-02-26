@@ -99,7 +99,7 @@ void ImageNode::paintFill(
   Renderer*            renderer,
   sk_sp<SkBlender>     blender,
   sk_sp<SkImageFilter> imageFilter,
-  const SkPath&        path)
+  const Shape&         path)
 {
   (void)path;
   VGG_IMPL(ImageNode)
@@ -117,7 +117,8 @@ void ImageNode::paintFill(
       if (mask.isEmpty() == false)
       {
         canvas->save();
-        canvas->clipPath(mask);
+        // canvas->clipPath(mask);
+        mask.clip(canvas, SkClipOp::kIntersect);
         hasMask = true;
       }
     }

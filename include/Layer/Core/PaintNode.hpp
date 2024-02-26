@@ -21,6 +21,7 @@
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/Mask.hpp"
 #include "Layer/Core/Transform.hpp"
+#include "Layer/Core/Shape.hpp"
 #include "Layer/Config.hpp"
 
 #include <glm/matrix.hpp>
@@ -232,19 +233,19 @@ protected:
   Mask           makeMaskBy(EBoolOp maskOp, Renderer* renderer);
 
   virtual void drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender);
-  virtual void drawRawStyle(Painter& painter, const SkPath& path, sk_sp<SkBlender> blender);
+  virtual void drawRawStyle(Painter& painter, const Shape& path, sk_sp<SkBlender> blender);
 
   Bound onRevalidate() override;
 
 protected:
   // Style
   virtual SkPath stylePath();
-  void           paintStyle(Renderer* renderer, const SkPath& path, const SkPath& mask);
+  void           paintStyle(Renderer* renderer, const Shape& path, const Shape& mask);
 
   [[deprecated]] virtual void paintFill(
     Renderer*            renderer,
     sk_sp<SkBlender>     blender,
     sk_sp<SkImageFilter> imageFilter,
-    const SkPath&        path); // TODO:: only for ImageNode overriding
+    const Shape&         path); // TODO:: only for ImageNode overriding
 };
 } // namespace VGG::layer

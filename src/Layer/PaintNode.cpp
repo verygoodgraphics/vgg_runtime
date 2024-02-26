@@ -20,6 +20,7 @@
 #include "Renderer.hpp"
 #include "PaintNodePrivate.hpp"
 #include "Layer/Core/PaintNode.hpp"
+#include "Layer/Core/Shape.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/TreeNode.hpp"
 #include "glm/ext/matrix_transform.hpp"
@@ -172,7 +173,7 @@ void PaintNode::paintPass(Renderer* renderer, int zorder)
   VGG_IMPL(PaintNode);
   if (!_->path)
   {
-    _->path = asOutlineMask(0).outlineMask;
+    _->path = Shape(asOutlineMask(0).outlineMask);
   }
   if (_->path->isEmpty())
   {
@@ -180,7 +181,7 @@ void PaintNode::paintPass(Renderer* renderer, int zorder)
   }
   if (!_->mask)
   {
-    _->mask = makeMaskBy(BO_INTERSECTION, renderer).outlineMask;
+    _->mask = Shape(makeMaskBy(BO_INTERSECTION, renderer).outlineMask);
   }
 
   _->ensureAlphaMask(renderer);
@@ -394,7 +395,7 @@ void PaintNode::drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
   }
 }
 
-void PaintNode::drawRawStyle(Painter& painter, const SkPath& path, sk_sp<SkBlender> blender)
+void PaintNode::drawRawStyle(Painter& painter, const Shape& path, sk_sp<SkBlender> blender)
 {
   d_ptr->drawRawStyleImpl(painter, path, std::move(blender));
 }
@@ -765,7 +766,7 @@ SkPath PaintNode::stylePath()
   return skPath;
 }
 
-void PaintNode::paintStyle(Renderer* renderer, const SkPath& path, const SkPath& outlineMask)
+void PaintNode::paintStyle(Renderer* renderer, const Shape& path, const Shape& outlineMask)
 {
   VGG_IMPL(PaintNode);
   Painter painter(renderer);
@@ -777,9 +778,10 @@ void PaintNode::paintStyle(Renderer* renderer, const SkPath& path, const SkPath&
     // 1. normal drawing
     if (blurType)
     {
-      SkPath res = path;
+      Shape res = path;
       if (!outlineMask.isEmpty())
-        Op(res, outlineMask, SkPathOp::kIntersect_SkPathOp, &res);
+        res.op(outlineMask, EBoolOp::BO_INTERSECTION);
+      // Op(res, outlineMask, SkPathOp::kIntersect_SkPathOp, &res);
       if (*blurType == BT_GAUSSIAN)
         painter.blurContentBegin(blur.radius, blur.radius, frameBound(), nullptr, 0);
       else if (*blurType == BT_BACKGROUND)
@@ -791,13 +793,15 @@ void PaintNode::paintStyle(Renderer* renderer, const SkPath& path, const SkPath&
     }
     if (!outlineMask.isEmpty())
     {
-      painter.beginClip(outlineMask);
+      // painter.beginClip(outlineMask); // TODO::
+      painter.canvas()->save();
+      outlineMask.clip(painter.renderer()->canvas(), SkClipOp::kIntersect);
     }
     auto blender = SkBlender::Mode(SkBlendMode::kSrcOver);
     drawRawStyle(painter, path, blender);
     if (!outlineMask.isEmpty())
     {
-      painter.endClip();
+      painter.canvas()->restore();
     }
     if (blurType)
     {
@@ -830,7 +834,7 @@ void PaintNode::paintFill(
   Renderer*            renderer,
   sk_sp<SkBlender>     blender,
   sk_sp<SkImageFilter> imageFilter,
-  const SkPath&        path)
+  const Shape&         path)
 {
   Painter             painter(renderer);
   sk_sp<SkMaskFilter> blur;

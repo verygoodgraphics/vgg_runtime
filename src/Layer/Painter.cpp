@@ -36,7 +36,7 @@ sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound& bound)
 }
 
 void Painter::drawPathBorder(
-  const SkPath&        skPath,
+  const Shape&         skPath,
   const Bound&         bound,
   const Border&        b,
   sk_sp<SkImageFilter> imageFilter,
@@ -49,24 +49,27 @@ void Painter::drawPathBorder(
   populateSkPaint(b, toSkRect(bound), strokePen);
   bool  inCenter = true;
   float strokeWidth = b.thickness;
-  if (b.position == PP_INSIDE && skPath.isLastContourClosed())
+  if (b.position == PP_INSIDE && skPath.isClosed())
   {
     // inside
     strokeWidth = 2.f * b.thickness;
     m_renderer->canvas()->save();
-    m_renderer->canvas()->clipPath(skPath, SkClipOp::kIntersect);
+    skPath.clip(m_renderer->canvas(), SkClipOp::kIntersect);
+    // m_renderer->canvas()->clipPath(skPath, SkClipOp::kIntersect);
     inCenter = false;
   }
-  else if (b.position == PP_OUTSIDE && skPath.isLastContourClosed())
+  else if (b.position == PP_OUTSIDE && skPath.isClosed())
   {
     // outside
     strokeWidth = 2.f * b.thickness;
     m_renderer->canvas()->save();
-    m_renderer->canvas()->clipPath(skPath, SkClipOp::kDifference);
+    // m_renderer->canvas()->clipPath(skPath, SkClipOp::kDifference);
+    skPath.clip(m_renderer->canvas(), SkClipOp::kDifference);
     inCenter = false;
   }
   strokePen.setStrokeWidth(strokeWidth);
-  m_renderer->canvas()->drawPath(skPath, strokePen);
+  // m_renderer->canvas()->drawPath(skPath, strokePen);
+  skPath.draw(m_renderer->canvas(), strokePen);
   if (!inCenter)
   {
     m_renderer->canvas()->restore();
@@ -74,9 +77,10 @@ void Painter::drawPathBorder(
 
   if (false)
   {
-    std::vector<SkPoint> pts(skPath.countPoints());
+    auto                 pt = skPath.asPath();
+    std::vector<SkPoint> pts(pt.countPoints());
     SkPaint              p;
-    skPath.getPoints(pts.data(), skPath.countPoints());
+    pt.getPoints(pts.data(), pts.size());
     p.setStrokeWidth(2);
     p.setColor(SK_ColorRED);
     SkFont a;
@@ -139,7 +143,7 @@ void Painter::drawInnerShadow(
 }
 
 void Painter::drawFill(
-  const SkPath&        skPath,
+  const Shape&         skPath,
   const Bound&         bound,
   const Fill&          f,
   sk_sp<SkImageFilter> imageFilter,
@@ -153,5 +157,6 @@ void Painter::drawFill(
   fillPen.setImageFilter(imageFilter);
   fillPen.setMaskFilter(mask);
   populateSkPaint(f.type, f.contextSettings, toSkRect(bound), fillPen);
-  m_renderer->canvas()->drawPath(skPath, fillPen);
+  // m_renderer->canvas()->drawPath(skPath, fillPen);
+  skPath.draw(m_renderer->canvas(), fillPen);
 }

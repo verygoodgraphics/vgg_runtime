@@ -71,7 +71,7 @@ public:
 
 protected:
   void  drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender) override;
-  void  drawRawStyle(Painter& painter, const SkPath& path, sk_sp<SkBlender> blender) override;
+  void  drawRawStyle(Painter& painter, const Shape& path, sk_sp<SkBlender> blender) override;
   Bound onRevalidate() override;
 };
 

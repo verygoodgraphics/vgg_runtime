@@ -69,7 +69,8 @@ struct MaskObject
     }
   };
   std::vector<MaskData> components;
-  SkPath                contour;
+  // SkPath                contour;
+  Shape                 contour;
 };
 
 struct LayerContextGuard
@@ -123,63 +124,35 @@ class PaintNode__pImpl // NOLINT
   VGG_DECL_API(PaintNode);
 
 public:
-  Bound                     bound;
-  Transform                 transform;
-  std::string               guid{};
-  std::vector<std::string>  maskedBy{};
-  std::vector<AlphaMask>    alphaMaskBy;
-  Mask                      outlineMask;
-  EMaskType                 maskType{ MT_NONE };
-  EMaskShowType             maskShowType{ MST_INVISIBLE };
-  EBoolOp                   clipOperator{ BO_NONE };
-  EOverflow                 overflow{ OF_HIDDEN };
-  EWindingType              windingRule{ WR_EVEN_ODD };
-  Style                     style;
-  ContextSetting            contextSetting;
-  EObjectType                type;
-  bool                      visible{ true };
-  ContourPtr                contour;
-  PaintOption               paintOption;
-  ContourOption             maskOption;
-  std::optional<SkPath>     path;
-  std::optional<SkPath>     mask;
-  std::optional<MaskObject> alphaMask;
-  LayerContextGuard         layerContextGuard;
+  Bound                            bound;
+  Transform                        transform;
+  std::string                      guid{};
+  std::vector<std::string>         maskedBy{};
+  std::vector<AlphaMask>           alphaMaskBy;
+  Mask                             outlineMask;
+  EMaskType                        maskType{ MT_NONE };
+  EMaskShowType                    maskShowType{ MST_INVISIBLE };
+  EBoolOp                          clipOperator{ BO_NONE };
+  EOverflow                        overflow{ OF_HIDDEN };
+  EWindingType                     windingRule{ WR_EVEN_ODD };
+  Style                            style;
+  ContextSetting                   contextSetting;
+  EObjectType                      type;
+  bool                             visible{ true };
+  ContourPtr                       contour;
+  PaintOption                      paintOption;
+  ContourOption                    maskOption;
+  // std::optional<SkPath>     path;
+  std::optional<VGG::layer::Shape> path;
+  std::optional<VGG::layer::Shape> mask;
+  std::optional<MaskObject>        alphaMask;
+  LayerContextGuard                layerContextGuard;
   // sk_sp<SkImageFilter>      innerShadowFilter{ nullptr };
 
   PaintNode__pImpl(PaintNode* api, EObjectType type)
     : q_ptr(api)
     , type(type)
   {
-  }
-  PaintNode__pImpl(const PaintNode__pImpl& other)
-  {
-    this->operator=(other);
-  }
-
-  PaintNode__pImpl& operator=(const PaintNode__pImpl& other)
-  {
-    bound = other.bound;
-    transform = other.transform;
-    guid = other.guid + "_Copy";
-    maskedBy = other.maskedBy;
-    outlineMask = other.outlineMask;
-    maskType = other.maskType;
-    clipOperator = other.clipOperator;
-    overflow = other.overflow;
-    windingRule = other.windingRule;
-    style = other.style;
-    contextSetting = other.contextSetting;
-    type = other.type;
-    visible = other.visible;
-    contour = other.contour;
-    paintOption = other.paintOption;
-    maskOption = other.maskOption;
-
-    path = other.path;
-    mask = other.mask;
-    alphaMask = other.alphaMask;
-    return *this;
   }
 
   void ensureAlphaMask(Renderer* renderer)
@@ -233,40 +206,6 @@ public:
       alphaMask = std::move(cache);
     }
   }
-
-  // template<typename Iter1, typename Iter2, typename F, typename R>
-  // std::vector<MaskObject> calcMaskObjects(Renderer* renderer, Iter1 begin, Iter2 end, F&& f)
-  // {
-  //   // auto                                          canvas = renderer->canvas();
-  //   const auto&    objects = renderer->maskObjects();
-  //   std::vector<R> cache;
-  //   // auto                                          maskAreaBound = Bound::makeInfinite();
-  //   // const auto&                                   selfBound = q_ptr->bound();
-  //   for (auto it = begin; it != end; ++it)
-  //   {
-  //     const auto& id = f(*it);
-  //     if (id != q_ptr->guid())
-  //     {
-  //       if (auto obj = objects.find(id); obj != objects.end())
-  //       {
-  //         const auto t = obj->second->mapTransform(q_ptr);
-  //         // const auto transformedBound = obj->second->bound() * t;
-  //         cache.emplace_back(obj->second, t);
-  //         cache.emplace_back(std::move(F()));
-  //         // if (selfBound.isIntersectWith(transformedBound))
-  //         // {
-  //         //   cache.emplace_back(obj->second, t);
-  //         //   maskAreaBound.intersectWith(transformedBound);
-  //         // }
-  //       }
-  //       else
-  //       {
-  //         DEBUG("No such mask: %s", id.c_str());
-  //       }
-  //     }
-  //   }
-  //   return cache;
-  // }
 
   void worldTransform(glm::mat3& mat)
   {
@@ -324,7 +263,8 @@ public:
   {
     if (!path)
     {
-      path = q_ptr->asOutlineMask(0).outlineMask;
+      path = Shape(q_ptr->asOutlineMask(0).outlineMask);
+      // path = Shape();
     }
     if (path->isEmpty())
     {
@@ -334,7 +274,7 @@ public:
     drawRawStyleImpl(painter, *path, blender);
   }
 
-  void drawWithAlphaMask(Renderer* renderer, const SkPath& path, const SkPath& outlineMask)
+  void drawWithAlphaMask(Renderer* renderer, const Shape& path, const Shape& outlineMask)
   {
     SkPaint p;
     auto    b = toSkRect(bound);
@@ -342,13 +282,16 @@ public:
     auto canvas = renderer->canvas();
     canvas->saveLayer(0, 0);
     canvas->clipRect(b);
-    canvas->clipPath(path);
-    // clip with path
+    path.clip(canvas, SkClipOp::kIntersect);
+    // canvas->clipPath(path);
+    //  clip with path
     Painter painter(renderer);
     drawMaskObjectIntoMaskLayer(renderer, nullptr);
     if (!outlineMask.isEmpty())
     {
-      painter.beginClip(outlineMask);
+      // painter.beginClip(outlineMask);
+      painter.canvas()->save();
+      outlineMask.clip(painter.canvas(), SkClipOp::kIntersect);
     }
     SkPaint objectLayerPaint;
     objectLayerPaint.setBlendMode(SkBlendMode::kSrcIn);
@@ -359,7 +302,8 @@ public:
     canvas->restore();
     if (!outlineMask.isEmpty())
     {
-      painter.endClip();
+      painter.canvas()->restore();
+      // painter.endClip();
     }
     canvas->restore();
   }
@@ -376,18 +320,20 @@ public:
     return std::nullopt;
   }
 
-  void drawBlurBgWithAlphaMask(Renderer* renderer, const SkPath& path, const SkPath& outlineMask)
+  void drawBlurBgWithAlphaMask(Renderer* renderer, const Shape& path, const Shape& outlineMask)
   {
     Painter    painter(renderer);
     const auto blur = style.blurs[0];
-    SkPath     res = path;
+    Shape      res = path;
     if (alphaMask && !alphaMask->contour.isEmpty())
     {
-      Op(res, alphaMask->contour, SkPathOp::kIntersect_SkPathOp, &res);
+      // Op(res, alphaMask->contour, SkPathOp::kIntersect_SkPathOp, &res);
+      res.op(alphaMask->contour, EBoolOp::BO_INTERSECTION);
     }
     if (!outlineMask.isEmpty())
     {
-      Op(res, outlineMask, SkPathOp::kIntersect_SkPathOp, &res);
+      // Op(res, outlineMask, SkPathOp::kIntersect_SkPathOp, &res);
+      res.op(outlineMask, EBoolOp::BO_INTERSECTION);
     }
     painter.blurBackgroundBegin(blur.radius, blur.radius, bound, &res);
 
@@ -400,12 +346,15 @@ public:
     auto blender = getOrCreateBlender("maskedObject", g_styleMaskBlenderShader);
     if (!outlineMask.isEmpty())
     {
-      painter.beginClip(outlineMask);
+      // painter.beginClip(outlineMask);
+      painter.canvas()->save();
+      outlineMask.clip(painter.canvas(), SkClipOp::kIntersect);
     }
     drawRawStyleImpl(painter, path, blender);
     if (!outlineMask.isEmpty())
     {
-      painter.endClip();
+      // painter.endClip();
+      painter.canvas()->restore();
     }
     painter.blurBackgroundEnd();
   }
@@ -426,10 +375,7 @@ public:
     }
   }
 
-  void drawBlurContentWithAlphaMask(
-    Renderer*     renderer,
-    const SkPath& path,
-    const SkPath& outlineMask)
+  void drawBlurContentWithAlphaMask(Renderer* renderer, const Shape& path, const Shape& outlineMask)
   {
     SkPaint    p;
     auto       bb = bound;
@@ -447,18 +393,22 @@ public:
     painter.blurContentBegin(blur.radius, blur.radius, bound, nullptr, blender);
     if (!outlineMask.isEmpty())
     {
-      painter.beginClip(outlineMask);
+      // painter.beginClip(outlineMask);
+      //
+      painter.canvas()->save();
+      outlineMask.clip(painter.canvas(), SkClipOp::kIntersect);
     }
     drawRawStyleImpl(painter, path, SkBlender::Mode(SkBlendMode::kSrcOver));
     if (!outlineMask.isEmpty())
     {
-      painter.endClip();
+      // painter.endClip();
+      painter.canvas()->restore();
     }
     painter.blurContentEnd(); // draw blur content layer into mask layer
     canvas->restore();        // draw masked layer into canvas
   }
 
-  void drawRawStyleImpl(Painter& painter, const SkPath& skPath, sk_sp<SkBlender> blender)
+  void drawRawStyleImpl(Painter& painter, const Shape& skPath, sk_sp<SkBlender> blender)
   {
     auto filled = false;
     for (const auto& f : style.fills)
@@ -538,7 +488,9 @@ public:
               [&](const SkPaint& paint) { painter.canvas()->saveLayer(nullptr, &paint); });
             if (s.clipShadow)
             {
-              painter.beginClip(skPath, SkClipOp::kDifference);
+              // painter.beginClip(skPath, SkClipOp::kDifference);
+              painter.canvas()->save();
+              skPath.clip(painter.canvas(), SkClipOp::kDifference);
             }
             auto    dropShadowFilter = makeDropShadowImageFilter(s, q_ptr->frameBound(), true, 0);
             SkPaint p;
@@ -547,7 +499,8 @@ public:
             if (filled)
             {
               p.setStyle(SkPaint::kFill_Style);
-              painter.canvas()->drawPath(*path, p);
+              // painter.canvas()->drawPath(*path, p);
+              path->draw(painter.canvas(), p);
             }
             if (border)
             {
@@ -557,7 +510,7 @@ public:
             }
             if (s.clipShadow)
             {
-              painter.endClip();
+              painter.canvas()->restore();
             }
             g.restore([&]() { painter.canvas()->restore(); });
           },
@@ -601,7 +554,8 @@ public:
               SkPaint p;
               p.setImageFilter(innerShadowFilter);
               p.setAntiAlias(true);
-              painter.canvas()->drawPath(skPath, p);
+              // painter.canvas()->drawPath(skPath, p);
+              skPath.draw(painter.canvas(), p);
             },
             [&](const OuterShadowStyle& s) {},
           },

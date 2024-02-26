@@ -26,10 +26,12 @@
 #include "Utility/Log.hpp"
 #include "glm/gtx/transform.hpp"
 
+#include <core/SkClipOp.h>
 #include <core/SkColorFilter.h>
 #include <core/SkRefCnt.h>
 #include <core/SkSamplingOptions.h>
 #include <core/SkScalar.h>
+#include <include/pathops/SkPathOps.h>
 #include <core/SkShader.h>
 #include <core/SkPathEffect.h>
 #include <include/core/SkBlendMode.h>
@@ -39,7 +41,6 @@
 #include <include/core/SkImage.h>
 #include <include/effects/SkImageFilters.h>
 #include <include/effects/SkColorMatrix.h>
-#include <include/pathops/SkPathOps.h>
 #include <include/core/SkFontStyle.h>
 #include <modules/skparagraph/include/DartTypes.h>
 #include <modules/skparagraph/include/TextStyle.h>

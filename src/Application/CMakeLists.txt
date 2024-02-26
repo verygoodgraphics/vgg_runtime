@@ -8,6 +8,7 @@ add_library(vgg_application STATIC
   Reporter.cpp
   RunLoop.cpp
   UIApplication.cpp
+  UIScrollView.cpp
   UIView.cpp
   VggEnv.cpp
   VggSdk.cpp

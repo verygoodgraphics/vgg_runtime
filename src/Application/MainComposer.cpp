@@ -19,13 +19,13 @@
 #include "Editor.hpp"
 #include "Presenter.hpp"
 #include "RunLoop.hpp"
-#include "UIView.hpp"
+#include "UIScrollView.hpp"
 
 using namespace VGG;
 
 MainComposer::MainComposer(PlatformComposer* platformComposer, std::shared_ptr<Mouse> mouse)
   : m_env{ new VggEnv }
-  , m_view{ new UIView }
+  , m_view{ new UIScrollView }
   , m_presenter{ new Presenter{ mouse } }
   , m_editor{ new Editor{ m_view, mouse } }
   , m_runLoop{ RunLoop::sharedInstance() }

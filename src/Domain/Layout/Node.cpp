@@ -368,6 +368,11 @@ std::string LayoutNode::name() const
   return getValue(K_NAME, std::string{});
 }
 
+std::string LayoutNode::type() const
+{
+  return getValue(K_CLASS, std::string{});
+}
+
 bool LayoutNode::isResizingAroundCenter() const
 {
   return getValue(K_KEEP_SHAPE_WHEN_RESIZE, false);

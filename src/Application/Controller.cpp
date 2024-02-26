@@ -95,6 +95,8 @@ class Statistic
   TimePointType m_fitPageEnd;
   TimePointType m_firstRenderEnd;
 
+  std::unordered_map<std::string, int> m_nodeCount;
+
 private:
   auto now()
   {
@@ -120,6 +122,11 @@ public:
       (long long int)duration_cast<milliseconds>(m_expandEnd - m_expandBegin).count(),
       (long long int)duration_cast<milliseconds>(m_fitPageEnd - m_expandEnd).count(),
       (long long int)duration_cast<milliseconds>(m_firstRenderEnd - m_fitPageEnd).count());
+
+    for (auto& [key, value] : m_nodeCount)
+    {
+      INFO("node count: %s %d", key.c_str(), value);
+    }
   }
 
   void startLoading()
@@ -144,6 +151,29 @@ public:
   void endFirstRender()
   {
     m_firstRenderEnd = now();
+  }
+
+  void countTreeNodes(const std::shared_ptr<LayoutNode>& tree)
+  {
+    ASSERT(tree);
+    const auto& type = tree->type();
+    countNode(type);
+
+    for (auto& child : tree->children())
+    {
+      countTreeNodes(child);
+    }
+  }
+
+private:
+  void countNode(const std::string& key)
+  {
+    if (key.empty())
+    {
+      return;
+    }
+
+    m_nodeCount[key]++;
   }
 };
 
@@ -330,6 +360,8 @@ void Controller::start()
 
   observeModelState();
   observeViewEvent();
+
+  Statistic::sharedInstance()->countTreeNodes(m_layout->layoutTree());
 }
 
 void Controller::startEditing()

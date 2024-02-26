@@ -175,6 +175,7 @@ public:
 
   std::string vggId() const;
   std::string name() const;
+  std::string type() const;
 
   bool isVisible() const;
 

@@ -107,9 +107,9 @@ struct Pattern
 
 struct AlphaMask
 {
-  std::string   id;
+  std::string    id;
   EAlphaMaskType type{ AM_ALPHA };
-  bool          crop{ true };
+  bool           crop{ true };
 };
 
 struct GradientStop

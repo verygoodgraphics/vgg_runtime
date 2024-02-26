@@ -196,7 +196,7 @@ public:
     return m_renderer;
   }
 
-  void blurBackgroundBegin(float radiusX, float radiusY, const Bound& bound, const SkPath* path)
+  void blurBackgroundBegin(float radiusX, float radiusY, const Bound& bound, const Shape* path)
   {
     auto filter = SkImageFilters::Blur(
       SkBlurMask::ConvertRadiusToSigma(radiusX),
@@ -205,7 +205,11 @@ public:
     auto b = toSkRect(bound);
     m_renderer->canvas()->save();
     if (path)
-      m_renderer->canvas()->clipPath(*path);
+    {
+      // m_renderer->canvas()->clipPath(*path);
+      path->clip(m_renderer->canvas(), SkClipOp::kIntersect);
+    }
+
     m_renderer->canvas()->saveLayer(SkCanvas::SaveLayerRec(&b, nullptr, filter.get(), 0));
   }
 
@@ -247,16 +251,16 @@ public:
     m_renderer->canvas()->restore();
   }
 
-  void beginClip(const SkPath& path, SkClipOp clipOp = SkClipOp::kIntersect)
-  {
-    m_renderer->canvas()->save();
-    m_renderer->canvas()->clipPath(path, clipOp);
-  }
+  // void beginClip(const SkPath& path, SkClipOp clipOp = SkClipOp::kIntersect)
+  // {
+  //   m_renderer->canvas()->save();
+  //   m_renderer->canvas()->clipPath(path, clipOp);
+  // }
 
-  void endClip()
-  {
-    m_renderer->canvas()->restore();
-  }
+  // void endClip()
+  // {
+  //   m_renderer->canvas()->restore();
+  // }
 
   [[deprecated]] void drawShadow(
     const SkPath&        skPath,
@@ -273,7 +277,7 @@ public:
     sk_sp<SkImageFilter> imageFilter);
 
   [[deprecated]] void drawFill(
-    const SkPath&        skPath,
+    const Shape&         skPath,
     const Bound&         bound,
     const Fill&          f,
     sk_sp<SkImageFilter> imageFilter,
@@ -281,7 +285,7 @@ public:
     sk_sp<SkMaskFilter>  mask);
 
   [[deprecated]] void drawPathBorder(
-    const SkPath&        skPath,
+    const Shape&         skPath,
     const Bound&         bound,
     const Border&        b,
     sk_sp<SkImageFilter> imageFilter,

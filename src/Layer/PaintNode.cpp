@@ -571,7 +571,7 @@ void PaintNode::setContourOption(ContourOption option)
   _->maskOption = option;
 }
 
-void PaintNode::setContourData(ContourPtr contour)
+void PaintNode::setContourData(ContourData contour)
 {
   VGG_IMPL(PaintNode);
   _->contour = std::move(contour);

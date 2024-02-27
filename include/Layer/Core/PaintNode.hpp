@@ -69,6 +69,8 @@ struct PaintOption
   }
 };
 
+using ContourData = std::optional<std::variant<ContourPtr, Ellipse, SkRect, SkRRect>>;
+
 class PaintNode;
 #ifdef USE_SHARED_PTR
 using PaintNodePtr = std::shared_ptr<PaintNode>;
@@ -182,7 +184,7 @@ public:
 
   void setContourOption(ContourOption option);
 
-  void setContourData(ContourPtr contour);
+  void setContourData(ContourData contour);
 
   Contour* contour();
 

@@ -56,16 +56,17 @@ ImageNode::ImageNode(VRefCnt* cnt, const std::string& name, std::string guid)
 {
 }
 
-Mask ImageNode::asOutlineMask(const Transform* mat)
+Shape ImageNode::asOutlineMask(const Transform* mat)
 {
-  Mask mask;
+  // Mask mask;
   auto rect = toSkRect(frameBound());
-  mask.outlineMask.addRect(rect);
+  // mask.outlineMask.addRect(rect);
   if (mat)
   {
-    mask.outlineMask.transform(toSkMatrix(mat->matrix()));
+    rect = toSkMatrix(mat->matrix()).mapRect(rect);
+    // mask.outlineMask.transform(toSkMatrix(mat->matrix()));
   }
-  return mask;
+  return Shape(rect);
 }
 
 void ImageNode::setImage(const std::string& guid)

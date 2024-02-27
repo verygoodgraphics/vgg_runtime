@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "Layer/Config.hpp"
+#include "Layer/Core/Shape.hpp"
 
 #include <include/core/SkPath.h>
 
@@ -25,13 +26,12 @@ namespace VGG
 class VGG_EXPORTS Mask
 {
 public:
-  SkPath outlineMask;
+  layer::Shape outlineMask;
   Mask(){};
-  void addMask(const Mask& mask)
-  {
-    outlineMask.addPath(mask.outlineMask);
-  }
-
+  // void addMask(const Mask& mask)
+  // {
+  //   outlineMask.addPath(mask.outlineMask);
+  // }
   Mask& operator=(Mask&&) noexcept = default;
   Mask(Mask&&) noexcept = default;
   Mask& operator=(const Mask&) = default;

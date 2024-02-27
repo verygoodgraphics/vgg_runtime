@@ -54,6 +54,7 @@
 #include <limits>
 #include <fstream>
 #include <string_view>
+#include <variant>
 
 namespace VGG::layer
 {
@@ -336,13 +337,19 @@ Shape PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
   Shape path;
   if (_->contour)
   {
-    // path = getSkiaPath(*_->contour, _->contour->closed, _->contour->cornerSmooth);
-    auto p = layer::makePath(*_->contour);
+    std::visit(
+      Overloaded{
+        [&](const Ellipse& c) { path.setOval(c); },
+        [&](const ContourPtr& c) { path.setContour(c); },
+        [&](const SkRect& c) { path.setRect(c); },
+        [&](const SkRRect& c) { path.setRRect(c); },
+      },
+      *_->contour);
+    // auto p = layer::makePath(*_->contour);
     if (mat)
     {
-      p.transform(toSkMatrix(mat->matrix()));
+      path.transform(toSkMatrix(mat->matrix()));
     }
-    path.setPath(p);
     return path;
   }
 

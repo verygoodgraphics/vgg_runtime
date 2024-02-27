@@ -18,6 +18,7 @@
 #include <core/SkClipOp.h>
 #include <core/SkPaint.h>
 #include <core/SkPath.h>
+#include <core/SkPathTypes.h>
 #include <core/SkRRect.h>
 #include <core/SkCanvas.h>
 
@@ -191,6 +192,29 @@ public:
 
   void op(const Shape& shape, EBoolOp op);
 
+  void transform(const SkMatrix& matrix)
+  {
+    switch (this->type())
+    {
+      case PATH:
+        m_u.path.transform(matrix);
+        break;
+      case RECT:
+        m_u.rect = matrix.mapRect(m_u.rect);
+        // m_u.rect.transform(matrix);
+        break;
+      case RRECT:
+        m_u.rrect.transform(matrix, &m_u.rrect);
+        break;
+      case ARCH:
+        ASSERT("Not implemented" && false);
+        break;
+      case OVAL:
+        m_u.rect = matrix.mapRect(m_u.rect);
+        break;
+    }
+  }
+
   void clip(SkCanvas* canvas, SkClipOp clipOp) const
   {
     switch (m_type)
@@ -207,6 +231,15 @@ public:
       case ARCH:
         clipArc(canvas, m_u.arc, clipOp);
         break;
+    }
+  }
+
+  void setFillType(EWindingType fillType)
+  {
+    if (this->type() == PATH)
+    {
+      m_u.path.setFillType(
+        EWindingType::WR_EVEN_ODD ? SkPathFillType::kEvenOdd : SkPathFillType::kWinding);
     }
   }
 

@@ -185,20 +185,21 @@ public:
         }
       }
     }
-    SkPath path;
+    Shape path;
     for (const auto& e : cache.components)
     {
       if (path.isEmpty())
       {
-        path = e.mask->asOutlineMask(&e.transform).outlineMask;
+        path = e.mask->asOutlineMask(&e.transform);
       }
       else
       {
-        Op(
-          path,
-          e.mask->asOutlineMask(&e.transform).outlineMask,
-          SkPathOp::kIntersect_SkPathOp,
-          &path);
+        path.op(e.mask->asOutlineMask(&e.transform), EBoolOp::BO_INTERSECTION);
+        // Op(
+        //   path,
+        //   e.mask->asOutlineMask(&e.transform),
+        //   SkPathOp::kIntersect_SkPathOp,
+        //   &path);
       }
     }
     if (!path.isEmpty())
@@ -263,7 +264,7 @@ public:
   {
     if (!path)
     {
-      path = Shape(q_ptr->asOutlineMask(0).outlineMask);
+      path = q_ptr->asOutlineMask(0);
       // path = Shape();
     }
     if (path->isEmpty())

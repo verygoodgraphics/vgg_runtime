@@ -194,7 +194,7 @@ public:
 
   void setOutlineMask(const Mask& mask);
 
-  virtual Mask asOutlineMask(const Transform* transform);
+  virtual Shape asOutlineMask(const Transform* transform);
 
   ~PaintNode();
 
@@ -227,10 +227,10 @@ protected:
 
 protected:
   // Mask
-  SkPath         makeBoundPath();
-  virtual SkPath makeContourImpl(ContourOption option, const Transform* mat);
-  SkPath         childPolyOperation() const;
-  Mask           makeMaskBy(EBoolOp maskOp, Renderer* renderer);
+  Shape         makeBoundPath();
+  virtual Shape makeContourImpl(ContourOption option, const Transform* mat);
+  Shape         childPolyOperation() const;
+  Shape         makeMaskBy(EBoolOp maskOp, Renderer* renderer);
 
   virtual void drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender);
   virtual void drawRawStyle(Painter& painter, const Shape& path, sk_sp<SkBlender> blender);
@@ -239,8 +239,8 @@ protected:
 
 protected:
   // Style
-  virtual SkPath stylePath();
-  void           paintStyle(Renderer* renderer, const Shape& path, const Shape& mask);
+  // virtual SkPath stylePath();
+  void paintStyle(Renderer* renderer, const Shape& path, const Shape& mask);
 
   [[deprecated]] virtual void paintFill(
     Renderer*            renderer,

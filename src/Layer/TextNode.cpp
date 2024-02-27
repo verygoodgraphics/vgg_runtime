@@ -164,7 +164,9 @@ void TextNode::drawRawStyle(Painter& painter, const Shape& path, sk_sp<SkBlender
   if (overflow() == OF_HIDDEN)
   {
     canvas->save();
-    canvas->clipPath(makeBoundPath());
+    auto bound = makeBoundPath();
+    bound.clip(canvas, SkClipOp::kIntersect);
+    // canvas->clipPath(makeBoundPath());
   }
   if (_->anchor)
   {

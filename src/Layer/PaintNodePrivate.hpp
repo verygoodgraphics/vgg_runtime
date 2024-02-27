@@ -16,6 +16,7 @@
 #pragma once
 #include "Layer/AttrSerde.hpp"
 #include "Layer/Core/Attrs.hpp"
+#include "Layer/Core/Shape.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/VUtils.hpp"
 #include "Layer/Renderer.hpp"
@@ -124,23 +125,25 @@ class PaintNode__pImpl // NOLINT
   VGG_DECL_API(PaintNode);
 
 public:
-  Bound                     bound;
-  Transform                 transform;
-  std::string               guid{};
-  std::vector<std::string>  maskedBy{};
-  std::vector<AlphaMask>    alphaMaskBy;
-  Mask                      outlineMask;
-  EMaskType                 maskType{ MT_NONE };
-  EMaskShowType             maskShowType{ MST_INVISIBLE };
-  EBoolOp                   clipOperator{ BO_NONE };
-  EOverflow                 overflow{ OF_HIDDEN };
-  EWindingType              windingRule{ WR_EVEN_ODD };
-  Style                     style;
-  ContextSetting            contextSetting;
-  EObjectType               type;
-  bool                      visible{ true };
-  ContourPtr                contour;
-  std::variant<ContourPtr>  primitive;
+  Bound                    bound;
+  Transform                transform;
+  std::string              guid{};
+  std::vector<std::string> maskedBy{};
+  std::vector<AlphaMask>   alphaMaskBy;
+  Mask                     outlineMask;
+  EMaskType                maskType{ MT_NONE };
+  EMaskShowType            maskShowType{ MST_INVISIBLE };
+  EBoolOp                  clipOperator{ BO_NONE };
+  EOverflow                overflow{ OF_HIDDEN };
+  EWindingType             windingRule{ WR_EVEN_ODD };
+  Style                    style;
+  ContextSetting           contextSetting;
+  EObjectType              type;
+  bool                     visible{ true };
+
+  // ContourPtr                contour;
+  std::optional<std::variant<ContourPtr, Ellipse, SkRect, SkRRect>> contour;
+
   PaintOption               paintOption;
   ContourOption             maskOption;
   // std::optional<SkPath>     path;
@@ -148,7 +151,6 @@ public:
   std::optional<Shape>      mask;
   std::optional<MaskObject> alphaMask;
   LayerContextGuard         layerContextGuard;
-  // sk_sp<SkImageFilter>      innerShadowFilter{ nullptr };
 
   PaintNode__pImpl(PaintNode* api, EObjectType type)
     : q_ptr(api)

@@ -17,8 +17,6 @@
 
 #include "Domain/Layout/Rect.hpp"
 
-#include <glm/glm.hpp>
-
 #include <array>
 #include <vector>
 
@@ -37,19 +35,30 @@ struct Matrix
   Scalar tx{ 0 };
   Scalar ty{ 0 };
 
-  bool operator==(const Matrix& rhs) const noexcept;
-  Matrix makeInverse() const;
+  Matrix() = default;
+  Matrix(Scalar a, Scalar b, Scalar c, Scalar d, Scalar tx, Scalar ty)
+    : a(a)
+    , b(b)
+    , c(c)
+    , d(d)
+    , tx(tx)
+    , ty(ty)
+  {
+  }
+
   Scalar decomposeRotateRadian() const;
+
+  Matrix rotated(Scalar radian) const;
+  Matrix scaled(Scalar x, Scalar y) const;
+  Matrix makeInverse() const;
+
+  bool operator==(const Matrix& rhs) const noexcept;
 
   static Matrix make(Scalar tx, Scalar ty, Scalar radian);
   static Matrix makeRotate(Scalar radian);
-  static Matrix make(glm::mat3 t);
-
-  static Matrix getAffineTransform(const std::array<Point, 3>& oldPoints,
-                                   const std::array<Point, 3>& newPoints);
-
-private:
-  glm::mat3 makeMat3() const;
+  static Matrix getAffineTransform(
+    const std::array<Point, 3>& oldPoints,
+    const std::array<Point, 3>& newPoints);
 };
 
 } // namespace Layout

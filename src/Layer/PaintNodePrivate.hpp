@@ -142,8 +142,7 @@ public:
   bool                     visible{ true };
 
   // ContourPtr                contour;
-  std::optional<std::variant<ContourPtr, Ellipse, SkRect, SkRRect>> contour;
-
+  ContourData               contour;
   PaintOption               paintOption;
   ContourOption             maskOption;
   // std::optional<SkPath>     path;

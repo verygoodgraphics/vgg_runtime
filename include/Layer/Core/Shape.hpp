@@ -119,7 +119,6 @@ public:
     if (m_path)
     {
       canvas->drawPath(*m_path, paint);
-      DEBUG("Drawing path");
     }
   }
 
@@ -239,7 +238,7 @@ public:
   RRectShape(const SkRRect& rect)
   {
     m_rect = rect;
-    setEmpty(false);
+    setEmpty(!m_rect.isValid());
     setClosed(true);
   }
   void draw(SkCanvas* canvas, const SkPaint& paint) const override
@@ -249,11 +248,25 @@ public:
 
   void clip(SkCanvas* canvas, SkClipOp clipOp) const override
   {
+    // canvas->clipRect(rrect().rect(), clipOp);
     canvas->clipRRect(rrect(), clipOp);
   }
 
   void transform(const SkMatrix& matrix) override
   {
+    auto     rect = matrix.mapRect(m_rect.rect());
+    auto     ul = m_rect.radii(SkRRect::Corner::kUpperLeft_Corner);
+    auto     ur = m_rect.radii(SkRRect::Corner::kUpperRight_Corner);
+    auto     br = m_rect.radii(SkRRect::Corner::kLowerRight_Corner);
+    auto     bl = m_rect.radii(SkRRect::Corner::kLowerLeft_Corner);
+    SkVector radii[4] = { ul, ur, br, bl };
+    for (int i = 0; i < 4; i++)
+    {
+      radii[i].fX = matrix.mapRadius(radii[i].fX);
+      radii[i].fY = matrix.mapRadius(radii[i].fY);
+    }
+    m_rect.setRectRadii(rect, radii);
+    setEmpty(m_rect.isValid());
   }
 
   SkPath asPath() override
@@ -278,9 +291,10 @@ public:
   RectShape(const SkRect& rect)
   {
     m_rect = rect;
-    setEmpty(false);
+    setEmpty(m_rect.isEmpty());
     setClosed(true);
   }
+
   void draw(SkCanvas* canvas, const SkPaint& paint) const override
   {
     canvas->drawRect(m_rect, paint);
@@ -294,6 +308,7 @@ public:
   void transform(const SkMatrix& matrix) override
   {
     m_rect = matrix.mapRect(m_rect);
+    setEmpty(m_rect.isEmpty());
   }
 
   SkPath asPath() override

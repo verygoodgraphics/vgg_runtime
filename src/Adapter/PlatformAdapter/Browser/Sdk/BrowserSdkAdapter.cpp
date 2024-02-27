@@ -18,6 +18,7 @@
 #include "TouchEvent.hpp"
 
 #include "Application/VggSdk.hpp"
+#include "Domain/Layout/Math.hpp"
 
 #include <emscripten.h>
 #include <emscripten/bind.h>
@@ -104,4 +105,21 @@ EMSCRIPTEN_BINDINGS(vgg_event)
     .property("y", &BMouseEvent::y);
 
   class_<BTouchEvent, base<BUIEvent>>("VggTouchEvent").constructor<>();
+}
+
+EMSCRIPTEN_BINDINGS(vgg_matrix)
+{
+  using Matrix = Layout::Matrix;
+
+  class_<Matrix>("Matrix")
+    .constructor<double, double, double, double, double, double>()
+    .property("a", &Matrix::a)
+    .property("b", &Matrix::b)
+    .property("c", &Matrix::c)
+    .property("d", &Matrix::d)
+    .property("tx", &Matrix::tx)
+    .property("ty", &Matrix::ty)
+    .function("rotationAngle", &Matrix::decomposeRotateRadian)
+    .function("rotated", &Matrix::rotated)
+    .function("scaled", &Matrix::scaled);
 }

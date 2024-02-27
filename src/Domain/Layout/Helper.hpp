@@ -15,8 +15,7 @@
  */
 #pragma once
 
-#include "Math.hpp"
-
+#include "Domain/Layout/Math.hpp"
 #include "Domain/Layout/Rect.hpp"
 
 #include <nlohmann/json.hpp>

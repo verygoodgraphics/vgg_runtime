@@ -11,4 +11,8 @@ void Shape::op(const Shape& shape, EBoolOp op)
   Op(p, shape.asPath(), sop, &p);
   setPath(p);
 }
+
+Shape::~Shape()
+{
+}
 } // namespace VGG::layer

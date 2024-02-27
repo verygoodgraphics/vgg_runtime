@@ -14,6 +14,8 @@
  */
 #pragma once
 #include "Layer/Core/VType.hpp"
+#include "Layer/PathGenerator.hpp"
+#include "Layer/Core/Attrs.hpp"
 #include "Utility/Log.hpp"
 #include <core/SkClipOp.h>
 #include <core/SkPaint.h>
@@ -26,8 +28,369 @@
 #include <vector>
 
 #include <optional>
+#include <variant>
 namespace VGG::layer
 {
+
+struct Arc
+{
+  SkRect oval;
+  float  startAngle;
+  float  sweepAngle;
+  bool   useCenter;
+  Arc() = default;
+  Arc(Arc&& arc) noexcept = default;
+  Arc& operator=(Arc&& arc) noexcept = default;
+  Arc(const Arc& arc) = default;
+  Arc& operator=(const Arc& arc) = default;
+  Arc(const SkRect& oval, float startAngle, float sweepAngle, bool useCenter)
+    : oval(oval)
+    , startAngle(startAngle)
+    , sweepAngle(sweepAngle)
+    , useCenter(useCenter)
+  {
+  }
+};
+
+struct Ellipse
+{
+  SkRect rect;
+  Ellipse() = default;
+  Ellipse(Ellipse&& oval) noexcept = default;
+  Ellipse& operator=(Ellipse&& oval) noexcept = default;
+  Ellipse(const Ellipse& oval) = default;
+  Ellipse& operator=(const Ellipse& oval) = default;
+  Ellipse(const SkRect& rect)
+    : rect(rect)
+  {
+  }
+};
+
+class ShapeBase : public std::enable_shared_from_this<ShapeBase>
+{
+public:
+  virtual void   draw(SkCanvas* canvas, const SkPaint& paint) const = 0;
+  virtual void   clip(SkCanvas* canvas, SkClipOp clipOp) const = 0;
+  virtual void   transform(const SkMatrix& matrix) = 0;
+  virtual SkPath asPath() = 0;
+  bool           isClosed() const
+  {
+    return m_closed;
+  }
+  bool isEmpty() const
+  {
+    return m_empty;
+  }
+
+  virtual ~ShapeBase() = default;
+
+protected:
+  void setEmpty(bool empty)
+  {
+    m_empty = empty;
+  }
+  void setClosed(bool closed)
+  {
+    m_closed = closed;
+  }
+  bool m_closed{ false };
+  bool m_empty{ true };
+};
+
+class ContourShape : public ShapeBase
+{
+public:
+  ContourShape(const ContourPtr& contour)
+  {
+    m_contour = contour;
+  }
+
+  ContourShape(const SkPath& path)
+  {
+    m_contour = nullptr;
+    m_path = path;
+    setEmpty(m_path->isEmpty());
+    setClosed(m_path->isLastContourClosed());
+  }
+
+  void draw(SkCanvas* canvas, const SkPaint& paint) const override
+  {
+    ensurePath();
+    if (m_path)
+    {
+      canvas->drawPath(*m_path, paint);
+      DEBUG("Drawing path");
+    }
+  }
+
+  void clip(SkCanvas* canvas, SkClipOp clipOp) const override
+  {
+    ensurePath();
+    if (m_path)
+      canvas->clipPath(*m_path, clipOp);
+  }
+  void transform(const SkMatrix& matrix) override
+  {
+    ensurePath();
+    if (m_path)
+      m_path->transform(matrix);
+  }
+
+  SkPath asPath() override
+  {
+    ensurePath();
+    if (m_path)
+      return *m_path;
+    return SkPath();
+  }
+
+  void setFillType(EWindingType fillType)
+  {
+    ensurePath();
+    if (m_path)
+      m_path->setFillType(
+        EWindingType::WR_EVEN_ODD ? SkPathFillType::kEvenOdd : SkPathFillType::kWinding);
+  }
+
+private:
+  // struct InternalPath
+  // {
+  // public:
+  //   SkPath asPath()
+  //   {
+  //     return std::visit(
+  //       [this](auto&& arg) -> SkPath
+  //       {
+  //         using T = std::decay_t<decltype(arg)>;
+  //         if constexpr (std::is_same_v<T, SkPath>)
+  //           return arg;
+  //         else
+  //         {
+  //           SkPath p = VGG::layer::makePath(*arg);
+  //           m_path = p;
+  //           return p;
+  //         }
+  //       },
+  //       m_path);
+  //   }
+  //   bool isClosed() const
+  //   {
+  //     return std::visit(
+  //       [](auto&& arg) -> bool
+  //       {
+  //         using T = std::decay_t<decltype(arg)>;
+  //         if constexpr (std::is_same_v<T, SkPath>)
+  //           return arg.isLastContourClosed();
+  //         else
+  //         {
+  //           return arg->closed;
+  //         }
+  //       },
+  //       m_path);
+  //   }
+  //   void setPath(const SkPath& path)
+  //   {
+  //     m_path = path;
+  //   }
+  //   void setContour(const ContourPtr& contour)
+  //   {
+  //     m_path = contour;
+  //   }
+  //
+  // private:
+  //   using Path = std::variant<ContourPtr, SkPath>;
+  //   Path m_path;
+  //   void ensurePath()
+  //   {
+  //     std::visit(
+  //       [this](auto&& arg) -> SkPath
+  //       {
+  //         using T = std::decay_t<decltype(arg)>;
+  //         if constexpr (std::is_same_v<T, ContourPtr>)
+  //         {
+  //           SkPath p = VGG::layer::makePath(*arg);
+  //           m_path = p;
+  //         }
+  //       },
+  //       m_path);
+  //   }
+  // };
+  ContourPtr            m_contour;
+  std::optional<SkPath> m_path;
+  void                  ensurePath() const
+  {
+    const_cast<ContourShape*>(this)->ensurePath();
+  }
+
+  void ensurePath()
+  {
+    if (!m_path && m_contour)
+    {
+      m_path = VGG::layer::makePath(*m_contour);
+      setEmpty(m_path->isEmpty());
+      setClosed(m_path->isLastContourClosed());
+    }
+  }
+};
+
+class RRectShape : public ShapeBase
+{
+public:
+  RRectShape(const SkRRect& rect)
+  {
+    m_rect = rect;
+    setEmpty(false);
+    setClosed(true);
+  }
+  void draw(SkCanvas* canvas, const SkPaint& paint) const override
+  {
+    canvas->drawRRect(rrect(), paint);
+  }
+
+  void clip(SkCanvas* canvas, SkClipOp clipOp) const override
+  {
+    canvas->clipRRect(rrect(), clipOp);
+  }
+
+  void transform(const SkMatrix& matrix) override
+  {
+  }
+
+  SkPath asPath() override
+  {
+    SkPath path;
+    path.addRRect(m_rect);
+    return path;
+  }
+
+  const SkRRect& rrect() const
+  {
+    return m_rect;
+  }
+
+private:
+  SkRRect m_rect;
+};
+
+class RectShape : public ShapeBase
+{
+public:
+  RectShape(const SkRect& rect)
+  {
+    m_rect = rect;
+    setEmpty(false);
+    setClosed(true);
+  }
+  void draw(SkCanvas* canvas, const SkPaint& paint) const override
+  {
+    canvas->drawRect(m_rect, paint);
+  }
+
+  void clip(SkCanvas* canvas, SkClipOp clipOp) const override
+  {
+    canvas->clipRect(m_rect, clipOp);
+  }
+
+  void transform(const SkMatrix& matrix) override
+  {
+    m_rect = matrix.mapRect(m_rect);
+  }
+
+  SkPath asPath() override
+  {
+    SkPath path;
+    path.addRect(m_rect);
+    return path;
+  }
+
+  SkRect rect() const
+  {
+    return m_rect;
+  }
+
+private:
+  SkRect m_rect;
+};
+
+class EllipseShape : public ShapeBase
+{
+public:
+  EllipseShape(const SkRect& rect)
+  {
+    m_oval = rect;
+    setEmpty(false);
+    setClosed(true);
+  }
+  void draw(SkCanvas* canvas, const SkPaint& paint) const override
+  {
+    canvas->drawOval(m_oval, paint);
+  }
+  void clip(SkCanvas* canvas, SkClipOp clipOp) const override
+  {
+    canvas->clipRect(m_oval, clipOp);
+  }
+  void transform(const SkMatrix& matrix) override
+  {
+    m_oval = matrix.mapRect(m_oval);
+  }
+  SkPath asPath() override
+  {
+    SkPath path;
+    path.addOval(m_oval);
+    return path;
+  }
+
+  SkRect ellipse() const
+  {
+    return m_oval;
+  }
+
+private:
+  SkRect m_oval;
+};
+
+class ArcShape : public ShapeBase
+{
+public:
+  ArcShape(const SkRect& oval, float startAngle, float sweepAngle, bool useCenter)
+  {
+    m_oval = oval;
+    m_startAngle = startAngle;
+    m_sweepAngle = sweepAngle;
+    m_useCenter = useCenter;
+    setEmpty(false);
+    setClosed(true);
+  }
+  void draw(SkCanvas* canvas, const SkPaint& paint) const override
+  {
+    canvas->drawArc(m_oval, m_startAngle, m_sweepAngle, m_useCenter, paint);
+  }
+  void clip(SkCanvas* canvas, SkClipOp clipOp) const override
+  {
+    canvas->clipRect(m_oval, clipOp);
+  }
+  void transform(const SkMatrix& matrix) override
+  {
+    m_oval = matrix.mapRect(m_oval);
+  }
+  SkPath asPath() override
+  {
+    SkPath path;
+    path.addOval(m_oval);
+    return path;
+  }
+
+  SkRect ellipse() const
+  {
+    return m_oval;
+  }
+
+private:
+  SkRect m_oval;
+  float  m_startAngle;
+  float  m_sweepAngle;
+  float  m_useCenter;
+};
 
 struct Shape
 {
@@ -42,52 +405,12 @@ public:
     OVAL
   };
 
-  struct Arc
-  {
-    SkRect oval;
-    float  startAngle;
-    float  sweepAngle;
-    bool   useCenter;
-    Arc() = default;
-    Arc(Arc&& arc) noexcept = default;
-    Arc& operator=(Arc&& arc) noexcept = default;
-    Arc(const Arc& arc) = default;
-    Arc& operator=(const Arc& arc) = default;
-    Arc(const SkRect& oval, float startAngle, float sweepAngle, bool useCenter)
-      : oval(oval)
-      , startAngle(startAngle)
-      , sweepAngle(sweepAngle)
-      , useCenter(useCenter)
-    {
-    }
-  };
-
-  struct Oval
-  {
-    SkRect rect;
-    Oval() = default;
-    Oval(Oval&& oval) noexcept = default;
-    Oval& operator=(Oval&& oval) noexcept = default;
-    Oval(const Oval& oval) = default;
-    Oval& operator=(const Oval& oval) = default;
-    Oval(const SkRect& rect)
-      : rect(rect)
-    {
-    }
-  };
-
   Shape()
     : m_type(EMPTY)
   {
   }
 
-  ~Shape()
-  {
-    if (type() == PATH)
-    {
-      m_u.path.~SkPath();
-    }
-  }
+  ~Shape();
 
   Shape(const Shape& shape)
   {
@@ -96,41 +419,24 @@ public:
 
   Shape& operator=(const Shape& shape)
   {
-    switch (shape.type())
-    {
-      case PATH:
-        setPath(shape.m_u.path);
-        break;
-      case RECT:
-        setRect(shape.m_u.rect);
-        break;
-      case RRECT:
-        setRRect(shape.m_u.rrect);
-        break;
-      case ARCH:
-        setArch(
-          shape.m_u.arc.oval,
-          shape.m_u.arc.startAngle,
-          shape.m_u.arc.sweepAngle,
-          shape.m_u.arc.useCenter);
-        break;
-      case OVAL:
-        setOval(shape.m_u.oval);
-      case EMPTY:
-        reset();
-        break;
-    }
+    m_type = shape.m_type;
+    m_impl = shape.m_impl;
     return *this;
   }
 
   bool isEmpty() const
   {
-    return m_type == EMPTY || (m_type == PATH && m_u.path.isEmpty());
+    return m_type == EMPTY || (m_type == PATH && m_impl->isEmpty());
   }
 
   explicit Shape(const SkPath& path)
   {
     setPath(path);
+  }
+
+  explicit Shape(ContourPtr contour)
+  {
+    setContour(contour);
   }
 
   explicit Shape(const SkRect& rect)
@@ -143,159 +449,111 @@ public:
     setRRect(rrect);
   }
 
-  explicit Shape(const Oval& oval)
+  explicit Shape(const Ellipse& oval)
   {
     setOval(oval);
   }
 
   explicit Shape(const Arc& arc)
   {
-    setArch(arc.oval, arc.startAngle, arc.sweepAngle, arc.useCenter);
+    setArc(arc.oval, arc.startAngle, arc.sweepAngle, arc.useCenter);
   }
 
   void setPath(const SkPath& path)
   {
-    if (this->type() == PATH)
-    {
-      m_u.path = path;
-    }
-    else
-    {
-      new (&m_u.path) SkPath(path);
-      m_type = PATH;
-    }
+    m_impl = std::make_shared<ContourShape>(path);
+    m_type = PATH;
+  }
+
+  void setContour(const ContourPtr& contour)
+  {
+    m_impl = std::make_shared<ContourShape>(contour);
+    m_type = PATH;
   }
 
   void setRect(const SkRect& rect)
   {
-    this->m_u.rect = rect;
+    m_impl = std::make_shared<RectShape>(rect);
     m_type = RECT;
+  }
+
+  std::optional<SkRect> asRect() const
+  {
+    if (type() == RECT)
+    {
+      return m_impl->asPath().getBounds();
+    }
+    return std::nullopt;
   }
 
   void setRRect(const SkRRect& rrect)
   {
-    this->m_u.rrect = rrect;
+    m_impl = std::make_shared<RRectShape>(rrect);
     m_type = RRECT;
   }
 
-  void setArch(const SkRect& oval, float startAngle, float sweepAngle, bool forceMoveTo)
+  std::optional<SkRRect> asRRect() const
   {
-    this->m_u.arc.oval = oval;
-    m_type = ARCH;
+    if (type() == RRECT)
+    {
+      return std::static_pointer_cast<RRectShape>(m_impl)->rrect();
+    }
+    return std::nullopt;
   }
 
-  void setOval(const Oval& oval)
+  void setArc(const SkRect& oval, float startAngle, float sweepAngle, bool forceMoveTo)
   {
-    this->m_u.oval = oval;
+    m_impl = std::make_shared<ArcShape>(oval, startAngle, sweepAngle, forceMoveTo);
+    m_type = ARCH;
+  }
+  void setOval(const Ellipse& ellipse)
+  {
+    m_impl = std::make_shared<EllipseShape>(ellipse.rect);
     m_type = OVAL;
+  }
+
+  std::optional<Ellipse> asOval() const
+  {
+    if (type() == OVAL)
+      return std::static_pointer_cast<EllipseShape>(m_impl)->ellipse();
+    return std::nullopt;
   }
 
   void op(const Shape& shape, EBoolOp op);
 
   void transform(const SkMatrix& matrix)
   {
-    switch (this->type())
-    {
-      case PATH:
-        m_u.path.transform(matrix);
-        break;
-      case RECT:
-        m_u.rect = matrix.mapRect(m_u.rect);
-        // m_u.rect.transform(matrix);
-        break;
-      case RRECT:
-        m_u.rrect.transform(matrix, &m_u.rrect);
-        break;
-      case ARCH:
-        ASSERT("Not implemented" && false);
-        break;
-      case OVAL:
-        m_u.rect = matrix.mapRect(m_u.rect);
-        break;
-    }
+    m_impl->transform(matrix);
   }
 
   void clip(SkCanvas* canvas, SkClipOp clipOp) const
   {
-    switch (m_type)
-    {
-      case PATH:
-        clipPath(canvas, m_u.path, clipOp);
-        break;
-      case RECT:
-        clipRect(canvas, m_u.rect, clipOp);
-        break;
-      case RRECT:
-        clipRRect(canvas, m_u.rrect, clipOp);
-        break;
-      case ARCH:
-        clipArc(canvas, m_u.arc, clipOp);
-        break;
-    }
+    m_impl->clip(canvas, clipOp);
   }
 
   void setFillType(EWindingType fillType)
   {
     if (this->type() == PATH)
     {
-      m_u.path.setFillType(
-        EWindingType::WR_EVEN_ODD ? SkPathFillType::kEvenOdd : SkPathFillType::kWinding);
+      std::static_pointer_cast<ContourShape>(m_impl)->setFillType(fillType);
     }
   }
 
   void draw(SkCanvas* canvas, const SkPaint& paint) const
   {
-    switch (this->type())
-    {
-      case PATH:
-        drawPath(canvas, m_u.path, paint);
-        break;
-      case RECT:
-        drawRect(canvas, m_u.rect, paint);
-        break;
-      case RRECT:
-        drawRRect(canvas, m_u.rrect, paint);
-        break;
-      case ARCH:
-        drawOval(canvas, m_u.oval, paint);
-        break;
-    }
+    m_impl->draw(canvas, paint);
   }
 
   SkPath asPath() const
   {
-    switch (this->type())
-    {
-      case PATH:
-        return m_u.path;
-      case RECT:
-        return SkPath::Rect(m_u.rect);
-      case RRECT:
-        return SkPath::RRect(m_u.rrect);
-      case OVAL:
-        return SkPath::Oval(m_u.oval.rect);
-      case ARCH:
-        return SkPath();
-    }
-    return SkPath();
+    if (m_impl == nullptr)
+      return SkPath();
+    return m_impl->asPath();
   }
 
   bool isClosed() const
   {
-    switch (this->type())
-    {
-      case PATH:
-        return m_u.path.isLastContourClosed();
-      case RECT:
-        return true;
-      case RRECT:
-        return true;
-      case OVAL:
-        return true;
-      case ARCH:
-        return true;
-    }
-    return true;
+    return m_impl->isClosed();
   }
 
   uint8_t type() const
@@ -306,91 +564,12 @@ public:
   void reset()
   {
     m_type = EMPTY;
+    m_impl.reset();
   }
 
 private:
-  union UData
-  {
-    SkPath  path;
-    SkRect  rect;
-    SkRRect rrect;
-    Oval    oval;
-    Arc     arc;
-    UData()
-    {
-    }
+  std::shared_ptr<ShapeBase> m_impl;
+  uint8_t                    m_type{ EMPTY };
 
-    ~UData()
-    {
-    }
-    UData(const UData& data)
-    {
-    }
-    UData(UData&& data) noexcept
-    {
-    }
-
-    UData& operator=(UData&& data) noexcept
-    {
-      return *this;
-    }
-
-    UData& operator=(const UData& data)
-    {
-      return *this;
-    }
-  } m_u;
-
-  uint8_t m_type{ EMPTY };
-
-  static void drawOval(SkCanvas* canvas, const Oval& oval, const SkPaint& paint)
-  {
-    canvas->drawOval(oval.rect, paint);
-  }
-
-  static void clipOval(SkCanvas* canvas, const Oval& oval, SkClipOp clipOp)
-  {
-    canvas->clipRect(oval.rect, clipOp);
-  }
-
-  static void drawArc(SkCanvas* canvas, const Arc& arc, const SkPaint& paint)
-  {
-    canvas->drawArc(arc.oval, arc.startAngle, arc.sweepAngle, arc.useCenter, paint);
-  }
-
-  static void clipArc(SkCanvas* canvas, const Arc& arc, SkClipOp clipOp)
-  {
-    canvas->clipRect(arc.oval, clipOp);
-  }
-
-  static void drawRect(SkCanvas* canvas, const SkRect& rect, const SkPaint& paint)
-  {
-    canvas->drawRect(rect, paint);
-  }
-
-  static void clipRect(SkCanvas* canvas, const SkRect& rect, SkClipOp clipOp)
-  {
-    canvas->clipRect(rect, clipOp);
-  }
-
-  static void drawRRect(SkCanvas* canvas, const SkRRect& rect, const SkPaint& paint)
-  {
-    canvas->drawRRect(rect, paint);
-  }
-
-  static void clipRRect(SkCanvas* canvas, const SkRRect& rect, SkClipOp clipOp)
-  {
-    canvas->clipRRect(rect, clipOp);
-  }
-
-  static void drawPath(SkCanvas* canvas, const SkPath& path, const SkPaint& paint)
-  {
-    canvas->drawPath(path, paint);
-  }
-
-  static void clipPath(SkCanvas* canvas, const SkPath& path, SkClipOp clipOp)
-  {
-    canvas->clipPath(path, clipOp);
-  }
 }; // namespace VGG::layer
 } // namespace VGG::layer

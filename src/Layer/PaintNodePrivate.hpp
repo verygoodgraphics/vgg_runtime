@@ -124,29 +124,30 @@ class PaintNode__pImpl // NOLINT
   VGG_DECL_API(PaintNode);
 
 public:
-  Bound                            bound;
-  Transform                        transform;
-  std::string                      guid{};
-  std::vector<std::string>         maskedBy{};
-  std::vector<AlphaMask>           alphaMaskBy;
-  Mask                             outlineMask;
-  EMaskType                        maskType{ MT_NONE };
-  EMaskShowType                    maskShowType{ MST_INVISIBLE };
-  EBoolOp                          clipOperator{ BO_NONE };
-  EOverflow                        overflow{ OF_HIDDEN };
-  EWindingType                     windingRule{ WR_EVEN_ODD };
-  Style                            style;
-  ContextSetting                   contextSetting;
-  EObjectType                      type;
-  bool                             visible{ true };
-  ContourPtr                       contour;
-  PaintOption                      paintOption;
-  ContourOption                    maskOption;
+  Bound                     bound;
+  Transform                 transform;
+  std::string               guid{};
+  std::vector<std::string>  maskedBy{};
+  std::vector<AlphaMask>    alphaMaskBy;
+  Mask                      outlineMask;
+  EMaskType                 maskType{ MT_NONE };
+  EMaskShowType             maskShowType{ MST_INVISIBLE };
+  EBoolOp                   clipOperator{ BO_NONE };
+  EOverflow                 overflow{ OF_HIDDEN };
+  EWindingType              windingRule{ WR_EVEN_ODD };
+  Style                     style;
+  ContextSetting            contextSetting;
+  EObjectType               type;
+  bool                      visible{ true };
+  ContourPtr                contour;
+  std::variant<ContourPtr>  primitive;
+  PaintOption               paintOption;
+  ContourOption             maskOption;
   // std::optional<SkPath>     path;
-  std::optional<VGG::layer::Shape> path;
-  std::optional<VGG::layer::Shape> mask;
-  std::optional<MaskObject>        alphaMask;
-  LayerContextGuard                layerContextGuard;
+  std::optional<Shape>      path;
+  std::optional<Shape>      mask;
+  std::optional<MaskObject> alphaMask;
+  LayerContextGuard         layerContextGuard;
   // sk_sp<SkImageFilter>      innerShadowFilter{ nullptr };
 
   PaintNode__pImpl(PaintNode* api, EObjectType type)

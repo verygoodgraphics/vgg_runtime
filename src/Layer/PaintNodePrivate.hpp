@@ -71,7 +71,7 @@ struct MaskObject
   };
   std::vector<MaskData> components;
   // SkPath                contour;
-  Shape                 contour;
+  ShapePath             contour;
 };
 
 struct LayerContextGuard
@@ -146,8 +146,8 @@ public:
   PaintOption               paintOption;
   ContourOption             maskOption;
   // std::optional<SkPath>     path;
-  std::optional<Shape>      path;
-  std::optional<Shape>      mask;
+  std::optional<ShapePath>  path;
+  std::optional<ShapePath>  mask;
   std::optional<MaskObject> alphaMask;
   LayerContextGuard         layerContextGuard;
 
@@ -187,7 +187,7 @@ public:
         }
       }
     }
-    Shape path;
+    ShapePath path;
     for (const auto& e : cache.components)
     {
       if (path.isEmpty())
@@ -277,7 +277,7 @@ public:
     drawRawStyleImpl(painter, *path, blender);
   }
 
-  void drawWithAlphaMask(Renderer* renderer, const Shape& path, const Shape& outlineMask)
+  void drawWithAlphaMask(Renderer* renderer, const ShapePath& path, const ShapePath& outlineMask)
   {
     SkPaint p;
     auto    b = toSkRect(bound);
@@ -323,11 +323,14 @@ public:
     return std::nullopt;
   }
 
-  void drawBlurBgWithAlphaMask(Renderer* renderer, const Shape& path, const Shape& outlineMask)
+  void drawBlurBgWithAlphaMask(
+    Renderer*        renderer,
+    const ShapePath& path,
+    const ShapePath& outlineMask)
   {
     Painter    painter(renderer);
     const auto blur = style.blurs[0];
-    Shape      res = path;
+    ShapePath  res = path;
     if (alphaMask && !alphaMask->contour.isEmpty())
     {
       // Op(res, alphaMask->contour, SkPathOp::kIntersect_SkPathOp, &res);
@@ -378,7 +381,10 @@ public:
     }
   }
 
-  void drawBlurContentWithAlphaMask(Renderer* renderer, const Shape& path, const Shape& outlineMask)
+  void drawBlurContentWithAlphaMask(
+    Renderer*        renderer,
+    const ShapePath& path,
+    const ShapePath& outlineMask)
   {
     SkPaint    p;
     auto       bb = bound;
@@ -411,7 +417,7 @@ public:
     canvas->restore();        // draw masked layer into canvas
   }
 
-  void drawRawStyleImplLegacy(Painter& painter, const Shape& skPath, sk_sp<SkBlender> blender)
+  void drawRawStyleImplLegacy(Painter& painter, const ShapePath& skPath, sk_sp<SkBlender> blender)
   {
     auto filled = false;
     for (const auto& f : style.fills)
@@ -472,100 +478,11 @@ public:
     painter.canvas()->restore();
   }
 
-  void drawRawStyleImpl2(Painter& painter, const Shape& skPath, sk_sp<SkBlender> blender)
+  void drawRawStyleImpl2(Painter& painter, const ShapePath& skPath, sk_sp<SkBlender> blender)
   {
-    auto filled = false;
-    for (const auto& f : style.fills)
-    {
-      if (f.isEnabled)
-      {
-        filled = true;
-        break;
-      }
-    }
-    auto  border = false;
-    float maxWidth = 0;
-    for (const auto& b : style.borders)
-    {
-      if (b.isEnabled)
-      {
-        border = true;
-        switch (b.position)
-        {
-          case PP_INSIDE:
-            break;
-          case PP_CENTER:
-            maxWidth = std::max(b.thickness, maxWidth);
-            break;
-          case PP_OUTSIDE:
-            maxWidth = std::max(b.thickness * 2, maxWidth);
-            break;
-        }
-      }
-    }
-
-    for (auto it = style.dropShadow.rbegin(); it != style.dropShadow.rend(); ++it)
-    {
-      const auto& s = *it;
-      if (!s.isEnabled)
-        return;
-      LayerContextGuard g;
-      g.saveLayer(
-        s.contextSettings,
-        [&](const SkPaint& paint) { painter.canvas()->saveLayer(nullptr, &paint); });
-      if (s.clipShadow)
-      {
-        // painter.beginClip(skPath, SkClipOp::kDifference);
-        painter.canvas()->save();
-        skPath.clip(painter.canvas(), SkClipOp::kDifference);
-      }
-      auto    dropShadowFilter = makeDropShadowImageFilter(s, q_ptr->frameBound(), true, 0);
-      SkPaint p;
-      p.setAntiAlias(true);
-      p.setImageFilter(dropShadowFilter);
-      if (filled)
-      {
-        p.setStyle(SkPaint::kFill_Style);
-        // painter.canvas()->drawPath(*path, p);
-        path->draw(painter.canvas(), p);
-      }
-      if (border)
-      {
-        // p.setStyle(SkPaint::kStroke_Style);
-        // p.setStrokeWidth(maxWidth);
-        // painter.canvas()->drawPath(*path, p);
-      }
-      if (s.clipShadow)
-      {
-        painter.canvas()->restore();
-      }
-      g.restore([&]() { painter.canvas()->restore(); });
-    }
-    q_ptr->paintFill(painter.renderer(), blender, 0, skPath);
-    for (const auto& b : style.borders)
-    {
-      if (!b.isEnabled)
-        continue;
-      painter.drawPathBorder(skPath, bound, b, 0, blender);
-    }
-    if (filled)
-    {
-      for (auto it = style.innerShadow.begin(); it != style.innerShadow.end(); ++it)
-      {
-        auto& s = *it;
-        if (!s.isEnabled)
-          return;
-        auto    innerShadowFilter = makeInnerShadowImageFilter(s, q_ptr->frameBound(), true, 0);
-        SkPaint p;
-        p.setImageFilter(innerShadowFilter);
-        p.setAntiAlias(true);
-        // painter.canvas()->drawPath(skPath, p);
-        skPath.draw(painter.canvas(), p);
-      }
-    }
   }
 
-  void drawRawStyleImpl(Painter& painter, const Shape& skPath, sk_sp<SkBlender> blender)
+  void drawRawStyleImpl(Painter& painter, const ShapePath& skPath, sk_sp<SkBlender> blender)
   {
     // return drawRawStyleImplLegacy(painter, skPath, blender);
 
@@ -622,7 +539,14 @@ public:
       {
         p.setStyle(SkPaint::kFill_Style);
         // painter.canvas()->drawPath(*path, p);
-        path->draw(painter.canvas(), p);
+        if (auto ss = skPath.outset(s.spread, s.spread); s.spread != 0.f && ss)
+        {
+          ss->draw(painter.canvas(), p);
+        }
+        else
+        {
+          skPath.draw(painter.canvas(), p);
+        }
       }
       if (border)
       {
@@ -654,8 +578,20 @@ public:
         SkPaint p;
         p.setImageFilter(innerShadowFilter);
         p.setAntiAlias(true);
-        // painter.canvas()->drawPath(skPath, p);
-        skPath.draw(painter.canvas(), p);
+        if (auto ss = skPath.outset(-s.spread, -s.spread); s.spread != 0.f && ss)
+        {
+          ss->draw(painter.canvas(), p);
+          SkPaint pp;
+          pp.setColor(SK_ColorRED);
+          pp.setStyle(SkPaint::kStroke_Style);
+          pp.setStrokeWidth(1);
+          ss->draw(painter.canvas(), pp);
+        }
+        else
+        {
+          skPath.draw(painter.canvas(), p);
+        }
+        // skPath.draw(painter.canvas(), p);
       }
     }
   }

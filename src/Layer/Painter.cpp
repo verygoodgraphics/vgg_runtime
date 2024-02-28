@@ -36,7 +36,7 @@ sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound& bound)
 }
 
 void Painter::drawPathBorder(
-  const Shape&         skPath,
+  const ShapePath&         skPath,
   const Bound&         bound,
   const Border&        b,
   sk_sp<SkImageFilter> imageFilter,
@@ -104,7 +104,7 @@ void Painter::drawPathBorder(
 }
 
 void Painter::drawShadow(
-  const Shape&         skPath,
+  const ShapePath&         skPath,
   const Bound&         bound,
   const Shadow&        s,
   SkPaint::Style       style,
@@ -124,7 +124,7 @@ void Painter::drawShadow(
 }
 
 void Painter::drawInnerShadow(
-  const Shape&         skPath,
+  const ShapePath&         skPath,
   const Bound&         bound,
   const Shadow&        s,
   SkPaint::Style       style,
@@ -144,7 +144,7 @@ void Painter::drawInnerShadow(
 }
 
 void Painter::drawFill(
-  const Shape&         skPath,
+  const ShapePath&         skPath,
   const Bound&         bound,
   const Fill&          f,
   sk_sp<SkImageFilter> imageFilter,

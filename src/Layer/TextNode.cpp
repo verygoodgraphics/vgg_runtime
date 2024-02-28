@@ -151,10 +151,10 @@ void TextNode::setFrameMode(ETextLayoutMode layoutMode)
 
 void TextNode::drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
 {
-  paintFill(renderer, std::move(blender), 0, Shape());
+  paintFill(renderer, std::move(blender), 0, ShapePath());
 }
 
-void TextNode::drawRawStyle(Painter& painter, const Shape& path, sk_sp<SkBlender> blender)
+void TextNode::drawRawStyle(Painter& painter, const ShapePath& path, sk_sp<SkBlender> blender)
 {
   auto renderer = painter.renderer();
   VGG_IMPL(TextNode);

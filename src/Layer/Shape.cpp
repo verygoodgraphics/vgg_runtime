@@ -4,7 +4,7 @@
 
 namespace VGG::layer
 {
-void Shape::op(const Shape& shape, EBoolOp op)
+void ShapePath::op(const ShapePath& shape, EBoolOp op)
 {
   SkPath p = asPath();
   auto   sop = toSkPathOp(op);
@@ -12,7 +12,7 @@ void Shape::op(const Shape& shape, EBoolOp op)
   setPath(p);
 }
 
-Shape::~Shape()
+ShapePath::~ShapePath()
 {
 }
 } // namespace VGG::layer

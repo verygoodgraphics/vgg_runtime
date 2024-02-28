@@ -173,7 +173,7 @@ public:
     return m_renderer;
   }
 
-  void blurBackgroundBegin(float radiusX, float radiusY, const Bound& bound, const Shape* path)
+  void blurBackgroundBegin(float radiusX, float radiusY, const Bound& bound, const ShapePath* path)
   {
     auto filter = SkImageFilters::Blur(
       SkBlurMask::ConvertRadiusToSigma(radiusX),
@@ -240,14 +240,14 @@ public:
   // }
 
   [[deprecated]] void drawShadow(
-    const Shape&         skPath,
+    const ShapePath&         skPath,
     const Bound&         bound,
     const Shadow&        s,
     SkPaint::Style       style,
     sk_sp<SkImageFilter> imageFilter);
 
   void drawInnerShadow(
-    const Shape&            skPath,
+    const ShapePath&            skPath,
     const Bound&            bound,
     const InnerShadowStyle& s,
     SkPaint::Style          style,
@@ -267,14 +267,14 @@ public:
   }
 
   [[deprecated]] void drawInnerShadow(
-    const Shape&         skPath,
+    const ShapePath&         skPath,
     const Bound&         bound,
     const Shadow&        s,
     SkPaint::Style       style,
     sk_sp<SkImageFilter> imageFilter);
 
   [[deprecated]] void drawFill(
-    const Shape&         skPath,
+    const ShapePath&         skPath,
     const Bound&         bound,
     const Fill&          f,
     sk_sp<SkImageFilter> imageFilter,
@@ -282,7 +282,7 @@ public:
     sk_sp<SkMaskFilter>  mask);
 
   [[deprecated]] void drawPathBorder(
-    const Shape&         skPath,
+    const ShapePath&         skPath,
     const Bound&         bound,
     const Border&        b,
     sk_sp<SkImageFilter> imageFilter,

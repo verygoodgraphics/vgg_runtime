@@ -26,7 +26,7 @@ namespace VGG
 class VGG_EXPORTS Mask
 {
 public:
-  layer::Shape outlineMask;
+  layer::ShapePath outlineMask;
   Mask(){};
   // void addMask(const Mask& mask)
   // {

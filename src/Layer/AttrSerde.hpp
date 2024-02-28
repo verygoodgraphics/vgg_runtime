@@ -453,7 +453,14 @@ inline void from_json(const json& j, Style& x)
   x.borders = j.value("borders", std::vector<Border>());
   x.fills = j.value("fills", std::vector<Fill>());
   x.shadows = j.value("shadows", std::vector<Shadow>());
-  x.shadowStyle = j.value("shadows", std::vector<ShadowStyle>());
+  for (const auto& s : j.value("shadows", json::array_t{}))
+  {
+    if (s.value("inner", false))
+      x.innerShadow.push_back(s);
+    else
+      x.dropShadow.push_back(s);
+  }
+  // x.shadowStyle = j.value("shadows", std::vector<ShadowStyle>());
 }
 
 inline void from_json(const json& j, TextLineAttr& x)

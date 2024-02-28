@@ -34,6 +34,11 @@ public:
     return rxcpp::observe_on_run_loop(m_runLoop);
   }
 
+  bool empty() const
+  {
+    return m_runLoop.empty();
+  }
+
   void dispatch()
   {
     while (!m_runLoop.empty() && m_runLoop.peek().when < m_runLoop.now())

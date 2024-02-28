@@ -105,7 +105,6 @@ public:
     m_appRender = std::make_shared<app::AppRender>();
     m_application->setLayer(m_appRender.get());
 
-    m_application->setView(m_mainComposer->view());
     m_application->setController(m_mainComposer->controller());
   }
 
@@ -127,7 +126,7 @@ public:
     m_context->init(m_graphicsContextConfig);
     m_appRender->init(m_context.get());
 
-    m_mainComposer->view()->setSize(w, h);
+    m_application->setView(m_mainComposer->view(), w, h);
 
     // VGG_APP_INIT
     UEvent evt;

@@ -396,6 +396,7 @@ sk_sp<SkImageFilter> makeInnerShadowImageFilter(
   const InnerShadowStyle& shadow,
   const Bound&            bound,
   bool                    shadowOnly,
+  bool                    overrideSpread,
   sk_sp<SkImageFilter>    input)
 {
   auto sigma = SkBlurMask::ConvertRadiusToSigma(shadow.blur);
@@ -403,10 +404,25 @@ sk_sp<SkImageFilter> makeInnerShadowImageFilter(
     SkImageFilters::ColorFilter(SkColorFilters::Blend(SK_ColorBLACK, SkBlendMode::kSrcIn), 0);
   auto f1 =
     SkImageFilters::ColorFilter(SkColorFilters::Blend(shadow.color, SkBlendMode::kSrcOut), 0);
-  auto f2 = SkImageFilters::Offset(shadow.offsetX, shadow.offsetY, f1);
+  sk_sp<SkImageFilter> f2;
+  if (overrideSpread || shadow.spread == 0)
+  {
+    f2 = SkImageFilters::Offset(shadow.offsetX, shadow.offsetY, f1);
+  }
+  else
+  {
+    const auto     halfWidth = bound.width() / 2;
+    const auto     halfHeight = bound.height() / 2;
+    const float    scaleX = std::max((bound.width() - 2 * shadow.spread) / bound.width(), 0.f);
+    const float    scaleY = std::max((bound.height() - 2 * shadow.spread) / bound.height(), 0.f);
+    const SkVector c = { halfWidth - halfWidth * scaleX, halfHeight - halfHeight * scaleY };
+    SkMatrix       m = SkMatrix::I();
+    m.postScale(scaleX, scaleY);
+    m.postTranslate(shadow.offsetX + c.fX, shadow.offsetY + c.fY);
+    auto f2 = SkImageFilters::MatrixTransform(m, getGlobalSamplingOptions(), f1);
+  }
   auto f3 = SkImageFilters::Blur(sigma, sigma, SkTileMode::kDecal, f2);
   auto f4 = SkImageFilters::Blend(SkBlendMode::kSrcIn, alpha, f3);
-  // auto f4 = f3;
   if (shadowOnly)
   {
     return f4;
@@ -419,11 +435,11 @@ sk_sp<SkImageFilter> makeInnerShadowImageFilter(
 sk_sp<SkImageFilter> makeDropShadowImageFilter(
   const OuterShadowStyle& shadow,
   const Bound&            bound,
-  bool                    shadowOnly,
+  bool                    overrideSpread,
   sk_sp<SkImageFilter>    input)
 {
   auto sigma = SkBlurMask::ConvertRadiusToSigma(shadow.blur);
-  if (shadowOnly)
+  if (overrideSpread || shadow.spread == 0.f)
   {
     return SkImageFilters::DropShadowOnly(
       shadow.offsetX,
@@ -433,13 +449,16 @@ sk_sp<SkImageFilter> makeDropShadowImageFilter(
       shadow.color,
       input);
   }
-  return SkImageFilters::DropShadow(
-    shadow.offsetX,
-    shadow.offsetY,
-    sigma,
-    sigma,
-    shadow.color,
-    input);
+  const auto     halfWidth = bound.width() / 2;
+  const auto     halfHeight = bound.height() / 2;
+  const float    scaleX = std::max((bound.width() + 2 * shadow.spread) / bound.width(), 0.f);
+  const float    scaleY = std::max((bound.height() + 2 * shadow.spread) / bound.height(), 0.f);
+  const SkVector c = { halfWidth - halfWidth * scaleX, halfHeight - halfHeight * scaleY };
+  SkMatrix       m = SkMatrix::I();
+  m.postScale(scaleX, scaleY);
+  m.postTranslate(shadow.offsetX + c.fX, shadow.offsetY + c.fY);
+  auto s = SkImageFilters::DropShadowOnly(0, 0, sigma, sigma, shadow.color, input);
+  return SkImageFilters::MatrixTransform(m, getGlobalSamplingOptions(), s);
 }
 
 } // namespace VGG::layer

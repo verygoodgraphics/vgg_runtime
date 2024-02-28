@@ -241,12 +241,13 @@ sk_sp<SkImageFilter> makeInnerShadowImageFilter(
   const InnerShadowStyle& shadow,
   const Bound&            bound,
   bool                    shadowOnly,
+  bool                    overrideSpread,
   sk_sp<SkImageFilter>    input);
 
 sk_sp<SkImageFilter> makeDropShadowImageFilter(
   const OuterShadowStyle& shadow,
   const Bound&            bound,
-  bool                    shadowOnly,
+  bool                    overrideSpread,
   sk_sp<SkImageFilter>    input);
 
 } // namespace VGG::layer

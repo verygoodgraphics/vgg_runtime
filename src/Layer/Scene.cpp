@@ -200,11 +200,7 @@ public:
           const auto                skr = toSkRect(frame->bound());
           const auto                skm = toSkMatrix(frame->transform().matrix());
           Rasterizer::RasterContext rasterCtx{ mat, frame->picture(), &skr, skm };
-          Timer                     t;
-          t.start();
           rasterizer->rasterize(rasterDevice, rasterCtx, lod, skv, &rasterTiles, &rasterMatrix, 0);
-          t.stop();
-          INFO("raster time: %d", (int)t.elapsed().ms());
         }
         canvas->save();
         canvas->resetMatrix();
@@ -223,11 +219,7 @@ public:
       {
         canvas->save();
         canvas->concat(toSkMatrix(frame->transform().matrix()));
-        Timer t;
-        t.start();
         canvas->drawPicture(frame->picture());
-        t.stop();
-        INFO("raster time: %d", (int)t.elapsed().ms());
         canvas->restore();
       }
     }

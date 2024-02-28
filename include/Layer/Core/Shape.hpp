@@ -66,7 +66,7 @@ struct Ellipse
   }
 };
 
-class ShapeBase : public std::enable_shared_from_this<ShapeBase>
+class Shape : public std::enable_shared_from_this<Shape>
 {
 public:
   virtual void   draw(SkCanvas* canvas, const SkPaint& paint) const = 0;
@@ -82,7 +82,7 @@ public:
     return m_empty;
   }
 
-  virtual ~ShapeBase() = default;
+  virtual ~Shape() = default;
 
 protected:
   void setEmpty(bool empty)
@@ -97,7 +97,7 @@ protected:
   bool m_empty{ true };
 };
 
-class ContourShape : public ShapeBase
+class ContourShape final : public Shape
 {
 public:
   ContourShape(const ContourPtr& contour)
@@ -232,7 +232,7 @@ private:
   }
 };
 
-class RRectShape : public ShapeBase
+class RRectShape final : public Shape
 {
 public:
   RRectShape(const SkRRect& rect)
@@ -281,11 +281,18 @@ public:
     return m_rect;
   }
 
+  SkRRect outset(float x, float y) const
+  {
+    auto r = rrect();
+    r.outset(x, y);
+    return r;
+  }
+
 private:
   SkRRect m_rect;
 };
 
-class RectShape : public ShapeBase
+class RectShape final : public Shape
 {
 public:
   RectShape(const SkRect& rect)
@@ -318,16 +325,23 @@ public:
     return path;
   }
 
-  SkRect rect() const
+  const SkRect& rect() const
   {
     return m_rect;
+  }
+
+  SkRect outset(float x, float y)
+  {
+    auto r = rect();
+    r.outset(x, y);
+    return r;
   }
 
 private:
   SkRect m_rect;
 };
 
-class EllipseShape : public ShapeBase
+class EllipseShape final : public Shape
 {
 public:
   EllipseShape(const SkRect& rect)
@@ -355,16 +369,23 @@ public:
     return path;
   }
 
-  SkRect ellipse() const
+  const SkRect& ellipse() const
   {
     return m_oval;
+  }
+
+  SkRect outset(float x, float y)
+  {
+    auto r = ellipse();
+    r.outset(x, y);
+    return r;
   }
 
 private:
   SkRect m_oval;
 };
 
-class ArcShape : public ShapeBase
+class ArcShape final : public Shape
 {
 public:
   ArcShape(const SkRect& oval, float startAngle, float sweepAngle, bool useCenter)
@@ -407,7 +428,7 @@ private:
   float  m_useCenter;
 };
 
-struct Shape
+struct ShapePath
 {
 public:
   enum EType : uint8_t
@@ -420,19 +441,19 @@ public:
     OVAL
   };
 
-  Shape()
+  ShapePath()
     : m_type(EMPTY)
   {
   }
 
-  ~Shape();
+  ~ShapePath();
 
-  Shape(const Shape& shape)
+  ShapePath(const ShapePath& shape)
   {
     *this = shape;
   }
 
-  Shape& operator=(const Shape& shape)
+  ShapePath& operator=(const ShapePath& shape)
   {
     m_type = shape.m_type;
     m_impl = shape.m_impl;
@@ -444,32 +465,32 @@ public:
     return m_type == EMPTY || (m_type == PATH && m_impl->isEmpty());
   }
 
-  explicit Shape(const SkPath& path)
+  explicit ShapePath(const SkPath& path)
   {
     setPath(path);
   }
 
-  explicit Shape(ContourPtr contour)
+  explicit ShapePath(ContourPtr contour)
   {
     setContour(contour);
   }
 
-  explicit Shape(const SkRect& rect)
+  explicit ShapePath(const SkRect& rect)
   {
     setRect(rect);
   }
 
-  explicit Shape(const SkRRect& rrect)
+  explicit ShapePath(const SkRRect& rrect)
   {
     setRRect(rrect);
   }
 
-  explicit Shape(const Ellipse& oval)
+  explicit ShapePath(const Ellipse& oval)
   {
     setOval(oval);
   }
 
-  explicit Shape(const Arc& arc)
+  explicit ShapePath(const Arc& arc)
   {
     setArc(arc.oval, arc.startAngle, arc.sweepAngle, arc.useCenter);
   }
@@ -534,7 +555,7 @@ public:
     return std::nullopt;
   }
 
-  void op(const Shape& shape, EBoolOp op);
+  void op(const ShapePath& shape, EBoolOp op);
 
   void transform(const SkMatrix& matrix)
   {
@@ -557,6 +578,22 @@ public:
   void draw(SkCanvas* canvas, const SkPaint& paint) const
   {
     m_impl->draw(canvas, paint);
+  }
+
+  std::optional<ShapePath> outset(float x, float y) const
+  {
+    switch (type())
+    {
+      case RECT:
+        return ShapePath(static_cast<RectShape*>(m_impl.get())->outset(x, y));
+      case RRECT:
+        return ShapePath(static_cast<RRectShape*>(m_impl.get())->outset(x, y));
+      case OVAL:
+        return ShapePath(static_cast<EllipseShape*>(m_impl.get())->outset(x, y));
+      default:
+        return std::nullopt;
+    }
+    return std::nullopt;
   }
 
   SkPath asPath() const
@@ -583,8 +620,8 @@ public:
   }
 
 private:
-  std::shared_ptr<ShapeBase> m_impl;
-  uint8_t                    m_type{ EMPTY };
+  std::shared_ptr<Shape> m_impl;
+  uint8_t                m_type{ EMPTY };
 
 }; // namespace VGG::layer
 } // namespace VGG::layer

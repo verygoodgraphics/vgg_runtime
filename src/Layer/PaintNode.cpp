@@ -130,10 +130,10 @@ Transform PaintNode::mapTransform(const PaintNode* node) const
   return Transform(mat);
 }
 
-Shape PaintNode::makeMaskBy(EBoolOp maskOp, Renderer* renderer)
+ShapePath PaintNode::makeMaskBy(EBoolOp maskOp, Renderer* renderer)
 {
   VGG_IMPL(PaintNode);
-  Shape result;
+  ShapePath result;
   if (_->maskedBy.empty())
     return result;
 
@@ -175,7 +175,7 @@ void PaintNode::paintPass(Renderer* renderer, int zorder)
   VGG_IMPL(PaintNode);
   if (!_->path)
   {
-    _->path = Shape(asOutlineMask(0));
+    _->path = ShapePath(asOutlineMask(0));
   }
   if (_->path->isEmpty())
   {
@@ -238,7 +238,7 @@ void PaintNode::setAlphaMaskBy(std::vector<AlphaMask> masks)
   _->alphaMaskBy = std::move(masks);
 }
 
-Shape PaintNode::makeBoundPath()
+ShapePath PaintNode::makeBoundPath()
 {
   const auto& skRect = toSkRect(frameBound());
   const auto& radius = style().frameRadius;
@@ -247,7 +247,7 @@ Shape PaintNode::makeBoundPath()
 
   if (!radius.has_value())
   {
-    return Shape(skRect);
+    return ShapePath(skRect);
   }
 
   for (const auto r : *radius)
@@ -277,17 +277,17 @@ Shape PaintNode::makeBoundPath()
   {
     p.addRect(skRect);
   }
-  return Shape(p);
+  return ShapePath(p);
 }
 
-Shape PaintNode::childPolyOperation() const
+ShapePath PaintNode::childPolyOperation() const
 {
   if (m_firstChild.empty())
   {
     WARN("no child in path %s", name().c_str());
-    return Shape();
+    return ShapePath();
   }
-  std::vector<std::pair<Shape, EBoolOp>> ct;
+  std::vector<std::pair<ShapePath, EBoolOp>> ct;
   for (auto it = m_firstChild.begin(); it != m_firstChild.end(); ++it)
   {
     auto paintNode = static_cast<PaintNode*>(it->get());
@@ -300,13 +300,13 @@ Shape PaintNode::childPolyOperation() const
     return ct[0].first;
   }
 
-  std::vector<Shape> res;
+  std::vector<ShapePath> res;
 
   // eval mask by operator
-  Shape skPath = ct[0].first;
+  ShapePath skPath = ct[0].first;
   for (std::size_t i = 1; i < ct.size(); i++)
   {
-    Shape rhs;
+    ShapePath rhs;
     auto  op = ct[i].second;
     if (op != BO_NONE)
     {
@@ -328,13 +328,13 @@ Shape PaintNode::childPolyOperation() const
   {
     path.addPath(s.asPath());
   }
-  return Shape(path);
+  return ShapePath(path);
 }
 
-Shape PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
+ShapePath PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
 {
   VGG_IMPL(PaintNode);
-  Shape path;
+  ShapePath path;
   if (_->contour)
   {
     std::visit(
@@ -353,7 +353,7 @@ Shape PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
     return path;
   }
 
-  auto appendPath = [this](Shape& path, const ContourOption& option, EBoolOp op)
+  auto appendPath = [this](ShapePath& path, const ContourOption& option, EBoolOp op)
   {
     for (auto it = begin(); it != end(); ++it)
     {
@@ -403,14 +403,14 @@ void PaintNode::drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
   }
 }
 
-void PaintNode::drawRawStyle(Painter& painter, const Shape& path, sk_sp<SkBlender> blender)
+void PaintNode::drawRawStyle(Painter& painter, const ShapePath& path, sk_sp<SkBlender> blender)
 {
   d_ptr->drawRawStyleImpl(painter, path, std::move(blender));
 }
 
-Shape PaintNode::asOutlineMask(const Transform* mat)
+ShapePath PaintNode::asOutlineMask(const Transform* mat)
 {
-  Shape mask;
+  ShapePath mask;
   mask = makeContourImpl(maskOption(), mat);
   mask.setFillType(childWindingType());
   return mask;
@@ -774,7 +774,7 @@ void PaintNode::postPaintPass(Renderer* renderer)
 //   return skPath;
 // }
 
-void PaintNode::paintStyle(Renderer* renderer, const Shape& path, const Shape& outlineMask)
+void PaintNode::paintStyle(Renderer* renderer, const ShapePath& path, const ShapePath& outlineMask)
 {
   VGG_IMPL(PaintNode);
   Painter painter(renderer);
@@ -786,7 +786,7 @@ void PaintNode::paintStyle(Renderer* renderer, const Shape& path, const Shape& o
     // 1. normal drawing
     if (blurType)
     {
-      Shape res = path;
+      ShapePath res = path;
       if (!outlineMask.isEmpty())
         res.op(outlineMask, EBoolOp::BO_INTERSECTION);
       // Op(res, outlineMask, SkPathOp::kIntersect_SkPathOp, &res);
@@ -842,7 +842,7 @@ void PaintNode::paintFill(
   Renderer*            renderer,
   sk_sp<SkBlender>     blender,
   sk_sp<SkImageFilter> imageFilter,
-  const Shape&         path)
+  const ShapePath&         path)
 {
   Painter             painter(renderer);
   sk_sp<SkMaskFilter> blur;

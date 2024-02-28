@@ -30,16 +30,17 @@ namespace VGG
 class Editor;
 class Presenter;
 class RunLoop;
+class UIScrollView;
 class UIView;
 
 class MainComposer
 {
   std::shared_ptr<VggEnv> m_env;
 
-  std::shared_ptr<UIView>    m_view;
-  std::shared_ptr<UIView>    m_editView;
-  std::shared_ptr<Presenter> m_presenter;
-  std::shared_ptr<Editor>    m_editor;
+  std::shared_ptr<UIScrollView> m_view;
+  std::shared_ptr<UIView>       m_editView;
+  std::shared_ptr<Presenter>    m_presenter;
+  std::shared_ptr<Editor>       m_editor;
 
   std::shared_ptr<RunLoop>    m_runLoop;
   std::shared_ptr<Controller> m_controller;

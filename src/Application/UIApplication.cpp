@@ -15,12 +15,13 @@
  */
 #include "UIApplication.hpp"
 
-#include "UIView.hpp"
+#include "UIScrollView.hpp"
 
-void UIApplication::setView(std::shared_ptr<UIView> view)
+void UIApplication::setView(std::shared_ptr<UIScrollView> view, double w, double h)
 {
   ASSERT(view);
   m_view = view;
+  m_view->setSize(w, h);
 
   ASSERT(m_layer);
   m_layer->addAppScene(m_view);

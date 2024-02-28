@@ -19,7 +19,6 @@
 #include "Application/Presenter.hpp"
 #include "Application/RunLoop.hpp"
 #include "Application/UIApplication.hpp"
-#include "Application/UIView.hpp"
 #include "Layer/FontManager.hpp"
 #include "Utility/ConfigManager.hpp"
 #include "Utility/Log.hpp"
@@ -128,8 +127,7 @@ extern "C"
     app->setLayer(sdlApp->layer());
 
     auto view = mainComposer.view();
-    view->setSize(cfg.windowSize[0], cfg.windowSize[1]);
-    app->setView(view);
+    app->setView(view, cfg.windowSize[0], cfg.windowSize[1]);
 
     auto controller = mainComposer.controller();
     controller->setEditMode(editMode);

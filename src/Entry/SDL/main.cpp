@@ -22,7 +22,6 @@
 #include "Application/Mouse.hpp"
 #include "Application/RunLoop.hpp"
 #include "Application/UIApplication.hpp"
-#include "Application/UIView.hpp"
 #include "Layer/Scene.hpp"
 #include "Utility/ConfigManager.hpp"
 
@@ -95,8 +94,7 @@ int main(int argc, char** argv)
   // inject dependencies
   app->setLayer(sdlApp->layer()); // 1. must be first
   auto view = mainComposer.view();
-  view->setSize(cfg.windowSize[0], cfg.windowSize[1]);
-  app->setView(view);
+  app->setView(view, cfg.windowSize[0], cfg.windowSize[1]);
 
   auto controller = mainComposer.controller();
   // controller->setEditMode(true);

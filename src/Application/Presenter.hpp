@@ -16,7 +16,7 @@
 #pragma once
 
 #include "Application/UIEvent.hpp"
-#include "Application/UIView.hpp"
+#include "Application/UIScrollView.hpp"
 #include "Domain/Daruma.hpp"
 #include "Domain/ModelEvent.hpp"
 #include "Utility/Log.hpp"
@@ -40,9 +40,9 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FontInfo, familyName, subfamilyN
 
 class Presenter : public std::enable_shared_from_this<Presenter>
 {
-  std::shared_ptr<UIView>    m_view;
-  std::shared_ptr<ViewModel> m_viewModel;
-  bool                       m_listenAllEvents{ false };
+  std::shared_ptr<UIScrollView> m_view;
+  std::shared_ptr<ViewModel>    m_viewModel;
+  bool                          m_listenAllEvents{ false };
 
   std::vector<FontInfo> m_requiredFonts;
 
@@ -128,7 +128,7 @@ public:
     }
   }
 
-  void setView(std::shared_ptr<UIView> view);
+  void setView(std::shared_ptr<UIScrollView> view);
 
   void setEditorEventListener(UIView::EventListener listener)
   {
@@ -144,6 +144,14 @@ public:
     else
     {
       return {};
+    }
+  }
+
+  void setContentSize(Layout::Size size)
+  {
+    if (m_view)
+    {
+      m_view->setContentSize(size);
     }
   }
 

@@ -38,6 +38,11 @@ struct Point
   Scalar x{ 0 };
   Scalar y{ 0 };
 
+  static Point zero()
+  {
+    return { 0, 0 };
+  }
+
   bool operator==(const Point& rhs) const noexcept;
   bool operator!=(const Point& rhs) const noexcept
   {

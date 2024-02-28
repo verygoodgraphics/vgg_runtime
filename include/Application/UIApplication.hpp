@@ -37,20 +37,20 @@ using namespace VGG;
 
 namespace VGG
 {
-class UIView;
+class UIScrollView;
 }
 
 class UIApplication : public app::EventListener
 {
-  app::AppRender*             m_layer{ nullptr };
-  std::shared_ptr<UIView>     m_view;
-  std::shared_ptr<Controller> m_controller;
+  app::AppRender*               m_layer{ nullptr };
+  std::shared_ptr<UIScrollView> m_view;
+  std::shared_ptr<Controller>   m_controller;
 
   bool m_firstRender{ true };
 
 public:
   void setLayer(app::AppRender* layer);
-  void setView(std::shared_ptr<UIView> view);
+  void setView(std::shared_ptr<UIScrollView> view, double w, double h);
 
   void setController(std::shared_ptr<Controller> controller)
   {

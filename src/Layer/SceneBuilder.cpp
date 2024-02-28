@@ -169,13 +169,13 @@ public:
     {
       s.offsetY = -s.offsetY;
     }
-
-    for (auto& s : style.shadowStyle) // TODO:: flip y axis
+    for (auto& s : style.innerShadow)
     {
-      std::visit(
-        Overloaded{ [&](InnerShadowStyle& s) { s.offsetY = -s.offsetY; },
-                    [&](OuterShadowStyle& s) { s.offsetY = -s.offsetY; } },
-        s);
+      s.offsetY = -s.offsetY;
+    }
+    for (auto& s : style.dropShadow)
+    {
+      s.offsetY = -s.offsetY;
     }
     for (auto& b : style.blurs)
     {

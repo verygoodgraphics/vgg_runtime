@@ -238,11 +238,15 @@ struct Blur
 
 struct Style
 {
-  std::vector<Blur>                   blurs;
-  std::vector<Border>                 borders;
-  std::vector<Fill>                   fills;
-  std::vector<Shadow>                 shadows;
-  std::vector<ShadowStyle>            shadowStyle;
+  std::vector<Blur>   blurs;
+  std::vector<Border> borders;
+  std::vector<Fill>   fills;
+  std::vector<Shadow> shadows;
+  // std::vector<ShadowStyle> shadowStyle;
+
+  std::vector<InnerShadowStyle> innerShadow;
+  std::vector<OuterShadowStyle> dropShadow;
+
   std::optional<std::array<float, 4>> frameRadius;
   float                               cornerSmooth;
 };

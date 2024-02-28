@@ -125,29 +125,6 @@ private:
   }
 
   template<typename Primitive>
-  void drawInnerShadow(
-    const Primitive&        primitive,
-    const SkRect&           bound,
-    const InnerShadowStyle& s,
-    EStyle                  style)
-  {
-
-    SkPaint pen;
-    auto    sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
-    pen.setAntiAlias(m_antiAlias);
-    pen.setImageFilter(
-      SkMyImageFilters::DropInnerShadowOnly(s.offsetX, s.offsetY, sigma, sigma, s.color, nullptr));
-    m_renderer->canvas()->saveLayer(nullptr, &pen);
-    if (s.spread > 0)
-      m_renderer->canvas()->scale(1.0 / s.spread, 1.0 / s.spread);
-    SkPaint fillPen;
-    fillPen.setStyle(toSkPaintStyle(style));
-    fillPen.setAntiAlias(m_antiAlias);
-    primitive.draw(m_renderer->canvas(), fillPen);
-    m_renderer->canvas()->restore();
-  }
-
-  template<typename Primitive>
   void drawOuterShadow(
     const Primitive         primitive,
     const SkRect&           bound,
@@ -263,14 +240,34 @@ public:
   // }
 
   [[deprecated]] void drawShadow(
-    const SkPath&        skPath,
+    const Shape&         skPath,
     const Bound&         bound,
     const Shadow&        s,
     SkPaint::Style       style,
     sk_sp<SkImageFilter> imageFilter);
 
+  void drawInnerShadow(
+    const Shape&            skPath,
+    const Bound&            bound,
+    const InnerShadowStyle& s,
+    SkPaint::Style          style,
+    sk_sp<SkImageFilter>    imageFilter)
+  {
+    SkPaint pen;
+    auto    sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
+    pen.setAntiAlias(m_antiAlias);
+    pen.setImageFilter(
+      SkMyImageFilters::DropInnerShadowOnly(s.offsetX, s.offsetY, sigma, sigma, s.color, nullptr));
+    m_renderer->canvas()->saveLayer(nullptr, &pen);
+    SkPaint fillPen;
+    fillPen.setStyle(style);
+    fillPen.setAntiAlias(m_antiAlias);
+    skPath.draw(m_renderer->canvas(), fillPen);
+    m_renderer->canvas()->restore();
+  }
+
   [[deprecated]] void drawInnerShadow(
-    const SkPath&        skPath,
+    const Shape&         skPath,
     const Bound&         bound,
     const Shadow&        s,
     SkPaint::Style       style,
@@ -369,18 +366,6 @@ public:
       drawOuterShadow(Rect(rect), toSkRect(rect), shadow, style);
   }
 
-  void drawRectInnerShadow(
-    const Bound&            rect,
-    const InnerShadowStyle& shadow,
-    EStyle                  style,
-    const Bound*            hint)
-  {
-    if (hint)
-      drawInnerShadow(Rect(rect), toSkRect(*hint), shadow, style);
-    else
-      drawInnerShadow(Rect(rect), toSkRect(rect), shadow, style);
-  }
-
   // Oval Drawing
   void drawOvalFill(const Bound& oval, const Fill& fill, const Bound* hint)
   {
@@ -408,19 +393,6 @@ public:
       drawOuterShadow(Rect(oval), toSkRect(*hint), shadow, style);
     else
       drawOuterShadow(Rect(oval), toSkRect(oval), shadow, style);
-  }
-
-  void drawOvalInnerShadow(
-    const Bound&            oval,
-    const InnerShadowStyle& shadow,
-    EStyle                  style,
-    const Bound*            hint)
-  {
-
-    if (hint)
-      drawInnerShadow(Rect(oval), toSkRect(*hint), shadow, style);
-    else
-      drawInnerShadow(Rect(oval), toSkRect(oval), shadow, style);
   }
 
   // Polygon Drawing

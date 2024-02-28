@@ -104,7 +104,7 @@ void Painter::drawPathBorder(
 }
 
 void Painter::drawShadow(
-  const SkPath&        skPath,
+  const Shape&         skPath,
   const Bound&         bound,
   const Shadow&        s,
   SkPaint::Style       style,
@@ -118,12 +118,13 @@ void Painter::drawShadow(
   m_renderer->canvas()->saveLayer(nullptr, &pen); // TODO:: test hint rect
   SkPaint fillPen;
   fillPen.setStyle(style);
-  m_renderer->canvas()->drawPath(skPath, fillPen);
+  // m_renderer->canvas()->drawPath(skPath, fillPen);
+  skPath.draw(m_renderer->canvas(), fillPen);
   m_renderer->canvas()->restore();
 }
 
 void Painter::drawInnerShadow(
-  const SkPath&        skPath,
+  const Shape&         skPath,
   const Bound&         bound,
   const Shadow&        s,
   SkPaint::Style       style,
@@ -138,7 +139,7 @@ void Painter::drawInnerShadow(
   SkPaint fillPen;
   fillPen.setStyle(style);
   fillPen.setAntiAlias(m_antiAlias);
-  m_renderer->canvas()->drawPath(skPath, fillPen);
+  skPath.draw(m_renderer->canvas(), fillPen);
   m_renderer->canvas()->restore();
 }
 

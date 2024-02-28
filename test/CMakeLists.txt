@@ -29,6 +29,7 @@ else()
     layer/refcounter_test.cpp
     layer/treenode_test.cpp
     layer/observe_test.cpp
+    Utility/TimerTests.cpp
   )
   target_include_directories(unit_tests PRIVATE
     .

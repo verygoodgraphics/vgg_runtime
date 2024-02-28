@@ -13,43 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
 
-#include "Application/Event/Event.hpp"
+#include <rxcpp/rx.hpp>
 
-namespace VGG::UIKit
+#include <functional>
+
+namespace VGG
 {
 
-enum class EUIGestureRecognizerState
+class Timer
 {
-  POSSIBLE,
-  BEGAN,
-  CHANGED,
-  ENDED,
-  CANCELLED,
-  FAILED,
-  RECOGNIZED = ENDED
-};
+public:
+  using TCallback = std::function<void()>;
 
-class UIGestureRecognizer
-{
-protected:
-  EUIGestureRecognizerState m_state;
+private:
+  TCallback                     m_callback;
+  rxcpp::composite_subscription m_timer;
 
 public:
-  virtual ~UIGestureRecognizer() = default;
-
-  // virtual void setView() = 0;
-  // virtual void abort() = 0;
-
-  auto state()
-  {
-    return m_state;
-  }
-
-  virtual void touchesBegan(UEvent e) = 0;
-  virtual void touchesMoved(UEvent e) = 0;
-  virtual void touchesEnded(UEvent e) = 0;
-  // virtual void touchesCancelled() = 0;
+  Timer(double interval, TCallback callback, bool repeats = false);
+  void invalidate();
 };
 
-} // namespace VGG::UIKit
+} // namespace VGG

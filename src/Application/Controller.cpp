@@ -647,17 +647,29 @@ void Controller::scaleContent(Layout::Size size)
     return;
   }
 
-  aspectFill(size.width);
+  aspectFill(size);
   // aspectFit(size);
 }
 
-void Controller::aspectFill(int width)
+void Controller::aspectFill(Layout::Size size)
 {
-  auto         pageSize = m_layout->pageSize(m_presenter->currentPageIndex());
-  auto         scaleFactor = width / pageSize.width;
-  Layout::Size size = { pageSize.width * scaleFactor,
-                        std::max(pageSize.height, pageSize.height * scaleFactor) };
-  m_layout->layout(size);
+  auto pageSize = m_layout->pageSize(m_presenter->currentPageIndex());
+  auto scaleFactor = size.width / pageSize.width;
+
+  if (scaleFactor < 1.)
+  {
+    Layout::Size targetSize = { pageSize.width * scaleFactor,
+                                pageSize.height }; // make sure to see all the contents
+    m_layout->layout(targetSize);
+  }
+  else
+  {
+    Layout::Size targetSize = {
+      pageSize.width * scaleFactor,
+      std::min(pageSize.height + size.height / 3., pageSize.height * scaleFactor) // set max height limit
+    };
+    m_layout->layout(targetSize);
+  }
 }
 
 void Controller::aspectFit(Layout::Size size)

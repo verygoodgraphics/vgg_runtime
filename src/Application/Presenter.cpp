@@ -63,6 +63,7 @@ void Presenter::fitForEditing(Layout::Size pageSize)
   }
   m_view->fitContent(xOffset, yOffset, scale);
   m_view->enableZoomer(true);
+  m_view->setScrollEnabled(false);
 }
 
 void Presenter::resetForRunning()
@@ -73,6 +74,7 @@ void Presenter::resetForRunning()
   }
   m_view->fitCurrentPage();
   m_view->enableZoomer(false);
+  m_view->setScrollEnabled(true);
 }
 
 void Presenter::listenViewEvent()
@@ -133,7 +135,7 @@ void Presenter::listenViewEvent()
     });
 }
 
-void Presenter::setView(std::shared_ptr<UIView> view)
+void Presenter::setView(std::shared_ptr<UIScrollView> view)
 {
   m_view = view;
 

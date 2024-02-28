@@ -15,34 +15,85 @@
  */
 #pragma once
 
-#include "UIView.hpp"
+#include "Application/UIView.hpp"
 
-#include "Domain/Layout/Rect.hpp"
+#include "UIPanGestureRecognizer.hpp"
+#include "Types.hpp"
 
+#include <memory>
+
+using VGG::Layout::Point;
+using VGG::Layout::Size;
 namespace VGG
 {
 
+namespace UIKit
+{
+class UIScrollViewAnimation;
+class UIScrollViewAnimationDeceleration;
+} // namespace UIKit
+
 class UIScrollView : public UIView
 {
-public:
-  using UISize = Layout::Size;
-  using UIPoint = Layout::Point;
+  friend class UIKit::UIScrollViewAnimationDeceleration;
 
+public:
 private:
-  UISize  m_contentSize{ 0, 0 };
-  UIPoint m_contentOffset{ 0, 0 };
+  Size  m_contentSize{ 0, 0 };
+  Point m_contentOffset{ 0, 0 };
+
+  bool m_scrollEnabled{ true };
+  bool m_bounces{ true };
+  bool m_dragging{ false };
+  bool m_decelerating{ false };
+
+  bool m_scrollTimer{ false };
+
+  UIKit::UIPanGestureRecognizer m_panGestureRecognizer;
+
+  std::shared_ptr<UIKit::UIScrollViewAnimation> m_scrollAnimation;
 
 public:
+  bool isScrollEnabled() const
+  {
+    return m_scrollEnabled;
+  }
+  void setScrollEnabled(bool enabled)
+  {
+    m_scrollEnabled = enabled;
+  }
+
+public:
+  UIScrollView();
+
   bool onEvent(UEvent e, void* userData) override;
 
-  void setContentSize(UISize size);
-  void setContentOffset(UIPoint offset);
-
-  void endDraggingWithDecelerationVelocity(UIPoint velocity);
+  void setContentSize(Size size);
+  void setContentOffset(Point offset);
+  auto contentOffset() const -> Point
+  {
+    return m_contentOffset;
+  }
 
 private:
   bool canScrollHorizontal();
   bool canScrollVertical();
+
+  void handleGesture(UIKit::UIPanGestureRecognizer& recognizer);
+
+  void beginDragging();
+  void dragBy(Point delta);
+  void endDraggingWithDecelerationVelocity(Point velocity);
+
+  void setScrollAnimation(std::shared_ptr<UIKit::UIScrollViewAnimation> animation);
+  void cancelScrollAnimation();
+  void updateScrollAnimation();
+
+  std::shared_ptr<UIKit::UIScrollViewAnimation> decelerationAnimationWithVelocity(Point velocity);
+
+  void  confineContent();
+  void  setRestrainedContentOffset(Point offset);
+  Point confinedContentOffset(Point contentOffset);
 };
 
 } // namespace VGG

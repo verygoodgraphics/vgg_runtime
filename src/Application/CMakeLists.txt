@@ -8,7 +8,11 @@ add_library(vgg_application STATIC
   Reporter.cpp
   RunLoop.cpp
   UIApplication.cpp
+  UIGestureRecognizer.cpp
+  UIPanGestureRecognizer.cpp
   UIScrollView.cpp
+  UIScrollViewAnimation.cpp
+  UIScrollViewAnimationDeceleration.cpp
   UIView.cpp
   VggEnv.cpp
   VggSdk.cpp

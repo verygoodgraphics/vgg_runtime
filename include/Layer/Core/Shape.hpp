@@ -118,6 +118,7 @@ public:
     ensurePath();
     if (m_path)
     {
+      DEBUG("draw path %d", m_path->countPoints());
       canvas->drawPath(*m_path, paint);
     }
   }
@@ -152,68 +153,6 @@ public:
   }
 
 private:
-  // struct InternalPath
-  // {
-  // public:
-  //   SkPath asPath()
-  //   {
-  //     return std::visit(
-  //       [this](auto&& arg) -> SkPath
-  //       {
-  //         using T = std::decay_t<decltype(arg)>;
-  //         if constexpr (std::is_same_v<T, SkPath>)
-  //           return arg;
-  //         else
-  //         {
-  //           SkPath p = VGG::layer::makePath(*arg);
-  //           m_path = p;
-  //           return p;
-  //         }
-  //       },
-  //       m_path);
-  //   }
-  //   bool isClosed() const
-  //   {
-  //     return std::visit(
-  //       [](auto&& arg) -> bool
-  //       {
-  //         using T = std::decay_t<decltype(arg)>;
-  //         if constexpr (std::is_same_v<T, SkPath>)
-  //           return arg.isLastContourClosed();
-  //         else
-  //         {
-  //           return arg->closed;
-  //         }
-  //       },
-  //       m_path);
-  //   }
-  //   void setPath(const SkPath& path)
-  //   {
-  //     m_path = path;
-  //   }
-  //   void setContour(const ContourPtr& contour)
-  //   {
-  //     m_path = contour;
-  //   }
-  //
-  // private:
-  //   using Path = std::variant<ContourPtr, SkPath>;
-  //   Path m_path;
-  //   void ensurePath()
-  //   {
-  //     std::visit(
-  //       [this](auto&& arg) -> SkPath
-  //       {
-  //         using T = std::decay_t<decltype(arg)>;
-  //         if constexpr (std::is_same_v<T, ContourPtr>)
-  //         {
-  //           SkPath p = VGG::layer::makePath(*arg);
-  //           m_path = p;
-  //         }
-  //       },
-  //       m_path);
-  //   }
-  // };
   ContourPtr            m_contour;
   std::optional<SkPath> m_path;
   void                  ensurePath() const
@@ -304,6 +243,7 @@ public:
 
   void draw(SkCanvas* canvas, const SkPaint& paint) const override
   {
+    DEBUG("draw rect");
     canvas->drawRect(m_rect, paint);
   }
 
@@ -356,17 +296,21 @@ public:
   }
   void clip(SkCanvas* canvas, SkClipOp clipOp) const override
   {
-    canvas->clipRect(m_oval, clipOp);
+    canvas->clipPath(const_cast<EllipseShape*>(this)->asPath(), clipOp);
   }
+
   void transform(const SkMatrix& matrix) override
   {
     m_oval = matrix.mapRect(m_oval);
+    m_path = std::nullopt;
   }
+
   SkPath asPath() override
   {
-    SkPath path;
-    path.addOval(m_oval);
-    return path;
+    if (m_path)
+      return *m_path;
+    m_path = SkPath::Oval(m_oval);
+    return *m_path;
   }
 
   const SkRect& ellipse() const
@@ -382,7 +326,8 @@ public:
   }
 
 private:
-  SkRect m_oval;
+  SkRect                m_oval;
+  std::optional<SkPath> m_path;
 };
 
 class ArcShape final : public Shape

@@ -147,14 +147,17 @@ ShapePath PaintNode::makeMaskBy(EBoolOp maskOp, Renderer* renderer)
       {
         const auto t = obj->second->mapTransform(this);
         auto       m = obj->second->asOutlineMask(&t);
-        if (result.isEmpty())
+        if (!m.isEmpty())
         {
-          result = m;
-        }
-        else
-        {
-          result.op(m, maskOp);
-          // Op(result.outlineMask, m.outlineMask, op, &result.outlineMask);
+          if (result.isEmpty())
+          {
+            result = m;
+          }
+          else
+          {
+            result.op(m, maskOp);
+            // Op(result.outlineMask, m.outlineMask, op, &result.outlineMask);
+          }
         }
       }
       else
@@ -307,7 +310,7 @@ ShapePath PaintNode::childPolyOperation() const
   for (std::size_t i = 1; i < ct.size(); i++)
   {
     ShapePath rhs;
-    auto  op = ct[i].second;
+    auto      op = ct[i].second;
     if (op != BO_NONE)
     {
       rhs = ct[i].first;
@@ -804,6 +807,12 @@ void PaintNode::paintStyle(Renderer* renderer, const ShapePath& path, const Shap
       // painter.beginClip(outlineMask); // TODO::
       painter.canvas()->save();
       outlineMask.clip(painter.renderer()->canvas(), SkClipOp::kIntersect);
+      // SkPaint p;
+      // p.setStrokeWidth(1);
+      // p.setColor(SK_ColorBLUE);
+      // p.setStyle(SkPaint::kStroke_Style);
+      // outlineMask.draw(painter.renderer()->canvas(), p);
+      // painter.endClip();
     }
     auto blender = SkBlender::Mode(SkBlendMode::kSrcOver);
     drawRawStyle(painter, path, blender);
@@ -842,7 +851,7 @@ void PaintNode::paintFill(
   Renderer*            renderer,
   sk_sp<SkBlender>     blender,
   sk_sp<SkImageFilter> imageFilter,
-  const ShapePath&         path)
+  const ShapePath&     path)
 {
   Painter             painter(renderer);
   sk_sp<SkMaskFilter> blur;

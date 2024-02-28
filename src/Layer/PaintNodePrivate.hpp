@@ -478,14 +478,9 @@ public:
     painter.canvas()->restore();
   }
 
-  void drawRawStyleImpl2(Painter& painter, const ShapePath& skPath, sk_sp<SkBlender> blender)
-  {
-  }
-
   void drawRawStyleImpl(Painter& painter, const ShapePath& skPath, sk_sp<SkBlender> blender)
   {
     // return drawRawStyleImplLegacy(painter, skPath, blender);
-
     auto filled = false;
     for (const auto& f : style.fills)
     {
@@ -516,35 +511,34 @@ public:
       }
     }
 
-    for (auto it = style.dropShadow.rbegin(); it != style.dropShadow.rend(); ++it)
+    for (const auto& s : style.dropShadow)
     {
-      const auto& s = *it;
       if (!s.isEnabled)
-        return;
+        continue;
       LayerContextGuard g;
       g.saveLayer(
         s.contextSettings,
         [&](const SkPaint& paint) { painter.canvas()->saveLayer(nullptr, &paint); });
       if (s.clipShadow)
       {
-        // painter.beginClip(skPath, SkClipOp::kDifference);
         painter.canvas()->save();
         skPath.clip(painter.canvas(), SkClipOp::kDifference);
       }
-      auto    dropShadowFilter = makeDropShadowImageFilter(s, q_ptr->frameBound(), true, 0);
-      SkPaint p;
-      p.setAntiAlias(true);
-      p.setImageFilter(dropShadowFilter);
       if (filled)
       {
+        SkPaint p;
+        p.setAntiAlias(true);
         p.setStyle(SkPaint::kFill_Style);
-        // painter.canvas()->drawPath(*path, p);
         if (auto ss = skPath.outset(s.spread, s.spread); s.spread != 0.f && ss)
         {
+          auto dropShadowFilter = makeDropShadowImageFilter(s, q_ptr->frameBound(), true, 0);
+          p.setImageFilter(dropShadowFilter);
           ss->draw(painter.canvas(), p);
         }
         else
         {
+          auto dropShadowFilter = makeDropShadowImageFilter(s, q_ptr->frameBound(), false, 0);
+          p.setImageFilter(dropShadowFilter);
           skPath.draw(painter.canvas(), p);
         }
       }
@@ -569,29 +563,15 @@ public:
     }
     if (filled)
     {
-      for (auto it = style.innerShadow.begin(); it != style.innerShadow.end(); ++it)
+      for (const auto& s : style.innerShadow)
       {
-        auto& s = *it;
         if (!s.isEnabled)
-          return;
-        auto    innerShadowFilter = makeInnerShadowImageFilter(s, q_ptr->frameBound(), true, 0);
+          continue;
+        auto innerShadowFilter = makeInnerShadowImageFilter(s, q_ptr->frameBound(), true, false, 0);
         SkPaint p;
         p.setImageFilter(innerShadowFilter);
         p.setAntiAlias(true);
-        if (auto ss = skPath.outset(-s.spread, -s.spread); s.spread != 0.f && ss)
-        {
-          ss->draw(painter.canvas(), p);
-          SkPaint pp;
-          pp.setColor(SK_ColorRED);
-          pp.setStyle(SkPaint::kStroke_Style);
-          pp.setStrokeWidth(1);
-          ss->draw(painter.canvas(), pp);
-        }
-        else
-        {
-          skPath.draw(painter.canvas(), p);
-        }
-        // skPath.draw(painter.canvas(), p);
+        skPath.draw(painter.canvas(), p);
       }
     }
   }

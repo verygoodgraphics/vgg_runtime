@@ -440,6 +440,8 @@ inline void from_json(const json& j, Fill& x)
 
 inline void from_json(const json& j, Style& x)
 {
+  if (!j.is_object())
+    return;
   x.blurs = j.value("blurs", std::vector<Blur>());
   x.borders = j.value("borders", std::vector<Border>());
   x.fills = j.value("fills", std::vector<Fill>());

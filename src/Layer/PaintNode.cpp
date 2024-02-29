@@ -241,43 +241,14 @@ void PaintNode::setAlphaMaskBy(std::vector<AlphaMask> masks)
 ShapePath PaintNode::makeBoundPath()
 {
   const auto& skRect = toSkRect(frameBound());
-  const auto& radius = style().frameRadius;
-  bool        rounded = false;
-  float       maxR = 0.0, minR = std::numeric_limits<float>::max();
-
-  if (!radius.has_value())
-  {
-    return ShapePath(skRect);
-  }
-
-  for (const auto r : *radius)
-  {
-    if (r > 0.f)
-    {
-      rounded = true;
-    }
-    maxR = std::max(maxR, r);
-    minR = std::min(minR, r);
-  }
-
-  SkPath p;
-  if (rounded)
-  {
-    if ((maxR - minR) < std::numeric_limits<float>::epsilon())
-    {
-      p.addRoundRect(skRect, minR, minR);
-    }
-    else
-    {
-      // TODO:: create general path
-      p.addRoundRect(skRect, minR, minR);
-    }
-  }
-  else
-  {
-    p.addRect(skRect);
-  }
-  return ShapePath(p);
+  auto        radius = style().frameRadius.value_or(std::array<float, 4>{ 0, 0, 0, 0 });
+  return std::visit(
+    Overloaded{
+      [&](const ContourPtr& c) { return ShapePath(c); },
+      [&](const SkRect& r) { return ShapePath(r); },
+      [&](const SkRRect& r) { return ShapePath(r); },
+    },
+    makeShape(radius, skRect, style().cornerSmooth));
 }
 
 ShapePath PaintNode::childPolyOperation() const

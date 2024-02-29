@@ -419,7 +419,7 @@ sk_sp<SkImageFilter> makeInnerShadowImageFilter(
     SkMatrix       m = SkMatrix::I();
     m.postScale(scaleX, scaleY);
     m.postTranslate(shadow.offsetX + c.fX, shadow.offsetY + c.fY);
-    auto f2 = SkImageFilters::MatrixTransform(m, getGlobalSamplingOptions(), f1);
+    f2 = SkImageFilters::MatrixTransform(m, getGlobalSamplingOptions(), f1);
   }
   auto f3 = SkImageFilters::Blur(sigma, sigma, SkTileMode::kDecal, f2);
   auto f4 = SkImageFilters::Blend(SkBlendMode::kSrcIn, alpha, f3);

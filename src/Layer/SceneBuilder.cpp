@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "Layer/Memory/VAllocator.hpp"
 #include "PathPatch.h"
 #include "Layer/SceneBuilder.hpp"
 #include "Layer/Core/VType.hpp"
@@ -37,6 +38,14 @@
 
 namespace
 {
+
+PaintNodePtr makeContourNode(VAllocator* alloc)
+{
+  auto p = makePaintNodePtr(alloc, "contour", VGG_CONTOUR, "");
+  p->setOverflow(OF_VISIBLE);
+  p->setContourOption(ContourOption{ ECoutourType::MCT_FRAMEONLY, false });
+  return p;
+}
 
 ///
 /// Convert coordinate system from VGG from to skia
@@ -183,6 +192,72 @@ public:
     }
   }
 };
+
+ContourPtr makeContourData(const json& j, const json& parent, const glm::mat3& totalMatrix)
+{
+  Contour contour;
+  contour.closed = j.value("closed", false);
+  const auto& points = getOrDefault(j, "points");
+  for (const auto& e : points)
+  {
+    contour.emplace_back(
+      getOptional<glm::vec2>(e, "point").value_or(glm::vec2{ 0, 0 }),
+      getOptional<float>(e, "radius").value_or(0.0),
+      getOptional<glm::vec2>(e, "curveFrom"),
+      getOptional<glm::vec2>(e, "curveTo"),
+      getOptional<int>(e, "cornerStyle"));
+  }
+  CoordinateConvert::convertCoordinateSystem(contour, totalMatrix);
+  auto ptr = std::make_shared<Contour>(contour);
+  ptr->cornerSmooth = getOptional<float>(parent, "cornerSmoothing").value_or(0.f);
+  if (!ptr->closed && !ptr->empty())
+  {
+    ptr->back().radius = 0;
+    ptr->front().radius = 0;
+  }
+  return ptr;
+}
+
+ShapeData makeShapeData(const json& j, const json& parent, const glm::mat3& totalMatrix)
+{
+  const auto klass = j.value("class", "");
+  const auto rect = SkRect::MakeXYWH(
+    parent["bounds"]["x"].get<float>(),
+    -parent["bounds"]["y"].get<float>(),
+    parent["bounds"]["width"].get<float>(),
+    parent["bounds"]["height"].get<float>());
+  if (klass == "contour")
+  {
+    return makeContourData(j, parent, totalMatrix);
+  }
+  else if (klass == "rectangle")
+  {
+    const auto rect = SkRect::MakeXYWH(
+      parent["bounds"]["x"].get<float>(),
+      -parent["bounds"]["y"].get<float>(),
+      parent["bounds"]["width"].get<float>(),
+      parent["bounds"]["height"].get<float>());
+    std::array<float, 4> radius = j.value("radius", std::array<float, 4>{ 0, 0, 0, 0 });
+    auto cornerSmoothing = getOptional<float>(parent, "cornerSmoothing").value_or(0.f);
+    auto s = makeShape(radius, rect, cornerSmoothing);
+    return std::visit([&](auto&& arg) { return ShapeData(arg); }, s);
+  }
+  else if (klass == "ellipse")
+  {
+    Ellipse oval;
+    oval.rect = rect;
+    return oval;
+  }
+  else if (klass == "polygon" || klass == "star")
+  {
+    auto cp = parent;
+    if (pathChange(cp))
+    {
+      return makeContourData(cp["shape"]["subshapes"][0]["subGeometry"], cp, totalMatrix);
+    }
+  }
+  return ShapeData();
+}
 
 template<typename F1, typename F2>
 inline PaintNodePtr makeObjectCommonProperty(
@@ -377,27 +452,13 @@ PaintNodePtr SceneBuilder::fromPath(const json& j, const glm::mat3& totalMatrix)
         const auto blop = subshape.value("booleanOperation", EBoolOp::BO_NONE);
         const auto geo = subshape.value("subGeometry", nlohmann::json{});
         const auto klass = geo.value("class", "");
-        if (klass == "contour")
+        if (
+          klass == "contour" || klass == "rectangle" || klass == "ellipse" || klass == "polygon" ||
+          klass == "star")
         {
-          p->addSubShape(makeContour(geo, j, matrix), blop);
-        }
-        else if (klass == "polygon" || klass == "star")
-        {
-          auto cp = j;
-          if (pathChange(cp))
-          {
-            p->addSubShape(
-              makeContour(cp["shape"]["subshapes"][0]["subGeometry"], cp, matrix),
-              blop);
-          }
-        }
-        else if (klass == "rectangle")
-        {
-          p->addSubShape(makeRect(geo, j, matrix), blop);
-        }
-        else if (klass == "ellipse")
-        {
-          p->addSubShape(makeEllipse(geo, j, matrix), blop);
+          auto shape = makeContourNode(m_alloc);
+          shape->setContourData(makeShapeData(geo, j, matrix));
+          p->addSubShape(shape, blop);
         }
         else if (klass == "path")
         {
@@ -622,89 +683,6 @@ std::vector<PaintNodePtr> SceneBuilder::fromTopLevelFrames(
     frames.push_back(fromFrame(e, totalMatrix));
   }
   return frames;
-}
-
-PaintNodePtr SceneBuilder::makeContourNode()
-{
-  auto p = makePaintNodePtr(m_alloc, "contour", VGG_CONTOUR, "");
-  p->setOverflow(OF_VISIBLE);
-  p->setContourOption(ContourOption{ ECoutourType::MCT_FRAMEONLY, false });
-  return p;
-}
-
-PaintNodePtr SceneBuilder::makeContour(
-  const json&      j,
-  const json&      parent,
-  const glm::mat3& totalMatrix)
-{
-  Contour contour;
-  contour.closed = j.value("closed", false);
-  const auto& points = getOrDefault(j, "points");
-  for (const auto& e : points)
-  {
-    contour.emplace_back(
-      getOptional<glm::vec2>(e, "point").value_or(glm::vec2{ 0, 0 }),
-      getOptional<float>(e, "radius").value_or(0.0),
-      getOptional<glm::vec2>(e, "curveFrom"),
-      getOptional<glm::vec2>(e, "curveTo"),
-      getOptional<int>(e, "cornerStyle"));
-  }
-  CoordinateConvert::convertCoordinateSystem(contour, totalMatrix);
-  auto ptr = std::make_shared<Contour>(contour);
-  ptr->cornerSmooth = getOptional<float>(parent, "cornerSmoothing").value_or(0.f);
-  if (!ptr->closed && !ptr->empty())
-  {
-    ptr->back().radius = 0;
-    ptr->front().radius = 0;
-  }
-  auto p = makeContourNode();
-  p->setContourData(std::move(ptr));
-  return p;
-}
-
-PaintNodePtr SceneBuilder::makeRect(const json& j, const json& parent, const glm::mat3& totalMatrix)
-{
-  auto rect = SkRect::MakeXYWH(
-    parent["bounds"]["x"].get<float>(),
-    -parent["bounds"]["y"].get<float>(),
-    parent["bounds"]["width"].get<float>(),
-    parent["bounds"]["height"].get<float>());
-  std::array<float, 4> radius = j.value("radius", std::array<float, 4>{ 0, 0, 0, 0 });
-  if (std::all_of(radius.begin(), radius.end(), [](float r) { return r == 0; }))
-  {
-    auto p = makeContourNode();
-    p->setContourData(rect);
-    return p;
-  }
-  else
-  {
-    SkRRect  rrect;
-    SkVector radii[4] = { { radius[0], radius[0] },
-                          { radius[1], radius[1] },
-                          { radius[2], radius[2] },
-                          { radius[3], radius[3] } };
-    rrect.setRectRadii(rect, radii);
-    auto p = makeContourNode();
-    p->setContourData(rrect);
-    return p;
-  }
-  return nullptr;
-}
-PaintNodePtr SceneBuilder::makeEllipse(
-  const json&      j,
-  const json&      parent,
-  const glm::mat3& totalMatrix)
-{
-  Ellipse oval;
-  auto    p = makeContourNode();
-  auto    rect = SkRect::MakeXYWH(
-    0,
-    0,
-    parent["bounds"]["width"].get<float>(),
-    parent["bounds"]["height"].get<float>());
-  oval.rect = rect;
-  p->setContourData(oval);
-  return p;
 }
 
 PaintNodePtr SceneBuilder::fromGroup(const json& j, const glm::mat3& totalMatrix)

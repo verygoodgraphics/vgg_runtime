@@ -111,11 +111,53 @@ void ShapePath ::setFillType(EWindingType fillType)
 void ShapePath::transform(ShapePath& shape, const SkMatrix& matrix)
 {
   SkPath path;
-  if (m_type != EMPTY)
+  if (m_type != EMPTY && !matrix.isIdentity())
   {
     path = m_impl->asPath();
     path.transform(matrix);
     shape = ShapePath(path);
   }
+  else if (matrix.isIdentity())
+  {
+    shape = *this;
+  }
 }
+
+std::variant<ContourPtr, SkRRect, SkRect> makeShape(
+  std::array<float, 4> radius,
+  const SkRect&        rect,
+  float                cornerSmoothing)
+{
+  if (radius[0] != 0 || radius[1] != 0 || radius[2] != 0 || radius[3] != 0)
+  {
+    if (cornerSmoothing <= 0.f)
+    {
+      SkRRect  rrect;
+      SkVector radii[4] = { { radius[0], radius[0] },
+                            { radius[1], radius[1] },
+                            { radius[2], radius[2] },
+                            { radius[3], radius[3] } };
+      rrect.setRectRadii(rect, radii);
+      return rrect;
+    }
+    else
+    {
+      glm::vec2 corners[4] = { { rect.x(), rect.y() },
+                               { rect.right(), rect.y() },
+                               { rect.right(), rect.bottom() },
+                               { rect.x(), rect.bottom() } };
+      Contour   contour;
+      contour.closed = true;
+      contour.cornerSmooth = cornerSmoothing;
+      for (int i = 0; i < 4; i++)
+        contour.emplace_back(corners[i], radius[i], std::nullopt, std::nullopt, std::nullopt);
+      return std::make_shared<Contour>(contour);
+    }
+  }
+  else
+  {
+    return rect;
+  }
+}
+
 } // namespace VGG::layer

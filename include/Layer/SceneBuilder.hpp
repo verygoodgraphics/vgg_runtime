@@ -146,12 +146,6 @@ private:
     return *this;
   }
 
-  PaintNodePtr makeContour(const json& j, const json& parent, const glm::mat3& totalMatrix);
-  PaintNodePtr makeRect(const json& j, const json& parent, const glm::mat3& totalMatrix);
-  PaintNodePtr makeEllipse(const json& j, const json& parent, const glm::mat3& totalMatrix);
-
-  PaintNodePtr makeContourNode();
-
   PaintNodePtr fromFrame(const json& j, const glm::mat3& totalMatrix);
 
   PaintNodePtr fromImage(const json& j, const glm::mat3& totalMatrix);

@@ -171,8 +171,3 @@ inline std::ostream& operator<<(std::ostream& os, const SkMatrix& mat)
   os << mat.getPerspX() << ", " << mat.getPerspY() << ", 1]" << std::endl;
   return os;
 }
-
-namespace VGG::layer
-{
-
-};

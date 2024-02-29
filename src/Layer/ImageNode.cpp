@@ -56,7 +56,7 @@ ImageNode::ImageNode(VRefCnt* cnt, const std::string& name, std::string guid)
 {
 }
 
-ShapePath ImageNode::asOutlineMask(const Transform* mat)
+ShapePath ImageNode::asVisualShape(const Transform* mat)
 {
   // Mask mask;
   auto rect = toSkRect(frameBound());

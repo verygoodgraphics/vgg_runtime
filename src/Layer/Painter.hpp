@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 #pragma once
-#include "Layer/VSkiaPrimitive.hpp"
 #include "VSkImageFilters.hpp"
+#include "Renderer.hpp"
 #include "VSkia.hpp"
 
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Effects.hpp"
-#include "Renderer.hpp"
 
 #include <core/SkBlendMode.h>
 #include <core/SkBlender.h>
@@ -126,10 +125,10 @@ private:
 
   template<typename Primitive>
   void drawOuterShadow(
-    const Primitive         primitive,
-    const SkRect&           bound,
+    const Primitive   primitive,
+    const SkRect&     bound,
     const DropShadow& s,
-    EStyle                  style)
+    EStyle            style)
   {
     SkPaint pen;
     pen.setAntiAlias(m_antiAlias);
@@ -229,18 +228,18 @@ public:
   }
 
   [[deprecated]] void drawShadow(
-    const ShapePath&        skPath,
-    const Bound&            bound,
-    const DropShadow& s,
-    SkPaint::Style          style,
-    sk_sp<SkImageFilter>    imageFilter);
+    const ShapePath&     skPath,
+    const Bound&         bound,
+    const DropShadow&    s,
+    SkPaint::Style       style,
+    sk_sp<SkImageFilter> imageFilter);
 
   [[deprecated]] void drawInnerShadow(
-    const ShapePath&        skPath,
-    const Bound&            bound,
-    const InnerShadow& s,
-    SkPaint::Style          style,
-    sk_sp<SkImageFilter>    imageFilter)
+    const ShapePath&     skPath,
+    const Bound&         bound,
+    const InnerShadow&   s,
+    SkPaint::Style       style,
+    sk_sp<SkImageFilter> imageFilter)
   {
     SkPaint pen;
     auto    sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
@@ -269,118 +268,6 @@ public:
     const Border&        b,
     sk_sp<SkImageFilter> imageFilter,
     sk_sp<SkBlender>     blender);
-
-  // Path Drawing
-  void drawPathFill(const SkPath& path, const Fill& fill, const Bound* hint)
-  {
-    if (hint)
-      drawFill(Path(path), toSkRect(*hint), fill);
-    else
-    {
-      auto p = Path(path);
-      drawFill(p, path.getBounds(), fill);
-    }
-  }
-
-  void drawPathBorder(const SkPath& path, const Border& border, const Bound* hint)
-  {
-    if (hint)
-      drawBorder(Path(path), toSkRect(*hint), border);
-    else
-    {
-      auto p = Path(path);
-      drawBorder(p, path.getBounds(), border);
-    }
-  }
-
-  void drawPathOuterShadow(
-    SkPath                  path,
-    const DropShadow& shadow,
-    EStyle                  style,
-    const Bound*            hint)
-  {
-    if (hint)
-    {
-      drawOuterShadow(Path(path), toSkRect(*hint), shadow, style);
-    }
-    else
-    {
-      drawOuterShadow(Path(path), toSkRect(*hint), shadow, style);
-    }
-  }
-
-  void drawPathInnerShadow(
-    SkPath                  path,
-    const InnerShadow& shadow,
-    EStyle                  style,
-    const Bound*            hint)
-  {
-  }
-
-  // Rect Drawing
-  void drawRectFill(const Bound& rect, const Fill& fill, const Bound* hint)
-  {
-    if (hint)
-      drawFill(Rect(rect), toSkRect(*hint), fill);
-    else
-      drawFill(Rect(rect), toSkRect(rect), fill);
-  }
-
-  void drawRectBorder(const Bound& rect, const Border& border, const Bound* hint)
-  {
-    if (hint)
-      drawBorder(Rect(rect), toSkRect(*hint), border);
-    else
-    {
-      drawBorder(Rect(rect), toSkRect(rect), border);
-    }
-  }
-
-  void drawRectOuterShadow(
-    const Bound&            rect,
-    const DropShadow& shadow,
-    EStyle                  style,
-    const Bound*            hint)
-  {
-    if (hint)
-      drawOuterShadow(Rect(rect), toSkRect(*hint), shadow, style);
-    else
-      drawOuterShadow(Rect(rect), toSkRect(rect), shadow, style);
-  }
-
-  // Oval Drawing
-  void drawOvalFill(const Bound& oval, const Fill& fill, const Bound* hint)
-  {
-    if (hint)
-      drawFill(Oval(oval), toSkRect(*hint), fill);
-    else
-      drawFill(Oval(oval), toSkRect(oval), fill);
-  }
-
-  void drawOvalBorder(const Bound& oval, const Border& fill, const Bound* hint)
-  {
-    if (hint)
-      drawBorder(Oval(oval), toSkRect(*hint), fill);
-    else
-      drawBorder(Oval(oval), toSkRect(oval), fill);
-  }
-
-  void drawOvalOuterShadow(
-    const Bound&            oval,
-    const DropShadow& shadow,
-    EStyle                  style,
-    const Bound*            hint)
-  {
-    if (hint)
-      drawOuterShadow(Rect(oval), toSkRect(*hint), shadow, style);
-    else
-      drawOuterShadow(Rect(oval), toSkRect(oval), shadow, style);
-  }
-
-  // Polygon Drawing
-  void drawPolygonFill()
-  {
-  }
 
   void drawImage(
     const Bound&         bound,

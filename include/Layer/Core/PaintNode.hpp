@@ -19,7 +19,6 @@
 #include "Layer/Core/TreeNode.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
-#include "Layer/Core/Mask.hpp"
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Core/Shape.hpp"
 #include "Layer/Config.hpp"
@@ -195,9 +194,7 @@ public:
 
   const PaintOption& paintOption() const;
 
-  void setOutlineMask(const Mask& mask);
-
-  virtual ShapePath asOutlineMask(const Transform* transform);
+  virtual ShapePath asVisualShape(const Transform* transform);
 
   ~PaintNode();
 

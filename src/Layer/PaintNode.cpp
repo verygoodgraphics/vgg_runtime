@@ -146,7 +146,7 @@ ShapePath PaintNode::makeMaskBy(EBoolOp maskOp, Renderer* renderer)
       if (auto obj = objects.find(id); obj != objects.end())
       {
         const auto t = obj->second->mapTransform(this);
-        auto       m = obj->second->asOutlineMask(&t);
+        auto       m = obj->second->asVisualShape(&t);
         if (result.isEmpty())
         {
           result = m;
@@ -175,7 +175,7 @@ void PaintNode::paintPass(Renderer* renderer, int zorder)
   VGG_IMPL(PaintNode);
   if (!_->path)
   {
-    _->path = ShapePath(asOutlineMask(0));
+    _->path = ShapePath(asVisualShape(0));
   }
   if (_->path->isEmpty())
   {
@@ -260,14 +260,14 @@ ShapePath PaintNode::childPolyOperation() const
   if (m_firstChild.size() == 1)
   {
     auto paintNode = static_cast<PaintNode*>(m_firstChild.front().get());
-    return paintNode->asOutlineMask(&paintNode->transform());
+    return paintNode->asVisualShape(&paintNode->transform());
   }
 
   std::vector<std::pair<ShapePath, EBoolOp>> ct;
   for (auto it = m_firstChild.begin(); it != m_firstChild.end(); ++it)
   {
     auto paintNode = static_cast<PaintNode*>(it->get());
-    auto childMask = paintNode->asOutlineMask(&paintNode->transform());
+    auto childMask = paintNode->asVisualShape(&paintNode->transform());
     ct.emplace_back(childMask, paintNode->clipOperator());
   }
 
@@ -384,18 +384,12 @@ void PaintNode::drawRawStyle(Painter& painter, const ShapePath& path, sk_sp<SkBl
   d_ptr->drawRawStyleImpl(painter, path, std::move(blender));
 }
 
-ShapePath PaintNode::asOutlineMask(const Transform* mat)
+ShapePath PaintNode::asVisualShape(const Transform* mat)
 {
   ShapePath mask;
   mask = makeContourImpl(maskOption(), mat);
   mask.setFillType(childWindingType());
   return mask;
-}
-
-void PaintNode::setOutlineMask(const Mask& mask)
-{
-  VGG_IMPL(PaintNode);
-  _->outlineMask = mask;
 }
 
 void PaintNode::setOverflow(EOverflow overflow)

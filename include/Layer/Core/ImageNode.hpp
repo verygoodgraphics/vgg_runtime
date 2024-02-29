@@ -62,7 +62,7 @@ public:
   void               setReplacesImage(bool fill);
   void               setImageFilter(const ImageFilter& filter);
   bool               fill() const;
-  ShapePath          asOutlineMask(const Transform* mat) override;
+  ShapePath          asVisualShape(const Transform* mat) override;
 
   virtual ~ImageNode() override;
 

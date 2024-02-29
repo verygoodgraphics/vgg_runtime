@@ -129,7 +129,6 @@ public:
   std::string              guid{};
   std::vector<std::string> maskedBy{};
   std::vector<AlphaMask>   alphaMaskBy;
-  Mask                     outlineMask;
   EMaskType                maskType{ MT_NONE };
   EMaskShowType            maskShowType{ MST_INVISIBLE };
   EBoolOp                  clipOperator{ BO_NONE };
@@ -190,11 +189,11 @@ public:
     {
       if (path.isEmpty())
       {
-        path = e.mask->asOutlineMask(&e.transform);
+        path = e.mask->asVisualShape(&e.transform);
       }
       else
       {
-        path.op(e.mask->asOutlineMask(&e.transform), EBoolOp::BO_INTERSECTION);
+        path.op(e.mask->asVisualShape(&e.transform), EBoolOp::BO_INTERSECTION);
         // Op(
         //   path,
         //   e.mask->asOutlineMask(&e.transform),
@@ -220,51 +219,11 @@ public:
     mat *= q_ptr->transform().matrix();
   }
 
-  template<typename Iter1, typename Iter2, typename F>
-  std::optional<SkPath> mapContourFromThis(
-    EBoolOp   maskOp,
-    Iter1     itr1,
-    Iter2     itr2,
-    F&&       f,
-    Renderer* renderer)
-  {
-    if (itr1 == itr2)
-      return std::nullopt;
-    SkPath      result;
-    auto        op = toSkPathOp(maskOp);
-    const auto& objects = renderer->maskObjects();
-    for (auto it = itr1; it != itr2; ++it)
-    {
-      const auto& id = f(*it);
-      if (id != q_ptr->guid())
-      {
-        if (auto obj = objects.find(id); obj != objects.end())
-        {
-          const auto t = obj->second->mapTransform(q_ptr);
-          auto       m = obj->second->asOutlineMask(&t);
-          if (result.isEmpty())
-          {
-            result = m.outlineMask;
-          }
-          else
-          {
-            Op(result, m.outlineMask, op, &result);
-          }
-        }
-        else
-        {
-          DEBUG("No such mask: %s", id.c_str());
-        }
-      }
-    }
-    return result;
-  }
-
   void drawAsAlphaMaskImpl(Renderer* renderer, sk_sp<SkBlender> blender)
   {
     if (!path)
     {
-      path = q_ptr->asOutlineMask(0);
+      path = q_ptr->asVisualShape(0);
       // path = Shape();
     }
     if (path->isEmpty())

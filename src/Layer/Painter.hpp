@@ -128,7 +128,7 @@ private:
   void drawOuterShadow(
     const Primitive         primitive,
     const SkRect&           bound,
-    const OuterShadowStyle& s,
+    const DropShadow& s,
     EStyle                  style)
   {
     SkPaint pen;
@@ -228,28 +228,17 @@ public:
     m_renderer->canvas()->restore();
   }
 
-  // void beginClip(const SkPath& path, SkClipOp clipOp = SkClipOp::kIntersect)
-  // {
-  //   m_renderer->canvas()->save();
-  //   m_renderer->canvas()->clipPath(path, clipOp);
-  // }
-
-  // void endClip()
-  // {
-  //   m_renderer->canvas()->restore();
-  // }
-
   [[deprecated]] void drawShadow(
-    const ShapePath&         skPath,
-    const Bound&         bound,
-    const Shadow&        s,
-    SkPaint::Style       style,
-    sk_sp<SkImageFilter> imageFilter);
-
-  void drawInnerShadow(
-    const ShapePath&            skPath,
+    const ShapePath&        skPath,
     const Bound&            bound,
-    const InnerShadowStyle& s,
+    const DropShadow& s,
+    SkPaint::Style          style,
+    sk_sp<SkImageFilter>    imageFilter);
+
+  [[deprecated]] void drawInnerShadow(
+    const ShapePath&        skPath,
+    const Bound&            bound,
+    const InnerShadow& s,
     SkPaint::Style          style,
     sk_sp<SkImageFilter>    imageFilter)
   {
@@ -266,15 +255,8 @@ public:
     m_renderer->canvas()->restore();
   }
 
-  [[deprecated]] void drawInnerShadow(
-    const ShapePath&         skPath,
-    const Bound&         bound,
-    const Shadow&        s,
-    SkPaint::Style       style,
-    sk_sp<SkImageFilter> imageFilter);
-
   [[deprecated]] void drawFill(
-    const ShapePath&         skPath,
+    const ShapePath&     skPath,
     const Bound&         bound,
     const Fill&          f,
     sk_sp<SkImageFilter> imageFilter,
@@ -282,7 +264,7 @@ public:
     sk_sp<SkMaskFilter>  mask);
 
   [[deprecated]] void drawPathBorder(
-    const ShapePath&         skPath,
+    const ShapePath&     skPath,
     const Bound&         bound,
     const Border&        b,
     sk_sp<SkImageFilter> imageFilter,
@@ -313,7 +295,7 @@ public:
 
   void drawPathOuterShadow(
     SkPath                  path,
-    const OuterShadowStyle& shadow,
+    const DropShadow& shadow,
     EStyle                  style,
     const Bound*            hint)
   {
@@ -329,7 +311,7 @@ public:
 
   void drawPathInnerShadow(
     SkPath                  path,
-    const InnerShadowStyle& shadow,
+    const InnerShadow& shadow,
     EStyle                  style,
     const Bound*            hint)
   {
@@ -356,7 +338,7 @@ public:
 
   void drawRectOuterShadow(
     const Bound&            rect,
-    const OuterShadowStyle& shadow,
+    const DropShadow& shadow,
     EStyle                  style,
     const Bound*            hint)
   {
@@ -385,7 +367,7 @@ public:
 
   void drawOvalOuterShadow(
     const Bound&            oval,
-    const OuterShadowStyle& shadow,
+    const DropShadow& shadow,
     EStyle                  style,
     const Bound*            hint)
   {

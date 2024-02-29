@@ -28,10 +28,6 @@ class VGG_EXPORTS Mask
 public:
   layer::ShapePath outlineMask;
   Mask(){};
-  // void addMask(const Mask& mask)
-  // {
-  //   outlineMask.addPath(mask.outlineMask);
-  // }
   Mask& operator=(Mask&&) noexcept = default;
   Mask(Mask&&) noexcept = default;
   Mask& operator=(const Mask&) = default;

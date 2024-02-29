@@ -241,14 +241,13 @@ void PaintNode::setAlphaMaskBy(std::vector<AlphaMask> masks)
 ShapePath PaintNode::makeBoundPath()
 {
   const auto& skRect = toSkRect(frameBound());
-  auto        radius = style().frameRadius.value_or(std::array<float, 4>{ 0, 0, 0, 0 });
   return std::visit(
     Overloaded{
       [&](const ContourPtr& c) { return ShapePath(c); },
       [&](const SkRect& r) { return ShapePath(r); },
       [&](const SkRRect& r) { return ShapePath(r); },
     },
-    makeShape(radius, skRect, style().cornerSmooth));
+    makeShape(style().frameRadius, skRect, style().cornerSmooth));
 }
 
 ShapePath PaintNode::childPolyOperation() const
@@ -270,11 +269,6 @@ ShapePath PaintNode::childPolyOperation() const
     auto paintNode = static_cast<PaintNode*>(it->get());
     auto childMask = paintNode->asOutlineMask(&paintNode->transform());
     ct.emplace_back(childMask, paintNode->clipOperator());
-  }
-
-  if (ct.size() == 1)
-  {
-    return ct[0].first;
   }
 
   std::vector<ShapePath> res;

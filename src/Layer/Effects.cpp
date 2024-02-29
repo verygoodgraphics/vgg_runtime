@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "Effects.hpp"
+#include "Layer/Core/Attrs.hpp"
 #include "Layer/LayerCache.h"
 #include "Layer/VSkia.hpp"
 #include <core/SkBlendMode.h>
@@ -393,11 +394,11 @@ sk_sp<SkShader> makeGradientLinear(const Bound& bound, const GradientLinear& g)
 }
 
 sk_sp<SkImageFilter> makeInnerShadowImageFilter(
-  const InnerShadowStyle& shadow,
-  const Bound&            bound,
-  bool                    shadowOnly,
-  bool                    overrideSpread,
-  sk_sp<SkImageFilter>    input)
+  const InnerShadow&   shadow,
+  const Bound&         bound,
+  bool                 shadowOnly,
+  bool                 overrideSpread,
+  sk_sp<SkImageFilter> input)
 {
   auto sigma = SkBlurMask::ConvertRadiusToSigma(shadow.blur);
   auto alpha =
@@ -433,10 +434,10 @@ sk_sp<SkImageFilter> makeInnerShadowImageFilter(
 }
 
 sk_sp<SkImageFilter> makeDropShadowImageFilter(
-  const OuterShadowStyle& shadow,
-  const Bound&            bound,
-  bool                    overrideSpread,
-  sk_sp<SkImageFilter>    input)
+  const DropShadow&    shadow,
+  const Bound&         bound,
+  bool                 overrideSpread,
+  sk_sp<SkImageFilter> input)
 {
   auto sigma = SkBlurMask::ConvertRadiusToSigma(shadow.blur);
   if (overrideSpread || shadow.spread == 0.f)

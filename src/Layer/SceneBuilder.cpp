@@ -174,10 +174,6 @@ public:
         },
         f.type);
     }
-    for (auto& s : style.shadows)
-    {
-      s.offsetY = -s.offsetY;
-    }
     for (auto& s : style.innerShadow)
     {
       s.offsetY = -s.offsetY;
@@ -630,7 +626,8 @@ PaintNodePtr SceneBuilder::fromFrame(const json& j, const glm::mat3& totalMatrix
     [&, this](PaintNode* p, const glm::mat3& matrix)
     {
       p->setContourOption(ContourOption(ECoutourType::MCT_FRAMEONLY, false));
-      const auto radius = getStackOptional<std::array<float, 4>>(j, "radius");
+      const auto radius = getStackOptional<std::array<float, 4>>(j, "radius")
+                            .value_or(std::array<float, 4>{ 0, 0, 0, 0 });
       p->style().frameRadius = radius;
       const auto& childObjects = getOrDefault(j, "childObjects");
       for (const auto& c : childObjects)
@@ -658,7 +655,8 @@ PaintNodePtr SceneBuilder::fromSymbolMaster(const json& j, const glm::mat3& tota
     },
     [&, this](PaintNode* p, const glm::mat3& matrix)
     {
-      const auto radius = getStackOptional<std::array<float, 4>>(j, "radius");
+      const auto radius = getStackOptional<std::array<float, 4>>(j, "radius")
+                            .value_or(std::array<float, 4>{ 0, 0, 0, 0 });
       p->style().frameRadius = radius;
       const auto& chidlObject = getOrDefault(j, "childObjects");
       for (const auto& e : chidlObject)

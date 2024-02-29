@@ -202,7 +202,7 @@ struct Shadow
   bool           isEnabled{ false };
 };
 
-struct InnerShadowStyle
+struct InnerShadow
 {
   ContextSetting contextSettings;
   float          blur{ 0.f };
@@ -213,7 +213,7 @@ struct InnerShadowStyle
   bool           isEnabled{ false };
 };
 
-struct OuterShadowStyle
+struct DropShadow
 {
   ContextSetting contextSettings;
   float          blur{ 0.f };
@@ -224,7 +224,6 @@ struct OuterShadowStyle
   bool           isEnabled{ false };
   bool           clipShadow{ true };
 };
-using ShadowStyle = std::variant<InnerShadowStyle, OuterShadowStyle>;
 
 struct Blur
 {
@@ -238,17 +237,13 @@ struct Blur
 
 struct Style
 {
-  std::vector<Blur>   blurs;
-  std::vector<Border> borders;
-  std::vector<Fill>   fills;
-  std::vector<Shadow> shadows;
-  // std::vector<ShadowStyle> shadowStyle;
-
-  std::vector<InnerShadowStyle> innerShadow;
-  std::vector<OuterShadowStyle> dropShadow;
-
-  std::optional<std::array<float, 4>> frameRadius;
-  float                               cornerSmooth;
+  std::vector<Blur>        blurs;
+  std::vector<Border>      borders;
+  std::vector<Fill>        fills;
+  std::vector<InnerShadow> innerShadow;
+  std::vector<DropShadow>  dropShadow;
+  std::array<float, 4>     frameRadius;
+  float                    cornerSmooth;
 };
 
 struct TextLineAttr

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "Painter.hpp"
+#include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/PathGenerator.hpp"
 #include "VSkia.hpp"
@@ -106,7 +107,7 @@ void Painter::drawPathBorder(
 void Painter::drawShadow(
   const ShapePath&     skPath,
   const Bound&         bound,
-  const Shadow&        s,
+  const DropShadow&    s,
   SkPaint::Style       style,
   sk_sp<SkImageFilter> imageFilter)
 {
@@ -119,26 +120,6 @@ void Painter::drawShadow(
   SkPaint fillPen;
   fillPen.setStyle(style);
   // m_renderer->canvas()->drawPath(skPath, fillPen);
-  skPath.draw(m_renderer->canvas(), fillPen);
-  m_renderer->canvas()->restore();
-}
-
-void Painter::drawInnerShadow(
-  const ShapePath&     skPath,
-  const Bound&         bound,
-  const Shadow&        s,
-  SkPaint::Style       style,
-  sk_sp<SkImageFilter> imageFilter)
-{
-  SkPaint pen;
-  auto    sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
-  pen.setAntiAlias(m_antiAlias);
-  pen.setImageFilter(
-    SkMyImageFilters::DropInnerShadowOnly(s.offsetX, s.offsetY, sigma, sigma, s.color, nullptr));
-  m_renderer->canvas()->saveLayer(nullptr, &pen);
-  SkPaint fillPen;
-  fillPen.setStyle(style);
-  fillPen.setAntiAlias(m_antiAlias);
   skPath.draw(m_renderer->canvas(), fillPen);
   m_renderer->canvas()->restore();
 }

@@ -56,7 +56,7 @@ ImageNode::ImageNode(VRefCnt* cnt, const std::string& name, std::string guid)
 {
 }
 
-ShapePath ImageNode::asVisualShape(const Transform* mat)
+VShape ImageNode::asVisualShape(const Transform* mat)
 {
   // Mask mask;
   auto rect = toSkRect(frameBound());
@@ -66,7 +66,7 @@ ShapePath ImageNode::asVisualShape(const Transform* mat)
     rect = toSkMatrix(mat->matrix()).mapRect(rect);
     // mask.outlineMask.transform(toSkMatrix(mat->matrix()));
   }
-  return ShapePath(rect);
+  return VShape(rect);
 }
 
 void ImageNode::setImage(const std::string& guid)
@@ -100,7 +100,7 @@ void ImageNode::paintFill(
   Renderer*            renderer,
   sk_sp<SkBlender>     blender,
   sk_sp<SkImageFilter> imageFilter,
-  const ShapePath&         path)
+  const VShape&         path)
 {
   (void)path;
   VGG_IMPL(ImageNode)

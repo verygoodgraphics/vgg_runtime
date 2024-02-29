@@ -14,16 +14,16 @@
  */
 #pragma once
 
-#include "Layer/Core/Shape.hpp"
+#include "Layer/Core/VShape.hpp"
 #include <core/SkRect.h>
 
 namespace VGG::layer
 {
 
-class RectShape final : public Shape
+class ShapeRect final : public Shape
 {
 public:
-  RectShape(const SkRect& rect)
+  ShapeRect(const SkRect& rect)
   {
     m_rect = rect;
     setEmpty(rect.isEmpty());
@@ -66,10 +66,10 @@ private:
   SkRect m_rect;
 };
 
-class RRectShape final : public Shape
+class ShapeRoundedRect final : public Shape
 {
 public:
-  RRectShape(const SkRRect& rect)
+  ShapeRoundedRect(const SkRRect& rect)
   {
     m_rect = rect;
     setEmpty(!m_rect.isValid());

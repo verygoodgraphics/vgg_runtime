@@ -20,7 +20,6 @@
 #include "Renderer.hpp"
 #include "PaintNodePrivate.hpp"
 #include "Layer/Core/PaintNode.hpp"
-#include "Layer/Core/Shape.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/TreeNode.hpp"
 #include "glm/ext/matrix_transform.hpp"
@@ -130,10 +129,10 @@ Transform PaintNode::mapTransform(const PaintNode* node) const
   return Transform(mat);
 }
 
-ShapePath PaintNode::makeMaskBy(EBoolOp maskOp, Renderer* renderer)
+VShape PaintNode::makeMaskBy(EBoolOp maskOp, Renderer* renderer)
 {
   VGG_IMPL(PaintNode);
-  ShapePath result;
+  VShape result;
   if (_->maskedBy.empty())
     return result;
 
@@ -175,7 +174,7 @@ void PaintNode::paintPass(Renderer* renderer, int zorder)
   VGG_IMPL(PaintNode);
   if (!_->path)
   {
-    _->path = ShapePath(asVisualShape(0));
+    _->path = VShape(asVisualShape(0));
   }
   if (_->path->isEmpty())
   {
@@ -238,24 +237,24 @@ void PaintNode::setAlphaMaskBy(std::vector<AlphaMask> masks)
   _->alphaMaskBy = std::move(masks);
 }
 
-ShapePath PaintNode::makeBoundPath()
+VShape PaintNode::makeBoundPath()
 {
   const auto& skRect = toSkRect(frameBound());
   return std::visit(
     Overloaded{
-      [&](const ContourPtr& c) { return ShapePath(c); },
-      [&](const SkRect& r) { return ShapePath(r); },
-      [&](const SkRRect& r) { return ShapePath(r); },
+      [&](const ContourPtr& c) { return VShape(c); },
+      [&](const SkRect& r) { return VShape(r); },
+      [&](const SkRRect& r) { return VShape(r); },
     },
     makeShape(style().frameRadius, skRect, style().cornerSmooth));
 }
 
-ShapePath PaintNode::childPolyOperation() const
+VShape PaintNode::childPolyOperation() const
 {
   if (m_firstChild.empty())
   {
     WARN("no child in path %s", name().c_str());
-    return ShapePath();
+    return VShape();
   }
   if (m_firstChild.size() == 1)
   {
@@ -263,7 +262,7 @@ ShapePath PaintNode::childPolyOperation() const
     return paintNode->asVisualShape(&paintNode->transform());
   }
 
-  std::vector<std::pair<ShapePath, EBoolOp>> ct;
+  std::vector<std::pair<VShape, EBoolOp>> ct;
   for (auto it = m_firstChild.begin(); it != m_firstChild.end(); ++it)
   {
     auto paintNode = static_cast<PaintNode*>(it->get());
@@ -271,14 +270,14 @@ ShapePath PaintNode::childPolyOperation() const
     ct.emplace_back(childMask, paintNode->clipOperator());
   }
 
-  std::vector<ShapePath> res;
+  std::vector<VShape> res;
 
   // eval mask by operator
-  ShapePath skPath = ct[0].first;
+  VShape skPath = ct[0].first;
   for (std::size_t i = 1; i < ct.size(); i++)
   {
-    ShapePath rhs;
-    auto      op = ct[i].second;
+    VShape rhs;
+    auto   op = ct[i].second;
     if (op != BO_NONE)
     {
       rhs = ct[i].first;
@@ -299,13 +298,13 @@ ShapePath PaintNode::childPolyOperation() const
   {
     path.addPath(s.asPath());
   }
-  return ShapePath(path);
+  return VShape(path);
 }
 
-ShapePath PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
+VShape PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
 {
   VGG_IMPL(PaintNode);
-  ShapePath path;
+  VShape path;
   if (_->contour)
   {
     // OPTIMIZE: cache the path to avoid recreate for everytime
@@ -320,14 +319,14 @@ ShapePath PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
     // auto p = layer::makePath(*_->contour);
     if (mat)
     {
-      ShapePath res;
+      VShape res;
       path.transform(res, toSkMatrix(mat->matrix()));
       return res;
     }
     return path;
   }
 
-  auto appendPath = [this](ShapePath& path, const ContourOption& option, EBoolOp op)
+  auto appendPath = [this](VShape& path, const ContourOption& option, EBoolOp op)
   {
     for (auto it = begin(); it != end(); ++it)
     {
@@ -358,7 +357,7 @@ ShapePath PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
   }
   if (mat)
   {
-    ShapePath res;
+    VShape res;
     path.transform(res, toSkMatrix(mat->matrix()));
     return res;
   }
@@ -379,14 +378,14 @@ void PaintNode::drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
   }
 }
 
-void PaintNode::drawRawStyle(Painter& painter, const ShapePath& path, sk_sp<SkBlender> blender)
+void PaintNode::drawRawStyle(Painter& painter, const VShape& path, sk_sp<SkBlender> blender)
 {
   d_ptr->drawRawStyleImpl(painter, path, std::move(blender));
 }
 
-ShapePath PaintNode::asVisualShape(const Transform* mat)
+VShape PaintNode::asVisualShape(const Transform* mat)
 {
-  ShapePath mask;
+  VShape mask;
   mask = makeContourImpl(maskOption(), mat);
   mask.setFillType(childWindingType());
   return mask;
@@ -690,7 +689,7 @@ void PaintNode::postPaintPass(Renderer* renderer)
   _->layerContextGuard.restore([&]() { canvas->restore(); });
 }
 
-void PaintNode::paintStyle(Renderer* renderer, const ShapePath& path, const ShapePath& outlineMask)
+void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape& outlineMask)
 {
   VGG_IMPL(PaintNode);
   Painter painter(renderer);
@@ -702,7 +701,7 @@ void PaintNode::paintStyle(Renderer* renderer, const ShapePath& path, const Shap
     // 1. normal drawing
     if (blurType)
     {
-      ShapePath res = path;
+      VShape res = path;
       if (!outlineMask.isEmpty())
         res.op(outlineMask, EBoolOp::BO_INTERSECTION);
       // Op(res, outlineMask, SkPathOp::kIntersect_SkPathOp, &res);
@@ -758,7 +757,7 @@ void PaintNode::paintFill(
   Renderer*            renderer,
   sk_sp<SkBlender>     blender,
   sk_sp<SkImageFilter> imageFilter,
-  const ShapePath&     path)
+  const VShape&        path)
 {
   Painter             painter(renderer);
   sk_sp<SkMaskFilter> blur;

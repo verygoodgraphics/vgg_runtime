@@ -20,7 +20,7 @@
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/Transform.hpp"
-#include "Layer/Core/Shape.hpp"
+#include "Layer/Core/VShape.hpp"
 #include "Layer/Config.hpp"
 
 #include <glm/matrix.hpp>
@@ -194,7 +194,7 @@ public:
 
   const PaintOption& paintOption() const;
 
-  virtual ShapePath asVisualShape(const Transform* transform);
+  virtual VShape asVisualShape(const Transform* transform);
 
   ~PaintNode();
 
@@ -227,25 +227,25 @@ protected:
 
 protected:
   // Mask
-  ShapePath         makeBoundPath();
-  virtual ShapePath makeContourImpl(ContourOption option, const Transform* mat);
-  ShapePath         childPolyOperation() const;
-  ShapePath         makeMaskBy(EBoolOp maskOp, Renderer* renderer);
+  VShape         makeBoundPath();
+  virtual VShape makeContourImpl(ContourOption option, const Transform* mat);
+  VShape         childPolyOperation() const;
+  VShape         makeMaskBy(EBoolOp maskOp, Renderer* renderer);
 
   virtual void drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender);
-  virtual void drawRawStyle(Painter& painter, const ShapePath& path, sk_sp<SkBlender> blender);
+  virtual void drawRawStyle(Painter& painter, const VShape& path, sk_sp<SkBlender> blender);
 
   Bound onRevalidate() override;
 
 protected:
   // Style
   // virtual SkPath stylePath();
-  void paintStyle(Renderer* renderer, const ShapePath& path, const ShapePath& mask);
+  void paintStyle(Renderer* renderer, const VShape& path, const VShape& mask);
 
   [[deprecated]] virtual void paintFill(
     Renderer*            renderer,
     sk_sp<SkBlender>     blender,
     sk_sp<SkImageFilter> imageFilter,
-    const ShapePath&     path); // TODO:: only for ImageNode overriding
+    const VShape&   path); // TODO:: only for ImageNode overriding
 };
 } // namespace VGG::layer

@@ -21,12 +21,12 @@ namespace VGG::UIKit
 
 struct UIScrollViewAnimationDecelerationComponent
 {
-  double decelerateTime;
-  float  position;
-  float  velocity;
-  double returnTime;
-  float  returnFrom;
-  bool   bounced;
+  double decelerateTime{ 0 };
+  double position{ 0 };
+  double velocity{ 0 };
+  double returnTime{ 0 };
+  double returnFrom{ 0 };
+  bool   bounced{ false };
 };
 
 class UIScrollViewAnimationDeceleration : public UIScrollViewAnimation

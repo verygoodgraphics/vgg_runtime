@@ -38,6 +38,7 @@ UIScrollView::UIScrollView()
 {
   m_panGestureRecognizer.setHandler([this](UIPanGestureRecognizer& pan)
                                     { this->handleGesture(pan); });
+  m_panGestureRecognizer.setView(this);
 }
 
 bool UIScrollView::onEvent(UEvent event, void* userData)
@@ -46,6 +47,7 @@ bool UIScrollView::onEvent(UEvent event, void* userData)
   {
     switch (event.type)
     {
+#ifndef EMSCRIPTEN
       case VGG_MOUSEBUTTONDOWN:
         VERBOSE("UIScrollView::onEvent: mouse down");
         m_panGestureRecognizer.touchesBegan(event);
@@ -60,15 +62,19 @@ bool UIScrollView::onEvent(UEvent event, void* userData)
         VERBOSE("UIScrollView::onEvent: mouse up");
         m_panGestureRecognizer.touchesEnded(event);
         break;
+#endif
 
       case VGG_TOUCHDOWN:
         VERBOSE("UIScrollView::onEvent: touch down");
+        m_panGestureRecognizer.touchesBegan(event);
         break;
       case VGG_TOUCHMOTION:
         VERBOSE("UIScrollView::onEvent: touch move");
+        m_panGestureRecognizer.touchesMoved(event);
         break;
       case VGG_TOUCHUP:
         VERBOSE("UIScrollView::onEvent: touch up");
+        m_panGestureRecognizer.touchesEnded(event);
         break;
 
       default:

@@ -717,23 +717,6 @@ bool Controller::handleTouchEvent(const VTouchEvent& evt)
     return false;
   }
 
-  if (evt.type == VGG_TOUCHDOWN)
-  {
-    m_panning = true;
-  }
-  else if (evt.type == VGG_TOUCHMOTION)
-  {
-    if (m_panning)
-    {
-      auto clientSize = m_presenter->viewSize();
-      return handleTranslate(evt.xrel * clientSize.width, evt.yrel * clientSize.height);
-    }
-  }
-  else if (evt.type == VGG_TOUCHUP)
-  {
-    m_panning = false;
-  }
-
   return false;
 }
 

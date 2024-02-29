@@ -1,14 +1,15 @@
-#include "Layer/Core/Shape.hpp"
+#include "Layer/Core/VShape.hpp"
 #include <pathops/SkPathOps.h>
 #include "Layer/VSkia.hpp"
 
-#include "Layer/Path.hpp"
-#include "Layer/Rect.hpp"
-#include "Layer/Ellipse.hpp"
+#include "Layer/ShapePath.hpp"
+#include "Layer/ShapeArc.hpp"
+#include "Layer/ShapeRect.hpp"
+#include "Layer/ShapeEllipse.hpp"
 
 namespace VGG::layer
 {
-void ShapePath::op(const ShapePath& shape, EBoolOp op)
+void VShape::op(const VShape& shape, EBoolOp op)
 {
   SkPath p = asPath();
   auto   sop = toSkPathOp(op);
@@ -16,34 +17,34 @@ void ShapePath::op(const ShapePath& shape, EBoolOp op)
   setPath(p);
 }
 
-ShapePath::~ShapePath()
+VShape::~VShape()
 {
 }
 
-bool ShapePath::isEmpty() const
+bool VShape::isEmpty() const
 {
   return m_type == EMPTY || (m_type == PATH && m_impl->isEmpty());
 }
 
-void ShapePath::setPath(const SkPath& path)
+void VShape::setPath(const SkPath& path)
 {
-  m_impl = std::make_shared<ContourShape>(path);
+  m_impl = std::make_shared<ShapePath>(path);
   m_type = PATH;
 }
 
-void ShapePath::setContour(const ContourPtr& contour)
+void VShape::setContour(const ContourPtr& contour)
 {
-  m_impl = std::make_shared<ContourShape>(contour);
+  m_impl = std::make_shared<ShapePath>(contour);
   m_type = PATH;
 }
 
-void ShapePath::setRect(const SkRect& rect)
+void VShape::setRect(const SkRect& rect)
 {
-  m_impl = std::make_shared<RectShape>(rect);
+  m_impl = std::make_shared<ShapeRect>(rect);
   m_type = RECT;
 }
 
-std::optional<SkRect> ShapePath::asRect() const
+std::optional<SkRect> VShape::asRect() const
 {
   if (type() == RECT)
   {
@@ -52,70 +53,70 @@ std::optional<SkRect> ShapePath::asRect() const
   return std::nullopt;
 }
 
-void ShapePath::setRRect(const SkRRect& rrect)
+void VShape::setRRect(const SkRRect& rrect)
 {
-  m_impl = std::make_shared<RRectShape>(rrect);
+  m_impl = std::make_shared<ShapeRoundedRect>(rrect);
   m_type = RRECT;
 }
 
-std::optional<SkRRect> ShapePath::asRRect() const
+std::optional<SkRRect> VShape::asRRect() const
 {
   if (type() == RRECT)
   {
-    return std::static_pointer_cast<RRectShape>(m_impl)->rrect();
+    return std::static_pointer_cast<ShapeRoundedRect>(m_impl)->rrect();
   }
   return std::nullopt;
 }
 
-void ShapePath::setArc(const SkRect& oval, float startAngle, float sweepAngle, bool forceMoveTo)
+void VShape::setArc(const SkRect& oval, float startAngle, float sweepAngle, bool forceMoveTo)
 {
   m_impl = std::make_shared<ArcShape>(oval, startAngle, sweepAngle, forceMoveTo);
   m_type = ARCH;
 }
-void ShapePath::setOval(const Ellipse& ellipse)
+void VShape::setOval(const Ellipse& ellipse)
 {
   m_impl = std::make_shared<EllipseShape>(ellipse.rect);
   m_type = OVAL;
 }
 
-std::optional<Ellipse> ShapePath::asOval() const
+std::optional<Ellipse> VShape::asOval() const
 {
   if (type() == OVAL)
     return std::static_pointer_cast<EllipseShape>(m_impl)->ellipse();
   return std::nullopt;
 }
 
-std::optional<ShapePath> ShapePath::outset(float x, float y) const
+std::optional<VShape> VShape::outset(float x, float y) const
 {
   switch (type())
   {
     case RECT:
-      return ShapePath(static_cast<RectShape*>(m_impl.get())->outset(x, y));
+      return VShape(static_cast<ShapeRect*>(m_impl.get())->outset(x, y));
     case RRECT:
-      return ShapePath(static_cast<RRectShape*>(m_impl.get())->outset(x, y));
+      return VShape(static_cast<ShapeRoundedRect*>(m_impl.get())->outset(x, y));
     case OVAL:
-      return ShapePath(static_cast<EllipseShape*>(m_impl.get())->outset(x, y));
+      return VShape(static_cast<EllipseShape*>(m_impl.get())->outset(x, y));
     default:
       return std::nullopt;
   }
   return std::nullopt;
 }
-void ShapePath ::setFillType(EWindingType fillType)
+void VShape ::setFillType(EWindingType fillType)
 {
   if (this->type() == PATH)
   {
-    std::static_pointer_cast<ContourShape>(m_impl)->setFillType(fillType);
+    std::static_pointer_cast<ShapePath>(m_impl)->setFillType(fillType);
   }
 }
 
-void ShapePath::transform(ShapePath& shape, const SkMatrix& matrix)
+void VShape::transform(VShape& shape, const SkMatrix& matrix)
 {
   SkPath path;
   if (m_type != EMPTY && !matrix.isIdentity())
   {
     path = m_impl->asPath();
     path.transform(matrix);
-    shape = ShapePath(path);
+    shape = VShape(path);
   }
   else if (matrix.isIdentity())
   {

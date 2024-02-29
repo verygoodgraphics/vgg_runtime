@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #pragma once
-#include "Layer/Core/Shape.hpp"
+#include "Layer/Core/VShape.hpp"
 
 namespace VGG::layer
 {

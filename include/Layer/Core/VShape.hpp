@@ -102,59 +102,7 @@ protected:
   bool m_empty{ true };
 };
 
-class ArcShape final : public Shape
-{
-public:
-  ArcShape(const SkRect& oval, float startAngle, float sweepAngle, bool useCenter)
-  {
-    m_oval = oval;
-    m_startAngle = startAngle;
-    m_sweepAngle = sweepAngle;
-    m_useCenter = useCenter;
-    setEmpty(false);
-    setClosed(true);
-  }
-
-  void draw(SkCanvas* canvas, const SkPaint& paint) const override
-  {
-    canvas->drawArc(m_oval, m_startAngle, m_sweepAngle, m_useCenter, paint);
-  }
-
-  void clip(SkCanvas* canvas, SkClipOp clipOp) const override
-  {
-    canvas->clipRect(m_oval, clipOp);
-  }
-
-  SkPath asPath() override
-  {
-    SkPath path;
-    path.addOval(m_oval);
-    return path;
-  }
-
-  SkRect bound() override
-  {
-    return m_oval;
-  }
-
-  std::optional<SkRect> visualBound() override
-  {
-    return m_oval;
-  }
-
-  SkRect ellipse() const
-  {
-    return m_oval;
-  }
-
-private:
-  SkRect m_oval;
-  float  m_startAngle;
-  float  m_sweepAngle;
-  float  m_useCenter;
-};
-
-struct ShapePath
+class VShape
 {
 public:
   enum EType : uint8_t
@@ -167,51 +115,51 @@ public:
     OVAL
   };
 
-  ShapePath()
+  VShape()
     : m_type(EMPTY)
   {
   }
 
-  ~ShapePath();
+  ~VShape();
 
-  ShapePath(const ShapePath& shape)
+  VShape(const VShape& shape)
   {
     *this = shape;
   }
 
-  ShapePath& operator=(const ShapePath& shape)
+  VShape& operator=(const VShape& shape)
   {
     m_type = shape.m_type;
     m_impl = shape.m_impl;
     return *this;
   }
 
-  explicit ShapePath(const SkPath& path)
+  explicit VShape(const SkPath& path)
   {
     setPath(path);
   }
 
-  explicit ShapePath(ContourPtr contour)
+  explicit VShape(ContourPtr contour)
   {
     setContour(contour);
   }
 
-  explicit ShapePath(const SkRect& rect)
+  explicit VShape(const SkRect& rect)
   {
     setRect(rect);
   }
 
-  explicit ShapePath(const SkRRect& rrect)
+  explicit VShape(const SkRRect& rrect)
   {
     setRRect(rrect);
   }
 
-  explicit ShapePath(const Ellipse& oval)
+  explicit VShape(const Ellipse& oval)
   {
     setOval(oval);
   }
 
-  explicit ShapePath(const Arc& arc)
+  explicit VShape(const Arc& arc)
   {
     setArc(arc.oval, arc.startAngle, arc.sweepAngle, arc.useCenter);
   }
@@ -233,9 +181,9 @@ public:
 
   std::optional<Ellipse> asOval() const;
 
-  void op(const ShapePath& shape, EBoolOp op);
+  void op(const VShape& shape, EBoolOp op);
 
-  void transform(ShapePath& shape, const SkMatrix& matrix);
+  void transform(VShape& shape, const SkMatrix& matrix);
 
   void clip(SkCanvas* canvas, SkClipOp clipOp) const
   {
@@ -249,7 +197,7 @@ public:
     m_impl->draw(canvas, paint);
   }
 
-  std::optional<ShapePath> outset(float x, float y) const;
+  std::optional<VShape> outset(float x, float y) const;
 
   SkPath asPath() const
   {

@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 #pragma once
-#include "Layer/Core/Shape.hpp"
+#include "Layer/Core/VShape.hpp"
 
 namespace VGG::layer
 {
 
-class ContourShape final : public Shape
+class ShapePath final : public Shape
 {
 public:
-  ContourShape(const ContourPtr& contour)
+  ShapePath(const ContourPtr& contour)
   {
     m_contour = contour;
   }
 
-  ContourShape(const SkPath& path)
+  ShapePath(const SkPath& path)
   {
     m_contour = nullptr;
     m_path = path;
@@ -79,7 +79,7 @@ private:
   std::optional<SkPath> m_path;
   void                  ensurePath() const
   {
-    const_cast<ContourShape*>(this)->ensurePath();
+    const_cast<ShapePath*>(this)->ensurePath();
   }
 
   void ensurePath()

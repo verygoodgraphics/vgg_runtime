@@ -16,7 +16,7 @@
 #pragma once
 #include "Layer/AttrSerde.hpp"
 #include "Layer/Core/Attrs.hpp"
-#include "Layer/Core/Shape.hpp"
+#include "Layer/Core/VShape.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/VUtils.hpp"
 #include "Layer/Renderer.hpp"
@@ -70,7 +70,7 @@ struct MaskObject
     }
   };
   std::vector<MaskData> components;
-  ShapePath             contour;
+  VShape                contour;
 };
 
 struct LayerContextGuard
@@ -143,8 +143,8 @@ public:
   PaintOption               paintOption;
   ContourOption             maskOption;
   // std::optional<SkPath>     path;
-  std::optional<ShapePath>  path;
-  std::optional<ShapePath>  mask;
+  std::optional<VShape>     path;
+  std::optional<VShape>     mask;
   std::optional<MaskObject> alphaMask;
   LayerContextGuard         layerContextGuard;
 
@@ -184,7 +184,7 @@ public:
         }
       }
     }
-    ShapePath path;
+    VShape path;
     for (const auto& e : cache.components)
     {
       if (path.isEmpty())
@@ -234,7 +234,7 @@ public:
     drawRawStyleImpl(painter, *path, blender);
   }
 
-  void drawWithAlphaMask(Renderer* renderer, const ShapePath& path, const ShapePath& outlineMask)
+  void drawWithAlphaMask(Renderer* renderer, const VShape& path, const VShape& outlineMask)
   {
     SkPaint p;
     auto    b = toSkRect(bound);
@@ -280,14 +280,11 @@ public:
     return std::nullopt;
   }
 
-  void drawBlurBgWithAlphaMask(
-    Renderer*        renderer,
-    const ShapePath& path,
-    const ShapePath& outlineMask)
+  void drawBlurBgWithAlphaMask(Renderer* renderer, const VShape& path, const VShape& outlineMask)
   {
     Painter    painter(renderer);
     const auto blur = style.blurs[0];
-    ShapePath  res = path;
+    VShape     res = path;
     if (alphaMask && !alphaMask->contour.isEmpty())
     {
       // Op(res, alphaMask->contour, SkPathOp::kIntersect_SkPathOp, &res);
@@ -339,9 +336,9 @@ public:
   }
 
   void drawBlurContentWithAlphaMask(
-    Renderer*        renderer,
-    const ShapePath& path,
-    const ShapePath& outlineMask)
+    Renderer*     renderer,
+    const VShape& path,
+    const VShape& outlineMask)
   {
     SkPaint    p;
     auto       bb = bound;
@@ -374,7 +371,7 @@ public:
     canvas->restore();        // draw masked layer into canvas
   }
 
-  void drawRawStyleImplLegacy(Painter& painter, const ShapePath& skPath, sk_sp<SkBlender> blender)
+  void drawRawStyleImplLegacy(Painter& painter, const VShape& skPath, sk_sp<SkBlender> blender)
   {
     auto filled = false;
     for (const auto& f : style.fills)
@@ -433,7 +430,7 @@ public:
     painter.canvas()->restore();
   }
 
-  void drawRawStyleImpl(Painter& painter, const ShapePath& skPath, sk_sp<SkBlender> blender)
+  void drawRawStyleImpl(Painter& painter, const VShape& skPath, sk_sp<SkBlender> blender)
   {
     // return drawRawStyleImplLegacy(painter, skPath, blender);
     auto filled = false;

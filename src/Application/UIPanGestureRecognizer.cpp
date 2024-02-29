@@ -16,12 +16,17 @@
 
 #include "UIPanGestureRecognizer.hpp"
 
+#include "Utility/Log.hpp"
 #include "Utility/VggDate.hpp"
+
+#undef DEBUG
+#define DEBUG(msg, ...)
 
 using namespace VGG::UIKit;
 
 void UIPanGestureRecognizer::touchesBegan(UEvent e)
 {
+  setState(EUIGestureRecognizerState::POSSIBLE);
 }
 
 void UIPanGestureRecognizer::touchesMoved(UEvent e)
@@ -43,22 +48,32 @@ void UIPanGestureRecognizer::touchesMoved(UEvent e)
     return;
   }
 
-  if (m_state == EUIGestureRecognizerState::POSSIBLE)
+  if (state() == EUIGestureRecognizerState::POSSIBLE)
   {
+    DEBUG("UIPanGestureRecognizer::touchesMoved: state -> began");
     m_lastMovementTime = nowTimestampInSeconds();
     setTranslation(translation);
-    m_state = EUIGestureRecognizerState::BEGAN;
+    setState(EUIGestureRecognizerState::BEGAN);
   }
-  else if (translate(translation))
+  else if (
+    state() == EUIGestureRecognizerState::BEGAN || state() == EUIGestureRecognizerState::CHANGED)
   {
-    m_state = EUIGestureRecognizerState::CHANGED;
+    if (translate(translation))
+    {
+      DEBUG("UIPanGestureRecognizer::touchesMoved: state -> changed");
+      setState(EUIGestureRecognizerState::CHANGED);
+    }
+  }
+  else
+  {
+    DEBUG("UIPanGestureRecognizer::touchesMoved: state is %d", (int)state());
   }
 }
 
 void UIPanGestureRecognizer::touchesEnded(UEvent e)
 {
-  translate(Point::zero());
-  m_state = EUIGestureRecognizerState::ENDED;
+  translate(m_lastDelta); // no more movement, use the last delta to calculate velocity
+  setState(EUIGestureRecognizerState::ENDED);
 }
 
 void UIPanGestureRecognizer::setTranslation(Point translation)
@@ -78,7 +93,12 @@ bool UIPanGestureRecognizer::translate(Point delta)
     m_translation.y += delta.y;
     m_velocity.x = delta.x / timeDiff;
     m_velocity.y = delta.y / timeDiff;
+    DEBUG(
+      "UIPanGestureRecognizer::translate: vecocity: x = %f, y = %f",
+      m_velocity.x,
+      m_velocity.y);
     m_lastMovementTime = now;
+    m_lastDelta = delta;
     return true;
   }
   else
@@ -95,4 +115,13 @@ Point UIPanGestureRecognizer::translation()
 Point UIPanGestureRecognizer::velocity()
 {
   return m_velocity;
+}
+
+void UIPanGestureRecognizer::setState(EUIGestureRecognizerState state)
+{
+  UIGestureRecognizer::setState(state);
+  if (m_handler)
+  {
+    m_handler(*this);
+  }
 }

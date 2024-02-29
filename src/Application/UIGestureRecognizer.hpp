@@ -32,8 +32,13 @@ enum class EUIGestureRecognizerState
 
 class UIGestureRecognizer
 {
-protected:
   EUIGestureRecognizerState m_state;
+
+protected:
+  virtual void setState(EUIGestureRecognizerState state)
+  {
+    m_state = state;
+  }
 
 public:
   virtual ~UIGestureRecognizer() = default;

@@ -18,8 +18,17 @@
 
 #include "UIScrollViewAnimationDeceleration.hpp"
 
+#include "Utility/Log.hpp"
+
 #include <algorithm>
 #include <cmath>
+
+#undef DEBUG
+#define DEBUG(msg, ...)
+
+#define VERBOSE DEBUG
+#undef VERBOSE
+#define VERBOSE(msg, ...)
 
 using namespace VGG;
 using namespace VGG::UIKit;
@@ -38,22 +47,28 @@ bool UIScrollView::onEvent(UEvent event, void* userData)
     switch (event.type)
     {
       case VGG_MOUSEBUTTONDOWN:
+        VERBOSE("UIScrollView::onEvent: mouse down");
         m_panGestureRecognizer.touchesBegan(event);
         break;
 
       case VGG_MOUSEMOTION:
+        VERBOSE("UIScrollView::onEvent: mouse move");
         m_panGestureRecognizer.touchesMoved(event);
         break;
 
       case VGG_MOUSEBUTTONUP:
+        VERBOSE("UIScrollView::onEvent: mouse up");
         m_panGestureRecognizer.touchesEnded(event);
         break;
 
       case VGG_TOUCHDOWN:
+        VERBOSE("UIScrollView::onEvent: touch down");
         break;
       case VGG_TOUCHMOTION:
+        VERBOSE("UIScrollView::onEvent: touch move");
         break;
       case VGG_TOUCHUP:
+        VERBOSE("UIScrollView::onEvent: touch up");
         break;
 
       default:
@@ -71,6 +86,7 @@ void UIScrollView::setContentSize(Size size)
 
 void UIScrollView::setContentOffset(Point offset)
 {
+  VERBOSE("UIScrollView::setContentOffset: x = %f, y = %f", offset.x, offset.y);
   m_contentOffset = offset;
   setOffset(Offset{ offset.x, offset.y });
 }
@@ -90,15 +106,18 @@ void UIScrollView::handleGesture(UIKit::UIPanGestureRecognizer& recognizer)
   switch (recognizer.state())
   {
     case EUIGestureRecognizerState::BEGAN:
+      VERBOSE("UIScrollView::handleGesture: began");
       beginDragging();
       break;
 
     case EUIGestureRecognizerState::CHANGED:
+      VERBOSE("UIScrollView::handleGesture: changed");
       dragBy(m_panGestureRecognizer.translation());
       m_panGestureRecognizer.setTranslation(Point::zero());
       break;
 
     case EUIGestureRecognizerState::ENDED:
+      VERBOSE("UIScrollView::handleGesture: ended");
       endDraggingWithDecelerationVelocity(m_panGestureRecognizer.velocity());
       break;
 
@@ -174,7 +193,12 @@ void UIScrollView::endDraggingWithDecelerationVelocity(Point velocity)
 
 void UIScrollView::cancelScrollAnimation()
 {
-  m_scrollTimer = false;
+  VERBOSE("UIScrollView::cancelScrollAnimation");
+  if (m_scrollTimer)
+  {
+    m_scrollTimer->invalidate();
+    m_scrollTimer = nullptr;
+  }
 
   m_scrollAnimation = nullptr;
 
@@ -186,8 +210,19 @@ void UIScrollView::cancelScrollAnimation()
 
 Point UIScrollView::confinedContentOffset(Point contentOffset)
 {
-  contentOffset.x = std::max(contentOffset.x, 0.0);
-  contentOffset.y = std::max(contentOffset.y, 0.0);
+  const auto viewSize = size();
+
+  if (contentOffset.x < viewSize.width - m_contentSize.width)
+  {
+    contentOffset.x = viewSize.width - m_contentSize.width;
+  }
+  if (contentOffset.y < viewSize.height - m_contentSize.height)
+  {
+    contentOffset.y = viewSize.height - m_contentSize.height;
+  }
+
+  contentOffset.x = std::min(contentOffset.x, 0.0);
+  contentOffset.y = std::min(contentOffset.y, 0.0);
 
   return contentOffset;
 }
@@ -229,7 +264,14 @@ void UIScrollView::setScrollAnimation(std::shared_ptr<UIScrollViewAnimation> ani
 
   if (!m_scrollTimer)
   {
-    m_scrollTimer = true; // call updateScrollAnimation
+    m_scrollTimer.reset(new Timer(
+      1. / 60,
+      [this]()
+      {
+        VERBOSE("UIScrollView: call updateScrollAnimation by timer");
+        this->updateScrollAnimation();
+      },
+      true));
   }
 }
 
@@ -237,6 +279,7 @@ void UIScrollView::updateScrollAnimation()
 {
   if (m_scrollAnimation->animate())
   {
+    DEBUG("UIScrollView::updateScrollAnimation: animation finished, cancel timer");
     cancelScrollAnimation();
   }
 }

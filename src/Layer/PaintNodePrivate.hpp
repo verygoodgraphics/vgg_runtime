@@ -70,7 +70,6 @@ struct MaskObject
     }
   };
   std::vector<MaskData> components;
-  // SkPath                contour;
   ShapePath             contour;
 };
 
@@ -141,7 +140,6 @@ public:
   EObjectType              type;
   bool                     visible{ true };
 
-  // ContourPtr                contour;
   ContourData               contour;
   PaintOption               paintOption;
   ContourOption             maskOption;

@@ -69,7 +69,8 @@ struct PaintOption
   }
 };
 
-using ContourData = std::optional<std::variant<ContourPtr, Ellipse, SkRect, SkRRect>>;
+using ShapeData = std::variant<ContourPtr, Ellipse, SkRect, SkRRect>;
+using ContourData = std::optional<ShapeData>;
 
 class PaintNode;
 #ifdef USE_SHARED_PTR
@@ -248,6 +249,6 @@ protected:
     Renderer*            renderer,
     sk_sp<SkBlender>     blender,
     sk_sp<SkImageFilter> imageFilter,
-    const ShapePath&         path); // TODO:: only for ImageNode overriding
+    const ShapePath&     path); // TODO:: only for ImageNode overriding
 };
 } // namespace VGG::layer

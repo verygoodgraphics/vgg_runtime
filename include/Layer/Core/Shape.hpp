@@ -114,18 +114,17 @@ public:
     setEmpty(false);
     setClosed(true);
   }
+
   void draw(SkCanvas* canvas, const SkPaint& paint) const override
   {
     canvas->drawArc(m_oval, m_startAngle, m_sweepAngle, m_useCenter, paint);
   }
+
   void clip(SkCanvas* canvas, SkClipOp clipOp) const override
   {
     canvas->clipRect(m_oval, clipOp);
   }
-  // void transform(const SkMatrix& matrix) override
-  // {
-  //   m_oval = matrix.mapRect(m_oval);
-  // }
+
   SkPath asPath() override
   {
     SkPath path;
@@ -137,10 +136,12 @@ public:
   {
     return m_oval;
   }
+
   std::optional<SkRect> visualBound() override
   {
     return m_oval;
   }
+
   SkRect ellipse() const
   {
     return m_oval;
@@ -277,6 +278,10 @@ public:
 private:
   std::shared_ptr<Shape> m_impl;
   uint8_t                m_type{ EMPTY };
-  SkMatrix               m_transform;
 }; // namespace VGG::layer
+
+std::variant<ContourPtr, SkRRect, SkRect> makeShape(
+  std::array<float, 4> radius,
+  const SkRect&        rect,
+  float                cornerSmoothing);
 } // namespace VGG::layer

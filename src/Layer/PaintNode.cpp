@@ -287,6 +287,12 @@ ShapePath PaintNode::childPolyOperation() const
     WARN("no child in path %s", name().c_str());
     return ShapePath();
   }
+  if (m_firstChild.size() == 1)
+  {
+    auto paintNode = static_cast<PaintNode*>(m_firstChild.front().get());
+    return paintNode->asOutlineMask(&paintNode->transform());
+  }
+
   std::vector<std::pair<ShapePath, EBoolOp>> ct;
   for (auto it = m_firstChild.begin(); it != m_firstChild.end(); ++it)
   {

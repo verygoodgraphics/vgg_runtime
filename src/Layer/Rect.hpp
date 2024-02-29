@@ -32,24 +32,12 @@ public:
 
   void draw(SkCanvas* canvas, const SkPaint& paint) const override
   {
-    if (m_matrix.isIdentity())
-      canvas->drawRect(rect(), paint);
-    {
-      canvas->save();
-      canvas->concat(m_matrix);
-      canvas->drawRect(rect(), paint);
-      canvas->restore();
-    }
+    canvas->drawRect(rect(), paint);
   }
 
   void clip(SkCanvas* canvas, SkClipOp clipOp) const override
   {
-    if (m_matrix.isIdentity())
-      canvas->clipRect(rect(), clipOp);
-    else
-    {
-      // canvas->clipPath(asPath(), clipOp);
-    }
+    canvas->clipRect(rect(), clipOp);
   }
 
   SkRect bound() override
@@ -75,9 +63,7 @@ public:
   }
 
 private:
-  SkRect   m_rect;
-  SkMatrix m_matrix;
-  // std::variant<SkRect, SkPath> m_rect;
+  SkRect m_rect;
 };
 
 class RRectShape final : public Shape
@@ -96,7 +82,6 @@ public:
 
   void clip(SkCanvas* canvas, SkClipOp clipOp) const override
   {
-    // canvas->clipRect(rrect().rect(), clipOp);
     canvas->clipRRect(rrect(), clipOp);
   }
 
@@ -104,23 +89,6 @@ public:
   {
     return rrect().rect();
   }
-
-  // void transform(const SkMatrix& matrix) override
-  // {
-  //   auto     rect = matrix.mapRect(m_rect.rect());
-  //   auto     ul = m_rect.radii(SkRRect::Corner::kUpperLeft_Corner);
-  //   auto     ur = m_rect.radii(SkRRect::Corner::kUpperRight_Corner);
-  //   auto     br = m_rect.radii(SkRRect::Corner::kLowerRight_Corner);
-  //   auto     bl = m_rect.radii(SkRRect::Corner::kLowerLeft_Corner);
-  //   SkVector radii[4] = { ul, ur, br, bl };
-  //   for (int i = 0; i < 4; i++)
-  //   {
-  //     radii[i].fX = matrix.mapRadius(radii[i].fX);
-  //     radii[i].fY = matrix.mapRadius(radii[i].fY);
-  //   }
-  //   m_rect.setRectRadii(rect, radii);
-  //   setEmpty(m_rect.isValid());
-  // }
 
   SkPath asPath() override
   {

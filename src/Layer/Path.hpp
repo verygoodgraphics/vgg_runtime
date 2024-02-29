@@ -39,7 +39,6 @@ public:
     ensurePath();
     if (m_path)
     {
-      DEBUG("draw path %d", m_path->countPoints());
       canvas->drawPath(*m_path, paint);
     }
   }

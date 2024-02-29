@@ -13,7 +13,11 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/Shape.hpp"
+#include "Layer/PathGenerator.hpp"
+
 #include "Layer/Core/VShape.hpp"
+#include <core/SkCanvas.h>
 
 namespace VGG::layer
 {
@@ -49,6 +53,12 @@ public:
     if (m_path)
       return m_path->getBounds();
     return SkRect::MakeEmpty();
+  }
+
+  Shape* clone() const override
+  {
+    ensurePath();
+    return new ShapePath(*m_path);
   }
 
   void clip(SkCanvas* canvas, SkClipOp clipOp) const override

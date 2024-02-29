@@ -73,6 +73,12 @@ else()
   set(SKIA_EXTERNAL_PROJECT_DIR ${SKIA_SOURCE_DIR} CACHE STRING "" FORCE)
 endif()
 
+# for windows msvc
+if(MSVC)
+  message(STATUS "Run skia git-sync-deps")
+  execute_process(COMMAND "python3" "tools/git-sync-deps" WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/lib/skia")
+endif()  
+
 message(STATUS "Use skia ${SKIA_EXTERNAL_PROJECT_DIR}")
 
 # test gn if is for the current platform

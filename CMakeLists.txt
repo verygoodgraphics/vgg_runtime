@@ -7,7 +7,10 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 set_property(GLOBAL PROPERTY POSITION_INDEPENDENT_CODE ON)
 
-set(SDL2_DIR "E:/lib/SDL2-2.28.5")
+# for windows msvc
+if(MSVC)
+  set(SDL2_DIR "${CMAKE_SOURCE_DIR}/lib/SDL2-2.28.5")
+endif()
 
 # customized platform checking flags
 # introduce customized cmake vars, see VggVars.cmake in cmake for details

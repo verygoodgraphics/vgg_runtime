@@ -665,8 +665,8 @@ PaintNodePtr SceneBuilder::makeContour(
 PaintNodePtr SceneBuilder::makeRect(const json& j, const json& parent, const glm::mat3& totalMatrix)
 {
   auto rect = SkRect::MakeXYWH(
-    0,
-    0,
+    parent["bounds"]["x"].get<float>(),
+    -parent["bounds"]["y"].get<float>(),
     parent["bounds"]["width"].get<float>(),
     parent["bounds"]["height"].get<float>());
   std::array<float, 4> radius = j.value("radius", std::array<float, 4>{ 0, 0, 0, 0 });

@@ -147,17 +147,14 @@ ShapePath PaintNode::makeMaskBy(EBoolOp maskOp, Renderer* renderer)
       {
         const auto t = obj->second->mapTransform(this);
         auto       m = obj->second->asOutlineMask(&t);
-        if (!m.isEmpty())
+        if (result.isEmpty())
         {
-          if (result.isEmpty())
-          {
-            result = m;
-          }
-          else
-          {
-            result.op(m, maskOp);
-            // Op(result.outlineMask, m.outlineMask, op, &result.outlineMask);
-          }
+          result = m;
+        }
+        else
+        {
+          result.op(m, maskOp);
+          // Op(result.outlineMask, m.outlineMask, op, &result.outlineMask);
         }
       }
       else
@@ -340,6 +337,7 @@ ShapePath PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
   ShapePath path;
   if (_->contour)
   {
+    // OPTIMIZE: cache the path to avoid recreate for everytime
     std::visit(
       Overloaded{
         [&](const Ellipse& c) { path.setOval(c); },
@@ -351,7 +349,9 @@ ShapePath PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
     // auto p = layer::makePath(*_->contour);
     if (mat)
     {
-      path.transform(toSkMatrix(mat->matrix()));
+      ShapePath res;
+      path.transform(res, toSkMatrix(mat->matrix()));
+      return res;
     }
     return path;
   }
@@ -387,7 +387,9 @@ ShapePath PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
   }
   if (mat)
   {
-    path.transform(toSkMatrix(mat->matrix()));
+    ShapePath res;
+    path.transform(res, toSkMatrix(mat->matrix()));
+    return res;
   }
   return path;
 }
@@ -723,60 +725,6 @@ void PaintNode::postPaintPass(Renderer* renderer)
   _->layerContextGuard.restore([&]() { canvas->restore(); });
 }
 
-// SkPath PaintNode::stylePath()
-// {
-//   return asOutlineMask(0);
-//
-//   std::vector<std::pair<SkPath, EBoolOp>> ct;
-//   for (const auto& c : m_firstChild)
-//   {
-//     auto p = static_cast<PaintNode*>(c.get());
-//     auto outline = p->asOutlineMask(&p->transform());
-//     ct.emplace_back(outline.outlineMask, p->clipOperator());
-//   }
-//   if (m_firstChild.empty())
-//   {
-//     ct.emplace_back(asOutlineMask(0).outlineMask, EBoolOp::BO_NONE);
-//   }
-//   assert(ct.size() >= 1);
-//
-//   if (ct.size() == 1)
-//   {
-//     return ct[0].first;
-//   }
-//
-//   std::vector<SkPath> res;
-//   SkPath              skPath = ct[0].first;
-//   for (std::size_t i = 1; i < ct.size(); i++)
-//   {
-//     SkPath rhs;
-//     auto   op = ct[i].second;
-//     if (op != BO_NONE)
-//     {
-//       auto skop = toSkPathOp(op);
-//       rhs = ct[i].first;
-//       Op(skPath, rhs, skop, &skPath);
-//     }
-//     else
-//     {
-//       res.push_back(skPath);
-//       skPath = ct[i].first;
-//     }
-//     op = ct[i].second;
-//   }
-//   res.push_back(skPath);
-//
-//   for (const auto& s : res)
-//   {
-//     skPath.addPath(s);
-//   }
-//   skPath.setFillType(
-//     childWindingType() == EWindingType::WR_EVEN_ODD ? SkPathFillType::kEvenOdd
-//                                                     : SkPathFillType::kWinding);
-//
-//   return skPath;
-// }
-
 void PaintNode::paintStyle(Renderer* renderer, const ShapePath& path, const ShapePath& outlineMask)
 {
   VGG_IMPL(PaintNode);
@@ -807,12 +755,6 @@ void PaintNode::paintStyle(Renderer* renderer, const ShapePath& path, const Shap
       // painter.beginClip(outlineMask); // TODO::
       painter.canvas()->save();
       outlineMask.clip(painter.renderer()->canvas(), SkClipOp::kIntersect);
-      // SkPaint p;
-      // p.setStrokeWidth(1);
-      // p.setColor(SK_ColorBLUE);
-      // p.setStyle(SkPaint::kStroke_Style);
-      // outlineMask.draw(painter.renderer()->canvas(), p);
-      // painter.endClip();
     }
     auto blender = SkBlender::Mode(SkBlendMode::kSrcOver);
     drawRawStyle(painter, path, blender);

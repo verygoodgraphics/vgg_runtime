@@ -16,6 +16,11 @@
 
 #include "Application/Event/Event.hpp"
 
+namespace VGG
+{
+class UIView;
+}
+
 namespace VGG::UIKit
 {
 
@@ -35,6 +40,8 @@ class UIGestureRecognizer
   EUIGestureRecognizerState m_state;
 
 protected:
+  UIView* m_view;
+
   virtual void setState(EUIGestureRecognizerState state)
   {
     m_state = state;
@@ -43,8 +50,10 @@ protected:
 public:
   virtual ~UIGestureRecognizer() = default;
 
-  // virtual void setView() = 0;
-  // virtual void abort() = 0;
+  void setView(UIView* view)
+  {
+    m_view = view;
+  }
 
   auto state()
   {

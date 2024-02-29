@@ -16,6 +16,8 @@
 
 #include "UIPanGestureRecognizer.hpp"
 
+#include "Application/UIView.hpp"
+
 #include "Utility/Log.hpp"
 #include "Utility/VggDate.hpp"
 
@@ -36,12 +38,31 @@ void UIPanGestureRecognizer::touchesMoved(UEvent e)
   {
     translation.x = e.motion.xrel;
     translation.y = e.motion.yrel;
+    DEBUG(
+      "UIPanGestureRecognizer::touchesMoved: mouse motion, x = %f, y = %f",
+      translation.x,
+      translation.y);
   }
   else if (e.type == VGG_TOUCHMOTION)
   {
-    // todo
-    // auto clientSize = m_presenter->viewSize();
-    // return handleTranslate(evt.xrel * clientSize.width, evt.yrel * clientSize.height);
+    DEBUG(
+      "UIPanGestureRecognizer::touchesMoved: touch motion, x = %f, y = %f",
+      e.touch.xrel,
+      e.touch.yrel);
+    if (m_view)
+    {
+      auto clientSize = m_view->size();
+      translation.x = e.touch.xrel * clientSize.width;
+      translation.y = e.touch.yrel * clientSize.height;
+      DEBUG(
+        "UIPanGestureRecognizer::touchesMoved: translation: x = %f, y = %f",
+        translation.x,
+        translation.y);
+    }
+    else
+    {
+      return;
+    }
   }
   else
   {

@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/Shape.hpp"
 #include "Layer/Core/VShape.hpp"
+#include <core/SkCanvas.h>
 
 namespace VGG::layer
 {
@@ -58,6 +60,11 @@ public:
     auto r = ellipse();
     r.outset(x, y);
     return r;
+  }
+
+  Shape* clone() const override
+  {
+    return new EllipseShape(m_oval);
   }
 
 private:

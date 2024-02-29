@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/Shape.hpp"
 #include "Layer/Core/VShape.hpp"
+#include <core/SkCanvas.h>
 
 namespace VGG::layer
 {
@@ -47,6 +49,11 @@ public:
     SkPath path;
     path.addOval(m_oval);
     return path;
+  }
+
+  Shape* clone() const override
+  {
+    return new ArcShape(m_oval, m_startAngle, m_sweepAngle, m_useCenter);
   }
 
   SkRect bound() override

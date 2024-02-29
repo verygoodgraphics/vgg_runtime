@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 #pragma once
-
+#include "Layer/Shape.hpp"
 #include "Layer/Core/VShape.hpp"
 #include <core/SkRect.h>
+#include <core/SkCanvas.h>
 
 namespace VGG::layer
 {
@@ -60,6 +61,11 @@ public:
     auto r = rect();
     r.outset(x, y);
     return r;
+  }
+
+  Shape* clone() const override
+  {
+    return new ShapeRect(m_rect);
   }
 
 private:
@@ -107,6 +113,11 @@ public:
     auto r = rrect();
     r.outset(x, y);
     return r;
+  }
+
+  Shape* clone() const override
+  {
+    return new ShapeRoundedRect(m_rect);
   }
 
 private:

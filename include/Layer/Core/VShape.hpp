@@ -14,21 +14,17 @@
  */
 #pragma once
 #include "Layer/Core/VType.hpp"
-#include "Layer/PathGenerator.hpp"
 #include "Layer/Core/Attrs.hpp"
-#include "Utility/Log.hpp"
 #include <core/SkClipOp.h>
 #include <core/SkPaint.h>
 #include <core/SkPath.h>
 #include <core/SkPathTypes.h>
 #include <core/SkRRect.h>
-#include <core/SkCanvas.h>
-
 #include <glm/glm.hpp>
-#include <vector>
-
 #include <optional>
 #include <variant>
+
+class SkCanvas;
 namespace VGG::layer
 {
 
@@ -66,170 +62,95 @@ struct Ellipse
   }
 };
 
-class Shape : public std::enable_shared_from_this<Shape>
-{
-public:
-  virtual void                  draw(SkCanvas* canvas, const SkPaint& paint) const = 0;
-  virtual void                  clip(SkCanvas* canvas, SkClipOp clipOp) const = 0;
-  virtual SkPath                asPath() = 0;
-  virtual SkRect                bound() = 0;
-  virtual std::optional<SkRect> visualBound()
-  {
-    return bound();
-  }
-
-  bool isClosed() const
-  {
-    return m_closed;
-  }
-  bool isEmpty() const
-  {
-    return m_empty;
-  }
-
-  virtual ~Shape() = default;
-
-protected:
-  void setEmpty(bool empty)
-  {
-    m_empty = empty;
-  }
-  void setClosed(bool closed)
-  {
-    m_closed = closed;
-  }
-  bool m_closed{ false };
-  bool m_empty{ true };
-};
-
+class Shape;
 class VShape
 {
 public:
-  enum EType : uint8_t
+  enum EShapeType : uint8_t
   {
     EMPTY,
     PATH,
     RECT,
     RRECT,
-    ARCH,
+    ARC,
     OVAL
   };
 
-  VShape()
-    : m_type(EMPTY)
-  {
-  }
-
-  ~VShape();
-
-  VShape(const VShape& shape)
-  {
-    *this = shape;
-  }
-
-  VShape& operator=(const VShape& shape)
-  {
-    m_type = shape.m_type;
-    m_impl = shape.m_impl;
-    return *this;
-  }
-
+  VShape();
   explicit VShape(const SkPath& path)
+    : VShape()
   {
     setPath(path);
   }
-
   explicit VShape(ContourPtr contour)
+    : VShape()
   {
     setContour(contour);
   }
-
   explicit VShape(const SkRect& rect)
+    : VShape()
   {
     setRect(rect);
   }
-
   explicit VShape(const SkRRect& rrect)
+    : VShape()
   {
     setRRect(rrect);
   }
-
   explicit VShape(const Ellipse& oval)
+    : VShape()
   {
     setOval(oval);
   }
-
   explicit VShape(const Arc& arc)
+    : VShape()
   {
     setArc(arc.oval, arc.startAngle, arc.sweepAngle, arc.useCenter);
   }
 
+  ~VShape();
+  VShape(const VShape& shape);
+  VShape& operator=(const VShape& shape);
+
   void setPath(const SkPath& path);
-
   void setContour(const ContourPtr& contour);
-
   void setRect(const SkRect& rect);
-
-  std::optional<SkRect> asRect() const;
-
   void setRRect(const SkRRect& rrect);
-
-  std::optional<SkRRect> asRRect() const;
-
   void setArc(const SkRect& oval, float startAngle, float sweepAngle, bool forceMoveTo);
   void setOval(const Ellipse& ellipse);
 
+  std::optional<SkRect>  asRect() const;
+  std::optional<SkRRect> asRRect() const;
   std::optional<Ellipse> asOval() const;
 
   void op(const VShape& shape, EBoolOp op);
-
   void transform(VShape& shape, const SkMatrix& matrix);
-
-  void clip(SkCanvas* canvas, SkClipOp clipOp) const
-  {
-    m_impl->clip(canvas, clipOp);
-  }
+  void clip(SkCanvas* canvas, SkClipOp clipOp) const;
+  void draw(SkCanvas* canvas, const SkPaint& paint) const;
 
   void setFillType(EWindingType fillType);
 
-  void draw(SkCanvas* canvas, const SkPaint& paint) const
-  {
-    m_impl->draw(canvas, paint);
-  }
-
   std::optional<VShape> outset(float x, float y) const;
 
-  SkPath asPath() const
-  {
-    if (m_impl == nullptr)
-      return SkPath();
-    return m_impl->asPath();
-  }
+  SkPath asPath() const;
+  bool   isEmpty() const;
+  bool   isClosed() const;
 
-  bool isEmpty() const;
-  bool isClosed() const
-  {
-    return m_impl->isClosed();
-  }
-
-  uint8_t type() const
+  EShapeType type() const
   {
     return m_type;
   }
 
-  void reset()
-  {
-    m_type = EMPTY;
-    m_impl.reset();
-  }
+  void reset();
 
 private:
-  std::shared_ptr<Shape> m_impl;
-  uint8_t                m_type{ EMPTY };
-}; // namespace VGG::layer
+  std::unique_ptr<Shape> m_shape;
+  EShapeType             m_type{ EMPTY };
+};
 
 std::variant<ContourPtr, SkRRect, SkRect> makeShape(
   std::array<float, 4> radius,
   const SkRect&        rect,
   float                cornerSmoothing);
+
 } // namespace VGG::layer

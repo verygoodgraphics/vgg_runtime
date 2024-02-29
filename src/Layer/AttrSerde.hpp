@@ -387,7 +387,7 @@ inline void from_json(const json& j, Shadow& x)
   x.spread = j.value("spread", 0.f);
 }
 
-inline void from_json(const json& j, InnerShadowStyle& x)
+inline void from_json(const json& j, InnerShadow& x)
 {
   x.blur = j.value("blur", 0.f);
   x.color = j.value("color", Color());
@@ -399,7 +399,7 @@ inline void from_json(const json& j, InnerShadowStyle& x)
   x.spread = j.value("spread", 0.f);
 }
 
-inline void from_json(const json& j, OuterShadowStyle& x)
+inline void from_json(const json& j, DropShadow& x)
 {
   x.blur = j.value("blur", 0.f);
   x.color = j.value("color", Color());
@@ -410,15 +410,6 @@ inline void from_json(const json& j, OuterShadowStyle& x)
   x.offsetY = p.y;
   x.spread = j.value("spread", 0.f);
   x.clipShadow = !j.value("showBehindTransparentAreas", true);
-}
-
-inline void from_json(const json& j, ShadowStyle& x)
-{
-  bool inner = j.at("inner").get<bool>();
-  if (!inner)
-    x = (OuterShadowStyle)j;
-  else
-    x = (InnerShadowStyle)j;
 }
 
 inline void from_json(const json& j, Blur& x)
@@ -452,7 +443,6 @@ inline void from_json(const json& j, Style& x)
   x.blurs = j.value("blurs", std::vector<Blur>());
   x.borders = j.value("borders", std::vector<Border>());
   x.fills = j.value("fills", std::vector<Fill>());
-  x.shadows = j.value("shadows", std::vector<Shadow>());
   for (const auto& s : j.value("shadows", json::array_t{}))
   {
     if (s.value("inner", false))
@@ -460,7 +450,6 @@ inline void from_json(const json& j, Style& x)
     else
       x.dropShadow.push_back(s);
   }
-  // x.shadowStyle = j.value("shadows", std::vector<ShadowStyle>());
 }
 
 inline void from_json(const json& j, TextLineAttr& x)

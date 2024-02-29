@@ -434,9 +434,9 @@ public:
         painter.canvas()->save();
         skPath.clip(painter.canvas(), SkClipOp::kDifference);
       }
-      for (const auto& s : style.shadows) // simplified into one shadow
+      for (const auto& s : style.dropShadow) // simplified into one shadow
       {
-        if (!s.isEnabled || s.inner)
+        if (!s.isEnabled)
           continue;
         if (filled)
           painter.drawShadow(skPath, bound, s, SkPaint::kFill_Style, nullptr);
@@ -465,10 +465,9 @@ public:
 
     painter.canvas()->save();
     skPath.clip(painter.canvas(), SkClipOp::kIntersect);
-    for (auto it = style.shadows.begin(); it != style.shadows.end(); ++it)
+    for (const auto& s : style.innerShadow)
     {
-      auto& s = *it;
-      if (!s.isEnabled || !s.inner)
+      if (!s.isEnabled)
         continue;
       painter.drawInnerShadow(skPath, bound, s, SkPaint::kFill_Style, nullptr);
     }

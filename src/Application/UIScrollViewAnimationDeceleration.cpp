@@ -18,7 +18,11 @@
 
 #include "UIScrollView.hpp"
 
+#include "Utility/Log.hpp"
 #include "Utility/VggDate.hpp"
+
+#undef DEBUG
+#define DEBUG(msg, ...)
 
 using namespace VGG::UIKit;
 
@@ -30,7 +34,7 @@ static const double physicsTimeStep = 1 / 120.;
 static const float  springTightness = 7;
 static const float  springDampening = 15;
 
-float UILinearInterpolation(float t, float start, float end)
+float uiLinearInterpolation(float t, float start, float end)
 {
   if (t <= 0)
   {
@@ -46,7 +50,7 @@ float UILinearInterpolation(float t, float start, float end)
   }
 }
 
-float UIQuadraticEaseOut(float t, float start, float end)
+float uiQuadraticEaseOut(float t, float start, float end)
 {
   if (t <= 0)
   {
@@ -58,7 +62,7 @@ float UIQuadraticEaseOut(float t, float start, float end)
   }
   else
   {
-    return UILinearInterpolation(2 * t - t * t, start, end);
+    return uiLinearInterpolation(2 * t - t * t, start, end);
   }
 }
 
@@ -69,7 +73,8 @@ static float clamp(float v, float min, float max)
 
 static float clampedVelocty(float v)
 {
-  const float V = 200;
+  DEBUG("clampedVelocty, v = %f", v);
+  const float V = 200000;
   return clamp(v, -V, V);
 }
 
@@ -88,12 +93,24 @@ static bool bounceComponent(double t, UIScrollViewAnimationDecelerationComponent
 {
   if (c->bounced && c->returnTime != 0)
   {
+    DEBUG("bounceComponent, 1: returnTime = %f", c->returnTime);
     const double returnBounceTime = std::min(1., ((t - c->returnTime) / returnAnimationDuration));
-    c->position = UIQuadraticEaseOut(returnBounceTime, c->returnFrom, to);
+    c->position = uiQuadraticEaseOut(returnBounceTime, c->returnFrom, to);
+    DEBUG(
+      "bounceComponent, 1: position = %f, returnBounceTime = %f, from = %f, to = %f",
+      c->position,
+      returnBounceTime,
+      c->returnFrom,
+      to);
     return (returnBounceTime == 1);
   }
-  else if (fabs(to - c->position) > 0)
+  else if (c->velocity != 0)
   {
+    DEBUG(
+      "bounceComponent, 2: to = %f, position = %f, velocity = %f",
+      to,
+      c->position,
+      c->velocity);
     const float F = spring(c->velocity, c->position, to, springTightness, springDampening);
 
     c->velocity += F * physicsTimeStep;
@@ -105,12 +122,17 @@ static bool bounceComponent(double t, UIScrollViewAnimationDecelerationComponent
     {
       c->returnFrom = c->position;
       c->returnTime = t;
+      DEBUG(
+        "bounceComponent, 2: set returnFrom = %f, returnTime = %f",
+        c->returnFrom,
+        c->returnTime);
     }
 
     return false;
   }
   else
   {
+    DEBUG("bounceComponent, 3: no bounce");
     return true;
   }
 }
@@ -154,6 +176,7 @@ UIScrollViewAnimationDeceleration::UIScrollViewAnimationDeceleration(UIScrollVie
 bool UIScrollViewAnimationDeceleration::animate()
 {
   const auto currentTime = nowTimestampInSeconds();
+  DEBUG("UIScrollViewAnimationDeceleration::animate: currentTime = %f", currentTime);
 
   auto timeDiff = currentTime - m_lastMomentumTime;
 

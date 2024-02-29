@@ -20,6 +20,8 @@
 #include "UIPanGestureRecognizer.hpp"
 #include "Types.hpp"
 
+#include <Utility/VggTimer.hpp>
+
 #include <memory>
 
 using VGG::Layout::Point;
@@ -47,7 +49,7 @@ private:
   bool m_dragging{ false };
   bool m_decelerating{ false };
 
-  bool m_scrollTimer{ false };
+  std::shared_ptr<Timer> m_scrollTimer;
 
   UIKit::UIPanGestureRecognizer m_panGestureRecognizer;
 

@@ -409,7 +409,7 @@ inline void from_json(const json& j, DropShadow& x)
   x.offsetX = p.x;
   x.offsetY = p.y;
   x.spread = j.value("spread", 0.f);
-  x.clipShadow = !j.value("showBehindTransparentAreas", true);
+  x.clipShadow = !j.value("showBehindTransparentAreas", false);
 }
 
 inline void from_json(const json& j, Blur& x)

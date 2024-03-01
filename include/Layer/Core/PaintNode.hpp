@@ -232,20 +232,17 @@ protected:
   VShape         childPolyOperation() const;
   VShape         makeMaskBy(EBoolOp maskOp, Renderer* renderer);
 
-  virtual void drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender);
-  virtual void drawRawStyle(Painter& painter, const VShape& path, sk_sp<SkBlender> blender);
-
-  Bound onRevalidate() override;
+  virtual void onDrawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender);
+  virtual void onDrawStyle(Painter& painter, const VShape& path, sk_sp<SkBlender> blender);
+  Bound        onRevalidate() override;
 
 protected:
-  // Style
-  // virtual SkPath stylePath();
   void paintStyle(Renderer* renderer, const VShape& path, const VShape& mask);
 
-  [[deprecated]] virtual void paintFill(
+  virtual void onDrawFill(
     Renderer*            renderer,
     sk_sp<SkBlender>     blender,
     sk_sp<SkImageFilter> imageFilter,
-    const VShape&   path); // TODO:: only for ImageNode overriding
+    const VShape&        path);
 };
 } // namespace VGG::layer

@@ -62,15 +62,15 @@ public:
   void               setReplacesImage(bool fill);
   void               setImageFilter(const ImageFilter& filter);
   bool               fill() const;
-  VShape          asVisualShape(const Transform* mat) override;
+  VShape             asVisualShape(const Transform* mat) override;
 
   virtual ~ImageNode() override;
 
 protected:
-  void paintFill(
+  void onDrawFill(
     Renderer*            renderer,
     sk_sp<SkBlender>     blender,
     sk_sp<SkImageFilter> imageFilter,
-    const VShape&     path) override;
+    const VShape&        path) override;
 };
 } // namespace VGG::layer

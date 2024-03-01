@@ -166,12 +166,12 @@ void TextNode::setFrameMode(ETextLayoutMode layoutMode)
   _->paragraphLayout->setTextLayoutMode(mode);
 }
 
-void TextNode::drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
+void TextNode::onDrawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
 {
   d_ptr->onDrawRawStyleImpl(renderer, std::move(blender));
 }
 
-void TextNode::drawRawStyle(Painter& painter, const VShape& path, sk_sp<SkBlender> blender)
+void TextNode::onDrawStyle(Painter& painter, const VShape& path, sk_sp<SkBlender> blender)
 {
   d_ptr->onDrawRawStyleImpl(painter.renderer(), std::move(blender));
 }

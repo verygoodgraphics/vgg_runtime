@@ -71,7 +71,7 @@ public:
   bool onEvent(UEvent e, void* userData) override;
 
   void setContentSize(Size size);
-  void setContentOffset(Point offset);
+  void setContentOffset(Point offset, bool byMouseWheel = false);
   auto contentOffset() const -> Point
   {
     return m_contentOffset;

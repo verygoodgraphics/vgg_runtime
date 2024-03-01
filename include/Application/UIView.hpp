@@ -62,6 +62,14 @@ private:
   Layout::Rect m_frame;
   Layout::Rect m_bounds;
 
+  std::shared_ptr<VGG::LayoutNode> m_mouseOverNode;
+  std::shared_ptr<VGG::LayoutNode> m_mouseEnterNode;
+
+  std::shared_ptr<VGG::LayoutNode> m_possibleClickTargetNode;
+  std::shared_ptr<VGG::LayoutNode> m_mouseLeaveTargetNode;
+  std::shared_ptr<VGG::LayoutNode> m_mouseOutTargetNode;
+  std::shared_ptr<VGG::LayoutNode> m_mouseOutNode;
+
   // editor
   bool       m_isEditor = false;
   // sidebar
@@ -175,6 +183,21 @@ private:
     int          motionX,
     int          motionY,
     EUIEventType type);
+  void handleMouseOutAndMouseLeave(
+    std::shared_ptr<VGG::LayoutNode> hitNode,
+    int                              jsButtonIndex,
+    int                              x,
+    int                              y,
+    int                              motionX,
+    int                              motionY);
+  void fireMouseEvent(
+    std::shared_ptr<VGG::LayoutNode> target,
+    VGG::EUIEventType                type,
+    int                              jsButtonIndex,
+    int                              x,
+    int                              y,
+    int                              motionX,
+    int                              motionY);
 
   bool handleTouchEvent(int x, int y, int motionX, int motionY, EUIEventType type);
 };

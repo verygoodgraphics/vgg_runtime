@@ -97,7 +97,7 @@ int main(int argc, char** argv)
   program.add_argument("-d", "--data").help("resources dir");
   program.add_argument("-p", "--prefix").help("the prefix of filename or dir");
   program.add_argument("-L", "--loaddir").help("iterates all the files in the given dir");
-  program.add_argument("-s", "--scale").help("canvas scale").scan<'g', float>().default_value(1.0);
+  program.add_argument("-s", "--scale").help("canvas scale").scan<'g', float>().default_value(1.0f);
   program.add_argument("-w", "--width").help("canvas width").scan<'g', float>();
   program.add_argument("-h", "--height").help("canvas height").scan<'g', float>();
   program.add_argument("-l", "--level").help("canvas level").scan<'i', int>();

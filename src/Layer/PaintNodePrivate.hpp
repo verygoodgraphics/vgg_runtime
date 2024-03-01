@@ -509,7 +509,7 @@ public:
     q_ptr->paintFill(painter.renderer(), blender, 0, skPath);
     for (const auto& b : style.borders)
     {
-      if (!b.isEnabled)
+      if (!b.isEnabled || b.thickness <= 0)
         continue;
       painter.drawPathBorder(skPath, bound, b, 0, blender);
     }

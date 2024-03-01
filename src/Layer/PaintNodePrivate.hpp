@@ -481,7 +481,7 @@ public:
         SkPaint p;
         p.setAntiAlias(true);
         p.setStyle(SkPaint::kFill_Style);
-        if (auto ss = skPath.outset(s.spread, s.spread); s.spread != 0.f && ss)
+        if (auto ss = skPath.outset(s.spread, s.spread); s.spread != 0.f && ss && !ss->isEmpty())
         {
           auto dropShadowFilter = makeDropShadowImageFilter(s, q_ptr->frameBound(), true, 0);
           p.setImageFilter(dropShadowFilter);

@@ -117,11 +117,13 @@ void VShape::setOval(const Ellipse& ellipse)
 
 void VShape::clip(SkCanvas* canvas, SkClipOp clipOp) const
 {
+  ASSERT(type() != EMPTY);
   m_shape->clip(canvas, clipOp);
 }
 
 void VShape::draw(SkCanvas* canvas, const SkPaint& paint) const
 {
+  ASSERT(type() != EMPTY);
   m_shape->draw(canvas, paint);
 }
 

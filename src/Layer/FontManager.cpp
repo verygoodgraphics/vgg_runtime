@@ -250,7 +250,7 @@ std::string FontManager::matchFontName(std::string_view inputName) const
     auto matched = fontMgr->fuzzyMatchFontFamilyName(fontName);
     if (matched)
     {
-      INFO(
+      DEBUG(
         "Font [%s] matches real name [%s][%f]",
         fontName.c_str(),
         matched->first.c_str(),

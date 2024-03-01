@@ -96,7 +96,7 @@ bool ImageNode::fill() const
   return d_ptr->fillReplacesImage;
 }
 
-void ImageNode::paintFill(
+void ImageNode::onDrawFill(
   Renderer*            renderer,
   sk_sp<SkBlender>     blender,
   sk_sp<SkImageFilter> imageFilter,

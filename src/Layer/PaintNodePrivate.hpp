@@ -231,7 +231,7 @@ public:
       return;
     }
     Painter painter(renderer);
-    drawRawStyleImpl(painter, *path, blender);
+    onDrawStyleImpl(painter, *path, blender);
   }
 
   void drawWithAlphaMask(Renderer* renderer, const VShape& path, const VShape& outlineMask)
@@ -258,7 +258,7 @@ public:
     canvas->saveLayer(0, &objectLayerPaint);
     canvas->clipRect(b);
     auto blender = SkBlender::Mode(SkBlendMode::kSrcOver);
-    drawRawStyleImpl(painter, path, blender);
+    onDrawStyleImpl(painter, path, blender);
     canvas->restore();
     if (!outlineMask.isEmpty())
     {
@@ -310,7 +310,7 @@ public:
       painter.canvas()->save();
       outlineMask.clip(painter.canvas(), SkClipOp::kIntersect);
     }
-    drawRawStyleImpl(painter, path, blender);
+    onDrawStyleImpl(painter, path, blender);
     if (!outlineMask.isEmpty())
     {
       // painter.endClip();
@@ -329,7 +329,7 @@ public:
         auto skm = toSkMatrix(p.transform.matrix());
         canvas->save();
         canvas->concat(skm);
-        p.mask->drawAsAlphaMask(renderer, p.blender);
+        p.mask->onDrawAsAlphaMask(renderer, p.blender);
         canvas->restore();
       }
     }
@@ -361,7 +361,7 @@ public:
       painter.canvas()->save();
       outlineMask.clip(painter.canvas(), SkClipOp::kIntersect);
     }
-    drawRawStyleImpl(painter, path, SkBlender::Mode(SkBlendMode::kSrcOver));
+    onDrawStyleImpl(painter, path, SkBlender::Mode(SkBlendMode::kSrcOver));
     if (!outlineMask.isEmpty())
     {
       // painter.endClip();
@@ -411,7 +411,7 @@ public:
       }
     }
 
-    q_ptr->paintFill(painter.renderer(), blender, 0, skPath);
+    q_ptr->onDrawFill(painter.renderer(), blender, 0, skPath);
     for (const auto& b : style.borders)
     {
       if (!b.isEnabled)
@@ -430,7 +430,7 @@ public:
     painter.canvas()->restore();
   }
 
-  void drawRawStyleImpl(Painter& painter, const VShape& skPath, sk_sp<SkBlender> blender)
+  void onDrawStyleImpl(Painter& painter, const VShape& skPath, sk_sp<SkBlender> blender)
   {
     // return drawRawStyleImplLegacy(painter, skPath, blender);
     auto filled = false;
@@ -506,7 +506,7 @@ public:
       }
       g.restore([&]() { painter.canvas()->restore(); });
     }
-    q_ptr->paintFill(painter.renderer(), blender, 0, skPath);
+    q_ptr->onDrawFill(painter.renderer(), blender, 0, skPath);
     for (const auto& b : style.borders)
     {
       if (!b.isEnabled || b.thickness <= 0)

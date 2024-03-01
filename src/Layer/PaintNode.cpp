@@ -364,7 +364,7 @@ VShape PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
   return path;
 }
 
-void PaintNode::drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
+void PaintNode::onDrawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
 {
   VGG_IMPL(PaintNode);
   if (_->contextSetting.opacity < 1.0)
@@ -378,9 +378,9 @@ void PaintNode::drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
   }
 }
 
-void PaintNode::drawRawStyle(Painter& painter, const VShape& path, sk_sp<SkBlender> blender)
+void PaintNode::onDrawStyle(Painter& painter, const VShape& path, sk_sp<SkBlender> blender)
 {
-  d_ptr->drawRawStyleImpl(painter, path, std::move(blender));
+  d_ptr->onDrawStyleImpl(painter, path, std::move(blender));
 }
 
 VShape PaintNode::asVisualShape(const Transform* mat)
@@ -722,7 +722,7 @@ void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape&
       outlineMask.clip(painter.renderer()->canvas(), SkClipOp::kIntersect);
     }
     auto blender = SkBlender::Mode(SkBlendMode::kSrcOver);
-    drawRawStyle(painter, path, blender);
+    onDrawStyle(painter, path, blender);
     if (!outlineMask.isEmpty())
     {
       painter.canvas()->restore();
@@ -754,7 +754,7 @@ void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape&
   }
 }
 
-void PaintNode::paintFill(
+void PaintNode::onDrawFill(
   Renderer*            renderer,
   sk_sp<SkBlender>     blender,
   sk_sp<SkImageFilter> imageFilter,

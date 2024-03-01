@@ -642,7 +642,8 @@ void PaintNode::paintChildrenRecursively(Renderer* renderer)
     }
   };
 
-  if (overflow() == OF_HIDDEN)
+  const auto clip = overflow() == OF_HIDDEN || overflow() == OF_SCROLL;
+  if (clip)
   {
     canvas->save();
     auto boundPath = makeBoundPath();
@@ -651,7 +652,7 @@ void PaintNode::paintChildrenRecursively(Renderer* renderer)
   }
   paintCall(masked);
   paintCall(noneMasked);
-  if (overflow() == OF_HIDDEN)
+  if (clip)
   {
     canvas->restore();
   }

@@ -661,6 +661,7 @@ void Controller::aspectFill(Layout::Size size)
     Layout::Size targetSize = { pageSize.width * scaleFactor,
                                 pageSize.height }; // make sure to see all the contents
     m_layout->layout(targetSize);
+    m_presenter->setContentSize(targetSize);
   }
   else
   {
@@ -671,6 +672,7 @@ void Controller::aspectFill(Layout::Size size)
         pageSize.height * scaleFactor) // set max height limit
     };
     m_layout->layout(targetSize);
+    m_presenter->setContentSize(targetSize);
   }
 }
 

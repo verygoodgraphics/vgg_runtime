@@ -67,19 +67,36 @@ public:
 #endif
   }
 
+  void onDrawRawStyleImpl(Renderer* renderer, sk_sp<SkBlender> blender)
+  {
+    if (paragraphLayout->empty())
+      return;
+    auto       canvas = renderer->canvas();
+    const auto clip = (q_ptr->overflow() == OF_HIDDEN || q_ptr->overflow() == OF_SCROLL);
+    if (clip)
+    {
+      canvas->save();
+      auto bound = q_ptr->makeBoundPath();
+      bound.clip(canvas, SkClipOp::kIntersect);
+    }
+    if (anchor && !paragraphLayout->paragraphCache.empty())
+    {
+      auto offsetY = anchor->y - paragraphLayout->firstBaseline();
+      painter->paintRaw(renderer, anchor->x, offsetY);
+    }
+    else
+    {
+      painter->paintParagraph(renderer);
+    }
+    if (clip)
+    {
+      canvas->restore();
+    }
+  }
+
   VParagraphPainterPtr     painter;
   RichTextBlockPtr         paragraphLayout;
   std::optional<glm::vec2> anchor;
-
-  TextNode__pImpl(const TextNode__pImpl& p)
-  {
-    this->operator=(p);
-  }
-
-  TextNode__pImpl& operator=(const TextNode__pImpl& p)
-  {
-    return *this;
-  }
 
   TextNode__pImpl(TextNode__pImpl&& p) noexcept = default;
   TextNode__pImpl& operator=(TextNode__pImpl&& p) noexcept = delete;
@@ -151,36 +168,12 @@ void TextNode::setFrameMode(ETextLayoutMode layoutMode)
 
 void TextNode::drawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
 {
-  paintFill(renderer, std::move(blender), 0, VShape());
+  d_ptr->onDrawRawStyleImpl(renderer, std::move(blender));
 }
 
 void TextNode::drawRawStyle(Painter& painter, const VShape& path, sk_sp<SkBlender> blender)
 {
-  auto renderer = painter.renderer();
-  VGG_IMPL(TextNode);
-  auto canvas = renderer->canvas();
-  if (_->paragraphLayout->empty())
-    return;
-  if (overflow() == OF_HIDDEN)
-  {
-    canvas->save();
-    auto bound = makeBoundPath();
-    bound.clip(canvas, SkClipOp::kIntersect);
-    // canvas->clipPath(makeBoundPath());
-  }
-  if (_->anchor)
-  {
-    auto offsetY = _->anchor->y - _->paragraphLayout->firstBaseline();
-    _->painter->paintRaw(renderer, _->anchor->x, offsetY);
-  }
-  else
-  {
-    _->painter->paintParagraph(renderer);
-  }
-  if (overflow() == OF_HIDDEN)
-  {
-    canvas->restore();
-  }
+  d_ptr->onDrawRawStyleImpl(painter.renderer(), std::move(blender));
 }
 
 void TextNode::setVerticalAlignment(ETextVerticalAlignment vertAlign)

@@ -642,7 +642,7 @@ void PaintNode::paintChildrenRecursively(Renderer* renderer)
     }
   };
 
-  const auto clip = overflow() == OF_HIDDEN || overflow() == OF_SCROLL;
+  const auto clip = (overflow() == OF_HIDDEN || overflow() == OF_SCROLL);
   if (clip)
   {
     canvas->save();

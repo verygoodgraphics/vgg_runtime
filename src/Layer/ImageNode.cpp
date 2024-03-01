@@ -100,7 +100,7 @@ void ImageNode::paintFill(
   Renderer*            renderer,
   sk_sp<SkBlender>     blender,
   sk_sp<SkImageFilter> imageFilter,
-  const VShape&         path)
+  const VShape&        path)
 {
   (void)path;
   VGG_IMPL(ImageNode)

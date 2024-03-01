@@ -506,10 +506,11 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
     {
       p->setVerticalAlignment(j.value("verticalAlignment", ETextVerticalAlignment::VA_TOP));
       p->setFrameMode(j.value("frameMode", ETextLayoutMode::TL_FIXED));
-      auto anchor = getStackOptional<std::array<float, 2>>(j, "anchorPoint");
-      if (anchor)
+      if (auto anchor = getStackOptional<std::array<float, 2>>(j, "anchorPoint"); anchor)
       {
-        p->setTextAnchor({ (*anchor)[0], (*anchor)[1] });
+        glm::vec2 anchorPoint = { (*anchor)[0], (*anchor)[1] };
+        CoordinateConvert::convertCoordinateSystem(anchorPoint, totalMatrix);
+        p->setTextAnchor(anchorPoint);
       }
 
       // 1.

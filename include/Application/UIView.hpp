@@ -152,13 +152,14 @@ public:
 
   void enableZoomer(bool enabled);
 
-  Offset getOffset();
-  void   setOffset(Offset offset);
-
   void setDrawBackground(bool drawBackground)
   {
     m_drawGrayBackground = drawBackground;
   }
+
+protected:
+  Offset getOffset();
+  void   setOffset(Offset offset);
 
 private:
   std::tuple<bool, bool, bool, bool> getKeyModifier(int keyMod);

@@ -176,7 +176,7 @@ bool Presenter::handleTranslate(double pageWidth, double pageHeight, float x, fl
   }
 
   // vertical scoll
-  const auto oldOffset = m_view->getOffset();
+  const auto oldOffset = m_view->contentOffset();
   auto       newOffset = oldOffset;
   newOffset.y += y;
   // limit offset range
@@ -200,7 +200,7 @@ bool Presenter::handleTranslate(double pageWidth, double pageHeight, float x, fl
       oldOffset.y,
       newOffset.x,
       newOffset.y);
-    m_view->setOffset(newOffset);
+    m_view->setContentOffset(newOffset, true);
     return true;
   }
 }

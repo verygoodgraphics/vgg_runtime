@@ -87,13 +87,23 @@ bool UIView::onEvent(UEvent evt, void* userData)
 
     case VGG_MOUSEMOTION:
     {
-      return handleMouseEvent(
-        0,
-        evt.motion.windowX,
-        evt.motion.windowY,
-        evt.motion.xrel,
-        evt.motion.yrel,
-        EUIEventType::MOUSEMOVE);
+      // according to js event order
+      EUIEventType types[] = { EUIEventType::MOUSEMOVE,
+                               EUIEventType::MOUSEOVER,
+                               EUIEventType::MOUSEENTER,
+                               EUIEventType::MOUSEOUT,
+                               EUIEventType::MOUSELEAVE };
+      for (auto type : types)
+      {
+        handleMouseEvent(
+          0,
+          evt.motion.windowX,
+          evt.motion.windowY,
+          evt.motion.xrel,
+          evt.motion.yrel,
+          type);
+      }
+      return true;
     }
     break;
 
@@ -318,20 +328,154 @@ bool UIView::handleMouseEvent(
   Layout::Point pointToDocument{ pointToPage.x + page->frame().origin.x,
                                  pointToPage.y + page->frame().origin.y };
 
-  auto target = page->hitTest(
+  const auto& hitNode = page->hitTest(pointToDocument, nullptr);
+  const auto& target = page->hitTest(
     pointToDocument,
     [&queryHasEventListener = m_hasEventListener, type](const std::string& targetKey)
     { return queryHasEventListener(targetKey, type); });
-  auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
 
+  switch (type)
+  {
+    case EUIEventType::MOUSEDOWN:
+    {
+      m_possibleClickTargetNode = hitNode;
+    }
+    break;
+
+    case EUIEventType::MOUSEMOVE:
+    {
+      handleMouseOutAndMouseLeave(hitNode, jsButtonIndex, x, y, motionX, motionY);
+    }
+    break;
+
+    case EUIEventType::MOUSEOVER:
+    {
+      if (target)
+      {
+        if (m_mouseOverNode == target)
+        {
+          return false;
+        }
+        m_mouseOverNode = target;
+      }
+    }
+    break;
+
+    case EUIEventType::MOUSEENTER:
+    {
+      if (target)
+      {
+        if (target == m_mouseEnterNode)
+        {
+          return false;
+        }
+        m_mouseEnterNode = target;
+      }
+    }
+    break;
+
+    case EUIEventType::MOUSEOUT:
+    {
+      if (target)
+      {
+        m_mouseOutTargetNode = target;
+        m_mouseOutNode = target;
+        return false;
+      }
+    }
+    break;
+
+    case EUIEventType::MOUSELEAVE:
+    {
+      if (target)
+      {
+        m_mouseLeaveTargetNode = target;
+        return false;
+      }
+    }
+    break;
+
+    default:
+      break;
+  }
+
+  fireMouseEvent(target, type, jsButtonIndex, x, y, motionX, motionY);
+  return true;
+}
+
+void UIView::handleMouseOutAndMouseLeave(
+  std::shared_ptr<VGG::LayoutNode> hitNode,
+  int                              jsButtonIndex,
+  int                              x,
+  int                              y,
+  int                              motionX,
+  int                              motionY)
+{
+  std::shared_ptr<VGG::LayoutNode> target;
+  EUIEventType                     type;
+
+  // mouseout
+  if (m_mouseOutTargetNode != hitNode)
+  {
+    if (m_mouseOutTargetNode->isAncestorOf(hitNode))
+    {
+      if (m_mouseOutNode != hitNode)
+      {
+        // fire mouseout
+        target = m_mouseOutTargetNode;
+        type = EUIEventType::MOUSEOUT;
+
+        m_mouseOutNode = hitNode;
+      }
+    }
+    else
+    {
+      // fire mouseout
+      target = m_mouseOutTargetNode;
+      type = EUIEventType::MOUSEOUT;
+
+      m_mouseOutTargetNode = nullptr;
+      m_mouseOutNode = nullptr;
+    }
+  }
+
+  // mouseleave
+  if (m_mouseLeaveTargetNode != hitNode)
+  {
+    if (!m_mouseLeaveTargetNode->isAncestorOf(hitNode))
+    {
+      // fire mouseleave
+      target = m_mouseLeaveTargetNode;
+      type = EUIEventType::MOUSELEAVE;
+
+      m_mouseLeaveTargetNode = nullptr;
+    }
+  }
+
+  if (target)
+  {
+    fireMouseEvent(target, type, jsButtonIndex, x, y, motionX, motionY);
+  }
+}
+
+void UIView::fireMouseEvent(
+  std::shared_ptr<VGG::LayoutNode> target,
+  VGG::EUIEventType                type,
+  int                              jsButtonIndex,
+  int                              x,
+  int                              y,
+  int                              motionX,
+  int                              motionY)
+{
+  auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
   m_eventListener(
     UIEventPtr(new MouseEvent(
       type,
       target ? target->vggId() : K_EMPTY_STRING,
       target ? target->path() : K_EMPTY_STRING,
       jsButtonIndex,
-      pointToPage.x,
-      pointToPage.y,
+      x,
+      y,
       motionX,
       motionY,
       alt,
@@ -339,8 +483,6 @@ bool UIView::handleMouseEvent(
       meta,
       shift)),
     target);
-
-  return true;
 }
 
 void UIView::show(const ViewModel& viewModel)

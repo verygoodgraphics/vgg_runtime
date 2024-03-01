@@ -71,6 +71,11 @@ std::shared_ptr<LayoutNode> LayoutNode::hitTest(
 
   if (pointInside(point))
   {
+    if (!hasEventListener)
+    {
+      return shared_from_this();
+    }
+
     if (hasEventListener(vggId()))
     {
       return shared_from_this();

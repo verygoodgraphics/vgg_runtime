@@ -22,6 +22,7 @@
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/TreeNode.hpp"
+#include "Layer/Effects.hpp"
 #include "glm/ext/matrix_transform.hpp"
 
 #include <core/SkBlendMode.h>
@@ -711,7 +712,17 @@ void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape&
       else if (*blurType == BT_BACKGROUND)
         painter.blurBackgroundBegin(blur.radius, blur.radius, frameBound(), &res);
       else if (*blurType == BT_MOTION)
-        DEBUG("Motion blur has not been implemented");
+      {
+        auto     f = makeMotionFilter(blur.motionAngle, 4.f);
+        auto     b = toSkRect(bound());
+        SkMatrix m = SkMatrix::I();
+        b = m.mapRect(b);
+        SkPaint pen;
+        pen.setImageFilter(f);
+        renderer->canvas()->save();
+        res.clip(renderer->canvas(), SkClipOp::kIntersect);
+        renderer->canvas()->saveLayer(&b, &pen);
+      }
       else if (*blurType == BT_ZOOM)
         DEBUG("Zoom blur has not been implemented");
     }
@@ -735,9 +746,14 @@ void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape&
       else if (*blurType == BT_BACKGROUND)
         painter.blurBackgroundEnd();
       else if (*blurType == BT_ZOOM)
+      {
         DEBUG("Zoom blur has not been implemented");
+      }
       else if (*blurType == BT_MOTION)
-        DEBUG("Motion blur has not been implemented");
+      {
+        renderer->canvas()->restore();
+        renderer->canvas()->restore();
+      }
     }
   }
   else

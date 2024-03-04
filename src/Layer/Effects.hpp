@@ -234,6 +234,8 @@ inline sk_sp<SkShader> makeGradientShader(const Bound& bound, const Gradient& gr
   return shader;
 }
 
+sk_sp<SkImageFilter> makeMotionBlurFilter(const MotionBlur& blur);
+
 inline void populateSkPaint(
   const FillType&       fillType,
   const ContextSetting& st,

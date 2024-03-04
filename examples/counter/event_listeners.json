@@ -18,5 +18,31 @@
         "fileName": "js/button_onclick.mjs"
       }
     ]
+  },
+  "#rightGroup": {
+    "mouseover": [
+      {
+        "createdAt": 1691118721013,
+        "fileName": "js/button_onclick.mjs"
+      }
+    ],
+    "mouseenter": [
+      {
+        "createdAt": 1691118721013,
+        "fileName": "js/button_onclick.mjs"
+      }
+    ],
+    "mouseout": [
+      {
+        "createdAt": 1691118721013,
+        "fileName": "js/button_onclick.mjs"
+      }
+    ],
+    "mouseleave": [
+      {
+        "createdAt": 1691118721013,
+        "fileName": "js/button_onclick.mjs"
+      }
+    ]
   }
 }

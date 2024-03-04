@@ -62,13 +62,14 @@ private:
   Layout::Rect m_frame;
   Layout::Rect m_bounds;
 
-  std::shared_ptr<VGG::LayoutNode> m_mouseOverNode;
-  std::shared_ptr<VGG::LayoutNode> m_mouseEnterNode;
-
   std::shared_ptr<VGG::LayoutNode> m_possibleClickTargetNode;
-  std::shared_ptr<VGG::LayoutNode> m_mouseLeaveTargetNode;
+
+  std::shared_ptr<VGG::LayoutNode> m_mouseOverTargetNode;
+  std::shared_ptr<VGG::LayoutNode> m_mouseOverNode;
+  std::shared_ptr<VGG::LayoutNode> m_mouseEnterTargetNode;
   std::shared_ptr<VGG::LayoutNode> m_mouseOutTargetNode;
   std::shared_ptr<VGG::LayoutNode> m_mouseOutNode;
+  std::shared_ptr<VGG::LayoutNode> m_mouseLeaveTargetNode;
 
   // editor
   bool       m_isEditor = false;
@@ -183,8 +184,16 @@ private:
     int          motionX,
     int          motionY,
     EUIEventType type);
-  void handleMouseOutAndMouseLeave(
-    std::shared_ptr<VGG::LayoutNode> hitNode,
+  void handleMouseOut(
+    std::shared_ptr<VGG::LayoutNode> targetNode,
+    std::shared_ptr<VGG::LayoutNode> hitNodeInTarget,
+    int                              jsButtonIndex,
+    int                              x,
+    int                              y,
+    int                              motionX,
+    int                              motionY);
+  void handleMouseLeave(
+    std::shared_ptr<VGG::LayoutNode> target,
     int                              jsButtonIndex,
     int                              x,
     int                              y,

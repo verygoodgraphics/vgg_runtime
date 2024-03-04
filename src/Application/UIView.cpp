@@ -33,6 +33,9 @@ using namespace nlohmann;
 
 constexpr auto K_EMPTY_STRING = "";
 
+#undef DEBUG
+#define DEBUG(msg, ...)
+
 UIView::UIView()
   : AppScene(std::make_unique<VGG::layer::RasterCacheTile>())
 {
@@ -150,6 +153,8 @@ bool UIView::onEvent(UEvent evt, void* userData)
             EUIEventType::CONTEXTMENU);
         }
       }
+
+      m_possibleClickTargetNode = nullptr;
     }
     break;
 
@@ -338,7 +343,26 @@ bool UIView::handleMouseEvent(
   {
     case EUIEventType::MOUSEDOWN:
     {
-      m_possibleClickTargetNode = hitNode;
+      std::shared_ptr<VGG::LayoutNode> clickTarget;
+
+      EUIEventType types[] = { EUIEventType::CLICK,
+                               EUIEventType::AUXCLICK,
+                               EUIEventType::CONTEXTMENU };
+      for (auto clickType : types)
+      {
+        clickTarget = page->hitTest(
+          pointToDocument,
+          [&queryHasEventListener = m_hasEventListener, clickType](const std::string& targetKey)
+          { return queryHasEventListener(targetKey, clickType); });
+        if (clickTarget)
+        {
+          m_possibleClickTargetNode = clickTarget;
+          DEBUG(
+            "mousedown, m_possibleClickTargetNode: %s",
+            m_possibleClickTargetNode->path().c_str());
+          break;
+        }
+      }
     }
     break;
 
@@ -378,6 +402,7 @@ bool UIView::handleMouseEvent(
     {
       if (target)
       {
+        DEBUG("m_mouseOutTargetNode: %s", target->path().c_str());
         m_mouseOutTargetNode = target;
         m_mouseOutNode = target;
         return false;
@@ -390,6 +415,17 @@ bool UIView::handleMouseEvent(
       if (target)
       {
         m_mouseLeaveTargetNode = target;
+        return false;
+      }
+    }
+    break;
+
+    case EUIEventType::CLICK:
+    case EUIEventType::AUXCLICK:
+    case EUIEventType::CONTEXTMENU:
+    {
+      if (target && m_possibleClickTargetNode != target)
+      {
         return false;
       }
     }
@@ -434,6 +470,7 @@ void UIView::handleMouseOutAndMouseLeave(
       target = m_mouseOutTargetNode;
       type = EUIEventType::MOUSEOUT;
 
+      DEBUG("m_mouseOutTargetNode: set to nullptr");
       m_mouseOutTargetNode = nullptr;
       m_mouseOutNode = nullptr;
     }

@@ -170,6 +170,54 @@ inline sk_sp<SkShader> makeGradientAngular(const Bound& bound, const G& g)
   return SkGradientShader::MakeSweep(from.x, from.y, colors.data(), positions.data(), sz, 0, &mat);
 }
 
+template<typename G>
+inline sk_sp<SkShader> makeGradientDiamond(const Bound& bound, const G& g)
+{
+  if (g.stops.empty())
+    return nullptr;
+
+  auto       f = bound.map(bound.size() * g.from);
+  auto       t = bound.map(bound.size() * g.to);
+  SkScalar   r = glm::distance(f, t);
+  const auto minPosition = 0.f;
+  const auto maxPosition = 1.f;
+
+  std::vector<SkColor>  colors;
+  std::vector<SkScalar> positions;
+  for (auto it = g.stops.begin(); it != g.stops.end(); ++it)
+  {
+    colors.push_back(it->color);
+    auto p = it->position;
+    positions.push_back((p - minPosition) / (maxPosition - minPosition));
+  }
+  auto mat = makeMatrix(bound, g.from, g.to, g.ellipse);
+  mat.preTranslate(f.x, f.y);
+  SkPoint pts[2] = { { 0, 0 }, { r / 2, r / 2 } };
+  auto    linearShader = SkGradientShader::MakeLinear(
+    pts,
+    colors.data(),
+    positions.data(),
+    colors.size(),
+    SkTileMode::kClamp,
+    0,
+    0);
+
+  auto result = SkRuntimeEffect::MakeForShader(SkString(R"(
+    uniform shader linearShader;
+    vec4 main(vec2 inCoords) {
+        return linearShader.eval(vec2(abs(inCoords.y) + abs(inCoords.x), 1.0));
+    }
+  )"));
+  if (!result.effect)
+  {
+    DEBUG("Runtime Effect Failed[%s]: %s", "diamond", result.errorText.data());
+    return nullptr;
+  }
+  sk_sp<SkShader> child[1] = { linearShader };
+  auto            s = result.effect->makeShader(nullptr, child, 1, &mat);
+  return s;
+}
+
 inline sk_sp<SkShader> makeGradientShader(const Bound& bound, const Gradient& gradient)
 {
   sk_sp<SkShader> shader;
@@ -178,7 +226,7 @@ inline sk_sp<SkShader> makeGradientShader(const Bound& bound, const Gradient& gr
       [&](const GradientLinear& p) { shader = makeGradientLinear(bound, p); },
       [&](const GradientRadial& p) { shader = makeGradientRadial(bound, p); },
       [&](const GradientAngular& p) { shader = makeGradientAngular(bound, p); },
-      [&](const GradientDiamond& p) { shader = makeGradientRadial(bound, p); },
+      [&](const GradientDiamond& p) { shader = makeGradientDiamond(bound, p); },
       [&](const GradientBasic& p) { // TODO::
       },
     },

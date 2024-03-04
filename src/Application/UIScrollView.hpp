@@ -45,7 +45,8 @@ private:
   Point m_contentOffset{ 0, 0 };
 
   bool m_scrollEnabled{ true };
-  bool m_bounces{ true };
+  bool m_bouncesHorizontally{ false };
+  bool m_bouncesVertically{ true };
   bool m_dragging{ false };
   bool m_decelerating{ false };
 
@@ -63,6 +64,15 @@ public:
   void setScrollEnabled(bool enabled)
   {
     m_scrollEnabled = enabled;
+  }
+
+  bool boucesHorizontally() const
+  {
+    return m_bouncesHorizontally;
+  }
+  bool boucesVertically() const
+  {
+    return m_bouncesVertically;
   }
 
 public:

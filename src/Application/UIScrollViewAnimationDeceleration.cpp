@@ -81,9 +81,21 @@ static float clampedVelocty(float v)
   return clamp(v, -V, V);
 }
 
-static bool bounceComponent(double t, UIScrollViewAnimationDecelerationComponent* c, float to)
+static bool bounceComponent(
+  double                                      t,
+  UIScrollViewAnimationDecelerationComponent* c,
+  float                                       to,
+  bool                                        bounces)
 {
   DEBUG("bounceComponent, c = %p,", c);
+
+  if (!bounces)
+  {
+    DEBUG("bounceComponent: bounce is disabled, return immediately");
+    c->velocity = 0;
+    c->position = to;
+    return true;
+  }
 
   if (c->bounced && (!doubleNearlyZero(c->returnTime)))
   {
@@ -102,6 +114,7 @@ static bool bounceComponent(double t, UIScrollViewAnimationDecelerationComponent
   {
     auto exceedTheBoundary = !doublesNearlyEqual(c->position,
                                                  to); // todo, if scroller is visible
+
     DEBUG(
       "bounceComponent, 2: to = %f, position = %f, velocity = %f",
       to,
@@ -198,8 +211,10 @@ bool UIScrollViewAnimationDeceleration::animate()
   {
     auto confinedOffset = m_scrollView->confinedContentOffset(Point{ m_x.position, m_y.position });
 
-    const auto verticalIsFinished = bounceComponent(beginTime(), &m_y, confinedOffset.y);
-    const auto horizontalIsFinished = bounceComponent(beginTime(), &m_x, confinedOffset.x);
+    const auto verticalIsFinished =
+      bounceComponent(beginTime(), &m_y, confinedOffset.y, m_scrollView->boucesVertically());
+    const auto horizontalIsFinished =
+      bounceComponent(beginTime(), &m_x, confinedOffset.x, m_scrollView->boucesHorizontally());
 
     finished = (verticalIsFinished && horizontalIsFinished && isFinishedWaitingForMomentumScroll);
 

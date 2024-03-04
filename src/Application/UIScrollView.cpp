@@ -19,6 +19,7 @@
 #include "UIScrollViewAnimationDeceleration.hpp"
 
 #include "Utility/Log.hpp"
+#include "Utility/VggFloat.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -158,19 +159,30 @@ void UIScrollView::dragBy(Point delta)
 
     const auto confinedOffset = confinedContentOffset(proposedOffset);
 
-    if (m_bounces)
+    if (m_bouncesHorizontally || m_bouncesVertically)
     {
-      bool shouldHorizontalBounce = (std::abs(proposedOffset.x - confinedOffset.x) > 0);
-      bool shouldVerticalBounce = (std::abs(proposedOffset.y - confinedOffset.y) > 0);
-
-      if (shouldHorizontalBounce)
+      if (m_bouncesHorizontally)
       {
-        proposedOffset.x = originalOffset.x + (0.055 * delta.x);
+        if (bool shouldHorizontalBounce = !doublesNearlyEqual(proposedOffset.x, confinedOffset.x))
+        {
+          proposedOffset.x = originalOffset.x + (0.055 * delta.x);
+        }
+      }
+      else
+      {
+        proposedOffset.x = confinedOffset.x;
       }
 
-      if (shouldVerticalBounce)
+      if (m_bouncesVertically)
       {
-        proposedOffset.y = originalOffset.y + (0.055 * delta.y);
+        if (bool shouldVerticalBounce = !doublesNearlyEqual(proposedOffset.y, confinedOffset.y))
+        {
+          proposedOffset.y = originalOffset.y + (0.055 * delta.y);
+        }
+      }
+      else
+      {
+        proposedOffset.y = confinedOffset.y;
       }
 
       setRestrainedContentOffset(proposedOffset);

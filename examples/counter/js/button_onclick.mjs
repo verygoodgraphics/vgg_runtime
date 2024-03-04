@@ -1,5 +1,5 @@
 function handleEvent(event, wrapper) {
-  console.log('handle event:', event, ', type:', event.type, ', target:', event.target, ', wrapper:', wrapper);
+  console.log(new Date().getTime(), 'handle event:', event, ', type:', event.type, ', target:', event.target);
 
   const wasmInstanceKey = 'instance';
 
@@ -17,7 +17,8 @@ function handleEvent(event, wrapper) {
       break;
     }
 
-    case 'mouseup': {
+    case 'mouseup':
+    case 'mouseleave': {
       let element = JSON.parse(vggSdk.getElement(buttonId));
       element.style.fills[0].color.alpha = 0.5;
       vggSdk.updateElement(buttonId, JSON.stringify(element));

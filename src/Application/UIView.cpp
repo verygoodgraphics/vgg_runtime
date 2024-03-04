@@ -333,11 +333,15 @@ bool UIView::handleMouseEvent(
   Layout::Point pointToDocument{ pointToPage.x + page->frame().origin.x,
                                  pointToPage.y + page->frame().origin.y };
 
-  const auto& hitNode = page->hitTest(pointToDocument, nullptr);
   const auto& target = page->hitTest(
     pointToDocument,
     [&queryHasEventListener = m_hasEventListener, type](const std::string& targetKey)
     { return queryHasEventListener(targetKey, type); });
+  std::shared_ptr<VGG::LayoutNode> hitNodeInTarget;
+  if (target)
+  {
+    hitNodeInTarget = target->hitTest(pointToDocument, nullptr);
+  }
 
   switch (type)
   {
@@ -366,57 +370,46 @@ bool UIView::handleMouseEvent(
     }
     break;
 
-    case EUIEventType::MOUSEMOVE:
-    {
-      handleMouseOutAndMouseLeave(hitNode, jsButtonIndex, x, y, motionX, motionY);
-    }
-    break;
-
     case EUIEventType::MOUSEOVER:
     {
       if (target)
       {
-        if (m_mouseOverNode == target)
+        if (target == m_mouseOverTargetNode && m_mouseOverNode == hitNodeInTarget)
         {
-          return false;
+          return true;
         }
-        m_mouseOverNode = target;
+        m_mouseOverTargetNode = target;
+        m_mouseOverNode = hitNodeInTarget;
+      }
+      else
+      {
+        m_mouseOverTargetNode = nullptr;
+        m_mouseOverNode = nullptr;
       }
     }
     break;
 
     case EUIEventType::MOUSEENTER:
     {
-      if (target)
+      if (target && target == m_mouseEnterTargetNode)
       {
-        if (target == m_mouseEnterNode)
-        {
-          return false;
-        }
-        m_mouseEnterNode = target;
+        return true;
       }
+      m_mouseEnterTargetNode = target;
     }
     break;
 
     case EUIEventType::MOUSEOUT:
     {
-      if (target)
-      {
-        DEBUG("m_mouseOutTargetNode: %s", target->path().c_str());
-        m_mouseOutTargetNode = target;
-        m_mouseOutNode = target;
-        return false;
-      }
+      handleMouseOut(target, hitNodeInTarget, jsButtonIndex, x, y, motionX, motionY);
+      return true;
     }
     break;
 
     case EUIEventType::MOUSELEAVE:
     {
-      if (target)
-      {
-        m_mouseLeaveTargetNode = target;
-        return false;
-      }
+      handleMouseLeave(target, jsButtonIndex, x, y, motionX, motionY);
+      return true;
     }
     break;
 
@@ -439,59 +432,99 @@ bool UIView::handleMouseEvent(
   return true;
 }
 
-void UIView::handleMouseOutAndMouseLeave(
-  std::shared_ptr<VGG::LayoutNode> hitNode,
+void UIView::handleMouseOut(
+  std::shared_ptr<VGG::LayoutNode> target,
+  std::shared_ptr<VGG::LayoutNode> hitNodeInTarget,
   int                              jsButtonIndex,
   int                              x,
   int                              y,
   int                              motionX,
   int                              motionY)
 {
-  std::shared_ptr<VGG::LayoutNode> target;
-  EUIEventType                     type;
+  std::shared_ptr<VGG::LayoutNode> fireTarget;
 
-  // mouseout
-  if (m_mouseOutTargetNode != hitNode)
+  if (target)
   {
-    if (m_mouseOutTargetNode->isAncestorOf(hitNode))
+    if (m_mouseOutTargetNode)
     {
-      if (m_mouseOutNode != hitNode)
+      if (target == m_mouseOutTargetNode)
       {
-        // fire mouseout
-        target = m_mouseOutTargetNode;
-        type = EUIEventType::MOUSEOUT;
-
-        m_mouseOutNode = hitNode;
+        if (m_mouseOutNode != hitNodeInTarget)
+        {
+          fireTarget = m_mouseOutTargetNode;
+          m_mouseOutNode = hitNodeInTarget;
+        }
+      }
+      else
+      {
+        fireTarget = m_mouseOutTargetNode;
+        m_mouseOutTargetNode = target;
+        m_mouseOutNode = hitNodeInTarget;
       }
     }
     else
     {
-      // fire mouseout
-      target = m_mouseOutTargetNode;
-      type = EUIEventType::MOUSEOUT;
-
-      DEBUG("m_mouseOutTargetNode: set to nullptr");
+      DEBUG("m_mouseOutTargetNode: %s", fireTarget->path().c_str());
+      m_mouseOutTargetNode = target;
+      m_mouseOutNode = hitNodeInTarget;
+      return;
+    }
+  }
+  else
+  {
+    if (m_mouseOutTargetNode)
+    {
+      fireTarget = m_mouseOutTargetNode;
+      DEBUG("mouse out of the m_mouseOutTargetNode, set it to nullptr");
       m_mouseOutTargetNode = nullptr;
       m_mouseOutNode = nullptr;
     }
   }
 
-  // mouseleave
-  if (m_mouseLeaveTargetNode != hitNode)
+  if (fireTarget)
   {
-    if (!m_mouseLeaveTargetNode->isAncestorOf(hitNode))
-    {
-      // fire mouseleave
-      target = m_mouseLeaveTargetNode;
-      type = EUIEventType::MOUSELEAVE;
+    fireMouseEvent(fireTarget, EUIEventType::MOUSEOUT, jsButtonIndex, x, y, motionX, motionY);
+  }
+}
 
+void UIView::handleMouseLeave(
+  std::shared_ptr<VGG::LayoutNode> target,
+  int                              jsButtonIndex,
+  int                              x,
+  int                              y,
+  int                              motionX,
+  int                              motionY)
+{
+  std::shared_ptr<VGG::LayoutNode> fireTarget;
+
+  if (target)
+  {
+    if (m_mouseLeaveTargetNode)
+    {
+      if (target == m_mouseLeaveTargetNode)
+      {
+        return;
+      }
+      else
+      {
+        fireTarget = m_mouseLeaveTargetNode;
+      }
+    }
+
+    m_mouseLeaveTargetNode = target;
+  }
+  else
+  {
+    if (m_mouseLeaveTargetNode)
+    {
+      fireTarget = m_mouseLeaveTargetNode;
       m_mouseLeaveTargetNode = nullptr;
     }
   }
 
-  if (target)
+  if (fireTarget)
   {
-    fireMouseEvent(target, type, jsButtonIndex, x, y, motionX, motionY);
+    fireMouseEvent(fireTarget, EUIEventType::MOUSELEAVE, jsButtonIndex, x, y, motionX, motionY);
   }
 }
 

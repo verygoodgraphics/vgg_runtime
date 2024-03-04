@@ -325,6 +325,41 @@ sk_sp<SkShader> makeStretchPattern(const Bound& bound, const PatternStretch& p)
   return shader;
 }
 
+sk_sp<SkImageFilter> makeMotionBlurFilter(const MotionBlur& blur)
+{
+  auto result = SkRuntimeEffect::MakeForShader(SkString(R"(
+        uniform shader child;
+        uniform float radius;
+		uniform float angle;
+        half4 main(float2 coord) {
+			float2 begin = coord - float2(cos(angle), sin(angle)) * radius * 10;
+			const int loop = 30;
+			float2 end = coord + float2(cos(angle), sin(angle)) * radius * 10;
+			half4 color = vec4(0,0,0,0);
+			for(int i = 0;i < loop ; i++){
+				float2 p = mix(begin, end, float(i) / float(loop));
+				color += child.eval(p);
+		    }
+			color /= float(loop);
+            return color;
+        }
+    )"));
+  if (result.effect == nullptr)
+  {
+
+    DEBUG("Runtime Effect Failed[%s]: %s", "motion blur", result.errorText.data());
+    return nullptr;
+  }
+  SkRuntimeShaderBuilder builder(std::move(result.effect));
+  builder.uniform("angle") = SkScalar(blur.angle) * (float)M_PI / 180.f;
+  builder.uniform("radius") = blur.radius;
+  return SkImageFilters::RuntimeShader(
+    builder,
+    /*sampleRadius=*/blur.radius,
+    /*childShaderName=*/"",
+    /*input=*/nullptr);
+}
+
 sk_sp<SkShader> makeTilePattern(const Bound& bound, const PatternTile& p)
 {
   auto img = loadImage(p.guid, Scene::getResRepo());

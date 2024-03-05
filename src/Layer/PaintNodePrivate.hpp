@@ -268,23 +268,88 @@ public:
     canvas->restore();
   }
 
-  // return nullopt indicates no blur effects
-  std::optional<EBlurType> blurType(Blur& blur)
+  sk_sp<SkImageFilter> blurImageFilter()
   {
-    auto hasBlur = style.blurs.empty() ? false : style.blurs[0].isEnabled;
-    if (hasBlur)
+    sk_sp<SkImageFilter> result;
+    for (const auto& b : style.blurs)
     {
-      blur = style.blurs[0];
-      return style.blurs[0].blurType;
+      if (!b.isEnabled)
+        continue;
+      sk_sp<SkImageFilter> filter;
+      std::visit(
+        Overloaded{ [](const BackgroundBlur& blur) {},
+                    [&](const LayerBlur& blur) { filter = makeLayerBlurFilter(blur); },
+                    [&](const MotionBlur& blur) { filter = makeMotionBlurFilter(blur); },
+                    [&](const RadialBlur& blur) { filter = makeRadialBlurFilter(blur); } },
+        b.type);
+      if (result == nullptr)
+      {
+        result = filter;
+      }
+      else
+      {
+        result = SkImageFilters::Compose(result, filter);
+      }
     }
-    return std::nullopt;
+    return result;
   }
 
-  void drawBlurBgWithAlphaMask(Renderer* renderer, const VShape& path, const VShape& outlineMask)
+  sk_sp<SkImageFilter> backgroundBlurImageFilter()
   {
-    Painter    painter(renderer);
-    const auto blur = style.blurs[0];
-    VShape     res = path;
+    sk_sp<SkImageFilter> result;
+    for (const auto& b : style.blurs)
+    {
+      if (!b.isEnabled)
+        continue;
+      if (auto ptr = std::get_if<BackgroundBlur>(&b.type); ptr)
+      {
+        sk_sp<SkImageFilter> filter;
+        filter = makeBackgroundBlurFilter(*ptr);
+        if (result == nullptr)
+        {
+          result = filter;
+        }
+        else
+        {
+          result = SkImageFilters::Compose(result, filter);
+        }
+      }
+    }
+    return result;
+  }
+
+  void beginLayer(
+    Renderer*            renderer,
+    const SkPaint*       paint,
+    const VShape*        clipShape,
+    sk_sp<SkImageFilter> backdropFilter)
+  {
+    SkRect   layerRect = toSkRect(q_ptr->frameBound());
+    SkMatrix m = SkMatrix::I();
+    layerRect = m.mapRect(layerRect);
+    renderer->canvas()->save();
+    if (clipShape)
+    {
+      clipShape->clip(renderer->canvas(), SkClipOp::kIntersect);
+    }
+    renderer->canvas()->saveLayer(
+      SkCanvas::SaveLayerRec(&layerRect, paint, backdropFilter.get(), 0));
+  }
+
+  void endLayer(Renderer* renderer)
+  {
+    renderer->canvas()->restore();
+    renderer->canvas()->restore();
+  }
+
+  void drawBlurBgWithAlphaMask(
+    Renderer*            renderer,
+    const VShape&        path,
+    const VShape&        outlineMask,
+    sk_sp<SkImageFilter> bgBlurImageFilter)
+  {
+    Painter painter(renderer);
+    VShape  res = path;
     if (alphaMask && !alphaMask->contour.isEmpty())
     {
       // Op(res, alphaMask->contour, SkPathOp::kIntersect_SkPathOp, &res);
@@ -295,7 +360,8 @@ public:
       // Op(res, outlineMask, SkPathOp::kIntersect_SkPathOp, &res);
       res.op(outlineMask, EBoolOp::BO_INTERSECTION);
     }
-    painter.blurBackgroundBegin(blur.radius, blur.radius, bound, &res);
+
+    painter.blurBackgroundBegin(bgBlurImageFilter, bound, &res);
 
     // draw alpha mask
     drawMaskObjectIntoMaskLayer(renderer, 0);
@@ -336,16 +402,16 @@ public:
   }
 
   void drawBlurContentWithAlphaMask(
-    Renderer*     renderer,
-    const VShape& path,
-    const VShape& outlineMask)
+    Renderer*            renderer,
+    const VShape&        path,
+    const VShape&        outlineMask,
+    sk_sp<SkImageFilter> blurImageFilter)
   {
-    SkPaint    p;
-    auto       bb = bound;
-    const auto blur = style.blurs[0];
-    bb.extend(blur.radius * 2);
-    auto b = toSkRect(bb);
-    auto canvas = renderer->canvas();
+    SkPaint p;
+    auto    bb = bound;
+    // bb.extend(blur.radius * 2);
+    auto    b = toSkRect(bb);
+    auto    canvas = renderer->canvas();
     canvas->saveLayer(0, 0);
     canvas->clipRect(b);
     drawMaskObjectIntoMaskLayer(renderer, 0);
@@ -353,11 +419,10 @@ public:
     // the blured layer need to be drawn into the parent layer contains alpha mask
     // SrcIn blend mode is necessary
     auto    blender = SkBlender::Mode(SkBlendMode::kSrcIn);
-    painter.blurContentBegin(blur.radius, blur.radius, bound, nullptr, blender);
+    painter.blurContentBegin(blurImageFilter, bound, nullptr, blender);
     if (!outlineMask.isEmpty())
     {
       // painter.beginClip(outlineMask);
-      //
       painter.canvas()->save();
       outlineMask.clip(painter.canvas(), SkClipOp::kIntersect);
     }
@@ -367,6 +432,7 @@ public:
       // painter.endClip();
       painter.canvas()->restore();
     }
+
     painter.blurContentEnd(); // draw blur content layer into mask layer
     canvas->restore();        // draw masked layer into canvas
   }

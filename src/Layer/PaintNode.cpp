@@ -696,39 +696,30 @@ void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape&
   VGG_IMPL(PaintNode);
   Painter painter(renderer);
   // draw blur, we assume that there is only one blur style
-  Blur    blur;
-  auto    blurType = _->blurType(blur);
+  auto    bgBlurFilter = _->backgroundBlurImageFilter();
+  auto    contentBlurFilter = _->blurImageFilter();
   if (!_->alphaMask)
   {
     // 1. normal drawing
-    if (blurType)
+    VShape res = path;
+    if (!outlineMask.isEmpty())
+      res.op(outlineMask, EBoolOp::BO_INTERSECTION);
+
+    if (bgBlurFilter || contentBlurFilter)
     {
-      VShape res = path;
-      if (!outlineMask.isEmpty())
-        res.op(outlineMask, EBoolOp::BO_INTERSECTION);
-      // Op(res, outlineMask, SkPathOp::kIntersect_SkPathOp, &res);
-      if (*blurType == BT_GAUSSIAN)
-        painter.blurContentBegin(blur.radius, blur.radius, frameBound(), nullptr, 0);
-      else if (*blurType == BT_BACKGROUND)
-        painter.blurBackgroundBegin(blur.radius, blur.radius, frameBound(), &res);
-      else if (*blurType == BT_MOTION)
+      if (contentBlurFilter)
       {
-        auto     f = makeMotionFilter(blur.motionAngle, 4.f);
-        auto     b = toSkRect(bound());
-        SkMatrix m = SkMatrix::I();
-        b = m.mapRect(b);
-        SkPaint pen;
-        pen.setImageFilter(f);
-        renderer->canvas()->save();
-        res.clip(renderer->canvas(), SkClipOp::kIntersect);
-        renderer->canvas()->saveLayer(&b, &pen);
+        SkPaint paint;
+        paint.setImageFilter(contentBlurFilter);
+        _->beginLayer(renderer, &paint, &res, bgBlurFilter);
       }
-      else if (*blurType == BT_ZOOM)
-        DEBUG("Zoom blur has not been implemented");
+      else
+      {
+        _->beginLayer(renderer, nullptr, &res, bgBlurFilter);
+      }
     }
     if (!outlineMask.isEmpty())
     {
-      // painter.beginClip(outlineMask); // TODO::
       painter.canvas()->save();
       outlineMask.clip(painter.renderer()->canvas(), SkClipOp::kIntersect);
     }
@@ -738,22 +729,9 @@ void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape&
     {
       painter.canvas()->restore();
     }
-    if (blurType)
+    if (bgBlurFilter || contentBlurFilter)
     {
-      // const auto bt = blurType.value();
-      if (*blurType == BT_GAUSSIAN)
-        painter.blurContentEnd();
-      else if (*blurType == BT_BACKGROUND)
-        painter.blurBackgroundEnd();
-      else if (*blurType == BT_ZOOM)
-      {
-        DEBUG("Zoom blur has not been implemented");
-      }
-      else if (*blurType == BT_MOTION)
-      {
-        renderer->canvas()->restore();
-        renderer->canvas()->restore();
-      }
+      _->endLayer(renderer);
     }
   }
   else
@@ -761,12 +739,12 @@ void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape&
     // 1. only alphamask: alphamask layer
     // 2. alphamask + background blur: blured content layer
     // 3. alphamask + content blur: alphamask layer + content blur layer
-    if (!blurType)
+    if (!bgBlurFilter && !contentBlurFilter)
       return _->drawWithAlphaMask(renderer, path, outlineMask);
-    else if (*blurType == BT_BACKGROUND)
-      return _->drawBlurBgWithAlphaMask(renderer, path, outlineMask);
-    else if (*blurType == BT_GAUSSIAN)
-      return _->drawBlurContentWithAlphaMask(renderer, path, outlineMask);
+    else if (bgBlurFilter && !contentBlurFilter)
+      return _->drawBlurBgWithAlphaMask(renderer, path, outlineMask, bgBlurFilter);
+    else if (!bgBlurFilter && contentBlurFilter)
+      return _->drawBlurContentWithAlphaMask(renderer, path, outlineMask, contentBlurFilter);
   }
 }
 

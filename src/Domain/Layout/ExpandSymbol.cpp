@@ -353,9 +353,15 @@ void ExpandSymbol::resizeInstance(nlohmann::json& instance, nlohmann::json& mast
     return;
   }
 
+  DEBUG(
+    "ExpandSymbol::resizeInstance, set instance bounds %s to master bounds %f, %f, %f, %f",
+    instance[K_BOUNDS].dump().c_str(),
+    masterBounds.left(),
+    masterBounds.top(),
+    masterBounds.width(),
+    masterBounds.height());
   to_json(instance[K_BOUNDS], masterBounds); // use master's bounds for layout
   layoutInstance(instance, instanceBounds.size);
-  to_json(instance[K_BOUNDS], instanceBounds); // restore instance bounds
 
   // todo: handle translate if masterBounds.origin != instanceBounds.origin
 }

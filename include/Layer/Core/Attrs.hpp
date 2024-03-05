@@ -225,14 +225,34 @@ struct DropShadow
   bool           clipShadow{ true };
 };
 
+struct BackgroundBlur
+{
+  float radius;
+};
+
+struct LayerBlur
+{
+  float radius;
+};
+
+struct MotionBlur
+{
+  float radius;
+  float angle;
+};
+
+struct RadialBlur
+{
+  float radius;
+  float xCenter, yCenter;
+};
+
+using BlurType = std::variant<BackgroundBlur, LayerBlur, MotionBlur, RadialBlur>;
+
 struct Blur
 {
-  glm::vec2 center;
-  float     radius;
-  float     motionAngle;
-  float     saturation;
-  bool      isEnabled;
-  EBlurType blurType;
+  bool     isEnabled;
+  BlurType type;
 };
 
 struct Style

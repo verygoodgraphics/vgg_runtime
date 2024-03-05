@@ -416,13 +416,29 @@ inline void from_json(const json& j, Blur& x)
 {
   if (!j.is_object())
     return;
-  x.radius = getStackOptional<float>(j, "radius").value_or(0.f);
-  x.motionAngle = getStackOptional<float>(j, "motionAngle").value_or(0.f);
-  const auto v = j.value("center", std::array<float, 2>{ 0, 0 });
-  x.center = glm::vec2(v[0], v[1]);
   x.isEnabled = j.value("isEnabled", false);
-  x.blurType = j.value("type", EBlurType());
-  x.saturation = j.value("saturation", 0.f);
+  const auto blurType = j.value("type", 0);
+  const auto radius = getStackOptional<float>(j, "radius").value_or(0.f);
+  switch (blurType)
+  {
+    case BT_LAYER:
+      x.type = LayerBlur{ radius };
+      break;
+    case BT_BACKGROUND:
+      x.type = BackgroundBlur{ radius };
+      break;
+    case BT_RADIAL:
+    {
+      const auto center = j.value("center", std::array<float, 2>{ 0, 0 });
+      x.type = RadialBlur{ radius, center[0], center[1] };
+      break;
+    }
+    case BT_MOTION:
+      x.type = MotionBlur{ radius, j.value("motionAngle", 0.f) };
+      break;
+    default:
+      break;
+  }
 }
 
 inline void from_json(const json& j, Fill& x)

@@ -360,6 +360,26 @@ sk_sp<SkImageFilter> makeMotionBlurFilter(const MotionBlur& blur)
     /*input=*/nullptr);
 }
 
+sk_sp<SkImageFilter> makeRadialBlurFilter(const RadialBlur& blur)
+{
+  return 0;
+}
+sk_sp<SkImageFilter> makeLayerBlurFilter(const LayerBlur& blur)
+{
+  return SkImageFilters::Blur(
+    SkBlurMask::ConvertRadiusToSigma(blur.radius),
+    SkBlurMask::ConvertRadiusToSigma(blur.radius),
+    0);
+}
+
+sk_sp<SkImageFilter> makeBackgroundBlurFilter(const BackgroundBlur& blur)
+{
+  return SkImageFilters::Blur(
+    SkBlurMask::ConvertRadiusToSigma(blur.radius),
+    SkBlurMask::ConvertRadiusToSigma(blur.radius),
+    0);
+}
+
 sk_sp<SkShader> makeTilePattern(const Bound& bound, const PatternTile& p)
 {
   auto img = loadImage(p.guid, Scene::getResRepo());

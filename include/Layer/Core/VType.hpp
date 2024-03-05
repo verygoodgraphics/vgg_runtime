@@ -223,9 +223,9 @@ enum EKnockoutType : uint8_t
 
 enum EBlurType : uint8_t
 {
-  BT_GAUSSIAN = 0,
+  BT_LAYER = 0,
   BT_MOTION = 1,
-  BT_ZOOM = 2,
+  BT_RADIAL = 2,
   BT_BACKGROUND = 3
 };
 

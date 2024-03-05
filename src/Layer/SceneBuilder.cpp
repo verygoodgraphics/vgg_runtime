@@ -53,6 +53,11 @@ PaintNodePtr makeContourNode(VAllocator* alloc)
 class CoordinateConvert
 {
 public:
+  static void convertCoordinateSystem(float& x, float& y, const glm::mat3& totalMatrix)
+  {
+    // evaluated form of 'point = totalMatrix * glm::vec3(point, 1.f);'
+    y = -y;
+  }
   static void convertCoordinateSystem(glm::vec2& point, const glm::mat3& totalMatrix)
   {
     // evaluated form of 'point = totalMatrix * glm::vec3(point, 1.f);'
@@ -176,15 +181,23 @@ public:
     }
     for (auto& s : style.innerShadow)
     {
-      s.offsetY = -s.offsetY;
+      CoordinateConvert::convertCoordinateSystem(s.offsetX, s.offsetY, totalMatrix);
     }
     for (auto& s : style.dropShadow)
     {
-      s.offsetY = -s.offsetY;
+      CoordinateConvert::convertCoordinateSystem(s.offsetX, s.offsetY, totalMatrix);
     }
     for (auto& b : style.blurs)
     {
-      convertCoordinateSystem(b.center, totalMatrix);
+      std::visit(
+        Overloaded{
+          [](const BackgroundBlur& blur) {},
+          [](const LayerBlur& blur) {},
+          [](const MotionBlur& blur) {},
+          [&](RadialBlur& blur)
+          { CoordinateConvert::convertCoordinateSystem(blur.xCenter, blur.yCenter, totalMatrix); },
+        },
+        b.type);
     }
   }
 };

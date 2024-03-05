@@ -172,12 +172,8 @@ public:
     return m_renderer;
   }
 
-  void blurBackgroundBegin(float radiusX, float radiusY, const Bound& bound, const VShape* path)
+  void blurBackgroundBegin(sk_sp<SkImageFilter> filter, const Bound& bound, const VShape* path)
   {
-    auto filter = SkImageFilters::Blur(
-      SkBlurMask::ConvertRadiusToSigma(radiusX),
-      SkBlurMask::ConvertRadiusToSigma(radiusY),
-      nullptr);
     auto b = toSkRect(bound);
     m_renderer->canvas()->save();
     if (path)
@@ -195,17 +191,12 @@ public:
     m_renderer->canvas()->restore();
   }
   void blurContentBegin(
-    float            radiusX,
-    float            radiusY,
-    const Bound&     bound,
-    const SkPath*    path,
-    sk_sp<SkBlender> blender)
+    sk_sp<SkImageFilter> filter,
+    const Bound&         bound,
+    const SkPath*        path,
+    sk_sp<SkBlender>     blender)
   {
     SkPaint pen;
-    auto    filter = SkImageFilters::Blur(
-      SkBlurMask::ConvertRadiusToSigma(radiusX),
-      SkBlurMask::ConvertRadiusToSigma(radiusY),
-      nullptr);
     pen.setImageFilter(std::move(filter));
     // pen.setBlendMode(SkBlendMode::kSrcOver);
     auto     bb = bound;
@@ -228,14 +219,14 @@ public:
   }
 
   [[deprecated]] void drawShadow(
-    const VShape&     skPath,
+    const VShape&        skPath,
     const Bound&         bound,
     const DropShadow&    s,
     SkPaint::Style       style,
     sk_sp<SkImageFilter> imageFilter);
 
   [[deprecated]] void drawInnerShadow(
-    const VShape&     skPath,
+    const VShape&        skPath,
     const Bound&         bound,
     const InnerShadow&   s,
     SkPaint::Style       style,
@@ -255,7 +246,7 @@ public:
   }
 
   [[deprecated]] void drawFill(
-    const VShape&     skPath,
+    const VShape&        skPath,
     const Bound&         bound,
     const Fill&          f,
     sk_sp<SkImageFilter> imageFilter,
@@ -263,7 +254,7 @@ public:
     sk_sp<SkMaskFilter>  mask);
 
   [[deprecated]] void drawPathBorder(
-    const VShape&     skPath,
+    const VShape&        skPath,
     const Bound&         bound,
     const Border&        b,
     sk_sp<SkImageFilter> imageFilter,

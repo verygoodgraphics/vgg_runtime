@@ -188,35 +188,6 @@ void PaintNode::paintPass(Renderer* renderer, int zorder)
 
   _->ensureAlphaMask(renderer);
 
-  // if (!_->alphaMask)
-  // {
-  //   MaskObject mo;
-  //   auto       iter = _->alphaMaskBy.cbegin();
-  //   auto       end = _->alphaMaskBy.cend();
-  //   auto       comp = _->calcMaskObjects(renderer, iter, end, [](const auto& e) { return e.id;
-  //   }); SkPath     path; for (const auto& e : comp)
-  //   {
-  //     if (path.isEmpty())
-  //     {
-  //       path = e.first->asOutlineMask(&e.second).outlineMask;
-  //     }
-  //     else
-  //     {
-  //       Op(
-  //         path,
-  //         e.first->asOutlineMask(&e.second).outlineMask,
-  //         SkPathOp::kIntersect_SkPathOp,
-  //         &path);
-  //     }
-  //   }
-  //   if (!path.isEmpty())
-  //   {
-  //     mo.contour = std::move(path);
-  //     mo.components = std::move(comp);
-  //     _->alphaMask = std::move(mo);
-  //   }
-  // }
-
   this->paintEvent(renderer);
 }
 
@@ -695,58 +666,41 @@ void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape&
 {
   VGG_IMPL(PaintNode);
   Painter painter(renderer);
-  // draw blur, we assume that there is only one blur style
-  auto    bgBlurFilter = _->backgroundBlurImageFilter();
-  auto    contentBlurFilter = _->blurImageFilter();
-  if (!_->alphaMask)
+  auto    dropbackFilter = _->backgroundBlurImageFilter();
+  auto    layerFilter = _->blurImageFilter();
+  auto    alphaMaskImageFilter =
+    _->alphaMask ? _->alphaMask->toImagefilter(toSkRect(frameBound()), 0) : 0;
+  const auto newLayer = dropbackFilter || layerFilter || _->alphaMask;
+  VShape     res = path;
+  if (!outlineMask.isEmpty())
   {
-    // 1. normal drawing
-    VShape res = path;
-    if (!outlineMask.isEmpty())
-      res.op(outlineMask, EBoolOp::BO_INTERSECTION);
-
-    if (bgBlurFilter || contentBlurFilter)
-    {
-      if (contentBlurFilter)
-      {
-        SkPaint paint;
-        paint.setImageFilter(contentBlurFilter);
-        _->beginLayer(renderer, &paint, &res, bgBlurFilter);
-      }
-      else
-      {
-        _->beginLayer(renderer, nullptr, &res, bgBlurFilter);
-      }
-    }
-    if (!outlineMask.isEmpty())
-    {
-      painter.canvas()->save();
-      outlineMask.clip(painter.renderer()->canvas(), SkClipOp::kIntersect);
-    }
-    auto blender = SkBlender::Mode(SkBlendMode::kSrcOver);
-    onDrawStyle(painter, path, blender);
-    if (!outlineMask.isEmpty())
-    {
-      painter.canvas()->restore();
-    }
-    if (bgBlurFilter || contentBlurFilter)
-    {
-      _->endLayer(renderer);
-    }
+    res.op(outlineMask, EBoolOp::BO_INTERSECTION);
   }
-  else
+  if (!outlineMask.isEmpty())
   {
-    // 1. only alphamask: alphamask layer
-    // 2. alphamask + background blur: blured content layer
-    // 3. alphamask + content blur: alphamask layer + content blur layer
-    if (!bgBlurFilter && !contentBlurFilter)
-      return _->drawWithAlphaMask(renderer, path, outlineMask);
-    else if (bgBlurFilter && !contentBlurFilter)
-      return _->drawBlurBgWithAlphaMask(renderer, path, outlineMask, bgBlurFilter);
-    else if (!bgBlurFilter && contentBlurFilter)
-      return _->drawBlurContentWithAlphaMask(renderer, path, outlineMask, contentBlurFilter);
-    else
-      return _->drawBlurContentWithAlphaMask(renderer, path, outlineMask, contentBlurFilter);
+    painter.canvas()->save();
+    outlineMask.clip(painter.renderer()->canvas(), SkClipOp::kIntersect);
+  }
+  if (newLayer)
+  {
+    if (_->alphaMask)
+    {
+      const auto rect = toSkRect(frameBound());
+      layerFilter = _->alphaMask->maskWith(rect, layerFilter, 0);
+    }
+    SkPaint layerPaint;
+    layerPaint.setAntiAlias(true);
+    layerPaint.setImageFilter(layerFilter);
+    _->beginLayer(renderer, &layerPaint, &res, dropbackFilter);
+  }
+  onDrawStyle(painter, path, 0);
+  if (newLayer)
+  {
+    _->endLayer(renderer);
+  }
+  if (!outlineMask.isEmpty())
+  {
+    painter.canvas()->restore();
   }
 }
 

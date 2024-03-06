@@ -29,34 +29,31 @@
 #include "Layer/Core/Transform.hpp"
 
 #include <core/SkBlender.h>
+#include <core/SkBlurTypes.h>
 #include <core/SkColor.h>
+#include <core/SkImage.h>
+#include <core/SkMaskFilter.h>
 #include <core/SkMatrix.h>
 #include <core/SkPaint.h>
+#include <core/SkSamplingOptions.h>
 #include <encode/SkPngEncoder.h>
 #include <core/SkBlendMode.h>
 #include <core/SkCanvas.h>
 #include <core/SkSurface.h>
 #include <core/SkImageFilter.h>
+#include <core/SkBBHFactory.h>
+#include <core/SkPictureRecorder.h>
+#include <effects/SkShaderMaskFilter.h>
+#include <effects/SkBlurMaskFilter.h>
+
+#include <src/shaders/SkPictureShader.h>
 
 namespace VGG::layer
 {
 
-template<typename F>
-Bound calcMaskAreaIntersection(const Bound& pruneBound, PaintNode* obj, F&& f)
+class MaskObject
 {
-  Bound bound;
-  while (auto m = f())
-  {
-    const auto t = m->mapTransform(obj);
-    const auto transformedBound = m->getBound() * t;
-    bound.intersectWith(transformedBound);
-    // auto outlineMask = m->asOutlineMask(&t);
-  }
-  return bound;
-}
-
-struct MaskObject
-{
+public:
   struct MaskData
   {
     PaintNode*       mask{ nullptr };
@@ -69,8 +66,54 @@ struct MaskObject
     {
     }
   };
-  std::vector<MaskData> components;
-  VShape                contour;
+  std::vector<MaskData>          components;
+  std::optional<sk_sp<SkShader>> shader;
+
+  sk_sp<SkImageFilter> toImagefilter(const SkRect& b, const SkMatrix* mat)
+  {
+    ensureMaskShader(b, mat);
+    return SkImageFilters::Shader(*shader);
+  }
+
+  sk_sp<SkImageFilter> maskWith(const SkRect& b, sk_sp<SkImageFilter> input, const SkMatrix* mat)
+  {
+    return SkImageFilters::Blend(SkBlendMode::kSrcIn, toImagefilter(b, mat), input, b);
+  }
+
+  sk_sp<SkMaskFilter> toMaskFilter(const SkRect& b, const SkMatrix* mat)
+  {
+    ensureMaskShader(b, mat);
+    return SkShaderMaskFilter::Make(*shader);
+  }
+
+  void ensureMaskShader(const SkRect& b, const SkMatrix* mat)
+  {
+    if (!shader)
+    {
+      Renderer          alphaMaskRender;
+      SkPictureRecorder rec;
+      auto              rt = SkRTreeFactory();
+      auto              canvas = rec.beginRecording(b, &rt);
+      alphaMaskRender.setCanvas(canvas);
+      for (const auto& p : components)
+      {
+        auto skm = toSkMatrix(p.transform.matrix());
+        canvas->save();
+        canvas->concat(skm);
+        p.mask->onDrawAsAlphaMask(&alphaMaskRender, 0);
+        canvas->restore();
+      }
+      auto maskShader = SkPictureShader::Make(
+        rec.finishRecordingAsPicture(),
+        SkTileMode::kClamp,
+        SkTileMode::kClamp,
+        SkFilterMode::kNearest,
+        mat,
+        &b);
+      ASSERT(maskShader);
+      shader = maskShader;
+    }
+  }
 };
 
 struct LayerContextGuard
@@ -194,11 +237,6 @@ public:
       else
       {
         path.op(e.mask->asVisualShape(&e.transform), EBoolOp::BO_INTERSECTION);
-        // Op(
-        //   path,
-        //   e.mask->asOutlineMask(&e.transform),
-        //   SkPathOp::kIntersect_SkPathOp,
-        //   &path);
       }
     }
     if (!path.isEmpty())
@@ -232,40 +270,6 @@ public:
     }
     Painter painter(renderer);
     onDrawStyleImpl(painter, *path, blender);
-  }
-
-  void drawWithAlphaMask(Renderer* renderer, const VShape& path, const VShape& outlineMask)
-  {
-    SkPaint p;
-    auto    b = toSkRect(bound);
-    p.setBlendMode(SkBlendMode::kSrcOver);
-    auto canvas = renderer->canvas();
-    canvas->saveLayer(0, 0);
-    canvas->clipRect(b);
-    path.clip(canvas, SkClipOp::kIntersect);
-    // canvas->clipPath(path);
-    //  clip with path
-    Painter painter(renderer);
-    drawMaskObjectIntoMaskLayer(renderer, nullptr);
-    if (!outlineMask.isEmpty())
-    {
-      // painter.beginClip(outlineMask);
-      painter.canvas()->save();
-      outlineMask.clip(painter.canvas(), SkClipOp::kIntersect);
-    }
-    SkPaint objectLayerPaint;
-    objectLayerPaint.setBlendMode(SkBlendMode::kSrcIn);
-    canvas->saveLayer(0, &objectLayerPaint);
-    canvas->clipRect(b);
-    auto blender = SkBlender::Mode(SkBlendMode::kSrcOver);
-    onDrawStyleImpl(painter, path, blender);
-    canvas->restore();
-    if (!outlineMask.isEmpty())
-    {
-      painter.canvas()->restore();
-      // painter.endClip();
-    }
-    canvas->restore();
   }
 
   sk_sp<SkImageFilter> blurImageFilter()
@@ -341,160 +345,6 @@ public:
   {
     renderer->canvas()->restore();
     renderer->canvas()->restore();
-  }
-
-  void drawBlurBgWithAlphaMask(
-    Renderer*            renderer,
-    const VShape&        path,
-    const VShape&        outlineMask,
-    sk_sp<SkImageFilter> bgBlurImageFilter)
-  {
-    Painter painter(renderer);
-    VShape  res = path;
-    if (alphaMask && !alphaMask->contour.isEmpty())
-    {
-      // Op(res, alphaMask->contour, SkPathOp::kIntersect_SkPathOp, &res);
-      res.op(alphaMask->contour, EBoolOp::BO_INTERSECTION);
-    }
-    if (!outlineMask.isEmpty())
-    {
-      // Op(res, outlineMask, SkPathOp::kIntersect_SkPathOp, &res);
-      res.op(outlineMask, EBoolOp::BO_INTERSECTION);
-    }
-
-    painter.blurBackgroundBegin(bgBlurImageFilter, bound, &res);
-
-    // draw alpha mask
-    drawMaskObjectIntoMaskLayer(renderer, 0);
-
-    // Objects need to be drawn with SrcOver into layer contains blured background
-    // and mask them by dstColor.a
-
-    auto blender = getOrCreateBlender("maskedObject", g_styleMaskBlenderShader);
-    if (!outlineMask.isEmpty())
-    {
-      // painter.beginClip(outlineMask);
-      painter.canvas()->save();
-      outlineMask.clip(painter.canvas(), SkClipOp::kIntersect);
-    }
-    onDrawStyleImpl(painter, path, blender);
-    if (!outlineMask.isEmpty())
-    {
-      // painter.endClip();
-      painter.canvas()->restore();
-    }
-    painter.blurBackgroundEnd();
-  }
-
-  void drawMaskObjectIntoMaskLayer(Renderer* renderer, sk_sp<SkBlender> blender)
-  {
-    if (alphaMask)
-    {
-      auto canvas = renderer->canvas();
-      for (const auto& p : alphaMask->components)
-      {
-        auto skm = toSkMatrix(p.transform.matrix());
-        canvas->save();
-        canvas->concat(skm);
-        p.mask->onDrawAsAlphaMask(renderer, p.blender);
-        canvas->restore();
-      }
-    }
-  }
-
-  void drawBlurContentWithAlphaMask(
-    Renderer*            renderer,
-    const VShape&        path,
-    const VShape&        outlineMask,
-    sk_sp<SkImageFilter> blurImageFilter)
-  {
-    SkPaint p;
-    auto    bb = bound;
-    // bb.extend(blur.radius * 2);
-    auto    b = toSkRect(bb);
-    auto    canvas = renderer->canvas();
-    canvas->saveLayer(0, 0);
-    canvas->clipRect(b);
-    drawMaskObjectIntoMaskLayer(renderer, 0);
-    Painter painter(renderer);
-    // the blured layer need to be drawn into the parent layer contains alpha mask
-    // SrcIn blend mode is necessary
-    auto    blender = SkBlender::Mode(SkBlendMode::kSrcIn);
-    painter.blurContentBegin(blurImageFilter, bound, nullptr, blender);
-    if (!outlineMask.isEmpty())
-    {
-      // painter.beginClip(outlineMask);
-      painter.canvas()->save();
-      outlineMask.clip(painter.canvas(), SkClipOp::kIntersect);
-    }
-    onDrawStyleImpl(painter, path, SkBlender::Mode(SkBlendMode::kSrcOver));
-    if (!outlineMask.isEmpty())
-    {
-      // painter.endClip();
-      painter.canvas()->restore();
-    }
-
-    painter.blurContentEnd(); // draw blur content layer into mask layer
-    canvas->restore();        // draw masked layer into canvas
-  }
-
-  void drawRawStyleImplLegacy(Painter& painter, const VShape& skPath, sk_sp<SkBlender> blender)
-  {
-    auto filled = false;
-    for (const auto& f : style.fills)
-    {
-      if (f.isEnabled)
-      {
-        filled = true;
-        break;
-      }
-    }
-    {
-      if (filled)
-      {
-        // transparent fill clip out the shadow
-        // painter.beginClip(skPath, SkClipOp::kDifference);
-        painter.canvas()->save();
-        skPath.clip(painter.canvas(), SkClipOp::kDifference);
-      }
-      for (const auto& s : style.dropShadow) // simplified into one shadow
-      {
-        if (!s.isEnabled)
-          continue;
-        if (filled)
-          painter.drawShadow(skPath, bound, s, SkPaint::kFill_Style, nullptr);
-
-        // for (const auto& b : style.borders)
-        // {
-        //   if (!b.isEnabled)
-        //     continue;
-        //   painter.drawShadow(skPath, bound, s, SkPaint::kStroke_Style, nullptr);
-        //   break;
-        // }
-      }
-      if (filled)
-      {
-        painter.canvas()->restore();
-      }
-    }
-
-    q_ptr->onDrawFill(painter.renderer(), blender, 0, skPath);
-    for (const auto& b : style.borders)
-    {
-      if (!b.isEnabled)
-        continue;
-      painter.drawPathBorder(skPath, bound, b, 0, blender);
-    }
-
-    painter.canvas()->save();
-    skPath.clip(painter.canvas(), SkClipOp::kIntersect);
-    for (const auto& s : style.innerShadow)
-    {
-      if (!s.isEnabled)
-        continue;
-      painter.drawInnerShadow(skPath, bound, s, SkPaint::kFill_Style, nullptr);
-    }
-    painter.canvas()->restore();
   }
 
   void onDrawStyleImpl(Painter& painter, const VShape& skPath, sk_sp<SkBlender> blender)

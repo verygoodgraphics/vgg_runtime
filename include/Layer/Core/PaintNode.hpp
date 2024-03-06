@@ -100,6 +100,7 @@ protected:
 protected:
   friend class DocBuilder;
   friend class Renderer;
+  friend class MaskObject;
 
 private:
   PaintNode(VRefCnt* cnt, const std::string& name, std::unique_ptr<PaintNode__pImpl> impl);

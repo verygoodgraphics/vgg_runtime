@@ -87,6 +87,11 @@ public:
     return m_enableDrawDebugPath;
   }
 
+  void setCanvas(SkCanvas* canvas)
+  {
+    m_canvas = canvas;
+  }
+
   SkCanvas* canvas()
   {
     return m_canvas;
@@ -95,6 +100,7 @@ public:
 private:
   friend class Frame;
   friend class Frame__pImpl;
+  friend class MaskObject;
   void draw(SkCanvas* canvas, layer::PaintNode* root);
 };
 

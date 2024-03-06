@@ -30,12 +30,17 @@
 namespace VGG::layer
 {
 
-sk_sp<SkColorFilter>   makeColorFilter(const ImageFilter& imageFilter);
-sk_sp<SkShader>        makeFitPattern(const Bound& bound, const PatternFit& p);
-sk_sp<SkShader>        makeFillPattern(const Bound& bound, const PatternFill& p);
-sk_sp<SkShader>        makeStretchPattern(const Bound& bound, const PatternStretch& p);
-sk_sp<SkShader>        makeTilePattern(const Bound& bound, const PatternTile& p);
-sk_sp<SkShader>        makeGradientLinear(const Bound& bound, const GradientLinear& g);
+sk_sp<SkColorFilter> makeColorFilter(const ImageFilter& imageFilter);
+sk_sp<SkShader>      makeFitPattern(const Bound& bound, const PatternFit& p);
+sk_sp<SkShader>      makeFillPattern(const Bound& bound, const PatternFill& p);
+sk_sp<SkShader>      makeStretchPattern(const Bound& bound, const PatternStretch& p);
+sk_sp<SkShader>      makeTilePattern(const Bound& bound, const PatternTile& p);
+sk_sp<SkShader>      makeGradientLinear(const Bound& bound, const GradientLinear& g);
+
+sk_sp<SkImageFilter>   makeMotionBlurFilter(const MotionBlur& blur);
+sk_sp<SkImageFilter>   makeRadialBlurFilter(const RadialBlur& blur, const Bound& bound);
+sk_sp<SkImageFilter>   makeLayerBlurFilter(const LayerBlur& blur);
+sk_sp<SkImageFilter>   makeBackgroundBlurFilter(const BackgroundBlur& blur);
 sk_sp<SkRuntimeEffect> getOrCreateEffect(EffectCacheKey key, const char* sksl);
 sk_sp<SkBlender>       getOrCreateBlender(EffectCacheKey name, const char* sksl);
 
@@ -233,11 +238,6 @@ inline sk_sp<SkShader> makeGradientShader(const Bound& bound, const Gradient& gr
     gradient.instance);
   return shader;
 }
-
-sk_sp<SkImageFilter> makeMotionBlurFilter(const MotionBlur& blur);
-sk_sp<SkImageFilter> makeRadialBlurFilter(const RadialBlur& blur);
-sk_sp<SkImageFilter> makeLayerBlurFilter(const LayerBlur& blur);
-sk_sp<SkImageFilter> makeBackgroundBlurFilter(const BackgroundBlur& blur);
 
 inline void populateSkPaint(
   const FillType&       fillType,

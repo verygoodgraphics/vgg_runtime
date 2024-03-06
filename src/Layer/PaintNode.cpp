@@ -745,6 +745,8 @@ void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape&
       return _->drawBlurBgWithAlphaMask(renderer, path, outlineMask, bgBlurFilter);
     else if (!bgBlurFilter && contentBlurFilter)
       return _->drawBlurContentWithAlphaMask(renderer, path, outlineMask, contentBlurFilter);
+    else
+      return _->drawBlurContentWithAlphaMask(renderer, path, outlineMask, contentBlurFilter);
   }
 }
 

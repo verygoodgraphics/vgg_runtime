@@ -328,44 +328,87 @@ sk_sp<SkShader> makeStretchPattern(const Bound& bound, const PatternStretch& p)
 sk_sp<SkImageFilter> makeMotionBlurFilter(const MotionBlur& blur)
 {
   auto result = SkRuntimeEffect::MakeForShader(SkString(R"(
-        uniform shader child;
-        uniform float radius;
-		uniform float angle;
-        half4 main(float2 coord) {
-			float2 begin = coord - float2(cos(angle), sin(angle)) * radius * 10;
-			const int loop = 30;
-			float2 end = coord + float2(cos(angle), sin(angle)) * radius * 10;
-			half4 color = vec4(0,0,0,0);
-			for(int i = 0;i < loop ; i++){
-				float2 p = mix(begin, end, float(i) / float(loop));
-				color += child.eval(p);
-		    }
-			color /= float(loop);
-            return color;
-        }
+uniform shader child;
+uniform float radius;
+uniform float angle;
+
+const float HASHSCALE1 = 443.8975;
+const int SAMPLE = 10;
+float hash13(vec3 p3)
+{
+    p3 = fract(p3 * HASHSCALE1);
+    p3 += dot(p3, p3.yzx + 19.19);
+    return fract((p3.x + p3.y) * p3.z);
+}
+
+half4 main(float2 coord){
+    half4 color = vec4(0, 0, 0, 0);
+    float2 d = float2(cos(angle), sin(angle));
+    for(int i = 0;i < SAMPLE ; i++){
+        float rnd = hash13(vec3(coord.x, coord.y, float(i)));
+        float t = (float(i) + rnd) / float(SAMPLE); 
+        t = (t * 2.0 - 1.0) * radius;
+        float2 p = coord + d * t;
+        color += child.eval(p);
+    }
+    color /= float(SAMPLE);
+    return color;
+}
     )"));
   if (result.effect == nullptr)
   {
-
     DEBUG("Runtime Effect Failed[%s]: %s", "motion blur", result.errorText.data());
     return nullptr;
   }
   SkRuntimeShaderBuilder builder(std::move(result.effect));
   builder.uniform("angle") = SkScalar(blur.angle) * (float)M_PI / 180.f;
   builder.uniform("radius") = blur.radius;
-  return SkImageFilters::RuntimeShader(
-    builder,
-    /*sampleRadius=*/blur.radius,
-    /*childShaderName=*/"",
-    /*input=*/nullptr);
+  return SkImageFilters::RuntimeShader(builder, blur.radius, "", nullptr);
 }
 
-sk_sp<SkImageFilter> makeRadialBlurFilter(const RadialBlur& blur)
+sk_sp<SkImageFilter> makeRadialBlurFilter(const RadialBlur& blur, const Bound& bound)
 {
-  return 0;
+  auto result = SkRuntimeEffect::MakeForShader(SkString(R"(
+uniform shader child;
+uniform float radius;
+uniform float2 center;
+
+const float HASHSCALE1 = 443.8975;
+const int SAMPLE = 10;
+float hash13(vec3 p3)
+{
+    p3 = fract(p3 * HASHSCALE1);
+    p3 += dot(p3, p3.yzx + 19.19);
+    return fract((p3.x + p3.y) * p3.z);
+}
+
+half4 main(float2 coord){
+    half4 color = vec4(0, 0, 0, 0);
+    float2 d = normalize(center - coord);
+    for(int i = 0;i < SAMPLE ; i++){
+        float rnd = hash13(vec3(coord.x, coord.y, float(i)));
+        float t = (float(i) + rnd) / float(SAMPLE); 
+        t = (t * 2.0 - 1.0) * radius;
+        float2 p = coord + d * t;
+        color += child.eval(p);
+    }
+    color /= float(SAMPLE);
+    return color;
+}
+)"));
+  if (result.effect == nullptr)
+  {
+    DEBUG("Runtime Effect Failed[%s]: %s", "motion blur", result.errorText.data());
+    return nullptr;
+  }
+  SkRuntimeShaderBuilder builder(std::move(result.effect));
+  builder.uniform("radius") = blur.radius;
+  builder.uniform("center") = SkV2{ blur.xCenter * bound.width(), blur.yCenter * bound.height() };
+  return SkImageFilters::RuntimeShader(builder, blur.radius, "", nullptr);
 }
 sk_sp<SkImageFilter> makeLayerBlurFilter(const LayerBlur& blur)
 {
+
   return SkImageFilters::Blur(
     SkBlurMask::ConvertRadiusToSigma(blur.radius),
     SkBlurMask::ConvertRadiusToSigma(blur.radius),

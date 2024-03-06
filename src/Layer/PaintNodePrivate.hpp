@@ -280,7 +280,8 @@ public:
         Overloaded{ [](const BackgroundBlur& blur) {},
                     [&](const LayerBlur& blur) { filter = makeLayerBlurFilter(blur); },
                     [&](const MotionBlur& blur) { filter = makeMotionBlurFilter(blur); },
-                    [&](const RadialBlur& blur) { filter = makeRadialBlurFilter(blur); } },
+                    [&, this](const RadialBlur& blur)
+                    { filter = makeRadialBlurFilter(blur, q_ptr->frameBound()); } },
         b.type);
       if (result == nullptr)
       {

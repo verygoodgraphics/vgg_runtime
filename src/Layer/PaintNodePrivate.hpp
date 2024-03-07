@@ -64,9 +64,13 @@ public:
     return m_displayList;
   }
 
-  sk_sp<SkImageFilter> asImageFilter() const
+  sk_sp<SkImageFilter> asImageFilter()
   {
-    return SkImageFilters::Shader(m_displayList);
+    if (!m_imageFilter)
+    {
+      m_imageFilter = SkImageFilters::Shader(m_displayList);
+    }
+    return m_imageFilter;
   }
 
 private:
@@ -74,8 +78,10 @@ private:
   DisplayList(sk_sp<SkPictureShader> shader)
     : m_displayList(std::move(shader))
   {
+    ASSERT(m_displayList);
   }
   sk_sp<SkPictureShader> m_displayList;
+  sk_sp<SkImageFilter>   m_imageFilter;
 };
 
 class DisplayListRecorder
@@ -475,6 +481,7 @@ public:
       }
     }
 
+    ensureDisplayList(painter, skPath, blender);
     for (const auto& s : style.dropShadow)
     {
       if (!s.isEnabled)
@@ -497,13 +504,19 @@ public:
         {
           auto dropShadowFilter = makeDropShadowImageFilter(s, q_ptr->frameBound(), true, 0);
           p.setImageFilter(dropShadowFilter);
+          // auto imageFilter = styleDisplayList->asImageFilter();
+          // ASSERT(imageFilter);
+          // auto output = SkImageFilters::Compose(imageFilter, dropShadowFilter);
           ss->draw(painter.canvas(), p);
         }
         else
         {
           auto dropShadowFilter = makeDropShadowImageFilter(s, q_ptr->frameBound(), false, 0);
           p.setImageFilter(dropShadowFilter);
-          skPath.draw(painter.canvas(), p);
+          p.setAntiAlias(true);
+          // p.setShader(styleDisplayList->asShader());
+          // painter.canvas()->drawPaint(p);
+          painter.canvas()->drawPicture(styleDisplayList->picture(), 0, &p);
         }
       }
       if (border)
@@ -518,7 +531,7 @@ public:
       }
       g.restore([&]() { painter.canvas()->restore(); });
     }
-    ensureDisplayList(painter, skPath, blender);
+
     styleDisplayList->playback(painter.renderer());
     if (filled)
     {
@@ -529,7 +542,8 @@ public:
         auto innerShadowFilter = makeInnerShadowImageFilter(s, q_ptr->frameBound(), true, false, 0);
         SkPaint p;
         p.setImageFilter(innerShadowFilter);
-        p.setAntiAlias(true);
+        // p.setAntiAlias(true);
+        //  painter.canvas()->drawPaint(p);
         skPath.draw(painter.canvas(), p);
       }
     }

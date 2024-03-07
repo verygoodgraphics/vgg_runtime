@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "Layer/Core/Transform.hpp"
+#include "Layer/SkSL.hpp"
 #include "VSkia.hpp"
 #include "Painter.hpp"
 #include "PathGenerator.hpp"
@@ -681,17 +682,31 @@ void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape&
     painter.canvas()->save();
     outlineMask.clip(painter.renderer()->canvas(), SkClipOp::kIntersect);
   }
+
   if (newLayer)
   {
+    const SkRect layerLogicalBound = toSkRect(frameBound());
+    SkRect       layerVisualBound =
+      layerFilter ? layerFilter.get()->computeFastBounds(layerLogicalBound) : layerLogicalBound;
+
     if (_->alphaMask)
     {
-      const auto rect = toSkRect(frameBound());
-      layerFilter = _->alphaMask->maskWith(rect, layerFilter, 0);
+      layerFilter = _->alphaMask->maskWith(layerVisualBound, layerFilter, 0);
+    }
+    _->ensureDisplayList(painter, path, 0);
+    if (dropbackFilter)
+    {
+      if (auto df = _->styleDisplayList->asImageFilter(); df)
+      {
+        auto blender = getOrCreateBlender("maskOut", g_maskOutBlender);
+        dropbackFilter = SkImageFilters::Blend(blender, df, dropbackFilter, layerLogicalBound);
+      }
     }
     SkPaint layerPaint;
     layerPaint.setAntiAlias(true);
     layerPaint.setImageFilter(layerFilter);
-    _->beginLayer(renderer, &layerPaint, &res, dropbackFilter);
+    VShape clipShape(layerVisualBound);
+    _->beginLayer(renderer, &layerPaint, &clipShape, dropbackFilter);
   }
   onDrawStyle(painter, path, 0);
   if (newLayer)

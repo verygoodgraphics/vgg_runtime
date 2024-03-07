@@ -54,11 +54,8 @@ public:
   };
 
 private:
-  bool                 m_antiAlias{ true };
-  Renderer*            m_renderer{ nullptr };
-  sk_sp<SkImageFilter> m_imageFilter;
-  sk_sp<SkBlender>     m_blender;
-  sk_sp<SkMaskFilter>  m_maskFilter;
+  bool      m_antiAlias{ true };
+  Renderer* m_renderer{ nullptr };
 
   static SkPaint::Style toSkPaintStyle(EStyle style)
   {
@@ -76,74 +73,6 @@ private:
     return SkPaint::kStroke_Style;
   }
 
-  template<typename Primitive>
-  void drawFill(const Primitive& primitive, const SkRect& bound, const Fill& f)
-  {
-    SkPaint fillPen;
-    fillPen.setStyle(SkPaint::kFill_Style);
-    fillPen.setAntiAlias(m_antiAlias);
-    fillPen.setBlender(m_blender);
-    fillPen.setImageFilter(m_imageFilter);
-    fillPen.setMaskFilter(m_maskFilter);
-    populateSkPaint(f.type, f.contextSettings, bound, fillPen);
-    primitive.draw(m_renderer->canvas(), fillPen);
-  }
-
-  template<typename Primitive>
-  void drawBorder(const Primitive& primitive, const SkRect& bound, const Border& b)
-  {
-    SkPaint strokePen;
-    strokePen.setAntiAlias(m_antiAlias);
-    strokePen.setBlender(m_blender);
-    strokePen.setImageFilter(m_imageFilter);
-    populateSkPaint(b, bound, strokePen);
-    bool  inCenter = true;
-    float strokeWidth = b.thickness;
-    if (b.position == PP_INSIDE && primitive.isClosed())
-    {
-      // inside
-      strokeWidth = 2.f * b.thickness;
-      m_renderer->canvas()->save();
-      primitive.clip(m_renderer->canvas(), SkClipOp::kIntersect);
-      inCenter = false;
-    }
-    else if (b.position == PP_OUTSIDE && primitive.isClosed())
-    {
-      // outside
-      strokeWidth = 2.f * b.thickness;
-      m_renderer->canvas()->save();
-      primitive.clip(m_renderer->canvas(), SkClipOp::kDifference);
-      inCenter = false;
-    }
-    strokePen.setStrokeWidth(strokeWidth);
-    primitive.draw(m_renderer->canvas(), strokePen);
-    if (!inCenter)
-    {
-      m_renderer->canvas()->restore();
-    }
-  }
-
-  template<typename Primitive>
-  void drawOuterShadow(
-    const Primitive   primitive,
-    const SkRect&     bound,
-    const DropShadow& s,
-    EStyle            style)
-  {
-    SkPaint pen;
-    pen.setAntiAlias(m_antiAlias);
-    auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
-    pen.setImageFilter(
-      SkImageFilters::DropShadowOnly(s.offsetX, -s.offsetY, sigma, sigma, s.color, nullptr));
-    m_renderer->canvas()->saveLayer(nullptr, &pen);
-    if (s.spread > 0)
-      m_renderer->canvas()->scale(1 + s.spread / 100.0, 1 + s.spread / 100.0);
-    SkPaint fillPen;
-    fillPen.setStyle(toSkPaintStyle(style));
-    primitive.draw(m_renderer->canvas(), fillPen);
-    m_renderer->canvas()->restore();
-  }
-
 public:
   Painter(Renderer* renderer)
     : m_renderer(renderer)
@@ -156,9 +85,6 @@ public:
     sk_sp<SkMaskFilter>  maskFilter,
     sk_sp<SkBlender>     blender)
     : m_renderer(renderer)
-    , m_imageFilter(std::move(imageFilter))
-    , m_blender(std::move(blender))
-    , m_maskFilter(std::move(maskFilter))
   {
   }
 

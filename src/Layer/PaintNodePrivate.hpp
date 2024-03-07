@@ -45,8 +45,85 @@
 #include <core/SkPictureRecorder.h>
 #include <effects/SkShaderMaskFilter.h>
 #include <effects/SkBlurMaskFilter.h>
-
 #include <src/shaders/SkPictureShader.h>
+
+class DisplayList
+{
+public:
+  SkPicture* picture() const
+  {
+    return m_displayList ? m_displayList->picture().get() : nullptr;
+  }
+  void playback(Renderer* renderer)
+  {
+    renderer->canvas()->drawPicture(m_displayList->picture());
+  }
+
+  sk_sp<SkShader> asShader() const
+  {
+    return m_displayList;
+  }
+
+  sk_sp<SkImageFilter> asImageFilter() const
+  {
+    return SkImageFilters::Shader(m_displayList);
+  }
+
+private:
+  friend class DisplayListRecorder;
+  DisplayList(sk_sp<SkPictureShader> shader)
+    : m_displayList(std::move(shader))
+  {
+  }
+  sk_sp<SkPictureShader> m_displayList;
+};
+
+class DisplayListRecorder
+{
+public:
+  DisplayListRecorder() = default;
+  DisplayListRecorder(const DisplayListRecorder&) = delete;
+  DisplayListRecorder& operator=(const DisplayListRecorder&) = delete;
+  Renderer*            beginRecording(const SkRect& b, const SkMatrix& matrix)
+  {
+    m_bound = b;
+    m_matrix = matrix;
+    if (!m_rec)
+    {
+      m_rec = std::make_unique<SkPictureRecorder>();
+      auto rt = SkRTreeFactory();
+      auto canvas = m_rec->beginRecording(b, &rt);
+      if (!m_renderer)
+      {
+        m_renderer = std::make_unique<Renderer>();
+      }
+      m_renderer->setCanvas(canvas);
+    }
+    return renderer();
+  }
+
+  Renderer* renderer() const
+  {
+    return m_renderer.get();
+  }
+  DisplayList finishRecording()
+  {
+    auto maskShader = sk_make_sp<SkPictureShader>(
+      m_rec->finishRecordingAsPicture(),
+      SkTileMode::kClamp,
+      SkTileMode::kClamp,
+      SkFilterMode::kNearest,
+      &m_bound);
+    ASSERT(maskShader);
+    return DisplayList(maskShader);
+  }
+
+private:
+  SkMatrix                           m_matrix;
+  SkRect                             m_bound;
+  std::unique_ptr<Renderer>          m_renderer;
+  std::unique_ptr<SkPictureRecorder> m_rec;
+};
 
 namespace VGG::layer
 {
@@ -182,19 +259,37 @@ public:
   EObjectType              type;
   bool                     visible{ true };
 
-  ContourData               contour;
-  PaintOption               paintOption;
-  ContourOption             maskOption;
-  // std::optional<SkPath>     path;
-  std::optional<VShape>     path;
-  std::optional<VShape>     mask;
-  std::optional<MaskObject> alphaMask;
-  LayerContextGuard         layerContextGuard;
+  ContourData                contour;
+  PaintOption                paintOption;
+  ContourOption              maskOption;
+  std::optional<DisplayList> styleDisplayList; // fill + border
+  std::optional<VShape>      path;
+  std::optional<VShape>      mask;
+  std::optional<MaskObject>  alphaMask;
+  LayerContextGuard          layerContextGuard;
 
   PaintNode__pImpl(PaintNode* api, EObjectType type)
     : q_ptr(api)
     , type(type)
   {
+  }
+
+  void ensureDisplayList(Painter& painter, const VShape& shape, sk_sp<SkBlender> blender)
+  {
+    if (!styleDisplayList)
+    {
+      DisplayListRecorder rec;
+      auto    recorder = rec.beginRecording(toSkRect(q_ptr->frameBound()), SkMatrix::I());
+      Painter p(recorder);
+      q_ptr->onDrawFill(recorder, blender, 0, shape);
+      for (const auto& b : style.borders)
+      {
+        if (!b.isEnabled || b.thickness <= 0)
+          continue;
+        p.drawPathBorder(shape, bound, b, 0, blender);
+      }
+      styleDisplayList = rec.finishRecording();
+    }
   }
 
   void ensureAlphaMask(Renderer* renderer)
@@ -423,13 +518,8 @@ public:
       }
       g.restore([&]() { painter.canvas()->restore(); });
     }
-    q_ptr->onDrawFill(painter.renderer(), blender, 0, skPath);
-    for (const auto& b : style.borders)
-    {
-      if (!b.isEnabled || b.thickness <= 0)
-        continue;
-      painter.drawPathBorder(skPath, bound, b, 0, blender);
-    }
+    ensureDisplayList(painter, skPath, blender);
+    styleDisplayList->playback(painter.renderer());
     if (filled)
     {
       for (const auto& s : style.innerShadow)

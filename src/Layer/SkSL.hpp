@@ -80,6 +80,15 @@ inline const char* g_styleMaskBlenderShader = R"(
     }
 )";
 
+inline const char* g_maskOutBlender = R"(
+    vec4 main(vec4 srcColor, vec4 dstColor){
+        if(dstColor.a > 0.0){
+            return srcColor;
+        } 
+		return vec4(0.0, 0.0, 0.0, 0.0);
+    }
+)";
+
 inline const char* g_blendModeLinearBurn = R"(
     vec4 main(vec4 srcColor, vec4 dstColor){
         return srcColor.rgba + dstColor.rgba - vec4(1,1,1,1);

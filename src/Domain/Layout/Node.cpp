@@ -854,6 +854,11 @@ const nlohmann::json* LayoutNode::model() const
 
 bool LayoutNode::shouldSkip()
 {
+  if (m_autoLayout && m_autoLayout->isEnabled())
+  {
+    return false;
+  }
+
   // parent adjust content is skip group or boolean group && (group || (boolean group))
   if (auto parent = m_parent.lock();
       parent &&

@@ -16,7 +16,6 @@
 #include "Painter.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VType.hpp"
-#include "Layer/PathGenerator.hpp"
 #include "VSkia.hpp"
 #include <core/SkBlendMode.h>
 #include <core/SkCanvas.h>
@@ -28,13 +27,7 @@
 #include <string>
 
 using namespace VGG;
-
 using namespace VGG::layer;
-
-sk_sp<SkShader> getGradientShader(const Gradient& g, const Bound& bound)
-{
-  return makeGradientShader(bound, g);
-}
 
 void Painter::drawPathBorder(
   const VShape&        skPath,
@@ -102,26 +95,6 @@ void Painter::drawPathBorder(
         textPaint);
     }
   }
-}
-
-void Painter::drawShadow(
-  const VShape&        skPath,
-  const Bound&         bound,
-  const DropShadow&    s,
-  SkPaint::Style       style,
-  sk_sp<SkImageFilter> imageFilter)
-{
-  SkPaint pen;
-  pen.setAntiAlias(m_antiAlias);
-  auto sigma = SkBlurMask::ConvertRadiusToSigma(s.blur);
-  pen.setImageFilter(
-    SkImageFilters::DropShadowOnly(s.offsetX, s.offsetY, sigma, sigma, s.color, nullptr));
-  m_renderer->canvas()->saveLayer(nullptr, &pen); // TODO:: test hint rect
-  SkPaint fillPen;
-  fillPen.setStyle(style);
-  // m_renderer->canvas()->drawPath(skPath, fillPen);
-  skPath.draw(m_renderer->canvas(), fillPen);
-  m_renderer->canvas()->restore();
 }
 
 void Painter::drawFill(

@@ -37,7 +37,7 @@ struct CacheState
   SkRect   rasterBound;
   int      tileWidth;
   int      tileHeight;
-  CacheState(int size = 20)
+  CacheState(int size = 40)
     : tileCache(size)
   {
   }
@@ -80,7 +80,7 @@ private:
     {
       constexpr int MAX_TILE_SIZE = 3072;
       constexpr int MIN_TILE_SIZE = 768;
-      const int     a = std::max(std::floor(n * l / v), 1.f);
+      const int     a = std::max(std::floor(n * l / (v + 10)), 1.f);
       return std::ceil(std::max(std::min(MAX_TILE_SIZE, int(l / a)), MIN_TILE_SIZE));
     };
     newTileWidth = length(w, clipRect.width(), 2);
@@ -387,7 +387,7 @@ std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::o
     _->invalidateContent();
     DEBUG("content changed");
     const auto preCacheRect =
-      clipRect.makeOutset(clipRect.width(), clipRect.height() * 3)
+      clipRect.makeOutset(clipRect.width(), clipRect.height() * 4)
         .makeOffset(-totalMatrix.getTranslateX(), -totalMatrix.getTranslateY());
     return reval(skv, preCacheRect);
   }

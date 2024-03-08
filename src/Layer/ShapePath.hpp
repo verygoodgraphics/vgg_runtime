@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/Core/VType.hpp"
 #include "Layer/Shape.hpp"
 #include "Layer/PathGenerator.hpp"
 
@@ -81,7 +82,8 @@ public:
     ensurePath();
     if (m_path)
       m_path->setFillType(
-        EWindingType::WR_EVEN_ODD ? SkPathFillType::kEvenOdd : SkPathFillType::kWinding);
+        fillType == EWindingType::WR_EVEN_ODD ? SkPathFillType::kEvenOdd
+                                              : SkPathFillType::kWinding);
   }
 
 private:

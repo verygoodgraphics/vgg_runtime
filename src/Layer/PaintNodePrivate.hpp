@@ -367,7 +367,6 @@ public:
 
   void onDrawStyleImpl(Painter& painter, const VShape& skPath, sk_sp<SkBlender> blender)
   {
-    // return drawRawStyleImplLegacy(painter, skPath, blender);
     auto filled = false;
     for (const auto& f : style.fills)
     {

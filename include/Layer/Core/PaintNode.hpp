@@ -25,11 +25,9 @@
 
 #include <glm/matrix.hpp>
 
-#include <any>
 #include <memory>
 #include <optional>
 #include <string>
-#include <unordered_map>
 class SkCanvas;
 class SkImageFilter;
 class SkImage;

@@ -114,7 +114,16 @@
         },
         "alignContent": {
           "description": "This property is used to align the children of a flex container along the cross axis. It applies to multi-line flex containers and affects the alignment of multiple lines.",
-          "$ref": "#/definitions/Alignment"
+          "type": "integer",
+          "enum": [1, 2, 3, 4, 5, 6],
+          "enumDescriptions": [
+            "start",
+            "center",
+            "end",
+            "space between",
+            "space around",
+            "space evenly"
+          ]
         },
         "wrap": {
           "description": "This property sets whether flex items are forced to be placed on a single line or can wrap onto multiple lines.",
@@ -219,7 +228,7 @@
           }
         },
         "cellAlign": {
-          "description": "This property is used to control the alignment of content within cells in the horizontal direction.\nIt is effective when the sum of column widths is less than the container width. Columns are fixed at \"start\" by default. \nThis property applies to all grid items, allowing you to uniformly adjust the position of all content within cells in the horizontal direction.\n",
+          "description": "This property uniformly controls the horizontal alignment of all subgrids within the grid container. \nIt takes effect when the sum of the column widths of the subgrids is less than the width of the grid container. \nBy default, the subgrids align at the start position, but you can adjust their horizontal position within the grid container.      \n",
           "$ref": "#/definitions/Alignment"
         }
       },
@@ -325,6 +334,22 @@
         "flexBasis": {
           "type": "number",
           "description": "This property is used to control the growth or shrinkage ratio of child elements in the allocation of remaining space within a flex container. The values of flex-grow and flex-shrink for all Flex items are the same, and based on the size of the remaining space in the container, flex items will automatically adjust its size to grow or shrink base on this property value."
+        },
+        "marginLeft": {
+          "type": "string",
+          "description": "The units are auto and pixel.\nExample values: \n  auto\n  5px\n  -10px\nDefault value is `0px`.\nNote that when the container's `justifyContent` use `space between`, and the main axis does not wrap, and all the child items have no margin set on the container's main axis direction, then the following rules are automatically applied:\n  1. When the container has only one child, the margins on the main axis direction of that child are set to auto.\n  2. When the container has more than one child, the margins are set to auto along the main axis direction, except for the start margin of the first child and the end margin of the last child."
+        },
+        "marginTop": {
+          "type": "string",
+          "description": "Refer to the description of marginLeft."
+        },
+        "marginRight": {
+          "type": "string",
+          "description": "Refer to the description of marginLeft."
+        },
+        "marginBottom": {
+          "type": "string",
+          "description": "Refer to the description of marginLeft."
         }
       },
       "additionalProperties": false

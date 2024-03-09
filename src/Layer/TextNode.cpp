@@ -16,18 +16,14 @@
 #include "Layer/ParagraphParser.hpp"
 #include "ParagraphLayout.hpp"
 #include "ParagraphPainter.hpp"
-#include "AttrSerde.hpp"
 #include "VSkFontMgr.hpp"
 #include "Renderer.hpp"
 
 #include "Layer/Memory/AllocatorImpl.hpp"
 #include "Layer/Core/TextNode.hpp"
-#include "Layer/Painter.hpp"
 #include "Layer/Core/Attrs.hpp"
-#include "Layer/Core/TreeNode.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/VType.hpp"
-#include "Layer/FontManager.hpp"
 
 #include <include/core/SkCanvas.h>
 #include <include/core/SkFont.h>
@@ -35,7 +31,6 @@
 #include <include/effects/SkRuntimeEffect.h>
 #include <core/SkTextBlob.h>
 
-#include <string_view>
 #include <memory>
 
 namespace VGG::layer
@@ -171,9 +166,9 @@ void TextNode::onDrawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
   d_ptr->onDrawRawStyleImpl(renderer, std::move(blender));
 }
 
-void TextNode::onDrawStyle(Painter& painter, const VShape& path, sk_sp<SkBlender> blender)
+void TextNode::onDrawStyle(Renderer* renderer, const VShape& path, sk_sp<SkBlender> blender)
 {
-  d_ptr->onDrawRawStyleImpl(painter.renderer(), std::move(blender));
+  d_ptr->onDrawRawStyleImpl(renderer, std::move(blender));
 }
 
 void TextNode::setVerticalAlignment(ETextVerticalAlignment vertAlign)

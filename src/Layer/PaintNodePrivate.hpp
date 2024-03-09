@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 #pragma once
-#include "Layer/AttrSerde.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VShape.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/VUtils.hpp"
 #include "Layer/Renderer.hpp"
 #include "Layer/Effects.hpp"
-#include "Layer/Painter.hpp"
 #include "Layer/VSkia.hpp"
 #include "Layer/DisplayList.hpp"
 #include "Utility/HelperMacro.hpp"
@@ -29,6 +27,7 @@
 #include "Renderer.hpp"
 #include "Layer/Core/Transform.hpp"
 
+#include <algorithm>
 #include <core/SkBlender.h>
 #include <core/SkBlurTypes.h>
 #include <core/SkColor.h>
@@ -37,6 +36,7 @@
 #include <core/SkMatrix.h>
 #include <core/SkPaint.h>
 #include <core/SkSamplingOptions.h>
+#include <core/SkShader.h>
 #include <encode/SkPngEncoder.h>
 #include <core/SkBlendMode.h>
 #include <core/SkCanvas.h>
@@ -191,28 +191,63 @@ public:
   std::optional<MaskObject>  alphaMask;
   LayerContextGuard          layerContextGuard;
 
+  sk_sp<SkShader> fillShader;
+
   PaintNode__pImpl(PaintNode* api, EObjectType type)
     : q_ptr(api)
     , type(type)
   {
   }
 
-  void ensureDisplayList(Painter& painter, const VShape& shape, sk_sp<SkBlender> blender)
+  void ensureDisplayList(Renderer* renderer, const VShape& shape, sk_sp<SkBlender> blender)
   {
     if (!styleDisplayList)
     {
       DisplayListRecorder rec;
-      auto    recorder = rec.beginRecording(toSkRect(q_ptr->frameBound()), SkMatrix::I());
-      Painter p(recorder);
+      auto recorder = rec.beginRecording(toSkRect(q_ptr->frameBound()), SkMatrix::I());
       q_ptr->onDrawFill(recorder, blender, 0, shape);
-      for (const auto& b : style.borders)
-      {
-        if (!b.isEnabled || b.thickness <= 0)
-          continue;
-        p.drawPathBorder(shape, bound, b, 0, blender);
-      }
+      drawBorder(recorder, shape, bound, style.borders, blender);
       styleDisplayList = rec.finishRecording();
     }
+  }
+
+  void ensureFillShader()
+  {
+    if (fillShader)
+      return;
+    const auto      bound = q_ptr->frameBound();
+    sk_sp<SkShader> dstShader;
+    for (const auto& f : style.fills)
+    {
+      if (!f.isEnabled)
+        continue;
+      const auto&     st = f.contextSettings;
+      sk_sp<SkShader> srcShader;
+      std::visit(
+        Overloaded{ [&](const Gradient& g) { srcShader = makeGradientShader(bound, g); },
+                    [&](const Color& c) { srcShader = SkShaders::Color(c); },
+                    [&](const Pattern& p) { srcShader = makePatternShader(bound, p); } },
+        f.type);
+
+      if (!dstShader)
+      {
+        dstShader = srcShader;
+      }
+      else
+      {
+        auto bm = toSkBlendMode(f.contextSettings.blendMode);
+        if (bm)
+        {
+          std::visit(
+            Overloaded{ [&](const sk_sp<SkBlender>& blender)
+                        { dstShader = SkShaders::Blend(blender, dstShader, srcShader); },
+                        [&](const SkBlendMode& mode)
+                        { dstShader = SkShaders::Blend(mode, dstShader, srcShader); } },
+            *bm);
+        }
+      }
+    }
+    fillShader = dstShader;
   }
 
   void ensureAlphaMask(Renderer* renderer)
@@ -286,8 +321,78 @@ public:
     {
       return;
     }
-    Painter painter(renderer);
-    onDrawStyleImpl(painter, *path, blender);
+    onDrawStyleImpl(renderer, *path, blender);
+  }
+
+  void drawBorder(
+    Renderer*                  renderer,
+    const VShape&              border,
+    const Bound&               bound,
+    const std::vector<Border>& borders,
+    sk_sp<SkBlender>           blender)
+  {
+    for (const auto& b : borders)
+    {
+      if (!b.isEnabled || b.thickness <= 0)
+        continue;
+
+      SkPaint strokePen;
+      strokePen.setAntiAlias(true);
+      strokePen.setBlender(blender);
+      // strokePen.setImageFilter(imageFilter);
+      populateSkPaint(b, toSkRect(bound), strokePen);
+      bool  inCenter = true;
+      float strokeWidth = b.thickness;
+      if (b.position == PP_INSIDE && border.isClosed())
+      {
+        // inside
+        strokeWidth = 2.f * b.thickness;
+        renderer->canvas()->save();
+        border.clip(renderer->canvas(), SkClipOp::kIntersect);
+        inCenter = false;
+      }
+      else if (b.position == PP_OUTSIDE && border.isClosed())
+      {
+        // outside
+        strokeWidth = 2.f * b.thickness;
+        renderer->canvas()->save();
+        border.clip(renderer->canvas(), SkClipOp::kDifference);
+        inCenter = false;
+      }
+      strokePen.setStrokeWidth(strokeWidth);
+      border.draw(renderer->canvas(), strokePen);
+      if (!inCenter)
+      {
+        renderer->canvas()->restore();
+      }
+    }
+
+    if (false)
+    {
+      auto                 pt = border.asPath();
+      std::vector<SkPoint> pts(pt.countPoints());
+      SkPaint              p;
+      pt.getPoints(pts.data(), pts.size());
+      p.setStrokeWidth(2);
+      p.setColor(SK_ColorRED);
+      SkFont a;
+      renderer->canvas()->drawPoints(SkCanvas::kPoints_PointMode, pts.size(), pts.data(), p);
+      for (std::size_t i = 0; i < pts.size(); i++)
+      {
+        SkPaint textPaint;
+        textPaint.setStrokeWidth(0.5);
+        textPaint.setColor(SK_ColorBLACK);
+        std::string index = std::to_string(i);
+        renderer->canvas()->drawSimpleText(
+          index.c_str(),
+          index.size(),
+          SkTextEncoding::kUTF8,
+          pts[i].x(),
+          pts[i].y(),
+          a,
+          textPaint);
+      }
+    }
   }
 
   sk_sp<SkImageFilter> blurImageFilter()
@@ -365,7 +470,7 @@ public:
     renderer->canvas()->restore();
   }
 
-  void onDrawStyleImpl(Painter& painter, const VShape& skPath, sk_sp<SkBlender> blender)
+  void onDrawStyleImpl(Renderer* renderer, const VShape& skPath, sk_sp<SkBlender> blender)
   {
     auto filled = false;
     for (const auto& f : style.fills)
@@ -397,7 +502,7 @@ public:
       }
     }
 
-    ensureDisplayList(painter, skPath, blender);
+    ensureDisplayList(renderer, skPath, blender);
     for (const auto& s : style.dropShadow)
     {
       if (!s.isEnabled)
@@ -405,11 +510,11 @@ public:
       LayerContextGuard g;
       g.saveLayer(
         s.contextSettings,
-        [&](const SkPaint& paint) { painter.canvas()->saveLayer(nullptr, &paint); });
+        [&](const SkPaint& paint) { renderer->canvas()->saveLayer(nullptr, &paint); });
       if (s.clipShadow)
       {
-        painter.canvas()->save();
-        skPath.clip(painter.canvas(), SkClipOp::kDifference);
+        renderer->canvas()->save();
+        skPath.clip(renderer->canvas(), SkClipOp::kDifference);
       }
       if (filled)
       {
@@ -423,16 +528,14 @@ public:
           // auto imageFilter = styleDisplayList->asImageFilter();
           // ASSERT(imageFilter);
           // auto output = SkImageFilters::Compose(imageFilter, dropShadowFilter);
-          ss->draw(painter.canvas(), p);
+          ss->draw(renderer->canvas(), p);
         }
         else
         {
           auto dropShadowFilter = makeDropShadowImageFilter(s, q_ptr->frameBound(), false, 0);
           p.setImageFilter(dropShadowFilter);
           p.setAntiAlias(true);
-          // p.setShader(styleDisplayList->asShader());
-          // painter.canvas()->drawPaint(p);
-          painter.canvas()->drawPicture(styleDisplayList->picture(), 0, &p);
+          renderer->canvas()->drawPicture(styleDisplayList->picture(), 0, &p);
         }
       }
       if (border)
@@ -443,12 +546,12 @@ public:
       }
       if (s.clipShadow)
       {
-        painter.canvas()->restore();
+        renderer->canvas()->restore();
       }
-      g.restore([&]() { painter.canvas()->restore(); });
+      g.restore([&]() { renderer->canvas()->restore(); });
     }
 
-    styleDisplayList->playback(painter.renderer());
+    styleDisplayList->playback(renderer);
     if (filled)
     {
       for (const auto& s : style.innerShadow)
@@ -460,7 +563,7 @@ public:
         p.setImageFilter(innerShadowFilter);
         // p.setAntiAlias(true);
         //  painter.canvas()->drawPaint(p);
-        skPath.draw(painter.canvas(), p);
+        skPath.draw(renderer->canvas(), p);
       }
     }
   }

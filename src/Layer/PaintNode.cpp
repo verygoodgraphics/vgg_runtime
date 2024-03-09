@@ -16,8 +16,6 @@
 #include "Layer/Core/Transform.hpp"
 #include "Layer/SkSL.hpp"
 #include "VSkia.hpp"
-#include "Painter.hpp"
-#include "PathGenerator.hpp"
 #include "Renderer.hpp"
 #include "PaintNodePrivate.hpp"
 #include "Layer/Core/PaintNode.hpp"
@@ -52,9 +50,6 @@
 #include <optional>
 #include <pathops/SkPathOps.h>
 #include <src/core/SkRuntimeEffectPriv.h>
-#include <limits>
-#include <fstream>
-#include <string_view>
 #include <variant>
 
 namespace VGG::layer
@@ -351,9 +346,9 @@ void PaintNode::onDrawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
   }
 }
 
-void PaintNode::onDrawStyle(Painter& painter, const VShape& path, sk_sp<SkBlender> blender)
+void PaintNode::onDrawStyle(Renderer* renderer, const VShape& path, sk_sp<SkBlender> blender)
 {
-  d_ptr->onDrawStyleImpl(painter, path, std::move(blender));
+  d_ptr->onDrawStyleImpl(renderer, path, std::move(blender));
 }
 
 VShape PaintNode::asVisualShape(const Transform* mat)
@@ -666,10 +661,9 @@ void PaintNode::postPaintPass(Renderer* renderer)
 void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape& outlineMask)
 {
   VGG_IMPL(PaintNode);
-  Painter painter(renderer);
-  auto    dropbackFilter = _->backgroundBlurImageFilter();
-  auto    layerFilter = _->blurImageFilter();
-  auto    alphaMaskImageFilter =
+  auto dropbackFilter = _->backgroundBlurImageFilter();
+  auto layerFilter = _->blurImageFilter();
+  auto alphaMaskImageFilter =
     _->alphaMask ? _->alphaMask->toImagefilter(toSkRect(frameBound()), 0) : 0;
   const auto newLayer = dropbackFilter || layerFilter || _->alphaMask;
   VShape     res = path;
@@ -679,8 +673,8 @@ void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape&
   }
   if (!outlineMask.isEmpty())
   {
-    painter.canvas()->save();
-    outlineMask.clip(painter.renderer()->canvas(), SkClipOp::kIntersect);
+    renderer->canvas()->save();
+    outlineMask.clip(renderer->canvas(), SkClipOp::kIntersect);
   }
 
   if (newLayer)
@@ -693,7 +687,7 @@ void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape&
     {
       layerFilter = _->alphaMask->maskWith(layerVisualBound, layerFilter, 0);
     }
-    _->ensureDisplayList(painter, path, 0);
+    _->ensureDisplayList(renderer, path, 0);
     if (dropbackFilter)
     {
       if (auto df = _->styleDisplayList->asImageFilter(); df)
@@ -708,14 +702,14 @@ void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape&
     VShape clipShape(layerVisualBound);
     _->beginLayer(renderer, &layerPaint, &clipShape, dropbackFilter);
   }
-  onDrawStyle(painter, path, 0);
+  onDrawStyle(renderer, path, 0);
   if (newLayer)
   {
     _->endLayer(renderer);
   }
   if (!outlineMask.isEmpty())
   {
-    painter.canvas()->restore();
+    renderer->canvas()->restore();
   }
 }
 
@@ -725,14 +719,29 @@ void PaintNode::onDrawFill(
   sk_sp<SkImageFilter> imageFilter,
   const VShape&        path)
 {
-  Painter             painter(renderer);
-  sk_sp<SkMaskFilter> blur;
+  // d_ptr->ensureFillShader();
+  // if (d_ptr->fillShader)
+  // {
+  //   SkPaint fillPen;
+  //   fillPen.setStyle(SkPaint::kFill_Style);
+  //   fillPen.setAntiAlias(true);
+  //   fillPen.setBlender(blender);
+  //   fillPen.setShader(d_ptr->fillShader);
+  //   path.draw(renderer->canvas(), fillPen);
+  // }
+
   for (size_t i = 0; i < style().fills.size(); ++i)
   {
     auto& f = style().fills[i];
     if (!f.isEnabled)
       continue;
-    painter.drawFill(path, frameBound(), f, imageFilter, blender, blur);
+    SkPaint fillPen;
+    fillPen.setStyle(SkPaint::kFill_Style);
+    fillPen.setAntiAlias(true);
+    fillPen.setBlender(blender);
+    fillPen.setImageFilter(imageFilter);
+    populateSkPaint(f.type, f.contextSettings, toSkRect(frameBound()), fillPen);
+    path.draw(renderer->canvas(), fillPen);
   }
 }
 

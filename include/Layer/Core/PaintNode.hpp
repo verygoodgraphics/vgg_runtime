@@ -232,7 +232,7 @@ protected:
   VShape         makeMaskBy(EBoolOp maskOp, Renderer* renderer);
 
   virtual void onDrawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender);
-  virtual void onDrawStyle(Painter& painter, const VShape& path, sk_sp<SkBlender> blender);
+  virtual void onDrawStyle(Renderer* renderer, const VShape& path, sk_sp<SkBlender> blender);
   Bound        onRevalidate() override;
 
 protected:

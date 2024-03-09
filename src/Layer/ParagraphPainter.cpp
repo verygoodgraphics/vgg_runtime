@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 #include "ParagraphPainter.hpp"
-#include "Layer/AttrSerde.hpp"
-#include "Painter.hpp"
-#include "Utility/Log.hpp"
 #include "VSkia.hpp"
+#include "Effects.hpp"
 
 #include <core/SkColor.h>
 #include <core/SkPaint.h>

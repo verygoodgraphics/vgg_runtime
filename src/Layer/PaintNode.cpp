@@ -726,9 +726,9 @@ Bound PaintNode::onDrawFill(
   // FillEffect fillEffect(style().fills, toSkRect(frameBound()));
   // SkPaint    p;
   // p.setShader(fillEffect.shader());
+  // p.setAntiAlias(true);
   // path.draw(renderer->canvas(), p);
 
-  auto fillBounds = SkRect::MakeEmpty();
   for (size_t i = 0; i < style().fills.size(); ++i)
   {
     auto& f = style().fills[i];
@@ -742,6 +742,7 @@ Bound PaintNode::onDrawFill(
     populateSkPaint(f.type, f.contextSettings, toSkRect(frameBound()), fillPen);
     path.draw(renderer->canvas(), fillPen);
   }
+  auto fillBounds = SkRect::MakeEmpty();
   return Bound{ fillBounds.x(), fillBounds.y(), fillBounds.width(), fillBounds.height() };
 }
 

@@ -52,7 +52,10 @@ public:
   {
     ensurePath();
     if (m_path)
-      return m_path->getBounds();
+    {
+      auto r = m_path->computeTightBounds();
+      return r;
+    }
     return SkRect::MakeEmpty();
   }
 

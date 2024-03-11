@@ -94,14 +94,14 @@ public:
   {
     return m_renderer.get();
   }
-  DisplayList finishRecording()
+  DisplayList finishRecording(const SkRect& cropRect)
   {
     auto maskShader = sk_make_sp<SkPictureShader>(
       m_rec->finishRecordingAsPicture(),
       SkTileMode::kClamp,
       SkTileMode::kClamp,
       SkFilterMode::kNearest,
-      &m_bound);
+      nullptr);
     ASSERT(maskShader);
     return DisplayList(maskShader, m_bound);
   }

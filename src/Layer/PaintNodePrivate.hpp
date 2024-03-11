@@ -247,14 +247,14 @@ public:
                     [&](const Pattern& p) { srcShader = makePatternShader(bound, p); } },
         f.type);
 
-      if (!dstShader)
-      {
-        dstShader = srcShader;
-      }
       if (st.opacity < 1.0)
       {
         srcShader = srcShader->makeWithColorFilter(
           SkColorFilters::Blend(Color{ 0, 0, 0, st.opacity }, SkBlendMode::kSrcIn));
+      }
+      if (!dstShader)
+      {
+        dstShader = srcShader;
       }
       else
       {
@@ -267,6 +267,10 @@ public:
                         [&](const SkBlendMode& mode)
                         { dstShader = SkShaders::Blend(mode, dstShader, srcShader); } },
             *bm);
+        }
+        else
+        {
+          dstShader = SkShaders::Blend(SkBlendMode::kSrcOver, dstShader, srcShader);
         }
       }
     }
@@ -377,19 +381,22 @@ public:
     if (!styleDisplayList)
     {
       DisplayListRecorder rec;
-      auto                styleBounds = computeStyleBounds(shape, borders);
-      auto                recorder = rec.beginRecording(styleBounds, SkMatrix::I());
+      SkRect              r = toSkRect(bound);
+      auto                styleBounds = computeStyleBounds(shape, borders, r);
+
+      auto recorder = rec.beginRecording(r, SkMatrix::I());
       q_ptr->onDrawFill(recorder, blender, 0, shape);
       drawBorder(recorder, shape, bound, borders, blender);
-      styleDisplayList = rec.finishRecording();
+      styleDisplayList = rec.finishRecording(styleBounds);
     }
   }
 
-  SkRect computeStyleBounds(const VShape& shape, const std::vector<Border>& borders) const
+  SkRect computeStyleBounds(
+    const VShape&              shape,
+    const std::vector<Border>& borders,
+    const SkRect&              bound) const
   {
-    SkRect rect;
-    rect.join(shape.bounds());
-    SkRect borderBounds;
+    SkRect rect = bound;
     for (const auto& b : borders)
     {
       if (!b.isEnabled || b.thickness <= 0)
@@ -401,23 +408,25 @@ public:
       strokePen.setStrokeCap(toSkPaintCap(b.lineCapStyle));
       strokePen.setStrokeMiter(b.miterLimit);
       float strokeWidth = b.thickness;
-      if (b.position == PP_INSIDE && shape.isClosed())
+      if (b.position == PP_INSIDE)
       {
         // inside
         strokeWidth = 2.f * b.thickness;
       }
-      else if (b.position == PP_OUTSIDE && shape.isClosed())
+      else if (b.position == PP_OUTSIDE)
       {
         // outside
         strokeWidth = 2.f * b.thickness;
       }
       strokePen.setStrokeWidth(strokeWidth);
       strokePen.setStyle(SkPaint::kStroke_Style);
-      SkRect result;
-      strokePen.computeFastBounds(rect, &result);
-      borderBounds.join(result);
+      if (strokePen.canComputeFastBounds())
+      {
+        SkRect result;
+        strokePen.computeFastBounds(bound, &result);
+        rect.join(result);
+      }
     }
-    rect.join(borderBounds);
     return rect;
   }
 
@@ -777,6 +786,11 @@ public:
     }
 
     styleDisplayList->playback(renderer);
+
+    // SkPaint p;
+    // p.setShader(styleDisplayList->asShader());
+    // p.setAntiAlias(true);
+    // renderer->canvas()->drawRect(r, p);
 
     if (filled)
     {

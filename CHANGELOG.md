@@ -1,5 +1,31 @@
 # VGG Runtime Changelog
 
+## [daruma-v4.12 (Mar 8, 2024)](https://github.com/verygoodgraphics/vgg_runtime/releases/tag/daruma-v4.12)
+* Feature: shadow improvement ([#273](https://github.com/verygoodgraphics/vgg_runtime/pull/273))
+* Feature: handle mousemove releated events  ([#277](https://github.com/verygoodgraphics/vgg_runtime/pull/277))
+* Feature: page scroll animation  ([#274](https://github.com/verygoodgraphics/vgg_runtime/pull/274))
+* Feature: optimized layout strategy for page aspect fill ([#272](https://github.com/verygoodgraphics/vgg_runtime/pull/272))
+* Feature: added matrix api  ([#271](https://github.com/verygoodgraphics/vgg_runtime/pull/271))
+* Feature: hue ([#269](https://github.com/verygoodgraphics/vgg_runtime/pull/269))
+* Bugfix: winding rule ([#280](https://github.com/verygoodgraphics/vgg_runtime/pull/280))
+* Bugfix: incorrect instance position  ([#278](https://github.com/verygoodgraphics/vgg_runtime/pull/278))
+* Bugfix: inconsistent view offset  ([#275](https://github.com/verygoodgraphics/vgg_runtime/pull/275))
+
+Full changelog: [daruma-v4.11.1...daruma-v4.12](https://github.com/verygoodgraphics/vgg_runtime/compare/daruma-v4.11.1...daruma-v4.12)
+
+## [daruma-v4.11.1 (Feb 26, 2024)](https://github.com/verygoodgraphics/vgg_runtime/releases/tag/daruma-v4.11.1)
+* Feature: optimize tile ([#263](https://github.com/verygoodgraphics/vgg_runtime/pull/263))
+* Feature: optimize expanding symbol instance ([#264](https://github.com/verygoodgraphics/vgg_runtime/pull/264))
+* Feature: add more align content options ([#262](https://github.com/verygoodgraphics/vgg_runtime/pull/262))
+* Bugfix: remove key json cache ([#267](https://github.com/verygoodgraphics/vgg_runtime/pull/267))
+* Bugfix: no radius for end point ([#266](https://github.com/verygoodgraphics/vgg_runtime/pull/266))
+* Bugfix: gradient and dashpattern ([#265](https://github.com/verygoodgraphics/vgg_runtime/pull/265))
+* Bugfix: expanding instance which using variable as master id ([#261](https://github.com/verygoodgraphics/vgg_runtime/pull/261))
+* Bugfix: exit wasm runtime ([#259](https://github.com/verygoodgraphics/vgg_runtime/pull/259))
+
+Full changelog: [daruma-v4.11...daruma-v4.11.1](https://github.com/verygoodgraphics/vgg_runtime/compare/daruma-v4.11...daruma-v4.11.1)
+
+
 ## [daruma-v4.11 (Feb 5, 2024)](https://github.com/verygoodgraphics/vgg_runtime/releases/tag/daruma-v4.11)
 
 * Bugfix: image sampling options for better image display ([#243](https://github.com/verygoodgraphics/vgg_runtime/pull/243))

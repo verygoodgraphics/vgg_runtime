@@ -666,23 +666,22 @@ void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape&
   auto alphaMaskImageFilter =
     _->alphaMask ? _->alphaMask->toImagefilter(toSkRect(frameBound()), 0) : 0;
   const auto newLayer = dropbackFilter || layerFilter || _->alphaMask;
-  VShape     res = path;
-  if (!outlineMask.isEmpty())
-  {
-    res.op(outlineMask, EBoolOp::BO_INTERSECTION);
-  }
+  // VShape     res = path;
+  // if (!outlineMask.isEmpty())
+  // {
+  //   res.op(outlineMask, EBoolOp::BO_INTERSECTION);
+  // }
   if (!outlineMask.isEmpty())
   {
     renderer->canvas()->save();
     outlineMask.clip(renderer->canvas(), SkClipOp::kIntersect);
   }
-
   if (newLayer)
   {
     SkRect objectBound;
     _->ensureStyleObjectRecorder(path, 0, _->style.fills, _->style.borders);
     objectBound.join(_->styleDisplayList->bounds());
-    _->ensureDropShadowEffects(_->style.dropShadow);
+    _->ensureDropShadowEffects(_->style.dropShadow, path);
     objectBound.join(_->dropShadowEffects->bounds());
     SkRect layerBound =
       layerFilter ? layerFilter.get()->computeFastBounds(objectBound) : objectBound;

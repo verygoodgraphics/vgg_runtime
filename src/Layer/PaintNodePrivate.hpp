@@ -187,7 +187,10 @@ public:
   void render(Renderer* render) override
   {
   }
-  DropShadowEffect(const std::vector<DropShadow>& dropShadow, const SkRect& bounds)
+  DropShadowEffect(
+    const std::vector<DropShadow>& dropShadow,
+    const SkRect&                  bounds,
+    bool                           overrideSpread)
 
   {
     for (const auto& s : dropShadow)
@@ -197,7 +200,7 @@ public:
       auto dropShadowFilter = makeDropShadowImageFilter(
         s,
         Bound{ bounds.x(), bounds.y(), bounds.width(), bounds.height() },
-        false,
+        overrideSpread,
         0);
       auto r = dropShadowFilter->computeFastBounds(bounds);
       m_imageFilters.emplace_back(dropShadowFilter, s);
@@ -430,11 +433,11 @@ public:
     return rect;
   }
 
-  void ensureDropShadowEffects(const std::vector<DropShadow>& shadow)
+  void ensureDropShadowEffects(const std::vector<DropShadow>& shadow, const VShape& shape)
   {
     if (!dropShadowEffects)
     {
-      dropShadowEffects = DropShadowEffect(shadow, toSkRect(q_ptr->frameBound()));
+      dropShadowEffects = DropShadowEffect(shadow, toSkRect(bound), shape.outset(0, 0).has_value());
     }
   }
 
@@ -741,7 +744,7 @@ public:
       }
     }
     ensureStyleObjectRecorder(skPath, blender, style.fills, style.borders);
-    ensureDropShadowEffects(style.dropShadow);
+    ensureDropShadowEffects(style.dropShadow, skPath);
     for (const auto& f : dropShadowEffects->filters())
     {
       LayerContextGuard g;

@@ -238,7 +238,7 @@ protected:
 protected:
   void paintStyle(Renderer* renderer, const VShape& path, const VShape& mask);
 
-  virtual void onDrawFill(
+  virtual Bound onDrawFill(
     Renderer*            renderer,
     sk_sp<SkBlender>     blender,
     sk_sp<SkImageFilter> imageFilter,

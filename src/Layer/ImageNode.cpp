@@ -96,7 +96,7 @@ bool ImageNode::fill() const
   return d_ptr->fillReplacesImage;
 }
 
-void ImageNode::onDrawFill(
+Bound ImageNode::onDrawFill(
   Renderer*            renderer,
   sk_sp<SkBlender>     blender,
   sk_sp<SkImageFilter> imageFilter,
@@ -131,6 +131,7 @@ void ImageNode::onDrawFill(
       canvas->restore();
     }
   }
+  return bound();
 }
 
 ImageNode::~ImageNode() = default;

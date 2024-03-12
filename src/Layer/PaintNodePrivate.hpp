@@ -37,6 +37,7 @@
 #include <core/SkPaint.h>
 #include <core/SkSamplingOptions.h>
 #include <core/SkShader.h>
+#include <effects/SkImageFilters.h>
 #include <encode/SkPngEncoder.h>
 #include <core/SkBlendMode.h>
 #include <core/SkCanvas.h>
@@ -46,6 +47,7 @@
 #include <core/SkPictureRecorder.h>
 #include <effects/SkShaderMaskFilter.h>
 #include <effects/SkBlurMaskFilter.h>
+#include <src/core/SkBlurMask.h>
 #include <src/shaders/SkPictureShader.h>
 
 namespace VGG::layer
@@ -162,6 +164,169 @@ public:
   }
 };
 
+class Effect
+{
+public:
+  virtual void render(Renderer* render) = 0;
+};
+
+class DropShadowEffect final : public Effect
+{
+public:
+  struct Shadow
+  {
+    Shadow(sk_sp<SkImageFilter> filter, const DropShadow& prop)
+      : filter(std::move(filter))
+      , prop(prop)
+    {
+    }
+    sk_sp<SkImageFilter> filter;
+    DropShadow           prop;
+  };
+
+  void render(Renderer* render) override
+  {
+  }
+  DropShadowEffect(const std::vector<DropShadow>& dropShadow, const SkRect& bounds)
+
+  {
+    for (const auto& s : dropShadow)
+    {
+      if (!s.isEnabled)
+        continue;
+      auto dropShadowFilter = makeDropShadowImageFilter(
+        s,
+        Bound{ bounds.x(), bounds.y(), bounds.width(), bounds.height() },
+        false,
+        0);
+      auto r = dropShadowFilter->computeFastBounds(bounds);
+      m_imageFilters.emplace_back(dropShadowFilter, s);
+      m_bounds.join(r);
+    }
+  }
+
+  DropShadowEffect& operator=(const DropShadowEffect& other) = delete;
+  DropShadowEffect(const DropShadowEffect& other) = delete;
+  DropShadowEffect& operator=(DropShadowEffect&& other) = default;
+  DropShadowEffect(DropShadowEffect&& other) = default;
+
+  const SkRect& bounds()
+  {
+    return m_bounds;
+  }
+
+  const std::vector<Shadow>& filters() const
+  {
+    return m_imageFilters;
+  }
+
+private:
+  std::vector<Shadow> m_imageFilters;
+  SkRect              m_bounds;
+};
+
+class FillEffect final : public Effect
+{
+public:
+  void render(Renderer* render) override
+  {
+  }
+  FillEffect(const std::vector<Fill>& fills, const SkRect& bounds)
+  {
+    sk_sp<SkShader> dstShader;
+    const auto      bound = Bound{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
+    for (const auto& f : fills)
+    {
+      if (!f.isEnabled)
+        continue;
+      const auto&     st = f.contextSettings;
+      sk_sp<SkShader> srcShader;
+      std::visit(
+        Overloaded{ [&](const Gradient& g) { srcShader = makeGradientShader(bound, g); },
+                    [&](const Color& c) { srcShader = SkShaders::Color(c); },
+                    [&](const Pattern& p) { srcShader = makePatternShader(bound, p); } },
+        f.type);
+
+      if (!dstShader)
+      {
+        dstShader = srcShader;
+      }
+      if (st.opacity < 1.0)
+      {
+        srcShader = srcShader->makeWithColorFilter(
+          SkColorFilters::Blend(Color{ 0, 0, 0, st.opacity }, SkBlendMode::kSrcIn));
+      }
+      else
+      {
+        auto bm = toSkBlendMode(f.contextSettings.blendMode);
+        if (bm)
+        {
+          std::visit(
+            Overloaded{ [&](const sk_sp<SkBlender>& blender)
+                        { dstShader = SkShaders::Blend(blender, dstShader, srcShader); },
+                        [&](const SkBlendMode& mode)
+                        { dstShader = SkShaders::Blend(mode, dstShader, srcShader); } },
+            *bm);
+        }
+      }
+    }
+    m_shader = dstShader;
+  }
+
+  sk_sp<SkShader> shader() const
+  {
+    return m_shader;
+  }
+
+  const SkRect& bounds()
+  {
+    return m_bounds;
+  }
+
+private:
+  SkRect          m_bounds;
+  sk_sp<SkShader> m_shader;
+};
+
+class InnerShadowEffect : public Effect
+{
+public:
+  void render(Renderer* render) override
+  {
+  }
+  InnerShadowEffect(const std::vector<InnerShadow>& innerShadow, const SkRect& bounds)
+  {
+    for (const auto& s : innerShadow)
+    {
+      if (!s.isEnabled)
+        continue;
+      auto innerShadowFilter = makeInnerShadowImageFilter(
+        s,
+        Bound{ bounds.x(), bounds.y(), bounds.width(), bounds.height() },
+        true,
+        false,
+        0);
+      SkRect r;
+      m_imageFilters.emplace_back(innerShadowFilter);
+      m_bounds.join(r);
+    }
+  }
+
+  const SkRect& bounds()
+  {
+    return m_bounds;
+  }
+
+  const std::vector<sk_sp<SkImageFilter>>& filters() const
+  {
+    return m_imageFilters;
+  }
+
+private:
+  std::vector<sk_sp<SkImageFilter>> m_imageFilters;
+  SkRect                            m_bounds;
+};
+
 class PaintNode__pImpl // NOLINT
 {
   VGG_DECL_API(PaintNode);
@@ -189,7 +354,11 @@ public:
   std::optional<VShape>      path;
   std::optional<VShape>      mask;
   std::optional<MaskObject>  alphaMask;
-  LayerContextGuard          layerContextGuard;
+
+  std::optional<DropShadowEffect>  dropShadowEffects;
+  std::optional<InnerShadowEffect> innerShadowEffects;
+
+  LayerContextGuard layerContextGuard;
 
   sk_sp<SkShader> fillShader;
 
@@ -199,15 +368,72 @@ public:
   {
   }
 
-  void ensureDisplayList(Renderer* renderer, const VShape& shape, sk_sp<SkBlender> blender)
+  void ensureStyleObjectRecorder(
+    const VShape&              shape,
+    sk_sp<SkBlender>           blender,
+    const std::vector<Fill>&   fills,
+    const std::vector<Border>& borders)
   {
     if (!styleDisplayList)
     {
       DisplayListRecorder rec;
-      auto recorder = rec.beginRecording(toSkRect(q_ptr->frameBound()), SkMatrix::I());
+      auto                styleBounds = computeStyleBounds(shape, borders);
+      auto                recorder = rec.beginRecording(styleBounds, SkMatrix::I());
       q_ptr->onDrawFill(recorder, blender, 0, shape);
-      drawBorder(recorder, shape, bound, style.borders, blender);
+      drawBorder(recorder, shape, bound, borders, blender);
       styleDisplayList = rec.finishRecording();
+    }
+  }
+
+  SkRect computeStyleBounds(const VShape& shape, const std::vector<Border>& borders) const
+  {
+    SkRect rect;
+    rect.join(shape.bounds());
+    SkRect borderBounds;
+    for (const auto& b : borders)
+    {
+      if (!b.isEnabled || b.thickness <= 0)
+        continue;
+      SkPaint strokePen;
+      strokePen.setAntiAlias(true);
+      populateSkPaint(b, rect, strokePen);
+      strokePen.setStrokeJoin(toSkPaintJoin(b.lineJoinStyle));
+      strokePen.setStrokeCap(toSkPaintCap(b.lineCapStyle));
+      strokePen.setStrokeMiter(b.miterLimit);
+      float strokeWidth = b.thickness;
+      if (b.position == PP_INSIDE && shape.isClosed())
+      {
+        // inside
+        strokeWidth = 2.f * b.thickness;
+      }
+      else if (b.position == PP_OUTSIDE && shape.isClosed())
+      {
+        // outside
+        strokeWidth = 2.f * b.thickness;
+      }
+      strokePen.setStrokeWidth(strokeWidth);
+      strokePen.setStyle(SkPaint::kStroke_Style);
+      SkRect result;
+      strokePen.computeFastBounds(rect, &result);
+      borderBounds.join(result);
+    }
+    rect.join(borderBounds);
+    return rect;
+  }
+
+  void ensureDropShadowEffects(const std::vector<DropShadow>& shadow)
+  {
+    if (!dropShadowEffects)
+    {
+      dropShadowEffects = DropShadowEffect(shadow, toSkRect(q_ptr->frameBound()));
+    }
+  }
+
+  void ensureInnerShadowEffects(const std::vector<InnerShadow>& shadow)
+  {
+    if (!innerShadowEffects)
+    {
+      innerShadowEffects = InnerShadowEffect(shadow, toSkRect(q_ptr->frameBound()));
     }
   }
 
@@ -324,13 +550,15 @@ public:
     onDrawStyleImpl(renderer, *path, blender);
   }
 
-  void drawBorder(
+  Bound drawBorder(
     Renderer*                  renderer,
     const VShape&              border,
     const Bound&               bound,
     const std::vector<Border>& borders,
     sk_sp<SkBlender>           blender)
   {
+    SkRect     resultBounds = border.bounds();
+    const auto shapeBounds = resultBounds;
     for (const auto& b : borders)
     {
       if (!b.isEnabled || b.thickness <= 0)
@@ -340,7 +568,7 @@ public:
       strokePen.setAntiAlias(true);
       strokePen.setBlender(blender);
       // strokePen.setImageFilter(imageFilter);
-      populateSkPaint(b, toSkRect(bound), strokePen);
+      populateSkPaint(b, shapeBounds, strokePen);
       bool  inCenter = true;
       float strokeWidth = b.thickness;
       if (b.position == PP_INSIDE && border.isClosed())
@@ -361,6 +589,9 @@ public:
       }
       strokePen.setStrokeWidth(strokeWidth);
       border.draw(renderer->canvas(), strokePen);
+      SkRect borderBounds;
+      strokePen.computeFastBounds(shapeBounds, &borderBounds);
+      resultBounds.join(borderBounds);
       if (!inCenter)
       {
         renderer->canvas()->restore();
@@ -393,6 +624,7 @@ public:
           textPaint);
       }
     }
+    return Bound{ resultBounds.x(), resultBounds.y(), resultBounds.width(), resultBounds.height() };
   }
 
   sk_sp<SkImageFilter> blurImageFilter()
@@ -452,16 +684,14 @@ public:
     const VShape*        clipShape,
     sk_sp<SkImageFilter> backdropFilter)
   {
-    SkRect   layerRect = toSkRect(q_ptr->frameBound());
-    SkMatrix m = SkMatrix::I();
-    layerRect = m.mapRect(layerRect);
     renderer->canvas()->save();
     if (clipShape)
     {
       clipShape->clip(renderer->canvas(), SkClipOp::kIntersect);
     }
+    auto layerBound = clipShape->bounds();
     renderer->canvas()->saveLayer(
-      SkCanvas::SaveLayerRec(&layerRect, paint, backdropFilter.get(), 0));
+      SkCanvas::SaveLayerRec(&layerBound, paint, backdropFilter.get(), 0));
   }
 
   void endLayer(Renderer* renderer)
@@ -501,17 +731,15 @@ public:
         }
       }
     }
-
-    ensureDisplayList(renderer, skPath, blender);
-    for (const auto& s : style.dropShadow)
+    ensureStyleObjectRecorder(skPath, blender, style.fills, style.borders);
+    ensureDropShadowEffects(style.dropShadow);
+    for (const auto& f : dropShadowEffects->filters())
     {
-      if (!s.isEnabled)
-        continue;
       LayerContextGuard g;
       g.saveLayer(
-        s.contextSettings,
+        f.prop.contextSettings,
         [&](const SkPaint& paint) { renderer->canvas()->saveLayer(nullptr, &paint); });
-      if (s.clipShadow)
+      if (f.prop.clipShadow)
       {
         renderer->canvas()->save();
         skPath.clip(renderer->canvas(), SkClipOp::kDifference);
@@ -521,19 +749,16 @@ public:
         SkPaint p;
         p.setAntiAlias(true);
         p.setStyle(SkPaint::kFill_Style);
-        if (auto ss = skPath.outset(s.spread, s.spread); s.spread != 0.f && ss && !ss->isEmpty())
+        if (auto ss = skPath.outset(f.prop.spread, f.prop.spread);
+            f.prop.spread != 0.f && ss && !ss->isEmpty())
         {
-          auto dropShadowFilter = makeDropShadowImageFilter(s, q_ptr->frameBound(), true, 0);
-          p.setImageFilter(dropShadowFilter);
-          // auto imageFilter = styleDisplayList->asImageFilter();
-          // ASSERT(imageFilter);
-          // auto output = SkImageFilters::Compose(imageFilter, dropShadowFilter);
+          auto dropShadowFilter = f.filter;
+          p.setImageFilter(f.filter);
           ss->draw(renderer->canvas(), p);
         }
         else
         {
-          auto dropShadowFilter = makeDropShadowImageFilter(s, q_ptr->frameBound(), false, 0);
-          p.setImageFilter(dropShadowFilter);
+          p.setImageFilter(f.filter);
           p.setAntiAlias(true);
           renderer->canvas()->drawPicture(styleDisplayList->picture(), 0, &p);
         }
@@ -544,7 +769,7 @@ public:
         // p.setStrokeWidth(maxWidth);
         // painter.canvas()->drawPath(*path, p);
       }
-      if (s.clipShadow)
+      if (f.prop.clipShadow)
       {
         renderer->canvas()->restore();
       }
@@ -552,16 +777,15 @@ public:
     }
 
     styleDisplayList->playback(renderer);
+
     if (filled)
     {
-      for (const auto& s : style.innerShadow)
+      ensureInnerShadowEffects(style.innerShadow);
+      for (auto& filter : innerShadowEffects->filters())
       {
-        if (!s.isEnabled)
-          continue;
-        auto innerShadowFilter = makeInnerShadowImageFilter(s, q_ptr->frameBound(), true, false, 0);
         SkPaint p;
-        p.setImageFilter(innerShadowFilter);
-        // p.setAntiAlias(true);
+        p.setImageFilter(filter);
+        p.setAntiAlias(true);
         //  painter.canvas()->drawPaint(p);
         skPath.draw(renderer->canvas(), p);
       }

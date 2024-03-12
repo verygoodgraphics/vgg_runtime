@@ -28,6 +28,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 namespace VGG
@@ -86,8 +87,9 @@ public:
   bool setLaunchFrame(const std::string& name);
 
   std::string getFramesInfo() const;
+  int         getFrameIndex(const std::string& name) const;
 
-  int getFrameIndex(const std::string& name) const;
+  std::unordered_set<std::string> texts() const;
 
 public: // event listener
   void addEventListener(
@@ -112,6 +114,8 @@ private:
   std::string getCode(const std::string& fileName);
 
   std::string uuidFor(const std::string& content);
+
+  void getTextsTo(std::unordered_set<std::string>& texts, const json& json) const;
 };
 
 } // namespace VGG

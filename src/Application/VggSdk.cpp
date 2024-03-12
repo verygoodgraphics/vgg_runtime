@@ -278,6 +278,22 @@ std::vector<uint8_t> VggSdk::vggFileBuffer()
   }
 }
 
+std::vector<std::string> VggSdk::texts()
+{
+  auto model = getModel();
+  if (model)
+  {
+    auto                     ret = model->texts();
+    std::vector<std::string> results{ ret.begin(), ret.end() };
+    return results;
+  }
+  else
+  {
+    WARN("VggSdk: no daruma file");
+    return {};
+  }
+}
+
 #ifdef EMSCRIPTEN
 bool VggSdk::jsAddFont(const emscripten::val& jsFontUint8Array, const std::string& defaultName)
 {

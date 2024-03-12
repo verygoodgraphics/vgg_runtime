@@ -722,27 +722,33 @@ Bound PaintNode::onDrawFill(
   sk_sp<SkImageFilter> imageFilter,
   const VShape&        path)
 {
-  // FillEffect fillEffect(style().fills, toSkRect(frameBound()));
-  // SkPaint    p;
-  // p.setShader(fillEffect.shader());
-  // p.setAntiAlias(true);
-  // path.draw(renderer->canvas(), p);
-
-  for (size_t i = 0; i < style().fills.size(); ++i)
+  auto       fillBound = frameBound(); // TODO:: should be computed from path
+  FillEffect fillEffect(style().fills, toSkRect(fillBound));
+  auto       shader = fillEffect.shader();
+  if (shader)
   {
-    auto& f = style().fills[i];
-    if (!f.isEnabled)
-      continue;
-    SkPaint fillPen;
-    fillPen.setStyle(SkPaint::kFill_Style);
-    fillPen.setAntiAlias(true);
-    fillPen.setBlender(blender);
-    fillPen.setImageFilter(imageFilter);
-    populateSkPaint(f.type, f.contextSettings, toSkRect(frameBound()), fillPen);
-    path.draw(renderer->canvas(), fillPen);
+    SkPaint p;
+    p.setStyle(SkPaint::kFill_Style);
+    p.setShader(shader);
+    p.setAntiAlias(true);
+    path.draw(renderer->canvas(), p);
   }
-  auto fillBounds = SkRect::MakeEmpty();
-  return Bound{ fillBounds.x(), fillBounds.y(), fillBounds.width(), fillBounds.height() };
+
+  // for (size_t i = 0; i < style().fills.size(); ++i)
+  // {
+  //   auto& f = style().fills[i];
+  //   if (!f.isEnabled)
+  //     continue;
+  //   SkPaint fillPen;
+  //   fillPen.setStyle(SkPaint::kFill_Style);
+  //   fillPen.setAntiAlias(true);
+  //   fillPen.setBlender(blender);
+  //   fillPen.setImageFilter(imageFilter);
+  //   populateSkPaint(f.type, f.contextSettings, toSkRect(frameBound()), fillPen);
+  //   path.draw(renderer->canvas(), fillPen);
+  // }
+
+  return fillBound;
 }
 
 PaintNode::~PaintNode() = default;

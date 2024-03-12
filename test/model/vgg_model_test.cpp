@@ -55,7 +55,7 @@ TEST_F(VggModelTestSuite, Load_from_file)
 TEST_F(VggModelTestSuite, Load_from_buffer)
 {
   // Given
-  std::ifstream file("testDataDir/vgg-daruma.zip", std::ios::binary | std::ios::ate);
+  std::ifstream   file("testDataDir/vgg-daruma.zip", std::ios::binary | std::ios::ate);
   std::streamsize size = file.tellg();
   file.seekg(0, std::ios::beg);
 
@@ -76,7 +76,7 @@ TEST_F(VggModelTestSuite, Get_design_doc)
 {
   // Given
   std::string filePath = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->load(filePath);
+  auto        ret = m_sut->load(filePath);
   EXPECT_EQ(ret, true);
 
   // When
@@ -90,7 +90,7 @@ TEST_F(VggModelTestSuite, Get_code)
 {
   // Given
   std::string filePath = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->load(filePath);
+  auto        ret = m_sut->load(filePath);
   EXPECT_EQ(ret, true);
 
   // When
@@ -105,7 +105,7 @@ TEST_F(VggModelTestSuite, add_event_listener)
 {
   // Given
   std::string filePath = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->load(filePath);
+  auto        ret = m_sut->load(filePath);
   EXPECT_EQ(ret, true);
 
   m_sut->removeEventListener("/fake", g_eventNameClick, "console.log('hello');");
@@ -123,7 +123,7 @@ TEST_F(VggModelTestSuite, remove_event_listener)
 {
   // Given
   std::string filePath = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->load(filePath);
+  auto        ret = m_sut->load(filePath);
   EXPECT_EQ(ret, true);
 
   m_sut->removeEventListener("/fake", g_eventNameClick, "console.log('hello');");
@@ -142,7 +142,7 @@ TEST_F(VggModelTestSuite, get_event_listeners)
 {
   // Given
   std::string filePath = "testDataDir/vgg-daruma.zip";
-  auto ret = m_sut->load(filePath);
+  auto        ret = m_sut->load(filePath);
   EXPECT_EQ(ret, true);
 
   m_sut->removeEventListener("/fake", g_eventNameClick, "console.log('hello');");
@@ -161,7 +161,7 @@ TEST_F(VggModelTestSuite, load_layout_doc)
 {
   // Given
   std::string filePath = "testDataDir/layout/0_space_between/";
-  auto ret = m_sut->load(filePath);
+  auto        ret = m_sut->load(filePath);
   EXPECT_EQ(ret, true);
 
   // When
@@ -169,4 +169,18 @@ TEST_F(VggModelTestSuite, load_layout_doc)
 
   // Then
   EXPECT_TRUE(layoutDoc);
+}
+
+TEST_F(VggModelTestSuite, GetTexts)
+{
+  // Given
+  std::string filePath = "testDataDir/vgg-daruma.zip";
+  auto        ret = m_sut->load(filePath);
+  EXPECT_EQ(ret, true);
+
+  // When
+  auto retTexts = m_sut->texts();
+
+  // Then
+  EXPECT_EQ(retTexts.size(), 1);
 }

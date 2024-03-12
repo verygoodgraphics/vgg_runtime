@@ -371,6 +371,17 @@ int Daruma::getFrameIndex(const std::string& name) const
   return -1;
 }
 
+std::unordered_set<std::string> Daruma::texts() const
+{
+  ASSERT(m_runtimeDesignDoc);
+
+  std::unordered_set<std::string> texts;
+
+  getTextsTo(texts, m_runtimeDesignDoc->content());
+
+  return texts;
+}
+
 std::string Daruma::getFramesInfo() const
 {
   ASSERT(m_designDoc);
@@ -410,4 +421,30 @@ bool Daruma::setLaunchFrame(const std::string& name)
   }
 
   return false;
+}
+
+void Daruma::getTextsTo(std::unordered_set<std::string>& texts, const json& json) const
+{
+  if (!json.is_object() && !json.is_array())
+  {
+    return;
+  }
+
+  if (json.is_object())
+  {
+    auto className = json.value(K_CLASS, "");
+    if (className == K_TEXT)
+    {
+      auto text = json.value(K_CONTENT, "");
+      if (!text.empty())
+      {
+        texts.insert(text);
+      }
+    }
+  }
+
+  for (auto& [key, value] : json.items())
+  {
+    getTextsTo(texts, value);
+  }
 }

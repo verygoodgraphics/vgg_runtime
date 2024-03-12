@@ -83,6 +83,7 @@ public:
 #ifdef EMSCRIPTEN
   emscripten::val vggFileUint8Array();
 #endif
+  virtual std::vector<std::string> texts() override;
 
   // event listener
   // event types: https://developer.mozilla.org/en-US/docs/Web/API/Element#events

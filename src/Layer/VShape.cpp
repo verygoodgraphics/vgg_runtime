@@ -175,6 +175,11 @@ bool VShape::isClosed() const
   return m_shape->isClosed();
 }
 
+SkRect VShape::bounds() const
+{
+  return m_shape->bound();
+}
+
 void VShape::reset()
 {
   if (type() != EMPTY)

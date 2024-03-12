@@ -130,6 +130,8 @@ public:
 
   void setFillType(EWindingType fillType);
 
+  SkRect bounds() const;
+
   std::optional<VShape> outset(float x, float y) const;
 
   SkPath asPath() const;

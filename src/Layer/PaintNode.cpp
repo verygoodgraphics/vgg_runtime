@@ -679,27 +679,31 @@ void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape&
 
   if (newLayer)
   {
-    const SkRect layerLogicalBound = toSkRect(frameBound());
-    SkRect       layerVisualBound =
-      layerFilter ? layerFilter.get()->computeFastBounds(layerLogicalBound) : layerLogicalBound;
+    SkRect objectBound;
+    _->ensureStyleObjectRecorder(path, 0, _->style.fills, _->style.borders);
+    objectBound.join(_->styleDisplayList->bounds());
+    _->ensureDropShadowEffects(_->style.dropShadow);
+    objectBound.join(_->dropShadowEffects->bounds());
+    SkRect layerBound =
+      layerFilter ? layerFilter.get()->computeFastBounds(objectBound) : objectBound;
 
     if (_->alphaMask)
     {
-      layerFilter = _->alphaMask->maskWith(layerVisualBound, layerFilter, 0);
+      layerFilter = _->alphaMask->maskWith(layerBound, layerFilter, 0);
+      // DEBUG("width height %f %f", layerBound.width(), layerBound.height());
     }
-    _->ensureDisplayList(renderer, path, 0);
     if (dropbackFilter)
     {
       if (auto df = _->styleDisplayList->asImageFilter(); df)
       {
         auto blender = getOrCreateBlender("maskOut", g_maskOutBlender);
-        dropbackFilter = SkImageFilters::Blend(blender, df, dropbackFilter, layerLogicalBound);
+        dropbackFilter = SkImageFilters::Blend(blender, df, dropbackFilter, objectBound);
       }
     }
     SkPaint layerPaint;
     layerPaint.setAntiAlias(true);
     layerPaint.setImageFilter(layerFilter);
-    VShape clipShape(layerVisualBound);
+    VShape clipShape(layerBound);
     _->beginLayer(renderer, &layerPaint, &clipShape, dropbackFilter);
   }
   onDrawStyle(renderer, path, 0);
@@ -713,23 +717,18 @@ void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape&
   }
 }
 
-void PaintNode::onDrawFill(
+Bound PaintNode::onDrawFill(
   Renderer*            renderer,
   sk_sp<SkBlender>     blender,
   sk_sp<SkImageFilter> imageFilter,
   const VShape&        path)
 {
-  // d_ptr->ensureFillShader();
-  // if (d_ptr->fillShader)
-  // {
-  //   SkPaint fillPen;
-  //   fillPen.setStyle(SkPaint::kFill_Style);
-  //   fillPen.setAntiAlias(true);
-  //   fillPen.setBlender(blender);
-  //   fillPen.setShader(d_ptr->fillShader);
-  //   path.draw(renderer->canvas(), fillPen);
-  // }
+  // FillEffect fillEffect(style().fills, toSkRect(frameBound()));
+  // SkPaint    p;
+  // p.setShader(fillEffect.shader());
+  // path.draw(renderer->canvas(), p);
 
+  auto fillBounds = SkRect::MakeEmpty();
   for (size_t i = 0; i < style().fills.size(); ++i)
   {
     auto& f = style().fills[i];
@@ -743,6 +742,7 @@ void PaintNode::onDrawFill(
     populateSkPaint(f.type, f.contextSettings, toSkRect(frameBound()), fillPen);
     path.draw(renderer->canvas(), fillPen);
   }
+  return Bound{ fillBounds.x(), fillBounds.y(), fillBounds.width(), fillBounds.height() };
 }
 
 PaintNode::~PaintNode() = default;

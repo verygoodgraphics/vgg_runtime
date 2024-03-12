@@ -67,7 +67,7 @@ public:
   virtual ~ImageNode() override;
 
 protected:
-  void onDrawFill(
+  Bound onDrawFill(
     Renderer*            renderer,
     sk_sp<SkBlender>     blender,
     sk_sp<SkImageFilter> imageFilter,

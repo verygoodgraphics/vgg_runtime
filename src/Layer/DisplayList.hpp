@@ -39,6 +39,11 @@ public:
     return m_displayList;
   }
 
+  const SkRect& bounds() const
+  {
+    return m_bounds;
+  }
+
   sk_sp<SkImageFilter> asImageFilter()
   {
     if (!m_imageFilter)
@@ -50,13 +55,15 @@ public:
 
 private:
   friend class DisplayListRecorder;
-  DisplayList(sk_sp<SkPictureShader> shader)
+  DisplayList(sk_sp<SkPictureShader> shader, const SkRect& bound)
     : m_displayList(std::move(shader))
+    , m_bounds(bound)
   {
     ASSERT(m_displayList);
   }
   sk_sp<SkPictureShader> m_displayList;
   sk_sp<SkImageFilter>   m_imageFilter;
+  SkRect                 m_bounds;
 };
 
 class DisplayListRecorder
@@ -96,7 +103,7 @@ public:
       SkFilterMode::kNearest,
       &m_bound);
     ASSERT(maskShader);
-    return DisplayList(maskShader);
+    return DisplayList(maskShader, m_bound);
   }
 
 private:

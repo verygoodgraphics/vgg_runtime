@@ -501,6 +501,14 @@ sk_sp<SkImageFilter> makeInnerShadowImageFilter(
   auto sigma = SkBlurMask::ConvertRadiusToSigma(shadow.blur);
   auto alpha =
     SkImageFilters::ColorFilter(SkColorFilters::Blend(SK_ColorBLACK, SkBlendMode::kSrcIn), 0);
+
+  // auto blender = getOrCreateBlender("innerShadow", R"(
+  // vec4 main(vec4 srcColor, vec4 dstColor) {
+  // return srcColor.a > 0? vec4(0,0,0,1) : vec4(0,0,0,0);
+  // }
+  // )");
+
+  // auto alpha = SkImageFilters::Blend(blender, 0, 0);
   auto f1 =
     SkImageFilters::ColorFilter(SkColorFilters::Blend(shadow.color, SkBlendMode::kSrcOut), 0);
   sk_sp<SkImageFilter> f2;
@@ -522,6 +530,7 @@ sk_sp<SkImageFilter> makeInnerShadowImageFilter(
   }
   auto f3 = SkImageFilters::Blur(sigma, sigma, SkTileMode::kDecal, f2);
   auto f4 = SkImageFilters::Blend(SkBlendMode::kSrcIn, alpha, f3);
+  // auto f4 = f3;
   if (shadowOnly)
   {
     return f4;

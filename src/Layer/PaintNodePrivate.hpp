@@ -394,16 +394,18 @@ public:
     if (!styleDisplayList)
     {
       DisplayListRecorder rec;
-      SkRect              r = toSkRect(bound);
+      SkRect              r = computeStyleBounds(shape, borders, shape.bounds());
       auto                recorder = rec.beginRecording(r, SkMatrix::I());
 
       SkRect     styleBounds = r;
       const auto fillBounds = toSkRect(q_ptr->onDrawFill(recorder, blender, 0, shape));
-      const auto borderBounds = drawBorder(recorder, shape, r, borders, blender);
+      const auto borderBounds = drawBorder(recorder, shape, shape.bounds(), borders, blender);
+
       ASSERT(borderBounds.contains(fillBounds));
       styleBounds.join(fillBounds);
       (void)borderBounds;
-      // styleBounds.join(borderBounds);
+      styleBounds.join(borderBounds);
+      ASSERT(styleBounds.contains(fillBounds));
       styleDisplayList = rec.finishRecording(styleBounds);
     }
   }
@@ -737,26 +739,6 @@ public:
         break;
       }
     }
-    auto  border = false;
-    float maxWidth = 0;
-    for (const auto& b : style.borders)
-    {
-      if (b.isEnabled)
-      {
-        border = true;
-        switch (b.position)
-        {
-          case PP_INSIDE:
-            break;
-          case PP_CENTER:
-            maxWidth = std::max(b.thickness, maxWidth);
-            break;
-          case PP_OUTSIDE:
-            maxWidth = std::max(b.thickness * 2, maxWidth);
-            break;
-        }
-      }
-    }
     ensureStyleObjectRecorder(skPath, blender, style.fills, style.borders);
     ensureDropShadowEffects(style.dropShadow, skPath);
     for (const auto& f : dropShadowEffects->filters())
@@ -786,17 +768,12 @@ public:
         {
           p.setImageFilter(f.filter);
           p.setAntiAlias(true);
-
           // p.setShader(styleDisplayList->asShader());
           // renderer->canvas()->drawRect(styleDisplayList->bounds(), p);
-          renderer->canvas()->drawPicture(styleDisplayList->picture(), 0, &p);
+          skPath.draw(
+            renderer->canvas(),
+            p); // TODO:: draw the styled object rather than just the path
         }
-      }
-      if (border)
-      {
-        // p.setStyle(SkPaint::kStroke_Style);
-        // p.setStrokeWidth(maxWidth);
-        // painter.canvas()->drawPath(*path, p);
       }
       if (f.prop.clipShadow)
       {
@@ -805,12 +782,16 @@ public:
       g.restore([&]() { renderer->canvas()->restore(); });
     }
 
-    styleDisplayList->playback(renderer);
+    // styleDisplayList->playback(renderer);
 
     // SkPaint p;
     // p.setShader(styleDisplayList->asShader());
     // p.setAntiAlias(true);
+    // auto r = styleDisplayList->bounds();
     // renderer->canvas()->drawRect(styleDisplayList->bounds(), p);
+    // above code is not accurate
+
+    styleDisplayList->playback(renderer);
 
     if (filled)
     {
@@ -819,18 +800,21 @@ public:
       if (filter)
       {
         SkPaint p;
-        p.setImageFilter(innerShadowEffects->mergedFilter());
+        p.setImageFilter(filter);
         p.setAntiAlias(true);
+        p.setAlphaf(1.0);
         skPath.draw(renderer->canvas(), p);
+        // TODO:: draw the styled object rather than just the path
       }
-      //  for (auto& filter : innerShadowEffects->filters())
-      //  {
-      //    SkPaint p;
-      //    p.setImageFilter(filter);
-      //    p.setAntiAlias(true);
-      //    //  painter.canvas()->drawPaint(p);
-      //    skPath.draw(renderer->canvas(), p);
-      //  }
+      // for (auto& filter : innerShadowEffects->filters())
+      // {
+      //   SkPaint p;
+      //   p.setImageFilter(filter);
+      //   p.setAntiAlias(true);
+      //   p.setAlphaf(0.5);
+      //   //  painter.canvas()->drawPaint(p);
+      //   skPath.draw(renderer->canvas(), p);
+      // }
     }
   }
 };

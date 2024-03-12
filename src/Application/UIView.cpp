@@ -428,7 +428,7 @@ bool UIView::handleMouseEvent(
       break;
   }
 
-  fireMouseEvent(target, type, jsButtonIndex, x, y, motionX, motionY);
+  fireMouseEvent(target, type, jsButtonIndex, pointToPage.x, pointToPage.y, motionX, motionY);
   return true;
 }
 

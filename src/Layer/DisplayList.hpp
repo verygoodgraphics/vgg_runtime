@@ -44,6 +44,16 @@ public:
     return m_bounds;
   }
 
+  sk_sp<SkShader> asAlphaShader()
+  {
+    return SkShaders::Blend(SkBlendMode::kSrcIn, m_displayList, SkShaders::Color(0xFFFFFFFF));
+  }
+
+  sk_sp<SkImageFilter> asAlphaImageFilter()
+  {
+    return SkImageFilters::Shader(asAlphaShader());
+  }
+
   sk_sp<SkImageFilter> asImageFilter()
   {
     if (!m_imageFilter)
@@ -103,7 +113,7 @@ public:
       SkFilterMode::kNearest,
       nullptr);
     ASSERT(maskShader);
-    return DisplayList(maskShader, m_bound);
+    return DisplayList(maskShader, cropRect);
   }
 
 private:

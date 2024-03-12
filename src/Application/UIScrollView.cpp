@@ -46,38 +46,58 @@ bool UIScrollView::onEvent(UEvent event, void* userData)
 {
   if (isScrollEnabled() && (canScrollHorizontal() || canScrollVertical()))
   {
+    VERBOSE("UIScrollView::onEvent: receive event(0x%x)", event.type);
+
+    bool handled = false;
     switch (event.type)
     {
 #ifndef EMSCRIPTEN
+        // handle touches only
+        // in browsers, mouse and touch events are both received, first mouse then touch.
       case VGG_MOUSEBUTTONDOWN:
-        VERBOSE("UIScrollView::onEvent: mouse down");
-        m_panGestureRecognizer.touchesBegan(event);
-        break;
-
-      case VGG_MOUSEMOTION:
-        VERBOSE("UIScrollView::onEvent: mouse move");
-        m_panGestureRecognizer.touchesMoved(event);
-        break;
-
-      case VGG_MOUSEBUTTONUP:
-        VERBOSE("UIScrollView::onEvent: mouse up");
-        m_panGestureRecognizer.touchesEnded(event);
-        break;
 #endif
-
       case VGG_TOUCHDOWN:
         VERBOSE("UIScrollView::onEvent: touch down");
         m_panGestureRecognizer.touchesBegan(event);
         break;
+
+#ifndef EMSCRIPTEN
+      case VGG_MOUSEMOTION:
+#endif
       case VGG_TOUCHMOTION:
         VERBOSE("UIScrollView::onEvent: touch move");
         m_panGestureRecognizer.touchesMoved(event);
         break;
+
+#ifndef EMSCRIPTEN
+      case VGG_MOUSEBUTTONUP:
+#endif
       case VGG_TOUCHUP:
         VERBOSE("UIScrollView::onEvent: touch up");
+        if (m_dragging)
+        {
+          handled = true;
+        }
         m_panGestureRecognizer.touchesEnded(event);
         break;
 
+      default:
+        break;
+    }
+
+    switch (event.type)
+    {
+      case VGG_MOUSEBUTTONDOWN:
+      case VGG_MOUSEMOTION:
+      case VGG_MOUSEBUTTONUP:
+      case VGG_TOUCHDOWN:
+      case VGG_TOUCHMOTION:
+      case VGG_TOUCHUP:
+        if (handled || m_dragging)
+        {
+          VERBOSE("UIScrollView::onEvent: event(0x%x) is handled", event.type);
+          return true;
+        }
       default:
         break;
     }

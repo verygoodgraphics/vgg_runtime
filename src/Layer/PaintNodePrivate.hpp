@@ -406,7 +406,8 @@ public:
       (void)borderBounds;
       styleBounds.join(borderBounds);
       ASSERT(styleBounds.contains(fillBounds));
-      styleDisplayList = rec.finishRecording(styleBounds);
+      auto mat = SkMatrix::Translate(styleBounds.x(), styleBounds.y());
+      styleDisplayList = rec.finishRecording(styleBounds, &mat);
     }
   }
 
@@ -782,16 +783,11 @@ public:
       g.restore([&]() { renderer->canvas()->restore(); });
     }
 
+    SkPaint p;
+    p.setShader(styleDisplayList->asShader());
+    p.setAntiAlias(true);
+    renderer->canvas()->drawRect(styleDisplayList->bounds(), p);
     // styleDisplayList->playback(renderer);
-
-    // SkPaint p;
-    // p.setShader(styleDisplayList->asShader());
-    // p.setAntiAlias(true);
-    // auto r = styleDisplayList->bounds();
-    // renderer->canvas()->drawRect(styleDisplayList->bounds(), p);
-    // above code is not accurate
-
-    styleDisplayList->playback(renderer);
 
     if (filled)
     {
@@ -804,7 +800,9 @@ public:
         p.setAntiAlias(true);
         p.setAlphaf(1.0);
         skPath.draw(renderer->canvas(), p);
-        // TODO:: draw the styled object rather than just the path
+
+        // p.setShader(styleDisplayList->asShader());
+        // renderer->canvas()->drawRect(styleDisplayList->bounds(), p);
       }
       // for (auto& filter : innerShadowEffects->filters())
       // {

@@ -27,11 +27,11 @@ class DisplayList
 public:
   SkPicture* picture() const
   {
-    return m_displayList ? m_displayList->picture().get() : nullptr;
+    return nullptr;
   }
   void playback(Renderer* renderer)
   {
-    renderer->canvas()->drawPicture(m_displayList->picture());
+    // renderer->canvas()->drawPicture(m_displayList->picture());
   }
 
   sk_sp<SkShader> asShader() const
@@ -65,15 +65,15 @@ public:
 
 private:
   friend class DisplayListRecorder;
-  DisplayList(sk_sp<SkPictureShader> shader, const SkRect& bound)
+  DisplayList(sk_sp<SkShader> shader, const SkRect& bound)
     : m_displayList(std::move(shader))
     , m_bounds(bound)
   {
     ASSERT(m_displayList);
   }
-  sk_sp<SkPictureShader> m_displayList;
-  sk_sp<SkImageFilter>   m_imageFilter;
-  SkRect                 m_bounds;
+  sk_sp<SkShader>      m_displayList;
+  sk_sp<SkImageFilter> m_imageFilter;
+  SkRect               m_bounds;
 };
 
 class DisplayListRecorder
@@ -104,14 +104,15 @@ public:
   {
     return m_renderer.get();
   }
-  DisplayList finishRecording(const SkRect& cropRect)
+  DisplayList finishRecording(const SkRect& cropRect, const SkMatrix* matrix)
   {
-    auto maskShader = sk_make_sp<SkPictureShader>(
-      m_rec->finishRecordingAsPicture(),
+    auto maskShader = SkPictureShader::Make(
+      m_rec->finishRecordingAsPictureWithCull(cropRect),
       SkTileMode::kClamp,
       SkTileMode::kClamp,
       SkFilterMode::kNearest,
-      nullptr);
+      matrix,
+      &cropRect);
     ASSERT(maskShader);
     return DisplayList(maskShader, cropRect);
   }

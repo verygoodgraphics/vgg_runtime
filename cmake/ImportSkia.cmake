@@ -77,7 +77,7 @@ endif()
 if(MSVC)
   message(STATUS "Run skia git-sync-deps")
   execute_process(COMMAND "python3" "tools/git-sync-deps" WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/lib/skia")
-endif()  
+endif()
 
 message(STATUS "Use skia ${SKIA_EXTERNAL_PROJECT_DIR}")
 

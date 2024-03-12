@@ -1,4 +1,4 @@
-add_library(vgg_application STATIC
+set(VGG_APPLICATION_SOURCE
   AppRender.cpp
   Controller.cpp
   Editor.cpp
@@ -13,6 +13,13 @@ add_library(vgg_application STATIC
   VggSdk.cpp
   ViewModel.cpp
 )
+
+if(MSVC)
+  add_library(vgg_application SHARED ${VGG_APPLICATION_SOURCE})
+  set_target_properties(vgg_application PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+else()
+  add_library(vgg_application STATIC ${VGG_APPLICATION_SOURCE})
+endif()
 
 target_include_directories(vgg_application PUBLIC
   ${CMAKE_SOURCE_DIR}/include

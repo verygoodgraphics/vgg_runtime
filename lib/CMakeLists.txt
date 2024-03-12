@@ -142,6 +142,12 @@ else()
   )
 endif()
 
+if(MSVC)
+  message(STATUS "start build node")
+  # note: node need vs2022
+  execute_process(COMMAND "vcbuild.bat" "${CMAKE_BUILD_TYPE}" "vs2022" "dll" "x64" WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/lib/${NODE_FOLDER}")
+endif()
+
 # this is an empty library for linking purpose only
 add_library(vgg_libnode STATIC empty.cpp)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "$ENV{name}" STREQUAL "nix-shell")
@@ -255,8 +261,10 @@ endif()
 
 install(TARGETS vgg_libnode_stub DESTINATION lib)
 if(VGG_CONTAINER_FOR_QT)
-  install(TARGETS zlib 
-    COMPONENT container
-    DESTINATION lib
-  )
+  if(NOT MSVC)
+    install(TARGETS zlib 
+      COMPONENT container
+      DESTINATION lib
+    )
+  endif()
 endif()

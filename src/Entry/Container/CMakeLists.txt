@@ -28,10 +28,23 @@ target_link_libraries(vgg_container PUBLIC
   vgg_adapter
 )
 
+if(MSVC)
+  set_target_properties(vgg_container PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
 install(TARGETS vgg_container
   COMPONENT container
   DESTINATION lib
 )
+
+if(MSVC)
+  # because in msvc, vgg_application is a SHARED target.
+  install(TARGETS vgg_application
+    COMPONENT container
+    DESTINATION lib
+  )
+endif()
+
 install(FILES
   ${CMAKE_SOURCE_DIR}/include/Application/Event/Event.hpp
   ${CMAKE_SOURCE_DIR}/include/Application/Event/EventAPI.hpp

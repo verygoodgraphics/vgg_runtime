@@ -70,7 +70,13 @@ skia_use_dng_sdk=false
 skia_use_fontconfig=false
 skia_use_libheif=false
 skia_use_expat=false
-skia_enable_pdf=true")
+skia_enable_pdf=true
+skia_use_system_libjpeg_turbo=false
+skia_use_system_harfbuzz=false
+skia_use_system_libpng=false
+skia_use_system_libwebp=false
+skia_use_system_expat=false
+skia_use_system_icu=false")
 
 set(SKIA_PRESET_FEATURES_FOR_MACOS
 "skia_use_egl=false

@@ -109,17 +109,23 @@ public:
     Result::TimeCost cost;
     if (m_enableExpand)
     {
-      cost.expand =
-        layer::Timer::time([this]() { m_doc = Layout::ExpandSymbol(m_doc, m_layout)(); });
+      nlohmann::json expandedLayout;
+      cost.expand = layer::Timer::time(
+        [&, this]()
+        {
+          const auto [a, b] = Layout::ExpandSymbol(m_doc, m_layout).run();
+          m_doc = std::move(a);
+          expandedLayout = std::move(b);
+        });
       if (m_enableLayout)
       {
         cost.layout = layer::Timer::time(
-          [this]()
+          [&, this]()
           {
             JsonDocumentPtr docPtr = std::make_shared<RawJsonDocument>();
             docPtr->setContent(m_doc);
             JsonDocumentPtr layoutPtr = std::make_shared<RawJsonDocument>();
-            layoutPtr->setContent(m_layout);
+            layoutPtr->setContent(expandedLayout);
             Layout::Layout layout(std::move(docPtr), std::move(layoutPtr));
             m_doc = layout.displayDesignDoc()->content();
           });

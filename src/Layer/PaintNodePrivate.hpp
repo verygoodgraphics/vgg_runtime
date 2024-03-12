@@ -47,6 +47,7 @@
 #include <core/SkPictureRecorder.h>
 #include <effects/SkShaderMaskFilter.h>
 #include <effects/SkBlurMaskFilter.h>
+#include <numeric>
 #include <src/core/SkBlurMask.h>
 #include <src/shaders/SkPictureShader.h>
 
@@ -253,7 +254,7 @@ public:
       if (st.opacity < 1.0)
       {
         srcShader = srcShader->makeWithColorFilter(
-          SkColorFilters::Blend(Color{ 0, 0, 0, st.opacity }, SkBlendMode::kSrcIn));
+          SkColorFilters::Blend(Color{ 0, 0, 0, st.opacity }, SkBlendMode::kDstIn));
       }
       if (!dstShader)
       {
@@ -278,6 +279,7 @@ public:
       }
     }
     m_shader = dstShader;
+    m_bounds = bounds;
   }
 
   sk_sp<SkShader> shader() const
@@ -317,6 +319,8 @@ public:
       m_imageFilters.emplace_back(innerShadowFilter);
       m_bounds.join(r);
     }
+    if (!m_imageFilters.empty())
+      m_mergedFilter = SkImageFilters::Merge(m_imageFilters.data(), m_imageFilters.size());
   }
 
   const SkRect& bounds()
@@ -329,8 +333,14 @@ public:
     return m_imageFilters;
   }
 
+  sk_sp<SkImageFilter> mergedFilter() const
+  {
+    return m_mergedFilter;
+  }
+
 private:
   std::vector<sk_sp<SkImageFilter>> m_imageFilters;
+  sk_sp<SkImageFilter>              m_mergedFilter;
   SkRect                            m_bounds;
 };
 
@@ -385,11 +395,15 @@ public:
     {
       DisplayListRecorder rec;
       SkRect              r = toSkRect(bound);
-      auto                styleBounds = computeStyleBounds(shape, borders, r);
+      auto                recorder = rec.beginRecording(r, SkMatrix::I());
 
-      auto recorder = rec.beginRecording(r, SkMatrix::I());
-      q_ptr->onDrawFill(recorder, blender, 0, shape);
-      drawBorder(recorder, shape, bound, borders, blender);
+      SkRect     styleBounds = r;
+      const auto fillBounds = toSkRect(q_ptr->onDrawFill(recorder, blender, 0, shape));
+      const auto borderBounds = drawBorder(recorder, shape, r, borders, blender);
+      ASSERT(borderBounds.contains(fillBounds));
+      styleBounds.join(fillBounds);
+      (void)borderBounds;
+      // styleBounds.join(borderBounds);
       styleDisplayList = rec.finishRecording(styleBounds);
     }
   }
@@ -562,14 +576,14 @@ public:
     onDrawStyleImpl(renderer, *path, blender);
   }
 
-  Bound drawBorder(
+  SkRect drawBorder(
     Renderer*                  renderer,
     const VShape&              border,
-    const Bound&               bound,
+    const SkRect&              bounds,
     const std::vector<Border>& borders,
     sk_sp<SkBlender>           blender)
   {
-    SkRect     resultBounds = border.bounds();
+    SkRect     resultBounds = bounds;
     const auto shapeBounds = resultBounds;
     for (const auto& b : borders)
     {
@@ -636,7 +650,7 @@ public:
           textPaint);
       }
     }
-    return Bound{ resultBounds.x(), resultBounds.y(), resultBounds.width(), resultBounds.height() };
+    return resultBounds;
   }
 
   sk_sp<SkImageFilter> blurImageFilter()
@@ -772,6 +786,9 @@ public:
         {
           p.setImageFilter(f.filter);
           p.setAntiAlias(true);
+
+          // p.setShader(styleDisplayList->asShader());
+          // renderer->canvas()->drawRect(styleDisplayList->bounds(), p);
           renderer->canvas()->drawPicture(styleDisplayList->picture(), 0, &p);
         }
       }
@@ -793,19 +810,27 @@ public:
     // SkPaint p;
     // p.setShader(styleDisplayList->asShader());
     // p.setAntiAlias(true);
-    // renderer->canvas()->drawRect(r, p);
+    // renderer->canvas()->drawRect(styleDisplayList->bounds(), p);
 
     if (filled)
     {
       ensureInnerShadowEffects(style.innerShadow);
-      for (auto& filter : innerShadowEffects->filters())
+      auto filter = innerShadowEffects->mergedFilter();
+      if (filter)
       {
         SkPaint p;
-        p.setImageFilter(filter);
+        p.setImageFilter(innerShadowEffects->mergedFilter());
         p.setAntiAlias(true);
-        //  painter.canvas()->drawPaint(p);
         skPath.draw(renderer->canvas(), p);
       }
+      //  for (auto& filter : innerShadowEffects->filters())
+      //  {
+      //    SkPaint p;
+      //    p.setImageFilter(filter);
+      //    p.setAntiAlias(true);
+      //    //  painter.canvas()->drawPaint(p);
+      //    skPath.draw(renderer->canvas(), p);
+      //  }
     }
   }
 };

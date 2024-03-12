@@ -59,12 +59,12 @@ private:
     RIGHT
   };
 
-  bool m_isEnabled{ false };
+  bool                      m_isEnabled{ false };
   std::weak_ptr<LayoutNode> m_hoverNode;
   std::weak_ptr<LayoutNode> m_selectedNode;
-  std::weak_ptr<UIView> m_contentView;
+  std::weak_ptr<UIView>     m_contentView;
 
-  bool m_isMouseDown{ false };
+  bool            m_isMouseDown{ false };
   EResizePosition m_mouseDownPosition;
 
   std::shared_ptr<Mouse> m_mouse;
@@ -115,7 +115,7 @@ private:
   void drawBorder(SkCanvas* canvas, const LayoutNode* node);
 
   EResizePosition checkMousePostion(int x, int y);
-  void resizeNode(MouseEvent* mouseMove);
+  void            resizeNode(MouseEvent* mouseMove);
 
   Layout::Rect getSelectNodeRect(EResizePosition position);
 

@@ -82,9 +82,10 @@ void drawRectCorner(SkCanvas* canvas, const SkRect& rect)
 
 void Editor::handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNode)
 {
-  DEBUG("Editor::handleUIEvent: type = %s, target = %s",
-        event->type().c_str(),
-        event->path().c_str());
+  DEBUG(
+    "Editor::handleUIEvent: type = %s, target = %s",
+    event->type().c_str(),
+    event->targetPath().c_str());
 
   switch (event->enumType())
   {
@@ -244,7 +245,7 @@ Editor::EResizePosition Editor::checkMousePostion(int x, int y)
   }
 
   Layout::Point mouse{ TO_VGG_LAYOUT_SCALAR(x), TO_VGG_LAYOUT_SCALAR(y) };
-  Layout::Rect f;
+  Layout::Rect  f;
   if (selectedNode == contentView->currentPage())
   {
     f.size = selectedNode->frame().size;
@@ -254,13 +255,14 @@ Editor::EResizePosition Editor::checkMousePostion(int x, int y)
     f = selectedNode->frameToAncestor(contentView->currentPage());
   }
 
-  DEBUG("Editor::checkMousePostion: selected node frame is: (%f, %f, %f, %f), mouse at: %f, %f",
-        f.origin.x,
-        f.origin.y,
-        f.size.width,
-        f.size.height,
-        mouse.x,
-        mouse.y);
+  DEBUG(
+    "Editor::checkMousePostion: selected node frame is: (%f, %f, %f, %f), mouse at: %f, %f",
+    f.origin.x,
+    f.origin.y,
+    f.size.width,
+    f.size.height,
+    mouse.x,
+    mouse.y);
 
   // top corner
   Layout::Rect topLeftCorner{ getSelectNodeRect(EResizePosition::TOP_LEFT) };
@@ -363,13 +365,14 @@ void Editor::resizeNode(MouseEvent* mouseMove)
   auto tx = mouseMove->movementX / scale;
   auto ty = mouseMove->movementY / scale;
 
-  DEBUG("Editor::resizeNode: selected node frame is: (%f, %f, %f, %f), mouse move is: %f, %f",
-        frame.origin.x,
-        frame.origin.y,
-        frame.size.width,
-        frame.size.height,
-        tx,
-        ty);
+  DEBUG(
+    "Editor::resizeNode: selected node frame is: (%f, %f, %f, %f), mouse move is: %f, %f",
+    frame.origin.x,
+    frame.origin.y,
+    frame.size.width,
+    frame.size.height,
+    tx,
+    ty);
 
   switch (m_mouseDownPosition)
   {
@@ -439,6 +442,22 @@ void Editor::resizeNode(MouseEvent* mouseMove)
   frame.size.width = std::max(frame.size.width, K_RESIZE_MIN_LENGTH);
   frame.size.height = std::max(frame.size.height, K_RESIZE_MIN_LENGTH);
 
+  if (selectedNode == contentView->currentPage())
+  {
+    auto offset = frame.origin - selectedNode->frame().origin;
+    switch (m_mouseDownPosition)
+    {
+      case EResizePosition::TOP_LEFT:
+      case EResizePosition::TOP_RIGHT:
+      case EResizePosition::BOTTOM_LEFT:
+      case EResizePosition::TOP:
+      case EResizePosition::LEFT:
+        contentView->zoomer()->setTranslate(offset.x, offset.y);
+        break;
+      default:
+        break;
+    }
+  }
   selectedNode->setFrame(frame, true);
 }
 

@@ -22,16 +22,15 @@
 namespace VGG::layer
 {
 
-class DisplayList
+class ObjectShader
 {
 public:
-  SkPicture* picture() const
+  void render(Renderer* renderer)
   {
-    return nullptr;
-  }
-  void playback(Renderer* renderer)
-  {
-    // renderer->canvas()->drawPicture(m_displayList->picture());
+    SkPaint p;
+    p.setShader(asShader());
+    p.setAntiAlias(true);
+    renderer->canvas()->drawRect(bounds(), p);
   }
 
   sk_sp<SkShader> asShader() const
@@ -64,8 +63,8 @@ public:
   }
 
 private:
-  friend class DisplayListRecorder;
-  DisplayList(sk_sp<SkShader> shader, const SkRect& bound)
+  friend class ObjectRecorder;
+  ObjectShader(sk_sp<SkShader> shader, const SkRect& bound)
     : m_displayList(std::move(shader))
     , m_bounds(bound)
   {
@@ -76,13 +75,13 @@ private:
   SkRect               m_bounds;
 };
 
-class DisplayListRecorder
+class ObjectRecorder
 {
 public:
-  DisplayListRecorder() = default;
-  DisplayListRecorder(const DisplayListRecorder&) = delete;
-  DisplayListRecorder& operator=(const DisplayListRecorder&) = delete;
-  Renderer*            beginRecording(const SkRect& b, const SkMatrix& matrix)
+  ObjectRecorder() = default;
+  ObjectRecorder(const ObjectRecorder&) = delete;
+  ObjectRecorder& operator=(const ObjectRecorder&) = delete;
+  Renderer*       beginRecording(const SkRect& b, const SkMatrix& matrix)
   {
     m_bound = b;
     m_matrix = matrix;
@@ -104,7 +103,7 @@ public:
   {
     return m_renderer.get();
   }
-  DisplayList finishRecording(const SkRect& cropRect, const SkMatrix* matrix)
+  ObjectShader finishRecording(const SkRect& cropRect, const SkMatrix* matrix)
   {
     auto maskShader = SkPictureShader::Make(
       m_rec->finishRecordingAsPictureWithCull(cropRect),
@@ -114,7 +113,7 @@ public:
       matrix,
       &cropRect);
     ASSERT(maskShader);
-    return DisplayList(maskShader, cropRect);
+    return ObjectShader(maskShader, cropRect);
   }
 
 private:

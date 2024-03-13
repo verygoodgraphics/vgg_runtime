@@ -25,7 +25,7 @@
 #include "Layer/Renderer.hpp"
 #include "Layer/Effects.hpp"
 #include "Layer/VSkia.hpp"
-#include "Layer/DisplayList.hpp"
+#include "Layer/ObjectShader.hpp"
 #include "Utility/HelperMacro.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/Transform.hpp"
@@ -142,13 +142,13 @@ public:
   EObjectType              type;
   bool                     visible{ true };
 
-  ContourData                contour;
-  PaintOption                paintOption;
-  ContourOption              maskOption;
-  std::optional<DisplayList> styleDisplayList; // fill + border
-  std::optional<VShape>      path;
-  std::optional<VShape>      mask;
-  std::optional<MaskObject>  alphaMask;
+  ContourData                 contour;
+  PaintOption                 paintOption;
+  ContourOption               maskOption;
+  std::optional<ObjectShader> styleDisplayList; // fill + border
+  std::optional<VShape>       path;
+  std::optional<VShape>       mask;
+  std::optional<MaskObject>   alphaMask;
 
   std::optional<DropShadowEffect>  dropShadowEffects;
   std::optional<InnerShadowEffect> innerShadowEffects;
@@ -171,11 +171,11 @@ public:
   {
     if (!styleDisplayList)
     {
-      DisplayListRecorder rec;
-      SkRect              r = computeStyleBounds(shape, borders, shape.bounds());
-      auto                recorder = rec.beginRecording(r, SkMatrix::I());
+      ObjectRecorder rec;
+      // SkRect              r = computeStyleBounds(shape, borders, shape.bounds());
+      SkRect              styleBounds = toSkRect(bound);
+      auto                recorder = rec.beginRecording(styleBounds, SkMatrix::I());
 
-      SkRect     styleBounds = r;
       const auto fillBounds = toSkRect(q_ptr->onDrawFill(recorder, blender, 0, shape));
       const auto borderBounds = drawBorder(recorder, shape, shape.bounds(), borders, blender);
 
@@ -189,44 +189,44 @@ public:
     }
   }
 
-  SkRect computeStyleBounds(
-    const VShape&              shape,
-    const std::vector<Border>& borders,
-    const SkRect&              bound) const
-  {
-    SkRect rect = bound;
-    for (const auto& b : borders)
-    {
-      if (!b.isEnabled || b.thickness <= 0)
-        continue;
-      SkPaint strokePen;
-      strokePen.setAntiAlias(true);
-      populateSkPaint(b, rect, strokePen);
-      strokePen.setStrokeJoin(toSkPaintJoin(b.lineJoinStyle));
-      strokePen.setStrokeCap(toSkPaintCap(b.lineCapStyle));
-      strokePen.setStrokeMiter(b.miterLimit);
-      float strokeWidth = b.thickness;
-      if (b.position == PP_INSIDE)
-      {
-        // inside
-        strokeWidth = 2.f * b.thickness;
-      }
-      else if (b.position == PP_OUTSIDE)
-      {
-        // outside
-        strokeWidth = 2.f * b.thickness;
-      }
-      strokePen.setStrokeWidth(strokeWidth);
-      strokePen.setStyle(SkPaint::kStroke_Style);
-      if (strokePen.canComputeFastBounds())
-      {
-        SkRect result;
-        strokePen.computeFastBounds(bound, &result);
-        rect.join(result);
-      }
-    }
-    return rect;
-  }
+  // SkRect computeStyleBounds(
+  //   const VShape&              shape,
+  //   const std::vector<Border>& borders,
+  //   const SkRect&              bound) const
+  // {
+  //   SkRect rect = bound;
+  //   for (const auto& b : borders)
+  //   {
+  //     if (!b.isEnabled || b.thickness <= 0)
+  //       continue;
+  //     SkPaint strokePen;
+  //     strokePen.setAntiAlias(true);
+  //     populateSkPaint(b, rect, strokePen);
+  //     strokePen.setStrokeJoin(toSkPaintJoin(b.lineJoinStyle));
+  //     strokePen.setStrokeCap(toSkPaintCap(b.lineCapStyle));
+  //     strokePen.setStrokeMiter(b.miterLimit);
+  //     float strokeWidth = b.thickness;
+  //     if (b.position == PP_INSIDE)
+  //     {
+  //       // inside
+  //       strokeWidth = 2.f * b.thickness;
+  //     }
+  //     else if (b.position == PP_OUTSIDE)
+  //     {
+  //       // outside
+  //       strokeWidth = 2.f * b.thickness;
+  //     }
+  //     strokePen.setStrokeWidth(strokeWidth);
+  //     strokePen.setStyle(SkPaint::kStroke_Style);
+  //     if (strokePen.canComputeFastBounds())
+  //     {
+  //       SkRect result;
+  //       strokePen.computeFastBounds(bound, &result);
+  //       rect.join(result);
+  //     }
+  //   }
+  //   return rect;
+  // }
 
   void ensureDropShadowEffects(const std::vector<DropShadow>& shadow, const VShape& shape)
   {
@@ -507,6 +507,10 @@ public:
     renderer->canvas()->restore();
   }
 
+  void onRevalidateImpl()
+  {
+  }
+
   void onDrawStyleImpl(Renderer* renderer, const VShape& skPath, sk_sp<SkBlender> blender)
   {
     auto filled = false;
@@ -525,11 +529,7 @@ public:
       dropShadowEffects->render(renderer, skPath);
     }
 
-    SkPaint p;
-    p.setShader(styleDisplayList->asShader());
-    p.setAntiAlias(true);
-    renderer->canvas()->drawRect(styleDisplayList->bounds(), p);
-    // styleDisplayList->playback(renderer);
+    styleDisplayList->render(renderer);
 
     if (filled)
     {

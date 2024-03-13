@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "Layer/Core/Transform.hpp"
+#include "Layer/Guard.hpp"
 #include "Layer/SkSL.hpp"
 #include "VSkia.hpp"
 #include "Renderer.hpp"
@@ -162,11 +163,42 @@ VShape PaintNode::makeMaskBy(EBoolOp maskOp, Renderer* renderer)
   return result;
 }
 
-void PaintNode::renderPass(Renderer* renderer)
+void PaintNode::render(Renderer* renderer)
 {
-  invokeRenderPass(renderer, 0);
+  VGG_IMPL(PaintNode);
+  if (!_->visible)
+    return;
+  auto canvas = renderer->canvas();
+  {
+    SaveLayerContextGuard lcg(
+      canvas,
+      _->contextSetting,
+      [&](SkCanvas* canvas, const SkPaint& p) { canvas->saveLayer(0, &p); });
+    {
+      SkAutoCanvasRestore acr(canvas, true);
+      canvas->concat(toSkMatrix(_->transform.matrix()));
+      if (renderer->isEnableDrawDebugBound())
+      {
+        renderer->drawDebugBound(this, 0);
+      }
+
+      if (_->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY)
+      {
+        paintSelf(renderer);
+      }
+      else if (_->paintOption.paintStrategy == EPaintStrategy::PS_RECURSIVELY)
+      {
+        paintSelf(renderer);
+        paintChildren(renderer);
+      }
+      else if (_->paintOption.paintStrategy == EPaintStrategy::PS_CHILDONLY)
+      {
+        paintChildren(renderer);
+      }
+    }
+  }
 }
-void PaintNode::paintPass(Renderer* renderer, int zorder)
+void PaintNode::paintSelf(Renderer* renderer)
 {
   VGG_IMPL(PaintNode);
   if (!_->path)
@@ -531,33 +563,7 @@ const PaintOption& PaintNode::paintOption() const
   return d_ptr->paintOption;
 }
 
-void PaintNode::invokeRenderPass(Renderer* renderer, int zorder)
-{
-  VGG_IMPL(PaintNode);
-  if (!_->visible)
-    return;
-  if (_->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY)
-  {
-    prePaintPass(renderer);
-    paintPass(renderer, zorder);
-    postPaintPass(renderer);
-  }
-  else if (_->paintOption.paintStrategy == EPaintStrategy::PS_RECURSIVELY)
-  {
-    prePaintPass(renderer);
-    paintPass(renderer, zorder);
-    paintChildrenPass(renderer);
-    postPaintPass(renderer);
-  }
-  else if (_->paintOption.paintStrategy == EPaintStrategy::PS_CHILDONLY)
-  {
-    prePaintPass(renderer);
-    paintChildrenPass(renderer);
-    postPaintPass(renderer);
-  }
-}
-
-void PaintNode::paintChildrenRecursively(Renderer* renderer)
+void PaintNode::paintChildren(Renderer* renderer)
 {
 
   VGG_IMPL(PaintNode);
@@ -580,83 +586,36 @@ void PaintNode::paintChildrenRecursively(Renderer* renderer)
     }
   }
 
-  int  zorder = 0;
   auto paintCall = [&](std::vector<PaintNode*>& nodes)
   {
     if (_->contextSetting.transparencyKnockoutGroup)
     {
       for (const auto& p : nodes)
       {
-
-        // TODO:: blend mode r = s!=0?s:d is needed.
-        // SkPaint paint;
-        // paint.setBlendMode(SkBlendMode::kSrc);
-        // canvas->save();
-        // canvas->scale(1, -1);
-        // canvas->saveLayer(toSkRect(getBound()), &paint);
-        //
-        p->invokeRenderPass(renderer, zorder);
-        // canvas->restore();
-        // canvas->restore();
-        zorder++;
+        p->render(renderer);
       }
     }
     else
     {
       for (const auto& p : nodes)
       {
-        p->invokeRenderPass(renderer, zorder);
-        zorder++;
+        p->render(renderer);
       }
     }
   };
 
   const auto clip = (overflow() == OF_HIDDEN || overflow() == OF_SCROLL);
-  if (clip)
   {
-    canvas->save();
-    auto boundPath = makeBoundPath();
-    boundPath.clip(canvas, SkClipOp::kIntersect);
-    // canvas->clipPath(makeBoundPath());
-  }
-  paintCall(masked);
-  paintCall(noneMasked);
-  if (clip)
-  {
-    canvas->restore();
-  }
-}
-
-void PaintNode::paintChildrenPass(Renderer* renderer)
-{
-  paintChildrenRecursively(renderer);
-}
-void PaintNode::prePaintPass(Renderer* renderer)
-{
-  VGG_IMPL(PaintNode);
-  auto canvas = renderer->canvas();
-  _->layerContextGuard.saveLayer(
-    _->contextSetting,
-    [&](const SkPaint& p)
+    SkAutoCanvasRestore acr(canvas, clip);
+    if (clip)
     {
-      // const auto b = toSkRect(bound());
-      canvas->saveLayer(0, &p);
-    });
-
-  canvas->save();
-  canvas->concat(toSkMatrix(_->transform.matrix()));
-  if (renderer->isEnableDrawDebugBound())
-  {
-    renderer->drawDebugBound(this, 0);
+      auto boundPath = makeBoundPath();
+      boundPath.clip(canvas, SkClipOp::kIntersect);
+      // canvas->clipPath(makeBoundPath());
+    }
+    paintCall(masked);
+    paintCall(noneMasked);
   }
-}
-
-void PaintNode::postPaintPass(Renderer* renderer)
-{
-  VGG_IMPL(PaintNode);
-  auto canvas = renderer->canvas();
-  canvas->restore();
-  _->layerContextGuard.restore([&]() { canvas->restore(); });
 }
 
 void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape& outlineMask)

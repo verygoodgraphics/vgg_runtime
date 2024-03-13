@@ -210,18 +210,11 @@ public:
     }
   }
 
-public:
-  // TODO:: chagne the following functions accessbility
-  void invokeRenderPass(Renderer* renderer, int zorder = 0);
-
 protected:
   // Render traverse
-  virtual void paintChildrenPass(Renderer* renderer);
-  void         paintChildrenRecursively(Renderer* renderer);
-  virtual void prePaintPass(Renderer* renderer);
-  virtual void postPaintPass(Renderer* renderer);
-  virtual void paintPass(Renderer* renderer, int zorder = 0);
-  void         renderPass(Renderer* renderer); // TODO:: should be private access
+  void         paintChildren(Renderer* renderer);
+  void         paintSelf(Renderer* renderer);
+  void         render(Renderer* renderer); // TODO:: should be private access
   virtual void paintEvent(Renderer* renderer);
 
 protected:

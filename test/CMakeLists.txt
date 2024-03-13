@@ -13,6 +13,7 @@ else()
     domain/layout/layout_tests.cpp
     domain/layout/lib_layout_tests.cpp
     domain/layout/resizing_tests.cpp
+    domain/model/DesignModelTests.cpp
     domain/model/daruma_helper.cpp
     editor/save_test.cpp
     exec/vgg_exec_test.cpp

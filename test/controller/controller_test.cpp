@@ -23,9 +23,6 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-#define SKIP_LOCAL_TEST                                                                            \
-  GTEST_SKIP() << "Skipping local './xxx.sdk.mjd' test, unsupported when evaluating data uri ";
-
 class ControllerTestSuite : public ::testing::Test
 {
 protected:

@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "Effects.hpp"
+#include "Layer/Core/VType.hpp"
 #include "Renderer.hpp"
 namespace VGG::layer
 {
@@ -26,15 +27,20 @@ public:
   {
     if (m_shader)
     {
-      SkPaint p;
-      p.setStyle(SkPaint::kFill_Style);
-      p.setShader(m_shader);
-      p.setBlender(m_blender);
-      p.setImageFilter(m_imageFilter);
-      p.setAntiAlias(true);
-      shape.draw(render->canvas(), p);
+      SkPaint pen;
+      pen.setStyle(SkPaint::kFill_Style);
+      pen.setShader(m_shader);
+      if (m_blender)
+      {
+        if (auto p = std::get_if<sk_sp<SkBlender>>(&*m_blender); p)
+          pen.setBlender(*p);
+        else if (auto p = std::get_if<SkBlendMode>(&*m_blender); p)
+          pen.setBlendMode(*p);
+      }
+      pen.setImageFilter(m_imageFilter);
+      pen.setAntiAlias(true);
+      shape.draw(render->canvas(), pen);
     }
-
     // for (size_t i = 0; i < style().fills.size(); ++i)
     // {
     //   auto& f = style().fills[i];
@@ -56,6 +62,8 @@ public:
     sk_sp<SkBlender>         blender)
   {
     evalShader(fills, bounds);
+    m_blender = blender;
+    m_imageFilter = imagFilter;
   }
 
   sk_sp<SkShader> shader() const
@@ -69,10 +77,10 @@ public:
   }
 
 private:
-  SkRect               m_bounds;
-  sk_sp<SkShader>      m_shader;
-  sk_sp<SkImageFilter> m_imageFilter;
-  sk_sp<SkBlender>     m_blender;
+  SkRect                                                     m_bounds;
+  sk_sp<SkShader>                                            m_shader;
+  sk_sp<SkImageFilter>                                       m_imageFilter;
+  std::optional<std::variant<SkBlendMode, sk_sp<SkBlender>>> m_blender;
 
   void evalShader(const std::vector<Fill>& fills, const SkRect& bounds)
   {
@@ -95,13 +103,17 @@ private:
         srcShader = srcShader->makeWithColorFilter(
           SkColorFilters::Blend(Color{ 0, 0, 0, st.opacity }, SkBlendMode::kDstIn));
       }
+      auto bm = toSkBlendMode(f.contextSettings.blendMode);
+      if (!bm)
+        DEBUG("no such blend mode %d", f.contextSettings.blendMode);
       if (!dstShader)
       {
         dstShader = srcShader;
+        if (!m_blender)
+          m_blender = bm;
       }
       else
       {
-        auto bm = toSkBlendMode(f.contextSettings.blendMode);
         if (bm)
         {
           std::visit(
@@ -110,10 +122,6 @@ private:
                         [&](const SkBlendMode& mode)
                         { dstShader = SkShaders::Blend(mode, dstShader, srcShader); } },
             *bm);
-        }
-        else
-        {
-          dstShader = SkShaders::Blend(SkBlendMode::kSrcOver, dstShader, srcShader);
         }
       }
     }

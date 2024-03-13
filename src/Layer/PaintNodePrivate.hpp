@@ -155,8 +155,6 @@ public:
 
   LayerContextGuard layerContextGuard;
 
-  sk_sp<SkShader> fillShader;
-
   PaintNode__pImpl(PaintNode* api, EObjectType type)
     : q_ptr(api)
     , type(type)
@@ -173,8 +171,8 @@ public:
     {
       ObjectRecorder rec;
       // SkRect              r = computeStyleBounds(shape, borders, shape.bounds());
-      SkRect              styleBounds = toSkRect(bound);
-      auto                recorder = rec.beginRecording(styleBounds, SkMatrix::I());
+      SkRect         styleBounds = toSkRect(bound);
+      auto           recorder = rec.beginRecording(styleBounds, SkMatrix::I());
 
       const auto fillBounds = toSkRect(q_ptr->onDrawFill(recorder, blender, 0, shape));
       const auto borderBounds = drawBorder(recorder, shape, shape.bounds(), borders, blender);
@@ -188,45 +186,6 @@ public:
       styleDisplayList = rec.finishRecording(styleBounds, &mat);
     }
   }
-
-  // SkRect computeStyleBounds(
-  //   const VShape&              shape,
-  //   const std::vector<Border>& borders,
-  //   const SkRect&              bound) const
-  // {
-  //   SkRect rect = bound;
-  //   for (const auto& b : borders)
-  //   {
-  //     if (!b.isEnabled || b.thickness <= 0)
-  //       continue;
-  //     SkPaint strokePen;
-  //     strokePen.setAntiAlias(true);
-  //     populateSkPaint(b, rect, strokePen);
-  //     strokePen.setStrokeJoin(toSkPaintJoin(b.lineJoinStyle));
-  //     strokePen.setStrokeCap(toSkPaintCap(b.lineCapStyle));
-  //     strokePen.setStrokeMiter(b.miterLimit);
-  //     float strokeWidth = b.thickness;
-  //     if (b.position == PP_INSIDE)
-  //     {
-  //       // inside
-  //       strokeWidth = 2.f * b.thickness;
-  //     }
-  //     else if (b.position == PP_OUTSIDE)
-  //     {
-  //       // outside
-  //       strokeWidth = 2.f * b.thickness;
-  //     }
-  //     strokePen.setStrokeWidth(strokeWidth);
-  //     strokePen.setStyle(SkPaint::kStroke_Style);
-  //     if (strokePen.canComputeFastBounds())
-  //     {
-  //       SkRect result;
-  //       strokePen.computeFastBounds(bound, &result);
-  //       rect.join(result);
-  //     }
-  //   }
-  //   return rect;
-  // }
 
   void ensureDropShadowEffects(const std::vector<DropShadow>& shadow, const VShape& shape)
   {
@@ -242,45 +201,6 @@ public:
     {
       innerShadowEffects = InnerShadowEffect(shadow, toSkRect(q_ptr->frameBound()));
     }
-  }
-
-  void ensureFillShader()
-  {
-    if (fillShader)
-      return;
-    const auto      bound = q_ptr->frameBound();
-    sk_sp<SkShader> dstShader;
-    for (const auto& f : style.fills)
-    {
-      if (!f.isEnabled)
-        continue;
-      const auto&     st = f.contextSettings;
-      sk_sp<SkShader> srcShader;
-      std::visit(
-        Overloaded{ [&](const Gradient& g) { srcShader = makeGradientShader(bound, g); },
-                    [&](const Color& c) { srcShader = SkShaders::Color(c); },
-                    [&](const Pattern& p) { srcShader = makePatternShader(bound, p); } },
-        f.type);
-
-      if (!dstShader)
-      {
-        dstShader = srcShader;
-      }
-      else
-      {
-        auto bm = toSkBlendMode(f.contextSettings.blendMode);
-        if (bm)
-        {
-          std::visit(
-            Overloaded{ [&](const sk_sp<SkBlender>& blender)
-                        { dstShader = SkShaders::Blend(blender, dstShader, srcShader); },
-                        [&](const SkBlendMode& mode)
-                        { dstShader = SkShaders::Blend(mode, dstShader, srcShader); } },
-            *bm);
-        }
-      }
-    }
-    fillShader = dstShader;
   }
 
   void ensureAlphaMask(Renderer* renderer)

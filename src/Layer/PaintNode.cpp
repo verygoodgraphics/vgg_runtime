@@ -689,7 +689,6 @@ void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape&
     if (_->alphaMask)
     {
       layerFilter = _->alphaMask->maskWith(layerBound, layerFilter, 0);
-      // DEBUG("width height %f %f", layerBound.width(), layerBound.height());
     }
     if (dropbackFilter)
     {

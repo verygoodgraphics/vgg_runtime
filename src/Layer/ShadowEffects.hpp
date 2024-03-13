@@ -15,8 +15,10 @@
  */
 #pragma once
 #include "Effects.hpp"
+#include "Layer/VSkia.hpp"
 #include "Renderer.hpp"
 #include "Guard.hpp"
+#include <effects/SkImageFilters.h>
 
 namespace VGG::layer
 {
@@ -37,40 +39,63 @@ public:
 
   void render(Renderer* renderer, const VShape& skPath) override
   {
-    for (const auto& f : filters())
+    if (m_mergedFilter)
     {
-      LayerContextGuard g;
-      g.saveLayer(
-        f.prop.contextSettings,
-        [&](const SkPaint& paint) { renderer->canvas()->saveLayer(nullptr, &paint); });
-      if (f.prop.clipShadow)
+      SkPaint p;
+      p.setImageFilter(m_mergedFilter);
+      p.setAntiAlias(true);
+      if (hasClipShadow())
       {
         renderer->canvas()->save();
         skPath.clip(renderer->canvas(), SkClipOp::kDifference);
       }
-      SkPaint p;
-      p.setAntiAlias(true);
-      p.setStyle(SkPaint::kFill_Style);
-      if (auto ss = skPath.outset(f.prop.spread, f.prop.spread);
-          f.prop.spread != 0.f && ss && !ss->isEmpty())
-      {
-        auto dropShadowFilter = f.filter;
-        p.setImageFilter(f.filter);
-        ss->draw(renderer->canvas(), p);
-      }
-      else
-      {
-        p.setImageFilter(f.filter);
-        p.setAntiAlias(true);
-        // p.setShader(styleDisplayList->asShader());
-        // renderer->canvas()->drawRect(styleDisplayList->bounds(), p);
-        skPath.draw(renderer->canvas(), p);
-      }
-      if (f.prop.clipShadow)
+      skPath.draw(renderer->canvas(), p);
+      if (hasClipShadow())
       {
         renderer->canvas()->restore();
       }
-      g.restore([&]() { renderer->canvas()->restore(); });
+    }
+    else
+    {
+      for (const auto& f : filters())
+      {
+        auto bm = toSkBlendMode(f.prop.contextSettings.blendMode);
+        if (bm)
+        {
+          SkPaint layerPaint;
+          std::visit(
+            Overloaded{ [&](const sk_sp<SkBlender>& blender) { layerPaint.setBlender(blender); },
+                        [&](const SkBlendMode& mode) { layerPaint.setBlendMode(mode); } },
+            *bm);
+          renderer->canvas()->saveLayer(nullptr, &layerPaint);
+        }
+        if (f.prop.clipShadow)
+        {
+          renderer->canvas()->save();
+          skPath.clip(renderer->canvas(), SkClipOp::kDifference);
+        }
+        SkPaint p;
+        p.setAntiAlias(true);
+        p.setStyle(SkPaint::kFill_Style);
+
+        // if (auto ss = skPath.outset(f.prop.spread, f.prop.spread);
+        //     f.prop.spread != 0.f && ss && !ss->isEmpty())
+        // {
+        //   p.setImageFilter(f.filter);
+        //   ss->draw(renderer->canvas(), p);
+        // }
+        p.setImageFilter(f.filter);
+        skPath.draw(renderer->canvas(), p);
+
+        if (f.prop.clipShadow)
+        {
+          renderer->canvas()->restore();
+        }
+        if (bm)
+        {
+          renderer->canvas()->restore();
+        }
+      }
     }
   }
   DropShadowEffect(
@@ -79,19 +104,59 @@ public:
     bool                           overrideSpread)
 
   {
-    bool canBeMerged = true;
+    std::vector<sk_sp<SkImageFilter>> filters;
+    for (auto& s : dropShadow)
+    {
+      if (!s.isEnabled)
+        continue;
+      DropShadow ss = s;
+      ss.color.a = ss.color.a * ss.contextSettings.opacity;
+      auto dropShadowFilter = makeDropShadowImageFilter(
+        ss,
+        Bound{ bounds.x(), bounds.y(), bounds.width(), bounds.height() },
+        false,
+        0);
+      auto r = dropShadowFilter->computeFastBounds(bounds);
+      m_bounds.join(r);
+      m_imageFilters.emplace_back(dropShadowFilter, ss);
+      filters.emplace_back(dropShadowFilter);
+    }
+
+    std::optional<bool> flip;
+    bool                canBeMerged = true;
+    bool                clip = false;
     for (const auto& s : dropShadow)
     {
       if (!s.isEnabled)
         continue;
-      auto dropShadowFilter = makeDropShadowImageFilter(
-        s,
-        Bound{ bounds.x(), bounds.y(), bounds.width(), bounds.height() },
-        overrideSpread,
-        0);
-      auto r = dropShadowFilter->computeFastBounds(bounds);
-      m_imageFilters.emplace_back(dropShadowFilter, s);
-      m_bounds.join(r);
+      if (!clip && s.clipShadow)
+        clip = true;
+      if (!flip)
+      {
+        flip = s.clipShadow;
+      }
+      else
+      {
+        if (*flip != s.clipShadow)
+        {
+          canBeMerged = false;
+        }
+      }
+      if (s.contextSettings.blendMode != EBlendMode::BM_NORMAL)
+      {
+        canBeMerged = false;
+      }
+    }
+
+    // If the following conditions are met, we can merge all shadows into one image filter
+    // 1. If all shadows has the same clip attribute
+    // 2. If all shadows has Normal blend mode
+
+    if (!filters.empty() && canBeMerged)
+    {
+      m_hasClip = clip;
+      m_mergedFilter = SkImageFilters::Merge(filters.data(), filters.size());
+      ASSERT(m_mergedFilter);
     }
   }
 
@@ -115,15 +180,16 @@ public:
     return m_mergedFilter;
   }
 
-  bool clipShadow() const
+  bool hasClipShadow() const
   {
-    return true;
+    return m_hasClip;
   }
 
 private:
   std::vector<Shadow>  m_imageFilters;
   sk_sp<SkImageFilter> m_mergedFilter;
   SkRect               m_bounds;
+  bool                 m_hasClip;
 };
 
 class InnerShadowEffect : public Effects

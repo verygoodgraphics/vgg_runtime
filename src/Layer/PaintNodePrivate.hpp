@@ -153,8 +153,6 @@ public:
   std::optional<DropShadowEffect>  dropShadowEffects;
   std::optional<InnerShadowEffect> innerShadowEffects;
 
-  LayerContextGuard layerContextGuard;
-
   PaintNode__pImpl(PaintNode* api, EObjectType type)
     : q_ptr(api)
     , type(type)

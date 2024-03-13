@@ -15,51 +15,114 @@
  */
 #pragma once
 #include <optional>
+#include <core/SkCanvas.h>
 
 #include "VSkia.hpp"
 
-struct LayerContextGuard
+class SaveLayerContextGuard
 {
+  SkCanvas*              m_canvas;
+  std::optional<SkPaint> m_paint;
+  int                    m_saveCount = 0;
+
 public:
-  std::optional<SkPaint> paint;
-  template<typename F>
-  void saveLayer(const ContextSetting& st, F&& f)
+  template<typename F = void(SkCanvas*, const SkPaint&)>
+  SaveLayerContextGuard(SkCanvas* canvas, const ContextSetting& st, F&& f)
+    : m_canvas(canvas)
+    , m_paint(std::nullopt)
   {
     auto bm = toSkBlendMode(st.blendMode);
+    m_saveCount = canvas->getSaveCount();
     if (bm)
     {
       std::visit(
         Overloaded{ [&, this](const sk_sp<SkBlender>& blender)
                     {
-                      paint = SkPaint();
-                      paint->setBlender(blender);
+                      m_paint = SkPaint();
+                      m_paint->setBlender(blender);
                     },
                     [&, this](const SkBlendMode& mode)
                     {
-                      paint = SkPaint();
-                      paint->setBlendMode(mode);
+                      m_paint = SkPaint();
+                      m_paint->setBlendMode(mode);
                     } },
         *bm);
     }
-
     if (st.opacity < 1.0)
     {
-      if (!paint)
-        paint = SkPaint();
-      paint->setAlphaf(st.opacity);
+      if (!m_paint)
+        m_paint = SkPaint();
+      m_paint->setAlphaf(st.opacity);
     }
-    if (paint)
+    if (m_paint)
     {
-      f(*paint);
+      f(canvas, *m_paint);
     }
   }
-  template<typename F>
-  void restore(F&& f)
+
+  void restore()
   {
-    if (paint)
+    if (m_paint && m_canvas)
     {
-      f();
+      m_canvas->restoreToCount(m_saveCount);
+      m_canvas = nullptr;
+      m_paint = std::nullopt;
     }
-    paint = std::nullopt;
   }
+
+  ~SaveLayerContextGuard()
+  {
+    if (m_paint && m_canvas)
+    {
+      m_canvas->restoreToCount(m_saveCount);
+    }
+  }
+  SaveLayerContextGuard(SaveLayerContextGuard&&) = delete;
+  SaveLayerContextGuard(const SaveLayerContextGuard&) = delete;
+  SaveLayerContextGuard& operator=(SaveLayerContextGuard&&) = delete;
+  SaveLayerContextGuard& operator=(const SaveLayerContextGuard&) = delete;
+};
+
+class SaveLayerGuard
+{
+public:
+  template<typename F = void(SkCanvas*)>
+  SaveLayerGuard(SkCanvas* canvas, F&& f)
+    : m_canvas(canvas)
+    , m_saveCount(0)
+  {
+    if (m_canvas)
+    {
+      m_saveCount = canvas->getSaveCount();
+      if (canvas)
+      {
+        f(canvas);
+      }
+    }
+  }
+  ~SaveLayerGuard()
+  {
+    if (m_canvas)
+    {
+      m_canvas->restoreToCount(m_saveCount);
+    }
+  }
+
+  void restore()
+  {
+    if (m_canvas)
+    {
+      m_canvas->restoreToCount(m_saveCount);
+      m_canvas = nullptr;
+    }
+  }
+
+private:
+  SkCanvas* m_canvas;
+  int       m_saveCount;
+
+  SaveLayerGuard(SaveLayerGuard&&) = delete;
+  SaveLayerGuard(const SaveLayerGuard&) = delete;
+  SaveLayerGuard& operator=(SaveLayerGuard&&) = delete;
+  SaveLayerGuard& operator=(const SaveLayerGuard&) = delete;
 };

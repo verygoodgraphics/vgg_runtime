@@ -90,7 +90,7 @@ void Renderer::draw(SkCanvas* canvas, layer::PaintNode* root)
   SkCanvas* oldCanvas = m_canvas;
   m_canvas = canvas;
   canvas->save();
-  root->renderPass(this);
+  root->render(this);
   canvas->restore();
   m_canvas = oldCanvas;
 }

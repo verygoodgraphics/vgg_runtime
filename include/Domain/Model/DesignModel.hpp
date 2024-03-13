@@ -110,6 +110,15 @@ inline json get_untyped(const json& j, std::string property)
 {
   return get_untyped(j, property.data());
 }
+
+template<typename T>
+inline void safeGetTo(T& to, const json& j, const char* property)
+{
+  if (j.contains(property))
+  {
+    to = j.at(property).get<T>();
+  }
+}
 #endif
 
 #ifndef NLOHMANN_OPTIONAL_VGG_Model_HELPER
@@ -520,7 +529,8 @@ enum class PatternInstanceClass : int
   PATTERN_IMAGE_FIT,
   PATTERN_IMAGE_STRETCH,
   PATTERN_IMAGE_TILE,
-  PATTERN_LAYER
+  PATTERN_LAYER,
+  PATTERN_UNKNOWN
 };
 
 /**
@@ -999,7 +1009,7 @@ struct PointAttr
   /**
    * Corner shapes of the point.
    */
-  std::optional<int64_t>             cornerStyle;
+  std::optional<int>                 cornerStyle;
   /**
    * When the current point is the starting point of the Bezier curve, this attribute
    * represents its control point.
@@ -2040,7 +2050,7 @@ struct SymbolMaster
   std::vector<std::string>                   outlineMaskBy;
   int64_t                                    overflow;
   std::optional<std::string>                 overrideKey;
-  std::vector<double>                        radius;
+  std::optional<std::vector<double>>         radius;
   std::optional<int64_t>                     resizesContent;
   Style                                      style;
   std::optional<int64_t>                     styleEffectBoolean;
@@ -2288,269 +2298,269 @@ namespace VGG
 {
 namespace Model
 {
-void from_json(const json& j, AlphaMask& x);
-void to_json(json& j, const AlphaMask& x);
+inline void from_json(const json& j, AlphaMask& x);
+inline void to_json(json& j, const AlphaMask& x);
 
-void from_json(const json& j, Color& x);
-void to_json(json& j, const Color& x);
+inline void from_json(const json& j, Color& x);
+inline void to_json(json& j, const Color& x);
 
-void from_json(const json& j, Rect& x);
-void to_json(json& j, const Rect& x);
+inline void from_json(const json& j, Rect& x);
+inline void to_json(json& j, const Rect& x);
 
-void from_json(const json& j, GraphicsContextSettings& x);
-void to_json(json& j, const GraphicsContextSettings& x);
+inline void from_json(const json& j, GraphicsContextSettings& x);
+inline void to_json(json& j, const GraphicsContextSettings& x);
 
-void from_json(const json& j, GradientBasicGeometry& x);
-void to_json(json& j, const GradientBasicGeometry& x);
+inline void from_json(const json& j, GradientBasicGeometry& x);
+inline void to_json(json& j, const GradientBasicGeometry& x);
 
-void from_json(const json& j, GradientHilight& x);
-void to_json(json& j, const GradientHilight& x);
+inline void from_json(const json& j, GradientHilight& x);
+inline void to_json(json& j, const GradientHilight& x);
 
-void from_json(const json& j, PerpendicularMatrix& x);
-void to_json(json& j, const PerpendicularMatrix& x);
+inline void from_json(const json& j, PerpendicularMatrix& x);
+inline void to_json(json& j, const PerpendicularMatrix& x);
 
-void from_json(const json& j, GradientStop& x);
-void to_json(json& j, const GradientStop& x);
+inline void from_json(const json& j, GradientStop& x);
+inline void to_json(json& j, const GradientStop& x);
 
-void from_json(const json& j, GradientInstance& x);
-void to_json(json& j, const GradientInstance& x);
+inline void from_json(const json& j, GradientInstance& x);
+inline void to_json(json& j, const GradientInstance& x);
 
-void from_json(const json& j, Gradient& x);
-void to_json(json& j, const Gradient& x);
+inline void from_json(const json& j, Gradient& x);
+inline void to_json(json& j, const Gradient& x);
 
-void from_json(const json& j, ImageFilters& x);
-void to_json(json& j, const ImageFilters& x);
+inline void from_json(const json& j, ImageFilters& x);
+inline void to_json(json& j, const ImageFilters& x);
 
-void from_json(const json& j, PatternImageFill& x);
-void to_json(json& j, const PatternImageFill& x);
-void from_json(const json& j, PatternImageStrech& x);
-void to_json(json& j, const PatternImageStrech& x);
-void from_json(const json& j, PatternImageFit& x);
-void to_json(json& j, const PatternImageFit& x);
-void from_json(const json& j, PatternImageTile& x);
-void to_json(json& j, const PatternImageTile& x);
-void from_json(const json& j, PatternLayerInstance& x);
-void to_json(json& j, const PatternLayerInstance& x);
+inline void from_json(const json& j, PatternImageFill& x);
+inline void to_json(json& j, const PatternImageFill& x);
+inline void from_json(const json& j, PatternImageStrech& x);
+inline void to_json(json& j, const PatternImageStrech& x);
+inline void from_json(const json& j, PatternImageFit& x);
+inline void to_json(json& j, const PatternImageFit& x);
+inline void from_json(const json& j, PatternImageTile& x);
+inline void to_json(json& j, const PatternImageTile& x);
+inline void from_json(const json& j, PatternLayerInstance& x);
+inline void to_json(json& j, const PatternLayerInstance& x);
 
-void from_json(const json& j, Pattern& x);
-void to_json(json& j, const Pattern& x);
+inline void from_json(const json& j, Pattern& x);
+inline void to_json(json& j, const Pattern& x);
 
-void from_json(const json& j, Border& x);
-void to_json(json& j, const Border& x);
+inline void from_json(const json& j, Border& x);
+inline void to_json(json& j, const Border& x);
 
-void from_json(const json& j, Fill& x);
-void to_json(json& j, const Fill& x);
+inline void from_json(const json& j, Fill& x);
+inline void to_json(json& j, const Fill& x);
 
-void from_json(const json& j, FontVariation& x);
-void to_json(json& j, const FontVariation& x);
+inline void from_json(const json& j, FontVariation& x);
+inline void to_json(json& j, const FontVariation& x);
 
-void from_json(const json& j, TextParagraph& x);
-void to_json(json& j, const TextParagraph& x);
+inline void from_json(const json& j, TextParagraph& x);
+inline void to_json(json& j, const TextParagraph& x);
 
-void from_json(const json& j, TextFontAttributes& x);
-void to_json(json& j, const TextFontAttributes& x);
+inline void from_json(const json& j, TextFontAttributes& x);
+inline void to_json(json& j, const TextFontAttributes& x);
 
-void from_json(const json& j, OverrideValue& x);
-void to_json(json& j, const OverrideValue& x);
+inline void from_json(const json& j, OverrideValue& x);
+inline void to_json(json& j, const OverrideValue& x);
 
-void from_json(const json& j, PointAttr& x);
-void to_json(json& j, const PointAttr& x);
+inline void from_json(const json& j, PointAttr& x);
+inline void to_json(json& j, const PointAttr& x);
 
-void from_json(const json& j, Region& x);
-void to_json(json& j, const Region& x);
+inline void from_json(const json& j, Region& x);
+inline void to_json(json& j, const Region& x);
 
-void from_json(const json& j, Segment& x);
-void to_json(json& j, const Segment& x);
+inline void from_json(const json& j, Segment& x);
+inline void to_json(json& j, const Segment& x);
 
-void from_json(const json& j, Blur& x);
-void to_json(json& j, const Blur& x);
+inline void from_json(const json& j, Blur& x);
+inline void to_json(json& j, const Blur& x);
 
-void from_json(const json& j, Shadow& x);
-void to_json(json& j, const Shadow& x);
+inline void from_json(const json& j, Shadow& x);
+inline void to_json(json& j, const Shadow& x);
 
-void from_json(const json& j, Style& x);
-void to_json(json& j, const Style& x);
+inline void from_json(const json& j, Style& x);
+inline void to_json(json& j, const Style& x);
 
-void from_json(const json& j, TextLineType& x);
-void to_json(json& j, const TextLineType& x);
+inline void from_json(const json& j, TextLineType& x);
+inline void to_json(json& j, const TextLineType& x);
 
-void from_json(const json& j, TextOnPath& x);
-void to_json(json& j, const TextOnPath& x);
+inline void from_json(const json& j, TextOnPath& x);
+inline void to_json(json& j, const TextOnPath& x);
 
-void from_json(const json& j, VariableAssign& x);
-void to_json(json& j, const VariableAssign& x);
+inline void from_json(const json& j, VariableAssign& x);
+inline void to_json(json& j, const VariableAssign& x);
 
-void from_json(const json& j, VariableDefine& x);
-void to_json(json& j, const VariableDefine& x);
+inline void from_json(const json& j, VariableDefine& x);
+inline void to_json(json& j, const VariableDefine& x);
 
-void from_json(const json& j, VariableRefer& x);
-void to_json(json& j, const VariableRefer& x);
+inline void from_json(const json& j, VariableRefer& x);
+inline void to_json(json& j, const VariableRefer& x);
 
-void from_json(const json& j, Vertex& x);
-void to_json(json& j, const Vertex& x);
+inline void from_json(const json& j, Vertex& x);
+inline void to_json(json& j, const Vertex& x);
 
-void from_json(const json& j, Contour& x);
-void to_json(json& j, const Contour& x);
-void from_json(const json& j, VectorNetwork& x);
-void to_json(json& j, const VectorNetwork& x);
-void from_json(const json& j, Ellipse& x);
-void to_json(json& j, const Ellipse& x);
-void from_json(const json& j, Polygon& x);
-void to_json(json& j, const Polygon& x);
-void from_json(const json& j, Rectangle& x);
-void to_json(json& j, const Rectangle& x);
-void from_json(const json& j, Star& x);
-void to_json(json& j, const Star& x);
+inline void from_json(const json& j, Contour& x);
+inline void to_json(json& j, const Contour& x);
+inline void from_json(const json& j, VectorNetwork& x);
+inline void to_json(json& j, const VectorNetwork& x);
+inline void from_json(const json& j, Ellipse& x);
+inline void to_json(json& j, const Ellipse& x);
+inline void from_json(const json& j, Polygon& x);
+inline void to_json(json& j, const Polygon& x);
+inline void from_json(const json& j, Rectangle& x);
+inline void to_json(json& j, const Rectangle& x);
+inline void from_json(const json& j, Star& x);
+inline void to_json(json& j, const Star& x);
 
-void from_json(const json& j, Subshape& x);
-void to_json(json& j, const Subshape& x);
+inline void from_json(const json& j, Subshape& x);
+inline void to_json(json& j, const Subshape& x);
 
-void from_json(const json& j, Shape& x);
-void to_json(json& j, const Shape& x);
+inline void from_json(const json& j, Shape& x);
+inline void to_json(json& j, const Shape& x);
 
-void from_json(const json& j, Path& x);
-void to_json(json& j, const Path& x);
+inline void from_json(const json& j, Path& x);
+inline void to_json(json& j, const Path& x);
 
-void from_json(const json& j, Frame& x);
-void to_json(json& j, const Frame& x);
+inline void from_json(const json& j, Frame& x);
+inline void to_json(json& j, const Frame& x);
 
-void from_json(const json& j, Group& x);
-void to_json(json& j, const Group& x);
+inline void from_json(const json& j, Group& x);
+inline void to_json(json& j, const Group& x);
 
-void from_json(const json& j, Image& x);
-void to_json(json& j, const Image& x);
+inline void from_json(const json& j, Image& x);
+inline void to_json(json& j, const Image& x);
 
-void from_json(const json& j, SymbolInstance& x);
-void to_json(json& j, const SymbolInstance& x);
+inline void from_json(const json& j, SymbolInstance& x);
+inline void to_json(json& j, const SymbolInstance& x);
 
-void from_json(const json& j, SymbolMaster& x);
-void to_json(json& j, const SymbolMaster& x);
+inline void from_json(const json& j, SymbolMaster& x);
+inline void to_json(json& j, const SymbolMaster& x);
 
-void from_json(const json& j, Text& x);
-void to_json(json& j, const Text& x);
+inline void from_json(const json& j, Text& x);
+inline void to_json(json& j, const Text& x);
 
-void from_json(const json& j, PatternLayerDef& x);
-void to_json(json& j, const PatternLayerDef& x);
+inline void from_json(const json& j, PatternLayerDef& x);
+inline void to_json(json& j, const PatternLayerDef& x);
 
-void from_json(const json& j, ReferencedStyle& x);
-void to_json(json& j, const ReferencedStyle& x);
+inline void from_json(const json& j, ReferencedStyle& x);
+inline void to_json(json& j, const ReferencedStyle& x);
 
-void from_json(const json& j, DesignModel& x);
-void to_json(json& j, const DesignModel& x);
+inline void from_json(const json& j, DesignModel& x);
+inline void to_json(json& j, const DesignModel& x);
 
-void from_json(const json& j, AlphaMaskByClass& x);
-void to_json(json& j, const AlphaMaskByClass& x);
+inline void from_json(const json& j, AlphaMaskByClass& x);
+inline void to_json(json& j, const AlphaMaskByClass& x);
 
-void from_json(const json& j, BackgroundColorClass& x);
-void to_json(json& j, const BackgroundColorClass& x);
+inline void from_json(const json& j, BackgroundColorClass& x);
+inline void to_json(json& j, const BackgroundColorClass& x);
 
-void from_json(const json& j, BoundsClass& x);
-void to_json(json& j, const BoundsClass& x);
+inline void from_json(const json& j, BoundsClass& x);
+inline void to_json(json& j, const BoundsClass& x);
 
-void from_json(const json& j, ContextSettingsClass& x);
-void to_json(json& j, const ContextSettingsClass& x);
+inline void from_json(const json& j, ContextSettingsClass& x);
+inline void to_json(json& j, const ContextSettingsClass& x);
 
-void from_json(const json& j, SubGeometryClass& x);
-void to_json(json& j, const SubGeometryClass& x);
+inline void from_json(const json& j, SubGeometryClass& x);
+inline void to_json(json& j, const SubGeometryClass& x);
 
-void from_json(const json& j, BorderClass& x);
-void to_json(json& j, const BorderClass& x);
+inline void from_json(const json& j, BorderClass& x);
+inline void to_json(json& j, const BorderClass& x);
 
-void from_json(const json& j, GradientClass& x);
-void to_json(json& j, const GradientClass& x);
+inline void from_json(const json& j, GradientClass& x);
+inline void to_json(json& j, const GradientClass& x);
 
-void from_json(const json& j, GeometryClass& x);
-void to_json(json& j, const GeometryClass& x);
+inline void from_json(const json& j, GeometryClass& x);
+inline void to_json(json& j, const GeometryClass& x);
 
-void from_json(const json& j, GradientInstanceClass& x);
-void to_json(json& j, const GradientInstanceClass& x);
+inline void from_json(const json& j, GradientInstanceClass& x);
+inline void to_json(json& j, const GradientInstanceClass& x);
 
-void from_json(const json& j, HilightClass& x);
-void to_json(json& j, const HilightClass& x);
+inline void from_json(const json& j, HilightClass& x);
+inline void to_json(json& j, const HilightClass& x);
 
-void from_json(const json& j, StopClass& x);
-void to_json(json& j, const StopClass& x);
+inline void from_json(const json& j, StopClass& x);
+inline void to_json(json& j, const StopClass& x);
 
-void from_json(const json& j, ImageFiltersClass& x);
-void to_json(json& j, const ImageFiltersClass& x);
+inline void from_json(const json& j, ImageFiltersClass& x);
+inline void to_json(json& j, const ImageFiltersClass& x);
 
-void from_json(const json& j, PatternInstanceClass& x);
-void to_json(json& j, const PatternInstanceClass& x);
+inline void from_json(const json& j, PatternInstanceClass& x);
+inline void to_json(json& j, const PatternInstanceClass& x);
 
-void from_json(const json& j, PatternClass& x);
-void to_json(json& j, const PatternClass& x);
+inline void from_json(const json& j, PatternClass& x);
+inline void to_json(json& j, const PatternClass& x);
 
-void from_json(const json& j, FillClass& x);
-void to_json(json& j, const FillClass& x);
+inline void from_json(const json& j, FillClass& x);
+inline void to_json(json& j, const FillClass& x);
 
-void from_json(const json& j, FontVariationClass& x);
-void to_json(json& j, const FontVariationClass& x);
+inline void from_json(const json& j, FontVariationClass& x);
+inline void to_json(json& j, const FontVariationClass& x);
 
-void from_json(const json& j, FontAttrClass& x);
-void to_json(json& j, const FontAttrClass& x);
+inline void from_json(const json& j, FontAttrClass& x);
+inline void to_json(json& j, const FontAttrClass& x);
 
-void from_json(const json& j, TextParagraphClass& x);
-void to_json(json& j, const TextParagraphClass& x);
+inline void from_json(const json& j, TextParagraphClass& x);
+inline void to_json(json& j, const TextParagraphClass& x);
 
-void from_json(const json& j, OverrideValueClass& x);
-void to_json(json& j, const OverrideValueClass& x);
+inline void from_json(const json& j, OverrideValueClass& x);
+inline void to_json(json& j, const OverrideValueClass& x);
 
-void from_json(const json& j, PointClass& x);
-void to_json(json& j, const PointClass& x);
+inline void from_json(const json& j, PointClass& x);
+inline void to_json(json& j, const PointClass& x);
 
-void from_json(const json& j, RegionClass& x);
-void to_json(json& j, const RegionClass& x);
+inline void from_json(const json& j, RegionClass& x);
+inline void to_json(json& j, const RegionClass& x);
 
-void from_json(const json& j, SegmentClass& x);
-void to_json(json& j, const SegmentClass& x);
+inline void from_json(const json& j, SegmentClass& x);
+inline void to_json(json& j, const SegmentClass& x);
 
-void from_json(const json& j, BlurClass& x);
-void to_json(json& j, const BlurClass& x);
+inline void from_json(const json& j, BlurClass& x);
+inline void to_json(json& j, const BlurClass& x);
 
-void from_json(const json& j, ShadowClass& x);
-void to_json(json& j, const ShadowClass& x);
+inline void from_json(const json& j, ShadowClass& x);
+inline void to_json(json& j, const ShadowClass& x);
 
-void from_json(const json& j, StyleClass& x);
-void to_json(json& j, const StyleClass& x);
+inline void from_json(const json& j, StyleClass& x);
+inline void to_json(json& j, const StyleClass& x);
 
-void from_json(const json& j, TextLineTypeClass& x);
-void to_json(json& j, const TextLineTypeClass& x);
+inline void from_json(const json& j, TextLineTypeClass& x);
+inline void to_json(json& j, const TextLineTypeClass& x);
 
-void from_json(const json& j, TextOnPathClass& x);
-void to_json(json& j, const TextOnPathClass& x);
+inline void from_json(const json& j, TextOnPathClass& x);
+inline void to_json(json& j, const TextOnPathClass& x);
 
-void from_json(const json& j, VariableAssignmentClass& x);
-void to_json(json& j, const VariableAssignmentClass& x);
+inline void from_json(const json& j, VariableAssignmentClass& x);
+inline void to_json(json& j, const VariableAssignmentClass& x);
 
-void from_json(const json& j, VariableDefClass& x);
-void to_json(json& j, const VariableDefClass& x);
+inline void from_json(const json& j, VariableDefClass& x);
+inline void to_json(json& j, const VariableDefClass& x);
 
-void from_json(const json& j, VariableRefClass& x);
-void to_json(json& j, const VariableRefClass& x);
+inline void from_json(const json& j, VariableRefClass& x);
+inline void to_json(json& j, const VariableRefClass& x);
 
-void from_json(const json& j, VertexClass& x);
-void to_json(json& j, const VertexClass& x);
+inline void from_json(const json& j, VertexClass& x);
+inline void to_json(json& j, const VertexClass& x);
 
-void from_json(const json& j, SubshapeClass& x);
-void to_json(json& j, const SubshapeClass& x);
+inline void from_json(const json& j, SubshapeClass& x);
+inline void to_json(json& j, const SubshapeClass& x);
 
-void from_json(const json& j, ShapeClass& x);
-void to_json(json& j, const ShapeClass& x);
+inline void from_json(const json& j, ShapeClass& x);
+inline void to_json(json& j, const ShapeClass& x);
 
-void from_json(const json& j, ChildObjectClass& x);
-void to_json(json& j, const ChildObjectClass& x);
+inline void from_json(const json& j, ChildObjectClass& x);
+inline void to_json(json& j, const ChildObjectClass& x);
 
-void from_json(const json& j, FrameClass& x);
-void to_json(json& j, const FrameClass& x);
+inline void from_json(const json& j, FrameClass& x);
+inline void to_json(json& j, const FrameClass& x);
 
-void from_json(const json& j, PatternLayerDefClass& x);
-void to_json(json& j, const PatternLayerDefClass& x);
+inline void from_json(const json& j, PatternLayerDefClass& x);
+inline void to_json(json& j, const PatternLayerDefClass& x);
 
-void from_json(const json& j, ReferenceClass& x);
-void to_json(json& j, const ReferenceClass& x);
+inline void from_json(const json& j, ReferenceClass& x);
+inline void to_json(json& j, const ReferenceClass& x);
 
-void from_json(const json& j, Version& x);
-void to_json(json& j, const Version& x);
+inline void from_json(const json& j, Version& x);
+inline void to_json(json& j, const Version& x);
 } // namespace Model
 } // namespace VGG
 namespace nlohmann
@@ -2597,10 +2607,10 @@ namespace Model
 {
 inline void from_json(const json& j, AlphaMask& x)
 {
-  x.alphaType = j.at("alphaType").get<int64_t>();
-  x.alphaMaskClass = j.at("class").get<AlphaMaskByClass>();
-  x.crop = j.at("crop").get<bool>();
-  x.id = j.at("id").get<std::string>();
+  safeGetTo(x.alphaType, j, "alphaType");
+  safeGetTo(x.alphaMaskClass, j, "class");
+  safeGetTo(x.crop, j, "crop");
+  safeGetTo(x.id, j, "id");
 }
 
 inline void to_json(json& j, const AlphaMask& x)
@@ -2614,11 +2624,11 @@ inline void to_json(json& j, const AlphaMask& x)
 
 inline void from_json(const json& j, Color& x)
 {
-  x.alpha = j.at("alpha").get<double>();
-  x.blue = j.at("blue").get<double>();
-  x.colorClass = j.at("class").get<BackgroundColorClass>();
-  x.green = j.at("green").get<double>();
-  x.red = j.at("red").get<double>();
+  safeGetTo(x.alpha, j, "alpha");
+  safeGetTo(x.blue, j, "blue");
+  safeGetTo(x.colorClass, j, "class");
+  safeGetTo(x.green, j, "green");
+  safeGetTo(x.red, j, "red");
 }
 
 inline void to_json(json& j, const Color& x)
@@ -2633,12 +2643,12 @@ inline void to_json(json& j, const Color& x)
 
 inline void from_json(const json& j, Rect& x)
 {
-  x.rectClass = j.at("class").get<BoundsClass>();
-  x.constrainProportions = j.at("constrainProportions").get<bool>();
-  x.height = j.at("height").get<double>();
-  x.width = j.at("width").get<double>();
-  x.x = j.at("x").get<double>();
-  x.y = j.at("y").get<double>();
+  safeGetTo(x.rectClass, j, "class");
+  safeGetTo(x.constrainProportions, j, "constrainProportions");
+  safeGetTo(x.height, j, "height");
+  safeGetTo(x.width, j, "width");
+  safeGetTo(x.x, j, "x");
+  safeGetTo(x.y, j, "y");
 }
 
 inline void to_json(json& j, const Rect& x)
@@ -2654,11 +2664,11 @@ inline void to_json(json& j, const Rect& x)
 
 inline void from_json(const json& j, GraphicsContextSettings& x)
 {
-  x.blendMode = j.at("blendMode").get<int64_t>();
-  x.graphicsContextSettingsClass = j.at("class").get<ContextSettingsClass>();
-  x.isolateBlending = j.at("isolateBlending").get<bool>();
-  x.opacity = j.at("opacity").get<double>();
-  x.transparencyKnockoutGroup = j.at("transparencyKnockoutGroup").get<int64_t>();
+  safeGetTo(x.blendMode, j, "blendMode");
+  safeGetTo(x.graphicsContextSettingsClass, j, "class");
+  safeGetTo(x.isolateBlending, j, "isolateBlending");
+  safeGetTo(x.opacity, j, "opacity");
+  safeGetTo(x.transparencyKnockoutGroup, j, "transparencyKnockoutGroup");
 }
 
 inline void to_json(json& j, const GraphicsContextSettings& x)
@@ -2673,14 +2683,14 @@ inline void to_json(json& j, const GraphicsContextSettings& x)
 
 inline void from_json(const json& j, GradientBasicGeometry& x)
 {
-  x.angle = j.at("angle").get<double>();
-  x.gradientBasicGeometryClass = j.at("class").get<GeometryClass>();
-  x.flag = j.at("flag").get<int64_t>();
-  x.length = j.at("length").get<double>();
-  x.matrix = j.at("matrix").get<std::vector<double>>();
-  x.widthRatio = j.at("widthRatio").get<double>();
-  x.xOrigin = j.at("xOrigin").get<double>();
-  x.yOrigin = j.at("yOrigin").get<double>();
+  safeGetTo(x.angle, j, "angle");
+  safeGetTo(x.gradientBasicGeometryClass, j, "class");
+  safeGetTo(x.flag, j, "flag");
+  safeGetTo(x.length, j, "length");
+  safeGetTo(x.matrix, j, "matrix");
+  safeGetTo(x.widthRatio, j, "widthRatio");
+  safeGetTo(x.xOrigin, j, "xOrigin");
+  safeGetTo(x.yOrigin, j, "yOrigin");
 }
 
 inline void to_json(json& j, const GradientBasicGeometry& x)
@@ -2698,11 +2708,11 @@ inline void to_json(json& j, const GradientBasicGeometry& x)
 
 inline void from_json(const json& j, GradientHilight& x)
 {
-  x.angle = j.at("angle").get<double>();
-  x.gradientHilightClass = j.at("class").get<HilightClass>();
-  x.length = j.at("length").get<double>();
-  x.xHilight = j.at("xHilight").get<double>();
-  x.yHilight = j.at("yHilight").get<double>();
+  safeGetTo(x.angle, j, "angle");
+  safeGetTo(x.gradientHilightClass, j, "class");
+  safeGetTo(x.length, j, "length");
+  safeGetTo(x.xHilight, j, "xHilight");
+  safeGetTo(x.yHilight, j, "yHilight");
 }
 
 inline void to_json(json& j, const GradientHilight& x)
@@ -2717,8 +2727,8 @@ inline void to_json(json& j, const GradientHilight& x)
 
 inline void from_json(const json& j, PerpendicularMatrix& x)
 {
-  x.flag = j.at("flag").get<int64_t>();
-  x.matrix = j.at("matrix").get<std::vector<double>>();
+  safeGetTo(x.flag, j, "flag");
+  safeGetTo(x.matrix, j, "matrix");
 }
 
 inline void to_json(json& j, const PerpendicularMatrix& x)
@@ -2730,10 +2740,10 @@ inline void to_json(json& j, const PerpendicularMatrix& x)
 
 inline void from_json(const json& j, GradientStop& x)
 {
-  x.gradientStopClass = j.at("class").get<StopClass>();
-  x.color = j.at("color").get<Color>();
-  x.midPoint = j.at("midPoint").get<double>();
-  x.position = j.at("position").get<double>();
+  safeGetTo(x.gradientStopClass, j, "class");
+  safeGetTo(x.color, j, "color");
+  safeGetTo(x.midPoint, j, "midPoint");
+  safeGetTo(x.position, j, "position");
 }
 
 inline void to_json(json& j, const GradientStop& x)
@@ -2747,10 +2757,10 @@ inline void to_json(json& j, const GradientStop& x)
 
 inline void from_json(const json& j, GradientInstance& x)
 {
-  x.gradientClass = j.at("class").get<GradientInstanceClass>();
-  x.from = j.at("from").get<std::vector<double>>();
-  x.to = j.at("to").get<std::vector<double>>();
-  x.stops = j.at("stops").get<std::vector<GradientStop>>();
+  safeGetTo(x.gradientClass, j, "class");
+  safeGetTo(x.from, j, "from");
+  safeGetTo(x.to, j, "to");
+  safeGetTo(x.stops, j, "stops");
   x.ellipse = get_stack_optional<std::variant<std::vector<double>, double>>(j, "ellipse");
 }
 
@@ -2769,8 +2779,8 @@ inline void to_json(json& j, const GradientInstance& x)
 
 inline void from_json(const json& j, Gradient& x)
 {
-  x.gradientClass = j.at("class").get<GradientClass>();
-  x.instance = j.at("instance").get<GradientInstance>();
+  safeGetTo(x.gradientClass, j, "class");
+  safeGetTo(x.instance, j, "instance");
 }
 
 inline void to_json(json& j, const Gradient& x)
@@ -2782,12 +2792,12 @@ inline void to_json(json& j, const Gradient& x)
 
 inline void from_json(const json& j, ImageFilters& x)
 {
-  x.imageFiltersClass = j.at("class").get<ImageFiltersClass>();
+  safeGetTo(x.imageFiltersClass, j, "class");
   x.contrast = get_stack_optional<double>(j, "contrast");
   x.exposure = get_stack_optional<double>(j, "exposure");
   x.highlights = get_stack_optional<double>(j, "highlights");
   x.hue = get_stack_optional<double>(j, "hue");
-  x.isEnabled = j.at("isEnabled").get<bool>();
+  safeGetTo(x.isEnabled, j, "isEnabled");
   x.saturation = get_stack_optional<double>(j, "saturation");
   x.shadows = get_stack_optional<double>(j, "shadows");
   x.temperature = get_stack_optional<double>(j, "temperature");
@@ -2835,9 +2845,9 @@ inline void to_json(json& j, const ImageFilters& x)
 
 inline void from_json(const json& j, PatternImageFill& x)
 {
-  x.class_ = j.at("class").get<PatternInstanceClass>();
-  x.imageFileName = j.at("imageFileName").get<std::string>();
-  x.rotation = j.at("rotation").get<double>();
+  safeGetTo(x.class_, j, "class");
+  safeGetTo(x.imageFileName, j, "imageFileName");
+  safeGetTo(x.rotation, j, "rotation");
   x.imageFilters = get_stack_optional<ImageFilters>(j, "imageFilters");
 }
 
@@ -2853,14 +2863,14 @@ inline void to_json(json& j, const PatternImageFill& x)
   }
 }
 
-void from_json(const json& j, PatternImageStrech& x)
+inline void from_json(const json& j, PatternImageStrech& x)
 {
-  x.class_ = j.at("class").get<PatternInstanceClass>();
-  x.imageFileName = j.at("imageFileName").get<std::string>();
-  x.matrix = j.at("matrix").get<std::vector<double>>();
+  safeGetTo(x.class_, j, "class");
+  safeGetTo(x.imageFileName, j, "imageFileName");
+  safeGetTo(x.matrix, j, "matrix");
   x.imageFilters = get_stack_optional<ImageFilters>(j, "imageFilters");
 }
-void to_json(json& j, const PatternImageStrech& x)
+inline void to_json(json& j, const PatternImageStrech& x)
 {
   j = json::object();
   j["class"] = x.class_;
@@ -2874,9 +2884,9 @@ void to_json(json& j, const PatternImageStrech& x)
 
 inline void from_json(const json& j, PatternImageFit& x)
 {
-  x.class_ = j.at("class").get<PatternInstanceClass>();
-  x.imageFileName = j.at("imageFileName").get<std::string>();
-  x.rotation = j.at("rotation").get<double>();
+  safeGetTo(x.class_, j, "class");
+  safeGetTo(x.imageFileName, j, "imageFileName");
+  safeGetTo(x.rotation, j, "rotation");
   x.imageFilters = get_stack_optional<ImageFilters>(j, "imageFilters");
 }
 inline void to_json(json& j, const PatternImageFit& x)
@@ -2891,17 +2901,17 @@ inline void to_json(json& j, const PatternImageFit& x)
   }
 }
 
-void from_json(const json& j, PatternImageTile& x)
+inline void from_json(const json& j, PatternImageTile& x)
 {
-  x.class_ = j.at("class").get<PatternInstanceClass>();
-  x.scale = j.at("scale").get<double>();
-  x.imageFileName = j.at("imageFileName").get<std::string>();
-  x.rotation = j.at("rotation").get<double>();
+  safeGetTo(x.class_, j, "class");
+  safeGetTo(x.scale, j, "scale");
+  safeGetTo(x.imageFileName, j, "imageFileName");
+  safeGetTo(x.rotation, j, "rotation");
   x.mirror = get_stack_optional<bool>(j, "mirror");
   x.mode = get_stack_optional<int>(j, "mode");
   x.imageFilters = get_stack_optional<ImageFilters>(j, "imageFilters");
 }
-void to_json(json& j, const PatternImageTile& x)
+inline void to_json(json& j, const PatternImageTile& x)
 {
   j = json::object();
   j["class"] = x.class_;
@@ -2922,20 +2932,20 @@ void to_json(json& j, const PatternImageTile& x)
   }
 }
 
-void from_json(const json& j, PatternLayerInstance& x)
+inline void from_json(const json& j, PatternLayerInstance& x)
 {
-  x.class_ = j.at("class").get<PatternInstanceClass>();
-  x.refLayerName = j.at("refLayerName").get<std::string>();
-  x.offset = j.at("offset").get<std::vector<double>>();
-  x.scale = j.at("scale").get<std::vector<double>>();
-  x.angle = j.at("angle").get<double>();
-  x.reflection = j.at("reflection").get<bool>();
-  x.r = j.at("r").get<double>();
-  x.shear = j.at("shear").get<double>();
-  x.shearAxis = j.at("shearAxis").get<double>();
-  x.matrix = j.at("matrix").get<std::vector<double>>();
+  safeGetTo(x.class_, j, "class");
+  safeGetTo(x.refLayerName, j, "refLayerName");
+  safeGetTo(x.offset, j, "offset");
+  safeGetTo(x.scale, j, "scale");
+  safeGetTo(x.angle, j, "angle");
+  safeGetTo(x.reflection, j, "reflection");
+  safeGetTo(x.r, j, "r");
+  safeGetTo(x.shear, j, "shear");
+  safeGetTo(x.shearAxis, j, "shearAxis");
+  safeGetTo(x.matrix, j, "matrix");
 }
-void to_json(json& j, const PatternLayerInstance& x)
+inline void to_json(json& j, const PatternLayerInstance& x)
 {
   j = json::object();
   j["class"] = x.class_;
@@ -2959,8 +2969,8 @@ inline void from_json(const json& j, Pattern& x)
     throw std::runtime_error("Could not deserialise!");
   }
 
-  x.patternClass = j.at("class").get<PatternClass>();
-  x.instance = j.at("instance").get<PatternInstanceType>();
+  safeGetTo(x.patternClass, j, "class");
+  safeGetTo(x.instance, j, "instance");
 }
 
 inline void to_json(json& j, const Pattern& x)
@@ -2975,24 +2985,24 @@ inline void from_json(const json& j, Border& x)
 {
   x.borderWeightsIndependent = get_stack_optional<bool>(j, "borderWeightsIndependent");
   x.bottomWeight = get_stack_optional<double>(j, "bottomWeight");
-  x.borderClass = j.at("class").get<BorderClass>();
+  safeGetTo(x.borderClass, j, "class");
   x.color = get_stack_optional<Color>(j, "color");
-  x.contextSettings = j.at("contextSettings").get<GraphicsContextSettings>();
-  x.dashedOffset = j.at("dashedOffset").get<double>();
-  x.dashedPattern = j.at("dashedPattern").get<std::vector<double>>();
-  x.fillType = j.at("fillType").get<int64_t>();
-  x.flat = j.at("flat").get<double>();
+  safeGetTo(x.contextSettings, j, "contextSettings");
+  safeGetTo(x.dashedOffset, j, "dashedOffset");
+  safeGetTo(x.dashedPattern, j, "dashedPattern");
+  safeGetTo(x.fillType, j, "fillType");
+  safeGetTo(x.flat, j, "flat");
   x.gradient = get_stack_optional<Gradient>(j, "gradient");
-  x.isEnabled = j.at("isEnabled").get<bool>();
+  safeGetTo(x.isEnabled, j, "isEnabled");
   x.leftWeight = get_stack_optional<double>(j, "leftWeight");
-  x.lineCapStyle = j.at("lineCapStyle").get<int64_t>();
-  x.lineJoinStyle = j.at("lineJoinStyle").get<int64_t>();
-  x.miterLimit = j.at("miterLimit").get<double>();
+  safeGetTo(x.lineCapStyle, j, "lineCapStyle");
+  safeGetTo(x.lineJoinStyle, j, "lineJoinStyle");
+  safeGetTo(x.miterLimit, j, "miterLimit");
   x.pattern = get_stack_optional<Pattern>(j, "pattern");
-  x.position = j.at("position").get<int64_t>();
+  safeGetTo(x.position, j, "position");
   x.rightWeight = get_stack_optional<double>(j, "rightWeight");
-  x.style = j.at("style").get<int64_t>();
-  x.thickness = j.at("thickness").get<double>();
+  safeGetTo(x.style, j, "style");
+  safeGetTo(x.thickness, j, "thickness");
   x.topWeight = get_stack_optional<double>(j, "topWeight");
 }
 
@@ -3048,12 +3058,12 @@ inline void to_json(json& j, const Border& x)
 
 inline void from_json(const json& j, Fill& x)
 {
-  x.fillClass = j.at("class").get<FillClass>();
+  safeGetTo(x.fillClass, j, "class");
   x.color = get_stack_optional<Color>(j, "color");
-  x.contextSettings = j.at("contextSettings").get<GraphicsContextSettings>();
-  x.fillType = j.at("fillType").get<int64_t>();
+  safeGetTo(x.contextSettings, j, "contextSettings");
+  safeGetTo(x.fillType, j, "fillType");
   x.gradient = get_stack_optional<Gradient>(j, "gradient");
-  x.isEnabled = j.at("isEnabled").get<bool>();
+  safeGetTo(x.isEnabled, j, "isEnabled");
   x.pattern = get_stack_optional<Pattern>(j, "pattern");
 }
 
@@ -3080,9 +3090,9 @@ inline void to_json(json& j, const Fill& x)
 
 inline void from_json(const json& j, FontVariation& x)
 {
-  x.fontVariationClass = j.at("class").get<FontVariationClass>();
-  x.name = j.at("name").get<std::string>();
-  x.value = j.at("value").get<double>();
+  safeGetTo(x.fontVariationClass, j, "class");
+  safeGetTo(x.name, j, "name");
+  safeGetTo(x.value, j, "value");
 }
 
 inline void to_json(json& j, const FontVariation& x)
@@ -3095,8 +3105,8 @@ inline void to_json(json& j, const FontVariation& x)
 
 inline void from_json(const json& j, TextParagraph& x)
 {
-  x.textParagraphClass = j.at("class").get<TextParagraphClass>();
-  x.paragraphSpacing = j.at("paragraphSpacing").get<double>();
+  safeGetTo(x.textParagraphClass, j, "class");
+  safeGetTo(x.paragraphSpacing, j, "paragraphSpacing");
 }
 
 inline void to_json(json& j, const TextParagraph& x)
@@ -3110,7 +3120,7 @@ inline void from_json(const json& j, TextFontAttributes& x)
 {
   x.baselineShift = get_stack_optional<double>(j, "baselineShift");
   x.borders = get_stack_optional<std::vector<Border>>(j, "borders");
-  x.textFontAttributesClass = j.at("class").get<FontAttrClass>();
+  safeGetTo(x.textFontAttributesClass, j, "class");
   x.fills = get_stack_optional<std::vector<Fill>>(j, "fills");
   x.fillUseType = get_stack_optional<int64_t>(j, "fillUseType");
   x.fontVariantCaps = get_stack_optional<int64_t>(j, "fontVariantCaps");
@@ -3239,10 +3249,10 @@ inline void to_json(json& j, const TextFontAttributes& x)
 
 inline void from_json(const json& j, OverrideValue& x)
 {
-  x.overrideValueClass = j.at("class").get<OverrideValueClass>();
+  safeGetTo(x.overrideValueClass, j, "class");
   x.effectOnLayout = get_stack_optional<bool>(j, "effectOnLayout");
-  x.objectId = j.at("objectId").get<std::vector<std::string>>();
-  x.overrideName = j.at("overrideName").get<std::string>();
+  safeGetTo(x.objectId, j, "objectId");
+  safeGetTo(x.overrideName, j, "overrideName");
   x.overrideValue = get_untyped(j, "overrideValue");
 }
 
@@ -3261,12 +3271,12 @@ inline void to_json(json& j, const OverrideValue& x)
 
 inline void from_json(const json& j, PointAttr& x)
 {
-  x.pointAttrClass = j.at("class").get<PointClass>();
-  x.cornerStyle = get_stack_optional<int64_t>(j, "cornerStyle");
+  safeGetTo(x.pointAttrClass, j, "class");
+  x.cornerStyle = get_stack_optional<int>(j, "cornerStyle");
   x.curveFrom = get_stack_optional<std::vector<double>>(j, "curveFrom");
   x.curveTo = get_stack_optional<std::vector<double>>(j, "curveTo");
   x.markType = get_stack_optional<int64_t>(j, "markType");
-  x.point = j.at("point").get<std::vector<double>>();
+  safeGetTo(x.point, j, "point");
   x.radius = get_stack_optional<double>(j, "radius");
 }
 
@@ -3299,10 +3309,10 @@ inline void to_json(json& j, const PointAttr& x)
 
 inline void from_json(const json& j, Region& x)
 {
-  x.regionClass = j.at("class").get<RegionClass>();
+  safeGetTo(x.regionClass, j, "class");
   x.fills = get_stack_optional<std::vector<Fill>>(j, "fills");
-  x.loops = j.at("loops").get<std::vector<std::vector<nlohmann::json>>>();
-  x.windingRule = j.at("windingRule").get<int64_t>();
+  safeGetTo(x.loops, j, "loops");
+  safeGetTo(x.windingRule, j, "windingRule");
 }
 
 inline void to_json(json& j, const Region& x)
@@ -3319,11 +3329,11 @@ inline void to_json(json& j, const Region& x)
 
 inline void from_json(const json& j, Segment& x)
 {
-  x.segmentClass = j.at("class").get<SegmentClass>();
+  safeGetTo(x.segmentClass, j, "class");
   x.curveFrom = get_stack_optional<std::vector<double>>(j, "curveFrom");
   x.curveTo = get_stack_optional<std::vector<double>>(j, "curveTo");
-  x.end = j.at("end").get<int64_t>();
-  x.start = j.at("start").get<int64_t>();
+  safeGetTo(x.end, j, "end");
+  safeGetTo(x.start, j, "start");
 }
 
 inline void to_json(json& j, const Segment& x)
@@ -3344,13 +3354,13 @@ inline void to_json(json& j, const Segment& x)
 
 inline void from_json(const json& j, Blur& x)
 {
-  x.center = j.at("center").get<std::vector<double>>();
-  x.blurClass = j.at("class").get<BlurClass>();
-  x.isEnabled = j.at("isEnabled").get<bool>();
+  safeGetTo(x.center, j, "center");
+  safeGetTo(x.blurClass, j, "class");
+  safeGetTo(x.isEnabled, j, "isEnabled");
   x.motionAngle = get_stack_optional<double>(j, "motionAngle");
   x.radius = get_stack_optional<double>(j, "radius");
-  x.saturation = j.at("saturation").get<double>();
-  x.type = j.at("type").get<int64_t>();
+  safeGetTo(x.saturation, j, "saturation");
+  safeGetTo(x.type, j, "type");
 }
 
 inline void to_json(json& j, const Blur& x)
@@ -3373,16 +3383,16 @@ inline void to_json(json& j, const Blur& x)
 
 inline void from_json(const json& j, Shadow& x)
 {
-  x.blur = j.at("blur").get<double>();
-  x.shadowClass = j.at("class").get<ShadowClass>();
-  x.color = j.at("color").get<Color>();
-  x.contextSettings = j.at("contextSettings").get<GraphicsContextSettings>();
-  x.inner = j.at("inner").get<bool>();
-  x.isEnabled = j.at("isEnabled").get<bool>();
-  x.offsetX = j.at("offsetX").get<double>();
-  x.offsetY = j.at("offsetY").get<double>();
+  safeGetTo(x.blur, j, "blur");
+  safeGetTo(x.shadowClass, j, "class");
+  safeGetTo(x.color, j, "color");
+  safeGetTo(x.contextSettings, j, "contextSettings");
+  safeGetTo(x.inner, j, "inner");
+  safeGetTo(x.isEnabled, j, "isEnabled");
+  safeGetTo(x.offsetX, j, "offsetX");
+  safeGetTo(x.offsetY, j, "offsetY");
   x.showBehindTransparentAreas = get_stack_optional<bool>(j, "showBehindTransparentAreas");
-  x.spread = j.at("spread").get<double>();
+  safeGetTo(x.spread, j, "spread");
 }
 
 inline void to_json(json& j, const Shadow& x)
@@ -3405,11 +3415,11 @@ inline void to_json(json& j, const Shadow& x)
 
 inline void from_json(const json& j, Style& x)
 {
-  x.blurs = j.at("blurs").get<std::vector<Blur>>();
-  x.borders = j.at("borders").get<std::vector<Border>>();
-  x.styleClass = j.at("class").get<StyleClass>();
-  x.fills = j.at("fills").get<std::vector<Fill>>();
-  x.shadows = j.at("shadows").get<std::vector<Shadow>>();
+  safeGetTo(x.blurs, j, "blurs");
+  safeGetTo(x.borders, j, "borders");
+  safeGetTo(x.styleClass, j, "class");
+  safeGetTo(x.fills, j, "fills");
+  safeGetTo(x.shadows, j, "shadows");
 }
 
 inline void to_json(json& j, const Style& x)
@@ -3424,10 +3434,10 @@ inline void to_json(json& j, const Style& x)
 
 inline void from_json(const json& j, TextLineType& x)
 {
-  x.textLineTypeClass = j.at("class").get<TextLineTypeClass>();
-  x.isFirst = j.at("isFirst").get<bool>();
-  x.level = j.at("level").get<int64_t>();
-  x.styleType = j.at("styleType").get<int64_t>();
+  safeGetTo(x.textLineTypeClass, j, "class");
+  safeGetTo(x.isFirst, j, "isFirst");
+  safeGetTo(x.level, j, "level");
+  safeGetTo(x.styleType, j, "styleType");
 }
 
 inline void to_json(json& j, const TextLineType& x)
@@ -3441,7 +3451,7 @@ inline void to_json(json& j, const TextLineType& x)
 
 inline void from_json(const json& j, TextOnPath& x)
 {
-  x.textOnPathClass = j.at("class").get<TextOnPathClass>();
+  safeGetTo(x.textOnPathClass, j, "class");
 }
 
 inline void to_json(json& j, const TextOnPath& x)
@@ -3452,8 +3462,8 @@ inline void to_json(json& j, const TextOnPath& x)
 
 inline void from_json(const json& j, VariableAssign& x)
 {
-  x.variableAssignClass = j.at("class").get<VariableAssignmentClass>();
-  x.id = j.at("id").get<std::string>();
+  safeGetTo(x.variableAssignClass, j, "class");
+  safeGetTo(x.id, j, "id");
   x.value = get_untyped(j, "value");
 }
 
@@ -3467,10 +3477,10 @@ inline void to_json(json& j, const VariableAssign& x)
 
 inline void from_json(const json& j, VariableDefine& x)
 {
-  x.variableDefineClass = j.at("class").get<VariableDefClass>();
-  x.id = j.at("id").get<std::string>();
+  safeGetTo(x.variableDefineClass, j, "class");
+  safeGetTo(x.id, j, "id");
   x.value = get_untyped(j, "value");
-  x.varType = j.at("varType").get<int64_t>();
+  safeGetTo(x.varType, j, "varType");
 }
 
 inline void to_json(json& j, const VariableDefine& x)
@@ -3484,9 +3494,9 @@ inline void to_json(json& j, const VariableDefine& x)
 
 inline void from_json(const json& j, VariableRefer& x)
 {
-  x.variableReferClass = j.at("class").get<VariableRefClass>();
-  x.id = j.at("id").get<std::string>();
-  x.objectField = j.at("objectField").get<std::string>();
+  safeGetTo(x.variableReferClass, j, "class");
+  safeGetTo(x.id, j, "id");
+  safeGetTo(x.objectField, j, "objectField");
 }
 
 inline void to_json(json& j, const VariableRefer& x)
@@ -3499,9 +3509,9 @@ inline void to_json(json& j, const VariableRefer& x)
 
 inline void from_json(const json& j, Vertex& x)
 {
-  x.vertexClass = j.at("class").get<VertexClass>();
+  safeGetTo(x.vertexClass, j, "class");
   x.markType = get_stack_optional<int64_t>(j, "markType");
-  x.point = j.at("point").get<std::vector<double>>();
+  safeGetTo(x.point, j, "point");
   x.radius = get_stack_optional<double>(j, "radius");
 }
 
@@ -3522,9 +3532,9 @@ inline void to_json(json& j, const Vertex& x)
 
 inline void from_json(const json& j, Contour& x)
 {
-  x.class_ = j.at("class").get<SubGeometryClass>();
-  x.closed = j.at("closed").get<bool>();
-  x.points = j.at("points").get<std::vector<PointAttr>>();
+  safeGetTo(x.class_, j, "class");
+  safeGetTo(x.closed, j, "closed");
+  safeGetTo(x.points, j, "points");
 }
 
 inline void to_json(json& j, const Contour& x)
@@ -3535,14 +3545,14 @@ inline void to_json(json& j, const Contour& x)
   j["points"] = x.points;
 }
 
-void from_json(const json& j, VectorNetwork& x)
+inline void from_json(const json& j, VectorNetwork& x)
 {
-  x.class_ = j.at("class").get<SubGeometryClass>();
-  x.vertices = j.at("vertices").get<std::vector<Vertex>>();
-  x.segments = j.at("segments").get<std::vector<Segment>>();
-  x.regions = j.at("regions").get<std::vector<Region>>();
+  safeGetTo(x.class_, j, "class");
+  safeGetTo(x.vertices, j, "vertices");
+  safeGetTo(x.segments, j, "segments");
+  safeGetTo(x.regions, j, "regions");
 }
-void to_json(json& j, const VectorNetwork& x)
+inline void to_json(json& j, const VectorNetwork& x)
 {
   j = json::object();
   j["class"] = x.class_;
@@ -3551,14 +3561,14 @@ void to_json(json& j, const VectorNetwork& x)
   j["regions"] = x.regions;
 }
 
-void from_json(const json& j, Ellipse& x)
+inline void from_json(const json& j, Ellipse& x)
 {
-  x.class_ = j.at("class").get<SubGeometryClass>();
-  x.startingAngle = j.at("startingAngle").get<double>();
-  x.endingAngle = j.at("endingAngle").get<double>();
-  x.innerRadius = j.at("innerRadius").get<double>();
+  safeGetTo(x.class_, j, "class");
+  safeGetTo(x.startingAngle, j, "startingAngle");
+  safeGetTo(x.endingAngle, j, "endingAngle");
+  safeGetTo(x.innerRadius, j, "innerRadius");
 }
-void to_json(json& j, const Ellipse& x)
+inline void to_json(json& j, const Ellipse& x)
 {
   j = json::object();
   j["class"] = x.class_;
@@ -3567,13 +3577,13 @@ void to_json(json& j, const Ellipse& x)
   j["innerRadius"] = x.innerRadius;
 }
 
-void from_json(const json& j, Polygon& x)
+inline void from_json(const json& j, Polygon& x)
 {
-  x.class_ = j.at("class").get<SubGeometryClass>();
-  x.pointCount = j.at("pointCount").get<int>();
+  safeGetTo(x.class_, j, "class");
+  safeGetTo(x.pointCount, j, "pointCount");
   x.radius = get_stack_optional<double>(j, "radius");
 }
-void to_json(json& j, const Polygon& x)
+inline void to_json(json& j, const Polygon& x)
 {
   j = json::object();
   j["class"] = x.class_;
@@ -3584,13 +3594,13 @@ void to_json(json& j, const Polygon& x)
   }
 }
 
-void from_json(const json& j, Rectangle& x)
+inline void from_json(const json& j, Rectangle& x)
 {
-  x.class_ = j.at("class").get<SubGeometryClass>();
+  safeGetTo(x.class_, j, "class");
   x.cornerRadius = get_stack_optional<double>(j, "cornerRadius");
   x.radius = get_stack_optional<std::vector<double>>(j, "radius");
 }
-void to_json(json& j, const Rectangle& x)
+inline void to_json(json& j, const Rectangle& x)
 {
   j = json::object();
   j["class"] = x.class_;
@@ -3601,14 +3611,14 @@ void to_json(json& j, const Rectangle& x)
   }
 }
 
-void from_json(const json& j, Star& x)
+inline void from_json(const json& j, Star& x)
 {
-  x.class_ = j.at("class").get<SubGeometryClass>();
-  x.ratio = j.at("ratio").get<double>();
-  x.pointCount = j.at("pointCount").get<int>();
+  safeGetTo(x.class_, j, "class");
+  safeGetTo(x.ratio, j, "ratio");
+  safeGetTo(x.pointCount, j, "pointCount");
   x.radius = get_stack_optional<double>(j, "radius");
 }
-void to_json(json& j, const Star& x)
+inline void to_json(json& j, const Star& x)
 {
   j = json::object();
   j["class"] = x.class_;
@@ -3622,10 +3632,10 @@ void to_json(json& j, const Star& x)
 
 inline void from_json(const json& j, Subshape& x)
 {
-  x.booleanOperation = j.at("booleanOperation").get<int64_t>();
-  x.subshapeClass = j.at("class").get<SubshapeClass>();
+  safeGetTo(x.booleanOperation, j, "booleanOperation");
+  safeGetTo(x.subshapeClass, j, "class");
 
-  x.subGeometry = j.at("subGeometry").get<std::shared_ptr<SubGeometryType>>();
+  safeGetTo(x.subGeometry, j, "subGeometry");
 }
 
 inline void to_json(json& j, const Subshape& x)
@@ -3638,10 +3648,10 @@ inline void to_json(json& j, const Subshape& x)
 
 inline void from_json(const json& j, Shape& x)
 {
-  x.shapeClass = j.at("class").get<ShapeClass>();
+  safeGetTo(x.shapeClass, j, "class");
   x.radius = get_stack_optional<double>(j, "radius");
-  x.subshapes = j.at("subshapes").get<std::vector<Subshape>>();
-  x.windingRule = j.at("windingRule").get<int64_t>();
+  safeGetTo(x.subshapes, j, "subshapes");
+  safeGetTo(x.windingRule, j, "windingRule");
 }
 
 inline void to_json(json& j, const Shape& x)
@@ -3658,32 +3668,32 @@ inline void to_json(json& j, const Shape& x)
 
 inline void from_json(const json& j, Path& x)
 {
-  x.alphaMaskBy = j.at("alphaMaskBy").get<std::vector<AlphaMask>>();
-  x.bounds = j.at("bounds").get<Rect>();
-  x.pathClass = j.at("class").get<ChildObjectClass>();
-  x.contextSettings = j.at("contextSettings").get<GraphicsContextSettings>();
+  safeGetTo(x.alphaMaskBy, j, "alphaMaskBy");
+  safeGetTo(x.bounds, j, "bounds");
+  safeGetTo(x.pathClass, j, "class");
+  safeGetTo(x.contextSettings, j, "contextSettings");
   x.cornerSmoothing = get_stack_optional<double>(j, "cornerSmoothing");
   x.horizontalConstraint = get_stack_optional<int64_t>(j, "horizontalConstraint");
-  x.id = j.at("id").get<std::string>();
-  x.isLocked = j.at("isLocked").get<bool>();
+  safeGetTo(x.id, j, "id");
+  safeGetTo(x.isLocked, j, "isLocked");
   x.keepShapeWhenResize = get_stack_optional<bool>(j, "keepShapeWhenResize");
   x.maskShowType = get_stack_optional<int64_t>(j, "maskShowType");
-  x.maskType = j.at("maskType").get<int64_t>();
-  x.matrix = j.at("matrix").get<std::vector<double>>();
+  safeGetTo(x.maskType, j, "maskType");
+  safeGetTo(x.matrix, j, "matrix");
   x.name = get_stack_optional<std::string>(j, "name");
-  x.outlineMaskBy = j.at("outlineMaskBy").get<std::vector<std::string>>();
-  x.overflow = j.at("overflow").get<int64_t>();
+  safeGetTo(x.outlineMaskBy, j, "outlineMaskBy");
+  safeGetTo(x.overflow, j, "overflow");
   x.overrideKey = get_stack_optional<std::string>(j, "overrideKey");
   x.resizesContent = get_stack_optional<int64_t>(j, "resizesContent");
   x.shape = get_heap_optional<Shape>(j, "shape");
-  x.style = j.at("style").get<Style>();
+  safeGetTo(x.style, j, "style");
   x.styleEffectBoolean = get_stack_optional<int64_t>(j, "styleEffectBoolean");
-  x.styleEffectMaskArea = j.at("styleEffectMaskArea").get<int64_t>();
+  safeGetTo(x.styleEffectMaskArea, j, "styleEffectMaskArea");
   x.transformedBounds = get_stack_optional<Rect>(j, "transformedBounds");
   x.variableDefs = get_stack_optional<std::vector<VariableDefine>>(j, "variableDefs");
   x.variableRefs = get_stack_optional<std::vector<VariableRefer>>(j, "variableRefs");
   x.verticalConstraint = get_stack_optional<int64_t>(j, "verticalConstraint");
-  x.visible = j.at("visible").get<bool>();
+  safeGetTo(x.visible, j, "visible");
   x.fillReplacesImage = get_stack_optional<bool>(j, "fillReplacesImage");
   x.imageFileName = get_stack_optional<std::string>(j, "imageFileName");
   x.imageFilters = get_stack_optional<ImageFilters>(j, "imageFilters");
@@ -3868,34 +3878,34 @@ inline void to_json(json& j, const Path& x)
 
 inline void from_json(const json& j, Frame& x)
 {
-  x.alphaMaskBy = j.at("alphaMaskBy").get<std::vector<AlphaMask>>();
+  safeGetTo(x.alphaMaskBy, j, "alphaMaskBy");
   x.backgroundColor = get_stack_optional<Color>(j, "backgroundColor");
-  x.bounds = j.at("bounds").get<Rect>();
-  x.childObjects = j.at("childObjects").get<std::vector<ContainerChildType>>();
-  x.frameClass = j.at("class").get<FrameClass>();
-  x.contextSettings = j.at("contextSettings").get<GraphicsContextSettings>();
+  safeGetTo(x.bounds, j, "bounds");
+  safeGetTo(x.childObjects, j, "childObjects");
+  safeGetTo(x.frameClass, j, "class");
+  safeGetTo(x.contextSettings, j, "contextSettings");
   x.cornerSmoothing = get_stack_optional<double>(j, "cornerSmoothing");
   x.horizontalConstraint = get_stack_optional<int64_t>(j, "horizontalConstraint");
-  x.id = j.at("id").get<std::string>();
-  x.isLocked = j.at("isLocked").get<bool>();
+  safeGetTo(x.id, j, "id");
+  safeGetTo(x.isLocked, j, "isLocked");
   x.keepShapeWhenResize = get_stack_optional<bool>(j, "keepShapeWhenResize");
   x.maskShowType = get_stack_optional<int64_t>(j, "maskShowType");
-  x.maskType = j.at("maskType").get<int64_t>();
-  x.matrix = j.at("matrix").get<std::vector<double>>();
+  safeGetTo(x.maskType, j, "maskType");
+  safeGetTo(x.matrix, j, "matrix");
   x.name = get_stack_optional<std::string>(j, "name");
-  x.outlineMaskBy = j.at("outlineMaskBy").get<std::vector<std::string>>();
-  x.overflow = j.at("overflow").get<int64_t>();
+  safeGetTo(x.outlineMaskBy, j, "outlineMaskBy");
+  safeGetTo(x.overflow, j, "overflow");
   x.overrideKey = get_stack_optional<std::string>(j, "overrideKey");
   x.radius = get_stack_optional<std::vector<double>>(j, "radius");
   x.resizesContent = get_stack_optional<int64_t>(j, "resizesContent");
-  x.style = j.at("style").get<Style>();
+  safeGetTo(x.style, j, "style");
   x.styleEffectBoolean = get_stack_optional<int64_t>(j, "styleEffectBoolean");
-  x.styleEffectMaskArea = j.at("styleEffectMaskArea").get<int64_t>();
+  safeGetTo(x.styleEffectMaskArea, j, "styleEffectMaskArea");
   x.transformedBounds = get_stack_optional<Rect>(j, "transformedBounds");
   x.variableDefs = get_stack_optional<std::vector<VariableDefine>>(j, "variableDefs");
   x.variableRefs = get_stack_optional<std::vector<VariableRefer>>(j, "variableRefs");
   x.verticalConstraint = get_stack_optional<int64_t>(j, "verticalConstraint");
-  x.visible = j.at("visible").get<bool>();
+  safeGetTo(x.visible, j, "visible");
 }
 
 inline void to_json(json& j, const Frame& x)
@@ -3975,34 +3985,34 @@ inline void to_json(json& j, const Frame& x)
 
 inline void from_json(const json& j, Group& x)
 {
-  x.alphaMaskBy = j.at("alphaMaskBy").get<std::vector<AlphaMask>>();
-  x.bounds = j.at("bounds").get<Rect>();
-  x.childObjects = j.at("childObjects").get<std::vector<ContainerChildType>>();
-  x.class_ = j.at("class").get<ChildObjectClass>();
-  x.contextSettings = j.at("contextSettings").get<GraphicsContextSettings>();
+  safeGetTo(x.alphaMaskBy, j, "alphaMaskBy");
+  safeGetTo(x.bounds, j, "bounds");
+  safeGetTo(x.childObjects, j, "childObjects");
+  safeGetTo(x.class_, j, "class");
+  safeGetTo(x.contextSettings, j, "contextSettings");
   x.cornerSmoothing = get_stack_optional<double>(j, "cornerSmoothing");
   x.groupNestMaskType = get_stack_optional<bool>(j, "groupNestMaskType");
   x.horizontalConstraint = get_stack_optional<int64_t>(j, "horizontalConstraint");
-  x.id = j.at("id").get<std::string>();
-  x.isLocked = j.at("isLocked").get<bool>();
+  safeGetTo(x.id, j, "id");
+  safeGetTo(x.isLocked, j, "isLocked");
   x.isVectorNetwork = get_stack_optional<bool>(j, "isVectorNetwork");
   x.keepShapeWhenResize = get_stack_optional<bool>(j, "keepShapeWhenResize");
   x.maskShowType = get_stack_optional<int64_t>(j, "maskShowType");
-  x.maskType = j.at("maskType").get<int64_t>();
-  x.matrix = j.at("matrix").get<std::vector<double>>();
+  safeGetTo(x.maskType, j, "maskType");
+  safeGetTo(x.matrix, j, "matrix");
   x.name = get_stack_optional<std::string>(j, "name");
-  x.outlineMaskBy = j.at("outlineMaskBy").get<std::vector<std::string>>();
-  x.overflow = j.at("overflow").get<int64_t>();
+  safeGetTo(x.outlineMaskBy, j, "outlineMaskBy");
+  safeGetTo(x.overflow, j, "overflow");
   x.overrideKey = get_stack_optional<std::string>(j, "overrideKey");
   x.resizesContent = get_stack_optional<int64_t>(j, "resizesContent");
-  x.style = j.at("style").get<Style>();
+  safeGetTo(x.style, j, "style");
   x.styleEffectBoolean = get_stack_optional<int64_t>(j, "styleEffectBoolean");
-  x.styleEffectMaskArea = j.at("styleEffectMaskArea").get<int64_t>();
+  safeGetTo(x.styleEffectMaskArea, j, "styleEffectMaskArea");
   x.transformedBounds = get_stack_optional<Rect>(j, "transformedBounds");
   x.variableDefs = get_stack_optional<std::vector<VariableDefine>>(j, "variableDefs");
   x.variableRefs = get_stack_optional<std::vector<VariableRefer>>(j, "variableRefs");
   x.verticalConstraint = get_stack_optional<int64_t>(j, "verticalConstraint");
-  x.visible = j.at("visible").get<bool>();
+  safeGetTo(x.visible, j, "visible");
 }
 
 inline void to_json(json& j, const Group& x)
@@ -4080,37 +4090,37 @@ inline void to_json(json& j, const Group& x)
   j["visible"] = x.visible;
 }
 
-void from_json(const json& j, Image& x)
+inline void from_json(const json& j, Image& x)
 {
-  x.alphaMaskBy = j.at("alphaMaskBy").get<std::vector<AlphaMask>>();
-  x.bounds = j.at("bounds").get<Rect>();
-  x.class_ = j.at("class").get<ChildObjectClass>();
-  x.contextSettings = j.at("contextSettings").get<GraphicsContextSettings>();
+  safeGetTo(x.alphaMaskBy, j, "alphaMaskBy");
+  safeGetTo(x.bounds, j, "bounds");
+  safeGetTo(x.class_, j, "class");
+  safeGetTo(x.contextSettings, j, "contextSettings");
   x.cornerSmoothing = get_stack_optional<double>(j, "cornerSmoothing");
   x.fillReplacesImage = get_stack_optional<bool>(j, "fillReplacesImage");
   x.horizontalConstraint = get_stack_optional<int64_t>(j, "horizontalConstraint");
-  x.id = j.at("id").get<std::string>();
-  x.imageFileName = j.at("imageFileName").get<std::string>();
+  safeGetTo(x.id, j, "id");
+  safeGetTo(x.imageFileName, j, "imageFileName");
   x.imageFilters = get_stack_optional<ImageFilters>(j, "imageFilters");
   x.keepShapeWhenResize = get_stack_optional<bool>(j, "keepShapeWhenResize");
   x.maskShowType = get_stack_optional<int64_t>(j, "maskShowType");
-  x.maskType = j.at("maskType").get<int64_t>();
-  x.matrix = j.at("matrix").get<std::vector<double>>();
+  safeGetTo(x.maskType, j, "maskType");
+  safeGetTo(x.matrix, j, "matrix");
   x.name = get_stack_optional<std::string>(j, "name");
-  x.outlineMaskBy = j.at("outlineMaskBy").get<std::vector<std::string>>();
-  x.overflow = j.at("overflow").get<int64_t>();
+  safeGetTo(x.outlineMaskBy, j, "outlineMaskBy");
+  safeGetTo(x.overflow, j, "overflow");
   x.overrideKey = get_stack_optional<std::string>(j, "overrideKey");
   x.resizesContent = get_stack_optional<int64_t>(j, "resizesContent");
-  x.style = j.at("style").get<Style>();
+  safeGetTo(x.style, j, "style");
   x.styleEffectBoolean = get_stack_optional<int64_t>(j, "styleEffectBoolean");
-  x.styleEffectMaskArea = j.at("styleEffectMaskArea").get<int64_t>();
+  safeGetTo(x.styleEffectMaskArea, j, "styleEffectMaskArea");
   x.transformedBounds = get_stack_optional<Rect>(j, "transformedBounds");
   x.variableDefs = get_stack_optional<std::vector<VariableDefine>>(j, "variableDefs");
   x.variableRefs = get_stack_optional<std::vector<VariableRefer>>(j, "variableRefs");
   x.verticalConstraint = get_stack_optional<int64_t>(j, "verticalConstraint");
-  x.visible = j.at("visible").get<bool>();
+  safeGetTo(x.visible, j, "visible");
 }
-void to_json(json& j, const Image& x)
+inline void to_json(json& j, const Image& x)
 {
   j = json::object();
   j["alphaMaskBy"] = x.alphaMaskBy;
@@ -4184,38 +4194,38 @@ void to_json(json& j, const Image& x)
   j["visible"] = x.visible;
 }
 
-void from_json(const json& j, SymbolInstance& x)
+inline void from_json(const json& j, SymbolInstance& x)
 {
-  x.alphaMaskBy = j.at("alphaMaskBy").get<std::vector<AlphaMask>>();
-  x.bounds = j.at("bounds").get<Rect>();
-  x.class_ = j.at("class").get<ChildObjectClass>();
-  x.contextSettings = j.at("contextSettings").get<GraphicsContextSettings>();
+  safeGetTo(x.alphaMaskBy, j, "alphaMaskBy");
+  safeGetTo(x.bounds, j, "bounds");
+  safeGetTo(x.class_, j, "class");
+  safeGetTo(x.contextSettings, j, "contextSettings");
   x.cornerSmoothing = get_stack_optional<double>(j, "cornerSmoothing");
   x.horizontalConstraint = get_stack_optional<int64_t>(j, "horizontalConstraint");
-  x.id = j.at("id").get<std::string>();
-  x.isLocked = j.at("isLocked").get<bool>();
+  safeGetTo(x.id, j, "id");
+  safeGetTo(x.isLocked, j, "isLocked");
   x.keepShapeWhenResize = get_stack_optional<bool>(j, "keepShapeWhenResize");
   x.maskShowType = get_stack_optional<int64_t>(j, "maskShowType");
-  x.maskType = j.at("maskType").get<int64_t>();
-  x.masterId = j.at("masterId").get<std::string>();
-  x.matrix = j.at("matrix").get<std::vector<double>>();
+  safeGetTo(x.maskType, j, "maskType");
+  safeGetTo(x.masterId, j, "masterId");
+  safeGetTo(x.matrix, j, "matrix");
   x.name = get_stack_optional<std::string>(j, "name");
-  x.outlineMaskBy = j.at("outlineMaskBy").get<std::vector<std::string>>();
-  x.overflow = j.at("overflow").get<int64_t>();
+  safeGetTo(x.outlineMaskBy, j, "outlineMaskBy");
+  safeGetTo(x.overflow, j, "overflow");
   x.overrideKey = get_stack_optional<std::string>(j, "overrideKey");
-  x.overrideValues = j.at("overflow").get<std::vector<OverrideValue>>();
+  safeGetTo(x.overrideValues, j, "overrideValues");
   x.resizesContent = get_stack_optional<int64_t>(j, "resizesContent");
-  x.style = j.at("style").get<Style>();
+  safeGetTo(x.style, j, "style");
   x.styleEffectBoolean = get_stack_optional<int64_t>(j, "styleEffectBoolean");
-  x.styleEffectMaskArea = j.at("styleEffectMaskArea").get<int64_t>();
+  safeGetTo(x.styleEffectMaskArea, j, "styleEffectMaskArea");
   x.transformedBounds = get_stack_optional<Rect>(j, "transformedBounds");
   x.variableAssignments = get_stack_optional<std::vector<VariableAssign>>(j, "variableAssignments");
   x.variableDefs = get_stack_optional<std::vector<VariableDefine>>(j, "variableDefs");
   x.variableRefs = get_stack_optional<std::vector<VariableRefer>>(j, "variableRefs");
   x.verticalConstraint = get_stack_optional<int64_t>(j, "verticalConstraint");
-  x.visible = j.at("visible").get<bool>();
+  safeGetTo(x.visible, j, "visible");
 }
-void to_json(json& j, const SymbolInstance& x)
+inline void to_json(json& j, const SymbolInstance& x)
 {
   j = json::object();
   j["alphaMaskBy"] = x.alphaMaskBy;
@@ -4287,37 +4297,37 @@ void to_json(json& j, const SymbolInstance& x)
   j["visible"] = x.visible;
 }
 
-void from_json(const json& j, SymbolMaster& x)
+inline void from_json(const json& j, SymbolMaster& x)
 {
-  x.alphaMaskBy = j.at("alphaMaskBy").get<std::vector<AlphaMask>>();
-  x.bounds = j.at("bounds").get<Rect>();
-  x.childObjects = j.at("childObjects").get<std::vector<ContainerChildType>>();
-  x.class_ = j.at("class").get<ChildObjectClass>();
-  x.contextSettings = j.at("contextSettings").get<GraphicsContextSettings>();
+  safeGetTo(x.alphaMaskBy, j, "alphaMaskBy");
+  safeGetTo(x.bounds, j, "bounds");
+  safeGetTo(x.childObjects, j, "childObjects");
+  safeGetTo(x.class_, j, "class");
+  safeGetTo(x.contextSettings, j, "contextSettings");
   x.cornerSmoothing = get_stack_optional<double>(j, "cornerSmoothing");
   x.horizontalConstraint = get_stack_optional<int64_t>(j, "horizontalConstraint");
-  x.id = j.at("id").get<std::string>();
-  x.isLocked = j.at("isLocked").get<bool>();
+  safeGetTo(x.id, j, "id");
+  safeGetTo(x.isLocked, j, "isLocked");
   x.keepShapeWhenResize = get_stack_optional<bool>(j, "keepShapeWhenResize");
   x.maskShowType = get_stack_optional<int64_t>(j, "maskShowType");
-  x.maskType = j.at("maskType").get<int64_t>();
-  x.matrix = j.at("matrix").get<std::vector<double>>();
+  safeGetTo(x.maskType, j, "maskType");
+  safeGetTo(x.matrix, j, "matrix");
   x.name = get_stack_optional<std::string>(j, "name");
-  x.outlineMaskBy = j.at("outlineMaskBy").get<std::vector<std::string>>();
-  x.overflow = j.at("overflow").get<int64_t>();
+  safeGetTo(x.outlineMaskBy, j, "outlineMaskBy");
+  safeGetTo(x.overflow, j, "overflow");
   x.overrideKey = get_stack_optional<std::string>(j, "overrideKey");
-  x.radius = j.at("radius").get<std::vector<double>>();
+  x.radius = get_stack_optional<std::vector<double>>(j, "radius");
   x.resizesContent = get_stack_optional<int64_t>(j, "resizesContent");
-  x.style = j.at("style").get<Style>();
+  safeGetTo(x.style, j, "style");
   x.styleEffectBoolean = get_stack_optional<int64_t>(j, "styleEffectBoolean");
-  x.styleEffectMaskArea = j.at("styleEffectMaskArea").get<int64_t>();
+  safeGetTo(x.styleEffectMaskArea, j, "styleEffectMaskArea");
   x.transformedBounds = get_stack_optional<Rect>(j, "transformedBounds");
   x.variableDefs = get_stack_optional<std::vector<VariableDefine>>(j, "variableDefs");
   x.variableRefs = get_stack_optional<std::vector<VariableRefer>>(j, "variableRefs");
   x.verticalConstraint = get_stack_optional<int64_t>(j, "verticalConstraint");
-  x.visible = j.at("visible").get<bool>();
+  safeGetTo(x.visible, j, "visible");
 }
-void to_json(json& j, const SymbolMaster& x)
+inline void to_json(json& j, const SymbolMaster& x)
 {
   j = json::object();
   j["alphaMaskBy"] = x.alphaMaskBy;
@@ -4355,7 +4365,10 @@ void to_json(json& j, const SymbolMaster& x)
   {
     j["overrideKey"] = x.overrideKey;
   }
-  j["radius"] = x.radius;
+  if (x.radius)
+  {
+    j["radius"] = x.radius;
+  }
   if (x.resizesContent)
   {
     j["resizesContent"] = x.resizesContent;
@@ -4385,46 +4398,46 @@ void to_json(json& j, const SymbolMaster& x)
   j["visible"] = x.visible;
 }
 
-void from_json(const json& j, Text& x)
+inline void from_json(const json& j, Text& x)
 {
-  x.alphaMaskBy = j.at("alphaMaskBy").get<std::vector<AlphaMask>>();
+  safeGetTo(x.alphaMaskBy, j, "alphaMaskBy");
   x.anchorPoint = get_stack_optional<std::vector<double>>(j, "anchorPoint");
-  x.bounds = j.at("bounds").get<Rect>();
-  x.class_ = j.at("class").get<ChildObjectClass>();
-  x.content = j.at("content").get<std::string>();
-  x.contextSettings = j.at("contextSettings").get<GraphicsContextSettings>();
+  safeGetTo(x.bounds, j, "bounds");
+  safeGetTo(x.class_, j, "class");
+  safeGetTo(x.content, j, "content");
+  safeGetTo(x.contextSettings, j, "contextSettings");
   x.cornerSmoothing = get_stack_optional<double>(j, "cornerSmoothing");
   x.defaultFontAttr = get_stack_optional<TextFontAttributes>(j, "defaultFontAttr");
-  x.fontAttr = j.at("fontAttr").get<std::vector<TextFontAttributes>>();
-  x.frameMode = j.at("frameMode").get<int>();
-  x.horizontalAlignment = j.at("horizontalAlignment").get<std::vector<int>>();
+  safeGetTo(x.fontAttr, j, "fontAttr");
+  safeGetTo(x.frameMode, j, "frameMode");
+  safeGetTo(x.horizontalAlignment, j, "horizontalAlignment");
   x.horizontalConstraint = get_stack_optional<int64_t>(j, "horizontalConstraint");
-  x.id = j.at("id").get<std::string>();
-  x.isLocked = j.at("isLocked").get<bool>();
+  safeGetTo(x.id, j, "id");
+  safeGetTo(x.isLocked, j, "isLocked");
   x.keepShapeWhenResize = get_stack_optional<bool>(j, "keepShapeWhenResize");
   x.maskShowType = get_stack_optional<int64_t>(j, "maskShowType");
-  x.maskType = j.at("maskType").get<int64_t>();
-  x.matrix = j.at("matrix").get<std::vector<double>>();
+  safeGetTo(x.maskType, j, "maskType");
+  safeGetTo(x.matrix, j, "matrix");
   x.name = get_stack_optional<std::string>(j, "name");
-  x.outlineMaskBy = j.at("outlineMaskBy").get<std::vector<std::string>>();
-  x.overflow = j.at("overflow").get<int64_t>();
+  safeGetTo(x.outlineMaskBy, j, "outlineMaskBy");
+  safeGetTo(x.overflow, j, "overflow");
   x.overrideKey = get_stack_optional<std::string>(j, "overrideKey");
   x.resizesContent = get_stack_optional<int64_t>(j, "resizesContent");
-  x.style = j.at("style").get<Style>();
+  safeGetTo(x.style, j, "style");
   x.styleEffectBoolean = get_stack_optional<int64_t>(j, "styleEffectBoolean");
-  x.styleEffectMaskArea = j.at("styleEffectMaskArea").get<int64_t>();
+  safeGetTo(x.styleEffectMaskArea, j, "styleEffectMaskArea");
   x.textLineType = get_stack_optional<std::vector<TextLineType>>(j, "textLineType");
   x.textOnPath = get_stack_optional<TextOnPath>(j, "textOnPath");
   x.transformedBounds = get_stack_optional<Rect>(j, "transformedBounds");
   x.truncatedHeight = get_stack_optional<double>(j, "truncatedHeight");
   x.variableDefs = get_stack_optional<std::vector<VariableDefine>>(j, "variableDefs");
   x.variableRefs = get_stack_optional<std::vector<VariableRefer>>(j, "variableRefs");
-  x.verticalAlignment = j.at("verticalAlignment").get<int64_t>();
+  safeGetTo(x.verticalAlignment, j, "verticalAlignment");
   x.verticalConstraint = get_stack_optional<int64_t>(j, "verticalConstraint");
   x.verticalTrim = get_stack_optional<bool>(j, "verticalTrim");
-  x.visible = j.at("visible").get<bool>();
+  safeGetTo(x.visible, j, "visible");
 }
-void to_json(json& j, const Text& x)
+inline void to_json(json& j, const Text& x)
 {
   j = json::object();
   j["alphaMaskBy"] = x.alphaMaskBy;
@@ -4521,33 +4534,33 @@ void to_json(json& j, const Text& x)
 
 inline void from_json(const json& j, PatternLayerDef& x)
 {
-  x.alphaMaskBy = j.at("alphaMaskBy").get<std::vector<AlphaMask>>();
-  x.bounds = j.at("bounds").get<Rect>();
-  x.childObjects = j.at("childObjects").get<std::vector<Path>>();
-  x.patternLayerDefClass = j.at("class").get<PatternLayerDefClass>();
-  x.contextSettings = j.at("contextSettings").get<GraphicsContextSettings>();
+  safeGetTo(x.alphaMaskBy, j, "alphaMaskBy");
+  safeGetTo(x.bounds, j, "bounds");
+  safeGetTo(x.childObjects, j, "childObjects");
+  safeGetTo(x.patternLayerDefClass, j, "class");
+  safeGetTo(x.contextSettings, j, "contextSettings");
   x.cornerSmoothing = get_stack_optional<double>(j, "cornerSmoothing");
   x.horizontalConstraint = get_stack_optional<int64_t>(j, "horizontalConstraint");
-  x.id = j.at("id").get<std::string>();
-  x.isLocked = j.at("isLocked").get<bool>();
+  safeGetTo(x.id, j, "id");
+  safeGetTo(x.isLocked, j, "isLocked");
   x.keepShapeWhenResize = get_stack_optional<bool>(j, "keepShapeWhenResize");
   x.maskShowType = get_stack_optional<int64_t>(j, "maskShowType");
-  x.maskType = j.at("maskType").get<int64_t>();
-  x.matrix = j.at("matrix").get<std::vector<double>>();
+  safeGetTo(x.maskType, j, "maskType");
+  safeGetTo(x.matrix, j, "matrix");
   x.name = get_stack_optional<std::string>(j, "name");
-  x.outlineMaskBy = j.at("outlineMaskBy").get<std::vector<std::string>>();
-  x.overflow = j.at("overflow").get<int64_t>();
+  safeGetTo(x.outlineMaskBy, j, "outlineMaskBy");
+  safeGetTo(x.overflow, j, "overflow");
   x.overrideKey = get_stack_optional<std::string>(j, "overrideKey");
-  x.patternBoundingBox = j.at("patternBoundingBox").get<std::vector<double>>();
+  safeGetTo(x.patternBoundingBox, j, "patternBoundingBox");
   x.resizesContent = get_stack_optional<int64_t>(j, "resizesContent");
-  x.style = j.at("style").get<Style>();
+  safeGetTo(x.style, j, "style");
   x.styleEffectBoolean = get_stack_optional<int64_t>(j, "styleEffectBoolean");
-  x.styleEffectMaskArea = j.at("styleEffectMaskArea").get<int64_t>();
+  safeGetTo(x.styleEffectMaskArea, j, "styleEffectMaskArea");
   x.transformedBounds = get_stack_optional<Rect>(j, "transformedBounds");
   x.variableDefs = get_stack_optional<std::vector<VariableDefine>>(j, "variableDefs");
   x.variableRefs = get_stack_optional<std::vector<VariableRefer>>(j, "variableRefs");
   x.verticalConstraint = get_stack_optional<int64_t>(j, "verticalConstraint");
-  x.visible = j.at("visible").get<bool>();
+  safeGetTo(x.visible, j, "visible");
 }
 
 inline void to_json(json& j, const PatternLayerDef& x)
@@ -4620,9 +4633,9 @@ inline void to_json(json& j, const PatternLayerDef& x)
 
 inline void from_json(const json& j, ReferencedStyle& x)
 {
-  x.class_ = j.at("class").get<ReferenceClass>();
-  x.id = j.at("id").get<std::string>();
-  x.style = j.at("style").get<Style>();
+  safeGetTo(x.class_, j, "class");
+  safeGetTo(x.id, j, "id");
+  safeGetTo(x.style, j, "style");
   x.contextSettings = get_stack_optional<GraphicsContextSettings>(j, "contextSettings");
   x.fontAttr = get_stack_optional<TextFontAttributes>(j, "fontAttr");
 }
@@ -4646,11 +4659,11 @@ inline void to_json(json& j, const ReferencedStyle& x)
 inline void from_json(const json& j, DesignModel& x)
 {
   x.fileName = get_stack_optional<std::string>(j, "fileName");
-  x.fileType = j.at("fileType").get<int64_t>();
-  x.frames = j.at("frames").get<std::vector<Frame>>();
+  safeGetTo(x.fileType, j, "fileType");
+  safeGetTo(x.frames, j, "frames");
   x.patternLayerDef = get_stack_optional<std::vector<PatternLayerDef>>(j, "patternLayerDef");
   x.references = get_stack_optional<std::vector<ReferenceType>>(j, "references");
-  x.version = j.at("version").get<Version>();
+  safeGetTo(x.version, j, "version");
 }
 
 inline void to_json(json& j, const DesignModel& x)
@@ -5031,7 +5044,7 @@ inline void from_json(const json& j, PatternInstanceClass& x)
     x = PatternInstanceClass::PATTERN_LAYER;
   else
   {
-    throw std::runtime_error("Input JSON does not conform to schema!");
+    x = PatternInstanceClass::PATTERN_UNKNOWN;
   }
 }
 
@@ -5055,7 +5068,7 @@ inline void to_json(json& j, const PatternInstanceClass& x)
       j = "patternLayer";
       break;
     default:
-      throw std::runtime_error("This should not happen");
+      break;
   }
 }
 
@@ -5952,6 +5965,8 @@ inline void adl_serializer<VGG::Model::PatternInstanceType>::from_json(
     case PatternInstanceClass::PATTERN_LAYER:
       x = j.get<PatternLayerInstance>();
       break;
+    default:
+      break;
   }
 }
 
@@ -5980,10 +5995,6 @@ inline void adl_serializer<VGG::Model::PatternInstanceType>::to_json(
   else if (auto p = std::get_if<PatternLayerInstance>(&x))
   {
     j = *p;
-  }
-  else
-  {
-    throw std::runtime_error("Could not serialise, invalid node!");
   }
 }
 } // namespace nlohmann

@@ -723,31 +723,8 @@ Bound PaintNode::onDrawFill(
   const VShape&        path)
 {
   auto       fillBound = frameBound(); // TODO:: should be computed from path
-  FillEffect fillEffect(style().fills, toSkRect(fillBound));
-  auto       shader = fillEffect.shader();
-  if (shader)
-  {
-    SkPaint p;
-    p.setStyle(SkPaint::kFill_Style);
-    p.setShader(shader);
-    p.setAntiAlias(true);
-    path.draw(renderer->canvas(), p);
-  }
-
-  // for (size_t i = 0; i < style().fills.size(); ++i)
-  // {
-  //   auto& f = style().fills[i];
-  //   if (!f.isEnabled)
-  //     continue;
-  //   SkPaint fillPen;
-  //   fillPen.setStyle(SkPaint::kFill_Style);
-  //   fillPen.setAntiAlias(true);
-  //   fillPen.setBlender(blender);
-  //   fillPen.setImageFilter(imageFilter);
-  //   populateSkPaint(f.type, f.contextSettings, toSkRect(frameBound()), fillPen);
-  //   path.draw(renderer->canvas(), fillPen);
-  // }
-
+  FillEffect fillEffect(style().fills, toSkRect(fillBound), imageFilter, blender);
+  fillEffect.render(renderer, path);
   return fillBound;
 }
 

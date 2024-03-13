@@ -504,10 +504,10 @@ sk_sp<SkImageFilter> makeInnerShadowImageFilter(
 
   // auto blender = getOrCreateBlender("innerShadow", R"(
   // vec4 main(vec4 srcColor, vec4 dstColor) {
-  // return srcColor.a > 0? vec4(0,0,0,1) : vec4(0,0,0,0);
+  // return vec4(0,0,0,step(0.5, srcColor.a));
   // }
   // )");
-
+  //
   // auto alpha = SkImageFilters::Blend(blender, 0, 0);
   auto f1 =
     SkImageFilters::ColorFilter(SkColorFilters::Blend(shadow.color, SkBlendMode::kSrcOut), 0);

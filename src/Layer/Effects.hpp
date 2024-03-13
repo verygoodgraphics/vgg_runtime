@@ -30,6 +30,12 @@
 namespace VGG::layer
 {
 
+class Effects
+{
+public:
+  virtual void render(Renderer* render, const VShape& shape) = 0;
+};
+
 sk_sp<SkColorFilter> makeColorFilter(const ImageFilter& imageFilter);
 sk_sp<SkShader>      makeFitPattern(const Bound& bound, const PatternFit& p);
 sk_sp<SkShader>      makeFillPattern(const Bound& bound, const PatternFill& p);

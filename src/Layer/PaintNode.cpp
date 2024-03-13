@@ -472,6 +472,7 @@ Bound PaintNode::onRevalidate()
   {
     e->revalidate();
   }
+  d_ptr->onRevalidateImpl();
   return d_ptr->bound;
 }
 

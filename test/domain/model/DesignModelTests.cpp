@@ -24,3 +24,15 @@ TEST_F(DesignModelTestSuite, Smoke)
   nlohmann::json json = data;
   EXPECT_EQ(json["frames"].size(), 1);
 }
+
+TEST_F(DesignModelTestSuite, SymbolInstance)
+{
+  std::string filePath = "testDataDir/symbol/symbol_instance/design.json";
+  auto        designJson = Helper::load_json(filePath);
+
+  DesignModel data = designJson;
+  EXPECT_EQ(data.frames.size(), 2);
+
+  nlohmann::json json = data;
+  EXPECT_EQ(json["frames"].size(), 2);
+}

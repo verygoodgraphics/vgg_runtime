@@ -1532,265 +1532,46 @@ struct Shape
   int64_t               windingRule;
 };
 
-/**
- * Path represents a vector geometry which is formed by individual subpaths combined
- * together via boolean operations.
- *
- * Details of an image.
- *
- * Details of a text.
- *
- * A group combines a list of objects, but it is not considered an object itself.
- * In contrast to a frame, a frame is an object that can be rendered and a container that
- * holds objects.
- * For example:
- * The group's fills affect all of its children.
- * The frame's fills affect itself.
- *
- * A frame is an object that can be rendered and a container that holds objects.
- * In contrast to a group, a group is not an object but rather a collection of objects.
- * For example:
- * The frame's fills affect itself.
- * The group's fills affect all of its children.
- *
- * Symbol instance object is an instance of a symbol master which can be overriden.
- *
- * A symbol master is a reusable object that contains a group of objects.
- */
-struct Path
+struct Object
 {
-  /**
-   * A list of alpha masks applied to the object.
-   */
-  std::vector<AlphaMask>                         alphaMaskBy;
-  /**
-   * The bounds of the object before undergoing matrix transformations.
-   */
-  Rect                                           bounds;
-  ChildObjectClass                               pathClass;
-  /**
-   * The opacity and blending-related configurations of the object.
-   */
-  GraphicsContextSettings                        contextSettings;
-  /**
-   * Smoothness of rounded corners. Range: `[0, 1]`.
-   * `0` is the default value, indicating no smoothing for rounded corners.
-   */
-  std::optional<double>                          cornerSmoothing;
-  /**
-   * Horizontal constraints for the object.
-   * Default value is `1`.
-   */
-  std::optional<int64_t>                         horizontalConstraint;
-  /**
-   * ID of the object, globally unique.
-   */
-  std::string                                    id;
-  /**
-   * If `true`, the object will be unable to be edited.
-   */
-  bool                                           isLocked;
-  /**
-   * `False`: When resizing occurs, the object scales according to the `horizontalConstraint`
-   * and `verticalConstraint`. (Default value.)
-   * `True`: When resizing occurs, the object itself maintains its angle, and the center
-   * position is scaled. The scaling occurs along both the length and width directions.
-   */
-  std::optional<bool>                            keepShapeWhenResize;
-  /**
-   * How the mask object is displayed.
-   */
-  std::optional<int64_t>                         maskShowType;
-  /**
-   * The mask type of the object.
-   */
-  int64_t                                        maskType;
-  /**
-   * Matrix used for translating, rotating, and scaling the object.
-   */
-  std::vector<double>                            matrix;
-  /**
-   * Name of the object, for user identification, encoded in UTF-8.
-   */
-  std::optional<std::string>                     name;
-  /**
-   * A list of outline masks applied to the object, clipped by the intersection of their
-   * outlines.
-   * The items in the list are object IDs of the masks.
-   */
-  std::vector<std::string>                       outlineMaskBy;
-  /**
-   * How to display the child element of the object when it overflows its container.
-   */
-  int64_t                                        overflow;
-  /**
-   * Used to be associated with the object by symbol instances for overriding its attributes.
-   * Check the `objectId` in the `OverrideValue` for details.
-   * If `overrideKey` exists, find a symbol master through upward traversal (which could be
-   * the object itself); `overrideKey` is unique within the symbol master.
-   */
-  std::optional<std::string>                     overrideKey;
-  /**
-   * How child objects behave when the object is resized.
-   */
-  std::optional<int64_t>                         resizesContent;
-  /**
-   * The shape of the path, describing the details of the path.
-   */
-  std::shared_ptr<Shape>                         shape;
-  /**
-   * The borders, fills, and other styles of the object.
-   */
-  Style                                          style;
-  /**
-   * How the `style` of the object affects the region participating in a Boolean operation
-   * with another object.
-   */
-  std::optional<int64_t>                         styleEffectBoolean;
-  /**
-   * How the `style` and `visible` of the mask object affect the area of the mask.
-   */
-  int64_t                                        styleEffectMaskArea;
-  /**
-   * An enclosing rectangle for the object. This property stores information about the object
-   * after the matrix transformation.
-   */
-  std::optional<Rect>                            transformedBounds;
-  /**
-   * A list of variables that can be used by children.
-   */
-  std::optional<std::vector<VariableDefine>>     variableDefs;
-  /**
-   * A list of referenced variables.
-   */
-  std::optional<std::vector<VariableRefer>>      variableRefs;
-  /**
-   * Vertical constraints for the object.
-   * Default value is `1`.
-   */
-  std::optional<int64_t>                         verticalConstraint;
-  /**
-   * If `false`, the object will be invisible.
-   */
-  bool                                           visible;
-  /**
-   * If the value is `true`, the image content is not displayed, and only the `fill` effect is
-   * shown.
-   * Otherwise, both the image content and the `fill` effect take effect simultaneously.
-   * Default value is `false`.
-   */
-  std::optional<bool>                            fillReplacesImage;
-  /**
-   * The path (UTF-8) of the image file.
-   */
-  std::optional<std::string>                     imageFileName;
-  /**
-   * Adjust the colors of the image.
-   */
-  std::optional<ImageFilters>                    imageFilters;
-  /**
-   * The position of the first character baseline when text is drawn.
-   * Horizontal and vertical alignments have been considered. The given coordinates are in the
-   * object's own coordinate system.
-   * If this property doesn't exist, text is drawn using `bounds`.
-   */
-  std::optional<std::vector<double>>             anchorPoint;
-  /**
-   * The text content of the text object.
-   * The encoding format is UTF-8.
-   */
-  std::optional<std::string>                     content;
-  /**
-   * The default font attributes of the text. If some font attributes are missing in
-   * `fontAttr`, take the font attributes here.
-   * The value of `length` in this field is meaningless.
-   */
-  std::optional<TextFontAttributes>              defaultFontAttr;
-  /**
-   * An ordered list, where each item sequentially describes the font attributes of a text
-   * fragment.
-   * If some font attributes are missing in an item, take the font attributes from
-   * `defaultFontAttr`.
-   */
-  std::optional<std::vector<TextFontAttributes>> fontAttr;
-  /**
-   * The mode of the text frame size.
-   */
-  std::optional<int64_t>                         frameMode;
-  /**
-   * The type of horizontal alignment for the text. When the number of items is less than the
-   * number of rows, the last value is reused.
-   */
-  std::optional<std::vector<int64_t>>            horizontalAlignment;
-  /**
-   * A list with a length equals to the number of text lines, where each item describes the
-   * index preceding each line of text.
-   */
-  std::optional<std::vector<TextLineType>>       textLineType;
-  /**
-   * The text is arranged along the path.
-   */
-  std::optional<TextOnPath>                      textOnPath;
-  /**
-   * The maximum height that can be displayed inside the text frame, with any text exceeding
-   * this height being truncated.
-   */
-  std::optional<double>                          truncatedHeight;
-  /**
-   * The type of vertical alignment for the text.
-   */
-  std::optional<int64_t>                         verticalAlignment;
-  /**
-   * If true, trim the text portion that extends beyond the text frame starting from the
-   * baseline, based on `verticalAlignment`
-   * Default value is `false`.
-   */
-  std::optional<bool>                            verticalTrim;
-  /**
-   * A list of all child objects.
-   * **Note:** The child object that appears later in the list will be displayed above the one
-   * that appears first.
-   */
-  std::optional<std::vector<Path>>               childObjects;
-  /**
-   * When the group itself is a mask and the group contains a mask, this value affects the
-   * valid area of the group as a mask.
-   * `True`: The mask region of the group is the result after the inner mask.
-   * `False`: A mask inside a group does not affect the region of the group's mask (default
-   * value).
-   * If the object does not act as a mask or does not have a mask child inside it, then this
-   * property is ignored.
-   */
-  std::optional<bool>                            groupNestMaskType;
-  /**
-   * This field is reserved for `vector-network` compatibility and is only true if
-   * `vector-network` is converted to a group.
-   * Default value is `false`.
-   */
-  std::optional<bool>                            isVectorNetwork;
-  /**
-   * The background color of the canvas on which the frame is positioned. Exists only on the
-   * top-level frame.
-   */
-  std::optional<Color>                           backgroundColor;
-  /**
-   * The radius values correspond to the corners in the following order: left-top, right-top,
-   * right-bottom, left-bottom.
-   * Default value is `[0, 0, 0, 0]`.
-   */
-  std::optional<std::vector<double>>             radius;
-  /**
-   * The object ID of the symbol master.
-   */
-  std::optional<std::string>                     masterId;
-  /**
-   * A list of overridden values.
-   */
-  std::optional<std::vector<OverrideValue>>      overrideValues;
-  /**
-   * Reassign the value of the variable defined in symbol master.
-   */
-  std::optional<std::vector<VariableAssign>>     variableAssignments;
+  virtual ~Object() = default;
+
+  std::vector<AlphaMask>   alphaMaskBy;
+  Rect                     bounds;
+  GraphicsContextSettings  contextSettings;
+  std::string              id;
+  bool                     isLocked;
+  int64_t                  maskType;
+  std::vector<double>      matrix;
+  std::vector<std::string> outlineMaskBy;
+  int64_t                  overflow;
+  Style                    style;
+  int64_t                  styleEffectMaskArea;
+  bool                     visible;
+
+  std::optional<double>                      cornerSmoothing;
+  std::optional<int64_t>                     horizontalConstraint;
+  std::optional<bool>                        keepShapeWhenResize;
+  std::optional<int64_t>                     maskShowType;
+  std::optional<std::string>                 name;
+  std::optional<std::string>                 overrideKey;
+  std::optional<int64_t>                     resizesContent;
+  std::optional<int64_t>                     styleEffectBoolean;
+  std::optional<Rect>                        transformedBounds;
+  std::optional<std::vector<VariableDefine>> variableDefs;
+  std::optional<std::vector<VariableRefer>>  variableRefs;
+  std::optional<int64_t>                     verticalConstraint;
+};
+
+struct Container : public Object
+{
+  std::vector<ContainerChildType> childObjects;
+};
+
+struct Path : public Object
+{
+  ChildObjectClass       class_;
+  std::shared_ptr<Shape> shape;
 };
 
 enum class FrameClass : int
@@ -1805,167 +1586,20 @@ enum class FrameClass : int
  * The frame's fills affect itself.
  * The group's fills affect all of its children.
  */
-struct Frame
+struct Frame : public Container
 {
-  /**
-   * A list of alpha masks applied to the object.
-   */
-  std::vector<AlphaMask>                     alphaMaskBy;
-  /**
-   * The background color of the canvas on which the frame is positioned. Exists only on the
-   * top-level frame.
-   */
-  std::optional<Color>                       backgroundColor;
-  /**
-   * The bounds of the object before undergoing matrix transformations.
-   */
-  Rect                                       bounds;
-  /**
-   * A list of all child objects.
-   * **Note:** The child object that appears later in the list will be displayed above the one
-   * that appears first.
-   */
-  std::vector<ContainerChildType>            childObjects;
-  FrameClass                                 frameClass;
-  /**
-   * The opacity and blending-related configurations of the object.
-   */
-  GraphicsContextSettings                    contextSettings;
-  /**
-   * Smoothness of rounded corners. Range: `[0, 1]`.
-   * `0` is the default value, indicating no smoothing for rounded corners.
-   */
-  std::optional<double>                      cornerSmoothing;
-  /**
-   * Horizontal constraints for the object.
-   * Default value is `1`.
-   */
-  std::optional<int64_t>                     horizontalConstraint;
-  /**
-   * ID of the object, globally unique.
-   */
-  std::string                                id;
-  /**
-   * If `true`, the object will be unable to be edited.
-   */
-  bool                                       isLocked;
-  /**
-   * `False`: When resizing occurs, the object scales according to the `horizontalConstraint`
-   * and `verticalConstraint`. (Default value.)
-   * `True`: When resizing occurs, the object itself maintains its angle, and the center
-   * position is scaled. The scaling occurs along both the length and width directions.
-   */
-  std::optional<bool>                        keepShapeWhenResize;
-  /**
-   * How the mask object is displayed.
-   */
-  std::optional<int64_t>                     maskShowType;
-  /**
-   * The mask type of the object.
-   */
-  int64_t                                    maskType;
-  /**
-   * Matrix used for translating, rotating, and scaling the object.
-   */
-  std::vector<double>                        matrix;
-  /**
-   * Name of the object, for user identification, encoded in UTF-8.
-   */
-  std::optional<std::string>                 name;
-  /**
-   * A list of outline masks applied to the object, clipped by the intersection of their
-   * outlines.
-   * The items in the list are object IDs of the masks.
-   */
-  std::vector<std::string>                   outlineMaskBy;
-  /**
-   * How to display the child element of the object when it overflows its container.
-   */
-  int64_t                                    overflow;
-  /**
-   * Used to be associated with the object by symbol instances for overriding its attributes.
-   * Check the `objectId` in the `OverrideValue` for details.
-   * If `overrideKey` exists, find a symbol master through upward traversal (which could be
-   * the object itself); `overrideKey` is unique within the symbol master.
-   */
-  std::optional<std::string>                 overrideKey;
-  /**
-   * The radius values correspond to the corners in the following order: left-top, right-top,
-   * right-bottom, left-bottom.
-   * Default value is `[0, 0, 0, 0]`.
-   */
-  std::optional<std::vector<double>>         radius;
-  /**
-   * How child objects behave when the object is resized.
-   */
-  std::optional<int64_t>                     resizesContent;
-  /**
-   * The borders, fills, and other styles of the object.
-   */
-  Style                                      style;
-  /**
-   * How the `style` of the object affects the region participating in a Boolean operation
-   * with another object.
-   */
-  std::optional<int64_t>                     styleEffectBoolean;
-  /**
-   * How the `style` and `visible` of the mask object affect the area of the mask.
-   */
-  int64_t                                    styleEffectMaskArea;
-  /**
-   * An enclosing rectangle for the object. This property stores information about the object
-   * after the matrix transformation.
-   */
-  std::optional<Rect>                        transformedBounds;
-  /**
-   * A list of variables that can be used by children.
-   */
-  std::optional<std::vector<VariableDefine>> variableDefs;
-  /**
-   * A list of referenced variables.
-   */
-  std::optional<std::vector<VariableRefer>>  variableRefs;
-  /**
-   * Vertical constraints for the object.
-   * Default value is `1`.
-   */
-  std::optional<int64_t>                     verticalConstraint;
-  /**
-   * If `false`, the object will be invisible.
-   */
-  bool                                       visible;
+  FrameClass frameClass;
+
+  std::optional<Color>               backgroundColor;
+  std::optional<std::vector<double>> radius;
 };
 
-struct Group
+struct Group : public Container
 {
-  std::vector<AlphaMask>                     alphaMaskBy;
-  Rect                                       bounds;
-  std::vector<ContainerChildType>            childObjects;
-  ChildObjectClass                           class_;
-  GraphicsContextSettings                    contextSettings;
-  std::optional<double>                      cornerSmoothing;
-  std::optional<bool>                        groupNestMaskType;
-  std::optional<int64_t>                     horizontalConstraint;
-  std::string                                id;
-  bool                                       isLocked;
-  std::optional<bool>                        isVectorNetwork;
-  std::optional<bool>                        keepShapeWhenResize;
-  std::optional<int64_t>                     maskShowType;
-  int64_t                                    maskType;
-  std::vector<double>                        matrix;
-  std::optional<std::string>                 name;
-  std::vector<std::string>                   outlineMaskBy;
-  int64_t                                    overflow;
-  std::optional<std::string>                 overrideKey;
-  std::optional<int64_t>                     resizesContent;
-  Style                                      style;
-  std::optional<int64_t>                     styleEffectBoolean;
-  int64_t                                    styleEffectMaskArea;
-  std::optional<Rect>                        transformedBounds;
-  std::optional<std::vector<VariableDefine>> variableDefs;
-  std::optional<std::vector<VariableRefer>>  variableRefs;
-  std::optional<int64_t>                     verticalConstraint;
-  bool                                       visible;
+  ChildObjectClass class_;
+
+  std::optional<bool> groupNestMaskType;
+  std::optional<bool> isVectorNetwork;
 };
 
 struct Image
@@ -1999,67 +1633,21 @@ struct Image
   bool                                       visible;
 };
 
-struct SymbolInstance
+struct SymbolInstance : public Object
 {
-  std::vector<AlphaMask>                     alphaMaskBy;
-  Rect                                       bounds;
-  ChildObjectClass                           class_;
-  GraphicsContextSettings                    contextSettings;
-  std::optional<double>                      cornerSmoothing;
-  std::optional<int64_t>                     horizontalConstraint;
-  std::string                                id;
-  bool                                       isLocked;
-  std::optional<bool>                        keepShapeWhenResize;
-  std::optional<int64_t>                     maskShowType;
-  int64_t                                    maskType;
-  std::string                                masterId;
-  std::vector<double>                        matrix;
-  std::optional<std::string>                 name;
-  std::vector<std::string>                   outlineMaskBy;
-  int64_t                                    overflow;
-  std::optional<std::string>                 overrideKey;
-  std::vector<OverrideValue>                 overrideValues;
-  std::optional<int64_t>                     resizesContent;
-  Style                                      style;
-  std::optional<int64_t>                     styleEffectBoolean;
-  int64_t                                    styleEffectMaskArea;
-  std::optional<Rect>                        transformedBounds;
+  ChildObjectClass           class_;
+  std::string                masterId;
+  std::vector<OverrideValue> overrideValues;
+
+  std::optional<std::vector<double>>         radius;
   std::optional<std::vector<VariableAssign>> variableAssignments;
-  std::optional<std::vector<VariableDefine>> variableDefs;
-  std::optional<std::vector<VariableRefer>>  variableRefs;
-  std::optional<int64_t>                     verticalConstraint;
-  bool                                       visible;
 };
 
-struct SymbolMaster
+struct SymbolMaster : public Container
 {
-  std::vector<AlphaMask>                     alphaMaskBy;
-  Rect                                       bounds;
-  std::vector<ContainerChildType>            childObjects;
-  ChildObjectClass                           class_;
-  GraphicsContextSettings                    contextSettings;
-  std::optional<double>                      cornerSmoothing;
-  std::optional<int64_t>                     horizontalConstraint;
-  std::string                                id;
-  bool                                       isLocked;
-  std::optional<bool>                        keepShapeWhenResize;
-  std::optional<int64_t>                     maskShowType;
-  int64_t                                    maskType;
-  std::vector<double>                        matrix;
-  std::optional<std::string>                 name;
-  std::vector<std::string>                   outlineMaskBy;
-  int64_t                                    overflow;
-  std::optional<std::string>                 overrideKey;
-  std::optional<std::vector<double>>         radius;
-  std::optional<int64_t>                     resizesContent;
-  Style                                      style;
-  std::optional<int64_t>                     styleEffectBoolean;
-  int64_t                                    styleEffectMaskArea;
-  std::optional<Rect>                        transformedBounds;
-  std::optional<std::vector<VariableDefine>> variableDefs;
-  std::optional<std::vector<VariableRefer>>  variableRefs;
-  std::optional<int64_t>                     verticalConstraint;
-  bool                                       visible;
+  ChildObjectClass class_;
+
+  std::optional<std::vector<double>> radius;
 };
 
 struct Text
@@ -2412,6 +2000,12 @@ inline void to_json(json& j, const Subshape& x);
 
 inline void from_json(const json& j, Shape& x);
 inline void to_json(json& j, const Shape& x);
+
+inline void from_json(const json& j, Object& x);
+inline void to_json(json& j, const Object& x);
+
+inline void from_json(const json& j, Container& x);
+inline void to_json(json& j, const Container& x);
 
 inline void from_json(const json& j, Path& x);
 inline void to_json(json& j, const Path& x);
@@ -3658,65 +3252,50 @@ inline void to_json(json& j, const Shape& x)
   j["windingRule"] = x.windingRule;
 }
 
-inline void from_json(const json& j, Path& x)
+inline void from_json(const json& j, Object& x)
 {
   safeGetTo(x.alphaMaskBy, j, "alphaMaskBy");
   safeGetTo(x.bounds, j, "bounds");
-  safeGetTo(x.pathClass, j, "class");
   safeGetTo(x.contextSettings, j, "contextSettings");
-  x.cornerSmoothing = get_stack_optional<double>(j, "cornerSmoothing");
-  x.horizontalConstraint = get_stack_optional<int64_t>(j, "horizontalConstraint");
   safeGetTo(x.id, j, "id");
   safeGetTo(x.isLocked, j, "isLocked");
-  x.keepShapeWhenResize = get_stack_optional<bool>(j, "keepShapeWhenResize");
-  x.maskShowType = get_stack_optional<int64_t>(j, "maskShowType");
   safeGetTo(x.maskType, j, "maskType");
   safeGetTo(x.matrix, j, "matrix");
-  x.name = get_stack_optional<std::string>(j, "name");
   safeGetTo(x.outlineMaskBy, j, "outlineMaskBy");
   safeGetTo(x.overflow, j, "overflow");
+  safeGetTo(x.style, j, "style");
+  safeGetTo(x.styleEffectMaskArea, j, "styleEffectMaskArea");
+  safeGetTo(x.visible, j, "visible");
+
+  x.cornerSmoothing = get_stack_optional<double>(j, "cornerSmoothing");
+  x.horizontalConstraint = get_stack_optional<int64_t>(j, "horizontalConstraint");
+  x.keepShapeWhenResize = get_stack_optional<bool>(j, "keepShapeWhenResize");
+  x.maskShowType = get_stack_optional<int64_t>(j, "maskShowType");
+  x.name = get_stack_optional<std::string>(j, "name");
   x.overrideKey = get_stack_optional<std::string>(j, "overrideKey");
   x.resizesContent = get_stack_optional<int64_t>(j, "resizesContent");
-  x.shape = get_heap_optional<Shape>(j, "shape");
-  safeGetTo(x.style, j, "style");
   x.styleEffectBoolean = get_stack_optional<int64_t>(j, "styleEffectBoolean");
-  safeGetTo(x.styleEffectMaskArea, j, "styleEffectMaskArea");
   x.transformedBounds = get_stack_optional<Rect>(j, "transformedBounds");
   x.variableDefs = get_stack_optional<std::vector<VariableDefine>>(j, "variableDefs");
   x.variableRefs = get_stack_optional<std::vector<VariableRefer>>(j, "variableRefs");
   x.verticalConstraint = get_stack_optional<int64_t>(j, "verticalConstraint");
-  safeGetTo(x.visible, j, "visible");
-  x.fillReplacesImage = get_stack_optional<bool>(j, "fillReplacesImage");
-  x.imageFileName = get_stack_optional<std::string>(j, "imageFileName");
-  x.imageFilters = get_stack_optional<ImageFilters>(j, "imageFilters");
-  x.anchorPoint = get_stack_optional<std::vector<double>>(j, "anchorPoint");
-  x.content = get_stack_optional<std::string>(j, "content");
-  x.defaultFontAttr = get_stack_optional<TextFontAttributes>(j, "defaultFontAttr");
-  x.fontAttr = get_stack_optional<std::vector<TextFontAttributes>>(j, "fontAttr");
-  x.frameMode = get_stack_optional<int64_t>(j, "frameMode");
-  x.horizontalAlignment = get_stack_optional<std::vector<int64_t>>(j, "horizontalAlignment");
-  x.textLineType = get_stack_optional<std::vector<TextLineType>>(j, "textLineType");
-  x.textOnPath = get_stack_optional<TextOnPath>(j, "textOnPath");
-  x.truncatedHeight = get_stack_optional<double>(j, "truncatedHeight");
-  x.verticalAlignment = get_stack_optional<int64_t>(j, "verticalAlignment");
-  x.verticalTrim = get_stack_optional<bool>(j, "verticalTrim");
-  x.childObjects = get_stack_optional<std::vector<Path>>(j, "childObjects");
-  x.groupNestMaskType = get_stack_optional<bool>(j, "groupNestMaskType");
-  x.isVectorNetwork = get_stack_optional<bool>(j, "isVectorNetwork");
-  x.backgroundColor = get_stack_optional<Color>(j, "backgroundColor");
-  x.radius = get_stack_optional<std::vector<double>>(j, "radius");
-  x.masterId = get_stack_optional<std::string>(j, "masterId");
-  x.overrideValues = get_stack_optional<std::vector<OverrideValue>>(j, "overrideValues");
-  x.variableAssignments = get_stack_optional<std::vector<VariableAssign>>(j, "variableAssignments");
 }
-
-inline void to_json(json& j, const Path& x)
+inline void to_json(json& j, const Object& x)
 {
   j = json::object();
   j["alphaMaskBy"] = x.alphaMaskBy;
   j["bounds"] = x.bounds;
-  j["class"] = x.pathClass;
   j["contextSettings"] = x.contextSettings;
+  j["id"] = x.id;
+  j["isLocked"] = x.isLocked;
+  j["maskType"] = x.maskType;
+  j["matrix"] = x.matrix;
+  j["outlineMaskBy"] = x.outlineMaskBy;
+  j["overflow"] = x.overflow;
+  j["style"] = x.style;
+  j["styleEffectMaskArea"] = x.styleEffectMaskArea;
+  j["visible"] = x.visible;
+
   if (x.cornerSmoothing)
   {
     j["cornerSmoothing"] = x.cornerSmoothing;
@@ -3725,8 +3304,6 @@ inline void to_json(json& j, const Path& x)
   {
     j["horizontalConstraint"] = x.horizontalConstraint;
   }
-  j["id"] = x.id;
-  j["isLocked"] = x.isLocked;
   if (x.keepShapeWhenResize)
   {
     j["keepShapeWhenResize"] = x.keepShapeWhenResize;
@@ -3735,14 +3312,10 @@ inline void to_json(json& j, const Path& x)
   {
     j["maskShowType"] = x.maskShowType;
   }
-  j["maskType"] = x.maskType;
-  j["matrix"] = x.matrix;
   if (x.name)
   {
     j["name"] = x.name;
   }
-  j["outlineMaskBy"] = x.outlineMaskBy;
-  j["overflow"] = x.overflow;
   if (x.overrideKey)
   {
     j["overrideKey"] = x.overrideKey;
@@ -3751,16 +3324,10 @@ inline void to_json(json& j, const Path& x)
   {
     j["resizesContent"] = x.resizesContent;
   }
-  if (x.shape)
-  {
-    j["shape"] = x.shape;
-  }
-  j["style"] = x.style;
   if (x.styleEffectBoolean)
   {
     j["styleEffectBoolean"] = x.styleEffectBoolean;
   }
-  j["styleEffectMaskArea"] = x.styleEffectMaskArea;
   if (x.transformedBounds)
   {
     j["transformedBounds"] = x.transformedBounds;
@@ -3777,309 +3344,76 @@ inline void to_json(json& j, const Path& x)
   {
     j["verticalConstraint"] = x.verticalConstraint;
   }
-  j["visible"] = x.visible;
-  if (x.fillReplacesImage)
-  {
-    j["fillReplacesImage"] = x.fillReplacesImage;
-  }
-  if (x.imageFileName)
-  {
-    j["imageFileName"] = x.imageFileName;
-  }
-  if (x.imageFilters)
-  {
-    j["imageFilters"] = x.imageFilters;
-  }
-  if (x.anchorPoint)
-  {
-    j["anchorPoint"] = x.anchorPoint;
-  }
-  if (x.content)
-  {
-    j["content"] = x.content;
-  }
-  if (x.defaultFontAttr)
-  {
-    j["defaultFontAttr"] = x.defaultFontAttr;
-  }
-  if (x.fontAttr)
-  {
-    j["fontAttr"] = x.fontAttr;
-  }
-  if (x.frameMode)
-  {
-    j["frameMode"] = x.frameMode;
-  }
-  if (x.horizontalAlignment)
-  {
-    j["horizontalAlignment"] = x.horizontalAlignment;
-  }
-  if (x.textLineType)
-  {
-    j["textLineType"] = x.textLineType;
-  }
-  if (x.textOnPath)
-  {
-    j["textOnPath"] = x.textOnPath;
-  }
-  if (x.truncatedHeight)
-  {
-    j["truncatedHeight"] = x.truncatedHeight;
-  }
-  if (x.verticalAlignment)
-  {
-    j["verticalAlignment"] = x.verticalAlignment;
-  }
-  if (x.verticalTrim)
-  {
-    j["verticalTrim"] = x.verticalTrim;
-  }
-  if (x.childObjects)
-  {
-    j["childObjects"] = x.childObjects;
-  }
-  if (x.groupNestMaskType)
-  {
-    j["groupNestMaskType"] = x.groupNestMaskType;
-  }
-  if (x.isVectorNetwork)
-  {
-    j["isVectorNetwork"] = x.isVectorNetwork;
-  }
-  if (x.backgroundColor)
-  {
-    j["backgroundColor"] = x.backgroundColor;
-  }
-  if (x.radius)
-  {
-    j["radius"] = x.radius;
-  }
-  if (x.masterId)
-  {
-    j["masterId"] = x.masterId;
-  }
-  if (x.overrideValues)
-  {
-    j["overrideValues"] = x.overrideValues;
-  }
-  if (x.variableAssignments)
-  {
-    j["variableAssignments"] = x.variableAssignments;
-  }
+}
+
+inline void from_json(const json& j, Container& x)
+{
+  from_json(j, static_cast<Object&>(x));
+  safeGetTo(x.childObjects, j, "childObjects");
+}
+inline void to_json(json& j, const Container& x)
+{
+  to_json(j, static_cast<const Object&>(x));
+  j["childObjects"] = x.childObjects;
+}
+
+inline void from_json(const json& j, Path& x)
+{
+  from_json(j, static_cast<Object&>(x));
+
+  safeGetTo(x.class_, j, "class");
+  safeGetTo(x.shape, j, "shape");
+}
+inline void to_json(json& j, const Path& x)
+{
+  to_json(j, static_cast<const Object&>(x));
+
+  j["class"] = x.class_;
+  j["shape"] = x.shape;
 }
 
 inline void from_json(const json& j, Frame& x)
 {
-  safeGetTo(x.alphaMaskBy, j, "alphaMaskBy");
-  x.backgroundColor = get_stack_optional<Color>(j, "backgroundColor");
-  safeGetTo(x.bounds, j, "bounds");
-  safeGetTo(x.childObjects, j, "childObjects");
+  from_json(j, static_cast<Container&>(x));
   safeGetTo(x.frameClass, j, "class");
-  safeGetTo(x.contextSettings, j, "contextSettings");
-  x.cornerSmoothing = get_stack_optional<double>(j, "cornerSmoothing");
-  x.horizontalConstraint = get_stack_optional<int64_t>(j, "horizontalConstraint");
-  safeGetTo(x.id, j, "id");
-  safeGetTo(x.isLocked, j, "isLocked");
-  x.keepShapeWhenResize = get_stack_optional<bool>(j, "keepShapeWhenResize");
-  x.maskShowType = get_stack_optional<int64_t>(j, "maskShowType");
-  safeGetTo(x.maskType, j, "maskType");
-  safeGetTo(x.matrix, j, "matrix");
-  x.name = get_stack_optional<std::string>(j, "name");
-  safeGetTo(x.outlineMaskBy, j, "outlineMaskBy");
-  safeGetTo(x.overflow, j, "overflow");
-  x.overrideKey = get_stack_optional<std::string>(j, "overrideKey");
+  x.backgroundColor = get_stack_optional<Color>(j, "backgroundColor");
   x.radius = get_stack_optional<std::vector<double>>(j, "radius");
-  x.resizesContent = get_stack_optional<int64_t>(j, "resizesContent");
-  safeGetTo(x.style, j, "style");
-  x.styleEffectBoolean = get_stack_optional<int64_t>(j, "styleEffectBoolean");
-  safeGetTo(x.styleEffectMaskArea, j, "styleEffectMaskArea");
-  x.transformedBounds = get_stack_optional<Rect>(j, "transformedBounds");
-  x.variableDefs = get_stack_optional<std::vector<VariableDefine>>(j, "variableDefs");
-  x.variableRefs = get_stack_optional<std::vector<VariableRefer>>(j, "variableRefs");
-  x.verticalConstraint = get_stack_optional<int64_t>(j, "verticalConstraint");
-  safeGetTo(x.visible, j, "visible");
 }
 
 inline void to_json(json& j, const Frame& x)
 {
-  j = json::object();
-  j["alphaMaskBy"] = x.alphaMaskBy;
+  to_json(j, static_cast<const Container&>(x));
+  j["class"] = x.frameClass;
   if (x.backgroundColor)
   {
     j["backgroundColor"] = x.backgroundColor;
-  }
-  j["bounds"] = x.bounds;
-  j["childObjects"] = x.childObjects;
-  j["class"] = x.frameClass;
-  j["contextSettings"] = x.contextSettings;
-  if (x.cornerSmoothing)
-  {
-    j["cornerSmoothing"] = x.cornerSmoothing;
-  }
-  if (x.horizontalConstraint)
-  {
-    j["horizontalConstraint"] = x.horizontalConstraint;
-  }
-  j["id"] = x.id;
-  j["isLocked"] = x.isLocked;
-  if (x.keepShapeWhenResize)
-  {
-    j["keepShapeWhenResize"] = x.keepShapeWhenResize;
-  }
-  if (x.maskShowType)
-  {
-    j["maskShowType"] = x.maskShowType;
-  }
-  j["maskType"] = x.maskType;
-  j["matrix"] = x.matrix;
-  if (x.name)
-  {
-    j["name"] = x.name;
-  }
-  j["outlineMaskBy"] = x.outlineMaskBy;
-  j["overflow"] = x.overflow;
-  if (x.overrideKey)
-  {
-    j["overrideKey"] = x.overrideKey;
   }
   if (x.radius)
   {
     j["radius"] = x.radius;
   }
-  if (x.resizesContent)
-  {
-    j["resizesContent"] = x.resizesContent;
-  }
-  j["style"] = x.style;
-  if (x.styleEffectBoolean)
-  {
-    j["styleEffectBoolean"] = x.styleEffectBoolean;
-  }
-  j["styleEffectMaskArea"] = x.styleEffectMaskArea;
-  if (x.transformedBounds)
-  {
-    j["transformedBounds"] = x.transformedBounds;
-  }
-  if (x.variableDefs)
-  {
-    j["variableDefs"] = x.variableDefs;
-  }
-  if (x.variableRefs)
-  {
-    j["variableRefs"] = x.variableRefs;
-  }
-  if (x.verticalConstraint)
-  {
-    j["verticalConstraint"] = x.verticalConstraint;
-  }
-  j["visible"] = x.visible;
 }
 
 inline void from_json(const json& j, Group& x)
 {
-  safeGetTo(x.alphaMaskBy, j, "alphaMaskBy");
-  safeGetTo(x.bounds, j, "bounds");
-  safeGetTo(x.childObjects, j, "childObjects");
+  from_json(j, static_cast<Container&>(x));
   safeGetTo(x.class_, j, "class");
-  safeGetTo(x.contextSettings, j, "contextSettings");
-  x.cornerSmoothing = get_stack_optional<double>(j, "cornerSmoothing");
   x.groupNestMaskType = get_stack_optional<bool>(j, "groupNestMaskType");
-  x.horizontalConstraint = get_stack_optional<int64_t>(j, "horizontalConstraint");
-  safeGetTo(x.id, j, "id");
-  safeGetTo(x.isLocked, j, "isLocked");
   x.isVectorNetwork = get_stack_optional<bool>(j, "isVectorNetwork");
-  x.keepShapeWhenResize = get_stack_optional<bool>(j, "keepShapeWhenResize");
-  x.maskShowType = get_stack_optional<int64_t>(j, "maskShowType");
-  safeGetTo(x.maskType, j, "maskType");
-  safeGetTo(x.matrix, j, "matrix");
-  x.name = get_stack_optional<std::string>(j, "name");
-  safeGetTo(x.outlineMaskBy, j, "outlineMaskBy");
-  safeGetTo(x.overflow, j, "overflow");
-  x.overrideKey = get_stack_optional<std::string>(j, "overrideKey");
-  x.resizesContent = get_stack_optional<int64_t>(j, "resizesContent");
-  safeGetTo(x.style, j, "style");
-  x.styleEffectBoolean = get_stack_optional<int64_t>(j, "styleEffectBoolean");
-  safeGetTo(x.styleEffectMaskArea, j, "styleEffectMaskArea");
-  x.transformedBounds = get_stack_optional<Rect>(j, "transformedBounds");
-  x.variableDefs = get_stack_optional<std::vector<VariableDefine>>(j, "variableDefs");
-  x.variableRefs = get_stack_optional<std::vector<VariableRefer>>(j, "variableRefs");
-  x.verticalConstraint = get_stack_optional<int64_t>(j, "verticalConstraint");
-  safeGetTo(x.visible, j, "visible");
 }
 
 inline void to_json(json& j, const Group& x)
 {
-  j = json::object();
-  j["alphaMaskBy"] = x.alphaMaskBy;
-  j["bounds"] = x.bounds;
-  j["childObjects"] = x.childObjects;
+  to_json(j, static_cast<const Container&>(x));
   j["class"] = x.class_;
-  j["contextSettings"] = x.contextSettings;
-  if (x.cornerSmoothing)
-  {
-    j["cornerSmoothing"] = x.cornerSmoothing;
-  }
   if (x.groupNestMaskType)
   {
     j["groupNestMaskType"] = x.groupNestMaskType;
   }
-  if (x.horizontalConstraint)
-  {
-    j["horizontalConstraint"] = x.horizontalConstraint;
-  }
-  j["id"] = x.id;
-  j["isLocked"] = x.isLocked;
   if (x.isVectorNetwork)
   {
     j["isVectorNetwork"] = x.isVectorNetwork;
   }
-  if (x.keepShapeWhenResize)
-  {
-    j["keepShapeWhenResize"] = x.keepShapeWhenResize;
-  }
-  if (x.maskShowType)
-  {
-    j["maskShowType"] = x.maskShowType;
-  }
-  j["maskType"] = x.maskType;
-  j["matrix"] = x.matrix;
-  if (x.name)
-  {
-    j["name"] = x.name;
-  }
-  j["outlineMaskBy"] = x.outlineMaskBy;
-  j["overflow"] = x.overflow;
-  if (x.overrideKey)
-  {
-    j["overrideKey"] = x.overrideKey;
-  }
-  if (x.resizesContent)
-  {
-    j["resizesContent"] = x.resizesContent;
-  }
-  j["style"] = x.style;
-  if (x.styleEffectBoolean)
-  {
-    j["styleEffectBoolean"] = x.styleEffectBoolean;
-  }
-  j["styleEffectMaskArea"] = x.styleEffectMaskArea;
-  if (x.transformedBounds)
-  {
-    j["transformedBounds"] = x.transformedBounds;
-  }
-  if (x.variableDefs)
-  {
-    j["variableDefs"] = x.variableDefs;
-  }
-  if (x.variableRefs)
-  {
-    j["variableRefs"] = x.variableRefs;
-  }
-  if (x.verticalConstraint)
-  {
-    j["verticalConstraint"] = x.verticalConstraint;
-  }
-  j["visible"] = x.visible;
 }
 
 inline void from_json(const json& j, Image& x)
@@ -4188,206 +3522,46 @@ inline void to_json(json& j, const Image& x)
 
 inline void from_json(const json& j, SymbolInstance& x)
 {
-  safeGetTo(x.alphaMaskBy, j, "alphaMaskBy");
-  safeGetTo(x.bounds, j, "bounds");
+  from_json(j, static_cast<Object&>(x));
+
   safeGetTo(x.class_, j, "class");
-  safeGetTo(x.contextSettings, j, "contextSettings");
-  x.cornerSmoothing = get_stack_optional<double>(j, "cornerSmoothing");
-  x.horizontalConstraint = get_stack_optional<int64_t>(j, "horizontalConstraint");
-  safeGetTo(x.id, j, "id");
-  safeGetTo(x.isLocked, j, "isLocked");
-  x.keepShapeWhenResize = get_stack_optional<bool>(j, "keepShapeWhenResize");
-  x.maskShowType = get_stack_optional<int64_t>(j, "maskShowType");
-  safeGetTo(x.maskType, j, "maskType");
   safeGetTo(x.masterId, j, "masterId");
-  safeGetTo(x.matrix, j, "matrix");
-  x.name = get_stack_optional<std::string>(j, "name");
-  safeGetTo(x.outlineMaskBy, j, "outlineMaskBy");
-  safeGetTo(x.overflow, j, "overflow");
-  x.overrideKey = get_stack_optional<std::string>(j, "overrideKey");
   safeGetTo(x.overrideValues, j, "overrideValues");
-  x.resizesContent = get_stack_optional<int64_t>(j, "resizesContent");
-  safeGetTo(x.style, j, "style");
-  x.styleEffectBoolean = get_stack_optional<int64_t>(j, "styleEffectBoolean");
-  safeGetTo(x.styleEffectMaskArea, j, "styleEffectMaskArea");
-  x.transformedBounds = get_stack_optional<Rect>(j, "transformedBounds");
+
+  x.radius = get_stack_optional<std::vector<double>>(j, "radius");
   x.variableAssignments = get_stack_optional<std::vector<VariableAssign>>(j, "variableAssignments");
-  x.variableDefs = get_stack_optional<std::vector<VariableDefine>>(j, "variableDefs");
-  x.variableRefs = get_stack_optional<std::vector<VariableRefer>>(j, "variableRefs");
-  x.verticalConstraint = get_stack_optional<int64_t>(j, "verticalConstraint");
-  safeGetTo(x.visible, j, "visible");
 }
 inline void to_json(json& j, const SymbolInstance& x)
 {
-  j = json::object();
-  j["alphaMaskBy"] = x.alphaMaskBy;
-  j["bounds"] = x.bounds;
+  to_json(j, static_cast<const Object&>(x));
+
   j["class"] = x.class_;
-  j["contextSettings"] = x.contextSettings;
-  if (x.cornerSmoothing)
-  {
-    j["cornerSmoothing"] = x.cornerSmoothing;
-  }
-  if (x.horizontalConstraint)
-  {
-    j["horizontalConstraint"] = x.horizontalConstraint;
-  }
-  j["id"] = x.id;
-  j["isLocked"] = x.isLocked;
-  if (x.keepShapeWhenResize)
-  {
-    j["keepShapeWhenResize"] = x.keepShapeWhenResize;
-  }
-  if (x.maskShowType)
-  {
-    j["maskShowType"] = x.maskShowType;
-  }
-  j["maskType"] = x.maskType;
   j["masterId"] = x.masterId;
-  j["matrix"] = x.matrix;
-  if (x.name)
-  {
-    j["name"] = x.name;
-  }
-  j["outlineMaskBy"] = x.outlineMaskBy;
-  j["overflow"] = x.overflow;
-  if (x.overrideKey)
-  {
-    j["overrideKey"] = x.overrideKey;
-  }
   j["overrideValues"] = x.overrideValues;
-  if (x.resizesContent)
+
+  if (x.radius)
   {
-    j["resizesContent"] = x.resizesContent;
-  }
-  j["style"] = x.style;
-  if (x.styleEffectBoolean)
-  {
-    j["styleEffectBoolean"] = x.styleEffectBoolean;
-  }
-  j["styleEffectMaskArea"] = x.styleEffectMaskArea;
-  if (x.transformedBounds)
-  {
-    j["transformedBounds"] = x.transformedBounds;
+    j["radius"] = x.radius;
   }
   if (x.variableAssignments)
   {
     j["variableAssignments"] = x.variableAssignments;
   }
-  if (x.variableDefs)
-  {
-    j["variableDefs"] = x.variableDefs;
-  }
-  if (x.variableRefs)
-  {
-    j["variableRefs"] = x.variableRefs;
-  }
-  if (x.verticalConstraint)
-  {
-    j["verticalConstraint"] = x.verticalConstraint;
-  }
-  j["visible"] = x.visible;
 }
 
 inline void from_json(const json& j, SymbolMaster& x)
 {
-  safeGetTo(x.alphaMaskBy, j, "alphaMaskBy");
-  safeGetTo(x.bounds, j, "bounds");
-  safeGetTo(x.childObjects, j, "childObjects");
+  from_json(j, static_cast<Container&>(x));
   safeGetTo(x.class_, j, "class");
-  safeGetTo(x.contextSettings, j, "contextSettings");
-  x.cornerSmoothing = get_stack_optional<double>(j, "cornerSmoothing");
-  x.horizontalConstraint = get_stack_optional<int64_t>(j, "horizontalConstraint");
-  safeGetTo(x.id, j, "id");
-  safeGetTo(x.isLocked, j, "isLocked");
-  x.keepShapeWhenResize = get_stack_optional<bool>(j, "keepShapeWhenResize");
-  x.maskShowType = get_stack_optional<int64_t>(j, "maskShowType");
-  safeGetTo(x.maskType, j, "maskType");
-  safeGetTo(x.matrix, j, "matrix");
-  x.name = get_stack_optional<std::string>(j, "name");
-  safeGetTo(x.outlineMaskBy, j, "outlineMaskBy");
-  safeGetTo(x.overflow, j, "overflow");
-  x.overrideKey = get_stack_optional<std::string>(j, "overrideKey");
-  x.radius = get_stack_optional<std::vector<double>>(j, "radius");
-  x.resizesContent = get_stack_optional<int64_t>(j, "resizesContent");
-  safeGetTo(x.style, j, "style");
-  x.styleEffectBoolean = get_stack_optional<int64_t>(j, "styleEffectBoolean");
-  safeGetTo(x.styleEffectMaskArea, j, "styleEffectMaskArea");
-  x.transformedBounds = get_stack_optional<Rect>(j, "transformedBounds");
-  x.variableDefs = get_stack_optional<std::vector<VariableDefine>>(j, "variableDefs");
-  x.variableRefs = get_stack_optional<std::vector<VariableRefer>>(j, "variableRefs");
-  x.verticalConstraint = get_stack_optional<int64_t>(j, "verticalConstraint");
-  safeGetTo(x.visible, j, "visible");
 }
 inline void to_json(json& j, const SymbolMaster& x)
 {
-  j = json::object();
-  j["alphaMaskBy"] = x.alphaMaskBy;
-  j["bounds"] = x.bounds;
-  j["childObjects"] = x.childObjects;
+  to_json(j, static_cast<const Container&>(x));
   j["class"] = x.class_;
-  j["contextSettings"] = x.contextSettings;
-  if (x.cornerSmoothing)
-  {
-    j["cornerSmoothing"] = x.cornerSmoothing;
-  }
-  if (x.horizontalConstraint)
-  {
-    j["horizontalConstraint"] = x.horizontalConstraint;
-  }
-  j["id"] = x.id;
-  j["isLocked"] = x.isLocked;
-  if (x.keepShapeWhenResize)
-  {
-    j["keepShapeWhenResize"] = x.keepShapeWhenResize;
-  }
-  if (x.maskShowType)
-  {
-    j["maskShowType"] = x.maskShowType;
-  }
-  j["maskType"] = x.maskType;
-  j["matrix"] = x.matrix;
-  if (x.name)
-  {
-    j["name"] = x.name;
-  }
-  j["outlineMaskBy"] = x.outlineMaskBy;
-  j["overflow"] = x.overflow;
-  if (x.overrideKey)
-  {
-    j["overrideKey"] = x.overrideKey;
-  }
   if (x.radius)
   {
     j["radius"] = x.radius;
   }
-  if (x.resizesContent)
-  {
-    j["resizesContent"] = x.resizesContent;
-  }
-  j["style"] = x.style;
-  if (x.styleEffectBoolean)
-  {
-    j["styleEffectBoolean"] = x.styleEffectBoolean;
-  }
-  j["styleEffectMaskArea"] = x.styleEffectMaskArea;
-  if (x.transformedBounds)
-  {
-    j["transformedBounds"] = x.transformedBounds;
-  }
-  if (x.variableDefs)
-  {
-    j["variableDefs"] = x.variableDefs;
-  }
-  if (x.variableRefs)
-  {
-    j["variableRefs"] = x.variableRefs;
-  }
-  if (x.verticalConstraint)
-  {
-    j["verticalConstraint"] = x.verticalConstraint;
-  }
-  j["visible"] = x.visible;
 }
 
 inline void from_json(const json& j, Text& x)

@@ -18,6 +18,7 @@
 #include "Guard.hpp"
 #include "ShadowEffects.hpp"
 #include "FillEffects.hpp"
+#include "Mask.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VShape.hpp"
 #include "Layer/Core/VType.hpp"
@@ -57,98 +58,33 @@
 namespace VGG::layer
 {
 
-class MaskObject
-{
-public:
-  struct MaskData
-  {
-    PaintNode*       mask{ nullptr };
-    Transform        transform;
-    sk_sp<SkBlender> blender{ nullptr };
-    MaskData(PaintNode* p, const Transform& t, sk_sp<SkBlender> blender)
-      : mask(p)
-      , transform(t)
-      , blender(std::move(blender))
-    {
-    }
-  };
-  std::vector<MaskData>          components;
-  std::optional<sk_sp<SkShader>> shader;
-
-  sk_sp<SkImageFilter> toImagefilter(const SkRect& b, const SkMatrix* mat)
-  {
-    ensureMaskShader(b, mat);
-    return SkImageFilters::Shader(*shader);
-  }
-
-  sk_sp<SkImageFilter> maskWith(const SkRect& b, sk_sp<SkImageFilter> input, const SkMatrix* mat)
-  {
-    return SkImageFilters::Blend(SkBlendMode::kSrcIn, toImagefilter(b, mat), input, b);
-  }
-
-  sk_sp<SkMaskFilter> toMaskFilter(const SkRect& b, const SkMatrix* mat)
-  {
-    ensureMaskShader(b, mat);
-    return SkShaderMaskFilter::Make(*shader);
-  }
-
-  void ensureMaskShader(const SkRect& b, const SkMatrix* mat)
-  {
-    if (!shader)
-    {
-      Renderer          alphaMaskRender;
-      SkPictureRecorder rec;
-      auto              rt = SkRTreeFactory();
-      auto              canvas = rec.beginRecording(b, &rt);
-      alphaMaskRender.setCanvas(canvas);
-      for (const auto& p : components)
-      {
-        auto skm = toSkMatrix(p.transform.matrix());
-        canvas->save();
-        canvas->concat(skm);
-        p.mask->onDrawAsAlphaMask(&alphaMaskRender, 0);
-        canvas->restore();
-      }
-      auto maskShader = SkPictureShader::Make(
-        rec.finishRecordingAsPicture(),
-        SkTileMode::kClamp,
-        SkTileMode::kClamp,
-        SkFilterMode::kNearest,
-        mat,
-        &b);
-      ASSERT(maskShader);
-      shader = maskShader;
-    }
-  }
-};
-
 class PaintNode__pImpl // NOLINT
 {
   VGG_DECL_API(PaintNode);
 
 public:
-  Bound                    bound;
-  Transform                transform;
-  std::string              guid{};
-  std::vector<std::string> maskedBy{};
+  Bound       bound;
+  Transform   transform;
+  std::string guid{};
+
+  std::vector<std::string> maskedBy;
   std::vector<AlphaMask>   alphaMaskBy;
-  EMaskType                maskType{ MT_NONE };
-  EMaskShowType            maskShowType{ MST_INVISIBLE };
-  EBoolOp                  clipOperator{ BO_NONE };
-  EOverflow                overflow{ OF_HIDDEN };
-  EWindingType             windingRule{ WR_EVEN_ODD };
-  Style                    style;
-  ContextSetting           contextSetting;
-  EObjectType              type;
-  bool                     visible{ true };
+
+  EMaskType      maskType{ MT_NONE };
+  EMaskShowType  maskShowType{ MST_INVISIBLE };
+  EBoolOp        clipOperator{ BO_NONE };
+  EOverflow      overflow{ OF_HIDDEN };
+  EWindingType   windingRule{ WR_EVEN_ODD };
+  Style          style;
+  ContextSetting contextSetting;
+  EObjectType    type;
+  bool           visible{ true };
 
   ContourData                 contour;
   PaintOption                 paintOption;
   ContourOption               maskOption;
   std::optional<ObjectShader> styleDisplayList; // fill + border
   std::optional<VShape>       path;
-  std::optional<VShape>       mask;
-  std::optional<MaskObject>   alphaMask;
 
   std::optional<DropShadowEffect>  dropShadowEffects;
   std::optional<InnerShadowEffect> innerShadowEffects;
@@ -161,6 +97,7 @@ public:
 
   void ensureStyleObjectRecorder(
     const VShape&              shape,
+    const VShape&              mask,
     sk_sp<SkBlender>           blender,
     const std::vector<Fill>&   fills,
     const std::vector<Border>& borders)
@@ -172,14 +109,10 @@ public:
       SkRect         styleBounds = toSkRect(bound);
       auto           recorder = rec.beginRecording(styleBounds, SkMatrix::I());
 
-      const auto fillBounds = toSkRect(q_ptr->onDrawFill(recorder, blender, 0, shape));
+      const auto fillBounds = toSkRect(q_ptr->onDrawFill(recorder, blender, 0, shape, mask));
       const auto borderBounds = drawBorder(recorder, shape, shape.bounds(), borders, blender);
-
-      ASSERT(borderBounds.contains(fillBounds));
       styleBounds.join(fillBounds);
-      (void)borderBounds;
       styleBounds.join(borderBounds);
-      ASSERT(styleBounds.contains(fillBounds));
       auto mat = SkMatrix::Translate(styleBounds.x(), styleBounds.y());
       styleDisplayList = rec.finishRecording(styleBounds, &mat);
     }
@@ -201,29 +134,28 @@ public:
     }
   }
 
-  void ensureAlphaMask(Renderer* renderer)
+  VShape ensureOutlineMask(Renderer* renderer, EBoolOp maskOp)
   {
-    if (alphaMask)
-      return;
-    auto        cache = MaskObject();
+    VShape result;
+    if (maskedBy.empty())
+      return result;
     const auto& objects = renderer->maskObjects();
-    // auto        maskAreaBound = q_ptr->bound();
-    for (auto it = alphaMaskBy.begin(); it != alphaMaskBy.end(); ++it)
+    for (const auto& id : maskedBy)
     {
-      const auto& id = it->id;
       if (id != q_ptr->guid())
       {
         if (auto obj = objects.find(id); obj != objects.end())
         {
           const auto t = obj->second->mapTransform(q_ptr);
-          cache.components.emplace_back(obj->second, t, getMaskBlender(it->type));
-          // OPTIMIZED:
-          // if (auto transformedBound = obj->second->bound().transform(t);
-          //     maskAreaBound.isIntersectWith(transformedBound))
-          // {
-          //   cache.components.emplace_back(obj->second, t, nullptr);
-          //   maskAreaBound.intersectWith(transformedBound);
-          // }
+          auto       m = obj->second->asVisualShape(&t);
+          if (result.isEmpty())
+          {
+            result = m;
+          }
+          else
+          {
+            result.op(m, maskOp);
+          }
         }
         else
         {
@@ -231,22 +163,7 @@ public:
         }
       }
     }
-    VShape path;
-    for (const auto& e : cache.components)
-    {
-      if (path.isEmpty())
-      {
-        path = e.mask->asVisualShape(&e.transform);
-      }
-      else
-      {
-        path.op(e.mask->asVisualShape(&e.transform), EBoolOp::BO_INTERSECTION);
-      }
-    }
-    if (!path.isEmpty())
-    {
-      alphaMask = std::move(cache);
-    }
+    return result;
   }
 
   void worldTransform(glm::mat3& mat)
@@ -272,7 +189,7 @@ public:
     {
       return;
     }
-    onDrawStyleImpl(renderer, *path, blender);
+    onDrawStyleImpl(renderer, *path, VShape(), blender);
   }
 
   SkRect drawBorder(
@@ -429,7 +346,11 @@ public:
   {
   }
 
-  void onDrawStyleImpl(Renderer* renderer, const VShape& skPath, sk_sp<SkBlender> blender)
+  void onDrawStyleImpl(
+    Renderer*        renderer,
+    const VShape&    skPath,
+    const VShape&    mask,
+    sk_sp<SkBlender> blender)
   {
     auto filled = false;
     for (const auto& f : style.fills)
@@ -440,7 +361,7 @@ public:
         break;
       }
     }
-    ensureStyleObjectRecorder(skPath, blender, style.fills, style.borders);
+    ensureStyleObjectRecorder(skPath, mask, blender, style.fills, style.borders);
     if (filled)
     {
       ensureDropShadowEffects(style.dropShadow, skPath);

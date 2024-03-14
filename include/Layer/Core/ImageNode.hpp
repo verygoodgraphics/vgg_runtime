@@ -71,6 +71,7 @@ protected:
     Renderer*            renderer,
     sk_sp<SkBlender>     blender,
     sk_sp<SkImageFilter> imageFilter,
-    const VShape&        path) override;
+    const VShape&        path,
+    const VShape&        mask) override;
 };
 } // namespace VGG::layer

@@ -70,8 +70,12 @@ public:
   ~TextNode();
 
 protected:
-  void  onDrawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender) override;
-  void  onDrawStyle(Renderer* renderer, const VShape& path, sk_sp<SkBlender> blender) override;
+  void onDrawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender) override;
+  void onDrawStyle(
+    Renderer*        renderer,
+    const VShape&    path,
+    const VShape&    mask,
+    sk_sp<SkBlender> blender) override;
   Bound onRevalidate() override;
 };
 

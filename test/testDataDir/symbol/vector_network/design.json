@@ -1,4 +1,5 @@
 {
+  "version": "1",
   "fileType": 3,
   "fileName": "/Users/houguanhua/code/vgg/vgg_runtime_B/test/testDataDir/symbol/vector_network/feature_vector_network_override.fig",
   "frames": [
@@ -30,7 +31,7 @@
         "x": 0,
         "y": 0
       },
-      "frame": {
+      "transformedBounds": {
         "class": "rect",
         "constrainProportions": false,
         "width": 800.0,
@@ -71,10 +72,12 @@
       "styleEffectMaskArea": 2,
       "maskShowType": 2,
       "overflow": 1,
+      "styleEffectBoolean": 1,
       "cornerSmoothing": 0.0,
       "horizontalConstraint": 1,
       "verticalConstraint": 1,
       "resizesContent": 0,
+      "variableDefs": [],
       "variableRefs": [],
       "class": "frame",
       "childObjects": [
@@ -106,7 +109,7 @@
             "x": 0,
             "y": 0
           },
-          "frame": {
+          "transformedBounds": {
             "class": "rect",
             "constrainProportions": true,
             "width": 746.0,
@@ -127,10 +130,12 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 2,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "horizontalConstraint": 5,
           "verticalConstraint": 5,
           "resizesContent": 0,
+          "variableDefs": [],
           "variableRefs": [],
           "class": "symbolInstance",
           "masterId": "61:40",
@@ -149,11 +154,11 @@
                       "class": "gradientLinear",
                       "from": [
                         -1.439799657276808e-08,
-                        0.9999999856020034
+                        -0.9999999856020034
                       ],
                       "to": [
                         0.9999999856020034,
-                        -1.439799657276808e-08
+                        1.439799657276808e-08
                       ],
                       "stops": [
                         {
@@ -180,8 +185,7 @@
                           "position": 1.0,
                           "midPoint": 0.5
                         }
-                      ],
-                      "invert": false
+                      ]
                     }
                   },
                   "fillType": 1,
@@ -203,7 +207,7 @@
                   "lineCapStyle": 1,
                   "lineJoinStyle": 0,
                   "miterLimit": 4.0,
-                  "strokeWeightsIndependent": false,
+                  "borderWeightsIndependent": false,
                   "topWeight": 0.0,
                   "leftWeight": 0.0,
                   "bottomWeight": 0.0,
@@ -242,6 +246,31 @@
             {
               "class": "overrideValue",
               "objectId": [
+                "7:45098"
+              ],
+              "overrideName": "bounds",
+              "overrideValue": {
+                "class": "rect",
+                "constrainProportions": true,
+                "width": 746.0,
+                "height": 602.0,
+                "x": 0,
+                "y": 0
+              },
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
+                "7:45098"
+              ],
+              "overrideName": "transformedBounds",
+              "overrideValue": null,
+              "effectOnLayout": false
+            },
+            {
+              "class": "overrideValue",
+              "objectId": [
                 "310:835"
               ],
               "overrideName": "bounds",
@@ -258,17 +287,10 @@
             {
               "class": "overrideValue",
               "objectId": [
-                "7:45098"
+                "310:835"
               ],
-              "overrideName": "bounds",
-              "overrideValue": {
-                "class": "rect",
-                "constrainProportions": true,
-                "width": 746.0,
-                "height": 602.0,
-                "x": 0,
-                "y": 0
-              },
+              "overrideName": "transformedBounds",
+              "overrideValue": null,
               "effectOnLayout": false
             }
           ],
@@ -286,7 +308,14 @@
         0.0,
         0.0,
         0.0
-      ]
+      ],
+      "backgroundColor": {
+        "class": "color",
+        "red": 0.9607843160629272,
+        "green": 0.9607843160629272,
+        "blue": 0.9607843160629272,
+        "alpha": 1.0
+      }
     },
     {
       "id": "61:37",
@@ -316,7 +345,7 @@
         "x": 0,
         "y": 0
       },
-      "frame": {
+      "transformedBounds": {
         "class": "rect",
         "constrainProportions": false,
         "width": 364.0,
@@ -357,10 +386,12 @@
       "styleEffectMaskArea": 2,
       "maskShowType": 2,
       "overflow": 1,
+      "styleEffectBoolean": 1,
       "cornerSmoothing": 0.0,
       "horizontalConstraint": 1,
       "verticalConstraint": 1,
       "resizesContent": 0,
+      "variableDefs": [],
       "variableRefs": [],
       "class": "frame",
       "childObjects": [
@@ -392,7 +423,7 @@
             "x": 0,
             "y": 0
           },
-          "frame": {
+          "transformedBounds": {
             "class": "rect",
             "constrainProportions": true,
             "width": 236.0,
@@ -433,11 +464,13 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 2,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "204:334",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
           "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
@@ -469,7 +502,7 @@
                 "x": 0,
                 "y": 0
               },
-              "frame": {
+              "transformedBounds": {
                 "class": "rect",
                 "constrainProportions": false,
                 "width": 236.0,
@@ -490,11 +523,13 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "204:333",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
               "variableRefs": [],
               "class": "group",
               "childObjects": [
@@ -526,7 +561,7 @@
                     "x": 0,
                     "y": 0
                   },
-                  "frame": {
+                  "transformedBounds": {
                     "class": "rect",
                     "constrainProportions": false,
                     "width": 236.0,
@@ -567,11 +602,13 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "204:333",
                   "horizontalConstraint": 5,
                   "verticalConstraint": 5,
                   "resizesContent": 0,
+                  "variableDefs": [],
                   "variableRefs": [],
                   "class": "path",
                   "shape": {
@@ -607,7 +644,7 @@
                             "x": 0,
                             "y": 0
                           },
-                          "frame": {
+                          "transformedBounds": {
                             "class": "rect",
                             "constrainProportions": false,
                             "width": 236.0,
@@ -648,11 +685,13 @@
                           "styleEffectMaskArea": 2,
                           "maskShowType": 2,
                           "overflow": 1,
+                          "styleEffectBoolean": 1,
                           "cornerSmoothing": 0.0,
                           "overrideKey": "204:333",
                           "horizontalConstraint": 5,
                           "verticalConstraint": 5,
                           "resizesContent": 0,
+                          "variableDefs": [],
                           "variableRefs": [],
                           "class": "path",
                           "shape": {
@@ -902,8 +941,7 @@
                               }
                             ],
                             "windingRule": 0
-                          },
-                          "pathType": 6
+                          }
                         },
                         "booleanOperation": 4
                       },
@@ -937,7 +975,7 @@
                             "x": 0,
                             "y": 0
                           },
-                          "frame": {
+                          "transformedBounds": {
                             "class": "rect",
                             "constrainProportions": false,
                             "width": 236.0,
@@ -978,11 +1016,13 @@
                           "styleEffectMaskArea": 2,
                           "maskShowType": 2,
                           "overflow": 1,
+                          "styleEffectBoolean": 1,
                           "cornerSmoothing": 0.0,
                           "overrideKey": "204:333",
                           "horizontalConstraint": 5,
                           "verticalConstraint": 5,
                           "resizesContent": 0,
+                          "variableDefs": [],
                           "variableRefs": [],
                           "class": "path",
                           "shape": {
@@ -1208,15 +1248,13 @@
                               }
                             ],
                             "windingRule": 0
-                          },
-                          "pathType": 6
+                          }
                         },
                         "booleanOperation": 4
                       }
                     ],
                     "windingRule": 0
-                  },
-                  "pathType": 6
+                  }
                 },
                 {
                   "id": "61:39_child_6",
@@ -1246,7 +1284,7 @@
                     "x": 0,
                     "y": 0
                   },
-                  "frame": {
+                  "transformedBounds": {
                     "class": "rect",
                     "constrainProportions": false,
                     "width": 236.0,
@@ -1287,11 +1325,13 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "204:333",
                   "horizontalConstraint": 5,
                   "verticalConstraint": 5,
                   "resizesContent": 0,
+                  "variableDefs": [],
                   "variableRefs": [],
                   "class": "path",
                   "shape": {
@@ -1327,7 +1367,7 @@
                             "x": 0,
                             "y": 0
                           },
-                          "frame": {
+                          "transformedBounds": {
                             "class": "rect",
                             "constrainProportions": false,
                             "width": 236.0,
@@ -1368,11 +1408,13 @@
                           "styleEffectMaskArea": 2,
                           "maskShowType": 2,
                           "overflow": 1,
+                          "styleEffectBoolean": 1,
                           "cornerSmoothing": 0.0,
                           "overrideKey": "204:333",
                           "horizontalConstraint": 5,
                           "verticalConstraint": 5,
                           "resizesContent": 0,
+                          "variableDefs": [],
                           "variableRefs": [],
                           "class": "path",
                           "shape": {
@@ -1414,8 +1456,7 @@
                               }
                             ],
                             "windingRule": 0
-                          },
-                          "pathType": 6
+                          }
                         },
                         "booleanOperation": 4
                       },
@@ -1449,7 +1490,7 @@
                             "x": 0,
                             "y": 0
                           },
-                          "frame": {
+                          "transformedBounds": {
                             "class": "rect",
                             "constrainProportions": false,
                             "width": 236.0,
@@ -1490,11 +1531,13 @@
                           "styleEffectMaskArea": 2,
                           "maskShowType": 2,
                           "overflow": 1,
+                          "styleEffectBoolean": 1,
                           "cornerSmoothing": 0.0,
                           "overrideKey": "204:333",
                           "horizontalConstraint": 5,
                           "verticalConstraint": 5,
                           "resizesContent": 0,
+                          "variableDefs": [],
                           "variableRefs": [],
                           "class": "path",
                           "shape": {
@@ -1904,8 +1947,7 @@
                               }
                             ],
                             "windingRule": 0
-                          },
-                          "pathType": 6
+                          }
                         },
                         "booleanOperation": 4
                       },
@@ -1939,7 +1981,7 @@
                             "x": 0,
                             "y": 0
                           },
-                          "frame": {
+                          "transformedBounds": {
                             "class": "rect",
                             "constrainProportions": false,
                             "width": 236.0,
@@ -1980,11 +2022,13 @@
                           "styleEffectMaskArea": 2,
                           "maskShowType": 2,
                           "overflow": 1,
+                          "styleEffectBoolean": 1,
                           "cornerSmoothing": 0.0,
                           "overrideKey": "204:333",
                           "horizontalConstraint": 5,
                           "verticalConstraint": 5,
                           "resizesContent": 0,
+                          "variableDefs": [],
                           "variableRefs": [],
                           "class": "path",
                           "shape": {
@@ -2194,15 +2238,13 @@
                               }
                             ],
                             "windingRule": 0
-                          },
-                          "pathType": 6
+                          }
                         },
                         "booleanOperation": 4
                       }
                     ],
                     "windingRule": 0
-                  },
-                  "pathType": 6
+                  }
                 },
                 {
                   "id": "61:39_child_7",
@@ -2232,7 +2274,7 @@
                     "x": 0,
                     "y": 0
                   },
-                  "frame": {
+                  "transformedBounds": {
                     "class": "rect",
                     "constrainProportions": false,
                     "width": 236.0,
@@ -2273,11 +2315,13 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "204:333",
                   "horizontalConstraint": 5,
                   "verticalConstraint": 5,
                   "resizesContent": 0,
+                  "variableDefs": [],
                   "variableRefs": [],
                   "class": "path",
                   "shape": {
@@ -2455,8 +2499,7 @@
                       }
                     ],
                     "windingRule": 0
-                  },
-                  "pathType": 6
+                  }
                 },
                 {
                   "id": "61:39_child_8",
@@ -2486,7 +2529,7 @@
                     "x": 0,
                     "y": 0
                   },
-                  "frame": {
+                  "transformedBounds": {
                     "class": "rect",
                     "constrainProportions": false,
                     "width": 236.0,
@@ -2527,11 +2570,13 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "204:333",
                   "horizontalConstraint": 5,
                   "verticalConstraint": 5,
                   "resizesContent": 0,
+                  "variableDefs": [],
                   "variableRefs": [],
                   "class": "path",
                   "shape": {
@@ -2581,8 +2626,7 @@
                       }
                     ],
                     "windingRule": 0
-                  },
-                  "pathType": 6
+                  }
                 },
                 {
                   "id": "61:39_child_9",
@@ -2612,7 +2656,7 @@
                     "x": 0,
                     "y": 0
                   },
-                  "frame": {
+                  "transformedBounds": {
                     "class": "rect",
                     "constrainProportions": false,
                     "width": 236.0,
@@ -2653,11 +2697,13 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "204:333",
                   "horizontalConstraint": 5,
                   "verticalConstraint": 5,
                   "resizesContent": 0,
+                  "variableDefs": [],
                   "variableRefs": [],
                   "class": "path",
                   "shape": {
@@ -2851,8 +2897,7 @@
                       }
                     ],
                     "windingRule": 0
-                  },
-                  "pathType": 6
+                  }
                 },
                 {
                   "id": "61:39_child_10",
@@ -2882,7 +2927,7 @@
                     "x": 0,
                     "y": 0
                   },
-                  "frame": {
+                  "transformedBounds": {
                     "class": "rect",
                     "constrainProportions": false,
                     "width": 236.0,
@@ -2923,11 +2968,13 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "204:333",
                   "horizontalConstraint": 5,
                   "verticalConstraint": 5,
                   "resizesContent": 0,
+                  "variableDefs": [],
                   "variableRefs": [],
                   "class": "path",
                   "shape": {
@@ -2977,8 +3024,7 @@
                       }
                     ],
                     "windingRule": 0
-                  },
-                  "pathType": 6
+                  }
                 },
                 {
                   "id": "61:39_child_11",
@@ -3008,7 +3054,7 @@
                     "x": 0,
                     "y": 0
                   },
-                  "frame": {
+                  "transformedBounds": {
                     "class": "rect",
                     "constrainProportions": false,
                     "width": 236.0,
@@ -3049,11 +3095,13 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "204:333",
                   "horizontalConstraint": 5,
                   "verticalConstraint": 5,
                   "resizesContent": 0,
+                  "variableDefs": [],
                   "variableRefs": [],
                   "class": "path",
                   "shape": {
@@ -3647,8 +3695,7 @@
                       }
                     ],
                     "windingRule": 0
-                  },
-                  "pathType": 6
+                  }
                 },
                 {
                   "id": "61:39_child_12",
@@ -3678,7 +3725,7 @@
                     "x": 0,
                     "y": 0
                   },
-                  "frame": {
+                  "transformedBounds": {
                     "class": "rect",
                     "constrainProportions": false,
                     "width": 236.0,
@@ -3719,11 +3766,13 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "204:333",
                   "horizontalConstraint": 5,
                   "verticalConstraint": 5,
                   "resizesContent": 0,
+                  "variableDefs": [],
                   "variableRefs": [],
                   "class": "path",
                   "shape": {
@@ -3773,8 +3822,7 @@
                       }
                     ],
                     "windingRule": 0
-                  },
-                  "pathType": 6
+                  }
                 },
                 {
                   "id": "61:39_child_13",
@@ -3804,7 +3852,7 @@
                     "x": 0,
                     "y": 0
                   },
-                  "frame": {
+                  "transformedBounds": {
                     "class": "rect",
                     "constrainProportions": false,
                     "width": 236.0,
@@ -3845,11 +3893,13 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "204:333",
                   "horizontalConstraint": 5,
                   "verticalConstraint": 5,
                   "resizesContent": 0,
+                  "variableDefs": [],
                   "variableRefs": [],
                   "class": "path",
                   "shape": {
@@ -4059,8 +4109,7 @@
                       }
                     ],
                     "windingRule": 0
-                  },
-                  "pathType": 6
+                  }
                 },
                 {
                   "id": "61:39_child_14",
@@ -4090,7 +4139,7 @@
                     "x": 0,
                     "y": 0
                   },
-                  "frame": {
+                  "transformedBounds": {
                     "class": "rect",
                     "constrainProportions": false,
                     "width": 236.0,
@@ -4131,11 +4180,13 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "204:333",
                   "horizontalConstraint": 5,
                   "verticalConstraint": 5,
                   "resizesContent": 0,
+                  "variableDefs": [],
                   "variableRefs": [],
                   "class": "path",
                   "shape": {
@@ -4769,8 +4820,7 @@
                       }
                     ],
                     "windingRule": 0
-                  },
-                  "pathType": 6
+                  }
                 }
               ],
               "isVectorNetwork": true
@@ -4781,8 +4831,7 @@
             0.0,
             0.0,
             0.0
-          ],
-          "variableDefs": []
+          ]
         },
         {
           "id": "61:40",
@@ -4812,7 +4861,7 @@
             "x": 0,
             "y": 0
           },
-          "frame": {
+          "transformedBounds": {
             "class": "rect",
             "constrainProportions": false,
             "width": 40.0,
@@ -4833,11 +4882,13 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 2,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "overrideKey": "7:45098",
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
           "variableRefs": [],
           "class": "symbolMaster",
           "childObjects": [
@@ -4869,7 +4920,7 @@
                 "x": 0,
                 "y": 0
               },
-              "frame": {
+              "transformedBounds": {
                 "class": "rect",
                 "constrainProportions": true,
                 "width": 40.0,
@@ -4890,11 +4941,13 @@
               "styleEffectMaskArea": 2,
               "maskShowType": 2,
               "overflow": 1,
+              "styleEffectBoolean": 1,
               "cornerSmoothing": 0.0,
               "overrideKey": "310:835",
               "horizontalConstraint": 5,
               "verticalConstraint": 5,
               "resizesContent": 0,
+              "variableDefs": [],
               "variableRefs": [],
               "class": "group",
               "childObjects": [
@@ -4926,7 +4979,7 @@
                     "x": 0,
                     "y": 0
                   },
-                  "frame": {
+                  "transformedBounds": {
                     "class": "rect",
                     "constrainProportions": true,
                     "width": 40.0,
@@ -4964,13 +5017,11 @@
                         "lineCapStyle": 1,
                         "lineJoinStyle": 0,
                         "miterLimit": 4.0,
-                        "strokeWeightsIndependent": false,
+                        "borderWeightsIndependent": false,
                         "topWeight": 0.0,
                         "leftWeight": 0.0,
                         "bottomWeight": 0.0,
-                        "rightWeight": 0.0,
-                        "startMarkerType": 10,
-                        "endMarkerType": 10
+                        "rightWeight": 0.0
                       }
                     ],
                     "fills": [],
@@ -4983,11 +5034,13 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "310:835",
                   "horizontalConstraint": 5,
                   "verticalConstraint": 5,
                   "resizesContent": 0,
+                  "variableDefs": [],
                   "variableRefs": [],
                   "class": "path",
                   "shape": {
@@ -5101,8 +5154,7 @@
                       }
                     ],
                     "windingRule": 0
-                  },
-                  "pathType": 6
+                  }
                 },
                 {
                   "id": "61:41_child_5",
@@ -5132,7 +5184,7 @@
                     "x": 0,
                     "y": 0
                   },
-                  "frame": {
+                  "transformedBounds": {
                     "class": "rect",
                     "constrainProportions": true,
                     "width": 40.0,
@@ -5170,13 +5222,11 @@
                         "lineCapStyle": 1,
                         "lineJoinStyle": 0,
                         "miterLimit": 4.0,
-                        "strokeWeightsIndependent": false,
+                        "borderWeightsIndependent": false,
                         "topWeight": 0.0,
                         "leftWeight": 0.0,
                         "bottomWeight": 0.0,
-                        "rightWeight": 0.0,
-                        "startMarkerType": 10,
-                        "endMarkerType": 10
+                        "rightWeight": 0.0
                       }
                     ],
                     "fills": [],
@@ -5189,11 +5239,13 @@
                   "styleEffectMaskArea": 2,
                   "maskShowType": 2,
                   "overflow": 1,
+                  "styleEffectBoolean": 1,
                   "cornerSmoothing": 0.0,
                   "overrideKey": "310:835",
                   "horizontalConstraint": 5,
                   "verticalConstraint": 5,
                   "resizesContent": 0,
+                  "variableDefs": [],
                   "variableRefs": [],
                   "class": "path",
                   "shape": {
@@ -5229,7 +5281,7 @@
                             "x": 0,
                             "y": 0
                           },
-                          "frame": {
+                          "transformedBounds": {
                             "class": "rect",
                             "constrainProportions": true,
                             "width": 40.0,
@@ -5267,13 +5319,11 @@
                                 "lineCapStyle": 1,
                                 "lineJoinStyle": 0,
                                 "miterLimit": 4.0,
-                                "strokeWeightsIndependent": false,
+                                "borderWeightsIndependent": false,
                                 "topWeight": 0.0,
                                 "leftWeight": 0.0,
                                 "bottomWeight": 0.0,
-                                "rightWeight": 0.0,
-                                "startMarkerType": 10,
-                                "endMarkerType": 10
+                                "rightWeight": 0.0
                               }
                             ],
                             "fills": [],
@@ -5286,11 +5336,13 @@
                           "styleEffectMaskArea": 2,
                           "maskShowType": 2,
                           "overflow": 1,
+                          "styleEffectBoolean": 1,
                           "cornerSmoothing": 0.0,
                           "overrideKey": "310:835",
                           "horizontalConstraint": 5,
                           "verticalConstraint": 5,
                           "resizesContent": 0,
+                          "variableDefs": [],
                           "variableRefs": [],
                           "class": "path",
                           "shape": {
@@ -5330,8 +5382,7 @@
                               }
                             ],
                             "windingRule": 0
-                          },
-                          "pathType": 6
+                          }
                         },
                         "booleanOperation": 4
                       },
@@ -5365,7 +5416,7 @@
                             "x": 0,
                             "y": 0
                           },
-                          "frame": {
+                          "transformedBounds": {
                             "class": "rect",
                             "constrainProportions": true,
                             "width": 40.0,
@@ -5403,13 +5454,11 @@
                                 "lineCapStyle": 1,
                                 "lineJoinStyle": 0,
                                 "miterLimit": 4.0,
-                                "strokeWeightsIndependent": false,
+                                "borderWeightsIndependent": false,
                                 "topWeight": 0.0,
                                 "leftWeight": 0.0,
                                 "bottomWeight": 0.0,
-                                "rightWeight": 0.0,
-                                "startMarkerType": 10,
-                                "endMarkerType": 10
+                                "rightWeight": 0.0
                               }
                             ],
                             "fills": [],
@@ -5422,11 +5471,13 @@
                           "styleEffectMaskArea": 2,
                           "maskShowType": 2,
                           "overflow": 1,
+                          "styleEffectBoolean": 1,
                           "cornerSmoothing": 0.0,
                           "overrideKey": "310:835",
                           "horizontalConstraint": 5,
                           "verticalConstraint": 5,
                           "resizesContent": 0,
+                          "variableDefs": [],
                           "variableRefs": [],
                           "class": "path",
                           "shape": {
@@ -5466,8 +5517,7 @@
                               }
                             ],
                             "windingRule": 0
-                          },
-                          "pathType": 6
+                          }
                         },
                         "booleanOperation": 4
                       },
@@ -5501,7 +5551,7 @@
                             "x": 0,
                             "y": 0
                           },
-                          "frame": {
+                          "transformedBounds": {
                             "class": "rect",
                             "constrainProportions": true,
                             "width": 40.0,
@@ -5539,13 +5589,11 @@
                                 "lineCapStyle": 1,
                                 "lineJoinStyle": 0,
                                 "miterLimit": 4.0,
-                                "strokeWeightsIndependent": false,
+                                "borderWeightsIndependent": false,
                                 "topWeight": 0.0,
                                 "leftWeight": 0.0,
                                 "bottomWeight": 0.0,
-                                "rightWeight": 0.0,
-                                "startMarkerType": 10,
-                                "endMarkerType": 10
+                                "rightWeight": 0.0
                               }
                             ],
                             "fills": [],
@@ -5558,11 +5606,13 @@
                           "styleEffectMaskArea": 2,
                           "maskShowType": 2,
                           "overflow": 1,
+                          "styleEffectBoolean": 1,
                           "cornerSmoothing": 0.0,
                           "overrideKey": "310:835",
                           "horizontalConstraint": 5,
                           "verticalConstraint": 5,
                           "resizesContent": 0,
+                          "variableDefs": [],
                           "variableRefs": [],
                           "class": "path",
                           "shape": {
@@ -5602,8 +5652,7 @@
                               }
                             ],
                             "windingRule": 0
-                          },
-                          "pathType": 6
+                          }
                         },
                         "booleanOperation": 4
                       },
@@ -5637,7 +5686,7 @@
                             "x": 0,
                             "y": 0
                           },
-                          "frame": {
+                          "transformedBounds": {
                             "class": "rect",
                             "constrainProportions": true,
                             "width": 40.0,
@@ -5675,13 +5724,11 @@
                                 "lineCapStyle": 1,
                                 "lineJoinStyle": 0,
                                 "miterLimit": 4.0,
-                                "strokeWeightsIndependent": false,
+                                "borderWeightsIndependent": false,
                                 "topWeight": 0.0,
                                 "leftWeight": 0.0,
                                 "bottomWeight": 0.0,
-                                "rightWeight": 0.0,
-                                "startMarkerType": 10,
-                                "endMarkerType": 10
+                                "rightWeight": 0.0
                               }
                             ],
                             "fills": [],
@@ -5694,11 +5741,13 @@
                           "styleEffectMaskArea": 2,
                           "maskShowType": 2,
                           "overflow": 1,
+                          "styleEffectBoolean": 1,
                           "cornerSmoothing": 0.0,
                           "overrideKey": "310:835",
                           "horizontalConstraint": 5,
                           "verticalConstraint": 5,
                           "resizesContent": 0,
+                          "variableDefs": [],
                           "variableRefs": [],
                           "class": "path",
                           "shape": {
@@ -5719,6 +5768,22 @@
                                     },
                                     {
                                       "class": "pointAttr",
+                                      "radius": 4.0,
+                                      "point": [
+                                        12.395301312884456,
+                                        -24.786135963655624
+                                      ]
+                                    },
+                                    {
+                                      "class": "pointAttr",
+                                      "radius": 4.0,
+                                      "point": [
+                                        4.790606977210954,
+                                        -32.39307451091429
+                                      ]
+                                    },
+                                    {
+                                      "class": "pointAttr",
                                       "point": [
                                         12.395301312884456,
                                         -24.786135963655624
@@ -5730,15 +5795,13 @@
                               }
                             ],
                             "windingRule": 0
-                          },
-                          "pathType": 6
+                          }
                         },
                         "booleanOperation": 4
                       }
                     ],
                     "windingRule": 0
-                  },
-                  "pathType": 6
+                  }
                 }
               ],
               "isVectorNetwork": true
@@ -5749,8 +5812,7 @@
             0.0,
             0.0,
             0.0
-          ],
-          "variableDefs": []
+          ]
         }
       ],
       "radius": [
@@ -5788,7 +5850,7 @@
         "x": 0.0,
         "y": 0.0
       },
-      "frame": {
+      "transformedBounds": {
         "class": "rect",
         "constrainProportions": false,
         "width": 100.0,
@@ -5809,6 +5871,7 @@
       "styleEffectMaskArea": 2,
       "maskShowType": 2,
       "overflow": 2,
+      "styleEffectBoolean": 1,
       "class": "frame",
       "childObjects": [
         {
@@ -5839,7 +5902,7 @@
             "x": 0,
             "y": 0
           },
-          "frame": {
+          "transformedBounds": {
             "class": "rect",
             "constrainProportions": false,
             "width": 100.0,
@@ -5859,11 +5922,11 @@
                     "class": "gradientLinear",
                     "from": [
                       0.8980815292194992,
-                      0.2528925619330078
+                      -0.2528925619330078
                     ],
                     "to": [
                       0.13908873500733687,
-                      0.5595041187547327
+                      -0.5595041187547327
                     ],
                     "stops": [
                       {
@@ -5914,8 +5977,7 @@
                         "position": 1.0,
                         "midPoint": 0.5
                       }
-                    ],
-                    "invert": false
+                    ]
                   }
                 },
                 "class": "fill",
@@ -5938,10 +6000,12 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
           "variableRefs": [],
           "class": "path",
           "shape": {
@@ -5950,49 +6014,19 @@
               {
                 "class": "subshape",
                 "subGeometry": {
-                  "class": "contour",
-                  "closed": true,
-                  "points": [
-                    {
-                      "class": "pointAttr",
-                      "radius": 0.0,
-                      "point": [
-                        0.0,
-                        0.0
-                      ]
-                    },
-                    {
-                      "class": "pointAttr",
-                      "radius": 0.0,
-                      "point": [
-                        100.0,
-                        0.0
-                      ]
-                    },
-                    {
-                      "class": "pointAttr",
-                      "radius": 0.0,
-                      "point": [
-                        100.0,
-                        -100.0
-                      ]
-                    },
-                    {
-                      "class": "pointAttr",
-                      "radius": 0.0,
-                      "point": [
-                        0.0,
-                        -100.0
-                      ]
-                    }
+                  "class": "rectangle",
+                  "radius": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
                   ]
                 },
                 "booleanOperation": 4
               }
             ],
             "windingRule": 0
-          },
-          "pathType": 0
+          }
         },
         {
           "id": "49:14",
@@ -6022,7 +6056,7 @@
             "x": 0,
             "y": 0
           },
-          "frame": {
+          "transformedBounds": {
             "class": "rect",
             "constrainProportions": false,
             "width": 100.0,
@@ -6039,17 +6073,15 @@
                 "pattern": {
                   "class": "pattern",
                   "instance": {
-                    "class": "patternImage",
-                    "fillType": 2,
-                    "imageTileMirrored": false,
                     "imageFileName": "resources/4b81d1adb3f80a81011b1a1812b3e2af88a25df1.jpeg",
+                    "class": "patternImageStretch",
                     "matrix": [
-                      0.23297080001666517,
+                      1.1928104960853256,
                       0.0,
                       0.0,
-                      0.1953125,
-                      -29.892379690645377,
-                      -33.59529972076416
+                      1.0,
+                      -0.29892379690645376,
+                      -0.3359529972076416
                     ]
                   }
                 },
@@ -6092,10 +6124,12 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
           "variableRefs": [],
           "class": "path",
           "shape": {
@@ -6104,49 +6138,19 @@
               {
                 "class": "subshape",
                 "subGeometry": {
-                  "class": "contour",
-                  "closed": true,
-                  "points": [
-                    {
-                      "class": "pointAttr",
-                      "radius": 0.0,
-                      "point": [
-                        0.0,
-                        0.0
-                      ]
-                    },
-                    {
-                      "class": "pointAttr",
-                      "radius": 0.0,
-                      "point": [
-                        100.0,
-                        0.0
-                      ]
-                    },
-                    {
-                      "class": "pointAttr",
-                      "radius": 0.0,
-                      "point": [
-                        100.0,
-                        -100.0
-                      ]
-                    },
-                    {
-                      "class": "pointAttr",
-                      "radius": 0.0,
-                      "point": [
-                        0.0,
-                        -100.0
-                      ]
-                    }
+                  "class": "rectangle",
+                  "radius": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
                   ]
                 },
                 "booleanOperation": 4
               }
             ],
             "windingRule": 0
-          },
-          "pathType": 0
+          }
         },
         {
           "id": "49:18",
@@ -6176,7 +6180,7 @@
             "x": 0,
             "y": 0
           },
-          "frame": {
+          "transformedBounds": {
             "class": "rect",
             "constrainProportions": false,
             "width": 100.0,
@@ -6196,14 +6200,16 @@
                     "class": "gradientRadial",
                     "from": [
                       0.7979323504816217,
-                      0.31729321559102064
+                      -0.31729321559102064
                     ],
                     "to": [
                       0.10338342151174743,
-                      0.5007518279467259
+                      -0.5007518279467259
                     ],
-                    "elipseLength": 0.6694070166258432,
-                    "invert": false,
+                    "ellipse": [
+                      0.6144737585340638,
+                      0.12721807119461848
+                    ],
                     "stops": [
                       {
                         "class": "gradientStop",
@@ -6276,10 +6282,12 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
           "variableRefs": [],
           "class": "path",
           "shape": {
@@ -6288,49 +6296,19 @@
               {
                 "class": "subshape",
                 "subGeometry": {
-                  "class": "contour",
-                  "closed": true,
-                  "points": [
-                    {
-                      "class": "pointAttr",
-                      "radius": 0.0,
-                      "point": [
-                        0.0,
-                        0.0
-                      ]
-                    },
-                    {
-                      "class": "pointAttr",
-                      "radius": 0.0,
-                      "point": [
-                        100.0,
-                        0.0
-                      ]
-                    },
-                    {
-                      "class": "pointAttr",
-                      "radius": 0.0,
-                      "point": [
-                        100.0,
-                        -100.0
-                      ]
-                    },
-                    {
-                      "class": "pointAttr",
-                      "radius": 0.0,
-                      "point": [
-                        0.0,
-                        -100.0
-                      ]
-                    }
+                  "class": "rectangle",
+                  "radius": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
                   ]
                 },
                 "booleanOperation": 4
               }
             ],
             "windingRule": 0
-          },
-          "pathType": 0
+          }
         },
         {
           "id": "57:21",
@@ -6360,7 +6338,7 @@
             "x": 0,
             "y": 0
           },
-          "frame": {
+          "transformedBounds": {
             "class": "rect",
             "constrainProportions": false,
             "width": 100.0,
@@ -6401,10 +6379,12 @@
           "styleEffectMaskArea": 2,
           "maskShowType": 2,
           "overflow": 1,
+          "styleEffectBoolean": 1,
           "cornerSmoothing": 0.0,
           "horizontalConstraint": 1,
           "verticalConstraint": 1,
           "resizesContent": 0,
+          "variableDefs": [],
           "variableRefs": [],
           "class": "path",
           "shape": {
@@ -6413,49 +6393,19 @@
               {
                 "class": "subshape",
                 "subGeometry": {
-                  "class": "contour",
-                  "closed": true,
-                  "points": [
-                    {
-                      "class": "pointAttr",
-                      "radius": 0.0,
-                      "point": [
-                        0.0,
-                        0.0
-                      ]
-                    },
-                    {
-                      "class": "pointAttr",
-                      "radius": 0.0,
-                      "point": [
-                        100.0,
-                        0.0
-                      ]
-                    },
-                    {
-                      "class": "pointAttr",
-                      "radius": 0.0,
-                      "point": [
-                        100.0,
-                        -100.0
-                      ]
-                    },
-                    {
-                      "class": "pointAttr",
-                      "radius": 0.0,
-                      "point": [
-                        0.0,
-                        -100.0
-                      ]
-                    }
+                  "class": "rectangle",
+                  "radius": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
                   ]
                 },
                 "booleanOperation": 4
               }
             ],
             "windingRule": 0
-          },
-          "pathType": 0
+          }
         }
       ]
     }

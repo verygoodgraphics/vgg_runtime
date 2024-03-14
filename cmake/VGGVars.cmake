@@ -82,7 +82,7 @@ list(APPEND VGG_HARMONY_TARGET_LIST "Harmony-arm64" "Harmony-riscv64" "Harmony-x
 list(APPEND VGG_LINUX_TARGET_LIST "Linux-x86" "Linux-x86_64" "Linux-arm64" "Linux-riscv64")
 
 # Windows targets
-list(APPEND VGG_WIN_TARGET_LIST "Windows-x86" "Windows-x86_64")
+list(APPEND VGG_WIN_TARGET_LIST "Windows-x86" "Windows-x86_64" "Windows-AMD64")
 
 # WebAssembly targets
 list(APPEND VGG_WASM_TARGET_LIST "WASM") # defaults to WASM32
@@ -98,7 +98,7 @@ list(APPEND VGG_ALL_TARGETS
 )
 
 # Arch Lists
-list(APPEND X86_ARCH_LIST "x86" "x86_64" "amd64" "i386" "i486" "i586" "i686" "x86-32" "x86-64")
+list(APPEND X86_ARCH_LIST "x86" "x86_64" "AMD64" "i386" "i486" "i586" "i686" "x86-32" "x86-64")
 list(APPEND ARM_ARCH_LIST "arm" "arm64" "armeabi" "armeabi-v7a" "arm64-v8a")
 list(APPEND RISCV_ARCH_LIST "riscv64")
 
@@ -121,7 +121,7 @@ else()
 endif()
 
 # Detect building host arch
-if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "x86|x86_64")
+if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "x86|x86_64|AMD64")
   set(VGG_VAR_HOST_ARCH "X86" CACHE STRING "" FORCE)
   add_compile_definitions(VGG_HOST_ARCH_X86)
 elseif(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "arm|arm64")

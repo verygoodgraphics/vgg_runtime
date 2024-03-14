@@ -28,6 +28,15 @@ target_link_libraries(vgg_container PUBLIC
   vgg_adapter
 )
 
+if(MSVC)
+  set_target_properties(vgg_container PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+  
+  install(TARGETS vgg_application
+    COMPONENT container
+    DESTINATION lib
+  )  
+endif()
+
 install(TARGETS vgg_container
   COMPONENT container
   DESTINATION lib

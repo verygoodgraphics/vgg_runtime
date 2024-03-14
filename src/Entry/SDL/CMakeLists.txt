@@ -10,7 +10,14 @@ if(Vulkan_FOUND)
   target_compile_definitions(sdl_runtime PRIVATE VGG_USE_VULKAN)
   target_link_libraries(sdl_runtime PRIVATE Vulkan::Vulkan)
 endif()
-target_link_libraries(sdl_runtime PRIVATE SDL2::SDL2)
+
+if(NOT MSVC)
+  target_link_libraries(sdl_runtime PRIVATE SDL2::SDL2)
+else()
+  target_include_directories(sdl_runtime PRIVATE ${SDL2_INCLUDE_DIRS})
+  target_link_libraries(sdl_runtime PRIVATE ${SDL2_LIBRARIES})
+endif()
+
 target_include_directories(sdl_runtime PRIVATE ${VGG_CONTRIB_ARGPARSE_INCLUDE})
 
 get_target_property(VGG_LAYER_RPATH vgg_layer BUILD_RPATH)

@@ -21,6 +21,11 @@ add_library(vgg_domain STATIC
   Saver/ZipStreamSaver.cpp
 )
 
+if(MSVC)
+  # for M_PI_4
+  target_compile_definitions(vgg_domain PRIVATE _USE_MATH_DEFINES)
+endif()
+
 target_include_directories(vgg_domain PUBLIC
   ${CMAKE_SOURCE_DIR}/include
   ${VGG_CONTRIB_JSON_INCLUDE}

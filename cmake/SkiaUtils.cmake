@@ -70,7 +70,14 @@ skia_use_dng_sdk=false
 skia_use_fontconfig=false
 skia_use_libheif=false
 skia_use_expat=false
-skia_enable_pdf=true")
+skia_enable_pdf=true
+skia_use_system_libjpeg_turbo=false
+skia_use_system_harfbuzz=false
+skia_use_system_libpng=false
+skia_use_system_libwebp=false
+skia_use_system_expat=false
+skia_use_system_icu=false
+skia_enable_skshaper=true")
 
 set(SKIA_PRESET_FEATURES_FOR_MACOS
 "skia_use_egl=false
@@ -293,7 +300,11 @@ string(APPEND OPTIONS " cc=\"${CMAKE_C_COMPILER}\"")
 
 # set config type for skia
 if(config STREQUAL "Debug")
-  string(APPEND OPTIONS " is_official_build=false is_debug=true")
+  if(NOT MSVC)
+    string(APPEND OPTIONS " is_official_build=false is_debug=true")
+  else()
+    string(APPEND OPTIONS " is_official_build=true is_debug=false")  
+  endif()
 elseif(config STREQUAL "Release")
   string(APPEND OPTIONS " is_official_build=true is_debug=false")
 elseif(config STREQUAL "RelWithDebInfo")
@@ -305,6 +316,14 @@ if(link_type STREQUAL "dynamic")
   string(APPEND OPTIONS " is_component_build=true")
 elseif(link_type STREQUAL "static")
   string(APPEND OPTIONS " is_component_build=false")
+endif()
+
+if(MSVC)
+  if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    string(APPEND OPTIONS " extra_cflags=[\"/MDd\"]")
+  else()
+    string(APPEND OPTIONS " extra_cflags=[\"/MD\"]")
+  endif()
 endif()
 
 # set features for skia

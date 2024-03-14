@@ -102,8 +102,9 @@ int NativeExecImpl::run_node(
   nodeThread.reset(new std::thread(
     [&, args]()
     {
-      int ret __attribute__((unused)) = node_main(args);
+      int ret = node_main(args);
       INFO("#node thread exit, ret = %d", ret);
+      UNUSED(ret);
     }));
 
   return 0;
@@ -297,7 +298,8 @@ void NativeExecImpl::run_task()
     }
 
     DEBUG("#evalScript, before eval");
-    int ret __attribute__((unused)) = eval(task->m_code);
+    int ret = eval(task->m_code);
     DEBUG("#evalScript, after eval, ret = %d", ret);
+    UNUSED(ret);
   }
 }

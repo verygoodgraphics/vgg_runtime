@@ -73,6 +73,11 @@ else()
   set(SKIA_EXTERNAL_PROJECT_DIR ${SKIA_SOURCE_DIR} CACHE STRING "" FORCE)
 endif()
 
+if(MSVC AND NOT DEFINED SKIA_DIR)
+  message(STATUS "Run skia git-sync-deps")
+  execute_process(COMMAND "python3" "tools/git-sync-deps" WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/lib/skia")
+endif()
+
 message(STATUS "Use skia ${SKIA_EXTERNAL_PROJECT_DIR}")
 
 # test gn if is for the current platform
@@ -94,6 +99,11 @@ set(SKIA_LIB_LINK_TYPE "dynamic")
 if(VGG_VAR_TARGET STREQUAL "WASM"
   OR VGG_VAR_TARGET MATCHES "^iOS")
     set(SKIA_LIB_LINK_TYPE "static")
+endif()
+
+if(MSVC)
+  # if SKIA_LIB_LINK_TYPE is dynamic, msvc will not generate skparagraph.lib, so make it static
+  set(SKIA_LIB_LINK_TYPE "static")
 endif()
 
 set(SKIA_LIB_BUILD_PREFIX "out/${VGG_VAR_TARGET}/${ENV_SHELL_PREFIX}/${CMAKE_CXX_COMPILER_ID}_${CMAKE_CXX_COMPILER_VERSION}/${SKIA_LIB_LINK_TYPE}/${CMAKE_BUILD_TYPE}" CACHE STRING "" FORCE)

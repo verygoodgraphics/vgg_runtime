@@ -1,11 +1,21 @@
 cmake_minimum_required(VERSION 3.19)
 project(vgg_runtime)
-set(CMAKE_CXX_STANDARD 17)
+
+if(MSVC)
+  set(CMAKE_CXX_STANDARD 20)
+else()
+  set(CMAKE_CXX_STANDARD 17)
+endif()
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 set_property(GLOBAL PROPERTY POSITION_INDEPENDENT_CODE ON)
+
+if(MSVC)
+  set(SDL2_DIR "${CMAKE_SOURCE_DIR}/lib/SDL2-2.28.5")
+endif()
 
 # customized platform checking flags
 # introduce customized cmake vars, see VggVars.cmake in cmake for details

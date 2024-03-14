@@ -100,7 +100,8 @@ Bound ImageNode::onDrawFill(
   Renderer*            renderer,
   sk_sp<SkBlender>     blender,
   sk_sp<SkImageFilter> imageFilter,
-  const VShape&        path)
+  const VShape&        path,
+  const VShape&        mask)
 {
   (void)path;
   VGG_IMPL(ImageNode)
@@ -112,16 +113,12 @@ Bound ImageNode::onDrawFill(
   if (_->shader)
   {
     bool hasMask = false;
-    if (PaintNode::d_ptr.get()->mask)
+    if (!mask.isEmpty())
     {
-      auto mask = PaintNode::d_ptr.get()->mask.value();
-      if (mask.isEmpty() == false)
-      {
-        canvas->save();
-        // canvas->clipPath(mask);
-        mask.clip(canvas, SkClipOp::kIntersect);
-        hasMask = true;
-      }
+      canvas->save();
+      // canvas->clipPath(mask);
+      mask.clip(canvas, SkClipOp::kIntersect);
+      hasMask = true;
     }
     SkPaint p;
     p.setShader(_->shader);

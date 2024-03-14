@@ -166,7 +166,11 @@ void TextNode::onDrawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
   d_ptr->onDrawRawStyleImpl(renderer, std::move(blender));
 }
 
-void TextNode::onDrawStyle(Renderer* renderer, const VShape& path, sk_sp<SkBlender> blender)
+void TextNode::onDrawStyle(
+  Renderer*        renderer,
+  const VShape&    path,
+  const VShape&    mask,
+  sk_sp<SkBlender> blender)
 {
   d_ptr->onDrawRawStyleImpl(renderer, std::move(blender));
 }

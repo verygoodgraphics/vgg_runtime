@@ -99,6 +99,7 @@ protected:
   friend class DocBuilder;
   friend class Renderer;
   friend class MaskObject;
+  friend class MaskBuilder;
 
 private:
   PaintNode(VRefCnt* cnt, const std::string& name, std::unique_ptr<PaintNode__pImpl> impl);
@@ -222,11 +223,14 @@ protected:
   VShape         makeBoundPath();
   virtual VShape makeContourImpl(ContourOption option, const Transform* mat);
   VShape         childPolyOperation() const;
-  VShape         makeMaskBy(EBoolOp maskOp, Renderer* renderer);
 
   virtual void onDrawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender);
-  virtual void onDrawStyle(Renderer* renderer, const VShape& path, sk_sp<SkBlender> blender);
-  Bound        onRevalidate() override;
+  virtual void onDrawStyle(
+    Renderer*        renderer,
+    const VShape&    path,
+    const VShape&    mask,
+    sk_sp<SkBlender> blender);
+  Bound onRevalidate() override;
 
 protected:
   void paintStyle(Renderer* renderer, const VShape& path, const VShape& mask);
@@ -235,6 +239,7 @@ protected:
     Renderer*            renderer,
     sk_sp<SkBlender>     blender,
     sk_sp<SkImageFilter> imageFilter,
-    const VShape&        path);
+    const VShape&        path,
+    const VShape&        mask);
 };
 } // namespace VGG::layer

@@ -1,4 +1,8 @@
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-unknown-warning-option -Wno-deprecated-declarations -Wno-nonnull -Wno-unused-private-field -Wno-maybe-uninitialized")
+if(MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
+else()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-unknown-warning-option -Wno-deprecated-declarations -Wno-nonnull -Wno-unused-private-field -Wno-maybe-uninitialized")
+endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 

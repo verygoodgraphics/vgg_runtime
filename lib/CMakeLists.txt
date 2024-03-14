@@ -26,6 +26,41 @@ if(EMSCRIPTEN)
 endif()
 
 file(READ ${CMAKE_SOURCE_DIR}/config/DepsConfig.json DEPS_CONFIG)
+
+if(MSVC)
+  if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/SDL2-2.28.5")
+    string(JSON SDL2_URL ERROR_VARIABLE SDL2_URL_NOTFOUND GET ${DEPS_CONFIG} sdl2 url)
+    string(JSON SDL2_FILENAME ERROR_VARIABLE SDL2_FILENAME_NOTFOUND GET ${DEPS_CONFIG} sdl2 filename)
+    string(JSON SDL2_ARCHIVE_MD5_CHECKSUM ERROR_VARIABLE SDL2_ARCHIVE_MD5_CHECKSUM_NOTFOUND GET ${DEPS_CONFIG} sdl2 md5)
+    if(SDL2_URL_NOTFOUND OR SDL2_FILENAME_NOTFOUND OR SDL2_ARCHIVE_MD5_CHECKSUM_NOTFOUND)
+      message(FATAL_ERROR "sdl2 url or filename or md5 not found in config/DepsConfig.json")
+    endif()
+
+    if(NOT EXISTS "${CMAKE_SOURCE_DIR}/downloads/${SDL2_FILENAME}")
+      set(DOWNLOAD_AT_PATH "${CMAKE_SOURCE_DIR}/downloads/${SDL2_FILENAME}")
+
+      message(STATUS "Downloading ${SDL2_URL} to ${DOWNLOAD_AT_PATH}")
+      file(DOWNLOAD ${SDL2_URL} ${DOWNLOAD_AT_PATH}
+        EXPECTED_MD5 ${SDL2_ARCHIVE_MD5_CHECKSUM}
+        STATUS DOWNLOAD_STATUS SHOW_PROGRESS)
+      if(NOT DOWNLOAD_STATUS MATCHES "^0;")
+        message(FATAL_ERROR "Downloading failed with ${DOWNLOAD_STATUS}")
+      endif()  
+    endif()
+
+    file(ARCHIVE_EXTRACT INPUT ${DOWNLOAD_AT_PATH} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR})
+  endif()
+
+  file(WRITE "${CMAKE_CURRENT_SOURCE_DIR}/SDL2-2.28.5/sdl2-config.cmake"
+    "set(SDL2_INCLUDE_DIRS \"\${CMAKE_CURRENT_LIST_DIR}/include\")\n"
+    "if (\${CMAKE_SIZEOF_VOID_P} MATCHES 8)\n"
+    "  set(SDL2_LIBRARIES \"\${CMAKE_CURRENT_LIST_DIR}/lib/x64/SDL2.lib;\${CMAKE_CURRENT_LIST_DIR}/lib/x64/SDL2main.lib\")\n"
+    "else ()\n"
+    "  set(SDL2_LIBRARIES \"\${CMAKE_CURRENT_LIST_DIR}/lib/x86/SDL2.lib;\${CMAKE_CURRENT_LIST_DIR}/lib/x86/SDL2main.lib\")\n"
+    "endif ()\n"
+    "string(STRIP \"\${SDL2_LIBRARIES}\" SDL2_LIBRARIES)")
+endif()
+
 if(VGG_VAR_TARGET MATCHES "^iOS")
   # Download src
   set(NODE_FOLDER "nodejs-mobile" CACHE STRING "node folder name" FORCE)
@@ -96,14 +131,22 @@ else()
     file(RENAME ${NODEJS_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/${NODE_FOLDER}")
   endif()
 
-  # this is a custom target to build node with its own building system
-  # NOTE this target will always be invoked
-  cmake_minimum_required(VERSION 3.22) # this is requied for the following invoking
-  add_custom_target(vgg_libnode_building
-    COMMENT "Build node if neccessary..."
-    COMMAND cmake -DNODE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/${NODE_FOLDER}
-      -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/BuildLibnode.cmake
-  )
+  if(NOT MSVC)
+    # this is a custom target to build node with its own building system
+    cmake_minimum_required(VERSION 3.22) # this is requied for the following invoking
+    add_custom_target(vgg_libnode_building
+      COMMENT "Build node if neccessary..."
+      COMMAND cmake -DNODE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/${NODE_FOLDER}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/BuildLibnode.cmake
+    )
+  else()
+    if(MSVC)
+      message(STATUS "start build node...")
+      # 1.node need vs2022
+      # 2.In windows, can not apply release mode DLL to other debug mode project
+      execute_process(COMMAND "vcbuild.bat" ${CMAKE_BUILD_TYPE} "vs2022" "dll" "x64" WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/lib/${NODE_FOLDER}")
+    endif()
+  endif()
 endif()
 
 # this is an empty library for linking purpose only
@@ -117,7 +160,9 @@ target_include_directories(vgg_libnode PUBLIC
   ${NODE_FOLDER}/deps/v8/include)
 
 if(NOT VGG_VAR_TARGET MATCHES "^iOS")
-  add_dependencies(vgg_libnode vgg_libnode_building)
+  if(NOT MSVC)
+    add_dependencies(vgg_libnode vgg_libnode_building)
+  endif()
 endif()
 
 # this is a stub library for providing missing interface that must be linked to libnode
@@ -184,6 +229,11 @@ elseif(APPLE)
       base64_ssse3
     )
   endif()
+elseif(MSVC)
+  target_link_directories(vgg_libnode PUBLIC
+    ${NODE_FOLDER}/out/${CMAKE_BUILD_TYPE}
+  )
+  target_link_libraries(vgg_libnode PRIVATE node)
 else()
   target_link_directories(vgg_libnode PUBLIC
     ${NODE_FOLDER}/out/Release/obj
@@ -227,8 +277,10 @@ endif()
 
 install(TARGETS vgg_libnode_stub DESTINATION lib)
 if(VGG_CONTAINER_FOR_QT)
-  install(TARGETS zlib
-    COMPONENT container
-    DESTINATION lib
-  )
+  if(NOT MSVC)
+    install(TARGETS zlib 
+      COMPONENT container
+      DESTINATION lib
+    )
+  endif()
 endif()

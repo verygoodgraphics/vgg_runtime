@@ -4,7 +4,14 @@ target_link_libraries(viewer PRIVATE vgg_utility vgg_layer vgg_application)
 if(NOT EMSCRIPTEN)
   find_package(SDL2 REQUIRED)
 endif()
-target_link_libraries(viewer PRIVATE SDL2::SDL2)
+
+if(NOT MSVC)
+  target_link_libraries(viewer PRIVATE SDL2)
+else()
+  target_include_directories(viewer PRIVATE ${SDL2_INCLUDE_DIRS})
+  target_link_libraries(viewer PRIVATE ${SDL2_LIBRARIES})  
+endif()
+
 target_include_directories(viewer PRIVATE ${VGG_CONTRIB_ARGPARSE_INCLUDE})
 
 get_target_property(VGG_LAYER_RPATH vgg_layer BUILD_RPATH)

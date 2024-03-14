@@ -2249,11 +2249,6 @@ struct ReferencedStyle
   std::optional<TextFontAttributes>      fontAttr;
 };
 
-enum class Version : int
-{
-  THE_1016
-};
-
 /**
  * VGG Vector Graphics Specification is a JSON-based spec for describing vector graphics.
  *
@@ -2289,7 +2284,7 @@ struct DesignModel
   /**
    * Current VGG specs version, conforming to semantic version format like `major.minor.patch`.
    */
-  Version                                     version;
+  std::string                                 version;
 };
 } // namespace Model
 } // namespace VGG
@@ -2558,9 +2553,6 @@ inline void to_json(json& j, const PatternLayerDefClass& x);
 
 inline void from_json(const json& j, ReferenceClass& x);
 inline void to_json(json& j, const ReferenceClass& x);
-
-inline void from_json(const json& j, Version& x);
-inline void to_json(json& j, const Version& x);
 } // namespace Model
 } // namespace VGG
 namespace nlohmann
@@ -5629,28 +5621,6 @@ inline void to_json(json& j, const ReferenceClass& x)
       break;
     case ReferenceClass::SYMBOL_MASTER:
       j = "symbolMaster";
-      break;
-    default:
-      throw std::runtime_error("This should not happen");
-  }
-}
-
-inline void from_json(const json& j, Version& x)
-{
-  if (j == "1.0.16")
-    x = Version::THE_1016;
-  else
-  {
-    throw std::runtime_error("Input JSON does not conform to schema!");
-  }
-}
-
-inline void to_json(json& j, const Version& x)
-{
-  switch (x)
-  {
-    case Version::THE_1016:
-      j = "1.0.16";
       break;
     default:
       throw std::runtime_error("This should not happen");

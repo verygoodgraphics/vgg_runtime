@@ -38,6 +38,7 @@ constexpr auto K_BORDER_PREFIX = "style.borders";
 
 namespace nl = nlohmann;
 using namespace VGG::Layout;
+using namespace VGG::Model;
 
 namespace
 {
@@ -91,6 +92,12 @@ enum class EVarType
 
 } // namespace
 
+ExpandSymbol::ExpandSymbol(const nlohmann::json& designJson, const nlohmann::json& layoutJson)
+  : m_designModel(designJson)
+  , m_layoutJson(layoutJson)
+{
+}
+
 nlohmann::json ExpandSymbol::operator()()
 {
   return std::get<0>(run());
@@ -98,10 +105,10 @@ nlohmann::json ExpandSymbol::operator()()
 
 std::pair<nlohmann::json, nlohmann::json> ExpandSymbol::run()
 {
-  collectMaster(m_designJson);
+  collectMaster(m_designModel);
   collectLayoutRules(m_layoutJson);
 
-  m_tmpOutDesignJson = m_designJson;
+  m_tmpOutDesignJson = m_designModel;
   m_layoutRulesCache = Layout::collectRules(m_layoutJson);
   m_outLayoutJsonMap = m_layoutRules;
 
@@ -115,6 +122,7 @@ std::pair<nlohmann::json, nlohmann::json> ExpandSymbol::run()
     expandInstance(el.value(), instanceIdStack);
   }
 
+  m_outDesignModel = m_tmpOutDesignJson;
   auto outLayoutJson = generateOutLayoutJson();
 
   return { std::move(m_tmpOutDesignJson), std::move(outLayoutJson) };
@@ -1148,36 +1156,33 @@ bool ExpandSymbol::applyReferenceOverride(
     {
       auto id = s.substr(std::strlen(K_PREFIX));
 
-      if (m_designJson.contains(K_REFERENCES))
+      if (m_designModel.references)
       {
-        auto& items = m_designJson[K_REFERENCES];
-        if (items.is_array())
+        auto& items = *m_designModel.references;
+        for (auto& srcReferenence : items)
         {
-          for (auto& srcReferenence : items)
+          if (auto p = std::get_if<ReferencedStyle>(&srcReferenence))
           {
-            if (srcReferenence[K_ID] == id)
+            if (p->id == id)
             {
-              if (srcReferenence.contains(K_STYLE))
+              destObjectJson[K_STYLE] = p->style;
+              if (p->contextSettings)
               {
-                destObjectJson[K_STYLE] = srcReferenence[K_STYLE];
+                destObjectJson[K_CONTEXT_SETTINGS] = *p->contextSettings;
               }
-              if (srcReferenence.contains(K_CONTEXT_SETTINGS))
+              if (p->fontAttr)
               {
-                destObjectJson[K_CONTEXT_SETTINGS] = srcReferenence[K_CONTEXT_SETTINGS];
-              }
-              if (srcReferenence.contains(K_FONT_ATTR))
-              {
-                destObjectJson[K_ATTR] = nlohmann::json::array({ srcReferenence[K_FONT_ATTR] });
+                destObjectJson[K_ATTR] = nlohmann::json::array({ *p->fontAttr });
               }
 
               return true;
             }
           }
-
-          WARN("ExpandSymbol::applyReferenceOverride, reference not found, return true to NOT "
-               "REPLACE with bad value");
-          return true;
         }
+
+        WARN("ExpandSymbol::applyReferenceOverride, reference not found, return true to NOT "
+             "REPLACE with bad value");
+        return true;
       }
     }
   }
@@ -1341,7 +1346,7 @@ void ExpandSymbol::layoutSubtree(
   Size                  size,
   bool                  preservingOrigin)
 {
-  m_layout->resizeNodeThenLayout(subtreeNodeId, size, preservingOrigin);
+  m_layout->resizeNodeThenLayout(std::string{ subtreeNodeId }, size, preservingOrigin);
   overrideLayoutRuleSize(subtreeNodeId, size);
 }
 

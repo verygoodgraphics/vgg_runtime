@@ -12,6 +12,7 @@
 #include <gtest/gtest.h>
 
 using namespace VGG;
+using namespace VGG::Model;
 
 namespace VGG::Layout
 {
@@ -167,13 +168,15 @@ TEST_F(VggExpandSymbolTestSuite, override_with_star_wildcard)
   ExpandSymbol sut{ design_json };
 
   // When
-  auto result_json = sut();
+  sut.run();
 
   // Then
-  nlohmann::json::json_pointer path{
-    "/frames/0/childObjects/2/childObjects/0/attr/0/fills/0/color/blue"
-  };
-  double blue = result_json[path];
+  const auto& result = sut.designModel();
+
+  // "/frames/0/childObjects/2/childObjects/0/fontAttr/0/fills/0/color/blue"
+  auto& master = std::get<SymbolMaster>(result.frames[0].childObjects[2]);
+  auto& text = std::get<Text>(master.childObjects[0]);
+  auto  blue = text.fontAttr[0].fills.value()[0].color.value().blue;
 
   EXPECT_DOUBLE_EQ(blue, 0.01908801696712621);
 }

@@ -199,6 +199,9 @@ void PaintNode::paintEvent(Renderer* renderer)
     renderer->canvas()->save();
     shapeMask.clip(renderer->canvas(), SkClipOp::kIntersect);
   }
+
+  SkPaint lp;
+  lp.setStyle(SkPaint::kStroke_Style);
   if (newLayer)
   {
     SkRect objectBound;
@@ -225,7 +228,8 @@ void PaintNode::paintEvent(Renderer* renderer)
       if (auto df = _->styleDisplayList->asImageFilter(); df)
       {
         auto blender = getOrCreateBlender("maskOut", g_maskOutBlender);
-        dropbackFilter = SkImageFilters::Blend(blender, df, dropbackFilter, objectBound);
+        dropbackFilter =
+          SkImageFilters::Blend(blender, df, dropbackFilter, _->styleDisplayList->bounds());
       }
     }
     SkPaint layerPaint;
@@ -233,7 +237,20 @@ void PaintNode::paintEvent(Renderer* renderer)
     layerPaint.setImageFilter(layerFilter);
     VShape clipShape(layerBound);
     _->beginLayer(renderer, &layerPaint, &clipShape, dropbackFilter);
+    if (renderer->isEnableDrawDebugBound())
+    {
+      lp.setColor(SK_ColorBLUE);
+      lp.setStrokeWidth(2);
+      renderer->canvas()->drawRect(layerBound, lp);
+      lp.setColor(SK_ColorCYAN);
+      lp.setStrokeWidth(4);
+      renderer->canvas()->drawRect(_->dropShadowEffects->bounds(), lp);
+      lp.setColor(SK_ColorGREEN);
+      lp.setStrokeWidth(3);
+      renderer->canvas()->drawRect(_->styleDisplayList->bounds(), lp);
+    }
   }
+
   onDrawStyle(renderer, path, shapeMask, 0);
   if (newLayer)
   {

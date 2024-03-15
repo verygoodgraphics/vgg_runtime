@@ -25,35 +25,28 @@ class FillEffect final : public Effects
 public:
   void render(Renderer* render, const VShape& shape) override
   {
-    if (m_shader)
-    {
-      SkPaint pen;
-      pen.setStyle(SkPaint::kFill_Style);
-      pen.setShader(m_shader);
-      if (m_blender)
-      {
-        if (auto p = std::get_if<sk_sp<SkBlender>>(&*m_blender); p)
-          pen.setBlender(*p);
-        else if (auto p = std::get_if<SkBlendMode>(&*m_blender); p)
-          pen.setBlendMode(*p);
-      }
-      pen.setImageFilter(m_imageFilter);
-      pen.setAntiAlias(true);
-      shape.draw(render->canvas(), pen);
-    }
-    // for (size_t i = 0; i < style().fills.size(); ++i)
+    // if (m_shader)
     // {
-    //   auto& f = style().fills[i];
-    //   if (!f.isEnabled)
-    //     continue;
-    //   SkPaint fillPen;
-    //   fillPen.setStyle(SkPaint::kFill_Style);
-    //   fillPen.setAntiAlias(true);
-    //   fillPen.setBlender(blender);
-    //   fillPen.setImageFilter(imageFilter);
-    //   populateSkPaint(f.type, f.contextSettings, toSkRect(frameBound()), fillPen);
-    //   path.draw(renderer->canvas(), fillPen);
+    //   SkPaint pen;
+    //   pen.setStyle(SkPaint::kFill_Style);
+    //   pen.setShader(m_shader);
+    //   pen.setImageFilter(m_imageFilter);
+    //   pen.setAntiAlias(true);
+    //   shape.draw(render->canvas(), pen);
     // }
+    for (size_t i = 0; i < m_fills.size(); ++i)
+    {
+      auto& f = m_fills[i];
+      if (!f.isEnabled)
+        continue;
+      SkPaint fillPen;
+      fillPen.setStyle(SkPaint::kFill_Style);
+      fillPen.setAntiAlias(true);
+      // fillPen.setBlender(m_blender);
+      fillPen.setImageFilter(m_imageFilter);
+      populateSkPaint(f.type, f.contextSettings, bounds(), fillPen);
+      shape.draw(render->canvas(), fillPen);
+    }
   }
   FillEffect(
     const std::vector<Fill>& fills,
@@ -61,15 +54,17 @@ public:
     sk_sp<SkImageFilter>     imagFilter,
     sk_sp<SkBlender>         blender)
   {
-    evalShader(fills, bounds);
+    m_bounds = bounds;
     m_blender = blender;
     m_imageFilter = imagFilter;
+    m_fills = fills;
+    // m_shader = evalShader(fills, bounds);
   }
 
-  sk_sp<SkShader> shader() const
-  {
-    return m_shader;
-  }
+  // sk_sp<SkShader> shader() const
+  // {
+  //   return m_shader;
+  // }
 
   const SkRect& bounds()
   {
@@ -77,12 +72,13 @@ public:
   }
 
 private:
-  SkRect                                                     m_bounds;
-  sk_sp<SkShader>                                            m_shader;
-  sk_sp<SkImageFilter>                                       m_imageFilter;
-  std::optional<std::variant<SkBlendMode, sk_sp<SkBlender>>> m_blender;
+  SkRect               m_bounds;
+  std::vector<Fill>    m_fills;
+  // sk_sp<SkShader>      m_shader;
+  sk_sp<SkImageFilter> m_imageFilter;
+  sk_sp<SkBlender>     m_blender;
 
-  void evalShader(const std::vector<Fill>& fills, const SkRect& bounds)
+  sk_sp<SkShader> evalShader(const std::vector<Fill>& fills, const SkRect& bounds)
   {
     const auto      bound = Bound{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
     sk_sp<SkShader> dstShader;
@@ -109,8 +105,32 @@ private:
       if (!dstShader)
       {
         dstShader = srcShader;
-        if (!m_blender)
-          m_blender = bm;
+        if (bm)
+        {
+          sk_sp<SkBlender> bl;
+          std::visit(
+            Overloaded{ [&](const sk_sp<SkBlender>& blender) { bl = blender; },
+                        [&](const SkBlendMode& mode)
+                        {
+                          bl = SkBlender::Mode(mode);
+                          DEBUG("first blend mode: %s", SkBlendMode_Name(mode));
+                        } },
+            *bm);
+          static const char*      s_sksl = R"(
+          uniform shader s, d;
+          uniform blender b;
+          half4 main(float2 xy) {
+          return b.eval(s.eval(xy), d.eval(xy));
+          })";
+          auto                    firstShader = SkRuntimeEffect::MakeForShader(SkString(s_sksl));
+          static SkRuntimeEffect* s_blendShader = firstShader.effect.release();
+
+          SkRuntimeEffect::ChildPtr children[] = { std::move(dstShader),
+                                                   SkRuntimeEffect::ChildPtr(),
+                                                   std::move(bl) };
+
+          dstShader = s_blendShader->makeShader(/*uniforms=*/{}, children);
+        }
       }
       else
       {
@@ -120,13 +140,15 @@ private:
             Overloaded{ [&](const sk_sp<SkBlender>& blender)
                         { dstShader = SkShaders::Blend(blender, dstShader, srcShader); },
                         [&](const SkBlendMode& mode)
-                        { dstShader = SkShaders::Blend(mode, dstShader, srcShader); } },
+                        {
+                          dstShader = SkShaders::Blend(mode, dstShader, srcShader);
+                          DEBUG("first blend mode: %s", SkBlendMode_Name(mode));
+                        } },
             *bm);
         }
       }
     }
-    m_shader = dstShader;
-    m_bounds = bounds;
+    return dstShader;
   }
 };
 } // namespace VGG::layer

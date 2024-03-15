@@ -50,12 +50,13 @@ class ExpandSymbol
   using RuleMap = std::unordered_map<std::string, std::shared_ptr<Internal::Rule::Rule>>;
   using RuleMapPtr = std::shared_ptr<RuleMap>;
 
-  const Model::DesignModel                        m_designModel;
-  const nlohmann::json&                           m_layoutJson;
-  std::unordered_map<std::string, nlohmann::json> m_outLayoutJsonMap; // performance
-  RuleMapPtr                                      m_layoutRulesCache; // performance
-  std::unordered_map<std::string, nlohmann::json> m_masters;
-  std::unordered_map<std::string, nlohmann::json> m_layoutRules;
+  const Model::DesignModel                                    m_designModel;
+  const nlohmann::json&                                       m_layoutJson;
+  std::unordered_map<std::string, nlohmann::json>             m_outLayoutJsonMap; // performance
+  RuleMapPtr                                                  m_layoutRulesCache; // performance
+  std::unordered_map<std::string, nlohmann::json>             m_masters;
+  std::unordered_map<std::string, const Model::SymbolMaster*> m_pMasters;
+  std::unordered_map<std::string, nlohmann::json>             m_layoutRules;
 
   std::shared_ptr<VGG::Layout::Layout> m_layout;
 
@@ -88,12 +89,28 @@ private:
   };
 
   void collectMaster(const nlohmann::json& json);
+  void collectMasters();
+  void collectMasterFromContainer(const Model::Container& conntainer);
+  template<typename T>
+  void collectMasterFromVariant(const T& variantNode);
   void collectLayoutRules(const nlohmann::json& json);
 
   void expandInstance(
     nlohmann::json&           json,
     std::vector<std::string>& instanceIdStack,
     bool                      again = false);
+
+  void traverseContainerNode(
+    Model::Container&         container,
+    std::vector<std::string>& instanceIdStack);
+  template<typename T>
+  void traverseVariantNode(T& variantNode, std::vector<std::string>& instanceIdStack);
+  template<typename T>
+  void expandInstanceVariant(
+    T&                        variantNode,
+    std::vector<std::string>& instanceIdStack,
+    bool                      again = false);
+
   void resizeInstance(nlohmann::json& instance, nlohmann::json& master);
 
   void layoutInstance(nlohmann::json& instance, const Size& instanceSize);

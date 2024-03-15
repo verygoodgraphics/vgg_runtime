@@ -106,6 +106,7 @@ nlohmann::json ExpandSymbol::operator()()
 std::pair<nlohmann::json, nlohmann::json> ExpandSymbol::run()
 {
   collectMaster(m_designModel);
+  collectMasters();
   collectLayoutRules(m_layoutJson);
 
   m_tmpOutDesignJson = m_designModel;
@@ -120,6 +121,11 @@ std::pair<nlohmann::json, nlohmann::json> ExpandSymbol::run()
   {
     std::vector<std::string> instanceIdStack{};
     expandInstance(el.value(), instanceIdStack);
+  }
+  for (auto& frame : m_outDesignModel.frames)
+  {
+    std::vector<std::string> instanceIdStack{};
+    traverseContainerNode(frame, instanceIdStack);
   }
 
   m_outDesignModel = m_tmpOutDesignJson;
@@ -148,6 +154,54 @@ void ExpandSymbol::collectMaster(const nlohmann::json& json)
   for (auto& el : json.items())
   {
     collectMaster(el.value());
+  }
+}
+
+void ExpandSymbol::collectMasters()
+{
+  for (auto& frame : m_outDesignModel.frames)
+  {
+    collectMasterFromContainer(frame);
+  }
+}
+
+void ExpandSymbol::collectMasterFromContainer(const Model::Container& conntainer)
+{
+  for (auto& child : conntainer.childObjects)
+  {
+    collectMasterFromVariant(child);
+  }
+}
+
+template<typename T>
+void ExpandSymbol::collectMasterFromVariant(const T& variantNode)
+{
+  if (auto p = std::get_if<SymbolMaster>(&variantNode))
+  {
+    auto& id = p->id;
+    m_pMasters[id] = p;
+    collectMasterFromContainer(*p);
+  }
+  else if (auto p = std::get_if<Frame>(&variantNode))
+  {
+    collectMasterFromContainer(*p);
+  }
+  else if (auto p = std::get_if<Group>(&variantNode))
+  {
+    collectMasterFromContainer(*p);
+  }
+  else if (auto p = std::get_if<Path>(&variantNode))
+  {
+    if (p->shape)
+    {
+      for (auto& subshape : p->shape->subshapes)
+      {
+        if (subshape.subGeometry)
+        {
+          collectMasterFromVariant(*subshape.subGeometry);
+        }
+      }
+    }
   }
 }
 
@@ -347,6 +401,108 @@ void ExpandSymbol::expandInstance(
   for (auto& el : json.items())
   {
     expandInstance(el.value(), instanceIdStack);
+  }
+}
+
+void ExpandSymbol::traverseContainerNode(
+  Model::Container&         container,
+  std::vector<std::string>& instanceIdStack)
+{
+  for (auto& child : container.childObjects)
+  {
+    traverseVariantNode(child, instanceIdStack);
+  }
+}
+
+template<typename T>
+void ExpandSymbol::expandInstanceVariant(
+  T&                        variantNode,
+  std::vector<std::string>& instanceIdStack,
+  bool                      again)
+{
+  static_assert(
+    std::is_same_v<T, ContainerChildType> || std::is_same_v<T, SubGeometryType>,
+    "T must be variant holds SymbolInstance & SymbolMaster");
+  if (!std::holds_alternative<SymbolInstance>(variantNode))
+  {
+    return;
+  }
+
+  auto& instance = std::get<SymbolInstance>(variantNode);
+
+  const auto& instanceId = instance.id;
+  if (
+    std::find(instanceIdStack.begin(), instanceIdStack.end(), instanceId) != instanceIdStack.end())
+  {
+    FAIL("ExpandSymbol::expandInstance: infinite expanding, a->b->a, return");
+    return;
+  }
+
+  const auto& masterId = instance.masterId;
+  if (m_pMasters.find(masterId) == m_pMasters.end())
+  {
+    return;
+  }
+
+  const auto& master = *m_pMasters[masterId];
+
+  Model::SymbolMaster instanceAsMaster;
+  static_cast<Model::Object&>(instanceAsMaster) = instance;
+  instanceAsMaster.class_ = master.class_;
+  instanceAsMaster.childObjects = master.childObjects;
+  instanceAsMaster.style = master.style;
+  instanceAsMaster.variableDefs = master.variableDefs;
+
+  // todo, rebuild layout tree
+
+  if (again)
+  {
+    auto originalId = split(instanceId).back();
+    instanceIdStack.push_back(originalId);
+  }
+  else
+  {
+    instanceIdStack.push_back(instanceId);
+  }
+
+  // 1. expand
+  traverseContainerNode(instanceAsMaster, instanceIdStack);
+}
+
+template<typename T>
+void ExpandSymbol::traverseVariantNode(T& variantNode, std::vector<std::string>& instanceIdStack)
+{
+  if (std::holds_alternative<SymbolInstance>(variantNode))
+  {
+    expandInstanceVariant(variantNode, instanceIdStack);
+    return;
+  }
+
+  if (auto p = std::get_if<Frame>(&variantNode))
+  {
+    traverseContainerNode(*p, instanceIdStack);
+  }
+  else if (auto p = std::get_if<Group>(&variantNode))
+  {
+    traverseContainerNode(*p, instanceIdStack);
+  }
+  else if (auto p = std::get_if<Path>(&variantNode))
+  {
+    if (p->shape)
+    {
+      for (auto& subshape : p->shape->subshapes)
+      {
+        if (subshape.subGeometry)
+        {
+          // SubGeometryType
+          traverseVariantNode(*subshape.subGeometry, instanceIdStack);
+        }
+      }
+    }
+  }
+  else if (auto p = std::get_if<SymbolMaster>(&variantNode))
+  {
+    traverseContainerNode(*p, instanceIdStack);
   }
 }
 

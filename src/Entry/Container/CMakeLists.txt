@@ -51,6 +51,17 @@ install(FILES
   ${CMAKE_SOURCE_DIR}/include/VGG/Container/VggTypes.hpp
   COMPONENT container
   DESTINATION VGG)
+
+if(MSVC)
+  install(FILES
+    "${CMAKE_SOURCE_DIR}/lib/${NODE_FOLDER}/${CMAKE_BUILD_TYPE}/node.exe"
+    "${CMAKE_SOURCE_DIR}/lib/${NODE_FOLDER}/${CMAKE_BUILD_TYPE}/libnode.dll"
+    "${SKIA_EXTERNAL_PROJECT_DIR}/${SKIA_LIB_BUILD_PREFIX}/icudtl.dat"
+    COMPONENT container
+    DESTINATION lib
+  )
+endif()
+
 if(VGG_VAR_TARGET MATCHES "^iOS")
   install(FILES
     ${CMAKE_SOURCE_DIR}/include/VGG/Container/MetalContainer.hpp

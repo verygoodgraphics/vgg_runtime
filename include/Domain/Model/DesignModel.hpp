@@ -1602,35 +1602,13 @@ struct Group : public Container
   std::optional<bool> isVectorNetwork;
 };
 
-struct Image
+struct Image : public Object
 {
-  std::vector<AlphaMask>                     alphaMaskBy;
-  Rect                                       bounds;
-  ChildObjectClass                           class_;
-  GraphicsContextSettings                    contextSettings;
-  std::optional<double>                      cornerSmoothing;
-  std::optional<bool>                        fillReplacesImage;
-  std::optional<int64_t>                     horizontalConstraint;
-  std::string                                id;
-  std::string                                imageFileName;
-  std::optional<ImageFilters>                imageFilters;
-  std::optional<bool>                        keepShapeWhenResize;
-  std::optional<int64_t>                     maskShowType;
-  int64_t                                    maskType;
-  std::vector<double>                        matrix;
-  std::optional<std::string>                 name;
-  std::vector<std::string>                   outlineMaskBy;
-  int64_t                                    overflow;
-  std::optional<std::string>                 overrideKey;
-  std::optional<int64_t>                     resizesContent;
-  Style                                      style;
-  std::optional<int64_t>                     styleEffectBoolean;
-  int64_t                                    styleEffectMaskArea;
-  std::optional<Rect>                        transformedBounds;
-  std::optional<std::vector<VariableDefine>> variableDefs;
-  std::optional<std::vector<VariableRefer>>  variableRefs;
-  std::optional<int64_t>                     verticalConstraint;
-  bool                                       visible;
+  ChildObjectClass class_;
+  std::string      imageFileName;
+
+  std::optional<bool>         fillReplacesImage;
+  std::optional<ImageFilters> imageFilters;
 };
 
 struct SymbolInstance : public Object
@@ -1650,44 +1628,21 @@ struct SymbolMaster : public Container
   std::optional<std::vector<double>> radius;
 };
 
-struct Text
+struct Text : public Object
 {
-  std::vector<AlphaMask>                     alphaMaskBy;
-  std::optional<std::vector<double>>         anchorPoint;
-  Rect                                       bounds;
-  ChildObjectClass                           class_;
-  std::string                                content;
-  GraphicsContextSettings                    contextSettings;
-  std::optional<double>                      cornerSmoothing;
-  std::optional<TextFontAttributes>          defaultFontAttr;
-  std::vector<TextFontAttributes>            fontAttr;
-  int                                        frameMode;
-  std::vector<int>                           horizontalAlignment;
-  std::optional<int64_t>                     horizontalConstraint;
-  std::string                                id;
-  bool                                       isLocked;
-  std::optional<bool>                        keepShapeWhenResize;
-  std::optional<int64_t>                     maskShowType;
-  int64_t                                    maskType;
-  std::vector<double>                        matrix;
-  std::optional<std::string>                 name;
-  std::vector<std::string>                   outlineMaskBy;
-  int64_t                                    overflow;
-  std::optional<std::string>                 overrideKey;
-  std::optional<int64_t>                     resizesContent;
-  Style                                      style;
-  std::optional<int64_t>                     styleEffectBoolean;
-  int64_t                                    styleEffectMaskArea;
-  std::optional<std::vector<TextLineType>>   textLineType;
-  std::optional<TextOnPath>                  textOnPath;
-  std::optional<Rect>                        transformedBounds;
-  std::optional<double>                      truncatedHeight;
-  std::optional<std::vector<VariableDefine>> variableDefs;
-  std::optional<std::vector<VariableRefer>>  variableRefs;
-  int                                        verticalAlignment;
-  std::optional<int64_t>                     verticalConstraint;
-  std::optional<bool>                        verticalTrim;
-  bool                                       visible;
+  ChildObjectClass                class_;
+  std::string                     content;
+  std::vector<TextFontAttributes> fontAttr;
+  int                             frameMode;
+  std::vector<int>                horizontalAlignment;
+  int                             verticalAlignment;
+
+  std::optional<std::vector<double>>       anchorPoint;
+  std::optional<TextFontAttributes>        defaultFontAttr;
+  std::optional<std::vector<TextLineType>> textLineType;
+  std::optional<TextOnPath>                textOnPath;
+  std::optional<double>                    truncatedHeight;
+  std::optional<bool>                      verticalTrim;
 };
 
 enum class PatternLayerDefClass : int
@@ -3418,106 +3373,29 @@ inline void to_json(json& j, const Group& x)
 
 inline void from_json(const json& j, Image& x)
 {
-  safeGetTo(x.alphaMaskBy, j, "alphaMaskBy");
-  safeGetTo(x.bounds, j, "bounds");
+  from_json(j, static_cast<Object&>(x));
+
   safeGetTo(x.class_, j, "class");
-  safeGetTo(x.contextSettings, j, "contextSettings");
-  x.cornerSmoothing = get_stack_optional<double>(j, "cornerSmoothing");
-  x.fillReplacesImage = get_stack_optional<bool>(j, "fillReplacesImage");
-  x.horizontalConstraint = get_stack_optional<int64_t>(j, "horizontalConstraint");
-  safeGetTo(x.id, j, "id");
   safeGetTo(x.imageFileName, j, "imageFileName");
+
+  x.fillReplacesImage = get_stack_optional<bool>(j, "fillReplacesImage");
   x.imageFilters = get_stack_optional<ImageFilters>(j, "imageFilters");
-  x.keepShapeWhenResize = get_stack_optional<bool>(j, "keepShapeWhenResize");
-  x.maskShowType = get_stack_optional<int64_t>(j, "maskShowType");
-  safeGetTo(x.maskType, j, "maskType");
-  safeGetTo(x.matrix, j, "matrix");
-  x.name = get_stack_optional<std::string>(j, "name");
-  safeGetTo(x.outlineMaskBy, j, "outlineMaskBy");
-  safeGetTo(x.overflow, j, "overflow");
-  x.overrideKey = get_stack_optional<std::string>(j, "overrideKey");
-  x.resizesContent = get_stack_optional<int64_t>(j, "resizesContent");
-  safeGetTo(x.style, j, "style");
-  x.styleEffectBoolean = get_stack_optional<int64_t>(j, "styleEffectBoolean");
-  safeGetTo(x.styleEffectMaskArea, j, "styleEffectMaskArea");
-  x.transformedBounds = get_stack_optional<Rect>(j, "transformedBounds");
-  x.variableDefs = get_stack_optional<std::vector<VariableDefine>>(j, "variableDefs");
-  x.variableRefs = get_stack_optional<std::vector<VariableRefer>>(j, "variableRefs");
-  x.verticalConstraint = get_stack_optional<int64_t>(j, "verticalConstraint");
-  safeGetTo(x.visible, j, "visible");
 }
 inline void to_json(json& j, const Image& x)
 {
-  j = json::object();
-  j["alphaMaskBy"] = x.alphaMaskBy;
-  j["bounds"] = x.bounds;
+  to_json(j, static_cast<const Object&>(x));
+
   j["class"] = x.class_;
-  j["contextSettings"] = x.contextSettings;
-  if (x.cornerSmoothing)
-  {
-    j["cornerSmoothing"] = x.cornerSmoothing;
-  }
+  j["imageFileName"] = x.imageFileName;
+
   if (x.fillReplacesImage)
   {
     j["fillReplacesImage"] = x.fillReplacesImage;
   }
-  if (x.horizontalConstraint)
-  {
-    j["horizontalConstraint"] = x.horizontalConstraint;
-  }
-  j["id"] = x.id;
-  j["imageFileName"] = x.imageFileName;
   if (x.imageFilters)
   {
     j["imageFilters"] = x.imageFilters;
   }
-  if (x.keepShapeWhenResize)
-  {
-    j["keepShapeWhenResize"] = x.keepShapeWhenResize;
-  }
-  if (x.maskShowType)
-  {
-    j["maskShowType"] = x.maskShowType;
-  }
-  j["maskType"] = x.maskType;
-  j["matrix"] = x.matrix;
-  if (x.name)
-  {
-    j["name"] = x.name;
-  }
-  j["outlineMaskBy"] = x.outlineMaskBy;
-  j["overflow"] = x.overflow;
-  if (x.overrideKey)
-  {
-    j["overrideKey"] = x.overrideKey;
-  }
-  if (x.resizesContent)
-  {
-    j["resizesContent"] = x.resizesContent;
-  }
-  j["style"] = x.style;
-  if (x.styleEffectBoolean)
-  {
-    j["styleEffectBoolean"] = x.styleEffectBoolean;
-  }
-  j["styleEffectMaskArea"] = x.styleEffectMaskArea;
-  if (x.transformedBounds)
-  {
-    j["transformedBounds"] = x.transformedBounds;
-  }
-  if (x.variableDefs)
-  {
-    j["variableDefs"] = x.variableDefs;
-  }
-  if (x.variableRefs)
-  {
-    j["variableRefs"] = x.variableRefs;
-  }
-  if (x.verticalConstraint)
-  {
-    j["verticalConstraint"] = x.verticalConstraint;
-  }
-  j["visible"] = x.visible;
 }
 
 inline void from_json(const json& j, SymbolInstance& x)
@@ -3566,102 +3444,41 @@ inline void to_json(json& j, const SymbolMaster& x)
 
 inline void from_json(const json& j, Text& x)
 {
-  safeGetTo(x.alphaMaskBy, j, "alphaMaskBy");
-  x.anchorPoint = get_stack_optional<std::vector<double>>(j, "anchorPoint");
-  safeGetTo(x.bounds, j, "bounds");
+  from_json(j, static_cast<Object&>(x));
+
   safeGetTo(x.class_, j, "class");
   safeGetTo(x.content, j, "content");
-  safeGetTo(x.contextSettings, j, "contextSettings");
-  x.cornerSmoothing = get_stack_optional<double>(j, "cornerSmoothing");
-  x.defaultFontAttr = get_stack_optional<TextFontAttributes>(j, "defaultFontAttr");
   safeGetTo(x.fontAttr, j, "fontAttr");
   safeGetTo(x.frameMode, j, "frameMode");
   safeGetTo(x.horizontalAlignment, j, "horizontalAlignment");
-  x.horizontalConstraint = get_stack_optional<int64_t>(j, "horizontalConstraint");
-  safeGetTo(x.id, j, "id");
-  safeGetTo(x.isLocked, j, "isLocked");
-  x.keepShapeWhenResize = get_stack_optional<bool>(j, "keepShapeWhenResize");
-  x.maskShowType = get_stack_optional<int64_t>(j, "maskShowType");
-  safeGetTo(x.maskType, j, "maskType");
-  safeGetTo(x.matrix, j, "matrix");
-  x.name = get_stack_optional<std::string>(j, "name");
-  safeGetTo(x.outlineMaskBy, j, "outlineMaskBy");
-  safeGetTo(x.overflow, j, "overflow");
-  x.overrideKey = get_stack_optional<std::string>(j, "overrideKey");
-  x.resizesContent = get_stack_optional<int64_t>(j, "resizesContent");
-  safeGetTo(x.style, j, "style");
-  x.styleEffectBoolean = get_stack_optional<int64_t>(j, "styleEffectBoolean");
-  safeGetTo(x.styleEffectMaskArea, j, "styleEffectMaskArea");
+  safeGetTo(x.verticalAlignment, j, "verticalAlignment");
+
+  x.anchorPoint = get_stack_optional<std::vector<double>>(j, "anchorPoint");
+  x.defaultFontAttr = get_stack_optional<TextFontAttributes>(j, "defaultFontAttr");
   x.textLineType = get_stack_optional<std::vector<TextLineType>>(j, "textLineType");
   x.textOnPath = get_stack_optional<TextOnPath>(j, "textOnPath");
-  x.transformedBounds = get_stack_optional<Rect>(j, "transformedBounds");
   x.truncatedHeight = get_stack_optional<double>(j, "truncatedHeight");
-  x.variableDefs = get_stack_optional<std::vector<VariableDefine>>(j, "variableDefs");
-  x.variableRefs = get_stack_optional<std::vector<VariableRefer>>(j, "variableRefs");
-  safeGetTo(x.verticalAlignment, j, "verticalAlignment");
-  x.verticalConstraint = get_stack_optional<int64_t>(j, "verticalConstraint");
   x.verticalTrim = get_stack_optional<bool>(j, "verticalTrim");
-  safeGetTo(x.visible, j, "visible");
 }
 inline void to_json(json& j, const Text& x)
 {
-  j = json::object();
-  j["alphaMaskBy"] = x.alphaMaskBy;
+  to_json(j, static_cast<const Object&>(x));
+
+  j["class"] = x.class_;
+  j["content"] = x.content;
+  j["fontAttr"] = x.fontAttr;
+  j["frameMode"] = x.frameMode;
+  j["horizontalAlignment"] = x.horizontalAlignment;
+  j["verticalAlignment"] = x.verticalAlignment;
+
   if (x.anchorPoint)
   {
     j["anchorPoint"] = x.anchorPoint;
-  }
-  j["bounds"] = x.bounds;
-  j["class"] = x.class_;
-  j["content"] = x.content;
-  j["contextSettings"] = x.contextSettings;
-  if (x.cornerSmoothing)
-  {
-    j["cornerSmoothing"] = x.cornerSmoothing;
   }
   if (x.defaultFontAttr)
   {
     j["defaultFontAttr"] = x.defaultFontAttr;
   }
-  j["fontAttr"] = x.fontAttr;
-  j["frameMode"] = x.frameMode;
-  j["horizontalAlignment"] = x.horizontalAlignment;
-  if (x.horizontalConstraint)
-  {
-    j["horizontalConstraint"] = x.horizontalConstraint;
-  }
-  j["id"] = x.id;
-  j["isLocked"] = x.isLocked;
-  if (x.keepShapeWhenResize)
-  {
-    j["keepShapeWhenResize"] = x.keepShapeWhenResize;
-  }
-  if (x.maskShowType)
-  {
-    j["maskShowType"] = x.maskShowType;
-  }
-  j["maskType"] = x.maskType;
-  j["matrix"] = x.matrix;
-  if (x.name)
-  {
-    j["name"] = x.name;
-  }
-  j["outlineMaskBy"] = x.outlineMaskBy;
-  j["overflow"] = x.overflow;
-  if (x.overrideKey)
-  {
-    j["overrideKey"] = x.overrideKey;
-  }
-  if (x.resizesContent)
-  {
-    j["resizesContent"] = x.resizesContent;
-  }
-  j["style"] = x.style;
-  if (x.styleEffectBoolean)
-  {
-    j["styleEffectBoolean"] = x.styleEffectBoolean;
-  }
-  j["styleEffectMaskArea"] = x.styleEffectMaskArea;
   if (x.textLineType)
   {
     j["textLineType"] = x.textLineType;
@@ -3670,32 +3487,14 @@ inline void to_json(json& j, const Text& x)
   {
     j["textOnPath"] = x.textOnPath;
   }
-  if (x.transformedBounds)
-  {
-    j["transformedBounds"] = x.transformedBounds;
-  }
   if (x.truncatedHeight)
   {
     j["truncatedHeight"] = x.truncatedHeight;
-  }
-  if (x.variableDefs)
-  {
-    j["variableDefs"] = x.variableDefs;
-  }
-  if (x.variableRefs)
-  {
-    j["variableRefs"] = x.variableRefs;
-  }
-  j["verticalAlignment"] = x.verticalAlignment;
-  if (x.verticalConstraint)
-  {
-    j["verticalConstraint"] = x.verticalConstraint;
   }
   if (x.verticalTrim)
   {
     j["verticalTrim"] = x.verticalTrim;
   }
-  j["visible"] = x.visible;
 }
 
 inline void from_json(const json& j, PatternLayerDef& x)

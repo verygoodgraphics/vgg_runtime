@@ -28,6 +28,10 @@ class grid_layout;
 
 namespace VGG
 {
+namespace Model
+{
+struct Object;
+}
 namespace Layout
 {
 struct Matrix;
@@ -69,6 +73,7 @@ class LayoutNode : public std::enable_shared_from_this<LayoutNode>
 
   std::weak_ptr<JsonDocument>        m_viewModel;
   const nlohmann::json::json_pointer m_path;
+  Model::Object*                     m_pModel{ nullptr };
 
   std::shared_ptr<Layout::Internal::AutoLayout> m_autoLayout;
   bool                                          m_needsLayout{ false };

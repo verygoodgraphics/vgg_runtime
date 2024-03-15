@@ -17,6 +17,7 @@
 
 #include "Mouse.hpp"
 
+#include "Domain/Layout/Node.hpp"
 #include "Layer/SceneBuilder.hpp"
 #include "Utility/Log.hpp"
 #include "Utility/VggFloat.hpp"
@@ -242,4 +243,13 @@ void Presenter::setModel(std::shared_ptr<ViewModel> viewModel)
   }
 
   listenViewEvent();
+}
+
+void Presenter::update()
+{
+  if (m_view && m_viewModel)
+  {
+    m_viewModel->layoutTree()->layoutIfNeeded();
+    m_view->show(*m_viewModel);
+  }
 }

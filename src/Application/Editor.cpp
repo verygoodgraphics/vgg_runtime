@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 #include "Editor.hpp"
-#include "Application/UIView.hpp"
-#include "Utility/Log.hpp"
 
+#include "Application/UIView.hpp"
+#include "Domain/Layout/Node.hpp"
 #include "Layer/Zoomer.hpp"
+#include "Utility/Log.hpp"
 
 #include <include/core/SkCanvas.h>
 

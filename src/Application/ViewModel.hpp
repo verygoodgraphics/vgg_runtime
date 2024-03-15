@@ -16,10 +16,10 @@
 #pragma once
 
 #include "Domain/Daruma.hpp"
-#include "Domain/Layout/Node.hpp"
 
 namespace VGG
 {
+class LayoutNode;
 namespace Layout
 {
 class Layout;
@@ -27,11 +27,11 @@ class Layout;
 
 struct ViewModel
 {
-  std::weak_ptr<Daruma> model;
+  std::weak_ptr<Daruma>         model;
   std::weak_ptr<Layout::Layout> layout;
 
   std::shared_ptr<LayoutNode> layoutTree() const;
-  JsonDocumentPtr designDoc() const;
+  JsonDocumentPtr             designDoc() const;
 
   VGG::Model::Loader::ResourcesType resources() const
   {

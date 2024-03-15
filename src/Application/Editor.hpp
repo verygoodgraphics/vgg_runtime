@@ -19,7 +19,7 @@
 #include "UIEvent.hpp"
 
 #include "Application/Mouse.hpp"
-#include "Domain/Layout/Node.hpp"
+#include "Domain/Layout/Rect.hpp"
 #include "Utility/Log.hpp"
 
 #include <memory>
@@ -29,7 +29,7 @@ class SkCanvas;
 
 namespace VGG
 {
-
+class LayoutNode;
 class UIView;
 
 class Editor : public app::AppRenderable

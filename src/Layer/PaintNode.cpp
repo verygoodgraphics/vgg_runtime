@@ -214,14 +214,18 @@ void PaintNode::paintEvent(Renderer* renderer)
 
     if (!_->alphaMaskBy.empty())
     {
-      auto alphaMaskIter = AlphaMaskIterator(_->alphaMaskBy);
+      auto     alphaMaskIter = AlphaMaskIterator(_->alphaMaskBy);
+      SkMatrix resetOffset = SkMatrix::Translate(
+        layerBound.x(),
+        layerBound.y()); // note that rasterized shader is located in the origin, we need a matrix
+                         // to reset the offset
       layerFilter = MaskBuilder::makeAlphaMaskWith(
         layerFilter,
         this,
         renderer->maskObjects(),
         alphaMaskIter,
         layerBound,
-        0);
+        &resetOffset);
     }
     if (dropbackFilter)
     {
@@ -240,7 +244,7 @@ void PaintNode::paintEvent(Renderer* renderer)
     if (renderer->isEnableDrawDebugBound())
     {
       lp.setColor(SK_ColorBLUE);
-      lp.setStrokeWidth(2);
+      lp.setStrokeWidth(5);
       renderer->canvas()->drawRect(layerBound, lp);
       lp.setColor(SK_ColorCYAN);
       lp.setStrokeWidth(4);
@@ -248,6 +252,9 @@ void PaintNode::paintEvent(Renderer* renderer)
       lp.setColor(SK_ColorGREEN);
       lp.setStrokeWidth(3);
       renderer->canvas()->drawRect(_->styleDisplayList->bounds(), lp);
+      lp.setStrokeWidth(2);
+      lp.setColor(SK_ColorYELLOW);
+      renderer->canvas()->drawRect(objectBound, lp);
     }
   }
 

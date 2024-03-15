@@ -174,8 +174,7 @@ public:
     const SkRect&                                      rect,
     const SkMatrix*                                    matrix)
   {
-    auto components = collectionMasks(self, maskObjects, iter);
-
+    auto              components = collectionMasks(self, maskObjects, iter);
     Renderer          alphaMaskRender;
     SkPictureRecorder rec;
     auto              rt = SkRTreeFactory();

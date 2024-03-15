@@ -28,9 +28,10 @@ public:
   void render(Renderer* renderer)
   {
     SkPaint p;
-    p.setShader(asShader());
+    // p.setShader(asShader());
     p.setAntiAlias(true);
-    renderer->canvas()->drawRect(bounds(), p);
+    // renderer->canvas()->drawRect(bounds(), p);
+    renderer->canvas()->drawPicture(m_picture);
   }
 
   sk_sp<SkShader> asShader() const
@@ -64,12 +65,14 @@ public:
 
 private:
   friend class ObjectRecorder;
-  ObjectShader(sk_sp<SkShader> shader, const SkRect& bound)
-    : m_displayList(std::move(shader))
+  ObjectShader(sk_sp<SkShader> shader, sk_sp<SkPicture> picture, const SkRect& bound)
+    : m_picture(picture)
+    , m_displayList(std::move(shader))
     , m_bounds(bound)
   {
     ASSERT(m_displayList);
   }
+  sk_sp<SkPicture>     m_picture;
   sk_sp<SkShader>      m_displayList;
   sk_sp<SkImageFilter> m_imageFilter;
   SkRect               m_bounds;
@@ -105,15 +108,16 @@ public:
   }
   ObjectShader finishRecording(const SkRect& cropRect, const SkMatrix* matrix)
   {
+    auto pic = m_rec->finishRecordingAsPictureWithCull(cropRect);
     auto maskShader = SkPictureShader::Make(
-      m_rec->finishRecordingAsPictureWithCull(cropRect),
+      pic,
       SkTileMode::kClamp,
       SkTileMode::kClamp,
       SkFilterMode::kNearest,
       matrix,
       &cropRect);
     ASSERT(maskShader);
-    return ObjectShader(maskShader, cropRect);
+    return ObjectShader(maskShader, pic, cropRect);
   }
 
 private:

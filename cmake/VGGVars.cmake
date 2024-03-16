@@ -10,16 +10,18 @@
 # The following CMake variable will be defined:
 #
 # - VGG_VAR_TARGET_PLATFORM will be the prefix of ${VGG_VAR_TARGET}, namely one of the following values:
+#   - Linux
+#   - Android
+#   - Harmony
 #   - iOS
 #   - macOS
-#   - Android
-#   - Linux
 #   - Windows
 #   - WASM
 #
 # - VGG_VAR_TARGET_ARCH will be categorized into one of the following values, depending on the suffix of ${VGG_VAR_TARGET}
-#   - ARM
 #   - X86
+#   - ARM
+#   - RISCV
 #   - WASM
 #
 # - VGG_VAR_HOST_PLATFORM refers to the host platform, and will be one of the following value:
@@ -30,6 +32,7 @@
 # - VGG_VAR_HOST_ARCH refers to the host cpu architecture, and will be one of the following values:
 #   - ARM
 #   - X86
+#   - RISCV
 #
 # The VGG_VAR_HOST_PLATFORM and VGG_VAR_HOST_ARCH will be consistent with target variables without cross-compiling.
 #
@@ -66,14 +69,17 @@
 ###############################################################################
 
 # Apple targets:
-list(APPEND VGG_APPLE_TARGET_LIST "iOS" "iOS-simulator" "macOS-arm64" "macOS-x86_64") # ios defaults to arm64
+list(APPEND VGG_APPLE_TARGET_LIST "iOS" "iOS-simulator" "macOS-arm64" "macOS-x86_64") # iOS defaults to arm64
 
 # Android targets:
 # Keep same with Andorid SDK https://developer.android.com/ndk/guides/abis
-list(APPEND VGG_ANDROID_TARGET_LIST "Android-armeabi_v7a" "Android-arm64_v8a" "Android-x86_64")
+list(APPEND VGG_ANDROID_TARGET_LIST "Android-armeabi-v7a" "Android-arm64-v8a" "Android-riscv64" "Android-x86_64")
+
+# Harmony targets:
+list(APPEND VGG_HARMONY_TARGET_LIST "Harmony-arm64" "Harmony-riscv64" "Harmony-x86_64")
 
 # Linux targets
-list(APPEND VGG_LINUX_TARGET_LIST "Linux-x86" "Linux-x86_64")
+list(APPEND VGG_LINUX_TARGET_LIST "Linux-x86" "Linux-x86_64" "Linux-arm64" "Linux-riscv64")
 
 # Windows targets
 list(APPEND VGG_WIN_TARGET_LIST "Windows-x86" "Windows-x86_64")
@@ -82,11 +88,19 @@ list(APPEND VGG_WIN_TARGET_LIST "Windows-x86" "Windows-x86_64")
 list(APPEND VGG_WASM_TARGET_LIST "WASM") # defaults to WASM32
 
 # All targets
-list(APPEND VGG_ALL_TARGETS ${VGG_APPLE_TARGET_LIST} ${VGG_ANDROID_TARGET_LIST} ${VGG_LINUX_TARGET_LIST} ${VGG_WIN_TARGET_LIST} ${VGG_WASM_TARGET_LIST})
+list(APPEND VGG_ALL_TARGETS
+  ${VGG_APPLE_TARGET_LIST}
+  ${VGG_ANDROID_TARGET_LIST}
+  ${VGG_HARMONY_TARGET_LIST}
+  ${VGG_LINUX_TARGET_LIST}
+  ${VGG_WIN_TARGET_LIST}
+  ${VGG_WASM_TARGET_LIST}
+)
 
 # Arch Lists
 list(APPEND X86_ARCH_LIST "x86" "x86_64" "amd64" "i386" "i486" "i586" "i686" "x86-32" "x86-64")
-list(APPEND ARM_ARCH_LIST "arm" "arm64" "armeabi" "armeabi-v7a")
+list(APPEND ARM_ARCH_LIST "arm" "arm64" "armeabi" "armeabi-v7a" "arm64-v8a")
+list(APPEND RISCV_ARCH_LIST "riscv64")
 
 
 ###############################################################################
@@ -113,6 +127,8 @@ if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "x86|x86_64")
 elseif(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "arm|arm64")
   set(VGG_VAR_HOST_ARCH "ARM" CACHE STRING "" FORCE)
   add_compile_definitions(VGG_HOST_ARCH_ARM)
+elseif(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "riscv64")
+  set(VGG_VAR_HOST_ARCH "RISCV" CACHE STRING "" FORCE)
 else()
   message(FATAL_ERROR "Unknown host arch: ${CMAKE_HOST_SYSTEM_PROCESSOR}")
 endif()
@@ -174,6 +190,8 @@ else()
       set(VGG_VAR_TARGET_ARCH "X86" CACHE STRING "" FORCE)
     elseif(_TARGET_PART2 IN_LIST ARM_ARCH_LIST)
       set(VGG_VAR_TARGET_ARCH "ARM" CACHE STRING "" FORCE)
+    elseif(_TARGET_PARTS IN_LIST RISCV_ARCH_LIST)
+      set(VGG_VAR_TARGET_ARCH "RISCV" CACHE STRING "" FORCE)
     endif()
   endif()
 endif()

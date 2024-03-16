@@ -183,7 +183,8 @@ void UIScrollView::dragBy(Point delta)
     {
       if (m_bouncesHorizontally)
       {
-        if (bool shouldHorizontalBounce = !doublesNearlyEqual(proposedOffset.x, confinedOffset.x))
+        // shouldHorizontalBounce
+        if (!doublesNearlyEqual(proposedOffset.x, confinedOffset.x))
         {
           proposedOffset.x = originalOffset.x + (0.055 * delta.x);
         }
@@ -195,7 +196,8 @@ void UIScrollView::dragBy(Point delta)
 
       if (m_bouncesVertically)
       {
-        if (bool shouldVerticalBounce = !doublesNearlyEqual(proposedOffset.y, confinedOffset.y))
+        // shouldVerticalBounce
+        if (!doublesNearlyEqual(proposedOffset.y, confinedOffset.y))
         {
           proposedOffset.y = originalOffset.y + (0.055 * delta.y);
         }

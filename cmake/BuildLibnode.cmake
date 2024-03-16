@@ -18,6 +18,12 @@ function(build_libnode WORK_DIR)
       WORKING_DIRECTORY "${WORK_DIR}"
       COMMAND_ERROR_IS_FATAL ANY)
 
+    # This is another workaround because clang 15 on macOS is not able to compile node v18. Upgrade of node is needed in the future
+    execute_process(
+      COMMAND sed -i".bak" "1s/^/#pragma clang diagnostic ignored \"-Wenum-constexpr-conversion\"/" deps/v8/src/base/bit-field.h
+      WORKING_DIRECTORY "${WORK_DIR}"
+      COMMAND_ERROR_IS_FATAL ANY)
+
     # Build node with ninja
     execute_process(
       COMMAND ninja -C "${WORK_DIR}/out/Release"

@@ -6,6 +6,26 @@ VGG Runtime only supports reading and rendering of `.daruma` files, which
 - you can use [VGG Daruma](https://verygoodgraphics.com/daruma) to convert from other design files online,
 - or you can use [VGG Sketch Parser](https://github.com/verygoodgraphics/vgg_sketch_parser) to convert from Sketch file locally.
 
+## Cross Platform Support
+
+| Platform\|Arch | X86  | ARM  | RISC-V | WASM |
+| -------------- | ---- | ---- | ------ | ---- |
+| Linux          | ✅    | ⛏️    | ⛏️      | N/A  |
+| Android        | ❌    | ⛏️    | ⭕️      | N/A  |
+| Harmony        | ❌    | ⛏️    | ⭕️      | N/A  |
+| iOS            | N/A  | ✅    | N/A    | N/A  |
+| macOS          | ✅    | ✅    | N/A    | N/A  |
+| Windows        | ⛏️    | ❌    | N/A    | N/A  |
+| WASM           | N/A  | N/A  | N/A    | ✅    |
+
+✅ Supported
+
+⛏️ Working in process
+
+⭕️ Not supported (but planned)
+
+❌ Not supported (no official plan)
+
 ## How To Build
 
 This project can be built with CMake using common practice.

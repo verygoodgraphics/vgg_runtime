@@ -66,11 +66,7 @@ int main(int argc, char** argv)
   cfg.appName = "SdlRuntime";
   cfg.windowSize[0] = 1920;
   cfg.windowSize[1] = 1080;
-#if defined(VGG_TARGET_ARCH_RISCV)
-  cfg.graphicsContextConfig.multiSample = 0;
-#else
   cfg.graphicsContextConfig.multiSample = 4;
-#endif
   cfg.graphicsContextConfig.stencilBit = 8;
   cfg.argc = argc;
   cfg.argv = argv;

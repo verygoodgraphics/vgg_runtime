@@ -7,7 +7,7 @@ function(build_libnode WORK_DIR)
 
   if (IS_NOT_BUILDABLE)
     # Configure
-    if (NOT VGG_VAR_TARGET_ARCH STREQUAL "X86")
+    if (VGG_VAR_TARGET_ARCH STREQUAL "X86")
       execute_process(
         COMMAND ./configure --enable-static --ninja
         WORKING_DIRECTORY ${WORK_DIR}

@@ -139,7 +139,7 @@ set(LIBNODE_DEPS
   icuucx
   llhttp
   nghttp2
-  nghttp3
+  #nghttp3
   ngtcp2
   node
   openssl
@@ -166,6 +166,7 @@ elseif(APPLE)
   if (VGG_VAR_TARGET_ARCH STREQUAL "ARM")
     target_link_libraries(vgg_libnode PRIVATE
       ${LIBNODE_DEPS}
+      nghttp3
       icutools
       v8_init
       base64_neon64
@@ -173,6 +174,7 @@ elseif(APPLE)
   else()
     target_link_libraries(vgg_libnode PRIVATE
       ${LIBNODE_DEPS}
+      nghttp3
       icutools
       v8_init
       base64_avx
@@ -200,21 +202,32 @@ else()
     ${NODE_FOLDER}/out/Release/obj/tools/icu
     ${NODE_FOLDER}/out/Release/obj/tools/v8_gypfiles
   )
-  target_link_libraries(vgg_libnode PRIVATE
-    "-Wl,--whole-archive"
-    ${LIBNODE_DEPS}
-    base64_avx
-    base64_avx2
-    base64_sse41
-    base64_sse42
-    base64_ssse3
-    "-Wl,--no-whole-archive"
-  )
+  if (VGG_VAR_TARGET_ARCH STREQUAL "ARM")
+    message(FATAL "Not yet support ARM platforms")
+  elseif (VGG_VAR_TARGET_ARCH STREQUAL "RISCV")
+    target_link_libraries(vgg_libnode PRIVATE
+      "-Wl,--whole-archive"
+      ${LIBNODE_DEPS}
+      "-Wl,--no-whole-archive"
+    )
+  else()
+    target_link_libraries(vgg_libnode PRIVATE
+      "-Wl,--whole-archive"
+      ${LIBNODE_DEPS}
+      nghttp3
+      base64_avx
+      base64_avx2
+      base64_sse41
+      base64_sse42
+      base64_ssse3
+      "-Wl,--no-whole-archive"
+    )
+  endif()
 endif()
 
 install(TARGETS vgg_libnode_stub DESTINATION lib)
 if(VGG_CONTAINER_FOR_QT)
-  install(TARGETS zlib 
+  install(TARGETS zlib
     COMPONENT container
     DESTINATION lib
   )

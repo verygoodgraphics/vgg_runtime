@@ -10,7 +10,7 @@ VGG Runtime only supports reading and rendering of `.daruma` files, which
 
 | Platform\|Arch | X86  | ARM  | RISC-V | WASM |
 | -------------- | ---- | ---- | ------ | ---- |
-| Linux          | ✅    | ⛏️    | ⛏️      | N/A  |
+| Linux          | ✅    | ⛏️    | ✅      | N/A  |
 | Android        | ❌    | ⛏️    | ⭕️      | N/A  |
 | Harmony        | ❌    | ⛏️    | ⭕️      | N/A  |
 | iOS            | N/A  | ✅    | N/A    | N/A  |

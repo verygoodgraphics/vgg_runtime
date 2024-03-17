@@ -7,10 +7,17 @@ function(build_libnode WORK_DIR)
 
   if (IS_NOT_BUILDABLE)
     # Configure
-    execute_process(
-      COMMAND ./configure --enable-static --ninja
-      WORKING_DIRECTORY ${WORK_DIR}
-      COMMAND_ERROR_IS_FATAL ANY)
+    if (NOT VGG_VAR_TARGET_ARCH STREQUAL "X86")
+      execute_process(
+        COMMAND ./configure --enable-static --ninja
+        WORKING_DIRECTORY ${WORK_DIR}
+        COMMAND_ERROR_IS_FATAL ANY)
+    else()
+      execute_process(
+        COMMAND ./configure --enable-static --ninja --openssl-no-asm
+        WORKING_DIRECTORY ${WORK_DIR}
+        COMMAND_ERROR_IS_FATAL ANY)
+    endif()
 
     # This is a patch if there is only python3 in search path, which is neccessary for building node with ninja
     execute_process(

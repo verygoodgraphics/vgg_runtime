@@ -17,6 +17,7 @@
 #include "AttributeGraph.hpp"
 #include "LayerAttribute.hpp"
 #include "ObjectAttribute.hpp"
+#include "TransformAttribute.hpp"
 
 namespace VGG::layer
 {
@@ -25,47 +26,51 @@ class RenderResultAttribute : public Attribute
 {
 public:
   RenderResultAttribute(
-    VRefCnt*                  cnt,
-    Ref<TransformAttribute>   transform,
-    Ref<LayerAttribute>       layerAttr,
-    Ref<StyleObjectAttribute> styleObject,
-    Ref<ShapeMaskAttribute>   shapeMask,
-    Ref<ShapeAttribute>       primitive)
+    VRefCnt*                       cnt,
+    Ref<TransformAttribute>        transform,
+    Ref<StyleObjectAttribute>      styleObject,
+    Ref<ShapeMaskAttribute>        shapeMask,
+    Ref<LayerPostProcessAttribute> layerPostProcess,
+    Ref<ShapeAttribute>            primitive)
     : Attribute(cnt)
     , m_transformAttr(transform)
-    , m_layerAttr(layerAttr)
+    , m_layerAttri(layerPostProcess)
     , m_styleObjectAttr(styleObject)
     , m_shapeMaskAttr(shapeMask)
     , m_shapeAttr(primitive)
   {
     observe(m_transformAttr);
     observe(m_styleObjectAttr);
+    observe(m_layerAttri);
     observe(m_shapeMaskAttr);
     observe(m_shapeAttr);
   }
 
-  void  render(Renderer* renderer);
+  void  render(Renderer* renderer) override;
   Bound onRevalidate() override;
   VGG_CLASS_MAKE(RenderResultAttribute);
 
 private:
-  void draw(Renderer* renderer);
+  std::pair<sk_sp<SkPicture>, Bound> revalidatePicture();
+
   void beginLayer(
     Renderer*            renderer,
     const SkPaint*       paint,
     const VShape*        clipShape,
     sk_sp<SkImageFilter> backdropFilter);
 
-  void                      endLayer(Renderer* renderer);
-  Ref<TransformAttribute>   m_transformAttr;
-  Ref<LayerAttribute>       m_layerAttr;
-  Ref<StyleObjectAttribute> m_styleObjectAttr;
-  Ref<ShapeMaskAttribute>   m_shapeMaskAttr;
-  Ref<ShapeAttribute>       m_shapeAttr;
-  sk_sp<SkPicture>          m_picture;
+  void endLayer(Renderer* renderer);
+
+  Ref<TransformAttribute>        m_transformAttr;
+  Ref<LayerPostProcessAttribute> m_layerAttri;
+  Ref<StyleObjectAttribute>      m_styleObjectAttr;
+  Ref<ShapeMaskAttribute>        m_shapeMaskAttr;
+  Ref<AlphaMaskAttribute>        m_alphaMaskAttr;
+  Ref<ShapeAttribute>            m_shapeAttr;
+  sk_sp<SkPicture>               m_picture;
 };
 
-Ref<RenderResultAttribute> renderResultDAG(
+Ref<RenderResultAttribute> renderResult(
   Ref<TransformAttribute>      transform,
   Ref<AlphaMaskAttribute>      alphaMask,
   Ref<LayerBlurAttribute>      layerBlur,
@@ -74,13 +79,11 @@ Ref<RenderResultAttribute> renderResultDAG(
   Ref<InnerShadowAttribute>    innerShadow,
   Ref<DropShadowAttribute>     dropShadow,
   Ref<ObjectAttribute>         object,
-  Ref<ShapeAttribute>          primitive)
+  Ref<ShapeAttribute>          shape)
 {
-  auto layerProcess = V_NEW<LayerPreProcessAttribute>(backgroundBlur);
-  auto layerPostProcess = V_NEW<LayerPostProcessAttribute>(alphaMask, layerBlur);
-  auto layer = V_NEW<LayerAttribute>(layerProcess, layerPostProcess);
-  auto style = V_NEW<StyleObjectAttribute>(innerShadow, dropShadow, object);
-  auto result = RenderResultAttribute::Make(transform, layer, style, shapeMask);
+  auto style = V_NEW<StyleObjectAttribute>(innerShadow, dropShadow, object, backgroundBlur);
+  auto layerPostProcess = V_NEW<LayerPostProcessAttribute>(alphaMask, layerBlur, style);
+  auto result = RenderResultAttribute::Make(transform, style, layerPostProcess, shapeMask, shape);
   return result;
 };
 } // namespace VGG::layer

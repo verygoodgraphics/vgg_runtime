@@ -15,6 +15,9 @@
  */
 #pragma once
 #include "AttributeGraph.hpp"
+#include "ImageFilterAttribute.hpp"
+#include "MaskAttribute.hpp"
+// #include "ObjectAttribute.hpp"
 
 namespace VGG::layer
 {
@@ -22,15 +25,16 @@ namespace VGG::layer
 class LayerPreProcessAttribute;
 class LayerPostProcessAttribute;
 
-class LayerEffectsAttribute : public Attribute
+class StyleObjectAttribute;
+
+class LayerBlurAttribute : public ImageFilterAttribute
 {
 public:
-  LayerEffectsAttribute(VRefCnt* cnt)
-    : Attribute(cnt)
+  LayerBlurAttribute(VRefCnt* cnt)
+    : ImageFilterAttribute(cnt)
   {
   }
-  virtual sk_sp<SkImageFilter> getImageFilter() const = 0;
-  VGG_CLASS_MAKE(LayerEffectsAttribute);
+  VGG_CLASS_MAKE(LayerBlurAttribute);
 
 private:
 };
@@ -52,87 +56,53 @@ private:
   sk_sp<SkImageFilter> m_filter;
 };
 
-class LayerPreProcessAttribute : public LayerEffectsAttribute
-{
-public:
-  LayerPreProcessAttribute(
-    VRefCnt*                     cnt,
-    LayerAttribute*              layerAttr,
-    Ref<BackgroundBlurAttribute> backgroundBlurAttribute,
-    Ref<ShapeAttribute>          primitive)
-    : LayerEffectsAttribute(cnt)
-    , m_backgroundBlurAttribute(backgroundBlurAttribute)
-    , m_primitiveAttr(primitive)
-    , m_layerAttri(layerAttr)
-  {
-    observe(m_backgroundBlurAttribute);
-  }
-  VGG_ATTRIBUTE(BackgroundBlur, Ref<BackgroundBlurAttribute>, m_backgroundBlurAttribute);
-  VGG_ATTRIBUTE(ShapeAttribute, Ref<ShapeAttribute>, m_primitiveAttr);
-  sk_sp<SkImageFilter> getImageFilter() const override
-  {
-    return m_backgroundBlurAttribute->getImageFilter();
-  }
-  Bound onRevalidate() override;
-
-private:
-  Ref<BackgroundBlurAttribute> m_backgroundBlurAttribute;
-  Ref<ShapeAttribute>          m_primitiveAttr;
-  LayerAttribute*              m_layerAttri;
-  sk_sp<SkImageFilter>         m_imageFilter;
-};
-
-class LayerPostProcessAttribute : public LayerEffectsAttribute
+class LayerPostProcessAttribute : public ImageFilterAttribute
 {
 public:
   LayerPostProcessAttribute(
-    VRefCnt*                cnt,
-    Ref<AlphaMaskAttribute> alphaMask,
-    Ref<LayerBlurAttribute> layerBlur,
-    Ref<ShapeAttribute>     primitive)
-    : LayerEffectsAttribute(cnt)
+    VRefCnt*                  cnt,
+    Ref<AlphaMaskAttribute>   alphaMask,
+    Ref<LayerBlurAttribute>   layerBlur,
+    Ref<StyleObjectAttribute> styleObjectAttr)
+    : ImageFilterAttribute(cnt)
     , m_alphaMaskAttr(alphaMask)
     , m_layerBlurAttr(layerBlur)
-    , m_primitiveAttr(primitive)
+    , m_styleObjectAttr(styleObjectAttr)
   {
     observe(m_alphaMaskAttr);
     observe(m_layerBlurAttr);
-    observe(m_primitiveAttr);
+    observe(m_styleObjectAttr);
+  }
+
+  Bound onRevalidate() override
+  {
+    // return union bound including dropshadow and object bound;
+
+    m_alphaMaskAttr->revalidate();
+    // m_styleObjectAttr->revalidate();
+    auto skRect = toSkRect(m_styleObjectAttr->bound());
+    m_imageFilter->computeFastBounds(skRect, &skRect);
+    //_->ensureDropShadowEffects(_->style.dropShadow, path);
+    return Bound();
+    // auto alphaMaskFilter = m_alphaMaskAttr->getImageFilter();
+    // auto layerBlurFilter = m_layerBlurAttr->getImageFilter();
+    // auto styleObjectFilter = m_styleObjectAttr->getImageFilter();
+    // m_imageFilter = SkImageFilters::Compose(
+    //   alphaMaskFilter, layerBlurFilter, styleObjectFilter);
+  }
+
+  sk_sp<SkImageFilter> getImageFilter() const override
+  {
+    return m_imageFilter;
   }
 
   VGG_CLASS_MAKE(LayerPostProcessAttribute);
 
 private:
-  Ref<AlphaMaskAttribute> m_alphaMaskAttr;
-  Ref<LayerBlurAttribute> m_layerBlurAttr;
-  Ref<ShapeAttribute>     m_primitiveAttr;
-  sk_sp<SkImageFilter>    m_imageFilter;
-};
-
-class LayerAttribute : public Attribute
-{
-public:
-  LayerAttribute(
-    VRefCnt*                       cnt,
-    Ref<LayerPreProcessAttribute>  preLayer,
-    Ref<LayerPostProcessAttribute> postLayer)
-    : Attribute(cnt)
-  {
-  }
-  VGG_ATTRIBUTE(PreProcess, Ref<LayerPreProcessAttribute>, m_preLayer);
-  VGG_ATTRIBUTE(PostProcess, Ref<LayerPostProcessAttribute>, m_postLayer);
-  VGG_CLASS_MAKE(LayerAttribute);
-  Bound onRevalidate() override
-  {
-    auto a = m_preLayer->revalidate();
-    auto b = m_postLayer->revalidate();
-    a.unionWith(b);
-    return a;
-  }
-
-private:
-  Ref<LayerPreProcessAttribute>  m_preLayer;
-  Ref<LayerPostProcessAttribute> m_postLayer;
+  Ref<AlphaMaskAttribute>   m_alphaMaskAttr;
+  Ref<LayerBlurAttribute>   m_layerBlurAttr;
+  Ref<StyleObjectAttribute> m_styleObjectAttr;
+  sk_sp<SkImageFilter>      m_imageFilter;
 };
 
 } // namespace VGG::layer

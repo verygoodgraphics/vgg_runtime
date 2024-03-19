@@ -15,6 +15,8 @@
  */
 #pragma once
 #include "AttributeGraph.hpp"
+#include "ImageFilterAttribute.hpp"
+#include "LayerAttribute.hpp"
 
 namespace VGG::layer
 {
@@ -62,21 +64,34 @@ class StyleObjectAttribute : public Attribute
 {
 public:
   StyleObjectAttribute(
-    VRefCnt*                  cnt,
-    Ref<InnerShadowAttribute> innerShadow,
-    Ref<DropShadowAttribute>  dropShadow,
-    Ref<ObjectAttribute>      object)
+    VRefCnt*                     cnt,
+    Ref<InnerShadowAttribute>    innerShadow,
+    Ref<DropShadowAttribute>     dropShadow,
+    Ref<ObjectAttribute>         object,
+    Ref<BackgroundBlurAttribute> backgroundBlur)
     : Attribute(cnt)
     , m_innerShadowAttr(innerShadow)
     , m_dropShadowAttr(dropShadow)
     , m_objectAttr(object)
+    , m_backgroundBlurAttr(backgroundBlur)
   {
     observe(m_innerShadowAttr);
     observe(m_dropShadowAttr);
     observe(m_objectAttr);
+    observe(m_backgroundBlurAttr);
   }
 
-  void draw(Renderer* renderer);
+  void render(Renderer* renderer) override;
+
+  sk_sp<SkImageFilter> getBackgroundBlurImageFilter() const
+  {
+    return m_backgroundBlurAttr->getImageFilter();
+  }
+
+  sk_sp<SkImageFilter> asImageFilter()
+  {
+    return m_objectImageFilter;
+  }
 
   Bound onRevalidate() override
   {
@@ -87,8 +102,11 @@ public:
   VGG_CLASS_MAKE(StyleObjectAttribute);
 
 private:
-  Ref<InnerShadowAttribute> m_innerShadowAttr;
-  Ref<DropShadowAttribute>  m_dropShadowAttr;
-  Ref<ObjectAttribute>      m_objectAttr;
+  Ref<InnerShadowAttribute>    m_innerShadowAttr;
+  Ref<DropShadowAttribute>     m_dropShadowAttr;
+  Ref<ObjectAttribute>         m_objectAttr;
+  Ref<BackgroundBlurAttribute> m_backgroundBlurAttr;
+
+  sk_sp<SkImageFilter> m_objectImageFilter;
 };
 } // namespace VGG::layer

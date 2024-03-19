@@ -269,12 +269,12 @@ void VLayer::render()
   VGG_IMPL(VLayer)
   SkCanvas* canvas = nullptr;
   canvas = _->skiaContext->canvas();
-  Timer t;
-  t.start();
+  // Timer t;
+  // t.start();
   _->renderInternal(canvas, enableDrawPosition());
-  t.stop();
-  auto tt = (int)t.duration().ms();
-  INFO("render time: %d ms", tt);
+  // t.stop();
+  // auto tt = (int)t.duration().ms();
+  // INFO("render time: %d ms", tt);
 }
 
 void VLayer::addRenderItem(std::shared_ptr<Renderable> item)

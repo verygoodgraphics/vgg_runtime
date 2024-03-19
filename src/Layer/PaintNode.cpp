@@ -667,10 +667,6 @@ void PaintNode::paintChildren(Renderer* renderer)
   }
 }
 
-void PaintNode::paintStyle(Renderer* renderer, const VShape& path, const VShape& outlineMask)
-{
-}
-
 Bound PaintNode::onDrawFill(
   Renderer*            renderer,
   sk_sp<SkBlender>     blender,

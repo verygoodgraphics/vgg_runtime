@@ -233,8 +233,6 @@ protected:
   Bound onRevalidate() override;
 
 protected:
-  void paintStyle(Renderer* renderer, const VShape& path, const VShape& mask);
-
   virtual Bound onDrawFill(
     Renderer*            renderer,
     sk_sp<SkBlender>     blender,

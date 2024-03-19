@@ -97,6 +97,15 @@ public:
     return m_canvas;
   }
 
+  Renderer createNew(SkCanvas* canvas)
+  {
+    Renderer r;
+    r.m_canvas = canvas;
+    r.m_enableDrawDebugBound = m_enableDrawDebugBound;
+    r.m_enableDrawDebugPath = m_enableDrawDebugPath;
+    return r;
+  }
+
 private:
   friend class Frame;
   friend class Frame__pImpl;

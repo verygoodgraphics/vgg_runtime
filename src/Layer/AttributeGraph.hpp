@@ -18,6 +18,7 @@
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VNode.hpp"
 #include "Layer/Core/VShape.hpp"
+// #include "Layer/LayerAttribute.hpp"
 #include "Layer/Memory/VNew.hpp"
 
 #include <core/SkPicture.h>
@@ -100,68 +101,10 @@ private:
   VShape m_shape;
 };
 
-class TransformAttribute : public Attribute
-{
-public:
-  TransformAttribute(VRefCnt* cnt, Transform transform)
-    : Attribute(cnt)
-    , m_transform(transform)
-  {
-  }
-  VGG_ATTRIBUTE(Transform, Transform, m_transform);
-  VGG_CLASS_MAKE(TransformAttribute);
-
-private:
-  Transform m_transform;
-};
-
 class LayerAttribute;
 class PaintNode;
 class LayerPostProcessAttribute;
 
-class AlphaMaskAttribute : public Attribute
-{
-public:
-  using MaskMap = std::unordered_map<std::string, PaintNode*>;
-  AlphaMaskAttribute(VRefCnt* cnt, LayerPostProcessAttribute* layer)
-    : Attribute(cnt)
-    , m_postProcessLayer(layer)
-  {
-  }
-
-  VGG_CLASS_MAKE(AlphaMaskAttribute);
-
-  VGG_ATTRIBUTE_PTR(MaskNode, PaintNode, m_maskNode);
-  VGG_ATTRIBUTE_PTR(PostProcessLayer, LayerPostProcessAttribute, m_postProcessLayer);
-  VGG_ATTRIBUTE(AlphaMasks, std::vector<AlphaMask>, m_alphaMasks);
-
-  Bound onRevalidate() override
-  {
-    return Bound();
-  }
-
-private:
-  std::pair<sk_sp<SkImageFilter>, SkRect> evalAlphaMaskFilter(
-    sk_sp<SkImageFilter> input,
-    const SkRect&        crop,
-    const MaskMap&       maskObjects);
-  sk_sp<SkShader>            m_alphaMaskShader;
-  std::vector<AlphaMask>     m_alphaMasks;
-  PaintNode*                 m_maskNode;
-  LayerPostProcessAttribute* m_postProcessLayer;
-};
-
-class LayerBlurAttribute : public Attribute
-{
-public:
-  LayerBlurAttribute(VRefCnt* cnt)
-    : Attribute(cnt)
-  {
-  }
-  VGG_CLASS_MAKE(LayerBlurAttribute);
-
-private:
-};
 
 class DropShadowAttribute : public Attribute
 {

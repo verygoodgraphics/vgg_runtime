@@ -17,6 +17,7 @@
 #include "RenderResultAttribute.hpp"
 #include "VSkia.hpp"
 #include "Renderer.hpp"
+#include "Effects.hpp"
 
 #include <core/SkCanvas.h>
 
@@ -32,12 +33,16 @@ void RenderResultAttribute::render(Renderer* renderer)
   canvas->drawPicture(m_picture);
 }
 
-void RenderResultAttribute::draw(Renderer* renderer)
+std::pair<sk_sp<SkPicture>, Bound> RenderResultAttribute::revalidatePicture()
 {
-  auto dropbackFilter = m_layerAttr->getPreProcess()->getImageFilter();
-  auto layerFilter = m_layerAttr->getPostProcess()->getImageFilter();
+  Renderer  rd;
+  Renderer* renderer = &rd;
 
-  const auto newLayer = dropbackFilter || layerFilter; //|| !_->alphaMaskBy.empty();
+  auto dropbackFilter = m_styleObjectAttr->getBackgroundBlurImageFilter();
+  auto layerFilter = m_layerAttri->getImageFilter();
+  auto alphaMaskFilter = m_alphaMaskAttr->getImageFilter();
+
+  const auto newLayer = dropbackFilter || layerFilter || alphaMaskFilter;
   auto       path = m_shapeAttr->getShape();
   VShape     shapeMask = m_shapeMaskAttr->getShape();
 
@@ -52,46 +57,37 @@ void RenderResultAttribute::draw(Renderer* renderer)
     // objectBound.join(_->styleDisplayList->bounds());
     // _->ensureDropShadowEffects(_->style.dropShadow, path);
     // objectBound.join(_->dropShadowEffects->bounds());
-    // SkRect layerBound =
-    //   layerFilter ? layerFilter.get()->computeFastBounds(objectBound) : objectBound;
-    //
-    // if (!_->alphaMaskBy.empty())
-    // {
-    //   auto alphaMaskIter = AlphaMaskIterator(_->alphaMaskBy);
-    //   layerFilter = MaskBuilder::makeAlphaMaskWith(
-    //     layerFilter,
-    //     this,
-    //     renderer->maskObjects(),
-    //     alphaMaskIter,
-    //     layerBound,
-    //     0);
-    // }
-
-    // if (dropbackFilter)
-    // {
-    //   if (auto df = _->styleDisplayList->asImageFilter(); df)
-    //   {
-    //     auto blender = getOrCreateBlender("maskOut", g_maskOutBlender);
-    //     dropbackFilter = SkImageFilters::Blend(blender, df, dropbackFilter, objectBound);
-    //   }
-    // }
+    SkRect layerBound = toSkRect(m_layerAttri->bound());
+    if (alphaMaskFilter)
+    {
+      layerFilter =
+        SkImageFilters::Blend(SkBlendMode::kSrcIn, alphaMaskFilter, layerFilter, layerBound);
+    }
+    if (dropbackFilter)
+    {
+      if (auto df = m_styleObjectAttr->asImageFilter(); df)
+      {
+        auto blender = getOrCreateBlender("maskOut", g_maskOutBlender);
+        dropbackFilter =
+          SkImageFilters::Blend(blender, df, dropbackFilter, toSkRect(m_styleObjectAttr->bound()));
+      }
+    }
     SkPaint layerPaint;
     layerPaint.setAntiAlias(true);
     layerPaint.setImageFilter(layerFilter);
-    auto   renderBounds = toSkRect(bound());
-    VShape clipShape(renderBounds);
+    VShape clipShape(layerBound);
     beginLayer(renderer, &layerPaint, &clipShape, dropbackFilter);
   }
-  m_styleObjectAttr->draw(renderer);
+  m_styleObjectAttr->render(renderer);
   if (newLayer)
   {
     endLayer(renderer);
   }
-
   if (!shapeMask.isEmpty())
   {
     renderer->canvas()->restore();
   }
+  return { sk_sp<SkPicture>(), bound() };
 }
 
 void RenderResultAttribute::beginLayer(
@@ -121,9 +117,11 @@ Bound RenderResultAttribute::onRevalidate()
   m_shapeAttr->revalidate();
   m_shapeMaskAttr->revalidate();
   m_transformAttr->revalidate();
-  auto layerBound = toSkRect(m_layerAttr->revalidate());
   auto styleObjectBound = toSkRect(m_styleObjectAttr->revalidate());
+  auto layerBound = toSkRect(m_layerAttri->revalidate());
   layerBound.join(styleObjectBound);
-  return Bound{ layerBound.x(), layerBound.y(), layerBound.width(), layerBound.height() };
+  auto [pic, bound] = revalidatePicture();
+  m_picture = std::move(pic);
+  return bound;
 }
 } // namespace VGG::layer

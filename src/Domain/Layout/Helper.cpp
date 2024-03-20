@@ -243,5 +243,138 @@ const nlohmann::json* getElementInTree(const nlohmann::json& node, const std::st
   return nullptr;
 }
 
+void applyOverridesDetailToTree(
+  nlohmann::json&           json,
+  std::stack<std::string>   reversedPath,
+  const nlohmann::json&     value,
+  std::vector<std::string>& outDirtyNodeIds)
+{
+  if (!json.is_object() && !json.is_array())
+  {
+    return;
+  }
+
+  for (auto& el : json.items())
+  {
+    applyOverridesDetailToTree(el.value(), reversedPath, value, outDirtyNodeIds);
+  }
+
+  if (!isLayoutNode(json))
+  {
+    return;
+  }
+
+  applyOverridesDetail(json, reversedPath, value, outDirtyNodeIds);
+}
+
+void applyOverridesDetail(
+  nlohmann::json&           json,
+  std::stack<std::string>   reversedPath,
+  const nlohmann::json&     value,
+  std::vector<std::string>& outDirtyNodeIds)
+{
+  if (reversedPath.empty())
+  {
+    return;
+  }
+
+  auto key = reversedPath.top();
+
+  reversedPath.pop();
+  auto isLastKey = reversedPath.empty();
+  if (isLastKey)
+  {
+    applyLeafOverrides(json, key, value, outDirtyNodeIds);
+    return;
+  }
+
+  if (key == "*")
+  {
+    for (auto& el : json.items())
+    {
+      applyOverridesDetail(el.value(), reversedPath, value, outDirtyNodeIds);
+    }
+  }
+  else if (json.is_array())
+  {
+    auto path = nlohmann::json::json_pointer{ "/" + key };
+    if (json.contains(path))
+    {
+      applyOverridesDetail(json[path], reversedPath, value, outDirtyNodeIds);
+    }
+  }
+  else
+  {
+    applyOverridesDetail(json[key], reversedPath, value, outDirtyNodeIds);
+  }
+}
+
+void applyLeafOverrides(
+  nlohmann::json&           json,
+  const std::string&        key,
+  const nlohmann::json&     value,
+  std::vector<std::string>& outDirtyNodeIds)
+{
+  if (value.is_null()) // A null value indicates deletion of the element
+  {
+    deleteLeafElement(json, key);
+    return;
+  }
+
+  if (key == "*")
+  {
+    for (auto& el : json.items())
+    {
+      el.value() = value;
+    }
+  }
+  else if (json.is_array())
+  {
+    auto path = nlohmann::json::json_pointer{ "/" + key };
+    if (json.contains(path))
+    {
+      json[path] = value;
+    }
+  }
+  else
+  {
+    json[key] = value;
+
+    if (key == K_VISIBLE)
+    {
+      outDirtyNodeIds.push_back(json[K_ID]);
+    }
+  }
+}
+
+void deleteLeafElement(nlohmann::json& json, const std::string& key)
+{
+  if (key == "*")
+  {
+    while (true)
+    {
+      auto it = json.begin();
+      if (it == json.end())
+      {
+        break;
+      }
+
+      json.erase(it.key());
+    }
+  }
+  else if (json.is_array())
+  {
+    auto path = nlohmann::json::json_pointer{ "/" + key };
+    if (json.contains(path))
+    {
+      auto index = std::stoul(key);
+      json.erase(index);
+    }
+  }
+  else
+  {
+    json.erase(key);
+  }
+}
 } // namespace Layout
 } // namespace VGG

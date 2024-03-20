@@ -44,6 +44,8 @@ inline std::ostream& operator<<(std::ostream& os, const glm::mat3 m)
 namespace VGG::layer
 {
 // TODO:: rename to RenderContext
+
+class PaintNode;
 class Renderer
 {
   using InternalObjectMap = std::unordered_map<std::string, PaintNode*>;

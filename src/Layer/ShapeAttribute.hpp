@@ -15,25 +15,39 @@
  */
 #pragma once
 
-#include "Layer/Core/Attrs.hpp"
-#include "Layer/Core/VNode.hpp"
 #include "AttributeNode.hpp"
 
 namespace VGG::layer
 {
 
-class TransformAttribute : public Attribute
+class ShapeAttribute : public Attribute
 {
 public:
-  TransformAttribute(VRefCnt* cnt, Transform transform)
+  ShapeAttribute(VRefCnt* cnt)
     : Attribute(cnt)
-    , m_transform(transform)
   {
   }
-  VGG_ATTRIBUTE(Transform, Transform, m_transform);
-  VGG_CLASS_MAKE(TransformAttribute);
+
+  virtual const VShape& getShape() const
+  {
+    return m_shape;
+  }
+
+  void setShape(const VShape& shape)
+  {
+    if (m_shape == shape)
+      return;
+    m_shape = shape;
+    invalidate();
+  }
+
+  Bound onRevalidate() override
+  {
+    const auto rect = m_shape.bounds();
+    return Bound{ rect.x(), rect.y(), rect.width(), rect.height() };
+  }
 
 private:
-  Transform m_transform;
+  VShape m_shape;
 };
 } // namespace VGG::layer

@@ -13,27 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
-
-#include "Layer/Core/Attrs.hpp"
-#include "Layer/Core/VNode.hpp"
 #include "AttributeNode.hpp"
+#include "Mask.hpp"
+#include "ObjectAttribute.hpp"
+
+#include "Layer/Renderer.hpp"
+#include <core/SkCanvas.h>
 
 namespace VGG::layer
 {
 
-class TransformAttribute : public Attribute
-{
-public:
-  TransformAttribute(VRefCnt* cnt, Transform transform)
-    : Attribute(cnt)
-    , m_transform(transform)
-  {
-  }
-  VGG_ATTRIBUTE(Transform, Transform, m_transform);
-  VGG_CLASS_MAKE(TransformAttribute);
+// Bound StyleObjectAttribute::onRevalidate()
+// {
+// }
 
-private:
-  Transform m_transform;
-};
 } // namespace VGG::layer

@@ -19,13 +19,14 @@
 #include "Event.hpp"
 #include "ISdk.hpp"
 #include "VggTypes.hpp"
+#include "VggPackage.h"
 
 #include <memory>
 
 namespace VGG
 {
 
-class IContainer
+class VGG_RUNTIME_DLL_DECLARE IContainer
 {
 protected:
   virtual IContainer* container() = 0;

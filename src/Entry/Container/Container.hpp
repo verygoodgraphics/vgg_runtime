@@ -32,7 +32,7 @@ class SkiaGraphicsContext;
 }
 
 class ContainerImpl;
-class Container : public IContainer
+class VGG_RUNTIME_DLL_DECLARE Container : public IContainer
 {
   std::shared_ptr<ContainerImpl> m_impl;
 

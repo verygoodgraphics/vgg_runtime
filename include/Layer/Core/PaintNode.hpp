@@ -31,6 +31,7 @@
 class SkCanvas;
 class SkImageFilter;
 class SkImage;
+class SkBlender;
 class Painter;
 
 namespace VGG::layer

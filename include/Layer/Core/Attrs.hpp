@@ -23,8 +23,6 @@
 #include "Layer/Core/VType.hpp"
 #include "Utility/Log.hpp"
 
-#include <include/effects/SkGradientShader.h>
-#include <include/effects/SkDashPathEffect.h>
 #include <include/core/SkMatrix.h>
 #include <glm/glm.hpp>
 

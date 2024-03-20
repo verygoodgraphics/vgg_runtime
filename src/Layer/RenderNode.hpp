@@ -15,7 +15,7 @@
  */
 #pragma once
 #include "AttributeNode.hpp"
-#include "ImageFilterAttribute.hpp"
+#include "ShapeAttribute.hpp"
 #include "LayerAttribute.hpp"
 #include "ObjectAttribute.hpp"
 #include "MaskAttribute.hpp"
@@ -65,15 +65,15 @@ public:
     Accessor() = default;
     Accessor(
       TransformAttribute*   transformAttr,
+      ShapeAttribute*       shapeAttr,
       AlphaMaskAttribute*   alphaMaskAttr,
       ShapeMaskAttribute*   shapemaskAttr,
-      ShapeAttribute*       shapeMask,
       DropShadowAttribute*  dropShadowAttr,
       InnerShadowAttribute* innerShadowAttr)
       : m_transformAttr(transformAttr)
       , m_alphaMaskAttr(alphaMaskAttr)
-      , m_shapemaskAttr(shapemaskAttr)
-      , m_shapeMask(shapeMask)
+      , m_shapeMaskAttr(shapemaskAttr)
+      , m_shapeAttr(shapeAttr)
       , m_dropShadowAttr(dropShadowAttr)
       , m_innerShadowAttr(innerShadowAttr)
     {
@@ -81,8 +81,8 @@ public:
     friend class RenderNode;
     TransformAttribute*   m_transformAttr;
     AlphaMaskAttribute*   m_alphaMaskAttr;
-    ShapeMaskAttribute*   m_shapemaskAttr;
-    ShapeAttribute*       m_shapeMask;
+    ShapeMaskAttribute*   m_shapeMaskAttr;
+    ShapeAttribute*       m_shapeAttr;
     DropShadowAttribute*  m_dropShadowAttr;
     InnerShadowAttribute* m_innerShadowAttr;
   };

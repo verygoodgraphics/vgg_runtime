@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 #pragma once
-#include "ImageFilterAttribute.hpp"
 #include "AttributeNode.hpp"
-#include "LayerAttribute.hpp"
+#include "ImageFilterAttribute.hpp"
 #include "ShapeAttribute.hpp"
 
 #include <core/SkImageFilter.h>

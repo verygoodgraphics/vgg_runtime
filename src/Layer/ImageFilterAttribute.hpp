@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 #pragma once
-#include "AttributeGraph.hpp"
-
+#include "AttributeNode.hpp"
+#include <core/SkImageFilter.h>
 namespace VGG::layer
 {
 

@@ -120,6 +120,11 @@ public:
     return ObjectShader(maskShader, pic, cropRect);
   }
 
+  sk_sp<SkPicture> finishAsPicture(const SkRect& cropRect)
+  {
+    return m_rec->finishRecordingAsPictureWithCull(cropRect);
+  }
+
 private:
   SkMatrix                           m_matrix;
   SkRect                             m_bound;

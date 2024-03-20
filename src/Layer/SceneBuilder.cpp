@@ -38,7 +38,7 @@
 
 namespace
 {
-
+using namespace VGG::layer;
 PaintNodePtr makeContourNode(VAllocator* alloc)
 {
   auto p = makePaintNodePtr(alloc, "contour", VGG_CONTOUR, "");

@@ -27,7 +27,7 @@
 
 namespace
 {
-
+using namespace VGG::layer;
 struct CacheState
 {
   using TileMap =

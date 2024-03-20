@@ -15,13 +15,8 @@
  */
 #pragma once
 
-#include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VNode.hpp"
-#include "Layer/Core/VShape.hpp"
-// #include "Layer/LayerAttribute.hpp"
 #include "Layer/Memory/VNew.hpp"
-
-#include <core/SkPicture.h>
 
 #define VGG_ATTRIBUTE(attrName, attrType, attrContainer)                                           \
   const attrType& get##attrName() const                                                            \
@@ -59,6 +54,28 @@
 
 namespace VGG::layer
 {
+
+template<typename T>
+class ArrayT : public std::vector<T>
+{
+public:
+  bool operator==(const ArrayT& other) const
+  {
+    if (this->size() != other.size())
+      return false;
+    for (int i = 0; i < std::min(this->size(), other.size()); ++i)
+    {
+      if ((*this)[i] != other[i])
+        return false;
+    }
+    return true;
+  }
+
+  bool operator!=(const ArrayT& other) const
+  {
+    return !(*this == other);
+  }
+};
 
 class Renderer;
 class Attribute : public VNode

@@ -16,6 +16,7 @@
 #pragma once
 
 #include "AttributeNode.hpp"
+#include "Layer/Core/VShape.hpp"
 
 namespace VGG::layer
 {

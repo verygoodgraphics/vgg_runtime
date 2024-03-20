@@ -25,6 +25,8 @@
 
 #include <core/SkBlender.h>
 #include <include/effects/SkRuntimeEffect.h>
+#include <include/effects/SkGradientShader.h>
+#include <include/effects/SkDashPathEffect.h>
 #include <include/core/SkSamplingOptions.h>
 
 namespace VGG::layer

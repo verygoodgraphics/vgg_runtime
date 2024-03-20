@@ -18,7 +18,7 @@
 #include "Layer/Core/VUtils.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
-#include "Layer/Scene.hpp"
+// #include "Layer/Scene.hpp"
 #include "Layer/SkSL.hpp"
 
 #include "Math/Algebra.hpp"

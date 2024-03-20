@@ -26,6 +26,7 @@
 #include <core/SkFontArguments.h>
 #include <core/SkFontStyle.h>
 #include <core/SkTypes.h>
+#include <effects/SkDashPathEffect.h>
 #include <modules/skparagraph/include/DartTypes.h>
 #include <modules/skparagraph/include/FontCollection.h>
 #include <modules/skparagraph/include/Metrics.h>
@@ -35,6 +36,7 @@
 using namespace skia::textlayout;
 namespace
 {
+using namespace VGG::layer;
 float findWeight(std::string_view key)
 {
   static std::vector<std::pair<std::string_view, float>> s_fontWeightMap = {

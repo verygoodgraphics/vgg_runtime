@@ -15,36 +15,62 @@
  */
 #pragma once
 #include "ImageFilterAttribute.hpp"
+#include "AttributeNode.hpp"
+#include "LayerAttribute.hpp"
+#include "ShapeAttribute.hpp"
+
+#include <core/SkImageFilter.h>
 
 namespace VGG::layer
 {
 
+class PaintNode;
+class ObjectAttribute;
+class LayerAttribute;
+using MaskMap = std::unordered_map<std::string, PaintNode*>;
 class AlphaMaskAttribute : public ImageFilterAttribute
 {
 public:
-  using MaskMap = std::unordered_map<std::string, PaintNode*>;
-  AlphaMaskAttribute(VRefCnt* cnt, PaintNode* maskedNode)
-    : ImageFilterAttribute(cnt)
-    , m_maskedNode(maskedNode)
-  {
-  }
+  AlphaMaskAttribute(VRefCnt* cnt, PaintNode* maskedNode, Ref<ImageFilterAttribute> layerAttribute);
 
   VGG_CLASS_MAKE(AlphaMaskAttribute);
   VGG_ATTRIBUTE_PTR(MaskNode, PaintNode, m_maskedNode);
+  VGG_ATTRIBUTE_PTR(MaskMap, MaskMap, m_maskMap);
   VGG_ATTRIBUTE(AlphaMasks, std::vector<AlphaMask>, m_alphaMasks);
-
-  Bound onRevalidate() override
+  void                 setInputImageFilter(Ref<ImageFilterAttribute> input);
+  Bound                onRevalidate() override;
+  sk_sp<SkImageFilter> getImageFilter() const override
   {
-    return Bound();
+    return m_alphaMaskFilter;
   }
 
 private:
-  std::pair<sk_sp<SkImageFilter>, SkRect> evalAlphaMaskFilter(
-    sk_sp<SkImageFilter> input,
-    const SkRect&        crop,
-    const MaskMap&       maskObjects);
-  sk_sp<SkShader>        m_alphaMaskShader;
-  std::vector<AlphaMask> m_alphaMasks;
-  PaintNode*             m_maskedNode;
+  Ref<ImageFilterAttribute> m_inputFilter;
+  std::vector<AlphaMask>    m_alphaMasks;
+  PaintNode*                m_maskedNode;
+  MaskMap*                  m_maskMap;
+  sk_sp<SkImageFilter>      m_alphaMaskFilter;
+};
+
+class ShapeMaskAttribute : public ShapeAttribute
+{
+public:
+  ShapeMaskAttribute(VRefCnt* cnt)
+    : ShapeAttribute(cnt)
+  {
+  }
+
+  VGG_ATTRIBUTE(MaskID, std::vector<std::string>, m_maskID);
+  VGG_ATTRIBUTE_PTR(MaskNode, PaintNode, m_maskedNode);
+  VGG_ATTRIBUTE_PTR(MaskMap, MaskMap, m_maskMap);
+  VGG_CLASS_MAKE(ShapeMaskAttribute);
+
+  Bound onRevalidate() override;
+
+private:
+  VShape                   m_shape;
+  std::vector<std::string> m_maskID;
+  PaintNode*               m_maskedNode;
+  MaskMap*                 m_maskMap;
 };
 } // namespace VGG::layer

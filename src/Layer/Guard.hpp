@@ -19,6 +19,9 @@
 
 #include "VSkia.hpp"
 
+namespace VGG::layer
+{
+
 class SaveLayerContextGuard
 {
   SkCanvas*              m_canvas;
@@ -126,3 +129,5 @@ private:
   SaveLayerGuard& operator=(SaveLayerGuard&&) = delete;
   SaveLayerGuard& operator=(const SaveLayerGuard&) = delete;
 };
+
+} // namespace VGG::layer

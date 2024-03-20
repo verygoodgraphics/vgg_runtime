@@ -48,6 +48,14 @@ VShape::VShape(const VShape& shape)
   *this = shape;
 }
 
+bool VShape::operator==(const VShape& others) const
+{
+  if (type() != others.type())
+    return false;
+  // TODO::
+  return false;
+}
+
 VShape& VShape::operator=(const VShape& shape)
 {
   if (shape.type() != EMPTY)

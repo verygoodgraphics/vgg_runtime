@@ -16,7 +16,6 @@
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include <core/SkClipOp.h>
-#include <core/SkPaint.h>
 #include <core/SkPath.h>
 #include <core/SkPathTypes.h>
 #include <core/SkRRect.h>
@@ -25,6 +24,7 @@
 #include <variant>
 
 class SkCanvas;
+class SkPaint;
 namespace VGG::layer
 {
 
@@ -111,6 +111,8 @@ public:
   ~VShape();
   VShape(const VShape& shape);
   VShape& operator=(const VShape& shape);
+
+  bool operator==(const VShape& others) const;
 
   void setPath(const SkPath& path);
   void setContour(const ContourPtr& contour);

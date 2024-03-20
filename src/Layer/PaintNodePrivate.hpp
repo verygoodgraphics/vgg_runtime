@@ -58,6 +58,86 @@
 namespace VGG::layer
 {
 
+namespace internal_draw
+{
+inline SkRect drawBorder(
+  Renderer*                  renderer,
+  const VShape&              border,
+  const SkRect&              bounds,
+  const std::vector<Border>& borders,
+  sk_sp<SkBlender>           blender)
+{
+  SkRect     resultBounds = bounds;
+  const auto shapeBounds = resultBounds;
+  for (const auto& b : borders)
+  {
+    if (!b.isEnabled || b.thickness <= 0)
+      continue;
+
+    SkPaint strokePen;
+    strokePen.setAntiAlias(true);
+    strokePen.setBlender(blender);
+    // strokePen.setImageFilter(imageFilter);
+    populateSkPaint(b, shapeBounds, strokePen);
+    bool  inCenter = true;
+    float strokeWidth = b.thickness;
+    if (b.position == PP_INSIDE && border.isClosed())
+    {
+      // inside
+      strokeWidth = 2.f * b.thickness;
+      renderer->canvas()->save();
+      border.clip(renderer->canvas(), SkClipOp::kIntersect);
+      inCenter = false;
+    }
+    else if (b.position == PP_OUTSIDE && border.isClosed())
+    {
+      // outside
+      strokeWidth = 2.f * b.thickness;
+      renderer->canvas()->save();
+      border.clip(renderer->canvas(), SkClipOp::kDifference);
+      inCenter = false;
+    }
+    strokePen.setStrokeWidth(strokeWidth);
+    border.draw(renderer->canvas(), strokePen);
+    SkRect borderBounds;
+    strokePen.computeFastBounds(shapeBounds, &borderBounds);
+    resultBounds.join(borderBounds);
+    if (!inCenter)
+    {
+      renderer->canvas()->restore();
+    }
+  }
+
+  if (false)
+  {
+    auto                 pt = border.asPath();
+    std::vector<SkPoint> pts(pt.countPoints());
+    SkPaint              p;
+    pt.getPoints(pts.data(), pts.size());
+    p.setStrokeWidth(2);
+    p.setColor(SK_ColorRED);
+    SkFont a;
+    renderer->canvas()->drawPoints(SkCanvas::kPoints_PointMode, pts.size(), pts.data(), p);
+    for (std::size_t i = 0; i < pts.size(); i++)
+    {
+      SkPaint textPaint;
+      textPaint.setStrokeWidth(0.5);
+      textPaint.setColor(SK_ColorBLACK);
+      std::string index = std::to_string(i);
+      renderer->canvas()->drawSimpleText(
+        index.c_str(),
+        index.size(),
+        SkTextEncoding::kUTF8,
+        pts[i].x(),
+        pts[i].y(),
+        a,
+        textPaint);
+    }
+  }
+  return resultBounds;
+}
+} // namespace internal_draw
+
 class PaintNode__pImpl // NOLINT
 {
   VGG_DECL_API(PaintNode);
@@ -110,7 +190,8 @@ public:
       auto           recorder = rec.beginRecording(styleBounds, SkMatrix::I());
 
       const auto fillBounds = toSkRect(q_ptr->onDrawFill(recorder, blender, 0, shape, mask));
-      const auto borderBounds = drawBorder(recorder, shape, shape.bounds(), borders, blender);
+      const auto borderBounds =
+        internal_draw::drawBorder(recorder, shape, shape.bounds(), borders, blender);
       styleBounds.join(fillBounds);
       styleBounds.join(borderBounds);
       auto mat = SkMatrix::Translate(styleBounds.x(), styleBounds.y());
@@ -190,83 +271,6 @@ public:
       return;
     }
     onDrawStyleImpl(renderer, *path, VShape(), blender);
-  }
-
-  SkRect drawBorder(
-    Renderer*                  renderer,
-    const VShape&              border,
-    const SkRect&              bounds,
-    const std::vector<Border>& borders,
-    sk_sp<SkBlender>           blender)
-  {
-    SkRect     resultBounds = bounds;
-    const auto shapeBounds = resultBounds;
-    for (const auto& b : borders)
-    {
-      if (!b.isEnabled || b.thickness <= 0)
-        continue;
-
-      SkPaint strokePen;
-      strokePen.setAntiAlias(true);
-      strokePen.setBlender(blender);
-      // strokePen.setImageFilter(imageFilter);
-      populateSkPaint(b, shapeBounds, strokePen);
-      bool  inCenter = true;
-      float strokeWidth = b.thickness;
-      if (b.position == PP_INSIDE && border.isClosed())
-      {
-        // inside
-        strokeWidth = 2.f * b.thickness;
-        renderer->canvas()->save();
-        border.clip(renderer->canvas(), SkClipOp::kIntersect);
-        inCenter = false;
-      }
-      else if (b.position == PP_OUTSIDE && border.isClosed())
-      {
-        // outside
-        strokeWidth = 2.f * b.thickness;
-        renderer->canvas()->save();
-        border.clip(renderer->canvas(), SkClipOp::kDifference);
-        inCenter = false;
-      }
-      strokePen.setStrokeWidth(strokeWidth);
-      border.draw(renderer->canvas(), strokePen);
-      SkRect borderBounds;
-      strokePen.computeFastBounds(shapeBounds, &borderBounds);
-      resultBounds.join(borderBounds);
-      if (!inCenter)
-      {
-        renderer->canvas()->restore();
-      }
-    }
-
-    if (false)
-    {
-      auto                 pt = border.asPath();
-      std::vector<SkPoint> pts(pt.countPoints());
-      SkPaint              p;
-      pt.getPoints(pts.data(), pts.size());
-      p.setStrokeWidth(2);
-      p.setColor(SK_ColorRED);
-      SkFont a;
-      renderer->canvas()->drawPoints(SkCanvas::kPoints_PointMode, pts.size(), pts.data(), p);
-      for (std::size_t i = 0; i < pts.size(); i++)
-      {
-        SkPaint textPaint;
-        textPaint.setStrokeWidth(0.5);
-        textPaint.setColor(SK_ColorBLACK);
-        std::string index = std::to_string(i);
-        renderer->canvas()->drawSimpleText(
-          index.c_str(),
-          index.size(),
-          SkTextEncoding::kUTF8,
-          pts[i].x(),
-          pts[i].y(),
-          a,
-          textPaint);
-      }
-    }
-    return resultBounds;
   }
 
   sk_sp<SkImageFilter> blurImageFilter()

@@ -21,6 +21,8 @@
 
 #include "Helper.hpp"
 #include "JsonKeys.hpp"
+
+#include "Domain/Model/Element.hpp"
 #include "Utility/Log.hpp"
 
 #include <algorithm>
@@ -37,6 +39,7 @@ constexpr auto K_PREFIX = "referenced_style_";
 constexpr auto K_BORDER_PREFIX = "style.borders";
 
 namespace nl = nlohmann;
+using namespace VGG::Domain;
 using namespace VGG::Layout;
 using namespace VGG::Model;
 
@@ -115,6 +118,9 @@ std::pair<nlohmann::json, nlohmann::json> ExpandSymbol::run()
 
   m_layout.reset(new Layout{ JsonDocumentPtr{ new ReferenceJsonDocument{ m_tmpOutDesignJson } },
                              getLayoutRules() });
+  m_sharedLayout.reset(
+    new Layout{ JsonDocumentPtr{ new ReferenceJsonDocument{ m_tmpOutDesignJson } },
+                getLayoutRules() });
 
   // expand instances in `frames` only
   for (auto& el : m_tmpOutDesignJson[K_FRAMES].items())
@@ -122,10 +128,13 @@ std::pair<nlohmann::json, nlohmann::json> ExpandSymbol::run()
     std::vector<std::string> instanceIdStack{};
     expandInstance(el.value(), instanceIdStack);
   }
-  for (auto& frame : m_outDesignModel.frames)
+
+  m_designDocument = std::make_shared<Domain::DesignDocument>(m_designModel);
+  m_designDocument->buildSubtree();
+  for (auto& page : m_designDocument->children())
   {
     std::vector<std::string> instanceIdStack{};
-    traverseContainerNode(frame, instanceIdStack);
+    traverseElementNode(page, instanceIdStack);
   }
 
   m_outDesignModel = m_tmpOutDesignJson;
@@ -159,9 +168,20 @@ void ExpandSymbol::collectMaster(const nlohmann::json& json)
 
 void ExpandSymbol::collectMasters()
 {
-  for (auto& frame : m_outDesignModel.frames)
+  for (auto& frame : m_designModel.frames)
   {
     collectMasterFromContainer(frame);
+  }
+  if (m_designModel.references)
+  {
+    auto& refs = *m_designModel.references;
+    for (auto& ref : refs)
+    {
+      if (auto p = std::get_if<SymbolMaster>(&ref))
+      {
+        m_pMasters[p->id] = p;
+      }
+    }
   }
 }
 
@@ -178,8 +198,7 @@ void ExpandSymbol::collectMasterFromVariant(const T& variantNode)
 {
   if (auto p = std::get_if<SymbolMaster>(&variantNode))
   {
-    auto& id = p->id;
-    m_pMasters[id] = p;
+    m_pMasters[p->id] = p;
     collectMasterFromContainer(*p);
   }
   else if (auto p = std::get_if<Frame>(&variantNode))
@@ -378,7 +397,7 @@ void ExpandSymbol::expandInstance(
         // 3.6 other overrides
         processOtherOverrides(json, instanceIdStack);
         // 3.7
-        layoutDirtyNodes(json);
+        layoutDirtyNodes(json[K_ID]);
         instanceIdStack.pop_back();
 
         // 4. again, makeMaskIdUnique after override: id -> unique id
@@ -404,33 +423,28 @@ void ExpandSymbol::expandInstance(
   }
 }
 
-void ExpandSymbol::traverseContainerNode(
-  Model::Container&         container,
-  std::vector<std::string>& instanceIdStack)
+void ExpandSymbol::traverseElementNode(
+  std::shared_ptr<Domain::Element> element,
+  std::vector<std::string>&        instanceIdStack)
 {
-  for (auto& child : container.childObjects)
+  if (auto instance = std::dynamic_pointer_cast<Domain::SymbolInstanceElement>(element))
   {
-    traverseVariantNode(child, instanceIdStack);
-  }
-}
-
-template<typename T>
-void ExpandSymbol::expandInstanceVariant(
-  T&                        variantNode,
-  std::vector<std::string>& instanceIdStack,
-  bool                      again)
-{
-  static_assert(
-    std::is_same_v<T, ContainerChildType> || std::is_same_v<T, SubGeometryType>,
-    "T must be variant holds SymbolInstance & SymbolMaster");
-  if (!std::holds_alternative<SymbolInstance>(variantNode))
-  {
+    expandInstanceElement(*instance, instanceIdStack);
     return;
   }
 
-  auto& instance = std::get<SymbolInstance>(variantNode);
+  for (auto& child : element->children())
+  {
+    traverseElementNode(child, instanceIdStack);
+  }
+}
 
-  const auto& instanceId = instance.id;
+void ExpandSymbol::expandInstanceElement(
+  Domain::SymbolInstanceElement& instance,
+  std::vector<std::string>&      instanceIdStack,
+  bool                           again)
+{
+  const auto& instanceId = instance.id();
   if (
     std::find(instanceIdStack.begin(), instanceIdStack.end(), instanceId) != instanceIdStack.end())
   {
@@ -438,22 +452,16 @@ void ExpandSymbol::expandInstanceVariant(
     return;
   }
 
-  const auto& masterId = instance.masterId;
+  const auto& masterId = instance.masterId();
   if (m_pMasters.find(masterId) == m_pMasters.end())
   {
     return;
   }
 
   const auto& master = *m_pMasters[masterId];
+  instance.setMaster(master);
 
-  Model::SymbolMaster instanceAsMaster;
-  static_cast<Model::Object&>(instanceAsMaster) = instance;
-  instanceAsMaster.class_ = master.class_;
-  instanceAsMaster.childObjects = master.childObjects;
-  instanceAsMaster.style = master.style;
-  instanceAsMaster.variableDefs = master.variableDefs;
-
-  // todo, rebuild layout tree
+  // // todo, rebuild layout tree
 
   if (again)
   {
@@ -466,43 +474,74 @@ void ExpandSymbol::expandInstanceVariant(
   }
 
   // 1. expand
-  traverseContainerNode(instanceAsMaster, instanceIdStack);
-}
+  traverseElementNode(instance.shared_from_this(), instanceIdStack);
 
-template<typename T>
-void ExpandSymbol::traverseVariantNode(T& variantNode, std::vector<std::string>& instanceIdStack)
-{
-  if (std::holds_alternative<SymbolInstance>(variantNode))
+  // 2 make instance tree nodes id unique
+  // 2.1
+  if (!again && instanceIdStack.size() > 1)
   {
-    expandInstanceVariant(variantNode, instanceIdStack);
-    return;
+    std::vector<std::string> idStackWithoutSelf{ instanceIdStack.begin(),
+                                                 instanceIdStack.end() - 1 };
+    auto                     prefix = join(idStackWithoutSelf) + K_SEPARATOR;
+    instance.addKeyPrefix(prefix);
   }
 
-  if (auto p = std::get_if<Frame>(&variantNode))
+  std::string instanceIdWithPrefix = instance.id();
+  mergeLayoutRule(instanceId, instanceIdWithPrefix);
+  mergeLayoutRule(masterId, instanceIdWithPrefix);
+
+  auto idPrefix = instanceIdWithPrefix + K_SEPARATOR;
+  for (auto child : instance.children())
   {
-    traverseContainerNode(*p, instanceIdStack);
+    makeTreeKeysUnique(child, idPrefix);
   }
-  else if (auto p = std::get_if<Group>(&variantNode))
+
+  // 2.2. update mask by: id -> unique id
+  for (auto child : instance.children())
   {
-    traverseContainerNode(*p, instanceIdStack);
+    makeMaskIdUnique(child, instance, idPrefix);
   }
-  else if (auto p = std::get_if<Path>(&variantNode))
+
+  // 3 overrides and scale
+  // 3.0 master id refer to a var
+  for (auto child : instance.children())
   {
-    if (p->shape)
-    {
-      for (auto& subshape : p->shape->subshapes)
-      {
-        if (subshape.subGeometry)
-        {
-          // SubGeometryType
-          traverseVariantNode(*subshape.subGeometry, instanceIdStack);
-        }
-      }
-    }
+    processVariableRefs(
+      child,
+      instance.shared_from_this(),
+      instanceIdStack,
+      EProcessVarRefOption::ONLY_MASTER);
   }
-  else if (auto p = std::get_if<SymbolMaster>(&variantNode))
+  // 3.1 master id overrides
+  processMasterIdOverrides(instance, instanceIdStack);
+
+  // 3.2: variables
+  processVariableAssignmentsOverrides(instance, instanceIdStack);
+  for (auto child : instance.children())
   {
-    traverseContainerNode(*p, instanceIdStack);
+    processVariableRefs(
+      child,
+      instance.shared_from_this(),
+      instanceIdStack,
+      EProcessVarRefOption::NOT_MASTER);
+  }
+
+  // 3.3: layout overrides
+  processLayoutOverrides(instance, instanceIdStack);
+  // 3.4: scale or layout before bounds overrides
+  resizeInstance(instance, master);
+  // 3.5 bounds overrides must be processed after scaling
+  processBoundsOverrides(instance, instanceIdStack);
+  // 3.6 other overrides
+  processOtherOverrides(instance, instanceIdStack);
+  // 3.7
+  layoutDirtyNodes(instance.id());
+  instanceIdStack.pop_back();
+
+  // 4. again, makeMaskIdUnique after override: id -> unique id
+  for (auto child : instance.children())
+  {
+    makeMaskIdUnique(child, instance, idPrefix);
   }
 }
 
@@ -1516,14 +1555,14 @@ void ExpandSymbol::layoutSubtree(
   overrideLayoutRuleSize(subtreeNode->id(), size);
 }
 
-void ExpandSymbol::layoutDirtyNodes(nlohmann::json& rootTreeJson)
+void ExpandSymbol::layoutDirtyNodes(const std::string& instanceId)
 {
   if (m_tmpDirtyNodeIds.empty())
   {
     return;
   }
 
-  m_layout->layoutNodes(m_tmpDirtyNodeIds, rootTreeJson[K_ID]);
+  m_layout->layoutNodes(m_tmpDirtyNodeIds, instanceId);
 
   m_tmpDirtyNodeIds.clear();
 }
@@ -1735,4 +1774,579 @@ void ExpandSymbol::removeInvalidCache(nlohmann::json& json)
   {
     removeInvalidCache(el.value());
   }
+}
+
+void ExpandSymbol::makeTreeKeysUnique(
+  std::shared_ptr<Domain::Element>& element,
+  const std::string&                idPrefix)
+{
+  if (!element)
+  {
+    return;
+  }
+
+  if (element && !element->id().empty())
+  {
+    // skip expanded instance
+    if (auto instance = std::dynamic_pointer_cast<SymbolInstanceElement>(element))
+    {
+      return;
+    }
+
+    auto oldObjectId = element->id();
+    element->addKeyPrefix(idPrefix);
+
+    auto newObjectId = element->id();
+    mergeLayoutRule(oldObjectId, newObjectId);
+  }
+
+  for (auto child : element->children())
+  {
+    makeTreeKeysUnique(child, idPrefix);
+  }
+}
+
+void ExpandSymbol::makeMaskIdUnique(
+  std::shared_ptr<Domain::Element>& element,
+  Domain::SymbolInstanceElement&    instance,
+  const std::string&                idPrefix)
+{
+  if (!element)
+  {
+    return;
+  }
+
+  element->makeMaskIdUnique(instance, idPrefix);
+}
+
+void ExpandSymbol::processVariableRefs(
+  std::shared_ptr<Domain::Element> element, // in instance tree
+  std::shared_ptr<Domain::Element> container,
+  const std::vector<std::string>&  instanceIdStack,
+  EProcessVarRefOption             option)
+{
+  if (!element)
+  {
+    return;
+  }
+
+  do
+  {
+    if (!element->isLayoutNode())
+    {
+      break;
+    }
+    if (!element->model())
+    {
+      break;
+    }
+    if (!element->model()->variableRefs)
+    {
+      break;
+    }
+    auto& refs = element->model()->variableRefs.value();
+
+    const std::vector<VariableAssign>*     containerVarAssigns = nullptr;
+    std::shared_ptr<SymbolInstanceElement> containerInstance =
+      std::dynamic_pointer_cast<SymbolInstanceElement>(container);
+    if (
+      containerInstance && containerInstance->model() &&
+      containerInstance->model()->variableAssignments)
+    {
+      containerVarAssigns = &containerInstance->model()->variableAssignments.value();
+    }
+
+    const std::vector<VariableDefine>* containerVarDefs = nullptr;
+    if (container && container->model() && container->model()->variableDefs)
+    {
+      containerVarDefs = &container->model()->variableDefs.value();
+    }
+
+    const std::vector<VariableDefine>* myVarDefs = nullptr;
+    if (element->model() && element->model()->variableDefs)
+    {
+      myVarDefs = &element->model()->variableDefs.value();
+    }
+
+    for (auto& ref : refs)
+    {
+      auto& varId = ref.id;
+      auto& objectField = ref.objectField;
+
+      if (option == EProcessVarRefOption::ONLY_MASTER)
+      {
+        if (objectField != K_MASTER_ID)
+        {
+          continue;
+        }
+      }
+      else if (option == EProcessVarRefOption::NOT_MASTER)
+      {
+        if (objectField == K_MASTER_ID)
+        {
+          continue;
+        }
+      }
+
+      const nlohmann::json* value{ nullptr };
+      auto                  varType{ EVarType::NONE };
+      auto                  found{ false };
+
+      // find var value
+      // find in container assignments
+      if (containerVarAssigns)
+      {
+        for (auto& assign : *containerVarAssigns)
+        {
+          if (varId == assign.id)
+          {
+            found = true;
+            value = &assign.value;
+            if (objectField == K_TEXT_DATA)
+            {
+              varType = EVarType::TEXT_PROPERTY;
+            }
+            // else varType is bool or string
+            break;
+          }
+        }
+      }
+
+      if (!found && myVarDefs)
+      {
+        // find in own defs
+        for (auto& def : *myVarDefs)
+        {
+          if (varId == def.id)
+          {
+            value = &def.value;
+            varType = EVarType{ def.varType };
+            found = true;
+            break;
+          }
+        }
+      }
+
+      if (!found && containerVarDefs)
+      {
+        // find in container defs
+        for (auto& def : *containerVarDefs)
+        {
+          if (varId == def.id)
+          {
+            value = &def.value;
+            varType = EVarType{ def.varType };
+            found = true;
+            break;
+          }
+        }
+      }
+
+      // apply value
+      if (found)
+      {
+        if (varType == EVarType::REFERENCE)
+        {
+          DEBUG("processVariableRefs, var type is reference");
+        }
+        else if (varType == EVarType::TEXT_PROPERTY)
+        {
+          auto textElement = std::dynamic_pointer_cast<TextElement>(element);
+          if (textElement)
+          {
+            textElement->updateFields(*value);
+          }
+        }
+        else
+        {
+          if (objectField == K_MASTER_ID) // masterId
+          {
+            auto instance = std::dynamic_pointer_cast<SymbolInstanceElement>(element);
+            if (instance)
+            {
+              resetInstanceInfo(*instance);
+              instance->updateMasterId(*value);
+              auto childInstanceIdStack = instanceIdStack;
+              expandInstanceElement(*instance, childInstanceIdStack, true);
+            }
+          }
+          else if (objectField == K_VISIBLE)
+          {
+            bool visible = *value;
+            element->setVisible(visible);
+          }
+        }
+      }
+    }
+
+  } while (true);
+
+  for (auto child : element->children())
+  {
+    processVariableRefs(child, element, instanceIdStack, option);
+  }
+}
+
+void ExpandSymbol::resetInstanceInfo(SymbolInstanceElement& instance)
+{
+  // Keep own layout rule; Remove children layout rule only;
+  removeInvalidLayoutRule(instance, true);
+
+  if (auto node = m_layout->layoutTree()->findDescendantNodeById(instance.id()))
+  {
+    node->removeAllChildren(); // remove all children
+  }
+}
+
+void ExpandSymbol::removeInvalidLayoutRule(const Element& element, bool keepOwn)
+{
+  if (!keepOwn)
+  {
+    auto id = element.id();
+    if (auto dstRulePtr = findOutLayoutObjectById(id); dstRulePtr)
+    {
+      auto& dstRule = *dstRulePtr;
+      dstRule = nlohmann::json(); // assign a null json; same as rules.erase(i);
+      m_layoutRulesCache->erase(id);
+      m_outLayoutJsonMap.erase(id);
+    }
+  }
+
+  for (auto child : element.children())
+  {
+    removeInvalidLayoutRule(*child);
+  }
+}
+
+void ExpandSymbol::processMasterIdOverrides(
+  Domain::SymbolInstanceElement&  instance,
+  const std::vector<std::string>& instanceIdStack)
+{
+  auto instanceModel = instance.model();
+  if (!instanceModel)
+  {
+    return;
+  }
+
+  std::vector<OverrideValue> masterIdOverrideValues;
+  std::copy_if(
+    instanceModel->overrideValues.begin(),
+    instanceModel->overrideValues.end(),
+    std::back_inserter(masterIdOverrideValues),
+    [](const OverrideValue& item) { return item.overrideName == K_MASTER_ID; });
+
+  // Sorting: Top-down, root first;
+  std::stable_sort(
+    masterIdOverrideValues.begin(),
+    masterIdOverrideValues.end(),
+    [](const OverrideValue& a, const OverrideValue& b)
+    { return a.objectId.size() < b.objectId.size(); });
+
+  for (auto& overrideItem : masterIdOverrideValues)
+  {
+    std::vector<std::string> childInstanceIdStack;
+    auto                     childObject =
+      findChildObject(instance, instanceIdStack, overrideItem, childInstanceIdStack);
+    if (!childObject)
+    {
+      continue;
+    }
+
+    auto childInstance = std::dynamic_pointer_cast<SymbolInstanceElement>(childObject);
+    if (!childInstance)
+    {
+      continue;
+    }
+
+    resetInstanceInfo(*childInstance);
+    childInstance->updateMasterId(overrideItem.overrideValue);
+    expandInstanceElement(*childInstance, childInstanceIdStack, true);
+  }
+}
+
+std::shared_ptr<Element> ExpandSymbol::findChildObject(
+  Domain::SymbolInstanceElement&  instance,
+  const std::vector<std::string>& instanceIdStack,
+  const Model::OverrideValue&     overrideItem,
+  std::vector<std::string>&       outChildInstanceIdStack)
+{
+  auto& objectIdPaths = overrideItem.objectId;
+  if (objectIdPaths.empty())
+  {
+    return nullptr;
+  }
+
+  if (objectIdPaths.size() == 1)
+  {
+    if (
+      objectIdPaths.front() == instance.masterId() ||
+      objectIdPaths.front() == instance.masterOverrideKey())
+    {
+      outChildInstanceIdStack = instanceIdStack;
+      return instance.shared_from_this();
+    }
+  }
+
+  outChildInstanceIdStack = instanceIdStack;
+  return instance.findElementByKey(objectIdPaths, &outChildInstanceIdStack);
+}
+
+void ExpandSymbol::processVariableAssignmentsOverrides(
+  Domain::SymbolInstanceElement&  instance,
+  const std::vector<std::string>& instanceIdStack)
+{
+  auto instanceModel = instance.model();
+  if (!instanceModel)
+  {
+    return;
+  }
+
+  std::vector<VGG::Model::OverrideValue> variableAssignments;
+  std::copy_if(
+    instanceModel->overrideValues.begin(),
+    instanceModel->overrideValues.end(),
+    std::back_inserter(variableAssignments),
+    [](const OverrideValue& item) { return item.overrideName == K_VARIABLE_ASSIGNMENTS; });
+
+  for (auto& overrideItem : variableAssignments)
+  {
+    std::vector<std::string> _;
+    auto childObject = findChildObject(instance, instanceIdStack, overrideItem, _);
+    if (!childObject)
+    {
+      continue;
+    }
+
+    auto childInstance = std::dynamic_pointer_cast<SymbolInstanceElement>(childObject);
+    if (!childInstance)
+    {
+      continue;
+    }
+
+    childInstance->updateVariableAssignments(overrideItem.overrideValue);
+    for (auto& child : childInstance->children())
+    {
+      processVariableRefs(child, childInstance, _, EProcessVarRefOption::ALL);
+    }
+  }
+}
+
+void ExpandSymbol::processLayoutOverrides(
+  Domain::SymbolInstanceElement&  instance,
+  const std::vector<std::string>& instanceIdStack)
+{
+  auto instanceModel = instance.model();
+  if (!instanceModel)
+  {
+    return;
+  }
+
+  std::vector<OverrideValue> layoutOverrideValues;
+  std::copy_if(
+    instanceModel->overrideValues.begin(),
+    instanceModel->overrideValues.end(),
+    std::back_inserter(layoutOverrideValues),
+    [](const OverrideValue& item) { return item.effectOnLayout; });
+
+  for (auto& overrideItem : layoutOverrideValues)
+  {
+    std::vector<std::string> _;
+
+    auto element = findChildObject(instance, instanceIdStack, overrideItem, _);
+    if (!element)
+    {
+      continue;
+    }
+    auto layoutObject = findOutLayoutObjectById(element->id());
+    if (!layoutObject)
+    {
+      continue;
+    }
+
+    std::string path = overrideItem.overrideName;
+    auto        value = overrideItem.overrideValue;
+    applyOverrides((*layoutObject), path, value);
+
+    if (layoutObject->contains(K_ID))
+    {
+      *(*m_layoutRulesCache)[(*layoutObject)[K_ID]] = *layoutObject;
+    }
+  }
+}
+
+void ExpandSymbol::resizeInstance(
+  Domain::SymbolInstanceElement&     instance,
+  const Domain::SymbolMasterElement& master)
+{
+  auto instanceModel = instance.model();
+  if (!instanceModel)
+  {
+    return;
+  }
+  auto masterModel = master.model();
+  if (!masterModel)
+  {
+    return;
+  }
+
+  Rect masterBounds{ { masterModel->bounds.x, masterModel->bounds.y },
+                     { masterModel->bounds.width, masterModel->bounds.height } };
+  Size instanceSize{ instanceModel->bounds.width, instanceModel->bounds.height };
+  if (masterBounds.size == instanceSize)
+  {
+    return;
+  }
+  instance.updateBounds(masterBounds);
+  layoutInstance(instance, instanceSize);
+}
+
+void ExpandSymbol::layoutInstance(Domain::SymbolInstanceElement& instance, const Size& instanceSize)
+{
+  auto node = m_layout->layoutTree()->findDescendantNodeById(instance.id());
+  if (!node)
+  {
+    return;
+  }
+
+  m_layout->rebuildSubtree(node); // force rebuild subtree with updated rules
+
+  node->setNeedLayout();
+
+  // layout with new size
+  layoutSubtree(node, instanceSize, true);
+}
+
+void ExpandSymbol::processBoundsOverrides(
+  Domain::SymbolInstanceElement&  instance,
+  const std::vector<std::string>& instanceIdStack)
+{
+  auto instanceModel = instance.model();
+  if (!instanceModel)
+  {
+    return;
+  }
+
+  std::vector<OverrideValue> boundsOverrideValues;
+  std::copy_if(
+    instanceModel->overrideValues.begin(),
+    instanceModel->overrideValues.end(),
+    std::back_inserter(boundsOverrideValues),
+    [](const OverrideValue& item) { return item.overrideName == K_BOUNDS; });
+
+  // Sorting: Top-down, root first;
+  std::stable_sort(
+    boundsOverrideValues.begin(),
+    boundsOverrideValues.end(),
+    [self = this, &instance, &instanceIdStack](const OverrideValue& a, const OverrideValue& b)
+    {
+      if (a.objectId.size() == b.objectId.size())
+      {
+        std::vector<std::string> _;
+
+        auto aElement = self->findChildObject(instance, instanceIdStack, a, _);
+        auto bElement = self->findChildObject(instance, instanceIdStack, b, _);
+        if (aElement && bElement)
+        {
+          return aElement->isAncestorOf(bElement);
+        }
+
+        return false;
+      }
+      else
+      {
+        return a.objectId.size() < b.objectId.size();
+      }
+    });
+
+  for (auto& overrideItem : boundsOverrideValues)
+  {
+    std::vector<std::string> _;
+    auto                     element = findChildObject(instance, instanceIdStack, overrideItem, _);
+    if (!element)
+    {
+      continue;
+    }
+
+    Rect newBounds = overrideItem.overrideValue;
+    layoutSubtree(element->id(), newBounds.size, false);
+  }
+}
+
+void ExpandSymbol::processOtherOverrides(
+  Domain::SymbolInstanceElement&  instance,
+  const std::vector<std::string>& instanceIdStack)
+{
+  auto instanceModel = instance.model();
+  if (!instanceModel)
+  {
+    return;
+  }
+
+  for (auto& item : instanceModel->overrideValues)
+  {
+    // skip items handled before
+    if (
+      item.effectOnLayout || item.overrideName == K_BOUNDS || item.overrideName == K_MASTER_ID ||
+      item.overrideName == K_VARIABLE_ASSIGNMENTS || item.overrideName.empty())
+    {
+      continue;
+    }
+
+    std::vector<std::string> _;
+
+    auto element = findChildObject(instance, instanceIdStack, item, _);
+    if (!element)
+    {
+      continue;
+    }
+
+    auto& value = item.overrideValue;
+    if (applyReferenceOverride(*element, item.overrideName, value))
+    {
+      continue;
+    }
+    element->applyOverride(item.overrideName, value, m_tmpDirtyNodeIds);
+  }
+}
+
+bool ExpandSymbol::applyReferenceOverride(
+  Domain::Element&      element,
+  const std::string&    name,
+  const nlohmann::json& value)
+{
+  if (name != K_STYLE)
+  {
+    return false;
+  }
+  if (!value.is_string())
+  {
+    return false;
+  }
+
+  std::string s = value;
+  if (s.rfind(K_PREFIX, 0) != 0)
+  {
+    return false;
+  }
+
+  auto id = s.substr(std::strlen(K_PREFIX));
+  if (m_designModel.references)
+  {
+    auto& items = *m_designModel.references;
+    for (auto& srcReferenence : items)
+    {
+      if (auto p = std::get_if<ReferencedStyle>(&srcReferenence))
+      {
+        if (p->id == id)
+        {
+          element.update(*p);
+
+          return true;
+        }
+      }
+    }
+    return true;
+  }
+
+  return false;
 }

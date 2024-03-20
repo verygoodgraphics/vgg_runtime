@@ -20,6 +20,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include <stack>
+
 namespace VGG
 {
 namespace Layout
@@ -47,5 +49,21 @@ bool isNodeWithKey(const nlohmann::json& json, const std::string& key);
 
 const nlohmann::json* getElementInTree(const nlohmann::json& tree, const std::string& id);
 
+void applyOverridesDetailToTree(
+  nlohmann::json&           json,
+  std::stack<std::string>   reversedPath,
+  const nlohmann::json&     value,
+  std::vector<std::string>& outDirtyNodeIds);
+void applyOverridesDetail(
+  nlohmann::json&           json,
+  std::stack<std::string>   reversedPath,
+  const nlohmann::json&     value,
+  std::vector<std::string>& outDirtyNodeIds);
+void applyLeafOverrides(
+  nlohmann::json&           json,
+  const std::string&        key,
+  const nlohmann::json&     value,
+  std::vector<std::string>& outDirtyNodeIds);
+void deleteLeafElement(nlohmann::json& json, const std::string& key);
 } // namespace Layout
 } // namespace VGG

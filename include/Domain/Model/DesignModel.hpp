@@ -1298,7 +1298,7 @@ struct VariableDefine
   /**
    * The value type of the variable.
    */
-  int64_t          varType;
+  int              varType;
 };
 
 enum class VariableRefClass : int

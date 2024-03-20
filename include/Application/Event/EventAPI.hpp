@@ -17,6 +17,7 @@
 
 #include "Keycode.hpp"
 #include "Scancode.hpp"
+#include "VggPackage.h"
 
 #include <memory>
 
@@ -36,7 +37,7 @@ public:
   virtual ~EventAPI() = default;
 };
 
-class EventManager
+class VGG_RUNTIME_DLL_DECLARE EventManager
 {
 public:
   EventManager() = delete;

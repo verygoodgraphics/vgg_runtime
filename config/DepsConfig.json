@@ -1,9 +1,9 @@
 {
     "skia": {
-        "url": "https://github.com/verygoodgraphics/skia/releases/download/20230317/skia-with-deps-20230317.tar.gz",
-        "md5": "fdf41ad5df78d92a7ee9b454d83520da",
-        "filename": "skia-with-deps-20230317.tar.gz",
-        "commit": "e297f2ee427694a346f78dd9d619e088d8b3bbb5"
+        "url": "https://github.com/verygoodgraphics/skia/releases/download/featureForWin/skia-win.zip",
+        "md5": "4fefb5c00560380f3af0274ff8f8cc38",
+        "filename": "skia-win.zip",
+        "commit": "b55f372ac5362f2c0785486dad0e82f673cfeda1"
     },
     "nodejs": {
         "url": "https://nodejs.org/dist/v18.15.0/node-v18.15.0.tar.gz",

@@ -76,8 +76,7 @@ skia_use_system_harfbuzz=false
 skia_use_system_libpng=false
 skia_use_system_libwebp=false
 skia_use_system_expat=false
-skia_use_system_icu=false
-skia_enable_skshaper=true")
+skia_use_system_icu=false")
 
 set(SKIA_PRESET_FEATURES_FOR_MACOS
 "skia_use_egl=false
@@ -300,11 +299,7 @@ string(APPEND OPTIONS " cc=\"${CMAKE_C_COMPILER}\"")
 
 # set config type for skia
 if(config STREQUAL "Debug")
-  if(NOT MSVC)
-    string(APPEND OPTIONS " is_official_build=false is_debug=true")
-  else()
-    string(APPEND OPTIONS " is_official_build=true is_debug=false")  
-  endif()
+  string(APPEND OPTIONS " is_official_build=false is_debug=true")
 elseif(config STREQUAL "Release")
   string(APPEND OPTIONS " is_official_build=true is_debug=false")
 elseif(config STREQUAL "RelWithDebInfo")

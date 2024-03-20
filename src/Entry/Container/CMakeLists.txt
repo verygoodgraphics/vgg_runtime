@@ -18,6 +18,10 @@ elseif(VGG_CONTAINER_FOR_QT)
   )
 endif()
 
+if(MSVC)
+  target_compile_definitions(vgg_container PRIVATE VGG_RUNTIME_DLL_EXPORTING)
+endif()
+
 target_include_directories(vgg_container PUBLIC
   ${CMAKE_SOURCE_DIR}/include/Application/Event
   ${CMAKE_SOURCE_DIR}/include/VGG/Container
@@ -27,15 +31,6 @@ target_link_libraries(vgg_container PUBLIC
   vgg_application
   vgg_adapter
 )
-
-if(MSVC)
-  set_target_properties(vgg_container PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
-  
-  install(TARGETS vgg_application
-    COMPONENT container
-    DESTINATION lib
-  )  
-endif()
 
 install(TARGETS vgg_container
   COMPONENT container
@@ -49,6 +44,7 @@ install(FILES
   ${CMAKE_SOURCE_DIR}/include/VGG/Container/IContainer.hpp
   ${CMAKE_SOURCE_DIR}/include/VGG/Container/ISdk.hpp
   ${CMAKE_SOURCE_DIR}/include/VGG/Container/VggTypes.hpp
+  ${CMAKE_SOURCE_DIR}/include/Package/VggPackage.h
   COMPONENT container
   DESTINATION VGG)
 
@@ -57,6 +53,11 @@ if(MSVC)
     "${CMAKE_SOURCE_DIR}/lib/${NODE_FOLDER}/${CMAKE_BUILD_TYPE}/node.exe"
     "${CMAKE_SOURCE_DIR}/lib/${NODE_FOLDER}/${CMAKE_BUILD_TYPE}/libnode.dll"
     "${SKIA_EXTERNAL_PROJECT_DIR}/${SKIA_LIB_BUILD_PREFIX}/icudtl.dat"
+    "${SKIA_LIB_DIR}/skia.dll"
+    "${SKIA_LIB_DIR}/skparagraph.dll"
+    "${SKIA_LIB_DIR}/skshaper.dll"
+    "${SKIA_LIB_DIR}/sktext.dll"
+    "${SKIA_LIB_DIR}/skunicode.dll"
     COMPONENT container
     DESTINATION lib
   )

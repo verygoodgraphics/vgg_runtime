@@ -39,6 +39,7 @@ public:
   VGG_CLASS_MAKE(LayerFXAttribute);
 
 private:
+  friend class RenderNode;
   SkRect revalidateLayerImageFilter(const SkRect& bounds);
 
   Ref<StyleObjectAttribute> m_styleObjectAttr;

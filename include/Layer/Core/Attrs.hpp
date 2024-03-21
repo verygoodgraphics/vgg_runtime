@@ -43,6 +43,13 @@ struct ContextSetting
   float         opacity{ 1.0 };
   bool          isolateBlending{ false };
   EKnockoutType transparencyKnockoutGroup{ KT_OFF };
+
+  bool operator==(const ContextSetting& rhs) const
+  {
+    return blendMode == rhs.blendMode && opacity == rhs.opacity &&
+           isolateBlending == rhs.isolateBlending &&
+           transparencyKnockoutGroup == rhs.transparencyKnockoutGroup;
+  }
 };
 
 struct ImageFilter
@@ -64,6 +71,13 @@ struct ImageFilter
       return false;
     return true;
   }
+
+  bool operator==(const ImageFilter& rhs) const
+  {
+    return exposure == rhs.exposure && contrast == rhs.contrast && saturation == rhs.saturation &&
+           temperature == rhs.temperature && tint == rhs.tint && highlight == rhs.highlight &&
+           shadow == rhs.shadow && hue == rhs.hue;
+  }
 };
 
 struct PatternTile
@@ -74,6 +88,12 @@ struct PatternTile
   bool             mirror{ true };
   float            rotation{ 0.f };
   float            scale{ 1.f };
+
+  bool operator==(const PatternTile& rhs) const
+  {
+    return imageFilter == rhs.imageFilter && guid == rhs.guid && mode == rhs.mode &&
+           mirror == rhs.mirror && rotation == rhs.rotation && scale == rhs.scale;
+  }
 };
 
 struct PatternStretch
@@ -82,6 +102,12 @@ struct PatternStretch
   std::string      guid;
   layer::Transform transform;
   bool             clip{ false };
+
+  bool operator==(const PatternStretch& rhs) const
+  {
+    return imageFilter == rhs.imageFilter && guid == rhs.guid && transform == rhs.transform &&
+           clip == rhs.clip;
+  }
 };
 
 struct PatternFill
@@ -89,6 +115,11 @@ struct PatternFill
   ImageFilter imageFilter;
   std::string guid;
   float       rotation;
+
+  bool operator==(const PatternFill& rhs) const
+  {
+    return imageFilter == rhs.imageFilter && guid == rhs.guid && rotation == rhs.rotation;
+  }
 };
 
 struct PatternFit
@@ -96,11 +127,20 @@ struct PatternFit
   ImageFilter imageFilter;
   std::string guid;
   float       rotation;
+
+  bool operator==(const PatternFit& rhs) const
+  {
+    return imageFilter == rhs.imageFilter && guid == rhs.guid && rotation == rhs.rotation;
+  }
 };
 
 struct Pattern
 {
   std::variant<PatternFill, PatternFit, PatternStretch, PatternTile> instance;
+  bool operator==(const Pattern& rhs) const
+  {
+    return instance == rhs.instance;
+  }
 };
 
 struct AlphaMask
@@ -108,6 +148,11 @@ struct AlphaMask
   std::string    id;
   EAlphaMaskType type{ AM_ALPHA };
   bool           crop{ true };
+
+  bool operator==(const AlphaMask& rhs) const
+  {
+    return id == rhs.id && type == rhs.type && crop == rhs.crop;
+  }
 };
 
 struct GradientStop
@@ -115,6 +160,11 @@ struct GradientStop
   Color color{ 1., 1., 1., 1. };
   float position{ 1.0 }; // [0,1]
   float midPoint;
+
+  bool operator==(const GradientStop& rhs) const
+  {
+    return color == rhs.color && position == rhs.position && midPoint == rhs.midPoint;
+  }
 };
 
 struct GradientLinear
@@ -123,6 +173,11 @@ struct GradientLinear
   glm::vec2                 to;
   std::vector<GradientStop> stops;
   bool                      invert{ false };
+
+  bool operator==(const GradientLinear& rhs) const
+  {
+    return from == rhs.from && to == rhs.to && stops == rhs.stops && invert == rhs.invert;
+  }
 };
 
 struct GradientRadial
@@ -132,6 +187,12 @@ struct GradientRadial
   std::vector<GradientStop>      stops;
   std::variant<float, glm::vec2> ellipse;
   bool                           invert{ false };
+
+  bool operator==(const GradientRadial& rhs) const
+  {
+    return from == rhs.from && to == rhs.to && stops == rhs.stops && ellipse == rhs.ellipse &&
+           invert == rhs.invert;
+  }
 };
 
 struct GradientDiamond
@@ -141,6 +202,12 @@ struct GradientDiamond
   std::vector<GradientStop>      stops;
   std::variant<float, glm::vec2> ellipse;
   bool                           invert{ false };
+
+  bool operator==(const GradientDiamond& rhs) const
+  {
+    return from == rhs.from && to == rhs.to && stops == rhs.stops && ellipse == rhs.ellipse &&
+           invert == rhs.invert;
+  }
 };
 
 struct GradientAngular
@@ -150,17 +217,22 @@ struct GradientAngular
   std::vector<GradientStop>      stops;
   std::variant<float, glm::vec2> ellipse;
   bool                           invert{ false };
-};
 
-struct GradientBasic
-{
-  // Ai specific
+  bool operator==(const GradientAngular& rhs) const
+  {
+    return from == rhs.from && to == rhs.to && stops == rhs.stops && ellipse == rhs.ellipse &&
+           invert == rhs.invert;
+  }
 };
 
 struct Gradient
 {
-  std::variant<GradientLinear, GradientRadial, GradientAngular, GradientBasic, GradientDiamond>
-    instance;
+  std::variant<GradientLinear, GradientRadial, GradientAngular, GradientDiamond> instance;
+
+  bool operator==(const Gradient& rhs) const
+  {
+    return instance == rhs.instance;
+  }
 };
 
 using FillType = std::variant<Gradient, Pattern, Color>;
@@ -170,6 +242,11 @@ struct Fill
   bool           isEnabled{ true }; // TODO:: Removed
   ContextSetting contextSettings{};
   FillType       type;
+
+  bool operator==(const Fill& rhs) const
+  {
+    return isEnabled == rhs.isEnabled && contextSettings == rhs.contextSettings && type == rhs.type;
+  }
 };
 
 struct Border
@@ -185,6 +262,15 @@ struct Border
   ELineJoin          lineJoinStyle;
   EPathPosition      position;
   bool               isEnabled;
+
+  bool operator==(const Border& rhs) const
+  {
+    return type == rhs.type && contextSettings == rhs.contextSettings &&
+           dashedPattern == rhs.dashedPattern && dashedOffset == rhs.dashedOffset &&
+           flat == rhs.flat && miterLimit == rhs.miterLimit && thickness == rhs.thickness &&
+           lineCapStyle == rhs.lineCapStyle && lineJoinStyle == rhs.lineJoinStyle &&
+           position == rhs.position && isEnabled == rhs.isEnabled;
+  }
 };
 
 struct Shadow
@@ -209,6 +295,13 @@ struct InnerShadow
   float          offsetY{ 0.f };
   float          spread{ 0.f };
   bool           isEnabled{ false };
+
+  bool operator==(const InnerShadow& rhs) const
+  {
+    return contextSettings == rhs.contextSettings && blur == rhs.blur && color == rhs.color &&
+           offsetX == rhs.offsetX && offsetY == rhs.offsetY && spread == rhs.spread &&
+           isEnabled == rhs.isEnabled;
+  }
 };
 
 struct DropShadow
@@ -221,28 +314,53 @@ struct DropShadow
   float          spread{ 0.f };
   bool           isEnabled{ false };
   bool           clipShadow{ true };
+
+  bool operator==(const DropShadow& rhs) const
+  {
+    return contextSettings == rhs.contextSettings && blur == rhs.blur && color == rhs.color &&
+           offsetX == rhs.offsetX && offsetY == rhs.offsetY && spread == rhs.spread &&
+           isEnabled == rhs.isEnabled && clipShadow == rhs.clipShadow;
+  }
 };
 
 struct BackgroundBlur
 {
   float radius;
+
+  bool operator==(const BackgroundBlur& rhs) const
+  {
+    return radius == rhs.radius;
+  }
 };
 
 struct LayerBlur
 {
   float radius;
+  bool  operator==(const LayerBlur& rhs) const
+  {
+    return radius == rhs.radius;
+  }
 };
 
 struct MotionBlur
 {
   float radius;
   float angle;
+  bool  operator==(const MotionBlur& rhs) const
+  {
+    return radius == rhs.radius && angle == rhs.angle;
+  }
 };
 
 struct RadialBlur
 {
   float radius;
   float xCenter, yCenter;
+
+  bool operator==(const RadialBlur& rhs) const
+  {
+    return radius == rhs.radius && xCenter == rhs.xCenter && yCenter == rhs.yCenter;
+  }
 };
 
 using BlurType = std::variant<BackgroundBlur, LayerBlur, MotionBlur, RadialBlur>;
@@ -251,6 +369,11 @@ struct Blur
 {
   bool     isEnabled;
   BlurType type;
+
+  bool operator==(const Blur& rhs) const
+  {
+    return isEnabled == rhs.isEnabled && type == rhs.type;
+  }
 };
 
 struct Style
@@ -262,6 +385,13 @@ struct Style
   std::vector<DropShadow>  dropShadow;
   std::array<float, 4>     frameRadius;
   float                    cornerSmooth;
+
+  bool operator==(const Style& rhs) const
+  {
+    return blurs == rhs.blurs && borders == rhs.borders && fills == rhs.fills &&
+           innerShadow == rhs.innerShadow && dropShadow == rhs.dropShadow &&
+           frameRadius == rhs.frameRadius && cornerSmooth == rhs.cornerSmooth;
+  }
 };
 
 struct TextLineAttr
@@ -363,3 +493,38 @@ struct Contour : public std::vector<ControlPoint>
 using ContourPtr = std::shared_ptr<Contour>;
 
 } // namespace VGG
+
+namespace std
+{
+template<>
+struct hash<VGG::ContextSetting>
+{
+  size_t operator()(const VGG::ContextSetting& v) const
+  {
+    size_t seeds = 0;
+    hash_combine(seeds, v.blendMode, v.opacity, v.isolateBlending, v.transparencyKnockoutGroup);
+    return seeds;
+  }
+};
+
+template<>
+struct hash<VGG::ImageFilter>
+{
+  size_t operator()(const VGG::ImageFilter& v) const
+  {
+    size_t seeds = 0;
+    hash_combine(
+      seeds,
+      v.exposure,
+      v.contrast,
+      v.saturation,
+      v.temperature,
+      v.tint,
+      v.highlight,
+      v.shadow,
+      v.hue);
+    return seeds;
+  }
+};
+
+} // namespace std

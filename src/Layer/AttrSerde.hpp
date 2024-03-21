@@ -303,11 +303,6 @@ inline void from_json(const json& j, Gradient& x)
     diamond.ellipse = g.value("ellipse", std::variant<float, glm::vec2>(1.f));
     x.instance = diamond;
   }
-  else if (klass == "gradientBasic")
-  {
-    GradientBasic basic;
-    x.instance = basic;
-  }
 }
 
 inline void from_json(const json& j, ContextSetting& x)

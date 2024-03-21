@@ -138,7 +138,6 @@ public:
             convertCoordinateSystem(*d, totalMatrix);
           }
         },
-        [&](GradientBasic& p) {},
       },
       gradient.instance);
   }

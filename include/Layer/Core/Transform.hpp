@@ -174,6 +174,11 @@ public:
   {
     return this->matrix() * other;
   }
+
+  bool operator==(const Transform& other) const
+  {
+    return m_matrix == other.m_matrix;
+  }
 };
 
 } // namespace VGG::layer

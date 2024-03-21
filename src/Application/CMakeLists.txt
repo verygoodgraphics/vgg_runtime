@@ -17,6 +17,7 @@ add_library(vgg_application STATIC
   VggEnv.cpp
   VggSdk.cpp
   ViewModel.cpp
+  Environment.cpp
 )
 
 if(MSVC)
@@ -32,6 +33,7 @@ target_include_directories(vgg_application PUBLIC
 target_include_directories(vgg_application PRIVATE
   ${CMAKE_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/include/Application
+  ${CMAKE_SOURCE_DIR}/include/Adapter
 )
 
 target_link_libraries(vgg_application PUBLIC

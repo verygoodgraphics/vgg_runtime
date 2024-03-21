@@ -97,14 +97,12 @@ Build & install vgg_container libraries for [vgg_qt](https://github.com/verygood
 ```bash
 mkdir build.qt
 cd build.qt
-cmake .. -DVGG_CONTAINER_FOR_QT=ON
-cmake --build . --parallel -t vgg_container
-cmake --install . --component container --prefix <path/to/vgg_qt/VggContainer/external>
+cmake .. -DVGG_CONTAINER_FOR_QT=ON -DCMAKE_BUILD_TYPE=Release
+cmake --build . --parallel -t vgg_container --config Release
+cmake --install . --component container --config Release --prefix <path/to/vgg_qt/VggContainer/external>
 ```
 
-#### Windows building example
-
-Compiling on Windows need extra efforts. It will be released once being stable.
+> Note: For debug build, please replace `Release` with `Debug` to the `cmake` commands.
 
 ### 4. Unit test
 

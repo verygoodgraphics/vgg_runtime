@@ -22,6 +22,7 @@
 #include "Application/Mouse.hpp"
 #include "Application/RunLoop.hpp"
 #include "Application/UIApplication.hpp"
+#include "Application/Environment.h"
 #include "Layer/Scene.hpp"
 #include "Utility/ConfigManager.hpp"
 
@@ -40,6 +41,8 @@ using AppImpl = VGG::entry::AppSDLImpl;
 int main(int argc, char** argv)
 {
   INFO("main");
+
+  VGG::Environment::setUp();
 
   argparse::ArgumentParser program("vgg", "0.1");
   program.add_argument(DARUMA_FILE_OR_DIRECTORY).help("daruma file or directory");
@@ -109,5 +112,6 @@ int main(int argc, char** argv)
     mainComposer.runLoop()->dispatch();
   }
 
+  VGG::Environment::tearDown();
   return 0;
 }

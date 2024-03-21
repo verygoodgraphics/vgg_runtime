@@ -53,8 +53,10 @@ Ref<RenderNode> RenderNode::MakeFrom(VAllocator* alloc, PaintNode* node)
     shapeMask,
     dropShadow,
     innerShadow,
-    style);
-  return 0;
+    object,
+    layerPostProcess,
+    backgroundBlur);
+  return result;
 }
 
 void RenderNode::render(Renderer* renderer)
@@ -70,7 +72,7 @@ void RenderNode::render(Renderer* renderer)
 
 SkRect RenderNode::recorder(Renderer* renderer)
 {
-  auto       dropbackFilter = m_styleObjectAttr->getBackgroundBlurImageFilter();
+  auto       dropbackFilter = m_objectAttr->getBackgroundBlurImageFilter();
   auto       layerFXFilter = m_alphaMaskAttr->getImageFilter();
   const auto newLayer = dropbackFilter || layerFXFilter;
 
@@ -82,7 +84,7 @@ SkRect RenderNode::recorder(Renderer* renderer)
     renderer->canvas()->save();
     shapeMask.clip(renderer->canvas(), SkClipOp::kIntersect);
   }
-  SkRect renderBound = toSkRect(m_styleObjectAttr->bound());
+  SkRect renderBound = toSkRect(m_objectAttr->bound());
   if (newLayer)
   {
     SkRect  layerBound = toSkRect(m_alphaMaskAttr->bound());
@@ -93,7 +95,7 @@ SkRect RenderNode::recorder(Renderer* renderer)
     beginLayer(renderer, &layerPaint, &clipShape, dropbackFilter);
     renderBound = layerBound;
   }
-  m_styleObjectAttr->render(renderer);
+  m_objectAttr->render(renderer);
   if (newLayer)
   {
     endLayer(renderer);
@@ -141,8 +143,8 @@ Bound RenderNode::onRevalidate()
   m_shapeMaskAttr->revalidate();
   m_transformAttr->revalidate();
   m_alphaMaskAttr->revalidate();
-  m_styleObjectAttr->revalidate();
-  auto rect = toSkRect(m_styleObjectAttr->bound());
+  m_objectAttr->revalidate();
+  auto rect = toSkRect(m_objectAttr->bound());
   auto [pic, bound] = revalidatePicture(rect);
   return Bound{ bound.x(), bound.y(), bound.width(), bound.height() };
 }

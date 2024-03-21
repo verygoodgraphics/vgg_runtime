@@ -30,7 +30,7 @@ public:
   {
     observe(m_styleObjectAttr);
   }
-  VGG_ATTRIBUTE(Blurs, std::vector<Blur>, m_blurs);
+  VGG_ATTRIBUTE(LayerBlur, std::vector<Blur>, m_blurs);
   Bound                onRevalidate() override;
   sk_sp<SkImageFilter> getImageFilter() const override
   {

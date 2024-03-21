@@ -26,6 +26,8 @@
   }                                                                                                \
   void set##attrName(const attrType& v)                                                            \
   {                                                                                                \
+    if (attrContainer == v)                                                                        \
+      return;                                                                                      \
     attrContainer = v;                                                                             \
     this->invalidate();                                                                            \
   }                                                                                                \
@@ -42,6 +44,8 @@
   }                                                                                                \
   void set##attrName(attrType* v)                                                                  \
   {                                                                                                \
+    if (attrContainer == v)                                                                        \
+      return;                                                                                      \
     attrContainer = v;                                                                             \
     this->invalidate();                                                                            \
   }
@@ -60,28 +64,6 @@
 
 namespace VGG::layer
 {
-
-template<typename T>
-class ArrayT : public std::vector<T>
-{
-public:
-  bool operator==(const ArrayT& other) const
-  {
-    if (this->size() != other.size())
-      return false;
-    for (int i = 0; i < std::min(this->size(), other.size()); ++i)
-    {
-      if ((*this)[i] != other[i])
-        return false;
-    }
-    return true;
-  }
-
-  bool operator!=(const ArrayT& other) const
-  {
-    return !(*this == other);
-  }
-};
 
 class Renderer;
 class Attribute : public VNode

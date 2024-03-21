@@ -88,6 +88,8 @@ Bound InnerShadowAttribute::onRevalidate()
   {
     m_shapeAttr->revalidate();
     auto shape = m_shapeAttr->getShape();
+    if (shape.isEmpty())
+      return Bound();
     auto shapeBounds = m_shapeAttr->getShape().bounds();
     if (!m_shadow.empty() && !shape.isEmpty())
     {

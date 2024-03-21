@@ -32,7 +32,7 @@ public:
     : ImageFilterAttribute(cnt)
   {
   }
-  VGG_ATTRIBUTE(BackgroundBlurStyle, std::vector<Blur>, m_blurs);
+  VGG_ATTRIBUTE(BackgroundBlur, std::vector<Blur>, m_blurs);
   sk_sp<SkImageFilter> getImageFilter() const override
   {
     return m_imageFilter;

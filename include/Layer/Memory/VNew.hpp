@@ -16,6 +16,7 @@
 #pragma once
 
 #include "Layer/Memory/RefCounterImpl.hpp"
+#include "Layer/Memory/RefCounterImplUnsafe.hpp"
 #include "Layer/Memory/VAllocator.hpp"
 
 #include <memory>
@@ -38,11 +39,10 @@ public:
   VNew(VNew&&) = delete;
   VNew& operator=(const VNew&) = delete;
   VNew& operator=(VNew&&) = delete;
-  template<typename... Args>
+  template<typename RefCounterType = RefCounterImpl<ObjectType, Allocator>, typename... Args>
   ObjectType* operator()(Args&&... args)
   {
-    auto refcnt = std::unique_ptr<RefCounterImpl<ObjectType, Allocator>>(
-      new RefCounterImpl<ObjectType, Allocator>());
+    auto refcnt = std::unique_ptr<RefCounterType>(new RefCounterType());
 
     ObjectType* obj = nullptr;
     if (m_allocator)
@@ -74,6 +74,24 @@ template<typename Type, typename... Args>
 Type* V_NEW(Args&&... args)
 {
   return VNew<Type, VAllocator>(nullptr)(std::forward<Args>(args)...);
+}
+
+template<
+  typename Type,
+  typename AllocatorType,
+  typename... Args,
+  typename = typename std::enable_if<std::is_base_of<VAllocator, AllocatorType>::value>::type>
+Type* V_NEW_UNSAFE(AllocatorType* alloc, Args&&... args)
+{
+  return VNew<Type, AllocatorType>(alloc)
+    .template operator()<RefCounterImplUnsafe<Type, AllocatorType>>(std::forward<Args>(args)...);
+}
+
+template<typename Type, typename... Args>
+Type* V_NEW_UNSAFE(Args&&... args)
+{
+  return VNew<Type, VAllocator>(nullptr)
+    .template operator()<RefCounterImplUnsafe<Type, VAllocator>>(std::forward<Args>(args)...);
 }
 
 // NOLINTEND

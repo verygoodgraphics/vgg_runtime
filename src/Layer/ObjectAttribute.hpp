@@ -41,6 +41,7 @@ public:
   VGG_CLASS_MAKE(BackgroundBlurAttribute);
 
 private:
+  friend class RenderNode;
   std::vector<Blur>    m_blurs;
   sk_sp<SkImageFilter> m_imageFilter;
 };
@@ -62,6 +63,7 @@ public:
   VGG_CLASS_MAKE(DropShadowAttribute);
 
 private:
+  friend class RenderNode;
   Ref<ShapeAttribute>             m_shapeAttr;
   std::vector<DropShadow>         m_shadow;
   std::optional<DropShadowEffect> m_dropShadowEffects;
@@ -82,6 +84,7 @@ public:
   VGG_CLASS_MAKE(InnerShadowAttribute);
 
 private:
+  friend class RenderNode;
   Ref<ShapeAttribute>              m_shapeAttr;
   std::vector<InnerShadow>         m_shadow;
   std::optional<InnerShadowEffect> m_innerShadowEffects;
@@ -107,7 +110,10 @@ public:
   VGG_ATTRIBUTE(FillStyle, std::vector<Fill>, m_fills);
   VGG_ATTRIBUTE(BorderStyle, std::vector<Border>, m_borders);
 
+  VGG_CLASS_MAKE(ObjectAttribute);
+
 private:
+  friend class RenderNode;
   SkRect revalidateObjectBounds(const std::vector<Border>& borders, const SkRect& bounds);
 
   std::function<SkRect(Renderer* renderer)> m_onDrawFill;
@@ -156,6 +162,7 @@ public:
   VGG_CLASS_MAKE(StyleObjectAttribute);
 
 private:
+  friend class RenderNode;
   void revalidateLayerFilter();
   void revalidateDropbackFilter();
 

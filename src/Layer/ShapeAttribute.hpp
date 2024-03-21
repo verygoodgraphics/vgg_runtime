@@ -48,7 +48,10 @@ public:
     return Bound{ rect.x(), rect.y(), rect.width(), rect.height() };
   }
 
+  VGG_CLASS_MAKE(ShapeAttribute);
+
 private:
+  friend class RenderNode;
   VShape m_shape;
 };
 } // namespace VGG::layer

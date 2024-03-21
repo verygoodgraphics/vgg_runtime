@@ -67,6 +67,7 @@ public:
   Bound onRevalidate() override;
 
 private:
+  friend class RenderNode;
   VShape                   m_shape;
   std::vector<std::string> m_maskID;
   PaintNode*               m_maskedNode;

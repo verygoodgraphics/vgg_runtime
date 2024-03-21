@@ -44,6 +44,10 @@ public:
 
   Bound onRevalidate() override
   {
+    if (m_shape.isEmpty())
+    {
+      return Bound{};
+    }
     const auto rect = m_shape.bounds();
     return Bound{ rect.x(), rect.y(), rect.width(), rect.height() };
   }

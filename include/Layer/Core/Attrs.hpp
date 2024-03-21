@@ -323,24 +323,23 @@ struct DropShadow
   }
 };
 
-struct BackgroundBlur
+struct GaussianBlur
 {
   float radius;
-
-  bool operator==(const BackgroundBlur& rhs) const
+  bool  operator==(const GaussianBlur& rhs) const
   {
     return radius == rhs.radius;
   }
 };
 
-struct LayerBlur
-{
-  float radius;
-  bool  operator==(const LayerBlur& rhs) const
-  {
-    return radius == rhs.radius;
-  }
-};
+// struct LayerBlur
+// {
+//   float radius;
+//   bool  operator==(const LayerBlur& rhs) const
+//   {
+//     return radius == rhs.radius;
+//   }
+// };
 
 struct MotionBlur
 {
@@ -356,39 +355,56 @@ struct RadialBlur
 {
   float radius;
   float xCenter, yCenter;
-
-  bool operator==(const RadialBlur& rhs) const
+  bool  operator==(const RadialBlur& rhs) const
   {
     return radius == rhs.radius && xCenter == rhs.xCenter && yCenter == rhs.yCenter;
   }
 };
 
-using BlurType = std::variant<BackgroundBlur, LayerBlur, MotionBlur, RadialBlur>;
+using BlurType = std::variant<GaussianBlur, MotionBlur, RadialBlur>;
 
-struct Blur
+struct LayerFX
 {
   bool     isEnabled;
   BlurType type;
 
-  bool operator==(const Blur& rhs) const
+  LayerFX(bool enabled, BlurType t)
+    : isEnabled(enabled)
+    , type(t){};
+
+  bool operator==(const LayerFX& rhs) const
   {
     return isEnabled == rhs.isEnabled && type == rhs.type;
   }
 };
 
+struct BackgroundFX
+{
+  bool         isEnabled;
+  GaussianBlur blur;
+  BackgroundFX(bool enabled, GaussianBlur b)
+    : isEnabled(enabled)
+    , blur{ b } {};
+  bool operator==(const BackgroundFX& rhs) const
+  {
+    return isEnabled == rhs.isEnabled && blur == rhs.blur;
+  }
+};
+
 struct Style
 {
-  std::vector<Blur>        blurs;
-  std::vector<Border>      borders;
-  std::vector<Fill>        fills;
-  std::vector<InnerShadow> innerShadow;
-  std::vector<DropShadow>  dropShadow;
-  std::array<float, 4>     frameRadius;
-  float                    cornerSmooth;
+  std::vector<LayerFX>      layerEffects;
+  std::vector<BackgroundFX> backgroundEffects;
+  std::vector<Border>       borders;
+  std::vector<Fill>         fills;
+  std::vector<InnerShadow>  innerShadow;
+  std::vector<DropShadow>   dropShadow;
+  std::array<float, 4>      frameRadius;
+  float                     cornerSmooth;
 
   bool operator==(const Style& rhs) const
   {
-    return blurs == rhs.blurs && borders == rhs.borders && fills == rhs.fills &&
+    return layerEffects == rhs.layerEffects && borders == rhs.borders && fills == rhs.fills &&
            innerShadow == rhs.innerShadow && dropShadow == rhs.dropShadow &&
            frameRadius == rhs.frameRadius && cornerSmooth == rhs.cornerSmooth;
   }

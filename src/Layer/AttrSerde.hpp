@@ -407,35 +407,6 @@ inline void from_json(const json& j, DropShadow& x)
   x.clipShadow = !j.value("showBehindTransparentAreas", false);
 }
 
-inline void from_json(const json& j, Blur& x)
-{
-  if (!j.is_object())
-    return;
-  x.isEnabled = j.value("isEnabled", false);
-  const auto blurType = j.value("type", 0);
-  const auto radius = getStackOptional<float>(j, "radius").value_or(0.f);
-  switch (blurType)
-  {
-    case BT_LAYER:
-      x.type = LayerBlur{ radius };
-      break;
-    case BT_BACKGROUND:
-      x.type = BackgroundBlur{ radius };
-      break;
-    case BT_RADIAL:
-    {
-      const auto center = j.value("center", std::array<float, 2>{ 0, 0 });
-      x.type = RadialBlur{ radius, center[0], center[1] };
-      break;
-    }
-    case BT_MOTION:
-      x.type = MotionBlur{ radius, j.value("motionAngle", 0.f) };
-      break;
-    default:
-      break;
-  }
-}
-
 inline void from_json(const json& j, Fill& x)
 {
   if (!j.is_object())
@@ -453,7 +424,34 @@ inline void from_json(const json& j, Style& x)
 {
   if (!j.is_object())
     return;
-  x.blurs = j.value("blurs", std::vector<Blur>());
+  x.layerEffects.clear();
+  x.backgroundEffects.clear();
+  for (const auto& b : j.value("blurs", json::array_t{}))
+  {
+    auto       isEnabled = b.value("isEnabled", false);
+    const auto blurType = b.value("type", 0);
+    const auto radius = getStackOptional<float>(b, "radius").value_or(0.f);
+    switch (blurType)
+    {
+      case BT_LAYER:
+        x.layerEffects.emplace_back(isEnabled, GaussianBlur{ radius });
+        break;
+      case BT_BACKGROUND:
+        x.backgroundEffects.emplace_back(isEnabled, GaussianBlur{ radius });
+        break;
+      case BT_RADIAL:
+      {
+        const auto center = b.value("center", std::array<float, 2>{ 0, 0 });
+        x.layerEffects.emplace_back(isEnabled, RadialBlur{ radius, center[0], center[1] });
+        break;
+      }
+      case BT_MOTION:
+        x.layerEffects.emplace_back(isEnabled, MotionBlur{ radius, b.value("motionAngle", 0.f) });
+        break;
+      default:
+        break;
+    }
+  }
   x.borders = j.value("borders", std::vector<Border>());
   x.fills = j.value("fills", std::vector<Fill>());
   for (const auto& s : j.value("shadows", json::array_t{}))

@@ -16,6 +16,7 @@
 #pragma once
 #include "AttributeNode.hpp"
 #include "ImageFilterAttribute.hpp"
+#include "Layer/Core/Attrs.hpp"
 #include "ShapeAttribute.hpp"
 #include "ShadowEffects.hpp"
 #include "ObjectShader.hpp"
@@ -32,7 +33,7 @@ public:
     : ImageFilterAttribute(cnt)
   {
   }
-  VGG_ATTRIBUTE(BackgroundBlur, std::vector<Blur>, m_blurs);
+  VGG_ATTRIBUTE(BackgroundBlur, std::vector<BackgroundFX>, m_blurs);
   sk_sp<SkImageFilter> getImageFilter() const override
   {
     return m_imageFilter;
@@ -42,8 +43,8 @@ public:
 
 private:
   friend class RenderNode;
-  std::vector<Blur>    m_blurs;
-  sk_sp<SkImageFilter> m_imageFilter;
+  std::vector<BackgroundFX> m_blurs;
+  sk_sp<SkImageFilter>      m_imageFilter;
 };
 
 class DropShadowAttribute : public Attribute

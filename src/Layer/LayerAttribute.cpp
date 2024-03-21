@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "Layer/Core/Attrs.hpp"
 #include "VSkia.hpp"
 #include "LayerAttribute.hpp"
 #include "Effects.hpp"
@@ -33,8 +34,7 @@ SkRect LayerFXAttribute::revalidateLayerImageFilter(const SkRect& bounds)
         continue;
       sk_sp<SkImageFilter> filter;
       std::visit(
-        Overloaded{ [](const BackgroundBlur& blur) {},
-                    [&](const LayerBlur& blur) { filter = makeLayerBlurFilter(blur); },
+        Overloaded{ [&](const GaussianBlur& blur) { filter = makeLayerBlurFilter(blur); },
                     [&](const MotionBlur& blur) { filter = makeMotionBlurFilter(blur); },
                     [&, this](const RadialBlur& blur)
                     { filter = makeRadialBlurFilter(blur, m_styleObjectAttr->bound()); } },

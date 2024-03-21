@@ -15,6 +15,7 @@
  */
 
 #include "RenderNode.hpp"
+#include "Layer/Memory/VAllocator.hpp"
 #include "VSkia.hpp"
 #include "Renderer.hpp"
 #include "Effects.hpp"
@@ -23,6 +24,38 @@
 
 namespace VGG::layer
 {
+
+Ref<RenderNode> RenderNode::MakeFrom(VAllocator* alloc, PaintNode* node)
+{
+  auto shape = ShapeAttribute::Make(alloc);
+  auto transform = TransformAttribute::Make(alloc);
+  auto innerShadow = InnerShadowAttribute::Make(alloc, shape);
+  auto dropShadow = DropShadowAttribute::Make(alloc, shape);
+  auto backgroundBlur = BackgroundBlurAttribute::Make(alloc);
+  auto object = ObjectAttribute::Make(alloc, shape);
+  auto shapeMask = ShapeMaskAttribute::Make(alloc);
+
+  auto style = StyleObjectAttribute::Make(alloc, innerShadow, dropShadow, object, backgroundBlur);
+  auto layerPostProcess = LayerFXAttribute::Make(alloc, style);
+  auto alphaMaskAttribute = AlphaMaskAttribute::Make(alloc, node, layerPostProcess);
+  auto result = RenderNode::Make(
+    alloc,
+    transform,
+    style,
+    layerPostProcess,
+    alphaMaskAttribute,
+    shapeMask,
+    shape);
+  result->m_accessor = AttributeAccessor(
+    transform,
+    shape,
+    alphaMaskAttribute,
+    shapeMask,
+    dropShadow,
+    innerShadow,
+    style);
+  return 0;
+}
 
 void RenderNode::render(Renderer* renderer)
 {

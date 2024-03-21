@@ -50,32 +50,34 @@ public:
   }
   void  render(Renderer* renderer);
   Bound onRevalidate() override;
-  VGG_CLASS_MAKE(RenderNode);
 
-  class Accessor
+  class AttributeAccessor
   {
   public:
-    Accessor(const Accessor&) = delete;
-    Accessor& operator=(const Accessor&) = delete;
-    Accessor(Accessor&&) = default;
-    Accessor& operator=(Accessor&&) = default;
-    ~Accessor() = default;
+    AttributeAccessor(const AttributeAccessor&) = delete;
+    AttributeAccessor& operator=(const AttributeAccessor&) = delete;
+    AttributeAccessor(AttributeAccessor&&) = default;
+    AttributeAccessor& operator=(AttributeAccessor&&) = default;
+    ~AttributeAccessor() = default;
 
   private:
-    Accessor() = default;
-    Accessor(
+    friend class RenderNode;
+    AttributeAccessor() = default;
+    AttributeAccessor(
       TransformAttribute*   transformAttr,
       ShapeAttribute*       shapeAttr,
       AlphaMaskAttribute*   alphaMaskAttr,
       ShapeMaskAttribute*   shapemaskAttr,
       DropShadowAttribute*  dropShadowAttr,
-      InnerShadowAttribute* innerShadowAttr)
+      InnerShadowAttribute* innerShadowAttr,
+      StyleObjectAttribute* styleObjectAttr)
       : m_transformAttr(transformAttr)
       , m_alphaMaskAttr(alphaMaskAttr)
       , m_shapeMaskAttr(shapemaskAttr)
       , m_shapeAttr(shapeAttr)
       , m_dropShadowAttr(dropShadowAttr)
       , m_innerShadowAttr(innerShadowAttr)
+      , m_styleObjectAttr(styleObjectAttr)
     {
     }
     friend class RenderNode;
@@ -85,14 +87,17 @@ public:
     ShapeAttribute*       m_shapeAttr;
     DropShadowAttribute*  m_dropShadowAttr;
     InnerShadowAttribute* m_innerShadowAttr;
+    StyleObjectAttribute* m_styleObjectAttr;
   };
 
-  Accessor* accessor()
+  AttributeAccessor* access()
   {
     return &m_accessor;
   }
-
+  static Ref<RenderNode> MakeFrom(VAllocator* alloc, PaintNode* node); // NOLINT
 private:
+  VGG_CLASS_MAKE(RenderNode);
+
   SkRect                              recorder(Renderer* renderer);
   std::pair<sk_sp<SkPicture>, SkRect> revalidatePicture(const SkRect& bounds);
 
@@ -110,27 +115,6 @@ private:
   Ref<ShapeAttribute>       m_shapeAttr;
   sk_sp<SkPicture>          m_picture;
 
-  Accessor m_accessor;
-};
-
-Ref<RenderNode> renderResult(
-  PaintNode*                   paintNode,
-  Ref<TransformAttribute>      transform,
-  Ref<AlphaMaskAttribute>      alphaMask,
-  Ref<BackgroundBlurAttribute> backgroundBlur,
-  Ref<ShapeMaskAttribute>      shapeMask,
-  Ref<InnerShadowAttribute>    innerShadow,
-  Ref<DropShadowAttribute>     dropShadow,
-  Ref<ObjectAttribute>         object,
-  Ref<ShapeAttribute>          shape)
-{
-  auto style = Ref<StyleObjectAttribute>(
-    V_NEW<StyleObjectAttribute>(innerShadow, dropShadow, object, backgroundBlur));
-  auto alphaMaskAttribute = AlphaMaskAttribute::Make(paintNode, nullptr);
-  auto layerPostProcess = Ref<LayerFXAttribute>(V_NEW<LayerFXAttribute>(style));
-  alphaMaskAttribute->setInputImageFilter(layerPostProcess);
-  auto result =
-    RenderNode::Make(transform, style, layerPostProcess, alphaMaskAttribute, shapeMask, shape);
-  return result;
+  AttributeAccessor m_accessor;
 };
 } // namespace VGG::layer

@@ -48,8 +48,8 @@ sk_sp<SkShader>      makeGradientLinear(const Bound& bound, const GradientLinear
 
 sk_sp<SkImageFilter>   makeMotionBlurFilter(const MotionBlur& blur);
 sk_sp<SkImageFilter>   makeRadialBlurFilter(const RadialBlur& blur, const Bound& bound);
-sk_sp<SkImageFilter>   makeLayerBlurFilter(const LayerBlur& blur);
-sk_sp<SkImageFilter>   makeBackgroundBlurFilter(const BackgroundBlur& blur);
+sk_sp<SkImageFilter>   makeLayerBlurFilter(const GaussianBlur& blur);
+sk_sp<SkImageFilter>   makeBackgroundBlurFilter(const GaussianBlur& blur);
 sk_sp<SkRuntimeEffect> getOrCreateEffect(EffectCacheKey key, const char* sksl);
 sk_sp<SkBlender>       getOrCreateBlender(EffectCacheKey name, const char* sksl);
 

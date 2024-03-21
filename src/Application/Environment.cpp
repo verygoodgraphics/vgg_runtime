@@ -1,8 +1,9 @@
-#include "environment.h"
+#include "Environment.h"
 #include "NativeExec.hpp"
 
 namespace VGG
 {
+
 void Environment::setUp()
 {
 }

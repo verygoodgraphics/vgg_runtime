@@ -1,12 +1,10 @@
 if(VGG_CONTAINER_FOR_QT)
   add_library(vgg_container SHARED
     Container.cpp
-    Environment.cpp
   )
 else()
   add_library(vgg_container STATIC
     Container.cpp
-    Environment.cpp
   )
 endif()
 
@@ -20,20 +18,20 @@ elseif(VGG_CONTAINER_FOR_QT)
   )
 endif()
 
-if(MSVC)
-  target_compile_definitions(vgg_container PRIVATE VGG_RUNTIME_DLL_EXPORTING)
-endif()
-
 target_include_directories(vgg_container PUBLIC
   ${CMAKE_SOURCE_DIR}/include/Application/Event
   ${CMAKE_SOURCE_DIR}/include/VGG/Container
-  ${CMAKE_SOURCE_DIR}/include/Adapter
 )
 
 target_link_libraries(vgg_container PUBLIC
   vgg_application
   vgg_adapter
 )
+
+if(MSVC)
+  target_compile_definitions(vgg_container PRIVATE VGG_RUNTIME_DLL_EXPORTING)
+  target_link_options(vgg_container PRIVATE /WHOLEARCHIVE:vgg_application)
+endif()
 
 install(TARGETS vgg_container
   COMPONENT container
@@ -44,10 +42,10 @@ install(FILES
   ${CMAKE_SOURCE_DIR}/include/Application/Event/EventAPI.hpp
   ${CMAKE_SOURCE_DIR}/include/Application/Event/Keycode.hpp
   ${CMAKE_SOURCE_DIR}/include/Application/Event/Scancode.hpp
+  ${CMAKE_SOURCE_DIR}/include/Application/Environment.h
   ${CMAKE_SOURCE_DIR}/include/VGG/Container/IContainer.hpp
   ${CMAKE_SOURCE_DIR}/include/VGG/Container/ISdk.hpp
   ${CMAKE_SOURCE_DIR}/include/VGG/Container/VggTypes.hpp
-  ${CMAKE_SOURCE_DIR}/include/VGG/Container/Environment.h
   ${CMAKE_SOURCE_DIR}/include/Package/VggPackage.h
   COMPONENT container
   DESTINATION VGG)

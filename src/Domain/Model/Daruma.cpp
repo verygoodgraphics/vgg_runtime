@@ -25,6 +25,7 @@
 #include "Domain/Model/DesignDocAdapter.hpp"
 #include "Domain/Model/Element.hpp"
 #include "Utility/Log.hpp"
+#include "Utility/VggFloat.hpp"
 
 #include <boost/uuid/name_generator_sha1.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -459,4 +460,36 @@ void Daruma::getTextsTo(
   {
     getTextsTo(texts, child);
   }
+}
+
+int Daruma::getFrameIndexForWidth(double width) const
+{
+  if (m_settingsDoc.is_object())
+  {
+    std::string frameName;
+
+    auto& breakpoints = m_settingsDoc[K_BREAKPOINTS];
+    if (breakpoints.is_array())
+    {
+      for (std::size_t i = 0; i < breakpoints.size(); ++i)
+      {
+        if (doublesNearlyEqual(breakpoints[i][K_MIN_WIDTH], width))
+        {
+          frameName = breakpoints[i][K_FRAME_NAME];
+          break;
+        }
+      }
+    }
+
+    auto frames = m_settingsDoc[K_FRAMES];
+    for (std::size_t i = 0; i < frames.size(); ++i)
+    {
+      if (frames[i][K_NAME] == frameName)
+      {
+        return i;
+      }
+    }
+  }
+
+  return -1;
 }

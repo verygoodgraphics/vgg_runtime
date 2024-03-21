@@ -34,5 +34,9 @@ constexpr auto K_FILE_NAME_KEY = "fileName";
 constexpr auto K_CREATED_AT_KEY = "createdAt";
 constexpr auto K_LAUNCH_FRAME_ID = "launchFrameId";
 
+constexpr auto K_BREAKPOINTS = "breakpoints";
+constexpr auto K_MIN_WIDTH = "minWidth";
+constexpr auto K_FRAME_NAME = "frameName";
+
 } // namespace Model
 } // namespace VGG

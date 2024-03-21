@@ -46,6 +46,8 @@ public:
   using InjectFn = std::function<void(node::Environment*)>;
   bool inject(InjectFn fn);
 
+  void release();
+
 private:
   std::shared_ptr<std::thread>    m_thread;
   std::shared_ptr<NativeExecImpl> m_impl;

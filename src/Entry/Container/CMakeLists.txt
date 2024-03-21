@@ -1,10 +1,12 @@
 if(VGG_CONTAINER_FOR_QT)
   add_library(vgg_container SHARED
     Container.cpp
+    Environment.cpp
   )
 else()
   add_library(vgg_container STATIC
     Container.cpp
+    Environment.cpp
   )
 endif()
 
@@ -25,6 +27,7 @@ endif()
 target_include_directories(vgg_container PUBLIC
   ${CMAKE_SOURCE_DIR}/include/Application/Event
   ${CMAKE_SOURCE_DIR}/include/VGG/Container
+  ${CMAKE_SOURCE_DIR}/include/Adapter
 )
 
 target_link_libraries(vgg_container PUBLIC
@@ -44,6 +47,7 @@ install(FILES
   ${CMAKE_SOURCE_DIR}/include/VGG/Container/IContainer.hpp
   ${CMAKE_SOURCE_DIR}/include/VGG/Container/ISdk.hpp
   ${CMAKE_SOURCE_DIR}/include/VGG/Container/VggTypes.hpp
+  ${CMAKE_SOURCE_DIR}/include/VGG/Container/Environment.h
   ${CMAKE_SOURCE_DIR}/include/Package/VggPackage.h
   COMPONENT container
   DESTINATION VGG)

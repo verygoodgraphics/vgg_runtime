@@ -17,6 +17,7 @@
 
 #include "Layer/Core/VNode.hpp"
 #include "Layer/Memory/VNew.hpp"
+#include "Layer/Memory/VNewUnsafe.hpp"
 
 #define VGG_ATTRIBUTE(attrName, attrType, attrContainer)                                           \
   const attrType& get##attrName() const                                                            \
@@ -49,7 +50,12 @@
   template<typename... Args>                                                                       \
   static Ref<className> Make(Args&&... args)                                                       \
   {                                                                                                \
-    return Ref<className>(V_NEW<className>(std::forward<Args>(args)...));                          \
+    return Ref<className>(V_NEW_UNSAFE<className>(std::forward<Args>(args)...));                   \
+  }                                                                                                \
+  template<typename... Args>                                                                       \
+  static Ref<className> MakeAlloc(VAllocator* alloc, Args&&... args)                               \
+  {                                                                                                \
+    return Ref<className>(V_NEW_UNSAFE<className>(alloc, std::forward<Args>(args)...));            \
   }
 
 namespace VGG::layer

@@ -25,15 +25,20 @@ namespace VGG::layer
 class TransformAttribute : public Attribute
 {
 public:
-  TransformAttribute(VRefCnt* cnt, Transform transform)
+  TransformAttribute(VRefCnt* cnt)
     : Attribute(cnt)
-    , m_transform(transform)
   {
   }
   VGG_ATTRIBUTE(Transform, Transform, m_transform);
   VGG_CLASS_MAKE(TransformAttribute);
 
+  Bound onRevalidate() override
+  {
+    return Bound{};
+  }
+
 private:
+  friend class RenderNode;
   Transform m_transform;
 };
 } // namespace VGG::layer

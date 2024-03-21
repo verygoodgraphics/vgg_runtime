@@ -15,30 +15,29 @@
  */
 #pragma once
 
-#include "Layer/Memory/RefCounterImpl.hpp"
 #include "Layer/Memory/VAllocator.hpp"
+#include "Layer/Memory/RefCounterImplUnsafe.hpp"
 
 #include <memory>
 #include <type_traits>
-
 namespace VGG::layer
 {
 
 template<typename ObjectType, typename Allocator>
-class VNew
+class VNewUnsafe
 {
   Allocator* const m_allocator;
 
 public:
-  VNew(Allocator* allocator)
+  VNewUnsafe(Allocator* allocator)
     : m_allocator(allocator)
   {
   }
-  VNew(const VNew&) = delete;
-  VNew(VNew&&) = delete;
-  VNew& operator=(const VNew&) = delete;
-  VNew& operator=(VNew&&) = delete;
-  template<typename... Args, typename RefCounterType = RefCounterImpl<ObjectType, Allocator>>
+  VNewUnsafe(const VNewUnsafe&) = delete;
+  VNewUnsafe(VNewUnsafe&&) = delete;
+  VNewUnsafe& operator=(const VNewUnsafe&) = delete;
+  VNewUnsafe& operator=(VNewUnsafe&&) = delete;
+  template<typename... Args, typename RefCounterType = RefCounterImplUnsafe<ObjectType, Allocator>>
   ObjectType* operator()(Args&&... args)
   {
     auto refcnt = std::unique_ptr<RefCounterType>(new RefCounterType());
@@ -64,17 +63,16 @@ template<
   typename AllocatorType,
   typename... Args,
   typename = typename std::enable_if<std::is_base_of<VAllocator, AllocatorType>::value>::type>
-Type* V_NEW(AllocatorType* alloc, Args&&... args)
+Type* V_NEW_UNSAFE(AllocatorType* alloc, Args&&... args)
 {
-  return VNew<Type, AllocatorType>(alloc)(std::forward<Args>(args)...);
+  return VNewUnsafe<Type, AllocatorType>(alloc)(std::forward<Args>(args)...);
 }
 
 template<typename Type, typename... Args>
-Type* V_NEW(Args&&... args)
+Type* V_NEW_UNSAFE(Args&&... args)
 {
-  return VNew<Type, VAllocator>(nullptr)(std::forward<Args>(args)...);
+  return VNewUnsafe<Type, VAllocator>(nullptr)(std::forward<Args>(args)...);
 }
 
 // NOLINTEND
-
 } // namespace VGG::layer

@@ -32,6 +32,12 @@ class RefCountedObject : public Base
   template<typename ObjectType, typename Allocator>
   friend class VNew;
 
+  template<typename ObjectType, typename Allocator>
+  friend class RefCounterImplUnsafe;
+
+  template<typename ObjectType, typename Allocator>
+  friend class VNewUnsafe;
+
 public:
   template<typename... Args>
   RefCountedObject(VRefCnt* cnt, Args&&... args) noexcept

@@ -92,6 +92,8 @@ public:
   std::string getLaunchFrameId() const;
   bool        setLaunchFrameById(const std::string& id);
 
+  int getFrameIndexForWidth(double width) const; // -1, error
+
   std::string getFramesInfo() const;
   int         getFrameIndexById(const std::string& id) const;
   std::string getFrameIdByIndex(const std::size_t index) const;

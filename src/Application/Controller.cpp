@@ -278,6 +278,13 @@ void Controller::onResize()
 {
   if (isNormalMode())
   {
+    auto currentPageIndex = m_presenter->currentPageIndex();
+    auto pageIndexForViewport = m_model->getFrameIndexForWidth(m_presenter->viewSize().width);
+    if (pageIndexForViewport != -1 && currentPageIndex != pageIndexForViewport)
+    {
+      m_presenter->setCurrentPage(pageIndexForViewport);
+    }
+
     m_presenter->resetForRunning();
     scaleContent(m_presenter->viewSize());
   }
@@ -350,7 +357,16 @@ void Controller::initModel(const char* designDocSchemaFilePath, const char* layo
 void Controller::start()
 {
   m_presenter->setModel(generateViewModel(m_model, m_presenter->viewSize()));
-  m_presenter->setCurrentPage(m_model->getFrameIndexById(m_model->getLaunchFrameId()));
+
+  auto pageIndexForViewport = m_model->getFrameIndexForWidth(m_presenter->viewSize().width);
+  if (pageIndexForViewport != -1)
+  {
+    m_presenter->setCurrentPage(pageIndexForViewport);
+  }
+  else
+  {
+    m_presenter->setCurrentPage(m_model->getFrameIndexById(m_model->getLaunchFrameId()));
+  }
 
   const auto& modelFileVersion = m_model->docVersion();
   if (versionCompare(modelFileVersion, REQUIRED_DOC_VERSION) != 0)

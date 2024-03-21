@@ -33,6 +33,8 @@
   }                                                                                                \
   void set##attrName(attrType&& v)                                                                 \
   {                                                                                                \
+    if (attrContainer == v)                                                                        \
+      return;                                                                                      \
     attrContainer = std::move(v);                                                                  \
     this->invalidate();                                                                            \
   }
@@ -70,10 +72,15 @@ class Attribute : public VNode
 {
 public:
   Attribute(VRefCnt* cnt)
-    : VNode(cnt)
+    : VNode(cnt, INVALIDATE)
   {
   }
   virtual void render(Renderer* renderer){};
+
+  bool isInvalid() const
+  {
+    return VNode::isInvalid();
+  }
 
 private:
 };

@@ -34,18 +34,15 @@ Bound BackgroundBlurAttribute::onRevalidate()
     {
       if (!b.isEnabled)
         continue;
-      if (auto ptr = std::get_if<BackgroundBlur>(&b.type); ptr)
+      sk_sp<SkImageFilter> filter;
+      filter = makeBackgroundBlurFilter(b.blur);
+      if (m_imageFilter == nullptr)
       {
-        sk_sp<SkImageFilter> filter;
-        filter = makeBackgroundBlurFilter(*ptr);
-        if (m_imageFilter == nullptr)
-        {
-          m_imageFilter = filter;
-        }
-        else
-        {
-          m_imageFilter = SkImageFilters::Compose(m_imageFilter, filter);
-        }
+        m_imageFilter = filter;
+      }
+      else
+      {
+        m_imageFilter = SkImageFilters::Compose(m_imageFilter, filter);
       }
     }
   }
@@ -193,6 +190,7 @@ void ObjectAttribute::render(Renderer* renderer)
 
 Bound ObjectAttribute::onRevalidate()
 {
+  m_shapeAttr->revalidate();
   for (const auto& f : m_fills)
   {
     if (f.isEnabled)
@@ -222,8 +220,9 @@ void StyleObjectAttribute::render(Renderer* renderer)
 
 Bound StyleObjectAttribute::onRevalidate()
 {
-  auto objectBounds = toSkRect(m_objectAttr->revalidate());
   m_innerShadowAttr->revalidate();
+  m_backgroundBlurAttr->revalidate();
+  auto objectBounds = toSkRect(m_objectAttr->revalidate());
   auto shadowBounds = toSkRect(m_dropShadowAttr->revalidate());
   objectBounds.join(shadowBounds);
   return Bound{ objectBounds.x(), objectBounds.y(), objectBounds.width(), objectBounds.height() };

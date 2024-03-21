@@ -15,11 +15,12 @@
  */
 
 #include "RenderNode.hpp"
-#include "Layer/Memory/VAllocator.hpp"
+#include "AttributeAccessor.hpp"
 #include "VSkia.hpp"
 #include "Renderer.hpp"
 #include "Effects.hpp"
 
+#include "Layer/Memory/VAllocator.hpp"
 #include <core/SkCanvas.h>
 
 namespace VGG::layer
@@ -46,7 +47,7 @@ Ref<RenderNode> RenderNode::MakeFrom(VAllocator* alloc, PaintNode* node)
     alphaMaskAttribute,
     shapeMask,
     shape);
-  result->m_accessor = AttributeAccessor(
+  result->m_accessor = std::unique_ptr<AttributeAccessor>(new AttributeAccessor(
     transform,
     shape,
     alphaMaskAttribute,
@@ -55,7 +56,7 @@ Ref<RenderNode> RenderNode::MakeFrom(VAllocator* alloc, PaintNode* node)
     innerShadow,
     object,
     layerPostProcess,
-    backgroundBlur);
+    backgroundBlur));
   return result;
 }
 
@@ -148,4 +149,14 @@ Bound RenderNode::onRevalidate()
   auto [pic, bound] = revalidatePicture(rect);
   return Bound{ bound.x(), bound.y(), bound.width(), bound.height() };
 }
+
+RenderNode::~RenderNode()
+{
+  unobserve(m_transformAttr);
+  unobserve(m_objectAttr);
+  unobserve(m_alphaMaskAttr);
+  unobserve(m_shapeMaskAttr);
+  unobserve(m_shapeAttr);
+}
+
 } // namespace VGG::layer

@@ -192,7 +192,7 @@ private:
   bool                 m_hasClip;
 };
 
-class InnerShadowEffect : public Effects
+class InnerShadowEffect final : public Effects
 {
 public:
   void render(Renderer* render, const VShape& shape) override

@@ -241,8 +241,6 @@ inline sk_sp<SkShader> makeGradientShader(const Bound& bound, const Gradient& gr
       [&](const GradientRadial& p) { shader = makeGradientRadial(bound, p); },
       [&](const GradientAngular& p) { shader = makeGradientAngular(bound, p); },
       [&](const GradientDiamond& p) { shader = makeGradientDiamond(bound, p); },
-      [&](const GradientBasic& p) { // TODO::
-      },
     },
     gradient.instance);
   return shader;

@@ -406,7 +406,7 @@ half4 main(float2 coord){
   builder.uniform("center") = SkV2{ blur.xCenter * bound.width(), blur.yCenter * bound.height() };
   return SkImageFilters::RuntimeShader(builder, blur.radius, "", nullptr);
 }
-sk_sp<SkImageFilter> makeLayerBlurFilter(const LayerBlur& blur)
+sk_sp<SkImageFilter> makeLayerBlurFilter(const GaussianBlur& blur)
 {
 
   return SkImageFilters::Blur(
@@ -415,7 +415,7 @@ sk_sp<SkImageFilter> makeLayerBlurFilter(const LayerBlur& blur)
     0);
 }
 
-sk_sp<SkImageFilter> makeBackgroundBlurFilter(const BackgroundBlur& blur)
+sk_sp<SkImageFilter> makeBackgroundBlurFilter(const GaussianBlur& blur)
 {
   return SkImageFilters::Blur(
     SkBlurMask::ConvertRadiusToSigma(blur.radius),

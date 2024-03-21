@@ -276,14 +276,13 @@ public:
   sk_sp<SkImageFilter> blurImageFilter()
   {
     sk_sp<SkImageFilter> result;
-    for (const auto& b : style.blurs)
+    for (const auto& b : style.layerEffects)
     {
       if (!b.isEnabled)
         continue;
       sk_sp<SkImageFilter> filter;
       std::visit(
-        Overloaded{ [](const BackgroundBlur& blur) {},
-                    [&](const LayerBlur& blur) { filter = makeLayerBlurFilter(blur); },
+        Overloaded{ [&](const GaussianBlur& blur) { filter = makeLayerBlurFilter(blur); },
                     [&](const MotionBlur& blur) { filter = makeMotionBlurFilter(blur); },
                     [&, this](const RadialBlur& blur)
                     { filter = makeRadialBlurFilter(blur, q_ptr->frameBound()); } },
@@ -303,22 +302,19 @@ public:
   sk_sp<SkImageFilter> backgroundBlurImageFilter()
   {
     sk_sp<SkImageFilter> result;
-    for (const auto& b : style.blurs)
+    for (const auto& b : style.backgroundEffects)
     {
       if (!b.isEnabled)
         continue;
-      if (auto ptr = std::get_if<BackgroundBlur>(&b.type); ptr)
+      sk_sp<SkImageFilter> filter;
+      filter = makeBackgroundBlurFilter(b.blur);
+      if (result == nullptr)
       {
-        sk_sp<SkImageFilter> filter;
-        filter = makeBackgroundBlurFilter(*ptr);
-        if (result == nullptr)
-        {
-          result = filter;
-        }
-        else
-        {
-          result = SkImageFilters::Compose(result, filter);
-        }
+        result = filter;
+      }
+      else
+      {
+        result = SkImageFilters::Compose(result, filter);
       }
     }
     return result;

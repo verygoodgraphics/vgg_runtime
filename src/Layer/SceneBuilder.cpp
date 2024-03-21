@@ -186,12 +186,11 @@ public:
     {
       CoordinateConvert::convertCoordinateSystem(s.offsetX, s.offsetY, totalMatrix);
     }
-    for (auto& b : style.blurs)
+    for (auto& b : style.layerEffects)
     {
       std::visit(
         Overloaded{
-          [](const BackgroundBlur& blur) {},
-          [](const LayerBlur& blur) {},
+          [](const GaussianBlur& blur) {},
           [](const MotionBlur& blur) {},
           [&](RadialBlur& blur)
           { CoordinateConvert::convertCoordinateSystem(blur.xCenter, blur.yCenter, totalMatrix); },

@@ -34,6 +34,7 @@ class Effects
 {
 public:
   virtual void render(Renderer* render, const VShape& shape) = 0;
+  virtual ~Effects() = default;
 };
 
 sk_sp<SkColorFilter> makeColorFilter(const ImageFilter& imageFilter);

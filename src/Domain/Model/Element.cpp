@@ -148,6 +148,22 @@ void DesignDocument::buildSubtree()
     element->buildSubtree();
     addChild(element);
   }
+  m_designModel->frames.clear();
+}
+
+Model::DesignModel DesignDocument::treeModel() const
+{
+  auto retModel = *m_designModel;
+  for (auto& child : children())
+  {
+    auto frameElement = std::dynamic_pointer_cast<FrameElement>(child);
+    if (frameElement)
+    {
+      retModel.frames.push_back(frameElement->treeModel());
+    }
+  }
+
+  return retModel;
 }
 
 // Element
@@ -227,7 +243,7 @@ void Element::makeMaskIdUnique(Domain::SymbolInstanceElement& instance, const st
     }
   }
 
-  for (auto child : instance.children())
+  for (auto& child : children())
   {
     child->makeMaskIdUnique(instance, idPrefix);
   }
@@ -387,13 +403,24 @@ std::shared_ptr<Element> Element::findElementByKey(
 
   return nullptr;
 }
+void Element::getToModel(Model::ContainerChildType& variantModel)
+{
+}
+void Element::getTreeToModel(Model::SubGeometryType& subGeometry)
+{
+  getToModel(subGeometry);
+}
+void Element::getTreeToModel(Model::ContainerChildType& variantModel)
+{
+  getToModel(variantModel);
+}
 
 // FrameElement
 FrameElement::FrameElement(const Model::Frame& frame)
 {
   m_frame = std::make_shared<Model::Frame>(frame);
 }
-Object* FrameElement::object() const
+Frame* FrameElement::object() const
 {
   return m_frame.get();
 }
@@ -417,13 +444,32 @@ void FrameElement::getToModel(Model::SubGeometryType& subGeometry)
   ASSERT(m_frame);
   subGeometry = *m_frame;
 }
+Model::Frame FrameElement::treeModel() const
+{
+  auto retModel = *m_frame;
+  for (auto& child : children())
+  {
+    ContainerChildType variantModel;
+    child->getTreeToModel(variantModel);
+    retModel.childObjects.push_back(variantModel);
+  }
+  return retModel;
+}
+void FrameElement::getTreeToModel(Model::SubGeometryType& subGeometry)
+{
+  subGeometry = treeModel();
+}
+void FrameElement::getTreeToModel(Model::ContainerChildType& variantModel)
+{
+  variantModel = treeModel();
+}
 
 // GroupElement
 GroupElement::GroupElement(const Model::Group& group)
 {
   m_group = std::make_shared<Model::Group>(group);
 }
-Object* GroupElement::object() const
+Group* GroupElement::object() const
 {
   return m_group.get();
 }
@@ -447,13 +493,32 @@ void GroupElement::getToModel(Model::SubGeometryType& subGeometry)
   ASSERT(m_group);
   subGeometry = *m_group;
 }
+Model::Group GroupElement::treeModel() const
+{
+  auto retModel = *m_group;
+  for (auto& child : children())
+  {
+    ContainerChildType variantModel;
+    child->getTreeToModel(variantModel);
+    retModel.childObjects.push_back(variantModel);
+  }
+  return retModel;
+}
+void GroupElement::getTreeToModel(Model::SubGeometryType& subGeometry)
+{
+  subGeometry = treeModel();
+}
+void GroupElement::getTreeToModel(Model::ContainerChildType& variantModel)
+{
+  variantModel = treeModel();
+}
 
 // SymbolMasterElement
 SymbolMasterElement::SymbolMasterElement(const Model::SymbolMaster& master)
 {
   m_master = std::make_shared<Model::SymbolMaster>(master);
 }
-Object* SymbolMasterElement::object() const
+SymbolMaster* SymbolMasterElement::object() const
 {
   return m_master.get();
 }
@@ -476,6 +541,25 @@ void SymbolMasterElement::getToModel(Model::SubGeometryType& subGeometry)
 {
   ASSERT(m_master);
   subGeometry = *m_master;
+}
+Model::SymbolMaster SymbolMasterElement::treeModel() const
+{
+  auto retModel = *m_master;
+  for (auto& child : children())
+  {
+    ContainerChildType variantModel;
+    child->getTreeToModel(variantModel);
+    retModel.childObjects.push_back(variantModel);
+  }
+  return retModel;
+}
+void SymbolMasterElement::getTreeToModel(Model::SubGeometryType& subGeometry)
+{
+  subGeometry = treeModel();
+}
+void SymbolMasterElement::getTreeToModel(Model::ContainerChildType& variantModel)
+{
+  variantModel = treeModel();
 }
 
 // SymbolInstanceElement
@@ -501,6 +585,7 @@ std::string SymbolInstanceElement::masterOverrideKey() const
 }
 void SymbolInstanceElement::setMaster(const Model::SymbolMaster& master)
 {
+  ASSERT(master.id == masterId());
   if (master.id == masterId())
   {
     m_master = std::make_unique<Model::SymbolMaster>(master);
@@ -552,13 +637,49 @@ void SymbolInstanceElement::getToModel(Model::SubGeometryType& subGeometry)
   ASSERT(m_instance);
   subGeometry = *m_instance;
 }
-
+Model::SymbolMaster SymbolInstanceElement::treeModel() const
+{
+  ASSERT(m_master);
+  Model::SymbolMaster retModel;
+  static_cast<Model::Object&>(retModel) = *m_instance;
+  for (auto& child : children())
+  {
+    ContainerChildType variantModel;
+    child->getTreeToModel(variantModel);
+    retModel.childObjects.push_back(variantModel);
+  }
+  retModel.class_ = m_master->class_;
+  retModel.radius = m_master->radius;
+  return retModel;
+}
+void SymbolInstanceElement::getTreeToModel(Model::SubGeometryType& subGeometry)
+{
+  if (m_master)
+  {
+    subGeometry = treeModel();
+  }
+  else
+  {
+    subGeometry = *m_instance;
+  }
+}
+void SymbolInstanceElement::getTreeToModel(Model::ContainerChildType& variantModel)
+{
+  if (m_master)
+  {
+    variantModel = treeModel();
+  }
+  else
+  {
+    variantModel = *m_instance;
+  }
+}
 // TextElement
 TextElement::TextElement(const Model::Text& text)
 {
   m_text = std::make_shared<Model::Text>(text);
 }
-Object* TextElement::object() const
+Text* TextElement::object() const
 {
   return m_text.get();
 }
@@ -596,13 +717,18 @@ void TextElement::getToModel(Model::SubGeometryType& subGeometry)
   ASSERT(m_text);
   subGeometry = *m_text;
 }
+void TextElement::getToModel(Model::ContainerChildType& variantModel)
+{
+  ASSERT(m_text);
+  variantModel = *m_text;
+}
 
 // ImageElement
 ImageElement::ImageElement(const Model::Image& image)
 {
   m_image = std::make_shared<Model::Image>(image);
 }
-Object* ImageElement::object() const
+Image* ImageElement::object() const
 {
   return m_image.get();
 }
@@ -620,6 +746,11 @@ void ImageElement::getToModel(Model::SubGeometryType& subGeometry)
 {
   ASSERT(m_image);
   subGeometry = *m_image;
+}
+void ImageElement::getToModel(Model::ContainerChildType& variantModel)
+{
+  ASSERT(m_image);
+  variantModel = *m_image;
 }
 
 // PathElement
@@ -650,6 +781,7 @@ nlohmann::json PathElement::jsonModel()
   ASSERT(m_path);
   if (m_path->shape)
   {
+    ASSERT(children().size() >= m_path->shape->subshapes.size());
     for (std::size_t i = 0; i < m_path->shape->subshapes.size(); i++)
     {
       auto subGeometry = std::make_shared<Model::SubGeometryType>();
@@ -678,6 +810,29 @@ void PathElement::getToModel(Model::SubGeometryType& subGeometry)
 {
   ASSERT(m_path);
   subGeometry = *m_path;
+}
+Model::Path PathElement::treeModel() const
+{
+  auto retModel = *m_path;
+  if (m_path->shape)
+  {
+    ASSERT(children().size() >= m_path->shape->subshapes.size());
+    for (std::size_t i = 0; i < m_path->shape->subshapes.size(); i++)
+    {
+      auto variantModel = std::make_shared<SubGeometryType>();
+      children()[i]->getTreeToModel(*variantModel);
+      retModel.shape->subshapes[i].subGeometry = variantModel;
+    }
+  }
+  return retModel;
+}
+void PathElement::getTreeToModel(Model::SubGeometryType& subGeometry)
+{
+  subGeometry = treeModel();
+}
+void PathElement::getTreeToModel(Model::ContainerChildType& variantModel)
+{
+  variantModel = treeModel();
 }
 
 // ContourElement

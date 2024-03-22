@@ -57,12 +57,13 @@
   static Ref<className> Make(Args&&... args)                                                       \
   {                                                                                                \
     return Ref<className>(V_NEW_UNSAFE<className>(std::forward<Args>(args)...));                   \
-  }                                                                                                \
-  template<typename... Args>                                                                       \
-  static Ref<className> MakeAlloc(VAllocator* alloc, Args&&... args)                               \
-  {                                                                                                \
-    return Ref<className>(V_NEW_UNSAFE<className>(alloc, std::forward<Args>(args)...));            \
   }
+
+// template<typename... Args>
+// static Ref<className> MakeAlloc(VAllocator* alloc, Args&&... args)
+// {
+//   return Ref<className>(V_NEW_UNSAFE<className>(alloc, std::forward<Args>(args)...));
+// }
 
 namespace VGG::layer
 {

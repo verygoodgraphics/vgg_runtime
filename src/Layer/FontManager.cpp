@@ -281,7 +281,7 @@ std::string FontManager::matchFontName(std::string_view inputName) const
     // the worst case
     fontName = "FiraSans";
   }
-  DEBUG("Given [%s], [%s] is choosed finally", std::string(inputName).c_str(), fontName.c_str());
+  // DEBUG("Given [%s], [%s] is choosed finally", std::string(inputName).c_str(), fontName.c_str());
   return fontName;
 }
 

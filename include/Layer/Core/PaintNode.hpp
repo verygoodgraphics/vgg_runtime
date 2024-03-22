@@ -37,6 +37,7 @@ class Painter;
 namespace VGG::layer
 {
 class Renderer;
+class AttributeAccessor;
 
 struct ContourOption
 {
@@ -161,7 +162,7 @@ public:
 
   const Transform& transform() const;
 
-  Transform& transform();
+  // Transform& transform();
 
   Transform globalTransform() const;
 
@@ -171,7 +172,7 @@ public:
 
   const std::string& guid() const;
 
-  bool isMasked() const;
+  // bool isMasked() const;
 
   void setMaskBy(std::vector<std::string> masks);
 
@@ -196,6 +197,8 @@ public:
   const PaintOption& paintOption() const;
 
   virtual VShape asVisualShape(const Transform* transform);
+
+  AttributeAccessor* attributeAccessor();
 
   ~PaintNode();
 

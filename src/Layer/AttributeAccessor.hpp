@@ -156,7 +156,7 @@ public:
 #undef ATTR_MEMBER_GETTER
 
 private:
-  friend class RenderNode;
+  friend class DefaultRenderNode;
   TransformAttribute* const      m_transformAttr;
   AlphaMaskAttribute* const      m_alphaMaskAttr;
   ShapeMaskAttribute* const      m_shapeMaskAttr;

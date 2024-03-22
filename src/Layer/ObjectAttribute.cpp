@@ -179,7 +179,7 @@ void ObjectAttribute::render(Renderer* renderer)
       FillEffect     fillEffect(m_fills, fillBounds, imageFilter, blender);
       fillEffect.render(renderer, shape);
       const auto borderBounds =
-        internal_draw::drawBorder(recorder, shape, shape.bounds(), m_borders, blender);
+        internal::drawBorder(recorder, shape, shape.bounds(), m_borders, blender);
       objectBounds.join(fillBounds);
       objectBounds.join(borderBounds);
       auto mat = SkMatrix::Translate(objectBounds.x(), objectBounds.y());

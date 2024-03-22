@@ -61,7 +61,7 @@
 namespace VGG::layer
 {
 
-namespace internal_draw
+namespace internal
 {
 inline SkRect drawBorder(
   Renderer*                  renderer,
@@ -139,7 +139,8 @@ inline SkRect drawBorder(
   }
   return resultBounds;
 }
-} // namespace internal_draw
+
+} // namespace internal
 
 class PaintNode__pImpl // NOLINT
 {
@@ -160,19 +161,22 @@ public:
   PaintOption    paintOption;
   ContourOption  maskOption;
 
+  std::optional<VShape> path;
+  Bound                 bound;
 #ifdef USE_OLD_CODE
-  Bound                            bound;
   Transform                        transform;
   Style                            style;
   std::vector<std::string>         maskedBy;
   std::vector<AlphaMask>           alphaMaskBy;
   std::optional<ObjectShader>      styleDisplayList; // fill + border
-  std::optional<VShape>            path;
   std::optional<DropShadowEffect>  dropShadowEffects;
   std::optional<InnerShadowEffect> innerShadowEffects;
 #else
-  Ref<DefaultRenderNode> renderNode;
+  Style dummyStyle;
+
 #endif
+
+  Ref<DefaultRenderNode> renderNode;
 
   PaintNode__pImpl(PaintNode* api, EObjectType type)
     : q_ptr(api)
@@ -232,7 +236,7 @@ public:
 
       const auto fillBounds = toSkRect(q_ptr->onDrawFill(recorder, blender, 0, shape, mask));
       const auto borderBounds =
-        internal_draw::drawBorder(recorder, shape, shape.bounds(), borders, blender);
+        internal::drawBorder(recorder, shape, shape.bounds(), borders, blender);
       styleBounds.join(fillBounds);
       styleBounds.join(borderBounds);
       auto mat = SkMatrix::Translate(styleBounds.x(), styleBounds.y());
@@ -356,6 +360,20 @@ public:
     renderer->canvas()->restore();
     renderer->canvas()->restore();
   }
+
+  void drawAsAlphaMaskImpl(Renderer* renderer, sk_sp<SkBlender> blender)
+  {
+    if (!path)
+    {
+      path = q_ptr->asVisualShape(0);
+      // path = Shape();
+    }
+    if (path->isEmpty())
+    {
+      return;
+    }
+    onDrawStyleImpl(renderer, *path, VShape(), blender);
+  }
 #endif
 
   void onRevalidateImpl()
@@ -371,19 +389,6 @@ public:
     }
     static_cast<PaintNode*>(p.get())->d_ptr->worldTransform(mat);
     mat *= q_ptr->transform().matrix();
-  }
-  void drawAsAlphaMaskImpl(Renderer* renderer, sk_sp<SkBlender> blender)
-  {
-    if (!path)
-    {
-      path = q_ptr->asVisualShape(0);
-      // path = Shape();
-    }
-    if (path->isEmpty())
-    {
-      return;
-    }
-    onDrawStyleImpl(renderer, *path, VShape(), blender);
   }
 };
 

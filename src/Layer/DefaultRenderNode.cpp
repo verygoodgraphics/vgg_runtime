@@ -28,7 +28,7 @@ namespace VGG::layer
 
 Ref<DefaultRenderNode> DefaultRenderNode::MakeFrom(VAllocator* alloc, PaintNode* node)
 {
-  auto shape = ShapeAttribute::Make(alloc);
+  auto shape = ShapeAttribute::Make(alloc, node);
   auto transform = TransformAttribute::Make(alloc);
   auto innerShadow = InnerShadowAttribute::Make(alloc, shape);
   auto dropShadow = DropShadowAttribute::Make(alloc, shape);
@@ -62,13 +62,9 @@ Ref<DefaultRenderNode> DefaultRenderNode::MakeFrom(VAllocator* alloc, PaintNode*
 
 void DefaultRenderNode::render(Renderer* renderer)
 {
-  auto canvas = renderer->canvas();
-  auto skMatrix = toSkMatrix(m_transformAttr->getTransform().matrix());
-  {
-    SkAutoCanvasRestore acr(canvas, true);
-    canvas->concat(skMatrix);
-    canvas->drawPicture(m_picture);
-  }
+  // auto canvas = renderer->canvas();
+  // canvas->drawPicture(m_picture);
+  recorder(renderer);
 }
 
 SkRect DefaultRenderNode::recorder(Renderer* renderer)

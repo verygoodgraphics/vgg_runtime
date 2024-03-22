@@ -23,14 +23,26 @@ target_include_directories(vgg_container PUBLIC
   ${CMAKE_SOURCE_DIR}/include/VGG/Container
 )
 
-target_link_libraries(vgg_container PUBLIC
-  vgg_application
-  vgg_adapter
-)
-
 if(MSVC)
+  target_link_libraries(vgg_container PUBLIC
+    vgg_application
+    vgg_adapter
+  )
   target_compile_definitions(vgg_container PRIVATE VGG_RUNTIME_DLL_EXPORTING)
   target_link_options(vgg_container PRIVATE /WHOLEARCHIVE:vgg_application)
+elseif(APPLE)
+  target_link_libraries(vgg_container PUBLIC
+    -force_load
+    vgg_application
+    vgg_adapter
+  )
+else()
+  target_link_libraries(vgg_container PUBLIC
+    "-Wl,--whole-archive"
+    vgg_application
+    "-Wl,--no-whole-archive"
+    vgg_adapter
+  )
 endif()
 
 install(TARGETS vgg_container

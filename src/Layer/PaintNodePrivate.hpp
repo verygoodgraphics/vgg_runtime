@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "Renderer.hpp"
+#include "DefaultRenderNode.hpp"
 #include "Guard.hpp"
 #include "ShadowEffects.hpp"
 #include "FillEffects.hpp"
@@ -54,6 +55,8 @@
 #include <numeric>
 #include <src/core/SkBlurMask.h>
 #include <src/shaders/SkPictureShader.h>
+
+#define USE_OLD_CODE
 
 namespace VGG::layer
 {
@@ -143,38 +146,76 @@ class PaintNode__pImpl // NOLINT
   VGG_DECL_API(PaintNode);
 
 public:
-  Bound       bound;
-  Transform   transform;
   std::string guid{};
-
-  std::vector<std::string> maskedBy;
-  std::vector<AlphaMask>   alphaMaskBy;
 
   EMaskType      maskType{ MT_NONE };
   EMaskShowType  maskShowType{ MST_INVISIBLE };
   EBoolOp        clipOperator{ BO_NONE };
   EOverflow      overflow{ OF_HIDDEN };
   EWindingType   windingRule{ WR_EVEN_ODD };
-  Style          style;
   ContextSetting contextSetting;
   EObjectType    type;
   bool           visible{ true };
+  ContourData    contour;
+  PaintOption    paintOption;
+  ContourOption  maskOption;
 
-  ContourData                 contour;
-  PaintOption                 paintOption;
-  ContourOption               maskOption;
-  std::optional<ObjectShader> styleDisplayList; // fill + border
-  std::optional<VShape>       path;
-
+#ifdef USE_OLD_CODE
+  Bound                            bound;
+  Transform                        transform;
+  Style                            style;
+  std::vector<std::string>         maskedBy;
+  std::vector<AlphaMask>           alphaMaskBy;
+  std::optional<ObjectShader>      styleDisplayList; // fill + border
+  std::optional<VShape>            path;
   std::optional<DropShadowEffect>  dropShadowEffects;
   std::optional<InnerShadowEffect> innerShadowEffects;
+#else
+  Ref<DefaultRenderNode> renderNode;
+#endif
 
   PaintNode__pImpl(PaintNode* api, EObjectType type)
     : q_ptr(api)
     , type(type)
   {
+#ifndef USE_OLD_CODE
+    renderNode = DefaultRenderNode::MakeFrom(0, api);
+    api->observe(renderNode);
+#endif
   }
 
+#ifdef USE_OLD_CODE
+
+  void onDrawStyleImpl(
+    Renderer*        renderer,
+    const VShape&    skPath,
+    const VShape&    mask,
+    sk_sp<SkBlender> blender)
+  {
+    auto filled = false;
+    for (const auto& f : style.fills)
+    {
+      if (f.isEnabled)
+      {
+        filled = true;
+        break;
+      }
+    }
+    ensureStyleObjectRecorder(skPath, mask, blender, style.fills, style.borders);
+    if (filled)
+    {
+      ensureDropShadowEffects(style.dropShadow, skPath);
+      dropShadowEffects->render(renderer, skPath);
+    }
+
+    styleDisplayList->render(renderer);
+
+    if (filled)
+    {
+      ensureInnerShadowEffects(style.innerShadow);
+      innerShadowEffects->render(renderer, skPath);
+    }
+  }
   void ensureStyleObjectRecorder(
     const VShape&              shape,
     const VShape&              mask,
@@ -247,32 +288,6 @@ public:
     return result;
   }
 
-  void worldTransform(glm::mat3& mat)
-  {
-    auto p = q_ptr->parent();
-    if (!p)
-    {
-      mat *= q_ptr->transform().matrix();
-      return;
-    }
-    static_cast<PaintNode*>(p.get())->d_ptr->worldTransform(mat);
-    mat *= q_ptr->transform().matrix();
-  }
-
-  void drawAsAlphaMaskImpl(Renderer* renderer, sk_sp<SkBlender> blender)
-  {
-    if (!path)
-    {
-      path = q_ptr->asVisualShape(0);
-      // path = Shape();
-    }
-    if (path->isEmpty())
-    {
-      return;
-    }
-    onDrawStyleImpl(renderer, *path, VShape(), blender);
-  }
-
   sk_sp<SkImageFilter> blurImageFilter()
   {
     sk_sp<SkImageFilter> result;
@@ -341,40 +356,35 @@ public:
     renderer->canvas()->restore();
     renderer->canvas()->restore();
   }
+#endif
 
   void onRevalidateImpl()
   {
   }
-
-  void onDrawStyleImpl(
-    Renderer*        renderer,
-    const VShape&    skPath,
-    const VShape&    mask,
-    sk_sp<SkBlender> blender)
+  void worldTransform(glm::mat3& mat)
   {
-    auto filled = false;
-    for (const auto& f : style.fills)
+    auto p = q_ptr->parent();
+    if (!p)
     {
-      if (f.isEnabled)
-      {
-        filled = true;
-        break;
-      }
+      mat *= q_ptr->transform().matrix();
+      return;
     }
-    ensureStyleObjectRecorder(skPath, mask, blender, style.fills, style.borders);
-    if (filled)
+    static_cast<PaintNode*>(p.get())->d_ptr->worldTransform(mat);
+    mat *= q_ptr->transform().matrix();
+  }
+  void drawAsAlphaMaskImpl(Renderer* renderer, sk_sp<SkBlender> blender)
+  {
+    if (!path)
     {
-      ensureDropShadowEffects(style.dropShadow, skPath);
-      dropShadowEffects->render(renderer, skPath);
+      path = q_ptr->asVisualShape(0);
+      // path = Shape();
     }
-
-    styleDisplayList->render(renderer);
-
-    if (filled)
+    if (path->isEmpty())
     {
-      ensureInnerShadowEffects(style.innerShadow);
-      innerShadowEffects->render(renderer, skPath);
+      return;
     }
+    onDrawStyleImpl(renderer, *path, VShape(), blender);
   }
 };
+
 } // namespace VGG::layer

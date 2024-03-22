@@ -114,14 +114,14 @@ Transform PaintNode::mapTransform(const PaintNode* node) const
     return Transform(mat);
   for (std::size_t i = 0; i < path1.size() && path1[i] != lca; i++)
   {
-    auto skm = static_cast<const PaintNode*>(path1[i])->d_ptr->transform.matrix();
+    auto skm = static_cast<const PaintNode*>(path1[i])->transform().matrix();
     auto inv = glm::inverse(skm);
     mat = mat * inv;
   }
 
   for (int i = lcaIdx - 1; i >= 0; i--)
   {
-    const auto m = static_cast<const PaintNode*>(path2[i])->d_ptr->transform.matrix();
+    const auto m = static_cast<const PaintNode*>(path2[i])->transform().matrix();
     mat = mat * m;
   }
   return Transform(mat);
@@ -140,12 +140,11 @@ void PaintNode::render(Renderer* renderer)
       [&](SkCanvas* canvas, const SkPaint& p) { canvas->saveLayer(0, &p); });
     {
       SkAutoCanvasRestore acr(canvas, true);
-      canvas->concat(toSkMatrix(_->transform.matrix()));
+      canvas->concat(toSkMatrix(transform().matrix()));
       if (renderer->isEnableDrawDebugBound())
       {
         renderer->drawDebugBound(this, 0);
       }
-
       if (_->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY)
       {
         paintSelf(renderer);
@@ -279,7 +278,11 @@ void PaintNode::setMaskBy(std::vector<std::string> masks)
 void PaintNode::setAlphaMaskBy(std::vector<AlphaMask> masks)
 {
   VGG_IMPL(PaintNode);
+#ifdef USE_OLD_CODE
   _->alphaMaskBy = std::move(masks);
+#else
+  _->renderNode->access()->setAlphaMaskBy(std::move(masks));
+#endif
 }
 
 VShape PaintNode::makeBoundPath()
@@ -494,7 +497,10 @@ bool PaintNode::isVisible() const
 void PaintNode::setStyle(const Style& style)
 {
   VGG_IMPL(PaintNode);
+#ifdef USE_OLD_CODE
   _->style = style;
+#else
+#endif
 }
 
 Style& PaintNode::style()
@@ -515,17 +521,29 @@ EBoolOp PaintNode::clipOperator() const
 void PaintNode::setTransform(const Transform& transform)
 {
   VGG_IMPL(PaintNode);
+#ifdef USE_OLD_CODE
   _->transform = transform;
+#else
+  _->renderNode->access()->setTransform(transform);
+#endif
 }
 
 Transform& PaintNode::transform()
 {
+#ifdef USE_OLD_CODE
   return d_ptr->transform;
+#else
+  return _->renderNode->access()->transform()->getTransform();
+#endif
 }
 
 const Transform& PaintNode::transform() const
 {
+#ifdef USE_OLD_CODE
   return d_ptr->transform;
+#else
+  return d_ptr->renderNode->access()->transform()->getTransform();
+#endif
 }
 
 Transform PaintNode::globalTransform() const
@@ -537,7 +555,11 @@ Transform PaintNode::globalTransform() const
 
 const Bound& PaintNode::frameBound() const
 {
+#ifdef USE_OLD_CODE
   return d_ptr->bound;
+#else
+  return _->renderNode->bound();
+#endif
 }
 
 void PaintNode::setFrameBound(const Bound& bound)
@@ -553,8 +575,11 @@ Bound PaintNode::onRevalidate()
   {
     e->revalidate();
   }
-  d_ptr->onRevalidateImpl();
+#ifdef USE_OLD_CODE
   return d_ptr->bound;
+#else
+  return d_ptr->renderNode->revalidate();
+#endif
 }
 
 const std::string& PaintNode::guid() const
@@ -562,10 +587,10 @@ const std::string& PaintNode::guid() const
   return d_ptr->guid;
 }
 
-bool PaintNode::isMasked() const
-{
-  return d_ptr->maskedBy.empty();
-}
+// bool PaintNode::isMasked() const
+// {
+//   return d_ptr->maskedBy.empty();
+// }
 
 EMaskType PaintNode::maskType() const
 {

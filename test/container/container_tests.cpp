@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "Application/Environment.hpp"
 #include "Application/Presenter.hpp"
 #include "Entry/Container/Container.hpp"
 
@@ -34,6 +35,10 @@ protected:
   void SetUp() override
   {
     m_sut.reset(new Container);
+  }
+  void TearDown() override
+  {
+    Environment::tearDown();
   }
 };
 

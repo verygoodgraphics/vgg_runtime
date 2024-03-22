@@ -54,11 +54,11 @@ install(FILES
   ${CMAKE_SOURCE_DIR}/include/Application/Event/EventAPI.hpp
   ${CMAKE_SOURCE_DIR}/include/Application/Event/Keycode.hpp
   ${CMAKE_SOURCE_DIR}/include/Application/Event/Scancode.hpp
-  ${CMAKE_SOURCE_DIR}/include/Application/Environment.h
+  ${CMAKE_SOURCE_DIR}/include/Application/Environment.hpp
   ${CMAKE_SOURCE_DIR}/include/VGG/Container/IContainer.hpp
   ${CMAKE_SOURCE_DIR}/include/VGG/Container/ISdk.hpp
   ${CMAKE_SOURCE_DIR}/include/VGG/Container/VggTypes.hpp
-  ${CMAKE_SOURCE_DIR}/include/Package/VggPackage.h
+  ${CMAKE_SOURCE_DIR}/include/Package/VggPackage.hpp
   COMPONENT container
   DESTINATION VGG)
 

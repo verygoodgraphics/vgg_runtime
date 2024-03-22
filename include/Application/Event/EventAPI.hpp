@@ -17,7 +17,7 @@
 
 #include "Keycode.hpp"
 #include "Scancode.hpp"
-#include "VggPackage.h"
+#include "VggPackage.hpp"
 
 #include <memory>
 

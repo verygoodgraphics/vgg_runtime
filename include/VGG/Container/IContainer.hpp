@@ -19,7 +19,7 @@
 #include "Event.hpp"
 #include "ISdk.hpp"
 #include "VggTypes.hpp"
-#include "VggPackage.h"
+#include "VggPackage.hpp"
 
 #include <memory>
 

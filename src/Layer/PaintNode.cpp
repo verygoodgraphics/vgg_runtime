@@ -163,21 +163,26 @@ void PaintNode::render(Renderer* renderer)
 }
 void PaintNode::paintSelf(Renderer* renderer)
 {
+#ifdef USE_OLD_CODE
   VGG_IMPL(PaintNode);
-  if (!_->path)
-  {
-    _->path = VShape(asVisualShape(0));
-  }
+  // if (!_->path)
+  // {
+  //   _->path = VShape(asVisualShape(0));
+  // }
+
+  ASSERT(_->path);
   if (_->path->isEmpty())
   {
     return;
   }
+#endif
   this->paintEvent(renderer);
 }
 
 void PaintNode::paintEvent(Renderer* renderer)
 {
   VGG_IMPL(PaintNode);
+#ifdef USE_OLD_CODE
   auto dropbackFilter = _->backgroundBlurImageFilter();
   auto layerFilter = _->blurImageFilter();
 
@@ -267,21 +272,25 @@ void PaintNode::paintEvent(Renderer* renderer)
   {
     renderer->canvas()->restore();
   }
+
+#else
+  _->renderNode->render(renderer);
+#endif
 }
 
 void PaintNode::setMaskBy(std::vector<std::string> masks)
 {
+#ifdef USE_OLD_CODE
   VGG_IMPL(PaintNode);
   _->maskedBy = std::move(masks);
+#endif
 }
 
 void PaintNode::setAlphaMaskBy(std::vector<AlphaMask> masks)
 {
-  VGG_IMPL(PaintNode);
 #ifdef USE_OLD_CODE
+  VGG_IMPL(PaintNode);
   _->alphaMaskBy = std::move(masks);
-#else
-  _->renderNode->access()->setAlphaMaskBy(std::move(masks));
 #endif
 }
 
@@ -414,6 +423,7 @@ VShape PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
 
 void PaintNode::onDrawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
 {
+#ifdef USE_OLD_CODE
   VGG_IMPL(PaintNode);
   if (_->contextSetting.opacity < 1.0)
   {
@@ -424,6 +434,7 @@ void PaintNode::onDrawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
   {
     renderer->canvas()->restore();
   }
+#endif
 }
 
 void PaintNode::onDrawStyle(
@@ -432,7 +443,9 @@ void PaintNode::onDrawStyle(
   const VShape&    mask,
   sk_sp<SkBlender> blender)
 {
+#ifdef USE_OLD_CODE
   d_ptr->onDrawStyleImpl(renderer, path, mask, std::move(blender));
+#endif
 }
 
 VShape PaintNode::asVisualShape(const Transform* mat)
@@ -496,22 +509,29 @@ bool PaintNode::isVisible() const
 
 void PaintNode::setStyle(const Style& style)
 {
-  VGG_IMPL(PaintNode);
 #ifdef USE_OLD_CODE
+  VGG_IMPL(PaintNode);
   _->style = style;
-#else
 #endif
 }
 
 Style& PaintNode::style()
 {
+#ifdef USE_OLD_CODE
   VGG_IMPL(PaintNode);
   return _->style;
+#else
+  return d_ptr->dummyStyle;
+#endif
 }
 
 const Style& PaintNode::style() const
 {
+#ifdef USE_OLD_CODE
   return d_ptr->style;
+#else
+  return d_ptr->dummyStyle;
+#endif
 }
 
 EBoolOp PaintNode::clipOperator() const
@@ -528,14 +548,14 @@ void PaintNode::setTransform(const Transform& transform)
 #endif
 }
 
-Transform& PaintNode::transform()
-{
-#ifdef USE_OLD_CODE
-  return d_ptr->transform;
-#else
-  return _->renderNode->access()->transform()->getTransform();
-#endif
-}
+// Transform& PaintNode::transform()
+// {
+// #ifdef USE_OLD_CODE
+//   return d_ptr->transform;
+// #else
+//   return d_ptr->renderNode->access()->transform()->getTransform();
+// #endif
+// }
 
 const Transform& PaintNode::transform() const
 {
@@ -555,11 +575,7 @@ Transform PaintNode::globalTransform() const
 
 const Bound& PaintNode::frameBound() const
 {
-#ifdef USE_OLD_CODE
   return d_ptr->bound;
-#else
-  return _->renderNode->bound();
-#endif
 }
 
 void PaintNode::setFrameBound(const Bound& bound)
@@ -571,14 +587,23 @@ void PaintNode::setFrameBound(const Bound& bound)
 
 Bound PaintNode::onRevalidate()
 {
+  VGG_IMPL(PaintNode);
+  Bound newBound;
   for (const auto& e : m_firstChild)
   {
-    e->revalidate();
+    newBound.unionWith(e->revalidate());
   }
 #ifdef USE_OLD_CODE
-  return d_ptr->bound;
+  if (!_->path)
+  {
+    _->path = VShape(asVisualShape(0));
+  }
+  return d_ptr->bound; // old code doesn't support revalidate actually
 #else
-  return d_ptr->renderNode->revalidate();
+  auto bound = _->renderNode->revalidate(); // This will trigger the shape attribute get the
+                                            // shape from the current node by the passed node
+  newBound.unionWith(bound);
+  return newBound;
 #endif
 }
 
@@ -619,6 +644,7 @@ void PaintNode::setContourData(ContourData contour)
 {
   VGG_IMPL(PaintNode);
   _->contour = std::move(contour);
+  // We don't support change contour data so far, because it's beyound the current design
 }
 
 const ContourOption& PaintNode::maskOption() const
@@ -703,6 +729,12 @@ Bound PaintNode::onDrawFill(
   FillEffect fillEffect(style().fills, fillBound, imageFilter, blender);
   fillEffect.render(renderer, path);
   return Bound{ fillBound.x(), fillBound.y(), fillBound.width(), fillBound.height() };
+}
+
+AttributeAccessor* PaintNode::attributeAccessor()
+{
+  ASSERT(d_ptr->renderNode);
+  return d_ptr->renderNode->access();
 }
 
 PaintNode::~PaintNode() = default;

@@ -13,44 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+#include "ShapeAttribute.hpp"
 
-#include "AttributeNode.hpp"
-#include "Layer/Core/VShape.hpp"
+#include "Layer/Core/PaintNode.hpp"
 
 namespace VGG::layer
 {
-
-class PaintNode;
-class ShapeAttribute : public Attribute
+Bound ShapeAttribute::onRevalidate()
 {
-public:
-  ShapeAttribute(VRefCnt* cnt, PaintNode* paint = 0)
-    : Attribute(cnt)
-    , m_paintNode(paint)
+  if (m_paintNode)
   {
+    m_shape = m_paintNode->asVisualShape(0);
+    // This is a temperoray solution, we don't need to set shape from setShape so far
   }
-
-  virtual const VShape& getShape() const
+  if (m_shape.isEmpty())
   {
-    return m_shape;
+    return Bound{};
   }
+  const auto rect = m_shape.bounds();
+  return Bound{ rect.x(), rect.y(), rect.width(), rect.height() };
+}
 
-  void setShape(const VShape& shape)
-  {
-    if (m_shape == shape)
-      return;
-    m_shape = shape;
-    invalidate();
-  }
-
-  Bound onRevalidate();
-
-  VGG_CLASS_MAKE(ShapeAttribute);
-
-private:
-  friend class RenderNode;
-  VShape     m_shape;
-  PaintNode* m_paintNode; // temperature solution
-};
 } // namespace VGG::layer

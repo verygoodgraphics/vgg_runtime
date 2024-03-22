@@ -14,78 +14,18 @@
  * limitations under the License.
  */
 #pragma once
-#include "AttributeNode.hpp"
-#include "Layer/Core/VNode.hpp"
-#include "ShapeAttribute.hpp"
-#include "LayerAttribute.hpp"
-#include "ObjectAttribute.hpp"
-#include "MaskAttribute.hpp"
-#include "TransformAttribute.hpp"
 
+#include "Layer/Core/VNode.hpp"
 namespace VGG::layer
 {
-
-class AttributeAccessor;
-
+class Renderer;
 class RenderNode : public VNode
 {
 public:
-  RenderNode(
-    VRefCnt*                  cnt,
-    Ref<TransformAttribute>   transform,
-    Ref<StyleObjectAttribute> styleObject,
-    Ref<LayerFXAttribute>     layerPostProcess,
-    Ref<AlphaMaskAttribute>   alphaMask,
-    Ref<ShapeMaskAttribute>   shapeMask,
-    Ref<ShapeAttribute>       shape)
-    : VNode(cnt, INVALIDATE)
-    , m_transformAttr(transform)
-    , m_objectAttr(styleObject)
-    , m_alphaMaskAttr(alphaMask)
-    , m_shapeMaskAttr(shapeMask)
-    , m_shapeAttr(shape)
+  RenderNode(VRefCnt* cnt, EState flags)
+    : VNode(cnt, flags)
   {
-    observe(m_transformAttr);
-    observe(m_objectAttr);
-    observe(m_alphaMaskAttr);
-    observe(m_shapeMaskAttr);
-    observe(m_shapeAttr);
   }
-  void render(Renderer* renderer);
-
-  bool isInvalid() const
-  {
-    return VNode::isInvalid();
-  }
-  Bound onRevalidate() override;
-
-  AttributeAccessor* access()
-  {
-    return m_accessor.get();
-  }
-
-  ~RenderNode();
-  static Ref<RenderNode> MakeFrom(VAllocator* alloc, PaintNode* node); // NOLINT
-private:
-  VGG_CLASS_MAKE(RenderNode);
-
-  SkRect                              recorder(Renderer* renderer);
-  std::pair<sk_sp<SkPicture>, SkRect> revalidatePicture(const SkRect& bounds);
-
-  void beginLayer(
-    Renderer*            renderer,
-    const SkPaint*       paint,
-    const VShape*        clipShape,
-    sk_sp<SkImageFilter> backdropFilter);
-
-  void                      endLayer(Renderer* renderer);
-  Ref<TransformAttribute>   m_transformAttr;
-  Ref<StyleObjectAttribute> m_objectAttr;
-  Ref<AlphaMaskAttribute>   m_alphaMaskAttr;
-  Ref<ShapeMaskAttribute>   m_shapeMaskAttr;
-  Ref<ShapeAttribute>       m_shapeAttr;
-  sk_sp<SkPicture>          m_picture;
-
-  std::unique_ptr<AttributeAccessor> m_accessor;
+  virtual void render(Renderer* render) = 0;
 };
 } // namespace VGG::layer

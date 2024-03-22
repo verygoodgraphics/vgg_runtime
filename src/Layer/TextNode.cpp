@@ -187,7 +187,9 @@ void TextNode::setVerticalAlignment(ETextVerticalAlignment vertAlign)
 Bound TextNode::onRevalidate()
 {
   VGG_IMPL(TextNode);
-  return _->painter->revalidate();
+  auto b = _->painter->revalidate();
+  PaintNode::onRevalidate();
+  return b;
 }
 
 TextNode::~TextNode() = default;

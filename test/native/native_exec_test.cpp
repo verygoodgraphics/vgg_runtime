@@ -1,5 +1,6 @@
 #include "Adapter/NativeExec.hpp"
 
+#include "Application/Environment.hpp"
 #include "Utility/Log.hpp"
 #include "test_config.hpp"
 
@@ -21,6 +22,7 @@ protected:
 
   void TearDown() override
   {
+    Environment::tearDown();
   }
 };
 

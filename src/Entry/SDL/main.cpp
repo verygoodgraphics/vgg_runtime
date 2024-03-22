@@ -22,7 +22,7 @@
 #include "Application/Mouse.hpp"
 #include "Application/RunLoop.hpp"
 #include "Application/UIApplication.hpp"
-#include "Application/Environment.h"
+#include "Application/Environment.hpp"
 #include "Layer/Scene.hpp"
 #include "Utility/ConfigManager.hpp"
 

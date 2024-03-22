@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "VggPackage.h"
+#include "VggPackage.hpp"
 
 namespace VGG
 {

@@ -1,5 +1,6 @@
 #include "Application/Controller.hpp"
 
+#include "Application/Environment.hpp"
 #include "Application/RunLoop.hpp"
 #include "Application/VggEnv.hpp"
 #include "Domain/Daruma.hpp"
@@ -49,6 +50,7 @@ protected:
       m_nativeComposer->teardown();
     }
     m_env.reset();
+    Environment::tearDown();
   }
 
   auto setupSdkWithLocalDic(bool catchJsException = false)

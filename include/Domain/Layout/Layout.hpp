@@ -16,8 +16,8 @@
 #pragma once
 
 #include "Domain/Daruma.hpp"
+#include "Domain/Layout/Node.hpp"
 #include "Utility/Log.hpp"
-#include "Node.hpp"
 
 #include <nlohmann/json.hpp>
 
@@ -27,6 +27,11 @@
 
 namespace VGG
 {
+namespace Domain
+{
+class DesignDocument;
+class Element;
+} // namespace Domain
 namespace Layout
 {
 namespace Internal
@@ -44,14 +49,15 @@ public:
   using RuleMapPtr = std::shared_ptr<RuleMap>;
 
 private:
-  JsonDocumentPtr             m_designDoc;
-  std::shared_ptr<LayoutNode> m_layoutTree;
-  RuleMapPtr                  m_rules;
-  std::vector<Size>           m_pageSize;
+  std::shared_ptr<Domain::DesignDocument> m_designDocument;
+  std::shared_ptr<LayoutNode>             m_layoutTree;
+  RuleMapPtr                              m_rules;
+  std::vector<Size>                       m_pageSize;
 
 public:
   Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc);
   Layout(JsonDocumentPtr designDoc, RuleMapPtr rules);
+  Layout(std::shared_ptr<Domain::DesignDocument> designDocument, RuleMapPtr rules);
 
   void layout(Size size, bool updateRule = false);
   void resizeNodeThenLayout(const std::string& nodeId, Size size, bool preservingOrigin);
@@ -79,23 +85,11 @@ public:
 private:
   void                        buildLayoutTree();
   std::shared_ptr<LayoutNode> createOneLayoutNode(
-    const nlohmann::json&               j,
-    const nlohmann::json::json_pointer& currentPath,
-    std::shared_ptr<LayoutNode>         parent);
-  void createLayoutNodes(
-    const nlohmann::json&               j,
-    const nlohmann::json::json_pointer& currentPath,
-    std::shared_ptr<LayoutNode>         parent);
+    std::shared_ptr<Domain::Element> element,
+    std::shared_ptr<LayoutNode>      parent);
 
-  void buildSubtree(
-    const nlohmann::json&               j,
-    const nlohmann::json::json_pointer& currentPath,
-    std::shared_ptr<LayoutNode>         parent);
+  void buildSubtree(std::shared_ptr<LayoutNode> parent);
 
-  void createOneOrMoreLayoutNodes(
-    const nlohmann::json&               j,
-    const nlohmann::json::json_pointer& currentPath,
-    std::shared_ptr<LayoutNode>         parent);
   void configureNodeAutoLayout(std::shared_ptr<LayoutNode> node, bool createAutoLayout = true);
 
   bool hasFirstOnTopNode();

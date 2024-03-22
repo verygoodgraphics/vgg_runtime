@@ -53,6 +53,7 @@ class ExpandSymbol
 
   const Model::DesignModel                                    m_designModel;
   const nlohmann::json&                                       m_layoutJson;
+  Model::DesignModel                                          m_outDesignModel;
   std::unordered_map<std::string, nlohmann::json>             m_outLayoutJsonMap; // performance
   RuleMapPtr                                                  m_layoutRulesCache; // performance
   std::unordered_map<std::string, nlohmann::json>             m_masters;
@@ -60,11 +61,8 @@ class ExpandSymbol
   std::unordered_map<std::string, nlohmann::json>             m_layoutRules;
 
   std::shared_ptr<VGG::Layout::Layout>         m_layout;
-  std::shared_ptr<VGG::Layout::Layout>         m_sharedLayout;
   std::shared_ptr<VGG::Domain::DesignDocument> m_designDocument;
 
-  nlohmann::json           m_tmpOutDesignJson;
-  Model::DesignModel       m_outDesignModel;
   std::vector<std::string> m_tmpDirtyNodeIds;
 
   std::unordered_map<std::string, nlohmann::json*> m_idToJsonMap;
@@ -78,10 +76,7 @@ public:
   nlohmann::json                            operator()();
   std::pair<nlohmann::json, nlohmann::json> run(); // 0: design.json; 1: layout.json
 
-  const Model::DesignModel& designModel() const
-  {
-    return m_outDesignModel;
-  }
+  Model::DesignModel designModel() const;
 
 private:
   enum class EProcessVarRefOption

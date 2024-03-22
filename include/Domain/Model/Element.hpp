@@ -45,7 +45,7 @@ class Element : public std::enable_shared_from_this<Element>
 public:
   virtual ~Element() = default;
 
-public: // Getters, Queries
+public:
   const std::shared_ptr<Element> parent() const
   {
     return m_parent.lock();
@@ -79,7 +79,7 @@ public: // Getters, Queries
     const std::vector<std::string>& keyStack,
     std::vector<std::string>*       outInstanceIdStack);
 
-public: // Setters, Commands
+public:
   void setVisible(bool visible);
 
   void addChild(std::shared_ptr<Element> child)
@@ -116,9 +116,14 @@ public: // Setters, Commands
     return nullptr;
   }
   virtual nlohmann::json jsonModel();
-  virtual void           updateJsonModel(const nlohmann::json& newJsonModel);
-  virtual void           getToModel(Model::SubGeometryType& subGeometry);
-  virtual void           updateModel(const Model::SubGeometryType& subGeometry);
+
+  virtual void updateJsonModel(const nlohmann::json& newJsonModel);
+  virtual void updateModel(const Model::SubGeometryType& subGeometry);
+
+  virtual void getToModel(Model::SubGeometryType& subGeometry);
+  virtual void getToModel(Model::ContainerChildType& variantModel);
+  virtual void getTreeToModel(Model::SubGeometryType& subGeometry);
+  virtual void getTreeToModel(Model::ContainerChildType& variantModel);
 
   void addChildren(const std::vector<Model::ContainerChildType>& children);
   void addSubGeometry(const Model::SubGeometryType& subGeometry);
@@ -139,6 +144,8 @@ public:
   DesignDocument(const Model::DesignModel& designModel);
 
   void buildSubtree() override;
+
+  Model::DesignModel treeModel() const;
 };
 
 class FrameElement : public Element
@@ -150,10 +157,14 @@ public:
 
   void buildSubtree() override;
 
-  Model::Object* object() const override;
+  Model::Frame*  object() const override;
   nlohmann::json jsonModel() override;
   void           updateJsonModel(const nlohmann::json& newJsonModel) override;
-  void           getToModel(Model::SubGeometryType& subGeometry) override;
+  Model::Frame   treeModel() const;
+
+  void getToModel(Model::SubGeometryType& subGeometry) override;
+  void getTreeToModel(Model::SubGeometryType& subGeometry) override;
+  void getTreeToModel(Model::ContainerChildType& variantModel) override;
 };
 
 class GroupElement : public Element
@@ -165,10 +176,13 @@ public:
 
   void buildSubtree() override;
 
-  Model::Object* object() const override;
+  Model::Group*  object() const override;
   nlohmann::json jsonModel() override;
   void           updateJsonModel(const nlohmann::json& newJsonModel) override;
   void           getToModel(Model::SubGeometryType& subGeometry) override;
+  Model::Group   treeModel() const;
+  void           getTreeToModel(Model::SubGeometryType& subGeometry) override;
+  void           getTreeToModel(Model::ContainerChildType& variantModel) override;
 };
 
 class SymbolMasterElement : public Element
@@ -180,10 +194,13 @@ public:
 
   void buildSubtree() override;
 
-  Model::Object* object() const override;
-  nlohmann::json jsonModel() override;
-  void           updateJsonModel(const nlohmann::json& newJsonModel) override;
-  void           getToModel(Model::SubGeometryType& subGeometry) override;
+  Model::SymbolMaster* object() const override;
+  nlohmann::json       jsonModel() override;
+  void                 updateJsonModel(const nlohmann::json& newJsonModel) override;
+  void                 getToModel(Model::SubGeometryType& subGeometry) override;
+  Model::SymbolMaster  treeModel() const;
+  void                 getTreeToModel(Model::SubGeometryType& subGeometry) override;
+  void                 getTreeToModel(Model::ContainerChildType& variantModel) override;
 };
 
 class SymbolInstanceElement : public Element
@@ -211,6 +228,9 @@ public:
   nlohmann::json         jsonModel() override;
   void                   updateJsonModel(const nlohmann::json& newJsonModel) override;
   void                   getToModel(Model::SubGeometryType& subGeometry) override;
+  Model::SymbolMaster    treeModel() const;
+  void                   getTreeToModel(Model::SubGeometryType& subGeometry) override;
+  void                   getTreeToModel(Model::ContainerChildType& variantModel) override;
 };
 
 class TextElement : public Element
@@ -223,10 +243,11 @@ public:
 
   void update(const Model::ReferencedStyle& refStyle) override;
 
-  Model::Object* object() const override;
+  Model::Text*   object() const override;
   nlohmann::json jsonModel() override;
   void           updateJsonModel(const nlohmann::json& newJsonModel) override;
   void           getToModel(Model::SubGeometryType& subGeometry) override;
+  void           getToModel(Model::ContainerChildType& variantModel) override;
 };
 
 class ImageElement : public Element
@@ -236,10 +257,11 @@ class ImageElement : public Element
 public:
   ImageElement(const Model::Image& image);
 
-  Model::Object* object() const override;
+  Model::Image*  object() const override;
   nlohmann::json jsonModel() override;
   void           updateJsonModel(const nlohmann::json& newJsonModel) override;
   void           getToModel(Model::SubGeometryType& subGeometry) override;
+  void           getToModel(Model::ContainerChildType& variantModel) override;
 };
 
 class PathElement : public Element
@@ -255,6 +277,9 @@ public:
   nlohmann::json jsonModel() override;
   void           updateJsonModel(const nlohmann::json& newJsonModel) override;
   void           getToModel(Model::SubGeometryType& subGeometry) override;
+  Model::Path    treeModel() const;
+  void           getTreeToModel(Model::SubGeometryType& subGeometry) override;
+  void           getTreeToModel(Model::ContainerChildType& variantModel) override;
 };
 
 class ContourElement : public Element

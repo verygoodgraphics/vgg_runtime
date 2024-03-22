@@ -28,6 +28,10 @@ class grid_layout;
 
 namespace VGG
 {
+namespace Domain
+{
+class Element;
+}
 namespace Model
 {
 struct Object;
@@ -73,7 +77,7 @@ class LayoutNode : public std::enable_shared_from_this<LayoutNode>
 
   std::weak_ptr<JsonDocument>        m_viewModel;
   const nlohmann::json::json_pointer m_path;
-  Model::Object*                     m_pModel{ nullptr };
+  std::weak_ptr<Domain::Element>     m_element;
 
   std::shared_ptr<Layout::Internal::AutoLayout> m_autoLayout;
   bool                                          m_needsLayout{ false };
@@ -89,6 +93,11 @@ public:
     : m_path{ path }
   {
   }
+  LayoutNode(std::weak_ptr<Domain::Element> element)
+    : m_element{ element }
+  {
+  }
+  virtual ~LayoutNode() = default;
 
   std::shared_ptr<LayoutNode> hitTest(
     const Layout::Point& point,
@@ -116,6 +125,11 @@ public:
   const std::vector<std::shared_ptr<LayoutNode>>& children() const
   {
     return m_children;
+  }
+
+  auto elementNode() const
+  {
+    return m_element.lock();
   }
 
   bool                        isAncestorOf(std::shared_ptr<LayoutNode> node);

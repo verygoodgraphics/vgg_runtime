@@ -1489,20 +1489,13 @@ struct Star
  */
 struct Subshape
 {
-  /**
-   * Boolean operations that combine the current subshape with the previous subshape in the
-   * array.
-   */
   int64_t                          booleanOperation;
   SubshapeClass                    subshapeClass;
-  /**
-   * Describes the detailed shape of the subshape through a contour with a list of points, a
-   * specified geometry, or another object.
-   * When the `frame`, `symbol-instance`, and `symbol-master` are in `subGeometry`, only the
-   * `childObjects` will be used, and the bounding box will be ignored.
-   * Any mask nested within this object will be invalidated.
-   */
   std::shared_ptr<SubGeometryType> subGeometry;
+
+  Subshape() = default;
+  Subshape(const Subshape& other);
+  Subshape& operator=(const Subshape& other);
 };
 
 /**
@@ -1572,6 +1565,28 @@ struct Path : public Object
 {
   ChildObjectClass       class_;
   std::shared_ptr<Shape> shape;
+
+  Path() = default;
+  Path(const Path& other)
+    : Object{ other }
+    , class_{ other.class_ }
+  {
+    if (other.shape)
+    {
+      shape = std::make_shared<Shape>(*other.shape);
+    }
+  }
+
+  Path& operator=(const Path& other)
+  {
+    static_cast<Object&>(*this) = other;
+    class_ = other.class_;
+    if (other.shape)
+    {
+      shape = std::make_shared<Shape>(*other.shape);
+    }
+    return *this;
+  }
 };
 
 enum class FrameClass : int

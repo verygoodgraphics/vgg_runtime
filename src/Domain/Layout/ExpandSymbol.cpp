@@ -108,39 +108,30 @@ nlohmann::json ExpandSymbol::operator()()
 
 std::pair<nlohmann::json, nlohmann::json> ExpandSymbol::run()
 {
-  collectMaster(m_designModel);
   collectMasters();
   collectLayoutRules(m_layoutJson);
 
-  m_tmpOutDesignJson = m_designModel;
   m_layoutRulesCache = Layout::collectRules(m_layoutJson);
   m_outLayoutJsonMap = m_layoutRules;
 
-  m_layout.reset(new Layout{ JsonDocumentPtr{ new ReferenceJsonDocument{ m_tmpOutDesignJson } },
-                             getLayoutRules() });
-  m_sharedLayout.reset(
-    new Layout{ JsonDocumentPtr{ new ReferenceJsonDocument{ m_tmpOutDesignJson } },
-                getLayoutRules() });
-
-  // expand instances in `frames` only
-  for (auto& el : m_tmpOutDesignJson[K_FRAMES].items())
-  {
-    std::vector<std::string> instanceIdStack{};
-    expandInstance(el.value(), instanceIdStack);
-  }
-
   m_designDocument = std::make_shared<Domain::DesignDocument>(m_designModel);
   m_designDocument->buildSubtree();
+  m_layout.reset(new Layout{ m_designDocument, getLayoutRules() });
+
   for (auto& page : m_designDocument->children())
   {
     std::vector<std::string> instanceIdStack{};
     traverseElementNode(page, instanceIdStack);
   }
 
-  m_outDesignModel = m_tmpOutDesignJson;
+  m_outDesignModel = m_designDocument->treeModel();
   auto outLayoutJson = generateOutLayoutJson();
+  return { m_outDesignModel, std::move(outLayoutJson) };
+}
 
-  return { std::move(m_tmpOutDesignJson), std::move(outLayoutJson) };
+DesignModel ExpandSymbol::designModel() const
+{
+  return m_outDesignModel;
 }
 
 void ExpandSymbol::collectMaster(const nlohmann::json& json)
@@ -474,7 +465,10 @@ void ExpandSymbol::expandInstanceElement(
   }
 
   // 1. expand
-  traverseElementNode(instance.shared_from_this(), instanceIdStack);
+  for (auto& child : instance.children())
+  {
+    traverseElementNode(child, instanceIdStack);
+  }
 
   // 2 make instance tree nodes id unique
   // 2.1

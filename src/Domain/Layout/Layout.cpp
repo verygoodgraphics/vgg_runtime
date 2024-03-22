@@ -48,16 +48,10 @@ Layout::Layout::Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc)
 
 Layout::Layout::Layout(JsonDocumentPtr designDoc, RuleMapPtr rules)
 {
-  ASSERT(false);
-
-  if (!m_rules)
-  {
-    m_rules = std::make_shared<RuleMap>();
-  }
-
-  // initial config
-  buildLayoutTree();
-  configureNodeAutoLayout(m_layoutTree);
+  ASSERT(designDoc);
+  auto designDocument = std::make_shared<Domain::DesignDocument>(designDoc->content());
+  designDocument->buildSubtree();
+  new (this) Layout(designDocument, rules);
 }
 
 Layout::Layout::Layout(std::shared_ptr<Domain::DesignDocument> designDocument, RuleMapPtr rules)
@@ -99,8 +93,6 @@ void Layout::Layout::layout(Size size, bool updateRule)
 
 void Layout::Layout::buildLayoutTree()
 {
-  m_layoutTree.reset(new LayoutNode{ nlohmann::json::json_pointer{ "/" } });
-
   m_layoutTree.reset(new LayoutNode{ m_designDocument });
   for (auto& child : m_designDocument->children())
   {

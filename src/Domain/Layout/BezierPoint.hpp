@@ -17,6 +17,7 @@
 #pragma once
 
 #include "Domain/Layout/Rect.hpp"
+#include "Domain/Model/DesignModel.hpp"
 
 #include <nlohmann/json.hpp>
 
@@ -32,6 +33,8 @@ struct BezierPoint
   Layout::Point                point;
   std::optional<Layout::Point> from;
   std::optional<Layout::Point> to;
+
+  static BezierPoint makeFromModel(const Model::PointAttr& model);
 
   BezierPoint makeFromModelFormat() const;
   BezierPoint makeModelFormat() const;

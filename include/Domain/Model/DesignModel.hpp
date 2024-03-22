@@ -171,7 +171,7 @@ struct AlphaMask
   /**
    * The data type whose values are used to control the transparency of the object.
    */
-  int64_t          alphaType;
+  int              alphaType;
   AlphaMaskByClass alphaMaskClass;
   /**
    * Whether to use the mask's boundary to crop the masked object.
@@ -205,11 +205,11 @@ struct Color
   /**
    * The opacity of the object. `0` represents transparent, and `1` represents opaque.
    */
-  double               alpha;
-  double               blue;
+  float                alpha;
+  float                blue;
   BackgroundColorClass colorClass;
-  double               green;
-  double               red;
+  float                green;
+  float                red;
 };
 
 enum class BoundsClass : int
@@ -270,7 +270,7 @@ struct GraphicsContextSettings
   /**
    * The blend mode of the object.
    */
-  int64_t              blendMode;
+  int                  blendMode;
   ContextSettingsClass graphicsContextSettingsClass;
   /**
    * To leave objects beneath unaffected, you can isolate the blending mode to a targeted
@@ -284,7 +284,7 @@ struct GraphicsContextSettings
   /**
    * In a transparency knockout group, the elements of a group don't show through each other.
    */
-  int64_t              transparencyKnockoutGroup;
+  int                  transparencyKnockoutGroup;
 };
 
 enum class SubGeometryClass : int
@@ -344,7 +344,7 @@ struct GradientBasicGeometry
    * This argument defines how the gradient will be rendered.For simple filled paths, flag
    * takes the value 1.
    */
-  int64_t             flag;
+  int                 flag;
   /**
    * This argument specifies the distance over which the gradient ramp is applied. The ramp
    * will be scaled so that its 100% value is the end of the length. This parameter may be
@@ -425,7 +425,7 @@ struct GradientHilight
 
 struct PerpendicularMatrix
 {
-  int64_t             flag;
+  int                 flag;
   std::vector<double> matrix;
 };
 
@@ -648,7 +648,7 @@ struct Border
   /**
    * The content types of the border's fill.
    */
-  int64_t                 fillType;
+  int                     fillType;
   /**
    * The flatness parameter specifies the accuracy or smoothness with which curves are
    * rendered as a sequence of flat line segments.
@@ -668,11 +668,11 @@ struct Border
   /**
    * The shape styles at the end of border lines.
    */
-  int64_t                 lineCapStyle;
+  int                     lineCapStyle;
   /**
    * The shape style at the corner of two border lines.
    */
-  int64_t                 lineJoinStyle;
+  int                     lineJoinStyle;
   /**
    * When the angle between two adjacent border lines is less than this value, a `miter` join
    * is used instead.
@@ -685,7 +685,7 @@ struct Border
   /**
    * The position types of the border relative to the boundary.
    */
-  int64_t                 position;
+  int                     position;
   /**
    * This is used only when `borderWeightsIndependent` is set to true, in order to specify the
    * border weight at the right of the rectangle. Default value is `0`.
@@ -695,7 +695,7 @@ struct Border
    * The type of the border style. The dashed style is further specified in `dashedOffset` and
    * `dashedPattern`.
    */
-  int64_t                 style;
+  int                     style;
   /**
    * The thickness of the border.
    * This attribute only works if `borderWeightsIndependent` is set to `false`.
@@ -730,7 +730,7 @@ struct Fill
   /**
    * The content type of the fill.
    */
-  int64_t                 fillType;
+  int                     fillType;
   /**
    * The gradient of the fill.
    */
@@ -824,18 +824,18 @@ struct TextFontAttributes
   /**
    * The priority of `fills`.
    */
-  std::optional<int64_t>                    fillUseType;
+  std::optional<int>                        fillUseType;
   /**
    * The type of small caps.
    * **Note**:
    * `textCase` and `fontVariantCaps` are mutually exclusive. If either item is nonzero, you
    * can ignore the value of the other, as they will not be nonzero at the same time.
    */
-  std::optional<int64_t>                    fontVariantCaps;
+  std::optional<int>                        fontVariantCaps;
   /**
    * The position of the text characters.
    */
-  std::optional<int64_t>                    fontVariantPosition;
+  std::optional<int>                        fontVariantPosition;
   /**
    * A list of font variations.
    */
@@ -862,11 +862,11 @@ struct TextFontAttributes
    * If a UTF-8 character is `4` bytes, its length counts as `2`.
    * If a UTF-8 character is `1 ~ 3` bytes, its length counts as `1`.
    */
-  std::optional<int64_t>                    length;
+  std::optional<int>                        length;
   /**
    * The unit of `letterSpacingValue` value.
    */
-  std::optional<int64_t>                    letterSpacingUnit;
+  std::optional<int>                        letterSpacingUnit;
   /**
    * Text character spacing value (can be negative).
    * Must be used together with `letterSpacingUnit`.
@@ -876,7 +876,7 @@ struct TextFontAttributes
   /**
    * The unit of `lineSpacingValue` value.
    */
-  std::optional<int64_t>                    lineSpacingUnit;
+  std::optional<int>                        lineSpacingUnit;
   /**
    * The spacing value of the text lines.
    * Must be used together with `lineSpacingUnit`.
@@ -921,7 +921,7 @@ struct TextFontAttributes
    * `textCase` and `fontVariantCaps` are mutually exclusive. If either item is nonzero, you
    * can ignore the value of the other, as they will not be nonzero at the same time.
    */
-  std::optional<int64_t>                    textCase;
+  std::optional<int>                        textCase;
   /**
    * The properties of the text paragraph, which are consistent across the same text paragraph.
    */
@@ -929,7 +929,7 @@ struct TextFontAttributes
   /**
    * The underline type of the text.
    */
-  std::optional<int64_t>                    underline;
+  std::optional<int>                        underline;
   /**
    * Scale the text characters vertically.
    * Default value is `1`.
@@ -1005,32 +1005,13 @@ enum class PointClass : int
  */
 struct PointAttr
 {
-  PointClass                         pointAttrClass;
-  /**
-   * Corner shapes of the point.
-   */
+  PointClass          pointAttrClass;
+  std::vector<double> point;
+
   std::optional<int>                 cornerStyle;
-  /**
-   * When the current point is the starting point of the Bezier curve, this attribute
-   * represents its control point.
-   */
   std::optional<std::vector<double>> curveFrom;
-  /**
-   * When the current point is the end point of the Bezier curve, this attribute represents
-   * its control point.
-   */
   std::optional<std::vector<double>> curveTo;
-  /**
-   * The shape type of the point. This property only applies to endpoints.
-   */
-  std::optional<int64_t>             markType;
-  /**
-   * The coordinates of the point before the matrix transformation.
-   */
-  std::vector<double>                point;
-  /**
-   * Corner radius at the point.
-   */
+  std::optional<int>                 markType;
   std::optional<double>              radius;
 };
 
@@ -1058,7 +1039,7 @@ struct Region
   /**
    * The rule determining whether an area is inside or outside a region.
    */
-  int64_t                                  windingRule;
+  int                                      windingRule;
 };
 
 enum class SegmentClass : int
@@ -1084,12 +1065,12 @@ struct Segment
    * The ending point of the segment. The number is the index of the `vertices` list in
    * `Vector NetWork`, starting from `0`.
    */
-  int64_t                            end;
+  int                                end;
   /**
    * The starting point of the segment. The number is the index of the `vertices` list in
    * `Vector NetWork`, starting from `0`.
    */
-  int64_t                            start;
+  int                                start;
 };
 
 enum class BlurClass : int
@@ -1124,7 +1105,7 @@ struct Blur
   /**
    * The type of blur.
    */
-  int64_t               type;
+  int                   type;
 };
 
 enum class ShadowClass : int
@@ -1228,8 +1209,8 @@ struct TextLineType
   /**
    * The hierarchy level of the text line, starting with `0`(default value).
    */
-  int64_t           level;
-  int64_t           styleType;
+  int               level;
+  int               styleType;
 };
 
 enum class TextOnPathClass : int
@@ -1335,19 +1316,19 @@ enum class VertexClass : int
  */
 struct Vertex
 {
-  VertexClass            vertexClass;
+  VertexClass           vertexClass;
   /**
    * The shape type of the vertex. This property only applies to endpoints.
    */
-  std::optional<int64_t> markType;
+  std::optional<int>    markType;
   /**
    * The coordinates of the point before the matrix transformation.
    */
-  std::vector<double>    point;
+  std::vector<double>   point;
   /**
    * Corner radius at the vertex.
    */
-  std::optional<double>  radius;
+  std::optional<double> radius;
 };
 
 enum class SubshapeClass : int
@@ -1360,7 +1341,7 @@ enum class ShapeClass : int
   SHAPE
 };
 
-enum class ChildObjectClass : int
+enum class ObjectClass : int
 {
   FRAME,
   GROUP,
@@ -1489,7 +1470,7 @@ struct Star
  */
 struct Subshape
 {
-  int64_t                          booleanOperation;
+  int                              booleanOperation;
   SubshapeClass                    subshapeClass;
   std::shared_ptr<SubGeometryType> subGeometry;
 
@@ -1522,38 +1503,40 @@ struct Shape
    * The rule determining whether an area is inside or outside a path.
    * Note: For `vectorNetwork`, this property should be ignored.
    */
-  int64_t               windingRule;
+  int                   windingRule;
 };
 
 struct Object
 {
   virtual ~Object() = default;
 
+  ObjectClass class_;
+
   std::vector<AlphaMask>   alphaMaskBy;
   Rect                     bounds;
   GraphicsContextSettings  contextSettings;
   std::string              id;
   bool                     isLocked;
-  int64_t                  maskType;
+  int                      maskType;
   std::vector<double>      matrix;
   std::vector<std::string> outlineMaskBy;
-  int64_t                  overflow;
+  int                      overflow;
   Style                    style;
-  int64_t                  styleEffectMaskArea;
+  int                      styleEffectMaskArea;
   bool                     visible;
 
   std::optional<double>                      cornerSmoothing;
-  std::optional<int64_t>                     horizontalConstraint;
+  std::optional<int>                         horizontalConstraint;
   std::optional<bool>                        keepShapeWhenResize;
-  std::optional<int64_t>                     maskShowType;
+  std::optional<int>                         maskShowType;
   std::optional<std::string>                 name;
   std::optional<std::string>                 overrideKey;
-  std::optional<int64_t>                     resizesContent;
-  std::optional<int64_t>                     styleEffectBoolean;
+  std::optional<int>                         resizesContent;
+  std::optional<int>                         styleEffectBoolean;
   std::optional<Rect>                        transformedBounds;
   std::optional<std::vector<VariableDefine>> variableDefs;
   std::optional<std::vector<VariableRefer>>  variableRefs;
-  std::optional<int64_t>                     verticalConstraint;
+  std::optional<int>                         verticalConstraint;
 };
 
 struct Container : public Object
@@ -1563,13 +1546,11 @@ struct Container : public Object
 
 struct Path : public Object
 {
-  ChildObjectClass       class_;
   std::shared_ptr<Shape> shape;
 
   Path() = default;
   Path(const Path& other)
     : Object{ other }
-    , class_{ other.class_ }
   {
     if (other.shape)
     {
@@ -1580,18 +1561,12 @@ struct Path : public Object
   Path& operator=(const Path& other)
   {
     static_cast<Object&>(*this) = other;
-    class_ = other.class_;
     if (other.shape)
     {
       shape = std::make_shared<Shape>(*other.shape);
     }
     return *this;
   }
-};
-
-enum class FrameClass : int
-{
-  FRAME
 };
 
 /**
@@ -1603,24 +1578,19 @@ enum class FrameClass : int
  */
 struct Frame : public Container
 {
-  FrameClass frameClass;
-
   std::optional<Color>               backgroundColor;
   std::optional<std::vector<double>> radius;
 };
 
 struct Group : public Container
 {
-  ChildObjectClass class_;
-
   std::optional<bool> groupNestMaskType;
   std::optional<bool> isVectorNetwork;
 };
 
 struct Image : public Object
 {
-  ChildObjectClass class_;
-  std::string      imageFileName;
+  std::string imageFileName;
 
   std::optional<bool>         fillReplacesImage;
   std::optional<ImageFilters> imageFilters;
@@ -1628,7 +1598,6 @@ struct Image : public Object
 
 struct SymbolInstance : public Object
 {
-  ChildObjectClass           class_;
   std::string                masterId;
   std::vector<OverrideValue> overrideValues;
 
@@ -1638,14 +1607,11 @@ struct SymbolInstance : public Object
 
 struct SymbolMaster : public Container
 {
-  ChildObjectClass class_;
-
   std::optional<std::vector<double>> radius;
 };
 
 struct Text : public Object
 {
-  ChildObjectClass                class_;
   std::string                     content;
   std::vector<TextFontAttributes> fontAttr;
   int                             frameMode;
@@ -1698,7 +1664,7 @@ struct PatternLayerDef
    * Horizontal constraints for the object.
    * Default value is `1`.
    */
-  std::optional<int64_t>                     horizontalConstraint;
+  std::optional<int>                         horizontalConstraint;
   /**
    * ID of the object, globally unique.
    */
@@ -1717,11 +1683,11 @@ struct PatternLayerDef
   /**
    * How the mask object is displayed.
    */
-  std::optional<int64_t>                     maskShowType;
+  std::optional<int>                         maskShowType;
   /**
    * The mask type of the object.
    */
-  int64_t                                    maskType;
+  int                                        maskType;
   /**
    * Matrix used for translating, rotating, and scaling the object.
    */
@@ -1739,7 +1705,7 @@ struct PatternLayerDef
   /**
    * How to display the child element of the object when it overflows its container.
    */
-  int64_t                                    overflow;
+  int                                        overflow;
   /**
    * Used to be associated with the object by symbol instances for overriding its attributes.
    * Check the `objectId` in the `OverrideValue` for details.
@@ -1751,7 +1717,7 @@ struct PatternLayerDef
   /**
    * How child objects behave when the object is resized.
    */
-  std::optional<int64_t>                     resizesContent;
+  std::optional<int>                         resizesContent;
   /**
    * The borders, fills, and other styles of the object.
    */
@@ -1760,11 +1726,11 @@ struct PatternLayerDef
    * How the `style` of the object affects the region participating in a Boolean operation
    * with another object.
    */
-  std::optional<int64_t>                     styleEffectBoolean;
+  std::optional<int>                         styleEffectBoolean;
   /**
    * How the `style` and `visible` of the mask object affect the area of the mask.
    */
-  int64_t                                    styleEffectMaskArea;
+  int                                        styleEffectMaskArea;
   /**
    * An enclosing rectangle for the object. This property stores information about the object
    * after the matrix transformation.
@@ -1782,7 +1748,7 @@ struct PatternLayerDef
    * Vertical constraints for the object.
    * Default value is `1`.
    */
-  std::optional<int64_t>                     verticalConstraint;
+  std::optional<int>                         verticalConstraint;
   /**
    * If `false`, the object will be invisible.
    */
@@ -1826,7 +1792,7 @@ struct DesignModel
   /**
    * The file type of current file.
    */
-  int64_t                                     fileType;
+  int                                         fileType;
   /**
    * A list of the frames.
    */
@@ -2106,11 +2072,8 @@ inline void to_json(json& j, const SubshapeClass& x);
 inline void from_json(const json& j, ShapeClass& x);
 inline void to_json(json& j, const ShapeClass& x);
 
-inline void from_json(const json& j, ChildObjectClass& x);
-inline void to_json(json& j, const ChildObjectClass& x);
-
-inline void from_json(const json& j, FrameClass& x);
-inline void to_json(json& j, const FrameClass& x);
+inline void from_json(const json& j, ObjectClass& x);
+inline void to_json(json& j, const ObjectClass& x);
 
 inline void from_json(const json& j, PatternLayerDefClass& x);
 inline void to_json(json& j, const PatternLayerDefClass& x);
@@ -2678,16 +2641,16 @@ inline void from_json(const json& j, TextFontAttributes& x)
   x.borders = get_stack_optional<std::vector<Border>>(j, "borders");
   safeGetTo(x.textFontAttributesClass, j, "class");
   x.fills = get_stack_optional<std::vector<Fill>>(j, "fills");
-  x.fillUseType = get_stack_optional<int64_t>(j, "fillUseType");
-  x.fontVariantCaps = get_stack_optional<int64_t>(j, "fontVariantCaps");
-  x.fontVariantPosition = get_stack_optional<int64_t>(j, "fontVariantPosition");
+  x.fillUseType = get_stack_optional<int>(j, "fillUseType");
+  x.fontVariantCaps = get_stack_optional<int>(j, "fontVariantCaps");
+  x.fontVariantPosition = get_stack_optional<int>(j, "fontVariantPosition");
   x.fontVariations = get_stack_optional<std::vector<FontVariation>>(j, "fontVariations");
   x.horizontalScale = get_stack_optional<double>(j, "horizontalScale");
   x.hyperlink = get_stack_optional<std::string>(j, "hyperlink");
-  x.length = get_stack_optional<int64_t>(j, "length");
-  x.letterSpacingUnit = get_stack_optional<int64_t>(j, "letterSpacingUnit");
+  x.length = get_stack_optional<int>(j, "length");
+  x.letterSpacingUnit = get_stack_optional<int>(j, "letterSpacingUnit");
   x.letterSpacingValue = get_stack_optional<double>(j, "letterSpacingValue");
-  x.lineSpacingUnit = get_stack_optional<int64_t>(j, "lineSpacingUnit");
+  x.lineSpacingUnit = get_stack_optional<int>(j, "lineSpacingUnit");
   x.lineSpacingValue = get_stack_optional<double>(j, "lineSpacingValue");
   x.linethrough = get_stack_optional<bool>(j, "linethrough");
   x.name = get_stack_optional<std::string>(j, "name");
@@ -2695,9 +2658,9 @@ inline void from_json(const json& j, TextFontAttributes& x)
   x.rotate = get_stack_optional<double>(j, "rotate");
   x.size = get_stack_optional<double>(j, "size");
   x.subFamilyName = get_stack_optional<std::string>(j, "subFamilyName");
-  x.textCase = get_stack_optional<int64_t>(j, "textCase");
+  x.textCase = get_stack_optional<int>(j, "textCase");
   x.textParagraph = get_stack_optional<TextParagraph>(j, "textParagraph");
-  x.underline = get_stack_optional<int64_t>(j, "underline");
+  x.underline = get_stack_optional<int>(j, "underline");
   x.verticalScale = get_stack_optional<double>(j, "verticalScale");
 }
 
@@ -2831,7 +2794,7 @@ inline void from_json(const json& j, PointAttr& x)
   x.cornerStyle = get_stack_optional<int>(j, "cornerStyle");
   x.curveFrom = get_stack_optional<std::vector<double>>(j, "curveFrom");
   x.curveTo = get_stack_optional<std::vector<double>>(j, "curveTo");
-  x.markType = get_stack_optional<int64_t>(j, "markType");
+  x.markType = get_stack_optional<int>(j, "markType");
   safeGetTo(x.point, j, "point");
   x.radius = get_stack_optional<double>(j, "radius");
 }
@@ -3066,7 +3029,7 @@ inline void to_json(json& j, const VariableRefer& x)
 inline void from_json(const json& j, Vertex& x)
 {
   safeGetTo(x.vertexClass, j, "class");
-  x.markType = get_stack_optional<int64_t>(j, "markType");
+  x.markType = get_stack_optional<int>(j, "markType");
   safeGetTo(x.point, j, "point");
   x.radius = get_stack_optional<double>(j, "radius");
 }
@@ -3224,6 +3187,8 @@ inline void to_json(json& j, const Shape& x)
 
 inline void from_json(const json& j, Object& x)
 {
+  safeGetTo(x.class_, j, "class");
+
   safeGetTo(x.alphaMaskBy, j, "alphaMaskBy");
   safeGetTo(x.bounds, j, "bounds");
   safeGetTo(x.contextSettings, j, "contextSettings");
@@ -3238,21 +3203,23 @@ inline void from_json(const json& j, Object& x)
   safeGetTo(x.visible, j, "visible");
 
   x.cornerSmoothing = get_stack_optional<double>(j, "cornerSmoothing");
-  x.horizontalConstraint = get_stack_optional<int64_t>(j, "horizontalConstraint");
+  x.horizontalConstraint = get_stack_optional<int>(j, "horizontalConstraint");
   x.keepShapeWhenResize = get_stack_optional<bool>(j, "keepShapeWhenResize");
-  x.maskShowType = get_stack_optional<int64_t>(j, "maskShowType");
+  x.maskShowType = get_stack_optional<int>(j, "maskShowType");
   x.name = get_stack_optional<std::string>(j, "name");
   x.overrideKey = get_stack_optional<std::string>(j, "overrideKey");
-  x.resizesContent = get_stack_optional<int64_t>(j, "resizesContent");
-  x.styleEffectBoolean = get_stack_optional<int64_t>(j, "styleEffectBoolean");
+  x.resizesContent = get_stack_optional<int>(j, "resizesContent");
+  x.styleEffectBoolean = get_stack_optional<int>(j, "styleEffectBoolean");
   x.transformedBounds = get_stack_optional<Rect>(j, "transformedBounds");
   x.variableDefs = get_stack_optional<std::vector<VariableDefine>>(j, "variableDefs");
   x.variableRefs = get_stack_optional<std::vector<VariableRefer>>(j, "variableRefs");
-  x.verticalConstraint = get_stack_optional<int64_t>(j, "verticalConstraint");
+  x.verticalConstraint = get_stack_optional<int>(j, "verticalConstraint");
 }
 inline void to_json(json& j, const Object& x)
 {
   j = json::object();
+  j["class"] = x.class_;
+
   j["alphaMaskBy"] = x.alphaMaskBy;
   j["bounds"] = x.bounds;
   j["contextSettings"] = x.contextSettings;
@@ -3331,21 +3298,18 @@ inline void from_json(const json& j, Path& x)
 {
   from_json(j, static_cast<Object&>(x));
 
-  safeGetTo(x.class_, j, "class");
   safeGetTo(x.shape, j, "shape");
 }
 inline void to_json(json& j, const Path& x)
 {
   to_json(j, static_cast<const Object&>(x));
 
-  j["class"] = x.class_;
   j["shape"] = x.shape;
 }
 
 inline void from_json(const json& j, Frame& x)
 {
   from_json(j, static_cast<Container&>(x));
-  safeGetTo(x.frameClass, j, "class");
   x.backgroundColor = get_stack_optional<Color>(j, "backgroundColor");
   x.radius = get_stack_optional<std::vector<double>>(j, "radius");
 }
@@ -3353,7 +3317,6 @@ inline void from_json(const json& j, Frame& x)
 inline void to_json(json& j, const Frame& x)
 {
   to_json(j, static_cast<const Container&>(x));
-  j["class"] = x.frameClass;
   if (x.backgroundColor)
   {
     j["backgroundColor"] = x.backgroundColor;
@@ -3367,7 +3330,6 @@ inline void to_json(json& j, const Frame& x)
 inline void from_json(const json& j, Group& x)
 {
   from_json(j, static_cast<Container&>(x));
-  safeGetTo(x.class_, j, "class");
   x.groupNestMaskType = get_stack_optional<bool>(j, "groupNestMaskType");
   x.isVectorNetwork = get_stack_optional<bool>(j, "isVectorNetwork");
 }
@@ -3375,7 +3337,6 @@ inline void from_json(const json& j, Group& x)
 inline void to_json(json& j, const Group& x)
 {
   to_json(j, static_cast<const Container&>(x));
-  j["class"] = x.class_;
   if (x.groupNestMaskType)
   {
     j["groupNestMaskType"] = x.groupNestMaskType;
@@ -3390,7 +3351,6 @@ inline void from_json(const json& j, Image& x)
 {
   from_json(j, static_cast<Object&>(x));
 
-  safeGetTo(x.class_, j, "class");
   safeGetTo(x.imageFileName, j, "imageFileName");
 
   x.fillReplacesImage = get_stack_optional<bool>(j, "fillReplacesImage");
@@ -3400,7 +3360,6 @@ inline void to_json(json& j, const Image& x)
 {
   to_json(j, static_cast<const Object&>(x));
 
-  j["class"] = x.class_;
   j["imageFileName"] = x.imageFileName;
 
   if (x.fillReplacesImage)
@@ -3417,7 +3376,6 @@ inline void from_json(const json& j, SymbolInstance& x)
 {
   from_json(j, static_cast<Object&>(x));
 
-  safeGetTo(x.class_, j, "class");
   safeGetTo(x.masterId, j, "masterId");
   safeGetTo(x.overrideValues, j, "overrideValues");
 
@@ -3428,7 +3386,6 @@ inline void to_json(json& j, const SymbolInstance& x)
 {
   to_json(j, static_cast<const Object&>(x));
 
-  j["class"] = x.class_;
   j["masterId"] = x.masterId;
   j["overrideValues"] = x.overrideValues;
 
@@ -3445,12 +3402,10 @@ inline void to_json(json& j, const SymbolInstance& x)
 inline void from_json(const json& j, SymbolMaster& x)
 {
   from_json(j, static_cast<Container&>(x));
-  safeGetTo(x.class_, j, "class");
 }
 inline void to_json(json& j, const SymbolMaster& x)
 {
   to_json(j, static_cast<const Container&>(x));
-  j["class"] = x.class_;
   if (x.radius)
   {
     j["radius"] = x.radius;
@@ -3461,7 +3416,6 @@ inline void from_json(const json& j, Text& x)
 {
   from_json(j, static_cast<Object&>(x));
 
-  safeGetTo(x.class_, j, "class");
   safeGetTo(x.content, j, "content");
   safeGetTo(x.fontAttr, j, "fontAttr");
   safeGetTo(x.frameMode, j, "frameMode");
@@ -3479,7 +3433,6 @@ inline void to_json(json& j, const Text& x)
 {
   to_json(j, static_cast<const Object&>(x));
 
-  j["class"] = x.class_;
   j["content"] = x.content;
   j["fontAttr"] = x.fontAttr;
   j["frameMode"] = x.frameMode;
@@ -3520,11 +3473,11 @@ inline void from_json(const json& j, PatternLayerDef& x)
   safeGetTo(x.patternLayerDefClass, j, "class");
   safeGetTo(x.contextSettings, j, "contextSettings");
   x.cornerSmoothing = get_stack_optional<double>(j, "cornerSmoothing");
-  x.horizontalConstraint = get_stack_optional<int64_t>(j, "horizontalConstraint");
+  x.horizontalConstraint = get_stack_optional<int>(j, "horizontalConstraint");
   safeGetTo(x.id, j, "id");
   safeGetTo(x.isLocked, j, "isLocked");
   x.keepShapeWhenResize = get_stack_optional<bool>(j, "keepShapeWhenResize");
-  x.maskShowType = get_stack_optional<int64_t>(j, "maskShowType");
+  x.maskShowType = get_stack_optional<int>(j, "maskShowType");
   safeGetTo(x.maskType, j, "maskType");
   safeGetTo(x.matrix, j, "matrix");
   x.name = get_stack_optional<std::string>(j, "name");
@@ -3532,14 +3485,14 @@ inline void from_json(const json& j, PatternLayerDef& x)
   safeGetTo(x.overflow, j, "overflow");
   x.overrideKey = get_stack_optional<std::string>(j, "overrideKey");
   safeGetTo(x.patternBoundingBox, j, "patternBoundingBox");
-  x.resizesContent = get_stack_optional<int64_t>(j, "resizesContent");
+  x.resizesContent = get_stack_optional<int>(j, "resizesContent");
   safeGetTo(x.style, j, "style");
-  x.styleEffectBoolean = get_stack_optional<int64_t>(j, "styleEffectBoolean");
+  x.styleEffectBoolean = get_stack_optional<int>(j, "styleEffectBoolean");
   safeGetTo(x.styleEffectMaskArea, j, "styleEffectMaskArea");
   x.transformedBounds = get_stack_optional<Rect>(j, "transformedBounds");
   x.variableDefs = get_stack_optional<std::vector<VariableDefine>>(j, "variableDefs");
   x.variableRefs = get_stack_optional<std::vector<VariableRefer>>(j, "variableRefs");
-  x.verticalConstraint = get_stack_optional<int64_t>(j, "verticalConstraint");
+  x.verticalConstraint = get_stack_optional<int>(j, "verticalConstraint");
   safeGetTo(x.visible, j, "visible");
 }
 
@@ -4492,74 +4445,52 @@ inline void to_json(json& j, const ShapeClass& x)
   }
 }
 
-inline void from_json(const json& j, ChildObjectClass& x)
+inline void from_json(const json& j, ObjectClass& x)
 {
   if (j == "frame")
-    x = ChildObjectClass::FRAME;
+    x = ObjectClass::FRAME;
   else if (j == "group")
-    x = ChildObjectClass::GROUP;
+    x = ObjectClass::GROUP;
   else if (j == "image")
-    x = ChildObjectClass::IMAGE;
+    x = ObjectClass::IMAGE;
   else if (j == "path")
-    x = ChildObjectClass::PATH;
+    x = ObjectClass::PATH;
   else if (j == "symbolInstance")
-    x = ChildObjectClass::SYMBOL_INSTANCE;
+    x = ObjectClass::SYMBOL_INSTANCE;
   else if (j == "symbolMaster")
-    x = ChildObjectClass::SYMBOL_MASTER;
+    x = ObjectClass::SYMBOL_MASTER;
   else if (j == "text")
-    x = ChildObjectClass::TEXT;
+    x = ObjectClass::TEXT;
   else
   {
     throw std::runtime_error("Input JSON does not conform to schema!");
   }
 }
 
-inline void to_json(json& j, const ChildObjectClass& x)
+inline void to_json(json& j, const ObjectClass& x)
 {
   switch (x)
   {
-    case ChildObjectClass::FRAME:
+    case ObjectClass::FRAME:
       j = "frame";
       break;
-    case ChildObjectClass::GROUP:
+    case ObjectClass::GROUP:
       j = "group";
       break;
-    case ChildObjectClass::IMAGE:
+    case ObjectClass::IMAGE:
       j = "image";
       break;
-    case ChildObjectClass::PATH:
+    case ObjectClass::PATH:
       j = "path";
       break;
-    case ChildObjectClass::SYMBOL_INSTANCE:
+    case ObjectClass::SYMBOL_INSTANCE:
       j = "symbolInstance";
       break;
-    case ChildObjectClass::SYMBOL_MASTER:
+    case ObjectClass::SYMBOL_MASTER:
       j = "symbolMaster";
       break;
-    case ChildObjectClass::TEXT:
+    case ObjectClass::TEXT:
       j = "text";
-      break;
-    default:
-      throw std::runtime_error("This should not happen");
-  }
-}
-
-inline void from_json(const json& j, FrameClass& x)
-{
-  if (j == "frame")
-    x = FrameClass::FRAME;
-  else
-  {
-    throw std::runtime_error("Input JSON does not conform to schema!");
-  }
-}
-
-inline void to_json(json& j, const FrameClass& x)
-{
-  switch (x)
-  {
-    case FrameClass::FRAME:
-      j = "frame";
       break;
     default:
       throw std::runtime_error("This should not happen");
@@ -4658,28 +4589,28 @@ inline void adl_serializer<VGG::Model::ContainerChildType>::from_json(
     throw std::runtime_error("Could not deserialise!");
   }
 
-  auto classType = j.at("class").get<ChildObjectClass>();
+  auto classType = j.at("class").get<ObjectClass>();
   switch (classType)
   {
-    case ChildObjectClass::FRAME:
+    case ObjectClass::FRAME:
       x = j.get<Frame>();
       break;
-    case ChildObjectClass::GROUP:
+    case ObjectClass::GROUP:
       x = j.get<Group>();
       break;
-    case ChildObjectClass::IMAGE:
+    case ObjectClass::IMAGE:
       x = j.get<Image>();
       break;
-    case ChildObjectClass::PATH:
+    case ObjectClass::PATH:
       x = j.get<Path>();
       break;
-    case ChildObjectClass::SYMBOL_INSTANCE:
+    case ObjectClass::SYMBOL_INSTANCE:
       x = j.get<SymbolInstance>();
       break;
-    case ChildObjectClass::SYMBOL_MASTER:
+    case ObjectClass::SYMBOL_MASTER:
       x = j.get<SymbolMaster>();
       break;
-    case ChildObjectClass::TEXT:
+    case ObjectClass::TEXT:
       x = j.get<Text>();
       break;
     default:

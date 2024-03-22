@@ -352,12 +352,6 @@ void ExpandSymbol::expandInstance(
         auto idPrefix = instanceIdWithPrefix + K_SEPARATOR;
         makeTreeKeysUnique(json[K_CHILD_OBJECTS], idPrefix); // children
 
-        // invalid tree nodes id cache
-        if (treeToRebuild)
-        {
-          treeToRebuild->invalidateIdCache();
-        }
-
         // 2.2. update mask by: id -> unique id
         makeMaskIdUnique(json[K_CHILD_OBJECTS], json, idPrefix);
 
@@ -1973,7 +1967,7 @@ void ExpandSymbol::processVariableRefs(
       }
     }
 
-  } while (true);
+  } while (false);
 
   for (auto child : element->children())
   {

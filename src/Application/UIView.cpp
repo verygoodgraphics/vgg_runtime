@@ -543,7 +543,7 @@ void UIView::fireMouseEvent(
     UIEventPtr(new MouseEvent(
       type,
       target ? target->vggId() : K_EMPTY_STRING,
-      target ? target->path() : K_EMPTY_STRING,
+      K_EMPTY_STRING,
       jsButtonIndex,
       x,
       y,
@@ -635,10 +635,7 @@ bool UIView::handleTouchEvent(int x, int y, int motionX, int motionY, EUIEventTy
     { return queryHasEventListener(targetKey, type); });
 
   m_eventListener(
-    UIEventPtr(new TouchEvent(
-      type,
-      target ? target->vggId() : K_EMPTY_STRING,
-      target ? target->path() : K_EMPTY_STRING)),
+    UIEventPtr(new TouchEvent(type, target ? target->vggId() : K_EMPTY_STRING, K_EMPTY_STRING)),
     target);
 
   return true;

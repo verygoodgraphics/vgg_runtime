@@ -25,6 +25,11 @@
 namespace VGG
 {
 
+namespace Layout
+{
+struct BezierPoint;
+}
+
 namespace Model
 {
 struct DesignModel;
@@ -66,8 +71,9 @@ public:
     {
       return obj->id;
     }
-    return "";
+    return {};
   }
+
   virtual const Model::Object* model() const
   {
     return object();
@@ -78,6 +84,10 @@ public:
   std::shared_ptr<Element> findElementByKey(
     const std::vector<std::string>& keyStack,
     std::vector<std::string>*       outInstanceIdStack);
+
+  std::string    type() const;
+  Layout::Rect   bounds() const;
+  Layout::Matrix matrix() const;
 
 public:
   void setVisible(bool visible);
@@ -119,6 +129,9 @@ public:
 
   virtual void updateJsonModel(const nlohmann::json& newJsonModel);
   virtual void updateModel(const Model::SubGeometryType& subGeometry);
+  void         updateBounds(double w, double h);
+  void         updateMatrix(double tx, double ty);
+  void         updateMatrix(const std::vector<double>& matrix);
 
   virtual void getToModel(Model::SubGeometryType& subGeometry);
   virtual void getToModel(Model::ContainerChildType& variantModel);
@@ -289,8 +302,13 @@ class ContourElement : public Element
 public:
   ContourElement(const Model::Contour& contour);
 
+  std::vector<Layout::BezierPoint> points() const;
+
+  Model::Contour* dataModel() const;
+
   void getToModel(Model::SubGeometryType& subGeometry) override;
   void updateModel(const Model::SubGeometryType& subGeometry) override;
+  void updatePoints(const std::vector<Layout::BezierPoint>& points);
 };
 
 class EllipseElement : public Element

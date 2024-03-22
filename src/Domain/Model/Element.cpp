@@ -16,6 +16,7 @@
 
 #include "Domain/Model/Element.hpp"
 
+#include "Layout/BezierPoint.hpp"
 #include "Layout/Helper.hpp"
 
 #include "Utility/Log.hpp"
@@ -177,6 +178,16 @@ void Element::setVisible(bool visible)
   model->visible = visible;
 }
 
+std::string Element::type() const
+{
+  if (auto pObject = object())
+  {
+    nlohmann::json j = pObject->class_;
+    return j;
+  }
+  return {};
+}
+
 nlohmann::json Element::jsonModel()
 {
   return {};
@@ -189,6 +200,31 @@ void Element::getToModel(Model::SubGeometryType& subGeometry)
 }
 void Element::updateModel(const Model::SubGeometryType& subGeometry)
 {
+}
+void Element::updateBounds(double w, double h)
+{
+  if (auto model = object())
+  {
+    model->bounds.width = w;
+    model->bounds.height = h;
+  }
+}
+void Element::updateMatrix(double tx, double ty)
+{
+  if (auto model = object())
+  {
+    model->matrix[5] = tx;
+    model->matrix[6] = ty;
+  }
+}
+
+void Element::updateMatrix(const std::vector<double>& matrix)
+{
+  if (auto model = object())
+  {
+    ASSERT(model->matrix.size() == matrix.size());
+    model->matrix = matrix;
+  }
 }
 
 void Element::addChildren(const std::vector<ContainerChildType>& children)
@@ -403,6 +439,30 @@ std::shared_ptr<Element> Element::findElementByKey(
 
   return nullptr;
 }
+
+Layout::Rect Element::bounds() const
+{
+  if (auto pModel = model())
+  {
+    auto r = pModel->bounds;
+    return { { r.x, r.y }, { r.width, r.height } };
+  }
+
+  return {};
+}
+
+Layout::Matrix Element::matrix() const
+{
+  if (auto pModel = model())
+  {
+    auto m = pModel->matrix;
+    ASSERT(m.size() == 6);
+    return { m[0], m[1], m[2], m[3], m[4], m[5] };
+  }
+
+  return {};
+}
+
 void Element::getToModel(Model::ContainerChildType& variantModel)
 {
 }
@@ -840,6 +900,26 @@ ContourElement::ContourElement(const Model::Contour& contour)
 {
   m_contour = std::make_shared<Model::Contour>(contour);
 }
+
+std::vector<Layout::BezierPoint> ContourElement::points() const
+{
+  ASSERT(m_contour);
+
+  std::vector<Layout::BezierPoint> result;
+  for (auto& point : m_contour->points)
+  {
+    result.push_back(Layout::BezierPoint::makeFromModel(point));
+  }
+
+  return result;
+}
+
+Model::Contour* ContourElement::dataModel() const
+{
+  ASSERT(m_contour);
+  return m_contour.get();
+}
+
 void ContourElement::getToModel(Model::SubGeometryType& subGeometry)
 {
   ASSERT(m_contour);
@@ -851,6 +931,29 @@ void ContourElement::updateModel(const Model::SubGeometryType& subGeometry)
   if (auto p = std::get_if<Model::Contour>(&subGeometry))
   {
     *m_contour = *p;
+  }
+}
+void ContourElement::updatePoints(const std::vector<Layout::BezierPoint>& points)
+{
+  if (!m_contour)
+  {
+    return;
+  }
+  ASSERT(m_contour->points.size() == points.size());
+  for (std::size_t i = 0; i < m_contour->points.size(); i++)
+  {
+    m_contour->points[i].point[0] = points[i].point.x;
+    m_contour->points[i].point[1] = points[i].point.y;
+    if (points[i].from)
+    {
+      (*m_contour->points[i].curveFrom)[0] = points[i].from->x;
+      (*m_contour->points[i].curveFrom)[1] = points[i].from->y;
+    }
+    if (points[i].to)
+    {
+      (*m_contour->points[i].curveTo)[0] = points[i].to->x;
+      (*m_contour->points[i].curveTo)[1] = points[i].to->y;
+    }
   }
 }
 

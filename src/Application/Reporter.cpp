@@ -68,7 +68,6 @@ void Reporter::onSelectNode(std::weak_ptr<LayoutNode> node)
   nlohmann::json event;
   event[K_TYPE] = K_SELECT;
   event[K_ID] = target->vggId();
-  event[K_PATH] = target->path();
 
   sendEventToJs(event);
 }

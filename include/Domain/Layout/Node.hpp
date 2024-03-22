@@ -30,8 +30,9 @@ namespace VGG
 {
 namespace Domain
 {
+class ContourElement;
 class Element;
-}
+} // namespace Domain
 namespace Model
 {
 struct Object;
@@ -75,29 +76,19 @@ class LayoutNode : public std::enable_shared_from_this<LayoutNode>
   std::weak_ptr<LayoutNode>                m_parent;
   std::vector<std::shared_ptr<LayoutNode>> m_children;
 
-  std::weak_ptr<JsonDocument>        m_viewModel;
-  const nlohmann::json::json_pointer m_path;
-  std::weak_ptr<Domain::Element>     m_element;
+  std::weak_ptr<Domain::Element> m_element;
 
   std::shared_ptr<Layout::Internal::AutoLayout> m_autoLayout;
   bool                                          m_needsLayout{ false };
   Layout::Rect                                  m_oldFrame;
 
-  bool        m_hasIdCache{ false };
-  std::string m_id; // cache
-
 public:
   using HitTestHook = std::function<bool(const std::string&)>;
 
-  LayoutNode(const nlohmann::json::json_pointer& path)
-    : m_path{ path }
-  {
-  }
   LayoutNode(std::weak_ptr<Domain::Element> element)
     : m_element{ element }
   {
   }
-  virtual ~LayoutNode() = default;
 
   std::shared_ptr<LayoutNode> hitTest(
     const Layout::Point& point,
@@ -135,15 +126,6 @@ public:
   bool                        isAncestorOf(std::shared_ptr<LayoutNode> node);
   std::shared_ptr<LayoutNode> closestCommonAncestor(std::shared_ptr<LayoutNode> node);
 
-  std::string path() const
-  {
-    return m_path.to_string();
-  }
-  const auto& jsonPointer() const
-  {
-    return m_path;
-  }
-
   Layout::Rect frame() const;
   Layout::Rect bounds() const;
   void         setFrame(
@@ -151,7 +133,6 @@ public:
             bool                updateRule = false,
             bool                useOldFrame = false,
             bool                duringLayout = false);
-  void setViewModel(JsonDocumentPtr viewModel);
 
   void dump(std::string indent = {});
 
@@ -189,8 +170,7 @@ public:
   Layout::Size swapWidthAndHeightIfNeeded(Layout::Size size);
 
 public:
-  const std::string& id();
-  void               invalidateIdCache();
+  std::string id();
 
   std::string vggId() const;
   std::string name() const;
@@ -247,10 +227,14 @@ private:
     const Layout::Size&  newContainerSize,
     const Layout::Point* parentOrigin);
   Layout::Rect resizeContour(
-    const Layout::Size&  oldContainerSize,
-    const Layout::Size&  newContainerSize,
-    const Layout::Point* parentOrigin);
-  void scaleContour(const Layout::Rect& oldFrame, const Layout::Rect& newFrame);
+    Domain::ContourElement& contourElement,
+    const Layout::Size&     oldContainerSize,
+    const Layout::Size&     newContainerSize,
+    const Layout::Point*    parentOrigin);
+  void scaleContour(
+    Domain::ContourElement& contourElement,
+    const Layout::Rect&     oldFrame,
+    const Layout::Rect&     newFrame);
 
   std::pair<Layout::Scalar, Layout::Scalar> resizeH(
     const Layout::Size&  oldContainerSize,
@@ -267,20 +251,12 @@ private:
   EResizing              verticalResizing() const;
   EAdjustContentOnResize adjustContentOnResize() const;
 
-  const nlohmann::json* model() const;
-
-  template<typename T>
-  T getValue(const char* key, T v) const;
-
   bool shouldSkip();
   bool isBooleanGroup();
 
   void updatePathNodeModel(
     const Layout::Rect&                     newFrame,
     const Layout::Matrix&                   matrix,
-    const std::vector<Layout::BezierPoint>& newPoints);
-  void updateContourNodeModelPoints(
-    const std::size_t                       subshapeIndex,
     const std::vector<Layout::BezierPoint>& newPoints);
 };
 

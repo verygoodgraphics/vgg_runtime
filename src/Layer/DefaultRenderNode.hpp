@@ -67,7 +67,11 @@ public:
   }
 
   ~DefaultRenderNode();
-  static Ref<DefaultRenderNode> MakeFrom(VAllocator* alloc, PaintNode* node); // NOLINT
+  static Ref<DefaultRenderNode> MakeFrom( // NOLINT
+    VAllocator*             alloc,
+    PaintNode*              node,
+    Ref<TransformAttribute> transform);
+
 private:
   VGG_CLASS_MAKE(DefaultRenderNode);
 

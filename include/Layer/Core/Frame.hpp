@@ -62,6 +62,10 @@ public:
   const std::string& guid() const;
   PaintNode*         root() const;
 
+  PaintNode* nodeAt(int x, int y);
+  void       nodeAt(int x, int y, std::vector<PaintNode*>& nodes);
+  PaintNode* nodeByID(const std::string& id);
+
   void             resetToOrigin(bool enable);
   bool             isVisible() const;
   const Transform& transform() const;

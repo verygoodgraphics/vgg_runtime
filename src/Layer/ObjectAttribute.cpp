@@ -113,7 +113,7 @@ void InnerShadowAttribute::render(Renderer* renderer)
   }
 }
 
-SkRect ObjectAttribute::revalidateObjectBounds(
+std::pair<SkRect, std::optional<SkPaint>> ObjectAttribute::revalidateObjectBounds(
   const std::vector<Border>& borders,
   const SkRect&              bounds)
 {
@@ -142,8 +142,8 @@ SkRect ObjectAttribute::revalidateObjectBounds(
     }
     if (maxWidthBorder)
     {
-      // Only consider these properties that affect bounds
       SkPaint paint;
+      // Only consider these properties that affect bounds
       paint.setStyle(SkPaint::kStroke_Style);
       paint.setAntiAlias(true);
       paint.setPathEffect(SkDashPathEffect::Make(
@@ -157,10 +157,14 @@ SkRect ObjectAttribute::revalidateObjectBounds(
       paint.setStrokeWidth(maxWidth);
       SkRect rect;
       paint.computeFastStrokeBounds(bounds, &rect);
-      return rect;
+      return { rect, paint };
     }
   }
-  return bounds;
+  return { bounds, std::nullopt };
+}
+
+void ObjectAttribute::revalidateMaskFilter(const SkPaint& strokePaint, const SkRect& bounds)
+{
 }
 
 void ObjectAttribute::render(Renderer* renderer)
@@ -184,6 +188,13 @@ void ObjectAttribute::render(Renderer* renderer)
       objectBounds.join(borderBounds);
       auto mat = SkMatrix::Translate(objectBounds.x(), objectBounds.y());
       m_styleDisplayList = rec.finishRecording(objectBounds, &mat);
+      // m_styleDisplayList->render(renderer);
+      SkPaint p;
+      p.setStyle(SkPaint::kFill_Style);
+      p.setAntiAlias(true);
+      p.setColor(SK_ColorRED);
+      p.setAlphaf(0.5f);
+      shape.draw(recorder->canvas(), p);
     }
   }
 }
@@ -199,10 +210,26 @@ Bound ObjectAttribute::onRevalidate()
       break;
     }
   }
-  if (m_shapeAttr && !m_borders.empty())
+  if (m_shapeAttr)
   {
     const auto& shape = m_shapeAttr->getShape();
-    auto        bounds = revalidateObjectBounds(m_borders, shape.bounds());
+    auto [bounds, paint] = revalidateObjectBounds(m_borders, shape.bounds());
+    ObjectRecorder rec;
+    auto           recorder = rec.beginRecording(bounds, SkMatrix::I());
+    SkPaint        fillPaint;
+    fillPaint.setAntiAlias(true);
+    fillPaint.setStyle(SkPaint::kFill_Style);
+    fillPaint.setAlphaf(1.0f);
+    shape.draw(recorder->canvas(), fillPaint);
+    if (auto strokePen = paint; strokePen)
+    {
+      strokePen->setAlphaf(1.0f);
+      shape.draw(recorder->canvas(), *strokePen);
+    }
+    auto mat = SkMatrix::Translate(bounds.x(), bounds.y());
+    auto object = rec.finishRecording(bounds, &mat);
+    m_maskFilter = object.asImageFilter();
+    ASSERT(m_maskFilter);
     return Bound{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
   }
   return Bound();
@@ -218,11 +245,34 @@ void StyleObjectAttribute::render(Renderer* renderer)
     m_innerShadowAttr->render(renderer);
 }
 
+void StyleObjectAttribute::revalidateDropbackFilter(const SkRect& bounds)
+{
+  ASSERT(m_backgroundBlurAttr);
+  m_backgroundBlurAttr->revalidate();
+  if (auto bgb = m_backgroundBlurAttr->getImageFilter())
+  {
+    if (m_bgBlurImageFilter != bgb || m_objectBounds != bounds)
+    {
+      m_bgBlurImageFilter = bgb;
+      if (m_bgBlurImageFilter)
+      {
+        static auto s_blender = getOrCreateBlender("maskOut", g_maskOutBlender);
+        auto        fb = m_objectAttr->asObjectMaskFilter();
+        m_dropbackImageFilter = SkImageFilters::Blend(s_blender, fb, m_bgBlurImageFilter, bounds);
+      }
+    }
+    else
+    {
+      m_dropbackImageFilter = nullptr;
+    }
+  }
+}
+
 Bound StyleObjectAttribute::onRevalidate()
 {
   m_innerShadowAttr->revalidate();
-  m_backgroundBlurAttr->revalidate();
   auto objectBounds = toSkRect(m_objectAttr->revalidate());
+  revalidateDropbackFilter(objectBounds);
   auto shadowBounds = toSkRect(m_dropShadowAttr->revalidate());
   objectBounds.join(shadowBounds);
   return Bound{ objectBounds.x(), objectBounds.y(), objectBounds.width(), objectBounds.height() };

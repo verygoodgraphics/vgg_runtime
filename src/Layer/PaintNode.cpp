@@ -165,24 +165,22 @@ void PaintNode::paintSelf(Renderer* renderer)
 {
 #ifdef USE_OLD_CODE
   VGG_IMPL(PaintNode);
-  // if (!_->path)
-  // {
-  //   _->path = VShape(asVisualShape(0));
-  // }
-
   ASSERT(_->path);
   if (_->path->isEmpty())
   {
     return;
   }
 #endif
-  this->paintEvent(renderer);
+  if (d_ptr->renderable)
+  {
+    this->paintEvent(renderer);
+  }
 }
 
 void PaintNode::paintEvent(Renderer* renderer)
 {
-  VGG_IMPL(PaintNode);
 #ifdef USE_OLD_CODE
+  VGG_IMPL(PaintNode);
   auto dropbackFilter = _->backgroundBlurImageFilter();
   auto layerFilter = _->blurImageFilter();
 
@@ -274,7 +272,7 @@ void PaintNode::paintEvent(Renderer* renderer)
   }
 
 #else
-  _->renderNode->render(renderer);
+  d_ptr->renderNode->render(renderer);
 #endif
 }
 
@@ -283,6 +281,8 @@ void PaintNode::setMaskBy(std::vector<std::string> masks)
 #ifdef USE_OLD_CODE
   VGG_IMPL(PaintNode);
   _->maskedBy = std::move(masks);
+#else
+  d_ptr->renderNode->access()->setShapeMask(std::move(masks));
 #endif
 }
 
@@ -291,6 +291,8 @@ void PaintNode::setAlphaMaskBy(std::vector<AlphaMask> masks)
 #ifdef USE_OLD_CODE
   VGG_IMPL(PaintNode);
   _->alphaMaskBy = std::move(masks);
+#else
+  d_ptr->renderNode->access()->setAlphaMask(std::move(masks));
 #endif
 }
 
@@ -509,9 +511,17 @@ bool PaintNode::isVisible() const
 
 void PaintNode::setStyle(const Style& style)
 {
-#ifdef USE_OLD_CODE
   VGG_IMPL(PaintNode);
+#ifdef USE_OLD_CODE
   _->style = style;
+#else
+  auto aa = _->renderNode->access();
+  aa->setFill(style.fills);
+  aa->setBorder(style.borders);
+  aa->setInnerShadow(style.innerShadow);
+  aa->setDropShadow(style.dropShadow);
+  aa->setLayerBlur(style.layerEffects);
+  aa->setBackgroundBlur(style.backgroundEffects);
 #endif
 }
 
@@ -588,30 +598,61 @@ void PaintNode::setFrameBound(const Bound& bound)
 Bound PaintNode::onRevalidate()
 {
   VGG_IMPL(PaintNode);
+  DEBUG("PaintNode onRevalidate: %s", name().c_str());
   Bound newBound;
   for (const auto& e : m_firstChild)
   {
     newBound.unionWith(e->revalidate());
   }
 #ifdef USE_OLD_CODE
-  if (!_->path)
+  if (
+    _->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY ||
+    _->paintOption.paintStrategy == EPaintStrategy::PS_RECURSIVELY)
   {
-    _->path = VShape(asVisualShape(0));
+    if (!_->path)
+    {
+      _->path = VShape(asVisualShape(0));
+    }
+    _->renderable = true;
+  }
+  else
+  {
+    _->renderable = true;
   }
   return d_ptr->bound; // old code doesn't support revalidate actually
 #else
-  auto bound = _->renderNode->revalidate(); // This will trigger the shape attribute get the
-                                            // shape from the current node by the passed node
-  newBound.unionWith(bound);
-  return newBound;
+  _->transformAttr->revalidate();
+  if (
+    _->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY ||
+    _->paintOption.paintStrategy == EPaintStrategy::PS_RECURSIVELY)
+  {
+    _->renderNode->revalidate(); // This will trigger the shape attribute get the
+    _->renderable = true;
+    // auto s = _->renderNode->access()->shape()->getShape();
+    // if (s.isEmpty())
+    // {
+    //   DEBUG("name :%s", name().c_str());
+    // }
+    // else
+    // {
+    //   _->renderable = true;
+    // }
+  }
+  else
+  {
+    _->renderable = false;
+  }
+  // shape from the current node by the passed node
+
+  // newBound.unionWith(bound);
+  // return newBound;
+  return d_ptr->bound;
 #endif
 }
-
 const std::string& PaintNode::guid() const
 {
   return d_ptr->guid;
 }
-
 // bool PaintNode::isMasked() const
 // {
 //   return d_ptr->maskedBy.empty();
@@ -644,7 +685,6 @@ void PaintNode::setContourData(ContourData contour)
 {
   VGG_IMPL(PaintNode);
   _->contour = std::move(contour);
-  // We don't support change contour data so far, because it's beyound the current design
 }
 
 const ContourOption& PaintNode::maskOption() const
@@ -669,7 +709,6 @@ void PaintNode::paintChildren(Renderer* renderer)
   VGG_IMPL(PaintNode);
   std::vector<PaintNode*> masked;
   std::vector<PaintNode*> noneMasked;
-  auto                    canvas = renderer->canvas();
   for (const auto& p : this->m_firstChild)
   {
     auto c = static_cast<PaintNode*>(p.get());
@@ -706,12 +745,12 @@ void PaintNode::paintChildren(Renderer* renderer)
 
   const auto clip = (overflow() == OF_HIDDEN || overflow() == OF_SCROLL);
   {
+    auto                canvas = renderer->canvas();
     SkAutoCanvasRestore acr(canvas, clip);
     if (clip)
     {
       auto boundPath = makeBoundPath();
       boundPath.clip(canvas, SkClipOp::kIntersect);
-      // canvas->clipPath(makeBoundPath());
     }
     paintCall(masked);
     paintCall(noneMasked);

@@ -123,7 +123,9 @@ Bound Frame::onRevalidate()
   VGG_IMPL(Frame);
   ASSERT(_->root);
   _->cache = nullptr;
-  auto b = _->root->revalidate().bound(_->root->transform());
+
+  auto bounds = _->root->revalidate();
+  auto b = bounds.bound(_->root->transform());
   _->transform.setMatrix(glm::mat3{ 1 });
   if (_->enableToOrigin)
   {
@@ -147,6 +149,18 @@ Frame::Frame(VRefCnt* cnt, PaintNodePtr root)
   ASSERT(root);
   d_ptr->root = root;
   observe(root);
+}
+
+PaintNode* Frame::nodeAt(int x, int y)
+{
+  return 0;
+}
+void Frame::nodeAt(int x, int y, std::vector<PaintNode*>& nodes)
+{
+}
+PaintNode* Frame::nodeByID(const std::string& id)
+{
+  return static_cast<PaintNode*>(root()->findChildRecursive(id).get());
 }
 
 Frame::~Frame()

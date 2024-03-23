@@ -26,18 +26,20 @@
 namespace VGG::layer
 {
 
-Ref<DefaultRenderNode> DefaultRenderNode::MakeFrom(VAllocator* alloc, PaintNode* node)
+Ref<DefaultRenderNode> DefaultRenderNode::MakeFrom(
+  VAllocator*             alloc,
+  PaintNode*              node,
+  Ref<TransformAttribute> transform)
 {
   auto shape = ShapeAttribute::Make(alloc, node);
-  auto transform = TransformAttribute::Make(alloc);
   auto innerShadow = InnerShadowAttribute::Make(alloc, shape);
   auto dropShadow = DropShadowAttribute::Make(alloc, shape);
   auto backgroundBlur = BackgroundBlurAttribute::Make(alloc);
   auto object = ObjectAttribute::Make(alloc, shape);
-  auto shapeMask = ShapeMaskAttribute::Make(alloc);
 
   auto style = StyleObjectAttribute::Make(alloc, innerShadow, dropShadow, object, backgroundBlur);
   auto layerPostProcess = LayerFXAttribute::Make(alloc, style);
+  auto shapeMask = ShapeMaskAttribute::Make(alloc, node, layerPostProcess);
   auto alphaMaskAttribute = AlphaMaskAttribute::Make(alloc, node, layerPostProcess);
   auto result = DefaultRenderNode::Make(
     alloc,
@@ -62,18 +64,17 @@ Ref<DefaultRenderNode> DefaultRenderNode::MakeFrom(VAllocator* alloc, PaintNode*
 
 void DefaultRenderNode::render(Renderer* renderer)
 {
-  // auto canvas = renderer->canvas();
-  // canvas->drawPicture(m_picture);
-  recorder(renderer);
+  auto canvas = renderer->canvas();
+  canvas->drawPicture(m_picture);
+  // recorder(renderer);
 }
 
 SkRect DefaultRenderNode::recorder(Renderer* renderer)
 {
-  auto       dropbackFilter = m_objectAttr->getBackgroundBlurImageFilter();
-  auto       layerFXFilter = m_alphaMaskAttr->getImageFilter();
-  const auto newLayer = dropbackFilter || layerFXFilter;
+  sk_sp<SkImageFilter> dropbackFilter = m_objectAttr->getBackgroundBlurImageFilter();
+  sk_sp<SkImageFilter> layerFXFilter = m_alphaMaskAttr->getImageFilter();
+  const auto           newLayer = dropbackFilter || layerFXFilter;
 
-  // auto path = m_shapeAttr->getShape();
   auto shapeMask = m_shapeMaskAttr->getShape();
 
   if (!shapeMask.isEmpty())
@@ -84,7 +85,13 @@ SkRect DefaultRenderNode::recorder(Renderer* renderer)
   SkRect renderBound = toSkRect(m_objectAttr->bound());
   if (newLayer)
   {
-    SkRect  layerBound = toSkRect(m_alphaMaskAttr->bound());
+    SkRect layerBound = toSkRect(m_alphaMaskAttr->bound());
+    DEBUG(
+      "layer bound %f %f %f %f",
+      layerBound.x(),
+      layerBound.y(),
+      layerBound.width(),
+      layerBound.height());
     SkPaint layerPaint;
     layerPaint.setAntiAlias(true);
     layerPaint.setImageFilter(layerFXFilter);
@@ -136,13 +143,14 @@ void DefaultRenderNode::endLayer(Renderer* renderer)
 
 Bound DefaultRenderNode::onRevalidate()
 {
-  // m_shapeAttr->revalidate();
+  INFO("DefaultRenderNode::onRevalidate");
   m_shapeMaskAttr->revalidate();
   m_transformAttr->revalidate();
   m_alphaMaskAttr->revalidate();
   m_objectAttr->revalidate();
   auto rect = toSkRect(m_objectAttr->bound());
   auto [pic, bound] = revalidatePicture(rect);
+  m_picture = pic;
   return Bound{ bound.x(), bound.y(), bound.width(), bound.height() };
 }
 

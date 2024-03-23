@@ -16,6 +16,7 @@
 #pragma once
 #include "AttributeNode.hpp"
 #include "ImageFilterAttribute.hpp"
+#include "Layer/LayerAttribute.hpp"
 #include "ShapeAttribute.hpp"
 
 #include <core/SkImageFilter.h>
@@ -40,7 +41,7 @@ public:
   Bound                onRevalidate() override;
   sk_sp<SkImageFilter> getImageFilter() const override
   {
-    return m_alphaMaskFilter;
+    return m_alphaMaskFilter ? m_alphaMaskFilter : m_inputFilter->getImageFilter();
   }
 
 private:
@@ -54,9 +55,13 @@ private:
 class ShapeMaskAttribute : public ShapeAttribute
 {
 public:
-  ShapeMaskAttribute(VRefCnt* cnt)
+  ShapeMaskAttribute(VRefCnt* cnt, PaintNode* node, Ref<LayerFXAttribute> layerFX)
     : ShapeAttribute(cnt)
+    , m_layerAttr(layerFX)
+    , m_maskedNode(node)
+    , m_maskMap(nullptr)
   {
+    observe(m_layerAttr);
   }
 
   VGG_ATTRIBUTE(MaskID, std::vector<std::string>, m_maskID);
@@ -68,6 +73,7 @@ public:
 
 private:
   friend class RenderNode;
+  Ref<LayerFXAttribute>    m_layerAttr;
   VShape                   m_shape;
   std::vector<std::string> m_maskID;
   PaintNode*               m_maskedNode;

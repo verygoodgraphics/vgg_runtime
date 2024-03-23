@@ -43,7 +43,7 @@ private:
   SkRect revalidateLayerImageFilter(const SkRect& bounds);
 
   Ref<StyleObjectAttribute> m_styleObjectAttr;
-  std::vector<LayerFX>         m_blurs;
+  std::vector<LayerFX>      m_blurs;
   sk_sp<SkImageFilter>      m_imageFilter;
 };
 

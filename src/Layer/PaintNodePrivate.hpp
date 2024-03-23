@@ -56,7 +56,7 @@
 #include <src/core/SkBlurMask.h>
 #include <src/shaders/SkPictureShader.h>
 
-#define USE_OLD_CODE
+// #define USE_OLD_CODE
 
 namespace VGG::layer
 {
@@ -162,6 +162,7 @@ public:
   ContourOption  maskOption;
 
   std::optional<VShape> path;
+  bool                  renderable{ false };
   Bound                 bound;
 #ifdef USE_OLD_CODE
   Transform                        transform;
@@ -176,15 +177,20 @@ public:
 
 #endif
 
-  Ref<DefaultRenderNode> renderNode;
+  Ref<DefaultRenderNode>  renderNode;
+  Ref<TransformAttribute> transformAttr;
+
+  sk_sp<SkPicture> picture;
 
   PaintNode__pImpl(PaintNode* api, EObjectType type)
     : q_ptr(api)
     , type(type)
   {
 #ifndef USE_OLD_CODE
-    renderNode = DefaultRenderNode::MakeFrom(0, api);
+    transformAttr = TransformAttribute::Make();
+    renderNode = DefaultRenderNode::MakeFrom(0, api, transformAttr);
     api->observe(renderNode);
+    api->observe(transformAttr);
 #endif
   }
 

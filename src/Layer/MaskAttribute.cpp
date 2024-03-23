@@ -67,7 +67,7 @@ Bound AlphaMaskAttribute::onRevalidate()
       &resetOffset);
     return Bound{ layerBound.x(), layerBound.y(), layerBound.width(), layerBound.height() };
   }
-  return Bound();
+  return Bound{ layerBound.x(), layerBound.y(), layerBound.width(), layerBound.height() };
 }
 
 Bound ShapeMaskAttribute::onRevalidate()
@@ -75,12 +75,8 @@ Bound ShapeMaskAttribute::onRevalidate()
   if (!m_maskID.empty() && m_maskMap)
   {
     auto iter = ShapeMaskIterator(m_maskID);
-    m_shape = MaskBuilder::makeShapeMask(
-      m_maskedNode,
-      *m_maskMap,
-      iter,
-      toSkRect(m_maskedNode->frameBound()), // This bound is inccorect, layer bound should be used
-      0);
+    auto layerBound = m_layerAttr->revalidate();
+    m_shape = MaskBuilder::makeShapeMask(m_maskedNode, *m_maskMap, iter, toSkRect(layerBound), 0);
   }
   return Bound();
 }

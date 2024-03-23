@@ -105,6 +105,12 @@ public:
   {
     return m_hasFill;
   }
+
+  sk_sp<SkImageFilter> asObjectMaskFilter()
+  {
+    return m_maskFilter;
+  }
+
   void  render(Renderer* renderer) override;
   Bound onRevalidate() override;
 
@@ -115,14 +121,20 @@ public:
 
 private:
   friend class RenderNode;
-  SkRect revalidateObjectBounds(const std::vector<Border>& borders, const SkRect& bounds);
+  std::pair<SkRect, std::optional<SkPaint>> revalidateObjectBounds(
+    const std::vector<Border>& borders,
+    const SkRect&              bounds);
+
+  void revalidateMaskFilter(const SkPaint& paint, const SkRect& bounds);
 
   std::function<SkRect(Renderer* renderer)> m_onDrawFill;
   Ref<ShapeAttribute>                       m_shapeAttr;
-  std::vector<Fill>                         m_fills;
-  std::vector<Border>                       m_borders;
-  bool                                      m_hasFill;
-  std::optional<ObjectShader>               m_styleDisplayList; // fill + border
+
+  sk_sp<SkImageFilter>        m_maskFilter;
+  std::vector<Fill>           m_fills;
+  std::vector<Border>         m_borders;
+  bool                        m_hasFill;
+  std::optional<ObjectShader> m_styleDisplayList; // fill + border
 };
 
 class StyleObjectAttribute : public Attribute
@@ -150,12 +162,7 @@ public:
 
   sk_sp<SkImageFilter> getBackgroundBlurImageFilter() const
   {
-    return m_backgroundBlurAttr->getImageFilter();
-  }
-
-  sk_sp<SkImageFilter> asImageFilter()
-  {
-    return m_objectImageFilter;
+    return m_dropbackImageFilter;
   }
 
   Bound onRevalidate() override;
@@ -164,14 +171,18 @@ public:
 
 private:
   friend class RenderNode;
-  void revalidateLayerFilter();
-  void revalidateDropbackFilter();
+
+  void revalidateDropbackFilter(const SkRect& bounds);
 
   Ref<InnerShadowAttribute>    m_innerShadowAttr;
   Ref<DropShadowAttribute>     m_dropShadowAttr;
   Ref<ObjectAttribute>         m_objectAttr;
   Ref<BackgroundBlurAttribute> m_backgroundBlurAttr;
 
+  SkRect               m_objectBounds;
+  sk_sp<SkImageFilter> m_bgBlurImageFilter;
+
+  sk_sp<SkImageFilter> m_dropbackImageFilter;
   sk_sp<SkImageFilter> m_objectImageFilter;
 };
 } // namespace VGG::layer

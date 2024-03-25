@@ -16,7 +16,6 @@
 
 #include "VSkia.hpp"
 #include "ObjectAttribute.hpp"
-
 #include "PaintNodePrivate.hpp"
 
 #include <core/SkImageFilter.h>
@@ -121,23 +120,20 @@ std::pair<SkRect, std::optional<SkPaint>> ObjectAttribute::revalidateObjectBound
   float         maxWidth = 0;
   if (!bounds.isEmpty())
   {
-    if (!m_borders.empty())
+    for (const auto& b : borders)
     {
-      for (const auto& b : borders)
+      if (!b.isEnabled || b.thickness <= 0)
+        continue;
+      // We simply assumes that the wider of the stroke, the larger its bounds
+      float strokeWidth = b.thickness;
+      if (b.position == PP_INSIDE)
+        strokeWidth = 2.f * b.thickness;
+      else if (b.position == PP_OUTSIDE)
+        strokeWidth = 2.f * b.thickness;
+      if (strokeWidth > maxWidth)
       {
-        if (!b.isEnabled || b.thickness <= 0)
-          continue;
-        // We simply assumes that the wider of the stroke, the larger its bounds
-        float strokeWidth = b.thickness;
-        if (b.position == PP_INSIDE)
-          strokeWidth = 2.f * b.thickness;
-        else if (b.position == PP_OUTSIDE)
-          strokeWidth = 2.f * b.thickness;
-        if (strokeWidth > maxWidth)
-        {
-          maxWidth = strokeWidth;
-          maxWidthBorder = &b;
-        }
+        maxWidth = strokeWidth;
+        maxWidthBorder = &b;
       }
     }
     if (maxWidthBorder)
@@ -172,36 +168,37 @@ void ObjectAttribute::render(Renderer* renderer)
   ASSERT(renderer);
   sk_sp<SkBlender>     blender; // maybe we need to add a blender, add to renderer
   sk_sp<SkImageFilter> imageFilter;
-  if (m_shapeAttr)
-  {
-    if (const auto& shape = m_shapeAttr->getShape(); !shape.isEmpty())
-    {
-      ObjectRecorder rec;
-      SkRect         objectBounds = shape.bounds();
-      auto           recorder = rec.beginRecording(objectBounds, SkMatrix::I());
-      auto           fillBounds = shape.bounds();
-      FillEffect     fillEffect(m_fills, fillBounds, imageFilter, blender);
-      fillEffect.render(renderer, shape);
-      const auto borderBounds =
-        internal::drawBorder(recorder, shape, shape.bounds(), m_borders, blender);
-      objectBounds.join(fillBounds);
-      objectBounds.join(borderBounds);
-      auto mat = SkMatrix::Translate(objectBounds.x(), objectBounds.y());
-      m_styleDisplayList = rec.finishRecording(objectBounds, &mat);
-      // m_styleDisplayList->render(renderer);
-      SkPaint p;
-      p.setStyle(SkPaint::kFill_Style);
-      p.setAntiAlias(true);
-      p.setColor(SK_ColorRED);
-      p.setAlphaf(0.5f);
-      shape.draw(recorder->canvas(), p);
-    }
-  }
+  m_renderObjectAttr->render(renderer);
+  // if (m_shapeAttr)
+  // {
+  //   if (const auto& shape = m_shapeAttr->getShape(); !shape.isEmpty())
+  //   {
+  //     ObjectRecorder rec;
+  //     SkRect         objectBounds = shape.bounds();
+  //     auto           recorder = rec.beginRecording(objectBounds, SkMatrix::I());
+  //     auto           fillBounds = shape.bounds();
+  //     FillEffect     fillEffect(m_fills, fillBounds, imageFilter, blender);
+  //     fillEffect.render(renderer, shape);
+  //     const auto borderBounds =
+  //       internal::drawBorder(recorder, shape, shape.bounds(), m_borders, blender);
+  //     objectBounds.join(fillBounds);
+  //     objectBounds.join(borderBounds);
+  //     auto mat = SkMatrix::Translate(objectBounds.x(), objectBounds.y());
+  //     m_styleDisplayList = rec.finishRecording(objectBounds, &mat);
+  //     // m_styleDisplayList->render(renderer);
+  //     SkPaint p;
+  //     p.setStyle(SkPaint::kFill_Style);
+  //     p.setAntiAlias(true);
+  //     p.setColor(SK_ColorRED);
+  //     p.setAlphaf(0.5f);
+  //     shape.draw(recorder->canvas(), p);
+  //   }
+  // }
 }
 
 Bound ObjectAttribute::onRevalidate()
 {
-  m_shapeAttr->revalidate();
+  ASSERT(m_renderObjectAttr);
   for (const auto& f : m_fills)
   {
     if (f.isEnabled)
@@ -210,29 +207,31 @@ Bound ObjectAttribute::onRevalidate()
       break;
     }
   }
-  if (m_shapeAttr)
-  {
-    const auto& shape = m_shapeAttr->getShape();
-    auto [bounds, paint] = revalidateObjectBounds(m_borders, shape.bounds());
-    ObjectRecorder rec;
-    auto           recorder = rec.beginRecording(bounds, SkMatrix::I());
-    SkPaint        fillPaint;
-    fillPaint.setAntiAlias(true);
-    fillPaint.setStyle(SkPaint::kFill_Style);
-    fillPaint.setAlphaf(1.0f);
-    shape.draw(recorder->canvas(), fillPaint);
-    if (auto strokePen = paint; strokePen)
-    {
-      strokePen->setAlphaf(1.0f);
-      shape.draw(recorder->canvas(), *strokePen);
-    }
-    auto mat = SkMatrix::Translate(bounds.x(), bounds.y());
-    auto object = rec.finishRecording(bounds, &mat);
-    m_maskFilter = object.asImageFilter();
-    ASSERT(m_maskFilter);
-    return Bound{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
-  }
-  return Bound();
+  return m_renderObjectAttr->revalidate();
+  // m_shapeAttr->revalidate();
+  // if (m_shapeAttr)
+  // {
+  //   const auto& shape = m_shapeAttr->getShape();
+  //   auto [bounds, paint] = revalidateObjectBounds(m_borders, shape.bounds());
+  //   ObjectRecorder rec;
+  //   auto           recorder = rec.beginRecording(bounds, SkMatrix::I());
+  //   SkPaint        fillPaint;
+  //   fillPaint.setAntiAlias(true);
+  //   fillPaint.setStyle(SkPaint::kFill_Style);
+  //   fillPaint.setAlphaf(1.0f);
+  //   shape.draw(recorder->canvas(), fillPaint);
+  //   if (auto strokePen = paint; strokePen)
+  //   {
+  //     strokePen->setAlphaf(1.0f);
+  //     shape.draw(recorder->canvas(), *strokePen);
+  //   }
+  //   auto mat = SkMatrix::Translate(bounds.x(), bounds.y());
+  //   auto object = rec.finishRecording(bounds, &mat);
+  //   m_maskFilter = object.asImageFilter();
+  //   ASSERT(m_maskFilter);
+  //   return Bound{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
+  // }
+  // return Bound();
 }
 
 void StyleObjectAttribute::render(Renderer* renderer)

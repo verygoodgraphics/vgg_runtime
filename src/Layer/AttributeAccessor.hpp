@@ -157,6 +157,7 @@ public:
 
 private:
   friend class DefaultRenderNode;
+  friend class RenderNodeFactory;
   TransformAttribute* const      m_transformAttr;
   AlphaMaskAttribute* const      m_alphaMaskAttr;
   ShapeMaskAttribute* const      m_shapeMaskAttr;

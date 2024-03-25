@@ -15,22 +15,19 @@
  */
 #pragma once
 
-#include "AttributeNode.hpp"
-#include "Layer/Core/VShape.hpp"
-#include "ShapeAttribute.hpp"
+#include "DefaultRenderNode.hpp"
 
 namespace VGG::layer
 {
 
-class RenderObjectAttribute : public Attribute
+class RenderNodeFactory
 {
 public:
-  RenderObjectAttribute(VRefCnt* cnt)
-    : Attribute(cnt)
-  {
-  }
-  virtual void            render(Renderer* renderer) = 0;
-  virtual ShapeAttribute* shape() const = 0;
+  //
+  static Ref<DefaultRenderNode> MakeVectorRenderNode( // NOLINT
+    VAllocator*             alloc,
+    PaintNode*              node,
+    Ref<TransformAttribute> transform);
 };
 
-} // namespace VGG::layer
+}; // namespace VGG::layer

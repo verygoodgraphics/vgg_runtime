@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "ParagraphPainter.hpp"
+#include "Layer/Settings.hpp"
 #include "VSkia.hpp"
 #include "Effects.hpp"
 
@@ -161,7 +162,7 @@ void VParagraphPainter::paintRaw(Renderer* renderer, float x, float y)
     auto&      p = m_paragraph->paragraphCache[i].paragraph;
     const auto curX = m_paragraph->paragraphCache[i].offsetX + x;
     p->paint(this, m_paragraph->paragraphCache[i].offsetX, offsetY);
-    if (renderer->isEnableDrawDebugBound())
+    if (getDebugBoundEnable())
     {
       DebugCanvas debugCanvas(renderer->canvas());
       drawParagraphDebugInfo(debugCanvas, m_paragraph->paragraph[i], p.get(), curX, offsetY, i);

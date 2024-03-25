@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "Settings.hpp"
 #include "Layer/Core/Frame.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/Transform.hpp"
@@ -62,7 +64,7 @@ public:
     if (mat)
       pictureCanvas->setMatrix(*mat);
     renderer->draw(pictureCanvas, root);
-    if (renderer->isEnableDrawDebugBound())
+    if (getDebugBoundEnable())
     {
       SkPaint paint;
       paint.setColor(SK_ColorBLUE);

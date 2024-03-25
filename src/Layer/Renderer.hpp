@@ -51,44 +51,13 @@ class Renderer
   using InternalObjectMap = std::unordered_map<std::string, PaintNode*>;
 
   SkCanvas*         m_canvas{ nullptr };
-  bool              m_enableDrawDebugBound{ false };
-  bool              m_enableDrawDebugPath{ false };
   InternalObjectMap m_maskObjects;
-
-  void updateMaskObject(PaintNode* p, std::unordered_map<std::string, PaintNode*>& objects);
 
 public:
   Renderer()
     : m_canvas(nullptr)
-    , m_enableDrawDebugBound(false)
   {
   }
-  void drawDebugBound(layer::PaintNode* p, int zorder);
-  // void updateMaskObject(layer::PaintNode* p);
-  // const std::unordered_map<std::string, layer::PaintNode*>& maskObjects() const
-  // {
-  //   return m_maskObjects;
-  // }
-
-  void enableDrawDebugBound(bool enabled)
-  {
-    m_enableDrawDebugBound = enabled;
-  }
-  bool isEnableDrawDebugBound()
-  {
-    return m_enableDrawDebugBound;
-  }
-
-  void setDrawDebugPathEnable(bool enabled)
-  {
-    m_enableDrawDebugPath = enabled;
-  }
-
-  bool drawDebugPathEnable()
-  {
-    return m_enableDrawDebugPath;
-  }
-
   void setCanvas(SkCanvas* canvas)
   {
     m_canvas = canvas;
@@ -103,8 +72,6 @@ public:
   {
     Renderer r;
     r.m_canvas = canvas;
-    r.m_enableDrawDebugBound = m_enableDrawDebugBound;
-    r.m_enableDrawDebugPath = m_enableDrawDebugPath;
     return r;
   }
 

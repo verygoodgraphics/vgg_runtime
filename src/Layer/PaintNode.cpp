@@ -16,6 +16,7 @@
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Guard.hpp"
 #include "Layer/LayerCache.h"
+#include "Layer/Settings.hpp"
 #include "Layer/SkSL.hpp"
 #include "VSkia.hpp"
 #include "Renderer.hpp"
@@ -53,6 +54,31 @@
 #include <pathops/SkPathOps.h>
 #include <src/core/SkRuntimeEffectPriv.h>
 #include <variant>
+
+inline SkColor nodeType2Color(EObjectType type)
+{
+  switch (type)
+  {
+    case EObjectType::VGG_PATH:
+      return SK_ColorRED;
+    case EObjectType::VGG_IMAGE:
+      return SK_ColorRED;
+    case EObjectType::VGG_GROUP:
+      return SK_ColorRED;
+    case EObjectType::VGG_TEXT:
+      return SK_ColorRED;
+    case EObjectType::VGG_ARTBOARD:
+      return SK_ColorRED;
+    case EObjectType::VGG_LAYER:
+      return SK_ColorRED;
+    case EObjectType::VGG_MASTER:
+      return SK_ColorRED;
+    case EObjectType::VGG_CONTOUR:
+      return SK_ColorYELLOW;
+    default:
+      return SK_ColorRED;
+  }
+}
 
 namespace VGG::layer
 {
@@ -143,9 +169,14 @@ void PaintNode::render(Renderer* renderer)
     {
       SkAutoCanvasRestore acr(canvas, true);
       canvas->concat(toSkMatrix(transform().matrix()));
-      if (renderer->isEnableDrawDebugBound())
+      if (getDebugBoundEnable())
       {
-        renderer->drawDebugBound(this, 0);
+        SkPaint strokePen;
+        strokePen.setStyle(SkPaint::kStroke_Style);
+        SkColor color = nodeType2Color(VGG_PATH);
+        strokePen.setColor(color);
+        strokePen.setStrokeWidth(2);
+        canvas->drawRect(toSkRect(bound()), strokePen);
       }
       if (_->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY)
       {
@@ -239,7 +270,7 @@ void PaintNode::paintEvent(Renderer* renderer)
       layerPaint.setImageFilter(layerFilter);
       VShape clipShape(layerBound);
       _->beginLayer(renderer, &layerPaint, &clipShape, dropbackFilter);
-      if (renderer->isEnableDrawDebugBound())
+      if (getDebugBoundEnable())
       {
         lp.setColor(SK_ColorBLUE);
         lp.setStrokeWidth(5);

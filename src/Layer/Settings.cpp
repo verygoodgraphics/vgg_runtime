@@ -13,24 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Renderer.hpp"
-#include "Layer/Core/PaintNode.hpp"
 
-#include <core/SkCanvas.h>
+#include "Settings.hpp"
+namespace
+{
+static bool g_enableDebugBounds = false;
+}
 
 namespace VGG::layer
 {
 
-void Renderer::draw(SkCanvas* canvas, layer::PaintNode* root)
+bool getDebugBoundEnable()
 {
-  ASSERT(root);
-  ASSERT(canvas);
-  SkCanvas* oldCanvas = m_canvas;
-  m_canvas = canvas;
-  canvas->save();
-  root->render(this);
-  canvas->restore();
-  m_canvas = oldCanvas;
+  return g_enableDebugBounds;
+}
+
+void enableDebugBound(bool enable)
+{
+  g_enableDebugBounds = enable;
 }
 
 } // namespace VGG::layer

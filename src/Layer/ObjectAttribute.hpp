@@ -57,7 +57,7 @@ public:
     observe(m_shapeAttr);
   }
 
-  void  render(Renderer* renderer) override;
+  void  render(Renderer* renderer);
   Bound onRevalidate() override;
 
   VGG_ATTRIBUTE(DropShadowStyle, std::vector<DropShadow>, m_shadow);
@@ -79,7 +79,7 @@ public:
   {
     observe(m_shapeAttr);
   }
-  void  render(Renderer* renderer) override;
+  void  render(Renderer* renderer);
   Bound onRevalidate() override;
   VGG_ATTRIBUTE(InnerShadowStyle, std::vector<InnerShadow>, m_shadow);
   VGG_CLASS_MAKE(InnerShadowAttribute);
@@ -111,7 +111,7 @@ public:
     return m_maskFilter;
   }
 
-  void  render(Renderer* renderer) override;
+  void  render(Renderer* renderer);
   Bound onRevalidate() override;
 
   VGG_ATTRIBUTE(FillStyle, std::vector<Fill>, m_fills);
@@ -158,7 +158,7 @@ public:
     observe(m_backgroundBlurAttr);
   }
 
-  void render(Renderer* renderer) override;
+  void render(Renderer* renderer);
 
   sk_sp<SkImageFilter> getBackgroundBlurImageFilter() const
   {

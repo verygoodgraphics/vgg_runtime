@@ -60,9 +60,10 @@ PaintNode::PaintNode(
   VRefCnt*           cnt,
   const std::string& name,
   EObjectType        type,
-  const std::string& guid)
+  const std::string& guid,
+  bool               legacyCode)
   : TreeNode(cnt, name)
-  , d_ptr(new PaintNode__pImpl(this, type))
+  , d_ptr(new PaintNode__pImpl(this, type, legacyCode))
 {
   d_ptr->guid = guid;
 }
@@ -163,15 +164,17 @@ void PaintNode::render(Renderer* renderer)
 }
 void PaintNode::paintSelf(Renderer* renderer)
 {
-#ifdef USE_OLD_CODE
   VGG_IMPL(PaintNode);
-  ASSERT(_->path);
-  if (_->path->isEmpty())
-  {
-    return;
-  }
-#endif
-  if (d_ptr->renderable)
+  // if (!_->legacyCode)
+  // {
+  //   VGG_IMPL(PaintNode);
+  //   ASSERT(_->path);
+  //   if (_->path->isEmpty())
+  //   {
+  //     return;
+  //   }
+  // }
+  if (_->renderable)
   {
     this->paintEvent(renderer);
   }
@@ -179,121 +182,116 @@ void PaintNode::paintSelf(Renderer* renderer)
 
 void PaintNode::paintEvent(Renderer* renderer)
 {
-#ifdef USE_OLD_CODE
   VGG_IMPL(PaintNode);
-  auto dropbackFilter = _->backgroundBlurImageFilter();
-  auto layerFilter = _->blurImageFilter();
 
-  const auto newLayer = dropbackFilter || layerFilter || !_->alphaMaskBy.empty();
-  ASSERT(_->path);
-  auto&  path = *_->path;
-  VShape shapeMask;
-  if (!_->maskedBy.empty())
+  if (_->legacyCode)
   {
-    auto iter = ShapeMaskIterator(_->maskedBy);
-    shapeMask =
-      MaskBuilder::makeShapeMask(this, renderer->maskObjects(), iter, toSkRect(frameBound()), 0);
-  }
+    auto dropbackFilter = _->backgroundBlurImageFilter();
+    auto layerFilter = _->blurImageFilter();
 
-  /// ====
-  if (!shapeMask.isEmpty())
-  {
-    renderer->canvas()->save();
-    shapeMask.clip(renderer->canvas(), SkClipOp::kIntersect);
-  }
-
-  SkPaint lp;
-  lp.setStyle(SkPaint::kStroke_Style);
-  if (newLayer)
-  {
-    SkRect objectBound;
-    _->ensureStyleObjectRecorder(path, shapeMask, 0, _->style.fills, _->style.borders);
-    objectBound.join(_->styleDisplayList->bounds());
-    _->ensureDropShadowEffects(_->style.dropShadow, path);
-    objectBound.join(_->dropShadowEffects->bounds());
-    SkRect layerBound =
-      layerFilter ? layerFilter.get()->computeFastBounds(objectBound) : objectBound;
-
-    if (!_->alphaMaskBy.empty())
+    const auto newLayer = dropbackFilter || layerFilter || !_->alphaMaskBy.empty();
+    ASSERT(_->path);
+    auto&  path = *_->path;
+    VShape shapeMask;
+    if (!_->maskedBy.empty())
     {
-      auto     alphaMaskIter = AlphaMaskIterator(_->alphaMaskBy);
-      SkMatrix resetOffset = SkMatrix::Translate(
-        layerBound.x(),
-        layerBound.y()); // note that rasterized shader is located in the origin, we need a matrix
-                         // to reset the offset
-      layerFilter = MaskBuilder::makeAlphaMaskWith(
-        layerFilter,
-        this,
-        renderer->maskObjects(),
-        alphaMaskIter,
-        layerBound,
-        &resetOffset);
+      auto iter = ShapeMaskIterator(_->maskedBy);
+      shapeMask =
+        MaskBuilder::makeShapeMask(this, renderer->maskObjects(), iter, toSkRect(frameBound()), 0);
     }
-    if (dropbackFilter)
+
+    /// ====
+    if (!shapeMask.isEmpty())
     {
-      if (auto df = _->styleDisplayList->asImageFilter(); df)
+      renderer->canvas()->save();
+      shapeMask.clip(renderer->canvas(), SkClipOp::kIntersect);
+    }
+
+    SkPaint lp;
+    lp.setStyle(SkPaint::kStroke_Style);
+    if (newLayer)
+    {
+      SkRect objectBound;
+      _->ensureStyleObjectRecorder(path, shapeMask, 0, _->style.fills, _->style.borders);
+      objectBound.join(_->styleDisplayList->bounds());
+      _->ensureDropShadowEffects(_->style.dropShadow, path);
+      objectBound.join(_->dropShadowEffects->bounds());
+      SkRect layerBound =
+        layerFilter ? layerFilter.get()->computeFastBounds(objectBound) : objectBound;
+
+      if (!_->alphaMaskBy.empty())
       {
-        auto blender = getOrCreateBlender("maskOut", g_maskOutBlender);
-        dropbackFilter =
-          SkImageFilters::Blend(blender, df, dropbackFilter, _->styleDisplayList->bounds());
+        auto     alphaMaskIter = AlphaMaskIterator(_->alphaMaskBy);
+        SkMatrix resetOffset = SkMatrix::Translate(
+          layerBound.x(),
+          layerBound.y()); // note that rasterized shader is located in the origin, we need a matrix
+                           // to reset the offset
+        layerFilter = MaskBuilder::makeAlphaMaskWith(
+          layerFilter,
+          this,
+          renderer->maskObjects(),
+          alphaMaskIter,
+          layerBound,
+          &resetOffset);
+      }
+      if (dropbackFilter)
+      {
+        if (auto df = _->styleDisplayList->asImageFilter(); df)
+        {
+          auto blender = getOrCreateBlender("maskOut", g_maskOutBlender);
+          dropbackFilter =
+            SkImageFilters::Blend(blender, df, dropbackFilter, _->styleDisplayList->bounds());
+        }
+      }
+      SkPaint layerPaint;
+      layerPaint.setAntiAlias(true);
+      layerPaint.setImageFilter(layerFilter);
+      VShape clipShape(layerBound);
+      _->beginLayer(renderer, &layerPaint, &clipShape, dropbackFilter);
+      if (renderer->isEnableDrawDebugBound())
+      {
+        lp.setColor(SK_ColorBLUE);
+        lp.setStrokeWidth(5);
+        renderer->canvas()->drawRect(layerBound, lp);
+        lp.setColor(SK_ColorCYAN);
+        lp.setStrokeWidth(4);
+        renderer->canvas()->drawRect(_->dropShadowEffects->bounds(), lp);
+        lp.setColor(SK_ColorGREEN);
+        lp.setStrokeWidth(3);
+        renderer->canvas()->drawRect(_->styleDisplayList->bounds(), lp);
+        lp.setStrokeWidth(2);
+        lp.setColor(SK_ColorYELLOW);
+        renderer->canvas()->drawRect(objectBound, lp);
       }
     }
-    SkPaint layerPaint;
-    layerPaint.setAntiAlias(true);
-    layerPaint.setImageFilter(layerFilter);
-    VShape clipShape(layerBound);
-    _->beginLayer(renderer, &layerPaint, &clipShape, dropbackFilter);
-    if (renderer->isEnableDrawDebugBound())
+
+    onDrawStyle(renderer, path, shapeMask, 0);
+    if (newLayer)
     {
-      lp.setColor(SK_ColorBLUE);
-      lp.setStrokeWidth(5);
-      renderer->canvas()->drawRect(layerBound, lp);
-      lp.setColor(SK_ColorCYAN);
-      lp.setStrokeWidth(4);
-      renderer->canvas()->drawRect(_->dropShadowEffects->bounds(), lp);
-      lp.setColor(SK_ColorGREEN);
-      lp.setStrokeWidth(3);
-      renderer->canvas()->drawRect(_->styleDisplayList->bounds(), lp);
-      lp.setStrokeWidth(2);
-      lp.setColor(SK_ColorYELLOW);
-      renderer->canvas()->drawRect(objectBound, lp);
+      _->endLayer(renderer);
+    }
+
+    if (!shapeMask.isEmpty())
+    {
+      renderer->canvas()->restore();
     }
   }
-
-  onDrawStyle(renderer, path, shapeMask, 0);
-  if (newLayer)
+  else
   {
-    _->endLayer(renderer);
+    d_ptr->renderNode->render(renderer);
   }
-
-  if (!shapeMask.isEmpty())
-  {
-    renderer->canvas()->restore();
-  }
-
-#else
-  d_ptr->renderNode->render(renderer);
-#endif
 }
 
 void PaintNode::setMaskBy(std::vector<std::string> masks)
 {
-#ifdef USE_OLD_CODE
   VGG_IMPL(PaintNode);
   _->maskedBy = std::move(masks);
-#else
-  d_ptr->renderNode->access()->setShapeMask(std::move(masks));
-#endif
 }
 
 void PaintNode::setAlphaMaskBy(std::vector<AlphaMask> masks)
 {
-#ifdef USE_OLD_CODE
   VGG_IMPL(PaintNode);
   _->alphaMaskBy = std::move(masks);
-#else
-  d_ptr->renderNode->access()->setAlphaMask(std::move(masks));
-#endif
 }
 
 VShape PaintNode::makeBoundPath()
@@ -425,7 +423,6 @@ VShape PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
 
 void PaintNode::onDrawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
 {
-#ifdef USE_OLD_CODE
   VGG_IMPL(PaintNode);
   if (_->contextSetting.opacity < 1.0)
   {
@@ -436,7 +433,6 @@ void PaintNode::onDrawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
   {
     renderer->canvas()->restore();
   }
-#endif
 }
 
 void PaintNode::onDrawStyle(
@@ -445,9 +441,7 @@ void PaintNode::onDrawStyle(
   const VShape&    mask,
   sk_sp<SkBlender> blender)
 {
-#ifdef USE_OLD_CODE
   d_ptr->onDrawStyleImpl(renderer, path, mask, std::move(blender));
-#endif
 }
 
 VShape PaintNode::asVisualShape(const Transform* mat)
@@ -512,9 +506,7 @@ bool PaintNode::isVisible() const
 void PaintNode::setStyle(const Style& style)
 {
   VGG_IMPL(PaintNode);
-#ifdef USE_OLD_CODE
   _->style = style;
-#else
   auto aa = _->renderNode->access();
   aa->setFill(style.fills);
   aa->setBorder(style.borders);
@@ -522,26 +514,17 @@ void PaintNode::setStyle(const Style& style)
   aa->setDropShadow(style.dropShadow);
   aa->setLayerBlur(style.layerEffects);
   aa->setBackgroundBlur(style.backgroundEffects);
-#endif
 }
 
 Style& PaintNode::style()
 {
-#ifdef USE_OLD_CODE
   VGG_IMPL(PaintNode);
   return _->style;
-#else
-  return d_ptr->dummyStyle;
-#endif
 }
 
 const Style& PaintNode::style() const
 {
-#ifdef USE_OLD_CODE
   return d_ptr->style;
-#else
-  return d_ptr->dummyStyle;
-#endif
 }
 
 EBoolOp PaintNode::clipOperator() const
@@ -551,11 +534,14 @@ EBoolOp PaintNode::clipOperator() const
 void PaintNode::setTransform(const Transform& transform)
 {
   VGG_IMPL(PaintNode);
-#ifdef USE_OLD_CODE
-  _->transform = transform;
-#else
-  _->renderNode->access()->setTransform(transform);
-#endif
+  if (_->legacyCode)
+  {
+    _->transform = transform;
+  }
+  else
+  {
+    _->renderNode->access()->setTransform(transform);
+  }
 }
 
 // Transform& PaintNode::transform()
@@ -569,11 +555,14 @@ void PaintNode::setTransform(const Transform& transform)
 
 const Transform& PaintNode::transform() const
 {
-#ifdef USE_OLD_CODE
-  return d_ptr->transform;
-#else
-  return d_ptr->renderNode->access()->transform()->getTransform();
-#endif
+  if (d_ptr->legacyCode)
+  {
+    return d_ptr->transform;
+  }
+  else
+  {
+    return d_ptr->renderNode->access()->transform()->getTransform();
+  }
 }
 
 Transform PaintNode::globalTransform() const
@@ -604,55 +593,59 @@ Bound PaintNode::onRevalidate()
   {
     newBound.unionWith(e->revalidate());
   }
-#ifdef USE_OLD_CODE
-  if (
-    _->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY ||
-    _->paintOption.paintStrategy == EPaintStrategy::PS_RECURSIVELY)
-  {
-    if (!_->path)
-    {
-      _->path = VShape(asVisualShape(0));
-    }
-    _->renderable = true;
-  }
-  else
-  {
-    _->renderable = true;
-  }
-  return d_ptr->bound; // old code doesn't support revalidate actually
-#else
-  _->transformAttr->revalidate();
-  if (
-    _->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY ||
-    _->paintOption.paintStrategy == EPaintStrategy::PS_RECURSIVELY)
-  {
-    _->renderNode->revalidate(); // This will trigger the shape attribute get the
-    _->renderable = true;
-    // auto s = _->renderNode->access()->shape()->getShape();
-    // if (s.isEmpty())
-    // {
-    //   DEBUG("name :%s", name().c_str());
-    // }
-    // else
-    // {
-    //   _->renderable = true;
-    // }
-  }
-  else
-  {
-    _->renderable = false;
-  }
-  // shape from the current node by the passed node
 
-  // newBound.unionWith(bound);
-  // return newBound;
-  return d_ptr->bound;
-#endif
+  if (_->legacyCode)
+  {
+    if (
+      _->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY ||
+      _->paintOption.paintStrategy == EPaintStrategy::PS_RECURSIVELY)
+    {
+      if (!_->path)
+      {
+        _->path = VShape(asVisualShape(0));
+      }
+      _->renderable = true;
+    }
+    else
+    {
+      _->renderable = false;
+    }
+    return d_ptr->bound; // old code doesn't support revalidate actually
+  }
+  else
+  {
+    _->transformAttr->revalidate();
+    if (
+      _->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY ||
+      _->paintOption.paintStrategy == EPaintStrategy::PS_RECURSIVELY)
+    {
+      _->renderNode->revalidate(); // This will trigger the shape attribute get the
+      _->renderable = true;
+      // auto s = _->renderNode->access()->shape()->getShape();
+      // if (s.isEmpty())
+      // {
+      //   DEBUG("name :%s", name().c_str());
+      // }
+      // else
+      // {
+      //   _->renderable = true;
+      // }
+    }
+    else
+    {
+      _->renderable = false;
+    }
+    // shape from the current node by the passed node
+    // newBound.unionWith(bound);
+    // return newBound;
+    return d_ptr->bound;
+  }
 }
 const std::string& PaintNode::guid() const
 {
   return d_ptr->guid;
 }
+
 // bool PaintNode::isMasked() const
 // {
 //   return d_ptr->maskedBy.empty();

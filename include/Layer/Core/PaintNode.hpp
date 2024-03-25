@@ -107,7 +107,12 @@ private:
   PaintNode(VRefCnt* cnt, const std::string& name, std::unique_ptr<PaintNode__pImpl> impl);
 
 public:
-  PaintNode(VRefCnt* cnt, const std::string& name, EObjectType type, const std::string& guid);
+  PaintNode(
+    VRefCnt*           cnt,
+    const std::string& name,
+    EObjectType        type,
+    const std::string& guid,
+    bool               legacyCode = false);
   PaintNode(const PaintNode&) = delete;
   PaintNode& operator=(const PaintNode&) = delete;
   PaintNode(PaintNode&&) = delete;

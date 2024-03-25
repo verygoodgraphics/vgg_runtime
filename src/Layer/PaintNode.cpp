@@ -15,6 +15,7 @@
  */
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Guard.hpp"
+#include "Layer/LayerCache.h"
 #include "Layer/SkSL.hpp"
 #include "VSkia.hpp"
 #include "Renderer.hpp"
@@ -187,8 +188,7 @@ void PaintNode::paintEvent(Renderer* renderer)
     if (!_->maskedBy.empty())
     {
       auto iter = ShapeMaskIterator(_->maskedBy);
-      shapeMask =
-        MaskBuilder::makeShapeMask(this, renderer->maskObjects(), iter, toSkRect(frameBound()), 0);
+      shapeMask = MaskBuilder::makeShapeMask(this, *getMaskMap(), iter, toSkRect(frameBound()), 0);
     }
 
     /// ====
@@ -220,7 +220,7 @@ void PaintNode::paintEvent(Renderer* renderer)
         layerFilter = MaskBuilder::makeAlphaMaskWith(
           layerFilter,
           this,
-          renderer->maskObjects(),
+          *getMaskMap(),
           alphaMaskIter,
           layerBound,
           &resetOffset);
@@ -277,12 +277,16 @@ void PaintNode::setMaskBy(std::vector<std::string> masks)
 {
   VGG_IMPL(PaintNode);
   _->maskedBy = std::move(masks);
+  auto aa = _->renderNode->access();
+  aa->setShapeMask(_->maskedBy);
 }
 
 void PaintNode::setAlphaMaskBy(std::vector<AlphaMask> masks)
 {
   VGG_IMPL(PaintNode);
   _->alphaMaskBy = std::move(masks);
+  auto aa = _->renderNode->access();
+  aa->setAlphaMask(_->alphaMaskBy);
 }
 
 VShape PaintNode::makeBoundPath()

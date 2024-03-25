@@ -1,5 +1,21 @@
 # VGG Runtime Changelog
 
+## [daruma-v4.13 (Mar 21, 2024)](https://github.com/verygoodgraphics/vgg_runtime/releases/tag/daruma-v4.13)
+* Feature: motion blur ([#287](https://github.com/verygoodgraphics/vgg_runtime/pull/287))
+* Feature: add support for RISC-V platform ([#290](https://github.com/verygoodgraphics/vgg_runtime/pull/290))
+
+Full changelog: [daruma-v4.12.1...daruma-v4.13](https://github.com/verygoodgraphics/vgg_runtime/compare/daruma-v4.12.1...daruma-v4.13)
+
+## [daruma-v4.12.1 (Mar 16, 2024)](https://github.com/verygoodgraphics/vgg_runtime/releases/tag/daruma-v4.12.1)
+* Feature: added workaround to fix nodejs compiling for clang 15 on macos ([#289](https://github.com/verygoodgraphics/vgg_runtime/pull/289))
+* Feature: translate view when resizing page ([#284](https://github.com/verygoodgraphics/vgg_runtime/pull/284))
+* Feature: disable click during scrolling ([#283](https://github.com/verygoodgraphics/vgg_runtime/pull/283))
+* Feature: get texts for SEO ([#282](https://github.com/verygoodgraphics/vgg_runtime/pull/282))
+* Bugfix: docbuilder ([#285](https://github.com/verygoodgraphics/vgg_runtime/pull/285))
+* Bugfix: unable to resize node in edit mode ([#286](https://github.com/verygoodgraphics/vgg_runtime/pull/286))
+
+Full changelog: [daruma-v4.12...daruma-v4.12.1](https://github.com/verygoodgraphics/vgg_runtime/compare/daruma-v4.12...daruma-v4.12.1)
+
 ## [daruma-v4.12 (Mar 8, 2024)](https://github.com/verygoodgraphics/vgg_runtime/releases/tag/daruma-v4.12)
 * Feature: shadow improvement ([#273](https://github.com/verygoodgraphics/vgg_runtime/pull/273))
 * Feature: handle mousemove releated events  ([#277](https://github.com/verygoodgraphics/vgg_runtime/pull/277))

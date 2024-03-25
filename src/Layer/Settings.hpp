@@ -13,24 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Renderer.hpp"
-#include "Layer/Core/PaintNode.hpp"
-
-#include <core/SkCanvas.h>
+#pragma once
 
 namespace VGG::layer
 {
 
-void Renderer::draw(SkCanvas* canvas, layer::PaintNode* root)
-{
-  ASSERT(root);
-  ASSERT(canvas);
-  SkCanvas* oldCanvas = m_canvas;
-  m_canvas = canvas;
-  canvas->save();
-  root->render(this);
-  canvas->restore();
-  m_canvas = oldCanvas;
-}
+void enableDebugBound(bool enable);
+bool getDebugBoundEnable();
 
 } // namespace VGG::layer

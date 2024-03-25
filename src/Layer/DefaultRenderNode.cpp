@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "Settings.hpp"
 #include "DefaultRenderNode.hpp"
 #include "AttributeAccessor.hpp"
 #include "VSkia.hpp"
@@ -30,6 +31,21 @@ void DefaultRenderNode::render(Renderer* renderer)
 {
   auto canvas = renderer->canvas();
   canvas->drawPicture(m_picture);
+
+  if (getDebugBoundEnable())
+  {
+    SkRect  renderBound = toSkRect(m_objectAttr->bound());
+    SkRect  layerBound = toSkRect(m_alphaMaskAttr->bound());
+    SkPaint p;
+    p.setStyle(SkPaint::kStroke_Style);
+    p.setColor(SK_ColorBLUE);
+    p.setStrokeWidth(3);
+    renderer->canvas()->drawRect(renderBound, p);
+
+    p.setColor(SK_ColorGREEN);
+    p.setStrokeWidth(2);
+    renderer->canvas()->drawRect(layerBound, p);
+  }
   // recorder(renderer);
 }
 
@@ -56,18 +72,6 @@ SkRect DefaultRenderNode::recorder(Renderer* renderer)
     VShape clipShape(layerBound);
     beginLayer(renderer, &layerPaint, &clipShape, dropbackFilter);
     renderBound = layerBound;
-  }
-  if (renderer->isEnableDrawDebugBound())
-  {
-    SkPaint p;
-    p.setStyle(SkPaint::kStroke_Style);
-    p.setColor(SK_ColorBLUE);
-    p.setStrokeWidth(3);
-    renderer->canvas()->drawRect(renderBound, p);
-
-    p.setColor(SK_ColorGREEN);
-    p.setStrokeWidth(2);
-    renderer->canvas()->drawRect(layerBound, p);
   }
   m_objectAttr->render(renderer);
   if (newLayer)

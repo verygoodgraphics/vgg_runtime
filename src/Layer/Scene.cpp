@@ -109,7 +109,14 @@ public:
     {
       f = roots[page].get();
       if (f && revalidate)
+      {
+        if (maskDirty)
+        {
+          updateMaskMap(f->root());
+          maskDirty = false;
+        }
         f->revalidate();
+      }
     }
     return f;
   }
@@ -182,11 +189,6 @@ public:
       return;
     auto* frame = currentFrame(true);
     ASSERT(frame);
-    if (maskDirty && frame)
-    {
-      renderer.updateMaskObject(frame->root());
-      maskDirty = false;
-    }
     if (frame)
     {
       frame->render(&renderer, nullptr);

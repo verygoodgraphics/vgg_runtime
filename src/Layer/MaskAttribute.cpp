@@ -15,6 +15,7 @@
  */
 // #include "MaskAttribute.hpp"
 #include "Layer/ImageFilterAttribute.hpp"
+#include "Layer/LayerCache.h"
 #include "VSkia.hpp"
 #include "MaskAttribute.hpp"
 #include "LayerAttribute.hpp"
@@ -32,7 +33,6 @@ AlphaMaskAttribute::AlphaMaskAttribute(
   : ImageFilterAttribute(cnt)
   , m_inputFilter(inputFilter)
   , m_maskedNode(maskedNode)
-  , m_maskMap(nullptr)
 {
   observe(inputFilter);
 }
@@ -50,8 +50,10 @@ void AlphaMaskAttribute::setInputImageFilter(Ref<ImageFilterAttribute> input)
 
 Bound AlphaMaskAttribute::onRevalidate()
 {
-  auto layerBound = toSkRect(m_inputFilter->revalidate());
-  if (!m_alphaMasks.empty() && m_maskMap)
+  auto  layerBound = toSkRect(m_inputFilter->revalidate());
+  auto& maskMap = *getMaskMap();
+  DEBUG("mask map size %d", (int)maskMap.size());
+  if (!m_alphaMasks.empty() && m_maskedNode && !maskMap.empty())
   {
     auto     layerFilter = m_inputFilter->getImageFilter();
     auto     alphaMaskIter = AlphaMaskIterator(m_alphaMasks);
@@ -61,7 +63,7 @@ Bound AlphaMaskAttribute::onRevalidate()
     m_alphaMaskFilter = MaskBuilder::makeAlphaMaskWith(
       layerFilter,
       m_maskedNode,
-      *m_maskMap,
+      maskMap,
       alphaMaskIter,
       layerBound,
       &resetOffset);
@@ -72,11 +74,15 @@ Bound AlphaMaskAttribute::onRevalidate()
 
 Bound ShapeMaskAttribute::onRevalidate()
 {
-  if (!m_maskID.empty() && m_maskMap)
+  if (!m_maskID.empty() && m_maskedNode)
   {
     auto iter = ShapeMaskIterator(m_maskID);
     auto layerBound = m_layerAttr->revalidate();
-    m_shape = MaskBuilder::makeShapeMask(m_maskedNode, *m_maskMap, iter, toSkRect(layerBound), 0);
+    if (!getMaskMap()->empty())
+    {
+      m_shape =
+        MaskBuilder::makeShapeMask(m_maskedNode, *getMaskMap(), iter, toSkRect(layerBound), 0);
+    }
   }
   return Bound();
 }

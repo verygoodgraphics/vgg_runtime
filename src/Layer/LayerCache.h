@@ -30,10 +30,13 @@ using EffectCache = LRUCache<EffectCacheKey, sk_sp<SkRuntimeEffect>>;
 
 using ImageCacheKey = std::string;
 using ImageCache = LRUCache<ImageCacheKey, sk_sp<SkImage>>;
+using MaskMap = std::unordered_map<std::string, PaintNode*>;
 
 BlenderCache*  getGlobalBlenderCache();
 EffectCache*   getGlobalEffectCache();
 ImageCache*    getGlobalImageCache();
 sk_sp<SkImage> loadImage(const std::string& imageGUID, const ResourceRepo& repo);
+MaskMap*       getMaskMap();
+void           updateMaskMap(PaintNode* p);
 
 } // namespace VGG::layer

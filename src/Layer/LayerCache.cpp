@@ -65,4 +65,37 @@ sk_sp<SkImage> loadImage(const std::string& imageGUID, const ResourceRepo& repo)
   return image;
 }
 
+MaskMap* getMaskMap()
+{
+  static MaskMap s_maskMap;
+  return &s_maskMap;
+}
+
+namespace
+{
+void updateMaskMapInternal(PaintNode* p)
+{
+  if (!p)
+    return;
+  auto objects = getMaskMap();
+  if (p->maskType() != MT_NONE)
+  {
+    if (auto it = objects->find(p->guid()); it == objects->end())
+    {
+      (*objects)[p->guid()] = p; // type of all children of paintnode must be paintnode
+    }
+  }
+  for (auto it = p->begin(); it != p->end(); ++it)
+  {
+    updateMaskMapInternal(static_cast<layer::PaintNode*>(it->get()));
+  }
+}
+} // namespace
+
+void updateMaskMap(PaintNode* p)
+{
+  getMaskMap()->clear();
+  updateMaskMapInternal(p);
+}
+
 } // namespace VGG::layer

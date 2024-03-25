@@ -64,11 +64,11 @@ public:
   {
   }
   void drawDebugBound(layer::PaintNode* p, int zorder);
-  void updateMaskObject(layer::PaintNode* p);
-  const std::unordered_map<std::string, layer::PaintNode*>& maskObjects() const
-  {
-    return m_maskObjects;
-  }
+  // void updateMaskObject(layer::PaintNode* p);
+  // const std::unordered_map<std::string, layer::PaintNode*>& maskObjects() const
+  // {
+  //   return m_maskObjects;
+  // }
 
   void enableDrawDebugBound(bool enabled)
   {

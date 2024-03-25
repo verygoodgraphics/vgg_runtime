@@ -76,8 +76,6 @@ public:
     : VNode(cnt, INVALIDATE)
   {
   }
-  virtual void render(Renderer* renderer){};
-
   bool isInvalid() const
   {
     return VNode::isInvalid();

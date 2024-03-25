@@ -165,15 +165,6 @@ void PaintNode::render(Renderer* renderer)
 void PaintNode::paintSelf(Renderer* renderer)
 {
   VGG_IMPL(PaintNode);
-  // if (!_->legacyCode)
-  // {
-  //   VGG_IMPL(PaintNode);
-  //   ASSERT(_->path);
-  //   if (_->path->isEmpty())
-  //   {
-  //     return;
-  //   }
-  // }
   if (_->renderable)
   {
     this->paintEvent(renderer);

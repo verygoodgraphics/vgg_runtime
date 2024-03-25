@@ -67,12 +67,9 @@ public:
   }
 
   ~DefaultRenderNode();
-  static Ref<DefaultRenderNode> MakeFrom( // NOLINT
-    VAllocator*             alloc,
-    PaintNode*              node,
-    Ref<TransformAttribute> transform);
 
 private:
+  friend class RenderNodeFactory;
   VGG_CLASS_MAKE(DefaultRenderNode);
 
   SkRect                              recorder(Renderer* renderer);

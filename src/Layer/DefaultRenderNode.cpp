@@ -26,41 +26,6 @@
 namespace VGG::layer
 {
 
-Ref<DefaultRenderNode> DefaultRenderNode::MakeFrom(
-  VAllocator*             alloc,
-  PaintNode*              node,
-  Ref<TransformAttribute> transform)
-{
-  auto shape = ShapeAttribute::Make(alloc, node);
-  auto innerShadow = InnerShadowAttribute::Make(alloc, shape);
-  auto dropShadow = DropShadowAttribute::Make(alloc, shape);
-  auto backgroundBlur = BackgroundBlurAttribute::Make(alloc);
-  auto object = ObjectAttribute::Make(alloc, shape);
-
-  auto style = StyleObjectAttribute::Make(alloc, innerShadow, dropShadow, object, backgroundBlur);
-  auto layerPostProcess = LayerFXAttribute::Make(alloc, style);
-  auto shapeMask = ShapeMaskAttribute::Make(alloc, node, layerPostProcess);
-  auto alphaMaskAttribute = AlphaMaskAttribute::Make(alloc, node, layerPostProcess);
-  auto result = DefaultRenderNode::Make(
-    alloc,
-    transform,
-    style,
-    layerPostProcess,
-    alphaMaskAttribute,
-    shapeMask,
-    shape);
-  result->m_accessor = std::unique_ptr<AttributeAccessor>(new AttributeAccessor(
-    transform,
-    shape,
-    alphaMaskAttribute,
-    shapeMask,
-    dropShadow,
-    innerShadow,
-    object,
-    layerPostProcess,
-    backgroundBlur));
-  return result;
-}
 
 void DefaultRenderNode::render(Renderer* renderer)
 {

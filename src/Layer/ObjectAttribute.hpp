@@ -17,6 +17,7 @@
 #include "AttributeNode.hpp"
 #include "ImageFilterAttribute.hpp"
 #include "Layer/Core/Attrs.hpp"
+#include "Layer/RenderObjectAttribute.hpp"
 #include "ShapeAttribute.hpp"
 #include "ShadowEffects.hpp"
 #include "ObjectShader.hpp"
@@ -94,11 +95,13 @@ private:
 class ObjectAttribute : public Attribute // fill + border
 {
 public:
-  ObjectAttribute(VRefCnt* cnt, Ref<ShapeAttribute> shape)
+  ObjectAttribute(VRefCnt* cnt, Ref<RenderObjectAttribute> renderObject)
     : Attribute(cnt)
-    , m_shapeAttr(shape)
+    //, m_shapeAttr(shape)
+    , m_renderObjectAttr(renderObject)
   {
-    observe(m_shapeAttr);
+    // observe(m_shapeAttr);
+    observe(m_renderObjectAttr);
   }
 
   bool hasFill() const
@@ -111,11 +114,22 @@ public:
     return m_maskFilter;
   }
 
+  sk_sp<SkImageFilter> imageFilter() const
+  {
+    return 0;
+  }
+
+  sk_sp<SkBlender> blender() const
+  {
+    return 0;
+  }
+
   void  render(Renderer* renderer);
   Bound onRevalidate() override;
 
   VGG_ATTRIBUTE(FillStyle, std::vector<Fill>, m_fills);
   VGG_ATTRIBUTE(BorderStyle, std::vector<Border>, m_borders);
+  VGG_ATTRIBUTE(RenderObject, Ref<RenderObjectAttribute>, m_renderObjectAttr);
 
   VGG_CLASS_MAKE(ObjectAttribute);
 
@@ -128,13 +142,15 @@ private:
   void revalidateMaskFilter(const SkPaint& paint, const SkRect& bounds);
 
   std::function<SkRect(Renderer* renderer)> m_onDrawFill;
-  Ref<ShapeAttribute>                       m_shapeAttr;
+  // Ref<ShapeAttribute>                       m_shapeAttr;
 
-  sk_sp<SkImageFilter>        m_maskFilter;
-  std::vector<Fill>           m_fills;
-  std::vector<Border>         m_borders;
-  bool                        m_hasFill;
-  std::optional<ObjectShader> m_styleDisplayList; // fill + border
+  Ref<RenderObjectAttribute> m_renderObjectAttr;
+
+  sk_sp<SkImageFilter> m_maskFilter;
+  std::vector<Fill>    m_fills;
+  std::vector<Border>  m_borders;
+  bool                 m_hasFill;
+  // std::optional<ObjectShader> m_styleDisplayList; // fill + border
 };
 
 class StyleObjectAttribute : public Attribute

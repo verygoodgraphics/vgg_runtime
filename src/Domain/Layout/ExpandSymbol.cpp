@@ -125,8 +125,10 @@ std::pair<nlohmann::json, nlohmann::json> ExpandSymbol::run()
   }
 
   m_outDesignModel = m_designDocument->treeModel();
-  auto outLayoutJson = generateOutLayoutJson();
-  return { m_outDesignModel, std::move(outLayoutJson) };
+  nlohmann::json outDesignJson = m_outDesignModel;
+  auto           outLayoutJson = generateOutLayoutJson();
+
+  return { std::move(outDesignJson), std::move(outLayoutJson) };
 }
 
 DesignModel ExpandSymbol::designModel() const
@@ -446,7 +448,42 @@ void ExpandSymbol::expandInstanceElement(
   const auto& master = *m_pMasters[masterId];
   instance.setMaster(master);
 
-  // // todo, rebuild layout tree
+  std::shared_ptr<LayoutNode> treeToRebuild;
+  // build subtree for recursive expand
+  if (instanceIdStack.empty())
+  {
+    treeToRebuild = m_layout->layoutTree()->findDescendantNodeById(instance.id());
+  }
+  else
+  {
+    // find node to rebuild, find in subtree
+    treeToRebuild = m_layout->layoutTree();
+    std::vector<std::string> tmpIdStack;
+    for (auto& tmpId : instanceIdStack)
+    {
+      tmpIdStack.push_back(tmpId);
+      const auto& parentInstanceNodeId = join(tmpIdStack);
+      auto        subtreeToRebuild = treeToRebuild->findDescendantNodeById(parentInstanceNodeId);
+      if (subtreeToRebuild)
+      {
+        treeToRebuild = subtreeToRebuild;
+      }
+      else
+      {
+        break;
+      }
+    }
+  }
+
+  // rebuild subtree
+  if (treeToRebuild)
+  {
+    m_layout->rebuildSubtree(treeToRebuild);
+  }
+  else
+  {
+    DEBUG("ExpandSymbol::expandInstance: node to rebuild not found");
+  }
 
   if (again)
   {
@@ -2270,12 +2307,14 @@ void ExpandSymbol::processOtherOverrides(
     return;
   }
 
-  for (auto& item : instanceModel->overrideValues)
+  const auto copiedItems = instanceModel->overrideValues; // copy to avoid iterator invalidation
+  for (auto& item : copiedItems)
   {
     // skip items handled before
     if (
-      item.effectOnLayout || item.overrideName == K_BOUNDS || item.overrideName == K_MASTER_ID ||
-      item.overrideName == K_VARIABLE_ASSIGNMENTS || item.overrideName.empty())
+      item.effectOnLayout.value_or(false) || item.overrideName == K_BOUNDS ||
+      item.overrideName == K_MASTER_ID || item.overrideName == K_VARIABLE_ASSIGNMENTS ||
+      item.overrideName.empty())
     {
       continue;
     }

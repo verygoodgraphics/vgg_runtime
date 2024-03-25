@@ -213,8 +213,9 @@ void Element::updateMatrix(double tx, double ty)
 {
   if (auto model = object())
   {
-    model->matrix[5] = tx;
-    model->matrix[6] = ty;
+    ASSERT(model->matrix.size() == 6);
+    model->matrix[4] = tx;
+    model->matrix[5] = ty;
   }
 }
 
@@ -303,11 +304,25 @@ void Element::update(const Model::ReferencedStyle& refStyle)
 void Element::applyOverride(
   const std::string&        name,
   const nlohmann::json&     value,
-  std::vector<std::string>& outDirtyNodeIds)
+  std::vector<std::string>& outDirtyNodeIds,
+  bool                      recursively)
 {
+  if (object() == nullptr) // override object only, skip subshapes like contour
+  {
+    return;
+  }
+
   nlohmann::json contentJson = jsonModel();
   applyOverrides(contentJson, name, value, outDirtyNodeIds);
   updateJsonModel(contentJson);
+
+  if (recursively)
+  {
+    for (auto& child : children())
+    {
+      child->applyOverride(name, value, outDirtyNodeIds, recursively);
+    }
+  }
 }
 
 void Element::addSubGeometry(const SubGeometryType& subGeometry)
@@ -324,8 +339,6 @@ void Element::applyOverrides(
   const nlohmann::json&     value,
   std::vector<std::string>& outDirtyNodeIds)
 {
-  const auto isBorder = name.rfind(K_BORDER_PREFIX, 0) == 0;
-
   // make name to json pointer string: x.y -> /x/y
   while (true)
   {
@@ -345,14 +358,7 @@ void Element::applyOverrides(
     path.pop_back();
   }
 
-  if (isBorder && Layout::isVectorNetworkGroupNode(json))
-  {
-    Layout::applyOverridesDetailToTree(json, reversedPath, value, outDirtyNodeIds);
-  }
-  else
-  {
-    Layout::applyOverridesDetail(json, reversedPath, value, outDirtyNodeIds);
-  }
+  Layout::applyOverridesDetail(json, reversedPath, value, outDirtyNodeIds);
 }
 
 bool Element::isAncestorOf(const std::shared_ptr<Element>& element) const
@@ -571,6 +577,23 @@ void GroupElement::getTreeToModel(Model::SubGeometryType& subGeometry)
 void GroupElement::getTreeToModel(Model::ContainerChildType& variantModel)
 {
   variantModel = treeModel();
+}
+
+void GroupElement::applyOverride(
+  const std::string&        name,
+  const nlohmann::json&     value,
+  std::vector<std::string>& outDirtyNodeIds,
+  bool                      recursively)
+{
+  recursively = false;
+
+  const auto isBorder = name.rfind(K_BORDER_PREFIX, 0) == 0;
+  if (isBorder && m_group->isVectorNetwork && m_group->isVectorNetwork.value())
+  {
+    recursively = true;
+  }
+
+  Element::applyOverride(name, value, outDirtyNodeIds, recursively);
 }
 
 // SymbolMasterElement

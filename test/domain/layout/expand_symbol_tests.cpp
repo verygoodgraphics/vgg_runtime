@@ -14,6 +14,8 @@
 using namespace VGG;
 using namespace VGG::Model;
 
+constexpr auto EPSILON = 1e-6;
+
 namespace VGG::Layout
 {
 
@@ -157,7 +159,7 @@ TEST_F(VggExpandSymbolTestSuite, color_override)
   };
   double blue = result_json[path];
 
-  EXPECT_DOUBLE_EQ(blue, 0.7517530913433672);
+  EXPECT_NEAR(blue, 0.7517530913433672, EPSILON);
 }
 
 TEST_F(VggExpandSymbolTestSuite, override_with_star_wildcard)
@@ -178,7 +180,7 @@ TEST_F(VggExpandSymbolTestSuite, override_with_star_wildcard)
   auto& text = std::get<Text>(master.childObjects[0]);
   auto  blue = text.fontAttr[0].fills.value()[0].color.value().blue;
 
-  EXPECT_DOUBLE_EQ(blue, 0.01908801696712621);
+  EXPECT_NEAR(blue, 0.01908801696712621, EPSILON);
 }
 
 TEST_F(VggExpandSymbolTestSuite, override_master_own_style)

@@ -18,6 +18,7 @@
 #include "Layer/Core/VUtils.hpp"
 #include "Layer/LayerCache.h"
 #include "Renderer.hpp"
+#include "Settings.hpp"
 
 #include "Layer/Scene.hpp"
 #include "Layer/Zoomer.hpp"
@@ -373,13 +374,12 @@ void Scene::enableDrawDebugBound(bool enabled)
 {
   VGG_IMPL(Scene)
   _->invalidateCurrentFrame();
-  _->renderer.enableDrawDebugBound(enabled);
+  enableDebugBound(enabled);
 }
 
 bool Scene::isEnableDrawDebugBound()
 {
-  VGG_IMPL(Scene)
-  return _->renderer.isEnableDrawDebugBound();
+  return getDebugBoundEnable();
 }
 
 } // namespace VGG

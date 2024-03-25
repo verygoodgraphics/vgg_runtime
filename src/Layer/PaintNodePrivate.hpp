@@ -15,7 +15,7 @@
  */
 #pragma once
 #include "Renderer.hpp"
-#include "DefaultRenderNode.hpp"
+#include "RenderNodeFactory.hpp"
 #include "Guard.hpp"
 #include "ShadowEffects.hpp"
 #include "FillEffects.hpp"
@@ -185,7 +185,7 @@ public:
     , legacyCode(legacyCode)
   {
     transformAttr = TransformAttribute::Make();
-    renderNode = DefaultRenderNode::MakeFrom(0, api, transformAttr);
+    renderNode = RenderNodeFactory::MakeVectorRenderNode(0, api, transformAttr);
     api->observe(renderNode);
     api->observe(transformAttr);
   }

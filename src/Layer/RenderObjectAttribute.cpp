@@ -13,24 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
-
-#include "AttributeNode.hpp"
-#include "Layer/Core/VShape.hpp"
-#include "ShapeAttribute.hpp"
 
 namespace VGG::layer
 {
 
-class RenderObjectAttribute : public Attribute
-{
-public:
-  RenderObjectAttribute(VRefCnt* cnt)
-    : Attribute(cnt)
-  {
-  }
-  virtual void            render(Renderer* renderer) = 0;
-  virtual ShapeAttribute* shape() const = 0;
-};
-
-} // namespace VGG::layer
+}

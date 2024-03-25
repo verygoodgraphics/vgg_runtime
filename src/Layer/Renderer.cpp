@@ -77,11 +77,11 @@ void Renderer::drawDebugBound(layer::PaintNode* p, int zorder)
   strokePen.setStrokeWidth(2);
   m_canvas->drawRect(toSkRect(p->bound()), strokePen);
 }
-void Renderer::updateMaskObject(layer::PaintNode* p)
-{
-  m_maskObjects.clear();
-  updateMaskObject(p, m_maskObjects);
-}
+// void Renderer::updateMaskObject(layer::PaintNode* p)
+// {
+//   m_maskObjects.clear();
+//   updateMaskObject(p, m_maskObjects);
+// }
 
 void Renderer::draw(SkCanvas* canvas, layer::PaintNode* root)
 {

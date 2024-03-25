@@ -26,7 +26,6 @@
 namespace VGG::layer
 {
 
-
 void DefaultRenderNode::render(Renderer* renderer)
 {
   auto canvas = renderer->canvas();
@@ -48,21 +47,27 @@ SkRect DefaultRenderNode::recorder(Renderer* renderer)
     shapeMask.clip(renderer->canvas(), SkClipOp::kIntersect);
   }
   SkRect renderBound = toSkRect(m_objectAttr->bound());
+  SkRect layerBound = toSkRect(m_alphaMaskAttr->bound());
   if (newLayer)
   {
-    SkRect layerBound = toSkRect(m_alphaMaskAttr->bound());
-    DEBUG(
-      "layer bound %f %f %f %f",
-      layerBound.x(),
-      layerBound.y(),
-      layerBound.width(),
-      layerBound.height());
     SkPaint layerPaint;
     layerPaint.setAntiAlias(true);
     layerPaint.setImageFilter(layerFXFilter);
     VShape clipShape(layerBound);
     beginLayer(renderer, &layerPaint, &clipShape, dropbackFilter);
     renderBound = layerBound;
+  }
+  if (renderer->isEnableDrawDebugBound())
+  {
+    SkPaint p;
+    p.setStyle(SkPaint::kStroke_Style);
+    p.setColor(SK_ColorBLUE);
+    p.setStrokeWidth(3);
+    renderer->canvas()->drawRect(renderBound, p);
+
+    p.setColor(SK_ColorGREEN);
+    p.setStrokeWidth(2);
+    renderer->canvas()->drawRect(layerBound, p);
   }
   m_objectAttr->render(renderer);
   if (newLayer)

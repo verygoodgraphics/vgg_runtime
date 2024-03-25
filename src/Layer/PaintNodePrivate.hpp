@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/LayerCache.h"
 #include "Renderer.hpp"
 #include "RenderNodeFactory.hpp"
 #include "Guard.hpp"
@@ -265,12 +266,12 @@ public:
     VShape result;
     if (maskedBy.empty())
       return result;
-    const auto& objects = renderer->maskObjects();
+    auto objects = getMaskMap();
     for (const auto& id : maskedBy)
     {
       if (id != q_ptr->guid())
       {
-        if (auto obj = objects.find(id); obj != objects.end())
+        if (auto obj = objects->find(id); obj != objects->end())
         {
           const auto t = obj->second->mapTransform(q_ptr);
           auto       m = obj->second->asVisualShape(&t);

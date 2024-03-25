@@ -35,7 +35,6 @@ public:
 
   VGG_CLASS_MAKE(AlphaMaskAttribute);
   VGG_ATTRIBUTE_PTR(MaskNode, PaintNode, m_maskedNode);
-  VGG_ATTRIBUTE_PTR(MaskMap, MaskMap, m_maskMap);
   VGG_ATTRIBUTE(AlphaMasks, std::vector<AlphaMask>, m_alphaMasks);
   void                 setInputImageFilter(Ref<ImageFilterAttribute> input);
   Bound                onRevalidate() override;
@@ -48,7 +47,6 @@ private:
   Ref<ImageFilterAttribute> m_inputFilter;
   std::vector<AlphaMask>    m_alphaMasks;
   PaintNode*                m_maskedNode;
-  MaskMap*                  m_maskMap;
   sk_sp<SkImageFilter>      m_alphaMaskFilter;
 };
 
@@ -59,14 +57,12 @@ public:
     : ShapeAttribute(cnt)
     , m_layerAttr(layerFX)
     , m_maskedNode(node)
-    , m_maskMap(nullptr)
   {
     observe(m_layerAttr);
   }
 
   VGG_ATTRIBUTE(MaskID, std::vector<std::string>, m_maskID);
   VGG_ATTRIBUTE_PTR(MaskNode, PaintNode, m_maskedNode);
-  VGG_ATTRIBUTE_PTR(MaskMap, MaskMap, m_maskMap);
   VGG_CLASS_MAKE(ShapeMaskAttribute);
 
   Bound onRevalidate() override;
@@ -77,6 +73,5 @@ private:
   VShape                   m_shape;
   std::vector<std::string> m_maskID;
   PaintNode*               m_maskedNode;
-  MaskMap*                 m_maskMap;
 };
 } // namespace VGG::layer

@@ -119,7 +119,8 @@ public:
   virtual void applyOverride(
     const std::string&        name,
     const nlohmann::json&     value,
-    std::vector<std::string>& outDirtyNodeIds);
+    std::vector<std::string>& outDirtyNodeIds,
+    bool                      recursively = false);
 
   virtual Model::Object* object() const
   {
@@ -196,6 +197,12 @@ public:
   Model::Group   treeModel() const;
   void           getTreeToModel(Model::SubGeometryType& subGeometry) override;
   void           getTreeToModel(Model::ContainerChildType& variantModel) override;
+
+  void applyOverride(
+    const std::string&        name,
+    const nlohmann::json&     value,
+    std::vector<std::string>& outDirtyNodeIds,
+    bool                      recursively) override;
 };
 
 class SymbolMasterElement : public Element

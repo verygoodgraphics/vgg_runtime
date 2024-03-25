@@ -195,13 +195,17 @@ bool Layout::Layout::hasFirstOnTopNode()
 
 JsonDocumentPtr Layout::Layout::displayDesignDoc()
 {
-  ASSERT(false);
+  ASSERT(m_designDocument);
+  JsonDocumentPtr result{ new RawJsonDocument() };
+  nlohmann::json  designJson = m_designDocument->treeModel();
+
   if (hasFirstOnTopNode())
   {
-    return nullptr;
+    reverseChildren(designJson);
   }
 
-  return nullptr;
+  result->setContent(designJson);
+  return result;
 }
 
 void Layout::Layout::reverseChildren(nlohmann::json& json)

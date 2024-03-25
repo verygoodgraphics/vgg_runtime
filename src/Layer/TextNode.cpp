@@ -111,7 +111,7 @@ public:
 };
 
 TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
-  : PaintNode(cnt, name, VGG_TEXT, std::move(guid))
+  : PaintNode(cnt, name, VGG_TEXT, std::move(guid), true)
   , d_ptr(new TextNode__pImpl(this))
 {
 }

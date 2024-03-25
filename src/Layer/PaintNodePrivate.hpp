@@ -161,10 +161,11 @@ public:
   PaintOption    paintOption;
   ContourOption  maskOption;
 
-  std::optional<VShape> path;
-  bool                  renderable{ false };
-  Bound                 bound;
-#ifdef USE_OLD_CODE
+  bool legacyCode{ false };
+
+  std::optional<VShape>            path;
+  bool                             renderable{ false };
+  Bound                            bound;
   Transform                        transform;
   Style                            style;
   std::vector<std::string>         maskedBy;
@@ -172,29 +173,22 @@ public:
   std::optional<ObjectShader>      styleDisplayList; // fill + border
   std::optional<DropShadowEffect>  dropShadowEffects;
   std::optional<InnerShadowEffect> innerShadowEffects;
-#else
-  Style dummyStyle;
-
-#endif
 
   Ref<DefaultRenderNode>  renderNode;
   Ref<TransformAttribute> transformAttr;
 
   sk_sp<SkPicture> picture;
 
-  PaintNode__pImpl(PaintNode* api, EObjectType type)
+  PaintNode__pImpl(PaintNode* api, EObjectType type, bool legacyCode)
     : q_ptr(api)
     , type(type)
+    , legacyCode(legacyCode)
   {
-#ifndef USE_OLD_CODE
     transformAttr = TransformAttribute::Make();
     renderNode = DefaultRenderNode::MakeFrom(0, api, transformAttr);
     api->observe(renderNode);
     api->observe(transformAttr);
-#endif
   }
-
-#ifdef USE_OLD_CODE
 
   void onDrawStyleImpl(
     Renderer*        renderer,
@@ -380,7 +374,6 @@ public:
     }
     onDrawStyleImpl(renderer, *path, VShape(), blender);
   }
-#endif
 
   void onRevalidateImpl()
   {

@@ -36,9 +36,9 @@ if(MSVC)
       message(FATAL_ERROR "sdl2 url or filename or md5 not found in config/DepsConfig.json")
     endif()
 
-    if(NOT EXISTS "${CMAKE_SOURCE_DIR}/downloads/${SDL2_FILENAME}")
-      set(DOWNLOAD_AT_PATH "${CMAKE_SOURCE_DIR}/downloads/${SDL2_FILENAME}")
+    set(DOWNLOAD_AT_PATH "${CMAKE_SOURCE_DIR}/downloads/${SDL2_FILENAME}")
 
+    if(NOT EXISTS "${CMAKE_SOURCE_DIR}/downloads/${SDL2_FILENAME}")
       message(STATUS "Downloading ${SDL2_URL} to ${DOWNLOAD_AT_PATH}")
       file(DOWNLOAD ${SDL2_URL} ${DOWNLOAD_AT_PATH}
         EXPECTED_MD5 ${SDL2_ARCHIVE_MD5_CHECKSUM}

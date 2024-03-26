@@ -1,4 +1,4 @@
-/*
+/*Paint
  * Copyright 2023 VeryGoodGraphics LTD <bd@verygoodgraphics.com>
  *
  * Licensed under the VGG License, Version 1.0 (the "License");
@@ -146,6 +146,8 @@ inline SkRect drawBorder(
 class PaintNode__pImpl // NOLINT
 {
   VGG_DECL_API(PaintNode);
+
+  friend class MaskBuilder;
 
 public:
   std::string guid{};
@@ -373,6 +375,7 @@ public:
     {
       return;
     }
+    DEBUG("drawAsAlphaMaskImpl");
     onDrawStyleImpl(renderer, *path, VShape(), blender);
   }
 

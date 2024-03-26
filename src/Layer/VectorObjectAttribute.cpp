@@ -40,13 +40,7 @@ void VectorObjectAttribute::render(Renderer* renderer)
       objectBounds.join(borderBounds);
       auto mat = SkMatrix::Translate(objectBounds.x(), objectBounds.y());
       m_objectShader = rec.finishRecording(objectBounds, &mat);
-      // m_styleDisplayList->render(renderer);
-      SkPaint p;
-      p.setStyle(SkPaint::kFill_Style);
-      p.setAntiAlias(true);
-      p.setColor(SK_ColorRED);
-      p.setAlphaf(0.5f);
-      shape.draw(recorder->canvas(), p);
+      m_objectShader->render(renderer);
     }
   }
 }

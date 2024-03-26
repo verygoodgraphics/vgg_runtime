@@ -51,9 +51,10 @@ public:
     observe(m_objectAttr);
     observe(m_alphaMaskAttr);
     observe(m_shapeMaskAttr);
-    // observe(m_shapeAttr);
   }
   void render(Renderer* renderer) override;
+
+  void renderAsMask(Renderer* render) override;
 
   bool isInvalid() const
   {
@@ -86,7 +87,6 @@ private:
   Ref<StyleObjectAttribute> m_objectAttr;
   Ref<AlphaMaskAttribute>   m_alphaMaskAttr;
   Ref<ShapeMaskAttribute>   m_shapeMaskAttr;
-  // Ref<ShapeAttribute>       m_shapeAttr;
   sk_sp<SkPicture>          m_picture;
 
   std::unique_ptr<AttributeAccessor> m_accessor;

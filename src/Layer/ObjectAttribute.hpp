@@ -138,19 +138,13 @@ private:
   std::pair<SkRect, std::optional<SkPaint>> revalidateObjectBounds(
     const std::vector<Border>& borders,
     const SkRect&              bounds);
-
   void revalidateMaskFilter(const SkPaint& paint, const SkRect& bounds);
 
-  std::function<SkRect(Renderer* renderer)> m_onDrawFill;
-  // Ref<ShapeAttribute>                       m_shapeAttr;
-
   Ref<RenderObjectAttribute> m_renderObjectAttr;
-
-  sk_sp<SkImageFilter> m_maskFilter;
-  std::vector<Fill>    m_fills;
-  std::vector<Border>  m_borders;
-  bool                 m_hasFill;
-  // std::optional<ObjectShader> m_styleDisplayList; // fill + border
+  sk_sp<SkImageFilter>       m_maskFilter;
+  std::vector<Fill>          m_fills;
+  std::vector<Border>        m_borders;
+  bool                       m_hasFill;
 };
 
 class StyleObjectAttribute : public Attribute

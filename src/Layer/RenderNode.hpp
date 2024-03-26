@@ -27,5 +27,6 @@ public:
   {
   }
   virtual void render(Renderer* render) = 0;
+  virtual void renderAsMask(Renderer* render) = 0;
 };
 } // namespace VGG::layer

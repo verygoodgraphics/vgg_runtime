@@ -287,7 +287,7 @@ inline PaintNodePtr makeObjectCommonProperty(
   // Pattern point in style are implicitly given by bound, we must supply the points in original
   // coordinates for correct converting
   obj->setStyle(SceneBuilder::fromStyle(j.value("style", json::object_t{}), b, convertedMatrix));
-  obj->style().cornerSmooth = getOptional<float>(j, "cornerSmoothing").value_or(0.f);
+  obj->setFrameCornerSmoothing(getOptional<float>(j, "cornerSmoothing").value_or(0.f));
   obj->setContextSettings(j.value("contextSettings", ContextSetting()));
   obj->setMaskBy(j.value("outlineMaskBy", std::vector<std::string>{}));
   obj->setAlphaMaskBy(j.value("alphaMaskBy", std::vector<AlphaMask>{}));
@@ -640,7 +640,7 @@ PaintNodePtr SceneBuilder::fromFrame(const json& j, const glm::mat3& totalMatrix
       p->setContourOption(ContourOption(ECoutourType::MCT_FRAMEONLY, false));
       const auto radius = getStackOptional<std::array<float, 4>>(j, "radius")
                             .value_or(std::array<float, 4>{ 0, 0, 0, 0 });
-      p->style().frameRadius = radius;
+      p->setFrameRadius(radius);
       const auto& childObjects = getOrDefault(j, "childObjects");
       for (const auto& c : childObjects)
       {
@@ -669,7 +669,7 @@ PaintNodePtr SceneBuilder::fromSymbolMaster(const json& j, const glm::mat3& tota
     {
       const auto radius = getStackOptional<std::array<float, 4>>(j, "radius")
                             .value_or(std::array<float, 4>{ 0, 0, 0, 0 });
-      p->style().frameRadius = radius;
+      p->setFrameRadius(radius);
       const auto& chidlObject = getOrDefault(j, "childObjects");
       for (const auto& e : chidlObject)
       {

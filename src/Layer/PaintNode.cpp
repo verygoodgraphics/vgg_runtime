@@ -329,7 +329,7 @@ VShape PaintNode::makeBoundPath()
       [&](const SkRect& r) { return VShape(r); },
       [&](const SkRRect& r) { return VShape(r); },
     },
-    makeShape(style().frameRadius, skRect, style().cornerSmooth));
+    makeShape(d_ptr->frameRadius, skRect, d_ptr->cornerSmooth));
 }
 
 VShape PaintNode::childPolyOperation() const
@@ -529,6 +529,26 @@ bool PaintNode::isVisible() const
   return d_ptr->visible;
 }
 
+void PaintNode::setFrameRadius(std::array<float, 4> radius)
+{
+  d_ptr->frameRadius = radius;
+}
+
+std::array<float, 4> PaintNode::frameRadius() const
+{
+  return d_ptr->frameRadius;
+}
+
+void PaintNode::setFrameCornerSmoothing(float smooth)
+{
+  d_ptr->cornerSmooth = smooth;
+}
+
+float PaintNode::frameCornerSmoothing() const
+{
+  return d_ptr->cornerSmooth;
+}
+
 void PaintNode::setStyle(const Style& style)
 {
   VGG_IMPL(PaintNode);
@@ -540,12 +560,6 @@ void PaintNode::setStyle(const Style& style)
   aa->setDropShadow(style.dropShadow);
   aa->setLayerBlur(style.layerEffects);
   aa->setBackgroundBlur(style.backgroundEffects);
-}
-
-Style& PaintNode::style()
-{
-  VGG_IMPL(PaintNode);
-  return _->style;
 }
 
 const Style& PaintNode::style() const
@@ -647,15 +661,6 @@ Bound PaintNode::onRevalidate()
     {
       _->renderNode->revalidate(); // This will trigger the shape attribute get the
       _->renderable = true;
-      // auto s = _->renderNode->access()->shape()->getShape();
-      // if (s.isEmpty())
-      // {
-      //   DEBUG("name :%s", name().c_str());
-      // }
-      // else
-      // {
-      //   _->renderable = true;
-      // }
     }
     else
     {

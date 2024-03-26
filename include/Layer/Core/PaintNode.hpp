@@ -153,9 +153,15 @@ public:
 
   bool isVisible() const;
 
-  void setStyle(const Style& style);
+  void setFrameRadius(std::array<float, 4> radius);
 
-  Style& style();
+  std::array<float, 4> frameRadius() const;
+
+  void setFrameCornerSmoothing(float smooth);
+
+  float frameCornerSmoothing() const;
+
+  void setStyle(const Style& style);
 
   const Style& style() const;
 
@@ -167,8 +173,6 @@ public:
 
   const Transform& transform() const;
 
-  // Transform& transform();
-
   Transform globalTransform() const;
 
   const Bound& frameBound() const; // content bound
@@ -176,8 +180,6 @@ public:
   void setFrameBound(const Bound& bound);
 
   const std::string& guid() const;
-
-  // bool isMasked() const;
 
   void setMaskBy(std::vector<std::string> masks);
 

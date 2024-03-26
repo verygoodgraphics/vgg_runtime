@@ -627,7 +627,6 @@ void PaintNode::setFrameBound(const Bound& bound)
 Bound PaintNode::onRevalidate()
 {
   VGG_IMPL(PaintNode);
-  DEBUG("PaintNode onRevalidate: %s", name().c_str());
   Bound newBound;
   for (const auto& e : m_firstChild)
   {

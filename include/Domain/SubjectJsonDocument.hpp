@@ -39,7 +39,8 @@ public:
     return m_subject.get_observable();
   }
 
-  virtual void addAt(const json::json_pointer& path, const json& value) override;
-  virtual void replaceAt(const json::json_pointer& path, const json& value) override;
-  virtual void deleteAt(const json::json_pointer& path) override;
+  void addAt(const json::json_pointer& path, const json& value) override;
+  void replaceAt(const json::json_pointer& path, const json& value) override;
+  void deleteAt(const json::json_pointer& path) override;
+  void updateElement(const std::string& id, const std::string& contentJsonString) override;
 };

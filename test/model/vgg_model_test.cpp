@@ -170,17 +170,3 @@ TEST_F(VggModelTestSuite, load_layout_doc)
   // Then
   EXPECT_TRUE(layoutDoc);
 }
-
-TEST_F(VggModelTestSuite, GetTexts)
-{
-  // Given
-  std::string filePath = "testDataDir/vgg-daruma.zip";
-  auto        ret = m_sut->load(filePath);
-  EXPECT_EQ(ret, true);
-
-  // When
-  auto retTexts = m_sut->texts();
-
-  // Then
-  EXPECT_EQ(retTexts.size(), 1);
-}

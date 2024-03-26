@@ -33,6 +33,11 @@
 
 namespace VGG
 {
+namespace Domain
+{
+class DesignDocument;
+class Element;
+} // namespace Domain
 
 using MakeJsonDocFn = std::function<JsonDocumentPtr(const json&)>;
 
@@ -52,8 +57,9 @@ class Daruma
   nlohmann::json               m_settingsDoc;
 
   // runtime view model, symbol instance expanded
-  JsonDocumentPtr m_runtimeDesignDoc;
-  JsonDocumentPtr m_runtimeLayoutDoc;
+  std::shared_ptr<Domain::DesignDocument> m_designDocTree;
+  JsonDocumentPtr                         m_runtimeDesignDoc;
+  JsonDocumentPtr                         m_runtimeLayoutDoc;
 
   rxcpp::subjects::subject<VGG::ModelEventPtr> m_subject;
   std::mutex                                   m_mutex;
@@ -70,7 +76,7 @@ public:
 
   JsonDocumentPtr runtimeDesignDoc();
   JsonDocumentPtr runtimeLayoutDoc();
-  void            setRuntimeDesignDoc(const nlohmann::json& designJson);
+  void            setRuntimeDesignDocTree(std::shared_ptr<Domain::DesignDocument> designDocTree);
   void            setRuntimeLayoutDoc(const nlohmann::json& layoutJson);
 
   JsonDocumentPtr& designDoc();
@@ -115,7 +121,8 @@ private:
 
   std::string uuidFor(const std::string& content);
 
-  void getTextsTo(std::unordered_set<std::string>& texts, const json& json) const;
+  void getTextsTo(std::unordered_set<std::string>& texts, std::shared_ptr<Domain::Element> element)
+    const;
 };
 
 } // namespace VGG

@@ -73,6 +73,17 @@ public:
     }
     return {};
   }
+  std::string name() const
+  {
+    if (auto obj = object())
+    {
+      if (obj->name)
+      {
+        return obj->name.value();
+      }
+    }
+    return {};
+  }
 
   virtual const Model::Object* model() const
   {
@@ -88,6 +99,8 @@ public:
   std::string    type() const;
   Layout::Rect   bounds() const;
   Layout::Matrix matrix() const;
+
+  std::shared_ptr<Element> getElementByKey(const std::string& key); // name or id
 
 public:
   void setVisible(bool visible);
@@ -160,6 +173,11 @@ public:
   void buildSubtree() override;
 
   Model::DesignModel treeModel() const;
+
+  std::shared_ptr<Model::DesignModel> designModel() const
+  {
+    return m_designModel;
+  }
 };
 
 class FrameElement : public Element

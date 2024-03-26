@@ -469,6 +469,27 @@ Layout::Matrix Element::matrix() const
   return {};
 }
 
+std::shared_ptr<Element> Element::getElementByKey(const std::string& key)
+{
+  if (auto pModel = object())
+  {
+    if (pModel->id == key || pModel->name == key)
+    {
+      return shared_from_this();
+    }
+
+    for (auto& child : children())
+    {
+      if (auto element = child->getElementByKey(key))
+      {
+        return element;
+      }
+    }
+  }
+
+  return nullptr;
+}
+
 void Element::getToModel(Model::ContainerChildType& variantModel)
 {
 }

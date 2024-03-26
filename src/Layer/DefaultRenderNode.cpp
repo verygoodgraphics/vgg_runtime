@@ -123,7 +123,6 @@ void DefaultRenderNode::endLayer(Renderer* renderer)
 
 Bound DefaultRenderNode::onRevalidate()
 {
-  INFO("DefaultRenderNode::onRevalidate");
   m_shapeMaskAttr->revalidate();
   m_transformAttr->revalidate();
   m_alphaMaskAttr->revalidate();

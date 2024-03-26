@@ -48,9 +48,11 @@ public:
 
   VGG_CLASS_MAKE(ShapeAttribute);
 
+protected:
+  VShape m_shape;
+
 private:
   friend class RenderNode;
-  VShape     m_shape;
   PaintNode* m_paintNode; // temperature solution
 };
 } // namespace VGG::layer

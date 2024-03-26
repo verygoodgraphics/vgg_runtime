@@ -70,7 +70,6 @@ public:
 private:
   friend class RenderNode;
   Ref<LayerFXAttribute>    m_layerAttr;
-  VShape                   m_shape;
   std::vector<std::string> m_maskID;
   PaintNode*               m_maskedNode;
 };

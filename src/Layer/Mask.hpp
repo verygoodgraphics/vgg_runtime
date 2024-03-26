@@ -172,32 +172,7 @@ public:
     const std::unordered_map<std::string, PaintNode*>& maskObjects,
     MaskIter&                                          iter,
     const SkRect&                                      rect,
-    const SkMatrix*                                    matrix)
-  {
-    auto              components = collectionMasks(self, maskObjects, iter);
-    Renderer          alphaMaskRender;
-    SkPictureRecorder rec;
-    auto              rt = SkRTreeFactory();
-    auto              canvas = rec.beginRecording(rect, &rt);
-    alphaMaskRender.setCanvas(canvas);
-    for (const auto& p : components)
-    {
-      auto skm = toSkMatrix(p.transform.matrix());
-      canvas->save();
-      canvas->concat(skm);
-      p.mask->onDrawAsAlphaMask(&alphaMaskRender, 0);
-      canvas->restore();
-    }
-    auto maskShader = SkPictureShader::Make(
-      rec.finishRecordingAsPicture(),
-      SkTileMode::kClamp,
-      SkTileMode::kClamp,
-      SkFilterMode::kNearest,
-      matrix,
-      &rect);
-    ASSERT(maskShader);
-    return maskShader;
-  }
+    const SkMatrix*                                    matrix);
 
 private:
   struct MaskData

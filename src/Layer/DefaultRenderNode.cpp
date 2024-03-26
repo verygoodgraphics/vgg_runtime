@@ -85,6 +85,12 @@ SkRect DefaultRenderNode::recorder(Renderer* renderer)
   return renderBound;
 }
 
+void DefaultRenderNode::renderAsMask(Renderer* render)
+{
+  ASSERT(m_objectAttr);
+  m_objectAttr->render(render);
+}
+
 std::pair<sk_sp<SkPicture>, SkRect> DefaultRenderNode::revalidatePicture(const SkRect& rect)
 {
   ObjectRecorder rec;

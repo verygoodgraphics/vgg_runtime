@@ -75,7 +75,6 @@ public:
 
 protected:
   Bound      onRevalidate() override;
-  void       render(Renderer* renderer, const SkMatrix* mat);
   SkPicture* picture();
 };
 } // namespace VGG::layer

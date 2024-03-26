@@ -50,30 +50,22 @@ public:
   {
   }
 
-  void ensurePicture(Renderer* renderer, const SkMatrix* mat, const Bound& clipBound)
+  sk_sp<SkPicture> renderPicture(const SkRect& bound)
   {
-    if (cache)
-      return;
-    ASSERT(root);
+    Renderer          r;
     SkPictureRecorder rec;
-    const auto&       b = q_ptr->bound();
     auto              rt = SkRTreeFactory();
-    auto              pictureCanvas = rec.beginRecording(
-      SkRect::MakeXYWH(b.topLeft().x, b.topLeft().y, b.width(), b.height()),
-      &rt);
-    if (mat)
-      pictureCanvas->setMatrix(*mat);
-    renderer->draw(pictureCanvas, root);
+    auto              pictureCanvas = rec.beginRecording(bound, &rt);
+    r.draw(pictureCanvas, root);
     if (getDebugBoundEnable())
     {
       SkPaint paint;
       paint.setColor(SK_ColorBLUE);
       paint.setStyle(SkPaint::kStroke_Style);
       paint.setStrokeWidth(1);
-      pictureCanvas->drawRect(toSkRect(b), paint);
+      pictureCanvas->drawRect(bound, paint);
     }
-    cache = rec.finishRecordingAsPicture();
-    ASSERT(cache);
+    return rec.finishRecordingAsPicture();
   }
 };
 
@@ -108,13 +100,6 @@ void Frame::resetToOrigin(bool enable)
   invalidate();
 }
 
-void Frame::render(Renderer* renderer, const SkMatrix* mat)
-{
-  VGG_IMPL(Frame);
-  revalidate();
-  _->ensurePicture(renderer, mat, bound());
-}
-
 SkPicture* Frame::picture()
 {
   return d_ptr->cache.get();
@@ -124,10 +109,9 @@ Bound Frame::onRevalidate()
 {
   VGG_IMPL(Frame);
   ASSERT(_->root);
-  _->cache = nullptr;
-
-  auto bounds = _->root->revalidate();
-  auto b = bounds.bound(_->root->transform());
+  auto bounds = root()->revalidate();
+  auto b = bounds.bound(root()->transform());
+  _->cache = _->renderPicture(toSkRect(b));
   _->transform.setMatrix(glm::mat3{ 1 });
   if (_->enableToOrigin)
   {
@@ -157,9 +141,11 @@ PaintNode* Frame::nodeAt(int x, int y)
 {
   return 0;
 }
+
 void Frame::nodeAt(int x, int y, std::vector<PaintNode*>& nodes)
 {
 }
+
 PaintNode* Frame::nodeByID(const std::string& id)
 {
   return static_cast<PaintNode*>(root()->findChildRecursive(id).get());

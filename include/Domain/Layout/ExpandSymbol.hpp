@@ -46,8 +46,6 @@ struct Rule;
 
 class ExpandSymbol
 {
-  friend class VggExpandSymbolTestSuite_RemoveInvalidJsonCache_Test;
-
   using RuleMap = std::unordered_map<std::string, std::shared_ptr<Internal::Rule::Rule>>;
   using RuleMapPtr = std::shared_ptr<RuleMap>;
 
@@ -56,7 +54,6 @@ class ExpandSymbol
   Model::DesignModel                                          m_outDesignModel;
   std::unordered_map<std::string, nlohmann::json>             m_outLayoutJsonMap; // performance
   RuleMapPtr                                                  m_layoutRulesCache; // performance
-  std::unordered_map<std::string, nlohmann::json>             m_masters;
   std::unordered_map<std::string, const Model::SymbolMaster*> m_pMasters;
   std::unordered_map<std::string, nlohmann::json>             m_layoutRules;
 
@@ -64,9 +61,6 @@ class ExpandSymbol
   std::shared_ptr<VGG::Domain::DesignDocument> m_designDocument;
 
   std::vector<std::string> m_tmpDirtyNodeIds;
-
-  std::unordered_map<std::string, nlohmann::json*> m_idToJsonMap;
-  std::unordered_map<std::string, nlohmann::json*> m_keyToJsonMap;
 
 public:
   ExpandSymbol(
@@ -86,17 +80,11 @@ private:
     NOT_MASTER,
   };
 
-  void collectMaster(const nlohmann::json& json);
   void collectMasters();
   void collectMasterFromContainer(const Model::Container& conntainer);
   template<typename T>
   void collectMasterFromVariant(const T& variantNode);
   void collectLayoutRules(const nlohmann::json& json);
-
-  void expandInstance(
-    nlohmann::json&           json,
-    std::vector<std::string>& instanceIdStack,
-    bool                      again = false);
 
   void traverseElementNode(
     std::shared_ptr<Domain::Element> element,
@@ -106,60 +94,36 @@ private:
     std::vector<std::string>&      instanceIdStack,
     bool                           again = false);
 
-  void resizeInstance(nlohmann::json& instance, nlohmann::json& master);
   void resizeInstance(
     Domain::SymbolInstanceElement&     instance,
     const Domain::SymbolMasterElement& master);
 
-  void layoutInstance(nlohmann::json& instance, const Size& instanceSize);
   void layoutInstance(Domain::SymbolInstanceElement& instance, const Size& instanceSize);
   void overrideLayoutRuleSize(const std::string& instanceId, const Size& instanceSize);
 
-  void resizeSubtree(nlohmann::json& subtreeJson, const nlohmann::json& newBoundsJson);
-
-  void layoutSubtree(const nlohmann::json& subtreeNodeId, Size size, bool preservingOrigin);
+  void layoutSubtree(const std::string& subtreeNodeId, Size size, bool preservingOrigin);
   void layoutSubtree(std::shared_ptr<LayoutNode> subtreeNode, Size size, bool preservingOrigin);
   void layoutDirtyNodes(const std::string& instanceId);
 
   void processMasterIdOverrides(
-    nlohmann::json&                 instance,
-    const std::vector<std::string>& instanceIdStack);
-  void processMasterIdOverrides(
     Domain::SymbolInstanceElement&  instance,
-    const std::vector<std::string>& instanceIdStack);
-  void processVariableAssignmentsOverrides(
-    nlohmann::json&                 instance,
     const std::vector<std::string>& instanceIdStack);
   void processVariableAssignmentsOverrides(
     Domain::SymbolInstanceElement&  instance,
     const std::vector<std::string>& instanceIdStack);
-  void processVariableRefs(
-    nlohmann::json&                 node,     // in instance tree
-    nlohmann::json*                 instance, // container
-    const std::vector<std::string>& instanceIdStack,
-    EProcessVarRefOption            option);
   void processVariableRefs(
     std::shared_ptr<Domain::Element> element,   // in instance tree
     std::shared_ptr<Domain::Element> container, // container
     const std::vector<std::string>&  instanceIdStack,
     EProcessVarRefOption             option);
   void processLayoutOverrides(
-    nlohmann::json&                 instance,
-    const std::vector<std::string>& instanceIdStack);
-  void processLayoutOverrides(
     Domain::SymbolInstanceElement&  instance,
-    const std::vector<std::string>& instanceIdStack);
-  void processBoundsOverrides(
-    nlohmann::json&                 instance,
     const std::vector<std::string>& instanceIdStack);
   void processBoundsOverrides(
     Domain::SymbolInstanceElement&  instance,
     const std::vector<std::string>& instanceIdStack);
   void processOtherOverrides(
     Domain::SymbolInstanceElement&  instance,
-    const std::vector<std::string>& instanceIdStack);
-  void processOtherOverrides(
-    nlohmann::json&                 instance,
     const std::vector<std::string>& instanceIdStack);
   void applyOverrides(nlohmann::json& json, std::string& path, const nlohmann::json& value);
   void applyOverridesDetail(
@@ -176,37 +140,17 @@ private:
     const nlohmann::json& value);
   void deleteLeafElement(nlohmann::json& json, const std::string& key);
   bool applyReferenceOverride(
-    nlohmann::json&       objectJson,
-    const std::string&    name,
-    const nlohmann::json& value);
-  bool applyReferenceOverride(
     Domain::Element&      objectJson,
     const std::string&    name,
     const nlohmann::json& value);
 
-  nlohmann::json* findChildObject(
-    nlohmann::json&                 instance,
-    const std::vector<std::string>& instanceIdStack,
-    const nlohmann::json&           overrideItem,
-    std::vector<std::string>&       outChildInstanceIdStack);
   std::shared_ptr<Domain::Element> findChildObject(
     Domain::SymbolInstanceElement&  instance,
     const std::vector<std::string>& instanceIdStack,
     const Model::OverrideValue&     overrideItem,
     std::vector<std::string>&       outChildInstanceIdStack);
-  nlohmann::json* findChildObjectInTree(
-    nlohmann::json&                 json,
-    const std::vector<std::string>& keyStack,
-    std::vector<std::string>*       outInstanceIdStack);
-  nlohmann::json* findJsonNodeInCache(const std::string& id);
 
-  void makeTreeKeysUnique(nlohmann::json& json, const std::string& idPrefix);
-  void makeNodeKeysUnique(nlohmann::json& json, const std::string& idPrefix);
   void makeTreeKeysUnique(std::shared_ptr<Domain::Element>& element, const std::string& idPrefix);
-  void makeMaskIdUnique(
-    nlohmann::json&    json,
-    nlohmann::json&    instanceJson,
-    const std::string& idPrefix);
   void makeMaskIdUnique(
     std::shared_ptr<Domain::Element>& element,
     Domain::SymbolInstanceElement&    instance,
@@ -219,19 +163,12 @@ private:
   void            removeInvalidLayoutRule(const nlohmann::json& instanceChildren);
   void            removeInvalidLayoutRule(const Domain::Element& element, bool keepOwn = false);
   bool            hasOriginalLayoutRule(const std::string& id);
-  bool            hasRuntimeLayoutRule(const nlohmann::json& id);
-  nlohmann::json* findOutLayoutObject(
-    nlohmann::json&                 instance,
-    const std::vector<std::string>& instanceIdStack,
-    const nlohmann::json&           overrideItem);
   nlohmann::json* findOutLayoutObjectById(const std::string& id);
 
   RuleMapPtr     getLayoutRules();
   nlohmann::json generateOutLayoutJson();
 
-  void resetInstanceInfo(nlohmann::json& instance);
   void resetInstanceInfo(Domain::SymbolInstanceElement& instance);
-  void removeInvalidCache(nlohmann::json& json);
 };
 } // namespace Layout
 

@@ -21,6 +21,9 @@
 #include "Loader/ZipLoader.hpp"
 #include "SubjectJsonDocument.hpp"
 #include "RawJsonDocument.hpp"
+
+#include "Domain/Model/DesignDocAdapter.hpp"
+#include "Domain/Model/Element.hpp"
 #include "Utility/Log.hpp"
 
 #include <boost/uuid/name_generator_sha1.hpp>
@@ -177,9 +180,12 @@ JsonDocumentPtr Daruma::runtimeLayoutDoc()
   return m_runtimeLayoutDoc;
 }
 
-void Daruma::setRuntimeDesignDoc(const nlohmann::json& designJson)
+void Daruma::setRuntimeDesignDocTree(std::shared_ptr<Domain::DesignDocument> designDocTree)
 {
-  auto doc = m_makeDesignDocFn(designJson);
+  ASSERT(designDocTree);
+
+  m_designDocTree = designDocTree;
+  auto doc = std::make_shared<DesignDocAdapter>(m_designDocTree);
   m_runtimeDesignDoc = JsonDocumentPtr(new SubjectJsonDocument(doc));
 }
 
@@ -352,17 +358,18 @@ std::string Daruma::uuidFor(const std::string& content)
 
 std::string Daruma::docVersion() const
 {
-  return m_runtimeDesignDoc->content().value(K_VERSION, K_EMPTY_STRING);
+  ASSERT(m_designDocTree);
+
+  return m_designDocTree->designModel()->version;
 }
 
 int Daruma::getFrameIndex(const std::string& name) const
 {
-  ASSERT(m_designDoc);
+  ASSERT(m_designDocTree);
 
-  const auto& frames = m_designDoc->content()[K_FRAMES];
-  for (std::size_t i = 0; i < frames.size(); ++i)
+  for (std::size_t i = 0; i < m_designDocTree->children().size(); ++i)
   {
-    if (frames[i][K_NAME] == name)
+    if (m_designDocTree->children()[i]->name() == name)
     {
       return i;
     }
@@ -373,27 +380,28 @@ int Daruma::getFrameIndex(const std::string& name) const
 
 std::unordered_set<std::string> Daruma::texts() const
 {
-  ASSERT(m_runtimeDesignDoc);
+  ASSERT(m_designDocTree);
 
   std::unordered_set<std::string> texts;
-
-  getTextsTo(texts, m_runtimeDesignDoc->content());
+  getTextsTo(texts, m_designDocTree);
 
   return texts;
 }
 
 std::string Daruma::getFramesInfo() const
 {
-  ASSERT(m_designDoc);
+  ASSERT(m_designDocTree);
 
   nlohmann::json info(nlohmann::json::value_t::array);
-  const auto&    frames = m_designDoc->content()[K_FRAMES];
-  for (const auto& frame : frames)
+  for (const auto& child : m_designDocTree->children())
   {
-    nlohmann::json frameInfo(nlohmann::json::value_t::object);
-    frameInfo[K_ID] = frame[K_ID];
-    frameInfo[K_NAME] = frame[K_NAME];
-    info.push_back(frameInfo);
+    if (auto frame = std::dynamic_pointer_cast<Domain::FrameElement>(child))
+    {
+      nlohmann ::json frameInfo(nlohmann::json::value_t::object);
+      frameInfo[K_ID] = frame->id();
+      frameInfo[K_NAME] = frame->name();
+      info.push_back(frameInfo);
+    }
   }
 
   return info.dump();
@@ -423,28 +431,20 @@ bool Daruma::setLaunchFrame(const std::string& name)
   return false;
 }
 
-void Daruma::getTextsTo(std::unordered_set<std::string>& texts, const json& json) const
+void Daruma::getTextsTo(
+  std::unordered_set<std::string>& texts,
+  std::shared_ptr<Domain::Element> element) const
 {
-  if (!json.is_object() && !json.is_array())
+  if (auto textElement = std::dynamic_pointer_cast<Domain::TextElement>(element))
   {
-    return;
-  }
-
-  if (json.is_object())
-  {
-    auto className = json.value(K_CLASS, "");
-    if (className == K_TEXT)
+    if (auto& content = textElement->object()->content; !content.empty())
     {
-      auto text = json.value(K_CONTENT, "");
-      if (!text.empty())
-      {
-        texts.insert(text);
-      }
+      texts.insert(content);
     }
   }
 
-  for (auto& [key, value] : json.items())
+  for (auto& child : element->children())
   {
-    getTextsTo(texts, value);
+    getTextsTo(texts, child);
   }
 }

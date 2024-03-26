@@ -65,6 +65,11 @@ protected:
   {
     return layoutRule(layoutJson, id) != nullptr;
   }
+
+  nlohmann::json getExpandedDesignJson(ExpandSymbol& sut)
+  {
+    return sut.run().first;
+  }
 };
 
 TEST_F(VggExpandSymbolTestSuite, Smoke)
@@ -75,7 +80,7 @@ TEST_F(VggExpandSymbolTestSuite, Smoke)
   ExpandSymbol sut{ design_json };
 
   // When
-  auto result_json = sut();
+  auto result_json = getExpandedDesignJson(sut);
 
   // Then
   EXPECT_TRUE(result_json.is_object());
@@ -89,7 +94,7 @@ TEST_F(VggExpandSymbolTestSuite, fill_childObjects)
   ExpandSymbol sut{ design_json };
 
   // When
-  auto result_json = sut();
+  auto result_json = getExpandedDesignJson(sut);
 
   // Then
   nlohmann::json::json_pointer path{ "/frames/0/childObjects/0/childObjects" };
@@ -104,7 +109,7 @@ TEST_F(VggExpandSymbolTestSuite, scale)
   ExpandSymbol sut{ design_json };
 
   // When
-  auto result_json = sut();
+  auto result_json = getExpandedDesignJson(sut);
 
   // Then
   nlohmann::json::json_pointer path{ "/frames/1/childObjects/0/childObjects/1" };
@@ -135,7 +140,7 @@ TEST_F(VggExpandSymbolTestSuite, expand_masterId_overridden_instance)
   ExpandSymbol sut{ design_json };
 
   // When
-  auto result_json = sut();
+  auto result_json = getExpandedDesignJson(sut);
 
   // Then
   nlohmann::json::json_pointer path{ "/frames/0/childObjects/4/childObjects/1" };
@@ -151,7 +156,7 @@ TEST_F(VggExpandSymbolTestSuite, color_override)
   ExpandSymbol sut{ design_json };
 
   // When
-  auto result_json = sut();
+  auto result_json = getExpandedDesignJson(sut);
 
   // Then
   nlohmann::json::json_pointer path{
@@ -170,13 +175,13 @@ TEST_F(VggExpandSymbolTestSuite, override_with_star_wildcard)
   ExpandSymbol sut{ design_json };
 
   // When
-  sut.run();
+  auto result = sut();
 
   // Then
-  const auto& result = sut.designModel();
+  const auto& model = result.first->treeModel();
 
   // "/frames/0/childObjects/2/childObjects/0/fontAttr/0/fills/0/color/blue"
-  auto& master = std::get<SymbolMaster>(result.frames[0].childObjects[2]);
+  auto& master = std::get<SymbolMaster>(model.frames[0].childObjects[2]);
   auto& text = std::get<Text>(master.childObjects[0]);
   auto  blue = text.fontAttr[0].fills.value()[0].color.value().blue;
 
@@ -191,7 +196,7 @@ TEST_F(VggExpandSymbolTestSuite, override_master_own_style)
   ExpandSymbol sut{ design_json };
 
   // When
-  auto result_json = sut();
+  auto result_json = getExpandedDesignJson(sut);
 
   // Then
   nlohmann::json::json_pointer path{ "/frames/0/childObjects/0/style/fills" };
@@ -208,7 +213,7 @@ TEST_F(VggExpandSymbolTestSuite, override_multi_times)
   ExpandSymbol sut{ design_json };
 
   // When
-  auto result_json = sut();
+  auto result_json = getExpandedDesignJson(sut);
 
   // Then
   nlohmann::json::json_pointer path{
@@ -227,7 +232,7 @@ TEST_F(VggExpandSymbolTestSuite, ReferenceStyleOverride)
   ExpandSymbol sut{ designJson };
 
   // When
-  auto resultJson = sut();
+  auto resultJson = getExpandedDesignJson(sut);
 
   // Then
   {
@@ -256,7 +261,7 @@ TEST_F(VggExpandSymbolTestSuite, IgnoreInvalideArrayIndexOverride)
   ExpandSymbol sut{ designJson };
 
   // When
-  auto resultJson = sut();
+  auto resultJson = getExpandedDesignJson(sut);
 
   // Then
   nlohmann::json::json_pointer path{ "/frames/1/childObjects/1/childObjects/0/style/fills" };
@@ -274,7 +279,7 @@ TEST_F(VggExpandSymbolTestSuite, BoundsOverride)
   ExpandSymbol sut{ designJson };
 
   // When
-  auto resultJson = sut();
+  auto resultJson = getExpandedDesignJson(sut);
 
   // Then
   {
@@ -315,7 +320,7 @@ TEST_F(VggExpandSymbolTestSuite, unique_object_id_in_instance_tree)
   ExpandSymbol sut{ design_json };
 
   // When
-  auto result_json = sut();
+  auto result_json = getExpandedDesignJson(sut);
 
   // Then
   nlohmann::json::json_pointer path{ "/frames/0/childObjects/4/childObjects/1/childObjects/0/id" };
@@ -335,7 +340,7 @@ TEST_F(VggExpandSymbolTestSuite, unique_id_in_mask_by)
   ExpandSymbol sut{ design_json };
 
   // When
-  auto result_json = sut();
+  auto result_json = getExpandedDesignJson(sut);
 
   // Then
   {
@@ -365,7 +370,7 @@ TEST_F(VggExpandSymbolTestSuite, validate_expanded_design_json)
   ExpandSymbol sut{ design_json };
 
   // When
-  auto result_json = sut();
+  auto result_json = getExpandedDesignJson(sut);
 
   // Then
   JsonSchemaValidator validator;

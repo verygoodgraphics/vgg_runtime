@@ -39,8 +39,8 @@ enum class ModelEventType
 
 struct ModelEvent
 {
-  using PathType = nlohmann::json::json_pointer;
-  using ValueType = nlohmann::json;
+  using PathType = std::string;
+  using ValueType = std::string;
 
   const ModelEventType type;
   const PathType       path;

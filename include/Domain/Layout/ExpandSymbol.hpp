@@ -50,8 +50,7 @@ class ExpandSymbol
   using RuleMapPtr = std::shared_ptr<RuleMap>;
 
   const Model::DesignModel                                    m_designModel;
-  const nlohmann::json&                                       m_layoutJson;
-  Model::DesignModel                                          m_outDesignModel;
+  const nlohmann::json                                        m_layoutJson;
   std::unordered_map<std::string, nlohmann::json>             m_outLayoutJsonMap; // performance
   RuleMapPtr                                                  m_layoutRulesCache; // performance
   std::unordered_map<std::string, const Model::SymbolMaster*> m_pMasters;
@@ -67,10 +66,11 @@ public:
     const nlohmann::json& designJson,
     const nlohmann::json& layoutJson = nlohmann::json());
 
-  nlohmann::json                            operator()();
-  std::pair<nlohmann::json, nlohmann::json> run(); // 0: design.json; 1: layout.json
+  std::pair<std::shared_ptr<VGG::Domain::DesignDocument>, nlohmann::json>
+                                            operator()(); // 0: design document tree; 1: layout.json
+  std::pair<nlohmann::json, nlohmann::json> run();        // 0: design.json; 1: layout.json
 
-  Model::DesignModel designModel() const;
+  std::shared_ptr<VGG::Layout::Layout> layout() const;
 
 private:
   enum class EProcessVarRefOption
@@ -130,15 +130,10 @@ private:
     nlohmann::json&         json,
     std::stack<std::string> reversedPath,
     const nlohmann::json&   value);
-  void applyOverridesDetailToTree(
-    nlohmann::json&         json,
-    std::stack<std::string> reversedPath,
-    const nlohmann::json&   value);
   void applyLeafOverrides(
     nlohmann::json&       json,
     const std::string&    key,
     const nlohmann::json& value);
-  void deleteLeafElement(nlohmann::json& json, const std::string& key);
   bool applyReferenceOverride(
     Domain::Element&      objectJson,
     const std::string&    name,

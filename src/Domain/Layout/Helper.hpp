@@ -38,21 +38,6 @@ void to_json(nlohmann::json& j, const Matrix& matrix);
 void from_json(const nlohmann::json& j, Matrix& matrix);
 // NOLINTEND
 
-bool isLayoutNode(const nlohmann::json& json);
-bool isGroupNode(const nlohmann::json& json);
-bool isPathNode(const nlohmann::json& json);
-bool isVectorNetworkGroupNode(const nlohmann::json& json);
-
-bool isNodeWithId(const nlohmann::json& json, const std::string& id);
-bool isNodeWithKey(const nlohmann::json& json, const std::string& key);
-
-const nlohmann::json* getElementInTree(const nlohmann::json& tree, const std::string& id);
-
-void applyOverridesDetailToTree(
-  nlohmann::json&           json,
-  std::stack<std::string>   reversedPath,
-  const nlohmann::json&     value,
-  std::vector<std::string>& outDirtyNodeIds);
 void applyOverridesDetail(
   nlohmann::json&           json,
   std::stack<std::string>   reversedPath,

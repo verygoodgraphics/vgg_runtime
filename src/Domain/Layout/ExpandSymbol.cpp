@@ -36,7 +36,6 @@
 // #define DUMP_TREE
 
 constexpr auto K_PREFIX = "referenced_style_";
-constexpr auto K_BORDER_PREFIX = "style.borders";
 
 namespace nl = nlohmann;
 using namespace VGG::Domain;
@@ -80,12 +79,7 @@ ExpandSymbol::ExpandSymbol(const nlohmann::json& designJson, const nlohmann::jso
 {
 }
 
-nlohmann::json ExpandSymbol::operator()()
-{
-  return std::get<0>(run());
-}
-
-std::pair<nlohmann::json, nlohmann::json> ExpandSymbol::run()
+std::pair<std::shared_ptr<VGG::Domain::DesignDocument>, nlohmann::json> ExpandSymbol::operator()()
 {
   collectMasters();
   collectLayoutRules(m_layoutJson);
@@ -103,16 +97,20 @@ std::pair<nlohmann::json, nlohmann::json> ExpandSymbol::run()
     traverseElementNode(page, instanceIdStack);
   }
 
-  m_outDesignModel = m_designDocument->treeModel();
-  nlohmann::json outDesignJson = m_outDesignModel;
-  auto           outLayoutJson = generateOutLayoutJson();
+  auto outLayoutJson = generateOutLayoutJson();
 
-  return { std::move(outDesignJson), std::move(outLayoutJson) };
+  return { m_designDocument, std::move(outLayoutJson) };
 }
 
-DesignModel ExpandSymbol::designModel() const
+std::pair<nlohmann::json, nlohmann::json> ExpandSymbol::run()
 {
-  return m_outDesignModel;
+  auto [designDocument, layoutJson] = operator()();
+  return { designDocument->treeModel(), std::move(layoutJson) };
+}
+
+std::shared_ptr<VGG::Layout::Layout> ExpandSymbol::layout() const
+{
+  return m_layout;
 }
 
 void ExpandSymbol::collectMasters()
@@ -358,8 +356,6 @@ void ExpandSymbol::applyOverrides(
   std::string&          name,
   const nlohmann::json& value)
 {
-  const auto isBorder = name.rfind(K_BORDER_PREFIX, 0) == 0;
-
   // make name to json pointer string: x.y -> /x/y
   while (true)
   {
@@ -385,14 +381,7 @@ void ExpandSymbol::applyOverrides(
     path.pop_back();
   }
 
-  if (isBorder && isVectorNetworkGroupNode(json))
-  {
-    applyOverridesDetailToTree(json, reversedPath, value);
-  }
-  else
-  {
-    applyOverridesDetail(json, reversedPath, value);
-  }
+  applyOverridesDetail(json, reversedPath, value);
 }
 
 void ExpandSymbol::applyOverridesDetail(
@@ -435,29 +424,6 @@ void ExpandSymbol::applyOverridesDetail(
   {
     applyOverridesDetail(json[key], reversedPath, value);
   }
-}
-
-void ExpandSymbol::applyOverridesDetailToTree(
-  nlohmann::json&         json,
-  std::stack<std::string> reversedPath,
-  const nlohmann::json&   value)
-{
-  if (!json.is_object() && !json.is_array())
-  {
-    return;
-  }
-
-  for (auto& el : json.items())
-  {
-    applyOverridesDetailToTree(el.value(), reversedPath, value);
-  }
-
-  if (!isLayoutNode(json))
-  {
-    return;
-  }
-
-  applyOverridesDetail(json, reversedPath, value);
 }
 
 std::string ExpandSymbol::join(
@@ -665,40 +631,6 @@ void ExpandSymbol::applyLeafOverrides(
         json[K_ID].dump().c_str());
       m_tmpDirtyNodeIds.push_back(json[K_ID]);
     }
-  }
-}
-
-void ExpandSymbol::deleteLeafElement(nlohmann::json& json, const std::string& key)
-{
-  if (key == "*")
-  {
-    while (true)
-    {
-      auto it = json.begin();
-      if (it == json.end())
-      {
-        break;
-      }
-
-      json.erase(it.key());
-    }
-  }
-  else if (json.is_array())
-  {
-    auto path = nlohmann::json::json_pointer{ "/" + key };
-    if (json.contains(path))
-    {
-      auto index = std::stoul(key);
-      json.erase(index);
-    }
-    else
-    {
-      DEBUG("invalid array index, %s", key.c_str());
-    }
-  }
-  else
-  {
-    json.erase(key);
   }
 }
 

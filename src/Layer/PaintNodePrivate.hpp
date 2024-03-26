@@ -177,6 +177,9 @@ public:
   std::optional<DropShadowEffect>  dropShadowEffects;
   std::optional<InnerShadowEffect> innerShadowEffects;
 
+  std::array<float, 4> frameRadius{ 0, 0, 0, 0 };
+  float                cornerSmooth{ 0 };
+
   Ref<DefaultRenderNode>  renderNode;
   Ref<TransformAttribute> transformAttr;
 

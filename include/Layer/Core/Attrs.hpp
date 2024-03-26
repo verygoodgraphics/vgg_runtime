@@ -399,14 +399,11 @@ struct Style
   std::vector<Fill>         fills;
   std::vector<InnerShadow>  innerShadow;
   std::vector<DropShadow>   dropShadow;
-  std::array<float, 4>      frameRadius;
-  float                     cornerSmooth;
 
   bool operator==(const Style& rhs) const
   {
     return layerEffects == rhs.layerEffects && borders == rhs.borders && fills == rhs.fills &&
-           innerShadow == rhs.innerShadow && dropShadow == rhs.dropShadow &&
-           frameRadius == rhs.frameRadius && cornerSmooth == rhs.cornerSmooth;
+           innerShadow == rhs.innerShadow && dropShadow == rhs.dropShadow;
   }
 };
 

@@ -75,13 +75,16 @@ public:
   Bound onRevalidate() override
   {
     // only revalidate cuurent page
-    DEBUG("revalidate image");
     if (rasterizer)
       rasterizer->invalidate(Rasterizer::EReason::CONTENT);
     if (auto f = currentFrame(true); f)
+    {
       return f->bound();
+    }
     else
+    {
       return bound();
+    }
   }
 
   void setFrames(RootArray roots)
@@ -129,7 +132,14 @@ public:
     {
       f = roots[index].get();
       if (f && revalidate)
+      {
+        if (maskDirty)
+        {
+          updateMaskMap(f->root());
+          maskDirty = false;
+        }
         f->revalidate();
+      }
     }
     return f;
   }
@@ -192,7 +202,6 @@ public:
     ASSERT(frame);
     if (frame)
     {
-      frame->render(&renderer, nullptr);
       if (rasterizer)
       {
         if (rasterizer->isInvalidate())

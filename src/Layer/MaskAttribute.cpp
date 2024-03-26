@@ -52,7 +52,6 @@ Bound AlphaMaskAttribute::onRevalidate()
 {
   auto  layerBound = toSkRect(m_inputFilter->revalidate());
   auto& maskMap = *getMaskMap();
-  DEBUG("mask map size %d", (int)maskMap.size());
   if (!m_alphaMasks.empty() && m_maskedNode && !maskMap.empty())
   {
     auto     layerFilter = m_inputFilter->getImageFilter();

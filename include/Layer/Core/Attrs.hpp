@@ -412,6 +412,11 @@ struct TextLineAttr
   bool firstLine{ false };
   int  level{ 0 };
   int  lineType{ TLT_PLAIN };
+
+  bool operator==(const TextLineAttr& rhs) const
+  {
+    return firstLine == rhs.firstLine && level == rhs.level && lineType == rhs.lineType;
+  }
 };
 
 using namespace std::string_view_literals;
@@ -471,6 +476,14 @@ struct TextStyleAttr
   bool                 lineThrough{ false };
   bool                 kerning{ false };
   ETextUnderline       underline{ UT_NONE };
+
+  bool operator==(const TextStyleAttr& rhs) const
+  {
+    return font.fontName == rhs.font.fontName && fills == rhs.fills && length == rhs.length &&
+           letterSpacing == rhs.letterSpacing && lineHeight == rhs.lineHeight &&
+           baselineShift == rhs.baselineShift && lineThrough == rhs.lineThrough &&
+           kerning == rhs.kerning && underline == rhs.underline;
+  }
 };
 
 struct ControlPoint

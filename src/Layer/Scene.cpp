@@ -62,7 +62,6 @@ public:
 
   RootArray               roots;
   int                     page{ 0 };
-  bool                    maskDirty{ true };
   Renderer                renderer;
   std::shared_ptr<Zoomer> zoomer;
   std::optional<Bound>    viewport;
@@ -114,11 +113,6 @@ public:
       f = roots[page].get();
       if (f && revalidate)
       {
-        if (maskDirty)
-        {
-          updateMaskMap(f->root());
-          maskDirty = false;
-        }
         f->revalidate();
       }
     }
@@ -133,11 +127,6 @@ public:
       f = roots[index].get();
       if (f && revalidate)
       {
-        if (maskDirty)
-        {
-          updateMaskMap(f->root());
-          maskDirty = false;
-        }
         f->revalidate();
       }
     }
@@ -166,7 +155,8 @@ public:
 
   void invalidateMask()
   {
-    maskDirty = true;
+    auto f = currentFrame(false);
+    f->invalidateMask();
   }
 
   void preFrame()

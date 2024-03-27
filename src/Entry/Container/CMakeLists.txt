@@ -38,9 +38,9 @@ elseif(APPLE)
   )
 else()
   target_link_libraries(vgg_container PUBLIC
-    "-Wl,--whole-archive"
-    vgg_application
-    "-Wl,--no-whole-archive"
+    # "-Wl,--whole-archive"
+    # vgg_application
+    # "-Wl,--no-whole-archive"
     vgg_adapter
   )
 endif()

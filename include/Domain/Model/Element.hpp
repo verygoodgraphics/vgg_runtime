@@ -100,7 +100,7 @@ public:
   Layout::Rect   bounds() const;
   Layout::Matrix matrix() const;
 
-  std::shared_ptr<Element> getElementByKey(const std::string& key); // name or id
+  virtual std::shared_ptr<Element> getElementByKey(const std::string& key); // name or id
 
 public:
   void setVisible(bool visible);
@@ -170,9 +170,10 @@ class DesignDocument : public Element
 public:
   DesignDocument(const Model::DesignModel& designModel);
 
-  void buildSubtree() override;
+  void               buildSubtree() override;
+  Model::DesignModel treeModel() const; // build the tree model
 
-  Model::DesignModel treeModel() const;
+  std::shared_ptr<Element> getElementByKey(const std::string& key) override;
 
   std::shared_ptr<Model::DesignModel> designModel() const
   {

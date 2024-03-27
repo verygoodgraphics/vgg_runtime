@@ -14,8 +14,6 @@
 using namespace VGG;
 using namespace VGG::Model;
 
-constexpr auto EPSILON = 1e-6;
-
 namespace VGG::Layout
 {
 

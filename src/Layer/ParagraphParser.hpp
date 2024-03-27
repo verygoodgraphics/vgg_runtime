@@ -54,6 +54,11 @@ struct ParagraphAttr
     , horiAlign(align)
   {
   }
+
+  bool operator==(const ParagraphAttr& other) const
+  {
+    return type == other.type && horiAlign == other.horiAlign;
+  }
 };
 
 class ParagraphListener

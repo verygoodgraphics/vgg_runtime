@@ -171,6 +171,11 @@ public:
 
   TreeNodePtr findChildRecursive(const std::string& name) const;
 
+  auto rbegin()
+  {
+    return m_firstChild.rbegin();
+  }
+
   auto begin()
   {
     return m_firstChild.begin();
@@ -184,6 +189,11 @@ public:
   auto end()
   {
     return m_firstChild.end();
+  }
+
+  auto rend()
+  {
+    return m_firstChild.rend();
   }
 
   auto cend() const

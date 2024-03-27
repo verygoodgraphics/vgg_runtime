@@ -290,6 +290,8 @@ void Controller::onResize()
     // todo, edited model
     // ResizeWindow{m_edit_layout}.onResize(m_presenter->editViewSize());
   }
+
+  m_presenter->update();
 }
 
 void Controller::setEditMode(bool editMode)

@@ -17,7 +17,6 @@ add_library(vgg_application STATIC
   VggEnv.cpp
   VggSdk.cpp
   ViewModel.cpp
-  Environment.cpp
 )
 
 if(MSVC)

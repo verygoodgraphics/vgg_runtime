@@ -40,6 +40,7 @@ else()
     PlatformAdapter/Native/Sdk/AdapterHelper.cpp
     PlatformAdapter/Native/Sdk/VggSdkAddon.cpp
     PlatformAdapter/Native/Sdk/VggSdkNodeAdapter.cpp
+    PlatformAdapter/Native/Environment.cpp
   )
   target_compile_definitions(vgg_adapter PRIVATE NODE_WANT_INTERNALS=1)
 endif()

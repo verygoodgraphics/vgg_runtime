@@ -6,10 +6,11 @@ if(NOT EMSCRIPTEN)
 endif()
 
 if(NOT MSVC)
-  target_link_libraries(viewer PRIVATE SDL2)
+  target_link_libraries(viewer PRIVATE SDL2::SDL2)
 else()
   target_include_directories(viewer PRIVATE ${SDL2_INCLUDE_DIRS})
-  target_link_libraries(viewer PRIVATE ${SDL2_LIBRARIES})  
+  target_link_libraries(viewer PRIVATE ${SDL2_LIBRARIES})
+  target_compile_definitions(viewer PRIVATE VGG_RUNTIME_DLL_EXPORTING)
 endif()
 
 target_include_directories(viewer PRIVATE ${VGG_CONTRIB_ARGPARSE_INCLUDE})
@@ -31,3 +32,14 @@ if(Vulkan_FOUND)
     exporter PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
                         BUILD_RPATH ${VGG_LAYER_RPATH})
 endif()
+
+add_custom_command(TARGET viewer POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  "${SKIA_LIB_DIR}/skia.dll"
+  "${SKIA_LIB_DIR}/skparagraph.dll"
+  "${SKIA_LIB_DIR}/skshaper.dll"
+  "${SKIA_LIB_DIR}/sktext.dll"
+  "${SKIA_LIB_DIR}/skunicode.dll"
+  "${SKIA_EXTERNAL_PROJECT_DIR}/${SKIA_LIB_BUILD_PREFIX}/icudtl.dat"
+  "${SDL2_DLL_PATH}"
+  "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}"
+)

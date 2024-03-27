@@ -54,11 +54,11 @@ install(FILES
   ${CMAKE_SOURCE_DIR}/include/Application/Event/EventAPI.hpp
   ${CMAKE_SOURCE_DIR}/include/Application/Event/Keycode.hpp
   ${CMAKE_SOURCE_DIR}/include/Application/Event/Scancode.hpp
-  ${CMAKE_SOURCE_DIR}/include/Application/Environment.hpp
   ${CMAKE_SOURCE_DIR}/include/VGG/Container/IContainer.hpp
   ${CMAKE_SOURCE_DIR}/include/VGG/Container/ISdk.hpp
   ${CMAKE_SOURCE_DIR}/include/VGG/Container/VggTypes.hpp
   ${CMAKE_SOURCE_DIR}/include/Package/VggPackage.hpp
+  ${CMAKE_SOURCE_DIR}/include/Adapter/Environment.hpp
   COMPONENT container
   DESTINATION VGG)
 
@@ -72,6 +72,7 @@ if(MSVC)
     "${SKIA_LIB_DIR}/skshaper.dll"
     "${SKIA_LIB_DIR}/sktext.dll"
     "${SKIA_LIB_DIR}/skunicode.dll"
+    "${SDL2_DLL_PATH}"
     COMPONENT container
     DESTINATION lib
   )

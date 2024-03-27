@@ -15,7 +15,7 @@ VGG Runtime only supports reading and rendering of `.daruma` files, which
 | Harmony        | ❌    | ⛏️    | ⭕️      | N/A  |
 | iOS            | N/A  | ✅    | N/A    | N/A  |
 | macOS          | ✅    | ✅    | N/A    | N/A  |
-| Windows        | ⛏️    | ❌    | N/A    | N/A  |
+| Windows        | ✅    | ❌    | N/A    | N/A  |
 | WASM           | N/A  | N/A  | N/A    | ✅    |
 
 ✅ Supported
@@ -66,6 +66,17 @@ cmake --build . --parallel
 ```
 
 > Note: For release build, please add `-DCMAKE_BUILD_TYPE=Release` to the first `cmake` command.
+
+#### Windows building example
+
+```bash
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Debug -G "Visual Studio 17 2022"
+cmake --build . --parallel --config Debug -t sdl_runtime
+```
+
+> Note: For release build, just replace `Debug` with `Release`.
 
 #### WebAssembly building example
 

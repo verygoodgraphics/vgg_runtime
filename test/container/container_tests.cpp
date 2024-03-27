@@ -210,10 +210,12 @@ TEST_F(ContainerTestSuite, SdkElementApis)
     auto j = nlohmann::json::parse(s);
     EXPECT_EQ(j["content"], "0");
 
+    j = nlohmann::json::object(); // Only update patches
     j["content"] = "100";
     sdk->updateElement(countId, j.dump());
     s = sdk->getElement(countId);
     j = nlohmann::json::parse(s);
     EXPECT_EQ(j["content"], "100");
+    EXPECT_EQ(j["name"], countId); // The original field should not be changed
   }
 }

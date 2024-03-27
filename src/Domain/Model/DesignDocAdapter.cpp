@@ -49,7 +49,9 @@ void DesignDocAdapter::updateElement(const std::string& id, const std::string& c
 {
   if (auto element = m_designDocTree->getElementByKey(id))
   {
-    const auto& j = nlohmann::json ::parse(contentJsonString);
+    auto        j = element->jsonModel();
+    const auto& patch = nlohmann::json ::parse(contentJsonString);
+    j.merge_patch(patch);
     element->updateJsonModel(j);
   }
 }

@@ -17,12 +17,12 @@
 #include "SdlMouse.hpp"
 
 #include "Adapter/NativeComposer.hpp"
+#include "Adapter/Environment.hpp"
 #include "Application/AppBase.hpp"
 #include "Application/MainComposer.hpp"
 #include "Application/Mouse.hpp"
 #include "Application/RunLoop.hpp"
 #include "Application/UIApplication.hpp"
-#include "Application/Environment.hpp"
 #include "Layer/Scene.hpp"
 #include "Utility/ConfigManager.hpp"
 

@@ -28,6 +28,7 @@ endif()
 file(READ ${CMAKE_SOURCE_DIR}/config/DepsConfig.json DEPS_CONFIG)
 
 if(MSVC)
+  set(SDL2_DLL_PATH "${CMAKE_SOURCE_DIR}/lib/SDL2-2.28.5/lib/x64/SDL2.dll" CACHE STRING "sdl2 dll position for msvc x64" FORCE)
   if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/SDL2-2.28.5")
     string(JSON SDL2_URL ERROR_VARIABLE SDL2_URL_NOTFOUND GET ${DEPS_CONFIG} sdl2 url)
     string(JSON SDL2_FILENAME ERROR_VARIABLE SDL2_FILENAME_NOTFOUND GET ${DEPS_CONFIG} sdl2 filename)
@@ -139,13 +140,11 @@ else()
       COMMAND cmake -DNODE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/${NODE_FOLDER}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/BuildLibnode.cmake
     )
-  else()
-    if(MSVC)
-      message(STATUS "start build node...")
-      # 1.node need vs2022
-      # 2.In windows, can not apply release mode DLL to other debug mode project
-      execute_process(COMMAND "vcbuild.bat" ${CMAKE_BUILD_TYPE} "vs2022" "dll" "x64" WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/lib/${NODE_FOLDER}")
-    endif()
+  elseif(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${NODE_FOLDER}/out/${CMAKE_BUILD_TYPE}/node.exe")
+    message(STATUS "start build node...")
+    # 1.node need vs2022
+    # 2.In windows, can not apply release mode DLL to other debug mode project
+    execute_process(COMMAND "vcbuild.bat" ${CMAKE_BUILD_TYPE} "vs2022" "dll" "x64" WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/lib/${NODE_FOLDER}")
   endif()
 endif()
 

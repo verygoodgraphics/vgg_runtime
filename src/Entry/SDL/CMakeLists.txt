@@ -36,7 +36,8 @@ if(MSVC)
       "${SKIA_LIB_DIR}/skparagraph.dll"
       "${SKIA_LIB_DIR}/skshaper.dll"
       "${SKIA_LIB_DIR}/sktext.dll"
-      "${SKIA_LIB_DIR}/skunicode.dll"    
+      "${SKIA_LIB_DIR}/skunicode.dll"
+      "${SDL2_DLL_PATH}"
       "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}"
     )
 endif()

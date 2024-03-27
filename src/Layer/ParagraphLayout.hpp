@@ -208,6 +208,8 @@ public:
 
   void setText(std::string utf8)
   {
+    if (m_utf8Text == utf8)
+      return;
     m_utf8Text = std::move(utf8);
     m_state = INIT;
     invalidate();
@@ -220,6 +222,8 @@ public:
 
   void setTextStyle(std::vector<TextStyleAttr> styles)
   {
+    if (m_textStyle == styles)
+      return;
     m_textStyle = std::move(styles);
     m_state = INIT;
     invalidate();
@@ -232,6 +236,8 @@ public:
 
   void setLineStyle(std::vector<ParagraphAttr> styles)
   {
+    if (m_lineStyle == styles)
+      return;
     m_lineStyle = std::move(styles);
     m_state = INIT;
     invalidate();

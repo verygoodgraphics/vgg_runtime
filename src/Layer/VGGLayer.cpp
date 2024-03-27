@@ -46,7 +46,7 @@
 namespace
 {
 
-glm::mat3 getLocalMatrix(PaintNode* node)
+inline glm::mat3 getLocalMatrix(PaintNode* node)
 {
   ASSERT(node);
   glm::mat3 local = glm::mat3{ 1 };
@@ -58,7 +58,7 @@ glm::mat3 getLocalMatrix(PaintNode* node)
   return local;
 }
 
-void drawBound(PaintNode* node, const glm::mat3& deviceMatrix, SkCanvas* canvas)
+inline void drawBound(PaintNode* node, const glm::mat3& deviceMatrix, SkCanvas* canvas)
 {
   ASSERT(canvas);
   if (node)
@@ -75,7 +75,7 @@ void drawBound(PaintNode* node, const glm::mat3& deviceMatrix, SkCanvas* canvas)
   }
 }
 
-void drawBounds(
+inline void drawBounds(
   std::vector<PaintNode*>::iterator begin,
   std::vector<PaintNode*>::iterator end,
   const glm::mat3&                  deviceMatrix,
@@ -95,7 +95,7 @@ std::string stringify(glm::vec2 scenePos, const char* name)
   return res;
 }
 
-void drawTextAt(
+inline void drawTextAt(
   SkCanvas*                       canvas,
   const std::vector<std::string>& strings,
   int                             curMouseX,
@@ -410,9 +410,9 @@ void VLayer::nodesAt(int x, int y, std::vector<PaintNode*>& nodes)
   auto p = d_ptr->invMatrix() * glm::vec3{ x, y, 1 };
   for (auto& s : d_ptr->scenes)
   {
-    auto last = nodes.size();
     s->nodesAt(p.x, p.y, nodes);
     VGG_LAYER_DEBUG_CODE(if (d_ptr->debugConfig.enableDrawClickBounds) {
+      auto last = nodes.size();
       auto matrix = d_ptr->matrix();
       auto zoomMatrix = s->zoomer() ? s->zoomer()->matrix() : glm::mat3{ 1 };
       auto f = s->frame(s->currentPage())->transform().matrix();

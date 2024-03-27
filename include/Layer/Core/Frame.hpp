@@ -66,6 +66,8 @@ public:
   void       nodesAt(int x, int y, std::vector<PaintNode*>& nodes);
   PaintNode* nodeByID(const std::string& id);
 
+  void invalidateMask(); // temporary solution
+
   void             resetToOrigin(bool enable);
   bool             isVisible() const;
   const Transform& transform() const;

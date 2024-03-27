@@ -619,15 +619,6 @@ void PaintNode::setTransform(const Transform& transform)
   }
 }
 
-// Transform& PaintNode::transform()
-// {
-// #ifdef USE_OLD_CODE
-//   return d_ptr->transform;
-// #else
-//   return d_ptr->renderNode->access()->transform()->getTransform();
-// #endif
-// }
-
 const Transform& PaintNode::transform() const
 {
   if (d_ptr->legacyCode)
@@ -711,11 +702,6 @@ const std::string& PaintNode::guid() const
 {
   return d_ptr->guid;
 }
-
-// bool PaintNode::isMasked() const
-// {
-//   return d_ptr->maskedBy.empty();
-// }
 
 EMaskType PaintNode::maskType() const
 {

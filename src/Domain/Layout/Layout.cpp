@@ -179,64 +179,19 @@ void Layout::Layout::configureNodeAutoLayout(
   }
 }
 
-bool Layout::Layout::hasFirstOnTopNode()
-{
-  for (const auto& [id, rule] : *m_rules)
-  {
-    if (auto flexContainerRule = rule->getFlexContainerRule();
-        flexContainerRule && flexContainerRule->zOrder)
-    {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 JsonDocumentPtr Layout::Layout::displayDesignDoc()
 {
-  ASSERT(m_designDocument);
+  auto designModel = designDocTree()->treeModel(true);
+
   JsonDocumentPtr result{ new RawJsonDocument() };
-  nlohmann::json  designJson = m_designDocument->treeModel();
-
-  if (hasFirstOnTopNode())
-  {
-    reverseChildren(designJson);
-  }
-
-  result->setContent(designJson);
+  result->setContent(designModel);
   return result;
 }
 
-void Layout::Layout::reverseChildren(nlohmann::json& json)
+std::shared_ptr<Domain::DesignDocument> Layout::Layout::designDocTree()
 {
-  if (!json.is_object() && !json.is_array())
-  {
-    return;
-  }
-
-  if (json.contains(K_ID) && json.contains(K_CHILD_OBJECTS))
-  {
-    auto nodeId = json[K_ID].get<std::string>();
-    if (m_rules->find(nodeId) != m_rules->end())
-    {
-      auto rule = (*m_rules)[nodeId];
-      if (auto flexContainerRule = rule->getFlexContainerRule();
-          flexContainerRule && flexContainerRule->zOrder)
-      {
-        auto& children = json[K_CHILD_OBJECTS];
-        if (children.is_array())
-        {
-          std::reverse(children.begin(), children.end());
-        }
-      }
-    }
-  }
-
-  for (auto& el : json.items())
-  {
-    reverseChildren(el.value());
-  }
+  updateFirstOnTop(m_designDocument);
+  return m_designDocument;
 }
 
 void Layout::Layout::resizeNodeThenLayout(
@@ -375,4 +330,32 @@ std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(
   }
 
   return node;
+}
+
+void Layout::Layout::updateFirstOnTop(std::shared_ptr<Domain::Element> element)
+{
+  if (!element)
+  {
+    return;
+  }
+
+  element->setFirstOnTop(false);
+  auto id = element->id();
+  if (!id.empty())
+  {
+    if (auto it = m_rules->find(id); it != m_rules->end())
+    {
+      auto rule = it->second;
+      if (auto flexContainerRule = rule->getFlexContainerRule();
+          flexContainerRule && flexContainerRule->zOrder)
+      {
+        element->setFirstOnTop(true);
+      }
+    }
+  }
+
+  for (auto& child : element->children())
+  {
+    updateFirstOnTop(child);
+  }
 }

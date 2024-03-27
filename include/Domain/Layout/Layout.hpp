@@ -77,7 +77,8 @@ public:
     return m_pageSize[index];
   }
 
-  JsonDocumentPtr displayDesignDoc();
+  std::shared_ptr<Domain::DesignDocument> designDocTree();
+  JsonDocumentPtr                         displayDesignDoc();
 
 public:
   static RuleMapPtr collectRules(const nlohmann::json& json);
@@ -92,8 +93,7 @@ private:
 
   void configureNodeAutoLayout(std::shared_ptr<LayoutNode> node, bool createAutoLayout = true);
 
-  bool hasFirstOnTopNode();
-  void reverseChildren(nlohmann::json& nodeJson);
+  void updateFirstOnTop(std::shared_ptr<Domain::Element> element);
 };
 
 } // namespace Layout

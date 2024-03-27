@@ -47,6 +47,8 @@ class Element : public std::enable_shared_from_this<Element>
   std::weak_ptr<Element>                m_parent;
   std::vector<std::shared_ptr<Element>> m_children;
 
+  bool m_fistOnTop{ false };
+
 public:
   virtual ~Element() = default;
 
@@ -56,10 +58,7 @@ public:
     return m_parent.lock();
   }
 
-  const std::vector<std::shared_ptr<Element>>& children() const
-  {
-    return m_children;
-  }
+  std::vector<std::shared_ptr<Element>> children(bool reverseChildrenIfFirstOnTop = false) const;
 
   bool isLayoutNode() const
   {
@@ -102,9 +101,19 @@ public:
 
   virtual std::shared_ptr<Element> getElementByKey(const std::string& key); // name or id
 
-public:
+public: // Getters, Setters
   void setVisible(bool visible);
 
+  bool isFirstOnTop() const
+  {
+    return m_fistOnTop;
+  }
+  void setFirstOnTop(bool firstOnTop)
+  {
+    m_fistOnTop = firstOnTop;
+  }
+
+public:
   void addChild(std::shared_ptr<Element> child)
   {
     if (!child)
@@ -149,8 +158,12 @@ public:
 
   virtual void getToModel(Model::SubGeometryType& subGeometry);
   virtual void getToModel(Model::ContainerChildType& variantModel);
-  virtual void getTreeToModel(Model::SubGeometryType& subGeometry);
-  virtual void getTreeToModel(Model::ContainerChildType& variantModel);
+  virtual void getTreeToModel(
+    Model::SubGeometryType& subGeometry,
+    bool                    reverseChildrenIfFirstOnTop);
+  virtual void getTreeToModel(
+    Model::ContainerChildType& variantModel,
+    bool                       reverseChildrenIfFirstOnTop);
 
   void addChildren(const std::vector<Model::ContainerChildType>& children);
   void addSubGeometry(const Model::SubGeometryType& subGeometry);
@@ -171,7 +184,8 @@ public:
   DesignDocument(const Model::DesignModel& designModel);
 
   void               buildSubtree() override;
-  Model::DesignModel treeModel() const; // build the tree model
+  Model::DesignModel treeModel(
+    bool reverseChildrenIfFirstOnTop = false) const; // build the tree model
 
   std::shared_ptr<Element> getElementByKey(const std::string& key) override;
 
@@ -193,11 +207,13 @@ public:
   Model::Frame*  object() const override;
   nlohmann::json jsonModel() override;
   void           updateJsonModel(const nlohmann::json& newJsonModel) override;
-  Model::Frame   treeModel() const;
+  Model::Frame   treeModel(bool reverseChildrenIfFirstOnTop) const;
 
   void getToModel(Model::SubGeometryType& subGeometry) override;
-  void getTreeToModel(Model::SubGeometryType& subGeometry) override;
-  void getTreeToModel(Model::ContainerChildType& variantModel) override;
+  void getTreeToModel(Model::SubGeometryType& subGeometry, bool reverseChildrenIfFirstOnTop)
+    override;
+  void getTreeToModel(Model::ContainerChildType& variantModel, bool reverseChildrenIfFirstOnTop)
+    override;
 };
 
 class GroupElement : public Element
@@ -213,9 +229,11 @@ public:
   nlohmann::json jsonModel() override;
   void           updateJsonModel(const nlohmann::json& newJsonModel) override;
   void           getToModel(Model::SubGeometryType& subGeometry) override;
-  Model::Group   treeModel() const;
-  void           getTreeToModel(Model::SubGeometryType& subGeometry) override;
-  void           getTreeToModel(Model::ContainerChildType& variantModel) override;
+  Model::Group   treeModel(bool reverseChildrenIfFirstOnTop) const;
+  void getTreeToModel(Model::SubGeometryType& subGeometry, bool reverseChildrenIfFirstOnTop)
+    override;
+  void getTreeToModel(Model::ContainerChildType& variantModel, bool reverseChildrenIfFirstOnTop)
+    override;
 
   void applyOverride(
     const std::string&        name,
@@ -237,9 +255,11 @@ public:
   nlohmann::json       jsonModel() override;
   void                 updateJsonModel(const nlohmann::json& newJsonModel) override;
   void                 getToModel(Model::SubGeometryType& subGeometry) override;
-  Model::SymbolMaster  treeModel() const;
-  void                 getTreeToModel(Model::SubGeometryType& subGeometry) override;
-  void                 getTreeToModel(Model::ContainerChildType& variantModel) override;
+  Model::SymbolMaster  treeModel(bool reverseChildrenIfFirstOnTop) const;
+  void getTreeToModel(Model::SubGeometryType& subGeometry, bool reverseChildrenIfFirstOnTop)
+    override;
+  void getTreeToModel(Model::ContainerChildType& variantModel, bool reverseChildrenIfFirstOnTop)
+    override;
 };
 
 class SymbolInstanceElement : public Element
@@ -267,9 +287,11 @@ public:
   nlohmann::json         jsonModel() override;
   void                   updateJsonModel(const nlohmann::json& newJsonModel) override;
   void                   getToModel(Model::SubGeometryType& subGeometry) override;
-  Model::SymbolMaster    treeModel() const;
-  void                   getTreeToModel(Model::SubGeometryType& subGeometry) override;
-  void                   getTreeToModel(Model::ContainerChildType& variantModel) override;
+  Model::SymbolMaster    treeModel(bool reverseChildrenIfFirstOnTop) const;
+  void getTreeToModel(Model::SubGeometryType& subGeometry, bool reverseChildrenIfFirstOnTop)
+    override;
+  void getTreeToModel(Model::ContainerChildType& variantModel, bool reverseChildrenIfFirstOnTop)
+    override;
 };
 
 class TextElement : public Element
@@ -316,9 +338,11 @@ public:
   nlohmann::json jsonModel() override;
   void           updateJsonModel(const nlohmann::json& newJsonModel) override;
   void           getToModel(Model::SubGeometryType& subGeometry) override;
-  Model::Path    treeModel() const;
-  void           getTreeToModel(Model::SubGeometryType& subGeometry) override;
-  void           getTreeToModel(Model::ContainerChildType& variantModel) override;
+  Model::Path    treeModel(bool reverseChildrenIfFirstOnTop) const;
+  void getTreeToModel(Model::SubGeometryType& subGeometry, bool reverseChildrenIfFirstOnTop)
+    override;
+  void getTreeToModel(Model::ContainerChildType& variantModel, bool reverseChildrenIfFirstOnTop)
+    override;
 };
 
 class ContourElement : public Element

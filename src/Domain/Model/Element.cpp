@@ -152,15 +152,15 @@ void DesignDocument::buildSubtree()
   m_designModel->frames.clear();
 }
 
-Model::DesignModel DesignDocument::treeModel() const
+Model::DesignModel DesignDocument::treeModel(bool reverseChildrenIfFirstOnTop) const
 {
   auto retModel = *m_designModel;
-  for (auto& child : children())
+  for (auto& child : children(reverseChildrenIfFirstOnTop))
   {
     auto frameElement = std::dynamic_pointer_cast<FrameElement>(child);
     if (frameElement)
     {
-      retModel.frames.push_back(frameElement->treeModel());
+      retModel.frames.push_back(frameElement->treeModel(reverseChildrenIfFirstOnTop));
     }
   }
 
@@ -182,6 +182,17 @@ std::shared_ptr<Element> DesignDocument::getElementByKey(const std::string& key)
 }
 
 // Element
+
+std::vector<std::shared_ptr<Element>> Element::children(bool reverseChildrenIfFirstOnTop) const
+{
+  auto result = m_children;
+  if (reverseChildrenIfFirstOnTop && isFirstOnTop())
+  {
+    std::reverse(result.begin(), result.end());
+  }
+  return result;
+}
+
 void Element::setVisible(bool visible)
 {
   auto model = this->object();
@@ -507,11 +518,13 @@ std::shared_ptr<Element> Element::getElementByKey(const std::string& key)
 void Element::getToModel(Model::ContainerChildType& variantModel)
 {
 }
-void Element::getTreeToModel(Model::SubGeometryType& subGeometry)
+void Element::getTreeToModel(Model::SubGeometryType& subGeometry, bool reverseChildrenIfFirstOnTop)
 {
   getToModel(subGeometry);
 }
-void Element::getTreeToModel(Model::ContainerChildType& variantModel)
+void Element::getTreeToModel(
+  Model::ContainerChildType& variantModel,
+  bool                       reverseChildrenIfFirstOnTop)
 {
   getToModel(variantModel);
 }
@@ -545,24 +558,28 @@ void FrameElement::getToModel(Model::SubGeometryType& subGeometry)
   ASSERT(m_frame);
   subGeometry = *m_frame;
 }
-Model::Frame FrameElement::treeModel() const
+Model::Frame FrameElement::treeModel(bool reverseChildrenIfFirstOnTop) const
 {
   auto retModel = *m_frame;
-  for (auto& child : children())
+  for (auto& child : children(reverseChildrenIfFirstOnTop))
   {
     ContainerChildType variantModel;
-    child->getTreeToModel(variantModel);
+    child->getTreeToModel(variantModel, reverseChildrenIfFirstOnTop);
     retModel.childObjects.push_back(variantModel);
   }
   return retModel;
 }
-void FrameElement::getTreeToModel(Model::SubGeometryType& subGeometry)
+void FrameElement::getTreeToModel(
+  Model::SubGeometryType& subGeometry,
+  bool                    reverseChildrenIfFirstOnTop)
 {
-  subGeometry = treeModel();
+  subGeometry = treeModel(reverseChildrenIfFirstOnTop);
 }
-void FrameElement::getTreeToModel(Model::ContainerChildType& variantModel)
+void FrameElement::getTreeToModel(
+  Model::ContainerChildType& variantModel,
+  bool                       reverseChildrenIfFirstOnTop)
 {
-  variantModel = treeModel();
+  variantModel = treeModel(reverseChildrenIfFirstOnTop);
 }
 
 // GroupElement
@@ -594,24 +611,28 @@ void GroupElement::getToModel(Model::SubGeometryType& subGeometry)
   ASSERT(m_group);
   subGeometry = *m_group;
 }
-Model::Group GroupElement::treeModel() const
+Model::Group GroupElement::treeModel(bool reverseChildrenIfFirstOnTop) const
 {
   auto retModel = *m_group;
-  for (auto& child : children())
+  for (auto& child : children(reverseChildrenIfFirstOnTop))
   {
     ContainerChildType variantModel;
-    child->getTreeToModel(variantModel);
+    child->getTreeToModel(variantModel, reverseChildrenIfFirstOnTop);
     retModel.childObjects.push_back(variantModel);
   }
   return retModel;
 }
-void GroupElement::getTreeToModel(Model::SubGeometryType& subGeometry)
+void GroupElement::getTreeToModel(
+  Model::SubGeometryType& subGeometry,
+  bool                    reverseChildrenIfFirstOnTop)
 {
-  subGeometry = treeModel();
+  subGeometry = treeModel(reverseChildrenIfFirstOnTop);
 }
-void GroupElement::getTreeToModel(Model::ContainerChildType& variantModel)
+void GroupElement::getTreeToModel(
+  Model::ContainerChildType& variantModel,
+  bool                       reverseChildrenIfFirstOnTop)
 {
-  variantModel = treeModel();
+  variantModel = treeModel(reverseChildrenIfFirstOnTop);
 }
 
 void GroupElement::applyOverride(
@@ -660,24 +681,28 @@ void SymbolMasterElement::getToModel(Model::SubGeometryType& subGeometry)
   ASSERT(m_master);
   subGeometry = *m_master;
 }
-Model::SymbolMaster SymbolMasterElement::treeModel() const
+Model::SymbolMaster SymbolMasterElement::treeModel(bool reverseChildrenIfFirstOnTop) const
 {
   auto retModel = *m_master;
-  for (auto& child : children())
+  for (auto& child : children(reverseChildrenIfFirstOnTop))
   {
     ContainerChildType variantModel;
-    child->getTreeToModel(variantModel);
+    child->getTreeToModel(variantModel, reverseChildrenIfFirstOnTop);
     retModel.childObjects.push_back(variantModel);
   }
   return retModel;
 }
-void SymbolMasterElement::getTreeToModel(Model::SubGeometryType& subGeometry)
+void SymbolMasterElement::getTreeToModel(
+  Model::SubGeometryType& subGeometry,
+  bool                    reverseChildrenIfFirstOnTop)
 {
-  subGeometry = treeModel();
+  subGeometry = treeModel(reverseChildrenIfFirstOnTop);
 }
-void SymbolMasterElement::getTreeToModel(Model::ContainerChildType& variantModel)
+void SymbolMasterElement::getTreeToModel(
+  Model::ContainerChildType& variantModel,
+  bool                       reverseChildrenIfFirstOnTop)
 {
-  variantModel = treeModel();
+  variantModel = treeModel(reverseChildrenIfFirstOnTop);
 }
 
 // SymbolInstanceElement
@@ -755,37 +780,41 @@ void SymbolInstanceElement::getToModel(Model::SubGeometryType& subGeometry)
   ASSERT(m_instance);
   subGeometry = *m_instance;
 }
-Model::SymbolMaster SymbolInstanceElement::treeModel() const
+Model::SymbolMaster SymbolInstanceElement::treeModel(bool reverseChildrenIfFirstOnTop) const
 {
   ASSERT(m_master);
   Model::SymbolMaster retModel;
   static_cast<Model::Object&>(retModel) = *m_instance;
-  for (auto& child : children())
+  for (auto& child : children(reverseChildrenIfFirstOnTop))
   {
     ContainerChildType variantModel;
-    child->getTreeToModel(variantModel);
+    child->getTreeToModel(variantModel, reverseChildrenIfFirstOnTop);
     retModel.childObjects.push_back(variantModel);
   }
   retModel.class_ = m_master->class_;
   retModel.radius = m_master->radius;
   return retModel;
 }
-void SymbolInstanceElement::getTreeToModel(Model::SubGeometryType& subGeometry)
+void SymbolInstanceElement::getTreeToModel(
+  Model::SubGeometryType& subGeometry,
+  bool                    reverseChildrenIfFirstOnTop)
 {
   if (m_master)
   {
-    subGeometry = treeModel();
+    subGeometry = treeModel(reverseChildrenIfFirstOnTop);
   }
   else
   {
     subGeometry = *m_instance;
   }
 }
-void SymbolInstanceElement::getTreeToModel(Model::ContainerChildType& variantModel)
+void SymbolInstanceElement::getTreeToModel(
+  Model::ContainerChildType& variantModel,
+  bool                       reverseChildrenIfFirstOnTop)
 {
   if (m_master)
   {
-    variantModel = treeModel();
+    variantModel = treeModel(reverseChildrenIfFirstOnTop);
   }
   else
   {
@@ -929,7 +958,7 @@ void PathElement::getToModel(Model::SubGeometryType& subGeometry)
   ASSERT(m_path);
   subGeometry = *m_path;
 }
-Model::Path PathElement::treeModel() const
+Model::Path PathElement::treeModel(bool reverseChildrenIfFirstOnTop) const
 {
   auto retModel = *m_path;
   if (m_path->shape)
@@ -938,19 +967,27 @@ Model::Path PathElement::treeModel() const
     for (std::size_t i = 0; i < m_path->shape->subshapes.size(); i++)
     {
       auto variantModel = std::make_shared<SubGeometryType>();
-      children()[i]->getTreeToModel(*variantModel);
+      children()[i]->getTreeToModel(*variantModel, reverseChildrenIfFirstOnTop);
       retModel.shape->subshapes[i].subGeometry = variantModel;
+    }
+    if (reverseChildrenIfFirstOnTop && isFirstOnTop())
+    {
+      std::reverse(retModel.shape->subshapes.begin(), retModel.shape->subshapes.end());
     }
   }
   return retModel;
 }
-void PathElement::getTreeToModel(Model::SubGeometryType& subGeometry)
+void PathElement::getTreeToModel(
+  Model::SubGeometryType& subGeometry,
+  bool                    reverseChildrenIfFirstOnTop)
 {
-  subGeometry = treeModel();
+  subGeometry = treeModel(reverseChildrenIfFirstOnTop);
 }
-void PathElement::getTreeToModel(Model::ContainerChildType& variantModel)
+void PathElement::getTreeToModel(
+  Model::ContainerChildType& variantModel,
+  bool                       reverseChildrenIfFirstOnTop)
 {
-  variantModel = treeModel();
+  variantModel = treeModel(reverseChildrenIfFirstOnTop);
 }
 
 // ContourElement

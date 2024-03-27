@@ -176,3 +176,39 @@ TEST_F(ContainerTestSuite, Sdk)
     EXPECT_EQ(retTexts.size(), 3);
   }
 }
+
+TEST_F(ContainerTestSuite, SdkElementApis)
+{
+  std::string filePath = "../../examples/counter/";
+
+  auto result = m_sut->load(filePath);
+  EXPECT_TRUE(result);
+
+  auto sdk = m_sut->sdk();
+
+  {
+    auto buttonId = "#counterButton";
+    auto s = sdk->getElement(buttonId);
+    auto j = nlohmann::json::parse(s);
+    EXPECT_NEAR(j["style"]["fills"][0]["color"]["alpha"], 1, EPSILON);
+
+    j["style"]["fills"][0]["color"]["alpha"] = 0.5;
+    sdk->updateElement(buttonId, j.dump());
+    s = sdk->getElement(buttonId);
+    j = nlohmann::json::parse(s);
+    EXPECT_EQ(j["style"]["fills"][0]["color"]["alpha"], 0.5);
+  }
+
+  {
+    auto countId = "#count";
+    auto s = sdk->getElement(countId);
+    auto j = nlohmann::json::parse(s);
+    EXPECT_EQ(j["content"], "0");
+
+    j["content"] = "100";
+    sdk->updateElement(countId, j.dump());
+    s = sdk->getElement(countId);
+    j = nlohmann::json::parse(s);
+    EXPECT_EQ(j["content"], "100");
+  }
+}

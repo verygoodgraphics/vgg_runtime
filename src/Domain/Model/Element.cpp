@@ -167,6 +167,20 @@ Model::DesignModel DesignDocument::treeModel() const
   return retModel;
 }
 
+std::shared_ptr<Element> DesignDocument::getElementByKey(const std::string& key)
+{
+  // design document has no object, so we need to find in its children
+  for (auto& child : children())
+  {
+    if (auto element = child->getElementByKey(key))
+    {
+      return element;
+    }
+  }
+
+  return nullptr;
+}
+
 // Element
 void Element::setVisible(bool visible)
 {

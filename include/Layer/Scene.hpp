@@ -22,8 +22,6 @@
 #include "Layer/Core/TreeNode.hpp"
 #include "Layer/Config.hpp"
 
-#include <nlohmann/json.hpp>
-
 #include <map>
 #include <memory>
 class SkCanvas;
@@ -48,13 +46,6 @@ class Rasterizer;
 using namespace layer;
 
 using ResourceRepo = std::map<std::string, std::vector<char>>;
-using ObjectTableType = std::unordered_map<std::string, PaintNodeRef>;
-using InstanceTable = std::unordered_map<
-  std::string,
-  std::pair<
-    PaintNodeRef,
-    std::string>>; // {instance_id: {instance_object: master_id}}
-                   //
 class Scene__pImpl;
 class VGG_EXPORTS Scene : public layer::Renderable
 {
@@ -68,7 +59,7 @@ public:
   {
     m_name = std::move(name);
   }
-  const std::string name() const
+  const std::string& name() const
   {
     return m_name;
   }
@@ -81,6 +72,9 @@ public:
   // To remove zoomer, just set nullptr
   void    setZoomer(std::shared_ptr<Zoomer> zoomer);
   Zoomer* zoomer();
+
+  PaintNode* nodeAt(int x, int y);
+  void       nodesAt(int x, int y, std::vector<PaintNode*>& nodes);
 
   void enableDrawDebugBound(bool enabled);
   bool isEnableDrawDebugBound();

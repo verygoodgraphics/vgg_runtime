@@ -23,3 +23,14 @@
 #else
 #define VGG_EXPORTS
 #endif
+
+#ifdef NDEBUG
+#define VGG_LAYER_DEBUG_CODE(code)
+#else
+#define VGG_LAYER_DEBUG
+#define VGG_LAYER_DEBUG_CODE(...)                                                                  \
+  do                                                                                               \
+  {                                                                                                \
+    __VA_ARGS__;                                                                                   \
+  } while (0);
+#endif

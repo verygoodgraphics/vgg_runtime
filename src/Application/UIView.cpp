@@ -556,9 +556,9 @@ void UIView::fireMouseEvent(
     target);
 }
 
-void UIView::show(const ViewModel& viewModel)
+void UIView::show(const ViewModel& viewModel, bool force)
 {
-  if (m_skipUntilNextLoop)
+  if (m_skipUntilNextLoop && !force)
   {
     return;
   }
@@ -569,7 +569,7 @@ void UIView::show(const ViewModel& viewModel)
                   .build();
   if (result.root)
   {
-    show(viewModel, std::move(*result.root));
+    show(viewModel, std::move(*result.root), force);
   }
   else
   {
@@ -577,9 +577,9 @@ void UIView::show(const ViewModel& viewModel)
   }
 }
 
-void UIView::show(const ViewModel& viewModel, std::vector<FramePtr> frames)
+void UIView::show(const ViewModel& viewModel, std::vector<FramePtr> frames, bool force)
 {
-  if (m_skipUntilNextLoop)
+  if (m_skipUntilNextLoop && !force)
   {
     return;
   }

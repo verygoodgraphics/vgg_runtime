@@ -227,10 +227,10 @@ public:
     return m_editSubject.get_observable();
   }
 
+  void update();
+
 private:
   void listenViewEvent();
-
-  void update();
 
   void updateEditView()
   {

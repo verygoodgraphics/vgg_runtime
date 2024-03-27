@@ -22,6 +22,7 @@
 #include "Layer/Core/VNode.hpp"
 #include "core/SkRefCnt.h"
 #include "Layer/Renderer.hpp"
+#include "LayerCache.h"
 
 #include <core/SkBBHFactory.h>
 #include <core/SkColor.h>
@@ -30,60 +31,6 @@
 
 #include <unordered_map>
 
-namespace
-{
-using namespace VGG::layer;
-
-void nodeAtRecursive(
-  PaintNode*               node,
-  int                      x,
-  int                      y,
-  std::vector<PaintNode*>& nodes,
-  const glm::mat3&         matrix)
-{
-  if (node->isVisible())
-  {
-    const auto m = matrix * node->transform().matrix();
-    const auto current = toSkMatrix(m);
-    auto       currentBounds = current.mapRect(toSkRect(node->bound()));
-    if (currentBounds.contains(x, y))
-    {
-      nodes.push_back(node);
-    }
-    for (auto c = node->cbegin(); c != node->cend(); ++c)
-    {
-      nodeAtRecursive(static_cast<PaintNode*>(c->get()), x, y, nodes, m);
-    }
-  }
-}
-
-PaintNode* nodeAtRecursive(PaintNode* node, int x, int y, const glm::mat3& matrix)
-{
-  if (node->isVisible())
-  {
-    const auto m = matrix * node->transform().matrix();
-    const auto current = toSkMatrix(m);
-    auto       deviceBounds = current.mapRect(toSkRect(node->frameBound()));
-    DEBUG(
-      "node: %s [%f %f %f %f ]",
-      node->name().c_str(),
-      deviceBounds.fLeft,
-      deviceBounds.fTop,
-      deviceBounds.fRight,
-      deviceBounds.fBottom);
-    if (deviceBounds.contains(x, y))
-    {
-      return node;
-    }
-    for (auto& child : *node)
-    {
-      return nodeAtRecursive(static_cast<PaintNode*>(child.get()), x, y, m);
-    }
-  }
-  return nullptr;
-}
-
-} // namespace
 
 namespace VGG::layer
 {
@@ -95,6 +42,8 @@ public:
   sk_sp<SkPicture> cache;
   bool             enableToOrigin{ false };
   Transform        transform;
+
+  bool maskDirty{ true };
 
   Frame__pImpl(Frame* api)
     : q_ptr(api)
@@ -160,6 +109,11 @@ Bound Frame::onRevalidate()
 {
   VGG_IMPL(Frame);
   ASSERT(_->root);
+  if (_->maskDirty)
+  {
+    updateMaskMap(root());
+    _->maskDirty = false;
+  }
   auto bounds = root()->revalidate();
   auto b = bounds.bound(root()->transform());
   _->cache = _->renderPicture(toSkRect(b));
@@ -209,6 +163,11 @@ void Frame::nodesAt(int x, int y, std::vector<PaintNode*>& nodes)
     auto p = inv * glm::vec3(x, y, 1);
     return r->nodesAt(p.x, p.y, nodes);
   }
+}
+
+void Frame::invalidateMask()
+{
+  d_ptr->maskDirty = true;
 }
 
 PaintNode* Frame::nodeByID(const std::string& id)

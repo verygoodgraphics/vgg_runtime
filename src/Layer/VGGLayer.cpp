@@ -43,6 +43,86 @@
 
 #include <optional>
 
+namespace
+{
+
+glm::mat3 getLocalMatrix(PaintNode* node)
+{
+  ASSERT(node);
+  glm::mat3 local = glm::mat3{ 1 };
+  while (node)
+  {
+    local = node->transform().matrix() * local;
+    node = static_cast<PaintNode*>(node->parent().get());
+  }
+  return local;
+}
+
+void drawBound(PaintNode* node, const glm::mat3& deviceMatrix, SkCanvas* canvas)
+{
+  ASSERT(canvas);
+  if (node)
+  {
+    auto    localMatrix = getLocalMatrix(node);
+    auto    bound = node->frameBound();
+    auto    current = toSkMatrix(deviceMatrix * localMatrix);
+    auto    deviceBounds = current.mapRect(toSkRect(bound));
+    SkPaint paint;
+    paint.setColor(SK_ColorRED);
+    paint.setAlphaf(0.3);
+    paint.setStyle(SkPaint::kFill_Style);
+    canvas->drawRect(deviceBounds, paint);
+  }
+}
+
+void drawBounds(
+  std::vector<PaintNode*>::iterator begin,
+  std::vector<PaintNode*>::iterator end,
+  const glm::mat3&                  deviceMatrix,
+  SkCanvas*                         canvas)
+{
+  for (auto it = begin; it != end; ++it)
+  {
+    drawBound(*it, deviceMatrix, canvas);
+  }
+}
+
+std::string stringify(glm::vec2 scenePos, const char* name)
+{
+  std::stringstream ss;
+  ss << name << ": (" << (int)scenePos.x << ", " << scenePos.y << ")";
+  std::string res{ std::istreambuf_iterator<char>{ ss }, {} };
+  return res;
+}
+
+void drawTextAt(
+  SkCanvas*                       canvas,
+  const std::vector<std::string>& strings,
+  int                             curMouseX,
+  int                             curMouseY)
+{
+  SkPaint textPaint;
+  textPaint.setColor(SK_ColorBLACK);
+  SkFont        font;
+  constexpr int FONTSIZE = 20;
+  font.setSize(FONTSIZE);
+  int dy = 0;
+  for (const auto& text : strings)
+  {
+    canvas->drawSimpleText(
+      text.c_str(),
+      text.size(),
+      SkTextEncoding::kUTF8,
+      curMouseX,
+      curMouseY + dy,
+      font,
+      textPaint);
+    dy += FONTSIZE;
+  }
+}
+
+} // namespace
+
 namespace VGG::layer
 {
 
@@ -96,15 +176,19 @@ class VLayer__pImpl
   VGG_DECL_API(VLayer);
 
 public:
-  Zoomer                                   zoomer;
-  // SkiaState skiaState;
   std::unique_ptr<SkiaContext>             skiaContext;
-  int                                      surfaceWidth;
-  int                                      surfaceHeight;
-  SkCanvas*                                canvas{ nullptr };
   std::vector<std::shared_ptr<Renderable>> items;
   std::vector<std::shared_ptr<Scene>>      scenes;
+  float                                    preScale{ 1.0 };
   bool                                     invalid{ true };
+
+  std::unique_ptr<SkPictureRecorder> rec;
+  sk_sp<SkPicture>                   layerPicture;
+  struct DebugConfig
+  {
+    bool enableDrawClickBounds{ false };
+    bool drawPosInfo{ false };
+  } debugConfig;
 
   VLayer__pImpl(VLayer* api)
     : q_ptr(api)
@@ -116,13 +200,24 @@ public:
     skiaContext = nullptr;
   }
 
+  glm::mat3 matrix() const
+  {
+    auto scale = q_ptr->context()->property().dpiScaling * q_ptr->scaleFactor();
+    return glm::mat3{ scale, 0, 0, 0, scale, 0, 0, 0, 1 };
+  }
+
+  glm::mat3 invMatrix() const
+  {
+    auto scale = 1.0 / q_ptr->context()->property().dpiScaling * q_ptr->scaleFactor();
+    return glm::mat3{ scale, 0, 0, 0, scale, 0, 0, 0, 1 };
+  }
+
   void renderInternal(SkCanvas* canvas, bool drawTextInfo)
   {
     ASSERT(canvas);
     canvas->save();
     canvas->clear(SK_ColorWHITE);
-    const auto scale = q_ptr->context()->property().dpiScaling * q_ptr->scaleFactor();
-    canvas->scale(scale, scale);
+    canvas->concat(toSkMatrix(matrix()));
     for (auto& scene : scenes)
     {
       scene->render(canvas);
@@ -139,58 +234,28 @@ public:
         auto z = scene->zoomer();
         if (z)
         {
-          info.push_back(mapCanvasPositionToScene(
-            z,
-            scene->name().c_str(),
-            q_ptr->m_position[0],
-            q_ptr->m_position[1]));
+          const auto pos =
+            z->invMatrix() * glm::vec3{ q_ptr->m_position[0], q_ptr->m_position[1], 1 };
+          info.push_back(stringify(pos, scene->name().c_str()));
         }
+        drawTextAt(canvas, info, q_ptr->m_position[0], q_ptr->m_position[1]);
       }
-      drawTextAt(canvas, info, q_ptr->m_position[0], q_ptr->m_position[1]);
+    }
+    if (rec)
+    {
+      layerPicture = rec->finishRecordingAsPicture();
+      rec = nullptr;
+    }
+    if (layerPicture)
+    {
+      static size_t s_delay = 0;
+      canvas->drawPicture(layerPicture);
+      s_delay++;
+      if (s_delay % 4 == 0)
+        layerPicture = nullptr;
     }
     canvas->restore();
     canvas->flush();
-  }
-
-  std::string mapCanvasPositionToScene(
-    const Zoomer* zoomer,
-    const char*   name,
-    int           curMouseX,
-    int           curMouseY)
-  {
-    std::stringstream ss;
-    float             windowPos[2] = { (float)curMouseX, (float)curMouseY };
-    float             logixXY[2];
-    zoomer->mapCanvasPosToLogicalPosition(windowPos, logixXY);
-    ss << name << ": (" << (int)logixXY[0] << ", " << (int)logixXY[1] << ")";
-    std::string res{ std::istreambuf_iterator<char>{ ss }, {} };
-    return res;
-  }
-
-  void drawTextAt(
-    SkCanvas*                       canvas,
-    const std::vector<std::string>& strings,
-    int                             curMouseX,
-    int                             curMouseY)
-  {
-    SkPaint textPaint;
-    textPaint.setColor(SK_ColorBLACK);
-    SkFont        font;
-    constexpr int FONTSIZE = 20;
-    font.setSize(FONTSIZE);
-    int dy = 0;
-    for (const auto& text : strings)
-    {
-      canvas->drawSimpleText(
-        text.c_str(),
-        text.size(),
-        SkTextEncoding::kUTF8,
-        curMouseX,
-        curMouseY + dy,
-        font,
-        textPaint);
-      dy += FONTSIZE;
-    }
   }
 
   sk_sp<SkImage> makeImage(SkSurface* surface, const ImageOptions& opts)
@@ -217,6 +282,36 @@ public:
     invalid = true;
   }
 };
+
+bool VLayer::enableDrawClickBounds() const
+{
+  return d_ptr->debugConfig.enableDrawClickBounds;
+}
+
+void VLayer::setDrawClickBounds(bool enable)
+{
+  d_ptr->debugConfig.enableDrawClickBounds = enable;
+}
+
+void VLayer::setDrawPositionEnabled(bool enable)
+{
+  d_ptr->debugConfig.drawPosInfo = enable;
+}
+
+bool VLayer::enableDrawPosition() const
+{
+  return d_ptr->debugConfig.drawPosInfo;
+}
+
+void VLayer::setScaleFactor(float scale)
+{
+  d_ptr->preScale = scale;
+}
+
+float VLayer::scaleFactor() const
+{
+  return d_ptr->preScale;
+}
 
 std::optional<ELayerError> VLayer::onInit()
 {
@@ -274,7 +369,10 @@ void VLayer::render()
   _->renderInternal(canvas, enableDrawPosition());
   t.stop();
   auto tt = (int)t.duration().ms();
-  INFO("render time: %d ms", tt);
+  if (tt > 20)
+  {
+    INFO("render time: %d ms", tt);
+  }
 }
 
 void VLayer::addRenderItem(std::shared_ptr<Renderable> item)
@@ -286,6 +384,57 @@ void VLayer::addScene(std::shared_ptr<Scene> scene)
 {
   d_ptr->scenes.push_back(std::move(scene));
   d_ptr->invalidate();
+}
+
+PaintNode* VLayer::nodeAt(int x, int y)
+{
+  auto p = d_ptr->invMatrix() * glm::vec3{ x, y, 1 };
+  // TODO:: Only return the object in the first scene
+  for (auto& s : d_ptr->scenes)
+  {
+    auto r = s->nodeAt(p.x, p.y);
+    VGG_LAYER_DEBUG_CODE(if (d_ptr->debugConfig.enableDrawClickBounds) {
+      auto matrix = d_ptr->matrix();
+      auto zoomMatrix = s->zoomer() ? s->zoomer()->matrix() : glm::mat3{ 1 };
+      auto f = s->frame(s->currentPage())->transform().matrix();
+      auto deviceMatrix = matrix * zoomMatrix * f;
+      drawBound(r, deviceMatrix, layerCanvas());
+    });
+    return r;
+  }
+  return nullptr;
+}
+
+void VLayer::nodesAt(int x, int y, std::vector<PaintNode*>& nodes)
+{
+  auto p = d_ptr->invMatrix() * glm::vec3{ x, y, 1 };
+  for (auto& s : d_ptr->scenes)
+  {
+    auto last = nodes.size();
+    s->nodesAt(p.x, p.y, nodes);
+    VGG_LAYER_DEBUG_CODE(if (d_ptr->debugConfig.enableDrawClickBounds) {
+      auto matrix = d_ptr->matrix();
+      auto zoomMatrix = s->zoomer() ? s->zoomer()->matrix() : glm::mat3{ 1 };
+      auto f = s->frame(s->currentPage())->transform().matrix();
+      auto deviceMatrix = matrix * zoomMatrix * f;
+      drawBounds(nodes.begin() + last, nodes.end(), deviceMatrix, layerCanvas());
+    });
+  }
+}
+
+SkCanvas* VLayer::layerCanvas()
+{
+  auto w = d_ptr->skiaContext->surface()->width();
+  auto h = d_ptr->skiaContext->surface()->height();
+  if (w == 0 || h == 0)
+    return nullptr;
+  d_ptr->rec = std::make_unique<SkPictureRecorder>();
+  return d_ptr->rec->beginRecording(SkRect::MakeWH(w, h));
+}
+
+void VLayer::clearLayerCanvas()
+{
+  d_ptr->layerPicture = nullptr;
 }
 
 void VLayer::setScene(std::shared_ptr<Scene> scene)

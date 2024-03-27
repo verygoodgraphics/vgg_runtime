@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "Layer/VSkia.hpp"
 #include "Settings.hpp"
 #include "Layer/Core/Frame.hpp"
 #include "Layer/Core/PaintNode.hpp"
@@ -31,6 +32,56 @@
 
 namespace
 {
+using namespace VGG::layer;
+
+void nodeAtRecursive(
+  PaintNode*               node,
+  int                      x,
+  int                      y,
+  std::vector<PaintNode*>& nodes,
+  const glm::mat3&         matrix)
+{
+  if (node->isVisible())
+  {
+    const auto m = matrix * node->transform().matrix();
+    const auto current = toSkMatrix(m);
+    auto       currentBounds = current.mapRect(toSkRect(node->bound()));
+    if (currentBounds.contains(x, y))
+    {
+      nodes.push_back(node);
+    }
+    for (auto c = node->cbegin(); c != node->cend(); ++c)
+    {
+      nodeAtRecursive(static_cast<PaintNode*>(c->get()), x, y, nodes, m);
+    }
+  }
+}
+
+PaintNode* nodeAtRecursive(PaintNode* node, int x, int y, const glm::mat3& matrix)
+{
+  if (node->isVisible())
+  {
+    const auto m = matrix * node->transform().matrix();
+    const auto current = toSkMatrix(m);
+    auto       deviceBounds = current.mapRect(toSkRect(node->frameBound()));
+    DEBUG(
+      "node: %s [%f %f %f %f ]",
+      node->name().c_str(),
+      deviceBounds.fLeft,
+      deviceBounds.fTop,
+      deviceBounds.fRight,
+      deviceBounds.fBottom);
+    if (deviceBounds.contains(x, y))
+    {
+      return node;
+    }
+    for (auto& child : *node)
+    {
+      return nodeAtRecursive(static_cast<PaintNode*>(child.get()), x, y, m);
+    }
+  }
+  return nullptr;
+}
 
 } // namespace
 
@@ -139,11 +190,25 @@ Frame::Frame(VRefCnt* cnt, PaintNodePtr root)
 
 PaintNode* Frame::nodeAt(int x, int y)
 {
-  return 0;
+  if (auto r = root(); r)
+  {
+    ASSERT(root()->parent() == nullptr);
+    auto inv = d_ptr->transform.inverse();
+    auto p = inv * glm::vec3(x, y, 1);
+    auto n = r->nodeAt(p.x, p.y);
+    return n;
+  }
+  return nullptr;
 }
 
-void Frame::nodeAt(int x, int y, std::vector<PaintNode*>& nodes)
+void Frame::nodesAt(int x, int y, std::vector<PaintNode*>& nodes)
 {
+  if (auto r = root(); r)
+  {
+    auto inv = d_ptr->transform.inverse();
+    auto p = inv * glm::vec3(x, y, 1);
+    return r->nodesAt(p.x, p.y, nodes);
+  }
 }
 
 PaintNode* Frame::nodeByID(const std::string& id)

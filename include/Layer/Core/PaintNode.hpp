@@ -102,6 +102,7 @@ protected:
   friend class Renderer;
   friend class MaskObject;
   friend class MaskBuilder;
+  friend class Frame;
 
 private:
   PaintNode(VRefCnt* cnt, const std::string& name, std::unique_ptr<PaintNode__pImpl> impl);
@@ -228,6 +229,9 @@ protected:
   void         paintSelf(Renderer* renderer);
   void         render(Renderer* renderer); // TODO:: should be private access
   virtual void paintEvent(Renderer* renderer);
+
+  PaintNode* nodeAt(int x, int y);
+  void       nodesAt(int x, int y, std::vector<PaintNode*>& nodes);
 
 protected:
   // Mask

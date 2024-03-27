@@ -62,6 +62,22 @@ public:
 
   void setOwnerScene(Scene* owner);
 
+  glm::mat3 matrix() const
+  {
+    auto tx = m_offset.x;
+    auto ty = m_offset.y;
+    auto s = m_scale.second;
+    return glm::mat3{ s, 0, 0, 0, s, 0, tx, ty, 1 };
+  }
+
+  glm::mat3 invMatrix() const
+  {
+    auto tx = -m_offset.x;
+    auto ty = -m_offset.y;
+    auto s = 1.0 / m_scale.second;
+    return glm::mat3{ s, 0, 0, 0, s, 0, tx * s, ty * s, 1 };
+  }
+
   // translation
   glm::vec2 translate() const
   {

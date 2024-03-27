@@ -63,7 +63,7 @@ public:
   PaintNode*         root() const;
 
   PaintNode* nodeAt(int x, int y);
-  void       nodeAt(int x, int y, std::vector<PaintNode*>& nodes);
+  void       nodesAt(int x, int y, std::vector<PaintNode*>& nodes);
   PaintNode* nodeByID(const std::string& id);
 
   void             resetToOrigin(bool enable);

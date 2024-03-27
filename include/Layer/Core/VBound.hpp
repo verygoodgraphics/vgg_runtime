@@ -194,6 +194,16 @@ public:
     return size.x >= 0 && size.y >= 0;
   }
 
+  bool contains(float x, float y) const
+  {
+    return x >= m_topLeft.x && x <= m_bottomRight.x && y >= m_topLeft.y && y <= m_bottomRight.y;
+  }
+
+  bool contains(const glm::vec2& p) const
+  {
+    return contains(p.x, p.y);
+  }
+
 public:
   static Bound makeInfinite()
   {

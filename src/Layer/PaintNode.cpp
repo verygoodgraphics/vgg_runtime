@@ -304,6 +304,41 @@ void PaintNode::paintEvent(Renderer* renderer)
   }
 }
 
+PaintNode* PaintNode::nodeAt(int x, int y)
+{
+  if (!isVisible())
+    return nullptr;
+  auto local = transform().inverse() * glm::vec3(x, y, 1);
+  if (frameBound().contains(local.x, local.y))
+  {
+    for (auto c = rbegin(); c != rend(); ++c)
+    {
+      auto n = static_cast<PaintNode*>(c->get());
+      auto r = n->nodeAt(local.x, local.y);
+      if (r)
+        return r;
+    }
+    return this;
+  }
+  return nullptr;
+}
+
+void PaintNode::nodesAt(int x, int y, std::vector<PaintNode*>& nodes)
+{
+  if (!isVisible())
+    return;
+  auto local = transform().inverse() * glm::vec3(x, y, 1);
+  if (frameBound().contains(local.x, local.y))
+  {
+    for (auto c = rbegin(); c != rend(); ++c)
+    {
+      auto n = static_cast<PaintNode*>(c->get());
+      n->nodesAt(local.x, local.y, nodes);
+    }
+    nodes.push_back(this);
+  }
+}
+
 void PaintNode::setMaskBy(std::vector<std::string> masks)
 {
   VGG_IMPL(PaintNode);
@@ -649,7 +684,9 @@ Bound PaintNode::onRevalidate()
     {
       _->renderable = false;
     }
-    return d_ptr->bound; // old code doesn't support revalidate actually
+    newBound.unionWith(d_ptr->bound);
+    // return newBound;
+    return d_ptr->bound;
   }
   else
   {
@@ -666,7 +703,6 @@ Bound PaintNode::onRevalidate()
       _->renderable = false;
     }
     // shape from the current node by the passed node
-    // newBound.unionWith(bound);
     // return newBound;
     return d_ptr->bound;
   }

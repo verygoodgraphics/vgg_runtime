@@ -22,6 +22,7 @@
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Core/VShape.hpp"
 #include "Layer/Config.hpp"
+#include "Layer/TransformAttribute.hpp"
 
 #include <glm/matrix.hpp>
 
@@ -93,6 +94,7 @@ inline PaintNodePtr makePaintNodePtr(Args&&... args)
 };
 
 class PaintNode__pImpl;
+class Accessor;
 class VGG_EXPORTS PaintNode : public TreeNode
 {
 protected:
@@ -114,7 +116,8 @@ public:
     const std::string& name,
     EObjectType        type,
     const std::string& guid,
-    bool               legacyCode = false);
+    bool               legacyCode = false,
+    bool               initVectorRenderNode = true);
   PaintNode(const PaintNode&) = delete;
   PaintNode& operator=(const PaintNode&) = delete;
   PaintNode(PaintNode&&) = delete;
@@ -179,7 +182,7 @@ public:
 
   const Bound& frameBound() const; // content bound
 
-  void setFrameBound(const Bound& bound);
+  virtual void setFrameBound(const Bound& bound);
 
   const std::string& guid() const;
 
@@ -232,10 +235,12 @@ protected:
   void         render(Renderer* renderer); // TODO:: should be private access
   virtual void onPaint(Renderer* renderer);
 
-  virtual void                  dispatchEvent(void* event);
-  VectorObjectAttibuteAccessor* attributeAccessor();
-  PaintNode*                    nodeAt(int x, int y);
-  void                          nodesAt(int x, int y, std::vector<PaintNode*>& nodes);
+  virtual void dispatchEvent(void* event);
+
+  TransformAttribute* transformAttribute();
+  Accessor*           attributeAccessor();
+  PaintNode*          nodeAt(int x, int y);
+  void                nodesAt(int x, int y, std::vector<PaintNode*>& nodes);
 
 protected:
   // Mask

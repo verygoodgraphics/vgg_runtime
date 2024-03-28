@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/AttributeNode.hpp"
 #include "Layer/ObjectAttribute.hpp"
 #include "Layer/ShapeAttribute.hpp"
 #include "RenderObjectAttribute.hpp"
@@ -26,6 +27,12 @@ class ObjectAttribute;
 class VectorObjectAttribute : public RenderObjectAttribute
 {
 public:
+  VectorObjectAttribute(VRefCnt* cnt, Ref<ShapeAttribute> shapeAttr)
+    : RenderObjectAttribute(cnt)
+    , m_shapeAttr(std::move(shapeAttr))
+  {
+    observe(m_shapeAttr);
+  }
   VectorObjectAttribute(
     VRefCnt*            cnt,
     Ref<ShapeAttribute> shapeAttr,
@@ -43,8 +50,8 @@ public:
     return m_maskFilter;
   }
 
+  VGG_ATTRIBUTE(ObjectAttribute, WeakRef<ObjectAttribute>, m_objectAttribute);
   Bound onRevalidate() override;
-
   VGG_CLASS_MAKE(VectorObjectAttribute);
 
 private:

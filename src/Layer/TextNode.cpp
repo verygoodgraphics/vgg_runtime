@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "Layer/AttributeAccessor.hpp"
 #include "Layer/ParagraphParser.hpp"
+#include "Layer/PaintNodePrivate.hpp"
+#include "Layer/TransformAttribute.hpp"
 #include "ParagraphLayout.hpp"
 #include "ParagraphPainter.hpp"
 #include "VSkFontMgr.hpp"
@@ -93,6 +96,8 @@ public:
   RichTextBlockPtr         paragraphLayout;
   std::optional<glm::vec2> anchor;
 
+  ParagraphAttributeAccessor* accessor;
+
   TextNode__pImpl(TextNode__pImpl&& p) noexcept = default;
   TextNode__pImpl& operator=(TextNode__pImpl&& p) noexcept = delete;
 
@@ -110,16 +115,35 @@ public:
 #endif
 };
 
+constexpr bool TEXT_LEGACY_CODE = false;
 TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
-  : PaintNode(cnt, name, VGG_TEXT, std::move(guid), true)
+  : PaintNode(cnt, name, VGG_TEXT, std::move(guid), TEXT_LEGACY_CODE, false)
   , d_ptr(new TextNode__pImpl(this))
 {
+  if (!TEXT_LEGACY_CODE)
+  {
+    auto t = transformAttribute();
+    t->ref();
+    auto [c, d] =
+      RenderNodeFactory::MakeParagraphRenderNode(nullptr, this, Ref<TransformAttribute>(t));
+    PaintNode::d_ptr->renderNode = std::move(c);
+    d_ptr->accessor = d.get();
+    PaintNode::d_ptr->accessor = std::move(d);
+    observe(PaintNode::d_ptr->renderNode);
+  }
 }
 
 void TextNode::setTextAnchor(glm::vec2 anchor)
 {
   VGG_IMPL(TextNode);
-  _->anchor = anchor;
+  if (TEXT_LEGACY_CODE)
+  {
+    _->anchor = anchor;
+  }
+  else
+  {
+    d_ptr->accessor->paragraph()->setAnchor(anchor);
+  }
 }
 
 void TextNode::setParagraph(
@@ -128,37 +152,78 @@ void TextNode::setParagraph(
   std::vector<ParagraphAttr> parStyle)
 {
   VGG_IMPL(TextNode);
-  if (utf8.empty())
-    return;
-  if (style.empty())
-    style.push_back(TextStyleAttr());
-  if (parStyle.empty())
-    parStyle.push_back(ParagraphAttr());
-  _->paragraphLayout->setText(std::move(utf8));
-  _->paragraphLayout->setTextStyle(std::move(style));
-  _->paragraphLayout->setLineStyle(std::move(parStyle));
+  if (TEXT_LEGACY_CODE)
+  {
+    if (utf8.empty())
+      return;
+    if (style.empty())
+      style.push_back(TextStyleAttr());
+    if (parStyle.empty())
+      parStyle.push_back(ParagraphAttr());
+    _->paragraphLayout->setText(std::move(utf8));
+    _->paragraphLayout->setTextStyle(std::move(style));
+    _->paragraphLayout->setLineStyle(std::move(parStyle));
+  }
+  else
+  {
+    d_ptr->accessor->paragraph()->setParagraph(
+      std::move(utf8),
+      std::move(style),
+      std::move(parStyle));
+  }
+}
+
+Bound TextNode::getPragraphBound() const
+{
+  if (TEXT_LEGACY_CODE)
+  {
+    return PaintNode::frameBound();
+  }
+  else
+  {
+    return d_ptr->accessor->paragraph()->getParagraphBound();
+  }
+}
+
+void TextNode::setParagraphBound(const Bound& bound)
+{
+  PaintNode::setFrameBound(bound);
+  d_ptr->accessor->paragraph()->setParagraphBound(bound);
+}
+
+void TextNode::setFrameBound(const Bound& bound)
+{
+  PaintNode::setFrameBound(bound);
+  if (!TEXT_LEGACY_CODE)
+  {
+    d_ptr->accessor->paragraph()->setParagraphBound(bound);
+  }
 }
 
 void TextNode::setFrameMode(ETextLayoutMode layoutMode)
 {
   VGG_IMPL(TextNode);
-#ifdef USE_SHARED_PTR
-  _->ensureObserve();
-#endif
-  TextLayoutMode mode;
-  switch (layoutMode)
+  if (TEXT_LEGACY_CODE)
   {
-    case TL_FIXED:
-      mode = TextLayoutFixed(frameBound());
-      break;
-    case TL_AUTOWIDTH:
-      mode = TextLayoutAutoWidth();
-      break;
-    case TL_AUTOHEIGHT:
-      mode = TextLayoutAutoHeight(frameBound().width());
-      break;
+    TextLayoutMode mode;
+    switch (layoutMode)
+    {
+      case TL_FIXED:
+        mode = TextLayoutFixed(frameBound());
+        break;
+      case TL_AUTOWIDTH:
+        mode = TextLayoutAutoWidth();
+        break;
+      case TL_AUTOHEIGHT:
+        mode = TextLayoutAutoHeight(frameBound().width());
+        break;
+    }
+    _->paragraphLayout->setTextLayoutMode(mode);
   }
-  _->paragraphLayout->setTextLayoutMode(mode);
+  else
+  {
+    d_ptr->accessor->paragraph()->setFrameMode(layoutMode);
+  }
 }
 
 void TextNode::onDrawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
@@ -181,15 +246,28 @@ void TextNode::setVerticalAlignment(ETextVerticalAlignment vertAlign)
 #ifdef USE_SHARED_PTR
   _->ensureObserve();
 #endif
-  _->paragraphLayout->setVerticalAlignment(vertAlign);
+  if (TEXT_LEGACY_CODE)
+    _->paragraphLayout->setVerticalAlignment(vertAlign);
+  else
+    d_ptr->accessor->paragraph()->setVerticalAlignment(vertAlign);
 }
 
 Bound TextNode::onRevalidate()
 {
   VGG_IMPL(TextNode);
-  auto b = _->painter->revalidate();
-  PaintNode::onRevalidate();
-  return b;
+  if (TEXT_LEGACY_CODE)
+  {
+    auto b = _->painter->revalidate();
+    PaintNode::onRevalidate();
+    return b;
+  }
+  else
+  {
+    auto b = d_ptr->accessor->paragraph()
+               ->revalidate(); // We just revalidate the paragraph attribute so far
+    PaintNode::onRevalidate();
+    return b;
+  }
 }
 
 TextNode::~TextNode() = default;

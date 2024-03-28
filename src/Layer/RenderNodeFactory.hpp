@@ -16,6 +16,7 @@
 #pragma once
 
 #include "DefaultRenderNode.hpp"
+#include "Layer/Core/PaintNode.hpp"
 
 namespace VGG::layer
 {
@@ -24,7 +25,13 @@ class RenderNodeFactory
 {
 public:
   //
-  static Ref<DefaultRenderNode> MakeVectorRenderNode( // NOLINT
+  static std::pair<Ref<DefaultRenderNode>, std::unique_ptr<VectorObjectAttibuteAccessor>>
+  MakeVectorRenderNode( // NOLINT
+    VAllocator*             alloc,
+    PaintNode*              node,
+    Ref<TransformAttribute> transform);
+
+  static Ref<DefaultRenderNode> MakeParagraphRenderNode( // NOLINT
     VAllocator*             alloc,
     PaintNode*              node,
     Ref<TransformAttribute> transform);

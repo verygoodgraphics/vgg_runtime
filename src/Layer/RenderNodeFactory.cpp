@@ -16,15 +16,19 @@
 #include "RenderNodeFactory.hpp"
 
 #include "DefaultRenderNode.hpp"
+#include "Layer/AttributeAccessor.hpp"
+#include "Layer/ParagraphObjectAttribute.hpp"
 #include "Layer/RenderObjectAttribute.hpp"
+#include "Layer/ShapeAttribute.hpp"
 #include "VectorObjectAttribute.hpp"
 namespace VGG::layer
 {
 
-Ref<DefaultRenderNode> RenderNodeFactory::MakeVectorRenderNode( // NOLINT
-  VAllocator*             alloc,
-  PaintNode*              node,
-  Ref<TransformAttribute> transform)
+std::pair<Ref<DefaultRenderNode>, std::unique_ptr<VectorObjectAttibuteAccessor>> RenderNodeFactory::
+  MakeVectorRenderNode( // NOLINT
+    VAllocator*             alloc,
+    PaintNode*              node,
+    Ref<TransformAttribute> transform)
 {
   auto shape = ShapeAttribute::Make(alloc, node);
   auto innerShadow = InnerShadowAttribute::Make(alloc, shape);
@@ -47,9 +51,9 @@ Ref<DefaultRenderNode> RenderNodeFactory::MakeVectorRenderNode( // NOLINT
     alphaMaskAttribute,
     shapeMask,
     shape);
-  result->m_accessor = std::unique_ptr<AttributeAccessor>(new AttributeAccessor(
-    transform,
+  auto aa = std::unique_ptr<VectorObjectAttibuteAccessor>(new VectorObjectAttibuteAccessor(
     shape,
+    transform,
     alphaMaskAttribute,
     shapeMask,
     dropShadow,
@@ -57,6 +61,47 @@ Ref<DefaultRenderNode> RenderNodeFactory::MakeVectorRenderNode( // NOLINT
     object,
     layerPostProcess,
     backgroundBlur));
+  return { result, std::move(aa) };
+}
+
+Ref<DefaultRenderNode> RenderNodeFactory::MakeParagraphRenderNode(
+  VAllocator*             alloc,
+  PaintNode*              node,
+  Ref<TransformAttribute> transform)
+{
+  // auto shape = ShapeAttribute::Make(alloc, node);
+  Ref<ShapeAttribute> shape = nullptr;
+  auto                innerShadow = InnerShadowAttribute::Make(alloc, shape);
+  auto                dropShadow = DropShadowAttribute::Make(alloc, shape);
+  auto                backgroundBlur = BackgroundBlurAttribute::Make(alloc);
+  auto                object = ObjectAttribute::Make(alloc, Ref<RenderObjectAttribute>());
+
+  auto paragraphAttribute = ParagraphObjectAttribute::Make(alloc);
+  object->setRenderObject(paragraphAttribute);
+
+  auto style = StyleObjectAttribute::Make(alloc, innerShadow, dropShadow, object, backgroundBlur);
+  auto layerPostProcess = LayerFXAttribute::Make(alloc, style);
+  auto shapeMask = ShapeMaskAttribute::Make(alloc, node, layerPostProcess);
+  auto alphaMaskAttribute = AlphaMaskAttribute::Make(alloc, node, layerPostProcess);
+  auto result = DefaultRenderNode::Make(
+    alloc,
+    transform,
+    style,
+    layerPostProcess,
+    alphaMaskAttribute,
+    shapeMask,
+    shape);
+  // result->m_accessor = std::unique_ptr<ParagraphAttributeAccessor>(new
+  // ParagraphAttributeAccessor(
+  //   shape,
+  //   transform,
+  //   alphaMaskAttribute,
+  //   shapeMask,
+  //   dropShadow,
+  //   innerShadow,
+  //   object,
+  //   layerPostProcess,
+  //   backgroundBlur));
   return result;
 }
 

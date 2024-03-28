@@ -26,6 +26,7 @@
 #include <glm/matrix.hpp>
 
 #include <memory>
+#include <functional>
 #include <optional>
 #include <string>
 class SkCanvas;
@@ -37,7 +38,7 @@ class Painter;
 namespace VGG::layer
 {
 class Renderer;
-class AttributeAccessor;
+class VectorObjectAttibuteAccessor;
 
 struct ContourOption
 {
@@ -206,7 +207,8 @@ public:
 
   virtual VShape asVisualShape(const Transform* transform);
 
-  AttributeAccessor* attributeAccessor();
+  using EventHandler = std::function<void(VectorObjectAttibuteAccessor*, void*)>;
+  void installPaintNodeEventHandler(EventHandler handler);
 
   ~PaintNode();
 
@@ -228,10 +230,12 @@ protected:
   void         paintChildren(Renderer* renderer);
   void         paintSelf(Renderer* renderer);
   void         render(Renderer* renderer); // TODO:: should be private access
-  virtual void paintEvent(Renderer* renderer);
+  virtual void onPaint(Renderer* renderer);
 
-  PaintNode* nodeAt(int x, int y);
-  void       nodesAt(int x, int y, std::vector<PaintNode*>& nodes);
+  virtual void                  dispatchEvent(void* event);
+  VectorObjectAttibuteAccessor* attributeAccessor();
+  PaintNode*                    nodeAt(int x, int y);
+  void                          nodesAt(int x, int y, std::vector<PaintNode*>& nodes);
 
 protected:
   // Mask

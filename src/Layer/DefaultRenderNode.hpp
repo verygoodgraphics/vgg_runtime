@@ -28,7 +28,7 @@
 namespace VGG::layer
 {
 
-class AttributeAccessor;
+class VectorObjectAttibuteAccessor;
 
 class DefaultRenderNode : public RenderNode
 {
@@ -62,11 +62,6 @@ public:
   }
   Bound onRevalidate() override;
 
-  AttributeAccessor* access()
-  {
-    return m_accessor.get();
-  }
-
   ~DefaultRenderNode();
 
 private:
@@ -88,7 +83,5 @@ private:
   Ref<AlphaMaskAttribute>   m_alphaMaskAttr;
   Ref<ShapeMaskAttribute>   m_shapeMaskAttr;
   sk_sp<SkPicture>          m_picture;
-
-  std::unique_ptr<AttributeAccessor> m_accessor;
 };
 } // namespace VGG::layer

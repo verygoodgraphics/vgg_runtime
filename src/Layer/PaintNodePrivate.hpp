@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/AttributeAccessor.hpp"
 #include "Layer/LayerCache.h"
+#include "Layer/Memory/VAllocator.hpp"
+#include "Layer/RenderObjectAttribute.hpp"
+#include "Layer/TransformAttribute.hpp"
+#include "Layer/VectorObjectAttribute.hpp"
 #include "Renderer.hpp"
 #include "RenderNodeFactory.hpp"
 #include "Guard.hpp"
@@ -171,7 +176,7 @@ public:
   std::optional<VShape>            path;
   bool                             renderable{ false };
   Bound                            bound;
-  Transform                        transform;
+  // Transform                        transform;
   Style                            style;
   std::vector<std::string>         maskedBy;
   std::vector<AlphaMask>           alphaMaskBy;
@@ -182,21 +187,36 @@ public:
   std::array<float, 4> frameRadius{ 0, 0, 0, 0 };
   float                cornerSmooth{ 0 };
 
-  Ref<DefaultRenderNode>                        renderNode;
-  Ref<TransformAttribute>                       transformAttr;
-  std::unique_ptr<VectorObjectAttibuteAccessor> accessor;
+  Ref<DefaultRenderNode>    renderNode;
+  Ref<TransformAttribute>   transformAttr;
+  std::unique_ptr<Accessor> accessor;
 
   sk_sp<SkPicture> picture;
 
-  PaintNode__pImpl(PaintNode* api, EObjectType type, bool legacyCode)
+  PaintNode__pImpl(PaintNode* api, EObjectType type, bool legacyCode, bool init)
     : q_ptr(api)
     , type(type)
     , legacyCode(legacyCode)
   {
     transformAttr = TransformAttribute::Make();
-    std::tie(renderNode, accessor) = RenderNodeFactory::MakeVectorRenderNode(0, api, transformAttr);
-    api->observe(renderNode);
     api->observe(transformAttr);
+
+    if (!legacyCode && init)
+    {
+      // auto shape = ShapeAttribute::Make((VAllocator*)nullptr, api);
+      // auto vectorObject = VectorObjectAttribute::Make((VAllocator*)nullptr, shape);
+      // auto [r, a] =
+      //   RenderNodeFactory::MakeDefaultRenderNode(nullptr, api, transformAttr, vectorObject);
+      // vectorObject->setObjectAttribute(a->styleObject());
+      // accessor = std::make_unique<VectorObjectAttibuteAccessor>(*a, shape);
+      // renderNode = std::move(r);
+
+      auto [c, d] = RenderNodeFactory::MakeVectorRenderNode(nullptr, api, transformAttr);
+      accessor = std::move(d);
+      renderNode = std::move(c);
+    }
+
+    api->observe(renderNode);
   }
 
   void onDrawStyleImpl(

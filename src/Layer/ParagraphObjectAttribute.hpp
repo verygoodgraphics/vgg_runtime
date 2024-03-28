@@ -15,6 +15,8 @@
  */
 
 #pragma once
+#include "Layer/AttributeNode.hpp"
+#include "Layer/Core/VType.hpp"
 #include "RenderObjectAttribute.hpp"
 #include "ParagraphPainter.hpp"
 namespace VGG::layer
@@ -46,6 +48,31 @@ public:
     m_paragraphLayout->setLineStyle(std::move(parStyle));
   }
 
+  VGG_ATTRIBUTE(ParagraphBound, Bound, m_fixedBound);
+
+  void setVerticalAlignment(ETextVerticalAlignment vertAlign)
+  {
+    m_paragraphLayout->setVerticalAlignment(vertAlign);
+  }
+
+  void setFrameMode(ETextLayoutMode layoutMode)
+  {
+    TextLayoutMode mode;
+    switch (layoutMode)
+    {
+      case TL_FIXED:
+        mode = TextLayoutFixed(getParagraphBound());
+        break;
+      case TL_AUTOWIDTH:
+        mode = TextLayoutAutoWidth();
+        break;
+      case TL_AUTOHEIGHT:
+        mode = TextLayoutAutoHeight(getParagraphBound().width());
+        break;
+    }
+    m_paragraphLayout->setTextLayoutMode(mode);
+  }
+
   void setAnchor(const glm::vec2& anchor)
   {
     if (m_anchor && *m_anchor == anchor)
@@ -63,11 +90,12 @@ public:
 
   Bound onRevalidate() override
   {
-    return Bound();
+    return m_painter->revalidate();
   }
 
 private:
   VParagraphPainterPtr     m_painter;
+  Bound                    m_fixedBound;
   RichTextBlockPtr         m_paragraphLayout;
   std::optional<glm::vec2> m_anchor;
 };

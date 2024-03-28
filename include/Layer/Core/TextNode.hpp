@@ -64,8 +64,12 @@ public:
     std::vector<TextStyleAttr> style,
     std::vector<ParagraphAttr> parStyle);
 
-  void setFrameMode(ETextLayoutMode mode);
-  void setVerticalAlignment(ETextVerticalAlignment vertAlign);
+  void  setFrameMode(ETextLayoutMode mode);
+  void  setParagraphBound(const Bound& bound);
+  Bound getPragraphBound() const;
+  void  setVerticalAlignment(ETextVerticalAlignment vertAlign);
+
+  virtual void setFrameBound(const Bound& bound) override;
 
   using EventHandler = std::function<void(const std::string&)>;
 

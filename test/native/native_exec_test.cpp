@@ -1,7 +1,8 @@
 #include "Adapter/NativeExec.hpp"
 
-#include "Application/Environment.hpp"
+#include "Adapter/Environment.hpp"
 #include "Utility/Log.hpp"
+
 #include "test_config.hpp"
 
 #include <gtest/gtest.h>

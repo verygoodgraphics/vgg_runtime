@@ -53,6 +53,7 @@ void UIView::onRender(SkCanvas* canvas)
     }
   }
   AppScene::onRender(canvas);
+  setDirty(false);
 }
 
 bool UIView::onEvent(UEvent evt, void* userData)

@@ -70,6 +70,7 @@ private:
   std::shared_ptr<Mouse> m_mouse;
 
   bool m_isDirty{ false };
+  bool m_isModelDirty{ false };
 
   std::weak_ptr<Listener> m_listener;
 
@@ -92,19 +93,9 @@ public:
     return false;
   }
 
-  bool isDirty()
-  {
-    return m_isEnabled && m_isDirty;
-  }
-  void setDirty(const bool dirty)
-  {
-    if (dirty == m_isDirty)
-    {
-      return;
-    }
-
-    m_isDirty = dirty;
-  }
+  bool isDirty();
+  bool isModelDirty();
+  void resetModelDirty();
 
   void setListener(std::weak_ptr<Listener> listener)
   {
@@ -121,6 +112,7 @@ private:
 
   void updateCursor(EResizePosition mousePosition);
   void didSelectNode(std::weak_ptr<LayoutNode> node);
+  void setDirty(const bool dirty);
 };
 
 } // namespace VGG

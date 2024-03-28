@@ -1,5 +1,5 @@
 {
-  "fileName": "hello-sketch",
+  "fileName": "cltqmjuv403oioopuk90zr86y/import/cltqmjuva03okoopuzwlrlrrg/allow_override_on_and_every_item_on.sketch",
   "fileType": 1,
   "frames": [
     {
@@ -25,20 +25,13 @@
           },
           "class": "symbolInstance",
           "contextSettings": {
-            "blendMode": 0,
+            "blendMode": 27,
             "class": "graphicsContextSettings",
             "isolateBlending": false,
             "opacity": 1.0,
             "transparencyKnockoutGroup": 0
           },
-          "frame": {
-            "class": "rect",
-            "constrainProportions": false,
-            "height": 1518.0,
-            "width": 1533.0,
-            "x": -2294.0,
-            "y": 980.9999999999999
-          },
+          "horizontalConstraint": 5,
           "id": "A1BC91E0-382D-4DE7-BB9C-39580F635365",
           "isLocked": false,
           "maskType": 0,
@@ -167,7 +160,7 @@
               {
                 "center": [
                   0.5,
-                  0.5
+                  -0.5
                 ],
                 "class": "blur",
                 "isEnabled": false,
@@ -183,6 +176,15 @@
             "shadows": []
           },
           "styleEffectMaskArea": 0,
+          "transformedBounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "height": 1518.0,
+            "width": 1533.0,
+            "x": -2294.0,
+            "y": 980.9999999999999
+          },
+          "verticalConstraint": 5,
           "visible": true
         },
         {
@@ -197,20 +199,13 @@
           },
           "class": "symbolInstance",
           "contextSettings": {
-            "blendMode": 0,
+            "blendMode": 27,
             "class": "graphicsContextSettings",
             "isolateBlending": false,
             "opacity": 1.0,
             "transparencyKnockoutGroup": 0
           },
-          "frame": {
-            "class": "rect",
-            "constrainProportions": false,
-            "height": 782.0,
-            "width": 501.0,
-            "x": -687.0,
-            "y": 981.0
-          },
+          "horizontalConstraint": 5,
           "id": "7684E00D-5EB1-4B1A-9F5F-2262D72F15D6",
           "isLocked": false,
           "maskType": 0,
@@ -269,7 +264,7 @@
               {
                 "center": [
                   0.5,
-                  0.5
+                  -0.5
                 ],
                 "class": "blur",
                 "isEnabled": false,
@@ -285,6 +280,15 @@
             "shadows": []
           },
           "styleEffectMaskArea": 0,
+          "transformedBounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "height": 782.0,
+            "width": 501.0,
+            "x": -687.0,
+            "y": 981.0
+          },
+          "verticalConstraint": 5,
           "visible": true
         },
         {
@@ -299,20 +303,13 @@
           },
           "class": "symbolInstance",
           "contextSettings": {
-            "blendMode": 0,
+            "blendMode": 27,
             "class": "graphicsContextSettings",
             "isolateBlending": false,
             "opacity": 1.0,
             "transparencyKnockoutGroup": 0
           },
-          "frame": {
-            "class": "rect",
-            "constrainProportions": false,
-            "height": 198.0,
-            "width": 626.0,
-            "x": -86.0,
-            "y": 942.0
-          },
+          "horizontalConstraint": 5,
           "id": "F4BD062C-2C67-4B37-9911-9FE802354086",
           "isLocked": false,
           "maskType": 0,
@@ -334,7 +331,7 @@
               "objectId": [
                 "95C02DB7-5EC9-4A61-97B1-0FFBE0C30E83"
               ],
-              "overrideName": "attr.*.fills.*.color",
+              "overrideName": "fontAttr.*.fills.*.color",
               "overrideValue": {
                 "alpha": 0.5,
                 "blue": 0.01908801696712621,
@@ -348,7 +345,7 @@
               "objectId": [
                 "95C02DB7-5EC9-4A61-97B1-0FFBE0C30E83"
               ],
-              "overrideName": "attr.*.size",
+              "overrideName": "fontAttr.*.size",
               "overrideValue": 50.0
             },
             {
@@ -356,7 +353,7 @@
               "objectId": [
                 "95C02DB7-5EC9-4A61-97B1-0FFBE0C30E83"
               ],
-              "overrideName": "attr.*.underline",
+              "overrideName": "fontAttr.*.underline",
               "overrideValue": 1
             },
             {
@@ -364,7 +361,7 @@
               "objectId": [
                 "95C02DB7-5EC9-4A61-97B1-0FFBE0C30E83"
               ],
-              "overrideName": "attr.*.linethrough",
+              "overrideName": "fontAttr.*.linethrough",
               "overrideValue": false
             },
             {
@@ -372,7 +369,7 @@
               "objectId": [
                 "95C02DB7-5EC9-4A61-97B1-0FFBE0C30E83"
               ],
-              "overrideName": "attr.*.horizontalAlignment",
+              "overrideName": "horizontalAlignment.*",
               "overrideValue": 2
             },
             {
@@ -388,7 +385,7 @@
               "objectId": [
                 "F052DA2D-69E8-4F54-AB92-F19335E9486F"
               ],
-              "overrideName": "attr.*.underline",
+              "overrideName": "fontAttr.*.underline",
               "overrideValue": 0
             },
             {
@@ -396,7 +393,7 @@
               "objectId": [
                 "F052DA2D-69E8-4F54-AB92-F19335E9486F"
               ],
-              "overrideName": "attr.*.linethrough",
+              "overrideName": "fontAttr.*.linethrough",
               "overrideValue": true
             },
             {
@@ -404,7 +401,7 @@
               "objectId": [
                 "985FEC76-D8E5-4EBF-B119-F26E367F7BC6"
               ],
-              "overrideName": "attr.*.underline",
+              "overrideName": "fontAttr.*.underline",
               "overrideValue": 1
             },
             {
@@ -412,7 +409,7 @@
               "objectId": [
                 "985FEC76-D8E5-4EBF-B119-F26E367F7BC6"
               ],
-              "overrideName": "attr.*.linethrough",
+              "overrideName": "fontAttr.*.linethrough",
               "overrideValue": false
             }
           ],
@@ -421,7 +418,7 @@
               {
                 "center": [
                   0.5,
-                  0.5
+                  -0.5
                 ],
                 "class": "blur",
                 "isEnabled": false,
@@ -437,6 +434,15 @@
             "shadows": []
           },
           "styleEffectMaskArea": 0,
+          "transformedBounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "height": 198.0,
+            "width": 626.0,
+            "x": -86.0,
+            "y": 942.0
+          },
+          "verticalConstraint": 5,
           "visible": true
         },
         {
@@ -451,20 +457,13 @@
           },
           "class": "symbolInstance",
           "contextSettings": {
-            "blendMode": 0,
+            "blendMode": 27,
             "class": "graphicsContextSettings",
             "isolateBlending": false,
             "opacity": 1.0,
             "transparencyKnockoutGroup": 0
           },
-          "frame": {
-            "class": "rect",
-            "constrainProportions": false,
-            "height": 2363.0,
-            "width": 2751.0,
-            "x": -2479.0,
-            "y": -727.0
-          },
+          "horizontalConstraint": 5,
           "id": "1E285B7D-5E0A-4926-8638-F6C7952EC3FB",
           "isLocked": false,
           "maskType": 0,
@@ -519,7 +518,7 @@
               {
                 "center": [
                   0.5,
-                  0.5
+                  -0.5
                 ],
                 "class": "blur",
                 "isEnabled": false,
@@ -535,6 +534,15 @@
             "shadows": []
           },
           "styleEffectMaskArea": 0,
+          "transformedBounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "height": 2363.0,
+            "width": 2751.0,
+            "x": -2479.0,
+            "y": -727.0
+          },
+          "verticalConstraint": 5,
           "visible": true
         },
         {
@@ -549,20 +557,13 @@
           },
           "class": "symbolInstance",
           "contextSettings": {
-            "blendMode": 0,
+            "blendMode": 27,
             "class": "graphicsContextSettings",
             "isolateBlending": false,
             "opacity": 1.0,
             "transparencyKnockoutGroup": 0
           },
-          "frame": {
-            "class": "rect",
-            "constrainProportions": false,
-            "height": 959.0,
-            "width": 796.0,
-            "x": 545.0,
-            "y": -862.0
-          },
+          "horizontalConstraint": 5,
           "id": "98C9A450-A48C-4072-B310-E9E80A20F309",
           "isLocked": false,
           "maskType": 0,
@@ -643,7 +644,7 @@
               {
                 "center": [
                   0.5,
-                  0.5
+                  -0.5
                 ],
                 "class": "blur",
                 "isEnabled": false,
@@ -659,6 +660,15 @@
             "shadows": []
           },
           "styleEffectMaskArea": 0,
+          "transformedBounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "height": 959.0,
+            "width": 796.0,
+            "x": 545.0,
+            "y": -862.0
+          },
+          "verticalConstraint": 5,
           "visible": true
         },
         {
@@ -673,20 +683,13 @@
           },
           "class": "symbolInstance",
           "contextSettings": {
-            "blendMode": 0,
+            "blendMode": 27,
             "class": "graphicsContextSettings",
             "isolateBlending": false,
             "opacity": 1.0,
             "transparencyKnockoutGroup": 0
           },
-          "frame": {
-            "class": "rect",
-            "constrainProportions": false,
-            "height": 959.0,
-            "width": 796.0,
-            "x": 500.0,
-            "y": -2015.0
-          },
+          "horizontalConstraint": 5,
           "id": "B48DA5D8-026E-4807-B226-0D2CDDA08A71",
           "isLocked": false,
           "maskType": 0,
@@ -726,7 +729,7 @@
               {
                 "center": [
                   0.5,
-                  0.5
+                  -0.5
                 ],
                 "class": "blur",
                 "isEnabled": false,
@@ -742,6 +745,15 @@
             "shadows": []
           },
           "styleEffectMaskArea": 0,
+          "transformedBounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "height": 959.0,
+            "width": 796.0,
+            "x": 500.0,
+            "y": -2015.0
+          },
+          "verticalConstraint": 5,
           "visible": true
         },
         {
@@ -756,20 +768,13 @@
           },
           "class": "symbolInstance",
           "contextSettings": {
-            "blendMode": 0,
+            "blendMode": 27,
             "class": "graphicsContextSettings",
             "isolateBlending": false,
             "opacity": 1.0,
             "transparencyKnockoutGroup": 0
           },
-          "frame": {
-            "class": "rect",
-            "constrainProportions": false,
-            "height": 1142.0,
-            "width": 776.0,
-            "x": -2017.0,
-            "y": -3528.0
-          },
+          "horizontalConstraint": 5,
           "id": "D9BE00F2-2EE4-4AD5-82E4-8CF24CE87C93",
           "isLocked": false,
           "maskType": 0,
@@ -807,7 +812,7 @@
                 "0B8DCD1B-9BEA-4DC3-88B9-D6A0BC5DD9C3",
                 "F052DA2D-69E8-4F54-AB92-F19335E9486F"
               ],
-              "overrideName": "attr.*.fills.*.color",
+              "overrideName": "fontAttr.*.fills.*.color",
               "overrideValue": {
                 "alpha": 0.5,
                 "blue": 1.0,
@@ -823,7 +828,7 @@
                 "0B8DCD1B-9BEA-4DC3-88B9-D6A0BC5DD9C3",
                 "985FEC76-D8E5-4EBF-B119-F26E367F7BC6"
               ],
-              "overrideName": "attr.*.fills.*.color",
+              "overrideName": "fontAttr.*.fills.*.color",
               "overrideValue": {
                 "alpha": 1.0,
                 "blue": 0.0,
@@ -838,7 +843,7 @@
               {
                 "center": [
                   0.5,
-                  0.5
+                  -0.5
                 ],
                 "class": "blur",
                 "isEnabled": false,
@@ -854,6 +859,15 @@
             "shadows": []
           },
           "styleEffectMaskArea": 0,
+          "transformedBounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "height": 1142.0,
+            "width": 776.0,
+            "x": -2017.0,
+            "y": -3528.0
+          },
+          "verticalConstraint": 5,
           "visible": true
         },
         {
@@ -868,20 +882,13 @@
           },
           "class": "symbolInstance",
           "contextSettings": {
-            "blendMode": 0,
+            "blendMode": 27,
             "class": "graphicsContextSettings",
             "isolateBlending": false,
             "opacity": 1.0,
             "transparencyKnockoutGroup": 0
           },
-          "frame": {
-            "class": "rect",
-            "constrainProportions": false,
-            "height": 1777.0,
-            "width": 1310.0,
-            "x": -528.0,
-            "y": -3235.0
-          },
+          "horizontalConstraint": 5,
           "id": "274AE754-141F-41FA-97CA-9BDCA1B3CA91",
           "isLocked": false,
           "maskType": 0,
@@ -942,7 +949,7 @@
               {
                 "center": [
                   0.5,
-                  0.5
+                  -0.5
                 ],
                 "class": "blur",
                 "isEnabled": false,
@@ -958,6 +965,15 @@
             "shadows": []
           },
           "styleEffectMaskArea": 0,
+          "transformedBounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "height": 1777.0,
+            "width": 1310.0,
+            "x": -528.0,
+            "y": -3235.0
+          },
+          "verticalConstraint": 5,
           "visible": true
         }
       ],
@@ -968,14 +984,6 @@
         "isolateBlending": false,
         "opacity": 1.0,
         "transparencyKnockoutGroup": 0
-      },
-      "frame": {
-        "class": "rect",
-        "constrainProportions": false,
-        "height": 5993.0,
-        "width": 3820.0,
-        "x": -2479.0,
-        "y": 981.0
       },
       "id": "1",
       "isLocked": false,
@@ -999,6 +1007,14 @@
         "shadows": []
       },
       "styleEffectMaskArea": 0,
+      "transformedBounds": {
+        "class": "rect",
+        "constrainProportions": false,
+        "height": 5993.0,
+        "width": 3820.0,
+        "x": -2479.0,
+        "y": 981.0
+      },
       "visible": true
     },
     {
@@ -1035,20 +1051,13 @@
               },
               "class": "path",
               "contextSettings": {
-                "blendMode": 0,
+                "blendMode": 27,
                 "class": "graphicsContextSettings",
                 "isolateBlending": false,
                 "opacity": 1.0,
                 "transparencyKnockoutGroup": 0
               },
-              "frame": {
-                "class": "rect",
-                "constrainProportions": false,
-                "height": 405.0,
-                "width": 325.0,
-                "x": 0.0,
-                "y": -157.0
-              },
+              "horizontalConstraint": 5,
               "id": "FB099C6B-9E82-43D9-84EE-909F6D602498",
               "isLocked": false,
               "maskType": 0,
@@ -1063,7 +1072,6 @@
               "name": "Star",
               "outlineMaskBy": [],
               "overflow": 1,
-              "pathType": 5,
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -1077,6 +1085,7 @@
                         {
                           "class": "pointAttr",
                           "cornerStyle": 0,
+                          "markType": 0,
                           "point": [
                             162.5,
                             -303.75
@@ -1158,6 +1167,7 @@
                         {
                           "class": "pointAttr",
                           "cornerStyle": 0,
+                          "markType": 0,
                           "point": [
                             258.0151034975269,
                             -366.32594136092683
@@ -1175,7 +1185,7 @@
                   {
                     "center": [
                       0.5,
-                      0.5
+                      -0.5
                     ],
                     "class": "blur",
                     "isEnabled": true,
@@ -1204,7 +1214,6 @@
                     },
                     "dashedOffset": 0.0,
                     "dashedPattern": [],
-                    "endMarkerType": 0,
                     "fillType": 0,
                     "flat": 0.0,
                     "gradient": {
@@ -1213,9 +1222,8 @@
                         "class": "gradientLinear",
                         "from": [
                           0.5,
-                          0.0
+                          -0.0
                         ],
-                        "invert": false,
                         "stops": [
                           {
                             "class": "gradientStop",
@@ -1244,7 +1252,7 @@
                         ],
                         "to": [
                           0.5,
-                          1.0
+                          -1.0
                         ]
                       }
                     },
@@ -1253,7 +1261,6 @@
                     "lineJoinStyle": 0,
                     "miterLimit": 10.0,
                     "position": 2,
-                    "startMarkerType": 0,
                     "style": 0,
                     "thickness": 10
                   }
@@ -1283,9 +1290,8 @@
                         "class": "gradientLinear",
                         "from": [
                           0.5,
-                          0.0
+                          -0.0
                         ],
-                        "invert": false,
                         "stops": [
                           {
                             "class": "gradientStop",
@@ -1314,7 +1320,7 @@
                         ],
                         "to": [
                           0.5,
-                          1.0
+                          -1.0
                         ]
                       }
                     },
@@ -1343,9 +1349,8 @@
                         "class": "gradientLinear",
                         "from": [
                           0.5,
-                          0.0
+                          -0.0
                         ],
-                        "invert": false,
                         "stops": [
                           {
                             "class": "gradientStop",
@@ -1374,7 +1379,7 @@
                         ],
                         "to": [
                           0.5,
-                          1.0
+                          -1.0
                         ]
                       }
                     },
@@ -1403,9 +1408,8 @@
                         "class": "gradientLinear",
                         "from": [
                           0.5,
-                          0.0
+                          -0.0
                         ],
-                        "invert": false,
                         "stops": [
                           {
                             "class": "gradientStop",
@@ -1434,7 +1438,7 @@
                         ],
                         "to": [
                           0.5,
-                          1.0
+                          -1.0
                         ]
                       }
                     },
@@ -1442,18 +1446,9 @@
                     "pattern": {
                       "class": "pattern",
                       "instance": {
-                        "class": "patternImage",
-                        "fillType": 1,
+                        "class": "patternImageFill",
                         "imageFileName": "resources/853732577995ec08625706620b0235b0184b90e8.pdf",
-                        "imageTileMirrored": false,
-                        "matrix": [
-                          1.0,
-                          0.0,
-                          0.0,
-                          1.0,
-                          0.0,
-                          0.0
-                        ]
+                        "rotation": 0
                       }
                     }
                   },
@@ -1480,9 +1475,8 @@
                         "class": "gradientLinear",
                         "from": [
                           0.5,
-                          0.0
+                          -0.0
                         ],
-                        "invert": false,
                         "stops": [
                           {
                             "class": "gradientStop",
@@ -1511,7 +1505,7 @@
                         ],
                         "to": [
                           0.5,
-                          1.0
+                          -1.0
                         ]
                       }
                     },
@@ -1539,7 +1533,7 @@
                     "inner": false,
                     "isEnabled": true,
                     "offsetX": 10.0,
-                    "offsetY": 20.0,
+                    "offsetY": -20.0,
                     "spread": 10.0
                   },
                   {
@@ -1562,7 +1556,7 @@
                     "inner": false,
                     "isEnabled": true,
                     "offsetX": 40.0,
-                    "offsetY": 50.0,
+                    "offsetY": -50.0,
                     "spread": 10.0
                   },
                   {
@@ -1585,7 +1579,7 @@
                     "inner": true,
                     "isEnabled": true,
                     "offsetX": 20.0,
-                    "offsetY": 30.0,
+                    "offsetY": -30.0,
                     "spread": 10.0
                   },
                   {
@@ -1608,31 +1602,33 @@
                     "inner": true,
                     "isEnabled": true,
                     "offsetX": 0.0,
-                    "offsetY": 1.0,
+                    "offsetY": -1.0,
                     "spread": 20.0
                   }
                 ]
               },
               "styleEffectMaskArea": 0,
+              "transformedBounds": {
+                "class": "rect",
+                "constrainProportions": false,
+                "height": 405.0,
+                "width": 325.0,
+                "x": 0.0,
+                "y": -157.0
+              },
+              "verticalConstraint": 5,
               "visible": true
             }
           ],
           "class": "symbolMaster",
           "contextSettings": {
-            "blendMode": 0,
+            "blendMode": 27,
             "class": "graphicsContextSettings",
             "isolateBlending": false,
             "opacity": 1.0,
             "transparencyKnockoutGroup": 0
           },
-          "frame": {
-            "class": "rect",
-            "constrainProportions": false,
-            "height": 562.0,
-            "width": 606.0,
-            "x": -766.0,
-            "y": 1122.0
-          },
+          "horizontalConstraint": 5,
           "id": "59B5C63E-4B01-4D1F-8D5B-459FE06E638C",
           "isLocked": false,
           "maskType": 0,
@@ -1647,12 +1643,13 @@
           "name": "Master-Path",
           "outlineMaskBy": [],
           "overflow": 2,
+          "resizesContent": 1,
           "style": {
             "blurs": [
               {
                 "center": [
                   0.5,
-                  0.5
+                  -0.5
                 ],
                 "class": "blur",
                 "isEnabled": false,
@@ -1688,6 +1685,15 @@
             "shadows": []
           },
           "styleEffectMaskArea": 0,
+          "transformedBounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "height": 562.0,
+            "width": 606.0,
+            "x": -766.0,
+            "y": 1122.0
+          },
+          "verticalConstraint": 5,
           "visible": true
         },
         {
@@ -1713,35 +1719,26 @@
               },
               "class": "image",
               "contextSettings": {
-                "blendMode": 0,
+                "blendMode": 27,
                 "class": "graphicsContextSettings",
                 "isolateBlending": false,
                 "opacity": 1.0,
                 "transparencyKnockoutGroup": 0
               },
               "fillReplacesImage": false,
-              "frame": {
-                "class": "rect",
-                "constrainProportions": true,
-                "height": 319.0,
-                "width": 319.0,
-                "x": 0.0,
-                "y": -193.0
-              },
+              "horizontalConstraint": 5,
               "id": "A5C629DE-9983-48B6-94B6-3C08557C841F",
-              "imageAdjust": {
-                "class": "imageAdjust",
-                "instance": {
-                  "brightness": 0.0,
-                  "class": "colorControls",
-                  "contrast": 1.0,
-                  "hue": 0.0,
-                  "isEnabled": false,
-                  "saturation": 1.0
-                }
-              },
               "imageFileName": "resources/acf8882c350632bb72770bbf67ac7f5861fd067f.png",
+              "imageFilters": {
+                "class": "imageFilters",
+                "contrast": 0.0,
+                "exposure": 0.0,
+                "hue": 0.0,
+                "isEnabled": false,
+                "saturation": 0.0
+              },
               "isLocked": false,
+              "keepShapeWhenResize": true,
               "maskType": 0,
               "matrix": [
                 1.0,
@@ -1759,7 +1756,7 @@
                   {
                     "center": [
                       0.5,
-                      0.5
+                      -0.5
                     ],
                     "class": "blur",
                     "isEnabled": false,
@@ -1788,7 +1785,6 @@
                     },
                     "dashedOffset": 0.0,
                     "dashedPattern": [],
-                    "endMarkerType": 0,
                     "fillType": 0,
                     "flat": 0.0,
                     "gradient": {
@@ -1797,9 +1793,8 @@
                         "class": "gradientLinear",
                         "from": [
                           0.5,
-                          0.0
+                          -0.0
                         ],
-                        "invert": false,
                         "stops": [
                           {
                             "class": "gradientStop",
@@ -1828,7 +1823,7 @@
                         ],
                         "to": [
                           0.5,
-                          1.0
+                          -1.0
                         ]
                       }
                     },
@@ -1837,7 +1832,6 @@
                     "lineJoinStyle": 0,
                     "miterLimit": 10.0,
                     "position": 0,
-                    "startMarkerType": 0,
                     "style": 0,
                     "thickness": 10
                   }
@@ -1867,9 +1861,8 @@
                         "class": "gradientLinear",
                         "from": [
                           0.5,
-                          0.0
+                          -0.0
                         ],
-                        "invert": false,
                         "stops": [
                           {
                             "class": "gradientStop",
@@ -1898,7 +1891,7 @@
                         ],
                         "to": [
                           0.5,
-                          1.0
+                          -1.0
                         ]
                       }
                     },
@@ -1908,25 +1901,27 @@
                 "shadows": []
               },
               "styleEffectMaskArea": 0,
+              "transformedBounds": {
+                "class": "rect",
+                "constrainProportions": true,
+                "height": 319.0,
+                "width": 319.0,
+                "x": 0.0,
+                "y": -193.0
+              },
+              "verticalConstraint": 5,
               "visible": true
             }
           ],
           "class": "symbolMaster",
           "contextSettings": {
-            "blendMode": 0,
+            "blendMode": 27,
             "class": "graphicsContextSettings",
             "isolateBlending": false,
             "opacity": 1.0,
             "transparencyKnockoutGroup": 0
           },
-          "frame": {
-            "class": "rect",
-            "constrainProportions": false,
-            "height": 512.0,
-            "width": 512.0,
-            "x": -96.0,
-            "y": 1097.0
-          },
+          "horizontalConstraint": 5,
           "id": "87621494-BE66-4837-9F83-EE3D6390C1D6",
           "isLocked": false,
           "maskType": 0,
@@ -1941,12 +1936,13 @@
           "name": "Master-Image",
           "outlineMaskBy": [],
           "overflow": 2,
+          "resizesContent": 1,
           "style": {
             "blurs": [
               {
                 "center": [
                   0.5,
-                  0.5
+                  -0.5
                 ],
                 "class": "blur",
                 "isEnabled": false,
@@ -1982,6 +1978,15 @@
             "shadows": []
           },
           "styleEffectMaskArea": 0,
+          "transformedBounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "height": 512.0,
+            "width": 512.0,
+            "x": -96.0,
+            "y": 1097.0
+          },
+          "verticalConstraint": 5,
           "visible": true
         },
         {
@@ -1997,9 +2002,25 @@
           "childObjects": [
             {
               "alphaMaskBy": [],
-              "attr": [
+              "bounds": {
+                "class": "rect",
+                "constrainProportions": false,
+                "height": 100.0,
+                "width": 549.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "class": "text",
+              "content": "Type something",
+              "contextSettings": {
+                "blendMode": 27,
+                "class": "graphicsContextSettings",
+                "isolateBlending": false,
+                "opacity": 1.0,
+                "transparencyKnockoutGroup": 0
+              },
+              "fontAttr": [
                 {
-                  "baseline": 0,
                   "baselineShift": 0.0,
                   "class": "fontAttr",
                   "fillUseType": 1,
@@ -2024,18 +2045,16 @@
                       "isEnabled": true
                     }
                   ],
-                  "horizontalAlignment": 0,
+                  "fontVariantPosition": 0,
                   "horizontalScale": 1.0,
-                  "kerning": false,
                   "length": 14,
-                  "letterSpacing": 0.0,
-                  "lettertransform": 0,
-                  "lineSpace": 24.0,
+                  "letterSpacingValue": 0.0,
+                  "lineSpacingValue": 90.0,
                   "linethrough": false,
                   "name": "PingFangHK-Semibold",
-                  "proportionalSpacing": 0.0,
                   "rotate": 0.0,
                   "size": 72.0,
+                  "textCase": 0,
                   "textParagraph": {
                     "class": "textParagraph",
                     "paragraphSpacing": 0.0
@@ -2044,34 +2063,14 @@
                   "verticalScale": 1.0
                 }
               ],
-              "bounds": {
-                "class": "rect",
-                "constrainProportions": false,
-                "height": 100.0,
-                "width": 549.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "class": "text",
-              "content": "Type something",
-              "contextSettings": {
-                "blendMode": 0,
-                "class": "graphicsContextSettings",
-                "isolateBlending": false,
-                "opacity": 1.0,
-                "transparencyKnockoutGroup": 0
-              },
-              "frame": {
-                "class": "rect",
-                "constrainProportions": false,
-                "height": 100.0,
-                "width": 549.0,
-                "x": 16.0,
-                "y": 0.0
-              },
               "frameMode": 1,
+              "horizontalAlignment": [
+                0
+              ],
+              "horizontalConstraint": 6,
               "id": "95C02DB7-5EC9-4A61-97B1-0FFBE0C30E83",
               "isLocked": false,
+              "keepShapeWhenResize": true,
               "maskType": 0,
               "matrix": [
                 1.0,
@@ -2083,13 +2082,13 @@
               ],
               "name": "Type something",
               "outlineMaskBy": [],
-              "overflow": 1,
+              "overflow": 2,
               "style": {
                 "blurs": [
                   {
                     "center": [
                       0.5,
-                      0.5
+                      -0.5
                     ],
                     "class": "blur",
                     "isEnabled": false,
@@ -2105,14 +2104,39 @@
                 "shadows": []
               },
               "styleEffectMaskArea": 0,
+              "transformedBounds": {
+                "class": "rect",
+                "constrainProportions": false,
+                "height": 100.0,
+                "width": 549.0,
+                "x": 16.0,
+                "y": 0.0
+              },
               "verticalAlignment": 0,
+              "verticalConstraint": 6,
               "visible": true
             },
             {
               "alphaMaskBy": [],
-              "attr": [
+              "bounds": {
+                "class": "rect",
+                "constrainProportions": false,
+                "height": 100.0,
+                "width": 163.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "class": "text",
+              "content": "hello",
+              "contextSettings": {
+                "blendMode": 27,
+                "class": "graphicsContextSettings",
+                "isolateBlending": false,
+                "opacity": 1.0,
+                "transparencyKnockoutGroup": 0
+              },
+              "fontAttr": [
                 {
-                  "baseline": 0,
                   "baselineShift": 0.0,
                   "class": "fontAttr",
                   "fillUseType": 1,
@@ -2137,18 +2161,16 @@
                       "isEnabled": true
                     }
                   ],
-                  "horizontalAlignment": 0,
+                  "fontVariantPosition": 0,
                   "horizontalScale": 1.0,
-                  "kerning": false,
                   "length": 5,
-                  "letterSpacing": 0.0,
-                  "lettertransform": 0,
-                  "lineSpace": 24.0,
+                  "letterSpacingValue": 0.0,
+                  "lineSpacingValue": 90.0,
                   "linethrough": false,
                   "name": "PingFangHK-Semibold",
-                  "proportionalSpacing": 0.0,
                   "rotate": 0.0,
                   "size": 72.0,
+                  "textCase": 0,
                   "textParagraph": {
                     "class": "textParagraph",
                     "paragraphSpacing": 0.0
@@ -2157,34 +2179,14 @@
                   "verticalScale": 1.0
                 }
               ],
-              "bounds": {
-                "class": "rect",
-                "constrainProportions": false,
-                "height": 100.0,
-                "width": 163.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "class": "text",
-              "content": "hello",
-              "contextSettings": {
-                "blendMode": 0,
-                "class": "graphicsContextSettings",
-                "isolateBlending": false,
-                "opacity": 1.0,
-                "transparencyKnockoutGroup": 0
-              },
-              "frame": {
-                "class": "rect",
-                "constrainProportions": false,
-                "height": 100.0,
-                "width": 163.0,
-                "x": 70.0,
-                "y": -98.0
-              },
               "frameMode": 0,
+              "horizontalAlignment": [
+                0
+              ],
+              "horizontalConstraint": 6,
               "id": "F052DA2D-69E8-4F54-AB92-F19335E9486F",
               "isLocked": false,
+              "keepShapeWhenResize": true,
               "maskType": 0,
               "matrix": [
                 1.0,
@@ -2202,7 +2204,7 @@
                   {
                     "center": [
                       0.5,
-                      0.5
+                      -0.5
                     ],
                     "class": "blur",
                     "isEnabled": false,
@@ -2218,14 +2220,39 @@
                 "shadows": []
               },
               "styleEffectMaskArea": 0,
+              "transformedBounds": {
+                "class": "rect",
+                "constrainProportions": false,
+                "height": 100.0,
+                "width": 163.0,
+                "x": 70.0,
+                "y": -98.0
+              },
               "verticalAlignment": 0,
+              "verticalConstraint": 6,
               "visible": true
             },
             {
               "alphaMaskBy": [],
-              "attr": [
+              "bounds": {
+                "class": "rect",
+                "constrainProportions": false,
+                "height": 100.0,
+                "width": 128.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "class": "text",
+              "content": "bad",
+              "contextSettings": {
+                "blendMode": 27,
+                "class": "graphicsContextSettings",
+                "isolateBlending": false,
+                "opacity": 1.0,
+                "transparencyKnockoutGroup": 0
+              },
+              "fontAttr": [
                 {
-                  "baseline": 0,
                   "baselineShift": 0.0,
                   "class": "fontAttr",
                   "fillUseType": 1,
@@ -2250,18 +2277,16 @@
                       "isEnabled": true
                     }
                   ],
-                  "horizontalAlignment": 0,
+                  "fontVariantPosition": 0,
                   "horizontalScale": 1.0,
-                  "kerning": false,
                   "length": 3,
-                  "letterSpacing": 0.0,
-                  "lettertransform": 0,
-                  "lineSpace": 24.0,
+                  "letterSpacingValue": 0.0,
+                  "lineSpacingValue": 90.0,
                   "linethrough": true,
                   "name": "PingFangHK-Semibold",
-                  "proportionalSpacing": 0.0,
                   "rotate": 0.0,
                   "size": 72.0,
+                  "textCase": 0,
                   "textParagraph": {
                     "class": "textParagraph",
                     "paragraphSpacing": 0.0
@@ -2270,34 +2295,14 @@
                   "verticalScale": 1.0
                 }
               ],
-              "bounds": {
-                "class": "rect",
-                "constrainProportions": false,
-                "height": 100.0,
-                "width": 128.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "class": "text",
-              "content": "bad",
-              "contextSettings": {
-                "blendMode": 0,
-                "class": "graphicsContextSettings",
-                "isolateBlending": false,
-                "opacity": 1.0,
-                "transparencyKnockoutGroup": 0
-              },
-              "frame": {
-                "class": "rect",
-                "constrainProportions": false,
-                "height": 100.0,
-                "width": 128.0,
-                "x": 342.0,
-                "y": -98.0
-              },
               "frameMode": 1,
+              "horizontalAlignment": [
+                0
+              ],
+              "horizontalConstraint": 6,
               "id": "985FEC76-D8E5-4EBF-B119-F26E367F7BC6",
               "isLocked": false,
+              "keepShapeWhenResize": true,
               "maskType": 0,
               "matrix": [
                 1.0,
@@ -2309,13 +2314,13 @@
               ],
               "name": "bad",
               "outlineMaskBy": [],
-              "overflow": 1,
+              "overflow": 2,
               "style": {
                 "blurs": [
                   {
                     "center": [
                       0.5,
-                      0.5
+                      -0.5
                     ],
                     "class": "blur",
                     "isEnabled": false,
@@ -2331,26 +2336,28 @@
                 "shadows": []
               },
               "styleEffectMaskArea": 0,
+              "transformedBounds": {
+                "class": "rect",
+                "constrainProportions": false,
+                "height": 100.0,
+                "width": 128.0,
+                "x": 342.0,
+                "y": -98.0
+              },
               "verticalAlignment": 0,
+              "verticalConstraint": 6,
               "visible": true
             }
           ],
           "class": "symbolMaster",
           "contextSettings": {
-            "blendMode": 0,
+            "blendMode": 27,
             "class": "graphicsContextSettings",
             "isolateBlending": false,
             "opacity": 1.0,
             "transparencyKnockoutGroup": 0
           },
-          "frame": {
-            "class": "rect",
-            "constrainProportions": false,
-            "height": 198.0,
-            "width": 626.0,
-            "x": 527.0,
-            "y": 1061.0
-          },
+          "horizontalConstraint": 5,
           "id": "E6687A9D-5F3C-49F7-90BB-F19DBC9A956C",
           "isLocked": false,
           "maskType": 0,
@@ -2365,12 +2372,13 @@
           "name": "Master-Text",
           "outlineMaskBy": [],
           "overflow": 2,
+          "resizesContent": 1,
           "style": {
             "blurs": [
               {
                 "center": [
                   0.5,
-                  0.5
+                  -0.5
                 ],
                 "class": "blur",
                 "isEnabled": false,
@@ -2406,6 +2414,15 @@
             "shadows": []
           },
           "styleEffectMaskArea": 0,
+          "transformedBounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "height": 198.0,
+            "width": 626.0,
+            "x": 527.0,
+            "y": 1061.0
+          },
+          "verticalConstraint": 5,
           "visible": true
         },
         {
@@ -2431,20 +2448,13 @@
               },
               "class": "symbolInstance",
               "contextSettings": {
-                "blendMode": 0,
+                "blendMode": 27,
                 "class": "graphicsContextSettings",
                 "isolateBlending": false,
                 "opacity": 1.0,
                 "transparencyKnockoutGroup": 0
               },
-              "frame": {
-                "class": "rect",
-                "constrainProportions": false,
-                "height": 198.0,
-                "width": 626.0,
-                "x": 50.0,
-                "y": -51.0
-              },
+              "horizontalConstraint": 5,
               "id": "0B8DCD1B-9BEA-4DC3-88B9-D6A0BC5DD9C3",
               "isLocked": false,
               "maskType": 0,
@@ -2491,7 +2501,7 @@
                   {
                     "center": [
                       0.5,
-                      0.5
+                      -0.5
                     ],
                     "class": "blur",
                     "isEnabled": false,
@@ -2507,6 +2517,15 @@
                 "shadows": []
               },
               "styleEffectMaskArea": 0,
+              "transformedBounds": {
+                "class": "rect",
+                "constrainProportions": false,
+                "height": 198.0,
+                "width": 626.0,
+                "x": 50.0,
+                "y": -51.0
+              },
+              "verticalConstraint": 5,
               "visible": true
             },
             {
@@ -2521,20 +2540,13 @@
               },
               "class": "symbolInstance",
               "contextSettings": {
-                "blendMode": 0,
+                "blendMode": 27,
                 "class": "graphicsContextSettings",
                 "isolateBlending": false,
                 "opacity": 1.0,
                 "transparencyKnockoutGroup": 0
               },
-              "frame": {
-                "class": "rect",
-                "constrainProportions": false,
-                "height": 562.0,
-                "width": 606.0,
-                "x": 50.0,
-                "y": -363.0
-              },
+              "horizontalConstraint": 5,
               "id": "651675C7-452D-48D3-A84A-A6CF6796E3B3",
               "isLocked": false,
               "maskType": 0,
@@ -2599,7 +2611,7 @@
                   {
                     "center": [
                       0.5,
-                      0.5
+                      -0.5
                     ],
                     "class": "blur",
                     "isEnabled": false,
@@ -2615,6 +2627,15 @@
                 "shadows": []
               },
               "styleEffectMaskArea": 0,
+              "transformedBounds": {
+                "class": "rect",
+                "constrainProportions": false,
+                "height": 562.0,
+                "width": 606.0,
+                "x": 50.0,
+                "y": -363.0
+              },
+              "verticalConstraint": 5,
               "visible": true
             },
             {
@@ -2629,20 +2650,13 @@
               },
               "class": "path",
               "contextSettings": {
-                "blendMode": 0,
+                "blendMode": 27,
                 "class": "graphicsContextSettings",
                 "isolateBlending": false,
                 "opacity": 1.0,
                 "transparencyKnockoutGroup": 0
               },
-              "frame": {
-                "class": "rect",
-                "constrainProportions": false,
-                "height": 83.0,
-                "width": 75.0,
-                "x": 581.0,
-                "y": -249.0
-              },
+              "horizontalConstraint": 5,
               "id": "31757F0E-A99C-447D-BE5C-BF84EC724F0B",
               "isLocked": false,
               "maskType": 0,
@@ -2657,7 +2671,6 @@
               "name": "Rectangle1",
               "outlineMaskBy": [],
               "overflow": 1,
-              "pathType": 0,
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -2671,6 +2684,7 @@
                         {
                           "class": "pointAttr",
                           "cornerStyle": 0,
+                          "markType": 0,
                           "point": [
                             0.0,
                             0.0
@@ -2698,6 +2712,7 @@
                         {
                           "class": "pointAttr",
                           "cornerStyle": 0,
+                          "markType": 0,
                           "point": [
                             0.0,
                             -83.0
@@ -2715,7 +2730,7 @@
                   {
                     "center": [
                       0.5,
-                      0.5
+                      -0.5
                     ],
                     "class": "blur",
                     "isEnabled": false,
@@ -2744,7 +2759,6 @@
                     },
                     "dashedOffset": 0.0,
                     "dashedPattern": [],
-                    "endMarkerType": 0,
                     "fillType": 0,
                     "flat": 0.0,
                     "gradient": {
@@ -2753,9 +2767,8 @@
                         "class": "gradientLinear",
                         "from": [
                           0.5,
-                          0.0
+                          -0.0
                         ],
-                        "invert": false,
                         "stops": [
                           {
                             "class": "gradientStop",
@@ -2784,7 +2797,7 @@
                         ],
                         "to": [
                           0.5,
-                          1.0
+                          -1.0
                         ]
                       }
                     },
@@ -2793,7 +2806,6 @@
                     "lineJoinStyle": 0,
                     "miterLimit": 10.0,
                     "position": 1,
-                    "startMarkerType": 0,
                     "style": 0,
                     "thickness": 1
                   }
@@ -2823,9 +2835,8 @@
                         "class": "gradientLinear",
                         "from": [
                           0.5,
-                          0.0
+                          -0.0
                         ],
-                        "invert": false,
                         "stops": [
                           {
                             "class": "gradientStop",
@@ -2854,7 +2865,7 @@
                         ],
                         "to": [
                           0.5,
-                          1.0
+                          -1.0
                         ]
                       }
                     },
@@ -2883,9 +2894,8 @@
                         "class": "gradientLinear",
                         "from": [
                           0.5,
-                          0.0
+                          -0.0
                         ],
-                        "invert": false,
                         "stops": [
                           {
                             "class": "gradientStop",
@@ -2914,7 +2924,7 @@
                         ],
                         "to": [
                           0.5,
-                          1.0
+                          -1.0
                         ]
                       }
                     },
@@ -2924,25 +2934,27 @@
                 "shadows": []
               },
               "styleEffectMaskArea": 0,
+              "transformedBounds": {
+                "class": "rect",
+                "constrainProportions": false,
+                "height": 83.0,
+                "width": 75.0,
+                "x": 581.0,
+                "y": -249.0
+              },
+              "verticalConstraint": 5,
               "visible": true
             }
           ],
           "class": "symbolMaster",
           "contextSettings": {
-            "blendMode": 0,
+            "blendMode": 27,
             "class": "graphicsContextSettings",
             "isolateBlending": false,
             "opacity": 1.0,
             "transparencyKnockoutGroup": 0
           },
-          "frame": {
-            "class": "rect",
-            "constrainProportions": false,
-            "height": 959.0,
-            "width": 796.0,
-            "x": -819.0,
-            "y": 376.0
-          },
+          "horizontalConstraint": 5,
           "id": "0739FFD5-CD47-45B9-9F75-7D7F6F3518AF",
           "isLocked": false,
           "maskType": 0,
@@ -2957,12 +2969,13 @@
           "name": "Master_Nest",
           "outlineMaskBy": [],
           "overflow": 2,
+          "resizesContent": 1,
           "style": {
             "blurs": [
               {
                 "center": [
                   0.5,
-                  0.5
+                  -0.5
                 ],
                 "class": "blur",
                 "isEnabled": false,
@@ -2978,6 +2991,15 @@
             "shadows": []
           },
           "styleEffectMaskArea": 0,
+          "transformedBounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "height": 959.0,
+            "width": 796.0,
+            "x": -819.0,
+            "y": 376.0
+          },
+          "verticalConstraint": 5,
           "visible": true
         },
         {
@@ -3003,20 +3025,13 @@
               },
               "class": "symbolInstance",
               "contextSettings": {
-                "blendMode": 0,
+                "blendMode": 27,
                 "class": "graphicsContextSettings",
                 "isolateBlending": false,
                 "opacity": 1.0,
                 "transparencyKnockoutGroup": 0
               },
-              "frame": {
-                "class": "rect",
-                "constrainProportions": false,
-                "height": 959.0,
-                "width": 796.0,
-                "x": -20.0,
-                "y": 24.0
-              },
+              "horizontalConstraint": 5,
               "id": "D4568B7D-9CCF-4284-98AB-4E7D2A4C8DED",
               "isLocked": false,
               "maskType": 0,
@@ -3039,7 +3054,7 @@
                     "0B8DCD1B-9BEA-4DC3-88B9-D6A0BC5DD9C3",
                     "95C02DB7-5EC9-4A61-97B1-0FFBE0C30E83"
                   ],
-                  "overrideName": "attr.*.size",
+                  "overrideName": "fontAttr.*.size",
                   "overrideValue": 30.0
                 },
                 {
@@ -3063,7 +3078,7 @@
                     "0B8DCD1B-9BEA-4DC3-88B9-D6A0BC5DD9C3",
                     "95C02DB7-5EC9-4A61-97B1-0FFBE0C30E83"
                   ],
-                  "overrideName": "attr.*.fills.*.color",
+                  "overrideName": "fontAttr.*.fills.*.color",
                   "overrideValue": {
                     "alpha": 0.8,
                     "blue": 0.0,
@@ -3092,7 +3107,7 @@
                   {
                     "center": [
                       0.5,
-                      0.5
+                      -0.5
                     ],
                     "class": "blur",
                     "isEnabled": false,
@@ -3108,6 +3123,15 @@
                 "shadows": []
               },
               "styleEffectMaskArea": 0,
+              "transformedBounds": {
+                "class": "rect",
+                "constrainProportions": false,
+                "height": 959.0,
+                "width": 796.0,
+                "x": -20.0,
+                "y": 24.0
+              },
+              "verticalConstraint": 5,
               "visible": true
             },
             {
@@ -3122,20 +3146,13 @@
               },
               "class": "path",
               "contextSettings": {
-                "blendMode": 0,
+                "blendMode": 27,
                 "class": "graphicsContextSettings",
                 "isolateBlending": false,
                 "opacity": 1.0,
                 "transparencyKnockoutGroup": 0
               },
-              "frame": {
-                "class": "rect",
-                "constrainProportions": false,
-                "height": 148.0,
-                "width": 191.0,
-                "x": 568.0,
-                "y": -994.0
-              },
+              "horizontalConstraint": 5,
               "id": "77077B65-EB8F-4D66-A533-44224D8720C7",
               "isLocked": false,
               "maskType": 0,
@@ -3150,7 +3167,6 @@
               "name": "Rectangle2",
               "outlineMaskBy": [],
               "overflow": 1,
-              "pathType": 0,
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -3164,6 +3180,7 @@
                         {
                           "class": "pointAttr",
                           "cornerStyle": 0,
+                          "markType": 0,
                           "point": [
                             0.0,
                             0.0
@@ -3191,6 +3208,7 @@
                         {
                           "class": "pointAttr",
                           "cornerStyle": 0,
+                          "markType": 0,
                           "point": [
                             0.0,
                             -148.0
@@ -3208,7 +3226,7 @@
                   {
                     "center": [
                       0.5,
-                      0.5
+                      -0.5
                     ],
                     "class": "blur",
                     "isEnabled": false,
@@ -3237,7 +3255,6 @@
                     },
                     "dashedOffset": 0.0,
                     "dashedPattern": [],
-                    "endMarkerType": 0,
                     "fillType": 0,
                     "flat": 0.0,
                     "gradient": {
@@ -3246,9 +3263,8 @@
                         "class": "gradientLinear",
                         "from": [
                           0.5,
-                          0.0
+                          -0.0
                         ],
-                        "invert": false,
                         "stops": [
                           {
                             "class": "gradientStop",
@@ -3277,7 +3293,7 @@
                         ],
                         "to": [
                           0.5,
-                          1.0
+                          -1.0
                         ]
                       }
                     },
@@ -3286,7 +3302,6 @@
                     "lineJoinStyle": 0,
                     "miterLimit": 10.0,
                     "position": 1,
-                    "startMarkerType": 0,
                     "style": 0,
                     "thickness": 1
                   }
@@ -3316,9 +3331,8 @@
                         "class": "gradientLinear",
                         "from": [
                           0.5,
-                          0.0
+                          -0.0
                         ],
-                        "invert": false,
                         "stops": [
                           {
                             "class": "gradientStop",
@@ -3347,7 +3361,7 @@
                         ],
                         "to": [
                           0.5,
-                          1.0
+                          -1.0
                         ]
                       }
                     },
@@ -3376,9 +3390,8 @@
                         "class": "gradientLinear",
                         "from": [
                           0.5,
-                          0.0
+                          -0.0
                         ],
-                        "invert": false,
                         "stops": [
                           {
                             "class": "gradientStop",
@@ -3407,7 +3420,7 @@
                         ],
                         "to": [
                           0.5,
-                          1.0
+                          -1.0
                         ]
                       }
                     },
@@ -3417,25 +3430,27 @@
                 "shadows": []
               },
               "styleEffectMaskArea": 0,
+              "transformedBounds": {
+                "class": "rect",
+                "constrainProportions": false,
+                "height": 148.0,
+                "width": 191.0,
+                "x": 568.0,
+                "y": -994.0
+              },
+              "verticalConstraint": 5,
               "visible": true
             }
           ],
           "class": "symbolMaster",
           "contextSettings": {
-            "blendMode": 0,
+            "blendMode": 27,
             "class": "graphicsContextSettings",
             "isolateBlending": false,
             "opacity": 1.0,
             "transparencyKnockoutGroup": 0
           },
-          "frame": {
-            "class": "rect",
-            "constrainProportions": false,
-            "height": 1142.0,
-            "width": 776.0,
-            "x": 46.0,
-            "y": 361.0
-          },
+          "horizontalConstraint": 5,
           "id": "C1CF0E49-B3C4-4A8E-AD64-46A81720E0D3",
           "isLocked": false,
           "maskType": 0,
@@ -3450,12 +3465,13 @@
           "name": "Master_Nest_Double",
           "outlineMaskBy": [],
           "overflow": 2,
+          "resizesContent": 1,
           "style": {
             "blurs": [
               {
                 "center": [
                   0.5,
-                  0.5
+                  -0.5
                 ],
                 "class": "blur",
                 "isEnabled": false,
@@ -3471,6 +3487,15 @@
             "shadows": []
           },
           "styleEffectMaskArea": 0,
+          "transformedBounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "height": 1142.0,
+            "width": 776.0,
+            "x": 46.0,
+            "y": 361.0
+          },
+          "verticalConstraint": 5,
           "visible": true
         },
         {
@@ -3496,20 +3521,13 @@
               },
               "class": "symbolInstance",
               "contextSettings": {
-                "blendMode": 0,
+                "blendMode": 27,
                 "class": "graphicsContextSettings",
                 "isolateBlending": false,
                 "opacity": 1.0,
                 "transparencyKnockoutGroup": 0
               },
-              "frame": {
-                "class": "rect",
-                "constrainProportions": false,
-                "height": 1142.0,
-                "width": 776.0,
-                "x": 58.0,
-                "y": -20.0
-              },
+              "horizontalConstraint": 5,
               "id": "74FC2703-A058-442A-941B-54990FADFAB5",
               "isLocked": false,
               "maskType": 0,
@@ -3556,7 +3574,7 @@
                     "651675C7-452D-48D3-A84A-A6CF6796E3B3",
                     "95C02DB7-5EC9-4A61-97B1-0FFBE0C30E83"
                   ],
-                  "overrideName": "attr.*.fills.*.color",
+                  "overrideName": "fontAttr.*.fills.*.color",
                   "overrideValue": {
                     "alpha": 1.0,
                     "blue": 1.0,
@@ -3571,7 +3589,7 @@
                   {
                     "center": [
                       0.5,
-                      0.5
+                      -0.5
                     ],
                     "class": "blur",
                     "isEnabled": false,
@@ -3587,6 +3605,15 @@
                 "shadows": []
               },
               "styleEffectMaskArea": 0,
+              "transformedBounds": {
+                "class": "rect",
+                "constrainProportions": false,
+                "height": 1142.0,
+                "width": 776.0,
+                "x": 58.0,
+                "y": -20.0
+              },
+              "verticalConstraint": 5,
               "visible": true
             },
             {
@@ -3601,20 +3628,13 @@
               },
               "class": "path",
               "contextSettings": {
-                "blendMode": 0,
+                "blendMode": 27,
                 "class": "graphicsContextSettings",
                 "isolateBlending": false,
                 "opacity": 1.0,
                 "transparencyKnockoutGroup": 0
               },
-              "frame": {
-                "class": "rect",
-                "constrainProportions": false,
-                "height": 165.0,
-                "width": 281.0,
-                "x": 250.0,
-                "y": -1100.0
-              },
+              "horizontalConstraint": 5,
               "id": "AF297472-B3DE-466B-88C5-BBA0C641B9EA",
               "isLocked": false,
               "maskType": 0,
@@ -3629,7 +3649,6 @@
               "name": "Rectangle3",
               "outlineMaskBy": [],
               "overflow": 1,
-              "pathType": 0,
               "shape": {
                 "class": "shape",
                 "subshapes": [
@@ -3643,6 +3662,7 @@
                         {
                           "class": "pointAttr",
                           "cornerStyle": 0,
+                          "markType": 0,
                           "point": [
                             0.0,
                             0.0
@@ -3670,6 +3690,7 @@
                         {
                           "class": "pointAttr",
                           "cornerStyle": 0,
+                          "markType": 0,
                           "point": [
                             0.0,
                             -165.0
@@ -3687,7 +3708,7 @@
                   {
                     "center": [
                       0.5,
-                      0.5
+                      -0.5
                     ],
                     "class": "blur",
                     "isEnabled": false,
@@ -3716,7 +3737,6 @@
                     },
                     "dashedOffset": 0.0,
                     "dashedPattern": [],
-                    "endMarkerType": 0,
                     "fillType": 0,
                     "flat": 0.0,
                     "gradient": {
@@ -3725,9 +3745,8 @@
                         "class": "gradientLinear",
                         "from": [
                           0.5,
-                          0.0
+                          -0.0
                         ],
-                        "invert": false,
                         "stops": [
                           {
                             "class": "gradientStop",
@@ -3756,7 +3775,7 @@
                         ],
                         "to": [
                           0.5,
-                          1.0
+                          -1.0
                         ]
                       }
                     },
@@ -3765,7 +3784,6 @@
                     "lineJoinStyle": 0,
                     "miterLimit": 10.0,
                     "position": 1,
-                    "startMarkerType": 0,
                     "style": 0,
                     "thickness": 1
                   }
@@ -3795,9 +3813,8 @@
                         "class": "gradientLinear",
                         "from": [
                           0.5,
-                          0.0
+                          -0.0
                         ],
-                        "invert": false,
                         "stops": [
                           {
                             "class": "gradientStop",
@@ -3826,7 +3843,7 @@
                         ],
                         "to": [
                           0.5,
-                          1.0
+                          -1.0
                         ]
                       }
                     },
@@ -3855,9 +3872,8 @@
                         "class": "gradientLinear",
                         "from": [
                           0.5,
-                          0.0
+                          -0.0
                         ],
-                        "invert": false,
                         "stops": [
                           {
                             "class": "gradientStop",
@@ -3886,7 +3902,7 @@
                         ],
                         "to": [
                           0.5,
-                          1.0
+                          -1.0
                         ]
                       }
                     },
@@ -3896,25 +3912,27 @@
                 "shadows": []
               },
               "styleEffectMaskArea": 0,
+              "transformedBounds": {
+                "class": "rect",
+                "constrainProportions": false,
+                "height": 165.0,
+                "width": 281.0,
+                "x": 250.0,
+                "y": -1100.0
+              },
+              "verticalConstraint": 5,
               "visible": true
             }
           ],
           "class": "symbolMaster",
           "contextSettings": {
-            "blendMode": 0,
+            "blendMode": 27,
             "class": "graphicsContextSettings",
             "isolateBlending": false,
             "opacity": 1.0,
             "transparencyKnockoutGroup": 0
           },
-          "frame": {
-            "class": "rect",
-            "constrainProportions": false,
-            "height": 1304.0,
-            "width": 957.0,
-            "x": -885.0,
-            "y": -882.0
-          },
+          "horizontalConstraint": 5,
           "id": "18114DF8-FF6D-4958-A7B8-4F1D36532FA5",
           "isLocked": false,
           "maskType": 0,
@@ -3929,12 +3947,13 @@
           "name": "Master_Nest_Triple",
           "outlineMaskBy": [],
           "overflow": 2,
+          "resizesContent": 1,
           "style": {
             "blurs": [
               {
                 "center": [
                   0.5,
-                  0.5
+                  -0.5
                 ],
                 "class": "blur",
                 "isEnabled": false,
@@ -3950,6 +3969,15 @@
             "shadows": []
           },
           "styleEffectMaskArea": 0,
+          "transformedBounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "height": 1304.0,
+            "width": 957.0,
+            "x": -885.0,
+            "y": -882.0
+          },
+          "verticalConstraint": 5,
           "visible": true
         }
       ],
@@ -3960,14 +3988,6 @@
         "isolateBlending": false,
         "opacity": 1.0,
         "transparencyKnockoutGroup": 0
-      },
-      "frame": {
-        "class": "rect",
-        "constrainProportions": false,
-        "height": 3308.0,
-        "width": 2038.0,
-        "x": -885.0,
-        "y": 1122.0
       },
       "id": "2",
       "isLocked": false,
@@ -3991,7 +4011,17 @@
         "shadows": []
       },
       "styleEffectMaskArea": 0,
+      "transformedBounds": {
+        "class": "rect",
+        "constrainProportions": false,
+        "height": 3308.0,
+        "width": 2038.0,
+        "x": -885.0,
+        "y": 1122.0
+      },
       "visible": true
     }
-  ]
+  ],
+  "references": [],
+  "version": "1.0.16"
 }

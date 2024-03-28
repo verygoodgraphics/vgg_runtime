@@ -70,6 +70,26 @@ BezierPoint BezierPoint::makeTransform(const Matrix& matrix) const
   return result;
 }
 
+BezierPoint BezierPoint::makeFromModel(const Model::PointAttr& model)
+{
+  BezierPoint result;
+
+  auto v = model.point;
+  result.point = { v[0], v[1] };
+  if (model.curveFrom.has_value())
+  {
+    auto v = model.curveFrom.value();
+    result.from = { v[0], v[1] };
+  }
+  if (model.curveTo.has_value())
+  {
+    auto v = model.curveTo.value();
+    result.to = { v[0], v[1] };
+  }
+
+  return result;
+}
+
 BezierPoint BezierPoint::makeFromModelFormat() const
 {
   BezierPoint result;

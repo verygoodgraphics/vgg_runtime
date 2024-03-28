@@ -227,17 +227,10 @@ public:
     return m_editSubject.get_observable();
   }
 
+  void update();
+
 private:
   void listenViewEvent();
-
-  void update()
-  {
-    if (m_view && m_viewModel)
-    {
-      m_viewModel->layoutTree()->layoutIfNeeded();
-      m_view->show(*m_viewModel);
-    }
-  }
 
   void updateEditView()
   {

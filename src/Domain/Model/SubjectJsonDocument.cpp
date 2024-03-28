@@ -39,3 +39,10 @@ void SubjectJsonDocument::deleteAt(const json::json_pointer& path)
 
   m_subject.get_subscriber().on_next(ModelEventPtr{ new ModelEventDelete{ path } });
 }
+
+void SubjectJsonDocument::updateElement(const std::string& id, const std::string& contentJsonString)
+{
+  JsonDocument::updateElement(id, contentJsonString);
+  m_subject.get_subscriber().on_next(
+    ModelEventPtr{ new ModelEventUpdate{ id, contentJsonString } });
+}

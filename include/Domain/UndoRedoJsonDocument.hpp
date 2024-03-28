@@ -28,7 +28,7 @@ public:
   {
     from_json(content, m_doc);
   }
-  virtual const json& content() const override
+  json content() const override
   {
     return m_doc.json_const_ref();
   }

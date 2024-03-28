@@ -18,11 +18,12 @@
 #include "Event/Event.hpp"
 #include "Event/EventAPI.hpp"
 #include "Event/Keycode.hpp"
-#include "Layer/Core/RasterCacheTile.hpp"
-#include "Layer/Zoomer.hpp"
 #include "ViewModel.hpp"
 
+#include "Domain/Layout/Node.hpp"
+#include "Layer/Core/RasterCacheTile.hpp"
 #include "Layer/SceneBuilder.hpp"
+#include "Layer/Zoomer.hpp"
 #include "Utility/Log.hpp"
 
 #include <include/core/SkCanvas.h>
@@ -52,6 +53,7 @@ void UIView::onRender(SkCanvas* canvas)
     }
   }
   AppScene::onRender(canvas);
+  setDirty(false);
 }
 
 bool UIView::onEvent(UEvent evt, void* userData)
@@ -542,7 +544,7 @@ void UIView::fireMouseEvent(
     UIEventPtr(new MouseEvent(
       type,
       target ? target->vggId() : K_EMPTY_STRING,
-      target ? target->path() : K_EMPTY_STRING,
+      K_EMPTY_STRING,
       jsButtonIndex,
       x,
       y,
@@ -555,9 +557,9 @@ void UIView::fireMouseEvent(
     target);
 }
 
-void UIView::show(const ViewModel& viewModel)
+void UIView::show(const ViewModel& viewModel, bool force)
 {
-  if (m_skipUntilNextLoop)
+  if (m_skipUntilNextLoop && !force)
   {
     return;
   }
@@ -568,7 +570,7 @@ void UIView::show(const ViewModel& viewModel)
                   .build();
   if (result.root)
   {
-    show(viewModel, std::move(*result.root));
+    show(viewModel, std::move(*result.root), force);
   }
   else
   {
@@ -576,9 +578,9 @@ void UIView::show(const ViewModel& viewModel)
   }
 }
 
-void UIView::show(const ViewModel& viewModel, std::vector<FramePtr> frames)
+void UIView::show(const ViewModel& viewModel, std::vector<FramePtr> frames, bool force)
 {
-  if (m_skipUntilNextLoop)
+  if (m_skipUntilNextLoop && !force)
   {
     return;
   }
@@ -634,10 +636,7 @@ bool UIView::handleTouchEvent(int x, int y, int motionX, int motionY, EUIEventTy
     { return queryHasEventListener(targetKey, type); });
 
   m_eventListener(
-    UIEventPtr(new TouchEvent(
-      type,
-      target ? target->vggId() : K_EMPTY_STRING,
-      target ? target->path() : K_EMPTY_STRING)),
+    UIEventPtr(new TouchEvent(type, target ? target->vggId() : K_EMPTY_STRING, K_EMPTY_STRING)),
     target);
 
   return true;

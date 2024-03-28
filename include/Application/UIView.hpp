@@ -18,7 +18,7 @@
 #include "AppScene.hpp"
 #include "UIEvent.hpp"
 
-#include "Domain/Layout/Node.hpp"
+#include "Domain/Layout/Rect.hpp"
 #include "Layer/Scene.hpp"
 
 #include <nlohmann/json.hpp>
@@ -30,6 +30,7 @@
 namespace VGG
 {
 
+class LayoutNode;
 struct ViewModel;
 
 class UIView : public app::AppScene
@@ -87,8 +88,8 @@ private:
 public:
   UIView();
 
-  void show(const ViewModel& viewModel);
-  void show(const ViewModel& viewModel, std::vector<FramePtr> frames);
+  void show(const ViewModel& viewModel, bool force = false);
+  void show(const ViewModel& viewModel, std::vector<FramePtr> frames, bool force = false);
   void fitContent(float xOffset, float yOffset, float scale);
   void fitCurrentPage();
 

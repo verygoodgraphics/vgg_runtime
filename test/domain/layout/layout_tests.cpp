@@ -1,6 +1,7 @@
 #include "base.hpp"
 
 #include "Domain/Layout/Layout.hpp"
+#include "Domain/Model/Element.hpp"
 #include "UseCase/StartRunning.hpp"
 
 #include "domain/model/daruma_helper.hpp"
@@ -232,4 +233,15 @@ TEST_F(VggLayoutTestSuite, EmptyContainer)
   std::vector<Layout::Rect> expectedFrames{ { { 26, 0 }, { 6, 6 } } };
 
   EXPECT_TRUE(descendantFrame({ 1 }, 0) == expectedFrames[0]);
+}
+
+TEST_F(VggLayoutTestSuite, FirstOnTop)
+{
+  setupWithExpanding("testDataDir/layout/11_first_on_top/");
+
+  auto tree = m_sut->designDocTree();
+  EXPECT_TRUE(tree->children().front()->isFirstOnTop());
+
+  auto json = m_sut->displayDesignDoc()->content();
+  EXPECT_EQ(json["frames"][0]["childObjects"][0]["name"], "Rectangle 3");
 }

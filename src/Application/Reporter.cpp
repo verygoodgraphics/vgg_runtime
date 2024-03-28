@@ -17,6 +17,7 @@
 
 #include "Domain/Daruma.hpp"
 #include "Domain/IVggEnv.hpp"
+#include "Domain/Layout/Node.hpp"
 #include "Domain/Model/JsonKeys.hpp"
 #include "Domain/VggExec.hpp"
 #include "Utility/Log.hpp"
@@ -67,7 +68,6 @@ void Reporter::onSelectNode(std::weak_ptr<LayoutNode> node)
   nlohmann::json event;
   event[K_TYPE] = K_SELECT;
   event[K_ID] = target->vggId();
-  event[K_PATH] = target->path();
 
   sendEventToJs(event);
 }

@@ -13,37 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
 
-#include "Domain/Daruma.hpp"
+#include "Domain/Model/DesignModel.hpp"
 
-namespace VGG
+using namespace VGG::Model;
+
+Subshape::Subshape(const Subshape& other)
+  : booleanOperation{ other.booleanOperation }
+  , subshapeClass{ other.subshapeClass }
 {
-class LayoutNode;
-namespace Layout
-{
-class Layout;
+  if (other.subGeometry)
+  {
+    subGeometry = std::make_shared<SubGeometryType>(*other.subGeometry);
+  }
 }
 
-struct ViewModel
+Subshape& Subshape::operator=(const Subshape& other)
 {
-  std::weak_ptr<Daruma>         model;
-  std::weak_ptr<Layout::Layout> layout;
-
-  std::shared_ptr<LayoutNode> layoutTree() const;
-  JsonDocumentPtr             designDoc() const;
-
-  VGG::Model::Loader::ResourcesType resources() const
+  booleanOperation = other.booleanOperation;
+  subshapeClass = other.subshapeClass;
+  if (other.subGeometry)
   {
-    if (auto sharedModel = model.lock())
-    {
-      return sharedModel->resources();
-    }
-    else
-    {
-      return {};
-    }
+    subGeometry = std::make_shared<SubGeometryType>(*other.subGeometry);
   }
-};
-
-} // namespace VGG
+  return *this;
+}

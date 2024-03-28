@@ -22,6 +22,7 @@
 #include "JsonKeys.hpp"
 #include "Rect.hpp"
 
+#include "Domain/Model/Element.hpp"
 #include "Math/Math.hpp"
 #include "Utility/Log.hpp"
 #include "Utility/VggFloat.hpp"
@@ -77,10 +78,6 @@ std::shared_ptr<LayoutNode> LayoutNode::hitTest(
     }
 
     if (hasEventListener(vggId()))
-    {
-      return shared_from_this();
-    }
-    if (hasEventListener(m_path))
     {
       return shared_from_this();
     }
@@ -200,10 +197,23 @@ void LayoutNode::setFrame(
     return;
   }
 
-  if (auto json = model(); Layout::isContourPathNode(*json))
+  auto element = m_element.lock();
+  if (!element)
   {
-    scaleContour(oldFrame, newFrame);
     return;
+  }
+  if (auto pathElement = std::dynamic_pointer_cast<Domain::PathElement>(element))
+  {
+    if (pathElement->children().size() == 1)
+    {
+      if (
+        auto contourElement =
+          std::dynamic_pointer_cast<Domain::ContourElement>(pathElement->children()[0]))
+      {
+        scaleContour(*contourElement, oldFrame, newFrame);
+        return;
+      }
+    }
   }
 
   if (m_autoLayout && m_autoLayout->isEnabled())
@@ -234,18 +244,18 @@ Layout::Rect LayoutNode::bounds() const
 
 Layout::Rect LayoutNode::modelBounds() const
 {
-  if (auto json = model())
+  if (auto element = m_element.lock())
   {
-    return (*json)[K_BOUNDS].get<Layout::Rect>();
+    return element->bounds();
   }
   return {};
 }
 
 Layout::Matrix LayoutNode::modelMatrix() const
 {
-  if (auto json = model())
+  if (auto element = m_element.lock())
   {
-    return (*json)[K_MATRIX].get<Layout::Matrix>();
+    return element->matrix();
   }
   return {};
 }
@@ -263,14 +273,9 @@ Layout::Size LayoutNode::size() const
   return modelBounds().size;
 }
 
-void LayoutNode::setViewModel(JsonDocumentPtr viewModel)
-{
-  m_viewModel = viewModel;
-}
-
 void LayoutNode::dump(std::string indent)
 {
-  std::cout << indent << id() << ", " << path() << std::endl;
+  std::cout << indent << id() << ", " << m_element.lock()->id() << std::endl;
 
   for (auto& child : m_children)
   {
@@ -282,16 +287,22 @@ uint32_t LayoutNode::backgroundColor()
 {
   uint32_t u32Color = 0xFFF5F5F5;
 
-  auto viewModel = m_viewModel.lock();
-  if (viewModel)
+  if (auto element = m_element.lock())
   {
-    nlohmann::json::json_pointer path{ m_path };
-    const auto&                  objectJson = viewModel->content()[path];
-
-    if (objectJson.contains(K_BACKGROUNDCOLOR))
+    if (auto frameElement = std::dynamic_pointer_cast<Domain::FrameElement>(element))
     {
-      Layout::Color color = objectJson[K_BACKGROUNDCOLOR];
-      u32Color = color.u32();
+      if (auto frameModel = frameElement->object())
+      {
+        if (frameModel->backgroundColor)
+        {
+          auto&         colorModel = frameModel->backgroundColor.value();
+          Layout::Color color{ colorModel.alpha,
+                               colorModel.red,
+                               colorModel.green,
+                               colorModel.blue };
+          u32Color = color.u32();
+        }
+      }
     }
   }
 
@@ -339,7 +350,14 @@ void LayoutNode::resizeChildNodes(
 
 bool LayoutNode::isVisible() const
 {
-  return getValue(K_VISIBLE, true);
+  if (auto element = m_element.lock())
+  {
+    if (auto pModel = element->object())
+    {
+      return pModel->visible;
+    }
+  }
+  return true;
 }
 
 std::string LayoutNode::vggId() const
@@ -347,45 +365,73 @@ std::string LayoutNode::vggId() const
   return name();
 }
 
-const std::string& LayoutNode::id()
+std::string LayoutNode::id()
 {
-  if (!m_hasIdCache)
+  if (auto element = m_element.lock())
   {
-    m_id = getValue<std::string>(K_ID, std::string{});
-    m_hasIdCache = true;
+    return element->id();
   }
 
-  return m_id;
-}
-
-void LayoutNode::invalidateIdCache()
-{
-  m_id.clear();
-  m_hasIdCache = false;
-  for (auto& child : m_children)
-  {
-    child->invalidateIdCache();
-  }
+  return {};
 }
 
 std::string LayoutNode::name() const
 {
-  return getValue(K_NAME, std::string{});
+  if (auto element = m_element.lock())
+  {
+    if (auto pModel = element->model())
+    {
+      if (pModel->name)
+      {
+        return pModel->name.value();
+      }
+    }
+  }
+
+  return {};
 }
 
 std::string LayoutNode::type() const
 {
-  return getValue(K_CLASS, std::string{});
+  if (auto element = m_element.lock())
+  {
+    return element->type();
+  }
+  return {};
 }
 
 bool LayoutNode::isResizingAroundCenter() const
 {
-  return getValue(K_KEEP_SHAPE_WHEN_RESIZE, false);
+  if (auto element = m_element.lock())
+  {
+    if (auto pModel = element->model())
+    {
+      if (pModel->keepShapeWhenResize)
+      {
+        return pModel->keepShapeWhenResize.value();
+      }
+    }
+  }
+
+  return false;
 }
 
 bool LayoutNode::isVectorNetwork() const
 {
-  return getValue(K_IS_VECTOR_NETWORK, false);
+  if (auto element = m_element.lock())
+  {
+    if (auto groupElement = std::dynamic_pointer_cast<Domain::GroupElement>(element))
+    {
+      if (auto pModel = groupElement->object())
+      {
+        if (pModel->isVectorNetwork)
+        {
+          return pModel->isVectorNetwork.value();
+        }
+      }
+    }
+  }
+  return false;
 }
 
 bool LayoutNode::isVectorNetworkDescendant() const
@@ -424,21 +470,17 @@ std::shared_ptr<LayoutNode> LayoutNode::findDescendantNodeById(const std::string
 
 void LayoutNode::updateModel(const Layout::Rect& toFrame)
 {
-  auto viewModel = m_viewModel.lock();
-  if (!viewModel)
+  auto element = m_element.lock();
+  if (!element)
   {
     return;
   }
 
   const auto newFrame = toFrame.makeModelRect();
 
-  nlohmann::json::json_pointer path{ m_path };
-  const auto&                  objectJson = viewModel->content()[path];
-
   // do not update useless frame
 
   // scale, bounds & matrix
-  auto boundsJson = objectJson[K_BOUNDS];
   auto oldBounds = modelBounds();
   auto matrix = modelMatrix();
   if (oldBounds.size.width > 0)
@@ -451,22 +493,8 @@ void LayoutNode::updateModel(const Layout::Rect& toFrame)
     auto yScale = newFrame.size.height / oldBounds.size.height;
     matrix.ty *= yScale;
   }
-  boundsJson[K_WIDTH] = newFrame.size.width;
-  boundsJson[K_HEIGHT] = newFrame.size.height;
-  DEBUG(
-    "LayoutNode::updateModel: bounds, -> %s, %s",
-    objectJson[K_BOUNDS].dump().c_str(),
-    boundsJson.dump().c_str());
-  viewModel->replaceAt(path / K_BOUNDS, boundsJson);
-
-  auto matrixJson = objectJson[K_MATRIX];
-  matrixJson[4] = matrix.tx;
-  matrixJson[5] = matrix.ty;
-  DEBUG(
-    "LayoutNode::updateModel: matrix, -> %s, %s",
-    objectJson[K_MATRIX].dump().c_str(),
-    matrixJson.dump().c_str());
-  viewModel->replaceAt(path / K_MATRIX, matrixJson);
+  element->updateBounds(newFrame.size.width, newFrame.size.height);
+  element->updateMatrix(matrix.tx, matrix.ty);
 
   // translate if needed
   auto originAfterScale = modelOrigin();
@@ -474,13 +502,7 @@ void LayoutNode::updateModel(const Layout::Rect& toFrame)
   {
     matrix.tx += newFrame.origin.x - originAfterScale.x;
     matrix.ty += newFrame.origin.y - originAfterScale.y;
-    matrixJson[4] = matrix.tx;
-    matrixJson[5] = matrix.ty;
-    DEBUG(
-      "LayoutNode::updateModel: matrix, -> %s, %s",
-      objectJson[K_MATRIX].dump().c_str(),
-      matrixJson.dump().c_str());
-    viewModel->replaceAt(path / K_MATRIX, matrixJson);
+    element->updateMatrix(matrix.tx, matrix.ty);
   }
 }
 
@@ -491,12 +513,6 @@ Layout::Point LayoutNode::origin() const
 
 Layout::Point LayoutNode::modelOrigin() const
 {
-  auto viewModel = m_viewModel.lock();
-  if (!viewModel)
-  {
-    return {};
-  }
-
   auto bounds = modelBounds();
   auto matrix = modelMatrix();
   auto [x, y] = bounds.origin;
@@ -591,9 +607,22 @@ Layout::Rect LayoutNode::resize(
     return resizeGroup(oldContainerSize, newContainerSize, parentOrigin);
   }
 
-  if (auto json = model(); Layout::isContourPathNode(*json))
+  auto element = m_element.lock();
+  if (!element)
   {
-    return resizeContour(oldContainerSize, newContainerSize, parentOrigin);
+    return {};
+  }
+  if (auto pathElement = std::dynamic_pointer_cast<Domain::PathElement>(element))
+  {
+    if (pathElement->children().size() == 1)
+    {
+      if (
+        auto contourElement =
+          std::dynamic_pointer_cast<Domain::ContourElement>(pathElement->children()[0]))
+      {
+        return resizeContour(*contourElement, oldContainerSize, newContainerSize, parentOrigin);
+      }
+    }
   }
 
   auto oldFrame = frame();
@@ -810,7 +839,18 @@ LayoutNode::EResizing LayoutNode::horizontalResizing() const
     return EResizing::SCALE;
   }
 
-  return getValue(K_HORIZONTAL_CONSTRAINT, EResizing::FIX_START_FIX_SIZE);
+  if (auto element = m_element.lock())
+  {
+    if (auto pModel = element->object())
+    {
+      if (pModel->horizontalConstraint)
+      {
+        return EResizing{ pModel->horizontalConstraint.value() };
+      }
+    }
+  }
+
+  return EResizing::FIX_START_FIX_SIZE;
 }
 
 LayoutNode::EResizing LayoutNode::verticalResizing() const
@@ -820,36 +860,32 @@ LayoutNode::EResizing LayoutNode::verticalResizing() const
     return EResizing::SCALE;
   }
 
-  return getValue(K_VERTICAL_CONSTRAINT, EResizing::FIX_START_FIX_SIZE);
+  if (auto element = m_element.lock())
+  {
+    if (auto pModel = element->object())
+    {
+      if (pModel->verticalConstraint)
+      {
+        return EResizing{ pModel->verticalConstraint.value() };
+      }
+    }
+  }
+  return EResizing::FIX_START_FIX_SIZE;
 }
 
 LayoutNode::EAdjustContentOnResize LayoutNode::adjustContentOnResize() const
 {
-  return getValue(K_RESIZES_CONTENT, EAdjustContentOnResize::ENABLED);
-}
-
-template<typename T>
-T LayoutNode::getValue(const char* key, T v) const
-{
-  if (auto json = model())
+  if (auto element = m_element.lock())
   {
-    return json->value(key, v);
+    if (auto pModel = element->object())
+    {
+      if (pModel->resizesContent)
+      {
+        return EAdjustContentOnResize{ pModel->resizesContent.value() };
+      }
+    }
   }
-
-  return v;
-}
-
-const nlohmann::json* LayoutNode::model() const
-{
-  auto viewModel = m_viewModel.lock();
-  if (!viewModel)
-  {
-    return nullptr;
-  }
-
-  const auto& objectJson = viewModel->content()[m_path];
-
-  return &objectJson;
+  return EAdjustContentOnResize::ENABLED;
 }
 
 bool LayoutNode::shouldSkip()
@@ -869,10 +905,13 @@ bool LayoutNode::shouldSkip()
       return false;
     }
 
-    auto json = model();
-    if (Layout::isGroupNode(*json))
+    if (auto element = m_element.lock())
     {
-      return true;
+      auto groupElement = std::dynamic_pointer_cast<Domain::GroupElement>(element);
+      if (groupElement)
+      {
+        return true;
+      }
     }
 
     return isBooleanGroup();
@@ -883,8 +922,19 @@ bool LayoutNode::shouldSkip()
 
 bool LayoutNode::isBooleanGroup()
 {
-  auto json = model();
-  return Layout::isPathNode(*json) && m_children.size() > 1;
+  auto element = m_element.lock();
+  if (!element)
+  {
+    return false;
+  }
+
+  auto pathElement = std::dynamic_pointer_cast<Domain::PathElement>(element);
+  if (!pathElement)
+  {
+    return false;
+  }
+
+  return pathElement->children().size() > 1;
 }
 
 Layout::Rect LayoutNode::resizeGroup(
@@ -933,15 +983,19 @@ Layout::Rect LayoutNode::resizeGroup(
     childTransformedFrames.push_back(child->transformedFrame());
   }
 
-  if (auto json = model(); json && isBooleanGroup())
+  if (isBooleanGroup())
   {
-    auto& subShapes = (*json)[K_SHAPE][K_SUBSHAPES];
+    auto element = m_element.lock();
+    auto pathElement = std::dynamic_pointer_cast<Domain::PathElement>(element);
+    ASSERT(pathElement->object());
+    ASSERT(pathElement->object()->shape);
+    auto& subShapes = pathElement->object()->shape->subshapes;
 
     newGroupFrame = childTransformedFrames[0];
     for (std::size_t i = 1; i < m_children.size(); i++)
     {
-      auto& subShape = subShapes[i];
-      auto  op = subShape.value(K_BOOLEANOPERATION, EBooleanOperation::NONE);
+      auto&             subShape = subShapes[i];
+      EBooleanOperation op{ subShape.booleanOperation };
       switch (op)
       {
         case EBooleanOperation::SUBTRACTION:
@@ -1145,41 +1199,19 @@ Layout::Size LayoutNode::swapWidthAndHeightIfNeeded(Layout::Size size)
 }
 
 Layout::Rect LayoutNode::resizeContour(
-  const Layout::Size&  oldContainerSize,
-  const Layout::Size&  newContainerSize,
-  const Layout::Point* parentOrigin)
+  Domain::ContourElement& contourElement,
+  const Layout::Size&     oldContainerSize,
+  const Layout::Size&     newContainerSize,
+  const Layout::Point*    parentOrigin)
 {
   DEBUG("resizeContour: begin, name = %s, id = %s", name().c_str(), id().c_str());
 
-  const auto json = model();
-  ASSERT(json);
-
-  const auto& subshapes = (*json)[K_SHAPE][K_SUBSHAPES];
-  ASSERT(subshapes.size() == 1);
-
-  const auto& subshape = subshapes[0];
-  const auto& subGeometry = subshape[K_SUBGEOMETRY];
-  ASSERT(subGeometry[K_CLASS] == K_CONTOUR);
+  auto pModel = contourElement.dataModel();
+  ASSERT(pModel);
 
   // get model point
-  const auto& points = subGeometry[K_POINTS];
-  ASSERT(points.size() > 0);
-  const bool isClosed = subGeometry[K_CLOSED];
-
-  // const auto                       oldSize = modelBounds().size;
-  std::vector<Layout::BezierPoint> oldModelPoints;
-  for (std::size_t j = 0; j < points.size(); ++j)
-  {
-    auto point = points[j].get<Layout::BezierPoint>();
-    oldModelPoints.push_back(point);
-
-    // auto oldFlipYModelPoint = point.point.makeFromModelPoint();
-    // DEBUG(
-    //   "resizeContour: old flip y model point %d: %f, %f",
-    //   j,
-    //   oldFlipYModelPoint.x,
-    //   oldFlipYModelPoint.y);
-  }
+  const bool                       isClosed = pModel->closed;
+  std::vector<Layout::BezierPoint> oldModelPoints = contourElement.points();
 
   // multiply matrix, to layout point
   const auto                       oldModelMatrix = modelMatrix();
@@ -1302,7 +1334,10 @@ Layout::Rect LayoutNode::resizeContour(
   return newModelFrame.makeFromModelRect();
 }
 
-void LayoutNode::scaleContour(const Layout::Rect& oldFrame, const Layout::Rect& newFrame)
+void LayoutNode::scaleContour(
+  Domain::ContourElement& contourElement,
+  const Layout::Rect&     oldFrame,
+  const Layout::Rect&     newFrame)
 {
   DEBUG("LayoutNode::scaleContour, id=%s", id().c_str());
 
@@ -1312,31 +1347,14 @@ void LayoutNode::scaleContour(const Layout::Rect& oldFrame, const Layout::Rect& 
   const auto xScaleFactor = doubleNearlyZero(oldSize.width) ? 0 : newSize.width / oldSize.width;
   const auto yScaleFactor = doubleNearlyZero(oldSize.height) ? 0 : newSize.height / oldSize.height;
 
-  const auto nodeJson = model();
-  ASSERT(nodeJson);
-
-  // ./shape/subshapes/XXX/subGeometry/points/XXX
-  auto& subshapes = (*nodeJson)[K_SHAPE][K_SUBSHAPES];
-  for (std::size_t i = 0; i < subshapes.size(); ++i)
+  const auto&                      points = contourElement.points();
+  std::vector<Layout::BezierPoint> newModelPoints;
+  for (auto point : points)
   {
-    auto& subshape = subshapes[i];
-    auto& subGeometry = subshape[K_SUBGEOMETRY];
-    if (subGeometry[K_CLASS] != K_CONTOUR)
-    {
-      continue;
-    }
-
-    std::vector<Layout::BezierPoint> newModelPoints;
-    auto&                            points = subGeometry[K_POINTS];
-    for (std::size_t j = 0; j < points.size(); ++j)
-    {
-      auto point = points[j].get<Layout::BezierPoint>();
-      point.scale(xScaleFactor, yScaleFactor);
-
-      newModelPoints.push_back(point);
-    }
-    updateContourNodeModelPoints(i, newModelPoints);
+    point.scale(xScaleFactor, yScaleFactor);
+    newModelPoints.push_back(point);
   }
+  contourElement.updatePoints(newModelPoints);
 }
 
 void LayoutNode::updatePathNodeModel(
@@ -1344,119 +1362,28 @@ void LayoutNode::updatePathNodeModel(
   const Layout::Matrix&                   matrix,
   const std::vector<Layout::BezierPoint>& newPoints)
 {
-  auto viewModel = m_viewModel.lock();
-  if (!viewModel)
+  auto element = m_element.lock();
+  if (!element)
   {
     return;
   }
 
-  nlohmann::json::json_pointer path{ m_path };
-  const auto&                  objectJson = viewModel->content()[path];
-
-  if (objectJson[K_CLASS] != K_PATH)
+  auto pathElement = std::dynamic_pointer_cast<Domain::PathElement>(element);
+  if (!pathElement)
   {
     return;
   }
+
   // do not update useless frame
+  pathElement->updateBounds(newFrame.width(), newFrame.height());
+  pathElement->updateMatrix({ matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty });
 
-  // bounds
-  auto boundsJson = objectJson[K_BOUNDS];
-  boundsJson[K_WIDTH] = newFrame.width();
-  boundsJson[K_HEIGHT] = newFrame.height();
-  DEBUG(
-    "LayoutNode::updatePathNodeModel: bounds, -> %s, %s",
-    objectJson[K_BOUNDS].dump().c_str(),
-    boundsJson.dump().c_str());
-  viewModel->replaceAt(path / K_BOUNDS, boundsJson);
-
-  // matrix
-  auto matrixJson = objectJson[K_MATRIX];
-  matrixJson[0] = matrix.a;
-  matrixJson[1] = matrix.b;
-  matrixJson[2] = matrix.c;
-  matrixJson[3] = matrix.d;
-  matrixJson[4] = matrix.tx;
-  matrixJson[5] = matrix.ty;
-  DEBUG(
-    "LayoutNode::updatePathNodeModel: matrix, -> %s, %s",
-    objectJson[K_MATRIX].dump().c_str(),
-    matrixJson.dump().c_str());
-  viewModel->replaceAt(path / K_MATRIX, matrixJson);
-
-  // points
-  // ./shape/subshapes/XXX/subGeometry/points/XXX
-  auto& subshapes = objectJson[K_SHAPE][K_SUBSHAPES];
-  path /= K_SHAPE;
-  path /= K_SUBSHAPES;
-  for (std::size_t i = 0; i < subshapes.size(); ++i)
+  for (auto& child : pathElement->children())
   {
-    auto& subshape = subshapes[i];
-    auto& subGeometry = subshape[K_SUBGEOMETRY];
-    if (subGeometry[K_CLASS] != K_CONTOUR)
+    if (auto contourElement = std::dynamic_pointer_cast<Domain::ContourElement>(child))
     {
-      continue;
+      contourElement->updatePoints(newPoints);
     }
-
-    auto& points = subGeometry[K_POINTS];
-    auto  pointsPath = path / i / K_SUBGEOMETRY / K_POINTS;
-    for (std::size_t j = 0; j < points.size(); ++j)
-    {
-      auto point = points[j];
-      to_json(point, newPoints[j]);
-
-      auto pointPath = pointsPath / j;
-      DEBUG(
-        "LayoutNode::updatePathNodeModel: %s, -> %s, %s",
-        pointPath.to_string().c_str(),
-        points[j].dump().c_str(),
-        point.dump().c_str());
-
-      viewModel->replaceAt(pointPath, point);
-    }
-  }
-}
-
-void LayoutNode::updateContourNodeModelPoints(
-  const std::size_t                       subshapeIndex,
-  const std::vector<Layout::BezierPoint>& newPoints)
-{
-  auto viewModel = m_viewModel.lock();
-  if (!viewModel)
-  {
-    return;
-  }
-
-  auto json = model();
-  if (!json)
-  {
-    return;
-  }
-
-  // points
-  // ./shape/subshapes/XXX/subGeometry/points/XXX
-  nlohmann::json::json_pointer path{ m_path };
-  auto&                        subshapes = (*json)[K_SHAPE][K_SUBSHAPES];
-  path /= K_SHAPE;
-  path /= K_SUBSHAPES;
-
-  auto& subshape = subshapes[subshapeIndex];
-  auto& subGeometry = subshape[K_SUBGEOMETRY];
-
-  auto& points = subGeometry[K_POINTS];
-  auto  pointsPath = path / subshapeIndex / K_SUBGEOMETRY / K_POINTS;
-  for (std::size_t j = 0; j < points.size(); ++j)
-  {
-    auto point = points[j];
-    to_json(point, newPoints[j]);
-
-    auto pointPath = pointsPath / j;
-    DEBUG(
-      "LayoutNode::updateContourNodeModelPoints: %s, -> %s, %s",
-      pointPath.to_string().c_str(),
-      points[j].dump().c_str(),
-      point.dump().c_str());
-
-    viewModel->replaceAt(pointPath, point);
   }
 }
 

@@ -26,7 +26,7 @@ public:
   {
     m_doc = content;
   }
-  virtual const json& content() const override
+  json content() const override
   {
     return m_doc;
   }

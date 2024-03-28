@@ -73,11 +73,9 @@ bool UIApplication::paint(int fps, bool force)
 
   if (force || needsPaint())
   {
+    m_controller->updateDisplayContentIfNeeded();
     if (m_layer->beginFrame(fps))
     {
-      m_view->setDirty(false);
-      m_controller->resetEditorDirty();
-
       m_layer->render();
       m_layer->endFrame();
 

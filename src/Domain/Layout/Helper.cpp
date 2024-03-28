@@ -20,23 +20,6 @@
 
 #include <nlohmann/json.hpp>
 
-namespace
-{
-
-const std::string* jsonFieldString(const nlohmann::json& json, const std::string& key)
-{
-  if (json.contains(key))
-  {
-    auto& rawJson = json[key];
-    auto  pString = rawJson.get_ptr<const nlohmann::json::string_t*>();
-    return pString;
-  }
-
-  return nullptr;
-}
-
-} // namespace
-
 namespace VGG
 {
 namespace Layout
@@ -102,146 +85,114 @@ void from_json(const nlohmann::json& json, Matrix& matrix)
   matrix.ty = json[5];
 }
 
-bool isLayoutNode(const nlohmann::json& json)
+void applyOverridesDetail(
+  nlohmann::json&           json,
+  std::stack<std::string>   reversedPath,
+  const nlohmann::json&     value,
+  std::vector<std::string>& outDirtyNodeIds)
 {
-  if (!json.is_object())
+  if (reversedPath.empty())
   {
-    return false;
+    return;
   }
 
-  // For better performance, reduce json key string construction
-  static std::string s_classKey{ K_CLASS };
+  auto key = reversedPath.top();
 
-  if (!json.contains(s_classKey))
+  reversedPath.pop();
+  auto isLastKey = reversedPath.empty();
+  if (isLastKey)
   {
-    return false;
+    applyLeafOverrides(json, key, value, outDirtyNodeIds);
+    return;
   }
 
-  auto& classJson = json[s_classKey];
-  auto  classNamePtr = classJson.get_ptr<const nlohmann::json::string_t*>();
-  if (!classNamePtr)
+  if (key == "*")
   {
-    return false;
-  }
-
-  auto& className = *classNamePtr;
-  if (
-    className == K_FRAME || className == K_GROUP || className == K_IMAGE || className == K_PATH ||
-    className == K_SYMBOL_INSTANCE || className == K_SYMBOL_MASTER || className == K_TEXT)
-  {
-    return true;
-  }
-
-  return false;
-}
-
-bool isGroupNode(const nlohmann::json& json)
-{
-  if (!json.is_object())
-  {
-    return false;
-  }
-
-  auto className = json.value(K_CLASS, "");
-  return className == K_GROUP;
-}
-
-bool isPathNode(const nlohmann::json& json)
-{
-  if (!json.is_object())
-  {
-    return false;
-  }
-
-  auto className = json.value(K_CLASS, "");
-  return className == K_PATH;
-}
-
-bool isContourPathNode(const nlohmann::json& json)
-{
-  if (!isPathNode(json))
-  {
-    return false;
-  }
-
-  const auto& subshapes = (json)[K_SHAPE][K_SUBSHAPES];
-  if (subshapes.size() != 1)
-  {
-    return false;
-  }
-
-  const auto& subshape = subshapes[0];
-  const auto& subGeometry = subshape[K_SUBGEOMETRY];
-  return (subGeometry[K_CLASS] == K_CONTOUR);
-}
-
-bool isVectorNetworkGroupNode(const nlohmann::json& json)
-{
-  if (!isGroupNode(json))
-  {
-    return false;
-  }
-
-  return json.value(K_IS_VECTOR_NETWORK, false);
-}
-
-bool isNodeWithId(const nlohmann::json& node, const std::string& id)
-{
-  if (isLayoutNode(node))
-  {
-    constexpr auto key = K_NAME; // vggId key is name
-    if (node.contains(key))
+    for (auto& el : json.items())
     {
-      if (node[key] == id)
+      applyOverridesDetail(el.value(), reversedPath, value, outDirtyNodeIds);
+    }
+  }
+  else if (json.is_array())
+  {
+    auto path = nlohmann::json::json_pointer{ "/" + key };
+    if (json.contains(path))
+    {
+      applyOverridesDetail(json[path], reversedPath, value, outDirtyNodeIds);
+    }
+  }
+  else
+  {
+    applyOverridesDetail(json[key], reversedPath, value, outDirtyNodeIds);
+  }
+}
+
+void applyLeafOverrides(
+  nlohmann::json&           json,
+  const std::string&        key,
+  const nlohmann::json&     value,
+  std::vector<std::string>& outDirtyNodeIds)
+{
+  if (value.is_null()) // A null value indicates deletion of the element
+  {
+    deleteLeafElement(json, key);
+    return;
+  }
+
+  if (key == "*")
+  {
+    for (auto& el : json.items())
+    {
+      el.value() = value;
+    }
+  }
+  else if (json.is_array())
+  {
+    auto path = nlohmann::json::json_pointer{ "/" + key };
+    if (json.contains(path))
+    {
+      json[path] = value;
+    }
+  }
+  else
+  {
+    json[key] = value;
+
+    if (key == K_VISIBLE)
+    {
+      outDirtyNodeIds.push_back(json[K_ID]);
+    }
+  }
+}
+
+void deleteLeafElement(nlohmann::json& json, const std::string& key)
+{
+  if (key == "*")
+  {
+    while (true)
+    {
+      auto it = json.begin();
+      if (it == json.end())
       {
-        return true;
+        break;
       }
+
+      json.erase(it.key());
     }
   }
-
-  return false;
-}
-
-bool isNodeWithKey(const nlohmann::json& json, const std::string& key)
-{
-  // For better performance, reduce json key string construction
-  static std::string s_overrideKey{ K_OVERRIDE_KEY };
-  if (auto pString = jsonFieldString(json, s_overrideKey); pString && *pString == key)
+  else if (json.is_array())
   {
-    return true;
-  }
-
-  static std::string s_id{ K_ID };
-  if (auto pString = jsonFieldString(json, s_id); pString && *pString == key)
-  {
-    return true;
-  }
-
-  return false;
-}
-
-const nlohmann::json* getElementInTree(const nlohmann::json& node, const std::string& id)
-{
-  if (!node.is_object() && !node.is_array())
-  {
-    return nullptr;
-  }
-
-  if (isNodeWithId(node, id))
-  {
-    return &node;
-  }
-
-  for (auto& el : node.items())
-  {
-    if (auto* element = getElementInTree(el.value(), id))
+    auto path = nlohmann::json::json_pointer{ "/" + key };
+    if (json.contains(path))
     {
-      return element;
+      auto index = std::stoul(key);
+      json.erase(index);
     }
   }
-
-  return nullptr;
+  else
+  {
+    json.erase(key);
+  }
 }
-
 } // namespace Layout
 } // namespace VGG

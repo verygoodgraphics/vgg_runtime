@@ -24,23 +24,23 @@ StartRunning::StartRunning(std::shared_ptr<Daruma> model)
 {
   ASSERT(model);
 
-  JsonDocumentPtr designDoc, layoutDoc;
   if (model->layoutDoc())
   {
-    auto result =
-      ExpandSymbol{ model->designDoc()->content(), model->layoutDoc()->content() }.run();
+    ExpandSymbol expandSymbol{ model->designDoc()->content(), model->layoutDoc()->content() };
 
-    model->setRuntimeDesignDoc(std::get<0>(result));
+    auto result = expandSymbol();
+    m_layout = expandSymbol.layout();
+
+    model->setRuntimeDesignDocTree(std::get<0>(result));
     model->setRuntimeLayoutDoc(std::get<1>(result));
-    layoutDoc = model->runtimeLayoutDoc();
   }
   else
   {
-    auto designJson = ExpandSymbol{ model->designDoc()->content() }();
-    model->setRuntimeDesignDoc(designJson);
+    ExpandSymbol expandSymbol{ model->designDoc()->content() };
+
+    auto result = expandSymbol();
+    m_layout = expandSymbol.layout();
+
+    model->setRuntimeDesignDocTree(std::get<0>(result));
   }
-
-  designDoc = model->runtimeDesignDoc();
-
-  m_layout.reset(new Layout::Layout{ designDoc, layoutDoc });
 }

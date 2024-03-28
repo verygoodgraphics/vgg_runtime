@@ -22,6 +22,9 @@
 #include "Rule.hpp"
 #include "Utility/Log.hpp"
 
+#include "Domain/Model/DesignModel.hpp"
+#include "Domain/Model/Element.hpp"
+
 #include <algorithm>
 
 #undef DEBUG
@@ -44,10 +47,18 @@ Layout::Layout::Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc)
 }
 
 Layout::Layout::Layout(JsonDocumentPtr designDoc, RuleMapPtr rules)
-  : m_designDoc{ designDoc }
+{
+  ASSERT(designDoc);
+  auto designDocument = std::make_shared<Domain::DesignDocument>(designDoc->content());
+  designDocument->buildSubtree();
+  new (this) Layout(designDocument, rules);
+}
+
+Layout::Layout::Layout(std::shared_ptr<Domain::DesignDocument> designDocument, RuleMapPtr rules)
+  : m_designDocument{ designDocument }
   , m_rules{ rules }
 {
-  ASSERT(m_designDoc);
+  ASSERT(m_designDocument);
 
   if (!m_rules)
   {
@@ -82,108 +93,29 @@ void Layout::Layout::layout(Size size, bool updateRule)
 
 void Layout::Layout::buildLayoutTree()
 {
-  auto& designJson = m_designDoc->content();
-  if (!designJson.is_object())
+  m_layoutTree.reset(new LayoutNode{ m_designDocument });
+  for (auto& child : m_designDocument->children())
   {
-    WARN("invalid design file");
-    return;
-  }
-
-  m_layoutTree.reset(new LayoutNode{ nlohmann::json::json_pointer{ "/" } });
-  json::json_pointer framesPath{ "/frames" };
-  for (std::size_t i = 0; i < designJson[K_FRAMES].size(); ++i)
-  {
-    auto path = framesPath / i;
-    auto page = createOneLayoutNode(designJson[path], path, m_layoutTree);
+    auto page = createOneLayoutNode(child, m_layoutTree);
     m_pageSize.push_back(page->frame().size);
   }
 }
 
-std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(
-  const nlohmann::json&       j,
-  const json::json_pointer&   currentPath,
-  std::shared_ptr<LayoutNode> parent)
+void Layout::Layout::buildSubtree(std::shared_ptr<LayoutNode> parent)
 {
-  if (!j.is_object())
+  if (!parent)
   {
-    WARN("create one layout node from json object, json is not object, return");
-    return nullptr;
+    return;
   }
-
-  if (!isLayoutNode(j))
+  auto element = parent->elementNode();
+  if (!element)
   {
-    return nullptr;
-  }
-
-  auto node = std::make_shared<LayoutNode>(currentPath);
-  node->setViewModel(m_designDoc);
-  if (parent)
-  {
-    parent->addChild(node);
-  }
-
-  buildSubtree(j, currentPath, node);
-
-  return node;
-}
-
-void Layout::Layout::buildSubtree(
-  const nlohmann::json&               j,
-  const nlohmann::json::json_pointer& currentPath,
-  std::shared_ptr<LayoutNode>         parent)
-{
-  if (j.contains(K_CHILD_OBJECTS))
-  {
-    auto path = currentPath / K_CHILD_OBJECTS;
-    createLayoutNodes(j[K_CHILD_OBJECTS], path, parent);
-  }
-
-  if (j[K_CLASS] == K_PATH)
-  {
-    // ./shape/subshapes/i/subGeometry
-    auto& subShapes = j[K_SHAPE][K_SUBSHAPES];
-    auto  subShapesPath = currentPath / K_SHAPE / K_SUBSHAPES;
-    auto  size = subShapes.size();
-    for (std::size_t i = 0; i < size; ++i)
-    {
-      createOneLayoutNode(subShapes[i][K_SUBGEOMETRY], subShapesPath / i / K_SUBGEOMETRY, parent);
-    }
-  }
-}
-
-void Layout::Layout::createLayoutNodes(
-  const nlohmann::json&       j,
-  const json::json_pointer&   currentPath,
-  std::shared_ptr<LayoutNode> parent)
-{
-  if (!j.is_array())
-  {
-    WARN("create layout nodes from json array, json is not array, return");
     return;
   }
 
-  auto size = j.size();
-  auto path = currentPath;
-  for (std::size_t i = 0; i < size; ++i)
+  for (auto& child : element->children())
   {
-    path /= i;
-    createOneOrMoreLayoutNodes(j[i], path, parent);
-    path.pop_back();
-  }
-}
-
-void Layout::Layout::createOneOrMoreLayoutNodes(
-  const nlohmann::json&       j,
-  const json::json_pointer&   currentPath,
-  std::shared_ptr<LayoutNode> parent)
-{
-  if (j.is_object())
-  {
-    createOneLayoutNode(j, currentPath, parent);
-  }
-  else if (j.is_array())
-  {
-    createLayoutNodes(j, currentPath, parent);
+    createOneLayoutNode(child, parent);
   }
 }
 
@@ -223,18 +155,10 @@ void Layout::Layout::configureNodeAutoLayout(
 {
   std::shared_ptr<VGG::Layout::Internal::Rule::Rule> rule;
 
-  auto& designJson = m_designDoc->content();
-  if (node->path() != "/")
+  const auto& nodeId = node->id();
+  if (m_rules->find(nodeId) != m_rules->end())
   {
-    auto& json = designJson[nlohmann::json::json_pointer{ node->path() }];
-    if (json.contains(K_ID))
-    {
-      auto nodeId = json.at(K_ID).get<std::string>();
-      if (m_rules->find(nodeId) != m_rules->end())
-      {
-        rule = (*m_rules)[nodeId];
-      }
-    }
+    rule = (*m_rules)[nodeId];
   }
 
   auto autoLayout = node->autoLayout();
@@ -255,64 +179,19 @@ void Layout::Layout::configureNodeAutoLayout(
   }
 }
 
-bool Layout::Layout::hasFirstOnTopNode()
-{
-  for (const auto& [id, rule] : *m_rules)
-  {
-    if (auto flexContainerRule = rule->getFlexContainerRule();
-        flexContainerRule && flexContainerRule->zOrder)
-    {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 JsonDocumentPtr Layout::Layout::displayDesignDoc()
 {
-  if (hasFirstOnTopNode())
-  {
-    auto designJson = m_designDoc->content();
-    reverseChildren(designJson);
+  auto designModel = designDocTree()->treeModel(true);
 
-    JsonDocumentPtr result{ new RawJsonDocument() };
-    result->setContent(designJson);
-    return result;
-  }
-
-  return m_designDoc;
+  JsonDocumentPtr result{ new RawJsonDocument() };
+  result->setContent(designModel);
+  return result;
 }
 
-void Layout::Layout::reverseChildren(nlohmann::json& json)
+std::shared_ptr<Domain::DesignDocument> Layout::Layout::designDocTree()
 {
-  if (!json.is_object() && !json.is_array())
-  {
-    return;
-  }
-
-  if (json.contains(K_ID) && json.contains(K_CHILD_OBJECTS))
-  {
-    auto nodeId = json[K_ID].get<std::string>();
-    if (m_rules->find(nodeId) != m_rules->end())
-    {
-      auto rule = (*m_rules)[nodeId];
-      if (auto flexContainerRule = rule->getFlexContainerRule();
-          flexContainerRule && flexContainerRule->zOrder)
-      {
-        auto& children = json[K_CHILD_OBJECTS];
-        if (children.is_array())
-        {
-          std::reverse(children.begin(), children.end());
-        }
-      }
-    }
-  }
-
-  for (auto& el : json.items())
-  {
-    reverseChildren(el.value());
-  }
+  updateFirstOnTop(m_designDocument);
+  return m_designDocument;
 }
 
 void Layout::Layout::resizeNodeThenLayout(
@@ -407,10 +286,7 @@ void Layout::Layout::rebuildSubtree(std::shared_ptr<LayoutNode> node)
   DEBUG("Layout::rebuildSubtree: node id is %s, %s", node->id().c_str(), node->path().c_str());
   node->removeAllChildren();
 
-  const auto& path = node->jsonPointer();
-  const auto& json = m_designDoc->content()[path];
-
-  buildSubtree(json, path, node);
+  buildSubtree(node);
   configureNodeAutoLayout(node, false);
 
 #ifdef DUMP_TREE
@@ -430,5 +306,56 @@ void Layout::Layout::rebuildSubtreeById(std::string nodeId)
 #ifdef DUMP_TREE
     m_layoutTree->dump();
 #endif
+  }
+}
+
+std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(
+  std::shared_ptr<Domain::Element> element,
+  std::shared_ptr<LayoutNode>      parent)
+{
+  if (!element || !element->isLayoutNode())
+  {
+    return nullptr;
+  }
+
+  auto node = std::make_shared<LayoutNode>(element);
+  if (parent)
+  {
+    parent->addChild(node);
+  }
+
+  for (auto& child : element->children())
+  {
+    createOneLayoutNode(child, node);
+  }
+
+  return node;
+}
+
+void Layout::Layout::updateFirstOnTop(std::shared_ptr<Domain::Element> element)
+{
+  if (!element)
+  {
+    return;
+  }
+
+  element->setFirstOnTop(false);
+  auto id = element->id();
+  if (!id.empty())
+  {
+    if (auto it = m_rules->find(id); it != m_rules->end())
+    {
+      auto rule = it->second;
+      if (auto flexContainerRule = rule->getFlexContainerRule();
+          flexContainerRule && flexContainerRule->zOrder)
+      {
+        element->setFirstOnTop(true);
+      }
+    }
+  }
+
+  for (auto& child : element->children())
+  {
+    updateFirstOnTop(child);
   }
 }

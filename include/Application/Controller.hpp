@@ -20,7 +20,6 @@
 #include "Application/UIEvent.hpp"
 
 #include "Domain/IVggEnv.hpp"
-#include "Domain/Layout/Layout.hpp"
 #include "Domain/Layout/Rect.hpp"
 
 #include <rxcpp/rx.hpp>
@@ -40,6 +39,11 @@ class Reporter;
 class RunLoop;
 class VggExec;
 struct ViewModel;
+
+namespace Layout
+{
+class Layout;
+}
 
 class Controller : public std::enable_shared_from_this<Controller>
 {
@@ -105,8 +109,8 @@ public:
     return m_mode == ERunMode::NORMAL_MODE;
   }
 
+  void updateDisplayContentIfNeeded();
   bool hasDirtyEditor();
-  void resetEditorDirty();
   void onFirstRender();
 
   void setEventListener(EventListener listener);

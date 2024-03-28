@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 #include "Editor.hpp"
-#include "Application/UIView.hpp"
-#include "Utility/Log.hpp"
 
+#include "Application/UIView.hpp"
+#include "Domain/Layout/Node.hpp"
 #include "Layer/Zoomer.hpp"
+#include "Utility/Log.hpp"
 
 #include <include/core/SkCanvas.h>
 
@@ -218,6 +219,8 @@ void Editor::onRender(SkCanvas* canvas)
   }
 
   canvas->restore();
+
+  setDirty(false);
 }
 
 void Editor::drawBorder(SkCanvas* canvas, const LayoutNode* node)
@@ -459,6 +462,7 @@ void Editor::resizeNode(MouseEvent* mouseMove)
     }
   }
   selectedNode->setFrame(frame, true);
+  m_isModelDirty = true;
 }
 
 Layout::Rect Editor::getSelectNodeRect(EResizePosition position)
@@ -607,4 +611,23 @@ void Editor::didSelectNode(std::weak_ptr<LayoutNode> node)
   {
     listener->onSelectNode(node);
   }
+}
+
+bool Editor::isDirty()
+{
+  return m_isEnabled && (m_isDirty || isModelDirty());
+}
+void Editor::setDirty(const bool dirty)
+{
+  m_isDirty = dirty;
+}
+
+bool Editor::isModelDirty()
+{
+  return m_isModelDirty;
+}
+
+void Editor::resetModelDirty()
+{
+  m_isModelDirty = false;
 }

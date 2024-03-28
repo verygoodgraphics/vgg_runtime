@@ -144,7 +144,7 @@ private:
   sk_sp<SkImageFilter>       m_maskFilter;
   std::vector<Fill>          m_fills;
   std::vector<Border>        m_borders;
-  bool                       m_hasFill;
+  bool                       m_hasFill{ false };
 };
 
 class StyleObjectAttribute : public Attribute

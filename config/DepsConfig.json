@@ -1,9 +1,9 @@
 {
     "skia": {
-        "url": "https://github.com/verygoodgraphics/skia/releases/download/20230317/skia-with-deps-20230317.tar.gz",
-        "md5": "fdf41ad5df78d92a7ee9b454d83520da",
-        "filename": "skia-with-deps-20230317.tar.gz",
-        "commit": "e297f2ee427694a346f78dd9d619e088d8b3bbb5"
+        "url": "https://github.com/verygoodgraphics/skia/releases/download/20240322/skia-with-deps-20240322.tar.gz",
+        "md5": "9db6fb10fd2815a56b0aa0d65a6244a0",
+        "filename": "skia-with-deps-20240322.tar.gz",
+        "commit": "8a93869433d850565053f0cf5894c9e93a2ed92e"
     },
     "nodejs": {
         "url": "https://nodejs.org/dist/v18.15.0/node-v18.15.0.tar.gz",
@@ -15,5 +15,10 @@
         "filename": "nodejs-mobile-v18.17.2.tar.gz",
         "ios-binary-url": "https://github.com/nodejs-mobile/nodejs-mobile/releases/download/v18.17.2/nodejs-mobile-v18.17.2-ios.zip",
         "ios-binary-filename": "nodejs-mobile-v18.17.2-ios.zip"
+    },
+    "sdl2": {
+        "url": "https://github.com/libsdl-org/SDL/releases/download/release-2.28.5/SDL2-devel-2.28.5-VC.zip",
+        "filename": "SDL2-devel-2.28.5-VC.zip",
+        "md5": "d8173db078e54040c666f411c5a6afff"
     }
 }

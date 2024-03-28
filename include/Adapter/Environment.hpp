@@ -16,34 +16,14 @@
 
 #pragma once
 
-#include "Event.hpp"
-#include "IContainer.hpp"
-#include "ISdk.hpp"
-#include "VggTypes.hpp"
-
-#include <memory>
+#include "VggPackage.hpp"
 
 namespace VGG
 {
-
-namespace layer
+class VGG_RUNTIME_DLL_DECLARE Environment
 {
-class SkiaGraphicsContext;
-}
-
-class ContainerImpl;
-class VGG_RUNTIME_DLL_DECLARE Container : public IContainer
-{
-  std::shared_ptr<ContainerImpl> m_impl;
-
 public:
-  Container();
-  ~Container();
-
-  void setGraphicsContext(std::unique_ptr<layer::SkiaGraphicsContext>& context, int w, int h);
-
-private:
-  virtual IContainer* container() override;
+  static void setUp();
+  static void tearDown();
 };
-
 } // namespace VGG

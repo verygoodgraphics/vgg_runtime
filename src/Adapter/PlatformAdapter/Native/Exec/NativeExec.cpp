@@ -27,6 +27,10 @@ using namespace VGG;
 std::shared_ptr<NativeExec> NativeExec::sharedInstance()
 {
   static auto s_sharedInstance = std::shared_ptr<NativeExec>(new NativeExec);
+
+  // should not call after NativeExec::release
+  assert(s_sharedInstance->m_thread);
+
   return s_sharedInstance;
 }
 
@@ -43,8 +47,7 @@ NativeExec::NativeExec()
 
 NativeExec::~NativeExec()
 {
-  teardown();
-  m_thread->join();
+  assert(!m_thread);
 }
 
 bool NativeExec::evalScript(const std::string& code)
@@ -104,4 +107,11 @@ void NativeExec::teardown()
 {
   m_impl->notify_node_thread_to_stop();
   m_impl->stop_node();
+}
+
+void NativeExec::release()
+{
+  teardown();
+  m_thread->join();
+  m_thread = nullptr;
 }

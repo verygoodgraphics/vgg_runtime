@@ -19,14 +19,20 @@ add_library(vgg_application STATIC
   ViewModel.cpp
 )
 
+if(MSVC)
+  target_compile_definitions(vgg_application PRIVATE VGG_RUNTIME_DLL_EXPORTING)
+endif()
+
 target_include_directories(vgg_application PUBLIC
   ${CMAKE_SOURCE_DIR}/include
   ${CMAKE_SOURCE_DIR}/include/VGG/Container
+  ${CMAKE_SOURCE_DIR}/include/Package
 )
 
 target_include_directories(vgg_application PRIVATE
   ${CMAKE_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/include/Application
+  ${CMAKE_SOURCE_DIR}/include/Adapter
 )
 
 target_link_libraries(vgg_application PUBLIC

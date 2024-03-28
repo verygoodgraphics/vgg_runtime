@@ -73,6 +73,14 @@ else()
   set(SKIA_EXTERNAL_PROJECT_DIR ${SKIA_SOURCE_DIR} CACHE STRING "" FORCE)
 endif()
 
+if(MSVC)
+  #message(STATUS "Run skia git-sync-deps")
+  #execute_process(COMMAND "python3" "tools/git-sync-deps" WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/lib/skia")
+  if(NOT EXISTS "${SKIA_SOURCE_DIR}/bin/gn.exe")
+    execute_process(COMMAND "python3" "bin/fetch-gn" WORKING_DIRECTORY ${SKIA_SOURCE_DIR} COMMAND_ERROR_IS_FATAL ANY)
+  endif()
+endif()
+
 message(STATUS "Use skia ${SKIA_EXTERNAL_PROJECT_DIR}")
 
 # test gn if is for the current platform
@@ -96,7 +104,18 @@ if(VGG_VAR_TARGET STREQUAL "WASM"
     set(SKIA_LIB_LINK_TYPE "static")
 endif()
 
-set(SKIA_LIB_BUILD_PREFIX "out/${VGG_VAR_TARGET}/${ENV_SHELL_PREFIX}/${CMAKE_CXX_COMPILER_ID}_${CMAKE_CXX_COMPILER_VERSION}/${SKIA_LIB_LINK_TYPE}/${CMAKE_BUILD_TYPE}" CACHE STRING "" FORCE)
+# if(MSVC)
+#   # if SKIA_LIB_LINK_TYPE is dynamic, msvc will not generate skparagraph.lib, so make it static
+#   set(SKIA_LIB_LINK_TYPE "static")
+# endif()
+
+if(MSVC)
+  # use appropriate length
+  set(SKIA_LIB_BUILD_PREFIX "out/${SKIA_LIB_LINK_TYPE}/${CMAKE_BUILD_TYPE}" CACHE STRING "" FORCE)
+else()
+  set(SKIA_LIB_BUILD_PREFIX "out/${VGG_VAR_TARGET}/${ENV_SHELL_PREFIX}/${CMAKE_CXX_COMPILER_ID}_${CMAKE_CXX_COMPILER_VERSION}/${SKIA_LIB_LINK_TYPE}/${CMAKE_BUILD_TYPE}" CACHE STRING "" FORCE)
+endif()
+
 message(STATUS "Skia build to: ${SKIA_EXTERNAL_PROJECT_DIR}/${SKIA_LIB_BUILD_PREFIX}")
 set(SKIA_LIB_DIR "${SKIA_EXTERNAL_PROJECT_DIR}/${SKIA_LIB_BUILD_PREFIX}" CACHE STRING "" FORCE)
 set(SKIA_INCLUDE_DIRS "${SKIA_EXTERNAL_PROJECT_DIR}" "${SKIA_EXTERNAL_PROJECT_DIR}/include/" CACHE STRING "" FORCE)

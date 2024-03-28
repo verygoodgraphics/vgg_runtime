@@ -17,6 +17,7 @@
 #include "SdlMouse.hpp"
 
 #include "Adapter/NativeComposer.hpp"
+#include "Adapter/Environment.hpp"
 #include "Application/AppBase.hpp"
 #include "Application/MainComposer.hpp"
 #include "Application/Mouse.hpp"
@@ -40,6 +41,8 @@ using AppImpl = VGG::entry::AppSDLImpl;
 int main(int argc, char** argv)
 {
   INFO("main");
+
+  VGG::Environment::setUp();
 
   argparse::ArgumentParser program("vgg", "0.1");
   program.add_argument(DARUMA_FILE_OR_DIRECTORY).help("daruma file or directory");
@@ -109,5 +112,6 @@ int main(int argc, char** argv)
     mainComposer.runLoop()->dispatch();
   }
 
+  VGG::Environment::tearDown();
   return 0;
 }

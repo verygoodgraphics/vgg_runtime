@@ -15,7 +15,7 @@ VGG Runtime only supports reading and rendering of `.daruma` files, which
 | Harmony        | ❌    | ⛏️    | ⭕️      | N/A  |
 | iOS            | N/A  | ✅    | N/A    | N/A  |
 | macOS          | ✅    | ✅    | N/A    | N/A  |
-| Windows        | ⛏️    | ❌    | N/A    | N/A  |
+| Windows        | ✅    | ❌    | N/A    | N/A  |
 | WASM           | N/A  | N/A  | N/A    | ✅    |
 
 ✅ Supported
@@ -67,6 +67,17 @@ cmake --build . --parallel
 
 > Note: For release build, please add `-DCMAKE_BUILD_TYPE=Release` to the first `cmake` command.
 
+#### Windows building example
+
+```bash
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Debug -G "Visual Studio 17 2022"
+cmake --build . --parallel --config Debug -t sdl_runtime
+```
+
+> Note: For release build, just replace `Debug` with `Release`.
+
 #### WebAssembly building example
 
 [Emscripten SDK](https://github.com/emscripten-core/emscripten) is required to build WebAssembly version. You should [install and activate](https://emscripten.org/docs/getting_started/downloads.html#installation-instructions-using-the-emsdk-recommended) at least one version of emsdk before proceeding.
@@ -97,14 +108,12 @@ Build & install vgg_container libraries for [vgg_qt](https://github.com/verygood
 ```bash
 mkdir build.qt
 cd build.qt
-cmake .. -DVGG_CONTAINER_FOR_QT=ON
-cmake --build . --parallel -t vgg_container
-cmake --install . --component container --prefix <path/to/vgg_qt/VggContainer/external>
+cmake .. -DVGG_CONTAINER_FOR_QT=ON -DCMAKE_BUILD_TYPE=Release
+cmake --build . --parallel -t vgg_container --config Release
+cmake --install . --component container --config Release --prefix <path/to/vgg_qt/VggContainer/external>
 ```
 
-#### Windows building example
-
-Compiling on Windows need extra efforts. It will be released once being stable.
+> Note: For debug build, please replace `Release` with `Debug` to the `cmake` commands.
 
 ### 4. Unit test
 

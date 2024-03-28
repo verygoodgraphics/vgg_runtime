@@ -18,6 +18,10 @@
 #include <cstdint>
 #include <cmath>
 
+#ifdef _MSC_VER
+#include <limits>
+#endif
+
 namespace VGG
 {
 bool nearlyEqual(double x, double y);

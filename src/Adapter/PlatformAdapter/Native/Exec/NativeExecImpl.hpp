@@ -28,7 +28,10 @@
 #include <queue>
 #include <string>
 #include <thread>
+
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 using node::CommonEnvironmentSetup;
 using node::Environment;

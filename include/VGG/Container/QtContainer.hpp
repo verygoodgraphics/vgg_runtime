@@ -24,7 +24,7 @@ namespace VGG
 {
 
 class QtContainerImpl;
-class QtContainer : public IContainer
+class VGG_RUNTIME_DLL_DECLARE QtContainer : public IContainer
 {
   std::unique_ptr<QtContainerImpl> m_impl;
 

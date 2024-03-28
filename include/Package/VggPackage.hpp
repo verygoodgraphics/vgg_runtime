@@ -14,36 +14,16 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef VGG_RUNTIME_DLL_DECLARE
 
-#include "Event.hpp"
-#include "IContainer.hpp"
-#include "ISdk.hpp"
-#include "VggTypes.hpp"
+#ifdef _MSC_VER
+#ifdef VGG_RUNTIME_DLL_EXPORTING
+#define VGG_RUNTIME_DLL_DECLARE __declspec(dllexport)
+#else
+#define VGG_RUNTIME_DLL_DECLARE __declspec(dllimport)
+#endif
+#else
+#define VGG_RUNTIME_DLL_DECLARE
+#endif
 
-#include <memory>
-
-namespace VGG
-{
-
-namespace layer
-{
-class SkiaGraphicsContext;
-}
-
-class ContainerImpl;
-class VGG_RUNTIME_DLL_DECLARE Container : public IContainer
-{
-  std::shared_ptr<ContainerImpl> m_impl;
-
-public:
-  Container();
-  ~Container();
-
-  void setGraphicsContext(std::unique_ptr<layer::SkiaGraphicsContext>& context, int w, int h);
-
-private:
-  virtual IContainer* container() override;
-};
-
-} // namespace VGG
+#endif

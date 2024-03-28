@@ -164,6 +164,8 @@ public:
   PaintOption    paintOption;
   ContourOption  maskOption;
 
+  std::function<void(VectorObjectAttibuteAccessor*, void*)> paintNodeEventHandler;
+
   bool legacyCode{ false };
 
   std::optional<VShape>            path;
@@ -180,8 +182,9 @@ public:
   std::array<float, 4> frameRadius{ 0, 0, 0, 0 };
   float                cornerSmooth{ 0 };
 
-  Ref<DefaultRenderNode>  renderNode;
-  Ref<TransformAttribute> transformAttr;
+  Ref<DefaultRenderNode>                        renderNode;
+  Ref<TransformAttribute>                       transformAttr;
+  std::unique_ptr<VectorObjectAttibuteAccessor> accessor;
 
   sk_sp<SkPicture> picture;
 
@@ -191,7 +194,7 @@ public:
     , legacyCode(legacyCode)
   {
     transformAttr = TransformAttribute::Make();
-    renderNode = RenderNodeFactory::MakeVectorRenderNode(0, api, transformAttr);
+    std::tie(renderNode, accessor) = RenderNodeFactory::MakeVectorRenderNode(0, api, transformAttr);
     api->observe(renderNode);
     api->observe(transformAttr);
   }

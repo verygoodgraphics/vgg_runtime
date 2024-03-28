@@ -67,6 +67,8 @@ public:
   void setFrameMode(ETextLayoutMode mode);
   void setVerticalAlignment(ETextVerticalAlignment vertAlign);
 
+  using EventHandler = std::function<void(const std::string&)>;
+
   ~TextNode();
 
 protected:

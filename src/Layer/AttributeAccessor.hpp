@@ -17,6 +17,7 @@
 #include <type_traits>
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Core/VShape.hpp"
+#include "Layer/ParagraphObjectAttribute.hpp"
 #include "ShapeAttribute.hpp"
 #include "LayerAttribute.hpp"
 #include "ObjectAttribute.hpp"
@@ -24,30 +25,25 @@
 #include "TransformAttribute.hpp"
 namespace VGG::layer
 {
+#define ATTR_MEMBER_GETTER(name, type, container)                                                  \
+  type* name() const                                                                               \
+  {                                                                                                \
+    return container;                                                                              \
+  }
 
-class AttributeAccessor
+class Accessor
 {
 public:
-  AttributeAccessor(const AttributeAccessor&) = delete;
-  AttributeAccessor& operator=(const AttributeAccessor&) = delete;
-  AttributeAccessor(AttributeAccessor&&) = delete;
-  AttributeAccessor& operator=(AttributeAccessor&&) = delete;
-  ~AttributeAccessor() = default;
+  Accessor(const Accessor&) = default;
+  Accessor& operator=(const Accessor& a) = delete;
+  Accessor(Accessor&&) = default;
+  Accessor& operator=(Accessor&&) = delete;
+  ~Accessor() = default;
 
   void setTransform(const Transform& transform)
   {
     ASSERT(m_transformAttr != nullptr);
     m_transformAttr->setTransform(transform);
-  }
-
-  template<
-    typename T,
-    typename DecayT = std::decay_t<T>,
-    typename = typename std::enable_if_t<std::is_same_v<DecayT, VShape>>>
-  void setShape(T&& shape)
-  {
-    ASSERT(m_shapeAttr != nullptr);
-    m_shapeAttr->setShape(std::forward<T>(shape));
   }
 
   template<
@@ -137,40 +133,27 @@ public:
     m_backgroundBlurAttr->setBackgroundBlur(std::forward<T>(blurs));
   }
 
-#define ATTR_MEMBER_GETTER(name, type, container)                                                  \
-  type* name() const                                                                               \
-  {                                                                                                \
-    return container;                                                                              \
-  }
-
   ATTR_MEMBER_GETTER(transform, TransformAttribute, m_transformAttr);
   ATTR_MEMBER_GETTER(alphaMask, AlphaMaskAttribute, m_alphaMaskAttr);
   ATTR_MEMBER_GETTER(shapeMask, ShapeMaskAttribute, m_shapeMaskAttr);
-  ATTR_MEMBER_GETTER(shape, ShapeAttribute, m_shapeAttr);
   ATTR_MEMBER_GETTER(dropShadow, DropShadowAttribute, m_dropShadowAttr);
   ATTR_MEMBER_GETTER(innerShadow, InnerShadowAttribute, m_innerShadowAttr);
   ATTR_MEMBER_GETTER(styleObject, ObjectAttribute, m_styleObjectAttr);
   ATTR_MEMBER_GETTER(layerFX, LayerFXAttribute, m_layerFXAttr);
   ATTR_MEMBER_GETTER(backgroundBlur, BackgroundBlurAttribute, m_backgroundBlurAttr);
 
-#undef ATTR_MEMBER_GETTER
-
-private:
-  friend class DefaultRenderNode;
-  friend class RenderNodeFactory;
+protected:
   TransformAttribute* const      m_transformAttr;
   AlphaMaskAttribute* const      m_alphaMaskAttr;
   ShapeMaskAttribute* const      m_shapeMaskAttr;
-  ShapeAttribute* const          m_shapeAttr;
   DropShadowAttribute* const     m_dropShadowAttr;
   InnerShadowAttribute* const    m_innerShadowAttr;
   ObjectAttribute* const         m_styleObjectAttr;
   LayerFXAttribute* const        m_layerFXAttr;
   BackgroundBlurAttribute* const m_backgroundBlurAttr;
 
-  AttributeAccessor(
+  Accessor(
     TransformAttribute*      transformAttr,
-    ShapeAttribute*          shapeAttr,
     AlphaMaskAttribute*      alphaMaskAttr,
     ShapeMaskAttribute*      shapemaskAttr,
     DropShadowAttribute*     dropShadowAttr,
@@ -181,7 +164,6 @@ private:
     : m_transformAttr(transformAttr)
     , m_alphaMaskAttr(alphaMaskAttr)
     , m_shapeMaskAttr(shapemaskAttr)
-    , m_shapeAttr(shapeAttr)
     , m_dropShadowAttr(dropShadowAttr)
     , m_innerShadowAttr(innerShadowAttr)
     , m_styleObjectAttr(objectAttr)
@@ -189,6 +171,84 @@ private:
     , m_backgroundBlurAttr(backgroundBlurAttr)
   {
   }
-  friend class RenderNode;
 };
+
+class VectorObjectAttibuteAccessor : public Accessor
+{
+public:
+  template<
+    typename T,
+    typename DecayT = std::decay_t<T>,
+    typename = typename std::enable_if_t<std::is_same_v<DecayT, VShape>>>
+  void setShape(T&& shape)
+  {
+    ASSERT(m_shapeAttr != nullptr);
+    m_shapeAttr->setShape(std::forward<T>(shape));
+  }
+  ATTR_MEMBER_GETTER(shape, ShapeAttribute, m_shapeAttr);
+
+private:
+  friend class DefaultRenderNode;
+  friend class RenderNodeFactory;
+  friend class RenderNode;
+  ShapeAttribute* const m_shapeAttr;
+
+  VectorObjectAttibuteAccessor(
+    ShapeAttribute*          shapeAttr,
+    TransformAttribute*      transformAttr,
+    AlphaMaskAttribute*      alphaMaskAttr,
+    ShapeMaskAttribute*      shapemaskAttr,
+    DropShadowAttribute*     dropShadowAttr,
+    InnerShadowAttribute*    innerShadowAttr,
+    ObjectAttribute*         objectAttr,
+    LayerFXAttribute*        layerPostProcessAttr,
+    BackgroundBlurAttribute* backgroundBlurAttr)
+    : Accessor(
+        transformAttr,
+        alphaMaskAttr,
+        shapemaskAttr,
+        dropShadowAttr,
+        innerShadowAttr,
+        objectAttr,
+        layerPostProcessAttr,
+        backgroundBlurAttr)
+    , m_shapeAttr(shapeAttr)
+  {
+  }
+};
+
+class ParagraphAttributeAccessor : public Accessor
+{
+public:
+  ATTR_MEMBER_GETTER(paragraph, ParagraphObjectAttribute, m_paraAttr);
+
+protected:
+  friend class RenderNodeFactory;
+  ParagraphObjectAttribute* const m_paraAttr;
+
+  ParagraphAttributeAccessor(
+    ParagraphObjectAttribute* paragraphObjectAttr,
+    TransformAttribute*       transformAttr,
+    AlphaMaskAttribute*       alphaMaskAttr,
+    ShapeMaskAttribute*       shapemaskAttr,
+    DropShadowAttribute*      dropShadowAttr,
+    InnerShadowAttribute*     innerShadowAttr,
+    ObjectAttribute*          objectAttr,
+    LayerFXAttribute*         layerPostProcessAttr,
+    BackgroundBlurAttribute*  backgroundBlurAttr)
+    : Accessor(
+        transformAttr,
+        alphaMaskAttr,
+        shapemaskAttr,
+        dropShadowAttr,
+        innerShadowAttr,
+        objectAttr,
+        layerPostProcessAttr,
+        backgroundBlurAttr)
+    , m_paraAttr(paragraphObjectAttr)
+  {
+  }
+};
+
+#undef ATTR_MEMBER_GETTER
 } // namespace VGG::layer

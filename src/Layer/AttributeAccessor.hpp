@@ -138,11 +138,12 @@ public:
   ATTR_MEMBER_GETTER(shapeMask, ShapeMaskAttribute, m_shapeMaskAttr);
   ATTR_MEMBER_GETTER(dropShadow, DropShadowAttribute, m_dropShadowAttr);
   ATTR_MEMBER_GETTER(innerShadow, InnerShadowAttribute, m_innerShadowAttr);
-  ATTR_MEMBER_GETTER(styleObject, ObjectAttribute, m_styleObjectAttr);
+  ATTR_MEMBER_GETTER(styleObject, ObjectAttribute, m_styleObjectAttr); // typo: Should be object
   ATTR_MEMBER_GETTER(layerFX, LayerFXAttribute, m_layerFXAttr);
   ATTR_MEMBER_GETTER(backgroundBlur, BackgroundBlurAttribute, m_backgroundBlurAttr);
 
 protected:
+  friend class RenderNodeFactory;
   TransformAttribute* const      m_transformAttr;
   AlphaMaskAttribute* const      m_alphaMaskAttr;
   ShapeMaskAttribute* const      m_shapeMaskAttr;
@@ -187,11 +188,11 @@ public:
   }
   ATTR_MEMBER_GETTER(shape, ShapeAttribute, m_shapeAttr);
 
-private:
-  friend class DefaultRenderNode;
-  friend class RenderNodeFactory;
-  friend class RenderNode;
-  ShapeAttribute* const m_shapeAttr;
+  VectorObjectAttibuteAccessor(const Accessor& acc, ShapeAttribute* shape)
+    : Accessor(acc)
+    , m_shapeAttr(shape)
+  {
+  }
 
   VectorObjectAttibuteAccessor(
     ShapeAttribute*          shapeAttr,
@@ -215,17 +216,20 @@ private:
     , m_shapeAttr(shapeAttr)
   {
   }
+
+protected:
+  ShapeAttribute* const m_shapeAttr;
 };
 
 class ParagraphAttributeAccessor : public Accessor
 {
 public:
   ATTR_MEMBER_GETTER(paragraph, ParagraphObjectAttribute, m_paraAttr);
-
-protected:
-  friend class RenderNodeFactory;
-  ParagraphObjectAttribute* const m_paraAttr;
-
+  ParagraphAttributeAccessor(const Accessor& acc, ParagraphObjectAttribute* paragraphObjectAttr)
+    : Accessor(acc)
+    , m_paraAttr(paragraphObjectAttr)
+  {
+  }
   ParagraphAttributeAccessor(
     ParagraphObjectAttribute* paragraphObjectAttr,
     TransformAttribute*       transformAttr,
@@ -248,6 +252,9 @@ protected:
     , m_paraAttr(paragraphObjectAttr)
   {
   }
+
+protected:
+  ParagraphObjectAttribute* const m_paraAttr;
 };
 
 #undef ATTR_MEMBER_GETTER

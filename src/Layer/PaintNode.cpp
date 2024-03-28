@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "Layer/AttributeAccessor.hpp"
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Guard.hpp"
 #include "Layer/LayerCache.h"
@@ -88,11 +89,12 @@ PaintNode::PaintNode(
   const std::string& name,
   EObjectType        type,
   const std::string& guid,
-  bool               legacyCode)
+  bool               legacyCode,
+  bool               initVectorRenderNode)
   : TreeNode(cnt, name)
-  , d_ptr(new PaintNode__pImpl(this, type, legacyCode))
+  , d_ptr(new PaintNode__pImpl(this, type, legacyCode, initVectorRenderNode))
 {
-  d_ptr->guid = guid;
+  auto renderObject = d_ptr->guid = guid;
 }
 
 PaintNode::PaintNode(VRefCnt* cnt, const std::string& name, std::unique_ptr<PaintNode__pImpl> impl)
@@ -343,14 +345,18 @@ void PaintNode::setMaskBy(std::vector<std::string> masks)
 {
   VGG_IMPL(PaintNode);
   _->maskedBy = std::move(masks);
-  _->accessor->setShapeMask(_->maskedBy);
+  if (!_->legacyCode)
+  {
+    _->accessor->setShapeMask(_->maskedBy);
+  }
 }
 
 void PaintNode::setAlphaMaskBy(std::vector<AlphaMask> masks)
 {
   VGG_IMPL(PaintNode);
   _->alphaMaskBy = std::move(masks);
-  _->accessor->setAlphaMask(_->alphaMaskBy);
+  if (!_->legacyCode)
+    _->accessor->setAlphaMask(_->alphaMaskBy);
 }
 
 VShape PaintNode::makeBoundPath()
@@ -586,13 +592,16 @@ void PaintNode::setStyle(const Style& style)
 {
   VGG_IMPL(PaintNode);
   _->style = style;
-  auto aa = _->accessor.get();
-  aa->setFill(style.fills);
-  aa->setBorder(style.borders);
-  aa->setInnerShadow(style.innerShadow);
-  aa->setDropShadow(style.dropShadow);
-  aa->setLayerBlur(style.layerEffects);
-  aa->setBackgroundBlur(style.backgroundEffects);
+  if (!_->legacyCode)
+  {
+    auto aa = _->accessor.get();
+    aa->setFill(style.fills);
+    aa->setBorder(style.borders);
+    aa->setInnerShadow(style.innerShadow);
+    aa->setDropShadow(style.dropShadow);
+    aa->setLayerBlur(style.layerEffects);
+    aa->setBackgroundBlur(style.backgroundEffects);
+  }
 }
 
 const Style& PaintNode::style() const
@@ -607,26 +616,12 @@ EBoolOp PaintNode::clipOperator() const
 void PaintNode::setTransform(const Transform& transform)
 {
   VGG_IMPL(PaintNode);
-  if (_->legacyCode)
-  {
-    _->transform = transform;
-  }
-  else
-  {
-    _->accessor->setTransform(transform);
-  }
+  _->transformAttr->setTransform(transform);
 }
 
 const Transform& PaintNode::transform() const
 {
-  if (d_ptr->legacyCode)
-  {
-    return d_ptr->transform;
-  }
-  else
-  {
-    return d_ptr->accessor->transform()->getTransform();
-  }
+  return d_ptr->transformAttr->getTransform();
 }
 
 Transform PaintNode::globalTransform() const
@@ -813,10 +808,14 @@ Bound PaintNode::onDrawFill(
   return Bound{ fillBound.x(), fillBound.y(), fillBound.width(), fillBound.height() };
 }
 
-VectorObjectAttibuteAccessor* PaintNode::attributeAccessor()
+Accessor* PaintNode::attributeAccessor()
 {
   ASSERT(d_ptr->accessor);
   return d_ptr->accessor.get();
+}
+TransformAttribute* PaintNode::transformAttribute()
+{
+  return d_ptr->transformAttr;
 }
 
 void PaintNode::installPaintNodeEventHandler(EventHandler handler)
@@ -829,7 +828,9 @@ void PaintNode::dispatchEvent(void* event)
   VGG_IMPL(PaintNode);
   if (_->paintNodeEventHandler)
   {
-    _->paintNodeEventHandler(attributeAccessor(), event);
+    _->paintNodeEventHandler(
+      static_cast<VectorObjectAttibuteAccessor*>(attributeAccessor()),
+      event);
   }
 }
 

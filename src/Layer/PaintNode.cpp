@@ -199,11 +199,11 @@ void PaintNode::paintSelf(Renderer* renderer)
   VGG_IMPL(PaintNode);
   if (_->renderable)
   {
-    this->paintEvent(renderer);
+    this->onPaint(renderer);
   }
 }
 
-void PaintNode::paintEvent(Renderer* renderer)
+void PaintNode::onPaint(Renderer* renderer)
 {
   VGG_IMPL(PaintNode);
 
@@ -343,16 +343,14 @@ void PaintNode::setMaskBy(std::vector<std::string> masks)
 {
   VGG_IMPL(PaintNode);
   _->maskedBy = std::move(masks);
-  auto aa = _->renderNode->access();
-  aa->setShapeMask(_->maskedBy);
+  _->accessor->setShapeMask(_->maskedBy);
 }
 
 void PaintNode::setAlphaMaskBy(std::vector<AlphaMask> masks)
 {
   VGG_IMPL(PaintNode);
   _->alphaMaskBy = std::move(masks);
-  auto aa = _->renderNode->access();
-  aa->setAlphaMask(_->alphaMaskBy);
+  _->accessor->setAlphaMask(_->alphaMaskBy);
 }
 
 VShape PaintNode::makeBoundPath()
@@ -588,7 +586,7 @@ void PaintNode::setStyle(const Style& style)
 {
   VGG_IMPL(PaintNode);
   _->style = style;
-  auto aa = _->renderNode->access();
+  auto aa = _->accessor.get();
   aa->setFill(style.fills);
   aa->setBorder(style.borders);
   aa->setInnerShadow(style.innerShadow);
@@ -615,7 +613,7 @@ void PaintNode::setTransform(const Transform& transform)
   }
   else
   {
-    _->renderNode->access()->setTransform(transform);
+    _->accessor->setTransform(transform);
   }
 }
 
@@ -627,7 +625,7 @@ const Transform& PaintNode::transform() const
   }
   else
   {
-    return d_ptr->renderNode->access()->transform()->getTransform();
+    return d_ptr->accessor->transform()->getTransform();
   }
 }
 
@@ -815,10 +813,24 @@ Bound PaintNode::onDrawFill(
   return Bound{ fillBound.x(), fillBound.y(), fillBound.width(), fillBound.height() };
 }
 
-AttributeAccessor* PaintNode::attributeAccessor()
+VectorObjectAttibuteAccessor* PaintNode::attributeAccessor()
 {
-  ASSERT(d_ptr->renderNode);
-  return d_ptr->renderNode->access();
+  ASSERT(d_ptr->accessor);
+  return d_ptr->accessor.get();
+}
+
+void PaintNode::installPaintNodeEventHandler(EventHandler handler)
+{
+  d_ptr->paintNodeEventHandler = handler;
+}
+
+void PaintNode::dispatchEvent(void* event)
+{
+  VGG_IMPL(PaintNode);
+  if (_->paintNodeEventHandler)
+  {
+    _->paintNodeEventHandler(attributeAccessor(), event);
+  }
 }
 
 PaintNode::~PaintNode() = default;

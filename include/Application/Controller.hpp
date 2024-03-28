@@ -109,8 +109,8 @@ public:
     return m_mode == ERunMode::NORMAL_MODE;
   }
 
+  void updateDisplayContentIfNeeded();
   bool hasDirtyEditor();
-  void resetEditorDirty();
   void onFirstRender();
 
   void setEventListener(EventListener listener);

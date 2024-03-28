@@ -592,14 +592,18 @@ MakeJsonDocFn Controller::createMakeJsonDocFn(const char* pJsonSchemaFilePath)
   return lambda;
 }
 
+void Controller::updateDisplayContentIfNeeded()
+{
+  if (m_editor->isModelDirty())
+  {
+    m_presenter->update();
+    m_editor->resetModelDirty();
+  }
+}
+
 bool Controller::hasDirtyEditor()
 {
   return isEditMode() && m_editor->isDirty();
-}
-
-void Controller::resetEditorDirty()
-{
-  m_editor->setDirty(false);
 }
 
 void Controller::fitPageForEditing()
@@ -607,6 +611,7 @@ void Controller::fitPageForEditing()
   auto pageSize = m_layout->pageSize(m_presenter->currentPageIndex());
   m_layout->layout(pageSize);
   m_presenter->fitForEditing(pageSize);
+  m_presenter->update();
 }
 
 void Controller::onFirstRender()

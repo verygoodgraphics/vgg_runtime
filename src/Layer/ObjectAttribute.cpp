@@ -199,6 +199,7 @@ void ObjectAttribute::render(Renderer* renderer)
 Bound ObjectAttribute::onRevalidate()
 {
   ASSERT(m_renderObjectAttr);
+  m_hasFill = false;
   for (const auto& f : m_fills)
   {
     if (f.isEnabled)
@@ -237,6 +238,7 @@ Bound ObjectAttribute::onRevalidate()
 void StyleObjectAttribute::render(Renderer* renderer)
 {
   auto filled = m_objectAttr->hasFill();
+  DEBUG("has filled %d", filled);
   if (filled && m_dropShadowAttr)
     m_dropShadowAttr->render(renderer);
   m_objectAttr->render(renderer);

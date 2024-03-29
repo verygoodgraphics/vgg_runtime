@@ -301,7 +301,7 @@ inline PaintNodePtr makeObjectCommonProperty(
   obj->setMaskShowType(maskShowType);
   obj->setOverflow(j.value("overflow", EOverflow::OF_VISIBLE));
   obj->setVisible(j.value("visible", true));
-  override(obj.get(), convertedMatrix);
+  override(obj.get(), convertedMatrix, b);
   return obj;
 }
 
@@ -425,8 +425,9 @@ inline PaintNodePtr SceneBuilder::fromImage(const json& j, const glm::mat3& tota
 #endif
       return p;
     },
-    [&](ImageNode* p, const glm::mat3& matrix)
+    [&](ImageNode* p, const glm::mat3& matrix, const Bound& bound)
     {
+      p->setImageBound(bound);
       p->setImage(j.value("imageFileName", ""));
       p->setReplacesImage(j.value("fillReplacesImage", false));
       p->setImageFilter(j.value("imageFilters", ImageFilter()));
@@ -447,7 +448,7 @@ PaintNodePtr SceneBuilder::fromPath(const json& j, const glm::mat3& totalMatrix)
 #endif
       return p;
     },
-    [&, this](PaintNode* p, const glm::mat3& matrix)
+    [&, this](PaintNode* p, const glm::mat3& matrix, const Bound& bound)
     {
       const auto shape = j.value("shape", json{});
       p->setChildWindingType(shape.value("windingRule", EWindingType::WR_EVEN_ODD));
@@ -513,7 +514,7 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
 #endif
       return p;
     },
-    [&](layer::TextNode* p, const glm::mat3& matrix)
+    [&](layer::TextNode* p, const glm::mat3& matrix, const Bound& bound)
     {
       p->setVerticalAlignment(j.value("verticalAlignment", ETextVerticalAlignment::VA_TOP));
       p->setFrameMode(j.value("frameMode", ETextLayoutMode::TL_FIXED));
@@ -523,6 +524,7 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
         CoordinateConvert::convertCoordinateSystem(anchorPoint, totalMatrix);
         p->setTextAnchor(anchorPoint);
       }
+      p->setParagraphBound(bound);
 
       // 1.
 
@@ -549,7 +551,6 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
         textStyle.push_back(json);
       }
 
-      const auto& b = p->frameBound();
       for (auto& style : textStyle)
       {
         CoordinateConvert::convertCoordinateSystem(style, totalMatrix);
@@ -589,6 +590,7 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
       }
       p->setParagraph(j.value("content", ""), std::move(textStyle), std::move(parStyle));
 
+      auto b = p->getPragraphBound();
       if (b.width() == 0 || b.height() == 0)
       {
         p->setFrameMode(TL_AUTOWIDTH);
@@ -635,7 +637,7 @@ PaintNodePtr SceneBuilder::fromFrame(const json& j, const glm::mat3& totalMatrix
 #endif
       return p;
     },
-    [&, this](PaintNode* p, const glm::mat3& matrix)
+    [&, this](PaintNode* p, const glm::mat3& matrix, const Bound& bound)
     {
       p->setContourOption(ContourOption(ECoutourType::MCT_FRAMEONLY, false));
       const auto radius = getStackOptional<std::array<float, 4>>(j, "radius")
@@ -665,7 +667,7 @@ PaintNodePtr SceneBuilder::fromSymbolMaster(const json& j, const glm::mat3& tota
 #endif
       return p;
     },
-    [&, this](PaintNode* p, const glm::mat3& matrix)
+    [&, this](PaintNode* p, const glm::mat3& matrix, const Bound& bound)
     {
       const auto radius = getStackOptional<std::array<float, 4>>(j, "radius")
                             .value_or(std::array<float, 4>{ 0, 0, 0, 0 });
@@ -711,7 +713,7 @@ PaintNodePtr SceneBuilder::fromGroup(const json& j, const glm::mat3& totalMatrix
 #endif
       return p;
     },
-    [&, this](PaintNode* p, const glm::mat3& matrix)
+    [&, this](PaintNode* p, const glm::mat3& matrix, const Bound& bound)
     {
       p->setOverflow(OF_VISIBLE); // Group do not clip inner content
       p->setContourOption(ContourOption(ECoutourType::MCT_UNION, false));

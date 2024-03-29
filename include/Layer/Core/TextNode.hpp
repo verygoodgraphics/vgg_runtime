@@ -71,8 +71,6 @@ public:
   Bound getPragraphBound() const;
   void  setVerticalAlignment(ETextVerticalAlignment vertAlign);
 
-  virtual void setFrameBound(const Bound& bound) override;
-
   using EventHandler = std::function<void(ParagraphAttributeAccessor*, void* event)>;
   void installParagraphNodeEventHandler(EventHandler handler);
 

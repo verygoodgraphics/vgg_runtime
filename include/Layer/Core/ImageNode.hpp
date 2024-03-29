@@ -20,6 +20,7 @@
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Memory/VNew.hpp"
 #include "Layer/Renderer.hpp"
+#include "Layer/ImageRenderObjectAttribute.hpp"
 #include <core/SkBlendMode.h>
 #include <utility>
 
@@ -55,8 +56,15 @@ public:
   ImageNode& operator=(const ImageNode&) = delete;
 
   ImageNode(ImageNode&&) noexcept = delete;
-  ImageNode&         operator=(ImageNode&&) noexcept = delete;
-  // void paintEvent(SkCanvas* canvas) override;
+  ImageNode& operator=(ImageNode&&) noexcept = delete;
+
+  void setFrameBound(const Bound& bound) override
+  {
+    PaintNode::setFrameBound(bound);
+    setImageBound(bound);
+  }
+
+  void               setImageBound(const Bound& bound);
   void               setImage(const std::string& guid);
   const std::string& getImageGUID() const;
   void               setReplacesImage(bool fill);

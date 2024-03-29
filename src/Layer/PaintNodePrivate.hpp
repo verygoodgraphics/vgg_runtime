@@ -17,7 +17,9 @@
 #include "Layer/AttributeAccessor.hpp"
 #include "Layer/LayerCache.h"
 #include "Layer/Memory/VAllocator.hpp"
+#include "Layer/ObjectAttribute.hpp"
 #include "Layer/RenderObjectAttribute.hpp"
+#include "Layer/ShapeAttribute.hpp"
 #include "Layer/TransformAttribute.hpp"
 #include "Layer/VectorObjectAttribute.hpp"
 #include "Renderer.hpp"
@@ -203,16 +205,19 @@ public:
 
     if (!legacyCode && init)
     {
-      // auto shape = ShapeAttribute::Make((VAllocator*)nullptr, api);
-      // auto vectorObject = VectorObjectAttribute::Make((VAllocator*)nullptr, shape);
-      // auto [r, a] =
-      //   RenderNodeFactory::MakeDefaultRenderNode(nullptr, api, transformAttr, vectorObject);
-      // vectorObject->setObjectAttribute(a->styleObject());
-      // accessor = std::make_unique<VectorObjectAttibuteAccessor>(*a, shape);
-      // renderNode = std::move(r);
-
-      auto [c, d] = RenderNodeFactory::MakeVectorRenderNode(nullptr, api, transformAttr);
-      accessor = std::move(d);
+      Ref<ShapeAttribute> shape;
+      auto [c, d] = RenderNodeFactory::MakeDefaultRenderNode(
+        nullptr,
+        api,
+        transformAttr,
+        [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<RenderObjectAttribute>
+        {
+          shape = ShapeAttribute::Make(alloc, api);
+          auto vectorObject = VectorObjectAttribute::Make(alloc, shape, object);
+          return vectorObject;
+        });
+      auto acc = std::make_unique<VectorObjectAttibuteAccessor>(*d, shape.get());
+      accessor = std::move(acc);
       renderNode = std::move(c);
     }
 

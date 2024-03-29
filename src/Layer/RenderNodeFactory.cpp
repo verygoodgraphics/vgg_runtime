@@ -17,6 +17,7 @@
 
 #include "DefaultRenderNode.hpp"
 #include "Layer/AttributeAccessor.hpp"
+#include "Layer/ObjectAttribute.hpp"
 #include "Layer/ParagraphObjectAttribute.hpp"
 #include "Layer/RenderObjectAttribute.hpp"
 #include "Layer/ShapeAttribute.hpp"
@@ -36,7 +37,7 @@ std::pair<Ref<DefaultRenderNode>, std::unique_ptr<VectorObjectAttibuteAccessor>>
   auto backgroundBlur = BackgroundBlurAttribute::Make(alloc);
   auto object = ObjectAttribute::Make(alloc, Ref<RenderObjectAttribute>());
 
-  auto vectorObject = VectorObjectAttribute::Make(alloc, shape, object);
+  auto vectorObject = VectorObjectAttribute::Make(alloc, shape, object.get());
   object->setRenderObject(vectorObject);
 
   auto style = StyleObjectAttribute::Make(alloc, innerShadow, dropShadow, object, backgroundBlur);
@@ -66,18 +67,17 @@ std::pair<Ref<DefaultRenderNode>, std::unique_ptr<VectorObjectAttibuteAccessor>>
 
 std::pair<Ref<DefaultRenderNode>, std::unique_ptr<Accessor>> RenderNodeFactory::
   MakeDefaultRenderNode( // NOLINT
-    VAllocator*                alloc,
-    PaintNode*                 node,
-    Ref<TransformAttribute>    transform,
-    Ref<RenderObjectAttribute> renderObject)
+    VAllocator*             alloc,
+    PaintNode*              node,
+    Ref<TransformAttribute> transform,
+    Creator                 creator)
 {
-
-  auto shape = Ref<ShapeAttribute>(renderObject->shape());
-  auto innerShadow = InnerShadowAttribute::Make(alloc, shape);
-  auto dropShadow = DropShadowAttribute::Make(alloc, shape);
   auto backgroundBlur = BackgroundBlurAttribute::Make(alloc);
   auto object = ObjectAttribute::Make(alloc, Ref<RenderObjectAttribute>());
-
+  auto renderObject = creator(alloc, object.get());
+  auto shape = incRef(renderObject->shape());
+  auto innerShadow = InnerShadowAttribute::Make(alloc, shape);
+  auto dropShadow = DropShadowAttribute::Make(alloc, shape);
   object->setRenderObject(renderObject);
 
   auto style = StyleObjectAttribute::Make(alloc, innerShadow, dropShadow, object, backgroundBlur);

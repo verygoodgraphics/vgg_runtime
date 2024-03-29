@@ -25,12 +25,13 @@ namespace VGG::layer
 class RenderNodeFactory
 {
 public:
+  using Creator = std::function<Ref<RenderObjectAttribute>(VAllocator* alloc, ObjectAttribute*)>;
   static std::pair<Ref<DefaultRenderNode>, std::unique_ptr<Accessor>>
   MakeDefaultRenderNode( // NOLINT
-    VAllocator*                alloc,
-    PaintNode*                 node,
-    Ref<TransformAttribute>    transform,
-    Ref<RenderObjectAttribute> renderObject);
+    VAllocator*             alloc,
+    PaintNode*              node,
+    Ref<TransformAttribute> transform,
+    Creator                 creator);
 
   static std::pair<Ref<DefaultRenderNode>, std::unique_ptr<VectorObjectAttibuteAccessor>>
   MakeVectorRenderNode( // NOLINT

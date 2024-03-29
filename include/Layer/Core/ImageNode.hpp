@@ -61,12 +61,6 @@ public:
   ImageNode(ImageNode&&) noexcept = delete;
   ImageNode& operator=(ImageNode&&) noexcept = delete;
 
-  void setFrameBound(const Bound& bound) override
-  {
-    PaintNode::setFrameBound(bound);
-    setImageBound(bound);
-  }
-
   void               setImageBound(const Bound& bound);
   void               setImage(const std::string& guid);
   const std::string& getImageGUID() const;

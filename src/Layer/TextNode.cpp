@@ -204,17 +204,7 @@ Bound TextNode::getPragraphBound() const
 
 void TextNode::setParagraphBound(const Bound& bound)
 {
-  PaintNode::setFrameBound(bound);
   d_ptr->accessor->paragraph()->setParagraphBound(bound);
-}
-
-void TextNode::setFrameBound(const Bound& bound)
-{
-  PaintNode::setFrameBound(bound);
-  if (!TEXT_LEGACY_CODE)
-  {
-    d_ptr->accessor->paragraph()->setParagraphBound(bound);
-  }
 }
 
 void TextNode::setFrameMode(ETextLayoutMode layoutMode)

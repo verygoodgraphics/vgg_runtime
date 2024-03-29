@@ -184,7 +184,7 @@ public:
 
   const Bound& frameBound() const; // content bound
 
-  virtual void setFrameBound(const Bound& bound);
+  void setFrameBound(const Bound& bound);
 
   const std::string& guid() const;
 

@@ -821,7 +821,7 @@ TransformAttribute* PaintNode::transformAttribute()
 
 void PaintNode::installPaintNodeEventHandler(EventHandler handler)
 {
-  d_ptr->paintNodeEventHandler = handler;
+  d_ptr->paintNodeEventHandler = std::move(handler);
 }
 
 void PaintNode::dispatchEvent(void* event)

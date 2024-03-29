@@ -50,7 +50,6 @@ class TextNode__pImpl;
 class VGG_EXPORTS TextNode final : public PaintNode
 {
   VGG_DECL_IMPL(TextNode);
-  friend class SceneBuilder;
 
 public:
   TextNode(VRefCnt* cnt, const std::string& name, std::string guid);
@@ -60,16 +59,14 @@ public:
   TextNode& operator=(TextNode&&) noexcept = delete;
 
   void setTextAnchor(glm::vec2 anchor);
-
   void setParagraph(
     std::string                utf8,
     std::vector<TextStyleAttr> style,
     std::vector<ParagraphAttr> parStyle);
 
-  void  setFrameMode(ETextLayoutMode mode);
-  void  setParagraphBound(const Bound& bound);
-  Bound getPragraphBound() const;
-  void  setVerticalAlignment(ETextVerticalAlignment vertAlign);
+  void setFrameMode(ETextLayoutMode mode);
+  void setParagraphBound(const Bound& bound);
+  void setVerticalAlignment(ETextVerticalAlignment vertAlign);
 
   using EventHandler = std::function<void(ParagraphAttributeAccessor*, void* event)>;
   void installParagraphNodeEventHandler(EventHandler handler);

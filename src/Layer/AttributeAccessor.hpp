@@ -17,6 +17,7 @@
 #include <type_traits>
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Core/VShape.hpp"
+#include "Layer/ImageRenderObjectAttribute.hpp"
 #include "Layer/ParagraphObjectAttribute.hpp"
 #include "ShapeAttribute.hpp"
 #include "LayerAttribute.hpp"
@@ -255,6 +256,20 @@ public:
 
 protected:
   ParagraphObjectAttribute* const m_paraAttr;
+};
+
+class ImageAttribtueAccessor : public Accessor
+{
+public:
+  ATTR_MEMBER_GETTER(image, ImageRenderObjectAttribute, m_imageAttr);
+  ImageAttribtueAccessor(const Accessor& acc, ImageRenderObjectAttribute* image)
+    : Accessor(acc)
+    , m_imageAttr(image)
+  {
+  }
+
+protected:
+  ImageRenderObjectAttribute* const m_imageAttr;
 };
 
 #undef ATTR_MEMBER_GETTER

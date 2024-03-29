@@ -670,6 +670,7 @@ Bound PaintNode::onRevalidate()
     }
     newBound.unionWith(d_ptr->bound);
     // return newBound;
+    DEBUG("PaintNode::onRevalidate %f %f", newBound.width(), newBound.height());
     return d_ptr->bound;
   }
   else

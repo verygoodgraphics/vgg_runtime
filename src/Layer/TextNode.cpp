@@ -123,8 +123,7 @@ TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
 {
   if (!TEXT_LEGACY_CODE)
   {
-    auto t = incRef(transformAttribute());
-
+    auto                          t = incRef(transformAttribute());
     Ref<ParagraphObjectAttribute> poa;
     auto [c, d] = RenderNodeFactory::MakeDefaultRenderNode(
       nullptr,
@@ -139,7 +138,6 @@ TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
     auto acc = std::make_unique<ParagraphAttributeAccessor>(*d, poa);
     d_ptr->accessor = acc.get();
     PaintNode::d_ptr->accessor = std::move(acc);
-
     PaintNode::d_ptr->renderNode = std::move(c);
     observe(PaintNode::d_ptr->renderNode);
   }

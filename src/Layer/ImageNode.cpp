@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "Layer/AttributeAccessor.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/Transform.hpp"
+#include "Layer/ImageRenderObjectAttribute.hpp"
 #include "Layer/Renderer.hpp"
 #include "VSkia.hpp"
 #include "PaintNodePrivate.hpp"
@@ -36,6 +38,8 @@
 namespace VGG::layer
 {
 
+constexpr bool IMAGE_LEGACY_CODE = false;
+
 class ImageNode__pImpl
 {
   VGG_DECL_API(ImageNode);
@@ -44,6 +48,9 @@ public:
   bool            fillReplacesImage = false;
   sk_sp<SkShader> shader;
   PatternStretch  pattern;
+
+  ImageAttribtueAccessor* accessor;
+
   ImageNode__pImpl(ImageNode* api)
     : q_ptr(api)
   {
@@ -51,49 +58,123 @@ public:
 };
 
 ImageNode::ImageNode(VRefCnt* cnt, const std::string& name, std::string guid)
-  : PaintNode(cnt, name, VGG_IMAGE, std::move(guid), true)
+  : PaintNode(cnt, name, VGG_IMAGE, std::move(guid), IMAGE_LEGACY_CODE, false)
   , d_ptr(new ImageNode__pImpl(this))
 {
+
+  if (!IMAGE_LEGACY_CODE)
+  {
+    auto                            t = incRef(transformAttribute());
+    Ref<ImageRenderObjectAttribute> ioa;
+    auto [c, d] = RenderNodeFactory::MakeDefaultRenderNode(
+      nullptr,
+      this,
+      t,
+      [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<RenderObjectAttribute>
+      {
+        ioa = ImageRenderObjectAttribute::Make(alloc, object);
+        return ioa;
+      });
+
+    auto acc = std::make_unique<ImageAttribtueAccessor>(*d, ioa);
+    d_ptr->accessor = acc.get();
+    PaintNode::d_ptr->accessor = std::move(acc);
+    PaintNode::d_ptr->renderNode = std::move(c);
+    observe(PaintNode::d_ptr->renderNode);
+  }
 }
 
 VShape ImageNode::asVisualShape(const Transform* mat)
 {
-  // Mask mask;
-  auto rect = toSkRect(frameBound());
-  // mask.outlineMask.addRect(rect);
-  if (mat)
+  if (IMAGE_LEGACY_CODE)
   {
-    rect = toSkMatrix(mat->matrix()).mapRect(rect);
-    // mask.outlineMask.transform(toSkMatrix(mat->matrix()));
+    // Mask mask;
+    auto rect = toSkRect(frameBound());
+    // mask.outlineMask.addRect(rect);
+    if (mat)
+    {
+      rect = toSkMatrix(mat->matrix()).mapRect(rect);
+      // mask.outlineMask.transform(toSkMatrix(mat->matrix()));
+    }
+    return VShape(rect);
   }
-  return VShape(rect);
+  else
+  {
+    auto b = toSkRect(d_ptr->accessor->image()->getImageBound());
+    return VShape(b);
+  }
 }
 
 void ImageNode::setImage(const std::string& guid)
 {
   VGG_IMPL(ImageNode)
-  _->pattern.guid = guid;
+  if (IMAGE_LEGACY_CODE)
+  {
+    _->pattern.guid = guid;
+  }
+  else
+  {
+    d_ptr->accessor->image()->setImageGUID(guid);
+  }
 }
 
 const std::string& ImageNode::getImageGUID() const
 {
-  return d_ptr->pattern.guid;
+  if (IMAGE_LEGACY_CODE)
+  {
+    return d_ptr->pattern.guid;
+  }
+  else
+  {
+    return d_ptr->accessor->image()->getImageGUID();
+  }
 }
 
 void ImageNode::setImageFilter(const ImageFilter& filter)
 {
-  d_ptr->pattern.imageFilter = filter;
+  if (IMAGE_LEGACY_CODE)
+  {
+    d_ptr->pattern.imageFilter = filter;
+  }
+  else
+  {
+    d_ptr->accessor->image()->setImageFilter(filter);
+  }
 }
 
 void ImageNode::setReplacesImage(bool fill)
 {
   VGG_IMPL(ImageNode)
-  _->fillReplacesImage = fill;
+
+  if (IMAGE_LEGACY_CODE)
+  {
+    _->fillReplacesImage = fill;
+  }
+  else
+  {
+    DEBUG("deprecated");
+  }
 }
 
 bool ImageNode::fill() const
 {
-  return d_ptr->fillReplacesImage;
+  if (IMAGE_LEGACY_CODE)
+  {
+    return d_ptr->fillReplacesImage;
+  }
+  else
+  {
+    DEBUG("deprecated");
+    return false;
+  }
+}
+
+void ImageNode::setImageBound(const Bound& bound)
+{
+  if (!IMAGE_LEGACY_CODE)
+  {
+    d_ptr->accessor->image()->setImageBound(bound);
+  }
 }
 
 Bound ImageNode::onDrawFill(
@@ -103,32 +184,40 @@ Bound ImageNode::onDrawFill(
   const VShape&        path,
   const VShape&        mask)
 {
-  (void)path;
-  VGG_IMPL(ImageNode)
-  auto canvas = renderer->canvas();
-  if (!_->shader)
+  if (IMAGE_LEGACY_CODE)
   {
-    _->shader = makeStretchPattern(bound(), d_ptr->pattern);
+    (void)path;
+    VGG_IMPL(ImageNode)
+    auto canvas = renderer->canvas();
+    if (!_->shader)
+    {
+      _->shader = makeStretchPattern(bound(), d_ptr->pattern);
+    }
+    if (_->shader)
+    {
+      bool hasMask = false;
+      if (!mask.isEmpty())
+      {
+        canvas->save();
+        // canvas->clipPath(mask);
+        mask.clip(canvas, SkClipOp::kIntersect);
+        hasMask = true;
+      }
+      SkPaint p;
+      p.setShader(_->shader);
+      canvas->drawPaint(p);
+      if (hasMask)
+      {
+        canvas->restore();
+      }
+    }
+    return bound();
   }
-  if (_->shader)
+  else
   {
-    bool hasMask = false;
-    if (!mask.isEmpty())
-    {
-      canvas->save();
-      // canvas->clipPath(mask);
-      mask.clip(canvas, SkClipOp::kIntersect);
-      hasMask = true;
-    }
-    SkPaint p;
-    p.setShader(_->shader);
-    canvas->drawPaint(p);
-    if (hasMask)
-    {
-      canvas->restore();
-    }
+    ASSERT(false && "unreachable");
+    return bound();
   }
-  return bound();
 }
 
 ImageNode::~ImageNode() = default;

@@ -171,7 +171,7 @@ public:
   PaintOption    paintOption;
   ContourOption  maskOption;
 
-  std::function<void(VectorObjectAttibuteAccessor*, void*)> paintNodeEventHandler;
+  PaintNode::EventHandler paintNodeEventHandler;
 
   bool legacyCode{ false };
 
@@ -220,6 +220,9 @@ public:
       accessor = std::move(acc);
       renderNode = std::move(c);
     }
+
+    // paintNodeEventHandler = [this](VectorObjectAttibuteAccessor*, void*)
+    // { DEBUG("paint node %s", q_ptr->name().c_str()); };
 
     api->observe(renderNode);
   }

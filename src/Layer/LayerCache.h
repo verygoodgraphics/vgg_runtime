@@ -23,6 +23,8 @@
 namespace VGG::layer
 {
 
+class PaintNode;
+
 using BlenderCacheKey = const char*;
 using EffectCacheKey = const char*;
 using BlenderCache = LRUCache<BlenderCacheKey, sk_sp<SkBlender>>;

@@ -39,6 +39,7 @@
 
 namespace VGG::layer
 {
+constexpr bool TEXT_LEGACY_CODE = false;
 
 class TextNode__pImpl
 {
@@ -68,6 +69,10 @@ public:
 
   void onDrawRawStyleImpl(Renderer* renderer, sk_sp<SkBlender> blender)
   {
+    if (!TEXT_LEGACY_CODE)
+    {
+      ASSERT(false && "unreachable");
+    }
     if (paragraphLayout->empty())
       return;
     auto       canvas = renderer->canvas();
@@ -98,6 +103,7 @@ public:
   std::optional<glm::vec2> anchor;
 
   ParagraphAttributeAccessor* accessor;
+  TextNode::EventHandler      paragraphNodeEventHandler;
 
   TextNode__pImpl(TextNode__pImpl&& p) noexcept = default;
   TextNode__pImpl& operator=(TextNode__pImpl&& p) noexcept = delete;
@@ -116,7 +122,6 @@ public:
 #endif
 };
 
-constexpr bool TEXT_LEGACY_CODE = false;
 TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
   : PaintNode(cnt, name, VGG_TEXT, std::move(guid), TEXT_LEGACY_CODE, false)
   , d_ptr(new TextNode__pImpl(this))
@@ -141,6 +146,8 @@ TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
     PaintNode::d_ptr->renderNode = std::move(c);
     observe(PaintNode::d_ptr->renderNode);
   }
+  // d_ptr->paragraphNodeEventHandler = [this](ParagraphAttributeAccessor*, void*)
+  // { DEBUG("text node: %s", this->name().c_str()); };
 }
 
 void TextNode::setTextAnchor(glm::vec2 anchor)
@@ -260,6 +267,21 @@ void TextNode::setVerticalAlignment(ETextVerticalAlignment vertAlign)
     _->paragraphLayout->setVerticalAlignment(vertAlign);
   else
     d_ptr->accessor->paragraph()->setVerticalAlignment(vertAlign);
+}
+
+void TextNode::installParagraphNodeEventHandler(EventHandler handler)
+{
+  d_ptr->paragraphNodeEventHandler = std::move(handler);
+}
+
+void TextNode::dispatchEvent(void* event)
+{
+  if (d_ptr->paragraphNodeEventHandler)
+  {
+    d_ptr->paragraphNodeEventHandler(
+      static_cast<ParagraphAttributeAccessor*>(attributeAccessor()),
+      event);
+  }
 }
 
 Bound TextNode::onRevalidate()

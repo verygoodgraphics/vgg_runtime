@@ -8,8 +8,6 @@
 #include <gtest/gtest.h>
 
 #include <glm/gtx/matrix_transform_2d.hpp>
-#include <glm/ext.hpp>
-#include <glm/glm.hpp>
 
 class VggResizingTestSuite : public BaseVggLayoutTestSuite
 {

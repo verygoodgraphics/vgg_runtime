@@ -16,27 +16,29 @@
 #pragma once
 
 #include <cmath>
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
 namespace VGG
 {
-inline bool decompose(const glm::mat3& mat,
-                      glm::vec2& scale,
-                      float& angle,
-                      glm::quat& quat,
-                      glm::vec2& skew,
-                      glm::vec2& trans,
-                      glm::vec3& persp)
+inline bool decompose(
+  const glm::mat3& mat,
+  glm::vec2&       scale,
+  float&           angle,
+  glm::quat&       quat,
+  glm::vec2&       skew,
+  glm::vec2&       trans,
+  glm::vec3&       persp)
 {
-  glm::mat4 mat4{ glm::vec4{ mat[0], 0 },
+  glm::mat4  mat4{ glm::vec4{ mat[0], 0 },
                   glm::vec4{ mat[1], 0 },
                   glm::vec4{ 0, 0, 1, 0 },
                   glm::vec4{ mat[2][0], mat[2][1], 0, 1 } };
-  glm::vec3 scale3;
-  glm::vec3 trans3;
-  glm::vec3 skew3;
-  glm::vec4 persp4;
+  glm::vec3  scale3;
+  glm::vec3  trans3;
+  glm::vec3  skew3;
+  glm::vec4  persp4;
   const auto ok = glm::decompose(mat4, scale3, quat, trans3, skew3, persp4);
   scale = scale3;
   angle = glm::roll(quat);

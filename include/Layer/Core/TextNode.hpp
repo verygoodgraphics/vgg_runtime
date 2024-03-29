@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include "Layer/AttributeAccessor.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/VType.hpp"
@@ -49,6 +50,7 @@ class TextNode__pImpl;
 class VGG_EXPORTS TextNode final : public PaintNode
 {
   VGG_DECL_IMPL(TextNode);
+  friend class SceneBuilder;
 
 public:
   TextNode(VRefCnt* cnt, const std::string& name, std::string guid);
@@ -71,11 +73,13 @@ public:
 
   virtual void setFrameBound(const Bound& bound) override;
 
-  using EventHandler = std::function<void(const std::string&)>;
+  using EventHandler = std::function<void(ParagraphAttributeAccessor*, void* event)>;
+  void installParagraphNodeEventHandler(EventHandler handler);
 
   ~TextNode();
 
 protected:
+  void dispatchEvent(void* event) override;
   void onDrawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender) override;
   void onDrawStyle(
     Renderer*        renderer,

@@ -50,6 +50,7 @@ public:
   PatternStretch  pattern;
 
   ImageAttribtueAccessor* accessor;
+  ImageNode::EventHandler imageNodeEventHandler;
 
   ImageNode__pImpl(ImageNode* api)
     : q_ptr(api)
@@ -82,6 +83,8 @@ ImageNode::ImageNode(VRefCnt* cnt, const std::string& name, std::string guid)
     PaintNode::d_ptr->renderNode = std::move(c);
     observe(PaintNode::d_ptr->renderNode);
   }
+  // d_ptr->imageNodeEventHandler = [this](ImageAttribtueAccessor* a, void* b)
+  // { DEBUG("image node %s", this->name().c_str()); };
 }
 
 VShape ImageNode::asVisualShape(const Transform* mat)
@@ -217,6 +220,19 @@ Bound ImageNode::onDrawFill(
   {
     ASSERT(false && "unreachable");
     return bound();
+  }
+}
+
+void ImageNode::installImageNodeEventHandler(EventHandler handler)
+{
+  d_ptr->imageNodeEventHandler = std::move(handler);
+}
+
+void ImageNode::dispatchEvent(void* event)
+{
+  if (d_ptr->imageNodeEventHandler)
+  {
+    d_ptr->imageNodeEventHandler(static_cast<ImageAttribtueAccessor*>(attributeAccessor()), event);
   }
 }
 

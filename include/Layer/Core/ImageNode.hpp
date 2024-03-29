@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/AttributeAccessor.hpp"
 #include "Layer/Core/TreeNode.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Config.hpp"
@@ -50,6 +51,8 @@ class ImageNode__pImpl;
 class VGG_EXPORTS ImageNode final : public PaintNode
 {
   VGG_DECL_IMPL(ImageNode)
+  friend class SceneBuilder;
+
 public:
   ImageNode(VRefCnt* cnt, const std::string& name, std::string guid);
   ImageNode(const ImageNode&) = delete;
@@ -72,9 +75,13 @@ public:
   bool               fill() const;
   VShape             asVisualShape(const Transform* mat) override;
 
+  using EventHandler = std::function<void(ImageAttribtueAccessor*, void* event)>;
+  void installImageNodeEventHandler(EventHandler handler);
+
   virtual ~ImageNode() override;
 
 protected:
+  void  dispatchEvent(void* event) override;
   Bound onDrawFill(
     Renderer*            renderer,
     sk_sp<SkBlender>     blender,

@@ -34,7 +34,6 @@ class SkCanvas;
 class SkImageFilter;
 class SkImage;
 class SkBlender;
-class Painter;
 
 namespace VGG::layer
 {
@@ -95,19 +94,21 @@ inline PaintNodePtr makePaintNodePtr(Args&&... args)
 
 class PaintNode__pImpl;
 class Accessor;
+
 class VGG_EXPORTS PaintNode : public TreeNode
 {
+  // some temporary friends
+  friend class PaintNodeEventDispatcher;
+
 protected:
   VGG_DECL_IMPL(PaintNode)
 
-protected:
   friend class DocBuilder;
   friend class Renderer;
   friend class MaskObject;
   friend class MaskBuilder;
   friend class Frame;
 
-private:
   PaintNode(VRefCnt* cnt, const std::string& name, std::unique_ptr<PaintNode__pImpl> impl);
 
 public:
@@ -123,6 +124,7 @@ public:
   PaintNode(PaintNode&&) = delete;
   PaintNode& operator=(PaintNode&&) = delete;
 
+public:
   void addChild(const PaintNodePtr node)
   {
     if (!node)
@@ -210,6 +212,7 @@ public:
 
   virtual VShape asVisualShape(const Transform* transform);
 
+public:
   using EventHandler = std::function<void(VectorObjectAttibuteAccessor*, void*)>;
   void installPaintNodeEventHandler(EventHandler handler);
 
@@ -263,5 +266,21 @@ protected:
     sk_sp<SkImageFilter> imageFilter,
     const VShape&        path,
     const VShape&        mask);
+};
+
+class PaintNodeEventDispatcher
+{
+  PaintNode* m_n;
+
+public:
+  PaintNodeEventDispatcher(PaintNode* n)
+    : m_n(n)
+  {
+  }
+  void operator()(void* event)
+  {
+    ASSERT(m_n);
+    m_n->dispatchEvent(event);
+  }
 };
 } // namespace VGG::layer

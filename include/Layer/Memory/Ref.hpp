@@ -456,4 +456,15 @@ public:
   }
 };
 
+template<typename T>
+Ref<T> incRef(T* p)
+{
+  if (p)
+  {
+    p->ref();
+    return Ref<T>(p);
+  }
+  return nullptr;
+}
+
 } // namespace VGG::layer

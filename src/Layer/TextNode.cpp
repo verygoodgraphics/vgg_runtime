@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "Layer/AttributeAccessor.hpp"
+#include "Layer/ParagraphObjectAttribute.hpp"
 #include "Layer/ParagraphParser.hpp"
 #include "Layer/PaintNodePrivate.hpp"
 #include "Layer/TransformAttribute.hpp"
@@ -122,13 +123,24 @@ TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
 {
   if (!TEXT_LEGACY_CODE)
   {
-    auto t = transformAttribute();
-    t->ref();
-    auto [c, d] =
-      RenderNodeFactory::MakeParagraphRenderNode(nullptr, this, Ref<TransformAttribute>(t));
+    auto t = incRef(transformAttribute());
+
+    Ref<ParagraphObjectAttribute> poa;
+    auto [c, d] = RenderNodeFactory::MakeDefaultRenderNode(
+      nullptr,
+      this,
+      t,
+      [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<RenderObjectAttribute>
+      {
+        poa = ParagraphObjectAttribute::Make(alloc);
+        return poa;
+      });
+
+    auto acc = std::make_unique<ParagraphAttributeAccessor>(*d, poa);
+    d_ptr->accessor = acc.get();
+    PaintNode::d_ptr->accessor = std::move(acc);
+
     PaintNode::d_ptr->renderNode = std::move(c);
-    d_ptr->accessor = d.get();
-    PaintNode::d_ptr->accessor = std::move(d);
     observe(PaintNode::d_ptr->renderNode);
   }
 }

@@ -105,6 +105,8 @@ public:
   ParagraphAttributeAccessor* accessor;
   TextNode::EventHandler      paragraphNodeEventHandler;
 
+  Bound bound;
+
   TextNode__pImpl(TextNode__pImpl&& p) noexcept = default;
   TextNode__pImpl& operator=(TextNode__pImpl&& p) noexcept = delete;
 
@@ -190,21 +192,16 @@ void TextNode::setParagraph(
   }
 }
 
-Bound TextNode::getPragraphBound() const
+void TextNode::setParagraphBound(const Bound& bound)
 {
   if (TEXT_LEGACY_CODE)
   {
-    return PaintNode::frameBound();
+    d_ptr->paragraphLayout->setParagraphHintBound(bound);
   }
   else
   {
-    return d_ptr->accessor->paragraph()->getParagraphBound();
+    d_ptr->accessor->paragraph()->setParagraphBound(bound);
   }
-}
-
-void TextNode::setParagraphBound(const Bound& bound)
-{
-  d_ptr->accessor->paragraph()->setParagraphBound(bound);
 }
 
 void TextNode::setFrameMode(ETextLayoutMode layoutMode)
@@ -212,20 +209,7 @@ void TextNode::setFrameMode(ETextLayoutMode layoutMode)
   VGG_IMPL(TextNode);
   if (TEXT_LEGACY_CODE)
   {
-    TextLayoutMode mode;
-    switch (layoutMode)
-    {
-      case TL_FIXED:
-        mode = TextLayoutFixed(frameBound());
-        break;
-      case TL_AUTOWIDTH:
-        mode = TextLayoutAutoWidth();
-        break;
-      case TL_AUTOHEIGHT:
-        mode = TextLayoutAutoHeight(frameBound().width());
-        break;
-    }
-    _->paragraphLayout->setTextLayoutMode(mode);
+    _->paragraphLayout->setTextLayoutMode(layoutMode);
   }
   else
   {

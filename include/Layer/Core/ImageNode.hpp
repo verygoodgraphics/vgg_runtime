@@ -62,6 +62,7 @@ public:
   ImageNode& operator=(ImageNode&&) noexcept = delete;
 
   void               setImageBound(const Bound& bound);
+  Bound              getImageBound() const;
   void               setImage(const std::string& guid);
   const std::string& getImageGUID() const;
   void               setReplacesImage(bool fill);

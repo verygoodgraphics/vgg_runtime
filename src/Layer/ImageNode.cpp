@@ -51,6 +51,7 @@ public:
 
   ImageAttribtueAccessor* accessor;
   ImageNode::EventHandler imageNodeEventHandler;
+  Bound                   bound;
 
   ImageNode__pImpl(ImageNode* api)
     : q_ptr(api)
@@ -87,12 +88,24 @@ ImageNode::ImageNode(VRefCnt* cnt, const std::string& name, std::string guid)
   // { DEBUG("image node %s", this->name().c_str()); };
 }
 
+Bound ImageNode::getImageBound() const
+{
+  if (!IMAGE_LEGACY_CODE)
+  {
+    return d_ptr->accessor->image()->getImageBound();
+  }
+  else
+  {
+    return d_ptr->bound;
+  }
+}
+
 VShape ImageNode::asVisualShape(const Transform* mat)
 {
   if (IMAGE_LEGACY_CODE)
   {
     // Mask mask;
-    auto rect = toSkRect(frameBound());
+    auto rect = toSkRect(getImageBound());
     // mask.outlineMask.addRect(rect);
     if (mat)
     {
@@ -177,6 +190,10 @@ void ImageNode::setImageBound(const Bound& bound)
   if (!IMAGE_LEGACY_CODE)
   {
     d_ptr->accessor->image()->setImageBound(bound);
+  }
+  else
+  {
+    d_ptr->bound = bound;
   }
 }
 

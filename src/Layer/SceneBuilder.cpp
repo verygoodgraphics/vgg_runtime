@@ -590,8 +590,7 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
       }
       p->setParagraph(j.value("content", ""), std::move(textStyle), std::move(parStyle));
 
-      auto b = p->getPragraphBound();
-      if (b.width() == 0 || b.height() == 0)
+      if (bound.width() == 0 || bound.height() == 0)
       {
         p->setFrameMode(TL_AUTOWIDTH);
       }

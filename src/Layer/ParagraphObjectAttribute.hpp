@@ -48,7 +48,12 @@ public:
     m_paragraphLayout->setLineStyle(std::move(parStyle));
   }
 
-  VGG_ATTRIBUTE(ParagraphBound, Bound, m_fixedBound);
+  // VGG_ATTRIBUTE(ParagraphBound, Bound, m_fixedBound);
+
+  void setParagraphBound(const Bound& bound)
+  {
+    m_paragraphLayout->setParagraphHintBound(bound);
+  }
 
   void setVerticalAlignment(ETextVerticalAlignment vertAlign)
   {
@@ -57,20 +62,7 @@ public:
 
   void setFrameMode(ETextLayoutMode layoutMode)
   {
-    TextLayoutMode mode;
-    switch (layoutMode)
-    {
-      case TL_FIXED:
-        mode = TextLayoutFixed(getParagraphBound());
-        break;
-      case TL_AUTOWIDTH:
-        mode = TextLayoutAutoWidth();
-        break;
-      case TL_AUTOHEIGHT:
-        mode = TextLayoutAutoHeight(getParagraphBound().width());
-        break;
-    }
-    m_paragraphLayout->setTextLayoutMode(mode);
+    m_paragraphLayout->setTextLayoutMode(layoutMode);
   }
 
   void setAnchor(const glm::vec2& anchor)
@@ -88,15 +80,13 @@ public:
 
   VGG_CLASS_MAKE(ParagraphObjectAttribute);
 
-  Bound onRevalidate() override
-  {
-    return m_painter->revalidate();
-  }
+  Bound onRevalidate() override;
 
 private:
   VParagraphPainterPtr     m_painter;
   Bound                    m_fixedBound;
   RichTextBlockPtr         m_paragraphLayout;
+  ETextLayoutMode          m_layoutMode;
   std::optional<glm::vec2> m_anchor;
 };
 

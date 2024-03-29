@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "ParagraphObjectAttribute.hpp"
+#include "Layer/AttributeAccessor.hpp"
 namespace VGG::layer
 {
 
@@ -50,6 +51,11 @@ void ParagraphObjectAttribute::render(Renderer* renderer)
   // {
   //   canvas->restore();
   // }
+}
+
+Bound ParagraphObjectAttribute::onRevalidate()
+{
+  return m_painter->revalidate();
 }
 
 } // namespace VGG::layer

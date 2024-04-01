@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include <core/SkColor.h>
+#include <format>
 #include <iterator>
 #include <ostream>
 #include <sstream>
@@ -85,14 +86,6 @@ inline void drawBounds(
   {
     drawBound(*it, deviceMatrix, canvas);
   }
-}
-
-std::string stringify(glm::vec2 scenePos, const char* name)
-{
-  std::stringstream ss;
-  ss << name << ": (" << (int)scenePos.x << ", " << scenePos.y << ")";
-  std::string res{ std::istreambuf_iterator<char>{ ss }, {} };
-  return res;
 }
 
 inline void drawTextAt(
@@ -236,7 +229,7 @@ public:
         {
           const auto pos =
             z->invMatrix() * glm::vec3{ q_ptr->m_position[0], q_ptr->m_position[1], 1 };
-          info.push_back(stringify(pos, scene->name().c_str()));
+          info.push_back(std::format("({}, {})", pos.x, pos.y));
         }
         drawTextAt(canvas, info, q_ptr->m_position[0], q_ptr->m_position[1]);
       }

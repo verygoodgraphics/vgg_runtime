@@ -64,14 +64,14 @@ public:
   int                     page{ 0 };
   Renderer                renderer;
   std::shared_ptr<Zoomer> zoomer;
-  std::optional<Bound>    viewport;
+  std::optional<Bounds>    viewport;
 
   std::unique_ptr<Rasterizer>   rasterizer;
   std::vector<Rasterizer::Tile> rasterTiles;
   SkMatrix                      rasterMatrix;
   int                           lod{ -1 };
 
-  Bound onRevalidate() override
+  Bounds onRevalidate() override
   {
     // only revalidate cuurent page
     if (rasterizer)
@@ -330,7 +330,7 @@ void Scene::onZoomTranslationChanged(float x, float y)
     d_ptr->rasterizer->invalidate(Rasterizer::EReason::ZOOM_TRANSLATION);
 }
 
-void Scene::onViewportChange(const Bound& bound)
+void Scene::onViewportChange(const Bounds& bound)
 {
   d_ptr->viewport = bound;
   if (d_ptr->rasterizer)

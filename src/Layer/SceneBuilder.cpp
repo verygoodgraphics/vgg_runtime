@@ -350,7 +350,7 @@ std::tuple<glm::mat3, glm::mat3, glm::mat3> SceneBuilder::fromMatrix(const json&
   return { original, newMatrix, inversed };
 }
 
-Bound SceneBuilder::fromBound(const json& j, const glm::mat3& totalMatrix)
+Bounds SceneBuilder::fromBound(const json& j, const glm::mat3& totalMatrix)
 {
   auto x = j.value("x", 0.f);
   auto y = j.value("y", 0.f);
@@ -360,10 +360,10 @@ Bound SceneBuilder::fromBound(const json& j, const glm::mat3& totalMatrix)
   auto bottomRight = glm::vec2{ x + width, y - height };
   CoordinateConvert::convertCoordinateSystem(topLeft, totalMatrix);
   CoordinateConvert::convertCoordinateSystem(bottomRight, totalMatrix);
-  return Bound{ topLeft, bottomRight };
+  return Bounds{ topLeft, bottomRight };
 }
 
-Style SceneBuilder::fromStyle(const json& j, const Bound& bound, const glm::mat3& totalMatrix)
+Style SceneBuilder::fromStyle(const json& j, const Bounds& bound, const glm::mat3& totalMatrix)
 {
   Style style;
   from_json(j, style);
@@ -425,7 +425,7 @@ inline PaintNodePtr SceneBuilder::fromImage(const json& j, const glm::mat3& tota
 #endif
       return p;
     },
-    [&](ImageNode* p, const glm::mat3& matrix, const Bound& bound)
+    [&](ImageNode* p, const glm::mat3& matrix, const Bounds& bound)
     {
       p->setImageBound(bound);
       p->setImage(j.value("imageFileName", ""));
@@ -448,7 +448,7 @@ PaintNodePtr SceneBuilder::fromPath(const json& j, const glm::mat3& totalMatrix)
 #endif
       return p;
     },
-    [&, this](PaintNode* p, const glm::mat3& matrix, const Bound& bound)
+    [&, this](PaintNode* p, const glm::mat3& matrix, const Bounds& bound)
     {
       const auto shape = j.value("shape", json{});
       p->setChildWindingType(shape.value("windingRule", EWindingType::WR_EVEN_ODD));
@@ -514,7 +514,7 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
 #endif
       return p;
     },
-    [&](layer::TextNode* p, const glm::mat3& matrix, const Bound& bound)
+    [&](layer::TextNode* p, const glm::mat3& matrix, const Bounds& bound)
     {
       p->setVerticalAlignment(j.value("verticalAlignment", ETextVerticalAlignment::VA_TOP));
       p->setFrameMode(j.value("frameMode", ETextLayoutMode::TL_FIXED));
@@ -636,7 +636,7 @@ PaintNodePtr SceneBuilder::fromFrame(const json& j, const glm::mat3& totalMatrix
 #endif
       return p;
     },
-    [&, this](PaintNode* p, const glm::mat3& matrix, const Bound& bound)
+    [&, this](PaintNode* p, const glm::mat3& matrix, const Bounds& bound)
     {
       p->setContourOption(ContourOption(ECoutourType::MCT_FRAMEONLY, false));
       const auto radius = getStackOptional<std::array<float, 4>>(j, "radius")
@@ -666,7 +666,7 @@ PaintNodePtr SceneBuilder::fromSymbolMaster(const json& j, const glm::mat3& tota
 #endif
       return p;
     },
-    [&, this](PaintNode* p, const glm::mat3& matrix, const Bound& bound)
+    [&, this](PaintNode* p, const glm::mat3& matrix, const Bounds& bound)
     {
       const auto radius = getStackOptional<std::array<float, 4>>(j, "radius")
                             .value_or(std::array<float, 4>{ 0, 0, 0, 0 });
@@ -712,7 +712,7 @@ PaintNodePtr SceneBuilder::fromGroup(const json& j, const glm::mat3& totalMatrix
 #endif
       return p;
     },
-    [&, this](PaintNode* p, const glm::mat3& matrix, const Bound& bound)
+    [&, this](PaintNode* p, const glm::mat3& matrix, const Bounds& bound)
     {
       p->setOverflow(OF_VISIBLE); // Group do not clip inner content
       p->setContourOption(ContourOption(ECoutourType::MCT_UNION, false));

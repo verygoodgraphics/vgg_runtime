@@ -114,7 +114,7 @@ private:
   SkCanvas* m_canvas;
 
 protected:
-  Bound onRevalidate() override
+  Bounds onRevalidate() override
   {
     auto newBound = m_paragraph->revalidate();
     m_cache.clear();

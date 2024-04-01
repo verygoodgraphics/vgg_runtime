@@ -94,7 +94,7 @@ std::pair<SkRect, std::optional<SkPaint>> VectorObjectAttribute::revalidateObjec
   return { bounds, std::nullopt };
 }
 
-Bound VectorObjectAttribute::onRevalidate()
+Bounds VectorObjectAttribute::onRevalidate()
 {
   ASSERT(m_shapeAttr);
   m_shapeAttr->revalidate();
@@ -120,11 +120,11 @@ Bound VectorObjectAttribute::onRevalidate()
       auto mat = SkMatrix::Translate(bounds.x(), bounds.y());
       auto object = rec.finishRecording(bounds, &mat);
       m_maskFilter = object.asImageFilter();
-      m_effectBounds = Bound{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
-      return Bound{ shapeBounds.x(), shapeBounds.y(), shapeBounds.width(), shapeBounds.height() };
+      m_effectBounds = Bounds{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
+      return Bounds{ shapeBounds.x(), shapeBounds.y(), shapeBounds.width(), shapeBounds.height() };
     }
   }
-  return Bound();
+  return Bounds();
 }
 
 } // namespace VGG::layer

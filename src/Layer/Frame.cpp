@@ -104,7 +104,7 @@ SkPicture* Frame::picture()
   return d_ptr->cache.get();
 }
 
-Bound Frame::onRevalidate()
+Bounds Frame::onRevalidate()
 {
   VGG_IMPL(Frame);
   ASSERT(_->root);
@@ -125,7 +125,7 @@ Bound Frame::onRevalidate()
   return b;
 }
 
-void Frame::setClipBound(const Bound& bound)
+void Frame::setClipBound(const Bounds& bound)
 {
   VGG_IMPL(Frame);
   ASSERT(_->root);

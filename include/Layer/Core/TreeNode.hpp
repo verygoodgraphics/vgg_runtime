@@ -233,9 +233,9 @@ protected:
 
   TreeNodePtr findChildRecursiveImpl(const TreeNodePtr& ptr, const std::string& name) const;
 
-  Bound onRevalidate() override
+  Bounds onRevalidate() override
   {
-    return Bound();
+    return Bounds();
   }
 };
 } // namespace VGG

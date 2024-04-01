@@ -55,7 +55,7 @@ public:
 
   // VGG_ATTRIBUTE(ParagraphBound, Bound, m_fixedBound);
 
-  void setParagraphBound(const Bound& bound)
+  void setParagraphBound(const Bounds& bound)
   {
     m_paragraphLayout->setParagraphHintBound(bound);
   }
@@ -78,7 +78,7 @@ public:
     invalidate();
   }
 
-  Bound effectBounds() const override
+  Bounds effectBounds() const override
   {
     return bound();
   }
@@ -90,11 +90,11 @@ public:
 
   VGG_CLASS_MAKE(ParagraphObjectAttribute);
 
-  Bound onRevalidate() override;
+  Bounds onRevalidate() override;
 
 private:
   VParagraphPainterPtr     m_painter;
-  Bound                    m_fixedBound;
+  Bounds                    m_fixedBound;
   RichTextBlockPtr         m_paragraphLayout;
   ETextLayoutMode          m_layoutMode;
   std::optional<glm::vec2> m_anchor;

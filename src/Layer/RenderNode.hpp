@@ -28,6 +28,6 @@ public:
   }
   virtual void  render(Renderer* render) = 0;
   virtual void  renderAsMask(Renderer* render) = 0;
-  virtual Bound effectBounds() const = 0;
+  virtual Bounds effectBounds() const = 0;
 };
 } // namespace VGG::layer

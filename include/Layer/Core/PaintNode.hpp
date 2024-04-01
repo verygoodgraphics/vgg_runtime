@@ -182,9 +182,9 @@ public:
 
   Transform globalTransform() const;
 
-  const Bound& frameBound() const; // content bound
+  const Bounds& frameBound() const; // content bound
 
-  void setFrameBound(const Bound& bound);
+  void setFrameBound(const Bounds& bound);
 
   const std::string& guid() const;
 
@@ -258,10 +258,10 @@ protected:
     const VShape&    path,
     const VShape&    mask,
     sk_sp<SkBlender> blender);
-  Bound onRevalidate() override;
+  Bounds onRevalidate() override;
 
 protected:
-  virtual Bound onDrawFill(
+  virtual Bounds onDrawFill(
     Renderer*            renderer,
     sk_sp<SkBlender>     blender,
     sk_sp<SkImageFilter> imageFilter,

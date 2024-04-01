@@ -472,7 +472,7 @@ inline void from_json(const json& j, TextLineAttr& x)
   x.lineType = j.value("styleType", 0);
 }
 
-inline void from_json(const json& j, Bound& b)
+inline void from_json(const json& j, Bounds& b)
 {
   if (!j.is_object())
     return;
@@ -481,7 +481,7 @@ inline void from_json(const json& j, Bound& b)
   const auto topLeft = glm::vec2{ x, y };
   auto       width = j.value("width", 0.f);
   auto       height = j.value("height", 0.f);
-  b = Bound{ topLeft, width, height };
+  b = Bounds{ topLeft, width, height };
 }
 
 inline void from_json(const json& j, Font::Axis& x)

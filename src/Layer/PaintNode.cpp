@@ -616,22 +616,22 @@ Transform PaintNode::globalTransform() const
   return Transform(mat);
 }
 
-const Bound& PaintNode::frameBound() const
+const Bounds& PaintNode::frameBound() const
 {
   return d_ptr->bound;
 }
 
-void PaintNode::setFrameBound(const Bound& bound)
+void PaintNode::setFrameBound(const Bounds& bound)
 {
   VGG_IMPL(PaintNode);
   _->bound = bound;
   invalidate();
 }
 
-Bound PaintNode::onRevalidate()
+Bounds PaintNode::onRevalidate()
 {
   VGG_IMPL(PaintNode);
-  Bound newBound;
+  Bounds newBound;
   for (const auto& e : m_firstChild)
   {
     newBound.unionWith(e->revalidate());
@@ -783,7 +783,7 @@ void PaintNode::paintChildren(Renderer* renderer)
   }
 }
 
-Bound PaintNode::onDrawFill(
+Bounds PaintNode::onDrawFill(
   Renderer*            renderer,
   sk_sp<SkBlender>     blender,
   sk_sp<SkImageFilter> imageFilter,
@@ -793,7 +793,7 @@ Bound PaintNode::onDrawFill(
   auto       fillBound = path.bounds();
   FillEffect fillEffect(style().fills, fillBound, imageFilter, blender);
   fillEffect.render(renderer, path);
-  return Bound{ fillBound.x(), fillBound.y(), fillBound.width(), fillBound.height() };
+  return Bounds{ fillBound.x(), fillBound.y(), fillBound.width(), fillBound.height() };
 }
 
 Accessor* PaintNode::attributeAccessor()

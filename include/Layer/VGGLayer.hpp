@@ -82,6 +82,7 @@ public:
   void       setScaleFactor(float scale);
   float      scaleFactor() const;
   PaintNode* nodeAt(int x, int y);
+  void       nodeAt(int x, int y, PaintNode::NodeVisitor visitor);
   void       nodesAt(int x, int y, std::vector<PaintNode*>& nodes);
   SkCanvas*  layerCanvas();
   void       clearLayerCanvas();

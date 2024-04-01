@@ -230,6 +230,7 @@ public:
       visitFunc(c.get(), std::forward<F>(f));
     }
   }
+  using NodeVisitor = bool (*)(PaintNode*);
 
 protected:
   // Render traverse
@@ -242,8 +243,8 @@ protected:
 
   TransformAttribute* transformAttribute();
   Accessor*           attributeAccessor();
-  PaintNode*          nodeAt(int x, int y);
-  void                nodesAt(int x, int y, std::vector<PaintNode*>& nodes);
+
+  bool nodeAt(int x, int y, NodeVisitor);
 
 protected:
   // Mask

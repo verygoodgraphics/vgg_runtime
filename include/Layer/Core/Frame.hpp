@@ -62,8 +62,7 @@ public:
   const std::string& guid() const;
   PaintNode*         root() const;
 
-  PaintNode* nodeAt(int x, int y);
-  void       nodesAt(int x, int y, std::vector<PaintNode*>& nodes);
+  void       nodeAt(int x, int y, PaintNode::NodeVisitor visitor);
   PaintNode* nodeByID(const std::string& id);
 
   void invalidateMask(); // temporary solution

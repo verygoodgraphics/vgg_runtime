@@ -20,6 +20,7 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -81,6 +82,9 @@ class LayoutNode : public std::enable_shared_from_this<LayoutNode>
   std::shared_ptr<Layout::Internal::AutoLayout> m_autoLayout;
   bool                                          m_needsLayout{ false };
   Layout::Rect                                  m_oldFrame;
+
+  std::optional<Layout::Scalar> m_rightMargin;
+  std::optional<Layout::Scalar> m_bottomMargin;
 
 public:
   using HitTestHook = std::function<bool(const std::string&)>;

@@ -41,6 +41,8 @@
 
 namespace
 {
+constexpr auto K_RESIZE_MIN_LENGTH = 1.0;
+
 enum class EBooleanOperation
 {
   UNION,
@@ -131,7 +133,7 @@ void LayoutNode::layoutIfNeeded()
   {
     m_needsLayout = false;
 
-    DEBUG("LayoutNode::layoutIfNeeded: node: %s, %s", id().c_str(), path().c_str());
+    DEBUG("LayoutNode::layoutIfNeeded: node: %s ", id().c_str());
 
     // configure container
     configureAutoLayout();
@@ -169,10 +171,9 @@ void LayoutNode::setFrame(
   }
 
   DEBUG(
-    "LayoutNode::setFrame: %s, %s, %s, %s, %f, %f, %f, %f -> %f, %f, %f, %f",
+    "LayoutNode::setFrame: %s, %s, %s, %f, %f, %f, %f -> %f, %f, %f, %f",
     name().c_str(),
     id().c_str(),
-    path().c_str(),
     m_autoLayout->isEnabled() ? "layout" : "scale",
     oldFrame.origin.x,
     oldFrame.origin.y,
@@ -675,7 +676,21 @@ std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeH(
     oldFrame = oldFrame.makeOffset(parentOrigin->x, parentOrigin->y);
   }
 
-  const auto rightMargin = oldContainerSize.width - oldFrame.right();
+  DEBUG("resizeH, old container size is %f, %f", oldContainerSize.width, oldContainerSize.height);
+  DEBUG(
+    "resizeH, old frame is %f, %f,  %f, %f",
+    oldFrame.origin.x,
+    oldFrame.origin.y,
+    oldFrame.size.width,
+    oldFrame.size.height);
+
+  if (!m_rightMargin)
+  {
+    const_cast<LayoutNode*>(this)->m_rightMargin = oldContainerSize.width - oldFrame.right();
+  }
+  const auto rightMargin = *m_rightMargin;
+
+  DEBUG("resizeH, right margin is %f, old frame right is %f", rightMargin, oldFrame.right());
 
   switch (horizontalResizing())
   {
@@ -683,6 +698,7 @@ std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeH(
     {
       x = oldFrame.left();
       w = newContainerSize.width - rightMargin - x;
+      DEBUG("resizeH, new: x: %f, w: %f", x, w);
     }
     break;
 
@@ -744,6 +760,12 @@ std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeH(
       break;
   }
 
+  if (w <= 0 || doubleNearlyZero(w))
+  {
+    DEBUG("resizeH, w is near zero, set to %f", K_RESIZE_MIN_LENGTH);
+    w = K_RESIZE_MIN_LENGTH;
+  }
+
   return { x, w };
 }
 
@@ -760,7 +782,11 @@ std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeV(
     oldFrame = oldFrame.makeOffset(parentOrigin->x, parentOrigin->y);
   }
 
-  const auto bottomMargin = oldContainerSize.height - oldFrame.bottom();
+  if (!m_bottomMargin)
+  {
+    const_cast<LayoutNode*>(this)->m_bottomMargin = oldContainerSize.height - oldFrame.bottom();
+  }
+  const auto bottomMargin = *m_bottomMargin;
 
   switch (verticalResizing())
   {
@@ -829,6 +855,11 @@ std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeV(
       break;
   }
 
+  if (h <= 0 || doubleNearlyZero(h))
+  {
+    DEBUG("resizeV, h is near zero, set to %f", K_RESIZE_MIN_LENGTH);
+    h = K_RESIZE_MIN_LENGTH;
+  }
   return { y, h };
 }
 
@@ -1396,10 +1427,9 @@ void LayoutNode::removeAllChildren()
 void LayoutNode::detachChildrenFromFlexNodeTree()
 {
   DEBUG(
-    "LayoutNode::detachChildrenFromFlexNodeTree: name = %s, id = %s, path =  %s",
+    "LayoutNode::detachChildrenFromFlexNodeTree: name = %s, id = %s",
     name().c_str(),
-    id().c_str(),
-    path().c_str());
+    id().c_str());
 
   // Pay attention to the deletion order, the last index must be deleted first, or the index
   // will change

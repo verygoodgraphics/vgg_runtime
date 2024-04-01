@@ -19,6 +19,7 @@
 #include "Layer/Core/VShape.hpp"
 #include "ShapeAttribute.hpp"
 
+class SkImageFilter;
 namespace VGG::layer
 {
 
@@ -29,8 +30,9 @@ public:
     : Attribute(cnt)
   {
   }
-  virtual void            render(Renderer* renderer) = 0;
-  virtual ShapeAttribute* shape() const = 0;
+  virtual void                 render(Renderer* renderer) = 0;
+  virtual ShapeAttribute*      shape() const = 0;
+  virtual sk_sp<SkImageFilter> getObjectMaskFilter() const = 0;
 };
 
 } // namespace VGG::layer

@@ -30,6 +30,11 @@ public:
   ImageRenderObjectAttribute(VRefCnt* cnt, ObjectAttribute* objectAttribute);
   void render(Renderer* renderer) override;
 
+  sk_sp<SkImageFilter> getObjectMaskFilter() const override
+  {
+    return 0;
+  }
+
   ShapeAttribute* shape() const override
   {
     return m_imageShape.get();

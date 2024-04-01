@@ -311,7 +311,7 @@ PaintNode* PaintNode::nodeAt(int x, int y)
   if (!isVisible())
     return nullptr;
   auto local = transform().inverse() * glm::vec3(x, y, 1);
-  if (frameBound().contains(local.x, local.y))
+  if (bound().contains(local.x, local.y))
   {
     for (auto c = rbegin(); c != rend(); ++c)
     {
@@ -330,7 +330,7 @@ void PaintNode::nodesAt(int x, int y, std::vector<PaintNode*>& nodes)
   if (!isVisible())
     return;
   auto local = transform().inverse() * glm::vec3(x, y, 1);
-  if (frameBound().contains(local.x, local.y))
+  if (bound().contains(local.x, local.y))
   {
     for (auto c = rbegin(); c != rend(); ++c)
     {
@@ -670,7 +670,6 @@ Bound PaintNode::onRevalidate()
     }
     newBound.unionWith(d_ptr->bound);
     // return newBound;
-    DEBUG("PaintNode::onRevalidate %f %f", newBound.width(), newBound.height());
     return d_ptr->bound;
   }
   else
@@ -680,7 +679,10 @@ Bound PaintNode::onRevalidate()
       _->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY ||
       _->paintOption.paintStrategy == EPaintStrategy::PS_RECURSIVELY)
     {
-      _->renderNode->revalidate(); // This will trigger the shape attribute get the
+      auto currentNodeBound =
+        _->renderNode->revalidate(); // This will trigger the shape attribute get the
+
+      newBound.unionWith(currentNodeBound);
       _->renderable = true;
     }
     else
@@ -689,7 +691,7 @@ Bound PaintNode::onRevalidate()
     }
     // shape from the current node by the passed node
     // return newBound;
-    return d_ptr->bound;
+    return newBound;
   }
 }
 const std::string& PaintNode::guid() const

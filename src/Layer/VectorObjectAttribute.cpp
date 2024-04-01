@@ -103,7 +103,8 @@ Bound VectorObjectAttribute::onRevalidate()
   {
     if (const auto& shape = m_shapeAttr->getShape(); !shape.isEmpty())
     {
-      auto [bounds, paint] = revalidateObjectBounds(parent->getBorderStyle(), shape.bounds());
+      auto shapeBounds = shape.bounds();
+      auto [bounds, paint] = revalidateObjectBounds(parent->getBorderStyle(), shapeBounds);
       ObjectRecorder rec;
       auto           recorder = rec.beginRecording(bounds, SkMatrix::I());
       SkPaint        fillPaint;
@@ -119,8 +120,8 @@ Bound VectorObjectAttribute::onRevalidate()
       auto mat = SkMatrix::Translate(bounds.x(), bounds.y());
       auto object = rec.finishRecording(bounds, &mat);
       m_maskFilter = object.asImageFilter();
-      DEBUG("bound height: %f", bounds.height());
-      return Bound{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
+      m_effectBounds = Bound{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
+      return Bound{ shapeBounds.x(), shapeBounds.y(), shapeBounds.width(), shapeBounds.height() };
     }
   }
   return Bound();

@@ -199,6 +199,7 @@ void ObjectAttribute::render(Renderer* renderer)
 Bound ObjectAttribute::onRevalidate()
 {
   ASSERT(m_renderObjectAttr);
+  m_renderObjectAttr->revalidate();
   m_hasFill = false;
   for (const auto& f : m_fills)
   {
@@ -208,7 +209,10 @@ Bound ObjectAttribute::onRevalidate()
       break;
     }
   }
-  return m_renderObjectAttr->revalidate();
+  // m_effectBounds =
+  //   m_renderObjectAttr->effectBounds(); // FIXME: maybe this could be done in the current
+  // object rather than m_renderObjectAttr
+  return m_renderObjectAttr->bound();
   // m_shapeAttr->revalidate();
   // if (m_shapeAttr)
   // {
@@ -251,14 +255,18 @@ void StyleObjectAttribute::revalidateDropbackFilter(const SkRect& bounds)
   m_backgroundBlurAttr->revalidate();
   if (auto bgb = m_backgroundBlurAttr->getImageFilter())
   {
-    if (m_bgBlurImageFilter != bgb || m_objectBounds != bounds)
+    if (m_bgBlurImageFilter != bgb || m_objectEffectBounds != bounds)
     {
+      DEBUG("blur bound: %f %f", bounds.width(), bounds.height());
       m_bgBlurImageFilter = bgb;
       if (m_bgBlurImageFilter)
       {
-        static auto s_blender = getOrCreateBlender("maskOut", g_maskOutBlender);
-        auto        fb = m_objectAttr->getObjectMaskFilter();
-        m_dropbackImageFilter = SkImageFilters::Blend(s_blender, fb, m_bgBlurImageFilter, bounds);
+        if (auto ro = m_objectAttr->getRenderObject(); ro)
+        {
+          static auto s_blender = getOrCreateBlender("maskOut", g_maskOutBlender);
+          auto        fb = ro->getObjectMaskFilter();
+          m_dropbackImageFilter = SkImageFilters::Blend(s_blender, fb, m_bgBlurImageFilter, bounds);
+        }
       }
     }
     else
@@ -271,11 +279,14 @@ void StyleObjectAttribute::revalidateDropbackFilter(const SkRect& bounds)
 Bound StyleObjectAttribute::onRevalidate()
 {
   m_innerShadowAttr->revalidate();
-  auto objectBounds = toSkRect(m_objectAttr->revalidate());
+  m_objectAttr->revalidate();
+  auto objectBounds = toSkRect(m_objectAttr->effectBounds());
   revalidateDropbackFilter(objectBounds);
   auto shadowBounds = toSkRect(m_dropShadowAttr->revalidate());
   objectBounds.join(shadowBounds);
-  return Bound{ objectBounds.x(), objectBounds.y(), objectBounds.width(), objectBounds.height() };
+  m_effectBounds =
+    Bound{ objectBounds.x(), objectBounds.y(), objectBounds.width(), objectBounds.height() };
+  return m_objectAttr->bound();
 }
 
 } // namespace VGG::layer

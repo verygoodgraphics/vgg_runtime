@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include <core/SkColor.h>
-#include <format>
+// #include <format>
 #include <iterator>
 #include <ostream>
 #include <sstream>
@@ -227,9 +227,9 @@ public:
         auto z = scene->zoomer();
         if (z)
         {
-          const auto pos =
-            z->invMatrix() * glm::vec3{ q_ptr->m_position[0], q_ptr->m_position[1], 1 };
-          info.push_back(std::format("({}, {})", pos.x, pos.y));
+          // const auto pos =
+          //   z->invMatrix() * glm::vec3{ q_ptr->m_position[0], q_ptr->m_position[1], 1 };
+          // info.push_back(std::format("({}, {})", pos.x, pos.y));
         }
         drawTextAt(canvas, info, q_ptr->m_position[0], q_ptr->m_position[1]);
       }

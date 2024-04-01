@@ -38,3 +38,5 @@ Subshape& Subshape::operator=(const Subshape& other)
   }
   return *this;
 }
+
+Container::~Container() = default;

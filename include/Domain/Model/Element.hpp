@@ -19,6 +19,8 @@
 #include "Domain/Layout/Rect.hpp"
 #include "Domain/Model/DesignModel.hpp"
 
+#include <nlohmann/json.hpp>
+
 #include <memory>
 #include <vector>
 
@@ -29,14 +31,6 @@ namespace Layout
 {
 struct BezierPoint;
 }
-
-namespace Model
-{
-struct DesignModel;
-struct Object;
-struct SymbolInstance;
-struct SymbolMaster;
-} // namespace Model
 
 namespace Domain
 {
@@ -64,25 +58,8 @@ public:
   {
     return object();
   }
-  std::string id() const
-  {
-    if (auto obj = object())
-    {
-      return obj->id;
-    }
-    return {};
-  }
-  std::string name() const
-  {
-    if (auto obj = object())
-    {
-      if (obj->name)
-      {
-        return obj->name.value();
-      }
-    }
-    return {};
-  }
+  std::string id() const;
+  std::string name() const;
 
   virtual const Model::Object* model() const
   {

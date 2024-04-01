@@ -17,8 +17,7 @@
 
 #include "Rect.hpp"
 
-#include "Domain/Model/DesignModel.hpp"
-#include "Domain/Model/Element.hpp"
+#include "Domain/Model/DesignModelFwd.hpp"
 
 #include <nlohmann/json.hpp>
 
@@ -31,6 +30,15 @@
 namespace VGG
 {
 class LayoutNode;
+
+namespace Domain
+{
+class DesignDocument;
+class Element;
+class SymbolInstanceElement;
+class SymbolMasterElement;
+} // namespace Domain
+
 namespace Layout
 {
 constexpr auto K_SEPARATOR = "__";
@@ -49,7 +57,7 @@ class ExpandSymbol
   using RuleMap = std::unordered_map<std::string, std::shared_ptr<Internal::Rule::Rule>>;
   using RuleMapPtr = std::shared_ptr<RuleMap>;
 
-  const Model::DesignModel                                    m_designModel;
+  const std::unique_ptr<Model::DesignModel>                   m_designModel;
   const nlohmann::json                                        m_layoutJson;
   std::unordered_map<std::string, nlohmann::json>             m_outLayoutJsonMap; // performance
   RuleMapPtr                                                  m_layoutRulesCache; // performance
@@ -65,6 +73,7 @@ public:
   ExpandSymbol(
     const nlohmann::json& designJson,
     const nlohmann::json& layoutJson = nlohmann::json());
+  ~ExpandSymbol();
 
   std::pair<std::shared_ptr<VGG::Domain::DesignDocument>, nlohmann::json>
                                             operator()(); // 0: design document tree; 1: layout.json

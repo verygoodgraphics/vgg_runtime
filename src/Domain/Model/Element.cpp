@@ -16,6 +16,7 @@
 
 #include "Domain/Model/Element.hpp"
 
+#include "Domain/Model/DesignModel.hpp"
 #include "Layout/BezierPoint.hpp"
 #include "Layout/Helper.hpp"
 
@@ -209,6 +210,27 @@ std::string Element::type() const
   {
     nlohmann::json j = pObject->class_;
     return j;
+  }
+  return {};
+}
+
+std::string Element::id() const
+{
+  if (auto obj = object())
+  {
+    return obj->id;
+  }
+  return {};
+}
+
+std::string Element::name() const
+{
+  if (auto obj = object())
+  {
+    if (obj->name)
+    {
+      return obj->name.value();
+    }
   }
   return {};
 }

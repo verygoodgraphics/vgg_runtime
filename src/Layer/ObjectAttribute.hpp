@@ -39,7 +39,7 @@ public:
   {
     return m_imageFilter;
   }
-  Bound onRevalidate() override;
+  Bounds onRevalidate() override;
   VGG_CLASS_MAKE(BackgroundBlurAttribute);
 
 private:
@@ -59,7 +59,7 @@ public:
   }
 
   void  render(Renderer* renderer);
-  Bound onRevalidate() override;
+  Bounds onRevalidate() override;
 
   VGG_ATTRIBUTE(DropShadowStyle, std::vector<DropShadow>, m_shadow);
   VGG_CLASS_MAKE(DropShadowAttribute);
@@ -81,7 +81,7 @@ public:
     observe(m_shapeAttr);
   }
   void  render(Renderer* renderer);
-  Bound onRevalidate() override;
+  Bounds onRevalidate() override;
   VGG_ATTRIBUTE(InnerShadowStyle, std::vector<InnerShadow>, m_shadow);
   VGG_CLASS_MAKE(InnerShadowAttribute);
 
@@ -119,14 +119,14 @@ public:
     return 0;
   }
 
-  Bound effectBounds() const
+  Bounds effectBounds() const
   {
     ASSERT(m_renderObjectAttr);
     return m_renderObjectAttr->effectBounds();
   }
 
   void  render(Renderer* renderer);
-  Bound onRevalidate() override;
+  Bounds onRevalidate() override;
 
   VGG_ATTRIBUTE(FillStyle, std::vector<Fill>, m_fills);
   VGG_ATTRIBUTE(BorderStyle, std::vector<Border>, m_borders);
@@ -177,12 +177,12 @@ public:
     return m_dropbackImageFilter;
   }
 
-  Bound effectBounds() const
+  Bounds effectBounds() const
   {
     return m_effectBounds;
   }
 
-  Bound onRevalidate() override;
+  Bounds onRevalidate() override;
 
   VGG_CLASS_MAKE(StyleObjectAttribute);
 
@@ -197,7 +197,7 @@ private:
   Ref<BackgroundBlurAttribute> m_backgroundBlurAttr;
 
   SkRect               m_objectEffectBounds;
-  Bound                m_effectBounds;
+  Bounds                m_effectBounds;
   sk_sp<SkImageFilter> m_bgBlurImageFilter;
 
   sk_sp<SkImageFilter> m_dropbackImageFilter;

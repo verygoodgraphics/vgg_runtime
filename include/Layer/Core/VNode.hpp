@@ -50,7 +50,7 @@ class VNode
   public ObjectImpl<VObject>
 #endif
 {
-  Bound                 m_bound;
+  Bounds                 m_bound;
   uint8_t               m_state{ 0 };
   std::vector<VNodeRef> m_observers;
 
@@ -68,7 +68,7 @@ protected:
   {
     INVALIDATE = 1 << 0
   };
-  virtual Bound onRevalidate() = 0;
+  virtual Bounds onRevalidate() = 0;
 
   bool isInvalid() const;
 
@@ -89,9 +89,9 @@ public:
 
   void invalidate();
 
-  const Bound& revalidate();
+  const Bounds& revalidate();
 
-  const Bound& bound() const
+  const Bounds& bound() const
   {
     ASSERT(!isInvalid());
     return m_bound;

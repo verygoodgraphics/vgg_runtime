@@ -25,7 +25,7 @@
 namespace VGG::layer
 {
 
-Bound BackgroundBlurAttribute::onRevalidate()
+Bounds BackgroundBlurAttribute::onRevalidate()
 {
   if (!m_blurs.empty())
   {
@@ -45,7 +45,7 @@ Bound BackgroundBlurAttribute::onRevalidate()
       }
     }
   }
-  return Bound();
+  return Bounds();
 }
 void DropShadowAttribute::render(Renderer* renderer)
 {
@@ -58,7 +58,7 @@ void DropShadowAttribute::render(Renderer* renderer)
   }
 }
 
-Bound DropShadowAttribute::onRevalidate()
+Bounds DropShadowAttribute::onRevalidate()
 {
   if (m_shapeAttr)
   {
@@ -69,36 +69,36 @@ Bound DropShadowAttribute::onRevalidate()
     {
       m_dropShadowEffects = DropShadowEffect(m_shadow, bounds, shape.outset(0, 0).has_value());
       SkRect shadowBounds = m_dropShadowEffects->bounds();
-      return Bound{ shadowBounds.x(),
+      return Bounds{ shadowBounds.x(),
                     shadowBounds.y(),
                     shadowBounds.width(),
                     shadowBounds.height() };
     }
   }
-  return Bound();
+  return Bounds();
 }
 
-Bound InnerShadowAttribute::onRevalidate()
+Bounds InnerShadowAttribute::onRevalidate()
 {
   if (m_shapeAttr)
   {
     m_shapeAttr->revalidate();
     auto shape = m_shapeAttr->getShape();
     if (shape.isEmpty())
-      return Bound();
+      return Bounds();
     auto shapeBounds = m_shapeAttr->getShape().bounds();
     if (!m_shadow.empty() && !shape.isEmpty())
     {
       m_innerShadowEffects = InnerShadowEffect(m_shadow, shapeBounds);
       // SkRect shadowBounds = m_innerShadowEffects->bounds();
       SkRect shadowBounds = shapeBounds;
-      return Bound{ shadowBounds.x(),
+      return Bounds{ shadowBounds.x(),
                     shadowBounds.y(),
                     shadowBounds.width(),
                     shadowBounds.height() };
     }
   }
-  return Bound();
+  return Bounds();
 }
 
 void InnerShadowAttribute::render(Renderer* renderer)
@@ -196,7 +196,7 @@ void ObjectAttribute::render(Renderer* renderer)
   // }
 }
 
-Bound ObjectAttribute::onRevalidate()
+Bounds ObjectAttribute::onRevalidate()
 {
   ASSERT(m_renderObjectAttr);
   m_renderObjectAttr->revalidate();
@@ -276,7 +276,7 @@ void StyleObjectAttribute::revalidateDropbackFilter(const SkRect& bounds)
   }
 }
 
-Bound StyleObjectAttribute::onRevalidate()
+Bounds StyleObjectAttribute::onRevalidate()
 {
   m_innerShadowAttr->revalidate();
   m_objectAttr->revalidate();
@@ -285,7 +285,7 @@ Bound StyleObjectAttribute::onRevalidate()
   auto shadowBounds = toSkRect(m_dropShadowAttr->revalidate());
   objectBounds.join(shadowBounds);
   m_effectBounds =
-    Bound{ objectBounds.x(), objectBounds.y(), objectBounds.width(), objectBounds.height() };
+    Bounds{ objectBounds.x(), objectBounds.y(), objectBounds.width(), objectBounds.height() };
   return m_objectAttr->bound();
 }
 

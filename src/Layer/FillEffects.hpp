@@ -80,7 +80,7 @@ private:
 
   sk_sp<SkShader> evalShader(const std::vector<Fill>& fills, const SkRect& bounds)
   {
-    const auto      bound = Bound{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
+    const auto      bound = Bounds{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
     sk_sp<SkShader> dstShader;
     sk_sp<SkShader> srcShader;
     for (const auto& f : fills)

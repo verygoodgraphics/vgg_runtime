@@ -231,7 +231,7 @@ vec4 main(vec4 inColor){
   return nullptr;
 }
 
-sk_sp<SkShader> makeFitPattern(const Bound& bound, const PatternFit& p)
+sk_sp<SkShader> makeFitPattern(const Bounds& bound, const PatternFit& p)
 {
   auto img = loadImage(p.guid, Scene::getResRepo());
   if (!img)
@@ -266,7 +266,7 @@ sk_sp<SkShader> makeFitPattern(const Bound& bound, const PatternFit& p)
   return shader;
 }
 
-sk_sp<SkShader> makeFillPattern(const Bound& bound, const PatternFill& p)
+sk_sp<SkShader> makeFillPattern(const Bounds& bound, const PatternFill& p)
 {
   auto img = loadImage(p.guid, Scene::getResRepo());
 
@@ -302,7 +302,7 @@ sk_sp<SkShader> makeFillPattern(const Bound& bound, const PatternFill& p)
   return shader;
 }
 
-sk_sp<SkShader> makeStretchPattern(const Bound& bound, const PatternStretch& p)
+sk_sp<SkShader> makeStretchPattern(const Bounds& bound, const PatternStretch& p)
 {
   auto img = loadImage(p.guid, Scene::getResRepo());
   if (!img)
@@ -366,7 +366,7 @@ half4 main(float2 coord){
   return SkImageFilters::RuntimeShader(builder, blur.radius, "", nullptr);
 }
 
-sk_sp<SkImageFilter> makeRadialBlurFilter(const RadialBlur& blur, const Bound& bound)
+sk_sp<SkImageFilter> makeRadialBlurFilter(const RadialBlur& blur, const Bounds& bound)
 {
   auto result = SkRuntimeEffect::MakeForShader(SkString(R"(
 uniform shader child;
@@ -423,7 +423,7 @@ sk_sp<SkImageFilter> makeBackgroundBlurFilter(const GaussianBlur& blur)
     0);
 }
 
-sk_sp<SkShader> makeTilePattern(const Bound& bound, const PatternTile& p)
+sk_sp<SkShader> makeTilePattern(const Bounds& bound, const PatternTile& p)
 {
   auto img = loadImage(p.guid, Scene::getResRepo());
 
@@ -456,7 +456,7 @@ sk_sp<SkShader> makeTilePattern(const Bound& bound, const PatternTile& p)
   return shader;
 }
 
-sk_sp<SkShader> makeGradientLinear(const Bound& bound, const GradientLinear& g)
+sk_sp<SkShader> makeGradientLinear(const Bounds& bound, const GradientLinear& g)
 {
   if (g.stops.empty())
     return nullptr;
@@ -493,7 +493,7 @@ sk_sp<SkShader> makeGradientLinear(const Bound& bound, const GradientLinear& g)
 
 sk_sp<SkImageFilter> makeInnerShadowImageFilter(
   const InnerShadow&   shadow,
-  const Bound&         bound,
+  const Bounds&         bound,
   bool                 shadowOnly,
   bool                 overrideSpread,
   sk_sp<SkImageFilter> input)
@@ -542,7 +542,7 @@ sk_sp<SkImageFilter> makeInnerShadowImageFilter(
 
 sk_sp<SkImageFilter> makeDropShadowImageFilter(
   const DropShadow&    shadow,
-  const Bound&         bound,
+  const Bounds&         bound,
   bool                 overrideSpread,
   sk_sp<SkImageFilter> input)
 {

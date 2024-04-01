@@ -44,7 +44,7 @@ public:
     invalidate();
   }
 
-  Bound onRevalidate();
+  Bounds onRevalidate();
 
   VGG_CLASS_MAKE(ShapeAttribute);
 

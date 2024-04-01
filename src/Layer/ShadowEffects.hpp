@@ -113,7 +113,7 @@ public:
       ss.color.a = ss.color.a * ss.contextSettings.opacity;
       auto dropShadowFilter = makeDropShadowImageFilter(
         ss,
-        Bound{ bounds.x(), bounds.y(), bounds.width(), bounds.height() },
+        Bounds{ bounds.x(), bounds.y(), bounds.width(), bounds.height() },
         false,
         0);
       auto r = dropShadowFilter->computeFastBounds(bounds);
@@ -224,7 +224,7 @@ public:
         continue;
       auto innerShadowFilter = makeInnerShadowImageFilter(
         s,
-        Bound{ bounds.x(), bounds.y(), bounds.width(), bounds.height() },
+        Bounds{ bounds.x(), bounds.y(), bounds.width(), bounds.height() },
         true,
         false,
         0);

@@ -65,7 +65,7 @@ void ImageRenderObjectAttribute::render(Renderer* renderer)
   };
 }
 
-Bound ImageRenderObjectAttribute::onRevalidate()
+Bounds ImageRenderObjectAttribute::onRevalidate()
 {
   if (!m_imageShader)
   {

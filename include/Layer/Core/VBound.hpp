@@ -26,30 +26,30 @@
 
 namespace VGG
 {
-class Bound
+class Bounds
 {
   glm::vec2 m_topLeft;
   glm::vec2 m_bottomRight;
 
 public:
-  Bound()
+  Bounds()
     : m_topLeft{ 0, 0 }
     , m_bottomRight{ 0, 0 }
   {
   }
-  Bound(float x, float y, float w, float h)
+  Bounds(float x, float y, float w, float h)
     : m_topLeft{ x, y }
     , m_bottomRight{ x + w, y + h }
   {
   }
 
-  Bound(const glm::vec2& topLeft, float w, float h)
+  Bounds(const glm::vec2& topLeft, float w, float h)
     : m_topLeft(topLeft)
     , m_bottomRight{ topLeft.x + w, topLeft.y + h }
   {
   }
 
-  Bound(const glm::vec2& p1, const glm::vec2& p2)
+  Bounds(const glm::vec2& p1, const glm::vec2& p2)
   {
     m_topLeft = glm::vec2(std::min(p1.x, p2.x), std::min(p1.y, p2.y));
     m_bottomRight = glm::vec2(std::max(p1.x, p2.x), std::max(p1.y, p2.y));
@@ -128,7 +128,7 @@ public:
     return std::sqrt(squaredDistance());
   }
 
-  Bound bound(const layer::Transform& transform) const
+  Bounds bound(const layer::Transform& transform) const
   {
     auto p1 = transform * glm::vec3{ m_topLeft, 1.0 };
     auto p2 = transform * glm::vec3{ glm::vec2{ m_bottomRight.x, m_topLeft.y }, 1.0 };
@@ -138,7 +138,7 @@ public:
     auto b = std::initializer_list<float>{ p1.y, p2.y, p3.y, p4.y };
     const auto [minX, maxX] = std::minmax_element(a.begin(), a.end());
     const auto [minY, maxY] = std::minmax_element(b.begin(), b.end());
-    return Bound{ *minX, *minY, *maxX - *minX, *maxY - *minY };
+    return Bounds{ *minX, *minY, *maxX - *minX, *maxY - *minY };
   }
 
   // Bound operator*(const layer::Transform& transform) const
@@ -146,12 +146,12 @@ public:
   //   return this->transform(transform);
   // }
 
-  bool operator==(const Bound& other) const
+  bool operator==(const Bounds& other) const
   {
     return m_topLeft == other.topLeft() && m_bottomRight == other.bottomRight();
   }
 
-  void unionWith(const Bound& bound)
+  void unionWith(const Bounds& bound)
   {
     m_topLeft.x = std::min(m_topLeft.x, bound.m_topLeft.x);
     m_topLeft.y = std::min(m_topLeft.y, bound.m_topLeft.y);
@@ -159,14 +159,14 @@ public:
     m_bottomRight.y = std::max(m_bottomRight.y, bound.m_bottomRight.y);
   }
 
-  Bound unionAs(const Bound& bound) const
+  Bounds unionAs(const Bounds& bound) const
   {
     auto newBound = *this;
     newBound.unionWith(bound);
     return newBound;
   }
 
-  void intersectWith(const Bound& bound)
+  void intersectWith(const Bounds& bound)
   {
     m_topLeft.x = std::max(m_topLeft.x, bound.m_topLeft.x);
     m_topLeft.y = std::max(m_topLeft.y, bound.m_topLeft.y);
@@ -174,20 +174,20 @@ public:
     m_bottomRight.y = std::min(m_bottomRight.y, bound.m_bottomRight.y);
   }
 
-  Bound intersectAs(const Bound& bound) const
+  Bounds intersectAs(const Bounds& bound) const
   {
     auto newBound = *this;
     newBound.intersectWith(bound);
     return newBound;
   }
 
-  bool isIntersectWith(const Bound& bound) const
+  bool isIntersectWith(const Bounds& bound) const
   {
     auto isect = intersectAs(bound);
     return isect.valid();
   }
 
-  bool isIntersectWithEx(const Bound& bound) const
+  bool isIntersectWithEx(const Bounds& bound) const
   {
     auto isect = intersectAs(bound);
     auto size = isect.size();
@@ -205,9 +205,9 @@ public:
   }
 
 public:
-  static Bound makeInfinite()
+  static Bounds makeInfinite()
   {
-    Bound b;
+    Bounds b;
     b.m_topLeft.x = std::numeric_limits<float>::lowest();
     b.m_topLeft.y = std::numeric_limits<float>::lowest();
     b.m_bottomRight.x = std::numeric_limits<float>::max();
@@ -215,9 +215,9 @@ public:
     return b;
   }
 
-  static Bound makeBoundLRTB(float l, float r, float t, float b)
+  static Bounds makeBoundLRTB(float l, float r, float t, float b)
   {
-    Bound bound;
+    Bounds bound;
     bound.m_topLeft = { l, t };
     bound.m_bottomRight = { r, b };
     return bound;
@@ -230,7 +230,7 @@ inline std::ostream& operator<<(std::ostream& os, const glm::vec2& v)
   return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const Bound& b)
+inline std::ostream& operator<<(std::ostream& os, const Bounds& b)
 {
   os << "[" << b.topLeft() << ", " << b.bottomRight() << "]" << std::endl;
   return os;

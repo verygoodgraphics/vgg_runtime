@@ -19,7 +19,7 @@
 
 namespace VGG::layer
 {
-Bound ShapeAttribute::onRevalidate()
+Bounds ShapeAttribute::onRevalidate()
 {
   if (m_paintNode)
   {
@@ -28,10 +28,10 @@ Bound ShapeAttribute::onRevalidate()
   }
   if (m_shape.isEmpty())
   {
-    return Bound{};
+    return Bounds{};
   }
   const auto rect = m_shape.bounds();
-  return Bound{ rect.x(), rect.y(), rect.width(), rect.height() };
+  return Bounds{ rect.x(), rect.y(), rect.width(), rect.height() };
 }
 
 } // namespace VGG::layer

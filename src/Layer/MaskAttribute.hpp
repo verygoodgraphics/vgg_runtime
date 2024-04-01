@@ -37,7 +37,7 @@ public:
   VGG_ATTRIBUTE_PTR(MaskNode, PaintNode, m_maskedNode);
   VGG_ATTRIBUTE(AlphaMasks, std::vector<AlphaMask>, m_alphaMasks);
   void                 setInputImageFilter(Ref<ImageFilterAttribute> input);
-  Bound                onRevalidate() override;
+  Bounds                onRevalidate() override;
   sk_sp<SkImageFilter> getImageFilter() const override
   {
     return m_alphaMaskFilter ? m_alphaMaskFilter : m_inputFilter->getImageFilter();
@@ -65,7 +65,7 @@ public:
   VGG_ATTRIBUTE_PTR(MaskNode, PaintNode, m_maskedNode);
   VGG_CLASS_MAKE(ShapeMaskAttribute);
 
-  Bound onRevalidate() override;
+  Bounds onRevalidate() override;
 
 private:
   friend class RenderNode;

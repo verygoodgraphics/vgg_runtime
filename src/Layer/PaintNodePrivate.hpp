@@ -177,7 +177,7 @@ public:
 
   std::optional<VShape>            path;
   bool                             renderable{ false };
-  Bound                            bound;
+  Bounds                            bound;
   // Transform                        transform;
   Style                            style;
   std::vector<std::string>         maskedBy;

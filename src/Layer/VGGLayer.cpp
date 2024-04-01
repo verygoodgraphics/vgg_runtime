@@ -265,7 +265,7 @@ public:
       float w = skiaContext->surface()->width();
       for (auto& s : scenes)
       {
-        s->onViewportChange(Bound{ 0, 0, w, h });
+        s->onViewportChange(Bounds{ 0, 0, w, h });
       }
       invalid = false;
     }

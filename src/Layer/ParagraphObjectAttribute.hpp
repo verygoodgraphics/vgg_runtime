@@ -78,6 +78,11 @@ public:
     invalidate();
   }
 
+  Bound effectBounds() const override
+  {
+    return bound();
+  }
+
   glm::vec2 getAnchor() const
   {
     return m_anchor.value_or(glm::vec2(0.0f));

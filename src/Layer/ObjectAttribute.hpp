@@ -109,12 +109,6 @@ public:
     return m_hasFill;
   }
 
-  sk_sp<SkImageFilter> getObjectMaskFilter()
-  {
-    ASSERT(m_renderObjectAttr);
-    return m_renderObjectAttr->getObjectMaskFilter();
-  }
-
   sk_sp<SkImageFilter> imageFilter() const
   {
     return 0;
@@ -123,6 +117,12 @@ public:
   sk_sp<SkBlender> blender() const
   {
     return 0;
+  }
+
+  Bound effectBounds() const
+  {
+    ASSERT(m_renderObjectAttr);
+    return m_renderObjectAttr->effectBounds();
   }
 
   void  render(Renderer* renderer);
@@ -146,6 +146,7 @@ private:
   std::vector<Fill>          m_fills;
   std::vector<Border>        m_borders;
   bool                       m_hasFill{ false };
+  // Bound                      m_effectBounds;
 };
 
 class StyleObjectAttribute : public Attribute
@@ -176,6 +177,11 @@ public:
     return m_dropbackImageFilter;
   }
 
+  Bound effectBounds() const
+  {
+    return m_effectBounds;
+  }
+
   Bound onRevalidate() override;
 
   VGG_CLASS_MAKE(StyleObjectAttribute);
@@ -190,7 +196,8 @@ private:
   Ref<ObjectAttribute>         m_objectAttr;
   Ref<BackgroundBlurAttribute> m_backgroundBlurAttr;
 
-  SkRect               m_objectBounds;
+  SkRect               m_objectEffectBounds;
+  Bound                m_effectBounds;
   sk_sp<SkImageFilter> m_bgBlurImageFilter;
 
   sk_sp<SkImageFilter> m_dropbackImageFilter;

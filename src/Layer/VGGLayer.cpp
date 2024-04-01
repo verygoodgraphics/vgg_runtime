@@ -65,7 +65,7 @@ inline void drawBound(PaintNode* node, const glm::mat3& deviceMatrix, SkCanvas* 
   if (node)
   {
     auto    localMatrix = getLocalMatrix(node);
-    auto    bound = node->frameBound();
+    auto    bound = node->bound();
     auto    current = toSkMatrix(deviceMatrix * localMatrix);
     auto    deviceBounds = current.mapRect(toSkRect(bound));
     SkPaint paint;

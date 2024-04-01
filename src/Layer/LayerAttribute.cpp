@@ -56,7 +56,7 @@ SkRect LayerFXAttribute::revalidateLayerImageFilter(const SkRect& bounds)
 Bound LayerFXAttribute::onRevalidate()
 {
   m_styleObjectAttr->revalidate();
-  const auto styledObjectBounds = toSkRect(m_styleObjectAttr->bound());
+  const auto styledObjectBounds = toSkRect(m_styleObjectAttr->effectBounds());
   const auto layerBound = revalidateLayerImageFilter(styledObjectBounds);
   return Bound{ layerBound.x(), layerBound.y(), layerBound.width(), layerBound.height() };
 }

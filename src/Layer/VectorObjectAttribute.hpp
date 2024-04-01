@@ -46,6 +46,11 @@ public:
   void            render(Renderer* renderer) override;
   ShapeAttribute* shape() const override;
 
+  Bound effectBounds() const override
+  {
+    return m_effectBounds;
+  }
+
   sk_sp<SkImageFilter> getObjectMaskFilter() const override
   {
     return m_maskFilter;
@@ -62,6 +67,7 @@ private:
   WeakRef<ObjectAttribute>    m_objectAttribute;
   Ref<ShapeAttribute>         m_shapeAttr;
   sk_sp<SkImageFilter>        m_maskFilter;
+  Bound                       m_effectBounds;
   std::optional<ObjectShader> m_objectShader;
 };
 

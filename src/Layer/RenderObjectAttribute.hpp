@@ -32,6 +32,7 @@ public:
   }
   virtual void                 render(Renderer* renderer) = 0;
   virtual ShapeAttribute*      shape() const = 0;
+  virtual Bound                effectBounds() const = 0;
   virtual sk_sp<SkImageFilter> getObjectMaskFilter() const = 0;
 };
 

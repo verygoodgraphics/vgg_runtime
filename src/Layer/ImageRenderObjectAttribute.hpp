@@ -75,6 +75,12 @@ public:
     return m_imageBound;
   }
 
+  Bound effectBounds() const override
+  {
+    // FIXME: border should be considered
+    return m_imageBound;
+  }
+
   VGG_CLASS_MAKE(ImageRenderObjectAttribute);
   Bound onRevalidate() override;
 

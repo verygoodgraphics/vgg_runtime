@@ -34,17 +34,20 @@ void DefaultRenderNode::render(Renderer* renderer)
 
   if (getDebugBoundEnable())
   {
-    SkRect  renderBound = toSkRect(m_objectAttr->bound());
-    SkRect  layerBound = toSkRect(m_alphaMaskAttr->bound());
-    SkPaint p;
-    p.setStyle(SkPaint::kStroke_Style);
-    p.setColor(SK_ColorBLUE);
-    p.setStrokeWidth(3);
-    renderer->canvas()->drawRect(renderBound, p);
+    SkRect layerBound = toSkRect(m_alphaMaskAttr->bound());
+    SkRect effectBounds = toSkRect(m_objectAttr->effectBounds());
 
+    SkPaint p;
+    p.setStroke(true);
     p.setColor(SK_ColorGREEN);
     p.setStrokeWidth(2);
     renderer->canvas()->drawRect(layerBound, p);
+
+    p.setColor(SK_ColorBLUE);
+    const SkScalar intervals[2] = { 10, 20 };
+    p.setPathEffect(SkDashPathEffect::Make(intervals, 2, 0));
+    p.setStrokeWidth(2);
+    renderer->canvas()->drawRect(effectBounds, p);
   }
   // recorder(renderer);
 }
@@ -91,6 +94,11 @@ void DefaultRenderNode::renderAsMask(Renderer* render)
   m_objectAttr->render(render);
 }
 
+Bound DefaultRenderNode::effectBounds() const
+{
+  return m_effectsBounds;
+}
+
 std::pair<sk_sp<SkPicture>, SkRect> DefaultRenderNode::revalidatePicture(const SkRect& rect)
 {
   ObjectRecorder rec;
@@ -129,8 +137,9 @@ Bound DefaultRenderNode::onRevalidate()
   m_objectAttr->revalidate();
   auto rect = toSkRect(m_objectAttr->bound());
   auto [pic, bound] = revalidatePicture(rect);
+  m_effectsBounds = Bound{ bound.x(), bound.y(), bound.width(), bound.height() };
   m_picture = pic;
-  return Bound{ bound.x(), bound.y(), bound.width(), bound.height() };
+  return m_objectAttr->bound();
 }
 
 DefaultRenderNode::~DefaultRenderNode()

@@ -56,6 +56,8 @@ public:
 
   void renderAsMask(Renderer* render) override;
 
+  Bound effectBounds() const override;
+
   bool isInvalid() const
   {
     return VNode::isInvalid();
@@ -82,6 +84,7 @@ private:
   Ref<StyleObjectAttribute> m_objectAttr;
   Ref<AlphaMaskAttribute>   m_alphaMaskAttr;
   Ref<ShapeMaskAttribute>   m_shapeMaskAttr;
+  Bound                     m_effectsBounds;
   sk_sp<SkPicture>          m_picture;
 };
 } // namespace VGG::layer

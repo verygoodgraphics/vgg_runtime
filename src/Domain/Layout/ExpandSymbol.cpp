@@ -74,8 +74,12 @@ enum class EVarType
 } // namespace
 
 ExpandSymbol::ExpandSymbol(const nlohmann::json& designJson, const nlohmann::json& layoutJson)
-  : m_designModel(designJson)
+  : m_designModel(new DesignModel(designJson))
   , m_layoutJson(layoutJson)
+{
+}
+
+ExpandSymbol::~ExpandSymbol()
 {
 }
 
@@ -87,7 +91,7 @@ std::pair<std::shared_ptr<VGG::Domain::DesignDocument>, nlohmann::json> ExpandSy
   m_layoutRulesCache = Layout::collectRules(m_layoutJson);
   m_outLayoutJsonMap = m_layoutRules;
 
-  m_designDocument = std::make_shared<Domain::DesignDocument>(m_designModel);
+  m_designDocument = std::make_shared<Domain::DesignDocument>(*m_designModel);
   m_designDocument->buildSubtree();
   m_layout.reset(new Layout{ m_designDocument, getLayoutRules() });
 
@@ -115,13 +119,13 @@ std::shared_ptr<VGG::Layout::Layout> ExpandSymbol::layout() const
 
 void ExpandSymbol::collectMasters()
 {
-  for (auto& frame : m_designModel.frames)
+  for (auto& frame : m_designModel->frames)
   {
     collectMasterFromContainer(frame);
   }
-  if (m_designModel.references)
+  if (m_designModel->references)
   {
-    auto& refs = *m_designModel.references;
+    auto& refs = *m_designModel->references;
     for (auto& ref : refs)
     {
       if (auto p = std::get_if<SymbolMaster>(&ref))
@@ -1220,9 +1224,9 @@ bool ExpandSymbol::applyReferenceOverride(
   }
 
   auto id = s.substr(std::strlen(K_PREFIX));
-  if (m_designModel.references)
+  if (m_designModel->references)
   {
-    auto& items = *m_designModel.references;
+    auto& items = *m_designModel->references;
     for (auto& srcReferenence : items)
     {
       if (auto p = std::get_if<ReferencedStyle>(&srcReferenence))

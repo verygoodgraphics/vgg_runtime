@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "DesignModelFwd.hpp"
+
 #include <nlohmann/json.hpp>
 
 #include <optional>
@@ -71,16 +73,6 @@ namespace VGG
 namespace Model
 {
 using nlohmann::json;
-
-struct Frame;
-struct Group;
-struct Image;
-struct Path;
-struct SymbolInstance;
-struct SymbolMaster;
-struct Text;
-using ContainerChildType =
-  std::variant<std::monostate, Frame, Group, Image, Path, SymbolInstance, SymbolMaster, Text>;
 
 struct PatternImageFill;
 struct PatternImageStrech;
@@ -1352,33 +1344,6 @@ enum class ObjectClass : int
   TEXT
 };
 
-struct Contour;
-struct VectorNetwork;
-struct Ellipse;
-struct Polygon;
-struct Rectangle;
-struct Star;
-using SubGeometryType = std::variant<
-  std::monostate,
-  Contour,
-  Ellipse,
-  Frame,
-  Group,
-  Image,
-  Path,
-  Polygon,
-  Rectangle,
-  Star,
-  SymbolInstance,
-  SymbolMaster,
-  Text,
-  VectorNetwork>;
-
-struct Subshape;
-
-struct Shape;
-
-struct ReferencedStyle;
 using ReferenceType = std::variant<std::monostate, ReferencedStyle, SymbolMaster>;
 
 /**

@@ -3,6 +3,8 @@
 #include "Domain/JsonSchemaValidator.hpp"
 #include "Domain/Layout/Helper.hpp"
 #include "Domain/Layout/Rule.hpp"
+#include "Domain/Model/DesignModel.hpp"
+#include "Domain/Model/Element.hpp"
 #include "Domain/Model/JsonKeys.hpp"
 #include "Utility/VggFloat.hpp"
 

@@ -1507,6 +1507,8 @@ struct Object
 struct Container : public Object
 {
   std::vector<ContainerChildType> childObjects;
+
+  ~Container();
 };
 
 struct Path : public Object

@@ -31,7 +31,6 @@
 
 #include <unordered_map>
 
-
 namespace VGG::layer
 {
 class Frame__pImpl
@@ -142,26 +141,14 @@ Frame::Frame(VRefCnt* cnt, PaintNodePtr root)
   observe(root);
 }
 
-PaintNode* Frame::nodeAt(int x, int y)
+void Frame::nodeAt(int x, int y, PaintNode::NodeVisitor visitor)
 {
   if (auto r = root(); r)
   {
     ASSERT(root()->parent() == nullptr);
     auto inv = d_ptr->transform.inverse();
     auto p = inv * glm::vec3(x, y, 1);
-    auto n = r->nodeAt(p.x, p.y);
-    return n;
-  }
-  return nullptr;
-}
-
-void Frame::nodesAt(int x, int y, std::vector<PaintNode*>& nodes)
-{
-  if (auto r = root(); r)
-  {
-    auto inv = d_ptr->transform.inverse();
-    auto p = inv * glm::vec3(x, y, 1);
-    return r->nodesAt(p.x, p.y, nodes);
+    r->nodeAt(p.x, p.y, visitor);
   }
 }
 

@@ -73,8 +73,7 @@ public:
   void    setZoomer(std::shared_ptr<Zoomer> zoomer);
   Zoomer* zoomer();
 
-  PaintNode* nodeAt(int x, int y);
-  void       nodesAt(int x, int y, std::vector<PaintNode*>& nodes);
+  void nodeAt(int x, int y, PaintNode::NodeVisitor visitor);
 
   void enableDrawDebugBound(bool enabled);
   bool isEnableDrawDebugBound();

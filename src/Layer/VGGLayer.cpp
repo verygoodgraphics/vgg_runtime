@@ -379,13 +379,34 @@ void VLayer::addScene(std::shared_ptr<Scene> scene)
   d_ptr->invalidate();
 }
 
+namespace
+{
+PaintNode* g_currentVisitorNode = nullptr;
+
+std::vector<PaintNode*>* g_visitedNodes = nullptr;
+
+bool nodeVisitor(PaintNode* p)
+{
+  g_visitedNodes->push_back(p);
+  return true;
+}
+
+bool firstNodeVisitor(PaintNode* p)
+{
+  g_currentVisitorNode = p;
+  return false;
+}
+}; // namespace
+
 PaintNode* VLayer::nodeAt(int x, int y)
 {
   auto p = d_ptr->invMatrix() * glm::vec3{ x, y, 1 };
   // TODO:: Only return the object in the first scene
   for (auto& s : d_ptr->scenes)
   {
-    auto r = s->nodeAt(p.x, p.y);
+    g_currentVisitorNode = nullptr;
+    s->nodeAt(p.x, p.y, firstNodeVisitor);
+    PaintNode* r = g_currentVisitorNode;
     VGG_LAYER_DEBUG_CODE(if (d_ptr->debugConfig.enableDrawClickBounds) {
       auto matrix = d_ptr->matrix();
       auto zoomMatrix = s->zoomer() ? s->zoomer()->matrix() : glm::mat3{ 1 };
@@ -398,12 +419,23 @@ PaintNode* VLayer::nodeAt(int x, int y)
   return nullptr;
 }
 
+void VLayer::nodeAt(int x, int y, PaintNode::NodeVisitor visitor)
+{
+  auto p = d_ptr->invMatrix() * glm::vec3{ x, y, 1 };
+  // TODO:: Only return the object in the first scene
+  for (auto& s : d_ptr->scenes)
+  {
+    s->nodeAt(p.x, p.y, visitor);
+  }
+}
+
 void VLayer::nodesAt(int x, int y, std::vector<PaintNode*>& nodes)
 {
   auto p = d_ptr->invMatrix() * glm::vec3{ x, y, 1 };
   for (auto& s : d_ptr->scenes)
   {
-    s->nodesAt(p.x, p.y, nodes);
+    g_visitedNodes = &nodes;
+    s->nodeAt(p.x, p.y, nodeVisitor);
     VGG_LAYER_DEBUG_CODE(if (d_ptr->debugConfig.enableDrawClickBounds) {
       auto last = nodes.size();
       auto matrix = d_ptr->matrix();

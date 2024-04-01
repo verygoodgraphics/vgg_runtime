@@ -32,6 +32,11 @@ public:
     return nullptr;
   }
 
+  sk_sp<SkImageFilter> getObjectMaskFilter() const override
+  {
+    return 0;
+  }
+
   void setParagraph(
     std::string                text,
     std::vector<TextStyleAttr> style,

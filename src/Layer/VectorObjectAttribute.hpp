@@ -43,9 +43,10 @@ public:
   {
     observe(m_shapeAttr);
   }
-  void                 render(Renderer* renderer) override;
-  ShapeAttribute*      shape() const override;
-  sk_sp<SkImageFilter> asObjectMaskFilter() const
+  void            render(Renderer* renderer) override;
+  ShapeAttribute* shape() const override;
+
+  sk_sp<SkImageFilter> getObjectMaskFilter() const override
   {
     return m_maskFilter;
   }

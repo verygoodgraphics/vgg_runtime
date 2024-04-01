@@ -56,43 +56,40 @@ std::pair<SkRect, std::optional<SkPaint>> VectorObjectAttribute::revalidateObjec
 {
   const Border* maxWidthBorder = nullptr;
   float         maxWidth = 0;
-  if (!bounds.isEmpty())
+  for (const auto& b : borders)
   {
-    for (const auto& b : borders)
+    if (!b.isEnabled || b.thickness <= 0)
+      continue;
+    // We simply assumes that the wider of the stroke, the larger its bounds
+    float strokeWidth = b.thickness;
+    if (b.position == PP_INSIDE)
+      strokeWidth = 2.f * b.thickness;
+    else if (b.position == PP_OUTSIDE)
+      strokeWidth = 2.f * b.thickness;
+    if (strokeWidth > maxWidth)
     {
-      if (!b.isEnabled || b.thickness <= 0)
-        continue;
-      // We simply assumes that the wider of the stroke, the larger its bounds
-      float strokeWidth = b.thickness;
-      if (b.position == PP_INSIDE)
-        strokeWidth = 2.f * b.thickness;
-      else if (b.position == PP_OUTSIDE)
-        strokeWidth = 2.f * b.thickness;
-      if (strokeWidth > maxWidth)
-      {
-        maxWidth = strokeWidth;
-        maxWidthBorder = &b;
-      }
+      maxWidth = strokeWidth;
+      maxWidthBorder = &b;
     }
-    if (maxWidthBorder)
-    {
-      SkPaint paint;
-      // Only consider these properties that affect bounds
-      paint.setStyle(SkPaint::kStroke_Style);
-      paint.setAntiAlias(true);
-      paint.setPathEffect(SkDashPathEffect::Make(
-        maxWidthBorder->dashedPattern.data(),
-        maxWidthBorder->dashedPattern.size(),
-        maxWidthBorder->dashedOffset));
-      paint.setStrokeJoin(toSkPaintJoin(maxWidthBorder->lineJoinStyle));
-      paint.setStrokeCap(toSkPaintCap(maxWidthBorder->lineCapStyle));
-      paint.setStrokeMiter(maxWidthBorder->miterLimit);
-      paint.setStrokeWidth(maxWidthBorder->thickness);
-      paint.setStrokeWidth(maxWidth);
-      SkRect rect;
-      paint.computeFastStrokeBounds(bounds, &rect);
-      return { rect, paint };
-    }
+  }
+  if (maxWidthBorder)
+  {
+    SkPaint paint;
+    // Only consider these properties that affect bounds
+    paint.setStyle(SkPaint::kStroke_Style);
+    paint.setAntiAlias(true);
+    paint.setPathEffect(SkDashPathEffect::Make(
+      maxWidthBorder->dashedPattern.data(),
+      maxWidthBorder->dashedPattern.size(),
+      maxWidthBorder->dashedOffset));
+    paint.setStrokeJoin(toSkPaintJoin(maxWidthBorder->lineJoinStyle));
+    paint.setStrokeCap(toSkPaintCap(maxWidthBorder->lineCapStyle));
+    paint.setStrokeMiter(maxWidthBorder->miterLimit);
+    paint.setStrokeWidth(maxWidthBorder->thickness);
+    paint.setStrokeWidth(maxWidth);
+    SkRect rect;
+    paint.computeFastStrokeBounds(bounds, &rect);
+    return { rect, paint };
   }
   return { bounds, std::nullopt };
 }
@@ -122,6 +119,7 @@ Bound VectorObjectAttribute::onRevalidate()
       auto mat = SkMatrix::Translate(bounds.x(), bounds.y());
       auto object = rec.finishRecording(bounds, &mat);
       m_maskFilter = object.asImageFilter();
+      DEBUG("bound height: %f", bounds.height());
       return Bound{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
     }
   }

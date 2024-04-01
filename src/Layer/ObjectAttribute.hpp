@@ -109,9 +109,10 @@ public:
     return m_hasFill;
   }
 
-  sk_sp<SkImageFilter> asObjectMaskFilter()
+  sk_sp<SkImageFilter> getObjectMaskFilter()
   {
-    return m_maskFilter;
+    ASSERT(m_renderObjectAttr);
+    return m_renderObjectAttr->getObjectMaskFilter();
   }
 
   sk_sp<SkImageFilter> imageFilter() const

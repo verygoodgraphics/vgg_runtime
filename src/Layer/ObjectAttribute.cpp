@@ -257,7 +257,7 @@ void StyleObjectAttribute::revalidateDropbackFilter(const SkRect& bounds)
       if (m_bgBlurImageFilter)
       {
         static auto s_blender = getOrCreateBlender("maskOut", g_maskOutBlender);
-        auto        fb = m_objectAttr->asObjectMaskFilter();
+        auto        fb = m_objectAttr->getObjectMaskFilter();
         m_dropbackImageFilter = SkImageFilters::Blend(s_blender, fb, m_bgBlurImageFilter, bounds);
       }
     }

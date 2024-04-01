@@ -397,9 +397,9 @@ bool RichTextBlock::ensureBuild(TextLayoutMode mode)
   return ok;
 }
 
-std::pair<Bound, float> RichTextBlock::internalLayout(const Bound& bound, ETextLayoutMode mode)
+std::pair<Bounds, float> RichTextBlock::internalLayout(const Bounds& bound, ETextLayoutMode mode)
 {
-  Bound      newBound = bound;
+  Bounds      newBound = bound;
   const auto layoutWidth = bound.width();
   float      newWidth = bound.width();
   float      newHeight = 0.f;

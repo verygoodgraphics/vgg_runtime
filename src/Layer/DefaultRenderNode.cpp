@@ -94,7 +94,7 @@ void DefaultRenderNode::renderAsMask(Renderer* render)
   m_objectAttr->render(render);
 }
 
-Bound DefaultRenderNode::effectBounds() const
+Bounds DefaultRenderNode::effectBounds() const
 {
   return m_effectsBounds;
 }
@@ -129,7 +129,7 @@ void DefaultRenderNode::endLayer(Renderer* renderer)
   renderer->canvas()->restore();
 }
 
-Bound DefaultRenderNode::onRevalidate()
+Bounds DefaultRenderNode::onRevalidate()
 {
   m_shapeMaskAttr->revalidate();
   m_transformAttr->revalidate();
@@ -137,7 +137,7 @@ Bound DefaultRenderNode::onRevalidate()
   m_objectAttr->revalidate();
   auto rect = toSkRect(m_objectAttr->bound());
   auto [pic, bound] = revalidatePicture(rect);
-  m_effectsBounds = Bound{ bound.x(), bound.y(), bound.width(), bound.height() };
+  m_effectsBounds = Bounds{ bound.x(), bound.y(), bound.width(), bound.height() };
   m_picture = pic;
   return m_objectAttr->bound();
 }

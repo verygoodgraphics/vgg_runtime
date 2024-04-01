@@ -32,9 +32,9 @@ public:
   VGG_ATTRIBUTE(Transform, Transform, m_transform);
   VGG_CLASS_MAKE(TransformAttribute);
 
-  Bound onRevalidate() override
+  Bounds onRevalidate() override
   {
-    return Bound{};
+    return Bounds{};
   }
 
 private:

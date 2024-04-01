@@ -65,7 +65,7 @@ public:
     std::vector<ParagraphAttr> parStyle);
 
   void setFrameMode(ETextLayoutMode mode);
-  void setParagraphBound(const Bound& bound);
+  void setParagraphBound(const Bounds& bound);
   void setVerticalAlignment(ETextVerticalAlignment vertAlign);
 
   using EventHandler = std::function<void(ParagraphAttributeAccessor*, void* event)>;
@@ -81,7 +81,7 @@ protected:
     const VShape&    path,
     const VShape&    mask,
     sk_sp<SkBlender> blender) override;
-  Bound onRevalidate() override;
+  Bounds onRevalidate() override;
 };
 
 } // namespace VGG::layer

@@ -53,11 +53,11 @@ SkRect LayerFXAttribute::revalidateLayerImageFilter(const SkRect& bounds)
   return bounds;
 }
 
-Bound LayerFXAttribute::onRevalidate()
+Bounds LayerFXAttribute::onRevalidate()
 {
   m_styleObjectAttr->revalidate();
   const auto styledObjectBounds = toSkRect(m_styleObjectAttr->effectBounds());
   const auto layerBound = revalidateLayerImageFilter(styledObjectBounds);
-  return Bound{ layerBound.x(), layerBound.y(), layerBound.width(), layerBound.height() };
+  return Bounds{ layerBound.x(), layerBound.y(), layerBound.width(), layerBound.height() };
 }
 } // namespace VGG::layer

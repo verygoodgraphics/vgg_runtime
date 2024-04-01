@@ -99,9 +99,9 @@ struct TextLayoutAutoWidth
 
 struct TextLayoutFixed
 {
-  Bound textBound;
+  Bounds textBound;
   TextLayoutFixed() = default;
-  TextLayoutFixed(const Bound& b)
+  TextLayoutFixed(const Bounds& b)
     : textBound(b)
   {
   }
@@ -157,12 +157,12 @@ private:
   std::vector<ParagraphAttr> m_lineStyle;
   sk_sp<FontCollection>      m_fontCollection;
 
-  Bound m_hintBound;
+  Bounds m_hintBound;
 
   int m_paragraphHeight{ 0 };
 
   bool                    ensureBuild(TextLayoutMode mode);
-  std::pair<Bound, float> internalLayout(const Bound& bound, ETextLayoutMode mode);
+  std::pair<Bounds, float> internalLayout(const Bounds& bound, ETextLayoutMode mode);
 
 protected:
   void onBegin() override;
@@ -177,7 +177,7 @@ protected:
     const TextStyleAttr& textAttr,
     void*                userData) override;
 
-  Bound onRevalidate() override
+  Bounds onRevalidate() override
   {
     TextLayoutMode mode;
     switch (m_layoutMode)
@@ -192,7 +192,7 @@ protected:
         mode = TextLayoutAutoHeight(m_hintBound.width());
         break;
     }
-    Bound newBound;
+    Bounds newBound;
     std::visit(
       Overloaded{
         [&](const TextLayoutAutoHeight& l) { std::tie(newBound, m_paragraphHeight) = layout(l); },
@@ -243,7 +243,7 @@ public:
     invalidate();
   }
 
-  void setParagraphHintBound(const Bound& bound)
+  void setParagraphHintBound(const Bounds& bound)
   {
     if (m_hintBound == bound)
       return;
@@ -309,36 +309,36 @@ public:
     return m_verticalAlign;
   }
 
-  std::pair<Bound, float> layout(TextLayoutFixed mode)
+  std::pair<Bounds, float> layout(TextLayoutFixed mode)
   {
     if (m_state >= LAYOUT)
       return { m_hintBound, m_paragraphHeight };
     ensureBuild(mode);
-    Bound newBound;
+    Bounds newBound;
     std::tie(newBound, m_paragraphHeight) = internalLayout(mode.textBound, TL_FIXED);
     m_state = LAYOUT;
     return { newBound, m_paragraphHeight };
   }
 
-  std::pair<Bound, float> layout(TextLayoutAutoWidth mode)
+  std::pair<Bounds, float> layout(TextLayoutAutoWidth mode)
   {
     if (m_state >= LAYOUT)
       return { m_hintBound, m_paragraphHeight };
     ensureBuild(mode);
-    Bound newBound;
-    std::tie(newBound, m_paragraphHeight) = internalLayout(Bound(), TL_AUTOWIDTH);
+    Bounds newBound;
+    std::tie(newBound, m_paragraphHeight) = internalLayout(Bounds(), TL_AUTOWIDTH);
     m_state = LAYOUT;
     return { newBound, m_paragraphHeight };
   }
 
-  std::pair<Bound, float> layout(TextLayoutAutoHeight mode)
+  std::pair<Bounds, float> layout(TextLayoutAutoHeight mode)
   {
     if (m_state >= LAYOUT)
       return { m_hintBound, m_paragraphHeight };
     ensureBuild(mode);
-    Bound b;
+    Bounds b;
     b.setWidth(mode.width);
-    Bound newBound;
+    Bounds newBound;
     std::tie(newBound, m_paragraphHeight) = internalLayout(b, TL_AUTOHEIGHT);
     m_state = LAYOUT;
     return { newBound, m_paragraphHeight };

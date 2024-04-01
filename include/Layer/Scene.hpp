@@ -83,7 +83,7 @@ public:
     return s_resRepo;
   }
 
-  void        onViewportChange(const Bound& bound);
+  void        onViewportChange(const Bounds& bound);
   static void setResRepo(std::map<std::string, std::vector<char>> repo);
 
 protected:

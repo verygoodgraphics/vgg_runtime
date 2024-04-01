@@ -48,7 +48,7 @@ void AlphaMaskAttribute::setInputImageFilter(Ref<ImageFilterAttribute> input)
   }
 }
 
-Bound AlphaMaskAttribute::onRevalidate()
+Bounds AlphaMaskAttribute::onRevalidate()
 {
   auto  layerBound = toSkRect(m_inputFilter->revalidate());
   auto& maskMap = *getMaskMap();
@@ -66,12 +66,12 @@ Bound AlphaMaskAttribute::onRevalidate()
       alphaMaskIter,
       layerBound,
       &resetOffset);
-    return Bound{ layerBound.x(), layerBound.y(), layerBound.width(), layerBound.height() };
+    return Bounds{ layerBound.x(), layerBound.y(), layerBound.width(), layerBound.height() };
   }
-  return Bound{ layerBound.x(), layerBound.y(), layerBound.width(), layerBound.height() };
+  return Bounds{ layerBound.x(), layerBound.y(), layerBound.width(), layerBound.height() };
 }
 
-Bound ShapeMaskAttribute::onRevalidate()
+Bounds ShapeMaskAttribute::onRevalidate()
 {
   if (!m_maskID.empty() && m_maskedNode)
   {
@@ -83,7 +83,7 @@ Bound ShapeMaskAttribute::onRevalidate()
         MaskBuilder::makeShapeMask(m_maskedNode, *getMaskMap(), iter, toSkRect(layerBound), 0);
     }
   }
-  return Bound();
+  return Bounds();
 }
 
 } // namespace VGG::layer

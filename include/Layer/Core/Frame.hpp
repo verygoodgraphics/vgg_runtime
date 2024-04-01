@@ -70,12 +70,12 @@ public:
   void             resetToOrigin(bool enable);
   bool             isVisible() const;
   const Transform& transform() const;
-  void             setClipBound(const Bound& bound);
+  void             setClipBound(const Bounds& bound);
 
   ~Frame();
 
 protected:
-  Bound      onRevalidate() override;
+  Bounds      onRevalidate() override;
   SkPicture* picture();
 };
 } // namespace VGG::layer

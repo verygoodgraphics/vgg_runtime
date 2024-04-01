@@ -61,8 +61,8 @@ public:
   ImageNode(ImageNode&&) noexcept = delete;
   ImageNode& operator=(ImageNode&&) noexcept = delete;
 
-  void               setImageBound(const Bound& bound);
-  Bound              getImageBound() const;
+  void               setImageBound(const Bounds& bound);
+  Bounds              getImageBound() const;
   void               setImage(const std::string& guid);
   const std::string& getImageGUID() const;
   void               setReplacesImage(bool fill);
@@ -77,7 +77,7 @@ public:
 
 protected:
   void  dispatchEvent(void* event) override;
-  Bound onDrawFill(
+  Bounds onDrawFill(
     Renderer*            renderer,
     sk_sp<SkBlender>     blender,
     sk_sp<SkImageFilter> imageFilter,

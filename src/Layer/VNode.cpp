@@ -86,7 +86,7 @@ void VNode::invalidate()
       }
     });
 }
-const Bound& VNode::revalidate()
+const Bounds& VNode::revalidate()
 {
   if (!isInvalid())
     return m_bound;

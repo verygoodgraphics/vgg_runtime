@@ -46,7 +46,7 @@ public:
   void            render(Renderer* renderer) override;
   ShapeAttribute* shape() const override;
 
-  Bound effectBounds() const override
+  Bounds effectBounds() const override
   {
     return m_effectBounds;
   }
@@ -57,7 +57,7 @@ public:
   }
 
   VGG_ATTRIBUTE(ObjectAttribute, WeakRef<ObjectAttribute>, m_objectAttribute);
-  Bound onRevalidate() override;
+  Bounds onRevalidate() override;
   VGG_CLASS_MAKE(VectorObjectAttribute);
 
 private:
@@ -67,7 +67,7 @@ private:
   WeakRef<ObjectAttribute>    m_objectAttribute;
   Ref<ShapeAttribute>         m_shapeAttr;
   sk_sp<SkImageFilter>        m_maskFilter;
-  Bound                       m_effectBounds;
+  Bounds                       m_effectBounds;
   std::optional<ObjectShader> m_objectShader;
 };
 

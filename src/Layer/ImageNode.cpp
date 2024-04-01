@@ -51,7 +51,7 @@ public:
 
   ImageAttribtueAccessor* accessor;
   ImageNode::EventHandler imageNodeEventHandler;
-  Bound                   bound;
+  Bounds                   bound;
 
   ImageNode__pImpl(ImageNode* api)
     : q_ptr(api)
@@ -88,7 +88,7 @@ ImageNode::ImageNode(VRefCnt* cnt, const std::string& name, std::string guid)
   // { DEBUG("image node %s", this->name().c_str()); };
 }
 
-Bound ImageNode::getImageBound() const
+Bounds ImageNode::getImageBound() const
 {
   if (!IMAGE_LEGACY_CODE)
   {
@@ -185,7 +185,7 @@ bool ImageNode::fill() const
   }
 }
 
-void ImageNode::setImageBound(const Bound& bound)
+void ImageNode::setImageBound(const Bounds& bound)
 {
   if (!IMAGE_LEGACY_CODE)
   {
@@ -197,7 +197,7 @@ void ImageNode::setImageBound(const Bound& bound)
   }
 }
 
-Bound ImageNode::onDrawFill(
+Bounds ImageNode::onDrawFill(
   Renderer*            renderer,
   sk_sp<SkBlender>     blender,
   sk_sp<SkImageFilter> imageFilter,

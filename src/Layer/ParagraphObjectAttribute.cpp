@@ -53,7 +53,7 @@ void ParagraphObjectAttribute::render(Renderer* renderer)
   // }
 }
 
-Bound ParagraphObjectAttribute::onRevalidate()
+Bounds ParagraphObjectAttribute::onRevalidate()
 {
   return m_painter->revalidate();
 }

@@ -105,7 +105,7 @@ public:
   ParagraphAttributeAccessor* accessor;
   TextNode::EventHandler      paragraphNodeEventHandler;
 
-  Bound bound;
+  Bounds bound;
 
   TextNode__pImpl(TextNode__pImpl&& p) noexcept = default;
   TextNode__pImpl& operator=(TextNode__pImpl&& p) noexcept = delete;
@@ -192,7 +192,7 @@ void TextNode::setParagraph(
   }
 }
 
-void TextNode::setParagraphBound(const Bound& bound)
+void TextNode::setParagraphBound(const Bounds& bound)
 {
   if (TEXT_LEGACY_CODE)
   {
@@ -258,7 +258,7 @@ void TextNode::dispatchEvent(void* event)
   }
 }
 
-Bound TextNode::onRevalidate()
+Bounds TextNode::onRevalidate()
 {
   VGG_IMPL(TextNode);
   if (TEXT_LEGACY_CODE)

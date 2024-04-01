@@ -351,7 +351,7 @@ void Scene::invalidate()
     f->invalidate();
 }
 
-PaintNode* Scene::nodeAt(int x, int y)
+void Scene::nodeAt(int x, int y, PaintNode::NodeVisitor visitor)
 {
   if (auto f = d_ptr->currentFrame(true); f)
   {
@@ -361,22 +361,7 @@ PaintNode* Scene::nodeAt(int x, int y)
       x = fp.x;
       y = fp.y;
     }
-    return f->nodeAt(x, y);
-  }
-  return nullptr;
-}
-
-void Scene::nodesAt(int x, int y, std::vector<PaintNode*>& nodes)
-{
-  if (auto f = d_ptr->currentFrame(true); f)
-  {
-    if (d_ptr->zoomer)
-    {
-      const auto fp = d_ptr->zoomer->invMatrix() * glm::vec3{ x, y, 1 };
-      x = fp.x;
-      y = fp.y;
-    }
-    f->nodesAt(x, y, nodes);
+    f->nodeAt(x, y, visitor);
   }
 }
 

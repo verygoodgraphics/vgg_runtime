@@ -23,16 +23,10 @@
 #include "Layer/Core/VShape.hpp"
 #include "Layer/Config.hpp"
 
-#include <glm/matrix.hpp>
-
 #include <memory>
 #include <functional>
 #include <optional>
 #include <string>
-class SkCanvas;
-class SkImageFilter;
-class SkImage;
-class SkBlender;
 
 namespace VGG::layer
 {
@@ -74,23 +68,13 @@ using ShapeData = std::variant<ContourPtr, Ellipse, SkRect, SkRRect>;
 using ContourData = std::optional<ShapeData>;
 
 class PaintNode;
-#ifdef USE_SHARED_PTR
-using PaintNodePtr = std::shared_ptr<PaintNode>;
-using PaintNodeRef = std::weak_ptr<PaintNode>;
-#else
 using PaintNodePtr = VGG::layer::Ref<PaintNode>;
 using PaintNodeRef = VGG::layer::WeakRef<PaintNode>;
-#endif
 
 template<typename... Args>
 inline PaintNodePtr makePaintNodePtr(Args&&... args)
 {
-#ifdef USE_SHARED_PTR
-  auto p = std::make_shared<PaintNode>(nullptr, std::forward<Args>(args)...);
-  return p;
-#else
   return PaintNodePtr(V_NEW<PaintNode>(std::forward<Args>(args)...));
-#endif
 };
 
 class PaintNode__pImpl;

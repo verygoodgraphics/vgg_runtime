@@ -21,7 +21,7 @@
 namespace VGG::layer
 {
 
-void VectorObjectAttribute::render(Renderer* renderer)
+void ShapeItem::render(Renderer* renderer)
 {
   if (auto shapeAttr = this->shape(); shapeAttr)
   {
@@ -45,12 +45,12 @@ void VectorObjectAttribute::render(Renderer* renderer)
   }
 }
 
-ShapeAttribute* VectorObjectAttribute::shape() const
+ShapeAttribute* ShapeItem::shape() const
 {
   return m_shapeAttr.get();
 }
 
-std::pair<SkRect, std::optional<SkPaint>> VectorObjectAttribute::revalidateObjectBounds(
+std::pair<SkRect, std::optional<SkPaint>> ShapeItem::revalidateObjectBounds(
   const std::vector<Border>& borders,
   const SkRect&              bounds)
 {
@@ -94,7 +94,7 @@ std::pair<SkRect, std::optional<SkPaint>> VectorObjectAttribute::revalidateObjec
   return { bounds, std::nullopt };
 }
 
-Bounds VectorObjectAttribute::onRevalidate()
+Bounds ShapeItem::onRevalidate()
 {
   ASSERT(m_shapeAttr);
   m_shapeAttr->revalidate();

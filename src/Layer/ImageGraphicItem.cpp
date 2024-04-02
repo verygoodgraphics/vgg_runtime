@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "ImageRenderObjectAttribute.hpp"
+#include "ImageGraphicItem.hpp"
 #include "ObjectAttribute.hpp"
 #include "ShapeAttribute.hpp"
 #include "PaintNodePrivate.hpp"
@@ -34,15 +34,15 @@ public:
 private:
 };
 
-ImageRenderObjectAttribute::ImageRenderObjectAttribute(VRefCnt* cnt, ObjectAttribute* object)
-  : InnerObjectAttribute(cnt)
+ImageItem::ImageItem(VRefCnt* cnt, ObjectAttribute* object)
+  : GraphicItem(cnt)
   , m_objectAttribute(object)
 {
   m_imageShape = ShapeAttribute::Make();
   observe(m_imageShape);
 }
 
-void ImageRenderObjectAttribute::render(Renderer* renderer)
+void ImageItem::render(Renderer* renderer)
 {
   DEBUG("render image");
   auto parent = m_objectAttribute.lock();
@@ -65,7 +65,7 @@ void ImageRenderObjectAttribute::render(Renderer* renderer)
   };
 }
 
-Bounds ImageRenderObjectAttribute::onRevalidate()
+Bounds ImageItem::onRevalidate()
 {
   if (!m_imageShader)
   {

@@ -68,7 +68,7 @@ public:
   void setParagraphBound(const Bounds& bound);
   void setVerticalAlignment(ETextVerticalAlignment vertAlign);
 
-  using EventHandler = std::function<void(ParagraphAttributeAccessor*, void* event)>;
+  using EventHandler = std::function<void(ParagraphItemAccessor*, void* event)>;
   void installParagraphNodeEventHandler(EventHandler handler);
 
   ~TextNode();

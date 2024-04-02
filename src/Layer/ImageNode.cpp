@@ -16,7 +16,7 @@
 #include "Layer/AttributeAccessor.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/Transform.hpp"
-#include "Layer/ImageRenderObjectAttribute.hpp"
+#include "Layer/ImageGraphicItem.hpp"
 #include "Layer/Renderer.hpp"
 #include "VSkia.hpp"
 #include "PaintNodePrivate.hpp"
@@ -67,14 +67,14 @@ ImageNode::ImageNode(VRefCnt* cnt, const std::string& name, std::string guid)
   if (!IMAGE_LEGACY_CODE)
   {
     auto                            t = incRef(transformAttribute());
-    Ref<ImageRenderObjectAttribute> ioa;
-    auto [c, d] = StyleNode::MakeRenderNode(
+    Ref<ImageItem> ioa;
+    auto [c, d] = StyleItem::MakeRenderNode(
       nullptr,
       this,
       t,
-      [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<InnerObjectAttribute>
+      [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<GraphicItem>
       {
-        ioa = ImageRenderObjectAttribute::Make(alloc, object);
+        ioa = ImageItem::Make(alloc, object);
         return ioa;
       });
 

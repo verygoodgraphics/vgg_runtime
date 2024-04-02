@@ -16,7 +16,7 @@
 #pragma once
 #include "AttributeNode.hpp"
 #include "ShapeAttribute.hpp"
-#include "RenderObjectAttribute.hpp"
+#include "GraphicItem.hpp"
 #include "ObjectAttribute.hpp"
 
 #include "Layer/Core/Attrs.hpp"
@@ -24,13 +24,13 @@
 
 namespace VGG::layer
 {
-class ImageRenderObjectAttribute final : public InnerObjectAttribute
+class ImageItem final : public GraphicItem
 {
 public:
-  ImageRenderObjectAttribute(VRefCnt* cnt, ObjectAttribute* objectAttribute);
+  ImageItem(VRefCnt* cnt, ObjectAttribute* objectAttribute);
   void render(Renderer* renderer) override;
 
-  sk_sp<SkImageFilter> getObjectMaskFilter() const override
+  sk_sp<SkImageFilter> getMaskFilter() const override
   {
     return 0;
   }
@@ -81,7 +81,7 @@ public:
     return m_imageBound;
   }
 
-  VGG_CLASS_MAKE(ImageRenderObjectAttribute);
+  VGG_CLASS_MAKE(ImageItem);
   Bounds onRevalidate() override;
 
 private:
@@ -89,6 +89,6 @@ private:
   Ref<ShapeAttribute>      m_imageShape;
   sk_sp<SkShader>          m_imageShader;
   PatternStretch           m_imagePattern;
-  Bounds                    m_imageBound;
+  Bounds                   m_imageBound;
 };
 } // namespace VGG::layer

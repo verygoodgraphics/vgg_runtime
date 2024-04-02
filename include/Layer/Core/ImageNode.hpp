@@ -21,7 +21,7 @@
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Memory/VNew.hpp"
 #include "Layer/Renderer.hpp"
-#include "Layer/ImageRenderObjectAttribute.hpp"
+#include "Layer/ImageGraphicItem.hpp"
 #include <core/SkBlendMode.h>
 #include <utility>
 

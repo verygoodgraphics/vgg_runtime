@@ -16,22 +16,41 @@
 #pragma once
 #include "AttributeNode.hpp"
 #include "ImageFilterAttribute.hpp"
-#include "ObjectAttribute.hpp"
+
+#include "Layer/Core/Attrs.hpp"
 
 namespace VGG::layer
 {
 
+class StyleAttribute;
+
+class BackdropFXAttribute : public ImageFilterAttribute
+{
+public:
+  BackdropFXAttribute(VRefCnt* cnt)
+    : ImageFilterAttribute(cnt)
+  {
+  }
+  VGG_ATTRIBUTE(BackgroundBlur, std::vector<BackgroundFX>, m_blurs);
+  sk_sp<SkImageFilter> getImageFilter() const override
+  {
+    return m_imageFilter;
+  }
+  Bounds onRevalidate() override;
+  VGG_CLASS_MAKE(BackdropFXAttribute);
+
+private:
+  friend class RenderNode;
+  std::vector<BackgroundFX> m_blurs;
+  sk_sp<SkImageFilter>      m_imageFilter;
+};
+
 class LayerFXAttribute : public ImageFilterAttribute
 {
 public:
-  LayerFXAttribute(VRefCnt* cnt, Ref<StyleObjectAttribute> styleObjectAttr)
-    : ImageFilterAttribute(cnt)
-    , m_styleObjectAttr(styleObjectAttr)
-  {
-    observe(m_styleObjectAttr);
-  }
+  LayerFXAttribute(VRefCnt* cnt, Ref<StyleAttribute> styleObjectAttr);
   VGG_ATTRIBUTE(LayerBlur, std::vector<LayerFX>, m_blurs);
-  Bounds                onRevalidate() override;
+  Bounds               onRevalidate() override;
   sk_sp<SkImageFilter> getImageFilter() const override
   {
     return m_imageFilter;
@@ -42,9 +61,9 @@ private:
   friend class RenderNode;
   SkRect revalidateLayerImageFilter(const SkRect& bounds);
 
-  Ref<StyleObjectAttribute> m_styleObjectAttr;
-  std::vector<LayerFX>      m_blurs;
-  sk_sp<SkImageFilter>      m_imageFilter;
+  Ref<StyleAttribute>  m_styleObjectAttr;
+  std::vector<LayerFX> m_blurs;
+  sk_sp<SkImageFilter> m_imageFilter;
 };
 
 } // namespace VGG::layer

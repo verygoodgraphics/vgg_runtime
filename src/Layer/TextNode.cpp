@@ -132,7 +132,7 @@ TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
   {
     auto                          t = incRef(transformAttribute());
     Ref<ParagraphObjectAttribute> poa;
-    auto [c, d] = RenderNodeFactory::MakeDefaultRenderNode(
+    auto [c, d] = StyleNode::MakeRenderNode(
       nullptr,
       this,
       t,

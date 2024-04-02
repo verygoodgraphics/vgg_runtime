@@ -16,7 +16,7 @@
 #pragma once
 #include "AttributeNode.hpp"
 #include "ImageFilterAttribute.hpp"
-#include "Layer/LayerAttribute.hpp"
+#include "Layer/EffectAttribute.hpp"
 #include "ShapeAttribute.hpp"
 
 #include <core/SkImageFilter.h>

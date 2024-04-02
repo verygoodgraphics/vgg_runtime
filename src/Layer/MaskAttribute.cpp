@@ -18,7 +18,7 @@
 #include "Layer/LayerCache.h"
 #include "VSkia.hpp"
 #include "MaskAttribute.hpp"
-#include "LayerAttribute.hpp"
+#include "EffectAttribute.hpp"
 #include "Mask.hpp"
 
 #include "Layer/Core/PaintNode.hpp"

@@ -17,7 +17,7 @@
 #include "RenderNode.hpp"
 #include "AttributeNode.hpp"
 #include "ShapeAttribute.hpp"
-#include "LayerAttribute.hpp"
+#include "EffectAttribute.hpp"
 #include "ObjectAttribute.hpp"
 #include "MaskAttribute.hpp"
 #include "AttributeAccessor.hpp"
@@ -28,19 +28,17 @@
 namespace VGG::layer
 {
 
-class VectorObjectAttibuteAccessor;
-
-class DefaultRenderNode : public RenderNode
+class StyleNode : public RenderNode
 {
 public:
-  DefaultRenderNode(
-    VRefCnt*                  cnt,
-    Ref<TransformAttribute>   transform,
-    Ref<StyleObjectAttribute> styleObject,
-    Ref<LayerFXAttribute>     layerPostProcess,
-    Ref<AlphaMaskAttribute>   alphaMask,
-    Ref<ShapeMaskAttribute>   shapeMask,
-    Ref<ShapeAttribute>       shape)
+  StyleNode(
+    VRefCnt*                cnt,
+    Ref<TransformAttribute> transform,
+    Ref<StyleAttribute>     styleObject,
+    Ref<LayerFXAttribute>   layerPostProcess,
+    Ref<AlphaMaskAttribute> alphaMask,
+    Ref<ShapeMaskAttribute> shapeMask,
+    Ref<ShapeAttribute>     shape)
     : RenderNode(cnt, INVALIDATE)
     , m_transformAttr(transform)
     , m_objectAttr(styleObject)
@@ -64,11 +62,17 @@ public:
   }
   Bounds onRevalidate() override;
 
-  ~DefaultRenderNode();
+  using Creator = std::function<Ref<RenderObjectAttribute>(VAllocator* alloc, ObjectAttribute*)>;
+  static std::pair<Ref<StyleNode>, std::unique_ptr<Accessor>> MakeRenderNode( // NOLINT
+    VAllocator*             alloc,
+    PaintNode*              node,
+    Ref<TransformAttribute> transform,
+    Creator                 creator);
+
+  ~StyleNode();
 
 private:
-  friend class RenderNodeFactory;
-  VGG_CLASS_MAKE(DefaultRenderNode);
+  VGG_CLASS_MAKE(StyleNode);
 
   SkRect                              recorder(Renderer* renderer);
   std::pair<sk_sp<SkPicture>, SkRect> revalidatePicture(const SkRect& bounds);
@@ -79,12 +83,12 @@ private:
     const VShape*        clipShape,
     sk_sp<SkImageFilter> backdropFilter);
 
-  void                      endLayer(Renderer* renderer);
-  Ref<TransformAttribute>   m_transformAttr;
-  Ref<StyleObjectAttribute> m_objectAttr;
-  Ref<AlphaMaskAttribute>   m_alphaMaskAttr;
-  Ref<ShapeMaskAttribute>   m_shapeMaskAttr;
-  Bounds                     m_effectsBounds;
-  sk_sp<SkPicture>          m_picture;
+  void                    endLayer(Renderer* renderer);
+  Ref<TransformAttribute> m_transformAttr;
+  Ref<StyleAttribute>     m_objectAttr;
+  Ref<AlphaMaskAttribute> m_alphaMaskAttr;
+  Ref<ShapeMaskAttribute> m_shapeMaskAttr;
+  Bounds                  m_effectsBounds;
+  sk_sp<SkPicture>        m_picture;
 };
 } // namespace VGG::layer

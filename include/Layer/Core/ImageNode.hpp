@@ -15,37 +15,19 @@
  */
 #pragma once
 #include "Layer/Core/AttributeAccessor.hpp"
-#include "Layer/Core/TreeNode.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Config.hpp"
-#include "Layer/Core/Transform.hpp"
 #include "Layer/Memory/VNew.hpp"
-#include "Layer/Renderer.hpp"
-#include "Layer/ImageGraphicItem.hpp"
-#include <core/SkBlendMode.h>
-#include <utility>
-
-class SkImage;
-class SkCanvas;
 
 namespace VGG::layer
 {
 class ImageNode;
-#ifdef USE_SHARED_PTR
-using ImageNodePtr = std::shared_ptr<ImageNode>;
-#else
 using ImageNodePtr = Ref<ImageNode>;
-#endif
 
 template<typename... Args>
 inline ImageNodePtr makeImageNodePtr(Args&&... args)
 {
-#ifdef USE_SHARED_PTR
-  auto p = std::make_shared<ImageNode>(nullptr, std::forward<Args>(args)...);
-  return p;
-#else
   return ImageNodePtr(V_NEW<ImageNode>(std::forward<Args>(args)...));
-#endif
 };
 class ImageNode__pImpl;
 class VGG_EXPORTS ImageNode final : public PaintNode

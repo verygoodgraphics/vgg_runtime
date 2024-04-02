@@ -45,10 +45,9 @@ class BackdropFXAttribute;
 class ShapeAttribute;
 
 class ParagraphItem;
-class ShapeItem;
 class ImageItem;
 
-class Accessor
+class VGG_EXPORTS Accessor
 {
 public:
   Accessor(const Accessor&) = default;
@@ -110,7 +109,7 @@ protected:
   }
 };
 
-class ShapeItemAttibuteAccessor : public Accessor
+class VGG_EXPORTS ShapeItemAttibuteAccessor : public Accessor
 {
 public:
   ShapeItemAttibuteAccessor(const Accessor& acc, ShapeAttribute* shape)
@@ -150,7 +149,7 @@ protected:
   ShapeAttribute* const m_shapeAttr;
 };
 
-class ParagraphItemAttributeAccessor : public Accessor
+class VGG_EXPORTS ParagraphItemAttributeAccessor : public Accessor
 {
 public:
   ParagraphItemAttributeAccessor(const Accessor& acc, ParagraphItem* paragraphObjectAttr)
@@ -196,7 +195,7 @@ protected:
   ParagraphItem* const m_paraAttr;
 };
 
-class ImageItemAttribtueAccessor : public Accessor
+class VGG_EXPORTS ImageItemAttribtueAccessor : public Accessor
 {
 public:
   ImageItemAttribtueAccessor(const Accessor& acc, ImageItem* image)

@@ -43,22 +43,8 @@ public:
 
   ParagraphItemAttributeAccessor* accessor;
   TextNode::EventHandler          paragraphNodeEventHandler;
-
   TextNode__pImpl(TextNode__pImpl&& p) noexcept = default;
   TextNode__pImpl& operator=(TextNode__pImpl&& p) noexcept = delete;
-
-#ifdef USE_SHARED_PTR
-  bool observed{ false };
-  void ensureObserve()
-  {
-    if (!observed)
-    {
-      q_ptr->observe(painter);
-      observed = true;
-    }
-  }
-#else
-#endif
 };
 
 TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)

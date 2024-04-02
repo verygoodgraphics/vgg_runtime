@@ -21,29 +21,17 @@
 #include "Layer/Core/VType.hpp"
 #include "Layer/Memory/VNew.hpp"
 #include "Layer/Memory/VRefCnt.hpp"
-#include "Layer/ParagraphLayout.hpp"
-#include "Layer/ParagraphParser.hpp"
-#include <utility>
 
 namespace VGG::layer
 {
 
 class TextNode;
-#ifdef USE_SHARED_PTR
-using TextNodePtr = std::shared_ptr<TextNode>;
-#else
 using TextNodePtr = Ref<TextNode>;
-#endif
 
 template<typename... Args>
 inline TextNodePtr makeTextNodePtr(Args&&... args)
 {
-#ifdef USE_SHARED_PTR
-  auto p = std::make_shared<TextNode>(nullptr, std::forward<Args>(args)...);
-  return p;
-#else
   return TextNodePtr(V_NEW<TextNode>(std::forward<Args>(args)...));
-#endif
 }
 
 class TextNode__pImpl;

@@ -61,7 +61,7 @@ public:
     this->invalidate();
   }
 
-  void setImageBound(const Bounds& bound)
+  void setImageBounds(const Bounds& bound)
   {
     if (m_imageBound == bound)
       return;
@@ -70,7 +70,7 @@ public:
     m_imageShape->setShape(VShape(toSkRect(bound)));
   }
 
-  const Bounds& getImageBound() const
+  const Bounds& getImageBounds() const
   {
     return m_imageBound;
   }

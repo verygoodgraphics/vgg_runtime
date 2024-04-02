@@ -14,23 +14,39 @@
  * limitations under the License.
  */
 #pragma once
-#include <type_traits>
+#include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Core/VShape.hpp"
-#include "Layer/ImageGraphicItem.hpp"
-#include "Layer/ParagraphGraphicItem.hpp"
-#include "ShapeAttribute.hpp"
-#include "EffectAttribute.hpp"
-#include "ObjectAttribute.hpp"
-#include "MaskAttribute.hpp"
-#include "TransformAttribute.hpp"
-namespace VGG::layer
-{
+#include "Layer/Core/VType.hpp"
+
+#include "Layer/ParagraphLayout.hpp" //TODO:: It's a private header
+
 #define ATTR_MEMBER_GETTER(name, type, container)                                                  \
   type* name() const                                                                               \
   {                                                                                                \
     return container;                                                                              \
   }
+
+#define ATTR_DECL(name, type)                                                                      \
+  void set##name(const type& v);                                                                   \
+  void set##name(type&& v);
+
+namespace VGG::layer
+{
+
+class TransformAttribute;
+class AlphaMaskAttribute;
+class ShapeMaskAttribute;
+class ObjectAttribute;
+class DropShadowAttribute;
+class InnerShadowAttribute;
+class LayerFXAttribute;
+class BackdropFXAttribute;
+class ShapeAttribute;
+
+class ParagraphItem;
+class ShapeItem;
+class ImageItem;
 
 class Accessor
 {
@@ -41,110 +57,29 @@ public:
   Accessor& operator=(Accessor&&) = delete;
   ~Accessor() = default;
 
-  void setTransform(const Transform& transform)
-  {
-    ASSERT(m_transformAttr != nullptr);
-    m_transformAttr->setTransform(transform);
-  }
+  ATTR_DECL(Transform, Transform);
+  ATTR_DECL(AlphaMask, std::vector<AlphaMask>);
+  ATTR_DECL(ShapeMask, std::vector<std::string>);
+  ATTR_DECL(DropShadows, std::vector<DropShadow>);
+  ATTR_DECL(InnerShadows, std::vector<InnerShadow>);
+  ATTR_DECL(Fills, std::vector<Fill>);
+  ATTR_DECL(Borders, std::vector<Border>);
+  ATTR_DECL(LayerBlurs, std::vector<LayerFX>);
+  ATTR_DECL(BackgroundBlurs, std::vector<BackgroundFX>);
 
-  template<
-    typename T,
-    typename DecayT = std::decay_t<T>,
-    typename =
-      typename std::enable_if_t<std::is_same_v<DecayT, std::vector<typename DecayT::value_type>>>>
-  void setAlphaMask(T&& alphaMasks)
-  {
-    ASSERT(m_alphaMaskAttr != nullptr);
-    m_alphaMaskAttr->setAlphaMasks(std::forward<T>(alphaMasks));
-  }
-
-  template<
-    typename T,
-    typename DecayT = std::decay_t<T>,
-    typename =
-      typename std::enable_if_t<std::is_same_v<DecayT, std::vector<typename DecayT::value_type>>>>
-  void setShapeMask(T&& maskID)
-  {
-    ASSERT(m_shapeMaskAttr != nullptr);
-    m_shapeMaskAttr->setMaskID(std::forward<T>(maskID));
-  }
-
-  template<
-    typename T,
-    typename DecayT = std::decay_t<T>,
-    typename =
-      typename std::enable_if_t<std::is_same_v<DecayT, std::vector<typename DecayT::value_type>>>>
-  void setDropShadow(T&& shadow)
-  {
-    m_dropShadowAttr->setDropShadowStyle(std::forward<T>(shadow));
-  }
-
-  template<
-    typename T,
-    typename DecayT = std::decay_t<T>,
-    typename =
-      typename std::enable_if_t<std::is_same_v<DecayT, std::vector<typename DecayT::value_type>>>>
-  void setInnerShadow(T&& shadow)
-  {
-    ASSERT(m_innerShadowAttr != nullptr);
-    m_innerShadowAttr->setInnerShadowStyle(std::forward<T>(shadow));
-  }
-
-  template<
-    typename T,
-    typename DecayT = std::decay_t<T>,
-    typename =
-      typename std::enable_if_t<std::is_same_v<DecayT, std::vector<typename DecayT::value_type>>>>
-  void setFill(T&& fill)
-  {
-    ASSERT(m_styleObjectAttr != nullptr);
-    m_styleObjectAttr->setFillStyle(std::forward<T>(fill));
-  }
-
-  template<
-    typename T,
-    typename DecayT = std::decay_t<T>,
-    typename =
-      typename std::enable_if_t<std::is_same_v<DecayT, std::vector<typename DecayT::value_type>>>>
-  void setBorder(T&& border)
-  {
-    ASSERT(m_styleObjectAttr != nullptr);
-    m_styleObjectAttr->setBorderStyle(std::forward<T>(border));
-  }
-
-  template<
-    typename T,
-    typename DecayT = std::decay_t<T>,
-    typename =
-      typename std::enable_if_t<std::is_same_v<DecayT, std::vector<typename DecayT::value_type>>>>
-  void setLayerBlur(T&& blurs)
-  {
-    ASSERT(m_layerFXAttr != nullptr);
-    m_layerFXAttr->setLayerBlur(std::forward<T>(blurs));
-  }
-
-  template<
-    typename T,
-    typename DecayT = std::decay_t<T>,
-    typename =
-      typename std::enable_if_t<std::is_same_v<DecayT, std::vector<typename DecayT::value_type>>>>
-  void setBackgroundBlur(T&& blurs)
-  {
-    ASSERT(m_backgroundBlurAttr != nullptr);
-    m_backgroundBlurAttr->setBackgroundBlur(std::forward<T>(blurs));
-  }
-
+  // The following api should not be accessed
   ATTR_MEMBER_GETTER(transform, TransformAttribute, m_transformAttr);
   ATTR_MEMBER_GETTER(alphaMask, AlphaMaskAttribute, m_alphaMaskAttr);
   ATTR_MEMBER_GETTER(shapeMask, ShapeMaskAttribute, m_shapeMaskAttr);
   ATTR_MEMBER_GETTER(dropShadow, DropShadowAttribute, m_dropShadowAttr);
   ATTR_MEMBER_GETTER(innerShadow, InnerShadowAttribute, m_innerShadowAttr);
-  ATTR_MEMBER_GETTER(styleObject, ObjectAttribute, m_styleObjectAttr); // typo: Should be object
+  ATTR_MEMBER_GETTER(styleObject, ObjectAttribute, m_styleObjectAttr);
   ATTR_MEMBER_GETTER(layerFX, LayerFXAttribute, m_layerFXAttr);
   ATTR_MEMBER_GETTER(backgroundBlur, BackdropFXAttribute, m_backgroundBlurAttr);
 
 protected:
   friend class StyleItem;
+
   TransformAttribute* const   m_transformAttr;
   AlphaMaskAttribute* const   m_alphaMaskAttr;
   ShapeMaskAttribute* const   m_shapeMaskAttr;
@@ -178,17 +113,6 @@ protected:
 class ShapeGraphicItemAttibuteAccessor : public Accessor
 {
 public:
-  template<
-    typename T,
-    typename DecayT = std::decay_t<T>,
-    typename = typename std::enable_if_t<std::is_same_v<DecayT, VShape>>>
-  void setShape(T&& shape)
-  {
-    ASSERT(m_shapeAttr != nullptr);
-    m_shapeAttr->setShape(std::forward<T>(shape));
-  }
-  ATTR_MEMBER_GETTER(shape, ShapeAttribute, m_shapeAttr);
-
   ShapeGraphicItemAttibuteAccessor(const Accessor& acc, ShapeAttribute* shape)
     : Accessor(acc)
     , m_shapeAttr(shape)
@@ -217,6 +141,10 @@ public:
     , m_shapeAttr(shapeAttr)
   {
   }
+  ATTR_DECL(Shape, VShape);
+
+  // The following api should not be accessed
+  ATTR_MEMBER_GETTER(shape, ShapeAttribute, m_shapeAttr);
 
 protected:
   ShapeAttribute* const m_shapeAttr;
@@ -225,7 +153,6 @@ protected:
 class ParagraphItemAccessor : public Accessor
 {
 public:
-  ATTR_MEMBER_GETTER(paragraph, ParagraphItem, m_paraAttr);
   ParagraphItemAccessor(const Accessor& acc, ParagraphItem* paragraphObjectAttr)
     : Accessor(acc)
     , m_paraAttr(paragraphObjectAttr)
@@ -253,20 +180,35 @@ public:
     , m_paraAttr(paragraphObjectAttr)
   {
   }
+  void setParagraph(
+    std::string                text,
+    std::vector<TextStyleAttr> style,
+    std::vector<ParagraphAttr> parStyle);
+  ATTR_DECL(ParagraphBound, Bounds);
+  ATTR_DECL(Anchor, glm::vec2);
+  ATTR_DECL(TextLayoutMode, ETextLayoutMode);
+  ATTR_DECL(VerticalAlignment, ETextVerticalAlignment);
+
+  // The following api should not be accessed
+  ATTR_MEMBER_GETTER(paragraph, ParagraphItem, m_paraAttr);
 
 protected:
   ParagraphItem* const m_paraAttr;
 };
 
-class ImageAttribtueAccessor : public Accessor
+class ImageItemAttribtueAccessor : public Accessor
 {
 public:
-  ATTR_MEMBER_GETTER(image, ImageItem, m_imageAttr);
-  ImageAttribtueAccessor(const Accessor& acc, ImageItem* image)
+  ImageItemAttribtueAccessor(const Accessor& acc, ImageItem* image)
     : Accessor(acc)
     , m_imageAttr(image)
   {
   }
+  ATTR_DECL(ImageGUID, std::string);
+  ATTR_DECL(ImageFilter, ImageFilter);
+  ATTR_DECL(ImageBounds, Bounds);
+
+  ATTR_MEMBER_GETTER(image, ImageItem, m_imageAttr);
 
 protected:
   ImageItem* const m_imageAttr;

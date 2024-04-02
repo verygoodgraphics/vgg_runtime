@@ -83,7 +83,7 @@ void ObjectAttribute::render(Renderer* renderer)
   ASSERT(renderer);
   sk_sp<SkBlender>     blender; // maybe we need to add a blender, add to renderer
   sk_sp<SkImageFilter> imageFilter;
-  m_renderObjectAttr->render(renderer);
+  m_graphicItem->render(renderer);
   // if (m_shapeAttr)
   // {
   //   if (const auto& shape = m_shapeAttr->getShape(); !shape.isEmpty())
@@ -113,8 +113,8 @@ void ObjectAttribute::render(Renderer* renderer)
 
 Bounds ObjectAttribute::onRevalidate()
 {
-  ASSERT(m_renderObjectAttr);
-  m_renderObjectAttr->revalidate();
+  ASSERT(m_graphicItem);
+  m_graphicItem->revalidate();
   m_hasFill = false;
   for (const auto& f : m_fills)
   {
@@ -127,7 +127,7 @@ Bounds ObjectAttribute::onRevalidate()
   // m_effectBounds =
   //   m_renderObjectAttr->effectBounds(); // FIXME: maybe this could be done in the current
   // object rather than m_renderObjectAttr
-  return m_renderObjectAttr->bound();
+  return m_graphicItem->bound();
   // m_shapeAttr->revalidate();
   // if (m_shapeAttr)
   // {
@@ -155,11 +155,11 @@ Bounds ObjectAttribute::onRevalidate()
 }
 
 StyleAttribute::StyleAttribute(
-  VRefCnt*                     cnt,
-  Ref<InnerShadowAttribute>    innerShadow,
-  Ref<DropShadowAttribute>     dropShadow,
-  Ref<ObjectAttribute>         object,
-  Ref<BackdropFXAttribute> backgroundBlur)
+  VRefCnt*                  cnt,
+  Ref<InnerShadowAttribute> innerShadow,
+  Ref<DropShadowAttribute>  dropShadow,
+  Ref<ObjectAttribute>      object,
+  Ref<BackdropFXAttribute>  backgroundBlur)
   : Attribute(cnt)
   , m_innerShadowAttr(std::move(innerShadow))
   , m_dropShadowAttr(std::move(dropShadow))
@@ -190,14 +190,13 @@ void StyleAttribute::revalidateDropbackFilter(const SkRect& bounds)
   {
     if (m_bgBlurImageFilter != bgb || m_objectEffectBounds != bounds)
     {
-      DEBUG("blur bound: %f %f", bounds.width(), bounds.height());
       m_bgBlurImageFilter = bgb;
       if (m_bgBlurImageFilter)
       {
-        if (auto ro = m_objectAttr->getRenderObject(); ro)
+        if (auto ro = m_objectAttr->getGraphicItem(); ro)
         {
           static auto s_blender = getOrCreateBlender("maskOut", g_maskOutBlender);
-          auto        fb = ro->getObjectMaskFilter();
+          auto        fb = ro->getMaskFilter();
           m_dropbackImageFilter = SkImageFilters::Blend(s_blender, fb, m_bgBlurImageFilter, bounds);
         }
       }

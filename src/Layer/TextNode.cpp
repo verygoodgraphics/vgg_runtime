@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include "Layer/AttributeAccessor.hpp"
-#include "Layer/ParagraphObjectAttribute.hpp"
+#include "Layer/ParagraphGraphicItem.hpp"
 #include "Layer/ParagraphParser.hpp"
 #include "Layer/PaintNodePrivate.hpp"
 #include "Layer/TransformAttribute.hpp"
@@ -102,8 +102,8 @@ public:
   RichTextBlockPtr         paragraphLayout;
   std::optional<glm::vec2> anchor;
 
-  ParagraphAttributeAccessor* accessor;
-  TextNode::EventHandler      paragraphNodeEventHandler;
+  ParagraphItemAccessor* accessor;
+  TextNode::EventHandler paragraphNodeEventHandler;
 
   Bounds bound;
 
@@ -130,25 +130,25 @@ TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
 {
   if (!TEXT_LEGACY_CODE)
   {
-    auto                          t = incRef(transformAttribute());
-    Ref<ParagraphObjectAttribute> poa;
-    auto [c, d] = StyleNode::MakeRenderNode(
+    auto               t = incRef(transformAttribute());
+    Ref<ParagraphItem> poa;
+    auto [c, d] = StyleItem::MakeRenderNode(
       nullptr,
       this,
       t,
-      [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<InnerObjectAttribute>
+      [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<GraphicItem>
       {
-        poa = ParagraphObjectAttribute::Make(alloc);
+        poa = ParagraphItem::Make(alloc);
         return poa;
       });
 
-    auto acc = std::make_unique<ParagraphAttributeAccessor>(*d, poa);
+    auto acc = std::make_unique<ParagraphItemAccessor>(*d, poa);
     d_ptr->accessor = acc.get();
     PaintNode::d_ptr->accessor = std::move(acc);
     PaintNode::d_ptr->renderNode = std::move(c);
     observe(PaintNode::d_ptr->renderNode);
   }
-  // d_ptr->paragraphNodeEventHandler = [this](ParagraphAttributeAccessor*, void*)
+  // d_ptr->paragraphNodeEventHandler = [this](ParagraphItemAccessor*, void*)
   // { DEBUG("text node: %s", this->name().c_str()); };
 }
 
@@ -253,7 +253,7 @@ void TextNode::dispatchEvent(void* event)
   if (d_ptr->paragraphNodeEventHandler)
   {
     d_ptr->paragraphNodeEventHandler(
-      static_cast<ParagraphAttributeAccessor*>(attributeAccessor()),
+      static_cast<ParagraphItemAccessor*>(attributeAccessor()),
       event);
   }
 }

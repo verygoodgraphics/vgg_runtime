@@ -15,7 +15,7 @@
  */
 #pragma once
 #include "AttributeNode.hpp"
-#include "RenderObjectAttribute.hpp"
+#include "GraphicItem.hpp"
 #include "ObjectShader.hpp"
 #include "ShadowAttribute.hpp"
 
@@ -29,11 +29,11 @@ class BackdropFXAttribute;
 class ObjectAttribute : public Attribute
 {
 public:
-  ObjectAttribute(VRefCnt* cnt, Ref<InnerObjectAttribute> renderObject)
+  ObjectAttribute(VRefCnt* cnt, Ref<GraphicItem> renderObject)
     : Attribute(cnt)
-    , m_renderObjectAttr(renderObject)
+    , m_graphicItem(renderObject)
   {
-    observe(m_renderObjectAttr);
+    observe(m_graphicItem);
   }
 
   bool hasFill() const
@@ -53,8 +53,9 @@ public:
 
   Bounds effectBounds() const
   {
-    ASSERT(m_renderObjectAttr);
-    return m_renderObjectAttr->effectBounds();
+    ASSERT(m_graphicItem);
+    // TODO:: bounds with border should evaluated here rather than in concrete graphics item
+    return m_graphicItem->effectBounds();
   }
 
   void   render(Renderer* renderer);
@@ -62,7 +63,7 @@ public:
 
   VGG_ATTRIBUTE(FillStyle, std::vector<Fill>, m_fills);
   VGG_ATTRIBUTE(BorderStyle, std::vector<Border>, m_borders);
-  VGG_ATTRIBUTE(RenderObject, Ref<InnerObjectAttribute>, m_renderObjectAttr);
+  VGG_ATTRIBUTE(GraphicItem, Ref<GraphicItem>, m_graphicItem);
 
   VGG_CLASS_MAKE(ObjectAttribute);
 
@@ -73,11 +74,11 @@ private:
     const SkRect&              bounds);
   void revalidateMaskFilter(const SkPaint& paint, const SkRect& bounds);
 
-  Ref<InnerObjectAttribute> m_renderObjectAttr;
-  sk_sp<SkImageFilter>       m_maskFilter;
-  std::vector<Fill>          m_fills;
-  std::vector<Border>        m_borders;
-  bool                       m_hasFill{ false };
+  Ref<GraphicItem>     m_graphicItem;
+  sk_sp<SkImageFilter> m_maskFilter;
+  std::vector<Fill>    m_fills;
+  std::vector<Border>  m_borders;
+  bool                 m_hasFill{ false };
 };
 
 class StyleAttribute : public Attribute

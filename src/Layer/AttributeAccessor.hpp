@@ -17,8 +17,8 @@
 #include <type_traits>
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Core/VShape.hpp"
-#include "Layer/ImageRenderObjectAttribute.hpp"
-#include "Layer/ParagraphObjectAttribute.hpp"
+#include "Layer/ImageGraphicItem.hpp"
+#include "Layer/ParagraphGraphicItem.hpp"
 #include "ShapeAttribute.hpp"
 #include "EffectAttribute.hpp"
 #include "ObjectAttribute.hpp"
@@ -144,7 +144,7 @@ public:
   ATTR_MEMBER_GETTER(backgroundBlur, BackdropFXAttribute, m_backgroundBlurAttr);
 
 protected:
-  friend class StyleNode;
+  friend class StyleItem;
   TransformAttribute* const   m_transformAttr;
   AlphaMaskAttribute* const   m_alphaMaskAttr;
   ShapeMaskAttribute* const   m_shapeMaskAttr;
@@ -175,7 +175,7 @@ protected:
   }
 };
 
-class VectorObjectAttibuteAccessor : public Accessor
+class ShapeGraphicItemAttibuteAccessor : public Accessor
 {
 public:
   template<
@@ -189,13 +189,13 @@ public:
   }
   ATTR_MEMBER_GETTER(shape, ShapeAttribute, m_shapeAttr);
 
-  VectorObjectAttibuteAccessor(const Accessor& acc, ShapeAttribute* shape)
+  ShapeGraphicItemAttibuteAccessor(const Accessor& acc, ShapeAttribute* shape)
     : Accessor(acc)
     , m_shapeAttr(shape)
   {
   }
 
-  VectorObjectAttibuteAccessor(
+  ShapeGraphicItemAttibuteAccessor(
     ShapeAttribute*       shapeAttr,
     TransformAttribute*   transformAttr,
     AlphaMaskAttribute*   alphaMaskAttr,
@@ -222,25 +222,25 @@ protected:
   ShapeAttribute* const m_shapeAttr;
 };
 
-class ParagraphAttributeAccessor : public Accessor
+class ParagraphItemAccessor : public Accessor
 {
 public:
-  ATTR_MEMBER_GETTER(paragraph, ParagraphObjectAttribute, m_paraAttr);
-  ParagraphAttributeAccessor(const Accessor& acc, ParagraphObjectAttribute* paragraphObjectAttr)
+  ATTR_MEMBER_GETTER(paragraph, ParagraphItem, m_paraAttr);
+  ParagraphItemAccessor(const Accessor& acc, ParagraphItem* paragraphObjectAttr)
     : Accessor(acc)
     , m_paraAttr(paragraphObjectAttr)
   {
   }
-  ParagraphAttributeAccessor(
-    ParagraphObjectAttribute* paragraphObjectAttr,
-    TransformAttribute*       transformAttr,
-    AlphaMaskAttribute*       alphaMaskAttr,
-    ShapeMaskAttribute*       shapemaskAttr,
-    DropShadowAttribute*      dropShadowAttr,
-    InnerShadowAttribute*     innerShadowAttr,
-    ObjectAttribute*          objectAttr,
-    LayerFXAttribute*         layerPostProcessAttr,
-    BackdropFXAttribute*      backgroundBlurAttr)
+  ParagraphItemAccessor(
+    ParagraphItem*        paragraphObjectAttr,
+    TransformAttribute*   transformAttr,
+    AlphaMaskAttribute*   alphaMaskAttr,
+    ShapeMaskAttribute*   shapemaskAttr,
+    DropShadowAttribute*  dropShadowAttr,
+    InnerShadowAttribute* innerShadowAttr,
+    ObjectAttribute*      objectAttr,
+    LayerFXAttribute*     layerPostProcessAttr,
+    BackdropFXAttribute*  backgroundBlurAttr)
     : Accessor(
         transformAttr,
         alphaMaskAttr,
@@ -255,21 +255,21 @@ public:
   }
 
 protected:
-  ParagraphObjectAttribute* const m_paraAttr;
+  ParagraphItem* const m_paraAttr;
 };
 
 class ImageAttribtueAccessor : public Accessor
 {
 public:
-  ATTR_MEMBER_GETTER(image, ImageRenderObjectAttribute, m_imageAttr);
-  ImageAttribtueAccessor(const Accessor& acc, ImageRenderObjectAttribute* image)
+  ATTR_MEMBER_GETTER(image, ImageItem, m_imageAttr);
+  ImageAttribtueAccessor(const Accessor& acc, ImageItem* image)
     : Accessor(acc)
     , m_imageAttr(image)
   {
   }
 
 protected:
-  ImageRenderObjectAttribute* const m_imageAttr;
+  ImageItem* const m_imageAttr;
 };
 
 #undef ATTR_MEMBER_GETTER

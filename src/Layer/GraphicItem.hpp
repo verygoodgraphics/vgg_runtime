@@ -16,6 +16,8 @@
 #pragma once
 
 #include "AttributeNode.hpp"
+#include "Layer/Core/VNode.hpp"
+#include "RenderNode.hpp"
 
 #include "Layer/Core/VBound.hpp"
 
@@ -26,17 +28,17 @@ class SkImageFilter;
 namespace VGG::layer
 {
 class ShapeAttribute;
-class InnerObjectAttribute : public Attribute
+class GraphicItem : public RenderNode
 {
 public:
-  InnerObjectAttribute(VRefCnt* cnt)
-    : Attribute(cnt)
+  GraphicItem(VRefCnt* cnt)
+    : RenderNode(cnt, INVALIDATE)
   {
   }
-  virtual void                 render(Renderer* renderer) = 0;
-  virtual ShapeAttribute*      shape() const = 0;
-  virtual Bounds               effectBounds() const = 0;
-  virtual sk_sp<SkImageFilter> getObjectMaskFilter() const = 0;
+
+  virtual ShapeAttribute* shape() const = 0;
+
+  virtual sk_sp<SkImageFilter> getMaskFilter() const = 0; // TODO::eliminate this later
 };
 
 } // namespace VGG::layer

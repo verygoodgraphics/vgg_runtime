@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ParagraphObjectAttribute.hpp"
+#include "ParagraphGraphicItem.hpp"
 #include "Layer/AttributeAccessor.hpp"
 namespace VGG::layer
 {
 
-ParagraphObjectAttribute::ParagraphObjectAttribute(VRefCnt* cnt)
-  : InnerObjectAttribute(cnt)
+ParagraphItem::ParagraphItem(VRefCnt* cnt)
+  : GraphicItem(cnt)
 {
   m_paragraphLayout = makeRichTextBlockPtr(VGGFontCollection::GlobalFontCollection());
   m_painter = makeVParagraphPainterPtr();
   m_painter->setParagraph(m_paragraphLayout);
   observe(m_painter);
 }
-void ParagraphObjectAttribute::render(Renderer* renderer)
+void ParagraphItem::render(Renderer* renderer)
 {
   if (m_paragraphLayout->empty())
     return;
@@ -53,7 +53,7 @@ void ParagraphObjectAttribute::render(Renderer* renderer)
   // }
 }
 
-Bounds ParagraphObjectAttribute::onRevalidate()
+Bounds ParagraphItem::onRevalidate()
 {
   return m_painter->revalidate();
 }

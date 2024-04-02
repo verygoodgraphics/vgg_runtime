@@ -220,6 +220,10 @@ public:
       accessor = std::move(acc);
       renderNode = std::move(c);
     }
+    if (legacyCode)
+    {
+      ASSERT(false);
+    }
 
     // paintNodeEventHandler = [this](VectorObjectAttibuteAccessor*, void*)
     // { DEBUG("paint node %s", q_ptr->name().c_str()); };
@@ -233,6 +237,7 @@ public:
     const VShape&    mask,
     sk_sp<SkBlender> blender)
   {
+    ASSERT(false);
     auto filled = false;
     for (const auto& f : style.fills)
     {
@@ -264,6 +269,7 @@ public:
     const std::vector<Fill>&   fills,
     const std::vector<Border>& borders)
   {
+    ASSERT(false);
     if (!styleDisplayList)
     {
       ObjectRecorder rec;
@@ -283,6 +289,7 @@ public:
 
   void ensureDropShadowEffects(const std::vector<DropShadow>& shadow, const VShape& shape)
   {
+    ASSERT(false);
     if (!dropShadowEffects)
     {
       dropShadowEffects = DropShadowEffect(shadow, toSkRect(bound), shape.outset(0, 0).has_value());
@@ -291,6 +298,7 @@ public:
 
   void ensureInnerShadowEffects(const std::vector<InnerShadow>& shadow)
   {
+    ASSERT(false);
     if (!innerShadowEffects)
     {
       innerShadowEffects = InnerShadowEffect(shadow, toSkRect(q_ptr->frameBound()));
@@ -299,6 +307,7 @@ public:
 
   VShape ensureOutlineMask(Renderer* renderer, EBoolOp maskOp)
   {
+    ASSERT(false);
     VShape result;
     if (maskedBy.empty())
       return result;
@@ -331,6 +340,7 @@ public:
 
   sk_sp<SkImageFilter> blurImageFilter()
   {
+    ASSERT(false);
     sk_sp<SkImageFilter> result;
     for (const auto& b : style.layerEffects)
     {
@@ -357,6 +367,7 @@ public:
 
   sk_sp<SkImageFilter> backgroundBlurImageFilter()
   {
+    ASSERT(false);
     sk_sp<SkImageFilter> result;
     for (const auto& b : style.backgroundEffects)
     {
@@ -382,6 +393,7 @@ public:
     const VShape*        clipShape,
     sk_sp<SkImageFilter> backdropFilter)
   {
+    ASSERT(false);
     renderer->canvas()->save();
     if (clipShape)
     {
@@ -394,12 +406,14 @@ public:
 
   void endLayer(Renderer* renderer)
   {
+    ASSERT(false);
     renderer->canvas()->restore();
     renderer->canvas()->restore();
   }
 
   void drawAsAlphaMaskImpl(Renderer* renderer, sk_sp<SkBlender> blender)
   {
+    ASSERT(false);
     if (!path)
     {
       path = q_ptr->asVisualShape(0);

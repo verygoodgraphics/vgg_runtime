@@ -69,10 +69,8 @@ public:
 
   void onDrawRawStyleImpl(Renderer* renderer, sk_sp<SkBlender> blender)
   {
-    if (!TEXT_LEGACY_CODE)
-    {
-      ASSERT(false && "unreachable");
-    }
+    if (TEXT_LEGACY_CODE)
+      ASSERT(false);
     if (paragraphLayout->empty())
       return;
     auto       canvas = renderer->canvas();
@@ -148,6 +146,9 @@ TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
     PaintNode::d_ptr->renderNode = std::move(c);
     observe(PaintNode::d_ptr->renderNode);
   }
+
+  if (TEXT_LEGACY_CODE)
+    ASSERT(false);
   // d_ptr->paragraphNodeEventHandler = [this](ParagraphItemAccessor*, void*)
   // { DEBUG("text node: %s", this->name().c_str()); };
 }
@@ -173,6 +174,7 @@ void TextNode::setParagraph(
   VGG_IMPL(TextNode);
   if (TEXT_LEGACY_CODE)
   {
+    ASSERT(false);
     if (utf8.empty())
       return;
     if (style.empty())
@@ -196,6 +198,7 @@ void TextNode::setParagraphBound(const Bounds& bound)
 {
   if (TEXT_LEGACY_CODE)
   {
+    ASSERT(false);
     d_ptr->paragraphLayout->setParagraphHintBound(bound);
   }
   else
@@ -209,6 +212,7 @@ void TextNode::setFrameMode(ETextLayoutMode layoutMode)
   VGG_IMPL(TextNode);
   if (TEXT_LEGACY_CODE)
   {
+    ASSERT(false);
     _->paragraphLayout->setTextLayoutMode(layoutMode);
   }
   else
@@ -228,6 +232,7 @@ void TextNode::onDrawStyle(
   const VShape&    mask,
   sk_sp<SkBlender> blender)
 {
+  ASSERT(false);
   d_ptr->onDrawRawStyleImpl(renderer, std::move(blender));
 }
 
@@ -238,7 +243,10 @@ void TextNode::setVerticalAlignment(ETextVerticalAlignment vertAlign)
   _->ensureObserve();
 #endif
   if (TEXT_LEGACY_CODE)
+  {
+    ASSERT(false);
     _->paragraphLayout->setVerticalAlignment(vertAlign);
+  }
   else
     d_ptr->accessor->paragraph()->setVerticalAlignment(vertAlign);
 }
@@ -263,6 +271,7 @@ Bounds TextNode::onRevalidate()
   VGG_IMPL(TextNode);
   if (TEXT_LEGACY_CODE)
   {
+    ASSERT(false);
     auto b = _->painter->revalidate();
     PaintNode::onRevalidate();
     return b;

@@ -211,6 +211,7 @@ void PaintNode::onPaint(Renderer* renderer)
 
   if (_->legacyCode)
   {
+    ASSERT(false);
     auto dropbackFilter = _->backgroundBlurImageFilter();
     auto layerFilter = _->blurImageFilter();
 
@@ -329,19 +330,29 @@ bool PaintNode::nodeAt(int x, int y, NodeVisitor visitor)
 void PaintNode::setMaskBy(std::vector<std::string> masks)
 {
   VGG_IMPL(PaintNode);
-  _->maskedBy = std::move(masks);
-  if (!_->legacyCode)
+  if (_->legacyCode)
   {
-    _->accessor->setShapeMask(_->maskedBy);
+    ASSERT(false);
+    _->maskedBy = std::move(masks);
+  }
+  else
+  {
+    _->accessor->setShapeMask(std::move(masks));
   }
 }
 
 void PaintNode::setAlphaMaskBy(std::vector<AlphaMask> masks)
 {
   VGG_IMPL(PaintNode);
-  _->alphaMaskBy = std::move(masks);
-  if (!_->legacyCode)
-    _->accessor->setAlphaMask(_->alphaMaskBy);
+  if (_->legacyCode)
+  {
+    ASSERT(false);
+    _->alphaMaskBy = std::move(masks);
+  }
+  else
+  {
+    _->accessor->setAlphaMask(std::move(masks));
+  }
 }
 
 VShape PaintNode::makeBoundPath()
@@ -474,6 +485,7 @@ VShape PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
 void PaintNode::onDrawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
 {
   VGG_IMPL(PaintNode);
+  ASSERT(false);
   if (_->contextSetting.opacity < 1.0)
   {
     renderer->canvas()->saveLayerAlpha(0, _->contextSetting.opacity * 255);
@@ -491,6 +503,7 @@ void PaintNode::onDrawStyle(
   const VShape&    mask,
   sk_sp<SkBlender> blender)
 {
+  ASSERT(false);
   d_ptr->onDrawStyleImpl(renderer, path, mask, std::move(blender));
 }
 
@@ -576,8 +589,12 @@ float PaintNode::frameCornerSmoothing() const
 void PaintNode::setStyle(const Style& style)
 {
   VGG_IMPL(PaintNode);
-  _->style = style;
-  if (!_->legacyCode)
+  if (_->legacyCode)
+  {
+    ASSERT(false);
+    _->style = style;
+  }
+  else
   {
     auto aa = _->accessor.get();
     aa->setFills(style.fills);
@@ -639,6 +656,7 @@ Bounds PaintNode::onRevalidate()
 
   if (_->legacyCode)
   {
+    ASSERT(false);
     if (
       _->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY ||
       _->paintOption.paintStrategy == EPaintStrategy::PS_RECURSIVELY)
@@ -790,6 +808,7 @@ Bounds PaintNode::onDrawFill(
   const VShape&        path,
   const VShape&        mask)
 {
+  ASSERT(false);
   auto       fillBound = path.bounds();
   FillEffect fillEffect(style().fills, fillBound, imageFilter, blender);
   fillEffect.render(renderer, path);
@@ -816,9 +835,7 @@ void PaintNode::dispatchEvent(void* event)
   VGG_IMPL(PaintNode);
   if (_->paintNodeEventHandler)
   {
-    _->paintNodeEventHandler(
-      static_cast<ShapeItemAttibuteAccessor*>(attributeAccessor()),
-      event);
+    _->paintNodeEventHandler(static_cast<ShapeItemAttibuteAccessor*>(attributeAccessor()), event);
   }
 }
 

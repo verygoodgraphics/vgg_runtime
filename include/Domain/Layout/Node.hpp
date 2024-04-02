@@ -84,7 +84,12 @@ class LayoutNode : public std::enable_shared_from_this<LayoutNode>
   Layout::Rect                                  m_oldFrame;
 
   std::optional<Layout::Scalar> m_rightMargin;
+  std::optional<Layout::Scalar> m_fixStartWidthRatio;
+  std::optional<Layout::Scalar> m_fixEndWidthRatio;
+
   std::optional<Layout::Scalar> m_bottomMargin;
+  std::optional<Layout::Scalar> m_fixStartHeightRatio;
+  std::optional<Layout::Scalar> m_fixEndHeightRatio;
 
 public:
   using HitTestHook = std::function<bool(const std::string&)>;
@@ -262,6 +267,11 @@ private:
     const Layout::Rect&                     newFrame,
     const Layout::Matrix&                   matrix,
     const std::vector<Layout::BezierPoint>& newPoints);
+
+  void saveOldRatio(
+    const Layout::Size&  oldContainerSize,
+    Layout::Rect         oldFrame,
+    const Layout::Point* parentOrigin);
 };
 
 } // namespace VGG

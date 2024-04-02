@@ -28,6 +28,7 @@
 #include "Utility/VggFloat.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <functional>
 #include <iostream>
 #include <numeric>
@@ -38,6 +39,8 @@
 #define VERBOSE DEBUG
 #undef VERBOSE
 #define VERBOSE(msg, ...)
+
+using namespace VGG;
 
 namespace
 {
@@ -51,10 +54,13 @@ enum class EBooleanOperation
   EXCLUSION,
   NONE
 };
-} // namespace
 
-namespace VGG
+bool isInvalidLength(Layout::Scalar length)
 {
+  return length < 0 || doubleNearlyZero(length) || std::isnan(length) || std::isinf(length);
+}
+
+} // namespace
 
 std::shared_ptr<LayoutNode> LayoutNode::hitTest(
   const Layout::Point& point,
@@ -633,6 +639,7 @@ Layout::Rect LayoutNode::resize(
     center = center.makeModelPoint().makeTransform(modelMatrix()).makeFromModelPoint();
     oldFrame.setCenter(center);
   }
+  saveOldRatio(oldContainerSize, oldFrame, parentOrigin);
   auto [x, w] = resizeH(oldContainerSize, newContainerSize, oldFrame, parentOrigin);
   auto [y, h] = resizeV(oldContainerSize, newContainerSize, oldFrame, parentOrigin);
   Layout::Point newOrigin{ x, y };
@@ -684,10 +691,6 @@ std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeH(
     oldFrame.size.width,
     oldFrame.size.height);
 
-  if (!m_rightMargin)
-  {
-    const_cast<LayoutNode*>(this)->m_rightMargin = oldContainerSize.width - oldFrame.right();
-  }
   const auto rightMargin = *m_rightMargin;
 
   DEBUG("resizeH, right margin is %f, old frame right is %f", rightMargin, oldFrame.right());
@@ -712,8 +715,9 @@ std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeH(
     case EResizing::FIX_START_SCALE:
     {
       x = oldFrame.left();
-      w = oldFrame.width() * (newContainerSize.width - x) /
-          (oldContainerSize.width - oldFrame.left());
+      const auto wRatio = *m_fixStartWidthRatio;
+      DEBUG("resizeH, w ratio is: %f", wRatio);
+      w = wRatio * (newContainerSize.width - x);
     }
     break;
 
@@ -726,8 +730,9 @@ std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeH(
 
     case EResizing::FIX_END_SCALE:
     {
-      w = oldFrame.width() * (newContainerSize.width - rightMargin) /
-          (oldContainerSize.width - rightMargin);
+      const auto wRatio = *m_fixEndWidthRatio;
+      DEBUG("resizeH, w ratio is: %f", wRatio);
+      w = wRatio * (newContainerSize.width - rightMargin);
       x = newContainerSize.width - rightMargin - w;
     }
     break;
@@ -760,9 +765,9 @@ std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeH(
       break;
   }
 
-  if (w <= 0 || doubleNearlyZero(w))
+  if (isInvalidLength(w))
   {
-    DEBUG("resizeH, w is near zero, set to %f", K_RESIZE_MIN_LENGTH);
+    DEBUG("resizeH, w is invalid, %f, set to %f", w, K_RESIZE_MIN_LENGTH);
     w = K_RESIZE_MIN_LENGTH;
   }
 
@@ -782,10 +787,6 @@ std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeV(
     oldFrame = oldFrame.makeOffset(parentOrigin->x, parentOrigin->y);
   }
 
-  if (!m_bottomMargin)
-  {
-    const_cast<LayoutNode*>(this)->m_bottomMargin = oldContainerSize.height - oldFrame.bottom();
-  }
   const auto bottomMargin = *m_bottomMargin;
 
   switch (verticalResizing())
@@ -807,8 +808,9 @@ std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeV(
     case EResizing::FIX_START_SCALE:
     {
       y = oldFrame.top();
-      h = oldFrame.height() * (newContainerSize.height - y) /
-          (oldContainerSize.height - oldFrame.top());
+      const auto hRatio = *m_fixStartHeightRatio;
+      DEBUG("resizeV, h ratio is: %f", hRatio);
+      h = hRatio * (newContainerSize.height - y);
     }
     break;
 
@@ -821,8 +823,9 @@ std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeV(
 
     case EResizing::FIX_END_SCALE:
     {
-      h = oldFrame.height() * (newContainerSize.height - bottomMargin) /
-          (oldContainerSize.height - bottomMargin);
+      const auto hRatio = *m_fixEndHeightRatio;
+      DEBUG("resizeV, h ratio is: %f", hRatio);
+      h = hRatio * (newContainerSize.height - bottomMargin);
       y = newContainerSize.height - bottomMargin - h;
     }
     break;
@@ -855,9 +858,9 @@ std::pair<Layout::Scalar, Layout::Scalar> LayoutNode::resizeV(
       break;
   }
 
-  if (h <= 0 || doubleNearlyZero(h))
+  if (isInvalidLength(h))
   {
-    DEBUG("resizeV, h is near zero, set to %f", K_RESIZE_MIN_LENGTH);
+    DEBUG("resizeV, h is invalid, %f, set to %f", h, K_RESIZE_MIN_LENGTH);
     h = K_RESIZE_MIN_LENGTH;
   }
   return { y, h };
@@ -1266,6 +1269,7 @@ Layout::Rect LayoutNode::resizeContour(
 
   // resize
   auto oldLayoutFrame = Layout::Rect::makeFromPoints(oldLayoutPoints, isClosed);
+  saveOldRatio(oldContainerSize, oldLayoutFrame, nullptr);
   auto [x, w] = resizeH(
     oldContainerSize,
     newContainerSize,
@@ -1471,4 +1475,73 @@ bool LayoutNode::isAncestorOf(std::shared_ptr<LayoutNode> node)
   return false;
 }
 
-} // namespace VGG
+void LayoutNode::saveOldRatio(
+  const Layout::Size&  oldContainerSize,
+  Layout::Rect         oldFrame,
+  const Layout::Point* parentOrigin)
+{
+  if (parentOrigin)
+  {
+    oldFrame = oldFrame.makeOffset(parentOrigin->x, parentOrigin->y);
+  }
+
+  if (!m_rightMargin)
+  {
+    m_rightMargin = oldContainerSize.width - oldFrame.right();
+  }
+  switch (horizontalResizing())
+  {
+    case EResizing::FIX_START_SCALE:
+    {
+      if (!m_fixStartWidthRatio)
+      {
+        m_fixStartWidthRatio = oldFrame.width() / (oldContainerSize.width - oldFrame.left());
+        DEBUG("FIX_START_SCALE, w ratio is: %f", *m_fixStartWidthRatio);
+      }
+    }
+    break;
+
+    case EResizing::FIX_END_SCALE:
+    {
+      if (!m_fixEndWidthRatio)
+      {
+        m_fixEndWidthRatio = oldFrame.width() / (oldContainerSize.width - *m_rightMargin);
+        DEBUG("FIX_END_SCALE, w ratio is: %f", *m_fixEndWidthRatio);
+      }
+    }
+    break;
+
+    default:
+      break;
+  }
+
+  if (!m_bottomMargin)
+  {
+    m_bottomMargin = oldContainerSize.height - oldFrame.bottom();
+  }
+  switch (verticalResizing())
+  {
+    case EResizing::FIX_START_SCALE:
+    {
+      if (!m_fixStartHeightRatio)
+      {
+        m_fixStartHeightRatio = oldFrame.height() / (oldContainerSize.height - oldFrame.top());
+        DEBUG("FIX_START_SCALE, h ratio is: %f", *m_fixStartHeightRatio);
+      }
+    }
+    break;
+
+    case EResizing::FIX_END_SCALE:
+    {
+      if (!m_fixEndHeightRatio)
+      {
+        m_fixEndHeightRatio = oldFrame.height() / (oldContainerSize.height - *m_bottomMargin);
+        DEBUG("FIX_END_SCALE, h ratio is: %f", *m_fixEndHeightRatio);
+      }
+    }
+    break;
+
+    default:
+      break;
+  }
+}

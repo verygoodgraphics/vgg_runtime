@@ -13,49 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Layer/Core/AttributeAccessor.hpp"
-#include "Layer/Core/Transform.hpp"
-#include "Layer/Guard.hpp"
-#include "Layer/LayerCache.h"
-#include "Layer/Settings.hpp"
-#include "Layer/SkSL.hpp"
+#include "Guard.hpp"
+#include "LayerCache.h"
+#include "Settings.hpp"
+#include "SkSL.hpp"
+#include "Effects.hpp"
 #include "VSkia.hpp"
 #include "Renderer.hpp"
-#include "PaintNodePrivate.hpp"
+#include "ShapeItem.hpp"
+#include "StyleItem.hpp"
+
+#include "Layer/Core/AttributeAccessor.hpp"
+#include "Layer/Core/Transform.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/TreeNode.hpp"
-#include "Layer/Effects.hpp"
-#include "glm/ext/matrix_transform.hpp"
 
-#include <core/SkBlendMode.h>
-#include <core/SkBlurTypes.h>
-#include <core/SkColor.h>
-#include <core/SkColorFilter.h>
-#include <core/SkImageFilter.h>
-#include <core/SkImageInfo.h>
-#include <core/SkMatrix.h>
-#include <core/SkPaint.h>
-#include <core/SkRect.h>
-#include <core/SkSamplingOptions.h>
-#include <core/SkSurfaceProps.h>
-#include <core/SkTileMode.h>
-#include <core/SkMaskFilter.h>
-#include <src/core/SkBlurMask.h>
-#include <src/core/SkMask.h>
-#include <effects/SkImageFilters.h>
-#include <effects/SkRuntimeEffect.h>
-#include <encode/SkPngEncoder.h>
-#include <gpu/GrDirectContext.h>
-#include <include/core/SkSurface.h>
-#include <include/core/SkCanvas.h>
-#include <core/SkPath.h>
-#include <core/SkRRect.h>
 #include <optional>
-#include <pathops/SkPathOps.h>
-#include <src/core/SkRuntimeEffectPriv.h>
-#include <variant>
 
+namespace
+{
 inline SkColor nodeType2Color(EObjectType type)
 {
   switch (type)
@@ -80,9 +57,84 @@ inline SkColor nodeType2Color(EObjectType type)
       return SK_ColorRED;
   }
 }
+} // namespace
 
 namespace VGG::layer
 {
+
+class PaintNode__pImpl // NOLINT
+{
+  VGG_DECL_API(PaintNode);
+
+  friend class MaskBuilder;
+
+public:
+  std::string guid{};
+
+  EMaskType      maskType{ MT_NONE };
+  EMaskShowType  maskShowType{ MST_INVISIBLE };
+  EBoolOp        clipOperator{ BO_NONE };
+  EOverflow      overflow{ OF_HIDDEN };
+  EWindingType   windingRule{ WR_EVEN_ODD };
+  ContextSetting contextSetting;
+  EObjectType    type;
+  bool           visible{ true };
+  ContourData    contour;
+  PaintOption    paintOption;
+  ContourOption  maskOption;
+
+  PaintNode::EventHandler paintNodeEventHandler;
+
+  std::optional<VShape> path;
+  bool                  renderable{ false };
+  Bounds                bound;
+
+  std::array<float, 4> frameRadius{ 0, 0, 0, 0 };
+  float                cornerSmooth{ 0 };
+
+  Ref<StyleItem>            renderNode;
+  Ref<TransformAttribute>   transformAttr;
+  std::unique_ptr<Accessor> accessor;
+
+  PaintNode__pImpl(PaintNode* api, EObjectType type, bool initBase)
+    : q_ptr(api)
+    , type(type)
+  {
+    transformAttr = TransformAttribute::Make();
+    api->observe(transformAttr);
+
+    if (initBase)
+    {
+      Ref<ShapeAttribute> shape;
+      auto [c, d] = StyleItem::MakeRenderNode(
+        nullptr,
+        api,
+        transformAttr,
+        [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<GraphicItem>
+        {
+          shape = ShapeAttribute::Make(alloc, api);
+          auto vectorObject = ShapeItem::Make(alloc, shape, object);
+          return vectorObject;
+        });
+      auto acc = std::make_unique<ShapeItemAttibuteAccessor>(*d, shape.get());
+      accessor = std::move(acc);
+      renderNode = std::move(c);
+      api->observe(renderNode);
+    }
+  }
+
+  void worldTransform(glm::mat3& mat)
+  {
+    auto p = q_ptr->parent();
+    if (!p)
+    {
+      mat *= q_ptr->transform().matrix();
+      return;
+    }
+    static_cast<PaintNode*>(p.get())->d_ptr->worldTransform(mat);
+    mat *= q_ptr->transform().matrix();
+  }
+};
 
 PaintNode::PaintNode(
   VRefCnt*           cnt,
@@ -637,6 +689,22 @@ TransformAttribute* PaintNode::transformAttribute()
 void PaintNode::installPaintNodeEventHandler(EventHandler handler)
 {
   d_ptr->paintNodeEventHandler = std::move(handler);
+}
+
+void PaintNode::onSetAccessor(std::unique_ptr<Accessor> acc)
+{
+  d_ptr->accessor = std::move(acc);
+}
+void PaintNode::onSetStyleItem(Ref<StyleItem> item)
+{
+  if (d_ptr->renderNode == item)
+    return;
+  d_ptr->renderNode = std::move(item);
+}
+
+StyleItem* PaintNode::styleItem()
+{
+  return d_ptr->renderNode.get();
 }
 
 void PaintNode::dispatchEvent(void* event)

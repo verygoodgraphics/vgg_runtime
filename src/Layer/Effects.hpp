@@ -81,7 +81,7 @@ inline sk_sp<SkShader> makePatternShader(const Bounds& bound, const Pattern& pat
 }
 
 inline SkMatrix makeMatrix(
-  const Bounds&                          bound,
+  const Bounds&                         bound,
   const glm::vec2&                      f,
   const glm::vec2&                      t,
   const std::variant<float, glm::vec2>& ellipse)
@@ -299,15 +299,22 @@ const SkSamplingOptions& getGlobalSamplingOptions();
 
 sk_sp<SkImageFilter> makeInnerShadowImageFilter(
   const InnerShadow&   shadow,
-  const Bounds&         bound,
+  const Bounds&        bound,
   bool                 shadowOnly,
   bool                 overrideSpread,
   sk_sp<SkImageFilter> input);
 
 sk_sp<SkImageFilter> makeDropShadowImageFilter(
   const DropShadow&    shadow,
-  const Bounds&         bound,
+  const Bounds&        bound,
   bool                 overrideSpread,
   sk_sp<SkImageFilter> input);
+
+SkRect drawBorder(
+  Renderer*                  renderer,
+  const VShape&              border,
+  const SkRect&              bounds,
+  const std::vector<Border>& borders,
+  sk_sp<SkBlender>           blender);
 
 } // namespace VGG::layer

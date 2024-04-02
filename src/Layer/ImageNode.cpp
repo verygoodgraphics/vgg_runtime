@@ -13,27 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ImageGraphicItem.hpp"
+#include "Renderer.hpp"
+#include "StyleItem.hpp"
+#include "VSkia.hpp"
+
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/Transform.hpp"
-#include "Layer/ImageGraphicItem.hpp"
-#include "Layer/Renderer.hpp"
-#include "VSkia.hpp"
-#include "PaintNodePrivate.hpp"
 #include "Layer/Core/AttributeAccessor.hpp"
 #include "Layer/Core/ImageNode.hpp"
 #include "Layer/Core/PaintNode.hpp"
-
-#include <glm/matrix.hpp>
-#include <include/core/SkBlendMode.h>
-#include <include/core/SkRect.h>
-#include <include/core/SkColor.h>
-#include <include/core/SkMatrix.h>
-#include <include/core/SkPaint.h>
-#include <include/core/SkPathTypes.h>
-#include <include/core/SkPoint.h>
-#include <include/core/SkTileMode.h>
-#include <include/core/SkCanvas.h>
-#include <include/core/SkImage.h>
 
 namespace VGG::layer
 {
@@ -76,9 +65,9 @@ ImageNode::ImageNode(VRefCnt* cnt, const std::string& name, std::string guid)
 
   auto acc = std::make_unique<ImageItemAttribtueAccessor>(*d, ioa);
   d_ptr->accessor = acc.get();
-  PaintNode::d_ptr->accessor = std::move(acc);
-  PaintNode::d_ptr->renderNode = std::move(c);
-  observe(PaintNode::d_ptr->renderNode);
+  onSetAccessor(std::move(acc));
+  onSetStyleItem(c);
+  observe(std::move(c));
 }
 
 Bounds ImageNode::getImageBound() const

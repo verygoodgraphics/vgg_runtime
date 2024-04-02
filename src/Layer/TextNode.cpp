@@ -13,29 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Layer/ParagraphGraphicItem.hpp"
-#include "Layer/ParagraphParser.hpp"
-#include "Layer/PaintNodePrivate.hpp"
-#include "Layer/TransformAttribute.hpp"
-#include "Layer/Core/AttributeAccessor.hpp"
+#include "ParagraphGraphicItem.hpp"
+#include "ParagraphParser.hpp"
+#include "TransformAttribute.hpp"
+#include "StyleItem.hpp"
 #include "ParagraphLayout.hpp"
 #include "ParagraphPainter.hpp"
 #include "VSkFontMgr.hpp"
 #include "Renderer.hpp"
 
 #include "Layer/Memory/AllocatorImpl.hpp"
+#include "Layer/Core/AttributeAccessor.hpp"
 #include "Layer/Core/TextNode.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/VType.hpp"
-
-#include <include/core/SkCanvas.h>
-#include <include/core/SkFont.h>
-#include <include/core/SkFontMetrics.h>
-#include <include/effects/SkRuntimeEffect.h>
-#include <core/SkTextBlob.h>
-
-#include <memory>
 
 namespace VGG::layer
 {
@@ -86,9 +78,9 @@ TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
     });
   auto acc = std::make_unique<ParagraphItemAttributeAccessor>(*d, poa);
   d_ptr->accessor = acc.get();
-  PaintNode::d_ptr->accessor = std::move(acc);
-  PaintNode::d_ptr->renderNode = std::move(c);
-  observe(PaintNode::d_ptr->renderNode);
+  onSetAccessor(std::move(acc));
+  onSetStyleItem(c);
+  observe(std::move(c));
 }
 
 void TextNode::setTextAnchor(glm::vec2 anchor)

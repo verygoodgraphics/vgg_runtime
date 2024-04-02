@@ -39,6 +39,7 @@ namespace VGG::layer
 class Renderer;
 class ShapeItemAttibuteAccessor;
 class TransformAttribute;
+class StyleItem;
 
 struct ContourOption
 {
@@ -238,6 +239,10 @@ protected:
   virtual void        dispatchEvent(void* event);
   TransformAttribute* transformAttribute();
   Accessor*           attributeAccessor();
+
+  void       onSetAccessor(std::unique_ptr<Accessor> acc);
+  void       onSetStyleItem(Ref<StyleItem> item);
+  StyleItem* styleItem();
 
   VShape         makeBoundPath();
   virtual VShape makeContourImpl(ContourOption option, const Transform* mat);

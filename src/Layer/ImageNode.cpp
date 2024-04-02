@@ -49,7 +49,7 @@ public:
   sk_sp<SkShader> shader;
   PatternStretch  pattern;
 
-  ImageAttribtueAccessor* accessor;
+  ImageItemAttribtueAccessor* accessor;
   ImageNode::EventHandler imageNodeEventHandler;
   Bounds                  bound;
 
@@ -78,7 +78,7 @@ ImageNode::ImageNode(VRefCnt* cnt, const std::string& name, std::string guid)
         return ioa;
       });
 
-    auto acc = std::make_unique<ImageAttribtueAccessor>(*d, ioa);
+    auto acc = std::make_unique<ImageItemAttribtueAccessor>(*d, ioa);
     d_ptr->accessor = acc.get();
     PaintNode::d_ptr->accessor = std::move(acc);
     PaintNode::d_ptr->renderNode = std::move(c);
@@ -92,7 +92,7 @@ Bounds ImageNode::getImageBound() const
 {
   if (!IMAGE_LEGACY_CODE)
   {
-    return d_ptr->accessor->image()->getImageBound();
+    return d_ptr->accessor->image()->getImageBounds();
   }
   else
   {
@@ -116,7 +116,7 @@ VShape ImageNode::asVisualShape(const Transform* mat)
   }
   else
   {
-    auto b = toSkRect(d_ptr->accessor->image()->getImageBound());
+    auto b = toSkRect(d_ptr->accessor->image()->getImageBounds());
     return VShape(b);
   }
 }
@@ -189,7 +189,7 @@ void ImageNode::setImageBound(const Bounds& bound)
 {
   if (!IMAGE_LEGACY_CODE)
   {
-    d_ptr->accessor->image()->setImageBound(bound);
+    d_ptr->accessor->image()->setImageBounds(bound);
   }
   else
   {
@@ -249,7 +249,7 @@ void ImageNode::dispatchEvent(void* event)
 {
   if (d_ptr->imageNodeEventHandler)
   {
-    d_ptr->imageNodeEventHandler(static_cast<ImageAttribtueAccessor*>(attributeAccessor()), event);
+    d_ptr->imageNodeEventHandler(static_cast<ImageItemAttribtueAccessor*>(attributeAccessor()), event);
   }
 }
 

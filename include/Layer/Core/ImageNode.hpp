@@ -70,7 +70,7 @@ public:
   bool               fill() const;
   VShape             asVisualShape(const Transform* mat) override;
 
-  using EventHandler = std::function<void(ImageAttribtueAccessor*, void* event)>;
+  using EventHandler = std::function<void(ImageItemAttribtueAccessor*, void* event)>;
   void installImageNodeEventHandler(EventHandler handler);
 
   virtual ~ImageNode() override;

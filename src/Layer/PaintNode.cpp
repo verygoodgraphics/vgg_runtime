@@ -580,12 +580,12 @@ void PaintNode::setStyle(const Style& style)
   if (!_->legacyCode)
   {
     auto aa = _->accessor.get();
-    aa->setFill(style.fills);
-    aa->setBorder(style.borders);
-    aa->setInnerShadow(style.innerShadow);
-    aa->setDropShadow(style.dropShadow);
-    aa->setLayerBlur(style.layerEffects);
-    aa->setBackgroundBlur(style.backgroundEffects);
+    aa->setFills(style.fills);
+    aa->setBorders(style.borders);
+    aa->setInnerShadows(style.innerShadow);
+    aa->setDropShadows(style.dropShadow);
+    aa->setLayerBlurs(style.layerEffects);
+    aa->setBackgroundBlurs(style.backgroundEffects);
   }
 }
 

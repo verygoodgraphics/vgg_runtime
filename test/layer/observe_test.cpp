@@ -28,7 +28,7 @@ public:
   }
 
 protected:
-  VGG::Bound onRevalidate() override
+  VGG::Bounds onRevalidate() override
   {
     if (child)
       child->revalidate();

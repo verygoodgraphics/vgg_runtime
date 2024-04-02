@@ -136,7 +136,7 @@ TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
       nullptr,
       this,
       t,
-      [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<RenderObjectAttribute>
+      [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<InnerObjectAttribute>
       {
         poa = ParagraphObjectAttribute::Make(alloc);
         return poa;

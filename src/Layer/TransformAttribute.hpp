@@ -15,9 +15,8 @@
  */
 #pragma once
 
-#include "Layer/Core/Attrs.hpp"
-#include "Layer/Core/VNode.hpp"
 #include "AttributeNode.hpp"
+#include "Layer/Core/Transform.hpp"
 
 namespace VGG::layer
 {

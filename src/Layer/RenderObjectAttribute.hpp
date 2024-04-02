@@ -16,13 +16,16 @@
 #pragma once
 
 #include "AttributeNode.hpp"
-#include "Layer/Core/VShape.hpp"
-#include "ShapeAttribute.hpp"
 
+#include "Layer/Core/VBound.hpp"
+
+template<typename T>
+class sk_sp;
 class SkImageFilter;
+
 namespace VGG::layer
 {
-
+class ShapeAttribute;
 class RenderObjectAttribute : public Attribute
 {
 public:
@@ -32,7 +35,7 @@ public:
   }
   virtual void                 render(Renderer* renderer) = 0;
   virtual ShapeAttribute*      shape() const = 0;
-  virtual Bounds                effectBounds() const = 0;
+  virtual Bounds               effectBounds() const = 0;
   virtual sk_sp<SkImageFilter> getObjectMaskFilter() const = 0;
 };
 

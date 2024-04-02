@@ -15,92 +15,24 @@
  */
 #pragma once
 #include "AttributeNode.hpp"
-#include "ImageFilterAttribute.hpp"
-#include "Layer/Core/Attrs.hpp"
-#include "Layer/RenderObjectAttribute.hpp"
-#include "ShapeAttribute.hpp"
-#include "ShadowEffects.hpp"
+#include "RenderObjectAttribute.hpp"
 #include "ObjectShader.hpp"
+#include "ShadowAttribute.hpp"
+
+#include "Layer/Core/Attrs.hpp"
 
 namespace VGG::layer
 {
 
-class ObjectAttribute;
+class BackdropFXAttribute;
 
-class BackgroundBlurAttribute : public ImageFilterAttribute
-{
-public:
-  BackgroundBlurAttribute(VRefCnt* cnt)
-    : ImageFilterAttribute(cnt)
-  {
-  }
-  VGG_ATTRIBUTE(BackgroundBlur, std::vector<BackgroundFX>, m_blurs);
-  sk_sp<SkImageFilter> getImageFilter() const override
-  {
-    return m_imageFilter;
-  }
-  Bounds onRevalidate() override;
-  VGG_CLASS_MAKE(BackgroundBlurAttribute);
-
-private:
-  friend class RenderNode;
-  std::vector<BackgroundFX> m_blurs;
-  sk_sp<SkImageFilter>      m_imageFilter;
-};
-
-class DropShadowAttribute : public Attribute
-{
-public:
-  DropShadowAttribute(VRefCnt* cnt, Ref<ShapeAttribute> shapeAttr)
-    : Attribute(cnt)
-    , m_shapeAttr(shapeAttr)
-  {
-    observe(m_shapeAttr);
-  }
-
-  void  render(Renderer* renderer);
-  Bounds onRevalidate() override;
-
-  VGG_ATTRIBUTE(DropShadowStyle, std::vector<DropShadow>, m_shadow);
-  VGG_CLASS_MAKE(DropShadowAttribute);
-
-private:
-  friend class RenderNode;
-  Ref<ShapeAttribute>             m_shapeAttr;
-  std::vector<DropShadow>         m_shadow;
-  std::optional<DropShadowEffect> m_dropShadowEffects;
-};
-
-class InnerShadowAttribute : public Attribute
-{
-public:
-  InnerShadowAttribute(VRefCnt* cnt, Ref<ShapeAttribute> shapeAttr)
-    : Attribute(cnt)
-    , m_shapeAttr(shapeAttr)
-  {
-    observe(m_shapeAttr);
-  }
-  void  render(Renderer* renderer);
-  Bounds onRevalidate() override;
-  VGG_ATTRIBUTE(InnerShadowStyle, std::vector<InnerShadow>, m_shadow);
-  VGG_CLASS_MAKE(InnerShadowAttribute);
-
-private:
-  friend class RenderNode;
-  Ref<ShapeAttribute>              m_shapeAttr;
-  std::vector<InnerShadow>         m_shadow;
-  std::optional<InnerShadowEffect> m_innerShadowEffects;
-};
-
-class ObjectAttribute : public Attribute // fill + border
+class ObjectAttribute : public Attribute
 {
 public:
   ObjectAttribute(VRefCnt* cnt, Ref<RenderObjectAttribute> renderObject)
     : Attribute(cnt)
-    //, m_shapeAttr(shape)
     , m_renderObjectAttr(renderObject)
   {
-    // observe(m_shapeAttr);
     observe(m_renderObjectAttr);
   }
 
@@ -125,7 +57,7 @@ public:
     return m_renderObjectAttr->effectBounds();
   }
 
-  void  render(Renderer* renderer);
+  void   render(Renderer* renderer);
   Bounds onRevalidate() override;
 
   VGG_ATTRIBUTE(FillStyle, std::vector<Fill>, m_fills);
@@ -146,33 +78,21 @@ private:
   std::vector<Fill>          m_fills;
   std::vector<Border>        m_borders;
   bool                       m_hasFill{ false };
-  // Bound                      m_effectBounds;
 };
 
-class StyleObjectAttribute : public Attribute
+class StyleAttribute : public Attribute
 {
 public:
-  StyleObjectAttribute(
-    VRefCnt*                     cnt,
-    Ref<InnerShadowAttribute>    innerShadow,
-    Ref<DropShadowAttribute>     dropShadow,
-    Ref<ObjectAttribute>         object,
-    Ref<BackgroundBlurAttribute> backgroundBlur)
-    : Attribute(cnt)
-    , m_innerShadowAttr(std::move(innerShadow))
-    , m_dropShadowAttr(std::move(dropShadow))
-    , m_objectAttr(std::move(object))
-    , m_backgroundBlurAttr(std::move(backgroundBlur))
-  {
-    observe(m_innerShadowAttr);
-    observe(m_dropShadowAttr);
-    observe(m_objectAttr);
-    observe(m_backgroundBlurAttr);
-  }
+  StyleAttribute(
+    VRefCnt*                  cnt,
+    Ref<InnerShadowAttribute> innerShadow,
+    Ref<DropShadowAttribute>  dropShadow,
+    Ref<ObjectAttribute>      object,
+    Ref<BackdropFXAttribute>  backgroundBlur);
 
   void render(Renderer* renderer);
 
-  sk_sp<SkImageFilter> getBackgroundBlurImageFilter() const
+  sk_sp<SkImageFilter> getBackdropImageFilter() const
   {
     return m_dropbackImageFilter;
   }
@@ -184,20 +104,20 @@ public:
 
   Bounds onRevalidate() override;
 
-  VGG_CLASS_MAKE(StyleObjectAttribute);
+  VGG_CLASS_MAKE(StyleAttribute);
 
 private:
   friend class RenderNode;
 
   void revalidateDropbackFilter(const SkRect& bounds);
 
-  Ref<InnerShadowAttribute>    m_innerShadowAttr;
-  Ref<DropShadowAttribute>     m_dropShadowAttr;
-  Ref<ObjectAttribute>         m_objectAttr;
-  Ref<BackgroundBlurAttribute> m_backgroundBlurAttr;
+  Ref<InnerShadowAttribute> m_innerShadowAttr;
+  Ref<DropShadowAttribute>  m_dropShadowAttr;
+  Ref<ObjectAttribute>      m_objectAttr;
+  Ref<BackdropFXAttribute>  m_backgroundBlurAttr;
 
   SkRect               m_objectEffectBounds;
-  Bounds                m_effectBounds;
+  Bounds               m_effectBounds;
   sk_sp<SkImageFilter> m_bgBlurImageFilter;
 
   sk_sp<SkImageFilter> m_dropbackImageFilter;

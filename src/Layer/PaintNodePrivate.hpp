@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 #pragma once
+#include "StyleNode.hpp"
+#include "Renderer.hpp"
+#include "Guard.hpp"
+#include "ShadowEffects.hpp"
+#include "FillEffects.hpp"
+#include "Mask.hpp"
 #include "Layer/AttributeAccessor.hpp"
 #include "Layer/LayerCache.h"
 #include "Layer/Memory/VAllocator.hpp"
@@ -22,12 +28,6 @@
 #include "Layer/ShapeAttribute.hpp"
 #include "Layer/TransformAttribute.hpp"
 #include "Layer/VectorObjectAttribute.hpp"
-#include "Renderer.hpp"
-#include "RenderNodeFactory.hpp"
-#include "Guard.hpp"
-#include "ShadowEffects.hpp"
-#include "FillEffects.hpp"
-#include "Mask.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VShape.hpp"
 #include "Layer/Core/VType.hpp"
@@ -177,7 +177,7 @@ public:
 
   std::optional<VShape>            path;
   bool                             renderable{ false };
-  Bounds                            bound;
+  Bounds                           bound;
   // Transform                        transform;
   Style                            style;
   std::vector<std::string>         maskedBy;
@@ -189,7 +189,7 @@ public:
   std::array<float, 4> frameRadius{ 0, 0, 0, 0 };
   float                cornerSmooth{ 0 };
 
-  Ref<DefaultRenderNode>    renderNode;
+  Ref<StyleNode>    renderNode;
   Ref<TransformAttribute>   transformAttr;
   std::unique_ptr<Accessor> accessor;
 
@@ -206,7 +206,7 @@ public:
     if (!legacyCode && init)
     {
       Ref<ShapeAttribute> shape;
-      auto [c, d] = RenderNodeFactory::MakeDefaultRenderNode(
+      auto [c, d] = StyleNode::MakeRenderNode(
         nullptr,
         api,
         transformAttr,

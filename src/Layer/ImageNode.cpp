@@ -51,7 +51,7 @@ public:
 
   ImageAttribtueAccessor* accessor;
   ImageNode::EventHandler imageNodeEventHandler;
-  Bounds                   bound;
+  Bounds                  bound;
 
   ImageNode__pImpl(ImageNode* api)
     : q_ptr(api)
@@ -68,7 +68,7 @@ ImageNode::ImageNode(VRefCnt* cnt, const std::string& name, std::string guid)
   {
     auto                            t = incRef(transformAttribute());
     Ref<ImageRenderObjectAttribute> ioa;
-    auto [c, d] = RenderNodeFactory::MakeDefaultRenderNode(
+    auto [c, d] = StyleNode::MakeRenderNode(
       nullptr,
       this,
       t,

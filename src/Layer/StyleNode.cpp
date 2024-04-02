@@ -15,7 +15,7 @@
  */
 
 #include "Settings.hpp"
-#include "StyleRenderNode.hpp"
+#include "StyleNode.hpp"
 #include "AttributeAccessor.hpp"
 #include "VSkia.hpp"
 #include "Renderer.hpp"
@@ -151,15 +151,14 @@ StyleNode::~StyleNode()
   // unobserve(m_shapeAttr);
 }
 
-std::pair<Ref<StyleNode>, std::unique_ptr<Accessor>> StyleNode::
-  MakeRenderNode( // NOLINT
-    VAllocator*             alloc,
-    PaintNode*              node,
-    Ref<TransformAttribute> transform,
-    Creator                 creator)
+std::pair<Ref<StyleNode>, std::unique_ptr<Accessor>> StyleNode::MakeRenderNode( // NOLINT
+  VAllocator*             alloc,
+  PaintNode*              node,
+  Ref<TransformAttribute> transform,
+  Creator                 creator)
 {
   auto backgroundBlur = BackdropFXAttribute::Make(alloc);
-  auto object = ObjectAttribute::Make(alloc, Ref<RenderObjectAttribute>());
+  auto object = ObjectAttribute::Make(alloc, Ref<InnerObjectAttribute>());
   auto renderObject = creator(alloc, object.get());
   auto shape = incRef(renderObject->shape());
   auto innerShadow = InnerShadowAttribute::Make(alloc, shape);

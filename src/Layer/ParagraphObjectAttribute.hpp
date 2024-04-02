@@ -22,7 +22,7 @@
 namespace VGG::layer
 {
 
-class ParagraphObjectAttribute : public RenderObjectAttribute
+class ParagraphObjectAttribute : public InnerObjectAttribute
 {
 public:
   ParagraphObjectAttribute(VRefCnt* cnt);

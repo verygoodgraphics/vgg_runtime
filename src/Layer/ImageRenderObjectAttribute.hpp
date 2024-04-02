@@ -24,7 +24,7 @@
 
 namespace VGG::layer
 {
-class ImageRenderObjectAttribute final : public RenderObjectAttribute
+class ImageRenderObjectAttribute final : public InnerObjectAttribute
 {
 public:
   ImageRenderObjectAttribute(VRefCnt* cnt, ObjectAttribute* objectAttribute);

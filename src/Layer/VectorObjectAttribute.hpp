@@ -24,11 +24,11 @@ namespace VGG::layer
 {
 
 class ObjectAttribute;
-class VectorObjectAttribute : public RenderObjectAttribute
+class VectorObjectAttribute : public InnerObjectAttribute
 {
 public:
   VectorObjectAttribute(VRefCnt* cnt, Ref<ShapeAttribute> shapeAttr)
-    : RenderObjectAttribute(cnt)
+    : InnerObjectAttribute(cnt)
     , m_shapeAttr(std::move(shapeAttr))
   {
     observe(m_shapeAttr);
@@ -37,7 +37,7 @@ public:
     VRefCnt*            cnt,
     Ref<ShapeAttribute> shapeAttr,
     ObjectAttribute*    objectAttribute)
-    : RenderObjectAttribute(cnt)
+    : InnerObjectAttribute(cnt)
     , m_objectAttribute(objectAttribute)
     , m_shapeAttr(std::move(shapeAttr))
   {

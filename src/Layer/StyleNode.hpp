@@ -62,7 +62,7 @@ public:
   }
   Bounds onRevalidate() override;
 
-  using Creator = std::function<Ref<RenderObjectAttribute>(VAllocator* alloc, ObjectAttribute*)>;
+  using Creator = std::function<Ref<InnerObjectAttribute>(VAllocator* alloc, ObjectAttribute*)>;
   static std::pair<Ref<StyleNode>, std::unique_ptr<Accessor>> MakeRenderNode( // NOLINT
     VAllocator*             alloc,
     PaintNode*              node,

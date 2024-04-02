@@ -72,7 +72,7 @@ ImageNode::ImageNode(VRefCnt* cnt, const std::string& name, std::string guid)
       nullptr,
       this,
       t,
-      [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<RenderObjectAttribute>
+      [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<InnerObjectAttribute>
       {
         ioa = ImageRenderObjectAttribute::Make(alloc, object);
         return ioa;

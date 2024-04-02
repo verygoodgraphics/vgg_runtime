@@ -110,16 +110,16 @@ protected:
   }
 };
 
-class ShapeGraphicItemAttibuteAccessor : public Accessor
+class ShapeItemAttibuteAccessor : public Accessor
 {
 public:
-  ShapeGraphicItemAttibuteAccessor(const Accessor& acc, ShapeAttribute* shape)
+  ShapeItemAttibuteAccessor(const Accessor& acc, ShapeAttribute* shape)
     : Accessor(acc)
     , m_shapeAttr(shape)
   {
   }
 
-  ShapeGraphicItemAttibuteAccessor(
+  ShapeItemAttibuteAccessor(
     ShapeAttribute*       shapeAttr,
     TransformAttribute*   transformAttr,
     AlphaMaskAttribute*   alphaMaskAttr,
@@ -150,15 +150,15 @@ protected:
   ShapeAttribute* const m_shapeAttr;
 };
 
-class ParagraphItemAccessor : public Accessor
+class ParagraphItemAttributeAccessor : public Accessor
 {
 public:
-  ParagraphItemAccessor(const Accessor& acc, ParagraphItem* paragraphObjectAttr)
+  ParagraphItemAttributeAccessor(const Accessor& acc, ParagraphItem* paragraphObjectAttr)
     : Accessor(acc)
     , m_paraAttr(paragraphObjectAttr)
   {
   }
-  ParagraphItemAccessor(
+  ParagraphItemAttributeAccessor(
     ParagraphItem*        paragraphObjectAttr,
     TransformAttribute*   transformAttr,
     AlphaMaskAttribute*   alphaMaskAttr,

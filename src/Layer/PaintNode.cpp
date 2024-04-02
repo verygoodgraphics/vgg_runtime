@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Layer/AttributeAccessor.hpp"
+#include "Layer/Core/AttributeAccessor.hpp"
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Guard.hpp"
 #include "Layer/LayerCache.h"
@@ -817,7 +817,7 @@ void PaintNode::dispatchEvent(void* event)
   if (_->paintNodeEventHandler)
   {
     _->paintNodeEventHandler(
-      static_cast<ShapeGraphicItemAttibuteAccessor*>(attributeAccessor()),
+      static_cast<ShapeItemAttibuteAccessor*>(attributeAccessor()),
       event);
   }
 }

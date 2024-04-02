@@ -16,11 +16,11 @@
 
 #include "Settings.hpp"
 #include "StyleItem.hpp"
-#include "AttributeAccessor.hpp"
 #include "VSkia.hpp"
 #include "Renderer.hpp"
 #include "Effects.hpp"
 
+#include "Layer/Core/AttributeAccessor.hpp"
 #include "Layer/Memory/VAllocator.hpp"
 #include <core/SkCanvas.h>
 

@@ -314,12 +314,11 @@ void attachNodesFromViewHierachy(std::shared_ptr<LayoutNode> view)
           auto childAutoLayout = subview->autoLayout();
 
           DEBUG(
-            "attachNodesFromViewHierachy, flex container[%p] add child[%p, %s, %s, %s], index: %d",
+            "attachNodesFromViewHierachy, flex container[%p] add child[%p, %s, %s], index: %d",
             containerNode,
             childAutoLayout->getFlexItem(),
             subview->id().c_str(),
             subview->name().c_str(),
-            subview->path().c_str(),
             index);
 
           containerNode->add_child(childAutoLayout->takeFlexItem(), index);
@@ -379,11 +378,10 @@ void applyLayoutToViewHierarchy(
   if (!view->isVisible())
   {
     DEBUG(
-      "applyLayoutToViewHierarchy, view, %s, %s, [%p, %s], invisible, return",
+      "applyLayoutToViewHierarchy, view, %s, %s, [%p], invisible, return",
       view->id().c_str(),
       view->name().c_str(),
-      view.get(),
-      view->path().c_str());
+      view.get());
     return;
   }
 
@@ -406,11 +404,10 @@ void applyLayoutToViewHierarchy(
     }
 
     DEBUG(
-      "applyLayoutToViewHierarchy, view, %s, %s, [%p, %s], x=%f, y=%f, width=%f, height=%f",
+      "applyLayoutToViewHierarchy, view, %s, %s, [%p], x=%f, y=%f, width=%f, height=%f",
       view->id().c_str(),
       view->name().c_str(),
       view.get(),
-      view->path().c_str(),
       frame.origin.x,
       frame.origin.y,
       frame.size.width,
@@ -430,9 +427,8 @@ void applyLayoutToViewHierarchy(
       frame = view->calculateResizedFrame(frame.size);
     }
     DEBUG(
-      "applyLayoutToViewHierarchy, view[%p, %s], x=%d, y=%d, width=%d, height=%d",
+      "applyLayoutToViewHierarchy, view[%p], x=%d, y=%d, width=%d, height=%d",
       view.get(),
-      view->path().c_str(),
       static_cast<int>(frame.origin.x),
       static_cast<int>(frame.origin.y),
       static_cast<int>(frame.size.width),
@@ -462,7 +458,7 @@ void applyLayoutToViewHierarchy(
       DEBUG(
         "applyLayoutToViewHierarchy, view[%p, %s], x=%d, y=%d, width=%d, height=%d",
         subview.get(),
-        subview->path().c_str(),
+        subview->id().c_str(),
         static_cast<int>(frame.origin.x),
         static_cast<int>(frame.origin.y),
         static_cast<int>(frame.size.width),
@@ -510,7 +506,7 @@ Size AutoLayout::calculateLayout(Size size)
     return size;
   }
 
-  DEBUG("AutoLayout::calculateLayout, view[%p, %s]", sharedView.get(), sharedView->path().c_str());
+  DEBUG("AutoLayout::calculateLayout, view[%p, %s]", sharedView.get(), sharedView->id().c_str());
   attachNodesFromViewHierachy(sharedView);
 
   if (auto flexNode = getFlexNode())
@@ -562,7 +558,7 @@ flexbox_node* AutoLayout::createFlexContainer()
     DEBUG(
       "AutoLayout::createFlexContainer, view[%p, %s], container[%p]",
       sharedView.get(),
-      sharedView->path().c_str(),
+      sharedView->id().c_str(),
       node);
   }
 
@@ -578,7 +574,7 @@ flexbox_node* AutoLayout::createFlexItem()
     DEBUG(
       "AutoLayout::createFlexItem, view[%p, %s], item[%p]",
       sharedView.get(),
-      sharedView->path().c_str(),
+      sharedView->id().c_str(),
       node);
   }
 
@@ -619,7 +615,7 @@ void AutoLayout::resetGridContainer()
     VERBOSE(
       "AutoLayout::resetGridContainer, view[%p, %s], grid container[%p]",
       sharedView.get(),
-      sharedView->path().c_str(),
+      sharedView->id().c_str(),
       m_gridContainerPtr);
   }
 
@@ -634,7 +630,7 @@ void AutoLayout::resetGridItem()
     VERBOSE(
       "AutoLayout::resetGridItem, view[%p, %s], grid item[%p]",
       sharedView.get(),
-      sharedView->path().c_str(),
+      sharedView->id().c_str(),
       m_gridItem.get());
   }
 
@@ -687,11 +683,10 @@ void AutoLayout::takeFlexNodeFromTree()
   m_flexNodeIndex = -1;
 
   DEBUG(
-    "AutoLayout::takeFlexNodeFromTree, flex node [%p], view[%s, %s, %s]",
+    "AutoLayout::takeFlexNodeFromTree, flex node [%p], view[%s, %s]",
     m_flexNodePtr,
     sharedView->id().c_str(),
-    sharedView->name().c_str(),
-    sharedView->path().c_str());
+    sharedView->name().c_str());
 }
 
 void AutoLayout::configure()
@@ -713,7 +708,7 @@ void AutoLayout::configure()
     DEBUG(
       "AutoLayout::configure, flex container, view[%p, %s]",
       sharedView.get(),
-      sharedView->path().c_str());
+      sharedView->id().c_str());
 
     resetGridContainer();
   }
@@ -722,7 +717,7 @@ void AutoLayout::configure()
     DEBUG(
       "AutoLayout::configure, grid container, view[%p, %s]",
       sharedView.get(),
-      sharedView->path().c_str());
+      sharedView->id().c_str());
 
     configureGridContainer();
   }
@@ -732,7 +727,7 @@ void AutoLayout::configure()
     DEBUG(
       "AutoLayout::configure, flex item, view[%p, %s]",
       sharedView.get(),
-      sharedView->path().c_str());
+      sharedView->id().c_str());
 
     configureFlexItem(detail);
     configureFlexNodeSize(getFlexItem());
@@ -744,7 +739,7 @@ void AutoLayout::configure()
     DEBUG(
       "AutoLayout::configure, grid item, view[%p, %s]",
       sharedView.get(),
-      sharedView->path().c_str());
+      sharedView->id().c_str());
     configureGridItem(detail);
     configureGridItemSize();
   }
@@ -859,11 +854,10 @@ void AutoLayout::configureFlexNodeSize(flexbox_node* node, bool forContainer)
 
   {
     VERBOSE(
-      "AutoLayout::configureFlexNodeSize, view[%s, %s, %p, %s]",
+      "AutoLayout::configureFlexNodeSize, view[%s, %s, %p]",
       sharedView->id().c_str(),
       sharedView->name().c_str(),
-      sharedView.get(),
-      sharedView->path().c_str());
+      sharedView.get());
   }
 
   auto width = sharedRule->width.value;
@@ -1310,12 +1304,11 @@ void AutoLayout::updateSizeRule()
       if (sharedRule->width.value.types == Rule::Length::ETypes::PX)
       {
         DEBUG(
-          "AutoLayout::updateSizeRule, width = %f, view[%s, %s, %p, %s]",
+          "AutoLayout::updateSizeRule, width = %f, view[%s, %s, %p]",
           newSize.width,
           sharedView->id().c_str(),
           sharedView->name().c_str(),
-          sharedView.get(),
-          sharedView->path().c_str());
+          sharedView.get());
 
         sharedRule->width.value.value = newSize.width;
         configureSize = true;
@@ -1328,12 +1321,11 @@ void AutoLayout::updateSizeRule()
       if (sharedRule->height.value.types == Rule::Length::ETypes::PX)
       {
         DEBUG(
-          "AutoLayout::updateSizeRule, height = %f, view[%s, %s, %p, %s]",
+          "AutoLayout::updateSizeRule, height = %f, view[%s, %s, %p]",
           newSize.height,
           sharedView->id().c_str(),
           sharedView->name().c_str(),
-          sharedView.get(),
-          sharedView->path().c_str());
+          sharedView.get());
         sharedRule->height.value.value = newSize.height;
         configureSize = true;
       }

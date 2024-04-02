@@ -53,16 +53,16 @@ public:
   std::vector<MaskData>          components;
   std::optional<sk_sp<SkShader>> shader;
 
-  sk_sp<SkImageFilter> toImagefilter(const SkRect& b, const SkMatrix* mat)
-  {
-    ensureMaskShader(b, mat);
-    return SkImageFilters::Shader(*shader);
-  }
+  // sk_sp<SkImageFilter> toImagefilter(const SkRect& b, const SkMatrix* mat)
+  // {
+  //   ensureMaskShader(b, mat);
+  //   return SkImageFilters::Shader(*shader);
+  // }
 
-  sk_sp<SkImageFilter> maskWith(const SkRect& b, sk_sp<SkImageFilter> input, const SkMatrix* mat)
-  {
-    return SkImageFilters::Blend(SkBlendMode::kSrcIn, toImagefilter(b, mat), input, b);
-  }
+  // sk_sp<SkImageFilter> maskWith(const SkRect& b, sk_sp<SkImageFilter> input, const SkMatrix* mat)
+  // {
+  //   return SkImageFilters::Blend(SkBlendMode::kSrcIn, toImagefilter(b, mat), input, b);
+  // }
 
   // sk_sp<SkMaskFilter> toMaskFilter(const SkRect& b, const SkMatrix* mat)
   // {
@@ -70,34 +70,34 @@ public:
   //   return SkShaderMaskFilter::Make(*shader);
   // }
 
-  void ensureMaskShader(const SkRect& b, const SkMatrix* mat)
-  {
-    if (!shader)
-    {
-      Renderer          alphaMaskRender;
-      SkPictureRecorder rec;
-      auto              rt = SkRTreeFactory();
-      auto              canvas = rec.beginRecording(b, &rt);
-      alphaMaskRender.setCanvas(canvas);
-      for (const auto& p : components)
-      {
-        auto skm = toSkMatrix(p.transform.matrix());
-        canvas->save();
-        canvas->concat(skm);
-        p.mask->onDrawAsAlphaMask(&alphaMaskRender, 0);
-        canvas->restore();
-      }
-      auto maskShader = SkPictureShader::Make(
-        rec.finishRecordingAsPicture(),
-        SkTileMode::kClamp,
-        SkTileMode::kClamp,
-        SkFilterMode::kNearest,
-        mat,
-        &b);
-      ASSERT(maskShader);
-      shader = maskShader;
-    }
-  }
+  // void ensureMaskShader(const SkRect& b, const SkMatrix* mat)
+  // {
+  //   if (!shader)
+  //   {
+  //     Renderer          alphaMaskRender;
+  //     SkPictureRecorder rec;
+  //     auto              rt = SkRTreeFactory();
+  //     auto              canvas = rec.beginRecording(b, &rt);
+  //     alphaMaskRender.setCanvas(canvas);
+  //     for (const auto& p : components)
+  //     {
+  //       auto skm = toSkMatrix(p.transform.matrix());
+  //       canvas->save();
+  //       canvas->concat(skm);
+  //       p.mask->onDrawAsAlphaMask(&alphaMaskRender, 0);
+  //       canvas->restore();
+  //     }
+  //     auto maskShader = SkPictureShader::Make(
+  //       rec.finishRecordingAsPicture(),
+  //       SkTileMode::kClamp,
+  //       SkTileMode::kClamp,
+  //       SkFilterMode::kNearest,
+  //       mat,
+  //       &b);
+  //     ASSERT(maskShader);
+  //     shader = maskShader;
+  //   }
+  // }
 };
 
 class MaskBuilder

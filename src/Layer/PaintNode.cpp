@@ -89,10 +89,9 @@ PaintNode::PaintNode(
   const std::string& name,
   EObjectType        type,
   const std::string& guid,
-  bool               legacyCode,
-  bool               initVectorRenderNode)
+  bool               initBase)
   : TreeNode(cnt, name)
-  , d_ptr(new PaintNode__pImpl(this, type, legacyCode, initVectorRenderNode))
+  , d_ptr(new PaintNode__pImpl(this, type, initBase))
 {
   auto renderObject = d_ptr->guid = guid;
 }
@@ -207,104 +206,7 @@ void PaintNode::paintSelf(Renderer* renderer)
 
 void PaintNode::onPaint(Renderer* renderer)
 {
-  VGG_IMPL(PaintNode);
-
-  if (_->legacyCode)
-  {
-    ASSERT(false);
-    auto dropbackFilter = _->backgroundBlurImageFilter();
-    auto layerFilter = _->blurImageFilter();
-
-    const auto newLayer = dropbackFilter || layerFilter || !_->alphaMaskBy.empty();
-    ASSERT(_->path);
-    auto&  path = *_->path;
-    VShape shapeMask;
-    if (!_->maskedBy.empty())
-    {
-      auto iter = ShapeMaskIterator(_->maskedBy);
-      shapeMask = MaskBuilder::makeShapeMask(this, *getMaskMap(), iter, toSkRect(frameBound()), 0);
-    }
-
-    /// ====
-    if (!shapeMask.isEmpty())
-    {
-      renderer->canvas()->save();
-      shapeMask.clip(renderer->canvas(), SkClipOp::kIntersect);
-    }
-
-    SkPaint lp;
-    lp.setStyle(SkPaint::kStroke_Style);
-    if (newLayer)
-    {
-      SkRect objectBound;
-      _->ensureStyleObjectRecorder(path, shapeMask, 0, _->style.fills, _->style.borders);
-      objectBound.join(_->styleDisplayList->bounds());
-      _->ensureDropShadowEffects(_->style.dropShadow, path);
-      objectBound.join(_->dropShadowEffects->bounds());
-      SkRect layerBound =
-        layerFilter ? layerFilter.get()->computeFastBounds(objectBound) : objectBound;
-
-      if (!_->alphaMaskBy.empty())
-      {
-        auto     alphaMaskIter = AlphaMaskIterator(_->alphaMaskBy);
-        SkMatrix resetOffset = SkMatrix::Translate(
-          layerBound.x(),
-          layerBound.y()); // note that rasterized shader is located in the origin, we need a matrix
-                           // to reset the offset
-        layerFilter = MaskBuilder::makeAlphaMaskWith(
-          layerFilter,
-          this,
-          *getMaskMap(),
-          alphaMaskIter,
-          layerBound,
-          &resetOffset);
-      }
-      if (dropbackFilter)
-      {
-        if (auto df = _->styleDisplayList->asImageFilter(); df)
-        {
-          auto blender = getOrCreateBlender("maskOut", g_maskOutBlender);
-          dropbackFilter =
-            SkImageFilters::Blend(blender, df, dropbackFilter, _->styleDisplayList->bounds());
-        }
-      }
-      SkPaint layerPaint;
-      layerPaint.setAntiAlias(true);
-      layerPaint.setImageFilter(layerFilter);
-      VShape clipShape(layerBound);
-      _->beginLayer(renderer, &layerPaint, &clipShape, dropbackFilter);
-      if (getDebugBoundEnable())
-      {
-        lp.setColor(SK_ColorBLUE);
-        lp.setStrokeWidth(5);
-        renderer->canvas()->drawRect(layerBound, lp);
-        lp.setColor(SK_ColorCYAN);
-        lp.setStrokeWidth(4);
-        renderer->canvas()->drawRect(_->dropShadowEffects->bounds(), lp);
-        lp.setColor(SK_ColorGREEN);
-        lp.setStrokeWidth(3);
-        renderer->canvas()->drawRect(_->styleDisplayList->bounds(), lp);
-        lp.setStrokeWidth(2);
-        lp.setColor(SK_ColorYELLOW);
-        renderer->canvas()->drawRect(objectBound, lp);
-      }
-    }
-
-    onDrawStyle(renderer, path, shapeMask, 0);
-    if (newLayer)
-    {
-      _->endLayer(renderer);
-    }
-
-    if (!shapeMask.isEmpty())
-    {
-      renderer->canvas()->restore();
-    }
-  }
-  else
-  {
-    d_ptr->renderNode->render(renderer);
-  }
+  d_ptr->renderNode->render(renderer);
 }
 
 bool PaintNode::nodeAt(int x, int y, NodeVisitor visitor)
@@ -330,29 +232,13 @@ bool PaintNode::nodeAt(int x, int y, NodeVisitor visitor)
 void PaintNode::setMaskBy(std::vector<std::string> masks)
 {
   VGG_IMPL(PaintNode);
-  if (_->legacyCode)
-  {
-    ASSERT(false);
-    _->maskedBy = std::move(masks);
-  }
-  else
-  {
-    _->accessor->setShapeMask(std::move(masks));
-  }
+  _->accessor->setShapeMask(std::move(masks));
 }
 
 void PaintNode::setAlphaMaskBy(std::vector<AlphaMask> masks)
 {
   VGG_IMPL(PaintNode);
-  if (_->legacyCode)
-  {
-    ASSERT(false);
-    _->alphaMaskBy = std::move(masks);
-  }
-  else
-  {
-    _->accessor->setAlphaMask(std::move(masks));
-  }
+  _->accessor->setAlphaMask(std::move(masks));
 }
 
 VShape PaintNode::makeBoundPath()
@@ -482,31 +368,6 @@ VShape PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
   return path;
 }
 
-void PaintNode::onDrawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
-{
-  VGG_IMPL(PaintNode);
-  ASSERT(false);
-  if (_->contextSetting.opacity < 1.0)
-  {
-    renderer->canvas()->saveLayerAlpha(0, _->contextSetting.opacity * 255);
-  }
-  d_ptr->drawAsAlphaMaskImpl(renderer, std::move(blender));
-  if (_->contextSetting.opacity < 1.0)
-  {
-    renderer->canvas()->restore();
-  }
-}
-
-void PaintNode::onDrawStyle(
-  Renderer*        renderer,
-  const VShape&    path,
-  const VShape&    mask,
-  sk_sp<SkBlender> blender)
-{
-  ASSERT(false);
-  d_ptr->onDrawStyleImpl(renderer, path, mask, std::move(blender));
-}
-
 VShape PaintNode::asVisualShape(const Transform* mat)
 {
   VShape mask;
@@ -589,26 +450,13 @@ float PaintNode::frameCornerSmoothing() const
 void PaintNode::setStyle(const Style& style)
 {
   VGG_IMPL(PaintNode);
-  if (_->legacyCode)
-  {
-    ASSERT(false);
-    _->style = style;
-  }
-  else
-  {
-    auto aa = _->accessor.get();
-    aa->setFills(style.fills);
-    aa->setBorders(style.borders);
-    aa->setInnerShadows(style.innerShadow);
-    aa->setDropShadows(style.dropShadow);
-    aa->setLayerBlurs(style.layerEffects);
-    aa->setBackgroundBlurs(style.backgroundEffects);
-  }
-}
-
-const Style& PaintNode::style() const
-{
-  return d_ptr->style;
+  auto aa = _->accessor.get();
+  aa->setFills(style.fills);
+  aa->setBorders(style.borders);
+  aa->setInnerShadows(style.innerShadow);
+  aa->setDropShadows(style.dropShadow);
+  aa->setLayerBlurs(style.layerEffects);
+  aa->setBackgroundBlurs(style.backgroundEffects);
 }
 
 EBoolOp PaintNode::clipOperator() const
@@ -653,49 +501,24 @@ Bounds PaintNode::onRevalidate()
   {
     newBound.unionWith(e->revalidate());
   }
-
-  if (_->legacyCode)
+  _->transformAttr->revalidate();
+  if (
+    _->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY ||
+    _->paintOption.paintStrategy == EPaintStrategy::PS_RECURSIVELY)
   {
-    ASSERT(false);
-    if (
-      _->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY ||
-      _->paintOption.paintStrategy == EPaintStrategy::PS_RECURSIVELY)
-    {
-      if (!_->path)
-      {
-        _->path = VShape(asVisualShape(0));
-      }
-      _->renderable = true;
-    }
-    else
-    {
-      _->renderable = false;
-    }
-    newBound.unionWith(d_ptr->bound);
-    // return newBound;
-    return d_ptr->bound;
+    auto currentNodeBound =
+      _->renderNode->revalidate(); // This will trigger the shape attribute get the
+
+    newBound.unionWith(currentNodeBound);
+    _->renderable = true;
   }
   else
   {
-    _->transformAttr->revalidate();
-    if (
-      _->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY ||
-      _->paintOption.paintStrategy == EPaintStrategy::PS_RECURSIVELY)
-    {
-      auto currentNodeBound =
-        _->renderNode->revalidate(); // This will trigger the shape attribute get the
-
-      newBound.unionWith(currentNodeBound);
-      _->renderable = true;
-    }
-    else
-    {
-      _->renderable = false;
-    }
-    // shape from the current node by the passed node
-    // return newBound;
-    return newBound;
+    _->renderable = false;
   }
+  // shape from the current node by the passed node
+  // return newBound;
+  return newBound;
 }
 const std::string& PaintNode::guid() const
 {
@@ -799,20 +622,6 @@ void PaintNode::paintChildren(Renderer* renderer)
     paintCall(masked);
     paintCall(noneMasked);
   }
-}
-
-Bounds PaintNode::onDrawFill(
-  Renderer*            renderer,
-  sk_sp<SkBlender>     blender,
-  sk_sp<SkImageFilter> imageFilter,
-  const VShape&        path,
-  const VShape&        mask)
-{
-  ASSERT(false);
-  auto       fillBound = path.bounds();
-  FillEffect fillEffect(style().fills, fillBound, imageFilter, blender);
-  fillEffect.render(renderer, path);
-  return Bounds{ fillBound.x(), fillBound.y(), fillBound.width(), fillBound.height() };
 }
 
 Accessor* PaintNode::attributeAccessor()

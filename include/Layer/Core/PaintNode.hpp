@@ -117,8 +117,7 @@ public:
     const std::string& name,
     EObjectType        type,
     const std::string& guid,
-    bool               legacyCode = false,
-    bool               initVectorRenderNode = true);
+    bool               initBase = true);
   PaintNode(const PaintNode&) = delete;
   PaintNode& operator=(const PaintNode&) = delete;
   PaintNode(PaintNode&&) = delete;
@@ -170,8 +169,6 @@ public:
 
   void setStyle(const Style& style);
 
-  const Style& style() const;
-
   EBoolOp clipOperator() const;
 
   Transform mapTransform(const PaintNode* node) const;
@@ -215,6 +212,8 @@ public:
 public:
   using EventHandler = std::function<void(ShapeItemAttibuteAccessor*, void*)>;
   void installPaintNodeEventHandler(EventHandler handler);
+  using NodeVisitor = bool (*)(PaintNode*);
+  bool nodeAt(int x, int y, NodeVisitor);
 
   ~PaintNode();
 
@@ -230,43 +229,20 @@ public:
       visitFunc(c.get(), std::forward<F>(f));
     }
   }
-  using NodeVisitor = bool (*)(PaintNode*);
 
 protected:
-  // Render traverse
-  void         paintChildren(Renderer* renderer);
-  void         paintSelf(Renderer* renderer);
-  void         render(Renderer* renderer); // TODO:: should be private access
-  virtual void onPaint(Renderer* renderer);
-
-  virtual void dispatchEvent(void* event);
-
+  void                paintChildren(Renderer* renderer);
+  void                paintSelf(Renderer* renderer);
+  void                render(Renderer* renderer);
+  virtual void        onPaint(Renderer* renderer);
+  virtual void        dispatchEvent(void* event);
   TransformAttribute* transformAttribute();
   Accessor*           attributeAccessor();
 
-  bool nodeAt(int x, int y, NodeVisitor);
-
-protected:
-  // Mask
   VShape         makeBoundPath();
   virtual VShape makeContourImpl(ContourOption option, const Transform* mat);
   VShape         childPolyOperation() const;
-
-  virtual void onDrawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender);
-  virtual void onDrawStyle(
-    Renderer*        renderer,
-    const VShape&    path,
-    const VShape&    mask,
-    sk_sp<SkBlender> blender);
-  Bounds onRevalidate() override;
-
-protected:
-  virtual Bounds onDrawFill(
-    Renderer*            renderer,
-    sk_sp<SkBlender>     blender,
-    sk_sp<SkImageFilter> imageFilter,
-    const VShape&        path,
-    const VShape&        mask);
+  Bounds         onRevalidate() override;
 };
 
 class PaintNodeEventDispatcher

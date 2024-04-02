@@ -39,7 +39,6 @@
 
 namespace VGG::layer
 {
-constexpr bool TEXT_LEGACY_CODE = false;
 
 class TextNode__pImpl
 {
@@ -48,62 +47,10 @@ public:
   TextNode__pImpl(TextNode* api)
     : q_ptr(api)
   {
-#ifdef USE_SHARED_PTR
-    paragraphLayout = makeRichTextBlockPtr(VGGFontCollection::GlobalFontCollection());
-#else
-    paragraphLayout =
-      makeRichTextBlockPtr(getGlobalMemoryAllocator(), VGGFontCollection::GlobalFontCollection());
-#endif
-#ifdef USE_SHARED_PTR
-    painter = makeVParagraphPainterPtr();
-#else
-    painter = makeVParagraphPainterPtr(getGlobalMemoryAllocator());
-#endif
-    painter->setParagraph(paragraphLayout);
-
-#ifdef USE_SHARED_PTR
-#else
-    q_ptr->observe(painter);
-#endif
   }
-
-  void onDrawRawStyleImpl(Renderer* renderer, sk_sp<SkBlender> blender)
-  {
-    if (TEXT_LEGACY_CODE)
-      ASSERT(false);
-    if (paragraphLayout->empty())
-      return;
-    auto       canvas = renderer->canvas();
-    const auto clip = (q_ptr->overflow() == OF_HIDDEN || q_ptr->overflow() == OF_SCROLL);
-    if (clip)
-    {
-      canvas->save();
-      auto bound = q_ptr->makeBoundPath();
-      bound.clip(canvas, SkClipOp::kIntersect);
-    }
-    if (anchor && !paragraphLayout->paragraphCache.empty())
-    {
-      auto offsetY = anchor->y - paragraphLayout->firstBaseline();
-      painter->paintRaw(renderer, anchor->x, offsetY);
-    }
-    else
-    {
-      painter->paintParagraph(renderer);
-    }
-    if (clip)
-    {
-      canvas->restore();
-    }
-  }
-
-  VParagraphPainterPtr     painter;
-  RichTextBlockPtr         paragraphLayout;
-  std::optional<glm::vec2> anchor;
 
   ParagraphItemAttributeAccessor* accessor;
   TextNode::EventHandler          paragraphNodeEventHandler;
-
-  Bounds bound;
 
   TextNode__pImpl(TextNode__pImpl&& p) noexcept = default;
   TextNode__pImpl& operator=(TextNode__pImpl&& p) noexcept = delete;
@@ -123,47 +70,30 @@ public:
 };
 
 TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
-  : PaintNode(cnt, name, VGG_TEXT, std::move(guid), TEXT_LEGACY_CODE, false)
+  : PaintNode(cnt, name, VGG_TEXT, std::move(guid), false)
   , d_ptr(new TextNode__pImpl(this))
 {
-  if (!TEXT_LEGACY_CODE)
-  {
-    auto               t = incRef(transformAttribute());
-    Ref<ParagraphItem> poa;
-    auto [c, d] = StyleItem::MakeRenderNode(
-      nullptr,
-      this,
-      t,
-      [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<GraphicItem>
-      {
-        poa = ParagraphItem::Make(alloc);
-        return poa;
-      });
-
-    auto acc = std::make_unique<ParagraphItemAttributeAccessor>(*d, poa);
-    d_ptr->accessor = acc.get();
-    PaintNode::d_ptr->accessor = std::move(acc);
-    PaintNode::d_ptr->renderNode = std::move(c);
-    observe(PaintNode::d_ptr->renderNode);
-  }
-
-  if (TEXT_LEGACY_CODE)
-    ASSERT(false);
-  // d_ptr->paragraphNodeEventHandler = [this](ParagraphItemAccessor*, void*)
-  // { DEBUG("text node: %s", this->name().c_str()); };
+  auto               t = incRef(transformAttribute());
+  Ref<ParagraphItem> poa;
+  auto [c, d] = StyleItem::MakeRenderNode(
+    nullptr,
+    this,
+    t,
+    [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<GraphicItem>
+    {
+      poa = ParagraphItem::Make(alloc);
+      return poa;
+    });
+  auto acc = std::make_unique<ParagraphItemAttributeAccessor>(*d, poa);
+  d_ptr->accessor = acc.get();
+  PaintNode::d_ptr->accessor = std::move(acc);
+  PaintNode::d_ptr->renderNode = std::move(c);
+  observe(PaintNode::d_ptr->renderNode);
 }
 
 void TextNode::setTextAnchor(glm::vec2 anchor)
 {
-  VGG_IMPL(TextNode);
-  if (TEXT_LEGACY_CODE)
-  {
-    _->anchor = anchor;
-  }
-  else
-  {
-    d_ptr->accessor->paragraph()->setAnchor(anchor);
-  }
+  d_ptr->accessor->paragraph()->setAnchor(anchor);
 }
 
 void TextNode::setParagraph(
@@ -171,84 +101,25 @@ void TextNode::setParagraph(
   std::vector<TextStyleAttr> style,
   std::vector<ParagraphAttr> parStyle)
 {
-  VGG_IMPL(TextNode);
-  if (TEXT_LEGACY_CODE)
-  {
-    ASSERT(false);
-    if (utf8.empty())
-      return;
-    if (style.empty())
-      style.push_back(TextStyleAttr());
-    if (parStyle.empty())
-      parStyle.push_back(ParagraphAttr());
-    _->paragraphLayout->setText(std::move(utf8));
-    _->paragraphLayout->setTextStyle(std::move(style));
-    _->paragraphLayout->setLineStyle(std::move(parStyle));
-  }
-  else
-  {
-    d_ptr->accessor->paragraph()->setParagraph(
-      std::move(utf8),
-      std::move(style),
-      std::move(parStyle));
-  }
+  d_ptr->accessor->paragraph()->setParagraph(
+    std::move(utf8),
+    std::move(style),
+    std::move(parStyle));
 }
 
 void TextNode::setParagraphBound(const Bounds& bound)
 {
-  if (TEXT_LEGACY_CODE)
-  {
-    ASSERT(false);
-    d_ptr->paragraphLayout->setParagraphHintBound(bound);
-  }
-  else
-  {
-    d_ptr->accessor->paragraph()->setParagraphBound(bound);
-  }
+  d_ptr->accessor->paragraph()->setParagraphBound(bound);
 }
 
 void TextNode::setFrameMode(ETextLayoutMode layoutMode)
 {
-  VGG_IMPL(TextNode);
-  if (TEXT_LEGACY_CODE)
-  {
-    ASSERT(false);
-    _->paragraphLayout->setTextLayoutMode(layoutMode);
-  }
-  else
-  {
-    d_ptr->accessor->paragraph()->setFrameMode(layoutMode);
-  }
-}
-
-void TextNode::onDrawAsAlphaMask(Renderer* renderer, sk_sp<SkBlender> blender)
-{
-  d_ptr->onDrawRawStyleImpl(renderer, std::move(blender));
-}
-
-void TextNode::onDrawStyle(
-  Renderer*        renderer,
-  const VShape&    path,
-  const VShape&    mask,
-  sk_sp<SkBlender> blender)
-{
-  ASSERT(false);
-  d_ptr->onDrawRawStyleImpl(renderer, std::move(blender));
+  d_ptr->accessor->paragraph()->setFrameMode(layoutMode);
 }
 
 void TextNode::setVerticalAlignment(ETextVerticalAlignment vertAlign)
 {
-  VGG_IMPL(TextNode);
-#ifdef USE_SHARED_PTR
-  _->ensureObserve();
-#endif
-  if (TEXT_LEGACY_CODE)
-  {
-    ASSERT(false);
-    _->paragraphLayout->setVerticalAlignment(vertAlign);
-  }
-  else
-    d_ptr->accessor->paragraph()->setVerticalAlignment(vertAlign);
+  d_ptr->accessor->paragraph()->setVerticalAlignment(vertAlign);
 }
 
 void TextNode::installParagraphNodeEventHandler(EventHandler handler)
@@ -268,21 +139,10 @@ void TextNode::dispatchEvent(void* event)
 
 Bounds TextNode::onRevalidate()
 {
-  VGG_IMPL(TextNode);
-  if (TEXT_LEGACY_CODE)
-  {
-    ASSERT(false);
-    auto b = _->painter->revalidate();
-    PaintNode::onRevalidate();
-    return b;
-  }
-  else
-  {
-    auto b = d_ptr->accessor->paragraph()
-               ->revalidate(); // We just revalidate the paragraph attribute so far
-    PaintNode::onRevalidate();
-    return b;
-  }
+  auto b =
+    d_ptr->accessor->paragraph()->revalidate(); // We just revalidate the paragraph attribute so far
+  PaintNode::onRevalidate();
+  return b;
 }
 
 TextNode::~TextNode() = default;

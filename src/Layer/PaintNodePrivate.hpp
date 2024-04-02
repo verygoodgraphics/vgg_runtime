@@ -173,18 +173,9 @@ public:
 
   PaintNode::EventHandler paintNodeEventHandler;
 
-  bool legacyCode{ false };
-
-  std::optional<VShape>            path;
-  bool                             renderable{ false };
-  Bounds                           bound;
-  // Transform                        transform;
-  Style                            style;
-  std::vector<std::string>         maskedBy;
-  std::vector<AlphaMask>           alphaMaskBy;
-  std::optional<ObjectShader>      styleDisplayList; // fill + border
-  std::optional<DropShadowEffect>  dropShadowEffects;
-  std::optional<InnerShadowEffect> innerShadowEffects;
+  std::optional<VShape> path;
+  bool                  renderable{ false };
+  Bounds                bound;
 
   std::array<float, 4> frameRadius{ 0, 0, 0, 0 };
   float                cornerSmooth{ 0 };
@@ -193,17 +184,14 @@ public:
   Ref<TransformAttribute>   transformAttr;
   std::unique_ptr<Accessor> accessor;
 
-  sk_sp<SkPicture> picture;
-
-  PaintNode__pImpl(PaintNode* api, EObjectType type, bool legacyCode, bool init)
+  PaintNode__pImpl(PaintNode* api, EObjectType type, bool initBase)
     : q_ptr(api)
     , type(type)
-    , legacyCode(legacyCode)
   {
     transformAttr = TransformAttribute::Make();
     api->observe(transformAttr);
 
-    if (!legacyCode && init)
+    if (initBase)
     {
       Ref<ShapeAttribute> shape;
       auto [c, d] = StyleItem::MakeRenderNode(
@@ -220,211 +208,7 @@ public:
       accessor = std::move(acc);
       renderNode = std::move(c);
     }
-    if (legacyCode)
-    {
-      ASSERT(false);
-    }
-
-    // paintNodeEventHandler = [this](VectorObjectAttibuteAccessor*, void*)
-    // { DEBUG("paint node %s", q_ptr->name().c_str()); };
-
     api->observe(renderNode);
-  }
-
-  void onDrawStyleImpl(
-    Renderer*        renderer,
-    const VShape&    skPath,
-    const VShape&    mask,
-    sk_sp<SkBlender> blender)
-  {
-    ASSERT(false);
-    auto filled = false;
-    for (const auto& f : style.fills)
-    {
-      if (f.isEnabled)
-      {
-        filled = true;
-        break;
-      }
-    }
-    ensureStyleObjectRecorder(skPath, mask, blender, style.fills, style.borders);
-    if (filled)
-    {
-      ensureDropShadowEffects(style.dropShadow, skPath);
-      dropShadowEffects->render(renderer, skPath);
-    }
-
-    styleDisplayList->render(renderer);
-
-    if (filled)
-    {
-      ensureInnerShadowEffects(style.innerShadow);
-      innerShadowEffects->render(renderer, skPath);
-    }
-  }
-  void ensureStyleObjectRecorder(
-    const VShape&              shape,
-    const VShape&              mask,
-    sk_sp<SkBlender>           blender,
-    const std::vector<Fill>&   fills,
-    const std::vector<Border>& borders)
-  {
-    ASSERT(false);
-    if (!styleDisplayList)
-    {
-      ObjectRecorder rec;
-      // SkRect              r = computeStyleBounds(shape, borders, shape.bounds());
-      SkRect         styleBounds = toSkRect(bound);
-      auto           recorder = rec.beginRecording(styleBounds, SkMatrix::I());
-
-      const auto fillBounds = toSkRect(q_ptr->onDrawFill(recorder, blender, 0, shape, mask));
-      const auto borderBounds =
-        internal::drawBorder(recorder, shape, shape.bounds(), borders, blender);
-      styleBounds.join(fillBounds);
-      styleBounds.join(borderBounds);
-      auto mat = SkMatrix::Translate(styleBounds.x(), styleBounds.y());
-      styleDisplayList = rec.finishRecording(styleBounds, &mat);
-    }
-  }
-
-  void ensureDropShadowEffects(const std::vector<DropShadow>& shadow, const VShape& shape)
-  {
-    ASSERT(false);
-    if (!dropShadowEffects)
-    {
-      dropShadowEffects = DropShadowEffect(shadow, toSkRect(bound), shape.outset(0, 0).has_value());
-    }
-  }
-
-  void ensureInnerShadowEffects(const std::vector<InnerShadow>& shadow)
-  {
-    ASSERT(false);
-    if (!innerShadowEffects)
-    {
-      innerShadowEffects = InnerShadowEffect(shadow, toSkRect(q_ptr->frameBound()));
-    }
-  }
-
-  VShape ensureOutlineMask(Renderer* renderer, EBoolOp maskOp)
-  {
-    ASSERT(false);
-    VShape result;
-    if (maskedBy.empty())
-      return result;
-    auto objects = getMaskMap();
-    for (const auto& id : maskedBy)
-    {
-      if (id != q_ptr->guid())
-      {
-        if (auto obj = objects->find(id); obj != objects->end())
-        {
-          const auto t = obj->second->mapTransform(q_ptr);
-          auto       m = obj->second->asVisualShape(&t);
-          if (result.isEmpty())
-          {
-            result = m;
-          }
-          else
-          {
-            result.op(m, maskOp);
-          }
-        }
-        else
-        {
-          DEBUG("No such mask: %s", id.c_str());
-        }
-      }
-    }
-    return result;
-  }
-
-  sk_sp<SkImageFilter> blurImageFilter()
-  {
-    ASSERT(false);
-    sk_sp<SkImageFilter> result;
-    for (const auto& b : style.layerEffects)
-    {
-      if (!b.isEnabled)
-        continue;
-      sk_sp<SkImageFilter> filter;
-      std::visit(
-        Overloaded{ [&](const GaussianBlur& blur) { filter = makeLayerBlurFilter(blur); },
-                    [&](const MotionBlur& blur) { filter = makeMotionBlurFilter(blur); },
-                    [&, this](const RadialBlur& blur)
-                    { filter = makeRadialBlurFilter(blur, q_ptr->frameBound()); } },
-        b.type);
-      if (result == nullptr)
-      {
-        result = filter;
-      }
-      else
-      {
-        result = SkImageFilters::Compose(result, filter);
-      }
-    }
-    return result;
-  }
-
-  sk_sp<SkImageFilter> backgroundBlurImageFilter()
-  {
-    ASSERT(false);
-    sk_sp<SkImageFilter> result;
-    for (const auto& b : style.backgroundEffects)
-    {
-      if (!b.isEnabled)
-        continue;
-      sk_sp<SkImageFilter> filter;
-      filter = makeBackgroundBlurFilter(b.blur);
-      if (result == nullptr)
-      {
-        result = filter;
-      }
-      else
-      {
-        result = SkImageFilters::Compose(result, filter);
-      }
-    }
-    return result;
-  }
-
-  void beginLayer(
-    Renderer*            renderer,
-    const SkPaint*       paint,
-    const VShape*        clipShape,
-    sk_sp<SkImageFilter> backdropFilter)
-  {
-    ASSERT(false);
-    renderer->canvas()->save();
-    if (clipShape)
-    {
-      clipShape->clip(renderer->canvas(), SkClipOp::kIntersect);
-    }
-    auto layerBound = clipShape->bounds();
-    renderer->canvas()->saveLayer(
-      SkCanvas::SaveLayerRec(&layerBound, paint, backdropFilter.get(), 0));
-  }
-
-  void endLayer(Renderer* renderer)
-  {
-    ASSERT(false);
-    renderer->canvas()->restore();
-    renderer->canvas()->restore();
-  }
-
-  void drawAsAlphaMaskImpl(Renderer* renderer, sk_sp<SkBlender> blender)
-  {
-    ASSERT(false);
-    if (!path)
-    {
-      path = q_ptr->asVisualShape(0);
-      // path = Shape();
-    }
-    if (path->isEmpty())
-    {
-      return;
-    }
-    DEBUG("drawAsAlphaMaskImpl");
-    onDrawStyleImpl(renderer, *path, VShape(), blender);
   }
 
   void onRevalidateImpl()

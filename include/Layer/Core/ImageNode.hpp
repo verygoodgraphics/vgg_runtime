@@ -62,12 +62,10 @@ public:
   ImageNode& operator=(ImageNode&&) noexcept = delete;
 
   void               setImageBound(const Bounds& bound);
-  Bounds              getImageBound() const;
+  Bounds             getImageBound() const;
   void               setImage(const std::string& guid);
   const std::string& getImageGUID() const;
-  void               setReplacesImage(bool fill);
   void               setImageFilter(const ImageFilter& filter);
-  bool               fill() const;
   VShape             asVisualShape(const Transform* mat) override;
 
   using EventHandler = std::function<void(ImageItemAttribtueAccessor*, void* event)>;
@@ -76,12 +74,6 @@ public:
   virtual ~ImageNode() override;
 
 protected:
-  void  dispatchEvent(void* event) override;
-  Bounds onDrawFill(
-    Renderer*            renderer,
-    sk_sp<SkBlender>     blender,
-    sk_sp<SkImageFilter> imageFilter,
-    const VShape&        path,
-    const VShape&        mask) override;
+  void dispatchEvent(void* event) override;
 };
 } // namespace VGG::layer

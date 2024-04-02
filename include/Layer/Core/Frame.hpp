@@ -75,7 +75,7 @@ public:
   ~Frame();
 
 protected:
-  Bounds      onRevalidate() override;
+  Bounds     onRevalidate() override;
   SkPicture* picture();
 };
 } // namespace VGG::layer

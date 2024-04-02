@@ -29,7 +29,7 @@ class BackdropFXAttribute;
 class ObjectAttribute : public Attribute
 {
 public:
-  ObjectAttribute(VRefCnt* cnt, Ref<RenderObjectAttribute> renderObject)
+  ObjectAttribute(VRefCnt* cnt, Ref<InnerObjectAttribute> renderObject)
     : Attribute(cnt)
     , m_renderObjectAttr(renderObject)
   {
@@ -62,7 +62,7 @@ public:
 
   VGG_ATTRIBUTE(FillStyle, std::vector<Fill>, m_fills);
   VGG_ATTRIBUTE(BorderStyle, std::vector<Border>, m_borders);
-  VGG_ATTRIBUTE(RenderObject, Ref<RenderObjectAttribute>, m_renderObjectAttr);
+  VGG_ATTRIBUTE(RenderObject, Ref<InnerObjectAttribute>, m_renderObjectAttr);
 
   VGG_CLASS_MAKE(ObjectAttribute);
 
@@ -73,7 +73,7 @@ private:
     const SkRect&              bounds);
   void revalidateMaskFilter(const SkPaint& paint, const SkRect& bounds);
 
-  Ref<RenderObjectAttribute> m_renderObjectAttr;
+  Ref<InnerObjectAttribute> m_renderObjectAttr;
   sk_sp<SkImageFilter>       m_maskFilter;
   std::vector<Fill>          m_fills;
   std::vector<Border>        m_borders;

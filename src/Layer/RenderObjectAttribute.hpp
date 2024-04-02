@@ -26,10 +26,10 @@ class SkImageFilter;
 namespace VGG::layer
 {
 class ShapeAttribute;
-class RenderObjectAttribute : public Attribute
+class InnerObjectAttribute : public Attribute
 {
 public:
-  RenderObjectAttribute(VRefCnt* cnt)
+  InnerObjectAttribute(VRefCnt* cnt)
     : Attribute(cnt)
   {
   }

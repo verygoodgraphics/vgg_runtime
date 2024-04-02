@@ -144,25 +144,25 @@ public:
   ATTR_MEMBER_GETTER(backgroundBlur, BackdropFXAttribute, m_backgroundBlurAttr);
 
 protected:
-  friend class StyleRenderNode;
-  TransformAttribute* const      m_transformAttr;
-  AlphaMaskAttribute* const      m_alphaMaskAttr;
-  ShapeMaskAttribute* const      m_shapeMaskAttr;
-  DropShadowAttribute* const     m_dropShadowAttr;
-  InnerShadowAttribute* const    m_innerShadowAttr;
-  ObjectAttribute* const         m_styleObjectAttr;
-  LayerFXAttribute* const        m_layerFXAttr;
-  BackdropFXAttribute* const m_backgroundBlurAttr;
+  friend class StyleNode;
+  TransformAttribute* const   m_transformAttr;
+  AlphaMaskAttribute* const   m_alphaMaskAttr;
+  ShapeMaskAttribute* const   m_shapeMaskAttr;
+  DropShadowAttribute* const  m_dropShadowAttr;
+  InnerShadowAttribute* const m_innerShadowAttr;
+  ObjectAttribute* const      m_styleObjectAttr;
+  LayerFXAttribute* const     m_layerFXAttr;
+  BackdropFXAttribute* const  m_backgroundBlurAttr;
 
   Accessor(
-    TransformAttribute*      transformAttr,
-    AlphaMaskAttribute*      alphaMaskAttr,
-    ShapeMaskAttribute*      shapemaskAttr,
-    DropShadowAttribute*     dropShadowAttr,
-    InnerShadowAttribute*    innerShadowAttr,
-    ObjectAttribute*         objectAttr,
-    LayerFXAttribute*        layerPostProcessAttr,
-    BackdropFXAttribute* backgroundBlurAttr)
+    TransformAttribute*   transformAttr,
+    AlphaMaskAttribute*   alphaMaskAttr,
+    ShapeMaskAttribute*   shapemaskAttr,
+    DropShadowAttribute*  dropShadowAttr,
+    InnerShadowAttribute* innerShadowAttr,
+    ObjectAttribute*      objectAttr,
+    LayerFXAttribute*     layerPostProcessAttr,
+    BackdropFXAttribute*  backgroundBlurAttr)
     : m_transformAttr(transformAttr)
     , m_alphaMaskAttr(alphaMaskAttr)
     , m_shapeMaskAttr(shapemaskAttr)
@@ -196,15 +196,15 @@ public:
   }
 
   VectorObjectAttibuteAccessor(
-    ShapeAttribute*          shapeAttr,
-    TransformAttribute*      transformAttr,
-    AlphaMaskAttribute*      alphaMaskAttr,
-    ShapeMaskAttribute*      shapemaskAttr,
-    DropShadowAttribute*     dropShadowAttr,
-    InnerShadowAttribute*    innerShadowAttr,
-    ObjectAttribute*         objectAttr,
-    LayerFXAttribute*        layerPostProcessAttr,
-    BackdropFXAttribute* backgroundBlurAttr)
+    ShapeAttribute*       shapeAttr,
+    TransformAttribute*   transformAttr,
+    AlphaMaskAttribute*   alphaMaskAttr,
+    ShapeMaskAttribute*   shapemaskAttr,
+    DropShadowAttribute*  dropShadowAttr,
+    InnerShadowAttribute* innerShadowAttr,
+    ObjectAttribute*      objectAttr,
+    LayerFXAttribute*     layerPostProcessAttr,
+    BackdropFXAttribute*  backgroundBlurAttr)
     : Accessor(
         transformAttr,
         alphaMaskAttr,
@@ -240,7 +240,7 @@ public:
     InnerShadowAttribute*     innerShadowAttr,
     ObjectAttribute*          objectAttr,
     LayerFXAttribute*         layerPostProcessAttr,
-    BackdropFXAttribute*  backgroundBlurAttr)
+    BackdropFXAttribute*      backgroundBlurAttr)
     : Accessor(
         transformAttr,
         alphaMaskAttr,

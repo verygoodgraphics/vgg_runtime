@@ -35,7 +35,7 @@ private:
 };
 
 ImageRenderObjectAttribute::ImageRenderObjectAttribute(VRefCnt* cnt, ObjectAttribute* object)
-  : RenderObjectAttribute(cnt)
+  : InnerObjectAttribute(cnt)
   , m_objectAttribute(object)
 {
   m_imageShape = ShapeAttribute::Make();

@@ -19,7 +19,7 @@ namespace VGG::layer
 {
 
 ParagraphObjectAttribute::ParagraphObjectAttribute(VRefCnt* cnt)
-  : RenderObjectAttribute(cnt)
+  : InnerObjectAttribute(cnt)
 {
   m_paragraphLayout = makeRichTextBlockPtr(VGGFontCollection::GlobalFontCollection());
   m_painter = makeVParagraphPainterPtr();

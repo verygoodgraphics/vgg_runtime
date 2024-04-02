@@ -210,7 +210,7 @@ public:
         nullptr,
         api,
         transformAttr,
-        [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<RenderObjectAttribute>
+        [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<InnerObjectAttribute>
         {
           shape = ShapeAttribute::Make(alloc, api);
           auto vectorObject = VectorObjectAttribute::Make(alloc, shape, object);

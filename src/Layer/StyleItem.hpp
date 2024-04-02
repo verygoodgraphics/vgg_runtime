@@ -20,7 +20,6 @@
 #include "EffectAttribute.hpp"
 #include "ObjectAttribute.hpp"
 #include "MaskAttribute.hpp"
-#include "AttributeAccessor.hpp"
 #include "TransformAttribute.hpp"
 
 #include "Layer/Core/VNode.hpp"

@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include "Layer/AttributeAccessor.hpp"
+#include "Layer/Core/AttributeAccessor.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/VType.hpp"
@@ -68,7 +68,7 @@ public:
   void setParagraphBound(const Bounds& bound);
   void setVerticalAlignment(ETextVerticalAlignment vertAlign);
 
-  using EventHandler = std::function<void(ParagraphItemAccessor*, void* event)>;
+  using EventHandler = std::function<void(ParagraphItemAttributeAccessor*, void* event)>;
   void installParagraphNodeEventHandler(EventHandler handler);
 
   ~TextNode();

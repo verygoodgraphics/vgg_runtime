@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Layer/AttributeAccessor.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/Transform.hpp"
 #include "Layer/ImageGraphicItem.hpp"
 #include "Layer/Renderer.hpp"
 #include "VSkia.hpp"
 #include "PaintNodePrivate.hpp"
+#include "Layer/Core/AttributeAccessor.hpp"
 #include "Layer/Core/ImageNode.hpp"
 #include "Layer/Core/PaintNode.hpp"
 
@@ -50,8 +50,8 @@ public:
   PatternStretch  pattern;
 
   ImageItemAttribtueAccessor* accessor;
-  ImageNode::EventHandler imageNodeEventHandler;
-  Bounds                  bound;
+  ImageNode::EventHandler     imageNodeEventHandler;
+  Bounds                      bound;
 
   ImageNode__pImpl(ImageNode* api)
     : q_ptr(api)
@@ -66,7 +66,7 @@ ImageNode::ImageNode(VRefCnt* cnt, const std::string& name, std::string guid)
 
   if (!IMAGE_LEGACY_CODE)
   {
-    auto                            t = incRef(transformAttribute());
+    auto           t = incRef(transformAttribute());
     Ref<ImageItem> ioa;
     auto [c, d] = StyleItem::MakeRenderNode(
       nullptr,
@@ -249,7 +249,9 @@ void ImageNode::dispatchEvent(void* event)
 {
   if (d_ptr->imageNodeEventHandler)
   {
-    d_ptr->imageNodeEventHandler(static_cast<ImageItemAttribtueAccessor*>(attributeAccessor()), event);
+    d_ptr->imageNodeEventHandler(
+      static_cast<ImageItemAttribtueAccessor*>(attributeAccessor()),
+      event);
   }
 }
 

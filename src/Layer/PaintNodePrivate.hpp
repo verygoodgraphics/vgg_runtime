@@ -20,14 +20,14 @@
 #include "ShadowEffects.hpp"
 #include "FillEffects.hpp"
 #include "Mask.hpp"
-#include "Layer/AttributeAccessor.hpp"
+#include "Layer/Core/AttributeAccessor.hpp"
 #include "Layer/LayerCache.h"
 #include "Layer/Memory/VAllocator.hpp"
 #include "Layer/ObjectAttribute.hpp"
 #include "Layer/GraphicItem.hpp"
 #include "Layer/ShapeAttribute.hpp"
 #include "Layer/TransformAttribute.hpp"
-#include "Layer/VectorObjectAttribute.hpp"
+#include "Layer/ShapeItem.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VShape.hpp"
 #include "Layer/Core/VType.hpp"
@@ -216,7 +216,7 @@ public:
           auto vectorObject = ShapeItem::Make(alloc, shape, object);
           return vectorObject;
         });
-      auto acc = std::make_unique<ShapeGraphicItemAttibuteAccessor>(*d, shape.get());
+      auto acc = std::make_unique<ShapeItemAttibuteAccessor>(*d, shape.get());
       accessor = std::move(acc);
       renderNode = std::move(c);
     }

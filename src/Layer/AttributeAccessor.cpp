@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include "AttributeAccessor.hpp"
-
 #include "Layer/MaskAttribute.hpp"
 #include "Layer/ObjectAttribute.hpp"
 #include "Layer/ShadowAttribute.hpp"
@@ -23,6 +21,7 @@
 #include "Layer/ImageGraphicItem.hpp"
 #include "Layer/ParagraphGraphicItem.hpp"
 
+#include "Layer/Core/AttributeAccessor.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Core/VType.hpp"
@@ -60,19 +59,19 @@ ATTR_DEF(
   BackgroundBlur,
   m_backgroundBlurAttr);
 
-ATTR_DEF(ShapeGraphicItemAttibuteAccessor, Shape, VShape, Shape, m_shapeAttr);
-ATTR_DEF(ParagraphItemAccessor, ParagraphBound, Bounds, ParagraphBound, m_paraAttr);
-ATTR_DEF(ParagraphItemAccessor, Anchor, glm::vec2, Anchor, m_paraAttr);
-ATTR_DEF(ParagraphItemAccessor, TextLayoutMode, ETextLayoutMode, FrameMode, m_paraAttr);
+ATTR_DEF(ShapeItemAttibuteAccessor, Shape, VShape, Shape, m_shapeAttr);
+ATTR_DEF(ParagraphItemAttributeAccessor, ParagraphBound, Bounds, ParagraphBound, m_paraAttr);
+ATTR_DEF(ParagraphItemAttributeAccessor, Anchor, glm::vec2, Anchor, m_paraAttr);
+ATTR_DEF(ParagraphItemAttributeAccessor, TextLayoutMode, ETextLayoutMode, FrameMode, m_paraAttr);
 
 ATTR_DEF(
-  ParagraphItemAccessor,
+  ParagraphItemAttributeAccessor,
   VerticalAlignment,
   ETextVerticalAlignment,
   VerticalAlignment,
   m_paraAttr);
 
-void ParagraphItemAccessor::setParagraph(
+void ParagraphItemAttributeAccessor::setParagraph(
   std::string                text,
   std::vector<TextStyleAttr> style,
   std::vector<ParagraphAttr> parStyle)

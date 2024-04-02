@@ -22,7 +22,6 @@
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Core/VShape.hpp"
 #include "Layer/Config.hpp"
-#include "Layer/TransformAttribute.hpp"
 
 #include <glm/matrix.hpp>
 
@@ -38,7 +37,8 @@ class SkBlender;
 namespace VGG::layer
 {
 class Renderer;
-class ShapeGraphicItemAttibuteAccessor;
+class ShapeItemAttibuteAccessor;
+class TransformAttribute;
 
 struct ContourOption
 {
@@ -213,7 +213,7 @@ public:
   virtual VShape asVisualShape(const Transform* transform);
 
 public:
-  using EventHandler = std::function<void(ShapeGraphicItemAttibuteAccessor*, void*)>;
+  using EventHandler = std::function<void(ShapeItemAttibuteAccessor*, void*)>;
   void installPaintNodeEventHandler(EventHandler handler);
 
   ~PaintNode();

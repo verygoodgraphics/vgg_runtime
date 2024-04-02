@@ -516,3 +516,105 @@ TEST_F(VggResizingTestSuite, HandleParentOrigin)
     EXPECT_TRUE(descendantFrame({ 0 }, 0) == expectedFrames[0]);
   }
 }
+
+TEST_F(VggResizingTestSuite, MinWidthFixStartEnd)
+{
+  setupWithExpanding("testDataDir/resizing/101_constraint__fix_start_and_end/");
+
+  m_sut->layout(Layout::Size{ 0.1, 1080 });
+  {
+    auto bounds = firstPage()->children()[0]->bounds();
+    EXPECT_DOUBLE_EQ(bounds.size.width, 1.);
+  }
+
+  m_sut->layout(Layout::Size{ 300, 1080 });
+  {
+    auto bounds = firstPage()->children()[0]->bounds();
+    EXPECT_DOUBLE_EQ(bounds.size.width, 200.);
+  }
+}
+
+TEST_F(VggResizingTestSuite, MinWidthFixStart)
+{
+  setupWithExpanding("testDataDir/resizing/102_constraint__fix_start_and_scale/");
+
+  m_sut->layout(Layout::Size{ 0.1, 1080 });
+  {
+    auto bounds = firstPage()->children()[0]->bounds();
+    EXPECT_DOUBLE_EQ(bounds.size.width, 1.);
+  }
+
+  m_sut->layout(Layout::Size{ 300, 1080 });
+  {
+    auto bounds = firstPage()->children()[0]->bounds();
+    EXPECT_DOUBLE_EQ(bounds.size.width, 200.);
+  }
+}
+
+TEST_F(VggResizingTestSuite, MinWidthFixEnd)
+{
+  setupWithExpanding("testDataDir/resizing/103_constraint__fix_end_and_scale/");
+
+  m_sut->layout(Layout::Size{ 0.1, 1080 });
+  {
+    auto bounds = firstPage()->children()[0]->bounds();
+    EXPECT_DOUBLE_EQ(bounds.size.width, 1.);
+  }
+
+  m_sut->layout(Layout::Size{ 300, 1080 });
+  {
+    auto bounds = firstPage()->children()[0]->bounds();
+    EXPECT_DOUBLE_EQ(bounds.size.width, 200.);
+  }
+}
+
+TEST_F(VggResizingTestSuite, MinHeightFixStartEnd)
+{
+  setupWithExpanding("testDataDir/resizing/111_constraint__fix_top_and_bottom/");
+
+  m_sut->layout(Layout::Size{ 300, 0.1 });
+  {
+    auto bounds = firstPage()->children()[0]->bounds();
+    EXPECT_DOUBLE_EQ(bounds.size.height, 1.);
+  }
+
+  m_sut->layout(Layout::Size{ 300, 300 });
+  {
+    auto bounds = firstPage()->children()[0]->bounds();
+    EXPECT_DOUBLE_EQ(bounds.size.height, 200.);
+  }
+}
+
+TEST_F(VggResizingTestSuite, MinHeightFixStart)
+{
+  setupWithExpanding("testDataDir/resizing/112_constraint__fix_top_and_scale/");
+
+  m_sut->layout(Layout::Size{ 300, 0.1 });
+  {
+    auto bounds = firstPage()->children()[0]->bounds();
+    EXPECT_DOUBLE_EQ(bounds.size.height, 1.);
+  }
+
+  m_sut->layout(Layout::Size{ 300, 300 });
+  {
+    auto bounds = firstPage()->children()[0]->bounds();
+    EXPECT_DOUBLE_EQ(bounds.size.height, 200.);
+  }
+}
+
+TEST_F(VggResizingTestSuite, MinHeightFixEnd)
+{
+  setupWithExpanding("testDataDir/resizing/113_constraint__fix_bottom_and_scale/");
+
+  m_sut->layout(Layout::Size{ 300, 0.1 });
+  {
+    auto bounds = firstPage()->children()[0]->bounds();
+    EXPECT_DOUBLE_EQ(bounds.size.height, 1.);
+  }
+
+  m_sut->layout(Layout::Size{ 300, 300 });
+  {
+    auto bounds = firstPage()->children()[0]->bounds();
+    EXPECT_DOUBLE_EQ(bounds.size.height, 200.);
+  }
+}

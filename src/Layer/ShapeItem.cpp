@@ -16,7 +16,6 @@
 #include "ShapeItem.hpp"
 #include "Effects.hpp"
 #include "FillEffects.hpp"
-#include "PaintNodePrivate.hpp"
 
 namespace VGG::layer
 {
@@ -35,7 +34,7 @@ void ShapeItem::render(Renderer* renderer)
       FillEffect     fillEffect(parent->getFillStyle(), fillBounds, 0, 0);
       fillEffect.render(renderer, shape);
       const auto borderBounds =
-        internal::drawBorder(recorder, shape, shape.bounds(), parent->getBorderStyle(), 0);
+        VGG::layer::drawBorder(recorder, shape, shape.bounds(), parent->getBorderStyle(), 0);
       objectBounds.join(fillBounds);
       objectBounds.join(borderBounds);
       auto mat = SkMatrix::Translate(objectBounds.x(), objectBounds.y());

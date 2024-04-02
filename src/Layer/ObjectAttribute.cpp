@@ -18,7 +18,6 @@
 #include "Effects.hpp"
 #include "ObjectAttribute.hpp"
 #include "ShapeAttribute.hpp"
-#include "PaintNodePrivate.hpp"
 #include "EffectAttribute.hpp"
 
 #include <core/SkImageFilter.h>

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 #include "Effects.hpp"
+#include "Renderer.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/LayerCache.h"
 #include "Layer/VSkia.hpp"
 #include <core/SkBlendMode.h>
 #include <core/SkColor.h>
+#include <core/SkCanvas.h>
 #include <effects/SkRuntimeEffect.h>
 #include <core/SkM44.h>
 #include <src/core/SkBlurMask.h>
@@ -493,7 +495,7 @@ sk_sp<SkShader> makeGradientLinear(const Bounds& bound, const GradientLinear& g)
 
 sk_sp<SkImageFilter> makeInnerShadowImageFilter(
   const InnerShadow&   shadow,
-  const Bounds&         bound,
+  const Bounds&        bound,
   bool                 shadowOnly,
   bool                 overrideSpread,
   sk_sp<SkImageFilter> input)
@@ -542,7 +544,7 @@ sk_sp<SkImageFilter> makeInnerShadowImageFilter(
 
 sk_sp<SkImageFilter> makeDropShadowImageFilter(
   const DropShadow&    shadow,
-  const Bounds&         bound,
+  const Bounds&        bound,
   bool                 overrideSpread,
   sk_sp<SkImageFilter> input)
 {
@@ -567,6 +569,83 @@ sk_sp<SkImageFilter> makeDropShadowImageFilter(
   m.postTranslate(shadow.offsetX + c.fX, shadow.offsetY + c.fY);
   auto s = SkImageFilters::DropShadowOnly(0, 0, sigma, sigma, shadow.color, input);
   return SkImageFilters::MatrixTransform(m, getGlobalSamplingOptions(), s);
+}
+
+SkRect drawBorder(
+  Renderer*                  renderer,
+  const VShape&              border,
+  const SkRect&              bounds,
+  const std::vector<Border>& borders,
+  sk_sp<SkBlender>           blender)
+{
+  SkRect     resultBounds = bounds;
+  const auto shapeBounds = resultBounds;
+  for (const auto& b : borders)
+  {
+    if (!b.isEnabled || b.thickness <= 0)
+      continue;
+
+    SkPaint strokePen;
+    strokePen.setAntiAlias(true);
+    strokePen.setBlender(blender);
+    // strokePen.setImageFilter(imageFilter);
+    populateSkPaint(b, shapeBounds, strokePen);
+    bool  inCenter = true;
+    float strokeWidth = b.thickness;
+    if (b.position == PP_INSIDE && border.isClosed())
+    {
+      // inside
+      strokeWidth = 2.f * b.thickness;
+      renderer->canvas()->save();
+      border.clip(renderer->canvas(), SkClipOp::kIntersect);
+      inCenter = false;
+    }
+    else if (b.position == PP_OUTSIDE && border.isClosed())
+    {
+      // outside
+      strokeWidth = 2.f * b.thickness;
+      renderer->canvas()->save();
+      border.clip(renderer->canvas(), SkClipOp::kDifference);
+      inCenter = false;
+    }
+    strokePen.setStrokeWidth(strokeWidth);
+    border.draw(renderer->canvas(), strokePen);
+    SkRect borderBounds;
+    strokePen.computeFastBounds(shapeBounds, &borderBounds);
+    resultBounds.join(borderBounds);
+    if (!inCenter)
+    {
+      renderer->canvas()->restore();
+    }
+  }
+
+  if (false)
+  {
+    auto                 pt = border.asPath();
+    std::vector<SkPoint> pts(pt.countPoints());
+    SkPaint              p;
+    pt.getPoints(pts.data(), pts.size());
+    p.setStrokeWidth(2);
+    p.setColor(SK_ColorRED);
+    SkFont a;
+    renderer->canvas()->drawPoints(SkCanvas::kPoints_PointMode, pts.size(), pts.data(), p);
+    for (std::size_t i = 0; i < pts.size(); i++)
+    {
+      SkPaint textPaint;
+      textPaint.setStrokeWidth(0.5);
+      textPaint.setColor(SK_ColorBLACK);
+      std::string index = std::to_string(i);
+      renderer->canvas()->drawSimpleText(
+        index.c_str(),
+        index.size(),
+        SkTextEncoding::kUTF8,
+        pts[i].x(),
+        pts[i].y(),
+        a,
+        textPaint);
+    }
+  }
+  return resultBounds;
 }
 
 } // namespace VGG::layer

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include "ParagraphGraphicItem.hpp"
-#include "Layer/AttributeAccessor.hpp"
+#include "Layer/Core/AttributeAccessor.hpp"
 namespace VGG::layer
 {
 

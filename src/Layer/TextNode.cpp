@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Layer/AttributeAccessor.hpp"
 #include "Layer/ParagraphGraphicItem.hpp"
 #include "Layer/ParagraphParser.hpp"
 #include "Layer/PaintNodePrivate.hpp"
 #include "Layer/TransformAttribute.hpp"
+#include "Layer/Core/AttributeAccessor.hpp"
 #include "ParagraphLayout.hpp"
 #include "ParagraphPainter.hpp"
 #include "VSkFontMgr.hpp"
@@ -102,8 +102,8 @@ public:
   RichTextBlockPtr         paragraphLayout;
   std::optional<glm::vec2> anchor;
 
-  ParagraphItemAccessor* accessor;
-  TextNode::EventHandler paragraphNodeEventHandler;
+  ParagraphItemAttributeAccessor* accessor;
+  TextNode::EventHandler          paragraphNodeEventHandler;
 
   Bounds bound;
 
@@ -142,7 +142,7 @@ TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
         return poa;
       });
 
-    auto acc = std::make_unique<ParagraphItemAccessor>(*d, poa);
+    auto acc = std::make_unique<ParagraphItemAttributeAccessor>(*d, poa);
     d_ptr->accessor = acc.get();
     PaintNode::d_ptr->accessor = std::move(acc);
     PaintNode::d_ptr->renderNode = std::move(c);
@@ -253,7 +253,7 @@ void TextNode::dispatchEvent(void* event)
   if (d_ptr->paragraphNodeEventHandler)
   {
     d_ptr->paragraphNodeEventHandler(
-      static_cast<ParagraphItemAccessor*>(attributeAccessor()),
+      static_cast<ParagraphItemAttributeAccessor*>(attributeAccessor()),
       event);
   }
 }

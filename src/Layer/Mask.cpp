@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include "Mask.hpp"
-#include "PaintNodePrivate.hpp"
+#include "StyleItem.hpp"
 namespace VGG::layer
 {
 
@@ -36,7 +36,7 @@ sk_sp<SkShader> MaskBuilder::makeAlphaMaskShader(
     auto skm = toSkMatrix(p.transform.matrix());
     canvas->save();
     canvas->concat(skm);
-    p.mask->d_ptr->renderNode->renderAsMask(&alphaMaskRender);
+    p.mask->styleItem()->renderAsMask(&alphaMaskRender);
     // p.mask->onDrawAsAlphaMask(&alphaMaskRender, 0);
     canvas->restore();
   }

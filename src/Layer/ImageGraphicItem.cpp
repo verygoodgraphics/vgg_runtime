@@ -17,9 +17,8 @@
 #include "ImageGraphicItem.hpp"
 #include "ObjectAttribute.hpp"
 #include "ShapeAttribute.hpp"
-#include "PaintNodePrivate.hpp"
-
 #include "Effects.hpp"
+
 namespace VGG::layer
 {
 
@@ -57,7 +56,7 @@ void ImageItem::render(Renderer* renderer)
   if (auto shape = m_imageShape->getShape(); !shape.isEmpty() && parent)
   {
     const auto skBound = toSkRect(m_imageBound);
-    internal::drawBorder(renderer, shape, skBound, parent->getBorderStyle(), 0);
+    VGG::layer::drawBorder(renderer, shape, skBound, parent->getBorderStyle(), 0);
   }
   else
   {

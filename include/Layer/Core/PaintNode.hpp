@@ -38,7 +38,7 @@ class SkBlender;
 namespace VGG::layer
 {
 class Renderer;
-class VectorObjectAttibuteAccessor;
+class ShapeGraphicItemAttibuteAccessor;
 
 struct ContourOption
 {
@@ -213,7 +213,7 @@ public:
   virtual VShape asVisualShape(const Transform* transform);
 
 public:
-  using EventHandler = std::function<void(VectorObjectAttibuteAccessor*, void*)>;
+  using EventHandler = std::function<void(ShapeGraphicItemAttibuteAccessor*, void*)>;
   void installPaintNodeEventHandler(EventHandler handler);
 
   ~PaintNode();

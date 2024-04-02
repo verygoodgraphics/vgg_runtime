@@ -17,27 +17,24 @@
 #include "Layer/AttributeNode.hpp"
 #include "Layer/ObjectAttribute.hpp"
 #include "Layer/ShapeAttribute.hpp"
-#include "RenderObjectAttribute.hpp"
+#include "GraphicItem.hpp"
 #include "ObjectShader.hpp"
 
 namespace VGG::layer
 {
 
 class ObjectAttribute;
-class VectorObjectAttribute : public InnerObjectAttribute
+class ShapeItem : public GraphicItem
 {
 public:
-  VectorObjectAttribute(VRefCnt* cnt, Ref<ShapeAttribute> shapeAttr)
-    : InnerObjectAttribute(cnt)
+  ShapeItem(VRefCnt* cnt, Ref<ShapeAttribute> shapeAttr)
+    : GraphicItem(cnt)
     , m_shapeAttr(std::move(shapeAttr))
   {
     observe(m_shapeAttr);
   }
-  VectorObjectAttribute(
-    VRefCnt*            cnt,
-    Ref<ShapeAttribute> shapeAttr,
-    ObjectAttribute*    objectAttribute)
-    : InnerObjectAttribute(cnt)
+  ShapeItem(VRefCnt* cnt, Ref<ShapeAttribute> shapeAttr, ObjectAttribute* objectAttribute)
+    : GraphicItem(cnt)
     , m_objectAttribute(objectAttribute)
     , m_shapeAttr(std::move(shapeAttr))
   {
@@ -51,23 +48,23 @@ public:
     return m_effectBounds;
   }
 
-  sk_sp<SkImageFilter> getObjectMaskFilter() const override
+  sk_sp<SkImageFilter> getMaskFilter() const override
   {
     return m_maskFilter;
   }
 
   VGG_ATTRIBUTE(ObjectAttribute, WeakRef<ObjectAttribute>, m_objectAttribute);
   Bounds onRevalidate() override;
-  VGG_CLASS_MAKE(VectorObjectAttribute);
+  VGG_CLASS_MAKE(ShapeItem);
 
 private:
   std::pair<SkRect, std::optional<SkPaint>> revalidateObjectBounds(
     const std::vector<Border>& borders,
     const SkRect&              bounds);
-  WeakRef<ObjectAttribute>    m_objectAttribute;
+  WeakRef<ObjectAttribute> m_objectAttribute;
   Ref<ShapeAttribute>         m_shapeAttr;
   sk_sp<SkImageFilter>        m_maskFilter;
-  Bounds                       m_effectBounds;
+  Bounds                      m_effectBounds;
   std::optional<ObjectShader> m_objectShader;
 };
 

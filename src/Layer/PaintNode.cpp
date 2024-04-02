@@ -817,7 +817,7 @@ void PaintNode::dispatchEvent(void* event)
   if (_->paintNodeEventHandler)
   {
     _->paintNodeEventHandler(
-      static_cast<VectorObjectAttibuteAccessor*>(attributeAccessor()),
+      static_cast<ShapeGraphicItemAttibuteAccessor*>(attributeAccessor()),
       event);
   }
 }

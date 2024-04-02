@@ -15,7 +15,7 @@
  */
 
 #include "Settings.hpp"
-#include "StyleNode.hpp"
+#include "StyleItem.hpp"
 #include "AttributeAccessor.hpp"
 #include "VSkia.hpp"
 #include "Renderer.hpp"
@@ -27,7 +27,7 @@
 namespace VGG::layer
 {
 
-void StyleNode::render(Renderer* renderer)
+void StyleItem::render(Renderer* renderer)
 {
   auto canvas = renderer->canvas();
   canvas->drawPicture(m_picture);
@@ -52,7 +52,7 @@ void StyleNode::render(Renderer* renderer)
   // recorder(renderer);
 }
 
-SkRect StyleNode::recorder(Renderer* renderer)
+SkRect StyleItem::recorder(Renderer* renderer)
 {
   sk_sp<SkImageFilter> dropbackFilter = m_objectAttr->getBackdropImageFilter();
   sk_sp<SkImageFilter> layerFXFilter = m_alphaMaskAttr->getImageFilter();
@@ -88,18 +88,18 @@ SkRect StyleNode::recorder(Renderer* renderer)
   return renderBound;
 }
 
-void StyleNode::renderAsMask(Renderer* render)
+void StyleItem::renderAsMask(Renderer* render)
 {
   ASSERT(m_objectAttr);
   m_objectAttr->render(render);
 }
 
-Bounds StyleNode::effectBounds() const
+Bounds StyleItem::effectBounds() const
 {
   return m_effectsBounds;
 }
 
-std::pair<sk_sp<SkPicture>, SkRect> StyleNode::revalidatePicture(const SkRect& rect)
+std::pair<sk_sp<SkPicture>, SkRect> StyleItem::revalidatePicture(const SkRect& rect)
 {
   ObjectRecorder rec;
   auto           renderer = rec.beginRecording(rect, SkMatrix::I());
@@ -107,7 +107,7 @@ std::pair<sk_sp<SkPicture>, SkRect> StyleNode::revalidatePicture(const SkRect& r
   return { rec.finishAsPicture(r), r };
 }
 
-void StyleNode::beginLayer(
+void StyleItem::beginLayer(
   Renderer*            renderer,
   const SkPaint*       paint,
   const VShape*        clipShape,
@@ -123,13 +123,13 @@ void StyleNode::beginLayer(
     SkCanvas::SaveLayerRec(&layerBound, paint, backdropFilter.get(), 0));
 }
 
-void StyleNode::endLayer(Renderer* renderer)
+void StyleItem::endLayer(Renderer* renderer)
 {
   renderer->canvas()->restore();
   renderer->canvas()->restore();
 }
 
-Bounds StyleNode::onRevalidate()
+Bounds StyleItem::onRevalidate()
 {
   m_shapeMaskAttr->revalidate();
   m_transformAttr->revalidate();
@@ -142,7 +142,7 @@ Bounds StyleNode::onRevalidate()
   return m_objectAttr->bound();
 }
 
-StyleNode::~StyleNode()
+StyleItem::~StyleItem()
 {
   unobserve(m_transformAttr);
   unobserve(m_objectAttr);
@@ -151,25 +151,25 @@ StyleNode::~StyleNode()
   // unobserve(m_shapeAttr);
 }
 
-std::pair<Ref<StyleNode>, std::unique_ptr<Accessor>> StyleNode::MakeRenderNode( // NOLINT
+std::pair<Ref<StyleItem>, std::unique_ptr<Accessor>> StyleItem::MakeRenderNode( // NOLINT
   VAllocator*             alloc,
   PaintNode*              node,
   Ref<TransformAttribute> transform,
   Creator                 creator)
 {
   auto backgroundBlur = BackdropFXAttribute::Make(alloc);
-  auto object = ObjectAttribute::Make(alloc, Ref<InnerObjectAttribute>());
+  auto object = ObjectAttribute::Make(alloc, Ref<GraphicItem>());
   auto renderObject = creator(alloc, object.get());
   auto shape = incRef(renderObject->shape());
   auto innerShadow = InnerShadowAttribute::Make(alloc, shape);
   auto dropShadow = DropShadowAttribute::Make(alloc, shape);
-  object->setRenderObject(renderObject);
+  object->setGraphicItem(renderObject);
 
   auto style = StyleAttribute::Make(alloc, innerShadow, dropShadow, object, backgroundBlur);
   auto layerPostProcess = LayerFXAttribute::Make(alloc, style);
   auto shapeMask = ShapeMaskAttribute::Make(alloc, node, layerPostProcess);
   auto alphaMaskAttribute = AlphaMaskAttribute::Make(alloc, node, layerPostProcess);
-  auto result = StyleNode::Make(
+  auto result = StyleItem::Make(
     alloc,
     transform,
     style,

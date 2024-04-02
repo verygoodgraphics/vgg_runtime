@@ -28,10 +28,10 @@
 namespace VGG::layer
 {
 
-class StyleNode : public RenderNode
+class StyleItem : public GraphicItem
 {
 public:
-  StyleNode(
+  StyleItem(
     VRefCnt*                cnt,
     Ref<TransformAttribute> transform,
     Ref<StyleAttribute>     styleObject,
@@ -39,7 +39,7 @@ public:
     Ref<AlphaMaskAttribute> alphaMask,
     Ref<ShapeMaskAttribute> shapeMask,
     Ref<ShapeAttribute>     shape)
-    : RenderNode(cnt, INVALIDATE)
+    : GraphicItem(cnt)
     , m_transformAttr(transform)
     , m_objectAttr(styleObject)
     , m_alphaMaskAttr(alphaMask)
@@ -52,7 +52,17 @@ public:
   }
   void render(Renderer* renderer) override;
 
-  void renderAsMask(Renderer* render) override;
+  void renderAsMask(Renderer* render);
+
+  ShapeAttribute* shape() const override
+  {
+    return 0;
+  }
+
+  sk_sp<SkImageFilter> getMaskFilter() const override
+  {
+    return 0;
+  }
 
   Bounds effectBounds() const override;
 
@@ -62,17 +72,17 @@ public:
   }
   Bounds onRevalidate() override;
 
-  using Creator = std::function<Ref<InnerObjectAttribute>(VAllocator* alloc, ObjectAttribute*)>;
-  static std::pair<Ref<StyleNode>, std::unique_ptr<Accessor>> MakeRenderNode( // NOLINT
+  using Creator = std::function<Ref<GraphicItem>(VAllocator* alloc, ObjectAttribute*)>;
+  static std::pair<Ref<StyleItem>, std::unique_ptr<Accessor>> MakeRenderNode( // NOLINT
     VAllocator*             alloc,
     PaintNode*              node,
     Ref<TransformAttribute> transform,
     Creator                 creator);
 
-  ~StyleNode();
+  ~StyleItem();
 
 private:
-  VGG_CLASS_MAKE(StyleNode);
+  VGG_CLASS_MAKE(StyleItem);
 
   SkRect                              recorder(Renderer* renderer);
   std::pair<sk_sp<SkPicture>, SkRect> revalidatePicture(const SkRect& bounds);

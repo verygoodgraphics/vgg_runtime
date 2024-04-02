@@ -17,22 +17,22 @@
 #pragma once
 #include "Layer/AttributeNode.hpp"
 #include "Layer/Core/VType.hpp"
-#include "RenderObjectAttribute.hpp"
+#include "GraphicItem.hpp"
 #include "ParagraphPainter.hpp"
 namespace VGG::layer
 {
 
-class ParagraphObjectAttribute : public InnerObjectAttribute
+class ParagraphItem : public GraphicItem
 {
 public:
-  ParagraphObjectAttribute(VRefCnt* cnt);
+  ParagraphItem(VRefCnt* cnt);
   virtual void    render(Renderer* renderer) override;
   ShapeAttribute* shape() const override
   {
     return nullptr;
   }
 
-  sk_sp<SkImageFilter> getObjectMaskFilter() const override
+  sk_sp<SkImageFilter> getMaskFilter() const override
   {
     return 0;
   }
@@ -88,13 +88,13 @@ public:
     return m_anchor.value_or(glm::vec2(0.0f));
   }
 
-  VGG_CLASS_MAKE(ParagraphObjectAttribute);
+  VGG_CLASS_MAKE(ParagraphItem);
 
   Bounds onRevalidate() override;
 
 private:
   VParagraphPainterPtr     m_painter;
-  Bounds                    m_fixedBound;
+  Bounds                   m_fixedBound;
   RichTextBlockPtr         m_paragraphLayout;
   ETextLayoutMode          m_layoutMode;
   std::optional<glm::vec2> m_anchor;

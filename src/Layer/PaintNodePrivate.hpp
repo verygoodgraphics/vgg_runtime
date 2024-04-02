@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #pragma once
-#include "StyleNode.hpp"
+#include "StyleItem.hpp"
 #include "Renderer.hpp"
 #include "Guard.hpp"
 #include "ShadowEffects.hpp"
@@ -24,7 +24,7 @@
 #include "Layer/LayerCache.h"
 #include "Layer/Memory/VAllocator.hpp"
 #include "Layer/ObjectAttribute.hpp"
-#include "Layer/RenderObjectAttribute.hpp"
+#include "Layer/GraphicItem.hpp"
 #include "Layer/ShapeAttribute.hpp"
 #include "Layer/TransformAttribute.hpp"
 #include "Layer/VectorObjectAttribute.hpp"
@@ -189,7 +189,7 @@ public:
   std::array<float, 4> frameRadius{ 0, 0, 0, 0 };
   float                cornerSmooth{ 0 };
 
-  Ref<StyleNode>    renderNode;
+  Ref<StyleItem>            renderNode;
   Ref<TransformAttribute>   transformAttr;
   std::unique_ptr<Accessor> accessor;
 
@@ -206,17 +206,17 @@ public:
     if (!legacyCode && init)
     {
       Ref<ShapeAttribute> shape;
-      auto [c, d] = StyleNode::MakeRenderNode(
+      auto [c, d] = StyleItem::MakeRenderNode(
         nullptr,
         api,
         transformAttr,
-        [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<InnerObjectAttribute>
+        [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<GraphicItem>
         {
           shape = ShapeAttribute::Make(alloc, api);
-          auto vectorObject = VectorObjectAttribute::Make(alloc, shape, object);
+          auto vectorObject = ShapeItem::Make(alloc, shape, object);
           return vectorObject;
         });
-      auto acc = std::make_unique<VectorObjectAttibuteAccessor>(*d, shape.get());
+      auto acc = std::make_unique<ShapeGraphicItemAttibuteAccessor>(*d, shape.get());
       accessor = std::move(acc);
       renderNode = std::move(c);
     }

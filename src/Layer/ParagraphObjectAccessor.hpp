@@ -20,7 +20,7 @@
 #include "Layer/Core/VShape.hpp"
 #include "Layer/ParagraphObjectAttribute.hpp"
 #include "ShapeAttribute.hpp"
-#include "LayerAttribute.hpp"
+#include "EffectAttribute.hpp"
 #include "ObjectAttribute.hpp"
 #include "MaskAttribute.hpp"
 #include "TransformAttribute.hpp"

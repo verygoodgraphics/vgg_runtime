@@ -15,102 +15,17 @@
  */
 
 #include "VSkia.hpp"
+#include "Effects.hpp"
 #include "ObjectAttribute.hpp"
+#include "ShapeAttribute.hpp"
 #include "PaintNodePrivate.hpp"
+#include "EffectAttribute.hpp"
 
 #include <core/SkImageFilter.h>
 #include <effects/SkImageFilters.h>
-#include "Effects.hpp"
 
 namespace VGG::layer
 {
-
-Bounds BackgroundBlurAttribute::onRevalidate()
-{
-  if (!m_blurs.empty())
-  {
-    for (const auto& b : m_blurs)
-    {
-      if (!b.isEnabled)
-        continue;
-      sk_sp<SkImageFilter> filter;
-      filter = makeBackgroundBlurFilter(b.blur);
-      if (m_imageFilter == nullptr)
-      {
-        m_imageFilter = filter;
-      }
-      else
-      {
-        m_imageFilter = SkImageFilters::Compose(m_imageFilter, filter);
-      }
-    }
-  }
-  return Bounds();
-}
-void DropShadowAttribute::render(Renderer* renderer)
-{
-  if (m_dropShadowEffects && m_shapeAttr)
-  {
-    if (const auto& shape = m_shapeAttr->getShape(); !shape.isEmpty())
-    {
-      m_dropShadowEffects->render(renderer, shape);
-    }
-  }
-}
-
-Bounds DropShadowAttribute::onRevalidate()
-{
-  if (m_shapeAttr)
-  {
-    m_shapeAttr->revalidate();
-    auto shape = m_shapeAttr->getShape();
-    auto bounds = toSkRect(m_shapeAttr->bound());
-    if (!m_shadow.empty() && !shape.isEmpty())
-    {
-      m_dropShadowEffects = DropShadowEffect(m_shadow, bounds, shape.outset(0, 0).has_value());
-      SkRect shadowBounds = m_dropShadowEffects->bounds();
-      return Bounds{ shadowBounds.x(),
-                    shadowBounds.y(),
-                    shadowBounds.width(),
-                    shadowBounds.height() };
-    }
-  }
-  return Bounds();
-}
-
-Bounds InnerShadowAttribute::onRevalidate()
-{
-  if (m_shapeAttr)
-  {
-    m_shapeAttr->revalidate();
-    auto shape = m_shapeAttr->getShape();
-    if (shape.isEmpty())
-      return Bounds();
-    auto shapeBounds = m_shapeAttr->getShape().bounds();
-    if (!m_shadow.empty() && !shape.isEmpty())
-    {
-      m_innerShadowEffects = InnerShadowEffect(m_shadow, shapeBounds);
-      // SkRect shadowBounds = m_innerShadowEffects->bounds();
-      SkRect shadowBounds = shapeBounds;
-      return Bounds{ shadowBounds.x(),
-                    shadowBounds.y(),
-                    shadowBounds.width(),
-                    shadowBounds.height() };
-    }
-  }
-  return Bounds();
-}
-
-void InnerShadowAttribute::render(Renderer* renderer)
-{
-  if (m_innerShadowEffects && m_shapeAttr)
-  {
-    if (const auto& shape = m_shapeAttr->getShape(); !shape.isEmpty())
-    {
-      m_innerShadowEffects->render(renderer, shape);
-    }
-  }
-}
 
 std::pair<SkRect, std::optional<SkPaint>> ObjectAttribute::revalidateObjectBounds(
   const std::vector<Border>& borders,
@@ -239,7 +154,25 @@ Bounds ObjectAttribute::onRevalidate()
   // return Bound();
 }
 
-void StyleObjectAttribute::render(Renderer* renderer)
+StyleAttribute::StyleAttribute(
+  VRefCnt*                     cnt,
+  Ref<InnerShadowAttribute>    innerShadow,
+  Ref<DropShadowAttribute>     dropShadow,
+  Ref<ObjectAttribute>         object,
+  Ref<BackdropFXAttribute> backgroundBlur)
+  : Attribute(cnt)
+  , m_innerShadowAttr(std::move(innerShadow))
+  , m_dropShadowAttr(std::move(dropShadow))
+  , m_objectAttr(std::move(object))
+  , m_backgroundBlurAttr(std::move(backgroundBlur))
+{
+  observe(m_innerShadowAttr);
+  observe(m_dropShadowAttr);
+  observe(m_objectAttr);
+  observe(m_backgroundBlurAttr);
+}
+
+void StyleAttribute::render(Renderer* renderer)
 {
   auto filled = m_objectAttr->hasFill();
   if (filled && m_dropShadowAttr)
@@ -249,7 +182,7 @@ void StyleObjectAttribute::render(Renderer* renderer)
     m_innerShadowAttr->render(renderer);
 }
 
-void StyleObjectAttribute::revalidateDropbackFilter(const SkRect& bounds)
+void StyleAttribute::revalidateDropbackFilter(const SkRect& bounds)
 {
   ASSERT(m_backgroundBlurAttr);
   m_backgroundBlurAttr->revalidate();
@@ -276,7 +209,7 @@ void StyleObjectAttribute::revalidateDropbackFilter(const SkRect& bounds)
   }
 }
 
-Bounds StyleObjectAttribute::onRevalidate()
+Bounds StyleAttribute::onRevalidate()
 {
   m_innerShadowAttr->revalidate();
   m_objectAttr->revalidate();

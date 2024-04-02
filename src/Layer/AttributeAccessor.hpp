@@ -20,7 +20,7 @@
 #include "Layer/ImageRenderObjectAttribute.hpp"
 #include "Layer/ParagraphObjectAttribute.hpp"
 #include "ShapeAttribute.hpp"
-#include "LayerAttribute.hpp"
+#include "EffectAttribute.hpp"
 #include "ObjectAttribute.hpp"
 #include "MaskAttribute.hpp"
 #include "TransformAttribute.hpp"
@@ -141,10 +141,10 @@ public:
   ATTR_MEMBER_GETTER(innerShadow, InnerShadowAttribute, m_innerShadowAttr);
   ATTR_MEMBER_GETTER(styleObject, ObjectAttribute, m_styleObjectAttr); // typo: Should be object
   ATTR_MEMBER_GETTER(layerFX, LayerFXAttribute, m_layerFXAttr);
-  ATTR_MEMBER_GETTER(backgroundBlur, BackgroundBlurAttribute, m_backgroundBlurAttr);
+  ATTR_MEMBER_GETTER(backgroundBlur, BackdropFXAttribute, m_backgroundBlurAttr);
 
 protected:
-  friend class RenderNodeFactory;
+  friend class StyleRenderNode;
   TransformAttribute* const      m_transformAttr;
   AlphaMaskAttribute* const      m_alphaMaskAttr;
   ShapeMaskAttribute* const      m_shapeMaskAttr;
@@ -152,7 +152,7 @@ protected:
   InnerShadowAttribute* const    m_innerShadowAttr;
   ObjectAttribute* const         m_styleObjectAttr;
   LayerFXAttribute* const        m_layerFXAttr;
-  BackgroundBlurAttribute* const m_backgroundBlurAttr;
+  BackdropFXAttribute* const m_backgroundBlurAttr;
 
   Accessor(
     TransformAttribute*      transformAttr,
@@ -162,7 +162,7 @@ protected:
     InnerShadowAttribute*    innerShadowAttr,
     ObjectAttribute*         objectAttr,
     LayerFXAttribute*        layerPostProcessAttr,
-    BackgroundBlurAttribute* backgroundBlurAttr)
+    BackdropFXAttribute* backgroundBlurAttr)
     : m_transformAttr(transformAttr)
     , m_alphaMaskAttr(alphaMaskAttr)
     , m_shapeMaskAttr(shapemaskAttr)
@@ -204,7 +204,7 @@ public:
     InnerShadowAttribute*    innerShadowAttr,
     ObjectAttribute*         objectAttr,
     LayerFXAttribute*        layerPostProcessAttr,
-    BackgroundBlurAttribute* backgroundBlurAttr)
+    BackdropFXAttribute* backgroundBlurAttr)
     : Accessor(
         transformAttr,
         alphaMaskAttr,
@@ -240,7 +240,7 @@ public:
     InnerShadowAttribute*     innerShadowAttr,
     ObjectAttribute*          objectAttr,
     LayerFXAttribute*         layerPostProcessAttr,
-    BackgroundBlurAttribute*  backgroundBlurAttr)
+    BackdropFXAttribute*  backgroundBlurAttr)
     : Accessor(
         transformAttr,
         alphaMaskAttr,

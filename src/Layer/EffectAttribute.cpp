@@ -13,16 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Layer/Core/Attrs.hpp"
 #include "VSkia.hpp"
-#include "LayerAttribute.hpp"
+#include "EffectAttribute.hpp"
+#include "ObjectAttribute.hpp"
 #include "Effects.hpp"
+
+#include "Layer/Core/Attrs.hpp"
 
 #include <core/SkImageFilter.h>
 #include <core/SkRect.h>
 
 namespace VGG::layer
 {
+
+LayerFXAttribute::LayerFXAttribute(VRefCnt* cnt, Ref<StyleAttribute> styleObjectAttr)
+  : ImageFilterAttribute(cnt)
+  , m_styleObjectAttr(styleObjectAttr)
+{
+  observe(m_styleObjectAttr);
+}
 
 SkRect LayerFXAttribute::revalidateLayerImageFilter(const SkRect& bounds)
 {
@@ -60,4 +69,28 @@ Bounds LayerFXAttribute::onRevalidate()
   const auto layerBound = revalidateLayerImageFilter(styledObjectBounds);
   return Bounds{ layerBound.x(), layerBound.y(), layerBound.width(), layerBound.height() };
 }
+
+Bounds BackdropFXAttribute::onRevalidate()
+{
+  if (!m_blurs.empty())
+  {
+    for (const auto& b : m_blurs)
+    {
+      if (!b.isEnabled)
+        continue;
+      sk_sp<SkImageFilter> filter;
+      filter = makeBackgroundBlurFilter(b.blur);
+      if (m_imageFilter == nullptr)
+      {
+        m_imageFilter = filter;
+      }
+      else
+      {
+        m_imageFilter = SkImageFilters::Compose(m_imageFilter, filter);
+      }
+    }
+  }
+  return Bounds();
+}
+
 } // namespace VGG::layer

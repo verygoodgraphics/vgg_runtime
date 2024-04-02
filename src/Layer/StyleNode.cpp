@@ -15,7 +15,7 @@
  */
 
 #include "Settings.hpp"
-#include "DefaultRenderNode.hpp"
+#include "StyleRenderNode.hpp"
 #include "AttributeAccessor.hpp"
 #include "VSkia.hpp"
 #include "Renderer.hpp"
@@ -27,7 +27,7 @@
 namespace VGG::layer
 {
 
-void DefaultRenderNode::render(Renderer* renderer)
+void StyleNode::render(Renderer* renderer)
 {
   auto canvas = renderer->canvas();
   canvas->drawPicture(m_picture);
@@ -52,9 +52,9 @@ void DefaultRenderNode::render(Renderer* renderer)
   // recorder(renderer);
 }
 
-SkRect DefaultRenderNode::recorder(Renderer* renderer)
+SkRect StyleNode::recorder(Renderer* renderer)
 {
-  sk_sp<SkImageFilter> dropbackFilter = m_objectAttr->getBackgroundBlurImageFilter();
+  sk_sp<SkImageFilter> dropbackFilter = m_objectAttr->getBackdropImageFilter();
   sk_sp<SkImageFilter> layerFXFilter = m_alphaMaskAttr->getImageFilter();
   const auto           newLayer = dropbackFilter || layerFXFilter;
 
@@ -88,18 +88,18 @@ SkRect DefaultRenderNode::recorder(Renderer* renderer)
   return renderBound;
 }
 
-void DefaultRenderNode::renderAsMask(Renderer* render)
+void StyleNode::renderAsMask(Renderer* render)
 {
   ASSERT(m_objectAttr);
   m_objectAttr->render(render);
 }
 
-Bounds DefaultRenderNode::effectBounds() const
+Bounds StyleNode::effectBounds() const
 {
   return m_effectsBounds;
 }
 
-std::pair<sk_sp<SkPicture>, SkRect> DefaultRenderNode::revalidatePicture(const SkRect& rect)
+std::pair<sk_sp<SkPicture>, SkRect> StyleNode::revalidatePicture(const SkRect& rect)
 {
   ObjectRecorder rec;
   auto           renderer = rec.beginRecording(rect, SkMatrix::I());
@@ -107,7 +107,7 @@ std::pair<sk_sp<SkPicture>, SkRect> DefaultRenderNode::revalidatePicture(const S
   return { rec.finishAsPicture(r), r };
 }
 
-void DefaultRenderNode::beginLayer(
+void StyleNode::beginLayer(
   Renderer*            renderer,
   const SkPaint*       paint,
   const VShape*        clipShape,
@@ -123,13 +123,13 @@ void DefaultRenderNode::beginLayer(
     SkCanvas::SaveLayerRec(&layerBound, paint, backdropFilter.get(), 0));
 }
 
-void DefaultRenderNode::endLayer(Renderer* renderer)
+void StyleNode::endLayer(Renderer* renderer)
 {
   renderer->canvas()->restore();
   renderer->canvas()->restore();
 }
 
-Bounds DefaultRenderNode::onRevalidate()
+Bounds StyleNode::onRevalidate()
 {
   m_shapeMaskAttr->revalidate();
   m_transformAttr->revalidate();
@@ -142,13 +142,52 @@ Bounds DefaultRenderNode::onRevalidate()
   return m_objectAttr->bound();
 }
 
-DefaultRenderNode::~DefaultRenderNode()
+StyleNode::~StyleNode()
 {
   unobserve(m_transformAttr);
   unobserve(m_objectAttr);
   unobserve(m_alphaMaskAttr);
   unobserve(m_shapeMaskAttr);
   // unobserve(m_shapeAttr);
+}
+
+std::pair<Ref<StyleNode>, std::unique_ptr<Accessor>> StyleNode::
+  MakeRenderNode( // NOLINT
+    VAllocator*             alloc,
+    PaintNode*              node,
+    Ref<TransformAttribute> transform,
+    Creator                 creator)
+{
+  auto backgroundBlur = BackdropFXAttribute::Make(alloc);
+  auto object = ObjectAttribute::Make(alloc, Ref<RenderObjectAttribute>());
+  auto renderObject = creator(alloc, object.get());
+  auto shape = incRef(renderObject->shape());
+  auto innerShadow = InnerShadowAttribute::Make(alloc, shape);
+  auto dropShadow = DropShadowAttribute::Make(alloc, shape);
+  object->setRenderObject(renderObject);
+
+  auto style = StyleAttribute::Make(alloc, innerShadow, dropShadow, object, backgroundBlur);
+  auto layerPostProcess = LayerFXAttribute::Make(alloc, style);
+  auto shapeMask = ShapeMaskAttribute::Make(alloc, node, layerPostProcess);
+  auto alphaMaskAttribute = AlphaMaskAttribute::Make(alloc, node, layerPostProcess);
+  auto result = StyleNode::Make(
+    alloc,
+    transform,
+    style,
+    layerPostProcess,
+    alphaMaskAttribute,
+    shapeMask,
+    shape);
+  auto aa = std::unique_ptr<Accessor>(new Accessor(
+    transform,
+    alphaMaskAttribute,
+    shapeMask,
+    dropShadow,
+    innerShadow,
+    object,
+    layerPostProcess,
+    backgroundBlur));
+  return { result, std::move(aa) };
 }
 
 } // namespace VGG::layer

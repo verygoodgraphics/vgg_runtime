@@ -55,7 +55,7 @@ TEST_F(VggLayoutTestSuite, Wrap)
   setupWithExpanding("testDataDir/layout/1_wrap/");
 
   // When
-  layout(*m_sut, Layout::Size{ 800, 900 });
+  layout(*m_sut, Layout::Size{ 799, 900 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{ { { 0, 0 }, { 200, 150 } },

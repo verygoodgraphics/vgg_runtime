@@ -220,6 +220,7 @@ struct FlexboxLayout
   double          rowGap;
   double          columnGap;
   Padding         padding;
+  bool            smartSpacing{ true };
   bool            zOrder;
 };
 
@@ -325,6 +326,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
   rowGap,
   columnGap,
   padding,
+  smartSpacing,
   zOrder);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
   GridLayout,

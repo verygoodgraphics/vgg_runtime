@@ -803,7 +803,7 @@ void AutoLayout::configureFlexItemMargin()
 
   bool shouldConfigureStart{ false };
   bool shouldConfigureEnd{ false };
-  if (container->isFlexSpaceBetweenAndNoWrap())
+  if (container->isSmartSpacingAndFlexSpaceBetweenAndNoWrap())
   {
     if (isOnlyChild())
     {
@@ -1013,7 +1013,7 @@ bool AutoLayout::is100PercentHeight()
   return sharedRule->height.value.is100Percent();
 }
 
-bool AutoLayout::isFlexSpaceBetweenAndNoWrap()
+bool AutoLayout::isSmartSpacingAndFlexSpaceBetweenAndNoWrap()
 {
   auto sharedRule = rule.lock();
   if (!sharedRule)
@@ -1023,6 +1023,10 @@ bool AutoLayout::isFlexSpaceBetweenAndNoWrap()
 
   const auto detail = sharedRule->getFlexContainerRule();
   if (!detail)
+  {
+    return false;
+  }
+  if (!detail->smartSpacing)
   {
     return false;
   }
@@ -1163,6 +1167,19 @@ void AutoLayout::configureFlexContainer(Rule::FlexboxLayout* layout)
   node->set_padding(padding_right, layout->padding.right);
   node->set_padding(padding_bottom, layout->padding.bottom);
   node->set_padding(padding_left, layout->padding.left);
+
+  if (layout->smartSpacing)
+  {
+    auto isHorizontalDirection = layout->direction == FlexboxLayout::EDirection::HORIZONTAL;
+    if (layout->justifyContent == FlexboxLayout::EJustifyContent::SPACE_BETWEEN)
+    {
+      node->set_gap(isHorizontalDirection ? gap_column : gap_row, 0);
+    }
+    if (layout->alignContent == EAlignStyle::SPACE_BETWEEN)
+    {
+      node->set_gap(isHorizontalDirection ? gap_row : gap_column, 0);
+    }
+  }
 
   // todo, hanlde position
 }

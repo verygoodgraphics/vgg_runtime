@@ -402,7 +402,7 @@ std::string LayoutNode::type() const
 {
   if (auto element = m_element.lock())
   {
-    return element->type();
+    return element->typeString();
   }
   return {};
 }

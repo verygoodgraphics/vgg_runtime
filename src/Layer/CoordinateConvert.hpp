@@ -1,0 +1,175 @@
+/*
+ * Copyright 2023 VeryGoodGraphics LTD <bd@verygoodgraphics.com>
+ *
+ * Licensed under the VGG License, Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.verygoodgraphics.com/licenses/LICENSE-1.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#pragma once
+
+#include "Layer/Core/VUtils.hpp"
+#include "Layer/Core/Attrs.hpp"
+#include <glm/glm.hpp>
+
+namespace VGG::layer
+{
+
+class CoordinateConvert
+{
+public:
+  static void convertCoordinateSystem(float& x, float& y, const glm::mat3& totalMatrix)
+  {
+    // evaluated form of 'point = totalMatrix * glm::vec3(point, 1.f);'
+    y = -y;
+  }
+  static void convertCoordinateSystem(glm::vec2& point, const glm::mat3& totalMatrix)
+  {
+    // evaluated form of 'point = totalMatrix * glm::vec3(point, 1.f);'
+    point.y = -point.y;
+  }
+
+  static void convertCoordinateSystem(Contour& contour, const glm::mat3& totalMatrix)
+  {
+    for (auto& p : contour)
+    {
+      convertCoordinateSystem(p.point, totalMatrix);
+      if (p.from)
+      {
+        convertCoordinateSystem(p.from.value(), totalMatrix);
+      }
+      if (p.to)
+      {
+        convertCoordinateSystem(p.to.value(), totalMatrix);
+      }
+    }
+  }
+
+  static std::pair<glm::mat3, glm::mat3> convertMatrixCoordinate(const glm::mat3& mat)
+  {
+    glm::mat3 scale = glm::identity<glm::mat3>();
+    scale = glm::scale(scale, { 1, -1 });
+    return { scale * mat * scale, scale * glm::inverse(mat) * scale };
+  }
+
+  static void convertCoordinateSystem(Pattern& pattern, const glm::mat3& totalMatrix)
+  {
+
+    std::visit(
+      Overloaded{ [](PatternFill& p) { p.rotation = -p.rotation; },
+                  [](PatternFit& p) { p.rotation = -p.rotation; },
+                  [](PatternStretch& p)
+                  {
+                    auto newMatrix = convertMatrixCoordinate(p.transform.matrix()).first;
+                    p.transform.setMatrix(newMatrix);
+                  },
+                  [](PatternTile& p) { p.rotation = -p.rotation; } },
+      pattern.instance);
+  }
+
+  static void convertCoordinateSystem(Gradient& gradient, const glm::mat3& totalMatrix)
+  {
+    std::visit(
+      Overloaded{
+        [&](GradientLinear& p)
+        {
+          convertCoordinateSystem(p.from, totalMatrix);
+          convertCoordinateSystem(p.to, totalMatrix);
+        },
+        [&](GradientRadial& p)
+        {
+          convertCoordinateSystem(p.from, totalMatrix);
+          convertCoordinateSystem(p.to, totalMatrix);
+          if (auto d = std::get_if<glm::vec2>(&p.ellipse); d)
+          {
+            convertCoordinateSystem(*d, totalMatrix);
+          }
+        },
+        [&](GradientAngular& p)
+        {
+          convertCoordinateSystem(p.from, totalMatrix);
+          convertCoordinateSystem(p.to, totalMatrix);
+          if (auto d = std::get_if<glm::vec2>(&p.ellipse); d)
+          {
+            convertCoordinateSystem(*d, totalMatrix);
+          }
+        },
+        [&](GradientDiamond& p)
+        {
+          convertCoordinateSystem(p.from, totalMatrix);
+          convertCoordinateSystem(p.to, totalMatrix);
+          if (auto d = std::get_if<glm::vec2>(&p.ellipse); d)
+          {
+            convertCoordinateSystem(*d, totalMatrix);
+          }
+        },
+      },
+      gradient.instance);
+  }
+
+  static void convertCoordinateSystem(TextStyleAttr& textStyle, const glm::mat3& totalMatrix)
+  {
+    for (auto& f : textStyle.fills)
+    {
+      std::visit(
+        Overloaded{
+          [&](Gradient& g) { convertCoordinateSystem(g, totalMatrix); },
+          [&](Pattern& p) { convertCoordinateSystem(p, totalMatrix); },
+          [&](Color& c) {},
+        },
+        f.type);
+    }
+  }
+
+  static void convertCoordinateSystem(Style& style, const glm::mat3& totalMatrix)
+  {
+    for (auto& b : style.borders)
+    {
+      std::visit(
+        Overloaded{
+          [&](Gradient& g) { convertCoordinateSystem(g, totalMatrix); },
+          [&](Pattern& p) { convertCoordinateSystem(p, totalMatrix); },
+          [&](Color& c) {},
+        },
+        b.type);
+    }
+    for (auto& f : style.fills)
+    {
+      std::visit(
+        Overloaded{
+          [&](Gradient& g) { convertCoordinateSystem(g, totalMatrix); },
+          [&](Pattern& p) { convertCoordinateSystem(p, totalMatrix); },
+          [&](Color& c) {},
+        },
+        f.type);
+    }
+    for (auto& s : style.innerShadow)
+    {
+      CoordinateConvert::convertCoordinateSystem(s.offsetX, s.offsetY, totalMatrix);
+    }
+    for (auto& s : style.dropShadow)
+    {
+      CoordinateConvert::convertCoordinateSystem(s.offsetX, s.offsetY, totalMatrix);
+    }
+    for (auto& b : style.layerEffects)
+    {
+      std::visit(
+        Overloaded{
+          [](const GaussianBlur& blur) {},
+          [](const MotionBlur& blur) {},
+          [&](RadialBlur& blur)
+          { CoordinateConvert::convertCoordinateSystem(blur.xCenter, blur.yCenter, totalMatrix); },
+        },
+        b.type);
+    }
+  }
+};
+} // namespace VGG::layer

@@ -48,6 +48,16 @@ struct adl_serializer<std::variant<float, glm::vec2>>
     }
   }
 };
+
+template<>
+struct adl_serializer<glm::mat3>
+{
+  static void from_json(const json& j, glm::mat3& m)
+  {
+    // TODO::
+  }
+};
+
 } // namespace nlohmann
 template<typename T>
 inline std::optional<T> getOptional(const nlohmann::json& obj, const std::string& key)

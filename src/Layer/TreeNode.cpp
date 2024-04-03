@@ -37,11 +37,7 @@ void TreeNode::pushChildBack(TreeNodePtr node)
 {
   auto it = m_firstChild.insert(m_firstChild.end(), node);
   node->m_iter = it;
-#ifdef USE_SHARED_PTR
-  node->m_parent = std::static_pointer_cast<TreeNode>(shared_from_this());
-#else
   node->m_parent = this;
-#endif
   observe(node);
 }
 
@@ -49,11 +45,7 @@ void TreeNode::pushChildFront(TreeNodePtr node)
 {
   auto it = m_firstChild.insert(m_firstChild.begin(), node);
   node->m_iter = it;
-#ifdef USE_SHARED_PTR
-  node->m_parent = std::static_pointer_cast<TreeNode>(shared_from_this());
-#else
   node->m_parent = this;
-#endif
   observe(node);
 }
 
@@ -66,11 +58,7 @@ void TreeNode::pushChildAt(const std::string& name, TreeNodePtr node)
   if (it != m_firstChild.end())
   {
     node->m_iter = m_firstChild.insert(it, node);
-#ifdef USE_SHARED_PTR
-    node->m_parent = std::static_pointer_cast<TreeNode>(shared_from_this());
-#else
     node->m_parent = this;
-#endif
     observe(node);
   }
 }
@@ -124,11 +112,7 @@ TreeNodePtr TreeNode::removeChild(const std::string& name)
   }
   auto r = *it;
   unobserve(*it);
-#ifdef USE_SHARED_PTR
-  r->m_parent.reset();
-#else
   r->m_parent.release();
-#endif
   r->m_iter = m_firstChild.end();
   m_firstChild.erase(it);
   return r;

@@ -32,23 +32,13 @@ namespace VGG::layer
 {
 class Frame;
 class Renderer;
-#ifdef USE_SHARED_PTR
-using FramePtr = std::shared_ptr<Frame>;
-using FrameRef = std::weak_ptr<Frame>;
-#else
 using FramePtr = VGG::layer::Ref<Frame>;
 using FrameRef = VGG::layer::WeakRef<Frame>;
-#endif
 
 template<typename... Args>
 inline FramePtr makeFramePtr(Args&&... args)
 {
-#ifdef USE_SHARED_PTR
-  auto p = std::make_shared<Frame>(nullptr, std::forward<Args>(args)...);
-  return p;
-#else
   return FramePtr(V_NEW<Frame>(std::forward<Args>(args)...));
-#endif
 };
 class Frame__pImpl;
 class Frame final : public VNode

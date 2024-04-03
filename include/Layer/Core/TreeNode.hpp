@@ -31,24 +31,13 @@ namespace VGG
 {
 class TreeNode;
 
-#ifdef USE_SHARED_PTR
-using TreeNodePtr = std::shared_ptr<TreeNode>;
-using TreeNodeRef = std::weak_ptr<TreeNode>;
-#else
 using TreeNodePtr = VGG::layer::Ref<TreeNode>;
 using TreeNodeRef = VGG::layer::WeakRef<TreeNode>;
-
-#endif
 
 template<typename... Args>
 inline TreeNodePtr makeTreeNodePtr(Args&&... args)
 {
-#ifdef USE_SHARED_PTR
-  auto p = std::make_shared<TreeNode>(nullptr, std::forward<Args>(args)...);
-  return p;
-#else
   return TreeNodePtr(layer::V_NEW<TreeNode>(std::forward<Args>(args)...));
-#endif
 };
 class VGG_EXPORTS TreeNode : public layer::VNode
 {
@@ -200,17 +189,6 @@ public:
   {
     return m_firstChild.cend();
   }
-
-  //   static TreeNodePtr createNode(const std::string& name)
-  //   {
-  // #ifdef USE_SHARED_PTR
-  //     return TreeNodePtr(new TreeNode(name));
-  // #else
-  //     return nullptr;
-  //     // TreeNodePtr();
-  //     //  makeTreeNodePtr(name);
-  // #endif
-  //   }
 
   virtual TreeNodePtr clone() const;
 

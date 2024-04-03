@@ -59,6 +59,7 @@ inline glm::mat3 getLocalMatrix(PaintNode* node)
   return local;
 }
 
+#ifdef VGG_LAYER_DEBUG
 inline void drawBound(PaintNode* node, const glm::mat3& deviceMatrix, SkCanvas* canvas)
 {
   ASSERT(canvas);
@@ -75,7 +76,6 @@ inline void drawBound(PaintNode* node, const glm::mat3& deviceMatrix, SkCanvas* 
     canvas->drawRect(deviceBounds, paint);
   }
 }
-
 inline void drawBounds(
   std::vector<PaintNode*>::iterator begin,
   std::vector<PaintNode*>::iterator end,
@@ -87,6 +87,7 @@ inline void drawBounds(
     drawBound(*it, deviceMatrix, canvas);
   }
 }
+#endif
 
 inline void drawTextAt(
   SkCanvas*                       canvas,

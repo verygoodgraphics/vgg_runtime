@@ -139,6 +139,7 @@ std::vector<std::string> split(const std::string& s, const std::string& delimite
 
 // DesignDocument
 DesignDocument::DesignDocument(const Model::DesignModel& designModel)
+  : Element(EType::ROOT)
 {
   m_designModel = std::make_shared<Model::DesignModel>(designModel);
 }
@@ -204,7 +205,7 @@ void Element::setVisible(bool visible)
   model->visible = visible;
 }
 
-std::string Element::type() const
+std::string Element::typeString() const
 {
   if (auto pObject = object())
   {
@@ -553,6 +554,7 @@ void Element::getTreeToModel(
 
 // FrameElement
 FrameElement::FrameElement(const Model::Frame& frame)
+  : Element(EType::FRAME)
 {
   m_frame = std::make_shared<Model::Frame>(frame);
 }
@@ -606,6 +608,7 @@ void FrameElement::getTreeToModel(
 
 // GroupElement
 GroupElement::GroupElement(const Model::Group& group)
+  : Element(EType::GROUP)
 {
   m_group = std::make_shared<Model::Group>(group);
 }
@@ -676,6 +679,7 @@ void GroupElement::applyOverride(
 
 // SymbolMasterElement
 SymbolMasterElement::SymbolMasterElement(const Model::SymbolMaster& master)
+  : Element(EType::SYMBOL_MASTER)
 {
   m_master = std::make_shared<Model::SymbolMaster>(master);
 }
@@ -729,6 +733,7 @@ void SymbolMasterElement::getTreeToModel(
 
 // SymbolInstanceElement
 SymbolInstanceElement::SymbolInstanceElement(const Model::SymbolInstance& instance)
+  : Element(EType::SYMBOL_INSTANCE)
 {
   m_instance = std::make_shared<Model::SymbolInstance>(instance);
 }
@@ -845,6 +850,7 @@ void SymbolInstanceElement::getTreeToModel(
 }
 // TextElement
 TextElement::TextElement(const Model::Text& text)
+  : Element(EType::TEXT)
 {
   m_text = std::make_shared<Model::Text>(text);
 }
@@ -894,6 +900,7 @@ void TextElement::getToModel(Model::ContainerChildType& variantModel)
 
 // ImageElement
 ImageElement::ImageElement(const Model::Image& image)
+  : Element(EType::IMAGE)
 {
   m_image = std::make_shared<Model::Image>(image);
 }
@@ -924,6 +931,7 @@ void ImageElement::getToModel(Model::ContainerChildType& variantModel)
 
 // PathElement
 PathElement::PathElement(const Model::Path& path)
+  : Element(EType::PATH)
 {
   m_path = std::make_shared<Model::Path>(path);
 }
@@ -1014,6 +1022,7 @@ void PathElement::getTreeToModel(
 
 // ContourElement
 ContourElement::ContourElement(const Model::Contour& contour)
+  : Element(EType::CONTOUR)
 {
   m_contour = std::make_shared<Model::Contour>(contour);
 }
@@ -1076,6 +1085,7 @@ void ContourElement::updatePoints(const std::vector<Layout::BezierPoint>& points
 
 // EllipseElement
 EllipseElement::EllipseElement(const Model::Ellipse& ellipse)
+  : Element(EType::ELLIPSE)
 {
   m_ellipse = std::make_shared<Model::Ellipse>(ellipse);
 }
@@ -1095,6 +1105,7 @@ void EllipseElement::updateModel(const Model::SubGeometryType& subGeometry)
 
 // PolygonElement
 PolygonElement::PolygonElement(const Model::Polygon& polygon)
+  : Element(EType::POLYGON)
 {
   m_polygon = std::make_shared<Model::Polygon>(polygon);
 }
@@ -1114,6 +1125,7 @@ void PolygonElement::updateModel(const Model::SubGeometryType& subGeometry)
 
 // RectangleElement
 RectangleElement::RectangleElement(const Model::Rectangle& rectangle)
+  : Element(EType::RECTANGLE)
 {
   m_rectangle = std::make_shared<Model::Rectangle>(rectangle);
 }
@@ -1133,6 +1145,7 @@ void RectangleElement::updateModel(const Model::SubGeometryType& subGeometry)
 
 // StarElement
 StarElement::StarElement(const Model::Star& star)
+  : Element(EType::STAR)
 {
   m_star = std::make_shared<Model::Star>(star);
 }
@@ -1152,6 +1165,7 @@ void StarElement::updateModel(const Model::SubGeometryType& subGeometry)
 
 // VectorNetworkElement
 VectorNetworkElement::VectorNetworkElement(const Model::VectorNetwork& network)
+  : Element(EType::VECTOR_NETWORK)
 {
   m_vectorNetwork = std::make_shared<Model::VectorNetwork>(network);
 }

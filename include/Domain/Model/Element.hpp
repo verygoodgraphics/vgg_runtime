@@ -38,15 +38,46 @@ class SymbolInstanceElement;
 
 class Element : public std::enable_shared_from_this<Element>
 {
+public:
+  enum class EType
+  {
+    NONE,
+    ROOT,
+    FRAME,
+    GROUP,
+    IMAGE,
+    PATH,
+    SYMBOL_INSTANCE,
+    SYMBOL_MASTER,
+    TEXT,
+    CONTOUR,
+    ELLIPSE,
+    POLYGON,
+    RECTANGLE,
+    STAR,
+    VECTOR_NETWORK
+  };
+
+private:
+  const EType                           m_type;
   std::weak_ptr<Element>                m_parent;
   std::vector<std::shared_ptr<Element>> m_children;
 
   bool m_fistOnTop{ false };
 
 public:
+  Element(EType type)
+    : m_type{ type }
+  {
+  }
   virtual ~Element() = default;
 
 public:
+  auto type() const
+  {
+    return m_type;
+  }
+
   const std::shared_ptr<Element> parent() const
   {
     return m_parent.lock();
@@ -72,7 +103,7 @@ public:
     const std::vector<std::string>& keyStack,
     std::vector<std::string>*       outInstanceIdStack);
 
-  std::string    type() const;
+  std::string    typeString() const;
   Layout::Rect   bounds() const;
   Layout::Matrix matrix() const;
 

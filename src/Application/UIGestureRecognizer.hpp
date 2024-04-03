@@ -26,6 +26,7 @@ namespace VGG::UIKit
 
 enum class EUIGestureRecognizerState
 {
+  NONE,
   POSSIBLE,
   BEGAN,
   CHANGED,

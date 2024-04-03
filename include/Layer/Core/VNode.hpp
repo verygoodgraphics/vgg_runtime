@@ -28,29 +28,16 @@
 #include <vector>
 #include <algorithm>
 
-// #define USE_SHARED_PTR 1
-
 namespace VGG::layer
 {
 class VNode;
 
-#ifdef USE_SHARED_PTR
-using VNodePtr = std::shared_ptr<VNode>;
-using VNodeRef = std::weak_ptr<VNode>;
-#else
 using VNodePtr = Ref<VNode>;
 using VNodeRef = WeakRef<VNode>;
-#endif
 
-class VNode
-  :
-#ifdef USE_SHARED_PTR
-  public std::enable_shared_from_this<VNode>
-#else
-  public ObjectImpl<VObject>
-#endif
+class VNode : public ObjectImpl<VObject>
 {
-  Bounds                 m_bound;
+  Bounds                m_bound;
   uint8_t               m_state{ 0 };
   std::vector<VNodeRef> m_observers;
 
@@ -78,12 +65,8 @@ protected:
 
 public:
   VNode(VRefCnt* cnt, EState initState = (EState)0)
-#ifndef USE_SHARED_PTR
     : ObjectImpl<VObject>(cnt)
     , m_state(initState)
-#else
-    : m_state(initState)
-#endif
   {
   }
 

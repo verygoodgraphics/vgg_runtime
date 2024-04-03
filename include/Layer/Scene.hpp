@@ -32,13 +32,8 @@ namespace VGG
 namespace layer
 {
 class PaintNode;
-#ifdef USE_SHARED_PTR
-using PaintNodePtr = std::shared_ptr<PaintNode>;
-using PaintNodeRef = std::weak_ptr<PaintNode>;
-#else
 using PaintNodePtr = VGG::layer::Ref<PaintNode>;
 using PaintNodeRef = VGG::layer::WeakRef<PaintNode>;
-#endif
 
 class VLayer;
 class Rasterizer;

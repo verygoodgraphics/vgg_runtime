@@ -110,21 +110,12 @@ struct TextLayoutFixed
 using TextLayoutMode = std::variant<TextLayoutFixed, TextLayoutAutoWidth, TextLayoutAutoHeight>;
 
 class RichTextBlock;
-#ifdef USE_SHARED_PTR
-using RichTextBlockPtr = std::shared_ptr<RichTextBlock>;
-#else
 using RichTextBlockPtr = VGG::layer::Ref<RichTextBlock>;
-#endif
 
 template<typename... Args>
 inline RichTextBlockPtr makeRichTextBlockPtr(Args&&... args)
 {
-#ifdef USE_SHARED_PTR
-  auto p = std::make_shared<RichTextBlock>(nullptr, std::forward<Args>(args)...);
-  return p;
-#else
   return RichTextBlockPtr(V_NEW<RichTextBlock>(std::forward<Args>(args)...));
-#endif
 };
 
 class RichTextBlock final
@@ -161,7 +152,7 @@ private:
 
   int m_paragraphHeight{ 0 };
 
-  bool                    ensureBuild(TextLayoutMode mode);
+  bool                     ensureBuild(TextLayoutMode mode);
   std::pair<Bounds, float> internalLayout(const Bounds& bound, ETextLayoutMode mode);
 
 protected:

@@ -7,8 +7,6 @@
 #include <gtest/gtest.h>
 using namespace VGG::layer;
 
-#ifndef USE_SHARED_PTR
-
 class TestObserveNode : public VNode
 {
 public:
@@ -50,4 +48,3 @@ TEST(ObserveTest, SimpleCase)
   root->child->child->invalidate();
   root->revalidate();
 }
-#endif

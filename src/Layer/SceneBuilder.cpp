@@ -18,22 +18,14 @@
 #include "PathPatch.h"
 #include "Layer/SceneBuilder.hpp"
 #include "Layer/Core/VType.hpp"
-#include "Layer/Core/VUtils.hpp"
-#include "Layer/ParagraphLayout.hpp"
+#include "Layer/CoordinateConvert.hpp"
 #include "Layer/ParagraphParser.hpp"
-#include "Math/Algebra.hpp"
-#include "Math/Math.hpp"
-#include "Utility/Log.hpp"
 #include "AttrSerde.hpp"
 
 #include "Layer/Core/Attrs.hpp"
-#include "Layer/VSkia.hpp"
-#include "Layer/Core/PaintNode.hpp"
-#include "Layer/Core/TreeNode.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/TextNode.hpp"
 #include "Layer/Core/ImageNode.hpp"
-#include <iterator>
 #include <variant>
 
 namespace
@@ -46,159 +38,6 @@ PaintNodePtr makeContourNode(VAllocator* alloc)
   p->setContourOption(ContourOption{ ECoutourType::MCT_FRAMEONLY, false });
   return p;
 }
-
-///
-/// Convert coordinate system from VGG from to skia
-///
-class CoordinateConvert
-{
-public:
-  static void convertCoordinateSystem(float& x, float& y, const glm::mat3& totalMatrix)
-  {
-    // evaluated form of 'point = totalMatrix * glm::vec3(point, 1.f);'
-    y = -y;
-  }
-  static void convertCoordinateSystem(glm::vec2& point, const glm::mat3& totalMatrix)
-  {
-    // evaluated form of 'point = totalMatrix * glm::vec3(point, 1.f);'
-    point.y = -point.y;
-  }
-
-  static void convertCoordinateSystem(Contour& contour, const glm::mat3& totalMatrix)
-  {
-    for (auto& p : contour)
-    {
-      convertCoordinateSystem(p.point, totalMatrix);
-      if (p.from)
-      {
-        convertCoordinateSystem(p.from.value(), totalMatrix);
-      }
-      if (p.to)
-      {
-        convertCoordinateSystem(p.to.value(), totalMatrix);
-      }
-    }
-  }
-
-  static std::pair<glm::mat3, glm::mat3> convertMatrixCoordinate(const glm::mat3& mat)
-  {
-    glm::mat3 scale = glm::identity<glm::mat3>();
-    scale = glm::scale(scale, { 1, -1 });
-    return { scale * mat * scale, scale * glm::inverse(mat) * scale };
-  }
-
-  static void convertCoordinateSystem(Pattern& pattern, const glm::mat3& totalMatrix)
-  {
-
-    std::visit(
-      Overloaded{ [](PatternFill& p) { p.rotation = -p.rotation; },
-                  [](PatternFit& p) { p.rotation = -p.rotation; },
-                  [](PatternStretch& p)
-                  {
-                    auto newMatrix = convertMatrixCoordinate(p.transform.matrix()).first;
-                    p.transform.setMatrix(newMatrix);
-                  },
-                  [](PatternTile& p) { p.rotation = -p.rotation; } },
-      pattern.instance);
-  }
-
-  static void convertCoordinateSystem(Gradient& gradient, const glm::mat3& totalMatrix)
-  {
-    std::visit(
-      Overloaded{
-        [&](GradientLinear& p)
-        {
-          convertCoordinateSystem(p.from, totalMatrix);
-          convertCoordinateSystem(p.to, totalMatrix);
-        },
-        [&](GradientRadial& p)
-        {
-          convertCoordinateSystem(p.from, totalMatrix);
-          convertCoordinateSystem(p.to, totalMatrix);
-          if (auto d = std::get_if<glm::vec2>(&p.ellipse); d)
-          {
-            convertCoordinateSystem(*d, totalMatrix);
-          }
-        },
-        [&](GradientAngular& p)
-        {
-          convertCoordinateSystem(p.from, totalMatrix);
-          convertCoordinateSystem(p.to, totalMatrix);
-          if (auto d = std::get_if<glm::vec2>(&p.ellipse); d)
-          {
-            convertCoordinateSystem(*d, totalMatrix);
-          }
-        },
-        [&](GradientDiamond& p)
-        {
-          convertCoordinateSystem(p.from, totalMatrix);
-          convertCoordinateSystem(p.to, totalMatrix);
-          if (auto d = std::get_if<glm::vec2>(&p.ellipse); d)
-          {
-            convertCoordinateSystem(*d, totalMatrix);
-          }
-        },
-      },
-      gradient.instance);
-  }
-
-  static void convertCoordinateSystem(TextStyleAttr& textStyle, const glm::mat3& totalMatrix)
-  {
-    for (auto& f : textStyle.fills)
-    {
-      std::visit(
-        Overloaded{
-          [&](Gradient& g) { convertCoordinateSystem(g, totalMatrix); },
-          [&](Pattern& p) { convertCoordinateSystem(p, totalMatrix); },
-          [&](Color& c) {},
-        },
-        f.type);
-    }
-  }
-
-  static void convertCoordinateSystem(Style& style, const glm::mat3& totalMatrix)
-  {
-    for (auto& b : style.borders)
-    {
-      std::visit(
-        Overloaded{
-          [&](Gradient& g) { convertCoordinateSystem(g, totalMatrix); },
-          [&](Pattern& p) { convertCoordinateSystem(p, totalMatrix); },
-          [&](Color& c) {},
-        },
-        b.type);
-    }
-    for (auto& f : style.fills)
-    {
-      std::visit(
-        Overloaded{
-          [&](Gradient& g) { convertCoordinateSystem(g, totalMatrix); },
-          [&](Pattern& p) { convertCoordinateSystem(p, totalMatrix); },
-          [&](Color& c) {},
-        },
-        f.type);
-    }
-    for (auto& s : style.innerShadow)
-    {
-      CoordinateConvert::convertCoordinateSystem(s.offsetX, s.offsetY, totalMatrix);
-    }
-    for (auto& s : style.dropShadow)
-    {
-      CoordinateConvert::convertCoordinateSystem(s.offsetX, s.offsetY, totalMatrix);
-    }
-    for (auto& b : style.layerEffects)
-    {
-      std::visit(
-        Overloaded{
-          [](const GaussianBlur& blur) {},
-          [](const MotionBlur& blur) {},
-          [&](RadialBlur& blur)
-          { CoordinateConvert::convertCoordinateSystem(blur.xCenter, blur.yCenter, totalMatrix); },
-        },
-        b.type);
-    }
-  }
-};
 
 ContourPtr makeContourData(const json& j, const json& parent, const glm::mat3& totalMatrix)
 {

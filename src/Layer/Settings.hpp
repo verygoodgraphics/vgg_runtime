@@ -18,7 +18,7 @@
 namespace VGG::layer
 {
 
-void enableDebugBound(bool enable);
-bool getDebugBoundEnable();
+void enableDebugBounds(bool enable);
+bool getDebugBoundsEnable();
 
 } // namespace VGG::layer

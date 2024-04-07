@@ -32,16 +32,16 @@ void StyleItem::render(Renderer* renderer)
   auto canvas = renderer->canvas();
   canvas->drawPicture(m_picture);
 
-  if (getDebugBoundEnable())
+  if (getDebugBoundsEnable())
   {
-    SkRect layerBound = toSkRect(m_alphaMaskAttr->bounds());
+    SkRect layerBounds = toSkRect(m_alphaMaskAttr->bounds());
     SkRect effectBounds = toSkRect(m_objectAttr->effectBounds());
 
     SkPaint p;
     p.setStroke(true);
     p.setColor(SK_ColorGREEN);
     p.setStrokeWidth(2);
-    renderer->canvas()->drawRect(layerBound, p);
+    renderer->canvas()->drawRect(layerBounds, p);
 
     p.setColor(SK_ColorBLUE);
     const SkScalar intervals[2] = { 10, 20 };
@@ -65,16 +65,16 @@ SkRect StyleItem::recorder(Renderer* renderer)
     renderer->canvas()->save();
     shapeMask.clip(renderer->canvas(), SkClipOp::kIntersect);
   }
-  SkRect renderBound = toSkRect(m_objectAttr->bounds());
-  SkRect layerBound = toSkRect(m_alphaMaskAttr->bounds());
+  SkRect renderBounds = toSkRect(m_objectAttr->bounds());
+  SkRect layerBounds = toSkRect(m_alphaMaskAttr->bounds());
   if (newLayer)
   {
     SkPaint layerPaint;
     layerPaint.setAntiAlias(true);
     layerPaint.setImageFilter(layerFXFilter);
-    VShape clipShape(layerBound);
+    VShape clipShape(layerBounds);
     beginLayer(renderer, &layerPaint, &clipShape, dropbackFilter);
-    renderBound = layerBound;
+    renderBounds = layerBounds;
   }
   m_objectAttr->render(renderer);
   if (newLayer)
@@ -85,7 +85,7 @@ SkRect StyleItem::recorder(Renderer* renderer)
   {
     renderer->canvas()->restore();
   }
-  return renderBound;
+  return renderBounds;
 }
 
 void StyleItem::renderAsMask(Renderer* render)
@@ -118,9 +118,9 @@ void StyleItem::beginLayer(
   {
     clipShape->clip(renderer->canvas(), SkClipOp::kIntersect);
   }
-  auto layerBound = clipShape->bounds();
+  auto layerBounds = clipShape->bounds();
   renderer->canvas()->saveLayer(
-    SkCanvas::SaveLayerRec(&layerBound, paint, backdropFilter.get(), 0));
+    SkCanvas::SaveLayerRec(&layerBounds, paint, backdropFilter.get(), 0));
 }
 
 void StyleItem::endLayer(Renderer* renderer)
@@ -136,8 +136,8 @@ Bounds StyleItem::onRevalidate()
   m_alphaMaskAttr->revalidate();
   m_objectAttr->revalidate();
   auto rect = toSkRect(m_objectAttr->bounds());
-  auto [pic, bound] = revalidatePicture(rect);
-  m_effectsBounds = Bounds{ bound.x(), bound.y(), bound.width(), bound.height() };
+  auto [pic, bounds] = revalidatePicture(rect);
+  m_effectsBounds = Bounds{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
   m_picture = pic;
   return m_objectAttr->bounds();
 }

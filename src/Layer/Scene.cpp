@@ -330,9 +330,9 @@ void Scene::onZoomTranslationChanged(float x, float y)
     d_ptr->rasterizer->invalidate(Rasterizer::EReason::ZOOM_TRANSLATION);
 }
 
-void Scene::onViewportChange(const Bounds& bound)
+void Scene::onViewportChange(const Bounds& bounds)
 {
-  d_ptr->viewport = bound;
+  d_ptr->viewport = bounds;
   if (d_ptr->rasterizer)
     d_ptr->rasterizer->invalidate(Rasterizer::EReason::VIEWPORT);
 }
@@ -383,16 +383,16 @@ void Scene::setResRepo(std::map<std::string, std::vector<char>> repo)
   getGlobalImageCache()->purge();
 }
 
-void Scene::enableDrawDebugBound(bool enabled)
+void Scene::enableDrawDebugBounds(bool enabled)
 {
   VGG_IMPL(Scene)
   _->invalidateCurrentFrame();
-  enableDebugBound(enabled);
+  enableDebugBounds(enabled);
 }
 
-bool Scene::isEnableDrawDebugBound()
+bool Scene::isEnableDrawDebugBounds()
 {
-  return getDebugBoundEnable();
+  return getDebugBoundsEnable();
 }
 
 } // namespace VGG

@@ -87,7 +87,7 @@ public:
 
   std::optional<VShape> path;
   bool                  renderable{ false };
-  Bounds                bound;
+  Bounds                bounds;
 
   std::array<float, 4> frameRadius{ 0, 0, 0, 0 };
   float                cornerSmooth{ 0 };
@@ -222,7 +222,7 @@ void PaintNode::render(Renderer* renderer)
     {
       SkAutoCanvasRestore acr(canvas, true);
       canvas->concat(toSkMatrix(transform().matrix()));
-      if (getDebugBoundEnable())
+      if (getDebugBoundsEnable())
       {
         SkPaint strokePen;
         strokePen.setStyle(SkPaint::kStroke_Style);
@@ -293,9 +293,9 @@ void PaintNode::setAlphaMaskBy(std::vector<AlphaMask> masks)
   _->accessor->setAlphaMask(std::move(masks));
 }
 
-VShape PaintNode::makeBoundPath()
+VShape PaintNode::makeBoundsPath()
 {
-  const auto& skRect = toSkRect(frameBound());
+  const auto& skRect = toSkRect(frameBounds());
   return std::visit(
     Overloaded{
       [&](const ContourPtr& c) { return VShape(c); },
@@ -395,15 +395,15 @@ VShape PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
   switch (option.contourType)
   {
     case MCT_FRAMEONLY:
-      path = this->makeBoundPath();
+      path = this->makeBoundsPath();
       break;
     case MCT_UNION_WITH_FRAME:
-      path = this->makeBoundPath();
+      path = this->makeBoundsPath();
     case MCT_UNION:
       appendPath(path, option, BO_UNION);
       break;
     case MCT_INTERSECT_WITH_FRAME:
-      path = this->makeBoundPath();
+      path = this->makeBoundsPath();
     case MCT_INTERSECT:
       appendPath(path, option, BO_INTERSECTION);
       break;
@@ -533,35 +533,35 @@ Transform PaintNode::globalTransform() const
   return Transform(mat);
 }
 
-const Bounds& PaintNode::frameBound() const
+const Bounds& PaintNode::frameBounds() const
 {
-  return d_ptr->bound;
+  return d_ptr->bounds;
 }
 
-void PaintNode::setFrameBounds(const Bounds& bound)
+void PaintNode::setFrameBounds(const Bounds& bounds)
 {
   VGG_IMPL(PaintNode);
-  _->bound = bound;
+  _->bounds = bounds;
   invalidate();
 }
 
 Bounds PaintNode::onRevalidate()
 {
   VGG_IMPL(PaintNode);
-  Bounds newBound;
+  Bounds newBounds;
   for (const auto& e : m_firstChild)
   {
-    newBound.unionWith(e->revalidate());
+    newBounds.unionWith(e->revalidate());
   }
   _->transformAttr->revalidate();
   if (
     _->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY ||
     _->paintOption.paintStrategy == EPaintStrategy::PS_RECURSIVELY)
   {
-    auto currentNodeBound =
+    auto currentNodeBounds =
       _->renderNode->revalidate(); // This will trigger the shape attribute get the
 
-    newBound.unionWith(currentNodeBound);
+    newBounds.unionWith(currentNodeBounds);
     _->renderable = true;
   }
   else
@@ -569,8 +569,8 @@ Bounds PaintNode::onRevalidate()
     _->renderable = false;
   }
   // shape from the current node by the passed node
-  // return newBound;
-  return newBound;
+  // return newBounds;
+  return newBounds;
 }
 const std::string& PaintNode::guid() const
 {
@@ -668,8 +668,8 @@ void PaintNode::paintChildren(Renderer* renderer)
     SkAutoCanvasRestore acr(canvas, clip);
     if (clip)
     {
-      auto boundPath = makeBoundPath();
-      boundPath.clip(canvas, SkClipOp::kIntersect);
+      auto boundsPath = makeBoundsPath();
+      boundsPath.clip(canvas, SkClipOp::kIntersect);
     }
     paintCall(masked);
     paintCall(noneMasked);

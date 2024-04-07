@@ -141,7 +141,7 @@ enum EMaskType : uint8_t
 enum EMaskShowType : uint8_t
 {
   MST_CONTENT = 0,
-  MST_BOUND = 1,
+  MST_BOUNDS = 1,
   MST_INVISIBLE = 2
 };
 

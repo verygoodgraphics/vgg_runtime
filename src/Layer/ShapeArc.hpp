@@ -56,12 +56,12 @@ public:
     return new ArcShape(m_oval, m_startAngle, m_sweepAngle, m_useCenter);
   }
 
-  SkRect bound() override
+  SkRect bounds() override
   {
     return m_oval;
   }
 
-  std::optional<SkRect> visualBound() override
+  std::optional<SkRect> visualBounds() override
   {
     return m_oval;
   }

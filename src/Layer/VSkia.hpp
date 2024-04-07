@@ -53,9 +53,9 @@
 #include <string>
 using namespace VGG;
 
-inline SkRect toSkRect(const VGG::Bounds& bound)
+inline SkRect toSkRect(const VGG::Bounds& bounds)
 {
-  const auto& b = bound;
+  const auto& b = bounds;
   return SkRect{ b.topLeft().x, b.topLeft().y, b.bottomRight().x, b.bottomRight().y };
 }
 

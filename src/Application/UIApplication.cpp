@@ -126,7 +126,7 @@ bool UIApplication::handleKeyEvent(VKeyboardEvent evt)
   if (key == VGGK_b)
   {
     INFO("Toggle object bounding box");
-    m_view->enableDrawDebugBound(!m_view->isEnableDrawDebugBound());
+    m_view->enableDrawDebugBounds(!m_view->isEnableDrawDebugBounds());
     m_view->setDirty(true);
     return true;
   }

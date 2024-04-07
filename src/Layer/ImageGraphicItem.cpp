@@ -22,10 +22,10 @@
 namespace VGG::layer
 {
 
-class ImageBoundAttribute : public ShapeAttribute
+class ImageBoundsAttribute : public ShapeAttribute
 {
 public:
-  ImageBoundAttribute(VRefCnt* cnt)
+  ImageBoundsAttribute(VRefCnt* cnt)
     : ShapeAttribute(cnt, 0)
   {
   }
@@ -55,8 +55,8 @@ void ImageItem::render(Renderer* renderer)
   ASSERT(m_imageShape);
   if (auto shape = m_imageShape->getShape(); !shape.isEmpty() && parent)
   {
-    const auto skBound = toSkRect(m_imageBound);
-    VGG::layer::drawBorder(renderer, shape, skBound, parent->getBorderStyle(), 0);
+    const auto skBounds = toSkRect(m_imageBounds);
+    VGG::layer::drawBorder(renderer, shape, skBounds, parent->getBorderStyle(), 0);
   }
   else
   {
@@ -68,12 +68,12 @@ Bounds ImageItem::onRevalidate()
 {
   if (!m_imageShader)
   {
-    m_imageShader = makeStretchPattern(m_imageBound, m_imagePattern);
+    m_imageShader = makeStretchPattern(m_imageBounds, m_imagePattern);
     VGG_LAYER_DEBUG_CODE(if (!m_imageShader) {
       DEBUG("failed to create image shader for %s", m_imagePattern.guid.c_str());
     });
   }
-  return m_imageBound;
+  return m_imageBounds;
 }
 
 } // namespace VGG::layer

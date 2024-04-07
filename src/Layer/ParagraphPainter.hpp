@@ -107,9 +107,9 @@ private:
 protected:
   Bounds onRevalidate() override
   {
-    auto newBound = m_paragraph->revalidate();
+    auto newBounds = m_paragraph->revalidate();
     m_cache.clear();
-    return newBound;
+    return newBounds;
   }
 };
 } // namespace layer

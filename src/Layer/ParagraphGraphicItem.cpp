@@ -35,8 +35,8 @@ void ParagraphItem::render(Renderer* renderer)
   // if (clip)
   // {
   //   canvas->save();
-  //   auto bound = q_ptr->makeBoundPath();
-  //   bound.clip(canvas, SkClipOp::kIntersect);
+  //   auto bounds = q_ptr->makeBoundsPath();
+  //   bounds.clip(canvas, SkClipOp::kIntersect);
   // }
   if (m_anchor && !m_paragraphLayout->paragraphCache.empty())
   {

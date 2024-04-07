@@ -50,25 +50,25 @@ void AlphaMaskAttribute::setInputImageFilter(Ref<ImageFilterAttribute> input)
 
 Bounds AlphaMaskAttribute::onRevalidate()
 {
-  auto  layerBound = toSkRect(m_inputFilter->revalidate());
+  auto  layerBounds = toSkRect(m_inputFilter->revalidate());
   auto& maskMap = *getMaskMap();
   if (!m_alphaMasks.empty() && m_maskedNode && !maskMap.empty())
   {
     auto     layerFilter = m_inputFilter->getImageFilter();
     auto     alphaMaskIter = AlphaMaskIterator(m_alphaMasks);
     SkMatrix resetOffset = SkMatrix::Translate(
-      layerBound.x(),
-      layerBound.y()); // note that rasterized shader is located in the origin, we need a matrix
+      layerBounds.x(),
+      layerBounds.y()); // note that rasterized shader is located in the origin, we need a matrix
     m_alphaMaskFilter = MaskBuilder::makeAlphaMaskWith(
       layerFilter,
       m_maskedNode,
       maskMap,
       alphaMaskIter,
-      layerBound,
+      layerBounds,
       &resetOffset);
-    return Bounds{ layerBound.x(), layerBound.y(), layerBound.width(), layerBound.height() };
+    return Bounds{ layerBounds.x(), layerBounds.y(), layerBounds.width(), layerBounds.height() };
   }
-  return Bounds{ layerBound.x(), layerBound.y(), layerBound.width(), layerBound.height() };
+  return Bounds{ layerBounds.x(), layerBounds.y(), layerBounds.width(), layerBounds.height() };
 }
 
 Bounds ShapeMaskAttribute::onRevalidate()
@@ -76,11 +76,11 @@ Bounds ShapeMaskAttribute::onRevalidate()
   if (!m_maskID.empty() && m_maskedNode)
   {
     auto iter = ShapeMaskIterator(m_maskID);
-    auto layerBound = m_layerAttr->revalidate();
+    auto layerBounds = m_layerAttr->revalidate();
     if (!getMaskMap()->empty())
     {
       m_shape =
-        MaskBuilder::makeShapeMask(m_maskedNode, *getMaskMap(), iter, toSkRect(layerBound), 0);
+        MaskBuilder::makeShapeMask(m_maskedNode, *getMaskMap(), iter, toSkRect(layerBounds), 0);
     }
   }
   return Bounds();

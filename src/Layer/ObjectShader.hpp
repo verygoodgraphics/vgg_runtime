@@ -65,10 +65,10 @@ public:
 
 private:
   friend class ObjectRecorder;
-  ObjectShader(sk_sp<SkShader> shader, sk_sp<SkPicture> picture, const SkRect& bound)
+  ObjectShader(sk_sp<SkShader> shader, sk_sp<SkPicture> picture, const SkRect& bounds)
     : m_picture(picture)
     , m_displayList(std::move(shader))
-    , m_bounds(bound)
+    , m_bounds(bounds)
   {
     ASSERT(m_displayList);
   }

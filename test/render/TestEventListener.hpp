@@ -312,7 +312,7 @@ public:
     if (key == VGGK_b)
     {
       INFO("Toggle object bounding box");
-      m_scene->enableDrawDebugBound(!m_scene->isEnableDrawDebugBound());
+      m_scene->enableDrawDebugBounds(!m_scene->isEnableDrawDebugBounds());
       return true;
     }
 

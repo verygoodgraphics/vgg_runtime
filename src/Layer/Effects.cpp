@@ -233,14 +233,14 @@ vec4 main(vec4 inColor){
   return nullptr;
 }
 
-sk_sp<SkShader> makeFitPattern(const Bounds& bound, const PatternFit& p)
+sk_sp<SkShader> makeFitPattern(const Bounds& bounds, const PatternFit& p)
 {
   auto img = loadImage(p.guid, Scene::getResRepo());
   if (!img)
     return nullptr;
   SkImageInfo mi = img->imageInfo();
-  float       width = bound.width();
-  float       height = bound.height();
+  float       width = bounds.width();
+  float       height = bounds.height();
   float       sx = (float)width / mi.width();
   float       sy = (float)height / mi.height();
   auto        m = glm::mat3{ 1.0 };
@@ -268,15 +268,15 @@ sk_sp<SkShader> makeFitPattern(const Bounds& bound, const PatternFit& p)
   return shader;
 }
 
-sk_sp<SkShader> makeFillPattern(const Bounds& bound, const PatternFill& p)
+sk_sp<SkShader> makeFillPattern(const Bounds& bounds, const PatternFill& p)
 {
   auto img = loadImage(p.guid, Scene::getResRepo());
 
   if (!img)
     return nullptr;
   SkImageInfo mi = img->imageInfo();
-  float       width = bound.width();
-  float       height = bound.height();
+  float       width = bounds.width();
+  float       height = bounds.height();
   float       sx = (float)width / mi.width();
   float       sy = (float)height / mi.height();
   auto        m = glm::mat3{ 1.0 };
@@ -304,14 +304,14 @@ sk_sp<SkShader> makeFillPattern(const Bounds& bound, const PatternFill& p)
   return shader;
 }
 
-sk_sp<SkShader> makeStretchPattern(const Bounds& bound, const PatternStretch& p)
+sk_sp<SkShader> makeStretchPattern(const Bounds& bounds, const PatternStretch& p)
 {
   auto img = loadImage(p.guid, Scene::getResRepo());
   if (!img)
     return nullptr;
   SkImageInfo mi = img->imageInfo();
-  float       width = bound.width();
-  float       height = bound.height();
+  float       width = bounds.width();
+  float       height = bounds.height();
   auto        m = glm::mat3{ 1.0 };
   m = glm::scale(m, { width, height });
   m *= p.transform.matrix();
@@ -368,7 +368,7 @@ half4 main(float2 coord){
   return SkImageFilters::RuntimeShader(builder, blur.radius, "", nullptr);
 }
 
-sk_sp<SkImageFilter> makeRadialBlurFilter(const RadialBlur& blur, const Bounds& bound)
+sk_sp<SkImageFilter> makeRadialBlurFilter(const RadialBlur& blur, const Bounds& bounds)
 {
   auto result = SkRuntimeEffect::MakeForShader(SkString(R"(
 uniform shader child;
@@ -405,7 +405,7 @@ half4 main(float2 coord){
   }
   SkRuntimeShaderBuilder builder(std::move(result.effect));
   builder.uniform("radius") = blur.radius;
-  builder.uniform("center") = SkV2{ blur.xCenter * bound.width(), blur.yCenter * bound.height() };
+  builder.uniform("center") = SkV2{ blur.xCenter * bounds.width(), blur.yCenter * bounds.height() };
   return SkImageFilters::RuntimeShader(builder, blur.radius, "", nullptr);
 }
 sk_sp<SkImageFilter> makeLayerBlurFilter(const GaussianBlur& blur)
@@ -425,7 +425,7 @@ sk_sp<SkImageFilter> makeBackgroundBlurFilter(const GaussianBlur& blur)
     0);
 }
 
-sk_sp<SkShader> makeTilePattern(const Bounds& bound, const PatternTile& p)
+sk_sp<SkShader> makeTilePattern(const Bounds& bounds, const PatternTile& p)
 {
   auto img = loadImage(p.guid, Scene::getResRepo());
 
@@ -458,14 +458,14 @@ sk_sp<SkShader> makeTilePattern(const Bounds& bound, const PatternTile& p)
   return shader;
 }
 
-sk_sp<SkShader> makeGradientLinear(const Bounds& bound, const GradientLinear& g)
+sk_sp<SkShader> makeGradientLinear(const Bounds& bounds, const GradientLinear& g)
 {
   if (g.stops.empty())
     return nullptr;
   auto minPosition = g.stops.front().position;
   auto maxPosition = g.stops.back().position;
-  auto f = bound.map(bound.size() * g.from);
-  auto t = bound.map(bound.size() * g.to);
+  auto f = bounds.map(bounds.size() * g.from);
+  auto t = bounds.map(bounds.size() * g.to);
   auto start = glm::mix(f, t, minPosition);
   auto end = glm::mix(f, t, maxPosition);
 
@@ -495,7 +495,7 @@ sk_sp<SkShader> makeGradientLinear(const Bounds& bound, const GradientLinear& g)
 
 sk_sp<SkImageFilter> makeInnerShadowImageFilter(
   const InnerShadow&   shadow,
-  const Bounds&        bound,
+  const Bounds&        bounds,
   bool                 shadowOnly,
   bool                 overrideSpread,
   sk_sp<SkImageFilter> input)
@@ -520,10 +520,10 @@ sk_sp<SkImageFilter> makeInnerShadowImageFilter(
   }
   else
   {
-    const auto     halfWidth = bound.width() / 2;
-    const auto     halfHeight = bound.height() / 2;
-    const float    scaleX = std::max((bound.width() - 2 * shadow.spread) / bound.width(), 0.f);
-    const float    scaleY = std::max((bound.height() - 2 * shadow.spread) / bound.height(), 0.f);
+    const auto     halfWidth = bounds.width() / 2;
+    const auto     halfHeight = bounds.height() / 2;
+    const float    scaleX = std::max((bounds.width() - 2 * shadow.spread) / bounds.width(), 0.f);
+    const float    scaleY = std::max((bounds.height() - 2 * shadow.spread) / bounds.height(), 0.f);
     const SkVector c = { halfWidth - halfWidth * scaleX, halfHeight - halfHeight * scaleY };
     SkMatrix       m = SkMatrix::I();
     m.postScale(scaleX, scaleY);
@@ -544,7 +544,7 @@ sk_sp<SkImageFilter> makeInnerShadowImageFilter(
 
 sk_sp<SkImageFilter> makeDropShadowImageFilter(
   const DropShadow&    shadow,
-  const Bounds&        bound,
+  const Bounds&        bounds,
   bool                 overrideSpread,
   sk_sp<SkImageFilter> input)
 {
@@ -559,10 +559,10 @@ sk_sp<SkImageFilter> makeDropShadowImageFilter(
       shadow.color,
       input);
   }
-  const auto     halfWidth = bound.width() / 2;
-  const auto     halfHeight = bound.height() / 2;
-  const float    scaleX = std::max((bound.width() + 2 * shadow.spread) / bound.width(), 0.f);
-  const float    scaleY = std::max((bound.height() + 2 * shadow.spread) / bound.height(), 0.f);
+  const auto     halfWidth = bounds.width() / 2;
+  const auto     halfHeight = bounds.height() / 2;
+  const float    scaleX = std::max((bounds.width() + 2 * shadow.spread) / bounds.width(), 0.f);
+  const float    scaleY = std::max((bounds.height() + 2 * shadow.spread) / bounds.height(), 0.f);
   const SkVector c = { halfWidth - halfWidth * scaleX, halfHeight - halfHeight * scaleY };
   SkMatrix       m = SkMatrix::I();
   m.postScale(scaleX, scaleY);

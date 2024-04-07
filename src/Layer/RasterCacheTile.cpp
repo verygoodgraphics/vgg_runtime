@@ -34,7 +34,7 @@ struct CacheState
     LRUCache<int, std::pair<bool, Rasterizer::Tile>>; // boolean indicates if the tile is valid
   SkMatrix rasterMatrix;
   TileMap  tileCache;
-  SkRect   rasterBound;
+  SkRect   rasterBounds;
   int      tileWidth;
   int      tileHeight;
   CacheState(int size = 40)
@@ -54,8 +54,8 @@ struct CacheState
     rasterMatrix = rasterContext.globalMatrix * rasterContext.localMatrix;
     rasterMatrix[SkMatrix::kMTransX] = 0;
     rasterMatrix[SkMatrix::kMTransY] = 0;
-    rasterBound = rasterMatrix.mapRect(*rasterContext.bound);
-    calcTileSize(rasterBound.width(), rasterBound.height(), clipRect);
+    rasterBounds = rasterMatrix.mapRect(*rasterContext.bounds);
+    calcTileSize(rasterBounds.width(), rasterBounds.height(), clipRect);
     for (auto it = tileCache.begin(); it != tileCache.end(); it++)
     {
       ASSERT(*it);
@@ -101,16 +101,16 @@ private:
 };
 struct TileIterator
 {
-  TileIterator(const SkRect& clip, int tileW, int tileH, const SkRect& bound)
+  TileIterator(const SkRect& clip, int tileW, int tileH, const SkRect& bounds)
     : tileWidth(tileW)
     , tileHeight(tileH)
-    , beginX(std::max(0, int((clip.x() - bound.x()) / tileW)))
-    , beginY(std::max(0, int((clip.y() - bound.y()) / tileH)))
+    , beginX(std::max(0, int((clip.x() - bounds.x()) / tileW)))
+    , beginY(std::max(0, int((clip.y() - bounds.y()) / tileH)))
     , endX(
-        std::min(std::ceil(bound.width() / tileW), std::ceil((clip.right() - bound.x()) / tileW)))
+        std::min(std::ceil(bounds.width() / tileW), std::ceil((clip.right() - bounds.x()) / tileW)))
     , endY(
-        std::min(std::ceil(bound.height() / tileH), std::ceil((clip.bottom() - bound.y()) / tileH)))
-    , column(std::ceil(bound.width() / tileW))
+        std::min(std::ceil(bounds.height() / tileH), std::ceil((clip.bottom() - bounds.y()) / tileH)))
+    , column(std::ceil(bounds.width() / tileW))
   {
     m_x = beginX;
     m_y = beginY;
@@ -217,8 +217,8 @@ std::vector<Rasterizer::Tile> rasterOrGetTiles(
           iter.tileHeight,
           tile->first,
           tile->second,
-          cache.rasterBound.left(),
-          cache.rasterBound.top());
+          cache.rasterBounds.left(),
+          cache.rasterBounds.top());
         tileState->first = true;
         tileState->second.image = rasterTile(surface, picture, cache.rasterMatrix, rect);
       }
@@ -231,8 +231,8 @@ std::vector<Rasterizer::Tile> rasterOrGetTiles(
         iter.tileHeight,
         tile->first,
         tile->second,
-        cache.rasterBound.left(),
-        cache.rasterBound.top());
+        cache.rasterBounds.left(),
+        cache.rasterBounds.top());
       auto v = cache.tileCache.insert(key, { true, { nullptr, rect } });
       v->second.image = rasterTile(surface, picture, cache.rasterMatrix, rect);
       tiles.push_back(v->second);
@@ -255,8 +255,8 @@ std::vector<Rasterizer::Tile> rasterOrGetTiles(
           iter.tileHeight,
           rt->first,
           rt->second,
-          cache.rasterBound.left(),
-          cache.rasterBound.top());
+          cache.rasterBounds.left(),
+          cache.rasterBounds.top());
         auto v = cache.tileCache.insert(key, { true, { nullptr, rect } });
         v->second.image = rasterTile(surface, picture, cache.rasterMatrix, rect);
       }
@@ -268,8 +268,8 @@ std::vector<Rasterizer::Tile> rasterOrGetTiles(
           iter.tileHeight,
           rt->first,
           rt->second,
-          cache.rasterBound.left(),
-          cache.rasterBound.top());
+          cache.rasterBounds.left(),
+          cache.rasterBounds.top());
         tileState->second.image = rasterTile(surface, picture, cache.rasterMatrix, rect);
       }
     }
@@ -368,9 +368,9 @@ std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::o
     -> std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix>
   {
     cache.revalidate(rasterContext, clipRect);
-    auto iter = TileIterator(skv, cache.tileWidth, cache.tileHeight, cache.rasterBound);
+    auto iter = TileIterator(skv, cache.tileWidth, cache.tileHeight, cache.rasterBounds);
     auto rasterIter =
-      TileIterator(rasterRect, cache.tileWidth, cache.tileHeight, cache.rasterBound);
+      TileIterator(rasterRect, cache.tileWidth, cache.tileHeight, cache.rasterBounds);
     if (!iter.valid())
     {
       DEBUG("no tile hit");

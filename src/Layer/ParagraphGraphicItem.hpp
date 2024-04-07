@@ -53,11 +53,11 @@ public:
     m_paragraphLayout->setLineStyle(std::move(parStyle));
   }
 
-  // VGG_ATTRIBUTE(ParagraphBound, Bound, m_fixedBound);
+  // VGG_ATTRIBUTE(ParagraphBounds, Bounds, m_fixedBounds);
 
-  void setParagraphBound(const Bounds& bound)
+  void setParagraphBounds(const Bounds& bounds)
   {
-    m_paragraphLayout->setParagraphHintBound(bound);
+    m_paragraphLayout->setParagraphHintBounds(bounds);
   }
 
   void setVerticalAlignment(ETextVerticalAlignment vertAlign)
@@ -94,7 +94,7 @@ public:
 
 private:
   VParagraphPainterPtr     m_painter;
-  Bounds                   m_fixedBound;
+  Bounds                   m_fixedBounds;
   RichTextBlockPtr         m_paragraphLayout;
   ETextLayoutMode          m_layoutMode;
   std::optional<glm::vec2> m_anchor;

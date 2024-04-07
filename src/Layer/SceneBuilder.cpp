@@ -15,6 +15,7 @@
  */
 
 #include "Layer/DocConcept.hpp"
+#include "Layer/JSONModel.hpp"
 #include "Layer/Memory/VAllocator.hpp"
 #include "PathPatch.h"
 #include "Layer/SceneBuilder.hpp"
@@ -58,64 +59,162 @@ struct BuilderImpl
   }
 
   template<typename T, typename F1, typename F2>
-    requires AbstractObject<T> && std::invocable<F1, std::string, std::string> &&
-             std::invocable<F2, PaintNode*, Bounds>
+    requires AbstractObject<T> && CallableObject<PaintNode*, F1, std::string, std::string> &&
+             CallableObject<void, F2, PaintNode*, glm::mat3, Bounds>
   static PaintNodePtr makeObjectBase(
-    const T&         object,
+    const T&         m,
     const glm::mat3& totalMatrix,
     F1&&             creator,
     F2&&             override)
   {
-    auto obj = creator(object.getName(), object.getId());
+    auto obj = creator(m.getName(), m.getId());
     if (!obj)
       return nullptr;
-    auto [originalMatrix, newMatrix, inversedNewMatrix] =
-      BuilderImpl::makeMatrix(object.getMatrix());
+    auto [originalMatrix, newMatrix, inversedNewMatrix] = BuilderImpl::makeMatrix(m.getMatrix());
     const auto convertedMatrix = inversedNewMatrix * totalMatrix * originalMatrix;
     obj->setTransform(Transform(newMatrix));
-    const auto b = BuilderImpl::makeBounds(object.getBounds(), convertedMatrix);
-    obj->setFrameBound(b);
+    const auto b = BuilderImpl::makeBounds(m.getBounds(), convertedMatrix);
+    obj->setFrameBounds(b);
     //
     // // Pattern point in style are implicitly given by bound, we must supply the points in
     // original
     // // coordinates for correct converting
-    obj->setStyle(SceneBuilder::fromStyle(object.getStyle(), b, convertedMatrix));
-    // obj->setFrameCornerSmoothing(getOptional<float>(j,
-    //  "cornerSmoothing").value_or(0.f)); obj->setContextSettings(j.value("contextSettings",
-    //  ContextSetting())); obj->setMaskBy(j.value("outlineMaskBy", std::vector<std::string>{}));
-    //  obj->setAlphaMaskBy(j.value("alphaMaskBy", std::vector<AlphaMask>{}));
-    //  const auto maskType = j.value("maskType", EMaskType::MT_NONE);
-    //  const auto defaultShowType =
-    //    maskType == EMaskType::MT_OUTLINE
-    //      ? MST_CONTENT
-    //      : (maskType == EMaskType::MT_ALPHA && false ? MST_BOUND : MST_INVISIBLE);
-    //  const auto maskShowType = j.value("maskShowType", defaultShowType);
-    //  obj->setMaskType(maskType);
-    //  obj->setMaskShowType(maskShowType);
-    //  obj->setOverflow(j.value("overflow", EOverflow::OF_VISIBLE));
-    //  obj->setVisible(j.value("visible", true));
-    //  override(obj.get(), convertedMatrix, b);
-    //  return obj;
+    auto style = m.getStyle();
+    obj->setStyle(style); // TODO:: convert coordinates
+    obj->setFrameCornerSmoothing(m.getCornerSmoothing());
+    obj->setContextSettings(m.getContextSetting());
+    obj->setMaskBy(m.getShapeMask());
+    obj->setAlphaMaskBy(m.getAlphaMask());
+    const auto maskType = m.getMaskType();
+    obj->setMaskType(maskType);
+    // const auto defaultShowType =
+    //   maskType == EMaskType::MT_OUTLINE
+    //     ? MST_CONTENT
+    //     : (maskType == EMaskType::MT_ALPHA && false ? MST_BOUND : MST_INVISIBLE);
+    obj->setMaskShowType(m.getMaskShowType()); // default show type??
+    obj->setOverflow(m.getOverflow());
+    obj->setVisible(m.getVisible());
+    override(0, convertedMatrix, Bounds());
+    return obj;
+  }
 
-    override(0, Bounds());
+  template<typename T, typename C>
+    requires layer::GroupObject<T> && layer::CastObject<C, T>
+  static PaintNodePtr fromGroup(const T& m, const glm::mat3& totalMatrix, VAllocator* alloc)
+  {
     return 0;
   }
-  template<typename T>
-    requires layer::FrameObject<T>
-  static void fromFrame(const T& object, const glm::mat3& totalMatrix, VAllocator* alloc)
+
+  template<typename T, typename C>
+    requires layer::FrameObject<T> && layer::CastObject<C, T>
+  static PaintNodePtr fromFrame(const T& m, const glm::mat3& totalMatrix, VAllocator* alloc)
   {
+    return makeObjectBase(
+      m,
+      totalMatrix,
+      [&](std::string name, std::string guid)
+      {
+        auto p = makePaintNodePtr(alloc, std::move(name), VGG_FRAME, std::move(guid));
+        return p;
+      },
+      [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bound)
+      {
+        p->setContourOption(ContourOption(ECoutourType::MCT_FRAMEONLY, false));
+        p->setFrameRadius(m.getRadius());
+        auto childObjects = m.getChildObjects();
+        for (const auto& c : childObjects)
+        {
+          p->addChild(BuilderImpl::fromObject<T, C>(C::asFrame(c), matrix, alloc));
+        }
+      });
   }
 
-  template<typename T>
-    requires layer::ImageObject<T>
-  static void fromImage(const T& object, const glm::mat3& totalMatrix, VAllocator* alloc)
+  template<typename T, typename C>
+    requires layer::FrameObject<T> && layer::CastObject<C, T>
+  static std::vector<PaintNodePtr> fromTopLevelFrames(
+    const std::vector<T>& frameObject,
+    const glm::mat3&      matrix,
+    VAllocator*           alloc)
   {
+    std::vector<PaintNodePtr> frames(4);
+    for (const auto& f : frameObject)
+    {
+      frames.push_back(BuilderImpl::fromFrame<T, C>(f, matrix, alloc));
+    }
+    return frames;
   }
 
-  template<typename T>
-    requires layer::TextObject<T>
-  static void fromText(const T& object, const glm::mat3& totalMatrix, VAllocator* alloc)
+  template<typename T, typename C>
+    requires layer::MasterObject<T> && layer::CastObject<C, T>
+  static PaintNodePtr fromMaster(const T& m, const glm::mat3& totalMatrix, VAllocator* alloc)
   {
+    return fromFrame(m, totalMatrix, alloc);
+  }
+
+  template<typename T, typename C>
+    requires layer::InstanceObject<T> && layer::CastObject<C, T>
+  static PaintNodePtr fromInstance(const T& m, const glm::mat3& totalMatrix, VAllocator* alloc)
+  {
+    DEBUG("not support instance");
+    return nullptr;
+  }
+
+  template<typename T, typename C>
+    requires layer::ImageObject<T> && layer::CastObject<C, T>
+  static PaintNodePtr fromImage(const T& object, const glm::mat3& totalMatrix, VAllocator* alloc)
+  {
+    return nullptr;
+  }
+
+  template<typename T, typename C>
+    requires layer::TextObject<T> && layer::CastObject<C, T>
+  static PaintNodePtr fromText(const T& object, const glm::mat3& totalMatrix, VAllocator* alloc)
+  {
+    return nullptr;
+  }
+
+  template<typename T, typename C>
+    requires layer::AbstractObject<T> && CastObject<C, T>
+  static PaintNodePtr fromObject(const T& m, const glm::mat3& totalMatrix, VAllocator* alloc)
+  {
+    PaintNodePtr ro;
+    switch (m.getObjectType())
+    {
+      case EModelObjectType::GROUP:
+        return BuilderImpl::fromGroup<decltype(C::asGroup(m)), C>(
+          C::asGroup(m),
+          totalMatrix,
+          alloc);
+      case EModelObjectType::FRAME:
+        return BuilderImpl::fromFrame<decltype(C::asFrame(m)), C>(
+          C::asFrame(m),
+          totalMatrix,
+          alloc);
+      case EModelObjectType::PATH:
+        DEBUG("not implemented");
+        break;
+      case EModelObjectType::IMAGE:
+        return BuilderImpl::fromImage<decltype(C::asImage(m)), C>(
+          C::asImage(m),
+          totalMatrix,
+          alloc);
+      case EModelObjectType::TEXT:
+        return BuilderImpl::fromText<decltype(C::asText(m)), C>(C::asText(m), totalMatrix, alloc);
+      case EModelObjectType::CONTOUR:
+        DEBUG("not implemented");
+        break;
+      case EModelObjectType::MASTER:
+        DEBUG("not implemented");
+        break;
+      case EModelObjectType::INSTANCE:
+        DEBUG("not implemented");
+        break;
+      case EModelObjectType::UNKNOWN:
+        DEBUG("not implemented");
+        break;
+    }
+    DEBUG("unknown object type");
+    return nullptr;
   }
 };
 
@@ -638,6 +737,18 @@ void SceneBuilder::buildImpl(const json& j)
   glm::mat3 mat = glm::identity<glm::mat3>();
   mat = glm::scale(mat, glm::vec2(1, -1));
   m_frames = fromTopLevelFrames(getOrDefault(j, "frames"), mat);
+}
+
+void SceneBuilder::buildImpl2(const json& j)
+{
+  glm::mat3 mat = glm::identity<glm::mat3>();
+  mat = glm::scale(mat, glm::vec2(1, -1));
+  auto                         frames = getOrDefault(j, "frames");
+  std::vector<JSONFrameObject> frameObjects;
+  m_frames = BuilderImpl::fromTopLevelFrames<JSONFrameObject, JSONModelCastObject>(
+    frameObjects,
+    mat,
+    m_alloc);
 }
 
 SceneBuilderResult SceneBuilder::build()

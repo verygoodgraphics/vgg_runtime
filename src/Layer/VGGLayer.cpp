@@ -47,6 +47,7 @@
 namespace
 {
 
+#ifdef VGG_LAYER_DEBUG
 inline glm::mat3 getLocalMatrix(PaintNode* node)
 {
   ASSERT(node);
@@ -59,14 +60,13 @@ inline glm::mat3 getLocalMatrix(PaintNode* node)
   return local;
 }
 
-#ifdef VGG_LAYER_DEBUG
-inline void drawBound(PaintNode* node, const glm::mat3& deviceMatrix, SkCanvas* canvas)
+inline void drawBounds(PaintNode* node, const glm::mat3& deviceMatrix, SkCanvas* canvas)
 {
   ASSERT(canvas);
   if (node)
   {
     auto    localMatrix = getLocalMatrix(node);
-    auto    bound = node->bound();
+    auto    bound = node->bounds();
     auto    current = toSkMatrix(deviceMatrix * localMatrix);
     auto    deviceBounds = current.mapRect(toSkRect(bound));
     SkPaint paint;
@@ -84,7 +84,7 @@ inline void drawBounds(
 {
   for (auto it = begin; it != end; ++it)
   {
-    drawBound(*it, deviceMatrix, canvas);
+    drawBounds(*it, deviceMatrix, canvas);
   }
 }
 #endif
@@ -413,7 +413,7 @@ PaintNode* VLayer::nodeAt(int x, int y)
       auto zoomMatrix = s->zoomer() ? s->zoomer()->matrix() : glm::mat3{ 1 };
       auto f = s->frame(s->currentPage())->transform().matrix();
       auto deviceMatrix = matrix * zoomMatrix * f;
-      drawBound(r, deviceMatrix, layerCanvas());
+      drawBounds(r, deviceMatrix, layerCanvas());
     });
     return r;
   }

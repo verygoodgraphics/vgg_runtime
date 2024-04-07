@@ -70,7 +70,7 @@ ImageNode::ImageNode(VRefCnt* cnt, const std::string& name, std::string guid)
   observe(std::move(c));
 }
 
-Bounds ImageNode::getImageBound() const
+Bounds ImageNode::getImageBounds() const
 {
   return d_ptr->accessor->image()->getImageBounds();
 }
@@ -96,7 +96,7 @@ void ImageNode::setImageFilter(const ImageFilter& filter)
   d_ptr->accessor->image()->setImageFilter(filter);
 }
 
-void ImageNode::setImageBound(const Bounds& bound)
+void ImageNode::setImageBounds(const Bounds& bound)
 {
   d_ptr->accessor->image()->setImageBounds(bound);
 }

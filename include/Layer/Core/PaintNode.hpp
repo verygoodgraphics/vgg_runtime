@@ -166,7 +166,7 @@ public:
 
   const Bounds& frameBound() const; // content bound
 
-  void setFrameBound(const Bounds& bound);
+  void setFrameBounds(const Bounds& bound);
 
   const std::string& guid() const;
 

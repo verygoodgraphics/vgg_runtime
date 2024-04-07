@@ -66,10 +66,10 @@ void VNode::invalidate()
 const Bounds& VNode::revalidate()
 {
   if (!isInvalid())
-    return m_bound;
-  m_bound = onRevalidate();
+    return m_bounds;
+  m_bounds = onRevalidate();
   m_state &= ~INVALIDATE;
-  return m_bound;
+  return m_bounds;
 }
 
 } // namespace VGG::layer

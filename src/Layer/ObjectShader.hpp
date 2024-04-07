@@ -86,7 +86,7 @@ public:
   ObjectRecorder& operator=(const ObjectRecorder&) = delete;
   Renderer*       beginRecording(const SkRect& b, const SkMatrix& matrix)
   {
-    m_bound = b;
+    m_bounds = b;
     m_matrix = matrix;
     if (!m_rec)
     {
@@ -127,7 +127,7 @@ public:
 
 private:
   SkMatrix                           m_matrix;
-  SkRect                             m_bound;
+  SkRect                             m_bounds;
   std::unique_ptr<Renderer>          m_renderer;
   std::unique_ptr<SkPictureRecorder> m_rec;
 };

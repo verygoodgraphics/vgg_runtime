@@ -37,7 +37,7 @@ using VNodeRef = WeakRef<VNode>;
 
 class VNode : public ObjectImpl<VObject>
 {
-  Bounds                m_bound;
+  Bounds                m_bounds;
   uint8_t               m_state{ 0 };
   std::vector<VNodeRef> m_observers;
 
@@ -74,10 +74,10 @@ public:
 
   const Bounds& revalidate();
 
-  const Bounds& bound() const
+  const Bounds& bounds() const
   {
     ASSERT(!isInvalid());
-    return m_bound;
+    return m_bounds;
   }
 };
 } // namespace VGG::layer

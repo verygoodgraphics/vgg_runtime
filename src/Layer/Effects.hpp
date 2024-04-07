@@ -232,15 +232,15 @@ inline sk_sp<SkShader> makeGradientDiamond(const Bounds& bound, const G& g)
   return s;
 }
 
-inline sk_sp<SkShader> makeGradientShader(const Bounds& bound, const Gradient& gradient)
+inline sk_sp<SkShader> makeGradientShader(const Bounds& bounds, const Gradient& gradient)
 {
   sk_sp<SkShader> shader;
   std::visit(
     Overloaded{
-      [&](const GradientLinear& p) { shader = makeGradientLinear(bound, p); },
-      [&](const GradientRadial& p) { shader = makeGradientRadial(bound, p); },
-      [&](const GradientAngular& p) { shader = makeGradientAngular(bound, p); },
-      [&](const GradientDiamond& p) { shader = makeGradientDiamond(bound, p); },
+      [&](const GradientLinear& p) { shader = makeGradientLinear(bounds, p); },
+      [&](const GradientRadial& p) { shader = makeGradientRadial(bounds, p); },
+      [&](const GradientAngular& p) { shader = makeGradientAngular(bounds, p); },
+      [&](const GradientDiamond& p) { shader = makeGradientDiamond(bounds, p); },
     },
     gradient.instance);
   return shader;

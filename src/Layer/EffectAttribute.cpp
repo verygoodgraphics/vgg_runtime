@@ -46,7 +46,7 @@ SkRect LayerFXAttribute::revalidateLayerImageFilter(const SkRect& bounds)
         Overloaded{ [&](const GaussianBlur& blur) { filter = makeLayerBlurFilter(blur); },
                     [&](const MotionBlur& blur) { filter = makeMotionBlurFilter(blur); },
                     [&, this](const RadialBlur& blur)
-                    { filter = makeRadialBlurFilter(blur, m_styleObjectAttr->bound()); } },
+                    { filter = makeRadialBlurFilter(blur, m_styleObjectAttr->bounds()); } },
         b.type);
       if (m_imageFilter == nullptr)
       {

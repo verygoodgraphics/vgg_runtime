@@ -53,7 +53,7 @@ public:
     std::vector<ParagraphAttr> parStyle);
 
   void setFrameMode(ETextLayoutMode mode);
-  void setParagraphBound(const Bounds& bound);
+  void setParagraphBounds(const Bounds& bound);
   void setVerticalAlignment(ETextVerticalAlignment vertAlign);
 
   using EventHandler = std::function<void(ParagraphItemAttributeAccessor*, void* event)>;

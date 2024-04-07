@@ -126,7 +126,7 @@ Bounds ObjectAttribute::onRevalidate()
   // m_effectBounds =
   //   m_renderObjectAttr->effectBounds(); // FIXME: maybe this could be done in the current
   // object rather than m_renderObjectAttr
-  return m_graphicItem->bound();
+  return m_graphicItem->bounds();
   // m_shapeAttr->revalidate();
   // if (m_shapeAttr)
   // {
@@ -217,7 +217,7 @@ Bounds StyleAttribute::onRevalidate()
   objectBounds.join(shadowBounds);
   m_effectBounds =
     Bounds{ objectBounds.x(), objectBounds.y(), objectBounds.width(), objectBounds.height() };
-  return m_objectAttr->bound();
+  return m_objectAttr->bounds();
 }
 
 } // namespace VGG::layer

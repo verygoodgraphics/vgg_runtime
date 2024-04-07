@@ -80,7 +80,7 @@ public:
 
   Bounds effectBounds() const override
   {
-    return bound();
+    return bounds();
   }
 
   glm::vec2 getAnchor() const

@@ -34,7 +34,7 @@ void StyleItem::render(Renderer* renderer)
 
   if (getDebugBoundEnable())
   {
-    SkRect layerBound = toSkRect(m_alphaMaskAttr->bound());
+    SkRect layerBound = toSkRect(m_alphaMaskAttr->bounds());
     SkRect effectBounds = toSkRect(m_objectAttr->effectBounds());
 
     SkPaint p;
@@ -65,8 +65,8 @@ SkRect StyleItem::recorder(Renderer* renderer)
     renderer->canvas()->save();
     shapeMask.clip(renderer->canvas(), SkClipOp::kIntersect);
   }
-  SkRect renderBound = toSkRect(m_objectAttr->bound());
-  SkRect layerBound = toSkRect(m_alphaMaskAttr->bound());
+  SkRect renderBound = toSkRect(m_objectAttr->bounds());
+  SkRect layerBound = toSkRect(m_alphaMaskAttr->bounds());
   if (newLayer)
   {
     SkPaint layerPaint;
@@ -135,11 +135,11 @@ Bounds StyleItem::onRevalidate()
   m_transformAttr->revalidate();
   m_alphaMaskAttr->revalidate();
   m_objectAttr->revalidate();
-  auto rect = toSkRect(m_objectAttr->bound());
+  auto rect = toSkRect(m_objectAttr->bounds());
   auto [pic, bound] = revalidatePicture(rect);
   m_effectsBounds = Bounds{ bound.x(), bound.y(), bound.width(), bound.height() };
   m_picture = pic;
-  return m_objectAttr->bound();
+  return m_objectAttr->bounds();
 }
 
 StyleItem::~StyleItem()

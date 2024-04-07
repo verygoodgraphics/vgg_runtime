@@ -282,7 +282,7 @@ inline PaintNodePtr makeObjectCommonProperty(
 
   obj->setTransform(Transform(newMatrix));
   const auto b = SceneBuilder::fromBound(j.value("bounds", json::object_t{}), convertedMatrix);
-  obj->setFrameBound(b);
+  obj->setFrameBounds(b);
 
   // Pattern point in style are implicitly given by bound, we must supply the points in original
   // coordinates for correct converting
@@ -423,7 +423,7 @@ inline PaintNodePtr SceneBuilder::fromImage(const json& j, const glm::mat3& tota
     },
     [&](ImageNode* p, const glm::mat3& matrix, const Bounds& bound)
     {
-      p->setImageBound(bound);
+      p->setImageBounds(bound);
       p->setImage(j.value("imageFileName", ""));
       // p->setReplacesImage(j.value("fillReplacesImage", false));
       p->setImageFilter(j.value("imageFilters", ImageFilter()));
@@ -512,7 +512,7 @@ PaintNodePtr SceneBuilder::fromText(const json& j, const glm::mat3& totalMatrix)
         CoordinateConvert::convertCoordinateSystem(anchorPoint, totalMatrix);
         p->setTextAnchor(anchorPoint);
       }
-      p->setParagraphBound(bound);
+      p->setParagraphBounds(bound);
 
       // 1.
 

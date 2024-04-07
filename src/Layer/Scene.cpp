@@ -78,11 +78,11 @@ public:
       rasterizer->invalidate(Rasterizer::EReason::CONTENT);
     if (auto f = currentFrame(true); f)
     {
-      return f->bound();
+      return f->bounds();
     }
     else
     {
-      return bound();
+      return bounds();
     }
   }
 
@@ -197,9 +197,9 @@ public:
         if (rasterizer->isInvalidate())
         {
           auto                      rasterDevice = canvas->recordingContext();
-          const auto                skv = toSkRect(viewport.value_or(frame->bound()));
+          const auto                skv = toSkRect(viewport.value_or(frame->bounds()));
           auto                      mat = canvas->getTotalMatrix(); // DPI * zoom
-          const auto                skr = toSkRect(frame->bound());
+          const auto                skr = toSkRect(frame->bounds());
           const auto                skm = toSkMatrix(frame->transform().matrix());
           Rasterizer::RasterContext rasterCtx{ mat, frame->picture(), &skr, skm };
           rasterizer->rasterize(rasterDevice, rasterCtx, lod, skv, &rasterTiles, &rasterMatrix, 0);

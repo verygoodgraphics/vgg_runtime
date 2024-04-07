@@ -43,8 +43,8 @@ public:
   ImageNode(ImageNode&&) noexcept = delete;
   ImageNode& operator=(ImageNode&&) noexcept = delete;
 
-  void               setImageBound(const Bounds& bound);
-  Bounds             getImageBound() const;
+  void               setImageBounds(const Bounds& bound);
+  Bounds             getImageBounds() const;
   void               setImage(const std::string& guid);
   const std::string& getImageGUID() const;
   void               setImageFilter(const ImageFilter& filter);

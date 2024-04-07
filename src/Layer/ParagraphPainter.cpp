@@ -73,7 +73,7 @@ void VParagraphPainter::drawTextBlob(
             continue;
           fillPen.setStyle(SkPaint::kFill_Style);
           fillPen.setAntiAlias(true);
-          populateSkPaint(f.type, f.contextSettings, toSkRect(m_paragraph->bound()), fillPen);
+          populateSkPaint(f.type, f.contextSettings, toSkRect(m_paragraph->bounds()), fillPen);
           paints.push_back(fillPen);
         }
         if (!paints.empty())
@@ -178,7 +178,7 @@ void VParagraphPainter::paintRaw(Renderer* renderer, float x, float y)
 
 void VParagraphPainter::paintParagraph(Renderer* renderer)
 {
-  const auto b = m_paragraph->bound();
+  const auto b = m_paragraph->bounds();
   float      totalHeight = m_paragraph->textHeight();
   float      offsetY = 0.f;
   auto       vertAlign = m_paragraph->verticalAlignment();

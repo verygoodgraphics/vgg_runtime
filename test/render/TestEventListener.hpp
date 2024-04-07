@@ -230,7 +230,7 @@ public:
         using namespace VGG::layer::exporter;
         auto                 page = m_scene->currentPage();
         auto                 f = m_scene->frame(page);
-        auto                 b = f->bound();
+        auto                 b = f->bounds();
         exporter::SVGOptions opt;
         opt.extend[0] = b.width();
         opt.extend[1] = b.height();
@@ -244,7 +244,7 @@ public:
       std::ofstream       ofs("capture.png");
       layer::ImageOptions opt;
       auto                f = m_scene->frame(m_scene->currentPage());
-      auto                b = f->bound();
+      auto                b = f->bounds();
       opt.extend[0] = b.width();
       opt.extend[1] = b.height();
       INFO("Capture PNG [%f, %f]", b.width(), b.height());
@@ -263,7 +263,7 @@ public:
       std::ofstream       ofs("capture.jpg");
       layer::ImageOptions opt;
       auto                f = m_scene->frame(m_scene->currentPage());
-      auto                b = f->bound();
+      auto                b = f->bounds();
       opt.extend[0] = b.width();
       opt.extend[1] = b.height();
       opt.encode = VGG::layer::EImageEncode::IE_JPEG;
@@ -280,7 +280,7 @@ public:
       std::ofstream       ofs("capture.webp");
       layer::ImageOptions opt;
       auto                f = m_scene->frame(m_scene->currentPage());
-      auto                b = f->bound();
+      auto                b = f->bounds();
       opt.extend[0] = b.width();
       opt.extend[1] = b.height();
       opt.encode = VGG::layer::EImageEncode::IE_WEBP;
@@ -300,7 +300,7 @@ public:
         using namespace VGG::layer::exporter;
         auto                 page = m_scene->currentPage();
         auto                 f = m_scene->frame(page);
-        auto                 b = f->bound();
+        auto                 b = f->bounds();
         exporter::PDFOptions opt;
         opt.extend[0] = b.width();
         opt.extend[1] = b.height();

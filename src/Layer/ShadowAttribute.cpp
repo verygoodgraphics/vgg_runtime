@@ -38,7 +38,7 @@ Bounds DropShadowAttribute::onRevalidate()
   {
     m_shapeAttr->revalidate();
     auto shape = m_shapeAttr->getShape();
-    auto bounds = toSkRect(m_shapeAttr->bound());
+    auto bounds = toSkRect(m_shapeAttr->bounds());
     if (!m_shadow.empty() && !shape.isEmpty())
     {
       m_dropShadowEffects = DropShadowEffect(m_shadow, bounds, shape.outset(0, 0).has_value());

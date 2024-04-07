@@ -229,7 +229,7 @@ void PaintNode::render(Renderer* renderer)
         SkColor color = nodeType2Color(VGG_PATH);
         strokePen.setColor(color);
         strokePen.setStrokeWidth(2);
-        canvas->drawRect(toSkRect(bound()), strokePen);
+        canvas->drawRect(toSkRect(bounds()), strokePen);
       }
       if (_->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY)
       {
@@ -266,7 +266,7 @@ bool PaintNode::nodeAt(int x, int y, NodeVisitor visitor)
   if (!isVisible())
     return true;
   auto local = transform().inverse() * glm::vec3(x, y, 1);
-  if (bound().contains(local.x, local.y))
+  if (bounds().contains(local.x, local.y))
   {
     for (auto c = rbegin(); c != rend(); ++c)
     {
@@ -538,7 +538,7 @@ const Bounds& PaintNode::frameBound() const
   return d_ptr->bound;
 }
 
-void PaintNode::setFrameBound(const Bounds& bound)
+void PaintNode::setFrameBounds(const Bounds& bound)
 {
   VGG_IMPL(PaintNode);
   _->bound = bound;

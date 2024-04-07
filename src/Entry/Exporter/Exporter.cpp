@@ -337,7 +337,7 @@ public:
     auto f = scene->frame(index);
     scene->setPage(index);
     f->revalidate();
-    const auto b = f->bound();
+    const auto b = f->bounds();
     const auto id = f->guid();
     const auto w = b.size().x;
     const auto h = b.size().y;
@@ -484,7 +484,7 @@ bool SVGIterator::next(std::string& key, std::vector<char>& data)
     return false;
   auto scene = d_impl->scene.get();
   auto f = scene->frame(d_impl->index);
-  auto b = f->bound();
+  auto b = f->bounds();
   auto id = f->guid();
 
   layer::exporter::SVGOptions opts;
@@ -551,7 +551,7 @@ bool PDFIterator::next(std::string& key, std::vector<char>& data)
   auto                        scene = d_impl->scene.get();
   auto                        f = scene->frame(d_impl->index);
   auto                        id = f->guid();
-  auto                        b = f->bound();
+  auto                        b = f->bounds();
   layer::exporter::PDFOptions opts;
   opts.extend[0] = b.width();
   opts.extend[1] = b.height();

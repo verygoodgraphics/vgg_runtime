@@ -85,9 +85,9 @@ void TextNode::setParagraph(
     std::move(parStyle));
 }
 
-void TextNode::setParagraphBounds(const Bounds& bound)
+void TextNode::setParagraphBounds(const Bounds& bounds)
 {
-  d_ptr->accessor->paragraph()->setParagraphBound(bound);
+  d_ptr->accessor->paragraph()->setParagraphBounds(bounds);
 }
 
 void TextNode::setFrameMode(ETextLayoutMode layoutMode)

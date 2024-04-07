@@ -148,9 +148,9 @@ Bounds ObjectAttribute::onRevalidate()
   //   auto object = rec.finishRecording(bounds, &mat);
   //   m_maskFilter = object.asImageFilter();
   //   ASSERT(m_maskFilter);
-  //   return Bound{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
+  //   return Bounds{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
   // }
-  // return Bound();
+  // return Bounds();
 }
 
 StyleAttribute::StyleAttribute(

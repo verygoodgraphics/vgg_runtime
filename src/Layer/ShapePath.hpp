@@ -48,7 +48,7 @@ public:
     }
   }
 
-  SkRect bound() override
+  SkRect bounds() override
   {
     ensurePath();
     if (m_path)

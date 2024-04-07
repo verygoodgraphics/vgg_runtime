@@ -23,12 +23,12 @@ static bool g_enableDebugBounds = false;
 namespace VGG::layer
 {
 
-bool getDebugBoundEnable()
+bool getDebugBoundsEnable()
 {
   return g_enableDebugBounds;
 }
 
-void enableDebugBound(bool enable)
+void enableDebugBounds(bool enable)
 {
   g_enableDebugBounds = enable;
 }

@@ -185,7 +185,7 @@ bool VShape::isClosed() const
 
 SkRect VShape::bounds() const
 {
-  return m_shape->bound();
+  return m_shape->bounds();
 }
 
 void VShape::reset()

@@ -16,7 +16,7 @@
 #pragma once
 #include "Layer/Core/VUtils.hpp"
 #include "Math/Math.hpp"
-#include "Layer/Core/VBound.hpp"
+#include "Layer/Core/VBounds.hpp"
 #include <optional>
 #include <variant>
 

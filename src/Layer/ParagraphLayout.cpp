@@ -397,11 +397,11 @@ bool RichTextBlock::ensureBuild(TextLayoutMode mode)
   return ok;
 }
 
-std::pair<Bounds, float> RichTextBlock::internalLayout(const Bounds& bound, ETextLayoutMode mode)
+std::pair<Bounds, float> RichTextBlock::internalLayout(const Bounds& bounds, ETextLayoutMode mode)
 {
-  Bounds      newBound = bound;
-  const auto layoutWidth = bound.width();
-  float      newWidth = bound.width();
+  Bounds      newBounds = bounds;
+  const auto layoutWidth = bounds.width();
+  float      newWidth = bounds.width();
   float      newHeight = 0.f;
 
   float maxWidth = 0.f;
@@ -461,16 +461,16 @@ std::pair<Bounds, float> RichTextBlock::internalLayout(const Bounds& bound, ETex
   switch (mode)
   {
     case TL_AUTOHEIGHT:
-      newBound.setHeight(newHeight);
+      newBounds.setHeight(newHeight);
       break;
     case TL_AUTOWIDTH:
-      newBound.setHeight(newHeight);
-      newBound.setWidth(newWidth);
+      newBounds.setHeight(newHeight);
+      newBounds.setWidth(newWidth);
       break;
     case TL_FIXED:
       break;
   }
-  return { newBound, newHeight };
+  return { newBounds, newHeight };
 }
 
 } // namespace VGG::layer

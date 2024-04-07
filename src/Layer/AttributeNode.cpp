@@ -23,7 +23,7 @@
 namespace VGG::layer
 {
 
-// Bound StyleObjectAttribute::onRevalidate()
+// Bounds StyleObjectAttribute::onRevalidate()
 // {
 // }
 

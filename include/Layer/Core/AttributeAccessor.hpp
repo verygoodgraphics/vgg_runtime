@@ -183,7 +183,7 @@ public:
     std::string                text,
     std::vector<TextStyleAttr> style,
     std::vector<ParagraphAttr> parStyle);
-  ATTR_DECL(ParagraphBound, Bounds);
+  ATTR_DECL(ParagraphBounds, Bounds);
   ATTR_DECL(Anchor, glm::vec2);
   ATTR_DECL(TextLayoutMode, ETextLayoutMode);
   ATTR_DECL(VerticalAlignment, ETextVerticalAlignment);

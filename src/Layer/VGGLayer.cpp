@@ -66,9 +66,9 @@ inline void drawBounds(PaintNode* node, const glm::mat3& deviceMatrix, SkCanvas*
   if (node)
   {
     auto    localMatrix = getLocalMatrix(node);
-    auto    bound = node->bounds();
+    auto    bounds = node->bounds();
     auto    current = toSkMatrix(deviceMatrix * localMatrix);
-    auto    deviceBounds = current.mapRect(toSkRect(bound));
+    auto    deviceBounds = current.mapRect(toSkRect(bounds));
     SkPaint paint;
     paint.setColor(SK_ColorRED);
     paint.setAlphaf(0.3);

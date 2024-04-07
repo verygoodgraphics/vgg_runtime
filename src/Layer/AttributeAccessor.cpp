@@ -60,7 +60,7 @@ ATTR_DEF(
   m_backgroundBlurAttr);
 
 ATTR_DEF(ShapeItemAttibuteAccessor, Shape, VShape, Shape, m_shapeAttr);
-ATTR_DEF(ParagraphItemAttributeAccessor, ParagraphBound, Bounds, ParagraphBound, m_paraAttr);
+ATTR_DEF(ParagraphItemAttributeAccessor, ParagraphBounds, Bounds, ParagraphBounds, m_paraAttr);
 ATTR_DEF(ParagraphItemAttributeAccessor, Anchor, glm::vec2, Anchor, m_paraAttr);
 ATTR_DEF(ParagraphItemAttributeAccessor, TextLayoutMode, ETextLayoutMode, FrameMode, m_paraAttr);
 

@@ -128,7 +128,7 @@ public:
     return std::sqrt(squaredDistance());
   }
 
-  Bounds bound(const layer::Transform& transform) const
+  Bounds bounds(const layer::Transform& transform) const
   {
     auto p1 = transform * glm::vec3{ m_topLeft, 1.0 };
     auto p2 = transform * glm::vec3{ glm::vec2{ m_bottomRight.x, m_topLeft.y }, 1.0 };
@@ -141,7 +141,7 @@ public:
     return Bounds{ *minX, *minY, *maxX - *minX, *maxY - *minY };
   }
 
-  // Bound operator*(const layer::Transform& transform) const
+  // Bounds operator*(const layer::Transform& transform) const
   // {
   //   return this->transform(transform);
   // }
@@ -151,45 +151,45 @@ public:
     return m_topLeft == other.topLeft() && m_bottomRight == other.bottomRight();
   }
 
-  void unionWith(const Bounds& bound)
+  void unionWith(const Bounds& bounds)
   {
-    m_topLeft.x = std::min(m_topLeft.x, bound.m_topLeft.x);
-    m_topLeft.y = std::min(m_topLeft.y, bound.m_topLeft.y);
-    m_bottomRight.x = std::max(m_bottomRight.x, bound.m_bottomRight.x);
-    m_bottomRight.y = std::max(m_bottomRight.y, bound.m_bottomRight.y);
+    m_topLeft.x = std::min(m_topLeft.x, bounds.m_topLeft.x);
+    m_topLeft.y = std::min(m_topLeft.y, bounds.m_topLeft.y);
+    m_bottomRight.x = std::max(m_bottomRight.x, bounds.m_bottomRight.x);
+    m_bottomRight.y = std::max(m_bottomRight.y, bounds.m_bottomRight.y);
   }
 
-  Bounds unionAs(const Bounds& bound) const
+  Bounds unionAs(const Bounds& bounds) const
   {
-    auto newBound = *this;
-    newBound.unionWith(bound);
-    return newBound;
+    auto newBounds = *this;
+    newBounds.unionWith(bounds);
+    return newBounds;
   }
 
-  void intersectWith(const Bounds& bound)
+  void intersectWith(const Bounds& bounds)
   {
-    m_topLeft.x = std::max(m_topLeft.x, bound.m_topLeft.x);
-    m_topLeft.y = std::max(m_topLeft.y, bound.m_topLeft.y);
-    m_bottomRight.x = std::min(m_bottomRight.x, bound.m_bottomRight.x);
-    m_bottomRight.y = std::min(m_bottomRight.y, bound.m_bottomRight.y);
+    m_topLeft.x = std::max(m_topLeft.x, bounds.m_topLeft.x);
+    m_topLeft.y = std::max(m_topLeft.y, bounds.m_topLeft.y);
+    m_bottomRight.x = std::min(m_bottomRight.x, bounds.m_bottomRight.x);
+    m_bottomRight.y = std::min(m_bottomRight.y, bounds.m_bottomRight.y);
   }
 
-  Bounds intersectAs(const Bounds& bound) const
+  Bounds intersectAs(const Bounds& bounds) const
   {
-    auto newBound = *this;
-    newBound.intersectWith(bound);
-    return newBound;
+    auto newBounds = *this;
+    newBounds.intersectWith(bounds);
+    return newBounds;
   }
 
-  bool isIntersectWith(const Bounds& bound) const
+  bool isIntersectWith(const Bounds& bounds) const
   {
-    auto isect = intersectAs(bound);
+    auto isect = intersectAs(bounds);
     return isect.valid();
   }
 
-  bool isIntersectWithEx(const Bounds& bound) const
+  bool isIntersectWithEx(const Bounds& bounds) const
   {
-    auto isect = intersectAs(bound);
+    auto isect = intersectAs(bounds);
     auto size = isect.size();
     return size.x >= 0 && size.y >= 0;
   }
@@ -215,12 +215,12 @@ public:
     return b;
   }
 
-  static Bounds makeBoundLRTB(float l, float r, float t, float b)
+  static Bounds makeBoundsLRTB(float l, float r, float t, float b)
   {
-    Bounds bound;
-    bound.m_topLeft = { l, t };
-    bound.m_bottomRight = { r, b };
-    return bound;
+    Bounds bounds;
+    bounds.m_topLeft = { l, t };
+    bounds.m_bottomRight = { r, b };
+    return bounds;
   }
 };
 

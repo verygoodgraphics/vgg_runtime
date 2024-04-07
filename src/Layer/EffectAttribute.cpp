@@ -66,8 +66,8 @@ Bounds LayerFXAttribute::onRevalidate()
 {
   m_styleObjectAttr->revalidate();
   const auto styledObjectBounds = toSkRect(m_styleObjectAttr->effectBounds());
-  const auto layerBound = revalidateLayerImageFilter(styledObjectBounds);
-  return Bounds{ layerBound.x(), layerBound.y(), layerBound.width(), layerBound.height() };
+  const auto layerBounds = revalidateLayerImageFilter(styledObjectBounds);
+  return Bounds{ layerBounds.x(), layerBounds.y(), layerBounds.width(), layerBounds.height() };
 }
 
 Bounds BackdropFXAttribute::onRevalidate()

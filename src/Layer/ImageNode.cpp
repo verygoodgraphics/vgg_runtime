@@ -38,7 +38,7 @@ public:
 
   ImageItemAttribtueAccessor* accessor;
   ImageNode::EventHandler     imageNodeEventHandler;
-  Bounds                      bound;
+  Bounds                      bounds;
 
   ImageNode__pImpl(ImageNode* api)
     : q_ptr(api)
@@ -96,9 +96,9 @@ void ImageNode::setImageFilter(const ImageFilter& filter)
   d_ptr->accessor->image()->setImageFilter(filter);
 }
 
-void ImageNode::setImageBounds(const Bounds& bound)
+void ImageNode::setImageBounds(const Bounds& bounds)
 {
-  d_ptr->accessor->image()->setImageBounds(bound);
+  d_ptr->accessor->image()->setImageBounds(bounds);
 }
 
 void ImageNode::installImageNodeEventHandler(EventHandler handler)

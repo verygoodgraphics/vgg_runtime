@@ -49,20 +49,20 @@ public:
   {
   }
 
-  sk_sp<SkPicture> renderPicture(const SkRect& bound)
+  sk_sp<SkPicture> renderPicture(const SkRect& bounds)
   {
     Renderer          r;
     SkPictureRecorder rec;
     auto              rt = SkRTreeFactory();
-    auto              pictureCanvas = rec.beginRecording(bound, &rt);
+    auto              pictureCanvas = rec.beginRecording(bounds, &rt);
     r.draw(pictureCanvas, root);
-    if (getDebugBoundEnable())
+    if (getDebugBoundsEnable())
     {
       SkPaint paint;
       paint.setColor(SK_ColorBLUE);
       paint.setStyle(SkPaint::kStroke_Style);
       paint.setStrokeWidth(1);
-      pictureCanvas->drawRect(bound, paint);
+      pictureCanvas->drawRect(bounds, paint);
     }
     return rec.finishRecordingAsPicture();
   }
@@ -114,7 +114,7 @@ Bounds Frame::onRevalidate()
     _->maskDirty = false;
   }
   auto bounds = root()->revalidate();
-  auto b = bounds.bound(root()->transform());
+  auto b = bounds.bounds(root()->transform());
   _->cache = _->renderPicture(toSkRect(b));
   _->transform.setMatrix(glm::mat3{ 1 });
   if (_->enableToOrigin)
@@ -125,7 +125,7 @@ Bounds Frame::onRevalidate()
   return b;
 }
 
-void Frame::setClipBound(const Bounds& bound)
+void Frame::setClipBounds(const Bounds& bounds)
 {
   VGG_IMPL(Frame);
   ASSERT(_->root);

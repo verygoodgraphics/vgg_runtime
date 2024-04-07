@@ -16,7 +16,7 @@
 #pragma once
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/Transform.hpp"
-#include "Layer/Core/VBound.hpp"
+#include "Layer/Core/VBounds.hpp"
 #include "Utility/HelperMacro.hpp"
 
 class SkPicture;
@@ -60,7 +60,7 @@ public:
   void             resetToOrigin(bool enable);
   bool             isVisible() const;
   const Transform& transform() const;
-  void             setClipBound(const Bounds& bound);
+  void             setClipBounds(const Bounds& bounds);
 
   ~Frame();
 

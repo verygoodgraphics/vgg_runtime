@@ -33,7 +33,7 @@ public:
     canvas->drawOval(m_oval, paint);
   }
 
-  SkRect bound() override
+  SkRect bounds() override
   {
     return m_oval;
   }

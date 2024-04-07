@@ -61,24 +61,24 @@ public:
     this->invalidate();
   }
 
-  void setImageBounds(const Bounds& bound)
+  void setImageBounds(const Bounds& bounds)
   {
-    if (m_imageBound == bound)
+    if (m_imageBounds == bounds)
       return;
     ASSERT(m_imageShape);
-    m_imageBound = bound;
-    m_imageShape->setShape(VShape(toSkRect(bound)));
+    m_imageBounds = bounds;
+    m_imageShape->setShape(VShape(toSkRect(bounds)));
   }
 
   const Bounds& getImageBounds() const
   {
-    return m_imageBound;
+    return m_imageBounds;
   }
 
   Bounds effectBounds() const override
   {
     // FIXME: border should be considered
-    return m_imageBound;
+    return m_imageBounds;
   }
 
   VGG_CLASS_MAKE(ImageItem);
@@ -89,6 +89,6 @@ private:
   Ref<ShapeAttribute>      m_imageShape;
   sk_sp<SkShader>          m_imageShader;
   PatternStretch           m_imagePattern;
-  Bounds                   m_imageBound;
+  Bounds                   m_imageBounds;
 };
 } // namespace VGG::layer

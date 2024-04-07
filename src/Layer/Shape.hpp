@@ -28,10 +28,10 @@ public:
   virtual void                  draw(SkCanvas* canvas, const SkPaint& paint) const = 0;
   virtual void                  clip(SkCanvas* canvas, SkClipOp clipOp) const = 0;
   virtual SkPath                asPath() = 0;
-  virtual SkRect                bound() = 0;
-  virtual std::optional<SkRect> visualBound()
+  virtual SkRect                bounds() = 0;
+  virtual std::optional<SkRect> visualBounds()
   {
-    return bound();
+    return bounds();
   }
 
   bool isClosed() const

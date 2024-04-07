@@ -70,15 +70,15 @@ public:
 
   void nodeAt(int x, int y, PaintNode::NodeVisitor visitor);
 
-  void enableDrawDebugBound(bool enabled);
-  bool isEnableDrawDebugBound();
+  void enableDrawDebugBounds(bool enabled);
+  bool isEnableDrawDebugBounds();
 
   static ResourceRepo& getResRepo()
   {
     return s_resRepo;
   }
 
-  void        onViewportChange(const Bounds& bound);
+  void        onViewportChange(const Bounds& bounds);
   static void setResRepo(std::map<std::string, std::vector<char>> repo);
 
 protected:

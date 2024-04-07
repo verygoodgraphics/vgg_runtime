@@ -40,14 +40,14 @@ public:
 };
 
 sk_sp<SkColorFilter> makeColorFilter(const ImageFilter& imageFilter);
-sk_sp<SkShader>      makeFitPattern(const Bounds& bound, const PatternFit& p);
-sk_sp<SkShader>      makeFillPattern(const Bounds& bound, const PatternFill& p);
-sk_sp<SkShader>      makeStretchPattern(const Bounds& bound, const PatternStretch& p);
-sk_sp<SkShader>      makeTilePattern(const Bounds& bound, const PatternTile& p);
-sk_sp<SkShader>      makeGradientLinear(const Bounds& bound, const GradientLinear& g);
+sk_sp<SkShader>      makeFitPattern(const Bounds& bounds, const PatternFit& p);
+sk_sp<SkShader>      makeFillPattern(const Bounds& bounds, const PatternFill& p);
+sk_sp<SkShader>      makeStretchPattern(const Bounds& bounds, const PatternStretch& p);
+sk_sp<SkShader>      makeTilePattern(const Bounds& bounds, const PatternTile& p);
+sk_sp<SkShader>      makeGradientLinear(const Bounds& bounds, const GradientLinear& g);
 
 sk_sp<SkImageFilter>   makeMotionBlurFilter(const MotionBlur& blur);
-sk_sp<SkImageFilter>   makeRadialBlurFilter(const RadialBlur& blur, const Bounds& bound);
+sk_sp<SkImageFilter>   makeRadialBlurFilter(const RadialBlur& blur, const Bounds& bounds);
 sk_sp<SkImageFilter>   makeLayerBlurFilter(const GaussianBlur& blur);
 sk_sp<SkImageFilter>   makeBackgroundBlurFilter(const GaussianBlur& blur);
 sk_sp<SkRuntimeEffect> getOrCreateEffect(EffectCacheKey key, const char* sksl);
@@ -68,26 +68,26 @@ inline sk_sp<SkBlender> getMaskBlender(EAlphaMaskType type)
   return nullptr;
 }
 
-inline sk_sp<SkShader> makePatternShader(const Bounds& bound, const Pattern& pattern)
+inline sk_sp<SkShader> makePatternShader(const Bounds& bounds, const Pattern& pattern)
 {
   sk_sp<SkShader> shader;
   std::visit(
-    Overloaded{ [&](const PatternFill& p) { shader = makeFillPattern(bound, p); },
-                [&](const PatternFit& p) { shader = makeFitPattern(bound, p); },
-                [&](const PatternStretch& p) { shader = makeStretchPattern(bound, p); },
-                [&](const PatternTile& p) { shader = makeTilePattern(bound, p); } },
+    Overloaded{ [&](const PatternFill& p) { shader = makeFillPattern(bounds, p); },
+                [&](const PatternFit& p) { shader = makeFitPattern(bounds, p); },
+                [&](const PatternStretch& p) { shader = makeStretchPattern(bounds, p); },
+                [&](const PatternTile& p) { shader = makeTilePattern(bounds, p); } },
     pattern.instance);
   return shader;
 }
 
 inline SkMatrix makeMatrix(
-  const Bounds&                         bound,
+  const Bounds&                         bounds,
   const glm::vec2&                      f,
   const glm::vec2&                      t,
   const std::variant<float, glm::vec2>& ellipse)
 {
-  const auto from = bound.map(bound.size() * f);
-  const auto to = bound.map(bound.size() * t);
+  const auto from = bounds.map(bounds.size() * f);
+  const auto to = bounds.map(bounds.size() * t);
 
   auto theta = [](const glm::vec2& from, const glm::vec2& to)
   {
@@ -100,7 +100,7 @@ inline SkMatrix makeMatrix(
     Overloaded{ [&](const float& f) { ratio = f; },
                 [&](const glm::vec2& p)
                 {
-                  auto       pp = bound.map(bound.size() * p);
+                  auto       pp = bounds.map(bounds.size() * p);
                   const auto a = glm::distance(from, to);
                   const auto b = glm::distance(from, pp);
                   ratio = (a == 0.f) ? 1.f : b / a;
@@ -114,13 +114,13 @@ inline SkMatrix makeMatrix(
   return mat;
 }
 template<typename G>
-inline sk_sp<SkShader> makeGradientRadial(const Bounds& bound, const G& g)
+inline sk_sp<SkShader> makeGradientRadial(const Bounds& bounds, const G& g)
 {
   if (g.stops.empty())
     return nullptr;
 
-  auto       f = bound.map(bound.size() * g.from);
-  auto       t = bound.map(bound.size() * g.to);
+  auto       f = bounds.map(bounds.size() * g.from);
+  auto       t = bounds.map(bounds.size() * g.to);
   SkScalar   r = glm::distance(f, t);
   const auto minPosition = 0.f;
   const auto maxPosition = 1.f;
@@ -133,7 +133,7 @@ inline sk_sp<SkShader> makeGradientRadial(const Bounds& bound, const G& g)
     auto p = it->position;
     positions.push_back((p - minPosition) / (maxPosition - minPosition));
   }
-  auto mat = makeMatrix(bound, g.from, g.to, g.ellipse);
+  auto mat = makeMatrix(bounds, g.from, g.to, g.ellipse);
   return SkGradientShader::MakeRadial(
     { f.x, f.y },
     r,
@@ -146,7 +146,7 @@ inline sk_sp<SkShader> makeGradientRadial(const Bounds& bound, const G& g)
 }
 
 template<typename G>
-inline sk_sp<SkShader> makeGradientAngular(const Bounds& bound, const G& g)
+inline sk_sp<SkShader> makeGradientAngular(const Bounds& bounds, const G& g)
 {
   if (g.stops.empty())
     return nullptr;
@@ -179,19 +179,19 @@ inline sk_sp<SkShader> makeGradientAngular(const Bounds& bound, const G& g)
     sz += 1;
   }
 
-  const auto mat = makeMatrix(bound, g.from, g.to, g.ellipse);
-  const auto from = bound.map(bound.size() * g.from);
+  const auto mat = makeMatrix(bounds, g.from, g.to, g.ellipse);
+  const auto from = bounds.map(bounds.size() * g.from);
   return SkGradientShader::MakeSweep(from.x, from.y, colors.data(), positions.data(), sz, 0, &mat);
 }
 
 template<typename G>
-inline sk_sp<SkShader> makeGradientDiamond(const Bounds& bound, const G& g)
+inline sk_sp<SkShader> makeGradientDiamond(const Bounds& bounds, const G& g)
 {
   if (g.stops.empty())
     return nullptr;
 
-  auto       f = bound.map(bound.size() * g.from);
-  auto       t = bound.map(bound.size() * g.to);
+  auto       f = bounds.map(bounds.size() * g.from);
+  auto       t = bounds.map(bounds.size() * g.to);
   SkScalar   r = glm::distance(f, t);
   const auto minPosition = 0.f;
   const auto maxPosition = 1.f;
@@ -204,7 +204,7 @@ inline sk_sp<SkShader> makeGradientDiamond(const Bounds& bound, const G& g)
     auto p = it->position;
     positions.push_back((p - minPosition) / (maxPosition - minPosition));
   }
-  auto mat = makeMatrix(bound, g.from, g.to, g.ellipse);
+  auto mat = makeMatrix(bounds, g.from, g.to, g.ellipse);
   mat.preTranslate(f.x, f.y);
   SkPoint pts[2] = { { 0, 0 }, { r / 2, r / 2 } };
   auto    linearShader = SkGradientShader::MakeLinear(
@@ -252,11 +252,11 @@ inline void populateSkPaint(
   const SkRect&         rect,
   SkPaint&              paint)
 {
-  Bounds bound{ rect.x(), rect.y(), rect.width(), rect.height() };
+  Bounds bounds{ rect.x(), rect.y(), rect.width(), rect.height() };
   std::visit(
     Overloaded{ [&](const Gradient& g)
                 {
-                  paint.setShader(makeGradientShader(bound, g));
+                  paint.setShader(makeGradientShader(bounds, g));
                   paint.setAlphaf(st.opacity);
                 },
                 [&](const Color& c)
@@ -266,7 +266,7 @@ inline void populateSkPaint(
                 },
                 [&](const Pattern& p)
                 {
-                  paint.setShader(makePatternShader(bound, p));
+                  paint.setShader(makePatternShader(bounds, p));
                   paint.setAlphaf(st.opacity);
                 } },
     fillType);
@@ -280,7 +280,7 @@ inline void populateSkPaint(
   }
 }
 
-inline void populateSkPaint(const Border& border, const SkRect& bound, SkPaint& paint)
+inline void populateSkPaint(const Border& border, const SkRect& bounds, SkPaint& paint)
 {
   paint.setStyle(SkPaint::kStroke_Style);
   paint.setPathEffect(SkDashPathEffect::Make(
@@ -291,7 +291,7 @@ inline void populateSkPaint(const Border& border, const SkRect& bound, SkPaint& 
   paint.setStrokeCap(toSkPaintCap(border.lineCapStyle));
   paint.setStrokeMiter(border.miterLimit);
   paint.setStrokeWidth(border.thickness);
-  populateSkPaint(border.type, border.contextSettings, bound, paint);
+  populateSkPaint(border.type, border.contextSettings, bounds, paint);
 }
 
 void                     setGlobalSamplingOptions(const SkSamplingOptions& opt);
@@ -299,14 +299,14 @@ const SkSamplingOptions& getGlobalSamplingOptions();
 
 sk_sp<SkImageFilter> makeInnerShadowImageFilter(
   const InnerShadow&   shadow,
-  const Bounds&        bound,
+  const Bounds&        bounds,
   bool                 shadowOnly,
   bool                 overrideSpread,
   sk_sp<SkImageFilter> input);
 
 sk_sp<SkImageFilter> makeDropShadowImageFilter(
   const DropShadow&    shadow,
-  const Bounds&        bound,
+  const Bounds&        bounds,
   bool                 overrideSpread,
   sk_sp<SkImageFilter> input);
 

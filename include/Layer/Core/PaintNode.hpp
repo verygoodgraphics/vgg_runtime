@@ -15,7 +15,7 @@
  */
 #pragma once
 #include "Layer/Memory/VNew.hpp"
-#include "Layer/Core/VBound.hpp"
+#include "Layer/Core/VBounds.hpp"
 #include "Layer/Core/TreeNode.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
@@ -164,9 +164,9 @@ public:
 
   Transform globalTransform() const;
 
-  const Bounds& frameBound() const; // content bound
+  const Bounds& frameBounds() const; // content bound
 
-  void setFrameBounds(const Bounds& bound);
+  void setFrameBounds(const Bounds& bounds);
 
   const std::string& guid() const;
 
@@ -228,7 +228,7 @@ protected:
   void       onSetStyleItem(Ref<StyleItem> item);
   StyleItem* styleItem();
 
-  VShape         makeBoundPath();
+  VShape         makeBoundsPath();
   virtual VShape makeContourImpl(ContourOption option, const Transform* mat);
   VShape         childPolyOperation() const;
   Bounds         onRevalidate() override;

@@ -41,7 +41,7 @@ public:
     canvas->clipRect(rect(), clipOp);
   }
 
-  SkRect bound() override
+  SkRect bounds() override
   {
     return rect();
   }
@@ -91,7 +91,7 @@ public:
     canvas->clipRRect(rrect(), clipOp);
   }
 
-  SkRect bound() override
+  SkRect bounds() override
   {
     return rrect().rect();
   }

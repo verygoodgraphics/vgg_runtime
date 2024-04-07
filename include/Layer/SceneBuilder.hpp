@@ -105,8 +105,8 @@ public:
   SceneBuilderResult build();
 
   static std::tuple<glm::mat3, glm::mat3, glm::mat3> fromMatrix(const json& j);
-  static Bounds fromBound(const json& j, const glm::mat3& totalMatrix);
-  static Style fromStyle(const json& j, const Bounds& bound, const glm::mat3& totalMatrix);
+  static Bounds fromBounds(const json& j, const glm::mat3& totalMatrix);
+  static Style fromStyle(const json& j, const Bounds& bounds, const glm::mat3& totalMatrix);
 
 private:
   std::vector<PaintNodePtr> m_frames;

@@ -78,9 +78,9 @@ private:
   sk_sp<SkImageFilter> m_imageFilter;
   sk_sp<SkBlender>     m_blender;
 
-  sk_sp<SkShader> evalShader(const std::vector<Fill>& fills, const SkRect& bounds)
+  sk_sp<SkShader> evalShader(const std::vector<Fill>& fills, const SkRect& bs)
   {
-    const auto      bound = Bounds{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
+    const auto      bounds = Bounds{ bs.x(), bs.y(), bs.width(), bs.height() };
     sk_sp<SkShader> dstShader;
     sk_sp<SkShader> srcShader;
     for (const auto& f : fills)
@@ -89,9 +89,9 @@ private:
         continue;
       const auto& st = f.contextSettings;
       std::visit(
-        Overloaded{ [&](const Gradient& g) { srcShader = makeGradientShader(bound, g); },
+        Overloaded{ [&](const Gradient& g) { srcShader = makeGradientShader(bounds, g); },
                     [&](const Color& c) { srcShader = SkShaders::Color(c); },
-                    [&](const Pattern& p) { srcShader = makePatternShader(bound, p); } },
+                    [&](const Pattern& p) { srcShader = makePatternShader(bounds, p); } },
         f.type);
 
       if (st.opacity < 1.0)

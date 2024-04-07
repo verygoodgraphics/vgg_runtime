@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #pragma once
-#include "Layer/Core/VBound.hpp"
+#include "Layer/Core/VBounds.hpp"
 #include <core/SkImage.h>
 #include <gpu/GrDirectContext.h>
 #include <tuple>
@@ -70,16 +70,16 @@ public:
   {
     const SkMatrix& globalMatrix;
     SkPicture*      picture;
-    const SkRect*   bound;
+    const SkRect*   bounds;
     const SkMatrix& localMatrix;
     RasterContext(
       const SkMatrix& transform,
       SkPicture*      pic,
-      const SkRect*   bound,
+      const SkRect*   bounds,
       const SkMatrix& mat)
       : globalMatrix(transform)
       , picture(pic)
-      , bound(bound)
+      , bounds(bounds)
       , localMatrix(mat)
     {
     }

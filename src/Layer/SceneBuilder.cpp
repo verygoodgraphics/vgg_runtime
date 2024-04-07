@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "Layer/DocConcept.hpp"
 #include "Layer/Memory/VAllocator.hpp"
 #include "PathPatch.h"
 #include "Layer/SceneBuilder.hpp"
@@ -26,7 +27,99 @@
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/TextNode.hpp"
 #include "Layer/Core/ImageNode.hpp"
+#include <concepts>
 #include <variant>
+
+#include "Layer/JSONModel.hpp"
+
+namespace
+{
+
+using namespace VGG::layer;
+struct BuilderImpl
+{
+  static std::tuple<glm::mat3, glm::mat3, glm::mat3> makeMatrix(const glm::mat3& m)
+  {
+    const auto [newMatrix, inversed] = CoordinateConvert::convertMatrixCoordinate(m);
+    return { m, newMatrix, inversed };
+  }
+
+  static Bounds makeBounds(const Bounds& bounds, const glm::mat3& totalMatrix)
+  {
+    auto x = bounds.topLeft().x;
+    auto y = bounds.topLeft().y;
+    auto width = bounds.width();
+    auto height = bounds.height();
+    auto topLeft = glm::vec2{ x, y };
+    auto bottomRight = glm::vec2{ x + width, y - height };
+    CoordinateConvert::convertCoordinateSystem(topLeft, totalMatrix);
+    CoordinateConvert::convertCoordinateSystem(bottomRight, totalMatrix);
+    return Bounds{ topLeft, bottomRight };
+  }
+
+  template<typename T, typename F1, typename F2>
+    requires AbstractObject<T> && std::invocable<F1, std::string, std::string> &&
+             std::invocable<F2, PaintNode*, Bounds>
+  static PaintNodePtr makeObjectBase(
+    const T&         object,
+    const glm::mat3& totalMatrix,
+    F1&&             creator,
+    F2&&             override)
+  {
+    auto obj = creator(object.getName(), object.getId());
+    if (!obj)
+      return nullptr;
+    auto [originalMatrix, newMatrix, inversedNewMatrix] =
+      BuilderImpl::makeMatrix(object.getMatrix());
+    const auto convertedMatrix = inversedNewMatrix * totalMatrix * originalMatrix;
+    obj->setTransform(Transform(newMatrix));
+    const auto b = BuilderImpl::makeBounds(object.getBounds(), convertedMatrix);
+    obj->setFrameBound(b);
+    //
+    // // Pattern point in style are implicitly given by bound, we must supply the points in
+    // original
+    // // coordinates for correct converting
+    obj->setStyle(SceneBuilder::fromStyle(object.getStyle(), b, convertedMatrix));
+    // obj->setFrameCornerSmoothing(getOptional<float>(j,
+    //  "cornerSmoothing").value_or(0.f)); obj->setContextSettings(j.value("contextSettings",
+    //  ContextSetting())); obj->setMaskBy(j.value("outlineMaskBy", std::vector<std::string>{}));
+    //  obj->setAlphaMaskBy(j.value("alphaMaskBy", std::vector<AlphaMask>{}));
+    //  const auto maskType = j.value("maskType", EMaskType::MT_NONE);
+    //  const auto defaultShowType =
+    //    maskType == EMaskType::MT_OUTLINE
+    //      ? MST_CONTENT
+    //      : (maskType == EMaskType::MT_ALPHA && false ? MST_BOUND : MST_INVISIBLE);
+    //  const auto maskShowType = j.value("maskShowType", defaultShowType);
+    //  obj->setMaskType(maskType);
+    //  obj->setMaskShowType(maskShowType);
+    //  obj->setOverflow(j.value("overflow", EOverflow::OF_VISIBLE));
+    //  obj->setVisible(j.value("visible", true));
+    //  override(obj.get(), convertedMatrix, b);
+    //  return obj;
+
+    override(0, Bounds());
+    return 0;
+  }
+  template<typename T>
+    requires layer::FrameObject<T>
+  static void fromFrame(const T& object, const glm::mat3& totalMatrix, VAllocator* alloc)
+  {
+  }
+
+  template<typename T>
+    requires layer::ImageObject<T>
+  static void fromImage(const T& object, const glm::mat3& totalMatrix, VAllocator* alloc)
+  {
+  }
+
+  template<typename T>
+    requires layer::TextObject<T>
+  static void fromText(const T& object, const glm::mat3& totalMatrix, VAllocator* alloc)
+  {
+  }
+};
+
+} // namespace
 
 namespace
 {

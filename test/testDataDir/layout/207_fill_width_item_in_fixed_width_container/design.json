@@ -1,0 +1,185 @@
+{
+  "version": "1",
+  "fileType": 3,
+  "fileName": "/Users/houguanhua/code/vgg/vgg_runtime_B/test/testDataDir/layout/207_fill_width_item_in_fixed_width_container/bug_0407_1.fig",
+  "frames": [
+    {
+      "id": "0:3",
+      "name": "Frame 1",
+      "isLocked": false,
+      "visible": true,
+      "contextSettings": {
+        "class": "graphicsContextSettings",
+        "blendMode": 27,
+        "opacity": 1.0,
+        "isolateBlending": false,
+        "transparencyKnockoutGroup": 0
+      },
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        -515.0,
+        350.0
+      ],
+      "bounds": {
+        "class": "rect",
+        "constrainProportions": false,
+        "width": 1660.0,
+        "height": 273.0,
+        "x": 0,
+        "y": 0
+      },
+      "transformedBounds": {
+        "class": "rect",
+        "constrainProportions": false,
+        "width": 1660.0,
+        "height": 273.0,
+        "x": -515.0,
+        "y": 350.0
+      },
+      "style": {
+        "class": "style",
+        "borders": [],
+        "fills": [
+          {
+            "fillType": 0,
+            "color": {
+              "class": "color",
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "class": "fill",
+            "isEnabled": true,
+            "contextSettings": {
+              "class": "graphicsContextSettings",
+              "blendMode": 0,
+              "opacity": 1.0,
+              "isolateBlending": false,
+              "transparencyKnockoutGroup": 0
+            }
+          }
+        ],
+        "blurs": [],
+        "shadows": []
+      },
+      "alphaMaskBy": [],
+      "outlineMaskBy": [],
+      "maskType": 0,
+      "styleEffectMaskArea": 2,
+      "maskShowType": 2,
+      "overflow": 1,
+      "styleEffectBoolean": 1,
+      "cornerSmoothing": 0.0,
+      "horizontalConstraint": 1,
+      "verticalConstraint": 1,
+      "resizesContent": 0,
+      "variableDefs": [],
+      "variableRefs": [],
+      "class": "frame",
+      "childObjects": [
+        {
+          "id": "2:2",
+          "name": "Frame 2",
+          "isLocked": false,
+          "visible": true,
+          "contextSettings": {
+            "class": "graphicsContextSettings",
+            "blendMode": 27,
+            "opacity": 1.0,
+            "isolateBlending": false,
+            "transparencyKnockoutGroup": 0
+          },
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            130.0,
+            0.0
+          ],
+          "bounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "width": 1400.0,
+            "height": 101.0,
+            "x": 0,
+            "y": 0
+          },
+          "transformedBounds": {
+            "class": "rect",
+            "constrainProportions": false,
+            "width": 1400.0,
+            "height": 101.0,
+            "x": 130.0,
+            "y": 0.0
+          },
+          "style": {
+            "class": "style",
+            "borders": [],
+            "fills": [
+              {
+                "fillType": 0,
+                "color": {
+                  "class": "color",
+                  "red": 0.9846028685569763,
+                  "green": 0.7587563991546631,
+                  "blue": 0.7587563991546631,
+                  "alpha": 1.0
+                },
+                "class": "fill",
+                "isEnabled": true,
+                "contextSettings": {
+                  "class": "graphicsContextSettings",
+                  "blendMode": 0,
+                  "opacity": 1.0,
+                  "isolateBlending": false,
+                  "transparencyKnockoutGroup": 0
+                }
+              }
+            ],
+            "blurs": [],
+            "shadows": []
+          },
+          "alphaMaskBy": [],
+          "outlineMaskBy": [],
+          "maskType": 0,
+          "styleEffectMaskArea": 2,
+          "maskShowType": 2,
+          "overflow": 1,
+          "styleEffectBoolean": 1,
+          "cornerSmoothing": 0.0,
+          "horizontalConstraint": 1,
+          "verticalConstraint": 1,
+          "resizesContent": 0,
+          "variableDefs": [],
+          "variableRefs": [],
+          "class": "frame",
+          "childObjects": [],
+          "radius": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      ],
+      "radius": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "backgroundColor": {
+        "class": "color",
+        "red": 0.9607843160629272,
+        "green": 0.9607843160629272,
+        "blue": 0.9607843160629272,
+        "alpha": 1.0
+      }
+    }
+  ]
+}

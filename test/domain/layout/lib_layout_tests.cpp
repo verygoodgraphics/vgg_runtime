@@ -302,3 +302,43 @@ TEST(LibLayoutTest, StrechNodeWithPercentHeight)
 
   EXPECT_DOUBLE_EQ(136, pNode00_1->get_layout_height());
 }
+
+TEST(LibLayoutTest, VerticalFlexAlignItemCenterContainerWithFillWidthItem)
+{
+  auto container = std::make_unique<flexbox_node>();
+  auto child = std::make_unique<flexbox_node>();
+
+  // container
+  container->set_direction(direction_column);
+  container->set_justify_content(justify_content_flex_start);
+  container->set_align_items(align_items_center);
+  container->set_align_content(align_content_flex_start);
+  container->set_wrap(wrap_no_wrap);
+  container->set_gap(gap_row, 10);
+  container->set_gap(gap_column, 0);
+  container->set_padding(padding_top, 0);
+  container->set_padding(padding_right, 0);
+  container->set_padding(padding_bottom, 0);
+  container->set_padding(padding_left, 0);
+
+  container->set_width(unit_point, 1660.0);
+  container->set_height(unit_point, 273.0);
+
+  // child
+  child->set_position(position_relative);
+  child->set_grow(0.0);
+  child->set_shrink(0.0);
+
+  child->set_max_width(unit_point, 1400.0);
+  child->set_width(unit_percent, 100.0);
+  child->set_height(unit_point, 101.0);
+
+  // setup tree
+  auto pChild = child.get();
+
+  // when
+  container->add_child(child, 0);
+  container->calc_layout();
+
+  EXPECT_DOUBLE_EQ(130.0, pChild->get_layout_left());
+}

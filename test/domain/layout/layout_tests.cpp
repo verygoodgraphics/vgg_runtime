@@ -245,3 +245,29 @@ TEST_F(VggLayoutTestSuite, FirstOnTop)
   auto json = m_sut->displayDesignDoc()->content();
   EXPECT_EQ(json["frames"][0]["childObjects"][0]["name"], "Rectangle 3");
 }
+
+TEST_F(VggLayoutTestSuite, Fill_height_item_in_fit_content_container)
+{
+  setupWithExpanding("testDataDir/layout/206_fill_height_item_in_fit_content_container/");
+
+  // When
+  layout(*m_sut, Layout::Size{ 1920, 1080 });
+
+  // Then
+  std::vector<Layout::Rect> expectedFrames{ { { 144, 48 }, { 247, 136 } } };
+
+  EXPECT_TRUE(descendantFrame({ 0, 1 }, 0) == expectedFrames[0]);
+}
+
+TEST_F(VggLayoutTestSuite, Fill_width_item_in_fixed_width_container)
+{
+  setupWithExpanding("testDataDir/layout/207_fill_width_item_in_fixed_width_container/");
+
+  // When
+  layout(*m_sut, Layout::Size{ 1920, 1080 });
+
+  // Then
+  std::vector<Layout::Rect> expectedFrames{ { { 260, 0 }, { 1400, 101 } } };
+
+  EXPECT_TRUE(descendantFrame({ 0 }, 0) == expectedFrames[0]);
+}

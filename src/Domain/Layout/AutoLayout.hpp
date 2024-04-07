@@ -131,6 +131,8 @@ private:
   bool directionIs(Rule::FlexboxLayout::EDirection direction);
   bool is100PercentWidth();
   bool is100PercentHeight();
+  bool isFitContentWidth();
+  bool isFitContentHeight();
   bool isSmartSpacingAndFlexSpaceBetweenAndNoWrap();
   bool isEmptyContainer();
   bool isOnlyChild();

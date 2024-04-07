@@ -956,8 +956,9 @@ void AutoLayout::configureFlexItemAlignSelf(flexbox_node* node)
   }
 
   if (
-    (container->isHorizontalDirection() && is100PercentHeight()) ||
-    (container->isVerticalDirection() && is100PercentWidth()))
+    (container->isHorizontalDirection() && container->isFitContentHeight() &&
+     is100PercentHeight()) ||
+    (container->isVerticalDirection() && container->isFitContentWidth() && is100PercentWidth()))
   {
     // todo, What if there is rotation?
     node->set_align_self(align_items_stretch);
@@ -1005,6 +1006,27 @@ bool AutoLayout::is100PercentHeight()
   }
 
   return sharedRule->height.value.is100Percent();
+}
+
+bool AutoLayout::isFitContentWidth()
+{
+  auto sharedRule = rule.lock();
+  if (!sharedRule)
+  {
+    return false;
+  }
+
+  return sharedRule->width.value.types == Length::ETypes::FIT_CONTENT;
+}
+bool AutoLayout::isFitContentHeight()
+{
+  auto sharedRule = rule.lock();
+  if (!sharedRule)
+  {
+    return false;
+  }
+
+  return sharedRule->height.value.types == Length::ETypes::FIT_CONTENT;
 }
 
 bool AutoLayout::isSmartSpacingAndFlexSpaceBetweenAndNoWrap()

@@ -74,6 +74,18 @@ public:
     return frames;
   }
 
+  static std::vector<FramePtr> build2(const json& j)
+  {
+    SceneBuilder builder;
+    builder.buildImpl2(j);
+    std::vector<FramePtr> frames;
+    for (auto& frame : builder.m_frames)
+    {
+      frames.emplace_back(makeFramePtr(std::move(frame)));
+    }
+    return frames;
+  }
+
   static SceneBuilder builder()
   {
     return SceneBuilder();
@@ -171,6 +183,8 @@ private:
   SceneBuilder() = default;
 
   void buildImpl(const json& j);
+
+  void buildImpl2(const json& j);
 
   static json defaultTextAttr();
 };

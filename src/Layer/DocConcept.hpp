@@ -29,21 +29,25 @@ using Float2 = std::array<float, 2>;
 namespace VGG::layer
 {
 
-template<typename T>
-concept AttrType =
-  requires(T a) { std::same_as<T, ContextSetting> || std::same_as<T, PatternTile>; };
-
-template<typename T>
-concept BoundsObject = requires(T a) {
-  C_DECL(X, (float));
-  C_DECL(Y, (float));
-  C_DECL(W, (float));
-  C_DECL(H, (float));
+enum class EModelObjectType
+{
+  GROUP,
+  FRAME,
+  PATH,
+  IMAGE,
+  TEXT,
+  CONTOUR,
+  MASTER,
+  INSTANCE,
+  UNKNOWN
 };
+
+template<class R, class F, class... Args>
+concept CallableObject = std::is_invocable_r<R, F, Args...>::value;
 
 template<typename T>
 concept AbstractObject = requires(T a) {
-  C_DECL(ObjectType, (EObjectType));
+  C_DECL(ObjectType, (EModelObjectType));
   C_DECL(Name, (std::string));
   C_DECL(Id, (std::string));
   C_DECL(Bounds, (Bounds));
@@ -57,17 +61,22 @@ concept AbstractObject = requires(T a) {
   C_DECL(MaskShowType, (EMaskShowType));
   C_DECL(ShapeMask, (std::vector<std::string>));
   C_DECL(AlphaMask, (std::vector<AlphaMask>));
-  {
-    a.getChildObjects()
-  };
+  C_DECL(ChildObjects, (std::vector<typename T::BaseType>));
 };
+
+template<typename T>
+concept GroupObject = AbstractObject<T>;
 
 template<typename T>
 concept FrameObject =
   AbstractObject<T> && requires(T a) { C_DECL(Radius, (std::array<float, 4>)); };
 
 template<typename T>
-concept GroupObject = AbstractObject<T>;
+concept MasterObject =
+  AbstractObject<T> && requires(T a) { C_DECL(Radius, (std::array<float, 4>)); };
+
+template<typename T>
+concept InstanceObject = AbstractObject<T>;
 
 template<typename T>
 concept ImageObject = AbstractObject<T> && requires(T a) {
@@ -76,14 +85,35 @@ concept ImageObject = AbstractObject<T> && requires(T a) {
   C_DECL(ImageFilter, (ImageFilter));
 };
 
-template<typename T>
+template<typename T, typename BaseType = T>
 concept TextObject = AbstractObject<T> && requires(T a) {
   C_DECL(Text, (std::string));
   C_DECL(TextBounds, (Bounds));
   C_DECL(VerticalAlignment, (ETextVerticalAlignment));
   C_DECL(LayoutMode, (ETextLayoutMode));
-  C_DECL(Anchor, (std::array<float, 2>));
-  C_DECL(DefaultFontAttr, (glm::vec2));
+  C_DECL(Anchor, (Float2));
+};
+
+template<typename T, typename U>
+concept CastObject = AbstractObject<U> && requires(T a) {
+  {
+    T::asGroup(std::declval<U>())
+  } -> GroupObject;
+  {
+    T::asFrame(std::declval<U>())
+  } -> FrameObject;
+  {
+    T::asMaster(std::declval<U>())
+  } -> MasterObject;
+  {
+    T::asInstance(std::declval<U>())
+  } -> InstanceObject;
+  {
+    T::asImage(std::declval<U>())
+  } -> ImageObject;
+  {
+    T::asText(std::declval<U>())
+  } -> TextObject;
 };
 
 #undef UNPACK

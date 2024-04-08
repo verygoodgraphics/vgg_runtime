@@ -26,6 +26,18 @@ namespace VGG::layer
 class CoordinateConvert
 {
 public:
+  static void convertCoordinateSystem(Bounds& bounds, const glm::mat3& totalMatrix)
+  {
+    auto x = bounds.topLeft().x;
+    auto y = bounds.topLeft().y;
+    auto width = bounds.width();
+    auto height = bounds.height();
+    auto topLeft = glm::vec2{ x, y };
+    auto bottomRight = glm::vec2{ x + width, y - height };
+    CoordinateConvert::convertCoordinateSystem(topLeft, totalMatrix);
+    CoordinateConvert::convertCoordinateSystem(bottomRight, totalMatrix);
+    bounds = Bounds{ topLeft, bottomRight };
+  }
   static void convertCoordinateSystem(float& x, float& y, const glm::mat3& totalMatrix)
   {
     // evaluated form of 'point = totalMatrix * glm::vec3(point, 1.f);'

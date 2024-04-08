@@ -64,7 +64,6 @@ struct PaintOption
   }
 };
 
-using ShapeData = std::variant<ContourPtr, Ellipse, SkRect, SkRRect>;
 using ContourData = std::optional<ShapeData>;
 
 class PaintNode;

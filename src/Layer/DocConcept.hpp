@@ -110,6 +110,8 @@ concept TextObject = AbstractObject<T> && requires(T a) {
   C_DECL(Anchor, (std::optional<Float2>));
   C_DECL(TextLineType, (std::vector<TextLineAttr>));
   C_DECL(HorizontalAlignment, (std::vector<ETextHorizontalAlignment>));
+  C_DECL(DefaultFontAttr, (TextStyleAttr));
+  C_DECL(FontAttr, (std::vector<TextStyleAttr>));
 };
 
 template<typename T, typename U>

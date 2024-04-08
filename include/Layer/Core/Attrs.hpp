@@ -467,15 +467,15 @@ struct Font
 
 struct TextStyleAttr
 {
-  Font                 font;
-  std::vector<Fill>    fills;
-  size_t               length{ 0 };
-  float                letterSpacing{ 0.0 };
-  std::optional<float> lineHeight;
-  float                baselineShift{ 0.0 };
-  bool                 lineThrough{ false };
-  bool                 kerning{ false };
-  ETextUnderline       underline{ UT_NONE };
+  Font                             font;
+  std::optional<std::vector<Fill>> fills;
+  size_t                           length{ 0 };
+  float                            letterSpacing{ 0.0 };
+  std::optional<float>             lineHeight;
+  float                            baselineShift{ 0.0 };
+  bool                             lineThrough{ false };
+  bool                             kerning{ false };
+  ETextUnderline                   underline{ UT_NONE };
 
   bool operator==(const TextStyleAttr& rhs) const
   {
@@ -483,6 +483,19 @@ struct TextStyleAttr
            letterSpacing == rhs.letterSpacing && lineHeight == rhs.lineHeight &&
            baselineShift == rhs.baselineShift && lineThrough == rhs.lineThrough &&
            kerning == rhs.kerning && underline == rhs.underline;
+  }
+
+  void update(const TextStyleAttr& rhs)
+  {
+    font = rhs.font;
+    fills = rhs.fills;
+    length = rhs.length;
+    letterSpacing = rhs.letterSpacing;
+    lineHeight = rhs.lineHeight;
+    baselineShift = rhs.baselineShift;
+    lineThrough = rhs.lineThrough;
+    kerning = rhs.kerning;
+    underline = rhs.underline;
   }
 };
 

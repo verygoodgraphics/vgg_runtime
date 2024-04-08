@@ -1,6 +1,6 @@
 /*
  * Copyright 2021-2023 Chaoya Li <harry75369@gmail.com>
- * Copyright 2023 VeryGoodGraphics LTD <bd@verygoodgraphics.com>
+ * Copyright 2023-2024 VeryGoodGraphics LTD <bd@verygoodgraphics.com>
  *
  * Licensed under the VGG License, Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.

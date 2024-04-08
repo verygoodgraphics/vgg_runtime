@@ -38,7 +38,6 @@ using namespace VGG;
 namespace VGG
 {
 class UIScrollView;
-}
 
 class UIApplication : public app::EventListener
 {
@@ -66,6 +65,10 @@ public:
   bool needsPaint();
   bool paint(int fps, bool force = false);
 
+  std::vector<uint8_t> makeImageSnapshot(ImageOptions options);
+
 private:
   bool handleKeyEvent(VKeyboardEvent evt);
 };
+
+} // namespace VGG

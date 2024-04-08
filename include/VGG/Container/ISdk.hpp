@@ -26,6 +26,13 @@ namespace VGG
 class ISdk
 {
 public:
+  struct ImageOptions
+  {
+    std::string type{ "png" }; // png, jpg, webp, raw
+    int         quality{ 100 };
+  };
+
+public:
   virtual ~ISdk() = default;
 
   virtual std::string designDocument() = 0;
@@ -50,6 +57,8 @@ public:
 
   virtual std::vector<uint8_t>     vggFileBuffer() = 0;
   virtual std::vector<std::string> texts() = 0;
+
+  virtual std::vector<uint8_t> makeImageSnapshot(const ImageOptions& options) = 0;
 };
 
 } // namespace VGG

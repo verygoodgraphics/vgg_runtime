@@ -85,6 +85,11 @@ public:
 #endif
   virtual std::vector<std::string> texts() override;
 
+  virtual std::vector<uint8_t> makeImageSnapshot(const ImageOptions& options) override;
+#ifdef EMSCRIPTEN
+  emscripten::val emMakeImageSnapshot(const ImageOptions& options);
+#endif
+
   // event listener
   // event types: https://developer.mozilla.org/en-US/docs/Web/API/Element#events
   void addEventListener(

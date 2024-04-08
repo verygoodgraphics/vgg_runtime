@@ -17,6 +17,8 @@
 
 #include "UIScrollView.hpp"
 
+using namespace VGG;
+
 void UIApplication::setView(std::shared_ptr<UIScrollView> view, double w, double h)
 {
   ASSERT(view);
@@ -149,4 +151,20 @@ void UIApplication::setLayer(app::AppRender* layer)
 #ifdef EMSCRIPTEN
   m_layer->setSamplingOptions(SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNearest));
 #endif
+}
+
+std::vector<uint8_t> UIApplication::makeImageSnapshot(ImageOptions options)
+{
+  std::vector<uint8_t> result;
+  ASSERT(m_layer);
+  options.position[0] = 0;
+  options.position[1] = 0;
+  options.extend[0] = m_view->contentSize().width;
+  options.extend[1] = m_view->contentSize().height;
+  if (auto maybeImageBytes = m_layer->makeImageSnapshot(options))
+  {
+    auto& bytes = maybeImageBytes.value();
+    std::copy(bytes.begin(), bytes.end(), std::back_inserter(result));
+  }
+  return result;
 }

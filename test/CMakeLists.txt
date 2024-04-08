@@ -7,6 +7,7 @@ else()
 
   add_executable(unit_tests
     container/MockSkiaGraphicsContext.cpp
+    container/SdkTests.cpp
     container/container_tests.cpp
     controller/controller_test.cpp
     domain/layout/expand_symbol_tests.cpp

@@ -122,6 +122,7 @@ extern "C"
     auto sdlApp = AppImpl::app();
     ASSERT(sdlApp);
     auto& mainComposer = VggBrowser::mainComposer();
+    mainComposer.env()->setApplication(app);
 
     // inject dependencies
     app->setLayer(sdlApp->layer());

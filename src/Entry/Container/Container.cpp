@@ -101,6 +101,7 @@ public:
       new MainComposer{ new NativeComposer(catchJsException), std::make_shared<FakeMouse>() });
 #endif
     m_application.reset(new UIApplication);
+    m_mainComposer->env()->setApplication(m_application.get());
 
     m_appRender = std::make_shared<app::AppRender>();
     m_application->setLayer(m_appRender.get());

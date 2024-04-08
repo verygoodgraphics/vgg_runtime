@@ -16,6 +16,7 @@
 #include "VggSdk.hpp"
 
 #include "Application/Presenter.hpp"
+#include "Application/UIApplication.hpp"
 #include "Application/VggEnv.hpp"
 #include "Domain/IVggEnv.hpp"
 #include "Domain/Saver/DirSaver.hpp"
@@ -304,6 +305,45 @@ bool VggSdk::jsAddFont(const emscripten::val& jsFontUint8Array, const std::strin
 emscripten::val VggSdk::vggFileUint8Array()
 {
   const auto&     buffer = vggFileBuffer();
+  emscripten::val array = emscripten::val::global("Uint8Array")
+                            .new_(emscripten::typed_memory_view(buffer.size(), buffer.data()));
+  return array;
+}
+#endif
+
+std::vector<uint8_t> VggSdk::makeImageSnapshot(const ImageOptions& sdkOptions)
+{
+  layer::ImageOptions options;
+
+  auto& type = sdkOptions.type;
+  if (type == "png")
+  {
+    options.encode = layer::EImageEncode::IE_PNG;
+  }
+  else if (type == "jpg")
+  {
+    options.encode = layer::EImageEncode::IE_JPEG;
+  }
+  else if (type == "webp")
+  {
+    options.encode = layer::EImageEncode::IE_WEBP;
+  }
+  else if (type == "raw")
+  {
+    options.encode = layer::EImageEncode::IE_RAW;
+  }
+
+  options.position[0] = 0;
+  options.position[1] = 0;
+  options.quality = sdkOptions.quality;
+
+  return env()->application()->makeImageSnapshot(options);
+}
+
+#ifdef EMSCRIPTEN
+emscripten::val VggSdk::emMakeImageSnapshot(const ImageOptions& options)
+{
+  const auto&     buffer = makeImageSnapshot(options);
   emscripten::val array = emscripten::val::global("Uint8Array")
                             .new_(emscripten::typed_memory_view(buffer.size(), buffer.data()));
   return array;

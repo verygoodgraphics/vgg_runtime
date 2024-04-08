@@ -80,6 +80,7 @@ public:
 
   bool onEvent(UEvent e, void* userData) override;
 
+  Size contentSize() const;
   void setContentSize(Size size);
   void setContentOffset(Point offset, bool byMouseWheel = false);
   auto contentOffset() const -> Point

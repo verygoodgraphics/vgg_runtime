@@ -30,6 +30,7 @@
 #include "Layer/Core/TextNode.hpp"
 #include "Layer/Core/ImageNode.hpp"
 #include <concepts>
+#include <type_traits>
 #include <variant>
 
 #include "Layer/JSONModel.hpp"
@@ -40,9 +41,15 @@ namespace
 using namespace VGG::layer;
 struct BuilderImpl
 {
+  struct Context
+  {
+    VAllocator*                   alloc;
+    SceneBuilder::FontNameVisitor fontNameVisitor;
+  };
+
   static TextStyleAttr defaultTextAttr()
   {
-    auto j = R"({
+    static TextStyleAttr s_defaultTextAttr = R"({
         "length":0,
         "name":"Fira Sans",
         "subFamilyName":"",
@@ -67,25 +74,13 @@ struct BuilderImpl
         "rotate":0,
         "textParagraph":{}
     })"_json;
-    return j;
+    return s_defaultTextAttr;
   }
+
   static std::tuple<glm::mat3, glm::mat3, glm::mat3> makeMatrix(const glm::mat3& m)
   {
     const auto [newMatrix, inversed] = CoordinateConvert::convertMatrixCoordinate(m);
     return { m, newMatrix, inversed };
-  }
-
-  static Bounds makeBounds(const Bounds& bounds, const glm::mat3& totalMatrix)
-  {
-    auto x = bounds.topLeft().x;
-    auto y = bounds.topLeft().y;
-    auto width = bounds.width();
-    auto height = bounds.height();
-    auto topLeft = glm::vec2{ x, y };
-    auto bottomRight = glm::vec2{ x + width, y - height };
-    CoordinateConvert::convertCoordinateSystem(topLeft, totalMatrix);
-    CoordinateConvert::convertCoordinateSystem(bottomRight, totalMatrix);
-    return Bounds{ topLeft, bottomRight };
   }
 
   template<typename T, typename F1, typename F2>
@@ -100,13 +95,15 @@ struct BuilderImpl
     auto obj = creator(m.getName(), m.getId());
     if (!obj)
       return nullptr;
-    Bounds bounds = m.getBounds();
-    auto   style = m.getStyle();
 
     auto [originalMatrix, newMatrix, inversedNewMatrix] = BuilderImpl::makeMatrix(m.getMatrix());
     const auto convertedMatrix = inversedNewMatrix * totalMatrix * originalMatrix;
-    CoordinateConvert::convertCoordinateSystem(bounds, totalMatrix);
-    CoordinateConvert::convertCoordinateSystem(style, totalMatrix);
+
+    auto bounds = m.getBounds();
+    CoordinateConvert::convertCoordinateSystem(bounds, convertedMatrix);
+
+    auto style = m.getStyle();
+    CoordinateConvert::convertCoordinateSystem(style, convertedMatrix);
 
     obj->setTransform(Transform(newMatrix));
     obj->setFrameBounds(bounds);
@@ -125,20 +122,20 @@ struct BuilderImpl
     obj->setMaskShowType(m.getMaskShowType()); // default show type??
     obj->setOverflow(m.getOverflow());
     obj->setVisible(m.getVisible());
-    override(0, convertedMatrix, Bounds());
+    override(obj, convertedMatrix, bounds);
     return obj;
   }
 
   template<typename T, typename C>
     requires layer::GroupObject<T> && layer::CastObject<C, T>
-  static PaintNodePtr fromGroup(const T& m, const glm::mat3& totalMatrix, VAllocator* alloc)
+  static PaintNodePtr fromGroup(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
   {
     return makeObjectBase(
       m,
       totalMatrix,
       [&](std::string name, std::string guid)
       {
-        auto p = makePaintNodePtr(alloc, std::move(name), VGG_GROUP, std::move(guid));
+        auto p = makePaintNodePtr(ctx.alloc, std::move(name), VGG_GROUP, std::move(guid));
         return p;
       },
       [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bound)
@@ -149,21 +146,21 @@ struct BuilderImpl
         auto childObjects = m.getChildObjects();
         for (const auto& c : childObjects)
         {
-          p->addChild(BuilderImpl::fromObject<T, C>(C::asGroup(c), matrix, alloc));
+          p->addChild(BuilderImpl::fromObject<T, C>(C::asGroup(c), matrix, ctx));
         }
       });
   }
 
   template<typename T, typename C>
     requires layer::FrameObject<T> && layer::CastObject<C, T>
-  static PaintNodePtr fromFrame(const T& m, const glm::mat3& totalMatrix, VAllocator* alloc)
+  static PaintNodePtr fromFrame(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
   {
     return makeObjectBase(
       m,
       totalMatrix,
       [&](std::string name, std::string guid)
       {
-        auto p = makePaintNodePtr(alloc, std::move(name), VGG_FRAME, std::move(guid));
+        auto p = makePaintNodePtr(ctx.alloc, std::move(name), VGG_FRAME, std::move(guid));
         return p;
       },
       [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bound)
@@ -173,20 +170,20 @@ struct BuilderImpl
         auto childObjects = m.getChildObjects();
         for (const auto& c : childObjects)
         {
-          p->addChild(BuilderImpl::fromObject<T, C>(C::asFrame(c), matrix, alloc));
+          p->addChild(BuilderImpl::fromObject<T, C>(C::asFrame(c), matrix, ctx));
         }
       });
   }
   template<typename T, typename C>
     requires layer::PathObject<T> && layer::CastObject<C, T>
-  static PaintNodePtr fromPath(const T& m, const glm::mat3& totalMatrix, VAllocator* alloc)
+  static PaintNodePtr fromPath(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
   {
     return makeObjectBase(
       m,
       totalMatrix,
       [&](std::string name, std::string guid)
       {
-        auto p = makePaintNodePtr(alloc, std::move(name), VGG_PATH, std::move(guid));
+        auto p = makePaintNodePtr(ctx.alloc, std::move(name), VGG_PATH, std::move(guid));
         return p;
       },
       [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bounds)
@@ -205,11 +202,11 @@ struct BuilderImpl
           if (VT(&geo, typename T::BaseType, ptr))
           {
             // none shape child
-            p->addSubShape(fromObject<typename T::BaseType, C>(*ptr, totalMatrix, alloc), blop);
+            p->addSubShape(fromObject<typename T::BaseType, C>(*ptr, totalMatrix, ctx), blop);
           }
           else if (VT(&geo, ShapeData, ptr))
           {
-            auto node = makePaintNodePtr(alloc, "contour", VGG_CONTOUR, "");
+            auto node = makePaintNodePtr(ctx.alloc, "contour", VGG_CONTOUR, "");
             node->setOverflow(OF_VISIBLE);
             node->setContourOption(ContourOption{ ECoutourType::MCT_FRAMEONLY, false });
             CoordinateConvert::convertCoordinateSystem(*ptr, totalMatrix);
@@ -226,26 +223,26 @@ struct BuilderImpl
   static std::vector<PaintNodePtr> fromTopLevelFrames(
     const std::vector<T>& frameObject,
     const glm::mat3&      matrix,
-    VAllocator*           alloc)
+    const Context&        ctx)
   {
     std::vector<PaintNodePtr> frames(4);
     for (const auto& f : frameObject)
     {
-      frames.push_back(BuilderImpl::fromFrame<T, C>(f, matrix, alloc));
+      frames.push_back(BuilderImpl::fromFrame<T, C>(f, matrix, ctx));
     }
     return frames;
   }
 
   template<typename T, typename C>
     requires layer::MasterObject<T> && layer::CastObject<C, T>
-  static PaintNodePtr fromMaster(const T& m, const glm::mat3& totalMatrix, VAllocator* alloc)
+  static PaintNodePtr fromMaster(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
   {
     return makeObjectBase(
       m,
       totalMatrix,
       [&](std::string name, std::string guid)
       {
-        auto p = makePaintNodePtr(alloc, std::move(name), VGG_FRAME, std::move(guid));
+        auto p = makePaintNodePtr(ctx.alloc, std::move(name), VGG_FRAME, std::move(guid));
         return p;
       },
       [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bound)
@@ -255,28 +252,28 @@ struct BuilderImpl
         auto childObjects = m.getChildObjects();
         for (const auto& c : childObjects)
         {
-          p->addChild(BuilderImpl::fromObject<T, C>(C::asMaster(c), matrix, alloc));
+          p->addChild(BuilderImpl::fromObject<T, C>(C::asMaster(c), matrix, ctx));
         }
       });
   }
 
   template<typename T, typename C>
     requires layer::InstanceObject<T> && layer::CastObject<C, T>
-  static PaintNodePtr fromInstance(const T& m, const glm::mat3& totalMatrix, VAllocator* alloc)
+  static PaintNodePtr fromInstance(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
   {
-    DEBUG("not support instance");
+    DEBUG("instance");
     return nullptr;
   }
 
   template<typename T, typename C>
     requires layer::ImageObject<T> && layer::CastObject<C, T>
-  static PaintNodePtr fromImage(const T& m, const glm::mat3& totalMatrix, VAllocator* alloc)
+  static PaintNodePtr fromImage(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
   {
     return makeObjectBase(
       m,
       totalMatrix,
       [&](std::string name, std::string guid)
-      { return makeImageNodePtr(alloc, std::move(name), std::move(guid)); },
+      { return makeImageNodePtr(ctx.alloc, std::move(name), std::move(guid)); },
       [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bounds)
       {
         auto i = static_cast<ImageNode*>(p);
@@ -289,13 +286,13 @@ struct BuilderImpl
 
   template<typename T, typename C>
     requires layer::TextObject<T> && layer::CastObject<C, T>
-  static PaintNodePtr fromText(const T& m, const glm::mat3& totalMatrix, VAllocator* alloc)
+  static PaintNodePtr fromText(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
   {
     return makeObjectBase(
       m,
       totalMatrix,
       [&](std::string name, std::string guid)
-      { return makeTextNodePtr(alloc, std::move(name), std::move(guid)); },
+      { return makeTextNodePtr(ctx.alloc, std::move(name), std::move(guid)); },
       [&](PaintNode* ptr, const glm::mat3& matrix, const Bounds& bounds)
       {
         auto p = static_cast<TextNode*>(ptr);
@@ -310,29 +307,27 @@ struct BuilderImpl
         p->setParagraphBounds(bounds);
 
         // 1.
-
         std::vector<TextStyleAttr> textStyle;
         auto                       defaultAttr = defaultTextAttr();
         defaultAttr.update(m.getDefaultFontAttr());
-        // auto fontAttr = m.getFontAttr();
-        // for (auto& att : fontAttr)
-        // {
-        //   auto json = defaultAttr;
-        //   json.update(att);
-        //   if (auto it = json.find("fills"); it == json.end())
-        //   {
-        //     json["fills"] =
-        //       j.value("style", nlohmann::json{}).value("fills", std::vector<nlohmann::json>());
-        //   }
-        //   if (auto it = json.find("borders"); it == json.end())
-        //   {
+        auto fontAttr = m.getFontAttr();
+        for (auto& att : fontAttr)
+        {
+          auto json = defaultAttr;
+          json.update(att);
+          if (!json.fills)
+          {
+            json.fills = m.getStyle().fills;
+          }
+          // if (auto it = json.find("borders"); it == json.end())
+          // {
+          //
+          //   json["borders"] =
+          //     j.value("style", nlohmann::json{}).value("borders", std::vector<nlohmann::json>());
+          // }
+          textStyle.push_back(json);
+        }
         //
-        //     json["borders"] =
-        //       j.value("style", nlohmann::json{}).value("borders", std::vector<nlohmann::json>());
-        //   }
-        //   textStyle.push_back(json);
-        // }
-
         for (auto& style : textStyle)
         {
           CoordinateConvert::convertCoordinateSystem(style, totalMatrix);
@@ -344,7 +339,6 @@ struct BuilderImpl
 
         std::vector<ParagraphAttr> parStyle;
         parStyle.reserve(lineType.size());
-
         size_t       i = 0;
         auto         defaultAlign = alignments.empty() ? HA_LEFT : alignments.back();
         TextLineAttr defaultLineType;
@@ -363,13 +357,13 @@ struct BuilderImpl
           parStyle.emplace_back(defaultLineType, alignments[i]);
           i++;
         }
-        // if (m_fontNameVisitor)
-        // {
-        //   for (const auto& style : textStyle)
-        //   {
-        //     m_fontNameVisitor(style.font.fontName, style.font.subFamilyName);
-        //   }
-        // }
+        if (ctx.fontNameVisitor)
+        {
+          for (const auto& style : textStyle)
+          {
+            ctx.fontNameVisitor(style.font.fontName, style.font.subFamilyName);
+          }
+        }
         p->setParagraph(m.getText(), std::move(textStyle), std::move(parStyle));
         if (bounds.width() == 0 || bounds.height() == 0)
         {
@@ -381,41 +375,32 @@ struct BuilderImpl
 
   template<typename T, typename C>
     requires layer::AbstractObject<T> && CastObject<C, T>
-  static PaintNodePtr fromObject(const T& m, const glm::mat3& totalMatrix, VAllocator* alloc)
+  static PaintNodePtr fromObject(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
   {
     PaintNodePtr ro;
     switch (m.getObjectType())
     {
       case EModelObjectType::GROUP:
-        return BuilderImpl::fromGroup<decltype(C::asGroup(m)), C>(
-          C::asGroup(m),
-          totalMatrix,
-          alloc);
+        return BuilderImpl::fromGroup<decltype(C::asGroup(m)), C>(C::asGroup(m), totalMatrix, ctx);
       case EModelObjectType::FRAME:
-        return BuilderImpl::fromFrame<decltype(C::asFrame(m)), C>(
-          C::asFrame(m),
-          totalMatrix,
-          alloc);
+        return BuilderImpl::fromFrame<decltype(C::asFrame(m)), C>(C::asFrame(m), totalMatrix, ctx);
       case EModelObjectType::PATH:
-        return BuilderImpl::fromPath<decltype(C::asPath(m)), C>(C::asPath(m), totalMatrix, alloc);
+        return BuilderImpl::fromPath<decltype(C::asPath(m)), C>(C::asPath(m), totalMatrix, ctx);
       case EModelObjectType::IMAGE:
-        return BuilderImpl::fromImage<decltype(C::asImage(m)), C>(
-          C::asImage(m),
-          totalMatrix,
-          alloc);
+        return BuilderImpl::fromImage<decltype(C::asImage(m)), C>(C::asImage(m), totalMatrix, ctx);
       case EModelObjectType::TEXT:
-        return BuilderImpl::fromText<decltype(C::asText(m)), C>(C::asText(m), totalMatrix, alloc);
+        return BuilderImpl::fromText<decltype(C::asText(m)), C>(C::asText(m), totalMatrix, ctx);
       case EModelObjectType::MASTER:
         return BuilderImpl::fromMaster<decltype(C::asMaster(m)), C>(
           C::asMaster(m),
           totalMatrix,
-          alloc);
+          ctx);
         break;
       case EModelObjectType::INSTANCE:
         return BuilderImpl::fromInstance<decltype(C::asInstance(m)), C>(
           C::asInstance(m),
           totalMatrix,
-          alloc);
+          ctx);
       case EModelObjectType::CONTOUR:
         DEBUG("not reachable");
         break;
@@ -424,6 +409,17 @@ struct BuilderImpl
         break;
     }
     return nullptr;
+  }
+
+  // interface
+  //
+  template<typename T, typename C>
+    requires layer::AbstractObject<T> && layer::CastObject<C, T>
+  static std::vector<PaintNodePtr> fromFrames(const T& obj, const Context& ctx)
+  {
+    glm::mat3 mat = glm::identity<glm::mat3>();
+    mat = glm::scale(mat, glm::vec2(1, -1));
+    return BuilderImpl::fromTopLevelFrames<T, C>(obj, mat, ctx);
   }
 };
 
@@ -951,12 +947,17 @@ void SceneBuilder::buildImpl2(const json& j)
 {
   glm::mat3 mat = glm::identity<glm::mat3>();
   mat = glm::scale(mat, glm::vec2(1, -1));
-  auto                         frames = getOrDefault(j, "frames");
   std::vector<JSONFrameObject> frameObjects;
-  m_frames = BuilderImpl::fromTopLevelFrames<JSONFrameObject, JSONModelCastObject>(
-    frameObjects,
-    mat,
-    m_alloc);
+  auto                         frames = getOrDefault(j, "frames");
+  for (auto& e : frames)
+  {
+    frameObjects.push_back(JSONFrameObject(std::move(e)));
+  }
+  BuilderImpl::Context ctx;
+  ctx.alloc = m_alloc;
+  ctx.fontNameVisitor = m_fontNameVisitor;
+  m_frames =
+    BuilderImpl::fromTopLevelFrames<JSONFrameObject, JSONModelCastObject>(frameObjects, mat, ctx);
 }
 
 SceneBuilderResult SceneBuilder::build()

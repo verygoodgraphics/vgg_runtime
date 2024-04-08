@@ -37,7 +37,10 @@ struct adl_serializer<glm::mat3>
 {
   static void from_json(const json& j, glm::mat3& m)
   {
-    // TODO::
+    std::array<float, 6> v = j;
+    m = glm::mat3{ glm::vec3{ v[0], v[1], 0 },
+                   glm::vec3{ v[2], v[3], 0 },
+                   glm::vec3{ v[4], v[5], 1 } };
   }
 };
 

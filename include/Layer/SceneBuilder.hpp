@@ -16,6 +16,7 @@
 #pragma once
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/Frame.hpp"
+#include "Layer/DocConcept.hpp"
 #include "Layer/Memory/VAllocator.hpp"
 
 #include <glm/glm.hpp>
@@ -118,7 +119,7 @@ public:
 
   static std::tuple<glm::mat3, glm::mat3, glm::mat3> fromMatrix(const json& j);
   static Bounds fromBounds(const json& j, const glm::mat3& totalMatrix);
-  static Style fromStyle(const json& j, const Bounds& bounds, const glm::mat3& totalMatrix);
+  static Style  fromStyle(const json& j, const Bounds& bounds, const glm::mat3& totalMatrix);
 
 private:
   std::vector<PaintNodePtr> m_frames;
@@ -158,6 +159,7 @@ private:
     return *this;
   }
 
+  // deprecated begin
   PaintNodePtr fromFrame(const json& j, const glm::mat3& totalMatrix);
 
   PaintNodePtr fromImage(const json& j, const glm::mat3& totalMatrix);
@@ -179,6 +181,8 @@ private:
   std::vector<PaintNodePtr> fromSymbolMasters(const json& j, const glm::mat3& totalMatrix);
 
   std::vector<PaintNodePtr> fromTopLevelFrames(const json& j, const glm::mat3& totalMatrix);
+
+  // deprecated end
 
   SceneBuilder() = default;
 

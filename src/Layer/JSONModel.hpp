@@ -20,6 +20,8 @@
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/AttrSerde.hpp"
 #include "Layer/NlohmannJSONImpl.hpp"
+#include "Layer/VSkia.hpp"
+#include "Layer/PathPatch.h"
 #include <type_traits>
 
 using namespace nlohmann;
@@ -27,31 +29,70 @@ using namespace nlohmann;
 namespace VGG::layer
 {
 
+inline ContourPtr makeContourData2(const json& j)
+{
+  Contour contour;
+  contour.closed = j.value("closed", false);
+  const auto& points = getOrDefault(j, "points");
+  for (const auto& e : points)
+  {
+    contour.emplace_back(
+      getOptional<glm::vec2>(e, "point").value_or(glm::vec2{ 0, 0 }),
+      getOptional<float>(e, "radius").value_or(0.0),
+      getOptional<glm::vec2>(e, "curveFrom"),
+      getOptional<glm::vec2>(e, "curveTo"),
+      getOptional<int>(e, "cornerStyle"));
+  }
+  auto ptr = std::make_shared<Contour>(contour);
+  if (!ptr->closed && !ptr->empty())
+  {
+    ptr->back().radius = 0;
+    ptr->front().radius = 0;
+  }
+  return ptr;
+}
+
+inline ShapeData makeShapeData2(
+  const json&   j,
+  const json&   parent,
+  const Bounds& bounds,
+  float         cornerSmoothing)
+{
+  const auto klass = j.value("class", "");
+  if (klass == "contour")
+  {
+    auto c = makeContourData2(j);
+    c->cornerSmooth = cornerSmoothing;
+    return c;
+  }
+  else if (klass == "rectangle")
+  {
+    const auto           rect = toSkRect(bounds);
+    std::array<float, 4> radius = j.value("radius", std::array<float, 4>{ 0, 0, 0, 0 });
+    auto                 s = makeShape(radius, rect, cornerSmoothing);
+    return std::visit([&](auto&& arg) { return ShapeData(arg); }, s);
+  }
+  else if (klass == "ellipse")
+  {
+    Ellipse oval;
+    oval.rect = toSkRect(bounds);
+    return oval;
+  }
+  else if (klass == "polygon" || klass == "star")
+  {
+    auto cp = parent;
+    if (pathChange(cp))
+    {
+      auto c = makeContourData2(cp["shape"]["subshapes"][0]["subGeometry"]);
+      c->cornerSmooth = cornerSmoothing;
+      return c;
+    }
+  }
+  return ShapeData();
+}
+
 #define M_JSON_FIELD_DEF(getter, key, type, dft) NLOHMANN_JSON_MODEL_IMPL(getter, key, type, dft)
 #define M_CLASS_GETTER NLOHMANN_JSON_OBJECT_MODEL_CLASS_GETTER
-
-#define M_OBJECT_TYPE_DEF                                                                          \
-  EModelObjectType getObjectType() const                                                           \
-  {                                                                                                \
-    auto klass = M_CLASS_GETTER;                                                                   \
-    if (klass == "group")                                                                          \
-      return EModelObjectType::GROUP;                                                              \
-    if (klass == "frame")                                                                          \
-      return EModelObjectType::FRAME;                                                              \
-    if (klass == "path")                                                                           \
-      return EModelObjectType::PATH;                                                               \
-    if (klass == "image")                                                                          \
-      return EModelObjectType::IMAGE;                                                              \
-    if (klass == "text")                                                                           \
-      return EModelObjectType::TEXT;                                                               \
-    if (klass == "contour")                                                                        \
-      return EModelObjectType::CONTOUR;                                                            \
-    if (klass == "master")                                                                         \
-      return EModelObjectType::MASTER;                                                             \
-    if (klass == "instance")                                                                       \
-      return EModelObjectType::INSTANCE;                                                           \
-    return EModelObjectType::UNKNOWN;                                                              \
-  }
 
 struct JSONObject
 {
@@ -65,10 +106,12 @@ struct JSONObject
   {
   }
   std::vector<JSONObject> getChildObjects() const;
-  EModelObjectType        getObjectType() const
+  M_JSON_FIELD_DEF(ObjectTypeString, "class", std::string, "");
+  EModelObjectType getObjectType() const
   {
     return type;
   }
+
   M_JSON_FIELD_DEF(Name, "name", std::string, "");
   M_JSON_FIELD_DEF(Id, "id", std::string, "");
   M_JSON_FIELD_DEF(Bounds, "bounds", Bounds, {});
@@ -167,7 +210,7 @@ struct JSONPathObject : public JSONObject
   }
   EWindingType getWindingType() const
   {
-    return EWindingType::WR_EVEN_ODD;
+    return j.value("shape", json{}).value("windingRule", EWindingType::WR_EVEN_ODD);
   }
 
   std::vector<SubShape<JSONObject>> getShapes() const;
@@ -225,7 +268,49 @@ std::vector<JSONObject> JSONObject::getChildObjects() const
 
 std::vector<SubShape<JSONObject>> JSONPathObject::getShapes() const
 {
-  return {};
+  std::vector<SubShape<JSONObject>> res;
+  const auto shapes = j.value("shape", json{}).value("subshapes", std::vector<json>());
+  for (const auto& subshape : shapes)
+  {
+    const auto blop = subshape.value("booleanOperation", EBoolOp::BO_NONE);
+    const auto geo = subshape.value("subGeometry", nlohmann::json{});
+    const auto klass = geo.value("class", "");
+    if (
+      klass == "contour" || klass == "rectangle" || klass == "ellipse" || klass == "polygon" ||
+      klass == "star")
+    {
+      res.emplace_back(blop, makeShapeData2(geo, j, getBounds(), getCornerSmoothing()));
+    }
+    else if (klass == "path")
+    {
+      res.emplace_back(blop, JSONPathObject(geo));
+    }
+    else if (klass == "image")
+    {
+      res.emplace_back(blop, JSONImageObject(geo));
+    }
+    else if (klass == "text")
+    {
+      res.emplace_back(blop, JSONTextObject(geo));
+    }
+    else if (klass == "group")
+    {
+      res.emplace_back(blop, JSONGroupObject(geo));
+    }
+    else if (klass == "symbolInstance")
+    {
+      res.emplace_back(blop, JSONInstanceObject(geo));
+    }
+    else if (klass == "frame")
+    {
+      res.emplace_back(blop, JSONFrameObject(geo));
+    }
+    else if (klass == "symbolMaster")
+    {
+      res.emplace_back(blop, JSONMasterObject(geo));
+    }
+  }
+  return res;
 }
 
 struct JSONModelCastObject

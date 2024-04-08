@@ -213,7 +213,7 @@ void VShape::transform(VShape& shape, const SkMatrix& matrix)
   }
 }
 
-std::variant<ContourPtr, SkRRect, SkRect> makeShape(
+std::variant<ContourPtr, Rectangle> makeShape(
   std::array<float, 4> radius,
   const SkRect&        rect,
   float                cornerSmoothing)
@@ -228,7 +228,7 @@ std::variant<ContourPtr, SkRRect, SkRect> makeShape(
                             { radius[2], radius[2] },
                             { radius[3], radius[3] } };
       rrect.setRectRadii(rect, radii);
-      return rrect;
+      return Rectangle{ .rect = rrect };
     }
     else
     {
@@ -246,7 +246,7 @@ std::variant<ContourPtr, SkRRect, SkRect> makeShape(
   }
   else
   {
-    return rect;
+    return Rectangle{ .rect = rect };
   }
 }
 

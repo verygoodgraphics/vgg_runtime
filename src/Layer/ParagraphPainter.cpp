@@ -54,8 +54,8 @@ void VParagraphPainter::drawTextBlob(
       assert(m_paragraph);
       const auto& style = m_paragraph->textStyles();
       assert(!style.empty());
-      const auto fills = style[styleID].fills;
-      if (fills.empty())
+      const auto& fills = style[styleID].fills;
+      if (fills && fills->empty())
       {
         SkPaint defaultPaint;
         defaultPaint.setColor(SK_ColorBLACK);
@@ -67,14 +67,17 @@ void VParagraphPainter::drawTextBlob(
         SkPaint fillPen;
         fillPen.setAntiAlias(true);
         std::vector<SkPaint> paints;
-        for (const auto& f : fills)
+        if (fills)
         {
-          if (!f.isEnabled)
-            continue;
-          fillPen.setStyle(SkPaint::kFill_Style);
-          fillPen.setAntiAlias(true);
-          populateSkPaint(f.type, f.contextSettings, toSkRect(m_paragraph->bounds()), fillPen);
-          paints.push_back(fillPen);
+          for (const auto& f : *fills)
+          {
+            if (!f.isEnabled)
+              continue;
+            fillPen.setStyle(SkPaint::kFill_Style);
+            fillPen.setAntiAlias(true);
+            populateSkPaint(f.type, f.contextSettings, toSkRect(m_paragraph->bounds()), fillPen);
+            paints.push_back(fillPen);
+          }
         }
         if (!paints.empty())
         {

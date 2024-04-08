@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "Guard.hpp"
+#include "Layer/Core/VShape.hpp"
 #include "LayerCache.h"
 #include "Settings.hpp"
 #include "SkSL.hpp"
@@ -298,9 +299,23 @@ VShape PaintNode::makeBoundsPath()
   const auto& skRect = toSkRect(frameBounds());
   return std::visit(
     Overloaded{
+      [&](const Ellipse& c) { return VShape(c); },
       [&](const ContourPtr& c) { return VShape(c); },
-      [&](const SkRect& r) { return VShape(r); },
-      [&](const SkRRect& r) { return VShape(r); },
+      [&](const Rectangle& r)
+      {
+        if (auto p = std::get_if<SkRect>(&r.rect); p)
+        {
+          return VShape(*p);
+        }
+        else if (auto p = std::get_if<SkRRect>(&r.rect); p)
+        {
+          return VShape(*p);
+        }
+        return VShape();
+      },
+      [&](const Star& s) {},
+      [&](const Polygon& p) {},
+      [&](const VectorNetwork& p) {},
     },
     makeShape(d_ptr->frameRadius, skRect, d_ptr->cornerSmooth));
 }
@@ -368,8 +383,20 @@ VShape PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
       Overloaded{
         [&](const Ellipse& c) { path.setOval(c); },
         [&](const ContourPtr& c) { path.setContour(c); },
-        [&](const SkRect& c) { path.setRect(c); },
-        [&](const SkRRect& c) { path.setRRect(c); },
+        [&](const Rectangle& r)
+        {
+          if (auto p = std::get_if<SkRect>(&r.rect); p)
+          {
+            path.setRect(*p);
+          }
+          else if (auto p = std::get_if<SkRRect>(&r.rect); p)
+          {
+            path.setRRect(*p);
+          }
+        },
+        [&](const Star& s) {},
+        [&](const Polygon& p) {},
+        [&](const VectorNetwork& p) {},
       },
       *_->contour);
     // auto p = layer::makePath(*_->contour);

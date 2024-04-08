@@ -122,7 +122,7 @@ template<typename F>
 TextStyle createTextStyle(const TextStyleAttr& attr, F&& fun)
 {
   TextStyle style;
-  if (!attr.fills.empty())
+  if (attr.fills && !attr.fills->empty())
   {
     auto painterID = fun();
     style.setForegroundPaintID(painterID);
@@ -130,7 +130,7 @@ TextStyle createTextStyle(const TextStyleAttr& attr, F&& fun)
       Overloaded{ [&](const Gradient& g) { WARN("Don't support gradient decoration"); },
                   [&](const Color& c) { style.setDecorationColor(c); },
                   [&](const Pattern& p) { WARN("Don't support pattern decoration"); } },
-      attr.fills[0].type);
+      (*attr.fills)[0].type);
   }
   else
   {
@@ -399,7 +399,7 @@ bool RichTextBlock::ensureBuild(TextLayoutMode mode)
 
 std::pair<Bounds, float> RichTextBlock::internalLayout(const Bounds& bounds, ETextLayoutMode mode)
 {
-  Bounds      newBounds = bounds;
+  Bounds     newBounds = bounds;
   const auto layoutWidth = bounds.width();
   float      newWidth = bounds.width();
   float      newHeight = 0.f;

@@ -40,8 +40,7 @@ namespace
 using namespace VGG::layer;
 struct BuilderImpl
 {
-
-  static json defaultTextAttr()
+  static TextStyleAttr defaultTextAttr()
   {
     auto j = R"({
         "length":0,
@@ -195,25 +194,26 @@ struct BuilderImpl
         p->setChildWindingType(m.getWindingType());
         p->setContourOption(ContourOption(ECoutourType::MCT_OBJECT_OPS, false));
         p->setPaintOption(PaintOption(EPaintStrategy::PS_SELFONLY));
-        const auto shapes = m.getShapes();
-        for (const auto& subshape : shapes)
+        auto shapes = m.getShapes();
+        for (auto& subshape : shapes)
         {
           const auto blop = subshape.booleanOperation;
-          const auto geo = subshape.geometry;
-#define VT(type)                                                                                   \
-  auto ptr = std::get_if<type>(&geo);                                                              \
-  ptr
-          if (VT(typename T::BaseType))
+          auto&      geo = subshape.geometry;
+#define VT(var, type, v)                                                                           \
+  auto v = std::get_if<type>(var);                                                                 \
+  v
+          if (VT(&geo, typename T::BaseType, ptr))
           {
             // none shape child
             p->addSubShape(fromObject<typename T::BaseType, C>(*ptr, totalMatrix, alloc), blop);
           }
-          else if (VT(ShapeData))
+          else if (VT(&geo, ShapeData, ptr))
           {
             auto node = makePaintNodePtr(alloc, "contour", VGG_CONTOUR, "");
             node->setOverflow(OF_VISIBLE);
             node->setContourOption(ContourOption{ ECoutourType::MCT_FRAMEONLY, false });
-            // node->setContourData(makeShapeData(geo, j, matrix)); // TODO
+            CoordinateConvert::convertCoordinateSystem(*ptr, totalMatrix);
+            node->setContourData(*ptr);
             p->addSubShape(node, blop);
           }
 #undef VT
@@ -312,13 +312,13 @@ struct BuilderImpl
         // 1.
 
         std::vector<TextStyleAttr> textStyle;
-        // auto                       defaultAttr = defaultTextAttr();
-        // defaultAttr.update(j.value("defaultFontAttr", json::object()), true);
-        // auto fontAttr = j.value("fontAttr", std::vector<json>{});
+        auto                       defaultAttr = defaultTextAttr();
+        defaultAttr.update(m.getDefaultFontAttr());
+        // auto fontAttr = m.getFontAttr();
         // for (auto& att : fontAttr)
         // {
         //   auto json = defaultAttr;
-        //   json.update(att, true);
+        //   json.update(att);
         //   if (auto it = json.find("fills"); it == json.end())
         //   {
         //     json["fills"] =
@@ -440,7 +440,7 @@ PaintNodePtr makeContourNode(VAllocator* alloc)
   return p;
 }
 
-ContourPtr makeContourData(const json& j, const json& parent, const glm::mat3& totalMatrix)
+ContourPtr makeContourData(const json& j, const glm::mat3& totalMatrix)
 {
   Contour contour;
   contour.closed = j.value("closed", false);
@@ -456,7 +456,6 @@ ContourPtr makeContourData(const json& j, const json& parent, const glm::mat3& t
   }
   CoordinateConvert::convertCoordinateSystem(contour, totalMatrix);
   auto ptr = std::make_shared<Contour>(contour);
-  ptr->cornerSmooth = getOptional<float>(parent, "cornerSmoothing").value_or(0.f);
   if (!ptr->closed && !ptr->empty())
   {
     ptr->back().radius = 0;
@@ -465,34 +464,31 @@ ContourPtr makeContourData(const json& j, const json& parent, const glm::mat3& t
   return ptr;
 }
 
-ShapeData makeShapeData(const json& j, const json& parent, const glm::mat3& totalMatrix)
+ShapeData makeShapeData(
+  const json&      j,
+  const json&      parent,
+  const Bounds&    bounds,
+  float            cornerSmoothing,
+  const glm::mat3& totalMatrix)
 {
   const auto klass = j.value("class", "");
-  const auto rect = SkRect::MakeXYWH(
-    parent["bounds"]["x"].get<float>(),
-    -parent["bounds"]["y"].get<float>(),
-    parent["bounds"]["width"].get<float>(),
-    parent["bounds"]["height"].get<float>());
   if (klass == "contour")
   {
-    return makeContourData(j, parent, totalMatrix);
+    auto c = makeContourData(j, totalMatrix);
+    c->cornerSmooth = cornerSmoothing;
+    return c;
   }
   else if (klass == "rectangle")
   {
-    const auto rect = SkRect::MakeXYWH(
-      parent["bounds"]["x"].get<float>(),
-      -parent["bounds"]["y"].get<float>(),
-      parent["bounds"]["width"].get<float>(),
-      parent["bounds"]["height"].get<float>());
+    const auto           rect = toSkRect(bounds);
     std::array<float, 4> radius = j.value("radius", std::array<float, 4>{ 0, 0, 0, 0 });
-    auto cornerSmoothing = getOptional<float>(parent, "cornerSmoothing").value_or(0.f);
-    auto s = makeShape(radius, rect, cornerSmoothing);
+    auto                 s = makeShape(radius, rect, cornerSmoothing);
     return std::visit([&](auto&& arg) { return ShapeData(arg); }, s);
   }
   else if (klass == "ellipse")
   {
     Ellipse oval;
-    oval.rect = rect;
+    oval.rect = toSkRect(bounds);
     return oval;
   }
   else if (klass == "polygon" || klass == "star")
@@ -500,7 +496,9 @@ ShapeData makeShapeData(const json& j, const json& parent, const glm::mat3& tota
     auto cp = parent;
     if (pathChange(cp))
     {
-      return makeContourData(cp["shape"]["subshapes"][0]["subGeometry"], cp, totalMatrix);
+      auto c = makeContourData(cp["shape"]["subshapes"][0]["subGeometry"], totalMatrix);
+      c->cornerSmooth = cornerSmoothing;
+      return c;
     }
   }
   return ShapeData();
@@ -697,7 +695,8 @@ PaintNodePtr SceneBuilder::fromPath(const json& j, const glm::mat3& totalMatrix)
           klass == "star")
         {
           auto shape = makeContourNode(m_alloc);
-          shape->setContourData(makeShapeData(geo, j, matrix));
+          auto cornerSmoothing = getOptional<float>(j, "cornerSmoothing").value_or(0.f);
+          shape->setContourData(makeShapeData(geo, j, bounds, cornerSmoothing, matrix));
           p->addSubShape(shape, blop);
         }
         else if (klass == "path")

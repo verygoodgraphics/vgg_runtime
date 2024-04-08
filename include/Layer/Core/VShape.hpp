@@ -29,6 +29,11 @@ class SkPaint;
 namespace VGG::layer
 {
 
+struct Rectangle
+{
+  std::variant<SkRect, SkRRect> rect;
+};
+
 struct Arc
 {
   SkRect oval;
@@ -62,6 +67,23 @@ struct Ellipse
   {
   }
 };
+
+struct Polygon
+{
+  // NOT IMPLEMENTED
+};
+
+struct Star
+{
+  // NOT IMPLEMENTED
+};
+
+struct VectorNetwork
+{
+  // NOT IMPLEMENTED
+};
+
+using ShapeData = std::variant<ContourPtr, Ellipse, Rectangle, Star, Polygon, VectorNetwork>;
 
 class Shape;
 class VShape
@@ -153,7 +175,7 @@ private:
   EShapeType             m_type{ EMPTY };
 };
 
-std::variant<ContourPtr, SkRRect, SkRect> makeShape(
+std::variant<ContourPtr, Rectangle> makeShape(
   std::array<float, 4> radius,
   const SkRect&        rect,
   float                cornerSmoothing);

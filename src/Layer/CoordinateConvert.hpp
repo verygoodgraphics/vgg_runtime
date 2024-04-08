@@ -18,6 +18,7 @@
 
 #include "Layer/Core/VUtils.hpp"
 #include "Layer/Core/Attrs.hpp"
+#include "Layer/Core/VShape.hpp"
 #include <glm/glm.hpp>
 
 namespace VGG::layer
@@ -26,6 +27,64 @@ namespace VGG::layer
 class CoordinateConvert
 {
 public:
+  static void convertCoordinateSystem(SkRect& rect, const glm::mat3& totalMatrix)
+  {
+    rect = SkRect::MakeXYWH(rect.fLeft, -rect.fTop, rect.width(), rect.height());
+  }
+
+  static void convertCoordinateSystem(SkRRect& rect, const glm::mat3& totalMatrix)
+  {
+    const auto r = SkRect::MakeXYWH(
+      rect.rect().fLeft,
+      -rect.rect().fTop,
+      rect.rect().width(),
+      rect.rect().height());
+    const SkVector radii[4] = { rect.radii(SkRRect::kUpperLeft_Corner),
+                                rect.radii(SkRRect::kUpperRight_Corner),
+                                rect.radii(SkRRect::kLowerRight_Corner),
+                                rect.radii(SkRRect::kLowerLeft_Corner) };
+    rect.setRectRadii(r, radii);
+  }
+
+  static void convertCoordinateSystem(ShapeData& shape, const glm::mat3& totalMatrix)
+  {
+#define VT(type)                                                                                   \
+  auto p = std::get_if<type>(&shape);                                                              \
+  p
+    if (VT(ContourPtr))
+    {
+      auto& v = *p;
+      CoordinateConvert::convertCoordinateSystem(*v, totalMatrix);
+    }
+    else if (VT(Rectangle))
+    {
+      if (auto r = std::get_if<SkRect>(&p->rect); r)
+      {
+        convertCoordinateSystem(*r, totalMatrix);
+      }
+      else if (auto r = std::get_if<SkRRect>(&p->rect); r)
+      {
+        convertCoordinateSystem(*r, totalMatrix);
+      }
+    }
+    else if (VT(Ellipse))
+    {
+      DEBUG("not impl");
+    }
+    else if (VT(Star))
+    {
+      DEBUG("not impl");
+    }
+    else if (VT(Polygon))
+    {
+      DEBUG("not impl");
+    }
+    else if (VT(VectorNetwork))
+    {
+      DEBUG("not impl");
+    }
+#undef VT
+  }
   static void convertCoordinateSystem(Bounds& bounds, const glm::mat3& totalMatrix)
   {
     auto x = bounds.topLeft().x;
@@ -129,15 +188,18 @@ public:
 
   static void convertCoordinateSystem(TextStyleAttr& textStyle, const glm::mat3& totalMatrix)
   {
-    for (auto& f : textStyle.fills)
+    if (textStyle.fills)
     {
-      std::visit(
-        Overloaded{
-          [&](Gradient& g) { convertCoordinateSystem(g, totalMatrix); },
-          [&](Pattern& p) { convertCoordinateSystem(p, totalMatrix); },
-          [&](Color& c) {},
-        },
-        f.type);
+      for (auto& f : *textStyle.fills)
+      {
+        std::visit(
+          Overloaded{
+            [&](Gradient& g) { convertCoordinateSystem(g, totalMatrix); },
+            [&](Pattern& p) { convertCoordinateSystem(p, totalMatrix); },
+            [&](Color& c) {},
+          },
+          f.type);
+      }
     }
   }
 

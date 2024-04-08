@@ -91,6 +91,7 @@ int main(int argc, char** argv)
   catchJsException = true;
 #endif
   MainComposer mainComposer{ new NativeComposer(catchJsException), std::make_shared<SdlMouse>() };
+  mainComposer.env()->setApplication(app);
 
   auto sdlApp = AppImpl::app();
 

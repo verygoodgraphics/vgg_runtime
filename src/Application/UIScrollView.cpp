@@ -106,6 +106,10 @@ bool UIScrollView::onEvent(UEvent event, void* userData)
   return UIView::onEvent(event, userData);
 }
 
+Size UIScrollView::contentSize() const
+{
+  return m_contentSize;
+}
 void UIScrollView::setContentSize(Size size)
 {
   m_contentSize = size;

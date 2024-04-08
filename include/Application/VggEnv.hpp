@@ -25,6 +25,7 @@
 
 namespace VGG
 {
+class UIApplication;
 
 class VggEnv : public IVggEnv
 {
@@ -34,6 +35,7 @@ class VggEnv : public IVggEnv
 
   DarumaContainer m_darumaContainer;
 
+  UIApplication*            m_application;
   std::weak_ptr<Controller> m_controller;
   std::weak_ptr<Presenter>  m_presenter;
 
@@ -78,6 +80,15 @@ public:
   virtual DarumaContainer& darumaContainer() override
   {
     return m_darumaContainer;
+  }
+
+  UIApplication* application()
+  {
+    return m_application;
+  }
+  void setApplication(UIApplication* application)
+  {
+    m_application = application;
   }
 
   std::shared_ptr<Controller> controller()

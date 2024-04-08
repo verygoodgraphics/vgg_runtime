@@ -35,6 +35,10 @@ using BTouchEvent = BrowserAdapter::TouchEvent;
 
 EMSCRIPTEN_BINDINGS(vgg_sdk)
 {
+  value_object<ISdk::ImageOptions>("ImageOptions")
+    .field("type", &ISdk::ImageOptions::type)
+    .field("quality", &ISdk::ImageOptions::quality);
+
   class_<VggSdk>("VggSdk")
     .constructor<>()
     // env
@@ -44,14 +48,12 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     .function("setListenerKey", &VggSdk::setListenerKey)
     // misc
     .function("texts", &VggSdk::texts)
+    .function("makeImageSnapshot", &VggSdk::emMakeImageSnapshot)
     // doc
     .function("getElement", &VggSdk::getElement)
     .function("updateElement", &VggSdk::updateElement)
     .function("getDesignDocument", &VggSdk::designDocument)
     .function("valueAt", &VggSdk::designDocumentValueAt)
-    .function("addAt", &VggSdk::designDocumentAddAt)
-    .function("deleteAt", &VggSdk::designDocumentDeleteAt)
-    .function("updateAt", &VggSdk::designDocumentReplaceAt)
     // frames
     .function("getFramesInfo", &VggSdk::getFramesInfo)
     .function("currentFrameIndex", &VggSdk::currentFrameIndex)

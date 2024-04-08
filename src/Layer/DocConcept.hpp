@@ -49,7 +49,10 @@ concept CallableObject = std::is_invocable_r<R, F, Args...>::value;
 
 template<typename T>
 concept AbstractObject = requires(T a) {
+  typename T::BaseType;
+  typename T::Self;
   C_DECL(ObjectType, (EModelObjectType));
+  C_DECL(ObjectTypeString, (std::string));
   C_DECL(Name, (std::string));
   C_DECL(Id, (std::string));
   C_DECL(Bounds, (Bounds));
@@ -70,6 +73,11 @@ template<typename ObjectType>
   requires AbstractObject<ObjectType>
 struct SubShape
 {
+  SubShape(EBoolOp bop, std::variant<ObjectType, ShapeData> geo)
+    : booleanOperation(bop)
+    , geometry(geo)
+  {
+  }
   EBoolOp                             booleanOperation;
   std::variant<ObjectType, ShapeData> geometry;
 };
@@ -137,6 +145,17 @@ concept CastObject = AbstractObject<U> && requires(T a) {
   {
     T::asPath(std::declval<U>())
   } -> PathObject;
+};
+
+template<typename T>
+concept ModelConcept = requires(T a) {
+  typename T::Model;
+  typename T::CastObject;
+  requires AbstractObject<typename T::Model> || GroupObject<typename T::Model> ||
+             FrameObject<typename T::Model> || MasterObject<typename T::Model> ||
+             InstanceObject<typename T::Model> || ImageObject<typename T::Model> ||
+             TextObject<typename T::Model> || PathObject<typename T::Model>;
+  requires CastObject<typename T::Model, T>;
 };
 
 #undef UNPACK

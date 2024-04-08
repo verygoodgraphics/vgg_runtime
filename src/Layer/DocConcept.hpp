@@ -18,7 +18,7 @@
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/VShape.hpp"
-#include "Layer/Core/PaintNode.hpp"
+
 #define UNPACK(...) __VA_ARGS__
 #define C_DECL(name, type)                                                                         \
   {                                                                                                \
@@ -44,6 +44,15 @@ enum class EModelObjectType
   UNKNOWN
 };
 
+#define DEF_MODEL_TYPE(enum) static constexpr EModelObjectType ObjectType = enum;
+
+#define DECL_MODEL(klass, base, type)                                                              \
+  using BaseType = base;                                                                           \
+  using Self = klass;                                                                              \
+  DEF_MODEL_TYPE(type)
+
+#define D_OBJECT_MODEL DEF_MODEL_TYPE(OBJECT)
+
 template<class R, class F, class... Args>
 concept CallableObject = std::is_invocable_r<R, F, Args...>::value;
 
@@ -51,6 +60,7 @@ template<typename T>
 concept AbstractObject = requires(T a) {
   typename T::BaseType;
   typename T::Self;
+  // T::BaseType::ObjectType == EModelObjectType::UNKNOWN;
   C_DECL(ObjectType, (EModelObjectType));
   C_DECL(ObjectTypeString, (std::string));
   C_DECL(Name, (std::string));
@@ -83,27 +93,55 @@ struct SubShape
 };
 
 template<typename T>
-concept GroupObject = AbstractObject<T>;
+concept GroupObject = AbstractObject<T> && requires(T a) {
+  {
+    T::ObjectType
+  } -> std::convertible_to<EModelObjectType>;
+  T::ObjectType == EModelObjectType::GROUP;
+};
 
 template<typename T>
-concept FrameObject =
-  AbstractObject<T> && requires(T a) { C_DECL(Radius, (std::array<float, 4>)); };
+concept FrameObject = AbstractObject<T> && requires(T a) {
+  {
+    T::ObjectType
+  } -> std::convertible_to<EModelObjectType>;
+  T::ObjectType == EModelObjectType::FRAME;
+  C_DECL(Radius, (std::array<float, 4>));
+};
 
 template<typename T>
-concept MasterObject =
-  AbstractObject<T> && requires(T a) { C_DECL(Radius, (std::array<float, 4>)); };
+concept MasterObject = AbstractObject<T> && requires(T a) {
+  {
+    T::ObjectType
+  } -> std::convertible_to<EModelObjectType>;
+  T::ObjectType == EModelObjectType::MASTER;
+  C_DECL(Radius, (std::array<float, 4>));
+};
 
 template<typename T>
-concept InstanceObject = AbstractObject<T>;
+concept InstanceObject = AbstractObject<T> && requires(T a) {
+  {
+    T::ObjectType
+  } -> std::convertible_to<EModelObjectType>;
+  T::ObjectType == EModelObjectType::INSTANCE;
+};
 
 template<typename T>
 concept PathObject = AbstractObject<T> && requires(T a) {
+  {
+    T::ObjectType
+  } -> std::convertible_to<EModelObjectType>;
+  T::ObjectType == EModelObjectType::PATH;
   C_DECL(WindingType, (EWindingType));
   C_DECL(Shapes, (std::vector<SubShape<typename T::BaseType>>));
 };
 
 template<typename T>
 concept ImageObject = AbstractObject<T> && requires(T a) {
+  {
+    T::ObjectType
+  } -> std::convertible_to<EModelObjectType>;
+  T::ObjectType == EModelObjectType::IMAGE;
   C_DECL(ImageBounds, (Bounds));
   C_DECL(ImageGUID, (std::string));
   C_DECL(ImageFilter, (ImageFilter));
@@ -111,6 +149,10 @@ concept ImageObject = AbstractObject<T> && requires(T a) {
 
 template<typename T, typename BaseType = T>
 concept TextObject = AbstractObject<T> && requires(T a) {
+  {
+    T::ObjectType
+  } -> std::convertible_to<EModelObjectType>;
+  T::ObjectType == EModelObjectType::TEXT;
   C_DECL(Text, (std::string));
   C_DECL(TextBounds, (Bounds));
   C_DECL(VerticalAlignment, (ETextVerticalAlignment));

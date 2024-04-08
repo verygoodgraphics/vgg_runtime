@@ -65,12 +65,10 @@ struct JSONObject
   {
   }
   std::vector<JSONObject> getChildObjects() const;
-
-  EModelObjectType getObjectType() const
+  EModelObjectType        getObjectType() const
   {
     return type;
   }
-
   M_JSON_FIELD_DEF(Name, "name", std::string, "");
   M_JSON_FIELD_DEF(Id, "id", std::string, "");
   M_JSON_FIELD_DEF(Bounds, "bounds", Bounds, {});
@@ -81,7 +79,7 @@ struct JSONObject
   M_JSON_FIELD_DEF(ContextSetting, "contextSettings", ContextSetting, {});
   M_JSON_FIELD_DEF(CornerSmoothing, "cornerSmoothin", float, 0.f);
   M_JSON_FIELD_DEF(MaskType, "maskType", EMaskType, EMaskType::MT_NONE);
-  M_JSON_FIELD_DEF(MaskShowType, "maskShowType", EMaskShowType, EMaskShowType::MST_BOUND);
+  M_JSON_FIELD_DEF(MaskShowType, "maskShowType", EMaskShowType, EMaskShowType::MST_BOUNDS);
   M_JSON_FIELD_DEF(ShapeMask, "outlineMaskBy", std::vector<std::string>, {});
   M_JSON_FIELD_DEF(AlphaMask, "alphaMaskBy", std::vector<AlphaMask>, {});
 };
@@ -116,8 +114,13 @@ struct JSONTextObject : public JSONObject
     "verticalAlignment",
     ETextVerticalAlignment,
     ETextVerticalAlignment::VA_TOP);
-
-  M_JSON_FIELD_DEF(Anchor, "anchorPoint", Float2, (Float2{ 0.f, 0.f }));
+  M_JSON_FIELD_DEF(Anchor, "anchorPoint", std::optional<Float2>, (std::nullopt));
+  M_JSON_FIELD_DEF(TextLineType, "textLineType", std::vector<TextLineAttr>, {});
+  M_JSON_FIELD_DEF(
+    HorizontalAlignment,
+    "horizontalAlignment",
+    std::vector<ETextHorizontalAlignment>,
+    {});
 };
 
 struct JSONGroupObject : public JSONObject
@@ -152,6 +155,22 @@ struct JSONMasterObject : public JSONObject
   M_JSON_FIELD_DEF(Radius, "radius", Float4, (Float4{ 0.f, 0.f, 0.f, 0.f }));
 };
 
+struct JSONPathObject : public JSONObject
+{
+  using BaseType = JSONObject;
+  using Self = JSONPathObject;
+  JSONPathObject(json j)
+    : JSONObject(std::move(j), EModelObjectType::PATH)
+  {
+  }
+  EWindingType getWindingType() const
+  {
+    return EWindingType::WR_EVEN_ODD;
+  }
+
+  std::vector<SubShape<JSONObject>> getShapes() const;
+};
+
 struct JSONInstanceObject : public JSONObject
 {
   using BaseType = JSONObject;
@@ -165,34 +184,34 @@ struct JSONInstanceObject : public JSONObject
 std::vector<JSONObject> JSONObject::getChildObjects() const
 {
   std::vector<JSONObject> objects;
-  const auto&             childObjects = getOrDefault(j, "childObjects");
-  for (const auto& j : childObjects)
+  const auto              childObjects = getOrDefault(j, "childObjects");
+  for (auto& j : childObjects)
   {
     switch (getObjectType())
     {
       case EModelObjectType::GROUP:
-        objects.emplace_back(JSONGroupObject(j));
+        objects.emplace_back(JSONGroupObject(std::move(j)));
         break;
       case EModelObjectType::FRAME:
-        objects.emplace_back(JSONFrameObject(j));
+        objects.emplace_back(JSONFrameObject(std::move(j)));
         break;
       case EModelObjectType::PATH:
-        DEBUG("not implemented");
+        objects.emplace_back(JSONPathObject(std::move(j)));
         break;
       case EModelObjectType::IMAGE:
-        objects.emplace_back(JSONImageObject(j));
+        objects.emplace_back(JSONImageObject(std::move(j)));
         break;
       case EModelObjectType::TEXT:
-        objects.emplace_back(JSONTextObject(j));
+        objects.emplace_back(JSONTextObject(std::move(j)));
         break;
       case EModelObjectType::CONTOUR:
         DEBUG("not implemented");
         break;
       case EModelObjectType::MASTER:
-        DEBUG("not implemented");
+        objects.emplace_back(JSONMasterObject(std::move(j)));
         break;
       case EModelObjectType::INSTANCE:
-        DEBUG("not implemented");
+        objects.emplace_back(JSONInstanceObject(std::move(j)));
         break;
       case EModelObjectType::UNKNOWN:
         DEBUG("unknown object type");
@@ -200,6 +219,11 @@ std::vector<JSONObject> JSONObject::getChildObjects() const
     }
   }
   return objects;
+}
+
+std::vector<SubShape<JSONObject>> JSONPathObject::getShapes() const
+{
+  return {};
 }
 
 struct JSONModelCastObject
@@ -223,9 +247,15 @@ struct JSONModelCastObject
   {
     return JSONTextObject(o.j);
   }
+
   static JSONMasterObject asMaster(JSONObject o)
   {
     return JSONMasterObject(o.j);
+  }
+
+  static JSONPathObject asPath(JSONObject o)
+  {
+    return JSONPathObject(o.j);
   }
 
   static JSONInstanceObject asInstance(JSONObject o)
@@ -233,17 +263,5 @@ struct JSONModelCastObject
     return JSONInstanceObject(o.j);
   }
 };
-
-template<typename T>
-  requires TextObject<T>
-inline void frameFrameTest(const T& f)
-{
-}
-
-inline int test()
-{
-  frameFrameTest(JSONTextObject({}));
-  return 0;
-}
 
 } // namespace VGG::layer

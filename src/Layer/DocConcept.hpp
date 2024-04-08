@@ -17,6 +17,8 @@
 
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VType.hpp"
+#include "Layer/Core/VShape.hpp"
+#include "Layer/Core/PaintNode.hpp"
 #define UNPACK(...) __VA_ARGS__
 #define C_DECL(name, type)                                                                         \
   {                                                                                                \
@@ -64,6 +66,14 @@ concept AbstractObject = requires(T a) {
   C_DECL(ChildObjects, (std::vector<typename T::BaseType>));
 };
 
+template<typename ObjectType>
+  requires AbstractObject<ObjectType>
+struct SubShape
+{
+  EBoolOp                             booleanOperation;
+  std::variant<ObjectType, ShapeData> geometry;
+};
+
 template<typename T>
 concept GroupObject = AbstractObject<T>;
 
@@ -79,6 +89,12 @@ template<typename T>
 concept InstanceObject = AbstractObject<T>;
 
 template<typename T>
+concept PathObject = AbstractObject<T> && requires(T a) {
+  C_DECL(WindingType, (EWindingType));
+  C_DECL(Shapes, (std::vector<SubShape<typename T::BaseType>>));
+};
+
+template<typename T>
 concept ImageObject = AbstractObject<T> && requires(T a) {
   C_DECL(ImageBounds, (Bounds));
   C_DECL(ImageGUID, (std::string));
@@ -91,7 +107,9 @@ concept TextObject = AbstractObject<T> && requires(T a) {
   C_DECL(TextBounds, (Bounds));
   C_DECL(VerticalAlignment, (ETextVerticalAlignment));
   C_DECL(LayoutMode, (ETextLayoutMode));
-  C_DECL(Anchor, (Float2));
+  C_DECL(Anchor, (std::optional<Float2>));
+  C_DECL(TextLineType, (std::vector<TextLineAttr>));
+  C_DECL(HorizontalAlignment, (std::vector<ETextHorizontalAlignment>));
 };
 
 template<typename T, typename U>
@@ -114,6 +132,9 @@ concept CastObject = AbstractObject<U> && requires(T a) {
   {
     T::asText(std::declval<U>())
   } -> TextObject;
+  {
+    T::asPath(std::declval<U>())
+  } -> PathObject;
 };
 
 #undef UNPACK

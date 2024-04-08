@@ -33,6 +33,15 @@ namespace nlohmann
 {
 
 template<>
+struct adl_serializer<glm::mat3>
+{
+  static void from_json(const json& j, glm::mat3& m)
+  {
+    // TODO::
+  }
+};
+
+template<>
 struct adl_serializer<std::variant<float, glm::vec2>>
 {
   static void from_json(const json& j, std::variant<float, glm::vec2>& x)
@@ -50,11 +59,29 @@ struct adl_serializer<std::variant<float, glm::vec2>>
 };
 
 template<>
-struct adl_serializer<glm::mat3>
+struct adl_serializer<std::optional<std::array<float, 2>>>
 {
-  static void from_json(const json& j, glm::mat3& m)
+  static void to_json(json& j, const std::optional<std::array<float, 2>>& opt)
   {
-    // TODO::
+    if (opt == std::nullopt)
+    {
+      j = nullptr;
+    }
+    else
+    {
+      j = *opt;
+    }
+  }
+  static void from_json(const json& j, std::optional<std::array<float, 2>>& x)
+  {
+    if (j.is_null())
+    {
+      x = std::nullopt;
+    }
+    else
+    {
+      x = j.template get<std::array<float, 2>>();
+    }
   }
 };
 

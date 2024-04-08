@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "Layer/Core/VShape.hpp"
 #include "Layer/DocConcept.hpp"
 #include "Layer/JSONModel.hpp"
 #include "Layer/Memory/VAllocator.hpp"
@@ -39,6 +40,36 @@ namespace
 using namespace VGG::layer;
 struct BuilderImpl
 {
+
+  static json defaultTextAttr()
+  {
+    auto j = R"({
+        "length":0,
+        "name":"Fira Sans",
+        "subFamilyName":"",
+        "size":14,
+        "fontVariations":[],
+        "postScript":"",
+        "kerning":true,
+        "letterSpacingValue":0,
+        "letterSpacingUnit":0,
+        "lineSpacingValue":0,
+        "lineSpacingUnit":0,
+        "fillUseType":0,
+        "underline":0,
+        "linethrough":false,
+        "fontVariantCaps":0,
+        "textCase":0,
+        "baselineShift":0,
+        "baseline":0,
+        "horizontalScale":1,
+        "verticalScale":1,
+        "proportionalSpacing":0,
+        "rotate":0,
+        "textParagraph":{}
+    })"_json;
+    return j;
+  }
   static std::tuple<glm::mat3, glm::mat3, glm::mat3> makeMatrix(const glm::mat3& m)
   {
     const auto [newMatrix, inversed] = CoordinateConvert::convertMatrixCoordinate(m);
@@ -70,27 +101,28 @@ struct BuilderImpl
     auto obj = creator(m.getName(), m.getId());
     if (!obj)
       return nullptr;
+    Bounds bounds = m.getBounds();
+    auto   style = m.getStyle();
+
     auto [originalMatrix, newMatrix, inversedNewMatrix] = BuilderImpl::makeMatrix(m.getMatrix());
     const auto convertedMatrix = inversedNewMatrix * totalMatrix * originalMatrix;
+    CoordinateConvert::convertCoordinateSystem(bounds, totalMatrix);
+    CoordinateConvert::convertCoordinateSystem(style, totalMatrix);
+
     obj->setTransform(Transform(newMatrix));
-    const auto b = BuilderImpl::makeBounds(m.getBounds(), convertedMatrix);
-    obj->setFrameBounds(b);
-    //
-    // // Pattern point in style are implicitly given by bound, we must supply the points in
-    // original
-    // // coordinates for correct converting
-    auto style = m.getStyle();
-    obj->setStyle(style); // TODO:: convert coordinates
+    obj->setFrameBounds(bounds);
+    obj->setStyle(style);
     obj->setFrameCornerSmoothing(m.getCornerSmoothing());
     obj->setContextSettings(m.getContextSetting());
     obj->setMaskBy(m.getShapeMask());
     obj->setAlphaMaskBy(m.getAlphaMask());
+
     const auto maskType = m.getMaskType();
     obj->setMaskType(maskType);
     // const auto defaultShowType =
     //   maskType == EMaskType::MT_OUTLINE
     //     ? MST_CONTENT
-    //     : (maskType == EMaskType::MT_ALPHA && false ? MST_BOUND : MST_INVISIBLE);
+    //     : (maskType == EMaskType::MT_ALPHA && false ? MST_BOUNDS : MST_INVISIBLE);
     obj->setMaskShowType(m.getMaskShowType()); // default show type??
     obj->setOverflow(m.getOverflow());
     obj->setVisible(m.getVisible());
@@ -102,7 +134,25 @@ struct BuilderImpl
     requires layer::GroupObject<T> && layer::CastObject<C, T>
   static PaintNodePtr fromGroup(const T& m, const glm::mat3& totalMatrix, VAllocator* alloc)
   {
-    return 0;
+    return makeObjectBase(
+      m,
+      totalMatrix,
+      [&](std::string name, std::string guid)
+      {
+        auto p = makePaintNodePtr(alloc, std::move(name), VGG_GROUP, std::move(guid));
+        return p;
+      },
+      [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bound)
+      {
+        p->setOverflow(OF_VISIBLE); // Group do not clip inner content
+        p->setContourOption(ContourOption(ECoutourType::MCT_UNION, false));
+        p->setPaintOption(EPaintStrategy(EPaintStrategy::PS_CHILDONLY));
+        auto childObjects = m.getChildObjects();
+        for (const auto& c : childObjects)
+        {
+          p->addChild(BuilderImpl::fromObject<T, C>(C::asGroup(c), matrix, alloc));
+        }
+      });
   }
 
   template<typename T, typename C>
@@ -128,6 +178,48 @@ struct BuilderImpl
         }
       });
   }
+  template<typename T, typename C>
+    requires layer::PathObject<T> && layer::CastObject<C, T>
+  static PaintNodePtr fromPath(const T& m, const glm::mat3& totalMatrix, VAllocator* alloc)
+  {
+    return makeObjectBase(
+      m,
+      totalMatrix,
+      [&](std::string name, std::string guid)
+      {
+        auto p = makePaintNodePtr(alloc, std::move(name), VGG_PATH, std::move(guid));
+        return p;
+      },
+      [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bounds)
+      {
+        p->setChildWindingType(m.getWindingType());
+        p->setContourOption(ContourOption(ECoutourType::MCT_OBJECT_OPS, false));
+        p->setPaintOption(PaintOption(EPaintStrategy::PS_SELFONLY));
+        const auto shapes = m.getShapes();
+        for (const auto& subshape : shapes)
+        {
+          const auto blop = subshape.booleanOperation;
+          const auto geo = subshape.geometry;
+#define VT(type)                                                                                   \
+  auto ptr = std::get_if<type>(&geo);                                                              \
+  ptr
+          if (VT(typename T::BaseType))
+          {
+            // none shape child
+            p->addSubShape(fromObject<typename T::BaseType, C>(*ptr, totalMatrix, alloc), blop);
+          }
+          else if (VT(ShapeData))
+          {
+            auto node = makePaintNodePtr(alloc, "contour", VGG_CONTOUR, "");
+            node->setOverflow(OF_VISIBLE);
+            node->setContourOption(ContourOption{ ECoutourType::MCT_FRAMEONLY, false });
+            // node->setContourData(makeShapeData(geo, j, matrix)); // TODO
+            p->addSubShape(node, blop);
+          }
+#undef VT
+        }
+      });
+  }
 
   template<typename T, typename C>
     requires layer::FrameObject<T> && layer::CastObject<C, T>
@@ -148,7 +240,24 @@ struct BuilderImpl
     requires layer::MasterObject<T> && layer::CastObject<C, T>
   static PaintNodePtr fromMaster(const T& m, const glm::mat3& totalMatrix, VAllocator* alloc)
   {
-    return fromFrame(m, totalMatrix, alloc);
+    return makeObjectBase(
+      m,
+      totalMatrix,
+      [&](std::string name, std::string guid)
+      {
+        auto p = makePaintNodePtr(alloc, std::move(name), VGG_FRAME, std::move(guid));
+        return p;
+      },
+      [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bound)
+      {
+        p->setContourOption(ContourOption(ECoutourType::MCT_FRAMEONLY, false));
+        p->setFrameRadius(m.getRadius());
+        auto childObjects = m.getChildObjects();
+        for (const auto& c : childObjects)
+        {
+          p->addChild(BuilderImpl::fromObject<T, C>(C::asMaster(c), matrix, alloc));
+        }
+      });
   }
 
   template<typename T, typename C>
@@ -161,16 +270,113 @@ struct BuilderImpl
 
   template<typename T, typename C>
     requires layer::ImageObject<T> && layer::CastObject<C, T>
-  static PaintNodePtr fromImage(const T& object, const glm::mat3& totalMatrix, VAllocator* alloc)
+  static PaintNodePtr fromImage(const T& m, const glm::mat3& totalMatrix, VAllocator* alloc)
   {
-    return nullptr;
+    return makeObjectBase(
+      m,
+      totalMatrix,
+      [&](std::string name, std::string guid)
+      { return makeImageNodePtr(alloc, std::move(name), std::move(guid)); },
+      [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bounds)
+      {
+        auto i = static_cast<ImageNode*>(p);
+        i->setImageBounds(bounds);
+        i->setImage(m.getImageGUID());
+        i->setImageFilter(m.getImageFilter());
+        // i->setReplacesImage(j.value("fillReplacesImage", false));
+      });
   }
 
   template<typename T, typename C>
     requires layer::TextObject<T> && layer::CastObject<C, T>
-  static PaintNodePtr fromText(const T& object, const glm::mat3& totalMatrix, VAllocator* alloc)
+  static PaintNodePtr fromText(const T& m, const glm::mat3& totalMatrix, VAllocator* alloc)
   {
-    return nullptr;
+    return makeObjectBase(
+      m,
+      totalMatrix,
+      [&](std::string name, std::string guid)
+      { return makeTextNodePtr(alloc, std::move(name), std::move(guid)); },
+      [&](PaintNode* ptr, const glm::mat3& matrix, const Bounds& bounds)
+      {
+        auto p = static_cast<TextNode*>(ptr);
+        p->setVerticalAlignment(m.getVerticalAlignment());
+        p->setFrameMode(m.getLayoutMode());
+        if (auto anchor = m.getAnchor(); anchor)
+        {
+          glm::vec2 anchorPoint = { (*anchor)[0], (*anchor)[1] };
+          CoordinateConvert::convertCoordinateSystem(anchorPoint, totalMatrix);
+          p->setTextAnchor(anchorPoint);
+        }
+        p->setParagraphBounds(bounds);
+
+        // 1.
+
+        std::vector<TextStyleAttr> textStyle;
+        // auto                       defaultAttr = defaultTextAttr();
+        // defaultAttr.update(j.value("defaultFontAttr", json::object()), true);
+        // auto fontAttr = j.value("fontAttr", std::vector<json>{});
+        // for (auto& att : fontAttr)
+        // {
+        //   auto json = defaultAttr;
+        //   json.update(att, true);
+        //   if (auto it = json.find("fills"); it == json.end())
+        //   {
+        //     json["fills"] =
+        //       j.value("style", nlohmann::json{}).value("fills", std::vector<nlohmann::json>());
+        //   }
+        //   if (auto it = json.find("borders"); it == json.end())
+        //   {
+        //
+        //     json["borders"] =
+        //       j.value("style", nlohmann::json{}).value("borders", std::vector<nlohmann::json>());
+        //   }
+        //   textStyle.push_back(json);
+        // }
+
+        for (auto& style : textStyle)
+        {
+          CoordinateConvert::convertCoordinateSystem(style, totalMatrix);
+        }
+
+        // 2.
+        auto lineType = m.getTextLineType();
+        auto alignments = m.getHorizontalAlignment();
+
+        std::vector<ParagraphAttr> parStyle;
+        parStyle.reserve(lineType.size());
+
+        size_t       i = 0;
+        auto         defaultAlign = alignments.empty() ? HA_LEFT : alignments.back();
+        TextLineAttr defaultLineType;
+        while (i < lineType.size() && i < alignments.size())
+        {
+          parStyle.emplace_back(lineType[i], alignments[i]);
+          i++;
+        }
+        while (i < lineType.size())
+        {
+          parStyle.emplace_back(lineType[i], defaultAlign);
+          i++;
+        }
+        while (i < alignments.size())
+        {
+          parStyle.emplace_back(defaultLineType, alignments[i]);
+          i++;
+        }
+        // if (m_fontNameVisitor)
+        // {
+        //   for (const auto& style : textStyle)
+        //   {
+        //     m_fontNameVisitor(style.font.fontName, style.font.subFamilyName);
+        //   }
+        // }
+        p->setParagraph(m.getText(), std::move(textStyle), std::move(parStyle));
+        if (bounds.width() == 0 || bounds.height() == 0)
+        {
+          p->setFrameMode(TL_AUTOWIDTH);
+        }
+        return p;
+      });
   }
 
   template<typename T, typename C>
@@ -191,8 +397,7 @@ struct BuilderImpl
           totalMatrix,
           alloc);
       case EModelObjectType::PATH:
-        DEBUG("not implemented");
-        break;
+        return BuilderImpl::fromPath<decltype(C::asPath(m)), C>(C::asPath(m), totalMatrix, alloc);
       case EModelObjectType::IMAGE:
         return BuilderImpl::fromImage<decltype(C::asImage(m)), C>(
           C::asImage(m),
@@ -200,20 +405,24 @@ struct BuilderImpl
           alloc);
       case EModelObjectType::TEXT:
         return BuilderImpl::fromText<decltype(C::asText(m)), C>(C::asText(m), totalMatrix, alloc);
-      case EModelObjectType::CONTOUR:
-        DEBUG("not implemented");
-        break;
       case EModelObjectType::MASTER:
-        DEBUG("not implemented");
+        return BuilderImpl::fromMaster<decltype(C::asMaster(m)), C>(
+          C::asMaster(m),
+          totalMatrix,
+          alloc);
         break;
       case EModelObjectType::INSTANCE:
-        DEBUG("not implemented");
+        return BuilderImpl::fromInstance<decltype(C::asInstance(m)), C>(
+          C::asInstance(m),
+          totalMatrix,
+          alloc);
+      case EModelObjectType::CONTOUR:
+        DEBUG("not reachable");
         break;
       case EModelObjectType::UNKNOWN:
-        DEBUG("not implemented");
+        DEBUG("unknown object type");
         break;
     }
-    DEBUG("unknown object type");
     return nullptr;
   }
 };

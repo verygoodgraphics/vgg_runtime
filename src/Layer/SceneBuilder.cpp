@@ -29,8 +29,6 @@
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/TextNode.hpp"
 #include "Layer/Core/ImageNode.hpp"
-#include <concepts>
-#include <type_traits>
 #include <variant>
 
 #include "Layer/JSONModel.hpp"
@@ -143,7 +141,7 @@ struct BuilderImpl
         p->setOverflow(OF_VISIBLE); // Group do not clip inner content
         p->setContourOption(ContourOption(ECoutourType::MCT_UNION, false));
         p->setPaintOption(EPaintStrategy(EPaintStrategy::PS_CHILDONLY));
-        auto childObjects = m.getChildObjects();
+        const auto childObjects = m.getChildObjects();
         for (const auto& c : childObjects)
         {
           p->addChild(BuilderImpl::fromObject<T, C>(C::asGroup(c), matrix, ctx));
@@ -221,16 +219,16 @@ struct BuilderImpl
   template<typename T, typename C>
     requires layer::FrameObject<T> && layer::CastObject<C, T>
   static std::vector<PaintNodePtr> fromTopLevelFrames(
-    const std::vector<T>& frameObject,
+    const std::vector<T>& frames,
     const glm::mat3&      matrix,
     const Context&        ctx)
   {
-    std::vector<PaintNodePtr> frames(4);
-    for (const auto& f : frameObject)
+    std::vector<PaintNodePtr> res(4);
+    for (const auto& f : frames)
     {
-      frames.push_back(BuilderImpl::fromFrame<T, C>(f, matrix, ctx));
+      res.push_back(BuilderImpl::fromFrame<T, C>(f, matrix, ctx));
     }
-    return frames;
+    return res;
   }
 
   template<typename T, typename C>
@@ -409,17 +407,6 @@ struct BuilderImpl
         break;
     }
     return nullptr;
-  }
-
-  // interface
-  //
-  template<typename T, typename C>
-    requires layer::AbstractObject<T> && layer::CastObject<C, T>
-  static std::vector<PaintNodePtr> fromFrames(const T& obj, const Context& ctx)
-  {
-    glm::mat3 mat = glm::identity<glm::mat3>();
-    mat = glm::scale(mat, glm::vec2(1, -1));
-    return BuilderImpl::fromTopLevelFrames<T, C>(obj, mat, ctx);
   }
 };
 

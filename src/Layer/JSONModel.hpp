@@ -22,7 +22,6 @@
 #include "Layer/NlohmannJSONImpl.hpp"
 #include "Layer/VSkia.hpp"
 #include "Layer/PathPatch.h"
-#include <type_traits>
 
 using namespace nlohmann;
 
@@ -96,22 +95,22 @@ inline ShapeData makeShapeData2(
 
 struct JSONObject
 {
+  // DECL_MODEL(JSONObject, JSONObject, UNKNOWN);
   using BaseType = JSONObject;
   using Self = JSONObject;
   json             j;
   EModelObjectType type;
-  JSONObject(json j, EModelObjectType type)
+  JSONObject(json j, EModelObjectType t)
     : j(std::move(j))
-    , type(type)
+    , type(t)
   {
   }
-  std::vector<JSONObject> getChildObjects() const;
-  M_JSON_FIELD_DEF(ObjectTypeString, "class", std::string, "");
   EModelObjectType getObjectType() const
   {
     return type;
   }
-
+  std::vector<JSONObject> getChildObjects() const;
+  M_JSON_FIELD_DEF(ObjectTypeString, "class", std::string, "");
   M_JSON_FIELD_DEF(Name, "name", std::string, "");
   M_JSON_FIELD_DEF(Id, "id", std::string, "");
   M_JSON_FIELD_DEF(Bounds, "bounds", Bounds, {});
@@ -129,8 +128,7 @@ struct JSONObject
 
 struct JSONImageObject : public JSONObject
 {
-  using BaseType = JSONObject;
-  using Self = JSONImageObject;
+  DECL_MODEL(JSONImageObject, JSONObject, EModelObjectType::IMAGE);
   JSONImageObject(json j)
     : JSONObject(std::move(j), EModelObjectType::IMAGE)
   {
@@ -142,8 +140,7 @@ struct JSONImageObject : public JSONObject
 
 struct JSONTextObject : public JSONObject
 {
-  using BaseType = JSONObject;
-  using Self = JSONTextObject;
+  DECL_MODEL(JSONTextObject, JSONObject, EModelObjectType::TEXT);
   JSONTextObject(json j)
     : JSONObject(std::move(j), EModelObjectType::TEXT)
   {
@@ -170,8 +167,7 @@ struct JSONTextObject : public JSONObject
 
 struct JSONGroupObject : public JSONObject
 {
-  using BaseType = JSONObject;
-  using Self = JSONGroupObject;
+  DECL_MODEL(JSONGroupObject, JSONObject, EModelObjectType::GROUP);
   JSONGroupObject(json j)
     : JSONObject(std::move(j), EModelObjectType::GROUP)
   {
@@ -180,8 +176,7 @@ struct JSONGroupObject : public JSONObject
 
 struct JSONFrameObject : public JSONObject
 {
-  using BaseType = JSONObject;
-  using Self = JSONFrameObject;
+  DECL_MODEL(JSONFrameObject, JSONObject, EModelObjectType::FRAME);
   JSONFrameObject(json j)
     : JSONObject(std::move(j), EModelObjectType::FRAME)
   {
@@ -191,8 +186,7 @@ struct JSONFrameObject : public JSONObject
 
 struct JSONMasterObject : public JSONObject
 {
-  using BaseType = JSONObject;
-  using Self = JSONMasterObject;
+  DECL_MODEL(JSONMasterObject, JSONObject, EModelObjectType::MASTER);
   JSONMasterObject(json j)
     : JSONObject(std::move(j), EModelObjectType::MASTER)
   {
@@ -202,8 +196,7 @@ struct JSONMasterObject : public JSONObject
 
 struct JSONPathObject : public JSONObject
 {
-  using BaseType = JSONObject;
-  using Self = JSONPathObject;
+  DECL_MODEL(JSONPathObject, JSONObject, EModelObjectType::PATH);
   JSONPathObject(json j)
     : JSONObject(std::move(j), EModelObjectType::PATH)
   {
@@ -218,8 +211,7 @@ struct JSONPathObject : public JSONObject
 
 struct JSONInstanceObject : public JSONObject
 {
-  using BaseType = JSONObject;
-  using Self = JSONInstanceObject;
+  DECL_MODEL(JSONInstanceObject, JSONObject, EModelObjectType::INSTANCE);
   JSONInstanceObject(json j)
     : JSONObject(std::move(j), EModelObjectType::INSTANCE)
   {

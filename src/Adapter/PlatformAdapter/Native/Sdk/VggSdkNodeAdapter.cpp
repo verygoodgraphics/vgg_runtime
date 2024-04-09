@@ -129,9 +129,6 @@ void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
     DECLARE_NODE_API_PROPERTY("setCurrentFrame", setCurrentFrame),
 
     DECLARE_NODE_API_PROPERTY("valueAt", DesignDocumentValueAt),
-    DECLARE_NODE_API_PROPERTY("updateAt", DesignDocumentReplaceAt),
-    DECLARE_NODE_API_PROPERTY("addAt", DesignDocumentAddAt),
-    DECLARE_NODE_API_PROPERTY("deleteAt", DesignDocumentDeleteAt),
 
     DECLARE_NODE_API_PROPERTY("addEventListener", AddEventListener),
     DECLARE_NODE_API_PROPERTY("removeEventListener", RemoveEventListener),
@@ -370,98 +367,6 @@ napi_value VggSdkNodeAdapter::DesignDocumentValueAt(napi_env env, napi_callback_
     NODE_API_CALL(env, napi_create_string_utf8(env, value.data(), value.size(), &ret));
 
     return ret;
-  }
-  catch (std::exception& e)
-  {
-    napi_throw_error(env, nullptr, e.what());
-  }
-
-  return nullptr;
-}
-
-napi_value VggSdkNodeAdapter::DesignDocumentReplaceAt(napi_env env, napi_callback_info info)
-{
-  size_t     argc = 3;
-  napi_value args[3];
-  napi_value _this;
-  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
-
-  if (argc != 2 && argc != 3)
-  {
-    napi_throw_error(env, nullptr, "Wrong number of arguments");
-    return nullptr;
-  }
-
-  try
-  {
-    auto json_pointer_string = GetArgString(env, args[0]);
-    auto json_value_string = GetArgString(env, args[1]);
-
-    VggSdkNodeAdapter* sdk_adapter;
-    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
-
-    sdk_adapter->m_vggSdk->designDocumentReplaceAt(json_pointer_string, json_value_string);
-  }
-  catch (std::exception& e)
-  {
-    napi_throw_error(env, nullptr, e.what());
-  }
-
-  return nullptr;
-}
-
-napi_value VggSdkNodeAdapter::DesignDocumentAddAt(napi_env env, napi_callback_info info)
-{
-  size_t     argc = 3;
-  napi_value args[3];
-  napi_value _this;
-  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
-
-  if (argc != 2 && argc != 3)
-  {
-    napi_throw_error(env, nullptr, "Wrong number of arguments");
-    return nullptr;
-  }
-
-  try
-  {
-    auto json_pointer_string = GetArgString(env, args[0]);
-    auto json_value_string = GetArgString(env, args[1]);
-
-    VggSdkNodeAdapter* sdk_adapter;
-    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
-
-    sdk_adapter->m_vggSdk->designDocumentAddAt(json_pointer_string, json_value_string);
-  }
-  catch (std::exception& e)
-  {
-    napi_throw_error(env, nullptr, e.what());
-  }
-
-  return nullptr;
-}
-
-napi_value VggSdkNodeAdapter::DesignDocumentDeleteAt(napi_env env, napi_callback_info info)
-{
-  size_t     argc = 2;
-  napi_value args[2];
-  napi_value _this;
-  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
-
-  if (argc != 1 && argc != 2)
-  {
-    napi_throw_error(env, nullptr, "Wrong number of arguments");
-    return nullptr;
-  }
-
-  try
-  {
-    auto json_pointer_string = GetArgString(env, args[0]);
-
-    VggSdkNodeAdapter* sdk_adapter;
-    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
-
-    sdk_adapter->m_vggSdk->designDocumentDeleteAt(json_pointer_string);
   }
   catch (std::exception& e)
   {

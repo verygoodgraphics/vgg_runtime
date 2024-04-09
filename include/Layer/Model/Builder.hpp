@@ -379,7 +379,7 @@ struct BuilderImpl
     const glm::mat3&                      matrix,
     const Context&                        ctx)
   {
-    std::vector<PaintNodePtr> nodes(4);
+    std::vector<PaintNodePtr> nodes;
     for (const auto& m : models)
     {
       nodes.push_back(BuilderImpl::from<M>(m, matrix, ctx));

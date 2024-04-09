@@ -1093,7 +1093,7 @@ struct Blur
   /**
    * The saturation level of the blur applies only to the `background` blur.
    */
-  double                saturation;
+  std::optional<double> saturation;
   /**
    * The type of blur.
    */
@@ -2845,7 +2845,7 @@ inline void from_json(const json& j, Blur& x)
   safeGetTo(x.isEnabled, j, "isEnabled");
   x.motionAngle = get_stack_optional<double>(j, "motionAngle");
   x.radius = get_stack_optional<double>(j, "radius");
-  safeGetTo(x.saturation, j, "saturation");
+  x.saturation = get_stack_optional<double>(j, "saturation");
   safeGetTo(x.type, j, "type");
 }
 
@@ -2863,7 +2863,10 @@ inline void to_json(json& j, const Blur& x)
   {
     j["radius"] = x.radius;
   }
-  j["saturation"] = x.saturation;
+  if (x.saturation)
+  {
+    j["saturation"] = x.saturation;
+  }
   j["type"] = x.type;
 }
 

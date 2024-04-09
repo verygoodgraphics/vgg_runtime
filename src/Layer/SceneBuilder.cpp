@@ -16,9 +16,10 @@
 
 #include "Layer/Core/VShape.hpp"
 #include "Layer/Model/JSONModel.hpp"
+#include "Layer/SceneBuilder.hpp"
 #include "Layer/Memory/VAllocator.hpp"
 #include "PathPatch.h"
-#include "Layer/SceneBuilder.hpp"
+#include "Layer/Model/Concept.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/ParagraphParser.hpp"
 #include "AttrSerde.hpp"
@@ -567,8 +568,7 @@ void SceneBuilder::buildImpl2(const json& j)
   BuilderImpl::Context ctx;
   ctx.alloc = m_alloc;
   ctx.fontNameVisitor = m_fontNameVisitor;
-  m_frames =
-    BuilderImpl::fromTopLevelFrames<JSONFrameObject, JSONModelCastObject>(frameObjects, mat, ctx);
+  m_frames = BuilderImpl::from<JSONModelFrame>(frameObjects, mat, ctx);
 }
 
 SceneBuilderResult SceneBuilder::build()

@@ -38,6 +38,10 @@ function handleEvent(event, wrapper) {
       break;
   }
 
+  if (vggSdk.delete) {
+    vggSdk.delete();
+  }
+
 }
 
 export default handleEvent;

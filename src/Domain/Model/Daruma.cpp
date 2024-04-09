@@ -378,6 +378,21 @@ int Daruma::getFrameIndex(const std::string& name) const
   return -1;
 }
 
+int Daruma::getFrameIndexById(const std::string& id) const
+{
+  ASSERT(m_designDocTree);
+
+  for (std::size_t i = 0; i < m_designDocTree->children().size(); ++i)
+  {
+    if (m_designDocTree->children()[i]->id() == id)
+    {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
 std::unordered_set<std::string> Daruma::texts() const
 {
   ASSERT(m_designDocTree);

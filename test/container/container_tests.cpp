@@ -145,6 +145,24 @@ TEST_F(ContainerTestSuite, Sdk)
   }
 
   {
+    auto index = sdk->currentFrameIndex();
+    auto success = sdk->setCurrentFrameById("#invalidFrameId");
+    EXPECT_FALSE(success);
+    auto index2 = sdk->currentFrameIndex();
+    EXPECT_EQ(index, index2);
+  }
+  {
+    auto index = sdk->currentFrameIndex();
+    EXPECT_NE(index, 0);
+
+    auto success = sdk->setCurrentFrameById("1:2");
+    EXPECT_TRUE(success);
+
+    index = sdk->currentFrameIndex();
+    EXPECT_EQ(index, 0);
+  }
+
+  {
     const auto launchFrameIndex = sdk->launchFrameIndex();
     EXPECT_EQ(launchFrameIndex, 0);
   }

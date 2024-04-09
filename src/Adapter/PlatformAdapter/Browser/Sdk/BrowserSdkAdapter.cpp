@@ -58,6 +58,7 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     .function("getFramesInfo", &VggSdk::getFramesInfo)
     .function("currentFrameIndex", &VggSdk::currentFrameIndex)
     .function("setCurrentFrame", &VggSdk::setCurrentFrame)
+    .function("setCurrentFrameById", &VggSdk::setCurrentFrameById)
     .function("launchFrameIndex", &VggSdk::launchFrameIndex)
     .function("setLaunchFrame", &VggSdk::setLaunchFrame)
     // font

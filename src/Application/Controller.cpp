@@ -741,4 +741,11 @@ bool Controller::setCurrentFrame(const std::string& name)
   return m_presenter->setCurrentPage(index);
 }
 
+bool Controller::setCurrentFrameById(const std::string& id)
+{
+  ASSERT(m_model);
+  auto index = m_model->getFrameIndexById(id);
+  return m_presenter->setCurrentPage(index);
+}
+
 } // namespace VGG

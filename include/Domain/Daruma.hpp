@@ -94,6 +94,7 @@ public:
 
   std::string getFramesInfo() const;
   int         getFrameIndex(const std::string& name) const;
+  int         getFrameIndexById(const std::string& id) const;
 
   std::unordered_set<std::string> texts() const;
 

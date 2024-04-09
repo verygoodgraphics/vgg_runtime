@@ -317,7 +317,7 @@ VShape PaintNode::makeBoundsPath()
       [&](const Polygon& p) {},
       [&](const VectorNetwork& p) {},
     },
-    makeShape(d_ptr->frameRadius, skRect, d_ptr->cornerSmooth));
+    makeShape(&d_ptr->frameRadius[0], skRect, d_ptr->cornerSmooth));
 }
 
 VShape PaintNode::childPolyOperation() const

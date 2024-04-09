@@ -526,7 +526,7 @@ struct Contour : public std::vector<ControlPoint>
 {
   bool    closed = true;
   float   cornerSmooth{ 0.f };
-  EBoolOp blop;
+  EBoolOp blop{ BO_NONE };
 };
 
 using ContourPtr = std::shared_ptr<Contour>;

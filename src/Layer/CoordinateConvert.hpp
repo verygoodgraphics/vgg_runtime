@@ -29,21 +29,21 @@ class CoordinateConvert
 public:
   static void convertCoordinateSystem(SkRect& rect, const glm::mat3& totalMatrix)
   {
-    rect = SkRect::MakeXYWH(rect.fLeft, -rect.fTop, rect.width(), rect.height());
+    auto bounds = Bounds{ rect.x(), rect.y(), rect.width(), rect.height() };
+    convertCoordinateSystem(bounds, totalMatrix);
+    rect =
+      SkRect::MakeXYWH(bounds.topLeft().x, bounds.topLeft().y, bounds.width(), bounds.height());
   }
 
   static void convertCoordinateSystem(SkRRect& rect, const glm::mat3& totalMatrix)
   {
-    const auto r = SkRect::MakeXYWH(
-      rect.rect().fLeft,
-      -rect.rect().fTop,
-      rect.rect().width(),
-      rect.rect().height());
+    auto innerRect = rect.rect();
+    convertCoordinateSystem(innerRect, totalMatrix);
     const SkVector radii[4] = { rect.radii(SkRRect::kUpperLeft_Corner),
                                 rect.radii(SkRRect::kUpperRight_Corner),
                                 rect.radii(SkRRect::kLowerRight_Corner),
                                 rect.radii(SkRRect::kLowerLeft_Corner) };
-    rect.setRectRadii(r, radii);
+    rect.setRectRadii(innerRect, radii);
   }
 
   static void convertCoordinateSystem(ShapeData& shape, const glm::mat3& totalMatrix)
@@ -60,7 +60,9 @@ public:
     {
       if (auto r = std::get_if<SkRect>(&p->rect); r)
       {
+        DEBUG("before rect %f %f %f %f", r->fLeft, r->fTop, r->fRight, r->fBottom);
         convertCoordinateSystem(*r, totalMatrix);
+        DEBUG("after rect %f %f %f %f", r->fLeft, r->fTop, r->fRight, r->fBottom);
       }
       else if (auto r = std::get_if<SkRRect>(&p->rect); r)
       {
@@ -87,12 +89,10 @@ public:
   }
   static void convertCoordinateSystem(Bounds& bounds, const glm::mat3& totalMatrix)
   {
-    auto x = bounds.topLeft().x;
-    auto y = bounds.topLeft().y;
     auto width = bounds.width();
     auto height = bounds.height();
-    auto topLeft = glm::vec2{ x, y };
-    auto bottomRight = glm::vec2{ x + width, y - height };
+    auto topLeft = bounds.topLeft();
+    auto bottomRight = glm::vec2{ topLeft.x + width, topLeft.y - height };
     CoordinateConvert::convertCoordinateSystem(topLeft, totalMatrix);
     CoordinateConvert::convertCoordinateSystem(bottomRight, totalMatrix);
     bounds = Bounds{ topLeft, bottomRight };

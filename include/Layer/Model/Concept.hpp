@@ -33,9 +33,19 @@ enum class EModelObjectType
   PATH,
   IMAGE,
   TEXT,
-  CONTOUR,
   MASTER,
   INSTANCE,
+  UNKNOWN
+};
+
+enum class EModelShapeType
+{
+  CONTOUR,
+  RECTANGLE,
+  ELLIPSE,
+  POLYGON,
+  STAR,
+  VECTORNETWORK,
   UNKNOWN
 };
 
@@ -208,17 +218,6 @@ concept CastObject = AbstractObject<U> && requires(T a) {
     T::asPath(std::declval<U>())
   } -> PathObject;
 };
-
-// template<typename T>
-//  concept ModelConcept = requires(T a) {
-//    typename T::Model;
-//    typename T::CastObject;
-//    requires AbstractObject<typename T::Model> || GroupObject<typename T::Model> ||
-//               FrameObject<typename T::Model> || MasterObject<typename T::Model> ||
-//               InstanceObject<typename T::Model> || ImageObject<typename T::Model> ||
-//               TextObject<typename T::Model> || PathObject<typename T::Model>;
-//    requires CastObject<typename T::CastObject, T>;
-//  };
 
 template<typename M, typename C>
 struct ModelPolicy

@@ -16,12 +16,12 @@
 #pragma once
 
 #include "Layer/Model/Concept.hpp"
+#include "Layer/Model/ModelUtils.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/AttrSerde.hpp"
 #include "Layer/NlohmannJSONImpl.hpp"
 #include "Layer/VSkia.hpp"
-#include "Layer/PathPatch.h"
 
 #include <nlohmann/json.hpp>
 
@@ -29,88 +29,6 @@ using namespace nlohmann;
 
 namespace VGG::layer
 {
-
-inline ContourPtr makeContourData2(const json& j)
-{
-  Contour contour;
-  contour.closed = j.value("closed", false);
-  const auto& points = getOrDefault(j, "points");
-  for (const auto& e : points)
-  {
-    contour.emplace_back(
-      getOptional<glm::vec2>(e, "point").value_or(glm::vec2{ 0, 0 }),
-      getOptional<float>(e, "radius").value_or(0.0),
-      getOptional<glm::vec2>(e, "curveFrom"),
-      getOptional<glm::vec2>(e, "curveTo"),
-      getOptional<int>(e, "cornerStyle"));
-  }
-  auto ptr = std::make_shared<Contour>(contour);
-  if (!ptr->closed && !ptr->empty())
-  {
-    ptr->back().radius = 0;
-    ptr->front().radius = 0;
-  }
-  return ptr;
-}
-
-inline ShapeData makeShapeData2(
-  const json&   j,
-  const json&   parent,
-  const Bounds& bounds,
-  float         cornerSmoothing)
-{
-  const auto klass = j.value("class", "");
-  if (klass == "contour")
-  {
-    auto c = makeContourData2(j);
-    c->cornerSmooth = cornerSmoothing;
-    return c;
-  }
-  else if (klass == "rectangle")
-  {
-    std::array<float, 4> radius = j.value("radius", std::array<float, 4>{ 0, 0, 0, 0 });
-    if (cornerSmoothing <= 0)
-    {
-      const auto rect = toSkRect(bounds);
-      auto       s = makeShape(&radius[0], rect, cornerSmoothing);
-      return std::visit([&](auto&& arg) { return ShapeData(arg); }, s);
-    }
-    else
-    {
-      const auto l = bounds.topLeft().x;
-      const auto t = bounds.topLeft().y;
-      const auto r = bounds.bottomRight().x;
-
-      glm::vec2 corners[4] = { bounds.topLeft(),
-                               { r, t },
-                               { r, t - bounds.height() },
-                               { l, t - bounds.height() } };
-      Contour   contour;
-      contour.closed = true;
-      contour.cornerSmooth = cornerSmoothing;
-      for (int i = 0; i < 4; i++)
-        contour.emplace_back(corners[i], radius[i], std::nullopt, std::nullopt, std::nullopt);
-      return std::make_shared<Contour>(contour);
-    }
-  }
-  else if (klass == "ellipse")
-  {
-    Ellipse oval;
-    oval.rect = toSkRect(bounds);
-    return oval;
-  }
-  else if (klass == "polygon" || klass == "star")
-  {
-    auto cp = parent;
-    if (pathChange(cp))
-    {
-      auto c = makeContourData2(cp["shape"]["subshapes"][0]["subGeometry"]);
-      c->cornerSmooth = cornerSmoothing;
-      return c;
-    }
-  }
-  return ShapeData();
-}
 
 #define M_JSON_FIELD_DEF(getter, key, type, dft) NLOHMANN_JSON_MODEL_IMPL(getter, key, type, dft)
 #define M_CLASS_GETTER NLOHMANN_JSON_OBJECT_MODEL_CLASS_GETTER
@@ -238,44 +156,53 @@ struct JSONInstanceObject : public JSONObject
   }
 };
 
-inline JSONObject dispatchObject(std::string_view klass, json j)
+inline JSONObject dispatchObject(EModelObjectType modelType, json j)
 {
-  if (klass == "object")
+  switch (modelType)
   {
-    return JSONObject(std::move(j), EModelObjectType::OBJECT);
+    case EModelObjectType::FRAME:
+      return JSONFrameObject(std::move(j));
+    case EModelObjectType::GROUP:
+      return JSONGroupObject(std::move(j));
+    case EModelObjectType::PATH:
+      return JSONPathObject(std::move(j));
+    case EModelObjectType::TEXT:
+      return JSONTextObject(std::move(j));
+    case EModelObjectType::MASTER:
+      return JSONMasterObject(std::move(j));
+    case EModelObjectType::IMAGE:
+      return JSONImageObject(std::move(j));
+    case EModelObjectType::OBJECT:
+      return JSONObject(std::move(j), EModelObjectType::OBJECT);
+    case EModelObjectType::INSTANCE:
+      return JSONInstanceObject(std::move(j));
+    case EModelObjectType::UNKNOWN:
+      break;
   }
-  else if (klass == "group")
+  return JSONObject(j, EModelObjectType::UNKNOWN);
+}
+
+inline ContourPtr makeContourData2(const json& j)
+{
+  Contour contour;
+  contour.closed = j.value("closed", false);
+  const auto& points = getOrDefault(j, "points");
+  for (const auto& e : points)
   {
-    return JSONGroupObject(std::move(j));
+    contour.emplace_back(
+      getOptional<glm::vec2>(e, "point").value_or(glm::vec2{ 0, 0 }),
+      getOptional<float>(e, "radius").value_or(0.0),
+      getOptional<glm::vec2>(e, "curveFrom"),
+      getOptional<glm::vec2>(e, "curveTo"),
+      getOptional<int>(e, "cornerStyle"));
   }
-  else if (klass == "frame")
+  auto ptr = std::make_shared<Contour>(contour);
+  if (!ptr->closed && !ptr->empty())
   {
-    return JSONFrameObject(std::move(j));
+    ptr->back().radius = 0;
+    ptr->front().radius = 0;
   }
-  else if (klass == "path")
-  {
-    return JSONPathObject(std::move(j));
-  }
-  else if (klass == "image")
-  {
-    return JSONImageObject(std::move(j));
-  }
-  else if (klass == "text")
-  {
-    return JSONTextObject(std::move(j));
-  }
-  else if (klass == "symbolMaster")
-  {
-    return JSONMasterObject(std::move(j));
-  }
-  else if (klass == "symbolInstance")
-  {
-    return JSONInstanceObject(std::move(j));
-  }
-  else
-  {
-    return JSONObject(j, EModelObjectType::UNKNOWN);
-  }
+  return ptr;
 }
 
 inline std::vector<JSONObject> JSONObject::getChildObjects() const
@@ -284,8 +211,9 @@ inline std::vector<JSONObject> JSONObject::getChildObjects() const
   const auto              childObjects = getOrDefault(j, "childObjects");
   for (auto& j : childObjects)
   {
-    auto klass = j.value("class", "");
-    objects.emplace_back(dispatchObject(klass, std::move(j)));
+    const auto klass = j.value("class", "");
+    auto       modelType = toModelType(klass);
+    objects.emplace_back(dispatchObject(modelType, std::move(j)));
   }
   return objects;
 }
@@ -294,20 +222,49 @@ inline std::vector<SubShape<JSONObject>> JSONPathObject::getShapes() const
 {
   std::vector<SubShape<JSONObject>> res;
   const auto shapes = j.value("shape", json{}).value("subshapes", std::vector<json>());
+  const auto bounds = getBounds();
+  const auto smooth = getCornerSmoothing();
   for (const auto& subshape : shapes)
   {
-    const auto blop = subshape.value("booleanOperation", EBoolOp::BO_NONE);
-    const auto geo = subshape.value("subGeometry", nlohmann::json{});
-    const auto klass = geo.value("class", "");
-    if (
-      klass == "contour" || klass == "rectangle" || klass == "ellipse" || klass == "polygon" ||
-      klass == "star")
+    const auto            blop = subshape.value("booleanOperation", EBoolOp::BO_NONE);
+    const auto            geo = subshape.value("subGeometry", nlohmann::json{});
+    const auto            klass = geo.value("class", "");
+    const EModelShapeType shapeType = toShapeType(klass);
+    if (shapeType != EModelShapeType::UNKNOWN)
     {
-      res.emplace_back(blop, makeShapeData2(std::move(geo), j, getBounds(), getCornerSmoothing()));
+      const auto radius = geo.value("radius", Float4{ 0.f, 0.f, 0.f, 0.f });
+      res.emplace_back(
+        blop,
+        makeShapeData2(
+          bounds,
+          shapeType,
+          radius.data(),
+          smooth,
+          [&](EModelShapeType type)
+          {
+            if (type == EModelShapeType::CONTOUR)
+            {
+              auto c = makeContourData2(geo);
+              c->cornerSmooth = smooth;
+              return c;
+            }
+            else if (type == EModelShapeType::POLYGON || type == EModelShapeType::STAR)
+            {
+              auto cp = j;
+              if (pathChange(cp))
+              {
+                auto c = makeContourData2(cp["shape"]["subshapes"][0]["subGeometry"]);
+                c->cornerSmooth = smooth;
+                return c;
+              }
+            }
+            return std::make_shared<Contour>();
+          }));
     }
     else
     {
-      res.emplace_back(blop, dispatchObject(klass, std::move(geo)));
+      const auto modelType = toModelType(klass);
+      res.emplace_back(blop, dispatchObject(modelType, std::move(geo)));
     }
   }
   return res;

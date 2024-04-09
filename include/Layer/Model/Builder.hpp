@@ -411,9 +411,6 @@ private:
         break;
       case EModelObjectType::INSTANCE:
         return BuilderImpl::from<decltype(C::asInstance(m)), C>(C::asInstance(m), totalMatrix, ctx);
-      case EModelObjectType::CONTOUR:
-        DEBUG("not reachable");
-        break;
       case EModelObjectType::UNKNOWN:
         DEBUG("unknown object type");
         break;

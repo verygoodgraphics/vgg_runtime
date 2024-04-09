@@ -118,6 +118,18 @@ bool VggSdk::setCurrentFrame(const std::string& name)
   return false;
 }
 
+bool VggSdk::setCurrentFrameById(const std::string& id)
+{
+  if (auto currentEnv = env())
+  {
+    if (auto controller = currentEnv->controller())
+    {
+      return controller->setCurrentFrameById(id);
+    }
+  }
+  return false;
+}
+
 int VggSdk::launchFrameIndex() const
 {
   return getModel()->getLaunchFrameIndex();

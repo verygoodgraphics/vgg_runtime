@@ -122,6 +122,7 @@ public:
 public:
   int  currentFrame() const;
   bool setCurrentFrame(const std::string& name);
+  bool setCurrentFrameById(const std::string& id);
 
 private:
   void          initModel(const char* designDocSchemaFilePath, const char* layoutDocSchemaFilePath);

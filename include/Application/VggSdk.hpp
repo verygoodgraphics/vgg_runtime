@@ -67,6 +67,7 @@ public:
   virtual std::string getFramesInfo() const override;
   virtual int         currentFrameIndex() const override;
   virtual bool        setCurrentFrame(const std::string& name) override;
+  virtual bool        setCurrentFrameById(const std::string& id) override;
   virtual int         launchFrameIndex() const override;
   virtual bool        setLaunchFrame(const std::string& name) override;
 

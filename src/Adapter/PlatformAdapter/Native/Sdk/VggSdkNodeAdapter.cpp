@@ -127,6 +127,7 @@ void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
     DECLARE_NODE_API_PROPERTY("getDesignDocument", GetDesignDocument),
 
     DECLARE_NODE_API_PROPERTY("setCurrentFrame", setCurrentFrame),
+    DECLARE_NODE_API_PROPERTY("setCurrentFrameById", setCurrentFrameById),
 
     DECLARE_NODE_API_PROPERTY("valueAt", DesignDocumentValueAt),
 
@@ -312,6 +313,40 @@ napi_value VggSdkNodeAdapter::setCurrentFrame(napi_env env, napi_callback_info i
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
     auto success = sdkAdapter->m_vggSdk->setCurrentFrame(name);
+
+    napi_value ret;
+    NODE_API_CALL(env, napi_get_boolean(env, success, &ret));
+    return ret;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+
+napi_value VggSdkNodeAdapter::setCurrentFrameById(napi_env env, napi_callback_info info)
+{
+  size_t     argc = 1;
+  napi_value args[1];
+  napi_value _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc != 1)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    auto id = GetArgString(env, args[0]);
+
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
+
+    auto success = sdkAdapter->m_vggSdk->setCurrentFrameById(id);
 
     napi_value ret;
     NODE_API_CALL(env, napi_get_boolean(env, success, &ret));

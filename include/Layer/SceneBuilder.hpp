@@ -16,12 +16,12 @@
 #pragma once
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/Frame.hpp"
-#include "Layer/DocConcept.hpp"
 #include "Layer/Memory/VAllocator.hpp"
+
+#include "Layer/Model/Builder.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/matrix.hpp>
-#include <nlohmann/json.hpp>
 
 #include <exception>
 #include <memory>
@@ -60,8 +60,7 @@ struct SceneBuilderResult
 class SceneBuilder
 {
 public:
-  using FontNameVisitor =
-    std::function<void(const std::string& familyName, const std::string& subFamilyName)>;
+  using FontNameVisitor = BuilderImpl::FontNameVisitor;
 
   static std::vector<FramePtr> build(const json& j)
   {

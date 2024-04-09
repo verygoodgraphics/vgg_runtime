@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include "DocConcept.hpp"
+#include "Layer/Model/Concept.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/AttrSerde.hpp"
@@ -216,7 +216,7 @@ struct JSONInstanceObject : public JSONObject
   }
 };
 
-std::vector<JSONObject> JSONObject::getChildObjects() const
+inline std::vector<JSONObject> JSONObject::getChildObjects() const
 {
   std::vector<JSONObject> objects;
   const auto              childObjects = getOrDefault(j, "childObjects");
@@ -258,7 +258,7 @@ std::vector<JSONObject> JSONObject::getChildObjects() const
   return objects;
 }
 
-std::vector<SubShape<JSONObject>> JSONPathObject::getShapes() const
+inline std::vector<SubShape<JSONObject>> JSONPathObject::getShapes() const
 {
   std::vector<SubShape<JSONObject>> res;
   const auto shapes = j.value("shape", json{}).value("subshapes", std::vector<json>());

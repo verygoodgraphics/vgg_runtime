@@ -126,7 +126,7 @@ struct BuilderImpl
 
   template<typename T, typename C>
     requires layer::GroupObject<T> && layer::CastObject<C, T>
-  static PaintNodePtr fromGroup(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
+  static PaintNodePtr from(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
   {
     return makeObjectBase(
       m,
@@ -144,14 +144,14 @@ struct BuilderImpl
         const auto childObjects = m.getChildObjects();
         for (const auto& c : childObjects)
         {
-          p->addChild(BuilderImpl::fromObject<T, C>(C::asGroup(c), matrix, ctx));
+          p->addChild(BuilderImpl::fromObject<typename T::BaseType, C>(c, matrix, ctx));
         }
       });
   }
 
   template<typename T, typename C>
     requires layer::FrameObject<T> && layer::CastObject<C, T>
-  static PaintNodePtr fromFrame(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
+  static PaintNodePtr from(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
   {
     return makeObjectBase(
       m,
@@ -168,13 +168,13 @@ struct BuilderImpl
         auto childObjects = m.getChildObjects();
         for (const auto& c : childObjects)
         {
-          p->addChild(BuilderImpl::fromObject<T, C>(C::asFrame(c), matrix, ctx));
+          p->addChild(BuilderImpl::fromObject<typename T::BaseType, C>(c, matrix, ctx));
         }
       });
   }
   template<typename T, typename C>
     requires layer::PathObject<T> && layer::CastObject<C, T>
-  static PaintNodePtr fromPath(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
+  static PaintNodePtr from(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
   {
     return makeObjectBase(
       m,
@@ -226,14 +226,14 @@ struct BuilderImpl
     std::vector<PaintNodePtr> res(4);
     for (const auto& f : frames)
     {
-      res.push_back(BuilderImpl::fromFrame<T, C>(f, matrix, ctx));
+      res.push_back(BuilderImpl::from<T, C>(f, matrix, ctx));
     }
     return res;
   }
 
   template<typename T, typename C>
     requires layer::MasterObject<T> && layer::CastObject<C, T>
-  static PaintNodePtr fromMaster(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
+  static PaintNodePtr from(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
   {
     return makeObjectBase(
       m,
@@ -250,14 +250,14 @@ struct BuilderImpl
         auto childObjects = m.getChildObjects();
         for (const auto& c : childObjects)
         {
-          p->addChild(BuilderImpl::fromObject<T, C>(C::asMaster(c), matrix, ctx));
+          p->addChild(BuilderImpl::fromObject<typename T::BaseType, C>(c, matrix, ctx));
         }
       });
   }
 
   template<typename T, typename C>
     requires layer::InstanceObject<T> && layer::CastObject<C, T>
-  static PaintNodePtr fromInstance(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
+  static PaintNodePtr from(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
   {
     DEBUG("instance");
     return nullptr;
@@ -265,7 +265,7 @@ struct BuilderImpl
 
   template<typename T, typename C>
     requires layer::ImageObject<T> && layer::CastObject<C, T>
-  static PaintNodePtr fromImage(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
+  static PaintNodePtr from(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
   {
     return makeObjectBase(
       m,
@@ -284,7 +284,7 @@ struct BuilderImpl
 
   template<typename T, typename C>
     requires layer::TextObject<T> && layer::CastObject<C, T>
-  static PaintNodePtr fromText(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
+  static PaintNodePtr from(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
   {
     return makeObjectBase(
       m,
@@ -378,27 +378,23 @@ struct BuilderImpl
     PaintNodePtr ro;
     switch (m.getObjectType())
     {
+      case EModelObjectType::OBJECT:
+        return nullptr;
       case EModelObjectType::GROUP:
-        return BuilderImpl::fromGroup<decltype(C::asGroup(m)), C>(C::asGroup(m), totalMatrix, ctx);
+        return BuilderImpl::from<decltype(C::asGroup(m)), C>(C::asGroup(m), totalMatrix, ctx);
       case EModelObjectType::FRAME:
-        return BuilderImpl::fromFrame<decltype(C::asFrame(m)), C>(C::asFrame(m), totalMatrix, ctx);
+        return BuilderImpl::from<decltype(C::asFrame(m)), C>(C::asFrame(m), totalMatrix, ctx);
       case EModelObjectType::PATH:
-        return BuilderImpl::fromPath<decltype(C::asPath(m)), C>(C::asPath(m), totalMatrix, ctx);
+        return BuilderImpl::from<decltype(C::asPath(m)), C>(C::asPath(m), totalMatrix, ctx);
       case EModelObjectType::IMAGE:
-        return BuilderImpl::fromImage<decltype(C::asImage(m)), C>(C::asImage(m), totalMatrix, ctx);
+        return BuilderImpl::from<decltype(C::asImage(m)), C>(C::asImage(m), totalMatrix, ctx);
       case EModelObjectType::TEXT:
-        return BuilderImpl::fromText<decltype(C::asText(m)), C>(C::asText(m), totalMatrix, ctx);
+        return BuilderImpl::from<decltype(C::asText(m)), C>(C::asText(m), totalMatrix, ctx);
       case EModelObjectType::MASTER:
-        return BuilderImpl::fromMaster<decltype(C::asMaster(m)), C>(
-          C::asMaster(m),
-          totalMatrix,
-          ctx);
+        return BuilderImpl::from<decltype(C::asMaster(m)), C>(C::asMaster(m), totalMatrix, ctx);
         break;
       case EModelObjectType::INSTANCE:
-        return BuilderImpl::fromInstance<decltype(C::asInstance(m)), C>(
-          C::asInstance(m),
-          totalMatrix,
-          ctx);
+        return BuilderImpl::from<decltype(C::asInstance(m)), C>(C::asInstance(m), totalMatrix, ctx);
       case EModelObjectType::CONTOUR:
         DEBUG("not reachable");
         break;

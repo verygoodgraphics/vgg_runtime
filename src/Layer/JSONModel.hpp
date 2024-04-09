@@ -95,9 +95,7 @@ inline ShapeData makeShapeData2(
 
 struct JSONObject
 {
-  // DECL_MODEL(JSONObject, JSONObject, UNKNOWN);
-  using BaseType = JSONObject;
-  using Self = JSONObject;
+  DECL_MODEL_OBJECT(JSONObject, JSONObject);
   json             j;
   EModelObjectType type;
   JSONObject(json j, EModelObjectType t)
@@ -128,7 +126,7 @@ struct JSONObject
 
 struct JSONImageObject : public JSONObject
 {
-  DECL_MODEL(JSONImageObject, JSONObject, EModelObjectType::IMAGE);
+  DECL_MODEL_IMAGE(JSONImageObject, JSONObject);
   JSONImageObject(json j)
     : JSONObject(std::move(j), EModelObjectType::IMAGE)
   {
@@ -140,7 +138,7 @@ struct JSONImageObject : public JSONObject
 
 struct JSONTextObject : public JSONObject
 {
-  DECL_MODEL(JSONTextObject, JSONObject, EModelObjectType::TEXT);
+  DECL_MODEL_TEXT(JSONTextObject, JSONObject);
   JSONTextObject(json j)
     : JSONObject(std::move(j), EModelObjectType::TEXT)
   {
@@ -167,7 +165,7 @@ struct JSONTextObject : public JSONObject
 
 struct JSONGroupObject : public JSONObject
 {
-  DECL_MODEL(JSONGroupObject, JSONObject, EModelObjectType::GROUP);
+  DECL_MODEL_GROUP(JSONGroupObject, JSONObject);
   JSONGroupObject(json j)
     : JSONObject(std::move(j), EModelObjectType::GROUP)
   {
@@ -176,7 +174,7 @@ struct JSONGroupObject : public JSONObject
 
 struct JSONFrameObject : public JSONObject
 {
-  DECL_MODEL(JSONFrameObject, JSONObject, EModelObjectType::FRAME);
+  DECL_MODEL_FRAME(JSONFrameObject, JSONObject);
   JSONFrameObject(json j)
     : JSONObject(std::move(j), EModelObjectType::FRAME)
   {
@@ -186,7 +184,7 @@ struct JSONFrameObject : public JSONObject
 
 struct JSONMasterObject : public JSONObject
 {
-  DECL_MODEL(JSONMasterObject, JSONObject, EModelObjectType::MASTER);
+  DECL_MODEL_MASTER(JSONMasterObject, JSONObject);
   JSONMasterObject(json j)
     : JSONObject(std::move(j), EModelObjectType::MASTER)
   {
@@ -196,7 +194,7 @@ struct JSONMasterObject : public JSONObject
 
 struct JSONPathObject : public JSONObject
 {
-  DECL_MODEL(JSONPathObject, JSONObject, EModelObjectType::PATH);
+  DECL_MODEL_PATH(JSONPathObject, JSONObject);
   JSONPathObject(json j)
     : JSONObject(std::move(j), EModelObjectType::PATH)
   {
@@ -211,7 +209,7 @@ struct JSONPathObject : public JSONObject
 
 struct JSONInstanceObject : public JSONObject
 {
-  DECL_MODEL(JSONInstanceObject, JSONObject, EModelObjectType::INSTANCE);
+  DECL_MODEL_INSTANCE(JSONInstanceObject, JSONObject);
   JSONInstanceObject(json j)
     : JSONObject(std::move(j), EModelObjectType::INSTANCE)
   {
@@ -226,6 +224,8 @@ std::vector<JSONObject> JSONObject::getChildObjects() const
   {
     switch (getObjectType())
     {
+      case EModelObjectType::OBJECT:
+        break;
       case EModelObjectType::GROUP:
         objects.emplace_back(JSONGroupObject(std::move(j)));
         break;

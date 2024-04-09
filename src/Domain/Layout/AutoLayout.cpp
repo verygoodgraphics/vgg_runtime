@@ -52,6 +52,7 @@ unit toLibUnit(LengthTypes type)
       return unit_point;
     case LengthTypes::PERCENT:
       return unit_percent;
+    case LengthTypes::AUTO:
     case LengthTypes::FIT_CONTENT:
       return unit_auto;
     default:

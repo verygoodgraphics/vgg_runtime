@@ -343,4 +343,6 @@ struct JSONModelCastObject
   }
 };
 
+using JSONModelFrame = ModelPolicy<JSONFrameObject, JSONModelCastObject>;
+
 } // namespace VGG::layer

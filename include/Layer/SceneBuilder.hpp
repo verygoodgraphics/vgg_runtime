@@ -116,6 +116,39 @@ public:
 
   SceneBuilderResult build();
 
+  template<typename M>
+  SceneBuilderResult build(std::vector<typename M::Model> objects)
+  {
+    SceneBuilderResult result;
+    if (!m_doc)
+      return { SceneBuilderResult::EResultType::BUILD_FAILD, std::nullopt };
+    const auto& doc = *m_doc;
+    if (auto it = doc.find("version");
+        it == doc.end() || (it != doc.end() && m_version && *it != *m_version))
+      result.type = SceneBuilderResult::EResultType::VERSION_MISMATCH;
+
+    glm::mat3 mat = glm::identity<glm::mat3>();
+    mat = glm::scale(mat, glm::vec2(1, -1));
+    BuilderImpl::Context ctx;
+    ctx.alloc = m_alloc;
+    ctx.fontNameVisitor = m_fontNameVisitor;
+    m_frames = BuilderImpl::from<M>(objects, mat, ctx);
+
+    if (!m_frames.empty())
+    {
+      result.root = RootArray();
+      for (auto& p : m_frames)
+      {
+        auto frame = makeFramePtr(std::move(p));
+        if (m_resetOrigin)
+          frame->resetToOrigin(true);
+        result.root->emplace_back(frame);
+      }
+    }
+    m_invalid = true;
+    return result;
+  }
+
   static std::tuple<glm::mat3, glm::mat3, glm::mat3> fromMatrix(const json& j);
   static Bounds fromBounds(const json& j, const glm::mat3& totalMatrix);
   static Style  fromStyle(const json& j, const Bounds& bounds, const glm::mat3& totalMatrix);

@@ -209,15 +209,22 @@ concept CastObject = AbstractObject<U> && requires(T a) {
   } -> PathObject;
 };
 
-template<typename T>
-concept ModelConcept = requires(T a) {
-  typename T::Model;
-  typename T::CastObject;
-  requires AbstractObject<typename T::Model> || GroupObject<typename T::Model> ||
-             FrameObject<typename T::Model> || MasterObject<typename T::Model> ||
-             InstanceObject<typename T::Model> || ImageObject<typename T::Model> ||
-             TextObject<typename T::Model> || PathObject<typename T::Model>;
-  requires CastObject<typename T::Model, T>;
+// template<typename T>
+//  concept ModelConcept = requires(T a) {
+//    typename T::Model;
+//    typename T::CastObject;
+//    requires AbstractObject<typename T::Model> || GroupObject<typename T::Model> ||
+//               FrameObject<typename T::Model> || MasterObject<typename T::Model> ||
+//               InstanceObject<typename T::Model> || ImageObject<typename T::Model> ||
+//               TextObject<typename T::Model> || PathObject<typename T::Model>;
+//    requires CastObject<typename T::CastObject, T>;
+//  };
+
+template<typename M, typename C>
+struct ModelPolicy
+{
+  using Model = M;
+  using CastObject = C;
 };
 
 #undef UNPACK

@@ -15,16 +15,15 @@
  */
 #pragma once
 #include "Layer/Core/Attrs.hpp"
+#include "Layer/Model/Concept.hpp"
 #include "Layer/Memory/VAllocator.hpp"
-
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/TextNode.hpp"
 #include "Layer/Core/ImageNode.hpp"
-
 #include "Layer/Model/JSONModel.hpp"
-
 #include "Layer/CoordinateConvert.hpp"
+
 #include <nlohmann/json.hpp>
 #include <functional>
 
@@ -215,7 +214,7 @@ struct BuilderImpl
 
   template<typename T, typename C>
     requires layer::FrameObject<T> && layer::CastObject<C, T>
-  static std::vector<PaintNodePtr> fromTopLevelFrames(
+  static std::vector<PaintNodePtr> from(
     const std::vector<T>& frames,
     const glm::mat3&      matrix,
     const Context&        ctx)
@@ -368,6 +367,27 @@ struct BuilderImpl
       });
   }
 
+  template<typename M>
+  static PaintNodePtr from(const M::Model& m, const glm::mat3& totalMatrix, const Context& ctx)
+  {
+    return from<typename M::Model, typename M::CastObject>(m, totalMatrix, ctx);
+  }
+
+  template<typename M>
+  static std::vector<PaintNodePtr> from(
+    const std::vector<typename M::Model>& models,
+    const glm::mat3&                      matrix,
+    const Context&                        ctx)
+  {
+    std::vector<PaintNodePtr> nodes(4);
+    for (const auto& m : models)
+    {
+      nodes.push_back(BuilderImpl::from<M>(m, matrix, ctx));
+    }
+    return nodes;
+  }
+
+private:
   template<typename T, typename C>
     requires layer::AbstractObject<T> && CastObject<C, T>
   static PaintNodePtr fromObject(const T& m, const glm::mat3& totalMatrix, const Context& ctx)

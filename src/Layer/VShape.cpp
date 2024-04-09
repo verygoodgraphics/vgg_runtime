@@ -214,7 +214,7 @@ void VShape::transform(VShape& shape, const SkMatrix& matrix)
 }
 
 std::variant<ContourPtr, Rectangle> makeShape(
-  float         radius[4],
+  const float   radius[4],
   const SkRect& rect,
   float         cornerSmoothing)
 {

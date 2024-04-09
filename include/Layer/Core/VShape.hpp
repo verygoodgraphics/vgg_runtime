@@ -176,8 +176,8 @@ private:
 };
 
 std::variant<ContourPtr, Rectangle> makeShape(
-  std::array<float, 4> radius,
-  const SkRect&        rect,
-  float                cornerSmoothing);
+  float         radius[4],
+  const SkRect& rect,
+  float         cornerSmoothing);
 
 } // namespace VGG::layer

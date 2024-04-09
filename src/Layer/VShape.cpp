@@ -214,9 +214,9 @@ void VShape::transform(VShape& shape, const SkMatrix& matrix)
 }
 
 std::variant<ContourPtr, Rectangle> makeShape(
-  std::array<float, 4> radius,
-  const SkRect&        rect,
-  float                cornerSmoothing)
+  float         radius[4],
+  const SkRect& rect,
+  float         cornerSmoothing)
 {
   if (radius[0] != 0 || radius[1] != 0 || radius[2] != 0 || radius[3] != 0)
   {

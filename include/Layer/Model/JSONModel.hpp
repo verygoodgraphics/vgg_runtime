@@ -68,10 +68,30 @@ inline ShapeData makeShapeData2(
   }
   else if (klass == "rectangle")
   {
-    const auto           rect = toSkRect(bounds);
     std::array<float, 4> radius = j.value("radius", std::array<float, 4>{ 0, 0, 0, 0 });
-    auto                 s = makeShape(radius, rect, cornerSmoothing);
-    return std::visit([&](auto&& arg) { return ShapeData(arg); }, s);
+    if (cornerSmoothing <= 0)
+    {
+      const auto rect = toSkRect(bounds);
+      auto       s = makeShape(&radius[0], rect, cornerSmoothing);
+      return std::visit([&](auto&& arg) { return ShapeData(arg); }, s);
+    }
+    else
+    {
+      const auto l = bounds.topLeft().x;
+      const auto t = bounds.topLeft().y;
+      const auto r = bounds.bottomRight().x;
+
+      glm::vec2 corners[4] = { bounds.topLeft(),
+                               { r, t },
+                               { r, t - bounds.height() },
+                               { l, t - bounds.height() } };
+      Contour   contour;
+      contour.closed = true;
+      contour.cornerSmooth = cornerSmoothing;
+      for (int i = 0; i < 4; i++)
+        contour.emplace_back(corners[i], radius[i], std::nullopt, std::nullopt, std::nullopt);
+      return std::make_shared<Contour>(contour);
+    }
   }
   else if (klass == "ellipse")
   {

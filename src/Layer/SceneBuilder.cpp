@@ -90,7 +90,7 @@ ShapeData makeShapeData(
   {
     const auto           rect = toSkRect(bounds);
     std::array<float, 4> radius = j.value("radius", std::array<float, 4>{ 0, 0, 0, 0 });
-    auto                 s = makeShape(radius, rect, cornerSmoothing);
+    auto                 s = makeShape(&radius[4], rect, cornerSmoothing);
     return std::visit([&](auto&& arg) { return ShapeData(arg); }, s);
   }
   else if (klass == "ellipse")

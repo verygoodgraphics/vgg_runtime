@@ -120,12 +120,6 @@ public:
   SceneBuilderResult build(std::vector<typename M::Model> objects)
   {
     SceneBuilderResult result;
-    if (!m_doc)
-      return { SceneBuilderResult::EResultType::BUILD_FAILD, std::nullopt };
-    const auto& doc = *m_doc;
-    if (auto it = doc.find("version");
-        it == doc.end() || (it != doc.end() && m_version && *it != *m_version))
-      result.type = SceneBuilderResult::EResultType::VERSION_MISMATCH;
 
     glm::mat3 mat = glm::identity<glm::mat3>();
     mat = glm::scale(mat, glm::vec2(1, -1));

@@ -1053,7 +1053,7 @@
       "description": "Define a blur style of an object.",
       "type": "object",
       "$id": "#Blur",
-      "required": ["class", "type", "isEnabled", "center", "saturation"],
+      "required": ["class", "type", "isEnabled", "radius"],
       "properties": {
         "class": {
           "type": "string",
@@ -1072,15 +1072,15 @@
         },
         "motionAngle": {
           "type": "number",
-          "description": "The angle of the blur direction applies only to the `motion` blur."
+          "description": "The angle of the blur direction applies only to the `motion` blur.\nDefault value is `0`."
         },
         "center": {
           "$ref": "#/definitions/Point",
-          "description": "The center of the blur applies only to the `zoom` blur.\nA relative coordinate according to the `bounds`, where `(0, 0)` represents the top-left corner of the `bounds`, and `(1, -1)` represents the bottom-right corner of the `bounds`."
+          "description": "The center of the blur applies only to the `zoom` blur.\nA relative coordinate according to the `bounds`, where `(0, 0)` represents the top-left corner of the `bounds`, and `(1, -1)` represents the bottom-right corner of the `bounds`.\nDefault value is (0.5, -0.5)."
         },
         "saturation": {
           "type": "number",
-          "description": "The saturation level of the blur applies only to the `background` blur."
+          "description": "The saturation level of the blur applies only to the `background` blur.\nDefault value is `1`."
         }
       },
       "additionalProperties": false

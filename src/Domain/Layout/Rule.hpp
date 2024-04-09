@@ -37,6 +37,7 @@ struct Length
   {
     PX = 1,
     PERCENT = 2,
+    AUTO = 3,
     FIT_CONTENT = 4
   };
 

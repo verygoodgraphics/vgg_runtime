@@ -475,11 +475,12 @@
         },
         "types": {
           "type": "integer",
-          "enum": [1, 2, 4],
+          "enum": [1, 2, 3, 4],
           "enumDescriptions": [
             "fixed (px): Width or height is a fixed value.",
             "relative (percent): The width or height of the child is the percentage relative to the width or height of the parent. Only children whose parents apply layout are available.",
-            "fit content (auto): The size of the parent is calculated from the sum of the size of the child nodes. In this case, the value of value is meaningless. Only the parent is available."
+            "auto: The width or height of the element will be calculated automatically. This value should not be applied to the maximum/minimum width and height. In this case, the value of value is meaningless. ",
+            "fit content: The size of the parent is calculated from the sum of the size of the child nodes. In this case, the value of value is meaningless. Only the parent is available."
           ]
         }
       },

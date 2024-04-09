@@ -23,6 +23,8 @@
 #include "Layer/VSkia.hpp"
 #include "Layer/PathPatch.h"
 
+#include <nlohmann/json.hpp>
+
 using namespace nlohmann;
 
 namespace VGG::layer
@@ -117,7 +119,7 @@ struct JSONObject
   M_JSON_FIELD_DEF(Overflow, "overflow", EOverflow, EOverflow::OF_VISIBLE);
   M_JSON_FIELD_DEF(Style, "style", Style, Style{});
   M_JSON_FIELD_DEF(ContextSetting, "contextSettings", ContextSetting, {});
-  M_JSON_FIELD_DEF(CornerSmoothing, "cornerSmoothin", float, 0.f);
+  M_JSON_FIELD_DEF(CornerSmoothing, "cornerSmoothing", float, 0.f);
   M_JSON_FIELD_DEF(MaskType, "maskType", EMaskType, EMaskType::MT_NONE);
   M_JSON_FIELD_DEF(MaskShowType, "maskShowType", EMaskShowType, EMaskShowType::MST_BOUNDS);
   M_JSON_FIELD_DEF(ShapeMask, "outlineMaskBy", std::vector<std::string>, {});
@@ -132,7 +134,7 @@ struct JSONImageObject : public JSONObject
   {
   }
   M_JSON_FIELD_DEF(ImageBounds, "bounds", Bounds, {});
-  M_JSON_FIELD_DEF(ImageGUID, "imageFillName", std::string, "");
+  M_JSON_FIELD_DEF(ImageGUID, "imageFileName", std::string, "");
   M_JSON_FIELD_DEF(ImageFilter, "imageFilters", ImageFilter, {});
 };
 
@@ -216,44 +218,54 @@ struct JSONInstanceObject : public JSONObject
   }
 };
 
+inline JSONObject dispatchObject(std::string_view klass, json j)
+{
+  if (klass == "object")
+  {
+    return JSONObject(std::move(j), EModelObjectType::OBJECT);
+  }
+  else if (klass == "group")
+  {
+    return JSONGroupObject(std::move(j));
+  }
+  else if (klass == "frame")
+  {
+    return JSONFrameObject(std::move(j));
+  }
+  else if (klass == "path")
+  {
+    return JSONPathObject(std::move(j));
+  }
+  else if (klass == "image")
+  {
+    return JSONImageObject(std::move(j));
+  }
+  else if (klass == "text")
+  {
+    return JSONTextObject(std::move(j));
+  }
+  else if (klass == "symbolMaster")
+  {
+    return JSONMasterObject(std::move(j));
+  }
+  else if (klass == "symbolInstance")
+  {
+    return JSONInstanceObject(std::move(j));
+  }
+  else
+  {
+    return JSONObject(j, EModelObjectType::UNKNOWN);
+  }
+}
+
 inline std::vector<JSONObject> JSONObject::getChildObjects() const
 {
   std::vector<JSONObject> objects;
   const auto              childObjects = getOrDefault(j, "childObjects");
   for (auto& j : childObjects)
   {
-    switch (getObjectType())
-    {
-      case EModelObjectType::OBJECT:
-        break;
-      case EModelObjectType::GROUP:
-        objects.emplace_back(JSONGroupObject(std::move(j)));
-        break;
-      case EModelObjectType::FRAME:
-        objects.emplace_back(JSONFrameObject(std::move(j)));
-        break;
-      case EModelObjectType::PATH:
-        objects.emplace_back(JSONPathObject(std::move(j)));
-        break;
-      case EModelObjectType::IMAGE:
-        objects.emplace_back(JSONImageObject(std::move(j)));
-        break;
-      case EModelObjectType::TEXT:
-        objects.emplace_back(JSONTextObject(std::move(j)));
-        break;
-      case EModelObjectType::CONTOUR:
-        DEBUG("not implemented");
-        break;
-      case EModelObjectType::MASTER:
-        objects.emplace_back(JSONMasterObject(std::move(j)));
-        break;
-      case EModelObjectType::INSTANCE:
-        objects.emplace_back(JSONInstanceObject(std::move(j)));
-        break;
-      case EModelObjectType::UNKNOWN:
-        DEBUG("unknown object type");
-        break;
-    }
+    auto klass = j.value("class", "");
+    objects.emplace_back(dispatchObject(klass, std::move(j)));
   }
   return objects;
 }
@@ -271,35 +283,11 @@ inline std::vector<SubShape<JSONObject>> JSONPathObject::getShapes() const
       klass == "contour" || klass == "rectangle" || klass == "ellipse" || klass == "polygon" ||
       klass == "star")
     {
-      res.emplace_back(blop, makeShapeData2(geo, j, getBounds(), getCornerSmoothing()));
+      res.emplace_back(blop, makeShapeData2(std::move(geo), j, getBounds(), getCornerSmoothing()));
     }
-    else if (klass == "path")
+    else
     {
-      res.emplace_back(blop, JSONPathObject(geo));
-    }
-    else if (klass == "image")
-    {
-      res.emplace_back(blop, JSONImageObject(geo));
-    }
-    else if (klass == "text")
-    {
-      res.emplace_back(blop, JSONTextObject(geo));
-    }
-    else if (klass == "group")
-    {
-      res.emplace_back(blop, JSONGroupObject(geo));
-    }
-    else if (klass == "symbolInstance")
-    {
-      res.emplace_back(blop, JSONInstanceObject(geo));
-    }
-    else if (klass == "frame")
-    {
-      res.emplace_back(blop, JSONFrameObject(geo));
-    }
-    else if (klass == "symbolMaster")
-    {
-      res.emplace_back(blop, JSONMasterObject(geo));
+      res.emplace_back(blop, dispatchObject(klass, std::move(geo)));
     }
   }
   return res;

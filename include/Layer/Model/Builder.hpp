@@ -140,7 +140,7 @@ struct BuilderImpl
         const auto childObjects = m.getChildObjects();
         for (const auto& c : childObjects)
         {
-          p->addChild(BuilderImpl::fromObject<typename T::BaseType, C>(c, matrix, ctx));
+          p->addChild(BuilderImpl::dispatchObject<typename T::BaseType, C>(c, matrix, ctx));
         }
       });
   }
@@ -164,7 +164,7 @@ struct BuilderImpl
         auto childObjects = m.getChildObjects();
         for (const auto& c : childObjects)
         {
-          p->addChild(BuilderImpl::fromObject<typename T::BaseType, C>(c, matrix, ctx));
+          p->addChild(BuilderImpl::dispatchObject<typename T::BaseType, C>(c, matrix, ctx));
         }
       });
   }
@@ -196,7 +196,7 @@ struct BuilderImpl
           if (VT(&geo, typename T::BaseType, ptr))
           {
             // none shape child
-            p->addSubShape(fromObject<typename T::BaseType, C>(*ptr, totalMatrix, ctx), blop);
+            p->addSubShape(dispatchObject<typename T::BaseType, C>(*ptr, totalMatrix, ctx), blop);
           }
           else if (VT(&geo, ShapeData, ptr))
           {
@@ -219,7 +219,7 @@ struct BuilderImpl
     const glm::mat3&      matrix,
     const Context&        ctx)
   {
-    std::vector<PaintNodePtr> res(4);
+    std::vector<PaintNodePtr> res;
     for (const auto& f : frames)
     {
       res.push_back(BuilderImpl::from<T, C>(f, matrix, ctx));
@@ -246,7 +246,7 @@ struct BuilderImpl
         auto childObjects = m.getChildObjects();
         for (const auto& c : childObjects)
         {
-          p->addChild(BuilderImpl::fromObject<typename T::BaseType, C>(c, matrix, ctx));
+          p->addChild(BuilderImpl::dispatchObject<typename T::BaseType, C>(c, matrix, ctx));
         }
       });
   }
@@ -255,7 +255,6 @@ struct BuilderImpl
     requires layer::InstanceObject<T> && layer::CastObject<C, T>
   static PaintNodePtr from(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
   {
-    DEBUG("instance");
     return nullptr;
   }
 
@@ -390,7 +389,7 @@ struct BuilderImpl
 private:
   template<typename T, typename C>
     requires layer::AbstractObject<T> && CastObject<C, T>
-  static PaintNodePtr fromObject(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
+  static PaintNodePtr dispatchObject(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
   {
     PaintNodePtr ro;
     switch (m.getObjectType())

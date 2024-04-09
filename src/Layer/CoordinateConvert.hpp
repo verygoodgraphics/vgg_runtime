@@ -69,19 +69,19 @@ public:
     }
     else if (VT(Ellipse))
     {
-      DEBUG("not impl");
+      convertCoordinateSystem(p->rect, totalMatrix);
     }
     else if (VT(Star))
     {
-      DEBUG("not impl");
+      DEBUG("Star not impl");
     }
     else if (VT(Polygon))
     {
-      DEBUG("not impl");
+      DEBUG("Polygon not impl");
     }
     else if (VT(VectorNetwork))
     {
-      DEBUG("not impl");
+      DEBUG("VectorNetwork not impl");
     }
 #undef VT
   }

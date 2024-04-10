@@ -38,7 +38,6 @@ using PaintNodeRef = VGG::layer::WeakRef<PaintNode>;
 class VLayer;
 class Rasterizer;
 } // namespace layer
-using namespace layer;
 
 using ResourceRepo = std::map<std::string, std::vector<char>>;
 class Scene__pImpl;
@@ -47,9 +46,9 @@ class VGG_EXPORTS Scene : public layer::Renderable
   friend class layer::VLayer; // Temporary support for VLayer
 
 public:
-  Scene(std::unique_ptr<Rasterizer> cache = nullptr);
+  Scene(std::unique_ptr<layer::Rasterizer> cache = nullptr);
   virtual ~Scene();
-  void setSceneRoots(std::vector<FramePtr> roots);
+  void setSceneRoots(std::vector<layer::FramePtr> roots);
   void setName(std::string name)
   {
     m_name = std::move(name);
@@ -58,17 +57,17 @@ public:
   {
     return m_name;
   }
-  void    nextArtboard();
-  void    preArtboard();
-  int     frameCount() const;
-  Frame*  frame(int index);
-  void    setPage(int num);
-  int     currentPage() const;
+  void          nextArtboard();
+  void          preArtboard();
+  int           frameCount() const;
+  layer::Frame* frame(int index);
+  void          setPage(int num);
+  int           currentPage() const;
   // To remove zoomer, just set nullptr
-  void    setZoomer(std::shared_ptr<Zoomer> zoomer);
-  Zoomer* zoomer();
+  void          setZoomer(std::shared_ptr<Zoomer> zoomer);
+  Zoomer*       zoomer();
 
-  void nodeAt(int x, int y, PaintNode::NodeVisitor visitor);
+  void nodeAt(int x, int y, layer::PaintNode::NodeVisitor visitor);
 
   void enableDrawDebugBounds(bool enabled);
   bool isEnableDrawDebugBounds();
@@ -85,7 +84,7 @@ protected:
   void onRender(SkCanvas* canvas) override;
   void onZoomScaleChanged(Zoomer::Scale value);
   void onZoomTranslationChanged(float x, float y);
-  void setOwner(VLayer* owner);
+  void setOwner(layer::VLayer* owner);
 
   void onRevalidate();
 

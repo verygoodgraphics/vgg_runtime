@@ -37,6 +37,7 @@ using namespace skia::textlayout;
 namespace
 {
 using namespace VGG::layer;
+using namespace VGG;
 float findWeight(std::string_view key)
 {
   static std::vector<std::pair<std::string_view, float>> s_fontWeightMap = {

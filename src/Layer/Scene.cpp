@@ -48,34 +48,34 @@ namespace VGG
 
 ResourceRepo Scene::s_resRepo{};
 
-class Scene__pImpl : public VNode
+class Scene__pImpl : public layer::VNode
 {
   VGG_DECL_API(Scene);
 
 public:
-  Scene__pImpl(VRefCnt* cnt, Scene* api)
+  Scene__pImpl(layer::VRefCnt* cnt, Scene* api)
     : VNode(cnt)
     , q_ptr(api)
   {
   }
-  using RootArray = std::vector<FramePtr>;
+  using RootArray = std::vector<layer::FramePtr>;
 
   RootArray               roots;
   int                     page{ 0 };
-  Renderer                renderer;
+  layer::Renderer         renderer;
   std::shared_ptr<Zoomer> zoomer;
-  std::optional<Bounds>    viewport;
+  std::optional<Bounds>   viewport;
 
-  std::unique_ptr<Rasterizer>   rasterizer;
-  std::vector<Rasterizer::Tile> rasterTiles;
-  SkMatrix                      rasterMatrix;
-  int                           lod{ -1 };
+  std::unique_ptr<layer::Rasterizer>   rasterizer;
+  std::vector<layer::Rasterizer::Tile> rasterTiles;
+  SkMatrix                             rasterMatrix;
+  int                                  lod{ -1 };
 
   Bounds onRevalidate() override
   {
     // only revalidate cuurent page
     if (rasterizer)
-      rasterizer->invalidate(Rasterizer::EReason::CONTENT);
+      rasterizer->invalidate(layer::Rasterizer::EReason::CONTENT);
     if (auto f = currentFrame(true); f)
     {
       return f->bounds();
@@ -105,9 +105,9 @@ public:
     invalidateMask();
   }
 
-  Frame* currentFrame(bool revalidate = false)
+  layer::Frame* currentFrame(bool revalidate = false)
   {
-    Frame* f = nullptr;
+    layer::Frame* f = nullptr;
     if (page >= 0 && page < (int)roots.size())
     {
       f = roots[page].get();
@@ -119,9 +119,9 @@ public:
     return f;
   }
 
-  Frame* frame(int index, bool revalidate = false)
+  layer::Frame* frame(int index, bool revalidate = false)
   {
-    Frame* f = nullptr;
+    layer::Frame* f = nullptr;
     if (index >= 0 && index < (int)roots.size())
     {
       f = roots[index].get();
@@ -196,12 +196,12 @@ public:
       {
         if (rasterizer->isInvalidate())
         {
-          auto                      rasterDevice = canvas->recordingContext();
-          const auto                skv = toSkRect(viewport.value_or(frame->bounds()));
-          auto                      mat = canvas->getTotalMatrix(); // DPI * zoom
-          const auto                skr = toSkRect(frame->bounds());
-          const auto                skm = toSkMatrix(frame->transform().matrix());
-          Rasterizer::RasterContext rasterCtx{ mat, frame->picture(), &skr, skm };
+          auto                             rasterDevice = canvas->recordingContext();
+          const auto                       skv = toSkRect(viewport.value_or(frame->bounds()));
+          auto                             mat = canvas->getTotalMatrix(); // DPI * zoom
+          const auto                       skr = toSkRect(frame->bounds());
+          const auto                       skm = toSkMatrix(frame->transform().matrix());
+          layer::Rasterizer::RasterContext rasterCtx{ mat, frame->picture(), &skr, skm };
           rasterizer->rasterize(rasterDevice, rasterCtx, lod, skv, &rasterTiles, &rasterMatrix, 0);
         }
         canvas->save();
@@ -228,7 +228,7 @@ public:
   }
 };
 
-Scene::Scene(std::unique_ptr<Rasterizer> cache)
+Scene::Scene(std::unique_ptr<layer::Rasterizer> cache)
   : d_ptr(V_NEW<Scene__pImpl>(this))
 {
   if (cache)
@@ -238,7 +238,7 @@ Scene::Scene(std::unique_ptr<Rasterizer> cache)
 }
 Scene::~Scene() = default;
 
-void Scene::setSceneRoots(std::vector<FramePtr> roots)
+void Scene::setSceneRoots(std::vector<layer::FramePtr> roots)
 {
   VGG_IMPL(Scene)
   if (roots.empty())
@@ -273,7 +273,7 @@ int Scene::frameCount() const
   return d_ptr->roots.size();
 }
 
-Frame* Scene::frame(int index)
+layer::Frame* Scene::frame(int index)
 {
   VGG_IMPL(Scene);
   return _->frame(index, true);
@@ -316,25 +316,25 @@ void Scene::onZoomScaleChanged(Zoomer::Scale value)
 {
   DEBUG("Scene: onZoomScaleChanged");
   std::visit(
-    Overloaded{ [this](Zoomer::EScaleLevel level) { this->d_ptr->lod = level; },
-                [this](Zoomer::OtherLevel other) { this->d_ptr->lod = -1; } },
+    layer::Overloaded{ [this](Zoomer::EScaleLevel level) { this->d_ptr->lod = level; },
+                       [this](Zoomer::OtherLevel other) { this->d_ptr->lod = -1; } },
     value.first);
   if (d_ptr->rasterizer)
-    d_ptr->rasterizer->invalidate(Rasterizer::EReason::ZOOM_SCALE);
+    d_ptr->rasterizer->invalidate(layer::Rasterizer::EReason::ZOOM_SCALE);
 }
 
 void Scene::onZoomTranslationChanged(float x, float y)
 {
   DEBUG("Scene: onZoomTranslationChanged");
   if (d_ptr->rasterizer)
-    d_ptr->rasterizer->invalidate(Rasterizer::EReason::ZOOM_TRANSLATION);
+    d_ptr->rasterizer->invalidate(layer::Rasterizer::EReason::ZOOM_TRANSLATION);
 }
 
 void Scene::onViewportChange(const Bounds& bounds)
 {
   d_ptr->viewport = bounds;
   if (d_ptr->rasterizer)
-    d_ptr->rasterizer->invalidate(Rasterizer::EReason::VIEWPORT);
+    d_ptr->rasterizer->invalidate(layer::Rasterizer::EReason::VIEWPORT);
 }
 
 void Scene::invalidateMask()
@@ -351,7 +351,7 @@ void Scene::invalidate()
     f->invalidate();
 }
 
-void Scene::nodeAt(int x, int y, PaintNode::NodeVisitor visitor)
+void Scene::nodeAt(int x, int y, layer::PaintNode::NodeVisitor visitor)
 {
   if (auto f = d_ptr->currentFrame(true); f)
   {
@@ -380,19 +380,19 @@ void Scene::preArtboard()
 void Scene::setResRepo(std::map<std::string, std::vector<char>> repo)
 {
   Scene::s_resRepo = std::move(repo);
-  getGlobalImageCache()->purge();
+  layer::getGlobalImageCache()->purge();
 }
 
 void Scene::enableDrawDebugBounds(bool enabled)
 {
   VGG_IMPL(Scene)
   _->invalidateCurrentFrame();
-  enableDebugBounds(enabled);
+  layer::enableDebugBounds(enabled);
 }
 
 bool Scene::isEnableDrawDebugBounds()
 {
-  return getDebugBoundsEnable();
+  return layer::getDebugBoundsEnable();
 }
 
 } // namespace VGG

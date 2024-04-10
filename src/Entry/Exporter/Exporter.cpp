@@ -162,7 +162,7 @@ public:
     layer->setScaleFactor(scale);
     // begin render one frame
     {
-      ScopedTimer t([&](auto d) { cost.render = d.s(); });
+      layer::ScopedTimer t([&](auto d) { cost.render = d.s(); });
       layer->beginFrame();
       layer->render();
       layer->endFrame();
@@ -170,7 +170,7 @@ public:
     // end render one frame
     std::optional<std::vector<char>> img;
     {
-      ScopedTimer t([&](auto d) { cost.encode = d.s(); });
+      layer::ScopedTimer t([&](auto d) { cost.encode = d.s(); });
       img = layer->makeImageSnapshot(opts);
     }
     return img;
@@ -243,7 +243,7 @@ public:
                                 .setResetOriginEnable(true)
                                 .setCheckVersion(VGG_PARSE_FORMAT_VER_STR)
                                 .setDoc(std::move(*res.doc))
-                                .setAllocator(getGlobalMemoryAllocator())
+                                .setAllocator(layer::getGlobalMemoryAllocator())
                                 .build();
     if (sceneBuilderResult.type)
     {
@@ -347,38 +347,38 @@ public:
     float         scale = 1.0;
     constexpr int MAX_SIDE = std::min(MAX_WIDTH, MAX_HEIGHT);
     std::visit(
-      Overloaded{ [&](const ImageOption::ScaleDetermine& s)
-                  {
-                    auto maxScale = MAX_SIDE / std::max(w, h);
-                    scale = s.value > maxScale ? maxScale : s.value;
-                    actualSize[0] = scale * w;
-                    actualSize[1] = scale * h;
-                  },
-                  [&](const ImageOption::WidthDetermine& width)
-                  {
-                    auto maxSide = width.value > MAX_SIDE ? MAX_SIDE : width.value;
-                    scale = std::min({ MAX_HEIGHT / w, MAX_WIDTH / h, maxSide / w });
-                    actualSize[0] = scale * w;
-                    actualSize[1] = scale * h;
-                  },
-                  [&](const ImageOption::HeightDetermine& height)
-                  {
-                    auto maxSide = height.value > MAX_SIDE ? MAX_SIDE : height.value;
-                    scale = std::min({ MAX_HEIGHT / w, MAX_WIDTH / h, maxSide / h });
-                    actualSize[0] = scale * w;
-                    actualSize[1] = scale * h;
-                  },
-                  [&, this](const ImageOption::LevelDetermine& level)
-                  {
-                    getMaxSurfaceSize(level.value, maxSurfaceSize);
-                    scale = calcScaleFactor(
-                      w,
-                      h,
-                      maxSurfaceSize[0],
-                      maxSurfaceSize[1],
-                      actualSize[0],
-                      actualSize[1]);
-                  } },
+      layer::Overloaded{ [&](const ImageOption::ScaleDetermine& s)
+                         {
+                           auto maxScale = MAX_SIDE / std::max(w, h);
+                           scale = s.value > maxScale ? maxScale : s.value;
+                           actualSize[0] = scale * w;
+                           actualSize[1] = scale * h;
+                         },
+                         [&](const ImageOption::WidthDetermine& width)
+                         {
+                           auto maxSide = width.value > MAX_SIDE ? MAX_SIDE : width.value;
+                           scale = std::min({ MAX_HEIGHT / w, MAX_WIDTH / h, maxSide / w });
+                           actualSize[0] = scale * w;
+                           actualSize[1] = scale * h;
+                         },
+                         [&](const ImageOption::HeightDetermine& height)
+                         {
+                           auto maxSide = height.value > MAX_SIDE ? MAX_SIDE : height.value;
+                           scale = std::min({ MAX_HEIGHT / w, MAX_WIDTH / h, maxSide / h });
+                           actualSize[0] = scale * w;
+                           actualSize[1] = scale * h;
+                         },
+                         [&, this](const ImageOption::LevelDetermine& level)
+                         {
+                           getMaxSurfaceSize(level.value, maxSurfaceSize);
+                           scale = calcScaleFactor(
+                             w,
+                             h,
+                             maxSurfaceSize[0],
+                             maxSurfaceSize[1],
+                             actualSize[0],
+                             actualSize[1]);
+                         } },
       size);
     layer::ImageOptions opts;
     opts.encode = toEImageEncode(type);
@@ -506,7 +506,7 @@ IteratorResult SVGIterator::next()
 {
   std::string       key;
   std::vector<char> image;
-  Timer             t;
+  layer::Timer      t;
   t.start();
   IteratorResult res(next(key, image));
   t.stop();
@@ -571,7 +571,7 @@ IteratorResult PDFIterator::next()
 {
   std::string       key;
   std::vector<char> image;
-  Timer             t;
+  layer::Timer      t;
   t.start();
   IteratorResult res(next(key, image));
   t.stop();

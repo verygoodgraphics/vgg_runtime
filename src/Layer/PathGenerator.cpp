@@ -38,6 +38,8 @@
 namespace
 {
 
+using namespace VGG;
+
 struct CubicCurve
 {
   glm::vec2 p1;

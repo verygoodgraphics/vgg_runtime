@@ -21,6 +21,7 @@
 namespace
 {
 
+using namespace VGG;
 using namespace VGG::layer;
 
 inline ContourPtr makeContourData2(const json& j)

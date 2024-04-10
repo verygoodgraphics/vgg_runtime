@@ -85,7 +85,7 @@ std::shared_ptr<LayoutNode> LayoutNode::hitTest(
       return shared_from_this();
     }
 
-    if (hasEventListener(vggId()))
+    if (hasEventListener(name()) || hasEventListener(id()))
     {
       return shared_from_this();
     }

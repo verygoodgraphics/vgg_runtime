@@ -86,7 +86,7 @@ void Editor::handleUIEvent(UIEventPtr event, std::weak_ptr<LayoutNode> targetNod
   DEBUG(
     "Editor::handleUIEvent: type = %s, target = %s",
     event->type().c_str(),
-    event->targetPath().c_str());
+    event->targetName().c_str());
 
   switch (event->enumType())
   {

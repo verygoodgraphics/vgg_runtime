@@ -219,7 +219,7 @@ private:
   {
     if (m_listener && evt)
     {
-      m_listener(evt->type(), evt->targetId(), evt->targetPath());
+      m_listener(evt->type(), evt->targetId(), evt->targetName());
     }
   }
 

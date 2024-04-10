@@ -74,7 +74,7 @@ bool UIView::onEvent(UEvent evt, void* userData)
   // todo, capturing
   // todo, bubbling
   UIEvent::TargetIdType       targetId;
-  UIEvent::TargetPathType     targetPath;
+  UIEvent::TargetNameType     targetName;
   std::shared_ptr<LayoutNode> targetNode;
   switch (evt.type)
   {
@@ -173,7 +173,7 @@ bool UIView::onEvent(UEvent evt, void* userData)
         UIEventPtr(new KeyboardEvent(
           EUIEventType::KEYDOWN,
           targetId,
-          targetPath,
+          targetName,
           evt.key.keysym.sym,
           evt.key.repeat,
           alt,
@@ -191,7 +191,7 @@ bool UIView::onEvent(UEvent evt, void* userData)
         UIEventPtr(new KeyboardEvent(
           EUIEventType::KEYUP,
           targetId,
-          targetPath,
+          targetName,
           evt.key.keysym.sym,
           evt.key.repeat,
           alt,
@@ -544,8 +544,8 @@ void UIView::fireMouseEvent(
   m_eventListener(
     UIEventPtr(new MouseEvent(
       type,
-      target ? target->vggId() : K_EMPTY_STRING,
-      K_EMPTY_STRING,
+      target ? target->id() : K_EMPTY_STRING,
+      target ? target->name() : K_EMPTY_STRING,
       jsButtonIndex,
       x,
       y,
@@ -644,7 +644,10 @@ bool UIView::handleTouchEvent(int x, int y, int motionX, int motionY, EUIEventTy
     { return queryHasEventListener(targetKey, type); });
 
   m_eventListener(
-    UIEventPtr(new TouchEvent(type, target ? target->vggId() : K_EMPTY_STRING, K_EMPTY_STRING)),
+    UIEventPtr(new TouchEvent(
+      type,
+      target ? target->id() : K_EMPTY_STRING,
+      target ? target->name() : K_EMPTY_STRING)),
     target);
 
   return true;
@@ -673,7 +676,7 @@ bool UIView::setCurrentPage(int index)
   {
     if (index >= 0 && static_cast<std::size_t>(index) < document->children().size())
     {
-      INFO("show page: %d, %s", index, document->children()[index]->vggId().c_str());
+      INFO("show page: %d, %s", index, document->children()[index]->name().c_str());
       m_page = index;
       if (index > Scene::currentPage())
       {

@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "DesignModelFwd.hpp"
+#include "Domain/Model/DesignModelFwd.hpp"
 
 #include <nlohmann/json.hpp>
 

@@ -19,6 +19,7 @@
 #include "Layer/Core/VType.hpp"
 
 #include "Layer/Core/VBounds.hpp"
+#include "Layer/Core/PaintNode.hpp"
 
 #include <vector>
 #include <string>
@@ -120,7 +121,7 @@ concept AbstractObject = requires(T a) {
     T::ObjectType
   } -> std::convertible_to<EModelObjectType>;
   REQ_DECL(ObjectType, (EModelObjectType));
-  REQ_DECL(ObjectTypeString, (std::string));
+  // REQ_DECL(ObjectTypeString, (std::string));
   REQ_DECL(Name, (std::string));
   REQ_DECL(Id, (std::string));
   REQ_DECL(Bounds, (Bounds));

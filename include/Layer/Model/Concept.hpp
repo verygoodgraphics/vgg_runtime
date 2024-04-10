@@ -193,7 +193,7 @@ concept TextObject = AbstractObject<T> && requires(T a) {
   REQ_DECL(TextBounds, (Bounds));
   REQ_DECL(VerticalAlignment, (ETextVerticalAlignment));
   REQ_DECL(LayoutMode, (ETextLayoutMode));
-  REQ_DECL(Anchor, (std::optional<Float2>));
+  REQ_DECL(Anchor, (Float2));
   REQ_DECL(TextLineType, (std::vector<TextLineAttr>));
   REQ_DECL(HorizontalAlignment, (std::vector<ETextHorizontalAlignment>));
   REQ_DECL(DefaultFontAttr, (TextStyleAttr));

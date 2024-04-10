@@ -141,7 +141,6 @@ private:
 
   void scaleContent(Layout::Size size);
   void aspectFill(Layout::Size size);
-  void aspectFit(Layout::Size size);
 
   std::shared_ptr<ViewModel> generateViewModel(std::shared_ptr<Daruma> model, Layout::Size size);
   MakeJsonDocFn              createMakeJsonDocFn(const char* pJsonSchemaFilePath);

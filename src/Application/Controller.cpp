@@ -655,7 +655,6 @@ void Controller::scaleContent(Layout::Size size)
   }
 
   aspectFill(size);
-  // aspectFit(size);
 }
 
 void Controller::aspectFill(Layout::Size size)
@@ -663,39 +662,24 @@ void Controller::aspectFill(Layout::Size size)
   auto pageSize = m_layout->pageSize(m_presenter->currentPageIndex());
   auto scaleFactor = size.width / pageSize.width;
 
+  Layout::Size targetSize;
   if (scaleFactor < 1.)
   {
-    Layout::Size targetSize = { pageSize.width * scaleFactor,
-                                pageSize.height }; // make sure to see all the contents
-    m_layout->layout(targetSize);
-    m_layout->layout(targetSize, true);
-    m_presenter->setContentSize(targetSize);
+    targetSize = { pageSize.width * scaleFactor,
+                   pageSize.height }; // make sure to see all the contents
   }
   else
   {
-    Layout::Size targetSize = {
+    targetSize = {
       pageSize.width * scaleFactor,
       std::min(
         pageSize.height + size.height / 3.,
         pageSize.height * scaleFactor) // set max height limit
     };
-    m_layout->layout(targetSize);
-    m_layout->layout(targetSize, true);
-    m_presenter->setContentSize(targetSize);
   }
-}
 
-void Controller::aspectFit(Layout::Size size)
-{
-  auto pageSize = m_layout->pageSize(m_presenter->currentPageIndex());
-
-  auto xScale = size.width / pageSize.width;
-  auto yScale = size.height / pageSize.height;
-  auto scale = std::min(xScale, yScale);
-
-  Layout::Size contentSize{ pageSize.width * scale, pageSize.height * scale };
-  m_layout->layout(contentSize);
-  m_presenter->setContentSize(contentSize);
+  m_layout->layout(targetSize, true); // true means updating layout size rules
+  m_presenter->setContentSize(targetSize);
 }
 
 bool Controller::handleTranslate(float x, float y, bool isMouseWheel)

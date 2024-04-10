@@ -31,7 +31,7 @@ protected:
   std::shared_ptr<AppZoomer> m_zoomerListener;
 
 public:
-  AppScene(std::unique_ptr<Rasterizer> cache = nullptr)
+  AppScene(std::unique_ptr<layer::Rasterizer> cache = nullptr)
     : Scene(std::move(cache))
   {
   }

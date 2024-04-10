@@ -51,7 +51,6 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
-using namespace VGG;
 
 inline SkRect toSkRect(const VGG::Bounds& bounds)
 {
@@ -76,6 +75,7 @@ inline SkMatrix toSkMatrix(const glm::mat3& mat)
 }
 inline SkPaint::Join toSkPaintJoin(VGG::ELineJoin join)
 {
+  using namespace VGG;
   SWITCH_MAP_ITEM_BEGIN(join)
   SWITCH_MAP_ITEM_DEF(LJ_MITER, SkPaint::kMiter_Join)
   SWITCH_MAP_ITEM_DEF(LJ_ROUND, SkPaint::kRound_Join)
@@ -83,8 +83,10 @@ inline SkPaint::Join toSkPaintJoin(VGG::ELineJoin join)
   SWITCH_MAP_ITEM_END(SkPaint::kMiter_Join)
 }
 
-inline std::optional<std::variant<SkBlendMode, sk_sp<SkBlender>>> toSkBlendMode(EBlendMode mode)
+inline std::optional<std::variant<SkBlendMode, sk_sp<SkBlender>>> toSkBlendMode(
+  VGG::EBlendMode mode)
 {
+  using namespace VGG;
   SWITCH_MAP_ITEM_BEGIN(mode)
   SWITCH_MAP_ITEM_DEF(BM_NORMAL, SkBlendMode::kSrcOver)
   SWITCH_MAP_ITEM_DEF(BM_DARKEN, SkBlendMode::kDarken)
@@ -122,6 +124,7 @@ inline std::optional<std::variant<SkBlendMode, sk_sp<SkBlender>>> toSkBlendMode(
 
 inline SkPaint::Cap toSkPaintCap(VGG::ELineCap cap)
 {
+  using namespace VGG;
   SWITCH_MAP_ITEM_BEGIN(cap)
   SWITCH_MAP_ITEM_DEF(LC_BUTT, SkPaint::kButt_Cap)
   SWITCH_MAP_ITEM_DEF(LC_ROUND, SkPaint::kRound_Cap)
@@ -129,8 +132,9 @@ inline SkPaint::Cap toSkPaintCap(VGG::ELineCap cap)
   SWITCH_MAP_ITEM_END(SkPaint::kButt_Cap)
 }
 
-inline skia::textlayout::TextAlign toSkTextAlign(ETextVerticalAlignment align)
+inline skia::textlayout::TextAlign toSkTextAlign(VGG::ETextVerticalAlignment align)
 {
+  using namespace VGG;
   SWITCH_MAP_ITEM_BEGIN(align)
   SWITCH_MAP_ITEM_DEF(VGG::ETextVerticalAlignment::VA_TOP, skia::textlayout::TextAlign::kStart);
   SWITCH_MAP_ITEM_DEF(VGG::ETextVerticalAlignment::VA_BOTTOM, skia::textlayout::TextAlign::kEnd);
@@ -138,8 +142,9 @@ inline skia::textlayout::TextAlign toSkTextAlign(ETextVerticalAlignment align)
   SWITCH_MAP_ITEM_END(skia::textlayout::TextAlign::kStart)
 }
 
-inline skia::textlayout::TextAlign toSkTextAlign(ETextHorizontalAlignment align)
+inline skia::textlayout::TextAlign toSkTextAlign(VGG::ETextHorizontalAlignment align)
 {
+  using namespace VGG;
   SWITCH_MAP_ITEM_BEGIN(align)
   SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_LEFT, skia::textlayout::TextAlign::kLeft);
   SWITCH_MAP_ITEM_DEF(VGG::ETextHorizontalAlignment::HA_RIGHT, skia::textlayout::TextAlign::kRight);
@@ -155,6 +160,7 @@ inline skia::textlayout::TextAlign toSkTextAlign(ETextHorizontalAlignment align)
 
 inline SkPathOp toSkPathOp(VGG::EBoolOp blop)
 {
+  using namespace VGG;
   SWITCH_MAP_ITEM_BEGIN(blop)
   SWITCH_MAP_ITEM_DEF(VGG::BO_UNION, SkPathOp::kUnion_SkPathOp)
   SWITCH_MAP_ITEM_DEF(BO_SUBSTRACTION, SkPathOp::kDifference_SkPathOp)

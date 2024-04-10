@@ -47,6 +47,8 @@
 namespace
 {
 
+using namespace VGG::layer;
+
 #ifdef VGG_LAYER_DEBUG
 inline glm::mat3 getLocalMatrix(PaintNode* node)
 {

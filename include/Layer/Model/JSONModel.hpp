@@ -47,7 +47,7 @@ struct JSONObject
     return type;
   }
   std::vector<JSONObject> getChildObjects() const;
-  M_JSON_FIELD_DEF(ObjectTypeString, "class", std::string, "");
+  // M_JSON_FIELD_DEF(ObjectTypeString, "class", std::string, "");
   M_JSON_FIELD_DEF(Name, "name", std::string, "");
   M_JSON_FIELD_DEF(Id, "id", std::string, "");
   M_JSON_FIELD_DEF(Bounds, "bounds", Bounds, {});

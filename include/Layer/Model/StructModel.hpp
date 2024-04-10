@@ -251,6 +251,8 @@ struct StructModelCastObject
     return StructInstanceObject(std::move(o.m));
   }
 };
+
+using StructModelFrame = ModelPolicy<StructFrameObject, StructModelCastObject>;
 #undef M_OBJECT_FIELD_DEF
 
 } // namespace VGG::layer

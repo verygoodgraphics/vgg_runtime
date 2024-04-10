@@ -20,6 +20,7 @@
 
 namespace
 {
+using namespace VGG;
 using namespace VGG::layer;
 using namespace VGG::Model;
 

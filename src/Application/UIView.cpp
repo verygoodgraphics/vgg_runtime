@@ -578,7 +578,7 @@ void UIView::show(const ViewModel& viewModel, bool force)
   }
 }
 
-void UIView::show(const ViewModel& viewModel, std::vector<FramePtr> frames, bool force)
+void UIView::show(const ViewModel& viewModel, std::vector<layer::FramePtr> frames, bool force)
 {
   if (m_skipUntilNextLoop && !force)
   {

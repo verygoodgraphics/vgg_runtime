@@ -67,7 +67,8 @@ void Reporter::onSelectNode(std::weak_ptr<LayoutNode> node)
 
   nlohmann::json event;
   event[K_TYPE] = K_SELECT;
-  event[K_ID] = target->vggId();
+  event[K_ID] = target->id();
+  event[K_NAME] = target->name();
 
   sendEventToJs(event);
 }
@@ -90,7 +91,7 @@ void Reporter::onEvent(UIEventPtr evt)
   nlohmann::json event;
   event[K_TYPE] = evt->type();
   event[K_ID] = evt->targetId();
-  event[K_PATH] = evt->targetPath();
+  event[K_NAME] = evt->targetName();
   sendEventToJs(event);
 }
 

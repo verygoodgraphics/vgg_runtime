@@ -23,6 +23,7 @@
 #include <string>
 
 #include <nlohmann/json.hpp>
+#include <string_view>
 
 using namespace nlohmann;
 namespace VGG::layer

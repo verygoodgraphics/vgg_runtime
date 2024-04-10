@@ -23,9 +23,7 @@
 #include "Layer/Core/VType.hpp"
 #include "Utility/Log.hpp"
 
-#include <include/core/SkMatrix.h>
 #include <glm/glm.hpp>
-
 #include <memory>
 #include <optional>
 #include <algorithm>
@@ -532,38 +530,3 @@ struct Contour : public std::vector<ControlPoint>
 using ContourPtr = std::shared_ptr<Contour>;
 
 } // namespace VGG
-
-namespace std
-{
-template<>
-struct hash<VGG::ContextSetting>
-{
-  size_t operator()(const VGG::ContextSetting& v) const
-  {
-    size_t seeds = 0;
-    hash_combine(seeds, v.blendMode, v.opacity, v.isolateBlending, v.transparencyKnockoutGroup);
-    return seeds;
-  }
-};
-
-template<>
-struct hash<VGG::ImageFilter>
-{
-  size_t operator()(const VGG::ImageFilter& v) const
-  {
-    size_t seeds = 0;
-    hash_combine(
-      seeds,
-      v.exposure,
-      v.contrast,
-      v.saturation,
-      v.temperature,
-      v.tint,
-      v.highlight,
-      v.shadow,
-      v.hue);
-    return seeds;
-  }
-};
-
-} // namespace std

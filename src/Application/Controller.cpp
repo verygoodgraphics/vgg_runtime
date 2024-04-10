@@ -349,7 +349,7 @@ void Controller::initModel(const char* designDocSchemaFilePath, const char* layo
 void Controller::start()
 {
   m_presenter->setModel(generateViewModel(m_model, m_presenter->viewSize()));
-  m_presenter->setCurrentPage(m_model->getLaunchFrameIndex());
+  m_presenter->setCurrentPage(m_model->getFrameIndexById(m_model->getLaunchFrameId()));
 
   const auto& modelFileVersion = m_model->docVersion();
   if (versionCompare(modelFileVersion, REQUIRED_DOC_VERSION) != 0)
@@ -729,16 +729,10 @@ bool Controller::handleTouchEvent(const VTouchEvent& evt)
   return false;
 }
 
-int Controller::currentFrame() const
-{
-  return m_presenter->currentPageIndex();
-}
-
-bool Controller::setCurrentFrame(const std::string& name)
+std::string Controller::currentFrameId() const
 {
   ASSERT(m_model);
-  auto index = m_model->getFrameIndex(name);
-  return m_presenter->setCurrentPage(index);
+  return m_model->getFrameIdByIndex(m_presenter->currentPageIndex());
 }
 
 bool Controller::setCurrentFrameById(const std::string& id)

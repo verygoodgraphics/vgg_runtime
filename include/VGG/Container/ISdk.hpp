@@ -42,11 +42,10 @@ public:
   virtual void updateElement(const std::string& id, const std::string& contentJsonString) = 0;
 
   virtual std::string getFramesInfo() const = 0;
-  virtual int         currentFrameIndex() const = 0;
-  virtual bool        setCurrentFrame(const std::string& name) = 0;
+  virtual std::string currentFrameId() const = 0;
   virtual bool        setCurrentFrameById(const std::string& id) = 0;
-  virtual int         launchFrameIndex() const = 0;
-  virtual bool        setLaunchFrame(const std::string& name) = 0;
+  virtual std::string launchFrameId() const = 0;
+  virtual bool        setLaunchFrameById(const std::string& id) = 0;
 
   virtual std::string requiredFonts() const = 0;
   virtual bool        addFont(const uint8_t* data, size_t size, const char* defaultName) = 0;

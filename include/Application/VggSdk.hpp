@@ -65,11 +65,10 @@ public:
   void        updateElement(const std::string& id, const std::string& contentJsonString) override;
 
   virtual std::string getFramesInfo() const override;
-  virtual int         currentFrameIndex() const override;
-  virtual bool        setCurrentFrame(const std::string& name) override;
+  virtual std::string currentFrameId() const override;
   virtual bool        setCurrentFrameById(const std::string& id) override;
-  virtual int         launchFrameIndex() const override;
-  virtual bool        setLaunchFrame(const std::string& name) override;
+  virtual std::string launchFrameId() const override;
+  virtual bool        setLaunchFrameById(const std::string& id) override;
 
   virtual std::string requiredFonts() const override;
   virtual bool        addFont(const uint8_t* data, size_t size, const char* defaultName) override;

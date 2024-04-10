@@ -44,7 +44,7 @@ public:
     content.clear();
 
     std::filesystem::path dir{ m_path };
-    std::ifstream ifs{ dir / name, std::ios::binary };
+    std::ifstream         ifs{ dir / name, std::ios::binary };
     if (!ifs)
     {
       return false;
@@ -57,7 +57,7 @@ public:
   virtual ResourcesType resources() const override
   {
     std::filesystem::path dir{ m_path };
-    dir /= ResourcesDirWithSlash;
+    dir /= K_RESOURCES_DIR_WITH_SLASH;
 
     ResourcesType resources;
 
@@ -69,16 +69,16 @@ public:
         {
           auto relative_path = dir_entry.path().lexically_relative(dir);
 
-          std::string key{ ResourcesDir };
+          std::string key{ K_RESOURCES_DIR };
           for (auto it = relative_path.begin(); it != relative_path.end(); ++it)
           {
             key.append("/"); // use "/" on both windows & posix
             key.append(it->string());
           }
 
-          std::ifstream ifs{ dir_entry.path(), std::ios::binary };
+          std::ifstream                  ifs{ dir_entry.path(), std::ios::binary };
           std::istreambuf_iterator<char> start{ ifs }, end;
-          std::vector<char> content{ start, end };
+          std::vector<char>              content{ start, end };
           resources[key] = std::move(content);
         }
       }

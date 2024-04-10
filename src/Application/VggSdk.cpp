@@ -93,29 +93,17 @@ std::string VggSdk::getFramesInfo() const
   return getModel()->getFramesInfo();
 }
 
-int VggSdk::currentFrameIndex() const
+std::string VggSdk::currentFrameId() const
 {
   if (auto currentEnv = env())
   {
     if (auto controller = currentEnv->controller())
     {
-      return controller->currentFrame();
+      return controller->currentFrameId();
     }
   }
 
-  return -1;
-}
-
-bool VggSdk::setCurrentFrame(const std::string& name)
-{
-  if (auto currentEnv = env())
-  {
-    if (auto controller = currentEnv->controller())
-    {
-      return controller->setCurrentFrame(name);
-    }
-  }
-  return false;
+  return {};
 }
 
 bool VggSdk::setCurrentFrameById(const std::string& id)
@@ -130,14 +118,14 @@ bool VggSdk::setCurrentFrameById(const std::string& id)
   return false;
 }
 
-int VggSdk::launchFrameIndex() const
+std::string VggSdk::launchFrameId() const
 {
-  return getModel()->getLaunchFrameIndex();
+  return getModel()->getLaunchFrameId();
 }
 
-bool VggSdk::setLaunchFrame(const std::string& name)
+bool VggSdk::setLaunchFrameById(const std::string& id)
 {
-  return getModel()->setLaunchFrame(name);
+  return getModel()->setLaunchFrameById(id);
 }
 
 std::string VggSdk::requiredFonts() const

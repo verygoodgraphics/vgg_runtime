@@ -120,9 +120,8 @@ public:
   bool handleTouchEvent(const VTouchEvent& evt);
 
 public:
-  int  currentFrame() const;
-  bool setCurrentFrame(const std::string& name);
-  bool setCurrentFrameById(const std::string& id);
+  std::string currentFrameId() const;
+  bool        setCurrentFrameById(const std::string& id);
 
 private:
   void          initModel(const char* designDocSchemaFilePath, const char* layoutDocSchemaFilePath);

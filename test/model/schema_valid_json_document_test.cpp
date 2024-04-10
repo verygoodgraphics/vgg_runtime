@@ -21,11 +21,11 @@ protected:
   void SetUp() override
   {
     std::ifstream schemaIfs(JSON_SCHEMA_FILE_NAME);
-    json schema = json::parse(schemaIfs);
+    json          schema = json::parse(schemaIfs);
 
-    auto filePath = std::string{ "./testDataDir/vgg-daruma/" } + design_file_name;
+    auto          filePath = std::string{ "./testDataDir/vgg-daruma/" } + K_DESIGN_FILE_NAME;
     std::ifstream document_fs(filePath);
-    json document = json::parse(document_fs);
+    json          document = json::parse(document_fs);
 
     auto schema_validator = std::make_shared<JsonSchemaValidator>();
     schema_validator->setRootSchema(schema);

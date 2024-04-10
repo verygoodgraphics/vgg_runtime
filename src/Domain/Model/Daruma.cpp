@@ -420,14 +420,16 @@ std::string Daruma::getFramesInfo() const
 
 std::string Daruma::getLaunchFrameId() const
 {
-  if (m_settingsDoc.is_object())
+  if (m_settingsDoc.is_object() && m_settingsDoc.contains(K_LAUNCH_FRAME_ID))
   {
-    return m_settingsDoc[K_LAUNCH_FRAME_ID];
+    auto& id = m_settingsDoc[K_LAUNCH_FRAME_ID];
+    if (id.is_string())
+    {
+      return id;
+    }
   }
-  else
-  {
-    return {};
-  }
+
+  return {};
 }
 
 bool Daruma::setLaunchFrameById(const std::string& id)

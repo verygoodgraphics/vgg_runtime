@@ -18,10 +18,6 @@
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Math/Algebra.hpp"
-#include "glm/ext/matrix_transform.hpp"
-#include "glm/gtx/matrix_transform_2d.hpp"
-#include "glm/gtx/quaternion.hpp"
-#include "glm/gtx/transform.hpp"
 
 #include <nlohmann/json.hpp>
 #include <glm/glm.hpp>

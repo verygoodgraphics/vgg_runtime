@@ -17,7 +17,12 @@
 
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VType.hpp"
-#include "Layer/Core/VShape.hpp"
+
+#include "Layer/Core/VBounds.hpp"
+
+#include <vector>
+#include <string>
+#include <optional>
 
 using Float4 = std::array<float, 4>;
 using Float2 = std::array<float, 2>;

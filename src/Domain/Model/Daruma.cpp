@@ -70,14 +70,13 @@ bool Daruma::load(std::vector<char>& buffer)
 
 void Daruma::accept(VGG::Model::Visitor* visitor)
 {
-  // todo, lock for thread safe
   const std::lock_guard<std::mutex> lock(m_mutex);
 
-  visitor->visit(design_file_name, m_designDoc->content().dump());
-  visitor->visit(event_listeners_file_name, m_eventListeners.dump());
+  visitor->visit(K_DESIGN_FILE_NAME, m_designDoc->content().dump());
+  visitor->visit(K_EVENT_LISTENERS_FILE_NAME, m_eventListeners.dump());
   if (m_layoutDoc && m_layoutDoc->content().is_object())
   {
-    visitor->visit(layout_file_name, m_layoutDoc->content().dump());
+    visitor->visit(K_LAYOUT_FILE_NAME, m_layoutDoc->content().dump());
   }
   if (m_settingsDoc.is_object())
   {
@@ -92,9 +91,9 @@ void Daruma::accept(VGG::Model::Visitor* visitor)
       std::vector<std::string> listeners{};
       for (auto it = typeEventListeners.cbegin(); it != typeEventListeners.cend(); ++it)
       {
-        if (it->is_object() && it->contains(file_name_key))
+        if (it->is_object() && it->contains(K_FILE_NAME_KEY))
         {
-          auto& fileName = (*it)[file_name_key];
+          auto& fileName = (*it)[K_FILE_NAME_KEY];
           visitor->visit(fileName, getCode(fileName));
         }
       }
@@ -103,7 +102,7 @@ void Daruma::accept(VGG::Model::Visitor* visitor)
 
   // resouces
   auto        resouces = m_loader->resources();
-  std::string resoucesDir{ Model::ResourcesDirWithSlash };
+  std::string resoucesDir{ Model::K_RESOURCES_DIR_WITH_SLASH };
 
   for (auto& [name, content] : resouces)
   {
@@ -116,7 +115,7 @@ bool Daruma::loadFiles()
   try
   {
     std::string fileContent;
-    if (m_loader->readFile(design_file_name, fileContent))
+    if (m_loader->readFile(K_DESIGN_FILE_NAME, fileContent))
     {
       auto tmpJson = json::parse(fileContent);
       auto doc = m_makeDesignDocFn(tmpJson);
@@ -129,7 +128,7 @@ bool Daruma::loadFiles()
       return false;
     }
 
-    if (m_loader->readFile(layout_file_name, fileContent) && m_makeLayoutDocFn)
+    if (m_loader->readFile(K_LAYOUT_FILE_NAME, fileContent) && m_makeLayoutDocFn)
     {
       auto tmpJson = json::parse(fileContent);
       auto doc = m_makeLayoutDocFn(tmpJson);
@@ -150,7 +149,7 @@ bool Daruma::loadFiles()
       DEBUG("#Daruma::loadFiles(), read settings file failed");
     }
 
-    if (m_loader->readFile(event_listeners_file_name, fileContent))
+    if (m_loader->readFile(K_EVENT_LISTENERS_FILE_NAME, fileContent))
     {
       m_eventListeners = json::parse(fileContent);
     }
@@ -213,7 +212,7 @@ void Daruma::addEventListener(
   const std::lock_guard<std::mutex> lock(m_mutex);
 
   // generate file name
-  auto fileName = uuidFor(code) + js_file_suffix;
+  auto fileName = uuidFor(code) + K_JS_FILE_SUFFIX;
 
   // create element listenters object
   if (!m_eventListeners.contains(targetKey))
@@ -232,9 +231,9 @@ void Daruma::addEventListener(
   auto& typeEventListeners = elementEventListeners[type];
   for (auto it = typeEventListeners.cbegin(); it != typeEventListeners.cend(); ++it)
   {
-    if (it->is_object() && it->contains(file_name_key))
+    if (it->is_object() && it->contains(K_FILE_NAME_KEY))
     {
-      auto& itemFileName = (*it)[file_name_key];
+      auto& itemFileName = (*it)[K_FILE_NAME_KEY];
       if (itemFileName.is_string() && itemFileName.get<std::string>() == fileName)
       {
         return;
@@ -247,9 +246,9 @@ void Daruma::addEventListener(
 
   // fill meta info
   auto item = json(json::value_t::object);
-  item[file_name_key] = fileName;
+  item[K_FILE_NAME_KEY] = fileName;
   using namespace std::chrono;
-  item[created_at_key] =
+  item[K_CREATED_AT_KEY] =
     duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 
   // save meta info
@@ -275,14 +274,14 @@ void Daruma::removeEventListener(
     return;
   }
 
-  auto fileName = uuidFor(code) + js_file_suffix;
+  auto fileName = uuidFor(code) + K_JS_FILE_SUFFIX;
 
   auto& typeEventListeners = elementEventListeners[type];
   for (auto it = typeEventListeners.cbegin(); it != typeEventListeners.cend(); ++it)
   {
-    if (it->is_object() && it->contains(file_name_key))
+    if (it->is_object() && it->contains(K_FILE_NAME_KEY))
     {
-      auto& itemFileName = (*it)[file_name_key];
+      auto& itemFileName = (*it)[K_FILE_NAME_KEY];
       if (itemFileName.is_string() && itemFileName.get<std::string>() == fileName)
       {
         const std::lock_guard<std::mutex> lock(m_mutex);
@@ -313,9 +312,9 @@ auto Daruma::getEventListeners(const std::string& targetKey) -> ListenersType
     std::vector<std::string> listeners{};
     for (auto it = typeEventListeners.cbegin(); it != typeEventListeners.cend(); ++it)
     {
-      if (it->is_object() && it->contains(file_name_key))
+      if (it->is_object() && it->contains(K_FILE_NAME_KEY))
       {
-        listeners.push_back(getCode((*it)[file_name_key]));
+        listeners.push_back(getCode((*it)[K_FILE_NAME_KEY]));
       }
     }
     result[type] = listeners;
@@ -363,19 +362,16 @@ std::string Daruma::docVersion() const
   return m_designDocTree->designModel()->version;
 }
 
-int Daruma::getFrameIndex(const std::string& name) const
+std::string Daruma::getFrameIdByIndex(const std::size_t index) const
 {
   ASSERT(m_designDocTree);
 
-  for (std::size_t i = 0; i < m_designDocTree->children().size(); ++i)
+  if (index < m_designDocTree->children().size())
   {
-    if (m_designDocTree->children()[i]->name() == name)
-    {
-      return i;
-    }
+    return m_designDocTree->children()[index]->id();
   }
 
-  return -1;
+  return {};
 }
 
 int Daruma::getFrameIndexById(const std::string& id) const
@@ -422,24 +418,23 @@ std::string Daruma::getFramesInfo() const
   return info.dump();
 }
 
-int Daruma::getLaunchFrameIndex() const
+std::string Daruma::getLaunchFrameId() const
 {
   if (m_settingsDoc.is_object())
   {
-    return m_settingsDoc[K_LAUNCH_FRAME_INDEX];
+    return m_settingsDoc[K_LAUNCH_FRAME_ID];
   }
   else
   {
-    return 0;
+    return {};
   }
 }
 
-bool Daruma::setLaunchFrame(const std::string& name)
+bool Daruma::setLaunchFrameById(const std::string& id)
 {
-  auto index = getFrameIndex(name);
-  if (index >= 0)
+  if (getFrameIndexById(id) >= 0)
   {
-    m_settingsDoc[K_LAUNCH_FRAME_INDEX] = index;
+    m_settingsDoc[K_LAUNCH_FRAME_ID] = id;
     return true;
   }
 

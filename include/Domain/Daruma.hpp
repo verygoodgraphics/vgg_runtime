@@ -89,12 +89,12 @@ public:
   std::string docVersion() const;
 
 public:
-  int  getLaunchFrameIndex() const;
-  bool setLaunchFrame(const std::string& name);
+  std::string getLaunchFrameId() const;
+  bool        setLaunchFrameById(const std::string& id);
 
   std::string getFramesInfo() const;
-  int         getFrameIndex(const std::string& name) const;
   int         getFrameIndexById(const std::string& id) const;
+  std::string getFrameIdByIndex(const std::size_t index) const;
 
   std::unordered_set<std::string> texts() const;
 

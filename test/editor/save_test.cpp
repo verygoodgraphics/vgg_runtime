@@ -60,10 +60,10 @@ protected:
 
     // Then
     std::filesystem::path dir{ dstDir };
-    auto                  ret = fs::is_regular_file(dir / design_file_name);
+    auto                  ret = fs::is_regular_file(dir / K_DESIGN_FILE_NAME);
     EXPECT_TRUE(ret);
 
-    ret = fs::is_regular_file(dir / event_listeners_file_name);
+    ret = fs::is_regular_file(dir / K_EVENT_LISTENERS_FILE_NAME);
     EXPECT_TRUE(ret);
   }
 

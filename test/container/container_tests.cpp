@@ -128,54 +128,49 @@ TEST_F(ContainerTestSuite, Sdk)
   }
 
   {
-    const auto index = sdk->currentFrameIndex();
-    EXPECT_EQ(index, 0);
+    const auto id = sdk->currentFrameId();
+    EXPECT_EQ(id, "1:2");
   }
 
   {
-    auto success = sdk->setCurrentFrame("#invalidFrameName");
-    EXPECT_FALSE(success);
-  }
-  {
-    auto success = sdk->setCurrentFrame("Frame 2");
-    EXPECT_TRUE(success);
-
-    const auto index = sdk->currentFrameIndex();
-    EXPECT_EQ(index, 1);
-  }
-
-  {
-    auto index = sdk->currentFrameIndex();
+    auto id1 = sdk->currentFrameId();
     auto success = sdk->setCurrentFrameById("#invalidFrameId");
     EXPECT_FALSE(success);
-    auto index2 = sdk->currentFrameIndex();
-    EXPECT_EQ(index, index2);
+    auto id2 = sdk->currentFrameId();
+    EXPECT_EQ(id1, id2);
   }
   {
-    auto index = sdk->currentFrameIndex();
-    EXPECT_NE(index, 0);
+    const std::string newId{ "1:3" };
 
-    auto success = sdk->setCurrentFrameById("1:2");
+    auto id1 = sdk->currentFrameId();
+    EXPECT_TRUE(id1 != newId);
+
+    auto success = sdk->setCurrentFrameById(newId);
     EXPECT_TRUE(success);
 
-    index = sdk->currentFrameIndex();
-    EXPECT_EQ(index, 0);
+    auto id2 = sdk->currentFrameId();
+    EXPECT_TRUE(id2 == newId);
   }
 
   {
-    const auto launchFrameIndex = sdk->launchFrameIndex();
-    EXPECT_EQ(launchFrameIndex, 0);
+    const auto launchFrameId = sdk->launchFrameId();
+    EXPECT_TRUE(launchFrameId == "");
   }
   {
-    auto success = sdk->setLaunchFrame("#invalidFrameName");
+    auto success = sdk->setLaunchFrameById("#invalidFrameName");
     EXPECT_FALSE(success);
   }
   {
-    auto success = sdk->setLaunchFrame("Frame 2");
+    const std::string newId{ "1:2" };
+
+    const auto id1 = sdk->launchFrameId();
+    EXPECT_TRUE(id1 != newId);
+
+    auto success = sdk->setLaunchFrameById(newId);
     EXPECT_TRUE(success);
 
-    const auto index = sdk->launchFrameIndex();
-    EXPECT_EQ(index, 1);
+    const auto id2 = sdk->launchFrameId();
+    EXPECT_TRUE(id2 == newId);
   }
 
   {
@@ -191,7 +186,7 @@ TEST_F(ContainerTestSuite, Sdk)
 
   {
     auto buffer = sdk->vggFileBuffer();
-    EXPECT_EQ(buffer.size(), 1493);
+    EXPECT_EQ(buffer.size(), 1494);
   }
 
   {

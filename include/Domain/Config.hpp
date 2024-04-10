@@ -20,19 +20,19 @@ namespace VGG
 namespace Model
 {
 
-constexpr auto design_file_name = "design.json";
-constexpr auto layout_file_name = "layout.json";
+constexpr auto K_DESIGN_FILE_NAME = "design.json";
+constexpr auto K_LAYOUT_FILE_NAME = "layout.json";
 constexpr auto K_SETTINGS_FILE_NAME = "settings.json";
-constexpr auto event_listeners_file_name = "event_listeners.json";
+constexpr auto K_EVENT_LISTENERS_FILE_NAME = "event_listeners.json";
 
-constexpr auto ResourcesDir = "resources";
-constexpr auto ResourcesDirWithSlash = "resources/";
+constexpr auto K_RESOURCES_DIR = "resources";
+constexpr auto K_RESOURCES_DIR_WITH_SLASH = "resources/";
 
-constexpr auto js_file_suffix = ".mjs";
+constexpr auto K_JS_FILE_SUFFIX = ".mjs";
 
-constexpr auto file_name_key = "fileName";
-constexpr auto created_at_key = "createdAt";
-constexpr auto K_LAUNCH_FRAME_INDEX = "launchFrameIndex";
+constexpr auto K_FILE_NAME_KEY = "fileName";
+constexpr auto K_CREATED_AT_KEY = "createdAt";
+constexpr auto K_LAUNCH_FRAME_ID = "launchFrameId";
 
 } // namespace Model
 } // namespace VGG

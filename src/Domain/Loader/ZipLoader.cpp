@@ -80,7 +80,7 @@ Loader::ResourcesType ZipLoader::resources() const
       }
 
       std::string fileName{ zip_entry_name(m_zipFile) };
-      if (fileName.rfind(ResourcesDirWithSlash, 0) == 0)
+      if (fileName.rfind(K_RESOURCES_DIR_WITH_SLASH, 0) == 0)
       {
         auto size = zip_entry_size(m_zipFile);
         if (size > 0)

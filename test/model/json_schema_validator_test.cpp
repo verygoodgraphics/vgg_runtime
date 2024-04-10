@@ -32,7 +32,7 @@ protected:
   json load_json(const std::string& json_file_name)
   {
     std::ifstream json_fs(json_file_name);
-    json json_data = json::parse(json_fs);
+    json          json_data = json::parse(json_fs);
 
     return json_data;
   }
@@ -50,7 +50,7 @@ protected:
 TEST_F(VggJsonSchemaValitatorTestSuite, GoodCase)
 {
   setRootSchemaByFileName(VGG_JSON_SCHEMA_FILE_NAME);
-  validate_by_filename(std::string{ "./testDataDir/vgg-daruma/" } + design_file_name, true);
+  validate_by_filename(std::string{ "./testDataDir/vgg-daruma/" } + K_DESIGN_FILE_NAME, true);
 }
 
 TEST_F(VggJsonSchemaValitatorTestSuite, BadTargetJson)
@@ -63,7 +63,7 @@ TEST_F(VggJsonSchemaValitatorTestSuite, ValidateByClassName)
 {
   // Given
   setRootSchemaByFileName(VGG_JSON_SCHEMA_FILE_NAME);
-  json json_data = load_json("./testDataDir/color.json");
+  json        json_data = load_json("./testDataDir/color.json");
   std::string className = "color";
 
   // When
@@ -75,13 +75,13 @@ TEST_F(VggJsonSchemaValitatorTestSuite, ValidateByClassName)
 
 TEST_F(VggJsonSchemaValitatorTestSuite, NoSchema)
 {
-  validate_by_filename(std::string{ "./testDataDir/vgg-daruma/" } + design_file_name, true);
+  validate_by_filename(std::string{ "./testDataDir/vgg-daruma/" } + K_DESIGN_FILE_NAME, true);
 }
 
 TEST_F(VggJsonSchemaValitatorTestSuite, NoSchemaValidateByClassName)
 {
   // Given
-  json json_data = load_json("./testDataDir/color.json");
+  json        json_data = load_json("./testDataDir/color.json");
   std::string className = "color";
 
   // When

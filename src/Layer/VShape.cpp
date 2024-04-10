@@ -236,12 +236,12 @@ std::variant<ContourPtr, Rectangle> makeShape(
                                { rect.right(), rect.y() },
                                { rect.right(), rect.bottom() },
                                { rect.x(), rect.bottom() } };
-      Contour   contour;
+      ContourArray   contour;
       contour.closed = true;
       contour.cornerSmooth = cornerSmoothing;
       for (int i = 0; i < 4; i++)
         contour.emplace_back(corners[i], radius[i], std::nullopt, std::nullopt, std::nullopt);
-      return std::make_shared<Contour>(contour);
+      return std::make_shared<ContourArray>(contour);
     }
   }
   else

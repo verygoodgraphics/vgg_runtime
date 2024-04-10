@@ -50,7 +50,7 @@ PaintNodePtr makeContourNode(VAllocator* alloc)
 
 ContourPtr makeContourData(const json& j, const glm::mat3& totalMatrix)
 {
-  Contour contour;
+  ContourArray contour;
   contour.closed = j.value("closed", false);
   const auto& points = getOrDefault(j, "points");
   for (const auto& e : points)
@@ -63,7 +63,7 @@ ContourPtr makeContourData(const json& j, const glm::mat3& totalMatrix)
       getOptional<int>(e, "cornerStyle"));
   }
   CoordinateConvert::convertCoordinateSystem(contour, totalMatrix);
-  auto ptr = std::make_shared<Contour>(contour);
+  auto ptr = std::make_shared<ContourArray>(contour);
   if (!ptr->closed && !ptr->empty())
   {
     ptr->back().radius = 0;

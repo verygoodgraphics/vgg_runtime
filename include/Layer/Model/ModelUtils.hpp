@@ -101,12 +101,12 @@ inline ShapeData makeShapeData2(
                                  { r, t },
                                  { r, t - bounds.height() },
                                  { l, t - bounds.height() } };
-        Contour   contour;
+        ContourArray   contour;
         contour.closed = true;
         contour.cornerSmooth = cornerSmoothing;
         for (int i = 0; i < 4; i++)
           contour.emplace_back(corners[i], radius[i], std::nullopt, std::nullopt, std::nullopt);
-        return std::make_shared<Contour>(contour);
+        return std::make_shared<ContourArray>(contour);
       }
     }
     case EModelShapeType::ELLIPSE:

@@ -25,7 +25,7 @@ using namespace VGG::layer;
 
 inline ContourPtr makeContourData2(const json& j)
 {
-  Contour contour;
+  ContourArray contour;
   contour.closed = j.value("closed", false);
   const auto& points = getOrDefault(j, "points");
   for (const auto& e : points)
@@ -37,7 +37,7 @@ inline ContourPtr makeContourData2(const json& j)
       getOptional<glm::vec2>(e, "curveTo"),
       getOptional<int>(e, "cornerStyle"));
   }
-  auto ptr = std::make_shared<Contour>(contour);
+  auto ptr = std::make_shared<ContourArray>(contour);
   if (!ptr->closed && !ptr->empty())
   {
     ptr->back().radius = 0;
@@ -129,7 +129,7 @@ std::vector<SubShape<JSONObject>> JSONPathObject::getShapes() const
                 return c;
               }
             }
-            return std::make_shared<Contour>();
+            return std::make_shared<ContourArray>();
           }));
     }
     else

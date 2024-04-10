@@ -20,5 +20,5 @@
 
 namespace VGG::layer
 {
-SkPath makePath(const Contour& contour);
+SkPath makePath(const ContourArray& contour);
 } // namespace VGG::layer

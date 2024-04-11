@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Layer/Model/JSONModel.hpp"
+#include "Layer/Model/StructModel.hpp"
 #include "loader.hpp"
 
 #include "Layer/SceneBuilder.hpp"
@@ -94,7 +96,7 @@ protected:
       Config::readGlobalConfig(file);
     }
 
-    m_scene = std::make_shared<AppScene>(std::make_unique<RasterCacheTile>());
+    m_scene = std::make_shared<AppScene>(std::make_unique<layer::RasterCacheTile>());
     // m_scene = std::make_shared<AppScene>();
     m_scene->setZoomerListener(std::make_shared<AppZoomer>());
 
@@ -132,13 +134,35 @@ protected:
                        .setExpandEnabled(true)
                        .setLayoutEnabled(true)
                        .build();
-          Timer t;
+          layer::Timer t;
           t.start();
+#define USE_TYPE 1
+
+#if USE_TYPE == 0
+#elif USE_TYPE == 1
+          std::vector<layer::JSONFrameObject> frames;
+          for (auto& f : nlohmann::json(res.doc))
+          {
+            frames.emplace_back(layer::JSONFrameObject(std::move(f)));
+          }
+#elif USE_TYPE == 2
+          std::vector<layer::StructFrameObject> frames;
+          for (auto& f : res.doc.frames)
+          {
+            auto p = std::make_unique<Model::Frame>(f);
+            frames.emplace_back(layer::StructFrameObject(std::move(p)));
+          }
+#endif
           auto sceneBuilderResult = VGG::layer::SceneBuilder::builder()
                                       .setResetOriginEnable(true)
-                                      .setDoc(std::move(*res.doc))
-                                      .setAllocator(getGlobalMemoryAllocator())
-                                      .build();
+                                      .setAllocator(layer::getGlobalMemoryAllocator())
+#if USE_TYPE == 0
+                                      .build(std::move(*res.doc));
+#elif USE_TYPE == 1
+                                      .build<layer::JSONModelFrame>(frames);
+#elif USE_TYPE == 2
+                                      .build<layer::StructModelFrame>(std::move(frames));
+#endif
           t.stop();
           auto dur = t.elapsed();
           INFO("Doc Expand Time Cost: %f", (double)res.timeCost.expand.s());
@@ -228,10 +252,10 @@ public:
       if (ofs.is_open())
       {
         using namespace VGG::layer::exporter;
-        auto                 page = m_scene->currentPage();
-        auto                 f = m_scene->frame(page);
-        auto                 b = f->bounds();
-        exporter::SVGOptions opt;
+        auto                        page = m_scene->currentPage();
+        auto                        f = m_scene->frame(page);
+        auto                        b = f->bounds();
+        layer::exporter::SVGOptions opt;
         opt.extend[0] = b.width();
         opt.extend[1] = b.height();
         makeSVG(m_scene.get(), opt, ofs);
@@ -297,11 +321,10 @@ public:
       std::ofstream ofs("capture.pdf");
       if (ofs.is_open())
       {
-        using namespace VGG::layer::exporter;
-        auto                 page = m_scene->currentPage();
-        auto                 f = m_scene->frame(page);
-        auto                 b = f->bounds();
-        exporter::PDFOptions opt;
+        auto                        page = m_scene->currentPage();
+        auto                        f = m_scene->frame(page);
+        auto                        b = f->bounds();
+        layer::exporter::PDFOptions opt;
         opt.extend[0] = b.width();
         opt.extend[1] = b.height();
         makePDF(m_scene.get(), opt, ofs);

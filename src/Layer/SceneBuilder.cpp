@@ -570,16 +570,13 @@ void SceneBuilder::buildImpl2(const json& j)
   m_frames = Serde::from<JSONModelFrame>(frameObjects, mat, ctx);
 }
 
-SceneBuilderResult SceneBuilder::build()
+SceneBuilderResult SceneBuilder::build(nlohmann::json j)
 {
   SceneBuilderResult result;
-  if (!m_doc)
-    return { SceneBuilderResult::EResultType::BUILD_FAILD, std::nullopt };
-  const auto& doc = *m_doc;
-  if (auto it = doc.find("version");
-      it == doc.end() || (it != doc.end() && m_version && *it != *m_version))
+  if (auto it = j.find("version");
+      it == j.end() || (it != j.end() && m_version && *it != *m_version))
     result.type = SceneBuilderResult::EResultType::VERSION_MISMATCH;
-  buildImpl(doc);
+  buildImpl(j);
   if (!m_frames.empty())
   {
     result.root = RootArray();

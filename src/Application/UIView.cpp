@@ -564,10 +564,8 @@ void UIView::show(const ViewModel& viewModel, bool force)
     return;
   }
 
-  auto result = layer::SceneBuilder::builder()
-                  .setResetOriginEnable(true)
-                  .setDoc(viewModel.designDoc()->content())
-                  .build();
+  auto result = layer::SceneBuilder::builder().setResetOriginEnable(true).build(
+    viewModel.designDoc()->content());
   if (result.root)
   {
     show(viewModel, std::move(*result.root), force);

@@ -46,6 +46,8 @@ private:
   static napi_value UpdateElement(napi_env env, napi_callback_info info);
 
   static napi_value setCurrentFrameById(napi_env env, napi_callback_info info);
+  static napi_value presentFrameById(napi_env env, napi_callback_info info);
+  static napi_value dismissFrame(napi_env env, napi_callback_info info);
 
   static napi_value GetDesignDocument(napi_env env, napi_callback_info info);
 

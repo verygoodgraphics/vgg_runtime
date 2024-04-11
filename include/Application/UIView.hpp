@@ -24,6 +24,7 @@
 #include <nlohmann/json.hpp>
 
 #include <memory>
+#include <stack>
 #include <tuple>
 #include <vector>
 
@@ -59,6 +60,11 @@ private:
 
   std::weak_ptr<LayoutNode> m_document;
   int                       m_page{ 0 };
+
+  std::stack<std::string> m_history; // page id stack; excludes presented pages
+
+  std::unordered_map<std::string, std::string> m_presentedPages;  // key: from; value: to
+  std::unordered_map<std::string, std::string> m_presentingPages; // key: to; value: from
 
   Layout::Rect m_frame;
   Layout::Rect m_bounds;
@@ -159,6 +165,9 @@ public:
     return m_page;
   }
   bool setCurrentPage(int index);
+  bool back();
+  bool presentPage(int index);
+  bool dismissPage();
 
   void enableZoomer(bool enabled);
 
@@ -177,6 +186,9 @@ private:
   void                        layoutSubviews();
   Layout::Point               converPointFromWindowAndScale(Layout::Point point);
   std::shared_ptr<LayoutNode> currentPage();
+  std::shared_ptr<LayoutNode> pageById(const std::string& id);
+
+  bool setCurrentPageIndex(int index);
 
   bool handleMouseEvent(
     int          jsButtonIndex,
@@ -185,6 +197,14 @@ private:
     int          motionX,
     int          motionY,
     EUIEventType type);
+  bool handleMouseEventOnPage(
+    std::shared_ptr<LayoutNode> page,
+    int                         jsButtonIndex,
+    int                         x,
+    int                         y,
+    int                         motionX,
+    int                         motionY,
+    EUIEventType                type);
   void handleMouseOut(
     std::shared_ptr<VGG::LayoutNode> targetNode,
     std::shared_ptr<VGG::LayoutNode> hitNodeInTarget,

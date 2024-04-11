@@ -317,6 +317,23 @@ std::shared_ptr<LayoutNode> UIView::currentPage()
   return nullptr;
 }
 
+std::shared_ptr<LayoutNode> UIView::pageById(const std::string& id)
+{
+  auto document = m_document.lock();
+  if (document)
+  {
+    for (const auto& page : document->children())
+    {
+      if (page->id() == id)
+      {
+        return page;
+      }
+    }
+  }
+
+  return nullptr;
+}
+
 bool UIView::handleMouseEvent(
   int          jsButtonIndex,
   int          x,
@@ -331,6 +348,33 @@ bool UIView::handleMouseEvent(
     return false;
   }
 
+  if (handleMouseEventOnPage(page, jsButtonIndex, x, y, motionX, motionY, type))
+  {
+    return true;
+  }
+
+  const auto& currentPageId = page->id();
+  if (m_presentingPages.contains(currentPageId))
+  {
+    const auto& fromPageId = m_presentingPages[currentPageId];
+    if (const auto& fromPage = pageById(fromPageId))
+    {
+      return handleMouseEventOnPage(page, jsButtonIndex, x, y, motionX, motionY, type);
+    }
+  }
+
+  return false;
+}
+
+bool UIView::handleMouseEventOnPage(
+  std::shared_ptr<LayoutNode> page,
+  int                         jsButtonIndex,
+  int                         x,
+  int                         y,
+  int                         motionX,
+  int                         motionY,
+  EUIEventType                type)
+{
   Layout::Point pointToPage =
     converPointFromWindowAndScale({ TO_VGG_LAYOUT_SCALAR(x), TO_VGG_LAYOUT_SCALAR(y) });
   Layout::Point pointToDocument{ pointToPage.x + page->frame().origin.x,
@@ -667,6 +711,63 @@ void UIView::setOffset(Offset offset)
 
 bool UIView::setCurrentPage(int index)
 {
+  auto oldPage = m_page;
+  bool success = setCurrentPageIndex(index);
+
+  if (m_page != oldPage)
+  {
+    m_history.push(currentPage()->id());
+  }
+
+  return success;
+}
+
+bool UIView::back()
+{
+  if (m_history.size() <= 1)
+  {
+    return false;
+  }
+
+  auto displayedPage = currentPage();
+
+  m_history.pop();
+  auto newPageId = m_history.top();
+
+  auto document = m_document.lock();
+  if (document)
+  {
+    for (std::size_t index = 0; index < document->children().size(); ++index)
+    {
+      if (document->children()[index]->id() == newPageId)
+      {
+        // clear presented page relations
+        auto to = displayedPage->id();
+        while (!to.empty())
+        {
+          if (!m_presentingPages.contains(to))
+          {
+            break;
+          }
+
+          auto from = m_presentingPages[to];
+          m_presentingPages.erase(to);
+          m_presentedPages.erase(from);
+
+          to = from;
+        }
+
+        setCurrentPageIndex(index);
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+bool UIView::setCurrentPageIndex(int index)
+{
   if (m_page == index)
   {
     return true;
@@ -698,5 +799,50 @@ bool UIView::setCurrentPage(int index)
       return true;
     }
   }
+  return false;
+}
+
+bool UIView::presentPage(int index)
+{
+  auto from = currentPage()->id();
+  auto oldPageIndex = m_page;
+
+  setCurrentPageIndex(index);
+  if (m_page != oldPageIndex)
+  {
+    auto to = currentPage()->id();
+    m_presentedPages[from] = to;
+    m_presentingPages[to] = from;
+    return true;
+  }
+
+  return false;
+}
+
+bool UIView::dismissPage()
+{
+  auto to = currentPage()->id();
+
+  if (!m_presentingPages.contains(to))
+  {
+    return false;
+  }
+
+  auto from = m_presentingPages[to];
+  m_presentingPages.erase(to);
+  m_presentedPages.erase(from);
+
+  auto document = m_document.lock();
+  if (document)
+  {
+    for (std::size_t index = 0; index < document->children().size(); ++index)
+    {
+      if (document->children()[index]->id() == from)
+      {
+        return setCurrentPageIndex(index);
+      }
+    }
+  }
+
   return false;
 }

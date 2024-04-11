@@ -262,3 +262,21 @@ void Presenter::update()
     m_view->show(*m_viewModel, true);
   }
 }
+
+bool Presenter::presentPage(int index)
+{
+  if (m_view)
+  {
+    return m_view->presentPage(index);
+  }
+  return false;
+}
+
+bool Presenter::dismissPage()
+{
+  if (m_view)
+  {
+    return m_view->dismissPage();
+  }
+  return false;
+}

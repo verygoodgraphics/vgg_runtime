@@ -60,6 +60,8 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     .function("setCurrentFrameById", &VggSdk::setCurrentFrameById)
     .function("launchFrameId", &VggSdk::launchFrameId)
     .function("setLaunchFrameById", &VggSdk::setLaunchFrameById)
+    .function("presentFrameById", &VggSdk::presentFrameById)
+    .function("dismissFrame", &VggSdk::dismissFrame)
     // font
     .function("requiredFonts", &VggSdk::requiredFonts)
     .function("addFont", &VggSdk::jsAddFont)

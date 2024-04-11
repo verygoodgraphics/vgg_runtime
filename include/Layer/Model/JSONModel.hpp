@@ -16,10 +16,10 @@
 #pragma once
 
 #include "Layer/Model/Concept.hpp"
+#include "Layer/Model/JSONModelSerde.hpp"
 #include "Layer/Model/ModelUtils.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
-#include "Layer/AttrSerde.hpp"
 #include "Layer/NlohmannJSONImpl.hpp"
 
 #include <nlohmann/json.hpp>

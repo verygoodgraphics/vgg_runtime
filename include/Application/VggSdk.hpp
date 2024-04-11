@@ -70,6 +70,9 @@ public:
   virtual std::string launchFrameId() const override;
   virtual bool        setLaunchFrameById(const std::string& id) override;
 
+  virtual bool presentFrameById(const std::string& id) override;
+  virtual bool dismissFrame() override;
+
   virtual std::string requiredFonts() const override;
   virtual bool        addFont(const uint8_t* data, size_t size, const char* defaultName) override;
 #ifdef EMSCRIPTEN

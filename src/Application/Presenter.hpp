@@ -85,6 +85,8 @@ public:
   {
     return m_view->setCurrentPage(index);
   }
+  bool presentPage(int index);
+  bool dismissPage();
 
   virtual void setModel(std::shared_ptr<ViewModel> viewModel);
   auto         requiredFonts()

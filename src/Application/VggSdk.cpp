@@ -128,6 +128,30 @@ bool VggSdk::setLaunchFrameById(const std::string& id)
   return getModel()->setLaunchFrameById(id);
 }
 
+bool VggSdk::presentFrameById(const std::string& id)
+{
+  if (auto currentEnv = env())
+  {
+    if (auto controller = currentEnv->controller())
+    {
+      return controller->presentFrameById(id);
+    }
+  }
+  return false;
+}
+
+bool VggSdk::dismissFrame()
+{
+  if (auto currentEnv = env())
+  {
+    if (auto controller = currentEnv->controller())
+    {
+      return controller->dismissFrame();
+    }
+  }
+  return false;
+}
+
 std::string VggSdk::requiredFonts() const
 {
   if (auto currentEnv = env())

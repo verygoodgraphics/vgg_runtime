@@ -47,6 +47,9 @@ public:
   virtual std::string launchFrameId() const = 0;
   virtual bool        setLaunchFrameById(const std::string& id) = 0;
 
+  virtual bool presentFrameById(const std::string& id) = 0;
+  virtual bool dismissFrame() = 0;
+
   virtual std::string requiredFonts() const = 0;
   virtual bool        addFont(const uint8_t* data, size_t size, const char* defaultName) = 0;
 

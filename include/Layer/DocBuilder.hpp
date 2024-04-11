@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 #pragma once
+#include "Domain/Model/DesignModel.hpp"
+#include "Domain/Model/Element.hpp"
 #include "Layer/Core/Timer.hpp"
 #include "Domain/JsonDocument.hpp"
 #include "Domain/Layout/ExpandSymbol.hpp"
@@ -36,11 +38,12 @@ using namespace nlohmann;
 
 class DocBuilder
 {
-  bool m_enableExpand{ true };
-  bool m_enableLayout{ true };
-  json m_layout;
-  json m_doc;
-  bool m_invalid{ false };
+  bool               m_enableExpand{ true };
+  bool               m_enableLayout{ true };
+  json               m_layout;
+  json               m_doc;
+  Model::DesignModel m_docModel;
+  bool               m_invalid{ false };
 
   void moveToThis(DocBuilder&& that) noexcept
   {
@@ -49,6 +52,7 @@ class DocBuilder
     m_enableLayout = that.m_enableLayout;
     m_layout = std::move(that.m_layout);
     m_doc = std::move(that.m_doc);
+    m_docModel = std::move(that.m_docModel);
     m_invalid = std::move(that.m_invalid);
     that.m_invalid = true;
   }
@@ -63,9 +67,10 @@ public:
       layer::Duration expand;
       layer::Duration layout;
     };
-    TimeCost            timeCost;
-    std::optional<json> doc;
-    Result(TimeCost timeCost, json doc)
+    TimeCost           timeCost;
+    // std::optional<json> doc; // deprecated
+    Model::DesignModel doc;
+    Result(TimeCost timeCost, Model::DesignModel doc)
       : timeCost(timeCost)
       , doc(std::move(doc))
     {
@@ -113,25 +118,29 @@ public:
       cost.expand = layer::Timer::time(
         [&, this]()
         {
-          const auto [a, b] = Layout::ExpandSymbol(m_doc, m_layout).run();
-          m_doc = std::move(a);
-          expandedLayout = std::move(b);
+          // const auto [a, b] = Layout::ExpandSymbol(m_doc, m_layout).run();
+          // m_doc = std::move(a);
+          auto e = Layout::ExpandSymbol(m_doc, m_layout);
+          e();
+          m_docModel = e.layout()->designDocTree()->treeModel(true);
+          // static_cast<Model::DesignDocument*>(a)->designModel();
+          // expandedLayout = std::move(b);
         });
-      if (m_enableLayout)
-      {
-        cost.layout = layer::Timer::time(
-          [&, this]()
-          {
-            JsonDocumentPtr docPtr = std::make_shared<RawJsonDocument>();
-            docPtr->setContent(m_doc);
-            JsonDocumentPtr layoutPtr = std::make_shared<RawJsonDocument>();
-            layoutPtr->setContent(expandedLayout);
-            Layout::Layout layout(std::move(docPtr), std::move(layoutPtr));
-            m_doc = layout.displayDesignDoc()->content();
-          });
-      }
+      // if (m_enableLayout)
+      // {
+      //   cost.layout = layer::Timer::time(
+      //     [&, this]()
+      //     {
+      //       JsonDocumentPtr docPtr = std::make_shared<RawJsonDocument>();
+      //       docPtr->setContent(m_doc);
+      //       JsonDocumentPtr layoutPtr = std::make_shared<RawJsonDocument>();
+      //       layoutPtr->setContent(expandedLayout);
+      //       Layout::Layout layout(std::move(docPtr), std::move(layoutPtr));
+      //       m_doc = layout.displayDesignDoc()->content();
+      //     });
+      // }
     }
-    Result res{ cost, std::move(m_doc) };
+    Result res{ cost, std::move(m_docModel) };
     m_invalid = true;
     return res;
   }

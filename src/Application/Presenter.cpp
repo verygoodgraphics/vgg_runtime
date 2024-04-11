@@ -220,12 +220,11 @@ void Presenter::setModel(std::shared_ptr<ViewModel> viewModel)
   auto                                      result =
     layer::SceneBuilder::builder()
       .setResetOriginEnable(true)
-      .setDoc(viewModel->designDoc()->content())
       .setFontNameVisitor(
         [&requiredFonts](const std::string& familyName, const std::string& subfamilyName) {
           requiredFonts[familyName + subfamilyName] = FontInfo{ familyName, subfamilyName };
         })
-      .build();
+      .build(viewModel->designDoc()->content());
 
   if (result.root)
   {

@@ -242,9 +242,8 @@ public:
     auto sceneBuilderResult = VGG::layer::SceneBuilder::builder()
                                 .setResetOriginEnable(true)
                                 .setCheckVersion(VGG_PARSE_FORMAT_VER_STR)
-                                .setDoc(std::move(*res.doc))
                                 .setAllocator(layer::getGlobalMemoryAllocator())
-                                .build();
+                                .build(res.doc);
     if (sceneBuilderResult.type)
     {
       if (*sceneBuilderResult.type == VGG::layer::SceneBuilderResult::EResultType::VERSION_MISMATCH)

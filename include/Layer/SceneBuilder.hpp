@@ -62,18 +62,6 @@ class SceneBuilder
 public:
   using FontNameVisitor = Serde::FontNameVisitor;
 
-  static std::vector<FramePtr> build(const json& j)
-  {
-    SceneBuilder builder;
-    builder.buildImpl(j);
-    std::vector<FramePtr> frames;
-    for (auto& frame : builder.m_frames)
-    {
-      frames.emplace_back(makeFramePtr(std::move(frame)));
-    }
-    return frames;
-  }
-
   static std::vector<FramePtr> build2(const json& j)
   {
     SceneBuilder builder;
@@ -99,10 +87,6 @@ public:
   {
     SET_BUILDER_OPTION(m_resetOrigin, enable);
   }
-  SceneBuilder setDoc(json doc)
-  {
-    SET_BUILDER_OPTION(m_doc, doc);
-  };
 
   SceneBuilder setFontNameVisitor(FontNameVisitor visitor)
   {
@@ -114,7 +98,7 @@ public:
     SET_BUILDER_OPTION(m_alloc, allocator);
   };
 
-  SceneBuilderResult build();
+  SceneBuilderResult build(nlohmann::json j);
 
   template<typename M>
   SceneBuilderResult build(std::vector<typename M::Model> objects)
@@ -153,7 +137,6 @@ private:
   std::optional<std::string> m_version;
   bool                       m_invalid{ false };
   bool                       m_resetOrigin{ false };
-  std::optional<json>        m_doc;
   VAllocator*                m_alloc{ nullptr };
 
   FontNameVisitor m_fontNameVisitor;
@@ -164,7 +147,6 @@ private:
     m_frames = std::move(that.m_frames);
     m_version = std::move(that.m_version);
     m_resetOrigin = std::move(that.m_resetOrigin);
-    m_doc = std::move(that.m_doc);
     m_alloc = std::move(that.m_alloc);
     m_invalid = std::move(that.m_invalid);
     m_fontNameVisitor = std::move(that.m_fontNameVisitor);

@@ -30,7 +30,7 @@
 namespace VGG::layer
 {
 
-struct BuilderImpl
+struct Serde
 {
   using FontNameVisitor =
     std::function<void(const std::string& familyName, const std::string& subFamilyName)>;
@@ -90,7 +90,7 @@ struct BuilderImpl
     if (!obj)
       return nullptr;
 
-    auto [originalMatrix, newMatrix, inversedNewMatrix] = BuilderImpl::makeMatrix(m.getMatrix());
+    auto [originalMatrix, newMatrix, inversedNewMatrix] = Serde::makeMatrix(m.getMatrix());
     const auto convertedMatrix = inversedNewMatrix * totalMatrix * originalMatrix;
 
     auto bounds = m.getBounds();
@@ -140,7 +140,7 @@ struct BuilderImpl
         const auto childObjects = m.getChildObjects();
         for (const auto& c : childObjects)
         {
-          p->addChild(BuilderImpl::dispatchObject<typename T::BaseType, C>(c, matrix, ctx));
+          p->addChild(Serde::dispatchObject<typename T::BaseType, C>(c, matrix, ctx));
         }
       });
   }
@@ -164,7 +164,7 @@ struct BuilderImpl
         auto childObjects = m.getChildObjects();
         for (const auto& c : childObjects)
         {
-          p->addChild(BuilderImpl::dispatchObject<typename T::BaseType, C>(c, matrix, ctx));
+          p->addChild(Serde::dispatchObject<typename T::BaseType, C>(c, matrix, ctx));
         }
       });
   }
@@ -222,7 +222,7 @@ struct BuilderImpl
     std::vector<PaintNodePtr> res;
     for (const auto& f : frames)
     {
-      res.push_back(BuilderImpl::from<T, C>(f, matrix, ctx));
+      res.push_back(Serde::from<T, C>(f, matrix, ctx));
     }
     return res;
   }
@@ -246,7 +246,7 @@ struct BuilderImpl
         auto childObjects = m.getChildObjects();
         for (const auto& c : childObjects)
         {
-          p->addChild(BuilderImpl::dispatchObject<typename T::BaseType, C>(c, matrix, ctx));
+          p->addChild(Serde::dispatchObject<typename T::BaseType, C>(c, matrix, ctx));
         }
       });
   }
@@ -379,7 +379,7 @@ struct BuilderImpl
     std::vector<PaintNodePtr> nodes;
     for (const auto& m : models)
     {
-      nodes.push_back(BuilderImpl::from<M>(m, matrix, ctx));
+      nodes.push_back(Serde::from<M>(m, matrix, ctx));
     }
     return nodes;
   }
@@ -395,20 +395,20 @@ private:
       case EModelObjectType::OBJECT:
         return nullptr;
       case EModelObjectType::GROUP:
-        return BuilderImpl::from<decltype(C::asGroup(m)), C>(C::asGroup(m), totalMatrix, ctx);
+        return Serde::from<decltype(C::asGroup(m)), C>(C::asGroup(m), totalMatrix, ctx);
       case EModelObjectType::FRAME:
-        return BuilderImpl::from<decltype(C::asFrame(m)), C>(C::asFrame(m), totalMatrix, ctx);
+        return Serde::from<decltype(C::asFrame(m)), C>(C::asFrame(m), totalMatrix, ctx);
       case EModelObjectType::PATH:
-        return BuilderImpl::from<decltype(C::asPath(m)), C>(C::asPath(m), totalMatrix, ctx);
+        return Serde::from<decltype(C::asPath(m)), C>(C::asPath(m), totalMatrix, ctx);
       case EModelObjectType::IMAGE:
-        return BuilderImpl::from<decltype(C::asImage(m)), C>(C::asImage(m), totalMatrix, ctx);
+        return Serde::from<decltype(C::asImage(m)), C>(C::asImage(m), totalMatrix, ctx);
       case EModelObjectType::TEXT:
-        return BuilderImpl::from<decltype(C::asText(m)), C>(C::asText(m), totalMatrix, ctx);
+        return Serde::from<decltype(C::asText(m)), C>(C::asText(m), totalMatrix, ctx);
       case EModelObjectType::MASTER:
-        return BuilderImpl::from<decltype(C::asMaster(m)), C>(C::asMaster(m), totalMatrix, ctx);
+        return Serde::from<decltype(C::asMaster(m)), C>(C::asMaster(m), totalMatrix, ctx);
         break;
       case EModelObjectType::INSTANCE:
-        return BuilderImpl::from<decltype(C::asInstance(m)), C>(C::asInstance(m), totalMatrix, ctx);
+        return Serde::from<decltype(C::asInstance(m)), C>(C::asInstance(m), totalMatrix, ctx);
       case EModelObjectType::UNKNOWN:
         DEBUG("unknown object type");
         break;

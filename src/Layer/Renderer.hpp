@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #pragma once
-#include "Layer/AttrSerde.hpp"
 #include "Layer/Core/VType.hpp"
 #include "VSkia.hpp"
 #include "Layer/Config.hpp"

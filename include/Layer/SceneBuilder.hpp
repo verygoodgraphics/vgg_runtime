@@ -18,7 +18,7 @@
 #include "Layer/Core/Frame.hpp"
 #include "Layer/Memory/VAllocator.hpp"
 
-#include "Layer/Model/Builder.hpp"
+#include "Layer/Model/Serde.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/matrix.hpp>
@@ -60,7 +60,7 @@ struct SceneBuilderResult
 class SceneBuilder
 {
 public:
-  using FontNameVisitor = BuilderImpl::FontNameVisitor;
+  using FontNameVisitor = Serde::FontNameVisitor;
 
   static std::vector<FramePtr> build(const json& j)
   {
@@ -123,10 +123,10 @@ public:
 
     glm::mat3 mat = glm::identity<glm::mat3>();
     mat = glm::scale(mat, glm::vec2(1, -1));
-    BuilderImpl::Context ctx;
+    Serde::Context ctx;
     ctx.alloc = m_alloc;
     ctx.fontNameVisitor = m_fontNameVisitor;
-    m_frames = BuilderImpl::from<M>(objects, mat, ctx);
+    m_frames = Serde::from<M>(objects, mat, ctx);
 
     if (!m_frames.empty())
     {

@@ -22,7 +22,6 @@
 #include "Layer/Model/Concept.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/ParagraphParser.hpp"
-#include "AttrSerde.hpp"
 
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/PaintNode.hpp"
@@ -565,10 +564,10 @@ void SceneBuilder::buildImpl2(const json& j)
   {
     frameObjects.push_back(JSONFrameObject(std::move(e)));
   }
-  BuilderImpl::Context ctx;
+  Serde::Context ctx;
   ctx.alloc = m_alloc;
   ctx.fontNameVisitor = m_fontNameVisitor;
-  m_frames = BuilderImpl::from<JSONModelFrame>(frameObjects, mat, ctx);
+  m_frames = Serde::from<JSONModelFrame>(frameObjects, mat, ctx);
 }
 
 SceneBuilderResult SceneBuilder::build()

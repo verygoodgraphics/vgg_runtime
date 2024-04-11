@@ -348,10 +348,7 @@ bool UIView::handleMouseEvent(
     return false;
   }
 
-  if (handleMouseEventOnPage(page, jsButtonIndex, x, y, motionX, motionY, type))
-  {
-    return true;
-  }
+  bool success = dispatchMouseEventOnPage(page, jsButtonIndex, x, y, motionX, motionY, type);
 
   const auto& currentPageId = page->id();
   if (m_presentingPages.contains(currentPageId))
@@ -359,14 +356,18 @@ bool UIView::handleMouseEvent(
     const auto& fromPageId = m_presentingPages[currentPageId];
     if (const auto& fromPage = pageById(fromPageId))
     {
-      return handleMouseEventOnPage(page, jsButtonIndex, x, y, motionX, motionY, type);
+      DEBUG(
+        "dispatch mouse event on from page: %s, %s",
+        fromPage->name().c_str(),
+        fromPage->id().c_str());
+      success |= dispatchMouseEventOnPage(fromPage, jsButtonIndex, x, y, motionX, motionY, type);
     }
   }
 
-  return false;
+  return success;
 }
 
-bool UIView::handleMouseEventOnPage(
+bool UIView::dispatchMouseEventOnPage(
   std::shared_ptr<LayoutNode> page,
   int                         jsButtonIndex,
   int                         x,
@@ -375,6 +376,8 @@ bool UIView::handleMouseEventOnPage(
   int                         motionY,
   EUIEventType                type)
 {
+  auto& eventContext = m_presentedTreeContext[page->id()];
+
   Layout::Point pointToPage =
     converPointFromWindowAndScale({ TO_VGG_LAYOUT_SCALAR(x), TO_VGG_LAYOUT_SCALAR(y) });
   Layout::Point pointToDocument{ pointToPage.x + page->frame().origin.x,
@@ -409,8 +412,9 @@ bool UIView::handleMouseEventOnPage(
         {
           m_possibleClickTargetNode = clickTarget;
           DEBUG(
-            "mousedown, m_possibleClickTargetNode: %s",
-            m_possibleClickTargetNode->path().c_str());
+            "mousedown, m_possibleClickTargetNode: %s, %s",
+            m_possibleClickTargetNode->name().c_str(),
+            m_possibleClickTargetNode->id().c_str());
           break;
         }
       }
@@ -421,41 +425,47 @@ bool UIView::handleMouseEventOnPage(
     {
       if (target)
       {
-        if (target == m_mouseOverTargetNode && m_mouseOverNode == hitNodeInTarget)
+        if (
+          target == eventContext.mouseOverTargetNode &&
+          eventContext.mouseOverNode == hitNodeInTarget)
         {
           return true;
         }
-        m_mouseOverTargetNode = target;
-        m_mouseOverNode = hitNodeInTarget;
+        eventContext.mouseOverTargetNode = target;
+        eventContext.mouseOverNode = hitNodeInTarget;
       }
       else
       {
-        m_mouseOverTargetNode = nullptr;
-        m_mouseOverNode = nullptr;
+        eventContext.mouseOverTargetNode = nullptr;
+        eventContext.mouseOverNode = nullptr;
       }
     }
     break;
 
     case EUIEventType::MOUSEENTER:
     {
-      if (target && target == m_mouseEnterTargetNode)
+      if (target && target == eventContext.mouseEnterTargetNode)
       {
         return true;
       }
-      m_mouseEnterTargetNode = target;
+      if (target)
+      {
+        DEBUG("mouse enter node: %s, %s", target->name().c_str(), target->id().c_str());
+      }
+      eventContext.mouseEnterTargetNode = target;
     }
     break;
 
     case EUIEventType::MOUSEOUT:
     {
-      handleMouseOut(target, hitNodeInTarget, jsButtonIndex, x, y, motionX, motionY);
+      handleMouseOut(eventContext, target, hitNodeInTarget, jsButtonIndex, x, y, motionX, motionY);
       return true;
     }
     break;
 
     case EUIEventType::MOUSELEAVE:
     {
-      handleMouseLeave(target, jsButtonIndex, x, y, motionX, motionY);
+      handleMouseLeave(eventContext, target, jsButtonIndex, x, y, motionX, motionY);
       return true;
     }
     break;
@@ -480,6 +490,7 @@ bool UIView::handleMouseEventOnPage(
 }
 
 void UIView::handleMouseOut(
+  EventContext&                    eventContext,
   std::shared_ptr<VGG::LayoutNode> target,
   std::shared_ptr<VGG::LayoutNode> hitNodeInTarget,
   int                              jsButtonIndex,
@@ -492,39 +503,39 @@ void UIView::handleMouseOut(
 
   if (target)
   {
-    if (m_mouseOutTargetNode)
+    if (eventContext.mouseOutTargetNode)
     {
-      if (target == m_mouseOutTargetNode)
+      if (target == eventContext.mouseOutTargetNode)
       {
-        if (m_mouseOutNode != hitNodeInTarget)
+        if (eventContext.mouseOutNode != hitNodeInTarget)
         {
-          fireTarget = m_mouseOutTargetNode;
-          m_mouseOutNode = hitNodeInTarget;
+          fireTarget = eventContext.mouseOutTargetNode;
+          eventContext.mouseOutNode = hitNodeInTarget;
         }
       }
       else
       {
-        fireTarget = m_mouseOutTargetNode;
-        m_mouseOutTargetNode = target;
-        m_mouseOutNode = hitNodeInTarget;
+        fireTarget = eventContext.mouseOutTargetNode;
+        eventContext.mouseOutTargetNode = target;
+        eventContext.mouseOutNode = hitNodeInTarget;
       }
     }
     else
     {
-      DEBUG("m_mouseOutTargetNode: %s", fireTarget->path().c_str());
-      m_mouseOutTargetNode = target;
-      m_mouseOutNode = hitNodeInTarget;
+      DEBUG("m_mouseOutTargetNode: %s, %s", fireTarget->name().c_str(), fireTarget->id().c_str());
+      eventContext.mouseOutTargetNode = target;
+      eventContext.mouseOutNode = hitNodeInTarget;
       return;
     }
   }
   else
   {
-    if (m_mouseOutTargetNode)
+    if (eventContext.mouseOutTargetNode)
     {
-      fireTarget = m_mouseOutTargetNode;
+      fireTarget = eventContext.mouseOutTargetNode;
       DEBUG("mouse out of the m_mouseOutTargetNode, set it to nullptr");
-      m_mouseOutTargetNode = nullptr;
-      m_mouseOutNode = nullptr;
+      eventContext.mouseOutTargetNode = nullptr;
+      eventContext.mouseOutNode = nullptr;
     }
   }
 
@@ -535,6 +546,7 @@ void UIView::handleMouseOut(
 }
 
 void UIView::handleMouseLeave(
+  EventContext&                    eventContext,
   std::shared_ptr<VGG::LayoutNode> target,
   int                              jsButtonIndex,
   int                              x,
@@ -546,31 +558,34 @@ void UIView::handleMouseLeave(
 
   if (target)
   {
-    if (m_mouseLeaveTargetNode)
+    if (eventContext.mouseLeaveTargetNode)
     {
-      if (target == m_mouseLeaveTargetNode)
+      if (target == eventContext.mouseLeaveTargetNode)
       {
         return;
       }
       else
       {
-        fireTarget = m_mouseLeaveTargetNode;
+        fireTarget = eventContext.mouseLeaveTargetNode;
       }
     }
 
-    m_mouseLeaveTargetNode = target;
+    DEBUG("mouse leave target node: %s, %s", target->name().c_str(), target->id().c_str());
+    eventContext.mouseLeaveTargetNode = target;
   }
   else
   {
-    if (m_mouseLeaveTargetNode)
+    if (eventContext.mouseLeaveTargetNode)
     {
-      fireTarget = m_mouseLeaveTargetNode;
-      m_mouseLeaveTargetNode = nullptr;
+      fireTarget = eventContext.mouseLeaveTargetNode;
+      DEBUG("mouse leave target set to null");
+      eventContext.mouseLeaveTargetNode = nullptr;
     }
   }
 
   if (fireTarget)
   {
+    DEBUG("mouse leave node: %s, %s", fireTarget->name().c_str(), fireTarget->id().c_str());
     fireMouseEvent(fireTarget, EUIEventType::MOUSELEAVE, jsButtonIndex, x, y, motionX, motionY);
   }
 }
@@ -712,9 +727,22 @@ void UIView::setOffset(Offset offset)
 bool UIView::setCurrentPage(int index)
 {
   auto oldPage = m_page;
+  auto oldPageId = currentPage()->id();
   bool success = setCurrentPageIndex(index);
 
   if (m_page != oldPage)
+  {
+    m_presentedTreeContext.erase(oldPageId);
+
+    if (!m_history.empty())
+    {
+      m_presentedTreeContext.erase(m_history.top());
+    }
+
+    m_history.push(currentPage()->id());
+  }
+
+  if (m_history.empty())
   {
     m_history.push(currentPage()->id());
   }
@@ -745,6 +773,8 @@ bool UIView::back()
         auto to = displayedPage->id();
         while (!to.empty())
         {
+          m_presentedTreeContext.erase(to);
+
           if (!m_presentingPages.contains(to))
           {
             break;
@@ -831,6 +861,7 @@ bool UIView::dismissPage()
   auto from = m_presentingPages[to];
   m_presentingPages.erase(to);
   m_presentedPages.erase(from);
+  m_presentedTreeContext.erase(to);
 
   auto document = m_document.lock();
   if (document)

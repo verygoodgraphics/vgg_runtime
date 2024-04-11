@@ -52,6 +52,16 @@ public:
 private:
   friend class Editor;
 
+  struct EventContext
+  {
+    std::shared_ptr<VGG::LayoutNode> mouseOverTargetNode;
+    std::shared_ptr<VGG::LayoutNode> mouseOverNode;
+    std::shared_ptr<VGG::LayoutNode> mouseEnterTargetNode;
+    std::shared_ptr<VGG::LayoutNode> mouseOutTargetNode;
+    std::shared_ptr<VGG::LayoutNode> mouseOutNode;
+    std::shared_ptr<VGG::LayoutNode> mouseLeaveTargetNode;
+  };
+
   EventListener    m_eventListener;
   HasEventListener m_hasEventListener;
 
@@ -71,12 +81,7 @@ private:
 
   std::shared_ptr<VGG::LayoutNode> m_possibleClickTargetNode;
 
-  std::shared_ptr<VGG::LayoutNode> m_mouseOverTargetNode;
-  std::shared_ptr<VGG::LayoutNode> m_mouseOverNode;
-  std::shared_ptr<VGG::LayoutNode> m_mouseEnterTargetNode;
-  std::shared_ptr<VGG::LayoutNode> m_mouseOutTargetNode;
-  std::shared_ptr<VGG::LayoutNode> m_mouseOutNode;
-  std::shared_ptr<VGG::LayoutNode> m_mouseLeaveTargetNode;
+  std::unordered_map<std::string, EventContext> m_presentedTreeContext; // key: node id
 
   // editor
   bool       m_isEditor = false;
@@ -197,7 +202,7 @@ private:
     int          motionX,
     int          motionY,
     EUIEventType type);
-  bool handleMouseEventOnPage(
+  bool dispatchMouseEventOnPage(
     std::shared_ptr<LayoutNode> page,
     int                         jsButtonIndex,
     int                         x,
@@ -206,6 +211,7 @@ private:
     int                         motionY,
     EUIEventType                type);
   void handleMouseOut(
+    EventContext&                    eventContext,
     std::shared_ptr<VGG::LayoutNode> targetNode,
     std::shared_ptr<VGG::LayoutNode> hitNodeInTarget,
     int                              jsButtonIndex,
@@ -214,6 +220,7 @@ private:
     int                              motionX,
     int                              motionY);
   void handleMouseLeave(
+    EventContext&                    eventContext,
     std::shared_ptr<VGG::LayoutNode> target,
     int                              jsButtonIndex,
     int                              x,

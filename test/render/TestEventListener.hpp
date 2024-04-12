@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Domain/Model/Element.hpp"
 #include "Layer/Model/JSONModel.hpp"
 #include "Layer/Model/StructModel.hpp"
 #include "loader.hpp"
@@ -136,7 +137,7 @@ protected:
                        .build();
           layer::Timer t;
           t.start();
-#define USE_TYPE 1
+#define USE_TYPE 2
 
 #if USE_TYPE == 0
 #elif USE_TYPE == 1
@@ -147,17 +148,19 @@ protected:
           }
 #elif USE_TYPE == 2
           std::vector<layer::StructFrameObject> frames;
-          for (auto& f : res.doc.frames)
+          for (auto& f : *res.doc)
           {
-            auto p = std::make_unique<Model::Frame>(f);
-            frames.emplace_back(layer::StructFrameObject(std::move(p)));
+            if (f->type() == VGG::Domain::Element::EType::FRAME)
+            {
+              frames.emplace_back(layer::StructFrameObject(f.get()));
+            }
           }
 #endif
           auto sceneBuilderResult = VGG::layer::SceneBuilder::builder()
                                       .setResetOriginEnable(true)
                                       .setAllocator(layer::getGlobalMemoryAllocator())
 #if USE_TYPE == 0
-                                      .build(std::move(*res.doc));
+                                      .build(res.doc->treeModel(true));
 #elif USE_TYPE == 1
                                       .build<layer::JSONModelFrame>(frames);
 #elif USE_TYPE == 2

@@ -67,10 +67,10 @@ public:
       layer::Duration expand;
       layer::Duration layout;
     };
-    TimeCost           timeCost;
+    TimeCost                                     timeCost;
     // std::optional<json> doc; // deprecated
-    Model::DesignModel doc;
-    Result(TimeCost timeCost, Model::DesignModel doc)
+    std::shared_ptr<VGG::Domain::DesignDocument> doc;
+    Result(TimeCost timeCost, std::shared_ptr<VGG::Domain::DesignDocument> doc)
       : timeCost(timeCost)
       , doc(std::move(doc))
     {
@@ -114,35 +114,17 @@ public:
     Result::TimeCost cost;
     if (m_enableExpand)
     {
-      nlohmann::json expandedLayout;
+      auto d = std::shared_ptr<VGG::Domain::DesignDocument>();
       cost.expand = layer::Timer::time(
         [&, this]()
         {
-          // const auto [a, b] = Layout::ExpandSymbol(m_doc, m_layout).run();
-          // m_doc = std::move(a);
-          auto e = Layout::ExpandSymbol(m_doc, m_layout);
-          e();
-          m_docModel = e.layout()->designDocTree()->treeModel(true);
-          // static_cast<Model::DesignDocument*>(a)->designModel();
-          // expandedLayout = std::move(b);
+          auto [a, b] = Layout::ExpandSymbol(m_doc, m_layout)();
+          d = std::move(a);
         });
-      // if (m_enableLayout)
-      // {
-      //   cost.layout = layer::Timer::time(
-      //     [&, this]()
-      //     {
-      //       JsonDocumentPtr docPtr = std::make_shared<RawJsonDocument>();
-      //       docPtr->setContent(m_doc);
-      //       JsonDocumentPtr layoutPtr = std::make_shared<RawJsonDocument>();
-      //       layoutPtr->setContent(expandedLayout);
-      //       Layout::Layout layout(std::move(docPtr), std::move(layoutPtr));
-      //       m_doc = layout.displayDesignDoc()->content();
-      //     });
-      // }
+      return { cost, std::move(d) };
     }
-    Result res{ cost, std::move(m_docModel) };
     m_invalid = true;
-    return res;
+    return { cost, {} };
   }
 
   static DocBuilder builder()

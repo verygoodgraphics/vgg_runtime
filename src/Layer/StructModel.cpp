@@ -15,6 +15,9 @@
  */
 #include "Layer/Model/StructModel.hpp"
 #include "Domain/Model/DesignModelFwd.hpp"
+#include "Domain/Model/Element.hpp"
+#include "Layer/Core/Attrs.hpp"
+#include "Layer/Core/VType.hpp"
 #include "Layer/Model/Concept.hpp"
 #include <variant>
 
@@ -24,38 +27,118 @@ using namespace VGG;
 using namespace VGG::layer;
 using namespace VGG::Model;
 
-inline std::pair<EModelObjectType, ModelType> consumeModelType(ContainerChildType& c)
+template<typename F>
+inline std::variant<EModelObjectType, EModelShapeType> subGeometryType(
+  const SubGeometryType& c,
+  F&&                    f)
 {
-  if (std::holds_alternative<Frame>(c))
+  if (std::holds_alternative<Model::Contour>(c))
   {
-    return { EModelObjectType::FRAME, std::make_unique<Frame>(std::get<Frame>(c)) };
+    return { EModelShapeType::CONTOUR };
   }
-  else if (std::holds_alternative<Group>(c))
+  else if (std::holds_alternative<Model::Rectangle>(c))
   {
-    return { EModelObjectType::GROUP, std::make_unique<Group>(std::get<Group>(c)) };
+    return { EModelShapeType::RECTANGLE };
   }
-  else if (std::holds_alternative<Image>(c))
+  else if (std::holds_alternative<Model::Ellipse>(c))
   {
-    return { EModelObjectType::IMAGE, std::make_unique<Image>(std::get<Image>(c)) };
+    return { EModelShapeType::ELLIPSE };
   }
-  else if (std::holds_alternative<Path>(c))
+  else if (std::holds_alternative<Model::Polygon>(c))
   {
-    return { EModelObjectType::PATH, std::make_unique<Path>(std::get<Path>(c)) };
+    return { EModelShapeType::POLYGON };
   }
-  else if (std::holds_alternative<SymbolInstance>(c))
+  else if (std::holds_alternative<Model::Star>(c))
   {
-    return { EModelObjectType::INSTANCE,
-             std::make_unique<SymbolInstance>(std::get<SymbolInstance>(c)) };
+    return { EModelShapeType::STAR };
   }
-  else if (std::holds_alternative<SymbolMaster>(c))
+  else if (std::holds_alternative<Model::VectorNetwork>(c))
   {
-    return { EModelObjectType::MASTER, std::make_unique<SymbolMaster>(std::get<SymbolMaster>(c)) };
+    return { EModelShapeType::VECTORNETWORK };
+  }
+  else if (std::holds_alternative<Model::Frame>(c))
+  {
+    return EModelObjectType::FRAME;
+  }
+  else if (std::holds_alternative<Model::Group>(c))
+  {
+    return { EModelObjectType::GROUP };
+  }
+  else if (std::holds_alternative<Model::Path>(c))
+  {
+    return { EModelObjectType::PATH };
   }
   else if (std::holds_alternative<Text>(c))
   {
-    return { EModelObjectType::TEXT, std::make_unique<Text>(std::get<Text>(c)) };
+    return { EModelObjectType::TEXT };
   }
-  return { EModelObjectType::UNKNOWN, nullptr };
+  else if (std::holds_alternative<Image>(c))
+  {
+    return { EModelObjectType::IMAGE };
+  }
+  else if (std::holds_alternative<SymbolMaster>(c))
+  {
+    return { EModelObjectType::MASTER };
+  }
+  else if (std::holds_alternative<SymbolInstance>(c))
+  {
+    return { EModelObjectType::INSTANCE };
+  }
+  return { EModelObjectType::UNKNOWN };
+}
+
+template<typename F1, typename F2>
+  requires CallableObject<void, F1, EModelObjectType> && CallableObject<void, F2, EModelShapeType>
+inline void toType(VGG::Domain::Element* m, F1&& f1, F2&& f2)
+{
+  using namespace VGG::Domain;
+  switch (m->type())
+  {
+    case Element::EType::FRAME:
+      f1(EModelObjectType::FRAME);
+      return;
+    case Element::EType::GROUP:
+      f1(EModelObjectType::GROUP);
+      return;
+    case Element::EType::PATH:
+      f1(EModelObjectType::PATH);
+      return;
+    case Element::EType::TEXT:
+      f1(EModelObjectType::TEXT);
+      return;
+    case Element::EType::SYMBOL_MASTER:
+      f1(EModelObjectType::MASTER);
+      return;
+    case Element::EType::IMAGE:
+      f1(EModelObjectType::IMAGE);
+      return;
+    case Element::EType::SYMBOL_INSTANCE:
+      f1(EModelObjectType::INSTANCE);
+      return;
+    case Element::EType::CONTOUR:
+      f2(EModelShapeType::CONTOUR);
+      return;
+    case Element::EType::RECTANGLE:
+      f2(EModelShapeType::RECTANGLE);
+      return;
+    case Element::EType::POLYGON:
+      f2(EModelShapeType::POLYGON);
+      return;
+    case Element::EType::STAR:
+      f2(EModelShapeType::STAR);
+      return;
+    case Element::EType::ELLIPSE:
+      f2(EModelShapeType::ELLIPSE);
+      return;
+    case Element::EType::VECTOR_NETWORK:
+      f2(EModelShapeType::VECTORNETWORK);
+      return;
+    case Element::EType::NONE:
+    case Element::EType::ROOT:
+      DEBUG("not support element type");
+      return;
+  }
+  return;
 }
 
 inline StructObject dispatchObject(EModelObjectType modelType, ModelType m)
@@ -84,6 +167,22 @@ inline StructObject dispatchObject(EModelObjectType modelType, ModelType m)
   return StructObject(std::move(m), EModelObjectType::UNKNOWN);
 }
 
+inline StructObject dispatchObject(EModelShapeType shapeType, ModelType m)
+{
+  switch (shapeType)
+  {
+    case EModelShapeType::CONTOUR:
+    case EModelShapeType::RECTANGLE:
+    case EModelShapeType::ELLIPSE:
+    case EModelShapeType::POLYGON:
+    case EModelShapeType::STAR:
+    case EModelShapeType::VECTORNETWORK:
+    case EModelShapeType::UNKNOWN:
+      return StructPathObject(m);
+  }
+  return StructPathObject(0);
+}
+
 } // namespace
 
 namespace VGG::layer
@@ -96,31 +195,142 @@ std::vector<StructObject> StructObject::getChildObjects() const
     case EModelObjectType::FRAME:
     case EModelObjectType::GROUP:
     case EModelObjectType::MASTER:
+    case EModelObjectType::INSTANCE:
+    case EModelObjectType::OBJECT:
     {
       std::vector<StructObject> objects;
-      auto                      childObjects = static_cast<Container*>(m.get())->childObjects;
-      for (auto& o : childObjects)
+      for (const auto& c : *m)
       {
-        auto [modelType, m] = consumeModelType(o);
-        objects.emplace_back(dispatchObject(modelType, std::move(m)));
+        toType(
+          c.get(),
+          [&](EModelObjectType objectType)
+          { objects.emplace_back(dispatchObject(objectType, c.get())); },
+          [&](EModelShapeType shapeType)
+          { objects.emplace_back(dispatchObject(shapeType, c.get())); });
       }
       return objects;
     }
     case EModelObjectType::PATH:
     case EModelObjectType::IMAGE:
     case EModelObjectType::TEXT:
-    case EModelObjectType::INSTANCE:
-    case EModelObjectType::OBJECT:
     case EModelObjectType::UNKNOWN:
-      DEBUG("no objects");
-      break;
+      DEBUG("getChildObjects() in class [%d] is useless", (int)t);
+      return {};
   }
   return {};
 }
 //
 std::vector<SubShape<StructObject>> StructPathObject::getShapes() const
 {
-  return {};
+  std::vector<SubShape<StructObject>> res;
+  auto                                impl = static_cast<VGG::Domain::PathElement*>(m);
+  auto                                model = static_cast<const VGG::Model::Path*>(impl->model());
+  const auto&                         shapes = model->shape->subshapes;
+  const auto                          bounds = getBounds();
+  const auto                          smooth = getCornerSmoothing();
+
+  auto count = impl->childObjects().size();
+  ASSERT(count == model->shape->subshapes.size());
+  for (size_t i = 0; i < count; i++)
+  {
+    const auto& model = shapes[i];
+    const auto  child = impl->childObjects()[i];
+    const auto  blop = EBoolOp(model.booleanOperation);
+    auto        m = child.get();
+    toType(
+      m,
+      [&](EModelObjectType objectType) { res.emplace_back(blop, dispatchObject(objectType, m)); },
+      [&](EModelShapeType shapeType)
+      {
+        std::array<float, 4> radius{ 0, 0, 0, 0 };
+
+        switch (shapeType)
+        {
+          case EModelShapeType::RECTANGLE:
+          {
+            auto dm = static_cast<Domain::RectangleElement*>(m)->dataModel();
+            if (dm->radius)
+            {
+              const auto& r = *dm->radius;
+              if (r.size() >= 4)
+              {
+                radius = { float(r[0]), float(r[1]), float(r[2]), float(r[3]) };
+              }
+            }
+          }
+          break;
+          case EModelShapeType::CONTOUR:
+          case EModelShapeType::ELLIPSE:
+          case EModelShapeType::POLYGON:
+          case EModelShapeType::STAR:
+          case EModelShapeType::VECTORNETWORK:
+            DEBUG("do not support network");
+            break;
+          case EModelShapeType::UNKNOWN:
+            DEBUG("unknown shape element");
+            break;
+        }
+
+        res.emplace_back(
+          blop,
+          makeShapeData2(
+            bounds,
+            shapeType,
+            radius.data(),
+            smooth,
+            [&](EModelShapeType type)
+            {
+              if (type == EModelShapeType::CONTOUR)
+              {
+                auto       dm = static_cast<Domain::ContourElement*>(m)->dataModel();
+                ContourPtr c = std::make_shared<ContourArray>();
+                c->cornerSmooth = smooth;
+                c->closed = dm->closed;
+
+                auto toVec2 = [](const std::vector<double>& v) -> glm::vec2 {
+                  return v.size() >= 2 ? glm::vec2{ v[0], v[1] } : glm::vec2{ 0, 0 };
+                };
+
+                auto toVec2Opt =
+                  [](const std::optional<std::vector<double>>& v) -> std::optional<glm::vec2>
+                {
+                  if (v.has_value())
+                    return v->size() >= 2 ? glm::vec2{ (*v)[0], (*v)[1] } : glm::vec2{ 0, 0 };
+                  else
+                    return std::nullopt;
+                };
+                for (const auto& e : dm->points)
+                {
+                  c->emplace_back(
+                    toVec2(e.point),
+                    e.radius.value_or(0.f),
+                    toVec2Opt(e.curveFrom),
+                    toVec2Opt(e.curveTo),
+                    e.cornerStyle);
+                }
+                if (!c->closed && !c->empty())
+                {
+                  c->back().radius = 0;
+                  c->front().radius = 0;
+                }
+                return c;
+              }
+              else if (type == EModelShapeType::POLYGON || type == EModelShapeType::STAR)
+              {
+                DEBUG("do not support POLYGON and STAR yet, need to convert to contour");
+                ContourPtr c;
+                // c->cornerSmooth = smooth;
+                return c;
+              }
+              else
+              {
+                DEBUG("unkonwn behavior");
+              }
+              return std::make_shared<ContourArray>();
+            }));
+      });
+  }
+  return res;
 }
 
 } // namespace VGG::layer

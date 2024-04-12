@@ -47,7 +47,7 @@ PaintNodePtr makeContourNode(VAllocator* alloc)
   return p;
 }
 
-ContourPtr makeContourData(const json& j, const glm::mat3& totalMatrix)
+ContourPtr makeContourData(const json& j, const json& parent, const glm::mat3& totalMatrix)
 {
   ContourArray contour;
   contour.closed = j.value("closed", false);
@@ -79,23 +79,31 @@ ShapeData makeShapeData(
   const glm::mat3& totalMatrix)
 {
   const auto klass = j.value("class", "");
+  const auto rect = SkRect::MakeXYWH(
+    parent["bounds"]["x"].get<float>(),
+    -parent["bounds"]["y"].get<float>(),
+    parent["bounds"]["width"].get<float>(),
+    parent["bounds"]["height"].get<float>());
   if (klass == "contour")
   {
-    auto c = makeContourData(j, totalMatrix);
-    c->cornerSmooth = cornerSmoothing;
-    return c;
+    return makeContourData(j, parent, totalMatrix);
   }
   else if (klass == "rectangle")
   {
-    const auto           rect = toSkRect(bounds);
+    const auto rect = SkRect::MakeXYWH(
+      parent["bounds"]["x"].get<float>(),
+      -parent["bounds"]["y"].get<float>(),
+      parent["bounds"]["width"].get<float>(),
+      parent["bounds"]["height"].get<float>());
     std::array<float, 4> radius = j.value("radius", std::array<float, 4>{ 0, 0, 0, 0 });
-    auto                 s = makeShape(&radius[4], rect, cornerSmoothing);
+    auto cornerSmoothing = getOptional<float>(parent, "cornerSmoothing").value_or(0.f);
+    auto s = makeShape(radius.data(), rect, cornerSmoothing);
     return std::visit([&](auto&& arg) { return ShapeData(arg); }, s);
   }
   else if (klass == "ellipse")
   {
     Ellipse oval;
-    oval.rect = toSkRect(bounds);
+    oval.rect = rect;
     return oval;
   }
   else if (klass == "polygon" || klass == "star")
@@ -103,13 +111,51 @@ ShapeData makeShapeData(
     auto cp = parent;
     if (pathChange(cp))
     {
-      auto c = makeContourData(cp["shape"]["subshapes"][0]["subGeometry"], totalMatrix);
-      c->cornerSmooth = cornerSmoothing;
-      return c;
+      return makeContourData(cp["shape"]["subshapes"][0]["subGeometry"], cp, totalMatrix);
     }
   }
   return ShapeData();
 }
+
+// ShapeData makeShapeData(
+//   const json&      j,
+//   const json&      parent,
+//   const Bounds&    bounds,
+//   float            cornerSmoothing,
+//   const glm::mat3& totalMatrix)
+// {
+//   const auto klass = j.value("class", "");
+//   if (klass == "contour")
+//   {
+//     auto c = makeContourData(j, totalMatrix);
+//     c->cornerSmooth = cornerSmoothing;
+//     return c;
+//   }
+//   else if (klass == "rectangle")
+//   {
+//     const auto           rect = toSkRect(bounds);
+//     std::array<float, 4> radius = j.value("radius", std::array<float, 4>{ 0, 0, 0, 0 });
+//     auto                 s = makeShape(&radius[4], rect, cornerSmoothing);
+//     return std::visit([&](auto&& arg) { return ShapeData(arg); }, s);
+//   }
+//   else if (klass == "ellipse")
+//   {
+//     Ellipse oval;
+//     oval.rect = toSkRect(bounds);
+//     return oval;
+//   }
+//   else if (klass == "polygon" || klass == "star")
+//   {
+//     auto cp = parent;
+//     if (pathChange(cp))
+//     {
+//       auto c = makeContourData(cp["shape"]["subshapes"][0]["subGeometry"], totalMatrix);
+//       c->cornerSmooth = cornerSmoothing;
+//       return c;
+//     }
+//   }
+//   return ShapeData();
+// }
 
 template<typename F1, typename F2>
 inline PaintNodePtr makeObjectCommonProperty(

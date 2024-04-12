@@ -135,16 +135,18 @@ protected:
                        .setExpandEnabled(true)
                        .setLayoutEnabled(true)
                        .build();
-          layer::Timer t;
-          t.start();
 #define USE_TYPE 2
 
 #if USE_TYPE == 0
 #elif USE_TYPE == 1
           std::vector<layer::JSONFrameObject> frames;
-          for (auto& f : nlohmann::json(res.doc))
+          for (auto& e : *res.doc)
           {
-            frames.emplace_back(layer::JSONFrameObject(std::move(f)));
+            if (e->type() == VGG::Domain::Element::EType::FRAME)
+            {
+              auto f = static_cast<VGG::Domain::FrameElement*>(e.get());
+              frames.emplace_back(layer::JSONFrameObject(f->treeModel(false)));
+            }
           }
 #elif USE_TYPE == 2
           std::vector<layer::StructFrameObject> frames;
@@ -156,13 +158,15 @@ protected:
             }
           }
 #endif
+          layer::Timer t;
+          t.start();
           auto sceneBuilderResult = VGG::layer::SceneBuilder::builder()
                                       .setResetOriginEnable(true)
                                       .setAllocator(layer::getGlobalMemoryAllocator())
 #if USE_TYPE == 0
-                                      .build(res.doc->treeModel(true));
+                                      .build(std::move(res.jsonDoc));
 #elif USE_TYPE == 1
-                                      .build<layer::JSONModelFrame>(frames);
+                                      .build<layer::JSONModelFrame>(std::move(frames));
 #elif USE_TYPE == 2
                                       .build<layer::StructModelFrame>(std::move(frames));
 #endif

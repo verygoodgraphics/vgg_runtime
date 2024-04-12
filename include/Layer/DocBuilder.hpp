@@ -68,10 +68,20 @@ public:
       layer::Duration layout;
     };
     TimeCost                                     timeCost;
-    // std::optional<json> doc; // deprecated
+    std::optional<json>                          jsonDoc; // deprecated
     std::shared_ptr<VGG::Domain::DesignDocument> doc;
     Result(TimeCost timeCost, std::shared_ptr<VGG::Domain::DesignDocument> doc)
       : timeCost(timeCost)
+      , doc(std::move(doc))
+    {
+    }
+
+    Result(
+      TimeCost                                     timeCost,
+      std::shared_ptr<VGG::Domain::DesignDocument> doc,
+      nlohmann::json                               jsonDoc)
+      : timeCost(timeCost)
+      , jsonDoc(std::move(jsonDoc))
       , doc(std::move(doc))
     {
     }
@@ -120,8 +130,17 @@ public:
         {
           auto [a, b] = Layout::ExpandSymbol(m_doc, m_layout)();
           d = std::move(a);
+
+          // legacy code
+          auto [x, y] = Layout::ExpandSymbol(m_doc, m_layout).run();
+          JsonDocumentPtr docPtr = std::make_shared<RawJsonDocument>();
+          docPtr->setContent(std::move(x));
+          JsonDocumentPtr layoutPtr = std::make_shared<RawJsonDocument>();
+          layoutPtr->setContent(std::move(y));
+          Layout::Layout layout(std::move(docPtr), std::move(layoutPtr));
+          m_doc = layout.displayDesignDoc()->content();
         });
-      return { cost, std::move(d) };
+      return { cost, std::move(d), std::move(m_doc) };
     }
     m_invalid = true;
     return { cost, {} };

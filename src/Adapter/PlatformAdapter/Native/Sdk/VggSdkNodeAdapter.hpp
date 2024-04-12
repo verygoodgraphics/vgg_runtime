@@ -49,6 +49,12 @@ private:
   static napi_value presentFrameById(napi_env env, napi_callback_info info);
   static napi_value dismissFrame(napi_env env, napi_callback_info info);
 
+  // instance state
+  static napi_value setMasterId(napi_env env, napi_callback_info info);
+  static napi_value presentState(napi_env env, napi_callback_info info);
+  static napi_value dismissState(napi_env env, napi_callback_info info);
+
+  //
   static napi_value GetDesignDocument(napi_env env, napi_callback_info info);
 
   static napi_value DesignDocumentValueAt(napi_env env, napi_callback_info info);

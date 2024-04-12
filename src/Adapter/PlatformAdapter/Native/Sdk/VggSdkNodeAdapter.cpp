@@ -130,6 +130,10 @@ void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
     DECLARE_NODE_API_PROPERTY("presentFrameById", presentFrameById),
     DECLARE_NODE_API_PROPERTY("dismissFrame", dismissFrame),
 
+    DECLARE_NODE_API_PROPERTY("setMasterId", setMasterId),
+    DECLARE_NODE_API_PROPERTY("presentState", presentState),
+    DECLARE_NODE_API_PROPERTY("dismissState", dismissState),
+
     DECLARE_NODE_API_PROPERTY("valueAt", DesignDocumentValueAt),
 
     DECLARE_NODE_API_PROPERTY("addEventListener", AddEventListener),
@@ -380,6 +384,111 @@ napi_value VggSdkNodeAdapter::dismissFrame(napi_env env, napi_callback_info info
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
     auto success = sdkAdapter->m_vggSdk->dismissFrame();
+
+    napi_value ret;
+    NODE_API_CALL(env, napi_get_boolean(env, success, &ret));
+    return ret;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+
+// instance state
+napi_value VggSdkNodeAdapter::setMasterId(napi_env env, napi_callback_info info)
+{
+  size_t     argc = 2;
+  napi_value args[2];
+  napi_value _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc != 2)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    auto instanceDescendantId = GetArgString(env, args[0]);
+    auto newMasterId = GetArgString(env, args[0]);
+
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
+
+    auto success = sdkAdapter->m_vggSdk->setMasterId(instanceDescendantId, newMasterId);
+
+    napi_value ret;
+    NODE_API_CALL(env, napi_get_boolean(env, success, &ret));
+    return ret;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+
+napi_value VggSdkNodeAdapter::presentState(napi_env env, napi_callback_info info)
+{
+  size_t     argc = 2;
+  napi_value args[2];
+  napi_value _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc != 2)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    auto instanceDescendantId = GetArgString(env, args[0]);
+    auto newMasterId = GetArgString(env, args[0]);
+
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
+
+    auto success = sdkAdapter->m_vggSdk->presentState(instanceDescendantId, newMasterId);
+
+    napi_value ret;
+    NODE_API_CALL(env, napi_get_boolean(env, success, &ret));
+    return ret;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+
+napi_value VggSdkNodeAdapter::dismissState(napi_env env, napi_callback_info info)
+{
+  size_t     argc = 1;
+  napi_value args[1];
+  napi_value _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc != 1)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    auto instanceDescendantId = GetArgString(env, args[0]);
+
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
+
+    auto success = sdkAdapter->m_vggSdk->dismissState(instanceDescendantId);
 
     napi_value ret;
     NODE_API_CALL(env, napi_get_boolean(env, success, &ret));

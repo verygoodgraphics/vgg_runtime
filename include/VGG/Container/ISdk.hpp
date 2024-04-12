@@ -53,11 +53,11 @@ public:
   // instance
   virtual bool presentState(
     const std::string& instanceDescendantId,
-    const std::string& stateMasterId) = 0;
+    const std::string& newStateMasterId) = 0;
   virtual bool dismissState(const std::string& instanceDescendantId) = 0;
   virtual bool setMasterId(
     const std::string& instanceDescendantId,
-    const std::string& masterId) = 0;
+    const std::string& newMasterId) = 0;
 
   virtual std::string requiredFonts() const = 0;
   virtual bool        addFont(const uint8_t* data, size_t size, const char* defaultName) = 0;

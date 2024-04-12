@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #pragma once
+#include "Domain/Model/Element.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Model/Concept.hpp"
@@ -24,56 +25,34 @@
 #include "Layer/Model/StructModelSerde.hpp"
 #include <type_traits>
 
-#define M_OBJECT_FIELD_DEF(classtype, req, key, type)                                              \
+#define M_OBJECT_FIELD_DEF(modeltype, modelgetter, req, key, type)                                 \
   type get##req() const                                                                            \
   {                                                                                                \
-    using FromType = std::remove_cvref_t<decltype(static_cast<classtype*>(m.get())->key)>;         \
-    return serde::model_serde_from<FromType, type, serde::ModelSerde<FromType, type>>(             \
-      static_cast<classtype*>(m.get())->key);                                                      \
+    auto modelPtr = static_cast<const modeltype*>(m->modelgetter());                               \
+    using FromType = std::remove_cvref_t<decltype(modelPtr->key)>;                                 \
+    using ToType = type;                                                                           \
+    return serde::model_serde_from<FromType, ToType, serde::ModelSerde<FromType, ToType>>(         \
+      modelPtr->key);                                                                              \
   }
 
-#define M_OBJECT_DFT_FIELD(classtype, req, key, type, dft)                                         \
+#define M_OBJECT_DFT_FIELD(modeltype, modelgetter, req, key, type, dft)                            \
   type get##req() const                                                                            \
   {                                                                                                \
-    using FromType = std::remove_cvref_t<decltype(*static_cast<classtype*>(m.get())->key)>;        \
-    if (static_cast<classtype*>(m.get())->key)                                                     \
+    auto modelPtr = static_cast<const modeltype*>(m->modelgetter());                               \
+                                                                                                   \
+    using FromType = std::remove_cvref_t<decltype(*(modelPtr->key))>;                              \
+    using ToType = type;                                                                           \
+    if (modelPtr->key)                                                                             \
     {                                                                                              \
-      return serde::model_serde_from<FromType, type, serde::ModelSerde<FromType, type>>(           \
-        (*(static_cast<classtype*>(m.get())->key)));                                               \
+      return serde::model_serde_from<FromType, ToType, serde::ModelSerde<FromType, ToType>>(       \
+        (*(modelPtr->key)));                                                                       \
     }                                                                                              \
     return dft;                                                                                    \
   }
-
-#define M_OBJECT_OPT_FIELD(classtype, req, key, type, dft)                                         \
-  type get##req() const                                                                            \
-  {                                                                                                \
-    using FromType = decltype(*(static_cast<classtype*>(m.get())->key));                           \
-    if (static_cast<classtype*>(m.get())->key)                                                     \
-    {                                                                                              \
-      return serde::model_serde_from<FromType, type, serde::ModelSerde<FromType, type>>(           \
-        (*(static_cast<classtype*>(m.get())->key)));                                               \
-    }                                                                                              \
-    return dft;                                                                                    \
-  }
-
-/*
-#define M_OBJECT_FIELD_DEF(classtype, req, key, type)                                              \
-  type get##req() const                                                                            \
-  {                                                                                                \
-    return {};                                                                                     \
-  }
-
-#define M_OBJECT_DFT_FIELD(classtype, req, key, type, dft)                                     \
-  type get##req() const                                                                            \
-  {                                                                                                \
-    return {};                                                                                     \
-  }
-  */
 
 namespace VGG::layer
 {
-using ModelType = std::unique_ptr<VGG::Model::Object>;
-
+using ModelType = VGG::Domain::Element*;
 struct StructObject
 {
   DECL_MODEL_OBJECT(StructObject, StructObject);
@@ -81,17 +60,14 @@ struct StructObject
   ModelType        m;
   EModelObjectType type;
   StructObject(ModelType m, EModelObjectType t)
-    : m(std::move(m))
+    : m(m)
     , type(t)
   {
+    ASSERT(m);
   }
-  StructObject(const StructObject& other)
-  {
-    m = std::make_unique<VGG::Model::Object>(*other.m);
-  }
-
-#define R(req, key, type) M_OBJECT_FIELD_DEF(VGG::Model::Object, req, key, type)
-#define R_OPT(req, key, type, dft) M_OBJECT_DFT_FIELD(VGG::Model::Object, req, key, type, dft)
+#define R(req, key, type) M_OBJECT_FIELD_DEF(VGG::Model::Object, model, req, key, type)
+#define R_OPT(req, key, type, dft)                                                                 \
+  M_OBJECT_DFT_FIELD(VGG::Model::Object, model, req, key, type, dft)
   EModelObjectType getObjectType() const
   {
     return type;
@@ -122,8 +98,8 @@ struct StructImageObject : public StructObject
   {
   }
 
-#define R(req, key, type) M_OBJECT_FIELD_DEF(VGG::Model::Image, req, key, type)
-#define R_OPT(req, key, type, dft) M_OBJECT_DFT_FIELD(VGG::Model::Image, req, key, type, dft)
+#define R(req, key, type) M_OBJECT_FIELD_DEF(VGG::Model::Image, model, req, key, type)
+#define R_OPT(req, key, type, dft) M_OBJECT_DFT_FIELD(VGG::Model::Image, model, req, key, type, dft)
   R(ImageBounds, bounds, Bounds);
   R(ImageGUID, imageFileName, std::string);
   R_OPT(ImageFilter, imageFilters, ImageFilter, ImageFilter{});
@@ -139,8 +115,8 @@ struct StructTextObject : public StructObject
   {
   }
 
-#define R(req, key, type) M_OBJECT_FIELD_DEF(VGG::Model::Text, req, key, type)
-#define R_OPT(req, key, type, dft) M_OBJECT_DFT_FIELD(VGG::Model::Text, req, key, type, dft)
+#define R(req, key, type) M_OBJECT_FIELD_DEF(VGG::Model::Text, model, req, key, type)
+#define R_OPT(req, key, type, dft) M_OBJECT_DFT_FIELD(VGG::Model::Text, model, req, key, type, dft)
 
   R(Text, content, std::string);
   R(TextBounds, bounds, Bounds);
@@ -177,8 +153,8 @@ struct StructFrameObject : public StructObject
   {
   }
 
-#define R(req, key, type) M_OBJECT_FIELD_DEF(VGG::Model::Frame, req, key, type)
-#define R_OPT(req, key, type, dft) M_OBJECT_DFT_FIELD(VGG::Model::Frame, req, key, type, dft)
+#define R(req, key, type) M_OBJECT_FIELD_DEF(VGG::Model::Frame, model, req, key, type)
+#define R_OPT(req, key, type, dft) M_OBJECT_DFT_FIELD(VGG::Model::Frame, model, req, key, type, dft)
   R_OPT(Radius, radius, Float4, (Float4{ 0, 0, 0, 0 }));
 #undef R_OPT
 #undef R
@@ -192,8 +168,9 @@ struct StructMasterObject : public StructObject
   {
   }
 
-#define R(req, key, type) M_OBJECT_FIELD_DEF(VGG::Model::SymbolMaster, req, key, type)
-#define R_OPT(req, key, type, dft) M_OBJECT_DFT_FIELD(VGG::Model::SymbolMaster, req, key, type, dft)
+#define R(req, key, type) M_OBJECT_FIELD_DEF(VGG::Model::SymbolMaster, model, req, key, type)
+#define R_OPT(req, key, type, dft)                                                                 \
+  M_OBJECT_DFT_FIELD(VGG::Model::SymbolMaster, model, req, key, type, dft)
 
   R_OPT(Radius, radius, Float4, (Float4{ 0.f, 0.f, 0.f, 0.f }));
 #undef R_OPT
@@ -208,11 +185,13 @@ struct StructPathObject : public StructObject
   {
   }
 
-#define R(req, key, type) M_OBJECT_FIELD_DEF(VGG::Model::Path, req, key, type)
-#define R_OPT(req, key, type, dft) M_OBJECT_DFT_FIELD(VGG::Model::Path, req, key, type, dft)
+#define R(req, key, type) M_OBJECT_FIELD_DEF(VGG::Model::Path, model, req, key, type)
+#define R_OPT(req, key, type, dft) M_OBJECT_DFT_FIELD(VGG::Model::Path, model, req, key, type, dft)
   EWindingType getWindingType() const
   {
-    return EWindingType();
+    auto shape = static_cast<const VGG::Model::Path*>(m->object())->shape.get();
+    ASSERT(shape);
+    return EWindingType(shape->windingRule);
   }
   std::vector<SubShape<StructObject>> getShapes() const;
 #undef R_OPT
@@ -226,9 +205,9 @@ struct StructInstanceObject : public StructObject
     : StructObject(std::move(m), EModelObjectType::INSTANCE)
   {
   }
-#define R(req, key, type) M_OBJECT_FIELD_DEF(VGG::Model::SymbolInstance, req, key, type)
+#define R(req, key, type) M_OBJECT_FIELD_DEF(VGG::Model::SymbolInstance, model, req, key, type)
 #define R_OPT(req, key, type, dft)                                                                 \
-  M_OBJECT_DFT_FIELD(VGG::Model::SymbolInstance, req, key, type, dft)
+  M_OBJECT_DFT_FIELD(VGG::Model::SymbolInstance, model, req, key, type, dft)
 
 #undef R_OPT
 #undef R

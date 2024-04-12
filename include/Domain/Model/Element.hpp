@@ -85,6 +85,31 @@ public:
 
   std::vector<std::shared_ptr<Element>> children(bool reverseChildrenIfFirstOnTop = false) const;
 
+  const auto& childObjects() const
+  {
+    return m_children;
+  }
+
+  auto begin() const noexcept
+  {
+    return m_children.begin();
+  }
+
+  auto end() const noexcept
+  {
+    return m_children.end();
+  }
+
+  auto cbegin() const noexcept
+  {
+    return m_children.cbegin();
+  }
+
+  auto cend() const noexcept
+  {
+    return m_children.cend();
+  }
+
   bool isLayoutNode() const
   {
     return object();
@@ -376,6 +401,11 @@ class EllipseElement : public Element
 public:
   EllipseElement(const Model::Ellipse& ellipse);
 
+  Model::Ellipse* dataModel() const
+  {
+    return m_ellipse.get();
+  }
+
   void getToModel(Model::SubGeometryType& subGeometry) override;
   void updateModel(const Model::SubGeometryType& subGeometry) override;
 };
@@ -387,6 +417,11 @@ class PolygonElement : public Element
 public:
   PolygonElement(const Model::Polygon& polygon);
 
+  Model::Polygon* dataModel() const
+  {
+    return m_polygon.get();
+  }
+
   void getToModel(Model::SubGeometryType& subGeometry) override;
   void updateModel(const Model::SubGeometryType& subGeometry) override;
 };
@@ -397,6 +432,10 @@ class RectangleElement : public Element
 
 public:
   RectangleElement(const Model::Rectangle& rectangle);
+  Model::Rectangle* dataModel() const
+  {
+    return m_rectangle.get();
+  }
 
   void getToModel(Model::SubGeometryType& subGeometry) override;
   void updateModel(const Model::SubGeometryType& subGeometry) override;
@@ -408,6 +447,10 @@ class StarElement : public Element
 
 public:
   StarElement(const Model::Star& star);
+  Model::Star* dataModel() const
+  {
+    return m_star.get();
+  }
 
   void getToModel(Model::SubGeometryType& subGeometry) override;
   void updateModel(const Model::SubGeometryType& subGeometry) override;
@@ -419,6 +462,11 @@ class VectorNetworkElement : public Element
 
 public:
   VectorNetworkElement(const Model::VectorNetwork& vectorNetwork);
+
+  Model::VectorNetwork* dataModel() const
+  {
+    return m_vectorNetwork.get();
+  }
 
   void getToModel(Model::SubGeometryType& subGeometry) override;
   void updateModel(const Model::SubGeometryType& subGeometry) override;

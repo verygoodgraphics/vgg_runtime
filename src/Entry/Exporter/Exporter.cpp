@@ -243,7 +243,7 @@ public:
                                 .setResetOriginEnable(true)
                                 .setCheckVersion(VGG_PARSE_FORMAT_VER_STR)
                                 .setAllocator(layer::getGlobalMemoryAllocator())
-                                .build(res.doc);
+                                .build(res.doc->treeModel());
     if (sceneBuilderResult.type)
     {
       if (*sceneBuilderResult.type == VGG::layer::SceneBuilderResult::EResultType::VERSION_MISMATCH)

@@ -22,6 +22,7 @@
 #include <nlohmann/json.hpp>
 
 #include <memory>
+#include <stack>
 #include <vector>
 
 namespace VGG
@@ -55,7 +56,8 @@ public:
     POLYGON,
     RECTANGLE,
     STAR,
-    VECTOR_NETWORK
+    VECTOR_NETWORK,
+    STATE_TREE
   };
 
 private:
@@ -115,6 +117,7 @@ public:
     return object();
   }
   std::string id() const;
+  std::string originalId() const;
   std::string name() const;
 
   virtual const Model::Object* model() const
@@ -158,9 +161,9 @@ public:
     m_children.push_back(child);
   }
 
-  void clearChildren()
+  auto clearChildren()
   {
-    m_children.clear();
+    return std::move(m_children);
   }
 
   virtual void buildSubtree()
@@ -299,6 +302,7 @@ class SymbolInstanceElement : public Element
 {
   std::shared_ptr<Model::SymbolInstance> m_instance;
   std::unique_ptr<Model::SymbolMaster>   m_master;
+  std::stack<std::string>                m_stateStack; // master id stack
 
 public:
   SymbolInstanceElement(const Model::SymbolInstance& instance);
@@ -311,10 +315,13 @@ public:
     return object();
   }
 
-  void setMaster(const Model::SymbolMaster& master);
-  void updateMasterId(const std::string& masterId);
-  void updateVariableAssignments(const nlohmann::json& json);
-  void updateBounds(const VGG::Layout::Rect& bounds);
+  void                                  setMaster(const Model::SymbolMaster& master);
+  std::vector<std::shared_ptr<Element>> updateMasterId(const std::string& masterId);
+  void                                  updateVariableAssignments(const nlohmann::json& json);
+  void                                  updateBounds(const VGG::Layout::Rect& bounds);
+
+  std::vector<std::shared_ptr<Element>> presentState(const std::string& masterId);
+  std::string                           dissmissState();
 
   Model::SymbolInstance* object() const override;
   nlohmann::json         jsonModel() override;
@@ -470,6 +477,14 @@ public:
 
   void getToModel(Model::SubGeometryType& subGeometry) override;
   void updateModel(const Model::SubGeometryType& subGeometry) override;
+};
+
+class StateTreeElement : public Element
+{
+  std::weak_ptr<Element> m_srcElement;
+
+public:
+  StateTreeElement(std::shared_ptr<Element> srcElement);
 };
 
 } // namespace Domain

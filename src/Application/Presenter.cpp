@@ -280,3 +280,14 @@ bool Presenter::dismissPage()
   }
   return false;
 }
+
+void Presenter::saveState(std::shared_ptr<StateTree> stateTree)
+{
+  ASSERT(m_view);
+  m_view->saveState(stateTree);
+}
+void Presenter::restoreState()
+{
+  ASSERT(m_view);
+  m_view->restoreState();
+}

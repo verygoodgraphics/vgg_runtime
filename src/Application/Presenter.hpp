@@ -30,6 +30,7 @@
 namespace VGG
 {
 class Mouse;
+class StateTree;
 
 struct FontInfo
 {
@@ -87,6 +88,9 @@ public:
   }
   bool presentPage(int index);
   bool dismissPage();
+
+  void saveState(std::shared_ptr<StateTree> stateTree);
+  void restoreState();
 
   virtual void setModel(std::shared_ptr<ViewModel> viewModel);
   auto         requiredFonts()

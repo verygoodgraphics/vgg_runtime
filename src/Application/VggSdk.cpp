@@ -358,3 +358,39 @@ emscripten::val VggSdk::emMakeImageSnapshot(const ImageOptions& options)
   return array;
 }
 #endif
+
+bool VggSdk::presentState(const std::string& instanceDescendantId, const std::string& stateMasterId)
+{
+  if (auto currentEnv = env())
+  {
+    if (auto controller = currentEnv->controller())
+    {
+      return controller->presentState(instanceDescendantId, stateMasterId);
+    }
+  }
+  return false;
+}
+
+bool VggSdk::dismissState(const std::string& instanceDescendantId)
+{
+  if (auto currentEnv = env())
+  {
+    if (auto controller = currentEnv->controller())
+    {
+      return controller->dismissState(instanceDescendantId);
+    }
+  }
+  return false;
+}
+
+bool VggSdk::setMasterId(const std::string& instanceDescendantId, const std::string& masterId)
+{
+  if (auto currentEnv = env())
+  {
+    if (auto controller = currentEnv->controller())
+    {
+      return controller->setMasterId(instanceDescendantId, masterId);
+    }
+  }
+  return false;
+}

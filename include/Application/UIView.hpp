@@ -32,6 +32,7 @@ namespace VGG
 {
 
 class LayoutNode;
+class StateTree;
 struct ViewModel;
 
 class UIView : public app::AppScene
@@ -75,6 +76,10 @@ private:
 
   std::unordered_map<std::string, std::string> m_presentedPages;  // key: from; value: to
   std::unordered_map<std::string, std::string> m_presentingPages; // key: to; value: from
+
+  // instance state
+  std::shared_ptr<VGG::StateTree> m_stateTree;
+  EventContext                    m_stateTreeContext;
 
   Layout::Rect m_frame;
   Layout::Rect m_bounds;
@@ -173,6 +178,9 @@ public:
   bool back();
   bool presentPage(int index);
   bool dismissPage();
+
+  void saveState(std::shared_ptr<StateTree> stateTree);
+  void restoreState();
 
   void enableZoomer(bool enabled);
 

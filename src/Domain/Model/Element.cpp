@@ -21,6 +21,7 @@
 #include "Layout/Helper.hpp"
 
 #include "Utility/Log.hpp"
+#include "Utility/VggString.hpp"
 
 #include <algorithm>
 
@@ -30,7 +31,6 @@ using namespace VGG::Model;
 
 namespace
 {
-constexpr auto K_SEPARATOR = "__";
 constexpr auto K_BORDER_PREFIX = "style.borders";
 
 struct ElementFactory
@@ -103,38 +103,6 @@ struct ElementFactory
   }
 };
 
-std::string join(
-  const std::vector<std::string>& instanceIdStack,
-  const std::string&              separator = K_SEPARATOR)
-{
-  if (instanceIdStack.empty())
-  {
-    return {};
-  }
-
-  return std::accumulate(
-    std::next(instanceIdStack.begin()),
-    instanceIdStack.end(),
-    instanceIdStack[0], // start with first element
-    [&](const std::string& a, const std::string& b) { return a + separator + b; });
-}
-
-std::vector<std::string> split(const std::string& s, const std::string& delimiter = K_SEPARATOR)
-{
-  size_t                   pos_start = 0, pos_end, delim_len = delimiter.length();
-  std::string              token;
-  std::vector<std::string> res;
-
-  while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos)
-  {
-    token = s.substr(pos_start, pos_end - pos_start);
-    pos_start = pos_end + delim_len;
-    res.push_back(token);
-  }
-
-  res.push_back(s.substr(pos_start));
-  return res;
-}
 } // namespace
 
 // DesignDocument
@@ -222,6 +190,11 @@ std::string Element::id() const
     return obj->id;
   }
   return {};
+}
+
+std::string Element::originalId() const
+{
+  return Helper::split(id()).back();
 }
 
 std::string Element::name() const
@@ -461,7 +434,7 @@ std::shared_ptr<Element> Element::findElementByKey(
   tmpInstanceIdStack.push_back(keyStack[0]);
 
   // 1. find by overrideKey first; 2. find by id
-  const auto& firstObjectId = join(tmpInstanceIdStack);
+  const auto& firstObjectId = Helper::join(tmpInstanceIdStack);
   if (
     (model->overrideKey && (model->overrideKey.value() == firstObjectId)) ||
     model->id == firstObjectId)
@@ -474,7 +447,7 @@ std::shared_ptr<Element> Element::findElementByKey(
     else
     {
       // the id is already prefixed: xxx__yyy__zzz;
-      const auto originalId = split(target->object()->id).back();
+      const auto originalId = Helper::split(target->object()->id).back();
       theOutInstanceIdStack->push_back(originalId);
 
       return target->findElementByKey(
@@ -763,11 +736,37 @@ void SymbolInstanceElement::setMaster(const Model::SymbolMaster& master)
     addChildren(m_master->childObjects);
   }
 }
-void SymbolInstanceElement::updateMasterId(const std::string& masterId)
+
+std::vector<std::shared_ptr<Element>> SymbolInstanceElement::updateMasterId(
+  const std::string& masterId)
 {
-  clearChildren();
   m_instance->masterId = masterId;
+  return clearChildren();
 }
+
+std::vector<std::shared_ptr<Element>> SymbolInstanceElement::presentState(
+  const std::string& newStateMasterId)
+{
+  if (masterId() == newStateMasterId)
+  {
+    return {};
+  }
+  m_stateStack.push(masterId());
+  return updateMasterId(newStateMasterId);
+}
+
+std::string SymbolInstanceElement::dissmissState()
+{
+  if (m_stateStack.empty())
+  {
+    return {};
+  }
+
+  auto lastStateMasterId = m_stateStack.top();
+  m_stateStack.pop();
+  return lastStateMasterId;
+}
+
 void SymbolInstanceElement::updateVariableAssignments(const nlohmann::json& json)
 {
   auto model = object();
@@ -1181,4 +1180,10 @@ void VectorNetworkElement::updateModel(const Model::SubGeometryType& subGeometry
   {
     *m_vectorNetwork = *p;
   }
+}
+
+StateTreeElement::StateTreeElement(std::shared_ptr<Element> srcElement)
+  : Element(EType::STATE_TREE)
+  , m_srcElement{ srcElement }
+{
 }

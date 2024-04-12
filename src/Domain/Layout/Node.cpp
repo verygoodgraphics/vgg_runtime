@@ -85,7 +85,7 @@ std::shared_ptr<LayoutNode> LayoutNode::hitTest(
       return shared_from_this();
     }
 
-    if (hasEventListener(name()) || hasEventListener(id()))
+    if (hasEventListener(id()) || hasEventListener(originalId()) || hasEventListener(name()))
     {
       return shared_from_this();
     }
@@ -377,6 +377,16 @@ std::string LayoutNode::id()
   if (auto element = m_element.lock())
   {
     return element->id();
+  }
+
+  return {};
+}
+
+std::string LayoutNode::originalId()
+{
+  if (auto element = m_element.lock())
+  {
+    return element->originalId();
   }
 
   return {};
@@ -1422,10 +1432,10 @@ void LayoutNode::updatePathNodeModel(
   }
 }
 
-void LayoutNode::removeAllChildren()
+std::vector<std::shared_ptr<LayoutNode>> LayoutNode::removeAllChildren()
 {
   autoLayout()->removeSubtree();
-  m_children.clear();
+  return std::move(m_children);
 }
 
 void LayoutNode::detachChildrenFromFlexNodeTree()

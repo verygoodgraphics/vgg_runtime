@@ -364,6 +364,11 @@ bool UIView::handleMouseEvent(
     }
   }
 
+  if (m_stateTree)
+  {
+    success |= dispatchMouseEventOnPage(m_stateTree, jsButtonIndex, x, y, motionX, motionY, type);
+  }
+
   return success;
 }
 
@@ -732,12 +737,9 @@ bool UIView::setCurrentPage(int index)
 
   if (m_page != oldPage)
   {
-    m_presentedTreeContext.erase(oldPageId);
-
-    if (!m_history.empty())
-    {
-      m_presentedTreeContext.erase(m_history.top());
-    }
+    m_presentedTreeContext.clear();
+    m_presentedPages.clear();
+    m_presentingPages.clear();
 
     m_history.push(currentPage()->id());
   }
@@ -876,4 +878,17 @@ bool UIView::dismissPage()
   }
 
   return false;
+}
+
+void UIView::saveState(std::shared_ptr<StateTree> stateTree)
+{
+  m_stateTree = stateTree;
+  m_stateTreeContext = m_presentedTreeContext[currentPage()->id()];
+  m_presentedTreeContext[currentPage()->id()] = EventContext{};
+}
+
+void UIView::restoreState()
+{
+  m_stateTree.reset();
+  m_stateTreeContext = EventContext{};
 }

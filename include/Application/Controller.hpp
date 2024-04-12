@@ -34,6 +34,7 @@ namespace VGG
 
 class Daruma;
 class Editor;
+class LayoutNode;
 class Presenter;
 class Reporter;
 class RunLoop;
@@ -124,6 +125,10 @@ public:
   bool        setCurrentFrameById(const std::string& id);
   bool        presentFrameById(const std::string& id);
   bool        dismissFrame();
+
+  bool presentState(const std::string& instanceDescendantId, const std::string& stateMasterId);
+  bool dismissState(const std::string& instanceDescendantId);
+  bool setMasterId(const std::string& instanceDescendantId, const std::string& stateMasterId);
 
 private:
   void          initModel(const char* designDocSchemaFilePath, const char* layoutDocSchemaFilePath);

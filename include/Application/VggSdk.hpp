@@ -73,6 +73,14 @@ public:
   virtual bool presentFrameById(const std::string& id) override;
   virtual bool dismissFrame() override;
 
+  // instance
+  virtual bool presentState(
+    const std::string& instanceDescendantId,
+    const std::string& stateMasterId) override;
+  virtual bool dismissState(const std::string& instanceDescendantId) override;
+  virtual bool setMasterId(const std::string& instanceDescendantId, const std::string& masterId)
+    override;
+
   virtual std::string requiredFonts() const override;
   virtual bool        addFont(const uint8_t* data, size_t size, const char* defaultName) override;
 #ifdef EMSCRIPTEN

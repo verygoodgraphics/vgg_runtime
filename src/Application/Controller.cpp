@@ -27,7 +27,9 @@
 #include "Domain/VggExec.hpp"
 #include "Utility/Log.hpp"
 #include "Utility/VggFloat.hpp"
+#include "Utility/VggString.hpp"
 #include "UseCase/EditModel.hpp"
+#include "UseCase/InstanceState.hpp"
 #include "UseCase/ModelChanged.hpp"
 #include "UseCase/ResizeWindow.hpp"
 #include "UseCase/StartRunning.hpp"
@@ -179,8 +181,7 @@ private:
 
 } // namespace
 
-namespace VGG
-{
+using namespace VGG;
 
 Controller::Controller(
   std::weak_ptr<IVggEnv>     env,
@@ -455,7 +456,9 @@ void Controller::handleEvent(UIEventPtr evt)
   }
 
   auto listenersMap = m_model->getEventListeners(evt->targetId());
+  auto originalIdListenersMap = m_model->getEventListeners(Helper::split(evt->targetId()).back());
   auto nameListenersMap = m_model->getEventListeners(evt->targetName());
+  listenersMap.merge(originalIdListenersMap);
   listenersMap.merge(nameListenersMap);
 
   std::string type = evt->type();
@@ -740,4 +743,47 @@ bool Controller::dismissFrame()
   return m_presenter->dismissPage();
 }
 
-} // namespace VGG
+bool Controller::presentState(
+  const std::string& instanceDescendantId,
+  const std::string& stateMasterId)
+{
+  auto          page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
+  InstanceState instanceState{ page };
+
+  auto stateTree = std::make_shared<StateTree>(page);
+  m_presenter->saveState(stateTree);
+  auto success = instanceState.presentState(instanceDescendantId, stateMasterId, stateTree.get());
+  if (success)
+  {
+    m_presenter->update();
+  }
+  return success;
+}
+
+bool Controller::dismissState(const std::string& instanceDescendantId)
+{
+  auto          page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
+  InstanceState instanceState{ page };
+
+  auto success = instanceState.dismissState(instanceDescendantId);
+  if (success)
+  {
+    m_presenter->update();
+  }
+  return success;
+}
+
+bool Controller::setMasterId(
+  const std::string& instanceDescendantId,
+  const std::string& stateMasterId)
+{
+  auto          page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
+  InstanceState instanceState{ page };
+
+  auto success = instanceState.setMasterId(instanceDescendantId, stateMasterId);
+  if (success)
+  {
+    m_presenter->update();
+  }
+  return success;
+}

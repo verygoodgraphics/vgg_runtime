@@ -1,4 +1,5 @@
 add_library(vgg_usecase STATIC
+  InstanceState.cpp
   ModelChanged.cpp
   ResizeWindow.cpp
   StartRunning.cpp

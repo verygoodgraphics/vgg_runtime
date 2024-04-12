@@ -33,6 +33,7 @@ namespace Domain
 {
 class ContourElement;
 class Element;
+class StateTreeElement;
 } // namespace Domain
 namespace Model
 {
@@ -77,6 +78,9 @@ class LayoutNode : public std::enable_shared_from_this<LayoutNode>
   std::weak_ptr<LayoutNode>                m_parent;
   std::vector<std::shared_ptr<LayoutNode>> m_children;
 
+  std::shared_ptr<LayoutNode>      m_oldState;
+  std::shared_ptr<Domain::Element> m_oldElement;
+
   std::weak_ptr<Domain::Element> m_element;
 
   std::shared_ptr<Layout::Internal::AutoLayout> m_autoLayout;
@@ -114,8 +118,8 @@ public:
     m_children.push_back(child);
   }
 
-  void removeAllChildren();
-  void detachChildrenFromFlexNodeTree();
+  std::vector<std::shared_ptr<LayoutNode>> removeAllChildren();
+  void                                     detachChildrenFromFlexNodeTree();
 
   const std::shared_ptr<LayoutNode> parent() const
   {
@@ -180,6 +184,7 @@ public:
 
 public:
   std::string id();
+  std::string originalId();
 
   std::string vggId() const;
   std::string name() const;
@@ -272,6 +277,31 @@ private:
     const Layout::Size&  oldContainerSize,
     Layout::Rect         oldFrame,
     const Layout::Point* parentOrigin);
+};
+
+class StateTree : public LayoutNode
+{
+  std::weak_ptr<LayoutNode> m_pageNode;
+  std::weak_ptr<LayoutNode> m_srcNode;
+
+  std::shared_ptr<Domain::StateTreeElement> m_treeElement;
+
+public:
+  StateTree(std::shared_ptr<LayoutNode> pageNode)
+    : LayoutNode(std::weak_ptr<Domain::Element>{})
+    , m_pageNode{ pageNode }
+  {
+  }
+
+  void setSrcNode(std::shared_ptr<LayoutNode> srcNode)
+  {
+    m_srcNode = srcNode;
+  }
+
+  void setTreeElement(std::shared_ptr<Domain::StateTreeElement> treeElement)
+  {
+    m_treeElement = treeElement;
+  }
 };
 
 } // namespace VGG

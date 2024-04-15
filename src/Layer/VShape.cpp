@@ -124,6 +124,18 @@ void VShape::setOval(const Ellipse& ellipse)
   m_type = OVAL;
 }
 
+void VShape::setPolygon(const Polygon& poly)
+{
+  m_shape = std::make_unique<ShapePath>(poly);
+  m_type = PATH;
+}
+
+void VShape::setStar(const Star& star)
+{
+  m_shape = std::make_unique<ShapePath>(star);
+  m_type = PATH;
+}
+
 void VShape::clip(SkCanvas* canvas, SkClipOp clipOp) const
 {
   ASSERT(type() != EMPTY);

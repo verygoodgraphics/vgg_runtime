@@ -366,12 +366,12 @@ napi_value VggSdkNodeAdapter::UpdateElement(napi_env env, napi_callback_info inf
 
 napi_value VggSdkNodeAdapter::setCurrentFrameById(napi_env env, napi_callback_info info)
 {
-  size_t     argc = 1;
-  napi_value args[1];
+  size_t     argc = 2;
+  napi_value args[2];
   napi_value _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
 
-  if (argc != 1)
+  if (argc < 1)
   {
     napi_throw_error(env, nullptr, "Wrong number of arguments");
     return nullptr;
@@ -403,12 +403,12 @@ napi_value VggSdkNodeAdapter::setCurrentFrameById(napi_env env, napi_callback_in
 
 napi_value VggSdkNodeAdapter::presentFrameById(napi_env env, napi_callback_info info)
 {
-  size_t     argc = 1;
-  napi_value args[1];
+  size_t     argc = 2;
+  napi_value args[2];
   napi_value _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
 
-  if (argc != 1)
+  if (argc < 1)
   {
     napi_throw_error(env, nullptr, "Wrong number of arguments");
     return nullptr;
@@ -440,16 +440,8 @@ napi_value VggSdkNodeAdapter::presentFrameById(napi_env env, napi_callback_info 
 
 napi_value VggSdkNodeAdapter::dismissFrame(napi_env env, napi_callback_info info)
 {
-  size_t     argc = 1;
-  napi_value args[1];
   napi_value _this;
-  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
-
-  if (argc != 0)
-  {
-    napi_throw_error(env, nullptr, "Wrong number of arguments");
-    return nullptr;
-  }
+  NODE_API_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &_this, NULL));
 
   try
   {

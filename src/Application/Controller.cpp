@@ -751,10 +751,10 @@ bool Controller::presentState(
   InstanceState instanceState{ page };
 
   auto stateTree = std::make_shared<StateTree>(page);
-  m_presenter->saveState(stateTree);
   auto success = instanceState.presentState(instanceDescendantId, stateMasterId, stateTree.get());
   if (success)
   {
+    m_presenter->saveState(stateTree);
     m_presenter->update();
   }
   return success;
@@ -768,6 +768,7 @@ bool Controller::dismissState(const std::string& instanceDescendantId)
   auto success = instanceState.dismissState(instanceDescendantId);
   if (success)
   {
+    m_presenter->restoreState();
     m_presenter->update();
   }
   return success;

@@ -102,6 +102,7 @@ public:
     : m_element{ element }
   {
   }
+  virtual ~LayoutNode() = default;
 
   std::shared_ptr<LayoutNode> hitTest(
     const Layout::Point& point,
@@ -121,7 +122,7 @@ public:
   std::vector<std::shared_ptr<LayoutNode>> removeAllChildren();
   void                                     detachChildrenFromFlexNodeTree();
 
-  const std::shared_ptr<LayoutNode> parent() const
+  virtual const std::shared_ptr<LayoutNode> parent() const
   {
     return m_parent.lock();
   }
@@ -183,8 +184,8 @@ public:
   Layout::Size swapWidthAndHeightIfNeeded(Layout::Size size);
 
 public:
-  std::string id();
-  std::string originalId();
+  virtual std::string id();
+  std::string         originalId();
 
   std::string vggId() const;
   std::string name() const;
@@ -291,6 +292,15 @@ public:
     : LayoutNode(std::weak_ptr<Domain::Element>{})
     , m_pageNode{ pageNode }
   {
+  }
+
+  virtual const std::shared_ptr<LayoutNode> parent() const
+  {
+    return m_srcNode.lock();
+  }
+  virtual std::string id()
+  {
+    return m_srcNode.lock()->id();
   }
 
   void setSrcNode(std::shared_ptr<LayoutNode> srcNode)

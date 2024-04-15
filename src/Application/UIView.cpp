@@ -883,12 +883,17 @@ bool UIView::dismissPage()
 void UIView::saveState(std::shared_ptr<StateTree> stateTree)
 {
   m_stateTree = stateTree;
-  m_stateTreeContext = m_presentedTreeContext[currentPage()->id()];
+  m_presentedTreeContext[stateTree->id()] = m_presentedTreeContext[currentPage()->id()];
   m_presentedTreeContext[currentPage()->id()] = EventContext{};
 }
 
 void UIView::restoreState()
 {
+  if (!m_stateTree)
+  {
+    return;
+  }
+
+  m_presentedTreeContext.erase(m_stateTree->id());
   m_stateTree.reset();
-  m_stateTreeContext = EventContext{};
 }

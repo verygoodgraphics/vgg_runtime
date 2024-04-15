@@ -100,6 +100,8 @@ struct JSONTextObject : public JSONObject
     "horizontalAlignment",
     std::vector<ETextHorizontalAlignment>,
     {});
+
+  std::vector<TextStyleAttr> getOverrideFontAttr() const;
 };
 
 struct JSONGroupObject : public JSONObject

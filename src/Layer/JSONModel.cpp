@@ -141,4 +141,50 @@ std::vector<SubShape<JSONObject>> JSONPathObject::getShapes() const
   }
   return res;
 }
+
+std::vector<TextStyleAttr> JSONTextObject::getOverrideFontAttr() const
+{
+  std::vector<TextStyleAttr> textStyle;
+  static const auto          s_defaultAttr = R"({
+        "length":0,
+        "name":"Fira Sans",
+        "subFamilyName":"",
+        "size":14,
+        "fontVariations":[],
+        "postScript":"",
+        "kerning":true,
+        "letterSpacingValue":0,
+        "letterSpacingUnit":0,
+        "lineSpacingValue":0,
+        "lineSpacingUnit":0,
+        "fillUseType":0,
+        "underline":0,
+        "linethrough":false,
+        "fontVariantCaps":0,
+        "textCase":0,
+        "baselineShift":0,
+        "baseline":0,
+        "horizontalScale":1,
+        "verticalScale":1,
+        "proportionalSpacing":0,
+        "rotate":0,
+        "textParagraph":{}
+    })"_json;
+  auto                       defaultAttr = s_defaultAttr;
+  defaultAttr.update(j.value("defaultFontAttr", json::object()), true);
+  auto fontAttr = j.value("fontAttr", std::vector<json>{});
+  for (auto& att : fontAttr)
+  {
+    auto json = defaultAttr;
+    json.update(att, true);
+    if (auto it = json.find("fills"); it == json.end())
+    {
+      json["fills"] =
+        j.value("style", nlohmann::json{}).value("fills", std::vector<nlohmann::json>());
+    }
+    textStyle.push_back(json);
+  }
+  return textStyle;
+}
+
 }; // namespace VGG::layer

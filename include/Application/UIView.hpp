@@ -79,7 +79,6 @@ private:
 
   // instance state
   std::shared_ptr<VGG::StateTree> m_stateTree;
-  EventContext                    m_stateTreeContext;
 
   Layout::Rect m_frame;
   Layout::Rect m_bounds;

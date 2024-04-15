@@ -560,13 +560,13 @@ Layout::Point LayoutNode::converPointToAncestor(
   auto x = point.x;
   auto y = point.y;
 
-  auto parent = m_parent.lock();
-  while (parent && parent != ancestorNode)
+  auto p = parent();
+  while (p && p != ancestorNode)
   {
-    auto origin = parent->origin();
+    auto origin = p->origin();
     x += origin.x;
     y += origin.y;
-    parent = parent->m_parent.lock();
+    p = p->m_parent.lock();
   }
 
   return { x, y };

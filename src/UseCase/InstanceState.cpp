@@ -60,7 +60,7 @@ bool InstanceState::presentState(
     stateTree->addChild(child);
   }
 
-  return setMasterId(instanceDescendantId, stateMasterId);
+  return setMasterId(instanceNode, stateMasterId);
 }
 
 bool InstanceState::dismissState(const std::string& instanceDescendantId)
@@ -89,6 +89,15 @@ bool InstanceState::setMasterId(
     return false;
   }
 
+  return setMasterId(instanceNode, stateMasterId);
+}
+
+bool InstanceState::setMasterId(
+  std::shared_ptr<LayoutNode> instanceNode,
+  const std::string&          stateMasterId)
+{
+  ASSERT(instanceNode);
+
   auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode().get());
   ASSERT(pInstance);
 
@@ -99,7 +108,7 @@ bool InstanceState::setMasterId(
   // update view model
   // render
 
-  return false;
+  return true;
 }
 
 std::shared_ptr<LayoutNode> InstanceState::findInstanceNode(const std::string& instanceDescendantId)

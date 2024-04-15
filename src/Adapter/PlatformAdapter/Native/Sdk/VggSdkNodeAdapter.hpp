@@ -69,6 +69,7 @@ private:
   static napi_value Redo(napi_env env, napi_callback_info info);
   static napi_value Save(napi_env env, napi_callback_info info);
 
+private:
   static napi_ref constructor;
 
   napi_env                m_env;

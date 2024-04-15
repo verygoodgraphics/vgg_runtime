@@ -17,10 +17,14 @@
 
 #include "PlatformAdapter/Native/Sdk/AdapterHelper.hpp"
 
+#include "Application/RunLoop.hpp"
 #include "Application/VggSdk.hpp"
 
-#include <string>
+#include <rxcpp/rx.hpp>
+
 #include <cassert>
+#include <functional>
+#include <string>
 
 constexpr auto listener_code_key = "listener";
 
@@ -96,6 +100,53 @@ using namespace VGG;
   {                                                                                                \
     (name), NULL, NULL, NULL, NULL, (value), napi_default, NULL                                    \
   }
+
+namespace
+{
+
+template<class ResultType, class OnError = rxcpp::detail::OnErrorEmpty>
+class SyncTaskInMainLoop
+{
+public:
+  using TaskFunction = std::function<ResultType()>;
+  using OnResult = std::function<void(ResultType)>;
+
+  SyncTaskInMainLoop(TaskFunction taskFunction, OnResult onResult, OnError onError = OnError())
+    : m_task_function{ std::move(taskFunction) }
+    , m_on_result{ std::move(onResult) }
+    , m_on_error{ std::move(onError) }
+  {
+  }
+
+  void operator()()
+  {
+    auto observable = rxcpp::make_observable_dynamic<ResultType>(
+      [&task_funcion = m_task_function](rxcpp::subscriber<ResultType> o)
+      {
+        try
+        {
+          auto result = task_funcion();
+          o.on_next(std::move(result));
+          o.on_completed();
+        }
+        catch (...)
+        {
+          o.on_error(std::current_exception());
+        }
+      });
+
+    observable.subscribe_on(RunLoop::sharedInstance()->thread())
+      .as_blocking()
+      .subscribe(m_on_result, m_on_error);
+  }
+
+private:
+  TaskFunction m_task_function;
+  OnResult     m_on_result;
+  OnError      m_on_error;
+};
+
+} // namespace
 
 napi_ref VggSdkNodeAdapter::constructor;
 
@@ -454,7 +505,10 @@ napi_value VggSdkNodeAdapter::presentState(napi_env env, napi_callback_info info
     VggSdkNodeAdapter* sdkAdapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
-    auto success = sdkAdapter->m_vggSdk->presentState(instanceDescendantId, newMasterId);
+    bool success{ false };
+    SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, instanceDescendantId, newMasterId]()
+                              { return sdk->presentState(instanceDescendantId, newMasterId); },
+                              [&success](bool result) { success = result; } }();
 
     napi_value ret;
     NODE_API_CALL(env, napi_get_boolean(env, success, &ret));

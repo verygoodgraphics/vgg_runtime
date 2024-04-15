@@ -38,6 +38,7 @@ public:
   bool setMasterId(const std::string& instanceDescendantId, const std::string& stateMasterId);
 
 private:
+  bool setMasterId(std::shared_ptr<LayoutNode> instanceNode, const std::string& stateMasterId);
   std::shared_ptr<LayoutNode> findInstanceNode(const std::string& instanceDescendantId);
 };
 

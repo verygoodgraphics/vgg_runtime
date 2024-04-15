@@ -33,14 +33,14 @@ std::shared_ptr<LayoutNode> ViewModel::layoutTree() const
   return {};
 }
 
-JsonDocumentPtr ViewModel::designDoc() const
+std::shared_ptr<Domain::DesignDocument> ViewModel::designDoc() const
 {
   auto sharedLayout = layout.lock();
   ASSERT(sharedLayout);
   if (sharedLayout)
   {
-    return sharedLayout->displayDesignDoc();
+    return sharedLayout->designDocTree();
   }
 
-  return JsonDocumentPtr(new RawJsonDocument{});
+  return {};
 }

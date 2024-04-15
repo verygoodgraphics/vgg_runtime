@@ -30,8 +30,8 @@ struct ViewModel
   std::weak_ptr<Daruma>         model;
   std::weak_ptr<Layout::Layout> layout;
 
-  std::shared_ptr<LayoutNode> layoutTree() const;
-  JsonDocumentPtr             designDoc() const;
+  std::shared_ptr<LayoutNode>             layoutTree() const;
+  std::shared_ptr<Domain::DesignDocument> designDoc() const;
 
   VGG::Model::Loader::ResourcesType resources() const
   {

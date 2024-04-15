@@ -296,29 +296,8 @@ struct Serde
         CoordinateConvert::convertCoordinateSystem(anchorPoint, totalMatrix);
         p->setTextAnchor(anchorPoint);
         p->setParagraphBounds(bounds);
-
         // 1.
-        std::vector<TextStyleAttr> textStyle;
-        auto                       defaultAttr = defaultTextAttr();
-        defaultAttr.update(m.getDefaultFontAttr());
-        auto fontAttr = m.getFontAttr();
-        for (auto& att : fontAttr)
-        {
-          auto json = defaultAttr;
-          json.update(att);
-          if (!json.fills)
-          {
-            json.fills = m.getStyle().fills;
-          }
-          // if (auto it = json.find("borders"); it == json.end())
-          // {
-          //
-          //   json["borders"] =
-          //     j.value("style", nlohmann::json{}).value("borders", std::vector<nlohmann::json>());
-          // }
-          textStyle.push_back(json);
-        }
-        //
+        std::vector<TextStyleAttr> textStyle = m.getOverrideFontAttr();
         for (auto& style : textStyle)
         {
           CoordinateConvert::convertCoordinateSystem(style, totalMatrix);

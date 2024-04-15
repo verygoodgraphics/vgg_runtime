@@ -125,8 +125,10 @@ struct StructTextObject : public StructObject
   R_OPT(Anchor, anchorPoint, Float2, (Float2{ 0, 0 }));
   R_OPT(TextLineType, textLineType, std::vector<TextLineAttr>, {});
   R_OPT(DefaultFontAttr, defaultFontAttr, TextStyleAttr, {});
+
   R(FontAttr, fontAttr, std::vector<TextStyleAttr>);
   R(HorizontalAlignment, horizontalAlignment, std::vector<ETextHorizontalAlignment>);
+  std::vector<TextStyleAttr> getOverrideFontAttr() const;
 #undef R_OPT
 #undef R
 };

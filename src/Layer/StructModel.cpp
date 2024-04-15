@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "Layer/Model/StructModel.hpp"
+#include "Domain/Model/DesignModel.hpp"
 #include "Domain/Model/DesignModelFwd.hpp"
 #include "Domain/Model/Element.hpp"
 #include "Layer/Core/Attrs.hpp"
@@ -26,6 +27,44 @@ namespace
 using namespace VGG;
 using namespace VGG::layer;
 using namespace VGG::Model;
+
+inline void update(
+  VGG::Model::TextFontAttributes&       attr,
+  const VGG::Model::TextFontAttributes& other)
+{
+
+#define M(field)                                                                                   \
+  if (other.field)                                                                                 \
+  {                                                                                                \
+    attr.field = other.field;                                                                      \
+  }
+
+  M(baselineShift);
+  M(borders);
+  // M(textFontAttributesClass);
+  M(fills);
+  M(fillUseType);
+  M(fontVariantCaps);
+  M(fontVariantPosition);
+  M(fontVariations);
+  M(horizontalScale);
+  M(hyperlink);
+  M(length);
+  M(letterSpacingUnit);
+  M(letterSpacingValue);
+  M(lineSpacingUnit);
+  M(linethrough);
+  M(name);
+  M(postScript);
+  M(rotate);
+  M(size);
+  M(subFamilyName);
+  M(textCase);
+  M(textParagraph);
+  M(underline);
+  M(verticalScale);
+#undef M
+}
 
 template<typename F>
 inline std::variant<EModelObjectType, EModelShapeType> subGeometryType(
@@ -331,6 +370,28 @@ std::vector<SubShape<StructObject>> StructPathObject::getShapes() const
       });
   }
   return res;
+}
+
+std::vector<TextStyleAttr> StructTextObject::getOverrideFontAttr() const
+{
+  const auto& fontAttr = static_cast<const Model::Text*>(m->model())->fontAttr;
+  const auto& style = static_cast<const Model::Text*>(m->model())->style;
+  const auto& defaultFontAttr = static_cast<const Model::Text*>(m->model())->defaultFontAttr;
+  std::vector<TextStyleAttr> textStyle;
+  for (const auto& attr : fontAttr)
+  {
+    auto defaultAttr = *defaultFontAttr;
+    update(defaultAttr, attr);
+    if (!defaultAttr.fills)
+    {
+      defaultAttr.fills = style.fills;
+    }
+    auto a = serde::ModelSerde<Model::TextFontAttributes, TextStyleAttr>::serde_from(defaultAttr);
+
+    textStyle.push_back(a);
+  }
+
+  return textStyle;
 }
 
 } // namespace VGG::layer

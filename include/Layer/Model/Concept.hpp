@@ -198,6 +198,7 @@ concept TextObject = AbstractObject<T> && requires(T a) {
   REQ_DECL(HorizontalAlignment, (std::vector<ETextHorizontalAlignment>));
   REQ_DECL(DefaultFontAttr, (TextStyleAttr));
   REQ_DECL(FontAttr, (std::vector<TextStyleAttr>));
+  REQ_DECL(OverrideFontAttr, (std::vector<TextStyleAttr>));
 };
 
 template<typename T, typename U>

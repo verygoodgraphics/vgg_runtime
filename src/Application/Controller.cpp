@@ -765,7 +765,7 @@ bool Controller::dismissState(const std::string& instanceDescendantId)
   auto          page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
   InstanceState instanceState{ page };
 
-  auto success = instanceState.dismissState(instanceDescendantId);
+  auto success = instanceState.dismissState(m_presenter->savedState().get(), instanceDescendantId);
   if (success)
   {
     m_presenter->restoreState();

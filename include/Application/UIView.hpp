@@ -178,8 +178,9 @@ public:
   bool presentPage(int index);
   bool dismissPage();
 
-  void saveState(std::shared_ptr<StateTree> stateTree);
-  void restoreState();
+  void                       saveState(std::shared_ptr<StateTree> stateTree);
+  std::shared_ptr<StateTree> savedState();
+  void                       restoreState();
 
   void enableZoomer(bool enabled);
 

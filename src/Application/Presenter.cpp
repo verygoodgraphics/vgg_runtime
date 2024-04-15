@@ -286,6 +286,13 @@ void Presenter::saveState(std::shared_ptr<StateTree> stateTree)
   ASSERT(m_view);
   m_view->saveState(stateTree);
 }
+
+std::shared_ptr<StateTree> Presenter::savedState()
+{
+  ASSERT(m_view);
+  return m_view->savedState();
+}
+
 void Presenter::restoreState()
 {
   ASSERT(m_view);

@@ -32,6 +32,10 @@ public:
     m_contour = contour;
   }
 
+  ShapePath(const Polygon& poly);
+
+  ShapePath(const Star& poly);
+
   ShapePath(const SkPath& path)
   {
     m_contour = nullptr;

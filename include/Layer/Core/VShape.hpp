@@ -70,12 +70,17 @@ struct Ellipse
 
 struct Polygon
 {
-  // NOT IMPLEMENTED
+  Bounds bounds;
+  float  radius{ 0.f };
+  int    count{ 0 };
 };
 
 struct Star
 {
-  // NOT IMPLEMENTED
+  Bounds bounds;
+  float  radius{ 0.f };
+  float  ratio{ 0.f };
+  int    count{ 0 };
 };
 
 struct VectorNetwork
@@ -131,6 +136,18 @@ public:
     setArc(arc.oval, arc.startAngle, arc.sweepAngle, arc.useCenter);
   }
 
+  explicit VShape(const Polygon& poly)
+    : VShape()
+  {
+    setPolygon(poly);
+  }
+
+  explicit VShape(const Star& star)
+    : VShape()
+  {
+    setStar(star);
+  }
+
   ~VShape();
   VShape(const VShape& shape);
   VShape& operator=(const VShape& shape);
@@ -143,6 +160,8 @@ public:
   void setRRect(const SkRRect& rrect);
   void setArc(const SkRect& oval, float startAngle, float sweepAngle, bool forceMoveTo);
   void setOval(const Ellipse& ellipse);
+  void setPolygon(const Polygon& ellipse);
+  void setStar(const Star& ellipse);
 
   std::optional<SkRect>  asRect() const;
   std::optional<SkRRect> asRRect() const;

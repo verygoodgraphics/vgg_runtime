@@ -15,6 +15,7 @@
  */
 
 #include "Layer/Model/JSONModel.hpp"
+#include "Layer/Model/Concept.hpp"
 
 #include <vector>
 
@@ -105,33 +106,53 @@ std::vector<SubShape<JSONObject>> JSONPathObject::getShapes() const
     if (shapeType != EModelShapeType::UNKNOWN)
     {
       const auto radius = geo.value("radius", Float4{ 0.f, 0.f, 0.f, 0.f });
-      res.emplace_back(
-        blop,
-        makeShapeData2(
-          bounds,
-          shapeType,
-          radius.data(),
-          smooth,
-          [&](EModelShapeType type)
-          {
-            if (type == EModelShapeType::CONTOUR)
+      if (shapeType == EModelShapeType::POLYGON)
+      {
+        res.emplace_back(
+          blop,
+          Polygon{ .bounds = bounds,
+                   .radius = geo.value("radius", 0.f),
+                   .count = geo.value("pointCount", 0) });
+      }
+      else if (shapeType == EModelShapeType::STAR)
+      {
+        res.emplace_back(
+          blop,
+          Star{ .bounds = bounds,
+                .radius = geo.value("radius", 0.f),
+                .ratio = geo.value("ratio", 0.f),
+                .count = geo.value("pointCount", 0) });
+      }
+      else
+      {
+        res.emplace_back(
+          blop,
+          makeShapeData2(
+            bounds,
+            shapeType,
+            radius.data(),
+            smooth,
+            [&](EModelShapeType type)
             {
-              auto c = makeContourData2(geo);
-              c->cornerSmooth = smooth;
-              return c;
-            }
-            else if (type == EModelShapeType::POLYGON || type == EModelShapeType::STAR)
-            {
-              auto cp = j;
-              if (pathChange(cp))
+              if (type == EModelShapeType::CONTOUR)
               {
-                auto c = makeContourData2(cp["shape"]["subshapes"][0]["subGeometry"]);
+                auto c = makeContourData2(geo);
                 c->cornerSmooth = smooth;
                 return c;
               }
-            }
-            return std::make_shared<ContourArray>();
-          }));
+              // else if (type == EModelShapeType::POLYGON || type == EModelShapeType::STAR)
+              // {
+              //   auto cp = j;
+              //   if (pathChange(cp))
+              //   {
+              //     auto c = makeContourData2(cp["shape"]["subshapes"][0]["subGeometry"]);
+              //     c->cornerSmooth = smooth;
+              //     return c;
+              //   }
+              // }
+              return std::make_shared<ContourArray>();
+            }));
+      }
     }
     else
     {

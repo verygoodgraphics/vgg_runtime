@@ -164,8 +164,8 @@ VggSdkNodeAdapter::~VggSdkNodeAdapter()
 
 void VggSdkNodeAdapter::Destructor(napi_env env, void* nativeObject, void* /*finalize_hint*/)
 {
-  VggSdkNodeAdapter* sdk_adapter = static_cast<VggSdkNodeAdapter*>(nativeObject);
-  delete sdk_adapter;
+  VggSdkNodeAdapter* sdkAdapter = static_cast<VggSdkNodeAdapter*>(nativeObject);
+  delete sdkAdapter;
 }
 
 void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
@@ -226,18 +226,18 @@ napi_value VggSdkNodeAdapter::New(napi_env env, napi_callback_info info)
   if (is_constructor)
   {
     // Invoked as constructor: `new VggSdk()`
-    VggSdkNodeAdapter* sdk_adapter = new VggSdkNodeAdapter();
-    sdk_adapter->m_env = env;
+    VggSdkNodeAdapter* sdkAdapter = new VggSdkNodeAdapter();
+    sdkAdapter->m_env = env;
 
     NODE_API_CALL(
       env,
       napi_wrap(
         env,
         _this,
-        sdk_adapter,
+        sdkAdapter,
         VggSdkNodeAdapter::Destructor,
         nullptr /* finalize_hint */,
-        &sdk_adapter->m_wrapper));
+        &sdkAdapter->m_wrapper));
 
     return _this;
   }
@@ -269,10 +269,15 @@ napi_value VggSdkNodeAdapter::SetEnv(napi_env env, napi_callback_info info)
   {
     auto envKey = GetArgString(env, args[0]);
 
-    VggSdkNodeAdapter* sdk_adapter;
-    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
-    sdk_adapter->m_vggSdk->setEnv(envKey);
+    SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, envKey]()
+                              {
+                                sdk->setEnv(envKey);
+                                return true;
+                              },
+                              [](bool) {} }();
   }
   catch (std::exception& e)
   {
@@ -302,7 +307,13 @@ napi_value VggSdkNodeAdapter::GetElement(napi_env env, napi_callback_info info)
     VggSdkNodeAdapter* sdkAdapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
-    const auto& value = sdkAdapter->m_vggSdk->getElement(id);
+    std::string value;
+    SyncTaskInMainLoop<bool>{ [&value, sdk = sdkAdapter->m_vggSdk, id]()
+                              {
+                                value = sdk->getElement(id);
+                                return true;
+                              },
+                              [](bool) {} }();
 
     napi_value ret;
     NODE_API_CALL(env, napi_create_string_utf8(env, value.data(), value.size(), &ret));
@@ -338,7 +349,12 @@ napi_value VggSdkNodeAdapter::UpdateElement(napi_env env, napi_callback_info inf
     VggSdkNodeAdapter* sdkAdapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
-    sdkAdapter->m_vggSdk->updateElement(id, contentPatch);
+    SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, id, contentPatch]()
+                              {
+                                sdk->updateElement(id, contentPatch);
+                                return true;
+                              },
+                              [](bool) {} }();
   }
   catch (std::exception& e)
   {
@@ -368,7 +384,10 @@ napi_value VggSdkNodeAdapter::setCurrentFrameById(napi_env env, napi_callback_in
     VggSdkNodeAdapter* sdkAdapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
-    auto success = sdkAdapter->m_vggSdk->setCurrentFrameById(id);
+    bool success{ false };
+    SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, id]()
+                              { return sdk->setCurrentFrameById(id); },
+                              [&success](bool result) { success = result; } }();
 
     napi_value ret;
     NODE_API_CALL(env, napi_get_boolean(env, success, &ret));
@@ -402,7 +421,10 @@ napi_value VggSdkNodeAdapter::presentFrameById(napi_env env, napi_callback_info 
     VggSdkNodeAdapter* sdkAdapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
-    auto success = sdkAdapter->m_vggSdk->presentFrameById(id);
+    bool success{ false };
+    SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, id]()
+                              { return sdk->presentFrameById(id); },
+                              [&success](bool result) { success = result; } }();
 
     napi_value ret;
     NODE_API_CALL(env, napi_get_boolean(env, success, &ret));
@@ -434,7 +456,9 @@ napi_value VggSdkNodeAdapter::dismissFrame(napi_env env, napi_callback_info info
     VggSdkNodeAdapter* sdkAdapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
-    auto success = sdkAdapter->m_vggSdk->dismissFrame();
+    bool success{ false };
+    SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk]() { return sdk->dismissFrame(); },
+                              [&success](bool result) { success = result; } }();
 
     napi_value ret;
     NODE_API_CALL(env, napi_get_boolean(env, success, &ret));
@@ -470,7 +494,10 @@ napi_value VggSdkNodeAdapter::setMasterId(napi_env env, napi_callback_info info)
     VggSdkNodeAdapter* sdkAdapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
-    auto success = sdkAdapter->m_vggSdk->setMasterId(instanceDescendantId, newMasterId);
+    bool success{ false };
+    SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, instanceDescendantId, newMasterId]()
+                              { return sdk->setMasterId(instanceDescendantId, newMasterId); },
+                              [&success](bool result) { success = result; } }();
 
     napi_value ret;
     NODE_API_CALL(env, napi_get_boolean(env, success, &ret));
@@ -542,7 +569,10 @@ napi_value VggSdkNodeAdapter::dismissState(napi_env env, napi_callback_info info
     VggSdkNodeAdapter* sdkAdapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
-    auto success = sdkAdapter->m_vggSdk->dismissState(instanceDescendantId);
+    bool success{ false };
+    SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, instanceDescendantId]()
+                              { return sdk->dismissState(instanceDescendantId); },
+                              [&success](bool result) { success = result; } }();
 
     napi_value ret;
     NODE_API_CALL(env, napi_get_boolean(env, success, &ret));
@@ -561,10 +591,16 @@ napi_value VggSdkNodeAdapter::GetDesignDocument(napi_env env, napi_callback_info
   napi_value _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &_this, nullptr));
 
-  VggSdkNodeAdapter* sdk_adapter;
-  NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
+  VggSdkNodeAdapter* sdkAdapter;
+  NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
-  const auto& json = sdk_adapter->m_vggSdk->designDocument();
+  std::string json;
+  SyncTaskInMainLoop<bool>{ [&json, sdk = sdkAdapter->m_vggSdk]()
+                            {
+                              json = sdk->designDocument();
+                              return true;
+                            },
+                            [](bool) {} }();
 
   napi_value ret;
   NODE_API_CALL(env, napi_create_string_utf8(env, json.data(), json.size(), &ret));
@@ -587,12 +623,18 @@ napi_value VggSdkNodeAdapter::DesignDocumentValueAt(napi_env env, napi_callback_
 
   try
   {
-    auto json_pointer_string = GetArgString(env, args[0]);
+    auto jsonPointer = GetArgString(env, args[0]);
 
-    VggSdkNodeAdapter* sdk_adapter;
-    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
-    const auto& value = sdk_adapter->m_vggSdk->designDocumentValueAt(json_pointer_string);
+    std::string value;
+    SyncTaskInMainLoop<bool>{ [&value, sdk = sdkAdapter->m_vggSdk, jsonPointer]()
+                              {
+                                value = sdk->designDocumentValueAt(jsonPointer);
+                                return true;
+                              },
+                              [](bool) {} }();
 
     napi_value ret;
     NODE_API_CALL(env, napi_create_string_utf8(env, value.data(), value.size(), &ret));
@@ -623,14 +665,19 @@ napi_value VggSdkNodeAdapter::AddEventListener(napi_env env, napi_callback_info 
 
   try
   {
-    VggSdkNodeAdapter* sdk_adapter;
-    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
     auto elementKey = GetArgString(env, args[0]);
     auto eventType = GetArgString(env, args[1]);
     auto listenerCode = GetArgString(env, args[2]);
 
-    sdk_adapter->m_vggSdk->addEventListener(elementKey, eventType, listenerCode);
+    SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, elementKey, eventType, listenerCode]()
+                              {
+                                sdk->addEventListener(elementKey, eventType, listenerCode);
+                                return true;
+                              },
+                              [](bool) {} }();
   }
   catch (std::exception& e)
   {
@@ -655,14 +702,19 @@ napi_value VggSdkNodeAdapter::RemoveEventListener(napi_env env, napi_callback_in
 
   try
   {
-    VggSdkNodeAdapter* sdk_adapter;
-    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
     auto elementKey = GetArgString(env, args[0]);
     auto eventType = GetArgString(env, args[1]);
     auto listenerCode = GetArgString(env, args[2]);
 
-    sdk_adapter->m_vggSdk->removeEventListener(elementKey, eventType, listenerCode);
+    SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, elementKey, eventType, listenerCode]()
+                              {
+                                sdk->removeEventListener(elementKey, eventType, listenerCode);
+                                return true;
+                              },
+                              [](bool) {} }();
   }
   catch (std::exception& e)
   {
@@ -728,13 +780,20 @@ napi_value VggSdkNodeAdapter::GetEventListeners(napi_env env, napi_callback_info
   {
     auto elementKey = GetArgString(env, args[0]);
 
-    VggSdkNodeAdapter* sdk_adapter;
-    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
     napi_value result_listeners_map; // result object
     napi_create_object(env, &result_listeners_map);
 
-    auto listenersMap = sdk_adapter->m_vggSdk->getEventListeners(elementKey);
+    VGG::VggSdk::ListenersType listenersMap;
+    SyncTaskInMainLoop<bool>{ [&listenersMap, sdk = sdkAdapter->m_vggSdk, elementKey]()
+                              {
+                                listenersMap = sdk->getEventListeners(elementKey);
+                                return true;
+                              },
+                              [](bool) {} }();
+
     for (auto& map_item : listenersMap)
     {
       if (map_item.second.empty())
@@ -799,10 +858,15 @@ napi_value VggSdkNodeAdapter::Save(napi_env env, napi_callback_info info)
 
   try
   {
-    VggSdkNodeAdapter* sdk_adapter;
-    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdk_adapter)));
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
-    sdk_adapter->m_vggSdk->save();
+    SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk]()
+                              {
+                                sdk->save();
+                                return true;
+                              },
+                              [](bool) {} }();
 
     return nullptr;
   }

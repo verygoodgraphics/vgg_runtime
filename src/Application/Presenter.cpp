@@ -18,6 +18,7 @@
 #include "Mouse.hpp"
 
 #include "Domain/Layout/Node.hpp"
+#include "Layer/Model/StructModel.hpp"
 #include "Layer/SceneBuilder.hpp"
 #include "Utility/Log.hpp"
 #include "Utility/VggFloat.hpp"
@@ -216,6 +217,15 @@ void Presenter::setModel(std::shared_ptr<ViewModel> viewModel)
     return;
   }
 
+  std::vector<layer::StructFrameObject> frames;
+  for (auto& f : *viewModel->designDoc())
+  {
+    if (f->type() == VGG::Domain::Element::EType::FRAME)
+    {
+      frames.emplace_back(layer::StructFrameObject(f.get()));
+    }
+  }
+
   std::unordered_map<std::string, FontInfo> requiredFonts;
   auto                                      result =
     layer::SceneBuilder::builder()
@@ -224,7 +234,7 @@ void Presenter::setModel(std::shared_ptr<ViewModel> viewModel)
         [&requiredFonts](const std::string& familyName, const std::string& subfamilyName) {
           requiredFonts[familyName + subfamilyName] = FontInfo{ familyName, subfamilyName };
         })
-      .build(viewModel->designDoc()->content());
+      .build<layer::StructModelFrame>(std::move(frames));
 
   if (result.root)
   {

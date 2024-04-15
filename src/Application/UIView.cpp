@@ -22,6 +22,7 @@
 
 #include "Domain/Layout/Node.hpp"
 #include "Layer/Core/RasterCacheTile.hpp"
+#include "Layer/Model/StructModel.hpp"
 #include "Layer/SceneBuilder.hpp"
 #include "Layer/Zoomer.hpp"
 #include "Utility/Log.hpp"
@@ -564,8 +565,17 @@ void UIView::show(const ViewModel& viewModel, bool force)
     return;
   }
 
-  auto result = layer::SceneBuilder::builder().setResetOriginEnable(true).build(
-    viewModel.designDoc()->content());
+  std::vector<layer::StructFrameObject> frames;
+  for (auto& f : *viewModel.designDoc())
+  {
+    if (f->type() == VGG::Domain::Element::EType::FRAME)
+    {
+      frames.emplace_back(layer::StructFrameObject(f.get()));
+    }
+  }
+  auto result =
+    layer::SceneBuilder::builder().setResetOriginEnable(true).build<layer::StructModelFrame>(
+      std::move(frames));
   if (result.root)
   {
     show(viewModel, std::move(*result.root), force);

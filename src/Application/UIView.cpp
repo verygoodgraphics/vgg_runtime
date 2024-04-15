@@ -887,6 +887,11 @@ void UIView::saveState(std::shared_ptr<StateTree> stateTree)
   m_presentedTreeContext[currentPage()->id()] = EventContext{};
 }
 
+std::shared_ptr<StateTree> UIView::savedState()
+{
+  return m_stateTree;
+}
+
 void UIView::restoreState()
 {
   if (!m_stateTree)

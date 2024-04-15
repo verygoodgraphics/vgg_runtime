@@ -63,9 +63,16 @@ bool InstanceState::presentState(
   return setMasterId(instanceNode, stateMasterId);
 }
 
-bool InstanceState::dismissState(const std::string& instanceDescendantId)
+bool InstanceState::dismissState(
+  const StateTree*   savedStateTree,
+  const std::string& instanceDescendantId)
 {
-  auto instanceNode = findInstanceNode(instanceDescendantId);
+  if (!savedStateTree)
+  {
+    return false;
+  }
+
+  auto instanceNode = savedStateTree->parent();
   if (!instanceNode)
   {
     return false;
@@ -75,7 +82,7 @@ bool InstanceState::dismissState(const std::string& instanceDescendantId)
   ASSERT(pInstance);
   auto oldMasterId = pInstance->dissmissState();
 
-  return setMasterId(instanceDescendantId, oldMasterId);
+  return setMasterId(instanceNode, oldMasterId);
 }
 
 bool InstanceState::setMasterId(

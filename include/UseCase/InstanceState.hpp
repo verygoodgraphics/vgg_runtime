@@ -34,7 +34,7 @@ public:
     const std::string& instanceDescendantId,
     const std::string& stateMasterId,
     StateTree*         stateTree);
-  bool dismissState(const std::string& instanceDescendantId);
+  bool dismissState(const StateTree* savedStateTree, const std::string& instanceDescendantId);
   bool setMasterId(const std::string& instanceDescendantId, const std::string& stateMasterId);
 
 private:

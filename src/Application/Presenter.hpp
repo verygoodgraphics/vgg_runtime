@@ -89,8 +89,9 @@ public:
   bool presentPage(int index);
   bool dismissPage();
 
-  void saveState(std::shared_ptr<StateTree> stateTree);
-  void restoreState();
+  void                       saveState(std::shared_ptr<StateTree> stateTree);
+  std::shared_ptr<StateTree> savedState();
+  void                       restoreState();
 
   virtual void setModel(std::shared_ptr<ViewModel> viewModel);
   auto         requiredFonts()

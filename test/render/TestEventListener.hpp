@@ -72,6 +72,7 @@ protected:
     program.add_argument("-p", "--prefix").help("the prefix of filename or dir");
     program.add_argument("-L", "--loaddir").help("iterates all the files in the given dir");
     program.add_argument("-c", "--config").help("specify config file");
+    program.add_argument("-m", "--model").help("model read by").default_value("struct");
     program.add_argument("-w", "--width")
       .help("width of viewport")
       .scan<'i', int>()
@@ -135,42 +136,46 @@ protected:
                        .setExpandEnabled(true)
                        .setLayoutEnabled(true)
                        .build();
-#define USE_TYPE 2
 
-#if USE_TYPE == 0
-#elif USE_TYPE == 1
-          std::vector<layer::JSONFrameObject> frames;
-          for (auto& e : *res.doc)
+          layer::SceneBuilderResult sceneBuilderResult;
+          layer::Timer              t;
+          if (program.get("-m") == "json")
           {
-            if (e->type() == VGG::Domain::Element::EType::FRAME)
+            std::vector<layer::JSONFrameObject> frames;
+            std::vector<nlohmann::json>         jsonModels;
+            for (auto& e : *res.doc)
             {
-              auto f = static_cast<VGG::Domain::FrameElement*>(e.get());
-              frames.emplace_back(layer::JSONFrameObject(f->treeModel(false)));
+              if (e->type() == VGG::Domain::Element::EType::FRAME)
+              {
+                auto f = static_cast<VGG::Domain::FrameElement*>(e.get());
+                jsonModels.emplace_back(f->treeModel(true));
+                frames.emplace_back(layer::JSONFrameObject(jsonModels.back()));
+              }
             }
+            t.start();
+            sceneBuilderResult = VGG::layer::SceneBuilder::builder()
+                                   .setResetOriginEnable(true)
+                                   .setAllocator(layer::getGlobalMemoryAllocator())
+                                   .build<layer::JSONModelFrame>(std::move(frames));
+            t.stop();
           }
-#elif USE_TYPE == 2
-          std::vector<layer::StructFrameObject> frames;
-          for (auto& f : *res.doc)
+          else if (program.get("-m") == "struct")
           {
-            if (f->type() == VGG::Domain::Element::EType::FRAME)
+            std::vector<layer::StructFrameObject> frames;
+            for (auto& f : *res.doc)
             {
-              frames.emplace_back(layer::StructFrameObject(f.get()));
+              if (f->type() == VGG::Domain::Element::EType::FRAME)
+              {
+                frames.emplace_back(layer::StructFrameObject(f.get()));
+              }
             }
+            t.start();
+            sceneBuilderResult = VGG::layer::SceneBuilder::builder()
+                                   .setResetOriginEnable(true)
+                                   .setAllocator(layer::getGlobalMemoryAllocator())
+                                   .build<layer::StructModelFrame>(std::move(frames));
+            t.stop();
           }
-#endif
-          layer::Timer t;
-          t.start();
-          auto sceneBuilderResult = VGG::layer::SceneBuilder::builder()
-                                      .setResetOriginEnable(true)
-                                      .setAllocator(layer::getGlobalMemoryAllocator())
-#if USE_TYPE == 0
-                                      .build(std::move(res.jsonDoc));
-#elif USE_TYPE == 1
-                                      .build<layer::JSONModelFrame>(std::move(frames));
-#elif USE_TYPE == 2
-                                      .build<layer::StructModelFrame>(std::move(frames));
-#endif
-          t.stop();
           auto dur = t.elapsed();
           INFO("Doc Expand Time Cost: %f", (double)res.timeCost.expand.s());
           INFO("Doc Layout Time Cost: %f", (double)res.timeCost.layout.s());

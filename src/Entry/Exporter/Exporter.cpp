@@ -22,6 +22,7 @@
 #include "Layer/SceneBuilder.hpp"
 #include "Utility/ConfigManager.hpp"
 #include "Layer/Core/PaintNode.hpp"
+#include "Layer/Model/StructModel.hpp"
 #include "Layer/VGGLayer.hpp"
 #include "Layer/Scene.hpp"
 #include "Layer/Exporter/SVGExporter.hpp"
@@ -239,11 +240,20 @@ public:
     BuilderResult::TimeCost cost;
     cost.layout = res.timeCost.layout.s();
     cost.expand = res.timeCost.expand.s();
+
+    std::vector<layer::StructFrameObject> frames;
+    for (auto& f : *res.doc)
+    {
+      if (f->type() == VGG::Domain::Element::EType::FRAME)
+      {
+        frames.emplace_back(layer::StructFrameObject(f.get()));
+      }
+    }
     auto sceneBuilderResult = VGG::layer::SceneBuilder::builder()
                                 .setResetOriginEnable(true)
                                 .setCheckVersion(VGG_PARSE_FORMAT_VER_STR)
                                 .setAllocator(layer::getGlobalMemoryAllocator())
-                                .build(res.doc->treeModel());
+                                .build<layer::StructModelFrame>(std::move(frames));
     if (sceneBuilderResult.type)
     {
       if (*sceneBuilderResult.type == VGG::layer::SceneBuilderResult::EResultType::VERSION_MISMATCH)

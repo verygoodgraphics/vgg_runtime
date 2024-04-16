@@ -16,16 +16,21 @@
 
 #include "UseCase/InstanceState.hpp"
 
+#include "Domain/Layout/ExpandSymbol.hpp"
 #include "Domain/Layout/Node.hpp"
 #include "Domain/Model/Element.hpp"
 #include "Utility/Log.hpp"
 
 using namespace VGG;
 
-InstanceState::InstanceState(std::shared_ptr<LayoutNode> page)
+InstanceState::InstanceState(
+  std::shared_ptr<LayoutNode>           page,
+  std::shared_ptr<Layout::ExpandSymbol> expander)
   : m_page{ page }
+  , m_expander{ expander }
 {
   ASSERT(page);
+  ASSERT(expander);
 }
 
 bool InstanceState::presentState(
@@ -108,10 +113,11 @@ bool InstanceState::setMasterId(
   auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode().get());
   ASSERT(pInstance);
 
-  auto oldElementChildren = pInstance->updateMasterId(stateMasterId);
-  instanceNode->removeAllChildren();
-
   // expand again
+  m_expander->expandInstance(
+    std::static_pointer_cast<Domain::SymbolInstanceElement>(instanceNode->elementNode()),
+    stateMasterId);
+
   // update view model
   // render
 

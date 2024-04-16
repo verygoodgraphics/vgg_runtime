@@ -20,9 +20,15 @@
 
 namespace VGG
 {
+namespace Layout
+{
+class ExpandSymbol;
+} // namespace Layout
+
 class StartRunning
 {
-  std::shared_ptr<Layout::Layout> m_layout;
+  std::shared_ptr<Layout::Layout>       m_layout;
+  std::shared_ptr<Layout::ExpandSymbol> m_expander;
 
 public:
   StartRunning(std::shared_ptr<Daruma> model);
@@ -35,6 +41,11 @@ public:
   std::shared_ptr<LayoutNode> layoutTree()
   {
     return m_layout->layoutTree();
+  }
+
+  auto expander()
+  {
+    return m_expander;
   }
 };
 

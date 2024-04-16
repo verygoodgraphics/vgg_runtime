@@ -1229,3 +1229,29 @@ bool ExpandSymbol::applyReferenceOverride(
 
   return false;
 }
+
+void ExpandSymbol::expandInstance(
+  std::shared_ptr<Domain::SymbolInstanceElement> instance,
+  std::string                                    masterId)
+{
+  if (!instance || masterId.empty())
+  {
+    return;
+  }
+
+  resetInstanceInfo(*instance);
+  instance->updateMasterId(masterId);
+
+  std::vector<std::string>         instanceIdStack;
+  std::shared_ptr<Domain::Element> tmpElement = instance->parent();
+  while (tmpElement)
+  {
+    if (tmpElement->type() == Element::EType::SYMBOL_INSTANCE)
+    {
+      instanceIdStack.insert(instanceIdStack.begin(), tmpElement->id());
+    }
+    tmpElement = tmpElement->parent();
+  }
+
+  expandInstanceElement(*instance, instanceIdStack, true);
+}

@@ -81,6 +81,10 @@ public:
 
   std::shared_ptr<VGG::Layout::Layout> layout() const;
 
+  void expandInstance(
+    std::shared_ptr<Domain::SymbolInstanceElement> instance,
+    std::string                                    masterId);
+
 private:
   enum class EProcessVarRefOption
   {

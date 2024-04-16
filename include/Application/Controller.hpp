@@ -43,8 +43,9 @@ struct ViewModel;
 
 namespace Layout
 {
+class ExpandSymbol;
 class Layout;
-}
+} // namespace Layout
 
 class Controller : public std::enable_shared_from_this<Controller>
 {
@@ -68,10 +69,12 @@ private:
   std::shared_ptr<Reporter>  m_reporter;
   bool                       m_panning{ false };
 
-  ERunMode                        m_mode;
-  std::shared_ptr<Daruma>         m_model;
-  std::shared_ptr<Daruma>         m_editModel;
-  std::shared_ptr<Layout::Layout> m_layout;
+  ERunMode                m_mode;
+  std::shared_ptr<Daruma> m_model;
+  std::shared_ptr<Daruma> m_editModel;
+
+  std::shared_ptr<Layout::Layout>       m_layout;
+  std::shared_ptr<Layout::ExpandSymbol> m_expander;
 
   EventListener m_listener;
 

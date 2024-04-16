@@ -38,6 +38,10 @@ constexpr auto K_EMPTY_STRING = "";
 #undef DEBUG
 #define DEBUG(msg, ...)
 
+#define VERBOSE DEBUG
+#undef VERBOSE
+#define VERBOSE(msg, ...)
+
 UIView::UIView()
   : AppScene(std::make_unique<VGG::layer::RasterCacheTile>())
 {
@@ -381,12 +385,24 @@ bool UIView::dispatchMouseEventOnPage(
   int                         motionY,
   EUIEventType                type)
 {
+  DEBUG("UIView::dispatchMouseEventOnPage, page: %s, %s", page->name().c_str(), page->id().c_str());
+
   auto& eventContext = m_presentedTreeContext[page->id()];
 
   Layout::Point pointToPage =
     converPointFromWindowAndScale({ TO_VGG_LAYOUT_SCALAR(x), TO_VGG_LAYOUT_SCALAR(y) });
-  Layout::Point pointToDocument{ pointToPage.x + page->frame().origin.x,
-                                 pointToPage.y + page->frame().origin.y };
+  Layout::Point pointToDocument{ pointToPage.x + page->asPage()->frame().origin.x,
+                                 pointToPage.y + page->asPage()->frame().origin.y };
+
+  VERBOSE(
+    "UIView::dispatchMouseEventOnPage, page: mouse: %d, %d; point to page: %f, %f; point to "
+    "document: %f, %f",
+    x,
+    y,
+    pointToPage.x,
+    pointToPage.y,
+    pointToDocument.x,
+    pointToDocument.y);
 
   const auto& target = page->hitTest(
     pointToDocument,
@@ -882,6 +898,7 @@ bool UIView::dismissPage()
 
 void UIView::saveState(std::shared_ptr<StateTree> stateTree)
 {
+  DEBUG("UIView::saveState, save state tree: %s", stateTree->id().c_str());
   m_stateTree = stateTree;
   m_presentedTreeContext[stateTree->id()] = m_presentedTreeContext[currentPage()->id()];
   m_presentedTreeContext[currentPage()->id()] = EventContext{};
@@ -899,6 +916,7 @@ void UIView::restoreState()
     return;
   }
 
+  DEBUG("UIView::restoreState, restore state tree: %s", m_stateTree->id().c_str());
   m_presentedTreeContext.erase(m_stateTree->id());
   m_stateTree.reset();
 }

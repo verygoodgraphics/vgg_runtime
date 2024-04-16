@@ -62,17 +62,17 @@ class SceneBuilder
 public:
   using FontNameVisitor = Serde::FontNameVisitor;
 
-  static std::vector<FramePtr> build2(const json& j)
-  {
-    SceneBuilder builder;
-    builder.buildImpl2(j);
-    std::vector<FramePtr> frames;
-    for (auto& frame : builder.m_frames)
-    {
-      frames.emplace_back(makeFramePtr(std::move(frame)));
-    }
-    return frames;
-  }
+  // static std::vector<FramePtr> build2(const json& j)
+  // {
+  //   SceneBuilder builder;
+  //   builder.buildImpl2(j);
+  //   std::vector<FramePtr> frames;
+  //   for (auto& frame : builder.m_frames)
+  //   {
+  //     frames.emplace_back(makeFramePtr(std::move(frame)));
+  //   }
+  //   return frames;
+  // }
 
   static SceneBuilder builder()
   {
@@ -98,7 +98,7 @@ public:
     SET_BUILDER_OPTION(m_alloc, allocator);
   };
 
-  SceneBuilderResult build(nlohmann::json j);
+  // SceneBuilderResult build(nlohmann::json j);
 
   template<typename M>
   SceneBuilderResult build(std::vector<typename M::Model> objects)
@@ -168,37 +168,37 @@ private:
   }
 
   // deprecated begin
-  PaintNodePtr fromFrame(const json& j, const glm::mat3& totalMatrix);
-
-  PaintNodePtr fromImage(const json& j, const glm::mat3& totalMatrix);
-
-  PaintNodePtr fromText(const json& j, const glm::mat3& totalMatrix);
-
-  PaintNodePtr fromPath(const json& j, const glm::mat3& totalMatrix);
-
-  PaintNodePtr fromObject(const json& j, const glm::mat3& totalMatrix);
-
-  PaintNodePtr fromGroup(const json& j, const glm::mat3& totalMatrix);
-
-  std::vector<PaintNodePtr> fromFrames(const json& j, const glm::mat3& totalMatrix);
-
-  PaintNodePtr fromSymbolInstance(const json& j, const glm::mat3& totalMatrix);
-
-  PaintNodePtr fromSymbolMaster(const json& j, const glm::mat3& totalMatrix);
-
-  std::vector<PaintNodePtr> fromSymbolMasters(const json& j, const glm::mat3& totalMatrix);
-
-  std::vector<PaintNodePtr> fromTopLevelFrames(const json& j, const glm::mat3& totalMatrix);
+  // PaintNodePtr fromFrame(const json& j, const glm::mat3& totalMatrix);
+  //
+  // PaintNodePtr fromImage(const json& j, const glm::mat3& totalMatrix);
+  //
+  // PaintNodePtr fromText(const json& j, const glm::mat3& totalMatrix);
+  //
+  // PaintNodePtr fromPath(const json& j, const glm::mat3& totalMatrix);
+  //
+  // PaintNodePtr fromObject(const json& j, const glm::mat3& totalMatrix);
+  //
+  // PaintNodePtr fromGroup(const json& j, const glm::mat3& totalMatrix);
+  //
+  // std::vector<PaintNodePtr> fromFrames(const json& j, const glm::mat3& totalMatrix);
+  //
+  // PaintNodePtr fromSymbolInstance(const json& j, const glm::mat3& totalMatrix);
+  //
+  // PaintNodePtr fromSymbolMaster(const json& j, const glm::mat3& totalMatrix);
+  //
+  // std::vector<PaintNodePtr> fromSymbolMasters(const json& j, const glm::mat3& totalMatrix);
+  //
+  // std::vector<PaintNodePtr> fromTopLevelFrames(const json& j, const glm::mat3& totalMatrix);
 
   // deprecated end
 
   SceneBuilder() = default;
 
-  void buildImpl(const json& j);
+  // void buildImpl(const json& j);
+  //
+  // void buildImpl2(const json& j);
 
-  void buildImpl2(const json& j);
-
-  static json defaultTextAttr();
+  // static json defaultTextAttr();
 };
 
 } // namespace VGG::layer

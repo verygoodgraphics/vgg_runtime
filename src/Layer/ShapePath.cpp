@@ -39,18 +39,18 @@ inline ContourPtr fromPolygon(const Polygon& poly)
   return std::make_shared<ContourArray>(std::move(c));
 }
 
-inline ContourPtr fromStar(const Star& poly)
+inline ContourPtr fromStar(const Star& star)
 {
   ContourArray c;
   c.closed = true;
-  ASSERT(poly.count >= 3);
-  c.reserve(poly.count * 2);
-  const auto pointCount = poly.count;
+  ASSERT(star.count >= 3);
+  c.reserve(star.count * 2);
+  const auto pointCount = star.count;
   const auto pi = VGG::math::number::Pi;
-  const auto ratio = poly.radius;
-  const auto radius = poly.radius;
-  const auto w = poly.bounds.width();
-  const auto h = poly.bounds.height();
+  const auto ratio = star.ratio;
+  const auto radius = star.radius;
+  const auto w = star.bounds.width();
+  const auto h = star.bounds.height();
   for (int i = 0; i < pointCount; ++i)
   {
     const float angle = -pi / 2 + 2 * i * pi / pointCount;

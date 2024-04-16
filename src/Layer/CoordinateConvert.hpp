@@ -189,18 +189,15 @@ public:
 
   static void convertCoordinateSystem(TextStyleAttr& textStyle, const glm::mat3& totalMatrix)
   {
-    if (textStyle.fills)
+    for (auto& f : textStyle.fills)
     {
-      for (auto& f : *textStyle.fills)
-      {
-        std::visit(
-          Overloaded{
-            [&](Gradient& g) { convertCoordinateSystem(g, totalMatrix); },
-            [&](Pattern& p) { convertCoordinateSystem(p, totalMatrix); },
-            [&](Color& c) {},
-          },
-          f.type);
-      }
+      std::visit(
+        Overloaded{
+          [&](Gradient& g) { convertCoordinateSystem(g, totalMatrix); },
+          [&](Pattern& p) { convertCoordinateSystem(p, totalMatrix); },
+          [&](Color& c) {},
+        },
+        f.type);
     }
   }
 

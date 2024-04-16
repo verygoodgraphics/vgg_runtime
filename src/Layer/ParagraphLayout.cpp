@@ -123,7 +123,7 @@ template<typename F>
 TextStyle createTextStyle(const TextStyleAttr& attr, F&& fun)
 {
   TextStyle style;
-  if (attr.fills && !attr.fills->empty())
+  if (!attr.fills.empty())
   {
     auto painterID = fun();
     style.setForegroundPaintID(painterID);
@@ -131,7 +131,7 @@ TextStyle createTextStyle(const TextStyleAttr& attr, F&& fun)
       Overloaded{ [&](const Gradient& g) { WARN("Don't support gradient decoration"); },
                   [&](const Color& c) { style.setDecorationColor(c); },
                   [&](const Pattern& p) { WARN("Don't support pattern decoration"); } },
-      (*attr.fills)[0].type);
+      attr.fills[0].type);
   }
   else
   {

@@ -109,7 +109,7 @@ std::shared_ptr<Layout::Internal::AutoLayout> LayoutNode::createAutoLayout()
 
 std::shared_ptr<LayoutNode> LayoutNode::autoLayoutContainer()
 {
-  return m_parent.lock();
+  return parent();
 }
 
 std::shared_ptr<Layout::Internal::AutoLayout> LayoutNode::containerAutoLayout()
@@ -204,7 +204,7 @@ void LayoutNode::setFrame(
     return;
   }
 
-  auto element = m_element.lock();
+  auto element = elementNode();
   if (!element)
   {
     return;
@@ -251,7 +251,7 @@ Layout::Rect LayoutNode::bounds() const
 
 Layout::Rect LayoutNode::modelBounds() const
 {
-  if (auto element = m_element.lock())
+  if (auto element = elementNode())
   {
     return element->bounds();
   }
@@ -260,7 +260,7 @@ Layout::Rect LayoutNode::modelBounds() const
 
 Layout::Matrix LayoutNode::modelMatrix() const
 {
-  if (auto element = m_element.lock())
+  if (auto element = elementNode())
   {
     return element->matrix();
   }
@@ -282,7 +282,7 @@ Layout::Size LayoutNode::size() const
 
 void LayoutNode::dump(std::string indent)
 {
-  std::cout << indent << id() << ", " << m_element.lock()->id() << std::endl;
+  std::cout << indent << id() << ", " << elementNode()->id() << std::endl;
 
   for (auto& child : m_children)
   {
@@ -294,7 +294,7 @@ uint32_t LayoutNode::backgroundColor()
 {
   uint32_t u32Color = 0xFFF5F5F5;
 
-  if (auto element = m_element.lock())
+  if (auto element = elementNode())
   {
     if (auto frameElement = std::dynamic_pointer_cast<Domain::FrameElement>(element))
     {
@@ -357,7 +357,7 @@ void LayoutNode::resizeChildNodes(
 
 bool LayoutNode::isVisible() const
 {
-  if (auto element = m_element.lock())
+  if (auto element = elementNode())
   {
     if (auto pModel = element->object())
     {
@@ -372,9 +372,9 @@ std::string LayoutNode::vggId() const
   return name();
 }
 
-std::string LayoutNode::id()
+std::string LayoutNode::id() const
 {
-  if (auto element = m_element.lock())
+  if (auto element = elementNode())
   {
     return element->id();
   }
@@ -382,9 +382,9 @@ std::string LayoutNode::id()
   return {};
 }
 
-std::string LayoutNode::originalId()
+std::string LayoutNode::originalId() const
 {
-  if (auto element = m_element.lock())
+  if (auto element = elementNode())
   {
     return element->originalId();
   }
@@ -394,7 +394,7 @@ std::string LayoutNode::originalId()
 
 std::string LayoutNode::name() const
 {
-  if (auto element = m_element.lock())
+  if (auto element = elementNode())
   {
     if (auto pModel = element->model())
     {
@@ -410,7 +410,7 @@ std::string LayoutNode::name() const
 
 std::string LayoutNode::type() const
 {
-  if (auto element = m_element.lock())
+  if (auto element = elementNode())
   {
     return element->typeString();
   }
@@ -419,7 +419,7 @@ std::string LayoutNode::type() const
 
 bool LayoutNode::isResizingAroundCenter() const
 {
-  if (auto element = m_element.lock())
+  if (auto element = elementNode())
   {
     if (auto pModel = element->model())
     {
@@ -435,7 +435,7 @@ bool LayoutNode::isResizingAroundCenter() const
 
 bool LayoutNode::isVectorNetwork() const
 {
-  if (auto element = m_element.lock())
+  if (auto element = elementNode())
   {
     if (auto groupElement = std::dynamic_pointer_cast<Domain::GroupElement>(element))
     {
@@ -453,15 +453,15 @@ bool LayoutNode::isVectorNetwork() const
 
 bool LayoutNode::isVectorNetworkDescendant() const
 {
-  auto parent = m_parent.lock();
-  while (parent)
+  auto p = parent();
+  while (p)
   {
-    if (parent->isVectorNetwork())
+    if (p->isVectorNetwork())
     {
       return true;
     }
 
-    parent = parent->m_parent.lock();
+    p = p->parent();
   }
 
   return false;
@@ -487,7 +487,7 @@ std::shared_ptr<LayoutNode> LayoutNode::findDescendantNodeById(const std::string
 
 void LayoutNode::updateModel(const Layout::Rect& toFrame)
 {
-  auto element = m_element.lock();
+  auto element = elementNode();
   if (!element)
   {
     return;
@@ -538,9 +538,9 @@ Layout::Point LayoutNode::modelOrigin() const
   auto newY = b * x + d * y + ty;
 
   Layout::Point relativePosition{ newX, newY };
-  if (auto parent = m_parent.lock())
+  if (auto p = parent())
   {
-    const auto& parentOrigin = parent->modelBounds().origin;
+    const auto& parentOrigin = p->modelBounds().origin;
     relativePosition.x -= parentOrigin.x;
     relativePosition.y -= parentOrigin.y;
   }
@@ -566,7 +566,7 @@ Layout::Point LayoutNode::converPointToAncestor(
     auto origin = p->origin();
     x += origin.x;
     y += origin.y;
-    p = p->m_parent.lock();
+    p = p->parent();
   }
 
   return { x, y };
@@ -624,7 +624,7 @@ Layout::Rect LayoutNode::resize(
     return resizeGroup(oldContainerSize, newContainerSize, parentOrigin);
   }
 
-  auto element = m_element.lock();
+  auto element = elementNode();
   if (!element)
   {
     return {};
@@ -665,9 +665,9 @@ Layout::Rect LayoutNode::resize(
   }
 
   // handle parent origin
-  if (auto parent = m_parent.lock())
+  if (auto p = parent())
   {
-    const auto& parentOrigin = parent->modelBounds().origin.makeFromModelPoint();
+    const auto& parentOrigin = p->modelBounds().origin.makeFromModelPoint();
     newOrigin = newOrigin - parentOrigin;
     newFrame.origin = newOrigin;
   }
@@ -883,7 +883,7 @@ LayoutNode::EResizing LayoutNode::horizontalResizing() const
     return EResizing::SCALE;
   }
 
-  if (auto element = m_element.lock())
+  if (auto element = elementNode())
   {
     if (auto pModel = element->object())
     {
@@ -904,7 +904,7 @@ LayoutNode::EResizing LayoutNode::verticalResizing() const
     return EResizing::SCALE;
   }
 
-  if (auto element = m_element.lock())
+  if (auto element = elementNode())
   {
     if (auto pModel = element->object())
     {
@@ -919,7 +919,7 @@ LayoutNode::EResizing LayoutNode::verticalResizing() const
 
 LayoutNode::EAdjustContentOnResize LayoutNode::adjustContentOnResize() const
 {
-  if (auto element = m_element.lock())
+  if (auto element = elementNode())
   {
     if (auto pModel = element->object())
     {
@@ -940,16 +940,15 @@ bool LayoutNode::shouldSkip()
   }
 
   // parent adjust content is skip group or boolean group && (group || (boolean group))
-  if (auto parent = m_parent.lock();
-      parent &&
-      parent->adjustContentOnResize() == EAdjustContentOnResize::SKIP_GROUP_OR_BOOLEAN_GROUP)
+  if (auto p = parent();
+      p && p->adjustContentOnResize() == EAdjustContentOnResize::SKIP_GROUP_OR_BOOLEAN_GROUP)
   {
     if (isVectorNetwork())
     {
       return false;
     }
 
-    if (auto element = m_element.lock())
+    if (auto element = elementNode())
     {
       auto groupElement = std::dynamic_pointer_cast<Domain::GroupElement>(element);
       if (groupElement)
@@ -966,7 +965,7 @@ bool LayoutNode::shouldSkip()
 
 bool LayoutNode::isBooleanGroup()
 {
-  auto element = m_element.lock();
+  auto element = elementNode();
   if (!element)
   {
     return false;
@@ -1029,7 +1028,7 @@ Layout::Rect LayoutNode::resizeGroup(
 
   if (isBooleanGroup())
   {
-    auto element = m_element.lock();
+    auto element = elementNode();
     auto pathElement = std::dynamic_pointer_cast<Domain::PathElement>(element);
     ASSERT(pathElement->object());
     ASSERT(pathElement->object()->shape);
@@ -1085,9 +1084,9 @@ Layout::Rect LayoutNode::resizeGroup(
 Layout::Rect LayoutNode::transformedFrame() const
 {
   auto bounds = modelBounds().makeTransform(modelMatrix(), Layout::Rect::ECoordinateType::MODEL);
-  if (auto parent = m_parent.lock())
+  if (auto p = parent())
   {
-    const auto& parentOrigin = parent->modelBounds().origin;
+    const auto& parentOrigin = p->modelBounds().origin;
     bounds = bounds.makeOffset(-parentOrigin.x, -parentOrigin.y);
   }
 
@@ -1104,7 +1103,7 @@ Layout::Rect LayoutNode::calculateResizedFrame(const Layout::Size& newSize)
     return newFrame;
   }
 
-  const auto parentNode = m_parent.lock();
+  const auto parentNode = parent();
   if (!parentNode || parentNode->adjustContentOnResize() == EAdjustContentOnResize::DISABLED)
   {
     return newFrame;
@@ -1407,7 +1406,7 @@ void LayoutNode::updatePathNodeModel(
   const Layout::Matrix&                   matrix,
   const std::vector<Layout::BezierPoint>& newPoints)
 {
-  auto element = m_element.lock();
+  auto element = elementNode();
   if (!element)
   {
     return;
@@ -1455,15 +1454,15 @@ void LayoutNode::detachChildrenFromFlexNodeTree()
 
 std::shared_ptr<LayoutNode> LayoutNode::closestCommonAncestor(std::shared_ptr<LayoutNode> node)
 {
-  auto parent = shared_from_this();
-  while (parent)
+  auto p = shared_from_this();
+  while (p)
   {
-    if (parent->isAncestorOf(node))
+    if (p->isAncestorOf(node))
     {
-      return parent;
+      return p;
     }
 
-    parent = parent->m_parent.lock();
+    p = p->parent();
   }
 
   return nullptr;
@@ -1471,15 +1470,15 @@ std::shared_ptr<LayoutNode> LayoutNode::closestCommonAncestor(std::shared_ptr<La
 
 bool LayoutNode::isAncestorOf(std::shared_ptr<LayoutNode> node)
 {
-  auto parent = node;
-  while (parent)
+  auto p = node;
+  while (p)
   {
-    if (parent.get() == this)
+    if (p.get() == this)
     {
       return true;
     }
 
-    parent = parent->m_parent.lock();
+    p = p->parent();
   }
 
   return false;
@@ -1554,4 +1553,22 @@ void LayoutNode::saveOldRatio(
     default:
       break;
   }
+}
+
+std::shared_ptr<LayoutNode> StateTree::srcNode() const
+{
+  if (!m_srcNode.lock()) // Node may become invalid and rebuilt during expanding instance
+  {
+    auto page = m_pageNode.lock();
+    ASSERT(page);
+    const_cast<StateTree*>(this)->m_srcNode = page->findDescendantNodeById(m_srcNodeId);
+  }
+  return m_srcNode.lock();
+}
+
+void StateTree::setSrcNode(std::shared_ptr<LayoutNode> srcNode)
+{
+  ASSERT(srcNode);
+  m_srcNode = srcNode;
+  m_srcNodeId = srcNode->id();
 }

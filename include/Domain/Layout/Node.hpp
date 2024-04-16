@@ -104,6 +104,23 @@ public:
   }
   virtual ~LayoutNode() = default;
 
+public:
+  virtual const LayoutNode* asPage() const
+  {
+    return this;
+  }
+
+  virtual const std::shared_ptr<LayoutNode> parent() const
+  {
+    return m_parent.lock();
+  }
+
+  virtual std::shared_ptr<VGG::Domain::Element> elementNode() const
+  {
+    return m_element.lock();
+  }
+
+public:
   std::shared_ptr<LayoutNode> hitTest(
     const Layout::Point& point,
     const HitTestHook&   hasEventListener);
@@ -122,19 +139,9 @@ public:
   std::vector<std::shared_ptr<LayoutNode>> removeAllChildren();
   void                                     detachChildrenFromFlexNodeTree();
 
-  virtual const std::shared_ptr<LayoutNode> parent() const
-  {
-    return m_parent.lock();
-  }
-
   const std::vector<std::shared_ptr<LayoutNode>>& children() const
   {
     return m_children;
-  }
-
-  auto elementNode() const
-  {
-    return m_element.lock();
   }
 
   bool                        isAncestorOf(std::shared_ptr<LayoutNode> node);
@@ -184,8 +191,8 @@ public:
   Layout::Size swapWidthAndHeightIfNeeded(Layout::Size size);
 
 public:
-  virtual std::string id();
-  std::string         originalId();
+  std::string id() const;
+  std::string originalId() const;
 
   std::string vggId() const;
   std::string name() const;
@@ -284,6 +291,7 @@ class StateTree : public LayoutNode
 {
   std::weak_ptr<LayoutNode> m_pageNode;
   std::weak_ptr<LayoutNode> m_srcNode;
+  std::string               m_srcNodeId;
 
   std::shared_ptr<Domain::StateTreeElement> m_treeElement;
 
@@ -294,19 +302,26 @@ public:
   {
   }
 
-  virtual const std::shared_ptr<LayoutNode> parent() const
+public:
+  const LayoutNode* asPage() const override
   {
-    return m_srcNode.lock();
-  }
-  virtual std::string id()
-  {
-    return m_srcNode.lock()->id();
+    return m_pageNode.lock().get();
   }
 
-  void setSrcNode(std::shared_ptr<LayoutNode> srcNode)
+  const std::shared_ptr<LayoutNode> parent() const override
   {
-    m_srcNode = srcNode;
+    return m_srcNode.lock()->parent();
   }
+
+  std::shared_ptr<VGG::Domain::Element> elementNode() const override
+  {
+    return m_srcNode.lock()->elementNode();
+  }
+
+public:
+  std::shared_ptr<LayoutNode> srcNode() const;
+
+  void setSrcNode(std::shared_ptr<LayoutNode> srcNode);
 
   void setTreeElement(std::shared_ptr<Domain::StateTreeElement> treeElement)
   {

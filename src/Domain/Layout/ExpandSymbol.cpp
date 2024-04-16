@@ -1234,6 +1234,11 @@ void ExpandSymbol::expandInstance(
   std::shared_ptr<Domain::SymbolInstanceElement> instance,
   std::string                                    masterId)
 {
+  DEBUG(
+    "ExpandSymbol::expandInstance %s with master id %s",
+    instance->id().c_str(),
+    masterId.c_str());
+
   if (!instance || masterId.empty())
   {
     return;

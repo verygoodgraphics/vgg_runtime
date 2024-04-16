@@ -77,7 +77,7 @@ bool InstanceState::dismissState(
     return false;
   }
 
-  auto instanceNode = savedStateTree->parent();
+  auto instanceNode = savedStateTree->srcNode();
   if (!instanceNode)
   {
     return false;

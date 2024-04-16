@@ -25,9 +25,10 @@ using namespace VGG::layer;
 using namespace VGG;
 inline ContourPtr fromPolygon(const Polygon& poly)
 {
-  ContourArray c;
-  c.closed = true;
   ASSERT(poly.count >= 3);
+  ContourArray c(poly.count);
+  c.closed = true;
+  c.cornerSmooth = poly.cornerSmoothing;
   c.reserve(poly.count * 2);
   for (int i = 0; i < poly.count; ++i)
   {
@@ -41,10 +42,11 @@ inline ContourPtr fromPolygon(const Polygon& poly)
 
 inline ContourPtr fromStar(const Star& star)
 {
-  ContourArray c;
-  c.closed = true;
   ASSERT(star.count >= 3);
-  c.reserve(star.count * 2);
+  ContourArray c(star.count);
+  c.closed = true;
+  c.cornerSmooth = star.cornerSmoothing;
+
   const auto pointCount = star.count;
   const auto pi = VGG::math::number::Pi;
   const auto ratio = star.ratio;

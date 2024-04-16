@@ -68,14 +68,7 @@ public:
     }
     else if (VT(Rectangle))
     {
-      if (auto r = std::get_if<SkRect>(&p->rect); r)
-      {
-        convertCoordinateSystem(*r, totalMatrix);
-      }
-      else if (auto r = std::get_if<SkRRect>(&p->rect); r)
-      {
-        convertCoordinateSystem(*r, totalMatrix);
-      }
+      convertCoordinateSystem(p->bounds, totalMatrix);
     }
     else if (VT(Ellipse))
     {

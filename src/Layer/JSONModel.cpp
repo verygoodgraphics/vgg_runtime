@@ -27,9 +27,9 @@ using namespace VGG::layer;
 
 inline ContourPtr makeContourData2(const json& j)
 {
-  ContourArray contour;
+  const auto&  points = getOrDefault(j, "points");
+  ContourArray contour(points.size());
   contour.closed = j.value("closed", false);
-  const auto& points = getOrDefault(j, "points");
   for (const auto& e : points)
   {
     contour.emplace_back(
@@ -105,54 +105,41 @@ std::vector<SubShape<JSONObject>> JSONPathObject::getShapes() const
     const EModelShapeType shapeType = toShapeType(klass);
     if (shapeType != EModelShapeType::UNKNOWN)
     {
-      const auto radius = geo.value("radius", Float4{ 0.f, 0.f, 0.f, 0.f });
+      Float4 radius = { 0, 0, 0, 0 };
+      int    countPoint = 0;
       if (shapeType == EModelShapeType::POLYGON)
       {
-        res.emplace_back(
-          blop,
-          Polygon{ .bounds = bounds,
-                   .radius = geo.value("radius", 0.f),
-                   .count = geo.value("pointCount", 0) });
+        radius[0] = geo.value("radius", 0.f);
+        countPoint = geo.value("pointCount", 0);
       }
       else if (shapeType == EModelShapeType::STAR)
       {
-        res.emplace_back(
-          blop,
-          Star{ .bounds = bounds,
-                .radius = geo.value("radius", 0.f),
-                .ratio = geo.value("ratio", 0.f),
-                .count = geo.value("pointCount", 0) });
+        radius[0] = geo.value("radius", 0.f);
+        radius[1] = geo.value("ratio", 0.f);
+        countPoint = geo.value("pointCount", 0);
       }
-      else
+      else if (shapeType == EModelShapeType::RECTANGLE)
       {
-        res.emplace_back(
-          blop,
-          makeShapeData2(
-            bounds,
-            shapeType,
-            radius.data(),
-            smooth,
-            [&](EModelShapeType type)
-            {
-              if (type == EModelShapeType::CONTOUR)
-              {
-                auto c = makeContourData2(geo);
-                c->cornerSmooth = smooth;
-                return c;
-              }
-              // else if (type == EModelShapeType::POLYGON || type == EModelShapeType::STAR)
-              // {
-              //   auto cp = j;
-              //   if (pathChange(cp))
-              //   {
-              //     auto c = makeContourData2(cp["shape"]["subshapes"][0]["subGeometry"]);
-              //     c->cornerSmooth = smooth;
-              //     return c;
-              //   }
-              // }
-              return std::make_shared<ContourArray>();
-            }));
+        radius = geo.value("radius", Float4{ 0.f, 0.f, 0.f, 0.f });
       }
+      res.emplace_back(
+        blop,
+        makeShapeData2(
+          bounds,
+          shapeType,
+          radius.data(),
+          smooth,
+          countPoint,
+          [&](EModelShapeType type)
+          {
+            if (type == EModelShapeType::CONTOUR)
+            {
+              auto c = makeContourData2(geo);
+              c->cornerSmooth = smooth;
+              return c;
+            }
+            return std::make_shared<ContourArray>(4);
+          }));
     }
     else
     {

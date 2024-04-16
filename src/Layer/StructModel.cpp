@@ -270,6 +270,7 @@ std::vector<SubShape<StructObject>> StructPathObject::getShapes() const
 
   auto count = impl->childObjects().size();
   ASSERT(count == model->shape->subshapes.size());
+  res.reserve(count);
   for (size_t i = 0; i < count; i++)
   {
     const auto& model = shapes[i];
@@ -282,11 +283,9 @@ std::vector<SubShape<StructObject>> StructPathObject::getShapes() const
       [&](EModelShapeType shapeType)
       {
         std::array<float, 4> radius{ 0, 0, 0, 0 };
-
+        int                  pointCount = 0;
         switch (shapeType)
         {
-          case EModelShapeType::VECTORNETWORK:
-            DEBUG("not support vector network");
           case EModelShapeType::RECTANGLE:
           {
             auto dm = static_cast<Domain::RectangleElement*>(m)->dataModel();
@@ -299,86 +298,76 @@ std::vector<SubShape<StructObject>> StructPathObject::getShapes() const
               }
             }
           }
-          case EModelShapeType::CONTOUR:
-          case EModelShapeType::ELLIPSE:
-          {
-            res.emplace_back(
-              blop,
-              makeShapeData2(
-                bounds,
-                shapeType,
-                radius.data(),
-                smooth,
-                [&](EModelShapeType type)
-                {
-                  if (type == EModelShapeType::CONTOUR)
-                  {
-                    auto       dm = static_cast<Domain::ContourElement*>(m)->dataModel();
-                    ContourPtr c = std::make_shared<ContourArray>();
-                    c->cornerSmooth = smooth;
-                    c->closed = dm->closed;
-
-                    auto toVec2 = [](const std::vector<double>& v) -> glm::vec2 {
-                      return v.size() >= 2 ? glm::vec2{ v[0], v[1] } : glm::vec2{ 0, 0 };
-                    };
-
-                    auto toVec2Opt =
-                      [](const std::optional<std::vector<double>>& v) -> std::optional<glm::vec2>
-                    {
-                      if (v.has_value())
-                        return v->size() >= 2 ? glm::vec2{ (*v)[0], (*v)[1] } : glm::vec2{ 0, 0 };
-                      else
-                        return std::nullopt;
-                    };
-                    for (const auto& e : dm->points)
-                    {
-                      c->emplace_back(
-                        toVec2(e.point),
-                        e.radius.value_or(0.f),
-                        toVec2Opt(e.curveFrom),
-                        toVec2Opt(e.curveTo),
-                        e.cornerStyle);
-                    }
-                    if (!c->closed && !c->empty())
-                    {
-                      c->back().radius = 0;
-                      c->front().radius = 0;
-                    }
-                    return c;
-                  }
-                  else
-                  {
-                    DEBUG("unkonwn behavior");
-                  }
-                  return std::make_shared<ContourArray>();
-                }));
-          }
           break;
           case EModelShapeType::POLYGON:
           {
             auto dm = static_cast<Domain::PolygonElement*>(m)->dataModel();
-            res.emplace_back(
-              blop,
-              Polygon{ .bounds = bounds,
-                       .radius = (float)dm->radius.value_or(0),
-                       .count = dm->pointCount });
+            pointCount = dm->pointCount;
+            radius[0] = dm->radius.value_or(0);
           }
           break;
           case EModelShapeType::STAR:
           {
             auto dm = static_cast<Domain::StarElement*>(m)->dataModel();
-            res.emplace_back(
-              blop,
-              Star{ .bounds = bounds,
-                    .radius = (float)dm->radius.value_or(0),
-                    .ratio = (float)dm->ratio,
-                    .count = dm->pointCount });
+            pointCount = dm->pointCount;
+            radius[0] = dm->radius.value_or(0);
+            radius[1] = dm->ratio;
           }
           break;
+          case EModelShapeType::VECTORNETWORK:
+          case EModelShapeType::CONTOUR:
+          case EModelShapeType::ELLIPSE:
           case EModelShapeType::UNKNOWN:
-            DEBUG("unknown shape element");
             break;
         }
+
+        res.emplace_back(
+          blop,
+          makeShapeData2(
+            bounds,
+            shapeType,
+            radius.data(),
+            smooth,
+            pointCount,
+            [&](EModelShapeType type)
+            {
+              if (type == EModelShapeType::CONTOUR)
+              {
+                auto       dm = static_cast<Domain::ContourElement*>(m)->dataModel();
+                ContourPtr c = std::make_shared<ContourArray>(dm->points.size());
+                c->cornerSmooth = smooth;
+                c->closed = dm->closed;
+
+                auto toVec2 = [](const std::vector<double>& v) -> glm::vec2 {
+                  return v.size() >= 2 ? glm::vec2{ v[0], v[1] } : glm::vec2{ 0, 0 };
+                };
+
+                auto toVec2Opt =
+                  [](const std::optional<std::vector<double>>& v) -> std::optional<glm::vec2>
+                {
+                  if (v.has_value())
+                    return v->size() >= 2 ? glm::vec2{ (*v)[0], (*v)[1] } : glm::vec2{ 0, 0 };
+                  else
+                    return std::nullopt;
+                };
+                for (const auto& e : dm->points)
+                {
+                  c->emplace_back(
+                    toVec2(e.point),
+                    e.radius.value_or(0.f),
+                    toVec2Opt(e.curveFrom),
+                    toVec2Opt(e.curveTo),
+                    e.cornerStyle);
+                }
+                if (!c->closed && !c->empty())
+                {
+                  c->back().radius = 0;
+                  c->front().radius = 0;
+                }
+                return c;
+              }
+              return std::make_shared<ContourArray>(4);
+            }));
       });
   }
   return res;

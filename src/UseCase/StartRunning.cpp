@@ -26,21 +26,20 @@ StartRunning::StartRunning(std::shared_ptr<Daruma> model)
 
   if (model->layoutDoc())
   {
-    ExpandSymbol expandSymbol{ model->designDoc()->content(), model->layoutDoc()->content() };
-
-    auto result = expandSymbol();
-    m_layout = expandSymbol.layout();
-
-    model->setRuntimeDesignDocTree(std::get<0>(result));
-    model->setRuntimeLayoutDoc(std::get<1>(result));
+    m_expander.reset(
+      new ExpandSymbol(model->designDoc()->content(), model->layoutDoc()->content()));
   }
   else
   {
-    ExpandSymbol expandSymbol{ model->designDoc()->content() };
+    m_expander.reset(new ExpandSymbol(model->designDoc()->content()));
+  }
 
-    auto result = expandSymbol();
-    m_layout = expandSymbol.layout();
+  auto result = (*m_expander)();
+  m_layout = m_expander->layout();
 
-    model->setRuntimeDesignDocTree(std::get<0>(result));
+  model->setRuntimeDesignDocTree(std::get<0>(result));
+  if (model->layoutDoc())
+  {
+    model->setRuntimeLayoutDoc(std::get<1>(result));
   }
 }

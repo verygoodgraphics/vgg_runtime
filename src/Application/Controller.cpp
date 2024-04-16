@@ -543,6 +543,7 @@ std::shared_ptr<ViewModel> Controller::generateViewModel(
   StartRunning startRunning{ model };
   Statistic::sharedInstance()->endExpanding();
   m_layout = startRunning.layout();
+  m_expander = startRunning.expander();
 
   if (isNormalMode())
   {
@@ -748,7 +749,7 @@ bool Controller::presentState(
   const std::string& stateMasterId)
 {
   auto          page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
-  InstanceState instanceState{ page };
+  InstanceState instanceState{ page, m_expander };
 
   auto stateTree = std::make_shared<StateTree>(page);
   auto success = instanceState.presentState(instanceDescendantId, stateMasterId, stateTree.get());
@@ -763,7 +764,7 @@ bool Controller::presentState(
 bool Controller::dismissState(const std::string& instanceDescendantId)
 {
   auto          page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
-  InstanceState instanceState{ page };
+  InstanceState instanceState{ page, m_expander };
 
   auto success = instanceState.dismissState(m_presenter->savedState().get(), instanceDescendantId);
   if (success)
@@ -779,7 +780,7 @@ bool Controller::setMasterId(
   const std::string& stateMasterId)
 {
   auto          page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
-  InstanceState instanceState{ page };
+  InstanceState instanceState{ page, m_expander };
 
   auto success = instanceState.setMasterId(instanceDescendantId, stateMasterId);
   if (success)

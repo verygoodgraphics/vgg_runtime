@@ -23,12 +23,18 @@ namespace VGG
 class LayoutNode;
 class StateTree;
 
+namespace Layout
+{
+class ExpandSymbol;
+} // namespace Layout
+
 class InstanceState
 {
-  std::shared_ptr<LayoutNode> m_page;
+  std::shared_ptr<LayoutNode>           m_page;
+  std::shared_ptr<Layout::ExpandSymbol> m_expander;
 
 public:
-  InstanceState(std::shared_ptr<LayoutNode> page);
+  InstanceState(std::shared_ptr<LayoutNode> page, std::shared_ptr<Layout::ExpandSymbol> expander);
 
   bool presentState(
     const std::string& instanceDescendantId,

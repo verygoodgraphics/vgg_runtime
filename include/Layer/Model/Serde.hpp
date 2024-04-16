@@ -41,36 +41,6 @@ struct Serde
     FontNameVisitor fontNameVisitor;
   };
 
-  static TextStyleAttr defaultTextAttr()
-  {
-    static TextStyleAttr s_defaultTextAttr = R"({
-        "length":0,
-        "name":"Fira Sans",
-        "subFamilyName":"",
-        "size":14,
-        "fontVariations":[],
-        "postScript":"",
-        "kerning":true,
-        "letterSpacingValue":0,
-        "letterSpacingUnit":0,
-        "lineSpacingValue":0,
-        "lineSpacingUnit":0,
-        "fillUseType":0,
-        "underline":0,
-        "linethrough":false,
-        "fontVariantCaps":0,
-        "textCase":0,
-        "baselineShift":0,
-        "baseline":0,
-        "horizontalScale":1,
-        "verticalScale":1,
-        "proportionalSpacing":0,
-        "rotate":0,
-        "textParagraph":{}
-    })"_json;
-    return s_defaultTextAttr;
-  }
-
   static std::tuple<glm::mat3, glm::mat3, glm::mat3> makeMatrix(const glm::mat3& m)
   {
     const auto [newMatrix, inversed] = CoordinateConvert::convertMatrixCoordinate(m);

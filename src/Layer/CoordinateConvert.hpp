@@ -46,6 +46,16 @@ public:
     rect.setRectRadii(innerRect, radii);
   }
 
+  static void convertCoordinateSystem(Star& star, const glm::mat3& totalMatrix)
+  {
+    convertCoordinateSystem(star.bounds, totalMatrix);
+  }
+
+  static void convertCoordinateSystem(Polygon& star, const glm::mat3& totalMatrix)
+  {
+    convertCoordinateSystem(star.bounds, totalMatrix);
+  }
+
   static void convertCoordinateSystem(ShapeData& shape, const glm::mat3& totalMatrix)
   {
 #define VT(type)                                                                                   \
@@ -60,9 +70,7 @@ public:
     {
       if (auto r = std::get_if<SkRect>(&p->rect); r)
       {
-        DEBUG("before rect %f %f %f %f", r->fLeft, r->fTop, r->fRight, r->fBottom);
         convertCoordinateSystem(*r, totalMatrix);
-        DEBUG("after rect %f %f %f %f", r->fLeft, r->fTop, r->fRight, r->fBottom);
       }
       else if (auto r = std::get_if<SkRRect>(&p->rect); r)
       {
@@ -75,11 +83,11 @@ public:
     }
     else if (VT(Star))
     {
-      DEBUG("Star not impl");
+      convertCoordinateSystem(*p, totalMatrix);
     }
     else if (VT(Polygon))
     {
-      DEBUG("Polygon not impl");
+      convertCoordinateSystem(*p, totalMatrix);
     }
     else if (VT(VectorNetwork))
     {

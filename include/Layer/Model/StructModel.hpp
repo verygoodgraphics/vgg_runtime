@@ -217,39 +217,39 @@ struct StructInstanceObject : public StructObject
 
 struct StructModelCastObject
 {
-  static StructGroupObject asGroup(StructObject o)
+  static StructGroupObject asGroup(const StructObject& o)
   {
-    return StructGroupObject(std::move(o.m));
+    return StructGroupObject(o.m);
   }
 
-  static StructFrameObject asFrame(StructObject o)
+  static StructFrameObject asFrame(const StructObject& o)
   {
-    return StructFrameObject(std::move(o.m));
+    return StructFrameObject(o.m);
   }
 
-  static StructImageObject asImage(StructObject o)
+  static StructImageObject asImage(const StructObject& o)
   {
-    return StructImageObject(std::move(o.m));
+    return StructImageObject(o.m);
   }
 
-  static StructTextObject asText(StructObject o)
+  static StructTextObject asText(const StructObject& o)
   {
-    return StructTextObject(std::move(o.m));
+    return StructTextObject(o.m);
   }
 
-  static StructMasterObject asMaster(StructObject o)
+  static StructMasterObject asMaster(const StructObject& o)
   {
-    return StructMasterObject(std::move(o.m));
+    return StructMasterObject(o.m);
   }
 
-  static StructPathObject asPath(StructObject o)
+  static StructPathObject asPath(const StructObject& o)
   {
-    return StructPathObject(std::move(o.m));
+    return StructPathObject(o.m);
   }
 
-  static StructInstanceObject asInstance(StructObject o)
+  static StructInstanceObject asInstance(const StructObject& o)
   {
-    return StructInstanceObject(std::move(o.m));
+    return StructInstanceObject(o.m);
   }
 };
 

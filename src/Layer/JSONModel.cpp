@@ -48,26 +48,26 @@ inline ContourPtr makeContourData2(const json& j)
   return ptr;
 }
 
-JSONObject dispatchObject(EModelObjectType modelType, json j)
+JSONObject dispatchObject(EModelObjectType modelType, const json& j)
 {
   switch (modelType)
   {
     case EModelObjectType::FRAME:
-      return JSONFrameObject(std::move(j));
+      return JSONFrameObject(j);
     case EModelObjectType::GROUP:
-      return JSONGroupObject(std::move(j));
+      return JSONGroupObject(j);
     case EModelObjectType::PATH:
-      return JSONPathObject(std::move(j));
+      return JSONPathObject(j);
     case EModelObjectType::TEXT:
-      return JSONTextObject(std::move(j));
+      return JSONTextObject(j);
     case EModelObjectType::MASTER:
-      return JSONMasterObject(std::move(j));
+      return JSONMasterObject(j);
     case EModelObjectType::IMAGE:
-      return JSONImageObject(std::move(j));
+      return JSONImageObject(j);
     case EModelObjectType::OBJECT:
-      return JSONObject(std::move(j), EModelObjectType::OBJECT);
+      return JSONObject(j, EModelObjectType::OBJECT);
     case EModelObjectType::INSTANCE:
-      return JSONInstanceObject(std::move(j));
+      return JSONInstanceObject(j);
     case EModelObjectType::UNKNOWN:
       break;
   }
@@ -80,13 +80,17 @@ namespace VGG::layer
 
 std::vector<JSONObject> JSONObject::getChildObjects() const
 {
+  if (j.find("childObjects") == j.end())
+    return std::vector<JSONObject>();
+  const auto&             childObjects = j["childObjects"];
   std::vector<JSONObject> objects;
-  const auto              childObjects = getOrDefault(j, "childObjects");
-  for (auto& j : childObjects)
+  DEBUG("child object size: %d", (int)childObjects.size());
+  objects.reserve(childObjects.size());
+  for (const auto& j : childObjects)
   {
     const auto klass = j.value("class", "");
     auto       modelType = toModelType(klass);
-    objects.emplace_back(dispatchObject(modelType, std::move(j)));
+    objects.emplace_back(dispatchObject(modelType, j));
   }
   return objects;
 }
@@ -94,13 +98,17 @@ std::vector<JSONObject> JSONObject::getChildObjects() const
 std::vector<SubShape<JSONObject>> JSONPathObject::getShapes() const
 {
   std::vector<SubShape<JSONObject>> res;
-  const auto shapes = j.value("shape", json{}).value("subshapes", std::vector<json>());
-  const auto bounds = getBounds();
-  const auto smooth = getCornerSmoothing();
+  if (j.find("shape") == j.end() || j["shape"].find("subshapes") == j["shape"].end())
+    return res;
+  const auto& shapes = j["shape"]["subshapes"];
+  const auto  bounds = getBounds();
+  const auto  smooth = getCornerSmoothing();
   for (const auto& subshape : shapes)
   {
+    if (subshape.find("subGeometry") == subshape.end())
+      continue;
     const auto            blop = subshape.value("booleanOperation", EBoolOp::BO_NONE);
-    const auto            geo = subshape.value("subGeometry", nlohmann::json{});
+    const auto&           geo = subshape["subGeometry"];
     const auto            klass = geo.value("class", "");
     const EModelShapeType shapeType = toShapeType(klass);
     if (shapeType != EModelShapeType::UNKNOWN)
@@ -144,7 +152,7 @@ std::vector<SubShape<JSONObject>> JSONPathObject::getShapes() const
     else
     {
       const auto modelType = toModelType(klass);
-      res.emplace_back(blop, dispatchObject(modelType, std::move(geo)));
+      res.emplace_back(blop, dispatchObject(modelType, geo));
     }
   }
   return res;

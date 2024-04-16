@@ -35,10 +35,10 @@ namespace VGG::layer
 struct JSONObject
 {
   DECL_MODEL_OBJECT(JSONObject, JSONObject);
-  json             j;
+  const json&      j;
   EModelObjectType type;
-  JSONObject(json j, EModelObjectType t)
-    : j(std::move(j))
+  JSONObject(const json& j, EModelObjectType t)
+    : j(j)
     , type(t)
   {
   }
@@ -47,7 +47,6 @@ struct JSONObject
     return type;
   }
   std::vector<JSONObject> getChildObjects() const;
-  // M_JSON_FIELD_DEF(ObjectTypeString, "class", std::string, "");
   M_JSON_FIELD_DEF(Name, "name", std::string, "");
   M_JSON_FIELD_DEF(Id, "id", std::string, "");
   M_JSON_FIELD_DEF(Bounds, "bounds", Bounds, {});
@@ -66,8 +65,8 @@ struct JSONObject
 struct JSONImageObject : public JSONObject
 {
   DECL_MODEL_IMAGE(JSONImageObject, JSONObject);
-  JSONImageObject(json j)
-    : JSONObject(std::move(j), EModelObjectType::IMAGE)
+  JSONImageObject(const json& j)
+    : JSONObject(j, EModelObjectType::IMAGE)
   {
   }
   M_JSON_FIELD_DEF(ImageBounds, "bounds", Bounds, {});
@@ -78,8 +77,8 @@ struct JSONImageObject : public JSONObject
 struct JSONTextObject : public JSONObject
 {
   DECL_MODEL_TEXT(JSONTextObject, JSONObject);
-  JSONTextObject(json j)
-    : JSONObject(std::move(j), EModelObjectType::TEXT)
+  JSONTextObject(const json& j)
+    : JSONObject(j, EModelObjectType::TEXT)
   {
   }
 
@@ -107,8 +106,8 @@ struct JSONTextObject : public JSONObject
 struct JSONGroupObject : public JSONObject
 {
   DECL_MODEL_GROUP(JSONGroupObject, JSONObject);
-  JSONGroupObject(json j)
-    : JSONObject(std::move(j), EModelObjectType::GROUP)
+  JSONGroupObject(const json& j)
+    : JSONObject(j, EModelObjectType::GROUP)
   {
   }
 };
@@ -116,8 +115,8 @@ struct JSONGroupObject : public JSONObject
 struct JSONFrameObject : public JSONObject
 {
   DECL_MODEL_FRAME(JSONFrameObject, JSONObject);
-  JSONFrameObject(json j)
-    : JSONObject(std::move(j), EModelObjectType::FRAME)
+  JSONFrameObject(const json& j)
+    : JSONObject(j, EModelObjectType::FRAME)
   {
   }
   M_JSON_FIELD_DEF(Radius, "radius", Float4, (Float4{ 0.f, 0.f, 0.f, 0.f }));
@@ -126,8 +125,8 @@ struct JSONFrameObject : public JSONObject
 struct JSONMasterObject : public JSONObject
 {
   DECL_MODEL_MASTER(JSONMasterObject, JSONObject);
-  JSONMasterObject(json j)
-    : JSONObject(std::move(j), EModelObjectType::MASTER)
+  JSONMasterObject(const json& j)
+    : JSONObject(j, EModelObjectType::MASTER)
   {
   }
   M_JSON_FIELD_DEF(Radius, "radius", Float4, (Float4{ 0.f, 0.f, 0.f, 0.f }));
@@ -136,8 +135,8 @@ struct JSONMasterObject : public JSONObject
 struct JSONPathObject : public JSONObject
 {
   DECL_MODEL_PATH(JSONPathObject, JSONObject);
-  JSONPathObject(json j)
-    : JSONObject(std::move(j), EModelObjectType::PATH)
+  JSONPathObject(const json& j)
+    : JSONObject(j, EModelObjectType::PATH)
   {
   }
   EWindingType getWindingType() const
@@ -151,8 +150,8 @@ struct JSONPathObject : public JSONObject
 struct JSONInstanceObject : public JSONObject
 {
   DECL_MODEL_INSTANCE(JSONInstanceObject, JSONObject);
-  JSONInstanceObject(json j)
-    : JSONObject(std::move(j), EModelObjectType::INSTANCE)
+  JSONInstanceObject(const json& j)
+    : JSONObject(j, EModelObjectType::INSTANCE)
   {
   }
 };
@@ -164,32 +163,32 @@ struct JSONModelCastObject
     return JSONGroupObject(o.j);
   }
 
-  static JSONFrameObject asFrame(JSONObject o)
+  static JSONFrameObject asFrame(const JSONObject& o)
   {
     return JSONFrameObject(o.j);
   }
 
-  static JSONImageObject asImage(JSONObject o)
+  static JSONImageObject asImage(const JSONObject& o)
   {
     return JSONImageObject(o.j);
   }
 
-  static JSONTextObject asText(JSONObject o)
+  static JSONTextObject asText(const JSONObject& o)
   {
     return JSONTextObject(o.j);
   }
 
-  static JSONMasterObject asMaster(JSONObject o)
+  static JSONMasterObject asMaster(const JSONObject& o)
   {
     return JSONMasterObject(o.j);
   }
 
-  static JSONPathObject asPath(JSONObject o)
+  static JSONPathObject asPath(const JSONObject& o)
   {
     return JSONPathObject(o.j);
   }
 
-  static JSONInstanceObject asInstance(JSONObject o)
+  static JSONInstanceObject asInstance(const JSONObject& o)
   {
     return JSONInstanceObject(o.j);
   }

@@ -238,6 +238,7 @@ std::vector<StructObject> StructObject::getChildObjects() const
     case EModelObjectType::OBJECT:
     {
       std::vector<StructObject> objects;
+      objects.reserve(m->childObjects().size());
       for (const auto& c : *m)
       {
         toType(

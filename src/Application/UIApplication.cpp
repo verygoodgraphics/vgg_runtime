@@ -153,7 +153,7 @@ void UIApplication::setLayer(app::AppRender* layer)
 #endif
 }
 
-std::vector<uint8_t> UIApplication::makeImageSnapshot(ImageOptions options)
+std::vector<uint8_t> UIApplication::makeImageSnapshot(layer::ImageOptions options)
 {
   std::vector<uint8_t> result;
   ASSERT(m_layer);

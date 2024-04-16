@@ -65,7 +65,7 @@ public:
   bool needsPaint();
   bool paint(int fps, bool force = false);
 
-  std::vector<uint8_t> makeImageSnapshot(ImageOptions options);
+  std::vector<uint8_t> makeImageSnapshot(layer::ImageOptions options);
 
 private:
   bool handleKeyEvent(VKeyboardEvent evt);

@@ -296,28 +296,9 @@ void PaintNode::setAlphaMaskBy(std::vector<AlphaMask> masks)
 
 VShape PaintNode::makeBoundsPath()
 {
-  const auto& skRect = toSkRect(frameBounds());
-  return std::visit(
-    Overloaded{
-      [&](const Ellipse& c) { return VShape(c); },
-      [&](const ContourPtr& c) { return VShape(c); },
-      [&](const Rectangle& r)
-      {
-        if (auto p = std::get_if<SkRect>(&r.rect); p)
-        {
-          return VShape(*p);
-        }
-        else if (auto p = std::get_if<SkRRect>(&r.rect); p)
-        {
-          return VShape(*p);
-        }
-        return VShape();
-      },
-      [&](const Star& s) { return VShape(s); },
-      [&](const Polygon& p) { return VShape(p); },
-      [&](const VectorNetwork& p) {},
-    },
-    makeShape(&d_ptr->frameRadius[0], skRect, d_ptr->cornerSmooth));
+  return makeFromRectangle(Rectangle{ .bounds = frameBounds(),
+                                      .radius = frameRadius(),
+                                      .cornerSmoothing = frameCornerSmoothing() });
 }
 
 VShape PaintNode::childPolyOperation() const
@@ -383,17 +364,7 @@ VShape PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
       Overloaded{
         [&](const Ellipse& c) { path.setOval(c); },
         [&](const ContourPtr& c) { path.setContour(c); },
-        [&](const Rectangle& r)
-        {
-          if (auto p = std::get_if<SkRect>(&r.rect); p)
-          {
-            path.setRect(*p);
-          }
-          else if (auto p = std::get_if<SkRRect>(&r.rect); p)
-          {
-            path.setRRect(*p);
-          }
-        },
+        [&](const Rectangle& r) { path = makeFromRectangle(r); },
         [&](const Star& s) { return path.setStar(s); },
         [&](const Polygon& p) { return path.setPolygon(p); },
         [&](const VectorNetwork& p) {},

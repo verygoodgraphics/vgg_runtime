@@ -225,11 +225,11 @@ void VShape::transform(VShape& shape, const SkMatrix& matrix)
   }
 }
 
-std::variant<ContourPtr, Rectangle> makeShape(
-  const float   radius[4],
-  const SkRect& rect,
-  float         cornerSmoothing)
+VShape makeFromRectangle(const Rectangle& rectangle)
 {
+  const auto& radius = rectangle.radius;
+  const auto& cornerSmoothing = rectangle.cornerSmoothing;
+  const auto  rect = toSkRect(rectangle.bounds);
   if (radius[0] != 0 || radius[1] != 0 || radius[2] != 0 || radius[3] != 0)
   {
     if (cornerSmoothing <= 0.f)
@@ -240,7 +240,7 @@ std::variant<ContourPtr, Rectangle> makeShape(
                             { radius[2], radius[2] },
                             { radius[3], radius[3] } };
       rrect.setRectRadii(rect, radii);
-      return Rectangle{ .rect = rrect };
+      return VShape(rrect);
     }
     else
     {
@@ -248,55 +248,52 @@ std::variant<ContourPtr, Rectangle> makeShape(
                                   { rect.right(), rect.y() },
                                   { rect.right(), rect.bottom() },
                                   { rect.x(), rect.bottom() } };
-      ContourArray contour;
+      ContourArray contour(4);
       contour.closed = true;
       contour.cornerSmooth = cornerSmoothing;
       for (int i = 0; i < 4; i++)
         contour.emplace_back(corners[i], radius[i], std::nullopt, std::nullopt, std::nullopt);
-      return std::make_shared<ContourArray>(contour);
+      return VShape(std::make_shared<ContourArray>(contour));
     }
   }
-  else
-  {
-    return Rectangle{ .rect = rect };
-  }
+  return VShape(rect);
 }
 
-inline std::variant<ContourPtr, SkRRect, SkRect> makeShapeOld(
-  std::array<float, 4> radius,
-  const SkRect&        rect,
-  float                cornerSmoothing)
-{
-  if (radius[0] != 0 || radius[1] != 0 || radius[2] != 0 || radius[3] != 0)
-  {
-    if (cornerSmoothing <= 0.f)
-    {
-      SkRRect  rrect;
-      SkVector radii[4] = { { radius[0], radius[0] },
-                            { radius[1], radius[1] },
-                            { radius[2], radius[2] },
-                            { radius[3], radius[3] } };
-      rrect.setRectRadii(rect, radii);
-      return rrect;
-    }
-    else
-    {
-      glm::vec2    corners[4] = { { rect.x(), rect.y() },
-                                  { rect.right(), rect.y() },
-                                  { rect.right(), rect.bottom() },
-                                  { rect.x(), rect.bottom() } };
-      ContourArray contour;
-      contour.closed = true;
-      contour.cornerSmooth = cornerSmoothing;
-      for (int i = 0; i < 4; i++)
-        contour.emplace_back(corners[i], radius[i], std::nullopt, std::nullopt, std::nullopt);
-      return std::make_shared<ContourArray>(contour);
-    }
-  }
-  else
-  {
-    return rect;
-  }
-}
+// std::variant<ContourPtr, Rectangle> makeShape(
+//   const float   radius[4],
+//   const SkRect& rect,
+//   float         cornerSmoothing)
+// {
+//   if (radius[0] != 0 || radius[1] != 0 || radius[2] != 0 || radius[3] != 0)
+//   {
+//     if (cornerSmoothing <= 0.f)
+//     {
+//       SkRRect  rrect;
+//       SkVector radii[4] = { { radius[0], radius[0] },
+//                             { radius[1], radius[1] },
+//                             { radius[2], radius[2] },
+//                             { radius[3], radius[3] } };
+//       rrect.setRectRadii(rect, radii);
+//       return Rectangle{ .rect = rrect };
+//     }
+//     else
+//     {
+//       glm::vec2    corners[4] = { { rect.x(), rect.y() },
+//                                   { rect.right(), rect.y() },
+//                                   { rect.right(), rect.bottom() },
+//                                   { rect.x(), rect.bottom() } };
+//       ContourArray contour;
+//       contour.closed = true;
+//       contour.cornerSmooth = cornerSmoothing;
+//       for (int i = 0; i < 4; i++)
+//         contour.emplace_back(corners[i], radius[i], std::nullopt, std::nullopt, std::nullopt);
+//       return std::make_shared<ContourArray>(contour);
+//     }
+//   }
+//   else
+//   {
+//     return Rectangle{ .rect = rect };
+//   }
+// }
 
 } // namespace VGG::layer

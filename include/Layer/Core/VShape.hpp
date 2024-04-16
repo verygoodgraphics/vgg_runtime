@@ -31,7 +31,9 @@ namespace VGG::layer
 
 struct Rectangle
 {
-  std::variant<SkRect, SkRRect> rect;
+  Bounds               bounds;
+  std::array<float, 4> radius = { 0, 0, 0, 0 };
+  float                cornerSmoothing{ 0.f };
 };
 
 struct Arc
@@ -73,6 +75,7 @@ struct Polygon
   Bounds bounds;
   float  radius{ 0.f };
   int    count{ 0 };
+  float  cornerSmoothing{ 0.f };
 };
 
 struct Star
@@ -81,6 +84,7 @@ struct Star
   float  radius{ 0.f };
   float  ratio{ 0.f };
   int    count{ 0 };
+  float  cornerSmoothing{ 0.f };
 };
 
 struct VectorNetwork
@@ -125,6 +129,7 @@ public:
   {
     setRRect(rrect);
   }
+
   explicit VShape(const Ellipse& oval)
     : VShape()
   {
@@ -194,9 +199,6 @@ private:
   EShapeType             m_type{ EMPTY };
 };
 
-std::variant<ContourPtr, Rectangle> makeShape(
-  const float   radius[4],
-  const SkRect& rect,
-  float         cornerSmoothing);
+VShape makeFromRectangle(const Rectangle& rectangle);
 
 } // namespace VGG::layer

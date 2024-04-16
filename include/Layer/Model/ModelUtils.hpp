@@ -73,41 +73,22 @@ inline ShapeData makeShapeData2(
   EModelShapeType type,
   const float     radius[4],
   float           cornerSmoothing,
-  F&&             fallbackContour)
+  int             pointCount,
+  F&&             fallback)
 {
   switch (type)
   {
     case EModelShapeType::CONTOUR:
     {
-      auto c = fallbackContour(type);
+      auto c = fallback(type);
       c->cornerSmooth = cornerSmoothing;
       return c;
     }
     case EModelShapeType::RECTANGLE:
     {
-      if (cornerSmoothing <= 0)
-      {
-        const auto rect = toSkRect(bounds);
-        auto       s = makeShape(radius, rect, cornerSmoothing);
-        return std::visit([&](auto&& arg) { return ShapeData(arg); }, s);
-      }
-      else
-      {
-        const auto l = bounds.topLeft().x;
-        const auto t = bounds.topLeft().y;
-        const auto r = bounds.bottomRight().x;
-
-        glm::vec2 corners[4] = { bounds.topLeft(),
-                                 { r, t },
-                                 { r, t - bounds.height() },
-                                 { l, t - bounds.height() } };
-        ContourArray   contour;
-        contour.closed = true;
-        contour.cornerSmooth = cornerSmoothing;
-        for (int i = 0; i < 4; i++)
-          contour.emplace_back(corners[i], radius[i], std::nullopt, std::nullopt, std::nullopt);
-        return std::make_shared<ContourArray>(contour);
-      }
+      return Rectangle{ .bounds = bounds,
+                        .radius = { radius[0], radius[1], radius[2], radius[3] },
+                        .cornerSmoothing = cornerSmoothing };
     }
     case EModelShapeType::ELLIPSE:
     {
@@ -116,10 +97,28 @@ inline ShapeData makeShapeData2(
       return oval;
     }
     case EModelShapeType::POLYGON:
+    {
+      return Polygon{ .bounds = bounds,
+                      .radius = radius[0],
+                      .count = pointCount,
+                      .cornerSmoothing = cornerSmoothing };
+    }
     case EModelShapeType::STAR:
+    {
+      return Star{ .bounds = bounds,
+                   .radius = radius[0],
+                   .ratio = radius[1],
+                   .count = pointCount,
+                   .cornerSmoothing = cornerSmoothing };
+    }
     case EModelShapeType::VECTORNETWORK:
-      return fallbackContour(type);
+    {
+      auto c = fallback(type);
+      c->cornerSmooth = cornerSmoothing;
+      return c;
+    }
     case EModelShapeType::UNKNOWN:
+      DEBUG("unknown shape type");
       break;
   }
   return ShapeData();

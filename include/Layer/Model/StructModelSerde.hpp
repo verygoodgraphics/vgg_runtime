@@ -527,11 +527,10 @@ struct ModelSerde<Model::TextFontAttributes, TextStyleAttr>
     x.font.size = t.size.value_or(14.0);
     if (t.fills)
     {
-      x.fills = std::vector<VGG::Fill>();
       for (const auto& f : *t.fills)
       {
-        x.fills->push_back(VGG::Fill());
-        serde::serde_from(f, x.fills->back());
+        x.fills.push_back(VGG::Fill());
+        serde::serde_from(f, x.fills.back());
       }
     }
     x.baselineShift = t.baselineShift.value_or(0.0);

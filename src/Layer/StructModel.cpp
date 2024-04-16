@@ -388,9 +388,8 @@ std::vector<TextStyleAttr> StructTextObject::getOverrideFontAttr() const
     {
       defaultAttr.fills = style.fills;
     }
-    auto a = serde::ModelSerde<Model::TextFontAttributes, TextStyleAttr>::serde_from(defaultAttr);
-
-    textStyle.push_back(a);
+    textStyle.push_back(
+      serde::ModelSerde<Model::TextFontAttributes, TextStyleAttr>::serde_from(defaultAttr));
   }
 
   return textStyle;

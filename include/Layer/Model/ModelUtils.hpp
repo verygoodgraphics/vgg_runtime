@@ -68,7 +68,7 @@ inline EModelShapeType toShapeType(std::string_view klass)
 }
 
 template<typename F>
-inline ShapeData makeShapeData2(
+inline ShapeData makeShapeData(
   const Bounds&   bounds,
   EModelShapeType type,
   const float     radius[4],

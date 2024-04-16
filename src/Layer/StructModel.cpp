@@ -324,7 +324,7 @@ std::vector<SubShape<StructObject>> StructPathObject::getShapes() const
 
         res.emplace_back(
           blop,
-          makeShapeData2(
+          makeShapeData(
             bounds,
             shapeType,
             radius.data(),

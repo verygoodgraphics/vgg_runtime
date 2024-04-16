@@ -322,6 +322,7 @@ public:
 
   std::vector<std::shared_ptr<Element>> presentState(const std::string& masterId);
   std::string                           dissmissState();
+  void                                  resetState();
 
   Model::SymbolInstance* object() const override;
   nlohmann::json         jsonModel() override;

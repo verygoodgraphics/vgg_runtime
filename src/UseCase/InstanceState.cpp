@@ -94,12 +94,16 @@ bool InstanceState::setMasterId(
   const std::string& instanceDescendantId,
   const std::string& stateMasterId)
 {
-  // todo
+  // todo, check nested instance
   auto instanceNode = findInstanceNode(instanceDescendantId);
   if (!instanceNode)
   {
     return false;
   }
+
+  auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode().get());
+  ASSERT(pInstance);
+  pInstance->resetState();
 
   return setMasterId(instanceNode, stateMasterId);
 }

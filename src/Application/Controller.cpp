@@ -785,6 +785,7 @@ bool Controller::setMasterId(
   auto success = instanceState.setMasterId(instanceDescendantId, stateMasterId);
   if (success)
   {
+    m_presenter->restoreState();
     m_presenter->update();
   }
   return success;

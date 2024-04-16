@@ -481,7 +481,7 @@ napi_value VggSdkNodeAdapter::setMasterId(napi_env env, napi_callback_info info)
   try
   {
     auto instanceDescendantId = GetArgString(env, args[0]);
-    auto newMasterId = GetArgString(env, args[0]);
+    auto newMasterId = GetArgString(env, args[1]);
 
     VggSdkNodeAdapter* sdkAdapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));

@@ -767,6 +767,14 @@ std::string SymbolInstanceElement::dissmissState()
   return lastStateMasterId;
 }
 
+void SymbolInstanceElement::resetState()
+{
+  while (!m_stateStack.empty())
+  {
+    m_stateStack.pop();
+  }
+}
+
 void SymbolInstanceElement::updateVariableAssignments(const nlohmann::json& json)
 {
   auto model = object();

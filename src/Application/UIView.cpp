@@ -385,7 +385,10 @@ bool UIView::dispatchMouseEventOnPage(
   int                         motionY,
   EUIEventType                type)
 {
-  DEBUG("UIView::dispatchMouseEventOnPage, page: %s, %s", page->name().c_str(), page->id().c_str());
+  VERBOSE(
+    "UIView::dispatchMouseEventOnPage, page: %s, %s",
+    page->name().c_str(),
+    page->id().c_str());
 
   auto& eventContext = m_presentedTreeContext[page->id()];
 

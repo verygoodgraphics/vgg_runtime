@@ -120,6 +120,11 @@ void Presenter::listenViewEvent()
           listenersMap.find(uiEventTypeToString(EUIEventType::MOUSEUP)) != listenersMap.end();
         if (auto mouse = sharedThis->m_mouse)
         {
+          DEBUG(
+            "set cursor, target = %s, event = %s, shouldHandleHover = %d",
+            targetKey.c_str(),
+            uiEventTypeToString(EUIEventType::CLICK),
+            shouldHandleHover);
           mouse->setCursor(shouldHandleHover ? Mouse::ECursor::HAND : Mouse::ECursor::ARROW);
         }
         if (shouldHandleHover)

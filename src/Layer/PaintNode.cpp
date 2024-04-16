@@ -365,8 +365,8 @@ VShape PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
         [&](const Ellipse& c) { path.setOval(c); },
         [&](const ContourPtr& c) { path.setContour(c); },
         [&](const Rectangle& r) { path = makeFromRectangle(r); },
-        [&](const Star& s) { return path.setStar(s); },
-        [&](const Polygon& p) { return path.setPolygon(p); },
+        [&](const Star& s) { path.setStar(s); },
+        [&](const Polygon& p) { path.setPolygon(p); },
         [&](const VectorNetwork& p) {},
       },
       *_->contour);

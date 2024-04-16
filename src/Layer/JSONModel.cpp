@@ -132,7 +132,7 @@ std::vector<SubShape<JSONObject>> JSONPathObject::getShapes() const
       }
       res.emplace_back(
         blop,
-        makeShapeData2(
+        makeShapeData(
           bounds,
           shapeType,
           radius.data(),

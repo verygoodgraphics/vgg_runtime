@@ -739,15 +739,34 @@ bool Controller::dismissFrame()
   return m_presenter->dismissPage();
 }
 
+bool Controller::setState(
+  const std::string& instanceDescendantId,
+  const std::string& listenerId,
+  const std::string& stateMasterId)
+{
+  auto          page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
+  InstanceState instanceState{ page, m_expander };
+
+  auto success = instanceState.setState(instanceDescendantId, listenerId, stateMasterId);
+  if (success)
+  {
+    m_presenter->restoreState();
+    m_presenter->update();
+  }
+  return success;
+}
+
 bool Controller::presentState(
   const std::string& instanceDescendantId,
+  const std::string& listenerId,
   const std::string& stateMasterId)
 {
   auto          page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
   InstanceState instanceState{ page, m_expander };
 
   auto stateTree = std::make_shared<StateTree>(page);
-  auto success = instanceState.presentState(instanceDescendantId, stateMasterId, stateTree.get());
+  auto success =
+    instanceState.presentState(instanceDescendantId, listenerId, stateMasterId, stateTree.get());
   if (success)
   {
     m_presenter->saveState(stateTree);
@@ -762,20 +781,6 @@ bool Controller::dismissState(const std::string& instanceDescendantId)
   InstanceState instanceState{ page, m_expander };
 
   auto success = instanceState.dismissState(m_presenter->savedState().get(), instanceDescendantId);
-  if (success)
-  {
-    m_presenter->restoreState();
-    m_presenter->update();
-  }
-  return success;
-}
-
-bool Controller::setState(const std::string& instanceDescendantId, const std::string& stateMasterId)
-{
-  auto          page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
-  InstanceState instanceState{ page, m_expander };
-
-  auto success = instanceState.setState(instanceDescendantId, stateMasterId);
   if (success)
   {
     m_presenter->restoreState();

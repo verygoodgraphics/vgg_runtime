@@ -129,9 +129,15 @@ public:
   bool        presentFrameById(const std::string& id);
   bool        dismissFrame();
 
-  bool presentState(const std::string& instanceDescendantId, const std::string& stateMasterId);
+  bool setState(
+    const std::string& instanceDescendantId,
+    const std::string& listenerId,
+    const std::string& stateMasterId);
+  bool presentState(
+    const std::string& instanceDescendantId,
+    const std::string& listenerId,
+    const std::string& stateMasterId);
   bool dismissState(const std::string& instanceDescendantId);
-  bool setState(const std::string& instanceDescendantId, const std::string& stateMasterId);
 
 private:
   void          initModel(const char* designDocSchemaFilePath, const char* layoutDocSchemaFilePath);

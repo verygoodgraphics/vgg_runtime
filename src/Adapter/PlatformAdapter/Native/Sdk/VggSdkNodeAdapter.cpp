@@ -496,7 +496,7 @@ napi_value VggSdkNodeAdapter::goBack(napi_env env, napi_callback_info info)
 // instance state
 napi_value VggSdkNodeAdapter::setState(napi_env env, napi_callback_info info)
 {
-  constexpr size_t ARG_COUNT = 3;
+  constexpr size_t ARG_COUNT = 4;
   size_t           argc = ARG_COUNT;
   napi_value       args[ARG_COUNT];
   napi_value       _this;
@@ -511,15 +511,18 @@ napi_value VggSdkNodeAdapter::setState(napi_env env, napi_callback_info info)
   try
   {
     auto instanceDescendantId = GetArgString(env, args[0]);
-    auto newMasterId = GetArgString(env, args[1]);
+    auto listenerId = GetArgString(env, args[1]);
+    auto newMasterId = GetArgString(env, args[2]);
 
     VggSdkNodeAdapter* sdkAdapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
     bool success{ false };
-    SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, instanceDescendantId, newMasterId]()
-                              { return sdk->setState(instanceDescendantId, newMasterId, true); },
-                              [&success](bool result) { success = result; } }();
+    SyncTaskInMainLoop<bool>{
+      [sdk = sdkAdapter->m_vggSdk, instanceDescendantId, listenerId, newMasterId]()
+      { return sdk->setState(instanceDescendantId, listenerId, newMasterId, true); },
+      [&success](bool result) { success = result; }
+    }();
 
     napi_value ret;
     NODE_API_CALL(env, napi_get_boolean(env, success, &ret));
@@ -535,7 +538,7 @@ napi_value VggSdkNodeAdapter::setState(napi_env env, napi_callback_info info)
 
 napi_value VggSdkNodeAdapter::presentState(napi_env env, napi_callback_info info)
 {
-  constexpr size_t ARG_COUNT = 3;
+  constexpr size_t ARG_COUNT = 4;
   size_t           argc = ARG_COUNT;
   napi_value       args[ARG_COUNT];
   napi_value       _this;
@@ -550,16 +553,18 @@ napi_value VggSdkNodeAdapter::presentState(napi_env env, napi_callback_info info
   try
   {
     auto instanceDescendantId = GetArgString(env, args[0]);
-    auto newMasterId = GetArgString(env, args[1]);
+    auto listenerId = GetArgString(env, args[1]);
+    auto newMasterId = GetArgString(env, args[2]);
 
     VggSdkNodeAdapter* sdkAdapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
     bool success{ false };
-    SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, instanceDescendantId, newMasterId]() {
-                               return sdk->presentState(instanceDescendantId, newMasterId, true);
-                             },
-                              [&success](bool result) { success = result; } }();
+    SyncTaskInMainLoop<bool>{
+      [sdk = sdkAdapter->m_vggSdk, instanceDescendantId, listenerId, newMasterId]()
+      { return sdk->presentState(instanceDescendantId, listenerId, newMasterId, true); },
+      [&success](bool result) { success = result; }
+    }();
 
     napi_value ret;
     NODE_API_CALL(env, napi_get_boolean(env, success, &ret));

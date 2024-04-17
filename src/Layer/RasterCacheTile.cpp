@@ -244,7 +244,7 @@ std::vector<Rasterizer::Tile> rasterOrGetTiles(
   }
   while (auto rt = rasterIter.next())
   {
-    const int key = rt->first + rt->second * iter.column;
+    const int key = rt->first + rt->second * rasterIter.column;
     if (!iter.contains(rt->first, rt->second))
     {
       auto tileState = cache.tileCache.find(key);
@@ -368,7 +368,7 @@ std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::o
     -> std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix>
   {
     cache.revalidate(rasterContext, clipRect);
-    auto iter = TileIterator(skv, cache.tileWidth, cache.tileHeight, cache.rasterBounds);
+    auto iter = TileIterator(clipRect, cache.tileWidth, cache.tileHeight, cache.rasterBounds);
     auto rasterIter =
       TileIterator(rasterRect, cache.tileWidth, cache.tileHeight, cache.rasterBounds);
     if (!iter.valid())
@@ -401,6 +401,8 @@ std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::o
     DEBUG("scale changed");
     if (lod < 0)
     {
+      purge();
+      _->invalidateContent();
       cache.inval();
     }
     return reval(skv, skv);

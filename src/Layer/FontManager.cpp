@@ -129,7 +129,8 @@ public:
     std::vector<std::string> fallbacks,
     std::vector<std::string> fallbackEmojiFonts)
   {
-#ifndef NDEBUG
+
+#ifdef VGG_LAYER_DEBUG
     DEBUG("Font directory: -----------");
     for (const auto& p : dirs)
     {
@@ -145,7 +146,8 @@ public:
         fallbacks.push_back(layer::resources::FiraSans::FONT_NAME);
       }
 #endif
-#ifndef NDEBUG
+
+#ifdef VGG_LAYER_DEBUG
       DEBUG("----  Fallback font:  -----------");
       for (const auto& f : fallbacks)
       {

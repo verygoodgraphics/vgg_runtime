@@ -108,8 +108,9 @@ struct TileIterator
     , beginY(std::max(0, int((clip.y() - bounds.y()) / tileH)))
     , endX(
         std::min(std::ceil(bounds.width() / tileW), std::ceil((clip.right() - bounds.x()) / tileW)))
-    , endY(
-        std::min(std::ceil(bounds.height() / tileH), std::ceil((clip.bottom() - bounds.y()) / tileH)))
+    , endY(std::min(
+        std::ceil(bounds.height() / tileH),
+        std::ceil((clip.bottom() - bounds.y()) / tileH)))
     , column(std::ceil(bounds.width() / tileW))
   {
     m_x = beginX;

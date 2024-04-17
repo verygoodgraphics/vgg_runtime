@@ -22,7 +22,7 @@
 // #define LOG_NOPROFILE
 // #define LOG_LOGFILE "log.txt
 
-#ifdef NDEBUG
+#ifdef VGG_NO_DEBUG_INFO
 #define LOG_NODEBUG
 #define LOG_NOASSERT
 #endif
@@ -75,9 +75,10 @@ inline std::string strfmt(const char* fmt, Args... args)
   return std::string(buf.get());
 }
 
-inline std::string strlimit(const std::string& s,
-                            size_t max = 10,
-                            const std::string& postfix = "...")
+inline std::string strlimit(
+  const std::string& s,
+  size_t             max = 10,
+  const std::string& postfix = "...")
 {
   std::string ls{ s };
   if (s.size() > max)
@@ -95,7 +96,7 @@ inline std::string strlimit(const std::string& s,
 inline unsigned char getNthFractionalDigit(size_t n, double v)
 {
   double coef = std::pow(10, n);
-  int m = std::fabs(coef * v);
+  int    m = std::fabs(coef * v);
   return m % 10;
 }
 
@@ -225,12 +226,13 @@ static inline FILE* _log_file_()
 #define WARNL(msg, ...)                                                                            \
   do                                                                                               \
   {                                                                                                \
-    _MSG_("WARN",                                                                                  \
-          LOG::_log_file_(),                                                                       \
-          WARN_COLOR("(%s:%d) " msg),                                                              \
-          __FILENAME__,                                                                            \
-          __LINE__,                                                                                \
-          ##__VA_ARGS__);                                                                          \
+    _MSG_(                                                                                         \
+      "WARN",                                                                                      \
+      LOG::_log_file_(),                                                                           \
+      WARN_COLOR("(%s:%d) " msg),                                                                  \
+      __FILENAME__,                                                                                \
+      __LINE__,                                                                                    \
+      ##__VA_ARGS__);                                                                              \
   } while (0)
 #define INFO(msg, ...)                                                                             \
   do                                                                                               \
@@ -319,7 +321,7 @@ using TimeMap = std::unordered_map<std::string, TimePoint>;
 using Precision = std::chrono::milliseconds;
 
 static TimeMap _timer_map_;
-static int _padding_counter_{ 1 };
+static int     _padding_counter_{ 1 };
 
 static inline void _timer_start_(const std::string& id)
 {
@@ -342,13 +344,14 @@ static inline double _timer_stop_(const std::string& id)
 #define PROFILE(id, ...)                                                                           \
   do                                                                                               \
   {                                                                                                \
-    _MSG_("PROFILE >>>",                                                                           \
-          LOG::_log_file_(),                                                                       \
-          "%*s----- %s",                                                                           \
-          LOG::_padding_counter_,                                                                  \
-          "{",                                                                                     \
-          id,                                                                                      \
-          ##__VA_ARGS__);                                                                          \
+    _MSG_(                                                                                         \
+      "PROFILE >>>",                                                                               \
+      LOG::_log_file_(),                                                                           \
+      "%*s----- %s",                                                                               \
+      LOG::_padding_counter_,                                                                      \
+      "{",                                                                                         \
+      id,                                                                                          \
+      ##__VA_ARGS__);                                                                              \
     LOG::_timer_start_(id);                                                                        \
   } while (0)
 #define PROFILE_END(id, ...)                                                                       \
@@ -357,24 +360,26 @@ static inline double _timer_stop_(const std::string& id)
     const double c = LOG::_timer_stop_(id);                                                        \
     if (c >= 0)                                                                                    \
     {                                                                                              \
-      _MSG_("*TIME COST*",                                                                         \
-            LOG::_log_file_(),                                                                     \
-            "%*s%.3lfs",                                                                           \
-            LOG::_padding_counter_ - 1,                                                            \
-            "",                                                                                    \
-            c / 1000);                                                                             \
+      _MSG_(                                                                                       \
+        "*TIME COST*",                                                                             \
+        LOG::_log_file_(),                                                                         \
+        "%*s%.3lfs",                                                                               \
+        LOG::_padding_counter_ - 1,                                                                \
+        "",                                                                                        \
+        c / 1000);                                                                                 \
     }                                                                                              \
     else                                                                                           \
     {                                                                                              \
       WARN("%s:%d NO PROFILE START FOUND", __FILENAME__, __LINE__);                                \
     }                                                                                              \
-    _MSG_("PROFILE END",                                                                           \
-          LOG::_log_file_(),                                                                       \
-          "%*s----} %s",                                                                           \
-          LOG::_padding_counter_,                                                                  \
-          "-",                                                                                     \
-          id,                                                                                      \
-          ##__VA_ARGS__);                                                                          \
+    _MSG_(                                                                                         \
+      "PROFILE END",                                                                               \
+      LOG::_log_file_(),                                                                           \
+      "%*s----} %s",                                                                               \
+      LOG::_padding_counter_,                                                                      \
+      "-",                                                                                         \
+      id,                                                                                          \
+      ##__VA_ARGS__);                                                                              \
   } while (0)
 #else
 #define PROFILE(id, ...)

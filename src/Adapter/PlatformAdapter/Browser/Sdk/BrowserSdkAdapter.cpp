@@ -63,6 +63,8 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     .function("presentFrameById", &VggSdk::presentFrameById)
     .function("dismissFrame", &VggSdk::dismissFrame)
     .function("goBack", &VggSdk::goBack)
+    .function("nextFrame", &VggSdk::nextFrame)
+    .function("previousFrame", &VggSdk::previousFrame)
     // instance state
     .function("presentState", &VggSdk::presentState)
     .function("dismissState", &VggSdk::dismissState)

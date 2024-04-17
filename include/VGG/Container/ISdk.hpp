@@ -51,6 +51,8 @@ public:
   virtual bool presentFrameById(const std::string& id, bool resetScrollPosition = true) = 0;
   virtual bool dismissFrame() = 0;
   virtual bool goBack(bool resetScrollPosition = true, bool resetState = true) = 0;
+  virtual bool nextFrame() = 0;
+  virtual bool previousFrame() = 0;
 
   // instance
   virtual bool setState(

@@ -55,3 +55,29 @@ TEST_F(SdkTestSuite, MakeImageSnapshot)
     EXPECT_GT(imageBytes.size(), 0);
   }
 }
+
+TEST_F(SdkTestSuite, NextPrevFrame)
+{
+  std::string filePath = "testDataDir/frame_list/";
+  auto        result = m_container->load(filePath);
+  EXPECT_TRUE(result);
+
+  {
+    auto success = sut()->previousFrame();
+    EXPECT_FALSE(success);
+  }
+  {
+    auto id1 = sut()->currentFrameId();
+
+    auto success = sut()->nextFrame();
+    EXPECT_TRUE(success);
+
+    auto id2 = sut()->currentFrameId();
+    EXPECT_NE(id1, id2);
+
+    success = sut()->previousFrame();
+    EXPECT_TRUE(success);
+    auto id3 = sut()->currentFrameId();
+    EXPECT_EQ(id1, id3);
+  }
+}

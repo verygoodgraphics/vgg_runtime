@@ -50,6 +50,8 @@ private:
   static napi_value presentFrameById(napi_env env, napi_callback_info info);
   static napi_value dismissFrame(napi_env env, napi_callback_info info);
   static napi_value goBack(napi_env env, napi_callback_info info);
+  static napi_value nextFrame(napi_env env, napi_callback_info info);
+  static napi_value previousFrame(napi_env env, napi_callback_info info);
 
   // instance state
   static napi_value setState(napi_env env, napi_callback_info info);

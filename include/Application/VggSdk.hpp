@@ -74,6 +74,8 @@ public:
   bool presentFrameById(const std::string& id, bool resetScrollPosition) override;
   bool dismissFrame() override;
   bool goBack(bool resetScrollPosition, bool resetState) override;
+  bool nextFrame() override;
+  bool previousFrame() override;
 
   // instance
   bool setState(

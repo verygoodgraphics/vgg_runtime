@@ -165,6 +165,32 @@ bool VggSdk::goBack(bool resetScrollPosition, bool resetState)
   return false;
 }
 
+bool VggSdk::nextFrame()
+{
+  if (auto currentEnv = env())
+  {
+    if (auto presenter = currentEnv->presenter())
+    {
+      return presenter->setCurrentPage(presenter->currentPageIndex() + 1);
+    }
+  }
+
+  return false;
+}
+
+bool VggSdk::previousFrame()
+{
+  if (auto currentEnv = env())
+  {
+    if (auto presenter = currentEnv->presenter())
+    {
+      return presenter->setCurrentPage(presenter->currentPageIndex() - 1);
+    }
+  }
+
+  return false;
+}
+
 std::string VggSdk::requiredFonts() const
 {
   if (auto currentEnv = env())

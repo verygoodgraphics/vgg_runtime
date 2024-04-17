@@ -46,9 +46,11 @@ public:
   virtual std::string launchFrameId() const = 0;
   virtual bool        setLaunchFrameById(const std::string& id) = 0;
 
+  // frame
   virtual bool setCurrentFrameById(const std::string& id, bool resetScrollPosition) = 0;
   virtual bool presentFrameById(const std::string& id, bool resetScrollPosition) = 0;
   virtual bool dismissFrame() = 0;
+  virtual bool goBack(bool resetScrollPosition, bool resetState) = 0;
 
   // instance
   virtual bool setState(

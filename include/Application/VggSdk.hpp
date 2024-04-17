@@ -69,9 +69,11 @@ public:
   virtual std::string launchFrameId() const override;
   virtual bool        setLaunchFrameById(const std::string& id) override;
 
+  // frame
   bool setCurrentFrameById(const std::string& id, bool resetScrollPosition) override;
   bool presentFrameById(const std::string& id, bool resetScrollPosition) override;
   bool dismissFrame() override;
+  bool goBack(bool resetScrollPosition, bool resetState) override;
 
   // instance
   bool setState(

@@ -780,52 +780,6 @@ bool UIView::setCurrentPage(int index)
   return success;
 }
 
-bool UIView::back()
-{
-  if (m_history.size() <= 1)
-  {
-    return false;
-  }
-
-  auto displayedPage = currentPage();
-
-  m_history.pop();
-  auto newPageId = m_history.top();
-
-  auto document = m_document.lock();
-  if (document)
-  {
-    for (std::size_t index = 0; index < document->children().size(); ++index)
-    {
-      if (document->children()[index]->id() == newPageId)
-      {
-        // clear presented page relations
-        auto to = displayedPage->id();
-        while (!to.empty())
-        {
-          m_presentedTreeContext.erase(to);
-
-          if (!m_presentingPages.contains(to))
-          {
-            break;
-          }
-
-          auto from = m_presentingPages[to];
-          m_presentingPages.erase(to);
-          m_presentedPages.erase(from);
-
-          to = from;
-        }
-
-        setCurrentPageIndex(index);
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
 bool UIView::setCurrentPageIndex(int index)
 {
   if (m_page == index)
@@ -901,6 +855,51 @@ bool UIView::dismissPage()
       if (document->children()[index]->id() == from)
       {
         return setCurrentPageIndex(index);
+      }
+    }
+  }
+
+  return false;
+}
+
+bool UIView::goBack(bool resetScrollPosition, bool resetState)
+{
+  if (m_history.size() <= 1)
+  {
+    return false;
+  }
+
+  auto displayedPage = currentPage();
+
+  m_history.pop();
+  auto backToPageId = m_history.top();
+
+  if (auto document = m_document.lock())
+  {
+    for (std::size_t index = 0; index < document->children().size(); ++index)
+    {
+      if (document->children()[index]->id() == backToPageId)
+      {
+        // clear presented page relations
+        auto to = displayedPage->id();
+        while (!to.empty())
+        {
+          m_presentedTreeContext.erase(to);
+
+          if (!m_presentingPages.contains(to))
+          {
+            break;
+          }
+
+          auto from = m_presentingPages[to];
+          m_presentingPages.erase(to);
+          m_presentedPages.erase(from);
+
+          to = from;
+        }
+
+        setCurrentPageIndex(index);
+        return true;
       }
     }
   }

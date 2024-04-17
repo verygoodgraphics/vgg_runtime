@@ -176,9 +176,9 @@ public:
     return m_page;
   }
   bool setCurrentPage(int index);
-  bool back();
   bool presentPage(int index);
   bool dismissPage();
+  bool goBack(bool resetScrollPosition, bool resetState);
 
   void                       saveState(std::shared_ptr<StateTree> stateTree);
   std::shared_ptr<StateTree> savedState();

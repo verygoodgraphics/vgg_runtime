@@ -286,6 +286,12 @@ bool Presenter::dismissPage()
   return false;
 }
 
+bool Presenter::goBack(bool resetScrollPosition, bool resetState)
+{
+  ASSERT(m_view);
+  return m_view->goBack(resetScrollPosition, resetState);
+}
+
 void Presenter::saveState(std::shared_ptr<StateTree> stateTree)
 {
   ASSERT(m_view);

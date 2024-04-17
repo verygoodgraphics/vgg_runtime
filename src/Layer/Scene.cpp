@@ -213,7 +213,7 @@ public:
           // SkPaint p;
           // p.setColor(SK_ColorRED);
           // p.setStyle(SkPaint::kStroke_Style);
-          // canvas->drawRect(tile[i].rect, p);
+          // canvas->drawRect(tile.rect, p);
         }
         canvas->restore();
       }
@@ -314,11 +314,11 @@ void Scene::setPage(int num)
 
 void Scene::onZoomScaleChanged(Zoomer::Scale value)
 {
-  DEBUG("Scene: onZoomScaleChanged");
   std::visit(
     layer::Overloaded{ [this](Zoomer::EScaleLevel level) { this->d_ptr->lod = level; },
                        [this](Zoomer::OtherLevel other) { this->d_ptr->lod = -1; } },
     value.first);
+  DEBUG("Scene: onZoomScaleChanged %d", this->d_ptr->lod);
   if (d_ptr->rasterizer)
     d_ptr->rasterizer->invalidate(layer::Rasterizer::EReason::ZOOM_SCALE);
 }

@@ -152,6 +152,19 @@ bool VggSdk::dismissFrame()
   return false;
 }
 
+bool VggSdk::goBack(bool resetScrollPosition, bool resetState)
+{
+  if (auto currentEnv = env())
+  {
+    if (auto presenter = currentEnv->presenter())
+    {
+      return presenter->goBack(resetScrollPosition, resetState);
+    }
+  }
+
+  return false;
+}
+
 std::string VggSdk::requiredFonts() const
 {
   if (auto currentEnv = env())

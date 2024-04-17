@@ -180,6 +180,7 @@ void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
     DECLARE_NODE_API_PROPERTY("setCurrentFrameById", setCurrentFrameById),
     DECLARE_NODE_API_PROPERTY("presentFrameById", presentFrameById),
     DECLARE_NODE_API_PROPERTY("dismissFrame", dismissFrame),
+    DECLARE_NODE_API_PROPERTY("goBack", goBack),
 
     DECLARE_NODE_API_PROPERTY("setState", setState),
     DECLARE_NODE_API_PROPERTY("presentState", presentState),
@@ -452,6 +453,32 @@ napi_value VggSdkNodeAdapter::dismissFrame(napi_env env, napi_callback_info info
 
     bool success{ false };
     SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk]() { return sdk->dismissFrame(); },
+                              [&success](bool result) { success = result; } }();
+
+    napi_value ret;
+    NODE_API_CALL(env, napi_get_boolean(env, success, &ret));
+    return ret;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+
+napi_value VggSdkNodeAdapter::goBack(napi_env env, napi_callback_info info)
+{
+  napi_value _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &_this, NULL));
+
+  try
+  {
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
+
+    bool success{ false };
+    SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk]() { return sdk->goBack(true, true); },
                               [&success](bool result) { success = result; } }();
 
     napi_value ret;

@@ -91,22 +91,22 @@ protected:
     }
   }
 
-  void mockClick(const std::string& path, int button = 0)
+  void mockClick(const std::string& name, int button = 0)
   {
     m_fakeViewSubject.get_subscriber().on_next(
-      UIEventPtr{ new MouseEvent{ EUIEventType::CLICK, "fakeId", path, button } });
+      UIEventPtr{ new MouseEvent{ EUIEventType::CLICK, "fakeId", name, {}, button } });
   }
 
-  void mockKeydown(const std::string& path)
+  void mockKeydown(const std::string& name)
   {
     m_fakeViewSubject.get_subscriber().on_next(
-      UIEventPtr{ new KeyboardEvent{ EUIEventType::KEYDOWN, "fakeId", path, 'a' } });
+      UIEventPtr{ new KeyboardEvent{ EUIEventType::KEYDOWN, "fakeId", name, {}, 'a' } });
   }
 
-  void mockTouch(const std::string& path)
+  void mockTouch(const std::string& name)
   {
     m_fakeViewSubject.get_subscriber().on_next(
-      UIEventPtr{ new TouchEvent{ EUIEventType::TOUCHSTART, "fakeId", path } });
+      UIEventPtr{ new TouchEvent{ EUIEventType::TOUCHSTART, "fakeId", name, {} } });
   }
 
   auto getDaruma()

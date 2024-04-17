@@ -47,22 +47,22 @@ public:
   virtual bool        setLaunchFrameById(const std::string& id) = 0;
 
   // frame
-  virtual bool setCurrentFrameById(const std::string& id, bool resetScrollPosition) = 0;
-  virtual bool presentFrameById(const std::string& id, bool resetScrollPosition) = 0;
+  virtual bool setCurrentFrameById(const std::string& id, bool resetScrollPosition = true) = 0;
+  virtual bool presentFrameById(const std::string& id, bool resetScrollPosition = true) = 0;
   virtual bool dismissFrame() = 0;
-  virtual bool goBack(bool resetScrollPosition, bool resetState) = 0;
+  virtual bool goBack(bool resetScrollPosition = true, bool resetState = true) = 0;
 
   // instance
   virtual bool setState(
     const std::string& instanceDescendantId,
     const std::string& listenerId,
     const std::string& newMasterId,
-    bool               resetScrollPosition) = 0;
+    bool               resetScrollPosition = true) = 0;
   virtual bool presentState(
     const std::string& instanceDescendantId,
     const std::string& listenerId,
     const std::string& newStateMasterId,
-    bool               resetScrollPosition) = 0;
+    bool               resetScrollPosition = true) = 0;
   virtual bool dismissState(const std::string& instanceDescendantId) = 0;
 
   virtual std::string requiredFonts() const = 0;

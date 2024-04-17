@@ -131,7 +131,7 @@ public:
 
   bool presentState(const std::string& instanceDescendantId, const std::string& stateMasterId);
   bool dismissState(const std::string& instanceDescendantId);
-  bool setMasterId(const std::string& instanceDescendantId, const std::string& stateMasterId);
+  bool setState(const std::string& instanceDescendantId, const std::string& stateMasterId);
 
 private:
   void          initModel(const char* designDocSchemaFilePath, const char* layoutDocSchemaFilePath);

@@ -106,7 +106,7 @@ std::string VggSdk::currentFrameId() const
   return {};
 }
 
-bool VggSdk::setCurrentFrameById(const std::string& id)
+bool VggSdk::setCurrentFrameById(const std::string& id, bool resetScrollPosition)
 {
   if (auto currentEnv = env())
   {
@@ -128,7 +128,7 @@ bool VggSdk::setLaunchFrameById(const std::string& id)
   return getModel()->setLaunchFrameById(id);
 }
 
-bool VggSdk::presentFrameById(const std::string& id)
+bool VggSdk::presentFrameById(const std::string& id, bool resetScrollPosition)
 {
   if (auto currentEnv = env())
   {
@@ -359,7 +359,25 @@ emscripten::val VggSdk::emMakeImageSnapshot(const ImageOptions& options)
 }
 #endif
 
-bool VggSdk::presentState(const std::string& instanceDescendantId, const std::string& stateMasterId)
+bool VggSdk::setState(
+  const std::string& instanceDescendantId,
+  const std::string& masterId,
+  bool               resetScrollPosition)
+{
+  if (auto currentEnv = env())
+  {
+    if (auto controller = currentEnv->controller())
+    {
+      return controller->setState(instanceDescendantId, masterId);
+    }
+  }
+  return false;
+}
+
+bool VggSdk::presentState(
+  const std::string& instanceDescendantId,
+  const std::string& stateMasterId,
+  bool               resetScrollPosition)
 {
   if (auto currentEnv = env())
   {
@@ -378,18 +396,6 @@ bool VggSdk::dismissState(const std::string& instanceDescendantId)
     if (auto controller = currentEnv->controller())
     {
       return controller->dismissState(instanceDescendantId);
-    }
-  }
-  return false;
-}
-
-bool VggSdk::setMasterId(const std::string& instanceDescendantId, const std::string& masterId)
-{
-  if (auto currentEnv = env())
-  {
-    if (auto controller = currentEnv->controller())
-    {
-      return controller->setMasterId(instanceDescendantId, masterId);
     }
   }
   return false;

@@ -770,14 +770,12 @@ bool Controller::dismissState(const std::string& instanceDescendantId)
   return success;
 }
 
-bool Controller::setMasterId(
-  const std::string& instanceDescendantId,
-  const std::string& stateMasterId)
+bool Controller::setState(const std::string& instanceDescendantId, const std::string& stateMasterId)
 {
   auto          page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
   InstanceState instanceState{ page, m_expander };
 
-  auto success = instanceState.setMasterId(instanceDescendantId, stateMasterId);
+  auto success = instanceState.setState(instanceDescendantId, stateMasterId);
   if (success)
   {
     m_presenter->restoreState();

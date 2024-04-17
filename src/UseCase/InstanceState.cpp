@@ -65,7 +65,7 @@ bool InstanceState::presentState(
     stateTree->addChild(child);
   }
 
-  return setMasterId(instanceNode, stateMasterId);
+  return setState(instanceNode, stateMasterId);
 }
 
 bool InstanceState::dismissState(
@@ -87,10 +87,10 @@ bool InstanceState::dismissState(
   ASSERT(pInstance);
   auto oldMasterId = pInstance->dissmissState();
 
-  return setMasterId(instanceNode, oldMasterId);
+  return setState(instanceNode, oldMasterId);
 }
 
-bool InstanceState::setMasterId(
+bool InstanceState::setState(
   const std::string& instanceDescendantId,
   const std::string& stateMasterId)
 {
@@ -105,10 +105,10 @@ bool InstanceState::setMasterId(
   ASSERT(pInstance);
   pInstance->resetState();
 
-  return setMasterId(instanceNode, stateMasterId);
+  return setState(instanceNode, stateMasterId);
 }
 
-bool InstanceState::setMasterId(
+bool InstanceState::setState(
   std::shared_ptr<LayoutNode> instanceNode,
   const std::string&          stateMasterId)
 {

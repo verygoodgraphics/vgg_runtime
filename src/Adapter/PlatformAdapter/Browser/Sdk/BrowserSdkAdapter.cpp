@@ -65,7 +65,7 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     // instance state
     .function("presentState", &VggSdk::presentState)
     .function("dismissState", &VggSdk::dismissState)
-    .function("setMasterId", &VggSdk::setMasterId)
+    .function("setState", &VggSdk::setState)
     // font
     .function("requiredFonts", &VggSdk::requiredFonts)
     .function("addFont", &VggSdk::jsAddFont)

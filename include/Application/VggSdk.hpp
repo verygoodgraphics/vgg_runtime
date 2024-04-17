@@ -66,20 +66,23 @@ public:
 
   virtual std::string getFramesInfo() const override;
   virtual std::string currentFrameId() const override;
-  virtual bool        setCurrentFrameById(const std::string& id) override;
   virtual std::string launchFrameId() const override;
   virtual bool        setLaunchFrameById(const std::string& id) override;
 
-  virtual bool presentFrameById(const std::string& id) override;
-  virtual bool dismissFrame() override;
+  bool setCurrentFrameById(const std::string& id, bool resetScrollPosition) override;
+  bool presentFrameById(const std::string& id, bool resetScrollPosition) override;
+  bool dismissFrame() override;
 
   // instance
-  virtual bool presentState(
+  bool setState(
     const std::string& instanceDescendantId,
-    const std::string& stateMasterId) override;
-  virtual bool dismissState(const std::string& instanceDescendantId) override;
-  virtual bool setMasterId(const std::string& instanceDescendantId, const std::string& masterId)
-    override;
+    const std::string& masterId,
+    bool               resetScrollPosition) override;
+  bool presentState(
+    const std::string& instanceDescendantId,
+    const std::string& stateMasterId,
+    bool               resetScrollPosition) override;
+  bool dismissState(const std::string& instanceDescendantId) override;
 
   virtual std::string requiredFonts() const override;
   virtual bool        addFont(const uint8_t* data, size_t size, const char* defaultName) override;

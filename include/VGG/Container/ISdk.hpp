@@ -43,21 +43,23 @@ public:
 
   virtual std::string getFramesInfo() const = 0;
   virtual std::string currentFrameId() const = 0;
-  virtual bool        setCurrentFrameById(const std::string& id) = 0;
   virtual std::string launchFrameId() const = 0;
   virtual bool        setLaunchFrameById(const std::string& id) = 0;
 
-  virtual bool presentFrameById(const std::string& id) = 0;
+  virtual bool setCurrentFrameById(const std::string& id, bool resetScrollPosition) = 0;
+  virtual bool presentFrameById(const std::string& id, bool resetScrollPosition) = 0;
   virtual bool dismissFrame() = 0;
 
   // instance
+  virtual bool setState(
+    const std::string& instanceDescendantId,
+    const std::string& newMasterId,
+    bool               resetScrollPosition) = 0;
   virtual bool presentState(
     const std::string& instanceDescendantId,
-    const std::string& newStateMasterId) = 0;
+    const std::string& newStateMasterId,
+    bool               resetScrollPosition) = 0;
   virtual bool dismissState(const std::string& instanceDescendantId) = 0;
-  virtual bool setMasterId(
-    const std::string& instanceDescendantId,
-    const std::string& newMasterId) = 0;
 
   virtual std::string requiredFonts() const = 0;
   virtual bool        addFont(const uint8_t* data, size_t size, const char* defaultName) = 0;

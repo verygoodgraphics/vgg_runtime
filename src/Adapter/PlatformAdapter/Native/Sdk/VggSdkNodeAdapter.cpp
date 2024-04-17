@@ -181,7 +181,7 @@ void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
     DECLARE_NODE_API_PROPERTY("presentFrameById", presentFrameById),
     DECLARE_NODE_API_PROPERTY("dismissFrame", dismissFrame),
 
-    DECLARE_NODE_API_PROPERTY("setMasterId", setMasterId),
+    DECLARE_NODE_API_PROPERTY("setState", setState),
     DECLARE_NODE_API_PROPERTY("presentState", presentState),
     DECLARE_NODE_API_PROPERTY("dismissState", dismissState),
 
@@ -366,12 +366,13 @@ napi_value VggSdkNodeAdapter::UpdateElement(napi_env env, napi_callback_info inf
 
 napi_value VggSdkNodeAdapter::setCurrentFrameById(napi_env env, napi_callback_info info)
 {
-  size_t     argc = 2;
-  napi_value args[2];
-  napi_value _this;
+  constexpr size_t ARG_COUNT = 2;
+  size_t           argc = ARG_COUNT;
+  napi_value       args[ARG_COUNT];
+  napi_value       _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
 
-  if (argc < 1)
+  if (argc < ARG_COUNT)
   {
     napi_throw_error(env, nullptr, "Wrong number of arguments");
     return nullptr;
@@ -386,7 +387,7 @@ napi_value VggSdkNodeAdapter::setCurrentFrameById(napi_env env, napi_callback_in
 
     bool success{ false };
     SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, id]()
-                              { return sdk->setCurrentFrameById(id); },
+                              { return sdk->setCurrentFrameById(id, true); },
                               [&success](bool result) { success = result; } }();
 
     napi_value ret;
@@ -403,12 +404,13 @@ napi_value VggSdkNodeAdapter::setCurrentFrameById(napi_env env, napi_callback_in
 
 napi_value VggSdkNodeAdapter::presentFrameById(napi_env env, napi_callback_info info)
 {
-  size_t     argc = 2;
-  napi_value args[2];
-  napi_value _this;
+  constexpr size_t ARG_COUNT = 2;
+  size_t           argc = ARG_COUNT;
+  napi_value       args[ARG_COUNT];
+  napi_value       _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
 
-  if (argc < 1)
+  if (argc < ARG_COUNT)
   {
     napi_throw_error(env, nullptr, "Wrong number of arguments");
     return nullptr;
@@ -423,7 +425,7 @@ napi_value VggSdkNodeAdapter::presentFrameById(napi_env env, napi_callback_info 
 
     bool success{ false };
     SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, id]()
-                              { return sdk->presentFrameById(id); },
+                              { return sdk->presentFrameById(id, true); },
                               [&success](bool result) { success = result; } }();
 
     napi_value ret;
@@ -465,14 +467,15 @@ napi_value VggSdkNodeAdapter::dismissFrame(napi_env env, napi_callback_info info
 }
 
 // instance state
-napi_value VggSdkNodeAdapter::setMasterId(napi_env env, napi_callback_info info)
+napi_value VggSdkNodeAdapter::setState(napi_env env, napi_callback_info info)
 {
-  size_t     argc = 2;
-  napi_value args[2];
-  napi_value _this;
+  constexpr size_t ARG_COUNT = 3;
+  size_t           argc = ARG_COUNT;
+  napi_value       args[ARG_COUNT];
+  napi_value       _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
 
-  if (argc != 2)
+  if (argc < ARG_COUNT)
   {
     napi_throw_error(env, nullptr, "Wrong number of arguments");
     return nullptr;
@@ -488,7 +491,7 @@ napi_value VggSdkNodeAdapter::setMasterId(napi_env env, napi_callback_info info)
 
     bool success{ false };
     SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, instanceDescendantId, newMasterId]()
-                              { return sdk->setMasterId(instanceDescendantId, newMasterId); },
+                              { return sdk->setState(instanceDescendantId, newMasterId, true); },
                               [&success](bool result) { success = result; } }();
 
     napi_value ret;
@@ -505,12 +508,13 @@ napi_value VggSdkNodeAdapter::setMasterId(napi_env env, napi_callback_info info)
 
 napi_value VggSdkNodeAdapter::presentState(napi_env env, napi_callback_info info)
 {
-  size_t     argc = 2;
-  napi_value args[2];
-  napi_value _this;
+  constexpr size_t ARG_COUNT = 3;
+  size_t           argc = ARG_COUNT;
+  napi_value       args[ARG_COUNT];
+  napi_value       _this;
   NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
 
-  if (argc != 2)
+  if (argc < ARG_COUNT)
   {
     napi_throw_error(env, nullptr, "Wrong number of arguments");
     return nullptr;
@@ -525,8 +529,9 @@ napi_value VggSdkNodeAdapter::presentState(napi_env env, napi_callback_info info
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
     bool success{ false };
-    SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, instanceDescendantId, newMasterId]()
-                              { return sdk->presentState(instanceDescendantId, newMasterId); },
+    SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, instanceDescendantId, newMasterId]() {
+                               return sdk->presentState(instanceDescendantId, newMasterId, true);
+                             },
                               [&success](bool result) { success = result; } }();
 
     napi_value ret;

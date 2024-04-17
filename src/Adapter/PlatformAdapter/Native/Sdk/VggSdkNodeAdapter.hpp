@@ -50,7 +50,7 @@ private:
   static napi_value dismissFrame(napi_env env, napi_callback_info info);
 
   // instance state
-  static napi_value setMasterId(napi_env env, napi_callback_info info);
+  static napi_value setState(napi_env env, napi_callback_info info);
   static napi_value presentState(napi_env env, napi_callback_info info);
   static napi_value dismissState(napi_env env, napi_callback_info info);
 

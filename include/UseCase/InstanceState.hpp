@@ -41,10 +41,10 @@ public:
     const std::string& stateMasterId,
     StateTree*         stateTree);
   bool dismissState(const StateTree* savedStateTree, const std::string& instanceDescendantId);
-  bool setMasterId(const std::string& instanceDescendantId, const std::string& stateMasterId);
+  bool setState(const std::string& instanceDescendantId, const std::string& stateMasterId);
 
 private:
-  bool setMasterId(std::shared_ptr<LayoutNode> instanceNode, const std::string& stateMasterId);
+  bool setState(std::shared_ptr<LayoutNode> instanceNode, const std::string& stateMasterId);
   std::shared_ptr<LayoutNode> findInstanceNode(const std::string& instanceDescendantId);
 };
 

@@ -335,7 +335,7 @@ std::vector<SubShape<StructObject>> StructPathObject::getShapes() const
               if (type == EModelShapeType::CONTOUR)
               {
                 auto       dm = static_cast<Domain::ContourElement*>(m)->dataModel();
-                ContourPtr c = std::make_shared<ContourArray>(dm->points.size());
+                ContourPtr c = std::make_shared<BezierContour>(dm->points.size());
                 c->cornerSmooth = smooth;
                 c->closed = dm->closed;
 
@@ -367,7 +367,7 @@ std::vector<SubShape<StructObject>> StructPathObject::getShapes() const
                 }
                 return c;
               }
-              return std::make_shared<ContourArray>(4);
+              return std::make_shared<BezierContour>(4);
             }));
       });
   }

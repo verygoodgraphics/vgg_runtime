@@ -33,7 +33,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES "Release")
-  add_definitions(-DVGG_NO_DEBUG_INFO)
+  add_definitions(-DVGG_NDEBUG)
 endif()
 
 # must fetch before add subdirectory vgg_contrib

@@ -25,10 +25,10 @@ namespace
 using namespace VGG;
 using namespace VGG::layer;
 
-inline ContourPtr makeContourData2(const json& j)
+inline ContourPtr makeContourData(const json& j)
 {
   const auto&  points = getOrDefault(j, "points");
-  ContourArray contour(points.size());
+  BezierContour contour(points.size());
   contour.closed = j.value("closed", false);
   for (const auto& e : points)
   {
@@ -39,7 +39,7 @@ inline ContourPtr makeContourData2(const json& j)
       getOptional<glm::vec2>(e, "curveTo"),
       getOptional<int>(e, "cornerStyle"));
   }
-  auto ptr = std::make_shared<ContourArray>(contour);
+  auto ptr = std::make_shared<BezierContour>(contour);
   if (!ptr->closed && !ptr->empty())
   {
     ptr->back().radius = 0;
@@ -142,11 +142,11 @@ std::vector<SubShape<JSONObject>> JSONPathObject::getShapes() const
           {
             if (type == EModelShapeType::CONTOUR)
             {
-              auto c = makeContourData2(geo);
+              auto c = makeContourData(geo);
               c->cornerSmooth = smooth;
               return c;
             }
-            return std::make_shared<ContourArray>(4);
+            return std::make_shared<BezierContour>(4);
           }));
     }
     else

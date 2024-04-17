@@ -24,7 +24,7 @@
 #define VGG_EXPORTS
 #endif
 
-#ifdef VGG_NO_DEBUG_INFO
+#ifdef VGG_NDEBUG
 #define VGG_LAYER_DEBUG_CODE(code)
 #else
 #define VGG_LAYER_DEBUG

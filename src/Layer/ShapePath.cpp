@@ -26,7 +26,7 @@ using namespace VGG;
 inline ContourPtr fromPolygon(const Polygon& poly)
 {
   ASSERT(poly.count >= 3);
-  ContourArray c(poly.count);
+  BezierContour c(poly.count);
   c.closed = true;
   c.cornerSmooth = poly.cornerSmoothing;
   c.reserve(poly.count * 2);
@@ -37,13 +37,13 @@ inline ContourPtr fromPolygon(const Polygon& poly)
     float y = (0.5 + sin(angle) * 0.5) * poly.bounds.height();
     c.emplace_back(glm::vec2{ x, y }, poly.radius, std::nullopt, std::nullopt, std::nullopt);
   }
-  return std::make_shared<ContourArray>(std::move(c));
+  return std::make_shared<BezierContour>(std::move(c));
 }
 
 inline ContourPtr fromStar(const Star& star)
 {
   ASSERT(star.count >= 3);
-  ContourArray c(star.count);
+  BezierContour c(star.count);
   c.closed = true;
   c.cornerSmooth = star.cornerSmoothing;
 
@@ -64,7 +64,7 @@ inline ContourPtr fromStar(const Star& star)
     const float y2 = (0.5 + (sin(angle2) * 0.5 * ratio)) * h;
     c.emplace_back(glm::vec2{ x2, y2 }, radius, std::nullopt, std::nullopt, std::nullopt);
   }
-  return std::make_shared<ContourArray>(std::move(c));
+  return std::make_shared<BezierContour>(std::move(c));
 }
 
 } // namespace

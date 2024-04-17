@@ -77,9 +77,6 @@ bool UIView::onEvent(UEvent evt, void* userData)
 
   // todo, capturing
   // todo, bubbling
-  UIEvent::TargetIdType       targetId;
-  UIEvent::TargetNameType     targetName;
-  std::shared_ptr<LayoutNode> targetNode;
   switch (evt.type)
   {
     case VGG_MOUSEBUTTONDOWN:
@@ -161,7 +158,7 @@ bool UIView::onEvent(UEvent evt, void* userData)
         }
       }
 
-      m_possibleClickTargetNode = nullptr;
+      m_possibleClickTargetNode = {};
     }
     break;
 
@@ -176,15 +173,16 @@ bool UIView::onEvent(UEvent evt, void* userData)
       m_eventListener(
         UIEventPtr(new KeyboardEvent(
           EUIEventType::KEYDOWN,
-          targetId,
-          targetName,
+          {},
+          {},
+          {},
           evt.key.keysym.sym,
           evt.key.repeat,
           alt,
           ctrl,
           meta,
           shift)),
-        targetNode);
+        {});
     }
     break;
 
@@ -194,15 +192,16 @@ bool UIView::onEvent(UEvent evt, void* userData)
       m_eventListener(
         UIEventPtr(new KeyboardEvent(
           EUIEventType::KEYUP,
-          targetId,
-          targetName,
+          {},
+          {},
+          {},
           evt.key.keysym.sym,
           evt.key.repeat,
           alt,
           ctrl,
           meta,
           shift)),
-        targetNode);
+        {});
     }
     break;
 
@@ -407,38 +406,36 @@ bool UIView::dispatchMouseEventOnPage(
     pointToDocument.x,
     pointToDocument.y);
 
-  const auto& target = page->hitTest(
+  auto target = page->hitTest(
     pointToDocument,
     [&queryHasEventListener = m_hasEventListener, type](const std::string& targetKey)
     { return queryHasEventListener(targetKey, type); });
   std::shared_ptr<VGG::LayoutNode> hitNodeInTarget;
-  if (target)
+  if (target.first)
   {
-    hitNodeInTarget = target->hitTest(pointToDocument, nullptr);
+    hitNodeInTarget = target.first->hitTest(pointToDocument, nullptr).first;
   }
 
   switch (type)
   {
     case EUIEventType::MOUSEDOWN:
     {
-      std::shared_ptr<VGG::LayoutNode> clickTarget;
-
       EUIEventType types[] = { EUIEventType::CLICK,
                                EUIEventType::AUXCLICK,
                                EUIEventType::CONTEXTMENU };
       for (auto clickType : types)
       {
-        clickTarget = page->hitTest(
+        auto clickTarget = page->hitTest(
           pointToDocument,
           [&queryHasEventListener = m_hasEventListener, clickType](const std::string& targetKey)
           { return queryHasEventListener(targetKey, clickType); });
-        if (clickTarget)
+        if (clickTarget.first)
         {
           m_possibleClickTargetNode = clickTarget;
           DEBUG(
             "mousedown, m_possibleClickTargetNode: %s, %s",
-            m_possibleClickTargetNode->name().c_str(),
-            m_possibleClickTargetNode->id().c_str());
+            m_possibleClickTargetNode.first->name().c_str(),
+            m_possibleClickTargetNode.first->id().c_str());
           break;
         }
       }
@@ -447,7 +444,7 @@ bool UIView::dispatchMouseEventOnPage(
 
     case EUIEventType::MOUSEOVER:
     {
-      if (target)
+      if (target.first)
       {
         if (
           target == eventContext.mouseOverTargetNode &&
@@ -460,7 +457,7 @@ bool UIView::dispatchMouseEventOnPage(
       }
       else
       {
-        eventContext.mouseOverTargetNode = nullptr;
+        eventContext.mouseOverTargetNode = {};
         eventContext.mouseOverNode = nullptr;
       }
     }
@@ -468,13 +465,13 @@ bool UIView::dispatchMouseEventOnPage(
 
     case EUIEventType::MOUSEENTER:
     {
-      if (target && target == eventContext.mouseEnterTargetNode)
+      if (target.first && target == eventContext.mouseEnterTargetNode)
       {
         return true;
       }
-      if (target)
+      if (auto node = target.first)
       {
-        DEBUG("mouse enter node: %s, %s", target->name().c_str(), target->id().c_str());
+        DEBUG("mouse enter node: %s, %s", node->name().c_str(), node->id().c_str());
       }
       eventContext.mouseEnterTargetNode = target;
     }
@@ -498,7 +495,7 @@ bool UIView::dispatchMouseEventOnPage(
     case EUIEventType::AUXCLICK:
     case EUIEventType::CONTEXTMENU:
     {
-      if (target && m_possibleClickTargetNode != target)
+      if (target.first && m_possibleClickTargetNode != target)
       {
         return false;
       }
@@ -515,7 +512,7 @@ bool UIView::dispatchMouseEventOnPage(
 
 void UIView::handleMouseOut(
   EventContext&                    eventContext,
-  std::shared_ptr<VGG::LayoutNode> target,
+  TargetNode                       target,
   std::shared_ptr<VGG::LayoutNode> hitNodeInTarget,
   int                              jsButtonIndex,
   int                              x,
@@ -523,11 +520,11 @@ void UIView::handleMouseOut(
   int                              motionX,
   int                              motionY)
 {
-  std::shared_ptr<VGG::LayoutNode> fireTarget;
+  TargetNode fireTarget;
 
-  if (target)
+  if (target.first)
   {
-    if (eventContext.mouseOutTargetNode)
+    if (eventContext.mouseOutTargetNode.first)
     {
       if (target == eventContext.mouseOutTargetNode)
       {
@@ -546,7 +543,10 @@ void UIView::handleMouseOut(
     }
     else
     {
-      DEBUG("m_mouseOutTargetNode: %s, %s", fireTarget->name().c_str(), fireTarget->id().c_str());
+      DEBUG(
+        "m_mouseOutTargetNode: %s, %s",
+        fireTarget.first->name().c_str(),
+        fireTarget.first->id().c_str());
       eventContext.mouseOutTargetNode = target;
       eventContext.mouseOutNode = hitNodeInTarget;
       return;
@@ -554,35 +554,35 @@ void UIView::handleMouseOut(
   }
   else
   {
-    if (eventContext.mouseOutTargetNode)
+    if (eventContext.mouseOutTargetNode.first)
     {
       fireTarget = eventContext.mouseOutTargetNode;
       DEBUG("mouse out of the m_mouseOutTargetNode, set it to nullptr");
-      eventContext.mouseOutTargetNode = nullptr;
+      eventContext.mouseOutTargetNode = {};
       eventContext.mouseOutNode = nullptr;
     }
   }
 
-  if (fireTarget)
+  if (fireTarget.first)
   {
     fireMouseEvent(fireTarget, EUIEventType::MOUSEOUT, jsButtonIndex, x, y, motionX, motionY);
   }
 }
 
 void UIView::handleMouseLeave(
-  EventContext&                    eventContext,
-  std::shared_ptr<VGG::LayoutNode> target,
-  int                              jsButtonIndex,
-  int                              x,
-  int                              y,
-  int                              motionX,
-  int                              motionY)
+  EventContext& eventContext,
+  TargetNode    target,
+  int           jsButtonIndex,
+  int           x,
+  int           y,
+  int           motionX,
+  int           motionY)
 {
-  std::shared_ptr<VGG::LayoutNode> fireTarget;
+  TargetNode fireTarget;
 
-  if (target)
+  if (target.first)
   {
-    if (eventContext.mouseLeaveTargetNode)
+    if (eventContext.mouseLeaveTargetNode.first)
     {
       if (target == eventContext.mouseLeaveTargetNode)
       {
@@ -594,41 +594,49 @@ void UIView::handleMouseLeave(
       }
     }
 
-    DEBUG("mouse leave target node: %s, %s", target->name().c_str(), target->id().c_str());
+    DEBUG(
+      "mouse leave target node: %s, %s",
+      target.first->name().c_str(),
+      target.first->id().c_str());
     eventContext.mouseLeaveTargetNode = target;
   }
   else
   {
-    if (eventContext.mouseLeaveTargetNode)
+    if (eventContext.mouseLeaveTargetNode.first)
     {
       fireTarget = eventContext.mouseLeaveTargetNode;
       DEBUG("mouse leave target set to null");
-      eventContext.mouseLeaveTargetNode = nullptr;
+      eventContext.mouseLeaveTargetNode = {};
     }
   }
 
-  if (fireTarget)
+  if (fireTarget.first)
   {
-    DEBUG("mouse leave node: %s, %s", fireTarget->name().c_str(), fireTarget->id().c_str());
+    DEBUG(
+      "mouse leave node: %s, %s",
+      fireTarget.first->name().c_str(),
+      fireTarget.first->id().c_str());
     fireMouseEvent(fireTarget, EUIEventType::MOUSELEAVE, jsButtonIndex, x, y, motionX, motionY);
   }
 }
 
 void UIView::fireMouseEvent(
-  std::shared_ptr<VGG::LayoutNode> target,
-  VGG::EUIEventType                type,
-  int                              jsButtonIndex,
-  int                              x,
-  int                              y,
-  int                              motionX,
-  int                              motionY)
+  TargetNode        target,
+  VGG::EUIEventType type,
+  int               jsButtonIndex,
+  int               x,
+  int               y,
+  int               motionX,
+  int               motionY)
 {
   auto [alt, ctrl, meta, shift] = getKeyModifier(EventManager::getModState());
+  auto [node, key] = target;
   m_eventListener(
     UIEventPtr(new MouseEvent(
       type,
-      target ? target->id() : K_EMPTY_STRING,
-      target ? target->name() : K_EMPTY_STRING,
+      node ? node->id() : K_EMPTY_STRING,
+      node ? node->name() : K_EMPTY_STRING,
+      key,
       jsButtonIndex,
       x,
       y,
@@ -638,7 +646,7 @@ void UIView::fireMouseEvent(
       ctrl,
       meta,
       shift)),
-    target);
+    node);
 }
 
 void UIView::show(const ViewModel& viewModel, bool force)
@@ -721,7 +729,7 @@ bool UIView::handleTouchEvent(int x, int y, int motionX, int motionY, EUIEventTy
   Layout::Point pointToDocument{ pointToPage.x + page->frame().origin.x,
                                  pointToPage.y + page->frame().origin.y };
 
-  auto target = page->hitTest(
+  auto [target, key] = page->hitTest(
     pointToDocument,
     [&queryHasEventListener = m_hasEventListener, type](const std::string& targetKey)
     { return queryHasEventListener(targetKey, type); });
@@ -730,7 +738,8 @@ bool UIView::handleTouchEvent(int x, int y, int motionX, int motionY, EUIEventTy
     UIEventPtr(new TouchEvent(
       type,
       target ? target->id() : K_EMPTY_STRING,
-      target ? target->name() : K_EMPTY_STRING)),
+      target ? target->name() : K_EMPTY_STRING,
+      key)),
     target);
 
   return true;

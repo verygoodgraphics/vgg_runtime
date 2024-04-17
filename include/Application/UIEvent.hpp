@@ -112,16 +112,20 @@ private:
   const EUIEventType   m_type;
   const TargetIdType   m_targetId;
   const TargetNameType m_targetName;
+  const std::string    m_targetKey;
 
 public:
-  UIEvent(EUIEventType type, const TargetIdType& targetId, const TargetNameType& targetName)
+  UIEvent(
+    EUIEventType          type,
+    const TargetIdType&   targetId,
+    const TargetNameType& targetName,
+    const std::string&    targetKey)
     : m_type{ type }
     , m_targetId{ targetId }
     , m_targetName{ targetName }
+    , m_targetKey{ targetKey }
   {
   }
-
-  virtual ~UIEvent() = default;
 
   TargetIdType targetId()
   {
@@ -131,13 +135,17 @@ public:
   {
     return m_targetName;
   }
+  std::string targetKey()
+  {
+    return m_targetKey;
+  }
 
-  virtual std::string target()
+  std::string target() override
   {
     return targetId();
   }
 
-  virtual std::string type()
+  std::string type() override
   {
     return uiEventTypeToString(m_type);
   }
@@ -167,13 +175,14 @@ struct KeyboardEvent
     EUIEventType          type,
     const TargetIdType&   targetId,
     const TargetNameType& targetName,
+    const std::string&    targetKey,
     int                   key,
     bool                  repeat = false,
     bool                  altKey = false,
     bool                  ctrlKey = false,
     bool                  metaKey = false,
     bool                  shiftKey = false)
-    : UIEvent(type, targetId, targetName)
+    : UIEvent{ type, targetId, targetName, targetKey }
     , key{ key }
     , repeat{ repeat }
     , altKey{ altKey }
@@ -211,6 +220,7 @@ struct MouseEvent
     EUIEventType          type,
     const TargetIdType&   targetId,
     const TargetNameType& targetName,
+    const std::string&    targetKey,
     int                   button = 0,
     int                   x = 0,
     int                   y = 0,
@@ -220,7 +230,7 @@ struct MouseEvent
     bool                  ctrlKey = false,
     bool                  metaKey = false,
     bool                  shiftKey = false)
-    : UIEvent(type, targetId, targetName)
+    : UIEvent{ type, targetId, targetName, targetKey }
     , button{ button }
     , x{ x }
     , y{ y }
@@ -244,8 +254,12 @@ struct TouchEvent
   : UIEvent
   , std::enable_shared_from_this<TouchEvent>
 {
-  TouchEvent(EUIEventType type, const TargetIdType& targetId, const TargetNameType& targetName)
-    : UIEvent(type, targetId, targetName)
+  TouchEvent(
+    EUIEventType          type,
+    const TargetIdType&   targetId,
+    const TargetNameType& targetName,
+    const std::string     targetKey)
+    : UIEvent{ type, targetId, targetName, targetKey }
   {
     assert(type >= EUIEventType::TOUCHCANCEL && type <= EUIEventType::TOUCHSTART);
   }

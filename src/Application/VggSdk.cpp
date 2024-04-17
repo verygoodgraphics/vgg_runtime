@@ -374,6 +374,7 @@ emscripten::val VggSdk::emMakeImageSnapshot(const ImageOptions& options)
 
 bool VggSdk::setState(
   const std::string& instanceDescendantId,
+  const std::string& listenerId,
   const std::string& masterId,
   bool               resetScrollPosition)
 {
@@ -381,7 +382,7 @@ bool VggSdk::setState(
   {
     if (auto controller = currentEnv->controller())
     {
-      return controller->setState(instanceDescendantId, masterId);
+      return controller->setState(instanceDescendantId, listenerId, masterId);
     }
   }
   return false;
@@ -389,6 +390,7 @@ bool VggSdk::setState(
 
 bool VggSdk::presentState(
   const std::string& instanceDescendantId,
+  const std::string& listenerId,
   const std::string& stateMasterId,
   bool               resetScrollPosition)
 {
@@ -396,7 +398,7 @@ bool VggSdk::presentState(
   {
     if (auto controller = currentEnv->controller())
     {
-      return controller->presentState(instanceDescendantId, stateMasterId);
+      return controller->presentState(instanceDescendantId, listenerId, stateMasterId);
     }
   }
   return false;

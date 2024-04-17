@@ -33,13 +33,33 @@ InstanceState::InstanceState(
   ASSERT(expander);
 }
 
+bool InstanceState::setState(
+  const std::string& instanceDescendantId,
+  const std::string& listenerId,
+  const std::string& stateMasterId)
+{
+  // todo, check nested instance
+  auto instanceNode = findInstanceNode(instanceDescendantId, listenerId);
+  if (!instanceNode)
+  {
+    return false;
+  }
+
+  auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode().get());
+  ASSERT(pInstance);
+  pInstance->resetState();
+
+  return setState(instanceNode, stateMasterId);
+}
+
 bool InstanceState::presentState(
   const std::string& instanceDescendantId,
+  const std::string& listenerId,
   const std::string& stateMasterId,
   StateTree*         stateTree)
 {
   ASSERT(stateTree);
-  auto instanceNode = findInstanceNode(instanceDescendantId);
+  auto instanceNode = findInstanceNode(instanceDescendantId, listenerId);
   if (!instanceNode)
   {
     return false;
@@ -91,24 +111,6 @@ bool InstanceState::dismissState(
 }
 
 bool InstanceState::setState(
-  const std::string& instanceDescendantId,
-  const std::string& stateMasterId)
-{
-  // todo, check nested instance
-  auto instanceNode = findInstanceNode(instanceDescendantId);
-  if (!instanceNode)
-  {
-    return false;
-  }
-
-  auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode().get());
-  ASSERT(pInstance);
-  pInstance->resetState();
-
-  return setState(instanceNode, stateMasterId);
-}
-
-bool InstanceState::setState(
   std::shared_ptr<LayoutNode> instanceNode,
   const std::string&          stateMasterId)
 {
@@ -128,9 +130,10 @@ bool InstanceState::setState(
   return true;
 }
 
-std::shared_ptr<LayoutNode> InstanceState::findInstanceNode(const std::string& instanceDescendantId)
+std::shared_ptr<LayoutNode> InstanceState::findInstanceNode(
+  const std::string& instanceDescendantId,
+  const std::string& listenerId)
 {
-  // find instance, ignore master
   auto node = m_page->findDescendantNodeById(instanceDescendantId);
   if (!node)
   {
@@ -140,9 +143,10 @@ std::shared_ptr<LayoutNode> InstanceState::findInstanceNode(const std::string& i
   std::shared_ptr<LayoutNode> instanceNode;
   while (node)
   {
-    if (node->elementNode()->type() == Domain::Element::EType::SYMBOL_INSTANCE)
+    if (const auto& id = node->id();
+        node->elementNode()->type() == Domain::Element::EType::SYMBOL_INSTANCE &&
+        ((id == listenerId) || !id.ends_with(listenerId)))
     {
-      // todo, check master id
       instanceNode = node;
       break;
     }

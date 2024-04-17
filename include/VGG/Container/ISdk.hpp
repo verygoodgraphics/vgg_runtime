@@ -55,10 +55,12 @@ public:
   // instance
   virtual bool setState(
     const std::string& instanceDescendantId,
+    const std::string& listenerId,
     const std::string& newMasterId,
     bool               resetScrollPosition) = 0;
   virtual bool presentState(
     const std::string& instanceDescendantId,
+    const std::string& listenerId,
     const std::string& newStateMasterId,
     bool               resetScrollPosition) = 0;
   virtual bool dismissState(const std::string& instanceDescendantId) = 0;

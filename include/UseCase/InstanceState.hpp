@@ -36,16 +36,22 @@ class InstanceState
 public:
   InstanceState(std::shared_ptr<LayoutNode> page, std::shared_ptr<Layout::ExpandSymbol> expander);
 
+  bool setState(
+    const std::string& instanceDescendantId,
+    const std::string& listenerId,
+    const std::string& stateMasterId);
   bool presentState(
     const std::string& instanceDescendantId,
+    const std::string& listenerId,
     const std::string& stateMasterId,
     StateTree*         stateTree);
   bool dismissState(const StateTree* savedStateTree, const std::string& instanceDescendantId);
-  bool setState(const std::string& instanceDescendantId, const std::string& stateMasterId);
 
 private:
   bool setState(std::shared_ptr<LayoutNode> instanceNode, const std::string& stateMasterId);
-  std::shared_ptr<LayoutNode> findInstanceNode(const std::string& instanceDescendantId);
+  std::shared_ptr<LayoutNode> findInstanceNode(
+    const std::string& instanceDescendantId,
+    const std::string& listenerId);
 };
 
 } // namespace VGG

@@ -77,7 +77,7 @@ enum EBlendMode
 
   // sketch
   BM_PLUS_DARKER,
-  BM_PlUS_LIGHTER,
+  BM_PLUS_LIGHTER,
 
   //  octopus
   BM_BLEND_DIVIDE,

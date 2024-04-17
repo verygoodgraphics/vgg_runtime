@@ -32,6 +32,10 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
+if(CMAKE_BUILD_TYPE MATCHES "Release")
+  add_definitions(-DVGG_NO_DEBUG_INFO)
+endif()
+
 # must fetch before add subdirectory vgg_contrib
 option(ENABLE_UNIT_TEST "Enable unit test" OFF)
 if(ENABLE_UNIT_TEST)

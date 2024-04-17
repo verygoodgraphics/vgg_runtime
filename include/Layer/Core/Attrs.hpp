@@ -507,17 +507,17 @@ struct ControlPoint
   }
 };
 
-struct ContourArray : public std::vector<ControlPoint>
+struct BezierContour : public std::vector<ControlPoint>
 {
   bool    closed = true;
   float   cornerSmooth{ 0.f };
   EBoolOp blop{ BO_NONE };
-  ContourArray(int reseved)
+  BezierContour(int reseved)
   {
     reserve(reseved);
   }
 };
 
-using ContourPtr = std::shared_ptr<ContourArray>;
+using ContourPtr = std::shared_ptr<BezierContour>;
 
 } // namespace VGG

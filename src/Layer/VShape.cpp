@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "Layer/Core/Attrs.hpp"
 #include "Layer/VSkia.hpp"
 #include "Layer/Shape.hpp"
 #include "Layer/ShapePath.hpp"
@@ -244,16 +245,16 @@ VShape makeFromRectangle(const Rectangle& rectangle)
     }
     else
     {
-      glm::vec2    corners[4] = { { rect.x(), rect.y() },
-                                  { rect.right(), rect.y() },
-                                  { rect.right(), rect.bottom() },
-                                  { rect.x(), rect.bottom() } };
-      ContourArray contour(4);
+      glm::vec2     corners[4] = { { rect.x(), rect.y() },
+                                   { rect.right(), rect.y() },
+                                   { rect.right(), rect.bottom() },
+                                   { rect.x(), rect.bottom() } };
+      BezierContour contour(4);
       contour.closed = true;
       contour.cornerSmooth = cornerSmoothing;
       for (int i = 0; i < 4; i++)
         contour.emplace_back(corners[i], radius[i], std::nullopt, std::nullopt, std::nullopt);
-      return VShape(std::make_shared<ContourArray>(contour));
+      return VShape(std::make_shared<BezierContour>(contour));
     }
   }
   return VShape(rect);

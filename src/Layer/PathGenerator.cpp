@@ -394,7 +394,7 @@ std::pair<int, SmoothCurveResult> smoothCurveWithRadius(
 
 namespace VGG::layer
 {
-SkPath makePath(const ContourArray& contour)
+SkPath makePath(const BezierContour& contour)
 {
   const auto& points = contour;
   auto        isClosed = contour.closed;

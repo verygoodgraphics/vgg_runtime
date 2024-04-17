@@ -22,7 +22,7 @@
 // #define LOG_NOPROFILE
 // #define LOG_LOGFILE "log.txt
 
-#ifdef VGG_NO_DEBUG_INFO
+#ifdef VGG_NDEBUG
 #define LOG_NODEBUG
 #define LOG_NOASSERT
 #endif

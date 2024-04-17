@@ -183,8 +183,6 @@ public:
 
   void setContourData(ContourData contour);
 
-  ContourArray* contour();
-
   const ContourOption& maskOption() const;
 
   void setPaintOption(PaintOption option);

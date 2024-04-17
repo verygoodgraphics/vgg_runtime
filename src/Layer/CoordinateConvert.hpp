@@ -109,7 +109,7 @@ public:
     point.y = -point.y;
   }
 
-  static void convertCoordinateSystem(ContourArray& contour, const glm::mat3& totalMatrix)
+  static void convertCoordinateSystem(BezierContour& contour, const glm::mat3& totalMatrix)
   {
     for (auto& p : contour)
     {

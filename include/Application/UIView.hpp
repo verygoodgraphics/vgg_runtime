@@ -27,6 +27,7 @@
 #include <stack>
 #include <tuple>
 #include <vector>
+#include <utility>
 
 namespace VGG
 {
@@ -52,15 +53,16 @@ public:
 
 private:
   friend class Editor;
+  using TargetNode = std::pair<std::shared_ptr<LayoutNode>, std::string>;
 
   struct EventContext
   {
-    std::shared_ptr<VGG::LayoutNode> mouseOverTargetNode;
+    TargetNode                       mouseOverTargetNode;
     std::shared_ptr<VGG::LayoutNode> mouseOverNode;
-    std::shared_ptr<VGG::LayoutNode> mouseEnterTargetNode;
-    std::shared_ptr<VGG::LayoutNode> mouseOutTargetNode;
+    TargetNode                       mouseEnterTargetNode;
+    TargetNode                       mouseOutTargetNode;
     std::shared_ptr<VGG::LayoutNode> mouseOutNode;
-    std::shared_ptr<VGG::LayoutNode> mouseLeaveTargetNode;
+    TargetNode                       mouseLeaveTargetNode;
   };
 
   EventListener    m_eventListener;
@@ -83,7 +85,7 @@ private:
   Layout::Rect m_frame;
   Layout::Rect m_bounds;
 
-  std::shared_ptr<VGG::LayoutNode> m_possibleClickTargetNode;
+  TargetNode m_possibleClickTargetNode;
 
   std::unordered_map<std::string, EventContext> m_presentedTreeContext; // key: node id
 
@@ -220,7 +222,7 @@ private:
     EUIEventType                type);
   void handleMouseOut(
     EventContext&                    eventContext,
-    std::shared_ptr<VGG::LayoutNode> targetNode,
+    TargetNode                       targetNode,
     std::shared_ptr<VGG::LayoutNode> hitNodeInTarget,
     int                              jsButtonIndex,
     int                              x,
@@ -228,21 +230,21 @@ private:
     int                              motionX,
     int                              motionY);
   void handleMouseLeave(
-    EventContext&                    eventContext,
-    std::shared_ptr<VGG::LayoutNode> target,
-    int                              jsButtonIndex,
-    int                              x,
-    int                              y,
-    int                              motionX,
-    int                              motionY);
+    EventContext& eventContext,
+    TargetNode    target,
+    int           jsButtonIndex,
+    int           x,
+    int           y,
+    int           motionX,
+    int           motionY);
   void fireMouseEvent(
-    std::shared_ptr<VGG::LayoutNode> target,
-    VGG::EUIEventType                type,
-    int                              jsButtonIndex,
-    int                              x,
-    int                              y,
-    int                              motionX,
-    int                              motionY);
+    TargetNode        target,
+    VGG::EUIEventType type,
+    int               jsButtonIndex,
+    int               x,
+    int               y,
+    int               motionX,
+    int               motionY);
 
   bool handleTouchEvent(int x, int y, int motionX, int motionY, EUIEventType type);
 };

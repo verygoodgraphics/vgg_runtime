@@ -62,7 +62,7 @@ bool isInvalidLength(Layout::Scalar length)
 
 } // namespace
 
-std::shared_ptr<LayoutNode> LayoutNode::hitTest(
+std::pair<std::shared_ptr<LayoutNode>, std::string> LayoutNode::hitTest(
   const Layout::Point& point,
   const HitTestHook&   hasEventListener)
 {
@@ -71,9 +71,9 @@ std::shared_ptr<LayoutNode> LayoutNode::hitTest(
   {
     if ((*it)->pointInside(point))
     {
-      if (auto targetNode = (*it)->hitTest(point, hasEventListener))
+      if (auto target = (*it)->hitTest(point, hasEventListener); target.first)
       {
-        return targetNode;
+        return target;
       }
     }
   }
@@ -82,16 +82,24 @@ std::shared_ptr<LayoutNode> LayoutNode::hitTest(
   {
     if (!hasEventListener)
     {
-      return shared_from_this();
+      return { shared_from_this(), {} };
     }
 
-    if (hasEventListener(id()) || hasEventListener(originalId()) || hasEventListener(name()))
+    std::vector<std::string> keys{ id(), originalId(), name() };
+    if (auto ele = elementNode(); ele && (ele->type() == Domain::Element::EType::SYMBOL_INSTANCE))
     {
-      return shared_from_this();
+      keys.push_back(std::static_pointer_cast<Domain::SymbolInstanceElement>(ele)->masterId());
+    }
+    for (const auto& key : keys)
+    {
+      if (hasEventListener(key))
+      {
+        return { shared_from_this(), key };
+      }
     }
   }
 
-  return nullptr;
+  return {};
 }
 
 std::shared_ptr<Layout::Internal::AutoLayout> LayoutNode::autoLayout() const

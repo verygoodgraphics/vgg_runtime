@@ -23,6 +23,7 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include <utility>
 
 class flexbox_node;
 class grid_layout;
@@ -121,7 +122,7 @@ public:
   }
 
 public:
-  std::shared_ptr<LayoutNode> hitTest(
+  std::pair<std::shared_ptr<LayoutNode>, std::string> hitTest(
     const Layout::Point& point,
     const HitTestHook&   hasEventListener);
 

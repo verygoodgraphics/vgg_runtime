@@ -174,6 +174,7 @@ inline void toType(VGG::Domain::Element* m, F1&& f1, F2&& f2)
       return;
     case Element::EType::NONE:
     case Element::EType::ROOT:
+    case Element::EType::STATE_TREE:
       DEBUG("not support element type");
       return;
   }

@@ -23,6 +23,9 @@
 
 using namespace VGG;
 
+#undef DEBUG
+#define DEBUG(msg, ...)
+
 InstanceState::InstanceState(
   std::shared_ptr<LayoutNode>           page,
   std::shared_ptr<Layout::ExpandSymbol> expander)
@@ -49,6 +52,14 @@ bool InstanceState::setState(
   ASSERT(pInstance);
   pInstance->resetState();
 
+  DEBUG(
+    "instance: %s, set state, old master id %s, new master id: %s; event target: %s, listener: %s",
+    instanceNode->id().c_str(),
+    pInstance->masterId().c_str(),
+    stateMasterId.c_str(),
+    instanceDescendantId.c_str(),
+    listenerId.c_str());
+
   return setState(instanceNode, stateMasterId);
 }
 
@@ -71,6 +82,15 @@ bool InstanceState::presentState(
   auto oldMasterId = pInstance->masterId();
   auto oldElementChildren = pInstance->presentState(stateMasterId);
   auto oldLayoutChildren = instanceNode->removeAllChildren();
+
+  DEBUG(
+    "instance %s, present state, old master id %s, new master id: %s; event target: %s, listener "
+    "id: %s",
+    instanceNode->id().c_str(),
+    oldMasterId.c_str(),
+    stateMasterId.c_str(),
+    instanceDescendantId.c_str(),
+    listenerId.c_str());
 
   auto treeElement = std::make_shared<Domain::StateTreeElement>(instanceNode->elementNode());
   for (auto& child : oldElementChildren)
@@ -105,7 +125,17 @@ bool InstanceState::dismissState(
 
   auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode().get());
   ASSERT(pInstance);
+  DEBUG(
+    "instance %s, dismiss state, master id %s; event target: %s",
+    instanceNode->id().c_str(),
+    pInstance->masterId().c_str(),
+    instanceDescendantId.c_str());
+
   auto oldMasterId = pInstance->dissmissState();
+  DEBUG(
+    "instance %s, dismiss state, back to master id %s",
+    instanceNode->id().c_str(),
+    oldMasterId.c_str());
 
   return setState(instanceNode, oldMasterId);
 }

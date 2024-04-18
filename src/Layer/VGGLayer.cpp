@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <algorithm>
 #include <core/SkColor.h>
 // #include <format>
 #include <iterator>
@@ -24,6 +25,10 @@
 #include <encode/SkJpegEncoder.h>
 #include <encode/SkWebpEncoder.h>
 
+#include "Layer/Core/TransformNode.hpp"
+#include "Layer/Core/VNode.hpp"
+#include "Layer/Core/RasterNode.hpp"
+#include "Layer/Core/ZoomerNode.hpp"
 #include "VSkiaGL.hpp" // this header and the skia headers must be included first for ios build
 
 #ifdef VGG_USE_VULKAN
@@ -116,6 +121,44 @@ inline void drawTextAt(
     dy += FONTSIZE;
   }
 }
+class ViewportNode : public ClipEffectNode
+{
+public:
+  ViewportNode(VRefCnt* cnt)
+    : ClipEffectNode(cnt, nullptr)
+  {
+  }
+
+  // void render(Renderer* r) override
+  // {
+  // }
+
+  Bounds effectBounds(const Bounds& bound) const
+  {
+    return m_viewport;
+  }
+
+  void setViewport(const Bounds& viewport)
+  {
+    m_viewport = viewport;
+    this->invalidate();
+  }
+
+  const Bounds& getViewport() const
+  {
+    return m_viewport;
+  }
+
+  Bounds onRevalidate() override
+  {
+    return m_viewport;
+  }
+
+  VGG_CLASS_MAKE(ViewportNode);
+
+private:
+  Bounds m_viewport;
+};
 
 } // namespace
 
@@ -175,6 +218,7 @@ public:
   std::unique_ptr<SkiaContext>             skiaContext;
   std::vector<std::shared_ptr<Renderable>> items;
   std::vector<std::shared_ptr<Scene>>      scenes;
+  std::vector<Ref<RenderNode>>             renderNodes;
   float                                    preScale{ 1.0 };
   bool                                     invalid{ true };
 
@@ -221,6 +265,12 @@ public:
     for (auto& item : items)
     {
       item->render(canvas);
+    }
+    for (auto& node : renderNodes)
+    {
+      Renderer r;
+      r.createNew(canvas);
+      node->render(&r);
     }
     if (drawTextInfo)
     {
@@ -380,6 +430,14 @@ void VLayer::addScene(std::shared_ptr<Scene> scene)
 {
   d_ptr->scenes.push_back(std::move(scene));
   d_ptr->invalidate();
+}
+
+void VLayer::addRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
+{
+  auto viewportClip = ViewportNode::Make();
+  auto rasterNode = RasterNode::Make(viewportClip, std::move(transform), std::move(node));
+  d_ptr->renderNodes.push_back(std::move(rasterNode));
+  d_ptr->revalidate();
 }
 
 namespace

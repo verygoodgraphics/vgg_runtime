@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/Core/RenderNode.hpp"
+#include "Layer/Core/TransformNode.hpp"
+#include "Layer/Core/ZoomerNode.hpp"
 #include "Layer/Config.hpp"
 #include "Layer/Effects.hpp"
 #include "Layer/Graphics/GraphicsLayer.hpp"
@@ -86,6 +89,8 @@ public:
   void       nodesAt(int x, int y, std::vector<PaintNode*>& nodes);
   SkCanvas*  layerCanvas();
   void       clearLayerCanvas();
+
+  void addRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node);
 
   void setDrawClickBounds(bool enable);
   bool enableDrawClickBounds() const;

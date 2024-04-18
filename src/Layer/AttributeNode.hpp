@@ -51,13 +51,6 @@
     this->invalidate();                                                                            \
   }
 
-#define VGG_CLASS_MAKE(className)                                                                  \
-  template<typename... Args>                                                                       \
-  static Ref<className> Make(Args&&... args)                                                       \
-  {                                                                                                \
-    return Ref<className>(V_NEW_UNSAFE<className>(std::forward<Args>(args)...));                   \
-  }
-
 namespace VGG::layer
 {
 

@@ -17,7 +17,7 @@
 
 #include "AttributeNode.hpp"
 #include "Layer/Core/VNode.hpp"
-#include "RenderNode.hpp"
+#include "Layer/Core/RenderNode.hpp"
 
 #include "Layer/Core/VBounds.hpp"
 

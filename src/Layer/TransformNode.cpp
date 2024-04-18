@@ -13,9 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Layer/Core/RenderNode.hpp"
+
+#include "Renderer.hpp"
+#include "Layer/Core/TransformNode.hpp"
 
 namespace VGG::layer
 {
+void TransformEffectNode::render(Renderer* renderer)
+{
+  auto canvas = renderer->canvas();
+  ASSERT(canvas);
+  SkAutoCanvasRestore acr(canvas, true);
+  canvas->concat(toSkMatrix(m_transform->getMatrix()));
+  m_child->render(renderer);
+}
 
 } // namespace VGG::layer

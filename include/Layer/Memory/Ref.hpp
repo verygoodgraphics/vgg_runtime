@@ -96,6 +96,7 @@ public:
   }
 
 public:
+  using Type = T;
   explicit Ref()
     : m_ptr(nullptr)
   {

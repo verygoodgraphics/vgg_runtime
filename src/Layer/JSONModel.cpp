@@ -16,6 +16,7 @@
 
 #include "Layer/Model/JSONModel.hpp"
 #include "Layer/Model/Concept.hpp"
+#include "Layer/Model/ModelUtils.hpp"
 
 #include <vector>
 
@@ -27,7 +28,7 @@ using namespace VGG::layer;
 
 inline ContourPtr makeContourData(const json& j)
 {
-  const auto&  points = getOrDefault(j, "points");
+  const auto&   points = getOrDefault(j, "points");
   BezierContour contour(points.size());
   contour.closed = j.value("closed", false);
   for (const auto& e : points)
@@ -84,7 +85,6 @@ std::vector<JSONObject> JSONObject::getChildObjects() const
     return std::vector<JSONObject>();
   const auto&             childObjects = j["childObjects"];
   std::vector<JSONObject> objects;
-  DEBUG("child object size: %d", (int)childObjects.size());
   objects.reserve(childObjects.size());
   for (const auto& j : childObjects)
   {
@@ -161,31 +161,7 @@ std::vector<SubShape<JSONObject>> JSONPathObject::getShapes() const
 std::vector<TextStyleAttr> JSONTextObject::getOverrideFontAttr() const
 {
   std::vector<TextStyleAttr> textStyle;
-  static const auto          s_defaultAttr = R"({
-        "length":0,
-        "name":"Fira Sans",
-        "subFamilyName":"",
-        "size":14,
-        "fontVariations":[],
-        "postScript":"",
-        "kerning":true,
-        "letterSpacingValue":0,
-        "letterSpacingUnit":0,
-        "lineSpacingValue":0,
-        "lineSpacingUnit":0,
-        "fillUseType":0,
-        "underline":0,
-        "linethrough":false,
-        "fontVariantCaps":0,
-        "textCase":0,
-        "baselineShift":0,
-        "baseline":0,
-        "horizontalScale":1,
-        "verticalScale":1,
-        "proportionalSpacing":0,
-        "rotate":0,
-        "textParagraph":{}
-    })"_json;
+  static const auto          s_defaultAttr = json::parse(DEFAULT_FONT_ATTR);
   auto                       defaultAttr = s_defaultAttr;
   defaultAttr.update(j.value("defaultFontAttr", json::object()), true);
   auto fontAttr = j.value("fontAttr", std::vector<json>{});

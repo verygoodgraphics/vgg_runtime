@@ -376,13 +376,20 @@ std::vector<SubShape<StructObject>> StructPathObject::getShapes() const
 
 std::vector<TextStyleAttr> StructTextObject::getOverrideFontAttr() const
 {
-  const auto& fontAttr = static_cast<const Model::Text*>(m->model())->fontAttr;
-  const auto& style = static_cast<const Model::Text*>(m->model())->style;
-  const auto& defaultFontAttr = static_cast<const Model::Text*>(m->model())->defaultFontAttr;
+  const auto&       fontAttr = static_cast<const Model::Text*>(m->model())->fontAttr;
+  const auto&       style = static_cast<const Model::Text*>(m->model())->style;
+  static const auto s_defaultAttr = TextFontAttributes(json(DEFAULT_FONT_ATTR));
+  auto              defaultFontAttr = s_defaultAttr;
+
+  const auto& defaultAttr = static_cast<const Model::Text*>(m->model())->defaultFontAttr;
+  if (defaultAttr)
+  {
+    update(defaultFontAttr, *defaultAttr);
+  }
   std::vector<TextStyleAttr> textStyle;
   for (const auto& attr : fontAttr)
   {
-    auto defaultAttr = *defaultFontAttr;
+    auto defaultAttr = defaultFontAttr;
     update(defaultAttr, attr);
     if (!defaultAttr.fills)
     {

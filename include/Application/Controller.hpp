@@ -69,7 +69,10 @@ private:
   std::shared_ptr<Reporter>  m_reporter;
   bool                       m_panning{ false };
 
-  ERunMode                m_mode;
+  // configuration
+  bool     m_isFitToViewportEnabled{ false };
+  ERunMode m_mode;
+
   std::shared_ptr<Daruma> m_model;
   std::shared_ptr<Daruma> m_editModel;
 
@@ -88,6 +91,11 @@ public:
     ERunMode                   mode = ERunMode::NORMAL_MODE);
   ~Controller() = default;
 
+public: // configure
+  void setEditMode(bool editMode);
+  void setFitToViewportEnabled(bool enabled);
+
+public:
   bool start(
     const std::string& filePath,
     const char*        designDocSchemaFilePath = nullptr,
@@ -103,7 +111,6 @@ public:
   void onResize();
 
   std::shared_ptr<app::AppRenderable> editor();
-  void                                setEditMode(bool editMode);
   bool                                isEditMode()
   {
     return m_mode == ERunMode::EDIT_MODE;

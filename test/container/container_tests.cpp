@@ -63,6 +63,22 @@ TEST_F(ContainerTestSuite, LoadModel)
   EXPECT_TRUE(result);
 }
 
+TEST_F(ContainerTestSuite, Configure)
+{
+  auto sdk = m_sut->sdk();
+
+  // configure before loading vgg file
+  EXPECT_NO_THROW(sdk->setFitToViewportEnabled(true));
+
+  std::string filePath = "testDataDir/frame_list/";
+  auto        result = m_sut->load(filePath);
+  EXPECT_TRUE(result);
+
+  // configure after loading vgg file
+  EXPECT_NO_THROW(sdk->setFitToViewportEnabled(false));
+  EXPECT_NO_THROW(sdk->setFitToViewportEnabled(true));
+}
+
 TEST_F(ContainerTestSuite, Render)
 {
   SKIP_DEBUG_TEST;

@@ -441,3 +441,14 @@ bool VggSdk::dismissState(const std::string& instanceDescendantId)
   }
   return false;
 }
+
+void VggSdk::setFitToViewportEnabled(bool enabled)
+{
+  if (auto currentEnv = env())
+  {
+    if (auto controller = currentEnv->controller())
+    {
+      controller->setFitToViewportEnabled(enabled);
+    }
+  }
+}

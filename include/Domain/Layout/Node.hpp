@@ -311,12 +311,12 @@ public:
 
   const std::shared_ptr<LayoutNode> parent() const override
   {
-    return m_srcNode.lock()->parent();
+    return srcNode()->parent();
   }
 
   std::shared_ptr<VGG::Domain::Element> elementNode() const override
   {
-    return m_srcNode.lock()->elementNode();
+    return srcNode()->elementNode();
   }
 
 public:

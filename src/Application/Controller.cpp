@@ -677,7 +677,7 @@ void Controller::aspectFill(Layout::Size size)
     };
   }
 
-  m_layout->layout(targetSize, true); // true means updating layout size rules
+  m_layout->layout(targetSize, m_isFitToViewportEnabled); // true means updating layout size rules
   m_presenter->setContentSize(targetSize);
 }
 
@@ -805,4 +805,19 @@ bool Controller::dismissState(const std::string& instanceDescendantId)
     m_presenter->triggerMouseEnter();
   }
   return success;
+}
+
+void Controller::setFitToViewportEnabled(bool enabled)
+{
+  if (m_isFitToViewportEnabled == enabled)
+  {
+    return;
+  }
+
+  m_isFitToViewportEnabled = enabled;
+
+  if (isNormalMode())
+  {
+    scaleContent(m_presenter->viewSize());
+  }
 }

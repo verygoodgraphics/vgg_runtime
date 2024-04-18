@@ -41,6 +41,9 @@ private:
   // env
   static napi_value SetEnv(napi_env env, napi_callback_info info);
 
+  // configure
+  static napi_value setFitToViewportEnabled(napi_env env, napi_callback_info info);
+
   // design document in vgg daruma file
   static napi_value GetElement(napi_env env, napi_callback_info info);
   static napi_value UpdateElement(napi_env env, napi_callback_info info);

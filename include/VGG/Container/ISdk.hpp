@@ -35,12 +35,17 @@ public:
 public:
   virtual ~ISdk() = default;
 
+  // configure
+  virtual void setFitToViewportEnabled(bool enabled) = 0;
+
+  // -
   virtual std::string designDocument() = 0;
   virtual std::string designDocumentValueAt(const std::string& jsonPointer) = 0;
 
   virtual std::string getElement(const std::string& id) = 0;
   virtual void updateElement(const std::string& id, const std::string& contentJsonString) = 0;
 
+  // -
   virtual std::string getFramesInfo() const = 0;
   virtual std::string currentFrameId() const = 0;
   virtual std::string launchFrameId() const = 0;
@@ -67,6 +72,7 @@ public:
     bool               resetScrollPosition = true) = 0;
   virtual bool dismissState(const std::string& instanceDescendantId) = 0;
 
+  // misc
   virtual std::string requiredFonts() const = 0;
   virtual bool        addFont(const uint8_t* data, size_t size, const char* defaultName) = 0;
 

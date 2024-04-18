@@ -48,8 +48,6 @@ public:
 #endif
   using IndexType = std::size_t;
 
-  virtual ~VggSdk() = default;
-
   // env
   void        setEnv(const std::string& key);
   std::string getEnv();
@@ -64,10 +62,10 @@ public:
   std::string getElement(const std::string& id) override;
   void        updateElement(const std::string& id, const std::string& contentJsonString) override;
 
-  virtual std::string getFramesInfo() const override;
-  virtual std::string currentFrameId() const override;
-  virtual std::string launchFrameId() const override;
-  virtual bool        setLaunchFrameById(const std::string& id) override;
+  std::string getFramesInfo() const override;
+  std::string currentFrameId() const override;
+  std::string launchFrameId() const override;
+  bool        setLaunchFrameById(const std::string& id) override;
 
   // frame
   bool setCurrentFrameById(const std::string& id, bool resetScrollPosition) override;
@@ -90,19 +88,21 @@ public:
     bool               resetScrollPosition) override;
   bool dismissState(const std::string& instanceDescendantId) override;
 
-  virtual std::string requiredFonts() const override;
-  virtual bool        addFont(const uint8_t* data, size_t size, const char* defaultName) override;
+  // misc
+  void        setFitToViewportEnabled(bool enabled) override;
+  std::string requiredFonts() const override;
+  bool        addFont(const uint8_t* data, size_t size, const char* defaultName) override;
 #ifdef EMSCRIPTEN
   bool jsAddFont(const emscripten::val& jsFontUint8Array, const std::string& defaultName);
 #endif
 
-  virtual std::vector<uint8_t> vggFileBuffer() override;
+  std::vector<uint8_t> vggFileBuffer() override;
 #ifdef EMSCRIPTEN
   emscripten::val vggFileUint8Array();
 #endif
-  virtual std::vector<std::string> texts() override;
+  std::vector<std::string> texts() override;
 
-  virtual std::vector<uint8_t> makeImageSnapshot(const ImageOptions& options) override;
+  std::vector<uint8_t> makeImageSnapshot(const ImageOptions& options) override;
 #ifdef EMSCRIPTEN
   emscripten::val emMakeImageSnapshot(const ImageOptions& options);
 #endif

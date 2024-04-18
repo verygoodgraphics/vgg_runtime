@@ -27,7 +27,8 @@ namespace adapter
 {
 
 std::string GetArgString(napi_env env, napi_value arg);
-int GetArgIntValue(napi_env env, napi_value arg);
+int         GetArgIntValue(napi_env env, napi_value arg);
+bool        GetArgBoolValue(napi_env env, napi_value arg);
 
 } // namespace adapter
 

@@ -46,6 +46,8 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     .function("setContainerKey", &VggSdk::setContainerKey)
     .function("setInstanceKey", &VggSdk::setInstanceKey)
     .function("setListenerKey", &VggSdk::setListenerKey)
+    // configure
+    .function("setFitToViewportEnabled", &VggSdk::setFitToViewportEnabled)
     // misc
     .function("texts", &VggSdk::texts)
     .function("makeImageSnapshot", &VggSdk::emMakeImageSnapshot)

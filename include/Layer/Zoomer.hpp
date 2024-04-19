@@ -29,7 +29,7 @@ namespace VGG
 class Scene;
 }
 
-class Zoomer
+class [[deprecated("Using ZoomerNode instead")]] Zoomer
 {
 
 public:

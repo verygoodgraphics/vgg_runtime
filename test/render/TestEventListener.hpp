@@ -1,8 +1,12 @@
 #pragma once
 
+#include "Application/ZoomerNodeController.hpp"
 #include "Domain/Model/Element.hpp"
+#include "Layer/Core/SceneNode.hpp"
+#include "Layer/Core/ZoomerNode.hpp"
 #include "Layer/Model/JSONModel.hpp"
 #include "Layer/Model/StructModel.hpp"
+#include "Layer/Memory/Ref.hpp"
 #include "loader.hpp"
 
 #include "Layer/SceneBuilder.hpp"
@@ -34,32 +38,15 @@ namespace fs = std::filesystem;
 using namespace VGG::app;
 
 class SkCanvas;
-class Editor : public VGG::app::AppRenderable
-{
-public:
-  Editor()
-  {
-  }
-
-  bool onEvent(UEvent e, void* userData) override
-  {
-    // Handle editor code herer
-    return true;
-  }
-
-protected:
-  void onRender(SkCanvas* canvas) override
-  {
-    // drawing here
-  }
-};
 
 constexpr char POS_ARG_INPUT_FILE[] = "fig/ai/sketch/json";
 template<typename App>
 class MyEventListener : public VGG::app::EventListener
 {
-  AppRender*                m_layer{ nullptr };
-  std::shared_ptr<AppScene> m_scene;
+  AppRender*                               m_layer{ nullptr };
+  std::shared_ptr<AppScene>                m_scene; // Deprecated
+  layer::Ref<layer::SceneNode>             m_sceneNode;
+  std::unique_ptr<app::ZoomNodeController> m_zoomController;
 
 protected:
   void onAppInit(App* app, char** argv, int argc)
@@ -191,7 +178,12 @@ protected:
           }
           if (sceneBuilderResult.root)
           {
-            m_scene->setSceneRoots(std::move(*sceneBuilderResult.root));
+            // m_scene->setSceneRoots(*sceneBuilderResult.root);
+
+            m_sceneNode = layer::SceneNode::Make(std::move(*sceneBuilderResult.root));
+            auto zoomNode = layer::ZoomerNode::Make();
+            m_zoomController = std::make_unique<ZoomNodeController>(zoomNode);
+            m_layer->addRenderNode(std::move(zoomNode), m_sceneNode);
           }
           m_layer->addAppScene(m_scene);
           m_layer->setDrawPositionEnabled(true);
@@ -217,6 +209,13 @@ public:
       auto app = reinterpret_cast<App*>(userData);
       onAppInit(app, evt.init.argv, evt.init.argc);
       return true;
+    }
+    if (m_zoomController)
+    {
+      if (m_zoomController->onEvent(evt, userData))
+      {
+        return true;
+      }
     }
     if (evt.type != VGG_KEYDOWN)
     {

@@ -41,7 +41,7 @@ class Rasterizer;
 
 using ResourceRepo = std::map<std::string, std::vector<char>>;
 class Scene__pImpl;
-class VGG_EXPORTS Scene : public layer::Renderable
+class VGG_EXPORTS [[deprecated("Using SceneNode instead")]] Scene : public layer::Renderable
 {
   friend class layer::VLayer; // Temporary support for VLayer
 

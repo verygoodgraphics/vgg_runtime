@@ -23,7 +23,7 @@
 namespace VGG::app
 {
 
-class AppScene
+class [[deprecated("Using SceneNode instead")]] AppScene
   : public Scene
   , public EventListener
 {

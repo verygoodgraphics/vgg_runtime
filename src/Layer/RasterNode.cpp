@@ -15,6 +15,7 @@
  */
 
 #include "Layer/Core/ZoomerNode.hpp"
+#include "Layer/ViewportNode.hpp"
 #include "Renderer.hpp"
 
 #include "Layer/Core/RasterNode.hpp"
@@ -38,10 +39,10 @@ namespace VGG::layer
 {
 
 RasterNode::RasterNode(
-  VRefCnt*            cnt,
-  Ref<ClipEffectNode> viewport,
-  Ref<ZoomerNode>     zoomer,
-  Ref<RenderNode>     child)
+  VRefCnt*          cnt,
+  Ref<ViewportNode> viewport,
+  Ref<ZoomerNode>   zoomer,
+  Ref<RenderNode>   child)
   : TransformEffectNode(cnt, std::move(zoomer), std::move(child))
   , m_viewport(viewport)
   , m_raster(std::make_unique<RasterCacheTile>())

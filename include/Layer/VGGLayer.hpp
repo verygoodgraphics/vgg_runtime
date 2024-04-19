@@ -61,6 +61,8 @@ struct PDFOptions
   int extend[2];
 };
 
+#define DEPRECATED(msg) [[deprecated(msg)]]
+
 class VLayer__pImpl;
 class VGG_EXPORTS VLayer : public GraphicsLayer
 {
@@ -78,19 +80,21 @@ public:
   virtual void endFrame() override;
   virtual void shutdown() override;
 
-  void       resize(int w, int h) override;
-  void       addRenderItem(std::shared_ptr<Renderable> item);
-  void       addScene(std::shared_ptr<Scene> scene);
-  void       setScene(std::shared_ptr<Scene> scene);
+  void resize(int w, int h) override;
+  DEPRECATED("use addRenderNode") void addRenderItem(std::shared_ptr<Renderable> item);
+  DEPRECATED("use addRenderNode") void addScene(std::shared_ptr<Scene> scene);
+  DEPRECATED("use addRenderNode") void setScene(std::shared_ptr<Scene> scene);
+
   void       setScaleFactor(float scale);
   float      scaleFactor() const;
   PaintNode* nodeAt(int x, int y);
   void       nodeAt(int x, int y, PaintNode::NodeVisitor visitor);
   void       nodesAt(int x, int y, std::vector<PaintNode*>& nodes);
-  SkCanvas*  layerCanvas();
-  void       clearLayerCanvas();
 
   void addRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node);
+
+  SkCanvas* layerCanvas();
+  void      clearLayerCanvas();
 
   void setDrawClickBounds(bool enable);
   bool enableDrawClickBounds() const;

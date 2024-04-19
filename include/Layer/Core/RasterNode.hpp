@@ -26,6 +26,8 @@
 #include "Layer/Core/TreeNode.hpp"
 #include "Layer/Config.hpp"
 
+#include "Layer/ViewportNode.hpp"
+
 #include <map>
 #include <memory>
 
@@ -35,10 +37,10 @@ class RasterNode : public TransformEffectNode
 {
 public:
   RasterNode(
-    VRefCnt*            cnt,
-    Ref<ClipEffectNode> viewport,
-    Ref<ZoomerNode>     zoomer,
-    Ref<RenderNode>     child);
+    VRefCnt*          cnt,
+    Ref<ViewportNode> viewport,
+    Ref<ZoomerNode>   zoomer,
+    Ref<RenderNode>   child);
 
   VGG_CLASS_MAKE(RasterNode);
 
@@ -56,7 +58,7 @@ public:
   Bounds onRevalidate() override;
 
 private:
-  WeakRef<ClipEffectNode>              m_viewport;
+  WeakRef<ViewportNode>                m_viewport;
   std::unique_ptr<Rasterizer>          m_raster;
   std::vector<layer::Rasterizer::Tile> m_rasterTiles;
   sk_sp<SkPicture>                     m_picture;

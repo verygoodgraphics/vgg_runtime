@@ -121,44 +121,6 @@ inline void drawTextAt(
     dy += FONTSIZE;
   }
 }
-class ViewportNode : public ClipEffectNode
-{
-public:
-  ViewportNode(VRefCnt* cnt)
-    : ClipEffectNode(cnt, nullptr)
-  {
-  }
-
-  // void render(Renderer* r) override
-  // {
-  // }
-
-  Bounds effectBounds(const Bounds& bound) const
-  {
-    return m_viewport;
-  }
-
-  void setViewport(const Bounds& viewport)
-  {
-    m_viewport = viewport;
-    this->invalidate();
-  }
-
-  const Bounds& getViewport() const
-  {
-    return m_viewport;
-  }
-
-  Bounds onRevalidate() override
-  {
-    return m_viewport;
-  }
-
-  VGG_CLASS_MAKE(ViewportNode);
-
-private:
-  Bounds m_viewport;
-};
 
 } // namespace
 
@@ -269,7 +231,7 @@ public:
     for (auto& node : renderNodes)
     {
       Renderer r;
-      r.createNew(canvas);
+      r = r.createNew(canvas);
       node->render(&r);
     }
     if (drawTextInfo)
@@ -319,6 +281,10 @@ public:
       for (auto& s : scenes)
       {
         s->onViewportChange(Bounds{ 0, 0, w, h });
+      }
+      for (auto& r : renderNodes)
+      {
+        r->revalidate();
       }
       invalid = false;
     }
@@ -434,10 +400,12 @@ void VLayer::addScene(std::shared_ptr<Scene> scene)
 
 void VLayer::addRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
 {
-  auto viewportClip = ViewportNode::Make();
-  auto rasterNode = RasterNode::Make(viewportClip, std::move(transform), std::move(node));
+  // auto viewportClip = ViewportNode::Make();
+  // auto rasterNode = RasterNode::Make(viewportClip, std::move(transform), std::move(node));
+
+  auto rasterNode = TransformEffectNode::Make(std::move(transform), std::move(node));
   d_ptr->renderNodes.push_back(std::move(rasterNode));
-  d_ptr->revalidate();
+  // d_ptr->revalidate();
 }
 
 namespace

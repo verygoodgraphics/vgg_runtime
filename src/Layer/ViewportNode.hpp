@@ -13,47 +13,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
-#include "Layer/Config.hpp"
-
-#include <memory>
-#include <optional>
-
-class SkCanvas;
+#include "Layer/Core/TransformNode.hpp"
 
 namespace VGG::layer
 {
-
-struct Viewport
+class ViewportNode : public ClipEffectNode
 {
-  int position[2] = { 0, 0 };
-  int extent[2] = { 0, 0 };
-};
-
-class VGG_EXPORTS [[deprecated("This interface will be removed")]] Renderable
-  : public std::enable_shared_from_this<Renderable>
-{
-  std::optional<Viewport> m_viewport;
-  bool                    m_visible{ true };
-
-protected:
-  virtual void onRender(SkCanvas* canvas) = 0;
-
 public:
-  void render(SkCanvas* canvas);
-  void setViewport(const Viewport& vp)
+  ViewportNode(VRefCnt* cnt)
+    : ClipEffectNode(cnt, nullptr)
   {
-    m_viewport = vp;
   }
 
-  void setVisible(bool enable)
+  void render(Renderer* r) override
   {
-    m_visible = enable;
   }
 
-  bool visible() const
+  Bounds effectBounds() const override
   {
-    return m_visible;
+    return m_viewport;
   }
+
+  void setViewport(const Bounds& viewport)
+  {
+    m_viewport = viewport;
+    this->invalidate();
+  }
+
+  const Bounds& getViewport() const
+  {
+    return m_viewport;
+  }
+
+  Bounds onRevalidate() override
+  {
+    return m_viewport;
+  }
+
+  VGG_CLASS_MAKE(ViewportNode);
+
+private:
+  Bounds m_viewport;
 };
 } // namespace VGG::layer

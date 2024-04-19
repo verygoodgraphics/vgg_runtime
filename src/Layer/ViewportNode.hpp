@@ -19,26 +19,31 @@
 
 namespace VGG::layer
 {
-class ViewportNode : public ClipEffectNode
+class ViewportNode : public TransformNode
 {
 public:
-  ViewportNode(VRefCnt* cnt)
-    : ClipEffectNode(cnt, nullptr)
+  ViewportNode(VRefCnt* cnt, float dpi)
+    : TransformNode(cnt)
+    , m_dpi(dpi)
   {
   }
 
-  void render(Renderer* r) override
+  void setDPI(float dpi)
   {
+    if (dpi == m_dpi)
+      return;
+    this->invalidate();
   }
 
-  Bounds effectBounds() const override
+  float getDPI() const
   {
-    return m_viewport;
+    return m_dpi;
   }
 
   void setViewport(const Bounds& viewport)
   {
-    m_viewport = viewport;
+    if (m_viewport == viewport)
+      return;
     this->invalidate();
   }
 
@@ -47,14 +52,24 @@ public:
     return m_viewport;
   }
 
+  bool hasInvalidate() const
+  {
+    return isInvalid();
+  }
+
+  glm::mat3 getMatrix() const override
+  {
+    return glm::mat3(m_dpi);
+  }
+
   Bounds onRevalidate() override
   {
     return m_viewport;
   }
-
   VGG_CLASS_MAKE(ViewportNode);
 
 private:
   Bounds m_viewport;
+  float  m_dpi{ 1.f };
 };
 } // namespace VGG::layer

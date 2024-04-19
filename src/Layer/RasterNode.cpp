@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include "Layer/Core/ZoomerNode.hpp"
-#include "Layer/ViewportNode.hpp"
+#include "Layer/Core/RasterCache.hpp"
 #include "Renderer.hpp"
+#include "Layer/RasterNode.hpp"
+#include "Layer/ViewportNode.hpp"
 
-#include "Layer/Core/RasterNode.hpp"
+#include "Layer/Core/ZoomerNode.hpp"
 #include "Layer/Core/TransformNode.hpp"
-
 #include "Layer/Core/RasterCacheTile.hpp"
 
 namespace
@@ -39,72 +39,120 @@ namespace VGG::layer
 {
 
 RasterNode::RasterNode(
-  VRefCnt*          cnt,
-  Ref<ViewportNode> viewport,
-  Ref<ZoomerNode>   zoomer,
-  Ref<RenderNode>   child)
+  VRefCnt*            cnt,
+  GrRecordingContext* device,
+  Ref<ViewportNode>   viewport,
+  Ref<ZoomerNode>     zoomer,
+  Ref<RenderNode>     child)
   : TransformEffectNode(cnt, std::move(zoomer), std::move(child))
   , m_viewport(viewport)
   , m_raster(std::make_unique<RasterCacheTile>())
 {
-  observe(viewport); // TODO::
+  m_device = device;
+  ASSERT(getChild());
+  ASSERT(m_device);
+  ASSERT(m_raster);
+  observe(viewport);
 }
 
 void RasterNode::render(Renderer* renderer)
 {
-  auto canvas = renderer->canvas();
-  auto rasterDevice = canvas->recordingContext();
-
-  SkRect skv = toSkRect(getChild()->bounds());
-  if (auto vp = m_viewport.lock())
+  auto c = getChild();
+  ASSERT(c);
+  if (!c->picture())
   {
-    skv = toSkRect(vp->bounds());
+    c->render(renderer);
   }
-
-  const auto z = asZoom(getTransform());
-  int        lod = -1;
-
-  std::visit(
-    layer::Overloaded{ [&](ZoomerNode::EScaleLevel level) { lod = level; },
-                       [&](ZoomerNode::OtherLevel other) { lod = -1; } },
-    z->scaleLevel());
-
-  auto                             mat = canvas->getTotalMatrix(); // DPI * zoom
-  const auto                       skr = toSkRect(getChild()->bounds());
-  const auto                       skm = toSkMatrix(z->getMatrix());
-  layer::Rasterizer::RasterContext rasterCtx{ mat, m_picture.get(), &skr, skm };
-  SkMatrix                         rasterMatrix;
-  m_raster->rasterize(rasterDevice, rasterCtx, lod, skv, &m_rasterTiles, &rasterMatrix, 0);
-
-  canvas->save();
-  canvas->resetMatrix();
-  canvas->setMatrix(rasterMatrix);
-  for (auto& tile : m_rasterTiles)
+  else
   {
-    canvas->drawImage(tile.image, tile.rect.left(), tile.rect.top());
-    // SkPaint p;
-    // p.setColor(SK_ColorRED);
-    // p.setStyle(SkPaint::kStroke_Style);
-    // canvas->drawRect(tile.rect, p);
+    auto canvas = renderer->canvas();
+    ASSERT(canvas);
+    canvas->save();
+    canvas->resetMatrix();
+    canvas->setMatrix(m_rasterMatrix);
+    for (auto& tile : m_rasterTiles)
+    {
+      canvas->drawImage(tile.image, tile.rect.left(), tile.rect.top());
+      // SkPaint p;
+      // p.setColor(SK_ColorRED);
+      // p.setStyle(SkPaint::kStroke_Style);
+      // canvas->drawRect(tile.rect, p);
+    }
+    canvas->restore();
   }
-  canvas->restore();
 }
 
 Bounds RasterNode::onRevalidate()
 {
-  auto z = asZoom(getTransform());
-  if (m_raster && z)
-  {
-    if (z->hasInvalScale())
-    {
-      m_raster->invalidate(layer::Rasterizer::EReason::ZOOM_SCALE);
-    }
+  auto c = getChild();
+  ASSERT(c);
+  auto   z = asZoom(getTransform());
+  bool   needRaster = false;
+  Bounds finalBounds;
 
-    if (z->hasOffsetInval())
+  // FIXME: you cannot determine the invalidation by hasInval**() functions,
+  // because it could be revaildated by other nodes. unless it is exclusive to this node.
+  if (m_raster)
+  {
+    if (c->hasInval())
     {
-      m_raster->invalidate(layer::Rasterizer::EReason::ZOOM_TRANSLATION);
+      m_raster->invalidate(layer::Rasterizer::EReason::CONTENT);
+      needRaster = true;
+      c->revalidate();
+    }
+    if (z)
+    {
+      if (z->hasInvalScale())
+      {
+        m_raster->invalidate(layer::Rasterizer::EReason::ZOOM_SCALE);
+        needRaster = true;
+      }
+      if (z->hasOffsetInval())
+      {
+        m_raster->invalidate(layer::Rasterizer::EReason::ZOOM_TRANSLATION);
+        needRaster = true;
+      }
+      z->revalidate();
+    }
+    if (m_viewport && m_viewport->hasInvalidate())
+    {
+      m_raster->invalidate(layer::Rasterizer::EReason::VIEWPORT);
+      m_viewport->revalidate();
+      needRaster = true;
+      finalBounds = m_viewport->bounds();
     }
   }
-  return TransformEffectNode::revalidate();
+
+  if (needRaster)
+  {
+    ASSERT(m_device);
+    SkRect skv = toSkRect(getChild()->bounds());
+    if (m_viewport)
+    {
+      skv = toSkRect(m_viewport->getViewport());
+    }
+
+    int lod = -1;
+    if (z)
+    {
+      std::visit(
+        layer::Overloaded{ [&](ZoomerNode::EScaleLevel level) { lod = level; },
+                           [&](ZoomerNode::OtherLevel other) { lod = -1; } },
+        z->scaleLevel());
+    }
+
+    if (c->picture())
+    {
+      const auto                localMatrix = SkMatrix::I();
+      const auto                deviceMatrix = toSkMatrix(m_viewport->getMatrix() * z->getMatrix());
+      const auto                contentBounds = toSkRect(c->bounds());
+      Rasterizer::RasterContext rasterCtx{ deviceMatrix,
+                                           c->picture(),
+                                           &contentBounds,
+                                           localMatrix };
+      m_raster->rasterize(m_device, rasterCtx, lod, skv, &m_rasterTiles, &m_rasterMatrix, 0);
+    }
+  }
+  return finalBounds;
 }
 } // namespace VGG::layer

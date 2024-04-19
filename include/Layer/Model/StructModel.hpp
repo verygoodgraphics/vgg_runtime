@@ -211,6 +211,7 @@ struct StructInstanceObject : public StructObject
 #define R_OPT(req, key, type, dft)                                                                 \
   M_OBJECT_DFT_FIELD(VGG::Model::SymbolInstance, model, req, key, type, dft)
 
+  R_OPT(Radius, radius, Float4, (Float4{ 0.f, 0.f, 0.f, 0.f }));
 #undef R_OPT
 #undef R
 };

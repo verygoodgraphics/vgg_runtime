@@ -154,6 +154,7 @@ struct JSONInstanceObject : public JSONObject
     : JSONObject(j, EModelObjectType::INSTANCE)
   {
   }
+  M_JSON_FIELD_DEF(Radius, "radius", Float4, (Float4{ 0.f, 0.f, 0.f, 0.f }));
 };
 
 struct JSONModelCastObject

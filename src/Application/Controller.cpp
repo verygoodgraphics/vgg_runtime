@@ -815,9 +815,4 @@ void Controller::setFitToViewportEnabled(bool enabled)
   }
 
   m_isFitToViewportEnabled = enabled;
-
-  if (isNormalMode())
-  {
-    scaleContent(m_presenter->viewSize());
-  }
 }

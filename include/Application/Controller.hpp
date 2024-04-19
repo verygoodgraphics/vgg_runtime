@@ -70,7 +70,7 @@ private:
   bool                       m_panning{ false };
 
   // configuration
-  bool     m_isFitToViewportEnabled{ false };
+  bool     m_isFitToViewportEnabled{ true };
   ERunMode m_mode;
 
   std::shared_ptr<Daruma> m_model;
@@ -91,9 +91,9 @@ public:
     ERunMode                   mode = ERunMode::NORMAL_MODE);
   ~Controller() = default;
 
-public: // configure
-  void setEditMode(bool editMode);
-  void setFitToViewportEnabled(bool enabled);
+public:                                       // configure
+  void setFitToViewportEnabled(bool enabled); // should be called before loading vgg file
+  void setEditMode(bool editMode);            // can be called before or after loading vgg file
 
 public:
   bool start(

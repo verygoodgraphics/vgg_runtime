@@ -45,6 +45,7 @@ class Frame final : public VNode
 {
   friend class VGG::Scene;
   friend class VGG::Scene__pImpl;
+  friend class SceneNode__pImpl;
   VGG_DECL_IMPL(Frame);
 
 public:

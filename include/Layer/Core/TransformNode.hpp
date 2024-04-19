@@ -86,6 +86,8 @@ public:
     return Bounds();
   }
 
+  VGG_CLASS_MAKE(TransformEffectNode);
+
 protected:
   TransformNode* getTransform() const
   {

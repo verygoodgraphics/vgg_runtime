@@ -225,7 +225,24 @@ struct Serde
     requires layer::InstanceObject<T> && layer::CastObject<C, T>
   static PaintNodePtr from(const T& m, const glm::mat3& totalMatrix, const Context& ctx)
   {
-    return nullptr;
+    return makeObjectBase(
+      m,
+      totalMatrix,
+      [&](std::string name, std::string guid)
+      {
+        auto p = makePaintNodePtr(ctx.alloc, std::move(name), VGG_FRAME, std::move(guid));
+        return p;
+      },
+      [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bound)
+      {
+        p->setContourOption(ContourOption(ECoutourType::MCT_FRAMEONLY, false));
+        p->setFrameRadius(m.getRadius());
+        auto childObjects = m.getChildObjects();
+        for (const auto& c : childObjects)
+        {
+          p->addChild(Serde::dispatchObject<typename T::BaseType, C>(c, matrix, ctx));
+        }
+      });
   }
 
   template<typename T, typename C>

@@ -28,6 +28,7 @@
 
 #include "Layer/ViewportNode.hpp"
 
+#include <gpu/GrRecordingContext.h>
 #include <map>
 #include <memory>
 
@@ -37,10 +38,11 @@ class RasterNode : public TransformEffectNode
 {
 public:
   RasterNode(
-    VRefCnt*          cnt,
-    Ref<ViewportNode> viewport,
-    Ref<ZoomerNode>   zoomer,
-    Ref<RenderNode>   child);
+    VRefCnt*            cnt,
+    GrRecordingContext* device,
+    Ref<ViewportNode>   viewport,
+    Ref<ZoomerNode>     zoomer,
+    Ref<RenderNode>     child);
 
   VGG_CLASS_MAKE(RasterNode);
 
@@ -51,16 +53,18 @@ public:
     return Bounds();
   }
 
-  ~RasterNode() override
-  {
-  }
-
   Bounds onRevalidate() override;
 
+  ~RasterNode() override
+  {
+    unobserve(m_viewport);
+  }
+
 private:
-  WeakRef<ViewportNode>                m_viewport;
+  GrRecordingContext*                  m_device{ nullptr };
+  Ref<ViewportNode>                    m_viewport;
   std::unique_ptr<Rasterizer>          m_raster;
   std::vector<layer::Rasterizer::Tile> m_rasterTiles;
-  sk_sp<SkPicture>                     m_picture;
+  SkMatrix                             m_rasterMatrix;
 };
 } // namespace VGG::layer

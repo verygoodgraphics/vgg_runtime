@@ -16,6 +16,7 @@
 #pragma once
 
 #include "Layer/Core/VNode.hpp"
+class SkPicture;
 namespace VGG::layer
 {
 class Renderer;
@@ -26,7 +27,15 @@ public:
     : VNode(cnt, flags)
   {
   }
-  virtual void   render(Renderer* render) = 0;
-  virtual Bounds effectBounds() const = 0;
+  bool hasInval() const
+  {
+    return isInvalid();
+  }
+  virtual void       render(Renderer* render) = 0;
+  virtual Bounds     effectBounds() const = 0;
+  virtual SkPicture* picture() const
+  {
+    return nullptr;
+  }
 };
 } // namespace VGG::layer

@@ -18,9 +18,6 @@
 #include "Layer/Core/Frame.hpp"
 #include "Layer/Config.hpp"
 
-class SkCanvas;
-class GrRecordingContext;
-
 namespace VGG::layer
 {
 class SceneNode__pImpl;
@@ -33,14 +30,16 @@ public:
 
   const std::vector<FramePtr>& frames() const;
 
-  void   setFrames(std::vector<FramePtr> frames);
-  void   insertFrame(int index, FramePtr frame);
-  Frame* frame(int index);
-  void   eraseFrame(int index);
-  void   render(Renderer* canvas) override;
-  void   nodeAt(int x, int y, layer::PaintNode::NodeVisitor visitor);
-  Bounds effectBounds() const override;
-  Bounds onRevalidate() override;
+  void       setFrames(std::vector<FramePtr> frames);
+  void       insertFrame(int index, FramePtr frame);
+  Frame*     frame(int index);
+  void       eraseFrame(int index);
+  void       render(Renderer* canvas) override;
+  void       nodeAt(int x, int y, layer::PaintNode::NodeVisitor visitor);
+  Bounds     effectBounds() const override;
+  Bounds     onRevalidate() override;
+  glm::mat3  getMatrix() const;
+  SkPicture* picture() const override;
 
   VGG_CLASS_MAKE(SceneNode);
   virtual ~SceneNode();

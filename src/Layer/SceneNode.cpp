@@ -146,4 +146,14 @@ Bounds SceneNode::onRevalidate()
   return bounds;
 }
 
+glm::mat3 SceneNode::getMatrix() const
+{
+  return glm::mat3{ 1.f };
+}
+
+SkPicture* SceneNode::picture() const
+{
+  return d_ptr->picture.get();
+}
+
 } // namespace VGG::layer

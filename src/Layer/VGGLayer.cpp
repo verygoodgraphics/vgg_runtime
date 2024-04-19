@@ -27,8 +27,9 @@
 
 #include "Layer/Core/TransformNode.hpp"
 #include "Layer/Core/VNode.hpp"
-#include "Layer/Core/RasterNode.hpp"
+#include "Layer/RasterNode.hpp"
 #include "Layer/Core/ZoomerNode.hpp"
+#include "Layer/ViewportNode.hpp"
 #include "VSkiaGL.hpp" // this header and the skia headers must be included first for ios build
 
 #ifdef VGG_USE_VULKAN
@@ -177,12 +178,15 @@ class VLayer__pImpl
   VGG_DECL_API(VLayer);
 
 public:
-  std::unique_ptr<SkiaContext>             skiaContext;
+  std::unique_ptr<SkiaContext> skiaContext;
+
   std::vector<std::shared_ptr<Renderable>> items;
   std::vector<std::shared_ptr<Scene>>      scenes;
-  std::vector<Ref<RenderNode>>             renderNodes;
-  float                                    preScale{ 1.0 };
-  bool                                     invalid{ true };
+
+  Ref<ViewportNode>            viewport;
+  std::vector<Ref<RenderNode>> renderNodes;
+  float                        preScale{ 1.0 };
+  bool                         invalid{ true };
 
   std::unique_ptr<SkPictureRecorder> rec;
   sk_sp<SkPicture>                   layerPicture;
@@ -317,7 +321,10 @@ bool VLayer::enableDrawPosition() const
 
 void VLayer::setScaleFactor(float scale)
 {
+  if (d_ptr->preScale == scale)
+    return;
   d_ptr->preScale = scale;
+  d_ptr->viewport->setDPI(context()->property().dpiScaling * scale);
 }
 
 float VLayer::scaleFactor() const
@@ -332,6 +339,8 @@ std::optional<ELayerError> VLayer::onInit()
 
   const auto& cfg = context()->config();
   const auto  api = context()->property().api;
+
+  d_ptr->viewport = ViewportNode::Make(d_ptr->preScale * context()->property().dpiScaling);
 
   if (api == EGraphicsAPIBackend::API_OPENGL)
   {
@@ -400,8 +409,11 @@ void VLayer::addScene(std::shared_ptr<Scene> scene)
 
 void VLayer::addRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
 {
-  // auto viewportClip = ViewportNode::Make();
-  // auto rasterNode = RasterNode::Make(viewportClip, std::move(transform), std::move(node));
+  // auto rasterNode = RasterNode::Make(
+  //   d_ptr->skiaContext->context(),
+  //   d_ptr->viewport,
+  //   std::move(transform),
+  //   std::move(node));
 
   auto rasterNode = TransformEffectNode::Make(std::move(transform), std::move(node));
   d_ptr->renderNodes.push_back(std::move(rasterNode));
@@ -507,6 +519,7 @@ void VLayer::resize(int w, int h)
   {
     INFO("resize: [%d, %d], actually (%d, %d)", w, h, finalW, finalH);
     _->skiaContext->resizeSurface(finalW, finalH);
+    _->viewport->setViewport(Bounds{ 0, 0, (float)finalW, (float)finalH });
     d_ptr->invalidate();
   }
 }

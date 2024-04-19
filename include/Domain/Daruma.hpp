@@ -38,11 +38,17 @@ namespace Domain
 class DesignDocument;
 class Element;
 } // namespace Domain
+namespace Model::Detail
+{
+class DarumaImpl;
+}
 
 using MakeJsonDocFn = std::function<JsonDocumentPtr(const json&)>;
 
 class Daruma
 {
+  std::unique_ptr<Model::Detail::DarumaImpl> m_impl;
+
   std::shared_ptr<VGG::Model::Loader> m_loader;
 
   std::unordered_map<std::string, std::string> m_memoryCode; // fileName: code_content
@@ -68,6 +74,7 @@ public:
   using ListenersType = std::unordered_map<std::string, std::vector<std::string>>;
 
   Daruma(const MakeJsonDocFn& makeDesignDocFn, const MakeJsonDocFn& makeLayoutDocFn = {});
+  ~Daruma();
 
   bool load(const std::string& path);   // zip file or dir
   bool load(std::vector<char>& buffer); // zip buffer
@@ -89,10 +96,13 @@ public:
   std::string docVersion() const;
 
 public:
-  std::string getLaunchFrameId() const;
+  std::string launchFrameId() const;
   bool        setLaunchFrameById(const std::string& id);
 
-  int getFrameIndexForWidth(double width) const; // -1, error
+  std::string currentTheme();
+  bool        setCurrentTheme(const std::string& name);
+
+  int getFrameIndexForWidth(double width) const; // -1: error
 
   std::string getFramesInfo() const;
   int         getFrameIndexById(const std::string& id) const;

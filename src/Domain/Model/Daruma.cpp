@@ -16,6 +16,7 @@
 #include "Daruma.hpp"
 
 #include "Config.hpp"
+#include "DarumaImpl.hpp"
 #include "JsonKeys.hpp"
 #include "Loader/DirLoader.hpp"
 #include "Loader/ZipLoader.hpp"
@@ -39,10 +40,13 @@ using namespace VGG::Model;
 namespace fs = std::filesystem;
 
 Daruma::Daruma(const MakeJsonDocFn& makeDesignDocFn, const MakeJsonDocFn& makeLayoutDocFn)
-  : m_makeDesignDocFn{ makeDesignDocFn }
+  : m_impl{ new Model::Detail::DarumaImpl }
+  , m_makeDesignDocFn{ makeDesignDocFn }
   , m_makeLayoutDocFn{ makeLayoutDocFn }
 {
 }
+
+Daruma::~Daruma() = default;
 
 bool Daruma::load(const std::string& path)
 {
@@ -144,6 +148,7 @@ bool Daruma::loadFiles()
     if (m_loader->readFile(K_SETTINGS_FILE_NAME, fileContent))
     {
       m_settingsDoc = json::parse(fileContent);
+      m_impl->setSettings(m_settingsDoc);
     }
     else
     {
@@ -419,25 +424,16 @@ std::string Daruma::getFramesInfo() const
   return info.dump();
 }
 
-std::string Daruma::getLaunchFrameId() const
+std::string Daruma::launchFrameId() const
 {
-  if (m_settingsDoc.is_object() && m_settingsDoc.contains(K_LAUNCH_FRAME_ID))
-  {
-    auto& id = m_settingsDoc[K_LAUNCH_FRAME_ID];
-    if (id.is_string())
-    {
-      return id;
-    }
-  }
-
-  return {};
+  return m_impl->settings().launchFrameId;
 }
 
 bool Daruma::setLaunchFrameById(const std::string& id)
 {
   if (getFrameIndexById(id) >= 0)
   {
-    m_settingsDoc[K_LAUNCH_FRAME_ID] = id;
+    m_impl->setLaunchFrameById(id);
     return true;
   }
 
@@ -464,32 +460,5 @@ void Daruma::getTextsTo(
 
 int Daruma::getFrameIndexForWidth(double width) const
 {
-  if (m_settingsDoc.is_object())
-  {
-    std::string frameName;
-
-    auto& breakpoints = m_settingsDoc[K_BREAKPOINTS];
-    if (breakpoints.is_array())
-    {
-      for (std::size_t i = 0; i < breakpoints.size(); ++i)
-      {
-        if (doublesNearlyEqual(breakpoints[i][K_MIN_WIDTH], width))
-        {
-          frameName = breakpoints[i][K_FRAME_NAME];
-          break;
-        }
-      }
-    }
-
-    auto frames = m_settingsDoc[K_FRAMES];
-    for (std::size_t i = 0; i < frames.size(); ++i)
-    {
-      if (frames[i][K_NAME] == frameName)
-      {
-        return i;
-      }
-    }
-  }
-
-  return -1;
+  return getFrameIndexById(m_impl->frameIdForWidth(width));
 }

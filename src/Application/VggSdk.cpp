@@ -120,7 +120,7 @@ bool VggSdk::setCurrentFrameById(const std::string& id, bool resetScrollPosition
 
 std::string VggSdk::launchFrameId() const
 {
-  return getModel()->getLaunchFrameId();
+  return getModel()->launchFrameId();
 }
 
 bool VggSdk::setLaunchFrameById(const std::string& id)

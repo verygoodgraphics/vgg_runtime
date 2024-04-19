@@ -365,7 +365,7 @@ void Controller::start()
   }
   else
   {
-    m_presenter->setCurrentPage(m_model->getFrameIndexById(m_model->getLaunchFrameId()));
+    m_presenter->setCurrentPage(m_model->getFrameIndexById(m_model->launchFrameId()));
   }
 
   const auto& modelFileVersion = m_model->docVersion();

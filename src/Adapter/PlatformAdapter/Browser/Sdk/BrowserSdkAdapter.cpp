@@ -48,6 +48,8 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     .function("setListenerKey", &VggSdk::setListenerKey)
     // configure
     .function("setFitToViewportEnabled", &VggSdk::setFitToViewportEnabled)
+    .function("currentTheme", &VggSdk::currentTheme)
+    .function("setCurrentTheme", &VggSdk::setCurrentTheme)
     // misc
     .function("texts", &VggSdk::texts)
     .function("makeImageSnapshot", &VggSdk::emMakeImageSnapshot)

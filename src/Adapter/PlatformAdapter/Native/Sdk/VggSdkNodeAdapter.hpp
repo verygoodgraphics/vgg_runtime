@@ -43,6 +43,10 @@ private:
 
   // configure
   static napi_value setFitToViewportEnabled(napi_env env, napi_callback_info info);
+  static napi_value launchFrameId(napi_env env, napi_callback_info info);
+  static napi_value setLaunchFrameId(napi_env env, napi_callback_info info);
+  static napi_value currentTheme(napi_env env, napi_callback_info info);
+  static napi_value setCurrentTheme(napi_env env, napi_callback_info info);
 
   // design document in vgg daruma file
   static napi_value GetElement(napi_env env, napi_callback_info info);

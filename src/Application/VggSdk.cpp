@@ -118,14 +118,22 @@ bool VggSdk::setCurrentFrameById(const std::string& id, bool resetScrollPosition
   return false;
 }
 
-std::string VggSdk::launchFrameId() const
+const std::string VggSdk::launchFrameId() const
 {
   return getModel()->launchFrameId();
 }
-
 bool VggSdk::setLaunchFrameById(const std::string& id)
 {
   return getModel()->setLaunchFrameById(id);
+}
+
+const std::string VggSdk::currentTheme() const
+{
+  return getModel()->currentTheme();
+}
+bool VggSdk::setCurrentTheme(const std::string& theme)
+{
+  return getModel()->setCurrentTheme(theme);
 }
 
 bool VggSdk::presentFrameById(const std::string& id, bool resetScrollPosition)

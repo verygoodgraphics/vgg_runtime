@@ -59,7 +59,7 @@ public:
   void            setSettings(const Settings& settings);
 
   const std::string currentTheme() const;
-  void              setCurrentTheme(const std::string& name);
+  bool              setCurrentTheme(const std::string& name);
 
   void setLaunchFrameById(const std::string& id);
 

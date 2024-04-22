@@ -94,6 +94,8 @@ public:
   std::shared_ptr<StateTree> savedState();
   void                       restoreState();
 
+  void triggerMouseEnter();
+
   virtual void setModel(std::shared_ptr<ViewModel> viewModel);
   auto         requiredFonts()
   {

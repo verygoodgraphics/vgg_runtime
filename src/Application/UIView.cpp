@@ -94,6 +94,8 @@ bool UIView::onEvent(UEvent evt, void* userData)
 
     case VGG_MOUSEMOTION:
     {
+      m_lastMouseMove = evt;
+
       // according to js event order
       EUIEventType types[] = { EUIEventType::MOUSEMOVE,
                                EUIEventType::MOUSEOVER,
@@ -930,4 +932,9 @@ void UIView::restoreState()
   DEBUG("UIView::restoreState, restore state tree: %s", m_stateTree->id().c_str());
   m_presentedTreeContext.erase(m_stateTree->id());
   m_stateTree.reset();
+}
+
+void UIView::triggerMouseEnter()
+{
+  onEvent(m_lastMouseMove, nullptr);
 }

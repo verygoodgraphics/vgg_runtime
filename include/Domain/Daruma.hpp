@@ -96,11 +96,11 @@ public:
   std::string docVersion() const;
 
 public:
-  std::string launchFrameId() const;
-  bool        setLaunchFrameById(const std::string& id);
+  const std::string launchFrameId() const;
+  bool              setLaunchFrameById(const std::string& id);
 
-  std::string currentTheme();
-  bool        setCurrentTheme(const std::string& name);
+  const std::string currentTheme() const;
+  bool              setCurrentTheme(const std::string& name);
 
   int getFrameIndexForWidth(double width) const; // -1: error
 

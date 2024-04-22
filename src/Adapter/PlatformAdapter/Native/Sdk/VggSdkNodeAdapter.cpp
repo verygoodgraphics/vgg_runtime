@@ -174,6 +174,11 @@ void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
     DECLARE_NODE_API_PROPERTY("setEnv", SetEnv),
     DECLARE_NODE_API_PROPERTY("setFitToViewportEnabled", setFitToViewportEnabled),
 
+    DECLARE_NODE_API_PROPERTY("launchFrameId", launchFrameId),
+    DECLARE_NODE_API_PROPERTY("setLaunchFrameById", setLaunchFrameId),
+    DECLARE_NODE_API_PROPERTY("currentTheme", currentTheme),
+    DECLARE_NODE_API_PROPERTY("setCurrentTheme", setCurrentTheme),
+
     DECLARE_NODE_API_PROPERTY("getElement", GetElement),
     DECLARE_NODE_API_PROPERTY("updateElement", UpdateElement),
     DECLARE_NODE_API_PROPERTY("getDesignDocument", GetDesignDocument),
@@ -998,4 +1003,138 @@ napi_value VggSdkNodeAdapter::Save(napi_env env, napi_callback_info info)
     napi_throw_error(env, nullptr, e.what());
     return nullptr;
   }
+}
+
+napi_value VggSdkNodeAdapter::launchFrameId(napi_env env, napi_callback_info info)
+{
+  napi_value _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &_this, NULL));
+
+  try
+  {
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
+
+    std::string result;
+    SyncTaskInMainLoop<bool>{ [&sdk = sdkAdapter->m_vggSdk, &result]()
+                              {
+                                result = sdk->launchFrameId();
+                                return true;
+                              },
+                              [](bool) {} }();
+
+    napi_value ret;
+    NODE_API_CALL(env, napi_create_string_utf8(env, result.data(), result.size(), &ret));
+    return ret;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+napi_value VggSdkNodeAdapter::setLaunchFrameId(napi_env env, napi_callback_info info)
+{
+  constexpr size_t ARG_COUNT = 1;
+  size_t           argc = ARG_COUNT;
+  napi_value       args[ARG_COUNT];
+  napi_value       _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc < ARG_COUNT)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    const auto id = GetArgString(env, args[0]);
+
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
+
+    bool success{ false };
+    SyncTaskInMainLoop<bool>{ [&sdk = sdkAdapter->m_vggSdk, &id]()
+                              { return sdk->setLaunchFrameById(id); },
+                              [&success](bool result) { success = result; } }();
+
+    napi_value ret;
+    NODE_API_CALL(env, napi_get_boolean(env, success, &ret));
+    return ret;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+
+napi_value VggSdkNodeAdapter::currentTheme(napi_env env, napi_callback_info info)
+{
+  napi_value _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &_this, NULL));
+
+  try
+  {
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
+
+    std::string result;
+    SyncTaskInMainLoop<bool>{ [&sdk = sdkAdapter->m_vggSdk, &result]()
+                              {
+                                result = sdk->currentTheme();
+                                return true;
+                              },
+                              [](bool) {} }();
+
+    napi_value ret;
+    NODE_API_CALL(env, napi_create_string_utf8(env, result.data(), result.size(), &ret));
+    return ret;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+napi_value VggSdkNodeAdapter::setCurrentTheme(napi_env env, napi_callback_info info)
+{
+  constexpr size_t ARG_COUNT = 1;
+  size_t           argc = ARG_COUNT;
+  napi_value       args[ARG_COUNT];
+  napi_value       _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc < ARG_COUNT)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    const auto themeName = GetArgString(env, args[0]);
+
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
+
+    bool success{ false };
+    SyncTaskInMainLoop<bool>{ [&sdk = sdkAdapter->m_vggSdk, &themeName]()
+                              { return sdk->setCurrentTheme(themeName); },
+                              [&success](bool result) { success = result; } }();
+
+    napi_value ret;
+    NODE_API_CALL(env, napi_get_boolean(env, success, &ret));
+    return ret;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
 }

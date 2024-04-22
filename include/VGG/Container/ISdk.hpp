@@ -48,8 +48,12 @@ public:
   // -
   virtual std::string getFramesInfo() const = 0;
   virtual std::string currentFrameId() const = 0;
-  virtual std::string launchFrameId() const = 0;
-  virtual bool        setLaunchFrameById(const std::string& id) = 0;
+
+  // configure
+  virtual const std::string launchFrameId() const = 0;
+  virtual bool              setLaunchFrameById(const std::string& id) = 0;
+  virtual const std::string currentTheme() const = 0;
+  virtual bool              setCurrentTheme(const std::string& theme) = 0;
 
   // frame
   virtual bool setCurrentFrameById(const std::string& id, bool resetScrollPosition = true) = 0;

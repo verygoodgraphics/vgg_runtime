@@ -64,8 +64,12 @@ public:
 
   std::string getFramesInfo() const override;
   std::string currentFrameId() const override;
-  std::string launchFrameId() const override;
-  bool        setLaunchFrameById(const std::string& id) override;
+
+  // configure
+  const std::string launchFrameId() const override;
+  bool              setLaunchFrameById(const std::string& id) override;
+  const std::string currentTheme() const override;
+  bool              setCurrentTheme(const std::string& theme) override;
 
   // frame
   bool setCurrentFrameById(const std::string& id, bool resetScrollPosition) override;

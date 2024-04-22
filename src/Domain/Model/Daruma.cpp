@@ -424,7 +424,7 @@ std::string Daruma::getFramesInfo() const
   return info.dump();
 }
 
-std::string Daruma::launchFrameId() const
+const std::string Daruma::launchFrameId() const
 {
   return m_impl->settings().launchFrameId;
 }
@@ -461,4 +461,14 @@ void Daruma::getTextsTo(
 int Daruma::getFrameIndexForWidth(double width) const
 {
   return getFrameIndexById(m_impl->frameIdForWidth(width));
+}
+
+const std::string Daruma::currentTheme() const
+{
+  return m_impl->currentTheme();
+}
+
+bool Daruma::setCurrentTheme(const std::string& name)
+{
+  return m_impl->setCurrentTheme(name);
 }

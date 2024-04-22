@@ -69,12 +69,15 @@ const std::string DarumaImpl::currentTheme() const
   return {};
 }
 
-void DarumaImpl::setCurrentTheme(const std::string& name)
+bool DarumaImpl::setCurrentTheme(const std::string& name)
 {
   if (isValidTheme(name))
   {
     m_settings.currentTheme = name;
+    return true;
   }
+
+  return false;
 }
 
 void DarumaImpl::setLaunchFrameById(const std::string& id)

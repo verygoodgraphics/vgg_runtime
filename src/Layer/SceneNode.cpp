@@ -34,9 +34,9 @@ public:
   {
   }
   using FrameArray = std::vector<layer::FramePtr>;
-  FrameArray frames;
-
+  FrameArray       frames;
   sk_sp<SkPicture> picture;
+
   sk_sp<SkPicture> revalidatePicture(const SkRect& bounds)
   {
     SkPictureRecorder rec;
@@ -139,8 +139,8 @@ Bounds SceneNode::onRevalidate()
   Bounds bounds;
   for (auto& frame : d_ptr->frames)
   {
-    frame->revalidate();
-    bounds.unionWith(frame->bounds());
+    const auto b = frame->revalidate().bounds(frame->transform());
+    bounds.unionWith(b);
   }
   d_ptr->picture = d_ptr->revalidatePicture(toSkRect(bounds));
   return bounds;

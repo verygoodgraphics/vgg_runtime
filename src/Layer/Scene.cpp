@@ -15,6 +15,8 @@
  */
 
 #include "Layer/Core/RasterCache.hpp"
+#include "Layer/Core/ResourceManager.hpp"
+#include "Layer/Core/DefaultResourceProvider.hpp"
 #include "Layer/Core/VUtils.hpp"
 #include "Layer/LayerCache.h"
 #include "Renderer.hpp"
@@ -38,6 +40,7 @@
 #include <gpu/GrDirectContext.h>
 #include <gpu/GrRecordingContext.h>
 #include <gpu/ganesh/SkSurfaceGanesh.h>
+#include <iterator>
 #include <memory>
 #include <string>
 #include <fstream>
@@ -379,7 +382,10 @@ void Scene::preArtboard()
 
 void Scene::setResRepo(std::map<std::string, std::vector<char>> repo)
 {
-  Scene::s_resRepo = std::move(repo);
+  std::unordered_map<std::string, std::vector<char>> data(
+    std::make_move_iterator(repo.begin()),
+    std::make_move_iterator(repo.end()));
+  layer::setGlobalResourceProvider(std::make_unique<layer::MapResourceProvider>(std::move(data)));
   layer::getGlobalImageCache()->purge();
 }
 

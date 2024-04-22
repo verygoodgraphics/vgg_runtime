@@ -2,8 +2,10 @@
 
 #include "Application/ZoomerNodeController.hpp"
 #include "Domain/Model/Element.hpp"
+#include "Layer/Core/DefaultResourceProvider.hpp"
 #include "Layer/Core/SceneNode.hpp"
 #include "Layer/Core/ZoomerNode.hpp"
+#include "Layer/Core/ResourceManager.hpp"
 #include "Layer/Model/JSONModel.hpp"
 #include "Layer/Model/StructModel.hpp"
 #include "Layer/Memory/Ref.hpp"
@@ -114,7 +116,8 @@ protected:
       if (r)
       {
         auto data = r->read(prefix / fp);
-        Scene::setResRepo(data.resource);
+
+        VGG::layer::setGlobalResourceProvider(std::make_unique<layer::FileResourceProvider>("tmp"));
         try
         {
           auto res = VGG::entry::DocBuilder::builder()

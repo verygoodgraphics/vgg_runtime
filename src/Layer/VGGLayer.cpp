@@ -235,7 +235,6 @@ public:
     for (auto& node : renderNodes)
     {
       Renderer r;
-      node->revalidate();
       r = r.createNew(canvas);
       node->render(&r);
     }
@@ -382,6 +381,11 @@ void VLayer::render()
   VGG_IMPL(VLayer)
   SkCanvas* canvas = nullptr;
   canvas = _->skiaContext->canvas();
+
+  for (auto& node : d_ptr->renderNodes)
+  {
+    node->revalidate();
+  }
   Timer t;
   t.start();
   _->renderInternal(canvas, enableDrawPosition());

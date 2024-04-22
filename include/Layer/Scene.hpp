@@ -77,8 +77,10 @@ public:
     return s_resRepo;
   }
 
-  void        onViewportChange(const Bounds& bounds);
-  static void setResRepo(std::map<std::string, std::vector<char>> repo);
+  void onViewportChange(const Bounds& bounds);
+
+  [[deprecated("Use setGlobalResourceProvider")]] static void setResRepo(
+    std::map<std::string, std::vector<char>> repo);
 
 protected:
   void onRender(SkCanvas* canvas) override;

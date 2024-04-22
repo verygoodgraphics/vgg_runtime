@@ -85,7 +85,8 @@ void Daruma::accept(VGG::Model::Visitor* visitor)
   }
   if (m_settingsDoc.is_object())
   {
-    visitor->visit(K_SETTINGS_FILE_NAME, m_settingsDoc.dump());
+    nlohmann::json j = m_impl->settings();
+    visitor->visit(K_SETTINGS_FILE_NAME, j.dump());
   }
 
   // js

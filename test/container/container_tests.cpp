@@ -202,7 +202,7 @@ TEST_F(ContainerTestSuite, Sdk)
 
   {
     auto buffer = sdk->vggFileBuffer();
-    EXPECT_EQ(buffer.size(), 1494);
+    EXPECT_EQ(buffer.size(), 1332);
   }
 
   {

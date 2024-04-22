@@ -32,6 +32,7 @@ public:
   {
     if (dpi == m_dpi)
       return;
+    m_dpi = dpi;
     this->invalidate();
   }
 
@@ -44,6 +45,7 @@ public:
   {
     if (m_viewport == viewport)
       return;
+    m_viewport = viewport;
     this->invalidate();
   }
 

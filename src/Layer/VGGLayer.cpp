@@ -235,6 +235,7 @@ public:
     for (auto& node : renderNodes)
     {
       Renderer r;
+      node->revalidate();
       r = r.createNew(canvas);
       node->render(&r);
     }
@@ -285,10 +286,6 @@ public:
       for (auto& s : scenes)
       {
         s->onViewportChange(Bounds{ 0, 0, w, h });
-      }
-      for (auto& r : renderNodes)
-      {
-        r->revalidate();
       }
       invalid = false;
     }
@@ -409,13 +406,13 @@ void VLayer::addScene(std::shared_ptr<Scene> scene)
 
 void VLayer::addRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
 {
-  // auto rasterNode = RasterNode::Make(
-  //   d_ptr->skiaContext->context(),
-  //   d_ptr->viewport,
-  //   std::move(transform),
-  //   std::move(node));
+  auto rasterNode = RasterNode::Make(
+    d_ptr->skiaContext->context(),
+    d_ptr->viewport,
+    std::move(transform),
+    std::move(node));
 
-  auto rasterNode = TransformEffectNode::Make(std::move(transform), std::move(node));
+  // auto rasterNode = TransformEffectNode::Make(std::move(transform), std::move(node));
   d_ptr->renderNodes.push_back(std::move(rasterNode));
   // d_ptr->revalidate();
 }

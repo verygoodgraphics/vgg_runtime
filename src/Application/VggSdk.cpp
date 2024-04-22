@@ -133,7 +133,14 @@ const std::string VggSdk::currentTheme() const
 }
 bool VggSdk::setCurrentTheme(const std::string& theme)
 {
-  return getModel()->setCurrentTheme(theme);
+  if (auto currentEnv = env())
+  {
+    if (auto controller = currentEnv->controller())
+    {
+      return controller->setCurrentTheme(theme);
+    }
+  }
+  return false;
 }
 
 bool VggSdk::presentFrameById(const std::string& id, bool resetScrollPosition)

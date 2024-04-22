@@ -135,6 +135,7 @@ public:
   bool        setCurrentFrameById(const std::string& id);
   bool        presentFrameById(const std::string& id);
   bool        dismissFrame();
+  bool        setCurrentTheme(const std::string& theme);
 
   bool setState(
     const std::string& instanceDescendantId,

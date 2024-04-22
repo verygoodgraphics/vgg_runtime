@@ -832,3 +832,17 @@ void Controller::setFitToViewportEnabled(bool enabled)
 
   m_isFitToViewportEnabled = enabled;
 }
+
+bool Controller::setCurrentTheme(const std::string& theme)
+{
+  auto ret = m_model->setCurrentTheme(theme);
+  if (ret)
+  {
+    auto pageIndexForViewport = m_model->getFrameIndexForWidth(m_presenter->viewSize().width);
+    if (pageIndexForViewport != m_presenter->currentPageIndex())
+    {
+      m_presenter->setCurrentPage(pageIndexForViewport);
+    }
+  }
+  return ret;
+}

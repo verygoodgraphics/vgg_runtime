@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "LayerCache.h"
+#include "Layer/Core/ResourceManager.hpp"
 #include <include/core/SkImage.h>
 
 namespace VGG::layer
@@ -54,27 +55,23 @@ sk_sp<SkImage> loadImage(const std::string& imageGUID, const ResourceRepo& repo)
   }
   else
   {
-    auto repo = Scene::getResRepo();
-    if (auto it = repo.find(guid); it != repo.end())
+    if (auto repo = getGlobalResourceProvider(); repo)
     {
-      auto data = SkData::MakeWithCopy(it->second.data(), it->second.size());
-      if (!data)
+      if (auto data = repo->readData(guid); data)
       {
-        WARN("Make SkData failed");
-        return image;
+        sk_sp<SkImage> skImage = SkImages::DeferredFromEncodedData(data);
+        if (!skImage)
+        {
+          WARN("Make SkImage failed.");
+          return image;
+        }
+        imageCache->insert(guid, skImage);
+        image = skImage;
       }
-      sk_sp<SkImage> skImage = SkImages::DeferredFromEncodedData(data);
-      if (!skImage)
+      else
       {
-        WARN("Make SkImage failed.");
-        return image;
+        WARN("Cannot find %s from resources repository", guid.c_str());
       }
-      imageCache->insert(guid, skImage);
-      image = skImage;
-    }
-    else
-    {
-      WARN("Cannot find %s from resources repository", guid.c_str());
     }
   }
   return image;

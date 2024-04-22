@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/Core/VShape.hpp"
 #if defined(_WIN32) && defined(LAYER_SHARED_LIBRARY)
 #ifdef layer_EXPORTS
 #define VGG_EXPORTS __declspec(dllexport)
@@ -33,4 +34,12 @@
   {                                                                                                \
     __VA_ARGS__;                                                                                   \
   } while (0);
+#endif
+
+#if __GNUC__ >= 13
+#include <iostream>
+#include <format>
+#define VGG_LAYER_LOG(...) std::cout << std::format(__VA_ARGS__) << std::endl;
+#else
+#define VGG_LAYER_LOG(...)
 #endif

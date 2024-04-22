@@ -852,3 +852,8 @@ VGG::Layout::Size Controller::currentPageSize()
   const auto& root = m_layout->layoutTree();
   return root->children()[m_presenter->currentPageIndex()]->frame().size;
 }
+
+void Controller::openUrl(const std::string& url, const std::string& target)
+{
+  vggExec()->openUrl(url, target);
+}

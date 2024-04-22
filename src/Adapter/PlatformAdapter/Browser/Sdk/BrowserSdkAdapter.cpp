@@ -80,6 +80,8 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     .function("addEventListener", &VggSdk::addEventListener)
     .function("removeEventListener", &VggSdk::removeEventListener)
     .function("getEventListeners", &VggSdk::getEventListeners)
+    // -
+    .function("openUrl", &VggSdk::openUrl)
     // editor
     .function("vggFileUint8Array", &VggSdk::vggFileUint8Array);
 }

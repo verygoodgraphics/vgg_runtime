@@ -53,3 +53,8 @@ void VggExec::setEnv()
       )";
   m_jsEngine->evalScript(oss.str());
 }
+
+void VggExec::openUrl(const std::string& url, const std::string& target)
+{
+  m_jsEngine->openUrl(url, target);
+}

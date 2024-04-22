@@ -84,6 +84,8 @@ public:
   virtual std::vector<std::string> texts() = 0;
 
   virtual std::vector<uint8_t> makeImageSnapshot(const ImageOptions& options) = 0;
+
+  virtual void openUrl(const std::string& url, const std::string& target) = 0;
 };
 
 } // namespace VGG

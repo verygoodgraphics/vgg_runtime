@@ -115,3 +115,8 @@ void NativeExec::release()
   m_thread->join();
   m_thread = nullptr;
 }
+
+void NativeExec::openUrl(const std::string& url, const std::string& target)
+{
+  WARN("todo, open url, %s, %s", url.c_str(), target.c_str());
+}

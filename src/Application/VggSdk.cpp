@@ -467,3 +467,14 @@ void VggSdk::setFitToViewportEnabled(bool enabled)
     }
   }
 }
+
+void VggSdk::openUrl(const std::string& url, const std::string& target)
+{
+  if (auto currentEnv = env())
+  {
+    if (auto controller = currentEnv->controller())
+    {
+      controller->openUrl(url, target);
+    }
+  }
+}

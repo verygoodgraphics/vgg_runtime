@@ -147,6 +147,8 @@ public:
     const std::string& stateMasterId);
   bool dismissState(const std::string& instanceDescendantId);
 
+  void openUrl(const std::string& url, const std::string& target);
+
 private:
   void          initModel(const char* designDocSchemaFilePath, const char* layoutDocSchemaFilePath);
   JsonDocument* createJsonDoc();

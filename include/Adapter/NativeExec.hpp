@@ -43,6 +43,8 @@ public:
   bool evalModule(const std::string& code, VGG::EventPtr event, std::shared_ptr<IVggEnv> env)
     override;
 
+  void openUrl(const std::string& url, const std::string& target) override;
+
   using InjectFn = std::function<void(node::Environment*)>;
   bool inject(InjectFn fn);
 

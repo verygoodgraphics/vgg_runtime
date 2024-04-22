@@ -30,6 +30,8 @@ public:
   bool evalModule(const std::string& code, VGG::EventPtr event, std::shared_ptr<IVggEnv> env)
     override;
 
+  void openUrl(const std::string& url, const std::string& target) override;
+
 private:
   std::string m_moduleWrapper;
   int         m_evalTimes = 0;

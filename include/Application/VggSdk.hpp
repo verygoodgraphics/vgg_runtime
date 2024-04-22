@@ -111,6 +111,8 @@ public:
   emscripten::val emMakeImageSnapshot(const ImageOptions& options);
 #endif
 
+  void openUrl(const std::string& url, const std::string& target) override;
+
   // event listener
   // event types: https://developer.mozilla.org/en-US/docs/Web/API/Element#events
   void addEventListener(

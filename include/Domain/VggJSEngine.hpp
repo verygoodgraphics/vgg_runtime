@@ -36,6 +36,8 @@ public:
     const std::string&       code,
     VGG::EventPtr            event,
     std::shared_ptr<IVggEnv> env) = 0;
+
+  virtual void openUrl(const std::string& url, const std::string& target) = 0;
 };
 
 } // namespace VGG

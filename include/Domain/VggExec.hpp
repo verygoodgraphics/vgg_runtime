@@ -39,6 +39,8 @@ public:
   bool evalModule(const std::string& script);
   bool evalModule(const std::string& code, VGG::EventPtr event);
 
+  void openUrl(const std::string& url, const std::string& target);
+
 private:
   std::shared_ptr<VggJSEngine> m_jsEngine;
   std::shared_ptr<IVggEnv>     m_env;

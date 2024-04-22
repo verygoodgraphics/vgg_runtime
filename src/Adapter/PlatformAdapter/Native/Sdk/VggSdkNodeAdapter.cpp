@@ -200,6 +200,8 @@ void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
     DECLARE_NODE_API_PROPERTY("removeEventListener", RemoveEventListener),
     DECLARE_NODE_API_PROPERTY("getEventListeners", GetEventListeners),
 
+    DECLARE_NODE_API_PROPERTY("openUrl", openUrl),
+
     DECLARE_NODE_API_PROPERTY("save", Save),
   };
 
@@ -1063,6 +1065,43 @@ napi_value VggSdkNodeAdapter::setLaunchFrameId(napi_env env, napi_callback_info 
     napi_value ret;
     NODE_API_CALL(env, napi_get_boolean(env, success, &ret));
     return ret;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+
+napi_value VggSdkNodeAdapter::openUrl(napi_env env, napi_callback_info info)
+{
+  constexpr size_t ARG_COUNT = 2;
+  size_t           argc = ARG_COUNT;
+  napi_value       args[ARG_COUNT];
+  napi_value       _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc < ARG_COUNT)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    const auto url = GetArgString(env, args[0]);
+    const auto target = GetArgString(env, args[1]);
+
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
+
+    SyncTaskInMainLoop<bool>{ [&sdk = sdkAdapter->m_vggSdk, &url, &target]()
+                              {
+                                sdk->openUrl(url, target);
+                                return true;
+                              },
+                              [](bool) {} }();
   }
   catch (std::exception& e)
   {

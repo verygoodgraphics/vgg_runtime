@@ -723,20 +723,35 @@ std::string Controller::currentFrameId() const
 bool Controller::setCurrentFrameById(const std::string& id)
 {
   ASSERT(m_model);
-  auto index = m_model->getFrameIndexById(id);
-  return m_presenter->setCurrentPage(index);
+  const auto index = m_model->getFrameIndexById(id);
+  const auto success = m_presenter->setCurrentPage(index);
+  if (success)
+  {
+    m_presenter->triggerMouseEnter();
+  }
+  return success;
 }
 
 bool Controller::presentFrameById(const std::string& id)
 {
   ASSERT(m_model);
-  auto index = m_model->getFrameIndexById(id);
-  return m_presenter->presentPage(index);
+  const auto index = m_model->getFrameIndexById(id);
+  const auto success = m_presenter->presentPage(index);
+  if (success)
+  {
+    m_presenter->triggerMouseEnter();
+  }
+  return success;
 }
 
 bool Controller::dismissFrame()
 {
-  return m_presenter->dismissPage();
+  const auto success = m_presenter->dismissPage();
+  if (success)
+  {
+    m_presenter->triggerMouseEnter();
+  }
+  return success;
 }
 
 bool Controller::setState(
@@ -752,6 +767,7 @@ bool Controller::setState(
   {
     m_presenter->restoreState();
     m_presenter->update();
+    m_presenter->triggerMouseEnter();
   }
   return success;
 }
@@ -771,6 +787,7 @@ bool Controller::presentState(
   {
     m_presenter->saveState(stateTree);
     m_presenter->update();
+    m_presenter->triggerMouseEnter();
   }
   return success;
 }
@@ -785,6 +802,7 @@ bool Controller::dismissState(const std::string& instanceDescendantId)
   {
     m_presenter->restoreState();
     m_presenter->update();
+    m_presenter->triggerMouseEnter();
   }
   return success;
 }

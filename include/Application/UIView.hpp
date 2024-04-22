@@ -102,6 +102,8 @@ private:
   bool m_isZoomerEnabled{ true };
   bool m_drawGrayBackground{ false };
 
+  UEvent m_lastMouseMove; // Used to trigger mouseenter event when content is updated
+
 public:
   UIView();
 
@@ -190,6 +192,8 @@ public:
   {
     m_drawGrayBackground = drawBackground;
   }
+
+  void triggerMouseEnter();
 
 protected:
   Offset getOffset();

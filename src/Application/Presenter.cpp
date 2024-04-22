@@ -309,3 +309,9 @@ void Presenter::restoreState()
   ASSERT(m_view);
   m_view->restoreState();
 }
+
+void Presenter::triggerMouseEnter()
+{
+  ASSERT(m_view);
+  m_view->triggerMouseEnter();
+}

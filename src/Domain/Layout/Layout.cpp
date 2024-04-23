@@ -70,22 +70,16 @@ Layout::Layout::Layout(std::shared_ptr<Domain::DesignDocument> designDocument, R
   configureNodeAutoLayout(m_layoutTree);
 }
 
-void Layout::Layout::layout(Size size, bool updateRule)
+void Layout::Layout::layout(Size size, int pageIndex, bool updateRule)
 {
-  // todo, layout current page only
-
-  // update root frame
   auto root = layoutTree();
-  auto frame = root->frame();
-
-  // Always update the root size because resizing the page does not update the root size
-  frame.size = size;
+  if (pageIndex < 0 || pageIndex >= root->children().size())
+  {
+    return;
+  }
 
   // udpate page frame
-  for (auto& page : root->children())
-  {
-    page->scaleTo(size, updateRule, true);
-  }
+  root->children()[pageIndex]->scaleTo(size, updateRule, true);
 
   // layout
   root->layoutIfNeeded();
@@ -97,7 +91,7 @@ void Layout::Layout::buildLayoutTree()
   for (auto& child : m_designDocument->children())
   {
     auto page = createOneLayoutNode(child, m_layoutTree);
-    m_pageSize.push_back(page->frame().size);
+    m_originalPageSize.push_back(page->frame().size);
   }
 }
 

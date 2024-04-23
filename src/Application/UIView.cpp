@@ -315,16 +315,6 @@ VGG::Layout::Point UIView::converPointFromWindowAndScale(Layout::Point point)
   return point;
 }
 
-void UIView::nextArtboard()
-{
-  setCurrentPage(m_page + 1);
-}
-
-void UIView::preArtboard()
-{
-  setCurrentPage(m_page - 1);
-}
-
 std::shared_ptr<LayoutNode> UIView::currentPage()
 {
   auto document = m_document.lock();

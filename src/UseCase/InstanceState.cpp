@@ -79,7 +79,16 @@ bool InstanceState::presentState(
   // save current state tree to still handle events
   auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode().get());
   ASSERT(pInstance);
-  auto oldMasterId = pInstance->masterId();
+  const auto& oldMasterId = pInstance->masterId();
+  if (oldMasterId == stateMasterId)
+  {
+    DEBUG(
+      "instance %s, present state, same master id %s, return",
+      instanceNode->id().c_str(),
+      oldMasterId.c_str());
+    return false;
+  }
+
   auto oldElementChildren = pInstance->presentState(stateMasterId);
   auto oldLayoutChildren = instanceNode->removeAllChildren();
 

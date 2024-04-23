@@ -106,7 +106,7 @@ void updateMaskMapInternal(PaintNode* p)
 
 void updateMaskMap(PaintNode* p)
 {
-  getMaskMap()->clear();
+  // getMaskMap()->clear();
   updateMaskMapInternal(p);
 }
 

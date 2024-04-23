@@ -135,13 +135,9 @@ public:
 
   void setClipOperator(EBoolOp op);
 
-  void setVisible(bool visible);
-
   void setChildWindingType(EWindingType rule);
 
   EWindingType childWindingType() const;
-
-  bool isVisible() const;
 
   void setFrameRadius(std::array<float, 4> radius);
 
@@ -192,6 +188,12 @@ public:
   virtual VShape asVisualShape(const Transform* transform);
 
 public:
+  Accessor* attributeAccessor();
+
+  void setVisible(bool visible);
+
+  bool isVisible() const;
+
   using EventHandler = std::function<void(ShapeItemAttibuteAccessor*, void*)>;
   void installPaintNodeEventHandler(EventHandler handler);
   using NodeVisitor = bool (*)(PaintNode*);
@@ -219,7 +221,6 @@ protected:
   virtual void        onPaint(Renderer* renderer);
   virtual void        dispatchEvent(void* event);
   TransformAttribute* transformAttribute();
-  Accessor*           attributeAccessor();
 
   void       onSetAccessor(std::unique_ptr<Accessor> acc);
   void       onSetStyleItem(Ref<StyleItem> item);

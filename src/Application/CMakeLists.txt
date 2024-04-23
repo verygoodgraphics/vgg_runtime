@@ -17,6 +17,8 @@ add_library(vgg_application STATIC
   VggEnv.cpp
   VggSdk.cpp
   ViewModel.cpp
+  Animate.cpp
+  AttrBridge.cpp
 )
 
 if(MSVC)

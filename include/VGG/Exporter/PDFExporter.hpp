@@ -26,11 +26,10 @@ class PDFIterator
 {
   std::unique_ptr<IteratorImplBase> d_impl; // NOLINT
 public:
-  PDFIterator(nlohmann::json design, nlohmann::json layout, Resource resource);
+  PDFIterator(nlohmann::json design, nlohmann::json layout);
   PDFIterator(
     nlohmann::json      design,
     nlohmann::json      layout,
-    Resource            resource,
     const ExportOption& opt,
     BuilderResult&      result);
   bool           next(std::string& key, std::vector<char>& data);

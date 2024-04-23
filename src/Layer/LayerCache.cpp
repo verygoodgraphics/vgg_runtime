@@ -37,19 +37,13 @@ ImageCache* getGlobalImageCache()
   return &s_imageCache;
 }
 
-sk_sp<SkImage> loadImage(const std::string& imageGUID, const ResourceRepo& repo)
+sk_sp<SkImage> loadImage(const std::string& imageGUID)
 {
   sk_sp<SkImage> image;
   if (imageGUID.empty())
     return image;
-  std::string guid = imageGUID;
-  if (auto pos = guid.find("./"); pos != std::string::npos && pos == 0)
-  {
-    // remove current dir notation
-    guid = guid.substr(2);
-  }
   auto imageCache = getGlobalImageCache();
-  if (auto it = imageCache->find(guid); it)
+  if (auto it = imageCache->find(imageGUID); it)
   {
     image = *it;
   }
@@ -57,7 +51,7 @@ sk_sp<SkImage> loadImage(const std::string& imageGUID, const ResourceRepo& repo)
   {
     if (auto repo = getGlobalResourceProvider(); repo)
     {
-      if (auto data = repo->readData(guid); data)
+      if (auto data = repo->readData(imageGUID); data)
       {
         sk_sp<SkImage> skImage = SkImages::DeferredFromEncodedData(data);
         if (!skImage)
@@ -65,12 +59,12 @@ sk_sp<SkImage> loadImage(const std::string& imageGUID, const ResourceRepo& repo)
           WARN("Make SkImage failed.");
           return image;
         }
-        imageCache->insert(guid, skImage);
+        imageCache->insert(imageGUID, skImage);
         image = skImage;
       }
       else
       {
-        WARN("Cannot find %s from resources repository", guid.c_str());
+        WARN("Cannot find %s from resources repository", imageGUID.c_str());
       }
     }
   }

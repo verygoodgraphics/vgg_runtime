@@ -37,7 +37,7 @@ using MaskMap = std::unordered_map<std::string, PaintNode*>;
 BlenderCache*  getGlobalBlenderCache();
 EffectCache*   getGlobalEffectCache();
 ImageCache*    getGlobalImageCache();
-sk_sp<SkImage> loadImage(const std::string& imageGUID, const ResourceRepo& repo);
+sk_sp<SkImage> loadImage(const std::string& imageGUID);
 MaskMap*       getMaskMap();
 void           updateMaskMap(PaintNode* p);
 

@@ -24,11 +24,10 @@ class SVGIterator
 {
   std::unique_ptr<IteratorImplBase> d_impl; // NOLINT
 public:
-  SVGIterator(nlohmann::json design, nlohmann::json layout, Resource resource);
+  SVGIterator(nlohmann::json design, nlohmann::json layout);
   SVGIterator(
     nlohmann::json      design,
     nlohmann::json      layout,
-    Resource            resource,
     const ExportOption& opt,
     BuilderResult&      result);
   bool           next(std::string& key, std::vector<char>& data);

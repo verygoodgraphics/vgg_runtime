@@ -17,53 +17,15 @@
 
 #include "Layer/Config.hpp"
 #include "Layer/Core/ResourceProvider.hpp"
+#include "Layer/LayerCache.h"
 #include <core/SkData.h>
 #include <string_view>
-#include <unordered_map>
-#include <vector>
 #include <string>
 #include <fstream>
 #include <filesystem>
 
 namespace VGG::layer
 {
-
-class MapResourceProvider : public ResourceProvider
-{
-public:
-  MapResourceProvider(std::unordered_map<std::string, std::vector<char>> data)
-    : m_data(std::move(data))
-  {
-  }
-  MapResourceProvider() = default;
-  MapResourceProvider(const MapResourceProvider&) = delete;
-  MapResourceProvider& operator=(const MapResourceProvider&) = delete;
-
-  MapResourceProvider(MapResourceProvider&&) = default;
-  MapResourceProvider& operator=(MapResourceProvider&&) = default;
-
-  void merge(std::unordered_map<std::string, std::vector<char>> data)
-  {
-    m_data.merge(std::move(data));
-  }
-
-  void purge()
-  {
-    m_data.clear();
-  }
-
-  Blob readData(std::string_view guid) override
-  {
-    if (auto it = m_data.find(guid.data()); it != m_data.end())
-    {
-      return SkData::MakeWithoutCopy(it->second.data(), it->second.size());
-    }
-    return nullptr;
-  }
-
-private:
-  std::unordered_map<std::string, std::vector<char>> m_data;
-};
 
 class FileResourceProvider : public ResourceProvider
 {

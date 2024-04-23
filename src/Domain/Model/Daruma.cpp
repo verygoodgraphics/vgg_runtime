@@ -406,25 +406,6 @@ std::unordered_set<std::string> Daruma::texts() const
   return texts;
 }
 
-std::string Daruma::getFramesInfo() const
-{
-  ASSERT(m_designDocTree);
-
-  nlohmann::json info(nlohmann::json::value_t::array);
-  for (const auto& child : m_designDocTree->children())
-  {
-    if (auto frame = std::dynamic_pointer_cast<Domain::FrameElement>(child))
-    {
-      nlohmann ::json frameInfo(nlohmann::json::value_t::object);
-      frameInfo[K_ID] = frame->id();
-      frameInfo[K_NAME] = frame->name();
-      info.push_back(frameInfo);
-    }
-  }
-
-  return info.dump();
-}
-
 const std::string Daruma::launchFrameId() const
 {
   return m_impl->settings().launchFrameId;

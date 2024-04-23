@@ -28,9 +28,9 @@ class AppRender__pImpl
 {
 public:
   VGG_DECL_API(AppRender)
-  std::vector<std::shared_ptr<AppScene>> listeners;
+  std::vector<std::shared_ptr<AppScene>>      listeners;
   std::vector<std::shared_ptr<AppRenderable>> renderables;
-  std::queue<std::pair<UEvent, void*>> msgQueue;
+  std::queue<std::pair<UEvent, void*>>        msgQueue;
   AppRender__pImpl(AppRender* api)
     : q_ptr(api)
   {

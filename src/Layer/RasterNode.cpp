@@ -92,6 +92,10 @@ Bounds RasterNode::onRevalidate()
 
   // FIXME: you cannot determine the invalidation by hasInval**() functions,
   // because it could be revaildated by other nodes. unless it is exclusive to this node.
+  //
+  // TODO:: This object does not have to be ZoomerNode-awared, it can be achieved by carefully
+  // judging from coressponding component of matrix in TransformNode.  In other words, it should be
+  // able to handle any sort of transformation node.
   if (m_raster)
   {
     if (c->hasInval())

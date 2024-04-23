@@ -91,7 +91,9 @@ public:
   void       nodeAt(int x, int y, PaintNode::NodeVisitor visitor);
   void       nodesAt(int x, int y, std::vector<PaintNode*>& nodes);
 
-  void addRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node);
+  void setRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node);
+
+  void setRenderNode(Ref<RenderNode> node);
 
   SkCanvas* layerCanvas();
   void      clearLayerCanvas();

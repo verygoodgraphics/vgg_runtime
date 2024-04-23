@@ -183,10 +183,12 @@ public:
   std::vector<std::shared_ptr<Renderable>> items;
   std::vector<std::shared_ptr<Scene>>      scenes;
 
-  Ref<ViewportNode>            viewport;
-  std::vector<Ref<RenderNode>> renderNodes;
-  float                        preScale{ 1.0 };
-  bool                         invalid{ true };
+  Ref<ViewportNode> viewport;
+  // std::vector<Ref<RenderNode>> renderNodes;
+
+  Ref<RenderNode> node;
+  float           preScale{ 1.0 };
+  bool            invalid{ true };
 
   std::unique_ptr<SkPictureRecorder> rec;
   sk_sp<SkPicture>                   layerPicture;
@@ -232,7 +234,7 @@ public:
     {
       item->render(canvas);
     }
-    for (auto& node : renderNodes)
+    if (node)
     {
       Renderer r;
       r = r.createNew(canvas);
@@ -381,10 +383,9 @@ void VLayer::render()
   VGG_IMPL(VLayer)
   SkCanvas* canvas = nullptr;
   canvas = _->skiaContext->canvas();
-
-  for (auto& node : d_ptr->renderNodes)
+  if (_->node)
   {
-    node->revalidate();
+    _->node->revalidate();
   }
   Timer t;
   t.start();
@@ -408,18 +409,22 @@ void VLayer::addScene(std::shared_ptr<Scene> scene)
   d_ptr->invalidate();
 }
 
-void VLayer::addRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
+void VLayer::setRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
 {
   auto rasterNode = RasterNode::Make(
     d_ptr->skiaContext->context(),
     d_ptr->viewport,
     std::move(transform),
     std::move(node));
-
-  // auto rasterNode = TransformEffectNode::Make(std::move(transform), std::move(node));
-  d_ptr->renderNodes.push_back(std::move(rasterNode));
-  // d_ptr->revalidate();
+  d_ptr->node = std::move(rasterNode);
 }
+
+void VLayer::setRenderNode(Ref<RenderNode> node)
+{
+  if (d_ptr->node != node)
+    d_ptr->node = std::move(node);
+}
+} // namespace VGG::layer
 
 namespace
 {
@@ -612,5 +617,5 @@ VLayer::~VLayer()
 {
   DEBUG("VGG Layer releasing...");
 }
-} // namespace VGG::layer
-  //
+// namespace VGG::layer
+//

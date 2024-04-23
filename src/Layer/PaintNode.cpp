@@ -469,7 +469,10 @@ EWindingType PaintNode::childWindingType() const
 void PaintNode::setVisible(bool visible)
 {
   VGG_IMPL(PaintNode);
+  if (_->visible == visible)
+    return;
   _->visible = visible;
+  this->invalidate();
 }
 
 bool PaintNode::isVisible() const

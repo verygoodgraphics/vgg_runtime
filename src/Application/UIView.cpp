@@ -42,6 +42,20 @@ constexpr auto K_EMPTY_STRING = "";
 #undef VERBOSE
 #define VERBOSE(msg, ...)
 
+namespace
+{
+bool operator==(
+  const std::pair<std::shared_ptr<LayoutNode>, std::string>& lhs,
+  const std::pair<std::shared_ptr<LayoutNode>, std::string>& rhs)
+{
+  if (lhs.first && rhs.first)
+  {
+    return lhs.first->id() == rhs.first->id();
+  }
+  return false;
+}
+} // namespace
+
 UIView::UIView()
   : AppScene(std::make_unique<VGG::layer::RasterCacheTile>())
 {

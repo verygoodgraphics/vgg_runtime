@@ -39,13 +39,16 @@ void VNode::observe(VNodePtr sender)
 
 void VNode::unobserve(VNodePtr sender)
 {
-  if (auto it = std::find_if(
-        sender->m_observers.begin(),
-        sender->m_observers.end(),
-        [&](const auto& o) { return o.lock() == this; });
-      it != sender->m_observers.end())
+  if (sender)
   {
-    sender->m_observers.erase(it);
+    if (auto it = std::find_if(
+          sender->m_observers.begin(),
+          sender->m_observers.end(),
+          [&](const auto& o) { return o.lock() == this; });
+        it != sender->m_observers.end())
+    {
+      sender->m_observers.erase(it);
+    }
   }
 }
 

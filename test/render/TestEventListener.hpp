@@ -41,13 +41,74 @@ using namespace VGG::app;
 
 class SkCanvas;
 
+class Pager
+{
+  layer::SceneNode* m_sceneNode;
+  int               m_currentPage = -1;
+
+  void setPage(int delta)
+  {
+    if (m_sceneNode && !m_sceneNode->getFrames().empty())
+    {
+      const auto total = m_sceneNode->getFrames().size();
+      auto       newPage = (m_currentPage + delta + total) % total;
+      if (newPage == m_currentPage)
+        return;
+      const auto& frames = m_sceneNode->getFrames();
+      frames[m_currentPage]->node()->setVisible(false);
+      frames[newPage]->node()->setVisible(true);
+      m_currentPage = newPage;
+    }
+  }
+
+public:
+  Pager(layer::SceneNode* sceneNode)
+    : m_sceneNode(sceneNode)
+  {
+    if (m_sceneNode && !m_sceneNode->getFrames().empty())
+    {
+      const auto& frames = m_sceneNode->getFrames();
+      for (int i = 0; i < m_sceneNode->getFrames().size(); i++)
+      {
+        frames[i]->node()->setVisible(false);
+      }
+      m_currentPage = 0;
+      frames[m_currentPage]->node()->setVisible(true);
+    }
+    else
+    {
+      m_currentPage = -1;
+    }
+  }
+
+  Bounds getPageBounds()
+  {
+    if (m_currentPage < 0 || m_currentPage >= m_sceneNode->getFrames().size())
+    {
+      return Bounds();
+    }
+    const auto& frames = m_sceneNode->getFrames();
+    return frames[m_currentPage]->bounds();
+  }
+
+  void nextFrame()
+  {
+    setPage(1);
+  }
+
+  void prevFrame()
+  {
+    setPage(-1);
+  }
+};
+
 constexpr char POS_ARG_INPUT_FILE[] = "fig/ai/sketch/json";
 template<typename App>
 class MyEventListener : public VGG::app::EventListener
 {
   AppRender*                               m_layer{ nullptr };
-  std::shared_ptr<AppScene>                m_scene; // Deprecated
   layer::Ref<layer::SceneNode>             m_sceneNode;
+  std::unique_ptr<Pager>                   m_pager;
   std::unique_ptr<app::ZoomNodeController> m_zoomController;
 
 protected:
@@ -86,10 +147,6 @@ protected:
       auto file = configfile.value();
       Config::readGlobalConfig(file);
     }
-
-    m_scene = std::make_shared<AppScene>(std::make_unique<layer::RasterCacheTile>());
-    // m_scene = std::make_shared<AppScene>();
-    m_scene->setZoomerListener(std::make_shared<AppZoomer>());
 
     std::filesystem::path prefix;
     std::filesystem::path respath;
@@ -180,14 +237,12 @@ protected:
           }
           if (sceneBuilderResult.root)
           {
-            // m_scene->setSceneRoots(*sceneBuilderResult.root);
-
             m_sceneNode = layer::SceneNode::Make(std::move(*sceneBuilderResult.root));
             auto zoomNode = layer::ZoomerNode::Make();
             m_zoomController = std::make_unique<ZoomNodeController>(zoomNode);
             m_layer->addRenderNode(std::move(zoomNode), m_sceneNode);
+            m_pager = std::make_unique<Pager>(m_sceneNode.get());
           }
-          m_layer->addAppScene(m_scene);
           m_layer->setDrawPositionEnabled(true);
         }
         catch (std::exception& e)
@@ -230,9 +285,9 @@ public:
     if (key == VGGK_PAGEUP && (mod & VGG_KMOD_CTRL))
     {
       INFO("Previous page");
-      if (m_scene)
+      if (m_pager)
       {
-        m_scene->preArtboard();
+        m_pager->prevFrame();
       }
       return true;
     }
@@ -240,9 +295,9 @@ public:
     if (key == VGGK_PAGEDOWN && (mod & VGG_KMOD_CTRL))
     {
       INFO("Next page");
-      if (m_scene)
+      if (m_pager)
       {
-        m_scene->nextArtboard();
+        m_pager->nextFrame();
       }
       return true;
     }
@@ -265,13 +320,13 @@ public:
       if (ofs.is_open())
       {
         using namespace VGG::layer::exporter;
-        auto                        page = m_scene->currentPage();
-        auto                        f = m_scene->frame(page);
-        auto                        b = f->bounds();
-        layer::exporter::SVGOptions opt;
-        opt.extend[0] = b.width();
-        opt.extend[1] = b.height();
-        makeSVG(m_scene.get(), opt, ofs);
+        // auto                        page = m_scene->currentPage();
+        // auto                        f = m_scene->frame(page);
+        // auto                        b = f->bounds();
+        // layer::exporter::SVGOptions opt;
+        // opt.extend[0] = b.width();
+        // opt.extend[1] = b.height();
+        // makeSVG(m_scene.get(), opt, ofs);
       }
       return true;
     }
@@ -280,8 +335,7 @@ public:
     {
       std::ofstream       ofs("capture.png");
       layer::ImageOptions opt;
-      auto                f = m_scene->frame(m_scene->currentPage());
-      auto                b = f->bounds();
+      auto                b = m_pager->getPageBounds();
       opt.extend[0] = b.width();
       opt.extend[1] = b.height();
       INFO("Capture PNG [%f, %f]", b.width(), b.height());
@@ -299,8 +353,7 @@ public:
       INFO("Capture JPEG");
       std::ofstream       ofs("capture.jpg");
       layer::ImageOptions opt;
-      auto                f = m_scene->frame(m_scene->currentPage());
-      auto                b = f->bounds();
+      auto                b = m_pager->getPageBounds();
       opt.extend[0] = b.width();
       opt.extend[1] = b.height();
       opt.encode = VGG::layer::EImageEncode::IE_JPEG;
@@ -316,8 +369,8 @@ public:
       INFO("Capture WEBP");
       std::ofstream       ofs("capture.webp");
       layer::ImageOptions opt;
-      auto                f = m_scene->frame(m_scene->currentPage());
-      auto                b = f->bounds();
+      auto                b = m_pager->getPageBounds();
+      opt.extend[0] = b.width();
       opt.extend[0] = b.width();
       opt.extend[1] = b.height();
       opt.encode = VGG::layer::EImageEncode::IE_WEBP;
@@ -334,13 +387,11 @@ public:
       std::ofstream ofs("capture.pdf");
       if (ofs.is_open())
       {
-        auto                        page = m_scene->currentPage();
-        auto                        f = m_scene->frame(page);
-        auto                        b = f->bounds();
+        auto                        b = m_pager->getPageBounds();
         layer::exporter::PDFOptions opt;
         opt.extend[0] = b.width();
         opt.extend[1] = b.height();
-        makePDF(m_scene.get(), opt, ofs);
+        // makePDF(m_scene.get(), opt, ofs);
       }
       return true;
     }
@@ -348,14 +399,14 @@ public:
     if (key == VGGK_b)
     {
       INFO("Toggle object bounding box");
-      m_scene->enableDrawDebugBounds(!m_scene->isEnableDrawDebugBounds());
+      // m_scene->enableDrawDebugBounds(!m_scene->isEnableDrawDebugBounds());
       return true;
     }
 
     if (key == VGGK_1)
     {
       INFO("Toggle cursor position");
-      m_layer->setDrawPositionEnabled(!m_layer->enableDrawPosition());
+      // m_layer->setDrawPositionEnabled(!m_layer->enableDrawPosition());
       return true;
     }
 

@@ -51,7 +51,7 @@ class Frame final : public VNode
 public:
   Frame(VRefCnt* cnt, PaintNodePtr root);
   const std::string& guid() const;
-  PaintNode*         root() const;
+  PaintNode*         node() const;
 
   void       nodeAt(int x, int y, PaintNode::NodeVisitor visitor);
   PaintNode* nodeByID(const std::string& id);

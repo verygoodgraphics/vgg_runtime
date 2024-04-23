@@ -71,9 +71,23 @@ SceneNode::~SceneNode()
   }
 }
 
-void SceneNode::setFrames(std::vector<layer::FramePtr> roots)
+void SceneNode::addFrame(FramePtr frame)
 {
-  d_ptr->frames = std::move(roots);
+  if (frame)
+  {
+    d_ptr->frames.push_back(std::move(frame));
+    observe(d_ptr->frames.back());
+    invalidate();
+  }
+}
+
+void SceneNode::setFrames(const std::vector<layer::FramePtr>& frames)
+{
+  if (d_ptr->frames == frames)
+  {
+    return;
+  }
+  d_ptr->frames = frames;
   for (auto& frame : d_ptr->frames)
   {
     observe(frame);
@@ -81,14 +95,25 @@ void SceneNode::setFrames(std::vector<layer::FramePtr> roots)
   invalidate();
 }
 
+const std::vector<FramePtr>& SceneNode::getFrames() const
+{
+  return d_ptr->frames;
+}
+
 void SceneNode::insertFrame(int index, FramePtr frame)
 {
+  if (!frame)
+    return;
   if (index < 0 || index > (int)d_ptr->frames.size())
   {
     return;
   }
-  d_ptr->frames.insert(d_ptr->frames.begin() + index, frame);
-  invalidate();
+  if (auto it = d_ptr->frames.insert(d_ptr->frames.begin() + index, frame);
+      it != d_ptr->frames.end())
+  {
+    observe(*it);
+    invalidate();
+  }
 }
 
 void SceneNode::eraseFrame(int index)
@@ -97,13 +122,11 @@ void SceneNode::eraseFrame(int index)
   {
     return;
   }
-  d_ptr->frames.erase(d_ptr->frames.begin() + index);
-  invalidate();
-}
-
-layer::Frame* SceneNode::frame(int index)
-{
-  return d_ptr->frames[index].get();
+  if (auto it = d_ptr->frames.erase(d_ptr->frames.begin() + index); it != d_ptr->frames.end())
+  {
+    unobserve(*it);
+    invalidate();
+  }
 }
 
 void SceneNode::render(Renderer* renderer)
@@ -124,12 +147,23 @@ void SceneNode::nodeAt(int x, int y, layer::PaintNode::NodeVisitor visitor)
   }
 }
 
+PaintNode* SceneNode::nodeByID(const std::string& id)
+{
+  for (auto& root : d_ptr->frames)
+  {
+    if (auto node = root->nodeByID(id); node)
+      return node;
+  }
+  return nullptr;
+}
+
 Bounds SceneNode::effectBounds() const
 {
   Bounds bounds;
   for (auto& frame : d_ptr->frames)
   {
-    bounds.unionWith(frame->bounds()); // FIXME:: frame has no effectBounds yet
+    const auto b = frame->revalidate().bounds(frame->transform());
+    bounds.unionWith(b); // FIXME:: frame has no effectBounds yet
   }
   return bounds;
 }

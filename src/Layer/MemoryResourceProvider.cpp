@@ -13,20 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
-#include <string_view>
 
-template<typename T>
-class sk_sp;
-class SkData;
+#include "Layer/Core/MemoryResourceProvider.hpp"
+#include <core/SkData.h>
+#include "Layer/LayerCache.h"
 
 namespace VGG::layer
 {
-using Blob = sk_sp<SkData>;
-class ResourceProvider
+
+MemoryResourceProvider::MemoryResourceProvider(
+  std::unordered_map<std::string, std::vector<char>> data)
+  : m_data(std::move(data))
 {
-public:
-  virtual Blob readData(std::string_view guid) = 0;
-  ~ResourceProvider() = default;
-};
+  getGlobalImageCache()->purge();
+}
+
+void MemoryResourceProvider::purge()
+{
+  m_data.clear();
+  getGlobalImageCache()->purge();
+}
+
+Blob MemoryResourceProvider::readData(std::string_view guid)
+{
+  if (auto it = m_data.find(guid.data()); it != m_data.end())
+  {
+    return SkData::MakeWithoutCopy(it->second.data(), it->second.size());
+  }
+  return nullptr;
+}
 } // namespace VGG::layer

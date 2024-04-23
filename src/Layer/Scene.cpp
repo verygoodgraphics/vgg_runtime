@@ -16,7 +16,7 @@
 
 #include "Layer/Core/RasterCache.hpp"
 #include "Layer/Core/ResourceManager.hpp"
-#include "Layer/Core/DefaultResourceProvider.hpp"
+#include "Layer/Core/MemoryResourceProvider.hpp"
 #include "Layer/Core/VUtils.hpp"
 #include "Layer/LayerCache.h"
 #include "Renderer.hpp"
@@ -48,8 +48,6 @@
 
 namespace VGG
 {
-
-ResourceRepo Scene::s_resRepo{};
 
 class Scene__pImpl : public layer::VNode
 {
@@ -385,8 +383,8 @@ void Scene::setResRepo(std::map<std::string, std::vector<char>> repo)
   std::unordered_map<std::string, std::vector<char>> data(
     std::make_move_iterator(repo.begin()),
     std::make_move_iterator(repo.end()));
-  layer::setGlobalResourceProvider(std::make_unique<layer::MapResourceProvider>(std::move(data)));
-  layer::getGlobalImageCache()->purge();
+  layer::setGlobalResourceProvider(
+    std::make_unique<layer::MemoryResourceProvider>(std::move(data)));
 }
 
 void Scene::enableDrawDebugBounds(bool enabled)

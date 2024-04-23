@@ -42,7 +42,6 @@ class ImageIterator
     Exporter&           exporter,
     nlohmann::json      design,
     nlohmann::json      layout,
-    Resource            resource,
     const ImageOption&  imageOpt,
     const ExportOption& exporterOpt,
     BuilderResult&      result);
@@ -69,29 +68,23 @@ public:
   Exporter();
   void info(ExporterInfo* info);
 
-  ImageIterator render(
-    nlohmann::json                           design,
-    nlohmann::json                           layout,
-    std::map<std::string, std::vector<char>> resources,
-    const ImageOption&                       opt)
+  ImageIterator render(nlohmann::json design, nlohmann::json layout, const ImageOption& opt)
   {
     BuilderResult result;
     return ImageIterator{
-      *this, std::move(design), std::move(layout), std::move(resources), opt, ExportOption(), result
+      *this, std::move(design), std::move(layout), opt, ExportOption(), result
     };
   }
 
   ImageIterator render(
-    nlohmann::json                           design,
-    nlohmann::json                           layout,
-    std::map<std::string, std::vector<char>> resources,
-    const ImageOption&                       imageOpt,
-    const ExportOption&                      exporterOpt,
-    BuilderResult&                           result)
+    nlohmann::json      design,
+    nlohmann::json      layout,
+    const ImageOption&  imageOpt,
+    const ExportOption& exporterOpt,
+    BuilderResult&      result)
   {
     return ImageIterator{
-      *this, std::move(design), std::move(layout), std::move(resources), imageOpt, exporterOpt,
-      result
+      *this, std::move(design), std::move(layout), imageOpt, exporterOpt, result
     };
   }
 

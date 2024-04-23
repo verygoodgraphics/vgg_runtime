@@ -39,7 +39,6 @@ class VLayer;
 class Rasterizer;
 } // namespace layer
 
-using ResourceRepo = std::map<std::string, std::vector<char>>;
 class Scene__pImpl;
 class VGG_EXPORTS [[deprecated("Using SceneNode instead")]] Scene : public layer::Renderable
 {
@@ -72,11 +71,6 @@ public:
   void enableDrawDebugBounds(bool enabled);
   bool isEnableDrawDebugBounds();
 
-  static ResourceRepo& getResRepo()
-  {
-    return s_resRepo;
-  }
-
   void onViewportChange(const Bounds& bounds);
 
   [[deprecated("Use setGlobalResourceProvider")]] static void setResRepo(
@@ -94,7 +88,6 @@ private:
   void invalidateMask();
   void invalidate();
 
-  static ResourceRepo s_resRepo;
   friend class ::Zoomer;
   VGG_DECL_IMPL_REF(Scene)
   std::string m_name{ "Default Scene" };

@@ -235,7 +235,7 @@ vec4 main(vec4 inColor){
 
 sk_sp<SkShader> makeFitPattern(const Bounds& bounds, const PatternFit& p)
 {
-  auto img = loadImage(p.guid, Scene::getResRepo());
+  auto img = loadImage(p.guid);
   if (!img)
     return nullptr;
   SkImageInfo mi = img->imageInfo();
@@ -270,7 +270,7 @@ sk_sp<SkShader> makeFitPattern(const Bounds& bounds, const PatternFit& p)
 
 sk_sp<SkShader> makeFillPattern(const Bounds& bounds, const PatternFill& p)
 {
-  auto img = loadImage(p.guid, Scene::getResRepo());
+  auto img = loadImage(p.guid);
 
   if (!img)
     return nullptr;
@@ -306,7 +306,7 @@ sk_sp<SkShader> makeFillPattern(const Bounds& bounds, const PatternFill& p)
 
 sk_sp<SkShader> makeStretchPattern(const Bounds& bounds, const PatternStretch& p)
 {
-  auto img = loadImage(p.guid, Scene::getResRepo());
+  auto img = loadImage(p.guid);
   if (!img)
     return nullptr;
   SkImageInfo mi = img->imageInfo();
@@ -427,7 +427,7 @@ sk_sp<SkImageFilter> makeBackgroundBlurFilter(const GaussianBlur& blur)
 
 sk_sp<SkShader> makeTilePattern(const Bounds& bounds, const PatternTile& p)
 {
-  auto img = loadImage(p.guid, Scene::getResRepo());
+  auto img = loadImage(p.guid);
 
   if (!img)
     return nullptr;

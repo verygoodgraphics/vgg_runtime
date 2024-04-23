@@ -1,4 +1,5 @@
 #pragma once
+#include "Layer/Core/DefaultResourceProvider.hpp"
 #include "Utility/ConfigManager.hpp"
 #include "reader.hpp"
 
@@ -31,7 +32,7 @@ protected:
     {
       data.format = readJson(getReadFile());
       data.layout = readJson(layoutFileName());
-      data.resource = readRes(getResource());
+      data.provider = readRes(getResource());
     }
     return data;
   }
@@ -75,34 +76,35 @@ protected:
     return outputDir / image;
   }
 
-  std::map<std::string, std::vector<char>> readRes(const fs::path& fullpath)
+  std::unique_ptr<layer::ResourceProvider> readRes(const fs::path& fullpath)
   {
-    std::map<std::string, std::vector<char>> resources;
     if (std::filesystem::exists(fullpath) == false)
-      return resources;
-    const fs::path prefix = this->m_config.value("outputImageDir", "resources");
-    for (const auto& entry : std::filesystem::recursive_directory_iterator(fullpath))
-    {
-      std::string key = (prefix / entry.path().filename()).string();
-      std::cout << "read image: " << entry.path() << " which key is: " << key << std::endl;
-      auto data = readBinary(entry.path());
-      if (data.has_value())
-      {
-        if (data.value().empty())
-        {
-          std::cout << "Image is empty: " << key << std::endl;
-        }
-        else
-        {
-          resources[key] = data.value();
-        }
-      }
-      else
-      {
-        std::cout << "Failed to read image: " << key << std::endl;
-      }
-    }
-    return resources;
+      return nullptr;
+    // const fs::path prefix = this->m_config.value("outputImageDir", "resources");
+    const auto prefix = fs::path(m_config.value("outputDir", ""));
+    return std::make_unique<layer::FileResourceProvider>(prefix);
+    // for (const auto& entry : std::filesystem::recursive_directory_iterator(fullpath))
+    // {
+    //   std::string key = (prefix / entry.path().filename()).string();
+    //   std::cout << "read image: " << entry.path() << " which key is: " << key << std::endl;
+    //   auto data = readBinary(entry.path());
+    //   if (data.has_value())
+    //   {
+    //     if (data.value().empty())
+    //     {
+    //       std::cout << "Image is empty: " << key << std::endl;
+    //     }
+    //     else
+    //     {
+    //       resources[key] = data.value();
+    //     }
+    //   }
+    //   else
+    //   {
+    //     std::cout << "Failed to read image: " << key << std::endl;
+    //   }
+    // }
+    // return resources;
   }
   nlohmann::json readJson(const fs::path& fullpath) const
   {
@@ -136,7 +138,7 @@ public:
     data.format = readJson(fullpath);
     const fs::path prefix = this->m_config.value("outputImageDir", "resources");
     auto           stem = fullpath.parent_path() / prefix;
-    data.resource = readRes(stem);
+    data.provider = readRes(stem);
     return data;
   }
 };

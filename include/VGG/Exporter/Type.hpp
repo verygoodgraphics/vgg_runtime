@@ -21,7 +21,6 @@
 #include <optional>
 #include <variant>
 using OutputCallback = std::function<bool(const std::string&, const std::vector<char>&)>;
-using Resource = std::map<std::string, std::vector<char>>;
 
 namespace VGG::exporter
 {

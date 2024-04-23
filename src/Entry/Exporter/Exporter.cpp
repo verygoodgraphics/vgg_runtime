@@ -15,7 +15,10 @@
  */
 #include "ContextVk.hpp"
 #include "Domain/Layout/Rule.hpp"
+#include "Layer/Core/DefaultResourceProvider.hpp"
+#include "Layer/Core/ResourceManager.hpp"
 #include "Layer/Core/VUtils.hpp"
+#include "Layer/LayerCache.h"
 #include "Layer/Memory/AllocatorImpl.hpp"
 #include "Domain/Layout/ExpandSymbol.hpp"
 #include "Layer/DocBuilder.hpp"
@@ -226,7 +229,6 @@ public:
   void initInternal(
     nlohmann::json      json,
     nlohmann::json      layout,
-    Resource            resource,
     const ExportOption& exportOpt,
     BuilderResult&      result)
   {
@@ -266,24 +268,22 @@ public:
       scene->setSceneRoots(std::move(*sceneBuilderResult.root));
     }
     result.timeCost = cost;
-    scene->setResRepo(std::move(resource));
     totalFrames = scene->frameCount();
     index = 0;
   }
 
-  IteratorImplBase(nlohmann::json json, nlohmann::json layout, Resource resource)
+  IteratorImplBase(nlohmann::json json, nlohmann::json layout)
   {
     BuilderResult result;
-    initInternal(std::move(json), std::move(layout), std::move(resource), ExportOption(), result);
+    initInternal(std::move(json), std::move(layout), ExportOption(), result);
   }
   IteratorImplBase(
     nlohmann::json      json,
     nlohmann::json      layout,
-    Resource            resource,
     const ExportOption& exportOpt,
     BuilderResult&      result)
   {
-    initInternal(std::move(json), std::move(layout), std::move(resource), exportOpt, result);
+    initInternal(std::move(json), std::move(layout), exportOpt, result);
   }
   ~IteratorImplBase() = default;
   bool tryNext()
@@ -323,11 +323,10 @@ public:
     Exporter&               exporter,
     nlohmann::json          json,
     nlohmann::json          layout,
-    Resource                resource,
     ImageOption::SizePolicy size,
     const ExportOption&     opt,
     BuilderResult&          result)
-    : IteratorImplBase(std::move(json), std::move(layout), std::move(resource), opt, result)
+    : IteratorImplBase(std::move(json), std::move(layout), opt, result)
     , exporter(exporter)
     , size(size)
   {
@@ -444,7 +443,6 @@ ImageIterator::ImageIterator(
   Exporter&           exporter,
   nlohmann::json      design,
   nlohmann::json      layout,
-  Resource            resource,
   const ImageOption&  opt,
   const ExportOption& exportOpt,
   BuilderResult&      result)
@@ -452,7 +450,6 @@ ImageIterator::ImageIterator(
       exporter,
       std::move(design),
       std::move(layout),
-      std::move(resource),
       opt.size,
       exportOpt,
       result))
@@ -462,24 +459,17 @@ ImageIterator::ImageIterator(
 
 ImageIterator::~ImageIterator() = default;
 
-SVGIterator::SVGIterator(nlohmann::json design, nlohmann::json layout, Resource resource)
-  : d_impl(
-      std::make_unique<IteratorImplBase>(std::move(design), std::move(layout), std::move(resource)))
+SVGIterator::SVGIterator(nlohmann::json design, nlohmann::json layout)
+  : d_impl(std::make_unique<IteratorImplBase>(std::move(design), std::move(layout)))
 {
 }
 
 SVGIterator::SVGIterator(
   nlohmann::json      design,
   nlohmann::json      layout,
-  Resource            resource,
   const ExportOption& opt,
   BuilderResult&      result)
-  : d_impl(std::make_unique<IteratorImplBase>(
-      std::move(design),
-      std::move(layout),
-      std::move(resource),
-      opt,
-      result))
+  : d_impl(std::make_unique<IteratorImplBase>(std::move(design), std::move(layout), opt, result))
 {
 }
 
@@ -528,24 +518,17 @@ IteratorResult SVGIterator::next()
 }
 SVGIterator::~SVGIterator() = default;
 
-PDFIterator::PDFIterator(nlohmann::json design, nlohmann::json layout, Resource resource)
-  : d_impl(
-      std::make_unique<IteratorImplBase>(std::move(design), std::move(layout), std::move(resource)))
+PDFIterator::PDFIterator(nlohmann::json design, nlohmann::json layout)
+  : d_impl(std::make_unique<IteratorImplBase>(std::move(design), std::move(layout)))
 {
 }
 
 PDFIterator::PDFIterator(
   nlohmann::json      design,
   nlohmann::json      layout,
-  Resource            resource,
   const ExportOption& opt,
   BuilderResult&      result)
-  : d_impl(std::make_unique<IteratorImplBase>(
-      std::move(design),
-      std::move(layout),
-      std::move(resource),
-      opt,
-      result))
+  : d_impl(std::make_unique<IteratorImplBase>(std::move(design), std::move(layout), opt, result))
 {
 }
 

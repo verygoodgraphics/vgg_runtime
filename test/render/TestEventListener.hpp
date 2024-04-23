@@ -91,9 +91,8 @@ protected:
     // m_scene = std::make_shared<AppScene>();
     m_scene->setZoomerListener(std::make_shared<AppZoomer>());
 
-    std::map<std::string, std::vector<char>> resources;
-    std::filesystem::path                    prefix;
-    std::filesystem::path                    respath;
+    std::filesystem::path prefix;
+    std::filesystem::path respath;
 
     if (auto p = program.present("-p"))
     {
@@ -117,7 +116,7 @@ protected:
       {
         auto data = r->read(prefix / fp);
 
-        VGG::layer::setGlobalResourceProvider(std::make_unique<layer::FileResourceProvider>("tmp"));
+        VGG::layer::setGlobalResourceProvider(std::move(data.provider));
         try
         {
           auto res = VGG::entry::DocBuilder::builder()

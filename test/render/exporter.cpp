@@ -1,3 +1,5 @@
+#include "Layer/Core/ResourceManager.hpp"
+#include "Layer/Core/DefaultResourceProvider.hpp"
 #include "Layer/VGGLayer.hpp"
 #include "loader.hpp"
 #include "Utility/ConfigManager.hpp"
@@ -39,18 +41,12 @@ void writeDoc(
   const std::string&            outputFilePostfix,
   nlohmann::json                design,
   nlohmann::json                layout,
-  Resource                      res,
   const exporter::ExportOption& opts)
 {
   exporter::BuilderResult buildResult;
   if (extension == ".pdf")
   {
-    auto iter = exporter::PDFIterator(
-      std::move(design),
-      std::move(layout),
-      std::move(res),
-      opts,
-      buildResult);
+    auto iter = exporter::PDFIterator(std::move(design), std::move(layout), opts, buildResult);
     if (buildResult.type)
     {
       DEBUG("Version mismatch: ");
@@ -64,12 +60,7 @@ void writeDoc(
   }
   else
   {
-    auto iter = exporter::SVGIterator(
-      std::move(design),
-      std::move(layout),
-      std::move(res),
-      opts,
-      buildResult);
+    auto iter = exporter::SVGIterator(std::move(design), std::move(layout), opts, buildResult);
     INFO("Expand Time Cost: [%f]", buildResult.timeCost->expand);
     INFO("Layout Time Cost: [%f]", buildResult.timeCost->layout);
     write(
@@ -226,7 +217,8 @@ int main(int argc, char** argv)
     auto r = load(ext);
     if (r)
     {
-      auto           data = r->read(desc.prefix.value_or(fs::path(".")) / desc.filepath);
+      auto data = r->read(desc.prefix.value_or(fs::path(".")) / desc.filepath);
+      layer::setGlobalResourceProvider(std::move(data.provider));
       const fs::path prefix = outputDir;
       fs::create_directory(prefix);
       const auto folder = fs::path(fp).filename().stem();
@@ -235,8 +227,7 @@ int main(int argc, char** argv)
         for (auto i = 0; i < program.get<int>("-r"); i++)
         {
           exporter::BuilderResult res;
-          auto                    iter =
-            exporter.render(data.format, data.layout, data.resource, opts, exportOpt, res);
+          auto iter = exporter.render(data.format, data.layout, opts, exportOpt, res);
           if (res.type)
           {
             DEBUG("Version mismatch");
@@ -252,14 +243,7 @@ int main(int argc, char** argv)
       }
       else
       {
-        writeDoc(
-          extension,
-          prefix,
-          outputFilePostfix,
-          data.format,
-          nlohmann::json{},
-          data.resource,
-          exportOpt);
+        writeDoc(extension, prefix, outputFilePostfix, data.format, nlohmann::json{}, exportOpt);
       }
     }
   }
@@ -276,14 +260,14 @@ int main(int argc, char** argv)
           auto r = load(desc.filepath.extension().string());
           if (r)
           {
-            auto           data = r->read(desc.prefix.value_or(fs::path(".")) / desc.filepath);
+            auto data = r->read(desc.prefix.value_or(fs::path(".")) / desc.filepath);
+            layer::setGlobalResourceProvider(std::move(data.provider));
             const fs::path prefix = outputDir;
             fs::create_directory(prefix);
             if (isBitmap)
             {
               exporter::BuilderResult res;
-              auto                    iter =
-                exporter.render(data.format, nlohmann::json{}, data.resource, opts, exportOpt, res);
+              auto iter = exporter.render(data.format, nlohmann::json{}, opts, exportOpt, res);
               std::cout << "Expand Time Cost: " << res.timeCost->expand << std::endl;
               std::cout << "Layout Time Cost: " << res.timeCost->layout << std::endl;
               write(
@@ -299,7 +283,6 @@ int main(int argc, char** argv)
                 outputFilePostfix,
                 data.format,
                 nlohmann::json{},
-                data.resource,
                 exportOpt);
             }
           }

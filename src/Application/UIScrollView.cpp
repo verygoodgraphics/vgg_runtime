@@ -113,15 +113,16 @@ Size UIScrollView::contentSize() const
 void UIScrollView::setContentSize(Size size)
 {
   m_contentSize = size;
+  confineContent();
 }
 
-void UIScrollView::setContentOffset(Point offset, bool byMouseWheel)
+void UIScrollView::setContentOffset(Point offset, bool cancelAnimation)
 {
   VERBOSE("UIScrollView::setContentOffset: x = %f, y = %f", offset.x, offset.y);
   m_contentOffset = offset;
   setOffset(Offset{ offset.x, offset.y });
 
-  if (byMouseWheel)
+  if (cancelAnimation)
   {
     cancelScrollAnimation();
   }

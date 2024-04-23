@@ -104,22 +104,17 @@ constexpr const char* uiEventTypeToString(EUIEventType e)
 
 class UIEvent : public Event
 {
-public:
-  using TargetIdType = std::string;
-  using TargetNameType = std::string;
-
-private:
-  const EUIEventType   m_type;
-  const TargetIdType   m_targetId;
-  const TargetNameType m_targetName;
-  const std::string    m_targetKey;
+  const EUIEventType m_type;
+  const std::string  m_targetId;   // id of the target element
+  const std::string  m_targetName; // name of the target element
+  const std::string  m_targetKey;  // key of listener: id, original id, name, or master id
 
 public:
   UIEvent(
-    EUIEventType          type,
-    const TargetIdType&   targetId,
-    const TargetNameType& targetName,
-    const std::string&    targetKey)
+    EUIEventType       type,
+    const std::string& targetId,
+    const std::string& targetName,
+    const std::string& targetKey)
     : m_type{ type }
     , m_targetId{ targetId }
     , m_targetName{ targetName }
@@ -127,11 +122,11 @@ public:
   {
   }
 
-  TargetIdType targetId()
+  std::string targetId()
   {
     return m_targetId;
   }
-  TargetNameType targetName()
+  std::string targetName()
   {
     return m_targetName;
   }
@@ -172,16 +167,16 @@ struct KeyboardEvent
   const bool shiftKey;
 
   KeyboardEvent(
-    EUIEventType          type,
-    const TargetIdType&   targetId,
-    const TargetNameType& targetName,
-    const std::string&    targetKey,
-    int                   key,
-    bool                  repeat = false,
-    bool                  altKey = false,
-    bool                  ctrlKey = false,
-    bool                  metaKey = false,
-    bool                  shiftKey = false)
+    EUIEventType       type,
+    const std::string& targetId,
+    const std::string& targetName,
+    const std::string& targetKey,
+    int                key,
+    bool               repeat = false,
+    bool               altKey = false,
+    bool               ctrlKey = false,
+    bool               metaKey = false,
+    bool               shiftKey = false)
     : UIEvent{ type, targetId, targetName, targetKey }
     , key{ key }
     , repeat{ repeat }
@@ -217,19 +212,19 @@ struct MouseEvent
   const bool shiftKey;
 
   MouseEvent(
-    EUIEventType          type,
-    const TargetIdType&   targetId,
-    const TargetNameType& targetName,
-    const std::string&    targetKey,
-    int                   button = 0,
-    int                   x = 0,
-    int                   y = 0,
-    int                   movementX = 0,
-    int                   movementY = 0,
-    bool                  altKey = false,
-    bool                  ctrlKey = false,
-    bool                  metaKey = false,
-    bool                  shiftKey = false)
+    EUIEventType       type,
+    const std::string& targetId,
+    const std::string& targetName,
+    const std::string& targetKey,
+    int                button = 0,
+    int                x = 0,
+    int                y = 0,
+    int                movementX = 0,
+    int                movementY = 0,
+    bool               altKey = false,
+    bool               ctrlKey = false,
+    bool               metaKey = false,
+    bool               shiftKey = false)
     : UIEvent{ type, targetId, targetName, targetKey }
     , button{ button }
     , x{ x }
@@ -255,10 +250,10 @@ struct TouchEvent
   , std::enable_shared_from_this<TouchEvent>
 {
   TouchEvent(
-    EUIEventType          type,
-    const TargetIdType&   targetId,
-    const TargetNameType& targetName,
-    const std::string     targetKey)
+    EUIEventType       type,
+    const std::string& targetId,
+    const std::string& targetName,
+    const std::string  targetKey)
     : UIEvent{ type, targetId, targetName, targetKey }
   {
     assert(type >= EUIEventType::TOUCHCANCEL && type <= EUIEventType::TOUCHSTART);

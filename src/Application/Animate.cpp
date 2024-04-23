@@ -122,14 +122,11 @@ void AnimateManage::deleteFinishedAnimate()
     m_animates.end(),
     [](auto animate) { return animate->isFinished(); });
 
-  auto itCopy = it;
-  for (; it != m_animates.end(); ++it)
+  if (it != m_animates.end())
   {
     DEBUG("animate stopped");
-    (*it)->stop();
+    m_animates.erase(it, m_animates.end());
   }
-
-  m_animates.erase(itCopy, m_animates.end());
 }
 
 NumberAnimate::NumberAnimate(

@@ -81,9 +81,17 @@ public:
   {
     if (m_transform)
       m_transform->revalidate();
+    Bounds bounds;
     if (m_child)
-      return m_child->revalidate();
-    return Bounds();
+    {
+      bounds = m_child->revalidate();
+      if (m_transform)
+      {
+        m_transform->revalidate();
+        bounds = bounds.bounds(Transform(m_transform->getMatrix()));
+      }
+    }
+    return bounds;
   }
 
   VGG_CLASS_MAKE(TransformEffectNode);

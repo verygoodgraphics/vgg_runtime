@@ -90,7 +90,14 @@ void VggSdk::updateElement(const std::string& id, const std::string& contentJson
 
 std::string VggSdk::getFramesInfo() const
 {
-  return getModel()->getFramesInfo();
+  if (auto currentEnv = env())
+  {
+    if (auto controller = currentEnv->controller())
+    {
+      return controller->getFramesInfo();
+    }
+  }
+  return {};
 }
 
 std::string VggSdk::currentFrameId() const

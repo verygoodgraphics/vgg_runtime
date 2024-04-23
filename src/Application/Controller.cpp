@@ -21,18 +21,19 @@
 #include "RunLoop.hpp"
 
 #include "Domain/Daruma.hpp"
+#include "Domain/Model/JsonKeys.hpp"
 #include "Domain/RawJsonDocument.hpp"
 #include "Domain/SchemaValidJsonDocument.hpp"
 #include "Domain/UndoRedoJsonDocument.hpp"
 #include "Domain/VggExec.hpp"
-#include "Utility/Log.hpp"
-#include "Utility/VggFloat.hpp"
-#include "Utility/VggString.hpp"
 #include "UseCase/EditModel.hpp"
 #include "UseCase/InstanceState.hpp"
 #include "UseCase/ModelChanged.hpp"
 #include "UseCase/ResizeWindow.hpp"
 #include "UseCase/StartRunning.hpp"
+#include "Utility/Log.hpp"
+#include "Utility/VggFloat.hpp"
+#include "Utility/VggString.hpp"
 
 #include "VGGVersion_generated.h"
 
@@ -856,4 +857,27 @@ VGG::Layout::Size Controller::currentPageSize()
 void Controller::openUrl(const std::string& url, const std::string& target)
 {
   vggExec()->openUrl(url, target);
+}
+
+const std::string Controller::getFramesInfo() const
+{
+  ASSERT(m_layout);
+
+  const auto& pages = m_layout->layoutTree()->children();
+
+  nlohmann::json info(nlohmann::json::value_t::array);
+  for (std::size_t i = 0; i < pages.size(); ++i)
+  {
+    const auto& page = pages[i];
+
+    nlohmann ::json frameInfo(nlohmann::json::value_t::object);
+    frameInfo[K_ID] = page->id();
+    frameInfo[K_NAME] = page->name();
+    const auto& size = m_layout->pageSize(i);
+    frameInfo[K_WIDTH] = size.width;
+    frameInfo[K_HEIGHT] = size.height;
+    info.push_back(frameInfo);
+  }
+
+  return info.dump();
 }

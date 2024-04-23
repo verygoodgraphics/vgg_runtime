@@ -131,6 +131,8 @@ public:
   bool handleTouchEvent(const VTouchEvent& evt);
 
 public:
+  const std::string getFramesInfo() const;
+
   std::string currentFrameId() const;
   bool        setCurrentFrameById(const std::string& id);
   bool        presentFrameById(const std::string& id);

@@ -16,6 +16,7 @@
 #pragma once
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/Transform.hpp"
+#include "Layer/Core/TransformNode.hpp"
 #include "Layer/Core/VBounds.hpp"
 #include "Utility/HelperMacro.hpp"
 

@@ -46,7 +46,7 @@ class Pager
   layer::SceneNode* m_sceneNode;
   int               m_currentPage = -1;
 
-  void setPage(int delta)
+  void setPageOffset(int delta)
   {
     if (m_sceneNode && !m_sceneNode->getFrames().empty())
     {
@@ -91,14 +91,19 @@ public:
     return frames[m_currentPage]->bounds();
   }
 
+  void setPage(int index)
+  {
+    setPageOffset(index - m_currentPage);
+  }
+
   void nextFrame()
   {
-    setPage(1);
+    setPageOffset(1);
   }
 
   void prevFrame()
   {
-    setPage(-1);
+    setPageOffset(-1);
   }
 };
 
@@ -240,7 +245,7 @@ protected:
             m_sceneNode = layer::SceneNode::Make(std::move(*sceneBuilderResult.root));
             auto zoomNode = layer::ZoomerNode::Make();
             m_zoomController = std::make_unique<ZoomNodeController>(zoomNode);
-            m_layer->addRenderNode(std::move(zoomNode), m_sceneNode);
+            m_layer->setRenderNode(std::move(zoomNode), m_sceneNode);
             m_pager = std::make_unique<Pager>(m_sceneNode.get());
           }
           m_layer->setDrawPositionEnabled(true);

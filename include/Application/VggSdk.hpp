@@ -32,6 +32,7 @@ namespace VGG
 {
 class Daruma;
 class VggEnv;
+class Controller;
 
 constexpr int main_or_editor_daruma_index = 0;
 constexpr int edited_daruma_index = 1;
@@ -146,7 +147,8 @@ private:
     IndexType index = main_or_editor_daruma_index) const;
   std::shared_ptr<VGG::Daruma> getModel(IndexType index = main_or_editor_daruma_index) const;
 
-  std::shared_ptr<VGG::VggEnv> env() const;
+  std::shared_ptr<VGG::VggEnv>     env() const;
+  std::shared_ptr<VGG::Controller> controller();
 };
 
 } // namespace VGG

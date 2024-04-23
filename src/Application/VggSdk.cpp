@@ -115,12 +115,9 @@ std::string VggSdk::currentFrameId() const
 
 bool VggSdk::setCurrentFrameById(const std::string& id, bool resetScrollPosition)
 {
-  if (auto currentEnv = env())
+  if (auto c = controller())
   {
-    if (auto controller = currentEnv->controller())
-    {
-      return controller->setCurrentFrameById(id);
-    }
+    return c->setCurrentFrameById(id);
   }
   return false;
 }
@@ -176,12 +173,9 @@ bool VggSdk::dismissFrame()
 
 bool VggSdk::goBack(bool resetScrollPosition, bool resetState)
 {
-  if (auto currentEnv = env())
+  if (auto c = controller())
   {
-    if (auto presenter = currentEnv->presenter())
-    {
-      return presenter->goBack(resetScrollPosition, resetState);
-    }
+    return c->goBack(resetScrollPosition, resetState);
   }
 
   return false;
@@ -189,12 +183,9 @@ bool VggSdk::goBack(bool resetScrollPosition, bool resetState)
 
 bool VggSdk::nextFrame()
 {
-  if (auto currentEnv = env())
+  if (auto c = controller())
   {
-    if (auto presenter = currentEnv->presenter())
-    {
-      return presenter->setCurrentPage(presenter->currentPageIndex() + 1);
-    }
+    return c->nextFrame();
   }
 
   return false;
@@ -202,12 +193,9 @@ bool VggSdk::nextFrame()
 
 bool VggSdk::previousFrame()
 {
-  if (auto currentEnv = env())
+  if (auto c = controller())
   {
-    if (auto presenter = currentEnv->presenter())
-    {
-      return presenter->setCurrentPage(presenter->currentPageIndex() - 1);
-    }
+    return c->previouseFrame();
   }
 
   return false;
@@ -484,4 +472,14 @@ void VggSdk::openUrl(const std::string& url, const std::string& target)
       controller->openUrl(url, target);
     }
   }
+}
+
+std::shared_ptr<VGG::Controller> VggSdk::controller()
+{
+  if (const auto& currentEnv = env())
+  {
+    return currentEnv->controller();
+  }
+
+  return {};
 }

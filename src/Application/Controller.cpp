@@ -624,9 +624,9 @@ bool Controller::hasDirtyEditor()
 
 void Controller::fitPageForEditing()
 {
-  auto pageSize = m_layout->pageSize(m_presenter->currentPageIndex());
-  m_layout->layout(pageSize);
-  m_presenter->fitForEditing(pageSize);
+  const auto& originalPageSize = m_layout->originalPageSize(m_presenter->currentPageIndex());
+  m_layout->layout(originalPageSize, m_presenter->currentPageIndex());
+  m_presenter->fitForEditing(originalPageSize);
   m_presenter->update();
 }
 
@@ -675,26 +675,29 @@ void Controller::scaleContent(Layout::Size size)
 
 void Controller::aspectFill(Layout::Size size)
 {
-  auto pageSize = m_layout->pageSize(m_presenter->currentPageIndex());
-  auto scaleFactor = size.width / pageSize.width;
+  const auto& originalPageSize = m_layout->originalPageSize(m_presenter->currentPageIndex());
+  const auto  scaleFactor = size.width / originalPageSize.width;
 
   Layout::Size targetSize;
   if (scaleFactor < 1.)
   {
-    targetSize = { pageSize.width * scaleFactor,
-                   pageSize.height }; // make sure to see all the contents
+    targetSize = { originalPageSize.width * scaleFactor,
+                   originalPageSize.height }; // make sure to see all the contents
   }
   else
   {
     targetSize = {
-      pageSize.width * scaleFactor,
+      originalPageSize.width * scaleFactor,
       std::min(
-        pageSize.height + size.height / 3.,
-        pageSize.height * scaleFactor) // set max height limit
+        originalPageSize.height + size.height / 3.,
+        originalPageSize.height * scaleFactor) // set max height limit
     };
   }
 
-  m_layout->layout(targetSize, m_isFitToViewportEnabled); // true means updating layout size rules
+  m_layout->layout(
+    targetSize,
+    m_presenter->currentPageIndex(),
+    m_isFitToViewportEnabled); // true means updating layout size rules
   m_presenter->setContentSize(currentPageSize());
 }
 
@@ -743,7 +746,7 @@ bool Controller::setCurrentFrameById(const std::string& id)
   const auto success = m_presenter->setCurrentPage(index);
   if (success)
   {
-    m_presenter->triggerMouseEnter();
+    pageDidChange();
   }
   return success;
 }
@@ -873,11 +876,48 @@ const std::string Controller::getFramesInfo() const
     nlohmann ::json frameInfo(nlohmann::json::value_t::object);
     frameInfo[K_ID] = page->id();
     frameInfo[K_NAME] = page->name();
-    const auto& size = m_layout->pageSize(i);
+    const auto& size = m_layout->originalPageSize(i);
     frameInfo[K_WIDTH] = size.width;
     frameInfo[K_HEIGHT] = size.height;
     info.push_back(frameInfo);
   }
 
   return info.dump();
+}
+
+bool Controller::nextFrame()
+{
+  if (m_presenter->setCurrentPage(m_presenter->currentPageIndex() + 1))
+  {
+    pageDidChange();
+    return true;
+  }
+  return false;
+}
+
+bool Controller::previouseFrame()
+{
+  if (m_presenter->setCurrentPage(m_presenter->currentPageIndex() - 1))
+  {
+    pageDidChange();
+    return true;
+  }
+  return false;
+}
+
+bool Controller::goBack(bool resetScrollPosition, bool resetState)
+{
+  if (m_presenter->goBack(resetScrollPosition, resetState))
+  {
+    pageDidChange();
+    return true;
+  }
+  return false;
+}
+
+void Controller::pageDidChange()
+{
+  scaleContent(m_presenter->viewSize());
+  m_presenter->update(); // todo, update only when needed
+  m_presenter->triggerMouseEnter();
 }

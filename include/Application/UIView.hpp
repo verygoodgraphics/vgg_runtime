@@ -171,9 +171,7 @@ public:
     m_skipUntilNextLoop = false;
   }
 
-  void nextArtboard();
-  void preArtboard();
-  int  currentPageIndex()
+  int currentPageIndex()
   {
     return m_page;
   }

@@ -135,9 +135,14 @@ public:
 
   std::string currentFrameId() const;
   bool        setCurrentFrameById(const std::string& id);
-  bool        presentFrameById(const std::string& id);
-  bool        dismissFrame();
-  bool        setCurrentTheme(const std::string& theme);
+
+  bool nextFrame();
+  bool previouseFrame();
+  bool goBack(bool resetScrollPosition, bool resetState);
+
+  bool presentFrameById(const std::string& id);
+  bool dismissFrame();
+  bool setCurrentTheme(const std::string& theme);
 
   bool setState(
     const std::string& instanceDescendantId,
@@ -174,6 +179,8 @@ private:
   MakeJsonDocFn              createMakeJsonDocFn(const char* pJsonSchemaFilePath);
 
   VGG::Layout::Size currentPageSize();
+
+  void pageDidChange();
 };
 
 } // namespace VGG

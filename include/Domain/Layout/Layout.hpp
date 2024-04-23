@@ -52,14 +52,14 @@ private:
   std::shared_ptr<Domain::DesignDocument> m_designDocument;
   std::shared_ptr<LayoutNode>             m_layoutTree;
   RuleMapPtr                              m_rules;
-  std::vector<Size>                       m_pageSize;
+  std::vector<Size>                       m_originalPageSize;
 
 public:
   Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc);
   Layout(JsonDocumentPtr designDoc, RuleMapPtr rules);
   Layout(std::shared_ptr<Domain::DesignDocument> designDocument, RuleMapPtr rules);
 
-  void layout(Size size, bool updateRule = false);
+  void layout(Size size, int pageIndex, bool updateRule = false);
   void resizeNodeThenLayout(const std::string& nodeId, Size size, bool preservingOrigin);
   void resizeNodeThenLayout(std::shared_ptr<LayoutNode> node, Size size, bool preservingOrigin);
   void layoutNodes(const std::vector<std::string>& nodeIds, const std::string& constainerNodeId);
@@ -72,9 +72,9 @@ public:
     return m_layoutTree;
   }
 
-  auto pageSize(int index)
+  auto originalPageSize(int index)
   {
-    return m_pageSize[index];
+    return m_originalPageSize[index];
   }
 
   std::shared_ptr<Domain::DesignDocument> designDocTree();

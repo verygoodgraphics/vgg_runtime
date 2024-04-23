@@ -42,7 +42,7 @@ inline FramePtr makeFramePtr(Args&&... args)
   return FramePtr(V_NEW<Frame>(std::forward<Args>(args)...));
 };
 class Frame__pImpl;
-class Frame final : public VNode
+class Frame final : public TransformEffectNode
 {
   friend class VGG::Scene;
   friend class VGG::Scene__pImpl;
@@ -62,12 +62,12 @@ public:
   void             resetToOrigin(bool enable);
   bool             isVisible() const;
   const Transform& transform() const;
-  void             setClipBounds(const Bounds& bounds);
+
+  SkPicture* picture() const override;
 
   ~Frame();
 
 protected:
-  Bounds     onRevalidate() override;
-  SkPicture* picture();
+  Bounds onRevalidate() override;
 };
 } // namespace VGG::layer

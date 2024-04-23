@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "Layer/Core/TransformNode.hpp"
+#include "Layer/PaintRenderNode.hpp"
 #include "Layer/VSkia.hpp"
 #include "Settings.hpp"
 #include "Layer/Core/Frame.hpp"
@@ -33,14 +35,21 @@
 
 namespace VGG::layer
 {
+
+PaintNodeAdaptor* asPaintNode(RenderNode* node)
+{
+  if (node)
+    return static_cast<PaintNodeAdaptor*>(node);
+  return nullptr;
+}
+
 class Frame__pImpl
 {
   VGG_DECL_API(Frame)
 public:
-  PaintNodePtr     root;
-  sk_sp<SkPicture> cache;
   bool             enableToOrigin{ false };
   Transform        transform;
+  sk_sp<SkPicture> cache;
 
   bool maskDirty{ true };
 
@@ -55,7 +64,7 @@ public:
     SkPictureRecorder rec;
     auto              rt = SkRTreeFactory();
     auto              pictureCanvas = rec.beginRecording(bounds, &rt);
-    r.draw(pictureCanvas, root);
+    r.draw(pictureCanvas, q_ptr->node());
     if (getDebugBoundsEnable())
     {
       SkPaint paint;
@@ -70,26 +79,23 @@ public:
 
 PaintNode* Frame::node() const
 {
-  ASSERT(d_ptr->root);
-  return d_ptr->root.get();
+  ASSERT(getChild());
+  return asPaintNode(getChild())->node();
 }
 
 const Transform& Frame::transform() const
 {
-  ASSERT(d_ptr->root);
   return d_ptr->transform;
 }
 
 const std::string& Frame::guid() const
 {
-  ASSERT(d_ptr->root);
-  return d_ptr->root->guid();
+  return node()->guid();
 }
 
 bool Frame::isVisible() const
 {
-  ASSERT(d_ptr->root);
-  return d_ptr->root->isVisible();
+  return node()->isVisible();
 }
 
 void Frame::resetToOrigin(bool enable)
@@ -99,7 +105,7 @@ void Frame::resetToOrigin(bool enable)
   invalidate();
 }
 
-SkPicture* Frame::picture()
+SkPicture* Frame::picture() const
 {
   return d_ptr->cache.get();
 }
@@ -107,14 +113,17 @@ SkPicture* Frame::picture()
 Bounds Frame::onRevalidate()
 {
   VGG_IMPL(Frame);
-  ASSERT(_->root);
   if (_->maskDirty)
   {
     updateMaskMap(node());
     _->maskDirty = false;
   }
+
+  // auto b = TransformEffectNode::onRevalidate().bounds(node()->transform());
+
   auto bounds = node()->revalidate();
   auto b = bounds.bounds(node()->transform());
+
   _->cache = _->renderPicture(toSkRect(b));
   _->transform.setMatrix(glm::mat3{ 1 });
   if (_->enableToOrigin)
@@ -125,20 +134,10 @@ Bounds Frame::onRevalidate()
   return b;
 }
 
-void Frame::setClipBounds(const Bounds& bounds)
-{
-  VGG_IMPL(Frame);
-  ASSERT(_->root);
-  invalidate();
-}
-
 Frame::Frame(VRefCnt* cnt, PaintNodePtr root)
-  : VNode(cnt, INVALIDATE)
+  : TransformEffectNode(cnt, 0, PaintNodeAdaptor::Make(std::move(root)))
   , d_ptr(std::make_unique<Frame__pImpl>(this))
 {
-  ASSERT(root);
-  d_ptr->root = root;
-  observe(root);
 }
 
 void Frame::nodeAt(int x, int y, PaintNode::NodeVisitor visitor)

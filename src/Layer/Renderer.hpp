@@ -79,6 +79,7 @@ private:
   friend class Frame__pImpl;
   friend class MaskObject;
   friend class SceneNode__pImpl;
+  friend class PaintNodeAdaptor;
   void draw(SkCanvas* canvas, layer::PaintNode* root);
 };
 

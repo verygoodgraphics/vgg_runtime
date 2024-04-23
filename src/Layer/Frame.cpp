@@ -68,7 +68,7 @@ public:
   }
 };
 
-PaintNode* Frame::root() const
+PaintNode* Frame::node() const
 {
   ASSERT(d_ptr->root);
   return d_ptr->root.get();
@@ -110,11 +110,11 @@ Bounds Frame::onRevalidate()
   ASSERT(_->root);
   if (_->maskDirty)
   {
-    updateMaskMap(root());
+    updateMaskMap(node());
     _->maskDirty = false;
   }
-  auto bounds = root()->revalidate();
-  auto b = bounds.bounds(root()->transform());
+  auto bounds = node()->revalidate();
+  auto b = bounds.bounds(node()->transform());
   _->cache = _->renderPicture(toSkRect(b));
   _->transform.setMatrix(glm::mat3{ 1 });
   if (_->enableToOrigin)
@@ -143,9 +143,9 @@ Frame::Frame(VRefCnt* cnt, PaintNodePtr root)
 
 void Frame::nodeAt(int x, int y, PaintNode::NodeVisitor visitor)
 {
-  if (auto r = root(); r)
+  if (auto r = node(); r)
   {
-    ASSERT(root()->parent() == nullptr);
+    ASSERT(node()->parent() == nullptr);
     auto inv = d_ptr->transform.inverse();
     auto p = inv * glm::vec3(x, y, 1);
     r->nodeAt(p.x, p.y, visitor);
@@ -159,7 +159,7 @@ void Frame::invalidateMask()
 
 PaintNode* Frame::nodeByID(const std::string& id)
 {
-  return static_cast<PaintNode*>(root()->findChildRecursive(id).get());
+  return static_cast<PaintNode*>(node()->findChildRecursive(id).get());
 }
 
 Frame::~Frame()

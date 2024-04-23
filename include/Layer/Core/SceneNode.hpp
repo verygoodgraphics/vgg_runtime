@@ -28,14 +28,17 @@ class VGG_EXPORTS SceneNode : public RenderNode
 public:
   SceneNode(VRefCnt* cnt, std::vector<FramePtr> frames);
 
-  const std::vector<FramePtr>& frames() const;
+  const std::vector<FramePtr>& getFrames() const;
+  void                         setFrames(const std::vector<FramePtr>& frames);
 
-  void       setFrames(std::vector<FramePtr> frames);
-  void       insertFrame(int index, FramePtr frame);
-  Frame*     frame(int index);
-  void       eraseFrame(int index);
-  void       render(Renderer* canvas) override;
+  void addFrame(FramePtr frame);
+  void insertFrame(int index, FramePtr frame);
+  void eraseFrame(int index);
+  void render(Renderer* canvas) override;
+
   void       nodeAt(int x, int y, layer::PaintNode::NodeVisitor visitor);
+  PaintNode* nodeByID(const std::string& id);
+
   Bounds     effectBounds() const override;
   Bounds     onRevalidate() override;
   glm::mat3  getMatrix() const;

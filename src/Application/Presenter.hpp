@@ -157,13 +157,7 @@ public:
     }
   }
 
-  void setContentSize(Layout::Size size)
-  {
-    if (m_view)
-    {
-      m_view->setContentSize(size);
-    }
-  }
+  void setContentSize(const Layout::Size& size);
 
   void setEditView(std::shared_ptr<UIView> view)
   {

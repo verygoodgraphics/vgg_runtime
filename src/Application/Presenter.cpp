@@ -315,3 +315,11 @@ void Presenter::triggerMouseEnter()
   ASSERT(m_view);
   m_view->triggerMouseEnter();
 }
+
+void Presenter::setContentSize(const Layout::Size& size)
+{
+  if (m_view)
+  {
+    m_view->setContentSize(size);
+  }
+}

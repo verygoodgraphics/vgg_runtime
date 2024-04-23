@@ -82,7 +82,7 @@ public:
 
   Size contentSize() const;
   void setContentSize(Size size);
-  void setContentOffset(Point offset, bool byMouseWheel = false);
+  void setContentOffset(Point offset, bool cancelAnimation = false);
   auto contentOffset() const -> Point
   {
     return m_contentOffset;

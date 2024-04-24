@@ -23,7 +23,6 @@
 #include "Application/Event/EventListener.hpp"
 #include "Application/Event/Keycode.hpp"
 
-#include "Layer/Scene.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/VGGLayer.hpp"
 #include "Layer/Exporter/SVGExporter.hpp"
@@ -89,6 +88,15 @@ public:
     }
     const auto& frames = m_sceneNode->getFrames();
     return frames[m_currentPage]->bounds();
+  }
+
+  layer::Frame* currentFrame()
+  {
+    if (m_currentPage < 0 || m_currentPage >= m_sceneNode->getFrames().size())
+    {
+      return nullptr;
+    }
+    return m_sceneNode->getFrames()[m_currentPage].get();
   }
 
   void setPage(int index)
@@ -325,13 +333,13 @@ public:
       if (ofs.is_open())
       {
         using namespace VGG::layer::exporter;
-        // auto                        page = m_scene->currentPage();
-        // auto                        f = m_scene->frame(page);
-        // auto                        b = f->bounds();
-        // layer::exporter::SVGOptions opt;
-        // opt.extend[0] = b.width();
-        // opt.extend[1] = b.height();
-        // makeSVG(m_scene.get(), opt, ofs);
+        auto f = m_pager->currentFrame();
+        f->revalidate();
+        auto                        b = f->bounds();
+        layer::exporter::SVGOptions opt;
+        opt.extend[0] = b.width();
+        opt.extend[1] = b.height();
+        makeSVG(f, opt, ofs);
       }
       return true;
     }
@@ -392,11 +400,14 @@ public:
       std::ofstream ofs("capture.pdf");
       if (ofs.is_open())
       {
-        auto                        b = m_pager->getPageBounds();
+        auto f = m_pager->currentFrame();
+        f->revalidate();
+        auto b = f->bounds();
+
         layer::exporter::PDFOptions opt;
         opt.extend[0] = b.width();
         opt.extend[1] = b.height();
-        // makePDF(m_scene.get(), opt, ofs);
+        makePDF(f, opt, ofs);
       }
       return true;
     }

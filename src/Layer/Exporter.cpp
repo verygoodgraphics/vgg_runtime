@@ -17,7 +17,7 @@
 #include "Layer/Exporter/PDFExporter.hpp"
 #include "Layer/Exporter/SVGExporter.hpp"
 #include "Layer/Renderer.hpp"
-#include "Layer/Scene.hpp"
+#include "Layer/VGGLayer.hpp"
 #include "Utility/Log.hpp"
 
 #include <core/SkStream.h>

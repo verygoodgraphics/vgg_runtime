@@ -23,7 +23,6 @@
 #include "Application/Mouse.hpp"
 #include "Application/RunLoop.hpp"
 #include "Application/UIApplication.hpp"
-#include "Layer/Scene.hpp"
 #include "Utility/ConfigManager.hpp"
 
 #include <argparse/argparse.hpp>

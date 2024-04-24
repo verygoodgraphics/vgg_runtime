@@ -26,7 +26,6 @@ class PDFIterator
 {
   std::unique_ptr<IteratorImplBase> d_impl; // NOLINT
 public:
-  PDFIterator(nlohmann::json design, nlohmann::json layout);
   PDFIterator(
     nlohmann::json      design,
     nlohmann::json      layout,

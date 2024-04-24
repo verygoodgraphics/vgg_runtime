@@ -34,7 +34,7 @@
 #include <fstream>
 #include <iterator>
 
-static void renderInternal(SkCanvas* canvas, layer::Frame* frame)
+static void renderInternal(SkCanvas* canvas, layer::FrameNode* frame)
 {
   ASSERT(frame);
   ASSERT(canvas);
@@ -51,7 +51,7 @@ static void renderInternal(SkCanvas* canvas, layer::Frame* frame)
 namespace VGG::layer::exporter
 {
 
-void makePDF(layer::Frame* frame, const PDFOptions& opts, std::ostream& os)
+void makePDF(layer::FrameNode* frame, const PDFOptions& opts, std::ostream& os)
 {
   SkStdOStream skos(os);
   auto         pdfDoc = SkPDF::MakeDocument(&skos);
@@ -73,7 +73,7 @@ void makePDF(layer::Frame* frame, const PDFOptions& opts, std::ostream& os)
   }
 }
 
-std::optional<std::vector<char>> makePDF(layer::Frame* frame, const PDFOptions& opts)
+std::optional<std::vector<char>> makePDF(layer::FrameNode* frame, const PDFOptions& opts)
 {
   std::stringstream data;
   layer::exporter::makePDF(frame, opts, data);
@@ -81,7 +81,7 @@ std::optional<std::vector<char>> makePDF(layer::Frame* frame, const PDFOptions& 
   return std::vector<char>{ d.begin(), d.end() };
 }
 
-std::optional<std::vector<char>> makeSVG(layer::Frame* frame, const SVGOptions& opts)
+std::optional<std::vector<char>> makeSVG(layer::FrameNode* frame, const SVGOptions& opts)
 {
   std::stringstream data;
   makeSVG(frame, opts, data);
@@ -89,7 +89,7 @@ std::optional<std::vector<char>> makeSVG(layer::Frame* frame, const SVGOptions& 
   return std::vector<char>{ d.begin(), d.end() };
 }
 
-void makeSVG(layer::Frame* frame, const SVGOptions& opts, std::ostream& os)
+void makeSVG(layer::FrameNode* frame, const SVGOptions& opts, std::ostream& os)
 {
   auto         rect = SkRect::MakeWH(opts.extend[0], opts.extend[1]);
   SkStdOStream skos(os);

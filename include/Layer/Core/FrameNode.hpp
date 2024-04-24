@@ -31,26 +31,26 @@ class Scene;
 } // namespace VGG
 namespace VGG::layer
 {
-class Frame;
+class FrameNode;
 class Renderer;
-using FramePtr = VGG::layer::Ref<Frame>;
-using FrameRef = VGG::layer::WeakRef<Frame>;
+using FramePtr = VGG::layer::Ref<FrameNode>;
+using FrameRef = VGG::layer::WeakRef<FrameNode>;
 
 template<typename... Args>
 inline FramePtr makeFramePtr(Args&&... args)
 {
-  return FramePtr(V_NEW<Frame>(std::forward<Args>(args)...));
+  return FramePtr(V_NEW<FrameNode>(std::forward<Args>(args)...));
 };
-class Frame__pImpl;
-class Frame final : public TransformEffectNode
+class FrameNode__pImpl;
+class FrameNode final : public TransformEffectNode
 {
   friend class VGG::Scene;
   friend class VGG::Scene__pImpl;
   friend class SceneNode__pImpl;
-  VGG_DECL_IMPL(Frame);
+  VGG_DECL_IMPL(FrameNode);
 
 public:
-  Frame(VRefCnt* cnt, PaintNodePtr root);
+  FrameNode(VRefCnt* cnt, PaintNodePtr root);
   const std::string& guid() const;
   PaintNode*         node() const;
 
@@ -69,7 +69,7 @@ public:
 
   SkPicture* picture() const override;
 
-  ~Frame();
+  ~FrameNode();
 
 protected:
   Bounds onRevalidate() override;

@@ -17,7 +17,7 @@
 #include "Layer/Core/TransformNode.hpp"
 #include "Layer/VSkia.hpp"
 #include "Settings.hpp"
-#include "Layer/Core/Frame.hpp"
+#include "Layer/Core/FrameNode.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Core/VNode.hpp"
@@ -35,9 +35,9 @@
 namespace VGG::layer
 {
 
-class Frame__pImpl
+class FrameNode__pImpl
 {
-  VGG_DECL_API(Frame)
+  VGG_DECL_API(FrameNode)
 public:
   bool             enableToOrigin{ false };
   Transform        transform;
@@ -46,7 +46,7 @@ public:
 
   bool maskDirty{ true };
 
-  Frame__pImpl(Frame* api)
+  FrameNode__pImpl(FrameNode* api)
     : q_ptr(api)
   {
   }
@@ -70,35 +70,35 @@ public:
   }
 };
 
-PaintNode* Frame::node() const
+PaintNode* FrameNode::node() const
 {
   ASSERT(d_ptr->node);
   return d_ptr->node.get();
 }
 
-const Transform& Frame::transform() const
+const Transform& FrameNode::transform() const
 {
   return d_ptr->transform;
 }
 
-const std::string& Frame::guid() const
+const std::string& FrameNode::guid() const
 {
   return node()->guid();
 }
 
-bool Frame::isVisible() const
+bool FrameNode::isVisible() const
 {
   return node()->isVisible();
 }
 
-void Frame::resetToOrigin(bool enable)
+void FrameNode::resetToOrigin(bool enable)
 {
-  VGG_IMPL(Frame);
+  VGG_IMPL(FrameNode);
   _->enableToOrigin = enable;
   invalidate();
 }
 
-void Frame::render(Renderer* renderer)
+void FrameNode::render(Renderer* renderer)
 {
   if (d_ptr->cache)
   {
@@ -114,21 +114,21 @@ void Frame::render(Renderer* renderer)
   }
 }
 
-Bounds Frame::effectBounds() const
+Bounds FrameNode::effectBounds() const
 {
   DEBUG("Does not support effectBounds for Frame so far");
   return node()->bounds();
 }
 
-SkPicture* Frame::picture() const
+SkPicture* FrameNode::picture() const
 {
   ASSERT(!isInvalid());
   return d_ptr->cache.get();
 }
 
-Bounds Frame::onRevalidate()
+Bounds FrameNode::onRevalidate()
 {
-  VGG_IMPL(Frame);
+  VGG_IMPL(FrameNode);
   if (_->maskDirty)
   {
     updateMaskMap(node());
@@ -148,17 +148,17 @@ Bounds Frame::onRevalidate()
   return b;
 }
 
-Frame::Frame(VRefCnt* cnt, PaintNodePtr root)
+FrameNode::FrameNode(VRefCnt* cnt, PaintNodePtr root)
   // TransformEffectNode is used just for its RenderNode interface now,
   // real implementation is in Frame class.
   : TransformEffectNode(cnt, 0, 0)
-  , d_ptr(std::make_unique<Frame__pImpl>(this))
+  , d_ptr(std::make_unique<FrameNode__pImpl>(this))
 {
   d_ptr->node = std::move(root);
   observe(d_ptr->node);
 }
 
-void Frame::nodeAt(int x, int y, PaintNode::NodeVisitor visitor)
+void FrameNode::nodeAt(int x, int y, PaintNode::NodeVisitor visitor)
 {
   if (auto r = node(); r)
   {
@@ -169,17 +169,17 @@ void Frame::nodeAt(int x, int y, PaintNode::NodeVisitor visitor)
   }
 }
 
-void Frame::invalidateMask()
+void FrameNode::invalidateMask()
 {
   d_ptr->maskDirty = true;
 }
 
-PaintNode* Frame::nodeByID(const std::string& id)
+PaintNode* FrameNode::nodeByID(const std::string& id)
 {
   return static_cast<PaintNode*>(node()->findChildRecursive(id).get());
 }
 
-Frame::~Frame()
+FrameNode::~FrameNode()
 {
   unobserve(d_ptr->node);
 }

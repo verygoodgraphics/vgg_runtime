@@ -694,7 +694,7 @@ void Controller::aspectFill(Layout::Size size)
   }
 
   m_layout->layout(targetSize, m_isFitToViewportEnabled); // true means updating layout size rules
-  m_presenter->setContentSize(targetSize);
+  m_presenter->setContentSize(currentPageSize());
 }
 
 bool Controller::handleTranslate(float x, float y, bool isMouseWheel)
@@ -715,8 +715,7 @@ bool Controller::handleTranslate(float x, float y, bool isMouseWheel)
               // SDL_emscriptenevents.c, Emscripten_HandleWheel: 100 pixels make up a step
   }
 
-  auto root = m_layout->layoutTree();
-  auto pageSize = root->children()[m_presenter->currentPageIndex()]->frame().size;
+  const auto& pageSize = currentPageSize();
   return m_presenter->handleTranslate(pageSize.width, pageSize.height, x, y);
 }
 
@@ -845,4 +844,11 @@ bool Controller::setCurrentTheme(const std::string& theme)
     }
   }
   return ret;
+}
+
+VGG::Layout::Size Controller::currentPageSize()
+{
+  ASSERT(m_layout);
+  const auto& root = m_layout->layoutTree();
+  return root->children()[m_presenter->currentPageIndex()]->frame().size;
 }

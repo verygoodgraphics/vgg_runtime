@@ -144,7 +144,6 @@ class Exporter__pImpl
 public:
   std::shared_ptr<VkGraphicsContext> ctx;
   std::shared_ptr<layer::VLayer>     layer;
-  std::shared_ptr<Scene>             scene;
   OutputCallback                     outputCallback;
   Exporter__pImpl(Exporter* api)
     : q_api(api)
@@ -156,38 +155,12 @@ public:
     layer->resize(w, h);
   }
 
-  [[deprecated]] std::optional<std::vector<char>> render(
-    std::shared_ptr<Scene>     scene,
-    float                      scale,
-    const layer::ImageOptions& opts,
-    IteratorResult::TimeCost&  cost)
-  {
-    // auto id = scene->frame(scene->currentPage())->guid();
-    layer->setScene(std::move(scene));
-    layer->setScaleFactor(scale);
-    // begin render one frame
-    {
-      layer::ScopedTimer t([&](auto d) { cost.render = d.s(); });
-      layer->beginFrame();
-      layer->render();
-      layer->endFrame();
-    }
-    // end render one frame
-    std::optional<std::vector<char>> img;
-    {
-      layer::ScopedTimer t([&](auto d) { cost.encode = d.s(); });
-      img = layer->makeImageSnapshot(opts);
-    }
-    return img;
-  }
-
   std::optional<std::vector<char>> render(
     layer::Ref<layer::Frame>   f,
     float                      scale,
     const layer::ImageOptions& opts,
     IteratorResult::TimeCost&  cost)
   {
-    // layer->setScene(std::move(scene));
     layer->setRenderNode(f);
     layer->setScaleFactor(scale);
     // begin render one frame
@@ -258,7 +231,6 @@ public:
     const ExportOption& exportOpt,
     BuilderResult&      result)
   {
-    // scene = std::make_shared<Scene>();
     auto res = VGG::entry::DocBuilder::builder()
                  .setDocument(std::move(json))
                  .setLayout(std::move(layout))
@@ -301,11 +273,6 @@ public:
     index = 0;
   }
 
-  IteratorImplBase(nlohmann::json json, nlohmann::json layout)
-  {
-    BuilderResult result;
-    initInternal(std::move(json), std::move(layout), ExportOption(), result);
-  }
   IteratorImplBase(
     nlohmann::json      json,
     nlohmann::json      layout,
@@ -465,11 +432,6 @@ ImageIterator::ImageIterator(
 
 ImageIterator::~ImageIterator() = default;
 
-SVGIterator::SVGIterator(nlohmann::json design, nlohmann::json layout)
-  : d_impl(std::make_unique<IteratorImplBase>(std::move(design), std::move(layout)))
-{
-}
-
 SVGIterator::SVGIterator(
   nlohmann::json      design,
   nlohmann::json      layout,
@@ -526,11 +488,6 @@ IteratorResult SVGIterator::next()
   return res;
 }
 SVGIterator::~SVGIterator() = default;
-
-PDFIterator::PDFIterator(nlohmann::json design, nlohmann::json layout)
-  : d_impl(std::make_unique<IteratorImplBase>(std::move(design), std::move(layout)))
-{
-}
 
 PDFIterator::PDFIterator(
   nlohmann::json      design,

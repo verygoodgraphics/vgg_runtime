@@ -3,7 +3,6 @@
 #include "Layer/VGGLayer.hpp"
 #include "loader.hpp"
 #include "Utility/ConfigManager.hpp"
-#include "Layer/Scene.hpp"
 #include "Utility/Log.hpp"
 
 #include "VGG/Exporter/ImageExporter.hpp"

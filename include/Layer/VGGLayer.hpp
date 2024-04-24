@@ -81,9 +81,9 @@ public:
   virtual void shutdown() override;
 
   void resize(int w, int h) override;
-  DEPRECATED("use addRenderNode") void addRenderItem(std::shared_ptr<Renderable> item);
-  DEPRECATED("use addRenderNode") void addScene(std::shared_ptr<Scene> scene);
-  DEPRECATED("use addRenderNode") void setScene(std::shared_ptr<Scene> scene);
+  DEPRECATED("use setRenderNode") void addRenderItem(std::shared_ptr<Renderable> item);
+  DEPRECATED("use setRenderNode") void addScene(std::shared_ptr<Scene> scene);
+  DEPRECATED("use setRenderNode") void setScene(std::shared_ptr<Scene> scene);
 
   void       setScaleFactor(float scale);
   float      scaleFactor() const;

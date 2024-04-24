@@ -83,7 +83,6 @@ class VGG_EXPORTS PaintNode : public TreeNode
 {
   // some temporary friends
   friend class PaintNodeEventDispatcher;
-  friend class PaintNodeAdaptor;
 
 protected:
   VGG_DECL_IMPL(PaintNode)

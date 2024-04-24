@@ -43,7 +43,6 @@ struct DataWrapper
   nlohmann::json                           format;
   nlohmann::json                           layout;
   std::unique_ptr<layer::ResourceProvider> provider;
-  // std::map<std::string, std::vector<char>> resource;
 };
 
 class IReader : public std::enable_shared_from_this<IReader>

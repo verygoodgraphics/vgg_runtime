@@ -68,14 +68,6 @@ public:
   Exporter();
   void info(ExporterInfo* info);
 
-  ImageIterator render(nlohmann::json design, nlohmann::json layout, const ImageOption& opt)
-  {
-    BuilderResult result;
-    return ImageIterator{
-      *this, std::move(design), std::move(layout), opt, ExportOption(), result
-    };
-  }
-
   ImageIterator render(
     nlohmann::json      design,
     nlohmann::json      layout,

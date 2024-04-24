@@ -24,7 +24,6 @@ class SVGIterator
 {
   std::unique_ptr<IteratorImplBase> d_impl; // NOLINT
 public:
-  SVGIterator(nlohmann::json design, nlohmann::json layout);
   SVGIterator(
     nlohmann::json      design,
     nlohmann::json      layout,

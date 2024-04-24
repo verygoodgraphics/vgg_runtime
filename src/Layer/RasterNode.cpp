@@ -73,10 +73,10 @@ void RasterNode::render(Renderer* renderer)
     for (auto& tile : m_rasterTiles)
     {
       canvas->drawImage(tile.image, tile.rect.left(), tile.rect.top());
-      SkPaint p;
-      p.setColor(SK_ColorRED);
-      p.setStyle(SkPaint::kStroke_Style);
-      canvas->drawRect(tile.rect, p);
+      // SkPaint p;
+      // p.setColor(SK_ColorRED);
+      // p.setStyle(SkPaint::kStroke_Style);
+      // canvas->drawRect(tile.rect, p);
     }
     canvas->restore();
   }

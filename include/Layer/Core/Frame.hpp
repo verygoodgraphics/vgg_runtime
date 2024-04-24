@@ -54,6 +54,8 @@ public:
   const std::string& guid() const;
   PaintNode*         node() const;
 
+  Bounds effectBounds() const override;
+
   void       nodeAt(int x, int y, PaintNode::NodeVisitor visitor);
   PaintNode* nodeByID(const std::string& id);
 
@@ -62,6 +64,8 @@ public:
   void             resetToOrigin(bool enable);
   bool             isVisible() const;
   const Transform& transform() const;
+
+  void render(Renderer* renderer) override;
 
   SkPicture* picture() const override;
 

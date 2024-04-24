@@ -84,8 +84,10 @@ void RasterNode::render(Renderer* renderer)
 
 Bounds RasterNode::onRevalidate()
 {
+  DEBUG("RasterNode::onRevalidate()");
   auto c = getChild();
   ASSERT(c);
+  c->revalidate();
   auto   z = asZoom(getTransform());
   bool   needRaster = false;
   Bounds finalBounds;
@@ -98,21 +100,30 @@ Bounds RasterNode::onRevalidate()
   // able to handle any sort of transformation node.
   if (m_raster)
   {
-    if (c->hasInval())
+    if (m_cacheUniqueID != c->picture()->uniqueID())
     {
+      DEBUG("content changed");
+      m_cacheUniqueID = c->picture()->uniqueID();
       m_raster->invalidate(layer::Rasterizer::EReason::CONTENT);
       needRaster = true;
-      c->revalidate();
     }
+    // if (c->hasInval())
+    // {
+    //   m_raster->invalidate(layer::Rasterizer::EReason::CONTENT);
+    //   needRaster = true;
+    //   c->revalidate();
+    // }
     if (z)
     {
       if (z->hasInvalScale())
       {
+        DEBUG("zoom scale changed");
         m_raster->invalidate(layer::Rasterizer::EReason::ZOOM_SCALE);
         needRaster = true;
       }
       if (z->hasOffsetInval())
       {
+        DEBUG("zoom translation changed");
         m_raster->invalidate(layer::Rasterizer::EReason::ZOOM_TRANSLATION);
         needRaster = true;
       }

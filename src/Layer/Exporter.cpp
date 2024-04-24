@@ -16,6 +16,7 @@
 #include "Stream.hpp"
 #include "Layer/Exporter/PDFExporter.hpp"
 #include "Layer/Exporter/SVGExporter.hpp"
+#include "Layer/Renderer.hpp"
 #include "Layer/Scene.hpp"
 #include "Utility/Log.hpp"
 
@@ -24,6 +25,7 @@
 #include <svg/SkSVGCanvas.h>
 #include <src/xml/SkXMLWriter.h>
 #include <core/SkCanvas.h>
+#include "Layer/Renderer.hpp"
 
 #include <optional>
 #include <vector>
@@ -32,20 +34,24 @@
 #include <fstream>
 #include <iterator>
 
-static void renderInternal(SkCanvas* canvas, VGG::Scene* scene)
+static void renderInternal(SkCanvas* canvas, layer::Frame* frame)
 {
-  ASSERT(scene);
+  ASSERT(frame);
   ASSERT(canvas);
   canvas->save();
   canvas->clear(SK_ColorWHITE);
-  scene->render(canvas);
+  frame->revalidate();
+  // canvas->drawPicture(frame->picture());
+  VGG::layer::Renderer r;
+  r = r.createNew(canvas);
+  frame->render(&r);
   canvas->flush();
   canvas->restore();
 }
 namespace VGG::layer::exporter
 {
 
-void makePDF(VGG::Scene* scene, const PDFOptions& opts, std::ostream& os)
+void makePDF(layer::Frame* frame, const PDFOptions& opts, std::ostream& os)
 {
   SkStdOStream skos(os);
   auto         pdfDoc = SkPDF::MakeDocument(&skos);
@@ -56,7 +62,7 @@ void makePDF(VGG::Scene* scene, const PDFOptions& opts, std::ostream& os)
     SkCanvas* pdfCanvas = pdfDoc->beginPage(w, h);
     if (pdfCanvas)
     {
-      renderInternal(pdfCanvas, scene);
+      renderInternal(pdfCanvas, frame);
     }
     pdfDoc->endPage();
     pdfDoc->close();
@@ -67,30 +73,30 @@ void makePDF(VGG::Scene* scene, const PDFOptions& opts, std::ostream& os)
   }
 }
 
-std::optional<std::vector<char>> makePDF(VGG::Scene* scene, const PDFOptions& opts)
+std::optional<std::vector<char>> makePDF(layer::Frame* frame, const PDFOptions& opts)
 {
   std::stringstream data;
-  layer::exporter::makePDF(scene, opts, data);
+  layer::exporter::makePDF(frame, opts, data);
   auto d = data.str();
   return std::vector<char>{ d.begin(), d.end() };
 }
 
-std::optional<std::vector<char>> makeSVG(VGG::Scene* scene, const SVGOptions& opts)
+std::optional<std::vector<char>> makeSVG(layer::Frame* frame, const SVGOptions& opts)
 {
   std::stringstream data;
-  makeSVG(scene, opts, data);
+  makeSVG(frame, opts, data);
   auto d = data.str();
   return std::vector<char>{ d.begin(), d.end() };
 }
 
-void makeSVG(VGG::Scene* scene, const SVGOptions& opts, std::ostream& os)
+void makeSVG(layer::Frame* frame, const SVGOptions& opts, std::ostream& os)
 {
   auto         rect = SkRect::MakeWH(opts.extend[0], opts.extend[1]);
   SkStdOStream skos(os);
   auto         svgCanvas = SkSVGCanvas::Make(rect, &skos);
   if (svgCanvas)
   {
-    renderInternal(svgCanvas.get(), scene);
+    renderInternal(svgCanvas.get(), frame);
   }
   else
   {

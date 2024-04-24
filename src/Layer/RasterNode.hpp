@@ -66,5 +66,6 @@ private:
   std::unique_ptr<Rasterizer>          m_raster;
   std::vector<layer::Rasterizer::Tile> m_rasterTiles;
   SkMatrix                             m_rasterMatrix;
+  int64_t                              m_cacheUniqueID{ -1 };
 };
 } // namespace VGG::layer

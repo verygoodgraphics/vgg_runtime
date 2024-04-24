@@ -158,7 +158,10 @@ PaintNode::PaintNode(VRefCnt* cnt, const std::string& name, std::unique_ptr<Pain
 void PaintNode::setContextSettings(const ContextSetting& settings)
 {
   VGG_IMPL(PaintNode);
+  if (_->contextSetting == settings)
+    return;
   _->contextSetting = settings;
+  this->invalidate();
 }
 
 Transform PaintNode::mapTransform(const PaintNode* node) const
@@ -441,12 +444,6 @@ EOverflow PaintNode::overflow() const
 const ContextSetting& PaintNode::contextSetting() const
 {
   return d_ptr->contextSetting;
-}
-
-ContextSetting& PaintNode::contextSetting()
-{
-  VGG_IMPL(PaintNode);
-  return _->contextSetting;
 }
 
 void PaintNode::setClipOperator(EBoolOp op)

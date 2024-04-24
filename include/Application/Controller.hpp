@@ -168,6 +168,8 @@ private:
 
   std::shared_ptr<ViewModel> generateViewModel(std::shared_ptr<Daruma> model, Layout::Size size);
   MakeJsonDocFn              createMakeJsonDocFn(const char* pJsonSchemaFilePath);
+
+  VGG::Layout::Size currentPageSize();
 };
 
 } // namespace VGG

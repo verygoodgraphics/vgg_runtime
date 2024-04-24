@@ -38,6 +38,11 @@
   {                                                                                                \
     ASSERT(container != nullptr);                                                                  \
     container->set##internalname(std::move(v));                                                    \
+  }                                                                                                \
+  const type& classname::get##name() const                                                         \
+  {                                                                                                \
+    ASSERT(container != nullptr);                                                                  \
+    return container->get##internalname();                                                         \
   }
 
 namespace VGG::layer

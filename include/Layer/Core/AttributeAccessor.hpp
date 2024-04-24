@@ -28,8 +28,9 @@
   }
 
 #define ATTR_DECL(name, type)                                                                      \
-  void set##name(const type& v);                                                                   \
-  void set##name(type&& v);
+  void        set##name(const type& v);                                                            \
+  void        set##name(type&& v);                                                                 \
+  const type& get##name() const;
 
 namespace VGG::layer
 {

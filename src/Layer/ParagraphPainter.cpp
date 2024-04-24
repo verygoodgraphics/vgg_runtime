@@ -181,7 +181,7 @@ void VParagraphPainter::paintParagraph(Renderer* renderer)
   const auto b = m_paragraph->bounds();
   float      totalHeight = m_paragraph->textHeight();
   float      offsetY = 0.f;
-  auto       vertAlign = m_paragraph->verticalAlignment();
+  auto       vertAlign = m_paragraph->getVerticalAlignment();
   switch (vertAlign)
   {
     case VA_BOTTOM:

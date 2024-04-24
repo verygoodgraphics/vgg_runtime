@@ -60,14 +60,29 @@ public:
     m_paragraphLayout->setParagraphHintBounds(bounds);
   }
 
+  const Bounds& getParagraphBounds() const
+  {
+    return m_paragraphLayout->getParagraphHintBounds();
+  }
+
   void setVerticalAlignment(ETextVerticalAlignment vertAlign)
   {
     m_paragraphLayout->setVerticalAlignment(vertAlign);
   }
 
+  const ETextVerticalAlignment& getVerticalAlignment() const
+  {
+    return m_paragraphLayout->getVerticalAlignment();
+  }
+
   void setFrameMode(ETextLayoutMode layoutMode)
   {
     m_paragraphLayout->setTextLayoutMode(layoutMode);
+  }
+
+  const ETextLayoutMode& getFrameMode() const
+  {
+    return m_paragraphLayout->getTextLayoutMode();
   }
 
   void setAnchor(const glm::vec2& anchor)
@@ -83,9 +98,14 @@ public:
     return bounds();
   }
 
-  glm::vec2 getAnchor() const
+  const glm::vec2& getAnchor() const
   {
-    return m_anchor.value_or(glm::vec2(0.0f));
+    static glm::vec2 s_dft(0.0f);
+    if (m_anchor)
+    {
+      return *m_anchor;
+    }
+    return s_dft;
   }
 
   VGG_CLASS_MAKE(ParagraphItem);

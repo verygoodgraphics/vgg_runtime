@@ -124,15 +124,11 @@ public:
     addChild(node);
   }
 
-  void setContextSettings(const ContextSetting& settings);
-
   void setOverflow(EOverflow overflow);
 
   EOverflow overflow() const;
 
-  const ContextSetting& contextSetting() const;
-
-  ContextSetting& contextSetting();
+  // ContextSetting& contextSetting();
 
   void setClipOperator(EBoolOp op);
 
@@ -189,11 +185,12 @@ public:
   virtual VShape asVisualShape(const Transform* transform);
 
 public:
+  void                  setVisible(bool visible);
+  bool                  isVisible() const;
+  void                  setContextSettings(const ContextSetting& settings);
+  const ContextSetting& contextSetting() const;
+
   Accessor* attributeAccessor();
-
-  void setVisible(bool visible);
-
-  bool isVisible() const;
 
   using EventHandler = std::function<void(ShapeItemAttibuteAccessor*, void*)>;
   void installPaintNodeEventHandler(EventHandler handler);

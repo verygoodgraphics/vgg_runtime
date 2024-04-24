@@ -483,3 +483,11 @@ std::shared_ptr<VGG::Controller> VggSdk::controller()
 
   return {};
 }
+
+void VggSdk::setContentMode(const std::string& mode)
+{
+  if (auto c = controller())
+  {
+    c->setContentMode(mode);
+  }
+}

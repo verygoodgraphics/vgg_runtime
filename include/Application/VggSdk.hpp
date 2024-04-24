@@ -67,6 +67,8 @@ public:
   std::string currentFrameId() const override;
 
   // configure
+  void              setFitToViewportEnabled(bool enabled) override;
+  void              setContentMode(const std::string& newModel) override;
   const std::string launchFrameId() const override;
   bool              setLaunchFrameById(const std::string& id) override;
   const std::string currentTheme() const override;
@@ -94,7 +96,6 @@ public:
   bool dismissState(const std::string& instanceDescendantId) override;
 
   // misc
-  void        setFitToViewportEnabled(bool enabled) override;
   std::string requiredFonts() const override;
   bool        addFont(const uint8_t* data, size_t size, const char* defaultName) override;
 #ifdef EMSCRIPTEN

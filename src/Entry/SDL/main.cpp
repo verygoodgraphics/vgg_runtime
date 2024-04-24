@@ -101,6 +101,9 @@ int main(int argc, char** argv)
 
   auto controller = mainComposer.controller();
   // controller->setEditMode(true);
+  // controller->setFitToViewportEnabled(false);
+  // controller->setContentMode("scaleAspectFill");
+  // controller->setContentMode("scaleAspectFit");
   auto darumaFileOrDir = program.get<std::string>(DARUMA_FILE_OR_DIRECTORY);
   controller->start(darumaFileOrDir, "../asset/vgg-format.json", "../asset/vgg_layout.json");
   app->setController(controller);

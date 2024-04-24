@@ -48,6 +48,7 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     .function("setListenerKey", &VggSdk::setListenerKey)
     // configure
     .function("setFitToViewportEnabled", &VggSdk::setFitToViewportEnabled)
+    .function("setContentMode", &VggSdk::setContentMode)
     .function("currentTheme", &VggSdk::currentTheme)
     .function("setCurrentTheme", &VggSdk::setCurrentTheme)
     // misc

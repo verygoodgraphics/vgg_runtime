@@ -106,9 +106,9 @@ public:
     invalidateMask();
   }
 
-  layer::Frame* currentFrame(bool revalidate = false)
+  layer::FrameNode* currentFrame(bool revalidate = false)
   {
-    layer::Frame* f = nullptr;
+    layer::FrameNode* f = nullptr;
     if (page >= 0 && page < (int)roots.size())
     {
       f = roots[page].get();
@@ -120,9 +120,9 @@ public:
     return f;
   }
 
-  layer::Frame* frame(int index, bool revalidate = false)
+  layer::FrameNode* frame(int index, bool revalidate = false)
   {
-    layer::Frame* f = nullptr;
+    layer::FrameNode* f = nullptr;
     if (index >= 0 && index < (int)roots.size())
     {
       f = roots[index].get();
@@ -274,7 +274,7 @@ int Scene::frameCount() const
   return d_ptr->roots.size();
 }
 
-layer::Frame* Scene::frame(int index)
+layer::FrameNode* Scene::frame(int index)
 {
   VGG_IMPL(Scene);
   return _->frame(index, true);

@@ -156,7 +156,7 @@ public:
   }
 
   std::optional<std::vector<char>> render(
-    layer::Ref<layer::Frame>   f,
+    layer::Ref<layer::FrameNode>   f,
     float                      scale,
     const layer::ImageOptions& opts,
     IteratorResult::TimeCost&  cost)

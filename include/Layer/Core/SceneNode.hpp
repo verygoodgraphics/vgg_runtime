@@ -15,7 +15,7 @@
  */
 #pragma once
 #include "Layer/VGGLayer.hpp"
-#include "Layer/Core/Frame.hpp"
+#include "Layer/Core/FrameNode.hpp"
 #include "Layer/Config.hpp"
 
 namespace VGG::layer

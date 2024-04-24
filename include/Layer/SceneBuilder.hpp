@@ -15,7 +15,7 @@
  */
 #pragma once
 #include "Layer/Core/PaintNode.hpp"
-#include "Layer/Core/Frame.hpp"
+#include "Layer/Core/FrameNode.hpp"
 #include "Layer/Core/SceneNode.hpp"
 #include "Layer/Memory/VAllocator.hpp"
 

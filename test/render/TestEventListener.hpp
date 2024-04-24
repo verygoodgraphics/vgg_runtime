@@ -90,7 +90,7 @@ public:
     return frames[m_currentPage]->bounds();
   }
 
-  layer::Frame* currentFrame()
+  layer::FrameNode* currentFrame()
   {
     if (m_currentPage < 0 || m_currentPage >= m_sceneNode->getFrames().size())
     {

@@ -16,7 +16,7 @@
 #pragma once
 #include "Layer/Renderable.hpp"
 #include "Layer/Core/RasterCache.hpp"
-#include "Layer/Core/Frame.hpp"
+#include "Layer/Core/FrameNode.hpp"
 #include "Layer/Memory/AllocatorImpl.hpp"
 #include "Layer/Zoomer.hpp"
 #include "Layer/Core/TreeNode.hpp"
@@ -59,7 +59,7 @@ public:
   void          nextArtboard();
   void          preArtboard();
   int           frameCount() const;
-  layer::Frame* frame(int index);
+  layer::FrameNode* frame(int index);
   void          setPage(int num);
   int           currentPage() const;
   // To remove zoomer, just set nullptr

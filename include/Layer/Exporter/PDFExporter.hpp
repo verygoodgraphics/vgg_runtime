@@ -24,7 +24,7 @@ class Scene;
 
 namespace VGG::layer
 {
-class Frame;
+class FrameNode;
 }
 namespace VGG::layer::exporter
 {
@@ -33,6 +33,6 @@ struct PDFOptions
   int position[2];
   int extend[2];
 };
-std::optional<std::vector<char>> makePDF(layer::Frame* frame, const PDFOptions& opts);
-void makePDF(layer::Frame* frame, const PDFOptions& opts, std::ostream& os);
+std::optional<std::vector<char>> makePDF(layer::FrameNode* frame, const PDFOptions& opts);
+void makePDF(layer::FrameNode* frame, const PDFOptions& opts, std::ostream& os);
 } // namespace VGG::layer::exporter

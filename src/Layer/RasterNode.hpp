@@ -20,7 +20,7 @@
 #include "Layer/VGGLayer.hpp"
 #include "Layer/Core/RasterCache.hpp"
 #include "Layer/Core/ZoomerNode.hpp"
-#include "Layer/Core/Frame.hpp"
+#include "Layer/Core/FrameNode.hpp"
 #include "Layer/Memory/AllocatorImpl.hpp"
 #include "Layer/Zoomer.hpp"
 #include "Layer/Core/TreeNode.hpp"

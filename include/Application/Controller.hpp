@@ -94,6 +94,8 @@ public:
 public:                                       // configure
   void setFitToViewportEnabled(bool enabled); // should be called before loading vgg file
   void setEditMode(bool editMode);            // can be called before or after loading vgg file
+  void setContentMode(
+    const std::string& contentMode); // can be called before or after loading vgg file
 
 public:
   bool start(
@@ -167,20 +169,25 @@ private:
   void observeViewEvent();
   void handleEvent(UIEventPtr evt);
 
+  bool hasContent() const;
+
   void startEditing();
   void observeEditModelState();
   void observeEditViewEvent();
-  void fitPageForEditing();
+  void layoutUpdateViewModelAndFitForEditing();
+  void layoutForEditing();
 
-  void scaleContent(Layout::Size size);
+  void scaleContent();
   void aspectFill(Layout::Size size);
 
   std::shared_ptr<ViewModel> generateViewModel(std::shared_ptr<Daruma> model, Layout::Size size);
   MakeJsonDocFn              createMakeJsonDocFn(const char* pJsonSchemaFilePath);
 
   VGG::Layout::Size currentPageSize();
+  VGG::Layout::Size currentPageOriginalSize();
 
   void pageDidChange();
+  void scaleContentUpdateViewModelAndFit();
 };
 
 } // namespace VGG

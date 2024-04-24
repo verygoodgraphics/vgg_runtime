@@ -38,6 +38,13 @@ public:
   // configure
   virtual void setFitToViewportEnabled(bool enabled) = 0;
 
+  /*
+    "topLeft"
+    "scaleAspectFill"
+    "scaleAspectFit"
+  */
+  virtual void setContentMode(const std::string& newModel) = 0;
+
   // -
   virtual std::string designDocument() = 0;
   virtual std::string designDocumentValueAt(const std::string& jsonPointer) = 0;

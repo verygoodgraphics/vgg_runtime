@@ -159,9 +159,10 @@ std::vector<uint8_t> UIApplication::makeImageSnapshot(layer::ImageOptions option
   ASSERT(m_layer);
   options.position[0] = 0;
   options.position[1] = 0;
-  const auto dpi = m_layer->context()->property().dpiScaling;
-  options.extend[0] = m_view->contentSize().width * dpi;
-  options.extend[1] = m_view->contentSize().height * dpi;
+  const auto& viewSize = m_view->size();
+  const auto  dpi = m_layer->context()->property().dpiScaling;
+  options.extend[0] = viewSize.width * dpi;
+  options.extend[1] = viewSize.height * dpi;
   if (auto maybeImageBytes = m_layer->makeImageSnapshot(options))
   {
     auto& bytes = maybeImageBytes.value();

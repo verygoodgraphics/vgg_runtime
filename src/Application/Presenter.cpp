@@ -33,7 +33,7 @@ using namespace VGG;
 
 const auto K_EDITOR_PADDING = 100;
 
-void Presenter::fitForEditing(Layout::Size pageSize)
+void Presenter::fitForEditing(const Layout::Size& pageSize)
 {
   auto maxSize = viewSize();
   maxSize.width -= 2 * K_EDITOR_PADDING;
@@ -66,17 +66,6 @@ void Presenter::fitForEditing(Layout::Size pageSize)
   m_view->fitContent(xOffset, yOffset, scale);
   m_view->enableZoomer(true);
   m_view->setScrollEnabled(false);
-}
-
-void Presenter::resetForRunning()
-{
-  if (!m_view)
-  {
-    return;
-  }
-  m_view->fitCurrentPage();
-  m_view->enableZoomer(false);
-  m_view->setScrollEnabled(true);
 }
 
 void Presenter::listenViewEvent()
@@ -316,10 +305,69 @@ void Presenter::triggerMouseEnter()
   m_view->triggerMouseEnter();
 }
 
-void Presenter::setContentSize(const Layout::Size& size)
+void Presenter::fitForRunning(const Layout::Size& pageSize)
 {
-  if (m_view)
+  if (!m_view)
   {
-    m_view->setContentSize(size);
+    return;
   }
+
+  switch (m_contentMode)
+  {
+    case EContentMode::TOP_LEFT:
+      m_view->fitCurrentPage();
+      m_view->setContentSize(pageSize);
+      break;
+    case EContentMode::SCALE_ASPECT_FILL:
+    case EContentMode::SCALE_ASPECT_FIT:
+      fitForAspectScale(pageSize);
+      break;
+  }
+
+  m_view->enableZoomer(false);
+  m_view->setScrollEnabled(true);
+}
+
+void Presenter::fitForAspectScale(const Layout::Size& pageSize)
+{
+  ASSERT(
+    m_contentMode == EContentMode::SCALE_ASPECT_FILL ||
+    m_contentMode == EContentMode::SCALE_ASPECT_FIT);
+  if (!m_view)
+  {
+    return;
+  }
+
+  const auto maxSize = viewSize();
+
+  auto         scale = 1.0;
+  Layout::Size contentSize;
+  if (
+    !doublesNearlyEqual(pageSize.width, maxSize.width) ||
+    !doublesNearlyEqual(pageSize.height, maxSize.height))
+  {
+    // scale
+    const auto xScale = maxSize.width / pageSize.width;
+    const auto yScale = maxSize.height / pageSize.height;
+    scale = m_contentMode == EContentMode::SCALE_ASPECT_FILL ? std::max(xScale, yScale)
+                                                             : std::min(xScale, yScale);
+
+    contentSize.width = pageSize.width * scale;
+    contentSize.height = pageSize.height * scale;
+  }
+  else
+  {
+    contentSize = pageSize;
+  }
+
+  const auto xOffset = (maxSize.width - contentSize.width) / 2;
+  const auto yOffset = (maxSize.height - contentSize.height) / 2;
+
+  if (contentSize.width > maxSize.width || contentSize.height > maxSize.height)
+  {
+    m_view->setContentSize(contentSize);
+  }
+
+  // set offset last, setContentSize may change contentOffset
+  m_view->fitContent(xOffset, yOffset, scale);
 }

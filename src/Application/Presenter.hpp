@@ -41,6 +41,15 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FontInfo, familyName, subfamilyN
 
 class Presenter : public std::enable_shared_from_this<Presenter>
 {
+public:
+  enum class EContentMode
+  {
+    TOP_LEFT,
+    SCALE_ASPECT_FIT,
+    SCALE_ASPECT_FILL
+  };
+
+private:
   std::shared_ptr<UIScrollView> m_view;
   std::shared_ptr<ViewModel>    m_viewModel;
   bool                          m_listenAllEvents{ false };
@@ -52,6 +61,7 @@ class Presenter : public std::enable_shared_from_this<Presenter>
 
   std::shared_ptr<Mouse> m_mouse;
 
+  EContentMode          m_contentMode{ EContentMode::TOP_LEFT };
   bool                  m_editMode{ false };
   UIView::EventListener m_editorEventListener;
 
@@ -75,8 +85,17 @@ public:
     m_listenAllEvents = enabled;
   }
 
-  void fitForEditing(Layout::Size pageSize);
-  void resetForRunning();
+  void fitForEditing(const Layout::Size& pageSize);
+  void fitForRunning(const Layout::Size& pageSize);
+
+  const auto contentMode() const
+  {
+    return m_contentMode;
+  }
+  void setContentMode(const EContentMode mode)
+  {
+    m_contentMode = mode;
+  }
 
   virtual int currentPageIndex()
   {
@@ -156,8 +175,6 @@ public:
       return {};
     }
   }
-
-  void setContentSize(const Layout::Size& size);
 
   void setEditView(std::shared_ptr<UIView> view)
   {
@@ -243,6 +260,8 @@ private:
       m_editView->show(*m_editViewModel);
     }
   }
+
+  void fitForAspectScale(const Layout::Size& pageSize);
 };
 
 } // namespace VGG

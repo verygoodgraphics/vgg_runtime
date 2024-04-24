@@ -61,6 +61,11 @@ public:
     this->invalidate();
   }
 
+  const ImageFilter& getImageFilter() const
+  {
+    return m_imagePattern.imageFilter;
+  }
+
   void setImageBounds(const Bounds& bounds)
   {
     if (m_imageBounds == bounds)

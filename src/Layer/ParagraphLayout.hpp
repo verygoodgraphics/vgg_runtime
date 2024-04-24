@@ -242,6 +242,11 @@ public:
     invalidate();
   }
 
+  const Bounds& getParagraphHintBounds() const
+  {
+    return m_hintBounds;
+  }
+
   const std::vector<TextStyleAttr>& textStyles() const
   {
     return m_textStyle;
@@ -269,7 +274,7 @@ public:
     invalidate();
   }
 
-  ETextLayoutMode getTextLayoutMode() const
+  const ETextLayoutMode& getTextLayoutMode() const
   {
     return m_layoutMode;
   }
@@ -295,7 +300,7 @@ public:
     invalidate();
   }
 
-  ETextVerticalAlignment verticalAlignment() const
+  const ETextVerticalAlignment& getVerticalAlignment() const
   {
     return m_verticalAlign;
   }

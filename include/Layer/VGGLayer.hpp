@@ -93,7 +93,7 @@ public:
 
   void setRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node);
 
-  void setRenderNode(Ref<RenderNode> node);
+  void setRenderNode(Ref<RenderNode> node); // This is recommanded
 
   SkCanvas* layerCanvas();
   void      clearLayerCanvas();

@@ -33,32 +33,13 @@ public:
   virtual glm::mat3 getMatrix() const = 0;
 };
 
-// class ClipEffectNode : public RenderNode
-// {
-// public:
-//   ClipEffectNode(VRefCnt* cnt, Ref<RenderNode> child)
-//     : RenderNode(cnt, EState::INVALIDATE)
-//     , m_child(child)
-//   {
-//     observe(m_child);
-//   }
-//
-//   ~ClipEffectNode()
-//   {
-//     unobserve(m_child);
-//   }
-//
-// private:
-//   Ref<RenderNode> m_child;
-// };
-
 class TransformEffectNode : public RenderNode
 {
 public:
   TransformEffectNode(VRefCnt* cnt, Ref<TransformNode> transform, Ref<RenderNode> child)
     : RenderNode(cnt, EState::INVALIDATE)
-    , m_transform(transform)
-    , m_child(child)
+    , m_transform(std::move(transform))
+    , m_child(std::move(child))
   {
     observe(m_transform);
     observe(m_child);

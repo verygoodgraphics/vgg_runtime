@@ -15,7 +15,6 @@
  */
 
 #include "Layer/Core/TransformNode.hpp"
-#include "Layer/PaintRenderNode.hpp"
 #include "Layer/VSkia.hpp"
 #include "Settings.hpp"
 #include "Layer/Core/Frame.hpp"
@@ -36,19 +35,13 @@
 namespace VGG::layer
 {
 
-PaintNodeAdaptor* asPaintNode(RenderNode* node)
-{
-  if (node)
-    return static_cast<PaintNodeAdaptor*>(node);
-  return nullptr;
-}
-
 class Frame__pImpl
 {
   VGG_DECL_API(Frame)
 public:
   bool             enableToOrigin{ false };
   Transform        transform;
+  Ref<PaintNode>   node;
   sk_sp<SkPicture> cache;
 
   bool maskDirty{ true };
@@ -79,8 +72,8 @@ public:
 
 PaintNode* Frame::node() const
 {
-  ASSERT(getChild());
-  return asPaintNode(getChild())->node();
+  ASSERT(d_ptr->node);
+  return d_ptr->node.get();
 }
 
 const Transform& Frame::transform() const
@@ -105,8 +98,31 @@ void Frame::resetToOrigin(bool enable)
   invalidate();
 }
 
+void Frame::render(Renderer* renderer)
+{
+  if (d_ptr->cache)
+  {
+    auto canvas = renderer->canvas();
+    canvas->save();
+    canvas->concat(toSkMatrix(d_ptr->transform.matrix()));
+    renderer->canvas()->drawPicture(d_ptr->cache.get());
+    canvas->restore();
+  }
+  else
+  {
+    DEBUG("Frame::render: no picture to render");
+  }
+}
+
+Bounds Frame::effectBounds() const
+{
+  DEBUG("Does not support effectBounds for Frame so far");
+  return node()->bounds();
+}
+
 SkPicture* Frame::picture() const
 {
+  ASSERT(!isInvalid());
   return d_ptr->cache.get();
 }
 
@@ -118,8 +134,6 @@ Bounds Frame::onRevalidate()
     updateMaskMap(node());
     _->maskDirty = false;
   }
-
-  // auto b = TransformEffectNode::onRevalidate().bounds(node()->transform());
 
   auto bounds = node()->revalidate();
   auto b = bounds.bounds(node()->transform());
@@ -135,9 +149,13 @@ Bounds Frame::onRevalidate()
 }
 
 Frame::Frame(VRefCnt* cnt, PaintNodePtr root)
-  : TransformEffectNode(cnt, 0, PaintNodeAdaptor::Make(std::move(root)))
+  // TransformEffectNode is used just for its RenderNode interface now,
+  // real implementation is in Frame class.
+  : TransformEffectNode(cnt, 0, 0)
   , d_ptr(std::make_unique<Frame__pImpl>(this))
 {
+  d_ptr->node = std::move(root);
+  observe(d_ptr->node);
 }
 
 void Frame::nodeAt(int x, int y, PaintNode::NodeVisitor visitor)
@@ -163,5 +181,7 @@ PaintNode* Frame::nodeByID(const std::string& id)
 
 Frame::~Frame()
 {
+  unobserve(d_ptr->node);
 }
+
 } // namespace VGG::layer

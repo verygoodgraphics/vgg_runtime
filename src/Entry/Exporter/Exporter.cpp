@@ -42,6 +42,7 @@
 #include <iostream>
 #include <algorithm>
 #include <iterator>
+#include <ranges>
 #include <variant>
 #include <exception>
 #include <memory>
@@ -155,7 +156,7 @@ public:
     layer->resize(w, h);
   }
 
-  std::optional<std::vector<char>> render(
+  [[deprecated]] std::optional<std::vector<char>> render(
     std::shared_ptr<Scene>     scene,
     float                      scale,
     const layer::ImageOptions& opts,
@@ -163,6 +164,31 @@ public:
   {
     // auto id = scene->frame(scene->currentPage())->guid();
     layer->setScene(std::move(scene));
+    layer->setScaleFactor(scale);
+    // begin render one frame
+    {
+      layer::ScopedTimer t([&](auto d) { cost.render = d.s(); });
+      layer->beginFrame();
+      layer->render();
+      layer->endFrame();
+    }
+    // end render one frame
+    std::optional<std::vector<char>> img;
+    {
+      layer::ScopedTimer t([&](auto d) { cost.encode = d.s(); });
+      img = layer->makeImageSnapshot(opts);
+    }
+    return img;
+  }
+
+  std::optional<std::vector<char>> render(
+    layer::Ref<layer::Frame>   f,
+    float                      scale,
+    const layer::ImageOptions& opts,
+    IteratorResult::TimeCost&  cost)
+  {
+    // layer->setScene(std::move(scene));
+    layer->setRenderNode(f);
     layer->setScaleFactor(scale);
     // begin render one frame
     {
@@ -221,10 +247,10 @@ void Exporter::setOutputCallback(OutputCallback callback)
 class IteratorImplBase
 {
 public:
-  float                  maxSurfaceSize[2];
-  int                    totalFrames{ 0 };
-  int                    index{ 0 };
-  std::shared_ptr<Scene> scene;
+  float                                  maxSurfaceSize[2];
+  int                                    index{ 0 };
+  std::vector<layer::FramePtr>           frames; // FIXME:: use const
+  std::vector<layer::FramePtr>::iterator iter;
 
   void initInternal(
     nlohmann::json      json,
@@ -232,7 +258,7 @@ public:
     const ExportOption& exportOpt,
     BuilderResult&      result)
   {
-    scene = std::make_shared<Scene>();
+    // scene = std::make_shared<Scene>();
     auto res = VGG::entry::DocBuilder::builder()
                  .setDocument(std::move(json))
                  .setLayout(std::move(layout))
@@ -265,10 +291,13 @@ public:
     }
     if (sceneBuilderResult.root)
     {
-      scene->setSceneRoots(std::move(*sceneBuilderResult.root));
+      namespace sv = std::views;
+      auto ranges =
+        std::move(*sceneBuilderResult.root) | sv::filter([](auto& f) { return f->isVisible(); });
+      this->frames = std::vector<layer::FramePtr>(ranges.begin(), ranges.end());
+      iter = this->frames.begin();
     }
     result.timeCost = cost;
-    totalFrames = scene->frameCount();
     index = 0;
   }
 
@@ -286,32 +315,6 @@ public:
     initInternal(std::move(json), std::move(layout), exportOpt, result);
   }
   ~IteratorImplBase() = default;
-  bool tryNext()
-  {
-    if (index >= scene->frameCount())
-    {
-      return false;
-    }
-    auto f = scene->frame(index);
-    while (f && !f->isVisible() && index < scene->frameCount())
-    {
-      // skip invisble frame
-      index++;
-      f = scene->frame(index);
-    }
-    if (index >= scene->frameCount())
-    {
-      return false;
-    }
-    if (!f)
-      return false;
-    return true;
-  }
-
-  void advance()
-  {
-    index++;
-  }
 };
 
 class ImageIteratorImpl : public IteratorImplBase
@@ -340,10 +343,13 @@ public:
     int                       quality,
     IteratorResult::TimeCost& cost)
   {
-    if (!tryNext())
+    if (iter == frames.end())
+    {
       return false;
-    auto f = scene->frame(index);
-    scene->setPage(index);
+    }
+    auto f = *iter;
+    if (!f)
+      return false;
     f->revalidate();
     const auto b = f->bounds();
     const auto id = f->guid();
@@ -403,14 +409,14 @@ public:
       actualSize[1]);
     opts.quality = quality;
     f->resetToOrigin(true);
-    auto res = state->render(scene, scale, opts, cost);
+    auto res = state->render(f, scale, opts, cost);
     if (!res.has_value())
     {
       return false;
     }
     key = std::move(id);
     image = std::move(res.value());
-    advance();
+    ++iter;
     return true;
   }
 };
@@ -479,25 +485,28 @@ SVGIterator::SVGIterator(SVGIterator&& other) noexcept
 }
 bool SVGIterator::next(std::string& key, std::vector<char>& data)
 {
-  if (!d_impl->tryNext())
+  if (d_impl->iter == d_impl->frames.end())
+  {
     return false;
-  auto scene = d_impl->scene.get();
-  auto f = scene->frame(d_impl->index);
+  }
+  auto f = *d_impl->iter;
+  if (!f)
+    return false;
+  f->revalidate();
   auto b = f->bounds();
   auto id = f->guid();
 
   layer::exporter::SVGOptions opts;
   opts.extend[0] = b.width();
   opts.extend[1] = b.height();
-  scene->setPage(d_impl->index);
-  auto res = layer::exporter::makeSVG(scene, opts);
+  auto res = layer::exporter::makeSVG(f, opts);
   if (!res.has_value())
   {
     return false;
   }
   key = std::move(id);
   data = std::move(res.value());
-  d_impl->advance();
+  ++d_impl->iter;
   return true;
 }
 
@@ -538,24 +547,27 @@ PDFIterator::PDFIterator(PDFIterator&& other) noexcept
 }
 bool PDFIterator::next(std::string& key, std::vector<char>& data)
 {
-  if (!d_impl->tryNext())
+  if (d_impl->iter == d_impl->frames.end())
+  {
     return false;
-  auto                        scene = d_impl->scene.get();
-  auto                        f = scene->frame(d_impl->index);
+  }
+  auto f = *d_impl->iter;
+  if (!f)
+    return false;
+  f->revalidate();
   auto                        id = f->guid();
   auto                        b = f->bounds();
   layer::exporter::PDFOptions opts;
   opts.extend[0] = b.width();
   opts.extend[1] = b.height();
-  scene->setPage(d_impl->index);
-  auto res = layer::exporter::makePDF(scene, opts);
+  auto res = layer::exporter::makePDF(f, opts);
   if (!res.has_value())
   {
     return false;
   }
   key = std::move(id);
   data = std::move(res.value());
-  d_impl->advance();
+  ++d_impl->iter;
   return true;
 }
 

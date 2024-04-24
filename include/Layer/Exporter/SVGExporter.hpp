@@ -21,6 +21,11 @@ namespace VGG
 {
 class Scene;
 }
+
+namespace VGG::layer
+{
+class Frame;
+}
 namespace VGG::layer::exporter
 {
 struct SVGOptions
@@ -29,6 +34,6 @@ struct SVGOptions
   int extend[2];
 };
 
-std::optional<std::vector<char>> makeSVG(VGG::Scene* scene, const SVGOptions& opts);
-void makeSVG(VGG::Scene* scene, const SVGOptions& opts, std::ostream& os);
+std::optional<std::vector<char>> makeSVG(VGG::layer::Frame* frame, const SVGOptions& opts);
+void makeSVG(VGG::layer::Frame* frame, const SVGOptions& opts, std::ostream& os);
 } // namespace VGG::layer::exporter

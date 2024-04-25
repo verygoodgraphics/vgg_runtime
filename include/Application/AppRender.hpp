@@ -35,7 +35,8 @@ public:
   void postEvent(UEvent e, void* userData);
   void sendEvent(UEvent e, void* userData);
   void addAppRenderable(std::shared_ptr<AppRenderable> listener);
-  void addAppScene(std::shared_ptr<AppScene> listener);
+  void addEventListener(std::shared_ptr<EventListener> listener);
+
   std::shared_ptr<AppScene> popAppScene();
   using VLayer::beginFrame;
   bool beginFrame(int fps);

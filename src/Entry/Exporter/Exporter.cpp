@@ -42,7 +42,6 @@
 #include <iostream>
 #include <algorithm>
 #include <iterator>
-#include <ranges>
 #include <variant>
 #include <exception>
 #include <memory>
@@ -156,10 +155,10 @@ public:
   }
 
   std::optional<std::vector<char>> render(
-    layer::Ref<layer::FrameNode>   f,
-    float                      scale,
-    const layer::ImageOptions& opts,
-    IteratorResult::TimeCost&  cost)
+    layer::Ref<layer::FrameNode> f,
+    float                        scale,
+    const layer::ImageOptions&   opts,
+    IteratorResult::TimeCost&    cost)
   {
     layer->setRenderNode(f);
     layer->setScaleFactor(scale);
@@ -263,10 +262,13 @@ public:
     }
     if (sceneBuilderResult.root)
     {
-      namespace sv = std::views;
-      auto ranges =
-        std::move(*sceneBuilderResult.root) | sv::filter([](auto& f) { return f->isVisible(); });
-      this->frames = std::vector<layer::FramePtr>(ranges.begin(), ranges.end());
+      for (auto& f : *sceneBuilderResult.root)
+      {
+        if (f->isVisible())
+        {
+          this->frames.push_back(std::move(f));
+        }
+      }
       iter = this->frames.begin();
     }
     result.timeCost = cost;

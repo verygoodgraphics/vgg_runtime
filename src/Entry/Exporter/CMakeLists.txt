@@ -14,6 +14,9 @@ if(Vulkan_FOUND)
 
   install(TARGETS vgg_exporter DESTINATION lib COMPONENT vgg_module_exporter)
   install(DIRECTORY 
+    ${CMAKE_SOURCE_DIR}/include/Layer
+    DESTINATION include COMPONENT vgg_module_exporter)
+  install(DIRECTORY 
     ${CMAKE_SOURCE_DIR}/include/VGG/Exporter
     DESTINATION include COMPONENT vgg_module_exporter)
 else()

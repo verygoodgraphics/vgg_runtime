@@ -27,6 +27,6 @@ class ResourceProvider
 {
 public:
   virtual Blob readData(std::string_view guid) = 0;
-  ~ResourceProvider() = default;
+  virtual ~ResourceProvider() = default;
 };
 } // namespace VGG::layer

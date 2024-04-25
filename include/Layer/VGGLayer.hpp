@@ -85,6 +85,7 @@ public:
   DEPRECATED("use setRenderNode") void addScene(std::shared_ptr<Scene> scene);
   DEPRECATED("use setRenderNode") void setScene(std::shared_ptr<Scene> scene);
 
+  void       setBackgroundColor(uint32_t color);
   void       setScaleFactor(float scale);
   float      scaleFactor() const;
   PaintNode* nodeAt(int x, int y);

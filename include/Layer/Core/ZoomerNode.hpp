@@ -104,6 +104,11 @@ public:
     return m_scale.first;
   }
 
+  const glm::vec2& getOffset() const
+  {
+    return m_offset;
+  }
+
   glm::mat3 matrix() const
   {
     auto tx = m_offset.x;

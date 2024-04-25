@@ -20,6 +20,14 @@ protected:
   {
   }
 
+  void layoutAllPage(const Layout::Size& size, bool updateRule = false)
+  {
+    for (std::size_t i = 0; i < m_sut->layoutTree()->children().size(); ++i)
+    {
+      m_sut->layout(size, i, updateRule);
+    }
+  }
+
   auto setupModel(const char* fileDir)
   {
     std::shared_ptr<Daruma> daruma{

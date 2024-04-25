@@ -19,7 +19,7 @@ TEST_F(VggResizingTestSuite, FigHorizontal)
   setup("testDataDir/resizing/fig_h/");
 
   // When
-  m_sut->layout(Layout::Size{ 1200, 400 });
+  layoutAllPage(Layout::Size{ 1200, 400 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{ { { 20, 0 }, { 100, 40 } },
@@ -40,7 +40,7 @@ TEST_F(VggResizingTestSuite, FigVertical)
   setup("testDataDir/resizing/fig_v/");
 
   // When
-  m_sut->layout(Layout::Size{ 272, 300 });
+  layoutAllPage(Layout::Size{ 272, 300 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{ { { 0, 20 }, { 40, 100 } },
@@ -61,7 +61,7 @@ TEST_F(VggResizingTestSuite, SketchHorizontal)
   setup("testDataDir/resizing/sketch_h/");
 
   // When
-  m_sut->layout(Layout::Size{ 800, 500 });
+  layoutAllPage(Layout::Size{ 800, 500 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{
@@ -85,7 +85,7 @@ TEST_F(VggResizingTestSuite, SketchVertical)
   setup("testDataDir/resizing/sketch_v/");
 
   // When
-  m_sut->layout(Layout::Size{ 600, 400 });
+  layoutAllPage(Layout::Size{ 600, 400 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{
@@ -132,7 +132,7 @@ TEST_F(VggResizingTestSuite, FigGroup)
   setup("testDataDir/resizing/fig_group/");
 
   // When
-  m_sut->layout(Layout::Size{ 600, 600 });
+  layoutAllPage(Layout::Size{ 600, 600 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{ { { 89, 45 }, { 440, 500 } },
@@ -149,7 +149,7 @@ TEST_F(VggResizingTestSuite, FigUnion)
   setup("testDataDir/resizing/fig_union/");
 
   // When
-  m_sut->layout(Layout::Size{ 600, 600 });
+  layoutAllPage(Layout::Size{ 600, 600 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{
@@ -171,7 +171,7 @@ TEST_F(VggResizingTestSuite, FigNestedGroup)
   setup("testDataDir/resizing/fig_nested_group/");
 
   // When
-  m_sut->layout(Layout::Size{ 800, 800 });
+  layoutAllPage(Layout::Size{ 800, 800 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{ { { 89, 27 }, { 431, 473.99996948242188 } },
@@ -188,7 +188,7 @@ TEST_F(VggResizingTestSuite, FigGroupWithRotatedChild)
   setup("testDataDir/resizing/fig_group_with_rotated_child/");
 
   // When
-  m_sut->layout(Layout::Size{ 800, 800 });
+  layoutAllPage(Layout::Size{ 800, 800 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{
@@ -207,7 +207,7 @@ TEST_F(VggResizingTestSuite, FigGroupWithRotatedScaleChild)
   setup("testDataDir/resizing/fig_group_with_rotated_scale_child/");
 
   // When
-  m_sut->layout(Layout::Size{ 800, 600 });
+  layoutAllPage(Layout::Size{ 800, 600 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{
@@ -431,7 +431,7 @@ TEST_F(VggResizingTestSuite, ResizeRectangle)
   setupWithExpanding("testDataDir/resizing/rotated/rectangle/");
 
   // When
-  m_sut->layout(Layout::Size{ 800, 400 });
+  layoutAllPage(Layout::Size{ 800, 400 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{ { { 546.21014404296875, 254.85577392578125 },
@@ -445,7 +445,7 @@ TEST_F(VggResizingTestSuite, ResizeTriangle)
   setupWithExpanding("testDataDir/resizing/rotated/triangle/sketch/");
 
   // When
-  m_sut->layout(Layout::Size{ 800, 400 });
+  layoutAllPage(Layout::Size{ 800, 400 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{ { { 496.45550537109375, 99.750534057617188 },
@@ -459,7 +459,7 @@ TEST_F(VggResizingTestSuite, ResizeEllipse)
   setupWithExpanding("testDataDir/resizing/rotated/ellipse/");
 
   // When
-  m_sut->layout(Layout::Size{ 800, 400 });
+  layoutAllPage(Layout::Size{ 800, 400 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{ { { 576.74481201171875, 133.94818115234375 },
@@ -473,7 +473,7 @@ TEST_F(VggResizingTestSuite, ResizeTextScale)
   setupWithExpanding("testDataDir/resizing/rotated/text/");
 
   // When
-  m_sut->layout(Layout::Size{ 800, 400 });
+  layoutAllPage(Layout::Size{ 800, 400 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{ { { 258.9304898734249, -26.859742651458987 },
@@ -487,7 +487,7 @@ TEST_F(VggResizingTestSuite, ResizeVectorNetwork)
   setupWithExpanding("testDataDir/resizing/vector_network/");
 
   // When
-  m_sut->layout(Layout::Size{ 800, 800 });
+  layoutAllPage(Layout::Size{ 800, 800 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{ { { 117.78839874267578, 0.0 },
@@ -501,8 +501,8 @@ TEST_F(VggResizingTestSuite, HandleParentOrigin)
   setupWithExpanding("testDataDir/resizing/201_handle_parent_origin/");
 
   // When
-  m_sut->layout(Layout::Size{ 1920, 1080 });
-  // m_sut->layout(Layout::Size{ 1056, 336 });
+  layoutAllPage(Layout::Size{ 1920, 1080 });
+  // layoutAllPage(Layout::Size{ 1056, 336 });
 
   // Then
   {
@@ -521,13 +521,13 @@ TEST_F(VggResizingTestSuite, MinWidthFixStartEnd)
 {
   setupWithExpanding("testDataDir/resizing/101_constraint__fix_start_and_end/");
 
-  m_sut->layout(Layout::Size{ 0.1, 1080 });
+  layoutAllPage(Layout::Size{ 0.1, 1080 });
   {
     auto bounds = firstPage()->children()[0]->bounds();
     EXPECT_DOUBLE_EQ(bounds.size.width, 1.);
   }
 
-  m_sut->layout(Layout::Size{ 300, 1080 });
+  layoutAllPage(Layout::Size{ 300, 1080 });
   {
     auto bounds = firstPage()->children()[0]->bounds();
     EXPECT_DOUBLE_EQ(bounds.size.width, 200.);
@@ -538,13 +538,13 @@ TEST_F(VggResizingTestSuite, MinWidthFixStart)
 {
   setupWithExpanding("testDataDir/resizing/102_constraint__fix_start_and_scale/");
 
-  m_sut->layout(Layout::Size{ 0.1, 1080 });
+  layoutAllPage(Layout::Size{ 0.1, 1080 });
   {
     auto bounds = firstPage()->children()[0]->bounds();
     EXPECT_DOUBLE_EQ(bounds.size.width, 1.);
   }
 
-  m_sut->layout(Layout::Size{ 300, 1080 });
+  layoutAllPage(Layout::Size{ 300, 1080 });
   {
     auto bounds = firstPage()->children()[0]->bounds();
     EXPECT_DOUBLE_EQ(bounds.size.width, 200.);
@@ -555,13 +555,13 @@ TEST_F(VggResizingTestSuite, MinWidthFixEnd)
 {
   setupWithExpanding("testDataDir/resizing/103_constraint__fix_end_and_scale/");
 
-  m_sut->layout(Layout::Size{ 0.1, 1080 });
+  layoutAllPage(Layout::Size{ 0.1, 1080 });
   {
     auto bounds = firstPage()->children()[0]->bounds();
     EXPECT_DOUBLE_EQ(bounds.size.width, 1.);
   }
 
-  m_sut->layout(Layout::Size{ 300, 1080 });
+  layoutAllPage(Layout::Size{ 300, 1080 });
   {
     auto bounds = firstPage()->children()[0]->bounds();
     EXPECT_DOUBLE_EQ(bounds.size.width, 200.);
@@ -572,13 +572,13 @@ TEST_F(VggResizingTestSuite, MinHeightFixStartEnd)
 {
   setupWithExpanding("testDataDir/resizing/111_constraint__fix_top_and_bottom/");
 
-  m_sut->layout(Layout::Size{ 300, 0.1 });
+  layoutAllPage(Layout::Size{ 300, 0.1 });
   {
     auto bounds = firstPage()->children()[0]->bounds();
     EXPECT_DOUBLE_EQ(bounds.size.height, 1.);
   }
 
-  m_sut->layout(Layout::Size{ 300, 300 });
+  layoutAllPage(Layout::Size{ 300, 300 });
   {
     auto bounds = firstPage()->children()[0]->bounds();
     EXPECT_DOUBLE_EQ(bounds.size.height, 200.);
@@ -589,13 +589,13 @@ TEST_F(VggResizingTestSuite, MinHeightFixStart)
 {
   setupWithExpanding("testDataDir/resizing/112_constraint__fix_top_and_scale/");
 
-  m_sut->layout(Layout::Size{ 300, 0.1 });
+  layoutAllPage(Layout::Size{ 300, 0.1 });
   {
     auto bounds = firstPage()->children()[0]->bounds();
     EXPECT_DOUBLE_EQ(bounds.size.height, 1.);
   }
 
-  m_sut->layout(Layout::Size{ 300, 300 });
+  layoutAllPage(Layout::Size{ 300, 300 });
   {
     auto bounds = firstPage()->children()[0]->bounds();
     EXPECT_DOUBLE_EQ(bounds.size.height, 200.);
@@ -606,13 +606,13 @@ TEST_F(VggResizingTestSuite, MinHeightFixEnd)
 {
   setupWithExpanding("testDataDir/resizing/113_constraint__fix_bottom_and_scale/");
 
-  m_sut->layout(Layout::Size{ 300, 0.1 });
+  layoutAllPage(Layout::Size{ 300, 0.1 });
   {
     auto bounds = firstPage()->children()[0]->bounds();
     EXPECT_DOUBLE_EQ(bounds.size.height, 1.);
   }
 
-  m_sut->layout(Layout::Size{ 300, 300 });
+  layoutAllPage(Layout::Size{ 300, 300 });
   {
     auto bounds = firstPage()->children()[0]->bounds();
     EXPECT_DOUBLE_EQ(bounds.size.height, 200.);

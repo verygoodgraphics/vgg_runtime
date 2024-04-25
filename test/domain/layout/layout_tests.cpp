@@ -13,9 +13,9 @@ using namespace VGG;
 class VggLayoutTestSuite : public BaseVggLayoutTestSuite
 {
 protected:
-  void layout(Layout::Layout& layout, Layout::Size size)
+  void layout(Layout::Size size)
   {
-    layout.layout(size, true);
+    layoutAllPage(size, true);
   }
 };
 
@@ -40,7 +40,7 @@ TEST_F(VggLayoutTestSuite, SpaceBetween)
   setupWithExpanding("testDataDir/layout/0_space_between/");
 
   // When
-  layout(*m_sut, Layout::Size{ 1400, 900 });
+  layout(Layout::Size{ 1400, 900 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{ { { 0, 0 }, { 200, 150 } },
@@ -55,7 +55,7 @@ TEST_F(VggLayoutTestSuite, Wrap)
   setupWithExpanding("testDataDir/layout/1_wrap/");
 
   // When
-  layout(*m_sut, Layout::Size{ 799, 900 });
+  layout(Layout::Size{ 799, 900 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{ { { 0, 0 }, { 200, 150 } },
@@ -156,7 +156,7 @@ TEST_F(VggLayoutTestSuite, RotatedLine)
   setupWithExpanding("testDataDir/layout/201_rotated_line/");
 
   // When
-  m_sut->layout(Layout::Size{ 1920, 1080 });
+  layoutAllPage(Layout::Size{ 1920, 1080 });
 
   // Then
   {
@@ -183,7 +183,7 @@ TEST_F(VggLayoutTestSuite, AddAutoMarginToItemsInNoWrapSpaceBetweenFlexContainer
   setupWithExpanding("testDataDir/layout/202_auto_margin/");
 
   // When
-  m_sut->layout(Layout::Size{ 380, 300 }, true);
+  layoutAllPage(Layout::Size{ 380, 300 }, true);
 
   // Then
   {
@@ -198,7 +198,7 @@ TEST_F(VggLayoutTestSuite, NonZeroFrameOrigin)
   setupWithExpanding("testDataDir/layout/203_frame_with_non_zero_origin/");
 
   // When
-  layout(*m_sut, Layout::Size{ 1920, 1080 });
+  layout(Layout::Size{ 1920, 1080 });
 
   // Then
   std::vector<Layout::Rect> expectedBounds{ { { -742, -477 }, { 1920, 1080 } } };
@@ -213,7 +213,7 @@ TEST_F(VggLayoutTestSuite, UpdateFlexContainerWidthByConstraints)
   setupWithExpanding("testDataDir/layout/204_resize_flex_container/");
 
   // When
-  layout(*m_sut, Layout::Size{ 1920, 1080 });
+  layout(Layout::Size{ 1920, 1080 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{ { { 94, 101 }, { 1762, 342 } } };
@@ -227,7 +227,7 @@ TEST_F(VggLayoutTestSuite, EmptyContainer)
   setupWithExpanding("testDataDir/layout/205_empty_container/");
 
   // When
-  layout(*m_sut, Layout::Size{ 1920, 1080 });
+  layout(Layout::Size{ 1920, 1080 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{ { { 26, 0 }, { 6, 6 } } };
@@ -251,7 +251,7 @@ TEST_F(VggLayoutTestSuite, Fill_height_item_in_fit_content_container)
   setupWithExpanding("testDataDir/layout/206_fill_height_item_in_fit_content_container/");
 
   // When
-  layout(*m_sut, Layout::Size{ 1920, 1080 });
+  layout(Layout::Size{ 1920, 1080 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{ { { 144, 48 }, { 247, 136 } } };
@@ -264,7 +264,7 @@ TEST_F(VggLayoutTestSuite, Fill_width_item_in_fixed_width_container)
   setupWithExpanding("testDataDir/layout/207_fill_width_item_in_fixed_width_container/");
 
   // When
-  layout(*m_sut, Layout::Size{ 1920, 1080 });
+  layout(Layout::Size{ 1920, 1080 });
 
   // Then
   std::vector<Layout::Rect> expectedFrames{ { { 260, 0 }, { 1400, 101 } } };

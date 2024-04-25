@@ -44,6 +44,9 @@ constexpr auto PSEUDO_PATH_EDIT_VIEW = "::editView";
 
 #define REQUIRED_DOC_VERSION VGG_PARSE_FORMAT_VER_STR
 
+#undef DEBUG
+#define DEBUG(msg, ...)
+
 namespace
 {
 // Method to compare two versions.
@@ -913,16 +916,19 @@ void Controller::pageDidChange()
 {
   if (!hasContent())
   {
+    DEBUG("pageDidChange no content, return");
     return;
   }
 
   if (isNormalMode())
   {
+    DEBUG("pageDidChange, normal mode");
     scaleContentUpdateViewModelAndFit();
     m_presenter->triggerMouseEnter();
   }
   else
   {
+    DEBUG("pageDidChange, edit mode");
     layoutUpdateViewModelAndFitForEditing();
   }
 }

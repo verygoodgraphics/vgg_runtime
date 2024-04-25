@@ -949,6 +949,10 @@ void Controller::setContentMode(const std::string& mode)
   {
     newMode = Presenter::EContentMode::SCALE_ASPECT_FILL;
   }
+  else if (mode == "scaleAspectFillTopCenter")
+  {
+    newMode = Presenter::EContentMode::SCALE_ASPECT_FILL_TOP_CENTER;
+  }
   else if (mode == "scaleAspectFit")
   {
     newMode = Presenter::EContentMode::SCALE_ASPECT_FIT;

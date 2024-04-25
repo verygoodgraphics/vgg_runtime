@@ -46,7 +46,8 @@ public:
   {
     TOP_LEFT,
     SCALE_ASPECT_FIT,
-    SCALE_ASPECT_FILL
+    SCALE_ASPECT_FILL,
+    SCALE_ASPECT_FILL_TOP_CENTER
   };
 
 private:

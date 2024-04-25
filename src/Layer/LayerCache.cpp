@@ -90,6 +90,11 @@ void updateMaskMapInternal(PaintNode* p)
     {
       (*objects)[p->guid()] = p; // type of all children of paintnode must be paintnode
     }
+    else if (auto ptr = it->second.lock(); !ptr)
+    {
+      objects->erase(it);
+      (*objects)[p->guid()] = p;
+    }
   }
   for (auto it = p->begin(); it != p->end(); ++it)
   {

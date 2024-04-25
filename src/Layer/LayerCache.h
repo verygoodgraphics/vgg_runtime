@@ -32,7 +32,7 @@ using EffectCache = LRUCache<EffectCacheKey, sk_sp<SkRuntimeEffect>>;
 
 using ImageCacheKey = std::string;
 using ImageCache = LRUCache<ImageCacheKey, sk_sp<SkImage>>;
-using MaskMap = std::unordered_map<std::string, PaintNode*>;
+using MaskMap = std::unordered_map<std::string, WeakRef<PaintNode>>;
 
 BlenderCache*  getGlobalBlenderCache();
 EffectCache*   getGlobalEffectCache();

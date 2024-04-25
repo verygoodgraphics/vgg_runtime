@@ -52,52 +52,6 @@ public:
   };
   std::vector<MaskData>          components;
   std::optional<sk_sp<SkShader>> shader;
-
-  // sk_sp<SkImageFilter> toImagefilter(const SkRect& b, const SkMatrix* mat)
-  // {
-  //   ensureMaskShader(b, mat);
-  //   return SkImageFilters::Shader(*shader);
-  // }
-
-  // sk_sp<SkImageFilter> maskWith(const SkRect& b, sk_sp<SkImageFilter> input, const SkMatrix* mat)
-  // {
-  //   return SkImageFilters::Blend(SkBlendMode::kSrcIn, toImagefilter(b, mat), input, b);
-  // }
-
-  // sk_sp<SkMaskFilter> toMaskFilter(const SkRect& b, const SkMatrix* mat)
-  // {
-  //   ensureMaskShader(b, mat);
-  //   return SkShaderMaskFilter::Make(*shader);
-  // }
-
-  // void ensureMaskShader(const SkRect& b, const SkMatrix* mat)
-  // {
-  //   if (!shader)
-  //   {
-  //     Renderer          alphaMaskRender;
-  //     SkPictureRecorder rec;
-  //     auto              rt = SkRTreeFactory();
-  //     auto              canvas = rec.beginRecording(b, &rt);
-  //     alphaMaskRender.setCanvas(canvas);
-  //     for (const auto& p : components)
-  //     {
-  //       auto skm = toSkMatrix(p.transform.matrix());
-  //       canvas->save();
-  //       canvas->concat(skm);
-  //       p.mask->onDrawAsAlphaMask(&alphaMaskRender, 0);
-  //       canvas->restore();
-  //     }
-  //     auto maskShader = SkPictureShader::Make(
-  //       rec.finishRecordingAsPicture(),
-  //       SkTileMode::kClamp,
-  //       SkTileMode::kClamp,
-  //       SkFilterMode::kNearest,
-  //       mat,
-  //       &b);
-  //     ASSERT(maskShader);
-  //     shader = maskShader;
-  //   }
-  // }
 };
 
 class MaskBuilder
@@ -123,11 +77,11 @@ public:
   MaskBuilder& operator=(MaskBuilder&&) noexcept = default;
 
   static VShape makeShapeMask(
-    PaintNode*                                         self,
-    const std::unordered_map<std::string, PaintNode*>& maskObjects,
-    MaskIter&                                          iter,
-    const SkRect&                                      rect,
-    const SkMatrix*                                    matrix)
+    PaintNode*      self,
+    const MaskMap&  maskObjects,
+    MaskIter&       iter,
+    const SkRect&   rect,
+    const SkMatrix* matrix)
   {
     auto   components = collectionMasks(self, maskObjects, iter);
     VShape shape;
@@ -146,33 +100,33 @@ public:
   }
 
   static sk_sp<SkImageFilter> makeAlphaMaskWith(
-    sk_sp<SkImageFilter>                               input,
-    PaintNode*                                         self,
-    const std::unordered_map<std::string, PaintNode*>& maskObjects,
-    MaskIter&                                          iter,
-    const SkRect&                                      rect,
-    const SkMatrix*                                    matrix)
+    sk_sp<SkImageFilter> input,
+    PaintNode*           self,
+    const MaskMap&       maskObjects,
+    MaskIter&            iter,
+    const SkRect&        rect,
+    const SkMatrix*      matrix)
   {
     auto alphaMask = makeAlphaMaskFilter(self, maskObjects, iter, rect, matrix);
     return SkImageFilters::Blend(SkBlendMode::kSrcIn, std::move(alphaMask), input, rect);
   }
 
   static sk_sp<SkImageFilter> makeAlphaMaskFilter(
-    PaintNode*                                         self,
-    const std::unordered_map<std::string, PaintNode*>& maskObjects,
-    MaskIter&                                          iter,
-    const SkRect&                                      rect,
-    const SkMatrix*                                    matrix)
+    PaintNode*      self,
+    const MaskMap&  maskObjects,
+    MaskIter&       iter,
+    const SkRect&   rect,
+    const SkMatrix* matrix)
   {
     return SkImageFilters::Shader(makeAlphaMaskShader(self, maskObjects, iter, rect, matrix));
   }
 
   static sk_sp<SkShader> makeAlphaMaskShader(
-    PaintNode*                                         self,
-    const std::unordered_map<std::string, PaintNode*>& maskObjects,
-    MaskIter&                                          iter,
-    const SkRect&                                      rect,
-    const SkMatrix*                                    matrix);
+    PaintNode*      self,
+    const MaskMap&  maskObjects,
+    MaskIter&       iter,
+    const SkRect&   rect,
+    const SkMatrix* matrix);
 
 private:
   struct MaskData
@@ -188,9 +142,9 @@ private:
     }
   };
   static std::vector<MaskData> collectionMasks(
-    PaintNode*                                         self,
-    const std::unordered_map<std::string, PaintNode*>& maskObjects,
-    MaskIter&                                          iter)
+    PaintNode*     self,
+    const MaskMap& maskObjects,
+    MaskIter&      iter)
   {
     std::vector<MaskData> components;
     while (auto mask = iter.next())
@@ -200,11 +154,11 @@ private:
       {
         if (auto obj = maskObjects.find(id); obj != maskObjects.end())
         {
-          const auto t = obj->second->mapTransform(self);
-          components.emplace_back(
-            obj->second,
-            t,
-            mask->second ? getMaskBlender(*mask->second) : nullptr);
+          if (auto m = obj->second.lock(); m)
+          {
+            const auto t = m->mapTransform(self);
+            components.emplace_back(m, t, m ? getMaskBlender(*mask->second) : nullptr);
+          }
         }
         else
         {

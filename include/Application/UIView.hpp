@@ -131,7 +131,6 @@ public:
   }
 
   bool onEvent(UEvent e, void* userData) override;
-  void onRender(SkCanvas* canvas);
 
   void addSubview(std::shared_ptr<UIView> view)
   {
@@ -192,10 +191,7 @@ public:
 
   void enableZoomer(bool enabled);
 
-  void setDrawBackground(bool drawBackground)
-  {
-    m_drawGrayBackground = drawBackground;
-  }
+  void setDrawBackground(bool drawBackground);
 
   void triggerMouseEnter();
 

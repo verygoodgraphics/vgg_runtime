@@ -192,6 +192,7 @@ public:
 
   std::unique_ptr<SkPictureRecorder> rec;
   sk_sp<SkPicture>                   layerPicture;
+  SkColor                            backgroundColor{ SK_ColorWHITE };
   struct DebugConfig
   {
     bool enableDrawClickBounds{ false };
@@ -224,7 +225,7 @@ public:
   {
     ASSERT(canvas);
     canvas->save();
-    canvas->clear(SK_ColorWHITE);
+    canvas->clear(backgroundColor);
     canvas->concat(toSkMatrix(matrix()));
     for (auto& scene : scenes)
     {
@@ -295,7 +296,17 @@ public:
   {
     invalid = true;
   }
+
+  void setBackgroundColor(SkColor color)
+  {
+    backgroundColor = color;
+  }
 };
+
+void VLayer::setBackgroundColor(uint32_t color)
+{
+  d_ptr->setBackgroundColor(color);
+}
 
 bool VLayer::enableDrawClickBounds() const
 {

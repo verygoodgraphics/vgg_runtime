@@ -229,6 +229,12 @@ public:
   {
     m_zoomer->setTranslate(dx, dy);
   }
+
+public:
+  void setBackgroundColor(uint32_t color)
+  {
+    m_layer->setBackgroundColor(color);
+  }
 };
 
 UIView::UIView()
@@ -237,20 +243,6 @@ UIView::UIView()
 }
 
 UIView::~UIView() = default;
-
-void UIView::onRender(SkCanvas* canvas)
-{
-  if (m_drawGrayBackground)
-  {
-    if (auto page = currentPage())
-    {
-      canvas->clear(page->backgroundColor());
-    }
-  }
-  // todo
-  // AppScene::onRender(canvas);
-  setDirty(false);
-}
 
 bool UIView::onEvent(UEvent evt, void* userData)
 {
@@ -1117,4 +1109,21 @@ float UIView::scale() const
 {
   return m_impl->scale();
 }
+
+void UIView::setDrawBackground(bool drawBackground)
+{
+  m_drawGrayBackground = drawBackground;
+
+  auto color = SK_ColorWHITE;
+  if (m_drawGrayBackground)
+  {
+    if (auto page = currentPage())
+    {
+      color = page->backgroundColor();
+    }
+  }
+
+  m_impl->setBackgroundColor(color);
+}
+
 } // namespace VGG

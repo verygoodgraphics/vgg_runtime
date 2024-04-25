@@ -163,10 +163,16 @@ std::vector<uint8_t> UIApplication::makeImageSnapshot(layer::ImageOptions option
   const auto  dpi = m_layer->context()->property().dpiScaling;
   options.extend[0] = viewSize.width * dpi;
   options.extend[1] = viewSize.height * dpi;
+
+  // const auto oldScaleFactor = m_layer->scaleFactor();
+  // m_layer->setScaleFactor(oldScaleFactor / dpi);
   if (auto maybeImageBytes = m_layer->makeImageSnapshot(options))
   {
-    auto& bytes = maybeImageBytes.value();
+    const auto& bytes = maybeImageBytes.value();
     std::copy(bytes.begin(), bytes.end(), std::back_inserter(result));
   }
+
+  // m_layer->setScaleFactor(oldScaleFactor);
+
   return result;
 }

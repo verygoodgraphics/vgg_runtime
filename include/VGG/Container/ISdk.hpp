@@ -41,6 +41,7 @@ public:
   /*
     "topLeft"
     "scaleAspectFill"
+    "scaleAspectFillTopCenter"
     "scaleAspectFit"
   */
   virtual void setContentMode(const std::string& newModel) = 0;

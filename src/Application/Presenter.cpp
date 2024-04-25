@@ -313,19 +313,16 @@ void Presenter::fitForRunning(const Layout::Size& pageSize)
     return;
   }
 
+  DEBUG("Presenter::fitForRunning: contentMode = %d", m_contentMode);
   switch (m_contentMode)
   {
     case EContentMode::TOP_LEFT:
-      DEBUG("Presenter::fitForRunning: contentMode = TOP_LEFT");
       m_view->fitCurrentPage();
       m_view->setContentSize(pageSize);
       break;
     case EContentMode::SCALE_ASPECT_FILL:
+    case EContentMode::SCALE_ASPECT_FILL_TOP_CENTER:
     case EContentMode::SCALE_ASPECT_FIT:
-      DEBUG(
-        "Presenter::fitForRunning: contentMode = %s",
-        m_contentMode == EContentMode::SCALE_ASPECT_FILL ? "SCALE_ASPECT_FILL"
-                                                         : "SCALE_ASPECT_FIT");
       fitForAspectScale(pageSize);
       break;
   }
@@ -336,18 +333,14 @@ void Presenter::fitForRunning(const Layout::Size& pageSize)
 
 void Presenter::fitForAspectScale(const Layout::Size& pageSize)
 {
-  ASSERT(
-    m_contentMode == EContentMode::SCALE_ASPECT_FILL ||
-    m_contentMode == EContentMode::SCALE_ASPECT_FIT);
   if (!m_view)
   {
     return;
   }
 
-  const auto maxSize = viewSize();
-
   auto         scale = 1.0;
   Layout::Size contentSize;
+  const auto   maxSize = viewSize();
   if (
     !doublesNearlyEqual(pageSize.width, maxSize.width) ||
     !doublesNearlyEqual(pageSize.height, maxSize.height))
@@ -355,8 +348,18 @@ void Presenter::fitForAspectScale(const Layout::Size& pageSize)
     // scale
     const auto xScale = maxSize.width / pageSize.width;
     const auto yScale = maxSize.height / pageSize.height;
-    scale = m_contentMode == EContentMode::SCALE_ASPECT_FILL ? std::max(xScale, yScale)
-                                                             : std::min(xScale, yScale);
+    switch (m_contentMode)
+    {
+      case EContentMode::SCALE_ASPECT_FILL:
+      case EContentMode::SCALE_ASPECT_FILL_TOP_CENTER:
+        scale = std::max(xScale, yScale);
+        break;
+      case EContentMode::SCALE_ASPECT_FIT:
+        scale = std::min(xScale, yScale);
+        break;
+      case EContentMode::TOP_LEFT:
+        return;
+    }
 
     contentSize.width = pageSize.width * scale;
     contentSize.height = pageSize.height * scale;
@@ -366,13 +369,15 @@ void Presenter::fitForAspectScale(const Layout::Size& pageSize)
     contentSize = pageSize;
   }
 
-  const auto xOffset = (maxSize.width - contentSize.width) / 2;
-  const auto yOffset = (maxSize.height - contentSize.height) / 2;
-
   if (contentSize.width > maxSize.width || contentSize.height > maxSize.height)
   {
     m_view->setContentSize(contentSize);
   }
+
+  const auto xOffset = (maxSize.width - contentSize.width) / 2;
+  const auto yOffset = m_contentMode == EContentMode::SCALE_ASPECT_FILL_TOP_CENTER
+                         ? 0
+                         : (maxSize.height - contentSize.height) / 2;
 
   // set offset last, setContentSize may change contentOffset
   DEBUG(

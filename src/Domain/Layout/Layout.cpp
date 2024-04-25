@@ -73,7 +73,7 @@ Layout::Layout::Layout(std::shared_ptr<Domain::DesignDocument> designDocument, R
 void Layout::Layout::layout(Size size, int pageIndex, bool updateRule)
 {
   auto root = layoutTree();
-  if (pageIndex < 0 || pageIndex >= root->children().size())
+  if (pageIndex < 0 || static_cast<std::size_t>(pageIndex) >= root->children().size())
   {
     return;
   }

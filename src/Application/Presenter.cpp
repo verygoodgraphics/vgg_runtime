@@ -309,17 +309,23 @@ void Presenter::fitForRunning(const Layout::Size& pageSize)
 {
   if (!m_view)
   {
+    DEBUG("Presenter::fitForRunning return");
     return;
   }
 
   switch (m_contentMode)
   {
     case EContentMode::TOP_LEFT:
+      DEBUG("Presenter::fitForRunning: contentMode = TOP_LEFT");
       m_view->fitCurrentPage();
       m_view->setContentSize(pageSize);
       break;
     case EContentMode::SCALE_ASPECT_FILL:
     case EContentMode::SCALE_ASPECT_FIT:
+      DEBUG(
+        "Presenter::fitForRunning: contentMode = %s",
+        m_contentMode == EContentMode::SCALE_ASPECT_FILL ? "SCALE_ASPECT_FILL"
+                                                         : "SCALE_ASPECT_FIT");
       fitForAspectScale(pageSize);
       break;
   }
@@ -369,5 +375,10 @@ void Presenter::fitForAspectScale(const Layout::Size& pageSize)
   }
 
   // set offset last, setContentSize may change contentOffset
+  DEBUG(
+    "Presenter::fitForAspectScale: xOffset = %f, yOffset = %f, scale = %f",
+    xOffset,
+    yOffset,
+    scale);
   m_view->fitContent(xOffset, yOffset, scale);
 }

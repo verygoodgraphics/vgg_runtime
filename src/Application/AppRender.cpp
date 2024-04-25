@@ -28,7 +28,7 @@ class AppRender__pImpl
 {
 public:
   VGG_DECL_API(AppRender)
-  std::vector<std::shared_ptr<AppScene>>      listeners;
+  std::vector<std::shared_ptr<EventListener>> listeners;
   std::vector<std::shared_ptr<AppRenderable>> renderables;
   std::queue<std::pair<UEvent, void*>>        msgQueue;
   AppRender__pImpl(AppRender* api)
@@ -69,11 +69,10 @@ void AppRender::sendEvent(UEvent e, void* userData)
   VGG_IMPL(AppRender)
   _->dispatchEvent(e, userData);
 }
-void AppRender::addAppScene(std::shared_ptr<AppScene> listener)
+void AppRender::addEventListener(std::shared_ptr<EventListener> listener)
 {
   VGG_IMPL(AppRender)
   _->listeners.push_back(listener);
-  addScene(std::move(listener));
 }
 
 void AppRender::addAppRenderable(std::shared_ptr<AppRenderable> listener)

@@ -26,7 +26,8 @@ void UIApplication::setView(std::shared_ptr<UIScrollView> view, double w, double
   m_view->setSize(w, h);
 
   ASSERT(m_layer);
-  m_layer->addAppScene(m_view);
+  m_layer->addEventListener(m_view);
+  m_view->setLayer(m_layer);
 }
 
 bool UIApplication::onEvent(UEvent evt, void* userData)
@@ -122,14 +123,6 @@ bool UIApplication::handleKeyEvent(VKeyboardEvent evt)
     m_controller->setEditMode(!m_controller->isEditMode());
     m_view->setDirty(true);
     m_view->setDrawBackground(m_controller->isEditMode());
-    return true;
-  }
-
-  if (key == VGGK_b)
-  {
-    INFO("Toggle object bounding box");
-    m_view->enableDrawDebugBounds(!m_view->isEnableDrawDebugBounds());
-    m_view->setDirty(true);
     return true;
   }
 

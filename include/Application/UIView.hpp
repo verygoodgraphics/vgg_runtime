@@ -15,9 +15,9 @@
  */
 #pragma once
 
-#include "AppScene.hpp"
 #include "UIEvent.hpp"
 
+#include "Application/Event/EventListener.hpp"
 #include "Domain/Layout/Rect.hpp"
 #include "Layer/Scene.hpp"
 
@@ -36,7 +36,13 @@ class LayoutNode;
 class StateTree;
 struct ViewModel;
 
-class UIView : public app::AppScene
+namespace app
+{
+class AppRender;
+}
+
+class UIViewImpl;
+class UIView : public app::EventListener
 {
 public:
   using EventListener = std::function<void(UIEventPtr, std::weak_ptr<LayoutNode>)>;
@@ -55,6 +61,8 @@ private:
   friend class Editor;
   using TargetNode = std::pair<std::shared_ptr<LayoutNode>, std::string>;
 
+  std::unique_ptr<UIViewImpl> m_impl;
+
   struct EventContext
   {
     TargetNode                       mouseOverTargetNode;
@@ -72,7 +80,6 @@ private:
   std::vector<std::shared_ptr<UIView>> m_subviews;
 
   std::weak_ptr<LayoutNode> m_document;
-  int                       m_page{ 0 };
 
   std::stack<std::string> m_history; // page id stack; excludes presented pages
 
@@ -106,6 +113,7 @@ private:
 
 public:
   UIView();
+  ~UIView();
 
   void show(const ViewModel& viewModel, bool force = false);
   void show(const ViewModel& viewModel, std::vector<layer::FramePtr> frames, bool force = false);
@@ -122,8 +130,8 @@ public:
     m_eventListener = listener;
   }
 
-  void onRender(SkCanvas* canvas) override;
   bool onEvent(UEvent e, void* userData) override;
+  void onRender(SkCanvas* canvas);
 
   void addSubview(std::shared_ptr<UIView> view)
   {
@@ -171,10 +179,8 @@ public:
     m_skipUntilNextLoop = false;
   }
 
-  int currentPageIndex()
-  {
-    return m_page;
-  }
+  int currentPageIndex();
+
   bool setCurrentPage(int index);
   bool presentPage(int index);
   bool dismissPage();
@@ -192,6 +198,13 @@ public:
   }
 
   void triggerMouseEnter();
+
+  void setLayer(app::AppRender* layer);
+
+public:
+  glm::vec2 translate() const;
+  void      setTranslate(float dx, float dy);
+  float     scale() const;
 
 protected:
   Offset getOffset();

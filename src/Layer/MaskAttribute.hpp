@@ -27,7 +27,6 @@ namespace VGG::layer
 class PaintNode;
 class ObjectAttribute;
 class LayerAttribute;
-using MaskMap = std::unordered_map<std::string, PaintNode*>;
 class AlphaMaskAttribute : public ImageFilterAttribute
 {
 public:
@@ -37,7 +36,7 @@ public:
   VGG_ATTRIBUTE_PTR(MaskNode, PaintNode, m_maskedNode);
   VGG_ATTRIBUTE(AlphaMasks, std::vector<AlphaMask>, m_alphaMasks);
   void                 setInputImageFilter(Ref<ImageFilterAttribute> input);
-  Bounds                onRevalidate() override;
+  Bounds               onRevalidate() override;
   sk_sp<SkImageFilter> getImageFilter() const override
   {
     return m_alphaMaskFilter ? m_alphaMaskFilter : m_inputFilter->getImageFilter();

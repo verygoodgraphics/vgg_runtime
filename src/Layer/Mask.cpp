@@ -19,11 +19,11 @@ namespace VGG::layer
 {
 
 sk_sp<SkShader> MaskBuilder::makeAlphaMaskShader(
-  PaintNode*                                         self,
-  const std::unordered_map<std::string, PaintNode*>& maskObjects,
-  MaskIter&                                          iter,
-  const SkRect&                                      rect,
-  const SkMatrix*                                    matrix)
+  PaintNode*      self,
+  const MaskMap&  maskObjects,
+  MaskIter&       iter,
+  const SkRect&   rect,
+  const SkMatrix* matrix)
 {
   auto              components = collectionMasks(self, maskObjects, iter);
   Renderer          alphaMaskRender;

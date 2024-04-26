@@ -382,17 +382,6 @@ std::string LayoutNode::vggId() const
   return name();
 }
 
-const std::string& LayoutNode::id() const
-{
-  if (const auto element = elementNode())
-  {
-    return element->id();
-  }
-
-  static const std::string emptyId;
-  return emptyId;
-}
-
 std::string LayoutNode::originalId() const
 {
   if (auto element = elementNode())
@@ -1581,4 +1570,28 @@ void StateTree::setSrcNode(std::shared_ptr<LayoutNode> srcNode)
   ASSERT(srcNode);
   m_srcNode = srcNode;
   m_srcNodeId = srcNode->id();
+}
+
+const std::string& LayoutNode::LayoutNode::id() const
+{
+  if (!m_hasIdCache)
+  {
+    if (const auto element = elementNode())
+    {
+      m_id = element->id();
+      m_hasIdCache = true;
+    }
+  }
+
+  return m_id;
+}
+
+void LayoutNode::invalidateIdCache()
+{
+  m_id.clear();
+  m_hasIdCache = false;
+  for (auto& child : m_children)
+  {
+    child->invalidateIdCache();
+  }
 }

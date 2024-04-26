@@ -291,6 +291,12 @@ void ExpandSymbol::expandInstanceElement(
     makeTreeKeysUnique(child, idPrefix);
   }
 
+  // invalid tree nodes id cache
+  if (treeToRebuild)
+  {
+    treeToRebuild->invalidateIdCache();
+  }
+
   // 2.2. update mask by: id -> unique id
   for (auto child : instance.children())
   {

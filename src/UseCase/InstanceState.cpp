@@ -48,7 +48,7 @@ bool InstanceState::setState(
     return false;
   }
 
-  auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode().get());
+  auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode());
   ASSERT(pInstance);
   pInstance->resetState();
 
@@ -77,7 +77,7 @@ bool InstanceState::presentState(
   }
 
   // save current state tree to still handle events
-  auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode().get());
+  auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode());
   ASSERT(pInstance);
   const auto& oldMasterId = pInstance->masterId();
   if (oldMasterId == stateMasterId)
@@ -101,7 +101,7 @@ bool InstanceState::presentState(
     instanceDescendantId.c_str(),
     listenerId.c_str());
 
-  auto treeElement = std::make_shared<Domain::StateTreeElement>(instanceNode->elementNode());
+  auto treeElement = std::make_shared<Domain::StateTreeElement>(pInstance->shared_from_this());
   for (auto& child : oldElementChildren)
   {
     treeElement->addChild(child);
@@ -132,7 +132,7 @@ bool InstanceState::dismissState(
     return false;
   }
 
-  auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode().get());
+  auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode());
   ASSERT(pInstance);
   DEBUG(
     "instance %s, dismiss state, master id %s; event target: %s",
@@ -155,12 +155,12 @@ bool InstanceState::setState(
 {
   ASSERT(instanceNode);
 
-  auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode().get());
+  auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode());
   ASSERT(pInstance);
 
   // expand again
   m_expander->expandInstance(
-    std::static_pointer_cast<Domain::SymbolInstanceElement>(instanceNode->elementNode()),
+    std::shared_ptr<Domain::SymbolInstanceElement>{ pInstance },
     stateMasterId);
 
   // update view model

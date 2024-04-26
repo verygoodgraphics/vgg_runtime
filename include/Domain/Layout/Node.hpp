@@ -116,9 +116,9 @@ public:
     return m_parent.lock();
   }
 
-  virtual std::shared_ptr<VGG::Domain::Element> elementNode() const
+  virtual VGG::Domain::Element* elementNode() const
   {
-    return m_element.lock();
+    return m_element.lock().get();
   }
 
 public:
@@ -314,7 +314,7 @@ public:
     return srcNode()->parent();
   }
 
-  std::shared_ptr<VGG::Domain::Element> elementNode() const override
+  VGG::Domain::Element* elementNode() const override
   {
     return srcNode()->elementNode();
   }

@@ -88,7 +88,7 @@ std::pair<std::shared_ptr<LayoutNode>, std::string> LayoutNode::hitTest(
     std::vector<std::string> keys{ id(), originalId(), name() };
     if (auto ele = elementNode(); ele && (ele->type() == Domain::Element::EType::SYMBOL_INSTANCE))
     {
-      keys.push_back(std::static_pointer_cast<Domain::SymbolInstanceElement>(ele)->masterId());
+      keys.push_back(static_cast<Domain::SymbolInstanceElement*>(ele)->masterId());
     }
     for (const auto& key : keys)
     {
@@ -217,14 +217,15 @@ void LayoutNode::setFrame(
   {
     return;
   }
-  if (auto pathElement = std::dynamic_pointer_cast<Domain::PathElement>(element))
+  if (element->type() == Domain::Element::EType::PATH)
   {
+    auto pathElement = static_cast<Domain::PathElement*>(element);
     if (pathElement->children().size() == 1)
     {
-      if (
-        auto contourElement =
-          std::dynamic_pointer_cast<Domain::ContourElement>(pathElement->children()[0]))
+      if (const auto c = pathElement->children()[0];
+          c && c->type() == Domain::Element::EType::CONTOUR)
       {
+        auto contourElement = static_cast<Domain::ContourElement*>(c.get());
         scaleContour(*contourElement, oldFrame, newFrame);
         return;
       }
@@ -304,8 +305,9 @@ uint32_t LayoutNode::backgroundColor()
 
   if (auto element = elementNode())
   {
-    if (auto frameElement = std::dynamic_pointer_cast<Domain::FrameElement>(element))
+    if (element->type() == Domain::Element::EType::FRAME)
     {
+      auto frameElement = static_cast<Domain::FrameElement*>(element);
       if (auto frameModel = frameElement->object())
       {
         if (frameModel->backgroundColor)
@@ -382,7 +384,7 @@ std::string LayoutNode::vggId() const
 
 const std::string& LayoutNode::id() const
 {
-  if (auto element = elementNode())
+  if (const auto element = elementNode())
   {
     return element->id();
   }
@@ -446,8 +448,9 @@ bool LayoutNode::isVectorNetwork() const
 {
   if (auto element = elementNode())
   {
-    if (auto groupElement = std::dynamic_pointer_cast<Domain::GroupElement>(element))
+    if (element->type() == Domain::Element::EType::GROUP)
     {
+      auto groupElement = static_cast<Domain::GroupElement*>(element);
       if (auto pModel = groupElement->object())
       {
         if (pModel->isVectorNetwork)
@@ -638,14 +641,15 @@ Layout::Rect LayoutNode::resize(
   {
     return {};
   }
-  if (auto pathElement = std::dynamic_pointer_cast<Domain::PathElement>(element))
+  if (element->type() == Domain::Element::EType::PATH)
   {
+    auto pathElement = static_cast<Domain::PathElement*>(element);
     if (pathElement->children().size() == 1)
     {
-      if (
-        auto contourElement =
-          std::dynamic_pointer_cast<Domain::ContourElement>(pathElement->children()[0]))
+      if (const auto c = pathElement->children()[0];
+          c && c->type() == Domain::Element::EType::CONTOUR)
       {
+        auto contourElement = static_cast<Domain::ContourElement*>(c.get());
         return resizeContour(*contourElement, oldContainerSize, newContainerSize, parentOrigin);
       }
     }
@@ -959,8 +963,7 @@ bool LayoutNode::shouldSkip()
 
     if (auto element = elementNode())
     {
-      auto groupElement = std::dynamic_pointer_cast<Domain::GroupElement>(element);
-      if (groupElement)
+      if (element->type() == Domain::Element::EType::GROUP)
       {
         return true;
       }
@@ -975,17 +978,12 @@ bool LayoutNode::shouldSkip()
 bool LayoutNode::isBooleanGroup()
 {
   auto element = elementNode();
-  if (!element)
+  if (!element || element->type() != Domain::Element::EType::PATH)
   {
     return false;
   }
 
-  auto pathElement = std::dynamic_pointer_cast<Domain::PathElement>(element);
-  if (!pathElement)
-  {
-    return false;
-  }
-
+  auto pathElement = static_cast<Domain::PathElement*>(element);
   return pathElement->children().size() > 1;
 }
 
@@ -1037,8 +1035,7 @@ Layout::Rect LayoutNode::resizeGroup(
 
   if (isBooleanGroup())
   {
-    auto element = elementNode();
-    auto pathElement = std::dynamic_pointer_cast<Domain::PathElement>(element);
+    const auto pathElement = static_cast<Domain::PathElement*>(elementNode());
     ASSERT(pathElement->object());
     ASSERT(pathElement->object()->shape);
     auto& subShapes = pathElement->object()->shape->subshapes;
@@ -1416,12 +1413,12 @@ void LayoutNode::updatePathNodeModel(
   const std::vector<Layout::BezierPoint>& newPoints)
 {
   auto element = elementNode();
-  if (!element)
+  if (!element || element->type() != Domain::Element::EType::PATH)
   {
     return;
   }
 
-  auto pathElement = std::dynamic_pointer_cast<Domain::PathElement>(element);
+  auto pathElement = static_cast<Domain::PathElement*>(element);
   if (!pathElement)
   {
     return;
@@ -1433,8 +1430,9 @@ void LayoutNode::updatePathNodeModel(
 
   for (auto& child : pathElement->children())
   {
-    if (auto contourElement = std::dynamic_pointer_cast<Domain::ContourElement>(child))
+    if (child && child->type() == Domain::Element::EType::CONTOUR)
     {
+      auto contourElement = static_cast<Domain::ContourElement*>(child.get());
       contourElement->updatePoints(newPoints);
     }
   }

@@ -201,7 +201,7 @@ void ExpandSymbol::expandInstanceElement(
   std::vector<std::string>&      instanceIdStack,
   bool                           again)
 {
-  const auto& instanceId = instance.id();
+  const auto instanceId = instance.id(); // copied id; intance id will change
   if (
     std::find(instanceIdStack.begin(), instanceIdStack.end(), instanceId) != instanceIdStack.end())
   {
@@ -278,10 +278,10 @@ void ExpandSymbol::expandInstanceElement(
     std::vector<std::string> idStackWithoutSelf{ instanceIdStack.begin(),
                                                  instanceIdStack.end() - 1 };
     auto                     prefix = join(idStackWithoutSelf) + K_SEPARATOR;
-    instance.addKeyPrefix(prefix);
+    instance.addKeyPrefix(prefix); // instance id & key changes
   }
 
-  std::string instanceIdWithPrefix = instance.id();
+  const std::string& instanceIdWithPrefix = instance.id();
   mergeLayoutRule(instanceId, instanceIdWithPrefix);
   mergeLayoutRule(masterId, instanceIdWithPrefix);
 

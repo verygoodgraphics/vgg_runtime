@@ -174,7 +174,7 @@ void Editor::onRender(SkCanvas* canvas)
 
   canvas->save();
 
-  auto offset = contentView->translate();
+  auto offset = contentView->offset();
   auto zoom = contentView->scale();
   canvas->translate(offset.x, offset.y);
   canvas->scale(zoom, zoom);
@@ -455,7 +455,7 @@ void Editor::resizeNode(MouseEvent* mouseMove)
       case EResizePosition::BOTTOM_LEFT:
       case EResizePosition::TOP:
       case EResizePosition::LEFT:
-        contentView->setTranslate(offset.x, offset.y);
+        contentView->translate(offset.x, offset.y);
         break;
       default:
         break;

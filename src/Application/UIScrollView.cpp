@@ -120,7 +120,7 @@ void UIScrollView::setContentOffset(Point offset, bool cancelAnimation)
 {
   VERBOSE("UIScrollView::setContentOffset: x = %f, y = %f", offset.x, offset.y);
   m_contentOffset = offset;
-  setOffset(Offset{ offset.x, offset.y });
+  setOffset(offset.x, offset.y);
 
   if (cancelAnimation)
   {

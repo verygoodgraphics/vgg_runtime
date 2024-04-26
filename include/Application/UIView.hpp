@@ -51,12 +51,6 @@ public:
 
   using ScalarType = int;
 
-  struct Offset
-  {
-    double x;
-    double y;
-  };
-
 private:
   friend class Editor;
   using TargetNode = std::pair<std::shared_ptr<LayoutNode>, std::string>;
@@ -197,14 +191,11 @@ public:
 
   void setLayer(app::AppRender* layer);
 
-public:
-  glm::vec2 translate() const;
-  void      setTranslate(float dx, float dy);
-  float     scale() const;
-
 protected:
-  Offset getOffset();
-  void   setOffset(Offset offset);
+  float     scale() const;
+  glm::vec2 offset() const;
+  void      setOffset(float dx, float dy);
+  void      translate(float dx, float dy);
 
 private:
   std::tuple<bool, bool, bool, bool> getKeyModifier(int keyMod);

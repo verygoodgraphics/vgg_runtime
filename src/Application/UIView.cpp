@@ -24,11 +24,9 @@
 #include "Application/ZoomerNodeController.hpp"
 #include "Domain/Layout/Node.hpp"
 #include "Layer/Core/MemoryResourceProvider.hpp"
-#include "Layer/Core/RasterCacheTile.hpp"
 #include "Layer/Core/ResourceManager.hpp"
 #include "Layer/Model/StructModel.hpp"
 #include "Layer/SceneBuilder.hpp"
-#include "Layer/Zoomer.hpp"
 #include "Utility/Log.hpp"
 
 #include <include/core/SkCanvas.h>
@@ -221,11 +219,16 @@ public:
     m_zoomer->setScale(scale);
   }
 
-  glm::vec2 translate() const
+  glm::vec2 offset() const
   {
     return m_zoomer->getOffset();
   }
-  void setTranslate(float dx, float dy)
+  void setOffset(glm::vec2 offset)
+  {
+    m_zoomer->setOffset(offset);
+  }
+
+  void translate(float dx, float dy)
   {
     m_zoomer->setTranslate(dx, dy);
   }
@@ -470,9 +473,9 @@ void UIView::layoutSubviews()
 
 VGG::Layout::Point UIView::converPointFromWindowAndScale(Layout::Point point)
 {
-  auto offset = translate();
-  point.x -= offset.x;
-  point.y -= offset.y;
+  const auto o = offset();
+  point.x -= o.x;
+  point.y -= o.y;
 
   auto scaleFactor = scale();
   point.x /= scaleFactor;
@@ -873,13 +876,13 @@ void UIView::show(const ViewModel& viewModel, std::vector<layer::FramePtr> frame
 void UIView::fitContent(float xOffset, float yOffset, float scale)
 {
   m_impl->setScale(scale);
-  setOffset({ xOffset, yOffset });
+  setOffset(xOffset, yOffset);
 }
 
 void UIView::fitCurrentPage()
 {
-  m_impl->setScale(Zoomer::SL_1_1);
-  setOffset({ 0, 0 });
+  m_impl->setScale(layer::ZoomerNode::SL_1_1);
+  setOffset(0, 0);
 }
 
 void UIView::enableZoomer(bool enabled)
@@ -914,18 +917,6 @@ bool UIView::handleTouchEvent(int x, int y, int motionX, int motionY, EUIEventTy
     target);
 
   return true;
-}
-
-UIView::Offset UIView::getOffset()
-{
-  auto offset = translate();
-  return { offset.x, offset.y };
-}
-
-void UIView::setOffset(Offset offset)
-{
-  m_impl->setTranslate(offset.x, offset.y);
-  setDirty(true);
 }
 
 bool UIView::setCurrentPage(int index)
@@ -1097,17 +1088,23 @@ void UIView::setLayer(app::AppRender* layer)
   m_impl->setLayer(layer);
 }
 
-glm::vec2 UIView::translate() const
-{
-  return m_impl->translate();
-}
-void UIView::setTranslate(float dx, float dy)
-{
-  return m_impl->setTranslate(dx, dy);
-}
 float UIView::scale() const
 {
   return m_impl->scale();
+}
+glm::vec2 UIView::offset() const
+{
+  return m_impl->offset();
+}
+void UIView::setOffset(float dx, float dy)
+{
+  m_impl->setOffset({ dx, dy });
+  setDirty(true);
+}
+void UIView::translate(float dx, float dy)
+{
+  m_impl->translate(dx, dy);
+  setDirty(true);
 }
 
 void UIView::setDrawBackground(bool drawBackground)

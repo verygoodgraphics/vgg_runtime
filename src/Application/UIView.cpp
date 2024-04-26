@@ -210,6 +210,22 @@ public:
   }
 
 public:
+  void setOffsetAndScale(float xOffset, float yOffset, float scale)
+  {
+    setScale(scale);
+
+    // set offset last
+    setOffset({ xOffset, yOffset });
+  }
+  void resetOffsetAndScale()
+  {
+    m_zoomer->setScale(layer::ZoomerNode::SL_1_1);
+
+    // set offset last
+    setOffset({ 0, 0 });
+  }
+
+public:
   float scale() const
   {
     return m_zoomer->scale();
@@ -873,16 +889,14 @@ void UIView::show(const ViewModel& viewModel, std::vector<layer::FramePtr> frame
   setDirty(true);
 }
 
-void UIView::fitContent(float xOffset, float yOffset, float scale)
+void UIView::setOffsetAndScale(float xOffset, float yOffset, float scale)
 {
-  m_impl->setScale(scale);
-  setOffset(xOffset, yOffset);
+  m_impl->setOffsetAndScale(xOffset, yOffset, scale);
 }
 
-void UIView::fitCurrentPage()
+void UIView::resetOffsetAndScale()
 {
-  m_impl->setScale(layer::ZoomerNode::SL_1_1);
-  setOffset(0, 0);
+  m_impl->resetOffsetAndScale();
 }
 
 void UIView::enableZoomer(bool enabled)

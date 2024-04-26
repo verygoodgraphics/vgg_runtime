@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "Application/Animate.hpp"
+#include "Application/AttrBridge.hpp"
 #include "Utility/VggTimer.hpp"
 #include "Utility/Log.hpp"
 
@@ -99,6 +100,11 @@ auto Animate::getStartTime()
   return m_startTime;
 }
 
+bool Animate::isFinished()
+{
+  return getInterpolator()->isFinished() || !isRunning();
+}
+
 void Animate::start()
 {
   assert(!m_timer);
@@ -165,11 +171,6 @@ void NumberAnimate::start()
     true);
 }
 
-bool NumberAnimate::isFinished()
-{
-  return getInterpolator()->isFinished() || !isRunning();
-}
-
 void NumberAnimate::setFromTo(const std::vector<double>& from, const std::vector<double>& to)
 {
   assert(!from.empty() && from.size() == to.size());
@@ -181,4 +182,75 @@ void NumberAnimate::setFromTo(const std::vector<double>& from, const std::vector
 void NumberAnimate::setAction(std::function<void(const std::vector<double>&)> action)
 {
   m_action = action;
+}
+
+ReplaceNodeAnimate::ReplaceNodeAnimate(
+  milliseconds                  duration,
+  milliseconds                  interval,
+  std::shared_ptr<Interpolator> interpolator,
+  std::shared_ptr<AttrBridge>   attrBridge)
+  : Animate(duration, interval, interpolator)
+  , m_attrBridge(attrBridge)
+  , m_isOnlyUpdatePaint(false)
+{
+}
+
+void ReplaceNodeAnimate::setFromTo(std::shared_ptr<LayoutNode> from, std::shared_ptr<LayoutNode> to)
+{
+  m_from = from;
+  m_to = to;
+}
+
+auto ReplaceNodeAnimate::getFrom()
+{
+  return m_from;
+}
+
+auto ReplaceNodeAnimate::getTo()
+{
+  return m_to;
+}
+
+auto ReplaceNodeAnimate::getAttrBridge()
+{
+  return m_attrBridge;
+}
+
+auto ReplaceNodeAnimate::getIsOnlyUpdatePaint()
+{
+  return m_isOnlyUpdatePaint;
+}
+
+void ReplaceNodeAnimate::setIsOnlyUpdatePaint(bool isOnlyUpdatePaint)
+{
+  m_isOnlyUpdatePaint = isOnlyUpdatePaint;
+}
+
+DissolveAnimate::DissolveAnimate(
+  milliseconds                  duration,
+  milliseconds                  interval,
+  std::shared_ptr<Interpolator> interpolator,
+  std::shared_ptr<AttrBridge>   attrBridge)
+  : ReplaceNodeAnimate(duration, interval, interpolator, attrBridge)
+{
+}
+
+void DissolveAnimate::start()
+{
+  auto attrBridge = getAttrBridge();
+  auto from = getFrom();
+  auto to = getTo();
+  assert(from && to && attrBridge);
+
+  auto createNumberAnimate = [this]()
+  { return std::make_shared<NumberAnimate>(getDuration(), getInterval(), getInterpolator()); };
+
+  auto opacity = attrBridge->getNodeOpacity(to, false);
+  assert(opacity);
+  attrBridge->setNodeOpacity(to, 0, false);
+  attrBridge->setNodeOpacity(to, 0, true);
+
+  attrBridge
+    ->updateOpacity(to, opacity ? *opacity : 0, getIsOnlyUpdatePaint(), createNumberAnimate());
+  attrBridge->updateOpacity(from, 0, getIsOnlyUpdatePaint(), createNumberAnimate());
 }

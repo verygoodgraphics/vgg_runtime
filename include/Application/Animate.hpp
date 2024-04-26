@@ -24,6 +24,7 @@ namespace VGG
 {
 
 class Timer;
+class LayoutNode;
 class AttrBridge;
 using std::chrono::milliseconds;
 
@@ -62,9 +63,9 @@ public:
   virtual ~Animate();
 
 public:
-  void         stop();
-  bool         isRunning();
-  virtual bool isFinished() = 0;
+  void stop();
+  bool isRunning();
+  bool isFinished();
 
   auto getDuration();
   auto getInterval();
@@ -107,10 +108,7 @@ public:
     milliseconds                  interval,
     std::shared_ptr<Interpolator> interpolator);
 
-public:
-  virtual bool isFinished() override;
-
-protected:
+private:
   virtual void start() override;
   void         setFromTo(const std::vector<double>& from, const std::vector<double>& to);
   void         setAction(std::function<void(const std::vector<double>&)> action);
@@ -122,12 +120,70 @@ private:
   std::function<void(const std::vector<double>&)> m_action;
 };
 
-// class DissolveAnimate : public Animate
-// {
-// };
+class ReplaceNodeAnimate : public Animate
+{
+  friend AttrBridge;
 
-// class SmartAnimate : public Animate
-// {
-// };
+public:
+  ReplaceNodeAnimate(
+    milliseconds                  duration,
+    milliseconds                  interval,
+    std::shared_ptr<Interpolator> interpolator,
+    std::shared_ptr<AttrBridge>   attrBridge);
+
+private:
+  void setFromTo(std::shared_ptr<LayoutNode> from, std::shared_ptr<LayoutNode> to);
+  void setIsOnlyUpdatePaint(bool isOnlyUpdatePaint);
+
+protected:
+  auto getFrom();
+  auto getTo();
+  auto getAttrBridge();
+  auto getIsOnlyUpdatePaint();
+
+private:
+  std::shared_ptr<LayoutNode> m_from;
+  std::shared_ptr<LayoutNode> m_to;
+  std::shared_ptr<AttrBridge> m_attrBridge;
+  bool                        m_isOnlyUpdatePaint;
+};
+
+class DissolveAnimate : public ReplaceNodeAnimate
+{
+public:
+  DissolveAnimate(
+    milliseconds                  duration,
+    milliseconds                  interval,
+    std::shared_ptr<Interpolator> interpolator,
+    std::shared_ptr<AttrBridge>   attrBridge);
+
+private:
+  virtual void start() override;
+
+private:
+  std::shared_ptr<NumberAnimate> m_fromAnimate;
+  std::shared_ptr<NumberAnimate> m_toAnimate;
+};
+
+// TODO
+class SmartAnimate : public ReplaceNodeAnimate
+{
+public:
+  SmartAnimate(
+    milliseconds                  duration,
+    milliseconds                  interval,
+    std::shared_ptr<Interpolator> interpolator,
+    std::shared_ptr<AttrBridge>   attrBridge);
+
+private:
+  virtual void start() override;
+  void         correlateNode();
+
+private:
+  std::vector<NumberAnimate> m_animates;
+
+  // true: by id, false: by name chain
+  bool m_correlateById;
+};
 
 } // namespace VGG

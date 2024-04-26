@@ -183,13 +183,15 @@ std::string Element::typeString() const
   return {};
 }
 
-std::string Element::id() const
+const std::string& Element::id() const
 {
   if (auto obj = object())
   {
     return obj->id;
   }
-  return {};
+
+  static const std::string emptyId;
+  return emptyId;
 }
 
 std::string Element::originalId() const

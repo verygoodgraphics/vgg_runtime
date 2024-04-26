@@ -115,7 +115,7 @@ std::shared_ptr<Layout::Internal::AutoLayout> LayoutNode::createAutoLayout()
   return m_autoLayout;
 }
 
-std::shared_ptr<LayoutNode> LayoutNode::autoLayoutContainer()
+LayoutNode* LayoutNode::autoLayoutContainer()
 {
   return parent();
 }
@@ -479,16 +479,16 @@ bool LayoutNode::isVectorNetworkDescendant() const
   return false;
 }
 
-std::shared_ptr<LayoutNode> LayoutNode::findDescendantNodeById(const std::string& id)
+LayoutNode* LayoutNode::findDescendantNodeById(const std::string& id)
 {
   if (this->id() == id)
   {
-    return shared_from_this();
+    return this;
   }
 
   for (auto& child : children())
   {
-    if (const auto& found = child->findDescendantNodeById(id))
+    if (const auto found = child->findDescendantNodeById(id))
     {
       return found;
     }
@@ -573,7 +573,7 @@ Layout::Point LayoutNode::converPointToAncestor(
   auto y = point.y;
 
   auto p = parent();
-  while (p && p != ancestorNode)
+  while (p && p != ancestorNode.get())
   {
     auto origin = p->origin();
     x += origin.x;
@@ -1459,9 +1459,9 @@ void LayoutNode::detachChildrenFromFlexNodeTree()
   }
 }
 
-std::shared_ptr<LayoutNode> LayoutNode::closestCommonAncestor(std::shared_ptr<LayoutNode> node)
+LayoutNode* LayoutNode::closestCommonAncestor(LayoutNode* node)
 {
-  auto p = shared_from_this();
+  auto p = this;
   while (p)
   {
     if (p->isAncestorOf(node))
@@ -1475,12 +1475,12 @@ std::shared_ptr<LayoutNode> LayoutNode::closestCommonAncestor(std::shared_ptr<La
   return nullptr;
 }
 
-bool LayoutNode::isAncestorOf(std::shared_ptr<LayoutNode> node)
+bool LayoutNode::isAncestorOf(LayoutNode* node)
 {
   auto p = node;
   while (p)
   {
-    if (p.get() == this)
+    if (p == this)
     {
       return true;
     }
@@ -1568,8 +1568,11 @@ std::shared_ptr<LayoutNode> StateTree::srcNode() const
   {
     auto page = m_pageNode.lock();
     ASSERT(page);
-    const_cast<StateTree*>(this)->m_srcNode = page->findDescendantNodeById(m_srcNodeId);
+
+    if (auto p = page->findDescendantNodeById(m_srcNodeId))
+      const_cast<StateTree*>(this)->m_srcNode = p->shared_from_this();
   }
+
   return m_srcNode.lock();
 }
 

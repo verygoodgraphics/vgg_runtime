@@ -67,7 +67,7 @@ Layout::Layout::Layout(std::shared_ptr<Domain::DesignDocument> designDocument, R
 
   // initial config
   buildLayoutTree();
-  configureNodeAutoLayout(m_layoutTree);
+  configureNodeAutoLayout(m_layoutTree.get());
 }
 
 void Layout::Layout::layout(Size size, int pageIndex, bool updateRule)
@@ -90,12 +90,12 @@ void Layout::Layout::buildLayoutTree()
   m_layoutTree.reset(new LayoutNode{ m_designDocument });
   for (auto& child : m_designDocument->children())
   {
-    auto page = createOneLayoutNode(child, m_layoutTree);
+    auto page = createOneLayoutNode(child, m_layoutTree.get());
     m_originalPageSize.push_back(page->frame().size);
   }
 }
 
-void Layout::Layout::buildSubtree(std::shared_ptr<LayoutNode> parent)
+void Layout::Layout::buildSubtree(LayoutNode* parent)
 {
   if (!parent)
   {
@@ -143,9 +143,7 @@ Layout::Layout::RuleMapPtr Layout::Layout::collectRules(const nlohmann::json& js
   return result;
 }
 
-void Layout::Layout::configureNodeAutoLayout(
-  std::shared_ptr<LayoutNode> node,
-  bool                        createAutoLayout)
+void Layout::Layout::configureNodeAutoLayout(LayoutNode* node, bool createAutoLayout)
 {
   std::shared_ptr<VGG::Layout::Internal::Rule::Rule> rule;
 
@@ -169,7 +167,7 @@ void Layout::Layout::configureNodeAutoLayout(
 
   for (auto& child : node->children())
   {
-    configureNodeAutoLayout(child);
+    configureNodeAutoLayout(child.get());
   }
 }
 
@@ -203,10 +201,7 @@ void Layout::Layout::resizeNodeThenLayout(
   }
 }
 
-void Layout::Layout::resizeNodeThenLayout(
-  std::shared_ptr<LayoutNode> node,
-  Size                        size,
-  bool                        preservingOrigin)
+void Layout::Layout::resizeNodeThenLayout(LayoutNode* node, Size size, bool preservingOrigin)
 {
   if (!node)
   {
@@ -251,16 +246,16 @@ void Layout::Layout::layoutNodes(
   }
 
   // get closed common ancestor
-  std::shared_ptr<LayoutNode> commonAncestor;
+  LayoutNode* commonAncestor{ nullptr };
   for (auto& subtree : subtrees)
   {
     if (!commonAncestor)
     {
-      commonAncestor = subtree;
+      commonAncestor = subtree.get();
     }
     else
     {
-      commonAncestor = commonAncestor->closestCommonAncestor(subtree);
+      commonAncestor = commonAncestor->closestCommonAncestor(subtree.get());
     }
   }
 
@@ -270,7 +265,7 @@ void Layout::Layout::layoutNodes(
   }
 }
 
-void Layout::Layout::rebuildSubtree(std::shared_ptr<LayoutNode> node)
+void Layout::Layout::rebuildSubtree(LayoutNode* node)
 {
   if (!node)
   {
@@ -305,7 +300,7 @@ void Layout::Layout::rebuildSubtreeById(std::string nodeId)
 
 std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(
   std::shared_ptr<Domain::Element> element,
-  std::shared_ptr<LayoutNode>      parent)
+  LayoutNode*                      parent)
 {
   if (!element || !element->isLayoutNode())
   {
@@ -320,7 +315,7 @@ std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(
 
   for (auto& child : element->children())
   {
-    createOneLayoutNode(child, node);
+    createOneLayoutNode(child, node.get());
   }
 
   return node;

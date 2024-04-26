@@ -218,7 +218,7 @@ void ExpandSymbol::expandInstanceElement(
   const auto& master = *m_pMasters[masterId];
   instance.setMaster(master);
 
-  std::shared_ptr<LayoutNode> treeToRebuild;
+  LayoutNode* treeToRebuild{ nullptr };
   // build subtree for recursive expand
   if (instanceIdStack.empty())
   {
@@ -227,7 +227,7 @@ void ExpandSymbol::expandInstanceElement(
   else
   {
     // find node to rebuild, find in subtree
-    treeToRebuild = m_layout->layoutTree();
+    treeToRebuild = m_layout->layoutTree().get();
     std::vector<std::string> tmpIdStack;
     for (auto& tmpId : instanceIdStack)
     {
@@ -537,10 +537,7 @@ void ExpandSymbol::layoutSubtree(const std::string& subtreeNodeId, Size size, bo
   overrideLayoutRuleSize(subtreeNodeId, size);
 }
 
-void ExpandSymbol::layoutSubtree(
-  std::shared_ptr<LayoutNode> subtreeNode,
-  Size                        size,
-  bool                        preservingOrigin)
+void ExpandSymbol::layoutSubtree(LayoutNode* subtreeNode, Size size, bool preservingOrigin)
 {
   ASSERT(subtreeNode);
   m_layout->resizeNodeThenLayout(subtreeNode, size, preservingOrigin);

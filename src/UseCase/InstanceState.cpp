@@ -186,7 +186,7 @@ std::shared_ptr<LayoutNode> InstanceState::findInstanceNode(
         node->elementNode()->type() == Domain::Element::EType::SYMBOL_INSTANCE &&
         ((id == listenerId) || !id.ends_with(listenerId)))
     {
-      instanceNode = node;
+      instanceNode.reset(node);
       break;
     }
     node = node->parent();

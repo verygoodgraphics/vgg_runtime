@@ -152,6 +152,12 @@ class UIViewImpl
 
   int m_page{ 0 };
 
+private:
+  bool isUnitTest() const
+  {
+    return m_layer == nullptr;
+  }
+
 public:
   void setLayer(app::AppRender* layer)
   {
@@ -163,7 +169,8 @@ public:
     m_sceneNode = layer::SceneNode::Make(std::move(frames));
     m_zoomer = layer::ZoomerNode::Make();
     m_zoomController = std::make_unique<app::ZoomNodeController>(m_zoomer);
-    m_layer->setRenderNode(m_zoomer, m_sceneNode);
+    if (!isUnitTest())
+      m_layer->setRenderNode(m_zoomer, m_sceneNode);
     m_pager = std::make_unique<Pager>(m_sceneNode.get());
     setPage(page());
 
@@ -206,6 +213,9 @@ public:
 
   bool onEvent(UEvent evt, void* userData)
   {
+    if (!m_zoomController)
+      return false;
+
     return m_zoomController->onEvent(evt, userData);
   }
 

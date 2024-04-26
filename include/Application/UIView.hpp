@@ -111,8 +111,8 @@ public:
 
   void show(const ViewModel& viewModel, bool force = false);
   void show(const ViewModel& viewModel, std::vector<layer::FramePtr> frames, bool force = false);
-  void fitContent(float xOffset, float yOffset, float scale);
-  void fitCurrentPage();
+  void setOffsetAndScale(float xOffset, float yOffset, float scale);
+  void resetOffsetAndScale();
 
   void registerEventListener(HasEventListener hasEventListener)
   {

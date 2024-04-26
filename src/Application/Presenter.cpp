@@ -63,7 +63,7 @@ void Presenter::fitForEditing(const Layout::Size& pageSize)
   {
     return;
   }
-  m_view->fitContent(xOffset, yOffset, scale);
+  m_view->setOffsetAndScale(xOffset, yOffset, scale);
   m_view->enableZoomer(true);
   m_view->setScrollEnabled(false);
 }
@@ -317,7 +317,7 @@ void Presenter::fitForRunning(const Layout::Size& pageSize)
   switch (m_contentMode)
   {
     case EContentMode::TOP_LEFT:
-      m_view->fitCurrentPage();
+      m_view->resetOffsetAndScale();
       m_view->setContentSize(pageSize);
       break;
     case EContentMode::SCALE_ASPECT_FILL:
@@ -385,5 +385,5 @@ void Presenter::fitForAspectScale(const Layout::Size& pageSize)
     xOffset,
     yOffset,
     scale);
-  m_view->fitContent(xOffset, yOffset, scale);
+  m_view->setOffsetAndScale(xOffset, yOffset, scale);
 }

@@ -181,8 +181,8 @@ void ExpandSymbol::collectLayoutRules(const nlohmann::json& layoutJson)
 }
 
 void ExpandSymbol::traverseElementNode(
-  std::shared_ptr<Domain::Element> element,
-  std::vector<std::string>&        instanceIdStack)
+  std::shared_ptr<Domain::Element>& element,
+  std::vector<std::string>&         instanceIdStack)
 {
   if (auto instance = std::dynamic_pointer_cast<Domain::SymbolInstanceElement>(element))
   {
@@ -301,11 +301,7 @@ void ExpandSymbol::expandInstanceElement(
   // 3.0 master id refer to a var
   for (auto child : instance.children())
   {
-    processVariableRefs(
-      child,
-      instance.shared_from_this(),
-      instanceIdStack,
-      EProcessVarRefOption::ONLY_MASTER);
+    processVariableRefs(child, instance, instanceIdStack, EProcessVarRefOption::ONLY_MASTER);
   }
   // 3.1 master id overrides
   processMasterIdOverrides(instance, instanceIdStack);
@@ -314,11 +310,7 @@ void ExpandSymbol::expandInstanceElement(
   processVariableAssignmentsOverrides(instance, instanceIdStack);
   for (auto child : instance.children())
   {
-    processVariableRefs(
-      child,
-      instance.shared_from_this(),
-      instanceIdStack,
-      EProcessVarRefOption::NOT_MASTER);
+    processVariableRefs(child, instance, instanceIdStack, EProcessVarRefOption::NOT_MASTER);
   }
 
   // 3.3: layout overrides
@@ -697,10 +689,10 @@ void ExpandSymbol::makeMaskIdUnique(
 }
 
 void ExpandSymbol::processVariableRefs(
-  std::shared_ptr<Domain::Element> element, // in instance tree
-  std::shared_ptr<Domain::Element> container,
-  const std::vector<std::string>&  instanceIdStack,
-  EProcessVarRefOption             option)
+  std::shared_ptr<Domain::Element>& element, // in instance tree
+  Domain::Element&                  container,
+  const std::vector<std::string>&   instanceIdStack,
+  EProcessVarRefOption              option)
 {
   if (!element)
   {
@@ -723,20 +715,20 @@ void ExpandSymbol::processVariableRefs(
     }
     auto& refs = element->model()->variableRefs.value();
 
-    const std::vector<VariableAssign>*     containerVarAssigns = nullptr;
-    std::shared_ptr<SymbolInstanceElement> containerInstance =
-      std::dynamic_pointer_cast<SymbolInstanceElement>(container);
-    if (
-      containerInstance && containerInstance->model() &&
-      containerInstance->model()->variableAssignments)
+    const std::vector<VariableAssign>* containerVarAssigns = nullptr;
+    if (container.type() == Element::EType::SYMBOL_INSTANCE)
     {
-      containerVarAssigns = &containerInstance->model()->variableAssignments.value();
+      auto containerInstance = static_cast<SymbolInstanceElement*>(&container);
+      if (containerInstance->model() && containerInstance->model()->variableAssignments)
+      {
+        containerVarAssigns = &containerInstance->model()->variableAssignments.value();
+      }
     }
 
     const std::vector<VariableDefine>* containerVarDefs = nullptr;
-    if (container && container->model() && container->model()->variableDefs)
+    if (container.model() && container.model()->variableDefs)
     {
-      containerVarDefs = &container->model()->variableDefs.value();
+      containerVarDefs = &container.model()->variableDefs.value();
     }
 
     const std::vector<VariableDefine>* myVarDefs = nullptr;
@@ -860,7 +852,7 @@ void ExpandSymbol::processVariableRefs(
 
   for (auto child : element->children())
   {
-    processVariableRefs(child, element, instanceIdStack, option);
+    processVariableRefs(child, *element, instanceIdStack, option);
   }
 }
 
@@ -1003,7 +995,7 @@ void ExpandSymbol::processVariableAssignmentsOverrides(
     childInstance->updateVariableAssignments(overrideItem.overrideValue);
     for (auto& child : childInstance->children())
     {
-      processVariableRefs(child, childInstance, _, EProcessVarRefOption::ALL);
+      processVariableRefs(child, *childInstance, _, EProcessVarRefOption::ALL);
     }
   }
 }

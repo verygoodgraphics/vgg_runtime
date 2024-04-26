@@ -192,8 +192,8 @@ public:
   Layout::Size swapWidthAndHeightIfNeeded(Layout::Size size);
 
 public:
-  std::string id() const;
-  std::string originalId() const;
+  const std::string& id() const;
+  std::string        originalId() const;
 
   std::string vggId() const;
   std::string name() const;

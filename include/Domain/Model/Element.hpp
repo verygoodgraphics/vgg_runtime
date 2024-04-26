@@ -116,9 +116,9 @@ public:
   {
     return object();
   }
-  std::string id() const;
-  std::string originalId() const;
-  std::string name() const;
+  const std::string& id() const;
+  std::string        originalId() const;
+  std::string        name() const;
 
   virtual const Model::Object* model() const
   {

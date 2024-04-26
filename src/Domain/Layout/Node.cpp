@@ -380,14 +380,15 @@ std::string LayoutNode::vggId() const
   return name();
 }
 
-std::string LayoutNode::id() const
+const std::string& LayoutNode::id() const
 {
   if (auto element = elementNode())
   {
     return element->id();
   }
 
-  return {};
+  static const std::string emptyId;
+  return emptyId;
 }
 
 std::string LayoutNode::originalId() const

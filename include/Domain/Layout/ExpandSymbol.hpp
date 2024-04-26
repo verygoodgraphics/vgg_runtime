@@ -100,8 +100,8 @@ private:
   void collectLayoutRules(const nlohmann::json& json);
 
   void traverseElementNode(
-    std::shared_ptr<Domain::Element> element,
-    std::vector<std::string>&        instanceIdStack);
+    std::shared_ptr<Domain::Element>& element,
+    std::vector<std::string>&         instanceIdStack);
   void expandInstanceElement(
     Domain::SymbolInstanceElement& instance,
     std::vector<std::string>&      instanceIdStack,
@@ -125,10 +125,10 @@ private:
     Domain::SymbolInstanceElement&  instance,
     const std::vector<std::string>& instanceIdStack);
   void processVariableRefs(
-    std::shared_ptr<Domain::Element> element,   // in instance tree
-    std::shared_ptr<Domain::Element> container, // container
-    const std::vector<std::string>&  instanceIdStack,
-    EProcessVarRefOption             option);
+    std::shared_ptr<Domain::Element>& element,   // in instance tree
+    Domain::Element&                  container, // container
+    const std::vector<std::string>&   instanceIdStack,
+    EProcessVarRefOption              option);
   void processLayoutOverrides(
     Domain::SymbolInstanceElement&  instance,
     const std::vector<std::string>& instanceIdStack);

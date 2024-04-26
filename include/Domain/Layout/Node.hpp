@@ -96,6 +96,9 @@ class LayoutNode : public std::enable_shared_from_this<LayoutNode>
   std::optional<Layout::Scalar> m_fixStartHeightRatio;
   std::optional<Layout::Scalar> m_fixEndHeightRatio;
 
+  mutable bool        m_hasIdCache{ false };
+  mutable std::string m_id; // cache
+
 public:
   using HitTestHook = std::function<bool(const std::string&)>;
 
@@ -193,6 +196,7 @@ public:
 
 public:
   const std::string& id() const;
+  void               invalidateIdCache();
   std::string        originalId() const;
 
   std::string vggId() const;

@@ -61,10 +61,10 @@ public:
 
   void layout(Size size, int pageIndex, bool updateRule = false);
   void resizeNodeThenLayout(const std::string& nodeId, Size size, bool preservingOrigin);
-  void resizeNodeThenLayout(std::shared_ptr<LayoutNode> node, Size size, bool preservingOrigin);
+  void resizeNodeThenLayout(LayoutNode* node, Size size, bool preservingOrigin);
   void layoutNodes(const std::vector<std::string>& nodeIds, const std::string& constainerNodeId);
 
-  void rebuildSubtree(std::shared_ptr<LayoutNode> node);
+  void rebuildSubtree(LayoutNode* node);
   void rebuildSubtreeById(std::string nodeId);
 
   std::shared_ptr<LayoutNode> layoutTree() const
@@ -87,11 +87,11 @@ private:
   void                        buildLayoutTree();
   std::shared_ptr<LayoutNode> createOneLayoutNode(
     std::shared_ptr<Domain::Element> element,
-    std::shared_ptr<LayoutNode>      parent);
+    LayoutNode*                      parent);
 
-  void buildSubtree(std::shared_ptr<LayoutNode> parent);
+  void buildSubtree(LayoutNode* parent);
 
-  void configureNodeAutoLayout(std::shared_ptr<LayoutNode> node, bool createAutoLayout = true);
+  void configureNodeAutoLayout(LayoutNode* node, bool createAutoLayout = true);
 
   void updateFirstOnTop(std::shared_ptr<Domain::Element> element);
 };

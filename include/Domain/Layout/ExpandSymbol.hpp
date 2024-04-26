@@ -115,7 +115,7 @@ private:
   void overrideLayoutRuleSize(const std::string& instanceId, const Size& instanceSize);
 
   void layoutSubtree(const std::string& subtreeNodeId, Size size, bool preservingOrigin);
-  void layoutSubtree(std::shared_ptr<LayoutNode> subtreeNode, Size size, bool preservingOrigin);
+  void layoutSubtree(LayoutNode* subtreeNode, Size size, bool preservingOrigin);
   void layoutDirtyNodes(const std::string& instanceId);
 
   void processMasterIdOverrides(

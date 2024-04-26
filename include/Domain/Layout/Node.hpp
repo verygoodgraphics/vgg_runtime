@@ -111,9 +111,9 @@ public:
     return this;
   }
 
-  virtual const std::shared_ptr<LayoutNode> parent() const
+  virtual LayoutNode* parent() const
   {
-    return m_parent.lock();
+    return m_parent.lock().get();
   }
 
   virtual VGG::Domain::Element* elementNode() const
@@ -145,8 +145,8 @@ public:
     return m_children;
   }
 
-  bool                        isAncestorOf(std::shared_ptr<LayoutNode> node);
-  std::shared_ptr<LayoutNode> closestCommonAncestor(std::shared_ptr<LayoutNode> node);
+  bool        isAncestorOf(LayoutNode* node);
+  LayoutNode* closestCommonAncestor(LayoutNode* node);
 
   Layout::Rect frame() const;
   Layout::Rect bounds() const;
@@ -165,7 +165,7 @@ public:
   std::shared_ptr<Layout::Internal::AutoLayout> createAutoLayout();
   void                                          configureAutoLayout();
 
-  std::shared_ptr<LayoutNode>                   autoLayoutContainer();
+  LayoutNode*                                   autoLayoutContainer();
   std::shared_ptr<Layout::Internal::AutoLayout> containerAutoLayout();
 
   void setNeedLayout();
@@ -180,7 +180,7 @@ public:
     bool                updateRule,
     bool                preservingOrigin); // return node that needs layout
 
-  std::shared_ptr<LayoutNode> findDescendantNodeById(const std::string& id);
+  LayoutNode* findDescendantNodeById(const std::string& id);
 
   Layout::Rect calculateResizedFrame(const Layout::Size& newSize);
   Layout::Rect frameToAncestor(std::shared_ptr<LayoutNode> ancestorNode = nullptr)
@@ -309,7 +309,7 @@ public:
     return m_pageNode.lock().get();
   }
 
-  const std::shared_ptr<LayoutNode> parent() const override
+  LayoutNode* parent() const override
   {
     return srcNode()->parent();
   }

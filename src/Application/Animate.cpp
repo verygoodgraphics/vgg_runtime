@@ -72,6 +72,11 @@ void Animate::stop()
   {
     m_timer->invalidate();
     m_timer = nullptr;
+
+    for (auto& item : m_callbackWhenStop)
+    {
+      item();
+    }
   }
 }
 
@@ -116,6 +121,11 @@ std::shared_ptr<Timer>& Animate::getTimerRef()
   return m_timer;
 }
 
+void Animate::addCallBackWhenStop(std::function<void()>&& fun)
+{
+  m_callbackWhenStop.emplace_back(std::move(fun));
+}
+
 void AnimateManage::addAnimate(std::shared_ptr<Animate> animate)
 {
   m_animates.emplace_back(animate);
@@ -155,15 +165,14 @@ void NumberAnimate::start()
       auto interpolator = getInterpolator();
       assert(interpolator);
 
+      auto passedTime =
+        std::chrono::duration_cast<milliseconds>(std::chrono::steady_clock::now() - getStartTime());
       const auto size = m_nowValue.size();
+      assert(size && size == m_from.size() && size == m_to.size());
+
       for (size_t i = 0; i < size; ++i)
       {
-        m_nowValue[i] = (*interpolator)(
-          std::chrono::duration_cast<milliseconds>(
-            std::chrono::steady_clock::now() - getStartTime()),
-          m_from.at(i),
-          m_to.at(i),
-          getDuration());
+        m_nowValue[i] = (*interpolator)(passedTime, m_from.at(i), m_to.at(i), getDuration());
       }
 
       m_action(m_nowValue);
@@ -171,7 +180,7 @@ void NumberAnimate::start()
     true);
 }
 
-void NumberAnimate::setFromTo(const std::vector<double>& from, const std::vector<double>& to)
+void NumberAnimate::setFromTo(const TParam& from, const TParam& to)
 {
   assert(!from.empty() && from.size() == to.size());
   m_from = from;
@@ -179,7 +188,7 @@ void NumberAnimate::setFromTo(const std::vector<double>& from, const std::vector
   m_nowValue.resize(from.size());
 }
 
-void NumberAnimate::setAction(std::function<void(const std::vector<double>&)> action)
+void NumberAnimate::setAction(std::function<void(const TParam&)> action)
 {
   m_action = action;
 }
@@ -240,17 +249,35 @@ void DissolveAnimate::start()
   auto attrBridge = getAttrBridge();
   auto from = getFrom();
   auto to = getTo();
+  auto isOnlyUpdatePaint = getIsOnlyUpdatePaint();
   assert(from && to && attrBridge);
 
   auto createNumberAnimate = [this]()
   { return std::make_shared<NumberAnimate>(getDuration(), getInterval(), getInterpolator()); };
 
-  auto opacity = attrBridge->getNodeOpacity(to, false);
+  auto opacity = AttrBridge::getOpacity(to);
   assert(opacity);
-  attrBridge->setNodeOpacity(to, 0, false);
-  attrBridge->setNodeOpacity(to, 0, true);
+  attrBridge->updateOpacity(to, 0, isOnlyUpdatePaint);
+  attrBridge->updateVisible(to, true, isOnlyUpdatePaint);
+  attrBridge->updateOpacity(to, opacity ? *opacity : 1, isOnlyUpdatePaint, createNumberAnimate());
 
-  attrBridge
-    ->updateOpacity(to, opacity ? *opacity : 0, getIsOnlyUpdatePaint(), createNumberAnimate());
-  attrBridge->updateOpacity(from, 0, getIsOnlyUpdatePaint(), createNumberAnimate());
+  auto fromAnimate = createNumberAnimate();
+  fromAnimate->addCallBackWhenStop([attrBridge, from, isOnlyUpdatePaint]()
+                                   { attrBridge->updateVisible(from, false, isOnlyUpdatePaint); });
+  attrBridge->updateVisible(from, true, isOnlyUpdatePaint);
+  attrBridge->updateOpacity(from, 0, isOnlyUpdatePaint, fromAnimate);
+}
+
+SmartAnimate::SmartAnimate(
+  milliseconds                  duration,
+  milliseconds                  interval,
+  std::shared_ptr<Interpolator> interpolator,
+  std::shared_ptr<AttrBridge>   attrBridge)
+  : ReplaceNodeAnimate(duration, interval, interpolator, attrBridge)
+  , m_correlateById(true)
+{
+}
+
+void SmartAnimate::start()
+{
 }

@@ -8,3 +8,5 @@ lib/node*
 lib/skia
 lib/SDL2*
 downloads
+.vscode/
+.vs/

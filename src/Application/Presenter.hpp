@@ -164,7 +164,7 @@ public:
   {
     return this->m_view;
   }
-  
+
   void setEditorEventListener(UIView::EventListener listener)
   {
     m_editorEventListener = listener;

@@ -331,7 +331,10 @@ struct Serde
   }
 
   template<typename M>
-  static PaintNodePtr from(const M::Model& m, const glm::mat3& totalMatrix, const Context& ctx)
+  static PaintNodePtr from(
+    const typename M::Model& m,
+    const glm::mat3&         totalMatrix,
+    const Context&           ctx)
   {
     return from<typename M::Model, typename M::CastObject>(m, totalMatrix, ctx);
   }

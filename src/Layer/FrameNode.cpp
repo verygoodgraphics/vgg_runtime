@@ -35,6 +35,33 @@
 namespace VGG::layer
 {
 
+PaintNode* findByID(PaintNode* ptr, std::string_view guid)
+{
+  if (ptr->guid() == guid)
+  {
+    return ptr;
+  }
+  for (const auto& ptr : *ptr)
+  {
+    auto n = static_cast<PaintNode*>(ptr.get());
+    if (n->guid() == guid)
+    {
+      return n;
+    }
+    else
+    {
+      auto r = findByID(n, guid);
+      if (r)
+        return r;
+    }
+  }
+  return nullptr;
+}
+} // namespace VGG::layer
+
+namespace VGG::layer
+{
+
 class FrameNode__pImpl
 {
   VGG_DECL_API(FrameNode)
@@ -174,9 +201,13 @@ void FrameNode::invalidateMask()
   d_ptr->maskDirty = true;
 }
 
-PaintNode* FrameNode::nodeByID(const std::string& id)
+PaintNode* FrameNode::nodeByID(std::string_view id)
 {
-  return static_cast<PaintNode*>(node()->findChildRecursive(id).get());
+  if (auto r = node(); r)
+  {
+    return findByID(r, id);
+  }
+  return nullptr;
 }
 
 FrameNode::~FrameNode()

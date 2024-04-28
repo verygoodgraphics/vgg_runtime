@@ -57,7 +57,7 @@ public:
   Bounds effectBounds() const override;
 
   void       nodeAt(int x, int y, PaintNode::NodeVisitor visitor);
-  PaintNode* nodeByID(const std::string& id);
+  PaintNode* nodeByID(std::string_view id);
 
   void invalidateMask(); // temporary solution
 

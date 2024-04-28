@@ -392,3 +392,24 @@ std::vector<std::shared_ptr<LayoutNode>> Layout::Layout::removeNodeChildren(Layo
 
   return node->removeAllChildren();
 }
+
+void Layout::Layout::cacheOneNode(LayoutNode* node)
+{
+  if (!node)
+    return;
+
+  if (const auto& id = node->id(); !id.empty())
+    m_nodeCacheMap[id] = node;
+}
+
+void Layout::Layout::cacheTreeNodes(LayoutNode* tree)
+{
+  if (!tree)
+    return;
+
+  if (const auto& id = tree->id(); !id.empty())
+    m_nodeCacheMap[id] = tree;
+
+  for (auto& child : tree->children())
+    cacheTreeNodes(child.get());
+}

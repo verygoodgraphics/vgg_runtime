@@ -227,27 +227,17 @@ void ExpandSymbol::expandInstanceElement(
   else
   {
     // find node to rebuild, find in subtree
-    treeToRebuild = m_layout->layoutTree().get();
-    std::vector<std::string> tmpIdStack;
-    for (auto& tmpId : instanceIdStack)
-    {
-      tmpIdStack.push_back(tmpId);
-      const auto& parentInstanceNodeId = join(tmpIdStack);
-      auto subtreeToRebuild = m_layout->findNodeInTreeById(treeToRebuild, parentInstanceNodeId);
-      if (subtreeToRebuild)
-      {
-        treeToRebuild = subtreeToRebuild;
-      }
-      else
-      {
-        break;
-      }
-    }
+    const auto& parentInstanceNodeId = join(instanceIdStack);
+    treeToRebuild = m_layout->findNodeById(parentInstanceNodeId);
+    if (treeToRebuild)
+      treeToRebuild =
+        treeToRebuild->findDescendantNodeById(instanceId); // not unique, find in subtree
   }
 
   // rebuild subtree
   if (treeToRebuild)
   {
+    ASSERT(treeToRebuild->id() == instanceId);
     m_layout->rebuildSubtree(treeToRebuild);
   }
   else
@@ -265,6 +255,20 @@ void ExpandSymbol::expandInstanceElement(
     instanceIdStack.push_back(instanceId);
   }
 
+  // 0. make instance id unique; To rebuild correct tree in child expanding
+  if (!again && instanceIdStack.size() > 1)
+  {
+    std::vector<std::string> idStackWithoutSelf{ instanceIdStack.begin(),
+                                                 instanceIdStack.end() - 1 };
+    auto                     prefix = join(idStackWithoutSelf) + K_SEPARATOR;
+    instance.addKeyPrefix(prefix); // instance id & key changes
+    if (treeToRebuild)
+    {
+      treeToRebuild->invalidateIdCache();
+      m_layout->cacheOneNode(treeToRebuild);
+    }
+  }
+
   // 1. expand
   for (auto& child : instance.children())
   {
@@ -273,15 +277,7 @@ void ExpandSymbol::expandInstanceElement(
 
   // 2 make instance tree nodes id unique
   // 2.1
-  if (!again && instanceIdStack.size() > 1)
-  {
-    std::vector<std::string> idStackWithoutSelf{ instanceIdStack.begin(),
-                                                 instanceIdStack.end() - 1 };
-    auto                     prefix = join(idStackWithoutSelf) + K_SEPARATOR;
-    instance.addKeyPrefix(prefix); // instance id & key changes
-  }
-
-  const std::string& instanceIdWithPrefix = instance.id();
+  const std::string& instanceIdWithPrefix = instance.id(); // changed id, with prefix
   mergeLayoutRule(instanceId, instanceIdWithPrefix);
   mergeLayoutRule(masterId, instanceIdWithPrefix);
 
@@ -295,6 +291,7 @@ void ExpandSymbol::expandInstanceElement(
   if (treeToRebuild)
   {
     treeToRebuild->invalidateIdCache();
+    m_layout->cacheTreeNodes(treeToRebuild);
   }
 
   // 2.2. update mask by: id -> unique id

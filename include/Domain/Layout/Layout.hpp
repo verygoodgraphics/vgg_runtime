@@ -84,6 +84,8 @@ public:
 
   LayoutNode* findNodeById(const std::string& id);
   LayoutNode* findNodeInTreeById(LayoutNode* tree, const std::string& id);
+  void        cacheOneNode(LayoutNode* node);
+  void        cacheTreeNodes(LayoutNode* tree);
 
   std::vector<std::shared_ptr<LayoutNode>> removeNodeChildren(LayoutNode* node);
   void                                     invalidateNodeCache(LayoutNode* tree);

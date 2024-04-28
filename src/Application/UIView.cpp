@@ -66,7 +66,7 @@ class Pager
   {
     if (m_sceneNode && !m_sceneNode->getFrames().empty())
     {
-      const auto total = m_sceneNode->getFrames().size();
+      const int total = m_sceneNode->getFrames().size();
       auto       newPage = (m_currentPage + delta + total) % total;
       if (newPage == m_currentPage)
         return;
@@ -84,7 +84,7 @@ public:
     if (m_sceneNode && !m_sceneNode->getFrames().empty())
     {
       const auto& frames = m_sceneNode->getFrames();
-      for (int i = 0; i < m_sceneNode->getFrames().size(); i++)
+      for (std::size_t i = 0; i < m_sceneNode->getFrames().size(); i++)
       {
         frames[i]->node()->setVisible(false);
       }
@@ -99,7 +99,7 @@ public:
 
   Bounds getPageBounds()
   {
-    if (m_currentPage < 0 || m_currentPage >= m_sceneNode->getFrames().size())
+    if (m_currentPage < 0 || static_cast<std::size_t>(m_currentPage) >= m_sceneNode->getFrames().size())
     {
       return Bounds();
     }
@@ -109,7 +109,7 @@ public:
 
   layer::FrameNode* currentFrame()
   {
-    if (m_currentPage < 0 || m_currentPage >= m_sceneNode->getFrames().size())
+    if (m_currentPage < 0 || static_cast<std::size_t>(m_currentPage) >= m_sceneNode->getFrames().size())
     {
       return nullptr;
     }

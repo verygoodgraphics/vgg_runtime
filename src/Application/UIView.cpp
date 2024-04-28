@@ -227,6 +227,11 @@ public:
     return m_zoomController->onEvent(evt, userData);
   }
 
+  auto getSceneNode()
+  {
+    return m_sceneNode;
+  }
+
 public:
   void setOffsetAndScale(float xOffset, float yOffset, float scale)
   {
@@ -1155,4 +1160,8 @@ void UIView::setDrawBackground(bool drawBackground)
   m_impl->setBackgroundColor(color);
 }
 
+layer::Ref<layer::SceneNode> UIView::getSceneNode()
+{
+  return m_impl->getSceneNode();
+}
 } // namespace VGG

@@ -29,13 +29,11 @@
 #include <core/SkColor.h>
 #include <core/SkSurface.h>
 #include <core/SkPictureRecorder.h>
-
 #include <unordered_map>
 
-namespace VGG::layer
+namespace
 {
-
-PaintNode* findByID(PaintNode* ptr, std::string_view guid)
+VGG::layer::PaintNode* findByID(VGG::layer::PaintNode* ptr, std::string_view guid)
 {
   if (ptr->guid() == guid)
   {
@@ -43,7 +41,7 @@ PaintNode* findByID(PaintNode* ptr, std::string_view guid)
   }
   for (const auto& ptr : *ptr)
   {
-    auto n = static_cast<PaintNode*>(ptr.get());
+    auto n = static_cast<VGG::layer::PaintNode*>(ptr.get());
     if (n->guid() == guid)
     {
       return n;
@@ -57,7 +55,7 @@ PaintNode* findByID(PaintNode* ptr, std::string_view guid)
   }
   return nullptr;
 }
-} // namespace VGG::layer
+} // namespace
 
 namespace VGG::layer
 {

@@ -54,6 +54,8 @@ private:
   RuleMapPtr                              m_rules;
   std::vector<Size>                       m_originalPageSize;
 
+  std::unordered_map<std::string, LayoutNode*> m_nodeCacheMap; // id: node
+
 public:
   Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc);
   Layout(JsonDocumentPtr designDoc, RuleMapPtr rules);
@@ -79,6 +81,12 @@ public:
 
   std::shared_ptr<Domain::DesignDocument> designDocTree();
   JsonDocumentPtr                         displayDesignDoc();
+
+  LayoutNode* findNodeById(const std::string& id);
+  LayoutNode* findNodeInTreeById(LayoutNode* tree, const std::string& id);
+
+  std::vector<std::shared_ptr<LayoutNode>> removeNodeChildren(LayoutNode* node);
+  void                                     invalidateNodeCache(LayoutNode* tree);
 
 public:
   static RuleMapPtr collectRules(const nlohmann::json& json);

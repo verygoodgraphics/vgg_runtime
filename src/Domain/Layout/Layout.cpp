@@ -191,7 +191,7 @@ void Layout::Layout::resizeNodeThenLayout(
   Size               size,
   bool               preservingOrigin)
 {
-  if (auto node = m_layoutTree->findDescendantNodeById(nodeId))
+  if (auto node = findNodeById(nodeId))
   {
     resizeNodeThenLayout(node, size, preservingOrigin);
   }
@@ -224,7 +224,7 @@ void Layout::Layout::layoutNodes(
   const std::vector<std::string>& nodeIds,
   const std::string&              constainerNodeId)
 {
-  auto containerNode = m_layoutTree->findDescendantNodeById(constainerNodeId);
+  auto containerNode = findNodeById(constainerNodeId);
   if (!containerNode)
   {
     DEBUG("Layout::layoutNodes: container node not found, %s", constainerNodeId.c_str());
@@ -234,7 +234,7 @@ void Layout::Layout::layoutNodes(
   std::vector<std::shared_ptr<LayoutNode>> subtrees;
   for (const auto& nodeId : nodeIds)
   {
-    if (auto node = containerNode->findDescendantNodeById(nodeId))
+    if (auto node = findNodeInTreeById(containerNode, nodeId))
     {
       DEBUG("Layout::layoutNodes: set flex container need to layout, %s", nodeId.c_str());
       auto subtree = node->autoLayout()->setNeedsLayout();
@@ -273,7 +273,7 @@ void Layout::Layout::rebuildSubtree(LayoutNode* node)
   }
 
   DEBUG("Layout::rebuildSubtree: node id is %s", node->id().c_str());
-  node->removeAllChildren();
+  removeNodeChildren(node);
 
   buildSubtree(node);
   configureNodeAutoLayout(node, false);
@@ -285,7 +285,7 @@ void Layout::Layout::rebuildSubtree(LayoutNode* node)
 
 void Layout::Layout::rebuildSubtreeById(std::string nodeId)
 {
-  if (auto node = m_layoutTree->findDescendantNodeById(nodeId))
+  if (auto node = findNodeById(nodeId))
   {
     rebuildSubtree(node);
   }
@@ -347,4 +347,48 @@ void Layout::Layout::updateFirstOnTop(std::shared_ptr<Domain::Element> element)
   {
     updateFirstOnTop(child);
   }
+}
+
+LayoutNode* Layout::Layout::findNodeById(const std::string& id)
+{
+  return findNodeInTreeById(m_layoutTree.get(), id);
+}
+
+LayoutNode* Layout::Layout::findNodeInTreeById(LayoutNode* tree, const std::string& id)
+{
+  if (!tree)
+    return nullptr;
+
+  if (m_nodeCacheMap.contains(id)) // cache hit
+    return m_nodeCacheMap[id];
+
+  auto p = tree->findDescendantNodeById(id);
+  if (p)
+    m_nodeCacheMap[id] = p; // cache result
+
+  return p;
+}
+
+void Layout::Layout::invalidateNodeCache(LayoutNode* tree)
+{
+  if (const auto& id = tree->id(); !id.empty())
+    m_nodeCacheMap.erase(id);
+
+  for (auto& child : tree->children())
+    invalidateNodeCache(child.get());
+
+  // m_nodeCacheMap.clear();
+}
+
+std::vector<std::shared_ptr<LayoutNode>> Layout::Layout::removeNodeChildren(LayoutNode* node)
+{
+  if (!node)
+  {
+    return {};
+  }
+
+  for (auto& child : node->children())
+    invalidateNodeCache(child.get());
+
+  return node->removeAllChildren();
 }

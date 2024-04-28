@@ -26,15 +26,20 @@ class StateTree;
 namespace Layout
 {
 class ExpandSymbol;
+class Layout;
 } // namespace Layout
 
 class InstanceState
 {
   std::shared_ptr<LayoutNode>           m_page;
   std::shared_ptr<Layout::ExpandSymbol> m_expander;
+  std::shared_ptr<Layout::Layout>       m_layout;
 
 public:
-  InstanceState(std::shared_ptr<LayoutNode> page, std::shared_ptr<Layout::ExpandSymbol> expander);
+  InstanceState(
+    std::shared_ptr<LayoutNode>           page,
+    std::shared_ptr<Layout::ExpandSymbol> expander,
+    std::shared_ptr<Layout::Layout>       layout);
 
   bool setState(
     const std::string& instanceDescendantId,

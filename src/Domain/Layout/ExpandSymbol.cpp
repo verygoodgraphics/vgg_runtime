@@ -222,7 +222,7 @@ void ExpandSymbol::expandInstanceElement(
   // build subtree for recursive expand
   if (instanceIdStack.empty())
   {
-    treeToRebuild = m_layout->layoutTree()->findDescendantNodeById(instance.id());
+    treeToRebuild = m_layout->findNodeById(instance.id());
   }
   else
   {
@@ -233,7 +233,7 @@ void ExpandSymbol::expandInstanceElement(
     {
       tmpIdStack.push_back(tmpId);
       const auto& parentInstanceNodeId = join(tmpIdStack);
-      auto        subtreeToRebuild = treeToRebuild->findDescendantNodeById(parentInstanceNodeId);
+      auto subtreeToRebuild = m_layout->findNodeInTreeById(treeToRebuild, parentInstanceNodeId);
       if (subtreeToRebuild)
       {
         treeToRebuild = subtreeToRebuild;
@@ -864,9 +864,9 @@ void ExpandSymbol::resetInstanceInfo(SymbolInstanceElement& instance)
   // Keep own layout rule; Remove children layout rule only;
   removeInvalidLayoutRule(instance, true);
 
-  if (auto node = m_layout->layoutTree()->findDescendantNodeById(instance.id()))
+  if (auto node = m_layout->findNodeById(instance.id()))
   {
-    node->removeAllChildren(); // remove all children
+    m_layout->removeNodeChildren(node);
   }
 }
 
@@ -1074,7 +1074,7 @@ void ExpandSymbol::resizeInstance(
 
 void ExpandSymbol::layoutInstance(Domain::SymbolInstanceElement& instance, const Size& instanceSize)
 {
-  auto node = m_layout->layoutTree()->findDescendantNodeById(instance.id());
+  auto node = m_layout->findNodeById(instance.id());
   if (!node)
   {
     return;

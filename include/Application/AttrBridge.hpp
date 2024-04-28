@@ -19,10 +19,13 @@
 #include <string>
 #include <array>
 #include <functional>
+#include <Math/Algebra.hpp>
+#include <glm/gtx/matrix_transform_2d.hpp>
 
 namespace VGG
 {
 
+class UIView;
 class LayoutNode;
 class Animate;
 class NumberAnimate;
@@ -31,9 +34,7 @@ class AnimateManage;
 
 namespace layer
 {
-class VLayer;
 class PaintNode;
-class Transform;
 } // namespace layer
 
 namespace Model
@@ -42,10 +43,10 @@ struct Object;
 struct Color;
 } // namespace Model
 
-class AttrBridge : public std::enable_shared_from_this<AttrBridge>
+class AttrBridge
 {
 public:
-  AttrBridge(layer::VLayer* vLayer, AnimateManage& animateManage);
+  AttrBridge(std::shared_ptr<UIView> view, AnimateManage& animateManage);
 
 public:
   bool updateColor(
@@ -61,6 +62,11 @@ public:
     bool                           isOnlyUpdatePaint = false,
     std::shared_ptr<NumberAnimate> animate = {});
 
+  bool updateVisible(
+    std::shared_ptr<LayoutNode> node,
+    bool                        visible,
+    bool                        isOnlyUpdatePaint = false);
+
   bool updateMatrix(
     std::shared_ptr<LayoutNode>    node,
     const std::array<double, 6>&   newMatrix,
@@ -75,23 +81,26 @@ public:
     std::shared_ptr<ReplaceNodeAnimate> animate = {});
 
 public:
-  // std::optional<Model::Color> getNodeColor(std::shared_ptr<LayoutNode> node, bool forPaintNode);
-  std::optional<double> getNodeOpacity(std::shared_ptr<LayoutNode> node, bool forPaintNode);
-  std::optional<std::array<double, 6>> getNodeMatrix(
-    std::shared_ptr<LayoutNode> node,
-    bool                        forPaintNode);
+  static std::optional<double> getOpacity(std::shared_ptr<LayoutNode> node);
+
+  static std::optional<bool> getVisible(std::shared_ptr<LayoutNode> node);
+
+  static std::optional<std::array<double, 6>> getMatrix(std::shared_ptr<LayoutNode> node);
 
 private:
-  // void setNodeColor(std::shared_ptr<LayoutNode> node, const Model::Color& value, bool
-  // forPaintNode);
-  void setNodeOpacity(std::shared_ptr<LayoutNode> node, double value, bool forPaintNode);
-  void setNodeMatrix(
+  static void setOpacity(std::shared_ptr<LayoutNode> node, double value);
+  static void setOpacity(layer::PaintNode* node, double value);
+
+  static void setVisible(std::shared_ptr<LayoutNode> node, bool value);
+  static void setVisible(layer::PaintNode* node, bool value);
+
+  static void setMatrix(
     std::shared_ptr<LayoutNode>  node,
-    const std::array<double, 6>& value,
-    bool                         forPaintNode);
+    const std::array<double, 6>& designMatrix);
+  static void setMatrix(layer::PaintNode* node, const std::array<double, 6>& designMatrix);
 
 private:
-  bool updateSimpleAttr(
+  void updateSimpleAttr(
     std::shared_ptr<LayoutNode>                     node,
     layer::PaintNode*                               paintNode,
     const std::vector<double>&                      from,
@@ -104,21 +113,30 @@ private:
   layer::PaintNode*     getPaintNode(std::shared_ptr<LayoutNode> node);
 
 private:
-  layer::VLayer* m_layer;
-  AnimateManage& m_animateManage;
+  std::shared_ptr<UIView> m_view;
+  AnimateManage&          m_animateManage;
 };
 
 class TransformHelper
 {
-public:
-  typedef std::array<double, 6> TVggMatrix;
+  friend AttrBridge;
 
 public:
-  static layer::Transform fromVggMatrix(const TVggMatrix& matrix);
-  static TVggMatrix       toVggMatrix(layer::Transform transform);
+  typedef std::array<double, 6> TDesignMatrix;
+  typedef glm::mat3             TRenderMatrix;
+
+public:
+  static TDesignMatrix transform(
+    double               selfWidth,
+    double               selfHeight,
+    double               desWidth,
+    double               desHeight,
+    const TDesignMatrix& desMatrix);
 
 private:
-  static void changeYDirection(layer::Transform& transform);
+  static TRenderMatrix fromDesignMatrix(const TDesignMatrix& matrix);
+  static TDesignMatrix toDesignMatrix(const TRenderMatrix& transform);
+  static void          changeYDirection(glm::mat3& transform);
 };
 
 } // namespace VGG

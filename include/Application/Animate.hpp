@@ -72,6 +72,8 @@ public:
   auto getInterpolator();
   auto getStartTime();
 
+  void addCallBackWhenStop(std::function<void()>&& fun);
+
 protected:
   virtual void            start() = 0;
   std::shared_ptr<Timer>& getTimerRef();
@@ -82,6 +84,7 @@ private:
   std::shared_ptr<Interpolator>         m_interpolator;
   std::shared_ptr<Timer>                m_timer;
   std::chrono::steady_clock::time_point m_startTime;
+  std::vector<std::function<void()>>    m_callbackWhenStop;
 };
 
 class AnimateManage
@@ -102,6 +105,8 @@ class NumberAnimate : public Animate
 {
   friend AttrBridge;
 
+  typedef std::vector<double> TParam;
+
 public:
   NumberAnimate(
     milliseconds                  duration,
@@ -110,14 +115,14 @@ public:
 
 private:
   virtual void start() override;
-  void         setFromTo(const std::vector<double>& from, const std::vector<double>& to);
-  void         setAction(std::function<void(const std::vector<double>&)> action);
+  void         setFromTo(const TParam& from, const TParam& to);
+  void         setAction(std::function<void(const TParam&)> action);
 
 private:
-  std::vector<double>                             m_from;
-  std::vector<double>                             m_to;
-  std::vector<double>                             m_nowValue;
-  std::function<void(const std::vector<double>&)> m_action;
+  TParam                             m_from;
+  TParam                             m_to;
+  TParam                             m_nowValue;
+  std::function<void(const TParam&)> m_action;
 };
 
 class ReplaceNodeAnimate : public Animate

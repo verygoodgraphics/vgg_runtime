@@ -776,7 +776,7 @@ bool Controller::setState(
   const std::string& stateMasterId)
 {
   auto          page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
-  InstanceState instanceState{ page, m_expander };
+  InstanceState instanceState{ page, m_expander, m_layout };
 
   auto success = instanceState.setState(instanceDescendantId, listenerId, stateMasterId);
   if (success)
@@ -794,7 +794,7 @@ bool Controller::presentState(
   const std::string& stateMasterId)
 {
   auto          page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
-  InstanceState instanceState{ page, m_expander };
+  InstanceState instanceState{ page, m_expander, m_layout };
 
   auto stateTree = std::make_shared<StateTree>(page);
   auto success =
@@ -811,7 +811,7 @@ bool Controller::presentState(
 bool Controller::dismissState(const std::string& instanceDescendantId)
 {
   auto          page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
-  InstanceState instanceState{ page, m_expander };
+  InstanceState instanceState{ page, m_expander, m_layout };
 
   auto success = instanceState.dismissState(m_presenter->savedState().get(), instanceDescendantId);
   if (success)

@@ -17,6 +17,7 @@
 #include "UseCase/InstanceState.hpp"
 
 #include "Domain/Layout/ExpandSymbol.hpp"
+#include "Domain/Layout/Layout.hpp"
 #include "Domain/Layout/Node.hpp"
 #include "Domain/Model/Element.hpp"
 #include "Utility/Log.hpp"
@@ -28,12 +29,15 @@ using namespace VGG;
 
 InstanceState::InstanceState(
   std::shared_ptr<LayoutNode>           page,
-  std::shared_ptr<Layout::ExpandSymbol> expander)
+  std::shared_ptr<Layout::ExpandSymbol> expander,
+  std::shared_ptr<Layout::Layout>       layout)
   : m_page{ page }
   , m_expander{ expander }
+  , m_layout{ layout }
 {
   ASSERT(page);
   ASSERT(expander);
+  ASSERT(layout);
 }
 
 bool InstanceState::setState(
@@ -90,7 +94,7 @@ bool InstanceState::presentState(
   }
 
   auto oldElementChildren = pInstance->presentState(stateMasterId);
-  auto oldLayoutChildren = instanceNode->removeAllChildren();
+  auto oldLayoutChildren = m_layout->removeNodeChildren(instanceNode.get());
 
   DEBUG(
     "instance %s, present state, old master id %s, new master id: %s; event target: %s, listener "

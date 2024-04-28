@@ -160,6 +160,11 @@ public:
 
   void setView(std::shared_ptr<UIScrollView> view);
 
+  auto getView()
+  {
+    return this->m_view;
+  }
+  
   void setEditorEventListener(UIView::EventListener listener)
   {
     m_editorEventListener = listener;

@@ -41,6 +41,11 @@ namespace app
 class AppRender;
 }
 
+namespace layer
+{
+class SceneNode;
+}
+
 class UIViewImpl;
 class UIView : public app::EventListener
 {
@@ -190,6 +195,8 @@ public:
   void triggerMouseEnter();
 
   void setLayer(app::AppRender* layer);
+
+  layer::Ref<layer::SceneNode> getSceneNode();
 
 protected:
   float     scale() const;

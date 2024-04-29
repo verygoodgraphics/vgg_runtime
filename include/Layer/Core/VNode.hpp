@@ -19,6 +19,7 @@
 #include "Layer/Memory/ObjectImpl.hpp"
 #include "Layer/Memory/VObject.hpp"
 #include "Layer/Memory/VRefCnt.hpp"
+#include "Layer/Memory/VNew.hpp"
 #include "Utility/Log.hpp"
 #include "Layer/Core/VBounds.hpp"
 
@@ -32,7 +33,8 @@
   template<typename... Args>                                                                       \
   static ::VGG::layer::Ref<className> Make(Args&&... args)                                         \
   {                                                                                                \
-    return ::VGG::layer::Ref<className>(V_NEW_UNSAFE<className>(std::forward<Args>(args)...));     \
+    return ::VGG::layer::Ref<className>(                                                           \
+      ::VGG::layer::V_NEW_UNSAFE<className>(std::forward<Args>(args)...));                         \
   }
 
 namespace VGG::layer

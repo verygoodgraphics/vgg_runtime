@@ -25,8 +25,6 @@
 #include <modules/skparagraph/include/TextStyle.h>
 #include <modules/skparagraph/include/TypefaceFontProvider.h>
 
-#include "Layer/Core/TreeNode.hpp"
-
 namespace VGG::layer
 {
 

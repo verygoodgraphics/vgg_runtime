@@ -98,7 +98,7 @@ void updateMaskMapInternal(PaintNode* p)
   }
   for (auto it = p->begin(); it != p->end(); ++it)
   {
-    updateMaskMapInternal(static_cast<layer::PaintNode*>(it->get()));
+    updateMaskMapInternal(it->get());
   }
 }
 } // namespace

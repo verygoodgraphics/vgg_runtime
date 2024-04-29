@@ -102,10 +102,7 @@ public:
   {
     return m_view->currentPageIndex();
   }
-  bool setCurrentPage(int index)
-  {
-    return m_view->setCurrentPage(index);
-  }
+  bool setCurrentPage(std::size_t index);
   bool presentPage(int index);
   bool dismissPage();
   bool goBack(bool resetScrollPosition, bool resetState);
@@ -137,7 +134,7 @@ public:
     m_editViewModel = viewModel;
     if (m_editView)
     {
-      m_editView->show(*m_editViewModel);
+      m_editView->show(m_editViewModel);
 
       m_editView->registerEventListener(
         [viewModel](std::string path, EUIEventType eventType)
@@ -263,11 +260,13 @@ private:
   {
     if (m_editView && m_editViewModel)
     {
-      m_editView->show(*m_editViewModel);
+      m_editView->show(m_editViewModel);
     }
   }
 
   void fitForAspectScale(const Layout::Size& pageSize);
+
+  bool setCurrentPage(std::size_t index, bool animated);
 };
 
 } // namespace VGG

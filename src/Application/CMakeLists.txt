@@ -1,9 +1,12 @@
 add_library(vgg_application STATIC
+  Animate.cpp
   AppRender.cpp
+  AttrBridge.cpp
   Controller.cpp
   Editor.cpp
   EventAPI.cpp
   MainComposer.cpp
+  Pager.cpp
   Presenter.cpp
   Reporter.cpp
   RunLoop.cpp
@@ -14,11 +17,10 @@ add_library(vgg_application STATIC
   UIScrollViewAnimation.cpp
   UIScrollViewAnimationDeceleration.cpp
   UIView.cpp
+  UIViewImpl.cpp
   VggEnv.cpp
   VggSdk.cpp
   ViewModel.cpp
-  Animate.cpp
-  AttrBridge.cpp
 )
 
 if(MSVC)

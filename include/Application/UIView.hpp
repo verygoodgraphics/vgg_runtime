@@ -46,7 +46,10 @@ namespace layer
 class SceneNode;
 }
 
+namespace internal
+{
 class UIViewImpl;
+}
 class UIView : public app::EventListener
 {
 public:
@@ -60,7 +63,7 @@ private:
   friend class Editor;
   using TargetNode = std::pair<std::shared_ptr<LayoutNode>, std::string>;
 
-  std::unique_ptr<UIViewImpl> m_impl;
+  std::unique_ptr<internal::UIViewImpl> m_impl;
 
   struct EventContext
   {
@@ -114,8 +117,13 @@ public:
   UIView();
   ~UIView();
 
-  void show(const ViewModel& viewModel, bool force = false);
-  void show(const ViewModel& viewModel, std::vector<layer::FramePtr> frames, bool force = false);
+  void frame();
+
+  void show(std::shared_ptr<ViewModel>& viewModel, bool force = false);
+  void show(
+    std::shared_ptr<ViewModel>&  viewModel,
+    std::vector<layer::FramePtr> frames,
+    bool                         force = false);
   void setOffsetAndScale(float xOffset, float yOffset, float scale);
   void resetOffsetAndScale();
 
@@ -158,10 +166,7 @@ public:
     ScalarType bottom,
     ScalarType left);
 
-  bool isDirty()
-  {
-    return m_isDirty;
-  }
+  bool isDirty();
   void setDirty(const bool dirty)
   {
     if (dirty == m_isDirty)
@@ -180,6 +185,7 @@ public:
   int currentPageIndex();
 
   bool setCurrentPage(int index);
+  bool setCurrentPageIndex(int index, bool animated = false);
   bool presentPage(int index);
   bool dismissPage();
   bool goBack(bool resetScrollPosition, bool resetState);
@@ -211,8 +217,6 @@ private:
   Layout::Point               converPointFromWindowAndScale(Layout::Point point);
   std::shared_ptr<LayoutNode> currentPage();
   std::shared_ptr<LayoutNode> pageById(const std::string& id);
-
-  bool setCurrentPageIndex(int index);
 
   bool handleMouseEvent(
     int          jsButtonIndex,

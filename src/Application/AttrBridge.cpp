@@ -310,6 +310,11 @@ bool AttrBridge::updateOpacity(
   {
     assert(value.size() == 1);
 
+    DEBUG(
+      "AttrBridge::updateOpacity: node[%s], paintNode[%p] value.at(0) = %f",
+      node->id().c_str(),
+      paintNode,
+      value.at(0));
     if (forPaintNode)
     {
       AttrBridge::setOpacity(paintNode, value.at(0));

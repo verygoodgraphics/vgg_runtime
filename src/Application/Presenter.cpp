@@ -232,7 +232,7 @@ void Presenter::setModel(std::shared_ptr<ViewModel> viewModel)
 
   if (result.root)
   {
-    m_view->show(*m_viewModel, std::move(*result.root));
+    m_view->show(m_viewModel, std::move(*result.root));
   }
   else
   {
@@ -253,7 +253,7 @@ void Presenter::update()
   if (m_view && m_viewModel)
   {
     m_viewModel->layoutTree()->layoutIfNeeded();
-    m_view->show(*m_viewModel, true);
+    m_view->show(m_viewModel, true);
   }
 }
 
@@ -386,4 +386,14 @@ void Presenter::fitForAspectScale(const Layout::Size& pageSize)
     yOffset,
     scale);
   m_view->setOffsetAndScale(xOffset, yOffset, scale);
+}
+
+bool Presenter::setCurrentPage(std::size_t index, bool animated)
+{
+  return m_view->setCurrentPageIndex(index, animated);
+}
+
+bool Presenter::setCurrentPage(std::size_t index)
+{
+  return setCurrentPage(index, true); // todo
 }

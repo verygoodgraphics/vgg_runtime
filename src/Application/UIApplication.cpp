@@ -88,7 +88,7 @@ bool UIApplication::paint(int fps, bool force)
         m_controller->onFirstRender();
       }
 
-      m_view->setDirty(false);
+      m_view->frame();
 
       return true;
     }

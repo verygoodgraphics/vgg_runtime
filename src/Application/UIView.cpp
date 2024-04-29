@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 #include "UIView.hpp"
+#include "UIViewImpl.hpp"
 
 #include "Event/Event.hpp"
 #include "Event/EventAPI.hpp"
 #include "Event/Keycode.hpp"
 #include "ViewModel.hpp"
 
-#include "Application/AppRender.hpp"
-#include "Application/ZoomerNodeController.hpp"
 #include "Domain/Layout/Node.hpp"
-#include "Layer/Core/MemoryResourceProvider.hpp"
-#include "Layer/Core/ResourceManager.hpp"
-#include "Layer/Model/StructModel.hpp"
 #include "Layer/SceneBuilder.hpp"
 #include "Utility/Log.hpp"
-
-#include <include/core/SkCanvas.h>
 
 using namespace VGG;
 using namespace VGG::Layout;
@@ -57,230 +51,13 @@ bool operator==(
   return false;
 }
 
-class Pager
-{
-  layer::SceneNode* m_sceneNode;
-  int               m_currentPage = -1;
-
-  void setPageOffset(int delta)
-  {
-    if (m_sceneNode && !m_sceneNode->getFrames().empty())
-    {
-      const int total = m_sceneNode->getFrames().size();
-      auto      newPage = (m_currentPage + delta + total) % total;
-      if (newPage == m_currentPage)
-        return;
-      const auto& frames = m_sceneNode->getFrames();
-      frames[m_currentPage]->node()->setVisible(false);
-      frames[newPage]->node()->setVisible(true);
-      m_currentPage = newPage;
-    }
-  }
-
-public:
-  Pager(layer::SceneNode* sceneNode)
-    : m_sceneNode(sceneNode)
-  {
-    if (m_sceneNode && !m_sceneNode->getFrames().empty())
-    {
-      const auto& frames = m_sceneNode->getFrames();
-      for (std::size_t i = 0; i < m_sceneNode->getFrames().size(); i++)
-      {
-        frames[i]->node()->setVisible(false);
-      }
-      m_currentPage = 0;
-      frames[m_currentPage]->node()->setVisible(true);
-    }
-    else
-    {
-      m_currentPage = -1;
-    }
-  }
-
-  Bounds getPageBounds()
-  {
-    if (
-      m_currentPage < 0 ||
-      static_cast<std::size_t>(m_currentPage) >= m_sceneNode->getFrames().size())
-    {
-      return Bounds();
-    }
-    const auto& frames = m_sceneNode->getFrames();
-    return frames[m_currentPage]->bounds();
-  }
-
-  layer::FrameNode* currentFrame()
-  {
-    if (
-      m_currentPage < 0 ||
-      static_cast<std::size_t>(m_currentPage) >= m_sceneNode->getFrames().size())
-    {
-      return nullptr;
-    }
-    return m_sceneNode->getFrames()[m_currentPage].get();
-  }
-
-  int page()
-  {
-    return m_currentPage;
-  }
-
-  void setPage(int index)
-  {
-    setPageOffset(index - m_currentPage);
-  }
-
-  void nextFrame()
-  {
-    setPageOffset(1);
-  }
-
-  void prevFrame()
-  {
-    setPageOffset(-1);
-  }
-};
-
 } // namespace
 
 namespace VGG
 {
 
-class UIViewImpl
-{
-  app::AppRender*                          m_layer{ nullptr };
-  layer::Ref<layer::SceneNode>             m_sceneNode;
-  std::unique_ptr<Pager>                   m_pager;
-  std::unique_ptr<app::ZoomNodeController> m_zoomController;
-  layer::Ref<layer::ZoomerNode>            m_zoomer;
-
-  int m_page{ 0 };
-
-private:
-  bool isUnitTest() const
-  {
-    return m_layer == nullptr;
-  }
-
-public:
-  UIViewImpl()
-  {
-    m_zoomer = layer::ZoomerNode::Make();
-    m_zoomController = std::make_unique<app::ZoomNodeController>(m_zoomer);
-  }
-
-  void setLayer(app::AppRender* layer)
-  {
-    m_layer = layer;
-  }
-
-  void show(const ViewModel& viewModel, std::vector<layer::FramePtr> frames)
-  {
-    m_sceneNode = layer::SceneNode::Make(std::move(frames));
-    if (!isUnitTest())
-      m_layer->setRenderNode(m_zoomer, m_sceneNode);
-    m_pager = std::make_unique<Pager>(m_sceneNode.get());
-    setPage(page());
-
-    const auto&                                        repo = viewModel.resources();
-    std::unordered_map<std::string, std::vector<char>> data(
-      std::make_move_iterator(repo.begin()),
-      std::make_move_iterator(repo.end()));
-
-    layer::setGlobalResourceProvider(
-      std::make_unique<layer::MemoryResourceProvider>(std::move(data)));
-  }
-
-  int page() const
-  {
-    return m_page;
-  }
-  void setPage(int page)
-  {
-    if (m_pager)
-    {
-      m_pager->setPage(page);
-      m_page = m_pager->page();
-    }
-    else
-    {
-      m_page = page;
-    }
-  }
-
-  void nextPage()
-  {
-    ASSERT(m_pager);
-    m_pager->nextFrame();
-  }
-  void previoustPage()
-  {
-    ASSERT(m_pager);
-    m_pager->prevFrame();
-  }
-
-  bool onEvent(UEvent evt, void* userData)
-  {
-    if (!m_zoomController)
-      return false;
-
-    return m_zoomController->onEvent(evt, userData);
-  }
-
-  auto getSceneNode()
-  {
-    return m_sceneNode;
-  }
-
-public:
-  void setOffsetAndScale(float xOffset, float yOffset, float scale)
-  {
-    setScale(scale);
-
-    // set offset last
-    setOffset({ xOffset, yOffset });
-  }
-  void resetOffsetAndScale()
-  {
-    m_zoomer->setScale(layer::ZoomerNode::SL_1_1);
-
-    // set offset last
-    setOffset({ 0, 0 });
-  }
-
-public:
-  float scale() const
-  {
-    return m_zoomer->scale();
-  }
-  void setScale(float scale)
-  {
-    m_zoomer->setScale(scale);
-  }
-
-  glm::vec2 offset() const
-  {
-    return m_zoomer->getOffset();
-  }
-  void setOffset(glm::vec2 offset)
-  {
-    m_zoomer->setOffset(offset);
-  }
-
-  void translate(float dx, float dy)
-  {
-    m_zoomer->setTranslate(dx, dy);
-  }
-
-public:
-  void setBackgroundColor(uint32_t color)
-  {
-    m_layer->setBackgroundColor(color);
-  }
-};
-
 UIView::UIView()
-  : m_impl{ new UIViewImpl }
+  : m_impl{ new internal::UIViewImpl(this) }
 {
 }
 
@@ -868,15 +645,16 @@ void UIView::fireMouseEvent(
     node);
 }
 
-void UIView::show(const ViewModel& viewModel, bool force)
+void UIView::show(std::shared_ptr<ViewModel>& viewModel, bool force)
 {
+  ASSERT(viewModel);
   if (m_skipUntilNextLoop && !force)
   {
     return;
   }
 
   std::vector<layer::StructFrameObject> frames;
-  for (auto& f : *viewModel.designDoc())
+  for (auto& f : *viewModel->designDoc())
   {
     if (f->type() == VGG::Domain::Element::EType::FRAME)
     {
@@ -896,8 +674,12 @@ void UIView::show(const ViewModel& viewModel, bool force)
   }
 }
 
-void UIView::show(const ViewModel& viewModel, std::vector<layer::FramePtr> frames, bool force)
+void UIView::show(
+  std::shared_ptr<ViewModel>&  viewModel,
+  std::vector<layer::FramePtr> frames,
+  bool                         force)
 {
+  ASSERT(viewModel);
   if (m_skipUntilNextLoop && !force)
   {
     return;
@@ -907,7 +689,7 @@ void UIView::show(const ViewModel& viewModel, std::vector<layer::FramePtr> frame
   m_impl->show(viewModel, frames);
   m_impl->setPage(m_impl->page());
 
-  m_document = viewModel.layoutTree();
+  m_document = viewModel->layoutTree();
 
   setDirty(true);
 }
@@ -979,7 +761,7 @@ bool UIView::setCurrentPage(int index)
   return success;
 }
 
-bool UIView::setCurrentPageIndex(int index)
+bool UIView::setCurrentPageIndex(int index, bool animated)
 {
   if (m_impl->page() == index)
   {
@@ -991,7 +773,7 @@ bool UIView::setCurrentPageIndex(int index)
     if (index >= 0 && static_cast<std::size_t>(index) < document->children().size())
     {
       INFO("show page: %d, %s", index, document->children()[index]->name().c_str());
-      m_impl->setPage(index);
+      m_impl->setPage(index, animated);
       setDirty(true);
       return true;
     }
@@ -1162,6 +944,18 @@ void UIView::setDrawBackground(bool drawBackground)
 
 layer::Ref<layer::SceneNode> UIView::getSceneNode()
 {
-  return m_impl->getSceneNode();
+  return m_impl->sceneNode();
 }
+
+void UIView::frame()
+{
+  m_impl->frame();
+  setDirty(false);
+}
+
+bool UIView::isDirty()
+{
+  return m_isDirty || m_impl->isDirty();
+}
+
 } // namespace VGG

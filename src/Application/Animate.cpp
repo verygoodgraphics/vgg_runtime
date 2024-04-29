@@ -131,6 +131,15 @@ void AnimateManage::addAnimate(std::shared_ptr<Animate> animate)
   m_animates.emplace_back(animate);
 }
 
+bool AnimateManage::hasRunningAnimation() const
+{
+  for (const auto& item : m_animates)
+    if (item->isRunning())
+      return true;
+
+  return false;
+}
+
 void AnimateManage::deleteFinishedAnimate()
 {
   auto it = std::remove_if(

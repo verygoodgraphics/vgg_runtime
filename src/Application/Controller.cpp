@@ -974,7 +974,7 @@ void Controller::setContentMode(const std::string& mode)
 void Controller::scaleContentUpdateViewModelAndFit()
 {
   scaleContent();
-  m_presenter->update();
+  // m_presenter->update();
   m_presenter->fitForRunning(currentPageSize());
 }
 

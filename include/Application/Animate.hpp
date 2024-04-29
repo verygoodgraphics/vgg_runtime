@@ -93,6 +93,7 @@ class AnimateManage
 
 public:
   void deleteFinishedAnimate();
+  bool hasRunningAnimation() const;
 
 private:
   void addAnimate(std::shared_ptr<Animate> animate);

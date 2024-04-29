@@ -61,7 +61,7 @@ public:
 
   glm::mat3 getMatrix() const override
   {
-    return glm::mat3(m_dpi);
+    return glm::mat3{ m_dpi, 0, 0, 0, m_dpi, 0, 0, 0, 1 };
   }
 
   Bounds onRevalidate() override

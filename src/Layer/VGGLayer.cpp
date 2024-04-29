@@ -231,10 +231,6 @@ public:
     {
       scene->render(canvas);
     }
-    for (auto& item : items)
-    {
-      item->render(canvas);
-    }
     if (node)
     {
       Renderer r;
@@ -268,6 +264,10 @@ public:
       s_delay++;
       if (s_delay % 4 == 0)
         layerPicture = nullptr;
+    }
+    for (auto& item : items)
+    {
+      item->render(canvas);
     }
     canvas->restore();
     canvas->flush();

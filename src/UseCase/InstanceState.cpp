@@ -163,9 +163,7 @@ bool InstanceState::setState(
   ASSERT(pInstance);
 
   // expand again
-  m_expander->expandInstance(
-    std::shared_ptr<Domain::SymbolInstanceElement>{ pInstance },
-    stateMasterId);
+  m_expander->expandInstance(*pInstance, stateMasterId);
 
   // update view model
   // render
@@ -190,7 +188,7 @@ std::shared_ptr<LayoutNode> InstanceState::findInstanceNode(
         node->elementNode()->type() == Domain::Element::EType::SYMBOL_INSTANCE &&
         ((id == listenerId) || !id.ends_with(listenerId)))
     {
-      instanceNode.reset(node);
+      instanceNode = node->shared_from_this();
       break;
     }
     node = node->parent();

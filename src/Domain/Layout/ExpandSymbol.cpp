@@ -1223,24 +1223,24 @@ bool ExpandSymbol::applyReferenceOverride(
 }
 
 void ExpandSymbol::expandInstance(
-  std::shared_ptr<Domain::SymbolInstanceElement> instance,
-  std::string                                    masterId)
+  Domain::SymbolInstanceElement& instance,
+  const std::string&             masterId)
 {
   DEBUG(
     "ExpandSymbol::expandInstance %s with master id %s",
     instance->id().c_str(),
     masterId.c_str());
 
-  if (!instance || masterId.empty())
+  if (masterId.empty())
   {
     return;
   }
 
-  resetInstanceInfo(*instance);
-  instance->updateMasterId(masterId);
+  resetInstanceInfo(instance);
+  instance.updateMasterId(masterId);
 
   std::vector<std::string>         instanceIdStack;
-  std::shared_ptr<Domain::Element> tmpElement = instance->parent();
+  std::shared_ptr<Domain::Element> tmpElement = instance.parent();
   while (tmpElement)
   {
     if (tmpElement->type() == Element::EType::SYMBOL_INSTANCE)
@@ -1250,5 +1250,5 @@ void ExpandSymbol::expandInstance(
     tmpElement = tmpElement->parent();
   }
 
-  expandInstanceElement(*instance, instanceIdStack, true);
+  expandInstanceElement(instance, instanceIdStack, true);
 }

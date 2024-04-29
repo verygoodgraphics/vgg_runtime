@@ -82,15 +82,12 @@ public:
 
   void resize(int w, int h) override;
   DEPRECATED("use setRenderNode") void addRenderItem(std::shared_ptr<Renderable> item);
-  DEPRECATED("use setRenderNode") void addScene(std::shared_ptr<Scene> scene);
-  DEPRECATED("use setRenderNode") void setScene(std::shared_ptr<Scene> scene);
 
   void       setBackgroundColor(uint32_t color);
   void       setScaleFactor(float scale);
   float      scaleFactor() const;
   PaintNode* nodeAt(int x, int y);
   void       nodeAt(int x, int y, PaintNode::NodeVisitor visitor);
-  void       nodesAt(int x, int y, std::vector<PaintNode*>& nodes);
 
   void setRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node);
 

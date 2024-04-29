@@ -16,6 +16,7 @@
 #pragma once
 
 #include "Layer/Core/VNode.hpp"
+#include <functional>
 class SkPicture;
 namespace VGG::layer
 {
@@ -23,6 +24,7 @@ class Renderer;
 class RenderNode : public VNode
 {
 public:
+  using NodeVisitor = std::function<bool(RenderNode*, void*)>;
   RenderNode(VRefCnt* cnt, EState flags)
     : VNode(cnt, flags)
   {
@@ -31,6 +33,7 @@ public:
   {
     return isInvalid();
   }
+  virtual bool   nodeAt(int x, int y, NodeVisitor vistor, void* userData) = 0;
   virtual void   render(Renderer* render) = 0;
   virtual Bounds effectBounds() const = 0;
 

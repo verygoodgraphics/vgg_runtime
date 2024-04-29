@@ -264,7 +264,7 @@ void PaintNode::onPaint(Renderer* renderer)
 bool PaintNode::nodeAt(int x, int y, NodeVisitor visitor)
 {
   if (!isVisible())
-    return true;
+    return false;
   auto local = transform().inverse() * glm::vec3(x, y, 1);
   if (bounds().contains(local.x, local.y))
   {
@@ -276,9 +276,8 @@ bool PaintNode::nodeAt(int x, int y, NodeVisitor visitor)
         return false;
       }
     }
-    return visitor(this);
   }
-  return true;
+  return false;
 }
 
 void PaintNode::setMaskBy(std::vector<std::string> masks)

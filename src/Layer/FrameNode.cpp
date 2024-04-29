@@ -183,15 +183,18 @@ FrameNode::FrameNode(VRefCnt* cnt, PaintNodePtr root)
   observe(d_ptr->node);
 }
 
-void FrameNode::nodeAt(int x, int y, PaintNode::NodeVisitor visitor)
+bool FrameNode::nodeAt(int x, int y, NodeVisitor vistor, void* userData)
 {
-  if (auto r = node(); r)
+  ASSERT(node()->parent() == nullptr);
+  auto inv = d_ptr->transform.inverse();
+  auto p = inv * glm::vec3(x, y, 1);
+  if (bounds().contains(p.x, p.y))
   {
-    ASSERT(node()->parent() == nullptr);
-    auto inv = d_ptr->transform.inverse();
-    auto p = inv * glm::vec3(x, y, 1);
-    r->nodeAt(p.x, p.y, visitor);
+    float xy[2] = { p.x, p.y };
+    vistor(this, xy);
+    return true;
   }
+  return false;
 }
 
 void FrameNode::invalidateMask()

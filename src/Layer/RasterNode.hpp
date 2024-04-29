@@ -47,6 +47,8 @@ public:
 
   void render(Renderer* renderer) override;
 
+  bool nodeAt(int x, int y, NodeVisitor vistor, void* userData) override;
+
   Bounds effectBounds() const override
   {
     return Bounds();

@@ -67,7 +67,7 @@ class Pager
     if (m_sceneNode && !m_sceneNode->getFrames().empty())
     {
       const int total = m_sceneNode->getFrames().size();
-      auto       newPage = (m_currentPage + delta + total) % total;
+      auto      newPage = (m_currentPage + delta + total) % total;
       if (newPage == m_currentPage)
         return;
       const auto& frames = m_sceneNode->getFrames();
@@ -99,7 +99,9 @@ public:
 
   Bounds getPageBounds()
   {
-    if (m_currentPage < 0 || static_cast<std::size_t>(m_currentPage) >= m_sceneNode->getFrames().size())
+    if (
+      m_currentPage < 0 ||
+      static_cast<std::size_t>(m_currentPage) >= m_sceneNode->getFrames().size())
     {
       return Bounds();
     }
@@ -109,7 +111,9 @@ public:
 
   layer::FrameNode* currentFrame()
   {
-    if (m_currentPage < 0 || static_cast<std::size_t>(m_currentPage) >= m_sceneNode->getFrames().size())
+    if (
+      m_currentPage < 0 ||
+      static_cast<std::size_t>(m_currentPage) >= m_sceneNode->getFrames().size())
     {
       return nullptr;
     }
@@ -159,6 +163,12 @@ private:
   }
 
 public:
+  UIViewImpl()
+  {
+    m_zoomer = layer::ZoomerNode::Make();
+    m_zoomController = std::make_unique<app::ZoomNodeController>(m_zoomer);
+  }
+
   void setLayer(app::AppRender* layer)
   {
     m_layer = layer;
@@ -167,8 +177,6 @@ public:
   void show(const ViewModel& viewModel, std::vector<layer::FramePtr> frames)
   {
     m_sceneNode = layer::SceneNode::Make(std::move(frames));
-    m_zoomer = layer::ZoomerNode::Make();
-    m_zoomController = std::make_unique<app::ZoomNodeController>(m_zoomer);
     if (!isUnitTest())
       m_layer->setRenderNode(m_zoomer, m_sceneNode);
     m_pager = std::make_unique<Pager>(m_sceneNode.get());

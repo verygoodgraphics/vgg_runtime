@@ -145,6 +145,10 @@ VGG Runtime uses fonts in system directories by default, but you can assign extr
 
 where an example of `config.json` is provided in [asset/etc/config.json](https://github.com/verygoodgraphics/vgg_runtime/blob/main/asset/etc/config.json).
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=verygoodgraphics/vgg_runtime&type=Date)](https://star-history.com/#verygoodgraphics/vgg_runtime&Date)
+
 ## LICENSE
 
 VGG Runtime is licensed under [VGG License](./LICENSE).

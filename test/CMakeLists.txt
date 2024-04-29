@@ -30,7 +30,6 @@ else()
     native/node_test_helper.cpp
     usecase/start_running_tests.cpp
     layer/refcounter_test.cpp
-    layer/treenode_test.cpp
     layer/observe_test.cpp
     Utility/TimerTests.cpp
   )

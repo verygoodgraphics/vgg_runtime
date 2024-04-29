@@ -28,7 +28,6 @@
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/VType.hpp"
-#include "Layer/Core/TreeNode.hpp"
 
 #include <optional>
 
@@ -71,6 +70,7 @@ class PaintNode__pImpl // NOLINT
 
 public:
   std::string guid{};
+  std::string name{};
 
   EMaskType      maskType{ MT_NONE };
   EMaskShowType  maskShowType{ MST_INVISIBLE };
@@ -132,7 +132,7 @@ public:
       mat *= q_ptr->transform().matrix();
       return;
     }
-    static_cast<PaintNode*>(p.get())->d_ptr->worldTransform(mat);
+    p.get()->d_ptr->worldTransform(mat);
     mat *= q_ptr->transform().matrix();
   }
 };
@@ -143,16 +143,12 @@ PaintNode::PaintNode(
   EObjectType        type,
   const std::string& guid,
   bool               initBase)
-  : TreeNode(cnt, name)
+  : VNode(cnt)
   , d_ptr(new PaintNode__pImpl(this, type, initBase))
 {
-  auto renderObject = d_ptr->guid = guid;
-}
-
-PaintNode::PaintNode(VRefCnt* cnt, const std::string& name, std::unique_ptr<PaintNode__pImpl> impl)
-  : TreeNode(cnt, name)
-  , d_ptr(std::move(impl))
-{
+  d_ptr->guid = guid;
+  d_ptr->name = name;
+  m_children.reserve(10);
 }
 
 void PaintNode::setContextSettings(const ContextSetting& settings)
@@ -166,9 +162,9 @@ void PaintNode::setContextSettings(const ContextSetting& settings)
 
 Transform PaintNode::mapTransform(const PaintNode* node) const
 {
-  auto findPath = [](const TreeNode* node) -> std::vector<const TreeNode*>
+  auto findPath = [](const PaintNode* node) -> std::vector<const PaintNode*>
   {
-    std::vector<const TreeNode*> path = { node };
+    std::vector<const PaintNode*> path = { node };
     while (node->parent())
     {
       node = node->parent().get();
@@ -176,10 +172,10 @@ Transform PaintNode::mapTransform(const PaintNode* node) const
     }
     return path;
   };
-  auto            path1 = findPath(node);
-  auto            path2 = findPath(this);
-  const TreeNode* lca = nullptr;
-  int             lcaIdx = -1;
+  auto             path1 = findPath(node);
+  auto             path2 = findPath(this);
+  const PaintNode* lca = nullptr;
+  int              lcaIdx = -1;
   for (int i = path1.size() - 1, j = path2.size() - 1; i >= 0 && j >= 0; i--, j--)
   {
     auto n1 = path1[i];
@@ -199,14 +195,14 @@ Transform PaintNode::mapTransform(const PaintNode* node) const
     return Transform(mat);
   for (std::size_t i = 0; i < path1.size() && path1[i] != lca; i++)
   {
-    auto skm = static_cast<const PaintNode*>(path1[i])->transform().matrix();
+    auto skm = path1[i]->transform().matrix();
     auto inv = glm::inverse(skm);
     mat = mat * inv;
   }
 
   for (int i = lcaIdx - 1; i >= 0; i--)
   {
-    const auto m = static_cast<const PaintNode*>(path2[i])->transform().matrix();
+    const auto m = path2[i]->transform().matrix();
     mat = mat * m;
   }
   return Transform(mat);
@@ -274,7 +270,7 @@ bool PaintNode::nodeAt(int x, int y, NodeVisitor visitor)
   {
     for (auto c = rbegin(); c != rend(); ++c)
     {
-      auto n = static_cast<PaintNode*>(c->get());
+      auto n = c->get();
       if (!n->nodeAt(local.x, local.y, visitor))
       {
         return false;
@@ -306,21 +302,21 @@ VShape PaintNode::makeBoundsPath()
 
 VShape PaintNode::childPolyOperation() const
 {
-  if (m_firstChild.empty())
+  if (m_children.empty())
   {
     WARN("no child in path %s", name().c_str());
     return VShape();
   }
-  if (m_firstChild.size() == 1)
+  if (m_children.size() == 1)
   {
-    auto paintNode = static_cast<PaintNode*>(m_firstChild.front().get());
+    auto paintNode = m_children.front().get();
     return paintNode->asVisualShape(&paintNode->transform());
   }
 
   std::vector<std::pair<VShape, EBoolOp>> ct;
-  for (auto it = m_firstChild.begin(); it != m_firstChild.end(); ++it)
+  for (auto it = m_children.begin(); it != m_children.end(); ++it)
   {
-    auto paintNode = static_cast<PaintNode*>(it->get());
+    auto paintNode = it->get();
     auto childMask = paintNode->asVisualShape(&paintNode->transform());
     ct.emplace_back(childMask, paintNode->clipOperator());
   }
@@ -387,7 +383,7 @@ VShape PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
   {
     for (auto it = begin(); it != end(); ++it)
     {
-      auto paintNode = static_cast<PaintNode*>(it->get());
+      auto paintNode = it->get();
       auto childMask = paintNode->makeContourImpl(option, &paintNode->transform());
       path.op(childMask, op);
     }
@@ -547,7 +543,7 @@ Bounds PaintNode::onRevalidate()
 {
   VGG_IMPL(PaintNode);
   Bounds newBounds;
-  for (const auto& e : m_firstChild)
+  for (const auto& e : m_children)
   {
     newBounds.unionWith(e->revalidate());
   }
@@ -573,6 +569,11 @@ Bounds PaintNode::onRevalidate()
 const std::string& PaintNode::guid() const
 {
   return d_ptr->guid;
+}
+
+const std::string& PaintNode::name() const
+{
+  return d_ptr->name;
 }
 
 EMaskType PaintNode::maskType() const
@@ -626,9 +627,9 @@ void PaintNode::paintChildren(Renderer* renderer)
   VGG_IMPL(PaintNode);
   std::vector<PaintNode*> masked;
   std::vector<PaintNode*> noneMasked;
-  for (const auto& p : this->m_firstChild)
+  for (const auto& p : this->m_children)
   {
-    auto c = static_cast<PaintNode*>(p.get());
+    auto c = p.get();
     if (c->maskType() == MT_OUTLINE)
     {
       if (c->d_ptr->maskShowType == MST_CONTENT)
@@ -712,6 +713,43 @@ void PaintNode::dispatchEvent(void* event)
   {
     _->paintNodeEventHandler(static_cast<ShapeItemAttibuteAccessor*>(attributeAccessor()), event);
   }
+}
+
+void PaintNode::addChild(PaintNodePtr node)
+{
+  m_children.insert(m_children.end(), node);
+  node->m_parent = this;
+  this->invalidate();
+  observe(node);
+}
+
+void PaintNode::addChild(ChildContainer::iterator pos, PaintNodePtr node)
+{
+  m_children.insert(pos, node);
+  node->m_parent = this;
+  observe(node);
+}
+
+PaintNodePtr PaintNode::removeChild(ChildContainer::iterator pos)
+{
+  if (auto it = m_children.erase(pos); it != m_children.end())
+  {
+    auto node = *it;
+    ASSERT(node);
+    unobserve(node);
+    node->invalidate();
+    this->invalidate();
+    return node;
+  }
+  return nullptr;
+}
+
+void PaintNode::removeChild(PaintNodePtr node)
+{
+  (void)std::remove(m_children.begin(), m_children.end(), node);
+  unobserve(node);
+  node->invalidate();
+  this->invalidate();
 }
 
 PaintNode::~PaintNode() = default;

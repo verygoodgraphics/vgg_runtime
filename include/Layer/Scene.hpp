@@ -19,7 +19,6 @@
 #include "Layer/Core/FrameNode.hpp"
 #include "Layer/Memory/AllocatorImpl.hpp"
 #include "Layer/Zoomer.hpp"
-#include "Layer/Core/TreeNode.hpp"
 #include "Layer/Config.hpp"
 
 #include <map>
@@ -56,15 +55,15 @@ public:
   {
     return m_name;
   }
-  void          nextArtboard();
-  void          preArtboard();
-  int           frameCount() const;
+  void              nextArtboard();
+  void              preArtboard();
+  int               frameCount() const;
   layer::FrameNode* frame(int index);
-  void          setPage(int num);
-  int           currentPage() const;
+  void              setPage(int num);
+  int               currentPage() const;
   // To remove zoomer, just set nullptr
-  void          setZoomer(std::shared_ptr<Zoomer> zoomer);
-  Zoomer*       zoomer();
+  void              setZoomer(std::shared_ptr<Zoomer> zoomer);
+  Zoomer*           zoomer();
 
   void nodeAt(int x, int y, layer::PaintNode::NodeVisitor visitor);
 

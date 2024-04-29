@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 #pragma once
-#include "Layer/Memory/VNew.hpp"
-#include "Layer/Core/VBounds.hpp"
-#include "Layer/Core/TreeNode.hpp"
+#include "Layer/Core/VNode.hpp"
+#include "Utility/HelperMacro.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/Transform.hpp"
@@ -79,7 +78,7 @@ inline PaintNodePtr makePaintNodePtr(Args&&... args)
 class PaintNode__pImpl;
 class Accessor;
 
-class VGG_EXPORTS PaintNode : public TreeNode
+class VGG_EXPORTS PaintNode : public VNode
 {
   // some temporary friends
   friend class PaintNodeEventDispatcher;
@@ -93,27 +92,19 @@ protected:
   friend class MaskBuilder;
   friend class Frame;
 
-  PaintNode(VRefCnt* cnt, const std::string& name, std::unique_ptr<PaintNode__pImpl> impl);
-
 public:
+  using ChildContainer = std::vector<PaintNodePtr>;
+
   PaintNode(
     VRefCnt*           cnt,
     const std::string& name,
     EObjectType        type,
     const std::string& guid,
     bool               initBase = true);
-  PaintNode(const PaintNode&) = delete;
-  PaintNode& operator=(const PaintNode&) = delete;
-  PaintNode(PaintNode&&) = delete;
-  PaintNode& operator=(PaintNode&&) = delete;
 
-public:
-  void addChild(const PaintNodePtr node)
-  {
-    if (!node)
-      return;
-    pushChildBack(std::move(node));
-  }
+  void addChild(const PaintNodePtr node);
+
+  void addChild(ChildContainer::iterator pos, PaintNodePtr node);
 
   void addSubShape(PaintNodePtr node, EBoolOp op)
   {
@@ -121,6 +112,50 @@ public:
       return;
     node->setClipOperator(op);
     addChild(node);
+  }
+
+  PaintNodePtr removeChild(ChildContainer::iterator pos);
+
+  void removeChild(PaintNodePtr node);
+
+  auto rbegin()
+  {
+    return m_children.rbegin();
+  }
+
+  auto begin()
+  {
+    return m_children.begin();
+  }
+
+  auto cbegin() const
+  {
+    return m_children.cbegin();
+  }
+
+  auto end()
+  {
+    return m_children.end();
+  }
+
+  auto rend()
+  {
+    return m_children.rend();
+  }
+
+  auto cend() const
+  {
+    return m_children.cend();
+  }
+
+  PaintNodePtr parent() const
+  {
+    return !m_parent.expired() ? m_parent.lock() : nullptr;
+  }
+
+  const ChildContainer& children()
+  {
+    return m_children;
   }
 
   void setOverflow(EOverflow overflow);
@@ -161,6 +196,8 @@ public:
 
   const std::string& guid() const;
 
+  const std::string& name() const;
+
   void setMaskBy(std::vector<std::string> masks);
 
   void setAlphaMaskBy(std::vector<AlphaMask> masks);
@@ -198,19 +235,6 @@ public:
 
   ~PaintNode();
 
-public:
-  template<typename F>
-  void visitFunc(VGG::TreeNode* p, F&& f)
-  {
-    if (!p)
-      return;
-    f(static_cast<PaintNode*>(p));
-    for (const auto& c : m_firstChild)
-    {
-      visitFunc(c.get(), std::forward<F>(f));
-    }
-  }
-
 protected:
   void                paintChildren(Renderer* renderer);
   void                paintSelf(Renderer* renderer);
@@ -227,6 +251,10 @@ protected:
   virtual VShape makeContourImpl(ContourOption option, const Transform* mat);
   VShape         childPolyOperation() const;
   Bounds         onRevalidate() override;
+
+private:
+  ChildContainer     m_children;
+  WeakRef<PaintNode> m_parent;
 };
 
 class PaintNodeEventDispatcher

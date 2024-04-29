@@ -354,16 +354,16 @@ void Scene::invalidate()
 
 void Scene::nodeAt(int x, int y, layer::PaintNode::NodeVisitor visitor)
 {
-  if (auto f = d_ptr->currentFrame(true); f)
-  {
-    if (d_ptr->zoomer)
-    {
-      const auto fp = d_ptr->zoomer->invMatrix() * glm::vec3{ x, y, 1 };
-      x = fp.x;
-      y = fp.y;
-    }
-    f->nodeAt(x, y, visitor);
-  }
+  // if (auto f = d_ptr->currentFrame(true); f)
+  // {
+  //   if (d_ptr->zoomer)
+  //   {
+  //     const auto fp = d_ptr->zoomer->invMatrix() * glm::vec3{ x, y, 1 };
+  //     x = fp.x;
+  //     y = fp.y;
+  //   }
+  //   f->nodeAt(x, y, visitor);
+  // }
 }
 
 void Scene::nextArtboard()

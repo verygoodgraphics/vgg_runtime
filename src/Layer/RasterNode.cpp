@@ -82,6 +82,22 @@ void RasterNode::render(Renderer* renderer)
   }
 }
 
+bool RasterNode::nodeAt(int x, int y, NodeVisitor vistor, void* userData)
+{
+  auto c = getChild();
+  ASSERT(c);
+  if (c)
+  {
+    auto z = asZoom(getTransform());
+    ASSERT(z);
+    const auto fp = z->invMatrix() * glm::vec3{ x, y, 1 };
+    x = fp.x;
+    y = fp.y;
+    return getChild()->nodeAt(x, y, vistor, userData);
+  }
+  return false;
+}
+
 Bounds RasterNode::onRevalidate()
 {
   DEBUG("RasterNode::onRevalidate()");

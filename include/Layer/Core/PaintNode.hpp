@@ -230,7 +230,7 @@ public:
 
   using EventHandler = std::function<void(ShapeItemAttibuteAccessor*, void*)>;
   void installPaintNodeEventHandler(EventHandler handler);
-  using NodeVisitor = bool (*)(PaintNode*);
+  using NodeVisitor = std::function<bool(PaintNode*)>;
   bool nodeAt(int x, int y, NodeVisitor);
 
   ~PaintNode();

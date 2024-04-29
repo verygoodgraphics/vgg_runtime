@@ -36,7 +36,8 @@ public:
   void eraseFrame(int index);
   void render(Renderer* canvas) override;
 
-  void       nodeAt(int x, int y, layer::PaintNode::NodeVisitor visitor);
+  bool nodeAt(int x, int y, NodeVisitor vistor, void* userData) override;
+
   PaintNode* nodeByID(const std::string& id);
 
   Bounds     effectBounds() const override;

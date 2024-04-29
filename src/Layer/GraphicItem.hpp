@@ -36,6 +36,11 @@ public:
   {
   }
 
+  virtual bool nodeAt(int x, int y, NodeVisitor vistor, void* userData) override
+  {
+    return false;
+  }
+
   virtual ShapeAttribute* shape() const = 0;
 
   virtual sk_sp<SkImageFilter> getMaskFilter() const = 0; // TODO::eliminate this later

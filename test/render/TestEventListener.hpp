@@ -9,6 +9,7 @@
 #include "Layer/Model/JSONModel.hpp"
 #include "Layer/Model/StructModel.hpp"
 #include "Layer/Memory/Ref.hpp"
+#include "Layer/Settings.hpp"
 #include "loader.hpp"
 
 #include "Layer/SceneBuilder.hpp"
@@ -287,6 +288,16 @@ public:
         return true;
       }
     }
+    if (evt.type == VGG_MOUSEBUTTONDOWN)
+    {
+      if (m_layer)
+      {
+        if (auto p = m_layer->nodeAt(evt.motion.windowX, evt.motion.windowY); p)
+        {
+          INFO("Click on %s", p->name().c_str());
+        }
+      }
+    }
     if (evt.type != VGG_KEYDOWN)
     {
       return false;
@@ -412,10 +423,17 @@ public:
       return true;
     }
 
+    if (key == VGGK_7)
+    {
+      INFO("Toggle click bound");
+      m_layer->setDrawClickBounds(!m_layer->enableDrawClickBounds());
+      return true;
+    }
+
     if (key == VGGK_b)
     {
       INFO("Toggle object bounding box");
-      // m_scene->enableDrawDebugBounds(!m_scene->isEnableDrawDebugBounds());
+      // m_layer->enableDrawDebugBounds(!m_layer->isEnableDrawDebugBounds());
       return true;
     }
 

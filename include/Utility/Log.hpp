@@ -216,7 +216,7 @@ static inline FILE* _log_file_()
   {                                                                                                \
     _MSG_("FAIL", LOG::_log_file_(), FAIL_COLOR("%s:%d "), __FILENAME__, __LINE__);                \
     FAIL(msg, ##__VA_ARGS__);                                                                      \
-    exit(EXIT_FAILURE);                                                                            \
+    std::abort();                                                                                  \
   } while (0)
 #define WARN(msg, ...)                                                                             \
   do                                                                                               \

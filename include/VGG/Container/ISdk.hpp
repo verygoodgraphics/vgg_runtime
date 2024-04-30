@@ -32,6 +32,13 @@ public:
     int         quality{ 100 };
   };
 
+  struct AnimationOptions
+  {
+    double      duration{ 0.3 };
+    std::string type{ "dissolve" };
+    std::string timingFunction{ "linear" };
+  };
+
 public:
   virtual ~ISdk() = default;
 
@@ -65,6 +72,10 @@ public:
 
   // frame
   virtual bool setCurrentFrameById(const std::string& id, bool resetScrollPosition = true) = 0;
+  virtual bool setCurrentFrameByIdAnimated(
+    const std::string&      id,
+    bool                    resetScrollPosition,
+    const AnimationOptions& option) = 0;
   virtual bool presentFrameById(const std::string& id, bool resetScrollPosition = true) = 0;
   virtual bool dismissFrame() = 0;
   virtual bool goBack(bool resetScrollPosition = true, bool resetState = true) = 0;

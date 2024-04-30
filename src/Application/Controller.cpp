@@ -309,14 +309,7 @@ void Controller::setEditMode(bool editMode)
     return;
   }
 
-  if (isNormalMode())
-  {
-    scaleContentUpdateViewModelAndFit();
-  }
-  else
-  {
-    layoutUpdateViewModelAndFitForEditing();
-  }
+  scaleContentUpdateViewModelAndFit();
 }
 
 std::shared_ptr<app::AppRenderable> Controller::editor()
@@ -359,14 +352,10 @@ void Controller::start()
   }
   if (pageChanged)
   {
-    scaleContent();
-    m_presenter->update();
+    scaleContentAndUpdate(m_presenter->currentPageIndex());
   }
 
-  if (isNormalMode())
-    m_presenter->fitForRunning(currentPageSize());
-  else
-    m_presenter->fitForEditing(currentPageOriginalSize());
+  fitPage();
 
   const auto& modelFileVersion = m_model->docVersion();
   if (versionCompare(modelFileVersion, REQUIRED_DOC_VERSION) != 0)
@@ -614,13 +603,6 @@ bool Controller::hasDirtyEditor()
   return isEditMode() && m_editor->isDirty();
 }
 
-void Controller::layoutUpdateViewModelAndFitForEditing()
-{
-  layoutForEditing();
-  m_presenter->update();
-  m_presenter->fitForEditing(currentPageOriginalSize());
-}
-
 void Controller::onFirstRender()
 {
   Statistic::sharedInstance()->endFirstRender();
@@ -656,46 +638,12 @@ void Controller::listenAllEvents(bool enabled)
 
 void Controller::scaleContent()
 {
-  if (!m_layout || !m_isFitToViewportEnabled)
-  {
-    return;
-  }
-
-  if (isNormalMode())
-  {
-    aspectFill(m_presenter->viewSize());
-  }
-  else
-  {
-    layoutForEditing();
-  }
+  scaleContent(m_presenter->currentPageIndex());
 }
 
 void Controller::aspectFill(Layout::Size size)
 {
-  const auto& originalPageSize = currentPageOriginalSize();
-  const auto  scaleFactor = size.width / originalPageSize.width;
-
-  Layout::Size targetSize;
-  if (scaleFactor < 1.)
-  {
-    targetSize = { originalPageSize.width * scaleFactor,
-                   originalPageSize.height }; // make sure to see all the contents
-  }
-  else
-  {
-    targetSize = {
-      originalPageSize.width * scaleFactor,
-      std::min(
-        originalPageSize.height + size.height / 3.,
-        originalPageSize.height * scaleFactor) // set max height limit
-    };
-  }
-
-  m_layout->layout(
-    targetSize,
-    m_presenter->currentPageIndex(),
-    m_isFitToViewportEnabled); // true means updating layout size rules
+  aspectFill(size, m_presenter->currentPageIndex());
 }
 
 bool Controller::handleTranslate(float x, float y, bool isMouseWheel)
@@ -740,10 +688,11 @@ bool Controller::setCurrentFrameById(const std::string& id)
 {
   ASSERT(m_model);
   const auto index = m_model->getFrameIndexById(id);
+  scaleContentAndUpdate(index);
   const auto success = m_presenter->setCurrentPage(index);
   if (success)
   {
-    pageDidChange();
+    fitPage();
   }
   return success;
 }
@@ -847,7 +796,7 @@ bool Controller::setCurrentTheme(const std::string& theme)
   return ret;
 }
 
-VGG::Layout::Size Controller::currentPageSize()
+VGG::Layout::Size Controller::currentPageSize() const
 {
   ASSERT(m_layout);
   const auto& root = m_layout->layoutTree();
@@ -886,7 +835,7 @@ bool Controller::nextFrame()
 {
   if (m_presenter->setCurrentPage(m_presenter->currentPageIndex() + 1))
   {
-    pageDidChange();
+    fitPage();
     return true;
   }
   return false;
@@ -896,7 +845,7 @@ bool Controller::previouseFrame()
 {
   if (m_presenter->setCurrentPage(m_presenter->currentPageIndex() - 1))
   {
-    pageDidChange();
+    fitPage();
     return true;
   }
   return false;
@@ -906,30 +855,51 @@ bool Controller::goBack(bool resetScrollPosition, bool resetState)
 {
   if (m_presenter->goBack(resetScrollPosition, resetState))
   {
-    pageDidChange();
+    fitPage();
     return true;
   }
   return false;
 }
 
-void Controller::pageDidChange()
+void Controller::scaleContentAndUpdate(std::size_t pageIndex)
 {
   if (!hasContent())
   {
-    DEBUG("pageDidChange no content, return");
+    DEBUG("scaleContentAndUpdate no content, return");
     return;
   }
 
   if (isNormalMode())
   {
-    DEBUG("pageDidChange, normal mode");
-    scaleContentUpdateViewModelAndFit();
+    DEBUG("scaleContentAndUpdate, normal mode");
+    scaleContent(pageIndex);
+  }
+  else
+  {
+    DEBUG("scaleContentAndUpdate, edit mode");
+
+    layoutForEditing(pageIndex);
+  }
+
+  m_presenter->update();
+}
+void Controller::fitPage()
+{
+  if (!hasContent())
+  {
+    DEBUG("fitPage no content, return");
+    return;
+  }
+
+  if (isNormalMode())
+  {
+    m_presenter->fitForRunning(currentPageSize());
     m_presenter->triggerMouseEnter();
   }
   else
   {
-    DEBUG("pageDidChange, edit mode");
-    layoutUpdateViewModelAndFitForEditing();
+    DEBUG("fitPage, edit mode");
+    m_presenter->fitForEditing(currentPageOriginalSize());
   }
 }
 
@@ -968,14 +938,13 @@ void Controller::setContentMode(const std::string& mode)
   }
 
   m_presenter->setContentMode(newMode);
-  pageDidChange();
+  fitPage();
 }
 
 void Controller::scaleContentUpdateViewModelAndFit()
 {
-  scaleContent();
-  // m_presenter->update();
-  m_presenter->fitForRunning(currentPageSize());
+  scaleContentAndUpdate(m_presenter->currentPageIndex());
+  fitPage();
 }
 
 bool Controller::hasContent() const
@@ -985,10 +954,64 @@ bool Controller::hasContent() const
 
 void Controller::layoutForEditing()
 {
-  m_layout->layout(currentPageOriginalSize(), m_presenter->currentPageIndex());
+  layoutForEditing(m_presenter->currentPageIndex());
 }
 
-VGG::Layout::Size Controller::currentPageOriginalSize()
+VGG::Layout::Size Controller::currentPageOriginalSize() const
 {
-  return m_layout->originalPageSize(m_presenter->currentPageIndex());
+  return pageOriginalSize(m_presenter->currentPageIndex());
+}
+
+void Controller::scaleContent(std::size_t pageIndex)
+{
+  if (!m_layout || !m_isFitToViewportEnabled)
+  {
+    return;
+  }
+
+  if (isNormalMode())
+  {
+    aspectFill(m_presenter->viewSize(), pageIndex);
+  }
+  else
+  {
+    layoutForEditing(pageIndex);
+  }
+}
+
+void Controller::aspectFill(Layout::Size size, std::size_t pageIndex)
+{
+  const auto& originalPageSize = pageOriginalSize(pageIndex);
+  const auto  scaleFactor = size.width / originalPageSize.width;
+
+  Layout::Size targetSize;
+  if (scaleFactor < 1.)
+  {
+    targetSize = { originalPageSize.width * scaleFactor,
+                   originalPageSize.height }; // make sure to see all the contents
+  }
+  else
+  {
+    targetSize = {
+      originalPageSize.width * scaleFactor,
+      std::min(
+        originalPageSize.height + size.height / 3.,
+        originalPageSize.height * scaleFactor) // set max height limit
+    };
+  }
+
+  m_layout->layout(
+    targetSize,
+    pageIndex,
+    m_isFitToViewportEnabled); // true means updating layout size rules
+}
+
+VGG::Layout::Size Controller::pageOriginalSize(std::size_t pageIndex) const
+{
+  return m_layout->originalPageSize(pageIndex);
+}
+
+void Controller::layoutForEditing(std::size_t pageIndex)
+{
+  m_layout->layout(pageOriginalSize(pageIndex), pageIndex);
 }

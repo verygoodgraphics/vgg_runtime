@@ -168,24 +168,28 @@ private:
   void observeViewEvent();
   void handleEvent(UIEventPtr evt);
 
-  bool hasContent() const;
+  bool              hasContent() const;
+  VGG::Layout::Size currentPageSize() const;
+  VGG::Layout::Size currentPageOriginalSize() const;
+  VGG::Layout::Size pageOriginalSize(std::size_t pageIndex) const;
 
   void startEditing();
   void observeEditModelState();
   void observeEditViewEvent();
-  void layoutUpdateViewModelAndFitForEditing();
   void layoutForEditing();
 
   void scaleContent();
   void aspectFill(Layout::Size size);
 
+  void layoutForEditing(std::size_t pageIndex);
+  void scaleContent(std::size_t pageIndex);
+  void aspectFill(Layout::Size size, std::size_t pageIndex);
+
   std::shared_ptr<ViewModel> generateViewModel(std::shared_ptr<Daruma> model, Layout::Size size);
   MakeJsonDocFn              createMakeJsonDocFn(const char* pJsonSchemaFilePath);
 
-  VGG::Layout::Size currentPageSize();
-  VGG::Layout::Size currentPageOriginalSize();
-
-  void pageDidChange();
+  void scaleContentAndUpdate(std::size_t pageIndex);
+  void fitPage();
   void scaleContentUpdateViewModelAndFit();
 };
 

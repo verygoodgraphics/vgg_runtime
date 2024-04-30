@@ -958,4 +958,12 @@ bool UIView::isDirty()
   return m_isDirty || m_impl->isDirty();
 }
 
+bool UIView::setCurrentPageIndex(
+  std::size_t                   index,
+  const app::UIAnimationOption& option,
+  app::AnimationCompletion      completion)
+{
+  return m_impl->setPage(index, option, completion);
+}
+
 } // namespace VGG

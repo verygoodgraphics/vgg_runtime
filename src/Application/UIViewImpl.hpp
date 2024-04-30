@@ -22,6 +22,7 @@
 #include "Application/Animate.hpp"
 #include "Application/AppRender.hpp"
 #include "Application/AttrBridge.hpp"
+#include "Application/UIAnimation.hpp"
 #include "Application/ZoomerNodeController.hpp"
 #include "Domain/Layout/Node.hpp"
 #include "Layer/Core/MemoryResourceProvider.hpp"
@@ -65,6 +66,10 @@ public:
   int  page() const;
   void setPage(int page);
   bool setPage(int index, bool animated);
+  bool setPage(
+    std::size_t                   index,
+    const app::UIAnimationOption& option,
+    app::AnimationCompletion      completion = app::AnimationCompletion());
   void nextPage();
   void previoustPage();
 

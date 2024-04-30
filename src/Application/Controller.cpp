@@ -20,6 +20,7 @@
 #include "Reporter.hpp"
 #include "RunLoop.hpp"
 
+#include "Application/UIAnimation.hpp"
 #include "Domain/Daruma.hpp"
 #include "Domain/Model/JsonKeys.hpp"
 #include "Domain/RawJsonDocument.hpp"
@@ -686,15 +687,7 @@ std::string Controller::currentFrameId() const
 
 bool Controller::setCurrentFrameById(const std::string& id)
 {
-  ASSERT(m_model);
-  const auto index = m_model->getFrameIndexById(id);
-  scaleContentAndUpdate(index);
-  const auto success = m_presenter->setCurrentPage(index);
-  if (success)
-  {
-    fitPage();
-  }
-  return success;
+  return setCurrentFrameById(id, false);
 }
 
 bool Controller::presentFrameById(const std::string& id)
@@ -1014,4 +1007,32 @@ VGG::Layout::Size Controller::pageOriginalSize(std::size_t pageIndex) const
 void Controller::layoutForEditing(std::size_t pageIndex)
 {
   m_layout->layout(pageOriginalSize(pageIndex), pageIndex);
+}
+
+bool Controller::setCurrentFrameById(const std::string& id, bool animated)
+{
+  if (animated)
+  {
+    return setCurrentFrameById(id, app::UIAnimationOption());
+  }
+  else
+  {
+    ASSERT(m_model);
+    const auto index = m_model->getFrameIndexById(id);
+    scaleContentAndUpdate(index);
+    const auto success = m_presenter->setCurrentPage(index);
+    if (success)
+    {
+      fitPage();
+    }
+    return success;
+  }
+}
+
+bool Controller::setCurrentFrameById(const std::string& id, const app::UIAnimationOption& option)
+{
+  ASSERT(m_model);
+  const auto index = m_model->getFrameIndexById(id);
+  scaleContentAndUpdate(index);
+  return m_presenter->setCurrentPageIndex(index, option, [this](bool) { fitPage(); });
 }

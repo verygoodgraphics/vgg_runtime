@@ -18,6 +18,10 @@
 
 using namespace VGG;
 using namespace VGG::internal;
+namespace
+{
+constexpr auto K_ANIMATION_INTERVAL = 16;
+}
 
 bool UIViewImpl::isUnitTest() const
 {
@@ -80,6 +84,14 @@ bool UIViewImpl::setPage(int index, bool animated)
     return true;
   }
 
+  return setPage(index, app::UIAnimationOption());
+}
+
+bool UIViewImpl::setPage(
+  std::size_t                   index,
+  const app::UIAnimationOption& option,
+  app::AnimationCompletion      completion)
+{
   const auto oldIndex = page();
   if (oldIndex == index)
     return false;
@@ -96,22 +108,25 @@ bool UIViewImpl::setPage(int index, bool animated)
 
   DEBUG("from page: %s, to page: %s", fromPage->id().c_str(), toPage->id().c_str());
 
-  const auto duration = 3000;
-  const auto interval = 16;
-
-  auto ab = std::make_shared<AttrBridge>(
+  auto action = std::make_shared<AttrBridge>(
     std::static_pointer_cast<UIView>(m_api->shared_from_this()),
     m_animationManager);
-  ab->replaceNode(
-    fromPage,
-    toPage,
-    true,
-    false,
-    std::make_shared<DissolveAnimate>(
-      std::chrono::milliseconds(duration),
-      std::chrono::milliseconds(interval),
-      std::make_shared<LinearInterpolator>(),
-      ab));
+
+  const int duration = option.duration * 1000;
+  auto      timing = std::make_shared<LinearInterpolator>();
+  auto      animation = std::make_shared<DissolveAnimate>(
+    std::chrono::milliseconds(duration),
+    std::chrono::milliseconds(K_ANIMATION_INTERVAL),
+    timing,
+    action);
+  if (completion)
+    animation->addCallBackWhenStop(
+      [completion]()
+      {
+        completion(true); // todo false for unfinished
+      });
+
+  action->replaceNode(fromPage, toPage, true, false, animation);
 
   return true;
 }

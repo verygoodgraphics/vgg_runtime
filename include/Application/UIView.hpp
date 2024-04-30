@@ -18,8 +18,9 @@
 #include "UIEvent.hpp"
 
 #include "Application/Event/EventListener.hpp"
-#include "Layer/Core/FrameNode.hpp"
+#include "Application/UIAnimation.hpp"
 #include "Domain/Layout/Rect.hpp"
+#include "Layer/Core/FrameNode.hpp"
 
 #include <nlohmann/json.hpp>
 
@@ -39,7 +40,7 @@ struct ViewModel;
 namespace app
 {
 class AppRender;
-}
+} // namespace app
 
 namespace layer
 {
@@ -186,6 +187,10 @@ public:
 
   bool setCurrentPage(int index);
   bool setCurrentPageIndex(int index, bool animated = false);
+  bool setCurrentPageIndex(
+    std::size_t                   index,
+    const app::UIAnimationOption& option,
+    VGG::app::AnimationCompletion completion = app::AnimationCompletion());
   bool presentPage(int index);
   bool dismissPage();
   bool goBack(bool resetScrollPosition, bool resetState);

@@ -56,7 +56,7 @@ public:
 
   Bounds effectBounds() const override;
 
-  bool nodeAt(int x, int y, NodeVisitor vistor, void* userData) override;
+  void nodeAt(int x, int y, NodeVisitor vistor, void* userData) override;
 
   PaintNode* nodeByID(std::string_view id);
 

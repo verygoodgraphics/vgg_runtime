@@ -139,17 +139,12 @@ void SceneNode::render(Renderer* renderer)
   }
 }
 
-bool SceneNode::nodeAt(int x, int y, NodeVisitor visitor, void* userData)
+void SceneNode::nodeAt(int x, int y, NodeVisitor visitor, void* userData)
 {
-  bool find = false;
   for (auto& root : d_ptr->frames)
   {
-    if (root->nodeAt(x, y, visitor, userData))
-    {
-      find = true;
-    }
+    root->nodeAt(x, y, visitor, userData);
   }
-  return find;
 }
 
 PaintNode* SceneNode::nodeByID(const std::string& id)

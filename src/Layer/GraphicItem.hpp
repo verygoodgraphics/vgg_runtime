@@ -36,9 +36,8 @@ public:
   {
   }
 
-  virtual bool nodeAt(int x, int y, NodeVisitor vistor, void* userData) override
+  void nodeAt(int x, int y, NodeVisitor vistor, void* userData) override
   {
-    return false;
   }
 
   virtual ShapeAttribute* shape() const = 0;

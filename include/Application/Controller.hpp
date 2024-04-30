@@ -30,6 +30,10 @@ class JsonDocument;
 
 namespace VGG
 {
+namespace app
+{
+struct UIAnimationOption;
+}
 
 class Daruma;
 class Editor;
@@ -136,6 +140,8 @@ public:
 
   std::string currentFrameId() const;
   bool        setCurrentFrameById(const std::string& id);
+  bool        setCurrentFrameById(const std::string& id, bool animated);
+  bool        setCurrentFrameById(const std::string& id, const app::UIAnimationOption& option);
 
   bool nextFrame();
   bool previouseFrame();

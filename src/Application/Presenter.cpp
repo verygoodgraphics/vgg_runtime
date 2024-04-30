@@ -395,5 +395,13 @@ bool Presenter::setCurrentPage(std::size_t index, bool animated)
 
 bool Presenter::setCurrentPage(std::size_t index)
 {
-  return setCurrentPage(index, true); // todo
+  return setCurrentPage(index, false);
+}
+
+bool Presenter::setCurrentPageIndex(
+  std::size_t                   index,
+  const app::UIAnimationOption& option,
+  app::AnimationCompletion      completion)
+{
+  return m_view->setCurrentPageIndex(index, option, completion);
 }

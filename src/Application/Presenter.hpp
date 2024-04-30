@@ -103,6 +103,10 @@ public:
     return m_view->currentPageIndex();
   }
   bool setCurrentPage(std::size_t index);
+  bool setCurrentPageIndex(
+    std::size_t                   index,
+    const app::UIAnimationOption& option,
+    app::AnimationCompletion      completion = app::AnimationCompletion());
   bool presentPage(int index);
   bool dismissPage();
   bool goBack(bool resetScrollPosition, bool resetState);

@@ -36,7 +36,7 @@ public:
   void eraseFrame(int index);
   void render(Renderer* canvas) override;
 
-  bool nodeAt(int x, int y, NodeVisitor vistor, void* userData) override;
+  void nodeAt(int x, int y, NodeVisitor vistor, void* userData) override;
 
   PaintNode* nodeByID(const std::string& id);
 

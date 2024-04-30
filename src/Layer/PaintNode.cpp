@@ -261,23 +261,20 @@ void PaintNode::onPaint(Renderer* renderer)
   d_ptr->renderNode->render(renderer);
 }
 
-bool PaintNode::nodeAt(int x, int y, NodeVisitor visitor)
+void PaintNode::nodeAt(int x, int y, NodeVisitor visitor, void* userData)
 {
-  if (!isVisible())
-    return false;
+  if (!isVisible() || !bounds().valid())
+    return;
   auto local = transform().inverse() * glm::vec3(x, y, 1);
   if (bounds().contains(local.x, local.y))
   {
     for (auto c = rbegin(); c != rend(); ++c)
     {
-      auto n = c->get();
-      if (!n->nodeAt(local.x, local.y, visitor))
-      {
-        return false;
-      }
+      (*c)->nodeAt(local.x, local.y, visitor, userData);
     }
+    const NodeAtContext ctx{ .localX = (int)local.x, .localY = (int)local.y, .userData = userData };
+    visitor(this, &ctx);
   }
-  return false;
 }
 
 void PaintNode::setMaskBy(std::vector<std::string> masks)

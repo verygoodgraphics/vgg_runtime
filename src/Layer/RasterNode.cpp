@@ -82,7 +82,7 @@ void RasterNode::render(Renderer* renderer)
   }
 }
 
-bool RasterNode::nodeAt(int x, int y, NodeVisitor vistor, void* userData)
+void RasterNode::nodeAt(int x, int y, NodeVisitor vistor, void* userData)
 {
   auto c = getChild();
   ASSERT(c);
@@ -95,7 +95,6 @@ bool RasterNode::nodeAt(int x, int y, NodeVisitor vistor, void* userData)
     y = fp.y;
     return getChild()->nodeAt(x, y, vistor, userData);
   }
-  return false;
 }
 
 Bounds RasterNode::onRevalidate()

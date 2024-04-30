@@ -180,10 +180,9 @@ public:
   std::unique_ptr<SkiaContext> skiaContext;
 
   std::vector<std::shared_ptr<Renderable>> items;
-  // std::vector<std::shared_ptr<Scene>>      scenes;
 
   Ref<ViewportNode> viewport;
-  // std::vector<Ref<RenderNode>> renderNodes;
+  Ref<ZoomerNode>   zoomerNode;
 
   Ref<RenderNode> node;
   float           preScale{ 1.0 };
@@ -399,6 +398,7 @@ void VLayer::addRenderItem(std::shared_ptr<Renderable> item)
 
 void VLayer::setRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
 {
+  d_ptr->zoomerNode = transform;
   auto rasterNode = RasterNode::Make(
     d_ptr->skiaContext->context(),
     d_ptr->viewport,
@@ -424,31 +424,39 @@ PaintNode* VLayer::nodeAt(int x, int y)
   {
     auto       p = d_ptr->invMatrix() * glm::vec3{ x, y, 1 };
     PaintNode* result = nullptr;
+#ifdef VGG_LAYER_DEBUG
+    glm::mat3 deviceMatrix{ 1.f };
+    if (d_ptr->viewport)
+      deviceMatrix *= d_ptr->viewport->getMatrix();
+    if (d_ptr->zoomerNode)
+    {
+      deviceMatrix *= d_ptr->zoomerNode->getMatrix();
+    }
+#endif
     d_ptr->node->nodeAt(
       p.x,
       p.y,
-      [&](RenderNode* node, void* userData)
+      [&](RenderNode* node, const RenderNode::NodeAtContext* ctx)
       {
-        auto paintNode = static_cast<FrameNode*>(node)->node();
-        auto xy = reinterpret_cast<float*>(userData);
-        DEBUG("nodeAt: %f, %f", xy[0], xy[1]);
-        if (paintNode->nodeAt(
-              xy[0],
-              xy[1],
-              [&](PaintNode* p)
-              {
-                DEBUG("paint node at");
-                result = p;
-                return false; // only find first
-              }))
-        {
-          return false;
-        }
-        return true;
+        auto frameNode = static_cast<FrameNode*>(node);
+        auto paintNode = frameNode->node();
+
+#ifdef VGG_LAYER_DEBUG
+        deviceMatrix *= frameNode->transform().matrix();
+#endif
+        paintNode->nodeAt(
+          ctx->localX,
+          ctx->localY,
+          [&](PaintNode* p, const PaintNode::NodeAtContext* ctx)
+          {
+            if (!result)
+              result = p;
+          },
+          nullptr);
       },
       nullptr);
     VGG_LAYER_DEBUG_CODE(if (result && d_ptr->debugConfig.enableDrawClickBounds) {
-      drawBounds(result, d_ptr->matrix(), layerCanvas());
+      drawBounds(result, deviceMatrix, layerCanvas());
     });
     return result;
   }
@@ -459,22 +467,16 @@ void VLayer::nodeAt(int x, int y, PaintNode::NodeVisitor visitor)
 {
   if (d_ptr->node)
   {
-    PaintNode* result = nullptr;
-    auto       p = d_ptr->invMatrix() * glm::vec3{ x, y, 1 };
+    auto p = d_ptr->invMatrix() * glm::vec3{ x, y, 1 };
     d_ptr->node->nodeAt(
       p.x,
       p.y,
-      [&](RenderNode* node, void* userData)
+      [&](RenderNode* node, const RenderNode::NodeAtContext* ctx)
       {
         auto paintNode = static_cast<FrameNode*>(node)->node();
-        auto xy = reinterpret_cast<float*>(userData);
-        paintNode->nodeAt(xy[0], xy[1], visitor);
-        return true;
+        paintNode->nodeAt(ctx->localX, ctx->localY, visitor, nullptr);
       },
       nullptr);
-    VGG_LAYER_DEBUG_CODE(if (result && d_ptr->debugConfig.enableDrawClickBounds) {
-      drawBounds(result, d_ptr->matrix(), layerCanvas());
-    });
   }
 }
 

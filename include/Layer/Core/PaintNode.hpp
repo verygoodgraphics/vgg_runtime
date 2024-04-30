@@ -230,8 +230,16 @@ public:
 
   using EventHandler = std::function<void(ShapeItemAttibuteAccessor*, void*)>;
   void installPaintNodeEventHandler(EventHandler handler);
-  using NodeVisitor = std::function<bool(PaintNode*)>;
-  bool nodeAt(int x, int y, NodeVisitor);
+
+  struct NodeAtContext
+  {
+    int       localX{ 0 };
+    int       localY{ 0 };
+    glm::mat3 ctm;
+    void*     userData{ nullptr };
+  };
+  using NodeVisitor = std::function<void(PaintNode*, const NodeAtContext* ctx)>;
+  void  nodeAt(int x, int y, NodeVisitor, void* userData);
 
   ~PaintNode();
 

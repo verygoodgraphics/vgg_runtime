@@ -122,7 +122,7 @@ struct StructTextObject : public StructObject
   R(TextBounds, bounds, Bounds);
   R(LayoutMode, frameMode, ETextLayoutMode);
   R(VerticalAlignment, verticalAlignment, ETextVerticalAlignment);
-  R_OPT(Anchor, anchorPoint, Float2, (Float2{ 0, 0 }));
+  R_OPT(Anchor, anchorPoint, std::optional<Float2>, std::nullopt);
   R_OPT(TextLineType, textLineType, std::vector<TextLineAttr>, {});
   R_OPT(DefaultFontAttr, defaultFontAttr, TextStyleAttr, {});
 

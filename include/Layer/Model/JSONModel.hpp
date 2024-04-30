@@ -90,7 +90,7 @@ struct JSONTextObject : public JSONObject
     "verticalAlignment",
     ETextVerticalAlignment,
     ETextVerticalAlignment::VA_TOP);
-  M_JSON_FIELD_DEF(Anchor, "anchorPoint", Float2, (Float2{ 0.f, 0.f }));
+  M_JSON_FIELD_DEF(Anchor, "anchorPoint", std::optional<Float2>, std::nullopt);
   M_JSON_FIELD_DEF(TextLineType, "textLineType", std::vector<TextLineAttr>, {});
   M_JSON_FIELD_DEF(DefaultFontAttr, "defaultFontAttr", TextStyleAttr, {});
   M_JSON_FIELD_DEF(FontAttr, "fontAttr", std::vector<TextStyleAttr>, {});

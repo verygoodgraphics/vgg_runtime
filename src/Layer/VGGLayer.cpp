@@ -414,14 +414,15 @@ void VLayer::setRenderNode(Ref<RenderNode> node)
 
 namespace
 {
+PaintNode* g_nodeAtResult = nullptr;
 }; // namespace
 
 PaintNode* VLayer::nodeAt(int x, int y)
 {
   if (d_ptr->node)
   {
-    auto       p = d_ptr->invMatrix() * glm::vec3{ x, y, 1 };
-    PaintNode* result = nullptr;
+    auto p = d_ptr->invMatrix() * glm::vec3{ x, y, 1 };
+    g_nodeAtResult = nullptr;
 #ifdef VGG_LAYER_DEBUG
     glm::mat3 deviceMatrix{ 1.f };
     if (d_ptr->viewport)
@@ -431,32 +432,34 @@ PaintNode* VLayer::nodeAt(int x, int y)
       deviceMatrix *= d_ptr->zoomerNode->getMatrix();
     }
 #endif
+
     d_ptr->node->nodeAt(
       p.x,
       p.y,
-      [&](RenderNode* node, const RenderNode::NodeAtContext* ctx)
+      [](RenderNode* node, const RenderNode::NodeAtContext* ctx)
       {
         auto frameNode = static_cast<FrameNode*>(node);
         auto paintNode = frameNode->node();
 
 #ifdef VGG_LAYER_DEBUG
-        deviceMatrix *= frameNode->transform().matrix();
+        auto deviceMatrix = reinterpret_cast<glm::mat3*>(ctx->userData);
+        *deviceMatrix *= frameNode->transform().matrix();
 #endif
         paintNode->nodeAt(
           ctx->localX,
           ctx->localY,
-          [&](PaintNode* p, const PaintNode::NodeAtContext* ctx)
+          [](PaintNode* p, const PaintNode::NodeAtContext* ctx)
           {
-            if (!result)
-              result = p;
+            if (!g_nodeAtResult)
+              g_nodeAtResult = p;
           },
           nullptr);
       },
-      nullptr);
-    VGG_LAYER_DEBUG_CODE(if (result && d_ptr->debugConfig.enableDrawClickBounds) {
-      drawBounds(result, deviceMatrix, layerCanvas());
+      &deviceMatrix);
+    VGG_LAYER_DEBUG_CODE(if (g_nodeAtResult && d_ptr->debugConfig.enableDrawClickBounds) {
+      drawBounds(g_nodeAtResult, deviceMatrix, layerCanvas());
     });
-    return result;
+    return g_nodeAtResult;
   }
   return nullptr;
 }
@@ -469,12 +472,12 @@ void VLayer::nodeAt(int x, int y, PaintNode::NodeVisitor visitor)
     d_ptr->node->nodeAt(
       p.x,
       p.y,
-      [&](RenderNode* node, const RenderNode::NodeAtContext* ctx)
+      [](RenderNode* node, const RenderNode::NodeAtContext* ctx)
       {
         auto paintNode = static_cast<FrameNode*>(node)->node();
-        paintNode->nodeAt(ctx->localX, ctx->localY, visitor, nullptr);
+        paintNode->nodeAt(ctx->localX, ctx->localY, (PaintNode::NodeVisitor)ctx->userData, nullptr);
       },
-      nullptr);
+      (void*)visitor);
   }
 }
 

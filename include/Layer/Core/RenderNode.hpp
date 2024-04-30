@@ -31,7 +31,7 @@ public:
     void* userData;
   };
 
-  using NodeVisitor = std::function<void(RenderNode*, const NodeAtContext*)>;
+  using NodeVisitor = void (*)(RenderNode*, const NodeAtContext*);
   RenderNode(VRefCnt* cnt, EState flags)
     : VNode(cnt, flags)
   {

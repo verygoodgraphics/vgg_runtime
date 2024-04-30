@@ -33,6 +33,7 @@
 
 namespace
 {
+using namespace VGG;
 inline SkColor nodeType2Color(EObjectType type)
 {
   switch (type)

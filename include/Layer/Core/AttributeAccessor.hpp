@@ -18,6 +18,7 @@
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Core/VShape.hpp"
 #include "Layer/Core/VType.hpp"
+#include "Layer/Config.hpp"
 
 #include "Layer/ParagraphLayout.hpp" //TODO:: It's a private header
 

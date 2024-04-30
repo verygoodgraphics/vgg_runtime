@@ -22,7 +22,6 @@
 #include "Layer/Core/ZoomerNode.hpp"
 #include "Layer/Core/FrameNode.hpp"
 #include "Layer/Memory/AllocatorImpl.hpp"
-#include "Layer/Zoomer.hpp"
 #include "Layer/Config.hpp"
 
 #include "Layer/ViewportNode.hpp"

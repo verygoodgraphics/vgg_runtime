@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "LayerCache.h"
+#include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/ResourceManager.hpp"
 #include <include/core/SkImage.h>
 

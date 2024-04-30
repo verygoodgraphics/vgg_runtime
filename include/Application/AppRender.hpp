@@ -15,7 +15,7 @@
  */
 #pragma once
 #include "Event/Event.hpp"
-#include "AppScene.hpp"
+#include "Utility/HelperMacro.hpp"
 #include "AppRenderable.hpp"
 
 #include "Layer/VGGLayer.hpp"
@@ -37,7 +37,6 @@ public:
   void addAppRenderable(std::shared_ptr<AppRenderable> listener);
   void addEventListener(std::shared_ptr<EventListener> listener);
 
-  std::shared_ptr<AppScene> popAppScene();
   using VLayer::beginFrame;
   bool beginFrame(int fps);
   void render();

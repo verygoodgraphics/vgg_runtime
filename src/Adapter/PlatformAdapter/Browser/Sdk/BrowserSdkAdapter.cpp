@@ -39,6 +39,11 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     .field("type", &ISdk::ImageOptions::type)
     .field("quality", &ISdk::ImageOptions::quality);
 
+  value_object<ISdk::AnimationOptions>("AnimationOptions")
+    .field("duration", &ISdk::AnimationOptions::duration)
+    .field("type", &ISdk::AnimationOptions::type)
+    .field("timingFunction", &ISdk::AnimationOptions::timingFunction);
+
   class_<VggSdk>("VggSdk")
     .constructor<>()
     // env
@@ -63,6 +68,7 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     .function("getFramesInfo", &VggSdk::getFramesInfo)
     .function("currentFrameId", &VggSdk::currentFrameId)
     .function("setCurrentFrameById", &VggSdk::setCurrentFrameById)
+    .function("setCurrentFrameByIdAnimated", &VggSdk::setCurrentFrameByIdAnimated)
     .function("launchFrameId", &VggSdk::launchFrameId)
     .function("setLaunchFrameById", &VggSdk::setLaunchFrameById)
     .function("presentFrameById", &VggSdk::presentFrameById)

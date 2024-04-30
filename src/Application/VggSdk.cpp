@@ -491,3 +491,31 @@ void VggSdk::setContentMode(const std::string& mode)
     c->setContentMode(mode);
   }
 }
+
+bool VggSdk::setCurrentFrameByIdAnimated(
+  const std::string&      id,
+  bool                    resetScrollPosition,
+  const AnimationOptions& inOption)
+{
+  auto c = controller();
+  if (!c)
+  {
+    return false;
+  }
+
+  app::UIAnimationOption option;
+  if (inOption.duration > 0)
+  {
+    option.duration = inOption.duration;
+  }
+  if (inOption.type == "dissolve")
+  {
+    option.type = app::EAnimationType::DISSOLVE;
+  }
+  if (inOption.timingFunction == "linear")
+  {
+    option.timingFunction = app::EAnimationTimingFunction::LINEAR;
+  }
+
+  return c->setCurrentFrameById(id, option);
+}

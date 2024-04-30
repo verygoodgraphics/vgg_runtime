@@ -76,6 +76,10 @@ public:
 
   // frame
   bool setCurrentFrameById(const std::string& id, bool resetScrollPosition) override;
+  bool setCurrentFrameByIdAnimated(
+    const std::string&      id,
+    bool                    resetScrollPosition,
+    const AnimationOptions& option) override;
   bool presentFrameById(const std::string& id, bool resetScrollPosition) override;
   bool dismissFrame() override;
   bool goBack(bool resetScrollPosition, bool resetState) override;

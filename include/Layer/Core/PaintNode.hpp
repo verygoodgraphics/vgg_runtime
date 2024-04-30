@@ -238,8 +238,8 @@ public:
     glm::mat3 ctm;
     void*     userData{ nullptr };
   };
-  using NodeVisitor = std::function<void(PaintNode*, const NodeAtContext* ctx)>;
-  void  nodeAt(int x, int y, NodeVisitor, void* userData);
+  using NodeVisitor = void (*)(PaintNode*, const NodeAtContext* ctx);
+  void nodeAt(int x, int y, NodeVisitor, void* userData);
 
   ~PaintNode();
 

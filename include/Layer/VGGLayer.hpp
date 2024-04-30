@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 #pragma once
+#include "Layer/Renderable.hpp"
 #include "Layer/Core/RenderNode.hpp"
 #include "Layer/Core/TransformNode.hpp"
 #include "Layer/Core/ZoomerNode.hpp"
+#include "Layer/Core/PaintNode.hpp"
 #include "Layer/Config.hpp"
 #include "Layer/Effects.hpp"
 #include "Layer/Graphics/GraphicsLayer.hpp"
-#include "Layer/Scene.hpp"
 
 #include <vector>
 class SkCanvas;

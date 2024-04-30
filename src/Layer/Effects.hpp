@@ -31,6 +31,8 @@
 
 namespace VGG::layer
 {
+class Renderer;
+class VShape;
 
 class Effects
 {

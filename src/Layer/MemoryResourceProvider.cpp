@@ -15,8 +15,9 @@
  */
 
 #include "Layer/Core/MemoryResourceProvider.hpp"
-#include <core/SkData.h>
 #include "Layer/LayerCache.h"
+#include <core/SkData.h>
+#include <core/SkImage.h>
 
 namespace VGG::layer
 {

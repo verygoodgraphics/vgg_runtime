@@ -17,7 +17,6 @@
 #include "Layer/Core/RasterCache.hpp"
 #include "Layer/LRUCache.hpp"
 #include "Layer/VSkia.hpp"
-#include "Layer/Zoomer.hpp"
 #include "Utility/HelperMacro.hpp"
 #include "Utility/Log.hpp"
 

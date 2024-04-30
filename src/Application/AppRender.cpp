@@ -15,7 +15,6 @@
  */
 #include "Application/AppRender.hpp"
 #include "AppRenderable.hpp"
-#include "AppScene.hpp"
 #include "Event/EventListener.hpp"
 #include "Utility/CappingProfiler.hpp"
 

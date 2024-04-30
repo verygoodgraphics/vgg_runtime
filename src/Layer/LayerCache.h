@@ -16,7 +16,7 @@
 #pragma once
 
 #include "LRUCache.hpp"
-#include "Layer/Scene.hpp"
+#include "Layer/Memory/Ref.hpp"
 #include <core/SkBlender.h>
 #include <effects/SkRuntimeEffect.h>
 

@@ -17,6 +17,7 @@
 #include "Layer/Core/RasterCacheTile.hpp"
 #include "Layer/Core/RasterCache.hpp"
 
+#include "Layer/Core/ZoomerNode.hpp"
 #include "Layer/LRUCache.hpp"
 #include "core/SkCanvas.h"
 #include "core/SkImage.h"
@@ -287,8 +288,8 @@ class RasterCacheTile__pImpl
   VGG_DECL_API(RasterCacheTile);
 
 public:
-  std::array<CacheState, Zoomer::ZOOM_LEVEL_COUNT + 1> cacheStack;
-  sk_sp<SkSurface>                                     surface;
+  std::array<CacheState, ZoomerNode::ZOOM_LEVEL_COUNT + 1> cacheStack;
+  sk_sp<SkSurface>                                         surface;
   RasterCacheTile__pImpl(RasterCacheTile* api)
     : q_ptr(api)
   {

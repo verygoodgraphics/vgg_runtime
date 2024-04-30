@@ -22,7 +22,6 @@
 #include "Event/EventListener.hpp"
 #include "Event/Keycode.hpp"
 
-#include "Layer/Scene.hpp"
 #include "Layer/VGGLayer.hpp"
 
 #include <nlohmann/json.hpp>

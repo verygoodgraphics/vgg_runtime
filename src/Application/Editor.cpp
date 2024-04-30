@@ -17,7 +17,6 @@
 
 #include "Application/UIView.hpp"
 #include "Domain/Layout/Node.hpp"
-#include "Layer/Zoomer.hpp"
 #include "Utility/Log.hpp"
 
 #include <include/core/SkCanvas.h>

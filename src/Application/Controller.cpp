@@ -159,7 +159,7 @@ public:
     m_firstRenderEnd = now();
   }
 
-  void countTreeNodes(const std::shared_ptr<LayoutNode>& tree)
+  void countTreeNodes(const std::shared_ptr<VGG::LayoutNode>& tree)
   {
     ASSERT(tree);
     const auto& type = tree->type();

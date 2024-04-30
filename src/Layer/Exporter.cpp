@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 #include "Stream.hpp"
+#include "Layer/Renderer.hpp"
 #include "Layer/Exporter/PDFExporter.hpp"
 #include "Layer/Exporter/SVGExporter.hpp"
 #include "Layer/Renderer.hpp"
 #include "Layer/VGGLayer.hpp"
+#include "Layer/Core/FrameNode.hpp"
 #include "Utility/Log.hpp"
 
 #include <core/SkStream.h>
@@ -25,7 +27,6 @@
 #include <svg/SkSVGCanvas.h>
 #include <src/xml/SkXMLWriter.h>
 #include <core/SkCanvas.h>
-#include "Layer/Renderer.hpp"
 
 #include <optional>
 #include <vector>
@@ -34,7 +35,7 @@
 #include <fstream>
 #include <iterator>
 
-static void renderInternal(SkCanvas* canvas, layer::FrameNode* frame)
+static void renderInternal(SkCanvas* canvas, VGG::layer::FrameNode* frame)
 {
   ASSERT(frame);
   ASSERT(canvas);

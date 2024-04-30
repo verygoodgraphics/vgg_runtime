@@ -16,7 +16,6 @@
 #pragma once
 
 #include "Application/AppRenderable.hpp"
-#include "Application/AppScene.hpp"
 #include "Application/UIEvent.hpp"
 
 #include "Domain/IVggEnv.hpp"

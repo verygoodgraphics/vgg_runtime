@@ -40,8 +40,6 @@
 #include "Stream.hpp"
 
 #include "Layer/VGGLayer.hpp"
-#include "Layer/Zoomer.hpp"
-#include "Layer/Scene.hpp"
 #include "Layer/Graphics/GraphicsLayer.hpp"
 #include "Layer/Graphics/GraphicsContext.hpp"
 #include "Layer/Graphics/ContextSkBase.hpp"

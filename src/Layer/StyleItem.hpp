@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "Layer/Core/RenderNode.hpp"
+#include "Layer/Core/AttributeAccessor.hpp"
 #include "AttributeNode.hpp"
 #include "ShapeAttribute.hpp"
 #include "EffectAttribute.hpp"

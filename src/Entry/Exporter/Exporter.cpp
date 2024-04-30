@@ -27,7 +27,6 @@
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Model/StructModel.hpp"
 #include "Layer/VGGLayer.hpp"
-#include "Layer/Scene.hpp"
 #include "Layer/Exporter/SVGExporter.hpp"
 #include "Layer/Exporter/PDFExporter.hpp"
 

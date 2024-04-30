@@ -18,6 +18,7 @@
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/LayerCache.h"
 #include "Layer/VSkia.hpp"
+#include "Layer/Core/VShape.hpp"
 #include <core/SkBlendMode.h>
 #include <core/SkColor.h>
 #include <core/SkCanvas.h>

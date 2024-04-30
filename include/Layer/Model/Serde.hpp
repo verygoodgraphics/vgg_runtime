@@ -278,10 +278,12 @@ struct Serde
         auto p = static_cast<TextNode*>(ptr);
         p->setVerticalAlignment(m.getVerticalAlignment());
         p->setFrameMode(m.getLayoutMode());
-        auto      anchor = m.getAnchor();
-        glm::vec2 anchorPoint = { anchor[0], anchor[1] };
-        CoordinateConvert::convertCoordinateSystem(anchorPoint, totalMatrix);
-        p->setTextAnchor(anchorPoint);
+        if (auto anchor = m.getAnchor(); anchor)
+        {
+          glm::vec2 anchorPoint = { (*anchor)[0], (*anchor)[1] };
+          CoordinateConvert::convertCoordinateSystem(anchorPoint, totalMatrix);
+          p->setTextAnchor(anchorPoint);
+        }
         p->setParagraphBounds(bounds);
         // 1.
         std::vector<TextStyleAttr> textStyle = m.getOverrideFontAttr();

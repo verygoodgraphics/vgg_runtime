@@ -482,13 +482,13 @@ struct ModelSerde<Model::ImageFilters, VGG::ImageFilter>
 };
 
 template<>
-struct ModelSerde<std::vector<double>, std::array<float, 2>>
+struct ModelSerde<std::vector<double>, std::optional<std::array<float, 2>>>
 {
-  static std::array<float, 2> serde_from(const std::vector<double>& v) // NOLINT
+  static std::optional<std::array<float, 2>> serde_from(const std::vector<double>& v) // NOLINT
   {
     if (v.size() != 2)
-      return { 0.0f, 0.0f };
-    return { (float)v[0], (float)v[1] };
+      return std::array{ 0.0f, 0.0f };
+    return std::array{ (float)v[0], (float)v[1] };
   }
 };
 

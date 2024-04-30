@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "PathGenerator.hpp"
+#include "Layer/Config.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VUtils.hpp"
 #include "Layer/Renderer.hpp"
@@ -292,8 +293,8 @@ std::pair<int, RadiusCurveResult> curveWithRadius(
     auto l2 = glm::distance(cp.point, np.point);
     auto r1 = eval(prevPrevPoint, *pp, cp);
     auto r2 = eval(*pp, cp, np);
-    ASSERT(r2 > 0);
-    auto     r3 = eval(cp, np, nextNextPoint);
+    auto r3 = eval(cp, np, nextNextPoint);
+    VGG_LAYER_DEBUG_CODE(if (r1 <= 0 || r2 <= 0 || r3 <= 0) { WARN("Invalid path point"); });
     auto     maxRadius = std::min(r2 / (r1 + r2) * l1, r2 / (r2 + r3) * l2);
     ArcCurve arcCurve{ cp.point, np.point, std::min(maxRadius, cp.radius) };
     return { 1, arcCurve };

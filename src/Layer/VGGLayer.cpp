@@ -423,7 +423,6 @@ PaintNode* VLayer::nodeAt(int x, int y)
   {
     auto p = d_ptr->invMatrix() * glm::vec3{ x, y, 1 };
     g_nodeAtResult = nullptr;
-#ifdef VGG_LAYER_DEBUG
     glm::mat3 deviceMatrix{ 1.f };
     if (d_ptr->viewport)
       deviceMatrix *= d_ptr->viewport->getMatrix();
@@ -431,7 +430,6 @@ PaintNode* VLayer::nodeAt(int x, int y)
     {
       deviceMatrix *= d_ptr->zoomerNode->getMatrix();
     }
-#endif
 
     d_ptr->node->nodeAt(
       p.x,
@@ -441,10 +439,8 @@ PaintNode* VLayer::nodeAt(int x, int y)
         auto frameNode = static_cast<FrameNode*>(node);
         auto paintNode = frameNode->node();
 
-#ifdef VGG_LAYER_DEBUG
         auto deviceMatrix = reinterpret_cast<glm::mat3*>(ctx->userData);
         *deviceMatrix *= frameNode->transform().matrix();
-#endif
         paintNode->nodeAt(
           ctx->localX,
           ctx->localY,

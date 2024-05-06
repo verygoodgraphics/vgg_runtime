@@ -334,9 +334,15 @@ void DissolveAnimate::start()
     addChildAnimate(animate);
 
     auto paintNodeFrom = attrBridge->getPaintNode(from);
+    auto opacity = AttrBridge::getOpacity(paintNodeFrom);
+    assert(opacity);
+
     animate->addCallBackWhenStop(
-      [attrBridge, from, isOnlyUpdatePaint, paintNodeFrom]()
-      { attrBridge->updateVisible(from, paintNodeFrom, false, isOnlyUpdatePaint); });
+      [attrBridge, from, isOnlyUpdatePaint, paintNodeFrom, opacity]()
+      {
+        attrBridge->updateVisible(from, paintNodeFrom, false, isOnlyUpdatePaint);
+        attrBridge->updateOpacity(from, paintNodeFrom, opacity ? *opacity : 1, isOnlyUpdatePaint);
+      });
 
     // attrBridge->updateVisible(from, true, isOnlyUpdatePaint);
     attrBridge->updateOpacity(from, paintNodeFrom, 0, isOnlyUpdatePaint, animate);

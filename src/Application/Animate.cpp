@@ -466,7 +466,10 @@ void SmartAnimate::addAnimate(
 
     auto paintNodeFrom = attrBridge->getPaintNode(itemFrom);
     auto paintNodeTo = attrBridge->getPaintNode(itemTo);
-    if (!paintNodeFrom || !paintNodeTo)
+
+    if (
+      !paintNodeFrom || !paintNodeTo || !*AttrBridge::getVisible(paintNodeFrom) ||
+      !*AttrBridge::getVisible(paintNodeTo))
     {
       continue;
     }

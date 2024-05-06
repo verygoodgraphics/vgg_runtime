@@ -91,11 +91,13 @@ inline void serde_ellipse(
       if (v.size() == 2)
       {
         x = glm::vec2{ v[0], v[1] };
+        return;
       }
     }
     else if (std::holds_alternative<double>(*t))
     {
       x = (float)std::get<double>(*t);
+      return;
     }
   }
   x = 1.f; // default value

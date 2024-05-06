@@ -71,15 +71,19 @@ Animate::~Animate()
 
 void Animate::stop()
 {
-  if (isRunning())
+  if (m_timer)
   {
     m_timer->invalidate();
     m_timer = nullptr;
+  }
 
+  if (!m_callbackWhenStop.empty())
+  {
     for (auto& item : m_callbackWhenStop)
     {
       item();
     }
+    m_callbackWhenStop.clear();
   }
 }
 
@@ -148,7 +152,15 @@ void AnimateManage::deleteFinishedAnimate()
   auto it = std::remove_if(
     m_animates.begin(),
     m_animates.end(),
-    [](auto animate) { return animate->isFinished(); });
+    [](auto animate)
+    {
+      auto result = animate->isFinished();
+      if (result)
+      {
+        animate->stop();
+      }
+      return result;
+    });
 
   if (it != m_animates.end())
   {
@@ -231,6 +243,22 @@ ReplaceNodeAnimate::ReplaceNodeAnimate(
 {
 }
 
+bool ReplaceNodeAnimate::isRunning()
+{
+  return std::any_of(
+    m_childAnimates.begin(),
+    m_childAnimates.end(),
+    [](std::shared_ptr<Animate> child) { return child->isRunning(); });
+}
+
+bool ReplaceNodeAnimate::isFinished()
+{
+  return std::all_of(
+    m_childAnimates.begin(),
+    m_childAnimates.end(),
+    [](std::shared_ptr<Animate> child) { return child->isFinished(); });
+}
+
 void ReplaceNodeAnimate::setFromTo(std::shared_ptr<LayoutNode> from, std::shared_ptr<LayoutNode> to)
 {
   m_from = from;
@@ -262,6 +290,11 @@ void ReplaceNodeAnimate::setIsOnlyUpdatePaint(bool isOnlyUpdatePaint)
   m_isOnlyUpdatePaint = isOnlyUpdatePaint;
 }
 
+void ReplaceNodeAnimate::addChildAnimate(std::shared_ptr<Animate> animate)
+{
+  m_childAnimates.emplace_back(animate);
+}
+
 DissolveAnimate::DissolveAnimate(
   milliseconds                  duration,
   milliseconds                  interval,
@@ -284,28 +317,29 @@ void DissolveAnimate::start()
 
   if (to)
   {
+    auto animate = createNumberAnimate();
+    addChildAnimate(animate);
+
     auto paintNodeTo = attrBridge->getPaintNode(to);
     auto opacity = AttrBridge::getOpacity(paintNodeTo);
     assert(opacity);
     attrBridge->updateOpacity(to, paintNodeTo, 0, isOnlyUpdatePaint);
     attrBridge->updateVisible(to, paintNodeTo, true, isOnlyUpdatePaint);
-    attrBridge->updateOpacity(
-      to,
-      paintNodeTo,
-      opacity ? *opacity : 1,
-      isOnlyUpdatePaint,
-      createNumberAnimate());
+    attrBridge->updateOpacity(to, paintNodeTo, opacity ? *opacity : 1, isOnlyUpdatePaint, animate);
   }
 
   if (from)
   {
+    auto animate = createNumberAnimate();
+    addChildAnimate(animate);
+
     auto paintNodeFrom = attrBridge->getPaintNode(from);
-    auto fromAnimate = createNumberAnimate();
-    fromAnimate->addCallBackWhenStop(
+    animate->addCallBackWhenStop(
       [attrBridge, from, isOnlyUpdatePaint, paintNodeFrom]()
       { attrBridge->updateVisible(from, paintNodeFrom, false, isOnlyUpdatePaint); });
+
     // attrBridge->updateVisible(from, true, isOnlyUpdatePaint);
-    attrBridge->updateOpacity(from, paintNodeFrom, 0, isOnlyUpdatePaint, fromAnimate);
+    attrBridge->updateOpacity(from, paintNodeFrom, 0, isOnlyUpdatePaint, animate);
   }
 }
 
@@ -325,14 +359,18 @@ void SmartAnimate::start()
   assert(from && to);
 
   auto attrBridge = getAttrBridge();
+  auto animate =
+    std::make_shared<DissolveAnimate>(getDuration(), getInterval(), getInterpolator(), attrBridge);
+
   attrBridge->replaceNode(
     from,
     to,
     attrBridge->getPaintNode(from),
     attrBridge->getPaintNode(to),
     getIsOnlyUpdatePaint(),
-    std::make_shared<DissolveAnimate>(getDuration(), getInterval(), getInterpolator(), attrBridge));
+    animate);
 
+  addChildAnimate(animate);
   addAnimate(from, to);
 }
 
@@ -456,6 +494,7 @@ void SmartAnimate::addAnimate(
       getIsOnlyUpdatePaint(),
       animate,
       type == VGG::Domain::Element::EType::FRAME); // TODO group, symbol and so on.
+    addChildAnimate(animate);
   }
 
   for (auto item : twins)

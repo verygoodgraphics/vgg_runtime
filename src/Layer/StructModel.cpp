@@ -53,6 +53,7 @@ inline void update(
   M(letterSpacingUnit);
   M(letterSpacingValue);
   M(lineSpacingUnit);
+  M(lineSpacingValue);
   M(linethrough);
   M(name);
   M(postScript);

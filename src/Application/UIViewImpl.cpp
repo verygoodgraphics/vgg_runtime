@@ -119,12 +119,13 @@ bool UIViewImpl::setPage(
     std::chrono::milliseconds(K_ANIMATION_INTERVAL),
     timing,
     action);
-  if (completion)
-    animation->addCallBackWhenStop(
-      [completion]()
-      {
+  animation->addCallBackWhenStop(
+    [this, index, completion]()
+    {
+      setPage(index);
+      if (completion)
         completion(true); // todo false for unfinished
-      });
+    });
 
   action->replaceNode(
     fromPage,

@@ -126,7 +126,13 @@ bool UIViewImpl::setPage(
         completion(true); // todo false for unfinished
       });
 
-  action->replaceNode(fromPage, toPage, true, false, animation);
+  action->replaceNode(
+    fromPage,
+    toPage,
+    action->getPaintNode(fromPage),
+    action->getPaintNode(toPage),
+    false,
+    animation);
 
   return true;
 }

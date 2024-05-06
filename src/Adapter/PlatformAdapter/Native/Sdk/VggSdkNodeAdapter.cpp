@@ -146,6 +146,43 @@ private:
   OnError      m_on_error;
 };
 
+const ISdk::AnimationOptions animationOptionsFromJsObject(napi_env env, napi_value value)
+{
+  ISdk::AnimationOptions options;
+  {
+    bool hasProperty = false;
+    napi_has_named_property(env, value, "duration", &hasProperty);
+    if (hasProperty)
+    {
+      napi_value durationValue;
+      napi_get_named_property(env, value, "duration", &durationValue);
+      napi_get_value_double(env, durationValue, &options.duration);
+    }
+  }
+  {
+    bool hasProperty = false;
+    napi_has_named_property(env, value, "type", &hasProperty);
+    if (hasProperty)
+    {
+      napi_value typeValue;
+      napi_get_named_property(env, value, "type", &typeValue);
+      options.type = GetArgString(env, typeValue);
+    }
+  }
+  {
+    bool hasProperty = false;
+    napi_has_named_property(env, value, "timingFunction", &hasProperty);
+    if (hasProperty)
+    {
+      napi_value timingFunctionValue;
+      napi_get_named_property(env, value, "timingFunction", &timingFunctionValue);
+      options.timingFunction = GetArgString(env, timingFunctionValue);
+    }
+  }
+
+  return options;
+}
+
 } // namespace
 
 napi_ref VggSdkNodeAdapter::constructor;
@@ -184,6 +221,7 @@ void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
     DECLARE_NODE_API_PROPERTY("getDesignDocument", GetDesignDocument),
 
     DECLARE_NODE_API_PROPERTY("setCurrentFrameById", setCurrentFrameById),
+    DECLARE_NODE_API_PROPERTY("setCurrentFrameByIdAnimated", setCurrentFrameByIdAnimated),
     DECLARE_NODE_API_PROPERTY("presentFrameById", presentFrameById),
     DECLARE_NODE_API_PROPERTY("dismissFrame", dismissFrame),
     DECLARE_NODE_API_PROPERTY("goBack", goBack),
@@ -438,6 +476,45 @@ napi_value VggSdkNodeAdapter::setCurrentFrameById(napi_env env, napi_callback_in
     bool success{ false };
     SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, id]()
                               { return sdk->setCurrentFrameById(id, true); },
+                              [&success](bool result) { success = result; } }();
+
+    napi_value ret;
+    NODE_API_CALL(env, napi_get_boolean(env, success, &ret));
+    return ret;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+
+napi_value VggSdkNodeAdapter::setCurrentFrameByIdAnimated(napi_env env, napi_callback_info info)
+{
+  constexpr size_t ARG_COUNT = 3;
+  size_t           argc = ARG_COUNT;
+  napi_value       args[ARG_COUNT];
+  napi_value       _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc < ARG_COUNT)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    const auto id = GetArgString(env, args[0]);
+    const auto options = animationOptionsFromJsObject(env, args[2]);
+
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
+
+    bool success{ false };
+    SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, id, &options]()
+                              { return sdk->setCurrentFrameByIdAnimated(id, true, options); },
                               [&success](bool result) { success = result; } }();
 
     napi_value ret;

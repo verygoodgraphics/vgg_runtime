@@ -405,3 +405,14 @@ bool Presenter::setCurrentPageIndex(
 {
   return m_view->setCurrentPageIndex(index, option, completion);
 }
+
+bool Presenter::updateViewNodeFillColor(
+  const std::string& id,
+  const std::size_t  fillIndex,
+  const double       r,
+  const double       g,
+  const double       b,
+  const double       a)
+{
+  return m_view->updateNodeFillColor(id, fillIndex, r, g, b, a);
+}

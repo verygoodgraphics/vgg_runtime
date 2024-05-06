@@ -93,6 +93,14 @@ public:
 public:
   void setBackgroundColor(uint32_t color);
 
+  bool updateNodeFillColor(
+    const std::string& id,
+    const std::size_t  fillIndex,
+    const double       r,
+    const double       g,
+    const double       b,
+    const double       a);
+
 public:
   void frame();
   bool isDirty();

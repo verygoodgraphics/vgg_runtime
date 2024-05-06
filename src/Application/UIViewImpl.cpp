@@ -213,3 +213,29 @@ bool UIViewImpl::isDirty()
 {
   return m_animationManager.hasRunningAnimation();
 }
+
+bool UIViewImpl::updateNodeFillColor(
+  const std::string& id,
+  const std::size_t  fillIndex,
+  const double       r,
+  const double       g,
+  const double       b,
+  const double       a)
+{
+  auto node = m_sceneNode->nodeByID(id);
+  if (!node)
+    return false;
+
+  auto fills = node->attributeAccessor()->getFills();
+  if (fillIndex >= fills.size())
+    return false;
+
+  Color color;
+  color.a = a;
+  color.r = r;
+  color.g = g;
+  color.b = b;
+  fills.at(fillIndex).type = color;
+  node->attributeAccessor()->setFills(fills);
+  return true;
+}

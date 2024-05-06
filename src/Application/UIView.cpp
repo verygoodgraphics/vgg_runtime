@@ -966,4 +966,19 @@ bool UIView::setCurrentPageIndex(
   return m_impl->setPage(index, option, completion);
 }
 
+bool UIView::updateNodeFillColor(
+  const std::string& id,
+  const std::size_t  fillIndex,
+  const double       r,
+  const double       g,
+  const double       b,
+  const double       a)
+{
+  const auto success = m_impl->updateNodeFillColor(id, fillIndex, r, g, b, a);
+  if (success)
+    setDirty(true);
+
+  return success;
+}
+
 } // namespace VGG

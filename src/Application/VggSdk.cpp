@@ -519,3 +519,16 @@ bool VggSdk::setCurrentFrameByIdAnimated(
 
   return c->setCurrentFrameById(id, option);
 }
+
+bool VggSdk::updateElementFillColor(
+  const std::string& id,
+  const std::size_t  fillIndex,
+  const double       r,
+  const double       g,
+  const double       b,
+  const double       a)
+{
+  if (const auto& c = controller())
+    return c->updateElementFillColor(id, fillIndex, r, g, b, a);
+  return false;
+}

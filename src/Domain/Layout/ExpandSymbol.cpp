@@ -852,7 +852,7 @@ void ExpandSymbol::processVariableRefs(
 
   for (auto child : element->children())
   {
-    processVariableRefs(child, *element, instanceIdStack, option);
+    processVariableRefs(child, container, instanceIdStack, option);
   }
 }
 

@@ -17,6 +17,9 @@
 #include "Application/AttrBridge.hpp"
 #include "Utility/VggTimer.hpp"
 #include "Utility/Log.hpp"
+#include "Domain/Layout/Node.hpp"
+#include "Domain/Model/Element.hpp"
+#include <unordered_map>
 
 using namespace VGG;
 
@@ -162,6 +165,16 @@ NumberAnimate::NumberAnimate(
 {
 }
 
+void NumberAnimate::addTriggeredCallback(TTriggeredCallback&& fun)
+{
+  m_triggeredCallback.emplace_back(std::move(fun));
+}
+
+const std::vector<NumberAnimate::TTriggeredCallback>& NumberAnimate::getTriggeredCallback()
+{
+  return m_triggeredCallback;
+}
+
 void NumberAnimate::start()
 {
   Animate::start();
@@ -185,6 +198,11 @@ void NumberAnimate::start()
       }
 
       m_action(m_nowValue);
+
+      for (auto& item : this->getTriggeredCallback())
+      {
+        item(m_nowValue);
+      }
     },
     true);
 }
@@ -259,22 +277,36 @@ void DissolveAnimate::start()
   auto from = getFrom();
   auto to = getTo();
   auto isOnlyUpdatePaint = getIsOnlyUpdatePaint();
-  assert(from && to && attrBridge);
+  assert(attrBridge && (from || to));
 
   auto createNumberAnimate = [this]()
   { return std::make_shared<NumberAnimate>(getDuration(), getInterval(), getInterpolator()); };
 
-  auto opacity = AttrBridge::getOpacity(to);
-  assert(opacity);
-  attrBridge->updateOpacity(to, 0, isOnlyUpdatePaint);
-  attrBridge->updateVisible(to, true, isOnlyUpdatePaint);
-  attrBridge->updateOpacity(to, opacity ? *opacity : 1, isOnlyUpdatePaint, createNumberAnimate());
+  if (to)
+  {
+    auto paintNodeTo = attrBridge->getPaintNode(to);
+    auto opacity = AttrBridge::getOpacity(paintNodeTo);
+    assert(opacity);
+    attrBridge->updateOpacity(to, paintNodeTo, 0, isOnlyUpdatePaint);
+    attrBridge->updateVisible(to, paintNodeTo, true, isOnlyUpdatePaint);
+    attrBridge->updateOpacity(
+      to,
+      paintNodeTo,
+      opacity ? *opacity : 1,
+      isOnlyUpdatePaint,
+      createNumberAnimate());
+  }
 
-  auto fromAnimate = createNumberAnimate();
-  fromAnimate->addCallBackWhenStop([attrBridge, from, isOnlyUpdatePaint]()
-                                   { attrBridge->updateVisible(from, false, isOnlyUpdatePaint); });
-  attrBridge->updateVisible(from, true, isOnlyUpdatePaint);
-  attrBridge->updateOpacity(from, 0, isOnlyUpdatePaint, fromAnimate);
+  if (from)
+  {
+    auto paintNodeFrom = attrBridge->getPaintNode(from);
+    auto fromAnimate = createNumberAnimate();
+    fromAnimate->addCallBackWhenStop(
+      [attrBridge, from, isOnlyUpdatePaint, paintNodeFrom]()
+      { attrBridge->updateVisible(from, paintNodeFrom, false, isOnlyUpdatePaint); });
+    // attrBridge->updateVisible(from, true, isOnlyUpdatePaint);
+    attrBridge->updateOpacity(from, paintNodeFrom, 0, isOnlyUpdatePaint, fromAnimate);
+  }
 }
 
 SmartAnimate::SmartAnimate(
@@ -283,10 +315,158 @@ SmartAnimate::SmartAnimate(
   std::shared_ptr<Interpolator> interpolator,
   std::shared_ptr<AttrBridge>   attrBridge)
   : ReplaceNodeAnimate(duration, interval, interpolator, attrBridge)
-  , m_correlateById(true)
 {
 }
 
 void SmartAnimate::start()
 {
+  auto from = getFrom();
+  auto to = getTo();
+  assert(from && to);
+
+  auto attrBridge = getAttrBridge();
+  attrBridge->replaceNode(
+    from,
+    to,
+    attrBridge->getPaintNode(from),
+    attrBridge->getPaintNode(to),
+    getIsOnlyUpdatePaint(),
+    std::make_shared<DissolveAnimate>(getDuration(), getInterval(), getInterpolator(), attrBridge));
+
+  addAnimate(from, to);
+}
+
+void SmartAnimate::addAnimate(
+  std::shared_ptr<LayoutNode> nodeFrom,
+  std::shared_ptr<LayoutNode> nodeTo)
+{
+  // TODO  Currently, the issue of opacity during smart animate is not being considered.
+
+  typedef std::shared_ptr<Domain::Element> TElement;
+
+  auto attrBridge = getAttrBridge();
+  bool isOnlyUpdatePaint = getIsOnlyUpdatePaint();
+
+  std::list<TElement> noteToDirectChildrenSorted;
+  do
+  {
+    if (!nodeTo)
+    {
+      break;
+    }
+
+    auto element = nodeTo->elementNode();
+    if (!element)
+    {
+      break;
+    }
+
+    auto children = element->children();
+    auto back_insert = std::back_inserter(noteToDirectChildrenSorted);
+
+    std::copy_if(
+      children.begin(),
+      children.end(),
+      back_insert,
+      [](TElement element) { return static_cast<bool>(element); });
+
+    noteToDirectChildrenSorted.sort([](TElement item0, TElement item1)
+                                    { return item0->name() < item1->name(); });
+
+  } while (false);
+
+  std::unordered_map<std::shared_ptr<LayoutNode>, std::shared_ptr<LayoutNode>> twins;
+  if (nodeFrom)
+  {
+    auto element = nodeFrom->elementNode();
+    if (element)
+    {
+      auto children = element->children();
+      for (auto child : children)
+      {
+        if (!child)
+        {
+          continue;
+        }
+
+        auto it = std::lower_bound(
+          noteToDirectChildrenSorted.begin(),
+          noteToDirectChildrenSorted.end(),
+          child,
+          [](TElement element, TElement target)
+          {
+            assert(element && target);
+            return element->name() < target->name();
+          });
+
+        if (it != noteToDirectChildrenSorted.end() && it->get()->name() == child->name())
+        {
+          twins.emplace(std::make_shared<LayoutNode>(child), std::make_shared<LayoutNode>(*it));
+          noteToDirectChildrenSorted.erase(it);
+        }
+      }
+    }
+  }
+
+  for (auto item : twins)
+  {
+    auto itemFrom = item.first;
+    auto itemTo = item.second;
+
+    auto objectFrom = AttrBridge::getlayoutNodeObject(itemFrom);
+    auto objectTo = AttrBridge::getlayoutNodeObject(itemTo);
+    if (!objectFrom || !objectTo)
+    {
+      continue;
+    }
+
+    if (objectTo->matrix.size() != 6)
+    {
+      assert(false);
+      continue;
+    }
+
+    auto paintNodeFrom = attrBridge->getPaintNode(itemFrom);
+    auto paintNodeTo = attrBridge->getPaintNode(itemTo);
+    if (!paintNodeFrom || !paintNodeTo)
+    {
+      continue;
+    }
+
+    auto transform = TransformHelper::transform(
+      *AttrBridge::getWidth(paintNodeFrom),
+      *AttrBridge::getHeight(paintNodeFrom),
+      *AttrBridge::getWidth(paintNodeTo),
+      *AttrBridge::getHeight(paintNodeTo),
+      *AttrBridge::getMatrix(paintNodeTo));
+
+    auto type = itemFrom->elementNode()->type();
+    auto animate = std::make_shared<NumberAnimate>(getDuration(), getInterval(), getInterpolator());
+    animate->addTriggeredCallback(std::bind(
+      AttrBridge::setTwinMatrix,
+      itemFrom,
+      itemTo,
+      paintNodeTo,
+      std::placeholders::_1,
+      isOnlyUpdatePaint));
+    attrBridge->updateMatrix(
+      itemFrom,
+      paintNodeFrom,
+      transform,
+      getIsOnlyUpdatePaint(),
+      animate,
+      type == VGG::Domain::Element::EType::FRAME); // TODO group, symbol and so on.
+  }
+
+  for (auto item : twins)
+  {
+    auto type = item.first->elementNode()->type();
+    if (
+      type == VGG::Domain::Element::EType::FRAME || type == VGG::Domain::Element::EType::GROUP ||
+      type == VGG::Domain::Element::EType::SYMBOL_INSTANCE ||
+      type == VGG::Domain::Element::EType::SYMBOL_MASTER)
+    {
+      addAnimate(item.first, item.second);
+    }
+  }
 }

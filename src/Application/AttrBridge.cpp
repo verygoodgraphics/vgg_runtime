@@ -32,43 +32,108 @@ AttrBridge::AttrBridge(std::shared_ptr<UIView> view, AnimateManage& animateManag
 {
 }
 
-std::optional<double> AttrBridge::getOpacity(std::shared_ptr<LayoutNode> node)
+std::optional<VGG::Color> AttrBridge::getFillColor(layer::PaintNode* node, size_t index)
 {
-  auto object = AttrBridge::getlayoutNodeObject(node);
-  if (!object)
+  if (!node)
   {
     return {};
   }
-  return object->contextSettings.opacity;
+
+  try
+  {
+    return std::get<VGG::Color>(node->attributeAccessor()->getFills().at(index).type);
+  }
+  catch (...)
+  {
+  }
+
+  return {};
 }
 
-std::optional<bool> AttrBridge::getVisible(std::shared_ptr<LayoutNode> node)
+std::optional<double> AttrBridge::getOpacity(layer::PaintNode* node)
 {
-  auto object = AttrBridge::getlayoutNodeObject(node);
-  if (!object)
+  if (!node)
   {
     return {};
   }
-  return object->visible;
+
+  return node->contextSetting().opacity;
 }
 
-std::optional<std::array<double, 6>> AttrBridge::getMatrix(std::shared_ptr<LayoutNode> node)
+std::optional<bool> AttrBridge::getVisible(layer::PaintNode* node)
+{
+  if (!node)
+  {
+    return {};
+  }
+
+  return node->isVisible();
+}
+
+std::optional<std::array<double, 6>> AttrBridge::getMatrix(layer::PaintNode* node)
+{
+  if (!node)
+  {
+    return {};
+  }
+
+  auto transform = node->attributeAccessor()->getTransform();
+  return TransformHelper::toDesignMatrix(transform.matrix());
+}
+
+std::optional<double> AttrBridge::getWidth(layer::PaintNode* node)
+{
+  if (!node)
+  {
+    return {};
+  }
+  return node->frameBounds().width();
+}
+
+std::optional<double> AttrBridge::getHeight(layer::PaintNode* node)
+{
+  if (!node)
+  {
+    return {};
+  }
+  return node->frameBounds().height();
+}
+
+void AttrBridge::setFillColor(
+  std::shared_ptr<LayoutNode> node,
+  size_t                      index,
+  const std::vector<double>&  argb)
 {
   auto object = AttrBridge::getlayoutNodeObject(node);
-  if (!object)
+  if (!object || index >= object->style.fills.size())
   {
-    return {};
+    return;
   }
 
-  if (object->matrix.size() != 6)
+  auto& color = object->style.fills.at(index).color;
+  color->alpha = static_cast<float>(argb.at(0));
+  color->red = static_cast<float>(argb.at(1));
+  color->green = static_cast<float>(argb.at(2));
+  color->blue = static_cast<float>(argb.at(3));
+}
+
+void AttrBridge::setFillColor(layer::PaintNode* node, size_t index, const std::vector<double>& argb)
+{
+  auto fills = node->attributeAccessor()->getFills();
+
+  if (index >= fills.size())
   {
-    assert(false);
-    return {};
+    return;
   }
 
-  auto result = std::array<double, 6>();
-  std::copy(object->matrix.begin(), object->matrix.end(), result.begin());
-  return result;
+  VGG::Color color;
+  color.a = static_cast<float>(argb.at(0));
+  color.r = static_cast<float>(argb.at(1));
+  color.g = static_cast<float>(argb.at(2));
+  color.b = static_cast<float>(argb.at(3));
+
+  fills.at(index).type = color;
+  node->attributeAccessor()->setFills(fills);
 }
 
 void AttrBridge::setOpacity(std::shared_ptr<LayoutNode> node, double value)
@@ -135,29 +200,19 @@ void AttrBridge::setMatrix(layer::PaintNode* node, const std::array<double, 6>& 
 
 void AttrBridge::updateSimpleAttr(
   std::shared_ptr<LayoutNode>                     node,
-  layer::PaintNode*                               paintNode,
   const std::vector<double>&                      from,
   const std::vector<double>&                      to,
-  std::function<void(const std::vector<double>&)> updateFrom,
-  std::function<void(const std::vector<double>&)> updateTo,
+  std::function<void(const std::vector<double>&)> update,
   std::shared_ptr<NumberAnimate>                  animate)
 {
-  assert(paintNode);
-
   if (!animate)
   {
-    updateFrom(to);
-    updateTo(to);
+    update(to);
   }
   else
   {
     animate->setFromTo(from, to);
-    animate->setAction(
-      [updateFrom, updateTo](const std::vector<double>& value)
-      {
-        updateFrom(value);
-        updateTo(value);
-      });
+    animate->setAction([update](const std::vector<double>& value) { update(value); });
     animate->start();
     m_animateManage.addAnimate(animate);
   }
@@ -216,6 +271,7 @@ layer::PaintNode* AttrBridge::getPaintNode(std::shared_ptr<LayoutNode> node)
 
 bool AttrBridge::updateColor(
   std::shared_ptr<LayoutNode>    node,
+  layer::PaintNode*              paintNode,
   size_t                         index,
   const Model::Color&            newColor,
   bool                           isOnlyUpdatePaint,
@@ -227,59 +283,36 @@ bool AttrBridge::updateColor(
     return false;
   }
 
-  auto paintNode = getPaintNode(node);
   if (!paintNode)
   {
     return false;
   }
 
-  auto updateFrom = [node, index, isOnlyUpdatePaint](const std::vector<double>& value)
+  auto update = [node, paintNode, index, isOnlyUpdatePaint](const std::vector<double>& value)
   {
-    if (isOnlyUpdatePaint)
+    if (!isOnlyUpdatePaint)
     {
-      return;
+      AttrBridge::setFillColor(node, index, value);
     }
 
-    auto object = AttrBridge::getlayoutNodeObject(node);
-    if (!object || index >= object->style.fills.size())
-    {
-      return;
-    }
-
-    auto& color = object->style.fills.at(index).color;
-    color->alpha = static_cast<float>(value.at(0));
-    color->red = static_cast<float>(value.at(1));
-    color->green = static_cast<float>(value.at(2));
-    color->blue = static_cast<float>(value.at(3));
+    AttrBridge::setFillColor(paintNode, index, value);
   };
 
-  auto updateTo = [paintNode, index](const std::vector<double>& value)
+  VGG::Color color;
+  try
   {
-    auto fills = paintNode->attributeAccessor()->getFills();
+    color = std::get<VGG::Color>(paintNode->attributeAccessor()->getFills().at(index).type);
+  }
+  catch (...)
+  {
+    return false;
+  }
 
-    VGG::Color color;
-    color.a = static_cast<float>(value.at(0));
-    color.r = static_cast<float>(value.at(1));
-    color.g = static_cast<float>(value.at(2));
-    color.b = static_cast<float>(value.at(3));
-
-    if (fills.size() <= index)
-    {
-      return;
-    }
-
-    fills.at(index).type = color;
-    paintNode->attributeAccessor()->setFills(fills);
-  };
-
-  auto color = object->style.fills.at(index).color;
   updateSimpleAttr(
     node,
-    paintNode,
-    { color->alpha, color->red, color->green, color->blue },
+    { color.a, color.r, color.g, color.b },
     { newColor.alpha, newColor.red, newColor.green, newColor.blue },
-    updateFrom,
-    updateTo,
+    update,
     animate);
 
   return true;
@@ -287,13 +320,13 @@ bool AttrBridge::updateColor(
 
 bool AttrBridge::updateOpacity(
   std::shared_ptr<LayoutNode>    node,
+  layer::PaintNode*              paintNode,
   double                         newOpacity,
   bool                           isOnlyUpdatePaint,
   std::shared_ptr<NumberAnimate> animate)
 {
   assert(newOpacity >= 0 && newOpacity <= 1);
 
-  auto paintNode = getPaintNode(node);
   if (!paintNode)
   {
     return false;
@@ -305,8 +338,7 @@ bool AttrBridge::updateOpacity(
     return false;
   }
 
-  auto update =
-    [node, paintNode, isOnlyUpdatePaint](const std::vector<double>& value, bool forPaintNode)
+  auto update = [node, paintNode, isOnlyUpdatePaint](const std::vector<double>& value)
   {
     assert(value.size() == 1);
 
@@ -315,30 +347,23 @@ bool AttrBridge::updateOpacity(
       node->id().c_str(),
       paintNode,
       value.at(0));
-    if (forPaintNode)
-    {
-      AttrBridge::setOpacity(paintNode, value.at(0));
-    }
-    else if (!isOnlyUpdatePaint)
+
+    if (!isOnlyUpdatePaint)
     {
       AttrBridge::setOpacity(node, value.at(0));
     }
+
+    AttrBridge::setOpacity(paintNode, value.at(0));
   };
 
-  updateSimpleAttr(
-    node,
-    paintNode,
-    { object->contextSettings.opacity },
-    { newOpacity },
-    std::bind(update, std::placeholders::_1, false),
-    std::bind(update, std::placeholders::_1, true),
-    animate);
+  updateSimpleAttr(node, { *AttrBridge::getOpacity(paintNode) }, { newOpacity }, update, animate);
 
   return true;
 }
 
 bool AttrBridge::updateVisible(
   std::shared_ptr<LayoutNode> node,
+  layer::PaintNode*           paintNode,
   bool                        visible,
   bool                        isOnlyUpdatePaint)
 {
@@ -346,24 +371,26 @@ bool AttrBridge::updateVisible(
   {
     AttrBridge::setVisible(node, visible);
   }
-  AttrBridge::setVisible(getPaintNode(node), visible);
+
+  AttrBridge::setVisible(paintNode, visible);
 
   return true;
 }
 
 bool AttrBridge::updateMatrix(
   std::shared_ptr<LayoutNode>    node,
+  layer::PaintNode*              paintNode,
   const std::array<double, 6>&   newMatrix,
   bool                           isOnlyUpdatePaint,
-  std::shared_ptr<NumberAnimate> animate)
+  std::shared_ptr<NumberAnimate> animate,
+  bool                           isNotScaleButChangeSize)
 {
-  auto paintNode = getPaintNode(node);
   if (!paintNode)
   {
     return false;
   }
 
-  auto oldMatrix = AttrBridge::getMatrix(node);
+  auto oldMatrix = AttrBridge::getMatrix(paintNode);
   if (!oldMatrix)
   {
     assert(false);
@@ -371,18 +398,21 @@ bool AttrBridge::updateMatrix(
   }
 
   auto update =
-    [node, paintNode, isOnlyUpdatePaint](const std::vector<double>& value, bool forPaintNode)
+    [node, paintNode, isOnlyUpdatePaint, isNotScaleButChangeSize](const std::vector<double>& value)
   {
     assert(value.size() == 5);
-
-    if (!forPaintNode && isOnlyUpdatePaint)
-    {
-      return;
-    }
 
     glm::vec2 translate{ static_cast<float>(value.at(0)), static_cast<float>(value.at(1)) };
     glm::vec2 scale{ static_cast<float>(value.at(2)), static_cast<float>(value.at(3)) };
     auto      rotate = static_cast<float>(value.at(4));
+
+    // TODO frame can not scale, should change width and height, what about group and symbol?
+    if (isNotScaleButChangeSize)
+    {
+      scale = glm::vec2{ 1.0f, 1.0f };
+
+      // TODO wait change size
+    }
 
     auto matrix = glm::identity<glm::mat3>();
     matrix = glm::translate(matrix, translate);
@@ -390,14 +420,12 @@ bool AttrBridge::updateMatrix(
     matrix = glm::scale(matrix, scale);
     auto designMatrix = TransformHelper::toDesignMatrix(matrix);
 
-    if (forPaintNode)
-    {
-      AttrBridge::setMatrix(paintNode, designMatrix);
-    }
-    else
+    if (!isOnlyUpdatePaint)
     {
       AttrBridge::setMatrix(node, designMatrix);
     }
+
+    AttrBridge::setMatrix(paintNode, designMatrix);
   };
 
   auto getInfo = [](layer::Transform transform)
@@ -413,29 +441,79 @@ bool AttrBridge::updateMatrix(
   std::vector<double> to =
     getInfo(VGG::layer::Transform(TransformHelper::fromDesignMatrix(newMatrix)));
 
-  updateSimpleAttr(
-    node,
-    paintNode,
-    from,
-    to,
-    std::bind(update, std::placeholders::_1, false),
-    std::bind(update, std::placeholders::_1, true),
-    animate);
+  updateSimpleAttr(node, from, to, update, animate);
 
   return true;
+}
+
+void AttrBridge::setTwinMatrix(
+  std::shared_ptr<LayoutNode> nodeFrom,
+  std::shared_ptr<LayoutNode> nodeTo,
+  layer::PaintNode*           paintNodeTo,
+  const std::vector<double>&  value,
+  bool                        isOnlyUpdatePaint)
+{
+  if (!nodeFrom || !nodeTo || !paintNodeTo)
+  {
+    assert(false);
+    return;
+  }
+
+  glm::vec2 translate{ static_cast<float>(value.at(0)), static_cast<float>(value.at(1)) };
+  glm::vec2 scale{ static_cast<float>(value.at(2)), static_cast<float>(value.at(3)) };
+  auto      rotate = static_cast<float>(value.at(4));
+
+  auto boundsFrom = AttrBridge::getlayoutNodeObject(nodeFrom)->bounds;
+  auto boundsTo = AttrBridge::getlayoutNodeObject(nodeTo)->bounds;
+
+  double width = boundsFrom.width * scale[0];
+  double height = boundsFrom.height * scale[1];
+
+  if (boundsTo.width)
+  {
+    scale[0] = width / boundsTo.width;
+  }
+  if (boundsTo.height)
+  {
+    scale[1] = height / boundsTo.height;
+  }
+
+  auto type = nodeFrom->elementNode()->type();
+  if (type == VGG::Domain::Element::EType::FRAME)
+  {
+    // TODO
+    // 1.change nodeTo size
+    // 2. consider group master instance and so on.
+    scale = glm::vec2{ 1.0f, 1.0f };
+  }
+
+  auto matrix = glm::identity<glm::mat3>();
+  matrix = glm::translate(matrix, translate);
+  matrix = glm::rotate(matrix, rotate);
+  matrix = glm::scale(matrix, scale);
+
+  auto designMatrix = TransformHelper::toDesignMatrix(matrix);
+
+  if (!isOnlyUpdatePaint)
+  {
+    AttrBridge::setMatrix(nodeTo, designMatrix);
+  }
+
+  AttrBridge::setMatrix(paintNodeTo, designMatrix);
 }
 
 bool AttrBridge::replaceNode(
   const std::shared_ptr<LayoutNode>   oldNode,
   const std::shared_ptr<LayoutNode>   newNode,
-  bool                                correlateById,
+  layer::PaintNode*                   oldPaintNode,
+  layer::PaintNode*                   newPaintNode,
   bool                                isOnlyUpdatePaint,
   std::shared_ptr<ReplaceNodeAnimate> animate)
 {
   if (!animate)
   {
-    AttrBridge::setVisible(getPaintNode(oldNode), false);
-    AttrBridge::setVisible(getPaintNode(newNode), true);
+    AttrBridge::setVisible(oldPaintNode, false);
+    AttrBridge::setVisible(newPaintNode, true);
 
     if (!isOnlyUpdatePaint)
     {

@@ -135,10 +135,6 @@ private:
 // TODO should construct PaintNode if from/to node is not top-level frame.
 // TODO test not top-level frame condition.
 
-// TODO need manange inner animate
-// for stop, for stopCallback and so on
-// guanhua report a bug for stopCallback, need test it.
-
 class ReplaceNodeAnimate : public Animate
 {
   friend AttrBridge;

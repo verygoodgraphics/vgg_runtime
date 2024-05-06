@@ -31,6 +31,8 @@ class Animate;
 class NumberAnimate;
 class ReplaceNodeAnimate;
 class AnimateManage;
+class SmartAnimate;
+struct Color;
 
 namespace layer
 {
@@ -45,49 +47,67 @@ struct Color;
 
 class AttrBridge
 {
+  friend SmartAnimate;
+
 public:
   AttrBridge(std::shared_ptr<UIView> view, AnimateManage& animateManage);
 
 public:
   bool updateColor(
     std::shared_ptr<LayoutNode>    node,
+    layer::PaintNode*              paintNode,
     size_t                         index,
     const Model::Color&            newColor,
-    bool                           isOnlyUpdatePaint = false,
+    bool                           isOnlyUpdatePaint,
     std::shared_ptr<NumberAnimate> animate = {});
 
   bool updateOpacity(
     std::shared_ptr<LayoutNode>    node,
+    layer::PaintNode*              paintNode,
     double                         newOpacity,
-    bool                           isOnlyUpdatePaint = false,
+    bool                           isOnlyUpdatePaint,
     std::shared_ptr<NumberAnimate> animate = {});
 
   bool updateVisible(
     std::shared_ptr<LayoutNode> node,
+    layer::PaintNode*           paintNode,
     bool                        visible,
-    bool                        isOnlyUpdatePaint = false);
+    bool                        isOnlyUpdatePaint);
 
   bool updateMatrix(
     std::shared_ptr<LayoutNode>    node,
+    layer::PaintNode*              paintNode,
     const std::array<double, 6>&   newMatrix,
-    bool                           isOnlyUpdatePaint = false,
-    std::shared_ptr<NumberAnimate> animate = {});
+    bool                           isOnlyUpdatePaint,
+    std::shared_ptr<NumberAnimate> animate = {},
+    bool                           isNotScaleButChangeSize = false);
 
   bool replaceNode(
     const std::shared_ptr<LayoutNode>   oldNode,
     const std::shared_ptr<LayoutNode>   newNode,
-    bool                                correlateById,
-    bool                                isOnlyUpdatePaint = false,
+    layer::PaintNode*                   oldPaintNode,
+    layer::PaintNode*                   newPaintNode,
+    bool                                isOnlyUpdatePaint,
     std::shared_ptr<ReplaceNodeAnimate> animate = {});
 
 public:
-  static std::optional<double> getOpacity(std::shared_ptr<LayoutNode> node);
+  layer::PaintNode* getPaintNode(std::shared_ptr<LayoutNode> node);
 
-  static std::optional<bool> getVisible(std::shared_ptr<LayoutNode> node);
-
-  static std::optional<std::array<double, 6>> getMatrix(std::shared_ptr<LayoutNode> node);
+public:
+  static std::optional<VGG::Color>            getFillColor(layer::PaintNode* node, size_t index);
+  static std::optional<double>                getOpacity(layer::PaintNode* node);
+  static std::optional<bool>                  getVisible(layer::PaintNode* node);
+  static std::optional<std::array<double, 6>> getMatrix(layer::PaintNode* node);
+  static std::optional<double>                getWidth(layer::PaintNode* node);
+  static std::optional<double>                getHeight(layer::PaintNode* node);
 
 private:
+  static void setFillColor(
+    std::shared_ptr<LayoutNode> node,
+    size_t                      index,
+    const std::vector<double>&  argb);
+  static void setFillColor(layer::PaintNode* node, size_t index, const std::vector<double>& argb);
+
   static void setOpacity(std::shared_ptr<LayoutNode> node, double value);
   static void setOpacity(layer::PaintNode* node, double value);
 
@@ -99,18 +119,22 @@ private:
     const std::array<double, 6>& designMatrix);
   static void setMatrix(layer::PaintNode* node, const std::array<double, 6>& designMatrix);
 
+  static void setTwinMatrix(
+    std::shared_ptr<LayoutNode> nodeFrom,
+    std::shared_ptr<LayoutNode> nodeTo,
+    layer::PaintNode*           paintNodeTo,
+    const std::vector<double>&  value,
+    bool                        isOnlyUpdatePaint);
+
 private:
   void updateSimpleAttr(
     std::shared_ptr<LayoutNode>                     node,
-    layer::PaintNode*                               paintNode,
     const std::vector<double>&                      from,
     const std::vector<double>&                      to,
-    std::function<void(const std::vector<double>&)> updateFrom,
-    std::function<void(const std::vector<double>&)> updateTo,
+    std::function<void(const std::vector<double>&)> update,
     std::shared_ptr<NumberAnimate>                  animate);
 
   static Model::Object* getlayoutNodeObject(std::shared_ptr<LayoutNode> node);
-  layer::PaintNode*     getPaintNode(std::shared_ptr<LayoutNode> node);
 
 private:
   std::shared_ptr<UIView> m_view;

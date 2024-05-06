@@ -106,13 +106,18 @@ class NumberAnimate : public Animate
 {
   friend AttrBridge;
 
-  typedef std::vector<double> TParam;
+  typedef std::vector<double>                TParam;
+  typedef std::function<void(const TParam&)> TTriggeredCallback;
 
 public:
   NumberAnimate(
     milliseconds                  duration,
     milliseconds                  interval,
     std::shared_ptr<Interpolator> interpolator);
+
+public:
+  void                                   addTriggeredCallback(TTriggeredCallback&& fun);
+  const std::vector<TTriggeredCallback>& getTriggeredCallback();
 
 private:
   virtual void start() override;
@@ -124,7 +129,15 @@ private:
   TParam                             m_to;
   TParam                             m_nowValue;
   std::function<void(const TParam&)> m_action;
+  std::vector<TTriggeredCallback>    m_triggeredCallback;
 };
+
+// TODO should construct PaintNode if from/to node is not top-level frame.
+// TODO test not top-level frame condition.
+
+// TODO need manange inner animate
+// for stop, for stopCallback and so on
+// guanhua report a bug for stopCallback, need test it.
 
 class ReplaceNodeAnimate : public Animate
 {
@@ -165,13 +178,8 @@ public:
 
 private:
   virtual void start() override;
-
-private:
-  std::shared_ptr<NumberAnimate> m_fromAnimate;
-  std::shared_ptr<NumberAnimate> m_toAnimate;
 };
 
-// TODO
 class SmartAnimate : public ReplaceNodeAnimate
 {
 public:
@@ -183,13 +191,7 @@ public:
 
 private:
   virtual void start() override;
-  void         correlateNode();
-
-private:
-  std::vector<NumberAnimate> m_animates;
-
-  // true: by id, false: by name chain
-  bool m_correlateById;
+  void         addAnimate(std::shared_ptr<LayoutNode> nodeFrom, std::shared_ptr<LayoutNode> nodeTo);
 };
 
 } // namespace VGG

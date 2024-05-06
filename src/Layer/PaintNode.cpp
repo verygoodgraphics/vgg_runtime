@@ -539,6 +539,8 @@ void PaintNode::setFrameBounds(const Bounds& bounds)
 Bounds PaintNode::onRevalidate()
 {
   VGG_IMPL(PaintNode);
+  if (!isVisible())
+    return Bounds();
   Bounds newBounds;
   for (const auto& e : m_children)
   {

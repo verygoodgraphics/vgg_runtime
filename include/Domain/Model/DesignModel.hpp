@@ -3372,6 +3372,7 @@ inline void to_json(json& j, const SymbolInstance& x)
 inline void from_json(const json& j, SymbolMaster& x)
 {
   from_json(j, static_cast<Container&>(x));
+  x.radius = get_stack_optional<std::vector<double>>(j, "radius");
 }
 inline void to_json(json& j, const SymbolMaster& x)
 {

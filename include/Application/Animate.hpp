@@ -64,8 +64,8 @@ public:
 
 public:
   void stop();
-  bool isRunning();
-  bool isFinished();
+  virtual bool isRunning();
+  virtual bool isFinished();
 
   auto getDuration();
   auto getInterval();
@@ -150,6 +150,10 @@ public:
     std::shared_ptr<Interpolator> interpolator,
     std::shared_ptr<AttrBridge>   attrBridge);
 
+public:
+  virtual bool isRunning();
+  virtual bool isFinished();
+
 private:
   void setFromTo(std::shared_ptr<LayoutNode> from, std::shared_ptr<LayoutNode> to);
   void setIsOnlyUpdatePaint(bool isOnlyUpdatePaint);
@@ -160,11 +164,14 @@ protected:
   auto getAttrBridge();
   auto getIsOnlyUpdatePaint();
 
+  void addChildAnimate(std::shared_ptr<Animate> animate);
+
 private:
-  std::shared_ptr<LayoutNode> m_from;
-  std::shared_ptr<LayoutNode> m_to;
-  std::shared_ptr<AttrBridge> m_attrBridge;
-  bool                        m_isOnlyUpdatePaint;
+  std::shared_ptr<LayoutNode>           m_from;
+  std::shared_ptr<LayoutNode>           m_to;
+  std::shared_ptr<AttrBridge>           m_attrBridge;
+  bool                                  m_isOnlyUpdatePaint;
+  std::vector<std::shared_ptr<Animate>> m_childAnimates;
 };
 
 class DissolveAnimate : public ReplaceNodeAnimate

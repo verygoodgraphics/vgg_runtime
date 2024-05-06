@@ -454,3 +454,36 @@ bool Daruma::setCurrentTheme(const std::string& name)
 {
   return m_impl->setCurrentTheme(name);
 }
+
+bool Daruma::updateElementFillColor(
+  const std::string& id,
+  const std::size_t  fillIndex,
+  const double       r,
+  const double       g,
+  const double       b,
+  const double       a)
+{
+  if (!m_designDocTree)
+    return false;
+
+  auto element = m_designDocTree->getElementByKey(id);
+  if (!element)
+    return false;
+
+  auto object = element->object();
+  if (!object)
+    return false;
+
+  if (fillIndex >= object->style.fills.size())
+    return false;
+
+  Model::Color c;
+  c.alpha = a;
+  c.red = r;
+  c.green = g;
+  c.blue = b;
+  c.colorClass = Model::BackgroundColorClass::COLOR;
+  object->style.fills[fillIndex].color = c;
+
+  return true;
+}

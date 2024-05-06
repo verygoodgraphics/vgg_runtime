@@ -109,6 +109,15 @@ public:
 
   std::unordered_set<std::string> texts() const;
 
+public:
+  bool updateElementFillColor(
+    const std::string& id,
+    const std::size_t  fillIndex,
+    const double       r,
+    const double       g,
+    const double       b,
+    const double       a);
+
 public: // event listener
   void addEventListener(
     const std::string& targetKey, // id or json pointer path

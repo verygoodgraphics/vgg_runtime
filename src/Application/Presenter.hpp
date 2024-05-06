@@ -257,6 +257,15 @@ public:
 
   void update();
 
+public:
+  bool updateViewNodeFillColor(
+    const std::string& id,
+    const std::size_t  fillIndex,
+    const double       r,
+    const double       g,
+    const double       b,
+    const double       a);
+
 private:
   void listenViewEvent();
 

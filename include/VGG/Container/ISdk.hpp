@@ -95,6 +95,15 @@ public:
     bool               resetScrollPosition = true) = 0;
   virtual bool dismissState(const std::string& instanceDescendantId) = 0;
 
+  // element
+  virtual bool updateElementFillColor(
+    const std::string& id,
+    const std::size_t  fillIndex,
+    const double       r,
+    const double       g,
+    const double       b,
+    const double       a) = 0;
+
   // misc
   virtual std::string requiredFonts() const = 0;
   virtual bool        addFont(const uint8_t* data, size_t size, const char* defaultName) = 0;

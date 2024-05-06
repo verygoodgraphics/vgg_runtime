@@ -99,6 +99,15 @@ public:
     bool               resetScrollPosition) override;
   bool dismissState(const std::string& instanceDescendantId) override;
 
+  // element
+  bool updateElementFillColor(
+    const std::string& id,
+    const std::size_t  index,
+    const double       r,
+    const double       g,
+    const double       b,
+    const double       a) override;
+
   // misc
   std::string requiredFonts() const override;
   bool        addFont(const uint8_t* data, size_t size, const char* defaultName) override;

@@ -209,6 +209,15 @@ public:
 
   layer::Ref<layer::SceneNode> getSceneNode();
 
+public:
+  bool updateNodeFillColor(
+    const std::string& id,
+    const std::size_t  fillIndex,
+    const double       r,
+    const double       g,
+    const double       b,
+    const double       a);
+
 protected:
   float     scale() const;
   glm::vec2 offset() const;

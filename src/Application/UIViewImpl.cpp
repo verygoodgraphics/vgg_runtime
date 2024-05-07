@@ -64,22 +64,17 @@ void UIViewImpl::show(std::shared_ptr<ViewModel>& viewModel, std::vector<layer::
 
 int UIViewImpl::page() const
 {
-  return m_page;
+  return m_pageIndexCache; // use cached page index, m_pager will be created after each show()
 }
 bool UIViewImpl::setPageIndex(int index)
 {
-  if (m_page == index)
+  ASSERT(m_pager);
+
+  if (m_pager->page() == index)
     return false;
 
-  if (m_pager)
-  {
-    m_pager->setPage(index);
-    m_page = m_pager->page();
-  }
-  else
-  {
-    m_page = index;
-  }
+  m_pager->setPage(index);
+  m_pageIndexCache = m_pager->page();
 
   return true;
 }

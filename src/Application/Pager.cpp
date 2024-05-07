@@ -16,7 +16,8 @@
 
 #include "Pager.hpp"
 
-using namespace VGG::internal;
+namespace VGG::internal
+{
 
 Pager::Pager(layer::SceneNode* sceneNode)
   : m_sceneNode(sceneNode)
@@ -94,3 +95,5 @@ void Pager::setPageOffset(int delta)
     m_currentPage = newPage;
   }
 }
+
+} // namespace VGG::internal

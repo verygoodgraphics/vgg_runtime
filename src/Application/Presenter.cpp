@@ -275,6 +275,10 @@ bool Presenter::dismissPage()
   return false;
 }
 
+void Presenter::initHistory()
+{
+  return m_view->initHistory();
+}
 bool Presenter::goBack(bool resetScrollPosition, bool resetState)
 {
   ASSERT(m_view);
@@ -388,22 +392,17 @@ void Presenter::fitForAspectScale(const Layout::Size& pageSize)
   m_view->setOffsetAndScale(xOffset, yOffset, scale);
 }
 
-bool Presenter::setCurrentPage(std::size_t index, bool animated)
+bool Presenter::setCurrentPageIndex(std::size_t index, bool updateHistory)
 {
-  return m_view->setCurrentPageIndex(index, animated);
+  return m_view->setCurrentPageIndex(index, updateHistory);
 }
 
-bool Presenter::setCurrentPage(std::size_t index)
-{
-  return setCurrentPage(index, false);
-}
-
-bool Presenter::setCurrentPageIndex(
+bool Presenter::setCurrentPageIndexAnimated(
   std::size_t                   index,
   const app::UIAnimationOption& option,
   app::AnimationCompletion      completion)
 {
-  return m_view->setCurrentPageIndex(index, option, completion);
+  return m_view->setCurrentPageIndexAnimated(index, option, completion);
 }
 
 bool Presenter::updateViewNodeFillColor(

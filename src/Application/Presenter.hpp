@@ -102,13 +102,14 @@ public:
   {
     return m_view->currentPageIndex();
   }
-  bool setCurrentPage(std::size_t index);
-  bool setCurrentPageIndex(
+  bool setCurrentPageIndex(std::size_t index, bool updateHistory);
+  bool setCurrentPageIndexAnimated(
     std::size_t                   index,
     const app::UIAnimationOption& option,
     app::AnimationCompletion      completion = app::AnimationCompletion());
   bool presentPage(int index);
   bool dismissPage();
+  void initHistory();
   bool goBack(bool resetScrollPosition, bool resetState);
 
   void                       saveState(std::shared_ptr<StateTree> stateTree);
@@ -278,8 +279,6 @@ private:
   }
 
   void fitForAspectScale(const Layout::Size& pageSize);
-
-  bool setCurrentPage(std::size_t index, bool animated);
 };
 
 } // namespace VGG

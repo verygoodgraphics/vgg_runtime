@@ -287,7 +287,7 @@ void Controller::onResize()
     auto pageIndexForViewport = m_model->getFrameIndexForWidth(m_presenter->viewSize().width);
     if (pageIndexForViewport != -1 && currentPageIndex != pageIndexForViewport)
     {
-      m_presenter->setCurrentPage(pageIndexForViewport);
+      m_presenter->setCurrentPageIndex(pageIndexForViewport, true);
     }
     scaleContentUpdateViewModelAndFit();
   }
@@ -345,12 +345,14 @@ void Controller::start()
   auto pageIndexForViewport = m_model->getFrameIndexForWidth(m_presenter->viewSize().width);
   if (pageIndexForViewport != -1)
   {
-    pageChanged = m_presenter->setCurrentPage(pageIndexForViewport);
+    pageChanged = m_presenter->setCurrentPageIndex(pageIndexForViewport, false);
   }
   else
   {
-    pageChanged = m_presenter->setCurrentPage(m_model->getFrameIndexById(m_model->launchFrameId()));
+    pageChanged =
+      m_presenter->setCurrentPageIndex(m_model->getFrameIndexById(m_model->launchFrameId()), false);
   }
+  m_presenter->initHistory();
   if (pageChanged)
   {
     scaleContentAndUpdate(m_presenter->currentPageIndex());
@@ -687,7 +689,13 @@ std::string Controller::currentFrameId() const
 
 bool Controller::setCurrentFrameById(const std::string& id)
 {
-  return setCurrentFrameById(id, false);
+  ASSERT(m_model);
+  const auto index = m_model->getFrameIndexById(id);
+  scaleContentAndUpdate(index);
+  const auto success = m_presenter->setCurrentPageIndex(index, true);
+  if (success)
+    fitPage();
+  return success;
 }
 
 bool Controller::presentFrameById(const std::string& id)
@@ -783,7 +791,7 @@ bool Controller::setCurrentTheme(const std::string& theme)
     auto pageIndexForViewport = m_model->getFrameIndexForWidth(m_presenter->viewSize().width);
     if (pageIndexForViewport != m_presenter->currentPageIndex())
     {
-      m_presenter->setCurrentPage(pageIndexForViewport);
+      m_presenter->setCurrentPageIndex(pageIndexForViewport, true);
     }
   }
   return ret;
@@ -826,7 +834,7 @@ const std::string Controller::getFramesInfo() const
 
 bool Controller::nextFrame()
 {
-  if (m_presenter->setCurrentPage(m_presenter->currentPageIndex() + 1))
+  if (m_presenter->setCurrentPageIndex(m_presenter->currentPageIndex() + 1, true))
   {
     fitPage();
     return true;
@@ -836,7 +844,7 @@ bool Controller::nextFrame()
 
 bool Controller::previouseFrame()
 {
-  if (m_presenter->setCurrentPage(m_presenter->currentPageIndex() - 1))
+  if (m_presenter->setCurrentPageIndex(m_presenter->currentPageIndex() - 1, true))
   {
     fitPage();
     return true;
@@ -1009,32 +1017,12 @@ void Controller::layoutForEditing(std::size_t pageIndex)
   m_layout->layout(pageOriginalSize(pageIndex), pageIndex);
 }
 
-bool Controller::setCurrentFrameById(const std::string& id, bool animated)
-{
-  if (animated)
-  {
-    return setCurrentFrameById(id, app::UIAnimationOption());
-  }
-  else
-  {
-    ASSERT(m_model);
-    const auto index = m_model->getFrameIndexById(id);
-    scaleContentAndUpdate(index);
-    const auto success = m_presenter->setCurrentPage(index);
-    if (success)
-    {
-      fitPage();
-    }
-    return success;
-  }
-}
-
 bool Controller::setCurrentFrameById(const std::string& id, const app::UIAnimationOption& option)
 {
   ASSERT(m_model);
   const auto index = m_model->getFrameIndexById(id);
   scaleContentAndUpdate(index);
-  return m_presenter->setCurrentPageIndex(index, option, [this](bool) { fitPage(); });
+  return m_presenter->setCurrentPageIndexAnimated(index, option, [this](bool) { fitPage(); });
 }
 
 bool Controller::updateElementFillColor(

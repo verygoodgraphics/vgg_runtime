@@ -35,7 +35,7 @@ public:
   struct AnimationOptions
   {
     double      duration{ 0.3 };
-    std::string type{ "dissolve" };
+    std::string type{ "dissolve" }; //"none"/"dissolve"
     std::string timingFunction{ "linear" };
   };
 

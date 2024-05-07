@@ -24,6 +24,7 @@ using AnimationCompletion = std::function<void(bool)>;
 
 enum class EAnimationType
 {
+  NONE,
   DISSOLVE
 };
 

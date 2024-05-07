@@ -499,25 +499,24 @@ bool VggSdk::setCurrentFrameByIdAnimated(
 {
   auto c = controller();
   if (!c)
-  {
     return false;
-  }
 
   app::UIAnimationOption option;
   if (inOption.duration > 0)
-  {
     option.duration = inOption.duration;
-  }
-  if (inOption.type == "dissolve")
-  {
-    option.type = app::EAnimationType::DISSOLVE;
-  }
-  if (inOption.timingFunction == "linear")
-  {
-    option.timingFunction = app::EAnimationTimingFunction::LINEAR;
-  }
 
-  return c->setCurrentFrameById(id, option);
+  if (inOption.type == "none")
+    option.type = app::EAnimationType::NONE;
+  else if (inOption.type == "dissolve")
+    option.type = app::EAnimationType::DISSOLVE;
+
+  if (inOption.timingFunction == "linear")
+    option.timingFunction = app::EAnimationTimingFunction::LINEAR;
+
+  if (option.type == app::EAnimationType::NONE)
+    return setCurrentFrameById(id, resetScrollPosition);
+  else
+    return c->setCurrentFrameById(id, option);
 }
 
 bool VggSdk::updateElementFillColor(

@@ -721,7 +721,7 @@ void PaintNode::addChild(PaintNodePtr node)
   observe(node);
 }
 
-void PaintNode::addChild(ChildContainer::iterator pos, PaintNodePtr node)
+void PaintNode::addChild(ChildContainer::const_iterator pos, PaintNodePtr node)
 {
   m_children.insert(pos, node);
   node->m_parent = this;
@@ -744,8 +744,15 @@ PaintNodePtr PaintNode::removeChild(ChildContainer::iterator pos)
 
 void PaintNode::removeChild(PaintNodePtr node)
 {
-  (void)std::remove(m_children.begin(), m_children.end(), node);
+  auto it = std::remove(m_children.begin(), m_children.end(), node);
+  if (it == m_children.end())
+  {
+    return;
+  }
+
+  m_children.erase(it);
   unobserve(node);
+  node->m_parent.release();
   node->invalidate();
   this->invalidate();
 }

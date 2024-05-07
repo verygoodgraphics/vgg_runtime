@@ -82,6 +82,9 @@ public:
     std::shared_ptr<NumberAnimate> animate = {},
     bool                           isNotScaleButChangeSize = false);
 
+  // The newPaintNode can be nullptr, in which case:
+  //    1.the newNode must be a frame or a symbol instance.
+  //    2.oldNode already removed and newNode already added.
   bool replaceNode(
     const std::shared_ptr<LayoutNode>   oldNode,
     const std::shared_ptr<LayoutNode>   newNode,

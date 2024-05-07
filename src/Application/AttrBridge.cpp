@@ -23,6 +23,8 @@
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/SceneNode.hpp"
 #include "Layer/Memory/Ref.hpp"
+#include "Layer/Model/StructModel.hpp"
+#include "Layer/SceneBuilder.hpp"
 
 using namespace VGG;
 
@@ -510,10 +512,91 @@ bool AttrBridge::replaceNode(
   bool                                isOnlyUpdatePaint,
   std::shared_ptr<ReplaceNodeAnimate> animate)
 {
+  auto removeOldPaintNodeIfNeed = [oldPaintNode, newPaintNode]()
+  {
+    if (!newPaintNode)
+    {
+      auto parent = oldPaintNode->parent();
+      if (parent)
+      {
+        parent->removeChild(layer::incRef(oldPaintNode));
+      }
+    }
+  };
+
+  if (!newPaintNode)
+  {
+    if (!newNode || !oldPaintNode)
+    {
+      return false;
+    }
+
+    assert((!oldNode || !oldNode->parent()) && newNode->parent());
+
+    auto element = newNode->elementNode();
+    if (!element)
+    {
+      return false;
+    }
+
+    auto                      type = newNode->elementNode()->type();
+    layer::SceneBuilderResult result;
+
+    if (type == VGG::Domain::Element::EType::FRAME)
+    {
+      result = layer::SceneBuilder::builder().build<layer::StructModelFrame>(
+        { layer::StructFrameObject(element) });
+    }
+    else if (type == VGG::Domain::Element::EType::SYMBOL_INSTANCE)
+    {
+      result = layer::SceneBuilder::builder().build<layer::StructModelInstance>(
+        { layer::StructInstanceObject(element) });
+    }
+    else
+    {
+      return false;
+    }
+
+    if (!result.root || result.root->size() != 1)
+    {
+      return false;
+    }
+
+    newPaintNode = result.root->at(0)->node();
+    if (!newPaintNode)
+    {
+      return false;
+    }
+
+    auto parent = oldPaintNode->parent();
+    if (!parent)
+    {
+      return false;
+    }
+
+    auto& children = parent->children();
+    auto  it = std::find_if(
+      children.begin(),
+      children.end(),
+      [oldPaintNode](auto& item) { return item == oldPaintNode; });
+    if (it == children.end())
+    {
+      return false;
+    }
+
+    parent->addChild(it, layer::incRef(result.root->at(0)->node()));
+
+    if (animate)
+    {
+      animate->addCallBackWhenStop(removeOldPaintNodeIfNeed);
+    }
+  }
+
   if (!animate)
   {
     AttrBridge::setVisible(oldPaintNode, false);
     AttrBridge::setVisible(newPaintNode, true);
+    removeOldPaintNodeIfNeed();
 
     if (!isOnlyUpdatePaint)
     {

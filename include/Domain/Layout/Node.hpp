@@ -140,6 +140,16 @@ public:
     m_children.push_back(child);
   }
 
+  void removeChild(std::shared_ptr<LayoutNode> child)
+  {
+    auto it = std::find(m_children.begin(), m_children.end(), child);
+    if (it != m_children.end())
+    {
+      (*it)->m_parent.reset();
+      m_children.erase(it);
+    }
+  }
+
   std::vector<std::shared_ptr<LayoutNode>> removeAllChildren();
   void                                     detachChildrenFromFlexNodeTree();
 

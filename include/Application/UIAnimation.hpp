@@ -25,7 +25,8 @@ using AnimationCompletion = std::function<void(bool)>;
 enum class EAnimationType
 {
   NONE,
-  DISSOLVE
+  DISSOLVE,
+  SMART
 };
 
 enum class EAnimationTimingFunction

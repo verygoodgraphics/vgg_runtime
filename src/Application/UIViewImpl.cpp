@@ -16,6 +16,8 @@
 
 #include "UIViewImpl.hpp"
 
+#include "Utility/Log.hpp"
+
 using namespace VGG;
 using namespace VGG::internal;
 namespace
@@ -31,6 +33,8 @@ bool UIViewImpl::isUnitTest() const
 UIViewImpl::UIViewImpl(UIView* api)
   : m_api(api)
 {
+  m_zoomer = layer::ZoomerNode::Make();
+  m_zoomController = std::make_unique<app::ZoomNodeController>(m_zoomer);
 }
 
 void UIViewImpl::setLayer(app::AppRender* layer)
@@ -44,8 +48,6 @@ void UIViewImpl::show(std::shared_ptr<ViewModel>& viewModel, std::vector<layer::
   m_viewModel = viewModel;
 
   m_sceneNode = layer::SceneNode::Make(std::move(frames));
-  m_zoomer = layer::ZoomerNode::Make();
-  m_zoomController = std::make_unique<app::ZoomNodeController>(m_zoomer);
   if (!isUnitTest())
     m_layer->setRenderNode(m_zoomer, m_sceneNode);
   m_pager = std::make_unique<Pager>(m_sceneNode.get());
@@ -109,11 +111,32 @@ bool UIViewImpl::setPageIndexAnimated(
 
   const int duration = option.duration * 1000;
   auto      timing = std::make_shared<LinearInterpolator>();
-  auto      animation = std::make_shared<DissolveAnimate>(
-    std::chrono::milliseconds(duration),
-    std::chrono::milliseconds(K_ANIMATION_INTERVAL),
-    timing,
-    action);
+
+  std::shared_ptr<ReplaceNodeAnimate> animation;
+
+  switch (option.type)
+  {
+    case app::EAnimationType::NONE:
+      ASSERT(false);
+      break;
+
+    case app::EAnimationType::DISSOLVE:
+      animation = std::make_shared<DissolveAnimate>(
+        std::chrono::milliseconds(duration),
+        std::chrono::milliseconds(K_ANIMATION_INTERVAL),
+        timing,
+        action);
+      break;
+
+    case app::EAnimationType::SMART:
+      animation = std::make_shared<SmartAnimate>(
+        std::chrono::milliseconds(duration),
+        std::chrono::milliseconds(K_ANIMATION_INTERVAL),
+        timing,
+        action);
+      break;
+  }
+
   animation->addCallBackWhenStop(
     [this, index, completion]()
     {

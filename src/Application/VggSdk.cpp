@@ -509,6 +509,8 @@ bool VggSdk::setCurrentFrameByIdAnimated(
     option.type = app::EAnimationType::NONE;
   else if (inOption.type == "dissolve")
     option.type = app::EAnimationType::DISSOLVE;
+  else if (inOption.type == "smart")
+    option.type = app::EAnimationType::SMART;
 
   if (inOption.timingFunction == "linear")
     option.timingFunction = app::EAnimationTimingFunction::LINEAR;

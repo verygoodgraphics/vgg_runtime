@@ -102,7 +102,7 @@ public:
 
 public:
   void frame();
-  bool isDirty();
+  bool isAnimating();
 };
 } // namespace internal
 } // namespace VGG

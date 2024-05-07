@@ -223,7 +223,7 @@ void UIViewImpl::frame()
   m_animationManager.deleteFinishedAnimate();
 }
 
-bool UIViewImpl::isDirty()
+bool UIViewImpl::isAnimating()
 {
   return m_animationManager.hasRunningAnimation();
 }

@@ -65,6 +65,9 @@ UIView::~UIView() = default;
 
 bool UIView::onEvent(UEvent evt, void* userData)
 {
+  if (m_impl->isAnimating())
+    return false;
+
   if (m_isZoomerEnabled && m_impl->onEvent(evt, userData))
   {
     // zoom or pan event
@@ -940,7 +943,7 @@ void UIView::frame()
 
 bool UIView::isDirty()
 {
-  return m_isDirty || m_impl->isDirty();
+  return m_isDirty || m_impl->isAnimating();
 }
 
 bool UIView::setCurrentPageIndexAnimated(

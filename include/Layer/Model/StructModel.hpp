@@ -255,6 +255,7 @@ struct StructModelCastObject
 };
 
 using StructModelFrame = ModelPolicy<StructFrameObject, StructModelCastObject>;
+using StructModelInstance = ModelPolicy<StructInstanceObject, StructModelCastObject>;
 #undef M_OBJECT_FIELD_DEF
 
 } // namespace VGG::layer

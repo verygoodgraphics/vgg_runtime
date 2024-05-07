@@ -105,7 +105,7 @@ public:
 
   void addChild(const PaintNodePtr node);
 
-  void addChild(ChildContainer::iterator pos, PaintNodePtr node);
+  void addChild(ChildContainer::const_iterator pos, PaintNodePtr node);
 
   void addSubShape(PaintNodePtr node, EBoolOp op)
   {

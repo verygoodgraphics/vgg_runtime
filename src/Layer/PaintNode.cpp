@@ -541,11 +541,21 @@ Bounds PaintNode::onRevalidate()
   VGG_IMPL(PaintNode);
   if (!isVisible())
     return Bounds();
-  Bounds newBounds;
+
   for (const auto& e : m_children)
   {
-    newBounds.unionWith(e->revalidate());
+    e->revalidate();
   }
+
+  Bounds newBounds = d_ptr->bounds;
+  if (overflow() == OF_VISIBLE)
+  {
+    for (const auto& e : m_children)
+    {
+      newBounds.unionWith(e->bounds());
+    }
+  }
+
   _->transformAttr->revalidate();
   if (
     _->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY ||

@@ -51,7 +51,7 @@ class UIViewImpl
 
   AnimateManage m_animationManager;
 
-  int m_page{ 0 };
+  int m_pageIndexCache{ 0 };
 
 private:
   bool isUnitTest() const;

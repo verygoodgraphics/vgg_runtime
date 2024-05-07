@@ -49,7 +49,7 @@ void UIViewImpl::show(std::shared_ptr<ViewModel>& viewModel, std::vector<layer::
   if (!isUnitTest())
     m_layer->setRenderNode(m_zoomer, m_sceneNode);
   m_pager = std::make_unique<Pager>(m_sceneNode.get());
-  setPage(page());
+  setPageIndex(page());
 
   const auto&                                        repo = m_viewModel->resources();
   std::unordered_map<std::string, std::vector<char>> data(
@@ -64,30 +64,25 @@ int UIViewImpl::page() const
 {
   return m_page;
 }
-void UIViewImpl::setPage(int page)
+bool UIViewImpl::setPageIndex(int index)
 {
+  if (m_page == index)
+    return false;
+
   if (m_pager)
   {
-    m_pager->setPage(page);
+    m_pager->setPage(index);
     m_page = m_pager->page();
   }
   else
   {
-    m_page = page;
-  }
-}
-bool UIViewImpl::setPage(int index, bool animated)
-{
-  if (!animated)
-  {
-    setPage(index);
-    return true;
+    m_page = index;
   }
 
-  return setPage(index, app::UIAnimationOption());
+  return true;
 }
 
-bool UIViewImpl::setPage(
+bool UIViewImpl::setPageIndexAnimated(
   std::size_t                   index,
   const app::UIAnimationOption& option,
   app::AnimationCompletion      completion)
@@ -122,7 +117,7 @@ bool UIViewImpl::setPage(
   animation->addCallBackWhenStop(
     [this, index, completion]()
     {
-      setPage(index);
+      m_api->setCurrentPageIndex(index, true); // clear context
       if (completion)
         completion(true); // todo false for unfinished
     });

@@ -185,9 +185,9 @@ public:
 
   int currentPageIndex();
 
-  bool setCurrentPage(int index);
-  bool setCurrentPageIndex(int index, bool animated = false);
-  bool setCurrentPageIndex(
+  void initHistory();
+  bool setCurrentPageIndex(int index, bool updateHistory);
+  bool setCurrentPageIndexAnimated(
     std::size_t                   index,
     const app::UIAnimationOption& option,
     VGG::app::AnimationCompletion completion = app::AnimationCompletion());

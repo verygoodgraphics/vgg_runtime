@@ -687,7 +687,7 @@ void UIView::show(
   m_skipUntilNextLoop = true;
 
   m_impl->show(viewModel, frames);
-  m_impl->setPage(m_impl->page());
+  m_impl->setPageIndex(m_impl->page());
 
   m_document = viewModel->layoutTree();
 
@@ -738,47 +738,32 @@ bool UIView::handleTouchEvent(int x, int y, int motionX, int motionY, EUIEventTy
   return true;
 }
 
-bool UIView::setCurrentPage(int index)
+bool UIView::setCurrentPageIndex(int index, bool updateHistory)
 {
-  auto oldPage = m_impl->page();
-  auto oldPageId = currentPage()->id();
-  bool success = setCurrentPageIndex(index);
+  if (m_impl->page() == index)
+    return true;
 
-  if (m_impl->page() != oldPage)
+  const auto document = m_document.lock();
+  if (!document)
+    return false;
+
+  if (index < 0 || static_cast<std::size_t>(index) >= document->children().size())
+    return false;
+
+  const bool success = m_impl->setPageIndex(index);
+  if (success)
   {
+    setDirty(true);
+
     m_presentedTreeContext.clear();
     m_presentedPages.clear();
     m_presentingPages.clear();
 
-    m_history.push(currentPage()->id());
-  }
-
-  if (m_history.empty())
-  {
-    m_history.push(currentPage()->id());
+    if (updateHistory)
+      m_history.push(currentPage()->id());
   }
 
   return success;
-}
-
-bool UIView::setCurrentPageIndex(int index, bool animated)
-{
-  if (m_impl->page() == index)
-  {
-    return true;
-  }
-
-  if (auto document = m_document.lock())
-  {
-    if (index >= 0 && static_cast<std::size_t>(index) < document->children().size())
-    {
-      INFO("show page: %d, %s", index, document->children()[index]->name().c_str());
-      m_impl->setPage(index, animated);
-      setDirty(true);
-      return true;
-    }
-  }
-  return false;
 }
 
 bool UIView::presentPage(int index)
@@ -786,7 +771,7 @@ bool UIView::presentPage(int index)
   auto from = currentPage()->id();
   auto oldPageIndex = m_impl->page();
 
-  setCurrentPageIndex(index);
+  setCurrentPageIndex(index, false);
   if (m_impl->page() != oldPageIndex)
   {
     auto to = currentPage()->id();
@@ -819,7 +804,7 @@ bool UIView::dismissPage()
     {
       if (document->children()[index]->id() == from)
       {
-        return setCurrentPageIndex(index);
+        return setCurrentPageIndex(index, false);
       }
     }
   }
@@ -863,7 +848,7 @@ bool UIView::goBack(bool resetScrollPosition, bool resetState)
           to = from;
         }
 
-        setCurrentPageIndex(index);
+        setCurrentPageIndex(index, false);
         return true;
       }
     }
@@ -958,12 +943,12 @@ bool UIView::isDirty()
   return m_isDirty || m_impl->isDirty();
 }
 
-bool UIView::setCurrentPageIndex(
+bool UIView::setCurrentPageIndexAnimated(
   std::size_t                   index,
   const app::UIAnimationOption& option,
   app::AnimationCompletion      completion)
 {
-  return m_impl->setPage(index, option, completion);
+  return m_impl->setPageIndexAnimated(index, option, completion);
 }
 
 bool UIView::updateNodeFillColor(
@@ -979,6 +964,11 @@ bool UIView::updateNodeFillColor(
     setDirty(true);
 
   return success;
+}
+
+void UIView::initHistory()
+{
+  m_history.push(currentPage()->id());
 }
 
 } // namespace VGG

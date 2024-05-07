@@ -64,9 +64,8 @@ public:
   void show(std::shared_ptr<ViewModel>& viewModel, std::vector<layer::FramePtr> frames);
 
   int  page() const;
-  void setPage(int page);
-  bool setPage(int index, bool animated);
-  bool setPage(
+  bool setPageIndex(int index);
+  bool setPageIndexAnimated(
     std::size_t                   index,
     const app::UIAnimationOption& option,
     app::AnimationCompletion      completion = app::AnimationCompletion());

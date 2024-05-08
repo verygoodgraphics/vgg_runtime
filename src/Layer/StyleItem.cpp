@@ -54,27 +54,22 @@ void StyleItem::render(Renderer* renderer)
 
 SkRect StyleItem::recorder(Renderer* renderer)
 {
-  sk_sp<SkImageFilter> dropbackFilter = m_objectAttr->getBackdropImageFilter();
-  sk_sp<SkImageFilter> layerFXFilter = m_alphaMaskAttr->getImageFilter();
-  const auto           newLayer = dropbackFilter || layerFXFilter;
-
   auto shapeMask = m_shapeMaskAttr->getShape();
-
   if (!shapeMask.isEmpty())
   {
     renderer->canvas()->save();
     shapeMask.clip(renderer->canvas(), SkClipOp::kIntersect);
   }
-  SkRect renderBounds = toSkRect(m_objectAttr->bounds());
-  SkRect layerBounds = toSkRect(m_alphaMaskAttr->bounds());
+  const auto newLayer = hasNewLayer();
+  SkRect     effectsBounds = toSkRect(m_objectAttr->effectBounds());
   if (newLayer)
   {
     SkPaint layerPaint;
     layerPaint.setAntiAlias(true);
-    layerPaint.setImageFilter(layerFXFilter);
-    VShape clipShape(layerBounds);
-    beginLayer(renderer, &layerPaint, &clipShape, dropbackFilter);
-    renderBounds = layerBounds;
+    layerPaint.setImageFilter(m_alphaMaskAttr->getImageFilter());
+    effectsBounds = toSkRect(m_alphaMaskAttr->bounds());
+    VShape clipShape(effectsBounds);
+    beginLayer(renderer, &layerPaint, &clipShape, m_objectAttr->getBackdropImageFilter());
   }
   m_objectAttr->render(renderer);
   if (newLayer)
@@ -85,13 +80,21 @@ SkRect StyleItem::recorder(Renderer* renderer)
   {
     renderer->canvas()->restore();
   }
-  return renderBounds;
+  return effectsBounds;
 }
 
 void StyleItem::renderAsMask(Renderer* render)
 {
   ASSERT(m_objectAttr);
   m_objectAttr->render(render);
+}
+
+bool StyleItem::hasNewLayer() const
+{
+  sk_sp<SkImageFilter> dropbackFilter = m_objectAttr->getBackdropImageFilter();
+  sk_sp<SkImageFilter> layerFXFilter = m_alphaMaskAttr->getImageFilter();
+  const auto           newLayer = dropbackFilter || layerFXFilter;
+  return newLayer;
 }
 
 Bounds StyleItem::effectBounds() const
@@ -135,10 +138,9 @@ Bounds StyleItem::onRevalidate()
   m_transformAttr->revalidate();
   m_alphaMaskAttr->revalidate();
   m_objectAttr->revalidate();
-  auto rect = toSkRect(m_objectAttr->bounds());
-  auto [pic, bounds] = revalidatePicture(rect);
+  auto [pic, bounds] = revalidatePicture(toSkRect(m_objectAttr->effectBounds()));
   m_effectsBounds = Bounds{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
-  m_picture = pic;
+  m_picture = std::move(pic);
   return m_objectAttr->bounds();
 }
 

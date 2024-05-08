@@ -93,6 +93,8 @@ private:
     const VShape*        clipShape,
     sk_sp<SkImageFilter> backdropFilter);
 
+  bool hasNewLayer() const;
+
   void                    endLayer(Renderer* renderer);
   Ref<TransformAttribute> m_transformAttr;
   Ref<StyleAttribute>     m_objectAttr;

@@ -61,7 +61,7 @@ private:
   std::pair<SkRect, std::optional<SkPaint>> revalidateObjectBounds(
     const std::vector<Border>& borders,
     const SkRect&              bounds);
-  WeakRef<ObjectAttribute> m_objectAttribute;
+  WeakRef<ObjectAttribute>    m_objectAttribute;
   Ref<ShapeAttribute>         m_shapeAttr;
   sk_sp<SkImageFilter>        m_maskFilter;
   Bounds                      m_effectBounds;

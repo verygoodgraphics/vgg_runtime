@@ -20,6 +20,7 @@
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/Model/Concept.hpp"
+#include <ranges>
 #include <variant>
 
 namespace
@@ -241,14 +242,29 @@ std::vector<StructObject> StructObject::getChildObjects() const
     {
       std::vector<StructObject> objects;
       objects.reserve(m->childObjects().size());
-      for (const auto& c : *m)
+      if (m->isFirstOnTop())
       {
-        toType(
-          c.get(),
-          [&](EModelObjectType objectType)
-          { objects.emplace_back(dispatchObject(objectType, c.get())); },
-          [&](EModelShapeType shapeType)
-          { objects.emplace_back(dispatchObject(shapeType, c.get())); });
+        for (const auto& c : *m | std::views::reverse)
+        {
+          toType(
+            c.get(),
+            [&](EModelObjectType objectType)
+            { objects.emplace_back(dispatchObject(objectType, c.get())); },
+            [&](EModelShapeType shapeType)
+            { objects.emplace_back(dispatchObject(shapeType, c.get())); });
+        }
+      }
+      else
+      {
+        for (const auto& c : *m)
+        {
+          toType(
+            c.get(),
+            [&](EModelObjectType objectType)
+            { objects.emplace_back(dispatchObject(objectType, c.get())); },
+            [&](EModelShapeType shapeType)
+            { objects.emplace_back(dispatchObject(shapeType, c.get())); });
+        }
       }
       return objects;
     }

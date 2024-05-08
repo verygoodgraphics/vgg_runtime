@@ -44,6 +44,10 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     .field("type", &ISdk::AnimationOptions::type)
     .field("timingFunction", &ISdk::AnimationOptions::timingFunction);
 
+  value_object<ISdk::StateOptions>("StateOptions")
+    .field("resetScrollPosition", &ISdk::StateOptions::resetScrollPosition)
+    .field("animation", &ISdk::StateOptions::animation);
+
   class_<VggSdk>("VggSdk")
     .constructor<>()
     // env

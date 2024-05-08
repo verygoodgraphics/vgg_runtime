@@ -697,8 +697,9 @@ napi_value VggSdkNodeAdapter::setState(napi_env env, napi_callback_info info)
 
     bool success{ false };
     SyncTaskInMainLoop<bool>{
-      [sdk = sdkAdapter->m_vggSdk, instanceDescendantId, listenerId, newMasterId]()
-      { return sdk->setState(instanceDescendantId, listenerId, newMasterId, true); },
+      [sdk = sdkAdapter->m_vggSdk, instanceDescendantId, listenerId, newMasterId]() {
+        return sdk->setState(instanceDescendantId, listenerId, newMasterId, ISdk::StateOptions{});
+      },
       [&success](bool result) { success = result; }
     }();
 
@@ -739,8 +740,10 @@ napi_value VggSdkNodeAdapter::presentState(napi_env env, napi_callback_info info
 
     bool success{ false };
     SyncTaskInMainLoop<bool>{
-      [sdk = sdkAdapter->m_vggSdk, instanceDescendantId, listenerId, newMasterId]()
-      { return sdk->presentState(instanceDescendantId, listenerId, newMasterId, true); },
+      [sdk = sdkAdapter->m_vggSdk, instanceDescendantId, listenerId, newMasterId]() {
+        return sdk
+          ->presentState(instanceDescendantId, listenerId, newMasterId, ISdk::StateOptions{});
+      },
       [&success](bool result) { success = result; }
     }();
 

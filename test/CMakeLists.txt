@@ -6,6 +6,7 @@ else()
   endif()
 
   add_executable(unit_tests
+    Animation/SymbolInstanceTest.cpp
     container/MockSkiaGraphicsContext.cpp
     container/SdkTests.cpp
     container/container_tests.cpp
@@ -57,7 +58,7 @@ else()
     COMMAND ${CMAKE_COMMAND} -E rm ${TMP_VGG_WORK_ZIP_FILE}
   )
 
-  target_link_libraries(unit_tests PRIVATE vgg_internal gtest_main gmock vgg_utility automerge
+  target_link_libraries(unit_tests PRIVATE gtest_main gmock 
     vgg_container
   )
   include(GoogleTest)

@@ -35,9 +35,16 @@ public:
   struct AnimationOptions
   {
     double      duration{ 0.3 };
-    std::string type{ "dissolve" }; //"none"/"dissolve"/"smart"
+    std::string type{ "none" }; //"none", "dissolve", "smart"
     std::string timingFunction{ "linear" };
   };
+
+  struct StateOptions
+  {
+    bool             resetScrollPosition{ true };
+    AnimationOptions animation;
+  };
+  using FrameOptions = StateOptions;
 
 public:
   virtual ~ISdk() = default;
@@ -84,15 +91,15 @@ public:
 
   // instance
   virtual bool setState(
-    const std::string& instanceDescendantId,
-    const std::string& listenerId,
-    const std::string& newMasterId,
-    bool               resetScrollPosition = true) = 0;
+    const std::string&  instanceDescendantId,
+    const std::string&  listenerId,
+    const std::string&  newMasterId,
+    const StateOptions& options) = 0;
   virtual bool presentState(
-    const std::string& instanceDescendantId,
-    const std::string& listenerId,
-    const std::string& newStateMasterId,
-    bool               resetScrollPosition = true) = 0;
+    const std::string&  instanceDescendantId,
+    const std::string&  listenerId,
+    const std::string&  newStateMasterId,
+    const StateOptions& options) = 0;
   virtual bool dismissState(const std::string& instanceDescendantId) = 0;
 
   // element

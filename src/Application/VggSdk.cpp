@@ -409,10 +409,10 @@ emscripten::val VggSdk::emMakeImageSnapshot(const ImageOptions& options)
 #endif
 
 bool VggSdk::setState(
-  const std::string& instanceDescendantId,
-  const std::string& listenerId,
-  const std::string& masterId,
-  bool               resetScrollPosition)
+  const std::string&  instanceDescendantId,
+  const std::string&  listenerId,
+  const std::string&  masterId,
+  const StateOptions& options)
 {
   if (auto currentEnv = env())
   {
@@ -425,10 +425,10 @@ bool VggSdk::setState(
 }
 
 bool VggSdk::presentState(
-  const std::string& instanceDescendantId,
-  const std::string& listenerId,
-  const std::string& stateMasterId,
-  bool               resetScrollPosition)
+  const std::string&  instanceDescendantId,
+  const std::string&  listenerId,
+  const std::string&  stateMasterId,
+  const StateOptions& options)
 {
   if (auto currentEnv = env())
   {

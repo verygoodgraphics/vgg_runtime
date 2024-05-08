@@ -88,15 +88,15 @@ public:
 
   // instance
   bool setState(
-    const std::string& instanceDescendantId,
-    const std::string& listenerId,
-    const std::string& masterId,
-    bool               resetScrollPosition) override;
+    const std::string&  instanceDescendantId,
+    const std::string&  listenerId,
+    const std::string&  masterId,
+    const StateOptions& options) override;
   bool presentState(
-    const std::string& instanceDescendantId,
-    const std::string& listenerId,
-    const std::string& stateMasterId,
-    bool               resetScrollPosition) override;
+    const std::string&  instanceDescendantId,
+    const std::string&  listenerId,
+    const std::string&  stateMasterId,
+    const StateOptions& options) override;
   bool dismissState(const std::string& instanceDescendantId) override;
 
   // element

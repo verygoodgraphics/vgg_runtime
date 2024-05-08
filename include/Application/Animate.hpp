@@ -28,6 +28,11 @@ class LayoutNode;
 class AttrBridge;
 using std::chrono::milliseconds;
 
+namespace Domain
+{
+class Element;
+}
+
 class Interpolator
 {
 public:
@@ -148,6 +153,9 @@ public:
 public:
   virtual bool isRunning();
   virtual bool isFinished();
+
+public:
+  static bool isContainerType(const Domain::Element* node);
 
 private:
   void setFromTo(std::shared_ptr<LayoutNode> from, std::shared_ptr<LayoutNode> to);

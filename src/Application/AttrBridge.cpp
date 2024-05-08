@@ -481,11 +481,9 @@ void AttrBridge::setTwinMatrix(
   }
 
   auto type = nodeFrom->elementNode()->type();
-  if (type == VGG::Domain::Element::EType::FRAME)
+  if (ReplaceNodeAnimate::isContainerType(nodeFrom->elementNode()))
   {
-    // TODO
-    // 1.change nodeTo size
-    // 2. consider group master instance and so on.
+    // TODO change nodeTo size
     scale = glm::vec2{ 1.0f, 1.0f };
   }
 

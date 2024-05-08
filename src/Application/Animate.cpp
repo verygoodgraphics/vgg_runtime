@@ -259,6 +259,22 @@ bool ReplaceNodeAnimate::isFinished()
     [](std::shared_ptr<Animate> child) { return child->isFinished(); });
 }
 
+bool ReplaceNodeAnimate::isContainerType(const Domain::Element* node)
+{
+  assert(node);
+
+  auto type = node->type();
+  if (
+    type == VGG::Domain::Element::EType::FRAME || type == VGG::Domain::Element::EType::GROUP ||
+    type == VGG::Domain::Element::EType::SYMBOL_INSTANCE ||
+    type == VGG::Domain::Element::EType::SYMBOL_MASTER)
+  {
+    return true;
+  }
+
+  return false;
+}
+
 void ReplaceNodeAnimate::setFromTo(std::shared_ptr<LayoutNode> from, std::shared_ptr<LayoutNode> to)
 {
   m_from = from;
@@ -480,13 +496,6 @@ void SmartAnimate::addAnimate(
       continue;
     }
 
-    // TODO group need other deal, not completed
-    auto type = itemFrom->elementNode()->type();
-    if (type == VGG::Domain::Element::EType::GROUP)
-    {
-      continue;
-    }
-
     auto transform = TransformHelper::transform(
       *AttrBridge::getWidth(paintNodeFrom),
       *AttrBridge::getHeight(paintNodeFrom),
@@ -504,9 +513,15 @@ void SmartAnimate::addAnimate(
       isOnlyUpdatePaint));
 
     auto paintNodeFromOriginalMatrix = attrBridge->getMatrix(paintNodeFrom);
+    bool itemFromIsContainer = ReplaceNodeAnimate::isContainerType(itemFrom->elementNode());
 
     animate->addCallBackWhenStop(
-      [paintNodeFromOriginalMatrix, itemFrom, paintNodeFrom, attrBridge, isOnlyUpdatePaint, type]()
+      [paintNodeFromOriginalMatrix,
+       itemFrom,
+       paintNodeFrom,
+       attrBridge,
+       isOnlyUpdatePaint,
+       itemFromIsContainer]()
       {
         assert(paintNodeFromOriginalMatrix);
         if (paintNodeFromOriginalMatrix)
@@ -517,7 +532,7 @@ void SmartAnimate::addAnimate(
             *paintNodeFromOriginalMatrix,
             isOnlyUpdatePaint,
             {},
-            type == VGG::Domain::Element::EType::FRAME); // TODO group, symbol and so on.
+            itemFromIsContainer);
         }
       });
 
@@ -527,18 +542,14 @@ void SmartAnimate::addAnimate(
       transform,
       isOnlyUpdatePaint,
       animate,
-      type == VGG::Domain::Element::EType::FRAME); // TODO group, symbol and so on.
+      itemFromIsContainer);
 
     addChildAnimate(animate);
   }
 
   for (auto item : twins)
   {
-    auto type = item.first->elementNode()->type();
-    if (
-      type == VGG::Domain::Element::EType::FRAME || type == VGG::Domain::Element::EType::GROUP ||
-      type == VGG::Domain::Element::EType::SYMBOL_INSTANCE ||
-      type == VGG::Domain::Element::EType::SYMBOL_MASTER)
+    if (ReplaceNodeAnimate::isContainerType(item.first->elementNode()))
     {
       addAnimate(item.first, item.second);
     }

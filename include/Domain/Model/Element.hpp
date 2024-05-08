@@ -74,6 +74,9 @@ public:
   }
   virtual ~Element() = default;
 
+  std::shared_ptr<Element>         cloneTree() const;
+  virtual std::shared_ptr<Element> clone() const = 0;
+
 public:
   auto type() const
   {
@@ -218,6 +221,7 @@ class DesignDocument : public Element
 
 public:
   DesignDocument(const Model::DesignModel& designModel);
+  std::shared_ptr<Element> clone() const override;
 
   void               buildSubtree() override;
   Model::DesignModel treeModel(
@@ -237,6 +241,7 @@ class FrameElement : public Element
 
 public:
   FrameElement(const Model::Frame& frame);
+  std::shared_ptr<Element> clone() const override;
 
   void buildSubtree() override;
 
@@ -258,6 +263,7 @@ class GroupElement : public Element
 
 public:
   GroupElement(const Model::Group& group);
+  std::shared_ptr<Element> clone() const override;
 
   void buildSubtree() override;
 
@@ -284,6 +290,7 @@ class SymbolMasterElement : public Element
 
 public:
   SymbolMasterElement(const Model::SymbolMaster& master);
+  std::shared_ptr<Element> clone() const override;
 
   void buildSubtree() override;
 
@@ -306,6 +313,7 @@ class SymbolInstanceElement : public Element
 
 public:
   SymbolInstanceElement(const Model::SymbolInstance& instance);
+  std::shared_ptr<Element> clone() const override;
 
   std::string masterId() const;
   std::string masterOverrideKey() const;
@@ -341,6 +349,8 @@ class TextElement : public Element
 
 public:
   TextElement(const Model::Text& text);
+  std::shared_ptr<Element> clone() const override;
+
   void updateFields(const nlohmann::json& json);
 
   void update(const Model::ReferencedStyle& refStyle) override;
@@ -358,6 +368,7 @@ class ImageElement : public Element
 
 public:
   ImageElement(const Model::Image& image);
+  std::shared_ptr<Element> clone() const override;
 
   Model::Image*  object() const override;
   nlohmann::json jsonModel() override;
@@ -372,6 +383,7 @@ class PathElement : public Element
 
 public:
   PathElement(const Model::Path& path);
+  std::shared_ptr<Element> clone() const override;
 
   void buildSubtree() override;
 
@@ -392,6 +404,7 @@ class ContourElement : public Element
 
 public:
   ContourElement(const Model::Contour& contour);
+  std::shared_ptr<Element> clone() const override;
 
   std::vector<Layout::BezierPoint> points() const;
 
@@ -405,6 +418,7 @@ public:
 class EllipseElement : public Element
 {
   std::shared_ptr<Model::Ellipse> m_ellipse;
+  std::shared_ptr<Element>        clone() const override;
 
 public:
   EllipseElement(const Model::Ellipse& ellipse);
@@ -424,6 +438,7 @@ class PolygonElement : public Element
 
 public:
   PolygonElement(const Model::Polygon& polygon);
+  std::shared_ptr<Element> clone() const override;
 
   Model::Polygon* dataModel() const
   {
@@ -440,6 +455,8 @@ class RectangleElement : public Element
 
 public:
   RectangleElement(const Model::Rectangle& rectangle);
+  std::shared_ptr<Element> clone() const override;
+
   Model::Rectangle* dataModel() const
   {
     return m_rectangle.get();
@@ -455,6 +472,8 @@ class StarElement : public Element
 
 public:
   StarElement(const Model::Star& star);
+  std::shared_ptr<Element> clone() const override;
+
   Model::Star* dataModel() const
   {
     return m_star.get();
@@ -470,6 +489,7 @@ class VectorNetworkElement : public Element
 
 public:
   VectorNetworkElement(const Model::VectorNetwork& vectorNetwork);
+  std::shared_ptr<Element> clone() const override;
 
   Model::VectorNetwork* dataModel() const
   {
@@ -486,6 +506,7 @@ class StateTreeElement : public Element
 
 public:
   StateTreeElement(std::shared_ptr<Element> srcElement);
+  std::shared_ptr<Element> clone() const override;
 };
 
 } // namespace Domain

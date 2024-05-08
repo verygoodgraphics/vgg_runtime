@@ -16,6 +16,7 @@
 #include "Presenter.hpp"
 
 #include "Mouse.hpp"
+#include "UIAnimation.hpp"
 
 #include "Domain/Layout/Node.hpp"
 #include "Layer/Model/StructModel.hpp"
@@ -418,4 +419,22 @@ bool Presenter::updateViewNodeFillColor(
   const double       a)
 {
   return m_view->updateNodeFillColor(id, fillIndex, r, g, b, a);
+}
+
+bool Presenter::setInstanceState(
+  const LayoutNode*             oldNode,
+  const LayoutNode*             newNode,
+  const app::UIAnimationOption& options,
+  app::AnimationCompletion      completion)
+{
+  return m_view->setInstanceState(oldNode, newNode, options, completion);
+}
+
+bool Presenter::presentInstanceState(
+  const LayoutNode*             oldNode,
+  const LayoutNode*             newNode,
+  const app::UIAnimationOption& options,
+  app::AnimationCompletion      completion)
+{
+  return m_view->presentInstanceState(oldNode, newNode, options, completion);
 }

@@ -16,6 +16,8 @@
 
 #include "UIViewImpl.hpp"
 
+#include "UIAnimation.hpp"
+
 #include "Utility/Log.hpp"
 
 using namespace VGG;
@@ -99,54 +101,16 @@ bool UIViewImpl::setPageIndexAnimated(
   const auto& toPage = pages[index];
 
   DEBUG("from page: %s, to page: %s", fromPage->id().c_str(), toPage->id().c_str());
-
-  auto action = std::make_shared<AttrBridge>(
-    std::static_pointer_cast<UIView>(m_api->shared_from_this()),
-    m_animationManager);
-
-  const int duration = option.duration * 1000;
-  auto      timing = std::make_shared<LinearInterpolator>();
-
-  std::shared_ptr<ReplaceNodeAnimate> animation;
-
-  switch (option.type)
-  {
-    case app::EAnimationType::NONE:
-      ASSERT(false);
-      break;
-
-    case app::EAnimationType::DISSOLVE:
-      animation = std::make_shared<DissolveAnimate>(
-        std::chrono::milliseconds(duration),
-        std::chrono::milliseconds(K_ANIMATION_INTERVAL),
-        timing,
-        action);
-      break;
-
-    case app::EAnimationType::SMART:
-      animation = std::make_shared<SmartAnimate>(
-        std::chrono::milliseconds(duration),
-        std::chrono::milliseconds(K_ANIMATION_INTERVAL),
-        timing,
-        action);
-      break;
-  }
-
-  animation->addCallBackWhenStop(
-    [this, index, completion]()
+  transition(
+    fromPage.get(),
+    toPage.get(),
+    option,
+    [this, index, completion](bool)
     {
       m_api->setCurrentPageIndex(index, true); // clear context
       if (completion)
         completion(true); // todo false for unfinished
     });
-
-  action->replaceNode(
-    fromPage,
-    toPage,
-    action->getPaintNode(fromPage),
-    action->getPaintNode(toPage),
-    true,
-    animation);
 
   return true;
 }
@@ -252,4 +216,99 @@ bool UIViewImpl::updateNodeFillColor(
   fills.at(fillIndex).type = color;
   node->attributeAccessor()->setFills(fills);
   return true;
+}
+
+bool UIViewImpl::setInstanceState(
+  const LayoutNode*             oldNode,
+  const LayoutNode*             newNode,
+  const app::UIAnimationOption& options,
+  app::AnimationCompletion      completion)
+{
+  if (!oldNode || !newNode)
+    return false;
+
+  transition(oldNode, newNode, options, completion, true);
+  return true;
+}
+
+bool UIViewImpl::presentInstanceState(
+  const LayoutNode*             oldNode,
+  const LayoutNode*             newNode,
+  const app::UIAnimationOption& options,
+  app::AnimationCompletion      completion)
+{
+  if (!oldNode || !newNode)
+    return false;
+
+  transition(oldNode, newNode, options, completion, true);
+  return true;
+}
+
+void UIViewImpl::transition(
+  const LayoutNode*             inFromNode,
+  const LayoutNode*             inToNode,
+  const app::UIAnimationOption& option,
+  app::AnimationCompletion      completion,
+  const bool                    makeNewPaintNode)
+{
+  ASSERT(inFromNode && inToNode);
+  auto fromNode = const_cast<LayoutNode*>(inFromNode)->shared_from_this();
+  auto toNode = const_cast<LayoutNode*>(inToNode)->shared_from_this();
+
+  DEBUG("from node: %s, to node: %s", fromNode->id().c_str(), toNode->id().c_str());
+
+  auto action = std::make_shared<AttrBridge>(
+    std::static_pointer_cast<UIView>(m_api->shared_from_this()),
+    m_animationManager);
+
+  const int duration = option.duration * 1000;
+  auto      timing = std::make_shared<LinearInterpolator>();
+
+  std::shared_ptr<ReplaceNodeAnimate> animation;
+
+  switch (option.type)
+  {
+    case app::EAnimationType::NONE:
+      break;
+
+    case app::EAnimationType::DISSOLVE:
+      animation = std::make_shared<DissolveAnimate>(
+        std::chrono::milliseconds(duration),
+        std::chrono::milliseconds(K_ANIMATION_INTERVAL),
+        timing,
+        action);
+      break;
+
+    case app::EAnimationType::SMART:
+      animation = std::make_shared<SmartAnimate>(
+        std::chrono::milliseconds(duration),
+        std::chrono::milliseconds(K_ANIMATION_INTERVAL),
+        timing,
+        action);
+      break;
+  }
+
+  if (animation)
+    animation->addCallBackWhenStop(
+      [completion]()
+      {
+        if (completion)
+          completion(true); // todo false for unfinished
+      });
+
+  action->replaceNode(
+    fromNode->shared_from_this(),
+    toNode->shared_from_this(),
+    action->getPaintNode(fromNode->shared_from_this()),
+    makeNewPaintNode ? nullptr : action->getPaintNode(toNode->shared_from_this()),
+    true,
+    animation);
+
+  if (!animation)
+  {
+    m_api->setDirty(true);
+
+    if (completion)
+      completion(true);
+  }
 }

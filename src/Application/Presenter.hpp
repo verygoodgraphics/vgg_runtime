@@ -259,6 +259,18 @@ public:
   void update();
 
 public:
+  bool setInstanceState(
+    const LayoutNode*             oldNode,
+    const LayoutNode*             newNode,
+    const app::UIAnimationOption& options,
+    app::AnimationCompletion      completion);
+  bool presentInstanceState(
+    const LayoutNode*             oldNode,
+    const LayoutNode*             newNode,
+    const app::UIAnimationOption& options,
+    app::AnimationCompletion      completion);
+
+public:
   bool updateViewNodeFillColor(
     const std::string& id,
     const std::size_t  fillIndex,

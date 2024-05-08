@@ -22,6 +22,7 @@ namespace VGG
 {
 class LayoutNode;
 class StateTree;
+class SnapshotTree;
 
 namespace Layout
 {
@@ -36,24 +37,32 @@ class InstanceState
   std::shared_ptr<Layout::Layout>       m_layout;
 
 public:
+  struct Result
+  {
+    bool                          success{ false };
+    std::shared_ptr<SnapshotTree> oldTree;
+    std::shared_ptr<LayoutNode>   newTree;
+  };
+
+public:
   InstanceState(
     std::shared_ptr<LayoutNode>           page,
     std::shared_ptr<Layout::ExpandSymbol> expander,
     std::shared_ptr<Layout::Layout>       layout);
 
-  bool setState(
+  Result setState(
     const std::string& instanceDescendantId,
     const std::string& listenerId,
     const std::string& stateMasterId);
-  bool presentState(
+  Result presentState(
     const std::string& instanceDescendantId,
     const std::string& listenerId,
     const std::string& stateMasterId,
     StateTree*         stateTree);
-  bool dismissState(const StateTree* savedStateTree, const std::string& instanceDescendantId);
+  Result dismissState(const StateTree* savedStateTree, const std::string& instanceDescendantId);
 
 private:
-  bool setState(std::shared_ptr<LayoutNode> instanceNode, const std::string& stateMasterId);
+  Result setState(std::shared_ptr<LayoutNode> instanceNode, const std::string& stateMasterId);
   std::shared_ptr<LayoutNode> findInstanceNode(
     const std::string& instanceDescendantId,
     const std::string& listenerId);

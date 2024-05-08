@@ -29,7 +29,32 @@
 constexpr auto listener_code_key = "listener";
 #endif
 
-using namespace VGG;
+namespace VGG
+{
+
+namespace
+{
+
+app::UIAnimationOption toUIAnimationOption(const ISdk::AnimationOptions& inOption)
+{
+  app::UIAnimationOption option;
+  if (inOption.duration > 0)
+    option.duration = inOption.duration;
+
+  if (inOption.type == "none")
+    option.type = app::EAnimationType::NONE;
+  else if (inOption.type == "dissolve")
+    option.type = app::EAnimationType::DISSOLVE;
+  else if (inOption.type == "smart")
+    option.type = app::EAnimationType::SMART;
+
+  if (inOption.timingFunction == "linear")
+    option.timingFunction = app::EAnimationTimingFunction::LINEAR;
+
+  return option;
+}
+
+} // namespace
 
 std::shared_ptr<VGG::VggEnv> VggSdk::env() const
 {
@@ -414,13 +439,12 @@ bool VggSdk::setState(
   const std::string&  masterId,
   const StateOptions& options)
 {
-  if (auto currentEnv = env())
+  if (auto c = controller())
   {
-    if (auto controller = currentEnv->controller())
-    {
-      return controller->setState(instanceDescendantId, listenerId, masterId);
-    }
+    app::StateOptions opts{ options.resetScrollPosition, toUIAnimationOption(options.animation) };
+    return c->setState(instanceDescendantId, listenerId, masterId, opts);
   }
+
   return false;
 }
 
@@ -430,12 +454,10 @@ bool VggSdk::presentState(
   const std::string&  stateMasterId,
   const StateOptions& options)
 {
-  if (auto currentEnv = env())
+  if (auto c = controller())
   {
-    if (auto controller = currentEnv->controller())
-    {
-      return controller->presentState(instanceDescendantId, listenerId, stateMasterId);
-    }
+    app::StateOptions opts{ options.resetScrollPosition, toUIAnimationOption(options.animation) };
+    return c->presentState(instanceDescendantId, listenerId, stateMasterId, opts);
   }
   return false;
 }
@@ -501,20 +523,7 @@ bool VggSdk::setCurrentFrameByIdAnimated(
   if (!c)
     return false;
 
-  app::UIAnimationOption option;
-  if (inOption.duration > 0)
-    option.duration = inOption.duration;
-
-  if (inOption.type == "none")
-    option.type = app::EAnimationType::NONE;
-  else if (inOption.type == "dissolve")
-    option.type = app::EAnimationType::DISSOLVE;
-  else if (inOption.type == "smart")
-    option.type = app::EAnimationType::SMART;
-
-  if (inOption.timingFunction == "linear")
-    option.timingFunction = app::EAnimationTimingFunction::LINEAR;
-
+  app::UIAnimationOption option = toUIAnimationOption(inOption);
   if (option.type == app::EAnimationType::NONE)
     return setCurrentFrameById(id, resetScrollPosition);
   else
@@ -533,3 +542,5 @@ bool VggSdk::updateElementFillColor(
     return c->updateElementFillColor(id, fillIndex, r, g, b, a);
   return false;
 }
+
+} // namespace VGG

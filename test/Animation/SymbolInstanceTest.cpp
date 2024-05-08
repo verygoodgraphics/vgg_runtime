@@ -19,6 +19,7 @@
 #include "Entry/Container/Container.hpp"
 
 #include "test_config.hpp"
+#include "container/MockSkiaGraphicsContext.hpp"
 
 #include <gtest/gtest.h>
 #include <thread>
@@ -39,6 +40,9 @@ protected:
   void SetUp() override
   {
     m_container.reset(new Container);
+
+    std::unique_ptr<layer::SkiaGraphicsContext> graphicsContext{ new MockSkiaGraphicsContext };
+    m_container->setGraphicsContext(graphicsContext, 600, 800);
   }
   void TearDown() override
   {
@@ -59,8 +63,9 @@ TEST_F(SymbolInstanceAnimationTestSuite, Smoke)
 
   {
     ISdk::StateOptions opts;
-    auto               success = sut()->setState("0:13__0:8", "0:8", "0:10", opts);
-    EXPECT_FALSE(success);
+    auto               success = sut()->presentState("0:13__0:5", "0:5", "0:10", opts);
+    // todo, set state
+    EXPECT_TRUE(success);
   }
 }
 

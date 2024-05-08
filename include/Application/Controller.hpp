@@ -17,6 +17,7 @@
 
 #include "Application/AppRenderable.hpp"
 #include "Application/UIEvent.hpp"
+#include "Application/UIOptions.hpp"
 
 #include "Domain/IVggEnv.hpp"
 #include "Domain/Layout/Rect.hpp"
@@ -151,13 +152,15 @@ public:
   bool setCurrentTheme(const std::string& theme);
 
   bool setState(
-    const std::string& instanceDescendantId,
-    const std::string& listenerId,
-    const std::string& stateMasterId);
+    const std::string&       instanceDescendantId,
+    const std::string&       listenerId,
+    const std::string&       stateMasterId,
+    const app::StateOptions& options);
   bool presentState(
-    const std::string& instanceDescendantId,
-    const std::string& listenerId,
-    const std::string& stateMasterId);
+    const std::string&       instanceDescendantId,
+    const std::string&       listenerId,
+    const std::string&       stateMasterId,
+    const app::StateOptions& options);
   bool dismissState(const std::string& instanceDescendantId);
 
   void openUrl(const std::string& url, const std::string& target);

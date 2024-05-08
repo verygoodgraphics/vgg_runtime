@@ -145,7 +145,7 @@ bool UIViewImpl::setPageIndexAnimated(
     toPage,
     action->getPaintNode(fromPage),
     action->getPaintNode(toPage),
-    false,
+    true,
     animation);
 
   return true;

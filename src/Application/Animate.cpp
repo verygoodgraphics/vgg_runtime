@@ -384,7 +384,7 @@ void SmartAnimate::addAnimate(
   std::shared_ptr<LayoutNode> nodeFrom,
   std::shared_ptr<LayoutNode> nodeTo)
 {
-  // TODO  Currently, the issue of opacity during smart animate is not being considered.
+  // TODO Currently, the issue of opacity during smart animate is not being considered.
 
   typedef std::shared_ptr<Domain::Element> TElement;
 
@@ -480,6 +480,13 @@ void SmartAnimate::addAnimate(
       continue;
     }
 
+    // TODO group need other deal, not completed
+    auto type = itemFrom->elementNode()->type();
+    if (type == VGG::Domain::Element::EType::GROUP)
+    {
+      continue;
+    }
+
     auto transform = TransformHelper::transform(
       *AttrBridge::getWidth(paintNodeFrom),
       *AttrBridge::getHeight(paintNodeFrom),
@@ -487,7 +494,6 @@ void SmartAnimate::addAnimate(
       *AttrBridge::getHeight(paintNodeTo),
       *AttrBridge::getMatrix(paintNodeTo));
 
-    auto type = itemFrom->elementNode()->type();
     auto animate = std::make_shared<NumberAnimate>(getDuration(), getInterval(), getInterpolator());
     animate->addTriggeredCallback(std::bind(
       AttrBridge::setTwinMatrix,
@@ -496,13 +502,33 @@ void SmartAnimate::addAnimate(
       paintNodeTo,
       std::placeholders::_1,
       isOnlyUpdatePaint));
+
+    auto paintNodeFromOriginalMatrix = attrBridge->getMatrix(paintNodeFrom);
+
+    animate->addCallBackWhenStop(
+      [paintNodeFromOriginalMatrix, itemFrom, paintNodeFrom, attrBridge, isOnlyUpdatePaint, type]()
+      {
+        assert(paintNodeFromOriginalMatrix);
+        if (paintNodeFromOriginalMatrix)
+        {
+          attrBridge->updateMatrix(
+            itemFrom,
+            paintNodeFrom,
+            *paintNodeFromOriginalMatrix,
+            isOnlyUpdatePaint,
+            {},
+            type == VGG::Domain::Element::EType::FRAME); // TODO group, symbol and so on.
+        }
+      });
+
     attrBridge->updateMatrix(
       itemFrom,
       paintNodeFrom,
       transform,
-      getIsOnlyUpdatePaint(),
+      isOnlyUpdatePaint,
       animate,
       type == VGG::Domain::Element::EType::FRAME); // TODO group, symbol and so on.
+
     addChildAnimate(animate);
   }
 

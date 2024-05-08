@@ -63,7 +63,7 @@ public:
   virtual ~Animate();
 
 public:
-  void stop();
+  void         stop();
   virtual bool isRunning();
   virtual bool isFinished();
 
@@ -132,9 +132,8 @@ private:
   std::vector<TTriggeredCallback>    m_triggeredCallback;
 };
 
-// TODO should construct PaintNode if from/to node is not top-level frame.
-// TODO test not top-level frame condition.
-
+// Note: Ensure that the properties of the old node, with the exception of a few specific
+// properties, are restored after the animation ends.
 class ReplaceNodeAnimate : public Animate
 {
   friend AttrBridge;

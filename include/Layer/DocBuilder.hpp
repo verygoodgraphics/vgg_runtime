@@ -128,8 +128,9 @@ public:
       cost.expand = layer::Timer::time(
         [&, this]()
         {
-          auto [a, b] = Layout::ExpandSymbol(m_doc, m_layout)();
-          d = std::move(a);
+          auto e = Layout::ExpandSymbol(m_doc, m_layout);
+          e();
+          d = e.layout()->designDocTree();
 
           // legacy code
           auto [x, y] = Layout::ExpandSymbol(m_doc, m_layout).run();

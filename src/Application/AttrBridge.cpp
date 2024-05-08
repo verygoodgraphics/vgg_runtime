@@ -480,7 +480,6 @@ void AttrBridge::setTwinMatrix(
     scale[1] = height / boundsTo.height;
   }
 
-  auto type = nodeFrom->elementNode()->type();
   if (ReplaceNodeAnimate::isContainerType(nodeFrom->elementNode()))
   {
     // TODO change nodeTo size

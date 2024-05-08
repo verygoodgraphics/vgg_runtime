@@ -19,6 +19,7 @@
 #include "Event/Event.hpp"
 #include "Event/EventAPI.hpp"
 #include "Event/Keycode.hpp"
+#include "UIAnimation.hpp"
 #include "ViewModel.hpp"
 
 #include "Domain/Layout/Node.hpp"
@@ -972,6 +973,23 @@ bool UIView::updateNodeFillColor(
 void UIView::initHistory()
 {
   m_history.push(currentPage()->id());
+}
+
+bool UIView::setInstanceState(
+  const LayoutNode*             oldNode,
+  const LayoutNode*             newNode,
+  const app::UIAnimationOption& options,
+  app::AnimationCompletion      completion)
+{
+  return m_impl->setInstanceState(oldNode, newNode, options, completion);
+}
+bool UIView::presentInstanceState(
+  const LayoutNode*             oldNode,
+  const LayoutNode*             newNode,
+  const app::UIAnimationOption& options,
+  app::AnimationCompletion      completion)
+{
+  return m_impl->presentInstanceState(oldNode, newNode, options, completion);
 }
 
 } // namespace VGG

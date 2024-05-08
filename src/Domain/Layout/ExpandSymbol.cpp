@@ -1228,7 +1228,7 @@ void ExpandSymbol::expandInstance(
 {
   DEBUG(
     "ExpandSymbol::expandInstance %s with master id %s",
-    instance->id().c_str(),
+    instance.id().c_str(),
     masterId.c_str());
 
   if (masterId.empty())

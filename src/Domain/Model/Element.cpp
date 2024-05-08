@@ -111,6 +111,12 @@ DesignDocument::DesignDocument(const Model::DesignModel& designModel)
 {
   m_designModel = std::make_shared<Model::DesignModel>(designModel);
 }
+
+std::shared_ptr<Element> DesignDocument::clone() const
+{
+  return std::make_shared<DesignDocument>(*m_designModel);
+}
+
 void DesignDocument::buildSubtree()
 {
   for (auto& frame : m_designModel->frames)
@@ -153,6 +159,13 @@ std::shared_ptr<Element> DesignDocument::getElementByKey(const std::string& key)
 
 // Element
 
+std::shared_ptr<Element> Element::cloneTree() const
+{
+  auto n = clone();
+  for (auto& child : childObjects())
+    n->addChild(child->clone());
+  return n;
+}
 std::vector<std::shared_ptr<Element>> Element::children(bool reverseChildrenIfFirstOnTop) const
 {
   auto result = m_children;
@@ -533,6 +546,10 @@ FrameElement::FrameElement(const Model::Frame& frame)
 {
   m_frame = std::make_shared<Model::Frame>(frame);
 }
+std::shared_ptr<Element> FrameElement::clone() const
+{
+  return std::make_shared<FrameElement>(*object());
+}
 Frame* FrameElement::object() const
 {
   return m_frame.get();
@@ -586,6 +603,10 @@ GroupElement::GroupElement(const Model::Group& group)
   : Element(EType::GROUP)
 {
   m_group = std::make_shared<Model::Group>(group);
+}
+std::shared_ptr<Element> GroupElement::clone() const
+{
+  return std::make_shared<GroupElement>(*object());
 }
 Group* GroupElement::object() const
 {
@@ -658,6 +679,10 @@ SymbolMasterElement::SymbolMasterElement(const Model::SymbolMaster& master)
 {
   m_master = std::make_shared<Model::SymbolMaster>(master);
 }
+std::shared_ptr<Element> SymbolMasterElement::clone() const
+{
+  return std::make_shared<SymbolMasterElement>(*object());
+}
 SymbolMaster* SymbolMasterElement::object() const
 {
   return m_master.get();
@@ -711,6 +736,10 @@ SymbolInstanceElement::SymbolInstanceElement(const Model::SymbolInstance& instan
   : Element(EType::SYMBOL_INSTANCE)
 {
   m_instance = std::make_shared<Model::SymbolInstance>(instance);
+}
+std::shared_ptr<Element> SymbolInstanceElement::clone() const
+{
+  return std::make_shared<SymbolInstanceElement>(*object());
 }
 SymbolInstance* SymbolInstanceElement::object() const
 {
@@ -863,6 +892,10 @@ TextElement::TextElement(const Model::Text& text)
 {
   m_text = std::make_shared<Model::Text>(text);
 }
+std::shared_ptr<Element> TextElement::clone() const
+{
+  return std::make_shared<TextElement>(*object());
+}
 Text* TextElement::object() const
 {
   return m_text.get();
@@ -913,6 +946,10 @@ ImageElement::ImageElement(const Model::Image& image)
 {
   m_image = std::make_shared<Model::Image>(image);
 }
+std::shared_ptr<Element> ImageElement::clone() const
+{
+  return std::make_shared<ImageElement>(*object());
+}
 Image* ImageElement::object() const
 {
   return m_image.get();
@@ -943,6 +980,10 @@ PathElement::PathElement(const Model::Path& path)
   : Element(EType::PATH)
 {
   m_path = std::make_shared<Model::Path>(path);
+}
+std::shared_ptr<Element> PathElement::clone() const
+{
+  return std::make_shared<PathElement>(*object());
 }
 Model::Path* PathElement::object() const
 {
@@ -1035,6 +1076,10 @@ ContourElement::ContourElement(const Model::Contour& contour)
 {
   m_contour = std::make_shared<Model::Contour>(contour);
 }
+std::shared_ptr<Element> ContourElement::clone() const
+{
+  return std::make_shared<ContourElement>(*dataModel());
+}
 
 std::vector<Layout::BezierPoint> ContourElement::points() const
 {
@@ -1098,6 +1143,10 @@ EllipseElement::EllipseElement(const Model::Ellipse& ellipse)
 {
   m_ellipse = std::make_shared<Model::Ellipse>(ellipse);
 }
+std::shared_ptr<Element> EllipseElement::clone() const
+{
+  return std::make_shared<EllipseElement>(*m_ellipse);
+}
 void EllipseElement::getToModel(Model::SubGeometryType& subGeometry)
 {
   ASSERT(m_ellipse);
@@ -1117,6 +1166,10 @@ PolygonElement::PolygonElement(const Model::Polygon& polygon)
   : Element(EType::POLYGON)
 {
   m_polygon = std::make_shared<Model::Polygon>(polygon);
+}
+std::shared_ptr<Element> PolygonElement::clone() const
+{
+  return std::make_shared<PolygonElement>(*m_polygon);
 }
 void PolygonElement::getToModel(Model::SubGeometryType& subGeometry)
 {
@@ -1138,6 +1191,10 @@ RectangleElement::RectangleElement(const Model::Rectangle& rectangle)
 {
   m_rectangle = std::make_shared<Model::Rectangle>(rectangle);
 }
+std::shared_ptr<Element> RectangleElement::clone() const
+{
+  return std::make_shared<RectangleElement>(*m_rectangle);
+}
 void RectangleElement::getToModel(Model::SubGeometryType& subGeometry)
 {
   ASSERT(m_rectangle);
@@ -1157,6 +1214,10 @@ StarElement::StarElement(const Model::Star& star)
   : Element(EType::STAR)
 {
   m_star = std::make_shared<Model::Star>(star);
+}
+std::shared_ptr<Element> StarElement::clone() const
+{
+  return std::make_shared<StarElement>(*m_star);
 }
 void StarElement::getToModel(Model::SubGeometryType& subGeometry)
 {
@@ -1178,6 +1239,10 @@ VectorNetworkElement::VectorNetworkElement(const Model::VectorNetwork& network)
 {
   m_vectorNetwork = std::make_shared<Model::VectorNetwork>(network);
 }
+std::shared_ptr<Element> VectorNetworkElement::clone() const
+{
+  return std::make_shared<VectorNetworkElement>(*m_vectorNetwork);
+}
 void VectorNetworkElement::getToModel(Model::SubGeometryType& subGeometry)
 {
   ASSERT(m_vectorNetwork);
@@ -1192,8 +1257,13 @@ void VectorNetworkElement::updateModel(const Model::SubGeometryType& subGeometry
   }
 }
 
+// StateTreeElement
 StateTreeElement::StateTreeElement(std::shared_ptr<Element> srcElement)
   : Element(EType::STATE_TREE)
   , m_srcElement{ srcElement }
 {
+}
+std::shared_ptr<Element> StateTreeElement::clone() const
+{
+  return {};
 }

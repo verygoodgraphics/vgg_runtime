@@ -90,6 +90,18 @@ public:
   void translate(float dx, float dy);
 
 public:
+  bool setInstanceState(
+    const LayoutNode*             oldNode,
+    const LayoutNode*             newNode,
+    const app::UIAnimationOption& options,
+    app::AnimationCompletion      completion);
+  bool presentInstanceState(
+    const LayoutNode*             oldNode,
+    const LayoutNode*             newNode,
+    const app::UIAnimationOption& options,
+    app::AnimationCompletion      completion);
+
+public:
   void setBackgroundColor(uint32_t color);
 
   bool updateNodeFillColor(
@@ -103,6 +115,14 @@ public:
 public:
   void frame();
   bool isAnimating();
+
+private:
+  void transition(
+    const LayoutNode*             fromNode,
+    const LayoutNode*             toNode,
+    const app::UIAnimationOption& option,
+    app::AnimationCompletion      completion,
+    const bool                    makeNewPaintNode = false);
 };
 } // namespace internal
 } // namespace VGG

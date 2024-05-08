@@ -22,10 +22,11 @@
 #include "Domain/Model/Element.hpp"
 #include "Utility/Log.hpp"
 
-using namespace VGG;
-
 #undef DEBUG
 #define DEBUG(msg, ...)
+
+namespace VGG
+{
 
 InstanceState::InstanceState(
   std::shared_ptr<LayoutNode>           page,
@@ -40,7 +41,7 @@ InstanceState::InstanceState(
   ASSERT(layout);
 }
 
-bool InstanceState::setState(
+InstanceState::Result InstanceState::setState(
   const std::string& instanceDescendantId,
   const std::string& listenerId,
   const std::string& stateMasterId)
@@ -49,7 +50,7 @@ bool InstanceState::setState(
   auto instanceNode = findInstanceNode(instanceDescendantId, listenerId);
   if (!instanceNode)
   {
-    return false;
+    return {};
   }
 
   auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode());
@@ -67,7 +68,7 @@ bool InstanceState::setState(
   return setState(instanceNode, stateMasterId);
 }
 
-bool InstanceState::presentState(
+InstanceState::Result InstanceState::presentState(
   const std::string& instanceDescendantId,
   const std::string& listenerId,
   const std::string& stateMasterId,
@@ -77,7 +78,7 @@ bool InstanceState::presentState(
   auto instanceNode = findInstanceNode(instanceDescendantId, listenerId);
   if (!instanceNode)
   {
-    return false;
+    return {};
   }
 
   // save current state tree to still handle events
@@ -90,7 +91,7 @@ bool InstanceState::presentState(
       "instance %s, present state, same master id %s, return",
       instanceNode->id().c_str(),
       oldMasterId.c_str());
-    return false;
+    return {};
   }
 
   auto oldElementChildren = pInstance->presentState(stateMasterId);
@@ -121,19 +122,19 @@ bool InstanceState::presentState(
   return setState(instanceNode, stateMasterId);
 }
 
-bool InstanceState::dismissState(
+InstanceState::Result InstanceState::dismissState(
   const StateTree*   savedStateTree,
   const std::string& instanceDescendantId)
 {
   if (!savedStateTree)
   {
-    return false;
+    return {};
   }
 
   auto instanceNode = savedStateTree->srcNode();
   if (!instanceNode)
   {
-    return false;
+    return {};
   }
 
   auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode());
@@ -153,7 +154,7 @@ bool InstanceState::dismissState(
   return setState(instanceNode, oldMasterId);
 }
 
-bool InstanceState::setState(
+InstanceState::Result InstanceState::setState(
   std::shared_ptr<LayoutNode> instanceNode,
   const std::string&          stateMasterId)
 {
@@ -168,7 +169,14 @@ bool InstanceState::setState(
   // update view model
   // render
 
-  return true;
+  Result ret;
+  ret.success = true;
+  auto ele = pInstance->cloneTree();
+  ret.oldTree = std::make_shared<SnapshotTree>(ele);
+  Layout::Layout::buildSubtree(ret.oldTree.get());
+  ret.newTree = instanceNode;
+
+  return ret;
 }
 
 std::shared_ptr<LayoutNode> InstanceState::findInstanceNode(
@@ -195,3 +203,5 @@ std::shared_ptr<LayoutNode> InstanceState::findInstanceNode(
   }
   return instanceNode;
 }
+
+} // namespace VGG

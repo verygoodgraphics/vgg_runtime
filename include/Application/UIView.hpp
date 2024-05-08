@@ -16,6 +16,7 @@
 #pragma once
 
 #include "UIEvent.hpp"
+#include "UIAnimation.hpp"
 
 #include "Application/Event/EventListener.hpp"
 #include "Application/UIAnimation.hpp"
@@ -208,6 +209,18 @@ public:
   void setLayer(app::AppRender* layer);
 
   layer::Ref<layer::SceneNode> getSceneNode();
+
+public:
+  bool setInstanceState(
+    const LayoutNode*             oldNode,
+    const LayoutNode*             newNode,
+    const app::UIAnimationOption& options,
+    app::AnimationCompletion      completion);
+  bool presentInstanceState(
+    const LayoutNode*             oldNode,
+    const LayoutNode*             newNode,
+    const app::UIAnimationOption& options,
+    app::AnimationCompletion      completion);
 
 public:
   bool updateNodeFillColor(

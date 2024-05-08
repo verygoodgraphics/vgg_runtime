@@ -92,14 +92,14 @@ public:
 
 public:
   static RuleMapPtr collectRules(const nlohmann::json& json);
+  static void       buildSubtree(LayoutNode* parent);
 
 private:
-  void                        buildLayoutTree();
-  std::shared_ptr<LayoutNode> createOneLayoutNode(
+  static std::shared_ptr<LayoutNode> makeTree(
     std::shared_ptr<Domain::Element> element,
     LayoutNode*                      parent);
 
-  void buildSubtree(LayoutNode* parent);
+  void buildLayoutTree();
 
   void configureNodeAutoLayout(LayoutNode* node, bool createAutoLayout = true);
 

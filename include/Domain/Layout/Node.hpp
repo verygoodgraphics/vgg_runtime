@@ -346,4 +346,16 @@ public:
   }
 };
 
+class SnapshotTree : public LayoutNode
+{
+  std::shared_ptr<Domain::Element> m_treeElement;
+
+public:
+  SnapshotTree(std::shared_ptr<Domain::Element> treeElement)
+    : LayoutNode(treeElement)
+    , m_treeElement{ treeElement }
+  {
+  }
+};
+
 } // namespace VGG

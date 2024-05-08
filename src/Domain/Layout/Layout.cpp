@@ -90,7 +90,7 @@ void Layout::Layout::buildLayoutTree()
   m_layoutTree.reset(new LayoutNode{ m_designDocument });
   for (auto& child : m_designDocument->children())
   {
-    auto page = createOneLayoutNode(child, m_layoutTree.get());
+    auto page = makeTree(child, m_layoutTree.get());
     m_originalPageSize.push_back(page->frame().size);
   }
 }
@@ -109,7 +109,7 @@ void Layout::Layout::buildSubtree(LayoutNode* parent)
 
   for (auto& child : element->children())
   {
-    createOneLayoutNode(child, parent);
+    makeTree(child, parent);
   }
 }
 
@@ -298,7 +298,7 @@ void Layout::Layout::rebuildSubtreeById(std::string nodeId)
   }
 }
 
-std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(
+std::shared_ptr<LayoutNode> Layout::Layout::makeTree(
   std::shared_ptr<Domain::Element> element,
   LayoutNode*                      parent)
 {
@@ -315,7 +315,7 @@ std::shared_ptr<LayoutNode> Layout::Layout::createOneLayoutNode(
 
   for (auto& child : element->children())
   {
-    createOneLayoutNode(child, node.get());
+    makeTree(child, node.get());
   }
 
   return node;

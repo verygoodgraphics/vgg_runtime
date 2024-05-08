@@ -183,6 +183,33 @@ const ISdk::AnimationOptions animationOptionsFromJsObject(napi_env env, napi_val
   return options;
 }
 
+const ISdk::StateOptions toStateOptions(napi_env env, napi_value value)
+{
+  ISdk::StateOptions options;
+  {
+    bool hasProperty = false;
+    napi_has_named_property(env, value, "resetScrollPosition", &hasProperty);
+    if (hasProperty)
+    {
+      napi_value v;
+      napi_get_named_property(env, value, "resetScrollPosition", &v);
+      napi_get_value_bool(env, v, &options.resetScrollPosition);
+    }
+  }
+  {
+    bool hasProperty = false;
+    napi_has_named_property(env, value, "animation", &hasProperty);
+    if (hasProperty)
+    {
+      napi_value v;
+      napi_get_named_property(env, value, "animation", &v);
+      options.animation = animationOptionsFromJsObject(env, v);
+    }
+  }
+
+  return options;
+}
+
 } // namespace
 
 napi_ref VggSdkNodeAdapter::constructor;
@@ -688,18 +715,18 @@ napi_value VggSdkNodeAdapter::setState(napi_env env, napi_callback_info info)
 
   try
   {
-    auto instanceDescendantId = GetArgString(env, args[0]);
-    auto listenerId = GetArgString(env, args[1]);
-    auto newMasterId = GetArgString(env, args[2]);
+    const auto& instanceDescendantId = GetArgString(env, args[0]);
+    const auto& listenerId = GetArgString(env, args[1]);
+    const auto& newMasterId = GetArgString(env, args[2]);
+    const auto& opts = toStateOptions(env, args[3]);
 
     VggSdkNodeAdapter* sdkAdapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
     bool success{ false };
     SyncTaskInMainLoop<bool>{
-      [sdk = sdkAdapter->m_vggSdk, instanceDescendantId, listenerId, newMasterId]() {
-        return sdk->setState(instanceDescendantId, listenerId, newMasterId, ISdk::StateOptions{});
-      },
+      [&sdk = sdkAdapter->m_vggSdk, &instanceDescendantId, &listenerId, &newMasterId, &opts]()
+      { return sdk->setState(instanceDescendantId, listenerId, newMasterId, opts); },
       [&success](bool result) { success = result; }
     }();
 
@@ -731,19 +758,18 @@ napi_value VggSdkNodeAdapter::presentState(napi_env env, napi_callback_info info
 
   try
   {
-    auto instanceDescendantId = GetArgString(env, args[0]);
-    auto listenerId = GetArgString(env, args[1]);
-    auto newMasterId = GetArgString(env, args[2]);
+    const auto& instanceDescendantId = GetArgString(env, args[0]);
+    const auto& listenerId = GetArgString(env, args[1]);
+    const auto& newMasterId = GetArgString(env, args[2]);
+    const auto& opts = toStateOptions(env, args[3]);
 
     VggSdkNodeAdapter* sdkAdapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
     bool success{ false };
     SyncTaskInMainLoop<bool>{
-      [sdk = sdkAdapter->m_vggSdk, instanceDescendantId, listenerId, newMasterId]() {
-        return sdk
-          ->presentState(instanceDescendantId, listenerId, newMasterId, ISdk::StateOptions{});
-      },
+      [&sdk = sdkAdapter->m_vggSdk, &instanceDescendantId, &listenerId, &newMasterId, &opts]()
+      { return sdk->presentState(instanceDescendantId, listenerId, newMasterId, opts); },
       [&success](bool result) { success = result; }
     }();
 

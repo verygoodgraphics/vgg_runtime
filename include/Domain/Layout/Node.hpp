@@ -108,6 +108,8 @@ public:
   }
   virtual ~LayoutNode() = default;
 
+  std::size_t treeSize() const;
+
 public:
   virtual const LayoutNode* asPage() const
   {

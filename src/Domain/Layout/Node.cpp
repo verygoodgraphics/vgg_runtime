@@ -62,6 +62,14 @@ bool isInvalidLength(Layout::Scalar length)
 
 } // namespace
 
+std::size_t LayoutNode::treeSize() const
+{
+  std::size_t count = 1;
+  for (const auto& child : children())
+    count += child->treeSize();
+  return count;
+}
+
 std::pair<std::shared_ptr<LayoutNode>, std::string> LayoutNode::hitTest(
   const Layout::Point& point,
   const HitTestHook&   hasEventListener)

@@ -76,6 +76,7 @@ public:
 
   std::shared_ptr<Element>         cloneTree() const;
   virtual std::shared_ptr<Element> clone() const = 0;
+  std::size_t                      size() const;
 
 public:
   auto type() const

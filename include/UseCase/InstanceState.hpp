@@ -62,7 +62,7 @@ public:
   Result dismissState(const StateTree* savedStateTree, const std::string& instanceDescendantId);
 
 private:
-  Result setState(std::shared_ptr<LayoutNode> instanceNode, const std::string& stateMasterId);
+  void setState(std::shared_ptr<LayoutNode> instanceNode, const std::string& stateMasterId);
   std::shared_ptr<LayoutNode> findInstanceNode(
     const std::string& instanceDescendantId,
     const std::string& listenerId);

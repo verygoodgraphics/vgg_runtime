@@ -46,7 +46,7 @@ InstanceState::Result InstanceState::setState(
   const std::string& listenerId,
   const std::string& stateMasterId)
 {
-  // todo, check nested instance
+  // todo: now find closest enclosing instance node, should find the right instance node
   auto instanceNode = findInstanceNode(instanceDescendantId, listenerId);
   if (!instanceNode)
   {
@@ -55,6 +55,13 @@ InstanceState::Result InstanceState::setState(
 
   auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode());
   ASSERT(pInstance);
+  Result ret;
+  ret.success = true;
+  auto ele = pInstance->cloneTree();
+  ret.oldTree = std::make_shared<SnapshotTree>(ele);
+  Layout::Layout::buildSubtree(ret.oldTree.get());
+  ret.newTree = instanceNode;
+
   pInstance->resetState();
 
   DEBUG(
@@ -65,7 +72,8 @@ InstanceState::Result InstanceState::setState(
     instanceDescendantId.c_str(),
     listenerId.c_str());
 
-  return setState(instanceNode, stateMasterId);
+  setState(instanceNode, stateMasterId);
+  return ret;
 }
 
 InstanceState::Result InstanceState::presentState(
@@ -94,6 +102,20 @@ InstanceState::Result InstanceState::presentState(
     return {};
   }
 
+  Result ret;
+  ret.success = true;
+  auto ele = pInstance->cloneTree();
+  ret.oldTree = std::make_shared<SnapshotTree>(ele);
+  Layout::Layout::buildSubtree(ret.oldTree.get());
+  ret.newTree = instanceNode;
+
+  DEBUG(
+    "clone tree size: element: original =  %zu, cloned = %zu; layout: original = %zu, cloned = %zu",
+    pInstance->size(),
+    ele->size(),
+    instanceNode->treeSize(),
+    ret.oldTree->treeSize());
+
   auto oldElementChildren = pInstance->presentState(stateMasterId);
   auto oldLayoutChildren = m_layout->removeNodeChildren(instanceNode.get());
 
@@ -119,7 +141,8 @@ InstanceState::Result InstanceState::presentState(
     stateTree->addChild(child);
   }
 
-  return setState(instanceNode, stateMasterId);
+  setState(instanceNode, stateMasterId);
+  return ret;
 }
 
 InstanceState::Result InstanceState::dismissState(
@@ -151,10 +174,14 @@ InstanceState::Result InstanceState::dismissState(
     instanceNode->id().c_str(),
     oldMasterId.c_str());
 
-  return setState(instanceNode, oldMasterId);
+  setState(instanceNode, oldMasterId);
+
+  Result ret;
+  ret.success = true;
+  return ret;
 }
 
-InstanceState::Result InstanceState::setState(
+void InstanceState::setState(
   std::shared_ptr<LayoutNode> instanceNode,
   const std::string&          stateMasterId)
 {
@@ -168,15 +195,6 @@ InstanceState::Result InstanceState::setState(
 
   // update view model
   // render
-
-  Result ret;
-  ret.success = true;
-  auto ele = pInstance->cloneTree();
-  ret.oldTree = std::make_shared<SnapshotTree>(ele);
-  Layout::Layout::buildSubtree(ret.oldTree.get());
-  ret.newTree = instanceNode;
-
-  return ret;
 }
 
 std::shared_ptr<LayoutNode> InstanceState::findInstanceNode(

@@ -163,9 +163,18 @@ std::shared_ptr<Element> Element::cloneTree() const
 {
   auto n = clone();
   for (auto& child : childObjects())
-    n->addChild(child->clone());
+    n->addChild(child->cloneTree());
   return n;
 }
+
+std::size_t Element::size() const
+{
+  std::size_t count = 1;
+  for (const auto& child : children())
+    count += child->size();
+  return count;
+}
+
 std::vector<std::shared_ptr<Element>> Element::children(bool reverseChildrenIfFirstOnTop) const
 {
   auto result = m_children;

@@ -15,6 +15,7 @@
 #include <filesystem>
 #include <fstream>
 #include <optional>
+#include <ranges>
 using namespace VGG;
 
 template<typename InputIterator, typename F>
@@ -83,7 +84,7 @@ constexpr char POS_ARG_INPUT_FILE[] = "fig/ai/sketch/json";
 int main(int argc, char** argv)
 {
   argparse::ArgumentParser program("exporter", "0.1");
-  program.add_argument(POS_ARG_INPUT_FILE).help("input fig/ai/sketch/json file");
+  program.add_argument(POS_ARG_INPUT_FILE).help("input fig/ai/sketch/json file").default_value("");
   program.add_argument("-d", "--data").help("resources dir");
   program.add_argument("-p", "--prefix").help("the prefix of filename or dir");
   program.add_argument("-L", "--loaddir").help("iterates all the files in the given dir");
@@ -107,6 +108,8 @@ int main(int argc, char** argv)
   program.add_argument("--disable-expand")
     .help("disable replace for symbol instance")
     .implicit_value(true);
+
+  program.add_argument("--repl").help("run as REPL mode").implicit_value(true);
 
   try
   {
@@ -207,10 +210,10 @@ int main(int argc, char** argv)
   exporter::Exporter     exporter;
   exporter.info(&info);
   INFO("%s", info.graphicsInfo.c_str());
-
-  if (auto loadfile = program.present(POS_ARG_INPUT_FILE))
+  auto loadfile = program.get<std::string>(POS_ARG_INPUT_FILE);
+  if (!loadfile.empty())
   {
-    auto fp = loadfile.value();
+    auto fp = loadfile;
     desc.filepath = fp;
     auto ext = fs::path(fp).extension().string();
     auto r = load(ext);
@@ -291,6 +294,68 @@ int main(int argc, char** argv)
     else
     {
       std::cout << "Directory " << dir << "not exists\n";
+    }
+  }
+  else if (auto repl = program.present<bool>("--repl"))
+  {
+    const char* prompt = "exporter(input, output)> ";
+
+    std::string line;
+    while (std::getline(std::cin, line))
+    {
+      std::cout << prompt;
+      if (line == "exit")
+        return 0;
+
+      auto view =
+        line | std::views::split(',') |
+        std::views::transform(
+          [](auto&& rng) { return std::string_view(&*rng.begin(), std::ranges::distance(rng)); });
+
+      // have not trimmed the string, becareful the space before and after the comma
+      std::vector<std::string_view> args(view.begin(), view.end());
+      if (args.empty())
+      {
+        std::cout << prompt;
+        continue;
+      }
+      fs::path filename = args[0];
+      fs::path output = args.size() > 1 ? args[1] : ".";
+      fs::path ext = filename.extension().string();
+      auto     r = load(ext);
+      if (r)
+      {
+        auto data = r->read(filename);
+        layer::setGlobalResourceProvider(std::move(data.provider));
+        auto rp = static_cast<layer::FileResourceProvider*>(layer::getGlobalResourceProvider()); // we assume it's a file resource provider
+        rp->setDirPrefix(filename.parent_path());
+        fs::create_directory(output);
+        if (isBitmap)
+        {
+          exporter::BuilderResult res;
+          auto iter = exporter.render(data.format, data.layout, opts, exportOpt, res);
+          INFO("Expand Time Cost: [%f]", res.timeCost->expand);
+          INFO("Layout Time Cost: [%f]", res.timeCost->layout);
+          write(
+            std::move(iter),
+            [&](auto guid) { return (output / guid).string(); },
+            extension);
+        }
+        else
+        {
+          writeDoc(
+            extension,
+            fs::path{},
+            outputFilePostfix,
+            data.format,
+            nlohmann::json{},
+            exportOpt);
+        }
+      }
+      else
+      {
+        std::cout << "Failed to load file: " << filename << std::endl;
+      }
     }
   }
   return 0;

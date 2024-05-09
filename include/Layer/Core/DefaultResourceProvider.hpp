@@ -41,6 +41,11 @@ public:
   FileResourceProvider(FileResourceProvider&&) = default;
   FileResourceProvider& operator=(FileResourceProvider&&) = default;
 
+  void setDirPrefix(std::filesystem::path cwd)
+  {
+    m_cwd = cwd;
+  }
+
   Blob readData(std::string_view guid) override
   {
     auto          filename = m_cwd / guid;

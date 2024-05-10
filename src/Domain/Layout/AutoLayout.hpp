@@ -54,6 +54,9 @@ private:
 
   Rect m_frame;
 
+  bool m_hasUnkownWidthDescendant{ false };
+  bool m_hasUnknownHeightDesendant{ false };
+
 public:
   std::weak_ptr<LayoutNode> view;
   std::weak_ptr<Rule::Rule> rule;
@@ -62,6 +65,7 @@ public:
   void configure();
   void configureFlexContainer();
   void configureFlexItemMargin();
+  void isFixedSize(bool& outWidth, bool& outHeight);
   void applyLayout(bool preservingOrigin);
   void setFrame(Rect frame);
   void updateSizeRule();
@@ -112,6 +116,16 @@ public:
     return m_gridItemFrames;
   }
 
+public:
+  void setHasUnknownWidthDescendant(const bool has)
+  {
+    m_hasUnkownWidthDescendant = has;
+  }
+  void setHasUnknownHeightDesencand(const bool has)
+  {
+    m_hasUnknownHeightDesendant = has;
+  }
+
 private:
   Size calculateLayout(Size size);
   void configureFlexNodeSize(flexbox_node* node, bool forContainer = false);
@@ -133,6 +147,7 @@ private:
   bool is100PercentHeight();
   bool isFitContentWidth();
   bool isFitContentHeight();
+  void isAsFixedSize(bool& inOutWidth, bool& inOutHeight);
   bool isSmartSpacingAndFlexSpaceBetweenAndNoWrap();
   bool isEmptyContainer();
   bool isOnlyChild();

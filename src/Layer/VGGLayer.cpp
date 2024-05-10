@@ -81,17 +81,6 @@ inline void drawBounds(PaintNode* node, const glm::mat3& deviceMatrix, SkCanvas*
     canvas->drawRect(deviceBounds, paint);
   }
 }
-inline void drawBounds(
-  std::vector<PaintNode*>::iterator begin,
-  std::vector<PaintNode*>::iterator end,
-  const glm::mat3&                  deviceMatrix,
-  SkCanvas*                         canvas)
-{
-  for (auto it = begin; it != end; ++it)
-  {
-    drawBounds(*it, deviceMatrix, canvas);
-  }
-}
 #endif
 
 inline void drawTextAt(

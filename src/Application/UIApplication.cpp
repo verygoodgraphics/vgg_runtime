@@ -128,6 +128,14 @@ bool UIApplication::handleKeyEvent(VKeyboardEvent evt)
     return true;
   }
 
+  if (key == VGGK_b)
+  {
+    INFO("Toggle object bounding box");
+    m_layer->setDebugModeEnabled(!m_layer->debugModeEnabled());
+    m_view->setDirty(true);
+    return true;
+  }
+
   if (key == VGGK_1)
   {
     INFO("Toggle cursor position");

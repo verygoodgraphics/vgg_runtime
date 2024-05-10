@@ -37,6 +37,7 @@ struct Color;
 namespace layer
 {
 class PaintNode;
+class Accessor;
 } // namespace layer
 
 namespace Model
@@ -107,7 +108,6 @@ public:
   layer::PaintNode* getPaintNode(std::shared_ptr<LayoutNode> node);
 
 public:
-  // TODO can be better for those funs?
   static std::optional<VGG::Color>            getFillColor(layer::PaintNode* node, size_t index);
   static std::optional<double>                getFillOpacity(layer::PaintNode* node, size_t index);
   static std::optional<size_t>                getFillSize(layer::PaintNode* node);
@@ -118,7 +118,6 @@ public:
   static std::optional<double>                getHeight(layer::PaintNode* node);
 
 private:
-  // TODO can be better for those funs?
   static void setFillColor(
     std::shared_ptr<LayoutNode> node,
     size_t                      index,

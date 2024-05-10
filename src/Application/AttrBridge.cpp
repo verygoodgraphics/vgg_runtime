@@ -34,16 +34,24 @@ AttrBridge::AttrBridge(std::shared_ptr<UIView> view, AnimateManage& animateManag
 {
 }
 
+#define CHECK_EXPR(expr, resultWhenFailed)                                                         \
+  if (!expr)                                                                                       \
+  {                                                                                                \
+    return resultWhenFailed;                                                                       \
+  }
+
+#define GET_PAINTNODE_ACCESSOR(node, accessor, resultWhenFailed)                                   \
+  CHECK_EXPR(node, resultWhenFailed)                                                               \
+  auto accessor = node->attributeAccessor();                                                       \
+  CHECK_EXPR(accessor, resultWhenFailed)
+
 std::optional<VGG::Color> AttrBridge::getFillColor(layer::PaintNode* node, size_t index)
 {
-  if (!node)
-  {
-    return {};
-  }
+  GET_PAINTNODE_ACCESSOR(node, accessor, {});
 
   try
   {
-    return std::get<VGG::Color>(node->attributeAccessor()->getFills().at(index).type);
+    return std::get<VGG::Color>(accessor->getFills().at(index).type);
   }
   catch (...)
   {
@@ -54,15 +62,11 @@ std::optional<VGG::Color> AttrBridge::getFillColor(layer::PaintNode* node, size_
 
 std::optional<double> AttrBridge::getFillOpacity(layer::PaintNode* node, size_t index)
 {
-  if (!node)
-  {
-    return {};
-  }
+  GET_PAINTNODE_ACCESSOR(node, accessor, {});
 
   try
   {
-    return static_cast<double>(
-      node->attributeAccessor()->getFills().at(index).contextSettings.opacity);
+    return static_cast<double>(accessor->getFills().at(index).contextSettings.opacity);
   }
   catch (...)
   {
@@ -73,68 +77,37 @@ std::optional<double> AttrBridge::getFillOpacity(layer::PaintNode* node, size_t 
 
 std::optional<size_t> AttrBridge::getFillSize(layer::PaintNode* node)
 {
-  if (!node)
-  {
-    return {};
-  }
-
-  try
-  {
-    return node->attributeAccessor()->getFills().size();
-  }
-  catch (...)
-  {
-  }
-
-  return {};
+  GET_PAINTNODE_ACCESSOR(node, accessor, {});
+  return accessor->getFills().size();
 }
 
 std::optional<double> AttrBridge::getOpacity(layer::PaintNode* node)
 {
-  if (!node)
-  {
-    return {};
-  }
-
+  CHECK_EXPR(node, {});
   return node->contextSetting().opacity;
 }
 
 std::optional<bool> AttrBridge::getVisible(layer::PaintNode* node)
 {
-  if (!node)
-  {
-    return {};
-  }
-
+  CHECK_EXPR(node, {});
   return node->isVisible();
 }
 
 std::optional<std::array<double, 6>> AttrBridge::getMatrix(layer::PaintNode* node)
 {
-  if (!node)
-  {
-    return {};
-  }
-
-  auto transform = node->attributeAccessor()->getTransform();
-  return TransformHelper::toDesignMatrix(transform.matrix());
+  GET_PAINTNODE_ACCESSOR(node, accessor, {});
+  return TransformHelper::toDesignMatrix(accessor->getTransform().matrix());
 }
 
 std::optional<double> AttrBridge::getWidth(layer::PaintNode* node)
 {
-  if (!node)
-  {
-    return {};
-  }
+  CHECK_EXPR(node, {});
   return node->frameBounds().width();
 }
 
 std::optional<double> AttrBridge::getHeight(layer::PaintNode* node)
 {
-  if (!node)
-  {
-    return {};
-  }
+  CHECK_EXPR(node, {});
   return node->frameBounds().height();
 }
 
@@ -158,8 +131,9 @@ void AttrBridge::setFillColor(
 
 void AttrBridge::setFillColor(layer::PaintNode* node, size_t index, const std::vector<double>& argb)
 {
-  auto fills = node->attributeAccessor()->getFills();
+  GET_PAINTNODE_ACCESSOR(node, accessor, void());
 
+  auto fills = accessor->getFills();
   if (index >= fills.size())
   {
     return;
@@ -172,7 +146,7 @@ void AttrBridge::setFillColor(layer::PaintNode* node, size_t index, const std::v
   color.b = static_cast<float>(argb.at(3));
 
   fills.at(index).type = color;
-  node->attributeAccessor()->setFills(fills);
+  accessor->setFills(fills);
 }
 
 void AttrBridge::setFillOpacity(std::shared_ptr<LayoutNode> node, size_t index, double value)
@@ -189,18 +163,16 @@ void AttrBridge::setFillOpacity(std::shared_ptr<LayoutNode> node, size_t index, 
 
 void AttrBridge::setFillOpacity(layer::PaintNode* node, size_t index, double value)
 {
-  if (node)
+  GET_PAINTNODE_ACCESSOR(node, accessor, void());
+
+  auto fills = accessor->getFills();
+  if (index >= fills.size())
   {
-    auto fills = node->attributeAccessor()->getFills();
-
-    if (index >= fills.size())
-    {
-      return;
-    }
-
-    fills.at(index).contextSettings.opacity = value;
-    node->attributeAccessor()->setFills(fills);
+    return;
   }
+
+  fills.at(index).contextSettings.opacity = value;
+  accessor->setFills(fills);
 }
 
 void AttrBridge::setOpacity(std::shared_ptr<LayoutNode> node, double value)
@@ -258,11 +230,8 @@ void AttrBridge::setMatrix(
 
 void AttrBridge::setMatrix(layer::PaintNode* node, const std::array<double, 6>& designMatrix)
 {
-  if (node)
-  {
-    node->attributeAccessor()->setTransform(
-      VGG::layer::Transform(TransformHelper::fromDesignMatrix(designMatrix)));
-  }
+  GET_PAINTNODE_ACCESSOR(node, accessor, void());
+  accessor->setTransform(VGG::layer::Transform(TransformHelper::fromDesignMatrix(designMatrix)));
 }
 
 void AttrBridge::updateSimpleAttr(
@@ -345,10 +314,7 @@ bool AttrBridge::updateColor(
   bool                           isOnlyUpdatePaint,
   std::shared_ptr<NumberAnimate> animate)
 {
-  if (!paintNode)
-  {
-    return false;
-  }
+  GET_PAINTNODE_ACCESSOR(paintNode, accessor, false);
 
   auto update = [node, paintNode, index, isOnlyUpdatePaint](const std::vector<double>& value)
   {
@@ -363,7 +329,7 @@ bool AttrBridge::updateColor(
   VGG::Color color;
   try
   {
-    color = std::get<VGG::Color>(paintNode->attributeAccessor()->getFills().at(index).type);
+    color = std::get<VGG::Color>(accessor->getFills().at(index).type);
   }
   catch (...)
   {

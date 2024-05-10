@@ -157,6 +157,9 @@ private:
   bool isFlexContainer();
   bool isGridContainer();
 
+  bool shouldChangeContainerHugWidth();
+  bool shouldChangeContainerHugHeight();
+
   Rule::GridLayout* gridLayout();
 
   void configureGridContainer();

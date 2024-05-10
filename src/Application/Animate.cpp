@@ -378,30 +378,91 @@ void SmartAnimate::start()
 {
   auto from = getFrom();
   auto to = getTo();
-  assert(from && to);
-
   auto attrBridge = getAttrBridge();
-  auto animate =
-    std::make_shared<DissolveAnimate>(getDuration(), getInterval(), getInterpolator(), attrBridge);
+  auto isOnlyUpdatePaint = getIsOnlyUpdatePaint();
 
-  attrBridge->replaceNode(
-    from,
-    to,
-    attrBridge->getPaintNode(from),
-    attrBridge->getPaintNode(to),
-    getIsOnlyUpdatePaint(),
-    animate);
+  if (!from || !to || !attrBridge)
+  {
+    assert(false);
+    return;
+  }
 
-  addChildAnimate(animate);
-  addAnimate(from, to);
+  addCallBackWhenStop(
+    [attrBridge, from, isOnlyUpdatePaint]()
+    { attrBridge->updateVisible(from, attrBridge->getPaintNode(from), false, isOnlyUpdatePaint); });
+
+  addTwinAnimate(from, to);
+  addOpacityAnimate(from, false);
+  addOpacityAnimate(to, true);
+  attrBridge->updateVisible(to, attrBridge->getPaintNode(to), true, isOnlyUpdatePaint);
 }
 
-void SmartAnimate::addAnimate(
+void SmartAnimate::addOpacityAnimate(std::shared_ptr<LayoutNode> node, bool toVisible)
+{
+  if (!node || !node->elementNode())
+  {
+    return;
+  }
+
+  auto attrBridge = getAttrBridge();
+  auto isOnlyUpdatePaint = getIsOnlyUpdatePaint();
+  auto paintNode = attrBridge->getPaintNode(node);
+
+  // for fill
+  do
+  {
+    auto size = attrBridge->getFillSize(paintNode);
+
+    if (!size)
+    {
+      assert(false);
+      break;
+    }
+
+    for (size_t i = 0; i < *size; ++i)
+    {
+      auto opacity = AttrBridge::getFillOpacity(paintNode, i);
+      if (!opacity)
+      {
+        assert(false);
+        continue;
+      }
+
+      auto animate =
+        std::make_shared<NumberAnimate>(getDuration(), getInterval(), getInterpolator());
+      addChildAnimate(animate);
+
+      if (toVisible)
+      {
+        attrBridge->updateFillOpacity(node, paintNode, i, 0, isOnlyUpdatePaint);
+        attrBridge->updateFillOpacity(node, paintNode, i, *opacity, isOnlyUpdatePaint, animate);
+      }
+      else
+      {
+        attrBridge->updateFillOpacity(node, paintNode, i, 0, isOnlyUpdatePaint, animate);
+        addCallBackWhenStop(
+          [attrBridge, node, isOnlyUpdatePaint, paintNode, opacity, i]()
+          { attrBridge->updateFillOpacity(node, paintNode, i, *opacity, isOnlyUpdatePaint); });
+      }
+    }
+  } while (false);
+
+  // TODO other attr in style
+
+  if (ReplaceNodeAnimate::isContainerType(node->elementNode()))
+  {
+    auto& children = node->children();
+    for (auto child : children)
+    {
+      addOpacityAnimate(child->shared_from_this(), toVisible);
+    }
+  }
+}
+
+void SmartAnimate::addTwinAnimate(
   std::shared_ptr<LayoutNode> nodeFrom,
   std::shared_ptr<LayoutNode> nodeTo)
 {
-  // TODO Currently, the issue of opacity during smart animate is not being considered.
-
   typedef std::shared_ptr<Domain::Element> TElement;
 
   auto attrBridge = getAttrBridge();
@@ -504,6 +565,8 @@ void SmartAnimate::addAnimate(
       *AttrBridge::getMatrix(paintNodeTo));
 
     auto animate = std::make_shared<NumberAnimate>(getDuration(), getInterval(), getInterpolator());
+    addChildAnimate(animate);
+
     animate->addTriggeredCallback(std::bind(
       AttrBridge::setTwinMatrix,
       itemFrom,
@@ -543,15 +606,13 @@ void SmartAnimate::addAnimate(
       isOnlyUpdatePaint,
       animate,
       itemFromIsContainer);
-
-    addChildAnimate(animate);
   }
 
   for (auto item : twins)
   {
     if (ReplaceNodeAnimate::isContainerType(item.first->elementNode()))
     {
-      addAnimate(item.first, item.second);
+      addTwinAnimate(item.first, item.second);
     }
   }
 }

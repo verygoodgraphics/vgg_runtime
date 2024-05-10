@@ -61,6 +61,14 @@ public:
     bool                           isOnlyUpdatePaint,
     std::shared_ptr<NumberAnimate> animate = {});
 
+  bool updateFillOpacity(
+    std::shared_ptr<LayoutNode>    node,
+    layer::PaintNode*              paintNode,
+    size_t                         index,
+    double                         newOpacity,
+    bool                           isOnlyUpdatePaint,
+    std::shared_ptr<NumberAnimate> animate = {});
+
   bool updateOpacity(
     std::shared_ptr<LayoutNode>    node,
     layer::PaintNode*              paintNode,
@@ -82,22 +90,27 @@ public:
     std::shared_ptr<NumberAnimate> animate = {},
     bool                           isNotScaleButChangeSize = false);
 
-  // The newPaintNode can be nullptr, in which case:
-  //    1.the newNode must be a frame or a symbol instance.
-  //    2.oldNode already removed and newNode already added.
+  // Note: if createNewPaintNode is true
+  //  1. oldNode already removed and newNode already added.
+  //  2. newPaintNode must be nullptr.
+  //  3. the type of newNode is frame or symbol-instance.
   bool replaceNode(
     const std::shared_ptr<LayoutNode>   oldNode,
     const std::shared_ptr<LayoutNode>   newNode,
     layer::PaintNode*                   oldPaintNode,
     layer::PaintNode*                   newPaintNode,
     bool                                isOnlyUpdatePaint,
-    std::shared_ptr<ReplaceNodeAnimate> animate = {});
+    std::shared_ptr<ReplaceNodeAnimate> animate = {},
+    bool                                createNewPaintNode = false);
 
 public:
   layer::PaintNode* getPaintNode(std::shared_ptr<LayoutNode> node);
 
 public:
+  // TODO can be better for those funs?
   static std::optional<VGG::Color>            getFillColor(layer::PaintNode* node, size_t index);
+  static std::optional<double>                getFillOpacity(layer::PaintNode* node, size_t index);
+  static std::optional<size_t>                getFillSize(layer::PaintNode* node);
   static std::optional<double>                getOpacity(layer::PaintNode* node);
   static std::optional<bool>                  getVisible(layer::PaintNode* node);
   static std::optional<std::array<double, 6>> getMatrix(layer::PaintNode* node);
@@ -105,11 +118,15 @@ public:
   static std::optional<double>                getHeight(layer::PaintNode* node);
 
 private:
+  // TODO can be better for those funs?
   static void setFillColor(
     std::shared_ptr<LayoutNode> node,
     size_t                      index,
     const std::vector<double>&  argb);
   static void setFillColor(layer::PaintNode* node, size_t index, const std::vector<double>& argb);
+
+  static void setFillOpacity(std::shared_ptr<LayoutNode> node, size_t index, double value);
+  static void setFillOpacity(layer::PaintNode* node, size_t index, double value);
 
   static void setOpacity(std::shared_ptr<LayoutNode> node, double value);
   static void setOpacity(layer::PaintNode* node, double value);

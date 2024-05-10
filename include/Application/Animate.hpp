@@ -201,7 +201,9 @@ public:
 
 private:
   virtual void start() override;
-  void         addAnimate(std::shared_ptr<LayoutNode> nodeFrom, std::shared_ptr<LayoutNode> nodeTo);
+
+  void addTwinAnimate(std::shared_ptr<LayoutNode> nodeFrom, std::shared_ptr<LayoutNode> nodeTo);
+  void addOpacityAnimate(std::shared_ptr<LayoutNode> node, bool toVisible);
 };
 
 } // namespace VGG

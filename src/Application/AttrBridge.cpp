@@ -52,6 +52,43 @@ std::optional<VGG::Color> AttrBridge::getFillColor(layer::PaintNode* node, size_
   return {};
 }
 
+std::optional<double> AttrBridge::getFillOpacity(layer::PaintNode* node, size_t index)
+{
+  if (!node)
+  {
+    return {};
+  }
+
+  try
+  {
+    return static_cast<double>(
+      node->attributeAccessor()->getFills().at(index).contextSettings.opacity);
+  }
+  catch (...)
+  {
+  }
+
+  return {};
+}
+
+std::optional<size_t> AttrBridge::getFillSize(layer::PaintNode* node)
+{
+  if (!node)
+  {
+    return {};
+  }
+
+  try
+  {
+    return node->attributeAccessor()->getFills().size();
+  }
+  catch (...)
+  {
+  }
+
+  return {};
+}
+
 std::optional<double> AttrBridge::getOpacity(layer::PaintNode* node)
 {
   if (!node)
@@ -136,6 +173,34 @@ void AttrBridge::setFillColor(layer::PaintNode* node, size_t index, const std::v
 
   fills.at(index).type = color;
   node->attributeAccessor()->setFills(fills);
+}
+
+void AttrBridge::setFillOpacity(std::shared_ptr<LayoutNode> node, size_t index, double value)
+{
+  if (auto object = AttrBridge::getlayoutNodeObject(node))
+  {
+    if (index >= object->style.fills.size())
+    {
+      return;
+    }
+    object->style.fills.at(index).contextSettings.opacity = value;
+  }
+}
+
+void AttrBridge::setFillOpacity(layer::PaintNode* node, size_t index, double value)
+{
+  if (node)
+  {
+    auto fills = node->attributeAccessor()->getFills();
+
+    if (index >= fills.size())
+    {
+      return;
+    }
+
+    fills.at(index).contextSettings.opacity = value;
+    node->attributeAccessor()->setFills(fills);
+  }
 }
 
 void AttrBridge::setOpacity(std::shared_ptr<LayoutNode> node, double value)
@@ -280,12 +345,6 @@ bool AttrBridge::updateColor(
   bool                           isOnlyUpdatePaint,
   std::shared_ptr<NumberAnimate> animate)
 {
-  auto object = getlayoutNodeObject(node);
-  if (!object)
-  {
-    return false;
-  }
-
   if (!paintNode)
   {
     return false;
@@ -321,6 +380,41 @@ bool AttrBridge::updateColor(
   return true;
 }
 
+bool AttrBridge::updateFillOpacity(
+  std::shared_ptr<LayoutNode>    node,
+  layer::PaintNode*              paintNode,
+  size_t                         index,
+  double                         newOpacity,
+  bool                           isOnlyUpdatePaint,
+  std::shared_ptr<NumberAnimate> animate)
+{
+  if (!paintNode)
+  {
+    return false;
+  }
+
+  auto update = [node, paintNode, index, isOnlyUpdatePaint](const std::vector<double>& value)
+  {
+    assert(value.size() == 1);
+
+    if (!isOnlyUpdatePaint)
+    {
+      AttrBridge::setFillOpacity(node, index, value.at(0));
+    }
+
+    AttrBridge::setFillOpacity(paintNode, index, value.at(0));
+  };
+
+  auto nowValue = AttrBridge::getFillOpacity(paintNode, index);
+  if (!nowValue)
+  {
+    return false;
+  }
+
+  updateSimpleAttr(node, { *nowValue }, { newOpacity }, update, animate);
+  return true;
+}
+
 bool AttrBridge::updateOpacity(
   std::shared_ptr<LayoutNode>    node,
   layer::PaintNode*              paintNode,
@@ -331,12 +425,6 @@ bool AttrBridge::updateOpacity(
   assert(newOpacity >= 0 && newOpacity <= 1);
 
   if (!paintNode)
-  {
-    return false;
-  }
-
-  auto object = getlayoutNodeObject(node);
-  if (!object)
   {
     return false;
   }
@@ -508,11 +596,29 @@ bool AttrBridge::replaceNode(
   layer::PaintNode*                   oldPaintNode,
   layer::PaintNode*                   newPaintNode,
   bool                                isOnlyUpdatePaint,
-  std::shared_ptr<ReplaceNodeAnimate> animate)
+  std::shared_ptr<ReplaceNodeAnimate> animate,
+  bool                                createNewPaintNode)
 {
-  auto removeOldPaintNodeIfNeed = [oldPaintNode, newPaintNode]()
+#ifdef DEBUG
+  if (createNewPaintNode)
   {
-    if (!newPaintNode)
+    assert(!newPaintNode);
+
+    if (oldNode)
+    {
+      assert(!oldNode->parent());
+    }
+
+    if (newNode)
+    {
+      assert(newNode->parent());
+    }
+  }
+#endif
+
+  auto removeOldPaintNodeIfNeed = [oldPaintNode, createNewPaintNode]()
+  {
+    if (createNewPaintNode)
     {
       auto parent = oldPaintNode->parent();
       if (parent)
@@ -522,14 +628,13 @@ bool AttrBridge::replaceNode(
     }
   };
 
-  if (!newPaintNode)
+  if (createNewPaintNode && !newPaintNode)
   {
     if (!newNode || !oldPaintNode)
     {
+      assert(false);
       return false;
     }
-
-    assert((!oldNode || !oldNode->parent()) && newNode->parent());
 
     auto element = newNode->elementNode();
     if (!element)
@@ -552,6 +657,7 @@ bool AttrBridge::replaceNode(
     }
     else
     {
+      assert(false);
       return false;
     }
 

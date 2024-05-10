@@ -16,7 +16,6 @@
 
 #include "Layer/Core/TransformNode.hpp"
 #include "Layer/VSkia.hpp"
-#include "Settings.hpp"
 #include "Layer/Core/FrameNode.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/Transform.hpp"
@@ -83,14 +82,6 @@ public:
     auto              rt = SkRTreeFactory();
     auto              pictureCanvas = rec.beginRecording(bounds, &rt);
     r.draw(pictureCanvas, q_ptr->node());
-    if (getDebugBoundsEnable())
-    {
-      SkPaint paint;
-      paint.setColor(SK_ColorBLUE);
-      paint.setStyle(SkPaint::kStroke_Style);
-      paint.setStrokeWidth(1);
-      pictureCanvas->drawRect(bounds, paint);
-    }
     return rec.finishRecordingAsPicture();
   }
 };
@@ -138,6 +129,20 @@ void FrameNode::render(Renderer* renderer)
     DEBUG("Frame::render: no picture to render");
   }
 }
+
+#ifdef VGG_LAYER_DEBUG
+void FrameNode::debug(Renderer* render)
+{
+  auto canvas = render->canvas();
+  ASSERT(canvas);
+  if (d_ptr->node)
+  {
+    SkAutoCanvasRestore acr(canvas, true);
+    canvas->concat(toSkMatrix(transform().matrix()));
+    d_ptr->node->debug(render);
+  }
+}
+#endif
 
 Bounds FrameNode::effectBounds() const
 {

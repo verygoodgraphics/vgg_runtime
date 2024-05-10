@@ -29,21 +29,32 @@ public:
   SceneNode(VRefCnt* cnt, std::vector<FramePtr> frames);
 
   const std::vector<FramePtr>& getFrames() const;
-  void                         setFrames(const std::vector<FramePtr>& frames);
+
+  void setFrames(const std::vector<FramePtr>& frames);
 
   void addFrame(FramePtr frame);
+
   void insertFrame(int index, FramePtr frame);
+
   void eraseFrame(int index);
+
   void render(Renderer* canvas) override;
 
   void nodeAt(int x, int y, NodeVisitor vistor, void* userData) override;
 
   PaintNode* nodeByID(const std::string& id);
 
-  Bounds     effectBounds() const override;
-  Bounds     onRevalidate() override;
-  glm::mat3  getMatrix() const;
+  Bounds effectBounds() const override;
+
+  Bounds onRevalidate() override;
+
+  glm::mat3 getMatrix() const;
+
   SkPicture* picture() const override;
+
+#ifdef VGG_LAYER_DEBUG
+  void debug(Renderer* render) override;
+#endif
 
   VGG_CLASS_MAKE(SceneNode);
   virtual ~SceneNode();

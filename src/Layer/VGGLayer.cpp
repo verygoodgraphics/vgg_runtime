@@ -176,17 +176,33 @@ public:
   bool            invalid{ true };
 
   std::unique_ptr<SkPictureRecorder> rec;
-  sk_sp<SkPicture>                   layerPicture;
-  SkColor                            backgroundColor{ SK_ColorWHITE };
+
+#ifdef VGG_LAYER_DEBUG
+  sk_sp<SkPicture> clickLayer;
+#endif
+
+  SkColor backgroundColor{ SK_ColorWHITE };
+
   struct DebugConfig
   {
     bool enableDrawClickBounds{ false };
+    bool debugMode{ false };
     bool drawPosInfo{ false };
   } debugConfig;
 
   VLayer__pImpl(VLayer* api)
     : q_ptr(api)
   {
+  }
+
+  SkCanvas* layerCanvas()
+  {
+    auto w = skiaContext->surface()->width();
+    auto h = skiaContext->surface()->height();
+    if (w == 0 || h == 0)
+      return nullptr;
+    rec = std::make_unique<SkPictureRecorder>();
+    return rec->beginRecording(SkRect::MakeWH(w, h));
   }
 
   void cleanup()
@@ -212,10 +228,6 @@ public:
     canvas->save();
     canvas->clear(backgroundColor);
     canvas->concat(toSkMatrix(matrix()));
-    for (auto& item : items)
-    {
-      item->render(canvas);
-    }
     if (node)
     {
       Renderer r;
@@ -227,23 +239,32 @@ public:
       std::vector<std::string> info;
       drawTextAt(canvas, info, q_ptr->m_position[0], q_ptr->m_position[1]);
     }
-    if (rec)
-    {
-      layerPicture = rec->finishRecordingAsPicture();
-      rec = nullptr;
-    }
-    if (layerPicture)
-    {
-      static size_t s_delay = 0;
-      canvas->drawPicture(layerPicture);
-      s_delay++;
-      if (s_delay % 4 == 0)
-        layerPicture = nullptr;
-    }
     for (auto& item : items)
     {
       item->render(canvas);
     }
+
+#ifdef VGG_LAYER_DEBUG
+    if (rec)
+    {
+      clickLayer = rec->finishRecordingAsPicture();
+      rec = nullptr;
+    }
+    if (clickLayer)
+    {
+      static size_t s_delay = 0;
+      canvas->drawPicture(clickLayer);
+      s_delay++;
+      if (s_delay % 4 == 0)
+        clickLayer = nullptr;
+    }
+    if (q_ptr->debugModeEnabled())
+    {
+      Renderer r;
+      r = r.createNew(canvas);
+      node->debug(&r);
+    }
+#endif
     canvas->restore();
     canvas->flush();
   }
@@ -295,6 +316,16 @@ void VLayer::setDrawPositionEnabled(bool enable)
 bool VLayer::enableDrawPosition() const
 {
   return d_ptr->debugConfig.drawPosInfo;
+}
+
+void VLayer::setDebugModeEnabled(bool enable)
+{
+  d_ptr->debugConfig.debugMode = enable;
+}
+
+bool VLayer::debugModeEnabled()
+{
+  return d_ptr->debugConfig.debugMode;
 }
 
 void VLayer::setScaleFactor(float scale)
@@ -442,7 +473,7 @@ PaintNode* VLayer::nodeAt(int x, int y)
       },
       &deviceMatrix);
     VGG_LAYER_DEBUG_CODE(if (g_nodeAtResult && d_ptr->debugConfig.enableDrawClickBounds) {
-      drawBounds(g_nodeAtResult, deviceMatrix, layerCanvas());
+      drawBounds(g_nodeAtResult, deviceMatrix, d_ptr->layerCanvas());
     });
     return g_nodeAtResult;
   }
@@ -464,21 +495,6 @@ void VLayer::nodeAt(int x, int y, PaintNode::NodeVisitor visitor)
       },
       (void*)visitor);
   }
-}
-
-SkCanvas* VLayer::layerCanvas()
-{
-  auto w = d_ptr->skiaContext->surface()->width();
-  auto h = d_ptr->skiaContext->surface()->height();
-  if (w == 0 || h == 0)
-    return nullptr;
-  d_ptr->rec = std::make_unique<SkPictureRecorder>();
-  return d_ptr->rec->beginRecording(SkRect::MakeWH(w, h));
-}
-
-void VLayer::clearLayerCanvas()
-{
-  d_ptr->layerPicture = nullptr;
 }
 
 void VLayer::resize(int w, int h)

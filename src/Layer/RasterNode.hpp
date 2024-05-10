@@ -46,6 +46,10 @@ public:
 
   void render(Renderer* renderer) override;
 
+#ifdef VGG_LAYER_DEBUG
+  void debug(Renderer* render) override;
+#endif
+
   void nodeAt(int x, int y, NodeVisitor vistor, void* userData) override;
 
   Bounds effectBounds() const override

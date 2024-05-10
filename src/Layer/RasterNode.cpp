@@ -22,6 +22,7 @@
 #include "Layer/Core/ZoomerNode.hpp"
 #include "Layer/Core/TransformNode.hpp"
 #include "Layer/Core/RasterCacheTile.hpp"
+#include <core/SkCanvas.h>
 
 namespace
 {
@@ -82,6 +83,21 @@ void RasterNode::render(Renderer* renderer)
   }
 }
 
+#ifdef VGG_LAYER_DEBUG
+void RasterNode::debug(Renderer* render)
+{
+  auto c = getChild();
+  ASSERT(c);
+  if (c)
+  {
+    auto                z = getTransform();
+    SkAutoCanvasRestore acr(render->canvas(), true);
+    render->canvas()->concat(toSkMatrix(z->getMatrix()));
+    c->debug(render);
+  }
+}
+#endif
+
 void RasterNode::nodeAt(int x, int y, NodeVisitor vistor, void* userData)
 {
   auto c = getChild();
@@ -99,7 +115,6 @@ void RasterNode::nodeAt(int x, int y, NodeVisitor vistor, void* userData)
 
 Bounds RasterNode::onRevalidate()
 {
-  DEBUG("RasterNode::onRevalidate()");
   auto c = getChild();
   ASSERT(c);
   c->revalidate();
@@ -111,8 +126,8 @@ Bounds RasterNode::onRevalidate()
   // because it could be revaildated by other nodes. unless it is exclusive to this node.
   //
   // TODO:: This object does not have to be ZoomerNode-awared, it can be achieved by carefully
-  // judging from coressponding component of matrix in TransformNode.  In other words, it should be
-  // able to handle any sort of transformation node.
+  // judging from coressponding component of matrix in TransformNode.  In other words, it should
+  // be able to handle any sort of transformation node.
   if (m_raster)
   {
     if (m_cacheUniqueID != c->picture()->uniqueID())
@@ -122,12 +137,6 @@ Bounds RasterNode::onRevalidate()
       m_raster->invalidate(layer::Rasterizer::EReason::CONTENT);
       needRaster = true;
     }
-    // if (c->hasInval())
-    // {
-    //   m_raster->invalidate(layer::Rasterizer::EReason::CONTENT);
-    //   needRaster = true;
-    //   c->revalidate();
-    // }
     if (z)
     {
       if (z->hasInvalScale())

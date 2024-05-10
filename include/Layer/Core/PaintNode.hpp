@@ -26,6 +26,7 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <any>
 
 namespace VGG::layer
 {
@@ -220,6 +221,10 @@ public:
 
   virtual VShape asVisualShape(const Transform* transform);
 
+#ifdef VGG_LAYER_DEBUG
+  void debug(Renderer* render);
+#endif
+
 public:
   void                  setVisible(bool visible);
   bool                  isVisible() const;
@@ -263,6 +268,12 @@ protected:
 private:
   ChildContainer     m_children;
   WeakRef<PaintNode> m_parent;
+
+public:
+#ifdef VGG_LAYER_DEBUG
+  std::string dbgInfo;
+  bool        hoverBounds{ false };
+#endif
 };
 
 class PaintNodeEventDispatcher

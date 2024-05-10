@@ -52,6 +52,10 @@ public:
   }
   void render(Renderer* renderer) override;
 
+#ifdef VGG_LAYER_DEBUG
+  virtual void debug(Renderer* render) override;
+#endif
+
   void renderAsMask(Renderer* render);
 
   ShapeAttribute* shape() const override

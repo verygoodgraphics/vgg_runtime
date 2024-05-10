@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #pragma once
-
+#include "Layer/Config.hpp"
 #include "Layer/Core/VNode.hpp"
 #include <functional>
 class SkPicture;
@@ -36,17 +36,22 @@ public:
     : VNode(cnt, flags)
   {
   }
-  bool hasInval() const
-  {
-    return isInvalid();
-  }
-  virtual void   nodeAt(int x, int y, NodeVisitor vistor, void* userData) = 0;
-  virtual void   render(Renderer* render) = 0;
+
+  virtual void nodeAt(int x, int y, NodeVisitor vistor, void* userData) = 0;
+
+  virtual void render(Renderer* render) = 0;
+
   virtual Bounds effectBounds() const = 0;
 
   virtual SkPicture* picture() const
   {
     return nullptr;
   }
+
+#ifdef VGG_LAYER_DEBUG
+  virtual void debug(Renderer* render)
+  {
+  }
+#endif
 };
 } // namespace VGG::layer

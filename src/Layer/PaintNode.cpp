@@ -16,7 +16,6 @@
 #include "Guard.hpp"
 #include "Layer/Core/VShape.hpp"
 #include "LayerCache.h"
-#include "Settings.hpp"
 #include "SkSL.hpp"
 #include "Effects.hpp"
 #include "VSkia.hpp"
@@ -223,15 +222,6 @@ void PaintNode::render(Renderer* renderer)
     {
       SkAutoCanvasRestore acr(canvas, true);
       canvas->concat(toSkMatrix(transform().matrix()));
-      if (getDebugBoundsEnable())
-      {
-        SkPaint strokePen;
-        strokePen.setStyle(SkPaint::kStroke_Style);
-        SkColor color = nodeType2Color(VGG_PATH);
-        strokePen.setColor(color);
-        strokePen.setStrokeWidth(2);
-        canvas->drawRect(toSkRect(bounds()), strokePen);
-      }
       if (_->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY)
       {
         paintSelf(renderer);
@@ -261,6 +251,29 @@ void PaintNode::onPaint(Renderer* renderer)
 {
   d_ptr->renderNode->render(renderer);
 }
+
+#ifdef VGG_LAYER_DEBUG
+void PaintNode::debug(Renderer* render)
+{
+  if (!isVisible())
+    return;
+  auto canvas = render->canvas();
+  ASSERT(canvas);
+  SkAutoCanvasRestore acr(canvas, true);
+  canvas->concat(toSkMatrix(transform().matrix()));
+  SkPaint strokePen;
+  strokePen.setStyle(SkPaint::kStroke_Style);
+  strokePen.setColor(SK_ColorRED);
+  strokePen.setStrokeWidth(2);
+  canvas->drawRect(toSkRect(bounds()), strokePen);
+  if (hoverBounds && d_ptr->renderNode && d_ptr->renderable)
+    d_ptr->renderNode->debug(render);
+  for (const auto& e : m_children)
+  {
+    e->debug(render);
+  }
+}
+#endif
 
 void PaintNode::nodeAt(int x, int y, NodeVisitor visitor, void* userData)
 {

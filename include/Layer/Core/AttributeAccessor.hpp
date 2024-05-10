@@ -45,6 +45,7 @@ class InnerShadowAttribute;
 class LayerFXAttribute;
 class BackdropFXAttribute;
 class ShapeAttribute;
+class PaintNode;
 
 class ParagraphItem;
 class ImageItem;
@@ -57,6 +58,11 @@ public:
   Accessor(Accessor&&) = default;
   Accessor& operator=(Accessor&&) = delete;
   ~Accessor() = default;
+
+  PaintNode* owner() const
+  {
+    return m_owner;
+  }
 
   ATTR_DECL(Transform, Transform);
   ATTR_DECL(AlphaMask, std::vector<AlphaMask>);
@@ -81,6 +87,7 @@ public:
 protected:
   friend class StyleItem;
 
+  PaintNode* const            m_owner{ nullptr };
   TransformAttribute* const   m_transformAttr;
   AlphaMaskAttribute* const   m_alphaMaskAttr;
   ShapeMaskAttribute* const   m_shapeMaskAttr;
@@ -91,6 +98,7 @@ protected:
   BackdropFXAttribute* const  m_backgroundBlurAttr;
 
   Accessor(
+    PaintNode*            owner,
     TransformAttribute*   transformAttr,
     AlphaMaskAttribute*   alphaMaskAttr,
     ShapeMaskAttribute*   shapemaskAttr,
@@ -99,7 +107,8 @@ protected:
     ObjectAttribute*      objectAttr,
     LayerFXAttribute*     layerPostProcessAttr,
     BackdropFXAttribute*  backgroundBlurAttr)
-    : m_transformAttr(transformAttr)
+    : m_owner(owner)
+    , m_transformAttr(transformAttr)
     , m_alphaMaskAttr(alphaMaskAttr)
     , m_shapeMaskAttr(shapemaskAttr)
     , m_dropShadowAttr(dropShadowAttr)
@@ -121,6 +130,7 @@ public:
   }
 
   ShapeItemAttibuteAccessor(
+    PaintNode*            owner,
     ShapeAttribute*       shapeAttr,
     TransformAttribute*   transformAttr,
     AlphaMaskAttribute*   alphaMaskAttr,
@@ -131,6 +141,7 @@ public:
     LayerFXAttribute*     layerPostProcessAttr,
     BackdropFXAttribute*  backgroundBlurAttr)
     : Accessor(
+        owner,
         transformAttr,
         alphaMaskAttr,
         shapemaskAttr,
@@ -160,6 +171,7 @@ public:
   {
   }
   ParagraphItemAttributeAccessor(
+    PaintNode*            owner,
     ParagraphItem*        paragraphObjectAttr,
     TransformAttribute*   transformAttr,
     AlphaMaskAttribute*   alphaMaskAttr,
@@ -170,6 +182,7 @@ public:
     LayerFXAttribute*     layerPostProcessAttr,
     BackdropFXAttribute*  backgroundBlurAttr)
     : Accessor(
+        owner,
         transformAttr,
         alphaMaskAttr,
         shapemaskAttr,

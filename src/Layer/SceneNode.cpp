@@ -19,6 +19,7 @@
 #include "Renderer.hpp"
 #include "Utility/Log.hpp"
 
+#include <core/SkColor.h>
 #include <core/SkPictureRecorder.h>
 
 namespace VGG::layer
@@ -138,6 +139,23 @@ void SceneNode::render(Renderer* renderer)
     canvas->drawPicture(d_ptr->picture.get());
   }
 }
+
+#ifdef VGG_LAYER_DEBUG
+void SceneNode::debug(Renderer* render)
+{
+  auto canvas = render->canvas();
+  ASSERT(canvas);
+  SkPaint strokePen;
+  strokePen.setStyle(SkPaint::kStroke_Style);
+  strokePen.setColor(SK_ColorYELLOW);
+  strokePen.setStrokeWidth(2);
+  canvas->drawRect(toSkRect(bounds()), strokePen);
+  for (auto& frame : d_ptr->frames)
+  {
+    frame->debug(render);
+  }
+}
+#endif
 
 void SceneNode::nodeAt(int x, int y, NodeVisitor visitor, void* userData)
 {

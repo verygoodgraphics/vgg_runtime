@@ -80,27 +80,31 @@ public:
   virtual void render() override;
   virtual void endFrame() override;
   virtual void shutdown() override;
+  void         resize(int w, int h) override;
 
-  void resize(int w, int h) override;
   DEPRECATED("use setRenderNode") void addRenderItem(std::shared_ptr<Renderable> item);
 
-  void       setBackgroundColor(uint32_t color);
-  void       setScaleFactor(float scale);
-  float      scaleFactor() const;
+  void setBackgroundColor(uint32_t color);
+
+  void setScaleFactor(float scale);
+
+  float scaleFactor() const;
+
   PaintNode* nodeAt(int x, int y);
-  void       nodeAt(int x, int y, PaintNode::NodeVisitor visitor);
+
+  void nodeAt(int x, int y, PaintNode::NodeVisitor visitor);
 
   void setRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node);
-
   void setRenderNode(Ref<RenderNode> node); // This is recommanded
-
-  SkCanvas* layerCanvas();
-  void      clearLayerCanvas();
-
+                                            //
   void setDrawClickBounds(bool enable);
   bool enableDrawClickBounds() const;
+
   void setDrawPositionEnabled(bool enable);
   bool enableDrawPosition() const;
+
+  void setDebugModeEnabled(bool enable);
+  bool debugModeEnabled();
 
   void drawPosition(int x, int y)
   {

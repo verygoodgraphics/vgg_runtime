@@ -6,6 +6,8 @@
 
 #include "domain/model/daruma_helper.hpp"
 
+#include "test_config.hpp"
+
 #include <gtest/gtest.h>
 
 using namespace VGG;

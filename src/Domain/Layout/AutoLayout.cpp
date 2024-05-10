@@ -886,9 +886,7 @@ void AutoLayout::configureFlexNodeSize(flexbox_node* node, bool forContainer)
 
   if (forContainer && isFlexContainer())
   {
-    bool changeContainerHugWidth = m_hasUnkownWidthDescendant;
-    changeContainerHugWidth |= isEmptyContainer();
-    if (width.types == Length::ETypes::FIT_CONTENT && changeContainerHugWidth)
+    if ((width.types == Length::ETypes::FIT_CONTENT) && shouldChangeContainerHugWidth())
     {
       width.types = Length::ETypes::PX;
       width.value = swapWidthAndHeight ? modelSize.height : modelSize.width;
@@ -898,9 +896,7 @@ void AutoLayout::configureFlexNodeSize(flexbox_node* node, bool forContainer)
         size.width);
     }
 
-    bool changeContainerHugHeight = m_hasUnknownHeightDesendant;
-    changeContainerHugHeight |= isEmptyContainer();
-    if (height.types == Length::ETypes::FIT_CONTENT && changeContainerHugHeight)
+    if ((height.types == Length::ETypes::FIT_CONTENT) && shouldChangeContainerHugHeight())
     {
       height.types = Length::ETypes::PX;
       height.value = swapWidthAndHeight ? modelSize.width : modelSize.height;
@@ -1064,7 +1060,6 @@ bool AutoLayout::isEmptyContainer()
   }
 
   auto node = getFlexContainer();
-  ASSERT(node);
   if (!node)
   {
     return false;
@@ -1520,20 +1515,25 @@ void AutoLayout::isAsFixedSize(bool& inOutWidth, bool& inOutHeight)
 
   if (!inOutWidth)
   {
-    bool changeContainerHugWidth = m_hasUnkownWidthDescendant;
-    changeContainerHugWidth |= isEmptyContainer();
     const auto& width = sharedRule->width.value;
-    inOutWidth = (width.types == Length::ETypes::FIT_CONTENT && changeContainerHugWidth);
+    inOutWidth = (width.types == Length::ETypes::FIT_CONTENT) && shouldChangeContainerHugWidth();
   }
 
   if (!inOutHeight)
   {
-    bool changeContainerHugHeight = m_hasUnknownHeightDesendant;
-    changeContainerHugHeight |= isEmptyContainer();
-
     const auto& height = sharedRule->height.value;
-    inOutHeight = (height.types == Length::ETypes::FIT_CONTENT && changeContainerHugHeight);
+    inOutHeight = (height.types == Length::ETypes::FIT_CONTENT) && shouldChangeContainerHugHeight();
   }
+}
+
+bool AutoLayout::shouldChangeContainerHugWidth()
+{
+  return (m_hasUnkownWidthDescendant && isHorizontalDirection()) || isEmptyContainer();
+}
+
+bool AutoLayout::shouldChangeContainerHugHeight()
+{
+  return (m_hasUnknownHeightDesendant && isVerticalDirection()) || isEmptyContainer();
 }
 
 } // namespace Internal

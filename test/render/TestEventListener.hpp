@@ -9,7 +9,6 @@
 #include "Layer/Model/JSONModel.hpp"
 #include "Layer/Model/StructModel.hpp"
 #include "Layer/Memory/Ref.hpp"
-#include "Layer/Settings.hpp"
 #include "loader.hpp"
 
 #include "Layer/SceneBuilder.hpp"
@@ -28,6 +27,7 @@
 #include "Layer/VGGLayer.hpp"
 #include "Layer/Exporter/SVGExporter.hpp"
 #include "Layer/Exporter/PDFExporter.hpp"
+#include "Layer/Config.hpp"
 
 #include <exception>
 #include <fstream>
@@ -40,6 +40,22 @@ namespace fs = std::filesystem;
 using namespace VGG::app;
 
 class SkCanvas;
+
+struct KeyboardState
+{
+public:
+};
+
+struct MouseState
+{
+};
+
+class Action
+{
+public:
+  virtual void match(const KeyboardState& state) = 0;
+  virtual void operator()(void* userData) = 0;
+};
 
 class Pager
 {
@@ -288,16 +304,43 @@ public:
         return true;
       }
     }
-    if (evt.type == VGG_MOUSEBUTTONDOWN)
+
+    static bool s_enableHover = false;
+    if (evt.type == VGG_MOUSEMOTION)
     {
-      if (m_layer)
+#ifdef VGG_LAYER_DEBUG
+      if (m_layer && s_enableHover)
       {
+        static VGG::layer::PaintNode* s_currentHover = nullptr;
         if (auto p = m_layer->nodeAt(evt.motion.windowX, evt.motion.windowY); p)
         {
-          INFO("Click on %s", p->name().c_str());
+          // enter
+          if (p != s_currentHover)
+          {
+            INFO("Hovering enter in %s", p->name().c_str());
+            if (s_currentHover)
+            {
+              s_currentHover->hoverBounds = false;
+            }
+            p->hoverBounds = true;
+            s_currentHover = p;
+          }
+        }
+        else
+        {
+          // exit
+          if (s_currentHover)
+          {
+            INFO("Hovering exit %s", s_currentHover->name().c_str());
+            s_currentHover->hoverBounds = false;
+            s_currentHover = nullptr;
+          }
         }
       }
+#endif
     }
+
+    // keyboard event
     if (evt.type != VGG_KEYDOWN)
     {
       return false;
@@ -423,24 +466,17 @@ public:
       return true;
     }
 
-    if (key == VGGK_7)
+    if (key == VGGK_h)
     {
-      INFO("Toggle click bound");
-      m_layer->setDrawClickBounds(!m_layer->enableDrawClickBounds());
+      INFO("Toggle hover bound");
+      s_enableHover = !s_enableHover;
       return true;
     }
 
     if (key == VGGK_b)
     {
-      INFO("Toggle object bounding box");
-      // m_layer->enableDrawDebugBounds(!m_layer->isEnableDrawDebugBounds());
-      return true;
-    }
-
-    if (key == VGGK_1)
-    {
-      INFO("Toggle cursor position");
-      // m_layer->setDrawPositionEnabled(!m_layer->enableDrawPosition());
+      INFO("Toggle debug mode");
+      m_layer->setDebugModeEnabled(!m_layer->debugModeEnabled());
       return true;
     }
 

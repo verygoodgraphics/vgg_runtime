@@ -68,6 +68,10 @@ public:
 
   void render(Renderer* renderer) override;
 
+#ifdef VGG_LAYER_DEBUG
+  void debug(Renderer* render) override;
+#endif
+
   SkPicture* picture() const override;
 
   ~FrameNode();

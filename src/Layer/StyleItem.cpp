@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include "Settings.hpp"
 #include "StyleItem.hpp"
 #include "VSkia.hpp"
 #include "Renderer.hpp"
@@ -31,26 +30,29 @@ void StyleItem::render(Renderer* renderer)
 {
   auto canvas = renderer->canvas();
   canvas->drawPicture(m_picture);
-
-  if (getDebugBoundsEnable())
-  {
-    SkRect layerBounds = toSkRect(m_alphaMaskAttr->bounds());
-    SkRect effectBounds = toSkRect(m_objectAttr->effectBounds());
-
-    SkPaint p;
-    p.setStroke(true);
-    p.setColor(SK_ColorGREEN);
-    p.setStrokeWidth(2);
-    renderer->canvas()->drawRect(layerBounds, p);
-
-    p.setColor(SK_ColorBLUE);
-    const SkScalar intervals[2] = { 10, 20 };
-    p.setPathEffect(SkDashPathEffect::Make(intervals, 2, 0));
-    p.setStrokeWidth(2);
-    renderer->canvas()->drawRect(effectBounds, p);
-  }
   // recorder(renderer);
 }
+
+#ifdef VGG_LAYER_DEBUG
+void StyleItem::debug(Renderer* render)
+{
+  auto   canvas = render->canvas();
+  SkRect layerBounds = toSkRect(m_alphaMaskAttr->bounds());
+  SkRect effectBounds = toSkRect(m_objectAttr->effectBounds());
+
+  SkPaint p;
+  p.setStroke(true);
+  p.setColor(SK_ColorGREEN);
+  p.setStrokeWidth(2);
+  canvas->drawRect(layerBounds, p);
+
+  p.setColor(SK_ColorBLUE);
+  const SkScalar intervals[2] = { 10, 20 };
+  p.setPathEffect(SkDashPathEffect::Make(intervals, 2, 0));
+  p.setStrokeWidth(2);
+  canvas->drawRect(effectBounds, p);
+}
+#endif
 
 SkRect StyleItem::recorder(Renderer* renderer)
 {
@@ -180,6 +182,7 @@ std::pair<Ref<StyleItem>, std::unique_ptr<Accessor>> StyleItem::MakeRenderNode( 
     shapeMask,
     shape);
   auto aa = std::unique_ptr<Accessor>(new Accessor(
+    node,
     transform,
     alphaMaskAttribute,
     shapeMask,

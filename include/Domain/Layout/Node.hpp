@@ -290,6 +290,8 @@ private:
     const Layout::Size&  oldContainerSize,
     Layout::Rect         oldFrame,
     const Layout::Point* parentOrigin);
+
+  void layoutIfNeeded(bool& hasUnkownWidthDescendant, bool& hasUnknownHeightDesendant);
 };
 
 class StateTree : public LayoutNode

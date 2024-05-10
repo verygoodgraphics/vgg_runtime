@@ -884,9 +884,11 @@ void AutoLayout::configureFlexNodeSize(flexbox_node* node, bool forContainer)
     }
   }
 
-  if (forContainer && isFlexContainer() && isEmptyContainer())
+  if (forContainer && isFlexContainer())
   {
-    if (width.types == Length::ETypes::FIT_CONTENT)
+    bool changeContainerHugWidth = m_hasUnkownWidthDescendant;
+    changeContainerHugWidth |= isEmptyContainer();
+    if (width.types == Length::ETypes::FIT_CONTENT && changeContainerHugWidth)
     {
       width.types = Length::ETypes::PX;
       width.value = swapWidthAndHeight ? modelSize.height : modelSize.width;
@@ -896,7 +898,9 @@ void AutoLayout::configureFlexNodeSize(flexbox_node* node, bool forContainer)
         size.width);
     }
 
-    if (height.types == Length::ETypes::FIT_CONTENT)
+    bool changeContainerHugHeight = m_hasUnknownHeightDesendant;
+    changeContainerHugHeight |= isEmptyContainer();
+    if (height.types == Length::ETypes::FIT_CONTENT && changeContainerHugHeight)
     {
       height.types = Length::ETypes::PX;
       height.value = swapWidthAndHeight ? modelSize.width : modelSize.height;
@@ -1488,6 +1492,50 @@ GridLayout* AutoLayout::gridLayout()
 
   return sharedRule->getGridContainerRule();
 }
+
+void AutoLayout::isFixedSize(bool& outWidth, bool& outHeight)
+{
+  auto sharedRule = rule.lock();
+  if (!sharedRule)
+    return;
+
+  const auto& widthValue = sharedRule->width.value;
+  const auto& heightValue = sharedRule->height.value;
+  outWidth = widthValue.types == Rule::Length::ETypes::PX;
+  outHeight = heightValue.types == Rule::Length::ETypes::PX;
+  isAsFixedSize(outWidth, outHeight);
+}
+
+void AutoLayout::isAsFixedSize(bool& inOutWidth, bool& inOutHeight)
+{
+  if (inOutWidth && inOutHeight)
+    return;
+
+  if (!isFlexContainer())
+    return;
+
+  const auto& sharedRule = rule.lock();
+  if (!sharedRule)
+    return;
+
+  if (!inOutWidth)
+  {
+    bool changeContainerHugWidth = m_hasUnkownWidthDescendant;
+    changeContainerHugWidth |= isEmptyContainer();
+    const auto& width = sharedRule->width.value;
+    inOutWidth = (width.types == Length::ETypes::FIT_CONTENT && changeContainerHugWidth);
+  }
+
+  if (!inOutHeight)
+  {
+    bool changeContainerHugHeight = m_hasUnknownHeightDesendant;
+    changeContainerHugHeight |= isEmptyContainer();
+
+    const auto& height = sharedRule->height.value;
+    inOutHeight = (height.types == Length::ETypes::FIT_CONTENT && changeContainerHugHeight);
+  }
+}
+
 } // namespace Internal
 } // namespace Layout
 } // namespace VGG

@@ -1528,12 +1528,24 @@ void AutoLayout::isAsFixedSize(bool& inOutWidth, bool& inOutHeight)
 
 bool AutoLayout::shouldChangeContainerHugWidth()
 {
-  return (m_hasUnkownWidthDescendant && isHorizontalDirection()) || isEmptyContainer();
+  if (isEmptyContainer())
+    return true;
+
+  if (isHorizontalDirection())
+    return m_hasUnkownWidthChild;
+  else
+    return !m_hasFixedWidthChild; // has no fixed width child, cannot calculate hug width
 }
 
 bool AutoLayout::shouldChangeContainerHugHeight()
 {
-  return (m_hasUnknownHeightDesendant && isVerticalDirection()) || isEmptyContainer();
+  if (isEmptyContainer())
+    return true;
+
+  if (isVerticalDirection())
+    return m_hasUnknownHeightChild;
+  else
+    return !m_hasFixedHeightChild;
 }
 
 } // namespace Internal

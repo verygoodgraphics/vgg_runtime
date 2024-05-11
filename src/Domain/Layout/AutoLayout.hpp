@@ -54,8 +54,10 @@ private:
 
   Rect m_frame;
 
-  bool m_hasUnkownWidthDescendant{ false };
-  bool m_hasUnknownHeightDesendant{ false };
+  bool m_hasUnkownWidthChild{ false };
+  bool m_hasUnknownHeightChild{ false };
+  bool m_hasFixedWidthChild{ false };
+  bool m_hasFixedHeightChild{ false };
 
 public:
   std::weak_ptr<LayoutNode> view;
@@ -117,13 +119,21 @@ public:
   }
 
 public:
-  void setHasUnknownWidthDescendant(const bool has)
+  void setHasUnknownWidthChild(const bool has)
   {
-    m_hasUnkownWidthDescendant = has;
+    m_hasUnkownWidthChild = has;
   }
-  void setHasUnknownHeightDesencand(const bool has)
+  void setHasUnknownHeightChild(const bool has)
   {
-    m_hasUnknownHeightDesendant = has;
+    m_hasUnknownHeightChild = has;
+  }
+  void setHasFixedWidthChild(const bool has)
+  {
+    m_hasFixedWidthChild = has;
+  }
+  void setHasFixedHeightChild(const bool has)
+  {
+    m_hasFixedHeightChild = has;
   }
 
 private:

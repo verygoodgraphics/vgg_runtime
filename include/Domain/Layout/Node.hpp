@@ -291,7 +291,7 @@ private:
     Layout::Rect         oldFrame,
     const Layout::Point* parentOrigin);
 
-  void layoutIfNeeded(bool& hasUnkownWidthDescendant, bool& hasUnknownHeightDesendant);
+  void updateLayoutSizeInfo();
 };
 
 class StateTree : public LayoutNode

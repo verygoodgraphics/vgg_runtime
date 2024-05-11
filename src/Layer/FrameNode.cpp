@@ -165,17 +165,15 @@ Bounds FrameNode::onRevalidate()
     _->maskDirty = false;
   }
 
-  auto bounds = node()->revalidate();
-  auto b = bounds.bounds(node()->transform());
-
-  _->cache = _->renderPicture(toSkRect(b));
+  const auto bounds = node()->revalidate();
+  _->cache = _->renderPicture(toSkRect(bounds));
   _->transform.setMatrix(glm::mat3{ 1 });
   if (_->enableToOrigin)
   {
     _->transform.setMatrix(
-      glm::translate(glm::mat3{ 1 }, glm::vec2(-b.topLeft().x, -b.topLeft().y)));
+      glm::translate(glm::mat3{ 1 }, glm::vec2(-bounds.topLeft().x, -bounds.topLeft().y)));
   }
-  return b;
+  return bounds.bounds(_->transform);
 }
 
 FrameNode::FrameNode(VRefCnt* cnt, PaintNodePtr root)
@@ -191,10 +189,11 @@ FrameNode::FrameNode(VRefCnt* cnt, PaintNodePtr root)
 void FrameNode::nodeAt(int x, int y, NodeVisitor vistor, void* userData)
 {
   ASSERT(node()->parent() == nullptr);
-  auto inv = d_ptr->transform.inverse();
-  auto p = inv * glm::vec3(x, y, 1);
-  if (bounds().contains(p.x, p.y))
+  if (bounds().contains(x, y))
   {
+    auto inv = d_ptr->transform.inverse();
+    auto p = inv * glm::vec3(x, y, 1);
+
     const RenderNode::NodeAtContext ctx{ static_cast<int>(p.x), static_cast<int>(p.y), userData };
     vistor(this, &ctx);
   }

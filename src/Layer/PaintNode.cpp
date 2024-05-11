@@ -241,7 +241,7 @@ void PaintNode::debug(Renderer* render)
   strokePen.setStyle(SkPaint::kStroke_Style);
   strokePen.setColor(SK_ColorRED);
   strokePen.setStrokeWidth(2);
-  canvas->drawRect(toSkRect(bounds()), strokePen);
+  canvas->drawRect(toSkRect(bounds().map(transform().inverse())), strokePen);
   if (hoverBounds && d_ptr->renderNode && d_ptr->renderable)
     d_ptr->renderNode->debug(render);
   for (const auto& e : m_children)
@@ -255,14 +255,14 @@ void PaintNode::nodeAt(int x, int y, NodeVisitor visitor, void* userData)
 {
   if (!isVisible() || !bounds().valid())
     return;
-  auto local = transform().inverse() * glm::vec3(x, y, 1);
-  if (bounds().contains(local.x, local.y))
+  if (bounds().contains(x, y))
   {
+    auto local = transform().inverse() * glm::vec3(x, y, 1);
     for (auto c = rbegin(); c != rend(); ++c)
     {
       (*c)->nodeAt(local.x, local.y, visitor, userData);
     }
-    const NodeAtContext ctx{ .localX = (int)local.x, .localY = (int)local.y, .userData = userData };
+    const NodeAtContext ctx{ .localX = x, .localY = y, .userData = userData };
     visitor(this, &ctx);
   }
 }
@@ -536,33 +536,31 @@ Bounds PaintNode::onRevalidate()
     e->revalidate();
   }
 
-  Bounds newBounds = d_ptr->bounds;
+  Bounds bounds = d_ptr->bounds;
+
   if (overflow() == OF_VISIBLE)
   {
     for (const auto& e : m_children)
     {
-      newBounds.unionWith(e->bounds());
+      bounds.unionWith(e->bounds());
     }
   }
-
   _->transformAttr->revalidate();
+
   if (
     _->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY ||
     _->paintOption.paintStrategy == EPaintStrategy::PS_RECURSIVELY)
   {
     auto currentNodeBounds =
       _->renderNode->revalidate(); // This will trigger the shape attribute get the
-
-    newBounds.unionWith(currentNodeBounds);
+    bounds.unionWith(currentNodeBounds);
     _->renderable = true;
   }
   else
   {
     _->renderable = false;
   }
-  // shape from the current node by the passed node
-  // return newBounds;
-  return newBounds;
+  return bounds.bounds(transform());
 }
 const std::string& PaintNode::guid() const
 {

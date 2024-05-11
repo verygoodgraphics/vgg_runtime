@@ -120,7 +120,7 @@ Bounds TextNode::onRevalidate()
   auto b =
     d_ptr->accessor->paragraph()->revalidate(); // We just revalidate the paragraph attribute so far
   PaintNode::onRevalidate();
-  return b;
+  return b.bounds(transform());
 }
 
 TextNode::~TextNode() = default;

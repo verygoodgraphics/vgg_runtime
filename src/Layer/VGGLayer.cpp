@@ -458,9 +458,6 @@ PaintNode* VLayer::nodeAt(int x, int y)
       {
         auto frameNode = static_cast<FrameNode*>(node);
         auto paintNode = frameNode->node();
-
-        auto deviceMatrix = reinterpret_cast<glm::mat3*>(ctx->userData);
-        *deviceMatrix *= frameNode->transform().matrix();
         paintNode->nodeAt(
           ctx->localX,
           ctx->localY,
@@ -471,7 +468,7 @@ PaintNode* VLayer::nodeAt(int x, int y)
           },
           nullptr);
       },
-      &deviceMatrix);
+      nullptr);
     VGG_LAYER_DEBUG_CODE(if (g_nodeAtResult && d_ptr->debugConfig.enableDrawClickBounds) {
       drawBounds(g_nodeAtResult, deviceMatrix, d_ptr->layerCanvas());
     });

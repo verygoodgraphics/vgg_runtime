@@ -177,13 +177,7 @@ PaintNode* SceneNode::nodeByID(const std::string& id)
 
 Bounds SceneNode::effectBounds() const
 {
-  Bounds bounds;
-  for (auto& frame : d_ptr->frames)
-  {
-    const auto b = frame->revalidate().bounds(frame->transform());
-    bounds.unionWith(b); // FIXME:: frame has no effectBounds yet
-  }
-  return bounds;
+  return bounds();
 }
 
 Bounds SceneNode::onRevalidate()
@@ -191,8 +185,7 @@ Bounds SceneNode::onRevalidate()
   Bounds bounds;
   for (auto& frame : d_ptr->frames)
   {
-    const auto b = frame->revalidate().bounds(frame->transform());
-    bounds.unionWith(b);
+    bounds.unionWith(frame->revalidate());
   }
   d_ptr->picture = d_ptr->revalidatePicture(toSkRect(bounds));
   return bounds;

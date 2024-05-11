@@ -33,30 +33,6 @@
 namespace
 {
 using namespace VGG;
-inline SkColor nodeType2Color(EObjectType type)
-{
-  switch (type)
-  {
-    case EObjectType::VGG_PATH:
-      return SK_ColorRED;
-    case EObjectType::VGG_IMAGE:
-      return SK_ColorRED;
-    case EObjectType::VGG_GROUP:
-      return SK_ColorRED;
-    case EObjectType::VGG_TEXT:
-      return SK_ColorRED;
-    case EObjectType::VGG_ARTBOARD:
-      return SK_ColorRED;
-    case EObjectType::VGG_LAYER:
-      return SK_ColorRED;
-    case EObjectType::VGG_MASTER:
-      return SK_ColorRED;
-    case EObjectType::VGG_CONTOUR:
-      return SK_ColorYELLOW;
-    default:
-      return SK_ColorRED;
-  }
-}
 } // namespace
 
 namespace VGG::layer

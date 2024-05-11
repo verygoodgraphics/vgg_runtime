@@ -81,7 +81,7 @@ protected:
     if (std::filesystem::exists(fullpath) == false)
       return nullptr;
     // const fs::path prefix = this->m_config.value("outputImageDir", "resources");
-    const auto prefix = fs::path(m_config.value("outputDir", ""));
+    const auto prefix = fs::path(m_config.value("outputDir", fullpath.parent_path().string()));
     return std::make_unique<layer::FileResourceProvider>(prefix);
     // for (const auto& entry : std::filesystem::recursive_directory_iterator(fullpath))
     // {

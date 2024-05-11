@@ -82,7 +82,7 @@ struct StructObject
   R(ContextSetting, contextSettings, ContextSetting);
   R_OPT(CornerSmoothing, cornerSmoothing, float, 0.f);
   R(MaskType, maskType, EMaskType);
-  R_OPT(MaskShowType, maskShowType, EMaskShowType, EMaskShowType::MST_BOUNDS);
+  R_OPT(MaskShowType, maskShowType, std::optional<EMaskShowType>, std::nullopt);
   R(ShapeMask, outlineMaskBy, std::vector<std::string>);
   R(AlphaMask, alphaMaskBy, std::vector<AlphaMask>);
   std::vector<StructObject> getChildObjects() const;

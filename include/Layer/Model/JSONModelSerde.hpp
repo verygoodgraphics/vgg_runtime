@@ -58,6 +58,22 @@ struct adl_serializer<std::variant<float, glm::vec2>>
 };
 
 template<>
+struct adl_serializer<std::optional<VGG::EMaskShowType>>
+{
+  static void from_json(const json& j, std::optional<VGG::EMaskShowType>& x)
+  {
+    if (j.is_null())
+    {
+      x = std::nullopt;
+    }
+    else
+    {
+      x = j.template get<VGG::EMaskShowType>();
+    }
+  }
+};
+
+template<>
 struct adl_serializer<std::optional<std::array<float, 2>>>
 {
   static void to_json(json& j, const std::optional<std::array<float, 2>>& opt)

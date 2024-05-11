@@ -132,7 +132,7 @@ concept AbstractObject = requires(T a) {
   REQ_DECL(ContextSetting, (ContextSetting));
   REQ_DECL(CornerSmoothing, (float));
   REQ_DECL(MaskType, (EMaskType));
-  REQ_DECL(MaskShowType, (EMaskShowType));
+  REQ_DECL(MaskShowType, (std::optional<EMaskShowType>));
   REQ_DECL(ShapeMask, (std::vector<std::string>));
   REQ_DECL(AlphaMask, (std::vector<AlphaMask>));
   REQ_DECL(ChildObjects, (std::vector<typename T::BaseType>));

@@ -495,6 +495,19 @@ struct ModelSerde<std::vector<double>, std::optional<std::array<float, 2>>>
 };
 
 template<>
+struct ModelSerde<int, std::optional<EMaskShowType>>
+{
+  static std::optional<EMaskShowType> serde_from(const std::optional<int>& v) // NOLINT
+  {
+    if (v.has_value())
+    {
+      return (EMaskShowType)*v;
+    }
+    return std::nullopt;
+  }
+};
+
+template<>
 struct ModelSerde<Model::TextLineType, TextLineAttr>
 {
   static TextLineAttr serde_from(const Model::TextLineType& t) // NOLINT

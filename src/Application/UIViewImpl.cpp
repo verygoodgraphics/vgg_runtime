@@ -85,7 +85,7 @@ bool UIViewImpl::setPageIndexAnimated(
   app::AnimationCompletion      completion)
 {
   const auto oldIndex = page();
-  if (oldIndex == index)
+  if (oldIndex == (int)index)
     return false;
 
   const auto& root = m_viewModel->layoutTree();

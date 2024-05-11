@@ -79,11 +79,12 @@ struct Serde
 
     const auto maskType = m.getMaskType();
     obj->setMaskType(maskType);
-    // const auto defaultShowType =
-    //   maskType == EMaskType::MT_OUTLINE
-    //     ? MST_CONTENT
-    //     : (maskType == EMaskType::MT_ALPHA && false ? MST_BOUNDS : MST_INVISIBLE);
-    obj->setMaskShowType(m.getMaskShowType()); // default show type??
+    const auto defaultShowType =
+      maskType == EMaskType::MT_OUTLINE
+        ? MST_CONTENT
+        : (maskType == EMaskType::MT_ALPHA && false ? MST_BOUNDS : MST_INVISIBLE);
+    auto maskShowType = m.getMaskShowType();
+    obj->setMaskShowType(maskShowType ? *maskShowType : defaultShowType); // default show type??
     obj->setOverflow(m.getOverflow());
     obj->setVisible(m.getVisible());
     override(obj, convertedMatrix, bounds);

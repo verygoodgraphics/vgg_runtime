@@ -57,7 +57,7 @@ struct JSONObject
   M_JSON_FIELD_DEF(ContextSetting, "contextSettings", ContextSetting, {});
   M_JSON_FIELD_DEF(CornerSmoothing, "cornerSmoothing", float, 0.f);
   M_JSON_FIELD_DEF(MaskType, "maskType", EMaskType, EMaskType::MT_NONE);
-  M_JSON_FIELD_DEF(MaskShowType, "maskShowType", EMaskShowType, EMaskShowType::MST_BOUNDS);
+  M_JSON_FIELD_DEF(MaskShowType, "maskShowType", std::optional<EMaskShowType>, std::nullopt);
   M_JSON_FIELD_DEF(ShapeMask, "outlineMaskBy", std::vector<std::string>, {});
   M_JSON_FIELD_DEF(AlphaMask, "alphaMaskBy", std::vector<AlphaMask>, {});
 };

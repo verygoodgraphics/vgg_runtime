@@ -138,28 +138,12 @@ void LayoutNode::setNeedLayout()
 
 void LayoutNode::layoutIfNeeded()
 {
-  bool hasUnkownWidthDescendant{ false };
-  bool hasUnknownHeightDesendant{ false };
-
-  layoutIfNeeded(hasUnknownHeightDesendant, hasUnkownWidthDescendant);
-}
-
-void LayoutNode::layoutIfNeeded(
-  bool& outHasUnknownWidthDescendant,
-  bool& outHasUnknownHeightDesencand)
-{
-  bool hasUnkownWidthDescendant{ false };
-  bool hasUnknownHeightDesendant{ false };
   for (auto& child : m_children)
   {
-    bool childHasUnknownWidthDescendant{ false };
-    bool childHasUnknownHeightDesencand{ false };
-
-    child->layoutIfNeeded(childHasUnknownWidthDescendant, childHasUnknownHeightDesencand);
-
-    hasUnkownWidthDescendant |= childHasUnknownWidthDescendant;
-    hasUnknownHeightDesendant |= childHasUnknownHeightDesencand;
+    child->layoutIfNeeded();
   }
+
+  updateLayoutSizeInfo();
 
   if (m_needsLayout)
   {
@@ -178,18 +162,9 @@ void LayoutNode::layoutIfNeeded(
 
     if (m_autoLayout)
     {
-      m_autoLayout->setHasUnknownWidthDescendant(hasUnkownWidthDescendant);
-      m_autoLayout->setHasUnknownHeightDesencand(hasUnknownHeightDesendant);
       m_autoLayout->applyLayout(true);
     }
   }
-
-  bool isFixedWidth{ false };
-  bool isFixedHeight{ false };
-  if (m_autoLayout)
-    m_autoLayout->isFixedSize(isFixedWidth, isFixedHeight);
-  outHasUnknownWidthDescendant = hasUnkownWidthDescendant || !isFixedWidth;
-  outHasUnknownHeightDesencand = hasUnknownHeightDesendant || !isFixedHeight;
 }
 
 Layout::Rect LayoutNode::frame() const
@@ -1621,4 +1596,33 @@ void LayoutNode::invalidateIdCache()
   {
     child->invalidateIdCache();
   }
+}
+
+void LayoutNode::updateLayoutSizeInfo()
+{
+  if (!m_autoLayout)
+    return;
+
+  bool hasUnkownWidthChild{ false };
+  bool hasUnknownHeightChild{ false };
+  bool hasFixedWidthChild{ false };
+  bool hasFixedHeightChild{ false };
+  for (auto& child : m_children)
+  {
+    bool childIsFixedWidth{ false };
+    bool childIsFixedHeight{ false };
+    if (child->m_autoLayout)
+      child->m_autoLayout->isFixedSize(childIsFixedWidth, childIsFixedHeight);
+
+    hasUnkownWidthChild |= !childIsFixedWidth;
+    hasUnknownHeightChild |= !childIsFixedHeight;
+
+    hasFixedWidthChild |= childIsFixedWidth;
+    hasFixedHeightChild |= childIsFixedHeight;
+  }
+
+  m_autoLayout->setHasUnknownWidthChild(hasUnkownWidthChild);
+  m_autoLayout->setHasUnknownHeightChild(hasUnknownHeightChild);
+  m_autoLayout->setHasFixedWidthChild(hasFixedWidthChild);
+  m_autoLayout->setHasFixedHeightChild(hasFixedHeightChild);
 }

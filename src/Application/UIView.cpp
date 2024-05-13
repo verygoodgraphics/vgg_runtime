@@ -742,43 +742,15 @@ bool UIView::handleTouchEvent(int x, int y, int motionX, int motionY, EUIEventTy
   return true;
 }
 
-bool UIView::setCurrentPageIndex(int index, bool updateHistory)
+bool UIView::presentFrame(
+  const int                index,
+  const app::FrameOptions& opts,
+  app::AnimationCompletion completion)
 {
-  if (m_impl->page() == index)
-    return true;
-
-  const auto document = m_document.lock();
-  if (!document)
-    return false;
-
-  if (index < 0 || static_cast<std::size_t>(index) >= document->children().size())
-    return false;
-
-  const bool success = m_impl->setPageIndex(index);
-  if (success)
+  const auto& from = currentPage()->id();
+  if (setCurrentFrameIndex(index, false, opts.animation, completion))
   {
-    setDirty(true);
-
-    m_presentedTreeContext.clear();
-    m_presentedPages.clear();
-    m_presentingPages.clear();
-
-    if (updateHistory)
-      m_history.push(currentPage()->id());
-  }
-
-  return success;
-}
-
-bool UIView::presentPage(int index)
-{
-  auto from = currentPage()->id();
-  auto oldPageIndex = m_impl->page();
-
-  setCurrentPageIndex(index, false);
-  if (m_impl->page() != oldPageIndex)
-  {
-    auto to = currentPage()->id();
+    const auto& to = currentPage()->id();
     m_presentedPages[from] = to;
     m_presentingPages[to] = from;
     return true;
@@ -787,31 +759,22 @@ bool UIView::presentPage(int index)
   return false;
 }
 
-bool UIView::dismissPage()
+bool UIView::dismissFrame(const app::FrameOptions& opts, app::AnimationCompletion completion)
 {
-  auto to = currentPage()->id();
-
+  const auto& to = currentPage()->id();
   if (!m_presentingPages.contains(to))
-  {
     return false;
-  }
 
-  auto from = m_presentingPages[to];
+  const auto& from = m_presentingPages[to];
   m_presentingPages.erase(to);
   m_presentedPages.erase(from);
   m_presentedTreeContext.erase(to);
 
-  auto document = m_document.lock();
+  const auto& document = m_document.lock();
   if (document)
-  {
     for (std::size_t index = 0; index < document->children().size(); ++index)
-    {
       if (document->children()[index]->id() == from)
-      {
-        return setCurrentPageIndex(index, false);
-      }
-    }
-  }
+        return setCurrentFrameIndex(index, false, opts.animation, completion);
 
   return false;
 }
@@ -852,7 +815,7 @@ bool UIView::goBack(bool resetScrollPosition, bool resetState)
           to = from;
         }
 
-        setCurrentPageIndex(index, false);
+        setCurrentFrameIndex(index, false);
         return true;
       }
     }
@@ -964,12 +927,43 @@ bool UIView::isDirty()
   }
 }
 
-bool UIView::setCurrentPageIndexAnimated(
-  std::size_t                   index,
-  const app::UIAnimationOption& option,
-  app::AnimationCompletion      completion)
+bool UIView::setCurrentFrameIndex(
+  const std::size_t                   index,
+  const bool                          updateHistory,
+  const app::UIAnimationOption&       option,
+  const VGG::app::AnimationCompletion completion)
 {
-  return m_impl->setPageIndexAnimated(index, option, completion);
+  if (m_impl->page() == index)
+    return true;
+
+  const auto document = m_document.lock();
+  if (!document)
+    return false;
+
+  if (index >= document->children().size())
+    return false;
+
+  const auto success = m_impl->setPageIndexAnimated(
+    index,
+    option,
+    [updateHistory, completion, this](bool finished)
+    {
+      if (finished && updateHistory)
+        m_history.push(currentPage()->id());
+      if (completion)
+        completion(finished);
+    });
+
+  if (success)
+  {
+    setDirty(true);
+
+    m_presentedTreeContext.clear();
+    m_presentedPages.clear();
+    m_presentingPages.clear();
+  }
+
+  return success;
 }
 
 bool UIView::updateNodeFillColor(

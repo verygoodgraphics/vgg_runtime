@@ -16,6 +16,7 @@
 #pragma once
 
 #include "Application/UIAnimation.hpp"
+#include "Application/UIOptions.hpp"
 #include "Application/UIEvent.hpp"
 #include "Application/UIScrollView.hpp"
 #include "Domain/Daruma.hpp"
@@ -73,7 +74,7 @@ private:
   rxcpp::observer<VGG::ModelEventPtr>       m_editModelObserver;
 
   app::UIAnimationOption m_lastPresentStateAnimationOptions;
-  app::UIAnimationOption m_lastPresentPageAnimationOptions;
+  app::FrameOptions      m_lastPresentFrameOptions;
 
 public:
   Presenter(std::shared_ptr<Mouse> mouse = nullptr)
@@ -106,13 +107,16 @@ public:
   {
     return m_view->currentPageIndex();
   }
-  bool setCurrentPageIndex(std::size_t index, bool updateHistory);
-  bool setCurrentPageIndexAnimated(
-    std::size_t                   index,
-    const app::UIAnimationOption& option,
-    app::AnimationCompletion      completion = app::AnimationCompletion());
-  bool presentPage(int index);
-  bool dismissPage();
+  bool setCurrentFrameIndex(
+    const std::size_t              index,
+    const bool                     updateHistory,
+    const app::UIAnimationOption&  option = {},
+    const app::AnimationCompletion completion = {});
+  bool presentFrame(
+    const int                index,
+    const app::FrameOptions& opts,
+    app::AnimationCompletion completion);
+  bool dismissFrame(app::AnimationCompletion completion);
   void initHistory();
   bool goBack(bool resetScrollPosition, bool resetState);
 
@@ -279,7 +283,7 @@ public:
   }
   const app::UIAnimationOption& dismissPageAnimationOptions() const
   {
-    return m_lastPresentPageAnimationOptions;
+    return m_lastPresentFrameOptions.animation;
   }
 
 public:

@@ -262,22 +262,27 @@ void Presenter::update()
   }
 }
 
-bool Presenter::presentPage(int index)
+bool Presenter::presentFrame(
+  const int                index,
+  const app::FrameOptions& opts,
+  app::AnimationCompletion completion)
 {
   if (m_view)
   {
-    return m_view->presentPage(index);
+    const auto success = m_view->presentFrame(index, opts, completion);
+    if (success)
+      m_lastPresentFrameOptions = opts;
+    return success;
   }
   return false;
 }
 
-bool Presenter::dismissPage()
+bool Presenter::dismissFrame(app::AnimationCompletion completion)
 {
-  if (m_view)
-  {
-    return m_view->dismissPage();
-  }
-  return false;
+  if (!m_view)
+    return false;
+
+  return m_view->dismissFrame(m_lastPresentFrameOptions, completion);
 }
 
 void Presenter::initHistory()
@@ -385,17 +390,13 @@ void Presenter::fitForAspectScale(const Layout::Size& pageSize)
   m_view->setOffsetAndScale(xOffset, yOffset, scale);
 }
 
-bool Presenter::setCurrentPageIndex(std::size_t index, bool updateHistory)
+bool Presenter::setCurrentFrameIndex(
+  const std::size_t              index,
+  const bool                     updateHistory,
+  const app::UIAnimationOption&  option,
+  const app::AnimationCompletion completion)
 {
-  return m_view->setCurrentPageIndex(index, updateHistory);
-}
-
-bool Presenter::setCurrentPageIndexAnimated(
-  std::size_t                   index,
-  const app::UIAnimationOption& option,
-  app::AnimationCompletion      completion)
-{
-  return m_view->setCurrentPageIndexAnimated(index, option, completion);
+  return m_view->setCurrentFrameIndex(index, updateHistory, option, completion);
 }
 
 bool Presenter::updateViewNodeFillColor(

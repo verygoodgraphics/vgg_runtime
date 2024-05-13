@@ -289,10 +289,11 @@ void Presenter::initHistory()
 {
   return m_view->initHistory();
 }
-bool Presenter::goBack(bool resetScrollPosition, bool resetState)
+
+bool Presenter::popFrame(const app::PopOptions& opts)
 {
   ASSERT(m_view);
-  return m_view->goBack(resetScrollPosition, resetState);
+  return m_view->popFrame(opts, m_lastPushFrameAnimationOptions);
 }
 
 std::shared_ptr<StateTree> Presenter::savedState()
@@ -393,10 +394,15 @@ void Presenter::fitForAspectScale(const Layout::Size& pageSize)
 bool Presenter::setCurrentFrameIndex(
   const std::size_t              index,
   const bool                     updateHistory,
-  const app::UIAnimationOption&  option,
+  const app::FrameOptions&       option,
   const app::AnimationCompletion completion)
 {
-  return m_view->setCurrentFrameIndex(index, updateHistory, option, completion);
+  const auto success =
+    m_view->setCurrentFrameIndex(index, updateHistory, option.animation, completion);
+  if (success && updateHistory)
+    m_lastPushFrameAnimationOptions = option.animation;
+
+  return success;
 }
 
 bool Presenter::updateViewNodeFillColor(

@@ -779,7 +779,7 @@ bool UIView::dismissFrame(const app::FrameOptions& opts, app::AnimationCompletio
   return false;
 }
 
-bool UIView::goBack(bool resetScrollPosition, bool resetState)
+bool UIView::popFrame(const app::PopOptions& popOpts, const app::UIAnimationOption& animationOpts)
 {
   if (m_history.size() <= 1)
   {
@@ -815,8 +815,7 @@ bool UIView::goBack(bool resetScrollPosition, bool resetState)
           to = from;
         }
 
-        setCurrentFrameIndex(index, false);
-        return true;
+        return setCurrentFrameIndex(index, false, animationOpts);
       }
     }
   }

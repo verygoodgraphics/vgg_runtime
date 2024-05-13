@@ -722,14 +722,16 @@ bool Controller::setState(
   auto          page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
   InstanceState instanceState{ page, m_expander, m_layout };
 
-  auto success = instanceState.setState(instanceDescendantId, listenerId, stateMasterId).success;
-  if (success)
+  auto result = instanceState.setState(instanceDescendantId, listenerId, stateMasterId);
+  if (result.success)
   {
-    m_presenter->restoreState();
-    m_presenter->update();
-    m_presenter->triggerMouseEnter();
+    m_presenter->setInstanceState(
+      result.oldTree.get(),
+      result.newTree.get(),
+      options.animation,
+      [this](bool) { m_presenter->triggerMouseEnter(); });
   }
-  return success;
+  return result.success;
 }
 
 bool Controller::presentState(

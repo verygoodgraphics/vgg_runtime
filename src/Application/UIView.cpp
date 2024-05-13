@@ -981,6 +981,7 @@ bool UIView::setInstanceState(
   const app::UIAnimationOption& options,
   app::AnimationCompletion      completion)
 {
+  restoreState();
   return m_impl->setInstanceState(oldNode, newNode, options, completion);
 }
 bool UIView::presentInstanceState(

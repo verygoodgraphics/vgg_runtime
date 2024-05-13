@@ -48,6 +48,10 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     .field("resetScrollPosition", &ISdk::StateOptions::resetScrollPosition)
     .field("animation", &ISdk::StateOptions::animation);
 
+  value_object<app::PopOptions>("PopOptions")
+    .field("resetScrollPosition", &app::PopOptions::resetScrollPosition)
+    .field("resetState", &app::PopOptions::resetState);
+
   class_<VggSdk>("VggSdk")
     .constructor<>()
     // env
@@ -71,15 +75,18 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     // frames
     .function("getFramesInfo", &VggSdk::getFramesInfo)
     .function("currentFrameId", &VggSdk::currentFrameId)
-    .function("setCurrentFrameById", &VggSdk::setCurrentFrameById)
-    .function("setCurrentFrameByIdAnimated", &VggSdk::setCurrentFrameByIdAnimated)
     .function("launchFrameId", &VggSdk::launchFrameId)
     .function("setLaunchFrameById", &VggSdk::setLaunchFrameById)
-    .function("presentFrameById", &VggSdk::presentFrameById)
+    .function("pushFrame", &VggSdk::pushFrame)
+    .function("popFrame", &VggSdk::popFrame)
+    .function("presentFrame", &VggSdk::presentFrame)
     .function("dismissFrame", &VggSdk::dismissFrame)
-    .function("goBack", &VggSdk::goBack)
     .function("nextFrame", &VggSdk::nextFrame)
     .function("previousFrame", &VggSdk::previousFrame)
+    .function("setCurrentFrameById", &VggSdk::setCurrentFrameById)                 // deprecated
+    .function("setCurrentFrameByIdAnimated", &VggSdk::setCurrentFrameByIdAnimated) // deprecated
+    .function("presentFrameById", &VggSdk::presentFrameById)                       // deprecated
+    .function("goBack", &VggSdk::goBack)                                           // deprecated
     // instance state
     .function("presentState", &VggSdk::presentState)
     .function("dismissState", &VggSdk::dismissState)

@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "Application/UIOptions.hpp"
+
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -44,6 +46,7 @@ public:
     bool             resetScrollPosition{ true };
     AnimationOptions animation;
   };
+
   using FrameOptions = StateOptions;
 
 public:
@@ -78,16 +81,24 @@ public:
   virtual bool              setCurrentTheme(const std::string& theme) = 0;
 
   // frame
-  virtual bool setCurrentFrameById(const std::string& id, bool resetScrollPosition = true) = 0;
-  virtual bool setCurrentFrameByIdAnimated(
+  virtual bool pushFrame(const std::string& id, const FrameOptions& opts) = 0;
+  virtual bool popFrame(const app::PopOptions& opts) = 0;
+  virtual bool presentFrame(const std::string& id, const FrameOptions& opts) = 0;
+  virtual bool dismissFrame() = 0;
+  virtual bool nextFrame() = 0;
+  virtual bool previousFrame() = 0;
+
+  [[deprecated]] virtual bool setCurrentFrameById(
+    const std::string& id,
+    bool               resetScrollPosition = true) = 0;
+  [[deprecated]] virtual bool setCurrentFrameByIdAnimated(
     const std::string&      id,
     bool                    resetScrollPosition,
     const AnimationOptions& option) = 0;
-  virtual bool presentFrameById(const std::string& id, bool resetScrollPosition = true) = 0;
-  virtual bool dismissFrame() = 0;
-  virtual bool goBack(bool resetScrollPosition = true, bool resetState = true) = 0;
-  virtual bool nextFrame() = 0;
-  virtual bool previousFrame() = 0;
+  [[deprecated]] virtual bool presentFrameById(
+    const std::string& id,
+    bool               resetScrollPosition = true) = 0;
+  [[deprecated]] virtual bool goBack(bool resetScrollPosition = true, bool resetState = true) = 0;
 
   // instance
   virtual bool setState(

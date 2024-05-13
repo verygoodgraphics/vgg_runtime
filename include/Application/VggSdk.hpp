@@ -75,16 +75,20 @@ public:
   bool              setCurrentTheme(const std::string& theme) override;
 
   // frame
+  bool pushFrame(const std::string& id, const FrameOptions& opts) override;
+  bool popFrame(const app::PopOptions& opts) override;
+  bool presentFrame(const std::string& id, const FrameOptions& opts) override;
+  bool dismissFrame() override;
+  bool nextFrame() override;
+  bool previousFrame() override;
+
   bool setCurrentFrameById(const std::string& id, bool resetScrollPosition) override;
   bool setCurrentFrameByIdAnimated(
     const std::string&      id,
     bool                    resetScrollPosition,
     const AnimationOptions& option) override;
   bool presentFrameById(const std::string& id, bool resetScrollPosition) override;
-  bool dismissFrame() override;
   bool goBack(bool resetScrollPosition, bool resetState) override;
-  bool nextFrame() override;
-  bool previousFrame() override;
 
   // instance
   bool setState(

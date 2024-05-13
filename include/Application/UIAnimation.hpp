@@ -38,7 +38,7 @@ struct UIAnimationOption
 {
   double duration{ 0.3 }; // seconds
 
-  EAnimationType           type{ EAnimationType::DISSOLVE };
+  EAnimationType           type{ EAnimationType::NONE };
   EAnimationTimingFunction timingFunction{ EAnimationTimingFunction::LINEAR };
 };
 

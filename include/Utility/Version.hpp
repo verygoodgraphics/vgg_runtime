@@ -27,7 +27,7 @@ struct Version
   inline static std::string get()
   {
 #ifdef GIT_SHA1
-    return strlimit(XSTR(GIT_SHA1), 8, "");
+    return strlimit(GIT_SHA1, 8, "");
 #else
     return "develop";
 #endif

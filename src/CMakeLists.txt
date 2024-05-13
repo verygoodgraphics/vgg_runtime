@@ -10,6 +10,7 @@ include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
 add_library(vgg_flags INTERFACE)
+target_compile_definitions(vgg_flags INTERFACE GIT_SHA1="${GIT_SHA1}")
 if (EMSCRIPTEN)
   target_compile_options(vgg_flags INTERFACE
     -fexceptions

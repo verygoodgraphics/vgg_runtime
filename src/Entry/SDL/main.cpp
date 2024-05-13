@@ -24,6 +24,7 @@
 #include "Application/RunLoop.hpp"
 #include "Application/UIApplication.hpp"
 #include "Utility/ConfigManager.hpp"
+#include "Utility/Version.hpp"
 
 #include <argparse/argparse.hpp>
 
@@ -39,7 +40,7 @@ using AppImpl = VGG::entry::AppSDLImpl;
 
 int main(int argc, char** argv)
 {
-  INFO("main");
+  INFO("#vgg runtime version: %s", VGG::Version::get().c_str());
 
   VGG::Environment::setUp();
 

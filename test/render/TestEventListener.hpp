@@ -57,6 +57,22 @@ public:
   virtual void operator()(void* userData) = 0;
 };
 
+void displayInfo(VGG::layer::PaintNode* node)
+{
+  if (node)
+  {
+    INFO("Name: %s", node->name().c_str());
+    INFO("ID: %s", node->guid().c_str());
+    const auto bounds = node->bounds();
+    INFO(
+      "Bounds: [%f, %f, %f, %f]",
+      bounds.topLeft().x,
+      bounds.topLeft().y,
+      bounds.width(),
+      bounds.height());
+  }
+}
+
 class Pager
 {
   layer::SceneNode* m_sceneNode;
@@ -72,6 +88,7 @@ class Pager
         return;
       const auto& frames = m_sceneNode->getFrames();
       frames[m_currentPage]->node()->setVisible(false);
+      INFO("Set page %d", (int)newPage);
       frames[newPage]->node()->setVisible(true);
       m_currentPage = newPage;
     }
@@ -324,6 +341,7 @@ public:
             }
             p->hoverBounds = true;
             s_currentHover = p;
+            displayInfo(p);
           }
         }
         else

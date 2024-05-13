@@ -100,14 +100,18 @@ struct Serde
       totalMatrix,
       [&](std::string name, std::string guid)
       {
-        auto p = makePaintNodePtr(ctx.alloc, std::move(name), VGG_GROUP, std::move(guid));
+        auto p = makePaintNodePtr(
+          ctx.alloc,
+          std::move(name),
+          VGG_GROUP,
+          std::move(guid),
+          ERenderTraitBits::RT_RENDER_CHILDREN);
         return p;
       },
       [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bound)
       {
         p->setOverflow(OF_VISIBLE); // Group do not clip inner content
         p->setContourOption(ContourOption(ECoutourType::MCT_UNION, false));
-        p->setPaintOption(EPaintStrategy(EPaintStrategy::PS_CHILDONLY));
         const auto childObjects = m.getChildObjects();
         for (const auto& c : childObjects)
         {
@@ -125,7 +129,8 @@ struct Serde
       totalMatrix,
       [&](std::string name, std::string guid)
       {
-        auto p = makePaintNodePtr(ctx.alloc, std::move(name), VGG_FRAME, std::move(guid));
+        auto p =
+          makePaintNodePtr(ctx.alloc, std::move(name), VGG_FRAME, std::move(guid), RT_DEFAULT);
         return p;
       },
       [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bound)
@@ -148,14 +153,18 @@ struct Serde
       totalMatrix,
       [&](std::string name, std::string guid)
       {
-        auto p = makePaintNodePtr(ctx.alloc, std::move(name), VGG_PATH, std::move(guid));
+        auto p = makePaintNodePtr(
+          ctx.alloc,
+          std::move(name),
+          VGG_PATH,
+          std::move(guid),
+          ERenderTraitBits::RT_RENDER_SELF);
         return p;
       },
       [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bounds)
       {
         p->setChildWindingType(m.getWindingType());
         p->setContourOption(ContourOption(ECoutourType::MCT_OBJECT_OPS, false));
-        p->setPaintOption(PaintOption(EPaintStrategy::PS_SELFONLY));
         auto shapes = m.getShapes();
         for (auto& subshape : shapes)
         {
@@ -171,7 +180,8 @@ struct Serde
           }
           else if (VT(&geo, ShapeData, ptr))
           {
-            auto node = makePaintNodePtr(ctx.alloc, "contour", VGG_CONTOUR, "");
+            auto node =
+              makePaintNodePtr(ctx.alloc, "contour", VGG_CONTOUR, "", ERenderTraitBits::RT_DEFAULT);
             node->setOverflow(OF_VISIBLE);
             node->setContourOption(ContourOption{ ECoutourType::MCT_FRAMEONLY, false });
             CoordinateConvert::convertCoordinateSystem(*ptr, totalMatrix);
@@ -207,7 +217,12 @@ struct Serde
       totalMatrix,
       [&](std::string name, std::string guid)
       {
-        auto p = makePaintNodePtr(ctx.alloc, std::move(name), VGG_FRAME, std::move(guid));
+        auto p = makePaintNodePtr(
+          ctx.alloc,
+          std::move(name),
+          VGG_FRAME,
+          std::move(guid),
+          ERenderTraitBits::RT_DEFAULT);
         return p;
       },
       [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bound)
@@ -231,7 +246,12 @@ struct Serde
       totalMatrix,
       [&](std::string name, std::string guid)
       {
-        auto p = makePaintNodePtr(ctx.alloc, std::move(name), VGG_FRAME, std::move(guid));
+        auto p = makePaintNodePtr(
+          ctx.alloc,
+          std::move(name),
+          VGG_FRAME,
+          std::move(guid),
+          ERenderTraitBits::RT_DEFAULT);
         return p;
       },
       [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bound)

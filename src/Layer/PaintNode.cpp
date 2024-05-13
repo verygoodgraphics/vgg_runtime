@@ -30,11 +30,6 @@
 
 #include <optional>
 
-namespace
-{
-using namespace VGG;
-} // namespace
-
 namespace VGG::layer
 {
 
@@ -57,13 +52,13 @@ public:
   EObjectType    type;
   bool           visible{ true };
   ContourData    contour;
-  PaintOption    paintOption;
   ContourOption  maskOption;
+
+  const ERenderTrait renderTrait{ ERenderTraitBits::RT_DEFAULT };
 
   PaintNode::EventHandler paintNodeEventHandler;
 
   std::optional<VShape> path;
-  bool                  renderable{ false };
   Bounds                bounds;
 
   std::array<float, 4> frameRadius{ 0, 0, 0, 0 };
@@ -73,9 +68,10 @@ public:
   Ref<TransformAttribute>   transformAttr;
   std::unique_ptr<Accessor> accessor;
 
-  PaintNode__pImpl(PaintNode* api, EObjectType type, bool initBase)
+  PaintNode__pImpl(PaintNode* api, EObjectType type, ERenderTrait renderTrait, bool initBase)
     : q_ptr(api)
     , type(type)
+    , renderTrait(renderTrait)
   {
     transformAttr = TransformAttribute::Make();
     api->observe(transformAttr);
@@ -118,9 +114,10 @@ PaintNode::PaintNode(
   const std::string& name,
   EObjectType        type,
   const std::string& guid,
+  ERenderTrait       renderTrait,
   bool               initBase)
   : VNode(cnt)
-  , d_ptr(new PaintNode__pImpl(this, type, initBase))
+  , d_ptr(new PaintNode__pImpl(this, type, renderTrait, initBase))
 {
   d_ptr->guid = guid;
   d_ptr->name = name;
@@ -187,7 +184,7 @@ Transform PaintNode::mapTransform(const PaintNode* node) const
 void PaintNode::render(Renderer* renderer)
 {
   VGG_IMPL(PaintNode);
-  if (!_->visible)
+  if (!isVisible())
     return;
   auto canvas = renderer->canvas();
   {
@@ -198,28 +195,16 @@ void PaintNode::render(Renderer* renderer)
     {
       SkAutoCanvasRestore acr(canvas, true);
       canvas->concat(toSkMatrix(transform().matrix()));
-      if (_->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY)
+
+      if (_->renderTrait & ERenderTraitBits::RT_RENDER_SELF)
       {
-        paintSelf(renderer);
+        onPaint(renderer);
       }
-      else if (_->paintOption.paintStrategy == EPaintStrategy::PS_RECURSIVELY)
-      {
-        paintSelf(renderer);
-        paintChildren(renderer);
-      }
-      else if (_->paintOption.paintStrategy == EPaintStrategy::PS_CHILDONLY)
+      if (_->renderTrait & ERenderTraitBits::RT_RENDER_CHILDREN)
       {
         paintChildren(renderer);
       }
     }
-  }
-}
-void PaintNode::paintSelf(Renderer* renderer)
-{
-  VGG_IMPL(PaintNode);
-  if (_->renderable)
-  {
-    this->onPaint(renderer);
   }
 }
 
@@ -242,7 +227,7 @@ void PaintNode::debug(Renderer* render)
   strokePen.setColor(SK_ColorRED);
   strokePen.setStrokeWidth(2);
   canvas->drawRect(toSkRect(bounds().map(transform().inverse())), strokePen);
-  if (hoverBounds && d_ptr->renderNode && d_ptr->renderable)
+  if (hoverBounds && d_ptr->renderNode && (d_ptr->renderTrait & ERenderTraitBits::RT_RENDER_SELF))
     d_ptr->renderNode->debug(render);
   for (const auto& e : m_children)
   {
@@ -547,19 +532,13 @@ Bounds PaintNode::onRevalidate()
   }
   _->transformAttr->revalidate();
 
-  if (
-    _->paintOption.paintStrategy == EPaintStrategy::PS_SELFONLY ||
-    _->paintOption.paintStrategy == EPaintStrategy::PS_RECURSIVELY)
+  if (_->renderTrait & ERenderTraitBits::RT_RENDER_SELF)
   {
     auto currentNodeBounds =
       _->renderNode->revalidate(); // This will trigger the shape attribute get the
     bounds.unionWith(currentNodeBounds);
-    _->renderable = true;
   }
-  else
-  {
-    _->renderable = false;
-  }
+
   return bounds.bounds(transform());
 }
 const std::string& PaintNode::guid() const
@@ -606,21 +585,9 @@ const ContourOption& PaintNode::maskOption() const
   return d_ptr->maskOption;
 }
 
-void PaintNode::setPaintOption(PaintOption option)
-{
-  VGG_IMPL(PaintNode);
-  _->paintOption = option;
-}
-
-const PaintOption& PaintNode::paintOption() const
-{
-  return d_ptr->paintOption;
-}
-
 void PaintNode::paintChildren(Renderer* renderer)
 {
 
-  VGG_IMPL(PaintNode);
   std::vector<PaintNode*> masked;
   std::vector<PaintNode*> noneMasked;
   for (const auto& p : this->m_children)
@@ -638,22 +605,11 @@ void PaintNode::paintChildren(Renderer* renderer)
       noneMasked.push_back(c);
     }
   }
-
   auto paintCall = [&](std::vector<PaintNode*>& nodes)
   {
-    if (_->contextSetting.transparencyKnockoutGroup)
+    for (const auto& p : nodes)
     {
-      for (const auto& p : nodes)
-      {
-        p->render(renderer);
-      }
-    }
-    else
-    {
-      for (const auto& p : nodes)
-      {
-        p->render(renderer);
-      }
+      p->render(renderer);
     }
   };
 

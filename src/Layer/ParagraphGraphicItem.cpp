@@ -30,14 +30,6 @@ void ParagraphItem::render(Renderer* renderer)
 {
   if (m_paragraphLayout->empty())
     return;
-  // auto canvas = renderer->canvas();
-  // const auto clip = (q_ptr->overflow() == OF_HIDDEN || q_ptr->overflow() == OF_SCROLL);
-  // if (clip)
-  // {
-  //   canvas->save();
-  //   auto bounds = q_ptr->makeBoundsPath();
-  //   bounds.clip(canvas, SkClipOp::kIntersect);
-  // }
   if (m_anchor && !m_paragraphLayout->paragraphCache.empty())
   {
     auto offsetY = m_anchor->y - m_paragraphLayout->firstBaseline();
@@ -47,10 +39,6 @@ void ParagraphItem::render(Renderer* renderer)
   {
     m_painter->paintParagraph(renderer);
   }
-  // if (clip)
-  // {
-  //   canvas->restore();
-  // }
 }
 
 Bounds ParagraphItem::onRevalidate()

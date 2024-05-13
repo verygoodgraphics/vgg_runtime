@@ -944,7 +944,24 @@ void UIView::frame()
 
 bool UIView::isDirty()
 {
-  return m_isDirty || m_impl->isAnimating();
+  if (m_isDirty)
+  {
+    return true;
+  }
+  else if (m_impl->isAnimating())
+  {
+    m_paintOnceMoreAfterAnimation = true;
+    return true;
+  }
+  else if (m_paintOnceMoreAfterAnimation)
+  {
+    m_paintOnceMoreAfterAnimation = false;
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
 
 bool UIView::setCurrentPageIndexAnimated(

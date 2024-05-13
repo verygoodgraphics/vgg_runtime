@@ -109,6 +109,7 @@ private:
   ScalarType m_left{ 0 };
 
   bool m_isDirty{ false };
+  bool m_paintOnceMoreAfterAnimation{ false };
   bool m_skipUntilNextLoop{ false };
   bool m_isZoomerEnabled{ true };
   bool m_drawGrayBackground{ false };

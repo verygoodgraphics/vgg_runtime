@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include "Application/UIAnimation.hpp"
 #include "Application/UIEvent.hpp"
 #include "Application/UIScrollView.hpp"
 #include "Domain/Daruma.hpp"
@@ -71,6 +72,9 @@ private:
   rxcpp::observer<VGG::ModelEventPtr>       m_modelObserver;
   rxcpp::observer<VGG::ModelEventPtr>       m_editModelObserver;
 
+  app::UIAnimationOption m_lastPresentStateAnimationOptions;
+  app::UIAnimationOption m_lastPresentPageAnimationOptions;
+
 public:
   Presenter(std::shared_ptr<Mouse> mouse = nullptr)
     : m_mouse{ mouse }
@@ -112,9 +116,7 @@ public:
   void initHistory();
   bool goBack(bool resetScrollPosition, bool resetState);
 
-  void                       saveState(std::shared_ptr<StateTree> stateTree);
   std::shared_ptr<StateTree> savedState();
-  void                       restoreState();
 
   void triggerMouseEnter();
 
@@ -265,10 +267,20 @@ public:
     const app::UIAnimationOption& options,
     app::AnimationCompletion      completion);
   bool presentInstanceState(
-    const LayoutNode*             oldNode,
-    const LayoutNode*             newNode,
-    const app::UIAnimationOption& options,
-    app::AnimationCompletion      completion);
+    const std::shared_ptr<StateTree>& oldState,
+    const LayoutNode*                 oldNode,
+    const LayoutNode*                 newNode,
+    const app::UIAnimationOption&     options,
+    app::AnimationCompletion          completion);
+
+  const app::UIAnimationOption& dismissStateAnimationOptions() const
+  {
+    return m_lastPresentStateAnimationOptions;
+  }
+  const app::UIAnimationOption& dismissPageAnimationOptions() const
+  {
+    return m_lastPresentPageAnimationOptions;
+  }
 
 public:
   bool updateViewNodeFillColor(

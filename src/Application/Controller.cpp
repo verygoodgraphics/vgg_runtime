@@ -748,8 +748,8 @@ bool Controller::presentState(
     instanceState.presentState(instanceDescendantId, listenerId, stateMasterId, stateTree.get());
   if (result.success)
   {
-    m_presenter->saveState(stateTree);
     return m_presenter->presentInstanceState(
+      stateTree,
       result.oldTree.get(),
       result.newTree.get(),
       options.animation,
@@ -763,15 +763,16 @@ bool Controller::dismissState(const std::string& instanceDescendantId)
   auto          page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
   InstanceState instanceState{ page, m_expander, m_layout };
 
-  auto success =
-    instanceState.dismissState(m_presenter->savedState().get(), instanceDescendantId).success;
-  if (success)
+  auto result = instanceState.dismissState(m_presenter->savedState().get(), instanceDescendantId);
+  if (result.success)
   {
-    m_presenter->restoreState();
-    m_presenter->update();
-    m_presenter->triggerMouseEnter();
+    m_presenter->setInstanceState(
+      result.oldTree.get(),
+      result.newTree.get(),
+      m_presenter->dismissStateAnimationOptions(),
+      [this](bool) { m_presenter->triggerMouseEnter(); });
   }
-  return success;
+  return result.success;
 }
 
 void Controller::setFitToViewportEnabled(bool enabled)

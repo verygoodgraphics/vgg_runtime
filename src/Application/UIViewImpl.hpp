@@ -95,11 +95,6 @@ public:
     const LayoutNode*             newNode,
     const app::UIAnimationOption& options,
     app::AnimationCompletion      completion);
-  bool presentInstanceState(
-    const LayoutNode*             oldNode,
-    const LayoutNode*             newNode,
-    const app::UIAnimationOption& options,
-    app::AnimationCompletion      completion);
 
 public:
   void setBackgroundColor(uint32_t color);

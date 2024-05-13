@@ -231,19 +231,6 @@ bool UIViewImpl::setInstanceState(
   return true;
 }
 
-bool UIViewImpl::presentInstanceState(
-  const LayoutNode*             oldNode,
-  const LayoutNode*             newNode,
-  const app::UIAnimationOption& options,
-  app::AnimationCompletion      completion)
-{
-  if (!oldNode || !newNode)
-    return false;
-
-  transition(oldNode, newNode, options, completion, true);
-  return true;
-}
-
 void UIViewImpl::transition(
   const LayoutNode*             inFromNode,
   const LayoutNode*             inToNode,

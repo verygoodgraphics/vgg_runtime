@@ -66,6 +66,7 @@ private:
   std::shared_ptr<LayoutNode> findInstanceNode(
     const std::string& instanceDescendantId,
     const std::string& listenerId);
+  Result makeResultWithOldTree(const std::shared_ptr<LayoutNode>& instanceNode);
 };
 
 } // namespace VGG

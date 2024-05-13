@@ -64,6 +64,8 @@ public:
 protected:
   void   dispatchEvent(void* event) override;
   Bounds onRevalidate() override;
+
+  void onPaint(Renderer* renderer) override;
 };
 
 } // namespace VGG::layer

@@ -147,8 +147,8 @@ void SceneNode::debug(Renderer* render)
   ASSERT(canvas);
   SkPaint strokePen;
   strokePen.setStyle(SkPaint::kStroke_Style);
-  strokePen.setColor(SK_ColorYELLOW);
-  strokePen.setStrokeWidth(2);
+  strokePen.setColor(SK_ColorCYAN);
+  strokePen.setStrokeWidth(3);
   canvas->drawRect(toSkRect(bounds()), strokePen);
   for (auto& frame : d_ptr->frames)
   {

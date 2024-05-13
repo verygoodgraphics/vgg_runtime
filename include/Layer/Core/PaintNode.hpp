@@ -48,21 +48,13 @@ struct ContourOption
   }
 };
 
-enum EPaintStrategy
+enum ERenderTraitBits : uint8_t
 {
-  PS_RECURSIVELY,
-  PS_SELFONLY,
-  PS_CHILDONLY,
+  RT_RENDER_SELF = 1,
+  RT_RENDER_CHILDREN = 1 << 1,
+  RT_DEFAULT = RT_RENDER_SELF | RT_RENDER_CHILDREN,
 };
-
-struct PaintOption
-{
-  EPaintStrategy paintStrategy{ PS_RECURSIVELY };
-  PaintOption(EPaintStrategy paintStrategy = PS_RECURSIVELY)
-    : paintStrategy(paintStrategy)
-  {
-  }
-};
+using ERenderTrait = uint8_t;
 
 using ContourData = std::optional<ShapeData>;
 
@@ -101,6 +93,7 @@ public:
     const std::string& name,
     EObjectType        type,
     const std::string& guid,
+    ERenderTrait       renderTrait,
     bool               initBase = true);
 
   void addChild(const PaintNodePtr node);
@@ -215,10 +208,6 @@ public:
 
   const ContourOption& maskOption() const;
 
-  void setPaintOption(PaintOption option);
-
-  const PaintOption& paintOption() const;
-
   virtual VShape asVisualShape(const Transform* transform);
 
 #ifdef VGG_LAYER_DEBUG
@@ -250,7 +239,6 @@ public:
 
 protected:
   void                paintChildren(Renderer* renderer);
-  void                paintSelf(Renderer* renderer);
   void                render(Renderer* renderer);
   virtual void        onPaint(Renderer* renderer);
   virtual void        dispatchEvent(void* event);

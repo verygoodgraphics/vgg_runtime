@@ -48,7 +48,7 @@ public:
 };
 
 TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
-  : PaintNode(cnt, name, VGG_TEXT, std::move(guid), false)
+  : PaintNode(cnt, name, VGG_TEXT, std::move(guid), RT_DEFAULT, false)
   , d_ptr(new TextNode__pImpl(this))
 {
   auto               t = incRef(transformAttribute());
@@ -112,6 +112,23 @@ void TextNode::dispatchEvent(void* event)
     d_ptr->paragraphNodeEventHandler(
       static_cast<ParagraphItemAttributeAccessor*>(attributeAccessor()),
       event);
+  }
+}
+
+void TextNode::onPaint(Renderer* renderer)
+{
+  auto       canvas = renderer->canvas();
+  const auto clip = (overflow() == OF_HIDDEN || overflow() == OF_SCROLL);
+  if (clip)
+  {
+    canvas->save();
+    auto bounds = makeBoundsPath();
+    bounds.clip(canvas, SkClipOp::kIntersect);
+  }
+  PaintNode::onPaint(renderer);
+  if (clip)
+  {
+    canvas->restore();
   }
 }
 

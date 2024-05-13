@@ -47,7 +47,7 @@ public:
 };
 
 ImageNode::ImageNode(VRefCnt* cnt, const std::string& name, std::string guid)
-  : PaintNode(cnt, name, VGG_IMAGE, std::move(guid), false)
+  : PaintNode(cnt, name, VGG_IMAGE, std::move(guid), RT_DEFAULT, false)
   , d_ptr(new ImageNode__pImpl(this))
 {
 

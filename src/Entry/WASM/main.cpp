@@ -98,6 +98,8 @@ extern "C"
 
   void emscripten_main(int width, int height, bool editMode) // NOLINT
   {
+    INFO("#vgg runtime version: %s", VGG::Version::get().c_str());
+
     Config::readGlobalConfig("/asset/etc/config.json");
 
     VGG::app::AppConfig cfg;

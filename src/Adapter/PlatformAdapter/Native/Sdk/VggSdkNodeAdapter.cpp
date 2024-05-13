@@ -210,6 +210,38 @@ const ISdk::StateOptions toStateOptions(napi_env env, napi_value value)
   return options;
 }
 
+const ISdk::FrameOptions toFrameOptions(napi_env env, napi_value value)
+{
+  return toStateOptions(env, value);
+}
+
+const app::PopOptions toPopOptions(napi_env env, napi_value value)
+{
+  app::PopOptions options;
+  {
+    bool hasProperty = false;
+    napi_has_named_property(env, value, "resetScrollPosition", &hasProperty);
+    if (hasProperty)
+    {
+      napi_value v;
+      napi_get_named_property(env, value, "resetScrollPosition", &v);
+      napi_get_value_bool(env, v, &options.resetScrollPosition);
+    }
+  }
+  {
+    bool hasProperty = false;
+    napi_has_named_property(env, value, "resetState", &hasProperty);
+    if (hasProperty)
+    {
+      napi_value v;
+      napi_get_named_property(env, value, "resetState", &v);
+      napi_get_value_bool(env, v, &options.resetState);
+    }
+  }
+
+  return options;
+}
+
 } // namespace
 
 napi_ref VggSdkNodeAdapter::constructor;
@@ -247,13 +279,17 @@ void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
     DECLARE_NODE_API_PROPERTY("updateElement", UpdateElement),
     DECLARE_NODE_API_PROPERTY("getDesignDocument", GetDesignDocument),
 
+    DECLARE_NODE_API_PROPERTY("pushFrame", pushFrame),
+    DECLARE_NODE_API_PROPERTY("popFrame", popFrame),
+    DECLARE_NODE_API_PROPERTY("presentFrame", presentFrame),
+    DECLARE_NODE_API_PROPERTY("dismissFrame", dismissFrame),
+    DECLARE_NODE_API_PROPERTY("nextFrame", nextFrame),
+    DECLARE_NODE_API_PROPERTY("previousFrame", previousFrame),
+    // deprecated
     DECLARE_NODE_API_PROPERTY("setCurrentFrameById", setCurrentFrameById),
     DECLARE_NODE_API_PROPERTY("setCurrentFrameByIdAnimated", setCurrentFrameByIdAnimated),
     DECLARE_NODE_API_PROPERTY("presentFrameById", presentFrameById),
-    DECLARE_NODE_API_PROPERTY("dismissFrame", dismissFrame),
     DECLARE_NODE_API_PROPERTY("goBack", goBack),
-    DECLARE_NODE_API_PROPERTY("nextFrame", nextFrame),
-    DECLARE_NODE_API_PROPERTY("previousFrame", previousFrame),
 
     DECLARE_NODE_API_PROPERTY("setState", setState),
     DECLARE_NODE_API_PROPERTY("presentState", presentState),
@@ -1270,6 +1306,122 @@ napi_value VggSdkNodeAdapter::setCurrentTheme(napi_env env, napi_callback_info i
     bool success{ false };
     SyncTaskInMainLoop<bool>{ [&sdk = sdkAdapter->m_vggSdk, &themeName]()
                               { return sdk->setCurrentTheme(themeName); },
+                              [&success](bool result) { success = result; } }();
+
+    napi_value ret;
+    NODE_API_CALL(env, napi_get_boolean(env, success, &ret));
+    return ret;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+
+napi_value VggSdkNodeAdapter::pushFrame(napi_env env, napi_callback_info info)
+{
+  constexpr size_t ARG_COUNT = 2;
+  size_t           argc = ARG_COUNT;
+  napi_value       args[ARG_COUNT];
+  napi_value       _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc < ARG_COUNT)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    const auto& id = GetArgString(env, args[0]);
+    const auto& options = toFrameOptions(env, args[1]);
+
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
+
+    bool success{ false };
+    SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, &id, &options]()
+                              { return sdk->pushFrame(id, options); },
+                              [&success](bool result) { success = result; } }();
+
+    napi_value ret;
+    NODE_API_CALL(env, napi_get_boolean(env, success, &ret));
+    return ret;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+
+napi_value VggSdkNodeAdapter::popFrame(napi_env env, napi_callback_info info)
+{
+  constexpr size_t ARG_COUNT = 1;
+  size_t           argc = ARG_COUNT;
+  napi_value       args[ARG_COUNT];
+  napi_value       _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc < ARG_COUNT)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    const auto& options = toPopOptions(env, args[0]);
+
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
+
+    bool success{ false };
+    SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, &options]()
+                              { return sdk->popFrame(options); },
+                              [&success](bool result) { success = result; } }();
+
+    napi_value ret;
+    NODE_API_CALL(env, napi_get_boolean(env, success, &ret));
+    return ret;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+
+napi_value VggSdkNodeAdapter::presentFrame(napi_env env, napi_callback_info info)
+{
+  constexpr size_t ARG_COUNT = 2;
+  size_t           argc = ARG_COUNT;
+  napi_value       args[ARG_COUNT];
+  napi_value       _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc < ARG_COUNT)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    const auto& id = GetArgString(env, args[0]);
+    const auto& options = toFrameOptions(env, args[1]);
+
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
+
+    bool success{ false };
+    SyncTaskInMainLoop<bool>{ [sdk = sdkAdapter->m_vggSdk, &id, &options]()
+                              { return sdk->presentFrame(id, options); },
                               [&success](bool result) { success = result; } }();
 
     napi_value ret;

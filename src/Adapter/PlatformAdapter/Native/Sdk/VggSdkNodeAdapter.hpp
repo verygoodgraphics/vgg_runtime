@@ -53,13 +53,19 @@ private:
   static napi_value UpdateElement(napi_env env, napi_callback_info info);
 
   // frame
-  static napi_value setCurrentFrameById(napi_env env, napi_callback_info info);
-  static napi_value setCurrentFrameByIdAnimated(napi_env env, napi_callback_info info);
-  static napi_value presentFrameById(napi_env env, napi_callback_info info);
+  static napi_value pushFrame(napi_env env, napi_callback_info info);
+  static napi_value popFrame(napi_env env, napi_callback_info info);
+  static napi_value presentFrame(napi_env env, napi_callback_info info);
   static napi_value dismissFrame(napi_env env, napi_callback_info info);
-  static napi_value goBack(napi_env env, napi_callback_info info);
   static napi_value nextFrame(napi_env env, napi_callback_info info);
   static napi_value previousFrame(napi_env env, napi_callback_info info);
+
+  [[deprecated]] static napi_value setCurrentFrameById(napi_env env, napi_callback_info info);
+  [[deprecated]] static napi_value setCurrentFrameByIdAnimated(
+    napi_env           env,
+    napi_callback_info info);
+  [[deprecated]] static napi_value presentFrameById(napi_env env, napi_callback_info info);
+  [[deprecated]] static napi_value goBack(napi_env env, napi_callback_info info);
 
   // instance state
   static napi_value setState(napi_env env, napi_callback_info info);

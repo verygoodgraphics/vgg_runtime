@@ -196,9 +196,8 @@ public:
   bool dismissPage();
   bool goBack(bool resetScrollPosition, bool resetState);
 
-  void                       saveState(std::shared_ptr<StateTree> stateTree);
+  void                       saveState(const std::shared_ptr<StateTree>& stateTree);
   std::shared_ptr<StateTree> savedState();
-  void                       restoreState();
 
   void enableZoomer(bool enabled);
 
@@ -287,6 +286,8 @@ private:
     int               motionY);
 
   bool handleTouchEvent(int x, int y, int motionX, int motionY, EUIEventType type);
+
+  void restoreState();
 };
 
 } // namespace VGG

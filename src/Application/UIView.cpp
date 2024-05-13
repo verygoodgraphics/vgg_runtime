@@ -861,7 +861,7 @@ bool UIView::goBack(bool resetScrollPosition, bool resetState)
   return false;
 }
 
-void UIView::saveState(std::shared_ptr<StateTree> stateTree)
+void UIView::saveState(const std::shared_ptr<StateTree>& stateTree)
 {
   DEBUG("UIView::saveState, save state tree: %s", stateTree->id().c_str());
   m_stateTree = stateTree;
@@ -990,7 +990,7 @@ bool UIView::presentInstanceState(
   const app::UIAnimationOption& options,
   app::AnimationCompletion      completion)
 {
-  return m_impl->presentInstanceState(oldNode, newNode, options, completion);
+  return m_impl->setInstanceState(oldNode, newNode, options, completion);
 }
 
 } // namespace VGG

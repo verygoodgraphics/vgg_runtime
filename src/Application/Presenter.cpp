@@ -290,22 +290,10 @@ bool Presenter::goBack(bool resetScrollPosition, bool resetState)
   return m_view->goBack(resetScrollPosition, resetState);
 }
 
-void Presenter::saveState(std::shared_ptr<StateTree> stateTree)
-{
-  ASSERT(m_view);
-  m_view->saveState(stateTree);
-}
-
 std::shared_ptr<StateTree> Presenter::savedState()
 {
   ASSERT(m_view);
   return m_view->savedState();
-}
-
-void Presenter::restoreState()
-{
-  ASSERT(m_view);
-  m_view->restoreState();
 }
 
 void Presenter::triggerMouseEnter()
@@ -431,10 +419,14 @@ bool Presenter::setInstanceState(
 }
 
 bool Presenter::presentInstanceState(
-  const LayoutNode*             oldNode,
-  const LayoutNode*             newNode,
-  const app::UIAnimationOption& options,
-  app::AnimationCompletion      completion)
+  const std::shared_ptr<StateTree>& oldState,
+  const LayoutNode*                 oldNode,
+  const LayoutNode*                 newNode,
+  const app::UIAnimationOption&     options,
+  app::AnimationCompletion          completion)
 {
-  return m_view->presentInstanceState(oldNode, newNode, options, completion);
+  m_lastPresentStateAnimationOptions = options;
+  bool success = m_view->setInstanceState(oldNode, newNode, options, completion);
+  m_view->saveState(oldState);
+  return success;
 }

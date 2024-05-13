@@ -55,13 +55,8 @@ InstanceState::Result InstanceState::setState(
 
   auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode());
   ASSERT(pInstance);
-  Result ret;
-  ret.success = true;
-  auto ele = pInstance->cloneTree();
-  ret.oldTree = std::make_shared<SnapshotTree>(ele);
-  Layout::Layout::buildSubtree(ret.oldTree.get());
-  ret.newTree = instanceNode;
 
+  auto ret = makeResultWithOldTree(instanceNode);
   pInstance->resetState();
 
   DEBUG(
@@ -102,13 +97,7 @@ InstanceState::Result InstanceState::presentState(
     return {};
   }
 
-  Result ret;
-  ret.success = true;
-  auto ele = pInstance->cloneTree();
-  ret.oldTree = std::make_shared<SnapshotTree>(ele);
-  Layout::Layout::buildSubtree(ret.oldTree.get());
-  ret.newTree = instanceNode;
-
+  auto ret = makeResultWithOldTree(instanceNode);
   DEBUG(
     "clone tree size: element: original =  %zu, cloned = %zu; layout: original = %zu, cloned = %zu",
     pInstance->size(),
@@ -168,6 +157,7 @@ InstanceState::Result InstanceState::dismissState(
     pInstance->masterId().c_str(),
     instanceDescendantId.c_str());
 
+  auto ret = makeResultWithOldTree(instanceNode);
   auto oldMasterId = pInstance->dissmissState();
   DEBUG(
     "instance %s, dismiss state, back to master id %s",
@@ -176,8 +166,6 @@ InstanceState::Result InstanceState::dismissState(
 
   setState(instanceNode, oldMasterId);
 
-  Result ret;
-  ret.success = true;
   return ret;
 }
 
@@ -192,9 +180,6 @@ void InstanceState::setState(
 
   // expand again
   m_expander->expandInstance(*pInstance, stateMasterId);
-
-  // update view model
-  // render
 }
 
 std::shared_ptr<LayoutNode> InstanceState::findInstanceNode(
@@ -220,6 +205,23 @@ std::shared_ptr<LayoutNode> InstanceState::findInstanceNode(
     node = node->parent();
   }
   return instanceNode;
+}
+
+InstanceState::Result InstanceState::makeResultWithOldTree(
+  const std::shared_ptr<LayoutNode>& instanceNode)
+{
+  ASSERT(instanceNode);
+  auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode());
+  ASSERT(pInstance);
+
+  Result ret;
+  ret.success = true;
+  auto ele = pInstance->cloneTree();
+  ret.oldTree = std::make_shared<SnapshotTree>(ele);
+  Layout::Layout::buildSubtree(ret.oldTree.get());
+  ret.newTree = instanceNode;
+
+  return ret;
 }
 
 } // namespace VGG

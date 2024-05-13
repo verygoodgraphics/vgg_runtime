@@ -107,7 +107,7 @@ bool UIViewImpl::setPageIndexAnimated(
     option,
     [this, index, completion](bool)
     {
-      m_api->setCurrentPageIndex(index, true); // clear context
+      setPageIndex(index);
       if (completion)
         completion(true); // todo false for unfinished
     });

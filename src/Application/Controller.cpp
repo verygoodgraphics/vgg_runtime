@@ -287,7 +287,7 @@ void Controller::onResize()
     auto pageIndexForViewport = m_model->getFrameIndexForWidth(m_presenter->viewSize().width);
     if (pageIndexForViewport != -1 && currentPageIndex != pageIndexForViewport)
     {
-      m_presenter->setCurrentPageIndex(pageIndexForViewport, true);
+      m_presenter->setCurrentFrameIndex(pageIndexForViewport, true);
     }
     scaleContentUpdateViewModelAndFit();
   }
@@ -345,12 +345,13 @@ void Controller::start()
   auto pageIndexForViewport = m_model->getFrameIndexForWidth(m_presenter->viewSize().width);
   if (pageIndexForViewport != -1)
   {
-    pageChanged = m_presenter->setCurrentPageIndex(pageIndexForViewport, false);
+    pageChanged = m_presenter->setCurrentFrameIndex(pageIndexForViewport, false);
   }
   else
   {
-    pageChanged =
-      m_presenter->setCurrentPageIndex(m_model->getFrameIndexById(m_model->launchFrameId()), false);
+    pageChanged = m_presenter->setCurrentFrameIndex(
+      m_model->getFrameIndexById(m_model->launchFrameId()),
+      false);
   }
   m_presenter->initHistory();
   if (pageChanged)
@@ -682,12 +683,7 @@ std::string Controller::currentFrameId() const
 
 bool Controller::dismissFrame()
 {
-  const auto success = m_presenter->dismissPage();
-  if (success)
-  {
-    m_presenter->triggerMouseEnter();
-  }
-  return success;
+  return m_presenter->dismissFrame([this](bool) { m_presenter->triggerMouseEnter(); });
 }
 
 bool Controller::setState(
@@ -770,7 +766,7 @@ bool Controller::setCurrentTheme(const std::string& theme)
     auto pageIndexForViewport = m_model->getFrameIndexForWidth(m_presenter->viewSize().width);
     if (pageIndexForViewport != m_presenter->currentPageIndex())
     {
-      m_presenter->setCurrentPageIndex(pageIndexForViewport, true);
+      m_presenter->setCurrentFrameIndex(pageIndexForViewport, true);
     }
   }
   return ret;
@@ -813,7 +809,7 @@ const std::string Controller::getFramesInfo() const
 
 bool Controller::nextFrame()
 {
-  if (m_presenter->setCurrentPageIndex(m_presenter->currentPageIndex() + 1, true))
+  if (m_presenter->setCurrentFrameIndex(m_presenter->currentPageIndex() + 1, true))
   {
     fitPage();
     return true;
@@ -823,7 +819,7 @@ bool Controller::nextFrame()
 
 bool Controller::previouseFrame()
 {
-  if (m_presenter->setCurrentPageIndex(m_presenter->currentPageIndex() - 1, true))
+  if (m_presenter->setCurrentFrameIndex(m_presenter->currentPageIndex() - 1, true))
   {
     fitPage();
     return true;
@@ -1005,10 +1001,8 @@ bool Controller::pushFrame(const std::string& id, const app::FrameOptions& opts)
   ASSERT(m_model);
   const auto index = m_model->getFrameIndexById(id);
   scaleContentAndUpdate(index);
-  return m_presenter->setCurrentPageIndexAnimated(
-    index,
-    opts.animation,
-    [this](bool) { fitPage(); });
+  return m_presenter
+    ->setCurrentFrameIndex(index, true, opts.animation, [this](bool) { fitPage(); });
 }
 bool Controller::popFrame(const app::PopOptions& opts)
 {
@@ -1023,10 +1017,6 @@ bool Controller::presentFrame(const std::string& id, const app::FrameOptions& op
 {
   ASSERT(m_model);
   const auto index = m_model->getFrameIndexById(id);
-  const auto success = m_presenter->presentPage(index);
-  if (success)
-  {
-    m_presenter->triggerMouseEnter();
-  }
-  return success;
+  scaleContentAndUpdate(index);
+  return m_presenter->presentFrame(index, opts, [this](bool) { fitPage(); });
 }

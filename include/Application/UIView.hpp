@@ -20,6 +20,7 @@
 
 #include "Application/Event/EventListener.hpp"
 #include "Application/UIAnimation.hpp"
+#include "Application/UIOptions.hpp"
 #include "Domain/Layout/Rect.hpp"
 #include "Layer/Core/FrameNode.hpp"
 
@@ -188,13 +189,16 @@ public:
   int currentPageIndex();
 
   void initHistory();
-  bool setCurrentPageIndex(int index, bool updateHistory);
-  bool setCurrentPageIndexAnimated(
-    std::size_t                   index,
-    const app::UIAnimationOption& option,
-    VGG::app::AnimationCompletion completion = app::AnimationCompletion());
-  bool presentPage(int index);
-  bool dismissPage();
+  bool setCurrentFrameIndex(
+    const std::size_t                   index,
+    const bool                          updateHistory,
+    const app::UIAnimationOption&       option = {},
+    const VGG::app::AnimationCompletion completion = {});
+  bool presentFrame(
+    const int                index,
+    const app::FrameOptions& opts,
+    app::AnimationCompletion completion = {});
+  bool dismissFrame(const app::FrameOptions& opts, app::AnimationCompletion completion = {});
   bool goBack(bool resetScrollPosition, bool resetState);
 
   void                       saveState(const std::shared_ptr<StateTree>& stateTree);

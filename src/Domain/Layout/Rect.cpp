@@ -145,10 +145,9 @@ Rect Rect::makeFromPoints(const std::vector<Point>& points)
 
 Rect Rect::makeFromPoints(const std::vector<BezierPoint>& points, bool isClosed)
 {
-  ASSERT(points.size() > 1);
-
   if (points.empty())
   {
+    WARN("Rect::makeFromPoints: empty points");
     return {};
   }
 

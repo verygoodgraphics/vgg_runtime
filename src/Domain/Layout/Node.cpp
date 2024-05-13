@@ -1252,6 +1252,11 @@ Layout::Rect LayoutNode::resizeContour(
   // get model point
   const bool                       isClosed = pModel->closed;
   std::vector<Layout::BezierPoint> oldModelPoints = contourElement.points();
+  if (oldModelPoints.empty())
+  {
+    WARN("LayoutNode::resizeContour: empty points");
+    return {};
+  }
 
   // multiply matrix, to layout point
   const auto                       oldModelMatrix = modelMatrix();

@@ -199,7 +199,7 @@ public:
     const app::FrameOptions& opts,
     app::AnimationCompletion completion = {});
   bool dismissFrame(const app::FrameOptions& opts, app::AnimationCompletion completion = {});
-  bool goBack(bool resetScrollPosition, bool resetState);
+  bool popFrame(const app::PopOptions& popOpts, const app::UIAnimationOption& animationOpts);
 
   void                       saveState(const std::shared_ptr<StateTree>& stateTree);
   std::shared_ptr<StateTree> savedState();

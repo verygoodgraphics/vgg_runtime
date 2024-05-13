@@ -1001,12 +1001,11 @@ bool Controller::pushFrame(const std::string& id, const app::FrameOptions& opts)
   ASSERT(m_model);
   const auto index = m_model->getFrameIndexById(id);
   scaleContentAndUpdate(index);
-  return m_presenter
-    ->setCurrentFrameIndex(index, true, opts.animation, [this](bool) { fitPage(); });
+  return m_presenter->setCurrentFrameIndex(index, true, opts, [this](bool) { fitPage(); });
 }
 bool Controller::popFrame(const app::PopOptions& opts)
 {
-  if (m_presenter->goBack(opts.resetScrollPosition, opts.resetState))
+  if (m_presenter->popFrame(opts))
   {
     fitPage();
     return true;

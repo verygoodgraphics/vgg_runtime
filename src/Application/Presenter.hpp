@@ -74,6 +74,7 @@ private:
   rxcpp::observer<VGG::ModelEventPtr>       m_editModelObserver;
 
   app::UIAnimationOption m_lastPresentStateAnimationOptions;
+  app::UIAnimationOption m_lastPushFrameAnimationOptions;
   app::FrameOptions      m_lastPresentFrameOptions;
 
 public:
@@ -110,7 +111,7 @@ public:
   bool setCurrentFrameIndex(
     const std::size_t              index,
     const bool                     updateHistory,
-    const app::UIAnimationOption&  option = {},
+    const app::FrameOptions&       option = {},
     const app::AnimationCompletion completion = {});
   bool presentFrame(
     const int                index,
@@ -118,9 +119,7 @@ public:
     app::AnimationCompletion completion);
   bool dismissFrame(app::AnimationCompletion completion);
   void initHistory();
-  bool goBack(bool resetScrollPosition, bool resetState);
-
-  std::shared_ptr<StateTree> savedState();
+  bool popFrame(const app::PopOptions& opts);
 
   void triggerMouseEnter();
 
@@ -277,13 +276,10 @@ public:
     const app::UIAnimationOption&     options,
     app::AnimationCompletion          completion);
 
+  std::shared_ptr<StateTree>    savedState();
   const app::UIAnimationOption& dismissStateAnimationOptions() const
   {
     return m_lastPresentStateAnimationOptions;
-  }
-  const app::UIAnimationOption& dismissPageAnimationOptions() const
-  {
-    return m_lastPresentFrameOptions.animation;
   }
 
 public:

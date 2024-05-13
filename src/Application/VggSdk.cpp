@@ -140,11 +140,7 @@ std::string VggSdk::currentFrameId() const
 
 bool VggSdk::setCurrentFrameById(const std::string& id, bool resetScrollPosition)
 {
-  if (auto c = controller())
-  {
-    return c->setCurrentFrameById(id);
-  }
-  return false;
+  return pushFrame(id, { resetScrollPosition, {} });
 }
 
 const std::string VggSdk::launchFrameId() const
@@ -174,14 +170,7 @@ bool VggSdk::setCurrentTheme(const std::string& theme)
 
 bool VggSdk::presentFrameById(const std::string& id, bool resetScrollPosition)
 {
-  if (auto currentEnv = env())
-  {
-    if (auto controller = currentEnv->controller())
-    {
-      return controller->presentFrameById(id);
-    }
-  }
-  return false;
+  return presentFrame(id, { resetScrollPosition, {} });
 }
 
 bool VggSdk::dismissFrame()
@@ -198,12 +187,7 @@ bool VggSdk::dismissFrame()
 
 bool VggSdk::goBack(bool resetScrollPosition, bool resetState)
 {
-  if (auto c = controller())
-  {
-    return c->goBack(resetScrollPosition, resetState);
-  }
-
-  return false;
+  return popFrame({ resetScrollPosition, resetState });
 }
 
 bool VggSdk::nextFrame()
@@ -519,15 +503,7 @@ bool VggSdk::setCurrentFrameByIdAnimated(
   bool                    resetScrollPosition,
   const AnimationOptions& inOption)
 {
-  auto c = controller();
-  if (!c)
-    return false;
-
-  app::UIAnimationOption option = toUIAnimationOption(inOption);
-  if (option.type == app::EAnimationType::NONE)
-    return setCurrentFrameById(id, resetScrollPosition);
-  else
-    return c->setCurrentFrameById(id, option);
+  return pushFrame(id, { resetScrollPosition, inOption });
 }
 
 bool VggSdk::updateElementFillColor(
@@ -543,4 +519,30 @@ bool VggSdk::updateElementFillColor(
   return false;
 }
 
+bool VggSdk::pushFrame(const std::string& id, const FrameOptions& inOpts)
+{
+  auto c = controller();
+  if (!c)
+    return false;
+
+  app::FrameOptions opts{ inOpts.resetScrollPosition, toUIAnimationOption(inOpts.animation) };
+  return c->pushFrame(id, opts);
+}
+bool VggSdk::popFrame(const app::PopOptions& opts)
+{
+  auto c = controller();
+  if (!c)
+    return false;
+
+  return c->popFrame(opts);
+}
+bool VggSdk::presentFrame(const std::string& id, const FrameOptions& inOpts)
+{
+  auto c = controller();
+  if (!c)
+    return false;
+
+  app::FrameOptions opts{ inOpts.resetScrollPosition, toUIAnimationOption(inOpts.animation) };
+  return c->presentFrame(id, opts);
+}
 } // namespace VGG

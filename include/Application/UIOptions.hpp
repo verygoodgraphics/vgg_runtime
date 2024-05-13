@@ -28,4 +28,10 @@ struct StateOptions
 
 using FrameOptions = StateOptions;
 
+struct PopOptions
+{
+  bool resetScrollPosition{ true };
+  bool resetState{ true };
+};
+
 } // namespace VGG::app

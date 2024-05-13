@@ -140,15 +140,14 @@ public:
   const std::string getFramesInfo() const;
 
   std::string currentFrameId() const;
-  bool        setCurrentFrameById(const std::string& id);
-  bool        setCurrentFrameById(const std::string& id, const app::UIAnimationOption& option);
 
+  bool pushFrame(const std::string& id, const app::FrameOptions& opts);
+  bool popFrame(const app::PopOptions& opts);
+  bool presentFrame(const std::string& id, const app::FrameOptions& opts);
+  bool dismissFrame();
   bool nextFrame();
   bool previouseFrame();
-  bool goBack(bool resetScrollPosition, bool resetState);
 
-  bool presentFrameById(const std::string& id);
-  bool dismissFrame();
   bool setCurrentTheme(const std::string& theme);
 
   bool setState(

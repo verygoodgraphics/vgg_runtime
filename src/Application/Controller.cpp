@@ -680,29 +680,6 @@ std::string Controller::currentFrameId() const
   return m_model->getFrameIdByIndex(m_presenter->currentPageIndex());
 }
 
-bool Controller::setCurrentFrameById(const std::string& id)
-{
-  ASSERT(m_model);
-  const auto index = m_model->getFrameIndexById(id);
-  scaleContentAndUpdate(index);
-  const auto success = m_presenter->setCurrentPageIndex(index, true);
-  if (success)
-    fitPage();
-  return success;
-}
-
-bool Controller::presentFrameById(const std::string& id)
-{
-  ASSERT(m_model);
-  const auto index = m_model->getFrameIndexById(id);
-  const auto success = m_presenter->presentPage(index);
-  if (success)
-  {
-    m_presenter->triggerMouseEnter();
-  }
-  return success;
-}
-
 bool Controller::dismissFrame()
 {
   const auto success = m_presenter->dismissPage();
@@ -847,16 +824,6 @@ bool Controller::nextFrame()
 bool Controller::previouseFrame()
 {
   if (m_presenter->setCurrentPageIndex(m_presenter->currentPageIndex() - 1, true))
-  {
-    fitPage();
-    return true;
-  }
-  return false;
-}
-
-bool Controller::goBack(bool resetScrollPosition, bool resetState)
-{
-  if (m_presenter->goBack(resetScrollPosition, resetState))
   {
     fitPage();
     return true;
@@ -1019,14 +986,6 @@ void Controller::layoutForEditing(std::size_t pageIndex)
   m_layout->layout(pageOriginalSize(pageIndex), pageIndex);
 }
 
-bool Controller::setCurrentFrameById(const std::string& id, const app::UIAnimationOption& option)
-{
-  ASSERT(m_model);
-  const auto index = m_model->getFrameIndexById(id);
-  scaleContentAndUpdate(index);
-  return m_presenter->setCurrentPageIndexAnimated(index, option, [this](bool) { fitPage(); });
-}
-
 bool Controller::updateElementFillColor(
   const std::string& id,
   const std::size_t  fillIndex,
@@ -1039,4 +998,35 @@ bool Controller::updateElementFillColor(
     return m_presenter->updateViewNodeFillColor(id, fillIndex, r, g, b, a);
 
   return false;
+}
+
+bool Controller::pushFrame(const std::string& id, const app::FrameOptions& opts)
+{
+  ASSERT(m_model);
+  const auto index = m_model->getFrameIndexById(id);
+  scaleContentAndUpdate(index);
+  return m_presenter->setCurrentPageIndexAnimated(
+    index,
+    opts.animation,
+    [this](bool) { fitPage(); });
+}
+bool Controller::popFrame(const app::PopOptions& opts)
+{
+  if (m_presenter->goBack(opts.resetScrollPosition, opts.resetState))
+  {
+    fitPage();
+    return true;
+  }
+  return false;
+}
+bool Controller::presentFrame(const std::string& id, const app::FrameOptions& opts)
+{
+  ASSERT(m_model);
+  const auto index = m_model->getFrameIndexById(id);
+  const auto success = m_presenter->presentPage(index);
+  if (success)
+  {
+    m_presenter->triggerMouseEnter();
+  }
+  return success;
 }

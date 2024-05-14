@@ -656,7 +656,8 @@ bool Controller::handleMouseWheel(float x, float y)
     return false;
   }
 
-  // y is step? SDL_emscriptenevents.c, Emscripten_HandleWheel: 100 pixels make up a step
+  // x,y is step, SDL_emscriptenevents.c, Emscripten_HandleWheel: 100 pixels make up a step
+  x *= 100;
   y *= 100;
 
   const auto& pageSize = currentPageSize();

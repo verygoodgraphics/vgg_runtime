@@ -165,8 +165,8 @@ void Presenter::setView(std::shared_ptr<UIScrollView> view)
 
 bool Presenter::handleTranslate(double pageWidth, double pageHeight, float x, float y)
 {
-  const auto [_, viewHeight] = viewSize();
-  if (viewHeight >= pageHeight)
+  const auto [viewWidth, viewHeight] = viewSize();
+  if ((viewWidth >= pageWidth) && (viewHeight >= pageHeight))
   {
     return false;
   }
@@ -174,12 +174,16 @@ bool Presenter::handleTranslate(double pageWidth, double pageHeight, float x, fl
   // vertical scoll
   const auto oldOffset = m_view->contentOffset();
   auto       newOffset = oldOffset;
+
+  newOffset.x += x;
+  newOffset.x = std::max(viewWidth - pageWidth, newOffset.x);
+  newOffset.x = std::min(newOffset.x, 0.0);
+
   newOffset.y += y;
-  // limit offset range
   newOffset.y = std::max(viewHeight - pageHeight, newOffset.y);
   newOffset.y = std::min(newOffset.y, 0.0);
 
-  if (doublesNearlyEqual(newOffset.y, oldOffset.y))
+  if (doublesNearlyEqual(newOffset.x, oldOffset.x) && doublesNearlyEqual(newOffset.y, oldOffset.y))
   {
     return false;
   }

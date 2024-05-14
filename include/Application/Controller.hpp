@@ -132,7 +132,7 @@ public:
   void setEventListener(EventListener listener);
   void listenAllEvents(bool enabled);
 
-  bool handleTranslate(float x, float y, bool isMouseWheel = false);
+  bool handleMouseWheel(float x, float y);
   bool handleTouchEvent(const VTouchEvent& evt);
 
 public:
@@ -193,7 +193,6 @@ private:
   void layoutForEditing();
 
   void scaleContent();
-  void aspectFill(Layout::Size size);
 
   void layoutForEditing(std::size_t pageIndex);
   void scaleContent(std::size_t pageIndex);

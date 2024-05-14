@@ -194,8 +194,13 @@ public:
     const bool                          updateHistory,
     const app::UIAnimationOption&       option = {},
     const VGG::app::AnimationCompletion completion = {});
+  bool pushFrame(
+    const std::size_t                   index,
+    const bool                          updateHistory,
+    const app::UIAnimationOption&       option = {},
+    const VGG::app::AnimationCompletion completion = {});
   bool presentFrame(
-    const int                index,
+    const std::size_t        index,
     const app::FrameOptions& opts,
     app::AnimationCompletion completion = {});
   bool dismissFrame(const app::FrameOptions& opts, app::AnimationCompletion completion = {});
@@ -248,6 +253,7 @@ private:
   Layout::Point               converPointFromWindowAndScale(Layout::Point point);
   std::shared_ptr<LayoutNode> currentPage();
   std::shared_ptr<LayoutNode> pageById(const std::string& id);
+  const std::string           pageIdByIndex(std::size_t index);
 
   bool handleMouseEvent(
     int          jsButtonIndex,

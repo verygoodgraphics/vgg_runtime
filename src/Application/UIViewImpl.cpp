@@ -100,7 +100,10 @@ bool UIViewImpl::setPageIndexAnimated(
   const auto& fromPage = pages[oldIndex];
   const auto& toPage = pages[index];
 
-  DEBUG("from page: %s, to page: %s", fromPage->id().c_str(), toPage->id().c_str());
+  DEBUG(
+    "UIViewImpl::setPageIndexAnimated: from page: %s, to page: %s",
+    fromPage->id().c_str(),
+    toPage->id().c_str());
   transition(
     fromPage.get(),
     toPage.get(),
@@ -242,7 +245,10 @@ void UIViewImpl::transition(
   auto fromNode = const_cast<LayoutNode*>(inFromNode)->shared_from_this();
   auto toNode = const_cast<LayoutNode*>(inToNode)->shared_from_this();
 
-  DEBUG("from node: %s, to node: %s", fromNode->id().c_str(), toNode->id().c_str());
+  DEBUG(
+    "UIViewImpl::transition: from node: %s, to node: %s",
+    fromNode->id().c_str(),
+    toNode->id().c_str());
 
   auto action = std::make_shared<AttrBridge>(
     std::static_pointer_cast<UIView>(m_api->shared_from_this()),

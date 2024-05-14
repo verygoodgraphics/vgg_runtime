@@ -337,6 +337,15 @@ std::shared_ptr<LayoutNode> UIView::pageById(const std::string& id)
   return nullptr;
 }
 
+const std::string UIView::pageIdByIndex(std::size_t index)
+{
+  if (const auto& doc = m_document.lock())
+    if (index < doc->children().size())
+      return doc->children()[index]->id();
+
+  return {};
+}
+
 bool UIView::handleMouseEvent(
   int          jsButtonIndex,
   int          x,
@@ -743,14 +752,14 @@ bool UIView::handleTouchEvent(int x, int y, int motionX, int motionY, EUIEventTy
 }
 
 bool UIView::presentFrame(
-  const int                index,
+  const std::size_t        index,
   const app::FrameOptions& opts,
   app::AnimationCompletion completion)
 {
   const auto& from = currentPage()->id();
   if (setCurrentFrameIndex(index, false, opts.animation, completion))
   {
-    const auto& to = currentPage()->id();
+    const auto& to = pageIdByIndex(index);
     m_presentedPages[from] = to;
     m_presentingPages[to] = from;
     return true;
@@ -765,15 +774,15 @@ bool UIView::dismissFrame(const app::FrameOptions& opts, app::AnimationCompletio
   if (!m_presentingPages.contains(to))
     return false;
 
-  const auto& from = m_presentingPages[to];
+  const auto copiedFrom = m_presentingPages[to];
   m_presentingPages.erase(to);
-  m_presentedPages.erase(from);
+  m_presentedPages.erase(copiedFrom);
   m_presentedTreeContext.erase(to);
 
   const auto& document = m_document.lock();
   if (document)
     for (std::size_t index = 0; index < document->children().size(); ++index)
-      if (document->children()[index]->id() == from)
+      if (document->children()[index]->id() == copiedFrom)
         return setCurrentFrameIndex(index, false, opts.animation, completion);
 
   return false;
@@ -954,14 +963,24 @@ bool UIView::setCurrentFrameIndex(
     });
 
   if (success)
-  {
     setDirty(true);
 
+  return success;
+}
+
+bool UIView::pushFrame(
+  const std::size_t                   index,
+  const bool                          updateHistory,
+  const app::UIAnimationOption&       option,
+  const VGG::app::AnimationCompletion completion)
+{
+  const auto success = setCurrentFrameIndex(index, updateHistory, option, completion);
+  if (success)
+  {
     m_presentedTreeContext.clear();
     m_presentedPages.clear();
     m_presentingPages.clear();
   }
-
   return success;
 }
 

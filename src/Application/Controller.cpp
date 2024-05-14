@@ -1001,7 +1001,7 @@ bool Controller::pushFrame(const std::string& id, const app::FrameOptions& opts)
   ASSERT(m_model);
   const auto index = m_model->getFrameIndexById(id);
   scaleContentAndUpdate(index);
-  return m_presenter->setCurrentFrameIndex(index, true, opts, [this](bool) { fitPage(); });
+  return m_presenter->pushFrame(index, true, opts, [this](bool) { fitPage(); });
 }
 bool Controller::popFrame(const app::PopOptions& opts)
 {

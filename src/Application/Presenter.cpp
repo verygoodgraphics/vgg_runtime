@@ -263,7 +263,7 @@ void Presenter::update()
 }
 
 bool Presenter::presentFrame(
-  const int                index,
+  const std::size_t        index,
   const app::FrameOptions& opts,
   app::AnimationCompletion completion)
 {
@@ -391,14 +391,22 @@ void Presenter::fitForAspectScale(const Layout::Size& pageSize)
   m_view->setOffsetAndScale(xOffset, yOffset, scale);
 }
 
-bool Presenter::setCurrentFrameIndex(
+bool Presenter::setCurrentFrameIndex(const std::size_t index, const bool updateHistory)
+{
+  const auto success = m_view->setCurrentFrameIndex(index, updateHistory, {}, {});
+  if (success && updateHistory)
+    m_lastPushFrameAnimationOptions = {};
+
+  return success;
+}
+
+bool Presenter::pushFrame(
   const std::size_t              index,
   const bool                     updateHistory,
   const app::FrameOptions&       option,
   const app::AnimationCompletion completion)
 {
-  const auto success =
-    m_view->setCurrentFrameIndex(index, updateHistory, option.animation, completion);
+  const auto success = m_view->pushFrame(index, updateHistory, option.animation, completion);
   if (success && updateHistory)
     m_lastPushFrameAnimationOptions = option.animation;
 

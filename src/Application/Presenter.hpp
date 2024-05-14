@@ -108,13 +108,14 @@ public:
   {
     return m_view->currentPageIndex();
   }
-  bool setCurrentFrameIndex(
+  bool setCurrentFrameIndex(const std::size_t index, const bool updateHistory);
+  bool pushFrame(
     const std::size_t              index,
     const bool                     updateHistory,
     const app::FrameOptions&       option = {},
     const app::AnimationCompletion completion = {});
   bool presentFrame(
-    const int                index,
+    const std::size_t        index,
     const app::FrameOptions& opts,
     app::AnimationCompletion completion);
   bool dismissFrame(app::AnimationCompletion completion);

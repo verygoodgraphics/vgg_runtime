@@ -829,26 +829,10 @@ bool Controller::previouseFrame()
 
 void Controller::scaleContentAndUpdate(std::size_t pageIndex)
 {
-  if (!hasContent())
-  {
-    DEBUG("scaleContentAndUpdate no content, return");
-    return;
-  }
-
-  if (isNormalMode())
-  {
-    DEBUG("scaleContentAndUpdate, normal mode");
-    scaleContent(pageIndex);
-  }
-  else
-  {
-    DEBUG("scaleContentAndUpdate, edit mode");
-
-    layoutForEditing(pageIndex);
-  }
-
+  scaleContent(pageIndex);
   m_presenter->update();
 }
+
 void Controller::fitPage()
 {
   if (!hasContent())
@@ -930,7 +914,7 @@ VGG::Layout::Size Controller::currentPageOriginalSize() const
 
 void Controller::scaleContent(std::size_t pageIndex)
 {
-  if (!m_layout || !m_isFitToViewportEnabled)
+  if (!hasContent() || !m_isFitToViewportEnabled)
   {
     return;
   }
@@ -1000,22 +984,40 @@ bool Controller::pushFrame(const std::string& id, const app::FrameOptions& opts)
 {
   ASSERT(m_model);
   const auto index = m_model->getFrameIndexById(id);
-  scaleContentAndUpdate(index);
-  return m_presenter->pushFrame(index, true, opts, [this](bool) { fitPage(); });
+  scaleContent(index);
+  return m_presenter->pushFrame(
+    index,
+    true,
+    opts,
+    [this](bool)
+    {
+      fitPage();
+      m_presenter->triggerMouseEnter();
+    });
 }
+
 bool Controller::popFrame(const app::PopOptions& opts)
 {
-  if (m_presenter->popFrame(opts))
-  {
-    fitPage();
-    return true;
-  }
-  return false;
+  return m_presenter->popFrame(
+    opts,
+    [this](bool)
+    {
+      fitPage();
+      m_presenter->triggerMouseEnter();
+    });
 }
+
 bool Controller::presentFrame(const std::string& id, const app::FrameOptions& opts)
 {
   ASSERT(m_model);
   const auto index = m_model->getFrameIndexById(id);
-  scaleContentAndUpdate(index);
-  return m_presenter->presentFrame(index, opts, [this](bool) { fitPage(); });
+  scaleContent(index);
+  return m_presenter->presentFrame(
+    index,
+    opts,
+    [this](bool)
+    {
+      fitPage();
+      m_presenter->triggerMouseEnter();
+    });
 }

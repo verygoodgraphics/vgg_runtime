@@ -77,56 +77,60 @@ void Presenter::listenViewEvent()
     {
       auto sharedThis = weakThis.lock();
       if (!sharedThis)
-      {
         return false;
-      }
-
       if (sharedThis->m_editMode)
-      {
         return true;
-      }
 
       auto sharedModel = sharedThis->m_viewModel->model.lock();
       if (!sharedModel)
-      {
         return false;
-      }
 
       auto        listenersMap = sharedModel->getEventListeners(targetKey);
       std::string type = uiEventTypeToString(eventType);
-
-      auto hasUserListener = listenersMap.find(type) != listenersMap.end();
-      if (hasUserListener)
-      {
+      if (listenersMap.find(type) != listenersMap.end()) // user listener
         return true;
-      }
-
-      if (eventType == EUIEventType::MOUSEMOVE)
-      {
-        // process hover
-        auto shouldHandleHover =
-          listenersMap.find(uiEventTypeToString(EUIEventType::CLICK)) != listenersMap.end() ||
-          listenersMap.find(uiEventTypeToString(EUIEventType::MOUSEDOWN)) != listenersMap.end() ||
-          listenersMap.find(uiEventTypeToString(EUIEventType::MOUSEUP)) != listenersMap.end();
-        if (auto mouse = sharedThis->m_mouse)
-        {
-          DEBUG(
-            "set cursor, target = %s, event = %s, shouldHandleHover = %d",
-            targetKey.c_str(),
-            uiEventTypeToString(EUIEventType::CLICK),
-            shouldHandleHover);
-          mouse->setCursor(shouldHandleHover ? Mouse::ECursor::HAND : Mouse::ECursor::ARROW);
-        }
-        if (shouldHandleHover)
-        {
-          return true; // stop hit test
-        }
-      }
 
       if (sharedThis->m_listenAllEvents)
-      {
         return true;
+
+      return false;
+    });
+
+  m_view->setUpdateCursorEventListener(
+    [weakThis](std::string targetKey, EUIEventType eventType)
+    {
+      if (eventType != EUIEventType::MOUSEMOVE)
+        return false;
+      auto sharedThis = weakThis.lock();
+      if (!sharedThis)
+        return false;
+      if (sharedThis->m_editMode)
+        return true;
+      auto sharedModel = sharedThis->m_viewModel->model.lock();
+      if (!sharedModel)
+        return false;
+
+      auto        listenersMap = sharedModel->getEventListeners(targetKey);
+      std::string type = uiEventTypeToString(eventType);
+      if (listenersMap.find(type) != listenersMap.end()) // hasUserListener
+        return true;
+
+      // process hover
+      auto shouldHandleHover =
+        listenersMap.find(uiEventTypeToString(EUIEventType::CLICK)) != listenersMap.end() ||
+        listenersMap.find(uiEventTypeToString(EUIEventType::MOUSEDOWN)) != listenersMap.end() ||
+        listenersMap.find(uiEventTypeToString(EUIEventType::MOUSEUP)) != listenersMap.end();
+      if (auto mouse = sharedThis->m_mouse)
+      {
+        DEBUG(
+          "set cursor, target = %s, event = %s, shouldHandleHover = %d",
+          targetKey.c_str(),
+          uiEventTypeToString(EUIEventType::CLICK),
+          shouldHandleHover);
+        mouse->setCursor(shouldHandleHover ? Mouse::ECursor::HAND : Mouse::ECursor::ARROW);
       }
+      if (shouldHandleHover)
+        return true; // stop hit test
 
       return false;
     });
@@ -290,10 +294,10 @@ void Presenter::initHistory()
   return m_view->initHistory();
 }
 
-bool Presenter::popFrame(const app::PopOptions& opts)
+bool Presenter::popFrame(const app::PopOptions& opts, app::AnimationCompletion completion)
 {
   ASSERT(m_view);
-  return m_view->popFrame(opts, m_lastPushFrameAnimationOptions);
+  return m_view->popFrame(opts, m_lastPushFrameAnimationOptions, completion);
 }
 
 std::shared_ptr<StateTree> Presenter::savedState()

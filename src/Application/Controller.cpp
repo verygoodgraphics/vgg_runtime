@@ -644,28 +644,20 @@ void Controller::scaleContent()
   scaleContent(m_presenter->currentPageIndex());
 }
 
-void Controller::aspectFill(Layout::Size size)
-{
-  aspectFill(size, m_presenter->currentPageIndex());
-}
-
-bool Controller::handleTranslate(float x, float y, bool isMouseWheel)
+bool Controller::handleMouseWheel(float x, float y)
 {
   if (isEditMode())
   {
     return false;
   }
 
-  if (doubleNearlyZero(y))
+  if (doubleNearlyZero(x) && doubleNearlyZero(y))
   {
     return false;
   }
 
-  if (isMouseWheel)
-  {
-    y *= 100; // y is step?
-              // SDL_emscriptenevents.c, Emscripten_HandleWheel: 100 pixels make up a step
-  }
+  // y is step? SDL_emscriptenevents.c, Emscripten_HandleWheel: 100 pixels make up a step
+  y *= 100;
 
   const auto& pageSize = currentPageSize();
   return m_presenter->handleTranslate(pageSize.width, pageSize.height, x, y);

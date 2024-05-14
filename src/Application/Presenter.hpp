@@ -120,7 +120,7 @@ public:
     app::AnimationCompletion completion);
   bool dismissFrame(app::AnimationCompletion completion);
   void initHistory();
-  bool popFrame(const app::PopOptions& opts);
+  bool popFrame(const app::PopOptions& opts, app::AnimationCompletion completion);
 
   void triggerMouseEnter();
 

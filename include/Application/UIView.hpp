@@ -80,6 +80,7 @@ private:
 
   EventListener    m_eventListener;
   HasEventListener m_hasEventListener;
+  HasEventListener m_updateCursorEventListener;
 
   UIView*                              m_superview{ nullptr };
   std::vector<std::shared_ptr<UIView>> m_subviews;
@@ -141,6 +142,11 @@ public:
     m_eventListener = listener;
   }
 
+  void setUpdateCursorEventListener(HasEventListener listener)
+  {
+    m_updateCursorEventListener = listener;
+  }
+
   bool onEvent(UEvent e, void* userData) override;
 
   void addSubview(std::shared_ptr<UIView> view)
@@ -197,14 +203,17 @@ public:
   bool pushFrame(
     const std::size_t                   index,
     const bool                          updateHistory,
-    const app::UIAnimationOption&       option = {},
-    const VGG::app::AnimationCompletion completion = {});
+    const app::UIAnimationOption&       option,
+    const VGG::app::AnimationCompletion completion);
   bool presentFrame(
     const std::size_t        index,
     const app::FrameOptions& opts,
-    app::AnimationCompletion completion = {});
-  bool dismissFrame(const app::FrameOptions& opts, app::AnimationCompletion completion = {});
-  bool popFrame(const app::PopOptions& popOpts, const app::UIAnimationOption& animationOpts);
+    app::AnimationCompletion completion);
+  bool dismissFrame(const app::FrameOptions& opts, app::AnimationCompletion completion);
+  bool popFrame(
+    const app::PopOptions&        popOpts,
+    const app::UIAnimationOption& animationOpts,
+    app::AnimationCompletion      completion);
 
   void                       saveState(const std::shared_ptr<StateTree>& stateTree);
   std::shared_ptr<StateTree> savedState();
@@ -269,7 +278,8 @@ private:
     int                         y,
     int                         motionX,
     int                         motionY,
-    EUIEventType                type);
+    EUIEventType                type,
+    bool                        updateCursor = false);
   void handleMouseOut(
     EventContext&                    eventContext,
     TargetNode                       targetNode,

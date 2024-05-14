@@ -360,7 +360,7 @@ bool UIView::handleMouseEvent(
     return false;
   }
 
-  bool success = dispatchMouseEventOnPage(page, jsButtonIndex, x, y, motionX, motionY, type);
+  bool success = dispatchMouseEventOnPage(page, jsButtonIndex, x, y, motionX, motionY, type, true);
 
   const auto& currentPageId = page->id();
   if (m_presentingPages.contains(currentPageId))
@@ -391,7 +391,8 @@ bool UIView::dispatchMouseEventOnPage(
   int                         y,
   int                         motionX,
   int                         motionY,
-  EUIEventType                type)
+  EUIEventType                type,
+  bool                        updateCursor)
 {
   VERBOSE(
     "UIView::dispatchMouseEventOnPage, page: %s, %s",
@@ -424,6 +425,12 @@ bool UIView::dispatchMouseEventOnPage(
   {
     hitNodeInTarget = target.first->hitTest(pointToDocument, nullptr).first;
   }
+
+  if (updateCursor && (type == EUIEventType::MOUSEMOVE))
+    page->hitTest(
+      pointToDocument,
+      [&updateCursorEventListener = m_updateCursorEventListener, type](const std::string& targetKey)
+      { return updateCursorEventListener(targetKey, type); });
 
   switch (type)
   {
@@ -788,7 +795,10 @@ bool UIView::dismissFrame(const app::FrameOptions& opts, app::AnimationCompletio
   return false;
 }
 
-bool UIView::popFrame(const app::PopOptions& popOpts, const app::UIAnimationOption& animationOpts)
+bool UIView::popFrame(
+  const app::PopOptions&        popOpts,
+  const app::UIAnimationOption& animationOpts,
+  app::AnimationCompletion      completion)
 {
   if (m_history.size() <= 1)
   {
@@ -824,7 +834,7 @@ bool UIView::popFrame(const app::PopOptions& popOpts, const app::UIAnimationOpti
           to = from;
         }
 
-        return setCurrentFrameIndex(index, false, animationOpts);
+        return setCurrentFrameIndex(index, false, animationOpts, completion);
       }
     }
   }

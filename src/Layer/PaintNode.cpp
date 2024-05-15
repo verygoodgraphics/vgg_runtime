@@ -30,6 +30,25 @@
 
 #include <optional>
 
+#define VGG_TRACE_PAINTNODE_INFO(...) VGG_TRACE_INFO("TRACE", PaintNode, __VA_ARGS__)
+
+#define VGG_PAINTNODE_DUMP(msg)                                                                    \
+  VGG_LAYER_DEBUG_CODE(std::string indent(this->level, '\t');                                      \
+                       VGG_TRACE_PAINTNODE_INFO("{}{}", indent, msg););
+
+namespace
+{
+
+#ifdef VGG_LAYER_DEBUG
+std::atomic_int g_paintNodeGlobalID = 0;
+int             genUniqueID()
+{
+  return g_paintNodeGlobalID++;
+}
+#endif
+
+} // namespace
+
 namespace VGG::layer
 {
 
@@ -130,6 +149,9 @@ PaintNode::PaintNode(
 {
   d_ptr->guid = guid;
   d_ptr->name = name;
+#ifdef VGG_LAYER_DEBUG
+  dbgInfo = std::format("[{} - {} - {}]", name, guid, genUniqueID());
+#endif
   m_children.reserve(10);
 }
 
@@ -527,8 +549,12 @@ void PaintNode::setFrameBounds(const Bounds& bounds)
 Bounds PaintNode::onRevalidate()
 {
   VGG_IMPL(PaintNode);
+
   if (!isVisible())
     return Bounds();
+
+  VGG_PAINTNODE_DUMP(
+    std::format("{} - {} - {} childs:{}", name(), guid(), genUniqueID(), m_children.size()));
 
   for (const auto& e : m_children)
   {
@@ -685,8 +711,12 @@ void PaintNode::addChild(PaintNodePtr node)
 {
   m_children.insert(m_children.end(), node);
   node->m_parent = this;
-  this->invalidate();
   observe(node);
+  this->invalidate();
+
+#ifdef VGG_LAYER_DEBUG
+  node->level = level + 1;
+#endif
 }
 
 void PaintNode::addChild(ChildContainer::const_iterator pos, PaintNodePtr node)
@@ -694,6 +724,10 @@ void PaintNode::addChild(ChildContainer::const_iterator pos, PaintNodePtr node)
   m_children.insert(pos, node);
   node->m_parent = this;
   observe(node);
+  this->invalidate();
+#ifdef VGG_LAYER_DEBUG
+  node->level = level + 1;
+#endif
 }
 
 PaintNodePtr PaintNode::removeChild(ChildContainer::iterator pos)
@@ -703,7 +737,6 @@ PaintNodePtr PaintNode::removeChild(ChildContainer::iterator pos)
     auto node = *it;
     ASSERT(node);
     unobserve(node);
-    node->invalidate();
     this->invalidate();
     return node;
   }
@@ -721,8 +754,11 @@ void PaintNode::removeChild(PaintNodePtr node)
   m_children.erase(it);
   unobserve(node);
   node->m_parent.release();
-  node->invalidate();
   this->invalidate();
+
+#ifdef VGG_LAYER_DEBUG
+  node->level = 0;
+#endif
 }
 
 PaintNode::~PaintNode() = default;

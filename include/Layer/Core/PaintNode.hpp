@@ -262,8 +262,8 @@ private:
 
 public:
 #ifdef VGG_LAYER_DEBUG
-  std::string dbgInfo;
-  bool        hoverBounds{ false };
+  bool hoverBounds{ false };
+  int  level{ 0 };
 #endif
 };
 

@@ -127,39 +127,33 @@ private:
   std::chrono::duration<double, typename std::chrono::system_clock::duration::period> _; // NOLINT
 };
 
-struct TimePoint
-{
-  /*
-   * see the std::put_time reference for more detail about the fmt string
-   * */
-  auto to(const char* fmt) const
-  {
-    return std::put_time(localtime(&_), fmt);
-  }
-
-  auto cnt() const
-  {
-    return _;
-  }
-  friend std::ostream& operator<<(std::ostream& os, TimePoint const& _)
-  {
-    return os << _.to("%c");
-  }
-  TimePoint() = default;
-  template<typename C, typename D>
-  TimePoint(std::chrono::time_point<C, D> const& _)
-    : _(std::chrono::system_clock::to_time_t(_))
-  {
-  }
-
-private:
-  std::time_t _; // NOLINT
-};
 struct Timer final
 {
   Timer() = default;
 
 public:
+  struct TimePoint
+  {
+    std::string string() const
+    {
+      return std::asctime(localTime());
+    }
+
+    std::tm* localTime() const
+    {
+      return localtime(&time);
+    }
+
+    TimePoint() = default;
+    template<typename C, typename D>
+    TimePoint(std::chrono::time_point<C, D> const& _)
+      : time(std::chrono::system_clock::to_time_t(_))
+    {
+    }
+
+    std::time_t time;
+  };
+
   Timer(const Timer&) = delete;
   Timer& operator=(const Timer&) = delete;
 
@@ -167,6 +161,7 @@ public:
   {
     m_end = m_begin = std::chrono::system_clock::now();
   }
+
   void stop()
   {
     m_end = std::chrono::system_clock::now();
@@ -177,12 +172,13 @@ public:
   {
     return m_duration;
   }
+
   auto elapsed() const
   {
     return Duration(std::chrono::system_clock::now() - m_begin);
   }
 
-  static auto current()
+  static auto now()
   {
     return TimePoint(std::chrono::system_clock::now());
   }
@@ -198,9 +194,9 @@ public:
   }
 
 private:
-  using TimePoint = std::chrono::time_point<std::chrono::system_clock>;
-  TimePoint m_begin, m_end;
-  Duration  m_duration;
+  using StdTimePoint = std::chrono::time_point<std::chrono::system_clock>;
+  StdTimePoint m_begin, m_end;
+  Duration     m_duration;
 };
 
 class ScopedTimer

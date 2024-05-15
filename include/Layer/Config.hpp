@@ -14,7 +14,36 @@
  * limitations under the License.
  */
 #pragma once
-#include "Layer/Core/VShape.hpp"
+
+#include <cstdio>
+
+#include <string_view>
+
+namespace VGG::layer
+{
+FILE* getLogStream(const char* category);
+}
+
+#define STRINGIFY(x) #x
+
+#if __GNUC__ >= 13
+#include <iostream>
+#include <format>
+
+#define VGG_TRACE_INFO_IMPL(category, label, ...)                                                  \
+  do                                                                                               \
+  {                                                                                                \
+    auto f = layer::getLogStream(category);                                                        \
+    auto s = std::format(__VA_ARGS__);                                                             \
+    if (!s.empty())                                                                                \
+    {                                                                                              \
+      fprintf(f, "[" STRINGIFY(label) "]%s\n", s.c_str());                                         \
+    }                                                                                              \
+  } while (0);
+#else
+#define VGG_TRACE_INFO_IMPL(category, label, ...)
+#endif
+
 #if defined(_WIN32) && defined(LAYER_SHARED_LIBRARY)
 #ifdef layer_EXPORTS
 #define VGG_EXPORTS __declspec(dllexport)
@@ -27,6 +56,8 @@
 
 #ifdef VGG_NDEBUG
 #define VGG_LAYER_DEBUG_CODE(code)
+#define VGG_TRACE_INFO(...)
+#define VGG_LAYER_LOG(...)
 #else
 #define VGG_LAYER_DEBUG
 #define VGG_LAYER_DEBUG_CODE(...)                                                                  \
@@ -34,13 +65,7 @@
   {                                                                                                \
     __VA_ARGS__;                                                                                   \
   } while (0);
-#endif
 
-#if __GNUC__ >= 13
-#include <iostream>
-#include <format>
-#define VGG_LAYER_LOG(...) std::cout << std::format(__VA_ARGS__) << std::endl;
-#else
-#define VGG_LAYER_LOG(...)
+#define VGG_TRACE_INFO(category, label, ...) VGG_TRACE_INFO_IMPL(category, label, __VA_ARGS__)
+#define VGG_LAYER_LOG(...) VGG_TRACE_INFO_IMPL("log", LAYER_INFO, __VA_ARGS__)
 #endif
-

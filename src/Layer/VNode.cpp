@@ -57,6 +57,7 @@ void VNode::invalidate()
   if (m_state & INVALIDATE)
     return;
   m_state |= INVALIDATE;
+  VGG_TRACE_VNODE_INFO("Invalidate: {}", dbgInfo);
   visitObservers(
     [](auto& obs)
     {
@@ -66,10 +67,12 @@ void VNode::invalidate()
       }
     });
 }
+
 const Bounds& VNode::revalidate()
 {
   if (!isInvalid())
     return m_bounds;
+  VGG_TRACE_VNODE_INFO("Revalidate: {}", dbgInfo);
   m_bounds = onRevalidate();
   m_state &= ~INVALIDATE;
   return m_bounds;

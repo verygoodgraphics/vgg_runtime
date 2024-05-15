@@ -363,18 +363,25 @@ void Editor::resizeNode(MouseEvent* mouseMove)
   }
 
   auto frame = selectedNode->frame();
-  auto scale = contentView->scale();
-  auto tx = mouseMove->movementX / scale;
-  auto ty = mouseMove->movementY / scale;
+
+  const auto tx = mouseMove->movementX;
+  const auto ty = mouseMove->movementY;
+  const auto scale = contentView->scale();
+  const auto dw = tx / scale;
+  const auto dh = ty / scale;
 
   DEBUG(
-    "Editor::resizeNode: selected node frame is: (%f, %f, %f, %f), mouse move is: %f, %f",
+    "Editor::resizeNode: selected node frame: (%f, %f, %f, %f), mouse move: %d, %d, dw: %f, dh: "
+    "%f, scale: %f",
     frame.origin.x,
     frame.origin.y,
     frame.size.width,
     frame.size.height,
     tx,
-    ty);
+    ty,
+    dw,
+    dh,
+    scale);
 
   switch (m_mouseDownPosition)
   {
@@ -383,16 +390,16 @@ void Editor::resizeNode(MouseEvent* mouseMove)
       frame.origin.x += tx;
       frame.origin.y += ty;
 
-      frame.size.width -= tx;
-      frame.size.height -= ty;
+      frame.size.width -= dw;
+      frame.size.height -= dh;
       break;
     }
     case EResizePosition::TOP_RIGHT:
     {
       frame.origin.y += ty;
 
-      frame.size.width += tx;
-      frame.size.height -= ty;
+      frame.size.width += dw;
+      frame.size.height -= dh;
       break;
     }
 
@@ -400,14 +407,14 @@ void Editor::resizeNode(MouseEvent* mouseMove)
     {
       frame.origin.x += tx;
 
-      frame.size.width -= tx;
-      frame.size.height += ty;
+      frame.size.width -= dw;
+      frame.size.height += dh;
       break;
     }
     case EResizePosition::BOTTOM_RIGHT:
     {
-      frame.size.width += tx;
-      frame.size.height += ty;
+      frame.size.width += dw;
+      frame.size.height += dh;
       break;
     }
 
@@ -415,12 +422,12 @@ void Editor::resizeNode(MouseEvent* mouseMove)
     {
       frame.origin.x += tx;
 
-      frame.size.width -= tx;
+      frame.size.width -= dw;
       break;
     }
     case EResizePosition::RIGHT:
     {
-      frame.size.width += tx;
+      frame.size.width += dw;
       break;
     }
 
@@ -428,12 +435,12 @@ void Editor::resizeNode(MouseEvent* mouseMove)
     {
       frame.origin.y += ty;
 
-      frame.size.height -= ty;
+      frame.size.height -= dh;
       break;
     }
     case EResizePosition::BOTTOM:
     {
-      frame.size.height += ty;
+      frame.size.height += dh;
       break;
     }
 
@@ -600,7 +607,7 @@ void Editor::didSelectNode(std::weak_ptr<LayoutNode> node)
 {
   if (auto selectedNode = node.lock())
   {
-    INFO("Editor::didSelectNode: path = %s", selectedNode->path().c_str());
+    INFO("Editor::didSelectNode: id = %s", selectedNode->id().c_str());
   }
 
   m_selectedNode = node;

@@ -31,7 +31,6 @@ class Animate;
 class NumberAnimate;
 class ReplaceNodeAnimate;
 class AnimateManage;
-class SmartAnimate;
 struct Color;
 
 namespace layer
@@ -48,12 +47,13 @@ struct Color;
 
 class AttrBridge
 {
-  friend SmartAnimate;
+  friend ReplaceNodeAnimate;
 
 public:
   AttrBridge(std::shared_ptr<UIView> view, AnimateManage& animateManage);
 
 public:
+  // TODO maybe can remove isOnlyUpdatePaint and judge node/paintNode
   bool updateColor(
     std::shared_ptr<LayoutNode>    node,
     layer::PaintNode*              paintNode,
@@ -100,7 +100,7 @@ public:
     const std::shared_ptr<LayoutNode>   newNode,
     layer::PaintNode*                   oldPaintNode,
     layer::PaintNode*                   newPaintNode,
-    bool                                isOnlyUpdatePaint,
+    bool                                isOnlyUpdatePaint, // TODO maybe can remove this param
     std::shared_ptr<ReplaceNodeAnimate> animate = {},
     bool                                createNewPaintNode = false);
 
@@ -138,6 +138,7 @@ private:
     const std::array<double, 6>& designMatrix);
   static void setMatrix(layer::PaintNode* node, const std::array<double, 6>& designMatrix);
 
+  // TODO just like updateMatrix, should accept isNotScaleButChangeSize
   static void setTwinMatrix(
     std::shared_ptr<LayoutNode> nodeFrom,
     std::shared_ptr<LayoutNode> nodeTo,
@@ -166,7 +167,9 @@ class TransformHelper
 
 public:
   typedef std::array<double, 6> TDesignMatrix;
-  typedef glm::mat3             TRenderMatrix;
+
+private:
+  typedef glm::mat3 TRenderMatrix;
 
 public:
   static TDesignMatrix transform(
@@ -176,10 +179,26 @@ public:
     double               desHeight,
     const TDesignMatrix& desMatrix);
 
+  // Note: When the matrix of the top-level frame is [1, 0, 0, 1, 0, 0], it is positioned at the top
+  // left corner of the window.
+  static TDesignMatrix moveToWindowTopLeft(
+    double               width,
+    double               height,
+    const TDesignMatrix& matrix);
+
+  // base on the design coordinate system.
+  static TDesignMatrix translate(double x, double y, const TDesignMatrix& matrix);
+
+  // return [ left-x, top-y, right-x, bottom-y ], base on the design coordinate system.
+  static std::array<double, 4> getLTRB(double width, double height, const TDesignMatrix& matrix);
+
 private:
   static TRenderMatrix fromDesignMatrix(const TDesignMatrix& matrix);
   static TDesignMatrix toDesignMatrix(const TRenderMatrix& transform);
   static void          changeYDirection(glm::mat3& transform);
+
+  // base on the design coordinate system.
+  static std::pair<double, double> calcXY(double x, double y, const TDesignMatrix& matrix);
 };
 
 } // namespace VGG

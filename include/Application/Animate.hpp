@@ -19,6 +19,7 @@
 #include <functional>
 #include <cassert>
 #include <vector>
+#include <array>
 
 namespace VGG
 {
@@ -31,6 +32,11 @@ using std::chrono::milliseconds;
 namespace Domain
 {
 class Element;
+}
+
+namespace layer
+{
+class PaintNode;
 }
 
 class Interpolator
@@ -144,6 +150,9 @@ class ReplaceNodeAnimate : public Animate
   friend AttrBridge;
 
 public:
+  typedef std::unordered_map<std::shared_ptr<LayoutNode>, std::shared_ptr<LayoutNode>> TTwins;
+
+public:
   ReplaceNodeAnimate(
     milliseconds                  duration,
     milliseconds                  interval,
@@ -167,7 +176,17 @@ protected:
   auto getAttrBridge();
   auto getIsOnlyUpdatePaint();
 
-  void addChildAnimate(std::shared_ptr<Animate> animate);
+  // After animation finished, all modified properties will be reverted to their original values.
+  void addStyleOpacityAnimate(
+    std::shared_ptr<LayoutNode> node,
+    layer::PaintNode*           paintNode,
+    bool                        toVisible,
+    bool                        recursive);
+
+  // After animation finished, all modified properties will be reverted to their original values.
+  void addTwinMatrixAnimate(const TTwins& twins);
+
+  std::shared_ptr<NumberAnimate> createAndAddNumberAnimate();
 
 private:
   std::shared_ptr<LayoutNode>           m_from;
@@ -203,7 +222,56 @@ private:
   virtual void start() override;
 
   void addTwinAnimate(std::shared_ptr<LayoutNode> nodeFrom, std::shared_ptr<LayoutNode> nodeTo);
-  void addOpacityAnimate(std::shared_ptr<LayoutNode> node, bool toVisible);
+};
+
+class MoveAnimate : public ReplaceNodeAnimate
+{
+public:
+  enum MoveType
+  {
+    MOVE_IN,
+
+    // TODO not complete.
+    MOVE_OUT
+  };
+
+  enum MoveDirection
+  {
+    FROM_RIGHT,
+    FROM_UP,
+    FROM_LEFT,
+    FROM_BOTTOM
+  };
+
+public:
+  MoveAnimate(
+    milliseconds                  duration,
+    milliseconds                  interval,
+    std::shared_ptr<Interpolator> interpolator,
+    std::shared_ptr<AttrBridge>   attrBridge,
+    MoveType                      moveType,
+    bool                          isSmart,
+    MoveDirection                 moveDirection);
+
+private:
+  virtual void start() override;
+
+  void dealChildren(
+    std::shared_ptr<LayoutNode> nodeFrom,
+    std::shared_ptr<LayoutNode> nodeTo,
+    layer::PaintNode*           paintNodeFrom,
+    layer::PaintNode*           paintNodeTo);
+
+  std::array<double, 6> getStartTranslateMatrix(const std::array<double, 6>& selfMatrix);
+  std::array<double, 6> getStopTranslateMatrix(const std::array<double, 6>& selfMatrix);
+
+private:
+  MoveType      m_moveType;
+  bool          m_isSmart;
+  MoveDirection m_moveDirection;
+
+  std::array<double, 4> m_fromLTRB;
+  std::array<double, 4> m_ToLTRB;
 };
 
 } // namespace VGG

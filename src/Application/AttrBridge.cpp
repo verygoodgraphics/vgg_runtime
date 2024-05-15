@@ -234,6 +234,7 @@ void AttrBridge::setMatrix(layer::PaintNode* node, const std::array<double, 6>& 
   accessor->setTransform(VGG::layer::Transform(TransformHelper::fromDesignMatrix(designMatrix)));
 }
 
+// TODO do not need node
 void AttrBridge::updateSimpleAttr(
   std::shared_ptr<LayoutNode>                     node,
   const std::vector<double>&                      from,
@@ -722,6 +723,47 @@ TransformHelper::TDesignMatrix TransformHelper::transform(
   return TransformHelper::toDesignMatrix(matrix);
 }
 
+TransformHelper::TDesignMatrix TransformHelper::moveToWindowTopLeft(
+  double               width,
+  double               height,
+  const TDesignMatrix& matrix)
+{
+  auto result = TransformHelper::getLTRB(width, height, matrix);
+  return TransformHelper::translate(-result[0], -result[1], matrix);
+}
+
+TransformHelper::TDesignMatrix TransformHelper::translate(
+  double               x,
+  double               y,
+  const TDesignMatrix& matrix)
+{
+  return TransformHelper::toDesignMatrix(
+    TransformHelper::fromDesignMatrix({ 1, 0, 0, 1, x, y }) *
+    TransformHelper::fromDesignMatrix(matrix));
+}
+
+std::array<double, 4> TransformHelper::getLTRB(
+  double               width,
+  double               height,
+  const TDesignMatrix& matrix)
+{
+  auto p0 = TransformHelper::calcXY(0, 0, matrix);
+  auto p1 = TransformHelper::calcXY(width, 0, matrix);
+  auto p2 = TransformHelper::calcXY(width, -height, matrix);
+  auto p3 = TransformHelper::calcXY(0, -height, matrix);
+
+  auto x = { std::get<0>(p0), std::get<0>(p1), std::get<0>(p2), std::get<0>(p3) };
+  auto y = { std::get<1>(p0), std::get<1>(p1), std::get<1>(p2), std::get<1>(p3) };
+
+  auto minX = std::min(x);
+  auto maxX = std::max(x);
+
+  auto minY = std::min(y);
+  auto maxY = std::max(y);
+
+  return { minX, maxY, maxX, minY };
+}
+
 glm::mat3 TransformHelper::fromDesignMatrix(const TDesignMatrix& matrix)
 {
   double a = matrix[0];
@@ -740,4 +782,18 @@ TransformHelper::TDesignMatrix TransformHelper::toDesignMatrix(const TRenderMatr
   auto m = transform;
   TransformHelper::changeYDirection(m);
   return { m[0][0], m[0][1], m[1][0], m[1][1], m[2][0], m[2][1] };
+}
+
+std::pair<double, double> TransformHelper::calcXY(double x, double y, const TDesignMatrix& matrix)
+{
+  double a = matrix[0];
+  double b = matrix[1];
+  double c = matrix[2];
+  double d = matrix[3];
+  double tx = matrix[4];
+  double ty = matrix[5];
+
+  double newX = a * x + c * y + tx;
+  double newY = b * x + d * y + ty;
+  return { newX, newY };
 }

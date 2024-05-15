@@ -19,9 +19,33 @@
 #include "Utility/Log.hpp"
 #include "Domain/Layout/Node.hpp"
 #include "Domain/Model/Element.hpp"
+#include "Layer/Core/PaintNode.hpp"
 #include <unordered_map>
 
 using namespace VGG;
+
+void clearPaintNodeChildren(layer::PaintNode* node)
+{
+  if (!node)
+  {
+    return;
+  }
+
+  while (node->begin() != node->end())
+  {
+    auto it = node->end();
+    node->removeChild(--it);
+  }
+}
+
+void setPaintNodeChildren(layer::PaintNode* node, const layer::PaintNode::ChildContainer& children)
+{
+  clearPaintNodeChildren(node);
+  for (auto& child : children)
+  {
+    node->addChild(child);
+  }
+}
 
 Interpolator::~Interpolator()
 {
@@ -306,9 +330,141 @@ void ReplaceNodeAnimate::setIsOnlyUpdatePaint(bool isOnlyUpdatePaint)
   m_isOnlyUpdatePaint = isOnlyUpdatePaint;
 }
 
-void ReplaceNodeAnimate::addChildAnimate(std::shared_ptr<Animate> animate)
+std::shared_ptr<NumberAnimate> ReplaceNodeAnimate::createAndAddNumberAnimate()
 {
+  auto animate = std::make_shared<NumberAnimate>(getDuration(), getInterval(), getInterpolator());
   m_childAnimates.emplace_back(animate);
+  return animate;
+};
+
+void ReplaceNodeAnimate::addStyleOpacityAnimate(
+  std::shared_ptr<LayoutNode> node,
+  layer::PaintNode*           paintNode,
+  bool                        toVisible,
+  bool                        recursive)
+{
+  if (!node || !node->elementNode() || !paintNode)
+  {
+    return;
+  }
+
+  auto attrBridge = getAttrBridge();
+  auto isOnlyUpdatePaint = getIsOnlyUpdatePaint();
+
+  // for fill
+  do
+  {
+    auto size = *attrBridge->getFillSize(paintNode);
+    for (size_t i = 0; i < size; ++i)
+    {
+      auto opacity = AttrBridge::getFillOpacity(paintNode, i);
+      if (!opacity)
+      {
+        assert(false);
+        continue;
+      }
+
+      auto animate = createAndAddNumberAnimate();
+
+      if (toVisible)
+      {
+        attrBridge->updateFillOpacity(node, paintNode, i, 0, isOnlyUpdatePaint);
+        attrBridge->updateFillOpacity(node, paintNode, i, *opacity, isOnlyUpdatePaint, animate);
+      }
+      else
+      {
+        attrBridge->updateFillOpacity(node, paintNode, i, 0, isOnlyUpdatePaint, animate);
+        addCallBackWhenStop(
+          [attrBridge, node, isOnlyUpdatePaint, paintNode, opacity, i]()
+          { attrBridge->updateFillOpacity(node, paintNode, i, *opacity, isOnlyUpdatePaint); });
+      }
+    }
+  } while (false);
+
+  // TODO other attr in style
+
+  if (recursive && ReplaceNodeAnimate::isContainerType(node->elementNode()))
+  {
+    auto& children = node->children();
+    for (auto& child : children)
+    {
+      auto nodeChild = child->shared_from_this();
+      addStyleOpacityAnimate(nodeChild, attrBridge->getPaintNode(nodeChild), toVisible, recursive);
+    }
+  }
+}
+
+void ReplaceNodeAnimate::addTwinMatrixAnimate(const TTwins& twins)
+{
+  auto attrBridge = getAttrBridge();
+  bool isOnlyUpdatePaint = getIsOnlyUpdatePaint();
+
+  for (auto& item : twins)
+  {
+    auto& itemFrom = item.first;
+    auto& itemTo = item.second;
+
+    if (!itemFrom || !itemTo)
+    {
+      assert(false);
+      continue;
+    }
+
+    auto paintNodeFrom = attrBridge->getPaintNode(itemFrom);
+    auto paintNodeTo = attrBridge->getPaintNode(itemTo);
+
+    if (
+      !paintNodeFrom || !paintNodeTo || !*AttrBridge::getVisible(paintNodeFrom) ||
+      !*AttrBridge::getVisible(paintNodeTo))
+    {
+      continue;
+    }
+
+    auto transform = TransformHelper::transform(
+      *AttrBridge::getWidth(paintNodeFrom),
+      *AttrBridge::getHeight(paintNodeFrom),
+      *AttrBridge::getWidth(paintNodeTo),
+      *AttrBridge::getHeight(paintNodeTo),
+      *AttrBridge::getMatrix(paintNodeTo));
+
+    auto animate = createAndAddNumberAnimate();
+    auto paintNodeFromOriginalMatrix = attrBridge->getMatrix(paintNodeFrom);
+    bool itemFromIsContainer = ReplaceNodeAnimate::isContainerType(itemFrom->elementNode());
+
+    attrBridge->updateMatrix(
+      itemFrom,
+      paintNodeFrom,
+      transform,
+      isOnlyUpdatePaint,
+      animate,
+      itemFromIsContainer);
+
+    animate->addTriggeredCallback(std::bind(
+      AttrBridge::setTwinMatrix,
+      itemFrom,
+      itemTo,
+      paintNodeTo,
+      std::placeholders::_1,
+      isOnlyUpdatePaint));
+
+    animate->addCallBackWhenStop(
+      [paintNodeFromOriginalMatrix,
+       itemFrom,
+       paintNodeFrom,
+       attrBridge,
+       isOnlyUpdatePaint,
+       itemFromIsContainer]()
+      {
+        assert(paintNodeFromOriginalMatrix);
+        attrBridge->updateMatrix(
+          itemFrom,
+          paintNodeFrom,
+          *paintNodeFromOriginalMatrix,
+          isOnlyUpdatePaint,
+          {},
+          itemFromIsContainer);
+      });
+  }
 }
 
 DissolveAnimate::DissolveAnimate(
@@ -328,14 +484,9 @@ void DissolveAnimate::start()
   auto isOnlyUpdatePaint = getIsOnlyUpdatePaint();
   assert(attrBridge && (from || to));
 
-  auto createNumberAnimate = [this]()
-  { return std::make_shared<NumberAnimate>(getDuration(), getInterval(), getInterpolator()); };
-
   if (to)
   {
-    auto animate = createNumberAnimate();
-    addChildAnimate(animate);
-
+    auto animate = createAndAddNumberAnimate();
     auto paintNodeTo = attrBridge->getPaintNode(to);
     auto opacity = AttrBridge::getOpacity(paintNodeTo);
     assert(opacity);
@@ -346,9 +497,7 @@ void DissolveAnimate::start()
 
   if (from)
   {
-    auto animate = createNumberAnimate();
-    addChildAnimate(animate);
-
+    auto animate = createAndAddNumberAnimate();
     auto paintNodeFrom = attrBridge->getPaintNode(from);
     auto opacity = AttrBridge::getOpacity(paintNodeFrom);
     assert(opacity);
@@ -387,76 +536,22 @@ void SmartAnimate::start()
     return;
   }
 
-  addCallBackWhenStop(
-    [attrBridge, from, isOnlyUpdatePaint]()
-    { attrBridge->updateVisible(from, attrBridge->getPaintNode(from), false, isOnlyUpdatePaint); });
-
-  addTwinAnimate(from, to);
-  addOpacityAnimate(from, false);
-  addOpacityAnimate(to, true);
-  attrBridge->updateVisible(to, attrBridge->getPaintNode(to), true, isOnlyUpdatePaint);
-}
-
-void SmartAnimate::addOpacityAnimate(std::shared_ptr<LayoutNode> node, bool toVisible)
-{
-  if (!node || !node->elementNode())
+  auto paintNodeFrom = attrBridge->getPaintNode(from);
+  auto paintNodeTo = attrBridge->getPaintNode(to);
+  if (!paintNodeFrom || !paintNodeTo)
   {
+    assert(false);
     return;
   }
 
-  auto attrBridge = getAttrBridge();
-  auto isOnlyUpdatePaint = getIsOnlyUpdatePaint();
-  auto paintNode = attrBridge->getPaintNode(node);
+  addCallBackWhenStop(
+    [attrBridge, from, isOnlyUpdatePaint, paintNodeFrom]()
+    { attrBridge->updateVisible(from, paintNodeFrom, false, isOnlyUpdatePaint); });
 
-  // for fill
-  do
-  {
-    auto size = attrBridge->getFillSize(paintNode);
-
-    if (!size)
-    {
-      assert(false);
-      break;
-    }
-
-    for (size_t i = 0; i < *size; ++i)
-    {
-      auto opacity = AttrBridge::getFillOpacity(paintNode, i);
-      if (!opacity)
-      {
-        assert(false);
-        continue;
-      }
-
-      auto animate =
-        std::make_shared<NumberAnimate>(getDuration(), getInterval(), getInterpolator());
-      addChildAnimate(animate);
-
-      if (toVisible)
-      {
-        attrBridge->updateFillOpacity(node, paintNode, i, 0, isOnlyUpdatePaint);
-        attrBridge->updateFillOpacity(node, paintNode, i, *opacity, isOnlyUpdatePaint, animate);
-      }
-      else
-      {
-        attrBridge->updateFillOpacity(node, paintNode, i, 0, isOnlyUpdatePaint, animate);
-        addCallBackWhenStop(
-          [attrBridge, node, isOnlyUpdatePaint, paintNode, opacity, i]()
-          { attrBridge->updateFillOpacity(node, paintNode, i, *opacity, isOnlyUpdatePaint); });
-      }
-    }
-  } while (false);
-
-  // TODO other attr in style
-
-  if (ReplaceNodeAnimate::isContainerType(node->elementNode()))
-  {
-    auto& children = node->children();
-    for (auto child : children)
-    {
-      addOpacityAnimate(child->shared_from_this(), toVisible);
-    }
-  }
+  addTwinAnimate(from, to);
+  addStyleOpacityAnimate(from, paintNodeFrom, false, true);
+  addStyleOpacityAnimate(to, paintNodeTo, true, true);
+  attrBridge->updateVisible(to, attrBridge->getPaintNode(to), true, isOnlyUpdatePaint);
 }
 
 void SmartAnimate::addTwinAnimate(
@@ -496,7 +591,7 @@ void SmartAnimate::addTwinAnimate(
 
   } while (false);
 
-  std::unordered_map<std::shared_ptr<LayoutNode>, std::shared_ptr<LayoutNode>> twins;
+  ReplaceNodeAnimate::TTwins twins;
   if (nodeFrom)
   {
     auto element = nodeFrom->elementNode();
@@ -529,90 +624,341 @@ void SmartAnimate::addTwinAnimate(
     }
   }
 
-  for (auto item : twins)
+  addTwinMatrixAnimate(twins);
+
+  for (auto& item : twins)
   {
-    auto itemFrom = item.first;
-    auto itemTo = item.second;
-
-    auto objectFrom = AttrBridge::getlayoutNodeObject(itemFrom);
-    auto objectTo = AttrBridge::getlayoutNodeObject(itemTo);
-    if (!objectFrom || !objectTo)
-    {
-      continue;
-    }
-
-    if (objectTo->matrix.size() != 6)
-    {
-      assert(false);
-      continue;
-    }
-
-    auto paintNodeFrom = attrBridge->getPaintNode(itemFrom);
-    auto paintNodeTo = attrBridge->getPaintNode(itemTo);
-
-    if (
-      !paintNodeFrom || !paintNodeTo || !*AttrBridge::getVisible(paintNodeFrom) ||
-      !*AttrBridge::getVisible(paintNodeTo))
-    {
-      continue;
-    }
-
-    auto transform = TransformHelper::transform(
-      *AttrBridge::getWidth(paintNodeFrom),
-      *AttrBridge::getHeight(paintNodeFrom),
-      *AttrBridge::getWidth(paintNodeTo),
-      *AttrBridge::getHeight(paintNodeTo),
-      *AttrBridge::getMatrix(paintNodeTo));
-
-    auto animate = std::make_shared<NumberAnimate>(getDuration(), getInterval(), getInterpolator());
-    addChildAnimate(animate);
-
-    animate->addTriggeredCallback(std::bind(
-      AttrBridge::setTwinMatrix,
-      itemFrom,
-      itemTo,
-      paintNodeTo,
-      std::placeholders::_1,
-      isOnlyUpdatePaint));
-
-    auto paintNodeFromOriginalMatrix = attrBridge->getMatrix(paintNodeFrom);
-    bool itemFromIsContainer = ReplaceNodeAnimate::isContainerType(itemFrom->elementNode());
-
-    animate->addCallBackWhenStop(
-      [paintNodeFromOriginalMatrix,
-       itemFrom,
-       paintNodeFrom,
-       attrBridge,
-       isOnlyUpdatePaint,
-       itemFromIsContainer]()
-      {
-        assert(paintNodeFromOriginalMatrix);
-        if (paintNodeFromOriginalMatrix)
-        {
-          attrBridge->updateMatrix(
-            itemFrom,
-            paintNodeFrom,
-            *paintNodeFromOriginalMatrix,
-            isOnlyUpdatePaint,
-            {},
-            itemFromIsContainer);
-        }
-      });
-
-    attrBridge->updateMatrix(
-      itemFrom,
-      paintNodeFrom,
-      transform,
-      isOnlyUpdatePaint,
-      animate,
-      itemFromIsContainer);
-  }
-
-  for (auto item : twins)
-  {
+    // TODO should judge item.second? test it.
     if (ReplaceNodeAnimate::isContainerType(item.first->elementNode()))
     {
       addTwinAnimate(item.first, item.second);
     }
   }
 }
+
+MoveAnimate::MoveAnimate(
+  milliseconds                  duration,
+  milliseconds                  interval,
+  std::shared_ptr<Interpolator> interpolator,
+  std::shared_ptr<AttrBridge>   attrBridge,
+  MoveType                      moveType,
+  bool                          isSmart,
+  MoveDirection                 moveDirection)
+  : ReplaceNodeAnimate(duration, interval, interpolator, attrBridge)
+  , m_moveType(moveType)
+  , m_isSmart(isSmart)
+  , m_moveDirection(moveDirection)
+  , m_fromLTRB{}
+  , m_ToLTRB{}
+{
+}
+
+void MoveAnimate::start()
+{
+  auto attrBridge = getAttrBridge();
+  auto from = getFrom();
+  auto to = getTo();
+  auto isOnlyUpdatePaint = getIsOnlyUpdatePaint();
+
+  if (
+    !attrBridge || !from || !to || !ReplaceNodeAnimate::isContainerType(from->elementNode()) ||
+    !ReplaceNodeAnimate::isContainerType(to->elementNode()))
+  {
+    assert(false);
+    return;
+  }
+
+  auto paintNodeFrom = attrBridge->getPaintNode(from);
+  auto paintNodeTo = attrBridge->getPaintNode(to);
+  if (!paintNodeFrom || !paintNodeTo)
+  {
+    assert(false);
+    return;
+  }
+
+  m_fromLTRB = TransformHelper::getLTRB(
+    *attrBridge->getWidth(paintNodeFrom),
+    *attrBridge->getHeight(paintNodeFrom),
+    *attrBridge->getMatrix(paintNodeFrom));
+
+  auto widthTo = *attrBridge->getWidth(paintNodeTo);
+  auto heightTo = *attrBridge->getHeight(paintNodeTo);
+  auto matirxTo = *attrBridge->getMatrix(paintNodeTo);
+
+  // TODO all ReplaceAnimate, should guarantee by user. Notify to gh.
+  // TODO after gh do it, this place do not need moveToWindowTopLeft, just use matirxTo.
+  auto to2TopLeftMatrix = TransformHelper::moveToWindowTopLeft(widthTo, heightTo, matirxTo);
+  m_ToLTRB = TransformHelper::getLTRB(widthTo, heightTo, to2TopLeftMatrix);
+
+  if (!m_isSmart)
+  {
+    auto matrixStart = getStartTranslateMatrix(to2TopLeftMatrix);
+    auto matrixStop = getStopTranslateMatrix(to2TopLeftMatrix);
+
+    attrBridge->updateMatrix(to, paintNodeTo, matrixStart, isOnlyUpdatePaint, {}, true);
+    attrBridge->updateVisible(to, paintNodeTo, true, isOnlyUpdatePaint);
+
+    auto animate = createAndAddNumberAnimate();
+    animate->addTriggeredCallback(
+      [](const std::vector<double>& value)
+      {
+        // TODO change From size to To.
+        // TODO bigger To size, because need clip.
+        // TODO those thing to smart? need think.
+      });
+    attrBridge->updateMatrix(to, paintNodeTo, matrixStop, isOnlyUpdatePaint, animate, true);
+  }
+  else
+  {
+    addStyleOpacityAnimate(from, paintNodeFrom, false, false);
+    addStyleOpacityAnimate(to, paintNodeTo, true, false);
+
+    // TODO need change nodeTo size. what about smartAnimate? maybe write this code to
+    // replaceAnimate.
+
+    // TODO after gh deal, maybe do not need this code.
+    attrBridge->updateMatrix(to, paintNodeTo, to2TopLeftMatrix, isOnlyUpdatePaint, {}, true);
+
+    attrBridge->updateVisible(to, paintNodeTo, true, isOnlyUpdatePaint);
+
+    // auto originFromChild = paintNodeFrom->children();
+    // auto originToChild = paintNodeTo->children();
+
+    dealChildren(from, to, paintNodeFrom, paintNodeTo);
+  }
+
+  // TODO maybe let this code to replacenode
+  addCallBackWhenStop(
+    [from, paintNodeFrom, attrBridge, isOnlyUpdatePaint]()
+    { attrBridge->updateVisible(from, paintNodeFrom, false, isOnlyUpdatePaint); });
+}
+
+void MoveAnimate::dealChildren(
+  std::shared_ptr<LayoutNode> nodeFrom,
+  std::shared_ptr<LayoutNode> nodeTo,
+  layer::PaintNode*           paintNodeFrom,
+  layer::PaintNode*           paintNodeTo)
+{
+  auto attrBridge = getAttrBridge();
+  bool isOnlyUpdatePaint = getIsOnlyUpdatePaint();
+
+  if (!paintNodeFrom || !paintNodeTo || !nodeFrom->elementNode() || !nodeTo->elementNode())
+  {
+    assert(false);
+    return;
+  }
+
+  assert(
+    ReplaceNodeAnimate::isContainerType(nodeFrom->elementNode()) &&
+    ReplaceNodeAnimate::isContainerType(nodeTo->elementNode()));
+
+  const auto& originFromChild = paintNodeFrom->children();
+  const auto& originToChild = paintNodeTo->children();
+
+  addCallBackWhenStop(
+    [originFromChild, originToChild, paintNodeFrom, paintNodeTo]()
+    {
+      setPaintNodeChildren(paintNodeFrom, originFromChild);
+      setPaintNodeChildren(paintNodeTo, originToChild);
+    });
+
+  std::unordered_map<std::string, std::shared_ptr<LayoutNode>> nodeIds;
+  for (auto& item : nodeFrom->children())
+  {
+    nodeIds.emplace(item->id(), item);
+  }
+  for (auto& item : nodeTo->children())
+  {
+    nodeIds.emplace(item->id(), item);
+  }
+  assert(nodeIds.size() == nodeFrom->children().size() + nodeTo->children().size());
+
+#ifdef DEBUG
+  std::unordered_map<std::string, layer::PaintNodePtr> paintNodeIds;
+
+  for (auto& item : originFromChild)
+  {
+    paintNodeIds.emplace(item->guid(), item);
+  }
+  for (auto& item : originToChild)
+  {
+    paintNodeIds.emplace(item->guid(), item);
+  }
+  assert(paintNodeIds.size() == originFromChild.size() + originToChild.size());
+  assert(paintNodeIds.size() == nodeIds.size());
+#endif // DEBUG
+
+  auto addTranslateAnimate =
+    [this, attrBridge, &nodeIds, isOnlyUpdatePaint](layer::PaintNode* paintNode)
+  {
+    if (!paintNode)
+    {
+      assert(false);
+      return;
+    }
+
+    auto it = nodeIds.find(paintNode->guid());
+    if (it == nodeIds.end() || !it->second->elementNode())
+    {
+      assert(false);
+      return;
+    }
+
+    // TODO this place maybe wrong, need think.
+    // TODO discuss with yl, our action is fine?
+    auto& node = it->second;
+    auto  matrix = *attrBridge->getMatrix(paintNode);
+    auto  matrixStart = getStartTranslateMatrix(matrix);
+    auto  matrixStop = getStopTranslateMatrix(matrix);
+    bool  isContainer = ReplaceNodeAnimate::isContainerType(node->elementNode());
+    auto  originMatrix = *attrBridge->getMatrix(paintNode);
+    auto  animate = createAndAddNumberAnimate();
+
+    attrBridge->updateMatrix(node, paintNode, matrixStart, isOnlyUpdatePaint, {}, isContainer);
+    attrBridge->updateMatrix(node, paintNode, matrixStop, isOnlyUpdatePaint, animate, isContainer);
+    animate->addCallBackWhenStop(
+      [attrBridge, node, paintNode, originMatrix, isOnlyUpdatePaint, isContainer]() {
+        attrBridge->updateMatrix(node, paintNode, originMatrix, isOnlyUpdatePaint, {}, isContainer);
+      });
+  };
+
+  // <from, to>
+  ReplaceNodeAnimate::TTwins twins;
+
+  std::list<layer::PaintNodePtr> childrenInAnimate(originToChild.begin(), originToChild.end());
+  auto                           itSearch = childrenInAnimate.begin();
+  auto                           itInsert = itSearch;
+
+  for (auto it = originFromChild.begin(); it != originFromChild.end(); ++it)
+  {
+    if (!(*it) || !*attrBridge->getVisible(it->get()))
+    {
+      continue;
+    }
+
+    auto result = std::find_if(
+      itSearch,
+      childrenInAnimate.end(),
+      [it, attrBridge](layer::PaintNodePtr obj)
+      {
+        if (!obj || !*attrBridge->getVisible(obj.get()))
+        {
+          return false;
+        }
+
+        return (*it)->name() == obj->name();
+      });
+
+    if (result == childrenInAnimate.end())
+    {
+      childrenInAnimate.insert(itInsert, *it);
+    }
+    else
+    {
+      for (auto tmp = itSearch; tmp != result; ++tmp)
+      {
+        addTranslateAnimate(*tmp);
+      }
+
+      childrenInAnimate.insert(result, *it);
+
+      auto itFrom = nodeIds.find(it->get()->guid());
+      auto itTo = nodeIds.find(result->get()->guid());
+      assert(itFrom != nodeIds.end() && itTo != nodeIds.end());
+      if (itFrom != nodeIds.end() && itTo != nodeIds.end())
+      {
+        twins.emplace(itFrom->second, itTo->second);
+
+        auto& childFrom = itFrom->second;
+        auto& childTo = itTo->second;
+        auto  elementFrom = childFrom->elementNode();
+        auto  elementTo = childTo->elementNode();
+        auto  childPaintFrom = attrBridge->getPaintNode(childFrom);
+        auto  childPaintTo = attrBridge->getPaintNode(childTo);
+        assert(elementFrom && elementTo);
+
+        if (
+          ReplaceNodeAnimate::isContainerType(elementFrom) &&
+          ReplaceNodeAnimate::isContainerType(elementTo))
+        {
+          dealChildren(childFrom, childTo, childPaintFrom, childPaintTo);
+        }
+        else
+        {
+          // TODO
+        }
+
+        addStyleOpacityAnimate(childFrom, childPaintFrom, false, false);
+        addStyleOpacityAnimate(childTo, childPaintTo, true, false);
+      }
+
+      itSearch = ++result;
+      itInsert = itSearch;
+    }
+  }
+
+  for (auto it = itSearch; it != childrenInAnimate.end(); ++it)
+  {
+    addTranslateAnimate(*it);
+  }
+
+  clearPaintNodeChildren(paintNodeFrom);
+  clearPaintNodeChildren(paintNodeTo);
+  for (auto& item : childrenInAnimate)
+  {
+    paintNodeTo->addChild(item);
+  }
+
+  addTwinMatrixAnimate(twins);
+}
+
+std::array<double, 6> MoveAnimate::getStartTranslateMatrix(const std::array<double, 6>& selfMatrix)
+{
+  if (m_moveType == MOVE_IN)
+  {
+    switch (m_moveDirection)
+    {
+      case VGG::MoveAnimate::FROM_RIGHT:
+        return TransformHelper::translate(m_fromLTRB[2], m_fromLTRB[1], selfMatrix);
+      case VGG::MoveAnimate::FROM_UP:
+        return TransformHelper::translate(m_ToLTRB[0], -m_ToLTRB[3], selfMatrix);
+      case VGG::MoveAnimate::FROM_LEFT:
+        return TransformHelper::translate(-m_ToLTRB[2], m_ToLTRB[0], selfMatrix);
+      case VGG::MoveAnimate::FROM_BOTTOM:
+        return TransformHelper::translate(m_fromLTRB[0], m_fromLTRB[3], selfMatrix);
+      default:
+        break;
+    }
+  }
+
+  // TODO not complete for MOVE_OUT
+  assert(false);
+  return {};
+}
+
+std::array<double, 6> MoveAnimate::getStopTranslateMatrix(const std::array<double, 6>& selfMatrix)
+{
+  if (m_moveType == MOVE_IN)
+  {
+    switch (m_moveDirection)
+    {
+      case VGG::MoveAnimate::FROM_RIGHT:
+        return TransformHelper::translate(m_fromLTRB[0], m_fromLTRB[1], selfMatrix);
+      case VGG::MoveAnimate::FROM_UP:
+        return TransformHelper::translate(m_ToLTRB[0], m_ToLTRB[0], selfMatrix);
+      case VGG::MoveAnimate::FROM_LEFT:
+        return TransformHelper::translate(m_ToLTRB[0], m_ToLTRB[0], selfMatrix);
+      case VGG::MoveAnimate::FROM_BOTTOM:
+        return TransformHelper::translate(m_fromLTRB[0], m_fromLTRB[0], selfMatrix);
+      default:
+        break;
+    }
+  }
+
+  // TODO not complete for MOVE_OUT
+  assert(false);
+  return {};
+}
+
+// TODO for replace animate, an container match an not container, need test it.
+// TODO test back for all replace animate

@@ -61,7 +61,9 @@ public:
   };
 
 private:
-  const EType                           m_type;
+  const EType m_type;
+  const int   m_idNumber;
+
   std::weak_ptr<Element>                m_parent;
   std::vector<std::shared_ptr<Element>> m_children;
 
@@ -70,6 +72,7 @@ private:
 public:
   Element(EType type)
     : m_type{ type }
+    , m_idNumber{ generateId() }
   {
   }
   virtual ~Element() = default;
@@ -82,6 +85,10 @@ public:
   auto type() const
   {
     return m_type;
+  }
+  int idNumber() const
+  {
+    return m_idNumber;
   }
 
   const std::shared_ptr<Element> parent() const
@@ -214,6 +221,8 @@ private:
     std::string               name,
     const nlohmann::json&     value,
     std::vector<std::string>& outDirtyNodeIds);
+
+  static int generateId();
 };
 
 class DesignDocument : public Element

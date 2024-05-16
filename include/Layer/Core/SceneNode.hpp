@@ -42,7 +42,7 @@ public:
 
   void nodeAt(int x, int y, NodeVisitor vistor, void* userData) override;
 
-  PaintNode* nodeByID(const std::string& id);
+  PaintNode* nodeByID(int id);
 
   Bounds effectBounds() const override;
 

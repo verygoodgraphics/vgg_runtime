@@ -254,14 +254,15 @@ layer::PaintNode* AttrBridge::getPaintNode(std::shared_ptr<LayoutNode> node)
     return nullptr;
   }
 
-  const auto& id = element->id();
+  const auto& id = element->idNumber();
 
   // for top-level frame
   if (node->parent() && !node->parent()->parent())
   {
     for (auto& frame : m_view->getSceneNode()->getFrames())
     {
-      if (frame->guid() == id)
+      ASSERT(frame->node());
+      if (frame->node()->uniqueID() == id)
       {
         return frame->node();
       }

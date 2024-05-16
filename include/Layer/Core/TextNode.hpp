@@ -40,7 +40,7 @@ class VGG_EXPORTS TextNode final : public PaintNode
   VGG_DECL_IMPL(TextNode);
 
 public:
-  TextNode(VRefCnt* cnt, const std::string& name, std::string guid);
+  TextNode(VRefCnt* cnt, int uniqueID, const std::string& name, std::string guid);
   TextNode(const TextNode&) = delete;
   TextNode& operator=(const TextNode&) = delete;
   TextNode(TextNode&&) noexcept = delete;

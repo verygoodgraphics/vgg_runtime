@@ -54,6 +54,8 @@ public:
   ContourData    contour;
   ContourOption  maskOption;
 
+  const int uniqueID{ 0 };
+
   const ERenderTrait renderTrait{ ERenderTraitBits::RT_DEFAULT };
 
   PaintNode::EventHandler paintNodeEventHandler;
@@ -68,7 +70,12 @@ public:
   Ref<TransformAttribute>   transformAttr;
   std::unique_ptr<Accessor> accessor;
 
-  PaintNode__pImpl(PaintNode* api, EObjectType type, ERenderTrait renderTrait, bool initBase)
+  PaintNode__pImpl(
+    PaintNode*   api,
+    int          uniqueID,
+    EObjectType  type,
+    ERenderTrait renderTrait,
+    bool         initBase)
     : q_ptr(api)
     , type(type)
     , renderTrait(renderTrait)
@@ -111,17 +118,23 @@ public:
 
 PaintNode::PaintNode(
   VRefCnt*           cnt,
+  int                uniqueID,
   const std::string& name,
   EObjectType        type,
   const std::string& guid,
   ERenderTrait       renderTrait,
   bool               initBase)
   : VNode(cnt)
-  , d_ptr(new PaintNode__pImpl(this, type, renderTrait, initBase))
+  , d_ptr(new PaintNode__pImpl(this, uniqueID, type, renderTrait, initBase))
 {
   d_ptr->guid = guid;
   d_ptr->name = name;
   m_children.reserve(10);
+}
+
+int PaintNode::uniqueID() const
+{
+  return d_ptr->uniqueID;
 }
 
 void PaintNode::setContextSettings(const ContextSetting& settings)

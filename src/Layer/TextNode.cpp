@@ -47,8 +47,8 @@ public:
   TextNode__pImpl& operator=(TextNode__pImpl&& p) noexcept = delete;
 };
 
-TextNode::TextNode(VRefCnt* cnt, const std::string& name, std::string guid)
-  : PaintNode(cnt, name, VGG_TEXT, std::move(guid), RT_DEFAULT, false)
+TextNode::TextNode(VRefCnt* cnt, int uniqueID, const std::string& name, std::string guid)
+  : PaintNode(cnt, uniqueID, name, VGG_TEXT, std::move(guid), RT_DEFAULT, false)
   , d_ptr(new TextNode__pImpl(this))
 {
   auto               t = incRef(transformAttribute());

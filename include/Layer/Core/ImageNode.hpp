@@ -36,7 +36,7 @@ class VGG_EXPORTS ImageNode final : public PaintNode
   friend class SceneBuilder;
 
 public:
-  ImageNode(VRefCnt* cnt, const std::string& name, std::string guid);
+  ImageNode(VRefCnt* cnt, int uniqueID, const std::string& name, std::string guid);
   ImageNode(const ImageNode&) = delete;
   ImageNode& operator=(const ImageNode&) = delete;
 

@@ -90,11 +90,14 @@ public:
 
   PaintNode(
     VRefCnt*           cnt,
+    int                uniqueID,
     const std::string& name,
     EObjectType        type,
     const std::string& guid,
     ERenderTrait       renderTrait,
     bool               initBase = true);
+
+  int uniqueID() const;
 
   void addChild(const PaintNodePtr node);
 

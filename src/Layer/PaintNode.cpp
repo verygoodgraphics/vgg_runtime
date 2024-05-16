@@ -30,11 +30,11 @@
 
 #include <optional>
 
-#define VGG_TRACE_PAINTNODE_INFO(...) VGG_TRACE_INFO("TRACE", PaintNode, __VA_ARGS__)
+#define VGG_PAINTNODE_LOG(...) VGG_LOG_DEV(log, PaintNode, __VA_ARGS__)
 
 #define VGG_PAINTNODE_DUMP(msg)                                                                    \
   VGG_LAYER_DEBUG_CODE(std::string indent(this->level, '\t');                                      \
-                       VGG_TRACE_PAINTNODE_INFO("{}{}", indent, msg););
+                       VGG_PAINTNODE_LOG("{}{}", indent, msg););
 
 namespace
 {

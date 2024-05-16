@@ -18,30 +18,46 @@
 #include <cstdio>
 
 #include <string_view>
+#include <vector>
+#include <mutex>
 
 namespace VGG::layer
 {
 FILE* getLogStream(const char* category);
-}
+
+} // namespace VGG::layer
 
 #define STRINGIFY(x) #x
+#define UNIQUE_NAME(prefix, __LINE__) prefix##__LINE__
 
 #if __GNUC__ >= 13
 #include <iostream>
 #include <format>
-
-#define VGG_TRACE_INFO_IMPL(category, label, ...)                                                  \
+#define VGG_LOG_IMPL(line, category, label, ...)                                                   \
   do                                                                                               \
   {                                                                                                \
-    auto f = layer::getLogStream(category);                                                        \
-    auto s = std::format(__VA_ARGS__);                                                             \
-    if (!s.empty())                                                                                \
+    auto f##line = layer::getLogStream(#category);                                                 \
+    if (f##line == nullptr)                                                                        \
+      break;                                                                                       \
+    auto s##line = std::format(__VA_ARGS__);                                                       \
+    if (!s##line.empty())                                                                          \
     {                                                                                              \
-      fprintf(f, "[" STRINGIFY(label) "]%s\n", s.c_str());                                         \
+      fprintf(f##line, "[" STRINGIFY(label) "]%s\n", s##line.c_str());                             \
     }                                                                                              \
   } while (0);
 #else
-#define VGG_TRACE_INFO_IMPL(category, label, ...)
+#define VGG_LOG_IMPL(line, category, label, ...)                                                   \
+  do                                                                                               \
+  {                                                                                                \
+    auto f##line = layer::getLogStream(#category);                                                 \
+    if (f##line == nullptr)                                                                        \
+      break;                                                                                       \
+    auto s##line = std::format(__VA_ARGS__);                                                       \
+    if (!s##line.empty())                                                                          \
+    {                                                                                              \
+      fprintf(f##line, "[" STRINGIFY(label) "]%s\n", s##line.c_str());                             \
+    }                                                                                              \
+  } while (0);
 #endif
 
 #if defined(_WIN32) && defined(LAYER_SHARED_LIBRARY)
@@ -56,8 +72,8 @@ FILE* getLogStream(const char* category);
 
 #ifdef VGG_NDEBUG
 #define VGG_LAYER_DEBUG_CODE(code)
-#define VGG_TRACE_INFO(...)
 #define VGG_LAYER_LOG(...)
+#define VGG_LOG_DEV(...)
 #else
 #define VGG_LAYER_DEBUG
 #define VGG_LAYER_DEBUG_CODE(...)                                                                  \
@@ -66,6 +82,7 @@ FILE* getLogStream(const char* category);
     __VA_ARGS__;                                                                                   \
   } while (0);
 
-#define VGG_TRACE_INFO(category, label, ...) VGG_TRACE_INFO_IMPL(category, label, __VA_ARGS__)
-#define VGG_LAYER_LOG(...) VGG_TRACE_INFO_IMPL("log", LAYER_INFO, __VA_ARGS__)
+#define VGG_LOG_DEV(category, label, ...) VGG_LOG_IMPL(__LINE__, category, label, __VA_ARGS__)
 #endif
+
+#define VGG_LOG(category, label, ...) VGG_LOG_IMPL(__LINE__, category, label, __VA_ARGS__)

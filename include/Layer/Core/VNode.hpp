@@ -38,7 +38,7 @@
       ::VGG::layer::V_NEW_UNSAFE<className>(std::forward<Args>(args)...));                         \
   }
 
-#define VGG_TRACE_VNODE_INFO(...) VGG_TRACE_INFO("TRACE", VNode, __VA_ARGS__)
+#define VGG_VNODE_INFO(...) VGG_LOG_DEV(log, VNode, __VA_ARGS__)
 
 namespace VGG::layer
 {
@@ -88,7 +88,7 @@ public:
 
   const Bounds& bounds() const
   {
-    VGG_TRACE_VNODE_INFO("{}", dbgInfo);
+    VGG_VNODE_INFO("{}", dbgInfo);
     ASSERT(!isInvalid());
     return m_bounds;
   }

@@ -16,6 +16,7 @@
 #include "VSkFontMgr.hpp"
 #include "Utility/ConfigManager.hpp"
 #include "Utility/Log.hpp"
+#include "Layer/Config.hpp"
 #include "Layer/FontManager.hpp"
 
 #include <core/SkFont.h>
@@ -30,6 +31,8 @@
 #ifdef VGG_USE_EMBBED_FONT
 #include "FiraSans.hpp"
 #include <zip.h>
+
+#define VGG_FONT_LOG(...) VGG_LOG_DEV(log, Font, __VA_ARGS__)
 
 namespace
 {
@@ -131,10 +134,10 @@ public:
   {
 
 #ifdef VGG_LAYER_DEBUG
-    DEBUG("Font directory: -----------");
+    VGG_FONT_LOG("Font directory: -----------");
     for (const auto& p : dirs)
     {
-      DEBUG("%s", p.string().c_str());
+      VGG_FONT_LOG("{}", p.string());
     }
 #endif
     sk_sp<SkFontMgrVGG> vggFontMgr = VGGFontDirectory(std::move(dirs));
@@ -148,14 +151,14 @@ public:
 #endif
 
 #ifdef VGG_LAYER_DEBUG
-      DEBUG("----  Fallback font:  -----------");
+      VGG_FONT_LOG("----  Fallback font:  -----------");
       for (const auto& f : fallbacks)
       {
-        DEBUG("%s", f.c_str());
+        VGG_FONT_LOG("{}", f);
       }
       for (const auto& f : fallbackEmojiFonts)
       {
-        DEBUG("%s", f.c_str());
+        VGG_FONT_LOG("{}", f);
       }
 #endif
       vggFontMgr->setFallbackFonts(std::move(fallbacks));
@@ -252,9 +255,9 @@ std::string FontManager::matchFontName(std::string_view inputName) const
     auto matched = fontMgr->fuzzyMatchFontFamilyName(fontName);
     if (matched)
     {
-      DEBUG(
-        "Font [%s] matches real name [%s][%f]",
-        fontName.c_str(),
+      VGG_FONT_LOG(
+        "Font [{}] matches real name [{}][{}]",
+        fontName,
         matched->first.c_str(),
         matched->second);
       fontName = std::string(matched->first.c_str());
@@ -271,7 +274,7 @@ std::string FontManager::matchFontName(std::string_view inputName) const
     }
     else
     {
-      DEBUG("No font in font manager");
+      VGG_FONT_LOG("No font in font manager");
     }
   }
   else if (const auto& fallbackFonts = fontMgr->fallbackFonts(); !fallbackFonts.empty())

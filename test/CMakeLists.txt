@@ -6,7 +6,7 @@ else()
   endif()
 
   add_executable(unit_tests
-    Animation/SymbolInstanceTest.cpp
+    Animation/SymbolInstanceAnimationTest.cpp
     container/MockSkiaGraphicsContext.cpp
     container/SdkTests.cpp
     container/container_tests.cpp

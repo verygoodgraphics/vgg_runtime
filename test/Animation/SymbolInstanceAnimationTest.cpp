@@ -50,21 +50,28 @@ protected:
   }
 };
 
-TEST_F(SymbolInstanceAnimationTestSuite, Smoke)
+TEST_F(SymbolInstanceAnimationTestSuite, PresentDismissSetState)
 {
-  std::string filePath =
-    "/Users/houguanhua/code/vgg/vgg_runtime_C/_feature/animation/symbol_instance/swap_master/";
-  auto result = m_container->load(filePath);
+  std::string filePath = "testDataDir/Animation/SymbolInstance/";
+  auto        result = m_container->load(filePath);
   ASSERT_TRUE(result);
   {
-    auto success = sut()->setCurrentFrameById("0:12");
+    auto success = sut()->pushFrame("0:12", {});
     ASSERT_TRUE(success);
   }
 
+  ISdk::StateOptions opts;
+  opts.animation.type = "dissolve";
   {
-    ISdk::StateOptions opts;
-    auto               success = sut()->presentState("0:13__0:5", "0:5", "0:10", opts);
-    // todo, set state
+    auto success = sut()->presentState("0:13__0:5", "0:5", "0:7", opts);
+    EXPECT_TRUE(success);
+  }
+  {
+    auto success = sut()->dismissState("0:13__0:5");
+    EXPECT_TRUE(success);
+  }
+  {
+    auto success = sut()->setState("0:13__0:5", "0:5", "0:7", opts);
     EXPECT_TRUE(success);
   }
 }

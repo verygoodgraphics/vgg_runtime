@@ -112,7 +112,7 @@ public:
   bool isAnimating();
 
 private:
-  void transition(
+  bool transition(
     const LayoutNode*             fromNode,
     const LayoutNode*             toNode,
     const app::UIAnimationOption& option,

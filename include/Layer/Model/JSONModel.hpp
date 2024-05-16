@@ -49,6 +49,7 @@ struct JSONObject
   std::vector<JSONObject> getChildObjects() const;
   M_JSON_FIELD_DEF(Name, "name", std::string, "");
   M_JSON_FIELD_DEF(Id, "id", std::string, "");
+  M_JSON_FIELD_DEF(UniqueId, "uniqueID", int, -1);
   M_JSON_FIELD_DEF(Bounds, "bounds", Bounds, {});
   M_JSON_FIELD_DEF(Matrix, "matrix", glm::mat3, { 1.f });
   M_JSON_FIELD_DEF(Visible, "visible", bool, true);

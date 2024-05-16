@@ -203,7 +203,7 @@ bool UIViewImpl::updateNodeFillColor(
   const double       b,
   const double       a)
 {
-  auto node = m_sceneNode->nodeByID(id);
+  auto node = m_sceneNode->nodeByID(0);
   if (!node)
     return false;
 

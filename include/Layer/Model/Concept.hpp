@@ -122,6 +122,7 @@ concept AbstractObject = requires(T a) {
   } -> std::convertible_to<EModelObjectType>;
   REQ_DECL(ObjectType, (EModelObjectType));
   // REQ_DECL(ObjectTypeString, (std::string));
+  REQ_DECL(UniqueId, (int));
   REQ_DECL(Name, (std::string));
   REQ_DECL(Id, (std::string));
   REQ_DECL(Bounds, (Bounds));

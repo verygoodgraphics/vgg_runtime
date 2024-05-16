@@ -58,7 +58,7 @@ public:
 
   void nodeAt(int x, int y, NodeVisitor vistor, void* userData) override;
 
-  PaintNode* nodeByID(std::string_view id);
+  PaintNode* nodeByID(int id);
 
   void invalidateMask(); // temporary solution
 

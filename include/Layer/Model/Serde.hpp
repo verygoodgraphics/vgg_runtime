@@ -102,6 +102,7 @@ struct Serde
       {
         auto p = makePaintNodePtr(
           ctx.alloc,
+          m.getUniqueId(),
           std::move(name),
           VGG_GROUP,
           std::move(guid),
@@ -129,8 +130,13 @@ struct Serde
       totalMatrix,
       [&](std::string name, std::string guid)
       {
-        auto p =
-          makePaintNodePtr(ctx.alloc, std::move(name), VGG_FRAME, std::move(guid), RT_DEFAULT);
+        auto p = makePaintNodePtr(
+          ctx.alloc,
+          m.getUniqueId(),
+          std::move(name),
+          VGG_FRAME,
+          std::move(guid),
+          RT_DEFAULT);
         return p;
       },
       [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bound)
@@ -155,6 +161,7 @@ struct Serde
       {
         auto p = makePaintNodePtr(
           ctx.alloc,
+          m.getUniqueId(),
           std::move(name),
           VGG_PATH,
           std::move(guid),
@@ -180,8 +187,13 @@ struct Serde
           }
           else if (VT(&geo, ShapeData, ptr))
           {
-            auto node =
-              makePaintNodePtr(ctx.alloc, "contour", VGG_CONTOUR, "", ERenderTraitBits::RT_DEFAULT);
+            auto node = makePaintNodePtr(
+              ctx.alloc,
+              m.getUniqueId(),
+              "contour",
+              VGG_CONTOUR,
+              "",
+              ERenderTraitBits::RT_DEFAULT);
             node->setOverflow(OF_VISIBLE);
             node->setContourOption(ContourOption{ ECoutourType::MCT_FRAMEONLY, false });
             CoordinateConvert::convertCoordinateSystem(*ptr, totalMatrix);
@@ -219,6 +231,7 @@ struct Serde
       {
         auto p = makePaintNodePtr(
           ctx.alloc,
+          m.getUniqueId(),
           std::move(name),
           VGG_FRAME,
           std::move(guid),
@@ -248,6 +261,7 @@ struct Serde
       {
         auto p = makePaintNodePtr(
           ctx.alloc,
+          m.getUniqueId(),
           std::move(name),
           VGG_FRAME,
           std::move(guid),
@@ -274,7 +288,7 @@ struct Serde
       m,
       totalMatrix,
       [&](std::string name, std::string guid)
-      { return makeImageNodePtr(ctx.alloc, std::move(name), std::move(guid)); },
+      { return makeImageNodePtr(ctx.alloc, m.getUniqueId(), std::move(name), std::move(guid)); },
       [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bounds)
       {
         auto i = static_cast<ImageNode*>(p);
@@ -293,7 +307,7 @@ struct Serde
       m,
       totalMatrix,
       [&](std::string name, std::string guid)
-      { return makeTextNodePtr(ctx.alloc, std::move(name), std::move(guid)); },
+      { return makeTextNodePtr(ctx.alloc, m.getUniqueId(), std::move(name), std::move(guid)); },
       [&](PaintNode* ptr, const glm::mat3& matrix, const Bounds& bounds)
       {
         auto p = static_cast<TextNode*>(ptr);

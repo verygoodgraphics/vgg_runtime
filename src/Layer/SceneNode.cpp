@@ -165,7 +165,7 @@ void SceneNode::nodeAt(int x, int y, NodeVisitor visitor, void* userData)
   }
 }
 
-PaintNode* SceneNode::nodeByID(const std::string& id)
+PaintNode* SceneNode::nodeByID(int id)
 {
   for (auto& root : d_ptr->frames)
   {

@@ -32,22 +32,22 @@
 
 namespace
 {
-VGG::layer::PaintNode* findByID(VGG::layer::PaintNode* ptr, std::string_view guid)
+VGG::layer::PaintNode* findByID(VGG::layer::PaintNode* ptr, int id)
 {
-  if (ptr->guid() == guid)
+  if (ptr->uniqueID() == id)
   {
     return ptr;
   }
   for (const auto& ptr : *ptr)
   {
     auto n = static_cast<VGG::layer::PaintNode*>(ptr.get());
-    if (n->guid() == guid)
+    if (n->uniqueID() == id)
     {
       return n;
     }
     else
     {
-      auto r = findByID(n, guid);
+      auto r = findByID(n, id);
       if (r)
         return r;
     }
@@ -204,7 +204,7 @@ void FrameNode::invalidateMask()
   d_ptr->maskDirty = true;
 }
 
-PaintNode* FrameNode::nodeByID(std::string_view id)
+PaintNode* FrameNode::nodeByID(int id)
 {
   if (auto r = node(); r)
   {

@@ -74,6 +74,10 @@ struct StructObject
   }
   R_OPT(Name, name, std::string, "");
   R(Id, id, std::string);
+  int getUniqueId() const
+  {
+    return m->idNumber();
+  }
   R(Bounds, bounds, Bounds);
   R(Matrix, matrix, glm::mat3);
   R(Visible, visible, bool);

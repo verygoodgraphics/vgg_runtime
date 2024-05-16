@@ -62,7 +62,7 @@ public:
 
 private:
   const EType m_type;
-  const int   m_idNumber;
+  int         m_idNumber;
 
   std::weak_ptr<Element>                m_parent;
   std::vector<std::shared_ptr<Element>> m_children;

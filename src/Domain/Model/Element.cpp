@@ -167,6 +167,7 @@ int Element::generateId()
 std::shared_ptr<Element> Element::cloneTree() const
 {
   auto n = clone();
+  n->m_idNumber = idNumber(); // clone id number
   for (auto& child : childObjects())
     n->addChild(child->cloneTree());
   return n;

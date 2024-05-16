@@ -49,15 +49,22 @@ InstanceState::Result InstanceState::setState(
   // todo: now find closest enclosing instance node, should find the right instance node
   auto instanceNode = findInstanceNode(instanceDescendantId, listenerId);
   if (!instanceNode)
-  {
-    return {};
-  }
+    return { false };
 
   auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode());
   ASSERT(pInstance);
 
   auto ret = makeResultWithOldTree(instanceNode);
   pInstance->resetState();
+  const auto& oldMasterId = pInstance->masterId();
+  if (oldMasterId == stateMasterId)
+  {
+    DEBUG(
+      "instance %s, set state, same master id %s, return",
+      instanceNode->id().c_str(),
+      oldMasterId.c_str());
+    return { false };
+  }
 
   DEBUG(
     "instance: %s, set state, old master id %s, new master id: %s; event target: %s, listener: %s",
@@ -80,9 +87,7 @@ InstanceState::Result InstanceState::presentState(
   ASSERT(stateTree);
   auto instanceNode = findInstanceNode(instanceDescendantId, listenerId);
   if (!instanceNode)
-  {
-    return {};
-  }
+    return { false };
 
   // save current state tree to still handle events
   auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode());
@@ -94,7 +99,7 @@ InstanceState::Result InstanceState::presentState(
       "instance %s, present state, same master id %s, return",
       instanceNode->id().c_str(),
       oldMasterId.c_str());
-    return {};
+    return { false };
   }
 
   auto ret = makeResultWithOldTree(instanceNode);
@@ -139,15 +144,11 @@ InstanceState::Result InstanceState::dismissState(
   const std::string& instanceDescendantId)
 {
   if (!savedStateTree)
-  {
-    return {};
-  }
+    return { false };
 
   auto instanceNode = savedStateTree->srcNode();
   if (!instanceNode)
-  {
-    return {};
-  }
+    return { false };
 
   auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode());
   ASSERT(pInstance);
@@ -216,9 +217,14 @@ InstanceState::Result InstanceState::makeResultWithOldTree(
 
   Result ret;
   ret.success = true;
+
+  // old
   auto ele = pInstance->cloneTree();
   ret.oldTree = std::make_shared<SnapshotTree>(ele);
   Layout::Layout::buildSubtree(ret.oldTree.get());
+
+  // new
+  pInstance->regenerateId(true);
   ret.newTree = instanceNode;
 
   return ret;

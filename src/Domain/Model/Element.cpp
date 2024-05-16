@@ -173,6 +173,14 @@ std::shared_ptr<Element> Element::cloneTree() const
   return n;
 }
 
+void Element::regenerateId(bool recursively)
+{
+  m_idNumber = generateId();
+  if (recursively)
+    for (auto& child : childObjects())
+      child->regenerateId(recursively);
+}
+
 std::size_t Element::size() const
 {
   std::size_t count = 1;

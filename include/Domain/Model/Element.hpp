@@ -81,6 +81,8 @@ public:
   virtual std::shared_ptr<Element> clone() const = 0;
   std::size_t                      size() const;
 
+  void regenerateId(bool recursively);
+
 public:
   auto type() const
   {

@@ -78,6 +78,7 @@ public:
     bool         initBase)
     : q_ptr(api)
     , type(type)
+    , uniqueID(uniqueID)
     , renderTrait(renderTrait)
   {
     transformAttr = TransformAttribute::Make();

@@ -203,7 +203,15 @@ bool UIViewImpl::updateNodeFillColor(
   const double       b,
   const double       a)
 {
-  auto node = m_sceneNode->nodeByID(0);
+  const auto& root = m_viewModel->layoutTree();
+  if (!root)
+    return false;
+
+  auto layoutNode = root->findDescendantNodeById(id);
+  if (!layoutNode)
+    return false;
+
+  auto node = m_sceneNode->nodeByID(layoutNode->elementNode()->idNumber());
   if (!node)
     return false;
 

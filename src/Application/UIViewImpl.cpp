@@ -238,11 +238,10 @@ bool UIViewImpl::setInstanceState(
   if (!oldNode || !newNode)
     return false;
 
-  transition(oldNode, newNode, options, completion, true);
-  return true;
+  return transition(oldNode, newNode, options, completion, true);
 }
 
-void UIViewImpl::transition(
+bool UIViewImpl::transition(
   const LayoutNode*             inFromNode,
   const LayoutNode*             inToNode,
   const app::UIAnimationOption& option,
@@ -297,7 +296,7 @@ void UIViewImpl::transition(
           completion(true); // todo false for unfinished
       });
 
-  action->replaceNode(
+  const auto success = action->replaceNode(
     fromNode->shared_from_this(),
     toNode->shared_from_this(),
     action->getPaintNode(fromNode->shared_from_this()),
@@ -305,11 +304,13 @@ void UIViewImpl::transition(
     true,
     animation);
 
-  if (!animation)
+  if (success && !animation)
   {
     m_api->setDirty(true);
 
     if (completion)
       completion(true);
   }
+
+  return success;
 }

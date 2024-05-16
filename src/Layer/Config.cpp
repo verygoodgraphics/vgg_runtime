@@ -16,64 +16,103 @@
 
 #include "Layer/Config.hpp"
 #include "Layer/Core/Timer.hpp"
+#include <mutex>
 #include <string>
 #include <stdlib.h>
 #include <cstring>
 #include <ranges>
 #include <unordered_map>
+#include <iostream>
 
 namespace
 {
 
-class FILEGuard
+using FILEPtr = std::unique_ptr<FILE, void (*)(FILE*)>;
+std::vector<std::pair<std::string_view, std::string_view>> parse(const char* var)
 {
-  FILE* m_f{ nullptr };
+  /*
+   * var should be a string of the form:
+   * category:stream[;category:stream]
+   *
+   * for category with prefix 'log', default stream is stderr
+   * other categories streamed to file with name <stream>.log
+   * stream can be 'stderr', 'stdout', 'null' or a file name
+   */
+  std::vector<std::pair<std::string_view, std::string_view>> result;
+  result.reserve(4);
+  std::string_view inputSV(var);
 
-public:
-  FILEGuard(FILE* f)
-    : m_f(f)
+  auto categoryStreamPairs = inputSV | std::views::split(';');
+  for (auto&& pair : categoryStreamPairs)
   {
-  }
-
-  FILEGuard(const FILEGuard&) = delete;
-  FILEGuard& operator=(const FILEGuard&) = delete;
-
-  FILEGuard(FILEGuard&& other) noexcept
-    : m_f(other.m_f)
-  {
-    other.m_f = nullptr;
-  }
-  FILEGuard& operator=(FILEGuard&& other) noexcept
-  {
-    if (this != &other)
+    std::vector<std::string_view> categoryStream;
+    for (auto&& part : pair | std::views::split(':'))
     {
-      if (m_f && m_f != stdout && m_f != stderr)
+      categoryStream.emplace_back(&*part.begin(), std::ranges::distance(part));
+    }
+    if (categoryStream.size() == 2)
+    {
+      result.emplace_back(categoryStream[0], categoryStream[1]);
+    }
+  }
+  std::sort(result.begin(), result.end());
+  result.erase(std::unique(result.begin(), result.end()), result.end());
+  return result;
+}
+
+struct ConfigVars
+{
+  std::once_flag flag;
+
+  std::vector<std::pair<std::string_view, std::string_view>> logConfigs;
+  bool                                                       enableLog{ false };
+  ConfigVars()
+  {
+    std::call_once(
+      flag,
+      [this]()
       {
-        fflush(m_f);
-        fclose(m_f);
-      }
-      m_f = other.m_f;
-      other.m_f = nullptr;
-    }
-    return *this;
-  }
+        const char* var = std::getenv("VGG_LAYER_LOG");
+        if (var)
+        {
+          logConfigs = parse(var);
+        }
+        else
+        {
+          logConfigs = { { "log", "stderr" },
+                         { "error", "stderr" },
+                         { "warn", "stderr" },
+                         { "info", "stderr" },
+                         { "debug", "stderr" } };
+        }
 
-  FILE* operator*() const
-  {
-    return m_f;
-  }
+        const char* enableLogVar = std::getenv("VGG_ENABLE_LAYER_LOG");
+        if (enableLogVar)
+        {
+          if (strcmp(enableLogVar, "0") == 0)
+          {
+            enableLog = false;
+          }
+          else if (strcmp(enableLogVar, "1") == 0)
+          {
+            enableLog = true;
+          }
+        }
 
-  ~FILEGuard()
-  {
-    if (m_f && m_f != stdout && m_f != stderr)
-    {
-      fflush(m_f);
-      fclose(m_f);
-    }
+        if (!enableLog)
+        {
+          for (const auto& [cat, stream] : logConfigs)
+          {
+            std::cout << "Log category: " << cat << " stream to " << stream << std::endl;
+          }
+        }
+      });
   }
 };
 
-std::unordered_map<std::string, FILEGuard> g_fileMap;
+ConfigVars                               g_configVars;
+std::unordered_map<std::string, FILE*>   g_categoryMap;
+std::unordered_map<std::string, FILEPtr> g_file;
 
 } // namespace
 
@@ -81,40 +120,67 @@ namespace VGG::layer
 {
 FILE* getLogStream(const char* category)
 {
-  /*
-   * var should be a string of the form:
-   * category:stream
-   *
-   * for category with prefix 'log', default stream is stderr
-   * other categories streamed to file with name category_<timestamp>.log
-   */
-  const char* var = std::getenv("VGG_LAYER_LOG_CONFIG");
-
-  if (!var)
+  if (!g_configVars.enableLog)
+  {
+    return nullptr;
+  }
+  if (!category)
   {
     return stderr;
   }
-
-  if (std::strcmp(var, "stderr") == 0)
-    return stderr;
-  else if (std::strcmp(var, "stdout") == 0)
-    return stdout;
-  else if (std::strcmp(var, "file") == 0)
+  namespace sv = std::views;
+  auto it = g_categoryMap.find(category);
+  if (it == g_categoryMap.end())
   {
-    auto it = g_fileMap.find(category);
-    if (it == g_fileMap.end())
+    for (const auto& [cat, stream] : g_configVars.logConfigs)
     {
-      auto filename = std::string(category) + "_" + std::to_string(Timer::now().time) + ".log";
-      auto res =
-        g_fileMap.emplace(std::make_pair(category, FILEGuard(fopen(filename.c_str(), "w"))));
-      if (res.second)
-        it = res.first;
+      if (cat == category)
+      {
+        std::pair<std::unordered_map<std::string, FILE*>::iterator, bool> res;
+        if (stream == "stderr")
+        {
+          res = g_categoryMap.emplace(std::make_pair(category, stderr));
+        }
+        else if (stream == "stdout")
+        {
+          res = g_categoryMap.emplace(std::make_pair(category, stdout));
+        }
+        else if (stream == "null")
+        {
+          res = g_categoryMap.emplace(std::make_pair(category, nullptr));
+        }
+        else
+        {
+          auto streamItr = g_file.find(std::string(stream));
+          if (streamItr == g_file.end())
+          {
+            FILE* f = fopen(std::string(stream).c_str(), "w");
+            if (f)
+            {
+              FILEPtr fp(f, [](FILE* f) {});
+              g_file.emplace(std::make_pair(stream, std::move(fp)));
+              res = g_categoryMap.emplace(std::make_pair(category, f));
+            }
+            else
+            {
+              res = g_categoryMap.emplace(std::make_pair(category, stderr));
+            }
+          }
+          else
+          {
+            res = g_categoryMap.emplace(std::make_pair(category, streamItr->second.get()));
+          }
+        }
+        // ASSERT(res.second);
+        return res.first->second;
+      }
     }
-    if (it != g_fileMap.end())
-    {
-      return *(it->second);
-    }
+  }
+  if (it != g_categoryMap.end())
+  {
+    return it->second;
   }
   return stderr;
 }
+
 } // namespace VGG::layer

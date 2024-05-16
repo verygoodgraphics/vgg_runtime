@@ -158,6 +158,11 @@ std::shared_ptr<Element> DesignDocument::getElementByKey(const std::string& key)
 }
 
 // Element
+int Element::generateId()
+{
+  static int s_id{ 0 };
+  return ++s_id;
+}
 
 std::shared_ptr<Element> Element::cloneTree() const
 {

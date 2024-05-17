@@ -34,6 +34,12 @@ struct Rectangle
   Bounds               bounds;
   std::array<float, 4> radius = { 0, 0, 0, 0 };
   float                cornerSmoothing{ 0.f };
+
+  bool operator==(const Rectangle& other) const
+  {
+    return bounds == other.bounds && radius == other.radius &&
+           cornerSmoothing == other.cornerSmoothing;
+  }
 };
 
 struct Arc
@@ -153,6 +159,8 @@ public:
     setStar(star);
   }
 
+  explicit VShape(const Rectangle& rectangle);
+
   ~VShape();
   VShape(const VShape& shape);
   VShape& operator=(const VShape& shape);
@@ -167,6 +175,7 @@ public:
   void setOval(const Ellipse& ellipse);
   void setPolygon(const Polygon& ellipse);
   void setStar(const Star& ellipse);
+  void setRectangle(const Rectangle& rectangle);
 
   std::optional<SkRect>  asRect() const;
   std::optional<SkRRect> asRRect() const;

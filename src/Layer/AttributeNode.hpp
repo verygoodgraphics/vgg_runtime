@@ -19,18 +19,18 @@
 #include "Layer/Memory/VNew.hpp"
 
 #define VGG_ATTRIBUTE(attrName, attrType, attrContainer)                                           \
-  const attrType& get##attrName() const                                                            \
+  attrType get##attrName() const                                                                   \
   {                                                                                                \
     return attrContainer;                                                                          \
   }                                                                                                \
-  void set##attrName(const attrType& v)                                                            \
+  void set##attrName(const std::remove_cvref_t<attrType>& v)                                       \
   {                                                                                                \
     if (attrContainer == v)                                                                        \
       return;                                                                                      \
     attrContainer = v;                                                                             \
     this->invalidate();                                                                            \
   }                                                                                                \
-  void set##attrName(attrType&& v)                                                                 \
+  void set##attrName(std::remove_cvref_t<attrType>&& v)                                            \
   {                                                                                                \
     if (attrContainer == v)                                                                        \
       return;                                                                                      \
@@ -38,17 +38,27 @@
     this->invalidate();                                                                            \
   }
 
-#define VGG_ATTRIBUTE_PTR(attrName, attrType, attrContainer)                                       \
-  attrType* get##attrName() const                                                                  \
+#define ATTR_DECL(name, type)                                                                      \
+  void set##name(const std::remove_cvref_t<type>& v);                                              \
+  void set##name(std::remove_cvref_t<type>&& v);                                                   \
+  type get##name() const;
+
+#define ATTR_DEF(classname, name, type, internalname, container)                                   \
+  void classname::set##name(const std::remove_cvref_t<type>& v)                                    \
   {                                                                                                \
-    return attrContainer;                                                                          \
+    ASSERT(container != nullptr);                                                                  \
+    container->set##internalname(v);                                                               \
   }                                                                                                \
-  void set##attrName(attrType* v)                                                                  \
+                                                                                                   \
+  void classname::set##name(std::remove_cvref_t<type>&& v)                                         \
   {                                                                                                \
-    if (attrContainer == v)                                                                        \
-      return;                                                                                      \
-    attrContainer = v;                                                                             \
-    this->invalidate();                                                                            \
+    ASSERT(container != nullptr);                                                                  \
+    container->set##internalname(std::move(v));                                                    \
+  }                                                                                                \
+  type classname::get##name() const                                                                \
+  {                                                                                                \
+    ASSERT(container != nullptr);                                                                  \
+    return container->get##internalname();                                                         \
   }
 
 namespace VGG::layer

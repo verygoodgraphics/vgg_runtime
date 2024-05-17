@@ -36,7 +36,7 @@ public:
   void   render(Renderer* renderer);
   Bounds onRevalidate() override;
 
-  VGG_ATTRIBUTE(DropShadowStyle, std::vector<DropShadow>, m_shadow);
+  VGG_ATTRIBUTE(DropShadowStyle, const std::vector<DropShadow>&, m_shadow);
   VGG_CLASS_MAKE(DropShadowAttribute);
 
 private:
@@ -57,7 +57,7 @@ public:
   }
   void   render(Renderer* renderer);
   Bounds onRevalidate() override;
-  VGG_ATTRIBUTE(InnerShadowStyle, std::vector<InnerShadow>, m_shadow);
+  VGG_ATTRIBUTE(InnerShadowStyle, const std::vector<InnerShadow>&, m_shadow);
   VGG_CLASS_MAKE(InnerShadowAttribute);
 
 private:

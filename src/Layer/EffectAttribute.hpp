@@ -31,7 +31,7 @@ public:
     : ImageFilterAttribute(cnt)
   {
   }
-  VGG_ATTRIBUTE(BackgroundBlur, std::vector<BackgroundFX>, m_blurs);
+  VGG_ATTRIBUTE(BackgroundBlur, const std::vector<BackgroundFX>&, m_blurs);
   sk_sp<SkImageFilter> getImageFilter() const override
   {
     return m_imageFilter;
@@ -49,7 +49,7 @@ class LayerFXAttribute : public ImageFilterAttribute
 {
 public:
   LayerFXAttribute(VRefCnt* cnt, Ref<StyleAttribute> styleObjectAttr);
-  VGG_ATTRIBUTE(LayerBlur, std::vector<LayerFX>, m_blurs);
+  VGG_ATTRIBUTE(LayerBlur, const std::vector<LayerFX>&, m_blurs);
   Bounds               onRevalidate() override;
   sk_sp<SkImageFilter> getImageFilter() const override
   {

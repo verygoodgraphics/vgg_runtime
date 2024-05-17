@@ -28,7 +28,7 @@ public:
     : Attribute(cnt)
   {
   }
-  VGG_ATTRIBUTE(Transform, Transform, m_transform);
+  VGG_ATTRIBUTE(Transform, const Transform&, m_transform);
   VGG_CLASS_MAKE(TransformAttribute);
 
   Bounds onRevalidate() override

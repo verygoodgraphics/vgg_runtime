@@ -80,7 +80,7 @@ public:
     m_paragraphLayout->setTextLayoutMode(layoutMode);
   }
 
-  const ETextLayoutMode& getFrameMode() const
+  ETextLayoutMode getFrameMode() const
   {
     return m_paragraphLayout->getTextLayoutMode();
   }
@@ -98,14 +98,13 @@ public:
     return bounds();
   }
 
-  const glm::vec2& getAnchor() const
+  glm::vec2 getAnchor() const
   {
-    static glm::vec2 s_dft(0.0f);
     if (m_anchor)
     {
       return *m_anchor;
     }
-    return s_dft;
+    return glm::vec2{ 0, 0 };
   }
 
   VGG_CLASS_MAKE(ParagraphItem);

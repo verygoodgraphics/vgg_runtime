@@ -18,6 +18,7 @@
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Core/VShape.hpp"
 #include "Layer/Core/VType.hpp"
+#include "Layer/AttributeNode.hpp"
 #include "Layer/Config.hpp"
 
 #include "Layer/ParagraphLayout.hpp" //TODO:: It's a private header
@@ -27,11 +28,6 @@
   {                                                                                                \
     return container;                                                                              \
   }
-
-#define ATTR_DECL(name, type)                                                                      \
-  void        set##name(const type& v);                                                            \
-  void        set##name(type&& v);                                                                 \
-  const type& get##name() const;
 
 namespace VGG::layer
 {
@@ -64,15 +60,15 @@ public:
     return m_owner;
   }
 
-  ATTR_DECL(Transform, Transform);
-  ATTR_DECL(AlphaMask, std::vector<AlphaMask>);
-  ATTR_DECL(ShapeMask, std::vector<std::string>);
-  ATTR_DECL(DropShadows, std::vector<DropShadow>);
-  ATTR_DECL(InnerShadows, std::vector<InnerShadow>);
-  ATTR_DECL(Fills, std::vector<Fill>);
-  ATTR_DECL(Borders, std::vector<Border>);
-  ATTR_DECL(LayerBlurs, std::vector<LayerFX>);
-  ATTR_DECL(BackgroundBlurs, std::vector<BackgroundFX>);
+  ATTR_DECL(Transform, const Transform&);
+  ATTR_DECL(AlphaMask, const std::vector<AlphaMask>&);
+  ATTR_DECL(ShapeMask, const std::vector<std::string>&);
+  ATTR_DECL(DropShadows, const std::vector<DropShadow>&);
+  ATTR_DECL(InnerShadows, const std::vector<InnerShadow>&);
+  ATTR_DECL(Fills, const std::vector<Fill>&);
+  ATTR_DECL(Borders, const std::vector<Border>&);
+  ATTR_DECL(LayerBlurs, const std::vector<LayerFX>&);
+  ATTR_DECL(BackgroundBlurs, const std::vector<BackgroundFX>&);
 
   // The following api should not be accessed
   ATTR_MEMBER_GETTER(transform, TransformAttribute, m_transformAttr);
@@ -153,7 +149,7 @@ public:
     , m_shapeAttr(shapeAttr)
   {
   }
-  ATTR_DECL(Shape, VShape);
+  ATTR_DECL(Shape, const VShape&);
 
   // The following api should not be accessed
   ATTR_MEMBER_GETTER(shape, ShapeAttribute, m_shapeAttr);
@@ -198,10 +194,10 @@ public:
     std::string                text,
     std::vector<TextStyleAttr> style,
     std::vector<ParagraphAttr> parStyle);
-  ATTR_DECL(ParagraphBounds, Bounds);
+  ATTR_DECL(ParagraphBounds, const Bounds&);
   ATTR_DECL(Anchor, glm::vec2);
   ATTR_DECL(TextLayoutMode, ETextLayoutMode);
-  ATTR_DECL(VerticalAlignment, ETextVerticalAlignment);
+  ATTR_DECL(VerticalAlignment, const ETextVerticalAlignment&);
 
   // The following api should not be accessed
   ATTR_MEMBER_GETTER(paragraph, ParagraphItem, m_paraAttr);
@@ -218,9 +214,9 @@ public:
     , m_imageAttr(image)
   {
   }
-  ATTR_DECL(ImageGUID, std::string);
-  ATTR_DECL(ImageFilter, ImageFilter);
-  ATTR_DECL(ImageBounds, Bounds);
+  ATTR_DECL(ImageGUID, const std::string&);
+  ATTR_DECL(ImageFilter, const ImageFilter&);
+  ATTR_DECL(ImageBounds, const Bounds&);
 
   ATTR_MEMBER_GETTER(image, ImageItem, m_imageAttr);
 

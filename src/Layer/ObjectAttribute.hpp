@@ -61,8 +61,8 @@ public:
   void   render(Renderer* renderer);
   Bounds onRevalidate() override;
 
-  VGG_ATTRIBUTE(FillStyle, std::vector<Fill>, m_fills);
-  VGG_ATTRIBUTE(BorderStyle, std::vector<Border>, m_borders);
+  VGG_ATTRIBUTE(FillStyle, const std::vector<Fill>&, m_fills);
+  VGG_ATTRIBUTE(BorderStyle, const std::vector<Border>&, m_borders);
   VGG_ATTRIBUTE(GraphicItem, Ref<GraphicItem>, m_graphicItem);
 
   VGG_CLASS_MAKE(ObjectAttribute);

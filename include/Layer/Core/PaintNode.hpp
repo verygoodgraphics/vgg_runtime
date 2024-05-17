@@ -167,6 +167,10 @@ public:
 
   EWindingType childWindingType() const;
 
+  void setFrameBounds(const Bounds& bounds);
+
+  const Bounds& frameBounds() const; // content bound
+
   void setFrameRadius(std::array<float, 4> radius);
 
   std::array<float, 4> frameRadius() const;
@@ -186,10 +190,6 @@ public:
   const Transform& transform() const;
 
   Transform globalTransform() const;
-
-  const Bounds& frameBounds() const; // content bound
-
-  void setFrameBounds(const Bounds& bounds);
 
   const std::string& guid() const;
 

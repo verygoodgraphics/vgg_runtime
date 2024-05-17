@@ -31,6 +31,7 @@
 namespace VGG::layer
 {
 class Renderer;
+class ShapeAttribute;
 class ShapeItemAttibuteAccessor;
 class TransformAttribute;
 class StyleItem;
@@ -247,8 +248,10 @@ protected:
   virtual void        dispatchEvent(void* event);
   TransformAttribute* transformAttribute();
 
-  void       onSetAccessor(std::unique_ptr<Accessor> acc);
-  void       onSetStyleItem(Ref<StyleItem> item);
+  void onSetAccessor(std::unique_ptr<Accessor> acc);
+  void onSetStyleItem(Ref<StyleItem> item);
+  void onSetShapeAttribute(ShapeAttribute* s);
+
   StyleItem* styleItem();
 
   VShape         makeBoundsPath();

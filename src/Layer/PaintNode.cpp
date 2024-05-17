@@ -87,7 +87,7 @@ public:
   float                cornerSmooth{ 0 };
 
   Ref<StyleItem>            renderNode;
-  ShapeItem*                shapeItem{ nullptr };
+  ShapeAttribute*           shapeItem{ nullptr };
   Ref<TransformAttribute>   transformAttr;
   std::unique_ptr<Accessor> accessor;
 
@@ -107,19 +107,18 @@ public:
 
     if (initBase)
     {
-      Ref<ShapeAttribute> shape;
       auto [c, d] = StyleItem::MakeRenderNode(
         nullptr,
         api,
         transformAttr,
         [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<GraphicItem>
         {
-          shape = PaintNodeShapeAttributeImpl::Make(alloc, api);
-          auto vectorObject = ShapeItem::Make(alloc, shape, object);
-          shapeItem = vectorObject;
+          auto s = PaintNodeShapeAttributeImpl::Make(alloc, api);
+          auto vectorObject = ShapeItem::Make(alloc, s, object);
+          shapeItem = s;
           return vectorObject;
         });
-      auto acc = std::make_unique<ShapeItemAttibuteAccessor>(*d, shape.get());
+      auto acc = std::make_unique<ShapeItemAttibuteAccessor>(*d, shapeItem);
       accessor = std::move(acc);
       renderNode = std::move(c);
       api->observe(renderNode);
@@ -485,7 +484,12 @@ bool PaintNode::isVisible() const
 
 void PaintNode::setFrameRadius(std::array<float, 4> radius)
 {
+  if (d_ptr->frameRadius == radius)
+    return;
   d_ptr->frameRadius = radius;
+  if (d_ptr->shapeItem)
+    d_ptr->shapeItem->revalidate();
+  this->revalidate();
 }
 
 std::array<float, 4> PaintNode::frameRadius() const
@@ -495,7 +499,12 @@ std::array<float, 4> PaintNode::frameRadius() const
 
 void PaintNode::setFrameCornerSmoothing(float smooth)
 {
+  if (d_ptr->cornerSmooth == smooth)
+    return;
   d_ptr->cornerSmooth = smooth;
+  if (d_ptr->shapeItem)
+    d_ptr->shapeItem->revalidate();
+  this->revalidate();
 }
 
 float PaintNode::frameCornerSmoothing() const
@@ -545,7 +554,11 @@ const Bounds& PaintNode::frameBounds() const
 void PaintNode::setFrameBounds(const Bounds& bounds)
 {
   VGG_IMPL(PaintNode);
+  if (_->bounds == bounds)
+    return;
   _->bounds = bounds;
+  if (_->shapeItem)
+    _->shapeItem->revalidate();
   invalidate();
 }
 
@@ -695,6 +708,13 @@ void PaintNode::onSetStyleItem(Ref<StyleItem> item)
   if (d_ptr->renderNode == item)
     return;
   d_ptr->renderNode = std::move(item);
+}
+
+void PaintNode::onSetShapeAttribute(ShapeAttribute* s)
+{
+  if (d_ptr->shapeItem == s)
+    return;
+  d_ptr->shapeItem = s;
 }
 
 StyleItem* PaintNode::styleItem()

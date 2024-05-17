@@ -66,6 +66,7 @@ ImageNode::ImageNode(VRefCnt* cnt, int uniqueID, const std::string& name, std::s
   auto acc = std::make_unique<ImageItemAttribtueAccessor>(*d, ioa);
   d_ptr->accessor = acc.get();
   onSetAccessor(std::move(acc));
+  onSetShapeAttribute(ioa->shape());
   onSetStyleItem(c);
   observe(std::move(c));
 }

@@ -50,7 +50,6 @@ ATTR_DEF(
   BackgroundBlur,
   m_backgroundBlurAttr);
 
-ATTR_DEF(ShapeItemAttibuteAccessor, Shape, const VShape&, Shape, m_shapeAttr);
 ATTR_DEF(
   ParagraphItemAttributeAccessor,
   ParagraphBounds,

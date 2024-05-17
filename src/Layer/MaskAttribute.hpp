@@ -60,6 +60,11 @@ public:
     observe(m_layerAttr);
   }
 
+  const VShape& getShape() const override
+  {
+    return m_shape;
+  }
+
   VGG_ATTRIBUTE(MaskID, const std::vector<std::string>&, m_maskID);
   VGG_ATTRIBUTE(MaskNode, PaintNode*, m_maskedNode);
   VGG_CLASS_MAKE(ShapeMaskAttribute);
@@ -68,6 +73,7 @@ public:
 
 private:
   friend class RenderNode;
+  VShape                   m_shape;
   Ref<LayerFXAttribute>    m_layerAttr;
   std::vector<std::string> m_maskID;
   PaintNode*               m_maskedNode;

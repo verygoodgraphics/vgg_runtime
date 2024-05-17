@@ -46,33 +46,53 @@ class VNode;
 using VNodePtr = Ref<VNode>;
 using VNodeRef = WeakRef<VNode>;
 
-class VNode : public ObjectImpl<VObject>
+class Invalidator
 {
-  Bounds                m_bounds;
-  uint8_t               m_state{ 0 };
-  std::vector<VNodeRef> m_observers;
+public:
+  Invalidator();
+  Invalidator(const Invalidator&) = delete;
+  Invalidator& operator=(const Invalidator&) = delete;
 
-  template<typename Visitor>
-  void visitObservers(Visitor&& v)
+  void emit(const Bounds&, const glm::mat3& ctm = glm::mat3(1.0f));
+
+  const Bounds& bounds() const
   {
-    for (auto& obs : m_observers)
-    {
-      v(obs);
-    }
+    return m_bounds;
   }
 
+  auto begin() const
+  {
+    return m_boundsArray.cbegin();
+  }
+  auto end() const
+  {
+    return m_boundsArray.cend();
+  }
+
+  void reset();
+
+private:
+  std::vector<Bounds> m_boundsArray;
+  Bounds              m_bounds;
+};
+
+class VNode : public ObjectImpl<VObject>
+{
 protected:
   enum EState
   {
-    INVALIDATE = 1 << 0
+    INVALIDATE = 1 << 0,
+    DAMAGE = 1 << 1,
+    TRAVERSALING = 1 << 2,
   };
-  virtual Bounds onRevalidate() = 0;
+  using EStateT = uint8_t;
 
-  bool isInvalid() const;
-
-  void observe(VNodePtr sender);
-
-  void unobserve(VNodePtr sender);
+  enum EDamageTraitBits
+  {
+    OVERRIDE_DAMAGE = 1 << 0,
+    BUBBLE_DAMAGE = 1 << 1,
+  };
+  using EDamageTrait = uint8_t;
 
 public:
   VNode(VRefCnt* cnt, EState initState = (EState)0)
@@ -83,7 +103,7 @@ public:
 
   void invalidate();
 
-  const Bounds& revalidate();
+  const Bounds& revalidate(Invalidator* inv = nullptr, const glm::mat3& ctm = glm::mat3(1.0f));
 
   const Bounds& bounds() const
   {
@@ -94,5 +114,30 @@ public:
 #ifdef VGG_LAYER_DEBUG
   std::string dbgInfo;
 #endif
+
+protected:
+  virtual Bounds onRevalidate() = 0;
+
+  bool isInvalid() const;
+
+  void observe(VNodePtr sender);
+
+  void unobserve(VNodePtr sender);
+
+private:
+  class ScopedState;
+  Bounds                m_bounds;
+  uint8_t               m_state : 3 { 0 };
+  EDamageTrait          m_trait : 2 { 0 };
+  std::vector<VNodeRef> m_observers;
+
+  template<typename Visitor>
+  void visitObservers(Visitor&& v)
+  {
+    for (auto& obs : m_observers)
+    {
+      v(obs);
+    }
+  }
 };
 } // namespace VGG::layer

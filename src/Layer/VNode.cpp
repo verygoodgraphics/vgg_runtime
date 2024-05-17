@@ -17,6 +17,37 @@
 
 namespace VGG::layer
 {
+
+class VNode::ScopedState
+{
+public:
+  ScopedState(VNode& node, EStateT flag)
+    : m_node(node)
+    , m_state(flag)
+    , m_isSet(node.m_state & flag)
+  {
+    node.m_state |= flag;
+  }
+
+  ~ScopedState()
+  {
+    if (!m_isSet)
+    {
+      m_node.m_state &= ~m_state;
+    }
+  }
+
+  bool wasSet() const
+  {
+    return m_isSet;
+  }
+
+private:
+  VNode&   m_node;
+  uint32_t m_state;
+  bool     m_isSet;
+};
+
 bool VNode::isInvalid() const
 {
   return m_state & INVALIDATE;
@@ -54,6 +85,9 @@ void VNode::unobserve(VNodePtr sender)
 
 void VNode::invalidate()
 {
+  ScopedState state(*this, TRAVERSALING);
+  if (state.wasSet())
+    return;
 #ifdef VGG_LAYER_DEBUG
   VGG_TRACE_DEV(dbgInfo);
 #endif
@@ -70,8 +104,11 @@ void VNode::invalidate()
     });
 }
 
-const Bounds& VNode::revalidate()
+const Bounds& VNode::revalidate(Invalidator* inv, const glm::mat3& ctm)
 {
+  ScopedState state(*this, TRAVERSALING);
+  if (state.wasSet())
+    return m_bounds;
 #ifdef VGG_LAYER_DEBUG
   VGG_TRACE_DEV(dbgInfo);
 #endif

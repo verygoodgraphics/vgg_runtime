@@ -151,9 +151,6 @@ public:
   }
   ATTR_DECL(Shape, const VShape&);
 
-  // The following api should not be accessed
-  ATTR_MEMBER_GETTER(shape, ShapeAttribute, m_shapeAttr);
-
 protected:
   ShapeAttribute* const m_shapeAttr;
 };

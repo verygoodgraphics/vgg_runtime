@@ -91,7 +91,7 @@ public:
 
 private:
   WeakRef<ObjectAttribute> m_objectAttribute;
-  Ref<ShapeAttribute>      m_imageShape;
+  Ref<ShapeAttributeImpl>  m_imageShape;
   sk_sp<SkShader>          m_imageShader;
   PatternStretch           m_imagePattern;
   Bounds                   m_imageBounds;

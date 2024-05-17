@@ -17,63 +17,33 @@
 
 #include "AttributeNode.hpp"
 #include "Layer/Core/VShape.hpp"
-
+#include "Layer/ShapeAttribute.hpp"
 namespace VGG::layer
 {
 
 class PaintNode;
-class ShapeAttribute : public Attribute
+class PaintNodeShapeAttributeImpl : public ShapeAttribute
 {
 public:
-  ShapeAttribute(VRefCnt* cnt)
-    : Attribute(cnt)
-  {
-  }
-
-  virtual const VShape& getShape() const = 0;
-
-  VGG_CLASS_MAKE(ShapeAttribute);
-
-private:
-  friend class RenderNode;
-};
-
-class ShapeAttributeImpl : public ShapeAttribute
-{
-public:
-  ShapeAttributeImpl(VRefCnt* cnt)
+  PaintNodeShapeAttributeImpl(VRefCnt* cnt, PaintNode* paint = 0)
     : ShapeAttribute(cnt)
+    , m_paintNode(paint)
   {
   }
+
   const VShape& getShape() const override
   {
     return m_shape;
   }
 
-  void setShape(const VShape& shape)
-  {
-    if (m_shape == shape)
-      return;
-    m_shape = shape;
-    invalidate();
-  }
-
-  Bounds onRevalidate() override
-  {
-    if (m_shape.isEmpty())
-    {
-      return Bounds{};
-    }
-    const auto rect = m_shape.bounds();
-    return Bounds{ rect.x(), rect.y(), rect.width(), rect.height() };
-  }
-
-  VGG_CLASS_MAKE(ShapeAttributeImpl);
+  Bounds onRevalidate() override;
+  VGG_CLASS_MAKE(PaintNodeShapeAttributeImpl);
 
 protected:
   VShape m_shape;
 
 private:
   friend class RenderNode;
+  PaintNode* m_paintNode; // temperature solution
 };
 } // namespace VGG::layer

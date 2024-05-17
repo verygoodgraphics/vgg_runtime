@@ -22,22 +22,11 @@
 namespace VGG::layer
 {
 
-class ImageBoundsAttribute : public ShapeAttribute
-{
-public:
-  ImageBoundsAttribute(VRefCnt* cnt)
-    : ShapeAttribute(cnt, 0)
-  {
-  }
-
-private:
-};
-
 ImageItem::ImageItem(VRefCnt* cnt, ObjectAttribute* object)
   : GraphicItem(cnt)
   , m_objectAttribute(object)
 {
-  m_imageShape = ShapeAttribute::Make();
+  m_imageShape = ShapeAttributeImpl::Make();
   observe(m_imageShape);
 }
 

@@ -13,11 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ShapeAttribute.hpp"
-
+#include "PaintNodeShapeAttributeImpl.hpp"
 #include "Layer/Core/PaintNode.hpp"
 
 namespace VGG::layer
 {
 
+Bounds PaintNodeShapeAttributeImpl::onRevalidate()
+{
+  if (m_shape.isEmpty())
+  {
+    m_shape = m_paintNode->asVisualShape(0);
+    return Bounds{};
+  }
+  const auto rect = m_shape.bounds();
+  return Bounds{ rect.x(), rect.y(), rect.width(), rect.height() };
+}
 } // namespace VGG::layer

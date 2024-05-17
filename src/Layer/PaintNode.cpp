@@ -15,6 +15,7 @@
  */
 #include "Guard.hpp"
 #include "Layer/Core/VShape.hpp"
+#include "Layer/PaintNodeShapeAttributeImpl.hpp"
 #include "LayerCache.h"
 #include "SkSL.hpp"
 #include "Effects.hpp"
@@ -86,6 +87,7 @@ public:
   float                cornerSmooth{ 0 };
 
   Ref<StyleItem>            renderNode;
+  ShapeItem*                shapeItem{ nullptr };
   Ref<TransformAttribute>   transformAttr;
   std::unique_ptr<Accessor> accessor;
 
@@ -112,8 +114,9 @@ public:
         transformAttr,
         [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<GraphicItem>
         {
-          shape = ShapeAttribute::Make(alloc, api);
+          shape = PaintNodeShapeAttributeImpl::Make(alloc, api);
           auto vectorObject = ShapeItem::Make(alloc, shape, object);
+          shapeItem = vectorObject;
           return vectorObject;
         });
       auto acc = std::make_unique<ShapeItemAttibuteAccessor>(*d, shape.get());
@@ -576,6 +579,7 @@ Bounds PaintNode::onRevalidate()
   {
     auto currentNodeBounds =
       _->renderNode->revalidate(); // This will trigger the shape attribute get the
+
     bounds.unionWith(currentNodeBounds);
   }
 

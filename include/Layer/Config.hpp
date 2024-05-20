@@ -49,20 +49,7 @@ FILE* getLogStream(const char* category);
     }                                                                                              \
   } while (0);
 #else
-#include <iostream>
-#include <format>
-#define VGG_LOG_IMPL(line, category, label, ...)                                                   \
-  do                                                                                               \
-  {                                                                                                \
-    auto UNI_NAME(f) = layer::getLogStream(#category);                                             \
-    if (UNI_NAME(f) == nullptr)                                                                    \
-      break;                                                                                       \
-    auto UNI_NAME(s) = std::format(__VA_ARGS__);                                                   \
-    if (!UNI_NAME(s).empty())                                                                      \
-    {                                                                                              \
-      fprintf(UNI_NAME(f), "[" STRINGIFY(label) "]%s\n", UNI_NAME(s).c_str());                     \
-    }                                                                                              \
-  } while (0);
+#define VGG_LOG_IMPL(...)
 #endif
 
 #if defined(_WIN32) && defined(LAYER_SHARED_LIBRARY)

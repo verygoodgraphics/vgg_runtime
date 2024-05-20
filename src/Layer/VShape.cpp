@@ -41,43 +41,6 @@ VShape::VShape()
 {
 }
 
-VShape::VShape(const Rectangle& rectangle)
-  : VShape()
-{
-  const auto& radius = rectangle.radius;
-  const auto& cornerSmoothing = rectangle.cornerSmoothing;
-  const auto  rect = toSkRect(rectangle.bounds);
-  if (radius[0] != 0 || radius[1] != 0 || radius[2] != 0 || radius[3] != 0)
-  {
-    if (cornerSmoothing <= 0.f)
-    {
-      SkRRect  rrect;
-      SkVector radii[4] = { { radius[0], radius[0] },
-                            { radius[1], radius[1] },
-                            { radius[2], radius[2] },
-                            { radius[3], radius[3] } };
-      rrect.setRectRadii(rect, radii);
-      setRRect(rrect);
-      return;
-    }
-    else
-    {
-      glm::vec2     corners[4] = { { rect.x(), rect.y() },
-                                   { rect.right(), rect.y() },
-                                   { rect.right(), rect.bottom() },
-                                   { rect.x(), rect.bottom() } };
-      BezierContour contour(4);
-      contour.closed = true;
-      contour.cornerSmooth = cornerSmoothing;
-      for (int i = 0; i < 4; i++)
-        contour.emplace_back(corners[i], radius[i], std::nullopt, std::nullopt, std::nullopt);
-      setContour(std::make_shared<BezierContour>(contour));
-      return;
-    }
-  }
-  setRect(rect);
-}
-
 VShape::~VShape()
 {
 }

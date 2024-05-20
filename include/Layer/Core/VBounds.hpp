@@ -23,7 +23,6 @@
 #include <ostream>
 
 #include "Layer/Core/Transform.hpp"
-#include <format>
 
 #if __GNUC__ >= 13
 #include <format>
@@ -267,6 +266,7 @@ inline std::ostream& operator<<(std::ostream& os, const glm::mat3& mat)
 
 } // namespace VGG
 
+#if __GNUC__ >= 13
 template<>
 struct std::formatter<VGG::Bounds>
 {
@@ -286,3 +286,4 @@ struct std::formatter<VGG::Bounds>
       s.height());
   }
 };
+#endif

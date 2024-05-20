@@ -52,7 +52,7 @@ public:
     std::ifstream in(filename, std::ios::binary);
     if (in.is_open() == false)
     {
-      VGG_LOG_DEV(log, ResourceProvider, "cannot open {}", filename.string());
+      VGG_LOG_DEV(LOG, ResourceProvider, "cannot open {}", filename.string());
       return nullptr;
     }
     in.seekg(0, std::ios::end);
@@ -61,7 +61,7 @@ public:
     char* data = (char*)malloc(length);
     if (!in.read(data, length))
     {
-      VGG_LOG_DEV(log, ResourceProvider, "read data failed");
+      VGG_LOG_DEV(LOG, ResourceProvider, "read data failed");
       return nullptr;
     }
     return SkData::MakeFromMalloc(data, length);

@@ -54,10 +54,12 @@ void VNode::unobserve(VNodePtr sender)
 
 void VNode::invalidate()
 {
+#ifdef VGG_LAYER_DEBUG
+  VGG_TRACE_DEV(dbgInfo);
+#endif
   if (m_state & INVALIDATE)
     return;
   m_state |= INVALIDATE;
-  VGG_VNODE_INFO("Invalidate: {}", dbgInfo);
   visitObservers(
     [](auto& obs)
     {
@@ -70,9 +72,11 @@ void VNode::invalidate()
 
 const Bounds& VNode::revalidate()
 {
+#ifdef VGG_LAYER_DEBUG
+  VGG_TRACE_DEV(dbgInfo);
+#endif
   if (!isInvalid())
     return m_bounds;
-  VGG_VNODE_INFO("Revalidate: {}", dbgInfo);
   m_bounds = onRevalidate();
   m_state &= ~INVALIDATE;
   return m_bounds;

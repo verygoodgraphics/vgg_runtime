@@ -27,7 +27,7 @@
 namespace
 {
 
-using FILEPtr = std::unique_ptr<FILE, void (*)(FILE*)>;
+using FILEPtr = std::shared_ptr<FILE>;
 std::vector<std::pair<std::string_view, std::string_view>> parse(const char* var)
 {
   /*
@@ -55,8 +55,6 @@ std::vector<std::pair<std::string_view, std::string_view>> parse(const char* var
       result.emplace_back(categoryStream[0], categoryStream[1]);
     }
   }
-  std::sort(result.begin(), result.end());
-  result.erase(std::unique(result.begin(), result.end()), result.end());
   return result;
 }
 
@@ -76,14 +74,8 @@ struct ConfigVars
         if (var)
         {
           logConfigs = parse(var);
-        }
-        else
-        {
-          logConfigs = { { "log", "stderr" },
-                         { "error", "stderr" },
-                         { "warn", "stderr" },
-                         { "info", "stderr" },
-                         { "debug", "stderr" } };
+          std::sort(logConfigs.begin(), logConfigs.end());
+          logConfigs.erase(std::unique(logConfigs.begin(), logConfigs.end()), logConfigs.end());
         }
 
         const char* enableLogVar = std::getenv("VGG_ENABLE_LAYER_LOG");
@@ -99,7 +91,7 @@ struct ConfigVars
           }
         }
 
-        if (!enableLog)
+        if (enableLog)
         {
           for (const auto& [cat, stream] : logConfigs)
           {
@@ -111,13 +103,14 @@ struct ConfigVars
 };
 
 ConfigVars                               g_configVars;
-std::unordered_map<std::string, FILE*>   g_categoryMap;
-std::unordered_map<std::string, FILEPtr> g_file;
+std::unordered_map<std::string, FILEPtr> g_categoryMap; // category -> FILEPtr
+std::unordered_map<std::string, FILEPtr> g_file;        // string -> FILEPtr
 
 } // namespace
 
 namespace VGG::layer
 {
+
 FILE* getLogStream(const char* category)
 {
   if (!g_configVars.enableLog)
@@ -136,14 +129,14 @@ FILE* getLogStream(const char* category)
     {
       if (cat == category)
       {
-        std::pair<std::unordered_map<std::string, FILE*>::iterator, bool> res;
+        std::pair<std::unordered_map<std::string, FILEPtr>::iterator, bool> res;
         if (stream == "stderr")
         {
-          res = g_categoryMap.emplace(std::make_pair(category, stderr));
+          res = g_categoryMap.emplace(std::make_pair(category, FILEPtr(stderr, [](FILE*) {})));
         }
         else if (stream == "stdout")
         {
-          res = g_categoryMap.emplace(std::make_pair(category, stdout));
+          res = g_categoryMap.emplace(std::make_pair(category, FILEPtr(stdout, [](FILE*) {})));
         }
         else if (stream == "null")
         {
@@ -159,7 +152,7 @@ FILE* getLogStream(const char* category)
             {
               FILEPtr fp(f, [](FILE* f) {});
               g_file.emplace(std::make_pair(stream, std::move(fp)));
-              res = g_categoryMap.emplace(std::make_pair(category, f));
+              res = g_categoryMap.emplace(std::make_pair(category, fp));
             }
             else
             {
@@ -168,17 +161,17 @@ FILE* getLogStream(const char* category)
           }
           else
           {
-            res = g_categoryMap.emplace(std::make_pair(category, streamItr->second.get()));
+            res = g_categoryMap.emplace(std::make_pair(category, streamItr->second));
           }
         }
         // ASSERT(res.second);
-        return res.first->second;
+        return res.first->second.get();
       }
     }
   }
   if (it != g_categoryMap.end())
   {
-    return it->second;
+    return it->second.get();
   }
   return stderr;
 }

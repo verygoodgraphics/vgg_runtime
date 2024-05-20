@@ -30,7 +30,7 @@
 
 #include <optional>
 
-#define VGG_PAINTNODE_LOG(...) VGG_LOG_DEV(log, PaintNode, __VA_ARGS__)
+#define VGG_PAINTNODE_LOG(...) VGG_LOG_DEV(LOG, PaintNode, __VA_ARGS__)
 
 #define VGG_PAINTNODE_DUMP(msg)                                                                    \
   VGG_LAYER_DEBUG_CODE(std::string indent(this->level, '\t');                                      \

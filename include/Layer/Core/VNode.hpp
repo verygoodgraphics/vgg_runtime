@@ -21,6 +21,7 @@
 #include "Layer/Memory/VRefCnt.hpp"
 #include "Layer/Memory/VNew.hpp"
 #include "Layer/Config.hpp"
+#include "Layer/StackTrace.hpp"
 #include "Utility/Log.hpp"
 #include "Layer/Core/VBounds.hpp"
 
@@ -37,8 +38,6 @@
     return ::VGG::layer::Ref<className>(                                                           \
       ::VGG::layer::V_NEW_UNSAFE<className>(std::forward<Args>(args)...));                         \
   }
-
-#define VGG_VNODE_INFO(...) VGG_LOG_DEV(log, VNode, __VA_ARGS__)
 
 namespace VGG::layer
 {
@@ -88,7 +87,6 @@ public:
 
   const Bounds& bounds() const
   {
-    VGG_VNODE_INFO("{}", dbgInfo);
     ASSERT(!isInvalid());
     return m_bounds;
   }

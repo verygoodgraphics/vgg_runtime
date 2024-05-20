@@ -28,7 +28,10 @@ FILE* getLogStream(const char* category);
 } // namespace VGG::layer
 
 #define STRINGIFY(x) #x
-#define UNIQUE_NAME(prefix, __LINE__) prefix##__LINE__
+#define CONCAT_IMPL(x, y) x##y
+#define CONCAT(x, y) CONCAT_IMPL(x, y)
+
+#define UNI_NAME(prefix) CONCAT(prefix, __LINE__)
 
 #if __GNUC__ >= 13
 #include <iostream>
@@ -36,26 +39,28 @@ FILE* getLogStream(const char* category);
 #define VGG_LOG_IMPL(line, category, label, ...)                                                   \
   do                                                                                               \
   {                                                                                                \
-    auto f##line = layer::getLogStream(#category);                                                 \
-    if (f##line == nullptr)                                                                        \
+    auto UNI_NAME(f) = layer::getLogStream(#category);                                             \
+    if (UNI_NAME(f) == nullptr)                                                                    \
       break;                                                                                       \
-    auto s##line = std::format(__VA_ARGS__);                                                       \
-    if (!s##line.empty())                                                                          \
+    auto UNI_NAME(s) = std::format(__VA_ARGS__);                                                   \
+    if (!UNI_NAME(s).empty())                                                                      \
     {                                                                                              \
-      fprintf(f##line, "[" STRINGIFY(label) "]%s\n", s##line.c_str());                             \
+      fprintf(UNI_NAME(f), "[" STRINGIFY(label) "]%s\n", UNI_NAME(s).c_str());                     \
     }                                                                                              \
   } while (0);
 #else
+#include <iostream>
+#include <format>
 #define VGG_LOG_IMPL(line, category, label, ...)                                                   \
   do                                                                                               \
   {                                                                                                \
-    auto f##line = layer::getLogStream(#category);                                                 \
-    if (f##line == nullptr)                                                                        \
+    auto UNI_NAME(f) = layer::getLogStream(#category);                                             \
+    if (UNI_NAME(f) == nullptr)                                                                    \
       break;                                                                                       \
-    auto s##line = std::format(__VA_ARGS__);                                                       \
-    if (!s##line.empty())                                                                          \
+    auto UNI_NAME(s) = std::format(__VA_ARGS__);                                                   \
+    if (!UNI_NAME(s).empty())                                                                      \
     {                                                                                              \
-      fprintf(f##line, "[" STRINGIFY(label) "]%s\n", s##line.c_str());                             \
+      fprintf(UNI_NAME(f), "[" STRINGIFY(label) "]%s\n", UNI_NAME(s).c_str());                     \
     }                                                                                              \
   } while (0);
 #endif

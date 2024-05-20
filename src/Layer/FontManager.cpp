@@ -32,7 +32,7 @@
 #include "FiraSans.hpp"
 #include <zip.h>
 
-#define VGG_FONT_LOG(...) VGG_LOG_DEV(log, Font, __VA_ARGS__)
+#define VGG_FONT_LOG(...) VGG_LOG_DEV(LOG, Font, __VA_ARGS__)
 
 namespace
 {

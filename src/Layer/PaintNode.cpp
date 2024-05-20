@@ -146,7 +146,7 @@ PaintNode::PaintNode(
   const std::string& guid,
   ERenderTrait       renderTrait,
   bool               initBase)
-  : VNode(cnt)
+  : VNode(cnt, EState::INVALIDATE)
   , d_ptr(new PaintNode__pImpl(this, uniqueID, type, renderTrait, initBase))
 {
   d_ptr->guid = guid;
@@ -248,6 +248,7 @@ void PaintNode::render(Renderer* renderer)
 
 void PaintNode::onPaint(Renderer* renderer)
 {
+  VGG_PAINTNODE_DUMP(std::format("PaintNode::onPaint {}", name()));
   d_ptr->renderNode->render(renderer);
 }
 
@@ -488,8 +489,7 @@ void PaintNode::setFrameRadius(std::array<float, 4> radius)
     return;
   d_ptr->frameRadius = radius;
   if (d_ptr->shapeItem)
-    d_ptr->shapeItem->revalidate();
-  this->revalidate();
+    d_ptr->shapeItem->invalidate();
 }
 
 std::array<float, 4> PaintNode::frameRadius() const
@@ -503,8 +503,7 @@ void PaintNode::setFrameCornerSmoothing(float smooth)
     return;
   d_ptr->cornerSmooth = smooth;
   if (d_ptr->shapeItem)
-    d_ptr->shapeItem->revalidate();
-  this->revalidate();
+    d_ptr->shapeItem->invalidate();
 }
 
 float PaintNode::frameCornerSmoothing() const
@@ -558,8 +557,7 @@ void PaintNode::setFrameBounds(const Bounds& bounds)
     return;
   _->bounds = bounds;
   if (_->shapeItem)
-    _->shapeItem->revalidate();
-  invalidate();
+    _->shapeItem->invalidate();
 }
 
 Bounds PaintNode::onRevalidate()

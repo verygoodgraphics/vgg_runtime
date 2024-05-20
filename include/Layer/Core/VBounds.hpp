@@ -23,6 +23,11 @@
 #include <ostream>
 
 #include "Layer/Core/Transform.hpp"
+#include <format>
+
+#if __GNUC__ >= 13
+#include <format>
+#endif
 
 namespace VGG
 {
@@ -261,3 +266,23 @@ inline std::ostream& operator<<(std::ostream& os, const glm::mat3& mat)
 }
 
 } // namespace VGG
+
+template<>
+struct std::formatter<VGG::Bounds>
+{
+  constexpr auto parse(std::format_parse_context& ctx)
+  {
+    return ctx.begin();
+  }
+
+  auto format(const VGG::Bounds& s, std::format_context& ctx) const
+  {
+    return std::format_to(
+      ctx.out(),
+      "[{}, {}, {}, {}]",
+      s.topLeft().x,
+      s.topLeft().y,
+      s.width(),
+      s.height());
+  }
+};

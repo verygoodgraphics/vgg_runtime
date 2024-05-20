@@ -29,6 +29,7 @@ public:
     : ShapeAttribute(cnt)
     , m_paintNode(paint)
   {
+    ASSERT(m_paintNode);
   }
 
   const VShape& getShape() const override
@@ -39,10 +40,8 @@ public:
   Bounds onRevalidate() override;
   VGG_CLASS_MAKE(PaintNodeShapeAttributeImpl);
 
-protected:
-  VShape m_shape;
-
 private:
+  VShape m_shape;
   friend class RenderNode;
   PaintNode* m_paintNode; // temperature solution
 };

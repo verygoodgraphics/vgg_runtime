@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "PaintNodeShapeAttributeImpl.hpp"
+#include "Layer/Config.hpp"
 #include "Layer/Core/PaintNode.hpp"
 
 namespace VGG::layer
@@ -21,12 +22,14 @@ namespace VGG::layer
 
 Bounds PaintNodeShapeAttributeImpl::onRevalidate()
 {
-  if (m_shape.isEmpty())
+  ASSERT(m_paintNode);
+  m_shape = m_paintNode->asVisualShape(0);
+  if (!m_shape.isEmpty())
   {
-    m_shape = m_paintNode->asVisualShape(0);
-    return Bounds{};
+    const auto rect = m_shape.bounds();
+    auto       bounds = Bounds{ rect.x(), rect.y(), rect.width(), rect.height() };
+    return bounds;
   }
-  const auto rect = m_shape.bounds();
-  return Bounds{ rect.x(), rect.y(), rect.width(), rect.height() };
+  return Bounds();
 }
 } // namespace VGG::layer

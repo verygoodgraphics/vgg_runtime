@@ -81,7 +81,7 @@ private:
 #ifdef VGG_NDEBUG
 #define VGG_TRACE_DEV
 #else
-#define VGG_TRACE_DEV(x) VGG_TRACE_IMPL(x)
+#define VGG_TRACE_DEV(msg) VGG_TRACE_IMPL(msg)
 #endif
 
-#define VGG_TRACE(x) VGG_TRACE_IMPL(x)
+#define VGG_TRACE(msg) VGG_TRACE_IMPL(msg)

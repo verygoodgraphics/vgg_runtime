@@ -15,6 +15,7 @@
  */
 
 #include "StyleItem.hpp"
+#include "Layer/Config.hpp"
 #include "VSkia.hpp"
 #include "Renderer.hpp"
 #include "Effects.hpp"
@@ -28,6 +29,7 @@ namespace VGG::layer
 
 void StyleItem::render(Renderer* renderer)
 {
+  VGG_LAYER_DEBUG_CODE(if (!m_picture) VGG_LOG_DEV(ERROR, StyleItem, "no picture"););
   auto canvas = renderer->canvas();
   canvas->drawPicture(m_picture);
   // recorder(renderer);

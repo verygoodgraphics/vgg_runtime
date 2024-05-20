@@ -55,7 +55,7 @@ void VNode::unobserve(VNodePtr sender)
 void VNode::invalidate()
 {
 #ifdef VGG_LAYER_DEBUG
-  VGG_TRACE_DEV(dbgInfo);
+  VGG_TRACE_DEV("Inval Node: " + dbgInfo);
 #endif
   if (m_state & INVALIDATE)
     return;
@@ -73,7 +73,7 @@ void VNode::invalidate()
 const Bounds& VNode::revalidate()
 {
 #ifdef VGG_LAYER_DEBUG
-  VGG_TRACE_DEV(dbgInfo);
+  VGG_TRACE_DEV("Reval Node: " + dbgInfo);
 #endif
   if (!isInvalid())
     return m_bounds;

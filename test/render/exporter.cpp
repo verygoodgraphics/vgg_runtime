@@ -319,6 +319,7 @@ int main(int argc, char** argv)
         std::cout << prompt;
         continue;
       }
+      std::cout << "Input: " << args[0] << ", Output: " << args[1] << std::endl;
       fs::path filename = args[0];
       fs::path output = args.size() > 1 ? args[1] : ".";
       fs::path ext = filename.extension().string();
@@ -327,7 +328,8 @@ int main(int argc, char** argv)
       {
         auto data = r->read(filename);
         layer::setGlobalResourceProvider(std::move(data.provider));
-        auto rp = static_cast<layer::FileResourceProvider*>(layer::getGlobalResourceProvider()); // we assume it's a file resource provider
+        auto rp = static_cast<layer::FileResourceProvider*>(
+          layer::getGlobalResourceProvider()); // we assume it's a file resource provider
         rp->setDirPrefix(filename.parent_path());
         fs::create_directory(output);
         if (isBitmap)

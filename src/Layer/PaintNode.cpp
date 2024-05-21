@@ -273,6 +273,18 @@ void PaintNode::debug(Renderer* render)
     e->debug(render);
   }
 }
+
+std::string PaintNode::dump() const
+{
+  std::string info;
+  const auto& b = d_ptr->accessor->getBackgroundBlurs();
+  info = std::format("{}[{}]:\n", name(), guid());
+  for (const auto& e : b)
+  {
+    info += std::string("Background Blur: ") + (e.isEnabled ? "Enabled" : "Disabled");
+  }
+  return info;
+}
 #endif
 
 void PaintNode::nodeAt(int x, int y, NodeVisitor visitor, void* userData)

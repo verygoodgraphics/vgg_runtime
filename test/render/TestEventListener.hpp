@@ -322,13 +322,13 @@ public:
       }
     }
 
-    static bool s_enableHover = false;
+    static bool                   s_enableHover = false;
+    static VGG::layer::PaintNode* s_currentHover = nullptr;
     if (evt.type == VGG_MOUSEMOTION)
     {
 #ifdef VGG_LAYER_DEBUG
       if (m_layer && s_enableHover)
       {
-        static VGG::layer::PaintNode* s_currentHover = nullptr;
         if (auto p = m_layer->nodeAt(evt.motion.windowX, evt.motion.windowY); p)
         {
           // enter
@@ -353,6 +353,19 @@ public:
             s_currentHover->hoverBounds = false;
             s_currentHover = nullptr;
           }
+        }
+      }
+#endif
+    }
+
+    if (evt.type == VGG_MOUSEBUTTONDOWN)
+    {
+#ifdef VGG_LAYER_DEBUG
+      if (m_layer)
+      {
+        if (auto p = m_layer->nodeAt(evt.motion.windowX, evt.motion.windowY); p)
+        {
+          INFO("%s", p->dump().c_str());
         }
       }
 #endif

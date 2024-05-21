@@ -58,7 +58,8 @@ public:
     return m_graphicItem->effectBounds();
   }
 
-  void   render(Renderer* renderer);
+  void render(Renderer* renderer);
+
   Bounds onRevalidate() override;
 
   VGG_ATTRIBUTE(FillStyle, const std::vector<Fill>&, m_fills);

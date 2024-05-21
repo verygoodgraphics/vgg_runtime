@@ -97,6 +97,15 @@ Bounds ShapeItem::onRevalidate()
 {
   ASSERT(m_shapeAttr);
   m_shapeAttr->revalidate();
+  return revalidateMaskFilter();
+}
+
+/**
+ * @brief Revalidate the mask filter for the shape item
+ * @return Bounds
+ */
+Bounds ShapeItem::revalidateMaskFilter()
+{
   auto parent = m_objectAttribute.lock();
   if (parent)
   {
@@ -123,7 +132,7 @@ Bounds ShapeItem::onRevalidate()
       return Bounds{ shapeBounds.x(), shapeBounds.y(), shapeBounds.width(), shapeBounds.height() };
     }
   }
-  return Bounds();
+  return Bounds{};
 }
 
 } // namespace VGG::layer

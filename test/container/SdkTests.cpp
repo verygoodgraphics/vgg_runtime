@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+#include "Adapter/Common/Container.hpp"
 #include "Adapter/Environment.hpp"
-#include "Entry/Container/Container.hpp"
 
 #include "test_config.hpp"
 

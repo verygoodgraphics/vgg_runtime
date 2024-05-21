@@ -40,7 +40,7 @@ void StyleItem::debug(Renderer* render)
 {
   auto   canvas = render->canvas();
   SkRect layerBounds = toSkRect(m_alphaMaskAttr->bounds());
-  SkRect effectBounds = toSkRect(m_objectAttr->effectBounds());
+  SkRect effectBounds = toSkRect(m_styleAttr->effectBounds());
 
   SkPaint p;
   p.setStroke(true);
@@ -74,20 +74,20 @@ void StyleItem::recorder(Renderer* renderer)
       p.setAntiAlias(true);
       p.setImageFilter(m_alphaMaskAttr->getImageFilter());
       shape = VShape(toSkRect(effectBounds()));
-      backdropFilter = m_objectAttr->getBackdropImageFilter();
+      backdropFilter = m_styleAttr->getBackdropImageFilter();
     });
-  m_objectAttr->render(renderer);
+  m_styleAttr->render(renderer);
 }
 
 void StyleItem::renderAsMask(Renderer* render)
 {
-  ASSERT(m_objectAttr);
-  m_objectAttr->render(render);
+  ASSERT(m_styleAttr);
+  m_styleAttr->render(render);
 }
 
 bool StyleItem::hasNewLayer() const
 {
-  sk_sp<SkImageFilter> dropbackFilter = m_objectAttr->getBackdropImageFilter();
+  sk_sp<SkImageFilter> dropbackFilter = m_styleAttr->getBackdropImageFilter();
   sk_sp<SkImageFilter> layerFXFilter = m_alphaMaskAttr->getImageFilter();
   const auto           newLayer = dropbackFilter || layerFXFilter;
   return newLayer;
@@ -95,7 +95,7 @@ bool StyleItem::hasNewLayer() const
 
 void StyleItem::revalidateEffectsBounds()
 {
-  m_effectsBounds = m_objectAttr->effectBounds();
+  m_effectsBounds = m_styleAttr->effectBounds();
   if (hasNewLayer())
   {
     m_effectsBounds = m_alphaMaskAttr->bounds();
@@ -120,18 +120,18 @@ Bounds StyleItem::onRevalidate()
   m_shapeMaskAttr->revalidate();
   m_transformAttr->revalidate();
   m_alphaMaskAttr->revalidate();
-  m_objectAttr->revalidate();
+  m_styleAttr->revalidate();
   revalidateEffectsBounds();
   // auto [pic, bounds] = revalidatePicture(toSkRect(m_objectAttr->effectBounds()));
   // m_effectsBounds = Bounds{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
   // m_picture = std::move(pic);
-  return m_objectAttr->bounds();
+  return m_styleAttr->bounds();
 }
 
 StyleItem::~StyleItem()
 {
   unobserve(m_transformAttr);
-  unobserve(m_objectAttr);
+  unobserve(m_styleAttr);
   unobserve(m_alphaMaskAttr);
   unobserve(m_shapeMaskAttr);
   // unobserve(m_shapeAttr);

@@ -17,6 +17,8 @@ add_executable(vgg_runtime "main.cpp")
       -s EXPORTED_RUNTIME_METHODS=\['ccall','cwrap','writeArrayToMemory','stringToUTF8'\] \
       -s EXIT_RUNTIME\
       --preload-file ../../../../asset \
+      --closure-args=--externs=${CMAKE_SOURCE_DIR}/src/Adapter/Browser/externs.js\
+      --pre-js ${CMAKE_SOURCE_DIR}/src/Adapter/Browser/vgg.js\
     "
   )
 

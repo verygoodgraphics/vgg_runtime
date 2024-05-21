@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-#include "../Common/FakeMouse.hpp"
 #include "Container.hpp"
+#include "FakeMouse.hpp"
 
+#ifdef EMSCRIPTEN
+#include "Adapter/BrowserComposer.hpp"
+#else
 #include "Adapter/NativeComposer.hpp"
+#endif
+
 #include "Application/AppRender.hpp"
 #include "Application/MainComposer.hpp"
 #include "Application/RunLoop.hpp"
@@ -93,12 +98,21 @@ public:
     m_mainComposer.reset(
       new MainComposer{ new FakePlatformComposer, std::make_shared<FakeMouse>() });
 #else
+
+#ifdef EMSCRIPTEN
+    // TODO: mouse
+    m_mainComposer.reset(new MainComposer{ new BrowserComposer(), std::make_shared<FakeMouse>() });
+
+#else
+
     bool catchJsException = false;
 #ifdef NDEBUG
     catchJsException = true;
 #endif
     m_mainComposer.reset(
       new MainComposer{ new NativeComposer(catchJsException), std::make_shared<FakeMouse>() });
+#endif
+
 #endif
     m_application.reset(new UIApplication);
     m_mainComposer->env()->setApplication(m_application.get());
@@ -116,6 +130,17 @@ public:
   {
     return m_mainComposer->controller()->start(
       filePath,
+      designDocSchemaFilePath,
+      layoutDocSchemaFilePath);
+  }
+
+  bool load(
+    std::vector<char>& buffer,
+    const char*        designDocSchemaFilePath = nullptr,
+    const char*        layoutDocSchemaFilePath = nullptr) override
+  {
+    return m_mainComposer->controller()->start(
+      buffer,
       designDocSchemaFilePath,
       layoutDocSchemaFilePath);
   }

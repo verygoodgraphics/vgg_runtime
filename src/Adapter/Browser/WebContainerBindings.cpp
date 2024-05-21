@@ -13,24 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
 
-#include "Application/PlatformComposer.hpp"
+#include "Browser/WebContainer.hpp"
 
-#include "BrowserJSEngine.hpp"
-
-#include <memory>
+#include <emscripten.h>
+#include <emscripten/bind.h>
+#include <emscripten/val.h>
 
 namespace VGG
 {
-
-class BrowserComposer : public PlatformComposer
+namespace
 {
-public:
-  virtual std::shared_ptr<VggJSEngine> createJsEngine() override
-  {
-    return std::make_shared<BrowserJSEngine>();
-  }
-};
 
+EMSCRIPTEN_BINDINGS(vgg_container)
+{
+  using namespace emscripten;
+
+  class_<WebContainer>("WebContainer")
+    .constructor<int, int, float>()
+    .function("load", &WebContainer::jsLoad)
+    // on event: mouse/touch/wheel/key/resize
+    .function("run", &WebContainer::jsRun);
+}
+
+} // namespace
 } // namespace VGG

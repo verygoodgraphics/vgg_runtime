@@ -1,4 +1,5 @@
 add_library(vgg_adapter OBJECT
+  Common/Container.cpp
   PlatformAdapter/Helper/StringHelper.cpp
 )
 
@@ -6,6 +7,9 @@ set_target_properties(vgg_adapter PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 if (EMSCRIPTEN)
   target_sources(vgg_adapter PRIVATE
+    Browser/WebContainer.cpp
+    Browser/WebContainerBindings.cpp
+    Browser/WebGraphicsContext.cpp
     PlatformAdapter/Browser/Exec/BrowserJSEngine.cpp
     PlatformAdapter/Browser/Sdk/BrowserSdkAdapter.cpp
   )
@@ -17,16 +21,10 @@ else()
     target_compile_options(vgg_adapter PRIVATE
       -fno-objc-arc
     )
-    target_include_directories(vgg_adapter PUBLIC
-      ${CMAKE_SOURCE_DIR}/include/Application/Event
-    )
   elseif(VGG_CONTAINER_FOR_QT)
     target_sources(vgg_adapter PRIVATE
       Container/QtGraphicsContext.cpp
       Container/QtQuickGraphicsContext.cpp
-    )
-    target_include_directories(vgg_adapter PUBLIC
-      ${CMAKE_SOURCE_DIR}/include/Application/Event
     )
   endif()
 
@@ -48,6 +46,8 @@ endif()
 
 target_include_directories(vgg_adapter PUBLIC
   ${CMAKE_SOURCE_DIR}/include
+  ${CMAKE_SOURCE_DIR}/include/Application/Event
+  ${CMAKE_SOURCE_DIR}/include/VGG/Container
 )
 
 target_include_directories(vgg_adapter PRIVATE

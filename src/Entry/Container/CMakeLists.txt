@@ -1,10 +1,10 @@
 if(VGG_CONTAINER_FOR_QT)
   add_library(vgg_container SHARED
-    Container.cpp
+    Dummy.cpp
   )
 else()
   add_library(vgg_container STATIC
-    Container.cpp
+    Dummy.cpp
   )
 endif()
 

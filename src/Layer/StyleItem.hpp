@@ -88,18 +88,49 @@ public:
 private:
   VGG_CLASS_MAKE(StyleItem);
 
-  SkRect                              recorder(Renderer* renderer);
+  void                                recorder(Renderer* renderer);
   std::pair<sk_sp<SkPicture>, SkRect> revalidatePicture(const SkRect& bounds);
-
-  void beginLayer(
-    Renderer*            renderer,
-    const SkPaint*       paint,
-    const VShape*        clipShape,
-    sk_sp<SkImageFilter> backdropFilter);
 
   bool hasNewLayer() const;
 
-  void                    endLayer(Renderer* renderer);
+  void revalidateEffectsBounds();
+
+  struct AutoLayerRestore
+  {
+    template<typename F>
+    AutoLayerRestore(Renderer* renderer, bool doSave, F&& f)
+      : m_renderer(renderer)
+    {
+      ASSERT(m_renderer);
+      m_saveCount = m_renderer->canvas()->getSaveCount();
+      if (doSave)
+      {
+        m_renderer->canvas()->save();
+        SkPaint              paint;
+        VShape               shape;
+        sk_sp<SkImageFilter> backdropFilter;
+        f(paint, shape, backdropFilter);
+        if (!shape.isEmpty())
+        {
+          shape.clip(m_renderer->canvas(), SkClipOp::kIntersect);
+        }
+        auto layerBounds = shape.bounds();
+        m_renderer->canvas()->saveLayer(
+          SkCanvas::SaveLayerRec(&layerBounds, &paint, backdropFilter.get(), 0));
+      }
+    }
+
+    ~AutoLayerRestore()
+    {
+      m_renderer->canvas()->restoreToCount(m_saveCount);
+      m_renderer = nullptr;
+    }
+
+  private:
+    Renderer* m_renderer{ nullptr };
+    int       m_saveCount;
+  };
+
   Ref<TransformAttribute> m_transformAttr;
   Ref<StyleAttribute>     m_objectAttr;
   Ref<AlphaMaskAttribute> m_alphaMaskAttr;

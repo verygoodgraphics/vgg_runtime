@@ -30,9 +30,9 @@ namespace VGG::layer
 void StyleItem::render(Renderer* renderer)
 {
   VGG_LAYER_DEBUG_CODE(if (!m_picture) VGG_LOG_DEV(ERROR, StyleItem, "no picture"););
-  auto canvas = renderer->canvas();
-  canvas->drawPicture(m_picture);
-  // recorder(renderer);
+  // auto canvas = renderer->canvas();
+  // canvas->drawPicture(m_picture);
+  recorder(renderer);
 }
 
 #ifdef VGG_LAYER_DEBUG
@@ -56,35 +56,27 @@ void StyleItem::debug(Renderer* render)
 }
 #endif
 
-SkRect StyleItem::recorder(Renderer* renderer)
+void StyleItem::recorder(Renderer* renderer)
 {
-  auto shapeMask = m_shapeMaskAttr->getShape();
+  auto       shapeMask = m_shapeMaskAttr->getShape();
+  const auto newLayer = hasNewLayer();
+
+  SkAutoCanvasRestore acr(renderer->canvas(), !shapeMask.isEmpty());
   if (!shapeMask.isEmpty())
   {
-    renderer->canvas()->save();
     shapeMask.clip(renderer->canvas(), SkClipOp::kIntersect);
   }
-  const auto newLayer = hasNewLayer();
-  SkRect     effectsBounds = toSkRect(m_objectAttr->effectBounds());
-  if (newLayer)
-  {
-    SkPaint layerPaint;
-    layerPaint.setAntiAlias(true);
-    layerPaint.setImageFilter(m_alphaMaskAttr->getImageFilter());
-    effectsBounds = toSkRect(m_alphaMaskAttr->bounds());
-    VShape clipShape(effectsBounds);
-    beginLayer(renderer, &layerPaint, &clipShape, m_objectAttr->getBackdropImageFilter());
-  }
+  AutoLayerRestore alr(
+    renderer,
+    newLayer,
+    [this](SkPaint& p, VShape& shape, sk_sp<SkImageFilter>& backdropFilter)
+    {
+      p.setAntiAlias(true);
+      p.setImageFilter(m_alphaMaskAttr->getImageFilter());
+      shape = VShape(toSkRect(effectBounds()));
+      backdropFilter = m_objectAttr->getBackdropImageFilter();
+    });
   m_objectAttr->render(renderer);
-  if (newLayer)
-  {
-    endLayer(renderer);
-  }
-  if (!shapeMask.isEmpty())
-  {
-    renderer->canvas()->restore();
-  }
-  return effectsBounds;
 }
 
 void StyleItem::renderAsMask(Renderer* render)
@@ -101,6 +93,15 @@ bool StyleItem::hasNewLayer() const
   return newLayer;
 }
 
+void StyleItem::revalidateEffectsBounds()
+{
+  m_effectsBounds = m_objectAttr->effectBounds();
+  if (hasNewLayer())
+  {
+    m_effectsBounds = m_alphaMaskAttr->bounds();
+  }
+}
+
 Bounds StyleItem::effectBounds() const
 {
   return m_effectsBounds;
@@ -110,30 +111,8 @@ std::pair<sk_sp<SkPicture>, SkRect> StyleItem::revalidatePicture(const SkRect& r
 {
   ObjectRecorder rec;
   auto           renderer = rec.beginRecording(rect, SkMatrix::I());
-  auto           r = recorder(renderer);
-  return { rec.finishAsPicture(r), r };
-}
-
-void StyleItem::beginLayer(
-  Renderer*            renderer,
-  const SkPaint*       paint,
-  const VShape*        clipShape,
-  sk_sp<SkImageFilter> backdropFilter)
-{
-  renderer->canvas()->save();
-  if (clipShape)
-  {
-    clipShape->clip(renderer->canvas(), SkClipOp::kIntersect);
-  }
-  auto layerBounds = clipShape->bounds();
-  renderer->canvas()->saveLayer(
-    SkCanvas::SaveLayerRec(&layerBounds, paint, backdropFilter.get(), 0));
-}
-
-void StyleItem::endLayer(Renderer* renderer)
-{
-  renderer->canvas()->restore();
-  renderer->canvas()->restore();
+  recorder(renderer);
+  return { rec.finishAsPicture(rect), rect };
 }
 
 Bounds StyleItem::onRevalidate()
@@ -142,9 +121,10 @@ Bounds StyleItem::onRevalidate()
   m_transformAttr->revalidate();
   m_alphaMaskAttr->revalidate();
   m_objectAttr->revalidate();
-  auto [pic, bounds] = revalidatePicture(toSkRect(m_objectAttr->effectBounds()));
-  m_effectsBounds = Bounds{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
-  m_picture = std::move(pic);
+  revalidateEffectsBounds();
+  // auto [pic, bounds] = revalidatePicture(toSkRect(m_objectAttr->effectBounds()));
+  // m_effectsBounds = Bounds{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
+  // m_picture = std::move(pic);
   return m_objectAttr->bounds();
 }
 

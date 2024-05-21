@@ -47,6 +47,53 @@ void setPaintNodeChildren(layer::PaintNode* node, const layer::PaintNode::ChildC
   }
 }
 
+// only for Debug
+void printAlign(int level)
+{
+#ifdef DEBUG
+  for (int i = 0; i < level; ++i)
+  {
+    std::cout << "    ";
+  }
+#endif // DEBUG
+}
+
+// only for Debug
+void printLayoutNode(std::shared_ptr<LayoutNode> node, int level)
+{
+#ifdef DEBUG
+  printAlign(level);
+
+  // TODO finish later.
+  // std::cout << "layout node, name: " << node->name() << ", id: " << node->id()
+  //          << ", number: " << node->elementNode()->idNumber() << std::endl;
+
+  ++level;
+  for (auto child : node->children())
+  {
+    printLayoutNode(child, level);
+  }
+#endif // DEBUG
+}
+
+// only for Debug
+void printPaintNode(layer::PaintNode* node, int level)
+{
+#ifdef DEBUG
+  printAlign(level);
+
+  // TODO finish later.
+  // std::cout << "paint node, name: " << node->name() << ", id: " << node->guid()
+  //          << ", number: " << node->uniqueID() << std::endl;
+
+  ++level;
+  for (auto child : node->children())
+  {
+    printPaintNode(child, level);
+  }
+#endif // DEBUG
+}
+
 Interpolator::~Interpolator()
 {
 }
@@ -762,6 +809,7 @@ void MoveAnimate::dealChildren(
       setPaintNodeChildren(paintNodeTo, originToChild);
     });
 
+  // TODO should use new identify, smartAnimate and so on.
   std::unordered_map<std::string, std::shared_ptr<LayoutNode>> nodeIds;
   for (auto& item : nodeFrom->children())
   {
@@ -788,46 +836,14 @@ void MoveAnimate::dealChildren(
   assert(paintNodeIds.size() == nodeIds.size());
 #endif // DEBUG
 
-  auto addTranslateAnimate =
-    [this, attrBridge, &nodeIds, isOnlyUpdatePaint](layer::PaintNode* paintNode)
-  {
-    if (!paintNode)
-    {
-      assert(false);
-      return;
-    }
-
-    auto it = nodeIds.find(paintNode->guid());
-    if (it == nodeIds.end() || !it->second->elementNode())
-    {
-      assert(false);
-      return;
-    }
-
-    // TODO this place maybe wrong, need think.
-    // TODO discuss with yl, our action is fine?
-    auto& node = it->second;
-    auto  matrix = *attrBridge->getMatrix(paintNode);
-    auto  matrixStart = getStartTranslateMatrix(matrix);
-    auto  matrixStop = getStopTranslateMatrix(matrix);
-    bool  isContainer = ReplaceNodeAnimate::isContainerType(node->elementNode());
-    auto  originMatrix = *attrBridge->getMatrix(paintNode);
-    auto  animate = createAndAddNumberAnimate();
-
-    attrBridge->updateMatrix(node, paintNode, matrixStart, isOnlyUpdatePaint, {}, isContainer);
-    attrBridge->updateMatrix(node, paintNode, matrixStop, isOnlyUpdatePaint, animate, isContainer);
-    animate->addCallBackWhenStop(
-      [attrBridge, node, paintNode, originMatrix, isOnlyUpdatePaint, isContainer]() {
-        attrBridge->updateMatrix(node, paintNode, originMatrix, isOnlyUpdatePaint, {}, isContainer);
-      });
-  };
-
   // <from, to>
   ReplaceNodeAnimate::TTwins twins;
 
   std::list<layer::PaintNodePtr> childrenInAnimate(originToChild.begin(), originToChild.end());
   auto                           itSearch = childrenInAnimate.begin();
   auto                           itInsert = itSearch;
+
+  std::vector<layer::PaintNodePtr> childrenToNeedMove;
 
   for (auto it = originFromChild.begin(); it != originFromChild.end(); ++it)
   {
@@ -857,7 +873,7 @@ void MoveAnimate::dealChildren(
     {
       for (auto tmp = itSearch; tmp != result; ++tmp)
       {
-        addTranslateAnimate(*tmp);
+        childrenToNeedMove.emplace_back(*tmp);
       }
 
       childrenInAnimate.insert(result, *it);
@@ -885,7 +901,7 @@ void MoveAnimate::dealChildren(
         }
         else
         {
-          // TODO
+          // TODO finish later.
         }
 
         addStyleOpacityAnimate(childFrom, childPaintFrom, false, false);
@@ -899,8 +915,97 @@ void MoveAnimate::dealChildren(
 
   for (auto it = itSearch; it != childrenInAnimate.end(); ++it)
   {
-    addTranslateAnimate(*it);
+    childrenToNeedMove.emplace_back(*it);
   }
+
+  do
+  {
+    const auto globalMatrixFrom = attrBridge->getGlobalMatrix(paintNodeFrom);
+    auto       globalMatrixTo = attrBridge->getGlobalMatrix(paintNodeTo);
+
+    if (!globalMatrixFrom || !globalMatrixTo)
+    {
+      assert(false);
+      break;
+    }
+
+    std::map<std::string, std::optional<TDesignMatrix>> childrenOriginMatrix;
+    for (auto& child : childrenToNeedMove)
+    {
+      // TODO replace all guid with new unique id. same for layoutNode.
+      childrenOriginMatrix[child->guid()] = attrBridge->getMatrix(child.get());
+    }
+
+    attrBridge->updateMatrix(
+      nodeTo,
+      paintNodeTo,
+      getStartTranslateMatrix(*globalMatrixFrom),
+      isOnlyUpdatePaint,
+      {},
+      true,
+      false,
+      true);
+
+    auto animate = createAndAddNumberAnimate();
+
+    attrBridge->updateMatrix(
+      nodeTo,
+      paintNodeTo,
+      getStopTranslateMatrix(*globalMatrixTo),
+      isOnlyUpdatePaint,
+      animate,
+      true,
+      true,
+      true);
+
+    attrBridge->updateMatrix(
+      nodeTo,
+      paintNodeTo,
+      *globalMatrixTo,
+      isOnlyUpdatePaint,
+      {},
+      true,
+      false,
+      true);
+
+    animate->addTriggeredCallback(
+      [childrenToNeedMove, childrenOriginMatrix, attrBridge, nodeIds, isOnlyUpdatePaint](
+        const std::vector<double>& value)
+      {
+        auto fatherMatrix = TransformHelper::createRenderMatrix(
+          { value.at(0), value.at(1) },
+          { value.at(2), value.at(3) },
+          value.at(4));
+
+        for (auto& child : childrenToNeedMove)
+        {
+          auto it = nodeIds.find(child->guid());
+          if (it == nodeIds.end() || !it->second->elementNode())
+          {
+            assert(false);
+            continue;
+          }
+
+          const auto& originalMatrix = childrenOriginMatrix.at(child->guid());
+          if (!originalMatrix)
+          {
+            assert(false);
+            break;
+          }
+
+          auto finalMatrix = fatherMatrix * TransformHelper::fromDesignMatrix(*originalMatrix);
+          attrBridge->updateMatrix(
+            it->second,
+            child.get(),
+            TransformHelper::toDesignMatrix(finalMatrix),
+            isOnlyUpdatePaint,
+            {},
+            ReplaceNodeAnimate::isContainerType(it->second->elementNode()),
+            false,
+            true);
+        }
+      });
+  } while (false);
 
   clearPaintNodeChildren(paintNodeFrom);
   clearPaintNodeChildren(paintNodeTo);
@@ -909,6 +1014,7 @@ void MoveAnimate::dealChildren(
     paintNodeTo->addChild(item);
   }
 
+  // TODO matrix animate maybe show apple to center point? smart have same problem.
   addTwinMatrixAnimate(twins);
 }
 

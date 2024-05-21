@@ -45,6 +45,9 @@ struct Object;
 struct Color;
 } // namespace Model
 
+typedef std::array<double, 6> TDesignMatrix;
+typedef glm::mat3             TRenderMatrix;
+
 class AttrBridge
 {
   friend ReplaceNodeAnimate;
@@ -83,13 +86,16 @@ public:
     bool                        visible,
     bool                        isOnlyUpdatePaint);
 
+  // Note: The coordinate system that newMatrix resides in depends on the value of isBasedOnGlobal.
   bool updateMatrix(
     std::shared_ptr<LayoutNode>    node,
     layer::PaintNode*              paintNode,
-    const std::array<double, 6>&   newMatrix,
+    const TDesignMatrix&           newMatrix,
     bool                           isOnlyUpdatePaint,
     std::shared_ptr<NumberAnimate> animate = {},
-    bool                           isNotScaleButChangeSize = false);
+    bool                           isNotScaleButChangeSize = false,
+    bool                           isFaker = false,
+    bool                           isBasedOnGlobal = false);
 
   // Note: if createNewPaintNode is true
   //  1. oldNode already removed and newNode already added.
@@ -108,14 +114,15 @@ public:
   layer::PaintNode* getPaintNode(std::shared_ptr<LayoutNode> node);
 
 public:
-  static std::optional<VGG::Color>            getFillColor(layer::PaintNode* node, size_t index);
-  static std::optional<double>                getFillOpacity(layer::PaintNode* node, size_t index);
-  static std::optional<size_t>                getFillSize(layer::PaintNode* node);
-  static std::optional<double>                getOpacity(layer::PaintNode* node);
-  static std::optional<bool>                  getVisible(layer::PaintNode* node);
-  static std::optional<std::array<double, 6>> getMatrix(layer::PaintNode* node);
-  static std::optional<double>                getWidth(layer::PaintNode* node);
-  static std::optional<double>                getHeight(layer::PaintNode* node);
+  static std::optional<VGG::Color>    getFillColor(layer::PaintNode* node, size_t index);
+  static std::optional<double>        getFillOpacity(layer::PaintNode* node, size_t index);
+  static std::optional<size_t>        getFillSize(layer::PaintNode* node);
+  static std::optional<double>        getOpacity(layer::PaintNode* node);
+  static std::optional<bool>          getVisible(layer::PaintNode* node);
+  static std::optional<TDesignMatrix> getMatrix(layer::PaintNode* node);
+  static std::optional<TDesignMatrix> getGlobalMatrix(layer::PaintNode* node);
+  static std::optional<double>        getWidth(layer::PaintNode* node);
+  static std::optional<double>        getHeight(layer::PaintNode* node);
 
 private:
   static void setFillColor(
@@ -133,10 +140,8 @@ private:
   static void setVisible(std::shared_ptr<LayoutNode> node, bool value);
   static void setVisible(layer::PaintNode* node, bool value);
 
-  static void setMatrix(
-    std::shared_ptr<LayoutNode>  node,
-    const std::array<double, 6>& designMatrix);
-  static void setMatrix(layer::PaintNode* node, const std::array<double, 6>& designMatrix);
+  static void setMatrix(std::shared_ptr<LayoutNode> node, const TDesignMatrix& designMatrix);
+  static void setMatrix(layer::PaintNode* node, const TDesignMatrix& designMatrix);
 
   // TODO just like updateMatrix, should accept isNotScaleButChangeSize
   static void setTwinMatrix(
@@ -166,12 +171,6 @@ class TransformHelper
   friend AttrBridge;
 
 public:
-  typedef std::array<double, 6> TDesignMatrix;
-
-private:
-  typedef glm::mat3 TRenderMatrix;
-
-public:
   static TDesignMatrix transform(
     double               selfWidth,
     double               selfHeight,
@@ -192,10 +191,21 @@ public:
   // return [ left-x, top-y, right-x, bottom-y ], base on the design coordinate system.
   static std::array<double, 4> getLTRB(double width, double height, const TDesignMatrix& matrix);
 
-private:
+  // base on the render coordinate system.
+  static std::array<double, 2> getTranslate(const TRenderMatrix& renderMatrix);
+  static std::array<double, 2> getScale(const TRenderMatrix& renderMatrix);
+  static double                getRotate(const TRenderMatrix& renderMatrix);
+
+  static TRenderMatrix createRenderMatrix(
+    const std::array<double, 2>& translate,
+    const std::array<double, 2>& scale,
+    double                       rotate);
+
   static TRenderMatrix fromDesignMatrix(const TDesignMatrix& matrix);
   static TDesignMatrix toDesignMatrix(const TRenderMatrix& transform);
-  static void          changeYDirection(glm::mat3& transform);
+
+private:
+  static void changeYDirection(glm::mat3& transform);
 
   // base on the design coordinate system.
   static std::pair<double, double> calcXY(double x, double y, const TDesignMatrix& matrix);

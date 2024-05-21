@@ -93,10 +93,35 @@ std::optional<bool> AttrBridge::getVisible(layer::PaintNode* node)
   return node->isVisible();
 }
 
-std::optional<std::array<double, 6>> AttrBridge::getMatrix(layer::PaintNode* node)
+std::optional<TDesignMatrix> AttrBridge::getMatrix(layer::PaintNode* node)
 {
   GET_PAINTNODE_ACCESSOR(node, accessor, {});
   return TransformHelper::toDesignMatrix(accessor->getTransform().matrix());
+}
+
+std::optional<TDesignMatrix> AttrBridge::getGlobalMatrix(layer::PaintNode* node)
+{
+  auto matrix = getMatrix(node);
+  if (!matrix)
+  {
+    assert(false);
+    return {};
+  }
+
+  auto result = TransformHelper::fromDesignMatrix(*matrix);
+
+  while (node = node->parent())
+  {
+    matrix = getMatrix(node);
+    if (!matrix)
+    {
+      assert(false);
+      return {};
+    }
+    result = TransformHelper::fromDesignMatrix(*matrix) * result;
+  }
+
+  return TransformHelper::toDesignMatrix(result);
 }
 
 std::optional<double> AttrBridge::getWidth(layer::PaintNode* node)
@@ -209,9 +234,7 @@ void AttrBridge::setVisible(layer::PaintNode* node, bool value)
   }
 }
 
-void AttrBridge::setMatrix(
-  std::shared_ptr<LayoutNode>  node,
-  const std::array<double, 6>& designMatrix)
+void AttrBridge::setMatrix(std::shared_ptr<LayoutNode> node, const TDesignMatrix& designMatrix)
 {
   auto object = AttrBridge::getlayoutNodeObject(node);
   if (!object)
@@ -228,7 +251,7 @@ void AttrBridge::setMatrix(
   std::copy(designMatrix.begin(), designMatrix.end(), object->matrix.begin());
 }
 
-void AttrBridge::setMatrix(layer::PaintNode* node, const std::array<double, 6>& designMatrix)
+void AttrBridge::setMatrix(layer::PaintNode* node, const TDesignMatrix& designMatrix)
 {
   GET_PAINTNODE_ACCESSOR(node, accessor, void());
   accessor->setTransform(VGG::layer::Transform(TransformHelper::fromDesignMatrix(designMatrix)));
@@ -441,14 +464,25 @@ bool AttrBridge::updateMatrix(
   const std::array<double, 6>&   newMatrix,
   bool                           isOnlyUpdatePaint,
   std::shared_ptr<NumberAnimate> animate,
-  bool                           isNotScaleButChangeSize)
+  bool                           isNotScaleButChangeSize,
+  bool                           isFaker,
+  bool                           isBasedOnGlobal)
 {
   if (!paintNode)
   {
     return false;
   }
 
-  auto oldMatrix = AttrBridge::getMatrix(paintNode);
+  std::optional<TDesignMatrix> oldMatrix;
+  if (isBasedOnGlobal)
+  {
+    oldMatrix = AttrBridge::getGlobalMatrix(paintNode);
+  }
+  else
+  {
+    oldMatrix = AttrBridge::getMatrix(paintNode);
+  }
+
   if (!oldMatrix)
   {
     assert(false);
@@ -456,51 +490,73 @@ bool AttrBridge::updateMatrix(
   }
 
   auto update =
-    [node, paintNode, isOnlyUpdatePaint, isNotScaleButChangeSize](const std::vector<double>& value)
+    [isFaker, node, paintNode, isOnlyUpdatePaint, isNotScaleButChangeSize, isBasedOnGlobal](
+      const std::vector<double>& value)
   {
+    if (isFaker)
+    {
+      return;
+    }
+
     assert(value.size() == 5);
 
-    glm::vec2 translate{ static_cast<float>(value.at(0)), static_cast<float>(value.at(1)) };
-    glm::vec2 scale{ static_cast<float>(value.at(2)), static_cast<float>(value.at(3)) };
-    auto      rotate = static_cast<float>(value.at(4));
+    std::array<double, 2> scale{ value[2], value[3] };
 
     // TODO frame can not scale, should change width and height, what about group and symbol?
     if (isNotScaleButChangeSize)
     {
-      scale = glm::vec2{ 1.0f, 1.0f };
-
-      // TODO wait change size
+      scale = { 1.0, 1.0 };
     }
 
-    auto matrix = glm::identity<glm::mat3>();
-    matrix = glm::translate(matrix, translate);
-    matrix = glm::rotate(matrix, rotate);
-    matrix = glm::scale(matrix, scale);
-    auto designMatrix = TransformHelper::toDesignMatrix(matrix);
+    auto matrix =
+      TransformHelper::createRenderMatrix({ value[0], value[1] }, { scale[0], scale[1] }, value[4]);
+    TDesignMatrix finalMatrix{};
+
+    if (isBasedOnGlobal)
+    {
+      glm::mat3 invMatrixs{ 1.0 };
+      auto      parent = paintNode->parent();
+
+      while (parent)
+      {
+        auto parentMatrix = getMatrix(parent);
+        if (!parentMatrix)
+        {
+          assert(false);
+          return;
+        }
+
+        invMatrixs *= layer::Transform(TransformHelper::fromDesignMatrix(*parentMatrix)).inverse();
+        parent = parent->parent();
+      }
+
+      finalMatrix = TransformHelper::toDesignMatrix(layer::Transform(invMatrixs * matrix).matrix());
+    }
+    else
+    {
+      finalMatrix = TransformHelper::toDesignMatrix(matrix);
+    }
 
     if (!isOnlyUpdatePaint)
     {
-      AttrBridge::setMatrix(node, designMatrix);
+      AttrBridge::setMatrix(node, finalMatrix);
     }
 
-    AttrBridge::setMatrix(paintNode, designMatrix);
+    AttrBridge::setMatrix(paintNode, finalMatrix);
   };
 
-  auto getInfo = [](layer::Transform transform)
+  // TODO layer Transform check, should use in last.
+  auto getInfo = [](const TRenderMatrix& transform)
   {
-    return std::vector<double>{ transform.translate()[0],
-                                transform.translate()[1],
-                                transform.scale()[0],
-                                transform.scale()[1],
-                                transform.rotate() };
+    auto translate = TransformHelper::getTranslate(transform);
+    auto scale = TransformHelper::getScale(transform);
+    auto rotate = TransformHelper::getRotate(transform);
+    return std::vector<double>{ translate[0], translate[1], scale[0], scale[1], rotate };
   };
-  std::vector<double> from =
-    getInfo(VGG::layer::Transform(TransformHelper::fromDesignMatrix(*oldMatrix)));
-  std::vector<double> to =
-    getInfo(VGG::layer::Transform(TransformHelper::fromDesignMatrix(newMatrix)));
 
+  std::vector<double> from = getInfo(TransformHelper::fromDesignMatrix(*oldMatrix));
+  std::vector<double> to = getInfo(TransformHelper::fromDesignMatrix(newMatrix));
   updateSimpleAttr(node, from, to, update, animate);
-
   return true;
 }
 
@@ -692,7 +748,7 @@ void TransformHelper::changeYDirection(glm::mat3& transform)
   transform = scale * transform * scale;
 }
 
-TransformHelper::TDesignMatrix TransformHelper::transform(
+TDesignMatrix TransformHelper::transform(
   double               selfWidth,
   double               selfHeight,
   double               desWidth,
@@ -723,7 +779,7 @@ TransformHelper::TDesignMatrix TransformHelper::transform(
   return TransformHelper::toDesignMatrix(matrix);
 }
 
-TransformHelper::TDesignMatrix TransformHelper::moveToWindowTopLeft(
+TDesignMatrix TransformHelper::moveToWindowTopLeft(
   double               width,
   double               height,
   const TDesignMatrix& matrix)
@@ -732,10 +788,7 @@ TransformHelper::TDesignMatrix TransformHelper::moveToWindowTopLeft(
   return TransformHelper::translate(-result[0], -result[1], matrix);
 }
 
-TransformHelper::TDesignMatrix TransformHelper::translate(
-  double               x,
-  double               y,
-  const TDesignMatrix& matrix)
+TDesignMatrix TransformHelper::translate(double x, double y, const TDesignMatrix& matrix)
 {
   return TransformHelper::toDesignMatrix(
     TransformHelper::fromDesignMatrix({ 1, 0, 0, 1, x, y }) *
@@ -764,6 +817,41 @@ std::array<double, 4> TransformHelper::getLTRB(
   return { minX, maxY, maxX, minY };
 }
 
+std::array<double, 2> TransformHelper::getTranslate(const TRenderMatrix& renderMatrix)
+{
+  layer::Transform matrix(renderMatrix);
+  return { matrix.translate()[0], matrix.translate()[1] };
+}
+
+std::array<double, 2> TransformHelper::getScale(const TRenderMatrix& renderMatrix)
+{
+  layer::Transform matrix(renderMatrix);
+  return { matrix.scale()[0], matrix.scale()[1] };
+}
+
+double TransformHelper::getRotate(const TRenderMatrix& renderMatrix)
+{
+  layer::Transform matrix(renderMatrix);
+  return matrix.rotate();
+}
+
+TRenderMatrix TransformHelper::createRenderMatrix(
+  const std::array<double, 2>& translate,
+  const std::array<double, 2>& scale,
+  double                       rotate)
+{
+  glm::vec2 glmTranslate{ static_cast<float>(translate.at(0)),
+                          static_cast<float>(translate.at(1)) };
+  glm::vec2 glmScale{ static_cast<float>(scale.at(0)), static_cast<float>(scale.at(1)) };
+  auto      glmRotate = static_cast<float>(rotate);
+
+  auto matrix = glm::identity<glm::mat3>();
+  matrix = glm::translate(matrix, glmTranslate);
+  matrix = glm::rotate(matrix, glmRotate);
+  matrix = glm::scale(matrix, glmScale);
+  return matrix;
+}
+
 glm::mat3 TransformHelper::fromDesignMatrix(const TDesignMatrix& matrix)
 {
   double a = matrix[0];
@@ -777,7 +865,7 @@ glm::mat3 TransformHelper::fromDesignMatrix(const TDesignMatrix& matrix)
   return renderMatrix;
 }
 
-TransformHelper::TDesignMatrix TransformHelper::toDesignMatrix(const TRenderMatrix& transform)
+TDesignMatrix TransformHelper::toDesignMatrix(const TRenderMatrix& transform)
 {
   auto m = transform;
   TransformHelper::changeYDirection(m);

@@ -215,7 +215,8 @@ public:
   virtual VShape asVisualShape(const Transform* transform);
 
 #ifdef VGG_LAYER_DEBUG
-  void debug(Renderer* render);
+  void        debug(Renderer* render);
+  std::string dump() const;
 #endif
 
 public:

@@ -41,12 +41,12 @@ public:
     Ref<ShapeAttribute>     shape)
     : GraphicItem(cnt)
     , m_transformAttr(transform)
-    , m_objectAttr(styleObject)
+    , m_styleAttr(styleObject)
     , m_alphaMaskAttr(alphaMask)
     , m_shapeMaskAttr(shapeMask)
   {
     observe(m_transformAttr);
-    observe(m_objectAttr);
+    observe(m_styleAttr);
     observe(m_alphaMaskAttr);
     observe(m_shapeMaskAttr);
   }
@@ -132,7 +132,7 @@ private:
   };
 
   Ref<TransformAttribute> m_transformAttr;
-  Ref<StyleAttribute>     m_objectAttr;
+  Ref<StyleAttribute>     m_styleAttr;
   Ref<AlphaMaskAttribute> m_alphaMaskAttr;
   Ref<ShapeMaskAttribute> m_shapeMaskAttr;
   Bounds                  m_effectsBounds;

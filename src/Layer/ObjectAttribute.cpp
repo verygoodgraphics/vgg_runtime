@@ -184,25 +184,30 @@ void StyleAttribute::render(Renderer* renderer)
 void StyleAttribute::revalidateDropbackFilter(const SkRect& bounds)
 {
   ASSERT(m_backgroundBlurAttr);
-  m_backgroundBlurAttr->revalidate();
-  if (auto bgb = m_backgroundBlurAttr->getImageFilter())
+  if (m_objectAttr->hasFill()) // Dropback effect determined by the wheather the
+                               // object has fill
   {
-    if (m_bgBlurImageFilter != bgb || m_objectEffectBounds != bounds)
+    m_backgroundBlurAttr->revalidate();
+    if (auto bgb = m_backgroundBlurAttr->getImageFilter())
     {
-      m_bgBlurImageFilter = bgb;
-      if (m_bgBlurImageFilter)
+      if (m_bgBlurImageFilter != bgb || m_objectEffectBounds != bounds)
       {
-        if (auto ro = m_objectAttr->getGraphicItem(); ro)
+        m_bgBlurImageFilter = bgb;
+        if (m_bgBlurImageFilter)
         {
-          static auto s_blender = getOrCreateBlender("maskOut", g_maskOutBlender);
-          auto        fb = ro->getMaskFilter();
-          m_dropbackImageFilter = SkImageFilters::Blend(s_blender, fb, m_bgBlurImageFilter, bounds);
+          if (auto ro = m_objectAttr->getGraphicItem(); ro)
+          {
+            static auto s_blender = getOrCreateBlender("maskOut", g_maskOutBlender);
+            auto        fb = ro->getMaskFilter();
+            m_dropbackImageFilter =
+              SkImageFilters::Blend(s_blender, fb, m_bgBlurImageFilter, bounds);
+          }
         }
       }
-    }
-    else
-    {
-      m_dropbackImageFilter = nullptr;
+      else
+      {
+        m_dropbackImageFilter = nullptr;
+      }
     }
   }
 }

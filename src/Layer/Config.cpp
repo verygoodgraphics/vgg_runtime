@@ -23,6 +23,7 @@
 #include <ranges>
 #include <unordered_map>
 #include <iostream>
+#include <algorithm>
 
 namespace
 {

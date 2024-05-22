@@ -64,9 +64,8 @@ void printLayoutNode(std::shared_ptr<LayoutNode> node, int level)
 #ifdef DEBUG
   printAlign(level);
 
-  // TODO finish later.
-  // std::cout << "layout node, name: " << node->name() << ", id: " << node->id()
-  //          << ", number: " << node->elementNode()->idNumber() << std::endl;
+  std::cout << node->name() << ", " << node->id() << "," << node->elementNode()->idNumber()
+            << std::endl;
 
   ++level;
   for (auto child : node->children())
@@ -82,9 +81,7 @@ void printPaintNode(layer::PaintNode* node, int level)
 #ifdef DEBUG
   printAlign(level);
 
-  // TODO finish later.
-  // std::cout << "paint node, name: " << node->name() << ", id: " << node->guid()
-  //          << ", number: " << node->uniqueID() << std::endl;
+  std::cout << node->name() << ", " << node->guid() << "," << node->uniqueID() << std::endl;
 
   ++level;
   for (auto child : node->children())
@@ -632,7 +629,6 @@ void SmartAnimate::addTwinAnimate(
   typedef std::shared_ptr<Domain::Element> TElement;
 
   auto attrBridge = getAttrBridge();
-  bool isOnlyUpdatePaint = getIsOnlyUpdatePaint();
 
   std::list<TElement> noteToDirectChildrenSorted;
   do

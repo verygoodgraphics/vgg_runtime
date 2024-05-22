@@ -500,7 +500,7 @@ void ReplaceNodeAnimate::addTwinMatrixAnimate(const TTwins& twins)
       itemTo,
       paintNodeTo,
       *widthFrom,
-      *heightTo,
+      *heightFrom,
       *widthTo,
       *heightTo,
       std::placeholders::_1,

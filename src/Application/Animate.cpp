@@ -757,15 +757,12 @@ void MoveAnimate::start()
     *attrBridge->getHeight(paintNodeFrom),
     *attrBridge->getMatrix(paintNodeFrom));
 
-  // TODO all ReplaceAnimate, should guarantee by user. Notify to gh.
-  // TODO after gh do it, this place do not need moveToWindowTopLeft, just use matirxTo.
-  auto to2TopLeftMatrix = TransformHelper::moveToWindowTopLeft(widthTo, heightTo, matirxTo);
-  m_ToLTRB = TransformHelper::getLTRB(widthTo, heightTo, to2TopLeftMatrix);
+  m_ToLTRB = TransformHelper::getLTRB(widthTo, heightTo, matirxTo);
 
   if (!m_isSmart)
   {
-    auto matrixStart = getStartTranslateMatrix(to2TopLeftMatrix);
-    auto matrixStop = getStopTranslateMatrix(to2TopLeftMatrix);
+    auto matrixStart = getStartTranslateMatrix(matirxTo);
+    auto matrixStop = getStopTranslateMatrix(matirxTo);
 
     attrBridge->updateMatrix(to, paintNodeTo, matrixStart, isOnlyUpdatePaint, {}, true);
     attrBridge->updateVisible(to, paintNodeTo, true, isOnlyUpdatePaint);
@@ -785,18 +782,7 @@ void MoveAnimate::start()
   {
     addStyleOpacityAnimate(from, paintNodeFrom, false, false);
     addStyleOpacityAnimate(to, paintNodeTo, true, false);
-
-    // TODO need change nodeTo size. what about smartAnimate? maybe write this code to
-    // replaceAnimate.
-
-    // TODO after gh deal, maybe do not need this code.
-    attrBridge->updateMatrix(to, paintNodeTo, to2TopLeftMatrix, isOnlyUpdatePaint, {}, true);
-
     attrBridge->updateVisible(to, paintNodeTo, true, isOnlyUpdatePaint);
-
-    // auto originFromChild = paintNodeFrom->children();
-    // auto originToChild = paintNodeTo->children();
-
     addTwinMatrixAnimate({ { from, to } });
     dealChildren(from, to, paintNodeFrom, paintNodeTo);
   }

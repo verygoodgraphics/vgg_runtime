@@ -118,6 +118,8 @@ private:
     const app::UIAnimationOption& option,
     app::AnimationCompletion      completion,
     const bool                    makeNewPaintNode = false);
+
+  void moveFramesToTopLeft();
 };
 } // namespace internal
 } // namespace VGG

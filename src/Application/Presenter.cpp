@@ -232,7 +232,6 @@ void Presenter::setModel(std::shared_ptr<ViewModel> viewModel)
   std::unordered_map<std::string, FontInfo> requiredFonts;
   auto                                      result =
     layer::SceneBuilder::builder()
-      .setResetOriginEnable(true)
       .setFontNameVisitor(
         [&requiredFonts](const std::string& familyName, const std::string& subfamilyName) {
           requiredFonts[familyName + subfamilyName] = FontInfo{ familyName, subfamilyName };

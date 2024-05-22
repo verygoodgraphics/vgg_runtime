@@ -681,9 +681,7 @@ void UIView::show(std::shared_ptr<ViewModel>& viewModel, bool force)
       frames.emplace_back(layer::StructFrameObject(f.get()));
     }
   }
-  auto result =
-    layer::SceneBuilder::builder().setResetOriginEnable(true).build<layer::StructModelFrame>(
-      std::move(frames));
+  auto result = layer::SceneBuilder::builder().build<layer::StructModelFrame>(std::move(frames));
   if (result.root)
   {
     show(viewModel, std::move(*result.root), force);

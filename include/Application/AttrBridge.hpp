@@ -161,6 +161,8 @@ private:
     std::shared_ptr<LayoutNode> nodeFrom,
     std::shared_ptr<LayoutNode> nodeTo,
     layer::PaintNode*           paintNodeTo,
+    double                      originalWidthFrom,
+    double                      originalHeightFrom,
     double                      originWidthTo,
     double                      originHeightTo,
     const std::vector<double>&  value,

@@ -457,10 +457,12 @@ void ReplaceNodeAnimate::addTwinMatrixAnimate(const TTwins& twins)
     auto paintNodeFrom = attrBridge->getPaintNode(itemFrom);
     auto paintNodeTo = attrBridge->getPaintNode(itemTo);
 
+    auto widthFrom = AttrBridge::getWidth(paintNodeFrom);
+    auto heightFrom = AttrBridge::getHeight(paintNodeFrom);
     auto widthTo = AttrBridge::getWidth(paintNodeTo);
     auto heightTo = AttrBridge::getHeight(paintNodeTo);
 
-    if (!widthTo || !heightTo)
+    if (!widthFrom || !heightFrom || !widthTo || !heightTo)
     {
       assert(false);
       continue;
@@ -474,10 +476,10 @@ void ReplaceNodeAnimate::addTwinMatrixAnimate(const TTwins& twins)
     // }
 
     auto transform = TransformHelper::transform(
-      *AttrBridge::getWidth(paintNodeFrom),
-      *AttrBridge::getHeight(paintNodeFrom),
-      *AttrBridge::getWidth(paintNodeTo),
-      *AttrBridge::getHeight(paintNodeTo),
+      *widthFrom,
+      *heightFrom,
+      *widthTo,
+      *heightTo,
       *AttrBridge::getMatrix(paintNodeTo));
 
     auto animate = createAndAddNumberAnimate();
@@ -497,6 +499,8 @@ void ReplaceNodeAnimate::addTwinMatrixAnimate(const TTwins& twins)
       itemFrom,
       itemTo,
       paintNodeTo,
+      *widthFrom,
+      *heightTo,
       *widthTo,
       *heightTo,
       std::placeholders::_1,

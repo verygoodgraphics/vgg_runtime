@@ -56,7 +56,6 @@ public:
   AttrBridge(std::shared_ptr<UIView> view, AnimateManage& animateManage);
 
 public:
-  // TODO maybe can remove isOnlyUpdatePaint and judge node/paintNode
   bool updateColor(
     std::shared_ptr<LayoutNode>    node,
     layer::PaintNode*              paintNode,
@@ -97,6 +96,14 @@ public:
     bool                           isFaker = false,
     bool                           isBasedOnGlobal = false);
 
+  bool updateSize(
+    std::shared_ptr<LayoutNode>    node,
+    layer::PaintNode*              paintNode,
+    double                         newWidth,
+    double                         newHeight,
+    bool                           isOnlyUpdatePaint,
+    std::shared_ptr<NumberAnimate> animate = {});
+
   // Note: if createNewPaintNode is true
   //  1. oldNode already removed and newNode already added.
   //  2. newPaintNode must be nullptr.
@@ -106,7 +113,7 @@ public:
     const std::shared_ptr<LayoutNode>   newNode,
     layer::PaintNode*                   oldPaintNode,
     layer::PaintNode*                   newPaintNode,
-    bool                                isOnlyUpdatePaint, // TODO maybe can remove this param
+    bool                                isOnlyUpdatePaint,
     std::shared_ptr<ReplaceNodeAnimate> animate = {},
     bool                                createNewPaintNode = false);
 

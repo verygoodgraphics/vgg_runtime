@@ -743,14 +743,17 @@ void MoveAnimate::start()
     return;
   }
 
+  auto widthTo = *attrBridge->getWidth(paintNodeTo);
+  auto heightTo = *attrBridge->getHeight(paintNodeTo);
+  auto matirxTo = *attrBridge->getMatrix(paintNodeTo);
+
+  auto widthFrom = *attrBridge->getWidth(paintNodeFrom);
+  auto heightFrom = *attrBridge->getWidth(paintNodeFrom);
+
   m_fromLTRB = TransformHelper::getLTRB(
     *attrBridge->getWidth(paintNodeFrom),
     *attrBridge->getHeight(paintNodeFrom),
     *attrBridge->getMatrix(paintNodeFrom));
-
-  auto widthTo = *attrBridge->getWidth(paintNodeTo);
-  auto heightTo = *attrBridge->getHeight(paintNodeTo);
-  auto matirxTo = *attrBridge->getMatrix(paintNodeTo);
 
   // TODO all ReplaceAnimate, should guarantee by user. Notify to gh.
   // TODO after gh do it, this place do not need moveToWindowTopLeft, just use matirxTo.
@@ -765,15 +768,16 @@ void MoveAnimate::start()
     attrBridge->updateMatrix(to, paintNodeTo, matrixStart, isOnlyUpdatePaint, {}, true);
     attrBridge->updateVisible(to, paintNodeTo, true, isOnlyUpdatePaint);
 
-    auto animate = createAndAddNumberAnimate();
-    animate->addTriggeredCallback(
-      [](const std::vector<double>& value)
-      {
-        // TODO change From size to To.
-        // TODO bigger To size, because need clip.
-        // TODO those thing to smart? need think.
-      });
-    attrBridge->updateMatrix(to, paintNodeTo, matrixStop, isOnlyUpdatePaint, animate, true);
+    auto animateMatrix = createAndAddNumberAnimate();
+    attrBridge->updateMatrix(to, paintNodeTo, matrixStop, isOnlyUpdatePaint, animateMatrix, true);
+
+    // TODO maybe add in animate group?
+    auto animateForSize = createAndAddNumberAnimate();
+    attrBridge
+      ->updateSize(from, paintNodeFrom, widthTo, heightTo, isOnlyUpdatePaint, animateForSize);
+    animateForSize->addCallBackWhenStop(
+      [widthFrom, heightFrom, from, paintNodeFrom, isOnlyUpdatePaint, attrBridge]()
+      { attrBridge->updateSize(from, paintNodeFrom, widthFrom, heightFrom, isOnlyUpdatePaint); });
   }
   else
   {
@@ -857,6 +861,7 @@ void MoveAnimate::dealChildren(
 
   // <from, to>
   ReplaceNodeAnimate::TTwins twins;
+  twins.emplace(nodeFrom, nodeTo);
 
   std::list<layer::PaintNodePtr> childrenInAnimate(originToChild.begin(), originToChild.end());
   auto                           itSearch = childrenInAnimate.begin();

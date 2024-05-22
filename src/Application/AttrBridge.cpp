@@ -884,29 +884,25 @@ TDesignMatrix TransformHelper::transform(
   double               desHeight,
   const TDesignMatrix& desMatrix)
 {
-  auto renderMatrix = VGG::layer::Transform(TransformHelper::fromDesignMatrix(desMatrix));
-  auto offset = renderMatrix.translate();
-  auto rotate = renderMatrix.rotate();
-  auto scale = renderMatrix.scale();
+  auto renderMatrix = TransformHelper::fromDesignMatrix(desMatrix);
+  auto offset = TransformHelper::getTranslate(renderMatrix);
+  auto rotate = TransformHelper::getRotate(renderMatrix);
+  auto scale = TransformHelper::getScale(renderMatrix);
 
-  auto finalScaleX = 1.0;
+  auto finalScaleX = 0.0;
   if (selfWidth)
   {
     finalScaleX = desWidth * scale[0] / selfWidth;
   }
 
-  auto finalScaleY = 1.0;
+  auto finalScaleY = 0.0;
   if (selfHeight)
   {
     finalScaleY = desHeight * scale[1] / selfHeight;
   }
 
-  // TODO can be better.
-  auto matrix = glm::mat3{ 1.0 };
-  matrix = glm::translate(matrix, offset);
-  matrix = glm::rotate(matrix, rotate);
-  matrix = glm::scale(matrix, { static_cast<float>(finalScaleX), static_cast<float>(finalScaleY) });
-  return TransformHelper::toDesignMatrix(matrix);
+  return TransformHelper::toDesignMatrix(
+    TransformHelper::createRenderMatrix(offset, { finalScaleX, finalScaleY }, rotate));
 }
 
 TDesignMatrix TransformHelper::moveToWindowTopLeft(

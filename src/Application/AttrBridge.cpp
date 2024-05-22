@@ -719,6 +719,40 @@ void AttrBridge::setTwinMatrix(
   AttrBridge::setMatrix(paintNodeTo, designMatrix);
 }
 
+bool AttrBridge::updateSize(
+  std::shared_ptr<LayoutNode>    node,
+  layer::PaintNode*              paintNode,
+  double                         newWidth,
+  double                         newHeight,
+  bool                           isOnlyUpdatePaint,
+  std::shared_ptr<NumberAnimate> animate)
+{
+  if (!paintNode || newWidth < 0 || newHeight < 0 || (!isOnlyUpdatePaint && !node))
+  {
+    assert(false);
+    return false;
+  }
+
+  double oldWidth = *AttrBridge::getWidth(paintNode);
+  double oldHeight = *AttrBridge::getHeight(paintNode);
+
+  auto update = [paintNode, node, isOnlyUpdatePaint](const std::vector<double>& value)
+  {
+    assert(value.size() == 2);
+    AttrBridge::setWidth(paintNode, value[0]);
+    AttrBridge::setHeight(paintNode, value[1]);
+
+    if (!isOnlyUpdatePaint)
+    {
+      AttrBridge::setWidth(node, value[0]);
+      AttrBridge::setHeight(node, value[1]);
+    }
+  };
+
+  updateSimpleAttr(node, { oldWidth, oldHeight }, { newWidth, newHeight }, update, animate);
+  return true;
+}
+
 bool AttrBridge::replaceNode(
   const std::shared_ptr<LayoutNode>   oldNode,
   const std::shared_ptr<LayoutNode>   newNode,

@@ -152,13 +152,13 @@ FILE* getLogStream(const char* category)
             FILE* f = fopen(std::string(stream).c_str(), "w");
             if (f)
             {
-              FILEPtr fp(f, [](FILE* f) {});
+              FILEPtr fp(f, [](FILE* f) { fclose(f); });
               g_file.emplace(std::make_pair(stream, std::move(fp)));
               res = g_categoryMap.emplace(std::make_pair(category, fp));
             }
             else
             {
-              res = g_categoryMap.emplace(std::make_pair(category, stderr));
+              res = g_categoryMap.emplace(std::make_pair(category, FILEPtr(stderr, [](FILE*) {})));
             }
           }
           else

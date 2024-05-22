@@ -31,8 +31,8 @@ FILE* getLogStream(const char* category);
 #define CONCAT(x, y) CONCAT_IMPL(x, y)
 #define UNI_NAME(prefix) CONCAT(prefix, __LINE__)
 
-#if ((defined(__GNUC__) && !defined(__clang__)) && __GNUC__ >= 13) ||                              \
-  (defined(__clang__) && __clang_major__ >= 16)
+#if !defined(EMSCRIPTEN) && (((defined(__GNUC__) && !defined(__clang__)) && __GNUC__ >= 13) ||     \
+                             (defined(__clang__) && __clang_major__ >= 16))
 #include <format>
 #define STD_FORMAT_SUPPORT
 #define STD_FORMAT(...) std::format(__VA_ARGS__)

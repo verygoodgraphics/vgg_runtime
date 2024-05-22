@@ -653,6 +653,8 @@ void AttrBridge::setTwinMatrix(
   std::shared_ptr<LayoutNode> nodeFrom,
   std::shared_ptr<LayoutNode> nodeTo,
   layer::PaintNode*           paintNodeTo,
+  double                      originalWidthFrom,
+  double                      originalHeightFrom,
   double                      originWidthTo,
   double                      originHeightTo,
   const std::vector<double>&  value,
@@ -668,20 +670,16 @@ void AttrBridge::setTwinMatrix(
   glm::vec2 scale{ static_cast<float>(value.at(2)), static_cast<float>(value.at(3)) };
   auto      rotate = static_cast<float>(value.at(4));
 
-  // TODO can be better.
-  auto boundsFrom = AttrBridge::getlayoutNodeObject(nodeFrom)->bounds;
-  auto boundsTo = AttrBridge::getlayoutNodeObject(nodeTo)->bounds;
+  double width = originalWidthFrom * scale[0];
+  double height = originalHeightFrom * scale[1];
 
-  double width = boundsFrom.width * scale[0];
-  double height = boundsFrom.height * scale[1];
-
-  if (boundsTo.width)
+  if (originWidthTo)
   {
-    scale[0] = width / boundsTo.width;
+    scale[0] = width / originWidthTo;
   }
-  if (boundsTo.height)
+  if (originHeightTo)
   {
-    scale[1] = height / boundsTo.height;
+    scale[1] = height / originHeightTo;
   }
 
   if (ReplaceNodeAnimate::isContainerType(nodeFrom->elementNode()))

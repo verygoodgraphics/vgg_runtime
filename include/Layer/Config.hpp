@@ -49,7 +49,7 @@ FILE* getLogStream(const char* category);
     }                                                                                              \
   } while (0);
 #else
-#define VGG_LOG_IMPL(...)
+#define VGG_LOG_IMPL(line, category, label, ...) (void)sizeof(__VA_ARGS__);
 #endif
 
 #if defined(_WIN32) && defined(LAYER_SHARED_LIBRARY)

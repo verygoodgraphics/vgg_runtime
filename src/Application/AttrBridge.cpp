@@ -666,12 +666,9 @@ void AttrBridge::setTwinMatrix(
     return;
   }
 
-  glm::vec2 translate{ static_cast<float>(value.at(0)), static_cast<float>(value.at(1)) };
-  glm::vec2 scale{ static_cast<float>(value.at(2)), static_cast<float>(value.at(3)) };
-  auto      rotate = static_cast<float>(value.at(4));
-
-  double width = originalWidthFrom * scale[0];
-  double height = originalHeightFrom * scale[1];
+  std::array<double, 2> scale{ value[2], value[3] };
+  double                width = originalWidthFrom * scale[0];
+  double                height = originalHeightFrom * scale[1];
 
   if (originWidthTo)
   {
@@ -682,10 +679,9 @@ void AttrBridge::setTwinMatrix(
     scale[1] = height / originHeightTo;
   }
 
+  // TODO same as updateMatrix, what about symbol and group?
   if (ReplaceNodeAnimate::isContainerType(nodeFrom->elementNode()))
   {
-    // TODO change nodeTo size
-
     auto newWidth = scale[0] * originWidthTo;
     auto newHeight = scale[1] * originHeightTo;
 
@@ -698,16 +694,11 @@ void AttrBridge::setTwinMatrix(
       AttrBridge::setHeight(nodeTo, newHeight);
     }
 
-    scale = glm::vec2{ 1.0f, 1.0f };
+    scale = { 1.0, 1.0 };
   }
 
-  // TODO can be better
-  auto matrix = glm::identity<glm::mat3>();
-  matrix = glm::translate(matrix, translate);
-  matrix = glm::rotate(matrix, rotate);
-  matrix = glm::scale(matrix, scale);
-
-  auto designMatrix = TransformHelper::toDesignMatrix(matrix);
+  auto designMatrix = TransformHelper::toDesignMatrix(
+    TransformHelper::createRenderMatrix({ value[0], value[1] }, { scale[0], scale[1] }, value[4]));
 
   if (!isOnlyUpdatePaint)
   {
@@ -979,9 +970,27 @@ TRenderMatrix TransformHelper::createRenderMatrix(
   const std::array<double, 2>& scale,
   double                       rotate)
 {
+  auto dealScale = [](double value)
+  {
+    if (std::abs(value) < 0.000001)
+    {
+      if (value > 0)
+      {
+        return 0.000001f;
+      }
+
+      return -0.000001f;
+    }
+
+    return static_cast<float>(value);
+  };
+
+  auto scaleX = dealScale(scale.at(0));
+  auto scaleY = dealScale(scale.at(1));
+
   glm::vec2 glmTranslate{ static_cast<float>(translate.at(0)),
                           static_cast<float>(translate.at(1)) };
-  glm::vec2 glmScale{ static_cast<float>(scale.at(0)), static_cast<float>(scale.at(1)) };
+  glm::vec2 glmScale{ scaleX, scaleY };
   auto      glmRotate = static_cast<float>(rotate);
 
   auto matrix = glm::identity<glm::mat3>();

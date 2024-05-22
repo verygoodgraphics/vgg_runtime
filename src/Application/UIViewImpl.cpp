@@ -20,8 +20,9 @@
 
 #include "Utility/Log.hpp"
 
-using namespace VGG;
-using namespace VGG::internal;
+namespace VGG::internal
+{
+
 namespace
 {
 constexpr auto K_ANIMATION_INTERVAL = 16;
@@ -50,6 +51,8 @@ void UIViewImpl::show(std::shared_ptr<ViewModel>& viewModel, std::vector<layer::
   m_viewModel = viewModel;
 
   m_sceneNode = layer::SceneNode::Make(std::move(frames));
+  moveFramesToTopLeft();
+
   if (!isUnitTest())
     m_layer->setRenderNode(m_zoomer, m_sceneNode);
   m_pager = std::make_unique<Pager>(m_sceneNode.get());
@@ -314,3 +317,25 @@ bool UIViewImpl::transition(
 
   return success;
 }
+
+void UIViewImpl::moveFramesToTopLeft()
+{
+  const auto& frames = m_viewModel->layoutTree()->children();
+  auto        layerBridge = std::make_shared<AttrBridge>(
+    std::static_pointer_cast<UIView>(m_api->shared_from_this()),
+    m_animationManager);
+  for (auto& frame : frames)
+  {
+    auto paintNode = layerBridge->getPaintNode(frame);
+    ASSERT(paintNode);
+
+    if (auto maybeMatrix = layerBridge->getMatrix(paintNode))
+    {
+      auto size = frame->bounds().size;
+      auto newMatrix = TransformHelper::moveToWindowTopLeft(size.width, size.height, *maybeMatrix);
+      layerBridge->updateMatrix(frame, paintNode, newMatrix, false);
+    }
+  }
+}
+
+} // namespace VGG::internal

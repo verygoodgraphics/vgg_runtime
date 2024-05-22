@@ -30,13 +30,8 @@ public:
   template<typename... Args>
   StackTrace(const char* frameInfo, const char* funcName, Args&&... args)
   {
-#if __GUNC__ >= 13
-    std::string info =
-      std::format("{} in {}: {}", frameInfo, funcName, std::forward<Args>(args)...);
-#else
     std::string info = frameInfo;
     info += funcName;
-#endif
     s_functionStack.push(info);
     VGG_TRACE_LOG("{}", info);
   }

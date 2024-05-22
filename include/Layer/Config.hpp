@@ -16,7 +16,6 @@
 #pragma once
 
 #include <cstdio>
-
 #include <string_view>
 #include <vector>
 #include <mutex>
@@ -30,12 +29,18 @@ FILE* getLogStream(const char* category);
 #define STRINGIFY(x) #x
 #define CONCAT_IMPL(x, y) x##y
 #define CONCAT(x, y) CONCAT_IMPL(x, y)
-
 #define UNI_NAME(prefix) CONCAT(prefix, __LINE__)
 
-#if __GNUC__ >= 13
-#include <iostream>
+#if ((defined(__GNUC__) && !defined(__clang__)) && __GNUC__ >= 13) ||                              \
+  (defined(__clang__) && __clang_major__ >= 16)
 #include <format>
+#define STD_FORMAT_SUPPORT
+#define STD_FORMAT(...) std::format(__VA_ARGS__)
+#else
+#define STD_FORMAT(...) ((void)sizeof(__VA_ARGS__), std::string(""))
+#endif
+
+#ifdef STD_FORMAT_SUPPORT
 #define VGG_LOG_IMPL(line, category, label, ...)                                                   \
   do                                                                                               \
   {                                                                                                \

@@ -41,11 +41,11 @@ namespace
 {
 
 #ifdef VGG_LAYER_DEBUG
-std::atomic_int g_paintNodeGlobalID = 0;
-int             genUniqueID()
-{
-  return g_paintNodeGlobalID++;
-}
+// std::atomic_int g_paintNodeGlobalID = 0;
+// int             genUniqueID()
+// {
+//   return g_paintNodeGlobalID++;
+// }
 #endif
 
 } // namespace
@@ -152,7 +152,7 @@ PaintNode::PaintNode(
   d_ptr->guid = guid;
   d_ptr->name = name;
 #ifdef VGG_LAYER_DEBUG
-  dbgInfo = std::format("[{} - {} - {}]", name, guid, genUniqueID());
+  dbgInfo = STD_FORMAT("[{} - {}]", name, guid);
 #endif
   m_children.reserve(10);
 }
@@ -248,7 +248,7 @@ void PaintNode::render(Renderer* renderer)
 
 void PaintNode::onPaint(Renderer* renderer)
 {
-  VGG_PAINTNODE_DUMP(std::format("PaintNode::onPaint {}", name()));
+  VGG_PAINTNODE_DUMP(STD_FORMAT("PaintNode::onPaint {}", name()));
   d_ptr->renderNode->render(renderer);
 }
 
@@ -567,8 +567,7 @@ Bounds PaintNode::onRevalidate()
   if (!isVisible())
     return Bounds();
 
-  VGG_PAINTNODE_DUMP(
-    std::format("{} - {} - {} childs:{}", name(), guid(), genUniqueID(), m_children.size()));
+  VGG_PAINTNODE_DUMP(STD_FORMAT("{} - {} childs:{}", name(), guid(), m_children.size()));
 
   for (const auto& e : m_children)
   {

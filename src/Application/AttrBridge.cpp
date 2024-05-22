@@ -110,8 +110,14 @@ std::optional<TDesignMatrix> AttrBridge::getGlobalMatrix(layer::PaintNode* node)
 
   auto result = TransformHelper::fromDesignMatrix(*matrix);
 
-  while (node = node->parent())
+  while (true)
   {
+    node = node->parent();
+    if (!node)
+    {
+      break;
+    }
+
     matrix = getMatrix(node);
     if (!matrix)
     {

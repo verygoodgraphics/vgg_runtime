@@ -466,12 +466,12 @@ void ReplaceNodeAnimate::addTwinMatrixAnimate(const TTwins& twins)
       continue;
     }
 
-    if (
-      !paintNodeFrom || !paintNodeTo || !*AttrBridge::getVisible(paintNodeFrom) ||
-      !*AttrBridge::getVisible(paintNodeTo))
-    {
-      continue;
-    }
+    // if (
+    //   !paintNodeFrom || !paintNodeTo || !*AttrBridge::getVisible(paintNodeFrom) ||
+    //   !*AttrBridge::getVisible(paintNodeTo))
+    //{
+    //   continue;
+    // }
 
     auto transform = TransformHelper::transform(
       *AttrBridge::getWidth(paintNodeFrom),
@@ -620,6 +620,8 @@ void SmartAnimate::start()
   addStyleOpacityAnimate(from, paintNodeFrom, false, true);
   addStyleOpacityAnimate(to, paintNodeTo, true, true);
   attrBridge->updateVisible(to, attrBridge->getPaintNode(to), true, isOnlyUpdatePaint);
+
+  addTwinMatrixAnimate({ { from, to } });
 }
 
 void SmartAnimate::addTwinAnimate(
@@ -795,6 +797,7 @@ void MoveAnimate::start()
     // auto originFromChild = paintNodeFrom->children();
     // auto originToChild = paintNodeTo->children();
 
+    addTwinMatrixAnimate({ { from, to } });
     dealChildren(from, to, paintNodeFrom, paintNodeTo);
   }
 
@@ -861,7 +864,6 @@ void MoveAnimate::dealChildren(
 
   // <from, to>
   ReplaceNodeAnimate::TTwins twins;
-  twins.emplace(nodeFrom, nodeTo);
 
   std::list<layer::PaintNodePtr> childrenInAnimate(originToChild.begin(), originToChild.end());
   auto                           itSearch = childrenInAnimate.begin();

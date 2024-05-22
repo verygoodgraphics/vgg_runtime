@@ -257,6 +257,48 @@ void AttrBridge::setMatrix(layer::PaintNode* node, const TDesignMatrix& designMa
   accessor->setTransform(VGG::layer::Transform(TransformHelper::fromDesignMatrix(designMatrix)));
 }
 
+void AttrBridge::setWidth(std::shared_ptr<LayoutNode> node, const double width)
+{
+  auto object = AttrBridge::getlayoutNodeObject(node);
+  if (!object)
+  {
+    return;
+  }
+
+  object->bounds.width = width;
+}
+
+void AttrBridge::setWidth(layer::PaintNode* node, const double width)
+{
+  if (node)
+  {
+    auto bounds = node->frameBounds();
+    bounds.setWidth(width);
+    node->setFrameBounds(bounds);
+  }
+}
+
+void AttrBridge::setHeight(std::shared_ptr<LayoutNode> node, const double height)
+{
+  auto object = AttrBridge::getlayoutNodeObject(node);
+  if (!object)
+  {
+    return;
+  }
+
+  object->bounds.height = height;
+}
+
+void AttrBridge::setHeight(layer::PaintNode* node, const double height)
+{
+  if (node)
+  {
+    auto bounds = node->frameBounds();
+    bounds.setHeight(height);
+    node->setFrameBounds(bounds);
+  }
+}
+
 // TODO do not need node
 void AttrBridge::updateSimpleAttr(
   std::shared_ptr<LayoutNode>                     node,
@@ -461,7 +503,7 @@ bool AttrBridge::updateVisible(
 bool AttrBridge::updateMatrix(
   std::shared_ptr<LayoutNode>    node,
   layer::PaintNode*              paintNode,
-  const std::array<double, 6>&   newMatrix,
+  const TDesignMatrix&           newMatrix,
   bool                           isOnlyUpdatePaint,
   std::shared_ptr<NumberAnimate> animate,
   bool                           isNotScaleButChangeSize,
@@ -489,9 +531,22 @@ bool AttrBridge::updateMatrix(
     return false;
   }
 
-  auto update =
-    [isFaker, node, paintNode, isOnlyUpdatePaint, isNotScaleButChangeSize, isBasedOnGlobal](
-      const std::vector<double>& value)
+  auto originWidth = AttrBridge::getWidth(paintNode);
+  auto originHeight = AttrBridge::getHeight(paintNode);
+  if (!originWidth || !originHeight)
+  {
+    assert(false);
+    return false;
+  }
+
+  auto update = [isFaker,
+                 node,
+                 paintNode,
+                 isOnlyUpdatePaint,
+                 isNotScaleButChangeSize,
+                 isBasedOnGlobal,
+                 originWidth,
+                 originHeight](const std::vector<double>& value)
   {
     if (isFaker)
     {
@@ -505,6 +560,17 @@ bool AttrBridge::updateMatrix(
     // TODO frame can not scale, should change width and height, what about group and symbol?
     if (isNotScaleButChangeSize)
     {
+      auto newWidth = scale[0] * (*originWidth);
+      auto newHeight = scale[1] * (*originHeight);
+      AttrBridge::setWidth(paintNode, newWidth);
+      AttrBridge::setHeight(paintNode, newHeight);
+
+      if (!isOnlyUpdatePaint)
+      {
+        AttrBridge::setWidth(node, newWidth);
+        AttrBridge::setHeight(node, newHeight);
+      }
+
       scale = { 1.0, 1.0 };
     }
 
@@ -557,6 +623,23 @@ bool AttrBridge::updateMatrix(
   std::vector<double> from = getInfo(TransformHelper::fromDesignMatrix(*oldMatrix));
   std::vector<double> to = getInfo(TransformHelper::fromDesignMatrix(newMatrix));
   updateSimpleAttr(node, from, to, update, animate);
+
+  if (animate)
+  {
+    animate->addCallBackWhenStop(
+      [node, paintNode, originWidth, originHeight, isOnlyUpdatePaint]()
+      {
+        AttrBridge::setWidth(paintNode, *originWidth);
+        AttrBridge::setHeight(paintNode, *originHeight);
+
+        if (!isOnlyUpdatePaint)
+        {
+          AttrBridge::setWidth(node, *originWidth);
+          AttrBridge::setHeight(node, *originHeight);
+        }
+      });
+  }
+
   return true;
 }
 
@@ -564,6 +647,8 @@ void AttrBridge::setTwinMatrix(
   std::shared_ptr<LayoutNode> nodeFrom,
   std::shared_ptr<LayoutNode> nodeTo,
   layer::PaintNode*           paintNodeTo,
+  double                      originWidthTo,
+  double                      originHeightTo,
   const std::vector<double>&  value,
   bool                        isOnlyUpdatePaint)
 {
@@ -577,6 +662,7 @@ void AttrBridge::setTwinMatrix(
   glm::vec2 scale{ static_cast<float>(value.at(2)), static_cast<float>(value.at(3)) };
   auto      rotate = static_cast<float>(value.at(4));
 
+  // TODO can be better.
   auto boundsFrom = AttrBridge::getlayoutNodeObject(nodeFrom)->bounds;
   auto boundsTo = AttrBridge::getlayoutNodeObject(nodeTo)->bounds;
 
@@ -595,9 +681,23 @@ void AttrBridge::setTwinMatrix(
   if (ReplaceNodeAnimate::isContainerType(nodeFrom->elementNode()))
   {
     // TODO change nodeTo size
+
+    auto newWidth = scale[0] * originWidthTo;
+    auto newHeight = scale[1] * originHeightTo;
+
+    AttrBridge::setWidth(paintNodeTo, newWidth);
+    AttrBridge::setHeight(paintNodeTo, newHeight);
+
+    if (!isOnlyUpdatePaint)
+    {
+      AttrBridge::setWidth(nodeTo, newWidth);
+      AttrBridge::setHeight(nodeTo, newHeight);
+    }
+
     scale = glm::vec2{ 1.0f, 1.0f };
   }
 
+  // TODO can be better
   auto matrix = glm::identity<glm::mat3>();
   matrix = glm::translate(matrix, translate);
   matrix = glm::rotate(matrix, rotate);
@@ -760,18 +860,19 @@ TDesignMatrix TransformHelper::transform(
   auto rotate = renderMatrix.rotate();
   auto scale = renderMatrix.scale();
 
-  auto finalScaleX = 0.0;
+  auto finalScaleX = 1.0;
   if (selfWidth)
   {
     finalScaleX = desWidth * scale[0] / selfWidth;
   }
 
-  auto finalScaleY = 0.0;
+  auto finalScaleY = 1.0;
   if (selfHeight)
   {
     finalScaleY = desHeight * scale[1] / selfHeight;
   }
 
+  // TODO can be better.
   auto matrix = glm::mat3{ 1.0 };
   matrix = glm::translate(matrix, offset);
   matrix = glm::rotate(matrix, rotate);

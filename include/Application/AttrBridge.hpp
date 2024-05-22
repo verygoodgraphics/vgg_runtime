@@ -143,11 +143,19 @@ private:
   static void setMatrix(std::shared_ptr<LayoutNode> node, const TDesignMatrix& designMatrix);
   static void setMatrix(layer::PaintNode* node, const TDesignMatrix& designMatrix);
 
+  static void setWidth(std::shared_ptr<LayoutNode> node, const double width);
+  static void setWidth(layer::PaintNode* node, const double width);
+
+  static void setHeight(std::shared_ptr<LayoutNode> node, const double height);
+  static void setHeight(layer::PaintNode* node, const double height);
+
   // TODO just like updateMatrix, should accept isNotScaleButChangeSize
   static void setTwinMatrix(
     std::shared_ptr<LayoutNode> nodeFrom,
     std::shared_ptr<LayoutNode> nodeTo,
     layer::PaintNode*           paintNodeTo,
+    double                      originWidthTo,
+    double                      originHeightTo,
     const std::vector<double>&  value,
     bool                        isOnlyUpdatePaint);
 

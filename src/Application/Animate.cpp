@@ -460,6 +460,15 @@ void ReplaceNodeAnimate::addTwinMatrixAnimate(const TTwins& twins)
     auto paintNodeFrom = attrBridge->getPaintNode(itemFrom);
     auto paintNodeTo = attrBridge->getPaintNode(itemTo);
 
+    auto widthTo = AttrBridge::getWidth(paintNodeTo);
+    auto heightTo = AttrBridge::getHeight(paintNodeTo);
+
+    if (!widthTo || !heightTo)
+    {
+      assert(false);
+      continue;
+    }
+
     if (
       !paintNodeFrom || !paintNodeTo || !*AttrBridge::getVisible(paintNodeFrom) ||
       !*AttrBridge::getVisible(paintNodeTo))
@@ -491,6 +500,8 @@ void ReplaceNodeAnimate::addTwinMatrixAnimate(const TTwins& twins)
       itemFrom,
       itemTo,
       paintNodeTo,
+      *widthTo,
+      *heightTo,
       std::placeholders::_1,
       isOnlyUpdatePaint));
 
@@ -510,6 +521,19 @@ void ReplaceNodeAnimate::addTwinMatrixAnimate(const TTwins& twins)
           isOnlyUpdatePaint,
           {},
           itemFromIsContainer);
+      });
+
+    animate->addCallBackWhenStop(
+      [itemTo, paintNodeTo, widthTo, heightTo, isOnlyUpdatePaint]()
+      {
+        AttrBridge::setWidth(paintNodeTo, *widthTo);
+        AttrBridge::setHeight(paintNodeTo, *heightTo);
+
+        if (!isOnlyUpdatePaint)
+        {
+          AttrBridge::setWidth(itemTo, *widthTo);
+          AttrBridge::setHeight(itemTo, *heightTo);
+        }
       });
   }
 }
@@ -809,28 +833,27 @@ void MoveAnimate::dealChildren(
       setPaintNodeChildren(paintNodeTo, originToChild);
     });
 
-  // TODO should use new identify, smartAnimate and so on.
-  std::unordered_map<std::string, std::shared_ptr<LayoutNode>> nodeIds;
+  std::unordered_map<int, std::shared_ptr<LayoutNode>> nodeIds;
   for (auto& item : nodeFrom->children())
   {
-    nodeIds.emplace(item->id(), item);
+    nodeIds.emplace(item->elementNode()->idNumber(), item);
   }
   for (auto& item : nodeTo->children())
   {
-    nodeIds.emplace(item->id(), item);
+    nodeIds.emplace(item->elementNode()->idNumber(), item);
   }
   assert(nodeIds.size() == nodeFrom->children().size() + nodeTo->children().size());
 
 #ifdef DEBUG
-  std::unordered_map<std::string, layer::PaintNodePtr> paintNodeIds;
+  std::unordered_map<int, layer::PaintNodePtr> paintNodeIds;
 
   for (auto& item : originFromChild)
   {
-    paintNodeIds.emplace(item->guid(), item);
+    paintNodeIds.emplace(item->uniqueID(), item);
   }
   for (auto& item : originToChild)
   {
-    paintNodeIds.emplace(item->guid(), item);
+    paintNodeIds.emplace(item->uniqueID(), item);
   }
   assert(paintNodeIds.size() == originFromChild.size() + originToChild.size());
   assert(paintNodeIds.size() == nodeIds.size());
@@ -878,8 +901,8 @@ void MoveAnimate::dealChildren(
 
       childrenInAnimate.insert(result, *it);
 
-      auto itFrom = nodeIds.find(it->get()->guid());
-      auto itTo = nodeIds.find(result->get()->guid());
+      auto itFrom = nodeIds.find(it->get()->uniqueID());
+      auto itTo = nodeIds.find(result->get()->uniqueID());
       assert(itFrom != nodeIds.end() && itTo != nodeIds.end());
       if (itFrom != nodeIds.end() && itTo != nodeIds.end())
       {
@@ -929,11 +952,10 @@ void MoveAnimate::dealChildren(
       break;
     }
 
-    std::map<std::string, std::optional<TDesignMatrix>> childrenOriginMatrix;
+    std::map<int, std::optional<TDesignMatrix>> childrenOriginMatrix;
     for (auto& child : childrenToNeedMove)
     {
-      // TODO replace all guid with new unique id. same for layoutNode.
-      childrenOriginMatrix[child->guid()] = attrBridge->getMatrix(child.get());
+      childrenOriginMatrix[child->uniqueID()] = attrBridge->getMatrix(child.get());
     }
 
     attrBridge->updateMatrix(
@@ -979,14 +1001,14 @@ void MoveAnimate::dealChildren(
 
         for (auto& child : childrenToNeedMove)
         {
-          auto it = nodeIds.find(child->guid());
+          auto it = nodeIds.find(child->uniqueID());
           if (it == nodeIds.end() || !it->second->elementNode())
           {
             assert(false);
             continue;
           }
 
-          const auto& originalMatrix = childrenOriginMatrix.at(child->guid());
+          const auto& originalMatrix = childrenOriginMatrix.at(child->uniqueID());
           if (!originalMatrix)
           {
             assert(false);

@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "Layer/Core/RenderNode.hpp"
+#include "Layer/Effects.hpp"
 #include "Layer/Core/AttributeAccessor.hpp"
 #include "AttributeNode.hpp"
 #include "ShapeAttribute.hpp"
@@ -38,18 +39,7 @@ public:
     Ref<LayerFXAttribute>   layerPostProcess,
     Ref<AlphaMaskAttribute> alphaMask,
     Ref<ShapeMaskAttribute> shapeMask,
-    Ref<ShapeAttribute>     shape)
-    : GraphicItem(cnt)
-    , m_transformAttr(transform)
-    , m_styleAttr(styleObject)
-    , m_alphaMaskAttr(alphaMask)
-    , m_shapeMaskAttr(shapeMask)
-  {
-    observe(m_transformAttr);
-    observe(m_styleAttr);
-    observe(m_alphaMaskAttr);
-    observe(m_shapeMaskAttr);
-  }
+    Ref<ShapeAttribute>     shape);
   void render(Renderer* renderer) override;
 
 #ifdef VGG_LAYER_DEBUG
@@ -70,10 +60,14 @@ public:
 
   Bounds effectBounds() const override;
 
+  ATTR_DECL(FillStyle, const std::vector<Fill>&);
+  ATTR_DECL(BorderStyle, const std::vector<Border>&);
+
   bool isInvalid() const
   {
     return VNode::isInvalid();
   }
+
   Bounds onRevalidate() override;
 
   using Creator = std::function<Ref<GraphicItem>(VAllocator* alloc, ObjectAttribute*)>;
@@ -137,5 +131,9 @@ private:
   Ref<ShapeMaskAttribute> m_shapeMaskAttr;
   Bounds                  m_effectsBounds;
   sk_sp<SkPicture>        m_picture;
+
+  Ref<FillEffect>     m_fillEffect;
+  std::vector<Fill>   m_fills;
+  std::vector<Border> m_borders;
 };
 } // namespace VGG::layer

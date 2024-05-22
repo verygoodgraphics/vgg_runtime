@@ -16,6 +16,8 @@
 
 #include "StyleItem.hpp"
 #include "Layer/Config.hpp"
+#include "Layer/Core/EffectNode.hpp"
+#include "Layer/ShapeItem.hpp"
 #include "VSkia.hpp"
 #include "Renderer.hpp"
 #include "Effects.hpp"
@@ -24,8 +26,33 @@
 #include "Layer/Memory/VAllocator.hpp"
 #include <core/SkCanvas.h>
 
+namespace
+{
+
+} // namespace
+
 namespace VGG::layer
 {
+
+StyleItem::StyleItem(
+  VRefCnt*                cnt,
+  Ref<TransformAttribute> transform,
+  Ref<StyleAttribute>     styleObject,
+  Ref<LayerFXAttribute>   layerPostProcess,
+  Ref<AlphaMaskAttribute> alphaMask,
+  Ref<ShapeMaskAttribute> shapeMask,
+  Ref<ShapeAttribute>     shape)
+  : GraphicItem(cnt)
+  , m_transformAttr(transform)
+  , m_styleAttr(styleObject)
+  , m_alphaMaskAttr(alphaMask)
+  , m_shapeMaskAttr(shapeMask)
+{
+  observe(m_transformAttr);
+  observe(m_styleAttr);
+  observe(m_alphaMaskAttr);
+  observe(m_shapeMaskAttr);
+}
 
 void StyleItem::render(Renderer* renderer)
 {
@@ -105,6 +132,49 @@ void StyleItem::revalidateEffectsBounds()
 Bounds StyleItem::effectBounds() const
 {
   return m_effectsBounds;
+}
+
+void StyleItem::setFillStyle(const std::vector<Fill>& fills)
+{
+  if (m_fills == fills)
+    return;
+  m_fills = fills;
+  if (m_fills.empty())
+  {
+    m_fillEffect = nullptr;
+  }
+  else
+  {
+  }
+}
+
+void StyleItem::setFillStyle(std::remove_cvref_t<const std::vector<Fill>&>&& fills)
+{
+  if (m_fills == fills)
+    return;
+  m_fills = fills;
+}
+
+const std::vector<Fill>& StyleItem::getFillStyle() const
+{
+  return m_fills;
+}
+
+void StyleItem::setBorderStyle(const std::vector<Border>& borders)
+{
+  if (m_borders == borders)
+    return;
+  m_borders = borders;
+}
+
+void StyleItem::setBorderStyle(std::remove_cvref_t<const std::vector<Border>&>&& borders)
+{
+  m_borders = borders;
+}
+
+const std::vector<Border>& StyleItem::getBorderStyle() const
+{
+  return m_borders;
 }
 
 std::pair<sk_sp<SkPicture>, SkRect> StyleItem::revalidatePicture(const SkRect& rect)

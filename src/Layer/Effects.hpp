@@ -21,6 +21,7 @@
 #include "Layer/LRUCache.hpp"
 #include "Layer/LayerCache.h"
 #include "Layer/SkSL.hpp"
+#include "Layer/Core/EffectNode.hpp"
 #include "Layer/VSkia.hpp"
 
 #include <core/SkBlender.h>
@@ -318,5 +319,151 @@ SkRect drawBorder(
   const SkRect&              bounds,
   const std::vector<Border>& borders,
   sk_sp<SkBlender>           blender);
+
+// Effect Nodes definition
+
+class FillEffectNode : public EffectNode
+{
+public:
+  FillEffectNode(VRefCnt* cnt, Ref<RenderNode> child)
+    : EffectNode(cnt, std::move(child))
+  {
+  }
+};
+
+class BorderEffect : public EffectNode
+{
+public:
+  BorderEffect(VRefCnt* cnt, Ref<RenderNode> child)
+    : EffectNode(cnt, std::move(child))
+  {
+  }
+};
+
+class DropShadowEffectNode : public EffectNode // TODO:: renamed to DropShadowEffect
+{
+public:
+  DropShadowEffectNode(VRefCnt* cnt, Ref<RenderNode> child)
+    : EffectNode(cnt, std::move(child))
+  {
+  }
+};
+
+class InnerShadowEffectNode : public EffectNode // TODO:: renamed to InnerShadowEffect
+{
+public:
+  InnerShadowEffectNode(VRefCnt* cnt, Ref<RenderNode> child)
+    : EffectNode(cnt, std::move(child))
+  {
+  }
+};
+
+// implementation of Effect Nodes
+class FillEffectImpl : public FillEffectNode
+{
+public:
+  FillEffectImpl(VRefCnt* cnt, Ref<RenderNode> child, const Fill& fill)
+    : FillEffectNode(cnt, std::move(child))
+  {
+  }
+  Bounds effectBounds() const override
+  {
+    return m_effectBounds;
+  }
+
+  VGG_ATTRIBUTE(FillStyle, const Fill&, m_fill);
+
+  VGG_CLASS_MAKE(FillEffectImpl);
+
+  Ref<FillEffectImpl> MakeFrom( // NOLINT
+    Ref<RenderNode>          child,
+    const std::vector<Fill>& fills);
+
+protected:
+  Bounds onRevalidate() override;
+
+private:
+  Fill   m_fill;
+  Bounds m_effectBounds;
+};
+
+class BorderEffectImpl : public BorderEffect
+{
+public:
+  BorderEffectImpl(VRefCnt* cnt, Ref<RenderNode> child, const Border& border)
+    : BorderEffect(cnt, std::move(child))
+  {
+  }
+
+  Bounds effectBounds() const override
+  {
+    return m_effectBounds;
+  }
+
+  Ref<BorderEffectImpl> MakeFrom( // NOLINT
+    Ref<RenderNode>            child,
+    const std::vector<Border>& borders);
+  VGG_CLASS_MAKE(BorderEffectImpl);
+
+protected:
+  Bounds onRevalidate() override;
+
+private:
+  Border m_border;
+  Bounds m_effectBounds;
+};
+
+class DropShadowEffectImpl : public DropShadowEffectNode
+{
+public:
+  DropShadowEffectImpl(VRefCnt* cnt, Ref<RenderNode> child, const DropShadow& dropShadow)
+    : DropShadowEffectNode(cnt, std::move(child))
+  {
+  }
+
+  Bounds effectBounds() const override
+  {
+    return m_effectBounds;
+  }
+
+  VGG_CLASS_MAKE(DropShadowEffectImpl);
+
+  Ref<DropShadowEffectImpl> MakeFrom( // NOLINT
+    Ref<RenderNode>                child,
+    const std::vector<DropShadow>& shadows);
+
+protected:
+  Bounds onRevalidate() override;
+
+private:
+  DropShadow m_dropShadow;
+  Bounds     m_effectBounds;
+};
+
+class InnerShadowEffectImpl : public InnerShadowEffectNode
+{
+public:
+  InnerShadowEffectImpl(VRefCnt* cnt, Ref<RenderNode> child, const InnerShadow& innerShadow)
+    : InnerShadowEffectNode(cnt, std::move(child))
+  {
+  }
+  Bounds effectBounds() const override
+  {
+    return m_effectBounds;
+  }
+
+  Ref<InnerShadowEffectImpl> MakeFrom( // NOLINT
+    Ref<RenderNode>                 child,
+    const std::vector<InnerShadow>& shadows);
+
+  VGG_CLASS_MAKE(InnerShadowEffectImpl);
+
+protected:
+  Bounds onRevalidate() override;
+
+private:
+  InnerShadow m_innerShadow;
+  Bounds      m_effectBounds;
+};
 
 } // namespace VGG::layer

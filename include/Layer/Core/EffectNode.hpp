@@ -17,6 +17,7 @@
 
 #include "Layer/Core/RenderNode.hpp"
 #include "Layer/Core/Attrs.hpp"
+#include "Layer/Core/AttributeAccessor.hpp"
 #include <complex>
 
 namespace VGG::layer
@@ -32,12 +33,10 @@ public:
     observe(m_child);
   }
 
-  Ref<RenderNode> getChild() const
+  const Ref<RenderNode>& getChild() const
   {
     return m_child;
   }
-
-  virtual Bounds effectBounds() const override = 0;
 
   ~EffectNode()
   {
@@ -48,81 +47,4 @@ private:
   Ref<RenderNode> m_child;
 };
 
-class FillEffectNode : public EffectNode
-{
-public:
-  FillEffectNode(VRefCnt* cnt, Ref<RenderNode> child)
-    : EffectNode(cnt, std::move(child))
-  {
-  }
-};
-
-class BorderEffectNode : public EffectNode
-{
-public:
-  BorderEffectNode(VRefCnt* cnt, Ref<RenderNode> child)
-    : EffectNode(cnt, std::move(child))
-  {
-  }
-};
-
-class FillEffectNodeImpl : public FillEffectNode
-{
-public:
-  FillEffectNodeImpl(VRefCnt* cnt, Ref<RenderNode> child, const Fill& fill)
-    : FillEffectNode(cnt, std::move(child))
-  {
-  }
-
-protected:
-  Bounds onRevalidate() override
-  {
-    return getChild()->bounds();
-  }
-};
-
-class BorderEffectNodeImpl : public BorderEffectNode
-{
-public:
-  BorderEffectNodeImpl(VRefCnt* cnt, Ref<RenderNode> child, const Border& border)
-    : BorderEffectNode(cnt, std::move(child))
-  {
-  }
-};
-
-class DropShadowEffectNode : public EffectNode
-{
-public:
-  DropShadowEffectNode(VRefCnt* cnt, Ref<RenderNode> child)
-    : EffectNode(cnt, std::move(child))
-  {
-  }
-};
-
-class DropShadowEffectNodeImpl : public DropShadowEffectNode
-{
-public:
-  DropShadowEffectNodeImpl(VRefCnt* cnt, Ref<RenderNode> child, const DropShadow& dropShadow)
-    : DropShadowEffectNode(cnt, std::move(child))
-  {
-  }
-};
-
-class InnerShadowEffectNode : public EffectNode
-{
-public:
-  InnerShadowEffectNode(VRefCnt* cnt, Ref<RenderNode> child)
-    : EffectNode(cnt, std::move(child))
-  {
-  }
-};
-
-class InnerShadowEffectNodeImpl : public InnerShadowEffectNode
-{
-public:
-  InnerShadowEffectNodeImpl(VRefCnt* cnt, Ref<RenderNode> child, const InnerShadow& innerShadow)
-    : InnerShadowEffectNode(cnt, std::move(child))
-  {
-  }
-};
 } // namespace VGG::layer

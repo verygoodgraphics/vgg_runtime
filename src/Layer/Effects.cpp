@@ -649,4 +649,77 @@ SkRect drawBorder(
   return resultBounds;
 }
 
+Bounds FillEffectImpl::onRevalidate()
+{
+  return Bounds();
+}
+
+Ref<FillEffectImpl> FillEffectImpl::MakeFrom(Ref<RenderNode> child, const std::vector<Fill>& fills)
+{
+  ASSERT(!fills.empty());
+  ASSERT(child);
+  auto first = FillEffectImpl::Make(child, fills[0]);
+  for (size_t i = 1; i < fills.size(); ++i)
+  {
+    first = FillEffectImpl::Make(first, fills[i]);
+  }
+  return first;
+}
+
+Bounds BorderEffectImpl::onRevalidate()
+{
+  return Bounds();
+}
+
+Ref<BorderEffectImpl> BorderEffectImpl::MakeFrom(
+  Ref<RenderNode>            child,
+  const std::vector<Border>& borders)
+{
+  ASSERT(!borders.empty());
+  ASSERT(child);
+  auto first = BorderEffectImpl::Make(child, borders[0]);
+  for (size_t i = 1; i < borders.size(); ++i)
+  {
+    first = BorderEffectImpl::Make(first, borders[i]);
+  }
+  return first;
+}
+
+Bounds InnerShadowEffectImpl::onRevalidate()
+{
+  return Bounds();
+}
+
+Ref<InnerShadowEffectImpl> InnerShadowEffectImpl::MakeFrom(
+  Ref<RenderNode>                 child,
+  const std::vector<InnerShadow>& shadows)
+{
+  ASSERT(!shadows.empty());
+  ASSERT(child);
+  auto first = InnerShadowEffectImpl::Make(child, shadows[0]);
+  for (size_t i = 1; i < shadows.size(); ++i)
+  {
+    first = InnerShadowEffectImpl::Make(first, shadows[i]);
+  }
+  return first;
+}
+
+Bounds DropShadowEffectImpl::onRevalidate()
+{
+  return Bounds();
+}
+
+Ref<DropShadowEffectImpl> DropShadowEffectImpl::MakeFrom(
+  Ref<RenderNode>                child,
+  const std::vector<DropShadow>& shadows)
+{
+  ASSERT(!shadows.empty());
+  ASSERT(child);
+  auto first = DropShadowEffectImpl::Make(child, shadows[0]);
+  for (size_t i = 1; i < shadows.size(); ++i)
+  {
+    first = DropShadowEffectImpl::Make(first, shadows[i]);
+  }
+  return first;
+}
 } // namespace VGG::layer

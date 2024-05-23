@@ -134,49 +134,6 @@ Bounds StyleItem::effectBounds() const
   return m_effectsBounds;
 }
 
-void StyleItem::setFillStyle(const std::vector<Fill>& fills)
-{
-  if (m_fills == fills)
-    return;
-  m_fills = fills;
-  if (m_fills.empty())
-  {
-    m_fillEffect = nullptr;
-  }
-  else
-  {
-  }
-}
-
-void StyleItem::setFillStyle(std::remove_cvref_t<const std::vector<Fill>&>&& fills)
-{
-  if (m_fills == fills)
-    return;
-  m_fills = fills;
-}
-
-const std::vector<Fill>& StyleItem::getFillStyle() const
-{
-  return m_fills;
-}
-
-void StyleItem::setBorderStyle(const std::vector<Border>& borders)
-{
-  if (m_borders == borders)
-    return;
-  m_borders = borders;
-}
-
-void StyleItem::setBorderStyle(std::remove_cvref_t<const std::vector<Border>&>&& borders)
-{
-  m_borders = borders;
-}
-
-const std::vector<Border>& StyleItem::getBorderStyle() const
-{
-  return m_borders;
-}
-
 std::pair<sk_sp<SkPicture>, SkRect> StyleItem::revalidatePicture(const SkRect& rect)
 {
   ObjectRecorder rec;

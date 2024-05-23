@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 #include "Effects.hpp"
+#include "Layer/PenNode.hpp"
 #include "Renderer.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/LayerCache.h"
+#include "Layer/ShapeAttribute.hpp"
 #include "Layer/VSkia.hpp"
 #include "Layer/Core/VShape.hpp"
 #include <core/SkBlendMode.h>
@@ -591,6 +593,7 @@ SkRect drawBorder(
     strokePen.setBlender(blender);
     // strokePen.setImageFilter(imageFilter);
     populateSkPaint(b, shapeBounds, strokePen);
+
     bool  inCenter = true;
     float strokeWidth = b.thickness;
     if (b.position == PP_INSIDE && border.isClosed())
@@ -649,77 +652,161 @@ SkRect drawBorder(
   return resultBounds;
 }
 
-Bounds FillEffectImpl::onRevalidate()
+void GraphicItemEffectNode::render(Renderer* renderer)
 {
-  return Bounds();
-}
-
-Ref<FillEffectImpl> FillEffectImpl::MakeFrom(Ref<RenderNode> child, const std::vector<Fill>& fills)
-{
-  ASSERT(!fills.empty());
-  ASSERT(child);
-  auto first = FillEffectImpl::Make(child, fills[0]);
-  for (size_t i = 1; i < fills.size(); ++i)
+  if (auto s = shape(); s)
   {
-    first = FillEffectImpl::Make(first, fills[i]);
+    if (auto vs = s->getShape(); !vs.isEmpty())
+    {
+      onRenderShape(renderer, vs);
+    }
   }
-  return first;
 }
 
-Bounds BorderEffectImpl::onRevalidate()
+// StackFillEffectImpl begin
+void StackFillEffectImpl::onRenderShape(Renderer* renderer, const VShape& vs)
 {
-  return Bounds();
-}
-
-Ref<BorderEffectImpl> BorderEffectImpl::MakeFrom(
-  Ref<RenderNode>            child,
-  const std::vector<Border>& borders)
-{
-  ASSERT(!borders.empty());
-  ASSERT(child);
-  auto first = BorderEffectImpl::Make(child, borders[0]);
-  for (size_t i = 1; i < borders.size(); ++i)
+  for (const auto& p : m_pens)
   {
-    first = BorderEffectImpl::Make(first, borders[i]);
+    // auto r = vs.bounds();
+    // auto bounds = Bounds{ r.x(), r.y(), r.width(), r.height() };
+    auto paint = p->paint(bounds());
+    vs.draw(renderer->canvas(), paint);
   }
-  return first;
 }
 
-Bounds InnerShadowEffectImpl::onRevalidate()
+void StackFillEffectImpl::setFillStyle(std::vector<Fill> fills)
 {
-  return Bounds();
-}
+  if (!changed(fills))
+    return;
 
-Ref<InnerShadowEffectImpl> InnerShadowEffectImpl::MakeFrom(
-  Ref<RenderNode>                 child,
-  const std::vector<InnerShadow>& shadows)
-{
-  ASSERT(!shadows.empty());
-  ASSERT(child);
-  auto first = InnerShadowEffectImpl::Make(child, shadows[0]);
-  for (size_t i = 1; i < shadows.size(); ++i)
+  for (auto& pen : m_pens)
   {
-    first = InnerShadowEffectImpl::Make(first, shadows[i]);
+    unobserve(pen);
   }
-  return first;
-}
+  m_pens.clear();
 
-Bounds DropShadowEffectImpl::onRevalidate()
-{
-  return Bounds();
-}
-
-Ref<DropShadowEffectImpl> DropShadowEffectImpl::MakeFrom(
-  Ref<RenderNode>                child,
-  const std::vector<DropShadow>& shadows)
-{
-  ASSERT(!shadows.empty());
-  ASSERT(child);
-  auto first = DropShadowEffectImpl::Make(child, shadows[0]);
-  for (size_t i = 1; i < shadows.size(); ++i)
+  for (auto& fill : fills)
   {
-    first = DropShadowEffectImpl::Make(first, shadows[i]);
+    auto pen = FillPenNode::Make(fill);
+    observe(pen);
+    m_pens.push_back(pen);
   }
-  return first;
+  invalidate();
 }
+// StackFillEffectImpl end
+
+// StackBorderEffectImpl begin
+void StackBorderEffectImpl::onRenderShape(Renderer* renderer, const VShape& border)
+{
+  SkRect     resultBounds = border.bounds();
+  const auto shapeBounds = resultBounds;
+  auto       originalBounds =
+    Bounds{ resultBounds.x(), resultBounds.y(), resultBounds.width(), resultBounds.height() };
+  for (const auto& p : m_pens)
+  {
+    auto b = p->getBorder();
+    if (b.isEnabled && b.thickness > 0)
+    {
+      auto strokePen = p->paint(originalBounds); // TODO:: we can use effectBounds for more accurate
+
+      bool  inCenter = true;
+      float strokeWidth = b.thickness;
+      if (b.position == PP_INSIDE && border.isClosed())
+      {
+        // inside
+        strokeWidth = 2.f * b.thickness;
+        renderer->canvas()->save();
+        border.clip(renderer->canvas(), SkClipOp::kIntersect);
+        inCenter = false;
+      }
+      else if (b.position == PP_OUTSIDE && border.isClosed())
+      {
+        // outside
+        strokeWidth = 2.f * b.thickness;
+        renderer->canvas()->save();
+        border.clip(renderer->canvas(), SkClipOp::kDifference);
+        inCenter = false;
+      }
+      strokePen.setStrokeWidth(strokeWidth);
+
+      border.draw(renderer->canvas(), strokePen);
+
+      SkRect borderBounds;
+      strokePen.computeFastBounds(shapeBounds, &borderBounds);
+      resultBounds.join(borderBounds);
+      if (!inCenter)
+      {
+        renderer->canvas()->restore();
+      }
+    }
+  }
+}
+
+void StackBorderEffectImpl::setBorderStyle(std::vector<Border> borders)
+{
+  if (!changed(borders))
+    return;
+  for (auto& pen : m_pens)
+  {
+    unobserve(pen);
+  }
+  m_pens.clear();
+  for (auto& border : borders)
+  {
+    auto pen = BorderPenNode::Make(border);
+    observe(pen);
+    m_pens.push_back(pen);
+  }
+  invalidate();
+}
+
+Bounds StackFillEffectImpl::onRevalidate()
+{
+  for (const auto& p : m_pens)
+  {
+    p->revalidate();
+  }
+  return getChild()->bounds();
+}
+
+// StackBorderEffectImpl end
+
+// Bounds InnerShadowEffectImpl::onRevalidate()
+// {
+//   return Bounds();
+// }
+//
+// Ref<InnerShadowEffectImpl> InnerShadowEffectImpl::MakeFrom(
+//   Ref<RenderNode>                 child,
+//   const std::vector<InnerShadow>& shadows)
+// {
+//   ASSERT(!shadows.empty());
+//   ASSERT(child);
+//   auto first = InnerShadowEffectImpl::Make(child, shadows[0]);
+//   for (size_t i = 1; i < shadows.size(); ++i)
+//   {
+//     first = InnerShadowEffectImpl::Make(first, shadows[i]);
+//   }
+//   return first;
+// }
+//
+// Bounds DropShadowEffectImpl::onRevalidate()
+// {
+//   return Bounds();
+// }
+//
+// Ref<DropShadowEffectImpl> DropShadowEffectImpl::MakeFrom(
+//   Ref<RenderNode>                child,
+//   const std::vector<DropShadow>& shadows)
+// {
+//   ASSERT(!shadows.empty());
+//   ASSERT(child);
+//   auto first = DropShadowEffectImpl::Make(child, shadows[0]);
+//   for (size_t i = 1; i < shadows.size(); ++i)
+//   {
+//     first = DropShadowEffectImpl::Make(first, shadows[i]);
+//   }
+//   return first;
+// }
 } // namespace VGG::layer

@@ -82,6 +82,9 @@ std::pair<std::shared_ptr<VGG::Domain::DesignDocument>, nlohmann::json> ExpandSy
 
   for (auto& page : m_designDocument->children())
   {
+    if (!page->object()->visible) // skip invisible frames
+      continue;
+
     std::vector<std::string> instanceIdStack{};
     traverseElementNode(page, instanceIdStack);
   }

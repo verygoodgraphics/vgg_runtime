@@ -157,7 +157,10 @@ private:
           if (auto m = obj->second.lock(); m)
           {
             const auto t = m->mapTransform(self);
-            components.emplace_back(m, t, m ? getMaskBlender(*mask->second) : nullptr);
+            components.emplace_back(
+              m,
+              t,
+              m ? (mask.has_value() ? getMaskBlender(*mask->second) : nullptr) : nullptr);
           }
         }
         else

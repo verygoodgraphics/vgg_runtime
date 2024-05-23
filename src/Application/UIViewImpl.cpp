@@ -305,7 +305,8 @@ bool UIViewImpl::transition(
     action->getPaintNode(fromNode->shared_from_this()),
     makeNewPaintNode ? nullptr : action->getPaintNode(toNode->shared_from_this()),
     true,
-    animation);
+    animation,
+    makeNewPaintNode);
 
   if (success && !animation)
   {

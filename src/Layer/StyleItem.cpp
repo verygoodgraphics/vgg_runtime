@@ -15,8 +15,10 @@
  */
 
 #include "StyleItem.hpp"
+#include "Layer/Core/PaintNode.hpp"
 #include "Layer/Config.hpp"
 #include "Layer/Core/EffectNode.hpp"
+#include "Layer/EffectAttribute.hpp"
 #include "Layer/ShapeItem.hpp"
 #include "VSkia.hpp"
 #include "Renderer.hpp"
@@ -36,22 +38,28 @@ namespace VGG::layer
 
 StyleItem::StyleItem(
   VRefCnt*                cnt,
+  PaintNode*              node,
   Ref<TransformAttribute> transform,
-  Ref<StyleAttribute>     styleObject,
-  Ref<LayerFXAttribute>   layerPostProcess,
-  Ref<AlphaMaskAttribute> alphaMask,
-  Ref<ShapeMaskAttribute> shapeMask,
-  Ref<ShapeAttribute>     shape)
+  Creator                 creator)
   : GraphicItem(cnt)
   , m_transformAttr(transform)
-  , m_styleAttr(styleObject)
-  , m_alphaMaskAttr(alphaMask)
-  , m_shapeMaskAttr(shapeMask)
 {
+
+  Ref<LayerFXAttribute> layerPostProcess = LayerFXAttribute::Make(WeakRef<StyleItem>(this));
+  m_shapeMaskAttr = ShapeMaskAttribute::Make(node, layerPostProcess);
+  m_alphaMaskAttr = AlphaMaskAttribute::Make(node, layerPostProcess);
+  m_objectAttr = ObjectAttribute::Make(Ref<GraphicItem>());
+  auto renderObject = creator(nullptr, m_objectAttr.get());
+  auto shape = incRef(renderObject->shape());
+  m_objectAttr->setGraphicItem(renderObject);
+  m_innerShadowAttr = InnerShadowAttribute::Make(shape);
+  m_dropShadowAttr = DropShadowAttribute::Make(shape);
+  m_backgroundBlurAttr = BackdropFXAttribute::Make();
+
   observe(m_transformAttr);
-  observe(m_styleAttr);
   observe(m_alphaMaskAttr);
   observe(m_shapeMaskAttr);
+  observeStyleAttribute();
 }
 
 void StyleItem::render(Renderer* renderer)
@@ -67,7 +75,7 @@ void StyleItem::debug(Renderer* render)
 {
   auto   canvas = render->canvas();
   SkRect layerBounds = toSkRect(m_alphaMaskAttr->bounds());
-  SkRect effectBounds = toSkRect(m_styleAttr->effectBounds());
+  SkRect effectBounds = toSkRect(styleEffectBounds());
 
   SkPaint p;
   p.setStroke(true);
@@ -101,20 +109,29 @@ void StyleItem::recorder(Renderer* renderer)
       p.setAntiAlias(true);
       p.setImageFilter(m_alphaMaskAttr->getImageFilter());
       shape = VShape(toSkRect(effectBounds()));
-      backdropFilter = m_styleAttr->getBackdropImageFilter();
+      backdropFilter = backdropImageFilter();
     });
-  m_styleAttr->render(renderer);
+  onRenderStyle(renderer);
+}
+
+void StyleItem::onRenderStyle(Renderer* renderer)
+{
+  auto filled = m_objectAttr->hasFill();
+  if (filled && m_dropShadowAttr)
+    m_dropShadowAttr->render(renderer);
+  m_objectAttr->render(renderer);
+  if (filled && m_innerShadowAttr)
+    m_innerShadowAttr->render(renderer);
 }
 
 void StyleItem::renderAsMask(Renderer* render)
 {
-  ASSERT(m_styleAttr);
-  m_styleAttr->render(render);
+  onRenderStyle(render);
 }
 
 bool StyleItem::hasNewLayer() const
 {
-  sk_sp<SkImageFilter> dropbackFilter = m_styleAttr->getBackdropImageFilter();
+  sk_sp<SkImageFilter> dropbackFilter = backdropImageFilter();
   sk_sp<SkImageFilter> layerFXFilter = m_alphaMaskAttr->getImageFilter();
   const auto           newLayer = dropbackFilter || layerFXFilter;
   return newLayer;
@@ -122,7 +139,7 @@ bool StyleItem::hasNewLayer() const
 
 void StyleItem::revalidateEffectsBounds()
 {
-  m_effectsBounds = m_styleAttr->effectBounds();
+  m_effectsBounds = styleEffectBounds();
   if (hasNewLayer())
   {
     m_effectsBounds = m_alphaMaskAttr->bounds();
@@ -142,23 +159,88 @@ std::pair<sk_sp<SkPicture>, SkRect> StyleItem::revalidatePicture(const SkRect& r
   return { rec.finishAsPicture(rect), rect };
 }
 
+Bounds StyleItem::onRevalidateStyle()
+{
+  m_innerShadowAttr->revalidate();
+  m_objectAttr->revalidate();
+  auto objectBounds = toSkRect(m_objectAttr->effectBounds());
+  revalidateDropbackFilter(objectBounds);
+  auto shadowBounds = toSkRect(m_dropShadowAttr->revalidate());
+  objectBounds.join(shadowBounds);
+  m_styleEffectBounds =
+    Bounds{ objectBounds.x(), objectBounds.y(), objectBounds.width(), objectBounds.height() };
+  return m_objectAttr->bounds();
+}
+
+void StyleItem::observeStyleAttribute()
+{
+  observe(m_innerShadowAttr);
+  observe(m_dropShadowAttr);
+  observe(m_objectAttr);
+  observe(m_backgroundBlurAttr);
+}
+
+void StyleItem::unobserveStyleAttribute()
+{
+  unobserve(m_innerShadowAttr);
+  unobserve(m_dropShadowAttr);
+  unobserve(m_objectAttr);
+  unobserve(m_backgroundBlurAttr);
+}
+
+void StyleItem::revalidateDropbackFilter(const SkRect& bounds)
+{
+  ASSERT(m_backgroundBlurAttr);
+  if (m_objectAttr->hasFill()) // Dropback effect determined by the wheather the
+                               // object has fill
+  {
+    m_backgroundBlurAttr->revalidate();
+    if (auto bgb = m_backgroundBlurAttr->getImageFilter())
+    {
+      if (m_bgBlurImageFilter != bgb || m_objectEffectBounds != bounds)
+      {
+        m_bgBlurImageFilter = bgb;
+        if (m_bgBlurImageFilter)
+        {
+          if (auto ro = m_objectAttr->getGraphicItem(); ro)
+          {
+            static auto s_blender = getOrCreateBlender("maskOut", g_maskOutBlender);
+            auto        fb = ro->getMaskFilter();
+            m_dropbackImageFilter =
+              SkImageFilters::Blend(s_blender, fb, m_bgBlurImageFilter, bounds);
+          }
+        }
+      }
+      else
+      {
+        m_dropbackImageFilter = nullptr;
+      }
+    }
+  }
+}
+
+Bounds StyleItem::objectBounds()
+{
+  return m_objectAttr->bounds();
+}
+
 Bounds StyleItem::onRevalidate()
 {
+  auto bounds = onRevalidateStyle(); // this must be the first, workaround
   m_shapeMaskAttr->revalidate();
   m_transformAttr->revalidate();
   m_alphaMaskAttr->revalidate();
-  m_styleAttr->revalidate();
+  // m_styleAttr->revalidate();
   revalidateEffectsBounds();
   // auto [pic, bounds] = revalidatePicture(toSkRect(m_objectAttr->effectBounds()));
   // m_effectsBounds = Bounds{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
   // m_picture = std::move(pic);
-  return m_styleAttr->bounds();
+  return bounds;
 }
 
 StyleItem::~StyleItem()
 {
   unobserve(m_transformAttr);
-  unobserve(m_styleAttr);
   unobserve(m_alphaMaskAttr);
   unobserve(m_shapeMaskAttr);
   // unobserve(m_shapeAttr);
@@ -170,36 +252,18 @@ std::pair<Ref<StyleItem>, std::unique_ptr<Accessor>> StyleItem::MakeRenderNode( 
   Ref<TransformAttribute> transform,
   Creator                 creator)
 {
-  auto backgroundBlur = BackdropFXAttribute::Make(alloc);
-  auto object = ObjectAttribute::Make(alloc, Ref<GraphicItem>());
-  auto renderObject = creator(alloc, object.get());
-  auto shape = incRef(renderObject->shape());
-  auto innerShadow = InnerShadowAttribute::Make(alloc, shape);
-  auto dropShadow = DropShadowAttribute::Make(alloc, shape);
-  object->setGraphicItem(renderObject);
+  auto result = StyleItem::Make(alloc, node, transform, creator);
 
-  auto style = StyleAttribute::Make(alloc, innerShadow, dropShadow, object, backgroundBlur);
-  auto layerPostProcess = LayerFXAttribute::Make(alloc, style);
-  auto shapeMask = ShapeMaskAttribute::Make(alloc, node, layerPostProcess);
-  auto alphaMaskAttribute = AlphaMaskAttribute::Make(alloc, node, layerPostProcess);
-  auto result = StyleItem::Make(
-    alloc,
-    transform,
-    style,
-    layerPostProcess,
-    alphaMaskAttribute,
-    shapeMask,
-    shape);
   auto aa = std::unique_ptr<Accessor>(new Accessor(
     node,
     transform,
-    alphaMaskAttribute,
-    shapeMask,
-    dropShadow,
-    innerShadow,
-    object,
-    layerPostProcess,
-    backgroundBlur));
+    result->m_alphaMaskAttr,
+    result->m_shapeMaskAttr,
+    result->m_dropShadowAttr,
+    result->m_innerShadowAttr,
+    result->m_objectAttr,
+    result->m_shapeMaskAttr->layerFX(),
+    result->m_backgroundBlurAttr));
   return { result, std::move(aa) };
 }
 

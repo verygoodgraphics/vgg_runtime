@@ -65,6 +65,11 @@ public:
     return m_shape;
   }
 
+  Ref<LayerFXAttribute> layerFX() const
+  {
+    return m_layerAttr;
+  }
+
   VGG_ATTRIBUTE(MaskID, const std::vector<std::string>&, m_maskID);
   VGG_ATTRIBUTE(MaskNode, PaintNode*, m_maskedNode);
   VGG_CLASS_MAKE(ShapeMaskAttribute);

@@ -83,6 +83,7 @@ public:
   auto getInterpolator();
   auto getStartTime();
 
+  // The calling order of the added functions is the reverse of the order in which they were added.
   void addCallBackWhenStop(std::function<void()>&& fun);
 
 protected:

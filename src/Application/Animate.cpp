@@ -147,9 +147,9 @@ void Animate::stop()
 
   if (!m_callbackWhenStop.empty())
   {
-    for (auto& item : m_callbackWhenStop)
+    for (auto it = m_callbackWhenStop.rbegin(); it != m_callbackWhenStop.rend(); ++it)
     {
-      item();
+      (*it)();
     }
     m_callbackWhenStop.clear();
   }

@@ -32,14 +32,8 @@ namespace VGG::layer
 class StyleItem : public GraphicItem
 {
 public:
-  StyleItem(
-    VRefCnt*                cnt,
-    Ref<TransformAttribute> transform,
-    Ref<StyleAttribute>     styleObject,
-    Ref<LayerFXAttribute>   layerPostProcess,
-    Ref<AlphaMaskAttribute> alphaMask,
-    Ref<ShapeMaskAttribute> shapeMask,
-    Ref<ShapeAttribute>     shape);
+  using Creator = std::function<Ref<GraphicItem>(VAllocator* alloc, ObjectAttribute*)>;
+  StyleItem(VRefCnt* cnt, PaintNode* node, Ref<TransformAttribute> transform, Creator creator);
   void render(Renderer* renderer) override;
 
 #ifdef VGG_LAYER_DEBUG
@@ -59,6 +53,8 @@ public:
   }
 
   Bounds effectBounds() const override;
+
+  Bounds objectBounds();
 
   void setFillStyle(std::vector<Fill> fills)
   {
@@ -82,12 +78,21 @@ public:
     return m_borderEffect->borders();
   }
 
+  InnerShadowAttribute* getInnerShadowAttribute() const
+  {
+    return m_innerShadowAttr.get();
+  }
+
   bool isInvalid() const
   {
     return VNode::isInvalid();
   }
 
-  using Creator = std::function<Ref<GraphicItem>(VAllocator* alloc, ObjectAttribute*)>;
+  const Bounds& styleEffectBounds() const
+  {
+    return m_styleEffectBounds;
+  }
+
   static std::pair<Ref<StyleItem>, std::unique_ptr<Accessor>> MakeRenderNode( // NOLINT
     VAllocator*             alloc,
     PaintNode*              node,
@@ -146,7 +151,36 @@ private:
   };
 
   Ref<TransformAttribute> m_transformAttr;
-  Ref<StyleAttribute>     m_styleAttr;
+
+  ////////////////////// StyleAttribute
+  Ref<InnerShadowAttribute> m_innerShadowAttr;
+  Ref<DropShadowAttribute>  m_dropShadowAttr;
+  Ref<ObjectAttribute>      m_objectAttr;
+  Ref<BackdropFXAttribute>  m_backgroundBlurAttr;
+
+  SkRect m_objectEffectBounds;
+  Bounds m_styleEffectBounds;
+
+  sk_sp<SkImageFilter> m_bgBlurImageFilter;
+
+  sk_sp<SkImageFilter>        m_dropbackImageFilter;
+  const sk_sp<SkImageFilter>& backdropImageFilter() const
+  {
+    return m_dropbackImageFilter;
+  }
+  sk_sp<SkImageFilter> m_objectImageFilter;
+
+  void observeStyleAttribute();
+
+  void unobserveStyleAttribute();
+
+  Bounds onRevalidateStyle();
+
+  void revalidateDropbackFilter(const SkRect& bounds);
+
+  void onRenderStyle(Renderer* renderer);
+
+  ////////////////////// StyleAttribute end
 
   Ref<AlphaMaskAttribute> m_alphaMaskAttr;
   Ref<ShapeMaskAttribute> m_shapeMaskAttr;

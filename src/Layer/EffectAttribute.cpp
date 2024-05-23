@@ -19,6 +19,7 @@
 #include "Effects.hpp"
 
 #include "Layer/Core/Attrs.hpp"
+#include "Layer/StyleItem.hpp"
 
 #include <core/SkImageFilter.h>
 #include <core/SkRect.h>
@@ -26,11 +27,10 @@
 namespace VGG::layer
 {
 
-LayerFXAttribute::LayerFXAttribute(VRefCnt* cnt, Ref<StyleAttribute> styleObjectAttr)
+LayerFXAttribute::LayerFXAttribute(VRefCnt* cnt, WeakRef<StyleItem> styleItem)
   : ImageFilterAttribute(cnt)
-  , m_styleObjectAttr(styleObjectAttr)
 {
-  observe(m_styleObjectAttr);
+  m_styleItem = styleItem;
 }
 
 SkRect LayerFXAttribute::revalidateLayerImageFilter(const SkRect& bounds)
@@ -46,7 +46,11 @@ SkRect LayerFXAttribute::revalidateLayerImageFilter(const SkRect& bounds)
         Overloaded{ [&](const GaussianBlur& blur) { filter = makeLayerBlurFilter(blur); },
                     [&](const MotionBlur& blur) { filter = makeMotionBlurFilter(blur); },
                     [&, this](const RadialBlur& blur)
-                    { filter = makeRadialBlurFilter(blur, m_styleObjectAttr->bounds()); } },
+                    {
+                      auto styleItem = m_styleItem.lock();
+                      if (styleItem)
+                        filter = makeRadialBlurFilter(blur, styleItem->objectBounds());
+                    } },
         b.type);
       if (m_imageFilter == nullptr)
       {
@@ -64,10 +68,15 @@ SkRect LayerFXAttribute::revalidateLayerImageFilter(const SkRect& bounds)
 
 Bounds LayerFXAttribute::onRevalidate()
 {
-  m_styleObjectAttr->revalidate();
-  const auto styledObjectBounds = toSkRect(m_styleObjectAttr->effectBounds());
-  const auto layerBounds = revalidateLayerImageFilter(styledObjectBounds);
-  return Bounds{ layerBounds.x(), layerBounds.y(), layerBounds.width(), layerBounds.height() };
+  auto styleItem = m_styleItem.lock();
+  if (styleItem)
+  {
+    styleItem->revalidate(); // cycle revalidation !!!: workaround
+    const auto styledObjectBounds = toSkRect(styleItem->styleEffectBounds());
+    const auto layerBounds = revalidateLayerImageFilter(styledObjectBounds);
+    return Bounds{ layerBounds.x(), layerBounds.y(), layerBounds.width(), layerBounds.height() };
+  }
+  return Bounds();
 }
 
 Bounds BackdropFXAttribute::onRevalidate()

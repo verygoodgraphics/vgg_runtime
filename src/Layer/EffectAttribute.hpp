@@ -22,6 +22,8 @@
 namespace VGG::layer
 {
 
+class StyleItem;
+
 class StyleAttribute;
 
 class BackdropFXAttribute : public ImageFilterAttribute
@@ -48,7 +50,7 @@ private:
 class LayerFXAttribute : public ImageFilterAttribute
 {
 public:
-  LayerFXAttribute(VRefCnt* cnt, Ref<StyleAttribute> styleObjectAttr);
+  LayerFXAttribute(VRefCnt* cnt, WeakRef<StyleItem> styleItem);
   VGG_ATTRIBUTE(LayerBlur, const std::vector<LayerFX>&, m_blurs);
   Bounds               onRevalidate() override;
   sk_sp<SkImageFilter> getImageFilter() const override
@@ -61,7 +63,7 @@ private:
   friend class RenderNode;
   SkRect revalidateLayerImageFilter(const SkRect& bounds);
 
-  Ref<StyleAttribute>  m_styleObjectAttr;
+  WeakRef<StyleItem>   m_styleItem;
   std::vector<LayerFX> m_blurs;
   sk_sp<SkImageFilter> m_imageFilter;
 };

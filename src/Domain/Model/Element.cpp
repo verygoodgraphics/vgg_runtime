@@ -783,12 +783,13 @@ std::string SymbolInstanceElement::masterOverrideKey() const
 void SymbolInstanceElement::setMaster(const Model::SymbolMaster& master)
 {
   ASSERT(master.id == masterId());
-  if (master.id == masterId())
-  {
-    m_master = std::make_unique<Model::SymbolMaster>(master);
-    clearChildren();
-    addChildren(m_master->childObjects);
-  }
+
+  m_master = std::make_unique<Model::SymbolMaster>(master);
+  clearChildren();
+  addChildren(m_master->childObjects);
+
+  object()->style = m_master->style;
+  object()->variableDefs = m_master->variableDefs;
 }
 
 std::vector<std::shared_ptr<Element>> SymbolInstanceElement::updateMasterId(

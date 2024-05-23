@@ -82,7 +82,7 @@ private:
   bool                 m_hasFill{ false };
 };
 
-class StyleAttribute : public Attribute
+class StyleAttribute : public Attribute // TODO:: StyleAttribute is unnecessary, remove later
 {
 public:
   StyleAttribute(

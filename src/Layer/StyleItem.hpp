@@ -60,15 +60,32 @@ public:
 
   Bounds effectBounds() const override;
 
-  ATTR_DECL(FillStyle, const std::vector<Fill>&);
-  ATTR_DECL(BorderStyle, const std::vector<Border>&);
+  void setFillStyle(std::vector<Fill> fills)
+  {
+    ASSERT(m_fillEffect);
+    m_fillEffect->setFillStyle(std::move(fills));
+  }
+  void setBorderStyle(std::vector<Border> borders)
+  {
+    ASSERT(m_borderEffect);
+    m_borderEffect->setBorderStyle(std::move(borders));
+  }
+
+  const std::vector<Ref<FillPenNode>>& getFillStyle() const
+  {
+    ASSERT(m_fillEffect);
+    return m_fillEffect->fills();
+  }
+  const std::vector<Ref<BorderPenNode>>& getBorderStyle() const
+  {
+    ASSERT(m_borderEffect);
+    return m_borderEffect->borders();
+  }
 
   bool isInvalid() const
   {
     return VNode::isInvalid();
   }
-
-  Bounds onRevalidate() override;
 
   using Creator = std::function<Ref<GraphicItem>(VAllocator* alloc, ObjectAttribute*)>;
   static std::pair<Ref<StyleItem>, std::unique_ptr<Accessor>> MakeRenderNode( // NOLINT
@@ -78,6 +95,9 @@ public:
     Creator                 creator);
 
   ~StyleItem();
+
+protected:
+  Bounds onRevalidate() override;
 
 private:
   VGG_CLASS_MAKE(StyleItem);
@@ -127,13 +147,13 @@ private:
 
   Ref<TransformAttribute> m_transformAttr;
   Ref<StyleAttribute>     m_styleAttr;
+
   Ref<AlphaMaskAttribute> m_alphaMaskAttr;
   Ref<ShapeMaskAttribute> m_shapeMaskAttr;
   Bounds                  m_effectsBounds;
   sk_sp<SkPicture>        m_picture;
 
-  Ref<FillEffect>     m_fillEffect;
-  std::vector<Fill>   m_fills;
-  std::vector<Border> m_borders;
+  Ref<StackFillEffectImpl>   m_fillEffect;
+  Ref<StackBorderEffectImpl> m_borderEffect;
 };
 } // namespace VGG::layer

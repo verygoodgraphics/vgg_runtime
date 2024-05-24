@@ -66,7 +66,7 @@ public:
     ASSERT(m_fillEffect);
     if (m_fills == fills)
       return;
-    // m_fills = fills;
+    m_fills = fills;
     m_fillEffect->setFillStyle(std::move(fills));
   }
   void setBorderStyle(const std::vector<Border>& borders)
@@ -74,7 +74,7 @@ public:
     ASSERT(m_borderEffect);
     if (m_borders == borders)
       return;
-    // m_borders = borders;
+    m_borders = borders;
     m_borderEffect->setBorderStyle(std::move(borders));
   }
 

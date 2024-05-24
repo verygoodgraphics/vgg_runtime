@@ -50,6 +50,33 @@ public:
 
   void revalidateMaskFilter()
   {
+    const auto& s = q_ptr->m_graphicItem->shape();
+    if (s)
+    {
+      if (const auto& shape = s->getShape(); !shape.isEmpty())
+      {
+        auto           bounds = toSkRect(q_ptr->m_borderEffect->effectBounds());
+        ObjectRecorder rec;
+        auto           recorder = rec.beginRecording(bounds, SkMatrix::I());
+        SkPaint        fillPaint;
+        fillPaint.setAntiAlias(true);
+        fillPaint.setStyle(SkPaint::kFill_Style);
+        fillPaint.setAlphaf(1.0f);
+        shape.draw(recorder->canvas(), fillPaint);
+        SkPaint strokePen;
+        strokePen.setAntiAlias(true);
+        strokePen.setStyle(SkPaint::kStroke_Style);
+        strokePen.setAlphaf(1.0f);
+        shape.draw(recorder->canvas(), strokePen);
+        auto mat = SkMatrix::Translate(bounds.x(), bounds.y());
+        auto object = rec.finishRecording(bounds, &mat);
+        itemMaskFilter = object.asImageFilter();
+      }
+    }
+    else
+    {
+      itemMaskFilter = nullptr;
+    }
   }
 };
 
@@ -208,7 +235,7 @@ Bounds StyleItem::onRevalidateStyle()
 
   onRevalidateObject();
 
-  auto objectBounds = toSkRect(m_graphicItem->effectBounds());
+  auto objectBounds = toSkRect(m_borderEffect->effectBounds());
   revalidateDropbackFilter(objectBounds);
   auto shadowBounds = toSkRect(m_dropShadowAttr->revalidate());
   objectBounds.join(shadowBounds);
@@ -248,7 +275,8 @@ void StyleItem::revalidateDropbackFilter(const SkRect& bounds)
           if (auto ro = m_graphicItem; ro)
           {
             static auto s_blender = getOrCreateBlender("maskOut", g_maskOutBlender);
-            auto        fb = ro->getMaskFilter();
+            d_ptr->revalidateMaskFilter();
+            auto fb = d_ptr->itemMaskFilter;
             m_dropbackImageFilter =
               SkImageFilters::Blend(s_blender, fb, m_bgBlurImageFilter, bounds);
           }

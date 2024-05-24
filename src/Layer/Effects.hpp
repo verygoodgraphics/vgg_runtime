@@ -335,6 +335,12 @@ public:
   {
   }
 
+  bool isVisible() const
+  {
+    ASSERT(isInvalid());
+    return m_visible;
+  }
+
   Bounds effectBounds() const override
   {
     ASSERT(getChild());
@@ -351,13 +357,18 @@ protected:
 
   virtual void onRenderShape(Renderer* renderer, const VShape& shape) = 0;
 
+  virtual bool onRevalidateVisible(const Bounds&) = 0;
+
   Bounds onRevalidate() override
   {
     ASSERT(getChild());
-    return getChild()->revalidate();
+    const auto bounds = getChild()->revalidate();
+    m_visible = onRevalidateVisible(bounds);
+    return bounds;
   }
 
 private:
+  bool m_visible{ false };
 };
 
 // implementation of Effect Nodes
@@ -393,8 +404,9 @@ public:
   VGG_CLASS_MAKE(StackFillEffectImpl);
 
 protected:
-  void   onRenderShape(Renderer* renderer, const VShape& shape) override;
-  Bounds onRevalidate() override;
+  void onRenderShape(Renderer* renderer, const VShape& shape) override;
+
+  bool onRevalidateVisible(const Bounds& bounds) override;
 
 private:
   bool changed(const std::vector<Fill>& fills)
@@ -452,9 +464,10 @@ protected:
     }
     return false;
   }
-  Bounds onRevalidate() override;
 
-  Bounds computeFastBounds(const SkRect& bounds) const;
+  bool onRevalidateVisible(const Bounds& bounds) override;
+
+  std::pair<bool, Bounds> computeFastBounds(const SkRect& bounds) const;
 
   void onRenderShape(Renderer* renderer, const VShape& shape) override;
 

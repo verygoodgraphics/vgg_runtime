@@ -746,15 +746,28 @@ void StackBorderEffectImpl::onRenderShape(Renderer* renderer, const VShape& bord
   }
 }
 
-Bounds StackBorderEffectImpl::onRevalidate()
+bool StackFillEffectImpl::onRevalidateVisible(const Bounds& bounds)
 {
-  GraphicItemEffectNode::onRevalidate();
-  auto bounds = getChild()->bounds();
-  m_effectBounds = computeFastBounds(toSkRect(bounds));
-  return bounds;
+  auto hasFill = false;
+  for (const auto& p : m_pens)
+  {
+    p->revalidate();
+    if (p->getFill().isEnabled)
+    {
+      hasFill = true;
+    }
+  }
+  return hasFill;
 }
 
-Bounds StackBorderEffectImpl::computeFastBounds(const SkRect& bounds) const
+bool StackBorderEffectImpl::onRevalidateVisible(const Bounds& bounds)
+{
+  auto res = computeFastBounds(toSkRect(bounds));
+  m_effectBounds = res.second;
+  return res.first;
+}
+
+std::pair<bool, Bounds> StackBorderEffectImpl::computeFastBounds(const SkRect& bounds) const
 {
   const Border* maxWidthBorder = nullptr;
   float         maxWidth = 0;
@@ -792,9 +805,9 @@ Bounds StackBorderEffectImpl::computeFastBounds(const SkRect& bounds) const
     paint.setStrokeWidth(maxWidth);
     SkRect rect;
     paint.computeFastStrokeBounds(bounds, &rect);
-    return Bounds{ rect.x(), rect.y(), rect.width(), rect.height() };
+    return { true, Bounds{ rect.x(), rect.y(), rect.width(), rect.height() } };
   }
-  return Bounds{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
+  return { false, Bounds{ bounds.x(), bounds.y(), bounds.width(), bounds.height() } };
 }
 
 void StackBorderEffectImpl::setBorderStyle(std::vector<Border> borders)
@@ -813,15 +826,6 @@ void StackBorderEffectImpl::setBorderStyle(std::vector<Border> borders)
     m_pens.push_back(pen);
   }
   invalidate();
-}
-
-Bounds StackFillEffectImpl::onRevalidate()
-{
-  for (const auto& p : m_pens)
-  {
-    p->revalidate();
-  }
-  return GraphicItemEffectNode::onRevalidate();
 }
 
 // StackBorderEffectImpl end

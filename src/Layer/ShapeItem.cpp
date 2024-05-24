@@ -24,26 +24,26 @@ namespace VGG::layer
 void ShapeItem::render(Renderer* renderer)
 {
   return;
-  if (auto shapeAttr = this->shape(); shapeAttr)
-  {
-    auto parent = m_styleItem.lock();
-    if (auto shape = shapeAttr->getShape(); !shape.isEmpty() && parent)
-    {
-      ObjectRecorder rec;
-      SkRect         objectBounds = shape.bounds();
-      // auto           recorder = rec.beginRecording(objectBounds, SkMatrix::I());
-      auto           fillBounds = shape.bounds();
-      FillEffect     fillEffect(parent->getFillStyle(), fillBounds, 0, 0);
-      fillEffect.render(renderer, shape);
-      const auto borderBounds =
-        VGG::layer::drawBorder(renderer, shape, shape.bounds(), parent->getBorderStyle(), 0);
-      objectBounds.join(fillBounds);
-      objectBounds.join(borderBounds);
-      // auto mat = SkMatrix::Translate(objectBounds.x(), objectBounds.y());
-      // m_objectShader = rec.finishRecording(objectBounds, &mat);
-      // m_objectShader->render(renderer);
-    }
-  }
+  // if (auto shapeAttr = this->shape(); shapeAttr)
+  // {
+  //   auto parent = m_styleItem.lock();
+  //   if (auto shape = shapeAttr->getShape(); !shape.isEmpty() && parent)
+  //   {
+  //     ObjectRecorder rec;
+  //     SkRect         objectBounds = shape.bounds();
+  //     // auto           recorder = rec.beginRecording(objectBounds, SkMatrix::I());
+  //     auto           fillBounds = shape.bounds();
+  //     FillEffect     fillEffect(parent->getFillStyle(), fillBounds, 0, 0);
+  //     fillEffect.render(renderer, shape);
+  //     const auto borderBounds =
+  //       VGG::layer::drawBorder(renderer, shape, shape.bounds(), parent->getBorderStyle(), 0);
+  //     objectBounds.join(fillBounds);
+  //     objectBounds.join(borderBounds);
+  //     // auto mat = SkMatrix::Translate(objectBounds.x(), objectBounds.y());
+  //     // m_objectShader = rec.finishRecording(objectBounds, &mat);
+  //     // m_objectShader->render(renderer);
+  //   }
+  // }
 }
 
 ShapeAttribute* ShapeItem::shape() const
@@ -99,42 +99,48 @@ Bounds ShapeItem::onRevalidate()
 {
   ASSERT(m_shapeAttr);
   m_shapeAttr->revalidate();
-  return revalidateMaskFilter();
+  if (const auto& shape = m_shapeAttr->getShape(); !shape.isEmpty())
+  {
+    const auto rect = shape.bounds();
+    return Bounds{ rect.x(), rect.y(), rect.width(), rect.height() };
+  }
+  return Bounds{};
 }
 
 /**
  * @brief Revalidate the mask filter for the shape item
  * @return Bounds
  */
-Bounds ShapeItem::revalidateMaskFilter()
-{
-  auto parent = m_styleItem.lock();
-  if (parent)
-  {
-    if (const auto& shape = m_shapeAttr->getShape(); !shape.isEmpty())
-    {
-      auto shapeBounds = shape.bounds();
-      auto [bounds, paint] = revalidateObjectBounds(parent->getBorderStyle(), shapeBounds);
-      ObjectRecorder rec;
-      auto           recorder = rec.beginRecording(bounds, SkMatrix::I());
-      SkPaint        fillPaint;
-      fillPaint.setAntiAlias(true);
-      fillPaint.setStyle(SkPaint::kFill_Style);
-      fillPaint.setAlphaf(1.0f);
-      shape.draw(recorder->canvas(), fillPaint);
-      if (auto strokePen = paint; strokePen)
-      {
-        strokePen->setAlphaf(1.0f);
-        shape.draw(recorder->canvas(), *strokePen);
-      }
-      auto mat = SkMatrix::Translate(bounds.x(), bounds.y());
-      auto object = rec.finishRecording(bounds, &mat);
-      m_maskFilter = object.asImageFilter();
-      m_effectBounds = Bounds{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
-      return Bounds{ shapeBounds.x(), shapeBounds.y(), shapeBounds.width(), shapeBounds.height() };
-    }
-  }
-  return Bounds{};
-}
+// Bounds ShapeItem::revalidateMaskFilter()
+// {
+//   auto parent = m_styleItem.lock();
+//   if (parent)
+//   {
+//     if (const auto& shape = m_shapeAttr->getShape(); !shape.isEmpty())
+//     {
+//       auto shapeBounds = shape.bounds();
+//       auto [bounds, paint] = revalidateObjectBounds(parent->getBorderStyle(), shapeBounds);
+//       ObjectRecorder rec;
+//       auto           recorder = rec.beginRecording(bounds, SkMatrix::I());
+//       SkPaint        fillPaint;
+//       fillPaint.setAntiAlias(true);
+//       fillPaint.setStyle(SkPaint::kFill_Style);
+//       fillPaint.setAlphaf(1.0f);
+//       shape.draw(recorder->canvas(), fillPaint);
+//       if (auto strokePen = paint; strokePen)
+//       {
+//         strokePen->setAlphaf(1.0f);
+//         shape.draw(recorder->canvas(), *strokePen);
+//       }
+//       auto mat = SkMatrix::Translate(bounds.x(), bounds.y());
+//       auto object = rec.finishRecording(bounds, &mat);
+//       m_maskFilter = object.asImageFilter();
+//       m_effectBounds = Bounds{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
+//       return Bounds{ shapeBounds.x(), shapeBounds.y(), shapeBounds.width(), shapeBounds.height()
+//       };
+//     }
+//   }
+//   return Bounds{};
+// }
 
 } // namespace VGG::layer

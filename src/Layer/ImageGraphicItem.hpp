@@ -27,7 +27,7 @@ namespace VGG::layer
 class ImageItem final : public GraphicItem
 {
 public:
-  ImageItem(VRefCnt* cnt, ObjectAttribute* objectAttribute);
+  ImageItem(VRefCnt* cnt, StyleItem* objectAttribute);
   void render(Renderer* renderer) override;
 
   sk_sp<SkImageFilter> getMaskFilter() const override
@@ -90,10 +90,10 @@ public:
   Bounds onRevalidate() override;
 
 private:
-  WeakRef<ObjectAttribute> m_objectAttribute;
-  Ref<ShapeAttributeImpl>  m_imageShape;
-  sk_sp<SkShader>          m_imageShader;
-  PatternStretch           m_imagePattern;
-  Bounds                   m_imageBounds;
+  WeakRef<StyleItem>      m_styleItem;
+  Ref<ShapeAttributeImpl> m_imageShape;
+  sk_sp<SkShader>         m_imageShader;
+  PatternStretch          m_imagePattern;
+  Bounds                  m_imageBounds;
 };
 } // namespace VGG::layer

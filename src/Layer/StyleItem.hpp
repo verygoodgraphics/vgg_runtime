@@ -32,7 +32,7 @@ namespace VGG::layer
 class StyleItem : public GraphicItem
 {
 public:
-  using Creator = std::function<Ref<GraphicItem>(VAllocator* alloc, ObjectAttribute*)>;
+  using Creator = std::function<Ref<GraphicItem>(VAllocator* alloc, StyleItem*)>;
   StyleItem(VRefCnt* cnt, PaintNode* node, Ref<TransformAttribute> transform, Creator creator);
   void render(Renderer* renderer) override;
 
@@ -56,32 +56,35 @@ public:
 
   Bounds objectBounds();
 
-  void setFillStyle(std::vector<Fill> fills)
-  {
-    ASSERT(m_fillEffect);
-    m_fillEffect->setFillStyle(std::move(fills));
-  }
-  void setBorderStyle(std::vector<Border> borders)
-  {
-    ASSERT(m_borderEffect);
-    m_borderEffect->setBorderStyle(std::move(borders));
-  }
-
-  const std::vector<Ref<FillPenNode>>& getFillStyle() const
-  {
-    ASSERT(m_fillEffect);
-    return m_fillEffect->fills();
-  }
-  const std::vector<Ref<BorderPenNode>>& getBorderStyle() const
-  {
-    ASSERT(m_borderEffect);
-    return m_borderEffect->borders();
-  }
+  // void setFillStyle(std::vector<Fill> fills)
+  // {
+  //   ASSERT(m_fillEffect);
+  //   m_fillEffect->setFillStyle(std::move(fills));
+  // }
+  // void setBorderStyle(std::vector<Border> borders)
+  // {
+  //   ASSERT(m_borderEffect);
+  //   m_borderEffect->setBorderStyle(std::move(borders));
+  // }
+  //
+  // const std::vector<Ref<FillPenNode>>& getFillStyle() const
+  // {
+  //   ASSERT(m_fillEffect);
+  //   return m_fillEffect->fills();
+  // }
+  // const std::vector<Ref<BorderPenNode>>& getBorderStyle() const
+  // {
+  //   ASSERT(m_borderEffect);
+  //   return m_borderEffect->borders();
+  // }
 
   InnerShadowAttribute* getInnerShadowAttribute() const
   {
     return m_innerShadowAttr.get();
   }
+
+  VGG_ATTRIBUTE(FillStyle, const std::vector<Fill>&, m_fills);
+  VGG_ATTRIBUTE(BorderStyle, const std::vector<Border>&, m_borders);
 
   bool isInvalid() const
   {
@@ -152,11 +155,23 @@ private:
 
   Ref<TransformAttribute> m_transformAttr;
 
-  ////////////////////// StyleAttribute
+  ////////////////////// StyleAttribute begin
   Ref<InnerShadowAttribute> m_innerShadowAttr;
   Ref<DropShadowAttribute>  m_dropShadowAttr;
-  Ref<ObjectAttribute>      m_objectAttr;
-  Ref<BackdropFXAttribute>  m_backgroundBlurAttr;
+
+  ////////////////////// ObjectAttribute begin
+
+  // Ref<ObjectAttribute> m_objectAttr;
+
+  Ref<GraphicItem>    m_graphicItem;
+  std::vector<Fill>   m_fills;
+  std::vector<Border> m_borders;
+  bool                m_hasFill{ false };
+
+  Bounds onRevalidateObject();
+
+  ////////////////////// ObjectAttribute end
+  Ref<BackdropFXAttribute> m_backgroundBlurAttr;
 
   SkRect m_objectEffectBounds;
   Bounds m_styleEffectBounds;
@@ -174,11 +189,11 @@ private:
 
   void unobserveStyleAttribute();
 
-  Bounds onRevalidateStyle();
-
   void revalidateDropbackFilter(const SkRect& bounds);
 
   void onRenderStyle(Renderer* renderer);
+
+  Bounds onRevalidateStyle();
 
   ////////////////////// StyleAttribute end
 

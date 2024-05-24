@@ -57,7 +57,7 @@ TextNode::TextNode(VRefCnt* cnt, int uniqueID, const std::string& name, std::str
     nullptr,
     this,
     t,
-    [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<GraphicItem>
+    [&](VAllocator* alloc, StyleItem* object) -> Ref<GraphicItem>
     {
       poa = ParagraphItem::Make(alloc);
       return poa;

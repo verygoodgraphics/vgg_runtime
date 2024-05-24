@@ -35,13 +35,14 @@ namespace VGG::layer
 class TransformAttribute;
 class AlphaMaskAttribute;
 class ShapeMaskAttribute;
-class ObjectAttribute;
+// class ObjectAttribute;
 class DropShadowAttribute;
 class InnerShadowAttribute;
 class LayerFXAttribute;
 class BackdropFXAttribute;
 class ShapeAttribute;
 class PaintNode;
+class StyleItem;
 
 class ParagraphItem;
 class ImageItem;
@@ -76,40 +77,38 @@ public:
   ATTR_MEMBER_GETTER(shapeMask, ShapeMaskAttribute, m_shapeMaskAttr);
   ATTR_MEMBER_GETTER(dropShadow, DropShadowAttribute, m_dropShadowAttr);
   ATTR_MEMBER_GETTER(innerShadow, InnerShadowAttribute, m_innerShadowAttr);
-  ATTR_MEMBER_GETTER(styleObject, ObjectAttribute, m_styleObjectAttr);
   ATTR_MEMBER_GETTER(layerFX, LayerFXAttribute, m_layerFXAttr);
   ATTR_MEMBER_GETTER(backgroundBlur, BackdropFXAttribute, m_backgroundBlurAttr);
 
 protected:
   friend class StyleItem;
-
   PaintNode* const            m_owner{ nullptr };
+  StyleItem* const            m_item;
   TransformAttribute* const   m_transformAttr;
   AlphaMaskAttribute* const   m_alphaMaskAttr;
   ShapeMaskAttribute* const   m_shapeMaskAttr;
   DropShadowAttribute* const  m_dropShadowAttr;
   InnerShadowAttribute* const m_innerShadowAttr;
-  ObjectAttribute* const      m_styleObjectAttr;
   LayerFXAttribute* const     m_layerFXAttr;
   BackdropFXAttribute* const  m_backgroundBlurAttr;
 
   Accessor(
     PaintNode*            owner,
+    StyleItem*            item,
     TransformAttribute*   transformAttr,
     AlphaMaskAttribute*   alphaMaskAttr,
     ShapeMaskAttribute*   shapemaskAttr,
     DropShadowAttribute*  dropShadowAttr,
     InnerShadowAttribute* innerShadowAttr,
-    ObjectAttribute*      objectAttr,
     LayerFXAttribute*     layerPostProcessAttr,
     BackdropFXAttribute*  backgroundBlurAttr)
     : m_owner(owner)
+    , m_item(item)
     , m_transformAttr(transformAttr)
     , m_alphaMaskAttr(alphaMaskAttr)
     , m_shapeMaskAttr(shapemaskAttr)
     , m_dropShadowAttr(dropShadowAttr)
     , m_innerShadowAttr(innerShadowAttr)
-    , m_styleObjectAttr(objectAttr)
     , m_layerFXAttr(layerPostProcessAttr)
     , m_backgroundBlurAttr(backgroundBlurAttr)
   {
@@ -127,23 +126,23 @@ public:
 
   ShapeItemAttibuteAccessor(
     PaintNode*            owner,
+    StyleItem*            item,
     ShapeAttribute*       shapeAttr,
     TransformAttribute*   transformAttr,
     AlphaMaskAttribute*   alphaMaskAttr,
     ShapeMaskAttribute*   shapemaskAttr,
     DropShadowAttribute*  dropShadowAttr,
     InnerShadowAttribute* innerShadowAttr,
-    ObjectAttribute*      objectAttr,
     LayerFXAttribute*     layerPostProcessAttr,
     BackdropFXAttribute*  backgroundBlurAttr)
     : Accessor(
         owner,
+        item,
         transformAttr,
         alphaMaskAttr,
         shapemaskAttr,
         dropShadowAttr,
         innerShadowAttr,
-        objectAttr,
         layerPostProcessAttr,
         backgroundBlurAttr)
     , m_shapeAttr(shapeAttr)
@@ -165,23 +164,23 @@ public:
   }
   ParagraphItemAttributeAccessor(
     PaintNode*            owner,
+    StyleItem*            item,
     ParagraphItem*        paragraphObjectAttr,
     TransformAttribute*   transformAttr,
     AlphaMaskAttribute*   alphaMaskAttr,
     ShapeMaskAttribute*   shapemaskAttr,
     DropShadowAttribute*  dropShadowAttr,
     InnerShadowAttribute* innerShadowAttr,
-    ObjectAttribute*      objectAttr,
     LayerFXAttribute*     layerPostProcessAttr,
     BackdropFXAttribute*  backgroundBlurAttr)
     : Accessor(
         owner,
+        item,
         transformAttr,
         alphaMaskAttr,
         shapemaskAttr,
         dropShadowAttr,
         innerShadowAttr,
-        objectAttr,
         layerPostProcessAttr,
         backgroundBlurAttr)
     , m_paraAttr(paragraphObjectAttr)

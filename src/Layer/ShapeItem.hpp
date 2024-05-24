@@ -62,11 +62,11 @@ private:
 
   Bounds revalidateMaskFilter();
 
-  WeakRef<StyleItem>          m_styleItem;
-  Ref<ShapeAttribute>         m_shapeAttr;
-  sk_sp<SkImageFilter>        m_maskFilter;
-  Bounds                      m_effectBounds;
-  std::optional<ObjectShader> m_objectShader;
+  WeakRef<StyleItem>   m_styleItem;
+  Ref<ShapeAttribute>  m_shapeAttr;
+  sk_sp<SkImageFilter> m_maskFilter;
+  Bounds               m_effectBounds;
+  // std::optional<ObjectShader> m_objectShader;
 };
 
 } // namespace VGG::layer

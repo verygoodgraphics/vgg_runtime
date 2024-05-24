@@ -670,8 +670,11 @@ void StackFillEffectImpl::onRenderShape(Renderer* renderer, const VShape& vs)
   {
     // auto r = vs.bounds();
     // auto bounds = Bounds{ r.x(), r.y(), r.width(), r.height() };
-    auto paint = p->paint(bounds());
-    vs.draw(renderer->canvas(), paint);
+    if (p->getFill().isEnabled)
+    {
+      auto paint = p->paint(bounds());
+      vs.draw(renderer->canvas(), paint);
+    }
   }
 }
 
@@ -743,6 +746,57 @@ void StackBorderEffectImpl::onRenderShape(Renderer* renderer, const VShape& bord
   }
 }
 
+Bounds StackBorderEffectImpl::onRevalidate()
+{
+  GraphicItemEffectNode::onRevalidate();
+  auto bounds = getChild()->bounds();
+  m_effectBounds = computeFastBounds(toSkRect(bounds));
+  return bounds;
+}
+
+Bounds StackBorderEffectImpl::computeFastBounds(const SkRect& bounds) const
+{
+  const Border* maxWidthBorder = nullptr;
+  float         maxWidth = 0;
+  for (const auto& p : m_pens)
+  {
+    const auto& b = p->getBorder();
+    if (!b.isEnabled || b.thickness <= 0)
+      continue;
+    // We simply assumes that the wider of the stroke, the larger its bounds
+    float strokeWidth = b.thickness;
+    if (b.position == PP_INSIDE)
+      strokeWidth = 2.f * b.thickness;
+    else if (b.position == PP_OUTSIDE)
+      strokeWidth = 2.f * b.thickness;
+    if (strokeWidth > maxWidth)
+    {
+      maxWidth = strokeWidth;
+      maxWidthBorder = &b;
+    }
+  }
+  if (maxWidthBorder)
+  {
+    SkPaint paint;
+    // Only consider these properties that affect bounds
+    paint.setStyle(SkPaint::kStroke_Style);
+    paint.setAntiAlias(true);
+    paint.setPathEffect(SkDashPathEffect::Make(
+      maxWidthBorder->dashedPattern.data(),
+      maxWidthBorder->dashedPattern.size(),
+      maxWidthBorder->dashedOffset));
+    paint.setStrokeJoin(toSkPaintJoin(maxWidthBorder->lineJoinStyle));
+    paint.setStrokeCap(toSkPaintCap(maxWidthBorder->lineCapStyle));
+    paint.setStrokeMiter(maxWidthBorder->miterLimit);
+    paint.setStrokeWidth(maxWidthBorder->thickness);
+    paint.setStrokeWidth(maxWidth);
+    SkRect rect;
+    paint.computeFastStrokeBounds(bounds, &rect);
+    return Bounds{ rect.x(), rect.y(), rect.width(), rect.height() };
+  }
+  return Bounds{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
+}
+
 void StackBorderEffectImpl::setBorderStyle(std::vector<Border> borders)
 {
   if (!changed(borders))
@@ -767,7 +821,7 @@ Bounds StackFillEffectImpl::onRevalidate()
   {
     p->revalidate();
   }
-  return getChild()->bounds();
+  return GraphicItemEffectNode::onRevalidate();
 }
 
 // StackBorderEffectImpl end

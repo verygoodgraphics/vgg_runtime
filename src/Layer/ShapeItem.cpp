@@ -23,6 +23,7 @@ namespace VGG::layer
 
 void ShapeItem::render(Renderer* renderer)
 {
+  return;
   if (auto shapeAttr = this->shape(); shapeAttr)
   {
     auto parent = m_styleItem.lock();
@@ -30,17 +31,17 @@ void ShapeItem::render(Renderer* renderer)
     {
       ObjectRecorder rec;
       SkRect         objectBounds = shape.bounds();
-      auto           recorder = rec.beginRecording(objectBounds, SkMatrix::I());
+      // auto           recorder = rec.beginRecording(objectBounds, SkMatrix::I());
       auto           fillBounds = shape.bounds();
       FillEffect     fillEffect(parent->getFillStyle(), fillBounds, 0, 0);
       fillEffect.render(renderer, shape);
       const auto borderBounds =
-        VGG::layer::drawBorder(recorder, shape, shape.bounds(), parent->getBorderStyle(), 0);
+        VGG::layer::drawBorder(renderer, shape, shape.bounds(), parent->getBorderStyle(), 0);
       objectBounds.join(fillBounds);
       objectBounds.join(borderBounds);
-      auto mat = SkMatrix::Translate(objectBounds.x(), objectBounds.y());
-      m_objectShader = rec.finishRecording(objectBounds, &mat);
-      m_objectShader->render(renderer);
+      // auto mat = SkMatrix::Translate(objectBounds.x(), objectBounds.y());
+      // m_objectShader = rec.finishRecording(objectBounds, &mat);
+      // m_objectShader->render(renderer);
     }
   }
 }

@@ -387,7 +387,7 @@ void applyLayoutToViewHierarchy(
   }
 
   auto autoLayout = view->autoLayout();
-  if (!autoLayout->isIncludedInLayout())
+  if (!autoLayout->isIncludedInLayout() && !isContainer) // should layout absolute container
   {
     DEBUG("applyLayoutToViewHierarchy, not included in layout, return");
     return;

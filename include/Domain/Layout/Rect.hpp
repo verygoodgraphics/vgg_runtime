@@ -16,6 +16,7 @@
 #pragma once
 
 #include <array>
+#include <iostream>
 #include <vector>
 
 namespace VGG
@@ -193,6 +194,10 @@ struct Rect
     origin.y = newCenter.y - height() / 2;
   }
 };
+
+std::ostream& operator<<(std::ostream& os, const Point& p);
+std::ostream& operator<<(std::ostream& os, const Size& s);
+std::ostream& operator<<(std::ostream& os, const Rect& r);
 
 } // namespace Layout
 

@@ -892,7 +892,9 @@ void AutoLayout::configureFlexNodeSize(flexbox_node* node, bool forContainer)
       width.value = swapWidthAndHeight ? modelSize.height : modelSize.width;
       size.width = width.value;
       DEBUG(
-        "AutoLayout::configureFlexNodeSize, empty container with hug width, set to px: %f",
+        "AutoLayout::configureFlexNodeSize, change container[%s, %s] width from hug to px: %f",
+        sharedView->id().c_str(),
+        sharedView->name().c_str(),
         size.width);
     }
 
@@ -902,7 +904,9 @@ void AutoLayout::configureFlexNodeSize(flexbox_node* node, bool forContainer)
       height.value = swapWidthAndHeight ? modelSize.width : modelSize.height;
       size.height = height.value;
       DEBUG(
-        "AutoLayout::configureFlexNodeSize, empty container with hug height, set to px: %f",
+        "AutoLayout::configureFlexNodeSize, change container[%s, %s] height from hug to px: %f",
+        sharedView->id().c_str(),
+        sharedView->name().c_str(),
         size.height);
     }
   }
@@ -1516,13 +1520,13 @@ void AutoLayout::isAsFixedSize(bool& inOutWidth, bool& inOutHeight)
   if (!inOutWidth)
   {
     const auto& width = sharedRule->width.value;
-    inOutWidth = (width.types == Length::ETypes::FIT_CONTENT) && shouldChangeContainerHugWidth();
+    inOutWidth = (width.types == Length::ETypes::FIT_CONTENT);
   }
 
   if (!inOutHeight)
   {
     const auto& height = sharedRule->height.value;
-    inOutHeight = (height.types == Length::ETypes::FIT_CONTENT) && shouldChangeContainerHugHeight();
+    inOutHeight = (height.types == Length::ETypes::FIT_CONTENT);
   }
 }
 

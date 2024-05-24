@@ -25,7 +25,6 @@ namespace VGG::layer
 
 ImageItem::ImageItem(VRefCnt* cnt, StyleItem* object)
   : GraphicItem(cnt)
-  , m_styleItem(object)
 {
   m_imageShape = ShapeAttributeImpl::Make();
   observe(m_imageShape);
@@ -34,7 +33,7 @@ ImageItem::ImageItem(VRefCnt* cnt, StyleItem* object)
 void ImageItem::render(Renderer* renderer)
 {
   DEBUG("render image");
-  auto parent = m_styleItem.lock();
+  // auto parent = m_styleItem.lock();
   if (m_imageShader)
   {
     auto    canvas = renderer->canvas();
@@ -43,15 +42,15 @@ void ImageItem::render(Renderer* renderer)
     canvas->drawPaint(p);
   }
   ASSERT(m_imageShape);
-  if (auto shape = m_imageShape->getShape(); !shape.isEmpty() && parent)
-  {
-    const auto skBounds = toSkRect(m_imageBounds);
-    VGG::layer::drawBorder(renderer, shape, skBounds, parent->getBorderStyle(), 0);
-  }
-  else
-  {
-    DEBUG("failed to get image border or shape");
-  };
+  // if (auto shape = m_imageShape->getShape(); !shape.isEmpty() && parent)
+  // {
+  //   const auto skBounds = toSkRect(m_imageBounds);
+  //   VGG::layer::drawBorder(renderer, shape, skBounds, parent->getBorderStyle(), 0);
+  // }
+  // else
+  // {
+  //   DEBUG("failed to get image border or shape");
+  // };
 }
 
 Bounds ImageItem::onRevalidate()

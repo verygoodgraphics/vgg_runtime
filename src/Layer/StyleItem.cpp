@@ -93,7 +93,7 @@ StyleItem::StyleItem(
   Ref<LayerFXAttribute> layerPostProcess = LayerFXAttribute::Make(WeakRef<StyleItem>(this));
   m_shapeMaskAttr = ShapeMaskAttribute::Make(node, layerPostProcess);
   m_alphaMaskAttr = AlphaMaskAttribute::Make(node, layerPostProcess);
-  m_graphicItem = creator(nullptr, this);
+  m_graphicItem = creator(nullptr, nullptr);
   auto shape = incRef(m_graphicItem->shape());
   // m_objectAttr->setGraphicItem(renderObject);
   m_innerShadowAttr = InnerShadowAttribute::Make(shape);

@@ -188,6 +188,7 @@ public:
   {
     return m_needsLayout;
   }
+  bool hasNeedsLayoutDescendant() const;
   void layoutIfNeeded();
 
   std::shared_ptr<LayoutNode> scaleTo(

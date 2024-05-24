@@ -40,7 +40,8 @@
 #undef VERBOSE
 #define VERBOSE(msg, ...)
 
-using namespace VGG;
+namespace VGG
+{
 
 namespace
 {
@@ -146,33 +147,30 @@ void LayoutNode::setNeedLayout()
 
 void LayoutNode::layoutIfNeeded()
 {
-  for (auto& child : m_children)
+  do
   {
-    child->layoutIfNeeded();
-  }
+    for (auto& child : m_children)
+      child->layoutIfNeeded();
 
-  updateLayoutSizeInfo();
+    updateLayoutSizeInfo();
 
-  if (m_needsLayout)
-  {
-    m_needsLayout = false;
-
-    DEBUG("LayoutNode::layoutIfNeeded: node: %s ", id().c_str());
-
-    // configure container
-    configureAutoLayout();
-
-    // configure child items
-    for (auto child : m_children)
+    if (m_needsLayout)
     {
-      child->configureAutoLayout();
-    }
+      m_needsLayout = false;
 
-    if (m_autoLayout)
-    {
-      m_autoLayout->applyLayout(true);
+      DEBUG("LayoutNode::layoutIfNeeded: node: %s ", id().c_str());
+
+      // configure container
+      configureAutoLayout();
+
+      // configure child items
+      for (auto child : m_children)
+        child->configureAutoLayout();
+
+      if (m_autoLayout)
+        m_autoLayout->applyLayout(true);
     }
-  }
+  } while (hasNeedsLayoutDescendant());
 }
 
 Layout::Rect LayoutNode::frame() const
@@ -1639,3 +1637,17 @@ void LayoutNode::updateLayoutSizeInfo()
   m_autoLayout->setHasFixedWidthChild(hasFixedWidthChild);
   m_autoLayout->setHasFixedHeightChild(hasFixedHeightChild);
 }
+
+bool LayoutNode::hasNeedsLayoutDescendant() const
+{
+  if (needsLayout())
+    return true;
+
+  for (auto& child : m_children)
+    if (child->hasNeedsLayoutDescendant())
+      return true;
+
+  return false;
+}
+
+} // namespace VGG

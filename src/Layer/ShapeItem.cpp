@@ -16,6 +16,7 @@
 #include "ShapeItem.hpp"
 #include "Effects.hpp"
 #include "FillEffects.hpp"
+#include "Layer/StyleItem.hpp"
 
 namespace VGG::layer
 {
@@ -24,7 +25,7 @@ void ShapeItem::render(Renderer* renderer)
 {
   if (auto shapeAttr = this->shape(); shapeAttr)
   {
-    auto parent = m_objectAttribute.lock();
+    auto parent = m_styleItem.lock();
     if (auto shape = shapeAttr->getShape(); !shape.isEmpty() && parent)
     {
       ObjectRecorder rec;
@@ -106,7 +107,7 @@ Bounds ShapeItem::onRevalidate()
  */
 Bounds ShapeItem::revalidateMaskFilter()
 {
-  auto parent = m_objectAttribute.lock();
+  auto parent = m_styleItem.lock();
   if (parent)
   {
     if (const auto& shape = m_shapeAttr->getShape(); !shape.isEmpty())

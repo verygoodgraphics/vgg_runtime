@@ -57,7 +57,7 @@ ImageNode::ImageNode(VRefCnt* cnt, int uniqueID, const std::string& name, std::s
     nullptr,
     this,
     t,
-    [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<GraphicItem>
+    [&](VAllocator* alloc, StyleItem* object) -> Ref<GraphicItem>
     {
       ioa = ImageItem::Make(alloc, object);
       return ioa;

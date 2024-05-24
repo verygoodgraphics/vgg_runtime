@@ -48,10 +48,9 @@ StyleItem::StyleItem(
   Ref<LayerFXAttribute> layerPostProcess = LayerFXAttribute::Make(WeakRef<StyleItem>(this));
   m_shapeMaskAttr = ShapeMaskAttribute::Make(node, layerPostProcess);
   m_alphaMaskAttr = AlphaMaskAttribute::Make(node, layerPostProcess);
-  m_objectAttr = ObjectAttribute::Make(Ref<GraphicItem>());
-  auto renderObject = creator(nullptr, m_objectAttr.get());
-  auto shape = incRef(renderObject->shape());
-  m_objectAttr->setGraphicItem(renderObject);
+  m_graphicItem = creator(nullptr, this);
+  auto shape = incRef(m_graphicItem->shape());
+  // m_objectAttr->setGraphicItem(renderObject);
   m_innerShadowAttr = InnerShadowAttribute::Make(shape);
   m_dropShadowAttr = DropShadowAttribute::Make(shape);
   m_backgroundBlurAttr = BackdropFXAttribute::Make();
@@ -116,11 +115,11 @@ void StyleItem::recorder(Renderer* renderer)
 
 void StyleItem::onRenderStyle(Renderer* renderer)
 {
-  auto filled = m_objectAttr->hasFill();
-  if (filled && m_dropShadowAttr)
+  if (m_hasFill && m_dropShadowAttr)
     m_dropShadowAttr->render(renderer);
-  m_objectAttr->render(renderer);
-  if (filled && m_innerShadowAttr)
+  // m_objectAttr->render(renderer);
+  m_graphicItem->render(renderer);
+  if (m_hasFill && m_innerShadowAttr)
     m_innerShadowAttr->render(renderer);
 }
 
@@ -159,24 +158,40 @@ std::pair<sk_sp<SkPicture>, SkRect> StyleItem::revalidatePicture(const SkRect& r
   return { rec.finishAsPicture(rect), rect };
 }
 
+Bounds StyleItem::onRevalidateObject()
+{
+  m_graphicItem->revalidate();
+  m_hasFill = false;
+  for (const auto& f : m_fills)
+  {
+    if (f.isEnabled)
+    {
+      m_hasFill = true;
+      break;
+    }
+  }
+  return m_graphicItem->bounds();
+}
+
 Bounds StyleItem::onRevalidateStyle()
 {
   m_innerShadowAttr->revalidate();
-  m_objectAttr->revalidate();
-  auto objectBounds = toSkRect(m_objectAttr->effectBounds());
+
+  onRevalidateObject();
+
+  auto objectBounds = toSkRect(m_graphicItem->effectBounds());
   revalidateDropbackFilter(objectBounds);
   auto shadowBounds = toSkRect(m_dropShadowAttr->revalidate());
   objectBounds.join(shadowBounds);
   m_styleEffectBounds =
     Bounds{ objectBounds.x(), objectBounds.y(), objectBounds.width(), objectBounds.height() };
-  return m_objectAttr->bounds();
+  return m_graphicItem->bounds();
 }
 
 void StyleItem::observeStyleAttribute()
 {
   observe(m_innerShadowAttr);
   observe(m_dropShadowAttr);
-  observe(m_objectAttr);
   observe(m_backgroundBlurAttr);
 }
 
@@ -184,15 +199,14 @@ void StyleItem::unobserveStyleAttribute()
 {
   unobserve(m_innerShadowAttr);
   unobserve(m_dropShadowAttr);
-  unobserve(m_objectAttr);
   unobserve(m_backgroundBlurAttr);
 }
 
 void StyleItem::revalidateDropbackFilter(const SkRect& bounds)
 {
   ASSERT(m_backgroundBlurAttr);
-  if (m_objectAttr->hasFill()) // Dropback effect determined by the wheather the
-                               // object has fill
+  if (m_hasFill) // Dropback effect determined by the wheather the
+                 // object has fill
   {
     m_backgroundBlurAttr->revalidate();
     if (auto bgb = m_backgroundBlurAttr->getImageFilter())
@@ -202,7 +216,7 @@ void StyleItem::revalidateDropbackFilter(const SkRect& bounds)
         m_bgBlurImageFilter = bgb;
         if (m_bgBlurImageFilter)
         {
-          if (auto ro = m_objectAttr->getGraphicItem(); ro)
+          if (auto ro = m_graphicItem; ro)
           {
             static auto s_blender = getOrCreateBlender("maskOut", g_maskOutBlender);
             auto        fb = ro->getMaskFilter();
@@ -221,7 +235,7 @@ void StyleItem::revalidateDropbackFilter(const SkRect& bounds)
 
 Bounds StyleItem::objectBounds()
 {
-  return m_objectAttr->bounds();
+  return m_graphicItem->bounds();
 }
 
 Bounds StyleItem::onRevalidate()
@@ -256,12 +270,12 @@ std::pair<Ref<StyleItem>, std::unique_ptr<Accessor>> StyleItem::MakeRenderNode( 
 
   auto aa = std::unique_ptr<Accessor>(new Accessor(
     node,
+    result.get(),
     transform,
     result->m_alphaMaskAttr,
     result->m_shapeMaskAttr,
     result->m_dropShadowAttr,
     result->m_innerShadowAttr,
-    result->m_objectAttr,
     result->m_shapeMaskAttr->layerFX(),
     result->m_backgroundBlurAttr));
   return { result, std::move(aa) };

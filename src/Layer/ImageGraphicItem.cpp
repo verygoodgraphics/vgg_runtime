@@ -17,14 +17,15 @@
 #include "ImageGraphicItem.hpp"
 #include "ObjectAttribute.hpp"
 #include "ShapeAttribute.hpp"
+#include "Layer/StyleItem.hpp"
 #include "Effects.hpp"
 
 namespace VGG::layer
 {
 
-ImageItem::ImageItem(VRefCnt* cnt, ObjectAttribute* object)
+ImageItem::ImageItem(VRefCnt* cnt, StyleItem* object)
   : GraphicItem(cnt)
-  , m_objectAttribute(object)
+  , m_styleItem(object)
 {
   m_imageShape = ShapeAttributeImpl::Make();
   observe(m_imageShape);
@@ -33,7 +34,7 @@ ImageItem::ImageItem(VRefCnt* cnt, ObjectAttribute* object)
 void ImageItem::render(Renderer* renderer)
 {
   DEBUG("render image");
-  auto parent = m_objectAttribute.lock();
+  auto parent = m_styleItem.lock();
   if (m_imageShader)
   {
     auto    canvas = renderer->canvas();

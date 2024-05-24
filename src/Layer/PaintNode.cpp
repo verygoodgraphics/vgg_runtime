@@ -111,7 +111,7 @@ public:
         nullptr,
         api,
         transformAttr,
-        [&](VAllocator* alloc, ObjectAttribute* object) -> Ref<GraphicItem>
+        [&](VAllocator* alloc, StyleItem* object) -> Ref<GraphicItem>
         {
           auto s = PaintNodeShapeAttributeImpl::Make(alloc, api);
           auto vectorObject = ShapeItem::Make(alloc, s, object);

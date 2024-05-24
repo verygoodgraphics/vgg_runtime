@@ -75,54 +75,10 @@ private:
     const SkRect&              bounds);
   void revalidateMaskFilter(const SkPaint& paint, const SkRect& bounds);
 
-  Ref<GraphicItem>     m_graphicItem;
-  sk_sp<SkImageFilter> m_maskFilter;
-  std::vector<Fill>    m_fills;
-  std::vector<Border>  m_borders;
-  bool                 m_hasFill{ false };
+  Ref<GraphicItem>    m_graphicItem;
+  std::vector<Fill>   m_fills;
+  std::vector<Border> m_borders;
+  bool                m_hasFill{ false };
 };
 
-class StyleAttribute : public Attribute // TODO:: StyleAttribute is unnecessary, remove later
-{
-public:
-  StyleAttribute(
-    VRefCnt*                  cnt,
-    Ref<InnerShadowAttribute> innerShadow,
-    Ref<DropShadowAttribute>  dropShadow,
-    Ref<ObjectAttribute>      object,
-    Ref<BackdropFXAttribute>  backgroundBlur);
-
-  void render(Renderer* renderer);
-
-  sk_sp<SkImageFilter> getBackdropImageFilter() const
-  {
-    return m_dropbackImageFilter;
-  }
-
-  Bounds effectBounds() const
-  {
-    return m_effectBounds;
-  }
-
-  Bounds onRevalidate() override;
-
-  VGG_CLASS_MAKE(StyleAttribute);
-
-private:
-  friend class RenderNode;
-
-  void revalidateDropbackFilter(const SkRect& bounds);
-
-  Ref<InnerShadowAttribute> m_innerShadowAttr;
-  Ref<DropShadowAttribute>  m_dropShadowAttr;
-  Ref<ObjectAttribute>      m_objectAttr;
-  Ref<BackdropFXAttribute>  m_backgroundBlurAttr;
-
-  SkRect               m_objectEffectBounds;
-  Bounds               m_effectBounds;
-  sk_sp<SkImageFilter> m_bgBlurImageFilter;
-
-  sk_sp<SkImageFilter> m_dropbackImageFilter;
-  sk_sp<SkImageFilter> m_objectImageFilter;
-};
 } // namespace VGG::layer

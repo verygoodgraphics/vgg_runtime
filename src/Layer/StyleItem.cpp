@@ -36,12 +36,30 @@ namespace
 namespace VGG::layer
 {
 
+class StyleItem__pImpl
+{
+  VGG_DECL_API(StyleItem);
+
+public:
+  StyleItem__pImpl(StyleItem* api)
+    : q_ptr(api)
+  {
+  }
+
+  sk_sp<SkImageFilter> itemMaskFilter;
+
+  void revalidateMaskFilter()
+  {
+  }
+};
+
 StyleItem::StyleItem(
   VRefCnt*                cnt,
   PaintNode*              node,
   Ref<TransformAttribute> transform,
   Creator                 creator)
   : GraphicItem(cnt)
+  , d_ptr(new StyleItem__pImpl(this))
   , m_transformAttr(transform)
 {
 
@@ -55,9 +73,14 @@ StyleItem::StyleItem(
   m_dropShadowAttr = DropShadowAttribute::Make(shape);
   m_backgroundBlurAttr = BackdropFXAttribute::Make();
 
+  m_fillEffect = StackFillEffectImpl::Make(m_graphicItem);
+  m_borderEffect = StackBorderEffectImpl::Make(m_graphicItem);
+
   observe(m_transformAttr);
   observe(m_alphaMaskAttr);
   observe(m_shapeMaskAttr);
+  observe(m_fillEffect);
+  observe(m_borderEffect);
   observeStyleAttribute();
 }
 
@@ -117,8 +140,11 @@ void StyleItem::onRenderStyle(Renderer* renderer)
 {
   if (m_hasFill && m_dropShadowAttr)
     m_dropShadowAttr->render(renderer);
-  // m_objectAttr->render(renderer);
+
   m_graphicItem->render(renderer);
+  m_fillEffect->render(renderer);
+  m_borderEffect->render(renderer);
+
   if (m_hasFill && m_innerShadowAttr)
     m_innerShadowAttr->render(renderer);
 }
@@ -162,8 +188,9 @@ Bounds StyleItem::onRevalidateObject()
 {
   m_graphicItem->revalidate();
   m_hasFill = false;
-  for (const auto& f : m_fills)
+  for (const auto& p : m_fillEffect->fills())
   {
+    const auto& f = p->getFill();
     if (f.isEnabled)
     {
       m_hasFill = true;
@@ -175,6 +202,8 @@ Bounds StyleItem::onRevalidateObject()
 
 Bounds StyleItem::onRevalidateStyle()
 {
+  m_fillEffect->revalidate();
+  m_borderEffect->revalidate();
   m_innerShadowAttr->revalidate();
 
   onRevalidateObject();

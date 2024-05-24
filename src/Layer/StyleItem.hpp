@@ -25,15 +25,20 @@
 #include "TransformAttribute.hpp"
 
 #include "Layer/Core/VNode.hpp"
+#include "Utility/HelperMacro.hpp"
 
 namespace VGG::layer
 {
 
+class StyleItem__pImpl;
 class StyleItem : public GraphicItem
 {
+  VGG_DECL_IMPL(StyleItem);
+
 public:
   using Creator = std::function<Ref<GraphicItem>(VAllocator* alloc, StyleItem*)>;
   StyleItem(VRefCnt* cnt, PaintNode* node, Ref<TransformAttribute> transform, Creator creator);
+
   void render(Renderer* renderer) override;
 
 #ifdef VGG_LAYER_DEBUG
@@ -56,17 +61,34 @@ public:
 
   Bounds objectBounds();
 
-  // void setFillStyle(std::vector<Fill> fills)
-  // {
-  //   ASSERT(m_fillEffect);
-  //   m_fillEffect->setFillStyle(std::move(fills));
-  // }
-  // void setBorderStyle(std::vector<Border> borders)
-  // {
-  //   ASSERT(m_borderEffect);
-  //   m_borderEffect->setBorderStyle(std::move(borders));
-  // }
-  //
+  void setFillStyle(const std::vector<Fill>& fills)
+  {
+    ASSERT(m_fillEffect);
+    if (m_fills == fills)
+      return;
+    // m_fills = fills;
+    m_fillEffect->setFillStyle(std::move(fills));
+  }
+  void setBorderStyle(const std::vector<Border>& borders)
+  {
+    ASSERT(m_borderEffect);
+    if (m_borders == borders)
+      return;
+    // m_borders = borders;
+    m_borderEffect->setBorderStyle(std::move(borders));
+  }
+
+  const std::vector<Fill>& getFillStyle() const
+  {
+    ASSERT(m_fillEffect);
+    return m_fills;
+  }
+  const std::vector<Border>& getBorderStyle() const
+  {
+    ASSERT(m_borderEffect);
+    return m_borders;
+  }
+
   // const std::vector<Ref<FillPenNode>>& getFillStyle() const
   // {
   //   ASSERT(m_fillEffect);
@@ -83,8 +105,8 @@ public:
     return m_innerShadowAttr.get();
   }
 
-  VGG_ATTRIBUTE(FillStyle, const std::vector<Fill>&, m_fills);
-  VGG_ATTRIBUTE(BorderStyle, const std::vector<Border>&, m_borders);
+  // VGG_ATTRIBUTE(FillStyle, const std::vector<Fill>&, m_fills);
+  // VGG_ATTRIBUTE(BorderStyle, const std::vector<Border>&, m_borders);
 
   bool isInvalid() const
   {
@@ -153,7 +175,7 @@ private:
     int       m_saveCount;
   };
 
-  Ref<TransformAttribute> m_transformAttr;
+  Ref<TransformAttribute> m_transformAttr; // Removed from StyleItem
 
   ////////////////////// StyleAttribute begin
   Ref<InnerShadowAttribute> m_innerShadowAttr;

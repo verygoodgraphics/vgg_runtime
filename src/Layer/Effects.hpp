@@ -331,6 +331,10 @@ public:
     ASSERT(getChild());
   };
 
+  void nodeAt(int x, int y, NodeVisitor vistor, void* userData) override
+  {
+  }
+
   Bounds effectBounds() const override
   {
     ASSERT(getChild());
@@ -449,6 +453,8 @@ protected:
     return false;
   }
   Bounds onRevalidate() override;
+
+  Bounds computeFastBounds(const SkRect& bounds) const;
 
   void onRenderShape(Renderer* renderer, const VShape& shape) override;
 

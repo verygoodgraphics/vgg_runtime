@@ -160,7 +160,7 @@ private:
             components.emplace_back(
               m,
               t,
-              m ? (mask.has_value() ? getMaskBlender(*mask->second) : nullptr) : nullptr);
+              m ? (mask->second.has_value() ? getMaskBlender(*mask->second) : nullptr) : nullptr);
           }
         }
         else

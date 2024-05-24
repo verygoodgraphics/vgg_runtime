@@ -90,7 +90,7 @@ public:
   Bounds onRevalidate() override;
 
 private:
-  WeakRef<StyleItem>      m_styleItem;
+  // WeakRef<StyleItem>      m_styleItem;
   Ref<ShapeAttributeImpl> m_imageShape;
   sk_sp<SkShader>         m_imageShader;
   PatternStretch          m_imagePattern;

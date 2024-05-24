@@ -25,8 +25,8 @@
 
 #include <algorithm>
 
-using namespace VGG;
-using namespace VGG::Layout;
+namespace VGG::Layout
+{
 
 bool Point::operator==(const Point& rhs) const noexcept
 {
@@ -219,3 +219,20 @@ Rect Rect::makeFromPoints(const BezierPoint p1, const BezierPoint p2)
 
   return {};
 }
+
+std::ostream& operator<<(std::ostream& os, const Point& p)
+{
+  return os << "[" << p.x << ", " << p.y << "]";
+}
+
+std::ostream& operator<<(std::ostream& os, const Size& s)
+{
+  return os << "[" << s.width << ", " << s.height << "]";
+}
+
+std::ostream& operator<<(std::ostream& os, const Rect& r)
+{
+  return os << "[" << r.origin << ", " << r.size << "]";
+}
+
+} // namespace VGG::Layout

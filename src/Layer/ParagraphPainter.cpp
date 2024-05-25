@@ -72,7 +72,21 @@ void VParagraphPainter::drawTextBlob(
             continue;
           fillPen.setStyle(SkPaint::kFill_Style);
           fillPen.setAntiAlias(true);
-          populateSkPaint(f.type, f.contextSettings, toSkRect(m_paragraph->bounds()), fillPen);
+          populateSkPaint(
+            f.type,
+            f.contextSettings,
+            toSkRect(m_paragraph->bounds()),
+            fillPen,
+            [&](const Gradient& g, const ContextSetting& st)
+            {
+              fillPen.setShader(makeGradientShader(m_paragraph->bounds(), g));
+              fillPen.setAlphaf(st.opacity);
+            },
+            [&](const Pattern& p, const ContextSetting& st)
+            {
+              fillPen.setShader(makePatternShader(m_paragraph->bounds(), p));
+              fillPen.setAlphaf(st.opacity);
+            });
           paints.push_back(fillPen);
         }
         if (!paints.empty())

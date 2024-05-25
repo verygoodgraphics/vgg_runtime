@@ -592,7 +592,22 @@ SkRect drawBorder(
     strokePen.setAntiAlias(true);
     strokePen.setBlender(blender);
     // strokePen.setImageFilter(imageFilter);
-    populateSkPaint(b, shapeBounds, strokePen);
+    const auto sb =
+      Bounds{ shapeBounds.x(), shapeBounds.y(), shapeBounds.width(), shapeBounds.height() };
+    populateSkPaint(
+      b,
+      shapeBounds,
+      strokePen,
+      [&](const Gradient& g, const ContextSetting& st)
+      {
+        strokePen.setShader(makeGradientShader(sb, g));
+        strokePen.setAlphaf(st.opacity);
+      },
+      [&](const Pattern& p, const ContextSetting& st)
+      {
+        strokePen.setShader(makePatternShader(sb, p));
+        strokePen.setAlphaf(st.opacity);
+      });
 
     bool  inCenter = true;
     float strokeWidth = b.thickness;

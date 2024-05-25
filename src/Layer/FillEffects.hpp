@@ -44,7 +44,22 @@ public:
       fillPen.setAntiAlias(true);
       // fillPen.setBlender(m_blender);
       fillPen.setImageFilter(m_imageFilter);
-      populateSkPaint(f.type, f.contextSettings, bounds(), fillPen);
+      const auto b = Bounds{ bounds().x(), bounds().y(), bounds().width(), bounds().height() };
+      populateSkPaint(
+        f.type,
+        f.contextSettings,
+        bounds(),
+        fillPen,
+        [&](const Gradient& g, const ContextSetting& st)
+        {
+          fillPen.setShader(makeGradientShader(b, g));
+          fillPen.setAlphaf(st.opacity);
+        },
+        [&](const Pattern& p, const ContextSetting& st)
+        {
+          fillPen.setShader(makePatternShader(b, p));
+          fillPen.setAlphaf(st.opacity);
+        });
       shape.draw(render->canvas(), fillPen);
     }
   }

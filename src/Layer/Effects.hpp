@@ -251,18 +251,22 @@ inline sk_sp<SkShader> makeGradientShader(const Bounds& bounds, const Gradient& 
   return shader;
 }
 
+template<typename GradientShader, typename PatternShader>
 inline void populateSkPaint(
   const FillType&       fillType,
   const ContextSetting& st,
   const SkRect&         rect,
-  SkPaint&              paint)
+  SkPaint&              paint,
+  GradientShader&&      gs,
+  PatternShader&&       ps)
 {
   Bounds bounds{ rect.x(), rect.y(), rect.width(), rect.height() };
   std::visit(
     Overloaded{ [&](const Gradient& g)
                 {
-                  paint.setShader(makeGradientShader(bounds, g));
-                  paint.setAlphaf(st.opacity);
+                  // paint.setShader(makeGradientShader(bounds, g));
+                  // paint.setAlphaf(st.opacity);
+                  gs(g, st);
                 },
                 [&](const Color& c)
                 {
@@ -271,8 +275,9 @@ inline void populateSkPaint(
                 },
                 [&](const Pattern& p)
                 {
-                  paint.setShader(makePatternShader(bounds, p));
-                  paint.setAlphaf(st.opacity);
+                  // paint.setShader(makePatternShader(bounds, p));
+                  // paint.setAlphaf(st.opacity);
+                  ps(p, st);
                 } },
     fillType);
   auto bm = toSkBlendMode(st.blendMode);
@@ -285,7 +290,13 @@ inline void populateSkPaint(
   }
 }
 
-inline void populateSkPaint(const Border& border, const SkRect& bounds, SkPaint& paint)
+template<typename GradientShader, typename PatternShader>
+inline void populateSkPaint(
+  const Border&    border,
+  const SkRect&    bounds,
+  SkPaint&         paint,
+  GradientShader&& gs,
+  PatternShader&&  ps)
 {
   paint.setStyle(SkPaint::kStroke_Style);
   paint.setPathEffect(SkDashPathEffect::Make(
@@ -296,7 +307,7 @@ inline void populateSkPaint(const Border& border, const SkRect& bounds, SkPaint&
   paint.setStrokeCap(toSkPaintCap(border.lineCapStyle));
   paint.setStrokeMiter(border.miterLimit);
   paint.setStrokeWidth(border.thickness);
-  populateSkPaint(border.type, border.contextSettings, bounds, paint);
+  populateSkPaint(border.type, border.contextSettings, bounds, paint, gs, ps);
 }
 
 void                     setGlobalSamplingOptions(const SkSamplingOptions& opt);

@@ -764,6 +764,7 @@ void StackBorderEffectImpl::onRenderShape(Renderer* renderer, const VShape& bord
 bool StackFillEffectImpl::onRevalidateVisible(const Bounds& bounds)
 {
   auto hasFill = false;
+  DEBUG("StackFillEffectImpl::onRevalidateVisible");
   for (const auto& p : m_pens)
   {
     p->revalidate();

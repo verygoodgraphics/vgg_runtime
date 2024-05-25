@@ -60,6 +60,8 @@ void RasterNode::render(Renderer* renderer)
 {
   auto c = getChild();
   ASSERT(c);
+  c->render(renderer);
+  return;
   if (!c->picture())
   {
     c->render(renderer);

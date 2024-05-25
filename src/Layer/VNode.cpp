@@ -93,6 +93,7 @@ void VNode::invalidate()
 #endif
   if (m_state & INVALIDATE)
     return;
+  DEBUG("on Invalidate %s", dbgInfo.c_str());
   m_state |= INVALIDATE;
   visitObservers(
     [](auto& obs)
@@ -114,6 +115,7 @@ const Bounds& VNode::revalidate(Invalidator* inv, const glm::mat3& ctm)
 #endif
   if (!isInvalid())
     return m_bounds;
+  DEBUG("on Revalidate %s", dbgInfo.c_str());
   m_bounds = onRevalidate();
   m_state &= ~INVALIDATE;
   return m_bounds;

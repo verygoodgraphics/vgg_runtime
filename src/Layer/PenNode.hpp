@@ -17,6 +17,7 @@
 
 #include "Layer/Core/VNode.hpp"
 #include "Layer/Core/AttributeAccessor.hpp"
+#include "Pattern.hpp"
 
 #include <core/SkPaint.h>
 #include <core/SkBlendMode.h>
@@ -157,13 +158,12 @@ public:
 protected:
   void onMakePaint(SkPaint* paint, const Bounds& bounds) const override;
 
-  Bounds onRevalidate() override
-  {
-    return Bounds();
-  }
+  Bounds onRevalidate() override;
 
 private:
-  Fill m_fill;
+  Fill                                   m_fill;
+  mutable std::unique_ptr<ShaderPattern> m_pattern;
+  mutable int                            m_currentFrame = 0;
 };
 
 class BorderPenNode : public PenNode // rename to BorderStyle
@@ -180,13 +180,12 @@ public:
 
 protected:
   void   onMakePaint(SkPaint* paint, const Bounds& bounds) const override;
-  Bounds onRevalidate() override
-  {
-    return Bounds();
-  }
+  Bounds onRevalidate() override;
 
 private:
-  Border m_border;
+  Border                                 m_border;
+  mutable std::unique_ptr<ShaderPattern> m_pattern;
+  mutable int                            m_currentFrame = 0;
 };
 
 } // namespace VGG::layer

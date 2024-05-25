@@ -38,6 +38,28 @@
     this->invalidate();                                                                            \
   }
 
+#define VGG_GET_ATTR(attrName, attrType, attrContainer)                                            \
+  attrType get##attrName() const                                                                   \
+  {                                                                                                \
+    return attrContainer;                                                                          \
+  }
+
+#define VGG_SET_ATTR(attrName, attrType, attrContainer)                                            \
+  void set##attrName(const std::remove_cvref_t<attrType>& v)                                       \
+  {                                                                                                \
+    if (attrContainer == v)                                                                        \
+      return;                                                                                      \
+    attrContainer = v;                                                                             \
+    this->invalidate();                                                                            \
+  }                                                                                                \
+  void set##attrName(std::remove_cvref_t<attrType>&& v)                                            \
+  {                                                                                                \
+    if (attrContainer == v)                                                                        \
+      return;                                                                                      \
+    attrContainer = std::move(v);                                                                  \
+    this->invalidate();                                                                            \
+  }
+
 #define ATTR_DECL(name, type)                                                                      \
   void set##name(const std::remove_cvref_t<type>& v);                                              \
   void set##name(std::remove_cvref_t<type>&& v);                                                   \

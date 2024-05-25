@@ -20,13 +20,40 @@ namespace VGG::layer
 
 void FillPenNode::onMakePaint(SkPaint* paint, const Bounds& bounds) const
 {
-  populateSkPaint(m_fill.type, m_fill.contextSettings, toSkRect(bounds), *paint);
+  populateSkPaint(
+    m_fill.type,
+    m_fill.contextSettings,
+    toSkRect(bounds),
+    *paint,
+    [&](const Gradient& g, const ContextSetting& st)
+    {
+      paint->setShader(makeGradientShader(bounds, g));
+      paint->setAlphaf(st.opacity);
+    },
+    [&](const Pattern& p, const ContextSetting& st)
+    {
+      paint->setShader(makePatternShader(bounds, p));
+      paint->setAlphaf(st.opacity);
+    });
 }
 
 void BorderPenNode::onMakePaint(SkPaint* paint, const Bounds& bounds) const
 
 {
-  populateSkPaint(m_border, toSkRect(bounds), *paint);
+  populateSkPaint(
+    m_border,
+    toSkRect(bounds),
+    *paint,
+    [&](const Gradient& g, const ContextSetting& st)
+    {
+      paint->setShader(makeGradientShader(bounds, g));
+      paint->setAlphaf(st.opacity);
+    },
+    [&](const Pattern& p, const ContextSetting& st)
+    {
+      paint->setShader(makePatternShader(bounds, p));
+      paint->setAlphaf(st.opacity);
+    });
 }
 
 } // namespace VGG::layer

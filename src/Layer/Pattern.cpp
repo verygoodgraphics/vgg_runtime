@@ -168,7 +168,7 @@ ShaderPattern::ShaderPattern(const Bounds& bounds, const PatternTile& p)
 sk_sp<SkShader> ShaderPattern::shader(int frame) const
 {
   ASSERT(m_codec);
-  ASSERT(m_frames.size() == frameCount());
+  ASSERT((int)m_frames.size() == frameCount());
   if (frame < 0 || frame >= frameCount())
   {
     return nullptr;

@@ -16,6 +16,7 @@
 #include "PenNode.hpp"
 #include "Effects.hpp"
 #include "Layer/Pattern.hpp"
+#include "Layer/GlobalSettings.hpp"
 
 namespace
 {
@@ -70,7 +71,10 @@ void FillPenNode::onMakePaint(SkPaint* paint, const Bounds& bounds) const
       {
         paint->setShader(this->m_pattern->shader(m_currentFrame++));
         m_currentFrame %= m_pattern->frameCount();
-        this->isInvalid();
+        if (isAnimatedPatternEnabled())
+        {
+          const_cast<FillPenNode*>(this)->invalidate();
+        }
       }
     }
   }
@@ -127,7 +131,11 @@ void BorderPenNode::onMakePaint(SkPaint* paint, const Bounds& bounds) const
       {
         paint->setShader(this->m_pattern->shader(m_currentFrame++));
         m_currentFrame %= m_pattern->frameCount();
-        this->isInvalid();
+        // if (isAnimatedPatternEnabled())
+        // {
+        //   const_cast<BorderPenNode*>(this)->invalidate();
+        //   DEBUG("BorderPenNode invalidate");
+        // }
       }
     }
   }

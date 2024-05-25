@@ -32,13 +32,8 @@ public:
   ShaderPattern(const Bounds& bounds, const PatternStretch& strecth);
   ShaderPattern(const Bounds& bounds, const PatternTile& tile);
 
-  // Move constructor
-  ShaderPattern(ShaderPattern&& other) noexcept = delete;
-
-  // Move assignment operator
-  ShaderPattern& operator=(ShaderPattern&& other) noexcept = delete;
-
-  // Delete the copy constructor and copy assignment operator
+  ShaderPattern(ShaderPattern&& other) noexcept = default;
+  ShaderPattern& operator=(ShaderPattern&& other) noexcept = default;
   ShaderPattern(const ShaderPattern& other) = delete;
   ShaderPattern& operator=(const ShaderPattern& other) = delete;
 
@@ -47,7 +42,7 @@ public:
     return m_codec != nullptr;
   }
 
-  bool frameCount() const
+  int frameCount() const
   {
     return m_codec->getFrameCount();
   }

@@ -38,6 +38,39 @@ ImageCache* getGlobalImageCache()
   return &s_imageCache;
 }
 
+ResourcesCache* getGlobalResourcesCache()
+{
+  static ResourcesCache s_blobCache(40);
+  return &s_blobCache;
+}
+
+sk_sp<SkData> loadBlob(const std::string& guid)
+{
+  if (auto cache = getGlobalResourcesCache(); cache)
+  {
+    if (auto it = cache->find(guid); it)
+    {
+      return *it;
+    }
+    else
+    {
+      if (auto repo = getGlobalResourceProvider(); repo)
+      {
+        if (auto data = repo->readData(guid); data)
+        {
+          cache->insert(guid, data);
+          return data;
+        }
+        else
+        {
+          WARN("Cannot find %s from resources repository", guid.data());
+        }
+      }
+    }
+  }
+  return nullptr;
+}
+
 sk_sp<SkImage> loadImage(const std::string& imageGUID)
 {
   sk_sp<SkImage> image;

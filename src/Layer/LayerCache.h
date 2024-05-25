@@ -18,6 +18,7 @@
 #include "LRUCache.hpp"
 #include "Layer/Memory/Ref.hpp"
 #include <core/SkBlender.h>
+#include <core/SkImage.h>
 #include <effects/SkRuntimeEffect.h>
 
 namespace VGG::layer
@@ -27,18 +28,24 @@ class PaintNode;
 
 using BlenderCacheKey = const char*;
 using EffectCacheKey = const char*;
+using ResourceGUID = std::string;
 using BlenderCache = LRUCache<BlenderCacheKey, sk_sp<SkBlender>>;
 using EffectCache = LRUCache<EffectCacheKey, sk_sp<SkRuntimeEffect>>;
-
+using ResourcesCache = LRUCache<ResourceGUID, sk_sp<SkData>>;
 using ImageCacheKey = std::string;
 using ImageCache = LRUCache<ImageCacheKey, sk_sp<SkImage>>;
+
 using MaskMap = std::unordered_map<std::string, WeakRef<PaintNode>>;
 
-BlenderCache*  getGlobalBlenderCache();
-EffectCache*   getGlobalEffectCache();
-ImageCache*    getGlobalImageCache();
-sk_sp<SkImage> loadImage(const std::string& imageGUID);
-MaskMap*       getMaskMap();
-void           updateMaskMap(PaintNode* p);
+BlenderCache*   getGlobalBlenderCache();
+EffectCache*    getGlobalEffectCache();
+ImageCache*     getGlobalImageCache();
+ResourcesCache* getGlobalResourcesCache();
+sk_sp<SkImage>  loadImage(const std::string& imageGUID); // DEPRECATED
+
+sk_sp<SkData> loadBlob(const std::string& guid);
+
+MaskMap* getMaskMap();
+void     updateMaskMap(PaintNode* p);
 
 } // namespace VGG::layer

@@ -87,7 +87,7 @@ std::pair<std::shared_ptr<LayoutNode>, std::string> LayoutNode::hitTest(
     }
   }
 
-  if (pointInside(point))
+  if (shouldHandleEvents() && pointInside(point))
   {
     if (!hasEventListener)
     {

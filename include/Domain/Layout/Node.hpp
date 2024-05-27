@@ -130,6 +130,10 @@ public:
   std::pair<std::shared_ptr<LayoutNode>, std::string> hitTest(
     const Layout::Point& point,
     const HitTestHook&   hasEventListener);
+  virtual bool shouldHandleEvents() const
+  {
+    return true;
+  }
 
   void addChild(std::shared_ptr<LayoutNode> child)
   {
@@ -336,6 +340,14 @@ public:
   VGG::Domain::Element* elementNode() const override
   {
     return srcNode()->elementNode();
+  }
+
+  bool shouldHandleEvents() const override
+  {
+    // The instance node (new state) will handle the event;
+    // This instance node (old state) should not handle events, only its child nodes should handle
+    // events.
+    return false;
   }
 
 public:

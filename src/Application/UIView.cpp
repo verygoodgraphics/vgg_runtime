@@ -844,8 +844,39 @@ void UIView::saveState(const std::shared_ptr<StateTree>& stateTree)
 {
   DEBUG("UIView::saveState, save state tree: %s", stateTree->id().c_str());
   m_stateTree = stateTree;
-  m_presentedTreeContext[stateTree->id()] = m_presentedTreeContext[currentPage()->id()];
-  m_presentedTreeContext[currentPage()->id()] = EventContext{};
+
+  EventContext& currentContext = m_presentedTreeContext[currentPage()->id()];
+  EventContext& oldContext = m_presentedTreeContext[stateTree->id()]; // make context
+
+  LayoutNode* instanceNode = stateTree->srcNode().get();
+  if (auto& n = currentContext.mouseOverTargetNode.first; n && (n.get() != instanceNode))
+  {
+    DEBUG("UIView::saveState, move mouse over node to old state tree: %s", n->id().c_str());
+    oldContext.mouseOverTargetNode = currentContext.mouseOverTargetNode;
+    oldContext.mouseOverNode = currentContext.mouseOverNode;
+    currentContext.mouseOverTargetNode = {};
+    currentContext.mouseOverNode.reset();
+  }
+  if (auto& n = currentContext.mouseEnterTargetNode.first; n && (n.get() != instanceNode))
+  {
+    DEBUG("UIView::saveState, move mouse enter node to old state tree: %s", n->id().c_str());
+    oldContext.mouseEnterTargetNode = currentContext.mouseEnterTargetNode;
+    currentContext.mouseEnterTargetNode = {};
+  }
+  if (auto& n = currentContext.mouseOutTargetNode.first; n && (n.get() != instanceNode))
+  {
+    DEBUG("UIView::saveState, move mouse out node to old state tree: %s", n->id().c_str());
+    oldContext.mouseOutTargetNode = currentContext.mouseOutTargetNode;
+    oldContext.mouseOutNode = currentContext.mouseOutNode;
+    currentContext.mouseOutTargetNode = {};
+    currentContext.mouseOutNode.reset();
+  }
+  if (auto& n = currentContext.mouseLeaveTargetNode.first; n && (n.get() != instanceNode))
+  {
+    DEBUG("UIView::saveState, move mouse leave node to old state tree: %s", n->id().c_str());
+    oldContext.mouseLeaveTargetNode = currentContext.mouseLeaveTargetNode;
+    currentContext.mouseLeaveTargetNode = {};
+  }
 }
 
 std::shared_ptr<StateTree> UIView::savedState()

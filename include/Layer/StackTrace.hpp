@@ -33,7 +33,7 @@ public:
     std::string info = frameInfo;
     info += funcName;
     s_functionStack.push(info);
-    VGG_TRACE_LOG("{}", info);
+    VGG_TRACE_LOG(": {}", info);
   }
 
   ~StackTrace()
@@ -69,14 +69,16 @@ private:
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
-#define AT __FILE__ ":" TOSTRING(__LINE__)
+#define AT __FILE__ ":" TOSTRING(__LINE__) " in "
 
 #define VGG_TRACE_IMPL(msg) VGG::layer::StackTrace __TRACE_VAR(AT, __FUNCTION__, msg);
 
 #ifdef VGG_NDEBUG
 #define VGG_TRACE_DEV
+#define VGG_DUMP_TRACE
 #else
 #define VGG_TRACE_DEV(msg) VGG_TRACE_IMPL(msg)
+#define VGG_DUMP_TRACE VGG::layer::StackTrace::printStackTrace();
 #endif
 
 #define VGG_TRACE(msg) VGG_TRACE_IMPL(msg)

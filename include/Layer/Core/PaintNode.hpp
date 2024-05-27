@@ -260,6 +260,13 @@ protected:
   VShape         childPolyOperation() const;
   Bounds         onRevalidate() override;
 
+#ifdef VGG_LAYER_DEBUG
+  int depth() const override
+  {
+    return level;
+  }
+#endif
+
 private:
   ChildContainer     m_children;
   WeakRef<PaintNode> m_parent;

@@ -26,6 +26,9 @@ public:
     : TransformNode(cnt)
     , m_dpi(dpi)
   {
+#ifdef VGG_LAYER_DEBUG
+    dbgInfo = "ViewportNode";
+#endif
   }
 
   void setDPI(float dpi)

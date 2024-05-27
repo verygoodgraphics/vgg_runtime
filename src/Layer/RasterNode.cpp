@@ -54,14 +54,15 @@ RasterNode::RasterNode(
   ASSERT(m_device);
   ASSERT(m_raster);
   observe(viewport);
+#ifdef VGG_LAYER_DEBUG
+  dbgInfo = "RasterNode";
+#endif
 }
 
 void RasterNode::render(Renderer* renderer)
 {
   auto c = getChild();
   ASSERT(c);
-  c->render(renderer);
-  return;
   if (!c->picture())
   {
     c->render(renderer);

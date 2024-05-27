@@ -73,7 +73,7 @@ void FillPenNode::onMakePaint(SkPaint* paint, const Bounds& bounds) const
         m_currentFrame %= m_pattern->frameCount();
         if (isAnimatedPatternEnabled())
         {
-          const_cast<FillPenNode*>(this)->invalidate();
+          repaint();
         }
       }
     }
@@ -131,11 +131,11 @@ void BorderPenNode::onMakePaint(SkPaint* paint, const Bounds& bounds) const
       {
         paint->setShader(this->m_pattern->shader(m_currentFrame++));
         m_currentFrame %= m_pattern->frameCount();
-        // if (isAnimatedPatternEnabled())
-        // {
-        //   const_cast<BorderPenNode*>(this)->invalidate();
-        //   DEBUG("BorderPenNode invalidate");
-        // }
+        if (isAnimatedPatternEnabled())
+        {
+          repaint();
+          DEBUG("BorderPenNode invalidate");
+        }
       }
     }
   }

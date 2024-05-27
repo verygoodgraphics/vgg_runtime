@@ -30,6 +30,7 @@
 #include <memory>
 #include <vector>
 #include <algorithm>
+#include <queue>
 
 #define VGG_CLASS_MAKE(className)                                                                  \
   template<typename... Args>                                                                       \
@@ -84,6 +85,7 @@ protected:
     INVALIDATE = 1 << 0,
     DAMAGE = 1 << 1,
     TRAVERSALING = 1 << 2,
+    PENDING = 1 << 3,
   };
   using EStateT = uint8_t;
 
@@ -94,6 +96,15 @@ protected:
   };
   using EDamageTrait = uint8_t;
 
+  // enum EEvent
+  // {
+  //   REPAINT
+  // };
+  //
+  // struct Event
+  // {
+  // };
+
 public:
   VNode(VRefCnt* cnt, EState initState = (EState)0)
     : ObjectImpl<VObject>(cnt)
@@ -102,6 +113,8 @@ public:
   }
 
   void invalidate();
+
+  void processRepaint();
 
   const Bounds& revalidate(Invalidator* inv = nullptr, const glm::mat3& ctm = glm::mat3(1.0f));
 
@@ -116,6 +129,12 @@ public:
 #endif
 
 protected:
+#ifdef VGG_LAYER_DEBUG
+  virtual int depth() const
+  {
+    return 0;
+  }
+#endif
   virtual Bounds onRevalidate() = 0;
 
   bool isInvalid() const;
@@ -123,6 +142,8 @@ protected:
   void observe(VNodePtr sender);
 
   void unobserve(VNodePtr sender);
+
+  void repaint() const;
 
 private:
   class ScopedState;
@@ -139,5 +160,7 @@ private:
       v(obs);
     }
   }
+
+  static std::queue<VNode*> s_repaintQueue;
 };
 } // namespace VGG::layer

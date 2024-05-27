@@ -218,6 +218,16 @@ public:
     const std::array<double, 2>& scale,
     double                       rotate);
 
+  // base on the render coordinate system.
+  static TRenderMatrix createRenderMatrix(
+    double width,
+    double height,
+    double centerXInFatherCoordinateSystem,
+    double centerYInFatherCoordinateSystem,
+    double scaleX,
+    double scaleY,
+    double rotate);
+
   static TRenderMatrix fromDesignMatrix(const TDesignMatrix& matrix);
   static TDesignMatrix toDesignMatrix(const TRenderMatrix& transform);
 

@@ -563,25 +563,36 @@ bool AttrBridge::updateMatrix(
 
     std::array<double, 2> scale{ value[2], value[3] };
 
+    auto realWidth = *originWidth;
+    auto realHeight = *originHeight;
+
     // TODO frame can not scale, should change width and height, what about group and symbol?
     if (isNotScaleButChangeSize)
     {
-      auto newWidth = scale[0] * (*originWidth);
-      auto newHeight = scale[1] * (*originHeight);
-      AttrBridge::setWidth(paintNode, newWidth);
-      AttrBridge::setHeight(paintNode, newHeight);
+      realWidth = scale[0] * (*originWidth);
+      realHeight = scale[1] * (*originHeight);
+
+      AttrBridge::setWidth(paintNode, realWidth);
+      AttrBridge::setHeight(paintNode, realHeight);
 
       if (!isOnlyUpdatePaint)
       {
-        AttrBridge::setWidth(node, newWidth);
-        AttrBridge::setHeight(node, newHeight);
+        AttrBridge::setWidth(node, realWidth);
+        AttrBridge::setHeight(node, realHeight);
       }
 
       scale = { 1.0, 1.0 };
     }
 
-    auto matrix =
-      TransformHelper::createRenderMatrix({ value[0], value[1] }, { scale[0], scale[1] }, value[4]);
+    auto matrix = TransformHelper::createRenderMatrix(
+      realWidth,
+      realHeight,
+      value[0],
+      value[1],
+      scale[0],
+      scale[1],
+      value[4]);
+
     TDesignMatrix finalMatrix{};
 
     if (isBasedOnGlobal)
@@ -620,14 +631,29 @@ bool AttrBridge::updateMatrix(
   // TODO layer Transform check, should use in last.
   auto getInfo = [](const TRenderMatrix& transform)
   {
-    auto translate = TransformHelper::getTranslate(transform);
     auto scale = TransformHelper::getScale(transform);
     auto rotate = TransformHelper::getRotate(transform);
-    return std::vector<double>{ translate[0], translate[1], scale[0], scale[1], rotate };
+    return std::vector<double>{ scale[0], scale[1], rotate };
   };
 
-  std::vector<double> from = getInfo(TransformHelper::fromDesignMatrix(*oldMatrix));
-  std::vector<double> to = getInfo(TransformHelper::fromDesignMatrix(newMatrix));
+  std::vector<double> oldMatrixInfo = getInfo(TransformHelper::fromDesignMatrix(*oldMatrix));
+  std::vector<double> newMatrixInfo = getInfo(TransformHelper::fromDesignMatrix(newMatrix));
+
+  auto centerOld = TransformHelper::calcXY(*originWidth / 2.0, -*originHeight / 2.0, *oldMatrix);
+  auto centerNew = TransformHelper::calcXY(*originWidth / 2.0, -*originHeight / 2.0, newMatrix);
+
+  std::vector<double> from{ std::get<0>(centerOld),
+                            -std::get<1>(centerOld),
+                            oldMatrixInfo[0],
+                            oldMatrixInfo[1],
+                            oldMatrixInfo[2] };
+
+  std::vector<double> to{ std::get<0>(centerNew),
+                          -std::get<1>(centerNew),
+                          newMatrixInfo[0],
+                          newMatrixInfo[1],
+                          newMatrixInfo[2] };
+
   updateSimpleAttr(node, from, to, update, animate);
 
   if (animate)
@@ -679,26 +705,37 @@ void AttrBridge::setTwinMatrix(
     scale[1] = height / originHeightTo;
   }
 
+  auto realWidth = originWidthTo;
+  auto realHeight = originHeightTo;
+
   // TODO same as updateMatrix, what about symbol and group?
   if (ReplaceNodeAnimate::isContainerType(nodeFrom->elementNode()))
   {
-    auto newWidth = scale[0] * originWidthTo;
-    auto newHeight = scale[1] * originHeightTo;
+    realWidth = scale[0] * originWidthTo;
+    realHeight = scale[1] * originHeightTo;
 
-    AttrBridge::setWidth(paintNodeTo, newWidth);
-    AttrBridge::setHeight(paintNodeTo, newHeight);
+    AttrBridge::setWidth(paintNodeTo, realWidth);
+    AttrBridge::setHeight(paintNodeTo, realHeight);
 
     if (!isOnlyUpdatePaint)
     {
-      AttrBridge::setWidth(nodeTo, newWidth);
-      AttrBridge::setHeight(nodeTo, newHeight);
+      AttrBridge::setWidth(nodeTo, realWidth);
+      AttrBridge::setHeight(nodeTo, realHeight);
     }
 
     scale = { 1.0, 1.0 };
   }
 
-  auto designMatrix = TransformHelper::toDesignMatrix(
-    TransformHelper::createRenderMatrix({ value[0], value[1] }, { scale[0], scale[1] }, value[4]));
+  auto matrix = TransformHelper::createRenderMatrix(
+    realWidth,
+    realHeight,
+    value[0],
+    value[1],
+    scale[0],
+    scale[1],
+    value[4]);
+
+  auto designMatrix = TransformHelper::toDesignMatrix(matrix);
 
   if (!isOnlyUpdatePaint)
   {
@@ -994,6 +1031,28 @@ TRenderMatrix TransformHelper::createRenderMatrix(
   matrix = glm::rotate(matrix, glmRotate);
   matrix = glm::scale(matrix, glmScale);
   return matrix;
+}
+
+TRenderMatrix TransformHelper::createRenderMatrix(
+  double width,
+  double height,
+  double centerXInFatherCoordinateSystem,
+  double centerYInFatherCoordinateSystem,
+  double scaleX,
+  double scaleY,
+  double rotate)
+{
+  auto m = glm::identity<glm::mat3>();
+  m = glm::rotate(m, static_cast<float>(rotate));
+  m = glm::scale(m, { static_cast<float>(scaleX), static_cast<float>(scaleY) });
+
+  glm::vec3 center{ static_cast<float>(width / 2.0), static_cast<float>(height / 2.0), 1.0f };
+
+  center = m * center;
+  auto tx = centerXInFatherCoordinateSystem - center[0];
+  auto ty = centerYInFatherCoordinateSystem - center[1];
+
+  return TransformHelper::createRenderMatrix({ tx, ty }, { scaleX, scaleY }, rotate);
 }
 
 glm::mat3 TransformHelper::fromDesignMatrix(const TDesignMatrix& matrix)

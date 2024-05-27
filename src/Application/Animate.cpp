@@ -781,6 +781,8 @@ void MoveAnimate::start()
     animateForSize->addCallBackWhenStop(
       [widthFrom, heightFrom, from, paintNodeFrom, isOnlyUpdatePaint, attrBridge]()
       { attrBridge->updateSize(from, paintNodeFrom, widthFrom, heightFrom, isOnlyUpdatePaint); });
+
+    // TODO should change size for moved in object.
   }
   else
   {
@@ -983,14 +985,26 @@ void MoveAnimate::dealChildren(
       false,
       true);
 
+    auto nodeToWidth = attrBridge->getWidth(paintNodeTo);
+    auto nodeToHeight = attrBridge->getHeight(paintNodeTo);
+
     animate->addTriggeredCallback(
-      [childrenToNeedMove, childrenOriginMatrix, attrBridge, nodeIds, isOnlyUpdatePaint](
-        const std::vector<double>& value)
+      [childrenToNeedMove,
+       childrenOriginMatrix,
+       attrBridge,
+       nodeIds,
+       isOnlyUpdatePaint,
+       nodeToWidth,
+       nodeToHeight](const std::vector<double>& value)
       {
         auto fatherMatrix = TransformHelper::createRenderMatrix(
-          { value.at(0), value.at(1) },
-          { value.at(2), value.at(3) },
-          value.at(4));
+          *nodeToWidth,
+          *nodeToHeight,
+          value[0],
+          value[1],
+          value[2],
+          value[3],
+          value[4]);
 
         for (auto& child : childrenToNeedMove)
         {

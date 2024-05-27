@@ -103,13 +103,6 @@ InstanceState::Result InstanceState::presentState(
   }
 
   auto ret = makeResultWithOldTree(instanceNode);
-  DEBUG(
-    "clone tree size: element: original =  %zu, cloned = %zu; layout: original = %zu, cloned = %zu",
-    pInstance->size(),
-    ele->size(),
-    instanceNode->treeSize(),
-    ret.oldTree->treeSize());
-
   auto oldElementChildren = pInstance->presentState(stateMasterId);
   auto oldLayoutChildren = m_layout->removeNodeChildren(instanceNode.get());
 

@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 #include "SchemaValidJsonDocument.hpp"
-
+#include <stdexcept>
+#include <string>
 #include "Utility/Log.hpp"
+#include <nlohmann/json.hpp>
 
+namespace
+{
 using json = nlohmann::json;
+}
 
 constexpr auto const_class_name = "class";
 

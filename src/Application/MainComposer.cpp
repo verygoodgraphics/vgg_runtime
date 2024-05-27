@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 #include "Application/MainComposer.hpp"
-#include "Async.hpp"
-
+#include <string>
+#include "Controller.hpp"
 #include "Editor.hpp"
+#include "PlatformComposer.hpp"
 #include "Presenter.hpp"
 #include "RunLoop.hpp"
 #include "UIScrollView.hpp"
+#include "UIView.hpp"
+#include "VggEnv.hpp"
+namespace VGG
+{
+class Mouse;
+}
 
-using namespace VGG;
+namespace VGG
+{
 
 MainComposer::MainComposer(PlatformComposer* platformComposer, std::shared_ptr<Mouse> mouse)
   : m_env{ new VggEnv }
@@ -53,3 +61,5 @@ void MainComposer::enableEdit(int top, int right, int bottom, int left)
     m_view->addSubview(m_editView);
   }
 }
+
+} // namespace VGG

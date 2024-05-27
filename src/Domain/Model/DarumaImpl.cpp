@@ -15,8 +15,11 @@
  */
 
 #include "DarumaImpl.hpp"
-
 #include <algorithm>
+#include <map>
+#include <memory>
+#include <utility>
+#include <nlohmann/json.hpp>
 
 namespace VGG::Model::Detail
 {

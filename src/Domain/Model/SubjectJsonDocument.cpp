@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 #include "SubjectJsonDocument.hpp"
+#include <rxcpp/rx-predef.hpp>
+#include <rxcpp/subjects/rx-subject.hpp>
 
-#include <algorithm>
-
+namespace
+{
 using namespace VGG;
+}
 
 void SubjectJsonDocument::addAt(const json::json_pointer& path, const json& value)
 {

@@ -15,8 +15,9 @@
  */
 #pragma once
 
+#include <string>
+#include <vector>
 #include "Domain/Saver.hpp"
-
 struct zip_t;
 
 namespace VGG
@@ -27,7 +28,7 @@ namespace Model
 class ZipSaver : public Saver
 {
   std::string m_filePath;
-  zip_t* m_zipFile{ nullptr };
+  zip_t*      m_zipFile{ nullptr };
 
 public:
   ZipSaver(const std::string& filePath);

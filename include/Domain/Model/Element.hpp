@@ -16,26 +16,34 @@
 
 #pragma once
 
-#include "Domain/Layout/Rect.hpp"
-#include "Domain/Model/DesignModel.hpp"
-
-#include <nlohmann/json.hpp>
-
+#include <cstddef>
 #include <memory>
 #include <stack>
+#include <string>
+#include <utility>
 #include <vector>
-
+#include "DesignModelFwd.hpp"
+#include "Domain/Layout/Math.hpp"
+#include "Domain/Layout/Rect.hpp"
+#include "Domain/Model/DesignModel.hpp"
+#include <nlohmann/json.hpp>
 namespace VGG
 {
-
+namespace Domain
+{
+class SymbolInstanceElement;
+}
 namespace Layout
 {
 struct BezierPoint;
 }
+} // namespace VGG
+
+namespace VGG
+{
 
 namespace Domain
 {
-class SymbolInstanceElement;
 
 class Element : public std::enable_shared_from_this<Element>
 {

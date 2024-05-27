@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 #include "ZipStreamSaver.hpp"
-
-#include "Utility/Log.hpp"
-
 #include <zip.h>
+#include <cstdlib>
+#include "Utility/Log.hpp"
 
 namespace VGG
 {

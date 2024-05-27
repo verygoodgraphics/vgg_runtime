@@ -15,24 +15,37 @@
  */
 #pragma once
 
+#include <cstddef>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 #include "Application/UIAnimation.hpp"
-#include "Application/UIOptions.hpp"
 #include "Application/UIEvent.hpp"
+#include "Application/UIOptions.hpp"
 #include "Application/UIScrollView.hpp"
-#include "Domain/Daruma.hpp"
+#include "Application/UIView.hpp"
+#include "Domain/Layout/Rect.hpp"
 #include "Domain/ModelEvent.hpp"
 #include "Utility/Log.hpp"
 #include "ViewModel.hpp"
-
 #include <nlohmann/json.hpp>
-#include <rxcpp/rx.hpp>
-
-#include <memory>
+#include <rxcpp/rx-includes.hpp>
+#include <rxcpp/rx-observable.hpp>
+#include <rxcpp/rx-observer.hpp>
+#include <rxcpp/rx-operators.hpp>
+#include <rxcpp/rx-predef.hpp>
+#include <rxcpp/rx-sources.hpp>
+#include <rxcpp/subjects/rx-subject.hpp>
+namespace VGG
+{
+class LayoutNode;
+class Mouse;
+class StateTree;
+} // namespace VGG
 
 namespace VGG
 {
-class Mouse;
-class StateTree;
 
 struct FontInfo
 {

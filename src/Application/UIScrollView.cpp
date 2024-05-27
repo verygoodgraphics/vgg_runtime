@@ -15,14 +15,16 @@
  */
 
 #include "UIScrollView.hpp"
-
-#include "UIScrollViewAnimationDeceleration.hpp"
-
-#include "Utility/Log.hpp"
-#include "Utility/VggFloat.hpp"
-
 #include <algorithm>
-#include <cmath>
+#include "Application/Types.hpp"
+#include "Application/UIGestureRecognizer.hpp"
+#include "Application/UIPanGestureRecognizer.hpp"
+#include "Application/UIScrollViewAnimation.hpp"
+#include "Event/Event.hpp"
+#include "UIScrollViewAnimationDeceleration.hpp"
+#include "UIView.hpp"
+#include "Utility/VggFloat.hpp"
+#include "Utility/VggTimer.hpp"
 
 #undef DEBUG
 #define DEBUG(msg, ...)

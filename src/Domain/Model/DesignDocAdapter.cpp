@@ -15,15 +15,15 @@
  */
 
 #include "DesignDocAdapter.hpp"
-
+#include "DesignModel.hpp"
 #include "Domain/Model/Element.hpp"
 #include "Utility/Log.hpp"
+#include <nlohmann/json.hpp>
 
-using namespace VGG;
-using namespace VGG::Domain;
-using namespace VGG::Model;
+namespace VGG::Model
+{
 
-DesignDocAdapter::DesignDocAdapter(std::shared_ptr<VGG::Domain::DesignDocument> designDocTree)
+DesignDocAdapter::DesignDocAdapter(std::shared_ptr<Domain::DesignDocument> designDocTree)
   : m_designDocTree{ designDocTree }
 {
   ASSERT(m_designDocTree != nullptr);
@@ -55,3 +55,5 @@ void DesignDocAdapter::updateElement(const std::string& id, const std::string& c
     element->updateJsonModel(j);
   }
 }
+
+} // namespace VGG::Model

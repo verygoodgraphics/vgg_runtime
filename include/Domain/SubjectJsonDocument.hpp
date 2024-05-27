@@ -15,14 +15,15 @@
  */
 #pragma once
 
+#include <string>
+#include <utility>
 #include "JsonDocument.hpp"
-
 #include "ModelEvent.hpp"
-
-#include <rxcpp/rx.hpp>
-
-#include <memory>
-#include <vector>
+#include <rxcpp/rx-includes.hpp>
+#include <rxcpp/rx-operators.hpp>
+#include <rxcpp/rx-predef.hpp>
+#include <rxcpp/rx-sources.hpp>
+#include <rxcpp/subjects/rx-subject.hpp>
 
 class SubjectJsonDocument : public JsonDocument
 {

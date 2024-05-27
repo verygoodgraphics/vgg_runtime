@@ -15,15 +15,20 @@
  */
 #pragma once
 
+#include <memory>
 #include "Domain/Daruma.hpp"
 #include "Domain/Layout/Layout.hpp"
-
 namespace VGG
 {
+class LayoutNode;
 namespace Layout
 {
 class ExpandSymbol;
-} // namespace Layout
+}
+} // namespace VGG
+
+namespace VGG
+{
 
 class StartRunning
 {

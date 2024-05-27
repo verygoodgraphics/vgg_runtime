@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "Rule.hpp"
-
 #include "JsonKeys.hpp"
-
 #include "Utility/Log.hpp"
 #include "Utility/VggFloat.hpp"
+#include <nlohmann/json.hpp>
 
 namespace VGG
 {

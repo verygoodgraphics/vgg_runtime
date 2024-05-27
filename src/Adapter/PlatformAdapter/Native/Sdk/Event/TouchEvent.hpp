@@ -15,9 +15,9 @@
  */
 #pragma once
 
+#include "Application/UIEvent.hpp"
 #include "UIEvent.hpp"
-
-#include <node_api.h>
+#include "js_native_api.h"
 
 namespace VGG
 {

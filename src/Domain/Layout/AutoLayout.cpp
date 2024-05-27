@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 #include "AutoLayout.hpp"
-
-#include "Utility/Log.hpp"
-#include "Rule.hpp"
-#include "Node.hpp"
-
+#include <stdint.h>
 #include <memory>
+#include <utility>
 #include <vector>
+#include "Node.hpp"
+#include "Rule.hpp"
+#include "Utility/Log.hpp"
+#include <define.h>
+#include <flexbox_node.h>
+#include <grid_item.h>
+#include <grid_layout.h>
 
 #undef DEBUG
 #define DEBUG(msg, ...)
@@ -29,20 +33,9 @@
 #undef VERBOSE
 #define VERBOSE(msg, ...)
 
-using namespace VGG::Layout::Internal::Rule;
-
-namespace VGG
-{
-class LayoutNode;
-
-namespace Layout
-{
-
-namespace Internal
-{
-
 namespace
 {
+using namespace VGG::Layout::Internal::Rule;
 using LengthTypes = VGG::Layout::Internal::Rule::Length::ETypes;
 unit toLibUnit(LengthTypes type)
 {
@@ -231,6 +224,8 @@ length_unit toLibLengthUnit(Length::ETypes type)
 
 } // namespace
 
+namespace VGG::Layout::Internal
+{
 namespace
 {
 using Views = std::vector<std::shared_ptr<LayoutNode>>;
@@ -867,7 +862,7 @@ void AutoLayout::configureFlexNodeSize(flexbox_node* node, bool forContainer)
   Layout::Size size{ width.value, height.value };
   auto         swapWidthAndHeight = sharedView->shouldSwapWidthAndHeight();
   const auto&  modelSize = sharedView->bounds().size;
-  if (width.types == Rule::Length::ETypes::PX && height.types == Rule::Length::ETypes::PX)
+  if (width.types == Length::ETypes::PX && height.types == Length::ETypes::PX)
   {
     size = sharedView->rotatedSize(size);
   }
@@ -1552,6 +1547,4 @@ bool AutoLayout::shouldChangeContainerHugHeight()
     return !m_hasFixedHeightChild;
 }
 
-} // namespace Internal
-} // namespace Layout
-} // namespace VGG
+} // namespace VGG::Layout::Internal

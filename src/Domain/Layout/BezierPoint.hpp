@@ -16,12 +16,20 @@
 
 #pragma once
 
-#include "Domain/Layout/Rect.hpp"
-#include "Domain/Model/DesignModel.hpp"
-
-#include <nlohmann/json.hpp>
-
 #include <optional>
+#include "Domain/Layout/Rect.hpp"
+#include <nlohmann/json.hpp>
+namespace VGG
+{
+namespace Layout
+{
+struct Matrix;
+}
+namespace Model
+{
+struct PointAttr;
+}
+} // namespace VGG
 
 namespace VGG
 {

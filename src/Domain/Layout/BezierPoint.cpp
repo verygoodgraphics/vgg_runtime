@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 #include "BezierPoint.hpp"
-
-#include "JsonKeys.hpp"
+#include <vector>
+#include "DesignModel.hpp"
 #include "Helper.hpp"
+#include "JsonKeys.hpp"
+#include "Rect.hpp"
+#include <nlohmann/json.hpp>
+namespace VGG
+{
+namespace Layout
+{
+struct Matrix;
+}
+} // namespace VGG
 
-using namespace VGG;
-using namespace Layout;
+namespace VGG::Layout
+{
 
-void Layout::to_json(nlohmann::json& j, const BezierPoint& bezierPoint)
+void to_json(nlohmann::json& j, const BezierPoint& bezierPoint)
 {
   j[K_POINT] = bezierPoint.point;
 
@@ -35,7 +45,7 @@ void Layout::to_json(nlohmann::json& j, const BezierPoint& bezierPoint)
   }
 }
 
-void Layout::from_json(const nlohmann::json& j, BezierPoint& bezierPoint)
+void from_json(const nlohmann::json& j, BezierPoint& bezierPoint)
 {
   if (j.contains(K_POINT))
   {
@@ -173,3 +183,5 @@ BezierPoint& BezierPoint::scale(const Scalar xScale, const Scalar yScale)
   }
   return *this;
 }
+
+} // namespace VGG::Layout

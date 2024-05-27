@@ -14,16 +14,23 @@
  * limitations under the License.
  */
 #include "VggSdk.hpp"
-
+#include <unordered_set>
 #include "Application/Presenter.hpp"
 #include "Application/UIApplication.hpp"
 #include "Application/VggEnv.hpp"
-#include "Domain/IVggEnv.hpp"
+#include "Controller.hpp"
+#include "Domain/Daruma.hpp"
+#include "Domain/DarumaContainer.hpp"
+#include "Domain/JsonDocument.hpp"
 #include "Domain/Saver/DirSaver.hpp"
 #include "Domain/Saver/ZipStreamSaver.hpp"
 #include "Layer/FontManager.hpp"
+#include "Layer/VGGLayer.hpp"
+#include "UIAnimation.hpp"
+#include "UIOptions.hpp"
 #include "UseCase/SaveModel.hpp"
 #include "Utility/Log.hpp"
+#include <nlohmann/json.hpp>
 
 #ifdef EMSCRIPTEN
 constexpr auto listener_code_key = "listener";

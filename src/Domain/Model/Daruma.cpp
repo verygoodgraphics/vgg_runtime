@@ -14,30 +14,41 @@
  * limitations under the License.
  */
 #include "Daruma.hpp"
-
+#include <chrono>
+#include <exception>
+#include <filesystem>
+#include <iterator>
+#include <map>
+#include <optional>
+#include <utility>
 #include "Config.hpp"
 #include "DarumaImpl.hpp"
-#include "JsonKeys.hpp"
+#include "DesignModel.hpp"
+#include "Domain/Model/DesignDocAdapter.hpp"
+#include "Domain/Model/Element.hpp"
 #include "Loader/DirLoader.hpp"
 #include "Loader/ZipLoader.hpp"
 #include "SubjectJsonDocument.hpp"
-#include "RawJsonDocument.hpp"
-
-#include "Domain/Model/DesignDocAdapter.hpp"
-#include "Domain/Model/Element.hpp"
 #include "Utility/Log.hpp"
-#include "Utility/VggFloat.hpp"
-
+#include "Visitor.hpp"
+#include <boost/uuid/basic_name_generator.hpp>
 #include <boost/uuid/name_generator_sha1.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <nlohmann/json.hpp>
+#include <rxcpp/rx-observable.hpp>
+#include <rxcpp/rx-operators.hpp>
+#include <rxcpp/rx-predef.hpp>
+#include <rxcpp/rx-sources.hpp>
+#include <rxcpp/subjects/rx-subject.hpp>
 
-#include <algorithm>
-#include <chrono>
-#include <filesystem>
+namespace VGG
+{
 
-using namespace VGG;
+namespace
+{
 using namespace VGG::Model;
 namespace fs = std::filesystem;
+} // namespace
 
 Daruma::Daruma(const MakeJsonDocFn& makeDesignDocFn, const MakeJsonDocFn& makeLayoutDocFn)
   : m_impl{ new Model::Detail::DarumaImpl }
@@ -487,3 +498,5 @@ bool Daruma::updateElementFillColor(
 
   return true;
 }
+
+} // namespace VGG

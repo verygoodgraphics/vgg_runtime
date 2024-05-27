@@ -15,28 +15,26 @@
  */
 #pragma once
 
+#include <stdint.h>
+#include <memory>
+#include <vector>
 #include "Application/AppRender.hpp"
 #include "Application/Controller.hpp"
-#include "Utility/ConfigManager.hpp"
-#include "Event/Event.hpp"
 #include "Event/EventListener.hpp"
-#include "Event/Keycode.hpp"
-
-#include "Layer/VGGLayer.hpp"
-
-#include <nlohmann/json.hpp>
-
-#include <exception>
-#include <filesystem>
-#include <fstream>
-#include <memory>
-
-namespace fs = std::filesystem;
-using namespace VGG;
-
+#include "Utility/Log.hpp"
 namespace VGG
 {
 class UIScrollView;
+namespace layer
+{
+struct ImageOptions;
+}
+} // namespace VGG
+struct VKeyboardEvent;
+union UEvent;
+
+namespace VGG
+{
 
 class UIApplication : public app::EventListener
 {

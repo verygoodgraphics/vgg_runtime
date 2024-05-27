@@ -15,14 +15,18 @@
  */
 #pragma once
 
+#include <memory>
 #include "Application/PlatformComposer.hpp"
-
-#include "Application/VggSdk.hpp"
 #include "NativeExec.hpp"
 #include "VggSdkAddon.hpp"
-
-#include <string>
-#include <memory>
+namespace VGG
+{
+class VggJSEngine;
+}
+namespace node
+{
+class Environment;
+}
 
 namespace VGG
 {

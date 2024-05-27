@@ -15,9 +15,11 @@
  */
 #pragma once
 
-#include <rxcpp/rx.hpp>
-
+#include <chrono>
+#include <compare>
 #include <memory>
+#include <rxcpp/operators/rx-observe_on.hpp>
+#include <rxcpp/schedulers/rx-runloop.hpp>
 
 namespace VGG
 {

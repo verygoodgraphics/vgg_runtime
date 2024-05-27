@@ -22,7 +22,7 @@ protected:
 
   void SetUp() override
   {
-    auto fn = [](const json& design_json)
+    auto fn = [](const nlohmann::json& design_json)
     {
       auto raw_json_doc = new RawJsonDocument();
       raw_json_doc->setContent(design_json);

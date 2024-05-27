@@ -15,8 +15,10 @@
  */
 
 #include "Domain/Model/DesignModel.hpp"
+#include "Domain/Model/DesignModelFwd.hpp"
 
-using namespace VGG::Model;
+namespace VGG::Model
+{
 
 Subshape::Subshape(const Subshape& other)
   : booleanOperation{ other.booleanOperation }
@@ -40,3 +42,5 @@ Subshape& Subshape::operator=(const Subshape& other)
 }
 
 Container::~Container() = default;
+
+} // namespace VGG::Model

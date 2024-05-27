@@ -15,11 +15,13 @@
  */
 
 #include "NativeComposer.hpp"
-
-#include "Domain/IVggEnv.hpp"
+#include <sstream>
+#include <string>
+#include "Application/VggEnv.hpp"
 #include "Utility/Log.hpp"
 
-using namespace VGG;
+namespace VGG
+{
 
 void NativeComposer::setupVgg()
 {
@@ -52,3 +54,5 @@ void NativeComposer::setupVgg()
     m_native_exec->evalScript(catch_exception);
   }
 }
+
+} // namespace VGG

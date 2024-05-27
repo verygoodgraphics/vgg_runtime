@@ -13,13 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
 
 #include "Types.hpp"
+namespace VGG
+{
+class UIScrollView;
+namespace Layout
+{
+struct Point;
+}
+} // namespace VGG
 
 namespace VGG
 {
-
-class UIScrollView;
 
 namespace UIKit
 {

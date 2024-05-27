@@ -15,23 +15,22 @@
  */
 #pragma once
 
-#include "Application/Controller.hpp"
+#include <memory>
 #include "Application/Mouse.hpp"
 #include "Application/PlatformComposer.hpp"
-#include "Application/VggEnv.hpp"
-
-#include "Domain/Daruma.hpp"
-
-#include <memory>
-
 namespace VGG
 {
-
+class Controller;
 class Editor;
 class Presenter;
 class RunLoop;
 class UIScrollView;
 class UIView;
+class VggEnv;
+} // namespace VGG
+
+namespace VGG
+{
 
 class MainComposer
 {

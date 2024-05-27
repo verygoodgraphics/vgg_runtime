@@ -14,26 +14,29 @@
  * limitations under the License.
  */
 #include "Layout.hpp"
-
+#include <cstddef>
+#include <new>
 #include "AutoLayout.hpp"
-#include "Helper.hpp"
+#include "Domain/JsonDocument.hpp"
+#include "Domain/Model/Element.hpp"
 #include "JsonKeys.hpp"
+#include "Node.hpp"
 #include "RawJsonDocument.hpp"
 #include "Rule.hpp"
 #include "Utility/Log.hpp"
-
-#include "Domain/Model/DesignModel.hpp"
-#include "Domain/Model/Element.hpp"
-
-#include <algorithm>
+#include <nlohmann/json.hpp>
 
 #undef DEBUG
 #define DEBUG(msg, ...)
 
 // #define DUMP_TREE
 
-using namespace VGG;
+namespace VGG
+{
+namespace
+{
 using namespace VGG::Layout::Internal::Rule;
+}
 
 Layout::Layout::Layout(JsonDocumentPtr designDoc, JsonDocumentPtr layoutDoc)
 {
@@ -413,3 +416,5 @@ void Layout::Layout::cacheTreeNodes(LayoutNode* tree)
   for (auto& child : tree->children())
     cacheTreeNodes(child.get());
 }
+
+} // namespace VGG

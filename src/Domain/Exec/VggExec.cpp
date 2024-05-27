@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 #include "VggExec.hpp"
-
 #include <sstream>
 
-using namespace VGG;
+namespace VGG
+{
 
 bool VggExec::evalScript(const std::string& program)
 {
@@ -58,3 +58,5 @@ void VggExec::openUrl(const std::string& url, const std::string& target)
 {
   m_jsEngine->openUrl(url, target);
 }
+
+} // namespace VGG

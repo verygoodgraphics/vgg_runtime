@@ -15,41 +15,37 @@
  */
 #pragma once
 
+#include <cstddef>
+#include <functional>
+#include <memory>
+#include <string>
+#include <vector>
 #include "Application/AppRenderable.hpp"
 #include "Application/UIEvent.hpp"
 #include "Application/UIOptions.hpp"
-
-#include "Domain/IVggEnv.hpp"
+#include "Domain/Daruma.hpp"
 #include "Domain/Layout/Rect.hpp"
 
-#include <rxcpp/rx.hpp>
-
-#include <memory>
-#include <string>
-
 class JsonDocument;
-
 namespace VGG
 {
-namespace app
-{
-struct UIAnimationOption;
-}
-
-class Daruma;
 class Editor;
-class LayoutNode;
+class IVggEnv;
 class Presenter;
 class Reporter;
 class RunLoop;
 class VggExec;
-struct ViewModel;
-
 namespace Layout
 {
 class ExpandSymbol;
 class Layout;
 } // namespace Layout
+struct ViewModel;
+} // namespace VGG
+struct VTouchEvent;
+
+namespace VGG
+{
 
 class Controller : public std::enable_shared_from_this<Controller>
 {

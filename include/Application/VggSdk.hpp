@@ -18,22 +18,27 @@
 #ifdef EMSCRIPTEN
 #include <emscripten/val.h>
 #endif
-
-#include "ISdk.hpp"
-
+#include <stdint.h>
 #include <cstddef>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
-
+#include "ISdk.hpp"
 class JsonDocument;
 namespace VGG
 {
 class Daruma;
 class VggEnv;
 class Controller;
+namespace app
+{
+struct PopOptions;
+}
+} // namespace VGG
 
+namespace VGG
+{
 constexpr int main_or_editor_daruma_index = 0;
 constexpr int edited_daruma_index = 1;
 

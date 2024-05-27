@@ -15,17 +15,18 @@
  */
 #pragma once
 
-#include <nlohmann/json.hpp>
-
 #include <memory>
+#include <string>
+#include <nlohmann/json.hpp>
 
 class JsonDocument;
 using JsonDocumentPtr = std::shared_ptr<JsonDocument>;
-using json = nlohmann::json;
 
 class JsonDocument
 {
 public:
+  using json = nlohmann::json;
+
   JsonDocument(JsonDocumentPtr jsonDoc = JsonDocumentPtr())
     : m_jsonDoc(jsonDoc)
   {

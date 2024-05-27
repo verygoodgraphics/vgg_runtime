@@ -15,11 +15,23 @@
  */
 
 #include "VggTimer.hpp"
-
-#include "Application/RunLoop.hpp"
-
+#include <stdint.h>
 #include <chrono>
+#include <deque>
+#include <exception>
 #include <functional>
+#include <memory>
+#include <utility>
+#include "Application/RunLoop.hpp"
+#include <rxcpp/rx-includes.hpp>
+#include <rxcpp/operators/rx-lift.hpp>
+#include <rxcpp/operators/rx-observe_on.hpp>
+#include <rxcpp/rx-observable.hpp>
+#include <rxcpp/rx-operators.hpp>
+#include <rxcpp/rx-predef.hpp>
+#include <rxcpp/rx-sources.hpp>
+#include <rxcpp/sources/rx-interval.hpp>
+#include <rxcpp/sources/rx-timer.hpp>
 
 namespace VGG
 {

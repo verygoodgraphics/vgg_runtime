@@ -19,6 +19,7 @@
 #include <chrono>
 #include <deque>
 #include <exception>
+#include <fstream>
 #include <unordered_map>
 #include <utility>
 #include "Application/ViewModel.hpp"
@@ -55,6 +56,15 @@
 #include <rxcpp/rx-operators.hpp>
 #include <rxcpp/rx-predef.hpp>
 #include <rxcpp/rx-sources.hpp>
+
+namespace VGG
+{
+namespace app
+{
+class AppRenderable;
+}
+} // namespace VGG
+struct VTouchEvent;
 
 constexpr auto PSEUDO_PATH_EDIT_VIEW = "::editView";
 
@@ -584,7 +594,7 @@ MakeJsonDocFn Controller::createMakeJsonDocFn(const char* pJsonSchemaFilePath)
   }
 
   // `jsonSchemaFilePath` is used in the returned lambda, so copy it.
-  auto lambda = [&, jsonSchemaFilePath = tmpJsonSchemaFilePath](const json& designJson)
+  auto lambda = [&, jsonSchemaFilePath = tmpJsonSchemaFilePath](const nlohmann::json& designJson)
   {
     auto jsonDocPtr = createJsonDoc();
     jsonDocPtr->setContent(designJson);
@@ -810,7 +820,7 @@ const std::string Controller::getFramesInfo() const
   {
     const auto& page = pages[i];
 
-    nlohmann ::json frameInfo(nlohmann::json::value_t::object);
+    nlohmann::json frameInfo(nlohmann::json::value_t::object);
     frameInfo[K_ID] = page->id();
     frameInfo[K_NAME] = page->name();
     const auto& size = m_layout->originalPageSize(i);

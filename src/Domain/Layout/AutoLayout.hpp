@@ -15,14 +15,17 @@
  */
 #pragma once
 
+#include <array>
+#include <cstddef>
+#include <limits>
+#include <memory>
+#include <optional>
+#include <vector>
 #include "Rect.hpp"
 #include "Rule.hpp"
-
 #include <flexbox_node.h>
 #include <grid_layout.h>
-
-#include <memory>
-#include <limits>
+class grid_item;
 
 namespace VGG
 {
@@ -33,11 +36,6 @@ namespace Layout
 
 namespace Internal
 {
-
-namespace Rule
-{
-struct GridLayout;
-}
 
 class AutoLayout
 {

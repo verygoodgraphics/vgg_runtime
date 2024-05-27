@@ -15,22 +15,22 @@
  */
 #pragma once
 
-#include "JsonDocument.hpp"
-
-#include "Loader.hpp"
-#include "ModelEvent.hpp"
-#include "Visitor.hpp"
-
-#include <nlohmann/json.hpp>
-#include <rxcpp/rx.hpp>
-
+#include <cstddef>
 #include <functional>
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
-
+#include "JsonDocument.hpp"
+#include "Loader.hpp"
+#include "ModelEvent.hpp"
+#include <nlohmann/json.hpp>
+#include <rxcpp/rx-includes.hpp>
+#include <rxcpp/rx-observable.hpp>
+#include <rxcpp/rx-predef.hpp>
+#include <rxcpp/subjects/rx-subject.hpp>
 namespace VGG
 {
 namespace Domain
@@ -38,12 +38,20 @@ namespace Domain
 class DesignDocument;
 class Element;
 } // namespace Domain
-namespace Model::Detail
+namespace Model
+{
+class Visitor;
+namespace Detail
 {
 class DarumaImpl;
 }
+} // namespace Model
+} // namespace VGG
 
-using MakeJsonDocFn = std::function<JsonDocumentPtr(const json&)>;
+namespace VGG
+{
+
+using MakeJsonDocFn = std::function<JsonDocumentPtr(const nlohmann::json&)>;
 
 class Daruma
 {
@@ -52,7 +60,7 @@ class Daruma
   std::shared_ptr<VGG::Model::Loader> m_loader;
 
   std::unordered_map<std::string, std::string> m_memoryCode; // fileName: code_content
-  json                                         m_eventListeners;
+  nlohmann::json                               m_eventListeners;
 
   // original model
   JsonDocumentPtr              m_designDoc;

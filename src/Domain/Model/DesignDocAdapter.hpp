@@ -15,10 +15,10 @@
  */
 #pragma once
 
-#include "JsonDocument.hpp"
-
 #include <memory>
-
+#include <string>
+#include "JsonDocument.hpp"
+#include <nlohmann/json.hpp>
 namespace VGG
 {
 namespace Domain

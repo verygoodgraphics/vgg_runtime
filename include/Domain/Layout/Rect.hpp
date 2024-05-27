@@ -15,19 +15,22 @@
  */
 #pragma once
 
-#include <array>
-#include <iostream>
+#include <ostream>
 #include <vector>
-
 namespace VGG
 {
-
 namespace Layout
 {
-
 struct BezierPoint;
 struct Matrix;
 struct Rect;
+} // namespace Layout
+} // namespace VGG
+
+namespace VGG
+{
+namespace Layout
+{
 
 using Scalar = double;
 

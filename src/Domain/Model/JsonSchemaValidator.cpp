@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "JsonSchemaValidator.hpp"
-
+#include <exception>
+#include <stdexcept>
+#include <vector>
 #include "Utility/Log.hpp"
-
-using nlohmann::json;
+#include <nlohmann/json.hpp>
+#include <valijson_nlohmann_bundled.hpp>
 
 JsonSchemaValidator::JsonSchemaValidator()
 {
@@ -38,39 +41,42 @@ bool JsonSchemaValidator::validate(const nlohmann::json& targetDocument)
   return validate(&m_schema, targetDocument);
 }
 
-bool JsonSchemaValidator::validate(const std::string& className,
-                                   const nlohmann::json& targetDocument)
+bool JsonSchemaValidator::validate(
+  const std::string&    className,
+  const nlohmann::json& targetDocument)
 {
   return validate(getSubschemaByClassName(className), targetDocument);
 }
 
-bool JsonSchemaValidator::validate(const valijson::Subschema* subschema,
-                                   const nlohmann::json& targetDocument)
+bool JsonSchemaValidator::validate(
+  const valijson::Subschema* subschema,
+  const nlohmann::json&      targetDocument)
 {
   if (!subschema)
   {
     return false;
   }
 
-  valijson::ValidationResults results;
+  valijson::ValidationResults             results;
   valijson::adapters::NlohmannJsonAdapter targetDocumentAdapter(targetDocument);
   if (!m_validator.validate(*subschema, targetDocumentAdapter, &results))
   {
     valijson::ValidationResults::Error error;
-    unsigned int errorNum = 1;
+    unsigned int                       errorNum = 1;
     while (results.popError(error))
     {
-      std::string context;
+      std::string                        context;
       std::vector<std::string>::iterator itr = error.context.begin();
       for (; itr != error.context.end(); itr++)
       {
         context += *itr;
       }
 
-      WARN("#vgg json schema validate error: %d, context: %s, desc: %s",
-           errorNum,
-           context.c_str(),
-           error.description.c_str());
+      WARN(
+        "#vgg json schema validate error: %d, context: %s, desc: %s",
+        errorNum,
+        context.c_str(),
+        error.description.c_str());
       ++errorNum;
     }
     return false;
@@ -91,7 +97,7 @@ const valijson::Subschema* JsonSchemaValidator::getSubschemaByClassName(
     try
     {
       auto& title = m_classTitleMap.at(className);
-      auto item = m_schema.getSubschemaByTitle(title);
+      auto  item = m_schema.getSubschemaByTitle(title);
       if (item)
       {
         m_classSubschemaMap[className] = item;
@@ -136,7 +142,7 @@ void JsonSchemaValidator::preProcessSchemaAndSetupMap(nlohmann::json& schemaJson
 
 void JsonSchemaValidator::setRootSchemaInternal(const nlohmann::json& schemaJson)
 {
-  valijson::SchemaParser parser;
+  valijson::SchemaParser                  parser;
   valijson::adapters::NlohmannJsonAdapter schemaDocumentAdapter(schemaJson);
   try
   {

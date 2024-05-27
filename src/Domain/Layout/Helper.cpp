@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 #include "Helper.hpp"
-
 #include "JsonKeys.hpp"
 #include "Rect.hpp"
-
+#include "Math.hpp"
 #include <nlohmann/json.hpp>
 
 namespace VGG

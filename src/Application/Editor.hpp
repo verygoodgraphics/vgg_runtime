@@ -15,22 +15,22 @@
  */
 #pragma once
 
+#include <memory>
 #include "AppRenderable.hpp"
-#include "UIEvent.hpp"
-
 #include "Application/Mouse.hpp"
 #include "Domain/Layout/Rect.hpp"
+#include "Event/Event.hpp"
+#include "UIEvent.hpp"
 #include "Utility/Log.hpp"
-
-#include <memory>
-#include <vector>
-
 class SkCanvas;
-
 namespace VGG
 {
 class LayoutNode;
 class UIView;
+} // namespace VGG
+
+namespace VGG
+{
 
 class Editor : public app::AppRenderable
 {

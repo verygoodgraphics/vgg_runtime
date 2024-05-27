@@ -15,11 +15,10 @@
  */
 #pragma once
 
-#include "Domain/Saver.hpp"
-
 #include <cstdint>
+#include <string>
 #include <vector>
-
+#include "Domain/Saver.hpp"
 struct zip_t;
 
 namespace VGG

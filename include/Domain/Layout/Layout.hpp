@@ -15,15 +15,14 @@
  */
 #pragma once
 
-#include "Domain/Daruma.hpp"
-#include "Domain/Layout/Node.hpp"
-#include "Utility/Log.hpp"
-
-#include <nlohmann/json.hpp>
-
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
+#include "Domain/Layout/Node.hpp"
+#include "Domain/JsonDocument.hpp"
+#include "Rect.hpp"
+#include <nlohmann/json.hpp>
 
 namespace VGG
 {

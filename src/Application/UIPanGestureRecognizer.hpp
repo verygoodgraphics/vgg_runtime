@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
 
-#include "UIGestureRecognizer.hpp"
-
-#include "Types.hpp"
-
-#include "Domain/Layout/Rect.hpp"
-
-#include <chrono>
 #include <functional>
+#include "Domain/Layout/Rect.hpp"
+#include "Types.hpp"
+#include "UIGestureRecognizer.hpp"
+union UEvent;
 
 namespace VGG::UIKit
 {

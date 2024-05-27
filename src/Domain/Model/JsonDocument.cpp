@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 #include "JsonDocument.hpp"
+#include <nlohmann/json.hpp>
 
-#include "Helper.hpp"
-
-json JsonDocument::content() const
+nlohmann::json JsonDocument::content() const
 {
   return m_jsonDoc->content();
 }

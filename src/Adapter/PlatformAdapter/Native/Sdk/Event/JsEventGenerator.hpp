@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include <sstream>
 #include "Application/EventVisitor.hpp"
 #include "Domain/IVggEnv.hpp"
 #include "UIEvent.hpp"

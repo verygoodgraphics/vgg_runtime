@@ -13,15 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef NATIVE_EXEC_HPP
-#define NATIVE_EXEC_HPP
-
-#include "Domain/VggJSEngine.hpp"
+#pragma once
 
 #include <functional>
 #include <memory>
+#include <string>
 #include <thread>
-
+#include "Domain/Event.hpp"
+#include "Domain/IVggEnv.hpp"
+#include "Domain/VggJSEngine.hpp"
+namespace VGG
+{
+class NativeExecImpl;
+}
 namespace node
 {
 class Environment;
@@ -29,8 +33,6 @@ class Environment;
 
 namespace VGG
 {
-
-class NativeExecImpl;
 
 class NativeExec final : public VggJSEngine
 {
@@ -60,5 +62,3 @@ private:
 };
 
 } // namespace VGG
-
-#endif

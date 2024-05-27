@@ -16,12 +16,33 @@
 
 #pragma once
 
-#include "Domain/Model/DesignModelFwd.hpp"
-
-#include <nlohmann/json.hpp>
-
+#include <memory>
 #include <optional>
+#include <stdexcept>
+#include <string>
 #include <variant>
+#include <vector>
+#include "Domain/Model/DesignModelFwd.hpp"
+#include <nlohmann/json.hpp>
+namespace VGG
+{
+namespace Model
+{
+struct Frame;
+struct Group;
+struct Image;
+struct Path;
+struct PatternImageFill;
+struct PatternImageFit;
+struct PatternImageStrech;
+struct PatternImageTile;
+struct PatternLayerInstance;
+struct ReferencedStyle;
+struct SymbolInstance;
+struct SymbolMaster;
+struct Text;
+} // namespace Model
+} // namespace VGG
 
 #ifndef NLOHMANN_OPT_HELPER
 #define NLOHMANN_OPT_HELPER
@@ -74,11 +95,6 @@ namespace Model
 {
 using nlohmann::json;
 
-struct PatternImageFill;
-struct PatternImageStrech;
-struct PatternImageFit;
-struct PatternImageTile;
-struct PatternLayerInstance;
 using PatternInstanceType = std::variant<
   std::monostate,
   PatternImageFill,

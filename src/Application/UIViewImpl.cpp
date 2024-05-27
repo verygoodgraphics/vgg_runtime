@@ -15,10 +15,34 @@
  */
 
 #include "UIViewImpl.hpp"
-
+#include <chrono>
+#include <functional>
+#include <iterator>
+#include <map>
+#include <optional>
+#include <unordered_map>
+#include <utility>
+#include "Animate.hpp"
+#include "AppRender.hpp"
+#include "Application/Pager.hpp"
+#include "Application/ViewModel.hpp"
+#include "AttrBridge.hpp"
+#include "Domain/Layout/Node.hpp"
+#include "Domain/Layout/Rect.hpp"
+#include "Domain/Model/Element.hpp"
+#include "Event/Event.hpp"
+#include "Layer/Core/AttributeAccessor.hpp"
+#include "Layer/Core/Attrs.hpp"
+#include "Layer/Core/MemoryResourceProvider.hpp"
+#include "Layer/Core/PaintNode.hpp"
+#include "Layer/Core/ResourceManager.hpp"
+#include "Layer/Core/ResourceProvider.hpp"
+#include "Layer/Core/VColor.hpp"
 #include "UIAnimation.hpp"
-
+#include "UIView.hpp"
 #include "Utility/Log.hpp"
+#include "ZoomerNodeController.hpp"
+#include <glm/detail/qualifier.hpp>
 
 namespace VGG::internal
 {

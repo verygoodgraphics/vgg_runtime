@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 #include "UIView.hpp"
-#include "UIViewImpl.hpp"
-
+#include <optional>
+#include "Domain/Layout/Node.hpp"
+#include "Domain/Model/Element.hpp"
 #include "Event/Event.hpp"
 #include "Event/EventAPI.hpp"
 #include "Event/Keycode.hpp"
-#include "UIAnimation.hpp"
-#include "ViewModel.hpp"
-
-#include "Domain/Layout/Node.hpp"
+#include "Layer/Model/StructModel.hpp"
 #include "Layer/SceneBuilder.hpp"
+#include "UIAnimation.hpp"
+#include "UIOptions.hpp"
+#include "UIViewImpl.hpp"
 #include "Utility/Log.hpp"
+#include "ViewModel.hpp"
+#include <core/SkColor.h>
+#include <glm/detail/qualifier.hpp>
+#include <nlohmann/json.hpp>
 
 using namespace VGG;
 using namespace VGG::Layout;

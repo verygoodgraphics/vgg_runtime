@@ -232,6 +232,8 @@ public:
     {
       Renderer r;
       r = r.createNew(canvas);
+      node->processRepaint();
+      node->revalidate();
       node->render(&r);
     }
     if (drawTextInfo)
@@ -394,10 +396,6 @@ void VLayer::render()
   VGG_IMPL(VLayer)
   SkCanvas* canvas = nullptr;
   canvas = _->skiaContext->canvas();
-  if (_->node)
-  {
-    _->node->revalidate();
-  }
   Timer t;
   t.start();
   _->renderInternal(canvas, enableDrawPosition());

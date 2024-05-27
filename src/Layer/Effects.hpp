@@ -373,7 +373,6 @@ protected:
   Bounds onRevalidate() override
   {
     ASSERT(getChild());
-    DEBUG("GraphicItemEffectNode::onRevalidate");
     const auto bounds = getChild()->revalidate();
     m_visible = onRevalidateVisible(bounds);
     return bounds;

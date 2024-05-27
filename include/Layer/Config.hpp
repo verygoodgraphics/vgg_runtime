@@ -50,7 +50,7 @@ FILE* getLogStream(const char* category);
     auto UNI_NAME(s) = std::format(__VA_ARGS__);                                                   \
     if (!UNI_NAME(s).empty())                                                                      \
     {                                                                                              \
-      fprintf(UNI_NAME(f), "[" STRINGIFY(label) "]%s\n", UNI_NAME(s).c_str());                     \
+      fprintf(UNI_NAME(f), "[" STRINGIFY(label) "]:%s\n", UNI_NAME(s).c_str());                     \
     }                                                                                              \
   } while (0);
 #else

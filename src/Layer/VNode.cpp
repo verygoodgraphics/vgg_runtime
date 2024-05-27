@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 #include "Layer/Core/VNode.hpp"
+#include "Layer/StackTrace.hpp"
 
 namespace VGG::layer
 {
+
+std::queue<VNode*> VNode::s_repaintQueue = {};
 
 class VNode::ScopedState
 {
@@ -83,17 +86,38 @@ void VNode::unobserve(VNodePtr sender)
   }
 }
 
+void VNode::repaint() const
+{
+  s_repaintQueue.push(const_cast<VNode*>(this));
+}
+
+void VNode::processRepaint()
+{
+  while (!s_repaintQueue.empty())
+  {
+    if (auto p = s_repaintQueue.front(); p)
+    {
+      p->invalidate();
+    }
+    s_repaintQueue.pop();
+  }
+}
+
 void VNode::invalidate()
 {
   ScopedState state(*this, TRAVERSALING);
   if (state.wasSet())
+  {
+    VGG_LOG_DEV(ERROR, VNode, "TRAVERSALING");
     return;
-#ifdef VGG_LAYER_DEBUG
-  VGG_TRACE_DEV(dbgInfo);
-#endif
+  }
   if (m_state & INVALIDATE)
     return;
-  DEBUG("on Invalidate %s", dbgInfo.c_str());
+#ifdef VGG_LAYER_DEBUG
+  std::string indent(depth(), '\t');
+  VGG_TRACE_DEV(indent + dbgInfo);
+  VGG_LOG_DEV(TRACE, VNode, "Invalidate: %s", (indent + dbgInfo).c_str());
+#endif
   m_state |= INVALIDATE;
   visitObservers(
     [](auto& obs)
@@ -109,13 +133,17 @@ const Bounds& VNode::revalidate(Invalidator* inv, const glm::mat3& ctm)
 {
   ScopedState state(*this, TRAVERSALING);
   if (state.wasSet())
+  {
+    VGG_LOG_DEV(ERROR, VNode, "TRAVERSALING");
     return m_bounds;
-#ifdef VGG_LAYER_DEBUG
-  VGG_TRACE_DEV(dbgInfo);
-#endif
+  }
   if (!isInvalid())
     return m_bounds;
-  DEBUG("on Revalidate %s", dbgInfo.c_str());
+#ifdef VGG_LAYER_DEBUG
+  std::string indent(depth(), '\t');
+  VGG_TRACE_DEV(indent + dbgInfo);
+  VGG_LOG_DEV(TRACE, VNode, "Revalidate: %s", (indent + dbgInfo).c_str());
+#endif
   m_bounds = onRevalidate();
   m_state &= ~INVALIDATE;
   return m_bounds;

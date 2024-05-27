@@ -16,8 +16,10 @@
 #pragma once
 #include "Layer/Config.hpp"
 #include "Layer/Core/VNode.hpp"
+
+#include <core/SkPicture.h>
 #include <functional>
-class SkPicture;
+
 namespace VGG::layer
 {
 class Renderer;

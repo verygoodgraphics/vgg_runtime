@@ -184,6 +184,9 @@ FrameNode::FrameNode(VRefCnt* cnt, PaintNodePtr root)
 {
   d_ptr->node = std::move(root);
   observe(d_ptr->node);
+#ifdef VGG_LAYER_DEBUG
+  dbgInfo = "Frame Node for " + d_ptr->node->guid();
+#endif
 }
 
 void FrameNode::nodeAt(int x, int y, NodeVisitor vistor, void* userData)

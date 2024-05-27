@@ -15,12 +15,15 @@
  */
 #pragma once
 
+#include <memory>
 #include "Domain/Layout/Layout.hpp"
-#include "Domain/Layout/Node.hpp"
-#include "Domain/Daruma.hpp"
 
 namespace VGG
 {
+namespace Layout
+{
+struct Size;
+}
 
 class ResizeWindow
 {

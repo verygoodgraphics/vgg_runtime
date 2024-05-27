@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 #include "Reporter.hpp"
-
+#include <sstream>
+#include <string>
 #include "Domain/Daruma.hpp"
+#include "Domain/DarumaContainer.hpp"
 #include "Domain/IVggEnv.hpp"
 #include "Domain/Layout/Node.hpp"
 #include "Domain/Model/JsonKeys.hpp"
 #include "Domain/VggExec.hpp"
 #include "Utility/Log.hpp"
-
-#include <sstream>
+#include <nlohmann/json.hpp>
 
 #undef DEBUG
 #define DEBUG(msg, ...)

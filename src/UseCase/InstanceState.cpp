@@ -15,7 +15,7 @@
  */
 
 #include "UseCase/InstanceState.hpp"
-
+#include <vector>
 #include "Domain/Layout/ExpandSymbol.hpp"
 #include "Domain/Layout/Layout.hpp"
 #include "Domain/Layout/Node.hpp"

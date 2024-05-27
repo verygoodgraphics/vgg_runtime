@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 #include "Editor.hpp"
-
+#include <algorithm>
 #include "Application/UIView.hpp"
 #include "Domain/Layout/Node.hpp"
+#include "Event/Keycode.hpp"
+#include "Mouse.hpp"
 #include "Utility/Log.hpp"
-
+#include <core/SkColor.h>
+#include <core/SkPaint.h>
+#include <core/SkRect.h>
+#include <core/SkScalar.h>
+#include <glm/detail/qualifier.hpp>
 #include <include/core/SkCanvas.h>
-
-#include <algorithm>
 
 #undef INFO
 #define INFO(msg, ...)

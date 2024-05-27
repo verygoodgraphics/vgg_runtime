@@ -14,32 +14,47 @@
  * limitations under the License.
  */
 #include "Controller.hpp"
-
+#include <algorithm>
+#include <cassert>
+#include <chrono>
+#include <deque>
+#include <exception>
+#include <unordered_map>
+#include <utility>
+#include "Application/ViewModel.hpp"
+#include "Domain/Daruma.hpp"
+#include "Domain/DarumaContainer.hpp"
+#include "Domain/IVggEnv.hpp"
+#include "Domain/JsonDocument.hpp"
+#include "Domain/Layout/Layout.hpp"
+#include "Domain/Layout/Node.hpp"
+#include "Domain/Model/JsonKeys.hpp"
+#include "Domain/ModelEvent.hpp"
+#include "Domain/RawJsonDocument.hpp"
+#include "Domain/VggExec.hpp"
 #include "Editor.hpp"
 #include "Presenter.hpp"
 #include "Reporter.hpp"
 #include "RunLoop.hpp"
-
-#include "Application/UIAnimation.hpp"
-#include "Domain/Daruma.hpp"
-#include "Domain/Model/JsonKeys.hpp"
-#include "Domain/RawJsonDocument.hpp"
-#include "Domain/SchemaValidJsonDocument.hpp"
-#include "Domain/UndoRedoJsonDocument.hpp"
-#include "Domain/VggExec.hpp"
+#include "UIEvent.hpp"
+#include "UIOptions.hpp"
 #include "UseCase/EditModel.hpp"
 #include "UseCase/InstanceState.hpp"
 #include "UseCase/ModelChanged.hpp"
-#include "UseCase/ResizeWindow.hpp"
 #include "UseCase/StartRunning.hpp"
 #include "Utility/Log.hpp"
 #include "Utility/VggFloat.hpp"
-#include "Utility/VggString.hpp"
-
 #include "VGGVersion_generated.h"
-
-#include <cassert>
-#include <chrono>
+#include <nlohmann/json.hpp>
+#include <rxcpp/operators/rx-lift.hpp>
+#include <rxcpp/operators/rx-map.hpp>
+#include <rxcpp/operators/rx-observe_on.hpp>
+#include <rxcpp/rx-includes.hpp>
+#include <rxcpp/rx-observable.hpp>
+#include <rxcpp/rx-observer.hpp>
+#include <rxcpp/rx-operators.hpp>
+#include <rxcpp/rx-predef.hpp>
+#include <rxcpp/rx-sources.hpp>
 
 constexpr auto PSEUDO_PATH_EDIT_VIEW = "::editView";
 

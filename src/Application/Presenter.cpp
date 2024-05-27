@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 #include "Presenter.hpp"
-
-#include "Mouse.hpp"
-#include "UIAnimation.hpp"
-
+#include <algorithm>
+#include <functional>
+#include <optional>
+#include <unordered_map>
+#include "Application/ViewModel.hpp"
+#include "Domain/Daruma.hpp"
 #include "Domain/Layout/Node.hpp"
+#include "Domain/Model/Element.hpp"
 #include "Layer/Model/StructModel.hpp"
 #include "Layer/SceneBuilder.hpp"
+#include "Mouse.hpp"
+#include "UIAnimation.hpp"
+#include "UIEvent.hpp"
+#include "UIOptions.hpp"
 #include "Utility/Log.hpp"
 #include "Utility/VggFloat.hpp"
-
-#include <algorithm>
-#include <unordered_map>
 
 #undef DEBUG
 #define DEBUG(msg, ...)

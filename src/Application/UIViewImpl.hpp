@@ -15,24 +15,32 @@
  */
 #pragma once
 
-#include "UIView.hpp"
-#include "ViewModel.hpp"
-#include "Pager.hpp"
-
+#include <stdint.h>
+#include <cstddef>
+#include <memory>
+#include <string>
+#include <vector>
 #include "Application/Animate.hpp"
-#include "Application/AppRender.hpp"
-#include "Application/AttrBridge.hpp"
 #include "Application/UIAnimation.hpp"
 #include "Application/ZoomerNodeController.hpp"
-#include "Domain/Layout/Node.hpp"
-#include "Layer/Core/MemoryResourceProvider.hpp"
-#include "Layer/Core/ResourceManager.hpp"
-#include "Layer/Model/StructModel.hpp"
-#include "Layer/SceneBuilder.hpp"
-#include "Utility/Log.hpp"
+#include "Layer/Core/FrameNode.hpp"
+#include "Layer/Core/SceneNode.hpp"
+#include "Layer/Core/ZoomerNode.hpp"
+#include "Layer/Memory/Ref.hpp"
+#include "Pager.hpp"
+#include "glm/ext/vector_float2.hpp"
+
+union UEvent;
 
 namespace VGG
 {
+class LayoutNode;
+class UIView;
+struct ViewModel;
+namespace app
+{
+class AppRender;
+}
 
 namespace internal
 {

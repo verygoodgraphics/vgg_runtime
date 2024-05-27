@@ -15,10 +15,8 @@
  */
 #pragma once
 
-#include "Domain/Layout/Rect.hpp"
-
 #include <array>
-#include <vector>
+#include "Domain/Layout/Rect.hpp"
 
 namespace VGG
 {

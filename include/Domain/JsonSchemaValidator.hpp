@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef VGG_JSON_SCHEMA_VALIDATOR_HPP
-#define VGG_JSON_SCHEMA_VALIDATOR_HPP
+#pragma once
 
+#include <string>
+#include <unordered_map>
 #include <nlohmann/json.hpp>
 #include <valijson_nlohmann_bundled.hpp>
-
-#include <unordered_map>
 
 class JsonSchemaValidator
 {
@@ -32,9 +31,9 @@ public:
   bool validate(const std::string& className, const nlohmann::json& targetDocument);
 
 private:
-  valijson::Validator m_validator;
-  valijson::Schema m_schema;
-  std::unordered_map<std::string, std::string> m_classTitleMap;
+  valijson::Validator                                         m_validator;
+  valijson::Schema                                            m_schema;
+  std::unordered_map<std::string, std::string>                m_classTitleMap;
   std::unordered_map<std::string, const valijson::Subschema*> m_classSubschemaMap;
 
   void preProcessSchemaAndSetupMap(nlohmann::json& schemaJson);
@@ -42,5 +41,3 @@ private:
   bool validate(const valijson::Subschema* subschema, const nlohmann::json& targetDocument);
   const valijson::Subschema* getSubschemaByClassName(const std::string& className);
 };
-
-#endif

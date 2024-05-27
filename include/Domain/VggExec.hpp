@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __VGG_EXEC_H__
-#define __VGG_EXEC_H__
-
-#include "VggJSEngine.hpp"
-#include "IVggEnv.hpp"
+#pragma once
 
 #include <memory>
 #include <string>
+#include "Event.hpp"
+#include "IVggEnv.hpp"
+#include "VggJSEngine.hpp"
 
 namespace VGG
 {
@@ -49,5 +48,3 @@ private:
 };
 
 } // namespace VGG
-
-#endif

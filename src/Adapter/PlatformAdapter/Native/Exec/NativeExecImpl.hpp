@@ -15,39 +15,34 @@
  */
 #pragma once
 
-#include <env-inl.h>
-#include <node.h>
-#include <util-inl.h>
-#include <uv.h>
-
-#include <assert.h>
-#include <iostream>
-#include <limits>
+#include <string_view>
 #include <memory>
 #include <mutex>
 #include <queue>
 #include <string>
 #include <thread>
-
+#include <vector>
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
-
-using node::CommonEnvironmentSetup;
-using node::Environment;
-using node::MultiIsolatePlatform;
-using v8::Context;
-using v8::HandleScope;
-using v8::Isolate;
-using v8::Locker;
-using v8::MaybeLocal;
-using v8::V8;
-using v8::Value;
+#include <uv.h>
+namespace VGG
+{
+class NativeExecImpl;
+}
+namespace node
+{
+class CommonEnvironmentSetup;
+class Environment;
+class MultiIsolatePlatform;
+} // namespace node
+namespace v8
+{
+class Isolate;
+} // namespace v8
 
 namespace VGG
 {
-
-class NativeExecImpl;
 
 struct NativeEvalTask
 {
@@ -70,7 +65,7 @@ private:
 
   int node_main(const std::vector<std::string>& args);
   int run_node_instance(
-    MultiIsolatePlatform*           platform,
+    node::MultiIsolatePlatform*     platform,
     const std::vector<std::string>& args,
     const std::vector<std::string>& exec_args);
   void run_task();
@@ -86,11 +81,11 @@ private:
     RUNNING,
     DEAD,
   };
-  volatile ExecState      m_state{ INIT };
-  CommonEnvironmentSetup* m_setup;
-  Isolate*                m_isolate;
-  Environment*            m_env;
-  uv_loop_t*              m_loop;
+  volatile ExecState            m_state{ INIT };
+  node::CommonEnvironmentSetup* m_setup;
+  v8::Isolate*                  m_isolate;
+  node::Environment*            m_env;
+  uv_loop_t*                    m_loop;
 
   std::queue<NativeEvalTask*> m_tasks;
   std::mutex                  m_tasks_mutex;

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "UseCase/ResizeWindow.hpp"
+#include "Domain/Layout/Rect.hpp"
 
 namespace VGG
 {

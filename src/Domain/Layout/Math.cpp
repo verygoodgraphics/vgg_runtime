@@ -15,19 +15,14 @@
  */
 
 #include "Math.hpp"
-
-#include "Rect.hpp"
-
+#include <array>
 #include "Math/Algebra.hpp"
-
+#include "Rect.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
 
-#include <array>
-#include <vector>
-
-using namespace VGG;
-using namespace Layout;
+namespace VGG::Layout
+{
 
 namespace
 {
@@ -106,3 +101,5 @@ Matrix Matrix::getAffineTransform(
   const auto mat3 = newGlmPoints * glm::inverse(oldGlmPoints);
   return fromMat3(mat3);
 }
+
+} // namespace VGG::Layout

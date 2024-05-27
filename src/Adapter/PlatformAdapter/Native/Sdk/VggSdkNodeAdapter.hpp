@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef VGG_SDK_NODE_ADAPTER_HPP
-#define VGG_SDK_NODE_ADAPTER_HPP
+#pragma once
 
 #include <memory>
-#include <vector>
-
-#include <node_api.h>
+#include "js_native_api.h"
+namespace VGG
+{
+class VggSdk;
+}
 
 namespace VGG
 {
-
-class VggSdk;
 
 class VggSdkNodeAdapter
 {
@@ -99,5 +98,3 @@ private:
 };
 
 } // namespace VGG
-
-#endif

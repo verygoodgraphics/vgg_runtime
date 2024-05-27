@@ -16,9 +16,7 @@
 #pragma once
 
 #include <string>
-#include <vector>
-
-#include <node_api.h>
+#include "js_native_api.h"
 
 namespace VGG
 {

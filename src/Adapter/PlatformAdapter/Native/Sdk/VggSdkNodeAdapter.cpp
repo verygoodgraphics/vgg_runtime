@@ -13,18 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "PlatformAdapter/Native/Sdk/VggSdkNodeAdapter.hpp"
-
-#include "PlatformAdapter/Native/Sdk/AdapterHelper.hpp"
-
-#include "Application/RunLoop.hpp"
-#include "Application/VggSdk.hpp"
-
-#include <rxcpp/rx.hpp>
-
-#include <cassert>
+#include <cstddef>
+#include <exception>
 #include <functional>
 #include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+#include "Application/RunLoop.hpp"
+#include "Application/UIOptions.hpp"
+#include "Application/VggSdk.hpp"
+#include "ISdk.hpp"
+#include "PlatformAdapter/Native/Sdk/AdapterHelper.hpp"
+#include <rxcpp/rx-includes.hpp>
+#include <rxcpp/rx-observable.hpp>
+#include <rxcpp/rx-observer.hpp>
+#include <rxcpp/rx-operators.hpp>
+#include <rxcpp/rx-predef.hpp>
+#include <rxcpp/rx-sources.hpp>
+#include <rxcpp/rx-subscriber.hpp>
+#include <rxcpp/sources/rx-iterate.hpp>
 
 constexpr auto listener_code_key = "listener";
 

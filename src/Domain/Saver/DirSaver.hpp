@@ -15,6 +15,8 @@
  */
 #pragma once
 
+#include <string>
+#include <vector>
 #include "Domain/Saver.hpp"
 
 namespace VGG

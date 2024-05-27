@@ -15,8 +15,11 @@
  */
 #pragma once
 
+#include <memory>
+#include <string>
 #include "Domain/Daruma.hpp"
-
+#include "Domain/Loader.hpp"
+#include "Domain/Model/Element.hpp"
 namespace VGG
 {
 class LayoutNode;
@@ -24,6 +27,10 @@ namespace Layout
 {
 class Layout;
 }
+} // namespace VGG
+
+namespace VGG
+{
 
 struct ViewModel
 {

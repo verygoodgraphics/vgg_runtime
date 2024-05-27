@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 #include "Rect.hpp"
-
+#include <algorithm>
+#include <optional>
+#include <ostream>
 #include "BezierPoint.hpp"
 #include "Math.hpp"
-
 #include "Utility/Log.hpp"
 #include "Utility/VggFloat.hpp"
-
 #include <bezier.h>
-
-#include <algorithm>
 
 namespace VGG::Layout
 {

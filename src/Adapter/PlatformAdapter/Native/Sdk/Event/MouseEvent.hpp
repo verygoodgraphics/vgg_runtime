@@ -15,11 +15,11 @@
  */
 #pragma once
 
+#include <memory>
+#include "Application/UIEvent.hpp"
 #include "UIEvent.hpp"
-
 #include "Utility/Log.hpp"
-
-#include <node_api.h>
+#include "js_native_api.h"
 
 namespace VGG
 {

@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 #include "ViewModel.hpp"
-
 #include "Domain/Layout/Layout.hpp"
-#include "Domain/RawJsonDocument.hpp"
 #include "Utility/Log.hpp"
 
-using namespace VGG;
+namespace VGG
+{
 
 std::shared_ptr<LayoutNode> ViewModel::layoutTree() const
 {
@@ -44,3 +43,5 @@ std::shared_ptr<Domain::DesignDocument> ViewModel::designDoc() const
 
   return {};
 }
+
+} // namespace VGG

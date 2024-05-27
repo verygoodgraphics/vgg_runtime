@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "Environment.hpp"
+#include <memory>
 #include "NativeExec.hpp"
 
 namespace VGG

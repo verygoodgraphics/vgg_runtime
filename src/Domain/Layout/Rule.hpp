@@ -15,12 +15,11 @@
  */
 #pragma once
 
-#include <nlohmann/json.hpp>
-
+#include <stdint.h>
 #include <optional>
 #include <string>
 #include <variant>
-#include <vector>
+#include <nlohmann/json.hpp>
 
 namespace VGG
 {

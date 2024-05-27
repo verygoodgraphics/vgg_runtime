@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 #include "DirSaver.hpp"
-
-#include "Utility/Log.hpp"
-
-#include <cstring>
 #include <fstream>
-#include <iostream>
+#include <ios>
+#include <cerrno>
+#include <cstring>
 #include <filesystem>
-
-namespace fs = std::filesystem;
+#include <fstream>
+#include "Utility/Log.hpp"
 
 namespace VGG
 {
@@ -37,6 +35,8 @@ DirSaver::DirSaver(const std::string& modelDir)
 
 void DirSaver::visit(const std::string& path, const std::vector<char>& content)
 {
+  namespace fs = std::filesystem;
+
   std::filesystem::path filePath{ m_model_dir };
   filePath /= path;
 

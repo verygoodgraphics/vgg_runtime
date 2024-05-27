@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 #include "ExpandSymbol.hpp"
-
-#include "Layout.hpp"
-#include "ReferenceJsonDocument.hpp"
-#include "Rule.hpp"
-
+#include <algorithm>
+#include <cstring>
+#include <fstream>
+#include <iterator>
+#include <numeric>
+#include <optional>
+#include <variant>
+#include "DesignModel.hpp"
+#include "Domain/Model/Element.hpp"
 #include "Helper.hpp"
 #include "JsonKeys.hpp"
-
-#include "Domain/Model/Element.hpp"
+#include "Layout.hpp"
+#include "Node.hpp"
+#include "Rect.hpp"
+#include "Rule.hpp"
 #include "Utility/Log.hpp"
 #include "Utility/VggString.hpp"
-
-#include <algorithm>
-#include <fstream>
-#include <numeric>
-#include <iostream>
+#include <nlohmann/json.hpp>
 
 #undef DEBUG
 #define DEBUG(msg, ...)

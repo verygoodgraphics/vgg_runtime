@@ -44,7 +44,6 @@ class AppRender;
 
 namespace internal
 {
-class Pager;
 
 class UIViewImpl
 {

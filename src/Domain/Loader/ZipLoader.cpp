@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 #include "ZipLoader.hpp"
-
-#include <zip.h>
-
+#include <utility>
+#include "Config.hpp"
 #include "Utility/Log.hpp"
+#include <zip.h>
 
 namespace VGG
 {

@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 #include "ZipSaver.hpp"
-
 #include <zip.h>
-
 #include <filesystem>
-#include <fstream>
-namespace fs = std::filesystem;
 
 namespace VGG
 {
@@ -29,6 +25,8 @@ namespace Model
 ZipSaver::ZipSaver(const std::string& filePath)
   : m_filePath{ filePath }
 {
+  namespace fs = std::filesystem;
+
   std::filesystem::path dirs{ m_filePath };
   dirs.remove_filename();
   fs::create_directories(dirs);

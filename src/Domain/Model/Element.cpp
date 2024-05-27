@@ -15,22 +15,25 @@
  */
 
 #include "Domain/Model/Element.hpp"
-
+#include <algorithm>
+#include <optional>
+#include <variant>
 #include "Domain/Model/DesignModel.hpp"
 #include "Layout/BezierPoint.hpp"
 #include "Layout/Helper.hpp"
-
+#include "Math.hpp"
+#include "Rect.hpp"
 #include "Utility/Log.hpp"
 #include "Utility/VggString.hpp"
+#include <nlohmann/json.hpp>
 
-#include <algorithm>
-
-using namespace VGG;
-using namespace VGG::Domain;
-using namespace VGG::Model;
+namespace VGG::Domain
+{
 
 namespace
 {
+using namespace Model;
+
 constexpr auto K_BORDER_PREFIX = "style.borders";
 
 struct ElementFactory
@@ -1291,3 +1294,5 @@ std::shared_ptr<Element> StateTreeElement::clone() const
 {
   return {};
 }
+
+} // namespace VGG::Domain

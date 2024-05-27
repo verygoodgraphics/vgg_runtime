@@ -15,46 +15,32 @@
  */
 #pragma once
 
-#include "Domain/JsonDocument.hpp"
-#include "Rect.hpp"
-
+#include <stdint.h>
+#include <algorithm>
+#include <cstddef>
 #include <functional>
 #include <memory>
 #include <optional>
 #include <string>
-#include <vector>
 #include <utility>
-
-class flexbox_node;
-class grid_layout;
-
+#include <vector>
+#include "Domain/Layout/Rect.hpp"
+#include "Domain/Model/Element.hpp"
 namespace VGG
 {
-namespace Domain
-{
-class ContourElement;
-class Element;
-class StateTreeElement;
-} // namespace Domain
-namespace Model
-{
-struct Object;
-}
 namespace Layout
 {
+struct BezierPoint;
 struct Matrix;
-
 namespace Internal
 {
 class AutoLayout;
-
-namespace Rule
-{
-struct Rule;
 }
-
-} // namespace Internal
 } // namespace Layout
+} // namespace VGG
+
+namespace VGG
+{
 
 class LayoutNode : public std::enable_shared_from_this<LayoutNode>
 {

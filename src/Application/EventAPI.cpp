@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Event/Keycode.hpp"
-#include "Utility/Log.hpp"
+#include <cstdint>
+#include <memory>
+#include <utility>
 #include "Event/EventAPI.hpp"
+#include "Event/Keycode.hpp"
+#include "Event/Scancode.hpp"
+#include "Utility/Log.hpp"
 
 static std::unique_ptr<EventAPI> g_vggEventAPIImpl = nullptr;
 

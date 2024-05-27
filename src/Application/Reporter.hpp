@@ -15,19 +15,19 @@
  */
 #pragma once
 
+#include <memory>
 #include "Editor.hpp"
 #include "UIEvent.hpp"
-
-#include "Domain/IVggEnv.hpp"
-
 #include <nlohmann/json.hpp>
-
-#include <memory>
+namespace VGG
+{
+class IVggEnv;
+class LayoutNode;
+class VggExec;
+} // namespace VGG
 
 namespace VGG
 {
-
-class VggExec;
 
 class Reporter : public Editor::Listener
 {

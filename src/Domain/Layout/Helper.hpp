@@ -15,12 +15,19 @@
  */
 #pragma once
 
-#include "Domain/Layout/Math.hpp"
-#include "Domain/Layout/Rect.hpp"
-
-#include <nlohmann/json.hpp>
-
 #include <stack>
+#include <string>
+#include <vector>
+#include <nlohmann/json.hpp>
+namespace VGG
+{
+namespace Layout
+{
+struct Matrix;
+struct Point;
+struct Rect;
+} // namespace Layout
+} // namespace VGG
 
 namespace VGG
 {

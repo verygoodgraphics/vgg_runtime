@@ -30,13 +30,20 @@
 #include "UIOptions.hpp"
 #include "Utility/Log.hpp"
 #include "Utility/VggFloat.hpp"
+#include <rxcpp/rx-includes.hpp>
+#include <rxcpp/rx-predef.hpp>
+#include <rxcpp/subjects/rx-subject.hpp>
 
 #undef DEBUG
 #define DEBUG(msg, ...)
 
-using namespace VGG;
+namespace VGG
+{
 
+namespace
+{
 const auto K_EDITOR_PADDING = 100;
+}
 
 void Presenter::fitForEditing(const Layout::Size& pageSize)
 {
@@ -452,3 +459,5 @@ bool Presenter::presentInstanceState(
   m_view->saveState(oldState);
   return success;
 }
+
+} // namespace VGG

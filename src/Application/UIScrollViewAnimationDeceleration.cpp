@@ -15,20 +15,20 @@
  */
 
 #include "UIScrollViewAnimationDeceleration.hpp"
-
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
+#include "Application/UIScrollViewAnimation.hpp"
+#include "Domain/Layout/Rect.hpp"
 #include "UIScrollView.hpp"
-
-#include "Utility/Log.hpp"
 #include "Utility/VggDate.hpp"
 #include "Utility/VggFloat.hpp"
-
-#include <cstdlib>
 
 #undef DEBUG
 #define DEBUG(msg, ...)
 
-using namespace VGG;
-using namespace VGG::UIKit;
+namespace VGG::UIKit
+{
 
 namespace
 {
@@ -244,3 +244,5 @@ void UIScrollViewAnimationDeceleration::momentumScrollBy(Point delta)
     m_y.decelerateTime = m_lastMomentumTime;
   }
 }
+
+} // namespace VGG::UIKit

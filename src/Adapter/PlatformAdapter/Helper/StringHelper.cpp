@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #include "PlatformAdapter/Helper/StringHelper.hpp"
-
 #include <cctype>
 #include <iomanip>
 #include <sstream>

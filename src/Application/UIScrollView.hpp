@@ -15,34 +15,31 @@
  */
 #pragma once
 
-#include "Application/UIView.hpp"
-
-#include "UIPanGestureRecognizer.hpp"
-#include "Types.hpp"
-
-#include <Utility/VggTimer.hpp>
-
 #include <memory>
-
-using VGG::Layout::Point;
-using VGG::Layout::Size;
+#include "Application/UIView.hpp"
+#include "Domain/Layout/Rect.hpp"
+#include "UIPanGestureRecognizer.hpp"
 namespace VGG
 {
-
+class Timer;
 namespace UIKit
 {
 class UIScrollViewAnimation;
 class UIScrollViewAnimationDeceleration;
 } // namespace UIKit
+} // namespace VGG
+union UEvent;
+
+namespace VGG
+{
 
 class UIScrollView : public UIView
 {
   friend class UIKit::UIScrollViewAnimationDeceleration;
 
-public:
 private:
-  Size  m_contentSize{ 0, 0 };
-  Point m_contentOffset{ 0, 0 };
+  Layout::Size  m_contentSize{ 0, 0 };
+  Layout::Point m_contentOffset{ 0, 0 };
 
   bool m_scrollEnabled{ true };
   bool m_bouncesHorizontally{ false };
@@ -80,10 +77,10 @@ public:
 
   bool onEvent(UEvent e, void* userData) override;
 
-  Size contentSize() const;
-  void setContentSize(Size size);
-  void setContentOffset(Point offset, bool cancelAnimation = false);
-  auto contentOffset() const -> Point
+  Layout::Size contentSize() const;
+  void         setContentSize(Layout::Size size);
+  void         setContentOffset(Layout::Point offset, bool cancelAnimation = false);
+  auto         contentOffset() const -> Layout::Point
   {
     return m_contentOffset;
   }
@@ -95,18 +92,19 @@ private:
   void handleGesture(UIKit::UIPanGestureRecognizer& recognizer);
 
   void beginDragging();
-  void dragBy(Point delta);
-  void endDraggingWithDecelerationVelocity(Point velocity);
+  void dragBy(Layout::Point delta);
+  void endDraggingWithDecelerationVelocity(Layout::Point velocity);
 
   void setScrollAnimation(std::shared_ptr<UIKit::UIScrollViewAnimation> animation);
   void cancelScrollAnimation();
   void updateScrollAnimation();
 
-  std::shared_ptr<UIKit::UIScrollViewAnimation> decelerationAnimationWithVelocity(Point velocity);
+  std::shared_ptr<UIKit::UIScrollViewAnimation> decelerationAnimationWithVelocity(
+    Layout::Point velocity);
 
-  void  confineContent();
-  void  setRestrainedContentOffset(Point offset);
-  Point confinedContentOffset(Point contentOffset);
+  void          confineContent();
+  void          setRestrainedContentOffset(Layout::Point offset);
+  Layout::Point confinedContentOffset(Layout::Point contentOffset);
 };
 
 } // namespace VGG

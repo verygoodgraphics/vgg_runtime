@@ -14,11 +14,21 @@
  * limitations under the License.
  */
 #include "UIApplication.hpp"
-
+#include <algorithm>
+#include <iterator>
+#include <optional>
+#include "AppRender.hpp"
+#include "Controller.hpp"
+#include "Domain/Layout/Rect.hpp"
+#include "Event/Event.hpp"
+#include "Event/Keycode.hpp"
 #include "Layer/Core/EventManager.hpp"
+#include "Layer/Graphics/GraphicsContext.hpp"
+#include "Layer/VGGLayer.hpp"
 #include "UIScrollView.hpp"
 
-using namespace VGG;
+namespace VGG
+{
 
 void UIApplication::setView(std::shared_ptr<UIScrollView> view, double w, double h)
 {
@@ -186,3 +196,5 @@ std::vector<uint8_t> UIApplication::makeImageSnapshot(layer::ImageOptions option
 
   return result;
 }
+
+} // namespace VGG

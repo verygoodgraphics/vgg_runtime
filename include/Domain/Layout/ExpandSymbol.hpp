@@ -15,22 +15,17 @@
  */
 #pragma once
 
-#include "Rect.hpp"
-
-#include "Domain/Model/DesignModelFwd.hpp"
-
-#include <nlohmann/json.hpp>
-
+#include <memory>
 #include <stack>
 #include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <nlohmann/json.hpp>
 
 namespace VGG
 {
 class LayoutNode;
-
 namespace Domain
 {
 class DesignDocument;
@@ -38,12 +33,10 @@ class Element;
 class SymbolInstanceElement;
 class SymbolMasterElement;
 } // namespace Domain
-
 namespace Layout
 {
-constexpr auto K_SEPARATOR = "__";
-
 class Layout;
+struct Size;
 namespace Internal
 {
 namespace Rule
@@ -51,6 +44,21 @@ namespace Rule
 struct Rule;
 }
 } // namespace Internal
+} // namespace Layout
+namespace Model
+{
+struct Container;
+struct DesignModel;
+struct OverrideValue;
+struct SymbolMaster;
+} // namespace Model
+} // namespace VGG
+
+namespace VGG
+{
+namespace Layout
+{
+constexpr auto K_SEPARATOR = "__";
 
 class ExpandSymbol
 {

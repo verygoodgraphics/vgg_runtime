@@ -15,14 +15,16 @@
  */
 #include <node.h>
 #include <node_api.h>
-#include <util.h>
-
-#include "VggSdkAddon.hpp"
-#include "PlatformAdapter/Native/Sdk/VggSdkNodeAdapter.hpp"
 #include "PlatformAdapter/Native/Sdk/Event/KeyboardEvent.hpp"
 #include "PlatformAdapter/Native/Sdk/Event/MouseEvent.hpp"
 #include "PlatformAdapter/Native/Sdk/Event/TouchEvent.hpp"
-#include "PlatformAdapter/Native/Sdk/Event/UIEvent.hpp"
+#include "PlatformAdapter/Native/Sdk/VggSdkNodeAdapter.hpp"
+#include "VggSdkAddon.hpp"
+#include "js_native_api_types.h"
+namespace node
+{
+class Environment;
+}
 
 napi_value InitializeLocalNapiBinding(napi_env env, napi_value exports)
 {

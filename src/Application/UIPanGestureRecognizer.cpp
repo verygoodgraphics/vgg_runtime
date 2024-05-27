@@ -15,10 +15,10 @@
  */
 
 #include "UIPanGestureRecognizer.hpp"
-
+#include "Application/Types.hpp"
+#include "Application/UIGestureRecognizer.hpp"
 #include "Application/UIView.hpp"
-
-#include "Utility/Log.hpp"
+#include "Event/Event.hpp"
 #include "Utility/VggDate.hpp"
 
 #undef DEBUG

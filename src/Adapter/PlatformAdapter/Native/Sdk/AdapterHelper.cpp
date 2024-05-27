@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 #include "AdapterHelper.hpp"
-#include "defines.hpp"
-#include "Utility/Log.hpp"
+#include <stdint.h>
+#include <stdlib.h>
 #include <cassert>
 #include <stdexcept>
+#include "Utility/Log.hpp"
+#include "defines.hpp"
 
 namespace VGG
 {

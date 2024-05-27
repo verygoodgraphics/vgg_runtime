@@ -15,44 +15,47 @@
  */
 #pragma once
 
-#include "UIEvent.hpp"
-#include "UIAnimation.hpp"
-
+#include <cstddef>
+#include <functional>
+#include <map>
+#include <memory>
+#include <stack>
+#include <string>
+#include <tuple>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 #include "Application/Event/EventListener.hpp"
 #include "Application/UIAnimation.hpp"
 #include "Application/UIOptions.hpp"
 #include "Domain/Layout/Rect.hpp"
+#include "Event/Event.hpp"
 #include "Layer/Core/FrameNode.hpp"
-
-#include <nlohmann/json.hpp>
-
-#include <memory>
-#include <stack>
-#include <tuple>
-#include <vector>
-#include <utility>
-
+#include "Layer/Memory/Ref.hpp"
+#include "UIEvent.hpp"
+#include "glm/ext/vector_float2.hpp"
 namespace VGG
 {
-
 class LayoutNode;
 class StateTree;
-struct ViewModel;
-
 namespace app
 {
 class AppRender;
-} // namespace app
-
-namespace layer
-{
-class SceneNode;
 }
-
 namespace internal
 {
 class UIViewImpl;
 }
+namespace layer
+{
+class SceneNode;
+}
+struct ViewModel;
+} // namespace VGG
+
+namespace VGG
+{
+
 class UIView : public app::EventListener
 {
 public:

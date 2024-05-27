@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 #include "NativeExec.hpp"
-
+#include <assert.h>
+#include "PlatformAdapter/Helper/StringHelper.hpp"
 #include "PlatformAdapter/Native/Exec/NativeExecImpl.hpp"
 #include "PlatformAdapter/Native/Sdk/Event/EventStore.hpp"
 #include "PlatformAdapter/Native/Sdk/Event/JsEventGenerator.hpp"
-#include "PlatformAdapter/Native/Sdk/Event/UIEvent.hpp"
-#include "PlatformAdapter/Helper/StringHelper.hpp"
 #include "Utility/Log.hpp"
 
-using namespace VGG;
+namespace VGG
+{
 
 std::shared_ptr<NativeExec> NativeExec::sharedInstance()
 {
@@ -120,3 +120,5 @@ void NativeExec::openUrl(const std::string& url, const std::string& target)
 {
   WARN("todo, open url, %s, %s", url.c_str(), target.c_str());
 }
+
+} // namespace VGG

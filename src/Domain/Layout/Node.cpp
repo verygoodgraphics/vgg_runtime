@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 #include "Node.hpp"
-
-#include "AutoLayout.hpp"
-#include "BezierPoint.hpp"
-#include "Color.hpp"
-#include "Helper.hpp"
-#include "JsonKeys.hpp"
-#include "Rect.hpp"
-
-#include "Domain/Model/Element.hpp"
-#include "Math/Math.hpp"
-#include "Utility/Log.hpp"
-#include "Utility/VggFloat.hpp"
-
-#include <algorithm>
 #include <cmath>
+#include <cstdlib>
 #include <functional>
 #include <iostream>
 #include <numeric>
+#include "AutoLayout.hpp"
+#include "BezierPoint.hpp"
+#include "Color.hpp"
+#include "DesignModel.hpp"
+#include "Domain/Model/Element.hpp"
+#include "Math.hpp"
+#include "Rect.hpp"
+#include "Utility/Log.hpp"
+#include "Utility/VggFloat.hpp"
+
 
 #undef DEBUG
 #define DEBUG(msg, ...)

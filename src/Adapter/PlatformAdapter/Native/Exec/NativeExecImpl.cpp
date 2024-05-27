@@ -14,8 +14,30 @@
  * limitations under the License.
  */
 #include "PlatformAdapter/Native/Exec/NativeExecImpl.hpp"
-
+#include <stdint.h>
+#include <stdio.h>
+#include <iostream>
+#include <limits>
+#include <string_view>
 #include "Utility/Log.hpp"
+#include "node.h"
+#include "uv.h"
+#include "v8-context.h"
+#include "v8-initialization.h"
+#include "v8-isolate.h"
+#include "v8-local-handle.h"
+#include "v8-locker.h"
+#include "v8-maybe.h"
+#include "v8-primitive.h"
+#include "v8-script.h"
+namespace node
+{
+class Environment;
+}
+namespace v8
+{
+class Value;
+}
 
 #undef INFO
 #define INFO(msg, ...)
@@ -23,9 +45,16 @@
 #undef DEBUG
 #define DEBUG(msg, ...)
 
-constexpr int THREAD_POOL_SIZE = 4;
+namespace
+{
+using namespace node;
+using namespace v8;
 
-using namespace VGG;
+constexpr int THREAD_POOL_SIZE = 4;
+} // namespace
+
+namespace VGG
+{
 
 /*
  * NativeExecImpl
@@ -303,3 +332,5 @@ void NativeExecImpl::run_task()
     UNUSED(ret);
   }
 }
+
+} // namespace VGG

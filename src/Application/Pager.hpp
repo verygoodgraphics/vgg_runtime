@@ -15,7 +15,15 @@
  */
 #pragma once
 
-#include "Layer/Core/SceneNode.hpp"
+#include "Layer/Core/VBounds.hpp"
+namespace VGG
+{
+namespace layer
+{
+class FrameNode;
+class SceneNode;
+} // namespace layer
+} // namespace VGG
 
 namespace VGG::internal
 {

@@ -61,21 +61,23 @@ public:
 
   Bounds objectBounds();
 
+  // Model attributes
   void setFillStyle(const std::vector<Fill>& fills)
   {
     ASSERT(m_fillEffect);
     if (m_fills == fills)
       return;
     m_fills = fills;
-    m_fillEffect->setFillStyle(std::move(fills));
+    m_fillEffect->applyFillStyle(std::move(fills));
   }
+
   void setBorderStyle(const std::vector<Border>& borders)
   {
     ASSERT(m_borderEffect);
     if (m_borders == borders)
       return;
     m_borders = borders;
-    m_borderEffect->setBorderStyle(std::move(borders));
+    m_borderEffect->applyBorderStyle(std::move(borders));
   }
 
   const std::vector<Fill>& getFillStyle() const
@@ -83,22 +85,26 @@ public:
     ASSERT(m_fillEffect);
     return m_fills;
   }
+
   const std::vector<Border>& getBorderStyle() const
   {
     ASSERT(m_borderEffect);
     return m_borders;
   }
 
-  // const std::vector<Ref<FillPenNode>>& getFillStyle() const
-  // {
-  //   ASSERT(m_fillEffect);
-  //   return m_fillEffect->fills();
-  // }
-  // const std::vector<Ref<BorderPenNode>>& getBorderStyle() const
-  // {
-  //   ASSERT(m_borderEffect);
-  //   return m_borderEffect->borders();
-  // }
+  // style manipulation APIs (view attributes)
+
+  const std::vector<Ref<Brush>>& getBrush() const
+  {
+    ASSERT(m_fillEffect);
+    return m_fillEffect->fills();
+  }
+
+  const std::vector<Ref<BorderBrush>>& getBorderBrush() const
+  {
+    ASSERT(m_borderEffect);
+    return m_borderEffect->borders();
+  }
 
   InnerShadowAttribute* getInnerShadowAttribute() const
   {

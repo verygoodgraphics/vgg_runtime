@@ -25,7 +25,11 @@ using namespace VGG;
 namespace VGG::layer
 {
 
-void FillPenNode::onMakePaint(SkPaint* paint, const Bounds& bounds) const
+void Brush::applyFill(const Fill& fill)
+{
+}
+
+void Brush::onMakePaint(SkPaint* paint, const Bounds& bounds) const
 {
   populateSkPaint(
     m_fill.type,
@@ -73,19 +77,23 @@ void FillPenNode::onMakePaint(SkPaint* paint, const Bounds& bounds) const
         m_currentFrame %= m_pattern->frameCount();
         if (isAnimatedPatternEnabled())
         {
-          const_cast<FillPenNode*>(this)->update();
+          const_cast<Brush*>(this)->update();
         }
       }
     }
   }
 }
 
-Bounds FillPenNode::onRevalidate()
+Bounds Brush::onRevalidate()
 {
   return Bounds();
 }
 
-void BorderPenNode::onMakePaint(SkPaint* paint, const Bounds& bounds) const
+void BorderBrush::applyBorder(const Border& border)
+{
+}
+
+void BorderBrush::onMakePaint(SkPaint* paint, const Bounds& bounds) const
 
 {
   populateSkPaint(
@@ -133,14 +141,14 @@ void BorderPenNode::onMakePaint(SkPaint* paint, const Bounds& bounds) const
         m_currentFrame %= m_pattern->frameCount();
         if (isAnimatedPatternEnabled())
         {
-          const_cast<BorderPenNode*>(this)->update();
+          const_cast<BorderBrush*>(this)->update();
         }
       }
     }
   }
 }
 
-Bounds BorderPenNode::onRevalidate()
+Bounds BorderBrush::onRevalidate()
 {
   return Bounds();
 }

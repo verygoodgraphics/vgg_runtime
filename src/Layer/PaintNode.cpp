@@ -527,8 +527,12 @@ void PaintNode::setStyle(const Style& style)
 {
   VGG_IMPL(PaintNode);
   auto aa = _->accessor.get();
-  aa->setFills(style.fills);
-  aa->setBorders(style.borders);
+  auto item = aa->styleItem();
+  // aa->setFills(style.fills);
+  // aa->setBorders(style.borders);
+  item->setFillStyle(style.fills);
+  item->setBorderStyle(style.borders);
+
   aa->setInnerShadows(style.innerShadow);
   aa->setDropShadows(style.dropShadow);
   aa->setLayerBlurs(style.layerEffects);

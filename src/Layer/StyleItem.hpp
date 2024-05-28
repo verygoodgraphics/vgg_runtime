@@ -31,7 +31,7 @@ namespace VGG::layer
 {
 
 class StyleItem__pImpl;
-class StyleItem : public GraphicItem
+class StyleItem : public RenderNode
 {
   VGG_DECL_IMPL(StyleItem);
 
@@ -41,21 +41,15 @@ public:
 
   void render(Renderer* renderer) override;
 
+  void nodeAt(int x, int y, NodeVisitor vistor, void* userData) override
+  {
+  }
+
 #ifdef VGG_LAYER_DEBUG
   virtual void debug(Renderer* render) override;
 #endif
 
   void renderAsMask(Renderer* render);
-
-  ShapeAttribute* shape() const override
-  {
-    return m_graphicItem->shape();
-  }
-
-  sk_sp<SkImageFilter> getMaskFilter() const override
-  {
-    return 0;
-  }
 
   Bounds effectBounds() const override;
 

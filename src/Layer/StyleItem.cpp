@@ -18,6 +18,7 @@
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Config.hpp"
 #include "Layer/Core/EffectNode.hpp"
+#include "Layer/Core/VNode.hpp"
 #include "Layer/EffectAttribute.hpp"
 #include "Layer/ShapeItem.hpp"
 #include "VSkia.hpp"
@@ -85,7 +86,7 @@ StyleItem::StyleItem(
   PaintNode*              node,
   Ref<TransformAttribute> transform,
   Creator                 creator)
-  : GraphicItem(cnt)
+  : RenderNode(cnt, INVALIDATE)
   , d_ptr(new StyleItem__pImpl(this))
   , m_transformAttr(transform)
 {
@@ -95,7 +96,6 @@ StyleItem::StyleItem(
   m_alphaMaskAttr = AlphaMaskAttribute::Make(node, layerPostProcess);
   m_graphicItem = creator(nullptr, nullptr);
   auto shape = incRef(m_graphicItem->shape());
-  // m_objectAttr->setGraphicItem(renderObject);
   m_innerShadowAttr = InnerShadowAttribute::Make(shape);
   m_dropShadowAttr = DropShadowAttribute::Make(shape);
   m_backgroundBlurAttr = BackdropFXAttribute::Make();
@@ -114,8 +114,6 @@ StyleItem::StyleItem(
 void StyleItem::render(Renderer* renderer)
 {
   VGG_LAYER_DEBUG_CODE(if (!m_picture) VGG_LOG_DEV(ERROR, StyleItem, "no picture"););
-  // auto canvas = renderer->canvas();
-  // canvas->drawPicture(m_picture);
   recorder(renderer);
 }
 

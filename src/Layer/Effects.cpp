@@ -685,7 +685,7 @@ void StackFillEffectImpl::onRenderShape(Renderer* renderer, const VShape& vs)
   {
     // auto r = vs.bounds();
     // auto bounds = Bounds{ r.x(), r.y(), r.width(), r.height() };
-    if (p->getFill().isEnabled)
+    if (p->getEnabled())
     {
       auto paint = p->paint(bounds());
       vs.draw(renderer->canvas(), paint);
@@ -720,25 +720,24 @@ void StackBorderEffectImpl::onRenderShape(Renderer* renderer, const VShape& bord
     Bounds{ resultBounds.x(), resultBounds.y(), resultBounds.width(), resultBounds.height() };
   for (const auto& p : m_pens)
   {
-    auto b = p->getBorder();
-    if (b.isEnabled && b.thickness > 0)
+    if (p->getEnabled() && p->getStrokeWidth() > 0)
     {
       auto strokePen = p->paint(originalBounds); // TODO:: we can use effectBounds for more accurate
 
       bool  inCenter = true;
-      float strokeWidth = b.thickness;
-      if (b.position == PP_INSIDE && border.isClosed())
+      float strokeWidth = p->getStrokeWidth();
+      if (p->getPosition() == PP_INSIDE && border.isClosed())
       {
         // inside
-        strokeWidth = 2.f * b.thickness;
+        strokeWidth = 2.f * p->getStrokeWidth();
         renderer->canvas()->save();
         border.clip(renderer->canvas(), SkClipOp::kIntersect);
         inCenter = false;
       }
-      else if (b.position == PP_OUTSIDE && border.isClosed())
+      else if (p->getPosition() == PP_OUTSIDE && border.isClosed())
       {
         // outside
-        strokeWidth = 2.f * b.thickness;
+        strokeWidth = 2.f * p->getStrokeWidth();
         renderer->canvas()->save();
         border.clip(renderer->canvas(), SkClipOp::kDifference);
         inCenter = false;
@@ -764,7 +763,7 @@ bool StackFillEffectImpl::onRevalidateVisible(const Bounds& bounds)
   for (const auto& p : m_pens)
   {
     p->revalidate();
-    if (p->getFill().isEnabled)
+    if (p->getEnabled())
     {
       hasFill = true;
     }
@@ -781,23 +780,22 @@ bool StackBorderEffectImpl::onRevalidateVisible(const Bounds& bounds)
 
 std::pair<bool, Bounds> StackBorderEffectImpl::computeFastBounds(const SkRect& bounds) const
 {
-  const Border* maxWidthBorder = nullptr;
-  float         maxWidth = 0;
+  const BorderBrush* maxWidthBorder = nullptr;
+  float              maxWidth = 0;
   for (const auto& p : m_pens)
   {
-    const auto& b = p->getBorder();
-    if (!b.isEnabled || b.thickness <= 0)
+    if (!p->getEnabled() || p->getStrokeWidth() <= 0)
       continue;
     // We simply assumes that the wider of the stroke, the larger its bounds
-    float strokeWidth = b.thickness;
-    if (b.position == PP_INSIDE)
-      strokeWidth = 2.f * b.thickness;
-    else if (b.position == PP_OUTSIDE)
-      strokeWidth = 2.f * b.thickness;
+    float strokeWidth = p->getStrokeWidth();
+    if (p->getPosition() == PP_INSIDE)
+      strokeWidth = 2.f * p->getStrokeWidth();
+    else if (p->getPosition() == PP_OUTSIDE)
+      strokeWidth = 2.f * p->getStrokeWidth();
     if (strokeWidth > maxWidth)
     {
       maxWidth = strokeWidth;
-      maxWidthBorder = &b;
+      maxWidthBorder = p.get();
     }
   }
   if (maxWidthBorder)
@@ -806,14 +804,15 @@ std::pair<bool, Bounds> StackBorderEffectImpl::computeFastBounds(const SkRect& b
     // Only consider these properties that affect bounds
     paint.setStyle(SkPaint::kStroke_Style);
     paint.setAntiAlias(true);
+    const auto& dashPattern = maxWidthBorder->getDashPattern();
     paint.setPathEffect(SkDashPathEffect::Make(
-      maxWidthBorder->dashedPattern.data(),
-      maxWidthBorder->dashedPattern.size(),
-      maxWidthBorder->dashedOffset));
-    paint.setStrokeJoin(toSkPaintJoin(maxWidthBorder->lineJoinStyle));
-    paint.setStrokeCap(toSkPaintCap(maxWidthBorder->lineCapStyle));
-    paint.setStrokeMiter(maxWidthBorder->miterLimit);
-    paint.setStrokeWidth(maxWidthBorder->thickness);
+      dashPattern.data(),
+      dashPattern.size(),
+      maxWidthBorder->getDashPatternOffset()));
+    paint.setStrokeJoin(maxWidthBorder->getStrokeJoin());
+    paint.setStrokeCap(maxWidthBorder->getStrokeCap());
+    paint.setStrokeMiter(maxWidthBorder->getStrokeMiter());
+    paint.setStrokeWidth(maxWidthBorder->getStrokeWidth());
     paint.setStrokeWidth(maxWidth);
     SkRect rect;
     paint.computeFastStrokeBounds(bounds, &rect);

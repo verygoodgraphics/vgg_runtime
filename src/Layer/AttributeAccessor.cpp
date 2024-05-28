@@ -41,8 +41,8 @@ ATTR_DEF(
   const std::vector<InnerShadow>&,
   InnerShadowStyle,
   m_innerShadowAttr);
-ATTR_DEF(Accessor, Fills, const std::vector<Fill>&, FillStyle, m_item);
-ATTR_DEF(Accessor, Borders, const std::vector<Border>&, BorderStyle, m_item);
+MODEL_DEF(Accessor, Fills, const std::vector<Fill>&, FillStyle, m_item);
+MODEL_DEF(Accessor, Borders, const std::vector<Border>&, BorderStyle, m_item);
 ATTR_DEF(Accessor, LayerBlurs, const std::vector<LayerFX>&, LayerBlur, m_layerFXAttr);
 ATTR_DEF(
   Accessor,

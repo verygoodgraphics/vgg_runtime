@@ -49,7 +49,7 @@ public:
 
   ShapeAttribute* shape() const override
   {
-    return 0;
+    return m_graphicItem->shape();
   }
 
   sk_sp<SkImageFilter> getMaskFilter() const override
@@ -61,8 +61,8 @@ public:
 
   Bounds objectBounds();
 
-  // Model attributes
-  void setFillStyle(const std::vector<Fill>& fills)
+  // Model attributes, these should be moved out of StyleItem. Maybe PaintNode is a good choice
+  void applyFillStyle(const std::vector<Fill>& fills)
   {
     ASSERT(m_fillEffect);
     if (m_fills == fills)
@@ -71,7 +71,7 @@ public:
     m_fillEffect->applyFillStyle(std::move(fills));
   }
 
-  void setBorderStyle(const std::vector<Border>& borders)
+  void applyBorderStyle(const std::vector<Border>& borders)
   {
     ASSERT(m_borderEffect);
     if (m_borders == borders)
@@ -80,13 +80,13 @@ public:
     m_borderEffect->applyBorderStyle(std::move(borders));
   }
 
-  const std::vector<Fill>& getFillStyle() const
+  const std::vector<Fill>& getModelFillStyle() const
   {
     ASSERT(m_fillEffect);
     return m_fills;
   }
 
-  const std::vector<Border>& getBorderStyle() const
+  const std::vector<Border>& getModelBorderStyle() const
   {
     ASSERT(m_borderEffect);
     return m_borders;
@@ -110,9 +110,6 @@ public:
   {
     return m_innerShadowAttr.get();
   }
-
-  // VGG_ATTRIBUTE(FillStyle, const std::vector<Fill>&, m_fills);
-  // VGG_ATTRIBUTE(BorderStyle, const std::vector<Border>&, m_borders);
 
   bool isInvalid() const
   {

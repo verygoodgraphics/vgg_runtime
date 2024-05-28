@@ -215,9 +215,9 @@ Bounds StyleItem::onRevalidateObject()
 {
   m_graphicItem->revalidate();
   m_hasFill = false;
-  for (const auto& p : m_fillEffect->fills())
+  for (const auto& p : m_fills)
   {
-    const auto& f = p->getFill();
+    const auto& f = p;
     if (f.isEnabled)
     {
       m_hasFill = true;

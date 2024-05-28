@@ -65,6 +65,24 @@
   void set##name(std::remove_cvref_t<type>&& v);                                                   \
   type get##name() const;
 
+#define MODEL_DEF(classname, name, type, internalname, container)                                  \
+  void classname::set##name(const std::remove_cvref_t<type>& v)                                    \
+  {                                                                                                \
+    ASSERT(container != nullptr);                                                                  \
+    container->apply##internalname(v);                                                             \
+  }                                                                                                \
+                                                                                                   \
+  void classname::set##name(std::remove_cvref_t<type>&& v)                                         \
+  {                                                                                                \
+    ASSERT(container != nullptr);                                                                  \
+    container->apply##internalname(std::move(v));                                                  \
+  }                                                                                                \
+  type classname::get##name() const                                                                \
+  {                                                                                                \
+    ASSERT(container != nullptr);                                                                  \
+    return container->getModel##internalname();                                                    \
+  }
+
 #define ATTR_DEF(classname, name, type, internalname, container)                                   \
   void classname::set##name(const std::remove_cvref_t<type>& v)                                    \
   {                                                                                                \

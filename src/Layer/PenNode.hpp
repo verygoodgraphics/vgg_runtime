@@ -17,6 +17,7 @@
 
 #include "Layer/Core/VNode.hpp"
 #include "Layer/Core/AttributeAccessor.hpp"
+#include "Layer/Core/VType.hpp"
 #include "Pattern.hpp"
 
 #include <core/SkPaint.h>
@@ -69,38 +70,7 @@ public:
     invalidate();
   }
 
-  void setColor(SkColor color)
-  {
-    if (std::holds_alternative<SkColor>(m_brush) && std::get<SkColor>(m_brush) == color)
-    {
-      return;
-    }
-    m_brush = color;
-    invalidate();
-  }
-
-  SkColor getColor() const
-  {
-    return std::get<SkColor>(m_brush);
-  }
-
-  void setShader(sk_sp<SkShader> shader)
-  {
-    if (
-      std::holds_alternative<sk_sp<SkShader>>(m_brush) &&
-      std::get<sk_sp<SkShader>>(m_brush) == shader)
-    {
-      return;
-    }
-    m_brush = shader;
-    invalidate();
-  }
-
-  sk_sp<SkShader> getShader() const
-  {
-    return std::get<sk_sp<SkShader>>(m_brush);
-  }
-
+  VGG_ATTRIBUTE(Brush, const FillType&, m_brush);
   VGG_ATTRIBUTE(Style, SkPaint::Style, m_style);
   VGG_ATTRIBUTE(StrokeWidth, float, m_strokeWidth);
   VGG_ATTRIBUTE(StrokeMiter, float, m_strokeMiter);
@@ -142,50 +112,50 @@ private:
   SkPaint::Style                              m_style = SkPaint::kFill_Style;
   SkPaint::Join                               m_strokeJoin = SkPaint::kMiter_Join;
   SkPaint::Cap                                m_strokeCap = SkPaint::kButt_Cap;
-  std::variant<SkColor, sk_sp<SkShader>>      m_brush;
+  FillType                                    m_brush;
 };
 
 class Brush : public PenNode
 {
 public:
+  Brush(VRefCnt* cnt)
+    : PenNode(cnt)
+  {
+  }
+
   Brush(VRefCnt* cnt, const Fill& fill)
     : PenNode(cnt)
-    , m_fill(fill)
   {
     applyFill(fill);
   }
 
-  // DEPRECATED
-  VGG_ATTRIBUTE(Fill, Fill, m_fill);
-
-  void applyFill(const Fill& fill);
+  VGG_ATTRIBUTE(Enabled, bool, m_enabled);
 
   VGG_CLASS_MAKE(Brush);
 
 protected:
-  void onMakePaint(SkPaint* paint, const Bounds& bounds) const override;
-
+  void   applyFill(const Fill& fill);
+  void   onMakePaint(SkPaint* paint, const Bounds& bounds) const override;
   Bounds onRevalidate() override;
 
 private:
-  Fill                                   m_fill; // DEPRECATED
+  bool                                   m_enabled{ true };
   mutable std::unique_ptr<ShaderPattern> m_pattern;
   mutable int                            m_currentFrame = 0;
 };
 
-class BorderBrush : public PenNode // TODO:: Should inherited from Brush
+class BorderBrush : public Brush
 {
 public:
   BorderBrush(VRefCnt* cnt, const Border& border)
-    : PenNode(cnt)
-    , m_border(border)
+    : Brush(cnt)
   {
     applyBorder(border);
   }
 
-  VGG_ATTRIBUTE(Border, Border, m_border); // DEPRECATED
-
-  void applyBorder(const Border& border);
+  VGG_ATTRIBUTE(Position, EPathPosition, m_position);
+  VGG_ATTRIBUTE(DashPattern, const std::vector<float>&, m_dashPattern);
+  VGG_ATTRIBUTE(DashPatternOffset, float, m_dashPatternOffset);
 
   VGG_CLASS_MAKE(BorderBrush);
 
@@ -194,9 +164,10 @@ protected:
   Bounds onRevalidate() override;
 
 private:
-  Border                                 m_border; // DEPRECATED
-  mutable std::unique_ptr<ShaderPattern> m_pattern;
-  mutable int                            m_currentFrame = 0;
+  void               applyBorder(const Border& border);
+  EPathPosition      m_position = EPathPosition::PP_CENTER;
+  std::vector<float> m_dashPattern;
+  float              m_dashPatternOffset = 0;
 };
 
 } // namespace VGG::layer

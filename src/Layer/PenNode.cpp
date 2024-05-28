@@ -27,42 +27,48 @@ namespace VGG::layer
 
 void Brush::applyFill(const Fill& fill)
 {
+  setStyle(SkPaint::kFill_Style);
+  setEnabled(fill.isEnabled);
+  setOpacity(fill.contextSettings.opacity);
+  auto bm = toSkBlendMode(fill.contextSettings.blendMode);
+  if (bm)
+  {
+    std::visit(
+      Overloaded{ [&](const sk_sp<SkBlender>& blender) { setBlender(blender); },
+                  [&](const SkBlendMode& mode) { setBlendMode(mode); } },
+      *bm);
+  }
+  setBrush(fill.type);
 }
 
 void Brush::onMakePaint(SkPaint* paint, const Bounds& bounds) const
 {
-  populateSkPaint(
-    m_fill.type,
-    m_fill.contextSettings,
-    toSkRect(bounds),
-    *paint,
-    [&](const Gradient& g, const ContextSetting& st)
-    {
-      paint->setShader(makeGradientShader(bounds, g));
-      paint->setAlphaf(st.opacity);
-    },
-    [&, this](const Pattern& p, const ContextSetting& st)
-    {
-      if (!this->m_pattern)
-      {
-        if (auto a = std::get_if<PatternFit>(&p.instance); a)
-        {
-          this->m_pattern = std::make_unique<ShaderPattern>(bounds, *a);
-        }
-        else if (auto a = std::get_if<PatternFill>(&p.instance); a)
-        {
-          this->m_pattern = std::make_unique<ShaderPattern>(bounds, *a);
-        }
-        else if (auto a = std::get_if<PatternStretch>(&p.instance); a)
-        {
-          this->m_pattern = std::make_unique<ShaderPattern>(bounds, *a);
-        }
-        else if (auto a = std::get_if<PatternTile>(&p.instance); a)
-        {
-          this->m_pattern = std::make_unique<ShaderPattern>(bounds, *a);
-        }
-      }
-    });
+  std::visit(
+    Overloaded{ [&](const Gradient& g) { paint->setShader(makeGradientShader(bounds, g)); },
+                [&](const Color& c) { paint->setColor(c); },
+                [&](const Pattern& p)
+                {
+                  if (!this->m_pattern)
+                  {
+                    if (auto a = std::get_if<PatternFit>(&p.instance); a)
+                    {
+                      this->m_pattern = std::make_unique<ShaderPattern>(bounds, *a);
+                    }
+                    else if (auto a = std::get_if<PatternFill>(&p.instance); a)
+                    {
+                      this->m_pattern = std::make_unique<ShaderPattern>(bounds, *a);
+                    }
+                    else if (auto a = std::get_if<PatternStretch>(&p.instance); a)
+                    {
+                      this->m_pattern = std::make_unique<ShaderPattern>(bounds, *a);
+                    }
+                    else if (auto a = std::get_if<PatternTile>(&p.instance); a)
+                    {
+                      this->m_pattern = std::make_unique<ShaderPattern>(bounds, *a);
+                    }
+                  }
+                } },
+    getBrush());
   if (this->m_pattern)
   {
     if (m_pattern->isValid())
@@ -91,61 +97,34 @@ Bounds Brush::onRevalidate()
 
 void BorderBrush::applyBorder(const Border& border)
 {
+  setStyle(SkPaint::kStroke_Style);
+  setEnabled(border.isEnabled);
+  setOpacity(border.contextSettings.opacity);
+  setDashPattern(border.dashedPattern);
+  setDashPatternOffset(border.dashedOffset);
+  setStrokeJoin(toSkPaintJoin(border.lineJoinStyle));
+  setStrokeCap(toSkPaintCap(border.lineCapStyle));
+  setStrokeWidth(border.thickness);
+  setStrokeMiter(border.miterLimit);
+  auto bm = toSkBlendMode(border.contextSettings.blendMode);
+  if (bm)
+  {
+    std::visit(
+      Overloaded{ [&](const sk_sp<SkBlender>& blender) { setBlender(blender); },
+                  [&](const SkBlendMode& mode) { setBlendMode(mode); } },
+      *bm);
+  }
+
+  setBrush(border.type);
 }
 
 void BorderBrush::onMakePaint(SkPaint* paint, const Bounds& bounds) const
 
 {
-  populateSkPaint(
-    m_border,
-    toSkRect(bounds),
-    *paint,
-    [&](const Gradient& g, const ContextSetting& st)
-    {
-      paint->setShader(makeGradientShader(bounds, g));
-      paint->setAlphaf(st.opacity);
-    },
-    [&, this](const Pattern& p, const ContextSetting& st)
-    {
-      if (!this->m_pattern)
-      {
-        if (auto a = std::get_if<PatternFit>(&p.instance); a)
-        {
-          this->m_pattern = std::make_unique<ShaderPattern>(bounds, *a);
-        }
-        else if (auto a = std::get_if<PatternFill>(&p.instance); a)
-        {
-          this->m_pattern = std::make_unique<ShaderPattern>(bounds, *a);
-        }
-        else if (auto a = std::get_if<PatternStretch>(&p.instance); a)
-        {
-          this->m_pattern = std::make_unique<ShaderPattern>(bounds, *a);
-        }
-        else if (auto a = std::get_if<PatternTile>(&p.instance); a)
-        {
-          this->m_pattern = std::make_unique<ShaderPattern>(bounds, *a);
-        }
-      }
-    });
-  if (this->m_pattern)
-  {
-    if (m_pattern->isValid())
-    {
-      if (m_pattern->frameCount() == 1)
-      {
-        paint->setShader(this->m_pattern->shader());
-      }
-      else
-      {
-        paint->setShader(this->m_pattern->shader(m_currentFrame++));
-        m_currentFrame %= m_pattern->frameCount();
-        if (isAnimatedPatternEnabled())
-        {
-          const_cast<BorderBrush*>(this)->update();
-        }
-      }
-    }
-  }
+  const auto& dashedPattern = getDashPattern();
+  paint->setPathEffect(
+    SkDashPathEffect::Make(dashedPattern.data(), dashedPattern.size(), getDashPatternOffset()));
+  Brush::onMakePaint(paint, bounds);
 }
 
 Bounds BorderBrush::onRevalidate()

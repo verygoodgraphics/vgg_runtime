@@ -530,8 +530,8 @@ void PaintNode::setStyle(const Style& style)
   auto item = aa->styleItem();
   // aa->setFills(style.fills);
   // aa->setBorders(style.borders);
-  item->setFillStyle(style.fills);
-  item->setBorderStyle(style.borders);
+  item->applyFillStyle(style.fills);
+  item->applyBorderStyle(style.borders);
 
   aa->setInnerShadows(style.innerShadow);
   aa->setDropShadows(style.dropShadow);

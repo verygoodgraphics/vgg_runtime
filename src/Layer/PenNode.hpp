@@ -144,6 +144,11 @@ private:
   SkColor m_color;
 };
 
+class BrushStyle : public PenNode
+{
+public:
+};
+
 class FillPenNode : public PenNode // rename to FillStyle
 {
 public:
@@ -153,6 +158,7 @@ public:
   {
   }
   VGG_ATTRIBUTE(Fill, const Fill&, m_fill);
+
   VGG_CLASS_MAKE(FillPenNode);
 
 protected:
@@ -176,6 +182,7 @@ public:
   }
 
   VGG_ATTRIBUTE(Border, const Border&, m_border);
+
   VGG_CLASS_MAKE(BorderPenNode);
 
 protected:

@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 #include "Layer/Core/VNode.hpp"
+#include "Layer/Core/EventManager.hpp"
 #include "Layer/StackTrace.hpp"
 
 namespace VGG::layer
 {
-
-std::queue<VNode*> VNode::s_repaintQueue = {};
 
 class VNode::ScopedState
 {
@@ -86,21 +85,14 @@ void VNode::unobserve(VNodePtr sender)
   }
 }
 
-void VNode::repaint() const
+void VNode::update()
 {
-  s_repaintQueue.push(const_cast<VNode*>(this));
-}
-
-void VNode::processRepaint()
-{
-  while (!s_repaintQueue.empty())
+  if (m_state & UPDATE)
   {
-    if (auto p = s_repaintQueue.front(); p)
-    {
-      p->invalidate();
-    }
-    s_repaintQueue.pop();
+    return;
   }
+  EventManager::postEvent({ this, ENodeEvent::UPDATE });
+  m_state |= UPDATE;
 }
 
 void VNode::invalidate()

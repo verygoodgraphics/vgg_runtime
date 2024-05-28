@@ -85,7 +85,7 @@ protected:
     INVALIDATE = 1 << 0,
     DAMAGE = 1 << 1,
     TRAVERSALING = 1 << 2,
-    PENDING = 1 << 3,
+    UPDATE = 1 << 3,
   };
   using EStateT = uint8_t;
 
@@ -96,15 +96,6 @@ protected:
   };
   using EDamageTrait = uint8_t;
 
-  // enum EEvent
-  // {
-  //   REPAINT
-  // };
-  //
-  // struct Event
-  // {
-  // };
-
 public:
   VNode(VRefCnt* cnt, EState initState = (EState)0)
     : ObjectImpl<VObject>(cnt)
@@ -114,7 +105,7 @@ public:
 
   void invalidate();
 
-  void processRepaint();
+  void update();
 
   const Bounds& revalidate(Invalidator* inv = nullptr, const glm::mat3& ctm = glm::mat3(1.0f));
 
@@ -143,12 +134,11 @@ protected:
 
   void unobserve(VNodePtr sender);
 
-  void repaint() const;
-
 private:
   class ScopedState;
+  friend class EventManager;
   Bounds                m_bounds;
-  uint8_t               m_state : 3 { 0 };
+  uint8_t               m_state : 4 { 0 };
   EDamageTrait          m_trait : 2 { 0 };
   std::vector<VNodeRef> m_observers;
 

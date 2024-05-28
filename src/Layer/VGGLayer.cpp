@@ -25,6 +25,7 @@
 #include <encode/SkJpegEncoder.h>
 #include <encode/SkWebpEncoder.h>
 
+#include "Layer/Core/EventManager.hpp"
 #include "Layer/Core/TransformNode.hpp"
 #include "Layer/Core/VNode.hpp"
 #include "Layer/RasterNode.hpp"
@@ -232,7 +233,7 @@ public:
     {
       Renderer r;
       r = r.createNew(canvas);
-      node->processRepaint();
+      EventManager::pollEvents();
       node->revalidate();
       node->render(&r);
     }

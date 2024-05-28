@@ -91,8 +91,7 @@ public:
   size_t weakDeref() override
   {
     auto cnt = --m_weakCnt;
-    // Deletes counter itself if and only if weak_ref == 0 and the object state is DESTROYED
-    if (cnt == 0)
+    if (cnt == 0 && m_cnt == 0)
     {
       destroy();
     }

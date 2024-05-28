@@ -44,7 +44,12 @@ public:
 
   void setBlendMode(SkBlendMode mode)
   {
+    if (std::holds_alternative<SkBlendMode>(m_blend) && std::get<SkBlendMode>(m_blend) == mode)
+    {
+      return;
+    }
     m_blend = mode;
+    invalidate();
   }
 
   sk_sp<SkBlender> getBlender() const
@@ -54,7 +59,46 @@ public:
 
   void setBlender(sk_sp<SkBlender> blender)
   {
+    if (
+      std::holds_alternative<sk_sp<SkBlender>>(m_blend) &&
+      std::get<sk_sp<SkBlender>>(m_blend) == blender)
+    {
+      return;
+    }
     m_blend = blender;
+    invalidate();
+  }
+
+  void setColor(SkColor color)
+  {
+    if (std::holds_alternative<SkColor>(m_brush) && std::get<SkColor>(m_brush) == color)
+    {
+      return;
+    }
+    m_brush = color;
+    invalidate();
+  }
+
+  SkColor getColor() const
+  {
+    return std::get<SkColor>(m_brush);
+  }
+
+  void setShader(sk_sp<SkShader> shader)
+  {
+    if (
+      std::holds_alternative<sk_sp<SkShader>>(m_brush) &&
+      std::get<sk_sp<SkShader>>(m_brush) == shader)
+    {
+      return;
+    }
+    m_brush = shader;
+    invalidate();
+  }
+
+  sk_sp<SkShader> getShader() const
+  {
+    return std::get<sk_sp<SkShader>>(m_brush);
   }
 
   VGG_ATTRIBUTE(Style, SkPaint::Style, m_style);
@@ -98,68 +142,25 @@ private:
   SkPaint::Style                              m_style = SkPaint::kFill_Style;
   SkPaint::Join                               m_strokeJoin = SkPaint::kMiter_Join;
   SkPaint::Cap                                m_strokeCap = SkPaint::kButt_Cap;
+  std::variant<SkColor, sk_sp<SkShader>>      m_brush;
 };
 
-class ShaderPenNode : public PenNode
+class Brush : public PenNode
 {
 public:
-  ShaderPenNode(VRefCnt* cnt)
+  Brush(VRefCnt* cnt, const Fill& fill)
     : PenNode(cnt)
+    , m_fill(fill)
   {
+    applyFill(fill);
   }
 
-  VGG_ATTRIBUTE(Shader, sk_sp<SkShader>, m_shader);
+  // DEPRECATED
+  VGG_ATTRIBUTE(Fill, Fill, m_fill);
 
-  VGG_CLASS_MAKE(ShaderPenNode);
+  void applyFill(const Fill& fill);
 
-protected:
-  void onMakePaint(SkPaint* paint, const Bounds& bounds) const override
-  {
-    paint->setShader(m_shader);
-  }
-
-private:
-  sk_sp<SkShader> m_shader;
-};
-
-class ColorPenNode : public PenNode
-{
-public:
-  ColorPenNode(VRefCnt* cnt)
-    : PenNode(cnt)
-  {
-  }
-
-  VGG_ATTRIBUTE(Color, SkColor, m_color);
-
-  VGG_CLASS_MAKE(ColorPenNode);
-
-protected:
-  void onMakePaint(SkPaint* paint, const Bounds& bounds) const override
-  {
-    paint->setColor(m_color);
-  }
-
-private:
-  SkColor m_color;
-};
-
-class BrushStyle : public PenNode
-{
-public:
-};
-
-class FillPenNode : public PenNode // rename to FillStyle
-{
-public:
-  FillPenNode(VRefCnt* cnt, Fill fill)
-    : PenNode(cnt)
-    , m_fill(std::move(fill))
-  {
-  }
-  VGG_ATTRIBUTE(Fill, const Fill&, m_fill);
-
-  VGG_CLASS_MAKE(FillPenNode);
+  VGG_CLASS_MAKE(Brush);
 
 protected:
   void onMakePaint(SkPaint* paint, const Bounds& bounds) const override;
@@ -167,30 +168,33 @@ protected:
   Bounds onRevalidate() override;
 
 private:
-  Fill                                   m_fill;
+  Fill                                   m_fill; // DEPRECATED
   mutable std::unique_ptr<ShaderPattern> m_pattern;
   mutable int                            m_currentFrame = 0;
 };
 
-class BorderPenNode : public PenNode // rename to BorderStyle
+class BorderBrush : public PenNode // TODO:: Should inherited from Brush
 {
 public:
-  BorderPenNode(VRefCnt* cnt, Border border)
+  BorderBrush(VRefCnt* cnt, const Border& border)
     : PenNode(cnt)
-    , m_border(std::move(border))
+    , m_border(border)
   {
+    applyBorder(border);
   }
 
-  VGG_ATTRIBUTE(Border, const Border&, m_border);
+  VGG_ATTRIBUTE(Border, Border, m_border); // DEPRECATED
 
-  VGG_CLASS_MAKE(BorderPenNode);
+  void applyBorder(const Border& border);
+
+  VGG_CLASS_MAKE(BorderBrush);
 
 protected:
   void   onMakePaint(SkPaint* paint, const Bounds& bounds) const override;
   Bounds onRevalidate() override;
 
 private:
-  Border                                 m_border;
+  Border                                 m_border; // DEPRECATED
   mutable std::unique_ptr<ShaderPattern> m_pattern;
   mutable int                            m_currentFrame = 0;
 };

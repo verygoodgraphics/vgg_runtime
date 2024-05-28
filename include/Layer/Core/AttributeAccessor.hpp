@@ -61,6 +61,11 @@ public:
     return m_owner;
   }
 
+  StyleItem* styleItem()
+  {
+    return m_item;
+  }
+
   ATTR_DECL(Transform, const Transform&);
   ATTR_DECL(AlphaMask, const std::vector<AlphaMask>&);
   ATTR_DECL(ShapeMask, const std::vector<std::string>&);

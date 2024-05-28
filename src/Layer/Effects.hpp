@@ -398,19 +398,19 @@ public:
     }
   }
 
-  const std::vector<Ref<FillPenNode>>& fills() const
+  const std::vector<Ref<Brush>>& fills() const
   {
     return m_pens;
   }
 
-  FillPenNode* fill(int i) const
+  Brush* fill(int i) const
   {
     if (i >= (int)m_pens.size() || i < 0)
       return nullptr;
     return m_pens[i].get();
   }
 
-  void setFillStyle(std::vector<Fill> fills);
+  void applyFillStyle(const std::vector<Fill>& fills);
 
   VGG_CLASS_MAKE(StackFillEffectImpl);
 
@@ -420,18 +420,7 @@ protected:
   bool onRevalidateVisible(const Bounds& bounds) override;
 
 private:
-  bool changed(const std::vector<Fill>& fills)
-  {
-    if (fills.size() != m_pens.size())
-      return true;
-    for (size_t i = 0; i < fills.size(); i++)
-    {
-      if (fills[i] != m_pens[i]->getFill())
-        return true;
-    }
-    return false;
-  }
-  std::vector<Ref<FillPenNode>> m_pens;
+  std::vector<Ref<Brush>> m_pens;
 };
 
 class StackBorderEffectImpl : public GraphicItemEffectNode
@@ -447,35 +436,23 @@ public:
     return m_effectBounds;
   }
 
-  const std::vector<Ref<BorderPenNode>>& borders() const
+  const std::vector<Ref<BorderBrush>>& borders() const
   {
     return m_pens;
   }
 
-  BorderPenNode* border(int i) const
+  BorderBrush* border(int i) const
   {
     if (i >= (int)m_pens.size() || i < 0)
       return nullptr;
     return m_pens[i].get();
   }
 
-  void setBorderStyle(std::vector<Border> borders);
+  void applyBorderStyle(const std::vector<Border>& borders);
 
   VGG_CLASS_MAKE(StackBorderEffectImpl);
 
 protected:
-  bool changed(const std::vector<Border>& borders)
-  {
-    if (borders.size() != m_pens.size())
-      return true;
-    for (size_t i = 0; i < borders.size(); i++)
-    {
-      if (borders[i] != m_pens[i]->getBorder())
-        return true;
-    }
-    return false;
-  }
-
   bool onRevalidateVisible(const Bounds& bounds) override;
 
   std::pair<bool, Bounds> computeFastBounds(const SkRect& bounds) const;
@@ -483,8 +460,8 @@ protected:
   void onRenderShape(Renderer* renderer, const VShape& shape) override;
 
 private:
-  Bounds                          m_effectBounds;
-  std::vector<Ref<BorderPenNode>> m_pens;
+  Bounds                        m_effectBounds;
+  std::vector<Ref<BorderBrush>> m_pens;
 };
 
 // class DropShadowEffectImpl : public EffectNode

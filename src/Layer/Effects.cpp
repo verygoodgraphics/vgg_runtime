@@ -693,11 +693,8 @@ void StackFillEffectImpl::onRenderShape(Renderer* renderer, const VShape& vs)
   }
 }
 
-void StackFillEffectImpl::setFillStyle(std::vector<Fill> fills)
+void StackFillEffectImpl::applyFillStyle(const std::vector<Fill>& fills)
 {
-  if (!changed(fills))
-    return;
-
   for (auto& pen : m_pens)
   {
     unobserve(pen);
@@ -706,7 +703,7 @@ void StackFillEffectImpl::setFillStyle(std::vector<Fill> fills)
 
   for (auto& fill : fills)
   {
-    auto pen = FillPenNode::Make(fill);
+    auto pen = Brush::Make(fill);
     observe(pen);
     m_pens.push_back(pen);
   }
@@ -825,10 +822,8 @@ std::pair<bool, Bounds> StackBorderEffectImpl::computeFastBounds(const SkRect& b
   return { false, Bounds{ bounds.x(), bounds.y(), bounds.width(), bounds.height() } };
 }
 
-void StackBorderEffectImpl::setBorderStyle(std::vector<Border> borders)
+void StackBorderEffectImpl::applyBorderStyle(const std::vector<Border>& borders)
 {
-  if (!changed(borders))
-    return;
   for (auto& pen : m_pens)
   {
     unobserve(pen);
@@ -836,7 +831,7 @@ void StackBorderEffectImpl::setBorderStyle(std::vector<Border> borders)
   m_pens.clear();
   for (auto& border : borders)
   {
-    auto pen = BorderPenNode::Make(border);
+    auto pen = BorderBrush::Make(border);
     observe(pen);
     m_pens.push_back(pen);
   }

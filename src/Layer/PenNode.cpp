@@ -102,6 +102,7 @@ void BorderBrush::applyBorder(const Border& border)
   setOpacity(border.contextSettings.opacity);
   setDashPattern(border.dashedPattern);
   setDashPatternOffset(border.dashedOffset);
+  setPosition(border.position);
   setStrokeJoin(toSkPaintJoin(border.lineJoinStyle));
   setStrokeCap(toSkPaintCap(border.lineCapStyle));
   setStrokeWidth(border.thickness);

@@ -370,7 +370,7 @@ protected:
 
   virtual bool onRevalidateVisible(const Bounds&) = 0;
 
-  Bounds onRevalidate() override
+  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override
   {
     ASSERT(getChild());
     const auto bounds = getChild()->revalidate();
@@ -484,7 +484,7 @@ private:
 //     const std::vector<DropShadow>& shadows);
 //
 // protected:
-//   Bounds onRevalidate() override;
+//   Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override;
 //
 // private:
 //   DropShadow m_dropShadow;
@@ -510,7 +510,7 @@ private:
 //   VGG_CLASS_MAKE(InnerShadowEffectImpl);
 //
 // protected:
-//   Bounds onRevalidate() override;
+//   Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override;
 //
 // private:
 //   InnerShadow m_innerShadow;

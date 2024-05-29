@@ -116,7 +116,7 @@ void RasterNode::nodeAt(int x, int y, NodeVisitor vistor, void* userData)
   }
 }
 
-Bounds RasterNode::onRevalidate()
+Bounds RasterNode::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
 {
   auto c = getChild();
   ASSERT(c);

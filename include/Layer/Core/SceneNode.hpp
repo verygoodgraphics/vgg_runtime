@@ -46,7 +46,7 @@ public:
 
   Bounds effectBounds() const override;
 
-  Bounds onRevalidate() override;
+  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override;
 
   glm::mat3 getMatrix() const;
 

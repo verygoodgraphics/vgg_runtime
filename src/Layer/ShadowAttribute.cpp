@@ -32,7 +32,7 @@ void DropShadowAttribute::render(Renderer* renderer)
   }
 }
 
-Bounds DropShadowAttribute::onRevalidate()
+Bounds DropShadowAttribute::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
 {
   if (m_shapeAttr)
   {
@@ -52,7 +52,7 @@ Bounds DropShadowAttribute::onRevalidate()
   return Bounds();
 }
 
-Bounds InnerShadowAttribute::onRevalidate()
+Bounds InnerShadowAttribute::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
 {
   if (m_shapeAttr)
   {

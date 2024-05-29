@@ -124,7 +124,7 @@ public:
   ~StyleItem();
 
 protected:
-  Bounds onRevalidate() override;
+  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override;
 
 private:
   VGG_CLASS_MAKE(StyleItem);

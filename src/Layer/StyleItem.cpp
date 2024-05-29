@@ -293,7 +293,7 @@ Bounds StyleItem::objectBounds()
   return m_graphicItem->bounds();
 }
 
-Bounds StyleItem::onRevalidate()
+Bounds StyleItem::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
 {
   auto bounds = onRevalidateStyle(); // this must be the first, workaround
   m_shapeMaskAttr->revalidate();

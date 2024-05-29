@@ -136,7 +136,7 @@ const Bounds& VNode::revalidate(Invalidator* inv, const glm::mat3& ctm)
   VGG_TRACE_DEV(indent + dbgInfo);
   VGG_LOG_DEV(TRACE, VNode, "Revalidate: %s", (indent + dbgInfo).c_str());
 #endif
-  m_bounds = onRevalidate();
+  m_bounds = onRevalidate(inv, ctm);
   m_state &= ~INVALIDATE;
   return m_bounds;
 }

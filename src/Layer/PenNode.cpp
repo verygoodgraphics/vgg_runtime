@@ -90,7 +90,7 @@ void Brush::onMakePaint(SkPaint* paint, const Bounds& bounds) const
   }
 }
 
-Bounds Brush::onRevalidate()
+Bounds Brush::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
 {
   return Bounds();
 }
@@ -128,7 +128,7 @@ void BorderBrush::onMakePaint(SkPaint* paint, const Bounds& bounds) const
   Brush::onMakePaint(paint, bounds);
 }
 
-Bounds BorderBrush::onRevalidate()
+Bounds BorderBrush::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
 {
   return Bounds();
 }

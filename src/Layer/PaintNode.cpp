@@ -576,7 +576,7 @@ void PaintNode::setFrameBounds(const Bounds& bounds)
     _->shapeItem->invalidate();
 }
 
-Bounds PaintNode::onRevalidate()
+Bounds PaintNode::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
 {
   VGG_IMPL(PaintNode);
 

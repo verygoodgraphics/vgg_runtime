@@ -105,7 +105,7 @@ private:
   SkCanvas* m_canvas;
 
 protected:
-  Bounds onRevalidate() override
+  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override
   {
     auto newBounds = m_paragraph->revalidate();
     m_cache.clear();

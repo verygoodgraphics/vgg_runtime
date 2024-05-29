@@ -31,7 +31,7 @@ public:
   VGG_ATTRIBUTE(Transform, const Transform&, m_transform);
   VGG_CLASS_MAKE(TransformAttribute);
 
-  Bounds onRevalidate() override
+  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override
   {
     return Bounds{};
   }

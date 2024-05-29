@@ -95,7 +95,7 @@ std::pair<SkRect, std::optional<SkPaint>> ShapeItem::revalidateObjectBounds(
   return { bounds, std::nullopt };
 }
 
-Bounds ShapeItem::onRevalidate()
+Bounds ShapeItem::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
 {
   ASSERT(m_shapeAttr);
   m_shapeAttr->revalidate();

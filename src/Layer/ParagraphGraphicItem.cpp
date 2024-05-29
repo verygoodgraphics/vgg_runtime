@@ -41,7 +41,7 @@ void ParagraphItem::render(Renderer* renderer)
   }
 }
 
-Bounds ParagraphItem::onRevalidate()
+Bounds ParagraphItem::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
 {
   return m_painter->revalidate();
 }

@@ -180,7 +180,7 @@ Bounds SceneNode::effectBounds() const
   return bounds();
 }
 
-Bounds SceneNode::onRevalidate()
+Bounds SceneNode::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
 {
   Bounds bounds;
   for (auto& frame : d_ptr->frames)

@@ -109,7 +109,7 @@ public:
 
   VGG_CLASS_MAKE(ParagraphItem);
 
-  Bounds onRevalidate() override;
+  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override;
 
 private:
   VParagraphPainterPtr     m_painter;

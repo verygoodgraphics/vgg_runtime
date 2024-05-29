@@ -50,17 +50,22 @@ install(TARGETS vgg_container
   DESTINATION lib
 )
 install(FILES
+  ${CMAKE_SOURCE_DIR}/include/Adapter/Environment.hpp
   ${CMAKE_SOURCE_DIR}/include/Application/Event/Event.hpp
   ${CMAKE_SOURCE_DIR}/include/Application/Event/EventAPI.hpp
   ${CMAKE_SOURCE_DIR}/include/Application/Event/Keycode.hpp
   ${CMAKE_SOURCE_DIR}/include/Application/Event/Scancode.hpp
+  ${CMAKE_SOURCE_DIR}/include/Package/VggPackage.hpp
   ${CMAKE_SOURCE_DIR}/include/VGG/Container/IContainer.hpp
   ${CMAKE_SOURCE_DIR}/include/VGG/Container/ISdk.hpp
   ${CMAKE_SOURCE_DIR}/include/VGG/Container/VggTypes.hpp
-  ${CMAKE_SOURCE_DIR}/include/Package/VggPackage.hpp
-  ${CMAKE_SOURCE_DIR}/include/Adapter/Environment.hpp
   COMPONENT container
   DESTINATION VGG)
+install(FILES
+  ${CMAKE_SOURCE_DIR}/include/Application/UIAnimation.hpp
+  ${CMAKE_SOURCE_DIR}/include/Application/UIOptions.hpp
+  COMPONENT container
+  DESTINATION VGG/Application)
 
 if(MSVC)
   install(FILES

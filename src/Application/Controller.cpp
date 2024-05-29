@@ -296,7 +296,7 @@ bool Controller::edit(std::vector<char>& buffer)
 
 void Controller::onResize()
 {
-  if (isNormalMode())
+  if (isNormalMode() && hasContent())
   {
     auto currentPageIndex = m_presenter->currentPageIndex();
     auto pageIndexForViewport = m_model->getFrameIndexForWidth(m_presenter->viewSize().width);

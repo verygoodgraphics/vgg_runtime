@@ -202,7 +202,7 @@ void AttrBridge::setFillOpacity(layer::PaintNode* node, size_t index, double val
     return;
   }
 
-  fills.at(index).contextSettings.opacity = value;
+  fills.at(index).contextSettings.opacity = static_cast<float>(value);
   accessor->setFills(fills);
 }
 
@@ -279,7 +279,7 @@ void AttrBridge::setWidth(layer::PaintNode* node, const double width)
   if (node)
   {
     auto bounds = node->frameBounds();
-    bounds.setWidth(width);
+    bounds.setWidth(static_cast<float>(width));
     node->setFrameBounds(bounds);
   }
 }
@@ -300,7 +300,7 @@ void AttrBridge::setHeight(layer::PaintNode* node, const double height)
   if (node)
   {
     auto bounds = node->frameBounds();
-    bounds.setHeight(height);
+    bounds.setHeight(static_cast<float>(height));
     node->setFrameBounds(bounds);
   }
 }
@@ -320,7 +320,7 @@ void AttrBridge::updateSimpleAttr(
   else
   {
     animate->setFromTo(from, to);
-    animate->setAction([update](const std::vector<double>& value) { update(value); });
+    animate->addTriggeredCallback([update](const std::vector<double>& value) { update(value); });
     animate->start();
     m_animateManage.addAnimate(animate);
   }
@@ -675,6 +675,7 @@ bool AttrBridge::updateMatrix(
   return true;
 }
 
+// TODO remove nodeFrom
 void AttrBridge::setTwinMatrix(
   std::shared_ptr<LayoutNode> nodeFrom,
   std::shared_ptr<LayoutNode> nodeTo,
@@ -709,7 +710,7 @@ void AttrBridge::setTwinMatrix(
   auto realHeight = originHeightTo;
 
   // TODO same as updateMatrix, what about symbol and group?
-  if (ReplaceNodeAnimate::isContainerType(nodeFrom->elementNode()))
+  if (ReplaceNodeAnimate::isContainerType(nodeTo->elementNode()))
   {
     realWidth = scale[0] * originWidthTo;
     realHeight = scale[1] * originHeightTo;

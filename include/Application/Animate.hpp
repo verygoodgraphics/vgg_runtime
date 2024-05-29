@@ -20,6 +20,7 @@
 #include <cassert>
 #include <vector>
 #include <array>
+#include <optional>
 
 namespace VGG
 {
@@ -28,6 +29,7 @@ class Timer;
 class LayoutNode;
 class AttrBridge;
 using std::chrono::milliseconds;
+using std::chrono::steady_clock;
 
 namespace Domain
 {
@@ -71,32 +73,44 @@ class Animate
 {
 public:
   Animate(milliseconds duration, milliseconds interval, std::shared_ptr<Interpolator> interpolator);
+  Animate(Animate* parent);
   virtual ~Animate();
 
 public:
-  void         stop();
-  virtual bool isRunning();
-  virtual bool isFinished();
-
-  auto getDuration();
-  auto getInterval();
-  auto getInterpolator();
-  auto getStartTime();
+  bool                          isIndependent();
+  bool                          isRunning();
+  bool                          isFinished();
+  milliseconds                  getDuration();
+  milliseconds                  getInterval();
+  std::shared_ptr<Interpolator> getInterpolator();
 
   // The calling order of the added functions is the reverse of the order in which they were added.
   void addCallBackWhenStop(std::function<void()>&& fun);
+  void stop();
+
+public:
+  virtual void timerCallback() = 0;
 
 protected:
-  virtual void            start() = 0;
-  std::shared_ptr<Timer>& getTimerRef();
+  virtual void start();
+
+  steady_clock::time_point getLastTriggeredTime();
+  steady_clock::time_point getStartTime();
+  milliseconds             getPassedTime();
+  Animate*                 getParent();
+  void                     addChildAnimate(std::shared_ptr<Animate> child);
+  const auto&              getChildAnimate();
 
 private:
-  milliseconds                          m_duration;
-  milliseconds                          m_interval;
-  std::shared_ptr<Interpolator>         m_interpolator;
-  std::shared_ptr<Timer>                m_timer;
-  std::chrono::steady_clock::time_point m_startTime;
-  std::vector<std::function<void()>>    m_callbackWhenStop;
+  std::optional<milliseconds>             m_duration;
+  std::optional<milliseconds>             m_interval;
+  std::shared_ptr<Interpolator>           m_interpolator;
+  Animate*                                m_parent;
+  std::vector<std::shared_ptr<Animate>>   m_childAnimates;
+  std::shared_ptr<Timer>                  m_timer;
+  std::optional<steady_clock::time_point> m_startTime;
+  std::optional<steady_clock::time_point> m_lastTriggeredTime;
+  std::vector<std::function<void()>>      m_callbackWhenStop;
 };
 
 class AnimateManage
@@ -108,6 +122,7 @@ public:
   bool hasRunningAnimation() const;
 
 private:
+  // if animate is not isIndependent, then do nothing.
   void addAnimate(std::shared_ptr<Animate> animate);
 
 private:
@@ -127,21 +142,21 @@ public:
     milliseconds                  interval,
     std::shared_ptr<Interpolator> interpolator);
 
+  NumberAnimate(Animate* parent);
+
 public:
-  void                                   addTriggeredCallback(TTriggeredCallback&& fun);
-  const std::vector<TTriggeredCallback>& getTriggeredCallback();
+  void        addTriggeredCallback(TTriggeredCallback&& fun);
+  const auto& getTriggeredCallback();
 
 private:
-  virtual void start() override;
+  virtual void timerCallback() override;
   void         setFromTo(const TParam& from, const TParam& to);
-  void         setAction(std::function<void(const TParam&)> action);
 
 private:
-  TParam                             m_from;
-  TParam                             m_to;
-  TParam                             m_nowValue;
-  std::function<void(const TParam&)> m_action;
-  std::vector<TTriggeredCallback>    m_triggeredCallback;
+  TParam                          m_from;
+  TParam                          m_to;
+  TParam                          m_nowValue;
+  std::vector<TTriggeredCallback> m_triggeredCallback;
 };
 
 // Note: Ensure that the properties of the old node, with the exception of a few specific
@@ -152,6 +167,7 @@ class ReplaceNodeAnimate : public Animate
 
 public:
   typedef std::unordered_map<std::shared_ptr<LayoutNode>, std::shared_ptr<LayoutNode>> TTwins;
+  typedef std::function<void()> TTriggeredCallback;
 
 public:
   ReplaceNodeAnimate(
@@ -161,15 +177,16 @@ public:
     std::shared_ptr<AttrBridge>   attrBridge);
 
 public:
-  virtual bool isRunning();
-  virtual bool isFinished();
+  void        addTriggeredCallback(TTriggeredCallback&& fun);
+  const auto& getTriggeredCallback();
 
 public:
   static bool isContainerType(const Domain::Element* node);
 
 private:
-  void setFromTo(std::shared_ptr<LayoutNode> from, std::shared_ptr<LayoutNode> to);
-  void setIsOnlyUpdatePaint(bool isOnlyUpdatePaint);
+  virtual void timerCallback() override;
+  void         setFromTo(std::shared_ptr<LayoutNode> from, std::shared_ptr<LayoutNode> to);
+  void         setIsOnlyUpdatePaint(bool isOnlyUpdatePaint);
 
 protected:
   auto getFrom();
@@ -190,11 +207,11 @@ protected:
   std::shared_ptr<NumberAnimate> createAndAddNumberAnimate();
 
 private:
-  std::shared_ptr<LayoutNode>           m_from;
-  std::shared_ptr<LayoutNode>           m_to;
-  std::shared_ptr<AttrBridge>           m_attrBridge;
-  bool                                  m_isOnlyUpdatePaint;
-  std::vector<std::shared_ptr<Animate>> m_childAnimates;
+  std::shared_ptr<LayoutNode>     m_from;
+  std::shared_ptr<LayoutNode>     m_to;
+  std::shared_ptr<AttrBridge>     m_attrBridge;
+  bool                            m_isOnlyUpdatePaint;
+  std::vector<TTriggeredCallback> m_triggeredCallback;
 };
 
 class DissolveAnimate : public ReplaceNodeAnimate
@@ -257,6 +274,9 @@ public:
 private:
   virtual void start() override;
 
+  // Note: When an object needs to update its coordinates in the global coordinate system using
+  // updateMatrix, if the parent object is also updating its matrix within the same callback cycle,
+  // the parent object's matrix must be updated first.
   void dealChildren(
     std::shared_ptr<LayoutNode> nodeFrom,
     std::shared_ptr<LayoutNode> nodeTo,

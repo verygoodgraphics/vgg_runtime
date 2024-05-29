@@ -63,7 +63,7 @@ public:
 
 protected:
   void   dispatchEvent(void* event) override;
-  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override;
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3 & mat) override;
 
   void onPaint(Renderer* renderer) override;
 };

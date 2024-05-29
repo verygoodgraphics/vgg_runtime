@@ -20,6 +20,14 @@
 namespace VGG::layer
 {
 
+void Revalidation::emit(const Bounds& bounds, const glm::mat3& ctm, VNode* node)
+{
+  const auto mappedBounds = bounds.map(ctm);
+  m_boundsArray.push_back(mappedBounds);
+  m_bounds.unionWith(mappedBounds);
+  DEBUG("Revalidation Region %s", node->dbgInfo.c_str());
+}
+
 class VNode::ScopedState
 {
 public:
@@ -95,7 +103,7 @@ void VNode::update()
   m_state |= UPDATE;
 }
 
-void VNode::invalidate()
+void VNode::invalidate(bool damage)
 {
   ScopedState state(*this, TRAVERSALING);
   if (state.wasSet())
@@ -103,25 +111,30 @@ void VNode::invalidate()
     VGG_LOG_DEV(ERROR, VNode, "TRAVERSALING");
     return;
   }
-  if (m_state & INVALIDATE)
+  if (!isInvalid() && (!damage || m_state & DAMAGE))
     return;
 #ifdef VGG_LAYER_DEBUG
   std::string indent(depth(), '\t');
   VGG_TRACE_DEV(indent + dbgInfo);
   VGG_LOG_DEV(TRACE, VNode, "Invalidate: %s", (indent + dbgInfo).c_str());
 #endif
+  if (damage && !(m_state & BUBBLE_DAMAGE))
+  {
+    m_state |= DAMAGE;
+    damage = false;
+  }
   m_state |= INVALIDATE;
   visitObservers(
-    [](auto& obs)
+    [&](auto& obs)
     {
       if (auto p = obs.lock(); p)
       {
-        p->invalidate();
+        p->invalidate(damage);
       }
     });
 }
 
-const Bounds& VNode::revalidate(Invalidator* inv, const glm::mat3& ctm)
+const Bounds& VNode::revalidate(Revalidation* inv, const glm::mat3& ctm)
 {
   ScopedState state(*this, TRAVERSALING);
   if (state.wasSet())
@@ -136,8 +149,27 @@ const Bounds& VNode::revalidate(Invalidator* inv, const glm::mat3& ctm)
   VGG_TRACE_DEV(indent + dbgInfo);
   VGG_LOG_DEV(TRACE, VNode, "Revalidate: %s", (indent + dbgInfo).c_str());
 #endif
-  m_bounds = onRevalidate(inv, ctm);
-  m_state &= ~INVALIDATE;
+
+  const bool noDamage = !inv || (!(m_state & DAMAGE) && !(m_trait & OVERRIDE_DAMAGE));
+  // no dmage means that only the current node don't emit changes if any, it doesn not mean that the
+  // children don't emit changes
+  if (noDamage)
+  {
+    m_bounds = onRevalidate(inv, ctm);
+  }
+  else
+  {
+    const auto prevBounds = m_bounds;
+    auto       override = m_trait & OVERRIDE_DAMAGE ? nullptr : inv;
+    m_bounds = onRevalidate(override, ctm);
+    inv->emit(prevBounds, ctm, this);
+    if (m_bounds != prevBounds)
+    {
+      inv->emit(m_bounds, ctm, this);
+    }
+  }
+
+  m_state &= ~(INVALIDATE | DAMAGE);
   return m_bounds;
 }
 

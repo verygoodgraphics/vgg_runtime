@@ -53,7 +53,7 @@ public:
     // return m_maskFilter;
     return nullptr;
   }
-  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override;
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3 & mat) override;
   VGG_CLASS_MAKE(ShapeItem);
 
 private:

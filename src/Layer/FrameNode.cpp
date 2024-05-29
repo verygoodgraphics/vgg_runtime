@@ -156,7 +156,7 @@ SkPicture* FrameNode::picture() const
   return d_ptr->cache.get();
 }
 
-Bounds FrameNode::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
+Bounds FrameNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
 {
   VGG_IMPL(FrameNode);
   if (_->maskDirty)
@@ -165,7 +165,7 @@ Bounds FrameNode::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
     _->maskDirty = false;
   }
 
-  const auto bounds = node()->revalidate();
+  const auto bounds = node()->revalidate(inv, mat);
   _->cache = _->renderPicture(toSkRect(bounds));
   _->transform.setMatrix(glm::mat3{ 1 });
   if (_->enableToOrigin)

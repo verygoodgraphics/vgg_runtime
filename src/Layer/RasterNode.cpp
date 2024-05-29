@@ -116,12 +116,13 @@ void RasterNode::nodeAt(int x, int y, NodeVisitor vistor, void* userData)
   }
 }
 
-Bounds RasterNode::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
+Bounds RasterNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
 {
   auto c = getChild();
   ASSERT(c);
-  c->revalidate();
-  auto   z = asZoom(getTransform());
+  auto       z = asZoom(getTransform());
+  const auto ctm = mat * z->getMatrix();
+  c->revalidate(inv, ctm);
   bool   needRaster = false;
   Bounds finalBounds;
 
@@ -154,7 +155,7 @@ Bounds RasterNode::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
         m_raster->invalidate(layer::Rasterizer::EReason::ZOOM_TRANSLATION);
         needRaster = true;
       }
-      z->revalidate();
+      z->revalidate(inv, ctm);
     }
     if (m_viewport && m_viewport->hasInvalidate())
     {

@@ -132,7 +132,7 @@ void TextNode::onPaint(Renderer* renderer)
   }
 }
 
-Bounds TextNode::onRevalidate(Invalidator* inv, const glm::mat3& mat)
+Bounds TextNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
 {
   auto b =
     d_ptr->accessor->paragraph()->revalidate(); // We just revalidate the paragraph attribute so far

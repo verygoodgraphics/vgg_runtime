@@ -34,7 +34,7 @@ public:
   }
 
   void   render(Renderer* renderer);
-  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override;
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3 & mat) override;
 
   VGG_ATTRIBUTE(DropShadowStyle, const std::vector<DropShadow>&, m_shadow);
   VGG_CLASS_MAKE(DropShadowAttribute);
@@ -56,7 +56,7 @@ public:
     observe(m_shapeAttr);
   }
   void   render(Renderer* renderer);
-  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override;
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3 & mat) override;
   VGG_ATTRIBUTE(InnerShadowStyle, const std::vector<InnerShadow>&, m_shadow);
   VGG_CLASS_MAKE(InnerShadowAttribute);
 

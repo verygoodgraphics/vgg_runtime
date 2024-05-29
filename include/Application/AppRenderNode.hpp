@@ -58,7 +58,7 @@ public:
     return m_sceneNode->effectBounds();
   }
 
-  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3 & mat) override
   {
     auto b = m_sceneNode->revalidate();
     return b;

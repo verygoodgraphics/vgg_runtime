@@ -58,7 +58,7 @@ public:
     unobserve(m_child);
   }
 
-  Bounds onRevalidate() override
+  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override
   {
     if (m_transform)
       m_transform->revalidate();

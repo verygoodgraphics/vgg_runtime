@@ -48,7 +48,7 @@ void AlphaMaskAttribute::setInputImageFilter(Ref<ImageFilterAttribute> input)
   }
 }
 
-Bounds AlphaMaskAttribute::onRevalidate()
+Bounds AlphaMaskAttribute::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
 {
   auto  layerBounds = toSkRect(m_inputFilter->revalidate());
   auto& maskMap = *getMaskMap();
@@ -71,7 +71,7 @@ Bounds AlphaMaskAttribute::onRevalidate()
   return Bounds{ layerBounds.x(), layerBounds.y(), layerBounds.width(), layerBounds.height() };
 }
 
-Bounds ShapeMaskAttribute::onRevalidate()
+Bounds ShapeMaskAttribute::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
 {
   if (!m_maskID.empty() && m_maskedNode)
   {

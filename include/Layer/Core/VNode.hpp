@@ -126,7 +126,7 @@ protected:
     return 0;
   }
 #endif
-  virtual Bounds onRevalidate() = 0;
+  virtual Bounds onRevalidate(Invalidator* inv = nullptr, const glm::mat3& ctm = glm::mat3(1.0f)) = 0;
 
   bool isInvalid() const;
 

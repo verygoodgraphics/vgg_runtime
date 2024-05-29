@@ -77,6 +77,6 @@ public:
   ~FrameNode();
 
 protected:
-  Bounds onRevalidate() override;
+  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override;
 };
 } // namespace VGG::layer

@@ -839,7 +839,7 @@ void StackBorderEffectImpl::applyBorderStyle(const std::vector<Border>& borders)
 
 // StackBorderEffectImpl end
 
-// Bounds InnerShadowEffectImpl::onRevalidate()
+// Bounds InnerShadowEffectImpl::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
 // {
 //   return Bounds();
 // }
@@ -858,7 +858,7 @@ void StackBorderEffectImpl::applyBorderStyle(const std::vector<Border>& borders)
 //   return first;
 // }
 //
-// Bounds DropShadowEffectImpl::onRevalidate()
+// Bounds DropShadowEffectImpl::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
 // {
 //   return Bounds();
 // }

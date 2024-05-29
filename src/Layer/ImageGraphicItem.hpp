@@ -87,7 +87,7 @@ public:
   }
 
   VGG_CLASS_MAKE(ImageItem);
-  Bounds onRevalidate() override;
+  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override;
 
 private:
   // WeakRef<StyleItem>      m_styleItem;

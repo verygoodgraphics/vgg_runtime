@@ -156,7 +156,7 @@ SkPicture* FrameNode::picture() const
   return d_ptr->cache.get();
 }
 
-Bounds FrameNode::onRevalidate()
+Bounds FrameNode::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
 {
   VGG_IMPL(FrameNode);
   if (_->maskDirty)

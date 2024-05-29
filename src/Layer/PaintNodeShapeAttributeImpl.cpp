@@ -20,7 +20,7 @@
 namespace VGG::layer
 {
 
-Bounds PaintNodeShapeAttributeImpl::onRevalidate()
+Bounds PaintNodeShapeAttributeImpl::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
 {
   ASSERT(m_paintNode);
   m_shape = m_paintNode->asVisualShape(0);

@@ -57,7 +57,7 @@ public:
     return Bounds();
   }
 
-  Bounds onRevalidate() override;
+  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override;
 
   ~RasterNode() override
   {

@@ -60,7 +60,7 @@ public:
 
   void render(Renderer* renderer);
 
-  Bounds onRevalidate() override;
+  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override;
 
   VGG_ATTRIBUTE(FillStyle, const std::vector<Fill>&, m_fills);
   VGG_ATTRIBUTE(BorderStyle, const std::vector<Border>&, m_borders);

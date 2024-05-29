@@ -136,7 +136,7 @@ public:
 protected:
   void   applyFill(const Fill& fill);
   void   onMakePaint(SkPaint* paint, const Bounds& bounds) const override;
-  Bounds onRevalidate() override;
+  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override;
 
 private:
   bool                                   m_enabled{ true };
@@ -161,7 +161,7 @@ public:
 
 protected:
   void   onMakePaint(SkPaint* paint, const Bounds& bounds) const override;
-  Bounds onRevalidate() override;
+  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override;
 
 private:
   void               applyBorder(const Border& border);

@@ -149,7 +149,7 @@ public:
     return m_offsetInvalid;
   }
 
-  Bounds onRevalidate() override
+  Bounds onRevalidate(Invalidator* inv, const glm::mat3& mat) override
   {
     m_scaleInvalid = false;
     m_offsetInvalid = false;

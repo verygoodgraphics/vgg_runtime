@@ -91,6 +91,28 @@ void printPaintNode(layer::PaintNode* node, int level)
 #endif // DEBUG
 }
 
+// only for Debug
+std::shared_ptr<LayoutNode> getLayoutNodeByName(std::shared_ptr<LayoutNode> node, std::string name)
+{
+#ifdef DEBUG
+  if (node->name() == name)
+  {
+    return node;
+  }
+
+  for (auto child : node->children())
+  {
+    auto target = getLayoutNodeByName(child, name);
+    if (target)
+    {
+      return target;
+    }
+  }
+#endif // DEBUG
+
+  return nullptr;
+}
+
 Interpolator::~Interpolator()
 {
 }
@@ -129,6 +151,12 @@ Animate::Animate(
   : m_duration(duration)
   , m_interval(interval)
   , m_interpolator(interpolator)
+  , m_parent(nullptr)
+{
+}
+
+Animate::Animate(Animate* parent)
+  : m_parent(parent)
 {
 }
 
@@ -155,45 +183,136 @@ void Animate::stop()
   }
 }
 
+bool Animate::isIndependent()
+{
+  return !getParent();
+}
+
 bool Animate::isRunning()
 {
+  if (!isIndependent())
+  {
+    return m_parent->isRunning();
+  }
+
   return static_cast<bool>(m_timer);
-}
-
-auto Animate::getDuration()
-{
-  return m_duration;
-}
-
-auto Animate::getInterval()
-{
-  return m_interval;
-}
-
-auto Animate::getInterpolator()
-{
-  return m_interpolator;
-}
-
-auto Animate::getStartTime()
-{
-  return m_startTime;
 }
 
 bool Animate::isFinished()
 {
+  if (!isIndependent())
+  {
+    return m_parent->isFinished();
+  }
+
   return getInterpolator()->isFinished() || !isRunning();
+}
+
+milliseconds Animate::getDuration()
+{
+  if (!isIndependent())
+  {
+    return m_parent->getDuration();
+  }
+
+  return *m_duration;
+}
+
+milliseconds Animate::getInterval()
+{
+  if (!isIndependent())
+  {
+    return m_parent->getInterval();
+  }
+
+  return *m_interval;
+}
+
+std::shared_ptr<Interpolator> Animate::getInterpolator()
+{
+  if (!isIndependent())
+  {
+    return m_parent->getInterpolator();
+  }
+
+  return m_interpolator;
+}
+
+steady_clock::time_point Animate::getLastTriggeredTime()
+{
+  assert(isRunning());
+
+  if (!isIndependent())
+  {
+    return m_parent->getLastTriggeredTime();
+  }
+
+  return *m_lastTriggeredTime;
+}
+
+steady_clock::time_point Animate::getStartTime()
+{
+  assert(isRunning());
+
+  if (!isIndependent())
+  {
+    return m_parent->getStartTime();
+  }
+  return *m_startTime;
+}
+
+milliseconds Animate::getPassedTime()
+{
+  assert(isRunning());
+
+  if (!isIndependent())
+  {
+    return m_parent->getPassedTime();
+  }
+
+  return std::chrono::duration_cast<milliseconds>(*m_lastTriggeredTime - *m_startTime);
 }
 
 void Animate::start()
 {
+  if (!isIndependent())
+  {
+    return;
+  }
+
   assert(!m_timer);
   m_startTime = std::chrono::steady_clock::now();
+  m_lastTriggeredTime = m_startTime;
+
+  m_timer = std::make_shared<Timer>(
+    getInterval().count() / 1000.0,
+    [this]() { this->timerCallback(); },
+    true);
 }
 
-std::shared_ptr<Timer>& Animate::getTimerRef()
+void Animate::timerCallback()
 {
-  return m_timer;
+  assert(isRunning());
+
+  if (isIndependent())
+  {
+    m_lastTriggeredTime = steady_clock::now();
+  }
+}
+
+Animate* Animate::getParent()
+{
+  return m_parent;
+}
+
+void Animate::addChildAnimate(std::shared_ptr<Animate> child)
+{
+  m_childAnimates.emplace_back(child);
+}
+
+const auto& Animate::getChildAnimate()
+{
+  return m_childAnimates;
 }
 
 void Animate::addCallBackWhenStop(std::function<void()>&& fun)
@@ -203,7 +322,10 @@ void Animate::addCallBackWhenStop(std::function<void()>&& fun)
 
 void AnimateManage::addAnimate(std::shared_ptr<Animate> animate)
 {
-  m_animates.emplace_back(animate);
+  if (animate->isIndependent())
+  {
+    m_animates.emplace_back(animate);
+  }
 }
 
 bool AnimateManage::hasRunningAnimation() const
@@ -245,46 +367,41 @@ NumberAnimate::NumberAnimate(
 {
 }
 
+NumberAnimate::NumberAnimate(Animate* parent)
+  : Animate(parent)
+{
+}
+
 void NumberAnimate::addTriggeredCallback(TTriggeredCallback&& fun)
 {
   m_triggeredCallback.emplace_back(std::move(fun));
 }
 
-const std::vector<NumberAnimate::TTriggeredCallback>& NumberAnimate::getTriggeredCallback()
+const auto& NumberAnimate::getTriggeredCallback()
 {
   return m_triggeredCallback;
 }
 
-void NumberAnimate::start()
+void NumberAnimate::timerCallback()
 {
-  Animate::start();
+  Animate::timerCallback();
 
-  auto& timer = getTimerRef();
-  timer = std::make_shared<Timer>(
-    getInterval().count() / 1000.0,
-    [this]()
-    {
-      auto interpolator = getInterpolator();
-      assert(interpolator);
+  auto interpolator = getInterpolator();
+  assert(interpolator);
 
-      auto passedTime =
-        std::chrono::duration_cast<milliseconds>(std::chrono::steady_clock::now() - getStartTime());
-      const auto size = m_nowValue.size();
-      assert(size && size == m_from.size() && size == m_to.size());
+  auto       passedTime = getPassedTime();
+  const auto size = m_nowValue.size();
+  assert(size && size == m_from.size() && size == m_to.size());
 
-      for (size_t i = 0; i < size; ++i)
-      {
-        m_nowValue[i] = (*interpolator)(passedTime, m_from.at(i), m_to.at(i), getDuration());
-      }
+  for (size_t i = 0; i < size; ++i)
+  {
+    m_nowValue[i] = (*interpolator)(passedTime, m_from.at(i), m_to.at(i), getDuration());
+  }
 
-      m_action(m_nowValue);
-
-      for (auto& item : this->getTriggeredCallback())
-      {
-        item(m_nowValue);
-      }
-    },
-    true);
+  for (auto& item : getTriggeredCallback())
+  {
+    item(m_nowValue);
+  }
 }
 
 void NumberAnimate::setFromTo(const TParam& from, const TParam& to)
@@ -293,11 +410,6 @@ void NumberAnimate::setFromTo(const TParam& from, const TParam& to)
   m_from = from;
   m_to = to;
   m_nowValue.resize(from.size());
-}
-
-void NumberAnimate::setAction(std::function<void(const TParam&)> action)
-{
-  m_action = action;
 }
 
 ReplaceNodeAnimate::ReplaceNodeAnimate(
@@ -311,20 +423,14 @@ ReplaceNodeAnimate::ReplaceNodeAnimate(
 {
 }
 
-bool ReplaceNodeAnimate::isRunning()
+void ReplaceNodeAnimate::addTriggeredCallback(TTriggeredCallback&& fun)
 {
-  return std::any_of(
-    m_childAnimates.begin(),
-    m_childAnimates.end(),
-    [](std::shared_ptr<Animate> child) { return child->isRunning(); });
+  m_triggeredCallback.emplace_back(fun);
 }
 
-bool ReplaceNodeAnimate::isFinished()
+const auto& ReplaceNodeAnimate::getTriggeredCallback()
 {
-  return std::all_of(
-    m_childAnimates.begin(),
-    m_childAnimates.end(),
-    [](std::shared_ptr<Animate> child) { return child->isFinished(); });
+  return m_triggeredCallback;
 }
 
 bool ReplaceNodeAnimate::isContainerType(const Domain::Element* node)
@@ -374,10 +480,25 @@ void ReplaceNodeAnimate::setIsOnlyUpdatePaint(bool isOnlyUpdatePaint)
   m_isOnlyUpdatePaint = isOnlyUpdatePaint;
 }
 
+void ReplaceNodeAnimate::timerCallback()
+{
+  Animate::timerCallback();
+
+  for (auto& child : getChildAnimate())
+  {
+    child->timerCallback();
+  }
+
+  for (auto& item : getTriggeredCallback())
+  {
+    item();
+  }
+}
+
 std::shared_ptr<NumberAnimate> ReplaceNodeAnimate::createAndAddNumberAnimate()
 {
-  auto animate = std::make_shared<NumberAnimate>(getDuration(), getInterval(), getInterpolator());
-  m_childAnimates.emplace_back(animate);
+  auto animate = std::make_shared<NumberAnimate>(this);
+  addChildAnimate(animate);
   return animate;
 };
 
@@ -524,18 +645,18 @@ void ReplaceNodeAnimate::addTwinMatrixAnimate(const TTwins& twins)
           itemFromIsContainer);
       });
 
-    animate->addCallBackWhenStop(
-      [itemTo, paintNodeTo, widthTo, heightTo, isOnlyUpdatePaint]()
-      {
-        AttrBridge::setWidth(paintNodeTo, *widthTo);
-        AttrBridge::setHeight(paintNodeTo, *heightTo);
+    // animate->addCallBackWhenStop(
+    //   [itemTo, paintNodeTo, widthTo, heightTo, isOnlyUpdatePaint]()
+    //   {
+    //     AttrBridge::setWidth(paintNodeTo, *widthTo);
+    //     AttrBridge::setHeight(paintNodeTo, *heightTo);
 
-        if (!isOnlyUpdatePaint)
-        {
-          AttrBridge::setWidth(itemTo, *widthTo);
-          AttrBridge::setHeight(itemTo, *heightTo);
-        }
-      });
+    //    if (!isOnlyUpdatePaint)
+    //    {
+    //      AttrBridge::setWidth(itemTo, *widthTo);
+    //      AttrBridge::setHeight(itemTo, *heightTo);
+    //    }
+    //  });
   }
 }
 
@@ -584,6 +705,8 @@ void DissolveAnimate::start()
     // attrBridge->updateVisible(from, true, isOnlyUpdatePaint);
     attrBridge->updateOpacity(from, paintNodeFrom, 0, isOnlyUpdatePaint, animate);
   }
+
+  ReplaceNodeAnimate::start();
 }
 
 SmartAnimate::SmartAnimate(
@@ -626,6 +749,7 @@ void SmartAnimate::start()
   attrBridge->updateVisible(to, attrBridge->getPaintNode(to), true, isOnlyUpdatePaint);
 
   addTwinMatrixAnimate({ { from, to } });
+  ReplaceNodeAnimate::start();
 }
 
 void SmartAnimate::addTwinAnimate(
@@ -797,6 +921,8 @@ void MoveAnimate::start()
   addCallBackWhenStop(
     [from, paintNodeFrom, attrBridge, isOnlyUpdatePaint]()
     { attrBridge->updateVisible(from, paintNodeFrom, false, isOnlyUpdatePaint); });
+
+  ReplaceNodeAnimate::start();
 }
 
 void MoveAnimate::dealChildren(
@@ -902,28 +1028,6 @@ void MoveAnimate::dealChildren(
       if (itFrom != nodeIds.end() && itTo != nodeIds.end())
       {
         twins.emplace(itFrom->second, itTo->second);
-
-        auto& childFrom = itFrom->second;
-        auto& childTo = itTo->second;
-        auto  elementFrom = childFrom->elementNode();
-        auto  elementTo = childTo->elementNode();
-        auto  childPaintFrom = attrBridge->getPaintNode(childFrom);
-        auto  childPaintTo = attrBridge->getPaintNode(childTo);
-        assert(elementFrom && elementTo);
-
-        if (
-          ReplaceNodeAnimate::isContainerType(elementFrom) &&
-          ReplaceNodeAnimate::isContainerType(elementTo))
-        {
-          dealChildren(childFrom, childTo, childPaintFrom, childPaintTo);
-        }
-        else
-        {
-          // TODO finish later.
-        }
-
-        addStyleOpacityAnimate(childFrom, childPaintFrom, false, false);
-        addStyleOpacityAnimate(childTo, childPaintTo, true, false);
       }
 
       itSearch = ++result;
@@ -934,6 +1038,33 @@ void MoveAnimate::dealChildren(
   for (auto it = itSearch; it != childrenInAnimate.end(); ++it)
   {
     childrenToNeedMove.emplace_back(*it);
+  }
+
+  addTwinMatrixAnimate(twins);
+
+  for (auto& twin : twins)
+  {
+    auto& childFrom = twin.first;
+    auto& childTo = twin.second;
+    auto  elementFrom = childFrom->elementNode();
+    auto  elementTo = childTo->elementNode();
+    auto  childPaintFrom = attrBridge->getPaintNode(childFrom);
+    auto  childPaintTo = attrBridge->getPaintNode(childTo);
+    assert(elementFrom && elementTo);
+
+    if (
+      ReplaceNodeAnimate::isContainerType(elementFrom) &&
+      ReplaceNodeAnimate::isContainerType(elementTo))
+    {
+      dealChildren(childFrom, childTo, childPaintFrom, childPaintTo);
+    }
+    else
+    {
+      // TODO finish later.
+    }
+
+    addStyleOpacityAnimate(childFrom, childPaintFrom, false, false);
+    addStyleOpacityAnimate(childTo, childPaintTo, true, false);
   }
 
   do
@@ -1042,9 +1173,6 @@ void MoveAnimate::dealChildren(
   {
     paintNodeTo->addChild(item);
   }
-
-  // TODO matrix animate maybe show apple to center point? smart have same problem.
-  addTwinMatrixAnimate(twins);
 }
 
 std::array<double, 6> MoveAnimate::getStartTranslateMatrix(const std::array<double, 6>& selfMatrix)

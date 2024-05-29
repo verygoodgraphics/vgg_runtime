@@ -118,6 +118,7 @@ ShaderPattern::ShaderPattern(const Bounds& bounds, const PatternFill& p)
   m = glm::translate(m, { -mi.width() / 2, -mi.height() / 2 });
   m_tileModeX = SkTileMode::kDecal;
   m_tileModeY = SkTileMode::kDecal;
+  m_colorFilter = makeColorFilter(p.imageFilter);
   m_matrix = toSkMatrix(m);
 }
 ShaderPattern::ShaderPattern(const Bounds& bounds, const PatternStretch& p)
@@ -136,6 +137,7 @@ ShaderPattern::ShaderPattern(const Bounds& bounds, const PatternStretch& p)
   m_matrix = toSkMatrix(m);
   m_tileModeX = SkTileMode::kDecal;
   m_tileModeY = SkTileMode::kDecal;
+  m_colorFilter = makeColorFilter(p.imageFilter);
 }
 ShaderPattern::ShaderPattern(const Bounds& bounds, const PatternTile& p)
 {
@@ -162,6 +164,7 @@ ShaderPattern::ShaderPattern(const Bounds& bounds, const PatternTile& p)
   auto m = glm::mat3{ 1.0 };
   m = glm::rotate(m, p.rotation);
   m = glm::scale(m, { p.scale, p.scale });
+  m_colorFilter = makeColorFilter(p.imageFilter);
   m_matrix = toSkMatrix(m);
 }
 

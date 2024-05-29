@@ -168,7 +168,7 @@ protected:
     const TextStyleAttr& textAttr,
     void*                userData) override;
 
-  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3 & mat) override
   {
     TextLayoutMode mode;
     switch (m_layoutMode)

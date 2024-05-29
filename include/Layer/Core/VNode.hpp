@@ -47,14 +47,14 @@ class VNode;
 using VNodePtr = Ref<VNode>;
 using VNodeRef = WeakRef<VNode>;
 
-class Invalidator
+class Revalidation
 {
 public:
-  Invalidator();
-  Invalidator(const Invalidator&) = delete;
-  Invalidator& operator=(const Invalidator&) = delete;
+  Revalidation() = default;
+  Revalidation(const Revalidation&) = delete;
+  Revalidation& operator=(const Revalidation&) = delete;
 
-  void emit(const Bounds&, const glm::mat3& ctm = glm::mat3(1.0f));
+  void emit(const Bounds& bounds, const glm::mat3& ctm, VNode* node = nullptr);
 
   const Bounds& bounds() const
   {
@@ -68,6 +68,11 @@ public:
   auto end() const
   {
     return m_boundsArray.cend();
+  }
+
+  const std::vector<Bounds>& boundsArray() const
+  {
+    return m_boundsArray;
   }
 
   void reset();
@@ -97,17 +102,18 @@ protected:
   using EDamageTrait = uint8_t;
 
 public:
-  VNode(VRefCnt* cnt, EState initState = (EState)0)
+  VNode(VRefCnt* cnt, EState initState = (EState)0, EDamageTrait trait = 0)
     : ObjectImpl<VObject>(cnt)
     , m_state(initState)
+    , m_trait(trait)
   {
   }
 
-  void invalidate();
+  void invalidate(bool damage = true);
 
   void update();
 
-  const Bounds& revalidate(Invalidator* inv = nullptr, const glm::mat3& ctm = glm::mat3(1.0f));
+  const Bounds& revalidate(Revalidation* inv = nullptr, const glm::mat3& ctm = glm::mat3(1.0f));
 
   const Bounds& bounds() const
   {
@@ -126,7 +132,9 @@ protected:
     return 0;
   }
 #endif
-  virtual Bounds onRevalidate(Invalidator* inv = nullptr, const glm::mat3& ctm = glm::mat3(1.0f)) = 0;
+  virtual Bounds onRevalidate(
+    Revalidation*    inv = nullptr,
+    const glm::mat3& ctm = glm::mat3(1.0f)) = 0;
 
   bool isInvalid() const;
 
@@ -139,7 +147,7 @@ private:
   friend class EventManager;
   Bounds                m_bounds;
   uint8_t               m_state : 4 { 0 };
-  EDamageTrait          m_trait : 2 { 0 };
+  const EDamageTrait    m_trait : 2 { 0 };
   std::vector<VNodeRef> m_observers;
 
   template<typename Visitor>

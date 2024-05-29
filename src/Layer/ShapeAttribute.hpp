@@ -58,7 +58,7 @@ public:
     invalidate();
   }
 
-  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3 & mat) override
   {
     if (m_shape.isEmpty())
     {

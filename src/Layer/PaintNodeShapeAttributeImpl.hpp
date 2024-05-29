@@ -37,7 +37,7 @@ public:
     return m_shape;
   }
 
-  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override;
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3 & mat) override;
   VGG_CLASS_MAKE(PaintNodeShapeAttributeImpl);
 
 private:

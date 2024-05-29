@@ -110,7 +110,7 @@ void ObjectAttribute::render(Renderer* renderer)
   // }
 }
 
-Bounds ObjectAttribute::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
+Bounds ObjectAttribute::onRevalidate(Revalidation* inv, const glm::mat3 & mat)
 {
   ASSERT(m_graphicItem);
   m_graphicItem->revalidate();

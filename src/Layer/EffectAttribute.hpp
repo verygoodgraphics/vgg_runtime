@@ -38,7 +38,7 @@ public:
   {
     return m_imageFilter;
   }
-  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override;
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3 & mat) override;
   VGG_CLASS_MAKE(BackdropFXAttribute);
 
 private:
@@ -52,7 +52,7 @@ class LayerFXAttribute : public ImageFilterAttribute
 public:
   LayerFXAttribute(VRefCnt* cnt, WeakRef<StyleItem> styleItem);
   VGG_ATTRIBUTE(LayerBlur, const std::vector<LayerFX>&, m_blurs);
-  Bounds               onRevalidate(Invalidator* inv, const glm::mat3 & mat) override;
+  Bounds               onRevalidate(Revalidation* inv, const glm::mat3 & mat) override;
   sk_sp<SkImageFilter> getImageFilter() const override
   {
     return m_imageFilter;

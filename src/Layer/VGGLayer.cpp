@@ -229,13 +229,45 @@ public:
     canvas->save();
     canvas->clear(backgroundColor);
     canvas->concat(toSkMatrix(matrix()));
+    Revalidation rev;
     if (node)
     {
       Renderer r;
       r = r.createNew(canvas);
       EventManager::pollEvents();
-      node->revalidate();
+      node->revalidate(&rev, matrix());
       node->render(&r);
+      if (false)
+      {
+        static int                 s_displayFrames = -1;
+        static std::vector<Bounds> s_bounds;
+        if (!rev.boundsArray().empty())
+        {
+          s_displayFrames = 0;
+          s_bounds = rev.boundsArray();
+        }
+        if (s_displayFrames >= 0 && s_displayFrames < 10)
+        {
+          for (const auto& bounds : s_bounds)
+          {
+            SkPaint p;
+            p.setStyle(SkPaint::kFill_Style);
+            p.setAlphaf(0.5);
+            p.setColor(SK_ColorGREEN);
+            canvas->drawRect(toSkRect(bounds), p);
+          }
+          SkPaint p;
+          p.setStyle(SkPaint::kStroke_Style);
+          p.setStrokeWidth(2);
+          p.setColor(SK_ColorGREEN);
+          canvas->drawRect(toSkRect(rev.bounds()), p);
+          s_displayFrames++;
+        }
+        else if (s_displayFrames >= 10)
+        {
+          s_displayFrames = -1;
+        }
+      }
     }
     if (drawTextInfo)
     {

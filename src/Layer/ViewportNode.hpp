@@ -67,7 +67,7 @@ public:
     return glm::mat3{ m_dpi, 0, 0, 0, m_dpi, 0, 0, 0, 1 };
   }
 
-  Bounds onRevalidate(Invalidator* inv, const glm::mat3 & mat) override
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3 & mat) override
   {
     return m_viewport;
   }

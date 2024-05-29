@@ -258,7 +258,7 @@ protected:
   VShape         makeBoundsPath();
   virtual VShape makeContourImpl(ContourOption option, const Transform* mat);
   VShape         childPolyOperation() const;
-  Bounds         onRevalidate(Invalidator* inv, const glm::mat3 & mat) override;
+  Bounds         onRevalidate(Revalidation* inv, const glm::mat3 & mat) override;
 
 #ifdef VGG_LAYER_DEBUG
   int depth() const override

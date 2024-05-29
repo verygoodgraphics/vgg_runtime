@@ -53,7 +53,7 @@ void ImageItem::render(Renderer* renderer)
   // };
 }
 
-Bounds ImageItem::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
+Bounds ImageItem::onRevalidate(Revalidation* inv, const glm::mat3 & mat)
 {
   if (!m_imageShader)
   {

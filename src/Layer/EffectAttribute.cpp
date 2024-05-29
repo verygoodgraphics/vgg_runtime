@@ -66,7 +66,7 @@ SkRect LayerFXAttribute::revalidateLayerImageFilter(const SkRect& bounds)
   return bounds;
 }
 
-Bounds LayerFXAttribute::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
+Bounds LayerFXAttribute::onRevalidate(Revalidation* inv, const glm::mat3 & mat)
 {
   auto styleItem = m_styleItem.lock();
   if (styleItem)
@@ -79,7 +79,7 @@ Bounds LayerFXAttribute::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
   return Bounds();
 }
 
-Bounds BackdropFXAttribute::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
+Bounds BackdropFXAttribute::onRevalidate(Revalidation* inv, const glm::mat3 & mat)
 {
   if (!m_blurs.empty())
   {

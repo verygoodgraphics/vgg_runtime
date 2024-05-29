@@ -576,7 +576,7 @@ void PaintNode::setFrameBounds(const Bounds& bounds)
     _->shapeItem->invalidate();
 }
 
-Bounds PaintNode::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
+Bounds PaintNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
 {
   VGG_IMPL(PaintNode);
 
@@ -584,10 +584,12 @@ Bounds PaintNode::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
     return Bounds();
 
   VGG_PAINTNODE_DUMP(STD_FORMAT("{} - {} childs:{}", name(), guid(), m_children.size()));
+  _->transformAttr->revalidate();
 
+  const auto ctm = _->transformAttr->getTransform().matrix() * mat;
   for (const auto& e : m_children)
   {
-    e->revalidate();
+    e->revalidate(inv, ctm);
   }
 
   Bounds bounds = d_ptr->bounds;
@@ -599,12 +601,11 @@ Bounds PaintNode::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
       bounds.unionWith(e->bounds());
     }
   }
-  _->transformAttr->revalidate();
 
   if (_->renderTrait & ERenderTraitBits::RT_RENDER_SELF)
   {
     auto currentNodeBounds =
-      _->renderNode->revalidate(); // This will trigger the shape attribute get the
+      _->renderNode->revalidate(inv, ctm); // This will trigger the shape attribute get the
 
     bounds.unionWith(currentNodeBounds);
   }

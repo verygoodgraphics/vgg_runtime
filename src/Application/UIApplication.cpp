@@ -22,6 +22,12 @@ using namespace VGG;
 void UIApplication::setView(std::shared_ptr<UIScrollView> view, double w, double h)
 {
   ASSERT(view);
+  if (m_view == view)
+  {
+    m_view->setSize(w, h);
+    return;
+  }
+
   m_view = view;
   m_view->setSize(w, h);
 

@@ -42,7 +42,12 @@ public:
 
   glm::mat3 getMatrix() const override
   {
-    return glm::mat3{ m_dpi, 0, 0, 0, m_dpi, 0, 0, 0, 1 };
+    return glm::mat3{ 1.f / m_dpi, 0, 0, 0, 1.f / m_dpi, 0, 0, 0, 1 };
+  }
+
+  glm::mat3 getInversedMatrix() override
+  {
+    return glm::inverse(getMatrix());
   }
 
   Bounds onRevalidate(Revalidation* inv, const glm::mat3& mat) override

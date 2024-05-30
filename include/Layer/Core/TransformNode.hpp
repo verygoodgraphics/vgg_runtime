@@ -117,7 +117,7 @@ public:
       {
         const auto matrix = m_transform->getMatrix();
         bounds = m_child->revalidate(inv, matrix * ctm);
-        bounds = bounds.bounds(Transform(matrix));
+        bounds = bounds.map(matrix);
       }
       else
       {

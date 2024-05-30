@@ -111,7 +111,7 @@ void VNode::invalidate(bool damage)
     VGG_LOG_DEV(ERROR, VNode, "TRAVERSALING");
     return;
   }
-  if (!isInvalid() && (!damage || m_state & DAMAGE))
+  if (isInvalid() && (!damage || m_state & DAMAGE))
     return;
 #ifdef VGG_LAYER_DEBUG
   std::string indent(depth(), '\t');

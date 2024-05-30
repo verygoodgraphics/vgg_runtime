@@ -67,8 +67,7 @@ public:
 private:
   GrRecordingContext* m_device{ nullptr };
   Ref<Viewport>       m_viewport;
-
-  glm::mat3 m_matrix;
+  glm::mat3           m_matrix;
 
   std::unique_ptr<Rasterizer>          m_raster;
   std::vector<layer::Rasterizer::Tile> m_rasterTiles;

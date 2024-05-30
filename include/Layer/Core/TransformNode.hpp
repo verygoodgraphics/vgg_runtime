@@ -35,6 +35,12 @@ public:
   {
     return glm::inverse(getMatrix());
   }
+
+public:
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3& ctm) override
+  {
+    return Bounds();
+  }
 };
 
 class Matrix : public TransformNode
@@ -51,15 +57,42 @@ public:
     return m_matrix;
   }
 
-  Bounds onRevalidate(Revalidation* inv, const glm::mat3& ctm) override
-  {
-    return Bounds();
-  }
-
   VGG_CLASS_MAKE(Matrix);
 
 private:
   glm::mat3 m_matrix;
+};
+
+class ConcateTransformNode : public TransformNode
+{
+public:
+  ConcateTransformNode(VRefCnt* cnt, Ref<TransformNode> a, Ref<TransformNode> b)
+    : TransformNode(cnt)
+    , m_a(std::move(a))
+    , m_b(std::move(b))
+  {
+    if (m_a)
+      observe(m_a);
+    if (m_b)
+      observe(m_b);
+  }
+
+  glm::mat3 getMatrix() const override
+  {
+    return m_b->getMatrix() * m_a->getMatrix();
+  }
+
+  ~ConcateTransformNode() override
+  {
+    unobserve(m_a);
+    unobserve(m_b);
+  }
+
+  VGG_CLASS_MAKE(ConcateTransformNode);
+
+private:
+  Ref<TransformNode> m_a;
+  Ref<TransformNode> m_b;
 };
 
 class TransformEffectNode : public RenderNode

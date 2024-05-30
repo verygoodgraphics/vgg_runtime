@@ -567,10 +567,11 @@ bool AttrBridge::updateMatrix(
     auto realHeight = *originHeight;
 
     // TODO frame can not scale, should change width and height, what about group and symbol?
+    // setTwinMatrix have same problem.
     if (isNotScaleButChangeSize)
     {
-      realWidth = scale[0] * (*originWidth);
-      realHeight = scale[1] * (*originHeight);
+      realWidth = std::abs(scale[0] * (*originWidth));
+      realHeight = std::abs(scale[1] * (*originHeight));
 
       AttrBridge::setWidth(paintNode, realWidth);
       AttrBridge::setHeight(paintNode, realHeight);
@@ -581,7 +582,8 @@ bool AttrBridge::updateMatrix(
         AttrBridge::setHeight(node, realHeight);
       }
 
-      scale = { 1.0, 1.0 };
+      scale[0] = std::copysign(1, scale[0]);
+      scale[1] = std::copysign(1, scale[1]);
     }
 
     auto matrix = TransformHelper::createRenderMatrix(
@@ -609,11 +611,15 @@ bool AttrBridge::updateMatrix(
           return;
         }
 
-        invMatrixs *= layer::Transform(TransformHelper::fromDesignMatrix(*parentMatrix)).inverse();
+        // invMatrixs *=
+        // layer::Transform(TransformHelper::fromDesignMatrix(*parentMatrix)).inverse();
+        invMatrixs *= glm::inverse(TransformHelper::fromDesignMatrix(*parentMatrix));
         parent = parent->parent();
       }
 
-      finalMatrix = TransformHelper::toDesignMatrix(layer::Transform(invMatrixs * matrix).matrix());
+      // finalMatrix = TransformHelper::toDesignMatrix(layer::Transform(invMatrixs *
+      // matrix).matrix());
+      finalMatrix = TransformHelper::toDesignMatrix(invMatrixs * matrix);
     }
     else
     {
@@ -628,12 +634,10 @@ bool AttrBridge::updateMatrix(
     AttrBridge::setMatrix(paintNode, finalMatrix);
   };
 
-  // TODO layer Transform check, should use in last.
   auto getInfo = [](const TRenderMatrix& transform)
   {
-    auto scale = TransformHelper::getScale(transform);
-    auto rotate = TransformHelper::getRotate(transform);
-    return std::vector<double>{ scale[0], scale[1], rotate };
+    auto value = TransformHelper::getTSR(transform);
+    return std::vector<double>{ value[2], value[3], value[4] };
   };
 
   std::vector<double> oldMatrixInfo = getInfo(TransformHelper::fromDesignMatrix(*oldMatrix));
@@ -675,9 +679,7 @@ bool AttrBridge::updateMatrix(
   return true;
 }
 
-// TODO remove nodeFrom
 void AttrBridge::setTwinMatrix(
-  std::shared_ptr<LayoutNode> nodeFrom,
   std::shared_ptr<LayoutNode> nodeTo,
   layer::PaintNode*           paintNodeTo,
   double                      originalWidthFrom,
@@ -685,9 +687,10 @@ void AttrBridge::setTwinMatrix(
   double                      originWidthTo,
   double                      originHeightTo,
   const std::vector<double>&  value,
-  bool                        isOnlyUpdatePaint)
+  bool                        isOnlyUpdatePaint,
+  bool                        isNotScaleButChangeSize)
 {
-  if (!nodeFrom || !nodeTo || !paintNodeTo)
+  if (!nodeTo || !paintNodeTo)
   {
     assert(false);
     return;
@@ -709,11 +712,10 @@ void AttrBridge::setTwinMatrix(
   auto realWidth = originWidthTo;
   auto realHeight = originHeightTo;
 
-  // TODO same as updateMatrix, what about symbol and group?
-  if (ReplaceNodeAnimate::isContainerType(nodeTo->elementNode()))
+  if (isNotScaleButChangeSize)
   {
-    realWidth = scale[0] * originWidthTo;
-    realHeight = scale[1] * originHeightTo;
+    realWidth = std::abs(scale[0] * originWidthTo);
+    realHeight = std::abs(scale[1] * originHeightTo);
 
     AttrBridge::setWidth(paintNodeTo, realWidth);
     AttrBridge::setHeight(paintNodeTo, realHeight);
@@ -724,7 +726,8 @@ void AttrBridge::setTwinMatrix(
       AttrBridge::setHeight(nodeTo, realHeight);
     }
 
-    scale = { 1.0, 1.0 };
+    scale[0] = std::copysign(1, scale[0]);
+    scale[1] = std::copysign(1, scale[1]);
   }
 
   auto matrix = TransformHelper::createRenderMatrix(
@@ -923,24 +926,24 @@ TDesignMatrix TransformHelper::transform(
   const TDesignMatrix& desMatrix)
 {
   auto renderMatrix = TransformHelper::fromDesignMatrix(desMatrix);
-  auto offset = TransformHelper::getTranslate(renderMatrix);
-  auto rotate = TransformHelper::getRotate(renderMatrix);
-  auto scale = TransformHelper::getScale(renderMatrix);
+  auto value = TransformHelper::getTSR(renderMatrix);
 
   auto finalScaleX = 0.0;
   if (selfWidth)
   {
-    finalScaleX = desWidth * scale[0] / selfWidth;
+    finalScaleX = desWidth * value[2] / selfWidth;
   }
 
   auto finalScaleY = 0.0;
   if (selfHeight)
   {
-    finalScaleY = desHeight * scale[1] / selfHeight;
+    finalScaleY = desHeight * value[3] / selfHeight;
   }
 
-  return TransformHelper::toDesignMatrix(
-    TransformHelper::createRenderMatrix(offset, { finalScaleX, finalScaleY }, rotate));
+  return TransformHelper::toDesignMatrix(TransformHelper::createRenderMatrix(
+    { value[0], value[1] },
+    { finalScaleX, finalScaleY },
+    value[4]));
 }
 
 TDesignMatrix TransformHelper::moveToWindowTopLeft(
@@ -981,22 +984,91 @@ std::array<double, 4> TransformHelper::getLTRB(
   return { minX, maxY, maxX, minY };
 }
 
-std::array<double, 2> TransformHelper::getTranslate(const TRenderMatrix& renderMatrix)
-{
-  layer::Transform matrix(renderMatrix);
-  return { matrix.translate()[0], matrix.translate()[1] };
-}
+// std::array<double, 2> TransformHelper::getTranslate(const TRenderMatrix& renderMatrix)
+//{
+//   layer::Transform matrix(renderMatrix);
+//   return { matrix.translate()[0], matrix.translate()[1] };
+// }
+//
+// std::array<double, 2> TransformHelper::getScale(const TRenderMatrix& renderMatrix)
+//{
+//   layer::Transform matrix(renderMatrix);
+//   return { matrix.scale()[0], matrix.scale()[1] };
+// }
+//
+// double TransformHelper::getRotate(const TRenderMatrix& renderMatrix)
+//{
+//   layer::Transform matrix(renderMatrix);
+//   return matrix.rotate();
+// }
 
-std::array<double, 2> TransformHelper::getScale(const TRenderMatrix& renderMatrix)
+std::array<double, 5> TransformHelper::getTSR(const TRenderMatrix& renderMatrix)
 {
-  layer::Transform matrix(renderMatrix);
-  return { matrix.scale()[0], matrix.scale()[1] };
-}
+  double a = renderMatrix[0][0];
+  double b = renderMatrix[0][1];
+  double c = renderMatrix[1][0];
+  double d = renderMatrix[1][1];
 
-double TransformHelper::getRotate(const TRenderMatrix& renderMatrix)
-{
-  layer::Transform matrix(renderMatrix);
-  return matrix.rotate();
+  double lengthOfScaleX = std::hypot(a, b);
+  double scaleX[2] = { lengthOfScaleX, -lengthOfScaleX };
+
+  double lengthOfScaleY = std::hypot(c, d);
+  double scaleY[2] = { lengthOfScaleY, -lengthOfScaleY };
+
+  if (!lengthOfScaleX || !lengthOfScaleY)
+  {
+    assert(false);
+    return { renderMatrix[2][0], renderMatrix[2][1], 1.0, 1.0, 0.0 };
+  }
+
+  double r0[2] = { std::atan2(b / scaleX[0], a / scaleX[0]),
+                   std::atan2(b / scaleX[1], a / scaleX[1]) };
+
+  double r1[2] = { std::atan2(-c / scaleY[0], d / scaleY[0]),
+                   std::atan2(-c / scaleY[1], d / scaleY[1]) };
+
+  double realScaleX = 0;
+  double realScaleY = 0;
+  double realRotation = 0;
+  if (std::abs(r0[0] - r1[0]) < 0.001)
+  {
+    realScaleX = scaleX[0];
+    realScaleY = scaleY[0];
+    realRotation = r0[0];
+
+    // assert(std::abs(r0[0] - r1[1]) > 0.001);
+    // assert(std::abs(r0[1] - r1[0]) > 0.001);
+    // assert(std::abs(r0[1] - r1[1]) > 0.001);
+  }
+  else if (std::abs(r0[0] - r1[1]) < 0.001)
+  {
+    realScaleX = scaleX[0];
+    realScaleY = scaleY[1];
+    realRotation = r0[0];
+
+    // assert(std::abs(r0[0] - r1[0]) > 0.001);
+    // assert(std::abs(r0[1] - r1[0]) > 0.001);
+    // assert(std::abs(r0[1] - r1[1]) > 0.001);
+  }
+  else if (std::abs(r0[1] - r1[0]) < 0.001)
+  {
+    realScaleX = scaleX[1];
+    realScaleY = scaleY[0];
+    realRotation = r0[1];
+
+    // assert(std::abs(r0[0] - r1[0]) > 0.001);
+    // assert(std::abs(r0[0] - r1[1]) > 0.001);
+    // assert(std::abs(r0[1] - r1[1]) > 0.001);
+  }
+  else
+  {
+    assert(std::abs(r0[1] - r1[1]) < 0.001);
+    realScaleX = scaleX[1];
+    realScaleY = scaleY[1];
+    realRotation = r0[1];
+  }
+
+  return { renderMatrix[2][0], renderMatrix[2][1], realScaleX, realScaleY, realRotation };
 }
 
 TRenderMatrix TransformHelper::createRenderMatrix(

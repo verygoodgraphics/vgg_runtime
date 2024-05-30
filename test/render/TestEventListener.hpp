@@ -287,7 +287,14 @@ protected:
             m_sceneNode = layer::SceneNode::Make(std::move(*sceneBuilderResult.root));
             auto zoomNode = layer::ZoomerNode::Make();
             m_zoomController = std::make_unique<ZoomNodeController>(zoomNode);
-            m_layer->setRenderNode(std::move(zoomNode), m_sceneNode);
+            if (false)
+            {
+              m_layer->setRenderNode(std::move(zoomNode), m_sceneNode);
+            }
+            else
+            {
+              m_layer->setRenderNode(layer::TransformEffectNode::Make(zoomNode, m_sceneNode));
+            }
             m_pager = std::make_unique<Pager>(m_sceneNode.get());
           }
           m_layer->setDrawPositionEnabled(true);

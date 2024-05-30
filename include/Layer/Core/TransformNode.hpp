@@ -31,6 +31,10 @@ public:
   }
 
   virtual glm::mat3 getMatrix() const = 0;
+  virtual glm::mat3 getInversedMatrix()
+  {
+    return glm::inverse(getMatrix());
+  }
 };
 
 class TransformEffectNode : public RenderNode
@@ -41,6 +45,8 @@ public:
     , m_transform(std::move(transform))
     , m_child(std::move(child))
   {
+    ASSERT(m_transform);
+    ASSERT(m_child);
     observe(m_transform);
     observe(m_child);
   }
@@ -48,6 +54,21 @@ public:
   Bounds effectBounds() const override
   {
     return m_child->effectBounds();
+  }
+
+  void nodeAt(int x, int y, NodeVisitor visitor, void* userData) override
+  {
+    if (m_child)
+    {
+      if (!m_transform)
+      {
+        const auto fp = m_transform->getInversedMatrix() * glm::vec3{ x, y, 1 };
+        x = fp.x;
+        y = fp.y;
+        return getChild()->nodeAt(x, y, visitor, userData);
+      }
+      return getChild()->nodeAt(x, y, visitor, userData);
+    }
   }
 
   void render(Renderer* renderer) override;
@@ -58,18 +79,21 @@ public:
     unobserve(m_child);
   }
 
-  Bounds onRevalidate(Revalidation* inv, const glm::mat3 & mat) override
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3& ctm) override
   {
-    if (m_transform)
-      m_transform->revalidate();
     Bounds bounds;
     if (m_child)
     {
-      bounds = m_child->revalidate();
       if (m_transform)
       {
         m_transform->revalidate();
-        bounds = bounds.bounds(Transform(m_transform->getMatrix()));
+        const auto matrix = m_transform->getMatrix();
+        bounds = m_child->revalidate(inv, matrix * ctm);
+        bounds = bounds.bounds(Transform(matrix));
+      }
+      else
+      {
+        bounds = m_child->revalidate(inv, ctm);
       }
     }
     return bounds;

@@ -169,8 +169,8 @@ public:
 
   std::vector<std::shared_ptr<Renderable>> items;
 
-  Ref<ViewportNode> viewport;
-  Ref<ZoomerNode>   zoomerNode;
+  Ref<Viewport>   viewport;
+  Ref<ZoomerNode> zoomerNode;
 
   Ref<RenderNode> node;
   float           preScale{ 1.0 };
@@ -239,18 +239,9 @@ public:
       node->render(&r);
       if (true)
       {
-        static int                 s_displayFrames = -1;
-        static std::vector<Bounds> s_bounds;
-        static Bounds              s_region;
         if (!rev.boundsArray().empty())
         {
-          s_displayFrames = 0;
-          s_bounds = rev.boundsArray();
-          s_region = rev.bounds();
-        }
-        if (s_displayFrames >= 0 && s_displayFrames < 10)
-        {
-          for (const auto& bounds : s_bounds)
+          for (const auto& bounds : rev.boundsArray())
           {
             SkPaint p;
             p.setStyle(SkPaint::kStroke_Style);
@@ -258,23 +249,27 @@ public:
             p.setColor(SK_ColorBLUE);
             canvas->drawRect(toSkRect(bounds), p);
           }
-          SkPaint p;
-          p.setStyle(SkPaint::kFill_Style);
-          p.setAlphaf(0.5);
-          p.setColor(SK_ColorGREEN);
-          canvas->drawRect(toSkRect(s_region), p);
-          DEBUG(
-            "damage region: %f %f %f %f",
-            s_region.topLeft().x,
-            s_region.topLeft().y,
-            s_region.width(),
-            s_region.height());
-          s_displayFrames++;
+          // SkPaint p;
+          // p.setStyle(SkPaint::kFill_Style);
+          // p.setAlphaf(0.5);
+          // p.setColor(SK_ColorGREEN);
+          // const auto region = rev.bounds();
+          // canvas->drawRect(toSkRect(region), p);
+          // DEBUG(
+          //   "damage region: %f %f %f %f",
+          //   region.topLeft().x,
+          //   region.topLeft().y,
+          //   region.width(),
+          //   region.height());
         }
-        else if (s_displayFrames >= 10)
-        {
-          s_displayFrames = -1;
-        }
+        // if (s_displayFrames >= 0 && s_displayFrames < 10)
+        // {
+        //   s_displayFrames++;
+        // }
+        // else if (s_displayFrames >= 10)
+        // {
+        //   s_displayFrames = -1;
+        // }
       }
     }
     if (drawTextInfo)
@@ -384,6 +379,11 @@ float VLayer::scaleFactor() const
   return d_ptr->preScale;
 }
 
+Viewport* VLayer::viewport()
+{
+  return d_ptr->viewport.get();
+}
+
 std::optional<ELayerError> VLayer::onInit()
 {
   VGG_IMPL(VLayer)
@@ -392,7 +392,7 @@ std::optional<ELayerError> VLayer::onInit()
   const auto& cfg = context()->config();
   const auto  api = context()->property().api;
 
-  d_ptr->viewport = ViewportNode::Make(d_ptr->preScale * context()->property().dpiScaling);
+  d_ptr->viewport = Viewport::Make(d_ptr->preScale * context()->property().dpiScaling);
 
   if (api == EGraphicsAPIBackend::API_OPENGL)
   {

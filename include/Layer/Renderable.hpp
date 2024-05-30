@@ -24,7 +24,7 @@ class SkCanvas;
 namespace VGG::layer
 {
 
-struct Viewport
+struct ViewportBounds
 {
   int position[2] = { 0, 0 };
   int extent[2] = { 0, 0 };
@@ -33,7 +33,7 @@ struct Viewport
 class VGG_EXPORTS [[deprecated("This interface will be removed")]] Renderable
   : public std::enable_shared_from_this<Renderable>
 {
-  std::optional<Viewport> m_viewport;
+  std::optional<ViewportBounds> m_viewport;
   bool                    m_visible{ true };
 
 protected:
@@ -41,7 +41,7 @@ protected:
 
 public:
   void render(SkCanvas* canvas);
-  void setViewport(const Viewport& vp)
+  void setViewport(const ViewportBounds& vp)
   {
     m_viewport = vp;
   }

@@ -25,7 +25,13 @@ void Revalidation::emit(const Bounds& bounds, const glm::mat3& ctm, VNode* node)
   const auto mappedBounds = bounds.map(ctm);
   m_boundsArray.push_back(mappedBounds);
   m_bounds.unionWith(mappedBounds);
-  DEBUG("Revalidation Region %s", node->dbgInfo.c_str());
+  DEBUG(
+    "Revalidation Region %s: [%f %f %f %f]",
+    node->dbgInfo.c_str(),
+    mappedBounds.topLeft().x,
+    mappedBounds.topLeft().y,
+    mappedBounds.width(),
+    mappedBounds.height());
 }
 
 class VNode::ScopedState

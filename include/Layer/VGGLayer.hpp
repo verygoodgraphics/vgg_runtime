@@ -22,6 +22,7 @@
 #include "Layer/Config.hpp"
 #include "Layer/Effects.hpp"
 #include "Layer/Graphics/GraphicsLayer.hpp"
+#include "Layer/ViewportNode.hpp"
 
 #include <vector>
 class SkCanvas;
@@ -90,13 +91,15 @@ public:
 
   float scaleFactor() const;
 
+  Viewport* viewport();
+
   PaintNode* nodeAt(int x, int y);
 
   void nodeAt(int x, int y, PaintNode::NodeVisitor visitor);
 
   void setRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node);
   void setRenderNode(Ref<RenderNode> node); // This is recommanded
-                                            //
+
   void setDrawClickBounds(bool enable);
   bool enableDrawClickBounds() const;
 

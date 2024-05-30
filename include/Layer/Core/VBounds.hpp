@@ -78,17 +78,17 @@ public:
     return m_topLeft;
   }
 
-  glm::vec2& topLeft()
+  float x() const
   {
-    return m_topLeft;
+    return m_topLeft.x;
   }
 
-  const glm::vec2& bottomRight() const
+  float y() const
   {
-    return m_bottomRight;
+    return m_topLeft.y;
   }
 
-  glm::vec2 bottomRight()
+  glm::vec2 bottomRight() const
   {
     return m_bottomRight;
   }

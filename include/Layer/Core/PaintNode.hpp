@@ -220,6 +220,7 @@ public:
 #endif
 
 public:
+  void                  render(Renderer* renderer);
   void                  setVisible(bool visible);
   bool                  isVisible() const;
   void                  setContextSettings(const ContextSetting& settings);
@@ -244,7 +245,6 @@ public:
 
 protected:
   void                paintChildren(Renderer* renderer);
-  void                render(Renderer* renderer);
   virtual void        onPaint(Renderer* renderer);
   virtual void        dispatchEvent(void* event);
   TransformAttribute* transformAttribute();
@@ -258,7 +258,7 @@ protected:
   VShape         makeBoundsPath();
   virtual VShape makeContourImpl(ContourOption option, const Transform* mat);
   VShape         childPolyOperation() const;
-  Bounds         onRevalidate(Revalidation* inv, const glm::mat3 & mat) override;
+  Bounds         onRevalidate(Revalidation* inv, const glm::mat3& mat) override;
 
 #ifdef VGG_LAYER_DEBUG
   int depth() const override

@@ -43,12 +43,10 @@ public:
     SkPictureRecorder rec;
     auto              rt = SkRTreeFactory();
     auto              pictureCanvas = rec.beginRecording(bounds, &rt);
+    Renderer          r = Renderer().createNew(pictureCanvas);
     for (const auto& root : frames)
     {
-      pictureCanvas->save();
-      pictureCanvas->concat(toSkMatrix(root->transform().matrix()));
-      pictureCanvas->drawPicture(root->picture());
-      pictureCanvas->restore();
+      root->render(&r);
     }
     return rec.finishRecordingAsPicture();
   }

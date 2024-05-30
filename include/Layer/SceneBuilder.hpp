@@ -104,9 +104,14 @@ public:
       result.root = RootArray();
       for (auto& p : m_frames)
       {
-        auto frame = makeFramePtr(std::move(p));
+        glm::mat3 mat = glm::identity<glm::mat3>();
         if (m_resetOrigin)
-          frame->resetToOrigin(true);
+        {
+          auto bounds = p->frameBounds();
+          bounds = bounds.map(p->transform().matrix());
+          mat = glm::translate(mat, glm::vec2(-bounds.x(), -bounds.y()));
+        }
+        auto frame = FrameNode::Make(Matrix::Make(mat), std::move(p));
         result.root->emplace_back(frame);
       }
     }

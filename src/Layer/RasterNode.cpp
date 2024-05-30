@@ -35,6 +35,19 @@ ZoomerNode* asZoom(TransformNode* node)
   return static_cast<ZoomerNode*>(node);
 }
 
+inline std::optional<Rasterizer::EReason> changed(glm::mat3& prevMatrix, const glm::mat3& newMatrix)
+{
+  if (prevMatrix[0][0] != newMatrix[0][0] || prevMatrix[1][1] != newMatrix[1][1])
+  {
+    return Rasterizer::EReason::ZOOM_SCALE;
+  }
+  else if (prevMatrix[2][0] != newMatrix[2][0] || prevMatrix[2][1] != newMatrix[2][1])
+  {
+    return Rasterizer::EReason::ZOOM_TRANSLATION;
+  }
+  return std::nullopt;
+}
+
 } // namespace
 
 namespace VGG::layer
@@ -119,11 +132,10 @@ void RasterNode::nodeAt(int x, int y, NodeVisitor vistor, void* userData)
 
 Bounds RasterNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
 {
-  auto c = getChild();
-  ASSERT(c);
-  auto       z = asZoom(getTransform());
-  const auto ctm = mat * z->getMatrix();
-  c->revalidate(inv, ctm);
+  TransformEffectNode::onRevalidate(inv, mat);
+  auto   c = getChild();
+  // auto       z = asZoom(getTransform());
+  // const auto ctm = mat * z->getMatrix();
   bool   needRaster = false;
   Bounds finalBounds;
 
@@ -140,30 +152,61 @@ Bounds RasterNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
       DEBUG("content changed");
       m_cacheUniqueID = c->picture()->uniqueID();
       m_raster->invalidate(layer::Rasterizer::EReason::CONTENT);
+      m_matrix = getTransform()->getMatrix();
       needRaster = true;
     }
-    if (z)
+    else
     {
-      if (z->hasInvalScale())
+      if (true)
       {
-        DEBUG("zoom scale changed");
-        m_raster->invalidate(layer::Rasterizer::EReason::ZOOM_SCALE);
-        needRaster = true;
+        auto newMatrix = getTransform()->getMatrix();
+        auto changeType = changed(m_matrix, newMatrix);
+        if (changeType)
+        {
+          m_raster->invalidate(*changeType);
+          m_matrix = newMatrix;
+          needRaster = true;
+        }
+        else
+        {
+          m_raster->invalidate(layer::Rasterizer::EReason::CONTENT);
+          needRaster = true;
+        }
+        if (m_viewport && m_viewport->hasInvalidate())
+        {
+          m_raster->invalidate(layer::Rasterizer::EReason::VIEWPORT);
+          m_viewport->revalidate();
+          needRaster = true;
+          finalBounds = m_viewport->bounds();
+        }
       }
-      if (z->hasOffsetInval())
+      else
       {
-        DEBUG("zoom translation changed");
-        m_raster->invalidate(layer::Rasterizer::EReason::ZOOM_TRANSLATION);
-        needRaster = true;
+        auto z = asZoom(getTransform());
+        if (z)
+        {
+          if (z->hasInvalScale())
+          {
+            DEBUG("zoom scale changed");
+            m_raster->invalidate(layer::Rasterizer::EReason::ZOOM_SCALE);
+            needRaster = true;
+          }
+          if (z->hasOffsetInval())
+          {
+            DEBUG("zoom translation changed");
+            m_raster->invalidate(layer::Rasterizer::EReason::ZOOM_TRANSLATION);
+            needRaster = true;
+          }
+          z->revalidate();
+        }
+        if (m_viewport && m_viewport->hasInvalidate())
+        {
+          m_raster->invalidate(layer::Rasterizer::EReason::VIEWPORT);
+          m_viewport->revalidate();
+          needRaster = true;
+          finalBounds = m_viewport->bounds();
+        }
       }
-      z->revalidate(inv, ctm);
-    }
-    if (m_viewport && m_viewport->hasInvalidate())
-    {
-      m_raster->invalidate(layer::Rasterizer::EReason::VIEWPORT);
-      m_viewport->revalidate();
-      needRaster = true;
-      finalBounds = m_viewport->bounds();
     }
   }
 
@@ -177,19 +220,20 @@ Bounds RasterNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
     }
 
     int lod = -1;
-    if (z)
-    {
-      std::visit(
-        layer::Overloaded{ [&](ZoomerNode::EScaleLevel level) { lod = level; },
-                           [&](ZoomerNode::OtherLevel other) { lod = -1; } },
-        z->scaleLevel());
-    }
+    // auto z = asZoom(getTransform());
+    // if (z)
+    // {
+    //   std::visit(
+    //     layer::Overloaded{ [&](ZoomerNode::EScaleLevel level) { lod = level; },
+    //                        [&](ZoomerNode::OtherLevel other) { lod = -1; } },
+    //     z->scaleLevel());
+    // }
 
     if (c->picture())
     {
-      const auto                localMatrix = SkMatrix::I();
-      const auto                deviceMatrix = toSkMatrix(m_viewport->getMatrix() * z->getMatrix());
-      const auto                contentBounds = toSkRect(c->bounds());
+      const auto localMatrix = SkMatrix::I();
+      const auto deviceMatrix = toSkMatrix(m_viewport->getMatrix() * getTransform()->getMatrix());
+      const auto contentBounds = toSkRect(c->bounds());
       Rasterizer::RasterContext rasterCtx{ deviceMatrix,
                                            c->picture(),
                                            &contentBounds,

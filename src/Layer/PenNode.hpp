@@ -32,7 +32,7 @@ class PenNode : public VNode
 {
 public:
   PenNode(VRefCnt* cnt)
-    : VNode(cnt, EState::INVALIDATE, EDamageTraitBits::BUBBLE_DAMAGE)
+    : VNode(cnt, EState::INVALIDATE)
   {
   }
 

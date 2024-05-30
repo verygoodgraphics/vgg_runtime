@@ -237,30 +237,38 @@ public:
       EventManager::pollEvents();
       node->revalidate(&rev, matrix());
       node->render(&r);
-      if (false)
+      if (true)
       {
         static int                 s_displayFrames = -1;
         static std::vector<Bounds> s_bounds;
+        static Bounds              s_region;
         if (!rev.boundsArray().empty())
         {
           s_displayFrames = 0;
           s_bounds = rev.boundsArray();
+          s_region = rev.bounds();
         }
         if (s_displayFrames >= 0 && s_displayFrames < 10)
         {
           for (const auto& bounds : s_bounds)
           {
             SkPaint p;
-            p.setStyle(SkPaint::kFill_Style);
-            p.setAlphaf(0.5);
-            p.setColor(SK_ColorGREEN);
+            p.setStyle(SkPaint::kStroke_Style);
+            p.setStrokeWidth(2);
+            p.setColor(SK_ColorBLUE);
             canvas->drawRect(toSkRect(bounds), p);
           }
           SkPaint p;
-          p.setStyle(SkPaint::kStroke_Style);
-          p.setStrokeWidth(2);
+          p.setStyle(SkPaint::kFill_Style);
+          p.setAlphaf(0.5);
           p.setColor(SK_ColorGREEN);
-          canvas->drawRect(toSkRect(rev.bounds()), p);
+          canvas->drawRect(toSkRect(s_region), p);
+          DEBUG(
+            "damage region: %f %f %f %f",
+            s_region.topLeft().x,
+            s_region.topLeft().y,
+            s_region.width(),
+            s_region.height());
           s_displayFrames++;
         }
         else if (s_displayFrames >= 10)

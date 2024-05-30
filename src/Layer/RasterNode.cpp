@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-#include "Layer/Core/RasterCache.hpp"
+#include "RasterNode.hpp"
 #include "Renderer.hpp"
-#include "Layer/RasterNode.hpp"
+
+#include "Layer/Core/RasterCache.hpp"
 #include "Layer/ViewportNode.hpp"
 
 #include "Layer/Core/ZoomerNode.hpp"
@@ -42,7 +43,7 @@ namespace VGG::layer
 RasterNode::RasterNode(
   VRefCnt*            cnt,
   GrRecordingContext* device,
-  Ref<ViewportNode>   viewport,
+  Ref<Viewport>       viewport,
   Ref<ZoomerNode>     zoomer,
   Ref<RenderNode>     child)
   : TransformEffectNode(cnt, std::move(zoomer), std::move(child))
@@ -109,7 +110,7 @@ void RasterNode::nodeAt(int x, int y, NodeVisitor vistor, void* userData)
   {
     auto z = asZoom(getTransform());
     ASSERT(z);
-    const auto fp = z->invMatrix() * glm::vec3{ x, y, 1 };
+    const auto fp = z->getInversedMatrix() * glm::vec3{ x, y, 1 };
     x = fp.x;
     y = fp.y;
     return getChild()->nodeAt(x, y, vistor, userData);

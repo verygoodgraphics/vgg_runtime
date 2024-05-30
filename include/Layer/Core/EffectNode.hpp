@@ -18,6 +18,7 @@
 #include "Layer/Core/RenderNode.hpp"
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/AttributeAccessor.hpp"
+#include "Layer/Core/VNode.hpp"
 #include <complex>
 
 namespace VGG::layer
@@ -27,7 +28,7 @@ class EffectNode : public RenderNode
 {
 public:
   EffectNode(VRefCnt* cnt, Ref<RenderNode> child)
-    : RenderNode(cnt, EState::INVALIDATE)
+    : RenderNode(cnt, EState::INVALIDATE, BUBBLE_DAMAGE)
     , m_child(std::move(child))
   {
     observe(m_child);

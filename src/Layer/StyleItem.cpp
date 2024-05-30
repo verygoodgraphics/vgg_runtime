@@ -86,7 +86,7 @@ StyleItem::StyleItem(
   PaintNode*              node,
   Ref<TransformAttribute> transform,
   Creator                 creator)
-  : RenderNode(cnt, INVALIDATE)
+  : RenderNode(cnt, INVALIDATE, OVERRIDE_DAMAGE)
   , d_ptr(new StyleItem__pImpl(this))
   , m_transformAttr(transform)
 {
@@ -293,7 +293,7 @@ Bounds StyleItem::objectBounds()
   return m_graphicItem->bounds();
 }
 
-Bounds StyleItem::onRevalidate(Revalidation* inv, const glm::mat3 & mat)
+Bounds StyleItem::onRevalidate(Revalidation* inv, const glm::mat3& mat)
 {
   auto bounds = onRevalidateStyle(); // this must be the first, workaround
   m_shapeMaskAttr->revalidate();

@@ -16,13 +16,14 @@
 
 #pragma once
 #include "Layer/Core/TransformNode.hpp"
+#include "Layer/Core/AttributeAccessor.hpp"
 
 namespace VGG::layer
 {
-class ViewportNode : public TransformNode
+class Viewport final : public TransformNode
 {
 public:
-  ViewportNode(VRefCnt* cnt, float dpi)
+  Viewport(VRefCnt* cnt, float dpi)
     : TransformNode(cnt)
     , m_dpi(dpi)
   {
@@ -31,31 +32,8 @@ public:
 #endif
   }
 
-  void setDPI(float dpi)
-  {
-    if (dpi == m_dpi)
-      return;
-    m_dpi = dpi;
-    this->invalidate();
-  }
-
-  float getDPI() const
-  {
-    return m_dpi;
-  }
-
-  void setViewport(const Bounds& viewport)
-  {
-    if (m_viewport == viewport)
-      return;
-    m_viewport = viewport;
-    this->invalidate();
-  }
-
-  const Bounds& getViewport() const
-  {
-    return m_viewport;
-  }
+  VGG_ATTRIBUTE(DPI, float, m_dpi);
+  VGG_ATTRIBUTE(Viewport, Bounds, m_viewport);
 
   bool hasInvalidate() const
   {
@@ -67,11 +45,11 @@ public:
     return glm::mat3{ m_dpi, 0, 0, 0, m_dpi, 0, 0, 0, 1 };
   }
 
-  Bounds onRevalidate(Revalidation* inv, const glm::mat3 & mat) override
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3& mat) override
   {
     return m_viewport;
   }
-  VGG_CLASS_MAKE(ViewportNode);
+  VGG_CLASS_MAKE(Viewport);
 
 private:
   Bounds m_viewport;

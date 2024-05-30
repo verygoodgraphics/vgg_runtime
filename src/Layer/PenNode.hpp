@@ -32,7 +32,7 @@ class PenNode : public VNode
 {
 public:
   PenNode(VRefCnt* cnt)
-    : VNode(cnt, EState::INVALIDATE)
+    : VNode(cnt, EState::INVALIDATE, BUBBLE_DAMAGE)
   {
   }
 

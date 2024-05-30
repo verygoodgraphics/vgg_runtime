@@ -38,7 +38,7 @@ public:
   RasterNode(
     VRefCnt*            cnt,
     GrRecordingContext* device,
-    Ref<ViewportNode>   viewport,
+    Ref<Viewport>       viewport,
     Ref<ZoomerNode>     zoomer,
     Ref<RenderNode>     child);
 
@@ -57,7 +57,7 @@ public:
     return Bounds();
   }
 
-  Bounds onRevalidate(Revalidation* inv, const glm::mat3 & mat) override;
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3& mat) override;
 
   ~RasterNode() override
   {
@@ -66,7 +66,7 @@ public:
 
 private:
   GrRecordingContext*                  m_device{ nullptr };
-  Ref<ViewportNode>                    m_viewport;
+  Ref<Viewport>                        m_viewport;
   std::unique_ptr<Rasterizer>          m_raster;
   std::vector<layer::Rasterizer::Tile> m_rasterTiles;
   SkMatrix                             m_rasterMatrix;

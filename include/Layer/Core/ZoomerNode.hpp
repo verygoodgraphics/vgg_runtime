@@ -122,7 +122,7 @@ public:
     return matrix();
   }
 
-  glm::mat3 invMatrix() const
+  glm::mat3 getInversedMatrix() override
   {
     auto tx = -m_offset.x;
     auto ty = -m_offset.y;

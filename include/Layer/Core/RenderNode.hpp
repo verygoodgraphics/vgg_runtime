@@ -34,8 +34,8 @@ public:
   };
 
   using NodeVisitor = void (*)(RenderNode*, const NodeAtContext*);
-  RenderNode(VRefCnt* cnt, EState flags)
-    : VNode(cnt, flags)
+  RenderNode(VRefCnt* cnt, EState flags, EDamageTrait trait = 0)
+    : VNode(cnt, flags, trait)
   {
   }
 

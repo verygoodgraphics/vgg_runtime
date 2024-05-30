@@ -569,7 +569,7 @@ void ReplaceNodeAnimate::addTwinMatrixAnimate(const TTwins& twins)
     auto& itemFrom = item.first;
     auto& itemTo = item.second;
 
-    if (!itemFrom || !itemTo)
+    if (!itemFrom || !itemTo || !itemTo->elementNode())
     {
       assert(false);
       continue;
@@ -617,7 +617,6 @@ void ReplaceNodeAnimate::addTwinMatrixAnimate(const TTwins& twins)
 
     animate->addTriggeredCallback(std::bind(
       AttrBridge::setTwinMatrix,
-      itemFrom,
       itemTo,
       paintNodeTo,
       *widthFrom,
@@ -625,7 +624,8 @@ void ReplaceNodeAnimate::addTwinMatrixAnimate(const TTwins& twins)
       *widthTo,
       *heightTo,
       std::placeholders::_1,
-      isOnlyUpdatePaint));
+      isOnlyUpdatePaint,
+      ReplaceNodeAnimate::isContainerType(itemTo->elementNode())));
 
     animate->addCallBackWhenStop(
       [paintNodeFromOriginalMatrix,
@@ -825,8 +825,9 @@ void SmartAnimate::addTwinAnimate(
 
   for (auto& item : twins)
   {
-    // TODO should judge item.second? test it.
-    if (ReplaceNodeAnimate::isContainerType(item.first->elementNode()))
+    if (
+      ReplaceNodeAnimate::isContainerType(item.first->elementNode()) &&
+      ReplaceNodeAnimate::isContainerType(item.second->elementNode()))
     {
       addTwinAnimate(item.first, item.second);
     }
@@ -850,6 +851,7 @@ MoveAnimate::MoveAnimate(
 {
 }
 
+// TODO notify to gh, back for move in is move out.
 void MoveAnimate::start()
 {
   auto attrBridge = getAttrBridge();
@@ -892,21 +894,29 @@ void MoveAnimate::start()
     auto matrixStart = getStartTranslateMatrix(matirxTo);
     auto matrixStop = getStopTranslateMatrix(matirxTo);
 
-    attrBridge->updateMatrix(to, paintNodeTo, matrixStart, isOnlyUpdatePaint, {}, true);
-    attrBridge->updateVisible(to, paintNodeTo, true, isOnlyUpdatePaint);
-
     auto animateMatrix = createAndAddNumberAnimate();
+    attrBridge->updateMatrix(to, paintNodeTo, matrixStart, isOnlyUpdatePaint, {}, true);
     attrBridge->updateMatrix(to, paintNodeTo, matrixStop, isOnlyUpdatePaint, animateMatrix, true);
 
-    // TODO maybe add in animate group?
-    auto animateForSize = createAndAddNumberAnimate();
+    auto animateForToSize = createAndAddNumberAnimate();
+    if (m_moveDirection == FROM_RIGHT || m_moveDirection == FROM_LEFT)
+    {
+      attrBridge->updateSize(to, paintNodeTo, 1.0, heightTo, isOnlyUpdatePaint);
+    }
+    else
+    {
+      attrBridge->updateSize(to, paintNodeTo, widthTo, 1.0, isOnlyUpdatePaint);
+    }
+    attrBridge->updateSize(to, paintNodeTo, widthTo, heightTo, isOnlyUpdatePaint, animateForToSize);
+
+    attrBridge->updateVisible(to, paintNodeTo, true, isOnlyUpdatePaint);
+
+    auto animateForFromSize = createAndAddNumberAnimate();
     attrBridge
-      ->updateSize(from, paintNodeFrom, widthTo, heightTo, isOnlyUpdatePaint, animateForSize);
-    animateForSize->addCallBackWhenStop(
+      ->updateSize(from, paintNodeFrom, widthTo, heightTo, isOnlyUpdatePaint, animateForFromSize);
+    animateForFromSize->addCallBackWhenStop(
       [widthFrom, heightFrom, from, paintNodeFrom, isOnlyUpdatePaint, attrBridge]()
       { attrBridge->updateSize(from, paintNodeFrom, widthFrom, heightFrom, isOnlyUpdatePaint); });
-
-    // TODO should change size for moved in object.
   }
   else
   {
@@ -917,7 +927,6 @@ void MoveAnimate::start()
     dealChildren(from, to, paintNodeFrom, paintNodeTo);
   }
 
-  // TODO maybe let this code to replacenode
   addCallBackWhenStop(
     [from, paintNodeFrom, attrBridge, isOnlyUpdatePaint]()
     { attrBridge->updateVisible(from, paintNodeFrom, false, isOnlyUpdatePaint); });

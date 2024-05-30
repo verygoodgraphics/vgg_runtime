@@ -156,9 +156,7 @@ private:
   static void setHeight(std::shared_ptr<LayoutNode> node, const double height);
   static void setHeight(layer::PaintNode* node, const double height);
 
-  // TODO just like updateMatrix, should accept isNotScaleButChangeSize
   static void setTwinMatrix(
-    std::shared_ptr<LayoutNode> nodeFrom,
     std::shared_ptr<LayoutNode> nodeTo,
     layer::PaintNode*           paintNodeTo,
     double                      originalWidthFrom,
@@ -166,7 +164,8 @@ private:
     double                      originWidthTo,
     double                      originHeightTo,
     const std::vector<double>&  value,
-    bool                        isOnlyUpdatePaint);
+    bool                        isOnlyUpdatePaint,
+    bool                        isNotScaleButChangeSize);
 
 private:
   void updateSimpleAttr(
@@ -209,9 +208,13 @@ public:
   static std::array<double, 4> getLTRB(double width, double height, const TDesignMatrix& matrix);
 
   // base on the render coordinate system.
-  static std::array<double, 2> getTranslate(const TRenderMatrix& renderMatrix);
-  static std::array<double, 2> getScale(const TRenderMatrix& renderMatrix);
-  static double                getRotate(const TRenderMatrix& renderMatrix);
+  // static std::array<double, 2> getTranslate(const TRenderMatrix& renderMatrix);
+  // static std::array<double, 2> getScale(const TRenderMatrix& renderMatrix);
+  // static double                getRotate(const TRenderMatrix& renderMatrix);
+
+  // base on the render coordinate system.
+  // return: [translate_x, translate_y, scale_x, scale_y, rotation]
+  static std::array<double, 5> getTSR(const TRenderMatrix& renderMatrix);
 
   static TRenderMatrix createRenderMatrix(
     const std::array<double, 2>& translate,

@@ -24,6 +24,7 @@
 #include "Layer/Renderer.hpp"
 #include "LayerCache.h"
 
+#include <algorithm>
 #include <core/SkBBHFactory.h>
 #include <core/SkColor.h>
 #include <core/SkSurface.h>
@@ -63,10 +64,7 @@ class FrameNode__pImpl
 {
   VGG_DECL_API(FrameNode)
 public:
-  bool             enableToOrigin{ false };
-  Transform        transform;
-  Ref<PaintNode>   node;
-  sk_sp<SkPicture> cache;
+  Ref<PaintNode> node;
 
   bool maskDirty{ true };
 
@@ -92,10 +90,10 @@ PaintNode* FrameNode::node() const
   return d_ptr->node.get();
 }
 
-const Transform& FrameNode::transform() const
-{
-  return d_ptr->transform;
-}
+// const Transform& FrameNode::transform() const
+// {
+//   return d_ptr->transform;
+// }
 
 const std::string& FrameNode::guid() const
 {
@@ -107,27 +105,11 @@ bool FrameNode::isVisible() const
   return node()->isVisible();
 }
 
-void FrameNode::resetToOrigin(bool enable)
-{
-  VGG_IMPL(FrameNode);
-  _->enableToOrigin = enable;
-  invalidate();
-}
-
 void FrameNode::render(Renderer* renderer)
 {
-  if (d_ptr->cache)
-  {
-    auto canvas = renderer->canvas();
-    canvas->save();
-    canvas->concat(toSkMatrix(d_ptr->transform.matrix()));
-    renderer->canvas()->drawPicture(d_ptr->cache.get());
-    canvas->restore();
-  }
-  else
-  {
-    DEBUG("Frame::render: no picture to render");
-  }
+  SkAutoCanvasRestore acr(renderer->canvas(), true);
+  renderer->canvas()->concat(toSkMatrix(getTransform()->getMatrix()));
+  node()->render(renderer);
 }
 
 #ifdef VGG_LAYER_DEBUG
@@ -138,7 +120,7 @@ void FrameNode::debug(Renderer* render)
   if (d_ptr->node)
   {
     SkAutoCanvasRestore acr(canvas, true);
-    canvas->concat(toSkMatrix(transform().matrix()));
+    canvas->concat(toSkMatrix(getTransform()->getMatrix()));
     d_ptr->node->debug(render);
   }
 }
@@ -150,13 +132,7 @@ Bounds FrameNode::effectBounds() const
   return node()->bounds();
 }
 
-SkPicture* FrameNode::picture() const
-{
-  ASSERT(!isInvalid());
-  return d_ptr->cache.get();
-}
-
-Bounds FrameNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
+Bounds FrameNode::onRevalidate(Revalidation* inv, const glm::mat3& ctm)
 {
   VGG_IMPL(FrameNode);
   if (_->maskDirty)
@@ -164,22 +140,17 @@ Bounds FrameNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
     updateMaskMap(node());
     _->maskDirty = false;
   }
-
-  const auto bounds = node()->revalidate(inv, mat);
-  _->cache = _->renderPicture(toSkRect(bounds));
-  _->transform.setMatrix(glm::mat3{ 1 });
-  if (_->enableToOrigin)
-  {
-    _->transform.setMatrix(
-      glm::translate(glm::mat3{ 1 }, glm::vec2(-bounds.topLeft().x, -bounds.topLeft().y)));
-  }
-  return bounds.bounds(_->transform);
+  getTransform()->revalidate();
+  const auto matrix = getTransform()->getMatrix();
+  const auto bounds = node()->revalidate(inv, matrix * ctm);
+  //_->cache = _->renderPicture(toSkRect(bounds));
+  return bounds.map(matrix);
 }
 
-FrameNode::FrameNode(VRefCnt* cnt, PaintNodePtr root)
+FrameNode::FrameNode(VRefCnt* cnt, Ref<TransformNode> transform, PaintNodePtr root)
   // TransformEffectNode is used just for its RenderNode interface now,
   // real implementation is in Frame class.
-  : TransformEffectNode(cnt, 0, 0)
+  : TransformEffectNode(cnt, std::move(transform), 0)
   , d_ptr(std::make_unique<FrameNode__pImpl>(this))
 {
   d_ptr->node = std::move(root);
@@ -194,7 +165,7 @@ void FrameNode::nodeAt(int x, int y, NodeVisitor vistor, void* userData)
   ASSERT(node()->parent() == nullptr);
   if (bounds().contains(x, y))
   {
-    auto inv = d_ptr->transform.inverse();
+    auto inv = getTransform()->getInversedMatrix();
     auto p = inv * glm::vec3(x, y, 1);
 
     const RenderNode::NodeAtContext ctx{ static_cast<int>(p.x), static_cast<int>(p.y), userData };

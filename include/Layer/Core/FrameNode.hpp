@@ -50,9 +50,14 @@ class FrameNode final : public TransformEffectNode
   VGG_DECL_IMPL(FrameNode);
 
 public:
-  FrameNode(VRefCnt* cnt, PaintNodePtr root);
+  FrameNode(VRefCnt* cnt, Ref<TransformNode> transform, PaintNodePtr root);
   const std::string& guid() const;
   PaintNode*         node() const;
+
+  TransformNode* getTransformNode()
+  {
+    return getTransform();
+  };
 
   Bounds effectBounds() const override;
 
@@ -62,9 +67,7 @@ public:
 
   void invalidateMask(); // temporary solution
 
-  void             resetToOrigin(bool enable);
-  bool             isVisible() const;
-  const Transform& transform() const;
+  bool isVisible() const;
 
   void render(Renderer* renderer) override;
 
@@ -72,11 +75,11 @@ public:
   void debug(Renderer* render) override;
 #endif
 
-  SkPicture* picture() const override;
-
   ~FrameNode();
 
+  VGG_CLASS_MAKE(FrameNode);
+
 protected:
-  Bounds onRevalidate(Revalidation* inv, const glm::mat3 & mat) override;
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3& mat) override;
 };
 } // namespace VGG::layer

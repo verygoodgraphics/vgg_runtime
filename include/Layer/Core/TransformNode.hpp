@@ -37,6 +37,31 @@ public:
   }
 };
 
+class Matrix : public TransformNode
+{
+public:
+  Matrix(VRefCnt* cnt, const glm::mat3& matrix = glm::mat3{ 1.0 })
+    : TransformNode(cnt)
+    , m_matrix(matrix)
+  {
+  }
+
+  glm::mat3 getMatrix() const override
+  {
+    return m_matrix;
+  }
+
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3& ctm) override
+  {
+    return Bounds();
+  }
+
+  VGG_CLASS_MAKE(Matrix);
+
+private:
+  glm::mat3 m_matrix;
+};
+
 class TransformEffectNode : public RenderNode
 {
 public:
@@ -45,15 +70,15 @@ public:
     , m_transform(std::move(transform))
     , m_child(std::move(child))
   {
-    ASSERT(m_transform);
-    ASSERT(m_child);
-    observe(m_transform);
-    observe(m_child);
+    if (m_transform)
+      observe(m_transform);
+    if (m_child)
+      observe(m_child);
   }
 
   Bounds effectBounds() const override
   {
-    return m_child->effectBounds();
+    return m_child ? m_child->effectBounds() : Bounds();
   }
 
   void nodeAt(int x, int y, NodeVisitor visitor, void* userData) override
@@ -82,11 +107,14 @@ public:
   Bounds onRevalidate(Revalidation* inv, const glm::mat3& ctm) override
   {
     Bounds bounds;
+    if (m_transform)
+    {
+      m_transform->revalidate();
+    }
     if (m_child)
     {
       if (m_transform)
       {
-        m_transform->revalidate();
         const auto matrix = m_transform->getMatrix();
         bounds = m_child->revalidate(inv, matrix * ctm);
         bounds = bounds.bounds(Transform(matrix));

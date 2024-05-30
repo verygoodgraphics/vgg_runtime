@@ -376,7 +376,6 @@ public:
       opts.extend[1],
       actualSize[1]);
     opts.quality = quality;
-    f->resetToOrigin(true);
     auto res = state->render(f, scale, opts, cost);
     if (!res.has_value())
     {

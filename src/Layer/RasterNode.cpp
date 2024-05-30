@@ -30,10 +30,10 @@ namespace
 
 using namespace VGG::layer;
 
-ZoomerNode* asZoom(TransformNode* node)
-{
-  return static_cast<ZoomerNode*>(node);
-}
+// ZoomerNode* asZoom(TransformNode* node)
+// {
+//   return static_cast<ZoomerNode*>(node);
+// }
 
 inline std::optional<Rasterizer::EReason> changed(glm::mat3& prevMatrix, const glm::mat3& newMatrix)
 {
@@ -59,7 +59,10 @@ RasterNode::RasterNode(
   Ref<Viewport>       viewport,
   Ref<ZoomerNode>     zoomer,
   Ref<RenderNode>     child)
-  : TransformEffectNode(cnt, std::move(zoomer), std::move(child))
+  : TransformEffectNode(
+      cnt,
+      ConcateTransformNode::Make(viewport, std::move(zoomer)),
+      std::move(child))
   , m_viewport(viewport)
   , m_raster(std::make_unique<RasterCacheTile>())
 {
@@ -79,7 +82,8 @@ void RasterNode::render(Renderer* renderer)
   ASSERT(c);
   if (!c->picture())
   {
-    c->render(renderer);
+    // c->render(renderer);
+    TransformEffectNode::render(renderer);
   }
   else
   {
@@ -121,7 +125,7 @@ void RasterNode::nodeAt(int x, int y, NodeVisitor vistor, void* userData)
   ASSERT(c);
   if (c)
   {
-    auto z = asZoom(getTransform());
+    auto z = getTransform();
     ASSERT(z);
     const auto fp = z->getInversedMatrix() * glm::vec3{ x, y, 1 };
     x = fp.x;
@@ -134,8 +138,6 @@ Bounds RasterNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
 {
   TransformEffectNode::onRevalidate(inv, mat);
   auto   c = getChild();
-  // auto       z = asZoom(getTransform());
-  // const auto ctm = mat * z->getMatrix();
   bool   needRaster = false;
   Bounds finalBounds;
 
@@ -182,30 +184,30 @@ Bounds RasterNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
       }
       else
       {
-        auto z = asZoom(getTransform());
-        if (z)
-        {
-          if (z->hasInvalScale())
-          {
-            DEBUG("zoom scale changed");
-            m_raster->invalidate(layer::Rasterizer::EReason::ZOOM_SCALE);
-            needRaster = true;
-          }
-          if (z->hasOffsetInval())
-          {
-            DEBUG("zoom translation changed");
-            m_raster->invalidate(layer::Rasterizer::EReason::ZOOM_TRANSLATION);
-            needRaster = true;
-          }
-          z->revalidate();
-        }
-        if (m_viewport && m_viewport->hasInvalidate())
-        {
-          m_raster->invalidate(layer::Rasterizer::EReason::VIEWPORT);
-          m_viewport->revalidate();
-          needRaster = true;
-          finalBounds = m_viewport->bounds();
-        }
+        // auto z = asZoom(getTransform());
+        // if (z)
+        // {
+        //   if (z->hasInvalScale())
+        //   {
+        //     DEBUG("zoom scale changed");
+        //     m_raster->invalidate(layer::Rasterizer::EReason::ZOOM_SCALE);
+        //     needRaster = true;
+        //   }
+        //   if (z->hasOffsetInval())
+        //   {
+        //     DEBUG("zoom translation changed");
+        //     m_raster->invalidate(layer::Rasterizer::EReason::ZOOM_TRANSLATION);
+        //     needRaster = true;
+        //   }
+        //   z->revalidate();
+        // }
+        // if (m_viewport && m_viewport->hasInvalidate())
+        // {
+        //   m_raster->invalidate(layer::Rasterizer::EReason::VIEWPORT);
+        //   m_viewport->revalidate();
+        //   needRaster = true;
+        //   finalBounds = m_viewport->bounds();
+        // }
       }
     }
   }
@@ -231,9 +233,9 @@ Bounds RasterNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
 
     if (c->picture())
     {
-      const auto localMatrix = SkMatrix::I();
-      const auto deviceMatrix = toSkMatrix(m_viewport->getMatrix() * getTransform()->getMatrix());
-      const auto contentBounds = toSkRect(c->bounds());
+      const auto                localMatrix = SkMatrix::I();
+      const auto                deviceMatrix = toSkMatrix(getTransform()->getMatrix());
+      const auto                contentBounds = toSkRect(c->bounds());
       Rasterizer::RasterContext rasterCtx{ deviceMatrix,
                                            c->picture(),
                                            &contentBounds,

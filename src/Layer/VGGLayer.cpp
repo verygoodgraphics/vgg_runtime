@@ -173,7 +173,6 @@ public:
   Ref<ZoomerNode> zoomerNode;
 
   Ref<RenderNode> node;
-  float           preScale{ 1.0 };
   bool            invalid{ true };
 
   std::unique_ptr<SkPictureRecorder> rec;
@@ -211,31 +210,18 @@ public:
     skiaContext = nullptr;
   }
 
-  glm::mat3 matrix() const
-  {
-    auto scale = q_ptr->context()->property().dpiScaling * q_ptr->scaleFactor();
-    return glm::mat3{ scale, 0, 0, 0, scale, 0, 0, 0, 1 };
-  }
-
-  glm::mat3 invMatrix() const
-  {
-    auto scale = 1.0 / q_ptr->context()->property().dpiScaling * q_ptr->scaleFactor();
-    return glm::mat3{ scale, 0, 0, 0, scale, 0, 0, 0, 1 };
-  }
-
   void renderInternal(SkCanvas* canvas, bool drawTextInfo)
   {
     ASSERT(canvas);
     canvas->save();
     canvas->clear(backgroundColor);
-    canvas->concat(toSkMatrix(matrix()));
     Revalidation rev;
     if (node)
     {
       Renderer r;
       r = r.createNew(canvas);
       EventManager::pollEvents();
-      node->revalidate(&rev, matrix());
+      node->revalidate(&rev, glm::mat3{ 1 });
       node->render(&r);
       if (true)
       {
@@ -262,14 +248,6 @@ public:
           //   region.width(),
           //   region.height());
         }
-        // if (s_displayFrames >= 0 && s_displayFrames < 10)
-        // {
-        //   s_displayFrames++;
-        // }
-        // else if (s_displayFrames >= 10)
-        // {
-        //   s_displayFrames = -1;
-        // }
       }
     }
     if (drawTextInfo)
@@ -313,17 +291,17 @@ public:
       SkIRect::MakeXYWH(opts.position[0], opts.position[1], opts.extend[0], opts.extend[1]));
   }
 
-  void revalidate()
-  {
-    if (invalid)
-    {
-      invalid = false;
-    }
-  }
-  void invalidate()
-  {
-    invalid = true;
-  }
+  // void revalidate()
+  // {
+  //   if (invalid)
+  //   {
+  //     invalid = false;
+  //   }
+  // }
+  // void invalidate()
+  // {
+  //   invalid = true;
+  // }
 
   void setBackgroundColor(SkColor color)
   {
@@ -368,15 +346,13 @@ bool VLayer::debugModeEnabled()
 
 void VLayer::setScaleFactor(float scale)
 {
-  if (d_ptr->preScale == scale)
-    return;
-  d_ptr->preScale = scale;
-  d_ptr->viewport->setDPI(context()->property().dpiScaling * scale);
+  d_ptr->viewport->setScale(scale);
+  // d_ptr->viewport->setDPI(context()->property().dpiScaling * scale);
 }
 
 float VLayer::scaleFactor() const
 {
-  return d_ptr->preScale;
+  return d_ptr->viewport->getScale();
 }
 
 Viewport* VLayer::viewport()
@@ -392,7 +368,7 @@ std::optional<ELayerError> VLayer::onInit()
   const auto& cfg = context()->config();
   const auto  api = context()->property().api;
 
-  d_ptr->viewport = Viewport::Make(d_ptr->preScale * context()->property().dpiScaling);
+  d_ptr->viewport = Viewport::Make(context()->property().dpiScaling);
 
   if (api == EGraphicsAPIBackend::API_OPENGL)
   {
@@ -427,7 +403,6 @@ std::optional<ELayerError> VLayer::onInit()
 void VLayer::beginFrame()
 {
   VGG_IMPL(VLayer);
-  _->revalidate();
   if (!_->skiaContext->prepareFrame())
     DEBUG("begin frame failed");
 }
@@ -480,7 +455,7 @@ PaintNode* VLayer::nodeAt(int x, int y)
 {
   if (d_ptr->node)
   {
-    auto p = d_ptr->invMatrix() * glm::vec3{ x, y, 1 };
+    auto p = glm::vec3{ x, y, 1 };
     g_nodeAtResult = nullptr;
     glm::mat3 deviceMatrix{ 1.f };
     if (d_ptr->viewport)
@@ -520,7 +495,7 @@ void VLayer::nodeAt(int x, int y, PaintNode::NodeVisitor visitor)
 {
   if (d_ptr->node)
   {
-    auto p = d_ptr->invMatrix() * glm::vec3{ x, y, 1 };
+    auto p = glm::vec3{ x, y, 1 };
     d_ptr->node->nodeAt(
       p.x,
       p.y,
@@ -543,7 +518,7 @@ void VLayer::resize(int w, int h)
     INFO("resize: [%d, %d], actually (%d, %d)", w, h, finalW, finalH);
     _->skiaContext->resizeSurface(finalW, finalH);
     _->viewport->setViewport(Bounds{ 0, 0, (float)finalW, (float)finalH });
-    d_ptr->invalidate();
+    // d_ptr->invalidate();
   }
 }
 void VLayer::endFrame()

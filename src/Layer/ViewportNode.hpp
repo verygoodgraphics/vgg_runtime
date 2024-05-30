@@ -33,6 +33,7 @@ public:
   }
 
   VGG_ATTRIBUTE(DPI, float, m_dpi);
+  VGG_ATTRIBUTE(Scale, float, m_scale);
   VGG_ATTRIBUTE(Viewport, Bounds, m_viewport);
 
   bool hasInvalidate() const
@@ -42,12 +43,12 @@ public:
 
   glm::mat3 getMatrix() const override
   {
-    return glm::mat3{ 1.f / m_dpi, 0, 0, 0, 1.f / m_dpi, 0, 0, 0, 1 };
+    return glm::mat3{ m_dpi * m_scale, 0, 0, 0, m_dpi * m_scale, 0, 0, 0, 1 };
   }
 
   glm::mat3 getInversedMatrix() override
   {
-    return glm::inverse(getMatrix());
+    return glm::mat3{ 1.f / (m_dpi * m_scale), 0, 0, 0, 1.f / (m_dpi * m_scale), 0, 0, 0, 1 };
   }
 
   Bounds onRevalidate(Revalidation* inv, const glm::mat3& mat) override
@@ -59,5 +60,6 @@ public:
 private:
   Bounds m_viewport;
   float  m_dpi{ 1.f };
+  float  m_scale{ 1.f };
 };
 } // namespace VGG::layer

@@ -54,6 +54,9 @@ public:
   Revalidation(const Revalidation&) = delete;
   Revalidation& operator=(const Revalidation&) = delete;
 
+  Revalidation(Revalidation&&) = default;
+  Revalidation& operator=(Revalidation&&) = default;
+
   void emit(const Bounds& bounds, const glm::mat3& ctm, VNode* node = nullptr);
 
   const Bounds& bounds() const
@@ -75,7 +78,16 @@ public:
     return m_boundsArray;
   }
 
-  void reset();
+  void swap(std::vector<Bounds>& boundsArray)
+  {
+    m_boundsArray.swap(boundsArray);
+  }
+
+  void reset()
+  {
+    m_boundsArray.clear();
+    m_bounds = Bounds();
+  }
 
 private:
   std::vector<Bounds> m_boundsArray;

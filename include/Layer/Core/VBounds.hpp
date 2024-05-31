@@ -171,6 +171,11 @@ public:
 
   void unionWith(const Bounds& bounds)
   {
+    if (!this->valid())
+    {
+      *this = bounds;
+      return;
+    }
     m_topLeft.x = std::min(m_topLeft.x, bounds.m_topLeft.x);
     m_topLeft.y = std::min(m_topLeft.y, bounds.m_topLeft.y);
     m_bottomRight.x = std::max(m_bottomRight.x, bounds.m_bottomRight.x);
@@ -266,25 +271,3 @@ inline std::ostream& operator<<(std::ostream& os, const glm::mat3& mat)
 }
 
 } // namespace VGG
-
-#ifdef STD_FORMAT_SUPPORT
-template<>
-struct std::formatter<VGG::Bounds>
-{
-  constexpr auto parse(std::format_parse_context& ctx)
-  {
-    return ctx.begin();
-  }
-
-  auto format(const VGG::Bounds& s, std::format_context& ctx) const
-  {
-    return std::format_to(
-      ctx.out(),
-      "[{}, {}, {}, {}]",
-      s.topLeft().x,
-      s.topLeft().y,
-      s.width(),
-      s.height());
-  }
-};
-#endif

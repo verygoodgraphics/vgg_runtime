@@ -14,7 +14,6 @@
 #include "Layer/SceneBuilder.hpp"
 #include "Layer/Memory/AllocatorImpl.hpp"
 #include "Layer/DocBuilder.hpp"
-#include "Layer/Core/RasterCacheTile.hpp"
 #include "Domain/Layout/ExpandSymbol.hpp"
 #include "Utility/ConfigManager.hpp"
 #include "Application/AppRender.hpp"
@@ -287,7 +286,7 @@ protected:
             m_sceneNode = layer::SceneNode::Make(std::move(*sceneBuilderResult.root));
             auto zoomNode = layer::ZoomerNode::Make();
             m_zoomController = std::make_unique<ZoomNodeController>(zoomNode);
-            if (false)
+            if (true)
             {
               m_layer->setRenderNode(std::move(zoomNode), m_sceneNode);
             }

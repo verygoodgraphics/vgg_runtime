@@ -16,6 +16,7 @@
 
 #pragma once
 #include "Layer/Core/TransformNode.hpp"
+#include "Layer/Core/VNode.hpp"
 #include "Layer/Renderable.hpp"
 #include "Layer/VGGLayer.hpp"
 #include "Layer/Core/RasterCache.hpp"
@@ -73,5 +74,49 @@ private:
   std::vector<layer::Rasterizer::Tile> m_rasterTiles;
   SkMatrix                             m_rasterMatrix;
   int64_t                              m_cacheUniqueID{ -1 };
+};
+
+class DamageRedrawNode : public TransformEffectNode
+{
+public:
+  DamageRedrawNode(
+    VRefCnt*            cnt,
+    GrRecordingContext* device,
+    Ref<Viewport>       viewport,
+    Ref<ZoomerNode>     zoomer,
+    Ref<RenderNode>     child);
+
+  VGG_CLASS_MAKE(DamageRedrawNode);
+
+  void render(Renderer* renderer) override;
+
+#ifdef VGG_LAYER_DEBUG
+  void debug(Renderer* render) override;
+#endif
+
+  Bounds effectBounds() const override
+  {
+    return Bounds();
+  }
+
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3& mat) override;
+
+  ~DamageRedrawNode() override
+  {
+    unobserve(m_viewport);
+  }
+
+private:
+  GrRecordingContext* m_device{ nullptr };
+  Ref<Viewport>       m_viewport;
+  sk_sp<SkImage>      m_rasterImage;
+  sk_sp<SkImage>      m_redrawRegionImage;
+
+  Revalidation m_rev;
+  Bounds       m_redrawBounds;
+
+  Bounds    m_viewportBounds;
+  glm::mat3 m_matrix;
+  int64_t   m_cacheUniqueID{ -1 };
 };
 } // namespace VGG::layer

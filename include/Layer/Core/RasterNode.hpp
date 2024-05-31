@@ -24,14 +24,16 @@
 #include "Layer/Memory/AllocatorImpl.hpp"
 #include "Layer/Config.hpp"
 
-#include "Layer/ViewportNode.hpp"
+#include "Layer/Core/ViewportNode.hpp"
 
-#include <gpu/GrRecordingContext.h>
 #include <map>
 #include <memory>
 
+class GrRecordingContext;
+
 namespace VGG::layer
 {
+class Rasterizer;
 class RasterNode : public TransformEffectNode
 {
 public:

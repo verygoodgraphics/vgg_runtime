@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-#include "RasterNode.hpp"
 #include "Renderer.hpp"
 
+#include "Layer/Core/RasterNode.hpp"
 #include "Layer/Core/RasterCache.hpp"
-#include "Layer/ViewportNode.hpp"
+#include "Layer/Core/ViewportNode.hpp"
 
 #include "Layer/Core/ZoomerNode.hpp"
 #include "Layer/Core/TransformNode.hpp"
 #include "Layer/Core/RasterCacheTile.hpp"
 #include <core/SkCanvas.h>
+#include <gpu/GrRecordingContext.h>
 
 namespace
 {

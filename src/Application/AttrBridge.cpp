@@ -305,9 +305,7 @@ void AttrBridge::setHeight(layer::PaintNode* node, const double height)
   }
 }
 
-// TODO do not need node
 void AttrBridge::updateSimpleAttr(
-  std::shared_ptr<LayoutNode>                     node,
   const std::vector<double>&                      from,
   const std::vector<double>&                      to,
   std::function<void(const std::vector<double>&)> update,
@@ -409,7 +407,6 @@ bool AttrBridge::updateColor(
   }
 
   updateSimpleAttr(
-    node,
     { color.a, color.r, color.g, color.b },
     { newColor.alpha, newColor.red, newColor.green, newColor.blue },
     update,
@@ -449,7 +446,7 @@ bool AttrBridge::updateFillOpacity(
     return false;
   }
 
-  updateSimpleAttr(node, { *nowValue }, { newOpacity }, update, animate);
+  updateSimpleAttr({ *nowValue }, { newOpacity }, update, animate);
   return true;
 }
 
@@ -485,7 +482,7 @@ bool AttrBridge::updateOpacity(
     AttrBridge::setOpacity(paintNode, value.at(0));
   };
 
-  updateSimpleAttr(node, { *AttrBridge::getOpacity(paintNode) }, { newOpacity }, update, animate);
+  updateSimpleAttr({ *AttrBridge::getOpacity(paintNode) }, { newOpacity }, update, animate);
 
   return true;
 }
@@ -566,8 +563,6 @@ bool AttrBridge::updateMatrix(
     auto realWidth = *originWidth;
     auto realHeight = *originHeight;
 
-    // TODO frame can not scale, should change width and height, what about group and symbol?
-    // setTwinMatrix have same problem.
     if (isNotScaleButChangeSize)
     {
       realWidth = std::abs(scale[0] * (*originWidth));
@@ -658,7 +653,7 @@ bool AttrBridge::updateMatrix(
                           newMatrixInfo[1],
                           newMatrixInfo[2] };
 
-  updateSimpleAttr(node, from, to, update, animate);
+  updateSimpleAttr(from, to, update, animate);
 
   if (animate)
   {
@@ -779,7 +774,7 @@ bool AttrBridge::updateSize(
     }
   };
 
-  updateSimpleAttr(node, { oldWidth, oldHeight }, { newWidth, newHeight }, update, animate);
+  updateSimpleAttr({ oldWidth, oldHeight }, { newWidth, newHeight }, update, animate);
   return true;
 }
 

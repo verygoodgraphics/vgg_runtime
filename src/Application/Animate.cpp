@@ -851,7 +851,7 @@ MoveAnimate::MoveAnimate(
 {
 }
 
-// TODO notify to gh, back for move in is move out.
+// TODO notify to gh, back animate is not good enough.
 void MoveAnimate::start()
 {
   auto attrBridge = getAttrBridge();
@@ -950,7 +950,7 @@ void MoveAnimate::dealChildren(
   }
 
   assert(
-    ReplaceNodeAnimate::isContainerType(nodeFrom->elementNode()) &&
+    ReplaceNodeAnimate::isContainerType(nodeFrom->elementNode()) ||
     ReplaceNodeAnimate::isContainerType(nodeTo->elementNode()));
 
   const auto& originFromChild = paintNodeFrom->children();
@@ -964,30 +964,21 @@ void MoveAnimate::dealChildren(
     });
 
   std::unordered_map<int, std::shared_ptr<LayoutNode>> nodeIds;
-  for (auto& item : nodeFrom->children())
+
+  auto extraChildren = [&nodeIds](std::shared_ptr<LayoutNode>& node)
   {
-    nodeIds.emplace(item->elementNode()->idNumber(), item);
-  }
-  for (auto& item : nodeTo->children())
-  {
-    nodeIds.emplace(item->elementNode()->idNumber(), item);
-  }
+    if (ReplaceNodeAnimate::isContainerType(node->elementNode()))
+    {
+      for (auto& item : node->children())
+      {
+        nodeIds.emplace(item->elementNode()->idNumber(), item);
+      }
+    }
+  };
+
+  extraChildren(nodeFrom);
+  extraChildren(nodeTo);
   assert(nodeIds.size() == nodeFrom->children().size() + nodeTo->children().size());
-
-#ifdef DEBUG
-  std::unordered_map<int, layer::PaintNodePtr> paintNodeIds;
-
-  for (auto& item : originFromChild)
-  {
-    paintNodeIds.emplace(item->uniqueID(), item);
-  }
-  for (auto& item : originToChild)
-  {
-    paintNodeIds.emplace(item->uniqueID(), item);
-  }
-  assert(paintNodeIds.size() == originFromChild.size() + originToChild.size());
-  assert(paintNodeIds.size() == nodeIds.size());
-#endif // DEBUG
 
   // <from, to>
   ReplaceNodeAnimate::TTwins twins;
@@ -1061,15 +1052,12 @@ void MoveAnimate::dealChildren(
     auto  childPaintTo = attrBridge->getPaintNode(childTo);
     assert(elementFrom && elementTo);
 
-    if (
-      ReplaceNodeAnimate::isContainerType(elementFrom) &&
-      ReplaceNodeAnimate::isContainerType(elementTo))
+    // TODO
+    // for move in animate, only nodeTo children need move
+    // move out animate is not currently under consideration
+    if (ReplaceNodeAnimate::isContainerType(elementTo))
     {
       dealChildren(childFrom, childTo, childPaintFrom, childPaintTo);
-    }
-    else
-    {
-      // TODO finish later.
     }
 
     addStyleOpacityAnimate(childFrom, childPaintFrom, false, false);
@@ -1231,6 +1219,3 @@ std::array<double, 6> MoveAnimate::getStopTranslateMatrix(const std::array<doubl
   assert(false);
   return {};
 }
-
-// TODO for replace animate, an container match an not container, need test it.
-// TODO test back for all replace animate

@@ -169,7 +169,6 @@ private:
 
 private:
   void updateSimpleAttr(
-    std::shared_ptr<LayoutNode>                     node,
     const std::vector<double>&                      from,
     const std::vector<double>&                      to,
     std::function<void(const std::vector<double>&)> update,

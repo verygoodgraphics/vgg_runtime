@@ -287,7 +287,7 @@ protected:
             m_sceneNode = layer::SceneNode::Make(std::move(*sceneBuilderResult.root));
             auto zoomNode = layer::ZoomerNode::Make();
             m_zoomController = std::make_unique<ZoomNodeController>(zoomNode);
-            if (true)
+            if (false)
             {
               m_layer->setRenderNode(std::move(zoomNode), m_sceneNode);
             }

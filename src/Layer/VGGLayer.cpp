@@ -212,7 +212,6 @@ public:
   void renderInternal(SkCanvas* canvas, bool drawTextInfo)
   {
     ASSERT(canvas);
-    canvas->save();
     canvas->clear(backgroundColor);
     Revalidation rev;
     if (node)
@@ -222,32 +221,6 @@ public:
       EventManager::pollEvents();
       node->revalidate(&rev, glm::mat3{ 1 });
       node->render(&r);
-      if (true)
-      {
-        if (!rev.boundsArray().empty())
-        {
-          for (const auto& bounds : rev.boundsArray())
-          {
-            SkPaint p;
-            p.setStyle(SkPaint::kStroke_Style);
-            p.setStrokeWidth(2);
-            p.setColor(SK_ColorBLUE);
-            canvas->drawRect(toSkRect(bounds), p);
-          }
-          // SkPaint p;
-          // p.setStyle(SkPaint::kFill_Style);
-          // p.setAlphaf(0.5);
-          // p.setColor(SK_ColorGREEN);
-          // const auto region = rev.bounds();
-          // canvas->drawRect(toSkRect(region), p);
-          // DEBUG(
-          //   "damage region: %f %f %f %f",
-          //   region.topLeft().x,
-          //   region.topLeft().y,
-          //   region.width(),
-          //   region.height());
-        }
-      }
     }
     if (drawTextInfo)
     {
@@ -280,7 +253,6 @@ public:
       node->debug(&r);
     }
 #endif
-    canvas->restore();
     canvas->flush();
   }
 
@@ -404,10 +376,7 @@ void VLayer::render()
   _->renderInternal(canvas, enableDrawPosition());
   t.stop();
   auto tt = (int)t.duration().ms();
-  if (tt > 20)
-  {
-    INFO("render time: %d ms", tt);
-  }
+  INFO("render time: %d ms", tt);
 }
 
 void VLayer::addRenderItem(std::shared_ptr<Renderable> item)
@@ -417,18 +386,24 @@ void VLayer::addRenderItem(std::shared_ptr<Renderable> item)
 
 void VLayer::setRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
 {
-  auto rasterNode = RasterNode::Make(
+  // d_ptr->node = RasterNode::Make(
+  //   d_ptr->skiaContext->context(),
+  //   d_ptr->viewport,
+  //   std::move(transform),
+  //   std::move(node));
+
+  d_ptr->node = DamageRedrawNode::Make(
     d_ptr->skiaContext->context(),
     d_ptr->viewport,
     std::move(transform),
     std::move(node));
-  d_ptr->node = std::move(rasterNode);
 }
 
 void VLayer::setRenderNode(Ref<RenderNode> node)
 {
   d_ptr->node = TransformEffectNode::Make(d_ptr->viewport, std::move(node));
 }
+
 } // namespace VGG::layer
 
 namespace

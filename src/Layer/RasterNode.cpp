@@ -82,7 +82,6 @@ void RasterNode::render(Renderer* renderer)
   ASSERT(c);
   if (!c->picture())
   {
-    // c->render(renderer);
     TransformEffectNode::render(renderer);
   }
   else
@@ -118,21 +117,6 @@ void RasterNode::debug(Renderer* render)
   }
 }
 #endif
-
-void RasterNode::nodeAt(int x, int y, NodeVisitor vistor, void* userData)
-{
-  auto c = getChild();
-  ASSERT(c);
-  if (c)
-  {
-    auto z = getTransform();
-    ASSERT(z);
-    const auto fp = z->getInversedMatrix() * glm::vec3{ x, y, 1 };
-    x = fp.x;
-    y = fp.y;
-    return getChild()->nodeAt(x, y, vistor, userData);
-  }
-}
 
 Bounds RasterNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
 {

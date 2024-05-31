@@ -123,9 +123,9 @@ public:
         const auto fp = m_transform->getInversedMatrix() * glm::vec3{ x, y, 1 };
         x = fp.x;
         y = fp.y;
-        return getChild()->nodeAt(x, y, visitor, userData);
+        return m_child->nodeAt(x, y, visitor, userData);
       }
-      return getChild()->nodeAt(x, y, visitor, userData);
+      return m_child->nodeAt(x, y, visitor, userData);
     }
   }
 

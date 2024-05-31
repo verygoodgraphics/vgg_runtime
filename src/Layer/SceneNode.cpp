@@ -157,9 +157,12 @@ void SceneNode::debug(Renderer* render)
 
 void SceneNode::nodeAt(int x, int y, NodeVisitor visitor, void* userData)
 {
-  for (auto& root : d_ptr->frames)
+  if (bounds().contains(x, y))
   {
-    root->nodeAt(x, y, visitor, userData);
+    for (auto& root : d_ptr->frames)
+    {
+      root->nodeAt(x, y, visitor, userData);
+    }
   }
 }
 

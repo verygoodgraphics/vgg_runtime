@@ -50,8 +50,6 @@ public:
   void debug(Renderer* render) override;
 #endif
 
-  void nodeAt(int x, int y, NodeVisitor vistor, void* userData) override;
-
   Bounds effectBounds() const override
   {
     return Bounds();

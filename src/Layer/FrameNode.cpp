@@ -142,7 +142,7 @@ Bounds FrameNode::onRevalidate(Revalidation* inv, const glm::mat3& ctm)
   }
   getTransform()->revalidate();
   const auto matrix = getTransform()->getMatrix();
-  const auto bounds = node()->revalidate(inv, matrix * ctm);
+  const auto bounds = node()->revalidate(inv, ctm * matrix);
   //_->cache = _->renderPicture(toSkRect(bounds));
   return bounds.map(matrix);
 }

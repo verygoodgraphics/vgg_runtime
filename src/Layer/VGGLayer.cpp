@@ -170,10 +170,9 @@ public:
   std::vector<std::shared_ptr<Renderable>> items;
 
   Ref<Viewport>   viewport;
-  Ref<ZoomerNode> zoomerNode;
-
   Ref<RenderNode> node;
-  bool            invalid{ true };
+
+  bool invalid{ true };
 
   std::unique_ptr<SkPictureRecorder> rec;
 
@@ -290,18 +289,6 @@ public:
     return surface->makeImageSnapshot(
       SkIRect::MakeXYWH(opts.position[0], opts.position[1], opts.extend[0], opts.extend[1]));
   }
-
-  // void revalidate()
-  // {
-  //   if (invalid)
-  //   {
-  //     invalid = false;
-  //   }
-  // }
-  // void invalidate()
-  // {
-  //   invalid = true;
-  // }
 
   void setBackgroundColor(SkColor color)
   {
@@ -430,7 +417,6 @@ void VLayer::addRenderItem(std::shared_ptr<Renderable> item)
 
 void VLayer::setRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
 {
-  d_ptr->zoomerNode = transform;
   auto rasterNode = RasterNode::Make(
     d_ptr->skiaContext->context(),
     d_ptr->viewport,
@@ -441,8 +427,7 @@ void VLayer::setRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
 
 void VLayer::setRenderNode(Ref<RenderNode> node)
 {
-  if (d_ptr->node != node)
-    d_ptr->node = std::move(node);
+  d_ptr->node = TransformEffectNode::Make(d_ptr->viewport, std::move(node));
 }
 } // namespace VGG::layer
 
@@ -457,14 +442,6 @@ PaintNode* VLayer::nodeAt(int x, int y)
   {
     auto p = glm::vec3{ x, y, 1 };
     g_nodeAtResult = nullptr;
-    glm::mat3 deviceMatrix{ 1.f };
-    if (d_ptr->viewport)
-      deviceMatrix *= d_ptr->viewport->getMatrix();
-    if (d_ptr->zoomerNode)
-    {
-      deviceMatrix *= d_ptr->zoomerNode->getMatrix();
-    }
-
     d_ptr->node->nodeAt(
       p.x,
       p.y,
@@ -484,7 +461,7 @@ PaintNode* VLayer::nodeAt(int x, int y)
       },
       nullptr);
     VGG_LAYER_DEBUG_CODE(if (g_nodeAtResult && d_ptr->debugConfig.enableDrawClickBounds) {
-      drawBounds(g_nodeAtResult, deviceMatrix, d_ptr->layerCanvas());
+      drawBounds(g_nodeAtResult, glm::mat3{ 1 }, d_ptr->layerCanvas());
     });
     return g_nodeAtResult;
   }
@@ -518,7 +495,6 @@ void VLayer::resize(int w, int h)
     INFO("resize: [%d, %d], actually (%d, %d)", w, h, finalW, finalH);
     _->skiaContext->resizeSurface(finalW, finalH);
     _->viewport->setViewport(Bounds{ 0, 0, (float)finalW, (float)finalH });
-    // d_ptr->invalidate();
   }
 }
 void VLayer::endFrame()

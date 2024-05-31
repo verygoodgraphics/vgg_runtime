@@ -586,7 +586,7 @@ Bounds PaintNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
   VGG_PAINTNODE_DUMP(STD_FORMAT("{} - {} childs:{}", name(), guid(), m_children.size()));
   _->transformAttr->revalidate();
 
-  const auto ctm = _->transformAttr->getTransform().matrix() * mat;
+  const auto ctm = mat * _->transformAttr->getTransform().matrix();
   for (const auto& e : m_children)
   {
     e->revalidate(inv, ctm);

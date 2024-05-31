@@ -28,9 +28,9 @@
 #include "Layer/Core/EventManager.hpp"
 #include "Layer/Core/TransformNode.hpp"
 #include "Layer/Core/VNode.hpp"
-#include "Layer/RasterNode.hpp"
+#include "Layer/Core/RasterNode.hpp"
 #include "Layer/Core/ZoomerNode.hpp"
-#include "Layer/ViewportNode.hpp"
+#include "Layer/Core/ViewportNode.hpp"
 #include "VSkiaGL.hpp" // this header and the skia headers must be included first for ios build
 
 #ifdef VGG_USE_VULKAN

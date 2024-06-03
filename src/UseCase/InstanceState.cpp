@@ -18,7 +18,7 @@
 #include <vector>
 #include "Domain/Layout/ExpandSymbol.hpp"
 #include "Domain/Layout/Layout.hpp"
-#include "Domain/Layout/Node.hpp"
+#include "Domain/Layout/LayoutNode.hpp"
 #include "Domain/Model/Element.hpp"
 #include "Utility/Log.hpp"
 

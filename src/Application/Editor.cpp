@@ -16,7 +16,7 @@
 #include "Editor.hpp"
 #include <algorithm>
 #include "Application/UIView.hpp"
-#include "Domain/Layout/Node.hpp"
+#include "Domain/Layout/LayoutNode.hpp"
 #include "Event/Keycode.hpp"
 #include "Mouse.hpp"
 #include "Utility/Log.hpp"

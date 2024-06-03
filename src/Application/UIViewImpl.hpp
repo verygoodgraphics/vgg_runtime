@@ -23,6 +23,7 @@
 #include "Application/Animate.hpp"
 #include "Application/UIAnimation.hpp"
 #include "Application/ZoomerNodeController.hpp"
+#include "Domain/Layout/LayoutContext.hpp"
 #include "Layer/Core/FrameNode.hpp"
 #include "Layer/Core/SceneNode.hpp"
 #include "Layer/Core/ZoomerNode.hpp"
@@ -113,6 +114,7 @@ public:
     const double       g,
     const double       b,
     const double       a);
+  std::unique_ptr<LayoutContext> layoutContext();
 
 public:
   void frame();

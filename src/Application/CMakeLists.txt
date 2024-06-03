@@ -1,5 +1,6 @@
 add_library(vgg_application STATIC
   Animate.cpp
+  AppLayoutContext.cpp
   AppRender.cpp
   AttrBridge.cpp
   Controller.cpp

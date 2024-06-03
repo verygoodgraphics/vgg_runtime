@@ -19,13 +19,14 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "Domain/Layout/Node.hpp"
+#include "Domain/Layout/LayoutNode.hpp"
 #include "Domain/JsonDocument.hpp"
 #include "Rect.hpp"
 #include <nlohmann/json.hpp>
 
 namespace VGG
 {
+class LayoutContext;
 namespace Domain
 {
 class DesignDocument;
@@ -60,7 +61,7 @@ public:
   Layout(JsonDocumentPtr designDoc, RuleMapPtr rules);
   Layout(std::shared_ptr<Domain::DesignDocument> designDocument, RuleMapPtr rules);
 
-  void layout(Size size, int pageIndex, bool updateRule = false);
+  void layout(Size size, int pageIndex, bool updateRule = false, LayoutContext* context = nullptr);
   void resizeNodeThenLayout(const std::string& nodeId, Size size, bool preservingOrigin);
   void resizeNodeThenLayout(LayoutNode* node, Size size, bool preservingOrigin);
   void layoutNodes(const std::vector<std::string>& nodeIds, const std::string& constainerNodeId);

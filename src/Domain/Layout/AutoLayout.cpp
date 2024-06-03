@@ -18,7 +18,7 @@
 #include <memory>
 #include <utility>
 #include <vector>
-#include "Node.hpp"
+#include "LayoutNode.hpp"
 #include "Rule.hpp"
 #include "Utility/Log.hpp"
 #include <define.h>
@@ -1312,14 +1312,13 @@ void AutoLayout::setFrame(Rect newFrame)
   m_frame = newFrame;
 }
 
-void AutoLayout::updateSizeRule()
+void AutoLayout::updateSizeRule(const Size newSize)
 {
   auto sharedView = view.lock();
   auto sharedRule = rule.lock();
   if (isEnabled() && sharedView && sharedRule)
   {
     bool configureSize{ false };
-    auto newSize = sharedView->frame().size;
     if (newSize != m_frame.size)
     {
       if (sharedRule->width.value.types == Rule::Length::ETypes::PX)

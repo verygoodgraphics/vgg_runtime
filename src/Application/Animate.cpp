@@ -17,7 +17,7 @@
 #include "Application/AttrBridge.hpp"
 #include "Utility/VggTimer.hpp"
 #include "Utility/Log.hpp"
-#include "Domain/Layout/Node.hpp"
+#include "Domain/Layout/LayoutNode.hpp"
 #include "Domain/Model/Element.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include <unordered_map>

@@ -15,7 +15,7 @@
  */
 #include "UIView.hpp"
 #include <optional>
-#include "Domain/Layout/Node.hpp"
+#include "Domain/Layout/LayoutNode.hpp"
 #include "Domain/Model/Element.hpp"
 #include "Event/Event.hpp"
 #include "Event/EventAPI.hpp"
@@ -1064,6 +1064,11 @@ bool UIView::presentInstanceState(
   app::AnimationCompletion      completion)
 {
   return m_impl->setInstanceState(oldNode, newNode, options, completion);
+}
+
+std::unique_ptr<LayoutContext> UIView::layoutContext()
+{
+  return m_impl->layoutContext();
 }
 
 } // namespace VGG

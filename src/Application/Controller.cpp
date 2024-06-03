@@ -28,7 +28,7 @@
 #include "Domain/IVggEnv.hpp"
 #include "Domain/JsonDocument.hpp"
 #include "Domain/Layout/Layout.hpp"
-#include "Domain/Layout/Node.hpp"
+#include "Domain/Layout/LayoutNode.hpp"
 #include "Domain/Model/JsonKeys.hpp"
 #include "Domain/ModelEvent.hpp"
 #include "Domain/RawJsonDocument.hpp"
@@ -65,6 +65,9 @@ class AppRenderable;
 }
 } // namespace VGG
 struct VTouchEvent;
+
+namespace VGG
+{
 
 constexpr auto PSEUDO_PATH_EDIT_VIEW = "::editView";
 
@@ -210,8 +213,6 @@ private:
 };
 
 } // namespace
-
-using namespace VGG;
 
 Controller::Controller(
   std::weak_ptr<IVggEnv>     env,
@@ -927,11 +928,6 @@ bool Controller::hasContent() const
   return !!m_layout;
 }
 
-void Controller::layoutForEditing()
-{
-  layoutForEditing(m_presenter->currentPageIndex());
-}
-
 VGG::Layout::Size Controller::currentPageOriginalSize() const
 {
   return pageOriginalSize(m_presenter->currentPageIndex());
@@ -975,10 +971,12 @@ void Controller::aspectFill(Layout::Size size, std::size_t pageIndex)
     };
   }
 
+  auto context = m_presenter->layoutContext();
   m_layout->layout(
     targetSize,
     pageIndex,
-    m_isFitToViewportEnabled); // true means updating layout size rules
+    /*updateRule=*/m_isFitToViewportEnabled,
+    context.get());
 }
 
 VGG::Layout::Size Controller::pageOriginalSize(std::size_t pageIndex) const
@@ -1046,3 +1044,5 @@ bool Controller::presentFrame(const std::string& id, const app::FrameOptions& op
       m_presenter->triggerMouseEnter();
     });
 }
+
+} // namespace VGG

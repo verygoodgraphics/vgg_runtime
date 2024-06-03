@@ -19,7 +19,7 @@
 #include "Domain/Daruma.hpp"
 #include "Domain/DarumaContainer.hpp"
 #include "Domain/IVggEnv.hpp"
-#include "Domain/Layout/Node.hpp"
+#include "Domain/Layout/LayoutNode.hpp"
 #include "Domain/Model/JsonKeys.hpp"
 #include "Domain/VggExec.hpp"
 #include "Utility/Log.hpp"

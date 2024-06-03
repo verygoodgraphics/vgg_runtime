@@ -26,7 +26,7 @@
 #include "Helper.hpp"
 #include "JsonKeys.hpp"
 #include "Layout.hpp"
-#include "Node.hpp"
+#include "LayoutNode.hpp"
 #include "Rect.hpp"
 #include "Rule.hpp"
 #include "Utility/Log.hpp"

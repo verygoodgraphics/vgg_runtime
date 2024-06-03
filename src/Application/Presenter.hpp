@@ -39,6 +39,7 @@
 #include <rxcpp/subjects/rx-subject.hpp>
 namespace VGG
 {
+class LayoutContext;
 class LayoutNode;
 class Mouse;
 class StateTree;
@@ -304,6 +305,8 @@ public:
     const double       g,
     const double       b,
     const double       a);
+
+  std::unique_ptr<LayoutContext> layoutContext();
 
 private:
   void listenViewEvent();

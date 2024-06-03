@@ -16,7 +16,7 @@
 #include "Application/AttrBridge.hpp"
 #include "Application/Animate.hpp"
 #include "Application/UIView.hpp"
-#include "Domain/Layout/Node.hpp"
+#include "Domain/Layout/LayoutNode.hpp"
 #include "Domain/Model/Element.hpp"
 #include "Domain/Model/DesignModel.hpp"
 #include "Layer/Core/AttributeAccessor.hpp"
@@ -373,7 +373,9 @@ layer::PaintNode* AttrBridge::getPaintNode(std::shared_ptr<LayoutNode> node)
     }
   }
 
-  return m_view->getSceneNode()->nodeByID(id);
+  if (auto sn = m_view->getSceneNode())
+    return sn->nodeByID(id);
+  return nullptr;
 }
 
 bool AttrBridge::updateColor(

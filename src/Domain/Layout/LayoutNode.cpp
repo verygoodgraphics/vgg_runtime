@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Node.hpp"
+#include "LayoutNode.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <functional>
@@ -23,12 +23,12 @@
 #include "BezierPoint.hpp"
 #include "Color.hpp"
 #include "DesignModel.hpp"
+#include "Domain/Layout/LayoutContext.hpp"
 #include "Domain/Model/Element.hpp"
 #include "Math.hpp"
 #include "Rect.hpp"
 #include "Utility/Log.hpp"
 #include "Utility/VggFloat.hpp"
-
 
 #undef DEBUG
 #define DEBUG(msg, ...)
@@ -142,12 +142,14 @@ void LayoutNode::setNeedLayout()
   m_needsLayout = true;
 }
 
-void LayoutNode::layoutIfNeeded()
+void LayoutNode::layoutIfNeeded(LayoutContext* context)
 {
+  m_context = context;
+
   do
   {
     for (auto& child : m_children)
-      child->layoutIfNeeded();
+      child->layoutIfNeeded(context);
 
     updateLayoutSizeInfo();
 
@@ -168,6 +170,8 @@ void LayoutNode::layoutIfNeeded()
         m_autoLayout->applyLayout(true);
     }
   } while (hasNeedsLayoutDescendant());
+
+  m_context = nullptr;
 }
 
 Layout::Rect LayoutNode::frame() const
@@ -205,6 +209,23 @@ void LayoutNode::setFrame(
 
   updateModel(newFrame);
 
+  auto element = elementNode();
+  if (!element)
+    return;
+
+  if (element->type() == Domain::Element::EType::TEXT)
+  {
+    if (auto c = context(); c && m_autoLayout && m_autoLayout->isEnabled())
+    {
+      const auto paintSize = c->nodeSize(this);
+      if (paintSize != size())
+      {
+        m_autoLayout->updateSizeRule(paintSize);
+        m_autoLayout->setNeedsLayout();
+      }
+    }
+  }
+
   if (shouldSkip())
   {
     return;
@@ -217,11 +238,6 @@ void LayoutNode::setFrame(
     return;
   }
 
-  auto element = elementNode();
-  if (!element)
-  {
-    return;
-  }
   if (element->type() == Domain::Element::EType::PATH)
   {
     auto pathElement = static_cast<Domain::PathElement*>(element);
@@ -241,7 +257,7 @@ void LayoutNode::setFrame(
   {
     if (updateRule)
     {
-      m_autoLayout->updateSizeRule();
+      m_autoLayout->updateSizeRule(size());
     }
 
     if (m_autoLayout->isContainer())
@@ -526,6 +542,11 @@ void LayoutNode::updateModel(const Layout::Rect& toFrame)
     matrix.tx += newFrame.origin.x - originAfterScale.x;
     matrix.ty += newFrame.origin.y - originAfterScale.y;
     element->updateMatrix(matrix.tx, matrix.ty);
+  }
+  if (auto c = context())
+  {
+    c->didUpdateBounds(this);
+    c->didUpdateMatrix(this);
   }
 }
 
@@ -1426,6 +1447,11 @@ void LayoutNode::updatePathNodeModel(
   // do not update useless frame
   pathElement->updateBounds(newFrame.width(), newFrame.height());
   pathElement->updateMatrix({ matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty });
+  if (auto c = context())
+  {
+    c->didUpdateBounds(this);
+    c->didUpdateMatrix(this);
+  }
 
   for (auto& child : pathElement->children())
   {
@@ -1433,6 +1459,8 @@ void LayoutNode::updatePathNodeModel(
     {
       auto contourElement = static_cast<Domain::ContourElement*>(child.get());
       contourElement->updatePoints(newPoints);
+      if (auto c = context())
+        c->didUpdateContourPoints(this);
     }
   }
 }
@@ -1647,4 +1675,12 @@ bool LayoutNode::hasNeedsLayoutDescendant() const
   return false;
 }
 
+LayoutContext* LayoutNode::context()
+{
+  if (m_context)
+    return m_context;
+  if (auto p = parent())
+    return p->context();
+  return nullptr;
+}
 } // namespace VGG

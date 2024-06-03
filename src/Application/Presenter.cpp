@@ -18,9 +18,10 @@
 #include <functional>
 #include <optional>
 #include <unordered_map>
+#include "Application/AppLayoutContext.hpp"
 #include "Application/ViewModel.hpp"
 #include "Domain/Daruma.hpp"
-#include "Domain/Layout/Node.hpp"
+#include "Domain/Layout/LayoutNode.hpp"
 #include "Domain/Model/Element.hpp"
 #include "Layer/Model/StructModel.hpp"
 #include "Layer/SceneBuilder.hpp"
@@ -460,4 +461,8 @@ bool Presenter::presentInstanceState(
   return success;
 }
 
+std::unique_ptr<LayoutContext> Presenter::layoutContext()
+{
+  return m_view->layoutContext();
+}
 } // namespace VGG

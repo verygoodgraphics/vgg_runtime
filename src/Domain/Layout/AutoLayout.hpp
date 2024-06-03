@@ -68,7 +68,7 @@ public:
   void isFixedSize(bool& outWidth, bool& outHeight);
   void applyLayout(bool preservingOrigin);
   void setFrame(Rect frame);
-  void updateSizeRule();
+  void updateSizeRule(Size newSize);
 
   std::shared_ptr<LayoutNode> setNeedsLayout(); // return node that needs layout
 

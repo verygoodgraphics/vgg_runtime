@@ -20,7 +20,7 @@
 #include "Domain/JsonDocument.hpp"
 #include "Domain/Model/Element.hpp"
 #include "JsonKeys.hpp"
-#include "Node.hpp"
+#include "LayoutNode.hpp"
 #include "RawJsonDocument.hpp"
 #include "Rule.hpp"
 #include "Utility/Log.hpp"
@@ -73,7 +73,7 @@ Layout::Layout::Layout(std::shared_ptr<Domain::DesignDocument> designDocument, R
   configureNodeAutoLayout(m_layoutTree.get());
 }
 
-void Layout::Layout::layout(Size size, int pageIndex, bool updateRule)
+void Layout::Layout::layout(Size size, int pageIndex, bool updateRule, LayoutContext* context)
 {
   auto root = layoutTree();
   if (pageIndex < 0 || static_cast<std::size_t>(pageIndex) >= root->children().size())
@@ -85,7 +85,7 @@ void Layout::Layout::layout(Size size, int pageIndex, bool updateRule)
   root->children()[pageIndex]->scaleTo(size, updateRule, true);
 
   // layout
-  root->layoutIfNeeded();
+  root->layoutIfNeeded(context);
 }
 
 void Layout::Layout::buildLayoutTree()

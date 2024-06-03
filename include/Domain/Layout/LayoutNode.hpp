@@ -28,6 +28,7 @@
 #include "Domain/Model/Element.hpp"
 namespace VGG
 {
+class LayoutContext;
 namespace Layout
 {
 struct BezierPoint;
@@ -179,7 +180,7 @@ public:
     return m_needsLayout;
   }
   bool hasNeedsLayoutDescendant() const;
-  void layoutIfNeeded();
+  void layoutIfNeeded(LayoutContext* context = nullptr);
 
   std::shared_ptr<LayoutNode> scaleTo(
     const Layout::Size& newSize,
@@ -207,6 +208,8 @@ public:
   std::string type() const;
 
   bool isVisible() const;
+
+  Layout::Matrix modelMatrix() const;
 
 private:
   bool isResizingAroundCenter() const;
@@ -244,7 +247,6 @@ private:
   void           updateModel(const Layout::Rect& frame);
   Layout::Point  modelOrigin() const;
   Layout::Rect   modelBounds() const;
-  Layout::Matrix modelMatrix() const;
   Layout::Matrix modelMatrixWithoutTranslate() const;
 
   Layout::Rect resize(
@@ -295,6 +297,11 @@ private:
     const Layout::Point* parentOrigin);
 
   void updateLayoutSizeInfo();
+
+  LayoutContext* context();
+
+private:
+  LayoutContext* m_context = nullptr;
 };
 
 class StateTree : public LayoutNode

@@ -28,6 +28,7 @@
 #include "Application/Event/EventListener.hpp"
 #include "Application/UIAnimation.hpp"
 #include "Application/UIOptions.hpp"
+#include "Domain/Layout/LayoutContext.hpp"
 #include "Domain/Layout/Rect.hpp"
 #include "Event/Event.hpp"
 #include "Layer/Core/FrameNode.hpp"
@@ -251,6 +252,7 @@ public:
     const double       g,
     const double       b,
     const double       a);
+  std::unique_ptr<LayoutContext> layoutContext();
 
 protected:
   float     scale() const;

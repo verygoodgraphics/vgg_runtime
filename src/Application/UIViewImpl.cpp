@@ -24,10 +24,11 @@
 #include <utility>
 #include "Animate.hpp"
 #include "AppRender.hpp"
+#include "Application/AppLayoutContext.hpp"
 #include "Application/Pager.hpp"
 #include "Application/ViewModel.hpp"
 #include "AttrBridge.hpp"
-#include "Domain/Layout/Node.hpp"
+#include "Domain/Layout/LayoutNode.hpp"
 #include "Domain/Layout/Rect.hpp"
 #include "Domain/Model/Element.hpp"
 #include "Event/Event.hpp"
@@ -361,6 +362,13 @@ void UIViewImpl::moveFramesToTopLeft()
       layerBridge->updateMatrix(frame, paintNode, newMatrix, false);
     }
   }
+}
+
+std::unique_ptr<LayoutContext> UIViewImpl::layoutContext()
+{
+  return std::make_unique<AppLayoutContext>(std::make_shared<AttrBridge>(
+    std::static_pointer_cast<UIView>(m_api->shared_from_this()),
+    m_animationManager));
 }
 
 } // namespace VGG::internal

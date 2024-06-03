@@ -188,7 +188,6 @@ private:
   void startEditing();
   void observeEditModelState();
   void observeEditViewEvent();
-  void layoutForEditing();
 
   void scaleContent();
 

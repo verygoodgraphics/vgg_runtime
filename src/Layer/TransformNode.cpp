@@ -28,4 +28,34 @@ void TransformEffectNode::render(Renderer* renderer)
   m_child->render(renderer);
 }
 
+Bounds RasterTransformNode::onRevalidate(Revalidation* inv, const glm::mat3& ctm)
+{
+  auto   c = getChild();
+  auto   t = getTransform();
+  Bounds childBounds;
+  if (t)
+  {
+    t->revalidate();
+    const auto& matrix = t->getMatrix();
+    m_deviceMatrix[2][0] = matrix[2][0];
+    m_deviceMatrix[2][1] = matrix[2][1];
+    m_rasterMatrix = matrix;
+    m_rasterMatrix[2][0] = 0.0f;
+    m_rasterMatrix[2][1] = 0.0f;
+  }
+  if (c)
+  {
+    if (t)
+    {
+      const auto& matrix = t->getMatrix();
+      childBounds = c->revalidate(inv, glm::mat3{ 1.0f });
+      childBounds = childBounds.map(matrix);
+    }
+    else
+    {
+      childBounds = c->revalidate(inv, glm::mat3(1.0f));
+    }
+  }
+  return childBounds;
+}
 } // namespace VGG::layer

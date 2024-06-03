@@ -138,7 +138,7 @@ std::shared_ptr<Layout::Internal::AutoLayout> LayoutNode::containerAutoLayout()
 
 void LayoutNode::setNeedLayout()
 {
-  VERBOSE("LayoutNode::setNeedLayout: node: %s, %s", id().c_str(), path().c_str());
+  VERBOSE("LayoutNode::setNeedLayout: node: %s", id().c_str());
   m_needsLayout = true;
 }
 
@@ -210,8 +210,11 @@ void LayoutNode::setFrame(
 
   updateModel(newFrame);
 
-  m_needsLayoutText = true;
-  updateTextLayoutInfo();
+  auto element = elementNode();
+  if (!element)
+    return;
+  if (element->type() == Domain::Element::EType::TEXT)
+    m_needsLayoutText = true;
 
   if (shouldSkip())
   {
@@ -225,9 +228,6 @@ void LayoutNode::setFrame(
     return;
   }
 
-  auto element = elementNode();
-  if (!element)
-    return;
   if (element->type() == Domain::Element::EType::PATH)
   {
     auto pathElement = static_cast<Domain::PathElement*>(element);

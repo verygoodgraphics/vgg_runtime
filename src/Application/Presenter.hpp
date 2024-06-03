@@ -144,7 +144,7 @@ public:
     return m_requiredFonts;
   }
 
-  void setNeedsReload()
+  void setDirtry()
   {
     m_view->setDirty(true);
   }

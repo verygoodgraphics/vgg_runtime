@@ -27,6 +27,9 @@ class AppLayoutContext : public LayoutContext
 public:
   AppLayoutContext(std::shared_ptr<AttrBridge> layerBridge);
 
+  bool isLayerValid() const override;
+  void setLayerValid(bool valid) override;
+
   std::optional<Layout::Size> nodeSize(LayoutNode* node) const override;
 
   void didUpdateBounds(LayoutNode* node) override;
@@ -35,6 +38,7 @@ public:
 
 private:
   std::shared_ptr<AttrBridge> m_layerBridge;
+  bool                        m_isLayerValid = false;
 };
 
 } // namespace VGG

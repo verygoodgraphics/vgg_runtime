@@ -107,6 +107,7 @@ bool UIApplication::paint(int fps, bool force)
 
       m_view->frame();
 
+      m_controller->postFrame();
       return true;
     }
   }

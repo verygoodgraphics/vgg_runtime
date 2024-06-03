@@ -24,6 +24,7 @@
 #include "Application/UIEvent.hpp"
 #include "Application/UIOptions.hpp"
 #include "Domain/Daruma.hpp"
+#include "Domain/Layout/LayoutContext.hpp"
 #include "Domain/Layout/Rect.hpp"
 
 class JsonDocument;
@@ -111,6 +112,7 @@ public:
   bool edit(std::vector<char>& buffer);
 
   void onResize();
+  void postFrame();
 
   std::shared_ptr<app::AppRenderable> editor();
   bool                                isEditMode()
@@ -201,6 +203,11 @@ private:
   void scaleContentAndUpdate(std::size_t pageIndex);
   void fitPage();
   void scaleContentUpdateViewModelAndFit();
+
+  LayoutContext* layoutContext();
+
+private:
+  std::unique_ptr<LayoutContext> m_layoutContext;
 };
 
 } // namespace VGG

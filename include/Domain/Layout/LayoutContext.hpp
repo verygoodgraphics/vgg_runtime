@@ -29,6 +29,9 @@ class LayoutContext
 public:
   virtual ~LayoutContext() = default;
 
+  virtual bool isLayerValid() const = 0;
+  virtual void setLayerValid(bool valid) = 0;
+
   virtual std::optional<Layout::Size> nodeSize(LayoutNode* node) const = 0;
 
   virtual void didUpdateBounds(LayoutNode* node) = 0;

@@ -276,14 +276,14 @@ void DamageRedrawNode::render(Renderer* renderer)
     auto canvas = renderer->canvas();
     ASSERT(canvas);
     canvas->save();
-    canvas->concat(toSkMatrix(getTransform()->getMatrix()));
-    // canvas->drawImage(m_rasterImage, 0, 0);
-    // canvas->drawImage(m_redrawRegionImage, m_redrawBounds.x(), m_redrawBounds.y());
+    // canvas->concat(toSkMatrix(m_deviceMatrix));
+    //   canvas->drawImage(m_rasterImage, 0, 0);
+    //   canvas->drawImage(m_redrawRegionImage, m_redrawBounds.x(), dirtyRect.y());
 
     canvas->drawImage(m_gpuSurface->makeImageSnapshot(), 0, 0);
     canvas->restore();
 
-    if (m_redrawBounds.valid())
+    if (m_rev.bounds().valid())
     {
       SkPaint p;
       p.setStyle(SkPaint::kStroke_Style);
@@ -291,7 +291,7 @@ void DamageRedrawNode::render(Renderer* renderer)
       p.setColor(SK_ColorBLUE);
       canvas->save();
       canvas->concat(toSkMatrix(getTransform()->getMatrix()));
-      canvas->drawRect(toSkRect(m_redrawBounds), p);
+      canvas->drawRect(toSkRect(m_rev.bounds()), p);
       canvas->restore();
     }
 
@@ -393,6 +393,10 @@ void blit(GrRecordingContext* context, SkImage* dst, const SkImage* src, int x, 
   }
 }
 
+void DamageRedrawNode::onRevalidateRasterMatrix(const glm::mat3& mat1, const glm::mat3& mat2)
+{
+}
+
 Bounds DamageRedrawNode::onRevalidate(Revalidation* rev, const glm::mat3& mat)
 {
   m_viewport->revalidate();
@@ -402,18 +406,33 @@ Bounds DamageRedrawNode::onRevalidate(Revalidation* rev, const glm::mat3& mat)
   auto t = getTransform();
 
   m_rev.reset();
-  Bounds childBounds;
   if (t)
   {
     t->revalidate();
   }
+  Bounds childBounds;
   if (c)
   {
     if (t)
     {
-      const auto matrix = t->getMatrix();
-      childBounds = c->revalidate(&m_rev, glm::mat3{ 1.0f });
-      childBounds = childBounds.map(matrix);
+      auto newRasterMatrix = getTransform()->getMatrix();
+      m_deviceMatrix[2][0] = newRasterMatrix[2][0];
+      m_deviceMatrix[2][1] = newRasterMatrix[2][1];
+      newRasterMatrix[2][0] = 0.0f;
+      newRasterMatrix[2][1] = 0.0f;
+
+      childBounds = c->revalidate(&m_rev, newRasterMatrix);
+      // childBounds = childBounds.map(newRasterMatrix);
+
+      if (
+        newRasterMatrix[0][0] != m_rasterMatrix[0][0] ||
+        newRasterMatrix[1][1] != m_rasterMatrix[1][1])
+      {
+        // scale changed (need to be rerastered). emit the whole bounding. But it could be optimized
+        m_rev.emit(childBounds, glm::mat3{ 1 });
+        DEBUG("scale changed");
+      }
+      m_rasterMatrix = newRasterMatrix;
     }
     else
     {
@@ -428,9 +447,6 @@ Bounds DamageRedrawNode::onRevalidate(Revalidation* rev, const glm::mat3& mat)
       m_device,
       skgpu::Budgeted::kYes,
       SkImageInfo::MakeN32Premul(m_viewportBounds.width(), m_viewportBounds.height()));
-
-    m_rev.emit(childBounds, glm::mat3{ 1 });
-    ASSERT(m_gpuSurface);
   }
 
   // bool needRepaint = false;
@@ -451,15 +467,21 @@ Bounds DamageRedrawNode::onRevalidate(Revalidation* rev, const glm::mat3& mat)
   // }
   //
 
-  m_redrawBounds = m_rev.bounds();
+  const auto dirtyRect = m_rev.bounds();
   // const auto& vb = m_viewport->bounds();
-  if (m_redrawBounds.valid())
+  if (dirtyRect.valid())
   {
-    const auto rbw = m_redrawBounds.width();
-    const auto rbh = m_redrawBounds.height();
-    const auto rbx = m_redrawBounds.x();
-    const auto rby = m_redrawBounds.y();
-    auto       surf = rasterSurface(m_device, rbw, rbh);
+
+    const auto rasterRect = dirtyRect.map(m_deviceMatrix).intersectAs(m_viewport->bounds());
+    const auto rbw = rasterRect.width();
+    const auto rbh = rasterRect.height();
+    const auto rbx = rasterRect.x();
+    const auto rby = rasterRect.y();
+    DEBUG("rbw: %f, rbh: %f, rbx: %f, rby: %f", rbw, rbh, rbx, rby);
+
+    auto surf = rasterSurface(m_device, rbw, rbh);
+
+    // ASSERT(getTransform()->getMatrix() == m_deviceMatrix * m_rasterMatrix);
     ASSERT(surf);
     auto cvs = surf->getCanvas();
     ASSERT(cvs);
@@ -473,7 +495,7 @@ Bounds DamageRedrawNode::onRevalidate(Revalidation* rev, const glm::mat3& mat)
     cvs->restore();
     // m_redrawRegionImage = surf->makeImageSnapshot(SkIRect::MakeXYWH(0, 0, rbw, rbh));
     // m_redrawRegionImage = surf->makeImageSnapshot();
-    m_redrawRegionImage = surf->makeImageSnapshot(SkIRect::MakeXYWH(0, 0, rbw, rbh));
+    // m_redrawRegionImage = surf->makeImageSnapshot(SkIRect::MakeXYWH(0, 0, rbw, rbh));
 
     blit(m_device, m_gpuSurface.get(), surf, rbx, rby);
   }

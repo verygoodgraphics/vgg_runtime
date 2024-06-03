@@ -106,6 +106,9 @@ public:
     unobserve(m_viewport);
   }
 
+protected:
+  void onRevalidateRasterMatrix(const glm::mat3& mat1, const glm::mat3& mat2);
+
 private:
   GrRecordingContext* m_device{ nullptr };
   Ref<Viewport>       m_viewport;
@@ -115,10 +118,11 @@ private:
   sk_sp<SkImage> m_redrawRegionImage;
 
   Revalidation m_rev;
-  Bounds       m_redrawBounds;
+  Bounds       m_rasterBounds;
 
   Bounds    m_viewportBounds;
-  glm::mat3 m_matrix;
+  glm::mat3 m_deviceMatrix = glm::mat3{ 1 };
+  glm::mat3 m_rasterMatrix = glm::mat3{ 1 };
   int64_t   m_cacheUniqueID{ -1 };
 };
 } // namespace VGG::layer

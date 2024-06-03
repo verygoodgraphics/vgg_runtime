@@ -44,6 +44,11 @@ public:
 
   static void pollEvents();
 
+  static bool hasEvents()
+  {
+    return !sharedInstance().m_eventQueue.empty();
+  }
+
   EventManager(const EventManager&) = delete;
   EventManager(EventManager&&) = delete;
   EventManager& operator=(const EventManager&) = delete;

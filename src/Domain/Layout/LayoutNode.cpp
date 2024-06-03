@@ -152,6 +152,7 @@ void LayoutNode::layoutIfNeeded(LayoutContext* context)
       child->layoutIfNeeded(context);
 
     updateLayoutSizeInfo();
+    updateTextLayoutInfo();
 
     if (m_needsLayout)
     {
@@ -209,22 +210,8 @@ void LayoutNode::setFrame(
 
   updateModel(newFrame);
 
-  auto element = elementNode();
-  if (!element)
-    return;
-
-  if (element->type() == Domain::Element::EType::TEXT)
-  {
-    if (auto c = context(); c && m_autoLayout && m_autoLayout->isEnabled())
-    {
-      const auto paintSize = c->nodeSize(this);
-      if (paintSize != size())
-      {
-        m_autoLayout->updateSizeRule(paintSize);
-        m_autoLayout->setNeedsLayout();
-      }
-    }
-  }
+  m_needsLayoutText = true;
+  updateTextLayoutInfo();
 
   if (shouldSkip())
   {
@@ -238,6 +225,9 @@ void LayoutNode::setFrame(
     return;
   }
 
+  auto element = elementNode();
+  if (!element)
+    return;
   if (element->type() == Domain::Element::EType::PATH)
   {
     auto pathElement = static_cast<Domain::PathElement*>(element);
@@ -1683,4 +1673,37 @@ LayoutContext* LayoutNode::context()
     return p->context();
   return nullptr;
 }
+
+void LayoutNode::updateTextLayoutInfo()
+{
+  if (!m_needsLayoutText)
+    return;
+
+  auto element = elementNode();
+  if (!element)
+    return;
+  if (element->type() != Domain::Element::EType::TEXT)
+    return;
+
+  if (auto c = context(); c && m_autoLayout && m_autoLayout->isEnabled())
+  {
+    const auto maybePaintSize = c->nodeSize(this);
+    if (maybePaintSize)
+    {
+      if (const auto& paintSize = *maybePaintSize; paintSize != size())
+      {
+        m_autoLayout->updateSizeRule(paintSize);
+        m_autoLayout->setNeedsLayout();
+      }
+
+      m_needsLayoutText = false;
+    }
+    else
+    {
+      // layout if needed after paint node ready
+      m_needsLayoutText = true;
+    }
+  }
+}
+
 } // namespace VGG

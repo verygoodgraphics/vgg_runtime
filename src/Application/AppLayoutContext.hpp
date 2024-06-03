@@ -27,7 +27,7 @@ class AppLayoutContext : public LayoutContext
 public:
   AppLayoutContext(std::shared_ptr<AttrBridge> layerBridge);
 
-  Layout::Size nodeSize(LayoutNode* node) const override;
+  std::optional<Layout::Size> nodeSize(LayoutNode* node) const override;
 
   void didUpdateBounds(LayoutNode* node) override;
   void didUpdateMatrix(LayoutNode* node) override;

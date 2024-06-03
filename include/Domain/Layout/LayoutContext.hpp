@@ -16,6 +16,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include "Domain/Layout/LayoutNode.hpp"
 #include "Domain/Layout/Rect.hpp"
 
@@ -28,7 +29,7 @@ class LayoutContext
 public:
   virtual ~LayoutContext() = default;
 
-  virtual Layout::Size nodeSize(LayoutNode* node) const = 0;
+  virtual std::optional<Layout::Size> nodeSize(LayoutNode* node) const = 0;
 
   virtual void didUpdateBounds(LayoutNode* node) = 0;
   virtual void didUpdateMatrix(LayoutNode* node) = 0;

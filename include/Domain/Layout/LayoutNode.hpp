@@ -75,6 +75,8 @@ class LayoutNode : public std::enable_shared_from_this<LayoutNode>
   bool                                          m_needsLayout{ false };
   Layout::Rect                                  m_oldFrame;
 
+  bool m_needsLayoutText = false;
+
   std::optional<Layout::Scalar> m_rightMargin;
   std::optional<Layout::Scalar> m_fixStartWidthRatio;
   std::optional<Layout::Scalar> m_fixEndWidthRatio;
@@ -299,6 +301,8 @@ private:
   void updateLayoutSizeInfo();
 
   LayoutContext* context();
+
+  void updateTextLayoutInfo();
 
 private:
   LayoutContext* m_context = nullptr;

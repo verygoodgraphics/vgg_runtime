@@ -367,23 +367,15 @@ void Controller::start()
 {
   m_presenter->setModel(generateViewModel(m_model, m_presenter->viewSize()));
 
-  bool pageChanged{ false };
   auto pageIndexForViewport = m_model->getFrameIndexForWidth(m_presenter->viewSize().width);
   if (pageIndexForViewport != -1)
-  {
-    pageChanged = m_presenter->setCurrentFrameIndex(pageIndexForViewport, false);
-  }
+    m_presenter->setCurrentFrameIndex(pageIndexForViewport, false);
   else
-  {
-    pageChanged = m_presenter->setCurrentFrameIndex(
-      m_model->getFrameIndexById(m_model->launchFrameId()),
-      false);
-  }
+    m_presenter->setCurrentFrameIndex(m_model->getFrameIndexById(m_model->launchFrameId()), false);
+
   m_presenter->initHistory();
-  if (pageChanged)
-  {
-    scaleContentAndUpdate(m_presenter->currentPageIndex());
-  }
+  // if pageChanged, do layout; else layout text node if needed(paint node ready)
+  scaleContentAndUpdate(m_presenter->currentPageIndex());
 
   fitPage();
 

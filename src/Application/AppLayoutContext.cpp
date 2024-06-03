@@ -28,16 +28,16 @@ AppLayoutContext::AppLayoutContext(std::shared_ptr<AttrBridge> layerBridge)
   ASSERT(m_layerBridge);
 }
 
-Layout::Size AppLayoutContext::nodeSize(LayoutNode* node) const
+std::optional<Layout::Size> AppLayoutContext::nodeSize(LayoutNode* node) const
 {
   ASSERT(node);
   auto paintNode = m_layerBridge->getPaintNode(node->shared_from_this());
   if (!paintNode) // scene node not ready
-    return node->bounds().size;
+    return {};
 
   paintNode->revalidate();
   auto& b = paintNode->bounds();
-  return { b.width(), b.height() };
+  return Layout::Size{ b.width(), b.height() };
 }
 
 void AppLayoutContext::didUpdateBounds(LayoutNode* node)

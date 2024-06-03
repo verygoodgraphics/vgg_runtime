@@ -358,12 +358,16 @@ layer::PaintNode* AttrBridge::getPaintNode(std::shared_ptr<LayoutNode> node)
     return nullptr;
   }
 
+  auto sceneNode = m_view->getSceneNode();
+  if (!sceneNode)
+    return nullptr;
+
   const auto& id = element->idNumber();
 
   // for top-level frame
   if (node->parent() && !node->parent()->parent())
   {
-    for (auto& frame : m_view->getSceneNode()->getFrames())
+    for (auto& frame : sceneNode->getFrames())
     {
       ASSERT(frame->node());
       if (frame->node()->uniqueID() == id)
@@ -373,9 +377,7 @@ layer::PaintNode* AttrBridge::getPaintNode(std::shared_ptr<LayoutNode> node)
     }
   }
 
-  if (auto sn = m_view->getSceneNode())
-    return sn->nodeByID(id);
-  return nullptr;
+  return sceneNode->nodeByID(id);
 }
 
 bool AttrBridge::updateColor(

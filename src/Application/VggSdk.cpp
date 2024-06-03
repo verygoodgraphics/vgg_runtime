@@ -239,7 +239,7 @@ bool VggSdk::addFont(const uint8_t* data, size_t size, const char* defaultName)
   {
     if (auto presenter = currentEnv->presenter())
     {
-      presenter->setNeedsReload();
+      presenter->setDirtry();
     }
   }
 

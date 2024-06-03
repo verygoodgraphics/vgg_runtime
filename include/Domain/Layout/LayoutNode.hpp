@@ -211,6 +211,7 @@ public:
 
   bool isVisible() const;
 
+  Layout::Size   size() const;
   Layout::Matrix modelMatrix() const;
 
 private:
@@ -241,7 +242,6 @@ private:
     bool                onlyWhichHasAbsolutePostion = false);
 
   Layout::Point origin() const;
-  Layout::Size  size() const;
   Layout::Rect  transformedFrame() const;
   void          saveOldFrame();
   void          saveChildrendOldFrame();

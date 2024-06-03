@@ -1324,11 +1324,11 @@ void AutoLayout::updateSizeRule(const Size newSize)
       if (sharedRule->width.value.types == Rule::Length::ETypes::PX)
       {
         DEBUG(
-          "AutoLayout::updateSizeRule, width = %f, view[%s, %s, %p]",
-          newSize.width,
+          "AutoLayout::updateSizeRule, view[%s, %s, %p], width = %f",
           sharedView->id().c_str(),
           sharedView->name().c_str(),
-          sharedView.get());
+          sharedView.get(),
+          newSize.width);
 
         sharedRule->width.value.value = newSize.width;
         configureSize = true;
@@ -1341,11 +1341,11 @@ void AutoLayout::updateSizeRule(const Size newSize)
       if (sharedRule->height.value.types == Rule::Length::ETypes::PX)
       {
         DEBUG(
-          "AutoLayout::updateSizeRule, height = %f, view[%s, %s, %p]",
-          newSize.height,
+          "AutoLayout::updateSizeRule, view[%s, %s, %p], height = %f",
           sharedView->id().c_str(),
           sharedView->name().c_str(),
-          sharedView.get());
+          sharedView.get(),
+          newSize.height);
         sharedRule->height.value.value = newSize.height;
         configureSize = true;
       }

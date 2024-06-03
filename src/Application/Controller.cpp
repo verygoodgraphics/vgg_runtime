@@ -367,15 +367,18 @@ void Controller::start()
 {
   m_presenter->setModel(generateViewModel(m_model, m_presenter->viewSize()));
 
+  bool pageChanged = false;
   auto pageIndexForViewport = m_model->getFrameIndexForWidth(m_presenter->viewSize().width);
   if (pageIndexForViewport != -1)
-    m_presenter->setCurrentFrameIndex(pageIndexForViewport, false);
+    pageChanged = m_presenter->setCurrentFrameIndex(pageIndexForViewport, false);
   else
-    m_presenter->setCurrentFrameIndex(m_model->getFrameIndexById(m_model->launchFrameId()), false);
+    pageChanged = m_presenter->setCurrentFrameIndex(
+      m_model->getFrameIndexById(m_model->launchFrameId()),
+      false);
 
   m_presenter->initHistory();
-  // if pageChanged, do layout; else layout text node if needed(paint node ready)
-  scaleContentAndUpdate(m_presenter->currentPageIndex());
+  if (pageChanged)
+    scaleContentAndUpdate(m_presenter->currentPageIndex());
 
   fitPage();
 
@@ -616,6 +619,7 @@ void Controller::updateDisplayContentIfNeeded()
   if (m_editor->isModelDirty())
   {
     m_presenter->update();
+    layoutContext()->setLayerValid(false);
     m_editor->resetModelDirty();
   }
 }
@@ -849,6 +853,7 @@ void Controller::scaleContentAndUpdate(std::size_t pageIndex)
 {
   scaleContent(pageIndex);
   m_presenter->update();
+  layoutContext()->setLayerValid(false);
 }
 
 void Controller::fitPage()
@@ -963,12 +968,11 @@ void Controller::aspectFill(Layout::Size size, std::size_t pageIndex)
     };
   }
 
-  auto context = m_presenter->layoutContext();
   m_layout->layout(
     targetSize,
     pageIndex,
     /*updateRule=*/m_isFitToViewportEnabled,
-    context.get());
+    layoutContext());
 }
 
 VGG::Layout::Size Controller::pageOriginalSize(std::size_t pageIndex) const
@@ -1035,6 +1039,23 @@ bool Controller::presentFrame(const std::string& id, const app::FrameOptions& op
       fitPage();
       m_presenter->triggerMouseEnter();
     });
+}
+
+LayoutContext* Controller::layoutContext()
+{
+  if (!m_layoutContext)
+    m_layoutContext = m_presenter->layoutContext();
+
+  return m_layoutContext.get();
+}
+
+void Controller::postFrame()
+{
+  auto context = layoutContext();
+  context->setLayerValid(true);
+  m_layout->layoutTree()->layoutIfNeeded(context); // layout text if needed
+  if (!context->isLayerValid())                    // paint node updated
+    m_presenter->setDirtry();
 }
 
 } // namespace VGG

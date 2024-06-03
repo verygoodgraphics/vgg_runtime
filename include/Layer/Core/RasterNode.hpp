@@ -110,7 +110,9 @@ private:
   GrRecordingContext* m_device{ nullptr };
   Ref<Viewport>       m_viewport;
   sk_sp<SkImage>      m_rasterImage;
-  sk_sp<SkImage>      m_redrawRegionImage;
+  sk_sp<SkSurface>    m_gpuSurface;
+
+  sk_sp<SkImage> m_redrawRegionImage;
 
   Revalidation m_rev;
   Bounds       m_redrawBounds;

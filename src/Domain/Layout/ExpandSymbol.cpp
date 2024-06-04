@@ -1084,7 +1084,7 @@ void ExpandSymbol::layoutInstance(Domain::SymbolInstanceElement& instance, const
 
   m_layout->rebuildSubtree(node); // force rebuild subtree with updated rules
 
-  node->setNeedLayout();
+  node->setContainerNeedsLayout();
 
   // layout with new size
   layoutSubtree(node, instanceSize, true);

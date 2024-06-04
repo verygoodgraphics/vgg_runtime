@@ -66,7 +66,9 @@ struct PDFOptions
 #define DEPRECATED(msg) [[deprecated(msg)]]
 
 class VLayer__pImpl;
-class VGG_EXPORTS VLayer : public GraphicsLayer
+class VGG_EXPORTS DEPRECATED(
+  "VLayer is deprecated. See render.cpp in test/render to learn how to use the rendering facility, "
+  "which is lower level and provides more flexibility.") VLayer : public GraphicsLayer
 {
   VGG_DECL_IMPL(VLayer);
   int m_position[2] = { 0, 0 };

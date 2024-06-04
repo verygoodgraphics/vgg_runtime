@@ -93,6 +93,11 @@ bool UIApplication::paint(int fps, bool force)
 
   if (force || needsPaint())
   {
+    if (force)
+    {
+      fps = 0;
+    }
+
     m_controller->updateDisplayContentIfNeeded();
     if (m_layer->beginFrame(fps))
     {

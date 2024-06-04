@@ -27,6 +27,8 @@
 #include "Utility/VggString.hpp"
 #include <nlohmann/json.hpp>
 
+#undef DEBUG
+#define DEBUG(msg, ...)
 namespace VGG::Domain
 {
 
@@ -275,6 +277,7 @@ void Element::updateMatrix(double tx, double ty)
 {
   if (auto model = object())
   {
+    DEBUG("Element::updateMatrix, [%s, %p], %f, %f", id().c_str(), this, tx, ty);
     ASSERT(model->matrix.size() == 6);
     model->matrix[4] = tx;
     model->matrix[5] = ty;
@@ -374,6 +377,11 @@ void Element::applyOverride(
     return;
   }
 
+  DEBUG(
+    "Element::applyOverride: [%s], name %s, value %s",
+    id().c_str(),
+    name.c_str(),
+    value.dump().c_str());
   nlohmann::json contentJson = jsonModel();
   applyOverrides(contentJson, name, value, outDirtyNodeIds);
   updateJsonModel(contentJson);
@@ -570,6 +578,7 @@ void Element::getTreeToModel(
 FrameElement::FrameElement(const Model::Frame& frame)
   : Element(EType::FRAME)
 {
+  DEBUG("FrameElement::FrameElement, [%s, %p]", frame.id.c_str(), this);
   m_frame = std::make_shared<Model::Frame>(frame);
 }
 std::shared_ptr<Element> FrameElement::clone() const
@@ -594,6 +603,12 @@ void FrameElement::updateJsonModel(const nlohmann::json& newJsonModel)
 {
   ASSERT(m_frame);
   *m_frame = newJsonModel;
+  DEBUG(
+    "Element::updateJsonModel, [%s, %p], %f, %f",
+    id().c_str(),
+    this,
+    m_frame->matrix[4],
+    m_frame->matrix[5]);
 }
 void FrameElement::getToModel(Model::SubGeometryType& subGeometry)
 {

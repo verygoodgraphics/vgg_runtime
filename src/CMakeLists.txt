@@ -1,5 +1,7 @@
 if(MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
+elseif(CMAKE_GENERATOR STREQUAL Xcode)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unknown-warning-option -Wno-deprecated-declarations -Wno-nonnull -Wno-unused-private-field -Wno-error=unused-function -Wno-maybe-uninitialized -Wno-error=restrict")
 else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-unknown-warning-option -Wno-deprecated-declarations -Wno-nonnull -Wno-unused-private-field -Wno-error=unused-function -Wno-maybe-uninitialized -Wno-error=restrict")
 endif()

@@ -45,6 +45,9 @@
 #include "ZoomerNodeController.hpp"
 #include <glm/detail/qualifier.hpp>
 
+#undef DEBUG
+#define DEBUG(msg, ...)
+
 namespace VGG::internal
 {
 
@@ -75,6 +78,7 @@ void UIViewImpl::show(std::shared_ptr<ViewModel>& viewModel, std::vector<layer::
   ASSERT(viewModel);
   m_viewModel = viewModel;
 
+  DEBUG("UIViewImpl::show: make scene node");
   m_sceneNode = layer::SceneNode::Make(std::move(frames));
   moveFramesToTopLeft();
 
@@ -329,7 +333,7 @@ bool UIViewImpl::transition(
     toNode->shared_from_this(),
     action->getPaintNode(fromNode->shared_from_this()),
     makeNewPaintNode ? nullptr : action->getPaintNode(toNode->shared_from_this()),
-    true,
+    /*isOnlyUpdatePaint=*/true,
     animation,
     makeNewPaintNode);
 

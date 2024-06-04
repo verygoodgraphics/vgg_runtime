@@ -26,6 +26,7 @@
 #include "Layer/Core/TransformNode.hpp"
 #include "Layer/Core/RasterCacheTile.hpp"
 #include <core/SkCanvas.h>
+#include <core/SkColor.h>
 #include <core/SkOverdrawCanvas.h>
 #include <gpu/GrBackendSurface.h>
 #include <gpu/GrRecordingContext.h>
@@ -360,6 +361,8 @@ void DamageRedrawNode::raster(const std::vector<Bounds>& damageBounds)
   for (const auto& dr : damageBounds)
   {
     const auto rasterRect = dr.intersectAs(m_viewportBounds);
+    if (rasterRect.valid() == false)
+      continue;
     const auto rbx = rasterRect.x();
     const auto rby = rasterRect.y();
     const auto rbw = rasterRect.width();
@@ -372,7 +375,7 @@ void DamageRedrawNode::raster(const std::vector<Bounds>& damageBounds)
     auto cvs = surf->getCanvas();
     ASSERT(cvs);
     cvs->save();
-    cvs->clear(SK_ColorTRANSPARENT);
+    cvs->clear(SK_ColorWHITE);
     cvs->concat(toSkMatrix(getTransform()->getMatrix()));
     cvs->translate(-rbx, -rby);
     auto c = getChild();

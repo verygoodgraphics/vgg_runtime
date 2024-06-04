@@ -11,7 +11,8 @@
 #include "Layer/Graphics/GraphicsSkia.hpp"
 #include "Layer/Core/EventManager.hpp"
 #include "Layer/Renderer.hpp"
-#include "Layer/VSkiaContext.hpp" // TODO:: make the file public
+#include "Layer/Graphics/VSkiaContext.hpp"
+#include "Layer/Graphics/VSkiaGL.hpp"
 #include "argparse/argparse.hpp"
 
 #include <core/SkColor.h>
@@ -33,37 +34,6 @@ using AppSDLImpl = VGG::entry::AppSDLImpl;
 using AppVkImpl = VGG::entry::AppSDLVkImpl;
 #endif
 using App = AppSDLImpl;
-
-SurfaceCreateProc glSurfaceCreateProc()
-{
-  return [](GrDirectContext* context, int w, int h, const VGG::layer::ContextConfig& cfg)
-  {
-    GrGLFramebufferInfo info;
-    info.fFBOID = 0;
-    info.fFormat = GR_GL_RGBA8;
-    GrBackendRenderTarget target(w, h, cfg.multiSample, cfg.stencilBit, info);
-    SkSurfaceProps        props;
-    return SkSurfaces::WrapBackendRenderTarget(
-      context,
-      target,
-      kBottomLeft_GrSurfaceOrigin,
-      SkColorType::kRGBA_8888_SkColorType,
-      nullptr,
-      &props);
-  };
-}
-
-ContextCreateProc glContextCreateProc(ContextInfoGL* context)
-{
-  return []()
-  {
-    sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
-    ASSERT(interface);
-    sk_sp<GrDirectContext> grContext = GrDirectContext::MakeGL(interface);
-    ASSERT(grContext);
-    return grContext;
-  };
-}
 
 VGG::layer::Ref<VGG::layer::RenderNode> loadScene(const argparse::ArgumentParser& program)
 {
@@ -209,14 +179,15 @@ argparse::ArgumentParser parse(int argc, char** argv)
 int run(const layer::ContextConfig& cfg, Viewer& viewer, const argparse::ArgumentParser& program)
 {
   using namespace VGG::layer;
+  using namespace VGG::layer::skia_impl;
   using namespace VGG;
   auto app = App::app();
   app->makeCurrent(); // init GL context
 
   // init skia
   VGG::layer::skia_impl::SkiaContext skia(
-    glContextCreateProc(static_cast<ContextInfoGL*>(app->contextInfo())),
-    glSurfaceCreateProc(),
+    gl::glContextCreateProc(static_cast<ContextInfoGL*>(app->contextInfo())),
+    gl::glSurfaceCreateProc(),
     cfg);
 
   viewer.zoomNode = VGG::layer::ZoomerNode::Make();

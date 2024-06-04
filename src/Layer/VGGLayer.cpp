@@ -32,13 +32,13 @@
 #include "Layer/Core/RasterNode.hpp"
 #include "Layer/Core/ZoomerNode.hpp"
 #include "Layer/Core/ViewportNode.hpp"
-#include "VSkiaGL.hpp" // this header and the skia headers must be included first for ios build
+#include "Layer/Graphics/VSkiaGL.hpp" // this header and the skia headers must be included first for ios build
 
 #ifdef VGG_USE_VULKAN
-#include "VSkiaVK.hpp"
+#include "Layer/Graphics/VSkiaVK.hpp"
 #endif
 #include "Renderer.hpp"
-#include "VSkiaContext.hpp"
+#include "Layer/Graphics/VSkiaContext.hpp"
 #include "Stream.hpp"
 
 #include "Layer/VGGLayer.hpp"

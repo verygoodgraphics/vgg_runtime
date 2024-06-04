@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #pragma once
-#include "VSkiaContext.hpp"
+#include "Layer/Graphics/VSkiaContext.hpp"
 
 #include "Layer/Graphics/ContextInfoVulkan.hpp"
 

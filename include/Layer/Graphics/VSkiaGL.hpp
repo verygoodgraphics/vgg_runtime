@@ -19,13 +19,13 @@
 #include <include/gpu/GrBackendSurface.h>
 #include <src/gpu/ganesh/gl/GrGLDefines.h>
 
-#include "VSkiaContext.hpp"
+#include "Layer/Graphics/VSkiaContext.hpp"
 #include "Layer/Graphics/GraphicsSkia.hpp"
 #include "Layer/Graphics/ContextInfoGL.hpp"
 
 namespace VGG::layer::skia_impl::gl
 {
-SurfaceCreateProc glSurfaceCreateProc()
+inline SurfaceCreateProc glSurfaceCreateProc()
 {
   return [](GrDirectContext* context, int w, int h, const ContextConfig& cfg)
   {
@@ -44,7 +44,7 @@ SurfaceCreateProc glSurfaceCreateProc()
   };
 }
 
-ContextCreateProc glContextCreateProc(ContextInfoGL* context)
+inline ContextCreateProc glContextCreateProc(ContextInfoGL* context)
 {
   return []()
   {

@@ -86,7 +86,7 @@ public:
     Ref<ZoomerNode>     zoomer,
     Ref<RenderNode>     child);
 
-  virtual void raster(const std::vector<Bounds>& damageBounds) = 0;
+  virtual void raster(const std::vector<Bounds>& bounds) = 0;
 
   const glm::mat3& getRasterMatrix() const
   {
@@ -122,6 +122,8 @@ private:
   glm::mat3           m_localMatrix = glm::mat3{ 1.0 };
 };
 
+std::vector<Bounds> mergeBounds(std::vector<Bounds> bounds);
+
 class DamageRedrawNode : public RasterTransformNode
 {
 public:
@@ -134,7 +136,7 @@ public:
 
   VGG_CLASS_MAKE(DamageRedrawNode);
 
-  void raster(const std::vector<Bounds>& damageBounds) override;
+  void raster(const std::vector<Bounds>& bounds) override;
   void render(Renderer* renderer) override;
 
 #ifdef VGG_LAYER_DEBUG

@@ -215,14 +215,14 @@ int run(const layer::ContextConfig& cfg, Viewer& viewer, const argparse::Argumen
     app->poll(); // event process
 
     // Rendering begin
-    Revalidation rev;
-    Timer        t;
-    t.start();
+    Revalidation        rev;
+    Timer               t;
     std::vector<Bounds> damageBounds;
+    t.start();
     {
       VGG::layer::EventManager::pollEvents();
       rasterNode->revalidate(&rev, glm::mat3{ 1 });
-      damageBounds.push_back(rev.bounds());
+      damageBounds = mergeBounds(rev.boundsArray());
       rasterNode->raster(damageBounds);
     }
 
@@ -243,8 +243,16 @@ int run(const layer::ContextConfig& cfg, Viewer& viewer, const argparse::Argumen
       {
         SkPaint p;
         p.setStyle(SkPaint::kStroke_Style);
-        p.setStrokeWidth(1);
+        p.setStrokeWidth(2);
         p.setColor(SK_ColorBLUE);
+        for (const auto& d : rev.boundsArray())
+        {
+          canvas->drawRect(toSkRect(d), p);
+        }
+
+        p.setColor(SK_ColorGREEN);
+        p.setStyle(SkPaint::kFill_Style);
+        p.setAlphaf(0.3);
         for (const auto& d : damageBounds)
         {
           canvas->drawRect(toSkRect(d), p);
@@ -255,7 +263,10 @@ int run(const layer::ContextConfig& cfg, Viewer& viewer, const argparse::Argumen
     skia.flushAndSubmit();
     t.stop();
     auto tt = (int)t.duration().ms();
-    INFO("render time: %d ms", tt);
+    if (tt >= 16)
+    {
+      INFO("render time: %d ms", tt);
+    }
     app->swapBuffer();
     skia.markSwap();
   }

@@ -345,7 +345,44 @@ void blit(GrRecordingContext* context, SkSurface* dst, SkSurface* src, int x, in
   dstCanvas->drawImage(src->makeImageSnapshot(), x, y);
 }
 
-void DamageRedrawNode::raster(const std::vector<Bounds>& damageBounds)
+std::vector<Bounds> mergeBounds(std::vector<Bounds> bounds)
+{
+  std::vector<Bounds> merged;
+  std::sort(
+    bounds.begin(),
+    bounds.end(),
+    [](const Bounds& a, const Bounds& b)
+    {
+      const auto aTopLeft = a.topLeft();
+      const auto bTopLeft = b.topLeft();
+      return aTopLeft.y < bTopLeft.y || (aTopLeft.y == bTopLeft.y && aTopLeft.x < bTopLeft.x);
+    });
+  for (auto& b : bounds)
+  {
+    if (merged.empty())
+    {
+      merged.push_back(b);
+    }
+    else
+    {
+      auto&       last = merged.back();
+      const auto& br = last.bottomRight();
+      const auto& tl = b.topLeft();
+
+      if (br.x >= tl.x && br.y >= tl.y)
+      {
+        last.unionWith(b);
+      }
+      else
+      {
+        merged.push_back(b);
+      }
+    }
+  }
+  return merged;
+}
+
+void DamageRedrawNode::raster(const std::vector<Bounds>& bounds)
 {
   ASSERT(!isInvalid());
 
@@ -358,7 +395,7 @@ void DamageRedrawNode::raster(const std::vector<Bounds>& damageBounds)
       SkImageInfo::MakeN32Premul(m_viewportBounds.width(), m_viewportBounds.height()));
   }
 
-  for (const auto& dr : damageBounds)
+  for (const auto& dr : bounds)
   {
     const auto rasterRect = dr.intersectAs(m_viewportBounds);
     if (rasterRect.valid() == false)

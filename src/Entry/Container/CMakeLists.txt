@@ -95,6 +95,7 @@ if(VGG_VAR_TARGET MATCHES "^iOS")
 elseif(VGG_CONTAINER_FOR_QT)
   install(FILES
     ${CMAKE_SOURCE_DIR}/include/VGG/Container/QtContainer.hpp
+    ${CMAKE_SOURCE_DIR}/include/VGG/Container/QtQuickContainer.hpp
     COMPONENT container
     DESTINATION VGG
   )

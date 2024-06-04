@@ -376,11 +376,11 @@ void DamageRedrawNode::raster(const std::vector<Bounds>& damageBounds)
     ASSERT(cvs);
     cvs->save();
     cvs->clear(SK_ColorWHITE);
-    cvs->concat(toSkMatrix(getTransform()->getMatrix()));
     cvs->translate(-rbx, -rby);
+    cvs->concat(toSkMatrix(getTransform()->getMatrix()));
+    // cvs->clipRect(SkRect::MakeXYWH(0, 0, rbh, rbw));
     auto c = getChild();
     ASSERT(c);
-    // cvs->clipRect(SkRect::MakeXYWH(0, 0, rbh, rbw));
     auto pic = c->picture();
     ASSERT(pic);
     pic->playback(cvs);

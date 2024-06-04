@@ -22,6 +22,10 @@ namespace VGG::layer
 
 void Revalidation::emit(const Bounds& bounds, const glm::mat3& ctm, VNode* node)
 {
+  if (bounds.valid() == false)
+  {
+    return;
+  }
   const auto mappedBounds = bounds.map(ctm);
   m_boundsArray.push_back(mappedBounds);
   m_bounds.unionWith(mappedBounds);

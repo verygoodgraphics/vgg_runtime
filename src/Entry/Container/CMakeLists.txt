@@ -15,6 +15,7 @@ if(VGG_VAR_TARGET MATCHES "^iOS")
 elseif(VGG_CONTAINER_FOR_QT)
   target_sources(vgg_container PRIVATE
     QtContainer.cpp
+    QtQuickContainer.cpp
   )
 endif()
 

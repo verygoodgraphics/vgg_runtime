@@ -120,8 +120,16 @@ public:
       layoutDocSchemaFilePath);
   }
 
-  void setGraphicsContext(std::unique_ptr<layer::SkiaGraphicsContext>& context, int w, int h)
+  void setGraphicsContext(
+    std::unique_ptr<layer::SkiaGraphicsContext>& context,
+    int                                          w,
+    int                                          h,
+    int                                          stencilBit,
+    int                                          multiSample)
   {
+    m_graphicsContextConfig.stencilBit = stencilBit;
+    m_graphicsContextConfig.multiSample = multiSample;
+
     m_context = std::move(context);
 
     m_context->init(m_graphicsContextConfig);
@@ -240,9 +248,11 @@ Container::~Container() = default;
 void Container::setGraphicsContext(
   std::unique_ptr<layer::SkiaGraphicsContext>& context,
   int                                          w,
-  int                                          h)
+  int                                          h,
+  int                                          stencilBit,
+  int                                          multiSample)
 {
-  m_impl->setGraphicsContext(context, w, h);
+  m_impl->setGraphicsContext(context, w, h, stencilBit, multiSample);
 }
 
 IContainer* Container::container()

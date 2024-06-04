@@ -15,40 +15,32 @@
  */
 
 #pragma once
-
-#include "Event.hpp"
 #include "IContainer.hpp"
-#include "ISdk.hpp"
-#include "VggTypes.hpp"
-
 #include <memory>
 
 namespace VGG
 {
 
-namespace layer
-{
-class SkiaGraphicsContext;
-}
+class QtQuickContainerImpl;
 
-class ContainerImpl;
-class VGG_RUNTIME_DLL_DECLARE Container : public IContainer
+class VGG_RUNTIME_DLL_DECLARE QtQuickContainer : public IContainer
 {
-  std::shared_ptr<ContainerImpl> m_impl;
-
 public:
-  Container();
-  ~Container();
+  QtQuickContainer(
+    int          width,
+    int          height,
+    double       devicePixelRatio,
+    unsigned int fboID,
+    int          stencilBit = 8,
+    int          multiSample = 4);
 
-  void setGraphicsContext(
-    std::unique_ptr<layer::SkiaGraphicsContext>& context,
-    int                                          w,
-    int                                          h,
-    int                                          stencilBit = 8,
-    int                                          multiSample = 0);
+  ~QtQuickContainer();
 
 private:
   virtual IContainer* container() override;
+
+private:
+  std::unique_ptr<QtQuickContainerImpl> m_impl;
 };
 
 } // namespace VGG

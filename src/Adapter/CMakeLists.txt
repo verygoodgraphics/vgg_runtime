@@ -23,6 +23,7 @@ else()
   elseif(VGG_CONTAINER_FOR_QT)
     target_sources(vgg_adapter PRIVATE
       Container/QtGraphicsContext.cpp
+      Container/QtQuickGraphicsContext.cpp
     )
     target_include_directories(vgg_adapter PUBLIC
       ${CMAKE_SOURCE_DIR}/include/Application/Event

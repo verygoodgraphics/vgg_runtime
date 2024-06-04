@@ -62,10 +62,8 @@ bool BrowserJSEngine::evalModule(
 
 void BrowserJSEngine::openUrl(const std::string& url, const std::string& target)
 {
-  std::string js{ "window.open('" };
+  std::string js{ "window.location.assign('" };
   js.append(url);
-  js.append("', '");
-  js.append(target);
   js.append("');");
 
   evalScript(js);

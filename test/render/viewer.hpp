@@ -36,7 +36,6 @@ using namespace VGG::app;
 
 class SkCanvas;
 
-constexpr char POS_ARG_INPUT_FILE[] = "fig/ai/sketch/json";
 class Pager
 {
   VGG::layer::SceneNode* m_sceneNode;

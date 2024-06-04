@@ -63,7 +63,7 @@ inline std::optional<Rasterizer::EReason> changed(glm::mat3& prevMatrix, const g
 namespace VGG::layer
 {
 
-RasterNode::RasterNode(
+TileRasterNode::TileRasterNode(
   VRefCnt*            cnt,
   GrRecordingContext* device,
   Ref<Viewport>       viewport,
@@ -86,7 +86,7 @@ RasterNode::RasterNode(
 #endif
 }
 
-void RasterNode::render(Renderer* renderer)
+void TileRasterNode::render(Renderer* renderer)
 {
   auto c = getChild();
   ASSERT(c);
@@ -114,7 +114,7 @@ void RasterNode::render(Renderer* renderer)
 }
 
 #ifdef VGG_LAYER_DEBUG
-void RasterNode::debug(Renderer* render)
+void TileRasterNode::debug(Renderer* render)
 {
   auto c = getChild();
   ASSERT(c);
@@ -128,7 +128,7 @@ void RasterNode::debug(Renderer* render)
 }
 #endif
 
-Bounds RasterNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
+Bounds TileRasterNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
 {
   TransformEffectNode::onRevalidate(inv, mat);
   auto   c = getChild();
@@ -243,7 +243,7 @@ Bounds RasterNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
 namespace VGG::layer
 {
 
-RasterTransformNode::RasterTransformNode(
+RasterNode::RasterNode(
   VRefCnt*            cnt,
   GrRecordingContext* device,
   Ref<Viewport>       viewport,
@@ -258,7 +258,7 @@ RasterTransformNode::RasterTransformNode(
 {
 }
 
-Bounds RasterTransformNode::onRevalidate(Revalidation* inv, const glm::mat3& ctm)
+Bounds RasterNode::onRevalidate(Revalidation* inv, const glm::mat3& ctm)
 {
   auto bounds = TransformEffectNode::onRevalidate(inv, ctm);
   m_viewport->revalidate();
@@ -276,20 +276,20 @@ Bounds RasterTransformNode::onRevalidate(Revalidation* inv, const glm::mat3& ctm
   return bounds;
 }
 
-DamageRedrawNode::DamageRedrawNode(
+RasterNodeImpl::RasterNodeImpl(
   VRefCnt*            cnt,
   GrRecordingContext* device,
   Ref<Viewport>       viewport,
   Ref<ZoomerNode>     zoomer,
   Ref<RenderNode>     child)
-  : RasterTransformNode(cnt, device, std::move(viewport), std::move(zoomer), std::move(child))
+  : RasterNode(cnt, device, std::move(viewport), std::move(zoomer), std::move(child))
 {
 #ifdef VGG_LAYER_DEBUG
   dbgInfo = "DamageRedrawNode";
 #endif
 }
 
-void DamageRedrawNode::render(Renderer* renderer)
+void RasterNodeImpl::render(Renderer* renderer)
 {
   auto c = getChild();
   ASSERT(c);
@@ -308,7 +308,7 @@ void DamageRedrawNode::render(Renderer* renderer)
 }
 
 #ifdef VGG_LAYER_DEBUG
-void DamageRedrawNode::debug(Renderer* render)
+void RasterNodeImpl::debug(Renderer* render)
 {
   auto c = getChild();
   ASSERT(c);
@@ -382,7 +382,7 @@ std::vector<Bounds> mergeBounds(std::vector<Bounds> bounds)
   return merged;
 }
 
-void DamageRedrawNode::raster(const std::vector<Bounds>& bounds)
+void RasterNodeImpl::raster(const std::vector<Bounds>& bounds)
 {
   ASSERT(!isInvalid());
 

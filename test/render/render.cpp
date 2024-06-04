@@ -209,10 +209,10 @@ int run(const layer::ContextConfig& cfg, Viewer& viewer, const argparse::Argumen
   viewer.viewportNode = VGG::layer::Viewport::Make(1.0);
   viewer.viewportChangeCallback = [&skia](int w, int h) { skia.resizeSurface(w, h); };
 
-  Ref<RasterTransformNode> rasterNode;
+  Ref<RasterNode> rasterNode;
   if (auto n = loadScene(program); n)
   {
-    rasterNode = VGG::layer::DamageRedrawNode::Make(
+    rasterNode = VGG::layer::RasterNodeImpl::Make(
       skia.context(),
       viewer.viewportNode,
       viewer.zoomNode,
@@ -249,10 +249,13 @@ int run(const layer::ContextConfig& cfg, Viewer& viewer, const argparse::Argumen
       r.setCanvas(canvas);
       canvas->clear(SK_ColorWHITE);
       rasterNode->render(&r);
-      // if (viewer.enableDebug)
-      // {
-      //   rasterNode->debug(&r);
-      // }
+
+#ifdef VGG_LAYER_DEBUG
+      if (viewer.enableDebug)
+      {
+        rasterNode->debug(&r);
+      }
+#endif
 
       if (viewer.enableDrawDamageBounds)
       {

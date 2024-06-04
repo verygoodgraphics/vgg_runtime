@@ -35,17 +35,17 @@ class GrRecordingContext;
 namespace VGG::layer
 {
 class Rasterizer;
-class RasterNode : public TransformEffectNode
+class TileRasterNode : public TransformEffectNode
 {
 public:
-  RasterNode(
+  TileRasterNode(
     VRefCnt*            cnt,
     GrRecordingContext* device,
     Ref<Viewport>       viewport,
     Ref<ZoomerNode>     zoomer,
     Ref<RenderNode>     child);
 
-  VGG_CLASS_MAKE(RasterNode);
+  VGG_CLASS_MAKE(TileRasterNode);
 
   void render(Renderer* renderer) override;
 
@@ -60,7 +60,7 @@ public:
 
   Bounds onRevalidate(Revalidation* inv, const glm::mat3& mat) override;
 
-  ~RasterNode() override
+  ~TileRasterNode() override
   {
     unobserve(m_viewport);
   }
@@ -76,10 +76,10 @@ private:
   int64_t                              m_cacheUniqueID{ -1 };
 };
 
-class RasterTransformNode : public TransformEffectNode
+class RasterNode : public TransformEffectNode
 {
 public:
-  RasterTransformNode(
+  RasterNode(
     VRefCnt*            cnt,
     GrRecordingContext* device,
     Ref<Viewport>       viewport,
@@ -113,7 +113,7 @@ protected:
     return m_device;
   }
 
-  VGG_CLASS_MAKE(RasterTransformNode);
+  VGG_CLASS_MAKE(RasterNode);
 
 private:
   GrRecordingContext* m_device{ nullptr };
@@ -124,17 +124,17 @@ private:
 
 std::vector<Bounds> mergeBounds(std::vector<Bounds> bounds);
 
-class DamageRedrawNode : public RasterTransformNode
+class RasterNodeImpl : public RasterNode
 {
 public:
-  DamageRedrawNode(
+  RasterNodeImpl(
     VRefCnt*            cnt,
     GrRecordingContext* device,
     Ref<Viewport>       viewport,
     Ref<ZoomerNode>     zoomer,
     Ref<RenderNode>     child);
 
-  VGG_CLASS_MAKE(DamageRedrawNode);
+  VGG_CLASS_MAKE(RasterNodeImpl);
 
   void raster(const std::vector<Bounds>& bounds) override;
   void render(Renderer* renderer) override;
@@ -149,10 +149,7 @@ public:
   }
 
 private:
-  sk_sp<SkImage>   m_rasterImage;
   sk_sp<SkSurface> m_gpuSurface;
-  Bounds           m_rasterBounds;
   Bounds           m_viewportBounds;
-  int64_t          m_cacheUniqueID{ -1 };
 };
 } // namespace VGG::layer

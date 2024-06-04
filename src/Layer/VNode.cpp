@@ -117,7 +117,7 @@ void VNode::invalidate(bool damage)
   VGG_TRACE_DEV(indent + dbgInfo);
   VGG_LOG_DEV(TRACE, VNode, "Invalidate: %s", (indent + dbgInfo).c_str());
 #endif
-  if (damage && !(m_state & BUBBLE_DAMAGE))
+  if (damage && !(m_trait & BUBBLE_DAMAGE))
   {
     m_state |= DAMAGE;
     damage = false;

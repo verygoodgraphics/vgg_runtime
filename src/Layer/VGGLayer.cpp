@@ -172,7 +172,7 @@ public:
 
   Ref<Viewport>            viewport;
   Ref<RenderNode>          node;
-  Ref<RasterTransformNode> rasterNode;
+  Ref<RasterNode> rasterNode;
 
   bool invalid{ true };
 
@@ -406,7 +406,7 @@ void VLayer::setRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
   //   std::move(transform),
   //   std::move(node));
 
-  d_ptr->node = RasterNode::Make(
+  d_ptr->node = TileRasterNode::Make(
     d_ptr->skiaContext->context(),
     d_ptr->viewport,
     std::move(transform),
@@ -416,7 +416,7 @@ void VLayer::setRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
 
 void VLayer::setRasterNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
 {
-  d_ptr->rasterNode = DamageRedrawNode::Make(
+  d_ptr->rasterNode = RasterNodeImpl::Make(
     d_ptr->skiaContext->context(),
     d_ptr->viewport,
     std::move(transform),

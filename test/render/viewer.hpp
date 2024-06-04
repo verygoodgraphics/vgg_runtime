@@ -1,3 +1,4 @@
+#pragma once
 #include "Application/ZoomerNodeController.hpp"
 #include "Domain/Model/Element.hpp"
 #include "Layer/Core/DefaultResourceProvider.hpp"
@@ -33,8 +34,6 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 using namespace VGG::app;
-
-class SkCanvas;
 
 class Pager
 {

@@ -1,3 +1,5 @@
+#include "viewer.hpp"
+
 #include "Application/Event/Event.hpp"
 #include "Application/AppBase.hpp"
 #include "Application/Event/EventAPI.hpp"
@@ -6,14 +8,14 @@
 #include "Layer/Graphics/GraphicsContext.hpp"
 #include "Layer/Core/ZoomerNode.hpp"
 #include "Layer/Core/ViewportNode.hpp"
-#include "TestEventListener.hpp"
 #include "Entry/SDL/AppSDLImpl.hpp"
 #include "Layer/Graphics/GraphicsSkia.hpp"
 #include "Layer/Core/EventManager.hpp"
 #include "Layer/Renderer.hpp"
 #include "Layer/Graphics/VSkiaContext.hpp"
 #include "Layer/Graphics/VSkiaGL.hpp"
-#include "argparse/argparse.hpp"
+
+#include <argparse/argparse.hpp>
 
 #include <core/SkColor.h>
 #include <include/gpu/ganesh/SkSurfaceGanesh.h>
@@ -34,6 +36,19 @@ using AppSDLImpl = VGG::entry::AppSDLImpl;
 using AppVkImpl = VGG::entry::AppSDLVkImpl;
 #endif
 using App = AppSDLImpl;
+
+constexpr char POS_ARG_INPUT_FILE[] = "fig/ai/sketch/json";
+
+template<typename App>
+class ViewerEventListener : public VGG::app::EventListener
+{
+public:
+  bool onEvent(UEvent evt, void* userData) override
+  {
+    return viewer.onEvent(evt, userData);
+  }
+  Viewer viewer;
+};
 
 VGG::layer::Ref<VGG::layer::RenderNode> loadScene(const argparse::ArgumentParser& program)
 {
@@ -287,7 +302,7 @@ int main(int argc, char** argv)
   cfg.argc = argc;
   cfg.argv = argv;
 
-  auto  listener = std::make_unique<MyEventListener<App>>();
+  auto  listener = std::make_unique<ViewerEventListener<App>>();
   auto& viewer = listener->viewer;
   cfg.eventListener = std::move(listener);
   try

@@ -98,6 +98,7 @@ public:
   void nodeAt(int x, int y, PaintNode::NodeVisitor visitor);
 
   void setRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node);
+  void setRasterNode(Ref<ZoomerNode> transform, Ref<RenderNode> node);
   void setRenderNode(Ref<RenderNode> node);
 
   void setDrawClickBounds(bool enable);

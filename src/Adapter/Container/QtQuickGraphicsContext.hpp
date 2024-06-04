@@ -1,0 +1,50 @@
+/*
+ * Copyright 2023-2024 VeryGoodGraphics LTD <bd@verygoodgraphics.com>
+ *
+ * Licensed under the VGG License, Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.verygoodgraphics.com/licenses/LICENSE-1.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#pragma once
+#include "Layer/Graphics/ContextSkBase.hpp"
+#include "include/gpu/GrDirectContext.h"
+
+namespace VGG
+{
+
+namespace layer
+{
+struct ContextProperty;
+}
+
+class QtQuickGraphicsContext : public VGG::layer::SkiaGraphicsContext
+{
+public:
+  QtQuickGraphicsContext(unsigned int fboID, double dpi);
+
+private:
+  virtual bool              swap() override;
+  virtual bool              makeCurrent() override;
+  virtual void              shutdown() override;
+  virtual void*             contextInfo() override;
+  virtual bool              onInit() override;
+  virtual void              onInitProperties(layer::ContextProperty& property) override;
+  virtual SurfaceCreateProc surfaceCreateProc() override;
+  virtual ContextCreateProc contextCreateProc() override;
+
+private:
+  unsigned int           m_fboID;
+  double                 m_dpi;
+  sk_sp<GrDirectContext> m_context;
+};
+
+} // namespace VGG

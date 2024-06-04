@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #pragma once
-#include "Layer/Core/Timer.hpp"
 #include "Layer/Graphics/GraphicsContext.hpp"
 #include "Layer/Graphics/GraphicsSkia.hpp"
 

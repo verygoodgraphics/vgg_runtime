@@ -26,7 +26,7 @@ class TransformNode : public VNode
 {
 public:
   TransformNode(VRefCnt* cnt)
-    : VNode(cnt)
+    : VNode(cnt, EState::INVALIDATE, EDamageTraitBits::BUBBLE_DAMAGE)
   {
   }
 
@@ -176,34 +176,6 @@ protected:
 private:
   Ref<TransformNode> m_transform;
   Ref<RenderNode>    m_child;
-};
-
-class RasterTransformNode : public TransformEffectNode
-{
-public:
-  RasterTransformNode(VRefCnt* cnt, Ref<TransformNode> transform, Ref<RenderNode> child)
-    : TransformEffectNode(cnt, std::move(transform), std::move(child))
-  {
-  }
-
-  const glm::mat3& getRasterMatrix() const
-  {
-    return m_rasterMatrix;
-  }
-
-  const glm::mat3& getDeviceMatrix() const
-  {
-    return m_deviceMatrix;
-  }
-
-protected:
-  Bounds onRevalidate(Revalidation* inv, const glm::mat3& ctm) override;
-
-  VGG_CLASS_MAKE(RasterTransformNode);
-
-private:
-  glm::mat3 m_rasterMatrix = glm::mat3{ 1.0 };
-  glm::mat3 m_deviceMatrix = glm::mat3{ 1.0 };
 };
 
 } // namespace VGG::layer

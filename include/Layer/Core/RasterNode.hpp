@@ -76,7 +76,53 @@ private:
   int64_t                              m_cacheUniqueID{ -1 };
 };
 
-class DamageRedrawNode : public TransformEffectNode
+class RasterTransformNode : public TransformEffectNode
+{
+public:
+  RasterTransformNode(
+    VRefCnt*            cnt,
+    GrRecordingContext* device,
+    Ref<Viewport>       viewport,
+    Ref<ZoomerNode>     zoomer,
+    Ref<RenderNode>     child);
+
+  virtual void raster(const std::vector<Bounds>& damageBounds) = 0;
+
+  const glm::mat3& getRasterMatrix() const
+  {
+    ASSERT(!isInvalid());
+    return m_rasterMatrix;
+  }
+
+  const glm::mat3& getLocalMatrix() const
+  {
+    ASSERT(!isInvalid());
+    return m_localMatrix;
+  }
+
+protected:
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3& ctm) override;
+
+  Viewport* viewport() const
+  {
+    return m_viewport.get();
+  }
+
+  GrRecordingContext* device() const
+  {
+    return m_device;
+  }
+
+  VGG_CLASS_MAKE(RasterTransformNode);
+
+private:
+  GrRecordingContext* m_device{ nullptr };
+  Ref<Viewport>       m_viewport;
+  glm::mat3           m_rasterMatrix = glm::mat3{ 1.0 };
+  glm::mat3           m_localMatrix = glm::mat3{ 1.0 };
+};
+
+class DamageRedrawNode : public RasterTransformNode
 {
 public:
   DamageRedrawNode(
@@ -88,6 +134,7 @@ public:
 
   VGG_CLASS_MAKE(DamageRedrawNode);
 
+  void raster(const std::vector<Bounds>& damageBounds) override;
   void render(Renderer* renderer) override;
 
 #ifdef VGG_LAYER_DEBUG
@@ -99,30 +146,11 @@ public:
     return Bounds();
   }
 
-  Bounds onRevalidate(Revalidation* inv, const glm::mat3& mat) override;
-
-  ~DamageRedrawNode() override
-  {
-    unobserve(m_viewport);
-  }
-
-protected:
-  void onRevalidateRasterMatrix(const glm::mat3& mat1, const glm::mat3& mat2);
-
 private:
-  GrRecordingContext* m_device{ nullptr };
-  Ref<Viewport>       m_viewport;
-  sk_sp<SkImage>      m_rasterImage;
-  sk_sp<SkSurface>    m_gpuSurface;
-
-  sk_sp<SkImage> m_redrawRegionImage;
-
-  Revalidation m_rev;
-  Bounds       m_rasterBounds;
-
-  Bounds    m_viewportBounds;
-  glm::mat3 m_deviceMatrix = glm::mat3{ 1 };
-  glm::mat3 m_rasterMatrix = glm::mat3{ 1 };
-  int64_t   m_cacheUniqueID{ -1 };
+  sk_sp<SkImage>   m_rasterImage;
+  sk_sp<SkSurface> m_gpuSurface;
+  Bounds           m_rasterBounds;
+  Bounds           m_viewportBounds;
+  int64_t          m_cacheUniqueID{ -1 };
 };
 } // namespace VGG::layer

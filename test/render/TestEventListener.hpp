@@ -288,7 +288,7 @@ protected:
             m_zoomController = std::make_unique<ZoomNodeController>(zoomNode);
             if (true)
             {
-              m_layer->setRenderNode(std::move(zoomNode), m_sceneNode);
+              m_layer->setRasterNode(std::move(zoomNode), m_sceneNode);
             }
             else
             {

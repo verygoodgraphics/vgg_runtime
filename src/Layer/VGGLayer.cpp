@@ -169,8 +169,9 @@ public:
 
   std::vector<std::shared_ptr<Renderable>> items;
 
-  Ref<Viewport>   viewport;
-  Ref<RenderNode> node;
+  Ref<Viewport>            viewport;
+  Ref<RenderNode>          node;
+  Ref<RasterTransformNode> rasterNode;
 
   bool invalid{ true };
 
@@ -213,14 +214,27 @@ public:
   {
     ASSERT(canvas);
     canvas->clear(backgroundColor);
-    Revalidation rev;
     if (node)
     {
       Renderer r;
       r = r.createNew(canvas);
       EventManager::pollEvents();
+      Revalidation rev;
       node->revalidate(&rev, glm::mat3{ 1 });
       node->render(&r);
+    }
+    else if (rasterNode)
+    {
+      Renderer r;
+      r = r.createNew(canvas);
+      EventManager::pollEvents();
+      Revalidation        rev;
+      std::vector<Bounds> damageBounds;
+      rasterNode->revalidate(&rev, glm::mat3{ 1 });
+      DEBUG("damage bounds size: %f %f", rev.bounds().width(), rev.bounds().height());
+      damageBounds.push_back(rev.bounds());
+      rasterNode->raster(damageBounds);
+      rasterNode->render(&r);
     }
     if (drawTextInfo)
     {
@@ -392,16 +406,28 @@ void VLayer::setRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
   //   std::move(transform),
   //   std::move(node));
 
-  d_ptr->node = DamageRedrawNode::Make(
+  d_ptr->node = RasterNode::Make(
     d_ptr->skiaContext->context(),
     d_ptr->viewport,
     std::move(transform),
     std::move(node));
+  d_ptr->rasterNode = nullptr;
+}
+
+void VLayer::setRasterNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
+{
+  d_ptr->rasterNode = DamageRedrawNode::Make(
+    d_ptr->skiaContext->context(),
+    d_ptr->viewport,
+    std::move(transform),
+    std::move(node));
+  d_ptr->node = nullptr;
 }
 
 void VLayer::setRenderNode(Ref<RenderNode> node)
 {
   d_ptr->node = TransformEffectNode::Make(d_ptr->viewport, std::move(node));
+  d_ptr->rasterNode = nullptr;
 }
 
 } // namespace VGG::layer

@@ -11,7 +11,7 @@ add_executable(vgg_runtime "main.cpp")
       -s NO_DISABLE_EXCEPTION_CATCHING \
       -s INITIAL_MEMORY=128MB \
       -s ALLOW_MEMORY_GROWTH=1 \
-      -s STACK_SIZE=32MB \
+      -s STACK_SIZE=100MB \
       --no-heap-copy \
       -s EXPORTED_FUNCTIONS=\['_load_file_from_mem','_is_latest_version','_emscripten_main'\] \
       -s EXPORTED_RUNTIME_METHODS=\['ccall','cwrap','writeArrayToMemory','stringToUTF8'\] \

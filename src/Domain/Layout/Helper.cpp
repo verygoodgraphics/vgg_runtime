@@ -157,7 +157,7 @@ void applyLeafOverrides(
   {
     json[key] = value;
 
-    if (key == K_VISIBLE)
+    if (key == K_VISIBLE || key == K_MATRIX)
     {
       outDirtyNodeIds.push_back(json[K_ID]);
     }

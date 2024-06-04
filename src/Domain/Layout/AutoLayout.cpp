@@ -1388,7 +1388,7 @@ std::shared_ptr<LayoutNode> AutoLayout::setNeedsLayout()
 
   if (sharedRule->isFlexContainer() || sharedRule->isGridContainer())
   {
-    sharedView->setNeedLayout();
+    sharedView->setNeedsLayout();
     return sharedView;
   }
 

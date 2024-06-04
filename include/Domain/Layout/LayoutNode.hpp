@@ -176,7 +176,8 @@ public:
   LayoutNode*                                   autoLayoutContainer();
   std::shared_ptr<Layout::Internal::AutoLayout> containerAutoLayout();
 
-  void setNeedLayout();
+  void setContainerNeedsLayout(); // container
+  void setNeedsLayout();          // self
   bool needsLayout() const
   {
     return m_needsLayout;

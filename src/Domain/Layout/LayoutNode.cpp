@@ -136,10 +136,14 @@ std::shared_ptr<Layout::Internal::AutoLayout> LayoutNode::containerAutoLayout()
   return nullptr;
 }
 
-void LayoutNode::setNeedLayout()
+void LayoutNode::setNeedsLayout()
 {
-  VERBOSE("LayoutNode::setNeedLayout: node: %s", id().c_str());
+  VERBOSE("LayoutNode::setNeedsLayout: node: %s", id().c_str());
   m_needsLayout = true;
+}
+void LayoutNode::setContainerNeedsLayout()
+{
+  autoLayout()->setNeedsLayout();
 }
 
 void LayoutNode::layoutIfNeeded(LayoutContext* context)
@@ -255,7 +259,7 @@ void LayoutNode::setFrame(
       resizeChildNodes(oldSize, newSize, true); // resize absolute child
       if (!duringLayout)
       {
-        setNeedLayout();
+        setContainerNeedsLayout();
       }
       return;
     }

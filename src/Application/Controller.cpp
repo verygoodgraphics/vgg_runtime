@@ -1053,8 +1053,9 @@ void Controller::postFrame()
 {
   auto context = layoutContext();
   context->setLayerValid(true);
-  m_layout->layoutTree()->layoutIfNeeded(context); // layout text if needed
-  if (!context->isLayerValid())                    // paint node updated
+  auto page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
+  page->layoutIfNeeded(context); // layout text if needed
+  if (!context->isLayerValid())  // paint node updated
     m_presenter->setDirtry();
 }
 

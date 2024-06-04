@@ -303,50 +303,6 @@ void DamageRedrawNode::render(Renderer* renderer)
     canvas->save();
     canvas->drawImage(m_gpuSurface->makeImageSnapshot(), 0, 0);
     canvas->restore();
-
-    // if (m_rev.bounds().valid())
-    // {
-    //   SkPaint p;
-    //   p.setStyle(SkPaint::kStroke_Style);
-    //   p.setStrokeWidth(2);
-    //   p.setColor(SK_ColorBLUE);
-    //   canvas->save();
-    //   canvas->concat(toSkMatrix(getTransform()->getMatrix()));
-    //   canvas->drawRect(toSkRect(m_rev.bounds()), p);
-    //   canvas->restore();
-    // }
-
-    // {
-    //   auto      pic = c->picture();
-    //   DevCanvas nCanvas(m_viewportBounds.width(), m_viewportBounds.height());
-    //
-    //   // nCanvas.addCanvas(canvas);
-    //   nCanvas.save();
-    //   SkRect   skv = toSkRect(m_viewportBounds);
-    //   SkRegion clip(SkIRect::MakeXYWH(skv.x(), skv.y(), skv.width(), skv.height()));
-    //   nCanvas.concat(toSkMatrix(getTransform()->getMatrix()));
-    //   nCanvas.clipRect(skv);
-    //   pic->playback(&nCanvas);
-    //   nCanvas.restore();
-    //   int totalDC = nCanvas.getTotalDrawCall();
-    //
-    //   nCanvas.resetDrawCall();
-    //
-    //   nCanvas.save();
-    //   const auto skDirtyRect = toSkRect(m_rev.bounds());
-    //   SkRegion   dirtyRect(SkIRect::MakeXYWH(
-    //     skDirtyRect.x(),
-    //     skDirtyRect.y(),
-    //     skDirtyRect.width(),
-    //     skDirtyRect.height()));
-    //
-    //   nCanvas.clipRect(skDirtyRect);
-    //   nCanvas.concat(toSkMatrix(getTransform()->getMatrix()));
-    //   pic->playback(&nCanvas);
-    //   nCanvas.restore();
-    //   int regionDC = nCanvas.getTotalDrawCall();
-    //   INFO("%d, total dc: %d, region dc %d", pic->approximateOpCount(), totalDC, regionDC);
-    // }
   }
 }
 
@@ -388,32 +344,6 @@ void blit(GrRecordingContext* context, SkSurface* dst, SkSurface* src, int x, in
   dstCanvas->drawImage(src->makeImageSnapshot(), x, y);
 }
 
-void blit(GrRecordingContext* context, SkImage* dst, const SkImage* src, int x, int y)
-{
-  GrBackendTexture tex;
-  if (SkImages::GetBackendTextureFromImage(src, &tex, true, 0))
-  {
-    auto dstSurf = SkSurfaces::WrapBackendTexture(
-      context,
-      tex,
-      GrSurfaceOrigin::kTopLeft_GrSurfaceOrigin,
-      2,
-      kRGBA_8888_SkColorType,
-      nullptr,
-      nullptr,
-      nullptr);
-
-    auto canvas = dstSurf->getCanvas();
-    canvas->drawImage(src, x, y);
-    dstSurf->flushAndSubmit();
-  }
-  else
-  {
-    DEBUG("failed to get backend texture from image");
-    // VGG_LOG_DEV(LOG, RASTERNODE, "failed to get backend texture from image");
-  }
-}
-
 void DamageRedrawNode::raster(const std::vector<Bounds>& damageBounds)
 {
   ASSERT(!isInvalid());
@@ -434,7 +364,6 @@ void DamageRedrawNode::raster(const std::vector<Bounds>& damageBounds)
     const auto rby = rasterRect.y();
     const auto rbw = rasterRect.width();
     const auto rbh = rasterRect.height();
-    DEBUG("rbx: %f, rby: %f", rbx, rby);
 
     auto surf = rasterSurface(device(), rbw, rbh);
 

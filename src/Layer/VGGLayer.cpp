@@ -26,6 +26,7 @@
 #include <encode/SkWebpEncoder.h>
 
 #include "Layer/Core/EventManager.hpp"
+#include "Layer/Core/Timer.hpp"
 #include "Layer/Core/TransformNode.hpp"
 #include "Layer/Core/VNode.hpp"
 #include "Layer/Core/RasterNode.hpp"

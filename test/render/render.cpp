@@ -1,7 +1,25 @@
 #include "Application/Event/Event.hpp"
 #include "Application/AppBase.hpp"
+#include "Application/Event/EventAPI.hpp"
+#include "Layer/Core/RasterNode.hpp"
+#include "Layer/Graphics/ContextInfoGL.hpp"
+#include "Layer/Graphics/GraphicsContext.hpp"
+#include "Layer/Core/ZoomerNode.hpp"
+#include "Layer/Core/ViewportNode.hpp"
 #include "TestEventListener.hpp"
 #include "Entry/SDL/AppSDLImpl.hpp"
+#include "Layer/Graphics/GraphicsSkia.hpp"
+#include "Layer/Core/EventManager.hpp"
+#include "Layer/Renderer.hpp"
+#include "Layer/VSkiaContext.hpp" // TODO:: make the file public
+#include "argparse/argparse.hpp"
+
+#include <core/SkColor.h>
+#include <include/gpu/ganesh/SkSurfaceGanesh.h>
+#include <include/gpu/GrBackendSurface.h>
+#include <include/gpu/gl/GrGLInterface.h>
+#include <src/gpu/ganesh/gl/GrGLDefines.h>
+
 #ifdef VGG_USE_VULKAN
 #include "Entry/SDL/SDLImpl/AppSDLVkImpl.hpp"
 #endif
@@ -16,9 +34,268 @@ using AppVkImpl = VGG::entry::AppSDLVkImpl;
 #endif
 using App = AppSDLImpl;
 
+SurfaceCreateProc glSurfaceCreateProc()
+{
+  return [](GrDirectContext* context, int w, int h, const VGG::layer::ContextConfig& cfg)
+  {
+    GrGLFramebufferInfo info;
+    info.fFBOID = 0;
+    info.fFormat = GR_GL_RGBA8;
+    GrBackendRenderTarget target(w, h, cfg.multiSample, cfg.stencilBit, info);
+    SkSurfaceProps        props;
+    return SkSurfaces::WrapBackendRenderTarget(
+      context,
+      target,
+      kBottomLeft_GrSurfaceOrigin,
+      SkColorType::kRGBA_8888_SkColorType,
+      nullptr,
+      &props);
+  };
+}
+
+ContextCreateProc glContextCreateProc(ContextInfoGL* context)
+{
+  return []()
+  {
+    sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
+    ASSERT(interface);
+    sk_sp<GrDirectContext> grContext = GrDirectContext::MakeGL(interface);
+    ASSERT(grContext);
+    return grContext;
+  };
+}
+
+VGG::layer::Ref<VGG::layer::RenderNode> loadScene(const argparse::ArgumentParser& program)
+{
+  std::filesystem::path prefix;
+  std::filesystem::path respath;
+
+  if (auto p = program.present("-p"))
+  {
+    prefix = p.value();
+  }
+  if (auto loadfile = program.present(POS_ARG_INPUT_FILE))
+  {
+    auto fp = loadfile.value();
+    auto ext = fs::path(fp).extension().string();
+    if (ext == ".json")
+    {
+      respath = std::filesystem::path(fp).stem(); // same with filename as default
+      if (auto res = program.present("-d"))
+      {
+        respath = res.value();
+      }
+    }
+
+    auto r = load(ext);
+    if (r)
+    {
+      auto data = r->read(prefix / fp);
+
+      VGG::layer::setGlobalResourceProvider(std::move(data.provider));
+      try
+      {
+        auto res = VGG::entry::DocBuilder::builder()
+                     .setDocument(std::move(data.format))
+                     .setLayout(std::move(data.layout))
+                     .setExpandEnabled(true)
+                     .setLayoutEnabled(true)
+                     .build();
+
+        layer::SceneBuilderResult sceneBuilderResult;
+        layer::Timer              t;
+        if (program.get("-m") == "json")
+        {
+          std::vector<layer::JSONFrameObject> frames;
+          std::vector<nlohmann::json>         jsonModels;
+          for (auto& e : *res.doc)
+          {
+            if (e->type() == VGG::Domain::Element::EType::FRAME)
+            {
+              auto f = static_cast<VGG::Domain::FrameElement*>(e.get());
+              jsonModels.emplace_back(f->treeModel(true));
+              frames.emplace_back(layer::JSONFrameObject(jsonModels.back()));
+            }
+          }
+          t.start();
+          sceneBuilderResult = VGG::layer::SceneBuilder::builder()
+                                 .setResetOriginEnable(true)
+                                 .setAllocator(layer::getGlobalMemoryAllocator())
+                                 .build<layer::JSONModelFrame>(std::move(frames));
+          t.stop();
+        }
+        else if (program.get("-m") == "struct")
+        {
+          std::vector<layer::StructFrameObject> frames;
+          for (auto& f : *res.doc)
+          {
+            if (f->type() == VGG::Domain::Element::EType::FRAME)
+            {
+              frames.emplace_back(layer::StructFrameObject(f.get()));
+            }
+          }
+          t.start();
+          sceneBuilderResult = VGG::layer::SceneBuilder::builder()
+                                 .setResetOriginEnable(true)
+                                 .setAllocator(layer::getGlobalMemoryAllocator())
+                                 .build<layer::StructModelFrame>(std::move(frames));
+          t.stop();
+        }
+        auto dur = t.elapsed();
+        INFO("Doc Expand Time Cost: %f", (double)res.timeCost.expand.s());
+        INFO("Doc Layout Time Cost: %f", (double)res.timeCost.layout.s());
+        INFO("Scene Build Time Cost: %f", (double)dur.s());
+        if (sceneBuilderResult.type)
+        {
+          if (
+            *sceneBuilderResult.type ==
+            VGG::layer::SceneBuilderResult::EResultType::VERSION_MISMATCH)
+          {
+            DEBUG("Format Version mismatch:");
+          }
+        }
+        VGG::layer::Ref<VGG::layer::SceneNode> sceneNode;
+        if (sceneBuilderResult.root)
+        {
+          sceneNode = layer::SceneNode::Make(std::move(*sceneBuilderResult.root));
+          return sceneNode;
+        }
+      }
+      catch (std::exception& e)
+      {
+        FAIL("load json failed: %s", e.what());
+      }
+    }
+  }
+  return nullptr;
+}
+
+argparse::ArgumentParser parse(int argc, char** argv)
+{
+  argparse::ArgumentParser program("vgg", "0.1");
+  program.add_argument(POS_ARG_INPUT_FILE).help("input fig/ai/sketch/json file");
+  program.add_argument("-d", "--data").help("resources dir");
+  program.add_argument("-p", "--prefix").help("the prefix of filename or dir");
+  program.add_argument("-L", "--loaddir").help("iterates all the files in the given dir");
+  program.add_argument("-c", "--config").help("specify config file");
+  program.add_argument("-m", "--model").help("model read by").default_value("struct");
+  program.add_argument("-w", "--width")
+    .help("width of viewport")
+    .scan<'i', int>()
+    .default_value(1200);
+  program.add_argument("-h", "--height")
+    .help("height of viewport")
+    .scan<'i', int>()
+    .default_value(800);
+
+  try
+  {
+    program.parse_args(argc, argv);
+  }
+  catch (const std::runtime_error& err)
+  {
+    std::cout << err.what() << std::endl;
+    std::cout << program;
+    exit(0);
+  }
+  if (auto configfile = program.present("-c"))
+  {
+    auto file = configfile.value();
+    Config::readGlobalConfig(file);
+  }
+  return program;
+}
+
+int run(const layer::ContextConfig& cfg, Viewer& viewer, const argparse::ArgumentParser& program)
+{
+  using namespace VGG::layer;
+  using namespace VGG;
+  auto app = App::app();
+  app->makeCurrent(); // init GL context
+
+  // init skia
+  VGG::layer::skia_impl::SkiaContext skia(
+    glContextCreateProc(static_cast<ContextInfoGL*>(app->contextInfo())),
+    glSurfaceCreateProc(),
+    cfg);
+
+  viewer.zoomNode = VGG::layer::ZoomerNode::Make();
+  viewer.viewportNode = VGG::layer::Viewport::Make(1.0);
+  viewer.viewportChangeCallback = [&skia](int w, int h) { skia.resizeSurface(w, h); };
+
+  Ref<RasterTransformNode> rasterNode;
+  if (auto n = loadScene(program); n)
+  {
+    rasterNode = VGG::layer::DamageRedrawNode::Make(
+      skia.context(),
+      viewer.viewportNode,
+      viewer.zoomNode,
+      std::move(n));
+  }
+  if (!rasterNode)
+  {
+    std::cout << "Cannot load scene\n";
+    return 1;
+  }
+
+  // Render loop
+  while (!app->shouldExit())
+  {
+    app->poll(); // event process
+
+    // Rendering begin
+    Revalidation rev;
+    Timer        t;
+    t.start();
+    std::vector<Bounds> damageBounds;
+    {
+      VGG::layer::EventManager::pollEvents();
+      rasterNode->revalidate(&rev, glm::mat3{ 1 });
+      damageBounds.push_back(rev.bounds());
+      rasterNode->raster(damageBounds);
+    }
+
+    skia.prepareFrame();
+
+    {
+      Renderer r;
+      auto     canvas = skia.canvas();
+      r.setCanvas(canvas);
+      canvas->clear(SK_ColorWHITE);
+      rasterNode->render(&r);
+      // if (viewer.enableDebug)
+      // {
+      //   rasterNode->debug(&r);
+      // }
+
+      if (viewer.enableDrawDamageBounds)
+      {
+        SkPaint p;
+        p.setStyle(SkPaint::kStroke_Style);
+        p.setStrokeWidth(1);
+        p.setColor(SK_ColorBLUE);
+        for (const auto& d : damageBounds)
+        {
+          canvas->drawRect(toSkRect(d), p);
+        }
+      }
+    }
+
+    skia.flushAndSubmit();
+    t.stop();
+    auto tt = (int)t.duration().ms();
+    INFO("render time: %d ms", tt);
+    app->swapBuffer();
+    skia.markSwap();
+  }
+  return 0;
+}
+
 #define main main
 int main(int argc, char** argv)
 {
+  auto program = parse(argc, argv);
+
   AppConfig cfg;
   cfg.appName = "Renderer";
   cfg.windowSize[0] = 1920;
@@ -27,7 +304,10 @@ int main(int argc, char** argv)
   cfg.graphicsContextConfig.stencilBit = 8;
   cfg.argc = argc;
   cfg.argv = argv;
-  cfg.eventListener = std::make_unique<MyEventListener<App>>();
+
+  auto  listener = std::make_unique<MyEventListener<App>>();
+  auto& viewer = listener->viewer;
+  cfg.eventListener = std::move(listener);
   try
   {
     App::createInstance(std::move(cfg));
@@ -37,12 +317,5 @@ int main(int argc, char** argv)
     std::cout << e.what() << std::endl;
   }
 
-  // or:
-  // SDLRuntime* app = AppBase::app();
-  // while (!app->shouldExit())
-  // {
-  //   app->poll();
-  //   app->process();
-  // }
-  return App::app()->exec();
+  return run(cfg.graphicsContextConfig, viewer, program);
 }

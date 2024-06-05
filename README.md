@@ -3,12 +3,13 @@
 VGG Runtime is an implementation of [VGG Specs](https://docs.verygoodgraphics.com/specs/overview) with cross-platform rendering and scripting capabilities.
 
 VGG Runtime only supports reading and rendering of `.daruma` files, which
-- you can use [VGG Daruma](https://verygoodgraphics.com/daruma) to convert from other design files online,
-- or you can use [VGG Sketch Parser](https://github.com/verygoodgraphics/vgg_sketch_parser) to convert from Sketch file locally.
+
+- you can use [VGG Command-line tool](https://github.com/verygoodgraphics/vgg_cli) to convert from other design files locally,
+- or you can use [VGG Daruma](https://daruma.run/) to convert online.
 
 ## Cross Platform Support
 
-| Platform\|Arch | X86  | ARM  | RISC-V | WASM |
+| Platform\\Arch | X86  | ARM  | RISC-V | WASM |
 | -------------- | ---- | ---- | ------ | ---- |
 | Linux          | ✅    | ⛏️    | ✅      | N/A  |
 | Android        | ❌    | ⛏️    | ⭕️      | N/A  |
@@ -32,17 +33,17 @@ This project can be built with CMake using common practice.
 
 ### 1. Build Requirements
 
-- C++ compiler supports C++17 or higher
+- C++ compiler supports C++20 or higher
 - Make, CMake and Ninja
 - Python3
 
 ### 2. Dependent Libraries
 
-- Use `git submodule update --init` to fetch VGG submodules.
+- Use `git submodule update --init --recursive` to fetch VGG submodules.
 - `Nodejs` and `Skia` would be automatically prepared during building.
 - System/user-provided installation of the following libraries
-  - Vulkan SDK (with SPIR-V tools)
   - SDL >= 2.26
+  - (optional) Vulkan SDK (with SPIR-V tools)
 
 #### Optinal: Specify Skia manually
 
@@ -52,7 +53,7 @@ You can also use your own skia by specifying `SKIA_DIR`:
 cmake .. -DSKIA_DIR=/path/to/your/skia
 ```
 
-Skia can be download from the [official website](https://skia.org/docs/user/download/). We use our Skia fork [vgg/m116](https://github.com/verygoodgraphics/skia/tree/vgg/m116) branch for building, which has some modifications and fixes for our scenario. We don't assure other versions could be successfully compiled using our CMake script.
+Skia can be downloaded from the [official website](https://skia.org/docs/user/download/). We use our Skia fork [vgg/m116](https://github.com/verygoodgraphics/skia/tree/vgg/m116) branch for building, which has some modifications and fixes for our scenario. We don't assure other versions could be successfully compiled using our CMake script.
 
 ### 3. Build Examples
 
@@ -91,7 +92,8 @@ cmake --build . --parallel
 ```
 
 #### iOS building example
-Build & install vgg_container libraries for [vgg_ios](https://github.com/verygoodgraphics/vgg_ios).
+
+Build & install `vgg_container` libraries for [vgg_ios](https://github.com/verygoodgraphics/vgg_ios).
 
 ```bash
 mkdir build.ios
@@ -103,7 +105,8 @@ cmake --install . --prefix <path/to/vgg_ios/VggRuntime/external>
 ```
 
 #### Qt building example
-Build & install vgg_container libraries for [vgg_qt](https://github.com/verygoodgraphics/vgg_qt).
+
+Build & install `vgg_container` libraries for [vgg_qt](https://github.com/verygoodgraphics/vgg_qt).
 
 ```bash
 mkdir build.qt
@@ -118,6 +121,7 @@ cmake --install . --component container --config Release --prefix <path/to/vgg_q
 ### 4. Unit test
 
 #### Linux/macOS unit test
+
 ```bash
 cd build
 cmake .. -DENABLE_UNIT_TEST=ON
@@ -133,7 +137,7 @@ Make sure you have built the `sdl_runtime` target. Then in the build directory, 
 ./sdl_runtime /path/to/your/file.daruma
 ```
 
-where `file.daruma` is a file conforming to [VGG Specs](https://docs.verygoodgraphics.com/specs/overview), which can be generated using [VGG Daruma](https://verygoodgraphics.com/daruma) or [VGG Sketch Parser](https://github.com/verygoodgraphics/vgg_sketch_parser).
+where `file.daruma` is a file conforming to [VGG Specs](https://docs.verygoodgraphics.com/specs/overview), which can be generated using [VGG Command-line tool](https://github.com/verygoodgraphics/vgg_cli) or [VGG Daruma](https://verygoodgraphics.com/daruma).
 
 ### Running with custom font configuration
 

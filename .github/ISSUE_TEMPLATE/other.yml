@@ -1,5 +1,5 @@
 name: Other issue
-description: Use this for any other issues. Do NOT create blank issues
+description: Use this for any other issues. Do NOT create blank issues.
 body:
   - type: textarea
     id: description

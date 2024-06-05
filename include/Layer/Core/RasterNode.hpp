@@ -35,46 +35,6 @@ class GrRecordingContext;
 namespace VGG::layer
 {
 class Rasterizer;
-class TileRasterNode : public TransformEffectNode
-{
-public:
-  TileRasterNode(
-    VRefCnt*            cnt,
-    GrRecordingContext* device,
-    Ref<Viewport>       viewport,
-    Ref<ZoomerNode>     zoomer,
-    Ref<RenderNode>     child);
-
-  VGG_CLASS_MAKE(TileRasterNode);
-
-  void render(Renderer* renderer) override;
-
-#ifdef VGG_LAYER_DEBUG
-  void debug(Renderer* render) override;
-#endif
-
-  Bounds effectBounds() const override
-  {
-    return Bounds();
-  }
-
-  Bounds onRevalidate(Revalidation* inv, const glm::mat3& mat) override;
-
-  ~TileRasterNode() override
-  {
-    unobserve(m_viewport);
-  }
-
-private:
-  GrRecordingContext* m_device{ nullptr };
-  Ref<Viewport>       m_viewport;
-  glm::mat3           m_matrix;
-
-  std::unique_ptr<Rasterizer>          m_raster;
-  std::vector<layer::Rasterizer::Tile> m_rasterTiles;
-  SkMatrix                             m_rasterMatrix;
-  int64_t                              m_cacheUniqueID{ -1 };
-};
 
 class RasterNode : public TransformEffectNode
 {
@@ -124,32 +84,4 @@ private:
 
 std::vector<Bounds> mergeBounds(std::vector<Bounds> bounds);
 
-class RasterNodeImpl : public RasterNode
-{
-public:
-  RasterNodeImpl(
-    VRefCnt*            cnt,
-    GrRecordingContext* device,
-    Ref<Viewport>       viewport,
-    Ref<ZoomerNode>     zoomer,
-    Ref<RenderNode>     child);
-
-  VGG_CLASS_MAKE(RasterNodeImpl);
-
-  void raster(const std::vector<Bounds>& bounds) override;
-  void render(Renderer* renderer) override;
-
-#ifdef VGG_LAYER_DEBUG
-  void debug(Renderer* render) override;
-#endif
-
-  Bounds effectBounds() const override
-  {
-    return Bounds();
-  }
-
-private:
-  sk_sp<SkSurface> m_gpuSurface;
-  Bounds           m_viewportBounds;
-};
 } // namespace VGG::layer

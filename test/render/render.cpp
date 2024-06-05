@@ -3,7 +3,9 @@
 #include "Application/Event/Event.hpp"
 #include "Application/AppBase.hpp"
 #include "Application/Event/EventAPI.hpp"
+#include "Layer/GlobalSettings.hpp"
 #include "Layer/Core/RasterNode.hpp"
+#include "Layer/Raster.hpp"
 #include "Layer/Graphics/ContextInfoGL.hpp"
 #include "Layer/Graphics/GraphicsContext.hpp"
 #include "Layer/Core/ZoomerNode.hpp"
@@ -54,6 +56,8 @@ VGG::layer::Ref<VGG::layer::RenderNode> loadScene(const argparse::ArgumentParser
 {
   std::filesystem::path prefix;
   std::filesystem::path respath;
+
+  // VGG::layer::setAnimatedPatternEnabled(false);
 
   if (auto p = program.present("-p"))
   {
@@ -212,11 +216,8 @@ int run(const layer::ContextConfig& cfg, Viewer& viewer, const argparse::Argumen
   Ref<RasterNode> rasterNode;
   if (auto n = loadScene(program); n)
   {
-    rasterNode = VGG::layer::RasterNodeImpl::Make(
-      skia.context(),
-      viewer.viewportNode,
-      viewer.zoomNode,
-      std::move(n));
+    rasterNode =
+      VGG::layer::raster::make(skia.context(), viewer.viewportNode, viewer.zoomNode, std::move(n));
   }
   if (!rasterNode)
   {

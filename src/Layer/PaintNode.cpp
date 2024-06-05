@@ -449,7 +449,6 @@ VShape PaintNode::asVisualShape(const Transform* mat)
 
 void PaintNode::setOverflow(EOverflow overflow)
 {
-
   VGG_IMPL(PaintNode);
   _->overflow = overflow;
 }

@@ -1563,6 +1563,7 @@ struct Frame : public Container
 {
   std::optional<Color>               backgroundColor;
   std::optional<std::vector<double>> radius;
+  std::optional<int>                 frameType;
 };
 
 struct Group : public Container
@@ -3298,6 +3299,7 @@ inline void from_json(const json& j, Frame& x)
   from_json(j, static_cast<Container&>(x));
   x.backgroundColor = get_stack_optional<Color>(j, "backgroundColor");
   x.radius = get_stack_optional<std::vector<double>>(j, "radius");
+  x.frameType = get_stack_optional<int>(j, "frameType");
 }
 
 inline void to_json(json& j, const Frame& x)
@@ -3311,6 +3313,8 @@ inline void to_json(json& j, const Frame& x)
   {
     j["radius"] = x.radius;
   }
+  if (x.frameType)
+    j["frameType"] = x.frameType;
 }
 
 inline void from_json(const json& j, Group& x)

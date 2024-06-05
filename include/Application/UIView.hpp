@@ -96,8 +96,8 @@ private:
   std::unordered_map<std::string, std::string> m_presentedPages;  // key: from; value: to
   std::unordered_map<std::string, std::string> m_presentingPages; // key: to; value: from
 
-  // instance state
-  std::shared_ptr<VGG::StateTree> m_stateTree;
+  // instance states
+  std::vector<std::shared_ptr<VGG::StateTree>> m_stateTrees;
 
   Layout::Rect m_frame;
   Layout::Rect m_bounds;
@@ -220,7 +220,7 @@ public:
     app::AnimationCompletion      completion);
 
   void                       saveState(const std::shared_ptr<StateTree>& stateTree);
-  std::shared_ptr<StateTree> savedState();
+  std::shared_ptr<StateTree> savedState(const std::string& instanceDescendantId);
 
   void enableZoomer(bool enabled);
 
@@ -313,7 +313,7 @@ private:
 
   bool handleTouchEvent(int x, int y, int motionX, int motionY, EUIEventType type);
 
-  void restoreState();
+  void restoreState(const std::string& instanceId);
 };
 
 } // namespace VGG

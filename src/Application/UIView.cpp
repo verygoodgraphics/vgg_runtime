@@ -381,10 +381,8 @@ bool UIView::handleMouseEvent(
     }
   }
 
-  if (m_stateTree)
-  {
-    success |= dispatchMouseEventOnPage(m_stateTree, jsButtonIndex, x, y, motionX, motionY, type);
-  }
+  for (auto& stateTree : m_stateTrees)
+    success |= dispatchMouseEventOnPage(stateTree, jsButtonIndex, x, y, motionX, motionY, type);
 
   return success;
 }
@@ -847,8 +845,16 @@ bool UIView::popFrame(
 
 void UIView::saveState(const std::shared_ptr<StateTree>& stateTree)
 {
+  ASSERT(stateTree);
   DEBUG("UIView::saveState, save state tree: %s", stateTree->id().c_str());
-  m_stateTree = stateTree;
+  auto it = std::find_if(
+    m_stateTrees.begin(),
+    m_stateTrees.end(),
+    [&stateTree](auto& s) { return s->id() == stateTree->id(); });
+  if (it != m_stateTrees.end())
+    *it = stateTree;
+  else
+    m_stateTrees.push_back(stateTree);
 
   EventContext& currentContext = m_presentedTreeContext[currentPage()->id()];
   EventContext& oldContext = m_presentedTreeContext[stateTree->id()]; // make context
@@ -884,25 +890,31 @@ void UIView::saveState(const std::shared_ptr<StateTree>& stateTree)
   }
 }
 
-std::shared_ptr<StateTree> UIView::savedState()
+std::shared_ptr<StateTree> UIView::savedState(const std::string& instanceDescendantId)
 {
-  return m_stateTree;
+  for (auto& s : m_stateTrees)
+    if (s->findDescendantNodeById(instanceDescendantId))
+      return s;
+  return nullptr;
 }
 
-void UIView::restoreState()
+void UIView::restoreState(const std::string& instanceId)
 {
-  if (!m_stateTree)
+  auto it = std::find_if(
+    m_stateTrees.begin(),
+    m_stateTrees.end(),
+    [&instanceId](auto& s) { return s->id() == instanceId; });
+  if (it != m_stateTrees.end())
   {
-    return;
+    DEBUG("UIView::restoreState, restore state tree: %s", (*it)->id().c_str());
+    m_presentedTreeContext.erase((*it)->id());
+    m_stateTrees.erase(it);
   }
-
-  DEBUG("UIView::restoreState, restore state tree: %s", m_stateTree->id().c_str());
-  m_presentedTreeContext.erase(m_stateTree->id());
-  m_stateTree.reset();
 }
 
 void UIView::triggerMouseEnter()
 {
+  DEBUG("UIView::triggerMouseEnter");
   onEvent(m_lastMouseMove, nullptr);
 }
 
@@ -1054,7 +1066,8 @@ bool UIView::setInstanceState(
   const app::UIAnimationOption& options,
   app::AnimationCompletion      completion)
 {
-  restoreState();
+  ASSERT(oldNode);
+  restoreState(oldNode->id());
   return m_impl->setInstanceState(oldNode, newNode, options, completion);
 }
 bool UIView::presentInstanceState(

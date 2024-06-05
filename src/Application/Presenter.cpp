@@ -311,10 +311,10 @@ bool Presenter::popFrame(const app::PopOptions& opts, app::AnimationCompletion c
   return m_view->popFrame(opts, m_lastPushFrameAnimationOptions, completion);
 }
 
-std::shared_ptr<StateTree> Presenter::savedState()
+std::shared_ptr<StateTree> Presenter::savedState(const std::string& instanceDescendantId)
 {
   ASSERT(m_view);
-  return m_view->savedState();
+  return m_view->savedState(instanceDescendantId);
 }
 
 void Presenter::triggerMouseEnter()

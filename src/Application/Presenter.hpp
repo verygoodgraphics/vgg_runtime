@@ -291,7 +291,7 @@ public:
     const app::UIAnimationOption&     options,
     app::AnimationCompletion          completion);
 
-  std::shared_ptr<StateTree>    savedState();
+  std::shared_ptr<StateTree>    savedState(const std::string& instanceDescendantId);
   const app::UIAnimationOption& dismissStateAnimationOptions() const
   {
     return m_lastPresentStateAnimationOptions;

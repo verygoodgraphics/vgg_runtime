@@ -1,5 +1,5 @@
 add_executable(viewer)
-target_sources(viewer PRIVATE render.cpp)
+target_sources(viewer PRIVATE viewer.cpp)
 target_link_libraries(viewer PRIVATE vgg_utility vgg_layer vgg_application)
 if(NOT EMSCRIPTEN)
   find_package(SDL2 REQUIRED)

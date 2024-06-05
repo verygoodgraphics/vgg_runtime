@@ -1,56 +1,51 @@
+#include "Layer/Core/VNode.hpp"
 #include "viewer.hpp"
+#include "loop.hpp"
 
-#include "Application/Event/Event.hpp"
-#include "Application/AppBase.hpp"
-#include "Application/Event/EventAPI.hpp"
 #include "Layer/GlobalSettings.hpp"
 #include "Layer/Core/RasterNode.hpp"
 #include "Layer/Raster.hpp"
-#include "Layer/Graphics/ContextInfoGL.hpp"
-#include "Layer/Graphics/GraphicsContext.hpp"
 #include "Layer/Core/ZoomerNode.hpp"
 #include "Layer/Core/ViewportNode.hpp"
-#include "Entry/SDL/AppSDLImpl.hpp"
-#include "Layer/Graphics/GraphicsSkia.hpp"
 #include "Layer/Core/EventManager.hpp"
 #include "Layer/Renderer.hpp"
-#include "Layer/Graphics/VSkiaContext.hpp"
-#include "Layer/Graphics/VSkiaGL.hpp"
 
 #include <argparse/argparse.hpp>
-
 #include <core/SkColor.h>
-#include <include/gpu/ganesh/SkSurfaceGanesh.h>
-#include <include/gpu/GrBackendSurface.h>
-#include <include/gpu/gl/GrGLInterface.h>
+#include <gpu/GrDirectContext.h>
+#include <gpu/GrRecordingContext.h>
+#include <gpu/ganesh/SkSurfaceGanesh.h>
+#include <gpu/GrBackendSurface.h>
+#include <gpu/gl/GrGLInterface.h>
 #include <src/gpu/ganesh/gl/GrGLDefines.h>
 
-#ifdef VGG_USE_VULKAN
-#include "Entry/SDL/SDLImpl/AppSDLVkImpl.hpp"
-#endif
 #include <exception>
 using namespace VGG;
 using namespace VGG::app;
 namespace fs = std::filesystem;
 
-using AppSDLImpl = VGG::entry::AppSDLImpl;
-#ifdef VGG_USE_VULKAN
-using AppVkImpl = VGG::entry::AppSDLVkImpl;
-#endif
-using App = AppSDLImpl;
-
 constexpr char POS_ARG_INPUT_FILE[] = "fig/ai/sketch/json";
 
-template<typename App>
-class ViewerEventListener : public VGG::app::EventListener
+inline sk_sp<SkSurface> createGPUSurface(
+  GrRecordingContext* context,
+  int                 w,
+  int                 h,
+  int                 multiSample,
+  int                 stencilBit)
 {
-public:
-  bool onEvent(UEvent evt, void* userData) override
-  {
-    return viewer.onEvent(evt, userData);
-  }
-  Viewer viewer;
-};
+  GrGLFramebufferInfo info;
+  info.fFBOID = 0;
+  info.fFormat = GR_GL_RGBA8;
+  GrBackendRenderTarget target(w, h, multiSample, stencilBit, info);
+  SkSurfaceProps        props;
+  return SkSurfaces::WrapBackendRenderTarget(
+    context,
+    target,
+    kBottomLeft_GrSurfaceOrigin,
+    SkColorType::kRGBA_8888_SkColorType,
+    nullptr,
+    &props);
+}
 
 VGG::layer::Ref<VGG::layer::RenderNode> loadScene(const argparse::ArgumentParser& program)
 {
@@ -195,29 +190,84 @@ argparse::ArgumentParser parse(int argc, char** argv)
   return program;
 }
 
-int run(const layer::ContextConfig& cfg, Viewer& viewer, const argparse::ArgumentParser& program)
+void drawDebug(
+  SkCanvas*                  canvas,
+  Viewer&                    viewer,
+  VGG::layer::RasterNode*    raster,
+  const layer::Revalidation& rev,
+  const std::vector<Bounds>& damageBounds)
 {
   using namespace VGG::layer;
-  using namespace VGG::layer::skia_impl;
+#ifdef VGG_LAYER_DEBUG
+  Renderer r;
+  r.setCanvas(canvas);
+  if (viewer.enableDebug)
+  {
+    raster->debug(&r);
+  }
+#endif
+
+  if (viewer.enableDrawDamageBounds)
+  {
+    SkPaint p;
+    p.setStyle(SkPaint::kStroke_Style);
+    p.setStrokeWidth(2);
+    p.setColor(SK_ColorBLUE);
+    for (const auto& d : rev.boundsArray())
+    {
+      canvas->drawRect(toSkRect(d), p);
+    }
+
+    p.setColor(SK_ColorGREEN);
+    p.setStyle(SkPaint::kFill_Style);
+    p.setAlphaf(0.3);
+    for (const auto& d : damageBounds)
+    {
+      canvas->drawRect(toSkRect(d), p);
+    }
+  }
+}
+
+int run(Loop& loop, Viewer& viewer, const argparse::ArgumentParser& program)
+{
+  using namespace VGG::layer;
   using namespace VGG;
-  auto app = App::app();
-  app->makeCurrent(); // init GL context
+  const auto& config = loop.getConfig();
 
-  // init skia
-  VGG::layer::skia_impl::SkiaContext skia(
-    gl::glContextCreateProc(static_cast<ContextInfoGL*>(app->contextInfo())),
-    gl::glSurfaceCreateProc(),
-    cfg);
+  sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
+  sk_sp<GrDirectContext>     directContext = GrDirectContext::MakeGL(interface);
 
+  sk_sp<SkSurface> gpuSurface;
   viewer.zoomNode = VGG::layer::ZoomerNode::Make();
   viewer.viewportNode = VGG::layer::Viewport::Make(1.0);
-  viewer.viewportChangeCallback = [&skia](int w, int h) { skia.resizeSurface(w, h); };
+
+  loop.setEventCallback(
+    [&viewer, &config, &gpuSurface, directContext = directContext.get()](
+      const UEvent& evt,
+      void*         userData)
+    {
+      if (auto& window = evt.window;
+          evt.type == VGG_WINDOWEVENT &&
+          (window.event == VGG_WINDOWEVENT_RESIZED || window.event == VGG_WINDOWEVENT_SIZE_CHANGED))
+      {
+        gpuSurface = createGPUSurface(
+          directContext,
+          window.drawableWidth,
+          window.drawableHeight,
+          config.multiSample,
+          config.stencilBit);
+      }
+      viewer.onEvent(evt, userData);
+    });
 
   Ref<RasterNode> rasterNode;
   if (auto n = loadScene(program); n)
   {
-    rasterNode =
-      VGG::layer::raster::make(skia.context(), viewer.viewportNode, viewer.zoomNode, std::move(n));
+    rasterNode = VGG::layer::raster::make(
+      directContext.get(),
+      viewer.viewportNode,
+      viewer.zoomNode,
+      std::move(n));
   }
   if (!rasterNode)
   {
@@ -225,69 +275,41 @@ int run(const layer::ContextConfig& cfg, Viewer& viewer, const argparse::Argumen
     return 1;
   }
 
-  // Render loop
-  while (!app->shouldExit())
+  constexpr float TIME_PER_FRAME = 16.67;
+  while (!loop.exit())
   {
-    app->poll(); // event process
-
-    // Rendering begin
-    Revalidation        rev;
-    Timer               t;
-    std::vector<Bounds> damageBounds;
+    Timer t;
     t.start();
+    loop.pollEvent(0);
+
+    // RENDER BEGIN
+    Revalidation        rev;
+    std::vector<Bounds> damageBounds;
     {
       VGG::layer::EventManager::pollEvents();
       rasterNode->revalidate(&rev, glm::mat3{ 1 });
       damageBounds = mergeBounds(rev.boundsArray());
       rasterNode->raster(damageBounds);
-    }
-
-    skia.prepareFrame();
-
-    {
       Renderer r;
-      auto     canvas = skia.canvas();
+      auto     canvas = gpuSurface->getCanvas();
       r.setCanvas(canvas);
       canvas->clear(SK_ColorWHITE);
       rasterNode->render(&r);
-
-#ifdef VGG_LAYER_DEBUG
-      if (viewer.enableDebug)
-      {
-        rasterNode->debug(&r);
-      }
-#endif
-
-      if (viewer.enableDrawDamageBounds)
-      {
-        SkPaint p;
-        p.setStyle(SkPaint::kStroke_Style);
-        p.setStrokeWidth(2);
-        p.setColor(SK_ColorBLUE);
-        for (const auto& d : rev.boundsArray())
-        {
-          canvas->drawRect(toSkRect(d), p);
-        }
-
-        p.setColor(SK_ColorGREEN);
-        p.setStyle(SkPaint::kFill_Style);
-        p.setAlphaf(0.3);
-        for (const auto& d : damageBounds)
-        {
-          canvas->drawRect(toSkRect(d), p);
-        }
-      }
     }
+    // RENDER END
 
-    skia.flushAndSubmit();
+    drawDebug(gpuSurface->getCanvas(), viewer, rasterNode.get(), rev, damageBounds);
+
+    directContext->flush();
+    loop.swap();
     t.stop();
-    auto tt = (int)t.duration().ms();
-    if (tt >= 16)
+    auto ms = (float)t.duration().ms();
+    if (ms > TIME_PER_FRAME)
     {
-      INFO("render time: %d ms", tt);
+      INFO("Frame Time Cost: %f", ms);
     }
-    app->swapBuffer();
-    skia.markSwap();
+    if (ms < TIME_PER_FRAME)
+      std::this_thread::sleep_for(std::chrono::milliseconds((int)(TIME_PER_FRAME - ms)));
   }
   return 0;
 }
@@ -295,28 +317,10 @@ int run(const layer::ContextConfig& cfg, Viewer& viewer, const argparse::Argumen
 #define main main
 int main(int argc, char** argv)
 {
-  auto program = parse(argc, argv);
-
-  AppConfig cfg;
-  cfg.appName = "Renderer";
-  cfg.windowSize[0] = 1920;
-  cfg.windowSize[1] = 1080;
-  cfg.graphicsContextConfig.multiSample = 0;
-  cfg.graphicsContextConfig.stencilBit = 8;
-  cfg.argc = argc;
-  cfg.argv = argv;
-
-  auto  listener = std::make_unique<ViewerEventListener<App>>();
-  auto& viewer = listener->viewer;
-  cfg.eventListener = std::move(listener);
-  try
-  {
-    App::createInstance(std::move(cfg));
-  }
-  catch (const std::exception& e)
-  {
-    std::cout << e.what() << std::endl;
-  }
-
-  return run(cfg.graphicsContextConfig, viewer, program);
+  auto         program = parse(argc, argv);
+  Viewer       viewer;
+  Loop::Config config{ .multiSample = 0, .stencilBit = 8 };
+  Loop         loop("Viewer", 1920, 1080, config);
+  loop.makeCurrent();
+  return run(loop, viewer, program);
 }

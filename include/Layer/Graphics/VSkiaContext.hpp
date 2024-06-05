@@ -38,7 +38,7 @@
 namespace VGG::layer::skia_impl
 {
 
-class SkiaContext
+class [[deprecated]] SkiaContext
 {
 public:
   SkiaContext(const SkiaContext&) = delete;

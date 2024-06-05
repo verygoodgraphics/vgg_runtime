@@ -71,21 +71,15 @@ public:
     , m_a(std::move(a))
     , m_b(std::move(b))
   {
-    if (m_a)
-      observe(m_a);
-    if (m_b)
-      observe(m_b);
+    ASSERT(m_a && m_b);
+    observe(m_a);
+    observe(m_b);
   }
 
   glm::mat3 getMatrix() const override
   {
-    return m_b->getMatrix() * m_a->getMatrix();
-  }
-
-  ~ConcateTransformNode() override
-  {
-    unobserve(m_a);
-    unobserve(m_b);
+    ASSERT(m_a && m_b);
+    return m_a->getMatrix() * m_b->getMatrix();
   }
 
   VGG_CLASS_MAKE(ConcateTransformNode);

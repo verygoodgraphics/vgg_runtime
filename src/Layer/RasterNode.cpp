@@ -35,6 +35,23 @@
 #include <gpu/ganesh/SkImageGanesh.h>
 #include <utils/SkNWayCanvas.h>
 
+namespace
+{
+using namespace VGG::layer;
+Ref<TransformNode> ensureTransformNode(Ref<TransformNode> viewport, Ref<TransformNode> zoomer)
+{
+  if (viewport && zoomer)
+    return ConcateTransformNode::Make(std::move(viewport), std::move(zoomer));
+  else if (viewport)
+    return viewport;
+  else if (zoomer)
+    return zoomer;
+  else
+    return Matrix::Make();
+}
+
+} // namespace
+
 namespace VGG::layer
 {
 
@@ -44,10 +61,7 @@ RasterNode::RasterNode(
   Ref<Viewport>       viewport,
   Ref<ZoomerNode>     zoomer,
   Ref<RenderNode>     child)
-  : TransformEffectNode(
-      cnt,
-      ConcateTransformNode::Make(viewport, std::move(zoomer)),
-      std::move(child))
+  : TransformEffectNode(cnt, ensureTransformNode(viewport, std::move(zoomer)), std::move(child))
   , m_device(device)
   , m_viewport(viewport)
 {
@@ -56,7 +70,8 @@ RasterNode::RasterNode(
 Bounds RasterNode::onRevalidate(Revalidation* inv, const glm::mat3& ctm)
 {
   auto bounds = TransformEffectNode::onRevalidate(inv, ctm);
-  m_viewport->revalidate();
+  if (m_viewport)
+    m_viewport->revalidate();
 
   auto t = getTransform();
   if (t)

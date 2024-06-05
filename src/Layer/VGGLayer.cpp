@@ -30,6 +30,7 @@
 #include "Layer/Core/TransformNode.hpp"
 #include "Layer/Core/VNode.hpp"
 #include "Layer/Core/RasterNode.hpp"
+#include "Layer/Raster.hpp"
 #include "Layer/Core/ZoomerNode.hpp"
 #include "Layer/Core/ViewportNode.hpp"
 #include "Layer/Graphics/VSkiaGL.hpp" // this header and the skia headers must be included first for ios build
@@ -170,8 +171,7 @@ public:
 
   std::vector<std::shared_ptr<Renderable>> items;
 
-  Ref<Viewport>            viewport;
-  Ref<RenderNode>          node;
+  Ref<Viewport>   viewport;
   Ref<RasterNode> rasterNode;
 
   bool invalid{ true };
@@ -215,16 +215,7 @@ public:
   {
     ASSERT(canvas);
     canvas->clear(backgroundColor);
-    if (node)
-    {
-      Renderer r;
-      r = r.createNew(canvas);
-      EventManager::pollEvents();
-      Revalidation rev;
-      node->revalidate(&rev, glm::mat3{ 1 });
-      node->render(&r);
-    }
-    else if (rasterNode)
+    if (rasterNode)
     {
       Renderer r;
       r = r.createNew(canvas);
@@ -260,11 +251,11 @@ public:
       if (s_delay % 4 == 0)
         clickLayer = nullptr;
     }
-    if (q_ptr->debugModeEnabled())
+    if (q_ptr->debugModeEnabled() && rasterNode)
     {
       Renderer r;
       r = r.createNew(canvas);
-      node->debug(&r);
+      rasterNode->debug(&r);
     }
 #endif
     canvas->flush();
@@ -398,15 +389,15 @@ void VLayer::addRenderItem(std::shared_ptr<Renderable> item)
   d_ptr->items.push_back(std::move(item));
 }
 
+void VLayer::setRenderNode(Ref<RenderNode> node)
+{
+  d_ptr->rasterNode = raster::makeEmptyRaster(std::move(node));
+}
+
 void VLayer::setRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
 {
-  // d_ptr->node = RasterNode::Make(
-  //   d_ptr->skiaContext->context(),
-  //   d_ptr->viewport,
-  //   std::move(transform),
-  //   std::move(node));
 
-  d_ptr->node = TileRasterNode::Make(
+  d_ptr->rasterNode = raster::makeTileRaster(
     d_ptr->skiaContext->context(),
     d_ptr->viewport,
     std::move(transform),
@@ -416,18 +407,11 @@ void VLayer::setRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
 
 void VLayer::setRasterNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
 {
-  d_ptr->rasterNode = RasterNodeImpl::Make(
+  d_ptr->rasterNode = raster::make(
     d_ptr->skiaContext->context(),
     d_ptr->viewport,
     std::move(transform),
     std::move(node));
-  d_ptr->node = nullptr;
-}
-
-void VLayer::setRenderNode(Ref<RenderNode> node)
-{
-  d_ptr->node = TransformEffectNode::Make(d_ptr->viewport, std::move(node));
-  d_ptr->rasterNode = nullptr;
 }
 
 } // namespace VGG::layer
@@ -439,11 +423,11 @@ PaintNode* g_nodeAtResult = nullptr;
 
 PaintNode* VLayer::nodeAt(int x, int y)
 {
-  if (d_ptr->node)
+  if (d_ptr->rasterNode)
   {
     auto p = glm::vec3{ x, y, 1 };
     g_nodeAtResult = nullptr;
-    d_ptr->node->nodeAt(
+    d_ptr->rasterNode->nodeAt(
       p.x,
       p.y,
       [](RenderNode* node, const RenderNode::NodeAtContext* ctx)
@@ -471,10 +455,10 @@ PaintNode* VLayer::nodeAt(int x, int y)
 
 void VLayer::nodeAt(int x, int y, PaintNode::NodeVisitor visitor)
 {
-  if (d_ptr->node)
+  if (d_ptr->rasterNode)
   {
     auto p = glm::vec3{ x, y, 1 };
-    d_ptr->node->nodeAt(
+    d_ptr->rasterNode->nodeAt(
       p.x,
       p.y,
       [](RenderNode* node, const RenderNode::NodeAtContext* ctx)

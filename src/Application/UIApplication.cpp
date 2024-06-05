@@ -15,6 +15,7 @@
  */
 #include "UIApplication.hpp"
 
+#include "Layer/Core/EventManager.hpp"
 #include "UIScrollView.hpp"
 
 using namespace VGG;
@@ -105,7 +106,7 @@ bool UIApplication::paint(int fps, bool force)
 
 bool UIApplication::needsPaint()
 {
-  return m_view->isDirty() || m_controller->hasDirtyEditor();
+  return m_view->isDirty() || m_controller->hasDirtyEditor() || layer::EventManager::hasEvents();
 }
 
 bool UIApplication::handleKeyEvent(VKeyboardEvent evt)

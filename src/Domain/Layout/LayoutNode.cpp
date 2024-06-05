@@ -259,7 +259,10 @@ void LayoutNode::setFrame(
       resizeChildNodes(oldSize, newSize, true); // resize absolute child
       if (!duringLayout)
       {
-        setContainerNeedsLayout();
+        if (m_autoLayout->isAboslutePosition())
+          setNeedsLayout();
+        else
+          setContainerNeedsLayout();
       }
       return;
     }

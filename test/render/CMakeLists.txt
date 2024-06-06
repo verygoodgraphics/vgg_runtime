@@ -13,6 +13,20 @@ else()
   target_compile_definitions(viewer PRIVATE VGG_RUNTIME_DLL_EXPORTING)
 endif()
 
+set(ENABLE_IMGUI OFF)
+if(ENABLE_IMGUI)
+  # For simplicity, we don't provide imgui source code. If you need ImGUI,
+  # download and put them in the imgui directory, like the how the cmake use it
+  # and set the ENABLE_IMGUI as ON
+  target_include_directories(viewer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/imgui)
+  file(GLOB IMGUI_SRC ${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui*.cpp)
+  set(IMGUI_IMPL_SRC 
+    ${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends/imgui_impl_opengl3.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends/imgui_impl_sdl2.cpp)
+  target_sources(viewer PRIVATE ${IMGUI_SRC} ${IMGUI_IMPL_SRC})
+  target_compile_definitions(viewer PRIVATE -DIMGUI_ENABLED)
+endif()
+
 target_include_directories(viewer PRIVATE ${VGG_CONTRIB_ARGPARSE_INCLUDE})
 
 get_target_property(VGG_LAYER_RPATH vgg_layer BUILD_RPATH)

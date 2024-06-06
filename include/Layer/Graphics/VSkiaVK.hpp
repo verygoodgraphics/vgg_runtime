@@ -18,8 +18,9 @@
 
 #include "Layer/Graphics/ContextInfoVulkan.hpp"
 
+#include <gpu/GrRecordingContext.h>
 #include <include/gpu/vk/GrVkBackendContext.h>
-#include <include/gpu/GrDirectContext.h>
+#include <include/gpu/GrRecordingContext.h>
 #include <include/gpu/GrBackendSurface.h>
 #include <include/gpu/ganesh/SkSurfaceGanesh.h>
 #include <include/third_party/vulkan/vulkan/vulkan_core.h>
@@ -43,7 +44,7 @@ namespace VGG::layer::skia_impl::vk
 
 SurfaceCreateProc vkSurfaceCreateProc()
 {
-  return [](GrDirectContext* context, int w, int h, const ContextConfig& cfg)
+  return [](GrRecordingContext* context, int w, int h, const ContextConfig& cfg)
   {
     ASSERT(context);
     GrVkImageInfo vkImageInfo;

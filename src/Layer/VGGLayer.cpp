@@ -311,7 +311,6 @@ bool VLayer::debugModeEnabled()
 void VLayer::setScaleFactor(float scale)
 {
   d_ptr->viewport->setScale(scale);
-  // d_ptr->viewport->setDPI(context()->property().dpiScaling * scale);
 }
 
 float VLayer::scaleFactor() const

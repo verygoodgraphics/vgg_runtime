@@ -15,9 +15,14 @@
  */
 #include "ContextVk.hpp"
 #include "Domain/Layout/Rule.hpp"
+#include "Layer/Exporter/ImageExporter.hpp"
+#include "Layer/Renderer.hpp"
+#include "Layer/Graphics/ContextInfoVulkan.hpp"
+#include "Layer/Graphics/VSkiaVK.hpp"
 #include "Layer/Core/DefaultResourceProvider.hpp"
 #include "Layer/Core/ResourceManager.hpp"
 #include "Layer/Core/VUtils.hpp"
+#include "Layer/Graphics/GraphicsSkia.hpp"
 #include "Layer/LayerCache.h"
 #include "Layer/Memory/AllocatorImpl.hpp"
 #include "Domain/Layout/ExpandSymbol.hpp"
@@ -26,7 +31,6 @@
 #include "Utility/ConfigManager.hpp"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Model/StructModel.hpp"
-#include "Layer/VGGLayer.hpp"
 #include "Layer/Exporter/SVGExporter.hpp"
 #include "Layer/Exporter/PDFExporter.hpp"
 
@@ -34,6 +38,11 @@
 #include "VGG/Exporter/SVGExporter.hpp"
 #include "VGG/Exporter/PDFExporter.hpp"
 #include "VGG/Exporter/Type.hpp"
+
+#include <gpu/GrRecordingContext.h>
+#include <src/gpu/ganesh/gl/GrGLDefines.h>
+#include <gpu/gl/GrGLInterface.h>
+#include <gpu/ganesh/SkSurfaceGanesh.h>
 
 #include <VGGVersion_generated.h>
 
@@ -141,16 +150,34 @@ class Exporter__pImpl
   Exporter* q_api; // NOLINT
 public:
   std::shared_ptr<VkGraphicsContext> ctx;
-  std::shared_ptr<layer::VLayer>     layer;
-  OutputCallback                     outputCallback;
+  sk_sp<GrRecordingContext>          grRecordingContext;
+  SurfaceCreateProc                  proc;
+
+  sk_sp<SkSurface> surface;
+
+  OutputCallback outputCallback;
   Exporter__pImpl(Exporter* api)
     : q_api(api)
   {
+    layer::ContextConfig cfg;
+    ctx = std::make_shared<VkGraphicsContext>();
+    cfg.stencilBit = 8;
+    cfg.multiSample = 4;
+    ctx->init(cfg);
+    grRecordingContext =
+      VGG::layer::skia_impl::vk::vkContextCreateProc((ContextInfoVulkan*)ctx->contextInfo())();
+    ASSERT(grRecordingContext);
+    proc = VGG::layer::skia_impl::vk::vkSurfaceCreateProc();
   }
 
   void resize(int w, int h)
   {
-    layer->resize(w, h);
+    ASSERT(ctx);
+    if (!surface || (w != surface->width() || h != surface->height()))
+    {
+      surface = proc(grRecordingContext.get(), w, h, ctx->config());
+      ASSERT(surface);
+    }
   }
 
   std::optional<std::vector<char>> render(
@@ -159,20 +186,26 @@ public:
     const layer::ImageOptions&   opts,
     IteratorResult::TimeCost&    cost)
   {
-    layer->setRenderNode(f);
-    layer->setScaleFactor(scale);
-    // begin render one frame
     {
       layer::ScopedTimer t([&](auto d) { cost.render = d.s(); });
-      layer->beginFrame();
-      layer->render();
-      layer->endFrame();
+      auto               canvas = surface->getCanvas();
+      layer::Renderer    r;
+      canvas->clear(SK_ColorWHITE);
+      canvas->save();
+      canvas->scale(scale, scale);
+      const auto& b = f->bounds();
+      canvas->translate(-b.x(), -b.y());
+      r.setCanvas(canvas);
+      f->revalidate();
+      f->render(&r);
+      canvas->restore();
+      canvas->flush();
     }
     // end render one frame
     std::optional<std::vector<char>> img;
     {
       layer::ScopedTimer t([&](auto d) { cost.encode = d.s(); });
-      img = layer->makeImageSnapshot(opts);
+      img = layer::exporter::makeImage(opts, surface.get());
     }
     return img;
   }
@@ -186,13 +219,6 @@ void setGlobalConfig(const std::string& fileName)
 Exporter::Exporter()
   : d_impl(new Exporter__pImpl(this))
 {
-  layer::ContextConfig cfg;
-  d_impl->ctx = std::make_shared<VkGraphicsContext>();
-  d_impl->layer = std::make_shared<layer::VLayer>();
-  cfg.stencilBit = 8;
-  cfg.multiSample = 4;
-  d_impl->ctx->init(cfg);
-  d_impl->layer->init(d_impl->ctx.get());
 }
 
 void Exporter::info(ExporterInfo* info)

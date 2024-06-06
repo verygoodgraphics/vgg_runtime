@@ -15,14 +15,15 @@
  */
 #pragma once
 
-#include <functional>
-#include "GraphicsContext.hpp"
+#include <Utility/Log.hpp>
+#include <Layer/VGGLayer.hpp>
+#include <optional>
+#include <vector>
 
-class SkSurface;
-class GrRecordingContext;
-template<typename T>
-class sk_sp;
+#include <core/SkSurface.h>
+#include <core/SkCanvas.h>
 
-using SurfaceCreateProc = std::function<sk_sp<
-  SkSurface>(GrRecordingContext* grContext, int w, int h, const VGG::layer::ContextConfig& cfg)>;
-using ContextCreateProc = std::function<sk_sp<GrRecordingContext>()>;
+namespace VGG::layer::exporter
+{
+std::optional<std::vector<char>> makeImage(const ImageOptions& opts, SkSurface* surface);
+} // namespace VGG::layer::exporter

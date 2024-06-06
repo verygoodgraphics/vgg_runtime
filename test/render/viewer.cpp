@@ -47,7 +47,7 @@ inline sk_sp<SkSurface> createGPUSurface(
     &props);
 }
 
-VGG::layer::Ref<VGG::layer::RenderNode> loadScene(const argparse::ArgumentParser& program)
+VGG::layer::Ref<VGG::layer::SceneNode> loadScene(const argparse::ArgumentParser& program)
 {
   std::filesystem::path prefix;
   std::filesystem::path respath;
@@ -263,6 +263,7 @@ int run(Loop& loop, Viewer& viewer, const argparse::ArgumentParser& program)
   Ref<RasterNode> rasterNode;
   if (auto n = loadScene(program); n)
   {
+    viewer.pager = std::make_unique<Pager>(n.get());
     rasterNode = VGG::layer::raster::make(
       directContext.get(),
       viewer.viewportNode,

@@ -78,7 +78,7 @@ private:
 
   std::unique_ptr<SkFILEWStream> m_stream;
   sk_sp<SkDocument>              m_document;
-  sk_sp<GrDirectContext>         m_grContext{ nullptr };
+  sk_sp<GrRecordingContext>      m_grContext{ nullptr };
   sk_sp<SkSurface>               m_surface{ nullptr };
   SurfaceCreateProc              m_skiaSurfaceCreateProc;
   ContextCreateProc              m_skiaContextCreateProc;
@@ -123,9 +123,13 @@ public:
 
   bool flushAndSubmit()
   {
-    auto ok = m_grContext->submit();
-    m_grContext->flush();
-    return ok;
+    if (auto dc = m_grContext->asDirectContext(); dc)
+    {
+      auto ok = dc->submit();
+      dc->flush();
+      return ok;
+    }
+    return false;
   }
 
   void markSwap()
@@ -163,7 +167,9 @@ public:
 
   GrDirectContext* context()
   {
-    return m_grContext.get();
+    if (auto dc = m_grContext->asDirectContext(); dc)
+      return dc;
+    return nullptr;
   }
 
   ~SkiaContext()

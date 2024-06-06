@@ -27,7 +27,7 @@ namespace VGG::layer::skia_impl::gl
 {
 inline SurfaceCreateProc glSurfaceCreateProc()
 {
-  return [](GrDirectContext* context, int w, int h, const ContextConfig& cfg)
+  return [](GrRecordingContext* context, int w, int h, const ContextConfig& cfg)
   {
     GrGLFramebufferInfo info;
     info.fFBOID = 0;

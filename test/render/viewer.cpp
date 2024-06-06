@@ -1,9 +1,9 @@
-#include "Layer/Core/VNode.hpp"
 #include "viewer.hpp"
 #include "loop.hpp"
 
 #include "Layer/GlobalSettings.hpp"
 #include "Layer/Core/RasterNode.hpp"
+#include "Layer/Core/VNode.hpp"
 #include "Layer/Raster.hpp"
 #include "Layer/Core/ZoomerNode.hpp"
 #include "Layer/Core/ViewportNode.hpp"
@@ -237,15 +237,18 @@ int run(Loop& loop, Viewer& viewer, const argparse::ArgumentParser& program)
   sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
   sk_sp<GrDirectContext>     directContext = GrDirectContext::MakeGL(interface);
 
-  sk_sp<SkSurface> gpuSurface;
   viewer.zoomNode = VGG::layer::ZoomerNode::Make();
   viewer.viewportNode = VGG::layer::Viewport::Make(1.0);
 
+  sk_sp<SkSurface> gpuSurface =
+    createGPUSurface(directContext.get(), 1920, 1080, config.multiSample, config.stencilBit);
+  viewer.viewportNode->setViewport(Bounds{ 0, 0, 1920, 1080 });
+
   loop.setEventCallback(
-    [&viewer, &config, &gpuSurface, directContext = directContext.get()](
-      const UEvent& evt,
-      void*         userData)
+    [&, directContext = directContext.get()](const SDL_Event& event, void* userData)
     {
+      auto evt = toUEvent(event, loop.resolutionScale());
+
       if (auto& window = evt.window;
           evt.type == VGG_WINDOWEVENT &&
           (window.event == VGG_WINDOWEVENT_RESIZED || window.event == VGG_WINDOWEVENT_SIZE_CHANGED))

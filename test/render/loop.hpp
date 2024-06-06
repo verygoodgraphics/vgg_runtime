@@ -3,6 +3,7 @@
 #include "Entry/SDL/EventAPISDLImpl.hpp"
 
 #include <SDL.h>
+#include <SDL_events.h>
 #include <SDL_opengl.h>
 #include <SDL_video.h>
 
@@ -65,7 +66,7 @@ struct Loop
       }
     }
   };
-  using EventCallback = std::function<void(const UEvent& e, void* userData)>;
+  using EventCallback = std::function<void(const SDL_Event& e, void* userData)>;
   struct Config
   {
     int multiSample = 0;
@@ -263,12 +264,11 @@ struct Loop
     while (SDL_WaitEventTimeout(&evt, timeout))
 #endif
     {
-      auto event = toUEvent(evt, resolutionScale());
       if (eventCallback)
       {
-        eventCallback(event, nullptr);
+        eventCallback(evt, nullptr);
       }
-      if (event.type == VGG_QUIT)
+      if (evt.type == SDL_QUIT)
       {
         exitFlags = true;
         break;

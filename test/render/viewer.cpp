@@ -1,6 +1,10 @@
 #include "viewer.hpp"
 #include "loop.hpp"
 
+#ifdef IMGUI_ENABLED
+#include "imgui_integration.hpp"
+#endif
+
 #include "Layer/GlobalSettings.hpp"
 #include "Layer/Core/RasterNode.hpp"
 #include "Layer/Core/VNode.hpp"
@@ -234,6 +238,11 @@ int run(Loop& loop, Viewer& viewer, const argparse::ArgumentParser& program)
   using namespace VGG;
   const auto& config = loop.getConfig();
 
+#ifdef IMGUI_ENABLED
+  initImGUI(loop.sdlState->window, loop.sdlState->glContext);
+  ImGuiPanelOfficialDemo panel;
+#endif
+
   sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
   sk_sp<GrDirectContext>     directContext = GrDirectContext::MakeGL(interface);
 
@@ -247,6 +256,9 @@ int run(Loop& loop, Viewer& viewer, const argparse::ArgumentParser& program)
   loop.setEventCallback(
     [&, directContext = directContext.get()](const SDL_Event& event, void* userData)
     {
+#ifdef IMGUI_ENABLED
+      processEventImGUI(event);
+#endif
       auto evt = toUEvent(event, loop.resolutionScale());
 
       if (auto& window = evt.window;
@@ -282,11 +294,14 @@ int run(Loop& loop, Viewer& viewer, const argparse::ArgumentParser& program)
   constexpr float TIME_PER_FRAME = 16.67;
   while (!loop.exit())
   {
+
     Timer t;
     t.start();
     loop.pollEvent(0);
-
-    // RENDER BEGIN
+#ifdef IMGUI_ENABLED
+    beginImGUIFrame();
+    drawImGUIFrame(&panel);
+#endif
     Revalidation        rev;
     std::vector<Bounds> damageBounds;
     {
@@ -300,11 +315,15 @@ int run(Loop& loop, Viewer& viewer, const argparse::ArgumentParser& program)
       canvas->clear(SK_ColorWHITE);
       rasterNode->render(&r);
     }
-    // RENDER END
 
     drawDebug(gpuSurface->getCanvas(), viewer, rasterNode.get(), rev, damageBounds);
 
     directContext->flush();
+
+#ifdef IMGUI_ENABLED
+    endImGUIFrame();
+#endif
+
     loop.swap();
     t.stop();
     auto ms = (float)t.duration().ms();
@@ -315,6 +334,10 @@ int run(Loop& loop, Viewer& viewer, const argparse::ArgumentParser& program)
     if (ms < TIME_PER_FRAME)
       std::this_thread::sleep_for(std::chrono::milliseconds((int)(TIME_PER_FRAME - ms)));
   }
+
+#ifdef IMGUI_ENABLED
+  shutdownImGUI();
+#endif
   return 0;
 }
 

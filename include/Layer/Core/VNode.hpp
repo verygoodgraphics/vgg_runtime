@@ -99,17 +99,17 @@ class VNode : public ObjectImpl<VObject>
 protected:
   enum EState
   {
-    INVALIDATE = 1 << 0,
-    DAMAGE = 1 << 1,
-    TRAVERSALING = 1 << 2,
-    UPDATE = 1 << 3,
+    INVALIDATE = 1 << 0,   // node is invalid
+    DAMAGE = 1 << 1,       // node is damaged, need to be redraw if necessary
+    TRAVERSALING = 1 << 2, // node is traversaling, avoid reentrant
+    UPDATE = 1 << 3,       // some events are sent to the internal event queue.
   };
   using EStateT = uint8_t;
 
   enum EDamageTraitBits
   {
-    OVERRIDE_DAMAGE = 1 << 0,
-    BUBBLE_DAMAGE = 1 << 1,
+    OVERRIDE_DAMAGE = 1 << 0, // node is damaged by the parent node
+    BUBBLE_DAMAGE = 1 << 1,   // just the bubble up the damage
   };
   using EDamageTrait = uint8_t;
 

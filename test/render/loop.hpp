@@ -58,7 +58,7 @@ struct Loop
         // NOTE The failure to delete GL context may be related to multi-thread and is hard
         // to make it right. For simplicity, we can just safely ignore the deletion.
         //
-        // SDL_GL_DeleteContext(m_sdlState.glContext);
+        // SDL_GL_DeleteContext(sdlState.glContext);
       }
       if (window)
       {
@@ -246,8 +246,8 @@ struct Loop
 #if defined(VGG_TARGET_PLATFORM_macOS) || defined(EMSCRIPTEN)
     int dw, dh;
     int ww, wh;
-    SDL_GL_GetDrawableSize(this->m_sdlState->window, &dw, &dh);
-    SDL_GetWindowSize(this->m_sdlState->window, &ww, &wh);
+    SDL_GL_GetDrawableSize(this->sdlState->window, &dw, &dh);
+    SDL_GetWindowSize(this->sdlState->window, &ww, &wh);
     const float s = float(dw) / (float)ww;
     return s;
 #else

@@ -242,24 +242,7 @@ void Presenter::setModel(std::shared_ptr<ViewModel> viewModel)
   }
 
   std::unordered_map<std::string, FontInfo> requiredFonts;
-  auto                                      result =
-    layer::SceneBuilder::builder()
-      .setFontNameVisitor(
-        [&requiredFonts](const std::string& familyName, const std::string& subfamilyName) {
-          requiredFonts[familyName + subfamilyName] = FontInfo{ familyName, subfamilyName };
-        })
-      .build<layer::StructModelFrame>(std::move(frames));
-
-  if (result.root)
-  {
-    m_view->show(m_viewModel, std::move(*result.root));
-  }
-  else
-  {
-    WARN("#Presenter::setModel, built scene is empty , return");
-    return;
-  }
-
+  m_view->show(m_viewModel, false, &requiredFonts);
   for (auto kv : requiredFonts)
   {
     m_requiredFonts.push_back(kv.second);

@@ -257,8 +257,6 @@ public:
 
 class FrameElement : public Element
 {
-  std::shared_ptr<Model::Frame> m_frame;
-
 public:
   FrameElement(const Model::Frame& frame);
   std::shared_ptr<Element> clone() const override;
@@ -275,6 +273,13 @@ public:
     override;
   void getTreeToModel(Model::ContainerChildType& variantModel, bool reverseChildrenIfFirstOnTop)
     override;
+
+  bool shouldDisplay() const;
+
+private:
+  std::shared_ptr<Model::Frame> m_frame;
+
+  const bool m_shouldDisplay;
 };
 
 class GroupElement : public Element

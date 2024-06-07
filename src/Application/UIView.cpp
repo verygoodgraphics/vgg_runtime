@@ -667,31 +667,35 @@ void UIView::fireMouseEvent(
     node);
 }
 
-void UIView::show(std::shared_ptr<ViewModel>& viewModel, bool force)
+void UIView::show(
+  std::shared_ptr<ViewModel>&                viewModel,
+  bool                                       force,
+  std::unordered_map<std::string, FontInfo>* requiredFonts)
 {
   ASSERT(viewModel);
   if (m_skipUntilNextLoop && !force)
-  {
     return;
-  }
 
   std::vector<layer::StructFrameObject> frames;
   for (auto& f : *viewModel->designDoc())
-  {
-    if (f->type() == VGG::Domain::Element::EType::FRAME)
-    {
+    if (
+      (f->type() == VGG::Domain::Element::EType::FRAME) &&
+      static_pointer_cast<Domain::FrameElement>(f)->shouldDisplay())
       frames.emplace_back(layer::StructFrameObject(f.get()));
-    }
-  }
-  auto result = layer::SceneBuilder::builder().build<layer::StructModelFrame>(std::move(frames));
+
+  auto result =
+    layer::SceneBuilder::builder()
+      .setFontNameVisitor(
+        [requiredFonts](const std::string& familyName, const std::string& subfamilyName)
+        {
+          if (requiredFonts)
+            (*requiredFonts)[familyName + subfamilyName] = FontInfo{ familyName, subfamilyName };
+        })
+      .build<layer::StructModelFrame>(std::move(frames));
   if (result.root)
-  {
     show(viewModel, std::move(*result.root), force);
-  }
   else
-  {
     WARN("#UIView::show, built scene is empty");
-  }
 }
 
 void UIView::show(

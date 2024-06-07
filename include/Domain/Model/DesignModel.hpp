@@ -1561,9 +1561,31 @@ struct Path : public Object
  */
 struct Frame : public Container
 {
+  enum EType
+  {
+    NORMAL,
+    VITURL,
+    COMPONENT
+  };
+
   std::optional<Color>               backgroundColor;
   std::optional<std::vector<double>> radius;
-  std::optional<int>                 frameType;
+  std::optional<EType>               frameType;
+
+  EType type() const
+  {
+    return frameType.value_or(EType::NORMAL);
+  }
+
+  bool isNormal() const
+  {
+    return type() == EType::NORMAL;
+  }
+
+  bool isComponent() const
+  {
+    return type() == EType::COMPONENT;
+  }
 };
 
 struct Group : public Container
@@ -3299,7 +3321,7 @@ inline void from_json(const json& j, Frame& x)
   from_json(j, static_cast<Container&>(x));
   x.backgroundColor = get_stack_optional<Color>(j, "backgroundColor");
   x.radius = get_stack_optional<std::vector<double>>(j, "radius");
-  x.frameType = get_stack_optional<int>(j, "frameType");
+  x.frameType = get_stack_optional<Frame::EType>(j, "frameType");
 }
 
 inline void to_json(json& j, const Frame& x)

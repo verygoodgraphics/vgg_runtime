@@ -204,7 +204,9 @@ private:
   void fitPage();
   void scaleContentUpdateViewModelAndFit();
 
-  LayoutContext* layoutContext();
+  LayoutContext*              layoutContext();
+  const LayoutNode*           currentFrame() const;
+  std::shared_ptr<LayoutNode> currentFrame();
 
 private:
   std::unique_ptr<LayoutContext> m_layoutContext;

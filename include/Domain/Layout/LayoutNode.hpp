@@ -371,4 +371,10 @@ public:
   }
 };
 
+class RootLayoutNode : public LayoutNode
+{
+public:
+  int modelIndex(int viewIndex);
+};
+
 } // namespace VGG

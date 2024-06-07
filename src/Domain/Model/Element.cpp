@@ -577,13 +577,14 @@ void Element::getTreeToModel(
 // FrameElement
 FrameElement::FrameElement(const Model::Frame& frame)
   : Element(EType::FRAME)
+  , m_frame(new Model::Frame(frame))
+  , m_shouldDisplay((frame.isNormal() && frame.visible))
 {
   DEBUG("FrameElement::FrameElement, [%s, %p]", frame.id.c_str(), this);
-  m_frame = std::make_shared<Model::Frame>(frame);
 }
 std::shared_ptr<Element> FrameElement::clone() const
 {
-  return std::make_shared<FrameElement>(*object());
+  return std::shared_ptr<Element>(new FrameElement(*object()));
 }
 Frame* FrameElement::object() const
 {
@@ -637,6 +638,11 @@ void FrameElement::getTreeToModel(
   bool                       reverseChildrenIfFirstOnTop)
 {
   variantModel = treeModel(reverseChildrenIfFirstOnTop);
+}
+bool FrameElement::shouldDisplay() const
+{
+  return true; // TODO: filter frame by type and visible
+  // return m_shouldDisplay;
 }
 
 // GroupElement

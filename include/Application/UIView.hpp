@@ -57,6 +57,12 @@ struct ViewModel;
 namespace VGG
 {
 
+struct FontInfo
+{
+  std::string familyName;
+  std::string subfamilyName;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FontInfo, familyName, subfamilyName);
 class UIView : public app::EventListener
 {
 public:
@@ -128,11 +134,10 @@ public:
 
   void frame();
 
-  void show(std::shared_ptr<ViewModel>& viewModel, bool force = false);
   void show(
-    std::shared_ptr<ViewModel>&  viewModel,
-    std::vector<layer::FramePtr> frames,
-    bool                         force = false);
+    std::shared_ptr<ViewModel>&                viewModel,
+    bool                                       force = false,
+    std::unordered_map<std::string, FontInfo>* requiredFonts = nullptr);
   void setOffsetAndScale(float xOffset, float yOffset, float scale);
   void resetOffsetAndScale();
 
@@ -314,6 +319,11 @@ private:
   bool handleTouchEvent(int x, int y, int motionX, int motionY, EUIEventType type);
 
   void restoreState(const std::string& instanceId);
+
+  void show(
+    std::shared_ptr<ViewModel>&  viewModel,
+    std::vector<layer::FramePtr> frames,
+    bool                         force = false);
 };
 
 } // namespace VGG

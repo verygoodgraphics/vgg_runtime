@@ -717,8 +717,7 @@ bool Controller::setState(
   const std::string&       stateMasterId,
   const app::StateOptions& options)
 {
-  auto          page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
-  InstanceState instanceState{ page, m_expander, m_layout };
+  InstanceState instanceState{ currentFrame(), m_expander, m_layout };
 
   auto result = instanceState.setState(instanceDescendantId, listenerId, stateMasterId);
   if (result.success)
@@ -738,7 +737,7 @@ bool Controller::presentState(
   const std::string&       stateMasterId,
   const app::StateOptions& options)
 {
-  auto          page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
+  auto          page = currentFrame();
   InstanceState instanceState{ page, m_expander, m_layout };
 
   auto        stateTree = std::make_shared<StateTree>(page);
@@ -758,8 +757,7 @@ bool Controller::presentState(
 
 bool Controller::dismissState(const std::string& instanceDescendantId)
 {
-  auto          page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
-  InstanceState instanceState{ page, m_expander, m_layout };
+  InstanceState instanceState{ currentFrame(), m_expander, m_layout };
 
   auto result = instanceState.dismissState(
     m_presenter->savedState(instanceDescendantId).get(),
@@ -801,9 +799,7 @@ bool Controller::setCurrentTheme(const std::string& theme)
 
 VGG::Layout::Size Controller::currentPageSize() const
 {
-  ASSERT(m_layout);
-  const auto& root = m_layout->layoutTree();
-  return root->children()[m_presenter->currentPageIndex()]->frame().size;
+  return currentFrame()->frame().size;
 }
 
 void Controller::openUrl(const std::string& url, const std::string& target)
@@ -1058,10 +1054,21 @@ void Controller::postFrame()
 {
   auto context = layoutContext();
   context->setLayerValid(true);
-  auto page = m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
-  page->layoutIfNeeded(context); // layout text if needed
-  if (!context->isLayerValid())  // paint node updated
+  currentFrame()->layoutIfNeeded(context); // layout text if needed
+  if (!context->isLayerValid())            // paint node updated
     m_presenter->setDirtry();
+}
+
+std::shared_ptr<LayoutNode> Controller::currentFrame()
+{
+  ASSERT(m_layout);
+  return m_layout->layoutTree()->children()[m_presenter->currentPageIndex()];
+}
+
+const LayoutNode* Controller::currentFrame() const
+{
+  ASSERT(m_layout);
+  return m_layout->layoutTree()->children()[m_presenter->currentPageIndex()].get();
 }
 
 } // namespace VGG

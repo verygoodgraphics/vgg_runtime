@@ -48,13 +48,6 @@ class StateTree;
 namespace VGG
 {
 
-struct FontInfo
-{
-  std::string familyName;
-  std::string subfamilyName;
-};
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FontInfo, familyName, subfamilyName);
-
 class Presenter : public std::enable_shared_from_this<Presenter>
 {
 public:

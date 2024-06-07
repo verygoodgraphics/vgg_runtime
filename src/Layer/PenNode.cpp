@@ -73,16 +73,13 @@ void Brush::onMakePaint(SkPaint* paint, const Bounds& bounds) const
   {
     if (m_pattern->isValid())
     {
-      if (m_pattern->frameCount() == 1)
+      if (m_pattern->frameCount() >= 1)
       {
-        paint->setShader(this->m_pattern->shader());
-      }
-      else
-      {
-        paint->setShader(this->m_pattern->shader(m_currentFrame++));
-        m_currentFrame %= m_pattern->frameCount();
+        paint->setShader(this->m_pattern->shader(m_currentFrame));
         if (isAnimatedPatternEnabled())
         {
+          m_currentFrame++;
+          m_currentFrame %= m_pattern->frameCount();
           const_cast<Brush*>(this)->update();
         }
       }
@@ -90,7 +87,7 @@ void Brush::onMakePaint(SkPaint* paint, const Bounds& bounds) const
   }
 }
 
-Bounds Brush::onRevalidate(Revalidation* inv, const glm::mat3 & mat)
+Bounds Brush::onRevalidate(Revalidation* inv, const glm::mat3& mat)
 {
   return Bounds();
 }
@@ -128,7 +125,7 @@ void BorderBrush::onMakePaint(SkPaint* paint, const Bounds& bounds) const
   Brush::onMakePaint(paint, bounds);
 }
 
-Bounds BorderBrush::onRevalidate(Revalidation* inv, const glm::mat3 & mat)
+Bounds BorderBrush::onRevalidate(Revalidation* inv, const glm::mat3& mat)
 {
   return Bounds();
 }

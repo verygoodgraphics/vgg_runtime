@@ -101,7 +101,7 @@ public:
 
   SurfaceCreateProc surfaceCreateProc()
   {
-    return [mtkView = m_mtkView](GrDirectContext* context, int w, int h, const VGG::layer::ContextConfig& cfg)
+    return [mtkView = m_mtkView](GrRecordingContext* context, int w, int h, const VGG::layer::ContextConfig& cfg)
     {
       return SkMtkViewToSurface(mtkView, context);
     };

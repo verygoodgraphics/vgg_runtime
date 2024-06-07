@@ -35,7 +35,7 @@ ContextCreateProc MockSkiaGraphicsContext::contextCreateProc()
 
 SurfaceCreateProc MockSkiaGraphicsContext::surfaceCreateProc()
 {
-  return [](GrDirectContext* context, int w, int h, const VGG::layer::ContextConfig& cfg)
+  return [](GrRecordingContext* context, int w, int h, const VGG::layer::ContextConfig& cfg)
   {
     DEBUG("make skia surface");
     return SkSurfaces::Null(w, h);

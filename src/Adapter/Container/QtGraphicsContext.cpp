@@ -49,7 +49,7 @@ public:
 
   SurfaceCreateProc surfaceCreateProc()
   {
-    return [](GrDirectContext* context, int w, int h, const VGG::layer::ContextConfig& cfg)
+    return [](GrRecordingContext* context, int w, int h, const VGG::layer::ContextConfig& cfg)
     {
       auto info = SkImageInfo::MakeN32Premul(w, h);
       auto surface = SkSurfaces::RenderTarget(context, skgpu::Budgeted::kNo, info);

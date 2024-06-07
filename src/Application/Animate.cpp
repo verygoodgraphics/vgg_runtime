@@ -1046,11 +1046,12 @@ void MoveAnimate::dealChildren(
   {
     auto& childFrom = twin.first;
     auto& childTo = twin.second;
-    auto  elementFrom = childFrom->elementNode();
+    // auto elementFrom = childFrom->elementNode();
     auto  elementTo = childTo->elementNode();
     auto  childPaintFrom = attrBridge->getPaintNode(childFrom);
     auto  childPaintTo = attrBridge->getPaintNode(childTo);
-    assert(elementFrom && elementTo);
+    // assert(elementFrom && elementTo);
+    assert(elementTo);
 
     // TODO
     // for move in animate, only nodeTo children need move

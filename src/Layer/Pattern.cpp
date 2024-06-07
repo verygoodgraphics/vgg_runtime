@@ -45,6 +45,9 @@ namespace VGG::layer
 
 std::string_view ShaderPattern::init(const std::string& guid)
 {
+  m_guid = guid;
+  m_frames.resize(1);
+  return ""sv;
   auto blob = loadBlob(guid);
   if (!blob)
   {
@@ -63,16 +66,20 @@ ShaderPattern::ShaderPattern(const Bounds& bounds, const PatternFit& p)
 {
   if (auto err = init(p.guid); !err.empty())
   {
+    DEBUG("%s", std::string(err.data()).c_str());
     return;
   }
 
-  SkImageInfo mi = m_codec->getInfo();
-  float       width = bounds.width();
-  float       height = bounds.height();
-  float       sx = (float)width / mi.width();
-  float       sy = (float)height / mi.height();
-  auto        m = glm::mat3{ 1.0 };
-  float       s = std::min(sx, sy);
+  auto img = loadImage(m_guid);
+  auto mi = img->imageInfo();
+
+  // SkImageInfo mi = m_codec->getInfo();
+  float width = bounds.width();
+  float height = bounds.height();
+  float sx = (float)width / mi.width();
+  float sy = (float)height / mi.height();
+  auto  m = glm::mat3{ 1.0 };
+  float s = std::min(sx, sy);
   if (sx < sy)
   {
     m = glm::translate(m, { 0, (height - s * mi.height()) / 2 });
@@ -97,7 +104,9 @@ ShaderPattern::ShaderPattern(const Bounds& bounds, const PatternFill& p)
     return;
   }
 
-  SkImageInfo mi = m_codec->getInfo();
+  auto        img = loadImage(m_guid);
+  auto        mi = img->imageInfo();
+  // SkImageInfo mi = m_codec->getInfo();
   float       width = bounds.width();
   float       height = bounds.height();
   float       sx = (float)width / mi.width();
@@ -127,10 +136,13 @@ ShaderPattern::ShaderPattern(const Bounds& bounds, const PatternStretch& p)
   {
     return;
   }
-  SkImageInfo mi = m_codec->getInfo();
-  float       width = bounds.width();
-  float       height = bounds.height();
-  auto        m = glm::mat3{ 1.0 };
+
+  auto  img = loadImage(m_guid);
+  auto  mi = img->imageInfo();
+  // SkImageInfo mi = m_codec->getInfo();
+  float width = bounds.width();
+  float height = bounds.height();
+  auto  m = glm::mat3{ 1.0 };
   m = glm::scale(m, { width, height });
   m *= p.transform.matrix();
   m = glm::scale(m, { 1.f / mi.width(), 1.f / mi.height() });
@@ -170,23 +182,25 @@ ShaderPattern::ShaderPattern(const Bounds& bounds, const PatternTile& p)
 
 sk_sp<SkShader> ShaderPattern::shader(int frame) const
 {
-  ASSERT(m_codec);
-  ASSERT((int)m_frames.size() == frameCount());
+  // ASSERT(m_codec);
+  // ASSERT((int)m_frames.size() == frameCount());
   if (frame < 0 || frame >= frameCount())
   {
     return nullptr;
   }
   if (!m_frames[frame])
   {
-    SkImageInfo      ii = m_codec->getInfo();
+    auto             img = loadImage(m_guid);
+    auto             mi = img->imageInfo();
+    // SkImageInfo      ii = m_codec->getInfo();
     SkCodec::Options options;
     options.fFrameIndex = frame;
-    auto [img, res] = m_codec->getImage(ii, &options);
-    if (res != SkCodec::Result::kSuccess)
-    {
-      VGG_LOG_DEV(LOG, Codec, "failed to decode frame {}. Error Code: {}", frame, (int)res);
-      return nullptr;
-    }
+    // auto [img, res] = m_codec->getImage(ii, &options);
+    // if (res != SkCodec::Result::kSuccess)
+    // {
+    //   VGG_LOG_DEV(LOG, Codec, "failed to decode frame {}. Error Code: {}", frame, (int)res);
+    //   return nullptr;
+    // }
     auto shader = createShader(img, m_tileModeX, m_tileModeY, m_matrix, m_colorFilter);
     if (!shader)
     {

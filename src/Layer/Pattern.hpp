@@ -39,12 +39,12 @@ public:
 
   bool isValid() const
   {
-    return m_codec != nullptr;
+    return true; // m_codec != nullptr;
   }
 
   int frameCount() const
   {
-    return m_codec->getFrameCount();
+    return 1; // m_codec->getFrameCount();
   }
 
   sk_sp<SkShader> shader(int frame = 0) const;
@@ -57,6 +57,8 @@ private:
   SkMatrix                 m_matrix;
   sk_sp<SkColorFilter>     m_colorFilter;
   SkTileMode               m_tileModeX, m_tileModeY;
+
+  std::string m_guid;
 };
 
 } // namespace VGG::layer

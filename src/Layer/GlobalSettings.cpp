@@ -18,7 +18,7 @@
 
 namespace
 {
-bool g_enableAnimatedPattern = true;
+bool g_enableAnimatedPattern = false;
 }
 
 namespace VGG::layer

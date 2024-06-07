@@ -395,13 +395,11 @@ void VLayer::setRenderNode(Ref<RenderNode> node)
 
 void VLayer::setRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
 {
-
   d_ptr->rasterNode = raster::makeTileRaster(
     d_ptr->skiaContext->context(),
     d_ptr->viewport,
     std::move(transform),
     std::move(node));
-  d_ptr->rasterNode = nullptr;
 }
 
 void VLayer::setRasterNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)

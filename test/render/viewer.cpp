@@ -3,6 +3,7 @@
 
 #ifdef IMGUI_ENABLED
 #include "imgui_integration.hpp"
+#include "imguipanel.hpp"
 #endif
 
 #include "Layer/GlobalSettings.hpp"
@@ -242,7 +243,6 @@ int run(Loop& loop, Viewer& viewer, const argparse::ArgumentParser& program)
 
 #ifdef IMGUI_ENABLED
   initImGUI(loop.sdlState->window, loop.sdlState->glContext);
-  ImGuiPanelOfficialDemo panel;
 #endif
 
   sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
@@ -255,6 +255,9 @@ int run(Loop& loop, Viewer& viewer, const argparse::ArgumentParser& program)
     createGPUSurface(directContext.get(), 1920, 1080, config.multiSample, config.stencilBit);
   viewer.viewportNode->setViewport(Bounds{ 0, 0, 1920, 1080 });
 
+#ifdef IMGUI_ENABLED
+  Panel panel(viewer);
+#endif
   loop.setEventCallback(
     [&, directContext = directContext.get()](const SDL_Event& event, void* userData)
     {
@@ -274,25 +277,35 @@ int run(Loop& loop, Viewer& viewer, const argparse::ArgumentParser& program)
           config.multiSample,
           config.stencilBit);
       }
+#ifdef IMGUI_ENABLED
+      if (evt.type == VGG_KEYDOWN && evt.key.keysym.sym == VGGK_p)
+      {
+        panel.setVisible(!panel.isVisible());
+      }
+#endif
       viewer.onEvent(evt, userData);
     });
 
   Ref<RasterNode> rasterNode;
+  SceneNode*      sceneNode = nullptr;
   if (auto n = loadScene(program); n)
   {
     viewer.pager = std::make_unique<Pager>(n.get());
+    sceneNode = n.get();
     rasterNode = VGG::layer::raster::make(
       directContext.get(),
       viewer.viewportNode,
       viewer.zoomNode,
       std::move(n));
+#ifdef IMGUI_ENABLED
+    panel.setScene(n.get());
+#endif
   }
   if (!rasterNode)
   {
     std::cout << "Cannot load scene\n";
     return 1;
   }
-
   constexpr float TIME_PER_FRAME = 16.67;
   while (!loop.exit())
   {

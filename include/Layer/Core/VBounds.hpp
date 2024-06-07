@@ -31,36 +31,39 @@
 
 namespace VGG
 {
-class Bounds
+template<typename T>
+class BoundsBase
 {
-  glm::vec2 m_topLeft;
-  glm::vec2 m_bottomRight;
+  using Vec2T = glm::vec<2, T, glm::defaultp>;
+  using Mat3T = glm::mat<3, 3, T, glm::defaultp>;
+  Vec2T m_topLeft;
+  Vec2T m_bottomRight;
 
 public:
-  Bounds()
+  BoundsBase()
     : m_topLeft{ 0, 0 }
     , m_bottomRight{ 0, 0 }
   {
   }
-  Bounds(float x, float y, float w, float h)
+  BoundsBase(T x, T y, T w, T h)
     : m_topLeft{ x, y }
     , m_bottomRight{ x + w, y + h }
   {
   }
 
-  Bounds(const glm::vec2& topLeft, float w, float h)
+  BoundsBase(const Vec2T& topLeft, T w, T h)
     : m_topLeft(topLeft)
     , m_bottomRight{ topLeft.x + w, topLeft.y + h }
   {
   }
 
-  Bounds(const glm::vec2& p1, const glm::vec2& p2)
+  BoundsBase(const Vec2T& p1, const Vec2T& p2)
   {
-    m_topLeft = glm::vec2(std::min(p1.x, p2.x), std::min(p1.y, p2.y));
-    m_bottomRight = glm::vec2(std::max(p1.x, p2.x), std::max(p1.y, p2.y));
+    m_topLeft = Vec2T(std::min(p1.x, p2.x), std::min(p1.y, p2.y));
+    m_bottomRight = Vec2T(std::max(p1.x, p2.x), std::max(p1.y, p2.y));
   }
 
-  void extend(float delta)
+  void extend(T delta)
   {
     m_topLeft.x -= delta;
     m_topLeft.y -= delta;
@@ -68,47 +71,47 @@ public:
     m_bottomRight.x += delta;
   }
 
-  glm::vec2 map(const glm::vec2& p) const
+  Vec2T map(const Vec2T& p) const
   {
-    return glm::vec2{ p.x + m_topLeft.x, (p.y + m_topLeft.y) };
+    return Vec2T{ p.x + m_topLeft.x, (p.y + m_topLeft.y) };
   }
 
-  const glm::vec2& topLeft() const
+  const Vec2T& topLeft() const
   {
     return m_topLeft;
   }
 
-  float x() const
+  T x() const
   {
     return m_topLeft.x;
   }
 
-  float y() const
+  T y() const
   {
     return m_topLeft.y;
   }
 
-  glm::vec2 bottomRight() const
+  Vec2T bottomRight() const
   {
     return m_bottomRight;
   }
 
-  float width() const
+  T width() const
   {
     return m_bottomRight.x - m_topLeft.x;
   }
 
-  void setWidth(float w)
+  void setWidth(T w)
   {
     m_bottomRight.x = m_topLeft.x + w;
   }
 
-  void setHeight(float h)
+  void setHeight(T h)
   {
     m_bottomRight.y = m_topLeft.y + h;
   }
 
-  float height() const
+  T height() const
   {
     return m_bottomRight.y - m_topLeft.y;
   }
@@ -118,12 +121,12 @@ public:
     return size().x > 0 && size().y > 0;
   }
 
-  glm::vec2 size() const
+  Vec2T size() const
   {
-    return glm::vec2{ width(), height() };
+    return Vec2T{ width(), height() };
   }
 
-  float squaredDistance() const
+  T squaredDistance() const
   {
     return width() * width() + height() * height();
   }
@@ -133,43 +136,38 @@ public:
     return std::sqrt(squaredDistance());
   }
 
-  Bounds bounds(const layer::Transform& transform) const
+  BoundsBase<float> bounds(const layer::Transform& transform) const
   {
     auto p1 = transform * glm::vec3{ m_topLeft, 1.0 };
     auto p2 = transform * glm::vec3{ glm::vec2{ m_bottomRight.x, m_topLeft.y }, 1.0 };
     auto p3 = transform * glm::vec3{ m_bottomRight, 1.0 };
     auto p4 = transform * glm::vec3{ glm::vec2{ m_topLeft.x, m_bottomRight.y }, 1.0 };
-    auto a = std::initializer_list<float>{ p1.x, p2.x, p3.x, p4.x };
-    auto b = std::initializer_list<float>{ p1.y, p2.y, p3.y, p4.y };
+    auto a = std::initializer_list<T>{ p1.x, p2.x, p3.x, p4.x };
+    auto b = std::initializer_list<T>{ p1.y, p2.y, p3.y, p4.y };
     const auto [minX, maxX] = std::minmax_element(a.begin(), a.end());
     const auto [minY, maxY] = std::minmax_element(b.begin(), b.end());
-    return Bounds{ *minX, *minY, *maxX - *minX, *maxY - *minY };
+    return BoundsBase<float>{ *minX, *minY, *maxX - *minX, *maxY - *minY };
   }
 
-  Bounds map(const glm::mat3& mat) const
+  BoundsBase<float> map(const glm::mat3& mat) const
   {
     auto p1 = mat * glm::vec3{ m_topLeft, 1.0 };
     auto p2 = mat * glm::vec3{ glm::vec2{ m_bottomRight.x, m_topLeft.y }, 1.0 };
     auto p3 = mat * glm::vec3{ m_bottomRight, 1.0 };
     auto p4 = mat * glm::vec3{ glm::vec2{ m_topLeft.x, m_bottomRight.y }, 1.0 };
-    auto a = std::initializer_list<float>{ p1.x, p2.x, p3.x, p4.x };
-    auto b = std::initializer_list<float>{ p1.y, p2.y, p3.y, p4.y };
+    auto a = std::initializer_list<T>{ p1.x, p2.x, p3.x, p4.x };
+    auto b = std::initializer_list<T>{ p1.y, p2.y, p3.y, p4.y };
     const auto [minX, maxX] = std::minmax_element(a.begin(), a.end());
     const auto [minY, maxY] = std::minmax_element(b.begin(), b.end());
-    return Bounds{ *minX, *minY, *maxX - *minX, *maxY - *minY };
+    return BoundsBase<float>{ *minX, *minY, *maxX - *minX, *maxY - *minY };
   }
 
-  // Bounds operator*(const layer::Transform& transform) const
-  // {
-  //   return this->transform(transform);
-  // }
-
-  bool operator==(const Bounds& other) const
+  bool operator==(const BoundsBase& other) const
   {
     return m_topLeft == other.topLeft() && m_bottomRight == other.bottomRight();
   }
 
-  void unionWith(const Bounds& bounds)
+  void unionWith(const BoundsBase& bounds)
   {
     if (!this->valid())
     {
@@ -182,14 +180,14 @@ public:
     m_bottomRight.y = std::max(m_bottomRight.y, bounds.m_bottomRight.y);
   }
 
-  Bounds unionAs(const Bounds& bounds) const
+  BoundsBase unionAs(const BoundsBase& bounds) const
   {
     auto newBounds = *this;
     newBounds.unionWith(bounds);
     return newBounds;
   }
 
-  void intersectWith(const Bounds& bounds)
+  void intersectWith(const BoundsBase& bounds)
   {
     m_topLeft.x = std::max(m_topLeft.x, bounds.m_topLeft.x);
     m_topLeft.y = std::max(m_topLeft.y, bounds.m_topLeft.y);
@@ -197,20 +195,20 @@ public:
     m_bottomRight.y = std::min(m_bottomRight.y, bounds.m_bottomRight.y);
   }
 
-  Bounds intersectAs(const Bounds& bounds) const
+  BoundsBase intersectAs(const BoundsBase& bounds) const
   {
     auto newBounds = *this;
     newBounds.intersectWith(bounds);
     return newBounds;
   }
 
-  bool isIntersectWith(const Bounds& bounds) const
+  bool isIntersectWith(const BoundsBase& bounds) const
   {
     auto isect = intersectAs(bounds);
     return isect.valid();
   }
 
-  bool isIntersectWithEx(const Bounds& bounds) const
+  bool isIntersectWithEx(const BoundsBase& bounds) const
   {
     auto isect = intersectAs(bounds);
     auto size = isect.size();
@@ -227,20 +225,33 @@ public:
     return contains(p.x, p.y);
   }
 
-public:
-  static Bounds makeInfinite()
+  BoundsBase<float> toFloatBounds() const
   {
-    Bounds b;
-    b.m_topLeft.x = std::numeric_limits<float>::lowest();
-    b.m_topLeft.y = std::numeric_limits<float>::lowest();
-    b.m_bottomRight.x = std::numeric_limits<float>::max();
-    b.m_bottomRight.y = std::numeric_limits<float>::max();
+    return BoundsBase<float>{ m_topLeft.x, m_topLeft.y, width(), height() };
+  }
+
+  BoundsBase<int> toIntBounds() const
+  {
+    return BoundsBase<int>{ static_cast<int>(m_topLeft.x),
+                            static_cast<int>(m_topLeft.y),
+                            static_cast<int>(width()),
+                            static_cast<int>(height()) };
+  }
+
+public:
+  static BoundsBase makeInfinite()
+  {
+    BoundsBase b;
+    b.m_topLeft.x = std::numeric_limits<T>::lowest();
+    b.m_topLeft.y = std::numeric_limits<T>::lowest();
+    b.m_bottomRight.x = std::numeric_limits<T>::max();
+    b.m_bottomRight.y = std::numeric_limits<T>::max();
     return b;
   }
 
-  static Bounds makeBoundsLRTB(float l, float r, float t, float b)
+  static BoundsBase makeBoundsLRTB(T l, T r, T t, T b)
   {
-    Bounds bounds;
+    BoundsBase bounds;
     bounds.m_topLeft = { l, t };
     bounds.m_bottomRight = { r, b };
     return bounds;
@@ -253,7 +264,8 @@ inline std::ostream& operator<<(std::ostream& os, const glm::vec2& v)
   return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const Bounds& b)
+template<typename T>
+inline std::ostream& operator<<(std::ostream& os, const BoundsBase<T>& b)
 {
   os << "[" << b.topLeft() << ", " << b.bottomRight() << "]" << std::endl;
   return os;
@@ -269,5 +281,8 @@ inline std::ostream& operator<<(std::ostream& os, const glm::mat3& mat)
   os << v0[2] << ", " << v1[2] << ", 1]" << std::endl;
   return os;
 }
+
+using Bounds = BoundsBase<float>;
+using Boundsi = BoundsBase<int>;
 
 } // namespace VGG

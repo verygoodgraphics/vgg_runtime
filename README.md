@@ -2,10 +2,7 @@
 
 VGG Runtime is an implementation of [VGG Specs](https://docs.verygoodgraphics.com/specs/overview) with cross-platform rendering and scripting capabilities.
 
-VGG Runtime only supports reading and rendering of `.daruma` files, which
-
-- you can use [VGG Command-line tool](https://github.com/verygoodgraphics/vgg_cli) to convert from other design files locally,
-- or you can use [VGG Daruma](https://daruma.run/) to convert online.
+VGG Runtime supports reading and rendering of `.daruma` files, which you can use [VGG Command-line tool](https://github.com/verygoodgraphics/vgg_cli) to convert from other design files.
 
 ## Cross Platform Support
 
@@ -137,7 +134,7 @@ Make sure you have built the `sdl_runtime` target. Then in the build directory, 
 ./sdl_runtime /path/to/your/file.daruma
 ```
 
-where `file.daruma` is a file conforming to [VGG Specs](https://docs.verygoodgraphics.com/specs/overview), which can be generated using [VGG Command-line tool](https://github.com/verygoodgraphics/vgg_cli) or [VGG Daruma](https://verygoodgraphics.com/daruma).
+where `file.daruma` is a file conforming to [VGG Specs](https://docs.verygoodgraphics.com/specs/overview), which can be generated using [VGG Command-line tool](https://github.com/verygoodgraphics/vgg_cli).
 
 ### Running with custom font configuration
 

@@ -152,4 +152,29 @@ where an example of `config.json` is provided in [asset/etc/config.json](https:/
 
 ## LICENSE
 
-VGG Runtime is licensed under [VGG License](./LICENSE).
+VGG Runtime is licensed under latest [VGG License](./LICENSE-latest), which is
+
+```
+                                 VGG License
+                            Version 2.0, Jun 2024
+                  https://www.verygoodgraphics.com/licenses/
+
+ This document outlines the VGG License, version 2.0.
+
+ Copyright Holder: VeryGoodGraphics LTD.
+
+ Source code released under VGG License 2.0 can be used under one of the following licenses:
+
+   1) VGG License, Version 1.0 (https://www.verygoodgraphics.com/licenses/LICENSE-1.0)
+
+      This license includes a royalty restriction for any commercial use.
+
+   2) Apache License, Version 2.0 (https://www.apache.org/licenses/LICENSE-2.0)
+
+      This license is available for personal use only.
+
+  You may choose either license according to your needs, with the restriction that the Apache License is strictly for personal use.
+
+  If the above licenses do not satisfy your needs, please contact the copyright holder at bd@verygoodgraphics.com.
+
+```

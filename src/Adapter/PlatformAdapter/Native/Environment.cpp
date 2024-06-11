@@ -16,12 +16,15 @@
 #include "Environment.hpp"
 #include <memory>
 #include "NativeExec.hpp"
+#include "Application/RunLoop.hpp"
 
 namespace VGG
 {
 
 void Environment::setUp()
 {
+  // new and delete runloop in same(main) thread
+  RunLoop::sharedInstance();
 }
 
 void Environment::tearDown()

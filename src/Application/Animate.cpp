@@ -167,6 +167,8 @@ Animate::~Animate()
 
 void Animate::stop()
 {
+  m_childAnimates.clear();
+
   if (m_timer)
   {
     m_timer->invalidate();

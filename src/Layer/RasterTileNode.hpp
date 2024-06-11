@@ -35,6 +35,7 @@ public:
   TileRasterNode(
     VRefCnt*            cnt,
     GrRecordingContext* device,
+    RasterExecutor*     executor,
     Ref<Viewport>       viewport,
     Ref<ZoomerNode>     zoomer,
     Ref<RenderNode>     child);

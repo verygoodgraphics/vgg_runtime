@@ -16,6 +16,7 @@
 
 #pragma once
 #include "Layer/Core/RasterNode.hpp"
+#include "Layer/RasterManager.hpp"
 
 namespace VGG::layer
 {
@@ -26,6 +27,7 @@ public:
   RasterNodeImpl(
     VRefCnt*            cnt,
     GrRecordingContext* device,
+    RasterExecutor*     executor,
     Ref<Viewport>       viewport,
     Ref<ZoomerNode>     zoomer,
     Ref<RenderNode>     child);

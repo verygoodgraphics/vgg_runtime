@@ -29,10 +29,11 @@ namespace VGG::layer
 TileRasterNode::TileRasterNode(
   VRefCnt*            cnt,
   GrRecordingContext* device,
+  RasterExecutor*     executor,
   Ref<Viewport>       viewport,
   Ref<ZoomerNode>     zoomer,
   Ref<RenderNode>     child)
-  : RasterNode(cnt, device, std::move(viewport), std::move(zoomer), std::move(child))
+  : RasterNode(cnt, device, executor, std::move(viewport), std::move(zoomer), std::move(child))
   , m_raster(std::make_unique<RasterCacheTile>())
 {
   ASSERT(getChild());
@@ -207,6 +208,7 @@ Ref<RasterNode> makeTileRaster(
 {
   return TileRasterNode::Make(
     device,
+    nullptr,
     std::move(viewport),
     std::move(zoomer),
     std::move(renderObject));

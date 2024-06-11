@@ -84,8 +84,9 @@ public:
   {
     if (auto it = m_map.find(key); it != m_map.end())
     {
-      *(it->second->fValue) = std::move(value);
-      return it->second->fValue;
+      auto entry = *(it->second);
+      entry->value = std::move(value);
+      return &(entry->value);
     }
     else
     {

@@ -152,4 +152,4 @@ where an example of `config.json` is provided in [asset/etc/config.json](https:/
 
 ## LICENSE
 
-VGG Runtime is licensed under [VGG License](./LICENSE).
+VGG Runtime is licensed under [VGG License](./LICENSE), which includes a royalty fee under certain conditions.

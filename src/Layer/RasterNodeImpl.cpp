@@ -15,6 +15,7 @@
  */
 #include "RasterNodeImpl.hpp"
 
+#include "Layer/RasterManager.hpp"
 #include "Renderer.hpp"
 #include "Layer/Raster.hpp"
 
@@ -27,10 +28,11 @@ namespace VGG::layer
 RasterNodeImpl::RasterNodeImpl(
   VRefCnt*            cnt,
   GrRecordingContext* device,
+  RasterExecutor*     executor,
   Ref<Viewport>       viewport,
   Ref<ZoomerNode>     zoomer,
   Ref<RenderNode>     child)
-  : RasterNode(cnt, device, std::move(viewport), std::move(zoomer), std::move(child))
+  : RasterNode(cnt, device, executor, std::move(viewport), std::move(zoomer), std::move(child))
 {
 #ifdef VGG_LAYER_DEBUG
   dbgInfo = "DamageRedrawNode";
@@ -183,7 +185,12 @@ Ref<RasterNode> make(
   Ref<ZoomerNode>     zoomer,
   Ref<RenderNode>     child)
 {
-  return RasterNodeImpl::Make(device, std::move(viewport), std::move(zoomer), std::move(child));
+  return RasterNodeImpl::Make(
+    device,
+    nullptr,
+    std::move(viewport),
+    std::move(zoomer),
+    std::move(child));
 }
 } // namespace raster
 } // namespace VGG::layer

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "RasterManager.hpp"
 #include "Renderer.hpp"
 #include "DevCanvas.hpp"
 
@@ -58,11 +59,13 @@ namespace VGG::layer
 RasterNode::RasterNode(
   VRefCnt*            cnt,
   GrRecordingContext* device,
+  RasterExecutor*     executor,
   Ref<Viewport>       viewport,
   Ref<ZoomerNode>     zoomer,
   Ref<RenderNode>     child)
   : TransformEffectNode(cnt, ensureTransformNode(viewport, std::move(zoomer)), std::move(child))
   , m_device(device)
+  , m_executor(executor)
   , m_viewport(viewport)
 {
 }

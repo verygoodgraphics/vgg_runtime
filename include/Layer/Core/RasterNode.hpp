@@ -35,6 +35,7 @@ class GrRecordingContext;
 namespace VGG::layer
 {
 class Rasterizer;
+class RasterExecutor;
 
 class RasterNode : public TransformEffectNode
 {
@@ -42,6 +43,7 @@ public:
   RasterNode(
     VRefCnt*            cnt,
     GrRecordingContext* device,
+    RasterExecutor*     executor,
     Ref<Viewport>       viewport,
     Ref<ZoomerNode>     zoomer,
     Ref<RenderNode>     child);
@@ -73,10 +75,16 @@ protected:
     return m_device;
   }
 
+  RasterExecutor* executor() const
+  {
+    return m_executor;
+  }
+
   VGG_CLASS_MAKE(RasterNode);
 
 private:
   GrRecordingContext* m_device{ nullptr };
+  RasterExecutor*     m_executor{ nullptr };
   Ref<Viewport>       m_viewport;
   glm::mat3           m_rasterMatrix = glm::mat3{ 1.0 };
   glm::mat3           m_localMatrix = glm::mat3{ 1.0 };

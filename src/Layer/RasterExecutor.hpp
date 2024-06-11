@@ -13,41 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Layer/Core/RasterNode.hpp"
-#include "Layer/Raster.hpp"
+#pragma once
+#include "Executor.hpp"
+
+#include <future>
 
 namespace VGG::layer
 {
-
-class EmptyRaster : public RasterNode
-{
-public:
-  EmptyRaster(VRefCnt* cnt, Ref<RenderNode> node)
-    : RasterNode(cnt, nullptr, nullptr, nullptr, nullptr, std::move(node))
-  {
-  }
-
-  void raster(const std::vector<Bounds>& bounds)
-  {
-  }
-
-  void render(Renderer* renderer)
-  {
-    getChild()->render(renderer);
-  }
-
-  VGG_CLASS_MAKE(EmptyRaster);
-};
-
-namespace raster
-{
-
-Ref<RasterNode> makeEmptyRaster(Ref<RenderNode> renderObject)
-{
-  if (!renderObject)
-    return nullptr;
-  return EmptyRaster::Make(std::move(renderObject));
-}
-} // namespace raster
 
 } // namespace VGG::layer

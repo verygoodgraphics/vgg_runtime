@@ -238,7 +238,7 @@ int NativeExecImpl::run_node_instance(
       uv_timer_start(
         &m_keep_alive_timer,
         [](uv_timer_t* timer) {},
-        std::numeric_limits<uint64_t>::max(),
+        (std::numeric_limits<uint64_t>::max)(),
         0);
 
       init_uv_async_task();

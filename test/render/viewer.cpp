@@ -1,4 +1,5 @@
 #include "viewer.hpp"
+#include "Layer/RasterManager.hpp"
 #include "loop.hpp"
 
 #ifdef IMGUI_ENABLED
@@ -286,17 +287,15 @@ int run(Loop& loop, Viewer& viewer, const argparse::ArgumentParser& program)
       viewer.onEvent(evt, userData);
     });
 
-  Ref<RasterNode> rasterNode;
-  SceneNode*      sceneNode = nullptr;
+  Ref<RasterNode>      rasterNode;
+  SceneNode*           sceneNode = nullptr;
+  SimpleRasterExecutor executor(directContext.get());
   if (auto n = loadScene(program); n)
   {
     viewer.pager = std::make_unique<Pager>(n.get());
     sceneNode = n.get();
-    rasterNode = VGG::layer::raster::make(
-      directContext.get(),
-      viewer.viewportNode,
-      viewer.zoomNode,
-      std::move(n));
+    rasterNode =
+      VGG::layer::raster::make(&executor, viewer.viewportNode, viewer.zoomNode, std::move(n));
 #ifdef IMGUI_ENABLED
     panel.setScene(n.get());
 #endif

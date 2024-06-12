@@ -26,13 +26,19 @@ namespace VGG::layer
 {
 
 RasterNodeImpl::RasterNodeImpl(
-  VRefCnt*            cnt,
-  GrRecordingContext* device,
-  RasterExecutor*     executor,
-  Ref<Viewport>       viewport,
-  Ref<ZoomerNode>     zoomer,
-  Ref<RenderNode>     child)
-  : RasterNode(cnt, device, executor, std::move(viewport), std::move(zoomer), std::move(child))
+  VRefCnt*        cnt,
+  RasterExecutor* executor,
+  Ref<Viewport>   viewport,
+  Ref<ZoomerNode> zoomer,
+  Ref<RenderNode> child)
+  : RasterNode(
+      cnt,
+      static_cast<SimpleRasterExecutor*>(executor)->context(),
+      executor,
+      std::move(viewport),
+      std::move(zoomer),
+      std::move(child))
+  , m_rasterMananger(1024, 1024, Boundsi(0, 0, 1024, 1024), executor)
 {
 #ifdef VGG_LAYER_DEBUG
   dbgInfo = "DamageRedrawNode";
@@ -52,7 +58,13 @@ void RasterNodeImpl::render(Renderer* renderer)
     auto canvas = renderer->canvas();
     ASSERT(canvas);
     canvas->save();
-    canvas->drawImage(m_gpuSurface->makeImageSnapshot(), 0, 0);
+    {
+      if (auto res = m_rasterMananger.query(0); res)
+      {
+        canvas->drawImage(res->surf->makeImageSnapshot(), 0, 0);
+      }
+    }
+    // canvas->drawImage(m_gpuSurface->makeImageSnapshot(), 0, 0);
     canvas->restore();
   }
 }
@@ -145,6 +157,13 @@ void RasterNodeImpl::raster(const std::vector<Bounds>& bounds)
       SkImageInfo::MakeN32Premul(m_viewportBounds.width(), m_viewportBounds.height()));
   }
 
+  auto c = getChild();
+  ASSERT(c);
+  auto pic = c->picture();
+  ASSERT(pic);
+
+  std::vector<RasterTask::Where> where;
+  where.reserve(bounds.size());
   for (const auto& dr : bounds)
   {
     const auto rasterRect = dr.intersectAs(m_viewportBounds);
@@ -154,43 +173,58 @@ void RasterNodeImpl::raster(const std::vector<Bounds>& bounds)
     const auto rby = rasterRect.y();
     const auto rbw = rasterRect.width();
     const auto rbh = rasterRect.height();
+    {
+      const auto worldRect = rasterRect.map(glm::inverse(getLocalMatrix()));
+      where.push_back(
+        RasterTask::Where{ .dst = { (int)rbx, (int)rby }, .src = worldRect.toIntBounds() });
+    }
 
-    auto surf = rasterSurface(device(), rbw, rbh);
+    if (false)
+    {
+      auto surf = rasterSurface(device(), rbw, rbh);
+      // ASSERT(getTransform()->getMatrix() == m_deviceMatrix * m_rasterMatrix);
+      ASSERT(surf);
+      auto cvs = surf->getCanvas();
+      ASSERT(cvs);
+      cvs->save();
+      cvs->clear(SK_ColorWHITE);
+      cvs->translate(-rbx, -rby);
+      cvs->concat(toSkMatrix(getTransform()->getMatrix()));
+      // cvs->clipRect(SkRect::MakeXYWH(0, 0, rbh, rbw));
+      pic->playback(cvs);
+      cvs->restore();
 
-    // ASSERT(getTransform()->getMatrix() == m_deviceMatrix * m_rasterMatrix);
-    ASSERT(surf);
-    auto cvs = surf->getCanvas();
-    ASSERT(cvs);
-    cvs->save();
-    cvs->clear(SK_ColorWHITE);
-    cvs->translate(-rbx, -rby);
-    cvs->concat(toSkMatrix(getTransform()->getMatrix()));
-    // cvs->clipRect(SkRect::MakeXYWH(0, 0, rbh, rbw));
-    auto c = getChild();
-    ASSERT(c);
-    auto pic = c->picture();
-    ASSERT(pic);
-    pic->playback(cvs);
-    cvs->restore();
-
-    blit(device(), m_gpuSurface.get(), surf, rbx, rby);
+      blit(device(), m_gpuSurface.get(), surf, rbx, rby);
+    }
   }
+
+  sk_sp<SkSurface> surf;
+  if (auto res = m_rasterMananger.query(0))
+  {
+    surf = std::move(res->surf);
+  }
+
+  RasterTask t{
+    .bgColor = SK_ColorWHITE,
+    .width = (int)m_viewportBounds.width(),
+    .height = (int)m_viewportBounds.height(),
+    .where = std::move(where),
+    .picture = sk_ref_sp(pic),
+    .surf = std::move(surf),
+  };
+
+  m_rasterMananger.raster(0, std::move(t));
 }
 
 namespace raster
 {
 Ref<RasterNode> make(
-  GrRecordingContext* device,
-  Ref<Viewport>       viewport,
-  Ref<ZoomerNode>     zoomer,
-  Ref<RenderNode>     child)
+  RasterExecutor* executor,
+  Ref<Viewport>   viewport,
+  Ref<ZoomerNode> zoomer,
+  Ref<RenderNode> child)
 {
-  return RasterNodeImpl::Make(
-    device,
-    nullptr,
-    std::move(viewport),
-    std::move(zoomer),
-    std::move(child));
+  return RasterNodeImpl::Make(executor, std::move(viewport), std::move(zoomer), std::move(child));
 }
 } // namespace raster
 } // namespace VGG::layer

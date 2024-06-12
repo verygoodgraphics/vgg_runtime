@@ -54,6 +54,7 @@ public:
 
   // configure
   virtual void setFitToViewportEnabled(bool enabled) = 0;
+  virtual void setBackgroundColor(uint32_t color) = 0; // ARGB
 
   /*
     "topLeft"

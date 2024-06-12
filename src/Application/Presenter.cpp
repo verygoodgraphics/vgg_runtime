@@ -448,4 +448,10 @@ std::unique_ptr<LayoutContext> Presenter::layoutContext()
 {
   return m_view->layoutContext();
 }
+
+void Presenter::setBackgroundColor(uint32_t color)
+{
+  m_view->setBackgroundColor(color);
+}
+
 } // namespace VGG

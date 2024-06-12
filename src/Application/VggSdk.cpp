@@ -552,4 +552,19 @@ bool VggSdk::presentFrame(const std::string& id, const FrameOptions& inOpts)
   app::FrameOptions opts{ inOpts.resetScrollPosition, toUIAnimationOption(inOpts.animation) };
   return c->presentFrame(id, opts);
 }
+
+void VggSdk::setBackgroundColor(uint32_t color)
+{
+  if (const auto& p = presenter())
+    p->setBackgroundColor(color);
+}
+
+std::shared_ptr<Presenter> VggSdk::presenter()
+{
+  if (const auto& currentEnv = env())
+    return currentEnv->presenter();
+
+  return nullptr;
+}
+
 } // namespace VGG

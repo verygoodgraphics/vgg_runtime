@@ -117,6 +117,7 @@ public:
   static std::weak_ptr<VggEnv> getDefault();
   static std::weak_ptr<VggEnv> get(const std::string& key);
   static void                  set(const std::string& key, std::weak_ptr<VggEnv> env);
+  static void                  erase(const std::string& key);
 
 private:
   static std::unordered_map<std::string, std::weak_ptr<VggEnv>>& getRepo();

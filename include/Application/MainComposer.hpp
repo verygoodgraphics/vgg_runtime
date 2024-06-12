@@ -48,11 +48,7 @@ class MainComposer
 
 public:
   MainComposer(PlatformComposer* platformComposer, std::shared_ptr<Mouse> mouse);
-
-  ~MainComposer()
-  {
-    m_platformComposer->teardown();
-  }
+  ~MainComposer();
 
   auto env()
   {

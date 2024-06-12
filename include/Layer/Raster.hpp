@@ -28,15 +28,16 @@ class RasterNode;
 class Viewport;
 class RenderNode;
 class ZoomerNode;
+class RasterExecutor;
 
 namespace raster
 {
 
 Ref<RasterNode> make(
-  GrRecordingContext* device,
-  Ref<Viewport>       viewport,
-  Ref<ZoomerNode>     zoomer,
-  Ref<RenderNode>     renderObject);
+  RasterExecutor* executor,
+  Ref<Viewport>   viewport,
+  Ref<ZoomerNode> zoomer,
+  Ref<RenderNode> renderObject);
 
 Ref<RasterNode> makeEmptyRaster(Ref<RenderNode> renderObject);
 

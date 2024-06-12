@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "Executor.hpp"
+#include "TileTask.hpp"
 #include "Layer/Core/VBounds.hpp"
 #include "Layer/Core/VNode.hpp"
 #include "Layer/LRUCache.hpp"
@@ -32,38 +33,16 @@ namespace VGG::layer
 
 class RasterExecutor;
 
-class RasterManager : public VNode
+class RasterManager
 {
 public:
-  class RasterTask
-  {
-  public:
-    RasterTask(
-      RasterManager*   mgr,
-      int              index,
-      sk_sp<SkPicture> picture,
-      const Boundsi&   damageBounds,
-      sk_sp<SkSurface> surf = nullptr)
-      : damageBounds(damageBounds)
-      , picture(std::move(picture))
-      , surf(std::move(surf))
-      , mgr(mgr)
-      , index(-1)
-    {
-    }
-    Boundsi          damageBounds;
-    sk_sp<SkPicture> picture;
-    sk_sp<SkSurface> surf; // optional, null indicates this is a new surface
-    RasterManager*   mgr;
-    int              index;
-  };
-
   class RasterResult
   {
   public:
+    RasterResult() = default;
     RasterResult(RasterManager* mgr, sk_sp<SkSurface> surf, int index)
-      : m_mgr(mgr)
-      , m_surf(std::move(surf))
+      : surf(std::move(surf))
+      , m_mgr(mgr)
       , m_index(index)
     {
     }
@@ -73,30 +52,26 @@ public:
       return { m_rx, m_ry };
     }
 
-    sk_sp<SkImage> image() const
-    {
-      return m_surf->makeImageSnapshot();
-    }
+    sk_sp<SkSurface> surf = nullptr;
 
   private:
-    RasterManager*   m_mgr;
-    sk_sp<SkSurface> m_surf;
-    int              m_rx, m_ry;
-    int              m_index;
+    RasterManager* m_mgr = nullptr;
+    int            m_rx = 0, m_ry = 0;
+    int            m_index = -1;
   };
 
-  RasterManager(
-    VRefCnt*        cnt,
-    int             tileWidth,
-    int             tileHeight,
-    const Bounds&   bounds,
-    RasterExecutor* executor)
-    : VNode(cnt)
-    , m_executor(executor)
+  RasterManager(int tileWidth, int tileHeight, const Boundsi& bounds, RasterExecutor* executor)
+    : m_executor(executor)
     , m_tileWidth(tileWidth)
     , m_tileHeight(tileHeight)
+    , m_bounds(bounds)
     , m_cache(40)
   {
+  }
+
+  std::pair<int, int> size() const
+  {
+    return { m_tileWidth, m_tileHeight };
   }
 
   int width() const
@@ -114,23 +89,30 @@ public:
     return m_bounds;
   }
 
-  void raster(std::vector<RasterTask> tasks);
+  void wait();
+
+  void raster(std::vector<TileTask> tasks);
+  void raster(int key, RasterTask tasks);
 
   void query(const std::vector<int>& query, std::vector<RasterResult>& result);
+  std::optional<RasterResult> query(int index);
 
 private:
   RasterExecutor* m_executor;
   int             m_tileWidth, m_tileHeight;
   Boundsi         m_bounds;
-  using ResultCache = LRUCache<int, std::future<RasterResult>>;
+  using ResultCache = LRUCache<int, RasterResult>;
+
   ResultCache m_cache;
+
+  std::queue<std::pair<int, std::future<RasterResult>>> m_tasks;
 };
 
 class RasterExecutor : public Executor
 {
 public:
-  virtual std::future<RasterManager::RasterResult> addRasterTask(
-    RasterManager::RasterTask task) = 0;
+  virtual std::future<RasterManager::RasterResult> addRasterTask(TileTask task) = 0;
+  virtual std::future<RasterManager::RasterResult> addRasterTask(RasterTask task) = 0;
 };
 
 class SimpleRasterExecutor : public RasterExecutor
@@ -142,14 +124,14 @@ public:
   {
   }
 
-  Future addRasterTask(RasterManager::RasterTask rasterTask) override;
+  Future addRasterTask(TileTask rasterTask) override;
+  Future addRasterTask(RasterTask rasterTask) override;
 
   void add(Task task) override
   {
     task();
   }
 
-protected:
   GrRecordingContext* context()
   {
     return m_context;
@@ -157,6 +139,8 @@ protected:
 
 private:
   GrRecordingContext* m_context;
+  SimpleRasterExecutor(SimpleRasterExecutor&&) = delete;
+  SimpleRasterExecutor&& operator=(SimpleRasterExecutor&&) = delete;
 };
 
 } // namespace VGG::layer

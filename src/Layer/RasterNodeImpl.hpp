@@ -25,12 +25,11 @@ class RasterNodeImpl : public RasterNode
 {
 public:
   RasterNodeImpl(
-    VRefCnt*            cnt,
-    GrRecordingContext* device,
-    RasterExecutor*     executor,
-    Ref<Viewport>       viewport,
-    Ref<ZoomerNode>     zoomer,
-    Ref<RenderNode>     child);
+    VRefCnt*        cnt,
+    RasterExecutor* executor,
+    Ref<Viewport>   viewport,
+    Ref<ZoomerNode> zoomer,
+    Ref<RenderNode> child);
 
   VGG_CLASS_MAKE(RasterNodeImpl);
 
@@ -48,6 +47,7 @@ public:
 
 private:
   sk_sp<SkSurface> m_gpuSurface;
+  RasterManager    m_rasterMananger;
   Bounds           m_viewportBounds;
 };
 } // namespace VGG::layer

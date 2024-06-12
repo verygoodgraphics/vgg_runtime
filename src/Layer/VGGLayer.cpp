@@ -405,15 +405,6 @@ void VLayer::setRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
     std::move(node));
 }
 
-void VLayer::setRasterNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
-{
-  d_ptr->rasterNode = raster::make(
-    d_ptr->skiaContext->context(),
-    d_ptr->viewport,
-    std::move(transform),
-    std::move(node));
-}
-
 } // namespace VGG::layer
 
 namespace

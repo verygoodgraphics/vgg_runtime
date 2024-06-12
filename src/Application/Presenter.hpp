@@ -110,6 +110,7 @@ public:
   {
     m_contentMode = mode;
   }
+  void setBackgroundColor(uint32_t color);
 
   virtual int currentPageIndex()
   {

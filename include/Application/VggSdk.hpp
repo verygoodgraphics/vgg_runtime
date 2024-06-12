@@ -31,6 +31,7 @@ namespace VGG
 class Daruma;
 class VggEnv;
 class Controller;
+class Presenter;
 namespace app
 {
 struct PopOptions;
@@ -78,6 +79,7 @@ public:
   bool              setLaunchFrameById(const std::string& id) override;
   const std::string currentTheme() const override;
   bool              setCurrentTheme(const std::string& theme) override;
+  void              setBackgroundColor(uint32_t color) override;
 
   // frame
   bool pushFrame(const std::string& id, const FrameOptions& opts) override;
@@ -168,10 +170,11 @@ public:
 private:
   std::shared_ptr<JsonDocument> getDesignDocument(
     IndexType index = main_or_editor_daruma_index) const;
-  std::shared_ptr<VGG::Daruma> getModel(IndexType index = main_or_editor_daruma_index) const;
+  std::shared_ptr<Daruma> getModel(IndexType index = main_or_editor_daruma_index) const;
 
-  std::shared_ptr<VGG::VggEnv>     env() const;
-  std::shared_ptr<VGG::Controller> controller();
+  std::shared_ptr<VggEnv>     env() const;
+  std::shared_ptr<Controller> controller();
+  std::shared_ptr<Presenter>  presenter();
 };
 
 } // namespace VGG

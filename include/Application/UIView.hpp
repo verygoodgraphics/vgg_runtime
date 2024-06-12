@@ -230,6 +230,7 @@ public:
   void enableZoomer(bool enabled);
 
   void setDrawBackground(bool drawBackground);
+  void setBackgroundColor(uint32_t color);
 
   void triggerMouseEnter();
 

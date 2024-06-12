@@ -69,6 +69,7 @@ TEST_F(ContainerTestSuite, Configure)
 
   // configure before loading vgg file
   EXPECT_NO_THROW(sdk->setFitToViewportEnabled(true));
+  EXPECT_NO_THROW(sdk->setBackgroundColor(0xFFFF0000));
 
   std::string filePath = "testDataDir/frame_list/";
   auto        result = m_sut->load(filePath);
@@ -77,6 +78,8 @@ TEST_F(ContainerTestSuite, Configure)
   // configure after loading vgg file
   EXPECT_NO_THROW(sdk->setFitToViewportEnabled(false));
   EXPECT_NO_THROW(sdk->setFitToViewportEnabled(true));
+
+  EXPECT_NO_THROW(sdk->setBackgroundColor(0xFFFF0000));
 }
 
 TEST_F(ContainerTestSuite, Render)
@@ -126,6 +129,21 @@ TEST_F(ContainerTestSuite, HandleEvent)
 
   // Then
   EXPECT_TRUE(called);
+}
+
+TEST_F(ContainerTestSuite, SetBackgrondColor)
+{
+  // Given
+  std::unique_ptr<layer::SkiaGraphicsContext> graphicsContext{ new MockSkiaGraphicsContext };
+  m_sut->setGraphicsContext(graphicsContext, 600, 800);
+
+  std::string filePath = "testDataDir/vgg-daruma-2";
+  auto        result = m_sut->load(filePath);
+  EXPECT_TRUE(result);
+
+  // Then
+  auto sdk = m_sut->sdk();
+  EXPECT_NO_THROW(sdk->setBackgroundColor(0xFFFF0000));
 }
 
 TEST_F(ContainerTestSuite, Sdk)

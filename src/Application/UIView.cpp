@@ -961,6 +961,11 @@ void UIView::setDrawBackground(bool drawBackground)
   m_impl->setBackgroundColor(color);
 }
 
+void UIView::setBackgroundColor(uint32_t color)
+{
+  m_impl->setBackgroundColor(color);
+}
+
 layer::Ref<layer::SceneNode> UIView::getSceneNode()
 {
   return m_impl->sceneNode();

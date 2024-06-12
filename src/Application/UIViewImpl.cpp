@@ -214,7 +214,8 @@ void UIViewImpl::translate(float dx, float dy)
 
 void UIViewImpl::setBackgroundColor(uint32_t color)
 {
-  m_layer->setBackgroundColor(color);
+  if (m_layer)
+    m_layer->setBackgroundColor(color);
 }
 
 void UIViewImpl::frame()

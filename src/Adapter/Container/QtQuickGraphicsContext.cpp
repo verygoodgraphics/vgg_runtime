@@ -63,7 +63,7 @@ void QtQuickGraphicsContext::onInitProperties(layer::ContextProperty& property)
 SurfaceCreateProc QtQuickGraphicsContext::surfaceCreateProc()
 {
   auto fboID = m_fboID;
-  return [fboID](GrDirectContext* context, int w, int h, const VGG::layer::ContextConfig& cfg)
+  return [fboID](GrRecordingContext* context, int w, int h, const VGG::layer::ContextConfig& cfg)
   {
     GrGLFramebufferInfo info;
     info.fFBOID = fboID;

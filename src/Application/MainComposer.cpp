@@ -54,6 +54,12 @@ MainComposer::MainComposer(PlatformComposer* platformComposer, std::shared_ptr<M
   m_env->setPresenter(m_presenter);
 }
 
+MainComposer::~MainComposer()
+{
+  VggEnv::erase(m_env->getEnv());
+  m_platformComposer->teardown();
+}
+
 void MainComposer::enableEdit(int top, int right, int bottom, int left)
 {
   m_editView.reset(new UIView);

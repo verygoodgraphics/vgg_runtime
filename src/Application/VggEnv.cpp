@@ -39,6 +39,11 @@ void VggEnv::set(const std::string& key, std::weak_ptr<VggEnv> env)
   getRepo()[key] = env;
 }
 
+void VggEnv::erase(const std::string& key)
+{
+  getRepo().erase(key);
+}
+
 std::unordered_map<std::string, std::weak_ptr<VggEnv>>& VggEnv::getRepo()
 {
   static std::unordered_map<std::string, std::weak_ptr<VggEnv>> repo;

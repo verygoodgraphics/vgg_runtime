@@ -64,9 +64,9 @@ RasterNode::RasterNode(
   Ref<ZoomerNode>     zoomer,
   Ref<RenderNode>     child)
   : TransformEffectNode(cnt, ensureTransformNode(viewport, std::move(zoomer)), std::move(child))
+  , m_viewport(viewport)
   , m_device(device)
   , m_executor(executor)
-  , m_viewport(viewport)
 {
 }
 

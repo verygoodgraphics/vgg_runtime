@@ -102,7 +102,7 @@ SimpleRasterExecutor::Future SimpleRasterExecutor::addRasterTask(RasterTask rast
     [&]() -> RasterManager::RasterResult
     {
       sk_sp<SkSurface> surf = std::move(rasterTask.surf);
-      if (!rasterTask.surf)
+      if (!surf)
       {
         surf = rasterSurface(context(), rasterTask.width, rasterTask.height);
         auto canvas = surf->getCanvas();
@@ -112,10 +112,13 @@ SimpleRasterExecutor::Future SimpleRasterExecutor::addRasterTask(RasterTask rast
       auto canvas = surf->getCanvas();
       for (const auto& b : rasterTask.where)
       {
+        const auto rasterRect = b.src.map(rasterTask.matrix);
         canvas->save();
-        canvas->translate(-b.src.x() + b.dst.x, -b.src.y() + b.dst.y);
+        canvas->translate(b.dst.x - rasterRect.x(), b.dst.y - rasterRect.y());
+        canvas->concat(toSkMatrix(rasterTask.matrix));
         canvas->clipRect(SkRect::MakeXYWH(b.src.x(), b.src.y(), b.src.width(), b.src.height()));
-        canvas->drawPicture(rasterTask.picture.get());
+        canvas->clear(rasterTask.bgColor);
+        rasterTask.picture->playback(canvas);
         canvas->restore();
       }
       return RasterManager::RasterResult(nullptr, std::move(surf), -1);

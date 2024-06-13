@@ -71,8 +71,7 @@ UIView::~UIView() = default;
 
 bool UIView::onEvent(UEvent evt, void* userData)
 {
-  if (m_impl->isAnimating())
-    return false;
+  VERBOSE("UIView::onEvent, 0x%x", evt.type);
 
   if (m_isZoomerEnabled && m_impl->onEvent(evt, userData))
   {

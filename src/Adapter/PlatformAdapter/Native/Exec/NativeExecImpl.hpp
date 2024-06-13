@@ -47,7 +47,7 @@ namespace VGG
 struct NativeEvalTask
 {
   std::string     m_code;
-  NativeExecImpl* m_exec_impl_ptr;
+  NativeExecImpl* m_exec_impl_ptr = nullptr;
 };
 
 class NativeExecImpl
@@ -82,10 +82,10 @@ private:
     DEAD,
   };
   volatile ExecState            m_state{ INIT };
-  node::CommonEnvironmentSetup* m_setup;
-  v8::Isolate*                  m_isolate;
-  node::Environment*            m_env;
-  uv_loop_t*                    m_loop;
+  node::CommonEnvironmentSetup* m_setup = nullptr;
+  v8::Isolate*                  m_isolate = nullptr;
+  node::Environment*            m_env = nullptr;
+  uv_loop_t*                    m_loop = nullptr;
 
   std::queue<NativeEvalTask*> m_tasks;
   std::mutex                  m_tasks_mutex;

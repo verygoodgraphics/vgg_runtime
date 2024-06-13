@@ -48,6 +48,7 @@ struct VTouchEvent;
 namespace VGG
 {
 
+class Statistic;
 class Controller : public std::enable_shared_from_this<Controller>
 {
 public:
@@ -90,7 +91,7 @@ public:
     std::shared_ptr<Presenter> presenter,
     std::shared_ptr<Editor>    editor,
     ERunMode                   mode = ERunMode::NORMAL_MODE);
-  ~Controller() = default;
+  ~Controller();
 
 public:                                       // configure
   void setFitToViewportEnabled(bool enabled); // should be called before loading vgg file
@@ -207,9 +208,11 @@ private:
   LayoutContext*              layoutContext();
   const LayoutNode*           currentFrame() const;
   std::shared_ptr<LayoutNode> currentFrame();
+  Statistic*                  statistic();
 
 private:
   std::unique_ptr<LayoutContext> m_layoutContext;
+  std::unique_ptr<Statistic>     m_statistic;
 };
 
 } // namespace VGG

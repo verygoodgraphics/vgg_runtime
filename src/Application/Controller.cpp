@@ -121,6 +121,8 @@ int versionCompare(const std::string& v1, const std::string& v2)
   return 0;
 }
 
+} // namespace
+
 class Statistic
 {
   using TimePointType = std::chrono::system_clock::time_point;
@@ -139,12 +141,6 @@ private:
   }
 
 public:
-  static std::shared_ptr<Statistic> sharedInstance()
-  {
-    static auto s_sharedInstance = std::shared_ptr<Statistic>(new Statistic);
-    return s_sharedInstance;
-  }
-
   void report()
   {
     using namespace std::chrono;
@@ -212,8 +208,6 @@ private:
   }
 };
 
-} // namespace
-
 Controller::Controller(
   std::weak_ptr<IVggEnv>     env,
   std::shared_ptr<RunLoop>   runLoop,
@@ -228,6 +222,7 @@ Controller::Controller(
   , m_editor{ editor }
   , m_reporter{ new Reporter{ env, jsEngine } }
   , m_mode(mode)
+  , m_statistic(new Statistic)
 {
   assert(m_runLoop);
 
@@ -236,6 +231,8 @@ Controller::Controller(
     m_editor->setListener(m_reporter);
   }
 }
+
+Controller::~Controller() = default;
 
 bool Controller::start(
   const std::string& filePath,
@@ -346,7 +343,7 @@ std::shared_ptr<app::AppRenderable> Controller::editor()
 
 void Controller::initModel(const char* designDocSchemaFilePath, const char* layoutDocSchemaFilePath)
 {
-  Statistic::sharedInstance()->startLoading();
+  statistic()->startLoading();
 
   if (designDocSchemaFilePath)
   {
@@ -394,7 +391,7 @@ void Controller::start()
   observeModelState();
   observeViewEvent();
 
-  Statistic::sharedInstance()->countTreeNodes(m_layout->layoutTree());
+  statistic()->countTreeNodes(m_layout->layoutTree());
 }
 
 void Controller::startEditing()
@@ -564,15 +561,15 @@ std::shared_ptr<ViewModel> Controller::generateViewModel(
   std::shared_ptr<Daruma> model,
   Layout::Size            size)
 {
-  Statistic::sharedInstance()->startExpanding();
+  statistic()->startExpanding();
   StartRunning startRunning{ model };
-  Statistic::sharedInstance()->endExpanding();
+  statistic()->endExpanding();
   m_layout = startRunning.layout();
   m_expander = startRunning.expander();
 
   scaleContent();
 
-  Statistic::sharedInstance()->endFittingPage();
+  statistic()->endFittingPage();
 
   auto viewModel = std::make_shared<ViewModel>();
   viewModel->model = m_model;
@@ -631,8 +628,8 @@ bool Controller::hasDirtyEditor()
 
 void Controller::onFirstRender()
 {
-  Statistic::sharedInstance()->endFirstRender();
-  Statistic::sharedInstance()->report();
+  statistic()->endFirstRender();
+  statistic()->report();
 
   ASSERT(m_reporter);
   m_reporter->onFirstRender();
@@ -1072,6 +1069,11 @@ const LayoutNode* Controller::currentFrame() const
 {
   ASSERT(m_layout);
   return m_layout->layoutTree()->children()[m_presenter->currentPageIndex()].get();
+}
+
+Statistic* Controller::statistic()
+{
+  return m_statistic.get();
 }
 
 } // namespace VGG

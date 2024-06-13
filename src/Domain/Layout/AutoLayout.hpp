@@ -156,7 +156,7 @@ private:
   bool isFitContentWidth();
   bool isFitContentHeight();
   void isAsFixedSize(bool& inOutWidth, bool& inOutHeight);
-  bool isSmartSpacingAndFlexSpaceBetweenAndNoWrap();
+  bool shouldConfigureSmartly();
   bool isEmptyContainer();
   bool isOnlyChild();
   bool isFirstChild();

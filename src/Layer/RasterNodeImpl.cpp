@@ -171,35 +171,16 @@ void RasterNodeImpl::raster(const std::vector<Bounds>& bounds)
       continue;
     const auto rbx = rasterRect.x();
     const auto rby = rasterRect.y();
-    const auto rbw = rasterRect.width();
-    const auto rbh = rasterRect.height();
+    // const auto rbw = rasterRect.width();
+    // const auto rbh = rasterRect.height();
+    const auto worldRect = rasterRect.map(getTransform()->getInversedMatrix());
     {
-      const auto worldRect = rasterRect.map(glm::inverse(getLocalMatrix()));
-      where.push_back(
-        RasterTask::Where{ .dst = { (int)rbx, (int)rby }, .src = worldRect.toIntBounds() });
-    }
-
-    if (false)
-    {
-      auto surf = rasterSurface(device(), rbw, rbh);
-      // ASSERT(getTransform()->getMatrix() == m_deviceMatrix * m_rasterMatrix);
-      ASSERT(surf);
-      auto cvs = surf->getCanvas();
-      ASSERT(cvs);
-      cvs->save();
-      cvs->clear(SK_ColorWHITE);
-      cvs->translate(-rbx, -rby);
-      cvs->concat(toSkMatrix(getTransform()->getMatrix()));
-      // cvs->clipRect(SkRect::MakeXYWH(0, 0, rbh, rbw));
-      pic->playback(cvs);
-      cvs->restore();
-
-      blit(device(), m_gpuSurface.get(), surf, rbx, rby);
+      where.push_back(RasterTask::Where{ .dst = { (int)rbx, (int)rby }, .src = worldRect });
     }
   }
 
   sk_sp<SkSurface> surf;
-  if (auto res = m_rasterMananger.query(0))
+  if (auto res = m_rasterMananger.query(0); res)
   {
     surf = std::move(res->surf);
   }
@@ -208,12 +189,51 @@ void RasterNodeImpl::raster(const std::vector<Bounds>& bounds)
     .bgColor = SK_ColorWHITE,
     .width = (int)m_viewportBounds.width(),
     .height = (int)m_viewportBounds.height(),
+    .matrix = getRasterMatrix(),
     .where = std::move(where),
     .picture = sk_ref_sp(pic),
     .surf = std::move(surf),
   };
 
   m_rasterMananger.raster(0, std::move(t));
+}
+
+Bounds RasterNodeImpl::onRevalidate(Revalidation* inv, const glm::mat3& ctm)
+{
+  return RasterNode::onRevalidate(inv, ctm);
+  // Bounds bounds;
+  // if (getTransform())
+  // {
+  //   getTransform()->revalidate();
+  // }
+  // if (getChild())
+  // {
+  //   if (getTransform())
+  //   {
+  //     const auto matrix = getTransform()->getMatrix();
+  //     bounds = getChild()->revalidate(inv, ctm);
+  //     bounds = bounds.map(matrix);
+  //   }
+  //   else
+  //   {
+  //     bounds = getChild()->revalidate(inv, ctm);
+  //   }
+  // }
+  //
+  // if (m_viewport)
+  //   m_viewport->revalidate();
+  //
+  // auto t = getTransform();
+  // if (t)
+  // {
+  //   const auto& totalMatrix = t->getMatrix();
+  //   m_localMatrix[2][0] = totalMatrix[2][0];
+  //   m_localMatrix[2][1] = totalMatrix[2][1];
+  //   m_rasterMatrix = totalMatrix;
+  //   m_rasterMatrix[2][0] = 0.0f;
+  //   m_rasterMatrix[2][1] = 0.0f;
+  // }
+  // return bounds;
 }
 
 namespace raster

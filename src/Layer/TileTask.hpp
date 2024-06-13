@@ -54,10 +54,11 @@ public:
     {
       int x, y;
     } dst;
-    Boundsi src;
+    Bounds src;
   };
   SkColor            bgColor;
   int                width, height;
+  glm::mat3          matrix;
   std::vector<Where> where;
   sk_sp<SkPicture>   picture;
   sk_sp<SkSurface>   surf; // optional, null indicates a new surface should be created, and the

@@ -45,6 +45,9 @@ public:
     return Bounds();
   }
 
+protected:
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3& ctm) override;
+
 private:
   sk_sp<SkSurface> m_gpuSurface;
   RasterManager    m_rasterMananger;

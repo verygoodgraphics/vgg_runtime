@@ -155,8 +155,8 @@ public:
     auto p2 = mat * glm::vec3{ glm::vec2{ m_bottomRight.x, m_topLeft.y }, 1.0 };
     auto p3 = mat * glm::vec3{ m_bottomRight, 1.0 };
     auto p4 = mat * glm::vec3{ glm::vec2{ m_topLeft.x, m_bottomRight.y }, 1.0 };
-    auto a = std::initializer_list<T>{ p1.x, p2.x, p3.x, p4.x };
-    auto b = std::initializer_list<T>{ p1.y, p2.y, p3.y, p4.y };
+    auto a = std::initializer_list<float>{ p1.x, p2.x, p3.x, p4.x };
+    auto b = std::initializer_list<float>{ p1.y, p2.y, p3.y, p4.y };
     const auto [minX, maxX] = std::minmax_element(a.begin(), a.end());
     const auto [minY, maxY] = std::minmax_element(b.begin(), b.end());
     return BoundsBase<float>{ *minX, *minY, *maxX - *minX, *maxY - *minY };

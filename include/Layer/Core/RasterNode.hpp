@@ -63,7 +63,10 @@ public:
   }
 
 protected:
-  Bounds onRevalidate(Revalidation* inv, const glm::mat3& ctm) override;
+  Bounds        onRevalidate(Revalidation* inv, const glm::mat3& ctm) override;
+  Ref<Viewport> m_viewport;
+  glm::mat3     m_rasterMatrix = glm::mat3{ 1.0 };
+  glm::mat3     m_localMatrix = glm::mat3{ 1.0 };
 
   Viewport* viewport() const
   {
@@ -85,9 +88,6 @@ protected:
 private:
   GrRecordingContext* m_device{ nullptr };
   RasterExecutor*     m_executor{ nullptr };
-  Ref<Viewport>       m_viewport;
-  glm::mat3           m_rasterMatrix = glm::mat3{ 1.0 };
-  glm::mat3           m_localMatrix = glm::mat3{ 1.0 };
 };
 
 std::vector<Bounds> mergeBounds(std::vector<Bounds> bounds);

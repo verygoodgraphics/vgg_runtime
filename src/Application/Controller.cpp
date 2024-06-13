@@ -684,7 +684,10 @@ bool Controller::handleMouseWheel(float x, float y)
   y *= 100;
 
   const auto& pageSize = currentPageSize();
-  return m_presenter->handleTranslate(pageSize.width, pageSize.height, x, y);
+  const bool  success = m_presenter->handleTranslate(pageSize.width, pageSize.height, x, y);
+  if (success)
+    m_presenter->triggerMouseEnter();
+  return success;
 }
 
 bool Controller::handleTouchEvent(const VTouchEvent& evt)

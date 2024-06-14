@@ -794,7 +794,7 @@ void AutoLayout::configureFlexItemMargin()
 
   bool shouldConfigureStart{ false };
   bool shouldConfigureEnd{ false };
-  if (container->shouldConfigureSmartly())
+  if (container->isSmartSpacingAndFlexSpaceBetweenAndNoWrap())
   {
     if (isOnlyChild())
     {
@@ -1029,45 +1029,26 @@ bool AutoLayout::isFitContentHeight()
   return sharedRule->height.value.types == Length::ETypes::FIT_CONTENT;
 }
 
-bool AutoLayout::shouldConfigureSmartly()
+bool AutoLayout::isSmartSpacingAndFlexSpaceBetweenAndNoWrap()
 {
   auto sharedRule = rule.lock();
   if (!sharedRule)
-    return false;
-  const auto detail = sharedRule->getFlexContainerRule();
-  if (!detail)
-    return false;
-
-  if (!detail->smartSpacing)
-    return false;
-  if (detail->justifyContent != FlexboxLayout::EJustifyContent::SPACE_BETWEEN)
-    return false;
-  if (detail->wrap != FlexboxLayout::EWrap::NO_WRAP)
-    return false;
-
-  auto node = getFlexContainer();
-  ASSERT(node);
-
-  const bool checkWidth = direction_row == node->get_direction();
-  const bool chickHeight = direction_column == node->get_direction();
-  bool       noAuto = true;
-  for (uint32_t i = 0; i < node->child_count(); ++i)
   {
-    auto c = node->get_child(i);
-    ASSERT(c);
-    if (checkWidth && unit_auto == std::get<0>(c->get_width()))
-    {
-      noAuto = false;
-      break;
-    }
-    if (chickHeight && unit_auto == std::get<0>(c->get_height()))
-    {
-      noAuto = false;
-      break;
-    }
+    return false;
   }
 
-  return noAuto;
+  const auto detail = sharedRule->getFlexContainerRule();
+  if (!detail)
+  {
+    return false;
+  }
+  if (!detail->smartSpacing)
+  {
+    return false;
+  }
+
+  return detail->justifyContent == FlexboxLayout::EJustifyContent::SPACE_BETWEEN &&
+         detail->wrap == FlexboxLayout::EWrap::NO_WRAP;
 }
 
 bool AutoLayout::isEmptyContainer()
@@ -1205,10 +1186,7 @@ void AutoLayout::configureFlexContainer(Rule::FlexboxLayout* layout)
   if (layout->smartSpacing)
   {
     auto isHorizontalDirection = layout->direction == FlexboxLayout::EDirection::HORIZONTAL;
-    if (
-      shouldConfigureSmartly() ||
-      ((layout->justifyContent == FlexboxLayout::EJustifyContent::SPACE_BETWEEN) &&
-       (layout->wrap == FlexboxLayout::EWrap::WRAP)))
+    if (layout->justifyContent == FlexboxLayout::EJustifyContent::SPACE_BETWEEN)
     {
       node->set_gap(isHorizontalDirection ? gap_column : gap_row, 0);
     }

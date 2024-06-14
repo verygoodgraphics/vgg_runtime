@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "RasterTask.hpp"
+#include "Renderer.hpp"
 #include "RasterNodeImpl.hpp"
 
 #include "Layer/RasterManager.hpp"
-#include "Renderer.hpp"
 #include "Layer/Raster.hpp"
 
 #include <core/SkSurface.h>
@@ -26,11 +27,11 @@ namespace VGG::layer
 {
 
 RasterNodeImpl::RasterNodeImpl(
-  VRefCnt*        cnt,
-  RasterExecutor* executor,
-  Ref<Viewport>   viewport,
-  Ref<ZoomerNode> zoomer,
-  Ref<RenderNode> child)
+  VRefCnt*                       cnt,
+  RasterManager::RasterExecutor* executor,
+  Ref<Viewport>                  viewport,
+  Ref<ZoomerNode>                zoomer,
+  Ref<RenderNode>                child)
   : RasterNode(
       cnt,
       static_cast<SimpleRasterExecutor*>(executor)->context(),
@@ -162,7 +163,7 @@ void RasterNodeImpl::raster(const std::vector<Bounds>& bounds)
   auto pic = c->picture();
   ASSERT(pic);
 
-  std::vector<RasterTask::Where> where;
+  std::vector<SurfaceTask::Where> where;
   where.reserve(bounds.size());
   for (const auto& dr : bounds)
   {
@@ -175,27 +176,24 @@ void RasterNodeImpl::raster(const std::vector<Bounds>& bounds)
     // const auto rbh = rasterRect.height();
     const auto worldRect = rasterRect.map(getTransform()->getInversedMatrix());
     {
-      where.push_back(RasterTask::Where{ .dst = { (int)rbx, (int)rby }, .src = worldRect });
+      where.push_back(SurfaceTask::Where{ .dst = { (int)rbx, (int)rby }, .src = worldRect });
     }
   }
-
   sk_sp<SkSurface> surf;
   if (auto res = m_rasterMananger.query(0); res)
   {
     surf = std::move(res->surf);
   }
 
-  RasterTask t{
-    .bgColor = SK_ColorWHITE,
-    .width = (int)m_viewportBounds.width(),
-    .height = (int)m_viewportBounds.height(),
-    .matrix = getRasterMatrix(),
-    .where = std::move(where),
-    .picture = sk_ref_sp(pic),
-    .surf = std::move(surf),
-  };
-
-  m_rasterMananger.raster(0, std::move(t));
+  m_rasterMananger.raster(std::make_unique<SurfaceTask>(
+    0,
+    SK_ColorWHITE,
+    (int)m_viewportBounds.width(),
+    (int)m_viewportBounds.height(),
+    getRasterMatrix(),
+    std::move(where),
+    sk_ref_sp(pic),
+    std::move(surf)));
 }
 
 Bounds RasterNodeImpl::onRevalidate(Revalidation* inv, const glm::mat3& ctm)
@@ -239,10 +237,10 @@ Bounds RasterNodeImpl::onRevalidate(Revalidation* inv, const glm::mat3& ctm)
 namespace raster
 {
 Ref<RasterNode> make(
-  RasterExecutor* executor,
-  Ref<Viewport>   viewport,
-  Ref<ZoomerNode> zoomer,
-  Ref<RenderNode> child)
+  RasterManager::RasterExecutor* executor,
+  Ref<Viewport>                  viewport,
+  Ref<ZoomerNode>                zoomer,
+  Ref<RenderNode>                child)
 {
   return RasterNodeImpl::Make(executor, std::move(viewport), std::move(zoomer), std::move(child));
 }

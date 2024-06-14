@@ -25,11 +25,11 @@ class RasterNodeImpl : public RasterNode
 {
 public:
   RasterNodeImpl(
-    VRefCnt*        cnt,
-    RasterExecutor* executor,
-    Ref<Viewport>   viewport,
-    Ref<ZoomerNode> zoomer,
-    Ref<RenderNode> child);
+    VRefCnt*                       cnt,
+    RasterManager::RasterExecutor* executor,
+    Ref<Viewport>                  viewport,
+    Ref<ZoomerNode>                zoomer,
+    Ref<RenderNode>                child);
 
   VGG_CLASS_MAKE(RasterNodeImpl);
 

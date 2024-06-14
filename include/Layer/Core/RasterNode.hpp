@@ -17,6 +17,7 @@
 #pragma once
 #include "Layer/Core/TransformNode.hpp"
 #include "Layer/Core/VNode.hpp"
+#include "Layer/RasterManager.hpp"
 #include "Layer/Renderable.hpp"
 #include "Layer/VGGLayer.hpp"
 #include "Layer/Core/RasterCache.hpp"
@@ -41,12 +42,12 @@ class RasterNode : public TransformEffectNode
 {
 public:
   RasterNode(
-    VRefCnt*            cnt,
-    GrRecordingContext* device,
-    RasterExecutor*     executor,
-    Ref<Viewport>       viewport,
-    Ref<ZoomerNode>     zoomer,
-    Ref<RenderNode>     child);
+    VRefCnt*                       cnt,
+    GrRecordingContext*            device,
+    RasterManager::RasterExecutor* executor,
+    Ref<Viewport>                  viewport,
+    Ref<ZoomerNode>                zoomer,
+    Ref<RenderNode>                child);
 
   virtual void raster(const std::vector<Bounds>& bounds) = 0;
 
@@ -78,7 +79,7 @@ protected:
     return m_device;
   }
 
-  RasterExecutor* executor() const
+  RasterManager::RasterExecutor* executor() const
   {
     return m_executor;
   }
@@ -86,8 +87,8 @@ protected:
   VGG_CLASS_MAKE(RasterNode);
 
 private:
-  GrRecordingContext* m_device{ nullptr };
-  RasterExecutor*     m_executor{ nullptr };
+  GrRecordingContext*            m_device{ nullptr };
+  RasterManager::RasterExecutor* m_executor{ nullptr };
 };
 
 std::vector<Bounds> mergeBounds(std::vector<Bounds> bounds);

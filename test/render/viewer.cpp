@@ -1,5 +1,6 @@
 #include "viewer.hpp"
 #include "Layer/RasterManager.hpp"
+#include "Layer/SimpleRasterExecutor.hpp"
 #include "loop.hpp"
 
 #ifdef IMGUI_ENABLED

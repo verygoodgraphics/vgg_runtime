@@ -29,17 +29,9 @@ namespace VGG::layer
 
 class RasterManager;
 
-class TileTask
+class TileTask : public RasterManager::RasterTask
 {
 public:
-  TileTask(RasterManager* mgr, int index, sk_sp<SkPicture> picture, sk_sp<SkSurface> surf = nullptr)
-    : picture(std::move(picture))
-    , surf(std::move(surf))
-    , mgr(mgr)
-    , index(-1)
-  {
-  }
-
   struct Where
   {
     struct
@@ -48,12 +40,61 @@ public:
     } dst;
     Bounds src;
   };
+  TileTask(
+    RasterManager*     mgr,
+    int                index,
+    std::vector<Where> where,
+    const glm::mat3&   matrix,
+    sk_sp<SkPicture>   picture,
+    sk_sp<SkSurface>   surf = nullptr)
+    : RasterTask(index)
+    , matrix(matrix)
+    , damage(std::move(where))
+    , picture(std::move(picture))
+    , surf(std::move(surf))
+    , mgr(mgr)
+  {
+  }
   SkColor            bgColor;
+  glm::mat3          matrix;
   std::vector<Where> damage;
   sk_sp<SkPicture>   picture;
   sk_sp<SkSurface>   surf; // optional, null indicates this is a new surface
   RasterManager*     mgr;
-  int                index;
+
+  RasterManager::RasterResult execute(GrRecordingContext* context) override
+  {
+    using RR = RasterManager::RasterResult;
+    const auto width = mgr->width();
+    const auto height = mgr->height();
+    if (!surf || surf->width() != width || surf->height() != height)
+    {
+      auto rasterSurface = [](GrRecordingContext* context, int w, int h)
+      {
+        const auto info = SkImageInfo::MakeN32Premul(w, h);
+        return SkSurfaces::RenderTarget(context, skgpu::Budgeted::kYes, info);
+      };
+
+      surf = rasterSurface(context, width, height);
+      ASSERT(surf);
+      auto canvas = surf->getCanvas();
+      canvas->clear(bgColor);
+    }
+
+    auto canvas = surf->getCanvas();
+    for (const auto& b : damage)
+    {
+      const auto rasterRect = b.src.map(matrix);
+      canvas->save();
+      canvas->translate(b.dst.x - rasterRect.x(), b.dst.y - rasterRect.y());
+      canvas->concat(toSkMatrix(matrix));
+      canvas->clipRect(SkRect::MakeXYWH(b.src.x(), b.src.y(), b.src.width(), b.src.height()));
+      canvas->clear(bgColor);
+      picture->playback(canvas);
+      canvas->restore();
+    }
+    return RR(mgr, std::move(surf), index());
+  }
 };
 
 class SurfaceTask : public RasterManager::RasterTask
@@ -124,7 +165,7 @@ public:
       picture->playback(canvas);
       canvas->restore();
     }
-    return RasterManager::RasterResult(nullptr, std::move(surf), -1);
+    return RasterManager::RasterResult(nullptr, std::move(surf), index());
   }
 };
 

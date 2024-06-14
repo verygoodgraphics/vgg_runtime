@@ -52,13 +52,4 @@ void RasterManager::raster(std::unique_ptr<RasterTask> task)
   m_tasks.push({ task->index(), m_executor->addRasterTask(std::move(task)) });
 }
 
-RasterManager::RasterResult::Future SimpleRasterExecutor::addRasterTask(
-  std::unique_ptr<RasterManager::RasterTask> rasterTask)
-{
-  using RR = RasterManager::RasterResult;
-  const auto task =
-    std::make_shared<std::packaged_task<RR()>>([&]() { return rasterTask->execute(context()); });
-  add([task]() { (*task)(); });
-  return task->get_future();
-}
 } // namespace VGG::layer

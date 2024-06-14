@@ -13,11 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "RasterExecutor.hpp"
+#include "SimpleRasterExecutor.hpp"
 
 #include <gpu/GrRecordingContext.h>
 
 namespace VGG::layer
 {
 
+RasterManager::RasterResult::Future SimpleRasterExecutor::addRasterTask(
+  std::unique_ptr<RasterManager::RasterTask> rasterTask)
+{
+  using RR = RasterManager::RasterResult;
+  const auto task =
+    std::make_shared<std::packaged_task<RR()>>([&]() { return rasterTask->execute(context()); });
+  add([task]() { (*task)(); });
+  return task->get_future();
+}
 } // namespace VGG::layer

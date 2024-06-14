@@ -21,6 +21,8 @@
 namespace VGG::layer
 {
 
+class TileTask;
+
 class RasterNodeImpl : public RasterNode
 {
 public:
@@ -49,8 +51,8 @@ protected:
   Bounds onRevalidate(Revalidation* inv, const glm::mat3& ctm) override;
 
 private:
-  sk_sp<SkSurface> m_gpuSurface;
-  RasterManager    m_rasterMananger;
-  Bounds           m_viewportBounds;
+  std::unique_ptr<RasterManager> m_rasterMananger;
+  glm::mat3                      m_prevMatrix;
+  uint32_t                       m_pictureUniqueID = -1;
 };
 } // namespace VGG::layer

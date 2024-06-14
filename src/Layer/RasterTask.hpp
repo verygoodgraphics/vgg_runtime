@@ -55,6 +55,7 @@ public:
     , mgr(mgr)
   {
   }
+
   SkColor            bgColor;
   glm::mat3          matrix;
   std::vector<Where> damage;

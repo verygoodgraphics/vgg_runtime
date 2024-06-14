@@ -63,6 +63,32 @@ public:
     return m_localMatrix;
   }
 
+  glm::mat3 getInversedRasterMatrix() const
+  {
+    ASSERT(!isInvalid());
+    return glm::inverse(m_rasterMatrix); // OPTIMIZED
+  }
+
+  glm::mat3 getInversedLocalMatrix() const
+  {
+    ASSERT(!isInvalid());
+    return glm::inverse(m_localMatrix); // OPTIMIZED
+  }
+
+  Bounds worldBoundsInRasterSpace() const
+  {
+    ASSERT(!isInvalid());
+    ASSERT(getChild());
+    return getChild()->bounds().map(getRasterMatrix());
+  }
+
+  Bounds viewportBoundsInRasterSpace() const
+  {
+    ASSERT(!isInvalid());
+    ASSERT(viewport());
+    return viewport()->bounds().map(getInversedLocalMatrix());
+  }
+
 protected:
   Bounds        onRevalidate(Revalidation* inv, const glm::mat3& ctm) override;
   Ref<Viewport> m_viewport;

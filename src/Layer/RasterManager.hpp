@@ -15,6 +15,8 @@
  */
 #pragma once
 #include "Executor.hpp"
+#include "VSkia.hpp"
+#include "TileIterator.hpp"
 #include "Layer/Core/VBounds.hpp"
 #include "Layer/Core/VNode.hpp"
 #include "Layer/LRUCache.hpp"
@@ -111,20 +113,27 @@ public:
     return m_tileHeight;
   }
 
+  TileIterator hitTiles(const Bounds& rasterHitBounds, const Bounds& rasterBounds) const
+  {
+    return TileIterator(toSkRect(rasterHitBounds), width(), height(), toSkRect(rasterBounds));
+  }
+
   int tileXCount() const
   {
     return m_bounds.width() / m_tileWidth;
   }
 
-  const Bounds& bounds() const
-  {
-    return m_bounds;
-  }
+  void createRasterTask(
+    std::vector<Bounds> damageBounds,
+    const glm::mat3&    rasterMatrix,
+    const Bounds&       worldBounds,
+    sk_sp<SkPicture>    pic);
 
-  void raster(std::unique_ptr<RasterTask> task);
+  void invalidate(std::vector<std::unique_ptr<RasterTask>> tasks);
+
+  void appendRasterTask(std::unique_ptr<RasterTask> task);
 
   void query(const std::vector<int>& query, std::vector<RasterResult>& result);
-
   std::optional<RasterResult> query(int index);
 
 private:
@@ -136,6 +145,8 @@ private:
   Bounds          m_bounds;
   ResultCache     m_cache;
   TaskQueue       m_tasks;
+
+  bool m_allCacheAreInvalid = true;
 };
 
 } // namespace VGG::layer

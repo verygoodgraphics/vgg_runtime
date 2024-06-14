@@ -71,6 +71,8 @@ ShaderPattern::ShaderPattern(const Bounds& bounds, const PatternFit& p)
   }
 
   auto img = loadImage(m_guid);
+  if (!img)
+    return;
   auto mi = img->imageInfo();
 
   // SkImageInfo mi = m_codec->getInfo();
@@ -104,7 +106,9 @@ ShaderPattern::ShaderPattern(const Bounds& bounds, const PatternFill& p)
     return;
   }
 
-  auto        img = loadImage(m_guid);
+  auto img = loadImage(m_guid);
+  if (!img)
+    return;
   auto        mi = img->imageInfo();
   // SkImageInfo mi = m_codec->getInfo();
   float       width = bounds.width();
@@ -137,7 +141,9 @@ ShaderPattern::ShaderPattern(const Bounds& bounds, const PatternStretch& p)
     return;
   }
 
-  auto  img = loadImage(m_guid);
+  auto img = loadImage(m_guid);
+  if (!img)
+    return;
   auto  mi = img->imageInfo();
   // SkImageInfo mi = m_codec->getInfo();
   float width = bounds.width();
@@ -190,7 +196,9 @@ sk_sp<SkShader> ShaderPattern::shader(int frame) const
   }
   if (!m_frames[frame])
   {
-    auto             img = loadImage(m_guid);
+    auto img = loadImage(m_guid);
+    if (!img)
+      return nullptr;
     auto             mi = img->imageInfo();
     // SkImageInfo      ii = m_codec->getInfo();
     SkCodec::Options options;

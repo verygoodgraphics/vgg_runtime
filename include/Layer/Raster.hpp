@@ -19,6 +19,7 @@
 #include "Layer/Core/ViewportNode.hpp"
 #include "Layer/Core/ZoomerNode.hpp"
 #include "Layer/Memory/Ref.hpp"
+#include "Layer/RasterManager.hpp"
 
 class GrRecordingContext;
 namespace VGG::layer
@@ -29,15 +30,16 @@ class Viewport;
 class RenderNode;
 class ZoomerNode;
 class RasterExecutor;
+class RasterManager;
 
 namespace raster
 {
 
 Ref<RasterNode> make(
-  RasterExecutor* executor,
-  Ref<Viewport>   viewport,
-  Ref<ZoomerNode> zoomer,
-  Ref<RenderNode> renderObject);
+  RasterManager::RasterExecutor* executor,
+  Ref<Viewport>                  viewport,
+  Ref<ZoomerNode>                zoomer,
+  Ref<RenderNode>                renderObject);
 
 Ref<RasterNode> makeEmptyRaster(Ref<RenderNode> renderObject);
 

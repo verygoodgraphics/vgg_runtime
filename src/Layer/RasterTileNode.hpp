@@ -17,6 +17,7 @@
 #pragma once
 #include "Layer/Core/RasterCache.hpp"
 #include "Layer/Core/RasterNode.hpp"
+#include "Layer/RasterManager.hpp"
 
 #include <vector>
 
@@ -33,12 +34,12 @@ class TileRasterNode : public RasterNode
 {
 public:
   TileRasterNode(
-    VRefCnt*            cnt,
-    GrRecordingContext* device,
-    RasterExecutor*     executor,
-    Ref<Viewport>       viewport,
-    Ref<ZoomerNode>     zoomer,
-    Ref<RenderNode>     child);
+    VRefCnt*                       cnt,
+    GrRecordingContext*            device,
+    RasterManager::RasterExecutor* executor,
+    Ref<Viewport>                  viewport,
+    Ref<ZoomerNode>                zoomer,
+    Ref<RenderNode>                child);
 
   VGG_CLASS_MAKE(TileRasterNode);
 

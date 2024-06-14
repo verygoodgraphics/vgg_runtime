@@ -57,12 +57,12 @@ namespace VGG::layer
 {
 
 RasterNode::RasterNode(
-  VRefCnt*            cnt,
-  GrRecordingContext* device,
-  RasterExecutor*     executor,
-  Ref<Viewport>       viewport,
-  Ref<ZoomerNode>     zoomer,
-  Ref<RenderNode>     child)
+  VRefCnt*                       cnt,
+  GrRecordingContext*            device,
+  RasterManager::RasterExecutor* executor,
+  Ref<Viewport>                  viewport,
+  Ref<ZoomerNode>                zoomer,
+  Ref<RenderNode>                child)
   : TransformEffectNode(cnt, ensureTransformNode(viewport, std::move(zoomer)), std::move(child))
   , m_viewport(viewport)
   , m_device(device)

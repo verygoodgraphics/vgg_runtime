@@ -15,7 +15,6 @@
  */
 #pragma once
 #include "Executor.hpp"
-#include "TileTask.hpp"
 #include "Layer/Core/VBounds.hpp"
 #include "Layer/Core/VNode.hpp"
 #include "Layer/LRUCache.hpp"
@@ -39,6 +38,7 @@ public:
   class RasterResult
   {
   public:
+    using Future = std::future<RasterResult>;
     RasterResult() = default;
     RasterResult(RasterManager* mgr, sk_sp<SkSurface> surf, int index)
       : surf(std::move(surf))
@@ -60,6 +60,30 @@ public:
     int            m_index = -1;
   };
 
+  class RasterTask
+  {
+  public:
+    RasterTask(int index)
+      : m_index(index)
+    {
+    }
+    int index() const
+    {
+      return m_index;
+    }
+    virtual RasterResult execute(GrRecordingContext* context) = 0;
+
+  private:
+    int m_index;
+  };
+
+  class RasterExecutor : public Executor
+  {
+  public:
+    virtual RasterManager::RasterResult::Future addRasterTask(
+      std::unique_ptr<RasterManager::RasterTask> task) = 0;
+  };
+
   RasterManager(int tileWidth, int tileHeight, const Boundsi& bounds, RasterExecutor* executor)
     : m_executor(executor)
     , m_tileWidth(tileWidth)
@@ -68,6 +92,9 @@ public:
     , m_cache(40)
   {
   }
+
+  RasterManager(const RasterManager&) = delete;
+  RasterManager& operator=(const RasterManager&) = delete;
 
   std::pair<int, int> size() const
   {
@@ -89,43 +116,33 @@ public:
     return m_bounds;
   }
 
-  void wait();
-
-  void raster(std::vector<TileTask> tasks);
-  void raster(int key, RasterTask tasks);
+  void raster(std::unique_ptr<RasterTask> task);
 
   void query(const std::vector<int>& query, std::vector<RasterResult>& result);
+
   std::optional<RasterResult> query(int index);
 
 private:
+  using ResultCache = LRUCache<int, RasterResult>;
+  using TaskQueue = std::queue<std::pair<int, std::future<RasterResult>>>;
+  void            wait();
   RasterExecutor* m_executor;
   int             m_tileWidth, m_tileHeight;
   Boundsi         m_bounds;
-  using ResultCache = LRUCache<int, RasterResult>;
-
-  ResultCache m_cache;
-
-  std::queue<std::pair<int, std::future<RasterResult>>> m_tasks;
+  ResultCache     m_cache;
+  TaskQueue       m_tasks;
 };
 
-class RasterExecutor : public Executor
+class SimpleRasterExecutor : public RasterManager::RasterExecutor
 {
 public:
-  virtual std::future<RasterManager::RasterResult> addRasterTask(TileTask task) = 0;
-  virtual std::future<RasterManager::RasterResult> addRasterTask(RasterTask task) = 0;
-};
-
-class SimpleRasterExecutor : public RasterExecutor
-{
-public:
-  using Future = std::future<RasterManager::RasterResult>;
   SimpleRasterExecutor(GrRecordingContext* context)
     : m_context(context)
   {
   }
 
-  Future addRasterTask(TileTask rasterTask) override;
-  Future addRasterTask(RasterTask rasterTask) override;
+  RasterManager::RasterResult::Future addRasterTask(
+    std::unique_ptr<RasterManager::RasterTask> rasterTask) override;
 
   void add(Task task) override
   {

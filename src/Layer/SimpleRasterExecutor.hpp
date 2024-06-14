@@ -14,11 +14,37 @@
  * limitations under the License.
  */
 #pragma once
-#include "Executor.hpp"
+#include "RasterManager.hpp"
 
 #include <future>
 
 namespace VGG::layer
 {
 
+class SimpleRasterExecutor : public RasterManager::RasterExecutor
+{
+public:
+  SimpleRasterExecutor(GrRecordingContext* context)
+    : m_context(context)
+  {
+  }
+
+  RasterManager::RasterResult::Future addRasterTask(
+    std::unique_ptr<RasterManager::RasterTask> rasterTask) override;
+
+  void add(Task task) override
+  {
+    task();
+  }
+
+  GrRecordingContext* context()
+  {
+    return m_context;
+  }
+
+private:
+  GrRecordingContext* m_context;
+  SimpleRasterExecutor(SimpleRasterExecutor&&) = delete;
+  SimpleRasterExecutor&& operator=(SimpleRasterExecutor&&) = delete;
+};
 } // namespace VGG::layer

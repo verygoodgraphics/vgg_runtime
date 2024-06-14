@@ -84,7 +84,7 @@ public:
       std::unique_ptr<RasterManager::RasterTask> task) = 0;
   };
 
-  RasterManager(int tileWidth, int tileHeight, const Boundsi& bounds, RasterExecutor* executor)
+  RasterManager(int tileWidth, int tileHeight, const Bounds& bounds, RasterExecutor* executor)
     : m_executor(executor)
     , m_tileWidth(tileWidth)
     , m_tileHeight(tileHeight)
@@ -111,7 +111,12 @@ public:
     return m_tileHeight;
   }
 
-  const Boundsi& bounds() const
+  int tileXCount() const
+  {
+    return m_bounds.width() / m_tileWidth;
+  }
+
+  const Bounds& bounds() const
   {
     return m_bounds;
   }
@@ -128,36 +133,9 @@ private:
   void            wait();
   RasterExecutor* m_executor;
   int             m_tileWidth, m_tileHeight;
-  Boundsi         m_bounds;
+  Bounds          m_bounds;
   ResultCache     m_cache;
   TaskQueue       m_tasks;
-};
-
-class SimpleRasterExecutor : public RasterManager::RasterExecutor
-{
-public:
-  SimpleRasterExecutor(GrRecordingContext* context)
-    : m_context(context)
-  {
-  }
-
-  RasterManager::RasterResult::Future addRasterTask(
-    std::unique_ptr<RasterManager::RasterTask> rasterTask) override;
-
-  void add(Task task) override
-  {
-    task();
-  }
-
-  GrRecordingContext* context()
-  {
-    return m_context;
-  }
-
-private:
-  GrRecordingContext* m_context;
-  SimpleRasterExecutor(SimpleRasterExecutor&&) = delete;
-  SimpleRasterExecutor&& operator=(SimpleRasterExecutor&&) = delete;
 };
 
 } // namespace VGG::layer

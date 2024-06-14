@@ -36,6 +36,7 @@ public:
   VGG_CLASS_MAKE(RasterNodeImpl);
 
   void raster(const std::vector<Bounds>& bounds) override;
+
   void render(Renderer* renderer) override;
 
 #ifdef VGG_LAYER_DEBUG

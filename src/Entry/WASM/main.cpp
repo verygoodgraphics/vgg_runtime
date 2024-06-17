@@ -100,6 +100,8 @@ extern "C"
   {
     INFO("#vgg runtime version: %s", VGG::Version::get().c_str());
 
+    setenv("SKPARAGRAPH_REMOVE_ROUNDING_HACK", "1", 1);
+
     Config::readGlobalConfig("/asset/etc/config.json");
 
     VGG::app::AppConfig cfg;

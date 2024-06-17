@@ -22,4 +22,6 @@ namespace VGG::layer
 bool isAnimatedPatternEnabled();
 void setAnimatedPatternEnabled(bool enable);
 
+void setupEnv();
+
 } // namespace VGG::layer

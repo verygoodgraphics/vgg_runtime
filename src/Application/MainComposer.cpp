@@ -23,6 +23,9 @@
 #include "UIScrollView.hpp"
 #include "UIView.hpp"
 #include "VggEnv.hpp"
+
+#include "Layer/GlobalSettings.hpp"
+
 namespace VGG
 {
 class Mouse;
@@ -39,6 +42,7 @@ MainComposer::MainComposer(PlatformComposer* platformComposer, std::shared_ptr<M
   , m_runLoop{ RunLoop::sharedInstance() }
   , m_platformComposer{ platformComposer }
 {
+  layer::setupEnv();
   VggEnv::set(m_env->getEnv(), m_env);
 
   m_presenter->setView(m_view);

@@ -15,6 +15,10 @@
  */
 
 #include "Layer/GlobalSettings.hpp"
+#include "Layer/Config.hpp"
+
+#include <stdlib.h>
+#include <initializer_list>
 
 namespace
 {
@@ -32,6 +36,32 @@ void setAnimatedPatternEnabled(bool enable)
 bool isAnimatedPatternEnabled()
 {
   return g_enableAnimatedPattern;
+}
+
+void setupEnv()
+{
+  static struct
+  {
+    const char* name;
+    const char* value;
+  } s_var = { "SKPARAGRAPH_REMOVE_ROUNDING_HACK", "1" };
+#ifdef _WIN32
+  for (const auto& var : { s_var })
+  {
+    if (_putenv_s(var.name, var.value) != 0)
+    {
+      VGG_LOG_DEV(LOG, Setup, "Failed to set environment variable {}={}", var.name, var.value);
+    }
+  }
+#else
+  for (const auto& var : { s_var })
+  {
+    if (setenv(var.name, var.value, 1) != 0)
+    {
+      VGG_LOG_DEV(LOG, Setup, "Failed to set environment variable {}={}", var.name, var.value);
+    }
+  }
+#endif
 }
 
 } // namespace VGG::layer

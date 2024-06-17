@@ -24,6 +24,7 @@
 #include <src/gpu/ganesh/gl/GrGLDefines.h>
 
 #include <exception>
+#include <thread>
 using namespace VGG;
 using namespace VGG::app;
 namespace fs = std::filesystem;
@@ -236,6 +237,7 @@ int run(Loop& loop, Viewer& viewer, const argparse::ArgumentParser& program)
 {
   using namespace VGG::layer;
   using namespace VGG;
+  layer::setupEnv();
   const auto& config = loop.getConfig();
 
 #ifdef IMGUI_ENABLED

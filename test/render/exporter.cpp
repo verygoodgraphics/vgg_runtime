@@ -1,5 +1,6 @@
 #include "Layer/Core/ResourceManager.hpp"
 #include "Layer/Core/DefaultResourceProvider.hpp"
+#include "Layer/GlobalSettings.hpp"
 #include "Layer/VGGLayer.hpp"
 #include "loader.hpp"
 #include "Utility/ConfigManager.hpp"
@@ -83,6 +84,7 @@ constexpr char POS_ARG_INPUT_FILE[] = "fig/ai/sketch/json";
 
 int main(int argc, char** argv)
 {
+  layer::setupEnv();
   argparse::ArgumentParser program("exporter", "0.1");
   program.add_argument(POS_ARG_INPUT_FILE).help("input fig/ai/sketch/json file").default_value("");
   program.add_argument("-d", "--data").help("resources dir");

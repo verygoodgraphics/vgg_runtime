@@ -1,5 +1,21 @@
 # VGG Runtime Changelog
 
+## [daruma-v5.1 (Jun 14, 2024)](https://github.com/verygoodgraphics/vgg_runtime/releases/tag/daruma-v5.1)
+* Feature: damage rect ([#370](https://github.com/verygoodgraphics/vgg_runtime/pull/370))
+* Feature: layout text ([#367](https://github.com/verygoodgraphics/vgg_runtime/pull/367))
+* Feature: move animate ([#365](https://github.com/verygoodgraphics/vgg_runtime/pull/365))
+* Feature: gif support ([#361](https://github.com/verygoodgraphics/vgg_runtime/pull/361))
+* Feature: update for vgg iOS container ([#362](https://github.com/verygoodgraphics/vgg_runtime/pull/362))
+* Bugfix: null pointer dereferencing ([#384](https://github.com/verygoodgraphics/vgg_runtime/pull/384))
+* Bugfix: handling events ([#379](https://github.com/verygoodgraphics/vgg_runtime/pull/379))
+* Bugfix: image rendering ([#378](https://github.com/verygoodgraphics/vgg_runtime/pull/378))
+* Bugfix: animate ([#376](https://github.com/verygoodgraphics/vgg_runtime/pull/376))
+* Bugfix: layer ([#374](https://github.com/verygoodgraphics/vgg_runtime/pull/374))
+* Bugfix: open url twice ([#360](https://github.com/verygoodgraphics/vgg_runtime/pull/360))
+* Bugfix: layout ([#359](https://github.com/verygoodgraphics/vgg_runtime/pull/359))
+
+Full changelog: [daruma-v5.0...daruma-v5.1](https://github.com/verygoodgraphics/vgg_runtime/compare/daruma-v5.0...daruma-v5.1)
+
 ## [daruma-v5.0 (May 24, 2024)](https://github.com/verygoodgraphics/vgg_runtime/releases/tag/daruma-v5.0)
 * Feature: skip expanding symbol instances in invisible frames ([#354](https://github.com/verygoodgraphics/vgg_runtime/pull/354))
 * Feature: animate ([#352](https://github.com/verygoodgraphics/vgg_runtime/pull/352))

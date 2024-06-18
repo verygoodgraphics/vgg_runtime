@@ -27,10 +27,12 @@ class QtQuickContainerImpl : public IContainer
 
   QtQuickContainer*          m_api;
   std::unique_ptr<Container> m_impl;
+  QtQuickGraphicsContext*    m_qtQuickGraphicscontext;
 
 public:
   QtQuickContainerImpl(QtQuickContainer* api)
     : m_api(api)
+    , m_qtQuickGraphicscontext{ nullptr }
   {
     m_impl.reset(new Container);
   }
@@ -38,6 +40,12 @@ public:
   IContainer* container() override
   {
     return m_impl.get();
+  }
+
+  void setFboID(unsigned int fboID)
+  {
+    assert(m_qtQuickGraphicscontext);
+    m_qtQuickGraphicscontext->setFboID(fboID);
   }
 
   void init(
@@ -52,6 +60,7 @@ public:
       new QtQuickGraphicsContext(fboID, devicePixelRatio)
     };
 
+    m_qtQuickGraphicscontext = dynamic_cast<QtQuickGraphicsContext*>(graphicsContext.get());
     m_impl->setGraphicsContext(graphicsContext, width, height, stencilBit, multiSample);
   }
 };
@@ -76,4 +85,10 @@ IContainer* QtQuickContainer::container()
 {
   return m_impl.get();
 }
+
+void QtQuickContainer::setFboID(unsigned int fboID)
+{
+  m_impl->setFboID(fboID);
+}
+
 } // namespace VGG

@@ -31,6 +31,9 @@ class QtQuickGraphicsContext : public VGG::layer::SkiaGraphicsContext
 public:
   QtQuickGraphicsContext(unsigned int fboID, double dpi);
 
+public:
+  void setFboID(unsigned int fboID);
+
 private:
   virtual bool              swap() override;
   virtual bool              makeCurrent() override;

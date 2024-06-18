@@ -36,6 +36,9 @@ public:
 
   ~QtQuickContainer();
 
+public:
+  void setFboID(unsigned int fboID);
+
 private:
   virtual IContainer* container() override;
 

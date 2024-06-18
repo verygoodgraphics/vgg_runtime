@@ -37,16 +37,15 @@
 #define DEBUG(msg, ...)
 
 // #define DUMP_TREE
-
-constexpr auto K_PREFIX = "referenced_style_";
-
-namespace nl = nlohmann;
-using namespace VGG::Domain;
-using namespace VGG::Layout;
-using namespace VGG::Model;
-
+namespace VGG::Layout
+{
 namespace
 {
+namespace nl = nlohmann;
+using namespace Domain;
+using namespace Model;
+
+constexpr auto K_PREFIX = "referenced_style_";
 
 enum class EVarType
 {
@@ -111,7 +110,7 @@ void ExpandSymbol::collectMasters()
 {
   for (auto& frame : m_designModel->frames)
   {
-    collectMasterFromContainer(frame);
+    collectMasterFromFrame(frame);
   }
   if (m_designModel->references)
   {
@@ -126,25 +125,35 @@ void ExpandSymbol::collectMasters()
   }
 }
 
-void ExpandSymbol::collectMasterFromContainer(const Model::Container& conntainer)
+void ExpandSymbol::collectMasterFromContainer(
+  const Model::Container& container,
+  const Model::Frame*     componentFrame)
 {
-  for (auto& child : conntainer.childObjects)
-  {
-    collectMasterFromVariant(child);
-  }
+  for (auto& child : container.childObjects)
+    collectMasterFromVariant(child, componentFrame);
+}
+
+void ExpandSymbol::collectMasterFromFrame(const Model::Frame& frame)
+{
+  collectMasterFromContainer(frame, frame.isComponent() ? &frame : nullptr);
 }
 
 template<typename T>
-void ExpandSymbol::collectMasterFromVariant(const T& variantNode)
+void ExpandSymbol::collectMasterFromVariant(
+  const T&            variantNode,
+  const Model::Frame* componentFrame)
 {
   if (auto p = std::get_if<SymbolMaster>(&variantNode))
   {
     m_pMasters[p->id] = p;
+    if (componentFrame)
+      m_variantComponent[p->id] = componentFrame;
+
     collectMasterFromContainer(*p);
   }
   else if (auto p = std::get_if<Frame>(&variantNode))
   {
-    collectMasterFromContainer(*p);
+    collectMasterFromFrame(*p);
   }
   else if (auto p = std::get_if<Group>(&variantNode))
   {
@@ -1257,3 +1266,14 @@ void ExpandSymbol::expandInstance(
 
   expandInstanceElement(instance, instanceIdStack, true);
 }
+
+bool ExpandSymbol::isSameComponent(const std::string& variantId1, const std::string& variantId2)
+{
+  auto it1 = m_variantComponent.find(variantId1);
+  auto it2 = m_variantComponent.find(variantId2);
+  if (it1 == m_variantComponent.end() || it2 == m_variantComponent.end())
+    return false;
+  return it1->second == it2->second;
+}
+
+} // namespace VGG::Layout

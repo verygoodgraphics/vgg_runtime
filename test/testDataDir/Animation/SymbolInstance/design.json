@@ -1,7 +1,7 @@
 {
-  "version": "2",
+  "version": "1.0.18",
   "fileType": 3,
-  "fileName": "/Users/houguanhua/code/vgg/vgg_runtime_C/_feature/animation/symbol_instance/swap_master_old/0509/feature_swap_master.fig",
+  "fileName": "/Users/houguanhua/code/vgg/vgg_runtime_C/test/testDataDir/Animation/SymbolInstance/feature_swap_master.fig",
   "frames": [
     {
       "id": "0:3",
@@ -843,6 +843,7 @@
         5.0,
         5.0
       ],
+      "frameType": 2,
       "backgroundColor": {
         "class": "color",
         "red": 0.9607843160629272,

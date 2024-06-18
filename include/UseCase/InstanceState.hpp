@@ -65,7 +65,8 @@ private:
   void setState(std::shared_ptr<LayoutNode> instanceNode, const std::string& stateMasterId);
   std::shared_ptr<LayoutNode> findInstanceNode(
     const std::string& instanceDescendantId,
-    const std::string& listenerId);
+    const std::string& listenerId,
+    const std::string& newVariantId);
   Result makeResultWithOldTree(const std::shared_ptr<LayoutNode>& instanceNode);
 };
 

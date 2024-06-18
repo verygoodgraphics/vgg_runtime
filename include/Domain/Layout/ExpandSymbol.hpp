@@ -49,6 +49,7 @@ namespace Model
 {
 struct Container;
 struct DesignModel;
+struct Frame;
 struct OverrideValue;
 struct SymbolMaster;
 } // namespace Model
@@ -65,18 +66,6 @@ class ExpandSymbol
   using RuleMap = std::unordered_map<std::string, std::shared_ptr<Internal::Rule::Rule>>;
   using RuleMapPtr = std::shared_ptr<RuleMap>;
 
-  const std::unique_ptr<Model::DesignModel>                   m_designModel;
-  const nlohmann::json                                        m_layoutJson;
-  std::unordered_map<std::string, nlohmann::json>             m_outLayoutJsonMap; // performance
-  RuleMapPtr                                                  m_layoutRulesCache; // performance
-  std::unordered_map<std::string, const Model::SymbolMaster*> m_pMasters;
-  std::unordered_map<std::string, nlohmann::json>             m_layoutRules;
-
-  std::shared_ptr<VGG::Layout::Layout>         m_layout;
-  std::shared_ptr<VGG::Domain::DesignDocument> m_designDocument;
-
-  std::vector<std::string> m_tmpDirtyNodeIds;
-
 public:
   ExpandSymbol(
     const nlohmann::json& designJson,
@@ -90,6 +79,7 @@ public:
   std::shared_ptr<VGG::Layout::Layout> layout() const;
 
   void expandInstance(Domain::SymbolInstanceElement& instance, const std::string& masterId);
+  bool isSameComponent(const std::string& variantId1, const std::string& variantId2);
 
 private:
   enum class EProcessVarRefOption
@@ -100,9 +90,12 @@ private:
   };
 
   void collectMasters();
-  void collectMasterFromContainer(const Model::Container& conntainer);
+  void collectMasterFromContainer(
+    const Model::Container& container,
+    const Model::Frame*     componentFrame = nullptr);
+  void collectMasterFromFrame(const Model::Frame& frame);
   template<typename T>
-  void collectMasterFromVariant(const T& variantNode);
+  void collectMasterFromVariant(const T& variantNode, const Model::Frame* componentFrame = nullptr);
   void collectLayoutRules(const nlohmann::json& json);
 
   void traverseElementNode(
@@ -183,6 +176,21 @@ private:
   nlohmann::json generateOutLayoutJson();
 
   void resetInstanceInfo(Domain::SymbolInstanceElement& instance);
+
+private:
+  const std::unique_ptr<Model::DesignModel>                   m_designModel;
+  const nlohmann::json                                        m_layoutJson;
+  std::unordered_map<std::string, nlohmann::json>             m_outLayoutJsonMap; // performance
+  RuleMapPtr                                                  m_layoutRulesCache; // performance
+  std::unordered_map<std::string, const Model::SymbolMaster*> m_pMasters;
+  std::unordered_map<std::string, const Model::Frame*>
+    m_variantComponent; // component variant masterId: component frame
+  std::unordered_map<std::string, nlohmann::json> m_layoutRules;
+
+  std::shared_ptr<VGG::Layout::Layout>         m_layout;
+  std::shared_ptr<VGG::Domain::DesignDocument> m_designDocument;
+
+  std::vector<std::string> m_tmpDirtyNodeIds;
 };
 } // namespace Layout
 

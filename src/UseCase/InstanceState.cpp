@@ -47,7 +47,7 @@ InstanceState::Result InstanceState::setState(
   const std::string& stateMasterId)
 {
   // todo: now find closest enclosing instance node, should find the right instance node
-  auto instanceNode = findInstanceNode(instanceDescendantId, listenerId);
+  auto instanceNode = findInstanceNode(instanceDescendantId, listenerId, stateMasterId);
   if (!instanceNode)
     return { false };
 
@@ -85,7 +85,7 @@ InstanceState::Result InstanceState::presentState(
   StateTree*         stateTree)
 {
   ASSERT(stateTree);
-  auto instanceNode = findInstanceNode(instanceDescendantId, listenerId);
+  auto instanceNode = findInstanceNode(instanceDescendantId, listenerId, stateMasterId);
   if (!instanceNode)
     return { false };
 
@@ -178,7 +178,8 @@ void InstanceState::setState(
 
 std::shared_ptr<LayoutNode> InstanceState::findInstanceNode(
   const std::string& instanceDescendantId,
-  const std::string& listenerId)
+  const std::string& listenerId,
+  const std::string& newVariantId)
 {
   auto node = m_page->findDescendantNodeById(instanceDescendantId);
   if (!node)
@@ -189,9 +190,11 @@ std::shared_ptr<LayoutNode> InstanceState::findInstanceNode(
   std::shared_ptr<LayoutNode> instanceNode;
   while (node)
   {
-    if (const auto& id = node->id();
-        node->elementNode()->type() == Domain::Element::EType::SYMBOL_INSTANCE &&
-        ((id == listenerId) || !id.ends_with(listenerId)))
+    if (
+      (node->elementNode()->type() == Domain::Element::EType::SYMBOL_INSTANCE) &&
+      m_expander->isSameComponent(
+        static_cast<Domain::SymbolInstanceElement*>(node->elementNode())->masterId(),
+        newVariantId))
     {
       instanceNode = node->shared_from_this();
       break;

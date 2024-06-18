@@ -1004,6 +1004,7 @@ bool Controller::pushFrame(const std::string& id, const app::FrameOptions& opts)
 {
   ASSERT(m_model);
   const auto index = m_model->getFrameIndexById(id);
+  layoutContext()->setLayerValid(false);
   scaleContent(index);
   return m_presenter->pushFrame(
     index,
@@ -1018,6 +1019,7 @@ bool Controller::pushFrame(const std::string& id, const app::FrameOptions& opts)
 
 bool Controller::popFrame(const app::PopOptions& opts)
 {
+  layoutContext()->setLayerValid(false);
   return m_presenter->popFrame(
     opts,
     [this](bool)
@@ -1031,6 +1033,7 @@ bool Controller::presentFrame(const std::string& id, const app::FrameOptions& op
 {
   ASSERT(m_model);
   const auto index = m_model->getFrameIndexById(id);
+  layoutContext()->setLayerValid(false);
   scaleContent(index);
   return m_presenter->presentFrame(
     index,

@@ -194,8 +194,10 @@ public:
     const TDesignMatrix& desMatrix);
 
   // Note: When the matrix of the top-level frame is [1, 0, 0, 1, 0, 0], it is positioned at the top
-  // left corner of the window.
+  // left corner of the window. boundOriginX and boundOriginY based on the design coordinate system.
   static TDesignMatrix moveToWindowTopLeft(
+    double               boundOriginX,
+    double               boundOriginY,
     double               width,
     double               height,
     const TDesignMatrix& matrix);

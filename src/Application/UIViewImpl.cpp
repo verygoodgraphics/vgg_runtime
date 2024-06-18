@@ -361,8 +361,14 @@ void UIViewImpl::moveFramesToTopLeft()
 
     if (auto maybeMatrix = layerBridge->getMatrix(paintNode))
     {
+      auto origin = frame->bounds().origin;
       auto size = frame->bounds().size;
-      auto newMatrix = TransformHelper::moveToWindowTopLeft(size.width, size.height, *maybeMatrix);
+      auto newMatrix = TransformHelper::moveToWindowTopLeft(
+        origin.x,
+        -origin.y,
+        size.width,
+        size.height,
+        *maybeMatrix);
       layerBridge->updateMatrix(frame, paintNode, newMatrix, false);
     }
   }

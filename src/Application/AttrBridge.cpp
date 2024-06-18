@@ -946,12 +946,18 @@ TDesignMatrix TransformHelper::transform(
 }
 
 TDesignMatrix TransformHelper::moveToWindowTopLeft(
+  double               boundOriginX,
+  double               boundOriginY,
   double               width,
   double               height,
   const TDesignMatrix& matrix)
 {
   auto result = TransformHelper::getLTRB(width, height, matrix);
-  return TransformHelper::translate(-result[0], -result[1], matrix);
+  return TransformHelper::translate(
+    -(result[0] + boundOriginX),
+    -(result[1] + boundOriginY),
+    matrix);
+  // return TransformHelper::translate(-result[0], -result[1], matrix);
 }
 
 TDesignMatrix TransformHelper::translate(double x, double y, const TDesignMatrix& matrix)

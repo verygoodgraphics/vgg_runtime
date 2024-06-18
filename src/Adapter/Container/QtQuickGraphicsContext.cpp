@@ -62,11 +62,10 @@ void QtQuickGraphicsContext::onInitProperties(layer::ContextProperty& property)
 
 SurfaceCreateProc QtQuickGraphicsContext::surfaceCreateProc()
 {
-  auto fboID = m_fboID;
-  return [fboID](GrRecordingContext* context, int w, int h, const VGG::layer::ContextConfig& cfg)
+  return [this](GrRecordingContext* context, int w, int h, const VGG::layer::ContextConfig& cfg)
   {
     GrGLFramebufferInfo info;
-    info.fFBOID = fboID;
+    info.fFBOID = this->m_fboID;
     info.fFormat = GR_GL_RGBA8;
     GrBackendRenderTarget target(w, h, cfg.multiSample, cfg.stencilBit, info);
     SkSurfaceProps        props;
@@ -84,4 +83,9 @@ ContextCreateProc QtQuickGraphicsContext::contextCreateProc()
 {
   auto tmp = m_context;
   return [tmp]() { return tmp; };
+}
+
+void QtQuickGraphicsContext::setFboID(unsigned int fboID)
+{
+  m_fboID = fboID;
 }

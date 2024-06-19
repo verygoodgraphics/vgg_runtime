@@ -62,7 +62,7 @@ inline glm::mat3 getLocalMatrix(PaintNode* node)
   glm::mat3 local = glm::mat3{ 1 };
   while (node)
   {
-    local = node->transform().matrix() * local;
+    local = node->getTransform().matrix() * local;
     node = static_cast<PaintNode*>(node->parent().get());
   }
   return local;

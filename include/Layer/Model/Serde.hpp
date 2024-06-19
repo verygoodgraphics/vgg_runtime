@@ -104,7 +104,7 @@ struct Serde
           ctx.alloc,
           m.getUniqueId(),
           std::move(name),
-          VGG_GROUP,
+          GROUP,
           std::move(guid),
           ERenderTraitBits::RT_RENDER_CHILDREN);
         return p;
@@ -112,7 +112,7 @@ struct Serde
       [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bound)
       {
         p->setOverflow(OF_VISIBLE); // Group do not clip inner content
-        p->setContourOption(ContourOption(ECoutourType::MCT_UNION, false));
+        p->setContourOption(ContourOption(ECoutourType::MCT_UNION));
         const auto childObjects = m.getChildObjects();
         for (const auto& c : childObjects)
         {
@@ -134,14 +134,14 @@ struct Serde
           ctx.alloc,
           m.getUniqueId(),
           std::move(name),
-          VGG_FRAME,
+          FRAME,
           std::move(guid),
           RT_DEFAULT);
         return p;
       },
       [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bound)
       {
-        p->setContourOption(ContourOption(ECoutourType::MCT_FRAMEONLY, false));
+        p->setContourOption(ContourOption(ECoutourType::MCT_FRAMEONLY));
         p->setFrameRadius(m.getRadius());
         auto childObjects = m.getChildObjects();
         for (const auto& c : childObjects)
@@ -163,7 +163,7 @@ struct Serde
           ctx.alloc,
           m.getUniqueId(),
           std::move(name),
-          VGG_PATH,
+          PATH,
           std::move(guid),
           ERenderTraitBits::RT_RENDER_SELF);
         return p;
@@ -171,7 +171,7 @@ struct Serde
       [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bounds)
       {
         p->setChildWindingType(m.getWindingType());
-        p->setContourOption(ContourOption(ECoutourType::MCT_OBJECT_OPS, false));
+        p->setContourOption(ContourOption(ECoutourType::MCT_OBJECT_OPS));
         auto shapes = m.getShapes();
         for (auto& subshape : shapes)
         {
@@ -191,11 +191,11 @@ struct Serde
               ctx.alloc,
               m.getUniqueId(),
               "contour",
-              VGG_CONTOUR,
+              CONTOUR,
               "",
               ERenderTraitBits::RT_DEFAULT);
             node->setOverflow(OF_VISIBLE);
-            node->setContourOption(ContourOption{ ECoutourType::MCT_FRAMEONLY, false });
+            node->setContourOption(ContourOption{ ECoutourType::MCT_FRAMEONLY });
             CoordinateConvert::convertCoordinateSystem(*ptr, totalMatrix);
             node->setContourData(*ptr);
             p->addSubShape(node, blop);
@@ -233,14 +233,14 @@ struct Serde
           ctx.alloc,
           m.getUniqueId(),
           std::move(name),
-          VGG_FRAME,
+          FRAME,
           std::move(guid),
           ERenderTraitBits::RT_DEFAULT);
         return p;
       },
       [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bound)
       {
-        p->setContourOption(ContourOption(ECoutourType::MCT_FRAMEONLY, false));
+        p->setContourOption(ContourOption(ECoutourType::MCT_FRAMEONLY));
         p->setFrameRadius(m.getRadius());
         auto childObjects = m.getChildObjects();
         for (const auto& c : childObjects)
@@ -263,14 +263,14 @@ struct Serde
           ctx.alloc,
           m.getUniqueId(),
           std::move(name),
-          VGG_FRAME,
+          FRAME,
           std::move(guid),
           ERenderTraitBits::RT_DEFAULT);
         return p;
       },
       [&](PaintNode* p, const glm::mat3& matrix, const Bounds& bound)
       {
-        p->setContourOption(ContourOption(ECoutourType::MCT_FRAMEONLY, false));
+        p->setContourOption(ContourOption(ECoutourType::MCT_FRAMEONLY));
         p->setFrameRadius(m.getRadius());
         auto childObjects = m.getChildObjects();
         for (const auto& c : childObjects)

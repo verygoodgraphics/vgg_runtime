@@ -108,7 +108,7 @@ public:
         if (m_resetOrigin)
         {
           auto bounds = p->frameBounds();
-          bounds = bounds.map(p->transform().matrix());
+          bounds = bounds.map(p->getTransform().matrix());
           mat = glm::translate(mat, glm::vec2(-bounds.x(), -bounds.y()));
         }
         auto frame = FrameNode::Make(Matrix::Make(mat), std::move(p));

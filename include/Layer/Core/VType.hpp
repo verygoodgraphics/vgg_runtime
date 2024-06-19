@@ -21,16 +21,14 @@ namespace VGG
 // TODO:: Could be removed in the future
 enum EObjectType
 {
-  VGG_LAYER = 0,
-  VGG_PATH,
-  VGG_IMAGE,
-  VGG_TEXT,
-  VGG_ARTBOARD,
-  VGG_GROUP,
-  VGG_FRAME,
-  VGG_CONTOUR,
-  VGG_MASTER,
-  VGG_INSTANCE
+  FRAME,
+  MASTER,
+  INSTANCE,
+  GROUP,
+  IMAGE,
+  TEXT,
+  PATH,
+  CONTOUR,
 };
 
 enum EBoolOp

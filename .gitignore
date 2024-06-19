@@ -10,3 +10,8 @@ lib/SDL2*
 downloads
 .vscode/
 .vs/
+
+/exported
+/tmp
+/myscripts
+/scripts

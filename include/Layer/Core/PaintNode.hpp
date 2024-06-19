@@ -100,6 +100,8 @@ public:
 
   int uniqueID() const;
 
+  EObjectType type() const;
+
   void addChild(const PaintNodePtr node);
 
   void addChild(ChildContainer::const_iterator pos, PaintNodePtr node);
@@ -188,7 +190,11 @@ public:
 
   void setTransform(const Transform& transform);
 
-  const Transform& transform() const;
+  Transform getTransform() const;
+
+  void setContentTransform(const Transform& transform);
+
+  Transform getContentTransform() const;
 
   Transform globalTransform() const;
 
@@ -256,7 +262,7 @@ protected:
   StyleItem* styleItem();
 
   VShape         makeBoundsPath();
-  virtual VShape makeContourImpl(ContourOption option, const Transform* mat);
+  virtual VShape makeContour(ContourOption option, const Transform* mat);
   VShape         childPolyOperation() const;
   Bounds         onRevalidate(Revalidation* inv, const glm::mat3& mat) override;
 

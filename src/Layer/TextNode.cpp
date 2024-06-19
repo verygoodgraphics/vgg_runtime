@@ -48,7 +48,7 @@ public:
 };
 
 TextNode::TextNode(VRefCnt* cnt, int uniqueID, const std::string& name, std::string guid)
-  : PaintNode(cnt, uniqueID, name, VGG_TEXT, std::move(guid), RT_DEFAULT, false)
+  : PaintNode(cnt, uniqueID, name, TEXT, std::move(guid), RT_DEFAULT, false)
   , d_ptr(new TextNode__pImpl(this))
 {
   auto               t = incRef(transformAttribute());
@@ -137,7 +137,7 @@ Bounds TextNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
   auto b =
     d_ptr->accessor->paragraph()->revalidate(); // We just revalidate the paragraph attribute so far
   PaintNode::onRevalidate(inv, mat);
-  return b.bounds(transform());
+  return b.bounds(getTransform());
 }
 
 TextNode::~TextNode() = default;

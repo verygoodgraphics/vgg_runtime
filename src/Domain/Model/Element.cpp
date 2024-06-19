@@ -516,6 +516,35 @@ std::shared_ptr<Element> Element::findElementByKey(
   return nullptr;
 }
 
+Element* Element::findElementByRef(
+  const std::vector<Element*>& refTargetReversedPath,
+  std::size_t                  index,
+  std::vector<std::string>*    outInstanceIdStack)
+{
+  ASSERT(index < refTargetReversedPath.size());
+  auto refAncestor = refTargetReversedPath[index];
+
+  if (name() != refAncestor->name())
+    return nullptr;
+
+  if (index > 0)
+  {
+    for (auto& child : children())
+      if (
+        auto found = child->findElementByRef(refTargetReversedPath, index - 1, outInstanceIdStack))
+      {
+        if (outInstanceIdStack && (child->type() == EType::SYMBOL_INSTANCE))
+          outInstanceIdStack->push_back(Helper::split(child->id()).back());
+
+        return found;
+      }
+
+    return nullptr;
+  }
+  else
+    return this;
+}
+
 Layout::Rect Element::bounds() const
 {
   if (auto pModel = model())
@@ -934,6 +963,21 @@ void SymbolInstanceElement::getTreeToModel(
     variantModel = *m_instance;
   }
 }
+
+void SymbolInstanceElement::saveOverrideTreeIfNeeded()
+{
+  if (m_overrideReferenceTree)
+    return;
+  m_overrideReferenceTree = std::static_pointer_cast<SymbolInstanceElement>(cloneTree());
+  if (m_master)
+    m_overrideReferenceTree->m_master = std::make_unique<Model::SymbolMaster>(*m_master);
+}
+
+SymbolInstanceElement* SymbolInstanceElement::overrideReferenceTree()
+{
+  return m_overrideReferenceTree.get();
+}
+
 // TextElement
 TextElement::TextElement(const Model::Text& text)
   : Element(EType::TEXT)

@@ -101,9 +101,10 @@ InstanceState::Result InstanceState::presentState(
       oldMasterId.c_str());
     return { false };
   }
+  pInstance->saveOverrideTreeIfNeeded(); // Before cleaning up the child nodes
 
   auto ret = makeResultWithOldTree(instanceNode);
-  auto oldElementChildren = pInstance->presentState(stateMasterId);
+  auto oldElementChildren = pInstance->presentState(stateMasterId); // Clean up the child nodes
   auto oldLayoutChildren = m_layout->removeNodeChildren(instanceNode.get());
 
   DEBUG(
@@ -171,6 +172,7 @@ void InstanceState::setState(
 
   auto pInstance = static_cast<Domain::SymbolInstanceElement*>(instanceNode->elementNode());
   ASSERT(pInstance);
+  pInstance->saveOverrideTreeIfNeeded();
 
   // expand again
   m_expander->expandInstance(*pInstance, stateMasterId);

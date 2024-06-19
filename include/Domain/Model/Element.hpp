@@ -151,6 +151,10 @@ public:
   std::shared_ptr<Element> findElementByKey(
     const std::vector<std::string>& keyStack,
     std::vector<std::string>*       outInstanceIdStack);
+  Element* findElementByRef(
+    const std::vector<Element*>& refTargetReversedPath,
+    std::size_t                  index,
+    std::vector<std::string>*    outInstanceIdStack);
 
   std::string    typeString() const;
   Layout::Rect   bounds() const;
@@ -332,10 +336,6 @@ public:
 
 class SymbolInstanceElement : public Element
 {
-  std::shared_ptr<Model::SymbolInstance> m_instance;
-  std::unique_ptr<Model::SymbolMaster>   m_master;
-  std::stack<std::string>                m_stateStack; // master id stack
-
 public:
   SymbolInstanceElement(const Model::SymbolInstance& instance);
   std::shared_ptr<Element> clone() const override;
@@ -366,6 +366,18 @@ public:
     override;
   void getTreeToModel(Model::ContainerChildType& variantModel, bool reverseChildrenIfFirstOnTop)
     override;
+
+  void                   saveOverrideTreeIfNeeded();
+  SymbolInstanceElement* overrideReferenceTree();
+
+private:
+  std::shared_ptr<Model::SymbolInstance> m_instance;
+  std::unique_ptr<Model::SymbolMaster>   m_master;
+  std::stack<std::string>                m_stateStack; // master id stack
+
+  std::shared_ptr<SymbolInstanceElement>
+    m_overrideReferenceTree; // tree expanded with init master id, nodes with object
+                             // id in overrideValue can be found in this tree
 };
 
 class TextElement : public Element

@@ -955,23 +955,57 @@ std::shared_ptr<Element> ExpandSymbol::findChildObject(
 {
   auto& objectIdPaths = overrideItem.objectId;
   if (objectIdPaths.empty())
-  {
     return nullptr;
-  }
 
-  if (objectIdPaths.size() == 1)
+  const auto refInstance = instance.overrideReferenceTree();
+  if (const auto& objectId = objectIdPaths.front(); objectIdPaths.size() == 1)
   {
-    if (
-      objectIdPaths.front() == instance.masterId() ||
-      objectIdPaths.front() == instance.masterOverrideKey())
+    if (objectId == instance.masterId() || objectId == instance.masterOverrideKey())
     {
       outChildInstanceIdStack = instanceIdStack;
       return instance.shared_from_this();
     }
+
+    if (refInstance)
+    {
+      if (objectId == refInstance->masterId() || objectId == refInstance->masterOverrideKey())
+      {
+        outChildInstanceIdStack = instanceIdStack;
+        return instance.shared_from_this();
+      }
+    }
   }
 
   outChildInstanceIdStack = instanceIdStack;
-  return instance.findElementByKey(objectIdPaths, &outChildInstanceIdStack);
+  if (auto e = instance.findElementByKey(objectIdPaths, &outChildInstanceIdStack))
+    return e;
+
+  if (!refInstance)
+    return nullptr;
+
+  const auto& refTarget = refInstance->findElementByKey(objectIdPaths, &outChildInstanceIdStack);
+  if (refTarget)
+  {
+    ASSERT(refTarget.get() != refInstance); // or will be found above(objectIdPaths.size() == 1)
+
+    std::vector<Element*> refTargetReversedPath;
+    auto                  pathNode = refTarget.get();
+    while (pathNode != refInstance)
+    {
+      refTargetReversedPath.push_back(pathNode);
+      pathNode = pathNode->parent().get();
+    }
+    refTargetReversedPath.push_back(refInstance);
+
+    if (
+      auto e = instance.findElementByRef(
+        refTargetReversedPath,
+        refTargetReversedPath.size() - 1,
+        &outChildInstanceIdStack))
+      return e->shared_from_this();
+  }
+
+  return nullptr;
 }
 
 void ExpandSymbol::processVariableAssignmentsOverrides(
